@@ -1,0 +1,24 @@
+PP=fpc
+BASEARGS= -FuSrcUnits\Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FiSrcUnits/Includes -Sm -FUCompiledUnits -FE./../BinDebug/
+DODEBUG= -gl 
+DORELEASE= -XX -O3 -CX -dRELEASE
+
+release:
+	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) Main
+	$(MAKE) clear
+	./EnigmaVB/enigmavbconsole.exe Main.evb
+debug:
+	$(PP) $(DODEBUG) $(BASEARGS) $(OPT) Main
+lib:
+	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) SaGeLib
+	$(MAKE) clear
+clear:
+	rm -f CompiledUnits/*
+	rm -f *.o
+	rm -f *.ppu
+	rm -f *.or
+	rm -f ppas.bat
+	rm -f *.a
+	rm -f fpc-res.res
+	rm -f SrcUnits/*.o
+	rm -f SrcUnits/*.ppu

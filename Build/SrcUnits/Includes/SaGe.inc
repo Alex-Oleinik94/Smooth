@@ -1,0 +1,14 @@
+{$MODE OBJFPC}
+{$ASMMODE INTEL}
+{$H+}
+
+//{$DEFINE LAZARUS}
+//{$DEFINE GLUT}
+
+//{$WARNINGS ON}
+{$WARNINGS OFF}
+{$NOTES ON}
+//{$NOTES OFF}
+
+{$DEFINE SGDebuging}
+//{$DEFINE SGMoreDebuging}
