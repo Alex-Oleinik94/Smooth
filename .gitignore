@@ -1,0 +1,4 @@
+*.bat
+*.ini
+Build/CompiledUnits/*
+*Your Results.txt
