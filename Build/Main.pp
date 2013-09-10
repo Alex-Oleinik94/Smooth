@@ -66,19 +66,17 @@ with TSGDrawClasses.Create do
 	end;
 end;
 
-procedure _1;
+procedure FPCTCTransliater;
 var
 	SGT:SGTranslater = nil;
 begin
-SGT:=SGTranslater.Create('_1.pas');
+SGT:=SGTranslater.Create('cmd');
 SGT.GoTranslate;
 SGT.Destroy;
 end;
 
+procedure GoGUI;
 begin
-{_1;
-Exit;}
-
 SGContext:=
 {$IFDEF LAZARUS}
       TSGContextLazarus
@@ -128,4 +126,42 @@ until (SGContext.Active = False);
 
 SGContext.Destroy;
 
+end;
+
+function GetComand(const comand:string):string;
+var
+	i:LongWord;
+begin
+Result:='';
+for i:=2 to Length(comand) do
+	Result+=comand[i];
+Result:=SGUpCaseString(Result);
+end;
+
+var
+	i:LongWord;
+	s:string;
+
+begin
+if argc>1 then
+	begin
+	WriteLn('Entered ',argc-1,' parametrs.');
+	s:=SGPCharToString(argv[1]);
+	if s[1]='-' then
+		begin
+		s:=GetComand(s);
+		if s='FPCTC' then
+			begin
+			WriteLn('Beginning FPC to C transliater.');
+			FPCTCTransliater;
+			end
+		else
+			WriteLn('Unknown command "',s,'".');
+		end
+	else
+		WriteLn('Trror sintexis command "',s,'". Befor cjmand must be simbol "''".');
+	//for i:=0 to argc-1 do WriteLn('"',argv[i],'"');
+	end
+else
+	GoGUI;
 end.

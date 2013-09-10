@@ -672,7 +672,7 @@ case c of
 end;
 if i<>0 then
 	FComment+=c;
-SourseToLog(['SGTComment.GoRead : I = "',i,'", FComment = "',FComment,'"']);
+//SourseToLog(['SGTComment.GoRead : I = "',i,'", FComment = "',FComment,'"']);
 until i=0;
 end;
 
@@ -1051,31 +1051,13 @@ end;
 
 procedure SGTReadClassComponent.SourseToLog(const Ar:packed array of const);
 var
-	i,ii:LongWord;
-	Ar2:array of TVarRec;
-	PStr1,PStr3,PStr2:PShortString;
+	OutString:String;
+	I:LongWord;
 begin
-//Ar2:=['[',FReadClass.StringInfo,'] '];
-New(PStr1); New(PStr2); New(PStr3);
-PStr1^:='[';
-PStr2^:=FReadClass.StringInfo;
-PStr3^:='] ';
-Ar2[0].vtype:=vtString;
-Ar2[0].vString:=PStr1;
-Ar2[1].vtype:=vtString;
-Ar2[1].vString:=PStr2;
-Ar2[2].vtype:=vtString;
-Ar2[2].vString:=PStr3;
-ii:=Length(Ar2);
-SetLength(Ar2,Length(Ar2)+Length(Ar));
-for i:=ii to High(Ar2) do
-	Ar2[i]:=Ar[i-ii];
-SGLog.Sourse(Ar2);
-SetLength(Ar2,0);
-//SetLength(Ar,0);
-Dispose(PStr1);
-Dispose(PStr3);
-Dispose(PStr2);
+OutString:='';
+OutString:=SGGetStringFromConstArray(Ar);
+SGLog.Sourse(['[ ',FReadClass.StringInfo,' ] ',OutString]);
+SetLength(OutString,0);
 end;
 
 function SGTReadClassComponent.NextIdentifierMRM:string;
@@ -1299,7 +1281,11 @@ procedure TSGTranslater.GoRead;
 var
 	FT:String = '';
 begin
-if SGUpCaseString(FObject)<>SGUpCaseString('Makefile') then
+if SGUpCaseString(FObject)='CMD' then
+	begin
+	
+	end
+else if SGUpCaseString(FObject)<>SGUpCaseString('Makefile') then
 	begin
 	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
@@ -1361,7 +1347,7 @@ end;
 
 function SGTRead.StringInfo:String;
 begin
-Result:='File:"'+FWay+'",Line:"'+SGStr(FLine)+'",Column:"'+SGStr(FColumn)+'"';
+Result:='"'+FWay+'":'+SGStr(FLine)+'x'+SGStr(FColumn)+'';
 end;
 
 procedure SGTRead.Member;

@@ -2,3 +2,8 @@
 *.ini
 Build/CompiledUnits/*
 *Your Results.txt
+Build/*.ppu
+Build/*.o
+Build/Main.res
+BinDebug/Main.exe
+BitRelease/Main.exe

@@ -321,8 +321,34 @@ function SGVal(const Text:string = '0'):Int64;inline;overload;
 function SGStringIf(const B:Boolean;const s:string):string;inline;
 function SGStringGetPart(const S:string;const a,b:LongWord):String;
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
+function SGGetStringFromConstArray(const Ar:packed array of const):String;
 
 implementation
+
+function SGGetStringFromConstArray(const Ar:packed array of const):String;
+var
+	i:LongWord;
+begin
+Result:='';
+if High(Ar)>=0 then 
+	begin
+	for i := 0 to High(ar) do
+		case ar[i].vtype of
+		vtInteger: 
+			Result+=SGStr(ar[i].vinteger);
+		vtString: 
+			Result+=(ar[i].vstring^);
+		vtAnsiString: 
+			Result+=(AnsiString(ar[i].vpointer));
+		vtBoolean: 
+			Result+=SGStr(ar[i].vboolean);
+		vtChar: 
+			Result+=ar[i].vchar;
+		vtExtended: 
+			Result+=SGStrReal(Extended(ar[i].vpointer^),5);
+		end;
+	end;
+end;
 
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
 type
@@ -442,27 +468,9 @@ end;
 
 procedure TSGLog.Sourse(const Ar:array of const;const WithTime:Boolean = True);
 var
-	i:LongWord;
 	OutString:String = '';
 begin
-if High(Ar)>=0 then 
-	begin
-	for i := 0 to High(ar) do
-		case ar[i].vtype of
-		vtInteger: 
-			OutString+=SGStr(ar[i].vinteger);
-		vtString: 
-			OutString+=(ar[i].vstring^);
-		vtAnsiString: 
-			OutString+=(AnsiString(ar[i].vpointer));
-		vtBoolean: 
-			OutString+=SGStr(ar[i].vboolean);
-		vtChar: 
-			OutString+=ar[i].vchar;
-		vtExtended: 
-			OutString+=SGStrReal(Extended(ar[i].vpointer^),5);
-		end;
-	end;
+OutString:=SGGetStringFromConstArray(Ar);
 Sourse(OutString,WithTime);
 SetLength(OutString,0);
 end;
