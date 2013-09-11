@@ -322,8 +322,38 @@ function SGStringIf(const B:Boolean;const s:string):string;inline;
 function SGStringGetPart(const S:string;const a,b:LongWord):String;
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
+function SGGetFileName(const WayName:string):string;
 
 implementation
+
+function SGGetFileName(const WayName:string):string;
+var
+	i:LongWord;
+	B:Boolean = False;
+	E:Boolean = False;
+	S:String = '';
+begin
+Result:='';
+i:=Length(WayName);
+while (not E) and (i>0) and (WayName[i]<>UnixSlash) and (WayName[i]<>WinSlash)  do
+	begin
+	Result+=WayName[i];
+	if WayName[i]='.' then
+		if b then
+			E:=True
+		else
+			begin
+			b:=True;
+			Result:='';
+			end;
+	i-=1;
+	end;
+S:=Result;
+Result:='';
+for i:=Length(S) downto 1 do
+	Result+=S[i];
+SetLength(S,0);
+end;
 
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
 var
@@ -973,7 +1003,7 @@ var
 begin
 Result:='';
 i:=Length(FileName);
-while (i<>0)and(FileName[i]<>'.') do
+while (i<>0)and(FileName[i]<>'.')and(FileName[i]<>UnixSlash)and(FileName[i]<>WinSlash) do
 	begin
 	Result+=FileName[i];
 	i-=1;

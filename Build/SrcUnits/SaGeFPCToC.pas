@@ -229,6 +229,7 @@ type
 			public
 		FObject:string;
 		FWays:packed array of String;
+		FOutWay:string;
 			public
 		procedure GoRead;override;
 		procedure GoTranslate;inline;
@@ -1280,12 +1281,57 @@ end;
 procedure TSGTranslater.GoRead;
 var
 	FT:String = '';
+	I,ii:LongWord;
+var
+	MW:String = '';
+	WasInCmd:Boolean = False;
 begin
 if SGUpCaseString(FObject)='CMD' then
 	begin
-	
-	end
-else if SGUpCaseString(FObject)<>SGUpCaseString('Makefile') then
+	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Cmd Type)']);
+	for ii:=2 to argc-1 do
+		begin
+		FT:=SGUpCaseString(SGPCharToString(argv[ii]));
+		if (FT[1]<>'-') then
+			begin
+			Writeln('Befor command "',FT,'" must be "-".');
+			SGLog.Sourse(['TSGTranslater.GoRead : ','Befor command "',FT,'" must be "-".']);
+			end
+		else if Length(FT)<3 then
+			begin
+			Writeln('Error sintaxis command "',FT,'". (Length>3)');
+			SGLog.Sourse(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'" (Length>3).']);
+			end
+		else
+			begin
+			if (FT[2]='P') and (FT[3]='M') then
+				begin
+				MW:='';
+				for i:=4 to Length(FT) do
+					MW+=FT[i];
+				end
+			else if (FT[2]='O') and (FT[3]='W') then
+				begin
+				FOutWay:='';
+				for i:=4 to Length(FT) do
+					FOutWay+=FT[i];
+				end
+			else if (FT[2]='P') and ((FT[3]='P') or (FT[3]='U') or (FT[3]='L')) then
+				begin
+				FObject:='';
+				for i:=4 to Length(FT) do
+					FObject+=FT[i];
+				end
+			else 
+				begin
+				Writeln('Error sintaxis command "',FT,'".');
+				SGLog.Sourse(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'".']);
+				end;
+			end;
+		end;
+	WasInCmd:=True;
+	end;
+if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SGUpCaseString(FObject))='PP') then
 	begin
 	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
@@ -1300,17 +1346,24 @@ else if SGUpCaseString(FObject)<>SGUpCaseString('Makefile') then
 		if FT='UNIT' then
 			FChunks[0]:=SGTUnit.Create;
 		if FT=SGUpCaseString('library') then
-			FChunks[0]:=SGTUnit.Create;
+			;//FChunks[0]:=SGTUnit.Create;
 		(FChunks[0] as SGTReadClassComponent).FReadClass:=SGTReadClass.Create(SGTRead.Create(FObject));
 		FChunks[0].FParent:=Self;
 		SGLog.Sourse(['TSGTranslater.GoRead : Go Read First Chunck "',FT,'"']);
 		FChunks[0].GoRead;
 		end;
 	end
+else  if (not WasInCmd) or (WasInCmd and (MW='')) then
+	begin
+	SGLog.Sourse(['TSGTranslater.GoRead : Don''t know what a you doing pider!']);
+	WriteLn('TSGTranslater.GoRead : Don''t know what a you doing pider!');
+	end
 else {= Makefile}
 	begin
+	if WasInCmd then
+		FObject:=MW;
 	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Makefile Type)']);
-	
+	WriteLn(SGGetFileName(FObject),':',SGGetFileExpansion(FObject),':',FObject);
 	end;
 end;
 
@@ -1336,6 +1389,7 @@ begin
 inherited;
 FWays:=nil;
 FChunks:=nil;
+FOutWay:='';
 end;
 
 destructor SGTranslater.Destroy;
