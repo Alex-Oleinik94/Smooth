@@ -146,7 +146,7 @@ WOW /e Тeкст
 	//{$MODE TP}
 	//{$MODE FPC}
 	//{$MODE DEFAULT}
-	{$STATIC ON}
+	//{$STATIC ON}
 	{$SMARTLINK ON}
 	{$NOTES ON}
 	{$WARNINGS ON}
@@ -180,7 +180,7 @@ unit san;
 interface
 	uses
 		{$IFDEF MSWINDOWS}
-			dos,crt,graph,windows,gl,glu,classes,SysUtils,OpenAL,MMSystem,SaGeImages,SaGe;
+			dos,crt,graph,windows,gl,glu,classes,SysUtils,OpenAL,MMSystem{,SaGeImages,SaGe};
 		{$ELSE}
 			{$IFDEF LINUX}
 				dos,crt,gl,glu,glx,xlib,unix,x,xutil,OpenAL;
@@ -952,7 +952,7 @@ var (*$NOTE >>|<            Begining     Var             >|<<*)
 		SanWndComboBoxI:longint;
 
 	{------------------------------From RNR unit <BEGIN>------------------------------}
-	RNRDevice: TALCdevice;
+	RNRDevice: OpenAL.TALCdevice;
 	RNRContext: TALCcontext;
 	RNRBuffer: array of TALuint;
 	RNRSource: array of TALuint;
@@ -1005,8 +1005,8 @@ var (*$NOTE >>|<            Begining     Var             >|<<*)
 		Icon:string;
 		Proc:pointer;
 		end = nil;
-property Width : longint read GetContextWidth;
-property Height : longint read GetContextHeight;
+{property Width : longint read GetContextWidth;
+property Height : longint read GetContextHeight;}
 {--------------------------------------------------------------------------------------------------}
 {**************************************************************************************************}
 (*=====================*)(*$NOTE >>|<   Begining Procedure Variable   >|<<*)(*====================*)
