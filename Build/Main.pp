@@ -156,6 +156,12 @@ if argc>1 then
 			FPCTCTransliater;
 			end
 		else
+			if s='FIP' then
+				begin
+				WriteLn('Beginning Find in pas.');
+				FindInPas;
+				end
+		else
 			WriteLn('Unknown command "',s,'".');
 		end
 	else

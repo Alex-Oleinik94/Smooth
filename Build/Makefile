@@ -1,11 +1,11 @@
 PP=fpc
-BASEARGS= -FuSrcUnits\Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FiSrcUnits/Includes -Sm -FUCompiledUnits -FE./../BinDebug/
+BASEARGS= -FuSrcUnits\Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/DirectX -FuSrcUnits/OpenGL -FiSrcUnits/Includes -Sm -FUCompiledUnits -FE./../BinDebug/
 DODEBUG= -gl 
 DORELEASE= -XX -O3 -CX -dRELEASE
 
 release:
 	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) Main
-	$(MAKE) clear
+	strip ..\BinDebug\Main.exe
 	./EnigmaVB/enigmavbconsole.exe Main.evb
 debug:
 	$(PP) $(DODEBUG) $(BASEARGS) $(OPT) Main

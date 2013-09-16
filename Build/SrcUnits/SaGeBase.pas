@@ -86,6 +86,8 @@ const
 	TextureDirectory = DataDirectory + Slash +'Textures';
 	TexturesDirectory = TextureDirectory;
 	FontsDirectory = FontDirectory;
+var
+	SGLogEnable:Boolean = False;
 type
 	TSGHandle = type LongInt;
 	TSGLibHandle = type TSGHandle;
@@ -323,8 +325,229 @@ function SGStringGetPart(const S:string;const a,b:LongWord):String;
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
 function SGGetFileName(const WayName:string):string;
+procedure SGReleaseFileWay(WAy:string);
+function SGGetFileWay(const Way:String):String;
+procedure SGMakeDirectory(const DirWay:String);
+procedure FindInPas;
 
 implementation
+
+procedure FindInPas;
+var
+	ArWords:array of string = nil;
+	Stream:TFileStream = nil;
+	Oy:LongWord;
+	PF,PS,PFF,PSF:LongWord;
+procedure FindInFile(const VFile:String);
+var
+	f:text;
+	i:longint;
+	Str:string;
+	ii:longint;
+	iii:longint;
+	iiii:longint;
+	KolStr:longint = 0;
+begin
+PF+=1;
+assign(f,VFile);
+reset(f);
+KolStr:=0;
+while not eof(f) do
+	begin
+	KolStr+=1;
+	readln(f,str);
+	for ii:=1 to Length(str) do
+		str[ii]:=UpCase(str[ii]);
+	iii:=0;
+	for ii:=Low(ArWords) to High(ArWords) do
+		begin
+		iiii:=Pos(ArWords[ii],str);
+		if iiii<>0 then
+			begin
+			iii+=1;
+			end;
+		end;
+	if iii<>0 then
+		begin
+		{SetLength(ArResults,Length(ArResults)+1);
+		ArResults[High(ArResults)].Kol:=iii;
+		ArResults[High(ArResults)].Str:=KolStr;
+		ArResults[High(ArResults)].Fail:=ArFiles[i];}
+		PS+=iii;
+		SGWriteStringToStream('In file "'+VFile+'" on string "'+SGStr(KolStr)+'" was "'+SGStr(iii)+'" match...'+#13+#10,Stream);
+		end;
+	end;
+close(f);
+
+Gotoxy(1,Oy);
+textcolor(15);
+write('Finded ');
+textcolor(10);
+write(PS);
+textcolor(15);
+write(' matches. Processed ');
+textcolor(10);
+write(PF);
+textcolor(15);
+writeln(' files ...');
+end;
+
+procedure DoFiles(const VDir:string);
+var
+	sr:dos.searchrec;
+	ArF:packed array[0..8] of string = 
+	('*.pas','*.pp','*.inc','*.cpp','*.cxx','*.h','*,hpp','*.hxx','*.c');
+	I:LongWord;
+begin
+for i:=0 to High(ArF) do
+	begin
+	dos.findfirst(VDir+Slash+ArF[i],$3F,sr);
+	while DosError<>18 do
+		begin
+		//SGWriteStringToStream('Do file "'+VDir+sr.name+'".'+#13+#10,Stream);
+		FindInFile(VDir+sr.name);
+		dos.findnext(sr);
+		end;
+	dos.findclose(sr);
+	end;
+end;
+
+procedure ConstWords;
+var
+	l:longint;
+	i:longint;
+begin
+textcolor(15);
+write('Enter words quantity:');
+textcolor(10);
+readln(l);
+textcolor(15);
+SetLength(ArWords,l);
+for i:=Low(ArWords) to High(ArWords) do
+	begin
+	textcolor(15);
+	write('Enter ',i+1,' word:');
+	textcolor(10);
+	readln(ArWords[i]);
+	textcolor(15);
+	end;
+end;
+
+procedure SkanWords;
+var
+	i:longint;
+	ii:longint;
+begin
+for i:=Low(ArWords) to High(ArWords) do
+	begin
+	for ii:=1 to Length(ArWords[i]) do
+		ArWords[i][ii]:=UpCase(ArWords[i][ii]);
+	end;
+i:=Low(ArWords);
+while i<=High(ArWords) do
+	begin
+	if (ArWords[i]='') or (ArWords[i]=' ') or (ArWords[i]='  ') or (ArWords[i]='   ') or (ArWords[i]='    ') then
+		begin
+		for ii:=i to High(ArWords)-1 do
+			ArWords[i]:=ArWords[i+1];
+		SetLength(ArWords,Length(ArWords)-1);
+		end;
+	i+=1;
+	end;
+end;
+
+procedure DoDirectories(const VDir:string);
+var
+	sr:dos.searchrec;
+begin
+//SGWriteStringToStream('Do dir "'+VDir+'".'+#13+#10,Stream);
+DoFiles(VDir+Slash);
+dos.findfirst(VDir+Slash+'*',$10,sr);
+while DosError<>18 do
+	begin
+	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir+Slash+sr.name))) then
+		BEGIN
+		DoFiles(VDir+Slash+sr.name+Slash);
+		DoDirectories(VDir+Slash+sr.name);
+		END;
+	dos.findnext(sr);
+	end;
+dos.findclose(sr);
+end;
+
+begin
+PF:=0;PS:=0;OY:=0;
+Stream:=TFileStream.Create('Find in pas results.txt',fmCreate);
+ConstWords;
+SkanWords;
+writeln('Find was begining... Psess any key to stop him...');
+Oy:=WhereY;
+DoDirectories('.');
+Stream.Destroy;
+end;
+
+procedure SGMakeDirectory(const DirWay:String);
+begin
+try
+MKDir(DirWay);
+except
+end;
+end;
+
+function SGGetFileWay(const Way:String):String;
+var
+	i,ii:LongWord;
+begin
+if SGGetFileName(Way)='' then
+	Result:=Way
+else
+	begin
+	Result:='';
+	ii:=0;
+	for i:=1 to Length(Way) do
+		if Way[i] in [UnixSlash,WinSlash] then
+			ii:=i;
+	if ii<>0 then
+		begin
+		for i:=1 to ii do
+			Result+=Way[i];
+		end;
+	end;
+end;
+
+procedure SGReleaseFileWay(WAy:string);
+var
+	ArF:packed array of string = nil;
+	i:LongWord = 0;
+	NowWay:String = '';
+begin
+Way:=SGGetFileWay(Way);
+SetLength(ArF,1);
+ArF[0]:='';
+i:=1;
+while (i<=Length(Way)) do
+	begin
+	if Way[i] in [UnixSlash,WinSlash] then
+		begin
+		SetLength(ArF,Length(ArF)+1);
+		ArF[High(ArF)]:='';
+		end
+	else
+		begin
+		ArF[High(ArF)]+=Way[i];
+		end;
+	i+=1;
+	end;
+NowWay:='';
+for i:=0 to high(ArF) do
+	if ArF[i]<>'' then
+		begin
+		if (ArF[i]<>'.') and (ArF[i]<>'..') then
+			SGMakeDirectory(NowWay+ArF[i]);
+		NowWay+=ArF[i]+Slash;
+		end;
+SetLength(ArF,0);
+end;
 
 function SGGetFileName(const WayName:string):string;
 var
@@ -500,9 +723,12 @@ procedure TSGLog.Sourse(const Ar:array of const;const WithTime:Boolean = True);
 var
 	OutString:String = '';
 begin
-OutString:=SGGetStringFromConstArray(Ar);
-Sourse(OutString,WithTime);
-SetLength(OutString,0);
+ if SGLogEnable then
+	begin
+	OutString:=SGGetStringFromConstArray(Ar);
+	Sourse(OutString,WithTime);
+	SetLength(OutString,0);
+	end;
 end;
 
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
@@ -630,6 +856,7 @@ var
 	a:TSGDateTime;
 	pc:PChar;
 begin
+if SGLogEnable then
 if not WithTime then
 	begin
 	pc:=SGStringToPChar(s+#13+#10);
@@ -651,12 +878,14 @@ end;
 constructor TSGLog.Create;
 begin
 inherited;
-FFileStream:=TFileStream.Create(DataDirectory+Slash+'EngineLog.log',fmCreate);
+if SGLogEnable then
+	FFileStream:=TFileStream.Create(DataDirectory+Slash+'EngineLog.log',fmCreate);
 end;
 
 destructor TSGLog.Destroy;
 begin
-FFileStream.Destroy;
+if SGLogEnable then
+	FFileStream.Destroy;
 inherited;
 end;
 

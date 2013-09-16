@@ -96,11 +96,17 @@ type
 		procedure Add(const NewComponent:SGTComponent);
 		function TransliatorClass:SGTranslater;
 		function LastChunk:SGTComponent;inline;
+			private
+		function GetOutWay:string;virtual;
 			public
 		FChunks:packed array of SGTComponent;
 		FPlace:SGTUPlace;
 		FParent:SGTComponent;
 		FName:String;
+		FWay:String;
+			public
+		property Way:string read FWay write FWay;
+		property OutWay:string read GetOutWay;
 		end;
 	TSGTComponent=SGTComponent;
 	
@@ -225,17 +231,19 @@ type
 		class function ClassName:string;override;
 		constructor Create;override;overload;
 		destructor Destroy;override;
-		class function Create(const Way:String):SGTranslater;overload;
+		class function Create(const VWay:String):SGTranslater;overload;
 			public
 		FObject:string;
 		FWays:packed array of String;
 		FOutWay:string;
+			private
+		function GetOutWay:string;override;
 			public
 		procedure GoRead;override;
 		procedure GoTranslate;inline;
 		procedure GoWrite(const FWriteClass:SGTWriteClass = nil);override;
-		function FileType(const Way:string):string;
-		function GoFindAndReadUnit(const Way:string):Boolean;
+		function FileType(const VWay:string):string;
+		function GoFindAndReadUnit(const VWay:string):Boolean;
 		end;
 	TSGTranslater=SGTranslater;
 
@@ -923,9 +931,9 @@ var
 	i:LongWord;
 begin
 SourseToLog(['SGTProgram.GoWrite : Beginning']);
-FStream:=SGTWriteClass.Create(FName+'.cpp');
+FStream:=SGTWriteClass.Create(OutWay+FWay+FName+'.cpp');
 FStream.WriteLn('//'+FName+'.pas');
-FStream.Writeln('#include "sageheader.h"');
+FStream.Writeln('#include "SaGeHeader.h"');
 if FChunks<>nil then
 	for i:=0 to High(FChunks) do
 		begin
@@ -1020,11 +1028,12 @@ var
 	FStream:SGTWriteClass = nil;
 	i:LongWord;
 begin
-FStream:=SGTWriteClass.Create(FName+'.h');
+
+FStream:=SGTWriteClass.Create(OutWay+FWay+FName+'.h');
 FStream.WriteLn('//Header (Interface) of "'+FName+'.pas"');
 FStream.WriteLn('#ifndef '+FName+'_included');
 FStream.WriteLn('#define '+FName+'_included');
-FStream.Writeln('#include "sageheader.h"');
+FStream.Writeln('#include "SaGeHeader.h"');
 if FChunks<>nil then
 	for i:=0 to High(FChunks) do
 		if FChunks[i].FPlace=SGTUHeader then
@@ -1035,7 +1044,7 @@ if FChunks<>nil then
 FStream.WriteLn('#endif');
 FStream.Destroy;
 
-FStream:=SGTWriteClass.Create(FName+'.cpp');
+FStream:=SGTWriteClass.Create(OutWay+FWay+FName+'.cpp');
 FStream.WriteLn('//CPP (Implementation) of "'+FName+'.pas"');
 FStream.WriteLn('#include "'+FName+'.h"');
 if FChunks<>nil then
@@ -1098,6 +1107,14 @@ Result:= IsZS([
 FReadClass.ReMember;
 end;
 {==========}(*SGTComponent*){==========}
+
+function SGTComponent.GetOutWay:string;
+begin
+if FParent<>nil then
+	Result:=FParent.OutWay
+else
+	Result:='';
+end;
 
 function SGTComponent.LastChunk:SGTComponent;inline;
 begin
@@ -1193,12 +1210,19 @@ end;
 
 {==========}(*SGTranslater*){==========}
 
+function TSGTranslater.GetOutWay:string;
+begin
+Result:=FOutWay;
+end;
+
 procedure TSGTranslater.GoWrite(const FWriteClass:SGTWriteClass = nil);
 var 
 	i:LongWord;
 	FSGH:SGTWriteClass = nil;
 begin
-FSGH:=SGTWriteClass.Create('sageheader.h');
+SGReleaseFileWay(FOutWay);
+
+FSGH:=SGTWriteClass.Create(FOutWay+'SaGeHeader.h');
 FSGH.WriteLn('#ifndef sageheader_included');
 FSGH.WriteLn('#define sageheader_included');
 FSGH.WriteLn('#include <iostream>');
@@ -1230,7 +1254,7 @@ for i:=0 to High(FChunks) do
 	end;
 end;
 
-function TSGTranslater.GoFindAndReadUnit(const Way:string):Boolean;
+function TSGTranslater.GoFindAndReadUnit(const VWay:string):Boolean;
 
 function ExistsUnit:Boolean;
 var
@@ -1239,7 +1263,7 @@ begin
 Result:=False;
 if FChunks<>nil then
 	for i:=0 to High(FChunks) do
-		if FChunks[i].FName=Way then
+		if FChunks[i].FName=VWay then
 			begin
 			Result:=True;
 			Exit;
@@ -1260,12 +1284,12 @@ FChunks[High(FChunks)].GoRead;
 Result:=True;
 end;
 
-function TSGTranslater.FileType(const Way:string):string;
+function TSGTranslater.FileType(const VWay:string):string;
 var
 	RC:SGTReadClass = nil;
 begin
 RC:=SGTReadClass.Create;
-RC.Add(SGTRead.Create(Way));
+RC.Add(SGTRead.Create(VWay));
 Result:=SGUpCaseString(RC.NextIdentifier);
 RC.Destroy;
 if (Result='VAR') or (Result='USES') or 
@@ -1315,6 +1339,8 @@ if SGUpCaseString(FObject)='CMD' then
 				FOutWay:='';
 				for i:=4 to Length(FT) do
 					FOutWay+=FT[i];
+				if not (FOutWay[Length(FOutWay)] in [UnixSlash,WinSlash]) then
+					FOutWay+=Slash;
 				end
 			else if (FT[2]='P') and ((FT[3]='P') or (FT[3]='U') or (FT[3]='L')) then
 				begin
@@ -1356,21 +1382,35 @@ if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SG
 else  if (not WasInCmd) or (WasInCmd and (MW='')) then
 	begin
 	SGLog.Sourse(['TSGTranslater.GoRead : Don''t know what a you doing pider!']);
-	WriteLn('TSGTranslater.GoRead : Don''t know what a you doing pider!');
+	if WasInCmd then
+		WriteLn('TSGTranslater.GoRead : Don''t know what a you doing pider!');
 	end
 else {= Makefile}
 	begin
 	if WasInCmd then
 		FObject:=MW;
 	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Makefile Type)']);
-	WriteLn(SGGetFileName(FObject),':',SGGetFileExpansion(FObject),':',FObject);
+	if (SGGetFileName(FObject)='') and (SGGetFileExpansion(FObject)='') then
+		begin
+		FObject+='Makefile';
+		end;
+	if SGFileExists(FObject) then
+		begin
+		SGLog.Sourse(['TSGTranslater.GoRead : Finded makefile.']);
+		end
+	else
+		begin
+		SGLog.Sourse(['TSGTranslater.GoRead : Don''t find makefile.']);
+		if WasInCmd then
+			WriteLn('Don''t find makefile..');
+		end;
 	end;
 end;
 
-class function SGTranslater.Create(const Way:String):SGTranslater;overload;
+class function SGTranslater.Create(const VWay:String):SGTranslater;overload;
 begin
 Result:=SGTranslater.Create;
-Result.FObject:=Way;
+Result.FObject:=VWay;
 end;
 
 procedure SGTranslater.GoTranslate;inline;
