@@ -37,7 +37,6 @@ type
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		function KeysPressed(const  Index : integer ) : Boolean;override;overload;
 			public
-		msg:Windows.TMSG;
 		hWindow:HWnd;
 		dcWindow:hDc;
 		rcWindow:HGLRC;
@@ -222,7 +221,10 @@ Windows.SwapBuffers(  dcWindow  );
 end;
 
 procedure TSGContextWinAPI.Messages;
+var
+	msg:Windows.TMSG;
 begin
+Fillchar(msg,sizeof(msg),0);
 if Windows.PeekMessage(@msg,0,0,0,0) = true then
 	begin
 	Windows.GetMessage(@msg,0,0,0);

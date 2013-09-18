@@ -1,9 +1,16 @@
 *.bat
 *.ini
 Build/CompiledUnits/*
+Build/SrcUnits/*.o
+Build/SrcUnits/*.a
+Build/SrcUnits/*.ppu
 *Your Results.txt
 Build/*.ppu
 Build/*.o
 Build/Main.res
 BinDebug/Main.exe
 BitRelease/Main.exe
+Others\DirectX\*.o
+Others\DirectX\*.ppu
+Others\DirectX\*.a
+
