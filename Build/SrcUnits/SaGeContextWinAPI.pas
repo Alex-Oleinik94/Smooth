@@ -1,4 +1,16 @@
-{$IFDEF SGREADINTERFACE}
+{$include Includes\SaGe.inc}
+
+unit SaGeContextWinAPI;
+
+interface
+
+uses
+	SaGeBase
+	,Windows
+	,SaGeContext
+	//,SaGe
+	//,SaGeImages
+	;
 //Где купить пиво? Ответ: в магазине. (Специально для макса)
 // Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
 {$DEFINE SGWinAPIDebug}
@@ -20,35 +32,35 @@ type
 	
 	TSGContextWinAPI=class(TSGContext)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		procedure Initialize;override;
 		procedure Run;override;
 		procedure Messages;override;
 		procedure SwapBuffers;override;
-		function GetCursorPosition:TSGPoint2f;override;
-		function GetWindowRect:TSGPoint2f;override;
-		function GetScreenResolution:TSGPoint2f;override;
-		function TopShift:LongWord;override;
-		function MouseShift:TSGPoint2f;override;
+		function  GetCursorPosition:TSGPoint2f;override;
+		function  GetWindowRect:TSGPoint2f;override;
+		function  GetScreenResolution:TSGPoint2f;override;
+		function  TopShift:LongWord;override;
+		function  MouseShift:TSGPoint2f;override;
 		procedure InitFullscreen(const b:boolean); override;
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
-		function KeysPressed(const  Index : integer ) : Boolean;override;overload;
+		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 			public
 		hWindow:HWnd;
 		dcWindow:hDc;
 		rcWindow:HGLRC;
 		clWindow:LongWord;
 		procedure ThrowError(pcErrorMessage : pChar);
-		function WindowRegister: Boolean;
-		function WindowCreate: HWnd;
-		function WindowInit(hParent : HWnd): Boolean;
+		function  WindowRegister: Boolean;
+		function  WindowCreate: HWnd;
+		function  WindowInit(hParent : HWnd): Boolean;
 		procedure KillOGLWindow(const KillRC:Boolean = True);
-		function CreateOGLWindow():Boolean;
+		function  CreateOGLWindow():Boolean;
 			public
-		function GetRC:LongWord;override;
+		function  GetRC:LongWord;override;
 		procedure SetRC(const NewRC:LongWord);override;
 		end;
 var
@@ -57,10 +69,16 @@ var
 function SGFullscreenQueschionWinAPIMethod:boolean;
 function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
-	{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
+function TSGContext.Get(const What:string):Pointer;
+begin
+if What='WINDOW HANDLE' then
+	Result:=Pointer(dcWindow)
+else
+	Result:=Inherited Get(What);
+end;
 
 function TSGContextWinAPI.KeysPressed(const  Index : integer ) : Boolean;overload;
 var
@@ -176,7 +194,7 @@ Succs:=CreateOGLWindow;
 Active:=Succs;
 if Active then
 	begin
-	SGInitOpenGL;
+	
 	if FCallInitialize<>nil then
 		FCallInitialize;
 	end;
@@ -195,8 +213,8 @@ while FActive and (FNewContextType=nil) do
 	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
 	FElapsedDateTime:=FDT;
 	
-	glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
-	SGInitMatrixMode(SG_3D);
+	{$note 1322}//glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
+	FRender.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
 		FCallDraw();
 	SGIIdleFunction;
@@ -468,17 +486,17 @@ Result := hWindow2;
 end;
 
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
-var
+{var
 	FunctionError : integer;
 	pfd : PIXELFORMATDESCRIPTOR;
-	iFormat : integer;
+	iFormat : integer;}
 begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent=',hParent,') : Enter']);
 	{$ENDIF}
- FunctionError := 0;
+//FunctionError := 0;
 dcWindow := GetDC( hParent );
-FillChar(pfd, sizeof(pfd), 0);
+{FillChar(pfd, sizeof(pfd), 0);
 pfd.nSize         := sizeof(pfd);
 pfd.nVersion      := 1;
 pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
@@ -500,7 +518,12 @@ wglMakeCurrent( dcWindow, rcWindow );
 if FunctionError = 0 then 
 	Result := true 
 else 
-	Result := false;
+	Result := false;}
+FRender:=FRenderClass.Create();
+FRender.Window:=Self;
+Result:=FRender.CreateContext();
+if Result then 
+	FRender.Init();
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
 	{$ENDIF}
@@ -544,14 +567,15 @@ end;
 
 procedure TSGContextWinAPI.KillOGLWindow(const KillRC:Boolean = True);
 begin
-if dcWindow<>0 then
-	wglMakeCurrent( dcWindow, 0 );
-if KillRC and (rcWindow<>0) then
+{if dcWindow<>0 then
+	wglMakeCurrent( dcWindow, 0 );}
+{if KillRC and (rcWindow<>0) then
 	begin
 	wglDeleteContext( rcWindow );
 	CloseHandle(rcWindow);
 	rcWindow:=0;
-	end;
+	end;}
+FRender.Destroy;
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
 if (dcWindow<>0) then
@@ -568,8 +592,5 @@ if hWindow<>0 then
 	end;
 end;
 
-
-	
-	{$ENDIF}
-
+end.
 

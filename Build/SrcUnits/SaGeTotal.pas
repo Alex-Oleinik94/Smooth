@@ -7,13 +7,11 @@ unit SaGeTotal;
 interface
 
 uses
-	SaGe
+	SaGeCommon
 	,SaGeMesh
 	,SaGeUtils
 	,SaGeBase
 	,SaGeContext
-	,Gl
-	,Glu
 	,SaGeCL
 	;
 type

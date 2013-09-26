@@ -10,20 +10,19 @@ uses
 		{$ENDIF}
 	,Classes
 	,SysUtils
-	,gl
-	,glu
 	,SaGeBase
 	,SaGeImagesBase
 	,SaGeImagesJpeg
 	,SaGeImagesPng
 	,SaGeImagesBmp
+	,SaGeRender
 	;
 type
 	SGIByte = type byte;
 	
 	PSGImage = ^TSGImage;
 	PTSGImage = PSGImage;
-	TSGImage=class(TObject)
+	TSGImage=class(TSGRenderObject)
 			public
 		constructor Create(const NewWay:string = '');
 		destructor Destroy;override;
@@ -32,7 +31,7 @@ type
 		
 		FStream:TMemoryStream;
 		
-		FTexture : GLUint;
+		FTexture : SGUint;
 		
 		FReadyToGoToTexture:boolean;
 		FWay:string;
@@ -58,7 +57,7 @@ type
 		class function GetLongWord(const FileBits:PByte;const Position:LongInt):LongWord;
 		class function GetLongWordBack(const FileBits:PByte;const Position:LongInt):LongWord;
 		procedure BindTexture;
-		class procedure DisableTexture;
+		procedure DisableTexture;
 		function ReadyTexture:Boolean;
 		procedure FreeSream;
 		procedure FreeBits;
@@ -73,7 +72,7 @@ type
 		property DataType : LongInt read FImage.FDataType write FImage.FDataType;
 		property Channels : LongInt read FImage.FChannels write FImage.FChannels;
 		property BitDepth: LongInt read FImage.FSizeChannel write FImage.FSizeChannel;
-		property Texture : GLUint read FTexture write FTexture;
+		property Texture : SGUint read FTexture write FTexture;
 		property Height : LongInt read FImage.FHeight write FImage.FHeight;
 		property Width : LongInt read FImage.FWidth write FImage.FWidth;
 		property Bits : LongInt read GetBitMapBits write SetBitMapBits;
@@ -454,7 +453,8 @@ end;
 
 procedure TSGImage.FreeTexture;
 begin
-glDeleteTextures(1,@FTexture);
+Render.DeleteTextures(1,@FTexture);
+//glDeleteTextures(1,@FTexture);
 FTexture:=0;
 end;
 
@@ -493,15 +493,17 @@ while true do
 end;
 
 
-class procedure TSGImage.DisableTexture;inline;
+procedure TSGImage.DisableTexture;inline;
 begin
-glDisable(GL_TEXTURE_2D);
+Render.Disable(SG_TEXTURE_2D);
+//glDisable(GL_TEXTURE_2D);
 end;
 
 procedure TSGImage.BindTexture;inline;
 begin
-glEnable(GL_TEXTURE_2D);
-glBindTexture(GL_TEXTURE_2D,FTexture);
+Render.Enable(SG_TEXTURE_2D);
+{glEnable(GL_TEXTURE_2D);
+glBindTexture(GL_TEXTURE_2D,FTexture);}
 end;
 
 procedure TSGImage.LoadBMPToBitMap;
@@ -611,7 +613,7 @@ procedure TSGImage.ToTexture;
 begin
 if FTexture<>0 then
 	FreeTexture;
-glEnable(GL_TEXTURE_2D);
+{glEnable(GL_TEXTURE_2D);
 glGenTextures(1, @FTexture);
 glBindTexture(GL_TEXTURE_2D, FTexture);
 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -625,7 +627,22 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 glTexImage2D(GL_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
 glBindTexture(GL_TEXTURE_2D, FTexture);
-glDisable(GL_TEXTURE_2D);
+glDisable(GL_TEXTURE_2D);}
+Render.Enable(SG_TEXTURE_2D);
+Render.GenTextures(1, @FTexture);
+Render.BindTexture(SG_TEXTURE_2D, FTexture);
+Render.PixelStorei(SG_UNPACK_ALIGNMENT, 4);
+Render.PixelStorei(SG_UNPACK_ROW_LENGTH, 0);
+Render.PixelStorei(SG_UNPACK_SKIP_ROWS, 0);
+Render.PixelStorei(SG_UNPACK_SKIP_PIXELS, 0);
+Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_MIN_FILTER, SG_LINEAR);
+Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_MAG_FILTER, SG_NEAREST);
+Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_WRAP_S, SG_REPEAT);
+Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_WRAP_T, SG_REPEAT);
+Render.TexEnvi(SG_TEXTURE_ENV, SG_TEXTURE_ENV_MODE, SG_MODULATE);
+Render.TexImage2D(SG_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
+Render.BindTexture(SG_TEXTURE_2D, FTexture);
+Render.Disable(SG_TEXTURE_2D);
 FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
 	SGLog.Sourse('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');

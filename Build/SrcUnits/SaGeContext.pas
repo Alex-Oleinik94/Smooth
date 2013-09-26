@@ -4,14 +4,12 @@ unit SaGeContext;
 interface
 uses
 	SaGeBase
-	,SaGe
+	,SaGeCommon
 	,SaGeImages
 	,Classes
 	,SysUtils
 	,crt
-	{$IFDEF MSWINDOWS}
-		,Windows
-		{$ENDIF}
+	,SaGeRender
 	{$IFDEF LAZARUS}
 		,Interfaces,
 		LMessages,
@@ -28,12 +26,12 @@ uses
 		,Forms
 		,_mmtime
 		{$ENDIF}
-	,Gl
+	{,Gl
 	,Glu
 	,GLext
 	{$IFDEF GLUT}
 		,glut
-		{$ENDIF}
+		{$ENDIF}}
 	;
 const
 	SG_ALT_KEY = 18;
@@ -46,9 +44,9 @@ type
 	TSGContext = class;
 	TSGContextClass = class of TSGContext;
 	TSGContextProcedure = TProcedure;
-	TSGContext=class
+	TSGContext=class(TSGClass)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		procedure Initialize;virtual;abstract;
@@ -127,39 +125,48 @@ type
 		procedure CopyInfo(const C:TSGContext);virtual;
 			public
 		FNewContextType:TSGContextClass;
+			public
+		FRenderClass:TSGRenderClass;
+		FRender:TSGRender;
+			public
+		property RenderClass:TSGRenderClass read FRenderClass write FRenderClass;
+		property Render:TSGRender read FRender write FRender;
+			public
+		function Get(const What:string):Pointer;override;
 		end;
 
-procedure SGInitMatrixMode(const Mode:SGByte = SG_3D; const dncht:Real = 120);inline;
-procedure SGMatrixMode(const Mode:SGByte = SG_3D; const dncht:Real = 120);inline;
 {$DEFINE SGREADINTERFACE}
-{$IFDEF MSWINDOWS}
-	{$I Includes\SaGeContextWinAPI.inc}
-	{$ENDIF}
 {$IFDEF GLUT}
 	{$I Includes\SaGeContextGLUT.inc}
 	{$ENDIF}
 {$IFDEF LAZARUS}
 	{$I Includes\SaGeContextLazarus.inc}
 	{$ENDIF}
-{$I Includes\SaGeContextGLFW.inc}
 {$UNDEF SGREADINTERFACE}
 var
 	SGContext:TSGContext = nil;
 var // Используется для пеехода к другому типу сонтекста
 	NewContext:TSGContext = nil;
 implementation
+
 {$DEFINE SGREADIMPLEMENTATION}
-{$IFDEF MSWINDOWS}
-	{$I Includes\SaGeContextWinAPI.inc}
-	{$ENDIF}
 {$IFDEF GLUT}
 	{$I Includes\SaGeContextGLUT.inc}
 	{$ENDIF}
 {$IFDEF LAZARUS}
 	{$I Includes\SaGeContextLazarus.inc}
 	{$ENDIF}
-{$I Includes\SaGeContextGLFW.inc}
 {$UNDEF SGREADIMPLEMENTATION}
+
+function TSGContext.Get(const What:string):Pointer;
+begin
+if What='HEIGHT' then
+	Result:=Pointer(FHeight)
+else if What='WIDHT' then
+	Result:=Pointer(FWidth)
+else
+	Result:=nil;
+end;
 
 procedure TSGContext.CopyInfo(const C:TSGContext);
 begin
@@ -306,31 +313,6 @@ if Index=SGNoCursorButton then
 	Result:=False
 else
 	Result:=FCursorKeysPressed[Index];
-end;
-
-procedure SGMatrixMode(const Mode:SGByte = SG_3D; const dncht:Real = 120);inline;
-begin
-SGInitMatrixMode(Mode);
-end;
-
-procedure SGInitMatrixMode(const Mode:SGByte = SG_3D; const dncht:Real = 120);inline;
-const
-	glub = 500;
-begin
-glViewport(0, 0, SGContext.Width, SGContext.Height);
-glMatrixMode(GL_PROJECTION);
-glLoadIdentity;
-if  Mode=SG_2D then
-	glOrtho(0,SGContext.Width,SGContext.Height,0,0,0.1)
-else
-	if Mode = SG_3D_ORTHO then
-		begin
-		glOrtho(-(SGContext.Width / dncht),SGContext.Width / dncht,-SGContext.Height / dncht,(SGContext.Height / dncht),0,500)
-		end
-	else
-		gluPerspective(45, SGContext.Width / SGContext.Height, 0.0011, 500);
-glMatrixMode(GL_MODELVIEW);
-glLoadIdentity;
 end;
 
 constructor TSGContext.Create;

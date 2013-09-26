@@ -7,10 +7,9 @@ interface
 uses 
 	crt
 	,Classes
-	,SaGe
+	,SaGeCommon
 	,SaGeBase
-	,Math
-	,GL;
+	,Math;
 type
 	TSGExpressionError=class
 			public

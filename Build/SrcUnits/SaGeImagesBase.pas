@@ -5,8 +5,8 @@ interface
 
 uses 
 	crt
-	,gl
 	,SaGeBase
+	,SaGeRender
 	;
 
 const 
@@ -299,38 +299,38 @@ case FChannels of
 1:
 	begin 
 	if Grayscale=SG_TRUE then 
-		FFormatType:=GL_LUMINANCE
+		FFormatType:=SG_LUMINANCE
 	else
 		if Alpha=SG_TRUE then
-			FFormatType:=GL_ALPHA
+			FFormatType:=SG_ALPHA
 		else
 			if (Alpha=SG_FALSE) and (Grayscale=SG_FALSE) then
-				FFormatType:=GL_INTENSITY
+				FFormatType:=SG_INTENSITY
 			else
-				FFormatType:=GL_RED;
+				FFormatType:=SG_RED;
 	end;
 2:
 	begin
 	//if (Grayscale=SG_TRUE) and (Alpha=SG_TRUE) then
-		FFormatType:=GL_LUMINANCE_ALPHA;
+		FFormatType:=SG_LUMINANCE_ALPHA;
 		
 	end;
 3:
 	begin
-	FFormatType:=GL_RGB;
+	FFormatType:=SG_RGB;
 	end;
 4:
 	begin
-	FFormatType:=GL_RGBA;
+	FFormatType:=SG_RGBA;
 	end;
 else
 	FFormatType:=0;
 end;
 case FSizeChannel of
 8:
-	FDataType:=GL_UNSIGNED_BYTE;
+	FDataType:=SG_UNSIGNED_BYTE;
 else
-	FDataType:=GL_BITMAP;
+	FDataType:=SG_BITMAP;
 end;
 end;
 

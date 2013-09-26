@@ -1,3 +1,6 @@
+{$IFDEF MSWINDOWS}
+	{$R .\..\SaGe.res}
+	{$ENDIF}
 {$I Includes\SaGe.inc}
 unit SaGeBase;
 
@@ -6,7 +9,6 @@ interface
 uses 
 	crt
 	,dos
-	,gl
 	{$IFDEF MSWINDOWS}
 		,windows
 		{$ENDIF}
@@ -89,6 +91,9 @@ const
 var
 	SGLogEnable:Boolean = False;
 type
+	SGUint = type LongWord;
+	PSGUInt = ^ SGUint;
+	SGInt = Int64;
 	TSGHandle = type LongInt;
 	TSGLibHandle = type TSGHandle;
 	TSGLibrary = TSGLibHandle;
@@ -131,7 +136,6 @@ type
 	Text=TextFile;
 	PTextFile=^TextFile;
 	
-	SGReal = glFloat;
 	TSGCaption =  string;
 	SGCaption = TSGCaption;
 	
@@ -140,6 +144,15 @@ type
 	SGFrameButtonsType = type TSGByte;
 	
 	TSGProcedure = TProcedure;
+type
+	PTSGPlane = ^ TSGPlane;
+	TSGPlane=object
+		a,b,c,d:real;
+		procedure Import(const a1:real = 0; const b1:real = 0; const c1:real = 0; const d1:real = 0);
+		procedure Write;
+		end;
+	PSGPlane = PTSGPlane;
+	SGPlane = TSGPlane;
 type
 	ArLong01=packed array [0..1] of LongWord;
 	PArLong01 = ^ArLong01;
@@ -156,18 +169,29 @@ type
 			public
 		property SaGeLibrary : TSGLibrary read FSaGeLibrary;
 		end;
-    
+	
+	TSGArTObject = type packed array of TObject;
+	
 	TSGObject=class(TObject);
 	
-	TSGDrawClass=class;
-	TSGClassOfDrawClass = class of TSGDrawClass;
-	TSGDrawClass=class(TSGObject)
+	TSGClass=class;
+	TSGClassClass = class of TSGClass;
+	TSGClassOfClass = TSGClassClass;
+	TSGClass=class(TSGObject)
 			public
 		constructor Create;virtual;
 		destructor Destroy;override;
+		class function ClassName:String;virtual;abstract;
+		function Get(const What:string):Pointer;virtual;abstract;
+		end;
+	
+	TSGDrawClass=class;
+	TSGClassOfDrawClass = class of TSGDrawClass;
+	TSGDrawClassClass = TSGClassOfDrawClass; 
+	TSGDrawClass=class(TSGClass)
 			public
 		procedure Draw;virtual;abstract;
-		class function ClassName:String;virtual;
+		class function ClassName:String;override;
 		end;
 		
 	TMemoryStream = Classes.TMemoryStream;
@@ -263,6 +287,12 @@ const
 var
 	SGZero:extended = 0.00001;
 	SGLog:TSGLog = nil;
+	Nan:real;
+	Inf:real;
+var
+	SGCLPaintProcedure : SGProcedure = nil;
+	SGCLForReSizeScreenProcedure : SGProcedure = nil;
+	SGCLLoadProcedure : SGProcedure = nil;
 operator + (a,b:TArReal):TArReal;inline;
 function LoadLibrary(AName: PChar): TSGLibHandle;
 function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
@@ -329,19 +359,426 @@ procedure SGReleaseFileWay(WAy:string);
 function SGGetFileWay(const Way:String):String;
 procedure SGMakeDirectory(const DirWay:String);
 procedure FindInPas;
+operator ** (const a:Real;const b:LongInt):Real;inline;overload;
+operator ** (const a:single;const b:LongInt):single;overload;inline;
+operator ** (const a:LongInt;const b:LongInt):LongInt;overload;inline;
+function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
+function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
+function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
+
+function SGPCharsEqual(const PChar1,PChar2:PChar):Boolean;inline;
+function SGPCharHigh(const VPChar:PChar):LongInt;inline;
+function SGPCharLength(const VPChar:PChar):LongWord;inline;
+function SGPCharDecFromEnd(var VPChar:PChar; const Number:LongWord = 1):PChar;
+function SGPCharUpCase(const VPChar:PChar):PChar;inline;
+function SGPCharRead:PChar;inline;
+function SGCharRead:Char;inline;
+function SGPCharDeleteSpaces(const VPChar:PCHAR):PChar;inline;
+function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
+
+function SGRealsEqual(const r1,r2:real):Boolean;inline;
+function SGRealExists(const r:real):Boolean;inline;
+procedure SGQuickRePlaceReals(var Real1,Real2:Real);inline;
+function SGRandomMinus:Int;inline;
+function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
+procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
+function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
+function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
+function SGGetFreeFileName(const Name:string):string;inline;
+function SGGetFileNameWithoutExpansion(const FileName:string):string;inline;
+function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
+function SGReadLnString:String;
+function SGReadLnByte:Byte;
+
+procedure SGSetCLProcedure(const p:Pointer = nil);
+procedure SCSetCLScreenBounds(const p:Pointer = nil);
+procedure SGSetCLLoadProcedure(p:Pointer);
 
 implementation
+
+procedure SGSetCLLoadProcedure(p:Pointer);
+begin
+SGCLLoadProcedure:=SGProcedure(p);
+end;
+
+
+procedure SGSetCLProcedure(const p:Pointer = nil);
+begin
+SGCLPaintProcedure:=SGProcedure(p);
+end;
+
+procedure SCSetCLScreenBounds(const p:Pointer = nil);
+begin
+SGCLForReSizeScreenProcedure:=SGProcedure(p);
+end;
+
+procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
+var
+	LongInt3:LongInt;
+begin
+LongInt3:=LongInt1;
+LongInt1:=LongInt2;
+LongInt2:=LongInt3;
+end;
+
+function SGReadLnByte:Byte;
+begin 
+Readln(Result);
+end;
+
+function SGReadLnString:String;
+begin
+Readln(Result);
+end;
+
+function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
+var
+	i:LongInt;
+begin
+Result:='';
+i:=Position1;
+while (VPChar[i]<>#0) and (i<>Position2+1) do
+	begin
+	SGPCharAddSimbol(Result,VPChar[i]);
+	i+=1;
+	end;
+end;
+
+function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
+begin
+Result:=0;
+while l<>0 do
+	begin
+	Result+=1;
+	l:=l div 10;
+	end;
+end;
+
+function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
+var
+	i:LongInt;
+begin
+Result:='';
+if Trunc(R)=0 then
+	begin
+	if R<0 then
+		Result+='-';
+	Result+='0';
+	end
+else
+	Result+=SGStr(Trunc(R));
+if Zeros<>0 then
+	begin
+	if Abs(R-Trunc(R))*10**Zeros<>0 then
+		begin
+		i:=Zeros-SGGetQuantitySimbolsInNumber(Trunc(Abs(R-Trunc(R))*(10**Zeros)));
+		Result+='.';
+		while i>0 do
+			begin
+			i-=1;
+			Result+='0';
+			end;
+		Result+=SGStr(Trunc(Abs(R-Trunc(R))*(10**Zeros)));
+		while Result[Length(Result)]='0' do
+			SetLength(Result,Length(Result)-1);//Byte(Result[0])-=1;
+		if Result[Length(Result)]='.' then
+			SetLength(Result,Length(Result)-1);//Byte(Result[0])-=1;
+		end;
+	end;
+end;
+
+function SGGetFileNameWithoutExpansion(const FileName:string):string;inline;
+var
+	i:LongInt;
+	PointPosition:LongInt = 0;
+begin
+for i:=1 to Length(FileName) do
+	begin
+	if FileName[i]='.' then
+		begin
+		PointPosition:=i;
+		end;
+	end;
+if (PointPosition=0) then
+	Result:=FileName
+else
+	begin
+	Result:='';
+	for i:=1 to PointPosition-1 do
+		Result+=FileName[i];
+	end;
+end;
+
+function SGGetFreeFileName(const Name:string):string;inline;
+var
+	FileExpansion:String = '';
+	FileName:string = '';
+	Number:LongInt = 1;
+
+begin
+if FileExists(Name) then
+	begin
+	FileExpansion:=SGGetFileExpansion(Name);
+	FileName:=SGGetFileNameWithoutExpansion(Name);
+	while FileExists(FileName+' (Copy '+SGStr(Number)+').'+FileExpansion) do
+		Number+=1;
+	Result:=FileName+' (Copy '+SGStr(Number)+').'+FileExpansion;
+	end
+else
+	Result:=Name;
+end;
+
+function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
+begin
+Result.Import(
+	+SGGetMatrix2x2(y1-y0,z1-z0,y2-y0,z2-z0),
+	-SGGetMatrix2x2(x1-x0,z1-z0,x2-x0,z2-z0),
+	+SGGetMatrix2x2(x1-x0,y1-y0,x2-x0,y2-y0),
+	-x0*SGGetMatrix2x2(y1-y0,z1-z0,y2-y0,z2-z0)
+	+y0*SGGetMatrix2x2(x1-x0,z1-z0,x2-x0,z2-z0)
+	-z0*SGGetMatrix2x2(x1-x0,y1-y0,x2-x0,y2-y0))
+end;
+
+procedure TSGPlane.Import(const a1:real = 0; const b1:real = 0; const c1:real = 0; const d1:real = 0);
+begin
+a:=a1;
+b:=b1;
+c:=c1;
+d:=d1;
+end;
+
+procedure TSGPlane.Write;
+begin
+System.Write(a:0:10,' ',b:0:10,' ',c:0:10,' ',d:0:10);
+end;
+
+function SGRandomMinus:Int;inline;
+begin
+if random(2)=0 then
+	Result:=-1
+else
+	Result:=1;
+end;
+
+procedure SGQuickRePlaceReals(var Real1,Real2:Real);inline;
+var
+	Real3:Real;
+begin
+Real3:=Real1;
+Real1:=Real2;
+Real2:=Real3;
+end;
+
+function SGRealExists(const r:real):Boolean;inline;
+begin
+Result:={(r<>Nan) and} (r<>Inf) and (r<>-Inf);
+end;
+
+function SGRealsEqual(const r1,r2:real):Boolean;inline;
+begin
+Result:=abs(r1-r2)<=SGZero;
+end;
+
+function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
+var
+	Length1:LongInt = 0;
+	Length2:LongInt = 0;
+	I:LongInt = 0;
+begin
+Length1:=SGPCharLength(VPChar1);
+Length2:=SGPCharLength(VPChar2);
+Result:=nil;
+GetMem(Result,Length1+Length2+1);
+Result[Length1+Length2]:=#0;
+for I:=0 to Length1-1 do
+	Result[I]:=VPChar1[i];
+for i:=Length1 to Length1+Length2-1 do
+	Result[I]:=VPChar2[I-Length1];
+end;
+
+function SGPCharDeleteSpaces(const VPChar:PCHAR):PChar;inline;
+var
+	I:Longint = 0;
+begin
+GetMem(Result,1);
+Result^:=#0;
+while VPChar[i]<>#0 do
+	begin
+	if VPChar[i]<>' ' then
+		SGPCharAddSimbol(Result,VPChar[i]);
+	I+=1;
+	end;
+end;
+
+function SGCharRead:Char;inline;
+begin
+Read(Result);
+end;
+
+function SGPCharRead:PChar;inline;
+begin
+GetMem(Result,1);
+Result[0]:=#0;
+while not eoln do
+	begin
+	SGPCharAddSimbol(Result,SGCharRead);
+	end;
+end;
+
+function SGPCharUpCase(const VPChar:PChar):PChar;inline;
+var
+	i:LongWord = 0;
+begin
+Result:=nil;
+if (VPChar<>nil) then
+	begin
+	I:=SGPCharLength(VPChar);
+	GetMem(Result,I+1);
+	Result[I]:=#0;
+	I:=0;
+	while VPChar[i]<>#0 do
+		begin
+		Result[i]:=UpCase(VPChar[i]);
+		I+=1;
+		end;
+	end;
+end;
+
+function SGPCharDecFromEnd(var VPChar:PChar; const Number:LongWord = 1):PChar;
+var
+	NewVPChar:PChar = nil;
+	LengthOld:LongWord = 0;
+	I:LongInt = 0;
+begin
+LengthOld:=SGPCharLength(VPChar);
+GetMem(NewVPChar,LengthOld-Number+1);
+for I:=0 to LengthOld-Number-1 do
+	NewVPChar[i]:=VPChar[i];
+NewVPChar[LengthOld-Number]:=#0;
+VPChar:=NewVPChar;
+Result:=NewVPChar;
+end;
+
+function SGPCharLength(const VPChar:PChar):LongWord;inline;
+begin
+Result:=SGPCharHigh(VPChar)+1;
+end;
+
+function SGPCharHigh(const VPChar:PChar):LongInt;inline;
+begin
+if (VPChar = nil) or (VPChar[0] = #0) then
+	Result:=-1
+else
+	begin
+	Result:=0;
+	while VPChar[Result]<>#0 do
+		Result+=1;
+	Result-=1;
+	end;
+end;
+
+function SGPCharsEqual(const PChar1,PChar2:PChar):Boolean;inline;
+var
+	I:LongInt = 0;
+	VExit:Boolean = False;
+begin
+Result:=True;
+if not ((PChar1=nil) and (PChar2=nil)) then
+	while Result and (not VExit) do
+		begin
+		if (PChar1=nil) or (PChar2=nil) or (PChar1[i]=#0) or (PChar2[i]=#0) then
+			VExit:=True;
+		if  ((PChar1=nil) and (PChar2<>nil) and (PChar2[i]<>#0)) or
+			((PChar2=nil) and (PChar1<>nil) and (PChar1[i]<>#0))then
+				Result:=False
+		else
+			if (PChar1<>nil) and (PChar2<>nil) and 
+				(((PChar1[i]=#0) and (PChar2[i]<>#0)) or 
+				 ((PChar2[i]=#0) and (PChar1[i]<>#0))) then
+					Result:=False
+			else
+				if (PChar1<>nil) and (PChar2<>nil) and 
+					(PChar1[i]<>#0) and (PChar2[i]<>#0) and 
+					(PChar1[i]<>PChar2[i]) then
+						Result:=False;					
+		I+=1;
+		end;
+end;
+
+function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
+var
+	NewVPChar:PChar = nil;
+	LengthOld:LongInt = 0;
+	I:LongInt = 0;
+begin
+if VPChar<>nil then
+	begin
+	while (VPChar[LengthOld]<>#0) do
+		LengthOld+=1;
+	end;
+GetMem(NewVPChar,LengthOld+2);
+for I:=0 to LengthOld-1 do
+	NewVPChar[i]:=VPChar[i];
+NewVPChar[LengthOld]:=VChar;
+NewVPChar[LengthOld+1]:=#0;
+VPChar:=NewVPChar;
+Result:=NewVPChar;
+end;
+
+function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
+begin
+Result:=a1*SGGetMatrix2x2(a5,a6,a8,a9)-a2*SGGetMatrix2x2(a4,a6,a7,a9)+a3*SGGetMatrix2x2(a4,a5,a7,a8);
+end;
+
+function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
+begin
+Result:=a1*a4-a2*a3;
+end;
+
+operator ** (const a:Real;const b:LongInt):Real;inline;overload;
+var
+	I:LongWord = 0;
+begin
+Result:=1;
+if b>0 then
+	for i:=1 to b do
+		Result*=a
+else
+	for i:=1 to abs(b) do
+		Result/=a
+end;
+
+operator ** (const a:Single;const b:LongInt):Single;inline;overload;
+var
+	I:LongWord = 0;
+begin
+Result:=1;
+if b>0 then
+	for i:=1 to b do
+		Result*=a
+else
+	for i:=1 to abs(b) do
+		Result/=a
+end;
+
+operator ** (const a:LongInt;const b:LongInt):LongInt;overload;inline;
+var
+	I:LongInt = 0;
+begin
+Result:=1;
+for i:=1 to b do
+	Result*=a;
+end;
 
 procedure FindInPas;
 var
 	ArWords:array of string = nil;
 	Stream:TFileStream = nil;
 	Oy:LongWord;
-	PF,PS,PFF,PSF:LongWord;
+	PF,PS:LongWord;
 procedure FindInFile(const VFile:String);
 var
 	f:text;
-	i:longint;
 	Str:string;
 	ii:longint;
 	iii:longint;
@@ -918,12 +1355,12 @@ Result:=FixIt;
 FixIt:=TGT-prevTGT;
 end;
 
-constructor TSGDrawClass.Create;
+constructor TSGClass.Create;
 begin
 inherited;
 end;
 
-destructor TSGDrawClass.Destroy;
+destructor TSGClass.Destroy;
 begin
 inherited;
 end;
@@ -1796,6 +2233,10 @@ end;
 
 initialization
 begin
+Nan:=sqrt(-1);
+Inf:=1/0;
+RandomIze;
+
 SGLog:=TSGLog.Create;
 SGLog.Sourse('(***) SaGe OpenGL Engine Log(***)',False);
 SGLog.Sourse('  << Create Log >>');

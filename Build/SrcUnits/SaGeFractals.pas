@@ -3,7 +3,7 @@ unit SaGeFractals;
 interface
 uses 
 	crt
-	,SaGe
+	,SaGeCommon
 	,SaGeContext
 	,SaGeBase
 	,Classes

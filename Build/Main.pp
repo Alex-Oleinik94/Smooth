@@ -16,7 +16,7 @@ uses
 	,Classes
 	,SysUtils
 	,SaGeContext
-	,SaGe
+	,SaGeCommon
 	,SaGeBase
 	,SaGeFractals
 	,SaGeUtils

@@ -5,10 +5,9 @@ unit SaGeUtils;
 interface
 uses
 	SaGeBase
-	,SaGe
+	,SaGeCommon
 	,SaGeContext
-	,Gl
-	,Glu
+	,SaGeRender
 	,SaGeImages
 	;
 type
@@ -74,11 +73,11 @@ type
 		end;
 		
 	PSGViewportObject = ^ TSGViewportObject;
-	TSGViewportObject=class
+	TSGViewportObject=class(TSGRenderClass)
 			private
 		FColor:TSGColor4f;
-		x,y,z:GLDouble;
-		depth:GLFloat;
+		x,y,z:Real;
+		depth:Single;
 		viewport:TViewPortArray;
 		mv_matrix,proj_matrix:T16DArray;
 		Point:SGPoint;

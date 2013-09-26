@@ -49,13 +49,10 @@ if(pD3d<>nil) then
 	pD3d._Release();
 end;
 
-//#define D3DFVF_MYVERT (D3DFVF_XYZ | D3DFVF_DIFFUSE)
-const D3DFVF_MYVERT = D3DFVF_XYZ or D3DFVF_DIFFUSE;
-
 procedure Render;
 var
 	v:array [0..2] of MyVert;
-	dwBlue:LongWord;
+	dwBlue,s123:LongWord;
 begin
 r+=0.001;
 
@@ -72,11 +69,12 @@ v[2].x := 0.5;
 v[2].y := 0.5;  
 v[2].z := 0.5;
 
-v[0].Color := D3DCOLOR_XRGB(255,0,0); // красный
+v[0].Color :=D3DCOLOR_XRGB(255,0,0); // красный
 v[1].Color := D3DCOLOR_XRGB(0,255,0); // зеленый
 v[2].Color := D3DCOLOR_XRGB(0,0,255); // синий
 
 dwBlue:=D3DCOLOR_XRGB(0,0,128);
+s123:=D3DCOLOR_XRGB(123,0,128);
 pDevice.Clear( 0, nil, D3DCLEAR_TARGET, dwBlue, 1.0, 0 );
 
 pDevice.BeginScene();
@@ -84,8 +82,11 @@ pDevice.BeginScene();
 // отключаем его
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
 // Просчет объектов всегда между BeginScene и EndScene
-pDevice.SetVertexShader( D3DFVF_MYVERT );
-pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v, sizeof(MyVert));
+pDevice.SetVertexShader( D3DFVF_DIFFUSE );
+pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, s123, sizeof(LongWord));
+
+pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
 
 pDevice.EndScene();
 
@@ -114,6 +115,7 @@ var
   
      msg:Windows.MSG;
 begin
+
 WindowClass.cbSize:=SizeOf(WindowClass);
 WindowClass.Style := CS_CLASSDC;
 WindowClass.lpfnWndProc := WndProc(@MsgProc);

@@ -6,10 +6,7 @@ interface
 uses
 	crt
 	,SaGeBase
-	,SaGe
-	,gl
-	,glu
-	,glext
+	,SaGeCommon
 	,SysUtils
 	;
 type

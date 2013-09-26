@@ -4,7 +4,7 @@ unit SaGeGameLogic;
 interface
 
 uses
-	SaGe
+	SaGeCommon
 	,SaGeBase
 	,SaGeMesh
 	,crt

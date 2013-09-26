@@ -6,10 +6,7 @@ interface
 
 uses
     classes
-    , gl
-    , glext
-    , glu
-    , SaGe
+    , SaGeCommon
     , SaGeBase
     , SaGeUtils
     , SaGeImages

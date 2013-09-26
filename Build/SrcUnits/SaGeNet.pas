@@ -7,7 +7,7 @@ interface
 uses
 	crt
 	,SaGeBase
-	,SaGe
+	,SaGeCommon
 	,lNet
 	,lCommon
 	,SysUtils
