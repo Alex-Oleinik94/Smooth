@@ -16,6 +16,8 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		function Width:LongWord;inline;
+		function Height:LongWord;inline;
 			protected
 		FWindow:TSGClass;
 			public
@@ -35,16 +37,30 @@ type
 		procedure Color4f(const r,g,b,a:single);virtual;abstract;
 		procedure Normal3f(const x,y,z:single);virtual;abstract;
 		procedure Translatef(const x,y,z:single);virtual;abstract;
-		procedure Enable(const VParam:LongWord);virtual;abstract;
-		procedure Disable(const VParam:LongWord);virtual;abstract;
-		procedure DeleteTextures(const VQuantity:LongWord;const VTextures:PSGUInt);virtual;abstract;
-		procedure Lightfv(const VLight,VParam:LongWord;const VParam2:Pointer);virtual;abstract;
-		procedure GenTextures(const VQuantity:LongWord;const VTextures:PSGUInt);virtual;abstract;
-		procedure BindTexture(const VParam:LongWord;const VTexture:SGUInt);virtual;abstract;
-		procedure TexParameteri(const VP1,VP2,VP3:LongWord);virtual;abstract;
-		procedure PixelStorei(const VParamName:LongWord;const VParam:SGInt);virtual;abstract;
-		procedure TexEnvi(const VP1,VP2,VP3:LongWord);virtual;abstract;
-		procedure TexImage2D(const VTextureType:LongWord;const VP1:LongWord;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:LongWord;const VBitMap:Pointer);virtual;abstract;
+		procedure Rotatef(const angle:single;const x,y,z:single);virtual;abstract;
+		procedure Enable(const VParam:Cardinal);virtual;abstract;
+		procedure Disable(const VParam:Cardinal);virtual;abstract;
+		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);virtual;abstract;
+		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure BindTexture(const VParam:Cardinal;const VTexture:SGUInt);virtual;abstract;
+		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);virtual;abstract;
+		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);virtual;abstract;
+		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);virtual;abstract;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer);virtual;abstract;
+		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);virtual;abstract;
+		procedure CullFace(const VParam:Cardinal);virtual;abstract;
+		procedure EnableClientState(const VParam:Cardinal);virtual;abstract;
+		procedure DisableClientState(const VParam:Cardinal);virtual;abstract;
+		procedure GenBuffersARB(const VQ:Integer;const PT:PCardinal);virtual;abstract;
+		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);virtual;abstract;
+		procedure BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);virtual;abstract;
+		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal);virtual;abstract;
+		procedure DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer);virtual;abstract;
+		procedure ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
+		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
+		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
+		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
@@ -66,6 +82,16 @@ end;
 destructor TSGRender.Destroy;
 begin
 inherited;
+end;
+
+function TSGRender.Width:LongWord;inline;
+begin
+Result:=LongWord(FWindow.Get('WIDTH'));
+end;
+
+function TSGRender.Height:LongWord;inline;
+begin
+Result:=LongWord(FWindow.Get('HEIGHT'));
 end;
 
 end.

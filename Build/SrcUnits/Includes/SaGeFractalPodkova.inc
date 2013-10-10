@@ -94,7 +94,7 @@ begin
 inherited;
 ClearMesh;
 Quantity:=(2**FDepth)+1;
-CalculateMeshes(Quantity,GL_LINE_STRIP);
+CalculateMeshes(Quantity,SG_LINE_STRIP);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
@@ -154,11 +154,11 @@ Threads:=1;
 Depth:=3;
 FLightingEnable:=False;
 
-InitProjectionComboBox(SGContext.Width-160,5{+SGContext.TopShift},150,30,[SGAnchRight],true);
+InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
 
 FLDC:=TSGLabel.Create;
 SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(SGContext.Width-160-90-125,5{+SGContext.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5{+Context.TopShift},115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
@@ -168,7 +168,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBPD:=TSGButton.Create;
 SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(SGContext.Width-160-30,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-30,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -178,7 +178,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create;
 SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(SGContext.Width-160-60,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-60,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -187,7 +187,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create;
 SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(SGContext.Width-160-90,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
@@ -197,7 +197,7 @@ SGScreen.LastChild.Visible:=True;
 
 FTCB:=TSGComboBox.Create;
 SGScreen.CreateChild(FTCB);
-SGScreen.LastChild.SetBounds(SGContext.Width-160-90-125-130,5,125,20);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125-130,5,125,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Рога');

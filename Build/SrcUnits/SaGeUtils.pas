@@ -12,6 +12,8 @@ uses
 	;
 type
 	SGIdentityObject=object
+		Context:TSGContext;
+		Render:TSGRender;
 		Rotate1:real;
 		Rotate2:real;
 		Rotate3:real;
@@ -72,8 +74,8 @@ type
 		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		end;
 		
-	PSGViewportObject = ^ TSGViewportObject;
-	TSGViewportObject=class(TSGRenderClass)
+	{PSGViewportObject = ^ TSGViewportObject;
+	TSGViewportObject=class(TSGRenderObject)
 			private
 		FColor:TSGColor4f;
 		x,y,z:Real;
@@ -93,7 +95,7 @@ type
 	SGViewportObject = TSGViewportObject;
 	PTSGViewportObject = PSGViewportObject;
 	
-function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;
+function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;}
 
 implementation
 
@@ -115,7 +117,7 @@ DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift
 FreeMem(P,SGPCharLength(P)+1);
 end;
 
-procedure SGViewportObject.SetPoint(NewPoint:SGPoint;const WithSmezhenie:boolean = True);
+{procedure SGViewportObject.SetPoint(NewPoint:SGPoint;const WithSmezhenie:boolean = True);
 begin
 Point:=NewPoint;
 //if WithSmezhenie then
@@ -139,7 +141,7 @@ ViewportObj.SetPoint(Point,WithSmezhenie);
 ViewportObj.CanculateVertex;
 Result:=ViewportObj.Vertex;
 ViewportObj.Destroy;
-end;
+end;}
 
 
 function TSGFont.Ready:Boolean;
@@ -329,20 +331,20 @@ while (s[i]<>#0) and (not ToExit) do
 		ToExit:=True;
 		SimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
 		end;
-	glBegin(GL_QUADS);
-	glTexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
-	glVertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
-	glTexCoord2f(
+	Render.BeginScene(SG_QUADS);
+	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
+	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
+	Render.TexCoord2f(
 		(Self.FSimbolParams[s[i]].x+SimbolWidth)/Self.Width,
 		1-(Self.FSimbolParams[s[i]].y/Self.Height));
-	glVertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
-	glTexCoord2f(
+	Render.Vertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
+	Render.TexCoord2f(
 		(Self.FSimbolParams[s[i]].x+SimbolWidth)/Self.Width,
 		1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
-	glVertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	glTexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
-	glVertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	glEnd();
+	Render.Vertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
+	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+	Render.EndScene();
 	Otstup.x+=FSimbolParams[s[i]].Width;
 	i+=1;
 	end;
@@ -387,10 +389,10 @@ procedure TSGGLImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const R
 procedure DoTexCoord(const NowRotation:Byte);inline;
 begin
 case (NowRotation mod 4) of
-0:glTexCoord2f(0,1);
-1:glTexCoord2f(1,1);
-2:glTexCoord2f(1,0);
-3:glTexCoord2f(0,0);
+0:Render.TexCoord2f(0,1);
+1:Render.TexCoord2f(1,1);
+2:Render.TexCoord2f(1,0);
+3:Render.TexCoord2f(0,0);
 end;
 end;
 begin
@@ -399,16 +401,16 @@ if RePlace then
 	RePlacVertex(Vertex1,Vertex2,rePlaceY);
 	end;
 BindTexture;
-glBegin(GL_QUADS);
+Render.BeginScene(SG_QUADS);
 DoTexCoord(Rotation);
-Vertex1.Vertex;
+Vertex1.Vertex(Render);
 DoTexCoord(Rotation+1);
-glVertex2f(Vertex2.x,Vertex1.y);
+Render.Vertex2f(Vertex2.x,Vertex1.y);
 DoTexCoord(Rotation+2);
-Vertex2.Vertex;
+Vertex2.Vertex(Render);
 DoTexCoord(Rotation+3);
-glVertex2f(Vertex1.x,Vertex2.y);
-glEnd();
+Render.Vertex2f(Vertex1.x,Vertex2.y);
+Render.EndScene();
 DisableTexture;
 end;
 
@@ -426,11 +428,11 @@ DrawImageFromTwoVertex2f(
 	RePlace,SG_2D);
 end;
 
-procedure SGViewportObject.CanculateColor;
+{procedure SGViewportObject.CanculateColor;
 begin
 glReadPixels(
 	Point.x,
-	SGContext.Height-Point.y-1,
+	Context.Height-Point.y-1,
 	1, 
 	1, 
 	GL_RGBA, 
@@ -438,11 +440,11 @@ glReadPixels(
 	@FColor);
 end;
 
-procedure SGViewportObject.CanculateVertex;{$}
+procedure SGViewportObject.CanculateVertex;//{$}
 begin
 glReadPixels(
 	Point.x,
-	SGContext.Height-Point.y-1,
+	Context.Height-Point.y-1,
 	1, 
 	1, 
 	GL_DEPTH_COMPONENT, 
@@ -450,7 +452,7 @@ glReadPixels(
 	@depth);
 gluUnProject(
 	Point.x,
-	SGContext.Height-Point.y-1,
+	Context.Height-Point.y-1,
 	depth,
 	mv_matrix,
 	proj_matrix,
@@ -458,7 +460,8 @@ gluUnProject(
 	@x,
 	@y,
 	@z);
-end;
+end;}
+
 procedure TSGGLImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
 begin
 if Vertex1.x>Vertex2.x then
@@ -487,7 +490,7 @@ procedure TSGGLImage.ImportFromDispley(const NeedAlpha:Boolean = True);
 begin
 ImportFromDispley(
 	SGPointImport(1,1),
-	SGPointImport(SGContext.Width,SGContext.Height),
+	SGPointImport(Render.Width,Render.Height),
 	NeedAlpha);
 end;
 
@@ -500,26 +503,26 @@ else
 if NeedAlpha then
 	begin
 	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*4);
-	glReadPixels(
+	Render.ReadPixels(
 		Point1.x-1,//+ReadPixelsShift.x,
 		Point1.y-1,//+ReadPixelsShift.y,
 		Point2.x-Point1.x+1, 
 		Point2.y-Point1.y+1, 
-		GL_RGBA, 
-		GL_UNSIGNED_BYTE, 
+		SG_RGBA, 
+		SG_UNSIGNED_BYTE, 
 		FImage.FBitMap);
 	Bits:=32;
 	end
 else
 	begin
 	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*3);
-	glReadPixels(
+	Render.ReadPixels(
 		Point1.x-1,//+ReadPixelsShift.x,
 		Point1.y-1,//+ReadPixelsShift.y,
 		Point2.x-Point1.x+1, 
 		Point2.y-Point1.y+1, 
-		GL_RGB, 
-		GL_UNSIGNED_BYTE, 
+		SG_RGB, 
+		SG_UNSIGNED_BYTE, 
 		FImage.FBitMap);
 	Bits:=24;
 	end;
@@ -553,17 +556,17 @@ while (s[i]<>#0) and (not ToExit) and (CursorPosition>i) do
 	end;
 if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
 	begin
-	glBegin(GL_LINES);
-	(Vertex1+Otstup).Vertex;
-	glVertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	glEnd();
+	Render.BeginScene(SG_LINES);
+	(Vertex1+Otstup).Vertex(Render);
+	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+	Render.EndScene();
 	end;
 end;
 
-function SGViewportObject.GetVertex:SGVertex;
+{function SGViewportObject.GetVertex:SGVertex;
 begin
 Result.Import(x,y,z);
-end;
+end;}
 
 procedure SGIdentityObject.Change(const Mode:LongWord = SG_3D);
 var
@@ -574,32 +577,32 @@ LastLeft:=Left;
 LastTop:=Top;
 LastR1:=Rotate1;
 LastR2:=Rotate2;
-if SGContext.CursorWheel=SGUpCursorWheel then
+if Context.CursorWheel=SGUpCursorWheel then
 	begin
 	Zum*=0.9;
 	Changet:=True;
 	end;
-if SGContext.CursorWheel=SGDownCursorWheel then
+if Context.CursorWheel=SGDownCursorWheel then
 	begin
 	Zum*=1/0.9;
 	Changet:=True;
 	end;
-if SGContext.CursorKeysPressed(SGLeftCursorButton) then
+if Context.CursorKeysPressed(SGLeftCursorButton) then
 	begin
-	Rotate2+=SGContext.CursorPosition(SGDeferenseCursorPosition).x/3;
-	Rotate1+=SGContext.CursorPosition(SGDeferenseCursorPosition).y/3;
+	Rotate2+=Context.CursorPosition(SGDeferenseCursorPosition).x/3;
+	Rotate1+=Context.CursorPosition(SGDeferenseCursorPosition).y/3;
 	end;
-if SGContext.CursorKeysPressed(SGRightCursorButton) then{$}
+if Context.CursorKeysPressed(SGRightCursorButton) then{$}
 	begin
-	Top+=    (-SGContext.CursorPosition(SGDeferenseCursorPosition).y/100)*Zum;
-	Left+=   ( SGContext.CursorPosition(SGDeferenseCursorPosition).x/100)*Zum;
+	Top+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*Zum;
+	Left+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*Zum;
 	end;
-if (SGContext.KeyPressed and (SGContext.KeysPressed(char(17))) and (SGContext.KeyPressedChar=char(189)) and (SGContext.KeyPressedType=SGDownKey)) then
+if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
 	begin
 	Zum*=1.1;
 	Changet:=true;
 	end;
-if  (SGContext.KeyPressed and (SGContext.KeysPressed(char(17))) and (SGContext.KeyPressedByte=187) and (SGContext.KeyPressedType=SGDownKey))  then
+if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
 	begin
 	Zum*=0.9;
 	Changet:=true;
@@ -611,16 +614,16 @@ end;
 procedure SGIdentityObject.Go(const Mode:LongWord = SG_3D);
 begin
 Change(Mode);
-SGInitMatrixMode(Mode,(Zum)*120);
+Render.InitMatrixMode(Mode,(Zum)*120);
 Init;
 end;
 
 procedure SGIdentityObject.Init(const tr :TSGVertex3f);overload;
 begin
-glTranslatef(Left,Top,-10*Zum);
-glRotatef(Rotate1,1,0,0);
-glRotatef(Rotate2,0,1,0);
-tr.Translate;
+Render.Translatef(Left,Top,-10*Zum);
+Render.Rotatef(Rotate1,1,0,0);
+Render.Rotatef(Rotate2,0,1,0);
+tr.Translate(Render);
 end;
 
 procedure SGIdentityObject.Init;overload;

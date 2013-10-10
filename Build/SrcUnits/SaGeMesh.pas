@@ -10,7 +10,9 @@ uses
     , SaGeBase
     , SaGeUtils
     , SaGeImages
-    , crt;
+    , SaGeRender
+    , crt
+    , SaGeContext;
 
 type
 	TSGMeshVertexType=(TSGMeshVertexType3f,TSGMeshVertexType2f);
@@ -108,11 +110,11 @@ type
     public
 		FEnableVBO:Boolean;
 		
-        FVBOVertexes:GluInt;
-        FVBOFaces:GluInt;
-        FVBONormals:GLUInt;
-        FVBOColors:GLUInt;
-        FVBOTexVertexes:GLUInt;
+        FVBOVertexes:Cardinal;
+        FVBOFaces:Cardinal;
+        FVBONormals:Cardinal;
+        FVBOColors:Cardinal;
+        FVBOTexVertexes:Cardinal;
     public
         FEnableCullFace: boolean;
         FObjectColor: TSGColor4f;
@@ -353,7 +355,7 @@ if SGFileExists(FileWay) then
 		SetLength(ArObjects,1);
 		NOfObjects:=1;
 		ArObjects[0]:=TSG3DObject.Create;
-		ArObjects[0].FPoligonesType:=GL_TRIANGLES;
+		ArObjects[0].FPoligonesType:=SG_TRIANGLES;
 		ReadLn(Text,ArObjects[0].FNOfVerts);
 		ReadLn(Text,i);
 		ReadLn(Text);
@@ -765,9 +767,9 @@ var
 	 OutputStrip:TSGArTSGFaceType = nil;
 	 b:boolean = True;
 begin
-{if FPoligonesType = GL_QUADS then
+{if FPoligonesType = SG_QUADS then
 	Con}
-if FPoligonesType = GL_TRIANGLES then
+if FPoligonesType = SG_TRIANGLES then
 	begin
 	try
 		CalculateDependensies(VertexesAndTriangles);
@@ -781,7 +783,7 @@ if FPoligonesType = GL_TRIANGLES then
 		begin
 		SetLength(ArFaces,0);
 		ArFaces:=OutputStrip;
-		FPoligonesType:=GL_TRIANGLE_STRIP;
+		FPoligonesType:=SG_TRIANGLE_STRIP;
 		FNOfFaces:=Length(OutputStrip);
 		end
 	else
@@ -955,13 +957,13 @@ class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;
 begin
 Result:=
 	Byte(
-		(ThisPoligoneType=GL_POINTS) or
-		(ThisPoligoneType=GL_TRIANGLE_STRIP) or
-		(ThisPoligoneType=GL_LINE_LOOP) or
-		(ThisPoligoneType=GL_LINE_STRIP))
-	+4*Byte( ThisPoligoneType = GL_QUADS )
-	+3*Byte( ThisPoligoneType = GL_TRIANGLES )
-	+2*Byte( ThisPoligoneType = GL_LINES );
+		(ThisPoligoneType=SG_POINTS) or
+		(ThisPoligoneType=SG_TRIANGLE_STRIP) or
+		(ThisPoligoneType=SG_LINE_LOOP) or
+		(ThisPoligoneType=SG_LINE_STRIP))
+	+4*Byte( ThisPoligoneType = SG_QUADS )
+	+3*Byte( ThisPoligoneType = SG_TRIANGLES )
+	+2*Byte( ThisPoligoneType = SG_LINES );
 end;
 
 function TSG3DObject.GetFaceLength(const FaceLength:Int64):Int64;overload;inline;
@@ -981,7 +983,7 @@ end;
 
 function TSG3DObject.ArFacesLines:PTSGFaceLine;inline;
 begin
-if FPoligonesType=GL_LINES then
+if FPoligonesType=SG_LINES then
 	Result:=PTSGFaceLine(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -990,10 +992,10 @@ end;
 function TSG3DObject.ArFacesPoints:PTSGFacePoint;inline;
 begin
 if (
-	(FPoligonesType=GL_POINTS) or
-	(FPoligonesType=GL_LINE_STRIP) or
-	(FPoligonesType=GL_LINE_LOOP) or
-	(FPoligonesType=GL_TRIANGLE_STRIP)
+	(FPoligonesType=SG_POINTS) or
+	(FPoligonesType=SG_LINE_STRIP) or
+	(FPoligonesType=SG_LINE_LOOP) or
+	(FPoligonesType=SG_TRIANGLE_STRIP)
 	)  then
 	Result:=PTSGFacePoint(Pointer(@ArFaces[0]))
 else
@@ -1002,7 +1004,7 @@ end;
 
 function TSG3DObject.ArFacesQuads:PTSGFaceQuad;inline;
 begin
-if FPoligonesType=GL_QUADS then
+if FPoligonesType=SG_QUADS then
 	Result:=PTSGFaceQuad(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -1010,7 +1012,7 @@ end;
 
 function TSG3DObject.ArFacesTriangles:PTSGFaceTriangle;inline;
 begin
-if FPoligonesType=GL_TRIANGLES then
+if FPoligonesType=SG_TRIANGLES then
 	Result:=PTSGFaceTriangle(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -1261,7 +1263,7 @@ begin
     ArTexVertexes := nil;
     FName := '';
     FMaterialID := -1;
-    FPoligonesType:=GL_TRIANGLES;
+    FPoligonesType:=SG_TRIANGLES;
     FEnableVBO:=False;
     FVBOColors:=0;
     FVBOFaces:=0;
@@ -1284,15 +1286,15 @@ begin
 	{$ENDIF}
     if FEnableCullFace then
     begin
-        glEnable(gl_cull_face);
-        glCullFace(gl_back);
+        Render.Enable(SG_cull_face);
+        Render.CullFace(SG_back);
     end;
     BasicDraw;
     if FEnableCullFace then
     begin
-        glCullFace(gl_front);
+        Render.CullFace(SG_front);
         BasicDraw;
-        glDisable(gl_cull_face);
+        Render.Disable(SG_cull_face);
     end;
 end;
 
@@ -1356,69 +1358,69 @@ end;
 
 procedure TSG3dObject.BasicDraw; inline;
 begin
-FObjectColor.Color;
+FObjectColor.Color(Render);
 
 if FEnableVBO then
-	glEnable(GL_ARRAY_BUFFER_ARB);
+	Render.Enable(SG_ARRAY_BUFFER_ARB);
 
-glEnableClientState(GL_VERTEX_ARRAY);
+Render.EnableClientState(SG_VERTEX_ARRAY);
 if FHasNormals then
-	glEnableClientState(GL_NORMAL_ARRAY);
+	Render.EnableClientState(SG_NORMAL_ARRAY);
 if FHasTexture then
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	Render.EnableClientState(SG_TEXTURE_COORD_ARRAY);
 if FNOfColors<>0 then
-	glEnableClientState(GL_COLOR_ARRAY);
+	Render.EnableClientState(SG_COLOR_ARRAY);
 
 if FEnableVBO then
 	begin
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOVertexes);
-	glVertexPointer(3,GL_FLOAT,SizeOf(TSGVertex),nil);
+	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOVertexes);
+	Render.VertexPointer(3,SG_FLOAT,SizeOf(TSGVertex),nil);
 	
 	if FHasNormals then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBONormals);
-		glNormalPointer(GL_FLOAT,SizeOf(TSGVertex),nil);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBONormals);
+		Render.NormalPointer(SG_FLOAT,SizeOf(TSGVertex),nil);
 		end;
 	
 	if FNOfColors<>0 then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOColors);
-		glColorPointer(3,GL_FLOAT,SizeOf(TSGVertex),nil);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOColors);
+		Render.ColorPointer(3,SG_FLOAT,SizeOf(TSGVertex),nil);
 		end;
 	
 	if FHasTexture then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOTexVertexes);
-		glTexCoordPointer(2, GL_FLOAT, SizeOf(TSGVertex2f),nil);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOTexVertexes);
+		Render.TexCoordPointer(2, SG_FLOAT, SizeOf(TSGVertex2f),nil);
 		end;
 	
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-	glDrawElements(FPoligonesType, GetFaceLength,GL_UNSIGNED_INT,nil);
+	Render.BindBufferARB(SG_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
+	Render.DrawElements(FPoligonesType, GetFaceLength,SG_UNSIGNED_INT,nil);
 	
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
-    glVertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f), GL_FLOAT, SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)), @ArVertex[0]);
+    Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f), SG_FLOAT, SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)), @ArVertex[0]);
     if FHasNormals then
-        glNormalPointer(GL_FLOAT, SizeOf(TSGVertex), @ArNormals[0]);
+        Render.NormalPointer(SG_FLOAT, SizeOf(TSGVertex), @ArNormals[0]);
     if FHasTexture then
-        glTexCoordPointer(2, GL_FLOAT, SizeOf(TSGVertex2f), @ArTexVertexes[0]);
+        Render.TexCoordPointer(2, SG_FLOAT, SizeOf(TSGVertex2f), @ArTexVertexes[0]);
     if FNOfColors<>0 then
-		glColorPointer(3,GL_FLOAT,SizeOf(TSGColor3f),@ArColors[0]);
-    glDrawElements(FPoligonesType, GetFaceLength , GL_UNSIGNED_INT, @ArFaces[0]);
+		Render.ColorPointer(3,SG_FLOAT,SizeOf(TSGColor3f),@ArColors[0]);
+    Render.DrawElements(FPoligonesType, GetFaceLength , SG_UNSIGNED_INT, @ArFaces[0]);
     end;
 
-glDisableClientState(GL_VERTEX_ARRAY);
+Render.DisableClientState(SG_VERTEX_ARRAY);
 if FHasNormals then
-	glDisableClientState(GL_NORMAL_ARRAY);
+	Render.DisableClientState(SG_NORMAL_ARRAY);
 if FHasTexture then
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	Render.DisableClientState(SG_TEXTURE_COORD_ARRAY);
 if FNOfColors<>0 then
-	glDisableClientState(GL_COLOR_ARRAY);
+	Render.DisableClientState(SG_COLOR_ARRAY);
 
 if FEnableVBO then
-	glDisable(GL_ARRAY_BUFFER_ARB);
+	Render.Disable(SG_ARRAY_BUFFER_ARB);
 end;
 
 procedure TSGModel.LoadToVBO;
@@ -1433,45 +1435,45 @@ end;
 
 procedure TSG3dObject.LoadToVBO;
 begin
-	glEnable(GL_ARRAY_BUFFER_ARB);
+	Render.Enable(SG_ARRAY_BUFFER_ARB);
 	
-	glGenBuffersARB(1, @FVBOVertexes);
-	glGenBuffersARB(1, @FVBOFaces);
+	Render.GenBuffersARB(1, @FVBOVertexes);
+	Render.GenBuffersARB(1, @FVBOFaces);
 	if FHasNormals then 
-		glGenBuffersARB(1, @FVBONormals);
+		Render.GenBuffersARB(1, @FVBONormals);
 	if FNOfColors<>0 then
-		glGenBuffersARB(1, @FVBOColors);
+		Render.GenBuffersARB(1, @FVBOColors);
 	if FHasTexture then
-		glGenBuffersARB(1, @FVBOTexVertexes);
+		Render.GenBuffersARB(1, @FVBOTexVertexes);
 
 
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOVertexes);
-	glBufferDataARB (GL_ARRAY_BUFFER_ARB,FNOfVerts*SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)),@ArVertex[0], GL_STATIC_DRAW_ARB);
+	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOVertexes);
+	Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfVerts*SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)),@ArVertex[0], SG_STATIC_DRAW_ARB);
 
 	if FHasNormals then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBONormals);
-		glBufferDataARB (GL_ARRAY_BUFFER_ARB,FNOfNormals*SizeOf(TSGVertex),@ArNormals[0], GL_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBONormals);
+		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfNormals*SizeOf(TSGVertex),@ArNormals[0], SG_STATIC_DRAW_ARB);
 		end;
 
 	if FNOfColors<>0 then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOColors);
-		glBufferDataARB (GL_ARRAY_BUFFER_ARB,FNOfColors*SizeOf(TSGVertex),@ArColors[0], GL_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOColors);
+		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfColors*SizeOf(TSGVertex),@ArColors[0], SG_STATIC_DRAW_ARB);
 		end;
 
 	if FHasTexture then
 		begin
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB,FVBOTexVertexes);
-		glBufferDataARB (GL_ARRAY_BUFFER_ARB,FNOfTexVertex*SizeOf(TSGVertex2f),@ArTexVertexes[0], GL_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOTexVertexes);
+		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfTexVertex*SizeOf(TSGVertex2f),@ArTexVertexes[0], SG_STATIC_DRAW_ARB);
 		end;
 
-	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
-	glBufferDataARB (GL_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength*SizeOf(TSGFaceType),@ArFaces[0], GL_STATIC_DRAW_ARB);
+	Render.BindBufferARB(SG_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
+	Render.BufferDataARB (SG_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength*SizeOf(TSGFaceType),@ArFaces[0], SG_STATIC_DRAW_ARB);
 
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,0);
 	
-	glDisable(GL_ARRAY_BUFFER_ARB);
+	Render.Disable(SG_ARRAY_BUFFER_ARB);
 	
 //	Delay(100);
 	ClearArrays(False);
@@ -1481,23 +1483,23 @@ end;
 
 procedure TSG3DObject.ClearVBO;inline;
 begin
-glDeleteBuffersARB(1,@FVBOFaces);
+Render.DeleteBuffersARB(1,@FVBOFaces);
 FVBOFaces:=0;
 if FHasNormals then
 	begin
-	glDeleteBuffersARB(1,@FVBONormals);
+	Render.DeleteBuffersARB(1,@FVBONormals);
 	FVBONormals:=0;
 	end;
-glDeleteBuffersARB(1,@FVBOVertexes);
+Render.DeleteBuffersARB(1,@FVBOVertexes);
 FVBOVertexes:=0;
 if FHasTexture then
 	begin
-	glDeleteBuffersARB(1,@FVBOTexVertexes);
+	Render.DeleteBuffersARB(1,@FVBOTexVertexes);
 	FVBOTexVertexes:=0;
 	end;
 if FNOfColors<>0 then
 	begin
-	glDeleteBuffersARB(1,@FVBOColors);
+	Render.DeleteBuffersARB(1,@FVBOColors);
 	FVBOColors:=0;
 	end;
 end;

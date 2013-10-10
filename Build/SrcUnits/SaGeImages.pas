@@ -16,13 +16,14 @@ uses
 	,SaGeImagesPng
 	,SaGeImagesBmp
 	,SaGeRender
+	,SaGeContext
 	;
 type
 	SGIByte = type byte;
 	
 	PSGImage = ^TSGImage;
 	PTSGImage = PSGImage;
-	TSGImage=class(TSGRenderObject)
+	TSGImage=class(TSGContextObject)
 			public
 		constructor Create(const NewWay:string = '');
 		destructor Destroy;override;

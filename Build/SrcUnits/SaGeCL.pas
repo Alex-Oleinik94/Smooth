@@ -12,6 +12,7 @@ uses
 	,SaGeContext
 	,gl
 	,SaGeUtils
+	,SaGeRender
 	;
 
 type
@@ -42,7 +43,7 @@ type
 	TArTSGComponent = TSGArTSGComponent;
 	TArTArTSGComponent = type packed array of TArTSGComponent;
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
-	TSGComponent=class(TObject)
+	TSGComponent=class(TSGContextObject)
 			public
 		constructor Create;
 		destructor Destroy;override;
@@ -474,7 +475,7 @@ type
 var
 	SGScreen:TSGComponent = nil;
 
-procedure SGCLLoad;
+procedure SGCLLoad(const Context:TSGCOntext);
 
 implementation
 
@@ -637,19 +638,19 @@ var
 function TSGComboBox.CursorInComponent():boolean;
 begin
 Result:=
-	(SGContext.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
-	(SGContext.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
-	(SGContext.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
 	(
 	(FOpen and 
 		(
-		(SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Colums*FOpenTimer)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Colums*FOpenTimer)
 		or
-		(SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight)
 		)
 	)
 	or
-	((not FOpen) and (SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight))
+	((not FOpen) and (Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight))
 	);
 FCursorOnComponent:=Result;
 end;
@@ -665,17 +666,17 @@ end;
 procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean);
 begin
 FBackLight:=True;
-if ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
+if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
 	begin
 	FOpen:=True;
 	CanRePleace:=False;
-	SGContext.FCursorKeyPressed:=SGNoCursorButton;
+	Context.FCursorKeyPressed:=SGNoCursorButton;
 	end
 else
 	FCursorOnThisItem:=-1;
-if FOpen and (SGContext.CursorWheel<>SGNoCursorWheel) then
+if FOpen and (Context.CursorWheel<>SGNoCursorWheel) then
 	begin
-	if SGContext.CursorWheel=SGUpCursorWheel then
+	if Context.CursorWheel=SGUpCursorWheel then
 		begin
 		if FFirstScrollItem<>0 then
 			FFirstScrollItem-=1;
@@ -687,7 +688,7 @@ if FOpen and (SGContext.CursorWheel<>SGNoCursorWheel) then
 			FFirstScrollItem+=1;
 			end;
 		end;
-	SGContext.FCursorWheel:=SGNoCursorWheel;
+	Context.FCursorWheel:=SGNoCursorWheel;
 	CanRePleace:=False;
 	end;
 inherited;
@@ -697,27 +698,27 @@ procedure TSGComboBox.FromUpDate(var FCanChange:Boolean);
 var
 	i:LongInt;
 begin
-if FOpen and (not FBackLight) and ((not FCanChange) or (SGContext.CursorKeyPressed<>SGNoCursorButton)) then
+if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNoCursorButton)) then
 	FOpen:=False;
 if FOpen and (FCursorOnComponent) then
 	begin
 	for i:=0 to Colums-1 do
 		begin
-		if 		(SGContext.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer)
+		if 		(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer)
 			and
-				(SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer)
+				(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer)
 			and
-				(((FMaxColumns<Length(FItems)) and (SGContext.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) then
+				(((FMaxColumns<Length(FItems)) and (Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) then
 					begin
 					FCursorOnThisItem:=FFirstScrollItem+i;
-					if ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGUpKey)) then
+					if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 						begin
 						FCanChange:=False;
 						FOpen:=False;
 						if FProcedure<>nil then
 							FProcedure(FSelectItem,FCursorOnThisItem,Self);
 						FSelectItem:=FCursorOnThisItem;
-						SGContext.FCursorKeyPressed:=SGNoCursorButton;
+						Context.FCursorKeyPressed:=SGNoCursorButton;
 						FTextColor:=SGColorImport();
 						FBodyColor:=SGColorImport;
 						if OnChange<>nil then
@@ -738,11 +739,11 @@ if IDItem<>-1 then
 	begin
 	if FItems[IDItem].FImage<>nil then
 		begin
-		SGColorImport(1,1,1,Color.a).Color;
+		SGColorImport(1,1,1,Color.a).Color(Render);
 		FItems[IDItem].FImage.DrawImageFromTwoVertex2fAsRatio(
 			SGPoint2fToVertex3f(Vertex1),
 			SGPoint2fToVertex3f(SGPoint2fImport(Vertex1.x+Height,Vertex3.y)),tRUE,0.85);
-		Color.Color;
+		Color.Color(Render);
 		Font.DrawFontFromTwoVertex2f(
 			FItems[IDItem].FCaption,
 			SGPoint2fToVertex2f(SGPoint2fImport(Vertex1.x+Height,Vertex1.y)),
@@ -750,7 +751,7 @@ if IDItem<>-1 then
 		end
 	else
 		begin
-		Color.Color;
+		Color.Color(Render);
 		Font.DrawFontFromTwoVertex2f(
 			FItems[IDItem].FCaption,
 			SGPoint2fToVertex2f(Vertex1),
@@ -791,7 +792,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	if  (1-FBackLightTimer>SGZero) and 
 		(1-FOpenTimer>SGZero)  then
-	SGRoundQuad( 
+	SGRoundQuad(Render, 
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
@@ -800,7 +801,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		True);
 	if  (FBackLightTimer>SGZero) and 
 		(1-FOpenTimer>SGZero)  then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
@@ -808,7 +809,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		SecondColor2.WithAlpha(0.3*FVisibleTimer*FBackLightTimer*(1-FOpenTimer))*1.3,
 		True);
 	if  (FOpenTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGVertexImport(
 			GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT).x,
@@ -854,7 +855,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if Boolean(FScroll) then
 		begin
 		if  (FOpenTimer>SGZero)  then
-		SGRoundQuad(
+		SGRoundQuad(Render,
 			SGVertexImport(
 				GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScrollWidth,
 				GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).y+FHeight*Colums*FOpenTimer*(FFirstScrollItem/High(FItems))
@@ -874,7 +875,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then
 				begin
 				if  (FOpenTimer>SGZero)  then
-				SGRoundQuad(
+				SGRoundQuad(Render,
 					SGVertexImport(
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
@@ -889,7 +890,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then
 				begin
 				if  (FOpenTimer>SGZero)  then	
-				SGRoundQuad(
+				SGRoundQuad(Render,
 					SGVertexImport(
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
@@ -904,7 +905,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then
 				begin
 				if  (FOpenTimer>SGZero) then
-				SGRoundQuad(
+				SGRoundQuad(Render,
 					SGVertexImport(
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
@@ -1007,16 +1008,16 @@ var
 	i:LongInt = -1;
 	ii:boolean = true;
 begin
-if FChangingButton and (not (SGContext.CursorKeysPressed(SGLeftCursorButton))) then
+if FChangingButton and (not (Context.CursorKeysPressed(SGLeftCursorButton))) then
 	begin
 	FChangingButton:=False;
 	end;
 if FChangingButton then
 	begin 
-	while (ii) and (Abs(Parent.AsScrollBar.FBeginingPosition-SGContext.CursorPosition(SGNowCursorPosition).y)>((Parent.AsScrollBar.Height-2*Parent.AsScrollBar.Width-13)/Parent.AsScrollBar.FScrollMax)) do
+	while (ii) and (Abs(Parent.AsScrollBar.FBeginingPosition-Context.CursorPosition(SGNowCursorPosition).y)>((Parent.AsScrollBar.Height-2*Parent.AsScrollBar.Width-13)/Parent.AsScrollBar.FScrollMax)) do
 		begin
 		ii:=False;
-		if Parent.AsScrollBar.FBeginingPosition-SGContext.CursorPosition(SGNowCursorPosition).y>0 then
+		if Parent.AsScrollBar.FBeginingPosition-Context.CursorPosition(SGNowCursorPosition).y>0 then
 			begin
 			if Parent.AsScrollBar.FScrollLow<>0 then
 				begin
@@ -1052,16 +1053,16 @@ begin
 FCursorOnButton:=True;
 {if SGMouseKeysDown[0] then
 	FChangingButton:=True;}
-if Active and ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGUpKey)) then
+if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 	begin
 	FChangingButtonTimer:=1;
 	case Parent.AsScrollBar.FScroolType of
 	SGScrollBarVertical:
 		begin
-		Parent.AsScrollBar.FBeginingPosition:=SGContext.CursorPosition(SGNowCursorPosition).y;
+		Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).y;
 		end;
 	SGScrollBarHorizon:
-		Parent.AsScrollBar.FBeginingPosition:=SGContext.CursorPosition(SGNowCursorPosition).x;
+		Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).x;
 	end;
 	end;
 end;
@@ -1211,7 +1212,7 @@ procedure TSGButtonMenuButton.FromUpDateUnderCursor(var CanRePleace:Boolean);
 var
 	i,ii:LongInt;
 begin
-if Active and (((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGUpKey)) or Parent.AsButtonMenu.FSelectNotClick) then
+if Active and (((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) or Parent.AsButtonMenu.FSelectNotClick) then
 	begin
 	ii:=-1;
 	for i:=0 to High(FParent.FChildren) do
@@ -1311,7 +1312,7 @@ var
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
@@ -1375,14 +1376,14 @@ if abs((GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SG_LEF
 FProgress:=(FProgress*7+FNeedProgress)/8;
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		Radius,10,
 		NilColor,
 		Color3.WithAlpha(0.3*FVisibleTimer)*1.3,
 		True,False);
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(
 			SGPointImport(
@@ -1441,7 +1442,7 @@ var
 	I,Iam:LongInt;
 	VPointer:TSGComponent;
 begin
-if (FParent<>nil) and ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGDownKey)) then
+if (FParent<>nil) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 	begin
 	Iam:=-1;
 	for i:=Low(FParent.FChildren) to High(FParent.FChildren) do
@@ -1459,7 +1460,7 @@ if (FParent<>nil) and ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGCo
 	end;
 if FRePlace then
 	begin
-	if SGContext.CursorKeysPressed(SGRightCursorButton) then
+	if Context.CursorKeysPressed(SGRightCursorButton) then
 		begin
 		if FParent<>nil then
 			begin
@@ -1508,8 +1509,8 @@ if FRePlace then
 												DestroyAlign;
 											end;
 			end;
-		AddToLeft(SGContext.CursorPosition(SGDeferenseCursorPosition).x);
-		AddToTop(SGContext.CursorPosition(SGDeferenseCursorPosition).y);
+		AddToLeft(Context.CursorPosition(SGDeferenseCursorPosition).x);
+		AddToTop(Context.CursorPosition(SGDeferenseCursorPosition).y);
 		end
 	else
 		begin
@@ -1530,7 +1531,7 @@ procedure TSGForm.FromDraw;
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
-	SGRoundWindowQuad(
+	SGRoundWindowQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_CHILDREN)),
@@ -1570,7 +1571,7 @@ end;
 
 procedure TSGForm.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
 begin
-if ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGDownKey)) and CanRePleace then
+if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) and CanRePleace then
 	begin
 	FRePlace:=True;
 	CanRePleace:=False;
@@ -1580,10 +1581,10 @@ end;
 function TSGForm.CursorInComponentCaption():boolean;
 begin
 Result:=
-	(SGContext.CursorPosition(SGNowCursorPosition).x>=FRealLeft) and 
-	(SGContext.CursorPosition(SGNowCursorPosition).y>=FRealTop) and 
-	(SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FTopShiftForChilds) and 
-	(SGContext.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth);
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft) and 
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop) and 
+	(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FTopShiftForChilds) and 
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth);
 FCursorOnComponentCaption:=Result;
 end;
 
@@ -1711,8 +1712,8 @@ procedure TSGComponent.SetMiddleBounds(const NewWidth,NewHeight:LongInt);
 begin
 FNeedHeight:=NewHeight;
 FNeedWidth:=NewWidth;
-FNeedLeft:=Round((SGContext.Width-NewWidth)/2);
-FNeedTop:=Round((SGContext.Height-NewHeight)/2);
+FNeedLeft:=Round((Context.Width-NewWidth)/2);
+FNeedTop:=Round((Context.Height-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
@@ -1792,7 +1793,7 @@ begin
 if FParent<>nil then
 	Result:=FParent.Width
 else
-	Result:=SGContext.Width;
+	Result:=Context.Width;
 end;
 
 function TSGComponent.GetScreenHeight : longint;
@@ -1800,7 +1801,7 @@ begin
 if FParent<>nil then
 	Result:=FParent.Height
 else
-	Result:=SGContext.Height;
+	Result:=Context.Height;
 end;
 
 procedure TSGComponent.SetRight(NewRight:LongInt);
@@ -1876,9 +1877,9 @@ FNoneTop:=NewTop;
 FNoneWidth:=NewWidth;
 {if FParent=SGScreen then
 	begin
-	Top:=Top+SGContext.TopShift;
-	FNeedTop+=SGContext.TopShift;
-	FNoneTop+=SGContext.TopShift;
+	Top:=Top+Context.TopShift;
+	FNeedTop+=Context.TopShift;
+	FNoneTop+=Context.TopShift;
 	end;}
 end;
 
@@ -2042,10 +2043,10 @@ end;
 function TSGComponent.CursorInComponent():boolean;
 begin
 Result:=
-	(SGContext.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
-	(SGContext.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
-	(SGContext.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
-	(SGContext.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight);
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
+	(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight);
 FCursorOnComponent:=Result;
 end;
 
@@ -2067,10 +2068,10 @@ while (Length(FChildren)>0) and (i<=High(FChildren)) do
 
 if FTopShiftStatus.FEnable then
 	begin
-	if (SGContext.TopShift<>FTopShiftStatus.FNowTopShift)then
+	if (Context.TopShift<>FTopShiftStatus.FNowTopShift)then
 		begin
 		FNeedTop-=FTopShiftStatus.FNowTopShift;
-		FTopShiftStatus.FNowTopShift:=SGContext.TopShift;
+		FTopShiftStatus.FNowTopShift:=Context.TopShift;
 		FNeedTop+=FTopShiftStatus.FNowTopShift;
 		end;
 	end;
@@ -2222,7 +2223,7 @@ end;
 
 function TSGComponent.CursorPosition:TSGPoint;
 begin
-Result:=SGContext.CursorPosition(SGNowCursorPosition);
+Result:=Context.CursorPosition(SGNowCursorPosition);
 end;
 
 procedure TSGComponent.CreateAlign(const NewAllign:SGByte);
@@ -2479,7 +2480,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
 		begin
-		SGRoundQuad(
+		SGRoundQuad(Render,
 			SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 			SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 			2,
@@ -2490,7 +2491,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		end;
 	if (1-FCursorOnComponentTimer>SGZero) and 
 		(1-FNowChangetTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		2,10,
@@ -2502,7 +2503,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				.AddAlpha(0.3*FVisibleTimer*(1-FCursorOnComponentTimer)*(1-FNowChangetTimer)*FActiveTimer)*1.3,
 		True);
 	if (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		2,10,
@@ -2512,7 +2513,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			.AddAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
 		True);
 	if (FVisibleTimer*FNowChangetTimer*FActiveTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		2,10,
@@ -2549,7 +2550,7 @@ procedure TSGEdit.FromUpDateUnderCursor(var CanRePleace:Boolean);
 begin 
 if CanRePleace then
 	begin
-	if ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGDownKey)) then
+	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 		begin
 		FNowChanget:=True;
 		FDrawCursor:=True;
@@ -2571,16 +2572,16 @@ var
 begin
 if FCanChange then
 	begin
-	if (not CursorInComponent) and ((SGContext.CursorKeyPressed<>SGNoCursorButton)) then
+	if (not CursorInComponent) and ((Context.CursorKeyPressed<>SGNoCursorButton)) then
 		FNowChanget:=False;
 	if FNowChanget then
 		begin
-		if SGContext.KeyPressedChar=#27 then
+		if Context.KeyPressedChar=#27 then
 			FNowChanget:=False;
 		end;
-	if FNowChanget and SGContext.KeyPressed and (SGContext.KeyPressedType=SGDownKey) then
+	if FNowChanget and Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
 		begin
-		case SGContext.KeyPressedChar of
+		case Context.KeyPressedChar of
 		#39://ToRight (Arrow)
 			begin
 			if FCursorPosition<Length(Caption) then
@@ -2659,10 +2660,10 @@ if FCanChange then
 			begin
 			if FCaption='' then
 				begin
-				{FCaption:=SGStringToPChar(SGWhatIsTheSimbol(longint(SGContext.KeyPressedChar),
-					SGContext.KeysPressed(16) , SGContext.KeysPressed(20)));}
-				FCaption:=SGWhatIsTheSimbol(longint(SGContext.KeyPressedChar),
-					SGContext.KeysPressed(16) , SGContext.KeysPressed(20));
+				{FCaption:=SGStringToPChar(SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+					Context.KeysPressed(16) , Context.KeysPressed(20)));}
+				FCaption:=SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+					Context.KeysPressed(16) , Context.KeysPressed(20));
 				FCursorPosition:=1;
 				CaptionCharget:=True;
 				end
@@ -2672,12 +2673,12 @@ if FCanChange then
 				FCaption:={SGPCharTotal(
 					SGPCharGetPart(FCaption,0,FCursorPosition-2),
 					SGPCharTotal(
-						SGStringToPChar(SGWhatIsTheSimbol(longint(SGContext.KeyPressedChar),
-							SGContext.KeysPressed(16) , SGContext.KeysPressed(20))),
+						SGStringToPChar(SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+							Context.KeysPressed(16) , Context.KeysPressed(20))),
 						SGPCharGetPart(FCaption,FCursorPosition-1,SGPCharHigh(FCaption))));}
 						SGStringGetPart(FCaption,1,FCursorPosition-1)+
-						SGWhatIsTheSimbol(longint(SGContext.KeyPressedChar),
-							SGContext.KeysPressed(16) , SGContext.KeysPressed(20))+
+						SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+							Context.KeysPressed(16) , Context.KeysPressed(20))+
 						SGStringGetPart(FCaption,FCursorPosition,Length(FCaption));
 				CaptionCharget:=True;
 				end;
@@ -2698,7 +2699,7 @@ if FNowChanget then
 	begin
 	if FDrawCursorElapsedTimeDontChange=0 then
 		begin
-		FDrawCursorElapsedTime+=SGContext.ElapsedTime;
+		FDrawCursorElapsedTime+=Context.ElapsedTime;
 		if FDrawCursorElapsedTime>=FDrawCursorElapsedTimeChange then
 			begin
 			FDrawCursor:= not FDrawCursor;
@@ -2707,14 +2708,14 @@ if FNowChanget then
 		end
 	else
 		begin
-		if FDrawCursorElapsedTimeDontChange<SGContext.ElapsedTime then
+		if FDrawCursorElapsedTimeDontChange<Context.ElapsedTime then
 			begin
-			FDrawCursorElapsedTime:=SGContext.ElapsedTime-FDrawCursorElapsedTimeDontChange;
+			FDrawCursorElapsedTime:=Context.ElapsedTime-FDrawCursorElapsedTimeDontChange;
 			FDrawCursorElapsedTimeDontChange:=0;
 			end
 		else
 			begin
-			FDrawCursorElapsedTimeDontChange-=SGContext.ElapsedTime;
+			FDrawCursorElapsedTimeDontChange-=Context.ElapsedTime;
 			end;
 		end;
 	end;
@@ -2780,7 +2781,7 @@ procedure TSGLabel.FromDraw;
 begin
 if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
 	begin
-	FTextColor.WithAlpha(FVisibleTimer).Color;
+	FTextColor.WithAlpha(FVisibleTimer).Color(Render);
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
 		SGPoint2fToVertex2f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
@@ -2810,9 +2811,9 @@ end;
 procedure TSGButton.FromUpDateUnderCursor(var CanRePleace:Boolean);
 begin
 FCursorOnButton:=True;
-if (SGContext.CursorKeysPressed(SGLeftCursorButton)) then
+if (Context.CursorKeysPressed(SGLeftCursorButton)) then
 	FChangingButton:=True;
-if Active and ((SGContext.CursorKeyPressed=SGLeftCursorButton) and (SGContext.CursorKeyPressedType=SGUpKey)) then
+if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 	begin
 	if (OnChange<>nil) then
 		OnChange(Self);
@@ -2842,7 +2843,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		end;
 	if (not Active) or (FActiveTimer<1-SGZero) then
 		begin
-		SGRoundQuad(
+		SGRoundQuad(Render,
 			SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 			SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 			5,10,
@@ -2854,7 +2855,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		(1-FCursorOnButtonTimer>SGZero) and 
 		(1-FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
@@ -2865,7 +2866,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		(FCursorOnButtonTimer>SGZero) and 
 		(1-FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
@@ -2875,7 +2876,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if  (FActiveTimer>SGZero) and 
 		(FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
-	SGRoundQuad(
+	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,
@@ -2917,7 +2918,7 @@ FCanHaveChildren:=False;
 FViewImage1:=nil;
 end;
 
-procedure SGCLPaint;
+procedure SGCLPaint(const Context:TSGContext);
 var
 	CanRePleace:Boolean = True;
 	i:LongWord;
@@ -2925,7 +2926,7 @@ begin
 if FNewPosition<>FOldPosition then
 	begin
 	glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
-	SGInitMatrixMode(SG_2D);
+	Context.Render.InitMatrixMode(SG_2D);
 	glColor4f(1,1,1,1);
 	
 	TSGComponent.UpgradeTimer(True,FMoveProgress);
@@ -2938,21 +2939,21 @@ if FNewPosition<>FOldPosition then
 	else
 		begin
 		glLineWidth(1);
-		SGInitMatrixMode(SG_2D);
+		Context.Render.InitMatrixMode(SG_2D);
 		
 		if SGScreens[FOldPosition].FImage <>nil then
 			begin
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0)+FMoveProgress*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height),
-				SGVertex2fImport(SGContext.Width,SGContext.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height)
+				SGVertex2fImport(0,0)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height),
+				SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)
 				,True,SG_2D);
 			end;
 		
 		if SGScreens[FNewPosition].FImage <>nil then
 			begin
 			SGScreens[FNewPosition].FImage.DrawImageFromTwoVertex2f(
-				(-1)*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height),
-				(-1)*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height)+SGVertex2fImport(SGContext.Width,SGContext.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(SGContext.Width,SGContext.Height)
+				(-1)*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height),
+				(-1)*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)+SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)
 				,True,SG_2D);
 			end;
 		
@@ -2964,7 +2965,7 @@ if FNewPosition=FOldPosition then
 		SGScreen.DrawDrawClasses;
 	
 	glLineWidth(1);
-	SGInitMatrixMode(SG_2D);
+	Context.Render.InitMatrixMode(SG_2D);
 	
 	if SGScreen<>nil then
 		SGScreen.FromUpDateUnderCursor(CanRePleace);
@@ -2979,9 +2980,9 @@ if FNewPosition=FOldPosition then
 	if SGScreen<>nil then
 		SGScreen.FromDraw;
 	
-	if (SGContext.KeysPressed(SG_CTRL_KEY)) and (SGContext.KeysPressed(SG_ALT_KEY)) and (SGContext.KeyPressedType=SGDownKey) then
+	if (Context.KeysPressed(SG_CTRL_KEY)) and (Context.KeysPressed(SG_ALT_KEY)) and (Context.KeyPressedType=SGDownKey) then
 		begin
-		case SGContext.KeyPressedByte of
+		case Context.KeyPressedByte of
 		87://Close
 			begin
 			SGScreens[FNewPosition].FScreen:=nil;
@@ -3004,7 +3005,7 @@ if FNewPosition=FOldPosition then
 				SGScreen.Destroy;
 				
 				SGScreen:=SGComponent.Create;
-				SGScreen.SetBounds(0,0,SGContext.Width,SGContext.Height);
+				SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 				SGScreen.SetShifts(0,0,0,0);
 				SGScreen.Visible:=True;
 				SGScreen.BoundsToNeedBounds;
@@ -3031,7 +3032,7 @@ if FNewPosition=FOldPosition then
 			FMoveProgress:=0;
 			
 			SGScreen:=SGComponent.Create;
-			SGScreen.SetBounds(0,0,SGContext.Width,SGContext.Height);
+			SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 			SGScreen.SetShifts(0,0,0,0);
 			SGScreen.Visible:=True;
 			SGScreen.BoundsToNeedBounds;
@@ -3053,13 +3054,13 @@ if FNewPosition=FOldPosition then
 			3:FMoveVector.Import(0,-1);
 			end;
 			
-			SGContext.InitializeProcedure();
+			Context.InitializeProcedure();
 			
 			glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
-			SGInitMatrixMode(SG_3D);
+			Context.Render.InitMatrixMode(SG_3D);
 			
 			SGScreen.DrawDrawClasses;
-			SGInitMatrixMode(SG_2D);
+			Context.Render.InitMatrixMode(SG_2D);
 			SGScreen.FromDraw;
 			
 			SGScreens[FNewPosition].FImage:=TSGGLImage.Create;
@@ -3068,10 +3069,10 @@ if FNewPosition=FOldPosition then
 			SGScreens[FNewPosition].FImage.ToTexture;
 			
 			glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
-			SGInitMatrixMode(SG_2D);
+			Context.Render.InitMatrixMode(SG_2D);
 			glColor4f(1,1,1,1);
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0),SGVertex2fImport(SGContext.Width,SGContext.Height),True,SG_2D);
+				SGVertex2fImport(0,0),SGVertex2fImport(Context.Width,Context.Height),True,SG_2D);
 			end;
 		end;
 		end;
@@ -3083,20 +3084,20 @@ begin
 inherited Destroy;
 end;
 
-procedure SGCLResizeScreen;
+procedure SGCLResizeScreen(const Context:TSGContext);
 begin
 if SGScreen<>nil then
 	begin
-	SGScreen.SetBounds(0,0,SGContext.Width,SGContext.Height);
+	SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 	SGScreen.BoundsToNeedBounds;
 	SGScreen.FromResize();
 	end;
 end;
 
-procedure SGCLLoad;
+procedure SGCLLoad(const Context:TSGContext);
 begin
 SGScreen:=SGComponent.Create;
-SGScreen.SetBounds(0,0,SGContext.Width,SGContext.Height);
+SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
 SGScreen.Visible:=True;
 SGScreen.BoundsToNeedBounds;

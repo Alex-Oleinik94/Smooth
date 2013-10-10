@@ -113,7 +113,7 @@ procedure TSGFractalMandelbrodRelease.UpDateLabelCoordCaption;inline;
 var
 	Point:SGPoint;
 begin
-Point:=SGContext.CursorPosition(SGNowCursorPosition);
+Point:=Context.CursorPosition(SGNowCursorPosition);
 LabelCoord.Caption:=SGStringToPChar('( '+SGFloatToString(Manda.FZNumber.x,3)+' ; '+SGFloatToString(Manda.FZNumber.y,3)+' ) , ( '+
 	SGFloatToString(GetPointOnPosOnMand(Point).x,7)+' ; '
 	+SGFloatToString(GetPointOnPosOnMand(Point).y,7)+' )');
@@ -169,7 +169,7 @@ begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	Manda.Width:=SGVal((Button.Parent.LastChild.Caption));
-	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(SGContext.Height/SGContext.Width));
+	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Context.Height/Context.Width));
 	Changet:=True;
 	NowSave:=true;
 	SelectPoint.Import;
@@ -177,10 +177,10 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	end;
 end;
 
-procedure FromExit;
+{procedure FromExit;
 begin
-SGContext.Close;
-end;
+Context.Close;
+end;}
 
 procedure ColorComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
 begin
@@ -214,7 +214,7 @@ procedure ZumButtonOnChange(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.FView.Import(-2.5,-2.5*(SGContext.Height/SGContext.Width),2.5,2.5*(SGContext.Height/SGContext.Width));
+	Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -266,14 +266,14 @@ Manda.Height:=StartDepth;
 Manda.FZNumber.Import(-0.181,0.66);
 Manda.FZMand:=False;
 Manda.FZDegree:=2;
-Manda.FView.Import(-2.5,-2.5*(SGContext.Height/SGContext.Width),2.5,2.5*(SGContext.Height/SGContext.Width));
+Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
 Manda.FImage.Way:=DataDirectory+Slash+'Images'+Slash+'Mand New.png';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
-ii+={SGContext.TopShift+}40;
+ii+={Context.TopShift+}40;
 for i:=0 to QuantityThreads-1 do
 	begin
 	FArProgressBar[i]:=TSGProgressBar.Create;
@@ -306,7 +306,7 @@ LabelProcent.FUserPointer1:=Self;
 
 LabelCoord:=TSGLabel.Create;
 SGScreen.CreateChild(LabelCoord);
-SGScreen.LastChild.SetBounds(10,SGContext.Height-25,SGContext.Width div 2,20);
+SGScreen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.Visible:=True;
@@ -316,7 +316,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 ScreenshotPanel:=TSGPanel.Create;
 SGScreen.CreateChild(ScreenshotPanel);
 SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(SGContext.Width-10-(130+140+10),SGContext.Height-30,130+140+10,25);
+SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10),Context.Height-30,130+140+10,25);
 SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -338,7 +338,7 @@ SGScreen.LastChild.LastChild.FUserPointer2:=SGScreen.LastChild.FChildren[High(SG
 SGScreen.LastChild.LastChild.Caption:='4096';
 
 SGScreen.CreateChild(TSGComboBox.Create);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125+45,5{+SGContext.TopShift},120,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125+45,5{+Context.TopShift},120,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Цвет №1');
@@ -352,7 +352,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 
 TypeComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(TypeComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125+45-185,5{+SGContext.TopShift},180,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125+45-185,5{+Context.TopShift},180,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Множество Жюлиа');
@@ -362,7 +362,7 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 
 SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-185+45-105,5{+SGContext.TopShift},100,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-185+45-105,5{+Context.TopShift},100,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Сброс зума';
@@ -371,7 +371,7 @@ ZumButton.OnChange:=TSGComponentProcedure(@ZumButtonOnChange);
 SGScreen.LastChild.FUserPointer1:=Self;
 
 SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-185-105+45-125,5{+SGContext.TopShift},120,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Установ. тчк.';
@@ -381,7 +381,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 
 StepenComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(StepenComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-185-105-125+45-105,5{+SGContext.TopShift},100,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
@@ -398,7 +398,7 @@ while i<=100 do
 
 QuantityRecComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(QuantityRecComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-185-105-125-105+45-105,5{+SGContext.TopShift},100,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
@@ -420,7 +420,7 @@ while i<=13 do
 VideoPanel:=TSGPanel.Create;
 SGScreen.CreateChild(VideoPanel);
 SGScreen.LastChild.Caption:=' ';
-SGScreen.LastChild.SetBounds(SGContext.Width-500,SGContext.Height-30-30,400,25);
+SGScreen.LastChild.SetBounds(Context.Width-500,Context.Height-30-30,400,25);
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -472,7 +472,7 @@ VideoPanel:=nil;
 fmStartPanel:=nil;
 
 SGScreen.CreateChild(TSGPanel.Create);
-SGScreen.LastChild.SetMiddleBounds(300,SGContext.Height-200);
+SGScreen.LastChild.SetMiddleBounds(300,Context.Height-200);
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.AsPanel.FViewLines:=False;
 SGScreen.LastChild.AsPanel.FViewQuad:=False;
@@ -593,8 +593,8 @@ end;
 function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;
 begin
 Result.Import(
-	Manda.FView.x1+(Point.x/(SGContext.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
-	Manda.FView.y1+((SGContext.Height-Point.y)/(SGContext.Height)*abs(Manda.FView.y1-Manda.FView.y2))
+	Manda.FView.x1+(Point.x/(Context.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
+	Manda.FView.y1+((Context.Height-Point.y)/(Context.Height)*abs(Manda.FView.y1-Manda.FView.y2))
 	);
 end;
 
@@ -604,7 +604,7 @@ var
 begin
 if MandaInitialized then
 	begin
-	SGInitMatrixMode(SG_2D);
+	Render.InitMatrixMode(SG_2D);
 
 	if Manda.ThreadsReady then
 		begin
@@ -776,98 +776,98 @@ if MandaInitialized then
 
 	if Manda.FImage.Ready then
 		begin
-		glColor3f(1,1,1);
+		Render.Color3f(1,1,1);
 		Manda.Draw;
 		//if Manda.FView.VertexInView(Manda.FZNumber) then
 			//begin
 			VtxForZN.Import(
-				abs(Manda.FZNumber.x-SGMin(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*SGContext.Width,
-				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*SGContext.Height
+				abs(Manda.FZNumber.x-SGMin(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Context.Width,
+				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Context.Height
 				);
-			glColor3f(1,1,1);
-			glBegin(GL_TRIANGLES);
-			glVertex2f(VtxForZN.x+5,VtxForZN.y);
-			glVertex2f(VtxForZN.x-2,VtxForZN.y-4);
-			glVertex2f(VtxForZN.x-2,VtxForZN.y+4);
-			glEnd();
+			Render.Color3f(1,1,1);
+			Render.BeginScene(SG_TRIANGLES);
+			Render.Vertex2f(VtxForZN.x+5,VtxForZN.y);
+			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y-4);
+			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y+4);
+			Render.EndScene();
 			//end;
 			{
 		else
 			Manda.FZNumber.WriteLn;}
-		if (SelectZNimberFlag and ((SGContext.CursorKeysPressed(SGLeftCursorButton)))) or (SGContext.CursorKeysPressed(SGMiddleCursorButton)) then
+		if (SelectZNimberFlag and ((Context.CursorKeysPressed(SGLeftCursorButton)))) or (Context.CursorKeysPressed(SGMiddleCursorButton)) then
 			begin
-			ComplexNumber:=GetPointOnPosOnMand(SGContext.CursorPosition(SGNowCursorPosition));
+			ComplexNumber:=GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition));
 			if Manda.FZNumber <> ComplexNumber then
 				begin
 				Manda.FZNumber:=ComplexNumber;
 				SelectZNimberFlag:=False;
 				//SGSetMouseKeyUp(1);
-				SGContext.SetCursorKey(SGUpKey,SGLeftCursorButton);
+				Context.SetCursorKey(SGUpKey,SGLeftCursorButton);
 				if not Manda.FZMand then
 					Changet:=True;
 				SelectPoint.Import;
 				SelectSecondPoint.Import;
 				end;
 			end;
-		if (SGContext.CursorKeysPressed(SGRightCursorButton))  then
+		if (Context.CursorKeysPressed(SGRightCursorButton))  then
 			begin
 			SelectPointEnabled:=True;
-			SelectPoint:=SGContext.CursorPosition(SGNowCursorPosition);
+			SelectPoint:=Context.CursorPosition(SGNowCursorPosition);
 			end;
 		if SelectPointEnabled then
 			begin
-			if SGContext.KeyPressedChar=#27 then
+			if Context.KeyPressedChar=#27 then
 				SelectPointEnabled:=False;
 			
-			SelectSecondPoint:=SGContext.CursorPosition(SGNowCursorPosition);
-			if abs(SelectPoint.x-SelectSecondPoint.x)/abs(SelectPoint.y-SelectSecondPoint.y)>SGContext.Width/SGContext.Height then
+			SelectSecondPoint:=Context.CursorPosition(SGNowCursorPosition);
+			if abs(SelectPoint.x-SelectSecondPoint.x)/abs(SelectPoint.y-SelectSecondPoint.y)>Context.Width/Context.Height then
 				begin
 				SelectSecondNormalPoint.y:=SelectSecondPoint.y;
 				if (SelectPoint.x<SelectSecondPoint.x)then
-					SelectSecondNormalPoint.x:=SelectPoint.x+Round(abs(SelectSecondPoint.y-SelectPoint.y)/SGContext.Height*SGContext.Width)
+					SelectSecondNormalPoint.x:=SelectPoint.x+Round(abs(SelectSecondPoint.y-SelectPoint.y)/Context.Height*Context.Width)
 				else
-					SelectSecondNormalPoint.x:=SelectPoint.x-Round(abs(SelectSecondPoint.y-SelectPoint.y)/SGContext.Height*SGContext.Width);
+					SelectSecondNormalPoint.x:=SelectPoint.x-Round(abs(SelectSecondPoint.y-SelectPoint.y)/Context.Height*Context.Width);
 				end
 			else
 				begin
 				SelectSecondNormalPoint.x:=SelectSecondPoint.x;
 				if SelectPoint.y<SelectSecondPoint.y then
-					SelectSecondNormalPoint.y:=SelectPoint.y+Round(abs(SelectSecondPoint.x-SelectPoint.x)/SGContext.Width*SGContext.Height)
+					SelectSecondNormalPoint.y:=SelectPoint.y+Round(abs(SelectSecondPoint.x-SelectPoint.x)/Context.Width*Context.Height)
 				else
-					SelectSecondNormalPoint.y:=SelectPoint.y-Round(abs(SelectSecondPoint.x-SelectPoint.x)/SGContext.Width*SGContext.Height);
+					SelectSecondNormalPoint.y:=SelectPoint.y-Round(abs(SelectSecondPoint.x-SelectPoint.x)/Context.Width*Context.Height);
 				end;
 			
-			glColor4f(0,0.5,0.70,0.6);
-			glBegin(GL_QUADS);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex;
-			glVertex2f(SelectSecondPoint.x,SelectPoint.y);
-			glEnd();
-			glColor4f(0,0.7,0.70,0.8);
-			glBegin(GL_LINE_LOOP);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex;
-			glVertex2f(SelectSecondPoint.x,SelectPoint.y);
-			glEnd();
+			Render.Color4f(0,0.5,0.70,0.6);
+			Render.BeginScene(SG_QUADS);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
+			SelectSecondPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
+			Render.EndScene();
+			Render.Color4f(0,0.7,0.70,0.8);
+			Render.BeginScene(SG_LINE_LOOP);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
+			SelectSecondPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
+			Render.EndScene();
 			
-			glColor4f(0.6,0.5,0.30,0.6);
-			glBegin(GL_QUADS);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			SelectSecondNormalPoint.Vertex;
-			glVertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
-			glEnd();
-			glColor4f(1,0.9,0.20,0.8);
-			glBegin(GL_LINE_LOOP);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			SelectSecondNormalPoint.Vertex;
-			glVertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
-			glEnd();
+			Render.Color4f(0.6,0.5,0.30,0.6);
+			Render.BeginScene(SG_QUADS);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
+			SelectSecondNormalPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
+			Render.EndScene();
+			Render.Color4f(1,0.9,0.20,0.8);
+			Render.BeginScene(SG_LINE_LOOP);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
+			SelectSecondNormalPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
+			Render.EndScene();
 			end;
-		if SelectPointEnabled and {(SGIsMouseKeyDown(1))} (SGContext.CursorKeysPressed(SGLeftCursorButton)) then
+		if SelectPointEnabled and {(SGIsMouseKeyDown(1))} (Context.CursorKeysPressed(SGLeftCursorButton)) then
 			begin
 			//Тут херачится новый зум
 			SelectSecondPoint:=SelectSecondNormalPoint;
@@ -878,10 +878,10 @@ if MandaInitialized then
 			if SelectPoint.y>SelectSecondPoint.y then
 				SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
 			{Manda.FView.Import(
-				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectPoint.x/SGContext.Width,
-				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectPoint.y)/SGContext.Height,
-				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectSecondPoint.x/SGContext.Width,
-				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectSecondPoint.y)/SGContext.Height);}
+				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectPoint.x/Context.Width,
+				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectPoint.y)/Context.Height,
+				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectSecondPoint.x/Context.Width,
+				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectSecondPoint.y)/Context.Height);}
 			Manda.FView.Import(
 				GetPointOnPosOnMand(SelectPoint).x,
 				GetPointOnPosOnMand(SelectPoint).y-abs(GetPointOnPosOnMand(SelectPoint).y-GetPointOnPosOnMand(SelectSecondPoint).y),
@@ -895,28 +895,28 @@ if MandaInitialized then
 		begin
 		if SecondImage<>nil then
 			begin
-			glColor3f(1,1,1);
+			Render.Color3f(1,1,1);
 			if SecondImage.Ready then
 				SecondImage.DrawImageFromTwoPoint2f(
 					SGPointImport(1,1),
-					SGPointImport(SGContext.Width,SGContext.Height),
+					SGPointImport(Context.Width,Context.Height),
 					True,SG_2D);
 			
-			glColor4f(0.1,0.7,0.20,0.6);
-			glBegin(GL_QUADS);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex;
-			glVertex2f(SelectSecondPoint.x,SelectPoint.y);
-			glEnd();
+			Render.Color4f(0.1,0.7,0.20,0.6);
+			Render.BeginScene(SG_QUADS);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
+			SelectSecondPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
+			Render.EndScene();
 			
-			glColor4f(0.05,0.9,0.10,0.8);
-			glBegin(GL_LINE_LOOP);
-			SelectPoint.Vertex;
-			glVertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex;
-			glVertex2f(SelectSecondPoint.x,SelectPoint.y);
-			glEnd();
+			Render.Color4f(0.05,0.9,0.10,0.8);
+			Render.BeginScene(SG_LINE_LOOP);
+			SelectPoint.Vertex(Render);
+			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
+			SelectSecondPoint.Vertex(Render);
+			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
+			Render.EndScene();
 			end;
 		end;
 
@@ -931,7 +931,7 @@ if MandaInitialized then
 		Manda.FImage.Way:=SGGetFreeFileName(DataDirectory+Slash+'Images'+Slash+'Mand New.png');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
-		ii:={SGContext.TopShift+}40;
+		ii:={Context.TopShift+}40;
 		FBeginCalc.Get;
 		for i:=0 to QuantityThreads-1 do
 			begin
@@ -1042,7 +1042,7 @@ inherited;
 if FImage.Ready then
 	FImage.DrawImageFromTwoPoint2f(
 		SGPointImport(1,1),
-		SGPointImport(SGContext.Width,SGContext.Height),
+		SGPointImport(Context.Width,Context.Height),
 		False,SG_3D);
 end;
 
@@ -1052,7 +1052,7 @@ begin
 inherited;
 FImage:=nil;
 FZNumber.Import(0,0.65);
-FView.Import(-1.5,-1.5*(SGContext.Height/SGContext.Width),1.5,1.5*(SGContext.Height/SGContext.Width));
+FView.Import(-1.5,-1.5*(Context.Height/Context.Width),1.5,1.5*(Context.Height/Context.Width));
 FZMand:=False;
 FZDegree:=2;
 FZQuantityRec:=256;

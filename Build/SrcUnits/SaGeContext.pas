@@ -5,7 +5,6 @@ interface
 uses
 	SaGeBase
 	,SaGeCommon
-	,SaGeImages
 	,Classes
 	,SysUtils
 	,crt
@@ -134,6 +133,22 @@ type
 			public
 		function Get(const What:string):Pointer;override;
 		end;
+type
+	TSGContextObject=class(TSGRenderObject)
+			protected
+		FContext:TSGContext;
+			public
+		property Context:TSGContext read FContext write FContext;
+		end;
+	
+	TSGDrawClass=class;
+	TSGClassOfDrawClass = class of TSGDrawClass;
+	TSGDrawClassClass = TSGClassOfDrawClass; 
+	TSGDrawClass=class(TSGContextObject)
+			public
+		procedure Draw;virtual;abstract;
+		class function ClassName:String;override;
+		end;
 
 {$DEFINE SGREADINTERFACE}
 {$IFDEF GLUT}
@@ -143,10 +158,10 @@ type
 	{$I Includes\SaGeContextLazarus.inc}
 	{$ENDIF}
 {$UNDEF SGREADINTERFACE}
-var
+{var
 	SGContext:TSGContext = nil;
 var // Используется для пеехода к другому типу сонтекста
-	NewContext:TSGContext = nil;
+	NewContext:TSGContext = nil;}
 implementation
 
 {$DEFINE SGREADIMPLEMENTATION}
@@ -157,6 +172,14 @@ implementation
 	{$I Includes\SaGeContextLazarus.inc}
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
+
+
+class function TSGDrawClass.ClassName:String;
+begin
+Result:='SaGe Draw Class';
+end;
+
+
 
 function TSGContext.Get(const What:string):Pointer;
 begin

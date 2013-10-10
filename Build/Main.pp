@@ -24,7 +24,7 @@ uses
 	,SaGeTotal
 	,SaGeMesh
 	,SaGeMath
-	,SaGeExamples
+	//,SaGeExamples
 	,SaGeShaders
 	,SaGeFPCToC
 	,gl
@@ -46,16 +46,16 @@ with TSGDrawClasses.Create do
 	begin
 	
 	
-	Add(TSGFractalLomanaya);
+	{Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
-	Add(TSGKillKostia);
+	Add(TSGKillKostia);}
 	Add(TSGFractalKohTriangle);
-	Add(TSGFractalMengerSpunchRelease);
+	{Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGGenAlg);
 	Add(TSGGraphic);
 	Add(TSGGraphViewer);
-	Add(TSGGraphViewer3D);
+	Add(TSGGraphViewer3D);}
 	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);

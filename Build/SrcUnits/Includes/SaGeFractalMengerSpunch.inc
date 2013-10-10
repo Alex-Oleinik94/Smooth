@@ -151,11 +151,11 @@ FSizeWriteTrue:=False;
 FFont1:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 FFont1.Loading;
 
-InitProjectionComboBox(SGContext.Width-250-90-125-155,5{+SGContext.TopShift},150,30,[SGAnchRight],true);
+InitProjectionComboBox(Context.Width-250-90-125-155,5{+Context.TopShift},150,30,[SGAnchRight],true);
 
 FComboBox2:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox2);
-SGScreen.LastChild.SetBounds(SGContext.Width-250,40{+SGContext.TopShift},230,30);
+SGScreen.LastChild.SetBounds(Context.Width-250,40{+Context.TopShift},230,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Нормали и Цвета');
@@ -169,7 +169,7 @@ SGScreen.LastChild.Visible:=True;
 
 FComboBox1:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox1);
-SGScreen.LastChild.SetBounds(SGContext.Width-250,5{+SGContext.TopShift},230,30);
+SGScreen.LastChild.SetBounds(Context.Width-250,5{+Context.TopShift},230,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Звездочка Менгера');
@@ -183,7 +183,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthPlus:=TSGButton.Create;
 SGScreen.CreateChild(FButtonDepthPlus);
-SGScreen.LastChild.SetBounds(SGContext.Width-250-30,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-30,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -193,7 +193,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepth:=TSGLabel.Create;
 SGScreen.CreateChild(FLabelDepth);
-SGScreen.LastChild.SetBounds(SGContext.Width-250-60,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-60,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -202,7 +202,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthMinus:=TSGButton.Create;
 SGScreen.CreateChild(FButtonDepthMinus);
-SGScreen.LastChild.SetBounds(SGContext.Width-250-90,5{+SGContext.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-90,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
@@ -212,7 +212,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepthCaption:=TSGLabel.Create;
 SGScreen.CreateChild(FLabelDepthCaption);
-SGScreen.LastChild.SetBounds(SGContext.Width-250-90-125,5{+SGContext.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-90-125,5{+Context.TopShift},115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
@@ -221,7 +221,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelSize:=TSGLabel.Create;
 SGScreen.CreateChild(FLabelSize);
-SGScreen.LastChild.SetBounds(5,SGContext.Height-25,SGContext.Width-20,20);
+SGScreen.LastChild.SetBounds(5,Context.Height-25,Context.Width-20,20);
 SGScreen.LastChild.Caption:='Загрузка...';
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -350,7 +350,7 @@ if DoAtThreads then
 				Quantity+=RecQuantity(FThreadsArray[ii].Arr6,FDepth-1);
 				end;
 			iii:=Length(FMesh.ArObjects);
-			CalculateMeshes(Quantity,GL_QUADS);
+			CalculateMeshes(Quantity,SG_QUADS);
 			FThreadsData[i].FData:=TSGMengerSpunchFractalData.Create(iii,i*(20 div Length(FThreadsData)),(i+1)*(20 div Length(FThreadsData))-1,Self,i);
 			FThreadsData[i].FFinished:=False;
 			end;
@@ -365,7 +365,7 @@ if DoAtThreads then
 			FThreadsData[i].FFinished:=True;
 			FThreadsData[i].FData:=nil;
 			end;
-		CalculateMeshes(RecQuantity(TSGMengerSpunchBoolAr6True,FDepth),GL_QUADS);
+		CalculateMeshes(RecQuantity(TSGMengerSpunchBoolAr6True,FDepth),SG_QUADS);
 		FThreadsData[0].FFinished:=False;
 		FThreadsData[0].FData:=TSGMengerSpunchFractalData.Create(0,0,0,Self,0);
 		FThreadsData[0].FThread:=TSGThread.Create(TSGPointerProcedure(@NewMengerThread),FThreadsData[0].FData);
@@ -374,7 +374,7 @@ if DoAtThreads then
 else
 	begin
 	Quantity:=RecQuantity(TSGMengerSpunchBoolAr6True,FDepth);
-	CalculateMeshes(Quantity,GL_QUADS);
+	CalculateMeshes(Quantity,SG_QUADS);
 	i:=0;
 	CalculateFromThread(i,i,i);
 	end;

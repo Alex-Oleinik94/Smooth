@@ -8,12 +8,12 @@ uses
 	,SaGeBase
 	,Classes
 	,SysUtils
-	,GL
 	,SaGeMesh
 	,SaGeCL
 	,SaGeUtils
 	,SaGeImages
 	,SaGeImagesBase
+	,SaGeRender
 	;
 type
 	TSGFractal = class;
@@ -350,7 +350,7 @@ if FLightingEnable then
 	FSun*=FSunAbs;
 	glColor3f(1,1,1);
 	glBegin(GL_POINTS);
-	FSun.Vertex;
+	FSun.Vertex(Render);
 	glEnd();
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
