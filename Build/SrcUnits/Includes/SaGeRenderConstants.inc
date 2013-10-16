@@ -246,7 +246,8 @@ const
   SG_3D_COLOR                       = $0602;
   SG_3D_COLOR_TEXTURE               = $0603;
   SG_4D_COLOR_TEXTURE               = $0604;
-
+  SG_3D_ORTHO 						= $0605;
+  
   // FeedBackToken
   SG_PASS_THROUGH_TOKEN             = $0700;
   SG_POINT_TOKEN                    = $0701;

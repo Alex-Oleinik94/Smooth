@@ -9,7 +9,9 @@ uses
 	,Classes
 	,SaGeCommon
 	,SaGeBase
-	,Math;
+	,Math
+	,SaGeRender
+	,SaGeContext;
 type
 	TSGExpressionError=class
 			public
@@ -153,6 +155,7 @@ type
 		FPEnd,FPBegin:LongWord;
 		end;
 	
+
 	TSGMathGraphic=class(TSGDrawClass)
 			public
 		constructor Create;
@@ -295,9 +298,9 @@ for i:=0 to FComplexity-1 do
 	if FArVertexes[i].Visible then
 		begin
 		if Quantity=0 then
-			glBegin(GL_LINE_STRIP);
+			Render.BeginScene(SG_LINE_STRIP);
 		Quantity+=1;
-		FArVertexes[i].Vertex;
+		FArVertexes[i].Vertex(Render);
 		LastVertex:=i;
 		end
 	else
@@ -305,8 +308,8 @@ for i:=0 to FComplexity-1 do
 		if Quantity>0 then
 			begin
 			if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-				FArVertexes[LastVertex].Vertex;
-			glEnd();
+				FArVertexes[LastVertex].Vertex(Render);
+			Render.EndScene();
 			Quantity:=0;
 			end;
 		end;
@@ -314,8 +317,8 @@ for i:=0 to FComplexity-1 do
 if Quantity>0 then
 	begin
 	if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-		FArVertexes[LastVertex].Vertex;
-	glEnd();
+		FArVertexes[LastVertex].Vertex(Render);
+	Render.EndScene();
 	Quantity:=0;
 	end;
 end;

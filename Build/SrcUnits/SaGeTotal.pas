@@ -13,6 +13,7 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeCL
+	,SaGeRender
 	;
 type
 	TSGDrawClasses=class(TSGDrawClass)
@@ -344,7 +345,7 @@ FImageBullet.Loading;}
 SetLength(FKosties,1);
 FButtonReset:=TSGButton.Create;
 SGScreen.CreateChild(FButtonReset);
-SGScreen.LastChild.SetBounds(SGContext.Width-50,5,40,20);
+SGScreen.LastChild.SetBounds(Context.Width-50,5,40,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Reset';
@@ -354,7 +355,7 @@ SGScreen.LastChild.Visible:=True;
 
 FDifficultyComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FDifficultyComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-145,5,118+145,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-145,5,118+145,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
@@ -374,7 +375,7 @@ SGScreen.LastChild.Visible:=True;
 
 FQuantityComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FQuantityComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-145-60,5,55,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60,5,55,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to 8 do
@@ -387,7 +388,7 @@ SGScreen.LastChild.Visible:=True;
 
 FComboBoxDeep:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBoxDeep);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-145-60-60,5,55,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60,5,55,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=3 to 8 do
@@ -399,7 +400,7 @@ SGScreen.LastChild.Visible:=True;
 
 FComboBoxRespamn:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBoxRespamn);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-145-60-60-130,5,125,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130,5,125,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
@@ -411,7 +412,7 @@ SGScreen.LastChild.Visible:=True;
 
 FGroundComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FGroundComboBox);
-SGScreen.LastChild.SetBounds(SGContext.Width-50-125-145-60-60-130-140,5,135,20);
+SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130-140,5,135,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Стенок нету');
@@ -427,7 +428,7 @@ SGScreen.LastChild.Visible:=True;
 
 FTimerLabel:=TSGLabel.Create;
 SGScreen.CreateChild(FTimerLabel);
-SGScreen.LastChild.SetBounds(10,SGContext.Height-25,SGContext.Width div 2,20);
+SGScreen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.Visible:=True;
@@ -437,7 +438,7 @@ FTimerLabel.TextColor.Import(0,0,0,1);
 
 FLabebYouLose:=TSGLabel.Create;
 SGScreen.CreateChild(FLabebYouLose);
-SGScreen.LastChild.SetBounds(5,SGContext.Height div 2 - 15,SGContext.Width-10,30);
+SGScreen.LastChild.SetBounds(5,Context.Height div 2 - 15,Context.Width-10,30);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:=TSGKillKostiaStringLose;
 SGScreen.LastChild.Visible:=False;
@@ -496,7 +497,7 @@ var
 begin
 FChanget:=True;
 FActive:=True;
-TSGKillKostiaHeight:=Trunc(((SGContext.Height/SGContext.Width)*FStartDeep))+1;
+TSGKillKostiaHeight:=Trunc(((Context.Height/Context.Width)*FStartDeep))+1;
 FSkullsNowPosition:=FQuantitySkulls;
 
 FBulletsGos:=0;
@@ -539,7 +540,7 @@ for i:=0 to High(FKosties) do
 until (FArray[FYou.x][FYou.y].FType=0) and (ii=0);
 
 OldFR:=FR;
-FR.Import(SGContext.Width/Length(FArray),SGContext.Height/Length(FArray[0]));
+FR.Import(Context.Width/Length(FArray),Context.Height/Length(FArray[0]));
 
 if FR.x>FR.y then
 	i:=Trunc(FR.x)
@@ -672,12 +673,12 @@ end;
 
 procedure TSGKillKostia.DoQuad(const i,ii:LongWord);inline;
 begin
-//glBegin(GL_QUADS);
-glVertex2f(FR.x*i,FR.y*ii);
-glVertex2f(FR.x*i,FR.y*(ii+1));
-glVertex2f(FR.x*(i+1),FR.y*(ii+1));
-glVertex2f(FR.x*(i+1),FR.y*ii);
-//glEnd();
+//Render.BeginScene(SG_QUADS);
+Render.Vertex2f(FR.x*i,FR.y*ii);
+Render.Vertex2f(FR.x*i,FR.y*(ii+1));
+Render.Vertex2f(FR.x*(i+1),FR.y*(ii+1));
+Render.Vertex2f(FR.x*(i+1),FR.y*ii);
+//Render.EndScene();
 end;
 
 function TSGKillKostia.Proverka(const KPos:TSGPoint2f;const b:Byte):Boolean;inline;
@@ -817,13 +818,13 @@ var
 	Vtx1,Vtx2:TSGVertex2f;
 	Any:TSGPoint2f;
 begin
-if SGContext.KeyPressed and (SGContext.KeyPressedType=SGDownKey) and (SGContext.KeyPressedByte=82) then	
+if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and (Context.KeyPressedByte=82) then	
 	Reset;
 if FActive then
 	begin
-	if SGContext.KeyPressed and (SGContext.KeyPressedType=SGDownKey) then
+	if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
 		begin
-		case SGContext.KeyPressedByte of
+		case Context.KeyPressedByte of
 		37,65: if FYou.x<>0 then
 			if FArray[FYou.x-1,FYou.y].FType=0 then
 				FYou.x-=1;
@@ -854,7 +855,7 @@ if FActive then
 						end;
 			end;
 		end;
-		if SGContext.KeyPressedByte in [37,65,38,87,39,68,40,83] then
+		if Context.KeyPressedByte in [37,65,38,87,39,68,40,83] then
 			FChanget:=True;
 		end;
 	
@@ -935,48 +936,48 @@ else
 	//FDTInterval:=FInterval;
 	end;
 
-SGMatrixMode(SG_2D);
-glBegin(GL_QUADS);
+Render.InitMatrixMode(SG_2D);
+Render.BeginScene(SG_QUADS);
 for i:=0 to High(FArray) do
 	for ii:=0 to High(FArray[0]) do
 		begin
 		if FArray[i][ii].FType=1 then
 			begin
-			glEnd;
-			SGColor3f(1,1,1);
+			Render.EndScene;
+			Render.Color3f(1,1,1);
 			Vtx1.Import(i*FR.x,ii*FR.y);
 			Vtx2.Import((i+1)*FR.x,(ii+1)*FR.y);
 			FImageBlock.DrawImageFromTwoVertex2f(Vtx1,Vtx2,True,SG_2D);
-			glBegin(GL_QUADS);
+			Render.BeginScene(SG_QUADS);
 			end
 		else
 			begin
 			if FArray[i][ii].FType=2 then
-					glColor4f(0.8,0,0.8,1)
+					Render.Color4f(0.8,0,0.8,1)
 				else
 					if FArray[i][ii].FWay=FForestHeight*FForestWidth then
-						SGGetColor4fFromLongWord($FFFF00).Color
+						SGGetColor4fFromLongWord($FFFF00).Color(Render)
 					else
-						TSGKillKostiaGetColor(FArray[i][ii].FWay).Color;
+						TSGKillKostiaGetColor(FArray[i][ii].FWay).Color(Render);
 			DoQuad(i,ii);
 			end;
 		end;
-glEnd;
+Render.EndScene;
 
 
 if FSkulls<>nil then
 	for i:=0 to High(FSkulls) do
 		begin
-		glColor4f(1,0.12,0.12,(FSkulls[i].FAlpha/FQuantitySkulls)*0.7);
+		Render.Color4f(1,0.12,0.12,(FSkulls[i].FAlpha/FQuantitySkulls)*0.7);
 		FImageSkull.DrawImageFromTwoVertex2f(FSkulls[i].FPosition,FSkulls[i].FPosition+FR,True,SG_2D);
 		end;
 
-glColor4f(0.8,0.1,0.1,0.8);
+Render.Color4f(0.8,0.1,0.1,0.8);
 for i:=0 to high(FKosties) do
 	if not FKosties[i].FActive then
 		FImageSkull.DrawImageFromTwoVertex2f(FKosties[i].FNowPosition,FKosties[i].FNowPosition+FR,True,SG_2D);
 
-SGColor3f(1,1,1);
+Render.Color3f(1,1,1);
 if FActive then
 	for i:=0 to high(FKosties) do
 		begin
@@ -997,17 +998,17 @@ else
 Vtx1:=FYou*FR;
 if (not FActive) and (not FVictory) then
 	begin
-	SGColor3f(0.1,0.9,0.1);
+	Render.Color3f(0.1,0.9,0.1);
 	FImageSkull.DrawImageFromTwoVertex2f(Vtx1,Vtx1+FR,True,SG_2D);
 	end
 else
 	begin
-	SGColor3f(1,1,1);
+	Render.Color3f(1,1,1);
 	FImageYou.DrawImageFromTwoVertex2f(Vtx1,Vtx1+FR,True,SG_2D);
 	end;
 
 
-SGColor3f(1,1,1);
+Render.Color3f(1,1,1);
 if (FBullets<>nil) and (Length(FBullets)>0) then
 for i:=0 to High(FBullets) do
 	begin
@@ -1026,22 +1027,22 @@ for i:=0 to High(FBullets) do
 	
 if not FActive then
 	begin
-	glBegin(GL_QUADS);
+	Render.BeginScene(SG_QUADS);
 	if FVictory then
-		glColor4f(0,1,0,FLabebYouLose.FVisibleTimer)
+		Render.Color4f(0,1,0,FLabebYouLose.FVisibleTimer)
 	else
-		glColor4f(1,0,0,FLabebYouLose.FVisibleTimer);
+		Render.Color4f(1,0,0,FLabebYouLose.FVisibleTimer);
 	
-	glVertex2f(SGContext.Width/2 - 300,SGContext.Height/2-100);
-	glVertex2f(SGContext.Width/2 + 300,SGContext.Height/2-100);
-	glVertex2f(SGContext.Width/2 + 300,SGContext.Height/2+100);
-	glVertex2f(SGContext.Width/2 - 300,SGContext.Height/2+100);
+	Render.Vertex2f(Context.Width/2 - 300,Context.Height/2-100);
+	Render.Vertex2f(Context.Width/2 + 300,Context.Height/2-100);
+	Render.Vertex2f(Context.Width/2 + 300,Context.Height/2+100);
+	Render.Vertex2f(Context.Width/2 - 300,Context.Height/2+100);
 
-	glVertex2f(0,SGContext.Height-25);
-	glVertex2f(SGContext.Width,SGContext.Height-25);
-	glVertex2f(SGContext.Width,SGContext.Height);
-	glVertex2f(0,SGContext.Height);
-	glEnd();
+	Render.Vertex2f(0,Context.Height-25);
+	Render.Vertex2f(Context.Width,Context.Height-25);
+	Render.Vertex2f(Context.Width,Context.Height);
+	Render.Vertex2f(0,Context.Height);
+	Render.EndScene();
 	end;
 end;
 
@@ -1111,7 +1112,7 @@ begin
 	{$ENDIF}
 FComboBox2:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox2);
-SGScreen.LastChild.SetBounds(5,5{+SGContext.TopShift},230,18);
+SGScreen.LastChild.SetBounds(5,5{+Context.TopShift},230,18);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;

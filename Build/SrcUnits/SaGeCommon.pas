@@ -255,8 +255,14 @@ function SGGetPointsCirclePoints(const FPoints:TArTSGVertex2f):TSGArLongWord;
 function SGX(const v:Single):TSGVertex3f;inline;
 function SGY(const v:Single):TSGVertex3f;inline;
 function SGZ(const v:Single):TSGVertex3f;inline;
+function Abs(const a:TSGVertex2f):extended;overload;inline;
 
 implementation
+
+function Abs(const a:TSGVertex2f):extended;overload;inline;
+begin
+Result:=sqrt(sqr(a.x)+sqr(a.y));
+end;
 
 procedure TSGScreenVertexes.ProcSumX(r:Real);
 begin

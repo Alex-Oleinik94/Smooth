@@ -16,6 +16,7 @@ uses
 	,Classes
 	,SysUtils
 	,SaGeContext
+	,SaGeContextWinAPI
 	,SaGeCommon
 	,SaGeBase
 	,SaGeFractals
@@ -25,12 +26,25 @@ uses
 	,SaGeMesh
 	,SaGeMath
 	//,SaGeExamples
-	,SaGeShaders
+	//,SaGeShaders
 	,SaGeFPCToC
 	,gl
 	,glext
 	,SaGeNet
 	,SageGeneticalAlgoritm;
+
+procedure FPCTCTransliater;
+var
+	SGT:SGTranslater = nil;
+begin
+SGT:=SGTranslater.Create('cmd');
+SGT.GoTranslate;
+SGT.Destroy;
+end;
+
+procedure GoGUI;
+var
+	Context:TSGContext = nil;
 
 procedure Draw;
 begin
@@ -66,18 +80,8 @@ with TSGDrawClasses.Create do
 	end;
 end;
 
-procedure FPCTCTransliater;
-var
-	SGT:SGTranslater = nil;
 begin
-SGT:=SGTranslater.Create('cmd');
-SGT.GoTranslate;
-SGT.Destroy;
-end;
-
-procedure GoGUI;
-begin
-SGContext:=
+Context:=
 {$IFDEF LAZARUS}
       TSGContextLazarus
 {$ELSE}
@@ -90,7 +94,7 @@ SGContext:=
        {$ENDIF}
 		.Create;
 
-with SGContext do
+with Context do
 	begin
 	Width:=GetScreenResolution.x;
 	Height:=GetScreenResolution.y;
@@ -104,27 +108,27 @@ with SGContext do
 	CursorIdentifier:=5;
 	end;
 
-SGContext.Initialize;
+Context.Initialize;
 
 repeat
 
-SGContext.Run;
+Context.Run;
 
-if SGContext.Active and (SGContext.FNewContextType<>nil) then
+if Context.Active and (Context.FNewContextType<>nil) then
 	begin
 	NewContext:=SGContext.FNewContextType.Create;
 	NewContext.CopyInfo(SGContext);
 	NewContext.FCallInitialize:=nil;
-	SGContext.SetRC(0);
-	SGContext.Destroy;
-	SGContext:=NewContext;
+	Context.SetRC(0);
+	Context.Destroy;
+	Context:=NewContext;
 	NewContext:=nil;
-	SGContext.Initialize;
+	Context.Initialize;
 	end;
 
-until (SGContext.Active = False);
+until (Context.Active = False);
 
-SGContext.Destroy;
+Context.Destroy;
 
 end;
 

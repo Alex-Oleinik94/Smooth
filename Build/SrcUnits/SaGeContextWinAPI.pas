@@ -8,6 +8,7 @@ uses
 	SaGeBase
 	,Windows
 	,SaGeContext
+	,SaGeCommon
 	//,SaGe
 	//,SaGeImages
 	;
@@ -213,7 +214,7 @@ while FActive and (FNewContextType=nil) do
 	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
 	FElapsedDateTime:=FDT;
 	
-	{$note 1322}//glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
+	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 	FRender.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
 		FCallDraw();

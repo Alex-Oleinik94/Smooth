@@ -25,6 +25,7 @@ type
 		function CreateContext():Boolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
+		function SupporedGPUBuffers:Boolean;inline;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
@@ -61,6 +62,7 @@ type
 		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
+		function IsEnabled(const VParam:Cardinal):Boolean;virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
@@ -73,6 +75,11 @@ type
 		end;
 
 implementation
+
+function TSGRender.SupporedGPUBuffers:Boolean;inline;
+begin
+Result:=False;
+end;
 
 constructor TSGRender.Create;
 begin

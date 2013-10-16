@@ -295,7 +295,7 @@ FSunTrigonometry[1]:=0;
 FSunTrigonometry[2]:=pi;
 FLightingEnable:=True;
 FMesh:=nil;
-FEnableVBO:=SGIsSuppored_GL_ARB_vertex_buffer_object;
+FEnableVBO:=Render.SupporedGPUBuffers;
 FShift:=336384;
 FMeshesInfo:=nil;
 FMeshesReady:=True;
@@ -348,17 +348,17 @@ if FLightingEnable then
 	FSunTrigonometry[2]+=pi/180		/20;
 	FSun.Import(cos(FSunTrigonometry[0]),sin(FSunTrigonometry[1]),cos(FSunTrigonometry[2]));
 	FSun*=FSunAbs;
-	glColor3f(1,1,1);
-	glBegin(GL_POINTS);
+	Render.Color3f(1,1,1);
+	Render.BeginScene(SG_POINTS);
 	FSun.Vertex(Render);
-	glEnd();
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	FSun.LightPosition();
+	Render.EndScene();
+	Render.Enable(SG_LIGHTING);
+	Render.Enable(SG_LIGHT0);
+	FSun.LightPosition(Render);
 	end
 else
-	if glIsEnabled(GL_LIGHTING)=1 then
-		glDisable(GL_LIGHTING);
+	if Render.IsEnabled(SG_LIGHTING) then
+		Render.Disable(SG_LIGHTING);
 if FEnableVBO then
 	begin
 	if (FMesh<>nil) and (FMesh.NOfObjects<>0) then
@@ -376,8 +376,8 @@ else
 		FMesh.Draw;
 if FLightingEnable then
 	begin
-	glDisable(GL_LIGHT0);
-	glDisable(GL_LIGHTING);
+	Render.Disable(SG_LIGHT0);
+	Render.Disable(SG_LIGHTING);
 	end;
 {$IFDEF SGMoreDebuging}
 	WriteLn('End of  "TSGFractal.Draw" : "'+ClassName+'"');
@@ -510,7 +510,7 @@ end;
 
 procedure TSGFractal.Draw;
 begin
-glColor3f(1,1,1);
+Render.Color3f(1,1,1);
 end;
 
 procedure TSGFractal.Calculate;
