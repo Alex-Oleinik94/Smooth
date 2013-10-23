@@ -63,6 +63,7 @@ type
 		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 		function IsEnabled(const VParam:Cardinal):Boolean;virtual;abstract;
+		procedure Clear(const VParam:Cardinal);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

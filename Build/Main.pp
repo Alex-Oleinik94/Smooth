@@ -80,6 +80,8 @@ with TSGDrawClasses.Create do
 	end;
 end;
 
+var
+	NewContext:TSGContext;
 begin
 Context:=
 {$IFDEF LAZARUS}
@@ -116,8 +118,8 @@ Context.Run;
 
 if Context.Active and (Context.FNewContextType<>nil) then
 	begin
-	NewContext:=SGContext.FNewContextType.Create;
-	NewContext.CopyInfo(SGContext);
+	NewContext:=Context.FNewContextType.Create;
+	NewContext.CopyInfo(Context);
 	NewContext.FCallInitialize:=nil;
 	Context.SetRC(0);
 	Context.Destroy;

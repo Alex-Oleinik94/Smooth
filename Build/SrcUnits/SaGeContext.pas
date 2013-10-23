@@ -173,13 +173,10 @@ implementation
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
-
 class function TSGDrawClass.ClassName:String;
 begin
 Result:='SaGe Draw Class';
 end;
-
-
 
 function TSGContext.Get(const What:string):Pointer;
 begin

@@ -9,6 +9,7 @@ uses
 	,Windows
 	,SaGeContext
 	,SaGeCommon
+	,SaGeRender
 	//,SaGe
 	//,SaGeImages
 	;
@@ -63,6 +64,7 @@ type
 			public
 		function  GetRC:LongWord;override;
 		procedure SetRC(const NewRC:LongWord);override;
+		function Get(const What:string):Pointer;override;
 		end;
 var
 	ClRec:Boolean = False;
@@ -73,7 +75,7 @@ procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' 
 
 implementation
 
-function TSGContext.Get(const What:string):Pointer;
+function TSGContextWinAPI.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=Pointer(dcWindow)
@@ -218,7 +220,7 @@ while FActive and (FNewContextType=nil) do
 	FRender.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
 		FCallDraw();
-	SGIIdleFunction;
+	//SGIIdleFunction;
 	
 	ClearKeys;
 	Messages;
@@ -273,7 +275,16 @@ end;
 function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 var
 	mRect:Windows.TRect;
+	SGContext:TSGContext;
 begin 
+SGContext:=TSGContext(Pointer(LParam));
+if SGCOntext is TSGContext then
+	SGLog.Sourse('VASSSSSSSIIIIIAA')
+else
+	begin
+	SGLog.Sourse('VASSSSSSSIIIIIAA!@!!@!@!@ O NOOOOOOOOOOOOOOOOO!');
+	Exit;
+	end;
 Result:=0;
 DoExit:=True;
 case AMessage of
@@ -364,6 +375,7 @@ function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinA
 var
 	DoExit:Boolean;
 begin 
+WriteLn(LongWord(LParam));
 DoExit:=False;
 {$IFDEF SGWinAPIDebugB}
 	SGLog.Sourse('MyGLWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
@@ -406,7 +418,7 @@ WindowClass.Style := cs_hRedraw and cs_vRedraw;
 WindowClass.lpfnWndProc := WndProc(@MyGLWndProc);
 WindowClass.cbClsExtra := 0;
 WindowClass.cbWndExtra := 0;
-WindowClass.hInstance :=system.MainInstance;;
+WindowClass.hInstance :=system.MainInstance;
 WindowClass.hIcon := LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
 WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
 WindowClass.hbrBackground := GetStockObject(WHITE_BRUSH);
@@ -424,6 +436,7 @@ var
   hWindow2: HWnd;
   dmScreenSettings : DEVMODE;
 begin
+WriteLn(LongWord(Self));
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
@@ -442,7 +455,7 @@ if not FFullscreen then
 			  FWidth,
 			  FHeight,
 			  0, 0,
-			  system.MainInstance,
+			  Self,//system.MainInstance,
 			  nil);
 			  
 	end 
