@@ -84,7 +84,7 @@ type
 			public
 		property ElapsedTime:LongWord read FElapsedTime;
 		property Width : LongWord read GetWidth write SetWidth;
-		property Height : LongWord read FHeight write FHeight;
+		property Height : LongWord read FHeight write SetHeight;
 		property DrawProcedure : TSGContextProcedure read FCallDraw write FCallDraw;
 		property InitializeProcedure : TSGContextProcedure read FCallInitialize write FCallInitialize;
 		property Fullscreen:Boolean read FFullscreen write InitFullscreen;

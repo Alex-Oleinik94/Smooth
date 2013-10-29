@@ -32,6 +32,7 @@ type
 		procedure Vertex3f(const x,y,z:single);virtual;abstract;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;
 		procedure EndScene();virtual;abstract;
+		
 		procedure Color3f(const r,g,b:single);virtual;abstract;
 		procedure TexCoord2f(const x,y:single);virtual;abstract;
 		procedure Vertex2f(const x,y:single);virtual;abstract;
@@ -73,6 +74,7 @@ type
 		FRender:TSGRender;
 			public
 		property Render:TSGRender read FRender write FRender;
+		//function WithRender(const 
 		end;
 
 implementation

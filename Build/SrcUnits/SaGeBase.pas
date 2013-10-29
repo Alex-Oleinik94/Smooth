@@ -332,10 +332,12 @@ var
 	SGLog:TSGLog = nil;
 	Nan:real;
 	Inf:real;
+type
+	SGCLProcedureWC =  procedure ( Context:Pointer) ;
 var
 	SGCLPaintProcedure : SGProcedure = nil;
 	SGCLForReSizeScreenProcedure : SGProcedure = nil;
-	SGCLLoadProcedure : SGProcedure = nil;
+	SGCLLoadProcedure : SGCLProcedureWC = nil;
 operator + (a,b:TArReal):TArReal;inline;
 function LoadLibrary(AName: PChar): TSGLibHandle;
 function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
@@ -400,7 +402,7 @@ function SGGetStringFromConstArray(const Ar:packed array of const):String;
 function SGGetFileName(const WayName:string):string;
 procedure SGReleaseFileWay(WAy:string);
 function SGGetFileWay(const Way:String):String;
-procedure SGMakeDirectory(const DirWay:String);
+procedure SGMakeDirectory(const DirWay:String);inline;
 procedure FindInPas;
 operator ** (const a:Real;const b:LongInt):Real;inline;overload;
 operator ** (const a:single;const b:LongInt):single;overload;inline;
@@ -436,12 +438,41 @@ function SGReadLnByte:Byte;
 procedure SGSetCLProcedure(const p:Pointer = nil);
 procedure SCSetCLScreenBounds(const p:Pointer = nil);
 procedure SGSetCLLoadProcedure(p:Pointer);
+function SGGetComand(const comand:string):string;inline;
+function SGExistsDirectory(const DirWay:String):Boolean;inline;
 
 implementation
 
+function SGExistsDirectory(const DirWay:String):Boolean;inline;
+begin
+Result:=False;
+try
+MKDir(DirWay);
+except
+Result:=True;
+end;
+if Result=False then
+	RMDIR(DirWay);
+end;
+
+function SGGetComand(const comand:string):string;inline;
+var
+	i:LongWord;
+begin
+if comand[1]='-' then
+	begin
+	Result:='';
+	for i:=2 to Length(comand) do
+		Result+=comand[i];
+	Result:=SGUpCaseString(Result);
+	end
+else
+	Result:=Comand;
+end;
+
 procedure SGSetCLLoadProcedure(p:Pointer);
 begin
-SGCLLoadProcedure:=SGProcedure(p);
+SGCLLoadProcedure:=SGCLProcedureWC(p);
 end;
 
 
@@ -966,7 +997,7 @@ DoDirectories('.');
 Stream.Destroy;
 end;
 
-procedure SGMakeDirectory(const DirWay:String);
+procedure SGMakeDirectory(const DirWay:String);inline;
 begin
 try
 MKDir(DirWay);

@@ -31,7 +31,8 @@ uses
 	,gl
 	,glext
 	,SaGeNet
-	,SageGeneticalAlgoritm;
+	,SageGeneticalAlgoritm
+	,SaGeRenderOpenGL;
 
 procedure FPCTCTransliater;
 var
@@ -53,7 +54,10 @@ end;
 
 procedure Init;
 begin
+Writeln(LongWord(Pointer(Context.Render)));
 SGScreen.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+SGScreen.Font.Context := Context;
+SGScreen.Font.Render := Context.Render;
 SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create do
@@ -108,9 +112,12 @@ with Context do
 	
 	IconIdentifier:=5;
 	CursorIdentifier:=5;
+	
+	RenderClass:=TSGRenderOpenGL;
 	end;
 
 Context.Initialize;
+
 
 repeat
 
@@ -134,18 +141,83 @@ Context.Destroy;
 
 end;
 
-function GetComand(const comand:string):string;
+procedure GoogleReNameCache;
+var 
+	Cache:string = 'Cache';
+var
+	sr:DOS.SearchRec;
+	f:TFileStream;
+	b:word;
+	razr:string;
+function IsRazr(const a:string):Boolean;
 var
 	i:LongWord;
 begin
-Result:='';
-for i:=2 to Length(comand) do
-	Result+=comand[i];
-Result:=SGUpCaseString(Result);
+Result:=False;
+for i:=1 to Length(a) do
+	if a[i]='.' then
+		begin
+		Result:=True;
+		Break;
+		end;
+end;
+
+begin
+if argc>2 then
+	Cache:=SGGetComand(argv[2]);
+if not SGExistsDirectory('.'+Slash+Cache) then
+	begin
+	WriteLn('Cashe Directory is not exists: "','.'+Slash+Cache,'".');
+	Exit;
+	end;
+SGMakeDirectory('.'+Slash+Cache+Slash+'Temp');
+SGMakeDirectory('.'+Slash+Cache+Slash+'Complited');
+DOS.findfirst('.'+Slash+Cache+Slash+'f_*',$3F,sr);
+While (dos.DosError<>18) do
+	begin
+	if not IsRazr(sr.name) then
+		begin
+		razr:='';
+		F:=TFileStream.Create('.'+Slash+Cache+Slash+sr.Name,fmOpenRead);
+		if F.Size >=2 then
+		F.ReadBuffer(b,2);
+		F.Destroy;
+		case b of
+		22339:;//хз
+		0:
+			begin
+			F:=TFileStream.Create('.'+Slash+Cache+Slash+sr.Name,fmOpenRead);
+			if F.Size >=4 then
+			F.ReadBuffer(b,2);
+			F.ReadBuffer(b,2);
+			F.Destroy;
+			if b = 8192 then
+				razr:='wmv'
+			else
+				begin writeln('Unknown ',sr.Name,' 0, ',b,'.');  end;
+			end;
+		8508,29230,35615,10799,12079,28777,10250:razr:=' ';
+		20617:razr:='png';
+		55551:razr:='jpg';
+		17481:razr:='mp3';
+		18759:razr:='gif';
+		else begin writeln('Unknown ',sr.Name,' ',b,'.');  end;
+		end;
+		if razr=' ' then
+			begin
+			MoveFile(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Temp'+Slash+sr.Name));
+			end
+		else
+			if razr<>'' then
+				MoveFile(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Complited'+Slash+sr.Name+'.'+razr));
+		end;
+	DOS.findnext(sr);
+	end;
+DOS.findclose(sr);
 end;
 
 var
-	i:LongWord;
+	//i:LongWord;
 	s:string;
 
 begin
@@ -155,23 +227,35 @@ if argc>1 then
 	s:=SGPCharToString(argv[1]);
 	if s[1]='-' then
 		begin
-		s:=GetComand(s);
+		s:=SGGetComand(s);
 		if s='FPCTC' then
 			begin
 			WriteLn('Beginning FPC to C transliater.');
 			FPCTCTransliater;
 			end
-		else
-			if s='FIP' then
-				begin
-				WriteLn('Beginning Find in pas.');
-				FindInPas;
-				end
+		else if s='FIP' then
+			begin
+			WriteLn('Beginning Find in pas.');
+			FindInPas;
+			end
+		else if s='GRNC' then
+			begin
+			WriteLn('Beginning Google ReName Cashe.');
+			GoogleReNameCache;
+			end
+		else if (s='H') or (s='HELP') then
+			begin
+			WriteLn('This is help. You can use:');
+			WriteLn('   -FIP: for run "Find in pas" program');
+			WriteLn('   -FPCTC: for run "FPC to C converter" program');
+			WriteLn('   -GRNC: for run "Google ReName Cashe" program');
+			WriteLn('   -H;-HELP: for run help');
+			end
 		else
 			WriteLn('Unknown command "',s,'".');
 		end
 	else
-		WriteLn('Trror sintexis command "',s,'". Befor cjmand must be simbol "''".');
+		WriteLn('Error sintexis command "',s,'". Befor cjmand must be simbol "''".');
 	//for i:=0 to argc-1 do WriteLn('"',argv[i],'"');
 	end
 else

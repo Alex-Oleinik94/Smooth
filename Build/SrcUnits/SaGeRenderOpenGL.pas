@@ -49,19 +49,212 @@ type
 		procedure MakeCurrent();override;
 		procedure Init();override;
 		procedure LoadExtendeds();
+		procedure Viewport(const a,b,c,d:LongWord);override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
 		procedure LoadIdentity();override;
-		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
+		
+		procedure Color3f(const r,g,b:single);override;
+		procedure TexCoord2f(const x,y:single);override;
+		procedure Vertex2f(const x,y:single);override;
+		procedure Color4f(const r,g,b,a:single);override;
+		procedure Normal3f(const x,y,z:single);override;
+		procedure Translatef(const x,y,z:single);override;
+		procedure Rotatef(const angle:single;const x,y,z:single);override;
+		procedure Enable(const VParam:Cardinal);override;
+		procedure Disable(const VParam:Cardinal);override;
+		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);override;
+		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure BindTexture(const VParam:Cardinal;const VTexture:SGUInt);override;
+		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
+		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
+		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer);override;
+		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);override;
+		procedure CullFace(const VParam:Cardinal);override;
+		procedure EnableClientState(const VParam:Cardinal);override;
+		procedure DisableClientState(const VParam:Cardinal);override;
+		procedure GenBuffersARB(const VQ:Integer;const PT:PCardinal);override;
+		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);override;
+		procedure BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);override;
+		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal);override;
+		procedure DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer);override;
+		procedure ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		function IsEnabled(const VParam:Cardinal):Boolean;override;
+		procedure Clear(const VParam:Cardinal);override;
 			public //Common variables for Begin/End
 		FNowPrimitive:TSGPrimtiveType;
 		FQuantityVertexes:LongWord;
 		end;
 
 implementation
+
+procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
+begin
+glColor3f(r,g,b);
+end;
+
+procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
+begin 
+glTexCoord2f(x,y);
+end;
+
+procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
+begin
+glVertex2f(x,y);
+end;
+
+procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single); 
+begin 
+glColor4f(r,g,b,a);
+end;
+
+procedure TSGRenderOpenGL.Normal3f(const x,y,z:single); 
+begin 
+glNormal3f(x,y,z);
+end;
+
+procedure TSGRenderOpenGL.Translatef(const x,y,z:single); 
+begin 
+glTranslatef(x,y,z);
+end;
+
+procedure TSGRenderOpenGL.Rotatef(const angle:single;const x,y,z:single); 
+begin 
+glRotatef(angle,x,y,z);
+end;
+
+procedure TSGRenderOpenGL.Enable(const VParam:Cardinal); 
+begin 
+glEnable(VParam);
+end;
+
+procedure TSGRenderOpenGL.Disable(const VParam:Cardinal); 
+begin 
+glDisable(VParam);
+end;
+
+procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+begin 
+glDeleteTextures(VQuantity,VTextures);
+end;
+
+procedure TSGRenderOpenGL.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer); 
+begin 
+glLightfv(VLight,VParam,VParam2);
+end;
+
+procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+begin 
+glGenTextures(VQuantity,VTextures);
+end;
+
+procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:SGUInt); 
+begin 
+glBindTexture(VParam,VTexture);
+end;
+
+procedure TSGRenderOpenGL.TexParameteri(const VP1,VP2,VP3:Cardinal); 
+begin 
+glTexParameteri(VP1,VP2,VP3);
+end;
+
+procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
+begin 
+glPixelStorei(VParamName,VParam);
+end;
+
+procedure TSGRenderOpenGL.TexEnvi(const VP1,VP2,VP3:Cardinal); 
+begin 
+glTexEnvi(VP1,VP2,VP3);
+end;
+
+procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer); 
+begin 
+glTexImage2D(VTextureType,VP1,VChannels,VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
+end;
+
+procedure TSGRenderOpenGL.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
+begin 
+glReadPixels(x,y,Vwidth,Vheight,format, atype,pixels);
+end;
+
+procedure TSGRenderOpenGL.CullFace(const VParam:Cardinal); 
+begin 
+glCullFace(VParam);
+end;
+
+procedure TSGRenderOpenGL.EnableClientState(const VParam:Cardinal); 
+begin 
+glEnableClientState(VParam);
+end;
+
+procedure TSGRenderOpenGL.DisableClientState(const VParam:Cardinal); 
+begin 
+glDisableClientState(VParam);
+end;
+
+procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
+begin 
+glGenBuffersARB(VQ,PT);
+end;
+
+procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
+begin 
+glDeleteBuffersARB(VQuantity,VPoint);
+end;
+
+procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
+begin 
+glBindBufferARB(VParam,VParam2);
+end;
+
+procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal); 
+begin 
+glBufferDataARB(VParam,VSize,VBuffer,VParam2);
+end;
+
+procedure TSGRenderOpenGL.DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer); 
+begin 
+glDrawElements(VParam,VSize,VParam2,VBuffer);
+end;
+
+procedure TSGRenderOpenGL.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
+begin 
+glColorPointer(VQChannels,VType,VSize,VBuffer);
+end;
+
+procedure TSGRenderOpenGL.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
+begin 
+glTexCoordPointer(VQChannels,VType,VSize,VBuffer);
+end;
+
+procedure TSGRenderOpenGL.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
+begin 
+glNormalPointer(VType,VSize,VBuffer);
+end;
+
+procedure TSGRenderOpenGL.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
+begin 
+glVertexPointer(VQChannels,VType,VSize,VBuffer);
+end;
+
+function TSGRenderOpenGL.IsEnabled(const VParam:Cardinal):Boolean; 
+begin 
+glIsEnabled(VParam);
+end;
+
+procedure TSGRenderOpenGL.Clear(const VParam:Cardinal); 
+begin 
+glClear(VParam);
+end;
 
 {$DEFINE SG_RENDER_EP}
 {$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}

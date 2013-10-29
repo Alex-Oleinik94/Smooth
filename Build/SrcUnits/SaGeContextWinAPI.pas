@@ -66,15 +66,15 @@ type
 		procedure SetRC(const NewRC:LongWord);override;
 		function Get(const What:string):Pointer;override;
 		end;
-var
-	ClRec:Boolean = False;
-
+	
 function SGFullscreenQueschionWinAPIMethod:boolean;
 function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
 
 implementation
 
+var
+	SGContexts:packed array of TSGContextWinAPI = nil;
 function TSGContextWinAPI.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
@@ -189,7 +189,7 @@ KillOGLWindow;
 inherited;
 end;
 
-procedure TSGContextWinAPI.Initialize;
+procedure TSGContextWinAPI.Initialize();
 var
 	Succs:Boolean;
 begin
@@ -197,9 +197,10 @@ Succs:=CreateOGLWindow;
 Active:=Succs;
 if Active then
 	begin
-	
+	if SGCLLoadProcedure<>nil then
+		SGCLLoadProcedure(Self);
 	if FCallInitialize<>nil then
-		FCallInitialize;
+		FCallInitialize();
 	end;
 end;
 
@@ -276,16 +277,20 @@ function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; 
 var
 	mRect:Windows.TRect;
 	SGContext:TSGContext;
+	i:LongWord;
 begin 
-SGContext:=TSGContext(Pointer(LParam));
-if SGCOntext is TSGContext then
-	SGLog.Sourse('VASSSSSSSIIIIIAA')
-else
-	begin
-	SGLog.Sourse('VASSSSSSSIIIIIAA!@!!@!@!@ O NOOOOOOOOOOOOOOOOO!');
-	Exit;
-	end;
+SGContext:=nil;
 Result:=0;
+DoExit:=False;
+if SGContexts<>nil then
+for i:=0 to High(SGContexts) do
+	if SGContexts[i].hWindow = Window then
+		begin
+		SGContext:=SGContexts[i];
+		Break;
+		end;
+if SGContext=nil then
+	Exit;
 DoExit:=True;
 case AMessage of
 wm_create:
@@ -375,7 +380,7 @@ function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinA
 var
 	DoExit:Boolean;
 begin 
-WriteLn(LongWord(LParam));
+//WriteLn(LongWord(LParam));
 DoExit:=False;
 {$IFDEF SGWinAPIDebugB}
 	SGLog.Sourse('MyGLWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
@@ -436,7 +441,7 @@ var
   hWindow2: HWnd;
   dmScreenSettings : DEVMODE;
 begin
-WriteLn(LongWord(Self));
+//WriteLn(LongWord(Self));
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
@@ -455,7 +460,7 @@ if not FFullscreen then
 			  FWidth,
 			  FHeight,
 			  0, 0,
-			  Self,//system.MainInstance,
+			  system.MainInstance,
 			  nil);
 			  
 	end 
@@ -510,6 +515,7 @@ begin
 	{$ENDIF}
 //FunctionError := 0;
 dcWindow := GetDC( hParent );
+//writeln('dcWindow=',dcWindow);
 {FillChar(pfd, sizeof(pfd), 0);
 pfd.nSize         := sizeof(pfd);
 pfd.nVersion      := 1;
@@ -536,6 +542,7 @@ else
 FRender:=FRenderClass.Create();
 FRender.Window:=Self;
 Result:=FRender.CreateContext();
+
 if Result then 
 	FRender.Init();
 {$IFDEF SGWinAPIDebug}
@@ -548,19 +555,21 @@ begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__CreateOGLWindow : Enter');
 	{$ENDIF}
-if not ClRec then
-	if not WindowRegister then 
+if not WindowRegister then
 		begin
 		ThrowError('Could not register the Application Window!');
 		WriteLn('Could not register the Application Window!');
 		CreateOGLWindow := false;
 		Exit;
-		end
-	else
-		begin
-		ClRec:=True;
 		end;
 hWindow := WindowCreate;
+
+if SGContexts=nil then
+	SetLength(SGContexts,1)
+else
+	SetLength(SGContexts,Length(SGContexts)+1);
+SGContexts[High(SGContexts)]:=Self;
+
 if longint(hWindow) = 0 then begin
 	ThrowError('Could not create Application Window!');
 	WriteLn('Could not create Application Window!');

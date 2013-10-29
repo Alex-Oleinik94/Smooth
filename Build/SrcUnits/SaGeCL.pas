@@ -475,7 +475,7 @@ type
 var
 	SGScreen:TSGComponent = nil;
 
-procedure SGCLLoad(const Context:TSGCOntext);
+procedure SGCLLoad( Context:TSGCOntext);
 
 implementation
 
@@ -3094,9 +3094,14 @@ if SGScreen<>nil then
 	end;
 end;
 
-procedure SGCLLoad(const Context:TSGContext);
+procedure SGCLLoad(Context:TSGContext);
 begin
+if SGScreen<>nil then
+	Exit;
+//writeln(Context is TSGContext);
 SGScreen:=SGComponent.Create;
+SGScreen.Context:=Context;
+//WriteLn(LongWord(Context),' ',{Context.Width,}' '{,Context.Height});
 SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
 SGScreen.Visible:=True;
@@ -3107,6 +3112,8 @@ SGScreens[Low(SGScreens)].FScreen:=SGScreen;
 SGScreens[Low(SGScreens)].FImage:=nil;
 
 ComboBoxImage:=TSGGLImage.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Textures'+Slash+'ComboBoxImage.png');
+ComboBoxImage.Render:=Context.Render;
+ComboBoxImage.Context:=Context;
 ComboBoxImage.Loading;
 end;
 
