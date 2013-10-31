@@ -42,8 +42,8 @@ type
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
 	TSGContext = class;
 	TSGContextClass = class of TSGContext;
-	TSGContextProcedure = TProcedure;
-	TSGContext=class(TSGClass)
+	TSGContextProcedure = procedure(const a:TSGContext);
+	TSGContext=class(TSGRenderObject)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
@@ -126,19 +126,25 @@ type
 		FNewContextType:TSGContextClass;
 			public
 		FRenderClass:TSGRenderClass;
-		FRender:TSGRender;
+		//FRender:TSGRender;
 			public
 		property RenderClass:TSGRenderClass read FRenderClass write FRenderClass;
-		property Render:TSGRender read FRender write FRender;
+		//property Render:TSGRender read FRender write FRender;
 			public
 		function Get(const What:string):Pointer;override;
 		end;
 type
 	TSGContextObject=class(TSGRenderObject)
-			protected
+			public
+		constructor Create;override;
+		destructor Destroy;override;
+		constructor Create(const VContext:TSGContext);virtual;overload;
+			public
 		FContext:TSGContext;
 			public
-		property Context:TSGContext read FContext write FContext;
+		procedure SetContext(const Context:TSGContext);
+			public
+		property Context:TSGContext read FContext write SetContext;
 		end;
 	
 	TSGDrawClass=class;
@@ -172,6 +178,31 @@ implementation
 	{$I Includes\SaGeContextLazarus.inc}
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
+
+constructor TSGContextObject.Create(const VContext:TSGContext);overload;
+begin
+inherited Create();
+FContext:=nil;
+SetContext(VContext);
+end;
+
+procedure TSGContextObject.SetContext(const Context:TSGContext);
+begin
+FContext:=Context;
+Render:=Context.Render;
+end;
+
+constructor TSGContextObject.Create;
+begin
+inherited;
+FContext:=nil;
+SGLog.Sourse('TSGContextObject__Create : Warning : Create without Context!!');
+end;
+
+destructor TSGContextObject.Destroy;
+begin
+inherited;
+end;
 
 class function TSGDrawClass.ClassName:String;
 begin
@@ -264,7 +295,7 @@ end;
 procedure TSGContext.Resize;
 begin
 if SGCLForReSizeScreenProcedure<>nil then
-	SGCLForReSizeScreenProcedure();
+	SGCLForReSizeScreenProcedure(Self);
 end;
 
 function TSGContext.GetWidth:LongWord;

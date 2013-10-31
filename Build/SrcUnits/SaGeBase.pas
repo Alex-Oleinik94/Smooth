@@ -141,7 +141,7 @@ const
 	TexturesDirectory = TextureDirectory;
 	FontsDirectory = FontDirectory;
 var
-	SGLogEnable:Boolean = False;
+	SGLogEnable:Boolean = True;
 type
 	SGUint = type LongWord;
 	PSGUInt = ^ SGUint;
@@ -335,8 +335,8 @@ var
 type
 	SGCLProcedureWC =  procedure ( Context:Pointer) ;
 var
-	SGCLPaintProcedure : SGProcedure = nil;
-	SGCLForReSizeScreenProcedure : SGProcedure = nil;
+	SGCLPaintProcedure : SGCLProcedureWC = nil;
+	SGCLForReSizeScreenProcedure : SGCLProcedureWC = nil;
 	SGCLLoadProcedure : SGCLProcedureWC = nil;
 operator + (a,b:TArReal):TArReal;inline;
 function LoadLibrary(AName: PChar): TSGLibHandle;
@@ -478,12 +478,12 @@ end;
 
 procedure SGSetCLProcedure(const p:Pointer = nil);
 begin
-SGCLPaintProcedure:=SGProcedure(p);
+SGCLPaintProcedure:=SGCLProcedureWC(p);
 end;
 
 procedure SCSetCLScreenBounds(const p:Pointer = nil);
 begin
-SGCLForReSizeScreenProcedure:=SGProcedure(p);
+SGCLForReSizeScreenProcedure:=SGCLProcedureWC(p);
 end;
 
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;

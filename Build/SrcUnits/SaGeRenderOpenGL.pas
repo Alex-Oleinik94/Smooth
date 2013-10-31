@@ -64,7 +64,7 @@ type
 		procedure Normal3f(const x,y,z:single);override;
 		procedure Translatef(const x,y,z:single);override;
 		procedure Rotatef(const angle:single;const x,y,z:single);override;
-		procedure Enable(const VParam:Cardinal);override;
+		procedure Enable(VParam:Cardinal);override;
 		procedure Disable(const VParam:Cardinal);override;
 		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);override;
@@ -89,12 +89,18 @@ type
 		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
 		function IsEnabled(const VParam:Cardinal):Boolean;override;
 		procedure Clear(const VParam:Cardinal);override;
+		procedure LineWidth(const VLW:Single);override;
 			public //Common variables for Begin/End
 		FNowPrimitive:TSGPrimtiveType;
 		FQuantityVertexes:LongWord;
 		end;
 
 implementation
+
+procedure TSGRenderOpenGL.LineWidth(const VLW:Single);
+begin
+glLineWidth(VLW);
+end;
 
 procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
 begin
@@ -131,8 +137,8 @@ begin
 glRotatef(angle,x,y,z);
 end;
 
-procedure TSGRenderOpenGL.Enable(const VParam:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.Enable(VParam:Cardinal); 
+begin
 glEnable(VParam);
 end;
 

@@ -200,7 +200,7 @@ if Active then
 	if SGCLLoadProcedure<>nil then
 		SGCLLoadProcedure(Self);
 	if FCallInitialize<>nil then
-		FCallInitialize();
+		FCallInitialize(Self);
 	end;
 end;
 
@@ -220,14 +220,14 @@ while FActive and (FNewContextType=nil) do
 	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 	FRender.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
-		FCallDraw();
+		FCallDraw(Self);
 	//SGIIdleFunction;
 	
 	ClearKeys;
 	Messages;
 	
 	if SGCLPaintProcedure<>nil then
-		SGCLPaintProcedure;
+		SGCLPaintProcedure(Self);
 	SwapBuffers;
 	end;
 end;
@@ -340,6 +340,7 @@ wm_mbuttonup:
 	SGContext.SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
 	begin
+	SGLog.Sourse('SageWindow is closed for API.');
 	SGContext.Active:=False;
 	PostQuitMessage(0);
 	Exit;
@@ -542,7 +543,7 @@ else
 FRender:=FRenderClass.Create();
 FRender.Window:=Self;
 Result:=FRender.CreateContext();
-
+//WriteLn(Result);
 if Result then 
 	FRender.Init();
 {$IFDEF SGWinAPIDebug}
@@ -557,8 +558,8 @@ begin
 	{$ENDIF}
 if not WindowRegister then
 		begin
-		ThrowError('Could not register the Application Window!');
-		WriteLn('Could not register the Application Window!');
+		//ThrowError('Could not register the Application Window!');
+		SGLog.Sourse('Could not register the Application Window!');
 		CreateOGLWindow := false;
 		Exit;
 		end;
@@ -571,14 +572,14 @@ else
 SGContexts[High(SGContexts)]:=Self;
 
 if longint(hWindow) = 0 then begin
-	ThrowError('Could not create Application Window!');
-	WriteLn('Could not create Application Window!');
+	//ThrowError('Could not create Application Window!');
+	SGLog.Sourse('Could not create Application Window!');
 	CreateOGLWindow := false;
 	Exit;
 	end;
 if not WindowInit(hWindow) then begin
-	ThrowError('Could not initialise Application Window!');
-	WriteLn('Could not initialise Application Window!');
+	//ThrowError('Could not initialise Application Window!');
+	SGLog.Sourse('Could not initialise Application Window!');
 	CreateOGLWindow := false;
 	Exit;
 	end;

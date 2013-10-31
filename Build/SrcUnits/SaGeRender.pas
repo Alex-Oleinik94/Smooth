@@ -40,7 +40,7 @@ type
 		procedure Normal3f(const x,y,z:single);virtual;abstract;
 		procedure Translatef(const x,y,z:single);virtual;abstract;
 		procedure Rotatef(const angle:single;const x,y,z:single);virtual;abstract;
-		procedure Enable(const VParam:Cardinal);virtual;abstract;
+		procedure Enable(VParam:Cardinal);virtual;
 		procedure Disable(const VParam:Cardinal);virtual;abstract;
 		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);virtual;abstract;
@@ -65,11 +65,15 @@ type
 		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
 		function IsEnabled(const VParam:Cardinal):Boolean;virtual;abstract;
 		procedure Clear(const VParam:Cardinal);virtual;abstract;
+		procedure LineWidth(const VLW:Single);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
 	
 	TSGRenderObject=class(TSGClass)
+			public
+		constructor Create;override;
+		destructor Destroy;override;
 			public
 		FRender:TSGRender;
 			public
@@ -78,6 +82,20 @@ type
 		end;
 
 implementation
+
+constructor TSGRenderObject.Create;
+begin
+inherited;
+FRender:=nil;
+end;
+
+destructor TSGRenderObject.Destroy;
+begin
+inherited;
+end;
+
+procedure TSGRender.Enable(VParam:Cardinal);
+begin end;
 
 function TSGRender.SupporedGPUBuffers:Boolean;inline;
 begin

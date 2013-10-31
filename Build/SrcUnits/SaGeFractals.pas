@@ -28,7 +28,7 @@ type
 	
 	TSGFractal = class(TSGDrawClass)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -63,7 +63,7 @@ type
 	
 	TSG3DFractal=class (TSGFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -100,7 +100,7 @@ type
 	
 	TSGImageFractal=class(TSGFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:TSGContext);override;
 			public
 		FImage:TSGGLImage;
 		FView:TSGScreenVertexes;
@@ -190,6 +190,7 @@ begin
 if FMesh=nil then
 	begin
 	FMesh:=TSGModel.Create;
+	FMesh.Context:=Context;
 	end
 else
 	if FMesh.NOfObjects>0 then
@@ -244,6 +245,7 @@ while Quantity<>0 do
 	SetLength(FMesh.ArObjects,FMesh.NOfObjects+1);
 	FMesh.NOfObjects+=1;
 	FMesh.ArObjects[FMesh.NOfObjects-1]:=TSG3DObject.Create;
+	FMesh.ArObjects[FMesh.NOfObjects-1].Context:=Context;
 	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FF8000);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
 	FMesh.ArObjects[FMesh.NOfObjects-1].FPoligonesType:=PoligoneType;
@@ -285,9 +287,9 @@ FFractal:=Fractal;
 FThreadID:=ThreadID;
 end;
 
-constructor TSG3DFractal.Create;
+constructor TSG3DFractal.Create(const VContext:TSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FSunAbs:=10;
 FSun.Import(0,0,-FSunAbs);
 FSunTrigonometry[0]:=pi/2;
@@ -302,6 +304,8 @@ FMeshesReady:=True;
 FEnableColors:=True;
 FEnableNormals:=True;
 FIdentityObject.Clear;
+FIdentityObject.Render:=Render;
+FIdentityObject.Context:=Context;
 FMatrixType:=SG_3D;
 end;
 
@@ -458,9 +462,9 @@ else
 end;
 
 
-constructor TSGImageFractal.Create;
+constructor TSGImageFractal.Create(const VContext:TSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FDepthHeight:=0;
 FImage:=nil;
 end;
@@ -528,9 +532,9 @@ begin
 Result:=Length(FThreadsData);
 end;
 
-constructor TSGFractal.Create;
+constructor TSGFractal.Create(const VContext:TSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FDepth:=3;
 FThreadsEnable:=False;
 FThreadsData:=nil;

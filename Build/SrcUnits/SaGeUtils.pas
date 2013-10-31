@@ -286,7 +286,7 @@ if (i>0)and (FWay[i]='.') then
 		LoadFont(FontWay);
 		end;
 	end;
-inherited;
+inherited ToTexture;
 end;
 
 constructor TSGFont.Create(const FileName:string = '');

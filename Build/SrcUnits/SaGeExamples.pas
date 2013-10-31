@@ -10,9 +10,6 @@ uses
 	,SaGeUtils
 	,SaGeContext
 	,SaGeShaders
-	,Gl
-	,Glu
-	,GLext
 	,SaGeCL
 	,SaGeNet
 	,SaGeMath

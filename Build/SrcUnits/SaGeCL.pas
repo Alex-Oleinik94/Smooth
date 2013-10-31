@@ -10,7 +10,6 @@ uses
 	,SaGeBase
 	,SaGeImages
 	,SaGeContext
-	,gl
 	,SaGeUtils
 	,SaGeRender
 	;
@@ -760,7 +759,7 @@ if IDItem<>-1 then
 	end;
 if (ComboBoxImage<>nil) and General and (not FOpen) then
 	begin
-	glColor4f(1,1,1,Color.A*FVisibleTimer);
+	Render.Color4f(1,1,1,Color.A*FVisibleTimer);
 	ComboBoxImage.DrawImageFromTwoVertex2fAsRatio(
 		SGVertexImport(Vertex3.x-Height,Vertex1.y),
 		SGPoint2fToVertex2f(Vertex3),
@@ -1344,7 +1343,7 @@ procedure TSGPicture.FromDraw;
 begin
 if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
 	begin
-	glColor4f(1,1,1,FVisibleTimer);
+	Render.Color4f(1,1,1,FVisibleTimer);
 	FImage.DrawImageFromTwoVertex2f(
 		SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)));
@@ -1400,7 +1399,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		begin
 		if (FFont<>nil) and (FFont.Ready) then
 			begin
-			glColor4f(1,1,1,FVisibleTimer);
+			Render.Color4f(1,1,1,FVisibleTimer);
 			FFont.DrawFontFromTwoVertex2f(
 				//SGPCharTotal(SGPCharTotal(SGPCharIf(FViewCaption,Caption),' '),SGPCharTotal(SGStringToPChar(SGFloatToString(100*FProgress,2)),'%')),
 				SGStringIf(FViewCaption,Caption)+' '+SGFloatToString(100*FProgress,2)+'%',
@@ -2014,6 +2013,7 @@ if (Child<>nil) and FCanHaveChildren then
 	begin
 	SetLength(FChildren,Length(FChildren)+1);
 	FChildren[High(FChildren)]:=Child;
+	Child.Context:=Context;
 	Child.FParent:=Self;
 	if Child.FFont=nil then
 		Child.FFont:=FFont;
@@ -2527,7 +2527,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	end;
 if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
 	begin
-	glColor4f(1,1,1,FVisibleTimer);
+	Render.Color4f(1,1,1,FVisibleTimer);
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
 		SGPoint2fToVertex2f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
@@ -2536,7 +2536,7 @@ if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
 	end;
 if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)then
 	begin
-	glColor4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
+	Render.Color4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
 	FFont.DrawCursorFromTwoVertex2f(
 		Caption,FCursorPosition,
 		SGPoint2fToVertex2f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
@@ -2836,7 +2836,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	if FViewImage1<>nil then
 		begin
-		glColor4f(1,1,1,FVisibleTimer);
+		Render.Color4f(1,1,1,FVisibleTimer);
 		FViewImage1.DrawImageFromTwoVertex2f(
 			SGPoint2fToVertex3f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
 			SGPoint2fToVertex3f(GetVertex([SG_RIGHT,SG_BOTTOM],SG_VERTEX_FOR_PARENT)));
@@ -2887,7 +2887,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	end;
 if (Caption<>'') and (FFont<>nil) and (FFont.Ready) and (FVisibleTimer>SGZero) then
 	begin
-	glColor4f(1,1,1,FVisibleTimer);
+	Render.Color4f(1,1,1,FVisibleTimer);
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
 		SGPoint2fToVertex2f(GetVertex([SG_LEFT,SG_TOP],SG_VERTEX_FOR_PARENT)),
@@ -2922,12 +2922,14 @@ procedure SGCLPaint(const Context:TSGContext);
 var
 	CanRePleace:Boolean = True;
 	i:LongWord;
+	Render:TSGRender = nil;
 begin
+Render:=Context.Render;
 if FNewPosition<>FOldPosition then
 	begin
-	glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
+	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 	Context.Render.InitMatrixMode(SG_2D);
-	glColor4f(1,1,1,1);
+	Render.Color4f(1,1,1,1);
 	
 	TSGComponent.UpgradeTimer(True,FMoveProgress);
 	
@@ -2938,8 +2940,8 @@ if FNewPosition<>FOldPosition then
 		end
 	else
 		begin
-		glLineWidth(1);
-		Context.Render.InitMatrixMode(SG_2D);
+		Render.LineWidth(1);
+		Render.InitMatrixMode(SG_2D);
 		
 		if SGScreens[FOldPosition].FImage <>nil then
 			begin
@@ -2964,7 +2966,7 @@ if FNewPosition=FOldPosition then
 	if SGScreen<>nil then
 		SGScreen.DrawDrawClasses;
 	
-	glLineWidth(1);
+	Render.LineWidth(1);
 	Context.Render.InitMatrixMode(SG_2D);
 	
 	if SGScreen<>nil then
@@ -3054,9 +3056,9 @@ if FNewPosition=FOldPosition then
 			3:FMoveVector.Import(0,-1);
 			end;
 			
-			Context.InitializeProcedure();
+			Context.InitializeProcedure(Context);
 			
-			glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
+			Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 			Context.Render.InitMatrixMode(SG_3D);
 			
 			SGScreen.DrawDrawClasses;
@@ -3068,9 +3070,9 @@ if FNewPosition=FOldPosition then
 			SGScreens[FNewPosition].FImage.Image.SetBounds(1024,512);
 			SGScreens[FNewPosition].FImage.ToTexture;
 			
-			glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
+			Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 			Context.Render.InitMatrixMode(SG_2D);
-			glColor4f(1,1,1,1);
+			Render.Color4f(1,1,1,1);
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
 				SGVertex2fImport(0,0),SGVertex2fImport(Context.Width,Context.Height),True,SG_2D);
 			end;
@@ -3098,10 +3100,9 @@ procedure SGCLLoad(Context:TSGContext);
 begin
 if SGScreen<>nil then
 	Exit;
-//writeln(Context is TSGContext);
+
 SGScreen:=SGComponent.Create;
 SGScreen.Context:=Context;
-//WriteLn(LongWord(Context),' ',{Context.Width,}' '{,Context.Height});
 SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
 SGScreen.Visible:=True;
@@ -3112,7 +3113,6 @@ SGScreens[Low(SGScreens)].FScreen:=SGScreen;
 SGScreens[Low(SGScreens)].FImage:=nil;
 
 ComboBoxImage:=TSGGLImage.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Textures'+Slash+'ComboBoxImage.png');
-ComboBoxImage.Render:=Context.Render;
 ComboBoxImage.Context:=Context;
 ComboBoxImage.Loading;
 end;

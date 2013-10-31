@@ -43,27 +43,19 @@ SGT.GoTranslate;
 SGT.Destroy;
 end;
 
-procedure GoGUI;
-var
-	Context:TSGContext = nil;
-
-procedure Draw;
+procedure Draw(const Context:TSGContext);
 begin
 
 end;
 
-procedure Init;
+procedure Init(const MyContext:TSGContext);
 begin
-Writeln(LongWord(Pointer(Context.Render)));
 SGScreen.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
-SGScreen.Font.Context := Context;
-SGScreen.Font.Render := Context.Render;
+SGScreen.Font.Context := MyContext;
 SGScreen.Font.Loading;
 
-with TSGDrawClasses.Create do
+with TSGDrawClasses.Create(MyContext) do
 	begin
-	
-	
 	{Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
 	Add(TSGKillKostia);}
@@ -84,6 +76,9 @@ with TSGDrawClasses.Create do
 	end;
 end;
 
+procedure GoGUI;
+var
+	Context:TSGContext = nil;
 var
 	NewContext:TSGContext;
 begin
@@ -107,13 +102,14 @@ with Context do
 	Fullscreen:=False;
 	Tittle:='SaGe OpenGL Window';
 	
-	DrawProcedure:=TProcedure(@Draw);
-	InitializeProcedure:=TProcedure(@Init);
+	DrawProcedure:=TSGContextProcedure(@Draw);
+	InitializeProcedure:=TSGContextProcedure(@Init);
 	
 	IconIdentifier:=5;
 	CursorIdentifier:=5;
 	
-	RenderClass:=TSGRenderOpenGL;
+	Context.RenderClass:=TSGRenderOpenGL;
+	Context.Render:=TSGRenderOpenGL.Create;
 	end;
 
 Context.Initialize;
@@ -149,6 +145,7 @@ var
 	f:TFileStream;
 	b:word;
 	razr:string;
+
 function IsRazr(const a:string):Boolean;
 var
 	i:LongWord;
@@ -167,7 +164,7 @@ if argc>2 then
 	Cache:=SGGetComand(argv[2]);
 if not SGExistsDirectory('.'+Slash+Cache) then
 	begin
-	WriteLn('Cashe Directory is not exists: "','.'+Slash+Cache,'".');
+	WriteLn('Cashe Directory is not exists: "','.\'+Slash+Cache,'".');
 	Exit;
 	end;
 SGMakeDirectory('.'+Slash+Cache+Slash+'Temp');
