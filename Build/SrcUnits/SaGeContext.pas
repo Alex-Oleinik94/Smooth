@@ -25,12 +25,6 @@ uses
 		,Forms
 		,_mmtime
 		{$ENDIF}
-	{,Gl
-	,Glu
-	,GLext
-	{$IFDEF GLUT}
-		,glut
-		{$ENDIF}}
 	;
 const
 	SG_ALT_KEY = 18;
@@ -41,6 +35,7 @@ type
 	TSGCursorWheel = (SGNoCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
 	TSGContext = class;
+	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
 	TSGContextProcedure = procedure(const a:TSGContext);
 	TSGContext=class(TSGRenderObject)
@@ -213,7 +208,7 @@ function TSGContext.Get(const What:string):Pointer;
 begin
 if What='HEIGHT' then
 	Result:=Pointer(FHeight)
-else if What='WIDHT' then
+else if What='WIDTH' then
 	Result:=Pointer(FWidth)
 else
 	Result:=nil;

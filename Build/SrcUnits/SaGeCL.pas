@@ -2925,10 +2925,11 @@ var
 	Render:TSGRender = nil;
 begin
 Render:=Context.Render;
+WriteLn(Context.Width,' ',Context.Height);
 if FNewPosition<>FOldPosition then
 	begin
 	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
-	Context.Render.InitMatrixMode(SG_2D);
+	Render.InitMatrixMode(SG_2D);
 	Render.Color4f(1,1,1,1);
 	
 	TSGComponent.UpgradeTimer(True,FMoveProgress);
@@ -2967,7 +2968,7 @@ if FNewPosition=FOldPosition then
 		SGScreen.DrawDrawClasses;
 	
 	Render.LineWidth(1);
-	Context.Render.InitMatrixMode(SG_2D);
+	Render.InitMatrixMode(SG_2D);
 	
 	if SGScreen<>nil then
 		SGScreen.FromUpDateUnderCursor(CanRePleace);
@@ -2980,7 +2981,7 @@ if FNewPosition=FOldPosition then
 			SGScreen.FromUpDate(CanRePleace);
 
 	if SGScreen<>nil then
-		SGScreen.FromDraw;
+		SGScreen.FromDraw(); // -- рендеринг всего
 	
 	if (Context.KeysPressed(SG_CTRL_KEY)) and (Context.KeysPressed(SG_ALT_KEY)) and (Context.KeyPressedType=SGDownKey) then
 		begin

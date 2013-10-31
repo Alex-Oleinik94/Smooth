@@ -90,9 +90,6 @@ type
 		function IsEnabled(const VParam:Cardinal):Boolean;override;
 		procedure Clear(const VParam:Cardinal);override;
 		procedure LineWidth(const VLW:Single);override;
-			public //Common variables for Begin/End
-		FNowPrimitive:TSGPrimtiveType;
-		FQuantityVertexes:LongWord;
 		end;
 
 implementation
@@ -279,14 +276,10 @@ SG_TRIANGLE_FAN:glBegin(GL_TRIANGLE_FAN);
 SG_QUADS:glBegin(GL_QUADS);
 SG_POLYGON:glBegin(GL_POLYGON)
 end;
-FQuantityVertexes:=0;
-FNowPrimitive:=VPrimitiveType;
 end;
 
 procedure TSGRenderOpenGL.EndScene();
 begin
-if FNowPrimitive=SG_LINE_LOOP then
-	
 glEnd();
 end;
 
@@ -380,25 +373,30 @@ end;
 procedure TSGRenderOpenGL.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
 const
 	glub = 500;
+var
+	CWidth,CHeight:LongWord;
 begin
-Viewport(0, 0, LongWord(FWindow.Get('WIDTH')), LongWord(FWindow.Get('HEIGHT')));
+CWidth:=LongWord(FWindow.Get('WIDTH'));
+CHeight:=LongWord(FWindow.Get('HEIGHT'));
+Viewport(0, 0, CWidth, CHeight);
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
-	glOrtho(0,LongWord(FWindow.Get('WIDTH')),LongWord(FWindow.Get('HEIGHT')),0,0,0.1)
+	glOrtho(0,CWidth,CHeight,0,0,0.1)
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		glOrtho(-(LongWord(FWindow.Get('WIDTH')) / dncht),LongWord(FWindow.Get('WIDTH')) / dncht,-LongWord(FWindow.Get('HEIGHT')) / dncht,(LongWord(FWindow.Get('HEIGHT')) / dncht),0,500)
+		glOrtho(-(CWidth / dncht),CWidth / dncht,-CHeight / dncht,(CHeight / dncht),0,500)
 		end
 	else
-		gluPerspective(45, LongWord(FWindow.Get('WIDTH')) / LongWord(FWindow.Get('HEIGHT')), 0.0011, 500);
+		gluPerspective(45, CWidth / CHeight, 0.0011, 500);
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
 
 procedure TSGRenderOpenGL.Viewport(const a,b,c,d:LongWord);
 begin
+//SGLog.Sourse([a,',',b,',',c,',',d,'- VIEWPORT']);
 glViewport(a,b,c,d);
 end;
 
@@ -410,7 +408,6 @@ end;
 procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
 begin
 glVertex3f(x,y,z);
-FQuantityVertexes+=1;
 end;
 
 function TSGRenderOpenGL.CreateContext():Boolean;

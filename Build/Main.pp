@@ -32,6 +32,7 @@ uses
 	,glext
 	,SaGeNet
 	,SageGeneticalAlgoritm
+	,SaGeRender
 	,SaGeRenderOpenGL;
 
 procedure FPCTCTransliater;
@@ -44,9 +45,7 @@ SGT.Destroy;
 end;
 
 procedure Draw(const Context:TSGContext);
-begin
-
-end;
+begin end;
 
 procedure Init(const MyContext:TSGContext);
 begin

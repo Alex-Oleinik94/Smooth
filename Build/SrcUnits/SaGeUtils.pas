@@ -599,12 +599,12 @@ if Context.CursorKeysPressed(SGRightCursorButton) then{$}
 	end;
 if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
 	begin
-	Zum*=1.1;
+	Zum*=1/0.89;
 	Changet:=true;
 	end;
 if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
 	begin
-	Zum*=0.9;
+	Zum*=0.89;
 	Changet:=true;
 	end;
 if (not Changet) and (not (SGRealsEqual(LastLeft,Left) and SGRealsEqual(LastR1,Rotate1) and SGRealsEqual(LastTop,Top) and SGRealsEqual(LastR2,Rotate2))) then
@@ -615,7 +615,7 @@ procedure SGIdentityObject.Go(const Mode:LongWord = SG_3D);
 begin
 Change(Mode);
 Render.InitMatrixMode(Mode,(Zum)*120);
-Init;
+Init();
 end;
 
 procedure SGIdentityObject.Init(const tr :TSGVertex3f);overload;
@@ -623,15 +623,12 @@ begin
 Render.Translatef(Left,Top,-10*Zum);
 Render.Rotatef(Rotate1,1,0,0);
 Render.Rotatef(Rotate2,0,1,0);
-tr.Translate(Render);
+Tr.Translate(Render);
 end;
 
 procedure SGIdentityObject.Init;overload;
-var
-	V:TSGVErtex3f;
 begin
-V.Import(0,0,0);
-Init(v);
+Init(SGVertexImport(0,0,0));
 end;
 
 procedure SGIdentityObject.Clear;
@@ -647,7 +644,7 @@ end;
 procedure SGIdentityObject.ChangeAndInit(const Mode:LongWord = SG_3D);
 begin
 Change(Mode);
-Init;
+Init();
 end;
 
 
