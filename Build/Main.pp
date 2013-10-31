@@ -232,7 +232,7 @@ if argc>1 then
 		else if s='FIP' then
 			begin
 			WriteLn('Beginning Find in pas.');
-			FindInPas;
+			FindInPas(True);
 			end
 		else if s='GRNC' then
 			begin

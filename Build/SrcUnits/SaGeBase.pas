@@ -403,7 +403,7 @@ function SGGetFileName(const WayName:string):string;
 procedure SGReleaseFileWay(WAy:string);
 function SGGetFileWay(const Way:String):String;
 procedure SGMakeDirectory(const DirWay:String);inline;
-procedure FindInPas;
+procedure FindInPas(const Cmd:Boolean = False);
 operator ** (const a:Real;const b:LongInt):Real;inline;overload;
 operator ** (const a:single;const b:LongInt):single;overload;inline;
 operator ** (const a:LongInt;const b:LongInt):LongInt;overload;inline;
@@ -429,11 +429,12 @@ function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
 function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
 function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
-function SGGetFreeFileName(const Name:string):string;inline;
+function SGGetFreeFileName(const Name:string;const sl:string = 'Copy'):string;inline;
 function SGGetFileNameWithoutExpansion(const FileName:string):string;inline;
 function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
 function SGReadLnString:String;
 function SGReadLnByte:Byte;
+function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):string;inline;
 
 procedure SGSetCLProcedure(const p:Pointer = nil);
 procedure SCSetCLScreenBounds(const p:Pointer = nil);
@@ -583,7 +584,21 @@ else
 	end;
 end;
 
-function SGGetFreeFileName(const Name:string):string;inline;
+function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):string;inline;
+var 
+	Number:LongInt = 1;
+begin
+if SGExistsDirectory(Name) then
+	begin
+	while SGExistsDirectory(Name+' ('+Sl+' '+SGStr(Number)+')') do
+		Number+=1;
+	Result:=Name+' ('+Sl+' '+SGStr(Number)+')';
+	end
+else
+	Result:=Name;
+end;
+
+function SGGetFreeFileName(const Name:string; const Sl:string = 'Copy'):string;inline;
 var
 	FileExpansion:String = '';
 	FileName:string = '';
@@ -594,9 +609,9 @@ if FileExists(Name) then
 	begin
 	FileExpansion:=SGGetFileExpansion(Name);
 	FileName:=SGGetFileNameWithoutExpansion(Name);
-	while FileExists(FileName+' (Copy '+SGStr(Number)+').'+FileExpansion) do
+	while FileExists(FileName+' ('+Sl+' '+SGStr(Number)+').'+FileExpansion) do
 		Number+=1;
-	Result:=FileName+' (Copy '+SGStr(Number)+').'+FileExpansion;
+	Result:=FileName+' ('+Sl+' '+SGStr(Number)+').'+FileExpansion;
 	end
 else
 	Result:=Name;
@@ -844,20 +859,29 @@ for i:=1 to b do
 	Result*=a;
 end;
 
-procedure FindInPas;
+procedure FindInPas(const Cmd:Boolean = False);
 var
 	ArWords:array of string = nil;
 	Stream:TFileStream = nil;
 	Oy:LongWord;
 	PF,PS:LongWord;
+	FArF:packed array of TFileStream = nil;
+	i,ii:LongWord;
+	ArF:packed array of string = nil;
+	FDir:string = '.';
+var
+	TempS,TempS2:String;
+	NameFolder:string = '';
+	ChisFi:LongWord = 0;
 procedure FindInFile(const VFile:String);
 var
 	f:text;
 	Str:string;
-	ii:longint;
-	iii:longint;
-	iiii:longint;
-	KolStr:longint = 0;
+	i:LongWord;
+	ii:LongWord;
+	iii:LongWord;
+	iiii:LongWord;
+	KolStr:LongWord = 0;
 begin
 PF+=1;
 assign(f,VFile);
@@ -885,7 +909,19 @@ while not eof(f) do
 		ArResults[High(ArResults)].Str:=KolStr;
 		ArResults[High(ArResults)].Fail:=ArFiles[i];}
 		PS+=iii;
-		SGWriteStringToStream('In file "'+VFile+'" on string "'+SGStr(KolStr)+'" was "'+SGStr(iii)+'" match...'+#13+#10,Stream);
+		if FArF=nil then
+			iiii:=0
+		else
+			iiii:=Length(FArF);
+		if iii>iiii then
+			begin
+			SetLength(FArF,iii);
+			for i:=iiii to iii-1 do
+				FArF[i]:=nil;
+			end;
+		if FArF[iii-1]=nil then
+			FArF[iii-1]:=TFileStream.Create(NameFolder+Slash+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
+		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+#13+#10,FArF[iii-1]);
 		end;
 	end;
 close(f);
@@ -900,14 +936,16 @@ write(' matches. Processed ');
 textcolor(10);
 write(PF);
 textcolor(15);
-writeln(' files ...');
+write(' files in ');
+TextColor(14);
+Write(ChisFi);
+TextColor(15);
+wRITElN(' derictoryes...');
 end;
 
 procedure DoFiles(const VDir:string);
 var
 	sr:dos.searchrec;
-	ArF:packed array[0..8] of string = 
-	('*.pas','*.pp','*.inc','*.cpp','*.cxx','*.h','*,hpp','*.hxx','*.c');
 	I:LongWord;
 begin
 for i:=0 to High(ArF) do
@@ -978,6 +1016,7 @@ while DosError<>18 do
 	begin
 	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir+Slash+sr.name))) then
 		BEGIN
+		ChisFi+=1;
 		DoFiles(VDir+Slash+sr.name+Slash);
 		DoDirectories(VDir+Slash+sr.name);
 		END;
@@ -987,14 +1026,88 @@ dos.findclose(sr);
 end;
 
 begin
+SetLength(ArF,9);
+ArF[0]:='*.pas';
+ArF[1]:='*.pp';
+ArF[2]:='*.inc';
+ArF[3]:='*.cpp';
+ArF[4]:='*.cxx';
+ArF[5]:='*.h';
+ArF[6]:='*.hpp';
+ArF[7]:='*.hxx';
+ArF[8]:='*.c';
+textcolor(15);
+if Cmd and (argc>2) then
+	begin
+	for i:=2 to argc-1 do
+		begin
+		if (argv[i][0]='-') then
+			begin
+			TempS:=SGPCharToString(argv[i]);
+			TempS:=SGGetComand(TempS);
+			if (Length(TempS)>2) or (TempS='H') then
+				if (TempS[1]='F') and (TempS[2]='D') then
+					begin
+					TempS2:='';
+					for ii:=3 to Length(TempS) do
+						TempS2+=TempS[ii];
+					while (Length(TempS2)>0) and ((TempS2[Length(TempS2)]='\') or (TempS2[Length(TempS2)]='/')) do
+						SetLength(TempS2,Length(TempS2)-1);
+					if TempS2='' then
+						TempS2:='.';
+					FDir:=TempS2;
+					Write('Selected find directory "');TextColor(14);Write(FDir);TextColor(15);WriteLn('".');
+					end
+				else if (TempS='VIEWEXP') then
+					begin
+					Write('Finding expansion:');textColor(14);Write('{');
+					for ii:=0 to High(ArF) do
+						begin
+						TextColor(13);Write(ArF[ii]);TextColor(14);
+						if ii<>High(ArF) then
+							Write(',');
+						end;
+					TextColor(14);WriteLn('}');TextColor(15);
+					end
+				else if (TempS='HELP') or (TempS='H') then
+					begin
+					WriteLn('This is help for "Find in pas".');
+					Write('    -FD');TextColor(13);Write('($directory)');TextColor(15);WriteLn(' : for change find directory.');
+					WriteLn('    -H; -HELP : for run help.');
+					end
+				else
+					WriteLn('Erroe syntax comand "',argv[i],'"')
+			else
+				WriteLn('Erroe syntax comand "',argv[i],'"');
+			end
+		else
+			WriteLn('Erroe syntax comand "',argv[i],'"');
+		end;
+	end;
 PF:=0;PS:=0;OY:=0;
-Stream:=TFileStream.Create('Find in pas results.txt',fmCreate);
+NameFolder:=SGGetFreeDirectoryName('Find In Pas Results','Part');
+Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
+SGMakeDirectory(NameFolder);
 ConstWords;
 SkanWords;
 writeln('Find was begining... Psess any key to stop him...');
 Oy:=WhereY;
-DoDirectories('.');
-Stream.Destroy;
+DoDirectories(FDir);
+if FArF<>nil then
+	begin
+	for i:=0 to High(FArF) do
+		if FArF[i]<>nil then
+			FArF[i].Destroy;
+	SetLength(FArF,0);
+	end;
+if PS=0 then
+	begin
+	RMDIR(NameFolder);
+	TextColor(12);Writeln('Matches don''t exists...');
+	TextColor(15);Write('Deleted results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
+	end;
+SetLength(ArF,0);
+SetLength(ArWords,0);
 end;
 
 procedure SGMakeDirectory(const DirWay:String);inline;
