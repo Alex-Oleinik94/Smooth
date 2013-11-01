@@ -12,7 +12,7 @@ uses
 	;
 type
 	SGIdentityObject=object
-		Context:TSGContext;
+		Context:PSGContext;
 		Render:TSGRender;
 		Rotate1:real;
 		Rotate2:real;
@@ -577,32 +577,32 @@ LastLeft:=Left;
 LastTop:=Top;
 LastR1:=Rotate1;
 LastR2:=Rotate2;
-if Context.CursorWheel=SGUpCursorWheel then
+if Context^.CursorWheel=SGUpCursorWheel then
 	begin
 	Zum*=0.9;
 	Changet:=True;
 	end;
-if Context.CursorWheel=SGDownCursorWheel then
+if Context^.CursorWheel=SGDownCursorWheel then
 	begin
 	Zum*=1/0.9;
 	Changet:=True;
 	end;
-if Context.CursorKeysPressed(SGLeftCursorButton) then
+if Context^.CursorKeysPressed(SGLeftCursorButton) then
 	begin
-	Rotate2+=Context.CursorPosition(SGDeferenseCursorPosition).x/3;
-	Rotate1+=Context.CursorPosition(SGDeferenseCursorPosition).y/3;
+	Rotate2+=Context^.CursorPosition(SGDeferenseCursorPosition).x/3;
+	Rotate1+=Context^.CursorPosition(SGDeferenseCursorPosition).y/3;
 	end;
-if Context.CursorKeysPressed(SGRightCursorButton) then{$}
+if Context^.CursorKeysPressed(SGRightCursorButton) then{$}
 	begin
-	Top+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*Zum;
-	Left+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*Zum;
+	Top+=    (-Context^.CursorPosition(SGDeferenseCursorPosition).y/100)*Zum;
+	Left+=   ( Context^.CursorPosition(SGDeferenseCursorPosition).x/100)*Zum;
 	end;
-if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
+if (Context^.KeyPressed and (Context^.KeysPressed(char(17))) and (Context^.KeyPressedChar=char(189)) and (Context^.KeyPressedType=SGDownKey)) then
 	begin
 	Zum*=1/0.89;
 	Changet:=true;
 	end;
-if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
+if  (Context^.KeyPressed and (Context^.KeysPressed(char(17))) and (Context^.KeyPressedByte=187) and (Context^.KeyPressedType=SGDownKey))  then
 	begin
 	Zum*=0.89;
 	Changet:=true;

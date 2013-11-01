@@ -47,10 +47,10 @@ end;
 procedure Draw(const Context:TSGContext);
 begin end;
 
-procedure Init(const MyContext:TSGContext);
+procedure Init(const MyContext:PSGContext);
 begin
 SGScreen.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
-SGScreen.Font.Context := MyContext;
+SGScreen.Font.SetContext(MyContext);
 SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
@@ -107,8 +107,8 @@ with Context do
 	IconIdentifier:=5;
 	CursorIdentifier:=5;
 	
-	Context.RenderClass:=TSGRenderOpenGL;
-	Context.Render:=TSGRenderOpenGL.Create;
+	RenderClass:=TSGRenderOpenGL;
+	FSelfPoint:=@Context;
 	end;
 
 Context.Initialize;
@@ -123,7 +123,7 @@ if Context.Active and (Context.FNewContextType<>nil) then
 	NewContext:=Context.FNewContextType.Create;
 	NewContext.CopyInfo(Context);
 	NewContext.FCallInitialize:=nil;
-	Context.SetRC(0);
+	Context.Render:=nil;
 	Context.Destroy;
 	Context:=NewContext;
 	NewContext:=nil;
@@ -213,9 +213,7 @@ DOS.findclose(sr);
 end;
 
 var
-	//i:LongWord;
 	s:string;
-
 begin
 if argc>1 then
 	begin

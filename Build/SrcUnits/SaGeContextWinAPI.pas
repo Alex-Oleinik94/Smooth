@@ -198,9 +198,9 @@ Active:=Succs;
 if Active then
 	begin
 	if SGCLLoadProcedure<>nil then
-		SGCLLoadProcedure(Self);
+		SGCLLoadProcedure(FSelfPoint);
 	if FCallInitialize<>nil then
-		FCallInitialize(Self);
+		FCallInitialize(FSelfPoint);
 	end;
 end;
 
@@ -220,15 +220,15 @@ while FActive and (FNewContextType=nil) do
 	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
 	Render.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
-		FCallDraw(Self);
+		FCallDraw(FSelfPoint);
 	//SGIIdleFunction;
 	
-	ClearKeys;
-	Messages;
+	ClearKeys();
+	Messages();
 	
 	if SGCLPaintProcedure<>nil then
-		SGCLPaintProcedure(Self);
-	SwapBuffers;
+		SGCLPaintProcedure(FSelfPoint);
+	SwapBuffers();
 	end;
 end;
 
@@ -540,12 +540,20 @@ if FunctionError = 0 then
 	Result := true 
 else 
 	Result := false;}
-FRender:=FRenderClass.Create();
-FRender.Window:=Self;
-Result:=FRender.CreateContext();
-//WriteLn(Result);
-if Result then 
-	FRender.Init();
+if FRender=nil then
+	begin
+	FRender:=FRenderClass.Create();
+	FRender.Window:=Self;
+	Result:=FRender.CreateContext();
+	if Result then 
+		FRender.Init();
+	end
+else
+	begin
+	FRender.Window:=Self;
+	FRender.MakeCurrent();
+	Result:=True;
+	end;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
 	{$ENDIF}
@@ -599,7 +607,8 @@ begin
 	CloseHandle(rcWindow);
 	rcWindow:=0;
 	end;}
-FRender.Destroy;
+if FRender<>nil then
+	FRender.Destroy;
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
 if (dcWindow<>0) then

@@ -430,7 +430,7 @@ procedure SGRoundQuad(
 	const QuadColor:SGColor; 
 	const LinesColor:SGColor4f; 
 	const WithLines:boolean = False;
-	const WithQuad:boolean = True);
+	const WithQuad:boolean = True);inline;
 var
 	ArVertex:TSGArTSGVertex = nil;
 begin

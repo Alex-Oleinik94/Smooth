@@ -37,8 +37,8 @@ type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
-	TSGContextProcedure = procedure(const a:TSGContext);
-	TSGContext=class(TSGRenderObject)
+	TSGContextProcedure = procedure(const a:PSGContext);
+	TSGContext=class(TSGClass)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
@@ -121,25 +121,29 @@ type
 		FNewContextType:TSGContextClass;
 			public
 		FRenderClass:TSGRenderClass;
-		//FRender:TSGRender;
+		FRender:TSGRender;
+		FSelfPoint:PSGContext;
 			public
 		property RenderClass:TSGRenderClass read FRenderClass write FRenderClass;
-		//property Render:TSGRender read FRender write FRender;
+		property Render:TSGRender read FRender write FRender;
 			public
 		function Get(const What:string):Pointer;override;
 		end;
 type
-	TSGContextObject=class(TSGRenderObject)
+	TSGContextObject=class(TSGClass)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
-		constructor Create(const VContext:TSGContext);virtual;overload;
+		constructor Create(const VContext:PSGContext);virtual;overload;
 			public
-		FContext:TSGContext;
+		FContext:PSGContext;
 			public
-		procedure SetContext(const Context:TSGContext);
+		procedure SetContext(const VContext:PSGContext);inline;
+		function GetContext():TSGContext;inline;
+		function GetRender():TSGRender;inline;
 			public
-		property Context:TSGContext read FContext write SetContext;
+		property Context:TSGContext read GetContext;
+		property Render:TSGRender read GetRender;
 		end;
 	
 	TSGDrawClass=class;
@@ -174,17 +178,26 @@ implementation
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
-constructor TSGContextObject.Create(const VContext:TSGContext);overload;
+constructor TSGContextObject.Create(const VContext:PSGContext);overload;
 begin
 inherited Create();
 FContext:=nil;
 SetContext(VContext);
 end;
 
-procedure TSGContextObject.SetContext(const Context:TSGContext);
+function TSGContextObject.GetRender():TSGRender;inline;
 begin
-FContext:=Context;
-Render:=Context.Render;
+Result:=FContext^.Render;
+end;
+
+procedure TSGContextObject.SetContext(const VContext:PSGContext);inline;
+begin
+FContext:=VContext;
+end;
+
+function TSGContextObject.GetContext():TSGContext;inline;
+begin
+Result:=FContext[0];
 end;
 
 constructor TSGContextObject.Create;
@@ -216,8 +229,10 @@ end;
 
 procedure TSGContext.CopyInfo(const C:TSGContext);
 begin
-if C.GetRC<>0 then
-	SetRC(C.GetRC);
+if C=nil then
+	Exit;
+FSelfPoint:=C.FSelfPoint;
+Render:=C.Render;
 FWidth:=C.FWidth;
 FHeight:=C.FHeight;
 FFullscreen:=C.FFullscreen;
@@ -290,7 +305,7 @@ end;
 procedure TSGContext.Resize;
 begin
 if SGCLForReSizeScreenProcedure<>nil then
-	SGCLForReSizeScreenProcedure(Self);
+	SGCLForReSizeScreenProcedure(FSelfPoint);
 end;
 
 function TSGContext.GetWidth:LongWord;
@@ -388,6 +403,7 @@ FCursorKeysPressed[SGLeftCursorButton]:=False;
 FCursorKeysPressed[SGRightCursorButton]:=False;
 FFullscreenData.FNotFullscreenHeight:=0;
 FFullscreenData.FNotFullscreenWidth:=0;
+FRender:=nil;
 end;
 
 procedure TSGContext.ClearKeys;inline;

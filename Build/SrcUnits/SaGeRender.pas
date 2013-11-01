@@ -69,30 +69,8 @@ type
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
-	
-	TSGRenderObject=class(TSGClass)
-			public
-		constructor Create;override;
-		destructor Destroy;override;
-			public
-		FRender:TSGRender;
-			public
-		property Render:TSGRender read FRender write FRender;
-		//function WithRender(const 
-		end;
 
 implementation
-
-constructor TSGRenderObject.Create;
-begin
-inherited;
-FRender:=nil;
-end;
-
-destructor TSGRenderObject.Destroy;
-begin
-inherited;
-end;
 
 procedure TSGRender.Enable(VParam:Cardinal);
 begin end;

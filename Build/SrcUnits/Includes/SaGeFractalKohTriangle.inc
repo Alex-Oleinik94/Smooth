@@ -3,7 +3,7 @@
 type
 	TSGFractalKohTriangle=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -154,7 +154,7 @@ with TSGFractalKohTriangle(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalKohTriangle.Create(const VContext:TSGContext);
+constructor TSGFractalKohTriangle.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
 FEnableColors:=False;

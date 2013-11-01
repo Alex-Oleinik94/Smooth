@@ -18,7 +18,7 @@ uses
 type
 	TSGDrawClasses=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -1119,16 +1119,17 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
-SGScreen.LastChild.Font.Context:=Context;
+SGScreen.LastChild.Font.SetContext(FContext);
 SGScreen.LastChild.Font.Loading;
 SGScreen.LastChild.Active:=Length(FArClasses)>1;
 FComboBox2.FDrawClass:=Self;
 FComboBox2.BoundsToNeedBounds;
 
-for i:=0 to High(FArClasses) do
-	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].ClassName));
-
-FNowDraw:=FArClasses[0].Create(Context);
+if (FArClasses<>nil) and (Length(FArClasses)>0) then
+	for i:=0 to High(FArClasses) do
+		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].ClassName));
+if (FArClasses<>nil) and (Length(FArClasses)>0) then
+	FNowDraw:=FArClasses[0].Create(FContext);
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
@@ -1163,7 +1164,7 @@ if FComboBox2<>nil then
 	FComboBox2.Active:=Length(FArClasses)>1;
 end;
 
-constructor TSGDrawClasses.Create(const VContext:TSGContext);
+constructor TSGDrawClasses.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
 FNowDraw:=nil;

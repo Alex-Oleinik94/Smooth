@@ -383,7 +383,9 @@ Viewport(0, 0, CWidth, CHeight);
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
-	glOrtho(0,CWidth,CHeight,0,0,0.1)
+	begin
+	glOrtho(0,CWidth,CHeight,0,0,0.1);
+	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
