@@ -950,7 +950,7 @@ var
 begin
 for i:=0 to High(ArF) do
 	begin
-	dos.findfirst(VDir+Slash+ArF[i],$3F,sr);
+	dos.findfirst(VDir+Slash+'*.'+ArF[i],$3F,sr);
 	while DosError<>18 do
 		begin
 		//SGWriteStringToStream('Do file "'+VDir+sr.name+'".'+#13+#10,Stream);
@@ -1027,15 +1027,15 @@ end;
 
 begin
 SetLength(ArF,9);
-ArF[0]:='*.pas';
-ArF[1]:='*.pp';
-ArF[2]:='*.inc';
-ArF[3]:='*.cpp';
-ArF[4]:='*.cxx';
-ArF[5]:='*.h';
-ArF[6]:='*.hpp';
-ArF[7]:='*.hxx';
-ArF[8]:='*.c';
+ArF[0]:='pas';
+ArF[1]:='pp';
+ArF[2]:='inc';
+ArF[3]:='cpp';
+ArF[4]:='cxx';
+ArF[5]:='h';
+ArF[6]:='hpp';
+ArF[7]:='hxx';
+ArF[8]:='c';
 textcolor(15);
 if Cmd and (argc>2) then
 	begin
@@ -1074,6 +1074,7 @@ if Cmd and (argc>2) then
 					WriteLn('This is help for "Find in pas".');
 					Write('    -FD');TextColor(13);Write('($directory)');TextColor(15);WriteLn(' : for change find directory.');
 					WriteLn('    -H; -HELP : for run help.');
+					WriteLn('    -VIEWEXP : for view expansion for find');
 					end
 				else
 					WriteLn('Erroe syntax comand "',argv[i],'"')
@@ -2418,9 +2419,14 @@ Nan:=sqrt(-1);
 Inf:=1/0;
 RandomIze;
 
+try
 SGLog:=TSGLog.Create;
 SGLog.Sourse('(***) SaGe OpenGL Engine Log(***)',False);
 SGLog.Sourse('  << Create Log >>');
+except
+SGLogEnable:=False;
+SGLog:=TSGLog.Create;
+end;
 end;
 
 finalization

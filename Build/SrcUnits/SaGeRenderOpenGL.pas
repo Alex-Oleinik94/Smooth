@@ -265,7 +265,8 @@ end;
 
 procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
-case VPrimitiveType of
+glBegin(VPrimitiveType);
+{case VPrimitiveType of
 SG_POINTS:glBegin(GL_POINTS);
 SG_LINES:glBegin(GL_LINES);
 SG_LINE_STRIP:glBegin(GL_LINE_STRIP);
@@ -275,7 +276,7 @@ SG_TRIANGLE_STRIP:glBegin(GL_TRIANGLE_STRIP);
 SG_TRIANGLE_FAN:glBegin(GL_TRIANGLE_FAN);
 SG_QUADS:glBegin(GL_QUADS);
 SG_POLYGON:glBegin(GL_POLYGON)
-end;
+end;}
 end;
 
 procedure TSGRenderOpenGL.EndScene();
