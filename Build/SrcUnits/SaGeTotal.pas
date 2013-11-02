@@ -937,7 +937,7 @@ else
 	end;
 
 Render.InitMatrixMode(SG_2D);
-Render.BeginScene(SG_QUADS);
+Render.BeginScene(SGR_QUADS);
 for i:=0 to High(FArray) do
 	for ii:=0 to High(FArray[0]) do
 		begin
@@ -948,7 +948,7 @@ for i:=0 to High(FArray) do
 			Vtx1.Import(i*FR.x,ii*FR.y);
 			Vtx2.Import((i+1)*FR.x,(ii+1)*FR.y);
 			FImageBlock.DrawImageFromTwoVertex2f(Vtx1,Vtx2,True,SG_2D);
-			Render.BeginScene(SG_QUADS);
+			Render.BeginScene(SGR_QUADS);
 			end
 		else
 			begin
@@ -1027,7 +1027,7 @@ for i:=0 to High(FBullets) do
 	
 if not FActive then
 	begin
-	Render.BeginScene(SG_QUADS);
+	Render.BeginScene(SGR_QUADS);
 	if FVictory then
 		Render.Color4f(0,1,0,FLabebYouLose.FVisibleTimer)
 	else

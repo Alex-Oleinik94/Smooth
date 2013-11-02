@@ -102,7 +102,7 @@ begin
 inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
-CalculateMeshes(Quantity,SG_LINES);
+CalculateMeshes(Quantity,SGR_LINES);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

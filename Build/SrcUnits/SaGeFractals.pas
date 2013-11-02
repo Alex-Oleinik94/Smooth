@@ -353,16 +353,16 @@ if FLightingEnable then
 	FSun.Import(cos(FSunTrigonometry[0]),sin(FSunTrigonometry[1]),cos(FSunTrigonometry[2]));
 	FSun*=FSunAbs;
 	Render.Color3f(1,1,1);
-	Render.BeginScene(SG_POINTS);
+	Render.BeginScene(SGR_POINTS);
 	FSun.Vertex(Render);
 	Render.EndScene();
-	Render.Enable(SG_LIGHTING);
-	Render.Enable(SG_LIGHT0);
+	Render.Enable(SGR_LIGHTING);
+	Render.Enable(SGR_LIGHT0);
 	FSun.LightPosition(Render);
 	end
 else
-	if Render.IsEnabled(SG_LIGHTING) then
-		Render.Disable(SG_LIGHTING);
+	if Render.IsEnabled(SGR_LIGHTING) then
+		Render.Disable(SGR_LIGHTING);
 if FEnableVBO then
 	begin
 	if (FMesh<>nil) and (FMesh.NOfObjects<>0) then
@@ -380,8 +380,8 @@ else
 		FMesh.Draw;
 if FLightingEnable then
 	begin
-	Render.Disable(SG_LIGHT0);
-	Render.Disable(SG_LIGHTING);
+	Render.Disable(SGR_LIGHT0);
+	Render.Disable(SGR_LIGHTING);
 	end;
 {$IFDEF SGMoreDebuging}
 	WriteLn('End of  "TSGFractal.Draw" : "'+ClassName+'"');

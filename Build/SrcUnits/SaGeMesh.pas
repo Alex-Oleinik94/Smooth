@@ -355,7 +355,7 @@ if SGFileExists(FileWay) then
 		SetLength(ArObjects,1);
 		NOfObjects:=1;
 		ArObjects[0]:=TSG3DObject.Create;
-		ArObjects[0].FPoligonesType:=SG_TRIANGLES;
+		ArObjects[0].FPoligonesType:=SGR_TRIANGLES;
 		ReadLn(Text,ArObjects[0].FNOfVerts);
 		ReadLn(Text,i);
 		ReadLn(Text);
@@ -767,9 +767,9 @@ var
 	 OutputStrip:TSGArTSGFaceType = nil;
 	 b:boolean = True;
 begin
-{if FPoligonesType = SG_QUADS then
+{if FPoligonesType = SGR_QUADS then
 	Con}
-if FPoligonesType = SG_TRIANGLES then
+if FPoligonesType = SGR_TRIANGLES then
 	begin
 	try
 		CalculateDependensies(VertexesAndTriangles);
@@ -783,7 +783,7 @@ if FPoligonesType = SG_TRIANGLES then
 		begin
 		SetLength(ArFaces,0);
 		ArFaces:=OutputStrip;
-		FPoligonesType:=SG_TRIANGLE_STRIP;
+		FPoligonesType:=SGR_TRIANGLE_STRIP;
 		FNOfFaces:=Length(OutputStrip);
 		end
 	else
@@ -957,13 +957,13 @@ class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;
 begin
 Result:=
 	Byte(
-		(ThisPoligoneType=SG_POINTS) or
-		(ThisPoligoneType=SG_TRIANGLE_STRIP) or
-		(ThisPoligoneType=SG_LINE_LOOP) or
-		(ThisPoligoneType=SG_LINE_STRIP))
-	+4*Byte( ThisPoligoneType = SG_QUADS )
-	+3*Byte( ThisPoligoneType = SG_TRIANGLES )
-	+2*Byte( ThisPoligoneType = SG_LINES );
+		(ThisPoligoneType=SGR_POINTS) or
+		(ThisPoligoneType=SGR_TRIANGLE_STRIP) or
+		(ThisPoligoneType=SGR_LINE_LOOP) or
+		(ThisPoligoneType=SGR_LINE_STRIP))
+	+4*Byte( ThisPoligoneType = SGR_QUADS )
+	+3*Byte( ThisPoligoneType = SGR_TRIANGLES )
+	+2*Byte( ThisPoligoneType = SGR_LINES );
 end;
 
 function TSG3DObject.GetFaceLength(const FaceLength:Int64):Int64;overload;inline;
@@ -983,7 +983,7 @@ end;
 
 function TSG3DObject.ArFacesLines:PTSGFaceLine;inline;
 begin
-if FPoligonesType=SG_LINES then
+if FPoligonesType=SGR_LINES then
 	Result:=PTSGFaceLine(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -992,10 +992,10 @@ end;
 function TSG3DObject.ArFacesPoints:PTSGFacePoint;inline;
 begin
 if (
-	(FPoligonesType=SG_POINTS) or
-	(FPoligonesType=SG_LINE_STRIP) or
-	(FPoligonesType=SG_LINE_LOOP) or
-	(FPoligonesType=SG_TRIANGLE_STRIP)
+	(FPoligonesType=SGR_POINTS) or
+	(FPoligonesType=SGR_LINE_STRIP) or
+	(FPoligonesType=SGR_LINE_LOOP) or
+	(FPoligonesType=SGR_TRIANGLE_STRIP)
 	)  then
 	Result:=PTSGFacePoint(Pointer(@ArFaces[0]))
 else
@@ -1004,7 +1004,7 @@ end;
 
 function TSG3DObject.ArFacesQuads:PTSGFaceQuad;inline;
 begin
-if FPoligonesType=SG_QUADS then
+if FPoligonesType=SGR_QUADS then
 	Result:=PTSGFaceQuad(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -1012,7 +1012,7 @@ end;
 
 function TSG3DObject.ArFacesTriangles:PTSGFaceTriangle;inline;
 begin
-if FPoligonesType=SG_TRIANGLES then
+if FPoligonesType=SGR_TRIANGLES then
 	Result:=PTSGFaceTriangle(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
@@ -1263,7 +1263,7 @@ begin
     ArTexVertexes := nil;
     FName := '';
     FMaterialID := -1;
-    FPoligonesType:=SG_TRIANGLES;
+    FPoligonesType:=SGR_TRIANGLES;
     FEnableVBO:=False;
     FVBOColors:=0;
     FVBOFaces:=0;
@@ -1286,15 +1286,15 @@ begin
 	{$ENDIF}
     if FEnableCullFace then
     begin
-        Render.Enable(SG_cull_face);
-        Render.CullFace(SG_back);
+        Render.Enable(SGR_CULL_FACE);
+        Render.CullFace(SGR_BACK);
     end;
     BasicDraw;
     if FEnableCullFace then
     begin
-        Render.CullFace(SG_front);
+        Render.CullFace(SGR_FRONT);
         BasicDraw;
-        Render.Disable(SG_cull_face);
+        Render.Disable(SGR_CULL_FACE);
     end;
 end;
 
@@ -1361,66 +1361,66 @@ begin
 FObjectColor.Color(Render);
 
 if FEnableVBO then
-	Render.Enable(SG_ARRAY_BUFFER_ARB);
+	Render.Enable(SGR_ARRAY_BUFFER_ARB);
 
-Render.EnableClientState(SG_VERTEX_ARRAY);
+Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
-	Render.EnableClientState(SG_NORMAL_ARRAY);
+	Render.EnableClientState(SGR_NORMAL_ARRAY);
 if FHasTexture then
-	Render.EnableClientState(SG_TEXTURE_COORD_ARRAY);
+	Render.EnableClientState(SGR_TEXTURE_COORD_ARRAY);
 if FNOfColors<>0 then
-	Render.EnableClientState(SG_COLOR_ARRAY);
+	Render.EnableClientState(SGR_COLOR_ARRAY);
 
 if FEnableVBO then
 	begin
-	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.VertexPointer(3,SG_FLOAT,SizeOf(TSGVertex),nil);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
+	Render.VertexPointer(3,SGR_FLOAT,SizeOf(TSGVertex),nil);
 	
 	if FHasNormals then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBONormals);
-		Render.NormalPointer(SG_FLOAT,SizeOf(TSGVertex),nil);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBONormals);
+		Render.NormalPointer(SGR_FLOAT,SizeOf(TSGVertex),nil);
 		end;
 	
 	if FNOfColors<>0 then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOColors);
-		Render.ColorPointer(3,SG_FLOAT,SizeOf(TSGVertex),nil);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOColors);
+		Render.ColorPointer(3,SGR_FLOAT,SizeOf(TSGVertex),nil);
 		end;
 	
 	if FHasTexture then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOTexVertexes);
-		Render.TexCoordPointer(2, SG_FLOAT, SizeOf(TSGVertex2f),nil);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOTexVertexes);
+		Render.TexCoordPointer(2, SGR_FLOAT, SizeOf(TSGVertex2f),nil);
 		end;
 	
-	Render.BindBufferARB(SG_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-	Render.DrawElements(FPoligonesType, GetFaceLength,SG_UNSIGNED_INT,nil);
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
+	Render.DrawElements(FPoligonesType, GetFaceLength,SGR_UNSIGNED_INT,nil);
 	
-	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
-    Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f), SG_FLOAT, SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)), @ArVertex[0]);
+    Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f), SGR_FLOAT, SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)), @ArVertex[0]);
     if FHasNormals then
-        Render.NormalPointer(SG_FLOAT, SizeOf(TSGVertex), @ArNormals[0]);
+        Render.NormalPointer(SGR_FLOAT, SizeOf(TSGVertex), @ArNormals[0]);
     if FHasTexture then
-        Render.TexCoordPointer(2, SG_FLOAT, SizeOf(TSGVertex2f), @ArTexVertexes[0]);
+        Render.TexCoordPointer(2, SGR_FLOAT, SizeOf(TSGVertex2f), @ArTexVertexes[0]);
     if FNOfColors<>0 then
-		Render.ColorPointer(3,SG_FLOAT,SizeOf(TSGColor3f),@ArColors[0]);
-    Render.DrawElements(FPoligonesType, GetFaceLength , SG_UNSIGNED_INT, @ArFaces[0]);
+		Render.ColorPointer(3,SGR_FLOAT,SizeOf(TSGColor3f),@ArColors[0]);
+    Render.DrawElements(FPoligonesType, GetFaceLength , SGR_UNSIGNED_INT, @ArFaces[0]);
     end;
 
-Render.DisableClientState(SG_VERTEX_ARRAY);
+Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
-	Render.DisableClientState(SG_NORMAL_ARRAY);
+	Render.DisableClientState(SGR_NORMAL_ARRAY);
 if FHasTexture then
-	Render.DisableClientState(SG_TEXTURE_COORD_ARRAY);
+	Render.DisableClientState(SGR_TEXTURE_COORD_ARRAY);
 if FNOfColors<>0 then
-	Render.DisableClientState(SG_COLOR_ARRAY);
+	Render.DisableClientState(SGR_COLOR_ARRAY);
 
 if FEnableVBO then
-	Render.Disable(SG_ARRAY_BUFFER_ARB);
+	Render.Disable(SGR_ARRAY_BUFFER_ARB);
 end;
 
 procedure TSGModel.LoadToVBO;
@@ -1435,7 +1435,7 @@ end;
 
 procedure TSG3dObject.LoadToVBO;
 begin
-	Render.Enable(SG_ARRAY_BUFFER_ARB);
+	Render.Enable(SGR_ARRAY_BUFFER_ARB);
 	
 	Render.GenBuffersARB(1, @FVBOVertexes);
 	Render.GenBuffersARB(1, @FVBOFaces);
@@ -1447,33 +1447,33 @@ begin
 		Render.GenBuffersARB(1, @FVBOTexVertexes);
 
 
-	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfVerts*SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)),@ArVertex[0], SG_STATIC_DRAW_ARB);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
+	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)),@ArVertex[0], SGR_STATIC_DRAW_ARB);
 
 	if FHasNormals then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBONormals);
-		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfNormals*SizeOf(TSGVertex),@ArNormals[0], SG_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBONormals);
+		Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfNormals*SizeOf(TSGVertex),@ArNormals[0], SGR_STATIC_DRAW_ARB);
 		end;
 
 	if FNOfColors<>0 then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOColors);
-		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfColors*SizeOf(TSGVertex),@ArColors[0], SG_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOColors);
+		Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfColors*SizeOf(TSGVertex),@ArColors[0], SGR_STATIC_DRAW_ARB);
 		end;
 
 	if FHasTexture then
 		begin
-		Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,FVBOTexVertexes);
-		Render.BufferDataARB (SG_ARRAY_BUFFER_ARB,FNOfTexVertex*SizeOf(TSGVertex2f),@ArTexVertexes[0], SG_STATIC_DRAW_ARB);
+		Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOTexVertexes);
+		Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfTexVertex*SizeOf(TSGVertex2f),@ArTexVertexes[0], SGR_STATIC_DRAW_ARB);
 		end;
 
-	Render.BindBufferARB(SG_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
-	Render.BufferDataARB (SG_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength*SizeOf(TSGFaceType),@ArFaces[0], SG_STATIC_DRAW_ARB);
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
+	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
 
-	Render.BindBufferARB(SG_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
 	
-	Render.Disable(SG_ARRAY_BUFFER_ARB);
+	Render.Disable(SGR_ARRAY_BUFFER_ARB);
 	
 //	Delay(100);
 	ClearArrays(False);

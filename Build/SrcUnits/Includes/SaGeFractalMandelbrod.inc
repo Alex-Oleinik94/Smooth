@@ -785,7 +785,7 @@ if MandaInitialized then
 				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Context.Height
 				);
 			Render.Color3f(1,1,1);
-			Render.BeginScene(SG_TRIANGLES);
+			Render.BeginScene(SGR_TRIANGLES);
 			Render.Vertex2f(VtxForZN.x+5,VtxForZN.y);
 			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y-4);
 			Render.Vertex2f(VtxForZN.x-2,VtxForZN.y+4);
@@ -838,14 +838,14 @@ if MandaInitialized then
 				end;
 			
 			Render.Color4f(0,0.5,0.70,0.6);
-			Render.BeginScene(SG_QUADS);
+			Render.BeginScene(SGR_QUADS);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
 			SelectSecondPoint.Vertex(Render);
 			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 			Render.EndScene();
 			Render.Color4f(0,0.7,0.70,0.8);
-			Render.BeginScene(SG_LINE_LOOP);
+			Render.BeginScene(SGR_LINE_LOOP);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
 			SelectSecondPoint.Vertex(Render);
@@ -853,14 +853,14 @@ if MandaInitialized then
 			Render.EndScene();
 			
 			Render.Color4f(0.6,0.5,0.30,0.6);
-			Render.BeginScene(SG_QUADS);
+			Render.BeginScene(SGR_QUADS);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
 			SelectSecondNormalPoint.Vertex(Render);
 			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
 			Render.EndScene();
 			Render.Color4f(1,0.9,0.20,0.8);
-			Render.BeginScene(SG_LINE_LOOP);
+			Render.BeginScene(SGR_LINE_LOOP);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
 			SelectSecondNormalPoint.Vertex(Render);
@@ -903,7 +903,7 @@ if MandaInitialized then
 					True,SG_2D);
 			
 			Render.Color4f(0.1,0.7,0.20,0.6);
-			Render.BeginScene(SG_QUADS);
+			Render.BeginScene(SGR_QUADS);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
 			SelectSecondPoint.Vertex(Render);
@@ -911,7 +911,7 @@ if MandaInitialized then
 			Render.EndScene();
 			
 			Render.Color4f(0.05,0.9,0.10,0.8);
-			Render.BeginScene(SG_LINE_LOOP);
+			Render.BeginScene(SGR_LINE_LOOP);
 			SelectPoint.Vertex(Render);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
 			SelectSecondPoint.Vertex(Render);

@@ -217,7 +217,7 @@ while FActive and (FNewContextType=nil) do
 	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
 	FElapsedDateTime:=FDT;
 	
-	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
+	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 	Render.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
 		FCallDraw(FSelfPoint);

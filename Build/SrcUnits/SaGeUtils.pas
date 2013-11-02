@@ -331,7 +331,7 @@ while (s[i]<>#0) and (not ToExit) do
 		ToExit:=True;
 		SimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
 		end;
-	Render.BeginScene(SG_QUADS);
+	Render.BeginScene(SGR_QUADS);
 	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
 	Render.TexCoord2f(
@@ -401,7 +401,7 @@ if RePlace then
 	RePlacVertex(Vertex1,Vertex2,rePlaceY);
 	end;
 BindTexture;
-Render.BeginScene(SG_QUADS);
+Render.BeginScene(SGR_QUADS);
 DoTexCoord(Rotation);
 Vertex1.Vertex(Render);
 DoTexCoord(Rotation+1);
@@ -508,8 +508,8 @@ if NeedAlpha then
 		Point1.y-1,//+ReadPixelsShift.y,
 		Point2.x-Point1.x+1, 
 		Point2.y-Point1.y+1, 
-		SG_RGBA, 
-		SG_UNSIGNED_BYTE, 
+		SGR_RGBA, 
+		SGR_UNSIGNED_BYTE, 
 		FImage.FBitMap);
 	Bits:=32;
 	end
@@ -521,8 +521,8 @@ else
 		Point1.y-1,//+ReadPixelsShift.y,
 		Point2.x-Point1.x+1, 
 		Point2.y-Point1.y+1, 
-		SG_RGB, 
-		SG_UNSIGNED_BYTE, 
+		SGR_RGB, 
+		SGR_UNSIGNED_BYTE, 
 		FImage.FBitMap);
 	Bits:=24;
 	end;
@@ -556,7 +556,7 @@ while (s[i]<>#0) and (not ToExit) and (CursorPosition>i) do
 	end;
 if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
 	begin
-	Render.BeginScene(SG_LINES);
+	Render.BeginScene(SGR_LINES);
 	(Vertex1+Otstup).Vertex(Render);
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
 	Render.EndScene();

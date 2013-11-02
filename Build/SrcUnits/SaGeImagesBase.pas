@@ -50,32 +50,32 @@ type
 			public
 		FBitMap:PByte;
 		
-		FWidth:LongInt;
-		FHeight:LongInt;
+		FWidth:Cardinal;
+		FHeight:Cardinal;
 		
-		FChannels:LongInt;
-		FSizeChannel:LongInt;
+		FChannels:Cardinal;
+		FSizeChannel:Cardinal;
 		
-		FFormatType:LongInt;
-		FDataType:LongInt;
+		FFormatType:Cardinal;
+		FDataType:Cardinal;
 			public
 		constructor Create;
 		destructor Destroy;override;
 			public
 		procedure Clear;
-		procedure CreateTypes(const Alpha:TSGBoolean = SG_UNKNOWN;const Grayscale:TSGBoolean = SG_UNKNOWN);
+		procedure CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
 		procedure WriteInfo;
 		procedure SetWidth(const NewWidth:LongInt);
 		procedure SetHeight(const NewHeight:LongInt);
 		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;inline;
 		procedure SetBounds(const NewBound:LongWord);overload;inline;
 			public
-		property Width : LongInt read FWidth write FWidth;
-		property Height : LongInt read FHeight write FHeight;
-		property Channels : LongInt read FChannels write FChannels;
-		property BitDepth : LongInt read FSizeChannel write FSizeChannel;
-		property PixelFormat : LongInt read FFormatType write FFormatType;
-		property PixelType : LongInt read FDataType write FDataType;
+		property Width : Cardinal read FWidth write FWidth;
+		property Height : Cardinal read FHeight write FHeight;
+		property Channels : Cardinal read FChannels write FChannels;
+		property BitDepth : Cardinal read FSizeChannel write FSizeChannel;
+		property PixelFormat : Cardinal read FFormatType write FFormatType;
+		property PixelType : Cardinal read FDataType write FDataType;
 		property BitMap : PByte read FBitMap write FBitMap;
 		end;
 
@@ -291,7 +291,7 @@ writeln('Channels = ',FChannels);
 writeln('BitDepth = ',FSizeChannel);
 end;
 
-procedure TSGBitMap.CreateTypes(const Alpha:TSGBoolean = SG_UNKNOWN;const Grayscale:TSGBoolean = SG_UNKNOWN);
+procedure TSGBitMap.CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
 begin
 FFormatType:=0;
 FDataType:=0;
@@ -299,38 +299,38 @@ case FChannels of
 1:
 	begin 
 	if Grayscale=SG_TRUE then 
-		FFormatType:=SG_LUMINANCE
+		FFormatType:=SGR_LUMINANCE
 	else
 		if Alpha=SG_TRUE then
-			FFormatType:=SG_ALPHA
+			FFormatType:=SGR_ALPHA
 		else
 			if (Alpha=SG_FALSE) and (Grayscale=SG_FALSE) then
-				FFormatType:=SG_INTENSITY
+				FFormatType:=SGR_INTENSITY
 			else
-				FFormatType:=SG_RED;
+				FFormatType:=SGR_RED;
 	end;
 2:
 	begin
 	//if (Grayscale=SG_TRUE) and (Alpha=SG_TRUE) then
-		FFormatType:=SG_LUMINANCE_ALPHA;
+		FFormatType:=SGR_LUMINANCE_ALPHA;
 		
 	end;
 3:
 	begin
-	FFormatType:=SG_RGB;
+	FFormatType:=SGR_RGB;
 	end;
 4:
 	begin
-	FFormatType:=SG_RGBA;
+	FFormatType:=SGR_RGBA;
 	end;
 else
 	FFormatType:=0;
 end;
 case FSizeChannel of
 8:
-	FDataType:=SG_UNSIGNED_BYTE;
+	FDataType:=SGR_UNSIGNED_BYTE;
 else
-	FDataType:=SG_BITMAP;
+	FDataType:=SGR_BITMAP;
 end;
 end;
 

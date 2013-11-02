@@ -298,7 +298,7 @@ for i:=0 to FComplexity-1 do
 	if FArVertexes[i].Visible then
 		begin
 		if Quantity=0 then
-			Render.BeginScene(SG_LINE_STRIP);
+			Render.BeginScene(SGR_LINE_STRIP);
 		Quantity+=1;
 		FArVertexes[i].Vertex(Render);
 		LastVertex:=i;

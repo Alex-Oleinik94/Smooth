@@ -2935,7 +2935,7 @@ Context:=FContext^;
 Render:=Context.Render;
 if FNewPosition<>FOldPosition then
 	begin
-	Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
+	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 	Render.InitMatrixMode(SG_2D);
 	Render.Color4f(1,1,1,1);
 	
@@ -3066,7 +3066,7 @@ if FNewPosition=FOldPosition then
 			
 			Context.InitializeProcedure(FContext);
 			
-			Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
+			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 			Context.Render.InitMatrixMode(SG_3D);
 			
 			SGScreen.DrawDrawClasses;
@@ -3078,7 +3078,7 @@ if FNewPosition=FOldPosition then
 			SGScreens[FNewPosition].FImage.Image.SetBounds(1024,512);
 			SGScreens[FNewPosition].FImage.ToTexture;
 			
-			Render.Clear(SG_COLOR_BUFFER_BIT OR SG_DEPTH_BUFFER_BIT);
+			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 			Context.Render.InitMatrixMode(SG_2D);
 			Render.Color4f(1,1,1,1);
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(

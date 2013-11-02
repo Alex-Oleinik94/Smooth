@@ -93,6 +93,8 @@ const
 	SGAnchorTop =                        $00000F;
 	SGAnchorBottom =                     $000010;
 	
+	SG_3D =                              $000011;
+	SG_3D_ORTHO =                        $000012;
 	SG_VERTEX_FOR_CHILDREN =             $000013;
 	SG_VERTEX_FOR_PARENT =               $000014;
 	
@@ -119,8 +121,10 @@ const
 	SG_WARNING =                         $000025;
 	SG_NOTE =                            $000026;
 	
-	SG_GLSL_3_0 =                          $000028;
-	SG_GLSL_ARB =                          $000029;
+	SG_2D =                              $000027;
+	
+	SG_GLSL_3_0 =                        $000028;
+	SG_GLSL_ARB =                        $000029;
 const
 	WinSlash = '\';
 	UnixSlash = '/';

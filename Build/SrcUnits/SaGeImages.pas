@@ -66,17 +66,17 @@ type
 		procedure FreeTexture;
 		procedure FreeAll;
 		function Ready:Boolean;virtual;
-		function GetBitMapBits:LongInt;
-		procedure SetBitMapBits(const Value:LongInt);
+		function GetBitMapBits:Cardinal;
+		procedure SetBitMapBits(const Value:Cardinal);
 			public 
-		property FormatType : LongInt read FImage.FFormatType write FImage.FFormatType;
-		property DataType : LongInt read FImage.FDataType write FImage.FDataType;
-		property Channels : LongInt read FImage.FChannels write FImage.FChannels;
-		property BitDepth: LongInt read FImage.FSizeChannel write FImage.FSizeChannel;
+		property FormatType : Cardinal read FImage.FFormatType write FImage.FFormatType;
+		property DataType : Cardinal read FImage.FDataType write FImage.FDataType;
+		property Channels : Cardinal read FImage.FChannels write FImage.FChannels;
+		property BitDepth: Cardinal read FImage.FSizeChannel write FImage.FSizeChannel;
 		property Texture : SGUint read FTexture write FTexture;
-		property Height : LongInt read FImage.FHeight write FImage.FHeight;
-		property Width : LongInt read FImage.FWidth write FImage.FWidth;
-		property Bits : LongInt read GetBitMapBits write SetBitMapBits;
+		property Height : Cardinal read FImage.FHeight write FImage.FHeight;
+		property Width : Cardinal read FImage.FWidth write FImage.FWidth;
+		property Bits : Cardinal read GetBitMapBits write SetBitMapBits;
 		property BitMap : PByte read FImage.FBitMap write FImage.FBitMap;
 		property Image : TSGBitMap read FImage;
 		property Way:string read FWay write FWay;
@@ -340,7 +340,7 @@ LoadToBitMap;
 ToTexture;
 end;
 
-procedure TSGImage.SetBitMapBits(const Value:LongInt);
+procedure TSGImage.SetBitMapBits(const Value:Cardinal);
 begin
 case Value of
 16:
@@ -367,7 +367,7 @@ end;
 FImage.CreateTypes;
 end;
 
-function TSGImage.GetBitMapBits:LongInt;
+function TSGImage.GetBitMapBits:Cardinal;
 begin
 Result:=FImage.FSizeChannel*FImage.FChannels;
 end;
@@ -441,8 +441,7 @@ end;
 class function TSGImage.IsJPEG(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
 begin
 Result:=
-	(
-	(FileBits[0]=$FF) and
+    ((FileBits[0]=$FF)and
 	(FileBits[1]=$D8) and
 	(FileBits[2]=$FF) );
 end;
@@ -496,13 +495,13 @@ end;
 
 procedure TSGImage.DisableTexture;inline;
 begin
-Render.Disable(SG_TEXTURE_2D);
+Render.Disable(SGR_TEXTURE_2D);
 //glDisable(GL_TEXTURE_2D);
 end;
 
 procedure TSGImage.BindTexture;inline;
 begin
-Render.Enable(SG_TEXTURE_2D);
+Render.Enable(SGR_TEXTURE_2D);
 {glEnable(GL_TEXTURE_2D);
 glBindTexture(GL_TEXTURE_2D,FTexture);}
 end;
@@ -629,21 +628,21 @@ glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 glTexImage2D(GL_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
 glBindTexture(GL_TEXTURE_2D, FTexture);
 glDisable(GL_TEXTURE_2D);}
-Render.Enable(SG_TEXTURE_2D);
+Render.Enable(SGR_TEXTURE_2D);
 Render.GenTextures(1, @FTexture);
-Render.BindTexture(SG_TEXTURE_2D, FTexture);
-Render.PixelStorei(SG_UNPACK_ALIGNMENT, 4);
-Render.PixelStorei(SG_UNPACK_ROW_LENGTH, 0);
-Render.PixelStorei(SG_UNPACK_SKIP_ROWS, 0);
-Render.PixelStorei(SG_UNPACK_SKIP_PIXELS, 0);
-Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_MIN_FILTER, SG_LINEAR);
-Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_MAG_FILTER, SG_NEAREST);
-Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_WRAP_S, SG_REPEAT);
-Render.TexParameteri(SG_TEXTURE_2D, SG_TEXTURE_WRAP_T, SG_REPEAT);
-Render.TexEnvi(SG_TEXTURE_ENV, SG_TEXTURE_ENV_MODE, SG_MODULATE);
-Render.TexImage2D(SG_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
-Render.BindTexture(SG_TEXTURE_2D, FTexture);
-Render.Disable(SG_TEXTURE_2D);
+Render.BindTexture(SGR_TEXTURE_2D, FTexture);
+Render.PixelStorei(SGR_UNPACK_ALIGNMENT, 4);
+Render.PixelStorei(SGR_UNPACK_ROW_LENGTH, 0);
+Render.PixelStorei(SGR_UNPACK_SKIP_ROWS, 0);
+Render.PixelStorei(SGR_UNPACK_SKIP_PIXELS, 0);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
+Render.TexEnvi(SGR_TEXTURE_ENV, SGR_TEXTURE_ENV_MODE, SGR_MODULATE);
+Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
+Render.BindTexture(SGR_TEXTURE_2D, FTexture);
+Render.Disable(SGR_TEXTURE_2D);
 FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
 	SGLog.Sourse('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');

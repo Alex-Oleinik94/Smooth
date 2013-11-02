@@ -60,7 +60,7 @@ type
 		procedure SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
 		procedure Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
 		procedure Normal(const VRender:TSGRender);
-		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SG_LIGHT0);inline;
+		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);inline;
 		procedure VertexPoint(const VRender:TSGRender);
 		procedure Write;inline;
 		procedure WriteLn;inline;
@@ -338,12 +338,12 @@ end;
 
 procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);
 begin
-VRender.BeginScene(SG_POINTS);
+VRender.BeginScene(SGR_POINTS);
 Vertex(VRender);
 VRender.EndScene();
 end;
 
-procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = {GL_LIGHT0}SG_LIGHT0);
+procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = {GL_LIGHT0}SGR_LIGHT0);
 var
 	Light:array[0..3] of TSGVertexType;
 	AmbientLight : array[0..3] of TSGVertexType = (0.5,0.5,0.5,1.0);
@@ -355,10 +355,10 @@ Light[1]:=y;
 Light[2]:=z;
 Light[3]:=2;
 VRender.Enable(Ligth);
-VRender.Lightfv(Ligth,SG_POSITION,@Light);
-VRender.Lightfv(Ligth,SG_AMBIENT, @AmbientLight);
-VRender.Lightfv(Ligth,SG_DIFFUSE, @DiffuseLight);
-VRender.Lightfv(Ligth,SG_SPECULAR, @SpecularLight);
+VRender.Lightfv(Ligth,SGR_POSITION,@Light);
+VRender.Lightfv(Ligth,SGR_AMBIENT, @AmbientLight);
+VRender.Lightfv(Ligth,SGR_DIFFUSE, @DiffuseLight);
+VRender.Lightfv(Ligth,SGR_SPECULAR, @SpecularLight);
 end;
 
 procedure TSGVertex3f.Normal(const VRender:TSGRender);
@@ -372,7 +372,7 @@ var
 begin
 b.Import(c.x,a.y,a.z);
 d.Import(a.x,c.y,a.z);
-VRender.BeginScene(SG_QUADS);
+VRender.BeginScene(SGR_QUADS);
 VRender.TexCoord2f(0,1);a.Vertex(VRender);
 VRender.TexCoord2f(1,1);b.Vertex(VRender);
 VRender.TexCoord2f(1,0);c.Vertex(VRender);
@@ -402,7 +402,7 @@ end;
 
 procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);
 begin
-VRender.BeginScene(SG_QUADS);
+VRender.BeginScene(SGR_QUADS);
 VRender.TexCoord2f(vl.x, vl.y);
 a.Vertex(VRender);
 VRender.TexCoord2f(np.x, vl.y);
@@ -490,7 +490,7 @@ begin
 if WithQuad then
 	begin
 	(QuadColor).Color(VRender);
-	VRender.BeginScene(SG_QUADS);//glBegin(GL_QUADS);
+	VRender.BeginScene(SGR_QUADS);//glBegin(GL_QUADS);
 	for i:=0 to Interval-1 do
 		begin
 		ArVertex[Interval-i].Vertex(VRender);
@@ -514,7 +514,7 @@ if WithQuad then
 if WithLines then
 	begin
 	LinesColor.Color(VRender);
-	VRender.BeginScene(SG_LINE_LOOP);//glBegin(GL_LINE_LOOP);
+	VRender.BeginScene(SGR_LINE_LOOP);//glBegin(GL_LINE_LOOP);
 	for i:=Low(ArVertex) to High(ArVertex) do
 		ArVertex[i].Vertex(VRender);
 	VRender.EndScene();//glEnd();

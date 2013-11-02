@@ -350,7 +350,7 @@ if DoAtThreads then
 				Quantity+=RecQuantity(FThreadsArray[ii].Arr6,FDepth-1);
 				end;
 			iii:=Length(FMesh.ArObjects);
-			CalculateMeshes(Quantity,SG_QUADS);
+			CalculateMeshes(Quantity,SGR_QUADS);
 			FThreadsData[i].FData:=TSGMengerSpunchFractalData.Create(iii,i*(20 div Length(FThreadsData)),(i+1)*(20 div Length(FThreadsData))-1,Self,i);
 			FThreadsData[i].FFinished:=False;
 			end;
@@ -365,7 +365,7 @@ if DoAtThreads then
 			FThreadsData[i].FFinished:=True;
 			FThreadsData[i].FData:=nil;
 			end;
-		CalculateMeshes(RecQuantity(TSGMengerSpunchBoolAr6True,FDepth),SG_QUADS);
+		CalculateMeshes(RecQuantity(TSGMengerSpunchBoolAr6True,FDepth),SGR_QUADS);
 		FThreadsData[0].FFinished:=False;
 		FThreadsData[0].FData:=TSGMengerSpunchFractalData.Create(0,0,0,Self,0);
 		FThreadsData[0].FThread:=TSGThread.Create(TSGPointerProcedure(@NewMengerThread),FThreadsData[0].FData);
@@ -374,7 +374,7 @@ if DoAtThreads then
 else
 	begin
 	Quantity:=RecQuantity(TSGMengerSpunchBoolAr6True,FDepth);
-	CalculateMeshes(Quantity,SG_QUADS);
+	CalculateMeshes(Quantity,SGR_QUADS);
 	i:=0;
 	CalculateFromThread(i,i,i);
 	end;

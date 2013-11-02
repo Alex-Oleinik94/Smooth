@@ -166,16 +166,16 @@ try
 	info_ptr := png_create_info_struct(png_ptr);
 	png_set_write_fn(png_ptr, Stream,@our_png_write_fn,@our_png_flush_fn);
 	BitMap.CreateTypes;
-	if BitMap.PixelFormat=SG_RGB then
+	if BitMap.PixelFormat=SGR_RGB then
 		ColorType:=PNG_COLOR_MASK_COLOR
 	else
-		if BitMap.PixelFormat=SG_RGBA then
+		if BitMap.PixelFormat=SGR_RGBA then
 			ColorType:=PNG_COLOR_TYPE_RGBA
 		else
-			if BitMap.PixelFormat=SG_LUMINANCE then
+			if BitMap.PixelFormat=SGR_LUMINANCE then
 				ColorType:=PNG_COLOR_TYPE_GRAY
 			else
-				if BitMap.PixelFormat=SG_LUMINANCE_ALPHA then
+				if BitMap.PixelFormat=SGR_LUMINANCE_ALPHA then
 					ColorType:=PNG_COLOR_TYPE_GRAY_ALPHA
 				else
 					ColorType:=0;
