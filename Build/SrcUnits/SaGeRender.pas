@@ -27,7 +27,7 @@ type
 		function CreateContext():Boolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
-		function SupporedGPUBuffers:Boolean;inline;
+		function SupporedGPUBuffers:Boolean;virtual;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
@@ -85,7 +85,7 @@ begin
 SGLog.Sourse('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
 end;
 
-function TSGRender.SupporedGPUBuffers:Boolean;inline;
+function TSGRender.SupporedGPUBuffers:Boolean;
 begin
 Result:=False;
 end;

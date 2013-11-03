@@ -52,6 +52,8 @@ type
 		procedure Init();override;
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
+		
+		function SupporedGPUBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
 		procedure LoadIdentity();override;
@@ -96,6 +98,11 @@ type
 		end;
 
 implementation
+
+function TSGRenderOpenGL.SupporedGPUBuffers:Boolean;
+begin
+Result:=SGIsSuppored_GL_ARB_vertex_buffer_object;
+end;
 
 procedure TSGRenderOpenGL.PointSize(const PS:Single);
 begin

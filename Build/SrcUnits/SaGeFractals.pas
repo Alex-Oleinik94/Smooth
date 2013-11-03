@@ -298,7 +298,7 @@ FSunTrigonometry[2]:=pi;
 FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedGPUBuffers;
-FShift:=336384;
+FShift:=336384;//Размерность максимального сегмента данных мешей модели
 FMeshesInfo:=nil;
 FMeshesReady:=True;
 FEnableColors:=True;
@@ -344,7 +344,20 @@ if (Not FMeshesReady) and FThreadsEnable and FEnableVBO then
 		begin 
 		FMeshesReady:=True;
 		end;
-	end;
+	end
+else
+	if (Not FMeshesReady) and FThreadsEnable and (not FEnableVBO) then
+		begin
+		ii:=1;
+		for i:=0 to High(FMeshesInfo) do
+			if FMeshesInfo[i]<>SG_TRUE then
+				begin
+				ii:=0;
+				Break;
+				end;
+		if ii=1 then
+			FMeshesReady:=True;
+		end;
 if FLightingEnable then
 	begin
 	FSunTrigonometry[0]+=pi/90		/20;
