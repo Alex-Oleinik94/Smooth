@@ -483,7 +483,8 @@ end;
 class function TSGGLImage.UnProjectShift:TSGPoint2f;
 begin
 //Result:=TSGViewportObject.Smezhenie;
-	{$}Result.Import;
+	//onu:{$}
+	Result.Import();
 end;
 
 procedure TSGGLImage.ImportFromDispley(const NeedAlpha:Boolean = True);

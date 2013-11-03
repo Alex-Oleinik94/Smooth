@@ -391,7 +391,7 @@ procedure TSGModel.LoadWRLFromFile(const FileWay: string);
 var
 	Text:TextFile;
 	Id:string;
-	b:byte;
+//nu:	b:byte;
 begin
 if SGFileExists(FileWay) then
 	begin
@@ -492,7 +492,7 @@ end;
 
 procedure TSG3DObject.Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
 var
-	i,ii,iii,iiii:LongWord;
+	i,ii,iiii:LongWord;
 	
 	ArEmptyIdentites:packed array of 
 		packed record

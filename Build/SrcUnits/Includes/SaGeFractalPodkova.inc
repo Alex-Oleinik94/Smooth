@@ -3,7 +3,7 @@
 type
 	TSGFractalPodkova=class(TSG3DFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -45,7 +45,7 @@ var
 procedure Rec(const t1,t2:TSGVertex;const NowDepth:LongWord;const b:integer = 1);
 var
 	V:TSGVertex3f;
-	NewType:Byte;
+//nu:	NewType:Byte;
 begin
 if NowDepth>0 then
 	begin  
@@ -145,9 +145,9 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalPodkova.Create;
+constructor TSGFractalPodkova.Create(const VContext:PSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FEnableColors:=False;
 FEnableNormals:=False;
 Threads:=1;

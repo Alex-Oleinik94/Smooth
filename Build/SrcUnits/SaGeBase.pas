@@ -866,7 +866,7 @@ end;
 procedure FindInPas(const Cmd:Boolean = False);
 var
 	ArWords:array of string = nil;
-	Stream:TFileStream = nil;
+//nu:	Stream:TFileStream = nil;
 	Oy:LongWord;
 	PF,PS:LongWord;
 	FArF:packed array of TFileStream = nil;

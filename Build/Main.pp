@@ -55,13 +55,13 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
-	{Add(TSGFractalLomanaya);
-	Add(TSGFractalPodkova);}
+	Add(TSGFractalLomanaya);
+	Add(TSGFractalPodkova);
 	Add(TSGFractalKohTriangle);
 	Add(TSGKillKostia);
 	Add(TSGFractalMengerSpunchRelease);
-	{Add(TSGFractalMandelbrodRelease);
-	Add(TSGGenAlg);
+	Add(TSGFractalMandelbrodRelease);
+	{Add(TSGGenAlg);
 	Add(TSGGraphic);
 	Add(TSGGraphViewer);
 	Add(TSGGraphViewer3D);}

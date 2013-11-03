@@ -3,7 +3,7 @@ type
 	TSGFractalMandelbrodThreadData=class;
 	TSGFractalMandelbrod=class(TSGImageFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		//destructor Destroy;override;
 			public
 		FZNumber:TSGComplexNumber;
@@ -45,10 +45,12 @@ type
 		end;
 
 procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadData);
+
+
 type
 	TSGFractalMandelbrodRelease=class(TSGDrawClass)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -260,7 +262,7 @@ var
 	i:LongInt;
 	ii:LongInt = 5;
 begin
-Manda:=TSGFractalMandelbrod.Create;
+Manda:=TSGFractalMandelbrod.Create(FContext);
 Manda.Width:=StartDepth;
 Manda.Height:=StartDepth;
 Manda.FZNumber.Import(-0.181,0.66);
@@ -446,9 +448,9 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 end;
 
 
-constructor TSGFractalMandelbrodRelease.Create;
+constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FArProgressBar:=nil;
 Changet:=False;
 SelectPointEnabled:=False;
@@ -1047,9 +1049,9 @@ if FImage.Ready then
 end;
 
 
-constructor TSGFractalMandelbrod.Create;
+constructor TSGFractalMandelbrod.Create(const VContext:PSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FImage:=nil;
 FZNumber.Import(0,0.65);
 FView.Import(-1.5,-1.5*(Context.Height/Context.Width),1.5,1.5*(Context.Height/Context.Width));

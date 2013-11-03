@@ -490,6 +490,7 @@ if FImage=nil then
 	FImage:=TSGGLImage.Create
 else
 	FImage.FreeAll;
+FImage.SetContext(FContext);
 FImage.FImage.Clear;
 FImage.Width:=FDepth;
 FImage.Height:=FDepth*Byte(FDepthHeight=0)+FDepthHeight;

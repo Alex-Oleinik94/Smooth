@@ -3,7 +3,7 @@
 type
 	TSGFractalLomanaya=class(TSG3DFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -132,9 +132,9 @@ with TSGFractalLomanaya(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalLomanaya.Create;
+constructor TSGFractalLomanaya.Create(const VContext:PSGContext);
 begin
-inherited;
+inherited Create(VContext);
 c17:=1/7;
 c27:=2/7;
 c37:=3/7;

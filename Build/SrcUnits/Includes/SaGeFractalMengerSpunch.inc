@@ -429,7 +429,7 @@ if NowDepth<=0 then
 	ArVerts[9-3].Import(T1.x+NewQ,		T1.y+NewQ,		T1.z);
 	ArVerts[9-2].Import(T1.x+NewQ,		T1.y+NewQ,		T1.z+NewQ);
 	ArVerts[9-1].Import(T1.x,			T1.y+NewQ,		T1.z+NewQ);
-	Delay(10);
+	//Delay(10);
 	for i:=0 to 5 do
 		begin
 		if ArTP[i] then
@@ -678,8 +678,8 @@ if FDeep = FMengerPlus then
 end;
 
 procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord);inline;
-var
-	B:boolean = False;
+//var
+//abnu:	B:boolean = False;
 begin
 FMesh.ArObjects[MeshID].FNOfVerts+=4;
 FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-4]:=i1;
