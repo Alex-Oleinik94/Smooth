@@ -138,12 +138,14 @@ try
 			png_destroy_read_struct(@png_ptr, @info_ptr, nil);
 		end;
 except
+	SGLog.Sourse('SaGeImagesPNG : Exeption in loading pnd!');
 	BitMap.Clear;
 	end;
+
 if (WarningsList<>nil) or (Length(WarningsList)<>0) then
 	begin
 	for i:= 0 to High(WarningsList) do
-		SGLog.Sourse('LoadPNG(TStream,TBiyMap) WarningsList : '+WarningsList[i]);
+		SGLog.Sourse('LoadPNG(TStream,TBitMap) WarningsList : '+WarningsList[i]);
 	SetLength(WarningsList,0);
 	end;
 end;

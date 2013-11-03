@@ -525,6 +525,7 @@ procedure TSGImage.LoadToBitMap;
 var
 	Loaded:Boolean = False;
 begin
+FStream.Position:=0;
 if (FStream.Size<2) then
 	exit;
 if (not Loaded) and IsBMP(FStream.Memory,FStream.Size) then
@@ -610,24 +611,17 @@ FStream.LoadFromFile(Way);
 end;
 
 procedure TSGImage.ToTexture;
+var
+	ddname:string;
+	dds:TFileStream;
 begin
 if FTexture<>0 then
 	FreeTexture;
-{glEnable(GL_TEXTURE_2D);
-glGenTextures(1, @FTexture);
-glBindTexture(GL_TEXTURE_2D, FTexture);
-glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-glTexImage2D(GL_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
-glBindTexture(GL_TEXTURE_2D, FTexture);
-glDisable(GL_TEXTURE_2D);}
+ddname:=SGGetFreeFileName('Vasia');
+dds:=TFileStream.Create(ddname,fmCreate);
+dds.WriteBuffer(FImage.FBitMap^,Channels*Width*Height);
+dds.Destroy;
+
 Render.Enable(SGR_TEXTURE_2D);
 Render.GenTextures(1, @FTexture);
 Render.BindTexture(SGR_TEXTURE_2D, FTexture);
