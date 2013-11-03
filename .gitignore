@@ -1,4 +1,5 @@
 *.ini
+Data/EngineLog.log
 Build/CompiledUnits/*
 Build/SrcUnits/*.o
 Build/SrcUnits/*.a

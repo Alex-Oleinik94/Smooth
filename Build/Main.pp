@@ -59,8 +59,8 @@ with TSGDrawClasses.Create(MyContext) do
 	Add(TSGFractalPodkova);}
 	Add(TSGFractalKohTriangle);
 	Add(TSGKillKostia);
-	{Add(TSGFractalMengerSpunchRelease);
-	Add(TSGFractalMandelbrodRelease);
+	Add(TSGFractalMengerSpunchRelease);
+	{Add(TSGFractalMandelbrodRelease);
 	Add(TSGGenAlg);
 	Add(TSGGraphic);
 	Add(TSGGraphViewer);

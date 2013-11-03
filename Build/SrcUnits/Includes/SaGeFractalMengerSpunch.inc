@@ -9,7 +9,7 @@ const
 type
 	TSGFractalMengerSpunch=class(TSG3DFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -44,7 +44,7 @@ type
 		
 	TSGFractalMengerSpunchRelease=class(TSGFractalMengerSpunch)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 			public
 		FComboBox1,FComboBox2:TSGComboBox;
@@ -143,12 +143,13 @@ inherited;
 WriteSize;
 end;
 
-constructor TSGFractalMengerSpunchRelease.Create;
+constructor TSGFractalMengerSpunchRelease.Create(const VContext:PSGContext);
 begin
-inherited Create();
+inherited Create(VContext);
 FSizeWriteTrue:=False;
 
 FFont1:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+FFont1.SetContext(FContext);
 FFont1.Loading;
 
 InitProjectionComboBox(Context.Width-250-90-125-155,5{+Context.TopShift},150,30,[SGAnchRight],true);
@@ -276,7 +277,8 @@ end;
 
 destructor TSGFractalMengerSpunchRelease.Destroy;
 begin
-FLabelSize.Font:=nil;
+if FLabelSize<>nil then 
+	FLabelSize.Font:=nil;
 if FComboBox1<>nil then FComboBox1.Destroy;
 if FButtonDepthMinus<>nil then FButtonDepthMinus.Destroy;
 if FButtonDepthPlus<>nil then FButtonDepthPlus.Destroy;
@@ -380,9 +382,9 @@ else
 	end;
 end;
 
-constructor TSGFractalMengerSpunch.Create();
+constructor TSGFractalMengerSpunch.Create(const VContext:PSGContext);
 begin
-inherited Create;
+inherited Create(VContext);
 FDeep:=FMengerCube;
 FEnableColors:=True;
 FEnableNormals:=True;
