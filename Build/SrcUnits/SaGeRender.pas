@@ -21,7 +21,9 @@ type
 			protected
 		FWindow:TSGClass;
 			public
-		procedure MakeCurrent();virtual;abstract;
+		function SetPixelFormat():Boolean;virtual;abstract;overload;
+		procedure MakeCurrent();virtual;
+		procedure ReleaseCurrent();virtual;abstract;
 		function CreateContext():Boolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
@@ -49,7 +51,7 @@ type
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);virtual;abstract;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);virtual;abstract;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);virtual;abstract;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer);virtual;abstract;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);virtual;abstract;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);virtual;abstract;
 		procedure CullFace(const VParam:Cardinal);virtual;abstract;
 		procedure EnableClientState(const VParam:Cardinal);virtual;abstract;
@@ -72,8 +74,15 @@ type
 
 implementation
 
+procedure TSGRender.MakeCurrent();
+begin
+SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited methad!!');
+end;
+
 procedure TSGRender.Enable(VParam:Cardinal);
-begin end;
+begin 
+SGLog.Sourse('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
+end;
 
 function TSGRender.SupporedGPUBuffers:Boolean;inline;
 begin
@@ -87,6 +96,7 @@ end;
 
 destructor TSGRender.Destroy;
 begin
+SGLog.Sourse(['TSGRender__Destroy()']);
 inherited;
 end;
 

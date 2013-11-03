@@ -114,8 +114,6 @@ type
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:LongInt);virtual;overload;
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;overload;
 			public
-		function GetRC:LongWord;virtual;abstract;
-		procedure SetRC(const NewRC:LongWord);virtual;abstract;
 		procedure CopyInfo(const C:TSGContext);virtual;
 			public
 		FNewContextType:TSGContextClass;
@@ -264,7 +262,7 @@ else
 			end;
 		end;
 FFullscreen:=b;
-Resize;
+Resize();
 end;
 
 function TSGContext.KeyPressedType:TSGCursorButtonType;inline;overload;

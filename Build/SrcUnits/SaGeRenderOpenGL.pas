@@ -45,8 +45,10 @@ type
 		{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
 		{$UNDEF SG_RENDER_EIC}
 			public
+		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		procedure MakeCurrent();override;
+		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
@@ -73,7 +75,7 @@ type
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer);override;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);override;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);override;
 		procedure CullFace(const VParam:Cardinal);override;
 		procedure EnableClientState(const VParam:Cardinal);override;
@@ -179,7 +181,7 @@ begin
 glTexEnvi(VP1,VP2,VP3);
 end;
 
-procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;const VBitMap:Pointer); 
+procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
 begin 
 glTexImage2D(VTextureType,VP1,VChannels,VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
@@ -418,32 +420,56 @@ function TSGRenderOpenGL.CreateContext():Boolean;
 	var
 		FDisplay:PDisplay;
 {$ELSE}
-	{$IFDEF MSWINDOWS}
-		var
-			pfd : PIXELFORMATDESCRIPTOR;
-			iFormat : integer;
-		{$ENDIF}
+	
 	{$ENDIF}
 begin
+Result:=False;
 {$IFDEF UNIX}
 	FDisplay:=XOpenDisplay(nil);
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		FillChar(pfd, sizeof(pfd), 0);
-		pfd.nSize         := sizeof(pfd);
-		pfd.nVersion      := 1;
-		pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
-		pfd.iPixelType    := PFD_TYPE_RGBA;
-		pfd.cColorBits    := 32;
-		pfd.cDepthBits    := 24;
-		pfd.iLayerType    := PFD_MAIN_PLANE;
-		iFormat := ChoosePixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), @pfd );
-		SetPixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), iFormat, @pfd );
-		FContext := wglCreateContext( LongWord(FWindow.Get('WINDOW HANDLE')) );
+		if SetPixelFormat() then
+			FContext := wglCreateContext( LongWord(FWindow.Get('WINDOW HANDLE')) );
+		Result:=FContext<>0;
 		{$ENDIF}
 	{$ENDIF}
-MakeCurrent();
+if Result then
+	MakeCurrent();
+end;
+
+procedure TSGRenderOpenGL.ReleaseCurrent();
+begin
+{$IFDEF UNIX}
+	if (FWindow<>0) and (FContext<>nil) then 
+		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('WINDOW HANDLE')),nil);
+{$ELSE}
+	{$IFDEF MSWINDOWS}
+		if (FWindow<>nil)  then 
+			wglMakeCurrent( LongWord(FWindow.Get('WINDOW HANDLE')), 0 );
+		{$ENDIF}
+	{$ENDIF}
+end;
+
+function TSGRenderOpenGL.SetPixelFormat():Boolean;overload;
+{$IFDEF MSWINDOWS}
+	var
+		pfd : PIXELFORMATDESCRIPTOR;
+		iFormat : integer;
+	{$ENDIF}
+begin
+{$IFDEF MSWINDOWS}
+	FillChar(pfd, sizeof(pfd), 0);
+	pfd.nSize         := sizeof(pfd);
+	pfd.nVersion      := 1;
+	pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
+	pfd.iPixelType    := PFD_TYPE_RGBA;
+	pfd.cColorBits    := 32;
+	pfd.cDepthBits    := 24;
+	pfd.iLayerType    := PFD_MAIN_PLANE;
+	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), @pfd );
+	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), iFormat, @pfd );
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.MakeCurrent();
@@ -453,6 +479,7 @@ begin
 		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('WINDOW HANDLE')),FContext);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
+		SGLog.Sourse(['TSGRender__MakeCurrent() : Info : dcWnd=',LongWord(FWindow.Get('WINDOW HANDLE')),', FContext=',FContext,', @wglMakeCurrent=',LongWord(@wglMakeCurrent),'.']);
 		if (FWindow<>nil) and (FContext<>0) then 
 			wglMakeCurrent( LongWord(FWindow.Get('WINDOW HANDLE')), FContext );
 		{$ENDIF}

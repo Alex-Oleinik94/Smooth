@@ -53,7 +53,6 @@ type
 			public
 		hWindow:HWnd;
 		dcWindow:hDc;
-		rcWindow:HGLRC;
 		clWindow:LongWord;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  WindowRegister: Boolean;
@@ -62,8 +61,6 @@ type
 		procedure KillOGLWindow(const KillRC:Boolean = True);
 		function  CreateOGLWindow():Boolean;
 			public
-		function  GetRC:LongWord;override;
-		procedure SetRC(const NewRC:LongWord);override;
 		function Get(const What:string):Pointer;override;
 		end;
 	
@@ -117,28 +114,6 @@ begin
 Windows.ShowCursor(B);
 end;
 
-function TSGContextWinAPI.GetRC:LongWord;
-begin
-Result:=rcWindow;
-end;
-
-procedure TSGContextWinAPI.SetRC(const NewRC:LongWord);
-begin
-rcWindow:=NewRC;
-end;
-
-procedure TSGContextWinAPI.InitFullscreen(const b:boolean); 
-begin
-if hWindow=0 then
-	inherited InitFullscreen(b)
-else
-	begin
-	KillOGLWindow(False);
-	inherited InitFullscreen(b);
-	CreateOGLWindow;
-	end;
-end;
-
 function TSGContextWinAPI.MouseShift:TSGPoint2f;
 begin
 Result.Import(-3*Byte(not FFullscreen),3*Byte(not FFullscreen));
@@ -178,14 +153,14 @@ constructor TSGContextWinAPI.Create;
 begin
 inherited;
 hWindow:=0;
-rcWindow:=0;
 dcWindow:=0;
 clWindow:=0;
 end;
 
 destructor TSGContextWinAPI.Destroy;
 begin
-KillOGLWindow;
+KillOGLWindow();
+SetLength(SGContexts,0);
 inherited;
 end;
 
@@ -193,7 +168,7 @@ procedure TSGContextWinAPI.Initialize();
 var
 	Succs:Boolean;
 begin
-Succs:=CreateOGLWindow;
+Succs:=CreateOGLWindow();
 Active:=Succs;
 if Active then
 	begin
@@ -478,6 +453,7 @@ else
 		if ChangeDisplaySettings(@dmScreenSettings,CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then 
 			begin
 			ThrowError('Screen resolution is not supported by your gfx card!');
+			SGLog.Sourse('Screen resolution is not supported by your gfx card!');
 			WindowCreate := 0;
 			Exit;
 			end;
@@ -506,53 +482,34 @@ Result := hWindow2;
 end;
 
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
-{var
-	FunctionError : integer;
-	pfd : PIXELFORMATDESCRIPTOR;
-	iFormat : integer;}
 begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent=',hParent,') : Enter']);
 	{$ENDIF}
-//FunctionError := 0;
 dcWindow := GetDC( hParent );
-//writeln('dcWindow=',dcWindow);
-{FillChar(pfd, sizeof(pfd), 0);
-pfd.nSize         := sizeof(pfd);
-pfd.nVersion      := 1;
-pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
-pfd.iPixelType    := PFD_TYPE_RGBA;
-pfd.cColorBits    := 32;
-pfd.cDepthBits    := 24;
-pfd.iLayerType    := PFD_MAIN_PLANE;
-iFormat := ChoosePixelFormat( dcWindow, @pfd );
-if (iFormat = 0) then 
-	FunctionError := 1;
-SetPixelFormat( dcWindow, iFormat, @pfd );
-if rcWindow=0 then
-	begin
-	rcWindow := wglCreateContext( dcWindow );
-	if (rcWindow = 0) then 
-		FunctionError := 2;
-	end;
-wglMakeCurrent( dcWindow, rcWindow );
-if FunctionError = 0 then 
-	Result := true 
-else 
-	Result := false;}
 if FRender=nil then
 	begin
+	{$IFDEF SGWinAPIDebug}
+		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
+		{$ENDIF}
 	FRender:=FRenderClass.Create();
 	FRender.Window:=Self;
 	Result:=FRender.CreateContext();
 	if Result then 
 		FRender.Init();
+	{$IFDEF SGWinAPIDebug}
+		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		{$ENDIF}
 	end
 else
 	begin
+	{$IFDEF SGWinAPIDebug}
+		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		{$ENDIF}
 	FRender.Window:=Self;
-	FRender.MakeCurrent();
-	Result:=True;
+	Result:=FRender.SetPixelFormat();
+	if Result then
+		Render.MakeCurrent();
 	end;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
@@ -566,7 +523,7 @@ begin
 	{$ENDIF}
 if not WindowRegister then
 		begin
-		//ThrowError('Could not register the Application Window!');
+		ThrowError('Could not register the Application Window!');
 		SGLog.Sourse('Could not register the Application Window!');
 		CreateOGLWindow := false;
 		Exit;
@@ -579,14 +536,16 @@ else
 	SetLength(SGContexts,Length(SGContexts)+1);
 SGContexts[High(SGContexts)]:=Self;
 
-if longint(hWindow) = 0 then begin
-	//ThrowError('Could not create Application Window!');
+if longint(hWindow) = 0 then 
+	begin
+	ThrowError('Could not create Application Window!');
 	SGLog.Sourse('Could not create Application Window!');
 	CreateOGLWindow := false;
 	Exit;
 	end;
-if not WindowInit(hWindow) then begin
-	//ThrowError('Could not initialise Application Window!');
+if not WindowInit(hWindow) then 
+	begin
+	ThrowError('Could not initialise Application Window!');
 	SGLog.Sourse('Could not initialise Application Window!');
 	CreateOGLWindow := false;
 	Exit;
@@ -599,16 +558,14 @@ end;
 
 procedure TSGContextWinAPI.KillOGLWindow(const KillRC:Boolean = True);
 begin
-{if dcWindow<>0 then
-	wglMakeCurrent( dcWindow, 0 );}
-{if KillRC and (rcWindow<>0) then
-	begin
-	wglDeleteContext( rcWindow );
-	CloseHandle(rcWindow);
-	rcWindow:=0;
-	end;}
-if FRender<>nil then
-	FRender.Destroy;
+if (FRender<>nil) and (KillRC) then
+	FRender.Destroy
+else
+	if (FRender<>nil) and (not KillRC) then
+		begin
+		FRender.ReleaseCurrent();
+		FRender.Window:=nil;
+		end;
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
 if (dcWindow<>0) then
@@ -622,6 +579,20 @@ if hWindow<>0 then
 	begin
 	CloseHandle( hWindow);
 	hWindow:=0;
+	end;
+UnregisterClass('SaGe Window', System.MainInstance);
+end;
+
+procedure TSGContextWinAPI.InitFullscreen(const b:boolean); 
+begin
+if hWindow=0 then
+	inherited InitFullscreen(b)
+else if Fullscreen<> b then
+	begin
+	inherited InitFullscreen(b);
+	KillOGLWindow(False);
+	Active:=True;
+	CreateOGLWindow;
 	end;
 end;
 

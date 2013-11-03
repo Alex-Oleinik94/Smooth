@@ -123,11 +123,12 @@ if Context.Active and (Context.FNewContextType<>nil) then
 	NewContext:=Context.FNewContextType.Create;
 	NewContext.CopyInfo(Context);
 	NewContext.FCallInitialize:=nil;
-	Context.Render:=nil;
+	Pointer(Context.FRender):=nil;
 	Context.Destroy;
 	Context:=NewContext;
 	NewContext:=nil;
 	Context.Initialize;
+	SGLog.Sourse('GoGUI : Context.Active and (Context.FNewContextType<>nil)');
 	end;
 
 until (Context.Active = False);

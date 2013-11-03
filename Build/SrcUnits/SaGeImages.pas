@@ -611,16 +611,9 @@ FStream.LoadFromFile(Way);
 end;
 
 procedure TSGImage.ToTexture;
-var
-	ddname:string;
-	dds:TFileStream;
 begin
 if FTexture<>0 then
 	FreeTexture;
-ddname:=SGGetFreeFileName('Vasia');
-dds:=TFileStream.Create(ddname,fmCreate);
-dds.WriteBuffer(FImage.FBitMap^,Channels*Width*Height);
-dds.Destroy;
 
 Render.Enable(SGR_TEXTURE_2D);
 Render.GenTextures(1, @FTexture);
