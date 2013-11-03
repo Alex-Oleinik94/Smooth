@@ -8,6 +8,7 @@ uses
 	,SaGeBase
 	,SaGeCommon
 	,SysUtils
+	,SaGeRender
 	;
 type
 	{
@@ -19,17 +20,17 @@ type
 	TSGProgram=class;
 	TSGShader=class(TObject)
 			public
-		constructor Create(const ShaderType:LongWord = GL_VERTEX_SHADER;const Version:LongWord = SG_GLSL_ARB);
+		constructor Create(const ShaderType:LongWord = SGR_VERTEX_SHADER;const Version:LongWord = SG_GLSL_ARB);
 		destructor Destroy;override;
 		procedure Compile;inline;
 		procedure Sourse(const s:string);overload;
 		procedure PrintInfoLog;
 			private
-		FShader:GLuint;
+		FShader:LongWord;
 		FType:LongWord;
 		FVersion:LongWord;
 			public
-		property Shader:GLuint read FShader;
+		property Shader:LongWord read FShader;
 		end;
 	TSGProgram=class(TObject)
 			public
@@ -37,7 +38,7 @@ type
 		destructor Destroy;override;
 		procedure Attach(const NewShader:TSGShader);
 			private
-		FProgram:GLuint;
+		FProgram:LongWord;
 		FShaders:
 			packed array of
 				TSGShader;

@@ -65,7 +65,7 @@ const
 type
 	TSGKillKostia=class(TSGDrawClass)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -304,11 +304,11 @@ with TSGKillKostia(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGKillKostia.Create;
+constructor TSGKillKostia.Create(const VContext:PSGContext);
 var
 	i:LongWord;
 begin
-inherited;
+inherited Create (VContext);
 FStartDeep:=8;
 FSkulls:=nil;
 FRespamn:=True;
@@ -558,6 +558,7 @@ if (FImageBlock=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageBlock<>nil then
 		FImageBlock.Destroy;
 	FImageBlock:=TSGGLImage.Create;
+	FImageBlock.SetContext(FContext);
 	with FImageBlock do
 		begin
 		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Block.png';
@@ -573,6 +574,7 @@ if (FImageBullet=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageBullet<>nil then
 		FImageBullet.Destroy;
 	FImageBullet:=TSGGLImage.Create;
+	FImageBullet.SetContext(FContext);
 	with FImageBullet do
 		begin
 		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Bullet.png';
@@ -591,24 +593,10 @@ if (FImageKostia=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageKostia<>nil then
 		FImageKostia.Destroy;
 	FImageKostia:=TSGGLImage.Create;
+	FImageKostia.SetContext(FContext);
 	with FImageKostia do
 		begin
 		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Standart Kostia.png';
-		LoadToMemory;
-		LoadToBitMap;
-		Image.SetBounds(ii,ii);
-		ToTexture;
-		end;
-	end;
-
-if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageSkull<>nil then
-		FImageSkull.Destroy;
-	FImageSkull:=TSGGLImage.Create;
-	with FImageSkull do
-		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -621,9 +609,26 @@ if (FImageYou=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageYou<>nil then
 		FImageYou.Destroy;
 	FImageYou:=TSGGLImage.Create;
+	FImageYou.SetContext(FContext);
 	with FImageYou do
 		begin
 		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'You.png';
+		LoadToMemory;
+		LoadToBitMap;
+		Image.SetBounds(ii,ii);
+		ToTexture;
+		end;
+	end;
+	
+if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
+	begin
+	if FImageSkull<>nil then
+		FImageSkull.Destroy;
+	FImageSkull:=TSGGLImage.Create;
+	FImageSkull.SetContext(FContext);
+	with FImageSkull do
+		begin
+		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -1099,7 +1104,10 @@ begin
 if a<>b then
 	begin
 	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy;
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw:=(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].Create;
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw:=
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].Create(
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FContext
+	);
 	end;
 end;
 

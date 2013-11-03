@@ -47,7 +47,7 @@ type
 		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);virtual;abstract;
 		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
-		procedure BindTexture(const VParam:Cardinal;const VTexture:SGUInt);virtual;abstract;
+		procedure BindTexture(const VParam:Cardinal;const VTexture:Cardinal);virtual;abstract;
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);virtual;abstract;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);virtual;abstract;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);virtual;abstract;
@@ -68,6 +68,7 @@ type
 		function IsEnabled(const VParam:Cardinal):Boolean;virtual;abstract;
 		procedure Clear(const VParam:Cardinal);virtual;abstract;
 		procedure LineWidth(const VLW:Single);virtual;abstract;
+		procedure PointSize(const PS:Single);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

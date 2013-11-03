@@ -9,20 +9,21 @@ uses
 	,SaGeFractals
 	,SaGeUtils
 	,SaGeContext
-	,SaGeShaders
+	//,SaGeShaders
 	,SaGeCL
 	,SaGeNet
 	,SaGeMath
 	,SaGeGeneticalAlgoritm
-	,SaGeBase;
-type
+	,SaGeBase
+	,SaGeRender;
+{type
 	TSGExampleShader=class(TSGDrawClass)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
-		end;
+		end;}
 const
 	mNothink=0;
 	mGround=1;
@@ -84,7 +85,7 @@ type
 			public
 		FAskConnection,FSayConnection:TSGUDPConnection;
 		end;
-type
+{type
 	TSGBezierCurve =object
 		StartArray : TArTSGVertex3f;
 		EndArray : TArTSGVertex3f;
@@ -98,7 +99,8 @@ type
 		function GetDetalization:longword;
 		procedure CalculateRandom(Detalization1,KolVertex,Diapazon:longint);
 		end;
-	SGBezierCurve = TSGBezierCurve;
+	SGBezierCurve = TSGBezierCurve;}
+	
 {$DEFINE SGREADINTERFACE}
 {$i Includes\SaGeExampleGraphViewer.inc}
 {$i Includes\SaGeExampleGeneticalAlgoritm.inc}
@@ -113,7 +115,7 @@ implementation
 {$i Includes\SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
-procedure TSGBezierCurve.Calculate;
+{procedure TSGBezierCurve.Calculate;
 var
 	i:longword;
 
@@ -182,7 +184,7 @@ procedure TSGBezierCurve.Init(const p:Pointer = nil);
 var	
 	i:longint;
 begin
-GlBegin(GL_LINE_STRIP);
+GlBegin(SGR_LINE_STRIP);
 for i:=Low(EndArray) to High(EndArray) do
 	begin
 	EndArray[i].Vertex(p);
@@ -202,9 +204,9 @@ for i:=1 to KolVertex do
 		SGRandomMinus*random(Diapazon)/(random(Diapazon)+1),
 		SGRandomMinus*random(Diapazon)/(random(Diapazon)+1)));
 Calculate;
-end;
+end;}
 
-procedure mmmSeaBatleReceieve(Parant:TSGUDPConnection;AStream:TMemoryStream; aSocket: TSGSocket);
+{procedure mmmSeaBatleReceieve(Parant:TSGUDPConnection;AStream:TMemoryStream; aSocket: TSGSocket);
 begin
 
 end;
@@ -233,7 +235,7 @@ end;
 procedure TSGSeaBatle.Draw;
 begin
 
-end;
+end;}
 
 {procedure OZConnect;
 begin
@@ -406,7 +408,7 @@ FMesh:=TSG3DObject.Create;
 with FMesh do
 	begin
 	FEnableCullFace:=False;
-	FPoligonesType:=GL_QUADS;
+	FPoligonesType:=SGR_QUADS;
 	FHasTexture:=True;
 	FillChar(Ar,SizeOf(Ar),0);
 	FObjectColor:=SGGetColor4fFromLongWord($FFFFFFFF);
@@ -532,13 +534,13 @@ SGLookAt(
 if (SGContext.KeyPressedByte=112) and (SGContext.KeyPressedType=SGDownKey) then
 	FWorld[0].FMeshReady:= not FWorld[0].FMeshReady;
 
-glEnable(GL_CULL_FACE);
-glCullFace(GL_FRONT);
+glEnable(SGR_CULL_FACE);
+glCullFace(SGR_FRONT);
 FTerrain.BindTexture;
 for i:=0 to High(FWorld) do
 	FWorld[i].Draw;
 FTerrain.DisableTexture;
-glDisable(GL_CULL_FACE);
+glDisable(SGR_CULL_FACE);
 end;
 
 destructor mChank.Destroy;
@@ -572,60 +574,60 @@ case t of
 	end;
 	
 	SGColor3f(1,1,1);
-	glBegin(GL_QUADS);
+	glBegin(SGR_QUADS);
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	(p3+SGVertexImport(1,1,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGVertexImport(1,0,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(1,0,0)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(1,1,0)).Vertex;
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	(p3+SGVertexImport(1,1,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGVertexImport(0,1,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(0,0,1)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(1,0,1)).Vertex;
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	(p3+SGVertexImport(1,1,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGVertexImport(0,1,1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(0,1,0)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGVertexImport(1,1,0)).Vertex;
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	p3.Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGX(1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGX(1)+SGY(1)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGY(1)).Vertex;
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	p3.Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGZ(1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGZ(1)+SGY(1)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGY(1)).Vertex;
 	
-	glTexCoord2f(c116*i+c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c1256);
 	p3.Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c1256);
 	(p3+SGX(1)).Vertex;
-	glTexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c116-c1256,c116*ii+c116-c1256);
 	(p3+SGX(1)+SGZ(1)).Vertex;
-	glTexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
+	Render.TexCoord2f(c116*i+c1256,c116*ii+c116-c1256);
 	(p3+SGZ(1)).Vertex;
 	glEnd();
 	end;
@@ -657,12 +659,12 @@ end;
 
 
 
-constructor TSGExampleShader.Create;
+{constructor TSGExampleShader.Create;
 var
 	Shader:TSGShader = nil;
 begin
 inherited;
-Shader:=TSGShader.Create(GL_VERTEX_SHADER);
+Shader:=TSGShader.Create(SGR_VERTEX_SHADER);
 Shader.Sourse(
 	'#version 150'+#13+#10+
 	'uniform mat4 viewMatrix, projMatrix;'+#13+#10+
@@ -695,7 +697,7 @@ end;
 procedure TSGExampleShader.Draw;
 begin
 
-end;
+end;}
 
 
 end.

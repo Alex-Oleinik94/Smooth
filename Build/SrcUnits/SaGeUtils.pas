@@ -310,7 +310,7 @@ var
 	ToExit:Boolean = False;
 	SimbolWidth:LongWord = 0;
 begin
-BindTexture;
+BindTexture();
 StringWidth:=StringLength(S);
 if AutoXShift then
 	begin
@@ -400,7 +400,7 @@ if RePlace then
 	begin
 	RePlacVertex(Vertex1,Vertex2,rePlaceY);
 	end;
-BindTexture;
+BindTexture();
 Render.BeginScene(SGR_QUADS);
 DoTexCoord(Rotation);
 Vertex1.Vertex(Render);
@@ -411,7 +411,7 @@ Vertex2.Vertex(Render);
 DoTexCoord(Rotation+3);
 Render.Vertex2f(Vertex1.x,Vertex2.y);
 Render.EndScene();
-DisableTexture;
+DisableTexture();
 end;
 
 procedure TSGGLImage.DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;

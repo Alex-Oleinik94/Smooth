@@ -136,9 +136,8 @@ end;
 
 procedure GAFindMin(Button:TSGComponent);
 var
-	Min,Max,ii,iii:Extended;
+	Min,Max:Extended;
 	Ex:TSGExpression = nil;
-	i:LongInt;
 begin
 Button.Parent.Visible:=False;
 with TSGGenAlg(Button.FUserPointer1) do
@@ -177,17 +176,17 @@ with TSGGenAlg(Button.FUserPointer1) do
 	Max:=FResultFP+Abs(b-a)/2;
 	Min:=FResultFP-Abs(b-a)/2;
 	FG.View.Import(
-		a-Abs(b-a)/2*(1/(SGContext.Height/SGContext.Width)),
+		a-Abs(b-a)/2*(1/(Context.Height/Context.Width)),
 		Min-Abs(b-a)/2,
-		b+Abs(b-a)/2*(1/(SGContext.Height/SGContext.Width)),
+		b+Abs(b-a)/2*(1/(Context.Height/Context.Width)),
 		Max+Abs(b-a)/2);
 	FG.Construct(True);
 	
 	FLPoint.Caption:=SGStringToPChar('('+SGStrReal(FFindPoint,5)+','+SGStrReal(FResultFP,5)+')');
 	FNB.Visible:=True;
 	FLPoint.SetBounds(
-		SGContext.Width-5-FLPoint.Font.StringLength(FLPoint.Caption),
-		SGContext.Height-25,
+		Context.Width-5-FLPoint.Font.StringLength(FLPoint.Caption),
+		Context.Height-25,
 		FLPoint.Font.StringLength(FLPoint.Caption),
 		21);
 	FLPoint.Visible:=True;
@@ -204,37 +203,37 @@ if FG<>nil then
 	FG.Messages;
 	FG.Construct;
 	
-	SGInitMatrixMode(SG_2D);
-	glColor4f(0.3,0.3,1,0.5);
-	glBegin(GL_QUADS);
+	Render.InitMatrixMode(SG_2D);
+	Render.Color4f(0.3,0.3,1,0.5);
+	Render.BeginScene(SGR_QUADS);
 	with FG do
 		begin
 		AbsX:=Abs(View.x1-View.x2);
-		glVertex2f(Round((a-View.x1)/absx*SGContext.Width),0);
-		glVertex2f(Round((a-View.x1)/absx*SGContext.Width),SGContext.Height);
-		glVertex2f(Round((b-View.x1)/absx*SGContext.Width),SGContext.Height);
-		glVertex2f(Round((b-View.x1)/absx*SGContext.Width),0);
+		Render.Vertex2f(Round((a-View.x1)/absx*Context.Width),0);
+		Render.Vertex2f(Round((a-View.x1)/absx*Context.Width),Context.Height);
+		Render.Vertex2f(Round((b-View.x1)/absx*Context.Width),Context.Height);
+		Render.Vertex2f(Round((b-View.x1)/absx*Context.Width),0);
 		end;
-	glEnd();
+	Render.EndScene();
 	FG.Draw;
-	SGInitMatrixMode(SG_2D);
-	glLineWidth(3);
-	glBegin(GL_LINES);
-	glColor4f(1,1,0,1);
+	Render.InitMatrixMode(SG_2D);
+	Render.LineWidth(3);
+	Render.BeginScene(SGR_LINES);
+	Render.Color4f(1,1,0,1);
 	FG.VertexOnScreen(SGVertex2fImport(FFindPoint,0));
 	FG.VertexOnScreen(SGVertex2fImport(FFindPoint,FResultFP));
 	FG.VertexOnScreen(SGVertex2fImport(0,FResultFP));
 	FG.VertexOnScreen(SGVertex2fImport(FFindPoint,FResultFP));
-	glEnd();
-	glLineWidth(1);
-	glPointSize(5);
-	glBegin(GL_POINTS);
-	glColor4f(1,0,0.5,1);
+	Render.EndScene();
+	Render.LineWidth(1);
+	Render.PointSize(5);
+	Render.BeginScene(SGR_POINTS);
+	Render.Color4f(1,0,0.5,1);
 	FG.VertexOnScreen(SGVertex2fImport(FFindPoint,0));
 	FG.VertexOnScreen(SGVertex2fImport(FFindPoint,FResultFP));
 	FG.VertexOnScreen(SGVertex2fImport(0,FResultFP));
-	glEnd();
-	glPointSize(1);
+	Render.EndScene();
+	Render.PointSize(1);
 	end;
 end;
 
@@ -249,7 +248,7 @@ b:=0;
 
 FNB:=TSGButton.Create;
 SGScreen.CreateChild(FNB);
-SGScreen.LastChild.SetBounds(SGContext.Width-90,1 ,80,15);
+SGScreen.LastChild.SetBounds(Context.Width-90,1 ,80,15);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Заного';
 SGScreen.LastChild.FUserPointer1:=Self;

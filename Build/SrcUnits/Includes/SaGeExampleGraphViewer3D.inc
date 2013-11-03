@@ -3,7 +3,7 @@
 type
 	TSGGraphViewer3D=class(TSG3DFractal)
 			public
-		constructor Create;override;
+		constructor Create(const VContext:PSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -23,9 +23,9 @@ begin
 inherited;
 end;
 
-constructor TSGGraphViewer3D.Create;
+constructor TSGGraphViewer3D.Create(const VContext:PSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FFunction:='x*y';
 
 Calculate;

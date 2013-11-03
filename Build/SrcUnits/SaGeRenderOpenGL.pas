@@ -71,7 +71,7 @@ type
 		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);override;
 		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
-		procedure BindTexture(const VParam:Cardinal;const VTexture:SGUInt);override;
+		procedure BindTexture(const VParam:Cardinal;const VTexture:Cardinal);override;
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
@@ -92,9 +92,15 @@ type
 		function IsEnabled(const VParam:Cardinal):Boolean;override;
 		procedure Clear(const VParam:Cardinal);override;
 		procedure LineWidth(const VLW:Single);override;
+		procedure PointSize(const PS:Single);override;
 		end;
 
 implementation
+
+procedure TSGRenderOpenGL.PointSize(const PS:Single);
+begin
+glPointSize(PS);
+end;
 
 procedure TSGRenderOpenGL.LineWidth(const VLW:Single);
 begin
@@ -103,7 +109,10 @@ end;
 
 procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
 begin
-glColor3f(r,g,b);
+if IsEnabled(GL_BLEND) then
+	glColor4f(r,g,b,1)
+else
+	glColor3f(r,g,b);
 end;
 
 procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
@@ -161,7 +170,7 @@ begin
 glGenTextures(VQuantity,VTextures);
 end;
 
-procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:SGUInt); 
+procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
 begin 
 glBindTexture(VParam,VTexture);
 end;

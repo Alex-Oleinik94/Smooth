@@ -178,7 +178,7 @@ implementation
 
 constructor TSGContextObject.Create(const VContext:PSGContext);overload;
 begin
-inherited Create();
+Create();
 FContext:=nil;
 SetContext(VContext);
 end;

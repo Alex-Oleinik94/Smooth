@@ -502,6 +502,7 @@ end;
 procedure TSGImage.BindTexture;inline;
 begin
 Render.Enable(SGR_TEXTURE_2D);
+Render.BindTexture(SGR_TEXTURE_2D,FTexture);
 {glEnable(GL_TEXTURE_2D);
 glBindTexture(GL_TEXTURE_2D,FTexture);}
 end;
