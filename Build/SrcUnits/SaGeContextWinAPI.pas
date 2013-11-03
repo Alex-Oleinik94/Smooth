@@ -10,13 +10,10 @@ uses
 	,SaGeContext
 	,SaGeCommon
 	,SaGeRender
-	//,SaGe
-	//,SaGeImages
 	;
 //Где купить пиво? Ответ: в магазине. (Специально для макса)
 // Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
-{$DEFINE SGWinAPIDebug}
-//{$DEFINE SGWinAPIDebugB}
+
 
 type
 	WinAPIParam = 
@@ -373,7 +370,7 @@ end;
 
 function TSGContextWinAPI.WindowRegister: Boolean;
 var
-  WindowClass: Windows.WndClass;
+  WindowClass: Windows.WndClassEx;
 
 (*Porzhat*) //return GetFileAttributes("c:\ProgramFiles (x86)")==-1?32:64;  
 {function GetProcessorArchitecture:Byte;
@@ -395,6 +392,7 @@ for i:=0 to SizeOf(Si)-1 do
 end;}
 
 begin
+WindowClass.cbSize := sizeof(WNDCLASSEX);
 WindowClass.Style := cs_hRedraw and cs_vRedraw;
 WindowClass.lpfnWndProc := WndProc(@MyGLWndProc);
 WindowClass.cbClsExtra := 0;
@@ -405,7 +403,8 @@ WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
 WindowClass.hbrBackground := GetStockObject(WHITE_BRUSH);
 WindowClass.lpszMenuName := nil;
 WindowClass.lpszClassName := 'SaGe Window';
-clWindow:=Windows.RegisterClass(WindowClass);
+WindowClass.hIconSm:=LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
+clWindow:=Windows.RegisterClassEx(WindowClass);
 Result := clWindow <> 0;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowRegister : Exit (Result=',Result,')']);
@@ -417,7 +416,6 @@ var
   hWindow2: HWnd;
   dmScreenSettings : DEVMODE;
 begin
-//WriteLn(LongWord(Self));
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
@@ -438,11 +436,9 @@ if not FFullscreen then
 			  0, 0,
 			  system.MainInstance,
 			  nil);
-			  
 	end 
 else
 	begin
-	///WriteLn(FWidth,' ',FHeight);
 	if (FWidth<>GetScreenResolution.x) or (FHeight<>GetScreenResolution.y) then
 		begin
 		dmScreenSettings.dmSize := sizeof(dmScreenSettings);
@@ -474,6 +470,7 @@ if hWindow2 <> 0 then
 	begin
 	ShowWindow(hWindow2, CmdShow);
 	UpdateWindow(hWindow2);
+	Active:=True;
 	end;
 Result := hWindow2;
 {$IFDEF SGWinAPIDebug}
@@ -589,9 +586,8 @@ if hWindow=0 then
 	inherited InitFullscreen(b)
 else if Fullscreen<> b then
 	begin
-	inherited InitFullscreen(b);
 	KillOGLWindow(False);
-	Active:=True;
+	inherited InitFullscreen(b);
 	CreateOGLWindow;
 	end;
 end;

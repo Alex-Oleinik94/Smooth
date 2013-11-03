@@ -249,7 +249,7 @@ if (b=True) and (FFullscreen=False) then
 	FFullscreenData.FNotFullscreenWidth:=Width;
 	Width:=GetScreenResolution.x;
 	Height:=GetScreenResolution.y;
-	//WriteLn(b,' ',Width,' ',Height);
+	//WriteLn(FFullscreen,' ',b,' ',Width,' ',Height);
 	end
 else
 	if (not b) and (FFullscreen) then
@@ -258,7 +258,7 @@ else
 			begin
 			Width:=FFullscreenData.FNotFullscreenWidth;
 			Height:=FFullscreenData.FNotFullscreenHeight;
-			//WriteLn(b,' ',Width,' ',Height);
+			//WriteLn(FFullscreen,' ',b,' ',Width,' ',Height);
 			end;
 		end;
 FFullscreen:=b;
@@ -282,7 +282,7 @@ begin
 FKeysPressed[Key]:=ButtonType = SGDownKey;
 FKeyPressedType:=ButtonType;
 FKeyPressed:=Key;
-WriteLn(Key);
+//WriteLn(Key);
 end;
 
 procedure TSGContext.Close;
