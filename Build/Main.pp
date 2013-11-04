@@ -11,6 +11,7 @@ uses
 	crt
 	{$IFDEF MSWINDOWS}
 		,windows
+		,SaGeRenderDirectX
 		{$ENDIF}
 	,dos
 	,Classes
@@ -76,12 +77,49 @@ with TSGDrawClasses.Create(MyContext) do
 	end;
 end;
 
-procedure GoGUI;
+procedure GoGUI(const Prt:string = '');
 var
 	Context:TSGContext = nil;
 var
 	NewContext:TSGContext;
+var //for cmd
+	S:String;
+	i:longWord;
+	FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN);
 begin
+FRenderState:=SGBR_UNKNOWN;
+if (Prt='CMD') and (argc>2) then
+	begin
+	for i:=2 to argc-1 do
+		if argv[i][0]='-' then
+			begin
+			S:=SGGetComand(SGStringToPChar(argv[2]));
+			if (S='HELP') or (S='H') then
+				begin
+				WriteLn('Whis is help for funning GUI.');
+				WriteLn('     -H; -HELP : for run help');
+				WriteLn('     -OPENGL   : for set prioritet render "OpenGL"');
+				WriteLn('     -DIRECTX  : for set prioritet render "DirectX"');
+				end
+			else if (S='OGL') or (S='OPENGL') then
+				begin
+				WriteLn('Set prioritet render : "OpenGL"');
+				FRenderState:=SGBR_OPENGL;
+				end
+			else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') then
+				begin
+				WriteLn('Set prioritet render : "DirectX"');
+				FRenderState:=SGBR_DIRECTX;
+				end
+			else
+				begin
+				WriteLn('Unknown comand "',S,'"!');
+				end;
+			end
+		else
+			WriteLn('Unknown comand "',argv[i],'"!');
+	end;
+
 Context:=
 {$IFDEF LAZARUS}
       TSGContextLazarus
@@ -100,7 +138,13 @@ with Context do
 	Width:=GetScreenResolution.x;
 	Height:=GetScreenResolution.y;
 	Fullscreen:=False;
-	Tittle:='SaGe OpenGL Window';
+	
+	{$IFDEF MSWINDOWS}
+		if FRenderState=SGBR_DIRECTX then
+			Tittle:='SaGe DirectX Window'
+		else
+		{$ENDIF}
+			Tittle:='SaGe OpenGL Window';
 	
 	DrawProcedure:=TSGContextProcedure(@Draw);
 	InitializeProcedure:=TSGContextProcedure(@Init);
@@ -108,8 +152,13 @@ with Context do
 	IconIdentifier:=5;
 	CursorIdentifier:=5;
 	
-	RenderClass:=TSGRenderOpenGL;
 	FSelfPoint:=@Context;
+	{$IFDEF MSWINDOWS}
+		if FRenderState=SGBR_DIRECTX then
+			RenderClass:=TSGRenderDirectX
+		else
+		{$ENDIF}
+			RenderClass:=TSGRenderOpenGL;
 	end;
 
 Context.Initialize;
@@ -129,7 +178,6 @@ if Context.Active and (Context.FNewContextType<>nil) then
 	Context:=NewContext;
 	NewContext:=nil;
 	Context.Initialize;
-	SGLog.Sourse('GoGUI : Context.Active and (Context.FNewContextType<>nil)');
 	end;
 
 until (Context.Active = False);
@@ -234,6 +282,11 @@ if argc>1 then
 			WriteLn('Beginning Find in pas.');
 			FindInPas(True);
 			end
+		else if s='GUI' then
+			begin
+			WriteLn('Beginning Grafical Interface.');
+			GoGUI('CMD');
+			end
 		else if s='GRNC' then
 			begin
 			WriteLn('Beginning Google ReName Cashe.');
@@ -242,18 +295,18 @@ if argc>1 then
 		else if (s='H') or (s='HELP') then
 			begin
 			WriteLn('This is help. You can use:');
-			WriteLn('   -FIP: for run "Find in pas" program');
-			WriteLn('   -FPCTC: for run "FPC to C converter" program');
-			WriteLn('   -GRNC: for run "Google ReName Cashe" program');
-			WriteLn('   -H;-HELP: for run help');
+			WriteLn('   -FIP                         : for run "Find in pas" program');
+			WriteLn('   -FPCTC                       : for run "FPC to C converter" program');
+			WriteLn('   -GRNC                        : for run "Google ReName Cashe" program');
+			WriteLn('   -H;-HELP                     : for run help');
+			WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 			end
 		else
 			WriteLn('Unknown command "',s,'".');
 		end
 	else
 		WriteLn('Error sintexis command "',s,'". Befor cjmand must be simbol "''".');
-	//for i:=0 to argc-1 do WriteLn('"',argv[i],'"');
 	end
 else
-	GoGUI;
+	GoGUI();
 end.

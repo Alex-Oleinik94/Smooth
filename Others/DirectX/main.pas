@@ -82,8 +82,8 @@ pDevice.BeginScene();
 // отключаем его
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
 // Просчет объектов всегда между BeginScene и EndScene
-pDevice.SetVertexShader( D3DFVF_DIFFUSE );
-pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, s123, sizeof(LongWord));
+//pDevice.SetVertexShader( D3DFVF_DIFFUSE );
+//pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, s123, sizeof(LongWord));
 
 pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));

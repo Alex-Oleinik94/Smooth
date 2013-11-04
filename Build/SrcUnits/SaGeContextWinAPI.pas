@@ -69,9 +69,12 @@ implementation
 
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
 function TSGContextWinAPI.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
+	Result:=Pointer(hWindow)
+else if What='DESCTOP WINDOW HANDLE' then
 	Result:=Pointer(dcWindow)
 else
 	Result:=Inherited Get(What);
@@ -162,11 +165,8 @@ inherited;
 end;
 
 procedure TSGContextWinAPI.Initialize();
-var
-	Succs:Boolean;
 begin
-Succs:=CreateOGLWindow();
-Active:=Succs;
+Active:=CreateOGLWindow();
 if Active then
 	begin
 	if SGCLLoadProcedure<>nil then
@@ -209,9 +209,9 @@ begin
 Result:=MessageBox(0,'Fullscreen Mode?', 'Question!',MB_YESNO OR MB_ICONQUESTION) <> IDNO;
 end;
 
-procedure TSGContextWinAPI.SwapBuffers;
+procedure TSGContextWinAPI.SwapBuffers();
 begin
-Windows.SwapBuffers(  dcWindow  );
+Render.SwapBuffers();
 end;
 
 procedure TSGContextWinAPI.Messages;

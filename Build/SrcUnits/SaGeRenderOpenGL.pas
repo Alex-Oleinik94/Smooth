@@ -52,6 +52,7 @@ type
 		procedure Init();override;
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
+		procedure SwapBuffers();override;
 		
 		function SupporedGPUBuffers:Boolean;override;
 			public
@@ -98,6 +99,13 @@ type
 		end;
 
 implementation
+
+procedure TSGRenderOpenGL.SwapBuffers();
+begin
+{$IFDEF MSWINDOWS}
+	Windows.SwapBuffers( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
+	{$ENDIF}
+end;
 
 function TSGRenderOpenGL.SupporedGPUBuffers:Boolean;
 begin
@@ -284,17 +292,6 @@ end;
 procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
 glBegin(VPrimitiveType);
-{case VPrimitiveType of
-SG_POINTS:glBegin(GL_POINTS);
-SG_LINES:glBegin(GL_LINES);
-SG_LINE_STRIP:glBegin(GL_LINE_STRIP);
-SG_LINE_LOOP:glBegin(GL_LINE_LOOP);
-SG_TRIANGLES:glBegin(GL_TRIANGLES);
-SG_TRIANGLE_STRIP:glBegin(GL_TRIANGLE_STRIP);
-SG_TRIANGLE_FAN:glBegin(GL_TRIANGLE_FAN);
-SG_QUADS:glBegin(GL_QUADS);
-SG_POLYGON:glBegin(GL_POLYGON)
-end;}
 end;
 
 procedure TSGRenderOpenGL.EndScene();
@@ -328,7 +325,7 @@ glDepthFunc(GL_LEQUAL);
 
 glEnable(GL_LINE_SMOOTH);
 glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-glLineWidth (1.5);
+glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
 glEnable(GL_TEXTURE_1D);
@@ -377,7 +374,7 @@ begin
 {$IFDEF UNIX}
 {$ELSE}
 	{$IFDEF MSWINDOW}
-		wglMakeCurrent( LongWord(FWindow.Get('WINDOW HANDLE')), 0 );
+		wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
 		if FContext<>0 then
 			begin
 			wglDeleteContext( FContext );
@@ -446,7 +443,7 @@ Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
-			FContext := wglCreateContext( LongWord(FWindow.Get('WINDOW HANDLE')) );
+			FContext := wglCreateContext( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
 		Result:=FContext<>0;
 		{$ENDIF}
 	{$ENDIF}
@@ -458,11 +455,11 @@ procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
 {$IFDEF UNIX}
 	if (FWindow<>0) and (FContext<>nil) then 
-		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('WINDOW HANDLE')),nil);
+		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil)  then 
-			wglMakeCurrent( LongWord(FWindow.Get('WINDOW HANDLE')), 0 );
+			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
 		{$ENDIF}
 	{$ENDIF}
 end;
@@ -483,8 +480,8 @@ begin
 	pfd.cColorBits    := 32;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), @pfd );
-	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('WINDOW HANDLE')), iFormat, @pfd );
+	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), @pfd );
+	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), iFormat, @pfd );
 	{$ENDIF}
 end;
 
@@ -492,12 +489,12 @@ procedure TSGRenderOpenGL.MakeCurrent();
 begin
 {$IFDEF UNIX}
 	if (FWindow<>0) and (FContext<>nil) then 
-		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('WINDOW HANDLE')),FContext);
+		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),FContext);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		SGLog.Sourse(['TSGRender__MakeCurrent() : Info : dcWnd=',LongWord(FWindow.Get('WINDOW HANDLE')),', FContext=',FContext,', @wglMakeCurrent=',LongWord(@wglMakeCurrent),'.']);
+		SGLog.Sourse(['TSGRender__MakeCurrent() : Info : dcWnd=',LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),', FContext=',FContext,', @wglMakeCurrent=',LongWord(@wglMakeCurrent),'.']);
 		if (FWindow<>nil) and (FContext<>0) then 
-			wglMakeCurrent( LongWord(FWindow.Get('WINDOW HANDLE')), FContext );
+			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), FContext );
 		{$ENDIF}
 	{$ENDIF}
 end;

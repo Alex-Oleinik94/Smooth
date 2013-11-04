@@ -28,6 +28,7 @@ type
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
 		function SupporedGPUBuffers:Boolean;virtual;
+		procedure SwapBuffers();virtual;abstract;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;

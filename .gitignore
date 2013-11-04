@@ -9,7 +9,7 @@ Build/*.o
 Build/Main.res
 BinDebug/Main.exe
 BinRelease/Main.exe
-Others\DirectX\*.o
-Others\DirectX\*.ppu
-Others\DirectX\*.a
+Others/DirectX/*.o
+Others/DirectX/*.ppu
+Others/DirectX/*.a
 
