@@ -589,7 +589,7 @@ end;
 
 class function TSGFractalMandelbrodRelease.ClassName:string;
 begin
-Result:='Фрактал Мандельброда';
+Result:='Фрактал Мандельброда и тп';
 end;
 
 function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;

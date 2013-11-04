@@ -22,7 +22,7 @@ type
 
 class function TSGFractalPodkova.ClassName:string;
 begin
-Result:='Рогатый дракон';
+Result:='Кривая Леви/Дракон Хартера';
 end;
 
 
@@ -197,11 +197,11 @@ SGScreen.LastChild.Visible:=True;
 
 FTCB:=TSGComboBox.Create;
 SGScreen.CreateChild(FTCB);
-SGScreen.LastChild.SetBounds(Context.Width-160-90-125-130,5,125,20);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125-130-50,5,125+50,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Рога');
-SGScreen.LastChild.AsComboBox.CreateItem('Дракон');
+SGScreen.LastChild.AsComboBox.CreateItem('Кривая Леви');
+SGScreen.LastChild.AsComboBox.CreateItem('Дракон Хартера — Хейтуэя');
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@fgsdfghjsafhjsdgjfgshdj);
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;

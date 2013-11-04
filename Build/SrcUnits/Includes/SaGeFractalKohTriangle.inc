@@ -22,7 +22,7 @@ type
 
 class function TSGFractalKohTriangle.ClassName:string;
 begin
-Result:='Треугольник Коха';
+Result:='Треугольник Серпинского';
 end;
 
 
