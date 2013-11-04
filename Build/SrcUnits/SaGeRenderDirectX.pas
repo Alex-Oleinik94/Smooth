@@ -83,7 +83,7 @@ type
 				end;
 		FNumberOfPoints:LongWord;
 			private
-		procedure AfterVertexProc();
+		procedure AfterVertexProc();inline;
 		end;
 
 implementation
@@ -93,7 +93,7 @@ begin
 pDevice.Present(nil, nil, 0, nil);
 end;
 
-procedure TSGRenderDirectX.AfterVertexProc();
+procedure TSGRenderDirectX.AfterVertexProc();inline;
 begin
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
@@ -105,8 +105,17 @@ else
 		begin
 		pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
-		end;
+		end
+	else
+		if (FNumberOfPoints=1) and (FPrimetiveType=SGR_POINTS) then
+			begin
+			pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+			pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, FArPoints[0], sizeof(FArPoints[0]));
+			end;
 case FPrimetiveType of
+SGR_POINTS:
+	if (FNumberOfPoints=1) then
+		FNumberOfPoints:=0;
 SGR_TRIANGLES: 
 	if FNumberOfPoints=3 then
 		begin
@@ -418,6 +427,9 @@ FillChar(d3dpp,SizeOf(d3dpp),0);
 d3dpp.Windowed := TRUE;
 d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
 d3dpp.BackBufferFormat := d3ddm.Format;
+//for d3d9!!!
+//d3dpp.EnableAutoDepthStencil:= True;
+//d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
         D3DCREATE_SOFTWARE_VERTEXPROCESSING, d3dpp, pDevice))) then
 	begin

@@ -402,7 +402,7 @@ WindowClass.hIcon := LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
 WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
 WindowClass.hbrBackground := GetStockObject(WHITE_BRUSH);
 WindowClass.lpszMenuName := nil;
-WindowClass.lpszClassName := 'SaGe Window';
+WindowClass.lpszClassName := 'SaGe Window Class';
 WindowClass.hIconSm:=LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
 clWindow:=Windows.RegisterClassEx(WindowClass);
 Result := clWindow <> 0;
@@ -421,7 +421,7 @@ begin
 	{$ENDIF}
 if not FFullscreen then 
 	begin	
-	hWindow2 := CreateWindow('SaGe Window',
+	hWindow2 := CreateWindow('SaGe Window Class',
 			  SGStringToPChar(FTittle),
 			  WS_CAPTION OR 
 			  WS_POPUPWINDOW OR
@@ -455,7 +455,7 @@ else
 			end;
 		end;
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
-		'SaGe Window',
+		'SaGe Window Class',
 		SGStringToPChar(FTittle),
 		WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
 		0, 0,
@@ -580,7 +580,7 @@ if hWindow<>0 then
 	CloseHandle( hWindow);
 	hWindow:=0;
 	end;
-UnregisterClass('SaGe Window', System.MainInstance);
+UnregisterClass('SaGe Window Class', System.MainInstance);
 end;
 
 procedure TSGContextWinAPI.InitFullscreen(const b:boolean); 
