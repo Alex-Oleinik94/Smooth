@@ -173,9 +173,9 @@ SGScreen.CreateChild(FComboBox1);
 SGScreen.LastChild.SetBounds(Context.Width-250,5{+Context.TopShift},230,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Звездочка Менгера');
+SGScreen.LastChild.AsComboBox.CreateItem('Звездочка');
 SGScreen.LastChild.AsComboBox.CreateItem('Губка Менгера');
-SGScreen.LastChild.AsComboBox.CreateItem('Снежинка Менгера (bug)');
+SGScreen.LastChild.AsComboBox.CreateItem('Снежинка (bug)');
 //SGScreen.LastChild.AsComboBox.CreateItem('New Губка Менгера');
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure);
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
@@ -220,7 +220,7 @@ SGScreen.LastChild.Caption:='Итерация:';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FLabelSize:=TSGLabel.Create;
+FLabelSize:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelSize);
 SGScreen.LastChild.SetBounds(5,Context.Height-25,Context.Width-20,20);
 SGScreen.LastChild.Caption:='Загрузка...';
@@ -230,10 +230,10 @@ FLabelSize.FTextPosition:=0;
 FLabelSize.Font:=FFont1;
 SGScreen.LastChild.Visible:=True;
 
-Depth:=0;
+Depth:=2;
 Threads:=1;
-Calculate;
-WriteSize;
+Calculate();
+WriteSize();
 end;
 
 procedure TSGFractalMengerSpunchRelease.WriteSize;inline;

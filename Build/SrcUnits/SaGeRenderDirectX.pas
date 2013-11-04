@@ -6,7 +6,9 @@ uses
 	,SaGeRender
 	,windows
 	,DynLibs
-	,Direct3D8
+	,DXTypes
+	,D3DX9
+	,Direct3D9
 	;
 type
 	TSGRenderDirectX=class(TSGRender)
@@ -18,8 +20,8 @@ type
 		d3ddm:D3DDISPLAYMODE;
 		d3dpp:D3DPRESENT_PARAMETERS;
 			//FOR USE
-		pD3D:IDirect3D8;
-		pDevice:IDirect3DDevice8;
+		pD3D:IDirect3D9;
+		pDevice:IDirect3DDevice9;
 			public
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
@@ -97,19 +99,19 @@ procedure TSGRenderDirectX.AfterVertexProc();inline;
 begin
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
-	pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+	pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 	pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 	end
 else
 	if (FNumberOfPoints=2) and ((FPrimetiveType=SGR_LINES) or (FPrimetiveType=SGR_LINE_LOOP) or (FPrimetiveType=SGR_LINE_STRIP)) then
 		begin
-		pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+		pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 		end
 	else
 		if (FNumberOfPoints=1) and (FPrimetiveType=SGR_POINTS) then
 			begin
-			pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+			pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 			pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 			end;
 case FPrimetiveType of
@@ -359,7 +361,7 @@ procedure TSGRenderDirectX.EndScene();
 begin
 if FPrimetiveType=SGR_LINE_LOOP then
 	begin
-	pDevice.SetVertexShader( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+	pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 	pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[1], sizeof(FArPoints[0]));
 	end;
 pDevice.EndScene();
@@ -412,26 +414,20 @@ end;
 
 function TSGRenderDirectX.CreateContext():Boolean;
 begin
-pD3D:=Direct3DCreate8( D3D_SDK_VERSION );
+pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
 if pD3d = nil then
 	begin
 	Result:=False;
 	exit;
 	end;
-if 0 <> pD3d.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3ddm ) then
-	begin
-	Result:=False; 
-	exit; 
-	end;
 FillChar(d3dpp,SizeOf(d3dpp),0);
 d3dpp.Windowed := TRUE;
 d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-d3dpp.BackBufferFormat := d3ddm.Format;
-//for d3d9!!!
+d3dpp.BackBufferFormat := D3DFMT_UNKNOWN;
 //d3dpp.EnableAutoDepthStencil:= True;
 //d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
-        D3DCREATE_SOFTWARE_VERTEXPROCESSING, d3dpp, pDevice))) then
+        D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
 	begin
 	Result:=False;
 	exit;

@@ -45,8 +45,22 @@ SGT.GoTranslate;
 SGT.Destroy;
 end;
 
-procedure Draw(const Context:TSGContext);
-begin end;
+procedure Draw(const Context:PSGContext);
+var
+	Render:TSGRender;
+begin
+Render:=Context^.Render;
+Render.InitMatrixMode(SG_3D);
+Render.Translatef(0,0,-2.5);
+Render.BeginScene(SGR_TRIANGLES);
+Render.Color3f(1,0,0);
+Render.Vertex3f(-0.5,-0.5,0.5);
+Render.Color3f(0,1,0);
+Render.Vertex3f(-0.5,0.5,0.5);
+Render.Color3f(0,0,1);
+Render.Vertex3f(0.5,0.5,0.5);
+Render.EndScene();
+end;
 
 procedure Init(const MyContext:PSGContext);
 begin
@@ -86,6 +100,7 @@ var //for cmd
 	S:String;
 	i:longWord;
 	FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN);
+	FGoToExit:Boolean = False;
 begin
 FRenderState:=SGBR_UNKNOWN;
 if (Prt='CMD') and (argc>2) then
@@ -93,13 +108,15 @@ if (Prt='CMD') and (argc>2) then
 	for i:=2 to argc-1 do
 		if argv[i][0]='-' then
 			begin
-			S:=SGGetComand(SGStringToPChar(argv[2]));
+			S:=SGGetComand(SGStringToPChar(argv[i]));
 			if (S='HELP') or (S='H') then
 				begin
 				WriteLn('Whis is help for funning GUI.');
 				WriteLn('     -H; -HELP : for run help');
 				WriteLn('     -OPENGL   : for set prioritet render "OpenGL"');
 				WriteLn('     -DIRECTX  : for set prioritet render "DirectX"');
+				FGoToExit:=True;
+				Break;
 				end
 			else if (S='OGL') or (S='OPENGL') then
 				begin
@@ -120,6 +137,8 @@ if (Prt='CMD') and (argc>2) then
 			WriteLn('Unknown comand "',argv[i],'"!');
 	end;
 
+if FGoToExit then
+	Exit;
 Context:=
 {$IFDEF LAZARUS}
       TSGContextLazarus
