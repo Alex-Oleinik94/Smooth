@@ -556,7 +556,10 @@ end;
 procedure TSGContextWinAPI.KillOGLWindow(const KillRC:Boolean = True);
 begin
 if (FRender<>nil) and (KillRC) then
-	FRender.Destroy
+	begin
+	FRender.Destroy();
+	FRender:=nil;
+	end
 else
 	if (FRender<>nil) and (not KillRC) then
 		begin
@@ -588,7 +591,7 @@ else if Fullscreen<> b then
 	begin
 	KillOGLWindow(False);
 	inherited InitFullscreen(b);
-	CreateOGLWindow;
+	Active:=CreateOGLWindow();
 	end;
 end;
 

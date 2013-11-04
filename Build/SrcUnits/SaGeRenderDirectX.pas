@@ -369,10 +369,10 @@ end;
 
 destructor TSGRenderDirectX.Destroy;
 begin
-if (pDevice<>nil)  then
-	pDevice._Release;
 if(pD3d<>nil) then
 	pD3d._Release();
+if (pDevice<>nil)  then
+	pDevice._Release;
 inherited;
 end;
 
