@@ -75,6 +75,7 @@ type
 		procedure PointSize(const PS:Single);override;
 			private
 		FClearColor:LongWord;
+			//приведение цветов и полигонов к Vertex-ам опенжл-я
 		FPrimetiveType:LongWord;
 		FPrimetivePrt:LongWord;
 		FNowColor:LongWord;
@@ -82,8 +83,12 @@ type
 			packed record
 				x,y,z:single;
 				Color:LongWord;
+				tx,ty:Single;
 				end;
 		FNumberOfPoints:LongWord;
+			//Текстуры
+		FNowTexture:LongWord;
+		FArTextures:packed array of IDirect3DTexture9;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -102,22 +107,24 @@ pDevice.Present(nil, nil, 0, nil);
 end;
 
 procedure TSGRenderDirectX.AfterVertexProc();inline;
+const
+	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_DIFFUSE or D3DFVF_TEX1;
 begin
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
-	pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+	pDevice.SetFVF( MyVertexType );
 	pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 	end
 else
 	if (FNumberOfPoints=2) and ((FPrimetiveType=SGR_LINES) or (FPrimetiveType=SGR_LINE_LOOP) or (FPrimetiveType=SGR_LINE_STRIP)) then
 		begin
-		pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+		pDevice.SetFVF( MyVertexType );
 		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], SizeOf(FArPoints[0]));
 		end
 	else
 		if (FNumberOfPoints=1) and (FPrimetiveType=SGR_POINTS) then
 			begin
-			pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
+			pDevice.SetFVF( MyVertexType );
 			pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 			end;
 case FPrimetiveType of
@@ -189,7 +196,8 @@ end;
 
 procedure TSGRenderDirectX.TexCoord2f(const x,y:single); 
 begin 
-
+FArPoints[FNumberOfPoints].tx:=x;
+FArPoints[FNumberOfPoints].ty:=y;
 end;
 
 procedure TSGRenderDirectX.Vertex2f(const x,y:single); 
@@ -245,7 +253,13 @@ end;
 
 procedure TSGRenderDirectX.Disable(const VParam:Cardinal); 
 begin 
-
+case VParam of
+SGR_TEXTURE_2D:
+	begin
+	FNowTexture:=0;
+	pDevice.SetTexture(0,nil);
+	end;
+end;
 end;
 
 procedure TSGRenderDirectX.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
@@ -260,12 +274,19 @@ end;
 
 procedure TSGRenderDirectX.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
 begin 
-
+if FArTextures=nil then
+	SetLength(FArTextures,1)
+else
+	SetLength(FArTextures,Length(FArTextures)+1);
+FArTextures[High(FArTextures)]:=nil;
+VTextures^:=Length(FArTextures);
 end;
 
 procedure TSGRenderDirectX.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
 begin 
-
+FNowTexture:=VTexture;
+if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1]<>nil) then
+	pDevice.SetTexture(0, FArTextures[FNowTexture-1]);
 end;
 
 procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal); 
@@ -284,8 +305,32 @@ begin
 end;
 
 procedure TSGRenderDirectX.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
+var
+	VTFormat:LongWord;
+	rcLockedRect:D3DLOCKED_RECT; 
+	rc:RECT;
+	MypBits:Pointer;
 begin 
+VTFormat:=0;
+case VFormatType of
+SGR_RGBA:VTFormat:=D3DFMT_A8R8G8B8;
+SGR_RGB:VTFormat:=D3DFMT_R8G8B8;
+SGR_LUMINANCE_ALPHA:;
+SGR_RED:;
+SGR_INTENSITY:;
+SGR_ALPHA:;
+SGR_LUMINANCE:;
+end;
+WriteLn(D3DXCreateTexture(pDevice,VWidth,VHeight,VChannels,D3DUSAGE_RENDERTARGET, VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1]));
 
+fillchar(rcLockedRect,sizeof(rcLockedRect),0);
+GetMem(MypBits,VWidth*VHeight*VChannels);
+Move(MypBits^,VBitMap^,VWidth*VHeight*VChannels);
+FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, @rc, D3DLOCK_DISCARD);
+rcLockedRect.pBits:=MypBits;
+rcLockedRect.Pitch:=VWidth*VChannels;
+FArTextures[FNowTexture-1].UnlockRect(0);
+//WriteLn(D3DXCreateTextureFromFile(pDevice,'Tahoma.bmp',FArTextures[FNowTexture-1]));
 end;
 
 procedure TSGRenderDirectX.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
@@ -383,27 +428,64 @@ end;
 
 procedure TSGRenderDirectX.Init();
 begin
-FNowColor:=D3DCOLOR_XRGB(1,1,1);
+FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
+FNowTexture:=0;
+
+//Включаем Z-буфер
+pDevice.SetRenderState(D3DRS_ZENABLE, 1);
+
+//выключаем освещение
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
+
+//============Прозрачность
 pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
 pDevice.SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
-pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
-pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
+pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+
+//чтобы рисовались все подлигоны, а не только те, у которых
+//нормаль направлена в сторону камеры
+pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+
+//===================СГЛАЖИВАНИЕ 
+pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
+//pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); // -- чето это сильно мутит, линии колбасу напоминают
+pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
+pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
+pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
+pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
+
+//========параметры текстур
+pDevice.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+pDevice.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+pDevice.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+pDevice.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 end;
 
-constructor TSGRenderDirectX.Create;
+constructor TSGRenderDirectX.Create();
 begin
-inherited Create;
+inherited Create();
+FArTextures:=nil;
+pDevice:=nil;
+pD3D:=nil;
 end;
 
-destructor TSGRenderDirectX.Destroy;
+destructor TSGRenderDirectX.Destroy();
+var
+	i:Cardinal;
 begin
+if FArTextures<>nil then
+	begin
+	for i:=0 to High(FArTextures) do
+		if FArTextures[i]<>nil then
+			FArTextures[i]._Release;
+	SetLength(FArTextures,0);
+	end;
 if(pD3d<>nil) then
 	pD3d._Release();
 if (pDevice<>nil)  then
-	pDevice._Release;
-inherited;
+	pDevice._Release();
+inherited Destroy();
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
@@ -418,7 +500,7 @@ LoadIdentity();
 if Mode=SG_3D then
 	begin
 	D3DXMatrixIdentity(Matrix);
-	D3DXMatrixPerspectiveFovLH(Matrix,  // полученная итоговая матрица проекции
+	D3DXMatrixPerspectiveFovLH(Matrix,            // полученная итоговая матрица проекции
 		D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
 		CWidth/CHeight,                           // соотношения сторон экрана Width/Height
 		0.0011,                                   // передний план отсечения сцены
@@ -442,7 +524,6 @@ else
 		D3DXMatrixTranslation(Matrix,-CWidth/2,-CHeight/2,0);
 		pDevice.SetTransform(D3DTS_WORLD, Matrix);
 		end;
-LoadIdentity();
 end;
 
 procedure TSGRenderDirectX.Viewport(const a,b,c,d:LongWord);
@@ -455,12 +536,13 @@ var
 	Matrix:D3DMATRIX;
 begin
 D3DXMatrixIdentity(Matrix);
+pDevice.SetTransform(D3DTS_WORLD,Matrix);
 pDevice.SetTransform(D3DTS_VIEW,Matrix);
+pDevice.SetTransform(D3DTS_PROJECTION,Matrix);
 end;
 
 procedure TSGRenderDirectX.Vertex3f(const x,y,z:single);
 begin
-//WriteLn(FNumberOfPoints,' ',FPrimetiveType);
 FArPoints[FNumberOfPoints].Color:=FNowColor;
 FArPoints[FNumberOfPoints].x:=x;
 FArPoints[FNumberOfPoints].y:=y;
@@ -471,30 +553,43 @@ end;
 
 function TSGRenderDirectX.CreateContext():Boolean;
 begin
-pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
-if pD3d = nil then
+if (pD3D=nil) then
 	begin
-	Result:=False;
-	exit;
-	end;
-pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
+	pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
+	SGLog.Sourse(['TSGRenderDirectX__CreateContext : pD3D="',LongWord(Pointer(pD3D)),'"']);
+	if pD3d = nil then
+		begin
+		Result:=False;
+		exit;
+		end;
+	pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
 
-FillChar(d3dpp,SizeOf(d3dpp),0);
+	FillChar(d3dpp,SizeOf(d3dpp),0);
 
-d3dpp.Windowed := True;
-d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-d3dpp.BackBufferFormat := d3ddm.Format;
-d3dpp.EnableAutoDepthStencil:= True;
-d3dpp.AutoDepthStencilFormat := D3DFMT_D16;
-d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
+	d3dpp.Windowed := True;
+	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
+	d3dpp.BackBufferFormat := d3ddm.Format;
+	d3dpp.EnableAutoDepthStencil:= True;
+	d3dpp.AutoDepthStencilFormat := D3DFMT_D16;
+	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 
-if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
-        D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
+	//У меня на  нетбуке вылетает с этим пораметром
+	//d3dpp.MultiSampleType:=D3DMULTISAMPLE_4_SAMPLES;
+
+	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
+		begin
+		SGLog.Sourse(['TSGRenderDirectX__CreateContext : pDevice="',LongWord(Pointer(pDevice)),'"']);
+		Result:=False;
+		exit;
+		end;
+	SGLog.Sourse(['TSGRenderDirectX__CreateContext : pDevice="',LongWord(Pointer(pDevice)),'"']);
+	Result:=True;
+	end
+else
 	begin
-	Result:=False;
-	exit;
+	
 	end;
-Result:=True;
 end;
 
 procedure TSGRenderDirectX.ReleaseCurrent();
