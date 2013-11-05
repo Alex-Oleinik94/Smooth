@@ -29,6 +29,7 @@ type
 		procedure Init();virtual;abstract;
 		function SupporedGPUBuffers:Boolean;virtual;
 		procedure SwapBuffers();virtual;abstract;
+		function TopShift(const VFullscreen:Boolean = False):LongWord;virtual;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
@@ -75,6 +76,11 @@ type
 		end;
 
 implementation
+
+function TSGRender.TopShift(const VFullscreen:Boolean = False):LongWord;
+begin
+Result:=0;
+end;
 
 procedure TSGRender.MakeCurrent();
 begin

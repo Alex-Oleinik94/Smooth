@@ -50,15 +50,15 @@ var
 	Render:TSGRender;
 begin
 Render:=Context^.Render;
-Render.InitMatrixMode(SG_3D);
+Render.InitMatrixMode(SG_2D);
 Render.Translatef(0,0,-2.5);
 Render.BeginScene(SGR_TRIANGLES);
 Render.Color3f(1,0,0);
-Render.Vertex3f(-0.5,-0.5,0.5);
+Render.Vertex3f(-100.5,-100.5,0);
 Render.Color3f(0,1,0);
-Render.Vertex3f(-0.5,0.5,0.5);
+Render.Vertex3f(-0.5,100.5,0);
 Render.Color3f(0,0,1);
-Render.Vertex3f(0.5,0.5,0.5);
+Render.Vertex3f(0.5,0.5,0);
 Render.EndScene();
 end;
 
@@ -101,6 +101,7 @@ var //for cmd
 	i:longWord;
 	FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN);
 	FGoToExit:Boolean = False;
+	VFullscreen:Boolean = False;
 begin
 FRenderState:=SGBR_UNKNOWN;
 if (Prt='CMD') and (argc>2) then
@@ -112,9 +113,10 @@ if (Prt='CMD') and (argc>2) then
 			if (S='HELP') or (S='H') then
 				begin
 				WriteLn('Whis is help for funning GUI.');
-				WriteLn('     -H; -HELP : for run help');
-				WriteLn('     -OPENGL   : for set prioritet render "OpenGL"');
-				WriteLn('     -DIRECTX  : for set prioritet render "DirectX"');
+				WriteLn('     -H; -HELP       : for run help');
+				WriteLn('     -OPENGL         : for set prioritet render "OpenGL"');
+				WriteLn('     -DIRECTX        : for set prioritet render "DirectX"');
+				WriteLn('     -F; -FULLSCREEN : for change fullscreen');
 				FGoToExit:=True;
 				Break;
 				end
@@ -122,6 +124,11 @@ if (Prt='CMD') and (argc>2) then
 				begin
 				WriteLn('Set prioritet render : "OpenGL"');
 				FRenderState:=SGBR_OPENGL;
+				end
+			else if (S='F') or (S='FULLSCREEN') then
+				begin
+				VFullscreen:=not VFullscreen;
+				WriteLn('Set fullscreen : "',VFullscreen,'"');
 				end
 			else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') then
 				begin
@@ -156,7 +163,7 @@ with Context do
 	begin
 	Width:=GetScreenResolution.x;
 	Height:=GetScreenResolution.y;
-	Fullscreen:=False;
+	Fullscreen:=VFullscreen;
 	
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then

@@ -31,18 +31,18 @@ type
 	
 	TSGContextWinAPI=class(TSGContext)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			public
-		procedure Initialize;override;
-		procedure Run;override;
-		procedure Messages;override;
-		procedure SwapBuffers;override;
-		function  GetCursorPosition:TSGPoint2f;override;
-		function  GetWindowRect:TSGPoint2f;override;
-		function  GetScreenResolution:TSGPoint2f;override;
-		function  TopShift:LongWord;override;
-		function  MouseShift:TSGPoint2f;override;
+		procedure Initialize();override;
+		procedure Run();override;
+		procedure Messages();override;
+		procedure SwapBuffers();override;
+		function  GetCursorPosition():TSGPoint2f;override;
+		function  GetWindowRect():TSGPoint2f;override;
+		function  GetScreenResolution():TSGPoint2f;override;
+		function  TopShift():LongWord;override;
+		function  MouseShift():TSGPoint2f;override;
 		procedure InitFullscreen(const b:boolean); override;
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
@@ -52,8 +52,8 @@ type
 		dcWindow:hDc;
 		clWindow:LongWord;
 		procedure ThrowError(pcErrorMessage : pChar);
-		function  WindowRegister: Boolean;
-		function  WindowCreate: HWnd;
+		function  WindowRegister(): Boolean;
+		function  WindowCreate(): HWnd;
 		function  WindowInit(hParent : HWnd): Boolean;
 		procedure KillOGLWindow(const KillRC:Boolean = True);
 		function  CreateOGLWindow():Boolean;
@@ -61,7 +61,7 @@ type
 		function Get(const What:string):Pointer;override;
 		end;
 	
-function SGFullscreenQueschionWinAPIMethod:boolean;
+function SGFullscreenQueschionWinAPIMethod():boolean;
 function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
 
@@ -114,14 +114,17 @@ begin
 Windows.ShowCursor(B);
 end;
 
-function TSGContextWinAPI.MouseShift:TSGPoint2f;
+function TSGContextWinAPI.MouseShift():TSGPoint2f;
 begin
 Result.Import(-3*Byte(not FFullscreen),3*Byte(not FFullscreen));
 end;
 
-function TSGContextWinAPI.TopShift:LongWord;
+function TSGContextWinAPI.TopShift():LongWord;
 begin
-Result:=28*Byte(not FFullscreen);
+if Render = nil then
+	Result:=0
+else
+	Result:=Render.TopShift(FFullscreen);
 end;
 
 function TSGContextWinAPI.GetScreenResolution:TSGPoint2f;

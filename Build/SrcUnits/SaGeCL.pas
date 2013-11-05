@@ -2086,18 +2086,18 @@ if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
 end;
 
-procedure TSGComponent.FromDraw;
+procedure TSGComponent.FromDraw();
 var
 	i:longint;
 begin
 For i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FromDraw;
+	FChildren[i].FromDraw();
 end;
 
 
-constructor TSGComponent.Create;
+constructor TSGComponent.Create();
 begin
-inherited Create;
+inherited Create();
 FDrawClass:=nil;
 FUnLimited:=False;
 OnChange:=nil;
@@ -2180,7 +2180,7 @@ if SGAnchRight in FAnchors then
 				end;
 			end;
 	end;
-BoundsToNeedBounds;
+BoundsToNeedBounds();
 {CW:=FNeedWidth;
 CH:=FNeedHeight;
 case FAlign of

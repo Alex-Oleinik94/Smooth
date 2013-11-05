@@ -47,9 +47,9 @@ procedure Render;
 var
 	v:array [0..2] of MyVert;
 	dwBlue:LongWord;
-	MatrixWorld:D3DMATRIX;
+	MatrixWorld,MatrixView,MatrixProjection:D3DMATRIX;
 begin
-r+=0.001;
+r+=0.01;
 
 fillchar(v,sizeof(v),0);
 v[0].x :=-0.5;  
@@ -71,7 +71,30 @@ v[2].Color := D3DCOLOR_XRGB(0,0,255); // синий
 dwBlue:=D3DCOLOR_XRGB(0,0,0);
 pDevice.Clear( 0, nil, D3DCLEAR_TARGET, dwBlue, 1.0, 0 );
 
-//D3DXMatrixIdentity(MatrixWorld);
+//========================================================================
+D3DXMatrixIdentity(MatrixProjection);
+// Изменяем матрицу проекции
+D3DXMatrixPerspectiveFovLH(MatrixProjection,  // полученная итоговая матрица проекции
+	D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
+	1024/600,                                     // соотношения сторон экрана 770/500=1.54
+	10.0,                                     // передний план отсечения сцены
+	200.0);                                   // задний план отсечения сцены
+// Устанавливаем матрицу проекции
+pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+//========================================================================
+D3DXMatrixIdentity(MatrixWorld);
+D3DXMatrixRotationY(MatrixWorld, r);
+
+//========================================================================
+{D3DXMatrixIdentity(MatrixView);
+D3DXMatrixRotationX(MatrixView,r);
+D3DXMatrixRotationY(MatrixView,r);
+D3DXMatrixRotationZ(MatrixView,r);
+pDevice.SetTransform(D3DTS_VIEW, MatrixView);}
+pDevice.GetTransform(D3DTS_VIEW, MatrixView);
+//========================================================================
+
+
 
 pDevice.BeginScene();
 // Поскольку мы не используем освещение для треугольника,
@@ -126,7 +149,7 @@ WindowClass.hIconSm:=0;
 RegisterClassEx( WindowClass );
 
 hWnd := CreateWindow( 'FirstDX_cl', 'FirstDX',
-                            WS_OVERLAPPEDWINDOW, 100, 100, 500, 500,
+                            WS_OVERLAPPEDWINDOW, 0, 0, 1024, 600,
                             GetDesktopWindow(), 0, WindowClass.hInstance, nil );
 WriteLn('hWnd=',hWnd);
 

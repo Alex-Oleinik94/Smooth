@@ -53,7 +53,7 @@ type
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
-		
+		function TopShift(const VFullscreen:Boolean = False):LongWord;override;
 		function SupporedGPUBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
@@ -99,6 +99,11 @@ type
 		end;
 
 implementation
+
+function TSGRenderOpenGL.TopShift(const VFullscreen:Boolean = False):LongWord;
+begin
+Result:=28*Byte(not VFullscreen);
+end;
 
 procedure TSGRenderOpenGL.SwapBuffers();
 begin

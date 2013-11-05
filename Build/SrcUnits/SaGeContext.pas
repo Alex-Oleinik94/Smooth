@@ -346,7 +346,7 @@ if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyP
 	end;
 end;
 
-function TSGContext.TopShift:LongWord;
+function TSGContext.TopShift():LongWord;
 begin
 Result:=0;
 end;

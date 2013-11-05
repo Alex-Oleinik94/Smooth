@@ -213,13 +213,25 @@ begin
 end;
 
 procedure TSGRenderDirectX.Translatef(const x,y,z:single); 
+var
+	Matrix:D3DMATRIX;
 begin 
-
+pDevice.GetTransform(D3DTS_VIEW,Matrix);
+D3DXMatrixTranslation(Matrix,x,y,z);
+pDevice.SetTransform(D3DTS_VIEW,Matrix);
 end;
 
 procedure TSGRenderDirectX.Rotatef(const angle:single;const x,y,z:single); 
+var
+	Matrix:D3DMATRIX;
+	v:TD3DXVector3;
 begin 
-
+v.x:=x;
+v.y:=y;
+v.z:=z;
+pDevice.GetTransform(D3DTS_WORLD,Matrix);
+D3DXMatrixRotationAxis(Matrix,v,angle/180*pi);
+pDevice.SetTransform(D3DTS_WORLD,Matrix);
 end;
 
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
@@ -388,8 +400,42 @@ inherited;
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
+var
+	MatrixProjection:D3DMATRIX;
+var
+	CWidth,CHeight:LongWord;
 begin
-
+CWidth:=LongWord(FWindow.Get('WIDTH'));
+CHeight:=LongWord(FWindow.Get('HEIGHT'));
+LoadIdentity();
+if Mode=SG_3D then
+	begin
+	D3DXMatrixIdentity(MatrixProjection);
+	D3DXMatrixPerspectiveFovLH(MatrixProjection,  // полученная итоговая матрица проекции
+		D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
+		CWidth/CHeight,                           // соотношения сторон экрана Width/Height
+		0.0011,                                   // передний план отсечения сцены
+		500);                                     // задний план отсечения сцены
+	pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+	end
+else
+	if Mode=SG_3D_ORTHO then
+		begin
+		D3DXMatrixIdentity(MatrixProjection);
+		D3DXMatrixOrthoLH(MatrixProjection,D3DX_PI/4,CWidth / CHeight,0.0011,500);
+		pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+		end
+	else if Mode=SG_2D then
+		begin
+		D3DXMatrixIdentity(MatrixProjection);
+		D3DXMatrixOrthoLH(MatrixProjection,CWidth,-CHeight,-0.0001,0.1);
+		pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+		
+		D3DXMatrixIdentity(MatrixProjection);
+		D3DXMatrixTranslation(MatrixProjection,-CWidth/2,-CHeight/2,0);
+		pDevice.SetTransform(D3DTS_WORLD, MatrixProjection);
+		end;
+LoadIdentity();
 end;
 
 procedure TSGRenderDirectX.Viewport(const a,b,c,d:LongWord);
@@ -398,8 +444,11 @@ begin
 end;
 
 procedure TSGRenderDirectX.LoadIdentity();
+var
+	Matrix:D3DMATRIX;
 begin
-
+D3DXMatrixIdentity(Matrix);
+pDevice.SetTransform(D3DTS_VIEW,Matrix);
 end;
 
 procedure TSGRenderDirectX.Vertex3f(const x,y,z:single);
