@@ -30,7 +30,7 @@ type
 		procedure Init();override;
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
-		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
+		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedGPUBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
@@ -92,8 +92,8 @@ implementation
 
 procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
-x:=3*Byte(not VFullscreen);
-y:=-1000*Byte(not VFullscreen);
+x:=Byte(not VFullscreen);
+y:=-28*Byte(not VFullscreen);
 end;
 
 procedure TSGRenderDirectX.SwapBuffers();
