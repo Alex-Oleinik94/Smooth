@@ -41,8 +41,6 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
-		function  TopShift():LongWord;override;
-		function  MouseShift():TSGPoint2f;override;
 		procedure InitFullscreen(const b:boolean); override;
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
@@ -112,19 +110,6 @@ end;
 procedure TSGContextWinAPI.ShowCursor(const b:Boolean);
 begin
 Windows.ShowCursor(B);
-end;
-
-function TSGContextWinAPI.MouseShift():TSGPoint2f;
-begin
-Result.Import(-3*Byte(not FFullscreen),3*Byte(not FFullscreen));
-end;
-
-function TSGContextWinAPI.TopShift():LongWord;
-begin
-if Render = nil then
-	Result:=0
-else
-	Result:=Render.TopShift(FFullscreen);
 end;
 
 function TSGContextWinAPI.GetScreenResolution:TSGPoint2f;

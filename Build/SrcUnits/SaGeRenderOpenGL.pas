@@ -54,6 +54,7 @@ type
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		function TopShift(const VFullscreen:Boolean = False):LongWord;override;
+		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedGPUBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
@@ -99,6 +100,12 @@ type
 		end;
 
 implementation
+
+procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
+begin
+x:=-7*Byte(not VFullscreen);
+y:=5*Byte(not VFullscreen);
+end;
 
 function TSGRenderOpenGL.TopShift(const VFullscreen:Boolean = False):LongWord;
 begin

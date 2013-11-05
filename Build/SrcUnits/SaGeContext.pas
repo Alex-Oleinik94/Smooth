@@ -47,7 +47,7 @@ type
 		procedure Run;virtual;abstract;
 		procedure Messages;virtual;
 		procedure SwapBuffers;virtual;abstract;
-		function TopShift:LongWord;virtual;
+		function TopShift():LongWord;virtual;
 		function GetCursorPosition:TSGPoint2f;virtual;abstract;
 		procedure SetCursorPosition(const a:TSGPoint2f);virtual;abstract;
 		function GetWindowRect:TSGPoint2f;virtual;abstract;
@@ -295,9 +295,18 @@ begin
 Result:=True;
 end;
 
-function TSGContext.MouseShift:TSGPoint2f;
+function TSGContext.MouseShift():TSGPoint2f;
+var
+	VA,VB:LongInt;
 begin
-Result.Import(0,0);
+if Render=nil then
+	Result.Import(0,0)
+else
+	begin
+	Render.MouseShift(VA,VB,FFullscreen);
+	Result.x:=VA;
+	Result.y:=VB;
+	end;
 end;
 
 procedure TSGContext.Resize;
@@ -306,7 +315,7 @@ if SGCLForReSizeScreenProcedure<>nil then
 	SGCLForReSizeScreenProcedure(FSelfPoint);
 end;
 
-function TSGContext.GetWidth:LongWord;
+function TSGContext.GetWidth():LongWord;
 begin
 Result:=FWidth;
 end;
@@ -321,19 +330,19 @@ begin
 FHeight:=NewHeight;
 end;
 
-function TSGContext.CursorWheel:TSGCursorWheel;overload;inline;
+function TSGContext.CursorWheel():TSGCursorWheel;overload;inline;
 begin
 Result:=FCursorWheel;
 end;
 
-procedure TSGContext.Messages;
+procedure TSGContext.Messages();
 var
 	Point:TSGPoint2f;
 begin
-Point:=GetCursorPosition;
-if RectInCoords then
-	Point-=GetWindowRect;
-Point+=MouseShift;
+Point:=GetCursorPosition();
+if RectInCoords() then
+	Point-=GetWindowRect();
+Point+=MouseShift();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
 FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]-FCursorPosition[SGLastCursorPosition];
@@ -348,7 +357,10 @@ end;
 
 function TSGContext.TopShift():LongWord;
 begin
-Result:=0;
+if Render = nil then
+	Result:=0
+else
+	Result:=Render.TopShift(FFullscreen);
 end;
 
 function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;inline;
@@ -356,12 +368,12 @@ begin
 Result:=FCursorPosition[Index];
 end;
 
-function TSGContext.CursorKeyPressed:TSGCursorButtons;overload;inline;
+function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;inline;
 begin
 Result:=FCursorKeyPressed;
 end;
 
-function TSGContext.CursorKeyPressedType:TSGCursorButtonType;overload;inline;
+function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;inline;
 begin
 Result:=FCursorKeyPressedType;
 end;
@@ -374,7 +386,7 @@ else
 	Result:=FCursorKeysPressed[Index];
 end;
 
-constructor TSGContext.Create;
+constructor TSGContext.Create();
 var
 	i:LongWord;
 begin
@@ -392,9 +404,9 @@ FNewContextType:=nil;
 for i:=0 to 255 do
 	FKeysPressed[i]:=False;
 FKeyPressed:=0;
-FCursorPosition[SGDeferenseCursorPosition].Import;
-FCursorPosition[SGNowCursorPosition].Import;
-FCursorPosition[SGLastCursorPosition].Import;
+FCursorPosition[SGDeferenseCursorPosition].Import();
+FCursorPosition[SGNowCursorPosition].Import();
+FCursorPosition[SGLastCursorPosition].Import();
 FCursorKeyPressed:=SGNoCursorButton;
 FCursorKeysPressed[SGMiddleCursorButton]:=False;
 FCursorKeysPressed[SGLeftCursorButton]:=False;
@@ -404,14 +416,14 @@ FFullscreenData.FNotFullscreenWidth:=0;
 FRender:=nil;
 end;
 
-procedure TSGContext.ClearKeys;inline;
+procedure TSGContext.ClearKeys();inline;
 begin
 FCursorKeyPressed:=SGNoCursorButton;
 FKeyPressed:=0;
 FCursorWheel:=SGNoCursorWheel; 
 end;
 
-destructor TSGContext.Destroy;
+destructor TSGContext.Destroy();
 begin
 inherited;
 end;

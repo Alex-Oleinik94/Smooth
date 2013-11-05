@@ -2077,7 +2077,7 @@ if FTopShiftStatus.FEnable then
 	if (Context.TopShift<>FTopShiftStatus.FNowTopShift)then
 		begin
 		FNeedTop-=FTopShiftStatus.FNowTopShift;
-		FTopShiftStatus.FNowTopShift:=Context.TopShift;
+		FTopShiftStatus.FNowTopShift:=Context.TopShift();
 		FNeedTop+=FTopShiftStatus.FNowTopShift;
 		end;
 	end;

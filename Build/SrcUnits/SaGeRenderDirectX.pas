@@ -30,7 +30,7 @@ type
 		procedure Init();override;
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
-		
+		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 		function SupporedGPUBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
@@ -89,6 +89,12 @@ type
 		end;
 
 implementation
+
+procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
+begin
+x:=3*Byte(not VFullscreen);
+y:=-1000*Byte(not VFullscreen);
+end;
 
 procedure TSGRenderDirectX.SwapBuffers();
 begin
@@ -383,6 +389,7 @@ procedure TSGRenderDirectX.Init;
 begin
 FNowColor:=D3DCOLOR_XRGB(1,1,1);
 FClearColor:=D3DCOLOR_XRGB(0,0,0);
+pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
 end;
 
 constructor TSGRenderDirectX.Create;
@@ -401,7 +408,7 @@ end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
 var
-	MatrixProjection:D3DMATRIX;
+	Matrix:D3DMATRIX;
 var
 	CWidth,CHeight:LongWord;
 begin
@@ -410,30 +417,30 @@ CHeight:=LongWord(FWindow.Get('HEIGHT'));
 LoadIdentity();
 if Mode=SG_3D then
 	begin
-	D3DXMatrixIdentity(MatrixProjection);
-	D3DXMatrixPerspectiveFovLH(MatrixProjection,  // полученная итоговая матрица проекции
+	D3DXMatrixIdentity(Matrix);
+	D3DXMatrixPerspectiveFovLH(Matrix,  // полученная итоговая матрица проекции
 		D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
 		CWidth/CHeight,                           // соотношения сторон экрана Width/Height
 		0.0011,                                   // передний план отсечения сцены
 		500);                                     // задний план отсечения сцены
-	pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 	end
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixIdentity(MatrixProjection);
-		D3DXMatrixOrthoLH(MatrixProjection,D3DX_PI/4,CWidth / CHeight,0.0011,500);
-		pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+		D3DXMatrixIdentity(Matrix);
+		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4,CWidth / CHeight,0.0011,500);
+		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		end
 	else if Mode=SG_2D then
 		begin
-		D3DXMatrixIdentity(MatrixProjection);
-		D3DXMatrixOrthoLH(MatrixProjection,CWidth,-CHeight,-0.0001,0.1);
-		pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+		D3DXMatrixIdentity(Matrix);
+		D3DXMatrixOrthoLH(Matrix,CWidth,-CHeight,-0.001,0.1);
+		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		
-		D3DXMatrixIdentity(MatrixProjection);
-		D3DXMatrixTranslation(MatrixProjection,-CWidth/2,-CHeight/2,0);
-		pDevice.SetTransform(D3DTS_WORLD, MatrixProjection);
+		D3DXMatrixIdentity(Matrix);
+		D3DXMatrixTranslation(Matrix,-CWidth/2,-CHeight/2,0);
+		pDevice.SetTransform(D3DTS_WORLD, Matrix);
 		end;
 LoadIdentity();
 end;
