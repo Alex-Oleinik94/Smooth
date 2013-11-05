@@ -33,6 +33,12 @@ if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
 	exit;
 	end;
 Result:=True;
+// Поскольку мы не используем освещение для треугольника,
+// отключаем его
+pDevice.SetRenderState(D3DRS_LIGHTING,0);
+pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
+pDevice.SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
 END;
 
 procedure ReleaseAll;
@@ -64,26 +70,26 @@ v[2].x := 0.5;
 v[2].y := 0.5;  
 v[2].z := 0.5;
 
-v[0].Color :=D3DCOLOR_XRGB(255,0,0); // красный
-v[1].Color := D3DCOLOR_XRGB(0,255,0); // зеленый
-v[2].Color := D3DCOLOR_XRGB(0,0,255); // синий
+v[0].Color :=D3DCOLOR_ARGB(255,0,0,150); // красный
+v[1].Color := D3DCOLOR_ARGB(0,255,0,200); // зеленый
+v[2].Color := D3DCOLOR_ARGB(0,0,255,255); // синий
 
 dwBlue:=D3DCOLOR_XRGB(0,0,0);
 pDevice.Clear( 0, nil, D3DCLEAR_TARGET, dwBlue, 1.0, 0 );
 
 //========================================================================
-D3DXMatrixIdentity(MatrixProjection);
+//D3DXMatrixIdentity(MatrixProjection);
 // Изменяем матрицу проекции
-D3DXMatrixPerspectiveFovLH(MatrixProjection,  // полученная итоговая матрица проекции
+{D3DXMatrixPerspectiveFovLH(MatrixProjection,  // полученная итоговая матрица проекции
 	D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
 	1024/600,                                     // соотношения сторон экрана 770/500=1.54
 	10.0,                                     // передний план отсечения сцены
-	200.0);                                   // задний план отсечения сцены
+	200.0);                                   // задний план отсечения сцены}
 // Устанавливаем матрицу проекции
-pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
+//pDevice.SetTransform(D3DTS_PROJECTION, MatrixProjection);
 //========================================================================
-D3DXMatrixIdentity(MatrixWorld);
-D3DXMatrixRotationY(MatrixWorld, r);
+//D3DXMatrixIdentity(MatrixWorld);
+//D3DXMatrixRotationY(MatrixWorld, r);
 
 //========================================================================
 {D3DXMatrixIdentity(MatrixView);
@@ -91,19 +97,19 @@ D3DXMatrixRotationX(MatrixView,r);
 D3DXMatrixRotationY(MatrixView,r);
 D3DXMatrixRotationZ(MatrixView,r);
 pDevice.SetTransform(D3DTS_VIEW, MatrixView);}
-pDevice.GetTransform(D3DTS_VIEW, MatrixView);
+//pDevice.GetTransform(D3DTS_VIEW, MatrixView);
 //========================================================================
 
 
 
 pDevice.BeginScene();
-// Поскольку мы не используем освещение для треугольника,
-// отключаем его
-pDevice.SetRenderState(D3DRS_LIGHTING,0);
 // Просчет объектов всегда между BeginScene и EndScene
-
 pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE);
-pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
+//pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
+v[1].x :=0.5;  
+v[1].y :=-0.5;  
+v[1].z :=-0.5;
+pDevice.DrawPrimitiveUp( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
 
 pDevice.EndScene();
 

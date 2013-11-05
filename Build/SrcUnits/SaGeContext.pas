@@ -198,19 +198,19 @@ begin
 Result:=FContext[0];
 end;
 
-constructor TSGContextObject.Create;
+constructor TSGContextObject.Create();
 begin
 inherited;
 FContext:=nil;
 SGLog.Sourse('TSGContextObject__Create : Warning : Create without Context!!');
 end;
 
-destructor TSGContextObject.Destroy;
+destructor TSGContextObject.Destroy();
 begin
 inherited;
 end;
 
-class function TSGDrawClass.ClassName:String;
+class function TSGDrawClass.ClassName():String;
 begin
 Result:='SaGe Draw Class';
 end;
@@ -265,7 +265,7 @@ FFullscreen:=b;
 Resize();
 end;
 
-function TSGContext.KeyPressedType:TSGCursorButtonType;inline;overload;
+function TSGContext.KeyPressedType():TSGCursorButtonType;inline;overload;
 begin
 Result:=FKeyPressedType;
 end;
@@ -285,12 +285,12 @@ FKeyPressed:=Key;
 //WriteLn(Key);
 end;
 
-procedure TSGContext.Close;
+procedure TSGContext.Close();
 begin
 FActive:=False;
 end;
 
-class function TSGContext.RectInCoords:Boolean;
+class function TSGContext.RectInCoords():Boolean;
 begin
 Result:=True;
 end;

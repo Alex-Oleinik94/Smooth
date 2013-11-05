@@ -112,7 +112,7 @@ else
 	if (FNumberOfPoints=2) and ((FPrimetiveType=SGR_LINES) or (FPrimetiveType=SGR_LINE_LOOP) or (FPrimetiveType=SGR_LINE_STRIP)) then
 		begin
 		pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
-		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
+		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], SizeOf(FArPoints[0]));
 		end
 	else
 		if (FNumberOfPoints=1) and (FPrimetiveType=SGR_POINTS) then
@@ -126,10 +126,7 @@ SGR_POINTS:
 		FNumberOfPoints:=0;
 SGR_TRIANGLES: 
 	if FNumberOfPoints=3 then
-		begin
 		FNumberOfPoints:=0;
-		FArPoints[FNumberOfPoints].Color:=FNowColor;
-		end;
 SGR_QUADS:
 	if FNumberOfPoints=3 then
 		begin
@@ -143,7 +140,6 @@ SGR_QUADS:
 			begin
 			FPrimetivePrt:=0;
 			FNumberOfPoints:=0;
-			FArPoints[0].Color:=FNowColor;
 			end;
 		end;
 SGR_LINE_LOOP:
@@ -167,12 +163,11 @@ SGR_LINES:
 	if FNumberOfPoints=2 then
 		begin
 		FNumberOfPoints:=0;
-		FArPoints[0].Color:=FArPoints[1].Color;
 		end;
 end;
 end;
 
-function TSGRenderDirectX.SupporedGPUBuffers:Boolean;
+function TSGRenderDirectX.SupporedGPUBuffers():Boolean;
 begin
 Result:=False;
 end;
@@ -189,8 +184,7 @@ end;
 
 procedure TSGRenderDirectX.Color3f(const r,g,b:single);
 begin
-FNowColor:=D3DCOLOR_XRGB(round(255*r),round(255*g),round(255*b));
-FArPoints[FNumberOfPoints].Color:=FNowColor;
+FNowColor:=D3DCOLOR_ARGB(255,round(255*r),round(255*g),round(255*b));
 end;
 
 procedure TSGRenderDirectX.TexCoord2f(const x,y:single); 
@@ -200,6 +194,7 @@ end;
 
 procedure TSGRenderDirectX.Vertex2f(const x,y:single); 
 begin
+FArPoints[FNumberOfPoints].Color:=FNowColor;
 FArPoints[FNumberOfPoints].x:=x;
 FArPoints[FNumberOfPoints].y:=y;
 FArPoints[FNumberOfPoints].z:=0;
@@ -208,9 +203,8 @@ AfterVertexProc();
 end;
 
 procedure TSGRenderDirectX.Color4f(const r,g,b,a:single); 
-begin 
-FNowColor:=D3DCOLOR_RGBA(round(255*r),round(255*g),round(255*b),round(255*a));
-FArPoints[FNumberOfPoints].Color:=FNowColor;
+begin
+FNowColor:=D3DCOLOR_ARGB(round(255*a),round(255*r),round(255*g),round(255*b));
 end;
 
 procedure TSGRenderDirectX.Normal3f(const x,y,z:single); 
@@ -220,24 +214,28 @@ end;
 
 procedure TSGRenderDirectX.Translatef(const x,y,z:single); 
 var
-	Matrix:D3DMATRIX;
+	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 begin 
-pDevice.GetTransform(D3DTS_VIEW,Matrix);
-D3DXMatrixTranslation(Matrix,x,y,z);
-pDevice.SetTransform(D3DTS_VIEW,Matrix);
+pDevice.GetTransform(D3DTS_WORLD,Matrix1);
+D3DXMatrixIdentity(Matrix2);
+D3DXMatrixTranslation(Matrix2,x,y,z);
+D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
+pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Rotatef(const angle:single;const x,y,z:single); 
 var
-	Matrix:D3DMATRIX;
+	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 	v:TD3DXVector3;
 begin 
 v.x:=x;
 v.y:=y;
 v.z:=z;
-pDevice.GetTransform(D3DTS_WORLD,Matrix);
-D3DXMatrixRotationAxis(Matrix,v,angle/180*pi);
-pDevice.SetTransform(D3DTS_WORLD,Matrix);
+pDevice.GetTransform(D3DTS_WORLD,Matrix1);
+D3DXMatrixIdentity(Matrix2);
+D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
+D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
+pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
@@ -362,22 +360,20 @@ end;
 
 procedure TSGRenderDirectX.Clear(const VParam:Cardinal); 
 begin 
-pDevice.Clear( 0, nil, D3DCLEAR_TARGET, FClearColor, 1.0, 0 );
+pDevice.Clear( 0, nil, D3DCLEAR_TARGET or D3DCLEAR_ZBUFFER, FClearColor, 1.0, 0 );
 end;
 
 procedure TSGRenderDirectX.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
-pDevice.BeginScene();
 FPrimetiveType:=VPrimitiveType;
 FPrimetivePrt:=0;
 FNumberOfPoints:=0;
-FArPoints[0].Color:=FNowColor;
-pDevice.SetRenderState(D3DRS_LIGHTING,0);
+pDevice.BeginScene();
 end;
 
 procedure TSGRenderDirectX.EndScene();
 begin
-if FPrimetiveType=SGR_LINE_LOOP then
+if (FPrimetiveType=SGR_LINE_LOOP) and (FNumberOfPoints=1) and (FPrimetivePrt=1) then
 	begin
 	pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 	pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[1], sizeof(FArPoints[0]));
@@ -385,10 +381,14 @@ if FPrimetiveType=SGR_LINE_LOOP then
 pDevice.EndScene();
 end;
 
-procedure TSGRenderDirectX.Init;
+procedure TSGRenderDirectX.Init();
 begin
 FNowColor:=D3DCOLOR_XRGB(1,1,1);
-FClearColor:=D3DCOLOR_XRGB(0,0,0);
+FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
+pDevice.SetRenderState(D3DRS_LIGHTING,0);
+pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
+pDevice.SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_ONE );
 pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
 end;
 
@@ -461,6 +461,7 @@ end;
 procedure TSGRenderDirectX.Vertex3f(const x,y,z:single);
 begin
 //WriteLn(FNumberOfPoints,' ',FPrimetiveType);
+FArPoints[FNumberOfPoints].Color:=FNowColor;
 FArPoints[FNumberOfPoints].x:=x;
 FArPoints[FNumberOfPoints].y:=y;
 FArPoints[FNumberOfPoints].z:=z;
@@ -476,12 +477,17 @@ if pD3d = nil then
 	Result:=False;
 	exit;
 	end;
+pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
+
 FillChar(d3dpp,SizeOf(d3dpp),0);
-d3dpp.Windowed := TRUE;
+
+d3dpp.Windowed := True;
 d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-d3dpp.BackBufferFormat := D3DFMT_UNKNOWN;
-//d3dpp.EnableAutoDepthStencil:= True;
-//d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
+d3dpp.BackBufferFormat := d3ddm.Format;
+d3dpp.EnableAutoDepthStencil:= True;
+d3dpp.AutoDepthStencilFormat := D3DFMT_D16;
+d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
+
 if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
         D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
 	begin

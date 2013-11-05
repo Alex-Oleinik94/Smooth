@@ -50,16 +50,21 @@ var
 	Render:TSGRender;
 begin
 Render:=Context^.Render;
-Render.InitMatrixMode(SG_2D);
-Render.Translatef(0,0,-2.5);
+{Render.InitMatrixMode(SG_2D);
 Render.BeginScene(SGR_TRIANGLES);
 Render.Color3f(1,0,0);
-Render.Vertex3f(-100.5,-100.5,0);
-Render.Color3f(0,1,0);
-Render.Vertex3f(-0.5,100.5,0);
+Render.Vertex2f(200,200);
 Render.Color3f(0,0,1);
-Render.Vertex3f(0.5,0.5,0);
-Render.EndScene();
+Render.Vertex2f(400,200);
+Render.Color3f(0,1,0);
+Render.Vertex2f(200,400);
+Render.Color3f(0,0,1);
+Render.Vertex2f(400,200);
+Render.Color3f(0,1,1);
+Render.Vertex2f(400,400);
+Render.Color3f(0,1,0);
+Render.Vertex2f(200,400);
+Render.EndScene();}
 end;
 
 procedure Init(const MyContext:PSGContext);
@@ -99,11 +104,15 @@ var
 var //for cmd
 	S:String;
 	i:longWord;
-	FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN);
+	{$IFDEF MSWINDOWS}
+		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN);
+		{$ENDIF}
 	FGoToExit:Boolean = False;
 	VFullscreen:Boolean = False;
 begin
-FRenderState:=SGBR_UNKNOWN;
+{$IFDEF MSWINDOWS}
+	FRenderState:=SGBR_UNKNOWN;
+	{$ENDIF}
 if (Prt='CMD') and (argc>2) then
 	begin
 	for i:=2 to argc-1 do
@@ -114,26 +123,30 @@ if (Prt='CMD') and (argc>2) then
 				begin
 				WriteLn('Whis is help for funning GUI.');
 				WriteLn('     -H; -HELP       : for run help');
-				WriteLn('     -OPENGL         : for set prioritet render "OpenGL"');
-				WriteLn('     -DIRECTX        : for set prioritet render "DirectX"');
+				{$IFDEF MSWINDOWS}
+					WriteLn('     -OPENGL         : for set prioritet render "OpenGL"');
+					WriteLn('     -DIRECTX        : for set prioritet render "DirectX"');
+					{$ENDIF}
 				WriteLn('     -F; -FULLSCREEN : for change fullscreen');
 				FGoToExit:=True;
 				Break;
 				end
-			else if (S='OGL') or (S='OPENGL') then
-				begin
-				WriteLn('Set prioritet render : "OpenGL"');
-				FRenderState:=SGBR_OPENGL;
-				end
+			{$IFDEF MSWINDOWS}
+				else if (S='OGL') or (S='OPENGL') then
+					begin
+					WriteLn('Set prioritet render : "OpenGL"');
+					FRenderState:=SGBR_OPENGL;
+					end
+				else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') then
+					begin
+					WriteLn('Set prioritet render : "DirectX"');
+					FRenderState:=SGBR_DIRECTX;
+					end
+				{$ENDIF}
 			else if (S='F') or (S='FULLSCREEN') then
 				begin
 				VFullscreen:=not VFullscreen;
 				WriteLn('Set fullscreen : "',VFullscreen,'"');
-				end
-			else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') then
-				begin
-				WriteLn('Set prioritet render : "DirectX"');
-				FRenderState:=SGBR_DIRECTX;
 				end
 			else
 				begin
@@ -146,6 +159,7 @@ if (Prt='CMD') and (argc>2) then
 
 if FGoToExit then
 	Exit;
+
 Context:=
 {$IFDEF LAZARUS}
       TSGContextLazarus
