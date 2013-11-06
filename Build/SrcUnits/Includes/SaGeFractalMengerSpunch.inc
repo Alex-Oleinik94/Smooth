@@ -246,7 +246,7 @@ if (not FSizeWriteTrue) and (FMesh<>nil) then
 		FLabelSize.Caption:=SGStringToPChar(
 			'Size-(All: '+SGGetSizeString(FMesh.Size)+
 			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
-			' ;Normal|Color|Vert: '+SGGetSizeString(SGMax(SGMax(FMesh.ColorsSize,FMesh.NormalsSize),FMesh.VertexesSize))+
+			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
 			' );LenArObj='+SGStr(FMesh.NOfObjects)+'.'
 			);
 		FSizeWriteTrue:=True;
@@ -682,27 +682,25 @@ procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const a
 //abnu:	B:boolean = False;
 begin
 FMesh.ArObjects[MeshID].FNOfVerts+=4;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-4]:=i1;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-3]:=i2;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-2]:=i3;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-1]:=i4;
+FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-4]:=i1;
+FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-3]:=i2;
+FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-2]:=i3;
+FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-1]:=i4;
 
 if FEnableColors then
 	begin
-	FMesh.ArObjects[MeshID].FNOfColors+=4;
-	FMesh.ArObjects[MeshID].ArColors[FMesh.ArObjects[MeshID].FNOfColors-4].Import(abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColors[FMesh.ArObjects[MeshID].FNOfColors-3].Import(abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColors[FMesh.ArObjects[MeshID].FNOfColors-2].Import(abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColors[FMesh.ArObjects[MeshID].FNOfColors-1].Import(abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-4].Import(abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-3].Import(abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-2].Import(abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-1].Import(abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
 	end;
 
 if FEnableNormals then
 	begin
-	FMesh.ArObjects[MeshID].FNOfNormals+=4;
-	FMesh.ArObjects[MeshID].ArNormals[FMesh.ArObjects[MeshID].FNOfNormals-4]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormals[FMesh.ArObjects[MeshID].FNOfNormals-3]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormals[FMesh.ArObjects[MeshID].FNOfNormals-2]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormals[FMesh.ArObjects[MeshID].FNOfNormals-1]:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-4]:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-3]:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-2]:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-1]:=Ar6Normals[ai];
 	end;
 
 FMesh.ArObjects[MeshID].ArFacesQuads[FMesh.ArObjects[MeshID].FNOfFaces+0].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;

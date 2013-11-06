@@ -147,6 +147,9 @@ const
 var
 	SGLogEnable:Boolean = True;
 type
+	Float = Single;
+	Double = Real;
+	
 	SGUint = type LongWord;
 	PSGUInt = ^ SGUint;
 	SGInt = Int64;
@@ -224,6 +227,9 @@ type
 		FSaGeLibrary:TSGLibrary;
 			public
 		property SaGeLibrary : TSGLibrary read FSaGeLibrary;
+		function qwerty(const Index:LongWord):float;virtual;abstract;
+			public
+		property qwertp[Index : LongWord]:float read qwerty;
 		end;
 	
 	TSGArTObject = type packed array of TObject;

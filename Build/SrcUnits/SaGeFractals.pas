@@ -118,9 +118,9 @@ type
 {$DEFINE SGREADINTERFACE}
 {$i Includes\SaGeFractalMengerSpunch.inc}
 {$i Includes\SaGeFractalMandelbrod.inc}
-{$i Includes\SaGeFractalKohTriangle.inc}
-{$i Includes\SaGeFractalPodkova.inc}
-{$i Includes\SaGeFractalLomanaya.inc}
+//{$i Includes\SaGeFractalKohTriangle.inc}
+//{$i Includes\SaGeFractalPodkova.inc}
+//{$i Includes\SaGeFractalLomanaya.inc}
 {$UNDEF SGREADINTERFACE}
 
 implementation
@@ -128,9 +128,9 @@ implementation
 {$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeFractalMengerSpunch.inc}
 {$i Includes\SaGeFractalMandelbrod.inc}
-{$i Includes\SaGeFractalKohTriangle.inc}
-{$i Includes\SaGeFractalPodkova.inc}
-{$i Includes\SaGeFractalLomanaya.inc}
+//{$i Includes\SaGeFractalKohTriangle.inc}
+//{$i Includes\SaGeFractalPodkova.inc}
+//{$i Includes\SaGeFractalLomanaya.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DFractal.Calculate;
@@ -274,10 +274,6 @@ procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 begin
 FMesh.ArObjects[MID].SetFaceLength(LFaces);
 FMesh.ArObjects[MID].SetVertexLength(LVertexes);
-if FEnableColors then
-	SetLength(FMesh.ArObjects[MID].ArColors,LVertexes);
-if FEnableNormals then
-	SetLength(FMesh.ArObjects[MID].ArNormals,LVertexes);
 end;
 
 constructor TSGFractalData.Create(const Fractal:TSGFractal; const ThreadID:LongWord);
