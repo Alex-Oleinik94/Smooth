@@ -1,6 +1,6 @@
 {$I Includes\SaGe.inc}
 {$DEFINE CLHINTS}
-unit SaGeCL;
+unit SaGeScreen;
 
 interface
 
@@ -849,13 +849,6 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		FBodyColor+=ThreeColor1.WithAlpha(0.4*FVisibleTimer);
 		FBodyColor/=QuikAnime;
 		end;
-	if  (1-FOpenTimer>SGZero) and
-		(FVisibleTimer>SGZero) then
-	DrawItem(
-		GetVertex([SGCL_LEFT,SGCL_TOP],SG_VERTEX_FOR_PARENT),
-		GetVertex([SGCL_RIGHT,SGCL_BOTTOM],SG_VERTEX_FOR_PARENT),
-		SGColorImport(1,1,1,1-FOpenTimer).WithAlpha(FVisibleTimer),
-		FSelectItem,True);
 	if Boolean(FScroll) then
 		begin
 		if  (FOpenTimer>SGZero)  then
@@ -933,7 +926,13 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				FFirstScrollItem+i);
 			end;
 		end;
-	
+	if  (1-FOpenTimer>SGZero) and
+		(FVisibleTimer>SGZero) then
+	DrawItem(
+		GetVertex([SGCL_LEFT,SGCL_TOP],SG_VERTEX_FOR_PARENT),
+		GetVertex([SGCL_RIGHT,SGCL_BOTTOM],SG_VERTEX_FOR_PARENT),
+		SGColorImport(1,1,1,1-FOpenTimer).WithAlpha(FVisibleTimer),
+		FSelectItem,True);
 	end;
 FBackLight:=False;
 inherited;

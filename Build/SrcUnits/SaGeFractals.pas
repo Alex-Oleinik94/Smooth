@@ -9,7 +9,7 @@ uses
 	,Classes
 	,SysUtils
 	,SaGeMesh
-	,SaGeCL
+	,SaGeScreen
 	,SaGeUtils
 	,SaGeImages
 	,SaGeImagesBase

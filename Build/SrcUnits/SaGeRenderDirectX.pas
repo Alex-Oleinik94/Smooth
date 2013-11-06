@@ -511,7 +511,7 @@ pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1);
 pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
-pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
+//pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
 end;
 
 constructor TSGRenderDirectX.Create();

@@ -22,15 +22,13 @@ uses
 	,SaGeBase
 	,SaGeFractals
 	,SaGeUtils
-	,SaGeCL
+	,SaGeScreen
 	,SaGeTotal
 	,SaGeMesh
 	,SaGeMath
 	//,SaGeExamples
 	//,SaGeShaders
 	,SaGeFPCToC
-	,gl
-	,glext
 	,SaGeNet
 	,SageGeneticalAlgoritm
 	,SaGeRender
