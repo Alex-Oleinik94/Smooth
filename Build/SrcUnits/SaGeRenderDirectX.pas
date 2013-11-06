@@ -308,29 +308,76 @@ procedure TSGRenderDirectX.TexImage2D(const VTextureType:Cardinal;const VP1:Card
 var
 	VTFormat:LongWord;
 	rcLockedRect:D3DLOCKED_RECT; 
+
+procedure RGBAToD3D_ARGB();inline;
+type
+	PLongWord = ^ LongWord;
+var
+	I,II:LongWord;
+begin
+i:=0;
+ii:=VWidth*VHeight;
+repeat
+PLongWord(rcLockedRect.pBits)[i]:=D3DCOLOR_ARGB(
+PByte(VBitMap)[i*VChannels+3],
+PByte(VBitMap)[i*VChannels+0],
+PByte(VBitMap)[i*VChannels+1],
+PByte(VBitMap)[i*VChannels+2]);
+i+=1;
+until i=ii;
+end;
+
+procedure RGBToD3D_XRGB();inline;
+type
+	PLongWord = ^ LongWord;
+var
+	i,ii:LongWord;
+begin
+i:=0;
+ii:=VWidth*VHeight;
+repeat
+PLongWord(rcLockedRect.pBits)[i]:=
+	D3DCOLOR_XRGB(PByte(VBitMap)[i*3],PByte(VBitMap)[i*3+1],PByte(VBitMap)[i*3+2]);
+i+=1;
+until i=ii;
+end;
+
 begin 
 VTFormat:=0;
 case VFormatType of
 SGR_RGBA:VTFormat:=D3DFMT_A8R8G8B8;
-SGR_RGB:VTFormat:=D3DFMT_R8G8B8;
-SGR_LUMINANCE_ALPHA:;
+SGR_RGB:VTFormat:=D3DFMT_X8R8G8B8;//D3DFMT_R8G8B8;
+SGR_LUMINANCE_ALPHA:VTFormat:=D3DFMT_A8L8;
 SGR_RED:;
 SGR_INTENSITY:;
-SGR_ALPHA:;
-SGR_LUMINANCE:;
+SGR_ALPHA:VTFormat:=D3DFMT_A8;
+SGR_LUMINANCE:VTFormat:=D3DFMT_L8;
 end;
+if VTFormat=D3DFMT_R8G8B8 then
+	WriteLn('D3DFMT_R8G8B8');
 if pDevice.CreateTexture(VWidth,VHeight,VChannels,D3DUSAGE_DYNAMIC, VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1],nil)<> D3D_OK then
-	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "D3DXCreateTexture" failed...');
-	
-fillchar(rcLockedRect,sizeof(rcLockedRect),0);
-
-if FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
-	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__LockRect" failed...')
+	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "D3DXCreateTexture" failed...')
 else
 	begin
-	Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
-	if FArTextures[FNowTexture-1].UnlockRect(0) <> D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
+	fillchar(rcLockedRect,sizeof(rcLockedRect),0);
+
+	if FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__LockRect" failed...')
+	else
+		begin
+		if (VTFormat=D3DFMT_A8R8G8B8) and (VFormatType=SGR_RGBA) then
+			begin
+			RGBAToD3D_ARGB();
+			end
+		else if (VTFormat=D3DFMT_X8R8G8B8) and (VFormatType=SGR_RGB) then
+			begin
+			RGBToD3D_XRGB();
+			end
+		else
+			Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
+		if FArTextures[FNowTexture-1].UnlockRect(0) <> D3D_OK then
+			SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
+		end;
 	end;
 end;
 
@@ -439,28 +486,32 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 //выключаем освещение
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
 
+//========параметры текстур
+//Включили вычисление цвета из текстуры RGB каналов
+pDevice.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+pDevice.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+pDevice.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+//Включение ALPHA прозрачности текстуры(Включили вычисление прозрачности из Alpha канала)
+pDevice.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
 //============Прозрачность
 pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
 pDevice.SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
+//===========CULL FACE
 //чтобы рисовались все подлигоны, а не только те, у которых
 //нормаль направлена в сторону камеры
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
 //===================СГЛАЖИВАНИЕ 
 pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
-//pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); // -- чето это сильно мутит, линии колбасу напоминают
+//Чето это сильно мутит, линии колбасу напоминают от этого параметра
+//pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
 pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
-
-//========параметры текстур
-pDevice.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-pDevice.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-pDevice.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-pDevice.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 end;
 
 constructor TSGRenderDirectX.Create();
