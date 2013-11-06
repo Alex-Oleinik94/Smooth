@@ -308,8 +308,6 @@ procedure TSGRenderDirectX.TexImage2D(const VTextureType:Cardinal;const VP1:Card
 var
 	VTFormat:LongWord;
 	rcLockedRect:D3DLOCKED_RECT; 
-	rc:RECT;
-	MypBits:Pointer;
 begin 
 VTFormat:=0;
 case VFormatType of
@@ -321,16 +319,19 @@ SGR_INTENSITY:;
 SGR_ALPHA:;
 SGR_LUMINANCE:;
 end;
-WriteLn(D3DXCreateTexture(pDevice,VWidth,VHeight,VChannels,D3DUSAGE_RENDERTARGET, VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1]));
-
+if pDevice.CreateTexture(VWidth,VHeight,VChannels,D3DUSAGE_DYNAMIC, VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1],nil)<> D3D_OK then
+	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "D3DXCreateTexture" failed...');
+	
 fillchar(rcLockedRect,sizeof(rcLockedRect),0);
-GetMem(MypBits,VWidth*VHeight*VChannels);
-Move(MypBits^,VBitMap^,VWidth*VHeight*VChannels);
-FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, @rc, D3DLOCK_DISCARD);
-rcLockedRect.pBits:=MypBits;
-rcLockedRect.Pitch:=VWidth*VChannels;
-FArTextures[FNowTexture-1].UnlockRect(0);
-//WriteLn(D3DXCreateTextureFromFile(pDevice,'Tahoma.bmp',FArTextures[FNowTexture-1]));
+
+if FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
+	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__LockRect" failed...')
+else
+	begin
+	Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
+	if FArTextures[FNowTexture-1].UnlockRect(0) <> D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
+	end;
 end;
 
 procedure TSGRenderDirectX.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
