@@ -685,6 +685,7 @@ if FEnableVBO then
 	Render.DrawElements(FPoligonesType, GetFaceLength() ,SGR_UNSIGNED_INT,nil);
 	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
