@@ -510,7 +510,6 @@ else
 		SGVertexImport(2.6,2.6,2.6),
 		-5.2,-5.2,
 		FDepth);
-	WriteLn(FMesh.NOfObjects);
 	if FEnableVBO and (FMesh<>nil) then
 		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO();
 	end;

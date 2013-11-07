@@ -726,7 +726,7 @@ else
 				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
 			GetSizeOfOneVertex(),
 			Pointer(LongWord(ArVertex)+SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
-    Render.DrawElements(FPoligonesType, GetFaceLength , SGR_UNSIGNED_INT, @ArFaces[0]);
+    Render.DrawElements(FPoligonesType, GetFaceLength() , SGR_UNSIGNED_INT, @ArFaces[0]);
     end;
 
 Render.DisableClientState(SGR_VERTEX_ARRAY);

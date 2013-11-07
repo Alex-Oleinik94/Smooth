@@ -74,6 +74,7 @@ type
 		procedure LineWidth(const VLW:Single);override;
 		procedure PointSize(const PS:Single);override;
 			private
+			//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
 			//приведение цветов и полигонов к Vertex-ам опенжл-я
 		FPrimetiveType:LongWord;
@@ -89,6 +90,12 @@ type
 			//Текстуры
 		FNowTexture:LongWord;
 		FArTextures:packed array of IDirect3DTexture9;
+			// VBO 
+		FArBuffers:packed array of IDirect3DVertexBuffer9;
+		FEnabledClientStateVertex:Boolean;
+		FEnabledClientStateColor:Boolean;
+		FEnabledClientStateNormal:Boolean;
+		FEnabledClientStateTexVertex:Boolean;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -107,24 +114,19 @@ pDevice.Present(nil, nil, 0, nil);
 end;
 
 procedure TSGRenderDirectX.AfterVertexProc();inline;
-const
-	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_DIFFUSE or D3DFVF_TEX1;
 begin
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
-	pDevice.SetFVF( MyVertexType );
 	pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 	end
 else
 	if (FNumberOfPoints=2) and ((FPrimetiveType=SGR_LINES) or (FPrimetiveType=SGR_LINE_LOOP) or (FPrimetiveType=SGR_LINE_STRIP)) then
 		begin
-		pDevice.SetFVF( MyVertexType );
 		pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[0], SizeOf(FArPoints[0]));
 		end
 	else
 		if (FNumberOfPoints=1) and (FPrimetiveType=SGR_POINTS) then
 			begin
-			pDevice.SetFVF( MyVertexType );
 			pDevice.DrawPrimitiveUP( D3DPT_POINTLIST, 1, FArPoints[0], sizeof(FArPoints[0]));
 			end;
 case FPrimetiveType of
@@ -259,12 +261,25 @@ SGR_TEXTURE_2D:
 	FNowTexture:=0;
 	pDevice.SetTexture(0,nil);
 	end;
+SGR_CULL_FACE:
+	begin
+	pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	end;
 end;
 end;
 
 procedure TSGRenderDirectX.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+var
+	i:LongWord;
 begin 
-
+for i:=0 to VQuantity-1 do
+	begin
+	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1]<>nil) then
+		begin
+		FArTextures[VTextures[i]-1]._Release();
+		FArTextures[VTextures[i]-1]:=nil;
+		end;
+	end;
 end;
 
 procedure TSGRenderDirectX.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer); 
@@ -273,13 +288,18 @@ begin
 end;
 
 procedure TSGRenderDirectX.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+var
+	I:LongWord;
 begin 
-if FArTextures=nil then
-	SetLength(FArTextures,1)
-else
-	SetLength(FArTextures,Length(FArTextures)+1);
-FArTextures[High(FArTextures)]:=nil;
-VTextures^:=Length(FArTextures);
+for i:=0 to VQuantity-1 do
+	begin
+	if FArTextures=nil then
+		SetLength(FArTextures,1)
+	else
+		SetLength(FArTextures,Length(FArTextures)+1);
+	FArTextures[High(FArTextures)]:=nil;
+	VTextures[i]:=Length(FArTextures);
+	end;
 end;
 
 procedure TSGRenderDirectX.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
@@ -388,7 +408,10 @@ end;
 
 procedure TSGRenderDirectX.CullFace(const VParam:Cardinal); 
 begin 
-
+case VParam of
+SGR_BACK:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CW );
+SGR_FRONT:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
+end;
 end;
 
 procedure TSGRenderDirectX.EnableClientState(const VParam:Cardinal); 
@@ -402,16 +425,36 @@ begin
 end;
 
 procedure TSGRenderDirectX.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
+var
+	i:LongWord;
 begin 
-
+for i:=0 to VQ-1 do
+	begin
+	if FArBuffers=nil then
+		SetLength(FArBuffers,1)
+	else
+		SetLength(FArBuffers,Length(FArBuffers)+1);
+	FArBuffers[High(FArBuffers)]:=nil;
+	PT[i]:=Length(FArBuffers);
+	end;
 end;
 
 procedure TSGRenderDirectX.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
+var
+	i:LongWord;
 begin 
-
+for i:=0 to VQuantity-1 do
+	if FArBuffers[PLongWord(VPoint)[i]]<>nil then
+	begin
+	FArBuffers[PLongWord(VPoint)[i]]._Release();
+	FArBuffers[PLongWord(VPoint)[i]]:=nil;
+	PLongWord(VPoint)[i]:=0;
+	end;
 end;
 
 procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
+//SGR_ELEMENT_ARRAY_BUFFER_ARB
+//SGR_ARRAY_BUFFER_ARB
 begin 
 
 end;
@@ -457,18 +500,20 @@ pDevice.Clear( 0, nil, D3DCLEAR_TARGET or D3DCLEAR_ZBUFFER, FClearColor, 1.0, 0 
 end;
 
 procedure TSGRenderDirectX.BeginScene(const VPrimitiveType:TSGPrimtiveType);
+const
+	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_DIFFUSE or D3DFVF_TEX1;
 begin
 FPrimetiveType:=VPrimitiveType;
 FPrimetivePrt:=0;
 FNumberOfPoints:=0;
 pDevice.BeginScene();
+pDevice.SetFVF( MyVertexType );
 end;
 
 procedure TSGRenderDirectX.EndScene();
 begin
 if (FPrimetiveType=SGR_LINE_LOOP) and (FNumberOfPoints=1) and (FPrimetivePrt=1) then
 	begin
-	pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE );
 	pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[1], sizeof(FArPoints[0]));
 	end;
 pDevice.EndScene();
@@ -505,12 +550,13 @@ pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
 //===================СГЛАЖИВАНИЕ 
-pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
+//pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
 //Чето это сильно мутит, линии колбасу напоминают от этого параметра
 //pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
 pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
-pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
+//От MIP фильтора у текстур возникают аномалии
+//pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
 //pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
 end;
 
@@ -521,12 +567,24 @@ FType:=SGRenderDirectX;
 FArTextures:=nil;
 pDevice:=nil;
 pD3D:=nil;
+FArBuffers:=nil;
+FEnabledClientStateVertex:=False;
+FEnabledClientStateColor:=False;
+FEnabledClientStateNormal:=False;
+FEnabledClientStateTexVertex:=False;
 end;
 
 destructor TSGRenderDirectX.Destroy();
 var
 	i:Cardinal;
 begin
+if FArBuffers<>nil then
+	begin
+	for i:=0 to High(FArBuffers) do
+		if FArBuffers[i]<>nil then
+			FArBuffers[i]._Release();
+	SetLength(FArBuffers,0);
+	end;
 if FArTextures<>nil then
 	begin
 	for i:=0 to High(FArTextures) do
