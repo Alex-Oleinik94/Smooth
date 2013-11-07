@@ -22,6 +22,8 @@ type
 			Arr6:TSGMengerSpunchBoolAr6;
 			Point:TSGVertex;
 			end;
+		FVertexIndex:LongWord;
+		FFaceIndex:LongWord;
 		procedure CalculateArray;
 		procedure Calculate;override;
 		procedure CalculateFromThread(var MeshID,ThreadArB,ThreadArE:LongWord);
@@ -681,33 +683,33 @@ procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const a
 //var
 //abnu:	B:boolean = False;
 begin
-FMesh.ArObjects[MeshID].FNOfVerts+=4;
-FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-4]:=i1;
-FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-3]:=i2;
-FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-2]:=i3;
-FMesh.ArObjects[MeshID].ArVertex3f[FMesh.ArObjects[MeshID].FNOfVerts-1]:=i4;
+FVertexIndex+=4;
+FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-4]^:=i1;
+FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^:=i2;
+FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-2]^:=i3;
+FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-1]^:=i4;
 
 if FEnableColors then
 	begin
-	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-4].Import(abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-3].Import(abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-2].Import(abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].ArColor4b[FMesh.ArObjects[MeshID].FNOfVerts-1].Import(abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-4,abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-3,abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-2,abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
+	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-1,abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
 	end;
 
 if FEnableNormals then
 	begin
-	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-4]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-3]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-2]:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FMesh.ArObjects[MeshID].FNOfNormals-1]:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-4]^:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-3]^:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-2]^:=Ar6Normals[ai];
+	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.ArObjects[MeshID].ArFacesQuads[FMesh.ArObjects[MeshID].FNOfFaces+0].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].ArFacesQuads[FMesh.ArObjects[MeshID].FNOfFaces+0].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-2;
-FMesh.ArObjects[MeshID].ArFacesQuads[FMesh.ArObjects[MeshID].FNOfFaces+0].p[2]:=FMesh.ArObjects[MeshID].FNOfVerts-3;
-FMesh.ArObjects[MeshID].ArFacesQuads[FMesh.ArObjects[MeshID].FNOfFaces+0].p[3]:=FMesh.ArObjects[MeshID].FNOfVerts-4;
-FMesh.ArObjects[MeshID].FNOfFaces+=1;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-2;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[2]:=FMesh.ArObjects[MeshID].FNOfVerts-3;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[3]:=FMesh.ArObjects[MeshID].FNOfVerts-4;
+FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads);
 end;

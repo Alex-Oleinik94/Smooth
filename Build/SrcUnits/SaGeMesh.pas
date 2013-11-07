@@ -125,6 +125,9 @@ type
 		property ArColor3b[Index : Cardinal]:PTSGColor3b read GetColor3b;
 		property ArColor4b[Index : Cardinal]:PTSGColor4b read GetColor4b;
 		
+		procedure SetColor(const Index:Cardinal;const r,g,b:Single; const a:Single = 1);inline;
+		procedure AutoSetColorType();inline;
+		
 		function GetNormal(const Index:Cardinal):PTSGVertex3f;inline;
 		property ArNormal[Index : Cardinal]:PTSGVertex3f read GetNormal;
 		
@@ -233,6 +236,44 @@ implementation
 {{$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeMesh3ds.inc}
 {$UNDEF SGREADIMPLEMENTATION}}
+
+procedure TSG3DObject.AutoSetColorType();inline;
+begin
+if Render<>nil then
+	begin
+	
+	end;
+end;
+
+procedure TSG3DObject.SetColor(const Index:Cardinal;const r,g,b:Single; const a:Single = 1);inline;
+begin
+if (FColorType=TSGMeshColorType3f) then
+	begin
+	ArColor3f[Index]^.r:=r;
+	ArColor3f[Index]^.g:=g;
+	ArColor3f[Index]^.b:=b;
+	end
+else if (FColorType=TSGMeshColorType4f) then
+	begin
+	ArColor4f[Index]^.r:=r;
+	ArColor4f[Index]^.g:=g;
+	ArColor4f[Index]^.b:=b;
+	ArColor4f[Index]^.a:=a;
+	end
+else if (FColorType=TSGMeshColorType3b) then
+	begin
+	ArColor3b[Index]^.r:=round(r*255);
+	ArColor3b[Index]^.g:=round(g*255);
+	ArColor3b[Index]^.b:=round(b*255);
+	end
+else if (FColorType=TSGMeshColorType4b) then
+	begin
+	ArColor4b[Index]^.r:=round(r*255);
+	ArColor4b[Index]^.g:=round(g*255);
+	ArColor4b[Index]^.b:=round(b*255);
+	ArColor4b[Index]^.a:=round(a*255);
+	end;
+end;
 
 function TSG3DObject.GetNormal(const Index:Cardinal):PTSGVertex3f;inline;
 begin

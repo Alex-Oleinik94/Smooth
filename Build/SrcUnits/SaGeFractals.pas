@@ -82,6 +82,9 @@ type
 		FEnableVBO:Boolean;
 		FEnableColors:boolean;
 		FEnableNormals:Boolean;
+		
+		//для PushIndexes()
+		FFaceIndex,FVertexIndex:Cardinal;
 			public
 		procedure Draw;override;
 		procedure Calculate;override;
@@ -133,7 +136,7 @@ implementation
 //{$i Includes\SaGeFractalLomanaya.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
-procedure TSG3DFractal.Calculate;
+procedure TSG3DFractal.Calculate();
 begin
 inherited;
 if FEnableVBO then
@@ -249,6 +252,8 @@ while Quantity<>0 do
 	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FF8000);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
 	FMesh.ArObjects[FMesh.NOfObjects-1].FPoligonesType:=PoligoneType;
+	if FEnableColors then
+		FMesh.ArObjects[FMesh.NOfObjects-1].AutoSetColorType();
 	if FEnableNormals then
 		FMesh.ArObjects[FMesh.NOfObjects-1].FHasNormals:=True;
 	if Quantity<=FShift then
