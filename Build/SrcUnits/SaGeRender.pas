@@ -9,25 +9,27 @@ uses
 type
 	TSGMatrixMode=LongWord;
 	TSGPrimtiveType=LongWord;
-	
+	TSGRenderType=(SGRenderNone,SGRenderOpenGL,SGRenderDirectX);
 	TSGRender=class;
 	TSGRenderClass=class of TSGRender;
 	TSGRender=class(TSGClass)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
-		function Width:LongWord;inline;
-		function Height:LongWord;inline;
+		constructor Create();override;
+		destructor Destroy();override;
+		function Width():LongWord;inline;
+		function Height():LongWord;inline;
 			protected
+		FType:TSGRenderType;
 		FWindow:TSGClass;
 			public
+		property RenderType:TSGRenderType read FType;
 		function SetPixelFormat():Boolean;virtual;abstract;overload;
 		procedure MakeCurrent();virtual;
 		procedure ReleaseCurrent();virtual;abstract;
 		function CreateContext():Boolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
-		function SupporedGPUBuffers:Boolean;virtual;
+		function SupporedGPUBuffers():Boolean;virtual;
 		procedure SwapBuffers();virtual;abstract;
 		function TopShift(const VFullscreen:Boolean = False):LongWord;virtual;
 		procedure MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);virtual;
@@ -99,28 +101,30 @@ begin
 SGLog.Sourse('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
 end;
 
-function TSGRender.SupporedGPUBuffers:Boolean;
+function TSGRender.SupporedGPUBuffers():Boolean;
 begin
 Result:=False;
 end;
 
-constructor TSGRender.Create;
+constructor TSGRender.Create();
 begin
+inherited Create();
 FWindow:=nil;
+FType:=SGRenderNone;
 end;
 
-destructor TSGRender.Destroy;
+destructor TSGRender.Destroy();
 begin
 SGLog.Sourse(['TSGRender__Destroy()']);
-inherited;
+inherited Destroy();
 end;
 
-function TSGRender.Width:LongWord;inline;
+function TSGRender.Width():LongWord;inline;
 begin
 Result:=LongWord(FWindow.Get('WIDTH'));
 end;
 
-function TSGRender.Height:LongWord;inline;
+function TSGRender.Height():LongWord;inline;
 begin
 Result:=LongWord(FWindow.Get('HEIGHT'));
 end;

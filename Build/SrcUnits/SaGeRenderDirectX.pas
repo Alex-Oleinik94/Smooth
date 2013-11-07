@@ -517,6 +517,7 @@ end;
 constructor TSGRenderDirectX.Create();
 begin
 inherited Create();
+FType:=SGRenderDirectX;
 FArTextures:=nil;
 pDevice:=nil;
 pD3D:=nil;

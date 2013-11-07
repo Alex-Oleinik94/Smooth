@@ -64,8 +64,8 @@ type
 	TSG3DFractal=class (TSGFractal)
 			public
 		constructor Create(const VContext:PSGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		destructor Destroy();override;
+		class function ClassName():string;override;
 			public
 		FMesh:TSGModel;
 		FMeshesInfo:packed array of TSGBoolean;
@@ -83,15 +83,13 @@ type
 		FEnableColors:boolean;
 		FEnableNormals:Boolean;
 		
-		//для PushIndexes()
-		FFaceIndex,FVertexIndex:Cardinal;
 			public
-		procedure Draw;override;
-		procedure Calculate;override;
+		procedure Draw();override;
+		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
-		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord);
-		procedure ClearMesh;inline;
-		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean);inline;
+		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
+		procedure ClearMesh();inline;
+		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;
 			public
 		property LightingEnable:Boolean read FLightingEnable write FLightingEnable;
 			public
@@ -111,9 +109,9 @@ type
 		procedure InitColor(x,y:LongInt;RecNumber:LongInt);virtual;
 		class function GetColor(const a,b,color:LongInt):byte;inline;
 		class function GetColorOne(const a,b,color:LongInt):byte;inline;
-		procedure ToTexture;virtual;
-		procedure BeginCalculate;override;
-		class function ClassName:string;override;
+		procedure ToTexture();virtual;
+		procedure BeginCalculate();override;
+		class function ClassName():string;override;
 		property Width:LongInt read FDepth write FDepth;
 		property Height:LongWord read FDepthHeight write FDepthHeight;
 		end;
@@ -121,9 +119,9 @@ type
 {$DEFINE SGREADINTERFACE}
 {$i Includes\SaGeFractalMengerSpunch.inc}
 {$i Includes\SaGeFractalMandelbrod.inc}
-//{$i Includes\SaGeFractalKohTriangle.inc}
-//{$i Includes\SaGeFractalPodkova.inc}
-//{$i Includes\SaGeFractalLomanaya.inc}
+{$i Includes\SaGeFractalKohTriangle.inc}
+{$i Includes\SaGeFractalPodkova.inc}
+{$i Includes\SaGeFractalLomanaya.inc}
 {$UNDEF SGREADINTERFACE}
 
 implementation
@@ -131,9 +129,9 @@ implementation
 {$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeFractalMengerSpunch.inc}
 {$i Includes\SaGeFractalMandelbrod.inc}
-//{$i Includes\SaGeFractalKohTriangle.inc}
-//{$i Includes\SaGeFractalPodkova.inc}
-//{$i Includes\SaGeFractalLomanaya.inc}
+{$i Includes\SaGeFractalKohTriangle.inc}
+{$i Includes\SaGeFractalPodkova.inc}
+{$i Includes\SaGeFractalLomanaya.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DFractal.Calculate();
@@ -206,9 +204,9 @@ else
 		end;
 end;
 
-procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean);inline;
+procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;
 begin
-if FMesh.ArObjects[MeshID].FNOfFaces>=FShift then
+if FFaceIndex>=FShift then
 	begin
 	if (not DoAtThreads) and FEnableVBO then
 		begin
@@ -217,6 +215,8 @@ if FMesh.ArObjects[MeshID].FNOfFaces>=FShift then
 	if FThreadsEnable and (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) and (FMeshesInfo[MeshID]=SG_FALSE) then
 		FMeshesInfo[MeshID]:=SG_TRUE;
 	MeshID+=1;
+	FVertexIndex:=0;
+	FFaceIndex:=0;
 	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.NOfObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.ArObjects[MeshID].FNOfFaces=0) then
 		begin
 		{if DoAtThreads then
@@ -237,7 +237,7 @@ if FMesh.ArObjects[MeshID].FNOfFaces>=FShift then
 	end;
 end;
 
-procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord);
+procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
 var
 	B:Boolean = True;
 begin
@@ -251,7 +251,8 @@ while Quantity<>0 do
 	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(FContext);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FF8000);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
-	FMesh.ArObjects[FMesh.NOfObjects-1].FPoligonesType:=PoligoneType;
+	FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=PoligoneType;
+	FMesh.ArObjects[FMesh.NOfObjects-1].VertexType:=VVertexType;
 	if FEnableColors then
 		FMesh.ArObjects[FMesh.NOfObjects-1].AutoSetColorType();
 	if FEnableNormals then
@@ -259,7 +260,7 @@ while Quantity<>0 do
 	if Quantity<=FShift then
 		begin
 		SetMeshArLength(FMesh.NOfObjects-1,Quantity,
-			TSG3DObject.GetFaceLength(Quantity,FMesh.ArObjects[FMesh.NOfObjects-1].FPoligonesType));
+			TSG3DObject.GetFaceLength(Quantity,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
 		Quantity:=0;
 		end
 	else
@@ -267,7 +268,7 @@ while Quantity<>0 do
 		if (not FEnableVBO) or b then
 			begin
 			SetMeshArLength(FMesh.NOfObjects-1,FShift,
-				TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].FPoligonesType));
+				TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
 			b:=False;
 			end;
 		Quantity-=FShift;
@@ -283,7 +284,7 @@ end;
 
 constructor TSGFractalData.Create(const Fractal:TSGFractal; const ThreadID:LongWord);
 begin
-inherited Create;
+inherited Create();
 FFractal:=Fractal;
 FThreadID:=ThreadID;
 end;
@@ -310,17 +311,17 @@ FIdentityObject.Context:=FContext;
 FMatrixType:=SG_3D;
 end;
 
-destructor TSG3DFractal.Destroy;
+destructor TSG3DFractal.Destroy();
 begin
 if FProjectionComboBox<>nil then
-	FProjectionComboBox.Destroy;
+	FProjectionComboBox.Destroy();
 if FMesh<>nil then 
 	FMesh.Destroy;
 SetLength(FMeshesInfo,0);
-inherited;
+inherited Destroy();
 end;
 
-procedure TSG3DFractal.Draw;
+procedure TSG3DFractal.Draw();
 var
 	i,ii:LongInt;
 begin
@@ -336,7 +337,7 @@ if (Not FMeshesReady) and FThreadsEnable and FEnableVBO then
 		if FMeshesInfo[i]=SG_TRUE then
 			begin
 			FMeshesInfo[i]:=SG_UNKNOWN;
-			FMesh.ArObjects[i].LoadToVBO;
+			FMesh.ArObjects[i].LoadToVBO();
 			end
 		else
 			if FMeshesInfo[i]=SG_FALSE then
@@ -539,7 +540,7 @@ end;
 procedure TSGFractal.SetThreadsQuantity(NewQuantity:LongWord);inline;
 begin
 SetLength(FThreadsData,NewQuantity);
-FThreadsEnable:=NewQuantity<>0;
+FThreadsEnable:=NewQuantity>0;
 end;
 
 function TSGFractal.GetThreadsQuantity():LongWord;inline;

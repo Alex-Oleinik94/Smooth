@@ -366,9 +366,10 @@ glDisable(GL_LIGHTING);
 LoadExtendeds();
 end;
 
-constructor TSGRenderOpenGL.Create;
+constructor TSGRenderOpenGL.Create();
 begin
-inherited;
+inherited Create();
+FType:=SGRenderOpenGL;
 {$IFDEF UNIX}
 	FContext:=nil;
 {$ELSE}

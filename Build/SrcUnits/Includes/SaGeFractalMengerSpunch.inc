@@ -22,8 +22,6 @@ type
 			Arr6:TSGMengerSpunchBoolAr6;
 			Point:TSGVertex;
 			end;
-		FVertexIndex:LongWord;
-		FFaceIndex:LongWord;
 		procedure CalculateArray;
 		procedure Calculate;override;
 		procedure CalculateFromThread(var MeshID,ThreadArB,ThreadArE:LongWord);
@@ -31,7 +29,7 @@ type
 		function GetArTP(const OldArTP:TSGMengerSpunchBoolAr6;const i,ii,iii: byte;const ThisDepth:LongWord = 0):TSGMengerSpunchBoolAr6;inline;
 		class function DoOrNotDo(const i,ii,iii:Byte):boolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:Byte):boolean;inline;
-		procedure PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord);inline;
+		procedure PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
 		function DoAtThreads:boolean;inline;
 		end;
 		
@@ -170,7 +168,7 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FComboBox1:=TSGComboBox.Create;
+FComboBox1:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox1);
 SGScreen.LastChild.SetBounds(Context.Width-250,5{+Context.TopShift},230,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -184,7 +182,7 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FButtonDepthPlus:=TSGButton.Create;
+FButtonDepthPlus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthPlus);
 SGScreen.LastChild.SetBounds(Context.Width-250-30,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -194,7 +192,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 FButtonDepthPlus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChange);
 SGScreen.LastChild.Visible:=True;
 
-FLabelDepth:=TSGLabel.Create;
+FLabelDepth:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepth);
 SGScreen.LastChild.SetBounds(Context.Width-250-60,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -203,7 +201,7 @@ SGScreen.LastChild.Caption:='0';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FButtonDepthMinus:=TSGButton.Create;
+FButtonDepthMinus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthMinus);
 SGScreen.LastChild.SetBounds(Context.Width-250-90,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -213,7 +211,7 @@ FButtonDepthMinus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChange)
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FLabelDepthCaption:=TSGLabel.Create;
+FLabelDepthCaption:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepthCaption);
 SGScreen.LastChild.SetBounds(Context.Width-250-90-125,5{+Context.TopShift},115,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -340,7 +338,7 @@ var
 	Quantity:int64 = 0;
 	i,ii,iii:LongWord;
 begin
-ClearMesh;
+ClearMesh();
 if DoAtThreads then
 	begin
 	if FDeep = FMengerCube then
@@ -412,6 +410,7 @@ procedure TSGFractalMengerSpunch.CalculateFromThread(var MeshID,ThreadArB,Thread
 var
 	i:LongInt;
 	ArVerts:packed array [1..8]of TSGVertex;
+	NOfV,NOfF:LongWord;// Индекс вершин и полигонов в меше
 
 procedure Rec(const ArTP:TSGMengerSpunchBoolAr6;const T1:TSGVertex;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
 var
@@ -438,17 +437,17 @@ if NowDepth<=0 then
 			begin
 			case i of
 			0:
-				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,MeshID);
+				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[3],ArVerts[4],i,AllQ,MeshID,NOfV,NOfF);
 			1:
-				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,MeshID);
+				PushIndexes(ArVerts[1],ArVerts[2],ArVerts[6],ArVerts[5],i,AllQ,MeshID,NOfV,NOfF);
 			2:
-				PushIndexes(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,MeshID);
+				PushIndexes(ArVerts[2],ArVerts[3],ArVerts[7],ArVerts[6],i,AllQ,MeshID,NOfV,NOfF);
 			3:
-				PushIndexes(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,MeshID);
+				PushIndexes(ArVerts[3],ArVerts[4],ArVerts[8],ArVerts[7],i,AllQ,MeshID,NOfV,NOfF);
 			4:
-				PushIndexes(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,MeshID);
+				PushIndexes(ArVerts[4],ArVerts[1],ArVerts[5],ArVerts[8],i,AllQ,MeshID,NOfV,NOfF);
 			5:
-				PushIndexes(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,MeshID);
+				PushIndexes(ArVerts[7],ArVerts[8],ArVerts[5],ArVerts[6],i,AllQ,MeshID,NOfV,NOfF);
 			end;
 			end;
 		end;
@@ -473,6 +472,8 @@ else
 end;
 
 begin
+NOfF:=0;
+NOfV:=0;
 if DoAtThreads then
 	begin
 	//try
@@ -509,8 +510,9 @@ else
 		SGVertexImport(2.6,2.6,2.6),
 		-5.2,-5.2,
 		FDepth);
+	WriteLn(FMesh.NOfObjects);
 	if FEnableVBO and (FMesh<>nil) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO;
+		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO();
 	end;
 end;
 
@@ -679,10 +681,11 @@ if FDeep = FMengerPlus then
 	end;
 end;
 
-procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord);inline;
+procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
 //var
 //abnu:	B:boolean = False;
 begin
+//writeln(FVertexIndex);
 FVertexIndex+=4;
 FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-4]^:=i1;
 FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^:=i2;
@@ -705,13 +708,13 @@ if FEnableNormals then
 	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-2;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[2]:=FMesh.ArObjects[MeshID].FNOfVerts-3;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[3]:=FMesh.ArObjects[MeshID].FNOfVerts-4;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[0]:=FVertexIndex-1;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[1]:=FVertexIndex-2;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[2]:=FVertexIndex-3;
+FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[3]:=FVertexIndex-4;
 FFaceIndex+=1;
 
-AfterPushIndexes(MeshID,DoAtThreads);
+AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);
 end;
 {$ENDIF}
 

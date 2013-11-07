@@ -75,9 +75,9 @@ with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
-	//Add(TSGFractalLomanaya);
-	//Add(TSGFractalPodkova);
-	//Add(TSGFractalKohTriangle);//Треугольник Серпинского
+	Add(TSGFractalLomanaya);
+	Add(TSGFractalPodkova);
+	Add(TSGFractalKohTriangle);//Треугольник Серпинского
 	Add(TSGKillKostia);
 	
 	{Add(TSGGenAlg);

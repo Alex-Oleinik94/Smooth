@@ -10,7 +10,7 @@ type
 		function RecQuantity(const ThisDepth:Int64):Int64;
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -26,38 +26,39 @@ Result:='Треугольник Серпинского';
 end;
 
 
-procedure TSGFractalKohTriangle.PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex);Inline;
+procedure TSGFractalKohTriangle.PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
-FMesh.ArObjects[MeshID].FNOfVerts+=3;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-3]:=v1;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-2]:=v2;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-1]:=v3;
+FVertexIndex+=3;
+FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
+FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
+FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v3;
 
 
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+0].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+0].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-2;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+0].p[0]:=FVertexIndex-1;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+0].p[1]:=FVertexIndex-2;
 
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+1].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-3;
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+1].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-2;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+1].p[0]:=FVertexIndex-3;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+1].p[1]:=FVertexIndex-2;
 
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+2].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].ArFacesLines[FMesh.ArObjects[MeshID].FNOfFaces+2].p[1]:=FMesh.ArObjects[MeshID].FNOfVerts-3;
-FMesh.ArObjects[MeshID].FNOfFaces+=3;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+2].p[0]:=FVertexIndex-1;
+FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+2].p[1]:=FVertexIndex-3;
+FFaceIndex+=3;
 
-AfterPushIndexes(MeshID,FThreadsEnable);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSGFractalKohTriangle.CalculateFromThread();
 var
 	MeshID:LongWord;
-
+	FVertexIndex,FFaceIndex:LongWord;
 procedure Rec(const t1,t2,t3:TSGVertex;const NowDepth:LongWord);
 begin
 PushIndexes(
 	MeshID,
 	(t1+t2)/2,
 	(t3+t2)/2,
-	(t1+t3)/2);
+	(t1+t3)/2,
+	FVertexIndex,FFaceIndex);
 if NowDepth>1 then
 	begin
 	Rec(t1,(t1+t2)/2,(t1+t3)/2,NowDepth-1);
@@ -68,11 +69,14 @@ end;
 
 begin
 MeshID:=0;
+FFaceIndex:=0;
+FVertexIndex:=0;
 PushIndexes(
 	MeshID,
 	SGVertexImport(cos(pi/2),sin(pi/2))*4,
 	SGVertexImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
-	SGVertexImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4);
+	SGVertexImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4,
+	FVertexIndex,FFaceIndex);
 if FDepth>0 then
 	begin
 	Rec(
@@ -102,7 +106,7 @@ begin
 inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
-CalculateMeshes(Quantity,SGR_LINES);
+CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

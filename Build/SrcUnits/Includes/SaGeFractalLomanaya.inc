@@ -9,7 +9,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -27,25 +27,26 @@ Result:='Кривая Миньковского';
 end;
 
 
-procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex);Inline;
+procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
-FMesh.ArObjects[MeshID].FNOfVerts+=1;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-1]:=v;
+FVertexIndex+=1;
+FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v;
 
 
-FMesh.ArObjects[MeshID].ArFacesPoints[FMesh.ArObjects[MeshID].FNOfFaces+0].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].FNOfFaces+=1;
+FMesh.ArObjects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex-1;
+FFaceIndex+=1;
 
-AfterPushIndexes(MeshID,FThreadsEnable);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSGFractalLomanaya.CalculateFromThread();
 var
 	MeshID:LongWord;
+	FVI,FFI:LongWord;
 
-procedure Rec(const t1,t2:TSGVertex;const NowDepth:LongWord);
+procedure Rec(const t1,t2:TSGVertex2f;const NowDepth:LongWord);
 var
-	e1,e2,e3,v1,v2,v3,v4:TSGVertex;
+	e1,e2,e3,v1,v2,v3,v4:TSGVertex2f;
 begin
 if NowDepth>0 then
 	begin
@@ -66,19 +67,21 @@ if NowDepth>0 then
 	Rec(e3,t2,NowDepth-1);
 	end
 else
-	PushIndexes(MeshID,t2);
+	PushIndexes(MeshID,t2,FVI,FFI);
 end;
 
 begin
 MeshID:=0;
-PushIndexes(MeshID,SGVertexImport(-6,-3.5));
+FFI:=0;
+FVI:=0;
+PushIndexes(MeshID,SGVertex2fImport(-6,-3.5),FVI,FFI);
 if FDepth=0 then
 	begin
-	PushIndexes(MeshID,SGVertexImport(6,3.5));
+	PushIndexes(MeshID,SGVertex2fImport(6,3.5),FVI,FFI);
 	end;
 if FDepth>0 then
 	begin
-	Rec(SGVertexImport(-6,-3.5),SGVertexImport(6,3.5),Depth)
+	Rec(SGVertex2fImport(-6,-3.5),SGVertex2fImport(6,3.5),Depth)
 	end;
 if FThreadsEnable then
 	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
@@ -86,25 +89,25 @@ if FThreadsEnable then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 end;
 
-procedure TSGFractalLomanaya.Calculate;
+procedure TSGFractalLomanaya.Calculate();
 var
 	Quantity:Int64;
 begin
 inherited;
 ClearMesh;
 Quantity:=(9**FDepth)+1;
-CalculateMeshes(Quantity,SGR_LINE_STRIP);
+CalculateMeshes(Quantity,SGR_LINE_STRIP,TSGMeshVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
 	FThreadsData[0].FData:=nil;
-	CalculateFromThread;
+	CalculateFromThread();
 	end
 else
 	begin
-	CalculateFromThread;
+	CalculateFromThread();
 	if FEnableVBO and (not FMesh.ArObjects[FMesh.NOfObjects-1].FEnableVBO) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO;
+		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO();
 	end;
 end;
 
@@ -113,7 +116,7 @@ begin
 with TSGFractalLomanaya(Button.FUserPointer1) do
 	begin
 	FDepth+=1;
-	Calculate;
+	Calculate();
 	FLD.Caption:=SGStringToPChar(SGStr(Depth));
 	end;
 end;
@@ -126,7 +129,7 @@ with TSGFractalLomanaya(Button.FUserPointer1) do
 	if Depth>0 then
 		begin
 		FDepth-=1;
-		Calculate;
+		Calculate();
 		FLD.Caption:=SGStringToPChar(SGStr(Depth));
 		end;
 	end;
@@ -147,7 +150,7 @@ Depth:=3;
 FLightingEnable:=False;
 InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
 
-FLDC:=TSGLabel.Create;
+FLDC:=TSGLabel.Create();
 SGScreen.CreateChild(FLDC);
 SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5{+Context.TopShift},115,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -157,7 +160,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
 
-FBPD:=TSGButton.Create;
+FBPD:=TSGButton.Create();
 SGScreen.CreateChild(FBPD);
 SGScreen.LastChild.SetBounds(Context.Width-160-30,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -167,7 +170,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
 SGScreen.LastChild.Visible:=True;
 
-FLD:=TSGLabel.Create;
+FLD:=TSGLabel.Create();
 SGScreen.CreateChild(FLD);
 SGScreen.LastChild.SetBounds(Context.Width-160-60,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -176,7 +179,7 @@ SGScreen.LastChild.Caption:='0';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FBMD:=TSGButton.Create;
+FBMD:=TSGButton.Create();
 SGScreen.CreateChild(FBMD);
 SGScreen.LastChild.SetBounds(Context.Width-160-90,5{+Context.TopShift},20,30);
 SGScreen.LastChild.AutoTopShift:=True;
@@ -188,10 +191,10 @@ SGScreen.LastChild.Visible:=True;
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
-Calculate;
+Calculate();
 end;
 
-destructor TSGFractalLomanaya.Destroy;
+destructor TSGFractalLomanaya.Destroy();
 begin
 FBMD.Destroy;
 FLD.Destroy;

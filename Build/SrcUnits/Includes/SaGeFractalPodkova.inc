@@ -9,7 +9,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -26,23 +26,24 @@ Result:='Кривая Леви/Дракон Хартера';
 end;
 
 
-procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex);Inline;
+procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
-FMesh.ArObjects[MeshID].FNOfVerts+=1;
-FMesh.ArObjects[MeshID].ArVertexes[FMesh.ArObjects[MeshID].FNOfVerts-1]:=v;
+FVertexIndex+=1;
+FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v;
 
 
-FMesh.ArObjects[MeshID].ArFacesPoints[FMesh.ArObjects[MeshID].FNOfFaces+0].p[0]:=FMesh.ArObjects[MeshID].FNOfVerts-1;
-FMesh.ArObjects[MeshID].FNOfFaces+=1;
+FMesh.ArObjects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex-1;
+FFaceIndex+=1;
 
-AfterPushIndexes(MeshID,FThreadsEnable);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;
 
 procedure TSGFractalPodkova.CalculateFromThread();
 var
 	MeshID:LongWord;
+	FVI,FFI:LongWord;
 
-procedure Rec(const t1,t2:TSGVertex;const NowDepth:LongWord;const b:integer = 1);
+procedure Rec(const t1,t2:TSGVertex2f;const NowDepth:LongWord;const b:integer = 1);
 var
 	V:TSGVertex3f;
 //nu:	NewType:Byte;
@@ -59,19 +60,21 @@ if NowDepth>0 then
 		Rec(v,t2,NowDepth-1,-1);
 	end
 else
-	PushIndexes(MeshID,t2);
+	PushIndexes(MeshID,t2,FVI,FFI);
 end;
 
 begin
 MeshID:=0;
-PushIndexes(MeshID,SGVertexImport(-3,-2));
+FFI:=0;
+FVI:=0;
+PushIndexes(MeshID,SGVertex2fImport(-3,-2),FVI,FFI);
 if FDepth=0 then
 	begin
-	PushIndexes(MeshID,SGVertexImport(3,-2));
+	PushIndexes(MeshID,SGVertex2fImport(3,-2),FVI,FFI);
 	end;
 if FDepth>0 then
 	begin
-	Rec(SGVertexImport(-3,-2),SGVertexImport(3,-2),FDepth)
+	Rec(SGVertex2fImport(-3,-2),SGVertex2fImport(3,-2),FDepth)
 	end;
 if FThreadsEnable then
 	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
@@ -94,7 +97,7 @@ begin
 inherited;
 ClearMesh;
 Quantity:=(2**FDepth)+1;
-CalculateMeshes(Quantity,SGR_LINE_STRIP);
+CalculateMeshes(Quantity,SGR_LINE_STRIP,TSGMeshVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

@@ -86,7 +86,7 @@ type
         FHasTexture: boolean;
         FHasNormals: boolean;
         FHasColors: boolean;
-        
+     private
         FQuantityTextures:LongWord;
         FPoligonesType:LongWord;
         FVertexType:TSGMeshVertexType;
@@ -102,6 +102,7 @@ type
 		property HasNormals:Boolean read FHasNormals write FHasNormals;
 		property ColorType:TSGMeshColorType read FColorType write SetColorType;
 		property VertexType:TSGMeshVertexType read FVertexType write SetVertexType;
+		property PoligonesType:LongWord read FPoligonesType write FPoligonesType;
     private
 		ArFaces:packed array of TSGFaceType;
 		// array of [Vertexes, Colors, Normals, TexVertexes]
@@ -126,7 +127,7 @@ type
 		property ArColor4b[Index : Cardinal]:PTSGColor4b read GetColor4b;
 		
 		procedure SetColor(const Index:Cardinal;const r,g,b:Single; const a:Single = 1);inline;
-		procedure AutoSetColorType();inline;
+		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 		
 		function GetNormal(const Index:Cardinal):PTSGVertex3f;inline;
 		property ArNormal[Index : Cardinal]:PTSGVertex3f read GetNormal;
@@ -237,11 +238,21 @@ implementation
 {$i Includes\SaGeMesh3ds.inc}
 {$UNDEF SGREADIMPLEMENTATION}}
 
-procedure TSG3DObject.AutoSetColorType();inline;
+procedure TSG3DObject.AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 begin
 if Render<>nil then
 	begin
-	
+	if Render.RenderType=SGRenderOpenGL then
+		begin
+		if VWithAlpha then
+			SetColorType(TSGMeshColorType4f)
+		else
+			SetColorType(TSGMeshColorType3f);
+		end
+	else if Render.RenderType=SGRenderDirectX then
+		begin
+		SetColorType(TSGMeshColorType4b);
+		end;
 	end;
 end;
 
@@ -383,7 +394,7 @@ end;
 
 function TSG3DObject.GetVertex2f(const Index:Cardinal):PTSGVertex2f;inline;
 begin
-Result:=PTSGVertex3f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PTSGVertex2f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
 procedure TSG3DObject.LoadFromFile(const FileWay:string);
@@ -403,8 +414,27 @@ end;
 
 procedure TSG3DObject.WriteInfo(const PredStr:string = '');
 begin
+WriteLn('TSG3DObject__WriteInfo(string)');
 WriteLn(PredStr,'FNOfVerts = ',FNOfVerts);
 WriteLn(PredStr,'FNOfFaces = ',FNOfFaces,'; RealFaceLength = ',GetFaceLength);
+WriteLn(PredStr,'FHasColors = ',FHasColors);
+WriteLn(PredStr,'FHasNormals = ',FHasNormals);
+WriteLn(PredStr,'FHasTexture = ',FHasTexture);
+WriteLn(PredStr,'GetSizeOfOneVertex() = ',GetSizeOfOneVertex());
+Write(PredStr,'FVertexFormat = ');
+if FVertexType=TSGMeshVertexType2f then
+	WriteLn('TSGMeshVertexType2f')
+else if FVertexType=TSGMeshVertexType3f then
+	WriteLn('TSGMeshVertexType3f');
+Write(PredStr,'FColorType = ');
+case FColorType of
+TSGMeshColorType3b:WriteLn('TSGMeshColorType3b');
+TSGMeshColorType4b:WriteLn('TSGMeshColorType4b');
+TSGMeshColorType3f:WriteLn('TSGMeshColorType3f');
+TSGMeshColorType4f:WriteLn('TSGMeshColorType4f');
+end;
+WriteLn(PredStr,'FQuantityTextures = ',FQuantityTextures);
+WriteLn(PredStr,'FEnableVBO = ',FEnableVBO);
 end;
 
 function TSG3DObject.RealSize:Int64;inline;
@@ -416,13 +446,14 @@ end;
 
 function TSG3DObject.VertexesSize:Int64;Inline;
 begin
-Result:=GetSizeOfOneVertex*FNOfVerts;
+Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
 
 function TSG3DObject.FacesSize:Int64;inline;
 begin
-Result:=SizeOf(TSGFaceType)*GetFaceLength;
+Result:=SizeOf(TSGFaceType)*GetFaceLength();
 end;
+
 function TSG3DObject.Size:Int64;inline;
 begin
 Result:=
@@ -455,6 +486,7 @@ end;
 
 procedure TSG3DObject.SetFaceLength(const NewLength:Int64);inline;
 begin
+FNOfFaces:=NewLength;
 SetLength(ArFaces ,GetFaceLength(NewLength));
 end;
 
@@ -590,12 +622,12 @@ if SGFileExists(FileWay) then
 	end;
 end;}
 
-procedure TSG3dObject.BasicDraw; inline;
+procedure TSG3dObject.BasicDraw(); inline;
 begin
 FObjectColor.Color(Render);
 
-if FEnableVBO then
-	Render.Enable(SGR_ARRAY_BUFFER_ARB);
+{if FEnableVBO then
+	Render.Enable(SGR_ARRAY_BUFFER_ARB);}
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -608,40 +640,92 @@ if FHasColors then
 if FEnableVBO then
 	begin
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.VertexPointer(3,SGR_FLOAT,SizeOf(TSGVertex),nil);
-	
-	if FHasNormals then
-		begin
-		//Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBONormals);
-		Render.NormalPointer(SGR_FLOAT,SizeOf(TSGVertex),nil);
-		end;
+	Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f),SGR_FLOAT,GetSizeOfOneVertex(),nil);
 	
 	if FHasColors then
 		begin
-		//Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOColors);
-		Render.ColorPointer(3,SGR_FLOAT,SizeOf(TSGVertex),nil);
+		Render.ColorPointer(
+			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
+			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
+				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
+			GetSizeOfOneVertex(),
+			Pointer(SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
+		end;
+	
+	if FHasNormals then
+		begin
+		Render.NormalPointer(
+			SGR_FLOAT,
+			GetSizeOfOneVertex(),
+			Pointer(
+				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType=TSGMeshColorType3b)*3+
+					byte(FColorType=TSGMeshColorType4b)*4+
+					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+				));
 		end;
 	
 	if FHasTexture then
 		begin
-		//Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOTexVertexes);
-		Render.TexCoordPointer(2, SGR_FLOAT, SizeOf(TSGVertex2f),nil);
+		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
+			Pointer(
+				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType=TSGMeshColorType3b)*3+
+					byte(FColorType=TSGMeshColorType4b)*4+
+					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+				Byte(FHasNormals)*(SizeOf(Single)*3)
+				));
 		end;
 	
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-	Render.DrawElements(FPoligonesType, GetFaceLength,SGR_UNSIGNED_INT,nil);
+	Render.DrawElements(FPoligonesType, GetFaceLength() ,SGR_UNSIGNED_INT,nil);
 	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
-    Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f), SGR_FLOAT, SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)), ArVertex);
+    Render.VertexPointer(
+		2+Byte(FVertexType=TSGMeshVertexType3f),
+		SGR_FLOAT, 
+		GetSizeOfOneVertex(), 
+		ArVertex);
     if FHasNormals then
-        Render.NormalPointer(SGR_FLOAT, SizeOf(TSGVertex), nil);
+        Render.NormalPointer(
+			SGR_FLOAT, 
+			GetSizeOfOneVertex(), 
+			Pointer(
+				LongWord(ArVertex)+
+				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType=TSGMeshColorType3b)*3+
+					byte(FColorType=TSGMeshColorType4b)*4+
+					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))));
     if FHasTexture then
-        Render.TexCoordPointer(2, SGR_FLOAT, SizeOf(TSGVertex2f), nil);
+        Render.TexCoordPointer(
+			2, 
+			SGR_FLOAT, 
+			GetSizeOfOneVertex(), 
+			Pointer(
+				LongWord(ArVertex)+
+				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType=TSGMeshColorType3b)*3+
+					byte(FColorType=TSGMeshColorType4b)*4+
+					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+				Byte(FHasNormals)*(SizeOf(Single)*3)));
     if FHasColors then
-		Render.ColorPointer(3,SGR_FLOAT,SizeOf(TSGColor3f),nil);
+		Render.ColorPointer(
+			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
+			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
+				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
+			GetSizeOfOneVertex(),
+			Pointer(LongWord(ArVertex)+SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
     Render.DrawElements(FPoligonesType, GetFaceLength , SGR_UNSIGNED_INT, @ArFaces[0]);
     end;
 
@@ -653,39 +737,42 @@ if FHasTexture then
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
 
-if FEnableVBO then
-	Render.Disable(SGR_ARRAY_BUFFER_ARB);
+{if FEnableVBO then
+	Render.Disable(SGR_ARRAY_BUFFER_ARB);}
 end;
 
 procedure TSG3dObject.LoadToVBO;
 begin
-	Render.Enable(SGR_ARRAY_BUFFER_ARB);
+	//Render.Enable(SGR_ARRAY_BUFFER_ARB);
 	
 	Render.GenBuffersARB(1, @FVBOVertexes);
 	Render.GenBuffersARB(1, @FVBOFaces);
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*SizeOf(TSGVertexType)*(2+Byte(FVertexType=TSGMeshVertexType3f)),ArVertex, SGR_STATIC_DRAW_ARB);
+	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
 
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
 	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
 	
-	Render.Disable(SGR_ARRAY_BUFFER_ARB);
+	//Render.Disable(SGR_ARRAY_BUFFER_ARB);
 	
 //	Delay(100);
 	ClearArrays(False);
 	FEnableVBO:=True;
-
 end;
 
-procedure TSG3DObject.ClearVBO;inline;
+procedure TSG3DObject.ClearVBO();inline;
 begin
-Render.DeleteBuffersARB(1,@FVBOFaces);
-FVBOFaces:=0;
-Render.DeleteBuffersARB(1,@FVBOVertexes);
-FVBOVertexes:=0;
+if FEnableVBO then
+	begin
+	Render.DeleteBuffersARB(1,@FVBOFaces);
+	FVBOFaces:=0;
+	Render.DeleteBuffersARB(1,@FVBOVertexes);
+	FVBOVertexes:=0;
+	FEnableVBO:=False;
+	end;
 end;
 
 (************************************************************************************)
@@ -758,12 +845,12 @@ if SGFileExists(FileWay) then
 	end;
 end;
 
-class function TSGModel.ClassName:String;
+class function TSGModel.ClassName():String;
 begin
 Result:='TSGModel';
 end;
 
-procedure TSGModel.WriteInfo;
+procedure TSGModel.WriteInfo();
 var
 	i:LongWord;
 begin
