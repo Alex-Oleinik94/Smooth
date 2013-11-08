@@ -245,7 +245,7 @@ var
 begin 
 pDevice.GetTransform(D3DTS_WORLD,Matrix1);
 D3DXMatrixIdentity(Matrix2);
-D3DXMatrixTranslation(Matrix2,-x,y,z);
+D3DXMatrixTranslation(Matrix2,-x,-y,-z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
 pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
@@ -712,7 +712,7 @@ pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 //нормаль направлена в сторону камеры
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
-//===================СГЛАЖИВАНИЕ 
+//===================СГЛАЖ�?ВАН�?Е 
 //pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
 //Чето это сильно мутит, линии колбасу напоминают от этого параметра
 //pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 

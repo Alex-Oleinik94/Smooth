@@ -348,15 +348,17 @@ FFormatType:=0;
 FDataType:=0;
 end;
 
-constructor TSGBitMap.Create;
+constructor TSGBitMap.Create();
 begin
+inherited;
 FBitMap:=nil;
 Clear;
 end;
 
-destructor TSGBitMap.Destroy;
+destructor TSGBitMap.Destroy();
 begin
 Clear;
+inherited;
 end;
 
 end.
