@@ -684,7 +684,6 @@ procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const a
 //var
 //abnu:	B:boolean = False;
 begin
-//writeln(FVertexIndex);
 FVertexIndex+=4;
 FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-4]^:=i1;
 FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^:=i2;

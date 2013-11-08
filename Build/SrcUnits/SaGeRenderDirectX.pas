@@ -11,6 +11,7 @@ uses
 	,Direct3D9
 	;
 type
+	TSGRDTypeDataBuffer=(SGRDTypeDataBufferVertex,SGRDTypeDataBufferColor,SGRDTypeDataBufferNormal,SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX=class(TSGRender)
 			public
 		constructor Create;override;
@@ -92,7 +93,11 @@ type
 		FArTextures:packed array of IDirect3DTexture9;
 			// ===VBO=== 
 			//Буферы
-		FArBuffers:packed array of IDirect3DResource9;
+		FArBuffers:packed array of 
+			packed record 
+			FResourse:IDirect3DResource9;
+			FResourseSize:Int64;
+			end;
 		FEnabledClientStateVertex:Boolean;
 		FEnabledClientStateColor:Boolean;
 		FEnabledClientStateNormal:Boolean;
@@ -100,7 +105,14 @@ type
 		// 0 - SGR_ARRAY_BUFFER_ARB
 		// 1 - SGR_ELEMENT_ARRAY_BUFFER_ARB
 		FVBOData:packed array [0..1] of LongWord;
-		FSizeOfBufferVertex:Byte;
+		FArDataBuffers:packed array[TSGRDTypeDataBuffer] of 
+			packed record
+			FVBOBuffer:LongWord;
+			FQuantityParams:Byte;
+			FDataType:LongWOrd;
+			FSizeOfOneVertex:Byte;
+			FShift:Cardinal;
+			end;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -183,7 +195,7 @@ end;
 
 function TSGRenderDirectX.SupporedGPUBuffers():Boolean;
 begin
-Result:=False;
+Result:=True;
 end;
 
 procedure TSGRenderDirectX.PointSize(const PS:Single);
@@ -233,7 +245,7 @@ var
 begin 
 pDevice.GetTransform(D3DTS_WORLD,Matrix1);
 D3DXMatrixIdentity(Matrix2);
-D3DXMatrixTranslation(Matrix2,x,y,z);
+D3DXMatrixTranslation(Matrix2,-x,y,z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
 pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
@@ -421,12 +433,22 @@ end;
 
 procedure TSGRenderDirectX.EnableClientState(const VParam:Cardinal); 
 begin 
-
+case VParam of
+SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=True;
+SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=True;
+SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex:=True;
+SGR_COLOR_ARRAY:FEnabledClientStateColor:=True;
+end;
 end;
 
 procedure TSGRenderDirectX.DisableClientState(const VParam:Cardinal); 
 begin 
-
+case VParam of
+SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=False;
+SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=False;
+SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex:=False;
+SGR_COLOR_ARRAY:FEnabledClientStateColor:=False;
+end;
 end;
 
 procedure TSGRenderDirectX.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
@@ -439,7 +461,8 @@ for i:=0 to VQ-1 do
 		SetLength(FArBuffers,1)
 	else
 		SetLength(FArBuffers,Length(FArBuffers)+1);
-	FArBuffers[High(FArBuffers)]:=nil;
+	FArBuffers[High(FArBuffers)].FResourse:=nil;
+	FArBuffers[High(FArBuffers)].FResourseSize:=0;
 	PT[i]:=Length(FArBuffers);
 	end;
 end;
@@ -449,10 +472,10 @@ var
 	i:LongWord;
 begin 
 for i:=0 to VQuantity-1 do
-	if FArBuffers[PLongWord(VPoint)[i]-1]<>nil then
+	if FArBuffers[PLongWord(VPoint)[i]-1].FResourse<>nil then
 	begin
-	FArBuffers[PLongWord(VPoint)[i]-1]._Release();
-	FArBuffers[PLongWord(VPoint)[i]-1]:=nil;
+	FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
+	FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
 	PLongWord(VPoint)[i]:=0;
 	end;
 end;
@@ -478,7 +501,7 @@ begin
 if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	begin
 	if pDevice.CreateVertexBuffer(VSize,0,0,D3DPOOL_DEFAULT,
-		IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]])),
+		IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]].FResourse)),
 		nil)<>D3D_OK then
 		begin
 		SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create vertex buffer!');
@@ -486,7 +509,7 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 		end
 	else
 		begin
-		if (FArBuffers[FVBOData[0]]as IDirect3DVertexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
+		if (FArBuffers[FVBOData[0]].FResourse as IDirect3DVertexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock vertex buffer!');
 			Exit;
@@ -494,7 +517,7 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 		else
 			begin
 			System.Move(VBuffer^,VVBuffer^,VSize);
-			if (FArBuffers[FVBOData[0]]as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
+			if (FArBuffers[FVBOData[0]].FResourse as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
 				begin
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock vertex buffer!');
 				end;
@@ -504,14 +527,14 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 	begin
 	if pDevice.CreateIndexBuffer(VSize,0,D3DFMT_INDEX16,D3DPOOL_DEFAULT,
-		IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]])),nil)<>D3D_OK then
+		IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]].FResourse)),nil)<>D3D_OK then
 		begin
 		SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create index buffer!');
 		exit;
 		end
 	else
 		begin
-		if (FArBuffers[FVBOData[1]] as IDirect3DIndexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
+		if (FArBuffers[FVBOData[1]].FResourse as IDirect3DIndexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock index buffer!');
 			Exit;
@@ -519,7 +542,7 @@ else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 		else
 			begin
 			System.Move(VBuffer^,VVBuffer^,VSize);
-			if (FArBuffers[FVBOData[1]]as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
+			if (FArBuffers[FVBOData[1]].FResourse as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
 				begin
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock index buffer!');
 				end;
@@ -530,12 +553,22 @@ end;
 
 procedure TSGRenderDirectX.DrawElements(
 	const VParam:Cardinal;
-	const VSize:int64;
+	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
 	VBuffer:Pointer); 
 var
 	VVMyVertexType:Cardinal = 0;
-	
+
+function GetNumPrimetives:LongWord;inline;
+begin
+case VParam of
+SGR_LINES:Result:=VSize div 2;
+SGR_TRIANGLES:Result:=VSize div 3;
+else
+	Result:=VSize;
+end;
+end;
+
 function FPT:_D3DPRIMITIVETYPE;inline;
 begin
 case VParam of
@@ -562,32 +595,61 @@ if FEnabledClientStateTexVertex then
 	VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;
 //установили тип приметивов
 pDevice.SetFVF(VVMyVertexType);
-//это установили вершинный буфер
-pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]])),0,FSizeOfBufferVertex);
-//устанавливаем индексный буфер
-pDevice.SetIndices(IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]])));
-//тперь дравим обьект
-pDevice.DrawIndexedPrimitive(FPT,0,0,{VertexLength}0,0,{NumTriangles}0);
+if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
+	begin
+	//это установили вершинный буфер
+	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : Failed!!');
+	//устанавливаем индексный буфер
+	if pDevice.SetIndices(IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]].FResourse))) <> D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : Failed!!');
+	//тперь дравим обьект
+	if pDevice.DrawIndexedPrimitive(FPT,0,0,
+		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer].FResourseSize div 
+		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex//FVBOData[0].FSizeOfBufferVertex
+		,0,GetNumPrimetives())<>D3D_OK then
+			SGLog.Sourse('TSGRenderDirectX__DrawElements : Draw Failed!!');
+	end
+else
+	begin
+	
+	end;
 end;
 
 procedure TSGRenderDirectX.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
-
+FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams:=VQChannels;
+FArDataBuffers[SGRDTypeDataBufferColor].FVBOBuffer:=FVBOData[0];
+FArDataBuffers[SGRDTypeDataBufferColor].FDataType:=VType;
+FArDataBuffers[SGRDTypeDataBufferColor].FSizeOfOneVertex:=VSize;
+FArDataBuffers[SGRDTypeDataBufferColor].FShift:=Cardinal(VBuffer);
 end;
 
 procedure TSGRenderDirectX.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
-
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FQuantityParams:=VQChannels;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FVBOBuffer:=FVBOData[0];
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FDataType:=VType;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FSizeOfOneVertex:=VSize;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift:=Cardinal(VBuffer);
 end;
 
 procedure TSGRenderDirectX.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
-
+FArDataBuffers[SGRDTypeDataBufferNormal].FQuantityParams:=3;
+FArDataBuffers[SGRDTypeDataBufferNormal].FVBOBuffer:=FVBOData[0];
+FArDataBuffers[SGRDTypeDataBufferNormal].FDataType:=VType;
+FArDataBuffers[SGRDTypeDataBufferNormal].FSizeOfOneVertex:=VSize;
+FArDataBuffers[SGRDTypeDataBufferNormal].FShift:=Cardinal(VBuffer);
 end;
 
 procedure TSGRenderDirectX.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
-
+FArDataBuffers[SGRDTypeDataBufferVertex].FQuantityParams:=VQChannels;
+FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer:=FVBOData[0];
+FArDataBuffers[SGRDTypeDataBufferVertex].FDataType:=VType;
+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex:=VSize;
+FArDataBuffers[SGRDTypeDataBufferVertex].FShift:=Cardinal(VBuffer);
 end;
 
 function TSGRenderDirectX.IsEnabled(const VParam:Cardinal):Boolean; 
@@ -658,6 +720,7 @@ pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
 //От MIP фильтора у текстур возникают аномалии
 //pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
+//Настройка режима анизотропной фильтрации (x1, x2 ,x4, x8, x16)
 //pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
 end;
 
@@ -675,7 +738,7 @@ FEnabledClientStateNormal:=False;
 FEnabledClientStateTexVertex:=False;
 FVBOData[0]:=0;
 FVBOData[1]:=0;
-FSizeOfBufferVertex:=0;
+FillChar(FArDataBuffers,SizeOf(FArDataBuffers),0);
 end;
 
 destructor TSGRenderDirectX.Destroy();
@@ -685,8 +748,8 @@ begin
 if FArBuffers<>nil then
 	begin
 	for i:=0 to High(FArBuffers) do
-		if FArBuffers[i]<>nil then
-			FArBuffers[i]._Release();
+		if FArBuffers[i].FResourse<>nil then
+			FArBuffers[i].FResourse._Release();
 	SetLength(FArBuffers,0);
 	end;
 if FArTextures<>nil then

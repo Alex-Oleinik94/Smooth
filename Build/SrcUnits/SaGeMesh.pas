@@ -624,6 +624,13 @@ end;}
 
 procedure TSG3dObject.BasicDraw(); inline;
 begin
+Render.BeginScene(SGR_QUADS);
+Render.Color4f(1,0,0,1); Render.Vertex3f(5,0,0);
+Render.Color4f(0,1,0,1); Render.Vertex3f(5,5,0);
+Render.Color4f(0,0,1,1); Render.Vertex3f(0,5,0);
+Render.Color4f(1,0,1,1); Render.Vertex3f(0,0,0);
+Render.EndScene();
+
 FObjectColor.Color(Render);
 
 {if FEnableVBO then
@@ -694,8 +701,17 @@ else
 		SGR_FLOAT, 
 		GetSizeOfOneVertex(), 
 		ArVertex);
-    if FHasNormals then
-        Render.NormalPointer(
+    if FHasColors then
+		Render.ColorPointer(
+			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
+			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
+				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
+			GetSizeOfOneVertex(),
+			Pointer(
+				LongWord(ArVertex)+
+				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
+	if FHasNormals then
+		Render.NormalPointer(
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
@@ -715,21 +731,13 @@ else
 				LongWord(ArVertex)+
 				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType=TSGMeshColorType3b)*3+
-					byte(FColorType=TSGMeshColorType4b)*4+
-					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+					byte(FColorType = TSGMeshColorType3b)*3+
+					byte(FColorType = TSGMeshColorType4b)*4+
+					byte(FColorType = TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = TSGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
-    if FHasColors then
-		Render.ColorPointer(
-			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
-			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
-				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
-			GetSizeOfOneVertex(),
-			Pointer(LongWord(ArVertex)+SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
     Render.DrawElements(FPoligonesType, GetFaceLength() , SGR_UNSIGNED_INT, @ArFaces[0]);
     end;
-
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
 	Render.DisableClientState(SGR_NORMAL_ARRAY);
@@ -751,7 +759,7 @@ begin
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
 	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
-
+	
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
 	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
 
@@ -963,14 +971,11 @@ var
 begin
 for i := 0 to NOfObjects - 1 do
 	begin
-	{if (i<=High(ArObjects)) and ((not ArObjects[i].FHasTexture) or (ArObjects[i].FHasTexture and (ArObjects[i].FMaterialID<=High(ArMaterials)) and (ArObjects[i].FMaterialID>=0))) then
-		begin    
-		if ArObjects[i].FHasTexture then
-			ArMaterials[ArObjects[i].FMaterialID].BindTexture;
-		ArObjects[i].Draw;
-		if ArObjects[i].FHasTexture and ArMaterials[ArObjects[i].FMaterialID].Ready then
-			ArMaterials[ArObjects[i].FMaterialID].DisableTexture;
-		end;}
+	{if ArObjects[i].FHasTexture then
+		ArMaterials[ArObjects[i].FMaterialID].BindTexture;}
+	ArObjects[i].Draw;
+	{if ArObjects[i].FHasTexture and ArMaterials[ArObjects[i].FMaterialID].Ready then
+		ArMaterials[ArObjects[i].FMaterialID].DisableTexture;}
 	end;
 end;
 

@@ -99,14 +99,17 @@ Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
 Klass.Destroy;
 end;
 
-procedure TSGFractalKohTriangle.Calculate;
+procedure TSGFractalKohTriangle.Calculate();
 var
 	Quantity:Int64;
 begin
 inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
-CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f);
+if Render.RenderType = SGRenderDirectX then 
+	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType3f)
+else
+	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

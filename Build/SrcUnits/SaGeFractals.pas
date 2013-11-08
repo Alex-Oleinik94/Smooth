@@ -299,7 +299,7 @@ FSunTrigonometry[1]:=0;
 FSunTrigonometry[2]:=pi;
 FLightingEnable:=True;
 FMesh:=nil;
-FEnableVBO:=Render.SupporedGPUBuffers;
+FEnableVBO:=Render.SupporedGPUBuffers();
 FShift:=336384;//Размерность максимального сегмента данных мешей модели
 FMeshesInfo:=nil;
 FMeshesReady:=True;
@@ -392,7 +392,9 @@ if FEnableVBO then
 	end
 else
 	if FMesh<>nil then
-		FMesh.Draw;
+		begin
+		FMesh.Draw();
+		end;
 if FLightingEnable then
 	begin
 	Render.Disable(SGR_LIGHT0);
