@@ -1,0 +1,2 @@
+mkdir CompiledUnits
+make debug

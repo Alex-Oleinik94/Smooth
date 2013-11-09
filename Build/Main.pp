@@ -7,17 +7,19 @@ uses
 		{$IFDEF UseCThreads}
 			cthreads,
 			{$ENDIF}
+		SaGeContextUnix,
+		Unix,
 		{$ENDIF}
 	crt
 	{$IFDEF MSWINDOWS}
 		,windows
 		,SaGeRenderDirectX
+		,SaGeContextWinAPI
 		{$ENDIF}
 	,dos
 	,Classes
 	,SysUtils
 	,SaGeContext
-	,SaGeContextWinAPI
 	,SaGeCommon
 	,SaGeBase
 	,SaGeFractals
@@ -30,7 +32,7 @@ uses
 	//,SaGeShaders
 	,SaGeFPCToC
 	,SaGeNet
-	,SageGeneticalAlgoritm
+	,SaGeGeneticalAlgoritm
 	,SaGeRender
 	,SaGeRenderOpenGL;
 
@@ -166,7 +168,7 @@ Context:=
                TSGContextGLUT
        {$ELSE}
 		   {$IFDEF MSWINDOWS}TSGContextWinAPI{$ENDIF}
-		   {$IFDEF UNIX}     TSGContextGlX   {$ENDIF}
+		   {$IFDEF UNIX}     TSGContextUnix   {$ENDIF}
 		   {$ENDIF}
        {$ENDIF}
 		.Create;
@@ -289,11 +291,11 @@ While (dos.DosError<>18) do
 		end;
 		if razr=' ' then
 			begin
-			MoveFile(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Temp'+Slash+sr.Name));
+			{$IFDEF MSWINDOWS}MoveFile{$ELSE}RenameFile{$ENDIF}(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Temp'+Slash+sr.Name));
 			end
 		else
 			if razr<>'' then
-				MoveFile(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Complited'+Slash+sr.Name+'.'+razr));
+				{$IFDEF MSWINDOWS}MoveFile{$ELSE}RenameFile{$ENDIF}(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Complited'+Slash+sr.Name+'.'+razr));
 		end;
 	DOS.findnext(sr);
 	end;

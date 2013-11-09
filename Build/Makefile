@@ -5,7 +5,7 @@ DORELEASE= -XX -O3 -CX -dRELEASE
 
 release:
 	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) Main
-	strip ..\BinDebug\Main.exe
+	strip ../BinDebug/Main
 	./EnigmaVB/enigmavbconsole.exe Main.evb
 debug:
 	$(PP) $(DODEBUG) $(BASEARGS) $(OPT) Main

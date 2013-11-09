@@ -8,6 +8,7 @@ Build/*.ppu
 Build/*.o
 Build/Main.res
 BinDebug/Main.exe
+BinDebug/Main
 BinRelease/Main.exe
 Others/DirectX/*.o
 Others/DirectX/*.ppu

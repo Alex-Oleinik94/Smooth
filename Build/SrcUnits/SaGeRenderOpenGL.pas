@@ -444,7 +444,7 @@ end;
 function TSGRenderOpenGL.CreateContext():Boolean;
 {$IFDEF UNIX}
 	var
-		FDisplay:PDisplay;
+		FDisplay:PDisplay = nil;
 {$ELSE}
 	
 	{$ENDIF}
@@ -452,6 +452,7 @@ begin
 Result:=False;
 {$IFDEF UNIX}
 	FDisplay:=XOpenDisplay(nil);
+	
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
@@ -467,7 +468,7 @@ end;
 procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
 {$IFDEF UNIX}
-	if (FWindow<>0) and (FContext<>nil) then 
+	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
@@ -501,7 +502,7 @@ end;
 procedure TSGRenderOpenGL.MakeCurrent();
 begin
 {$IFDEF UNIX}
-	if (FWindow<>0) and (FContext<>nil) then 
+	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),FContext);
 {$ELSE}
 	{$IFDEF MSWINDOWS}

@@ -11,6 +11,7 @@ uses
 	,dos
 	{$IFDEF MSWINDOWS}
 		,windows
+		,MMSystem
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,unix
@@ -20,7 +21,6 @@ uses
 	,SaGeBased
 	,SysUtils
 	,Classes
-	,MMSystem
 	;
 
 const 
@@ -268,7 +268,7 @@ type
 	TSGDataTime=TSGDateTime;
 	
 	TSGThreadProcedure = procedure ( p : pointer );
-	TSGThreadFunction = function ( p:pointer ) : {$IFDEF MSWINDOWS} LongInt{$ELSE} int64{$ENDIF};
+	TSGThreadFunction = function ( p:pointer ) : {$IFDEF MSWINDOWS} LongInt{$ELSE} LongInt{$ENDIF};
 	TSGThread=class(TSGObject)
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
@@ -305,19 +305,6 @@ type
 		function HaveItem(const FItem:String):Boolean;overload;inline;
 		function ExistsItem(const FItem:String):TSGByte;overload;
 		procedure KillItem(const FItem:string);
-		end;
-	TSGMMTimer=object
-			public
-		tc: TTimeCaps;
-		TGT:integer;
-		prevTGT: integer;
-		FixIt:integer;
-		ElapsedTime: word;
-		OldElapsedTime: word;
-			public
-		procedure Alloc;
-		procedure Free;
-		function Elapsed():integer;
 		end;
 	TSGLog=class(TObject)
 			public
@@ -1479,30 +1466,6 @@ end;
 function SGFileExists(const FileName:string = ''):boolean;
 begin
 Result:=FileExists(FileName);
-end;
-
-procedure TSGMMTimer.Alloc;
-begin
-  timeGetDevCaps(@tc, SizeOf(tc));
-  timeBeginPeriod(tc.wPeriodMin);
-  prevTGT:=timeGetTime;
-end;
-
-procedure TSGMMTimer.Free;
-begin
-  timeEndPeriod(tc.wPeriodMin);
-end;
-
-
-function TSGMMTimer.Elapsed:integer;
-begin
-prevTGT:=TGT;
-TGT:=timeGetTime;
-if (TGT<>0) and (prevTGT<>0) and (TGT>prevTGT) then
-Result:=TGT-prevTGT
-else
-Result:=FixIt;
-FixIt:=TGT-prevTGT;
 end;
 
 constructor TSGClass.Create;

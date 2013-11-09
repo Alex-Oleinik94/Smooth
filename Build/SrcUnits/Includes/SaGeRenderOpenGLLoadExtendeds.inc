@@ -522,28 +522,30 @@ else
 	SetLength(Extendeds,Length(Extendeds)+1);
 	Extendeds[High(Extendeds)]:='GL_ARB_texture_env_add';
 	end;
-SGIsSuppored_WGL_ARB_extensions_string:=Load_WGL_ARB_extensions_string;
-if SGIsSuppored_WGL_ARB_extensions_string then
-	begin
-	SGLog.Sourse('WGL_ARB_extensions_string');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_extensions_string';
-	end;
-SGIsSuppored_WGL_ARB_buffer_region:=Load_WGL_ARB_buffer_region;
-if SGIsSuppored_WGL_ARB_buffer_region then
-	begin
-	SGLog.Sourse('WGL_ARB_buffer_region');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_buffer_region';
-	end;
+{$IFDEF MSWINDOWS}
+	SGIsSuppored_WGL_ARB_extensions_string:=Load_WGL_ARB_extensions_string;
+	if SGIsSuppored_WGL_ARB_extensions_string then
+		begin
+		SGLog.Sourse('WGL_ARB_extensions_string');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_extensions_string';
+		end;
+	SGIsSuppored_WGL_ARB_buffer_region:=Load_WGL_ARB_buffer_region;
+	if SGIsSuppored_WGL_ARB_buffer_region then
+		begin
+		SGLog.Sourse('WGL_ARB_buffer_region');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_buffer_region';
+		end;
+	{$ENDIF}
 SGIsSuppored_GL_ARB_texture_cube_map:=Load_GL_ARB_texture_cube_map;
 if SGIsSuppored_GL_ARB_texture_cube_map then
 	begin
@@ -1468,39 +1470,41 @@ else
 	SetLength(Extendeds,Length(Extendeds)+1);
 	Extendeds[High(Extendeds)]:='GL_ATI_vertex_streams';
 	end;
-SGIsSuppored_WGL_I3D_image_buffer:=Load_WGL_I3D_image_buffer;
-if SGIsSuppored_WGL_I3D_image_buffer then
-	begin
-	SGLog.Sourse('WGL_I3D_image_buffer');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_image_buffer';
-	end;
-SGIsSuppored_WGL_I3D_swap_frame_lock:=Load_WGL_I3D_swap_frame_lock;
-if SGIsSuppored_WGL_I3D_swap_frame_lock then
-	begin
-	SGLog.Sourse('WGL_I3D_swap_frame_lock');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_swap_frame_lock';
-	end;
-SGIsSuppored_WGL_I3D_swap_frame_usage:=Load_WGL_I3D_swap_frame_usage;
-if SGIsSuppored_WGL_I3D_swap_frame_usage then
-	begin
-	SGLog.Sourse('WGL_I3D_swap_frame_usage');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_swap_frame_usage';
-	end;
+{$IFDEF MSWINDOWS}
+	SGIsSuppored_WGL_I3D_image_buffer:=Load_WGL_I3D_image_buffer;
+	if SGIsSuppored_WGL_I3D_image_buffer then
+		begin
+		SGLog.Sourse('WGL_I3D_image_buffer');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_image_buffer';
+		end;
+	SGIsSuppored_WGL_I3D_swap_frame_lock:=Load_WGL_I3D_swap_frame_lock;
+	if SGIsSuppored_WGL_I3D_swap_frame_lock then
+		begin
+		SGLog.Sourse('WGL_I3D_swap_frame_lock');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_swap_frame_lock';
+		end;
+	SGIsSuppored_WGL_I3D_swap_frame_usage:=Load_WGL_I3D_swap_frame_usage;
+	if SGIsSuppored_WGL_I3D_swap_frame_usage then
+		begin
+		SGLog.Sourse('WGL_I3D_swap_frame_usage');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_swap_frame_usage';
+		end;
+	{$ENDIF}
 SGIsSuppored_GL_3DFX_texture_compression_FXT1:=Load_GL_3DFX_texture_compression_FXT1;
 if SGIsSuppored_GL_3DFX_texture_compression_FXT1 then
 	begin
@@ -1875,138 +1879,140 @@ else
 	SetLength(Extendeds,Length(Extendeds)+1);
 	Extendeds[High(Extendeds)]:='GL_APPLE_vertex_array_range';
 	end;
-SGIsSuppored_WGL_ARB_pixel_format:=Load_WGL_ARB_pixel_format;
-if SGIsSuppored_WGL_ARB_pixel_format then
-	begin
-	SGLog.Sourse('WGL_ARB_pixel_format');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_pixel_format';
-	end;
-SGIsSuppored_WGL_ARB_make_current_read:=Load_WGL_ARB_make_current_read;
-if SGIsSuppored_WGL_ARB_make_current_read then
-	begin
-	SGLog.Sourse('WGL_ARB_make_current_read');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_make_current_read';
-	end;
-SGIsSuppored_WGL_ARB_pbuffer:=Load_WGL_ARB_pbuffer;
-if SGIsSuppored_WGL_ARB_pbuffer then
-	begin
-	SGLog.Sourse('WGL_ARB_pbuffer');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_pbuffer';
-	end;
-SGIsSuppored_WGL_EXT_swap_control:=Load_WGL_EXT_swap_control;
-if SGIsSuppored_WGL_EXT_swap_control then
-	begin
-	SGLog.Sourse('WGL_EXT_swap_control');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_EXT_swap_control';
-	end;
-SGIsSuppored_WGL_ARB_render_texture:=Load_WGL_ARB_render_texture;
-if SGIsSuppored_WGL_ARB_render_texture then
-	begin
-	SGLog.Sourse('WGL_ARB_render_texture');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ARB_render_texture';
-	end;
-SGIsSuppored_WGL_EXT_extensions_string:=Load_WGL_EXT_extensions_string;
-if SGIsSuppored_WGL_EXT_extensions_string then
-	begin
-	SGLog.Sourse('WGL_EXT_extensions_string');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_EXT_extensions_string';
-	end;
-SGIsSuppored_WGL_EXT_make_current_read:=Load_WGL_EXT_make_current_read;
-if SGIsSuppored_WGL_EXT_make_current_read then
-	begin
-	SGLog.Sourse('WGL_EXT_make_current_read');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_EXT_make_current_read';
-	end;
-SGIsSuppored_WGL_EXT_pbuffer:=Load_WGL_EXT_pbuffer;
-if SGIsSuppored_WGL_EXT_pbuffer then
-	begin
-	SGLog.Sourse('WGL_EXT_pbuffer');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_EXT_pbuffer';
-	end;
-SGIsSuppored_WGL_EXT_pixel_format:=Load_WGL_EXT_pixel_format;
-if SGIsSuppored_WGL_EXT_pixel_format then
-	begin
-	SGLog.Sourse('WGL_EXT_pixel_format');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_EXT_pixel_format';
-	end;
-SGIsSuppored_WGL_I3D_digital_video_control:=Load_WGL_I3D_digital_video_control;
-if SGIsSuppored_WGL_I3D_digital_video_control then
-	begin
-	SGLog.Sourse('WGL_I3D_digital_video_control');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_digital_video_control';
-	end;
-SGIsSuppored_WGL_I3D_gamma:=Load_WGL_I3D_gamma;
-if SGIsSuppored_WGL_I3D_gamma then
-	begin
-	SGLog.Sourse('WGL_I3D_gamma');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_gamma';
-	end;
-SGIsSuppored_WGL_I3D_genlock:=Load_WGL_I3D_genlock;
-if SGIsSuppored_WGL_I3D_genlock then
-	begin
-	SGLog.Sourse('WGL_I3D_genlock');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_I3D_genlock';
-	end;
+{$IFDEF MSWINDOWS}
+	SGIsSuppored_WGL_ARB_pixel_format:=Load_WGL_ARB_pixel_format;
+	if SGIsSuppored_WGL_ARB_pixel_format then
+		begin
+		SGLog.Sourse('WGL_ARB_pixel_format');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_pixel_format';
+		end;
+	SGIsSuppored_WGL_ARB_make_current_read:=Load_WGL_ARB_make_current_read;
+	if SGIsSuppored_WGL_ARB_make_current_read then
+		begin
+		SGLog.Sourse('WGL_ARB_make_current_read');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_make_current_read';
+		end;
+	SGIsSuppored_WGL_ARB_pbuffer:=Load_WGL_ARB_pbuffer;
+	if SGIsSuppored_WGL_ARB_pbuffer then
+		begin
+		SGLog.Sourse('WGL_ARB_pbuffer');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_pbuffer';
+		end;
+	SGIsSuppored_WGL_EXT_swap_control:=Load_WGL_EXT_swap_control;
+	if SGIsSuppored_WGL_EXT_swap_control then
+		begin
+		SGLog.Sourse('WGL_EXT_swap_control');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_EXT_swap_control';
+		end;
+	SGIsSuppored_WGL_ARB_render_texture:=Load_WGL_ARB_render_texture;
+	if SGIsSuppored_WGL_ARB_render_texture then
+		begin
+		SGLog.Sourse('WGL_ARB_render_texture');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ARB_render_texture';
+		end;
+	SGIsSuppored_WGL_EXT_extensions_string:=Load_WGL_EXT_extensions_string;
+	if SGIsSuppored_WGL_EXT_extensions_string then
+		begin
+		SGLog.Sourse('WGL_EXT_extensions_string');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_EXT_extensions_string';
+		end;
+	SGIsSuppored_WGL_EXT_make_current_read:=Load_WGL_EXT_make_current_read;
+	if SGIsSuppored_WGL_EXT_make_current_read then
+		begin
+		SGLog.Sourse('WGL_EXT_make_current_read');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_EXT_make_current_read';
+		end;
+	SGIsSuppored_WGL_EXT_pbuffer:=Load_WGL_EXT_pbuffer;
+	if SGIsSuppored_WGL_EXT_pbuffer then
+		begin
+		SGLog.Sourse('WGL_EXT_pbuffer');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_EXT_pbuffer';
+		end;
+	SGIsSuppored_WGL_EXT_pixel_format:=Load_WGL_EXT_pixel_format;
+	if SGIsSuppored_WGL_EXT_pixel_format then
+		begin
+		SGLog.Sourse('WGL_EXT_pixel_format');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_EXT_pixel_format';
+		end;
+	SGIsSuppored_WGL_I3D_digital_video_control:=Load_WGL_I3D_digital_video_control;
+	if SGIsSuppored_WGL_I3D_digital_video_control then
+		begin
+		SGLog.Sourse('WGL_I3D_digital_video_control');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_digital_video_control';
+		end;
+	SGIsSuppored_WGL_I3D_gamma:=Load_WGL_I3D_gamma;
+	if SGIsSuppored_WGL_I3D_gamma then
+		begin
+		SGLog.Sourse('WGL_I3D_gamma');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_gamma';
+		end;
+	SGIsSuppored_WGL_I3D_genlock:=Load_WGL_I3D_genlock;
+	if SGIsSuppored_WGL_I3D_genlock then
+		begin
+		SGLog.Sourse('WGL_I3D_genlock');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_I3D_genlock';
+		end;
+	{$ENDIF}
 SGIsSuppored_GL_ARB_matrix_palette:=Load_GL_ARB_matrix_palette;
 if SGIsSuppored_GL_ARB_matrix_palette then
 	begin
@@ -2073,17 +2079,19 @@ else
 	SetLength(Extendeds,Length(Extendeds)+1);
 	Extendeds[High(Extendeds)]:='GL_NV_vertex_program2';
 	end;
-SGIsSuppored_WGL_NV_render_texture_rectangle:=Load_WGL_NV_render_texture_rectangle;
-if SGIsSuppored_WGL_NV_render_texture_rectangle then
-	begin
-	SGLog.Sourse('WGL_NV_render_texture_rectangle');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_NV_render_texture_rectangle';
-	end;
+{$IFDEF MSWINDOWS}
+	SGIsSuppored_WGL_NV_render_texture_rectangle:=Load_WGL_NV_render_texture_rectangle;
+	if SGIsSuppored_WGL_NV_render_texture_rectangle then
+		begin
+		SGLog.Sourse('WGL_NV_render_texture_rectangle');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_NV_render_texture_rectangle';
+		end;
+	{$ENDIF}
 SGIsSuppored_GL_NV_pixel_data_range:=Load_GL_NV_pixel_data_range;
 if SGIsSuppored_GL_NV_pixel_data_range then
 	begin
@@ -2128,17 +2136,19 @@ else
 	SetLength(Extendeds,Length(Extendeds)+1);
 	Extendeds[High(Extendeds)]:='GL_ATI_draw_buffers';
 	end;
-SGIsSuppored_WGL_ATI_pixel_format_float:=Load_WGL_ATI_pixel_format_float;
-if SGIsSuppored_WGL_ATI_pixel_format_float then
-	begin
-	SGLog.Sourse('WGL_ATI_pixel_format_float');
-	i+=1;
-	end
-else
-	begin
-	SetLength(Extendeds,Length(Extendeds)+1);
-	Extendeds[High(Extendeds)]:='WGL_ATI_pixel_format_float';
-	end;
+{$IFDEF MSWINDOWS}
+	SGIsSuppored_WGL_ATI_pixel_format_float:=Load_WGL_ATI_pixel_format_float;
+	if SGIsSuppored_WGL_ATI_pixel_format_float then
+		begin
+		SGLog.Sourse('WGL_ATI_pixel_format_float');
+		i+=1;
+		end
+	else
+		begin
+		SetLength(Extendeds,Length(Extendeds)+1);
+		Extendeds[High(Extendeds)]:='WGL_ATI_pixel_format_float';
+		end;
+	{$ENDIF}
 SGIsSuppored_GL_ATI_texture_env_combine3:=Load_GL_ATI_texture_env_combine3;
 if SGIsSuppored_GL_ATI_texture_env_combine3 then
 	begin
