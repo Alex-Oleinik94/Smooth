@@ -7,7 +7,7 @@ uses
 	,png
 	,Classes
 	,SaGeImagesBase
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeRender
 	;
 type

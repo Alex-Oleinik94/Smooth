@@ -3,7 +3,7 @@ unit SaGeFPCToC;
 interface
 uses
 	Classes,
-	SaGeBase;
+	SaGeBase, SaGeBased;
 type
 	SGTranslater=class;
 	

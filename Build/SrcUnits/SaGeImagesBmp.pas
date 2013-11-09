@@ -3,7 +3,7 @@ unit SaGeImagesBmp;
 interface
 uses
 	crt
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeImagesBase
 	,Classes
 	,SysUtils

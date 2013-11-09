@@ -2,7 +2,7 @@
 unit SaGeRenderDirectX;
 interface
 uses
-	SaGeBase
+	SaGeBase, SaGeBased
 	,SaGeRender
 	,windows
 	,DynLibs

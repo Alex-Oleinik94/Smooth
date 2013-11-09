@@ -3,7 +3,7 @@ unit SaGeContext;
 
 interface
 uses
-	SaGeBase
+	SaGeBase, SaGeBased
 	,SaGeCommon
 	,Classes
 	,SysUtils

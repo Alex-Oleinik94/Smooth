@@ -5,7 +5,7 @@ uses
 	crt
 	,SaGeCommon
 	,SaGeContext
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,Classes
 	,SysUtils
 	,SaGeMesh

@@ -2,7 +2,7 @@
 unit SaGeCommon;
 interface 
 uses
-	SaGeBase,
+	SaGeBase, SaGeBased,
 	SaGeRender,
 	Classes,
 	SysUtils;

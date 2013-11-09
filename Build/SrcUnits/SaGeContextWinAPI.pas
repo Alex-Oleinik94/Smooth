@@ -5,7 +5,7 @@ unit SaGeContextWinAPI;
 interface
 
 uses
-	SaGeBase
+	SaGeBase, SaGeBased
 	,Windows
 	,SaGeContext
 	,SaGeCommon

@@ -5,7 +5,7 @@ unit SaGeShaders;
 interface
 uses
 	crt
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeCommon
 	,SysUtils
 	,SaGeRender

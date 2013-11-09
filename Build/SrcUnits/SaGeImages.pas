@@ -10,7 +10,7 @@ uses
 		{$ENDIF}
 	,Classes
 	,SysUtils
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeImagesBase
 	,SaGeImagesJpeg
 	,SaGeImagesPng

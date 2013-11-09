@@ -7,7 +7,7 @@
 unit SaGeRenderOpenGL;
 interface
 uses
-	SaGeBase
+	SaGeBase, SaGeBased
 	,SaGeRender
 	,gl
 	,glu

@@ -3,7 +3,7 @@ Unit SaGeGeneticalAlgoritm;
 interface
 uses 
 	crt
-	,SaGeBase;
+	,SaGeBase, SaGeBased;
 type
 	TSGGAValueType = extended;//Тип значений функции
 	TSGGAFunction=function(const x:TSGGAValueType;const p:pointer):TSGGAValueType;//тип функциии

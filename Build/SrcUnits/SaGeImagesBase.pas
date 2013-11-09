@@ -5,7 +5,7 @@ interface
 
 uses 
 	crt
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeRender
 	;
 

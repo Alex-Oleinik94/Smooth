@@ -7,7 +7,7 @@ interface
 uses
 	Crt
 	,SaGeCommon
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeImages
 	,SaGeContext
 	,SaGeUtils

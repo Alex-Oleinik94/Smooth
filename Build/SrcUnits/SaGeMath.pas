@@ -8,7 +8,7 @@ uses
 	crt
 	,Classes
 	,SaGeCommon
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,Math
 	,SaGeRender
 	,SaGeContext;

@@ -5,7 +5,7 @@ interface
 
 uses
 	SaGeCommon
-	,SaGeBase
+	,SaGeBase, SaGeBased
 	,SaGeMesh
 	,crt
 	,SaGeNet

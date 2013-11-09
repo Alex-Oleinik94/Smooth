@@ -17,6 +17,7 @@ uses
 		,Dl
 		{$ENDIF}
 	,DynLibs
+	,SaGeBased
 	,SysUtils
 	,Classes
 	,MMSystem
@@ -379,7 +380,6 @@ function SGExistsFirstPartString(const AString:String;const Part:String):Boolean
 function SGReadStringInQuotesFromStream(Const Stream:TStream;const Quote:char = #39):string;inline;
 procedure SGLoadLoadPartStreamToStream(const StreamIn,StreamOut:TStream; const Size:Int64);overload;inline;
 procedure SGLoadLoadPartStreamToStream(const StreamIn:TStream;StreamOut:TMemoryStream; const Size:Int64);overload;inline;
-operator **(const a,b:Real):Real;inline;
 function Log(const a,b:real):real;inline;
 function SGPCharLength(const pc:PChar):int64;inline;
 function SGStr(const b:boolean):String;overload;inline;
@@ -398,7 +398,6 @@ procedure SGConsoleMenu(const Ar:TSGConsoleMenuArray;
 	const VActiveText:LongWord = 10;
 	const Koima:Boolean = True);
 function SGPCharToString(const VChar:PChar):string;inline;
-operator ** (const a,b:byte):byte;inline;overload;
 function SGMin(const a,b:LongInt):LongInt;overload;inline;
 function SGMin(const a,b:LongWord):LongWord;overload;inline;
 function SGMin(const a,b:Int64):Int64;overload;inline;
@@ -414,9 +413,6 @@ procedure SGReleaseFileWay(WAy:string);
 function SGGetFileWay(const Way:String):String;
 procedure SGMakeDirectory(const DirWay:String);inline;
 procedure FindInPas(const Cmd:Boolean = False);
-operator ** (const a:Real;const b:LongInt):Real;inline;overload;
-operator ** (const a:single;const b:LongInt):single;overload;inline;
-operator ** (const a:LongInt;const b:LongInt):LongInt;overload;inline;
 function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
 function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
 function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
@@ -832,41 +828,6 @@ end;
 function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
 begin
 Result:=a1*a4-a2*a3;
-end;
-
-operator ** (const a:Real;const b:LongInt):Real;inline;overload;
-var
-	I:LongWord = 0;
-begin
-Result:=1;
-if b>0 then
-	for i:=1 to b do
-		Result*=a
-else
-	for i:=1 to abs(b) do
-		Result/=a
-end;
-
-operator ** (const a:Single;const b:LongInt):Single;inline;overload;
-var
-	I:LongWord = 0;
-begin
-Result:=1;
-if b>0 then
-	for i:=1 to b do
-		Result*=a
-else
-	for i:=1 to abs(b) do
-		Result/=a
-end;
-
-operator ** (const a:LongInt;const b:LongInt):LongInt;overload;inline;
-var
-	I:LongInt = 0;
-begin
-Result:=1;
-for i:=1 to b do
-	Result*=a;
 end;
 
 procedure FindInPas(const Cmd:Boolean = False);
@@ -1329,15 +1290,6 @@ else
 	Result:=b;
 end;
 
-operator ** (const a,b:byte):byte;inline;overload;
-var
-	i:Byte;
-begin
-Result:=1;
-for i:=1 to b do
-	Result*=a;
-end;
-
 function SGPCharToString(const VChar:PChar):string;inline;
 var
 	i:Longint = 0;
@@ -1687,11 +1639,6 @@ end;
 function Log(const a,b:real):real;inline;
 begin
 Result:=(Ln(b)/Ln(a));
-end;
-
-operator **(const a,b:Real):Real;inline;
-begin
-Result:=exp(b*ln(a));
 end;
 
 procedure SGLoadLoadPartStreamToStream(const StreamIn:TStream;StreamOut:TMemoryStream; const Size:Int64);overload;inline;
