@@ -328,7 +328,21 @@ end;
 
 procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal); 
 begin 
-
+if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then//or (VP1 = SGR_TEXTURE_3D) then
+	begin
+	case VP2 of
+	SGR_TEXTURE_MIN_FILTER:
+		if VP3 = SGR_LINEAR then
+			pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR)
+		else if VP3 = SGR_NEAREST then
+			pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
+	SGR_TEXTURE_MAG_FILTER:
+		if VP3 = SGR_LINEAR then
+			pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR)
+		else if VP3 = SGR_NEAREST then
+			pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT); 
+	end;
+	end;
 end;
 
 procedure TSGRenderDirectX.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
