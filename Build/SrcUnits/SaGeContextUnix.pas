@@ -8,7 +8,6 @@ uses
 	,SaGeRender
 	,SaGeContext
 	{$IFDEF UNIX}
-		,Dl
 		,unix
 		,x
 		,xlib

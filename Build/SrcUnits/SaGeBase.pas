@@ -15,7 +15,7 @@ uses
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,unix
-		,Dl
+		,dl
 		{$ENDIF}
 	,DynLibs
 	,SaGeBased

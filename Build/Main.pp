@@ -4,9 +4,7 @@
 program Main;
 uses
 	{$IFDEF UNIX}
-		{$IFDEF UseCThreads}
-			cthreads,
-			{$ENDIF}
+		cthreads,
 		SaGeContextUnix,
 		Unix,
 		{$ENDIF}
