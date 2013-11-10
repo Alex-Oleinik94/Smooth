@@ -31,7 +31,6 @@ type
 		procedure InitFullscreen(const b:boolean); override;
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
-		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
 		winAttr: TXSetWindowAttributes;
@@ -48,28 +47,111 @@ type
 implementation
 
 procedure TSGContextUnix.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
+{
+	* }(*WinAPI Codes*){
+	* 8 - Tab
+	* 20 - Caps Lock
+	* 32 - Space
+	* 16 - Right & Left Shift
+	* 17 - Right & Left Ctrl
+	* SG_ALT_KEY - Right & Left Alt
+	* 8 - BackSpace
+	* 13 - Enter
+	* 93 - Option
+	* 33 - Page Up
+	* 34 - Page Down
+	* 36 - Home
+	* 35 - End
+	* 46 - Delete
+	* 220 - \
+	* 189 - -_
+	* 187 - =+
+	* 16 - Shift
+	* 45 - Inc
+	* [112..123] - F1 -F12
+	* }
 var
 	PKey:PByte = nil;
 	NormalKey:Byte = 0;
 begin
 PKey := PByte(@VKey);
-WriteLn(PKey[0],' ',PKey[1]);
+//WriteLn(PKey[0],' ',PKey[1]);
 case PKey[1] of
 0://English
 	begin
 	(*
-	[48..57] - [)!@#$%^&*(] of 0..9
+	[48..57] - 0..9
 	32 - Space
 	114 - R key
+	33 - ! (1)
+	64 - @ (2)
+	35 - # (3)
+	36 - $ (4)
+	37 - % (5)
+	94 - ^ (6)
+	38 - & (7)
+	42 - * (8)
+	40 - ( (9)
+	41 - ) (0)
+	45 - -
+	95 - _
+	61 - =
+	43 - +
+	59 - ;
 	*)
 	case PKey[0] of
-	114:NormalKey:=82;// R key
+	65,97 :NormalKey:=65;//a A key
+	66,98 :NormalKey:=66;//b B key
+	67,99 :NormalKey:=67;//c C key
+	68,100:NormalKey:=68;//d D key
+	69,101:NormalKey:=69;//e E key
+	70,102:NormalKey:=70;//f F key
+	71,103:NormalKey:=71;//g G key
+	72,104:NormalKey:=72;//h H key
+	73,105:NormalKey:=73;//i I key
+	74,106:NormalKey:=74;//j J key
+	75,107:NormalKey:=75;//k K key
+	76,108:NormalKey:=76;//l L key
+	77,109:NormalKey:=77;//m M key
+	78,110:NormalKey:=78;//n N key
+	79,111:NormalKey:=79;//o O key
+	80,112:NormalKey:=80;//p P key
+	81,113:NormalKey:=81;//q Q key
+	82,114:NormalKey:=82;//r R key
+	83,115:NormalKey:=83;//s S key
+	84,116:NormalKey:=84;//t T key
+	85,117:NormalKey:=85;//u U key
+	86,118:NormalKey:=86;//v V key
+	87,119:NormalKey:=87;//w W key
+	88,120:NormalKey:=88;//x X key
+	89,121:NormalKey:=89;//y Y key
+	90,122:NormalKey:=90;//z Z key
+	
+	
 	32:NormalKey:=32;// Space
+	
+	// =====0..9====
+	48,49,50,51,52,53,54,55,56,57: // - Normal
+		NormalKey:=PKey[0];
+	//With Shift
+	41:NormalKey:=48;//0
+	33:NormalKey:=49;//1
+	64:NormalKey:=50;//2
+	35:NormalKey:=51;//3
+	36:NormalKey:=52;//4
+	37:NormalKey:=53;//5
+	94:NormalKey:=54;//6
+	38:NormalKey:=55;//7
+	42:NormalKey:=56;//8
+	40:NormalKey:=57;//9
+	
 	end;
 	end;
 6://Russian
 	begin
-	
+	case PKey[0] of
+	176:NormalKey:=51;//Nomer ("3")
+	end;
 	
 	end;
 255://System
@@ -114,6 +196,11 @@ case PKey[1] of
 	8:NormalKey:=8;// Backspace
 	27:NormalKey:=27;// Escape
 	13:NormalKey:=13;// Enter
+	255:NormalKey:=46;// Delete
+	225,226:NormalKey:=16;// Shift
+	229:NormalKey:=20;// Caps Lock
+	233,234:NormalKey:=SG_ALT_KEY;//Alt
+	227,228:NormalKey:=SG_CTRL_KEY;//Ctrl
 	end;
 	end;
 end;
@@ -131,11 +218,6 @@ else if What = 'VISUAL INFO' then
 	Result:=visinfo
 else
 	Result:=Inherited Get(What);
-end;
-
-function TSGContextUnix.KeysPressed(const  Index : integer ) : Boolean;overload;
-begin
-
 end;
 
 procedure TSGContextUnix.SetCursorPosition(const a:TSGPoint2f);
@@ -265,8 +347,8 @@ While XPending(dpy)<>0 do
 		1:SetCursorKey(SGDownKey,SGLeftCursorButton);
 		2:SetCursorKey(SGDownKey,SGMiddleCursorButton);
 		3:SetCursorKey(SGDownKey,SGRightCursorButton);
-		4:FCursorWheel:=SGDownCursorWheel;
-		5:FCursorWheel:=SGUpCursorWheel;
+		4:FCursorWheel:=SGUpCursorWheel;
+		5:FCursorWheel:=SGDownCursorWheel;
 		end;
 		end;
 	ButtonRelease:
