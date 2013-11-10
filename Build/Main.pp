@@ -1,5 +1,5 @@
 {$I SrcUnits\Includes\SaGe.inc}
-//{$APPTYPE CONSOLE}
+{$APPTYPE CONSOLE}
 //{$APPTYPE GUI}
 program Main;
 uses
@@ -75,12 +75,12 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGKillKostia);
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
 	Add(TSGFractalKohTriangle);//Треугольник Серпинского
-	Add(TSGKillKostia);
 	
 	{Add(TSGGenAlg);
 	Add(TSGGraphic);

@@ -16,12 +16,12 @@ uses
 		,windows
 		{$ENDIF}
 	{$IFDEF UNIX}
-		,unix
 		,Dl
+		,glx
+		,unix
 		,x
 		,xlib
 		,xutil
-		,glx
 		{$ENDIF}
 	,DynLibs
 	;
@@ -103,19 +103,38 @@ implementation
 
 procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
-x:=-7*Byte(not VFullscreen);
-y:=5*Byte(not VFullscreen);
+{$IFDEF MSWINDOWS}
+	x:=-7*Byte(not VFullscreen);
+	y:=5*Byte(not VFullscreen);
+{$ELSE}
+	{$IFDEF UNIX}
+		x:=0;
+		y:=0;
+		{$ENDIF}
+	{$ENDIF}
 end;
 
 function TSGRenderOpenGL.TopShift(const VFullscreen:Boolean = False):LongWord;
 begin
-Result:=28*Byte(not VFullscreen);
+{$IFDEF MSWINDOWS}
+	Result:=28*Byte(not VFullscreen);
+{$ELSE}
+	{$IFDEF UNIX}
+		Result:=0;
+		{$ENDIF}
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.SwapBuffers();
 begin
 {$IFDEF MSWINDOWS}
 	Windows.SwapBuffers( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
+{$ELSE}
+	{$IFDEF UNIX}
+		glXSwapBuffers(
+			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			LongWord(FWindow.Get('WINDOW HANDLE')));
+		{$ENDIF}
 	{$ENDIF}
 end;
 
@@ -386,7 +405,7 @@ destructor TSGRenderOpenGL.Destroy;
 begin
 {$IFDEF UNIX}
 {$ELSE}
-	{$IFDEF MSWINDOW}
+	{$IFDEF MSWINDOWS}
 		wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
 		if FContext<>0 then
 			begin
@@ -442,18 +461,19 @@ glVertex3f(x,y,z);
 end;
 
 function TSGRenderOpenGL.CreateContext():Boolean;
-{$IFDEF UNIX}
-	var
-		FDisplay:PDisplay = nil;
-{$ELSE}
-	
-	{$ENDIF}
 begin
 Result:=False;
 {$IFDEF UNIX}
-	FDisplay:=XOpenDisplay(nil);
-	
-	
+	initGlx();
+	FContext := glXCreateContext(
+		PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+		PXVisualInfo(FWindow.Get('VISUAL INFO')),nil,true);
+	if FContext = nil then
+		begin
+		SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not create an OpenGL rendering context!');
+		Exit;
+		end;
+	Result:=FContext<>nil;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
@@ -469,7 +489,10 @@ procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
 {$IFDEF UNIX}
 	if (FWindow<>nil) and (FContext<>nil) then 
-		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),nil);
+		glXMakeCurrent(
+			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			LongWord(FWindow.Get('WINDOW HANDLE')),
+			nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil)  then 
@@ -497,16 +520,21 @@ begin
 	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), @pfd );
 	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), iFormat, @pfd );
 	{$ENDIF}
+{$IFDEF UNIX}
+	Result:=True;
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.MakeCurrent();
 begin
 {$IFDEF UNIX}
 	if (FWindow<>nil) and (FContext<>nil) then 
-		glXMakeCurrent(XOpenDisplay(nil),LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),FContext);
+		glXMakeCurrent(
+			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			LongWord(FWindow.Get('WINDOW HANDLE')),
+			FContext);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		SGLog.Sourse(['TSGRender__MakeCurrent() : Info : dcWnd=',LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')),', FContext=',FContext,', @wglMakeCurrent=',LongWord(@wglMakeCurrent),'.']);
 		if (FWindow<>nil) and (FContext<>0) then 
 			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), FContext );
 		{$ENDIF}

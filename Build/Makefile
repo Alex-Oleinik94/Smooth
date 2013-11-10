@@ -3,10 +3,11 @@ BASEARGS= -FuSrcUnits\Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits
 DODEBUG= -gl 
 DORELEASE= -XX -O3 -CX -dRELEASE
 
+enigma:
+	./EnigmaVB/enigmavbconsole.exe Main.evb
 release:
 	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) Main
 	strip ../BinDebug/Main
-	./EnigmaVB/enigmavbconsole.exe Main.evb
 debug:
 	$(PP) $(DODEBUG) $(BASEARGS) $(OPT) Main
 lib:

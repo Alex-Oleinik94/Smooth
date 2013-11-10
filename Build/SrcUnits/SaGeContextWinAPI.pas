@@ -299,8 +299,8 @@ wm_rbuttonup:
 wm_mbuttonup:
 	SGContext.SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
-	begin
-	SGLog.Sourse('SageWindow is closed for API.');
+	begin 
+	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed for API.');
 	SGContext.Active:=False;
 	PostQuitMessage(0);
 	Exit;
