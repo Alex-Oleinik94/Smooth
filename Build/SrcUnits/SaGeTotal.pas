@@ -10,7 +10,8 @@ uses
 	SaGeCommon
 	,SaGeMesh
 	,SaGeUtils
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeContext
 	,SaGeScreen
 	,SaGeRender

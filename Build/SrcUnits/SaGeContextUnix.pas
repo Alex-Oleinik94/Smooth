@@ -32,6 +32,7 @@ type
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
+		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
 		winAttr: TXSetWindowAttributes;
 		dpy: PDisplay;
@@ -45,6 +46,80 @@ type
 		function Get(const What:string):Pointer;override;
 		end;
 implementation
+
+procedure TSGContextUnix.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
+var
+	PKey:PByte = nil;
+	NormalKey:Byte = 0;
+begin
+PKey := PByte(@VKey);
+WriteLn(PKey[0],' ',PKey[1]);
+case PKey[1] of
+0://English
+	begin
+	(*
+	[48..57] - [)!@#$%^&*(] of 0..9
+	32 - Space
+	114 - R key
+	*)
+	case PKey[0] of
+	114:NormalKey:=82;// R key
+	32:NormalKey:=32;// Space
+	end;
+	end;
+6://Russian
+	begin
+	
+	
+	end;
+255://System
+	begin
+	(*
+	227 - Left Ctrl
+	228 - Right Ctrl
+	235 - Windows
+	233 - Left Alt
+	234 - Right Alt
+	103 - Option 
+	13 - Enter
+	225 - Left Shift
+	226 - Right Shift
+	9 - Tab
+	229 - cAPS LOCK
+	8 - Back Space
+	255 - Delete
+	27 - Escape
+	85 - Page Up
+	86 - Page Down
+	80 - Home
+	87 - End
+	82 - Up
+	81 - Left
+	83 - Right
+	84 - Down
+	[190..201] - F1 .. F12
+	68 - F - Help (F1)
+	149 - F - WiFi (F3)
+	0 - F - Lighting Down (F11)
+	177 - F- Lighting Up (F12)
+	99 - Ins
+	127 - Num Lock
+	19 - Pause | Break
+	*)
+	case PKey[0] of
+	82:NormalKey:=38;// Up
+	81:NormalKey:=37;// Left
+	83:NormalKey:=39;// Right
+	84:NormalKey:=40;// Down
+	8:NormalKey:=8;// Backspace
+	27:NormalKey:=27;// Escape
+	13:NormalKey:=13;// Enter
+	end;
+	end;
+end;
+if NormalKey<>0 then
+	SetKey(VKeyType,NormalKey);
+end;
 
 function TSGContextUnix.Get(const What:string):Pointer;
 begin
@@ -76,9 +151,18 @@ end;
 
 function TSGContextUnix.GetScreenResolution:TSGPoint2f;
 begin
-Result.Import(
-	XWidthOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)),
-	XHeightOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)));
+if dpy = nil then
+	begin
+	Result.Import(
+		XWidthOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)),
+		XHeightOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)));
+	end
+else
+	begin
+	Result.Import(
+		XWidthOfScreen(XScreenOfDisplay(dpy,0)),
+		XHeightOfScreen(XScreenOfDisplay(dpy,0)));
+	end;
 end;
 
 function TSGContextUnix.GetCursorPosition:TSGPoint2f;
@@ -196,15 +280,12 @@ While XPending(dpy)<>0 do
 	KeyPress:
 		begin
 		XLookupString(@Event.Xkey,@s,sizeof(s),@KeySum,nil);
-		//SetKey(SGDownKey,WParam);
-		(*SGSetKey(char(Keysum));
-		SGSetKeyDown(char(Keysum));*)
+		SetUnixKey(Keysum,SGDownKey);
 		end;
 	KeyRelease:
 		begin
 		XLookupString(@Event.Xkey,@s,sizeof(s),@KeySum,nil);
-		//SetKey(SGUpKey,WParam);
-		(*SGSetKeyUp(char(Keysum));*)
+		SetUnixKey(Keysum,SGUpKey);
 		end;
 	DestroyNotify:
 		begin
