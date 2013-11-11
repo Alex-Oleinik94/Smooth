@@ -26,7 +26,7 @@ uses
 	,SaGeTotal
 	,SaGeMesh
 	,SaGeMath
-	//,SaGeExamples
+	,SaGeExamples
 	//,SaGeShaders
 	,SaGeFPCToC
 	,SaGeNet
@@ -44,25 +44,8 @@ SGT.Destroy;
 end;
 
 procedure Draw(const Context:PSGContext);
-var
-	Render:TSGRender;
 begin
-Render:=Context^.Render;
-{Render.InitMatrixMode(SG_2D);
-Render.BeginScene(SGR_TRIANGLES);
-Render.Color3f(1,0,0);
-Render.Vertex2f(200,200);
-Render.Color3f(0,0,1);
-Render.Vertex2f(400,200);
-Render.Color3f(0,1,0);
-Render.Vertex2f(200,400);
-Render.Color3f(0,0,1);
-Render.Vertex2f(400,200);
-Render.Color3f(0,1,1);
-Render.Vertex2f(400,400);
-Render.Color3f(0,1,0);
-Render.Vertex2f(200,400);
-Render.EndScene();}
+
 end;
 
 procedure Init(const MyContext:PSGContext);
@@ -73,16 +56,17 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
-	Add(TSGKillKostia);
+	
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
 	Add(TSGFractalKohTriangle);//Треугольник Серпинского
+	Add(TSGKillKostia);
 	
-	{Add(TSGGenAlg);
+	//Add(TSGGenAlg);
 	Add(TSGGraphic);
-	Add(TSGGraphViewer);
+	{Add(TSGGraphViewer);
 	Add(TSGGraphViewer3D);}
 	
 	//Add(TSGMeshViever);

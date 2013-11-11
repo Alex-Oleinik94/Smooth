@@ -11,7 +11,7 @@ type
 		FZMand:Boolean;
 		FZQuantityRec:LongInt;
 		FColorScheme:SGByte;
-		procedure InitColor(x,y:LongInt;RecNumber:LongInt);override;
+		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
 		function Rec(Number:TSGComplexNumber):LongInt;inline;
 			public
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
@@ -1061,7 +1061,7 @@ FZQuantityRec:=256;
 FColorScheme:=0;
 end;
 
-procedure TSGFractalMandelbrod.InitColor(x,y:LongInt;RecNumber:LongInt);
+procedure TSGFractalMandelbrod.InitColor(const x,y:LongInt;const RecNumber:LongInt);
 var
 	Color:Byte;
 begin

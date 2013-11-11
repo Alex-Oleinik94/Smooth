@@ -88,11 +88,10 @@ type
 				tx,ty:Single;
 				end;
 		FNumberOfPoints:LongWord;
-			//Текстуры
+			//Textures
 		FNowTexture:LongWord;
 		FArTextures:packed array of IDirect3DTexture9;
 			// ===VBO=== 
-			//Буферы
 		FArBuffers:packed array of 
 			packed record 
 			FResourse:IDirect3DResource9;
@@ -244,8 +243,7 @@ var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 begin 
 pDevice.GetTransform(D3DTS_WORLD,Matrix1);
-D3DXMatrixIdentity(Matrix2);
-D3DXMatrixTranslation(Matrix2,-x,-y,-z);
+D3DXMatrixTranslation(Matrix2,x,y,-z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
 pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
@@ -259,9 +257,8 @@ v.x:=x;
 v.y:=y;
 v.z:=z;
 pDevice.GetTransform(D3DTS_WORLD,Matrix1);
-D3DXMatrixIdentity(Matrix2);
-D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
-D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
+D3DXMatrixRotationAxis(Matrix2,v,-angle/180*pi);
+D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
 pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
 
@@ -791,7 +788,6 @@ CHeight:=LongWord(FWindow.Get('HEIGHT'));
 LoadIdentity();
 if Mode=SG_3D then
 	begin
-	D3DXMatrixIdentity(Matrix);
 	D3DXMatrixPerspectiveFovLH(Matrix,            // полученная итоговая матрица проекции
 		D3DX_PI/4,                                // поле зрения в направлении оси Y в радианах
 		CWidth/CHeight,                           // соотношения сторон экрана Width/Height
@@ -802,17 +798,14 @@ if Mode=SG_3D then
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixIdentity(Matrix);
 		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4,CWidth / CHeight,0.0011,500);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		end
 	else if Mode=SG_2D then
 		begin
-		D3DXMatrixIdentity(Matrix);
 		D3DXMatrixOrthoLH(Matrix,CWidth,-CHeight,-0.001,0.1);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		
-		D3DXMatrixIdentity(Matrix);
 		D3DXMatrixTranslation(Matrix,-CWidth/2,-CHeight/2,0);
 		pDevice.SetTransform(D3DTS_WORLD, Matrix);
 		end;

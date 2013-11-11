@@ -106,7 +106,7 @@ type
 		FImage:TSGGLImage;
 		FView:TSGScreenVertexes;
 		FDepthHeight:LongWord;
-		procedure InitColor(x,y:LongInt;RecNumber:LongInt);virtual;
+		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);virtual;
 		class function GetColor(const a,b,color:LongInt):byte;inline;
 		class function GetColorOne(const a,b,color:LongInt):byte;inline;
 		procedure ToTexture();virtual;
@@ -525,7 +525,7 @@ if (color>=a) and (color<=b) then
 	end;
 end;
 
-procedure TSGImageFractal.InitColor(x,y:LongInt;RecNumber:LongInt);inline;
+procedure TSGImageFractal.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
 begin
 FImage.FImage.FBitMap[((FDepth-Y)*FDepth+X)*3]:=trunc((RecNumber/15)*255);
 end;
