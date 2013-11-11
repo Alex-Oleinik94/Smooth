@@ -74,14 +74,7 @@ MeshID:=0;
 FFI:=0;
 FVI:=0;
 PushIndexes(MeshID,SGVertex2fImport(-6,-3.5),FVI,FFI);
-if FDepth=0 then
-	begin
-	PushIndexes(MeshID,SGVertex2fImport(6,3.5),FVI,FFI);
-	end;
-if FDepth>0 then
-	begin
-	Rec(SGVertex2fImport(-6,-3.5),SGVertex2fImport(6,3.5),Depth)
-	end;
+Rec(SGVertex2fImport(-6,-3.5),SGVertex2fImport(6,3.5),Depth);
 if FThreadsEnable then
 	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
 		if FMeshesInfo[MeshID]=SG_FALSE then
@@ -120,6 +113,7 @@ with TSGFractalLomanaya(Button.FUserPointer1) do
 	FDepth+=1;
 	Calculate();
 	FLD.Caption:=SGStringToPChar(SGStr(Depth));
+	FBMD.Active:=True;
 	end;
 end;
 
@@ -133,6 +127,8 @@ with TSGFractalLomanaya(Button.FUserPointer1) do
 		FDepth-=1;
 		Calculate();
 		FLD.Caption:=SGStringToPChar(SGStr(Depth));
+		if FDepth=0 then
+			FBMD.Active:=False;
 		end;
 	end;
 end;
