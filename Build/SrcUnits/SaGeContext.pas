@@ -163,7 +163,7 @@ type
 {$UNDEF SGREADINTERFACE}
 {var
 	SGContext:TSGContext = nil;
-var // РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РїРµРµС…РѕРґР° Рє РґСЂСѓРіРѕРјСѓ С‚РёРїСѓ СЃРѕРЅС‚РµРєСЃС‚Р°
+var // Используется для пеехода к другому типу сонтекста
 	NewContext:TSGContext = nil;}
 implementation
 
@@ -221,6 +221,10 @@ if What='HEIGHT' then
 	Result:=Pointer(FHeight)
 else if What='WIDTH' then
 	Result:=Pointer(FWidth)
+else if What='CURPOSY' then
+	Result:=Pointer(FCursorPosition[SGNowCursorPosition].y)
+else if What='CURPOSX' then
+	Result:=Pointer(FCursorPosition[SGNowCursorPosition].x)
 else
 	Result:=nil;
 end;

@@ -2448,10 +2448,11 @@ var
 	CC:Boolean = False;
 begin
 CC:=NewCaption=FCaption;
+FCursorPosition:=0;
 if not CC then
 	begin
-	inherited;
-	TextTypeEvent;
+	inherited SetCaption(NewCaption);
+	TextTypeEvent();
 	if OnChange<>nil then
 		OnChange(Self);
 	end;
@@ -2603,12 +2604,8 @@ if FCanChange then
 			FNowChanget:=False;
 		#46: //Delete
 			begin  
-			if FCursorPosition<>Length(Caption)+1 then
+			if FCursorPosition<Length(Caption) then
 				begin
-				{FCaption:=SGPCharTotal(
-					SGPCharGetPart(FCaption,0,FCursorPosition-1),
-					SGPCharGetPart(FCaption,FCursorPosition+1,SGPCharHigh(FCaption))
-					);}
 				FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
 					SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
 				CaptionCharget:=True;
@@ -2624,10 +2621,6 @@ if FCanChange then
 			else if FCursorPosition<>0 then
 				begin
 				FCursorPosition-=1;
-				{FCaption:=SGPCharTotal(
-					SGPCharGetPart(FCaption,0,FCursorPosition-1),
-					SGPCharGetPart(FCaption,FCursorPosition+1,SGPCharHigh(FCaption))
-					);}
 				FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
 					SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
 				CaptionCharget:=True;
@@ -2661,7 +2654,7 @@ if FCanChange then
 			FCursorPosition:=0;
 			CursorChanget:=True;
 			end;
-		else
+		else//Simbol
 			begin
 			if FCaption='' then
 				begin
@@ -2696,7 +2689,7 @@ else
 		FNowChanget:=False;
 if CaptionCharget then
 	begin
-	TextTypeEvent;
+	TextTypeEvent();
 	if OnChange<>nil then
 		OnChange(Self);
 	end;

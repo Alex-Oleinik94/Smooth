@@ -45,7 +45,7 @@ type
  operator ** (const a, b: TSGLongWord) 	: TSGInt64;		inline; overload;
  operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	inline;	overload; 
  operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload; 
- 
+
  {
  *	Author: 	Sanches
  * 	Modifier:	REZ1DENT3 
@@ -59,6 +59,7 @@ type
  }
  operator ** (const a : TSGReal; 	const b : TSGLongInt) : TSGReal; 	inline; overload;
  operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
+ operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
  
 implementation
 
@@ -743,6 +744,12 @@ operator ** (const a : TSGReal; 	const b : TSGLongInt) : TSGReal; 	inline; overl
 begin
 	result := power(a, b);
 end;
+
+operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
+begin
+	result := power(a, b);
+end;
+
 
 operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
 begin

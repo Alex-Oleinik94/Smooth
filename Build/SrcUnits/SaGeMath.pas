@@ -8,7 +8,8 @@ uses
 	crt
 	,Classes
 	,SaGeCommon
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,Math
 	,SaGeRender
 	,SaGeContext;
@@ -158,7 +159,7 @@ type
 
 	TSGMathGraphic=class(TSGDrawClass)
 			public
-		constructor Create;
+		constructor Create();override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			protected

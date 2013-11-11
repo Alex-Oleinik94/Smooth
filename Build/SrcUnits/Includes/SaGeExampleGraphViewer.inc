@@ -20,6 +20,10 @@ type
 		Changet:boolean;
 		NotUsedInGraphic:Boolean;
 		end;
+	
+	//==============
+	//TSGGraphViewer
+	//==============
 	TSGGraphViewer=class(TSGGraphic)
 			public
 		constructor Create(const VContext:PSGContext);override;
@@ -68,6 +72,7 @@ inherited Create(VContext);
 MathGraphic:=nil;
 NotUsedInGraphic:=True;
 MathGraphic:=TSGMathGraphic.Create;
+MathGraphic.SetContext(FContext);
 MathGraphic.Expression:='x*sinx';
 MathGraphic.Complexity:=Context.Width;
 MathGraphic.VertexFunction:=@VertexFunction;
@@ -149,9 +154,9 @@ end;
 procedure TSGGraphic.Draw;
 var
 	msd:LongInt;
-	c,q,q1,q2:Extended;
+	c,q,q1,q2:TSGExtended;
 	i:LongWord;
-	Absx,Absy,k1,k2,k3:Extended;
+	Absx,Absy,k1,k2,k3:TSGExtended;
 
 function SGStTen(const a:Int64):String;
 var
@@ -194,7 +199,7 @@ for i:=0 to 1 do
 	q:=GetFP(View.y1,View.y2,msd-i);
 	if i=1 then
 		q1:=q;
-	c:=(10.0**(msd-i));
+	c:=(10.0**Real((msd-i)));
 	while q < View.y2 do
 		begin
 		k3:=Abs(1-(q-View.y1)/AbsY-View.y2/AbsY);
@@ -229,7 +234,7 @@ k2:=Abs(1-View.y2/AbsY);
 for i:=0 to 1 do
 	begin
 	q:=GetFP(View.x1,View.x2,msd-i);
-	c:=(10.0**(msd-i));
+	c:=(10.0**Real((msd-i)));
 	if i=1 then
 		q2:=q;
 	while q < View.x2 do
@@ -317,7 +322,11 @@ while q < View.y2 do
 	end;
 end;
 
-
+//======================================================================================
+//======================================================================================
+//====================================TSGGraphViewer====================================
+//======================================================================================
+//======================================================================================
 procedure GoNewGrafic(Button:TSGComponent);
 begin
 with TSGGraphViewer(Button.FUserPointer1) do
@@ -339,6 +348,7 @@ EulatuonEdit:=nil;
 EulatuonLabel:=nil;
 
 Image:=TSGGLImage.Create(TextureDirectory+Slash+'IconArea-hover.png');
+Image.SetContext(FContext);
 Image.Loading;
 
 Fb2:=TSGButton.Create;
@@ -357,6 +367,7 @@ SGScreen.LastChild.Caption:=SGStringToPChar(SGPCharToString(MathGraphic.Expressi
 EulatuonLabel.TextPosition:=True;
 EulatuonLabel.TextColor.Import(0.7,0,0.7);
 EulatuonLabel.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
+EulatuonLabel.Font.SetContext(FCOntext);
 EulatuonLabel.Font.Loading;
 EulatuonLabel.AutoTopShift:=True;
 
@@ -414,7 +425,7 @@ if SelectPointEnabled then
 		Render.EndScene();
 		end;
 	end;
-if SelectPointEnabled and ({SGIsMouseKeyDown(1)}Context.CursorKeysPressed(SGLeftCursorButton)) then
+if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
 	begin
 	SelectPointEnabled:=False;
 	if SelectPoint.x>SelectSecondPoint.x then

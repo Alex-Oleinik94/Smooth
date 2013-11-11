@@ -34,15 +34,6 @@ uses
 	,SaGeRender
 	,SaGeRenderOpenGL;
 
-procedure FPCTCTransliater;
-var
-	SGT:SGTranslater = nil;
-begin
-SGT:=SGTranslater.Create('cmd');
-SGT.GoTranslate;
-SGT.Destroy;
-end;
-
 procedure Draw(const Context:PSGContext);
 begin
 
@@ -56,23 +47,19 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
-	
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
 	Add(TSGFractalKohTriangle);//Треугольник Серпинского
 	Add(TSGKillKostia);
-	
-	//Add(TSGGenAlg);
 	Add(TSGGraphic);
-	{Add(TSGGraphViewer);
-	Add(TSGGraphViewer3D);}
+	Add(TSGGraphViewer);
+	Add(TSGGraphViewer3D);
+	Add(TSGGenAlg);
 	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
-	//Add(TSGSeaBatle);
-	//Add(TSGminecraft);
 	
 	Initialize;
 	end;
@@ -185,7 +172,6 @@ with Context do
 
 Context.Initialize;
 
-
 repeat
 
 Context.Run;
@@ -205,10 +191,19 @@ if Context.Active and (Context.FNewContextType<>nil) then
 until (Context.Active = False);
 
 Context.Destroy;
-
 end;
 
-procedure GoogleReNameCache;
+
+procedure FPCTCTransliater();
+var
+	SGT:SGTranslater = nil;
+begin
+SGT:=SGTranslater.Create('cmd');
+SGT.GoTranslate;
+SGT.Destroy;
+end;
+
+procedure GoogleReNameCache();
 var 
 	Cache:string = 'Cache';
 var

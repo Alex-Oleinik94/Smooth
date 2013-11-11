@@ -3,7 +3,8 @@ Unit SaGeGeneticalAlgoritm;
 interface
 uses 
 	crt
-	,SaGeBase, SaGeBased;
+	,SaGeBase
+	,SaGeBased;
 type
 	TSGGAValueType = extended;//Тип значений функции
 	TSGGAFunction=function(const x:TSGGAValueType;const p:pointer):TSGGAValueType;//тип функциии
@@ -140,7 +141,7 @@ var
 	i,ii,iii:LongWord;
 	A,B,C:TSGGAValueType;
 begin
-writeln(Hromosoma.FValue:0:10);
+//writeln(Hromosoma.FValue:0:10);
 (*Jorjies*)
 A:=Interval.A;
 B:=Interval.B;
@@ -181,9 +182,9 @@ if i>0 then
 		i:=i div 2;
 		end;
 	end;}
-for i:=0 to High(Hromosoma.FBits) do
+{for i:=0 to High(Hromosoma.FBits) do
 	write(Hromosoma.FBits[i]);
-writeln;
+writeln;}
 end;
 
 procedure SGGA.NewPopulation(const Param:LongWord);
@@ -305,11 +306,11 @@ case FOperatorOtbora of
 	Sort(FQuantityPopulation+QuantityK*2+QuantityM-1);
 	SetLength(FPopulation,1);
 	
-	write('Pop =>');
+	{write('Pop =>');
 	for i:=0 to High(FPopulation) do
 		begin
 		write(FPopulation[i].FValue:0:5,' ');
-		end;writeln;
+		end;writeln;}
 	
 	FResultat:=FPopulation[0].FValue;
 	SetLength(FPopulation,0);

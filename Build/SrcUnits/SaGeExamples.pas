@@ -43,16 +43,16 @@ uses
 	
 {$DEFINE SGREADINTERFACE}
 {$i Includes\SaGeExampleGraphViewer.inc}
-//{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
-//{$i Includes\SaGeExampleGraphViewer3D.inc}
+{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
+{$i Includes\SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADINTERFACE}
 
 implementation
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeExampleGraphViewer.inc}
-//{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
-//{$i Includes\SaGeExampleGraphViewer3D.inc}
+{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
+{$i Includes\SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 {procedure TSGBezierCurve.Calculate;

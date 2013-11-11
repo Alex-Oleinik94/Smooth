@@ -120,8 +120,12 @@ implementation
 
 procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
-x:=Byte(not VFullscreen);
-y:=-28*Byte(not VFullscreen);
+x:=
+	Byte(not VFullscreen)*(-8+
+	Round(LongWord(FWindow.Get('CURPOSX'))/LongWord(FWindow.Get('WIDTH'))*15));
+y:=
+	Byte(not VFullscreen)*(-28+
+	Round(LongWord(FWindow.Get('CURPOSY'))/LongWord(FWindow.Get('HEIGHT'))*33));
 end;
 
 procedure TSGRenderDirectX.SwapBuffers();
