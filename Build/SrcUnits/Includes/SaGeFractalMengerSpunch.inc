@@ -72,6 +72,7 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 		Calculate;
 		FSizeWriteTrue:=False;
 		WriteSize;
+		FButtonDepthMinus.Active:=True;
 		end;
 	end;
 end;
@@ -86,6 +87,8 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 		Calculate;
 		FSizeWriteTrue:=False;
 		WriteSize;
+		if Depth=0 then
+			FButtonDepthMinus.Active:=False;
 		end;
 	end;
 end;

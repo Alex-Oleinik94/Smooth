@@ -144,6 +144,7 @@ with TSGFractalKohTriangle(Button.FUserPointer1) do
 	FDepth+=1;
 	Calculate;
 	FLD.Caption:=SGStringToPChar(SGStr(Depth));
+	FBMD.Active:=True;
 	end;
 end;
 
@@ -157,6 +158,8 @@ with TSGFractalKohTriangle(Button.FUserPointer1) do
 		FDepth-=1;
 		Calculate;
 		FLD.Caption:=SGStringToPChar(SGStr(Depth));
+		if Depth=0 then
+			FBMD.Active:=False;
 		end;
 	end;
 end;
