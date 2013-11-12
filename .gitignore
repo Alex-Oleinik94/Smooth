@@ -7,9 +7,9 @@ Build/SrcUnits/*.ppu
 Build/*.ppu
 Build/*.o
 Build/Main.res
-BinDebug/Main.exe
-BinDebug/Main
-BinRelease/Main.exe
+Binaries/Main.exe
+Binaries/Main
+Binaries/Main_Release.exe
 Others/DirectX/*.o
 Others/DirectX/*.ppu
 Others/DirectX/*.a

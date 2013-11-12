@@ -1,2 +1,0 @@
-"Main.exe" -FIP
-pause

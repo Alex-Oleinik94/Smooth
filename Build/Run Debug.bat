@@ -1,2 +1,0 @@
-.\..\BinDebug\Main.exe
-pause
