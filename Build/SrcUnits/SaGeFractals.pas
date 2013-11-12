@@ -217,7 +217,7 @@ if FFaceIndex>=FShift then
 	MeshID+=1;
 	FVertexIndex:=0;
 	FFaceIndex:=0;
-	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.NOfObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.ArObjects[MeshID].FNOfFaces=0) then
+	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.NOfObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.ArObjects[MeshID].QuantityVertexes=0) then
 		begin
 		{if DoAtThreads then
 			begin
@@ -256,7 +256,7 @@ while Quantity<>0 do
 	if FEnableColors then
 		FMesh.ArObjects[FMesh.NOfObjects-1].AutoSetColorType();
 	if FEnableNormals then
-		FMesh.ArObjects[FMesh.NOfObjects-1].FHasNormals:=True;
+		FMesh.ArObjects[FMesh.NOfObjects-1].HasNormals:=True;
 	if Quantity<=FShift then
 		begin
 		SetMeshArLength(FMesh.NOfObjects-1,Quantity,

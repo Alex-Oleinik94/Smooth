@@ -5,13 +5,14 @@ unit SaGeMesh;
 interface
 
 uses
-    classes
+    Classes
     , SaGeCommon
-    , SaGeBase, SaGeBased
+    , SaGeBase
+    , SaGeBased
     , SaGeUtils
     , SaGeImages
     , SaGeRender
-    , crt
+    , Crt
     , SaGeContext;
 
 type
@@ -79,14 +80,14 @@ type
         constructor Create(); override;
         destructor Destroy(); override;
         class function ClassName():string;override;
-    public
-        FNOfVerts: int64;
-        FNOfFaces: int64;
+    protected
+        FNOfVerts: LongWord;
+        FNOfFaces: LongWord;
         
-        FHasTexture: boolean;
-        FHasNormals: boolean;
-        FHasColors: boolean;
-     private
+        FHasTexture: Boolean;
+        FHasNormals: Boolean;
+        FHasColors: Boolean;
+    protected
         FQuantityTextures:LongWord;
         FPoligonesType:LongWord;
         FVertexType:TSGMeshVertexType;
@@ -97,6 +98,7 @@ type
 		procedure SetHasTesture(const VHasTexture:Boolean);
 		function GetSizeOfOneVertex():LongWord;inline;
     public
+		property QuantityVertexes:LongWord read FNOfVerts;
 		property HasTexture:Boolean read FHasTexture write FHasTexture;
 		property HasColors:Boolean read FHasColors write FHasColors;
 		property HasNormals:Boolean read FHasNormals write FHasNormals;
@@ -116,6 +118,9 @@ type
 		property ArVertex3f[Index : Cardinal]:PTSGVertex3f read GetVertex3f;
 		property ArVertex2f[Index : Cardinal]:PTSGVertex2f read GetVertex2f;
 		
+		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
+		procedure AddFace(const FQuantityNewFaces:LongWord = 1);
+		
 		function GetColor3f(const Index:Cardinal):PTSGColor3f;inline;
 		function GetColor4f(const Index:Cardinal):PTSGColor4f;inline;
 		function GetColor3b(const Index:Cardinal):PTSGColor3b;inline;
@@ -133,7 +138,7 @@ type
 		property ArNormal[Index : Cardinal]:PTSGVertex3f read GetNormal;
 		
 		procedure SetVertexLength(const NewVertexLength:int64);inline;
-		function GetVertexLength():int64;overload;inline;
+		function GetVertexesSize():int64;overload;inline;
 		
 		function ArFacesLines():PTSGFaceLine;inline;
 		function ArFacesQuads():PTSGFaceQuad;inline;
@@ -147,14 +152,14 @@ type
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
 	public
 		property Faces:Int64 read GetFaceLength write SetFaceLength;
-		property Vertexes:Int64 read GetVertexLength write SetVertexLength;
+		property Vertexes:Int64 write SetVertexLength;
     public
 		FEnableVBO:Boolean;
 		
-        FVBOVertexes:Cardinal;
-        FVBOFaces:Cardinal;
+        FVBOVertexes:LongWord;
+        FVBOFaces:LongWord;
     public
-        FEnableCullFace: boolean;
+        FEnableCullFace: Boolean;
         FObjectColor: TSGColor4f;
     public
         procedure Draw(); override;
@@ -162,9 +167,9 @@ type
         procedure LoadToVBO();
         procedure ClearVBO();
         procedure ClearArrays(const ClearN:Boolean = True);
+			public
         //procedure SaveToStream(const Stream: TStream);
         //procedure LoadFromStream(const Stream: TStream);
-		function GetSizeOf():int64;
 		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
 		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
@@ -174,17 +179,18 @@ type
 		//procedure Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
 		procedure WriteInfo(const PredStr:string = '');
 		procedure LoadFromFile(const FileWay:string);
+		procedure LoadFromOBJ(const FFileName:string);virtual;
 	public
-		function VertexesSize:Int64;Inline;
-		function FacesSize:Int64;inline;
-		function Size:Int64;inline;
-		function RealSize:Int64;inline;
+		function VertexesSize():Int64;Inline;
+		function FacesSize():Int64;inline;
+		function Size():Int64;inline;
+		function RealSize():Int64;inline;
+		function GetSizeOf():int64;inline;
     end;
 
     PSG3dObject = ^TSG3dObject;
 
     { TSGModel }
-
     TSGModel = class(TSGDrawClass)
     public
         constructor Create;override;
@@ -199,10 +205,10 @@ type
     protected
         procedure AddObjectColor(const ObjColor: TSGColor4f);
     public
-        procedure Draw; override;
+        procedure Draw(); override;
         property FObjectColor: TSGColor4f write AddObjectColor;
         property ObjectColor: TSGColor4f write AddObjectColor;
-		procedure LoadToVBO;
+		procedure LoadToVBO();
     public
         //procedure LoadFromSaGe3DObjFile(const FileWay: string);
         //procedure SaveToSaGe3DObjFile(const FileWay: string);
@@ -211,16 +217,16 @@ type
 		procedure SaveToFile(const FileWay: string);
         class function GetWRLNextIdentity(const Text:PTextFile):string;
         procedure Load3DSFromFile(const FileWay:string);
-        procedure Stripificate;
+        procedure Stripificate();
         procedure Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
-        procedure WriteInfo;
+        procedure WriteInfo();
         procedure LoadFromFile(const FileWay:string);
-        procedure Clear;virtual;
+        procedure Clear();virtual;
     public
-		function VertexesSize:Int64;
-		function FacesSize:Int64;
-		function Size:Int64;
-		function RealSize:Int64;
+		function VertexesSize():Int64;
+		function FacesSize():Int64;
+		function Size():Int64;
+		function RealSize():Int64;
     end;
     PSGModel = ^TSGModel;
     
@@ -237,6 +243,198 @@ implementation
 {{$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeMesh3ds.inc}
 {$UNDEF SGREADIMPLEMENTATION}}
+
+procedure TSG3DObject.AddFace(const FQuantityNewFaces:LongWord = 1);
+begin
+SetFaceLength(FQuantityNewFaces+FNOfFaces);
+end;
+
+procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
+var
+	f:TextFile;
+	C:TSGChar;
+	Comand:String = '';
+	ArMaterials:packed array of 
+		packed record 
+		Color:TSGColor3f;
+		Name:String;
+		end = nil;
+	NowMatCOlor:TSGColor3f = (r:1;g:1;b:1);
+
+procedure LoadingMaterials(const FMaterialsFileName:String);
+var
+	fm:TextFile;
+	Comand:string = '';
+	NowSelectMaterial:LongWord;
+begin
+if not SGFileExists(SGGetFileWay(FFileName)+FMaterialsFileName) then
+	Exit;
+Assign(fm,SGGetFileWay(FFileName)+FMaterialsFileName);
+Reset(fm);
+while not SeekEof(fm) do
+	begin
+	c:=#0;
+	Comand:='';
+	while SeekEoln(fm) do
+		begin
+		ReadLn(fm);
+		end;
+	while c<>' ' do
+		begin
+		Read(fm,C);
+		if C<>' ' then
+			Comand+=C;
+		end;
+	if Comand = '#' then
+		begin
+		ReadLn(fm);
+		end
+	else if Comand = 'illum' then
+		begin
+		ReadLn(fm);
+		end
+	else if Comand = 'd' then
+		begin
+		ReadLn(fm);
+		end
+	else if Comand = 'Ks' then
+		begin
+		ReadLn(fm);
+		end
+	else if Comand = 'Ka' then
+		begin
+		ReadLn(fm);
+		end
+	else if Comand = 'Kd' then
+		begin
+		ReadLn(fm,
+			ArMaterials[NowSelectMaterial].Color.r,
+			ArMaterials[NowSelectMaterial].Color.g,
+			ArMaterials[NowSelectMaterial].Color.b);
+		end
+	else if Comand='newmtl' then
+		begin
+		ReadLn(fm,Comand);
+		if ArMaterials=nil then
+			SetLength(ArMaterials,1)
+		else
+			SetLength(ArMaterials,Length(ArMaterials)+1);
+		NowSelectMaterial:=High(ArMaterials);
+		ArMaterials[NowSelectMaterial].Name:=Comand;
+		end
+	else
+		ReadLn(fm);
+	end;
+Close(fm);
+end;
+
+function FindMaterial(const FMaterialName:String):TSGColor3f;
+var
+	i,ii:LongWord;
+begin
+ii:=0;
+if ArMaterials<>nil then
+for i:=0 to High(ArMaterials) do
+	if ArMaterials[i].Name=FMaterialName then
+		begin
+		Result:=ArMaterials[i].Color;
+		ii:=1;
+		Break;
+		end;
+if ii=0 then
+	Result.Import(1,1,1);
+end;
+
+procedure AddV();
+var
+	x0,y0,z0:Single;
+begin
+ReadLn(f,x0,y0,z0);
+AddVertex(1);
+ArVertex3f[QuantityVertexes-1]^.x:=x0;
+ArVertex3f[QuantityVertexes-1]^.y:=y0;
+ArVertex3f[QuantityVertexes-1]^.z:=z0;
+SetColor(QuantityVertexes-1,NowMatCOlor.r,NowMatCOlor.g,NowMatCOlor.b);
+end;
+
+procedure AddF();
+var
+	a1,a2,a3:LongInt;
+begin
+ReadLn(f,a1,a2,a3);
+AddFace(1);
+ArFacesTriangles[FNOfFaces-1].p0:=QuantityVertexes+a1;
+ArFacesTriangles[FNOfFaces-1].p1:=QuantityVertexes+a2;
+ArFacesTriangles[FNOfFaces-1].p2:=QuantityVertexes+a3;
+end;
+
+begin
+AutoSetColorType();
+SetVertexType(TSGMeshVertexType3f);
+PoligonesType:=SGR_TRIANGLES;
+NowMatCOlor.Import(1,1,1);
+
+Assign(f,FFileName);
+Reset(f);
+while not SeekEof(f) do
+	begin
+	c:=#0;
+	Comand:='';
+	while SeekEoln(f) do
+		begin
+		ReadLn(f);
+		end;
+	while c<>' ' do
+		begin
+		Read(f,C);
+		if C<>' ' then
+			Comand+=C;
+		end;
+	if Comand = '#' then
+		begin
+		ReadLn(f);
+		end
+	else if Comand='v' then
+		begin
+		AddV();
+		end
+	else if Comand='f' then
+		begin
+		AddF();
+		end
+	else if Comand='o' then
+		begin
+		ReadLn(f);//Name of model
+		end
+	else if Comand='usemtl' then
+		begin
+		ReadLn(f,Comand);
+		NowMatCOlor:=FindMaterial(Comand);
+		end
+	else if Comand='mtllib' then
+		begin
+		ReadLn(f,Comand);
+		LoadingMaterials(Comand);
+		end
+	else if Comand='g' then
+		begin
+		ReadLn(f);//Name now mesh
+		end
+	else if Comand='s' then
+		begin
+		ReadLn(f);
+		end
+	else
+		ReadLn(f);
+	end;
+Close(f);
+end;
+
+procedure TSG3DObject.AddVertex(const FQuantityNewVertexes:LongWord = 1);
+begin
+FNOfVerts+=FQuantityNewVertexes;
+ReAllocMem(ArVertex,GetVertexesSize());
+end;
 
 procedure TSG3DObject.AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 begin
@@ -363,7 +561,7 @@ end;
 procedure TSG3DObject.SetVertexLength(const NewVertexLength:int64);inline;
 begin
 FNOfVerts:=NewVertexLength;
-GetMem(ArVertex,GetVertexLength());
+GetMem(ArVertex,GetVertexesSize());
 end;
 
 function TSG3DObject.GetSizeOfOneVertex():LongWord;
@@ -382,7 +580,7 @@ Result:=
 +Byte(FHasNormals)*3*SizeOf(Single);
 end;
 
-function TSG3DObject.GetVertexLength():int64;overload;inline;
+function TSG3DObject.GetVertexesSize():int64;overload;inline;
 begin
 Result:=FNOfVerts*GetSizeOfOneVertex();
 end;
@@ -624,12 +822,6 @@ end;}
 
 procedure TSG3dObject.BasicDraw(); inline;
 begin
-Render.BeginScene(SGR_QUADS);
-Render.Color4f(1,0,0,1); Render.Vertex3f(5,0,0);
-Render.Color4f(0,1,0,1); Render.Vertex3f(5,5,0);
-Render.Color4f(0,0,1,1); Render.Vertex3f(0,5,0);
-Render.Color4f(1,0,1,1); Render.Vertex3f(0,0,0);
-Render.EndScene();
 
 FObjectColor.Color(Render);
 
