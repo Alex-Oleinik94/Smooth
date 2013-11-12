@@ -23,3 +23,4 @@ clear:
 	rm -f fpc-res.res
 	rm -f SrcUnits/*.o
 	rm -f SrcUnits/*.ppu
+	rm -f Main.res

@@ -87,7 +87,7 @@ var
 begin
 inherited;
 ClearMesh();
-Quantity:=(9**FDepth)+1;
+Quantity:=(8**FDepth)+1;
 if Render.RenderType = SGRenderDirectX then 
 	CalculateMeshes(Quantity,SGR_LINE_STRIP,TSGMeshVertexType3f)
 else

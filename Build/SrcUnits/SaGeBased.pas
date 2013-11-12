@@ -732,12 +732,12 @@ end;
 
 operator ** (const a, b: TSGByte) 		: TSGByte; 		inline; overload;
 begin
-	result := trunc(power(a, b));
+	result := round(power(a, b));
 end;
 
 operator ** (const a, b: TSGLongWord) 	: TSGInt64;		inline; overload;
 begin
-	result := trunc(power(a, b));
+	result := round(power(a, b));
 end;
  
 operator ** (const a : TSGReal; 	const b : TSGLongInt) : TSGReal; 	inline; overload;
@@ -758,7 +758,7 @@ end;
 
 operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	inline;	overload; 
 begin
-	result := trunc(power(a, b));
+	result := round(power(a, b));
 end;
 
 operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload; 
