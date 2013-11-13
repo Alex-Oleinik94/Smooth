@@ -13,9 +13,9 @@ type
 	
 	TSGPoint2f=object
 		x,y:longint;
-		procedure Import(const x1:longint = 0; const y1:longint = 0);
-		procedure Write;
-		procedure Vertex(const VRender:TSGRender);
+		procedure Import(const x1:longint = 0; const y1:longint = 0);inline;
+		procedure Write;inline;
+		procedure Vertex(const VRender:TSGRender);inline;
 		end;
 	TSGPoint = TSGPoint2f;
 	SGPoint = TSGPoint2f;
@@ -27,7 +27,7 @@ type
 		z:longint;
 			public
 		procedure Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);inline;
-		procedure Vertex(const VRender:TSGRender);
+		procedure Vertex(const VRender:TSGRender);inline;
 		end;
 	SGPoint3f = TSGPoint3f;
 	PSGPoint3f = ^ SGPoint3f;
@@ -36,14 +36,14 @@ type
 	
 	TSGVertex2f=object
 		x,y:TSGVertexType;
-		procedure Vertex(const VRender:TSGRender);
-		procedure TexCoord(const VRender:TSGRender);
-		procedure SetVariables(const x1:real = 0; const y1:real = 0);
-		procedure Import(const x1:real = 0;const y1:real = 0);
-		procedure Write;
-		procedure WriteLn;
-		procedure Round;overload;
-		procedure Translate(const VRender:TSGRender);
+		procedure Vertex(const VRender:TSGRender);inline;
+		procedure TexCoord(const VRender:TSGRender);inline;
+		procedure SetVariables(const x1:real = 0; const y1:real = 0);inline;
+		procedure Import(const x1:real = 0;const y1:real = 0);inline;
+		procedure Write;inline;
+		procedure WriteLn;inline;
+		procedure Round;inline;overload;
+		procedure Translate(const VRender:TSGRender);inline;
 		end;
 	PTSGVertex2f=^TSGVertex2f;
 	TArTSGVertex2f = type packed array of TSGVertex2f;
@@ -59,15 +59,15 @@ type
 		procedure Vertex(const VRender:TSGRender);inline;
 		procedure SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
 		procedure Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
-		procedure Normal(const VRender:TSGRender);
+		procedure Normal(const VRender:TSGRender);inline;
 		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);inline;
-		procedure VertexPoint(const VRender:TSGRender);
+		procedure VertexPoint(const VRender:TSGRender);inline;
 		procedure Write;inline;
 		procedure WriteLn;inline;
 		procedure Vertex(const VRender:TSGRender;Const P:Pointer);inline;
-		procedure Normalize;
-		procedure ReadFromTextFile(const Fail:PTextFile);
-		procedure ReadLnFromTextFile(const Fail:PTextFile);
+		procedure Normalize;inline;
+		procedure ReadFromTextFile(const Fail:PTextFile);inline;
+		procedure ReadLnFromTextFile(const Fail:PTextFile);inline;
 		procedure Translate(const VRender:TSGRender);inline;
 		end;
 	SGVertex3f=TSGVertex3f;
@@ -94,9 +94,9 @@ type
 	TSGScreenVertexes=object
 		Vertexes:array[0..1] of TSGVertex2f;
 		procedure Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);
-		procedure Write;
-		procedure ProcSumX(r:Real);
-		procedure ProcSumY(r:Real);
+		procedure Write;inline;
+		procedure ProcSumX(r:Real);inline;
+		procedure ProcSumY(r:Real);inline;
 		property SumX:real write ProcSumX;
 		property SumY:real write ProcSumY;
 		property X1:TSGVertexType read Vertexes[0].x write Vertexes[0].x;
@@ -217,35 +217,33 @@ operator := (const a:TSGPoint2f):TSGVertex2f;overload;inline;
 
 operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
 
-function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;
-function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;
-function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;
-function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;
-function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;	
+function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
+function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
+function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
+function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline;
+function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
 //procedure SGQuad(const Vertex1:SGVertex;const Vertex2:SGVertex;const Vertex3:SGVertex;const Vertex4:SGVertex);
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;inline;
 function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):real;inline;
-function SGTreugPlosh(const a1,a2,a3:SGVertex):real;
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;
-function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;
-function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;
+function SGTreugPlosh(const a1,a2,a3:SGVertex):real;inline;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;inline;
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;inline;
+function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;inline;
+function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;inline;
 function Random(const lx,ly:LongWord):TSGPoint2f;overload;inline;
-function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;
+function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;inline;
 procedure SGRoundQuad(const VRender:TSGRender;const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;
+function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;inline;
 function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;inline;
 function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;inline;
 function SGGetArrayOfRoundQuad(const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt):SGArVertex;
 procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
-	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);
+	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);inline;
 procedure SGConstructRoundQuad(const VRender:TSGRender;const ArVertex:SGArSGVertex;const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-//procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint);
-//procedure SGWndSomeQuad(a,c:SGVertex);
 function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):real;inline;
-procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); 
-function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;
+procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); inline;
+function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;inline;
 function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;inline;
 function SGComplexNumberImport(const x:real = 0;const y:real = 0):TSGComplexNumber;inline;
 function SGPoint2fImport(const x1:int64 = 0; const y1:int64 = 0):TSGPoint2f;overload;inline;
@@ -264,49 +262,49 @@ begin
 Result:=sqrt(sqr(a.x)+sqr(a.y));
 end;
 
-procedure TSGScreenVertexes.ProcSumX(r:Real);
+procedure TSGScreenVertexes.ProcSumX(r:Real);inline;
 begin
 Vertexes[0].x+=r;
 Vertexes[1].x+=r;
 end;
 
-procedure TSGScreenVertexes.ProcSumY(r:Real);
+procedure TSGScreenVertexes.ProcSumY(r:Real);inline;
 begin
 Vertexes[0].y+=r;
 Vertexes[1].y+=r;
 end;
 
-procedure TSGVertex3f.WriteLn;
+procedure TSGVertex3f.WriteLn;inline;
 begin
 Write;
 System.WriteLn()
 end;
 
-procedure TSGVertex3f.Write;
+procedure TSGVertex3f.Write;inline;
 begin
 inherited Write;
 System.Write(' ',z:0:10)
 end;
 
-procedure TSGVertex2f.Write;
+procedure TSGVertex2f.Write;inline;
 begin
 System.Write(x:0:10,' ',y:0:10);
 end;
 
-procedure TSGVertex2f.WriteLn;
+procedure TSGVertex2f.WriteLn;inline;
 begin
 Write;
 System.Writeln;
 end;
 
-procedure TSGScreenVertexes.Write;
+procedure TSGScreenVertexes.Write;inline;
 begin
 Vertexes[0].Write;
 System.Write(' ');
 Vertexes[1].WriteLn;
 end;
 
-operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;
+operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
 var
 	x,y,x1,y1:real;
 begin
@@ -323,7 +321,7 @@ Result.Import(
 	y+y1);
 end;
 
-procedure TSGScreenVertexes.Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);
+procedure TSGScreenVertexes.Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);inline;
 begin
 Vertexes[0].x:=x1;
 Vertexes[0].y:=y1;
@@ -336,14 +334,14 @@ begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y));
 end;
 
-procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);
+procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);inline;
 begin
 VRender.BeginScene(SGR_POINTS);
 Vertex(VRender);
 VRender.EndScene();
 end;
 
-procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = {GL_LIGHT0}SGR_LIGHT0);
+procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);inline;
 var
 	Light:array[0..3] of TSGVertexType;
 	AmbientLight : array[0..3] of TSGVertexType = (0.5,0.5,0.5,1.0);
@@ -361,12 +359,12 @@ VRender.Lightfv(Ligth,SGR_DIFFUSE, @DiffuseLight);
 VRender.Lightfv(Ligth,SGR_SPECULAR, @SpecularLight);
 end;
 
-procedure TSGVertex3f.Normal(const VRender:TSGRender);
+procedure TSGVertex3f.Normal(const VRender:TSGRender);inline;
 begin
 VRender.Normal3f(x,y,z);
 end;
 
-procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:TSGRender);
+procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:TSGRender);inline;
 var
 	b,d:SGVertex;
 begin
@@ -400,7 +398,7 @@ begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);
+procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);inline;
 begin
 VRender.BeginScene(SGR_QUADS);
 VRender.TexCoord2f(vl.x, vl.y);
@@ -416,7 +414,7 @@ end;
 
 procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
-	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);
+	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);inline;
 begin
 SGRoundQuad(VRender,Vertex11,Vertex13,Radius1,Interval,QuadColor1,LinesColor1,WithLines);
 SGRoundQuad(VRender,Vertex21,Vertex23,Radius2,Interval,QuadColor2,LinesColor2,WithLines);
@@ -552,7 +550,7 @@ begin
 VRender.Vertex2f(x,y);
 end;
 
-procedure TSGVertex3f.Normalize;
+procedure TSGVertex3f.Normalize();inline;
 var
 	vabs:real;
 begin
@@ -562,7 +560,7 @@ y/=vabs;
 z/=vabs;
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender;Const P:Pointer);
+procedure TSGVertex3f.Vertex(const VRender:TSGRender;Const P:Pointer);inline;
 begin
 if p=nil then
 	VRender.Vertex3f(x,y,z)
@@ -570,7 +568,7 @@ else
 	TSGShodowVertexProcedure(p)(x,y,z);
 end;
 
-function TSGColor4f.AddAlpha(const NewAlpha:real = 1):TSGColor4f;
+function TSGColor4f.AddAlpha(const NewAlpha:real = 1):TSGColor4f;inline;
 begin
 a*=NewAlpha;
 Result:=Self;
@@ -608,14 +606,14 @@ begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;
+function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;inline;
 begin
 Result.Import(
 	Round(Vertex.X),
 	Round(Vertex.Y));
 end;
 
-procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType);
+procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType);inline;
 var
 	a:TSGVertexType;
 begin
@@ -711,13 +709,13 @@ Result.x:=x1;
 Result.y:=y1;
 end;
 
-procedure TSGVertex2f.Round;overload;
+procedure TSGVertex2f.Round;inline;overload;
 begin
 x:=System.Round(x);
 y:=System.Round(y);
 end;
 
-procedure TSGColor4f.Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);
+procedure TSGColor4f.Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);inline;
 begin
 r:=r1;
 b:=b1;
@@ -725,28 +723,28 @@ g:=g1;
 a:=a1;
 end;
 
-function TSGColor4f.WithAlpha(const NewAlpha:real = 1):TSGColor4f;
+function TSGColor4f.WithAlpha(const NewAlpha:real = 1):TSGColor4f;inline;
 begin
 Result:=Self;
 Result.a*=NewAlpha;
 end;
 
-procedure TSGVertex3f.Translate(const VRender:TSGRender);
+procedure TSGVertex3f.Translate(const VRender:TSGRender);inline;
 begin
 VRender.Translatef(x,y,z);
 end;
 
-procedure TSGVertex2f.Translate(const VRender:TSGRender);
+procedure TSGVertex2f.Translate(const VRender:TSGRender);inline;
 begin
 VRender.Translatef(x,y,0);
 end;
 
-procedure TSGVertex3f.ReadFromTextFile(const Fail:PTextFile);
+procedure TSGVertex3f.ReadFromTextFile(const Fail:PTextFile);inline;
 begin
 Read(Fail^,x,y,z);
 end;
 
-procedure TSGVertex3f.ReadLnFromTextFile(const Fail:PTextFile);
+procedure TSGVertex3f.ReadLnFromTextFile(const Fail:PTextFile);inline;
 begin
 ReadFromTextFile(Fail);
 ReadLn(Fail^);
@@ -802,7 +800,7 @@ begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-procedure TSGPoint3f.Vertex(const VRender:TSGRender);
+procedure TSGPoint3f.Vertex(const VRender:TSGRender);inline;
 begin
 VRender.Vertex3f(x,y,z);
 end;
@@ -883,14 +881,14 @@ begin
 Result.Import(a.x-b,a.y-b);
 end;
 
-function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;
+function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
 begin
 Result.x:=x;
 Result.y:=y;
 Result.z:=z;
 end;
 
-function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;
+function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
 begin
 Result.SetVariables(
 	-r*(t1.x-t2.x)+t1.x,
@@ -911,12 +909,12 @@ Result:=SGGetVertexOnIntersectionOfThreePlane(
 	SGGetPlaneFromThreeVertex(SGGetVertexInAttitude(q1,q3),w1,w2));
 end;
 
-function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;
+function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;inline;
 begin
 Result:=SGGetPlaneFromNineReals(a1.x,a1.y,a1.z,a2.x,a2.y,a2.z,a3.x,a3.y,a3.z);
 end;
 
-procedure SGPoint.Import(const x1:longint = 0; const y1:longint = 0);
+procedure SGPoint.Import(const x1:longint = 0; const y1:longint = 0);inline;
 begin
 x:=x1;
 y:=y1;
@@ -934,25 +932,24 @@ Result.x:=a.x-b.x;
 Result.y:=a.y-b.y;
 end;
 
-procedure TSGColor3f.Color(const VRender:TSGRender);
+procedure TSGColor3f.Color(const VRender:TSGRender);inline;
 begin
 SetColor(VRender);
 end;
 
-procedure TSGColor3f.SetColor(const VRender:TSGRender);
+procedure TSGColor3f.SetColor(const VRender:TSGRender);inline;
 begin
 VRender.Color3f(r,g,b);
 end;
 
-procedure TSGColor3f.Import(const r1: single; const g1: single; const b1: single
-  );
+procedure TSGColor3f.Import(const r1: single; const g1: single; const b1: single);inline;
 begin
   r:=r1;
   g:=g1;
   b:=b1;
 end;
 
-function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;
+function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;inline;
 var a,b,c:real;
 begin
 a:=p1.y*(p2.z-p3.z)+p2.y*(p3.z-p1.z)+p3.y*(p1.z-p2.z);
@@ -961,26 +958,26 @@ c:=p1.x*(p2.y-p3.y)+p2.x*(p3.y-p1.y)+p3.x*(p1.y-p2.y);
 Result.Import(a/(sqrt(a*a+b*b+c*c)),b/(sqrt(a*a+b*b+c*c)),c/(sqrt(a*a+b*b+c*c)));
 end;
 
-function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;
+function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
 begin
 Result.x:=NewX;
 Result.y:=NewY;
 end;
 
-function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;
+function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline;
 begin
 Result.x:=Round(NewX);
 Result.y:=Round(NewY);
 end;
 
-procedure TSGVertex3f.Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);
+procedure TSGVertex3f.Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
 begin
 x:=x1;
 y:=y1;
 z:=z1;
 end;
 
-function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;
+function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
 begin
 Result.x:=x;
 Result.y:=y;
@@ -1022,7 +1019,7 @@ begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y)+sqr(Vertex1.z-Vertex2.z));
 end;
 
-function SGTreugPlosh(const a1,a2,a3:SGVertex):real;
+function SGTreugPlosh(const a1,a2,a3:SGVertex):real;inline;
 var
 	p:real;
 begin
@@ -1030,7 +1027,7 @@ p:=(SGAbsTwoVertex(a1,a2)+SGAbsTwoVertex(a1,a3)+SGAbsTwoVertex(a3,a2))/2;
 SGTreugPlosh:=sqrt(p*(p-SGAbsTwoVertex(a1,a2))*(p-SGAbsTwoVertex(a3,a2))*(p-SGAbsTwoVertex(a1,a3)));
 end;
 
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;inline;
 begin
 Result:=SGVertexOnQuad(
 	Vertex,
@@ -1046,7 +1043,7 @@ Result:=SGVertexOnQuad(
 		QuadVertex3.z));
 end;
 
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;inline;
 begin
 if abs(
 	(SGAbsTwoVertex(QuadVertex1,QuadVertex2)*SGAbsTwoVertex(QuadVertex2,QuadVertex3))
@@ -1062,7 +1059,7 @@ else
 	Result:=True;
 end;
 
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;inline;
 var de,de1,de2,de3:real;
 begin
 p1.d:=-1*(p1.d);
@@ -1075,7 +1072,7 @@ de3:=SGGetMatrix3x3(p1.a,p1.b,p1.d,p2.a,p2.b,p2.d,p3.a,p3.b,p3.d);
 Result.Import(de1/de,de2/de,de3/de);
 end;
 
-procedure TSGPoint2f.Write;
+procedure TSGPoint2f.Write;inline;
 begin
 writeln(x,' ',y);
 end;
@@ -1202,20 +1199,20 @@ begin
 Result.Import(0,0,v);
 end;
 
-procedure TSGVertex2f.SetVariables(const x1:real = 0; const y1:real = 0);
+procedure TSGVertex2f.SetVariables(const x1:real = 0; const y1:real = 0);inline;
 begin
 x:=x1;
 y:=y1;
 end;
 
-procedure TSGVertex3f.SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);
+procedure TSGVertex3f.SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
 begin
 x:=x1;
 y:=y1;
 z:=z1;
 end;
 
-procedure TSGColor4f.SetVariables(const r1:real = 0; const g1:real = 0; const b1:real = 0; const a1:real = 1);
+procedure TSGColor4f.SetVariables(const r1:real = 0; const g1:real = 0; const b1:real = 0; const a1:real = 1);inline;
 begin
 r:=r1;
 g:=g1;
@@ -1223,27 +1220,27 @@ b:=b1;
 a:=a1;
 end;
 
-procedure TSGVertex2f.TexCoord(const VRender:TSGRender);
+procedure TSGVertex2f.TexCoord(const VRender:TSGRender);inline;
 begin
 VRender.TexCoord2f(x,y);
 end;
 
-procedure TSGColor4f.SetColor(const VRender:TSGRender);
+procedure TSGColor4f.SetColor(const VRender:TSGRender);inline;
 begin
 Color(VRender);
 end;
 
-procedure TSGColor4f.Color(const VRender:TSGRender);
+procedure TSGColor4f.Color(const VRender:TSGRender);inline;
 begin
 VRender.Color4f(r,g,b,a);
 end;
 
-procedure TSGVertex2f.Vertex(const VRender:TSGRender);
+procedure TSGVertex2f.Vertex(const VRender:TSGRender);inline;
 begin
 VRender.Vertex2f(x,y);
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender);
+procedure TSGVertex3f.Vertex(const VRender:TSGRender);inline;
 begin
 VRender.Vertex3f(x,y,z);
 end;

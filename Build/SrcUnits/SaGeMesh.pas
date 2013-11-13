@@ -248,11 +248,54 @@ implementation
 procedure TSG3DObject.AddNormals();
 var
 	SecondArVertex:Pointer = nil;
+	i,ii,iiii,iii:LongWord;
+	ArPoligonesNormals:packed array of TSGVertex3f = nil;
+	Plane:SGPlane;
+	Vertex:TSGVertex;
 begin
-if FHasNormals then
+if FHasNormals or (FPoligonesType<>SGR_TRIANGLES) then
 	Exit;
-GetMem(SecondArVertex,GetSizeOfOneVertex()+3*SizeOf(Single));
-
+ii:=GetSizeOfOneVertex();
+iii:=ii+3*SizeOf(Single);
+GetMem(SecondArVertex,iii*FNOfVerts);
+for i:=0 to FNOfVerts-1 do
+	Move(
+		PByte(ArVertex)[i*ii],
+		PByte(SecondArVertex)[i*iii],
+		ii);
+FreeMem(ArVertex);
+ArVertex:=SecondArVertex;
+SecondArVertex:=nil;
+FHasNormals:=True;
+SetLength(ArPoligonesNormals,FNOfFaces);
+for i:=0 to FNOfFaces-1 do
+	begin
+	Plane:=SGGetPlaneFromThreeVertex(
+		ArVertex3f[ArFacesTriangles[i].p[0]]^,
+		ArVertex3f[ArFacesTriangles[i].p[1]]^,
+		ArVertex3f[ArFacesTriangles[i].p[2]]^);
+	ArPoligonesNormals[i].Import(
+		Plane.a,Plane.b,Plane.c);
+	end;
+for i:=0 to FNOfVerts-1 do
+	begin
+	Vertex.Import(0,0,0);
+	for ii:=0 to FNOfFaces-1 do
+		begin
+		iii:=0;
+		for iiii:=0 to 2 do
+			if ArFacesTriangles[ii].p[iiii]=i then
+				begin
+				iii:=1;
+				Break;
+				end;
+		if iii=1 then
+			Vertex+=ArPoligonesNormals[ii];
+		end;
+	Vertex.Normalize();
+	ArNormal[i]^:=Vertex;
+	end;
+SetLength(ArPoligonesNormals,0);
 end;
 
 procedure TSG3DObject.LoadFromStream(const Stream: TStream);
@@ -280,8 +323,6 @@ Stream.ReadBuffer(ArFaces[0],Length(ArFaces)*SizeOf(TSGFaceType));
 end;
 
 procedure TSG3DObject.SaveToStream(const Stream: TStream);
-var
-	VPChar:PChar = nil;
 begin
 Stream.WriteBuffer(FObjectColor,SizeOf(FObjectColor));
 Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));

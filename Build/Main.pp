@@ -32,11 +32,12 @@ uses
 	,SaGeNet
 	,SaGeGeneticalAlgoritm
 	,SaGeRender
-	,SaGeRenderOpenGL;
+	,SaGeRenderOpenGL
+	,SaGeModel;
+
 
 procedure Draw(const Context:PSGContext);
 begin
-
 end;
 
 procedure Init(const MyContext:PSGContext);

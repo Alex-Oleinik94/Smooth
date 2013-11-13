@@ -4,7 +4,8 @@ unit SaGeExamples;
 
 interface
 uses
-	SaGeCommon
+	 SaGeCommon
+	,Classes
 	,SaGeMesh
 	,SaGeFractals
 	,SaGeUtils
