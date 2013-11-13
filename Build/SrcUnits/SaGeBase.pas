@@ -341,7 +341,7 @@ function LoadLibrary(AName: PChar): TSGLibHandle;
 function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
 function SGTruncUp(const t:real):LongInt;inline;
 operator -(a,b:TSGDateTime):TSGDateTime;inline;
-function SGReadStringFromStream(const Stream:TStream):String;
+function SGReadStringFromStream(const Stream:TStream):String;inline;
 procedure SGWriteStringToStream(const String1:String;const Stream:TStream;const Stavit00:Boolean = True);inline;
 function SGReadStringInQuotesFromTextFile(const TextFile:PText):String;
 function SGReadWordFromTextFile(const TextFile:PTextFile):String;
@@ -2209,7 +2209,7 @@ if Stavit00 then
 end;
 
 
-function SGReadStringFromStream(const Stream:TStream):String;
+function SGReadStringFromStream(const Stream:TStream):String;inline;
 var
 	c:char = #1;
 begin

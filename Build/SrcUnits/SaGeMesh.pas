@@ -168,8 +168,8 @@ type
         procedure ClearVBO();
         procedure ClearArrays(const ClearN:Boolean = True);
 			public
-        //procedure SaveToStream(const Stream: TStream);
-        //procedure LoadFromStream(const Stream: TStream);
+        procedure SaveToStream(const Stream: TStream);virtual;
+        procedure LoadFromStream(const Stream: TStream);virtual;
 		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
 		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
@@ -186,6 +186,10 @@ type
 		function Size():Int64;inline;
 		function RealSize():Int64;inline;
 		function GetSizeOf():int64;inline;
+	protected 
+		FName:String;
+	public
+		property Name:string read FName write FName;
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -239,6 +243,49 @@ type
 implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+procedure TSG3DObject.LoadFromStream(const Stream: TStream);
+begin
+Stream.ReadBuffer(FObjectColor,SizeOf(FObjectColor));
+Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
+Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
+Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
+Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
+Stream.ReadBuffer(FColorType,SizeOf(FColorType));
+
+FName:=SGReadStringFromStream(Stream);
+
+if ArVertex<>nil then
+	FreeMem(ArVertex);
+GetMem(ArVertex,GetSizeOfOneVertex()*FNOfVerts);
+Stream.ReadBuffer(PByte(ArVertex)^,FNOfVerts*GetSizeOfOneVertex());
+
+SetFaceLength(FNOfFaces);
+Stream.ReadBuffer(ArFaces[0],Length(ArFaces)*SizeOf(TSGFaceType));
+end;
+
+procedure TSG3DObject.SaveToStream(const Stream: TStream);
+var
+	VPChar:PChar = nil;
+begin
+Stream.WriteBuffer(FObjectColor,SizeOf(FObjectColor));
+Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
+Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
+Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
+Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
+Stream.WriteBuffer(FColorType,SizeOf(FColorType));
+SGWriteStringToStream(FName,Stream);
+Stream.WriteBuffer(PByte(ArVertex)^,FNOfVerts*GetSizeOfOneVertex());
+Stream.WriteBuffer(ArFaces[0],Length(ArFaces)*SizeOf(TSGFaceType));
+end;
 
 procedure TSG3DObject.AddFace(const FQuantityNewFaces:LongWord = 1);
 begin
@@ -731,6 +778,7 @@ end;
 constructor TSG3dObject.Create();
 begin
     inherited Create();
+    FName:='';
     FQuantityTextures:=0;
     FEnableCullFace := False;
     FObjectColor.Import(1, 1, 1, 1);
@@ -741,7 +789,6 @@ begin
     FNOfVerts := 0;
     ArVertex := nil;
     ArFaces := nil;
-    //FName := '';
     //FMaterialID := -1;
     FPoligonesType:=SGR_TRIANGLES;
     FColorType:=TSGMeshColorType3b;
