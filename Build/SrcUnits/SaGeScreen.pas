@@ -1,5 +1,5 @@
 {$I Includes\SaGe.inc}
-{$DEFINE CLHINTS}
+//{$DEFINE CLHINTS}
 unit SaGeScreen;
 
 interface
@@ -125,7 +125,7 @@ type
 		FFont:TSGGLFont;
 		
 		procedure UpgradeTimers;virtual;
-		class procedure UpgradeTimer(const Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+		procedure UpgradeTimer(const Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
 		procedure FromDraw;virtual;
 		procedure FromResize();virtual;
 		procedure FromUpDate(var FCanChange:Boolean);virtual;
@@ -1894,17 +1894,17 @@ While Result=0 do
 	Result:=random(3)-1;
 end;
 
-class procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
 begin
 if Flag then
 	begin
-	Timer+=SGObjectTimerConst*Mn2*Mnozhitel;
+	Timer+=SGObjectTimerConst*Mn2*Mnozhitel*Context.ElapsedTime;
 	if Timer>1 then
 		Timer:=1;
 	end
 else
 	begin
-	Timer-=SGObjectTimerConst*(1/Mn2)*Mnozhitel;
+	Timer-=SGObjectTimerConst*(1/Mn2)*Mnozhitel*Context.ElapsedTime;
 	if Timer<0 then
 		Timer:=0;
 	end;
@@ -2931,7 +2931,7 @@ if FNewPosition<>FOldPosition then
 	Render.InitMatrixMode(SG_2D);
 	Render.Color4f(1,1,1,1);
 	
-	TSGComponent.UpgradeTimer(True,FMoveProgress);
+	SGScreen.UpgradeTimer(True,FMoveProgress);
 	
 	if Abs(1-FMoveProgress)<SGZero then
 		begin

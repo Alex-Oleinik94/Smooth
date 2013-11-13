@@ -170,6 +170,7 @@ type
 			public
         procedure SaveToStream(const Stream: TStream);virtual;
         procedure LoadFromStream(const Stream: TStream);virtual;
+        procedure AddNormals();virtual;
 		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
 		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
@@ -243,6 +244,16 @@ type
 implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+procedure TSG3DObject.AddNormals();
+var
+	SecondArVertex:Pointer = nil;
+begin
+if FHasNormals then
+	Exit;
+GetMem(SecondArVertex,GetSizeOfOneVertex()+3*SizeOf(Single));
+
+end;
 
 procedure TSG3DObject.LoadFromStream(const Stream: TStream);
 begin

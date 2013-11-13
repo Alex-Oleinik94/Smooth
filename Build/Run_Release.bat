@@ -1,2 +1,4 @@
-.\..\Binaries\Main_Release.exe
+cd ./../Binaries/
+"Main_Release.exe"
+cd ./../Build/
 pause
