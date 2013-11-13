@@ -1,0 +1,2 @@
+./../Binaries/Main.exe
+pause

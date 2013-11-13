@@ -1,2 +1,2 @@
-.\..\Binaries\ReleaseMain.exe
+.\..\Binaries\Main_Release.exe
 pause

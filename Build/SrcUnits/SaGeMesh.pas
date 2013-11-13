@@ -234,15 +234,11 @@ type
 		
 		end;
 
-{{$DEFINE SGREADINTERFACE}
-{$i Includes\SaGeMesh3ds.inc}
-{$UNDEF SGREADINTERFACE}}
+//{$DEFINE SGREADINTERFACE}      {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-{{$DEFINE SGREADIMPLEMENTATION}
-{$i Includes\SaGeMesh3ds.inc}
-{$UNDEF SGREADIMPLEMENTATION}}
+//{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DObject.AddFace(const FQuantityNewFaces:LongWord = 1);
 begin
