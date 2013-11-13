@@ -213,7 +213,7 @@ end;
 
 procedure TSGRenderDirectX.Color3f(const r,g,b:single);
 begin
-FNowColor:=D3DCOLOR_ARGB(255,round(255*r),round(255*g),round(255*b));
+Color4f(r,g,b,1);
 end;
 
 procedure TSGRenderDirectX.TexCoord2f(const x,y:single); 
@@ -234,7 +234,11 @@ end;
 
 procedure TSGRenderDirectX.Color4f(const r,g,b,a:single); 
 begin
-FNowColor:=D3DCOLOR_ARGB(round(255*a),round(255*r),round(255*g),round(255*b));
+FNowColor:=D3DCOLOR_ARGB(
+	Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a),
+	Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r),
+	Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g),
+	Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b));
 end;
 
 procedure TSGRenderDirectX.Normal3f(const x,y,z:single); 
