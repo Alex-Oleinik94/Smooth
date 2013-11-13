@@ -7,7 +7,6 @@ enigma:
 	./EnigmaVB/enigmavbconsole.exe Main.evb
 release:
 	$(PP) $(DORELEASE) $(BASEARGS) $(OPT) Main
-	strip ../Binaries/Main
 debug:
 	$(PP) $(DODEBUG) $(BASEARGS) $(OPT) Main
 lib:
