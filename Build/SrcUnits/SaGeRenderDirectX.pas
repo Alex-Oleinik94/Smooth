@@ -492,11 +492,11 @@ var
 begin 
 for i:=0 to VQuantity-1 do
 	if FArBuffers[PLongWord(VPoint)[i]-1].FResourse<>nil then
-	begin
-	FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
-	FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
-	PLongWord(VPoint)[i]:=0;
-	end;
+		begin
+		FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
+		FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
+		PLongWord(VPoint)[i]:=0;
+		end;
 end;
 
 procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
@@ -519,7 +519,7 @@ var
 begin 
 if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	begin
-	if pDevice.CreateVertexBuffer(VSize,0,D3DFVF_XYZ,D3DPOOL_DEFAULT,
+	if pDevice.CreateVertexBuffer(VSize,0,0,D3DPOOL_DEFAULT,
 		IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),
 		nil)<>D3D_OK then
 		begin
@@ -639,6 +639,8 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 			SGLog.Sourse(['FPT()=',Byte(FPT()),
 				';div = ',
 					FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize  div 
+					FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex,', ',
+					FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize  ,', ', 
 					FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex,
 				';GetNumPrimetives()=',GetNumPrimetives()]);
 			SGLog.Sourse('>>>>>>>>>>>>>>');
