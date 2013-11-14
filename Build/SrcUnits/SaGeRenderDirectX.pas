@@ -504,8 +504,8 @@ procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Car
 //SGR_ARRAY_BUFFER_ARB
 begin 
 case VParam of
-SGR_ARRAY_BUFFER_ARB:FVBOData[0]:=VParam2-1;
-SGR_ELEMENT_ARRAY_BUFFER_ARB:FVBOData[1]:=VParam2-1;
+SGR_ARRAY_BUFFER_ARB:FVBOData[0]:=VParam2;
+SGR_ELEMENT_ARRAY_BUFFER_ARB:FVBOData[1]:=VParam2;
 end;
 end;
 
@@ -519,8 +519,8 @@ var
 begin 
 if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	begin
-	if pDevice.CreateVertexBuffer(VSize,0,0,D3DPOOL_DEFAULT,
-		IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]].FResourse)),
+	if pDevice.CreateVertexBuffer(VSize,0,D3DFVF_XYZ,D3DPOOL_DEFAULT,
+		IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),
 		nil)<>D3D_OK then
 		begin
 		SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create vertex buffer!');
@@ -528,7 +528,7 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 		end
 	else
 		begin
-		if (FArBuffers[FVBOData[0]].FResourse as IDirect3DVertexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
+		if (FArBuffers[FVBOData[0]-1].FResourse as IDirect3DVertexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock vertex buffer!');
 			Exit;
@@ -536,24 +536,27 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 		else
 			begin
 			System.Move(VBuffer^,VVBuffer^,VSize);
-			if (FArBuffers[FVBOData[0]].FResourse as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
+			FArBuffers[FVBOData[0]-1].FResourseSize:=VSize;
+			if (FArBuffers[FVBOData[0]-1].FResourse as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
 				begin
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock vertex buffer!');
+				Exit;
 				end;
+			SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[0],' vertex buffer!']);
 			end;
 		end;
 	end
 else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 	begin
 	if pDevice.CreateIndexBuffer(VSize,0,D3DFMT_INDEX16,D3DPOOL_DEFAULT,
-		IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]].FResourse)),nil)<>D3D_OK then
+		IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]-1].FResourse)),nil)<>D3D_OK then
 		begin
 		SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create index buffer!');
 		exit;
 		end
 	else
 		begin
-		if (FArBuffers[FVBOData[1]].FResourse as IDirect3DIndexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
+		if (FArBuffers[FVBOData[1]-1].FResourse as IDirect3DIndexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock index buffer!');
 			Exit;
@@ -561,10 +564,13 @@ else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 		else
 			begin
 			System.Move(VBuffer^,VVBuffer^,VSize);
-			if (FArBuffers[FVBOData[1]].FResourse as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
+			FArBuffers[FVBOData[1]-1].FResourseSize:=VSize;
+			if (FArBuffers[FVBOData[1]-1].FResourse as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
 				begin
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock index buffer!');
+				Exit;
 				end;
+			SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[1],' indexes buffer!']);
 			end;
 		end;
 	end;
@@ -612,22 +618,31 @@ if FEnabledClientStateNormal then
 	VVMyVertexType:=VVMyVertexType or D3DFVF_NORMAL;
 if FEnabledClientStateTexVertex then
 	VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;
-//установили тип приметивов
+//Set format of vertex
 pDevice.SetFVF(VVMyVertexType);
 if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
 	begin
-	//это установили вершинный буфер
-	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__DrawElements : Failed!!');
-	//устанавливаем индексный буфер
-	if pDevice.SetIndices(IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]].FResourse))) <> D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__DrawElements : Failed!!');
-	//тперь дравим обьект
-	if pDevice.DrawIndexedPrimitive(FPT,0,0,
-		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer].FResourseSize div 
-		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex//FVBOData[0].FSizeOfBufferVertex
+	//Set vertex buffer
+	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
+	//Set Index buffer
+	if pDevice.SetIndices(IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]-1].FResourse))) <> D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetIndices : Failed!!');
+	//Draw
+	if pDevice.DrawIndexedPrimitive(FPT(),0,0,
+		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div 
+		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex
 		,0,GetNumPrimetives())<>D3D_OK then
-			SGLog.Sourse('TSGRenderDirectX__DrawElements : Draw Failed!!');
+			begin
+			SGLog.Sourse('TSGRenderDirectX__DrawElements : DrawIndexedPrimitive : Draw Failed!! ');
+			SGLog.Sourse('<<<<<<<<<<<<<<');
+			SGLog.Sourse(['FPT()=',Byte(FPT()),
+				';div = ',
+					FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize  div 
+					FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex,
+				';GetNumPrimetives()=',GetNumPrimetives()]);
+			SGLog.Sourse('>>>>>>>>>>>>>>');
+			end;
 	end
 else
 	begin
