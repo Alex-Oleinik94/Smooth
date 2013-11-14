@@ -171,6 +171,7 @@ type
         procedure SaveToStream(const Stream: TStream);virtual;
         procedure LoadFromStream(const Stream: TStream);virtual;
         procedure AddNormals();virtual;
+        procedure CatmulClark();virtual;
 		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
 		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
@@ -244,6 +245,59 @@ type
 implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+procedure TSG3DObject.CatmulClark();
+var
+	ArMiddlePointsPol:packed array of TSGVertex3f = nil;
+	ii,iii,i:LongWord;
+	ArNeighbourPoligons:packed array of array [0..2] of LongWord;
+
+function FindNeighbour(const p1,p2:TSGFaceType; const Pol:LongWord):LongWord;
+var
+	i,ii,iii:LongWord;
+begin
+Result:=FNOfFaces;
+for i:=0 to FNOfFaces-1 do
+	if i<>Pol then
+		begin
+		iii:=0;
+		for ii:=0 to 2 do
+			if (ArFacesTriangles[i].p[ii]=p1) or (ArFacesTriangles[i].p[ii]=p2) then
+				iii+=1;
+		if iii=2 then
+			begin
+			Result:=i;
+			Break;
+			end;
+		end;
+end;
+
+begin
+SetLength(ArMiddlePointsPol,FNOfFaces);
+For i:=0 to FNOfFaces-1 do
+	begin
+	case FPoligonesType of
+	SGR_TRIANGLES:
+		begin
+		ArMiddlePointsPol[i]:=
+			(ArVertex3f[ArFacesTriangles[i].p[0]]^+
+			ArVertex3f[ArFacesTriangles[i].p[1]]^+
+			ArVertex3f[ArFacesTriangles[i].p[2]]^)/3;
+		end;
+	end;
+	end;
+SetLength(ArNeighbourPoligons,FNOfFaces);
+for i:=0 to FNOfFaces-1 do
+	begin
+	ArNeighbourPoligons[i][0]:=FindNeighbour(
+		ArFacesTriangles[i].p[0],ArFacesTriangles[i].p[1],i);
+	ArNeighbourPoligons[i][1]:=FindNeighbour(
+		ArFacesTriangles[i].p[2],ArFacesTriangles[i].p[1],i);
+	ArNeighbourPoligons[i][2]:=FindNeighbour(
+		ArFacesTriangles[i].p[0],ArFacesTriangles[i].p[2],i);
+	end;
+	
+end;
 
 procedure TSG3DObject.AddNormals();
 var

@@ -208,8 +208,8 @@ type
 	PTSGPlane = ^ TSGPlane;
 	TSGPlane=object
 		a,b,c,d:real;
-		procedure Import(const a1:real = 0; const b1:real = 0; const c1:real = 0; const d1:real = 0);
-		procedure Write;
+		procedure Import(const a1:real = 0; const b1:real = 0; const c1:real = 0; const d1:real = 0);inline;
+		procedure Write;inline;
 		end;
 	PSGPlane = PTSGPlane;
 	SGPlane = TSGPlane;
