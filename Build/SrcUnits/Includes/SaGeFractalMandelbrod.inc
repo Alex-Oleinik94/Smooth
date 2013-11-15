@@ -347,6 +347,9 @@ SGScreen.LastChild.AsComboBox.CreateItem('Цвет №1');
 SGScreen.LastChild.AsComboBox.CreateItem('Цвет №2');
 SGScreen.LastChild.AsComboBox.CreateItem('Цвет №3');
 SGScreen.LastChild.AsComboBox.CreateItem('Монохромный');
+SGScreen.LastChild.AsComboBox.CreateItem('Дьявол');
+SGScreen.LastChild.AsComboBox.CreateItem('Желтая пыль');
+SGScreen.LastChild.AsComboBox.CreateItem('Роза');
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 ColorComboBox:=SGScreen.LastChild.AsComboBox;
@@ -1085,6 +1088,47 @@ case FColorScheme of
 	FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=Color;
 	FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=Color;
 	FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=Color; 
+	end;
+
+4:
+	begin
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := Color;
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := (SizeOf(FImage.FImage.FBitMap) * Color) div 255;
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 0;	// nil
+	end;
+
+5:
+	begin
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := trunc(abs(cos(Color) * Color));
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0])));
+		if Color <> 0 then
+			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := GetColor(
+				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1], 
+				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0], 
+				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]
+			) DIV Color) DIV 128
+		else
+			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := GetColor(
+				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1], 
+				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0], 
+				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]
+			) DIV 255) DIV 158;
+	end;
+
+6:
+	begin
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := trunc(abs(sin(Color) * Color));
+		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := GetColor(
+			128, 
+			383, 
+			trunc(abs(cos(Color) * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]))
+		);
+		if (FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] < FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]) then
+			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 
+				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] ** 2) DIV 255
+		else
+			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 
+				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] ** 2) DIV 255;
 	end;
 else
 	begin
