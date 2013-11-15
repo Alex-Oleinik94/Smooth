@@ -148,6 +148,19 @@ const
 var
 	SGLogEnable:Boolean = True;
 type
+	TSGEnumPointer = 
+		{$IFDEF CPU64}
+			QWord;
+		{$ELSE}
+			{$IFDEF CPU32}
+				LongWord;
+			{$ELSE}
+				{$IFDEF CPU16}
+					Word;
+					{$ENDIF}
+				{$ENDIF}
+			{$ENDIF}
+	TSGMaxEnum = TSGEnumPointer;
 	Float = Single;
 	Double = Real;
 	
@@ -1889,8 +1902,10 @@ ThreadClass.Execute;
 end;
 
 destructor TSGThread.Destroy;
-var
-	i:Boolean;
+{$IFDEF MSWINDOWS}
+	var
+		i:Boolean;
+	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
 	if not FFinished then
@@ -1901,7 +1916,8 @@ begin
 	if FHandle<>0 then
 		CloseHandle(FHandle);
 {$ELSE}
-	Killthread(FHandle);
+	if not FFinished then
+		KillThread(FHandle);
 	{$ENDIF}
 FHandle:=0;
 FThreadID:=0;

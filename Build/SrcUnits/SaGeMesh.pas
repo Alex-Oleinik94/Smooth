@@ -112,47 +112,47 @@ type
 	public
 		function GetArVertexes():Pointer;inline;
 		
-		function GetVertex3f(const Index:Cardinal):PTSGVertex3f;inline;
-		function GetVertex2f(const Index:Cardinal):PTSGVertex2f;inline;
+		function GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+		function GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
 		
-		property ArVertex3f[Index : Cardinal]:PTSGVertex3f read GetVertex3f;
-		property ArVertex2f[Index : Cardinal]:PTSGVertex2f read GetVertex2f;
+		property ArVertex3f[Index : TSGMaxEnum]:PTSGVertex3f read GetVertex3f;
+		property ArVertex2f[Index : TSGMaxEnum]:PTSGVertex2f read GetVertex2f;
 		
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
 		procedure AddFace(const FQuantityNewFaces:LongWord = 1);
 		
-		function GetColor3f(const Index:Cardinal):PTSGColor3f;inline;
-		function GetColor4f(const Index:Cardinal):PTSGColor4f;inline;
-		function GetColor3b(const Index:Cardinal):PTSGColor3b;inline;
-		function GetColor4b(const Index:Cardinal):PTSGColor4b;inline;
+		function GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
+		function GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
+		function GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
+		function GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
 		
-		property ArColor3f[Index : Cardinal]:PTSGColor3f read GetColor3f;
-		property ArColor4f[Index : Cardinal]:PTSGColor4f read GetColor4f;
-		property ArColor3b[Index : Cardinal]:PTSGColor3b read GetColor3b;
-		property ArColor4b[Index : Cardinal]:PTSGColor4b read GetColor4b;
+		property ArColor3f[Index : TSGMaxEnum]:PTSGColor3f read GetColor3f;
+		property ArColor4f[Index : TSGMaxEnum]:PTSGColor4f read GetColor4f;
+		property ArColor3b[Index : TSGMaxEnum]:PTSGColor3b read GetColor3b;
+		property ArColor4b[Index : TSGMaxEnum]:PTSGColor4b read GetColor4b;
 		
-		procedure SetColor(const Index:Cardinal;const r,g,b:Single; const a:Single = 1);inline;
+		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 		
-		function GetNormal(const Index:Cardinal):PTSGVertex3f;inline;
-		property ArNormal[Index : Cardinal]:PTSGVertex3f read GetNormal;
+		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
 		
-		procedure SetVertexLength(const NewVertexLength:int64);inline;
-		function GetVertexesSize():int64;overload;inline;
+		procedure SetVertexLength(const NewVertexLength:TSGMaxEnum);inline;
+		function GetVertexesSize():TSGMaxEnum;overload;inline;
 		
 		function ArFacesLines():PTSGFaceLine;inline;
 		function ArFacesQuads():PTSGFaceQuad;inline;
 		function ArFacesTriangles():PTSGFaceTriangle;inline;
 		function ArFacesPoints():PTSGFacePoint;inline;
 		
-		procedure SetFaceLength(const NewLength:Int64);inline;
-		function GetFaceLength():Int64;overload;inline;
-		function GetFaceLength(const FaceLength:Int64):Int64;overload;inline;
-		class function GetFaceLength(const FaceLength:Int64; const ThisPoligoneType:LongWord):Int64;overload;inline;
+		procedure SetFaceLength(const NewLength:TSGMaxEnum);inline;
+		function GetFaceLength():TSGMaxEnum;overload;inline;
+		function GetFaceLength(const FaceLength:TSGMaxEnum):TSGMaxEnum;overload;inline;
+		class function GetFaceLength(const FaceLength:TSGMaxEnum; const ThisPoligoneType:LongWord):TSGMaxEnum;overload;inline;
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
 	public
-		property Faces:Int64 read GetFaceLength write SetFaceLength;
-		property Vertexes:Int64 write SetVertexLength;
+		property Faces:TSGMaxEnum read GetFaceLength write SetFaceLength;
+		property Vertexes:TSGMaxEnum write SetVertexLength;
     public
 		FEnableVBO:Boolean;
 		
@@ -302,7 +302,7 @@ end;
 procedure TSG3DObject.AddNormals();
 var
 	SecondArVertex:Pointer = nil;
-	i,ii,iiii,iii:LongWord;
+	i,ii,iiii,iii:TSGMaxEnum;
 	ArPoligonesNormals:packed array of TSGVertex3f = nil;
 	Plane:SGPlane;
 	Vertex:TSGVertex;
@@ -603,7 +603,7 @@ if Render<>nil then
 	end;
 end;
 
-procedure TSG3DObject.SetColor(const Index:Cardinal;const r,g,b:Single; const a:Single = 1);inline;
+procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
 begin
 if (FColorType=TSGMeshColorType3f) then
 	begin
@@ -633,7 +633,7 @@ else if (FColorType=TSGMeshColorType4b) then
 	end;
 end;
 
-function TSG3DObject.GetNormal(const Index:Cardinal):PTSGVertex3f;inline;
+function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f( 
 	LongWord(ArVertex)+
@@ -648,7 +648,7 @@ Result:=PTSGVertex3f(
 	);
 end;
 
-function TSG3DObject.GetColor4f(const Index:Cardinal):PTSGColor4f;inline;
+function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
 begin
 Result:=PTSGColor4f( 
 	LongWord(ArVertex)+
@@ -657,7 +657,7 @@ Result:=PTSGColor4f(
 	);
 end;
 
-function TSG3DObject.GetColor3b(const Index:Cardinal):PTSGColor3b;inline;
+function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
 begin
 Result:=PTSGColor3b( 
 	LongWord(ArVertex)+
@@ -666,7 +666,7 @@ Result:=PTSGColor3b(
 	);
 end;
 
-function TSG3DObject.GetColor4b(const Index:Cardinal):PTSGColor4b;inline;
+function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
 begin
 Result:=PTSGColor4b( 
 	LongWord(ArVertex)+
@@ -675,7 +675,7 @@ Result:=PTSGColor4b(
 	);
 end;
 
-function TSG3DObject.GetColor3f(const Index:Cardinal):PTSGColor3f;inline;
+function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
 begin
 Result:=PTSGColor3f( 
 	LongWord(ArVertex)+
@@ -707,7 +707,7 @@ if VHasTexture and (FQuantityTextures=0) then
 FHasTexture:=VHasTexture;
 end;
 
-procedure TSG3DObject.SetVertexLength(const NewVertexLength:int64);inline;
+procedure TSG3DObject.SetVertexLength(const NewVertexLength:TSGMaxEnum);inline;
 begin
 FNOfVerts:=NewVertexLength;
 GetMem(ArVertex,GetVertexesSize());
@@ -729,17 +729,17 @@ Result:=
 +Byte(FHasNormals)*3*SizeOf(Single);
 end;
 
-function TSG3DObject.GetVertexesSize():int64;overload;inline;
+function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload;inline;
 begin
 Result:=FNOfVerts*GetSizeOfOneVertex();
 end;
 
-function TSG3DObject.GetVertex3f(const Index:Cardinal):PTSGVertex3f;inline;
+function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-function TSG3DObject.GetVertex2f(const Index:Cardinal):PTSGVertex2f;inline;
+function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
 begin
 Result:=PTSGVertex2f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
@@ -749,7 +749,7 @@ begin
 (**)
 end;
 
-class function TSG3DObject.GetFaceLength(const FaceLength:Int64; const ThisPoligoneType:LongWord):Int64;overload;inline;
+class function TSG3DObject.GetFaceLength(const FaceLength:TSGMaxEnum; const ThisPoligoneType:LongWord):TSGMaxEnum;overload;inline;
 begin
 Result:=FaceLength*GetPoligoneInt(ThisPoligoneType);
 end;
@@ -821,17 +821,17 @@ Result:=
 	+2*Byte( ThisPoligoneType = SGR_LINES );
 end;
 
-function TSG3DObject.GetFaceLength(const FaceLength:Int64):Int64;overload;inline;
+function TSG3DObject.GetFaceLength(const FaceLength:TSGMaxEnum):TSGMaxEnum;overload;inline;
 begin
 Result:=GetFaceLength(FaceLength,FPoligonesType);
 end;
 
-function TSG3DObject.GetFaceLength:Int64;overload;inline;
+function TSG3DObject.GetFaceLength:TSGMaxEnum;overload;inline;
 begin
 Result:=GetFaceLength(FNOfFaces);
 end;
 
-procedure TSG3DObject.SetFaceLength(const NewLength:Int64);inline;
+procedure TSG3DObject.SetFaceLength(const NewLength:TSGMaxEnum);inline;
 begin
 FNOfFaces:=NewLength;
 SetLength(ArFaces ,GetFaceLength(NewLength));

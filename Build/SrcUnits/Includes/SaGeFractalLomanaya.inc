@@ -83,7 +83,7 @@ end;
 
 procedure TSGFractalLomanaya.Calculate();
 var
-	Quantity:Int64;
+	Quantity:TSGMaxEnum;
 begin
 inherited;
 ClearMesh();
