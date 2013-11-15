@@ -270,7 +270,7 @@ type
 	TSGThreadProcedure = procedure ( p : pointer );
 	TSGThreadFunctionResult = 
 	{$IFDEF MSWINDOWS}
-		LonfWord;
+		LongWord;
 	{$ELSE}
 		{$IFDEF UNIX}
 			{$IFDEF CPU32}
