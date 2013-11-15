@@ -1,2 +1,3 @@
-./../Binaries/Main.exe
-pause
+cd ./../Binaries/
+./Main
+cd ./../Build/

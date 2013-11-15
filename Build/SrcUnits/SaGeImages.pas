@@ -126,26 +126,41 @@ else
 	end;
 end;
 
-procedure TGACopySwapPixel(const source, destination: Pointer);
+procedure TGACopySwapPixel(const Source, Destination: Pointer);
+{$IFNDEF CPU32}
+	var
+		bl,bh:byte;
+	{$ENDIF}
 begin
-asm
-push eax
-push edx
-push ebx
-mov eax, source
-mov edx, destination
-mov bl,[eax+0]
-mov bh,[eax+1]
-mov [edx+2],bl
-mov [edx+1],bh
-mov bl,[eax+2]
-mov bh,[eax+3]
-mov [edx+0],bl
-mov [edx+3],bh
-pop ebx
-pop edx
-pop eax
-end;
+{$IFDEF CPU32}
+	asm
+	push eax
+	push edx
+	push ebx
+	mov eax, source
+	mov edx, destination
+	mov bl,[eax+0]
+	mov bh,[eax+1]
+	mov [edx+2],bl
+	mov [edx+1],bh
+	mov bl,[eax+2]
+	mov bh,[eax+3]
+	mov [edx+0],bl
+	mov [edx+3],bh
+	pop ebx
+	pop edx
+	pop eax
+	end;
+{$ELSE}
+	bl:=PByte(Source)[0];
+	bh:=PByte(Source)[1];
+	PByte(Destination)[2]:=bl;
+	PByte(Destination)[1]:=bh;
+	bl:=PByte(Source)[2];
+	bh:=PByte(Source)[3];
+	PByte(Destination)[0]:=bl;
+	PByte(Destination)[3]:=bh;
+	{$ENDIF}
 end;
 
 function LoadTGA(const Stream:TStream):TSGBitmap;

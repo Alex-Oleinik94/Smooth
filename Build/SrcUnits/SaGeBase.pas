@@ -268,7 +268,20 @@ type
 	TSGDataTime=TSGDateTime;
 	
 	TSGThreadProcedure = procedure ( p : pointer );
-	TSGThreadFunction = function ( p:pointer ) : {$IFDEF MSWINDOWS} LongInt{$ELSE} LongInt{$ENDIF};
+	TSGThreadFunctionResult = 
+	{$IFDEF MSWINDOWS}
+		LonfWord;
+	{$ELSE}
+		{$IFDEF UNIX}
+			{$IFDEF CPU32}
+				LongInt;
+				{$ENDIF}
+			{$IFDEF CPU64}
+				Int64;
+				{$ENDIF}
+			{$ENDIF}
+		{$ENDIF}
+	TSGThreadFunction = function ( p:pointer ) : TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
 	TSGThread=class(TSGObject)
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
@@ -1869,7 +1882,7 @@ begin
 FParametr:=Pointer;
 end;
 
-function TSGThreadStart(ThreadClass:TSGThread) {$IFDEF MSWINDOWS} :LongWord; stdcall; {$ELSE} : LongInt; {$ENDIF}
+function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
 begin
 Result:=0;
 ThreadClass.Execute;
