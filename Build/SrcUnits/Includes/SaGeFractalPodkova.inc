@@ -28,12 +28,13 @@ end;
 
 procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
-FVertexIndex+=1;
-FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v;
-
-
-FMesh.ArObjects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex-1;
+if Render.RenderType=SGRenderOpenGL then
+	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex]^:=v
+else
+	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
+FMesh.ArObjects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex;
 FFaceIndex+=1;
+FVertexIndex+=1;
 
 AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
 end;

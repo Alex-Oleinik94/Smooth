@@ -495,6 +495,7 @@ for i:=0 to VQuantity-1 do
 		begin
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
+		FArBuffers[PLongWord(VPoint)[i]-1].FResourseSize:=0;
 		PLongWord(VPoint)[i]:=0;
 		end;
 end;

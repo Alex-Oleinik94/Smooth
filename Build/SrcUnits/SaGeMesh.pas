@@ -19,7 +19,7 @@ type
 	TSGMeshVertexType=(TSGMeshVertexType3f,TSGMeshVertexType2f);
 	TSGMeshColorType=(TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
 	
-	TSGFaceType = type longword;
+	TSGFaceType = type word;//type longword;
 	TSGArTSGFaceType = packed array of TSGFaceType;
 	TSGArTSGArTSGFaceType = packed array of TSGArTSGFaceType;
 	TSGFaceLine=record
@@ -924,7 +924,7 @@ begin
     if FEnableCullFace then
     begin
         Render.CullFace(SGR_FRONT);
-        BasicDraw;
+        BasicDraw();
         Render.Disable(SGR_CULL_FACE);
     end;
 end;
@@ -970,12 +970,15 @@ if SGFileExists(FileWay) then
 end;}
 
 procedure TSG3dObject.BasicDraw(); inline;
+const
+	FaceFormat = SGR_UNSIGNED_SHORT; 
+// GL_UNSIGNED_INT - LongWord - 4
+// GL_UNSIGNED_SHORT - Word - 2
+// GL_UNSIGNED_BYTE - Byte - 1
 begin
 
 FObjectColor.Color(Render);
 
-{if FEnableVBO then
-	Render.Enable(SGR_ARRAY_BUFFER_ARB);}
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1030,7 +1033,7 @@ if FEnableVBO then
 		end;
 	
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-	Render.DrawElements(FPoligonesType, GetFaceLength() ,SGR_UNSIGNED_INT,nil);
+	Render.DrawElements(FPoligonesType, GetFaceLength() ,FaceFormat,nil);
 	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
@@ -1077,7 +1080,7 @@ else
 					byte(FColorType = TSGMeshColorType4f)*4*SizeOf(Single)+
 					byte(FColorType = TSGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
-    Render.DrawElements(FPoligonesType, GetFaceLength() , SGR_UNSIGNED_INT, @ArFaces[0]);
+    Render.DrawElements(FPoligonesType, GetFaceLength() , FaceFormat, @ArFaces[0]);
     end;
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1086,15 +1089,10 @@ if FHasTexture then
 	Render.DisableClientState(SGR_TEXTURE_COORD_ARRAY);
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
-
-{if FEnableVBO then
-	Render.Disable(SGR_ARRAY_BUFFER_ARB);}
 end;
 
 procedure TSG3dObject.LoadToVBO;
 begin
-	//Render.Enable(SGR_ARRAY_BUFFER_ARB);
-	
 	Render.GenBuffersARB(1, @FVBOVertexes);
 	Render.GenBuffersARB(1, @FVBOFaces);
 
@@ -1105,10 +1103,8 @@ begin
 	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	
-	//Render.Disable(SGR_ARRAY_BUFFER_ARB);
-	
-//	Delay(100);
 	ClearArrays(False);
 	FEnableVBO:=True;
 end;

@@ -29,9 +29,18 @@ end;
 procedure TSGFractalKohTriangle.PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
 FVertexIndex+=3;
-FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
-FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
-FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v3;
+if Render.RenderType<>SGRenderDirectX then
+	begin
+	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
+	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
+	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v3;
+	end
+else
+	begin
+	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^.Import(v1.x,v1.y);
+	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-2]^.Import(v2.x,v2.y);
+	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-1]^.Import(v3.x,v3.y);
+	end;
 
 
 FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+0].p[0]:=FVertexIndex-1;

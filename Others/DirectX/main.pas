@@ -105,7 +105,7 @@ pDevice.SetTransform(D3DTS_VIEW, MatrixView);}
 pDevice.BeginScene();
 // Просчет объектов всегда между BeginScene и EndScene
 pDevice.SetFVF( D3DFVF_XYZ or D3DFVF_DIFFUSE);
-//pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
+pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, v[0], sizeof(MyVert));
 v[1].x :=0.5;  
 v[1].y :=-0.5;  
 v[1].z :=-0.5;

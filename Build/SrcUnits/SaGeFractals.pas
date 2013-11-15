@@ -300,7 +300,12 @@ FSunTrigonometry[2]:=pi;
 FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedGPUBuffers();
-FShift:=336384;//Размерность максимального сегмента данных мешей модели
+
+//Размерность максимального сегмента данных мешей модели
+FShift:=4608;
+// 2 2 2 2 2 2 2 2 2 3 3 73
+///336384; - былоа до того как я изметил тип индексов на word (норм для лонгворд)
+
 FMeshesInfo:=nil;
 FMeshesReady:=True;
 FEnableColors:=True;
