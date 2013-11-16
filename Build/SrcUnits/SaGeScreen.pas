@@ -3112,7 +3112,7 @@ SetLength(SGScreens,1);
 SGScreens[Low(SGScreens)].FScreen:=SGScreen;
 SGScreens[Low(SGScreens)].FImage:=nil;
 
-ComboBoxImage:=TSGGLImage.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Textures'+Slash+'ComboBoxImage.png');
+ComboBoxImage:=TSGGLImage.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Textures'+Slash+'ComboBoxImage.png');
 ComboBoxImage.SetContext(Context);
 ComboBoxImage.Loading;
 end;

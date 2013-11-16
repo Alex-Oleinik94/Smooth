@@ -46,7 +46,7 @@ type
 		procedure Saveing(const Format:SGByte = SGI_PNG);
 			public
 		procedure LoadToMemory;virtual;
-		procedure LoadToBitMap;virtual;
+		function LoadToBitMap:Boolean;virtual;
 		procedure Loading;
 		procedure ToTexture;virtual;
 		procedure LoadTextureMainThread;
@@ -537,7 +537,7 @@ begin
 Result:=FileBits[Position]+FileBits[Position+1]*256+FileBits[Position+2]*256*256+FileBits[Position+3]*256*256*256;
 end;
 
-procedure TSGImage.LoadToBitMap;
+function TSGImage.LoadToBitMap:Boolean;
 var
 	Loaded:Boolean = False;
 begin
@@ -589,6 +589,7 @@ if (not Loaded) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
 		{$ENDIF}
 	end;
 FReadyToGoToTexture:=Loaded;
+Result:=Loaded;
 end;
 
 procedure TSGImage.FreeSream;

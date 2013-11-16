@@ -460,8 +460,17 @@ procedure SCSetCLScreenBounds(const p:Pointer = nil);
 procedure SGSetCLLoadProcedure(p:Pointer);
 function SGGetComand(const comand:string):string;inline;
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
+function SGGetCurrentDirectory():string;inline;
 
 implementation
+
+function SGGetCurrentDirectory():string;inline;
+begin
+if argc>0 then
+	Result:=SGGetFileWay(argv[0])
+else
+	Result:='';
+end;
 
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
 begin
@@ -1815,6 +1824,7 @@ else
 		i-=1;
 		end;
 	end;
+Result:=SGUpCaseString(Result);
 end;
 
 function SGMin(const a,b:single):single;inline;overload;

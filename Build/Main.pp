@@ -42,7 +42,7 @@ end;
 
 procedure Init(const MyContext:PSGContext);
 begin
-SGScreen.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+SGScreen.Font:=TSGGLFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
 SGScreen.Font.Loading;
 
@@ -155,7 +155,7 @@ with Context do
 		else
 		{$ENDIF}
 			Tittle:='SaGe OpenGL Window';
-	
+		
 	DrawProcedure:=TSGContextProcedure(@Draw);
 	InitializeProcedure:=TSGContextProcedure(@Init);
 	
@@ -281,9 +281,70 @@ DOS.findclose(sr);
 end;
 
 var
+	ViewerImage:TSGGLImage = nil;
+procedure ViewerDraw(const Context:PSGContext);
+begin
+Context^.Render.InitMatrixMode(SG_2D);
+ViewerImage.DrawImageFromTwoVertex2f(
+	SGVertex2fImport(0,0),
+	SGVertex2fImport(Context^.Width,Context^.Height));
+end;
+
+
+procedure GoViewer(const FileWay:String);
+var
+	Context:TSGContext = nil;
+begin
+if 
+(SGGetFileExpansion(FileWay)='PNG') or
+(SGGetFileExpansion(FileWay)='JPG') or 
+(SGGetFileExpansion(FileWay)='JPEG') or 
+(SGGetFileExpansion(FileWay)='BMP') or 
+(SGGetFileExpansion(FileWay)='TGA') then
+	begin
+	ViewerImage:=TSGGLImage.Create();
+	ViewerImage.Way:=FileWay;
+	ViewerImage.LoadToMemory();
+	if ViewerImage.LoadToBitMap() then
+		begin
+		Context:=
+			   {$IFDEF MSWINDOWS}TSGContextWinAPI{$ENDIF}
+			   {$IFDEF UNIX}     TSGContextUnix   {$ENDIF}
+				.Create();
+		Context.Width:=ViewerImage.Width;
+		Context.Height:=ViewerImage.Height;
+		Context.Fullscreen:=False;
+		Context.DrawProcedure:=TSGContextProcedure(@ViewerDraw);
+		Context.Tittle:='"'+FileWay+'" - SaGe Image Viewer';
+		Context.RenderClass:=
+				//{$IFDEF MSWINDOWS}TSGRenderDirectX{$ENDIF}
+				//{$IFDEF UNIX}     
+				TSGRenderOpenGL;// {$ENDIF};
+		Context.FSelfPoint:=@Context;
+		Context.Initialize();
+		ViewerImage.SetContext(@Context);
+		ViewerImage.ToTexture();
+		Context.Run();
+		Context.Destroy();
+		end
+	else
+		begin
+		WriteLn('Error in loading to bit map!');
+		end;
+	ViewerImage.Destroy();
+	end
+else
+	WriteLn('Unknown expansion "',(SGGetFileExpansion(FileWay)),'"!');
+end;
+
+var
 	s:string;
 begin
-if argc>1 then
+if (argc=2) and (SGFileExists(SGPCharToString(argv[0]))) then
+	begin
+	GoViewer(SGPCharToString(argv[1]));
+	end
+else if argc>1 then
 	begin
 	WriteLn('Entered ',argc-1,' parametrs.');
 	s:=SGPCharToString(argv[1]);
