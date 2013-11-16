@@ -150,6 +150,7 @@ constructor TSGFractalMengerSpunchRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
 FSizeWriteTrue:=False;
+FEnableNormals:=False;
 
 FFont1:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 FFont1.SetContext(FContext);
@@ -167,7 +168,7 @@ SGScreen.LastChild.AsComboBox.CreateItem('Только Нормали');
 SGScreen.LastChild.AsComboBox.CreateItem('Только Цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Ваще Ничего');
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure2);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.FSelectItem:=2;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
@@ -709,10 +710,7 @@ if FEnableNormals then
 	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[0]:=FVertexIndex-1;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[1]:=FVertexIndex-2;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[2]:=FVertexIndex-3;
-FMesh.ArObjects[MeshID].ArFacesQuads[FFaceIndex].p[3]:=FVertexIndex-4;
+FMesh.ArObjects[MeshID].SetFaceQuad(FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);

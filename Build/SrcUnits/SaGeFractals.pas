@@ -251,7 +251,10 @@ while Quantity<>0 do
 	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(FContext);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FF8000);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
-	FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=PoligoneType;
+	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+		FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=SGR_TRIANGLES
+	else
+		FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=PoligoneType;
 	FMesh.ArObjects[FMesh.NOfObjects-1].VertexType:=VVertexType;
 	if FEnableColors then
 		FMesh.ArObjects[FMesh.NOfObjects-1].AutoSetColorType();
@@ -259,16 +262,24 @@ while Quantity<>0 do
 		FMesh.ArObjects[FMesh.NOfObjects-1].HasNormals:=True;
 	if Quantity<=FShift then
 		begin
-		SetMeshArLength(FMesh.NOfObjects-1,Quantity,
-			TSG3DObject.GetFaceLength(Quantity,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
+		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+			SetMeshArLength(FMesh.NOfObjects-1,Quantity*2,
+				TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
+		else
+			SetMeshArLength(FMesh.NOfObjects-1,Quantity,
+				TSG3DObject.GetFaceLength(Quantity,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
 		Quantity:=0;
 		end
 	else
 		begin
 		if (not FEnableVBO) or b then
 			begin
-			SetMeshArLength(FMesh.NOfObjects-1,FShift,
-				TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
+			if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+				SetMeshArLength(FMesh.NOfObjects-1,FShift*2,
+					TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
+			else
+				SetMeshArLength(FMesh.NOfObjects-1,FShift,
+					TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
 			b:=False;
 			end;
 		Quantity-=FShift;
@@ -299,10 +310,10 @@ FSunTrigonometry[1]:=0;
 FSunTrigonometry[2]:=pi;
 FLightingEnable:=True;
 FMesh:=nil;
-FEnableVBO:=Render.SupporedGPUBuffers();
+FEnableVBO:=Render.SupporedVBOBuffers();
 
 //Размерность максимального сегмента данных мешей модели
-FShift:=4608;
+FShift:=4608*2;
 // 2 2 2 2 2 2 2 2 2 3 3 73
 ///336384; - былоа до того как я изметил тип индексов на word (норм для лонгворд)
 

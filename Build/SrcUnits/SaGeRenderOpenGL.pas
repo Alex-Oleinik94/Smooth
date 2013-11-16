@@ -55,7 +55,7 @@ type
 		procedure SwapBuffers();override;
 		function TopShift(const VFullscreen:Boolean = False):LongWord;override;
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
-		function SupporedGPUBuffers:Boolean;override;
+		function SupporedVBOBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
 		procedure LoadIdentity();override;
@@ -138,7 +138,7 @@ begin
 	{$ENDIF}
 end;
 
-function TSGRenderOpenGL.SupporedGPUBuffers:Boolean;
+function TSGRenderOpenGL.SupporedVBOBuffers:Boolean;
 begin
 Result:=SGIsSuppored_GL_ARB_vertex_buffer_object;
 end;

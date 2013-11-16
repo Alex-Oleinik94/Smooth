@@ -32,7 +32,7 @@ type
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
-		function SupporedGPUBuffers:Boolean;override;
+		function SupporedVBOBuffers:Boolean;override;
 			public
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
 		procedure LoadIdentity();override;
@@ -196,7 +196,7 @@ SGR_LINES:
 end;
 end;
 
-function TSGRenderDirectX.SupporedGPUBuffers():Boolean;
+function TSGRenderDirectX.SupporedVBOBuffers():Boolean;
 begin
 Result:=True;
 end;

@@ -5,7 +5,7 @@ unit SaGeMesh;
 interface
 
 uses
-    Classes
+      Classes
     , SaGeCommon
     , SaGeBase
     , SaGeBased
@@ -140,6 +140,7 @@ type
 		procedure SetVertexLength(const NewVertexLength:TSGMaxEnum);inline;
 		function GetVertexesSize():TSGMaxEnum;overload;inline;
 		
+		procedure SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
 		function ArFacesLines():PTSGFaceLine;inline;
 		function ArFacesQuads():PTSGFaceQuad;inline;
 		function ArFacesTriangles():PTSGFaceTriangle;inline;
@@ -245,6 +246,26 @@ type
 implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+procedure TSG3DObject.SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
+begin
+if Render.RenderType=SGRenderDirectX then
+	begin
+	ArFacesTriangles[Index*2].p[0]:=p0;
+	ArFacesTriangles[Index*2].p[1]:=p1;
+	ArFacesTriangles[Index*2].p[2]:=p2;
+	ArFacesTriangles[Index*2+1].p[0]:=p2;
+	ArFacesTriangles[Index*2+1].p[1]:=p3;
+	ArFacesTriangles[Index*2+1].p[2]:=p0;
+	end
+else
+	begin
+	ArFacesQuads[Index].p[0]:=p0;
+	ArFacesQuads[Index].p[1]:=p1;
+	ArFacesQuads[Index].p[2]:=p2;
+	ArFacesQuads[Index].p[3]:=p3;
+	end;
+end;
 
 procedure TSG3DObject.CatmulClark();
 var
@@ -906,7 +927,8 @@ end;
 
 destructor TSG3dObject.Destroy();
 begin
-ClearArrays;
+ClearArrays();
+ClearVBO();
 inherited Destroy();
 end;
 
@@ -1098,7 +1120,7 @@ begin
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
 	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
-	
+	//WriteInfo('  ');
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
 	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
 
@@ -1107,15 +1129,18 @@ begin
 	
 	ClearArrays(False);
 	FEnableVBO:=True;
+	//WriteLn(123);
 end;
 
 procedure TSG3DObject.ClearVBO();inline;
 begin
-if FEnableVBO then
+if FEnableVBO and (Render<>nil) then
 	begin
-	Render.DeleteBuffersARB(1,@FVBOFaces);
+	if FVBOFaces <> 0 then
+		Render.DeleteBuffersARB(1,@FVBOFaces);
 	FVBOFaces:=0;
-	Render.DeleteBuffersARB(1,@FVBOVertexes);
+	if FVBOVertexes<>0 then
+		Render.DeleteBuffersARB(1,@FVBOVertexes);
 	FVBOVertexes:=0;
 	FEnableVBO:=False;
 	end;

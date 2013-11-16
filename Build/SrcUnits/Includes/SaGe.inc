@@ -5,10 +5,10 @@
 //{$DEFINE LAZARUS}
 //{$DEFINE GLUT}
 
-//{$WARNINGS ON}
+{$WARNINGS OFF}
 {$WARNINGS OFF}
 {$NOTES ON}
-//{$NOTES OFF}
+{$NOTES OFF}
 
 {$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
