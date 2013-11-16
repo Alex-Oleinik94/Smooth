@@ -590,6 +590,7 @@ begin
 case VParam of
 SGR_LINES:Result:=VSize div 2;
 SGR_TRIANGLES:Result:=VSize div 3;
+SGR_LINE_STRIP:Result:=VSize -1;
 else
 	Result:=VSize;
 end;
@@ -611,18 +612,19 @@ end;
 begin 
 if VBuffer<>nil then
 	Exit;
-if FEnabledClientStateVertex then
-	VVMyVertexType:=VVMyVertexType or D3DFVF_XYZ;
-if FEnabledClientStateColor then
-	VVMyVertexType:=VVMyVertexType or D3DFVF_DIFFUSE;
-if FEnabledClientStateNormal then
-	VVMyVertexType:=VVMyVertexType or D3DFVF_NORMAL;
-if FEnabledClientStateTexVertex then
-	VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;
-//Set format of vertex
-pDevice.SetFVF(VVMyVertexType);
 if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
 	begin
+	if FEnabledClientStateVertex then
+		VVMyVertexType:=VVMyVertexType or D3DFVF_XYZ;
+	if FEnabledClientStateColor then
+		VVMyVertexType:=VVMyVertexType or D3DFVF_DIFFUSE;
+	if FEnabledClientStateNormal then
+		VVMyVertexType:=VVMyVertexType or D3DFVF_NORMAL;
+	if FEnabledClientStateTexVertex then
+		VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;
+	//Set format of vertex
+	pDevice.BeginScene();
+	pDevice.SetFVF(VVMyVertexType);
 	//Set vertex buffer
 	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
@@ -646,6 +648,7 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 				';GetNumPrimetives()=',GetNumPrimetives()]);
 			SGLog.Sourse('>>>>>>>>>>>>>>');
 			end;
+	pDevice.EndScene();
 	end
 else
 	begin
@@ -787,7 +790,11 @@ if FArBuffers<>nil then
 	for i:=0 to High(FArBuffers) do
 		if FArBuffers[i].FResourse<>nil then
 			FArBuffers[i].FResourse._Release();
+	try
 	SetLength(FArBuffers,0);
+	except
+	SGLog.Sourse('TSGRenderDirectX__Destroy : Error : Exception with "SetLength(FArBuffers,0);"');
+	end;
 	end;
 if FArTextures<>nil then
 	begin
