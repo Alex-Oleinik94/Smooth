@@ -239,8 +239,6 @@ if FFaceIndex>=FShift then
 end;
 
 procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
-var
-	B:Boolean = True;
 begin
 while Quantity<>0 do
 	begin
@@ -273,16 +271,12 @@ while Quantity<>0 do
 		end
 	else
 		begin
-		if (not FEnableVBO) or b then
-			begin
-			if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-				SetMeshArLength(FMesh.NOfObjects-1,FShift*2,
-					TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
-			else
-				SetMeshArLength(FMesh.NOfObjects-1,FShift,
-					TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
-			b:=False;
-			end;
+		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+			SetMeshArLength(FMesh.NOfObjects-1,FShift*2,
+				TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
+		else
+			SetMeshArLength(FMesh.NOfObjects-1,FShift,
+				TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
 		Quantity-=FShift;
 		end;
 	end;

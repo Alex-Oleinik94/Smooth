@@ -184,11 +184,9 @@ type
 		procedure LoadFromFile(const FileWay:string);
 		procedure LoadFromOBJ(const FFileName:string);virtual;
 	public
-		function VertexesSize():Int64;Inline;
-		function FacesSize():Int64;inline;
-		function Size():Int64;inline;
-		function RealSize():Int64;inline;
-		function GetSizeOf():int64;inline;
+		function VertexesSize():QWord;Inline;
+		function FacesSize():QWord;inline;
+		function Size():QWord;inline;
 	protected 
 		FName:String;
 	public
@@ -230,10 +228,9 @@ type
         procedure LoadFromFile(const FileWay:string);
         procedure Clear();virtual;
     public
-		function VertexesSize():Int64;
-		function FacesSize():Int64;
-		function Size():Int64;
-		function RealSize():Int64;
+		function VertexesSize():QWord;
+		function FacesSize():QWord;
+		function Size():QWord;
     end;
     PSGModel = ^TSGModel;
     
@@ -805,28 +802,21 @@ WriteLn(PredStr,'FQuantityTextures = ',FQuantityTextures);
 WriteLn(PredStr,'FEnableVBO = ',FEnableVBO);
 end;
 
-function TSG3DObject.RealSize:Int64;inline;
-begin
-Result:=
-	Length(ArFaces)*SizeOf(TSGFaceType)+
-	FNOfVerts*GetSizeOfOneVertex();
-end;
-
-function TSG3DObject.VertexesSize:Int64;Inline;
+function TSG3DObject.VertexesSize():QWord;Inline;
 begin
 Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
 
-function TSG3DObject.FacesSize:Int64;inline;
+function TSG3DObject.FacesSize():QWord;inline;
 begin
 Result:=SizeOf(TSGFaceType)*GetFaceLength();
 end;
 
-function TSG3DObject.Size:Int64;inline;
+function TSG3DObject.Size():QWord;inline;
 begin
 Result:=
-	FacesSize+
-	VertexesSize;
+	FacesSize()+
+	VertexesSize();
 end;
 
 class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
@@ -893,13 +883,6 @@ if FPoligonesType=SGR_TRIANGLES then
 	Result:=PTSGFaceTriangle(Pointer(@ArFaces[0]))
 else
 	Result:=nil;
-end;
-
-function TSG3dObject.GetSizeOf:int64;
-begin
-Result:=
-	GetFaceLength*SizeOf(TSGFaceType)+
-	FNOfVerts*GetSizeOfOneVertex();
 end;
 
 constructor TSG3dObject.Create();
@@ -1115,6 +1098,7 @@ end;
 
 procedure TSG3dObject.LoadToVBO;
 begin
+	//WriteInfo();WriteLn('Press enter. Tyta  vcio OK!');readln;
 	Render.GenBuffersARB(1, @FVBOVertexes);
 	Render.GenBuffersARB(1, @FVBOFaces);
 
@@ -1240,15 +1224,6 @@ for i:=0 to NOfObjects-1 do
 	;//ArObjects[i].Optimization(SaveColors,SaveNormals);
 end;
 
-function TSGModel.RealSize():Int64;
-var
-	i:LongWord;
-begin
-Result:=0;
-for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].RealSize;
-end;
-
 procedure TSGModel.Stripificate;
 var
 	i:LongWord;
@@ -1257,7 +1232,7 @@ for i:=0 to NOfObjects-1 do
 	;//ArObjects[i].Stripificate;
 end;
 
-function TSGModel.VertexesSize:Int64;Inline;
+function TSGModel.VertexesSize():QWord;Inline;
 var
 	i:LongWord;
 begin
@@ -1266,22 +1241,22 @@ for i:=0 to NOfObjects-1 do
 	Result+=ArObjects[i].VertexesSize();
 end;
 
-function TSGModel.FacesSize:Int64;inline;
+function TSGModel.FacesSize():QWord;inline;
 var
 	i:LongWord;
 begin
 Result:=0;
 for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].FacesSize;
+	Result+=ArObjects[i].FacesSize();
 end;
 
-function TSGModel.Size:Int64;inline;
+function TSGModel.Size():QWord;inline;
 var
 	i:LongWord;
 begin
 Result:=0;
 for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].Size;
+	Result+=ArObjects[i].Size();
 end;
 
 constructor TSGMaterialInfo.Create;
