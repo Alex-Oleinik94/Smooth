@@ -372,8 +372,8 @@ glLightfv(GL_LIGHT0,GL_AMBIENT, @AmbientLight);
 glLightfv(GL_LIGHT0,GL_DIFFUSE, @DiffuseLight);
 glLightfv(GL_LIGHT0,GL_SPECULAR, @SpecularLight);
 glEnable(GL_LIGHT0);
-
 glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
+glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
 glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);

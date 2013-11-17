@@ -2,7 +2,8 @@
 unit SaGeRenderDirectX;
 interface
 uses
-	SaGeBase, SaGeBased
+	 SaGeBase
+	,SaGeBased
 	,SaGeRender
 	,windows
 	,DynLibs
@@ -10,7 +11,11 @@ uses
 	,D3DX9
 	,Direct3D9
 	;
+
 type
+	D3DXVector3 = TD3DXVector3;
+	D3DVector = D3DXVector3;
+	
 	TSGRDTypeDataBuffer=(SGRDTypeDataBufferVertex,SGRDTypeDataBufferColor,SGRDTypeDataBufferNormal,SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX=class(TSGRender)
 			public
@@ -117,6 +122,18 @@ type
 		end;
 
 implementation
+
+(*for look at*)
+{//задаем соответствующие вектора 
+D3DXVECTOR3 position(5.0f, 3.0f, –10.0f); 
+D3DXVECTOR3 target(0.0f, 0.0f, 0.0f); 
+D3DXVECTOR3 up(0.0f, 1.0f, 0.0f); 
+//создаем матрицу 
+D3DXMATRIX V; 
+//инициализируем её 
+D3DXMatrixLookAtLH(&V, &position, &target, &up); 
+//и задаем как матрицу вида 
+pDevice->SetTransform(D3DTS_VIEW, &V);}
 
 procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
@@ -272,7 +289,12 @@ end;
 
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
 begin
-
+case VParam of
+SGR_LIGHTING:
+	begin
+	pDevice.LightEnable(0,True);
+	end;
+end;
 end;
 
 procedure TSGRenderDirectX.Disable(const VParam:Cardinal); 
@@ -286,6 +308,10 @@ SGR_TEXTURE_2D:
 SGR_CULL_FACE:
 	begin
 	pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	end;
+SGR_LIGHTING:
+	begin
+	pDevice.LightEnable(0,False);
 	end;
 end;
 end;
@@ -723,6 +749,10 @@ pDevice.EndScene();
 end;
 
 procedure TSGRenderDirectX.Init();
+var
+	Material:D3DMATERIAL9;
+	Light:D3DLIGHT9;
+	VectorDir:D3DXVECTOR3;
 begin
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
@@ -731,7 +761,32 @@ FNowTexture:=0;
 //Р’РєР»СЋС‡Р°РµРј Z-Р±СѓС„РµСЂ
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
-//РІС‹РєР»СЋС‡Р°РµРј РѕСЃРІРµС‰РµРЅРёРµ
+//Устанавливаем материал
+FillChar(Material,SizeOf(Material),0);
+Material.Diffuse.r := 0.5;
+Material.Ambient.r := 0.5;
+Material.Diffuse.g := 1;
+Material.Ambient.g := 1;
+Material.Diffuse.b := 0;
+Material.Ambient.b := 0;
+Material.Diffuse.a := 1;
+Material.Ambient.a := 1;
+pDevice.SetMaterial(Material);
+
+//Устанавливаем освящение
+FillChar(Light,SizeOf(Light),0);
+Light.Diffuse.r := 1 ;
+Light.Diffuse.g := 1 ;
+Light.Diffuse.b := 1 ;
+Light.Range := 1000;
+Light.Direction.x:=0;
+Light.Direction.y:=1;
+Light.Direction.z:=0;
+pDevice.SetLight(0, Light);
+pDevice.LightEnable(0, True);
+pDevice.SetRenderState(D3DRS_LIGHTING,1);
+pDevice.SetRenderState(D3DRS_AMBIENT, 0);
+//Отключаем свет
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
 
 //========РїР°СЂР°РјРµС‚СЂС‹ С‚РµРєСЃС‚СѓСЂ
@@ -888,7 +943,7 @@ if (pD3D=nil) then
 	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
 	d3dpp.BackBufferFormat := d3ddm.Format;
 	d3dpp.EnableAutoDepthStencil:= True;
-	d3dpp.AutoDepthStencilFormat := D3DFMT_D16;
+	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
 	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	//РЈ РјРµРЅСЏ РЅР°  РЅРµС‚Р±СѓРєРµ РІС‹Р»РµС‚Р°РµС‚ СЃ СЌС‚РёРј РїРѕСЂР°РјРµС‚СЂРѕРј
