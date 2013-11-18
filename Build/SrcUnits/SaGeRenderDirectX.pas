@@ -282,7 +282,7 @@ v.x:=x;
 v.y:=y;
 v.z:=z;
 pDevice.GetTransform(D3DTS_WORLD,Matrix1);
-D3DXMatrixRotationAxis(Matrix2,v,-angle/180*pi);
+D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
 D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
 pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
 end;
@@ -882,6 +882,8 @@ if Mode=SG_3D then
 		0.0011,                                   // передний план отсечения сцены
 		500);                                     // задний план отсечения сцены
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+	D3DXMatrixScaling(Matrix,1,1,-1);
+	pDevice.SetTransform(D3DTS_WORLD, Matrix);
 	end
 else
 	if Mode=SG_3D_ORTHO then
