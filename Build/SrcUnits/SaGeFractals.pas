@@ -373,9 +373,9 @@ else
 		end;
 if FLightingEnable then
 	begin
-	FSunTrigonometry[0]+=pi/90		/20;
-	FSunTrigonometry[1]-=pi/60		/20;
-	FSunTrigonometry[2]+=pi/180		/20;
+	FSunTrigonometry[0]+=pi/90		/20*Context.ElapsedTime;
+	FSunTrigonometry[1]-=pi/60		/20*Context.ElapsedTime;
+	FSunTrigonometry[2]+=pi/180		/20*Context.ElapsedTime;
 	FSun.Import(cos(FSunTrigonometry[0]),sin(FSunTrigonometry[1]),cos(FSunTrigonometry[2]));
 	FSun*=FSunAbs;
 	Render.Color3f(1,1,1);

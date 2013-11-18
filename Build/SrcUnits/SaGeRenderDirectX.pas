@@ -270,10 +270,10 @@ procedure TSGRenderDirectX.Translatef(const x,y,z:single);
 var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 begin 
-pDevice.GetTransform(D3DTS_WORLD,Matrix1);
+pDevice.GetTransform(D3DTS_VIEW,Matrix1);
 D3DXMatrixTranslation(Matrix2,x,y,-z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
-pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
+pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Rotatef(const angle:single;const x,y,z:single); 
@@ -284,10 +284,10 @@ begin
 v.x:=x;
 v.y:=y;
 v.z:=z;
-pDevice.GetTransform(D3DTS_WORLD,Matrix1);
+pDevice.GetTransform(D3DTS_VIEW,Matrix1);
 D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
 D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
-pDevice.SetTransform(D3DTS_WORLD,MatrixOut);
+pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
@@ -1005,7 +1005,7 @@ if Mode=SG_3D then
 		500);                                     // задний план отсечения сцены
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 	D3DXMatrixScaling(Matrix,1,1,-1);
-	pDevice.SetTransform(D3DTS_WORLD, Matrix);
+	pDevice.SetTransform(D3DTS_VIEW, Matrix);
 	end
 else
 	if Mode=SG_3D_ORTHO then
@@ -1013,7 +1013,7 @@ else
 		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4*dncht/120,D3DX_PI/4*dncht/120/CWidth*CHeight,0.0011,500);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		D3DXMatrixScaling(Matrix,1,1,-1);
-		pDevice.SetTransform(D3DTS_WORLD, Matrix);
+		pDevice.SetTransform(D3DTS_VIEW, Matrix);
 		end
 	else if Mode=SG_2D then
 		begin
@@ -1021,7 +1021,7 @@ else
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		
 		D3DXMatrixTranslation(Matrix,-CWidth/2,-CHeight/2,0);
-		pDevice.SetTransform(D3DTS_WORLD, Matrix);
+		pDevice.SetTransform(D3DTS_VIEW, Matrix);
 		end;
 end;
 
