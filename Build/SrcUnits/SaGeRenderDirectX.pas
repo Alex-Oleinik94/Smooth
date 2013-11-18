@@ -375,16 +375,13 @@ SGR_LIGHT0:
 		begin
 		FLigth._Type:=D3DLIGHT_POINT;
 		FLigth.Attenuation0:=1;
-		//FLigth.Attenuation1:=0.5;
-		//FLigth.Attenuation2:=0.5;
-		{FLigth.Attenuation1:=1;
-		FLigth.Attenuation2:=1;}
 		FLigth.Position.x:=PArS(VParam2)[0];
 		FLigth.Position.y:=PArS(VParam2)[1];
 		FLigth.Position.z:=PArS(VParam2)[2];
 		pDevice.SetLight(0, FLigth);
 		pDevice.LightEnable(0, True);
 		pDevice.SetRenderState(D3DRS_LIGHTING,1);
+		pDevice.SetRenderState(D3DRS_AMBIENT, 1);
 		end;
 	else 
 		begin 
@@ -882,15 +879,19 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
 //Устанавливаем материал
 FillChar(Material,SizeOf(Material),0);
-Material.Diffuse.r := 0.4;
-Material.Ambient.r := 0.4;
-Material.Diffuse.g := 0.4;
-Material.Ambient.g := 0.4;
-Material.Diffuse.b := 0.4;
-Material.Ambient.b := 0.4;
+Material.Diffuse.r := 1;
+Material.Diffuse.g := 1;
+Material.Diffuse.b := 1;
 Material.Diffuse.a := 1;
-Material.Ambient.a := 1;
-Material.Power:=0;
+Material.Ambient.r := 0;
+Material.Ambient.g := 0;
+Material.Ambient.b := 0;
+Material.Ambient.a := 0;
+Material.Specular.r:=0.4;
+Material.Specular.g:=0.4;
+Material.Specular.b:=0.4;
+Material.Specular.a:=1;
+Material.Power:=2;
 pDevice.SetMaterial(Material);
 
 //Устанавливаем освящение
