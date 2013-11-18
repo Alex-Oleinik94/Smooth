@@ -353,10 +353,10 @@ Light[1]:=y;
 Light[2]:=z;
 Light[3]:=2;
 VRender.Enable(Ligth);
-VRender.Lightfv(Ligth,SGR_POSITION,@Light);
 VRender.Lightfv(Ligth,SGR_AMBIENT, @AmbientLight);
 VRender.Lightfv(Ligth,SGR_DIFFUSE, @DiffuseLight);
 VRender.Lightfv(Ligth,SGR_SPECULAR, @SpecularLight);
+VRender.Lightfv(Ligth,SGR_POSITION,@Light);
 end;
 
 procedure TSGVertex3f.Normal(const VRender:TSGRender);inline;

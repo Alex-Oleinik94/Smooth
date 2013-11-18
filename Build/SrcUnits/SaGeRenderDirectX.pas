@@ -118,6 +118,8 @@ type
 			FSizeOfOneVertex:Byte;
 			FShift:Cardinal;
 			end;
+		// Light
+		FLigth:D3DLIGHT9;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -293,7 +295,11 @@ begin
 case VParam of
 SGR_LIGHTING:
 	begin
-	pDevice.LightEnable(0,True);
+	pDevice.SetRenderState(D3DRS_LIGHTING,1);
+	end;
+SGR_LIGHT0..SGR_LIGHT7:
+	begin
+	pDevice.LightEnable(VParam-SGR_LIGHT0,True);
 	end;
 end;
 end;
@@ -312,7 +318,11 @@ SGR_CULL_FACE:
 	end;
 SGR_LIGHTING:
 	begin
-	pDevice.LightEnable(0,False);
+	pDevice.SetRenderState(D3DRS_LIGHTING,0);
+	end;
+SGR_LIGHT0..SGR_LIGHT7:
+	begin
+	pDevice.LightEnable(VParam-SGR_LIGHT0,False);
 	end;
 end;
 end;
@@ -332,8 +342,59 @@ for i:=0 to VQuantity-1 do
 end;
 
 procedure TSGRenderDirectX.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer); 
+type
+	PArS = ^ Single;
 begin 
-
+{FLigth._Type:=D3DLIGHT_POINT;}
+case VLight of
+SGR_LIGHT0:
+	begin
+	case VParam of
+	SGR_AMBIENT:
+		begin
+		FLigth.AMBIENT.r:=PArS(VParam2)[0];
+		FLigth.AMBIENT.g:=PArS(VParam2)[1];
+		FLigth.AMBIENT.b:=PArS(VParam2)[2];
+		FLigth.AMBIENT.a:=PArS(VParam2)[3];
+		end;
+	SGR_DIFFUSE:
+		begin
+		FLigth.Diffuse.r := PArS(VParam2)[0] ;
+		FLigth.Diffuse.g := PArS(VParam2)[2] ;
+		FLigth.Diffuse.b := PArS(VParam2)[3] ;
+		FLigth.Diffuse.a := PArS(VParam2)[4] ;
+		end;
+	SGR_SPECULAR:
+		begin
+		FLigth.SPECULAR.r:= PArS(VParam2)[0] ;
+		FLigth.SPECULAR.g:= PArS(VParam2)[1] ;
+		FLigth.SPECULAR.b:= PArS(VParam2)[2] ;
+		FLigth.SPECULAR.a:= PArS(VParam2)[3] ;
+		end;
+	SGR_POSITION:
+		begin
+		FLigth._Type:=D3DLIGHT_POINT;
+		FLigth.Attenuation0:=1;
+		//FLigth.Attenuation1:=0.5;
+		//FLigth.Attenuation2:=0.5;
+		{FLigth.Attenuation1:=1;
+		FLigth.Attenuation2:=1;}
+		FLigth.Position.x:=PArS(VParam2)[0];
+		FLigth.Position.y:=PArS(VParam2)[1];
+		FLigth.Position.z:=PArS(VParam2)[2];
+		pDevice.SetLight(0, FLigth);
+		pDevice.LightEnable(0, True);
+		pDevice.SetRenderState(D3DRS_LIGHTING,1);
+		end;
+	else 
+		begin 
+		end;
+	end;
+	end;
+else
+	begin
+	end;
+end;
 end;
 
 procedure TSGRenderDirectX.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
@@ -810,7 +871,6 @@ end;
 procedure TSGRenderDirectX.Init();
 var
 	Material:D3DMATERIAL9;
-	Light:D3DLIGHT9;
 	VectorDir:D3DXVECTOR3;
 begin
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
@@ -822,26 +882,28 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
 //Устанавливаем материал
 FillChar(Material,SizeOf(Material),0);
-Material.Diffuse.r := 0.5;
-Material.Ambient.r := 0.5;
-Material.Diffuse.g := 1;
-Material.Ambient.g := 1;
-Material.Diffuse.b := 0;
-Material.Ambient.b := 0;
+Material.Diffuse.r := 0.4;
+Material.Ambient.r := 0.4;
+Material.Diffuse.g := 0.4;
+Material.Ambient.g := 0.4;
+Material.Diffuse.b := 0.4;
+Material.Ambient.b := 0.4;
 Material.Diffuse.a := 1;
 Material.Ambient.a := 1;
+Material.Power:=0;
 pDevice.SetMaterial(Material);
 
 //Устанавливаем освящение
-FillChar(Light,SizeOf(Light),0);
-Light.Diffuse.r := 1 ;
-Light.Diffuse.g := 1 ;
-Light.Diffuse.b := 1 ;
-Light.Range := 1000;
-Light.Direction.x:=0;
-Light.Direction.y:=1;
-Light.Direction.z:=0;
-pDevice.SetLight(0, Light);
+FillChar(FLigth,SizeOf(FLigth),0);
+FLigth._Type:=D3DLIGHT_POINT;
+FLigth.Diffuse.r := 1 ;
+FLigth.Diffuse.g := 1 ;
+FLigth.Diffuse.b := 1 ;
+FLigth.Range := 1000;// предел расстояния, на котором освещаются примитивы, смотря от камеры.
+{FLigth.Direction.x:=0;
+FLigth.Direction.y:=1;
+FLigth.Direction.z:=0;}
+pDevice.SetLight(0, FLigth);
 pDevice.LightEnable(0, True);
 pDevice.SetRenderState(D3DRS_LIGHTING,1);
 pDevice.SetRenderState(D3DRS_AMBIENT, 0);
