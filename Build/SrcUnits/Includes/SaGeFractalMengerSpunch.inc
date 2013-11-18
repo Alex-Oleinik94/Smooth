@@ -150,7 +150,6 @@ constructor TSGFractalMengerSpunchRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
 FSizeWriteTrue:=False;
-FEnableNormals:=False;
 
 FFont1:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 FFont1.SetContext(FContext);
@@ -168,7 +167,7 @@ SGScreen.LastChild.AsComboBox.CreateItem('Только Нормали');
 SGScreen.LastChild.AsComboBox.CreateItem('Только Цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Ваще Ничего');
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure2);
-SGScreen.LastChild.AsComboBox.FSelectItem:=2;
+SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 

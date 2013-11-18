@@ -100,7 +100,8 @@ type
 		FArBuffers:packed array of 
 			packed record 
 			FResourse:IDirect3DResource9;
-			FResourseSize:Int64;
+			FResourseSize:QWord;
+			FVertexDeclaration:IDirect3DVertexDeclaration9;
 			end;
 		FEnabledClientStateVertex:Boolean;
 		FEnabledClientStateColor:Boolean;
@@ -508,6 +509,7 @@ for i:=0 to VQ-1 do
 		SetLength(FArBuffers,Length(FArBuffers)+1);
 	FArBuffers[High(FArBuffers)].FResourse:=nil;
 	FArBuffers[High(FArBuffers)].FResourseSize:=0;
+	FArBuffers[High(FArBuffers)].FVertexDeclaration:=nil;
 	PT[i]:=Length(FArBuffers);
 	end;
 end;
@@ -522,6 +524,11 @@ for i:=0 to VQuantity-1 do
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourseSize:=0;
+		if FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration<>nil then
+			begin
+			FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration._Release();
+			FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration:=nil;
+			end;
 		PLongWord(VPoint)[i]:=0;
 		end;
 end;
@@ -608,8 +615,8 @@ procedure TSGRenderDirectX.DrawElements(
 	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
 	VBuffer:Pointer); 
-var
-	VVMyVertexType:Cardinal = 0;
+{var
+	VVMyVertexType:Cardinal = 0;}
 
 function GetNumPrimetives:LongWord;inline;
 begin
@@ -635,22 +642,74 @@ else
 end;
 end;
 
+var
+	VFVFArray:packed array of _D3DVERTEXELEMENT9 = nil;
+
+procedure AddElVFVF();inline;
+begin
+if VFVFArray= nil then
+	SetLength(VFVFArray,1)
+else
+	SetLength(VFVFArray,Length(VFVFArray)+1);
+FillChar(VFVFArray[High(VFVFArray)],SizeOf(_D3DVERTEXELEMENT9),0);
+end;
+
 begin 
 if VBuffer<>nil then
 	Exit;
 if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
 	begin
-	if FEnabledClientStateVertex then
+	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration = nil then
+		begin
+		if FEnabledClientStateVertex then
+			begin
+			AddElVFVF();
+			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferVertex].FShift;
+			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT3;
+			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
+			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_POSITION;
+			end;
+		if FEnabledClientStateColor then
+			begin
+			AddElVFVF();
+			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferColor].FShift;
+			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_D3DCOLOR;
+			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
+			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_COLOR;
+			end;
+		if FEnabledClientStateNormal then
+			begin
+			AddElVFVF();
+			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
+			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT3;
+			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
+			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_NORMAL;
+			end;
+		if FEnabledClientStateTexVertex then
+			begin
+			AddElVFVF();
+			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
+			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT2;
+			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
+			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_TEXCOORD;
+			end;
+		AddElVFVF();
+		VFVFArray[High(VFVFArray)]:=D3DDECL_END;
+		pDevice.CreateVertexDeclaration(@VFVFArray[0],FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
+		end;
+	
+	{if FEnabledClientStateVertex then
 		VVMyVertexType:=VVMyVertexType or D3DFVF_XYZ;
 	if FEnabledClientStateColor then
 		VVMyVertexType:=VVMyVertexType or D3DFVF_DIFFUSE;
 	if FEnabledClientStateNormal then
 		VVMyVertexType:=VVMyVertexType or D3DFVF_NORMAL;
 	if FEnabledClientStateTexVertex then
-		VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;
-	//Set format of vertex
+		VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;}
 	pDevice.BeginScene();
-	pDevice.SetFVF(VVMyVertexType);
+	//Set format of vertex
+	//------pDevice.SetFVF(VVMyVertexType);
+	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
 	//Set vertex buffer
 	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
@@ -888,8 +947,10 @@ if Mode=SG_3D then
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4,CWidth / CHeight,0.0011,500);
+		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4*dncht/120,D3DX_PI/4*dncht/120/CWidth*CHeight,0.0011,500);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+		D3DXMatrixScaling(Matrix,1,1,-1);
+		pDevice.SetTransform(D3DTS_WORLD, Matrix);
 		end
 	else if Mode=SG_2D then
 		begin
