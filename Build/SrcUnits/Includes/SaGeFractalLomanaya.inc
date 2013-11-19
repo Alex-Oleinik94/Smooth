@@ -150,6 +150,7 @@ Threads:=1;
 Depth:=3;
 FLightingEnable:=False;
 InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
+InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FLDC:=TSGLabel.Create();
 SGScreen.CreateChild(FLDC);

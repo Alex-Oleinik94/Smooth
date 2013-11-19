@@ -215,8 +215,8 @@ c1:=SGGetColor4fFromLongWord($FF0000);
 c2:=SGGetColor4fFromLongWord($0000FF);
 c3:=SGGetColor4fFromLongWord($FF8000);
 
-InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],True);
 InitEffectsComboBox(Context.Width-160,40,150,30,[SGAnchRight],True);
+InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],True);
 InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FLDC:=TSGLabel.Create;

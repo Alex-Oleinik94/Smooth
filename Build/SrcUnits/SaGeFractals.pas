@@ -470,7 +470,7 @@ if FLightingEnable then
 	Render.Disable(SGR_LIGHTING);
 	end;
 if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
-	if (not ((FThreadsEnable) and (Length(FThreadsData)>0))) or (((FThreadsEnable) and (Length(FThreadsData)>0)) and FMeshesReady) then
+	if (not ((FThreadsEnable))) or (((FThreadsEnable)) and FMeshesReady) then
 		begin
 		FSizeLabel.Caption:=(
 			'Size-(All: '+SGGetSizeString(FMesh.Size)+
@@ -479,6 +479,7 @@ if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
 			' );LenArObj='+SGStr(FMesh.NOfObjects)+'.'
 			);
 		FSizeLabelFlag:=True;
+		//WriteLn(FSizeLabel.Caption);
 		end
 	else
 		begin
