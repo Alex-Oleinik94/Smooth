@@ -1,33 +1,42 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeUtils;
 
 interface
 uses
-	SaGeBase, SaGeBased
+	 SaGeBase
+	,SaGeBased
 	,SaGeCommon
 	,SaGeContext
 	,SaGeRender
 	,SaGeImages
 	;
 type
-	SGIdentityObject=object
-		Context:PSGContext;
-		Render:TSGRender;
-		Rotate1:real;
-		Rotate2:real;
-		Rotate3:real;
-		Zum:real;
-		Left:real;
-		Top:real;
-		Changet:Boolean;
-		procedure Clear;
-		procedure Change(const Mode:LongWord = SG_3D);
-		procedure Init(const Tr:TSGVertex3f);overload;
-		procedure Init;overload;
-		procedure ChangeAndInit(const Mode:LongWord = SG_3D);
-		procedure Go(const Mode:LongWord = SG_3D);
+(*====================================================================*)
+(*============================TSGCamera===============================*)
+(*====================================================================*)
+	
+	TSGCamera=class(TSGContextObject)
+			public
+		constructor Create();override;
+			protected
+		FMatrixMode,FViewMode:TSGByte;
+		FRotateX,FRotateY,FTranslateX,FTranslateY,FZum:TSGSingle;
+		procedure SetViewMode(const NewViewMode:TSGByte);virtual;abstract;
+		procedure Change();inline;
+		procedure InitMatrix();inline;
+			public
+		property MatrixMode:TSGByte read FMatrixMode write FMatrixMode;
+		property ViewMode:TSGByte read FViewMode write SetViewMode;
+		procedure Clear();inline;
+		procedure CallAction();inline;
+		//procedure InitViewModeComboBox();inline;
 		end;
+	
+(*====================================================================*)
+(*============================TSGGLImage==============================*)
+(*====================================================================*)
+
 	SGImage = SaGeImages.TSGImage;
 	TSGImage = SaGeImages.TSGImage;
 	TStringParams=packed array of packed array [0..1] of string;
@@ -41,7 +50,11 @@ type
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
 		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
 		end;
-	
+
+(*====================================================================*)
+(*=============================TSGFont================================*)
+(*====================================================================*)
+
 	TSGSimbolParam=object
 		X,Y,Width:LongInt;
 		end;
@@ -66,7 +79,11 @@ type
 		property FontReady:Boolean read FFontReady;
 		function Ready:Boolean;override;
 		end;
-	
+
+(*====================================================================*)
+(*=============================TSGGLFont==============================*)
+(*====================================================================*)
+
 	TSGGLFont=class(TSGFont)
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -99,24 +116,109 @@ function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:bo
 
 implementation
 
-procedure TSGGLFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-var
-	P:PChar;
+(*====================================================================*)
+(*============================TSGCamera===============================*)
+(*====================================================================*)
+
+constructor TSGCamera.Create();
 begin
-P:=SGStringToPChar(S);
-DrawFontFromTwoVertex2f(P,Vertex1,Vertex2,AutoXShift,AutoYShift);
-FreeMem(P,SGPCharLength(P)+1);
+inherited;
+FMatrixMode:=SG_3D;
+Clear();
 end;
 
-procedure TSGGLFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-var
-	P:PChar;
+procedure TSGCamera.Change();inline;
 begin
-P:=SGStringToPChar(S);
-DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift);
-FreeMem(P,SGPCharLength(P)+1);
+if Context.CursorWheel=SGUpCursorWheel then
+	begin
+	FZum*=0.9;
+	end;
+if Context.CursorWheel=SGDownCursorWheel then
+	begin
+	FZum*=1/0.9;
+	end;
+if Context.CursorKeysPressed(SGLeftCursorButton) then
+	begin
+	FRotateY+=Context.CursorPosition(SGDeferenseCursorPosition).x/3;
+	FRotateX+=Context.CursorPosition(SGDeferenseCursorPosition).y/3;
+	end;
+if Context.CursorKeysPressed(SGRightCursorButton) then
+	begin
+	FTranslateY+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*FZum;
+	FTranslateX+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*FZum;
+	end;
+if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
+	begin
+	FZum*=1/0.89;
+	end;
+if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
+	begin
+	FZum*=0.89;
+	end;
 end;
 
+procedure TSGCamera.InitMatrix();inline;
+begin
+Render.InitMatrixMode(FMatrixMode,FZum);
+Render.Translatef(FTranslateX,FTranslateY,-10*FZum);
+Render.Rotatef(FRotateX,1,0,0);
+Render.Rotatef(FRotateY,0,1,0);
+end;
+
+procedure TSGCamera.CallAction();inline;
+begin
+Change();
+InitMatrix();
+end;
+
+procedure TSGCamera.Clear();inline;
+begin
+FZum:=1;
+FRotateX:=0;
+FRotateY:=0;
+FTranslateX:=0;
+FTranslateY:=0;
+end;
+
+//======================================================================
+
+{procedure SGViewportObject.CanculateColor;
+begin
+glReadPixels(
+	Point.x,
+	Context.Height-Point.y-1,
+	1, 
+	1, 
+	GL_RGBA, 
+	GL_FLOAT, 
+	@FColor);
+end;
+
+procedure SGViewportObject.CanculateVertex; 
+begin
+glReadPixels(
+	Point.x,
+	Context.Height-Point.y-1,
+	1, 
+	1, 
+	GL_DEPTH_COMPONENT, 
+	GL_FLOAT, 
+	@depth);
+gluUnProject(
+	Point.x,
+	Context.Height-Point.y-1,
+	depth,
+	mv_matrix,
+	proj_matrix,
+	viewport,
+	@x,
+	@y,
+	@z);
+end;}
+{function SGViewportObject.GetVertex:SGVertex;
+begin
+Result.Import(x,y,z);
+end;}
 {procedure SGViewportObject.SetPoint(NewPoint:SGPoint;const WithSmezhenie:boolean = True);
 begin
 Point:=NewPoint;
@@ -143,6 +245,27 @@ Result:=ViewportObj.Vertex;
 ViewportObj.Destroy;
 end;}
 
+(*====================================================================*)
+(*=============================TSGFont================================*)
+(*====================================================================*)
+
+procedure TSGGLFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+var
+	P:PChar;
+begin
+P:=SGStringToPChar(S);
+DrawFontFromTwoVertex2f(P,Vertex1,Vertex2,AutoXShift,AutoYShift);
+FreeMem(P,SGPCharLength(P)+1);
+end;
+
+procedure TSGGLFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+var
+	P:PChar;
+begin
+P:=SGStringToPChar(S);
+DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift);
+FreeMem(P,SGPCharLength(P)+1);
+end;
 
 function TSGFont.Ready:Boolean;
 begin
@@ -380,6 +503,10 @@ for i:=1 to Length(S) do
 	end;
 end;
 
+(*====================================================================*)
+(*============================TSGGLImage==============================*)
+(*====================================================================*)
+
 procedure TSGGLImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
 begin
 DrawImageFromTwoVertex2f(SGPoint2fToVertex2f(Vertex1),SGPoint2fToVertex2f(Vertex2),RePlace,RePlaceY,Rotation);
@@ -427,40 +554,6 @@ DrawImageFromTwoVertex2f(
 		Vertex2.y-abs(Vertex1.y-Vertex2.y)*((1-Ratio)/2)),
 	RePlace,SG_2D);
 end;
-
-{procedure SGViewportObject.CanculateColor;
-begin
-glReadPixels(
-	Point.x,
-	Context.Height-Point.y-1,
-	1, 
-	1, 
-	GL_RGBA, 
-	GL_FLOAT, 
-	@FColor);
-end;
-
-procedure SGViewportObject.CanculateVertex;//{$}
-begin
-glReadPixels(
-	Point.x,
-	Context.Height-Point.y-1,
-	1, 
-	1, 
-	GL_DEPTH_COMPONENT, 
-	GL_FLOAT, 
-	@depth);
-gluUnProject(
-	Point.x,
-	Context.Height-Point.y-1,
-	depth,
-	mv_matrix,
-	proj_matrix,
-	viewport,
-	@x,
-	@y,
-	@z);
-end;}
 
 procedure TSGGLImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
 begin
@@ -563,91 +656,5 @@ if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
 	Render.EndScene();
 	end;
 end;
-
-{function SGViewportObject.GetVertex:SGVertex;
-begin
-Result.Import(x,y,z);
-end;}
-
-procedure SGIdentityObject.Change(const Mode:LongWord = SG_3D);
-var
-	LastTop,LastLeft,LastR1,LastR2:real;
-begin
-Changet:=False;
-LastLeft:=Left;
-LastTop:=Top;
-LastR1:=Rotate1;
-LastR2:=Rotate2;
-if Context^.CursorWheel=SGUpCursorWheel then
-	begin
-	Zum*=0.9;
-	Changet:=True;
-	end;
-if Context^.CursorWheel=SGDownCursorWheel then
-	begin
-	Zum*=1/0.9;
-	Changet:=True;
-	end;
-if Context^.CursorKeysPressed(SGLeftCursorButton) then
-	begin
-	Rotate2+=Context^.CursorPosition(SGDeferenseCursorPosition).x/3;
-	Rotate1+=Context^.CursorPosition(SGDeferenseCursorPosition).y/3;
-	end;
-if Context^.CursorKeysPressed(SGRightCursorButton) then{$}
-	begin
-	Top+=    (-Context^.CursorPosition(SGDeferenseCursorPosition).y/100)*Zum;
-	Left+=   ( Context^.CursorPosition(SGDeferenseCursorPosition).x/100)*Zum;
-	end;
-if (Context^.KeyPressed and (Context^.KeysPressed(char(17))) and (Context^.KeyPressedChar=char(189)) and (Context^.KeyPressedType=SGDownKey)) then
-	begin
-	Zum*=1/0.89;
-	Changet:=true;
-	end;
-if  (Context^.KeyPressed and (Context^.KeysPressed(char(17))) and (Context^.KeyPressedByte=187) and (Context^.KeyPressedType=SGDownKey))  then
-	begin
-	Zum*=0.89;
-	Changet:=true;
-	end;
-if (not Changet) and (not (SGRealsEqual(LastLeft,Left) and SGRealsEqual(LastR1,Rotate1) and SGRealsEqual(LastTop,Top) and SGRealsEqual(LastR2,Rotate2))) then
-	Changet:=True;
-end;
-
-procedure SGIdentityObject.Go(const Mode:LongWord = SG_3D);
-begin
-Change(Mode);
-Render.InitMatrixMode(Mode,(Zum)*120);
-Init();
-end;
-
-procedure SGIdentityObject.Init(const tr :TSGVertex3f);overload;
-begin
-Render.Translatef(Left,Top,-10*Zum);
-Render.Rotatef(Rotate1,1,0,0);
-Render.Rotatef(Rotate2,0,1,0);
-Tr.Translate(Render);
-end;
-
-procedure SGIdentityObject.Init;overload;
-begin
-Init(SGVertexImport(0,0,0));
-end;
-
-procedure SGIdentityObject.Clear;
-begin
-Rotate1:=0;
-Rotate2:=0;
-Rotate3:=0;
-Top:=0;
-Zum:=1;
-Left:=0;
-end;
-
-procedure SGIdentityObject.ChangeAndInit(const Mode:LongWord = SG_3D);
-begin
-Change(Mode);
-Init();
-end;
-
-
 
 end.

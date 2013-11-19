@@ -51,7 +51,7 @@ type
 		procedure Draw;override;
 			protected
 		FMesh:TSGModel;
-		FIO:SGIdentityObject;
+		FCamera:TSGCamera;
 		end;
 type
 	TSGKostiaArray=packed array of
@@ -1054,7 +1054,7 @@ end;
 
 procedure TSGMeshViever.Draw;
 begin
-FIO.ChangeAndInit;
+FCamera.CallAction();
 if FMesh<>nil then
 	FMesh.Draw;
 end;
@@ -1062,7 +1062,8 @@ end;
 constructor TSGMeshViever.Create;
 begin
 inherited;
-FIO.Clear;
+FCamera:=TSGCamera.Create();
+FCamera.SetContext(FContext);
 FMesh:=nil;
 
 
@@ -1071,6 +1072,8 @@ end;
 
 destructor TSGMeshViever.Destroy;
 begin
+if FCamera<>nil then
+	FCamera.Destroy();
 inherited;
 end;
 

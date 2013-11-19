@@ -77,8 +77,7 @@ type
 		FSunAbs:real;
 		FSunTrigonometry:packed array[0..2] of real;
 		FLightingEnable:Boolean;
-		FIdentityObject:SGIdentityObject;
-		FMatrixType:SGByte;
+		FCamera:TSGCamera;
 		
 		FEnableVBO:Boolean;
 		FEnableColors:boolean;
@@ -169,8 +168,8 @@ begin
 with TSG3DFractal(VComboBox.FUserPointer1) do
 	begin
 	case b of
-	0:FMatrixType:=SG_3D;
-	1:FMatrixType:=SG_3D_ORTHO;
+	0:FCamera.MatrixMode:=SG_3D;
+	1:FCamera.MatrixMode:=SG_3D_ORTHO;
 	end;
 	end;
 end;
@@ -366,10 +365,9 @@ FMeshesInfo:=nil;
 FMeshesReady:=True;
 FEnableColors:=True;
 FEnableNormals:=True;
-FIdentityObject.Clear;
-FIdentityObject.Render:=Render;
-FIdentityObject.Context:=FContext;
-FMatrixType:=SG_3D;
+FCamera:=TSGCamera.Create();
+FCamera.SetContext(FContext);
+FCamera.MatrixMode:=SG_3D;
 FProjectionComboBox:=nil;
 FSizeLabel:=nil;
 FEffectsComboBox:=Nil;
@@ -378,6 +376,8 @@ end;
 
 destructor TSG3DFractal.Destroy();
 begin
+if FCamera<>nil then
+	FCamera.Destroy();
 if FSizeLabel<>nil then
 	FSizeLabel.Destroy();
 if FProjectionComboBox<>nil then
@@ -398,7 +398,7 @@ begin
 	WriteLn('Begin of  "TSGFractal.Draw" : "'+ClassName+'"');
 	WriteLn('Var: FMeshesReady=',FMeshesReady,'; FEnableVBO=',FEnableVBO,' .');
 	{$ENDIF}
-FIdentityObject.Go(FMatrixType);
+FCamera.CallAction();
 if (Not FMeshesReady) and FThreadsEnable and FEnableVBO then
 	begin
 	ii:=1;

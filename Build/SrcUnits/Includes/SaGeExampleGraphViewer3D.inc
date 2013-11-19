@@ -21,7 +21,7 @@ type
 {$IFDEF SGREADIMPLEMENTATION}
 procedure TSGGraphViewer3D.Draw();
 begin
-FIdentityObject.Go(FMatrixType);
+FCamera.CallAction();
 FSunTrigonometry[0]+=pi/90		/20;
 FSunTrigonometry[1]-=pi/60		/20;
 FSunTrigonometry[2]+=pi/180		/20;
