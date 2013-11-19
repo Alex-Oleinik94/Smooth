@@ -123,6 +123,7 @@ type
 {$i Includes\SaGeFractalKohTriangle.inc}
 {$i Includes\SaGeFractalPodkova.inc}
 {$i Includes\SaGeFractalLomanaya.inc}
+{$i Includes\SageFractalTetraider.inc}
 {$UNDEF SGREADINTERFACE}
 
 implementation
@@ -133,6 +134,7 @@ implementation
 {$i Includes\SaGeFractalKohTriangle.inc}
 {$i Includes\SaGeFractalPodkova.inc}
 {$i Includes\SaGeFractalLomanaya.inc}
+{$i Includes\SageFractalTetraider.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DFractal.Calculate();

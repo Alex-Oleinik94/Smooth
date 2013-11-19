@@ -48,6 +48,7 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGFractalTetraider);
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalPodkova);
