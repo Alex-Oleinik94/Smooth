@@ -1,4 +1,4 @@
-{$include Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeRender;
 
@@ -34,7 +34,7 @@ type
 		function TopShift(const VFullscreen:Boolean = False):LongWord;virtual;
 		procedure MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);virtual;
 			public
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);virtual;abstract;
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
 		procedure Vertex3f(const x,y,z:single);virtual;abstract;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;

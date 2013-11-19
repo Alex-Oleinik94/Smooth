@@ -1,9 +1,4 @@
-{$IFDEF UNIX}
-{$ELSE}
-	{$IFDEF MSWINDOW}
-		{$ENDIF}
-	{$ENDIF}
-{$include Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeRenderOpenGL;
 interface
 uses
@@ -57,7 +52,7 @@ type
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
 		procedure LoadIdentity();override;
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
@@ -418,7 +413,7 @@ begin
 inherited;
 end;
 
-procedure TSGRenderOpenGL.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
+procedure TSGRenderOpenGL.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
 const
 	glub = 500;
 var
@@ -436,7 +431,7 @@ if  Mode=SG_2D then
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		glOrtho(-(CWidth / dncht),CWidth / dncht,-CHeight / dncht,(CHeight / dncht),0,500)
+		glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500)
 		end
 	else
 		gluPerspective(45, CWidth / CHeight, 0.0011, 500);

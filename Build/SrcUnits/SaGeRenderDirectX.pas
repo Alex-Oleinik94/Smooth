@@ -1,4 +1,11 @@
-{$include Includes\SaGe.inc}
+{$IFDEF UNIX}
+	NOTE "Òû קעמ המכבאוב????"
+{$ELSE}
+	{$IFDEF MSWINDOW}
+		{$ENDIF}
+	{$ENDIF}
+
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeRenderDirectX;
 interface
 uses
@@ -39,7 +46,7 @@ type
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);override;
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
 		procedure LoadIdentity();override;
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
@@ -987,7 +994,7 @@ if (pDevice<>nil)  then
 inherited Destroy();
 end;
 
-procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 120);
+procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
 var
 	Matrix:D3DMATRIX;
 var
@@ -1010,7 +1017,7 @@ if Mode=SG_3D then
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4*dncht/120,D3DX_PI/4*dncht/120/CWidth*CHeight,0.0011,500);
+		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4*dncht*30,D3DX_PI/4*dncht*30/CWidth*CHeight,0.0011,500);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 		D3DXMatrixScaling(Matrix,1,1,-1);
 		pDevice.SetTransform(D3DTS_VIEW, Matrix);
