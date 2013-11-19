@@ -302,7 +302,7 @@ FSunAbs:=10;
 FSun.Import(0,0,-FSunAbs);
 FSunTrigonometry[0]:=pi/2;
 FSunTrigonometry[1]:=0;
-FSunTrigonometry[2]:=pi;
+FSunTrigonometry[2]:=pi+pi;
 FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedVBOBuffers();

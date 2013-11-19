@@ -48,14 +48,14 @@ SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
-	Add(TSGKillKostia);
-	Add(TSGFractalLomanaya);
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalPodkova);
 	Add(TSGFractalKohTriangle);//Треугольник Серпинского
+	Add(TSGFractalLomanaya);
 	Add(TSGGraphic);
 	Add(TSGGraphViewer);
+	Add(TSGKillKostia);
 	Add(TSGGraphViewer3D);
 	Add(TSGGenAlg);
 	
