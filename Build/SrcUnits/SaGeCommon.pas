@@ -127,6 +127,7 @@ type
 		procedure Import(const r1:single = 0; const g1:single = 0; const b1:single = 0);
 		procedure ReadFromStream(const Stream:TStream);inline;
 		procedure WriteToStream(const Stream:TStream);inline;
+		procedure Normalize();inline;
 		end;
 	PTArTSGColor3f = ^TArTSGColor3f;
 	TArTSGColor3f = array of TSGColor3f;
@@ -182,6 +183,9 @@ operator * (const b:byte;const a:SGColor):SGColor;inline;overload;
 operator + (const a,b:SGColor):SGColor;inline;overload;
 operator - (const a,b:SGColor):SGColor;inline;overload;
 operator / (const a:SGColor;const b:real):SGColor;inline;overload;
+
+operator * (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+operator / (const a:TSGColor3f;const b:real):SGColor;inline;overload;
 
 operator + (const a,b:SGVertex):SGVertex;inline;overload;
 operator - (const a,b:SGVertex):SGVertex;inline;overload;
@@ -550,6 +554,16 @@ begin
 VRender.Vertex2f(x,y);
 end;
 
+procedure TSGColor3f.Normalize();inline;
+var
+	kk:single;
+begin
+kk:=SGAbsTwoVertex(NilVertex,SGVertexImport(r,g,b));
+r/=kk;
+g/=kk;
+b/=kk;
+end;
+
 procedure TSGVertex3f.Normalize();inline;
 var
 	vabs:real;
@@ -666,7 +680,21 @@ Result.b:=a.b-b.b;
 Result.a:=a.a-b.a;
 end;
 
-operator / (const a:SGColor;const b:real):SGColor;inline;
+operator * (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+begin
+Result.r:=a.r*b;
+Result.g:=a.g*b;
+Result.b:=a.b*b;
+end;
+
+operator / (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+begin
+Result.r:=a.r/b;
+Result.g:=a.g/b;
+Result.b:=a.b/b;
+end;
+
+operator / (const a:SGColor;const b:real):SGColor;inline;overload;
 begin
 Result.r:=a.r/b;
 Result.g:=a.g/b;

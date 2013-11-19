@@ -94,9 +94,13 @@ type
 			public
 		property LightingEnable:Boolean read FLightingEnable write FLightingEnable;
 			public
-		FProjectionComboBox:TSGComboBox;
+		FProjectionComboBox,FEffectsComboBox:TSGComboBox;
+		FSizeLabel:TSGLabel;
+		FSizeLabelFlag:Boolean;
 			public
 		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
 		end;
 	TSGFractal3D=TSG3DFractal;
 	
@@ -139,6 +143,7 @@ implementation
 
 procedure TSG3DFractal.Calculate();
 begin
+FSizeLabelFlag:=False;
 inherited;
 if FEnableVBO then
 	FMeshesReady:=False;
@@ -168,6 +173,49 @@ with TSG3DFractal(VComboBox.FUserPointer1) do
 	1:FMatrixType:=SG_3D_ORTHO;
 	end;
 	end;
+end;
+
+procedure mmmComboBoxEffProc(a,b:LongInt;VComboBox:TSGComboBox);
+begin
+with TSG3DFractal(VComboBox.FUserPointer1) do
+	begin
+	if a<>b then
+		begin
+		FEnableColors:=(b=2) or (b=0);
+		FEnableNormals:=(b=1) or (b=0);
+		FLightingEnable:=FEnableNormals;
+		Calculate();
+		end;
+	end;
+end;
+
+procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+begin
+FSizeLabel:=TSGLabel.Create;
+SGScreen.CreateChild(FSizeLabel);
+SGScreen.LastChild.SetBounds(a,b,c,d);
+SGScreen.LastChild.AutoTopShift:=ATS;
+SGScreen.LastChild.Anchors:=Anch;
+SGScreen.LastChild.FUserPointer1:=Self;
+SGScreen.LastChild.Visible:=True;
+FSizeLabel.FTextPosition:=0;
+end;
+
+procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+begin
+FEffectsComboBox:=TSGComboBox.Create;
+SGScreen.CreateChild(FEffectsComboBox);
+SGScreen.LastChild.SetBounds(a,b,c,d);
+SGScreen.LastChild.AutoTopShift:=ATS;
+SGScreen.LastChild.Anchors:=Anch;
+SGScreen.LastChild.AsComboBox.CreateItem('Нормали и цвета');
+SGScreen.LastChild.AsComboBox.CreateItem('Только нормали');
+SGScreen.LastChild.AsComboBox.CreateItem('Только цвета');
+SGScreen.LastChild.AsComboBox.CreateItem('Ничего нету');
+SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxEffProc);
+SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.FUserPointer1:=Self;
+SGScreen.LastChild.Visible:=True;
 end;
 
 procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
@@ -250,7 +298,7 @@ while Quantity<>0 do
 	FMesh.NOfObjects+=1;
 	FMesh.ArObjects[FMesh.NOfObjects-1]:=TSG3DObject.Create;
 	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(FContext);
-	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FF8000);
+	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
 	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
 		FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=SGR_TRIANGLES
@@ -322,12 +370,20 @@ FIdentityObject.Clear;
 FIdentityObject.Render:=Render;
 FIdentityObject.Context:=FContext;
 FMatrixType:=SG_3D;
+FProjectionComboBox:=nil;
+FSizeLabel:=nil;
+FEffectsComboBox:=Nil;
+FSizeLabelFlag:=False;
 end;
 
 destructor TSG3DFractal.Destroy();
 begin
+if FSizeLabel<>nil then
+	FSizeLabel.Destroy();
 if FProjectionComboBox<>nil then
 	FProjectionComboBox.Destroy();
+if FEffectsComboBox<>nil then
+	FEffectsComboBox.Destroy();
 if FMesh<>nil then 
 	FMesh.Destroy;
 SetLength(FMeshesInfo,0);
@@ -413,6 +469,24 @@ if FLightingEnable then
 	Render.Disable(SGR_LIGHT0);
 	Render.Disable(SGR_LIGHTING);
 	end;
+if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
+	if (not ((FThreadsEnable) and (Length(FThreadsData)>0))) or (((FThreadsEnable) and (Length(FThreadsData)>0)) and FMeshesReady) then
+		begin
+		FSizeLabel.Caption:=(
+			'Size-(All: '+SGGetSizeString(FMesh.Size)+
+			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
+			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
+			' );LenArObj='+SGStr(FMesh.NOfObjects)+'.'
+			);
+		FSizeLabelFlag:=True;
+		end
+	else
+		begin
+		FSizeLabel.Caption:=SGStringToPChar(
+			'Загрузка... (NOfObjects='+SGStr(Length(FMesh.ArObjects))+';Threads='+SGStr(Threads)
+			);
+		FSizeLabel.Caption:=FSizeLabel.Caption+')';
+		end;
 {$IFDEF SGMoreDebuging}
 	WriteLn('End of  "TSGFractal.Draw" : "'+ClassName+'"');
 	{$ENDIF}

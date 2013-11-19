@@ -638,16 +638,16 @@ else if (FColorType=TSGMeshColorType4f) then
 	end
 else if (FColorType=TSGMeshColorType3b) then
 	begin
-	ArColor3b[Index]^.r:=round(r*255);
-	ArColor3b[Index]^.g:=round(g*255);
-	ArColor3b[Index]^.b:=round(b*255);
+	ArColor3b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+	ArColor3b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
+	ArColor3b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
 	end
 else if (FColorType=TSGMeshColorType4b) then
 	begin
-	ArColor4b[Index]^.r:=round(r*255);
-	ArColor4b[Index]^.g:=round(g*255);
-	ArColor4b[Index]^.b:=round(b*255);
-	ArColor4b[Index]^.a:=round(a*255);
+	ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+	ArColor4b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
+	ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+	ArColor4b[Index]^.a:=Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a);
 	end;
 end;
 
