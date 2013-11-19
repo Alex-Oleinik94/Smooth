@@ -914,7 +914,7 @@ while not eof(f) do
 			end;
 		if FArF[iii-1]=nil then
 			FArF[iii-1]:=TFileStream.Create(NameFolder+Slash+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
-		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+#13+#10,FArF[iii-1]);
+		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+#13+#10,FArF[iii-1],False);
 		end;
 	end;
 close(f);
@@ -1091,7 +1091,9 @@ if FArF<>nil then
 	begin
 	for i:=0 to High(FArF) do
 		if FArF[i]<>nil then
+			begin
 			FArF[i].Destroy;
+			end;
 	SetLength(FArF,0);
 	end;
 if PS=0 then

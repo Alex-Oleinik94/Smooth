@@ -1,4 +1,4 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeModel;
 
@@ -13,72 +13,71 @@ uses
 	, SaGeRender
 	, Crt
 	, SaGeContext
-	, SaGeMesh;
+	, SaGeMesh
+	, SaGeGameMesh;
 type
-	TSGBaseModel=class(TSGDrawClass)
+	TSGGameModel=class(TSGDrawClass)
 			public
 		constructor Create();override;
 		destructor Destroy(); override;
 		class function ClassName():String;override;
 			protected
-		FName:String;
 		FQuantityMeshes:LongWord;
-		FQuantityMaterials:LongWord;
-		FMeshes:packed array of 
-			packed record
-			FMaterialIdentity:LongWord;
-			FMesh:TSG3DObject;
-			end;
-		FMaterials:packed array of
-			packed record
-			FName:string;
-			Ka,Kd,Ks:TSGColor3f;
-			d:TSGFloat;
-			end;
-		
-		FEnableDrawOnyWhichEnableVBO:Boolean;
-		procedure LoadFromOBJ(const FFileName:string);virtual;
+		FMeshes:packed array of TSGGameMesh;
 			public
 		procedure Draw();override;
+		procedure FindCollision();virtual;
 		end;
 
 implementation
 
-procedure TSGBaseModel.LoadFromOBJ(const FFileName:string);
-begin
-end;
-
-procedure TSGBaseModel.Draw();
+procedure TSGGameModel.FindCollision();
 var
-	i:LongWord;
+	i,ii:TSGMaxEnum;
 begin
-for i:=0 to FQuantityMeshes-1 do
-	begin
-	if FMeshes[i].FMesh <> nil then
-		if (not FEnableDrawOnyWhichEnableVBO) or (FEnableDrawOnyWhichEnableVBO and FMeshes[i].FMesh.FEnableVBO) then
-			FMeshes[i].FMesh.Draw();
-	end;
+if FMeshes<>nil then
+	for i:=0 to FQuantityMeshes-2 do
+		if FMeshes[i]<>nil then
+			for ii:=i+1 to FQuantityMeshes-1 do
+				if FMeshes[ii]<>nil then
+					if FMeshes[ii].FDistance+FMeshes[i].FDistance>=SGAbsTwoVertex(FMeshes[ii].FPosition,FMeshes[i].FPosition) then
+						begin
+						//Вод тут ищем колизии
+						end;
 end;
 
-constructor TSGBaseModel.Create();
+procedure TSGGameModel.Draw();
+var
+	i:TSGMaxEnum;
+begin
+if FMeshes<>nil then
+	for i:=0 to FQuantityMeshes-1 do
+		begin
+		if FMeshes[i]<>nil then
+			begin
+			//!Render.PushMatrix();
+			FMeshes[i].TransfomMatrix();
+			FMeshes[i].Draw();
+			//!Render.PopMatrix();
+			end;
+		end;
+end;
+
+constructor TSGGameModel.Create();
 begin
 inherited;
-FName:='';
 FQuantityMeshes:=0;
 FMeshes:=nil;
-FMaterials:=nil;
-FQuantityMaterials:=0;
-FEnableDrawOnyWhichEnableVBO:=False;
 end;
 
-destructor TSGBaseModel.Destroy(); 
+destructor TSGGameModel.Destroy(); 
 begin
 inherited;
 end;
 
-class function TSGBaseModel.ClassName():String;
+class function TSGGameModel.ClassName():String;
 begin
-Result:='Base Model';
+Result:='Game Model';
 end;
 
 end.

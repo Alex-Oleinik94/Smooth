@@ -111,6 +111,7 @@ type
 		ArVertex:Pointer;
 	public
 		function GetArVertexes():Pointer;inline;
+		function GetArFaces():Pointer;inline;
 		
 		function GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 		function GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
@@ -700,6 +701,14 @@ Result:=PTSGColor3f(
 	GetSizeOfOneVertex()*Index+
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
 	);
+end;
+
+function TSG3DObject.GetArFaces():Pointer;inline;
+begin
+if ArFaces=nil then
+	Result:=nil
+else
+	Result:=@ArFaces[0];
 end;
 
 function TSG3DObject.GetArVertexes():Pointer;inline;

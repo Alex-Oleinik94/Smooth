@@ -207,6 +207,7 @@ operator - (const a:TSGVertex2f):TSGVertex2f;overload;inline;
 operator * (const a,b:TSGVertex2f):TSGVertex2f;overload;inline;
 operator + (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
 operator - (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
+operator := (const b:single):TSGVertex3f;overload;inline;
 
 operator + (const a,b:SGPoint):SGPoint;inline;overload;
 operator - (const a,b:SGPoint):SGPoint;inline;overload;
@@ -260,6 +261,11 @@ function SGZ(const v:Single):TSGVertex3f;inline;
 function Abs(const a:TSGVertex2f):extended;overload;inline;
 
 implementation
+
+operator := (const b:single):TSGVertex3f;overload;inline;
+begin
+Result.Import(b,b,b);
+end;
 
 function Abs(const a:TSGVertex2f):extended;overload;inline;
 begin

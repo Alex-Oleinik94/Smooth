@@ -33,7 +33,8 @@ uses
 	,SaGeGeneticalAlgoritm
 	,SaGeRender
 	,SaGeRenderOpenGL
-	,SaGeModel;
+	,SaGeModel
+	,SaGeTron;
 
 
 procedure Draw(const Context:PSGContext);
@@ -341,7 +342,7 @@ end;
 var
 	s:string;
 begin
-if (argc=2) and (SGFileExists(SGPCharToString(argv[0]))) then
+if (argc=2) and (SGFileExists(SGPCharToString(argv[1]))) then
 	begin
 	GoViewer(SGPCharToString(argv[1]));
 	end
