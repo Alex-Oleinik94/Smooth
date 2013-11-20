@@ -55,16 +55,17 @@ with TSGDrawClasses.Create(MyContext) do
 	Add(TSGFractalTetraider);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
-	Add(TSGGraphic);
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
-	Add(TSGGraphViewer3D);
 	Add(TSGGenAlg);
+	
+	//Add(TSGGraphic);
+	//Add(TSGGraphViewer3D);
 	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
 	
-	Initialize;
+	Initialize();
 	end;
 end;
 

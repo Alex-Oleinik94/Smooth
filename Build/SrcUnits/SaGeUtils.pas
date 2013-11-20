@@ -45,7 +45,7 @@ type
 			private
 		FStartArray : TArTSGVertex3f;
 		FMesh : TSG3DObject;
-		FDetalization:LongWord;
+		FDetalization : LongWord;
 		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
 		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
 		function GetResultVertex(const Attitude:real;const FArray:TArTSGVertex3f):TSGVertex3f;inline;overload;
@@ -56,6 +56,7 @@ type
 		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
 		property Detalization:LongWord read FDetalization write FDetalization;
 		procedure Draw();override;
+		function VertexQuantity:TSGMaxEnum;inline;
 		end;
 	
 (*====================================================================*)
@@ -145,6 +146,14 @@ implementation
 (*==========================TSGBezierCurve============================*)
 (*====================================================================*)
 
+function TSGBezierCurve.VertexQuantity:TSGMaxEnum;inline;
+begin
+if FStartArray=nil then
+	Result:=0
+else
+	Result:=Length(FStartArray);
+end;
+
 procedure TSGBezierCurve.Draw();
 begin
 if FMesh<>nil then
@@ -181,6 +190,9 @@ var
 begin
 if FMesh<>nil then
 	FMesh.Destroy();
+FMesh:=nil;
+if (FStartArray=nil) or (Length(FStartArray)=0) then
+	Exit;
 FMesh:=TSG3DObject.Create();
 FMesh.SetContext(FContext);
 FMesh.FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
@@ -189,9 +201,9 @@ FMesh.PoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType:=TSGMeshVertexType3f;
 FMesh.SetFaceLength(FDetalization);
 FMesh.SetVertexLength(FDetalization);
-for i:=0 to High(FStartArray) do
+for i:=0 to FDetalization-1 do
 	begin
-	FMesh.ArVertex3f[i]^:=GetResultVertex(i/Detalization);
+	FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
 	FMesh.ArFacesPoints[i].p[0]:=i;
 	end;
 FMesh.LoadToVBO();
@@ -222,7 +234,7 @@ begin
 inherited;
 FStartArray:=nil;
 FMesh:=nil;
-FDetalization:=0;
+FDetalization:=50;
 end;
 
 destructor TSGBezierCurve.Destroy();

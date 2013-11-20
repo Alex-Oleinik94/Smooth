@@ -46,6 +46,7 @@ type
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
+		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
 		procedure LoadIdentity();override;
 		procedure Vertex3f(const x,y,z:single);override;
@@ -992,6 +993,17 @@ if(pD3d<>nil) then
 if (pDevice<>nil)  then
 	pDevice._Release();
 inherited Destroy();
+end;
+
+procedure TSGRenderDirectX.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
+var
+	Matrix:D3DMATRIX;
+begin
+LoadIdentity();
+D3DXMatrixOrthoOffCenterRH(Matrix,x0,x1,y0,y1,0.0011,500);
+pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+D3DXMatrixScaling(Matrix,1,1,-1);
+pDevice.SetTransform(D3DTS_VIEW, Matrix);
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);

@@ -52,6 +52,7 @@ type
 		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
+		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
 		procedure LoadIdentity();override;
 		procedure Vertex3f(const x,y,z:single);override;
@@ -411,6 +412,15 @@ begin
 		{$ENDIF}
 	{$ENDIF}
 inherited;
+end;
+
+procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
+begin
+glMatrixMode(GL_PROJECTION);
+LoadIdentity();
+glOrtho(x0,x1,y0,y1,0,0.1);
+glMatrixMode(GL_MODELVIEW);
+LoadIdentity();
 end;
 
 procedure TSGRenderOpenGL.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);

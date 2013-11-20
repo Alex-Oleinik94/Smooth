@@ -98,20 +98,67 @@ type
 		FArProgressBar:packed array of
 			TSGProgressBar;
 		
+		//Time
 		FDateTime:TSGDateTime;
 		FBeginCalc:TSGDateTime;
+		
+		//Bezier Curve
+		FEnablePictureStripPanel:Boolean;
+		FBezierCurve:TSGBezierCurve;
+		
+		FButtonEnableCurve:TSGButton;
+		FBezierCurvePanel:TSGPanel;
+		FBezierCurveEditKadr:TSGEdit;
+		
+		FEnablePictureStripAddingPoints:Boolean;
 			public
-		procedure OffComponents;inline;
-		procedure OnComponents;inline;
-		procedure InitManda;inline;
+		procedure DrawBezierPoints();inline;
+		procedure OffComponents();inline;
+		procedure OnComponents();inline;
+		procedure InitManda();inline;
 		function GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;
-		procedure UpDateLabelCoordCaption;inline;
+		procedure UpDateLabelCoordCaption();inline;
 		end;
 {$ENDIF}
 
 {$IFDEF SGREADIMPLEMENTATION}
 
-procedure TSGFractalMandelbrodRelease.UpDateLabelCoordCaption;inline;
+procedure TSGFractalMandelbrodRelease.DrawBezierPoints();inline;
+var
+	A:TSGVertex3f;
+	i:TSGMaxEnum;
+	S:Extended;
+begin
+if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
+	begin
+	S:=Abs(Manda.FView.y1-Manda.FView.y2)/60;
+	Render.Color4f(1,1,0,0.5);
+	Render.BeginScene(SGR_QUADS);
+	for i:=0 to FBezierCurve.VertexQuantity-1 do
+		begin
+		A:=FBezierCurve.Vertexes[i];
+		Render.Vertex2f(A.x+S,A.y+S);
+		Render.Vertex2f(A.x-S,A.y+S);
+		Render.Vertex2f(A.x-S,A.y-S);
+		Render.Vertex2f(A.x+S,A.y-S);
+		end;
+	Render.EndScene();
+	
+	Render.Color4f(1,1,0,0.9);
+	for i:=0 to FBezierCurve.VertexQuantity-1 do
+		begin
+		Render.BeginScene(SGR_LINE_LOOP);
+		A:=FBezierCurve.Vertexes[i];
+		Render.Vertex2f(A.x+S,A.y+S);
+		Render.Vertex2f(A.x-S,A.y+S);
+		Render.Vertex2f(A.x-S,A.y-S);
+		Render.Vertex2f(A.x+S,A.y-S);
+		Render.EndScene();
+		end;
+	end;
+end;
+
+procedure TSGFractalMandelbrodRelease.UpDateLabelCoordCaption();inline;
 var
 	Point:SGPoint;
 begin
@@ -122,7 +169,7 @@ LabelCoord.Caption:=SGStringToPChar('( '+SGFloatToString(Manda.FZNumber.x,3)+' ;
 end;
 
 
-procedure TSGFractalMandelbrodRelease.OffComponents;inline;
+procedure TSGFractalMandelbrodRelease.OffComponents();inline;
 begin
 ScreenshotPanel.Visible:=False;
 ScreenshotPanel.Active:=False;
@@ -134,20 +181,22 @@ ZumButton.Visible:=False;
 ZumButton.Active:=False;
 ButtonSelectZNumber.Visible:=False;
 ButtonSelectZNumber.Active:=False;
-
-{VideoPanel.Visible:=False;
-VideoPanel.Active:=False;}
-
+FButtonEnableCurve.Visible:=False;
+FButtonEnableCurve.Active:=False;
 StepenComboBox.Visible:=False;
 StepenComboBox.Active:=False;
 QuantityRecComboBox.Visible:=False;
 QuantityRecComboBox.Active:=False;
+FBezierCurvePanel.Active:=False;
+FBezierCurvePanel.Visible:=False;
 end;
 
-procedure TSGFractalMandelbrodRelease.OnComponents;inline;
+procedure TSGFractalMandelbrodRelease.OnComponents();inline;
 begin
-ScreenshotPanel.Visible:=True;
-ScreenshotPanel.Active:=True;
+ScreenshotPanel.Visible:=not FEnablePictureStripPanel;
+ScreenshotPanel.Active:=not FEnablePictureStripPanel;
+FBezierCurvePanel.Active:=FEnablePictureStripPanel;
+FBezierCurvePanel.Visible:=FEnablePictureStripPanel;
 ColorComboBox.Visible:=True;
 ColorComboBox.Active:=True;
 TypeComboBox.Visible:=True;
@@ -156,10 +205,8 @@ ZumButton.Visible:=True;
 ZumButton.Active:=True;
 ButtonSelectZNumber.Visible:=True;
 ButtonSelectZNumber.Active:=True;
-
-{VideoPanel.Visible:=True;
-VideoPanel.Active:=True;}
-
+FButtonEnableCurve.Visible:=True;
+FButtonEnableCurve.Active:=True;
 StepenComboBox.Visible:=True;
 StepenComboBox.Active:=True;
 QuantityRecComboBox.Visible:=True;
@@ -178,11 +225,6 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SelectSecondPoint.Import;
 	end;
 end;
-
-{procedure FromExit;
-begin
-Context.Close;
-end;}
 
 procedure ColorComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
 begin
@@ -226,7 +268,10 @@ end;
 procedure ButtonSelectZNumberOnChange(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
+	begin
 	SelectZNimberFlag:=True;
+	OffComponents();
+	end;
 end;
 
 procedure QuantityRecComboBoxProcedure(a,b:LongInt;aaa:TSGComponent);
@@ -257,7 +302,43 @@ Result:=TSGEditTextTypeFunctionNumber(Self);
 TSGComponent(Self.FUserPointer2).Active:=Result;
 end;
 
-procedure TSGFractalMandelbrodRelease.InitManda;inline;
+procedure bcpOnOffVideo(Button:TSGButton);
+begin
+with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
+	begin
+	FEnablePictureStripPanel:=not FEnablePictureStripPanel;
+	OnComponents();
+	if FEnablePictureStripPanel then
+		begin
+		Button.Caption:='Off видео панель';
+		FBezierCurve:=TSGBezierCurve.Create();
+		FBezierCurve.SetContext(FContext);
+		end
+	else
+		begin
+		Button.Caption:='On видео панель';
+		if FBezierCurve<>nil then
+			FBezierCurve.Destroy();
+		FBezierCurve:=nil;
+		FEnablePictureStripAddingPoints:=False;
+		FBezierCurvePanel.Children[1].Caption:='On режим добавления точек';
+		end;
+	end;
+end;
+
+procedure bcpAddPoint(Button:TSGButton);
+begin
+with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
+	begin
+	FEnablePictureStripAddingPoints:= not FEnablePictureStripAddingPoints;
+	if FEnablePictureStripAddingPoints then
+		Button.Caption:='Off режим добавления точек'
+	else
+		Button.Caption:='On режим добавления точек';
+	end;
+end;
+
+procedure TSGFractalMandelbrodRelease.InitManda();inline;
 var
 	i:LongInt;
 	ii:LongInt = 5;
@@ -421,20 +502,64 @@ while i<=13 do
 	i+=1;
 	end;
 
-
-VideoPanel:=TSGPanel.Create;
-SGScreen.CreateChild(VideoPanel);
-SGScreen.LastChild.Caption:=' ';
-SGScreen.LastChild.SetBounds(Context.Width-500,Context.Height-30-30,400,25);
-SGScreen.LastChild.BoundsToNeedBounds;
+FButtonEnableCurve:=TSGButton.Create();
+SGScreen.CreateChild(FButtonEnableCurve);
+SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,150,20);
+SGScreen.LastChild.AutoTopShift:=False;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
+SGScreen.LastChild.Caption:='On видео панель';
+FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
 SGScreen.LastChild.FUserPointer1:=Self;
 
-VideoPanel.CreateChild(TSGLabel.Create);
-SGScreen.LastChild.LastChild.Caption:='Видео';
-SGScreen.LastChild.LastChild.SetBounds(5,5,60,20);
+FBezierCurvePanel:=TSGPanel.Create();
+SGScreen.CreateChild(FBezierCurvePanel);
+SGScreen.LastChild.Caption:='';
+SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10),Context.Height-130,130+140+10,125);
+SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
+SGScreen.LastChild.BoundsToNeedBounds;
+SGScreen.LastChild.FUserPointer1:=Self;
+
+FBezierCurvePanel.CreateChild(TSGButton.Create());
+FBezierCurvePanel.LastChild.AsButton.Caption:='On режим добавления точек';
+FBezierCurvePanel.LastChild.AsButton.SetBounds(3,3,275,20);
+FBezierCurvePanel.LastChild.AsButton.OnChange:=TSGComponentProcedure(@bcpAddPoint);
+FBezierCurvePanel.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+
+FBezierCurvePanel.CreateChild(TSGLabel.Create());
+FBezierCurvePanel.LastChild.Caption:='Количество точек: 0';
+FBezierCurvePanel.LastChild.SetBounds(3,25,275,20);
+FBezierCurvePanel.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+
+FBezierCurvePanel.CreateChild(TSGLabel.Create());
+FBezierCurvePanel.LastChild.Caption:='Количество кадров:';
+FBezierCurvePanel.LastChild.AsLabel.FTextPosition:=0;
+FBezierCurvePanel.LastChild.SetBounds(3,47,137,20);
+FBezierCurvePanel.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+
+FBezierCurveEditKadr:=TSGEdit.Create();
+SGScreen.LastChild.CreateChild(FBezierCurveEditKadr);
+SGScreen.LastChild.LastChild.SetBounds(123,47,137,20);
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+(SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
+(SGScreen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
+SGScreen.LastChild.LastChild.Caption:='10000';
+
+FBezierCurvePanel.CreateChild(TSGLabel.Create());
+FBezierCurvePanel.LastChild.Caption:='Примерно займет времени:';
+FBezierCurvePanel.LastChild.SetBounds(3,70,275,20);
+FBezierCurvePanel.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+
+FBezierCurvePanel.CreateChild(TSGButton.Create());
+FBezierCurvePanel.LastChild.AsButton.Caption:='Начать и забить на комп';
+FBezierCurvePanel.LastChild.AsButton.SetBounds(3,92,275,20);
+FBezierCurvePanel.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+FBezierCurveEditKadr.FUserPointer2:=Pointer(FBezierCurvePanel.LastChild);
 
 end;
 
@@ -454,6 +579,12 @@ end;
 constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
+FBezierCurveEditKadr:=nil;
+FEnablePictureStripAddingPoints:=False;
+FBezierCurvePanel:=nil;
+FButtonEnableCurve:=nil;
+FBezierCurve:=nil;
+FEnablePictureStripPanel:=False;
 FArProgressBar:=nil;
 Changet:=False;
 SelectPointEnabled:=False;
@@ -537,8 +668,14 @@ end;
 
 destructor TSGFractalMandelbrodRelease.Destroy;
 var
-	i:LongWord;
+	i:TSGMaxEnum;
 begin
+if FBezierCurvePanel<>nil then
+	FBezierCurvePanel.Destroy();
+if FButtonEnableCurve<>nil then
+	FButtonEnableCurve.Destroy();
+if FBezierCurve<>nil then
+	FBezierCurve.Destroy();
 if SecondImage<>nil then
 	SecondImage.Destroy;
 SecondImage:=nil;
@@ -603,7 +740,7 @@ Result.Import(
 	);
 end;
 
-procedure TSGFractalMandelbrodRelease.Draw;
+procedure TSGFractalMandelbrodRelease.Draw();
 var
 	i,ii:LongInt;
 begin
@@ -634,7 +771,7 @@ if MandaInitialized then
 		if not NowSave then
 			begin
 			Manda.ToTexture;
-			OnComponents;
+			OnComponents();
 			{if SecondImage<>nil then
 				begin
 				SecondImage.Destroy;
@@ -655,7 +792,7 @@ if MandaInitialized then
 			end;
 		end;
 
-	UpDateLabelCoordCaption;
+	UpDateLabelCoordCaption();
 
 	if LabelProcent.Visible and ( not Manda.ThreadsReady) then
 		begin
@@ -806,7 +943,7 @@ if MandaInitialized then
 				begin
 				Manda.FZNumber:=ComplexNumber;
 				SelectZNimberFlag:=False;
-				//SGSetMouseKeyUp(1);
+				OnComponents();
 				Context.SetCursorKey(SGUpKey,SGLeftCursorButton);
 				if not Manda.FZMand then
 					Changet:=True;
@@ -872,7 +1009,7 @@ if MandaInitialized then
 			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
 			Render.EndScene();
 			end;
-		if SelectPointEnabled and {(SGIsMouseKeyDown(1))} (Context.CursorKeysPressed(SGLeftCursorButton)) then
+		if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
 			begin
 			//Тут херачится новый зум
 			SelectSecondPoint:=SelectSecondNormalPoint;
@@ -882,11 +1019,6 @@ if MandaInitialized then
 				SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
 			if SelectPoint.y>SelectSecondPoint.y then
 				SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
-			{Manda.FView.Import(
-				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectPoint.x/Context.Width,
-				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectPoint.y)/Context.Height,
-				Manda.FView.x1+abs(Manda.FView.x1-Manda.FView.x2)*SelectSecondPoint.x/Context.Width,
-				Manda.FView.y1+abs(Manda.FView.y1-Manda.FView.y2)*(SelectSecondPoint.y)/Context.Height);}
 			Manda.FView.Import(
 				GetPointOnPosOnMand(SelectPoint).x,
 				GetPointOnPosOnMand(SelectPoint).y-abs(GetPointOnPosOnMand(SelectPoint).y-GetPointOnPosOnMand(SelectSecondPoint).y),
@@ -924,10 +1056,31 @@ if MandaInitialized then
 			Render.EndScene();
 			end;
 		end;
-
+	
+	if FEnablePictureStripAddingPoints  and 
+		(Context.KeyPressedChar='A') and 
+		(Context.KeyPressedType=SGUpKey) then
+		begin
+		FBezierCurve.AddVertex(
+			SGVertexImport(
+				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).x,
+				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).y));
+		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
+		FBezierCurve.Calculate();
+		Context.FCursorKeyPressed:=SGNoCursorButton;
+		end;
+	
+	if FEnablePictureStripPanel then
+		begin
+		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
+		if FBezierCurve<>nil then
+			FBezierCurve.Draw();
+		DrawBezierPoints();
+		end;
+	
 	if Changet then
 		begin
-		OffComponents;
+		OffComponents();
 		if SecondImage<>nil then
 			SecondImage.Destroy;
 		SecondImage:=Manda.FImage;

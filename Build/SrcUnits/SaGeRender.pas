@@ -35,6 +35,7 @@ type
 		function TopShift(const VFullscreen:Boolean = False):LongWord;virtual;
 		procedure MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);virtual;
 			public
+		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
 		procedure Vertex3f(const x,y,z:single);virtual;abstract;
