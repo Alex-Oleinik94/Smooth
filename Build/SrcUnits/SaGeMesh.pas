@@ -9,7 +9,6 @@ uses
     , SaGeCommon
     , SaGeBase
     , SaGeBased
-    , SaGeUtils
     , SaGeImages
     , SaGeRender
     , Crt
@@ -65,7 +64,7 @@ type
 	1 : (p:packed array[0..3] of byte);
 	end;
 	
-    TSGMaterialInfo = class(TSGGLImage)
+    TSGMaterialInfo = class//(TSGGLImage)
         constructor Create;
     public
         strName, strFile: string;
@@ -1082,7 +1081,7 @@ else
 					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))));
     if FHasTexture then
         Render.TexCoordPointer(
-			2, 
+			2,
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(

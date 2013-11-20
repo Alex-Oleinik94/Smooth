@@ -4,7 +4,8 @@ unit SaGeRender;
 
 interface
 uses 
-	SaGeBase, SaGeBased;
+	 SaGeBase
+	,SaGeBased;
 {$include Includes\SaGeRenderConstants.inc}
 type
 	TSGMatrixMode=LongWord;

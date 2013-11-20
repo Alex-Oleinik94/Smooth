@@ -10,6 +10,7 @@ uses
 	,SaGeContext
 	,SaGeRender
 	,SaGeImages
+	,SaGeMesh
 	;
 type
 (*====================================================================*)
@@ -31,6 +32,30 @@ type
 		procedure Clear();inline;
 		procedure CallAction();inline;
 		//procedure InitViewModeComboBox();inline;
+		end;
+
+(*====================================================================*)
+(*==========================TSGBezierCurve============================*)
+(*====================================================================*)
+
+	TSGBezierCurve=class(TSGDrawClass)
+			public
+		constructor Create();override;
+		destructor Destroy();override;
+			private
+		FStartArray : TArTSGVertex3f;
+		FMesh : TSG3DObject;
+		FDetalization:LongWord;
+		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
+		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
+		function GetResultVertex(const Attitude:real;const FArray:TArTSGVertex3f):TSGVertex3f;inline;overload;
+			public
+		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
+		procedure Calculate();
+		procedure AddVertex(const VVertex:TSGVertex3f);
+		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
+		property Detalization:LongWord read FDetalization write FDetalization;
+		procedure Draw();override;
 		end;
 	
 (*====================================================================*)
@@ -115,6 +140,99 @@ type
 function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;}
 
 implementation
+
+(*====================================================================*)
+(*==========================TSGBezierCurve============================*)
+(*====================================================================*)
+
+procedure TSGBezierCurve.Draw();
+begin
+if FMesh<>nil then
+	FMesh.Draw();
+end;
+
+function TSGBezierCurve.GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
+begin
+Result:=GetResultVertex(Attitude,FStartArray);
+end;
+
+function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:TArTSGVertex3f):TSGVertex3f;inline;overload;
+var
+	VArray:TArTSGVertex3f;
+	i:TSGMaxEnum;
+begin
+if Length(FArray)=1 then
+	Result:=FArray[0]
+else if Length(FArray)=2 then
+	Result:=SGGetVertexInAttitude(FArray[0],FArray[1],Attitude)
+else
+	begin
+	SetLength(VArray,Length(FArray)-1);
+	for i:=0 to High(VArray) do
+		VArray[i]:=SGGetVertexInAttitude(FArray[i],FArray[i+1],Attitude);
+	Result:=GetResultVertex(Attitude,VArray);
+	SetLength(VArray,0);
+	end;
+end;
+
+procedure TSGBezierCurve.Calculate();
+var
+	i:TSGMaxEnum;
+begin
+if FMesh<>nil then
+	FMesh.Destroy();
+FMesh:=TSG3DObject.Create();
+FMesh.SetContext(FContext);
+FMesh.FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+FMesh.FEnableCullFace:=False;
+FMesh.PoligonesType:=SGR_LINE_STRIP;
+FMesh.VertexType:=TSGMeshVertexType3f;
+FMesh.SetFaceLength(FDetalization);
+FMesh.SetVertexLength(FDetalization);
+for i:=0 to High(FStartArray) do
+	begin
+	FMesh.ArVertex3f[i]^:=GetResultVertex(i/Detalization);
+	FMesh.ArFacesPoints[i].p[0]:=i;
+	end;
+FMesh.LoadToVBO();
+end;
+
+procedure TSGBezierCurve.SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
+begin
+if FStartArray<>nil then
+	FStartArray[Index]:=VVertex;
+end;
+
+function TSGBezierCurve.GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
+begin
+Result:=FStartArray[Index];
+end;
+
+procedure TSGBezierCurve.AddVertex(const VVertex:TSGVertex3f);
+begin
+if FStartArray=nil then
+	SetLength(FStartArray,1)
+else
+	SetLength(FStartArray,Length(FStartArray)+1);
+FStartArray[High(FStartArray)]:=VVertex;
+end;
+
+constructor TSGBezierCurve.Create();
+begin
+inherited;
+FStartArray:=nil;
+FMesh:=nil;
+FDetalization:=0;
+end;
+
+destructor TSGBezierCurve.Destroy();
+begin
+if FStartArray<>nil then
+	SetLength(FStartArray,0);
+if FMesh<>nil then
+	FMesh.Destroy();
+inherited;
+end;
 
 (*====================================================================*)
 (*============================TSGCamera===============================*)
