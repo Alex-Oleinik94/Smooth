@@ -26,7 +26,7 @@ type
 
 class function TSGFractalTetraider.ClassName:string;
 begin
-Result:='Тетраидер';
+Result:='Тетраидер Серпинского';
 end;
 
 
@@ -210,10 +210,10 @@ Depth:=3;
 FLightingEnable:=True;
 Radius:=5;
 h:=sqrt(3)*Radius/2;
-c0:=SGGetColor4fFromLongWord($00FF00);
-c1:=SGGetColor4fFromLongWord($FF0000);
-c2:=SGGetColor4fFromLongWord($0000FF);
-c3:=SGGetColor4fFromLongWord($FF8000);
+c0:=SGGetColor4fFromLongWord($FF00FF);
+c1:=SGGetColor4fFromLongWord($00FFFF);
+c2:=SGGetColor4fFromLongWord($FFFF00);
+c3:=SGGetColor4fFromLongWord($0080FF);
 
 InitEffectsComboBox(Context.Width-160,40,150,30,[SGAnchRight],True);
 InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],True);
