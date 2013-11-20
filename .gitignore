@@ -9,8 +9,10 @@ Build/Main.res
 Binaries/Main.exe
 Binaries/Main
 Binaries/Main_Release.exe
+Binaries/Main_Lazarus.exe
 Others/DirectX/*.o
 Others/DirectX/*.ppu
 Others/DirectX/*.a
 Others/DirectX/*.exe
+*.bak
 

@@ -341,6 +341,7 @@ end;
 
 var
 	s:string;
+
 begin
 if (argc=2) and (SGFileExists(SGPCharToString(argv[1]))) then
 	begin
