@@ -439,6 +439,7 @@ if not SGFileExists(SGGetFileWay(FFileName)+FMaterialsFileName) then
 	Exit;
 Assign(fm,SGGetFileWay(FFileName)+FMaterialsFileName);
 Reset(fm);
+NowSelectMaterial:=0;
 while not SeekEof(fm) do
 	begin
 	c:=#0;
@@ -655,9 +656,8 @@ end;
 function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f( 
-	LongWord(ArVertex)+
+	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
 	+Byte(FHasColors)*( //Цвета
 	byte(FColorType=TSGMeshColorType3b)*3+
@@ -670,7 +670,7 @@ end;
 function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
 begin
 Result:=PTSGColor4f( 
-	LongWord(ArVertex)+
+	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
 	);
@@ -679,7 +679,7 @@ end;
 function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
 begin
 Result:=PTSGColor3b( 
-	LongWord(ArVertex)+
+	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
 	);
@@ -687,17 +687,17 @@ end;
 
 function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
 begin
-Result:=PTSGColor4b( 
-	LongWord(ArVertex)+
+Result:=PTSGColor4b(Pointer(
+	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
-	);
+	));
 end;
 
 function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
 begin
 Result:=PTSGColor3f( 
-	LongWord(ArVertex)+
+	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
 	);
@@ -1066,14 +1066,14 @@ else
 				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
 			GetSizeOfOneVertex(),
 			Pointer(
-				LongWord(ArVertex)+
+				TSGMaxEnum(ArVertex)+
 				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
 	if FHasNormals then
 		Render.NormalPointer(
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
-				LongWord(ArVertex)+
+				TSGMaxEnum(ArVertex)+
 				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
 				Byte(FHasColors)*(
 					byte(FColorType=TSGMeshColorType3b)*3+
@@ -1086,7 +1086,7 @@ else
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
-				LongWord(ArVertex)+
+				TSGMaxEnum(ArVertex)+
 				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
 				Byte(FHasColors)*(
 					byte(FColorType = TSGMeshColorType3b)*3+

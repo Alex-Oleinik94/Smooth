@@ -1,11 +1,13 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
+
 //{$DEFINE CLHINTS}
+
 unit SaGeScreen;
 
 interface
 
 uses
-	Crt
+	 Crt
 	,SaGeCommon
 	,SaGeBase, SaGeBased
 	,SaGeImages
@@ -129,7 +131,7 @@ type
 		procedure FromDraw;virtual;
 		procedure FromResize();virtual;
 		procedure FromUpDate(var FCanChange:Boolean);virtual;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);virtual;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);virtual;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);virtual;
 			protected
 		procedure SetVisible(const b:Boolean);virtual;
@@ -149,6 +151,9 @@ type
 		FCursorOnComponentCaption:Boolean;
 		FCanHaveChildren:Boolean;
 		FComponentProcedure:TSGComponentProcedure;
+		FChildrenPriority:TSGMaxEnum;
+		procedure ClearPriority();
+		procedure MakePriority();
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
 		function GetVertex(const THAT:SGSetOfByte;const FOR_THAT:SGByte):SGPoint;inline;
@@ -210,7 +215,7 @@ type
 		FIcon:TSGGLImage;
 		FRePlace:Boolean;
 		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
 		function CursorInComponentCaption():boolean;override;
 			public
@@ -231,7 +236,7 @@ type
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw;override;
 		end;
 	
@@ -329,7 +334,7 @@ type
 			public
 		procedure FromDraw;override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;inline;
 			protected
 		procedure SetCaption(const NewCaption:SGCaption);override;
@@ -346,7 +351,7 @@ type
 		constructor Create;
 			public
 		FIdentifity:Int64;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 			public
 		property Identifity : int64 read FIdentifity write FIdentifity;
 		end;
@@ -385,7 +390,7 @@ type
 		destructor Destroy;override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw;override;
 		end;
 	TSGScrollBar=class(TSGComponent)
@@ -402,7 +407,7 @@ type
 		procedure UpDateScrollBounds;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		end;
 	
 	TSGComboBoxProcedure = TSGButtonMenuProcedure;
@@ -434,13 +439,15 @@ type
 		//This Oly For Optimizing Draw 
 		FRCAr1,FRCAr2:TSGArTSGVertex;
 		FRCV1,FRCV2:TSGVertex;
+		
+		FClickOnOpenBox:Boolean;
 			public
 		procedure DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);inline;
 		function Colums:LongInt;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromDraw;override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGGLImage = nil;const FIdent:Int = -1);
@@ -464,7 +471,7 @@ type
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromDraw;override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure BoundsToNeedBounds;override;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
 			public
@@ -534,24 +541,25 @@ for i:=0 to High(FItems) do
 				FItems[i][ii].BoundsToNeedBounds;
 end;
 
-procedure TSGGrid.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGGrid.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 var
 	i,ii:LongInt;
 begin
-inherited;
-for i:=High(FItems) downto Low(FItems) do
-	if FItems[i]<>nil then
-		for ii:=High(FItems[i]) downto Low(FItems[i]) do
-			if FItems[i][ii]<>nil then
-				if FItems[i][ii].CursorInComponent() and FItems[i][ii].FVisible and FItems[i][ii].Active then
-					begin
-					FItems[i][ii].FromUpDateUnderCursor(CanRePleace);
-					if FItems[i][ii].CursorInComponentCaption() then
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+if CursorInComponentNow then
+	for i:=High(FItems) downto Low(FItems) do
+		if FItems[i]<>nil then
+			for ii:=High(FItems[i]) downto Low(FItems[i]) do
+				if FItems[i][ii]<>nil then
+					if FItems[i][ii].CursorInComponent() and FItems[i][ii].FVisible and FItems[i][ii].Active then
 						begin
-						FItems[i][ii].FromUpDateCaptionUnderCursor(CanRePleace);
+						FItems[i][ii].FromUpDateUnderCursor(CanRePleace);
+						if FItems[i][ii].CursorInComponentCaption() then
+							begin
+							FItems[i][ii].FromUpDateCaptionUnderCursor(CanRePleace);
+							end;
+						Break;
 						end;
-					Break;
-					end;
 end;
 
 procedure TSGGrid.FromUpDate(var FCanChange:Boolean);
@@ -667,44 +675,57 @@ else
 	Result:=FMaxColumns;
 end;
 
-procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-FBackLight:=True;
-if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
+if CursorInComponentNow then
 	begin
-	FOpen:=True;
-	CanRePleace:=False;
-	Context.FCursorKeyPressed:=SGNoCursorButton;
-	end
-else
-	FCursorOnThisItem:=-1;
-if FOpen and (Context.CursorWheel<>SGNoCursorWheel) then
-	begin
-	if Context.CursorWheel=SGUpCursorWheel then
+	FBackLight:=True;
+	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) and CanRePleace then
 		begin
-		if FFirstScrollItem<>0 then
-			FFirstScrollItem-=1;
+		FOpen:=True;
+		CanRePleace:=False;
+		Context.FCursorKeyPressed:=SGNoCursorButton;
+		MakePriority();
 		end
 	else
-		begin
-		if FFirstScrollItem+Colums-1<>High(FItems) then
+		FCursorOnThisItem:=-1;
+	if FOpen and CanRePleace then
+		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 			begin
-			FFirstScrollItem+=1;
+			CanRePleace:=False;
+			FClickOnOpenBox:=True;
 			end;
+	if FOpen and (Context.CursorWheel<>SGNoCursorWheel) then
+		begin
+		if Context.CursorWheel=SGUpCursorWheel then
+			begin
+			if FFirstScrollItem<>0 then
+				FFirstScrollItem-=1;
+			end
+		else
+			begin
+			if FFirstScrollItem+Colums-1<>High(FItems) then
+				begin
+				FFirstScrollItem+=1;
+				end;
+			end;
+		Context.FCursorWheel:=SGNoCursorWheel;
+		CanRePleace:=False;
 		end;
-	Context.FCursorWheel:=SGNoCursorWheel;
-	CanRePleace:=False;
 	end;
-inherited;
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGComboBox.FromUpDate(var FCanChange:Boolean);
 var
-	i:LongInt;
+	i:TSGMaxEnum;
 begin
 if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNoCursorButton)) then
+	begin
 	FOpen:=False;
-if FOpen and (FCursorOnComponent) then
+	ClearPriority();
+	end;
+if  FOpen and (FCursorOnComponent) then
 	begin
 	for i:=0 to Colums-1 do
 		begin
@@ -715,18 +736,20 @@ if FOpen and (FCursorOnComponent) then
 				(((FMaxColumns<Length(FItems)) and (Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) then
 					begin
 					FCursorOnThisItem:=FFirstScrollItem+i;
-					if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
+					if FClickOnOpenBox then
 						begin
 						FCanChange:=False;
 						FOpen:=False;
+						ClearPriority();
 						if FProcedure<>nil then
 							FProcedure(FSelectItem,FCursorOnThisItem,Self);
 						FSelectItem:=FCursorOnThisItem;
 						Context.FCursorKeyPressed:=SGNoCursorButton;
 						FTextColor:=SGColorImport();
-						FBodyColor:=SGColorImport;
+						FBodyColor:=SGColorImport();
 						if OnChange<>nil then
 							OnChange(Self);
+						FClickOnOpenBox:=False;
 						end;
 					Break;
 					end;
@@ -952,6 +975,7 @@ end;
 constructor TSGComboBox.Create;
 begin
 inherited;
+FClickOnOpenBox:=False;
 FOpenTimer:=0;
 FOpen:=False;
 FBackLight:=False;
@@ -1051,22 +1075,25 @@ if FComponentProcedure<>nil then
 FCursorOnButton:=False;
 end;
 
-procedure TSGScrollBarButton.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGScrollBarButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-FCursorOnButton:=True;
-{if SGMouseKeysDown[0] then
-	FChangingButton:=True;}
-if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
+if CursorInComponentNow then
 	begin
-	FChangingButtonTimer:=1;
-	case Parent.AsScrollBar.FScroolType of
-	SGScrollBarVertical:
+	FCursorOnButton:=True;
+	{if SGMouseKeysDown[0] then
+		FChangingButton:=True;}
+	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 		begin
-		Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).y;
+		FChangingButtonTimer:=1;
+		case Parent.AsScrollBar.FScroolType of
+		SGScrollBarVertical:
+			begin
+			Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).y;
+			end;
+		SGScrollBarHorizon:
+			Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).x;
 		end;
-	SGScrollBarHorizon:
-		Parent.AsScrollBar.FBeginingPosition:=Context.CursorPosition(SGNowCursorPosition).x;
-	end;
+		end;
 	end;
 end;
 
@@ -1086,9 +1113,9 @@ UpDateScrollBounds;
 inherited FromUpDate(FCanChange);
 end;
 
-procedure TSGScrollBar.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGScrollBar.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-inherited FromUpDateUnderCursor(CanRePleace);
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGScrollBar.UpDateScrollBounds;
@@ -1211,23 +1238,26 @@ else
 	FMiddleTop:=0;
 end;
 
-procedure TSGButtonMenuButton.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGButtonMenuButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 var
 	i,ii:LongInt;
 begin
-if Active and (((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) or Parent.AsButtonMenu.FSelectNotClick) then
+if CursorInComponentNow then
 	begin
-	ii:=-1;
-	for i:=0 to High(FParent.FChildren) do
-		if FParent.FChildren[i]=Self then
-			begin
-			ii:=i;
-			Break;
-			end;
-	if FParent.AsButtonMenu.FActiveButton<>ii then
-		FParent.AsButtonMenu.SetButton(ii);
+	if Active and (((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) or Parent.AsButtonMenu.FSelectNotClick) then
+		begin
+		ii:=-1;
+		for i:=0 to High(FParent.FChildren) do
+			if FParent.FChildren[i]=Self then
+				begin
+				ii:=i;
+				Break;
+				end;
+		if FParent.AsButtonMenu.FActiveButton<>ii then
+			FParent.AsButtonMenu.SetButton(ii);
+		end;
 	end;
-inherited FromUpDateUnderCursor(CanRePleace);
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGButtonMenu.SetButton(const l:LongInt);
@@ -1567,9 +1597,9 @@ FIcon.Create;
 FTopShiftForChilds:=30;
 end;
 
-procedure TSGForm.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGForm.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-inherited FromUpDateUnderCursor(CanRePleace);
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGForm.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
@@ -1939,6 +1969,8 @@ if FParent<>nil then
 		end;
 	if ii<>-1 then
 		begin
+		if ii+1 = FParent.FChildrenPriority then
+			ClearPriority();
 		{$IFDEF SGMoreDebuging}
 			WriteLn('"TSGComponent.DestroyParent" :  Find Self on '+SGStr(ii+1)+' position .');
 			{$ENDIF}
@@ -2057,17 +2089,23 @@ end;
 
 procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
 var
-	i:LongInt = 0;
+	i,ii:TSGMaxEnum;
 begin
 UpDateObjects;
 UpgradeTimers;
 
-{for i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FromUpDate(FCanChange);}
+ii:=0;
+if (FChildrenPriority <> 0) and (Length(FChildren)>0) and (ii-1<=High(FChildren)) then
+	begin
+	ii:=FChildrenPriority;
+	FChildren[ii-1].FromUpDate(FCanChange);
+	end;
 
+i:=0;
 while (Length(FChildren)>0) and (i<=High(FChildren)) do
 	begin
-	FChildren[i].FromUpDate(FCanChange);
+	if (ii=0) or ((ii<>0) and (i<>ii-1)) then
+		FChildren[i].FromUpDate(FCanChange);
 	i+=1;
 	end;
 
@@ -2087,16 +2125,71 @@ end;
 
 procedure TSGComponent.FromDraw();
 var
-	i:longint;
+	i:TSGMaxEnum;
 begin
-For i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FromDraw();
+if FChildren<>nil then
+	if (FChildrenPriority=0) or (FChildrenPriority-1>High(FChildren)) then
+		begin
+		For i:=Low(FChildren) to High(FChildren) do
+			FChildren[i].FromDraw();
+		end
+	else
+		begin
+		For i:=Low(FChildren) to High(FChildren) do
+			if i<>FChildrenPriority-1 then
+				FChildren[i].FromDraw();
+		FChildren[FChildrenPriority-1].FromDraw();
+		end;
 end;
 
+procedure TSGComponent.ClearPriority();
+var
+	i,ii:TSGMaxEnum;
+begin
+FChildrenPriority:=0;
+if FParent<>nil then
+	begin
+	if FParent.FChildrenPriority<>0 then
+		begin
+		ii:=0;
+		for i:=0 to High(FParent.FChildren) do
+			if Pointer(Self)=Pointer(FParent.FChildren) then
+				begin
+				ii:=i+1;
+				Break;
+				end;
+		if (ii=FParent.FChildrenPriority) then
+			FParent.ClearPriority();
+		end;
+	end;
+end;
+
+procedure TSGComponent.MakePriority();
+var
+	i,ii:TSGMaxEnum;
+begin
+if FParent<>nil then
+	begin
+	ii:=0;
+	if FParent.FChildren<>nil then
+		for i:=0 to High(FParent.FChildren) do
+			if FParent.FChildren[i]=Self then
+				begin
+				ii:=i+1;
+				Break;
+				end;
+	if ii<>0 then
+		begin
+		FParent.FChildrenPriority:=ii;
+		FParent.MakePriority();
+		end;
+	end;
+end;
 
 constructor TSGComponent.Create();
 begin
 inherited Create();
+FChildrenPriority:=0;
 FDrawClass:=nil;
 FUnLimited:=False;
 OnChange:=nil;
@@ -2340,13 +2433,28 @@ if FParent<>nil then
 	end;
 end;
 
-procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 var
 	i:LongInt = -1;
 	IDComponentUnderCursor:LongInt = -1;
 begin
+if (FChildrenPriority>0) and 
+	FChildren[FChildrenPriority-1].FVisible and 
+	FChildren[FChildrenPriority-1].Active then
+	begin
+	FChildren[FChildrenPriority-1].FromUpDateUnderCursor(CanRePleace,
+		FChildren[FChildrenPriority-1].CursorInComponent());
+	if FChildren[FChildrenPriority-1].CursorInComponentCaption() then
+		begin
+		FChildren[FChildrenPriority-1].FromUpDateCaptionUnderCursor(CanRePleace);
+		end;
+	end;
+
 for i:=High(FChildren) downto Low(FChildren) do
-	if FChildren[i].CursorInComponent() and FChildren[i].FVisible and FChildren[i].Active then
+	if  ((FChildrenPriority=0) or ((FChildrenPriority>0) and (i<>FChildrenPriority-1))) and 
+		FChildren[i].CursorInComponent() and 
+		FChildren[i].FVisible and 
+		FChildren[i].Active then
 		begin
 		IDComponentUnderCursor:=i;
 		Break;
@@ -2552,23 +2660,24 @@ if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)
 inherited;
 end;
 
-procedure TSGEdit.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGEdit.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin 
-if CanRePleace then
-	begin
-	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
+if CursorInComponentNow then
+	if CanRePleace then
 		begin
-		FNowChanget:=True;
-		FDrawCursor:=True;
-		FDrawCursorTimer:=1;
-		FDrawCursorElapsedTime:=0;
-		FDrawCursorElapsedTimeDontChange:=30;
-		end;
-	end
-else
-	if FNowChanget then
-		FNowChanget:=False;
-inherited FromUpDateUnderCursor(CanRePleace);
+		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
+			begin
+			FNowChanget:=True;
+			FDrawCursor:=True;
+			FDrawCursorTimer:=1;
+			FDrawCursorElapsedTime:=0;
+			FDrawCursorElapsedTimeDontChange:=30;
+			end;
+		end
+	else
+		if FNowChanget then
+			FNowChanget:=False;
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGEdit.FromUpDate(var FCanChange:Boolean);
@@ -2806,18 +2915,21 @@ UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
 inherited FromUpDate(FCanChange);
 end;
 
-procedure TSGButton.FromUpDateUnderCursor(var CanRePleace:Boolean);
+procedure TSGButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-FCursorOnButton:=True;
-if (Context.CursorKeysPressed(SGLeftCursorButton)) then
-	FChangingButton:=True;
-if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
+if CursorInComponentNow then
 	begin
-	if (OnChange<>nil) then
-		OnChange(Self);
-	FChangingButtonTimer:=1;
+	FCursorOnButton:=True;
+	if (Context.CursorKeysPressed(SGLeftCursorButton)) then
+		FChangingButton:=True;
+	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
+		begin
+		if (OnChange<>nil) then
+			OnChange(Self);
+		FChangingButtonTimer:=1;
+		end;
 	end;
-inherited FromUpDateUnderCursor(CanRePleace);
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGButton.FromDraw;

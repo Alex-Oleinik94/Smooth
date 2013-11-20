@@ -6,9 +6,8 @@
 //{$DEFINE GLUT}
 
 {$WARNINGS OFF}
-{$WARNINGS OFF}
 {$NOTES ON}
 {$NOTES OFF}
 
-{$DEFINE SGDebuging}
+//{$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
