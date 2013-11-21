@@ -14,5 +14,7 @@ Others/DirectX/*.o
 Others/DirectX/*.ppu
 Others/DirectX/*.a
 Others/DirectX/*.exe
+Data/Images/*/*.png
+Data/Images/*.png
 *.bak
 

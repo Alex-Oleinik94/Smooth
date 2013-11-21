@@ -52,6 +52,7 @@ type
 		function GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 			public
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
+		function GetLow(const R:Real):TSGVertex3f;
 		procedure Calculate();
 		procedure AddVertex(const VVertex:TSGVertex3f);
 		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
@@ -185,11 +186,7 @@ else
 	end;
 end;
 
-procedure TSGBezierCurve.Calculate();
-var
-	i:TSGMaxEnum;
-
-function GetLow(const R:Real):TSGVertex3f;
+function TSGBezierCurve.GetLow(const R:Real):TSGVertex3f;
 var
 	StN:Real;
 begin
@@ -209,10 +206,12 @@ else if trunc(StN) >= High(FStartArray)-1 then
 else
 	Result:=(
 		GetResultVertex((StN-(Trunc(StN)-1))/2		,@FStartArray[trunc(StN)-1]		,3)+
-		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3)
-		)/2;
-//wRITE(r:0:10,' ');Result.WriteLn();READLN();
+		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3));
 end;
+
+procedure TSGBezierCurve.Calculate();
+var
+	i:TSGMaxEnum;
 
 begin
 if FMesh<>nil then

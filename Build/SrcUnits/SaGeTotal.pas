@@ -1159,10 +1159,10 @@ begin
 	{$ENDIF}
 if FNowDraw=nil then
 	begin
-	Initialize;
+	Initialize();
 	end
 else
-	FNowDraw.Draw;
+	FNowDraw.Draw();
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
 	{$ENDIF}

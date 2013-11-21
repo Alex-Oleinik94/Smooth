@@ -109,10 +109,21 @@ type
 		FButtonEnableCurve:TSGButton;
 		FBezierCurvePanel:TSGPanel;
 		FBezierCurveEditKadr:TSGEdit;
+		FBezierCurveLabelPoints:TSGLabel;
+		FBezierCurveGoButton:TSGButton;
+		
+		FBezierCurveKadrProgressBar:TSGProgressBar;
 		
 		FEnablePictureStripAddingPoints:Boolean;
+		FKomponentsNowOffOn:Boolean;
+		FBezierNowSelectPoint:TSGMaxEnum;
+		FNowRenderitsiaVideo:Boolean;
+		
+		FVideoBuffer:String;
 		
 		FNowKadr:QWord;
+		FAllKadrs:QWOrd;
+		
 			public
 		procedure DrawBezierPoints();inline;
 		procedure OffComponents();inline;
@@ -191,10 +202,12 @@ QuantityRecComboBox.Visible:=False;
 QuantityRecComboBox.Active:=False;
 FBezierCurvePanel.Active:=False;
 FBezierCurvePanel.Visible:=False;
+FKomponentsNowOffOn:=False;
 end;
 
 procedure TSGFractalMandelbrodRelease.OnComponents();inline;
 begin
+FKomponentsNowOffOn:=True;
 ScreenshotPanel.Visible:=not FEnablePictureStripPanel;
 ScreenshotPanel.Active:=not FEnablePictureStripPanel;
 FBezierCurvePanel.Active:=FEnablePictureStripPanel;
@@ -222,7 +235,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	Manda.Width:=SGVal((Button.Parent.LastChild.Caption));
 	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Context.Height/Context.Width));
 	Changet:=True;
-	NowSave:=true;
+	NowSave:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
 	end;
@@ -250,8 +263,8 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	if a<>b then
 		begin
 		Changet:=True;
-		SelectPoint.Import;
-		SelectSecondPoint.Import;
+		SelectPoint.Import();
+		SelectSecondPoint.Import();
 		end;
 	end;
 end;
@@ -304,6 +317,13 @@ Result:=TSGEditTextTypeFunctionNumber(Self);
 TSGComponent(Self.FUserPointer2).Active:=Result;
 end;
 
+function MyMandNumberFucntionVideo(const Self:TSGEdit):boolean;
+begin
+Result:=TSGEditTextTypeFunctionNumber(Self);
+with TSGFractalMandelbrodRelease(Self.FUserPointer1) do
+TSGComponent(Self.FUserPointer2).Active:=Result and (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>=2);
+end;
+
 procedure bcpOnOffVideo(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
@@ -315,6 +335,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 		Button.Caption:='Off видео панель';
 		FBezierCurve:=TSGBezierCurve.Create();
 		FBezierCurve.SetContext(FContext);
+		FBezierCurveGoButton.Active:=False;
 		end
 	else
 		begin
@@ -324,7 +345,29 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 		FBezierCurve:=nil;
 		FEnablePictureStripAddingPoints:=False;
 		FBezierCurvePanel.Children[1].Caption:='On режим добавления точек';
+		FBezierCurveLabelPoints.Caption:='Количество точек: 0';
 		end;
+	end;
+end;
+
+procedure bcpGoVideo(Button:TSGButton);
+begin
+with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
+	begin
+	OffComponents();
+	FBezierCurveKadrProgressBar.Visible:=True;
+	FBezierCurveKadrProgressBar.Progress:=0;
+	FNowKadr:=0;
+	FAllKadrs:=SGVal(FBezierCurveEditKadr.Caption);
+	FNowRenderitsiaVideo:=True;
+	Changet:=True;
+	SelectPoint.Import();
+	SelectSecondPoint.Import();
+	Manda.FZMand:=False;
+	FVideoBuffer:=SGGetFreeDirectoryName(DataDirectory+Slash+'Images'+Slash+'Manda Buffer','Part');
+	SGMakeDirectory(FVideoBuffer);
+	Manda.Width:=1920;
+	Manda.Height:=1080;
 	end;
 end;
 
@@ -364,8 +407,9 @@ for i:=0 to QuantityThreads-1 do
 	FArProgressBar[i]:=TSGProgressBar.Create;
 	SGScreen.CreateChild(FArProgressBar[i]);
 	SGScreen.LastChild.SetBounds(10,ii,300,20);
+	SGScreen.LastChild.BoundsToNeedBounds();
 	FArProgressBar[i].AutoTopShift:=True;
-	ii+=25;
+	ii+=23;
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
 	Manda.BeginThread(i,FArProgressBar[i]);
@@ -503,6 +547,13 @@ while i<=13 do
 		end;
 	i+=1;
 	end;
+	
+FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
+SGScreen.CreateChild(FBezierCurveKadrProgressBar);
+SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,-(-(130+140+10)-150-5),20);
+SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
+SGScreen.LastChild.AsProgressBar.FColor1:=SGColorImport(1,1,0,0.7);
+SGScreen.LastChild.AsProgressBar.FColor2:=SGColorImport(1,1/3,0,0.9);
 
 FButtonEnableCurve:=TSGButton.Create();
 SGScreen.CreateChild(FButtonEnableCurve);
@@ -528,7 +579,9 @@ FBezierCurvePanel.LastChild.AsButton.OnChange:=TSGComponentProcedure(@bcpAddPoin
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
-FBezierCurvePanel.CreateChild(TSGLabel.Create());
+
+FBezierCurveLabelPoints:=TSGLabel.Create();
+FBezierCurvePanel.CreateChild(FBezierCurveLabelPoints);
 FBezierCurvePanel.LastChild.Caption:='Количество точек: 0';
 FBezierCurvePanel.LastChild.SetBounds(3,25,275,20);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
@@ -546,9 +599,9 @@ SGScreen.LastChild.CreateChild(FBezierCurveEditKadr);
 SGScreen.LastChild.LastChild.SetBounds(123,47,137,20);
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
-(SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
+(SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntionVideo);
 (SGScreen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
-SGScreen.LastChild.LastChild.Caption:='10000';
+SGScreen.LastChild.LastChild.Caption:='200';
 
 FBezierCurvePanel.CreateChild(TSGLabel.Create());
 FBezierCurvePanel.LastChild.Caption:='Примерно займет времени:';
@@ -556,9 +609,11 @@ FBezierCurvePanel.LastChild.SetBounds(3,70,275,20);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
-FBezierCurvePanel.CreateChild(TSGButton.Create());
+FBezierCurveGoButton:=TSGButton.Create();
+FBezierCurvePanel.CreateChild(FBezierCurveGoButton);
 FBezierCurvePanel.LastChild.AsButton.Caption:='Начать и забить на комп';
 FBezierCurvePanel.LastChild.AsButton.SetBounds(3,92,275,20);
+FBezierCurvePanel.LastChild.AsButton.OnChange:=TSGComponentProcedure(@bcpGoVideo);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 FBezierCurveEditKadr.FUserPointer2:=Pointer(FBezierCurvePanel.LastChild);
@@ -581,6 +636,9 @@ end;
 constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
+FNowRenderitsiaVideo:=False;
+FBezierNowSelectPoint:=0;
+FKomponentsNowOffOn:=False;
 FBezierCurveEditKadr:=nil;
 FEnablePictureStripAddingPoints:=False;
 FBezierCurvePanel:=nil;
@@ -749,11 +807,11 @@ begin
 if MandaInitialized then
 	begin
 	Render.InitMatrixMode(SG_2D);
-
-	if Manda.ThreadsReady then
+	
+	if Manda.ThreadsReady  then
 		begin
 		Delay(5);
-		Manda.AfterCalculate;
+		Manda.AfterCalculate();
 		
 		for i:=0 to QuantityThreads-1 do
 			begin
@@ -761,18 +819,21 @@ if MandaInitialized then
 			//SGScreen.Children[CID-QuantityThreads+i+2].AsProgressBar.Visible:=False;
 			end;
 		
-		FDateTime.Get;
-		LabelProcent.Visible:=False;
+		FDateTime.Get();
+		if not FNowRenderitsiaVideo then
+			begin
+			LabelProcent.Visible:=False;
+			LblProcent.Visible:=False;
+			end;
 		LabelProcent.Caption:='100%';
-		LblProcent.Visible:=False;
 		LblProcent.Caption:=SGStringToPChar('100%, Прошло: '+
 			(
 			SGSecondsToStringTime(
 			(FDateTime-FBeginCalc).GetPastSeconds))+'.');
 		
-		if not NowSave then
+		if (not NowSave)  and (not FNowRenderitsiaVideo) then
 			begin
-			Manda.ToTexture;
+			Manda.ToTexture();
 			OnComponents();
 			{if SecondImage<>nil then
 				begin
@@ -780,22 +841,34 @@ if MandaInitialized then
 				SecondImage:=nil;
 				end;}
 			end
-		else
-			begin
-			if not DirectoryExists(DataDirectory+Slash+'Images') then
-				MkDir(DataDirectory+Slash+'Images');
-			Manda.FImage.Saveing(SGI_PNG);
-			Manda.Width:=StartDepth;
-			Manda.Height:=StartDepth;
-			Manda.FImage.Destroy;
-			Manda.FImage:=SecondImage;
-			SecondImage:=nil;
-			NowSave:=False;
-			end;
+		else 
+			if Manda.FImage<>nil then
+				begin
+				if not DirectoryExists(DataDirectory+Slash+'Images') then
+					MkDir(DataDirectory+Slash+'Images');
+				if FNowRenderitsiaVideo then
+					Manda.FImage.Way:=FVideoBuffer+Slash+SGStr(FNowKadr)+'.png';
+				Manda.FImage.Saveing(SGI_PNG);
+				if not FNowRenderitsiaVideo then
+					begin
+					Manda.Width:=StartDepth;
+					Manda.Height:=StartDepth;
+					end;
+				Manda.FImage.Destroy();
+				Manda.FImage:=nil;
+				if not FNowRenderitsiaVideo then
+					begin
+					Manda.FImage:=SecondImage;
+					SecondImage:=nil;
+					end;
+				if FNowRenderitsiaVideo then
+					Changet:=True;
+				NowSave:=False;
+				end;
 		end;
-
+	
 	UpDateLabelCoordCaption();
-
+	
 	if LabelProcent.Visible and ( not Manda.ThreadsReady) then
 		begin
 		Delay(5);
@@ -918,7 +991,7 @@ if MandaInitialized then
 		end;
 
 
-	if Manda.FImage.Ready then
+	if (Manda.FImage<>nil) and Manda.FImage.Ready then
 		begin
 		Render.Color3f(1,1,1);
 		Manda.Draw;
@@ -1070,9 +1143,11 @@ if MandaInitialized then
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
 		FBezierCurve.Calculate();
 		Context.FCursorKeyPressed:=SGNoCursorButton;
+		FBezierCurveLabelPoints.Caption:='Количество точек: '+SGStr(FBezierCurve.VertexQuantity);
+		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSGEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
 	
-	if FEnablePictureStripPanel then
+	if FEnablePictureStripPanel and FKomponentsNowOffOn and (not Changet) and (not FNowRenderitsiaVideo) then
 		begin
 		//Manda.FView.Write();
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
@@ -1083,17 +1158,47 @@ if MandaInitialized then
 	
 	if Changet then
 		begin
+		if FNowRenderitsiaVideo then
+			begin
+			FNowKadr+=1;
+			if FNowKadr>FAllKadrs then
+				begin
+				FNowRenderitsiaVideo:=False;
+				Changet:=False;
+				Manda.FImage:=SecondImage;
+				SecondImage:=nil;
+				FBezierCurveKadrProgressBar.Visible:=False;
+				Exit;
+				end
+			else
+				FBezierCurveKadrProgressBar.Progress:=FNowKadr/FAllKadrs;
+			end;
 		OffComponents();
-		if SecondImage<>nil then
-			SecondImage.Destroy;
-		SecondImage:=Manda.FImage;
-		Manda.FImage:=nil;
-		Manda.BeginCalculate;
+		if not FNowRenderitsiaVideo then
+			if SecondImage<>nil then
+				SecondImage.Destroy;
+		if (not FNowRenderitsiaVideo) or (FNowRenderitsiaVideo and (Manda.FImage<>nil)) then
+			begin
+			SecondImage:=Manda.FImage;
+			Manda.FImage:=nil;
+			end;
+		if FNowRenderitsiaVideo then
+			begin
+			Manda.FZNumber.x:=FBezierCurve.GetLow(FNowKadr/FAllKadrs).x;
+			Manda.FZNumber.y:=FBezierCurve.GetLow(FNowKadr/FAllKadrs).y;
+			end;
+		if (not FNowRenderitsiaVideo) and (not NowSave) then
+			begin
+			Manda.Width:=StartDepth;
+			Manda.Height:=StartDepth;
+			end;
+		Manda.BeginCalculate();
 		Manda.FImage.Way:=SGGetFreeFileName(DataDirectory+Slash+'Images'+Slash+'Mand New.png');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;
 		FBeginCalc.Get;
+		Manda.ThreadsBoolean();
 		for i:=0 to QuantityThreads-1 do
 			begin
 			with FArProgressBar[i] do
