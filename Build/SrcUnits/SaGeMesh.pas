@@ -15,9 +15,12 @@ uses
     , SaGeContext;
 
 type
-	TSGMeshVertexType=(TSGMeshVertexType3f,TSGMeshVertexType2f);
 	TSGMeshColorType=(TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
-	
+	TSGMeshVertexType=TSGVertexFormat;
+const
+	TSGMeshVertexType2f = SG_VERTEX_2F;
+	TSGMeshVertexType3f = SG_VERTEX_3F;
+type
 	TSGFaceType = type word;//type longword;
 	TSGArTSGFaceType = packed array of TSGFaceType;
 	TSGArTSGArTSGFaceType = packed array of TSGArTSGFaceType;
@@ -96,6 +99,7 @@ type
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
 		procedure SetHasTesture(const VHasTexture:Boolean);
 		function GetSizeOfOneVertex():LongWord;inline;
+		function GetVertexLength():QWord;inline;
     public
 		property QuantityVertexes:LongWord read FNOfVerts;
 		property HasTexture:Boolean read FHasTexture write FHasTexture;
@@ -104,7 +108,7 @@ type
 		property ColorType:TSGMeshColorType read FColorType write SetColorType;
 		property VertexType:TSGMeshVertexType read FVertexType write SetVertexType;
 		property PoligonesType:LongWord read FPoligonesType write FPoligonesType;
-    private
+    protected
 		ArFaces:packed array of TSGFaceType;
 		// array of [Vertexes, Colors, Normals, TexVertexes]
 		ArVertex:Pointer;
@@ -137,7 +141,7 @@ type
 		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
 		
-		procedure SetVertexLength(const NewVertexLength:TSGMaxEnum);inline;
+		procedure SetVertexLength(const NewVertexLength:QWord);inline;
 		function GetVertexesSize():TSGMaxEnum;overload;inline;
 		
 		procedure SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
@@ -153,7 +157,7 @@ type
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
 	public
 		property Faces:TSGMaxEnum read GetFaceLength write SetFaceLength;
-		property Vertexes:TSGMaxEnum write SetVertexLength;
+		property Vertexes:QWord read GetVertexLength write SetVertexLength;
     public
 		FEnableVBO:Boolean;
 		
@@ -243,6 +247,11 @@ type
 implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+function TSG3DObject.GetVertexLength():QWord;inline;
+begin
+Result:=FNOfVerts;
+end;
 
 procedure TSG3DObject.SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
 begin
@@ -733,7 +742,7 @@ if VHasTexture and (FQuantityTextures=0) then
 FHasTexture:=VHasTexture;
 end;
 
-procedure TSG3DObject.SetVertexLength(const NewVertexLength:TSGMaxEnum);inline;
+procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord);inline;
 begin
 FNOfVerts:=NewVertexLength;
 GetMem(ArVertex,GetVertexesSize());
