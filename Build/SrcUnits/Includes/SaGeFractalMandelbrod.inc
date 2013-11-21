@@ -1184,8 +1184,8 @@ if MandaInitialized then
 			end;
 		if FNowRenderitsiaVideo then
 			begin
-			Manda.FZNumber.x:=FBezierCurve.GetLow(FNowKadr/FAllKadrs).x;
-			Manda.FZNumber.y:=FBezierCurve.GetLow(FNowKadr/FAllKadrs).y;
+			Manda.FZNumber.x:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x;
+			Manda.FZNumber.y:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y;
 			end;
 		if (not FNowRenderitsiaVideo) and (not NowSave) then
 			begin

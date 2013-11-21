@@ -50,9 +50,9 @@ type
 		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
 		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
 		function GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
+		function GetLow(const R:Real):TSGVertex3f;inline;
 			public
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
-		function GetLow(const R:Real):TSGVertex3f;
 		procedure Calculate();
 		procedure AddVertex(const VVertex:TSGVertex3f);
 		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
@@ -164,7 +164,10 @@ end;
 
 function TSGBezierCurve.GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 begin
-Result:=GetResultVertex(Attitude,@FStartArray[0],Length(FStartArray));
+if (FType = SG_Bezier_Curve_High)or (Length(FStartArray)<3) then
+	Result:=GetResultVertex(Attitude,@FStartArray[0],Length(FStartArray))
+else
+	Result:=GetLow(Attitude);
 end;
 
 function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
@@ -186,7 +189,7 @@ else
 	end;
 end;
 
-function TSGBezierCurve.GetLow(const R:Real):TSGVertex3f;
+function TSGBezierCurve.GetLow(const R:Real):TSGVertex3f;inline;
 var
 	StN:Real;
 begin
@@ -206,13 +209,12 @@ else if trunc(StN) >= High(FStartArray)-1 then
 else
 	Result:=(
 		GetResultVertex((StN-(Trunc(StN)-1))/2		,@FStartArray[trunc(StN)-1]		,3)+
-		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3));
+		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3))/2;
 end;
 
 procedure TSGBezierCurve.Calculate();
 var
 	i:TSGMaxEnum;
-
 begin
 if FMesh<>nil then
 	FMesh.Destroy();
@@ -227,21 +229,10 @@ FMesh.PoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType:=TSGMeshVertexType3f;
 FMesh.SetFaceLength(FDetalization);
 FMesh.SetVertexLength(FDetalization);
-if (FType = SG_Bezier_Curve_High) or (Length(FStartArray)<3) then
+for i:=0 to FDetalization-1 do
 	begin
-	for i:=0 to FDetalization-1 do
-		begin
-		FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
-		FMesh.ArFacesPoints[i].p[0]:=i;
-		end;
-	end
-else
-	begin
-	for i:=0 to FDetalization-1 do
-		begin
-		FMesh.ArVertex3f[i]^:=GetLow(i/(Detalization-1));
-		FMesh.ArFacesPoints[i].p[0]:=i;
-		end;
+	FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
+	FMesh.ArFacesPoints[i].p[0]:=i;
 	end;
 FMesh.LoadToVBO();
 end;
