@@ -554,6 +554,7 @@ SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-
 SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
 SGScreen.LastChild.AsProgressBar.FColor1:=SGColorImport(1,1,0,0.7);
 SGScreen.LastChild.AsProgressBar.FColor2:=SGColorImport(1,1/3,0,0.9);
+SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FButtonEnableCurve:=TSGButton.Create();
 SGScreen.CreateChild(FButtonEnableCurve);
@@ -726,10 +727,12 @@ SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 end;
 
-destructor TSGFractalMandelbrodRelease.Destroy;
+destructor TSGFractalMandelbrodRelease.Destroy();
 var
 	i:TSGMaxEnum;
 begin
+if FBezierCurveKadrProgressBar<> nil then
+	FBezierCurveKadrProgressBar.Destroy();
 if FBezierCurvePanel<>nil then
 	FBezierCurvePanel.Destroy();
 if FButtonEnableCurve<>nil then
