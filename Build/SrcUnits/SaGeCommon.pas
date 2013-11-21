@@ -8,7 +8,7 @@ uses
 	SysUtils;
 	
 type
-	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);	
+	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);
 	
 	TSGThreadProcedure = SaGeBase.TSGThreadProcedure;
 	TSGThread = SaGeBase.TSGThread;

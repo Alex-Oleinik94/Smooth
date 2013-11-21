@@ -92,6 +92,8 @@ if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
 	else
 		iii:=ii+1;
 	
+	
+	SetLength(ArMinkIndexes,0);
 	end;
 SetLength(ArMinkVertexes,0);
 SetLength(ArMinkConnect,0);

@@ -40,7 +40,7 @@ if FMeshes<>nil then
 		if FMeshes[i]<>nil then
 			for ii:=i+1 to FQuantityMeshes-1 do
 				if FMeshes[ii]<>nil then
-					if FMeshes[ii].FDistance+FMeshes[i].FDistance>=SGAbsTwoVertex(FMeshes[ii].FPosition,FMeshes[i].FPosition) then
+					//if SGPInSphere(FMeshes[ii].FCo) then
 						begin
 						//Вод тут ищем колизии
 						end;

@@ -111,6 +111,8 @@ type
 		FBezierCurveEditKadr:TSGEdit;
 		
 		FEnablePictureStripAddingPoints:Boolean;
+		
+		FNowKadr:QWord;
 			public
 		procedure DrawBezierPoints();inline;
 		procedure OffComponents();inline;

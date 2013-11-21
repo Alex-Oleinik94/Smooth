@@ -37,7 +37,7 @@ type
 (*====================================================================*)
 (*==========================TSGBezierCurve============================*)
 (*====================================================================*)
-
+	TSGBezierCurveType=(SG_Bezier_Curve_High,SG_Bezier_Curve_Low);
 	TSGBezierCurve=class(TSGDrawClass)
 			public
 		constructor Create();override;
@@ -46,9 +46,10 @@ type
 		FStartArray : TArTSGVertex3f;
 		FMesh : TSG3DObject;
 		FDetalization : LongWord;
+		FType:TSGBezierCurveType;
 		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
 		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
-		function GetResultVertex(const Attitude:real;const FArray:TArTSGVertex3f):TSGVertex3f;inline;overload;
+		function GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 			public
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 		procedure Calculate();
@@ -162,24 +163,24 @@ end;
 
 function TSGBezierCurve.GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 begin
-Result:=GetResultVertex(Attitude,FStartArray);
+Result:=GetResultVertex(Attitude,@FStartArray[0],Length(FStartArray));
 end;
 
-function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:TArTSGVertex3f):TSGVertex3f;inline;overload;
+function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 var
 	VArray:TArTSGVertex3f;
 	i:TSGMaxEnum;
 begin
-if Length(FArray)=1 then
+if VLength=1 then
 	Result:=FArray[0]
-else if Length(FArray)=2 then
+else if VLength=2 then
 	Result:=SGGetVertexInAttitude(FArray[0],FArray[1],Attitude)
 else
 	begin
-	SetLength(VArray,Length(FArray)-1);
+	SetLength(VArray,VLength-1);
 	for i:=0 to High(VArray) do
 		VArray[i]:=SGGetVertexInAttitude(FArray[i],FArray[i+1],Attitude);
-	Result:=GetResultVertex(Attitude,VArray);
+	Result:=GetResultVertex(Attitude,@VArray[0],VLength-1);
 	SetLength(VArray,0);
 	end;
 end;
@@ -187,6 +188,32 @@ end;
 procedure TSGBezierCurve.Calculate();
 var
 	i:TSGMaxEnum;
+
+function GetLow(const R:Real):TSGVertex3f;
+var
+	StN:Real;
+begin
+StN:=R*High(FStartArray);
+if trunc(StN) = 0 then
+	Result:=(
+		GetResultVertex(StN,  @FStartArray[trunc(StN)],2)+
+		GetResultVertex(StN/2,@FStartArray[trunc(StN)],3)
+		)/2
+else if trunc(StN) >= High(FStartArray)-1 then
+	begin
+	Result:=(
+		GetResultVertex((StN-High(FStartArray)+2)/2	 		,@FStartArray[High(FStartArray)-2]		,3)+
+		GetResultVertex((StN-(High(FStartArray)-1))			,@FStartArray[High(FStartArray)-1]		,2)
+		)/2
+	end
+else
+	Result:=(
+		GetResultVertex((StN-(Trunc(StN)-1))/2		,@FStartArray[trunc(StN)-1]		,3)+
+		GetResultVertex((StN-(Trunc(StN)))/2		,@FStartArray[trunc(StN)]		,3)
+		)/2;
+//wRITE(r:0:10,' ');Result.WriteLn();READLN();
+end;
+
 begin
 if FMesh<>nil then
 	FMesh.Destroy();
@@ -201,10 +228,21 @@ FMesh.PoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType:=TSGMeshVertexType3f;
 FMesh.SetFaceLength(FDetalization);
 FMesh.SetVertexLength(FDetalization);
-for i:=0 to FDetalization-1 do
+if (FType = SG_Bezier_Curve_High) or (Length(FStartArray)<3) then
 	begin
-	FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
-	FMesh.ArFacesPoints[i].p[0]:=i;
+	for i:=0 to FDetalization-1 do
+		begin
+		FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
+		FMesh.ArFacesPoints[i].p[0]:=i;
+		end;
+	end
+else
+	begin
+	for i:=0 to FDetalization-1 do
+		begin
+		FMesh.ArVertex3f[i]^:=GetLow(i/(Detalization-1));
+		FMesh.ArFacesPoints[i].p[0]:=i;
+		end;
 	end;
 FMesh.LoadToVBO();
 end;
@@ -235,6 +273,7 @@ inherited;
 FStartArray:=nil;
 FMesh:=nil;
 FDetalization:=50;
+FType:=SG_Bezier_Curve_Low;
 end;
 
 destructor TSGBezierCurve.Destroy();
