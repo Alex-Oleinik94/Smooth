@@ -1023,9 +1023,9 @@ if MandaInitialized then
 				SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
 			Manda.FView.Import(
 				GetPointOnPosOnMand(SelectPoint).x,
-				GetPointOnPosOnMand(SelectPoint).y-abs(GetPointOnPosOnMand(SelectPoint).y-GetPointOnPosOnMand(SelectSecondPoint).y),
+				GetPointOnPosOnMand(SelectSecondPoint).y,
 				GetPointOnPosOnMand(SelectSecondPoint).x,
-				GetPointOnPosOnMand(SelectSecondPoint).y-abs(GetPointOnPosOnMand(SelectPoint).y-GetPointOnPosOnMand(SelectSecondPoint).y)
+				GetPointOnPosOnMand(SelectPoint).y
 				);
 			Changet:=True;
 			end;
@@ -1074,6 +1074,7 @@ if MandaInitialized then
 	
 	if FEnablePictureStripPanel then
 		begin
+		//Manda.FView.Write();
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
 		if FBezierCurve<>nil then
 			FBezierCurve.Draw();
