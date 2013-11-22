@@ -468,7 +468,8 @@ end;
 
 procedure TSGImage.FreeTexture;
 begin
-Render.DeleteTextures(1,@FTexture);
+if (FTexture<>0) and (FCOntext<>nil) and (Context<>nil) and (Render<>nil) then
+	Render.DeleteTextures(1,@FTexture);
 //glDeleteTextures(1,@FTexture);
 FTexture:=0;
 end;

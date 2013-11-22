@@ -1,4 +1,4 @@
-{$I SrcUnits\Includes\SaGe.inc}
+{$INCLUDE SrcUnits\Includes\SaGe.inc}
 {$APPTYPE CONSOLE}
 //{$APPTYPE GUI}
 program Main;
@@ -346,47 +346,146 @@ else
 	WriteLn('Unknown expansion "',(SGGetFileExpansion(FileWay)),'"!');
 end;
 
+procedure DllScan();
+var
+	FailWay:string;
+	Lib:TSGLibrary;
+	A:array [#0..#255] of Boolean;
+	i,iii:TSGMaxEnum;
+	S:STring;
+	axtung:Boolean;
+	Pc:PChar;
+
+procedure RecDll(const Depth:LongWord);
+var
+	ii:Byte;
+begin
+for ii:=0 to 129 do
+	if  A[char(ii)] then
+	begin
+	S+=Char(ii);
+	if Depth=1 then
+		begin
+		Pc:=SGStringToPChar(S);
+		iii:=0;
+		try
+		iii:=TSGMaxEnum(SaGeBase.GetProcAddress(Lib,Pc));
+		except
+		end;
+		if iii<>0 then
+			WriteLn('Result "',S,'"!!!');
+		FreeMem(Pc);
+		end
+	else
+		begin
+		RecDll(Depth-1);
+		end;
+	SetLength(S,Length(S)-1);
+	end;
+end;
+
+begin
+if argc<=2 then
+	begin
+	Writeln('Enter file please as paramrter!');
+	Exit;
+	end;
+FailWay:=argv[2];
+if not SGFileExists(FailWay) then
+	begin
+	Writeln('File must be exists!');
+	Exit;
+	end;
+Lib:=SaGeBase.LoadLibrary(SGStringToPChar(FailWay));
+WriteLn(Lib);
+if Lib=0 then
+	begin
+	Writeln('Load library failed!');
+	Exit;
+	end;
+FillChar(A[char(0)],256,0);
+for i:=0 to 255 do
+	if char(i) in ['a'..'z','A'..'Z','_','0'..'9'] then
+		A[char(i)]:=True;
+S:='';
+for i:=1 to 255 do
+	begin
+	Writeln('Scaning ',i,' simbol words..');
+	RecDll(i);
+	end;
+end;
+
+procedure ImageResizer();
+var
+	Image:TSGImage;
+begin
+if (argc=5) and SGFileExists(argv[2]) and (SGVal(SGPCharToString(argv[3]))>0)and (SGVal(SGPCharToString(argv[4]))>0)  then
+	begin
+	Image:=TSGImage.Create();
+	Image.Way:=argv[2];
+	Image.LoadToMemory();
+	Image.LoadToBitMap();
+	Image.Image.SetBounds(
+		SGVal(SGPCharToString(argv[3])),
+		SGVal(SGPCharToString(argv[4])));
+	Image.Way:=SGGetFreeFileName(Image.Way);
+	Image.Saveing();
+	Image.Destroy();
+	end
+else
+	WriteLn('Error in parameters You must rnter @filename, @new_width and @new_height!');
+end;
+
 var
 	s:string;
 
 begin
-if (argc=2) and (SGFileExists(SGPCharToString(argv[1]))) then
+if (argc=2) and (SGFileExists(SGPCharToString(argv[1]))) and 
+	(SGGetFileExpansion(argv[1])='PNG') then
 	begin
 	GoViewer(SGPCharToString(argv[1]));
 	end
 else if argc>1 then
 	begin
-	WriteLn('Entered ',argc-1,' parametrs.');
+	//WriteLn('Entered ',argc-1,' parametrs.');
 	s:=SGPCharToString(argv[1]);
 	if s[1]='-' then
 		begin
 		s:=SGGetComand(s);
 		if s='FPCTC' then
 			begin
-			WriteLn('Beginning FPC to C transliater.');
+			//WriteLn('Beginning FPC to C transliater.');
 			FPCTCTransliater;
 			end
 		else if s='FIP' then
 			begin
-			WriteLn('Beginning Find in pas.');
+			//WriteLn('Beginning Find in pas.');
 			FindInPas(True);
 			end
+		else if s='IR' then
+			ImageResizer()
 		else if s='GUI' then
 			begin
-			WriteLn('Beginning Grafical Interface.');
+			//WriteLn('Beginning Grafical Interface.');
 			GoGUI('CMD');
+			end
+		else if s='DLLSCAN' then
+			begin
+			DllScan();
 			end
 		else if s='GRNC' then
 			begin
-			WriteLn('Beginning Google ReName Cashe.');
+			//WriteLn('Beginning Google ReName Cashe.');
 			GoogleReNameCache;
 			end
 		else if (s='H') or (s='HELP') then
 			begin
-			WriteLn('This is help. You can use:');
+			WriteLn('This is help for SaGe. You can use:');
 			WriteLn('   -FIP                         : for run "Find in pas" program');
 			WriteLn('   -FPCTC                       : for run "FPC to C converter" program');
 			WriteLn('   -GRNC                        : for run "Google ReName Cashe" program');
+			WriteLn('   -DLLSCAN                     : for run scanning dll for procedures');
+			WriteLn('   -IR                          : for run image resizer');
 			WriteLn('   -H;-HELP                     : for run help');
 			WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 			end
