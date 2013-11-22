@@ -1,5 +1,9 @@
 {$IFDEF SGREADINTERFACE}
 type
+	TSGMandaPixel=record
+		r,g,b:Byte;
+		end;
+	
 	TSGFractalMandelbrodThreadData=class;
 	TSGFractalMandelbrod=class(TSGImageFractal)
 			public
@@ -11,9 +15,13 @@ type
 		FZMand:Boolean;
 		FZQuantityRec:LongInt;
 		FColorScheme:SGByte;
+		FAttitudeForThemeEnable:Boolean;
+		FTheme1,FTheme2:SGByte;
+		FFAttitudeForTheme:Real;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
 		function Rec(Number:TSGComplexNumber):LongInt;inline;
 			public
+		function GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 		procedure Calculate;override;
 		procedure Draw;override;
@@ -850,7 +858,11 @@ if MandaInitialized then
 				if not DirectoryExists(DataDirectory+Slash+'Images') then
 					MkDir(DataDirectory+Slash+'Images');
 				if FNowRenderitsiaVideo then
+					begin
+					if not DirectoryExists(DataDirectory+Slash+'Videos') then
+						MkDir(DataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+SGStr(FNowKadr)+'.png';
+					end;
 				Manda.FImage.Saveing(SGI_PNG);
 				if not FNowRenderitsiaVideo then
 					begin
@@ -1150,13 +1162,14 @@ if MandaInitialized then
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSGEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
 	
-	if FEnablePictureStripPanel and FKomponentsNowOffOn and (not Changet) and (not FNowRenderitsiaVideo) then
+	if FEnablePictureStripPanel  then
 		begin
 		//Manda.FView.Write();
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
 		if FBezierCurve<>nil then
 			FBezierCurve.Draw();
-		DrawBezierPoints();
+		if FKomponentsNowOffOn then
+			DrawBezierPoints();
 		end;
 	
 	if Changet then
@@ -1319,6 +1332,10 @@ end;
 constructor TSGFractalMandelbrod.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
+FTheme1:=0;
+FTheme2:=0;
+FFAttitudeForTheme:=0;
+FAttitudeForThemeEnable:=False;
 FImage:=nil;
 FZNumber.Import(0,0.65);
 FView.Import(-1.5,-1.5*(Context.Height/Context.Width),1.5,1.5*(Context.Height/Context.Width));
@@ -1328,88 +1345,109 @@ FZQuantityRec:=256;
 FColorScheme:=0;
 end;
 
-procedure TSGFractalMandelbrod.InitColor(const x,y:LongInt;const RecNumber:LongInt);
+function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
 var
 	Color:Byte;
 begin
 Color:=Round((RecNumber/20)*255);
-case FColorScheme of
+case VColorSceme of
 1:
 	begin
-	FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=GetColor(0,383,Color) div 2;
-	FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=GetColor(128,896,Color);
-	FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=GetColor(0,383,Color);
+	Result.r:=GetColor(0,383,Color) div 2;
+	Result.g:=GetColor(128,896,Color);
+	Result.b:=GetColor(0,383,Color);
 	end;
 2:
 	begin
-	FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=GetColorOne(FZQuantityRec div 4,FZQuantityRec,Color);
-	FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=GetColorOne(0,FZQuantityRec,Color);
-	FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=GetColorOne(FZQuantityRec div 2,FZQuantityRec,Color);
+	Result.r:=GetColorOne(FZQuantityRec div 4,FZQuantityRec,Color);
+	Result.g:=GetColorOne(0,FZQuantityRec,Color);
+	Result.b:=GetColorOne(FZQuantityRec div 2,FZQuantityRec,Color);
 	end;
 3:
 	begin
 	Color:=Trunc(RecNumber/FZQuantityRec*255);
-	FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=Color;
-	FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=Color;
-	FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=Color; 
+	Result.r:=Color;
+	Result.g:=Color;
+	Result.b:=Color; 
 	end;
 
 4:
 	begin
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := Color;
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := (SizeOf(FImage.FImage.FBitMap) * Color) div 255;
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 0;	// nil
+		Result.r := Color;
+		Result.g := (SizeOf(FImage.FImage.FBitMap) * Color) div 255;
+		Result.b := 0;	// nil
 	end;
 
 5:
 	begin
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := trunc(abs(cos(Color) * Color));
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0])));
+		Result.r := trunc(abs(cos(Color) * Color));
+		Result.g := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * Result.r)));
 		if Color <> 0 then
-			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := GetColor(
-				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1], 
-				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0], 
-				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]
+			Result.b := GetColor(
+				Result.g, 
+				Result.r, 
+				(sqr(Result.r)
 			) DIV Color) DIV 128
 		else
-			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := GetColor(
-				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1], 
-				FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0], 
-				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]
+			Result.b := GetColor(
+				Result.g, 
+				Result.r, 
+				(sqr(Result.r)
 			) DIV 255) DIV 158;
 	end;
 
 6:
 	begin
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] := trunc(abs(sin(Color) * Color));
-		FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] := GetColor(
+		Result.r:= trunc(abs(sin(Color) * Color));
+		Result.g := GetColor(
 			128, 
 			383, 
-			trunc(abs(cos(Color) * FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]))
+			trunc(abs(cos(Color) * Result.r))
 		);
-		if (FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] < FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0]) then
-			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 
-				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 0] ** 2) DIV 255
+		if (Result.g < Result.r) then
+			Result.b := 
+				(sqr(Result.r)) DIV 255
 		else
-			FImage.FImage.FBitMap[(Y * Width + X) * 3 + 2] := 
-				(FImage.FImage.FBitMap[(Y * Width + X) * 3 + 1] ** 2) DIV 255;
+			Result.b := 
+				(sqr(Result.g)) DIV 255;
 	end;
 else
 	begin
 	if RecNumber=FZQuantityRec then
 		begin
-		FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=255;
-		FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=127;
-		FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=0;
+		Result.r:=255;
+		Result.g:=127;
+		Result.b:=0;
 		end
 	else
 		begin
-		FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=GetColor(200,400,Color);
-		FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=GetColor(0,200,Color);
-		FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=GetColor(100,300,Color);
+		Result.r:=GetColor(200,400,Color);
+		Result.g:=GetColor(0,200,Color);
+		Result.b:=GetColor(100,300,Color);
 		end;
 	end;
 end;
+end;
+
+procedure TSGFractalMandelbrod.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
+var
+	MandaPixel1,MandaPixel2:TSGMandaPixel;
+begin
+if FAttitudeForThemeEnable then
+	begin
+	MandaPixel1:=GetPixelColor(FTheme1,RecNumber);
+	MandaPixel2:=GetPixelColor(FTheme2,RecNumber);
+	MandaPixel1.r:=Round(MandaPixel1.r*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.r);
+	MandaPixel1.g:=Round(MandaPixel1.g*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.g);
+	MandaPixel1.b:=Round(MandaPixel1.b*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.b);
+	end
+else
+	begin
+	MandaPixel1:=GetPixelColor(FColorScheme,RecNumber);
+	end;
+FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=MandaPixel1.r;
+FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=MandaPixel1.g;
+FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=MandaPixel1.b;
 end;
 
 procedure TSGFractalMandelbrod.CalculateFromThread(Data:TSGFractalMandelbrodThreadData);

@@ -21,6 +21,7 @@ type
 	TSGByte		= Byte;
 	TSGInt64	= Int64;
 	TSGLongWord	= LongWord;
+	TSGWord	    = Word;
 	TSGSingle	= Single;
 	TSGChar		= Char;
 	//TSGBoolean	= Boolean;

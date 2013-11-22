@@ -35,6 +35,7 @@ uses
 	,SaGeRenderOpenGL
 	,SaGeModel
 	,SaGeTron;
+	//,SaGeX264Encoder;
 
 
 procedure Draw(const Context:PSGContext);
@@ -42,7 +43,12 @@ begin
 end;
 
 procedure Init(const MyContext:PSGContext);
+{var
+	En:TSGX264Encoder = nil;}
 begin
+{En:=TSGX264Encoder.Create();
+En.Open('',nil);}
+
 SGScreen.Font:=TSGGLFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
 SGScreen.Font.Loading;

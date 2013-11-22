@@ -47,11 +47,15 @@ type
 		FMesh : TSG3DObject;
 		FDetalization : LongWord;
 		FType:TSGBezierCurveType;
+		FLowIndex:LongWord;
+		FLowAttitude:Real;
 		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
 		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
 		function GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 		function GetLow(const R:Real):TSGVertex3f;inline;
 			public
+		property LowAttitude:Real read FLowAttitude;
+		property LowIndex:LongWord read FLowIndex;
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 		procedure Calculate();
 		procedure AddVertex(const VVertex:TSGVertex3f);
@@ -194,6 +198,8 @@ var
 	StN:Real;
 begin
 StN:=R*High(FStartArray);
+FLowIndex:=trunc(StN);
+FLowAttitude:=StN - FLowIndex;
 if trunc(StN) = 0 then
 	Result:=(
 		GetResultVertex(StN,  @FStartArray[trunc(StN)],2)+
