@@ -694,6 +694,7 @@ if CursorInComponentNow then
 			begin
 			CanRePleace:=False;
 			FClickOnOpenBox:=True;
+			Context.FCursorKeyPressed:=SGNoCursorButton;
 			end;
 	if FOpen and (Context.CursorWheel<>SGNoCursorWheel) then
 		begin

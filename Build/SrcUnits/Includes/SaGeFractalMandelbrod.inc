@@ -15,11 +15,12 @@ type
 		FZMand:Boolean;
 		FZQuantityRec:LongInt;
 		FColorScheme:SGByte;
+		
 		FAttitudeForThemeEnable:Boolean;
 		FTheme1,FTheme2:SGByte;
 		FFAttitudeForTheme:Real;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
-		function Rec(Number:TSGComplexNumber):LongInt;inline;
+		function Rec(Number:TSGComplexNumber):Word;inline;
 			public
 		function GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
@@ -132,7 +133,13 @@ type
 		FNowKadr:QWord;
 		FAllKadrs:QWOrd;
 		
+		FCurveArPoints:packed array of SGByte;
+		FCurveSelectPoint:Int64;
+		
+		FCurvePointPanel:TSGPanel;
+		FCurvePCB:TSGCOmboBox;
 			public
+		procedure UnDatePointCurvePanel();inline;
 		procedure DrawBezierPoints();inline;
 		procedure OffComponents();inline;
 		procedure OnComponents();inline;
@@ -144,11 +151,30 @@ type
 
 {$IFDEF SGREADIMPLEMENTATION}
 
+procedure TSGFractalMandelbrodRelease.UnDatePointCurvePanel();inline;
+begin
+if FCurveSelectPoint=-1 then
+	begin
+	FCurvePointPanel.Visible:=False;
+	FCurvePointPanel.Active:=False;
+	end
+else
+	begin
+	FCurvePointPanel.Visible:=True;
+	FCurvePointPanel.Active:=True;
+	if (FCurvePCB<>nil) and (FCurveSelectPoint<>-1) then
+		begin
+		FCurvePCB.FSelectItem:=FCurveArPoints[FCurveSelectPoint];
+		end;
+	end;
+end;
+
 procedure TSGFractalMandelbrodRelease.DrawBezierPoints();inline;
 var
 	A:TSGVertex3f;
 	i:TSGMaxEnum;
 	S:Extended;
+	PC:TSGVertex2f;
 begin
 if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 	begin
@@ -157,17 +183,33 @@ if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 	Render.BeginScene(SGR_QUADS);
 	for i:=0 to FBezierCurve.VertexQuantity-1 do
 		begin
+		if i=FCurveSelectPoint then
+			Render.Color4f(1,0.2,0,0.4);
 		A:=FBezierCurve.Vertexes[i];
 		Render.Vertex2f(A.x+S,A.y+S);
 		Render.Vertex2f(A.x-S,A.y+S);
 		Render.Vertex2f(A.x-S,A.y-S);
 		Render.Vertex2f(A.x+S,A.y-S);
+		if (Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey) then
+			begin
+			PC:=GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition));
+			if (abs(PC.x-A.x)<(S)) and ((abs(PC.y-A.y)<(S))) and (FCurveSelectPoint<>i) then
+				begin
+				FCurveSelectPoint:=i;
+				Context.FCursorKeyPressed:=SGNoCursorButton;
+				UnDatePointCurvePanel();
+				end;
+			end;
+		if i=FCurveSelectPoint then
+			Render.Color4f(1,1,0,0.5);
 		end;
 	Render.EndScene();
 	
 	Render.Color4f(1,1,0,0.9);
 	for i:=0 to FBezierCurve.VertexQuantity-1 do
 		begin
+		if i=FCurveSelectPoint then
+			Render.Color4f(1,0.2,0,0.4);
 		Render.BeginScene(SGR_LINE_LOOP);
 		A:=FBezierCurve.Vertexes[i];
 		Render.Vertex2f(A.x+S,A.y+S);
@@ -175,6 +217,8 @@ if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 		Render.Vertex2f(A.x-S,A.y-S);
 		Render.Vertex2f(A.x+S,A.y-S);
 		Render.EndScene();
+		if i=FCurveSelectPoint then
+			Render.Color4f(1,1,0,0.9);
 		end;
 	end;
 end;
@@ -211,6 +255,8 @@ QuantityRecComboBox.Active:=False;
 FBezierCurvePanel.Active:=False;
 FBezierCurvePanel.Visible:=False;
 FKomponentsNowOffOn:=False;
+FCurvePointPanel.Visible:=False;
+FCurvePointPanel.Active:=False;
 end;
 
 procedure TSGFractalMandelbrodRelease.OnComponents();inline;
@@ -234,6 +280,8 @@ StepenComboBox.Visible:=True;
 StepenComboBox.Active:=True;
 QuantityRecComboBox.Visible:=True;
 QuantityRecComboBox.Active:=True;
+FCurvePointPanel.Visible:=FEnablePictureStripPanel and (FCurveSelectPoint<>-1);
+FCurvePointPanel.Active:=FCurvePointPanel.Visible;
 end;
 
 procedure SaveImage(Button:TSGButton);
@@ -248,6 +296,16 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SelectSecondPoint.Import;
 	end;
 end;
+
+procedure CurveColorComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
+begin
+with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
+	begin
+	if FCurveSelectPoint<>-1 then
+		FCurveArPoints[FCurveSelectPoint]:=b;
+	end;
+end;
+
 
 procedure ColorComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
 begin
@@ -351,6 +409,11 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 		if FBezierCurve<>nil then
 			FBezierCurve.Destroy();
 		FBezierCurve:=nil;
+		if FCurveArPoints<>nil then
+			SetLength(FCurveArPoints,0);
+		FCurveSelectPoint:=-1;
+		FCurvePointPanel.Visible:=False;
+		FCurveArPoints:=nil;
 		FEnablePictureStripAddingPoints:=False;
 		FBezierCurvePanel.Children[1].Caption:='On режим добавления точек';
 		FBezierCurveLabelPoints.Caption:='Количество точек: 0';
@@ -573,6 +636,31 @@ SGScreen.LastChild.Caption:='On видео панель';
 FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
 SGScreen.LastChild.FUserPointer1:=Self;
 
+FCurvePointPanel:=TSGPanel.Create();
+SGScreen.CreateChild(FCurvePointPanel);
+SGScreen.LastChild.Caption:='';
+SGScreen.LastChild.SetBounds(Context.Width-10-(140+10),Context.Height-130-130,140+10,125);
+SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
+SGScreen.LastChild.BoundsToNeedBounds;
+SGScreen.LastChild.FUserPointer1:=Self;
+
+
+FCurvePointPanel.CreateChild(TSGComboBox.Create);
+FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №1');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №2');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №3');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Монохромный');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Дьявол');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Желтая пыль');
+FCurvePointPanel.LastChild.AsComboBox.CreateItem('Роза');
+FCurvePointPanel.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@CurveColorComboBoxProcedure);
+FCurvePointPanel.LastChild.AsComboBox.FSelectItem:=0;
+FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
+FCurvePointPanel.LastChild.FUserPointer1:=Self;
+
+
+
 FBezierCurvePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FBezierCurvePanel);
 SGScreen.LastChild.Caption:='';
@@ -620,7 +708,7 @@ FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
 FBezierCurveGoButton:=TSGButton.Create();
 FBezierCurvePanel.CreateChild(FBezierCurveGoButton);
-FBezierCurvePanel.LastChild.AsButton.Caption:='Начать и забить на комп';
+FBezierCurvePanel.LastChild.AsButton.Caption:='Начать и пусть весь мир подождет';
 FBezierCurvePanel.LastChild.AsButton.SetBounds(3,92,275,20);
 FBezierCurvePanel.LastChild.AsButton.OnChange:=TSGComponentProcedure(@bcpGoVideo);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
@@ -645,6 +733,9 @@ end;
 constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
+FCurvePointPanel:=nil;
+FCurveSelectPoint:=-1;
+FCurveArPoints:=nil;
 FNowRenderitsiaVideo:=False;
 FBezierNowSelectPoint:=0;
 FKomponentsNowOffOn:=False;
@@ -739,6 +830,10 @@ destructor TSGFractalMandelbrodRelease.Destroy();
 var
 	i:TSGMaxEnum;
 begin
+if FCurvePointPanel<>nil then
+	FCurvePointPanel.Destroy();
+if FCurveArPoints<>nil then
+	SetLength(FCurveArPoints,0);
 if FBezierCurveKadrProgressBar<> nil then
 	FBezierCurveKadrProgressBar.Destroy();
 if FBezierCurvePanel<>nil then
@@ -1151,13 +1246,18 @@ if MandaInitialized then
 		(Context.KeyPressedChar='A') and 
 		(Context.KeyPressedType=SGUpKey) then
 		begin
+		if FCurveArPoints=nil then
+			SetLength(FCurveArPoints,1)
+		else 
+			SetLength(FCurveArPoints,Length(FCurveArPoints)+1);
+		FCurveArPoints[High(FCurveArPoints)]:=Manda.FColorScheme;
 		FBezierCurve.AddVertex(
 			SGVertexImport(
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).x,
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).y));
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
 		FBezierCurve.Calculate();
-		Context.FCursorKeyPressed:=SGNoCursorButton;
+		Context.FKeyPressed:=0;
 		FBezierCurveLabelPoints.Caption:='Количество точек: '+SGStr(FBezierCurve.VertexQuantity);
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSGEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
@@ -1167,7 +1267,15 @@ if MandaInitialized then
 		//Manda.FView.Write();
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
 		if FBezierCurve<>nil then
+			begin
 			FBezierCurve.Draw();
+			Render.Color3f(1,0,1);
+			Render.PointSize(5);
+			Render.BeginScene(SGR_POINTS);
+			Manda.FZNumber.Vertex(Render);
+			Render.EndScene();
+			Render.PointSize(1);
+			end;
 		if FKomponentsNowOffOn then
 			DrawBezierPoints();
 		end;
@@ -1184,6 +1292,7 @@ if MandaInitialized then
 				Manda.FImage:=SecondImage;
 				SecondImage:=nil;
 				FBezierCurveKadrProgressBar.Visible:=False;
+				Manda.FAttitudeForThemeEnable:=False;
 				Exit;
 				end
 			else
@@ -1202,6 +1311,18 @@ if MandaInitialized then
 			begin
 			Manda.FZNumber.x:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x;
 			Manda.FZNumber.y:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y;
+			Manda.FAttitudeForThemeEnable:=True;
+			Manda.FFAttitudeForTheme:=FBezierCurve.LowAttitude;
+			if FBezierCurve.LowIndex<>FBezierCurve.VertexQuantity-1 then
+				begin
+				Manda.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
+				Manda.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex+1];
+				end
+			else
+				begin
+				Manda.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
+				Manda.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex];
+				end;
 			end;
 		if (not FNowRenderitsiaVideo) and (not NowSave) then
 			begin
@@ -1526,13 +1647,13 @@ while ii<Width do
 	end;
 end;
 
-function TSGFractalMandelbrod.Rec(Number:TSGComplexNumber):LongInt;inline;
+function TSGFractalMandelbrod.Rec(Number:TSGComplexNumber):Word;inline;
 var 
-	Depth2:longint = 0;
+	Depth2:Word = 0;
 	Number2:TSGComplexNumber;
 begin
 Number2:=Number;
-While (Depth2<FZQuantityRec) and(SGAbsTwoVertex2f(Number,SGVertex2fImport)<2) do
+While (Depth2<FZQuantityRec) and(sqrt(sqr(Number.x)+sqr(Number.y))<2) do
 	begin
 	Depth2+=1;
 	Number:=Number**FZDegree;
