@@ -61,7 +61,7 @@ type
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 		procedure Calculate();
 		procedure AddVertex(const VVertex:TSGVertex3f);
-		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
+		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex; 
 		property Detalization:LongWord read FDetalization write FDetalization;
 		procedure Draw();override;
 		function VertexQuantity:TSGMaxEnum;inline;
@@ -83,7 +83,7 @@ type
 		class function UnProjectShift:TSGPoint2f;
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
 		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
-		procedure AddWaterString(const VString:String;const VFont:TSGFont);
+		procedure AddWaterString(const VString:String;const VFont:TSGFont;const VType:LongWord = 0);
 		end;
 
 (*====================================================================*)
@@ -688,7 +688,7 @@ end;
 (*============================TSGGLImage==============================*)
 (*====================================================================*)
 
-procedure TSGGLImage.AddWaterString(const VString:String;const VFont:TSGFont);
+procedure TSGGLImage.AddWaterString(const VString:String;const VFont:TSGFont;const VType:LongWord = 0);
 var
 	PBits:PSGPixel3b;
 	StrL:LongWord;
@@ -705,10 +705,20 @@ PBits[a].g:=trunc(PBits[a].g*(255-PFontBits[b].a)/255+(255-PBits[a].g)*(PFontBit
 PBits[a].b:=trunc(PBits[a].b*(255-PFontBits[b].a)/255+(255-PBits[a].b)*(PFontBits[b].a)/255);
 end;
 
+var
+	SumR,SumG,SumB,Sum:TSGMaxEnum;
+
+procedure AddSum(const a,b:TSGMaxEnum);inline;
+begin
+PBits[a].r:=trunc(PBits[a].r*(255-PFontBits[b].a)/255+(SumR)*(PFontBits[b].a)/255);
+PBits[a].g:=trunc(PBits[a].g*(255-PFontBits[b].a)/255+(SumG)*(PFontBits[b].a)/255);
+PBits[a].b:=trunc(PBits[a].b*(255-PFontBits[b].a)/255+(SumB)*(PFontBits[b].a)/255);
+end;
+
 begin
 if (Image=nil) or (Channels<>3) or (VFont.Channels<>4) or (VFont.Image=nil)or (VFont.Image.BitMap=nil) then
 	begin
-	SGLog.Sourse('TSGGLImage__AddWaterString : Error :Invalid arametrs!');
+	SGLog.Sourse('TSGGLImage__AddWaterString : Error : Invalid arametrs!');
 	Exit;
 	end;
 PBits:=PSGPixel3b(Image.BitMap);
@@ -716,15 +726,52 @@ StrL:=VFont.StringLength(VString);
 PW:=Width-StrL-5;
 PH:=Height-VFont.FontHeight-4;
 PFontBits:=PSGPixel4b(VFont.FImage.BitMap);
+if VType=0 then
+	begin
+	SumB:=0;
+	SumR:=0;
+	Sum:=0;
+	SumG:=0;
+	for i:=1 to Length(VString) do
+		begin
+		SI:=VFont.GetSimbolInfo(VString[i]);
+		for iw:=0 to VFont.SimbolWidth[VString[i]]-1 do
+			for ih:=1 to VFont.FontHeight do
+				begin
+				Sum+=1;
+				SumR+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].r;
+				SumG+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].g;
+				SumB+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].b;
+				end;
+		PW+=VFont.SimbolWidth[VString[i]];
+		end;
+	SumR:=Trunc(SumR/Sum);
+	SumG:=Trunc(SumG/Sum);
+	SumB:=Trunc(SumB/Sum);
+	SumR:=255-SumR;
+	SumG:=255-SumG;
+	SumB:=255-SumB;
+	PW:=Width-StrL-5;
+	end;
+
 for i:=1 to Length(VString) do
 	begin
 	SI:=VFont.GetSimbolInfo(VString[i]);
 	for iw:=0 to VFont.SimbolWidth[VString[i]]-1 do
 		for ih:=1 to VFont.FontHeight do
 			begin
-			Invert(
-				Width*Height+(PW+iw)-(PH+ih)*Width,
-				VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+			case VType of
+			0:
+				begin
+				AddSum(
+					Width*Height+(PW+iw)-(PH+ih)*Width,
+					VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+				end;
+			else
+				Invert(
+					Width*Height+(PW+iw)-(PH+ih)*Width,
+					VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+			end;
 			end;
 	PW+=VFont.SimbolWidth[VString[i]];
 	end;

@@ -138,6 +138,8 @@ type
 		
 		FCurvePointPanel:TSGPanel;
 		FCurvePCB:TSGCOmboBox;
+		
+		FTNRF:TSGFont;
 			public
 		procedure UnDatePointCurvePanel();inline;
 		procedure DrawBezierPoints();inline;
@@ -701,7 +703,7 @@ SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.LastChild.Caption:='200';
 
 FBezierCurvePanel.CreateChild(TSGLabel.Create());
-FBezierCurvePanel.LastChild.Caption:='Примерно займет времени:';
+FBezierCurvePanel.LastChild.Caption:='Примерно займет времени: дохрена!';
 FBezierCurvePanel.LastChild.SetBounds(3,70,275,20);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
@@ -733,6 +735,7 @@ end;
 constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
 begin
 inherited Create(VContext);
+FTNRF:=nil;
 FCurvePointPanel:=nil;
 FCurveSelectPoint:=-1;
 FCurveArPoints:=nil;
@@ -824,12 +827,18 @@ SGScreen.LastChild.LastChild.AsComboBox.CreateItem('6');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('8');
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+
+FTNRF:=TSGFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
+FTNRF.SetContext(FContext);
+FTNRF.Loading;
 end;
 
 destructor TSGFractalMandelbrodRelease.Destroy();
 var
 	i:TSGMaxEnum;
 begin
+if FTNRF<>nil then
+	FTNRF.Destroy();
 if FCurvePointPanel<>nil then
 	FCurvePointPanel.Destroy();
 if FCurveArPoints<>nil then
@@ -958,7 +967,7 @@ if MandaInitialized then
 						MkDir(DataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+SGStr(FNowKadr)+'.png';
 					end;
-				Manda.FImage.AddWaterString('@made by SaGe',SGScreen.Font);
+				Manda.FImage.AddWaterString('made by SaGe',FTNRF,0);
 				Manda.FImage.Saveing(SGI_PNG);
 				if not FNowRenderitsiaVideo then
 					begin
