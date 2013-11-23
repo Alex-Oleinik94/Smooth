@@ -11,8 +11,10 @@ uses
 	,SaGeRender
 	,SaGeImages
 	,SaGeMesh
+	,SaGeImagesBase
 	;
 type
+	TSGFont=class;
 (*====================================================================*)
 (*============================TSGCamera===============================*)
 (*====================================================================*)
@@ -81,6 +83,7 @@ type
 		class function UnProjectShift:TSGPoint2f;
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
 		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
+		procedure AddWaterString(const VString:String;const VFont:TSGFont);
 		end;
 
 (*====================================================================*)
@@ -103,8 +106,11 @@ type
 		FFontHeight:LongInt;
 		procedure LoadFont(const FontWay:string);
 		class function GetLongInt(var Params:TStringParams;const Param:string):LongInt;
+		function GetSimbolWidth(const Index:char):LongInt;inline;
 			public
+		function GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
 		property FontHeight:LongInt read FFontHeight;
+		property SimbolWidth[Index:char]:LongInt read GetSimbolWidth;
 		procedure ToTexture;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:string ):LongWord;overload;
@@ -414,6 +420,16 @@ end;}
 (*=============================TSGFont================================*)
 (*====================================================================*)
 
+function TSGFont.GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
+begin
+Result.Import(FSimbolParams[VSimbol].x,FSimbolParams[VSimbol].y);
+end;
+
+function TSGFont.GetSimbolWidth(const Index:char):LongInt;inline;
+begin
+Result:=FSimbolParams[Index].Width
+end;
+
 procedure TSGGLFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	P:PChar;
@@ -596,7 +612,7 @@ var
 	StringWidth:LongInt = 0;
 	Otstup:SGVertex2f = (x:0;y:0);
 	ToExit:Boolean = False;
-	SimbolWidth:LongWord = 0;
+	ThisSimbolWidth:LongWord = 0;
 begin
 BindTexture();
 StringWidth:=StringLength(S);
@@ -613,23 +629,23 @@ if AutoYShift then
 Otstup.Round;
 while (s[i]<>#0) and (not ToExit) do
 	begin
-	SimbolWidth:=FSimbolParams[s[i]].Width;
+	ThisSimbolWidth:=FSimbolParams[s[i]].Width;
 	if Otstup.x+FSimbolParams[s[i]].Width>Abs(Vertex2.x-Vertex1.x) then
 		begin
 		ToExit:=True;
-		SimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
+		ThisSimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
 		end;
 	Render.BeginScene(SGR_QUADS);
 	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
 	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+SimbolWidth)/Self.Width,
+		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth)/Self.Width,
 		1-(Self.FSimbolParams[s[i]].y/Self.Height));
-	Render.Vertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
+	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
 	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+SimbolWidth)/Self.Width,
+		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth)/Self.Width,
 		1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
-	Render.Vertex2f(Otstup.x+SimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
 	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
 	Render.EndScene();
@@ -671,6 +687,48 @@ end;
 (*====================================================================*)
 (*============================TSGGLImage==============================*)
 (*====================================================================*)
+
+procedure TSGGLImage.AddWaterString(const VString:String;const VFont:TSGFont);
+var
+	PBits:PSGPixel3b;
+	StrL:LongWord;
+	PW,PH:LongWord;
+	i:LongWord;
+	PFontBits:PSGPixel4b;
+	iw,ih:LongWord;
+	SI:TSGPoint2f;
+
+procedure Invert(const a,b:TSGMaxEnum);inline;
+begin
+PBits[a].r:=trunc(PBits[a].r*(255-PFontBits[b].a)/255+(255-PBits[a].r)*(PFontBits[b].a)/255);
+PBits[a].g:=trunc(PBits[a].g*(255-PFontBits[b].a)/255+(255-PBits[a].g)*(PFontBits[b].a)/255);
+PBits[a].b:=trunc(PBits[a].b*(255-PFontBits[b].a)/255+(255-PBits[a].b)*(PFontBits[b].a)/255);
+end;
+
+begin
+if (Image=nil) or (Channels<>3) or (VFont.Channels<>4) or (VFont.Image=nil)or (VFont.Image.BitMap=nil) then
+	begin
+	SGLog.Sourse('TSGGLImage__AddWaterString : Error :Invalid arametrs!');
+	Exit;
+	end;
+PBits:=PSGPixel3b(Image.BitMap);
+StrL:=VFont.StringLength(VString);
+PW:=Width-StrL-5;
+PH:=Height-VFont.FontHeight-4;
+PFontBits:=PSGPixel4b(VFont.FImage.BitMap);
+for i:=1 to Length(VString) do
+	begin
+	SI:=VFont.GetSimbolInfo(VString[i]);
+	for iw:=0 to VFont.SimbolWidth[VString[i]]-1 do
+		for ih:=1 to VFont.FontHeight do
+			begin
+			Invert(
+				Width*Height+(PW+iw)-(PH+ih)*Width,
+				VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+			end;
+	PW+=VFont.SimbolWidth[VString[i]];
+	end;
+end;
 
 procedure TSGGLImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
 begin

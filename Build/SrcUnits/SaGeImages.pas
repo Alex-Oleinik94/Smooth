@@ -631,7 +631,7 @@ end;
 procedure TSGImage.ToTexture;
 begin
 if FTexture<>0 then
-	FreeTexture;
+	FreeTexture();
 
 Render.Enable(SGR_TEXTURE_2D);
 Render.GenTextures(1, @FTexture);

@@ -958,6 +958,7 @@ if MandaInitialized then
 						MkDir(DataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+SGStr(FNowKadr)+'.png';
 					end;
+				Manda.FImage.AddWaterString('@made by SaGe',SGScreen.Font);
 				Manda.FImage.Saveing(SGI_PNG);
 				if not FNowRenderitsiaVideo then
 					begin

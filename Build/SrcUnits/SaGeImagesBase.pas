@@ -5,7 +5,8 @@ interface
 
 uses 
 	crt
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeRender
 	;
 
@@ -26,7 +27,7 @@ type
 	PSGPixel3b=^TSGPixel3b;
 	PSGPixel = PSGPixel3b;
 	TSGPixel3b=object
-		r,g,b:SGByte;
+		r,g,b:Byte;
 		procedure Import(const r1:SGByte = 0;const g1:SGByte = 0;const b1:SGByte = 0);inline;
 		procedure Write;inline;
 		procedure WriteLn;inline;
@@ -35,6 +36,11 @@ type
 	TSGPixel=TSGPixel3b;
 	SGPixel3b = TSGPixel3b;
 	SGPixel = SGPixel3b;
+	
+	PSGPixel4b=^TSGPixel4b;
+	TSGPixel4b=object(TSGPixel3b)
+		a:Byte;
+		end;
 	
 	TSGPixelInfo=object
 		FArray:packed array of 
