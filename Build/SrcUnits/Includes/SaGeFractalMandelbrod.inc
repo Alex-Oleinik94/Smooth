@@ -460,7 +460,36 @@ procedure TSGFractalMandelbrodRelease.InitManda();inline;
 var
 	i:LongInt;
 	ii:LongInt = 5;
+	VNameThemes:packed array of string = nil;
+
+procedure AddNameTheme(const s:string);inline;
 begin
+if VNameThemes=nil then
+	SetLength(VNameThemes,1)
+else
+	SetLength(VNameThemes,Length(VNameThemes)+1);
+VNameThemes[High(VNameThemes)]:=s;
+end;
+
+begin
+AddNameTheme('Стандартная');
+AddNameTheme('Молнии');
+AddNameTheme('Кучка гавна');
+AddNameTheme('Монохромный');
+AddNameTheme('Дьявол');
+AddNameTheme('Желтая пыль');
+AddNameTheme('Роза');
+AddNameTheme('Плесень');
+AddNameTheme('Медуза');
+AddNameTheme('Грибок');
+AddNameTheme('Амёба');
+AddNameTheme('Сакура');
+AddNameTheme('Голубая пыль');
+AddNameTheme('Красная пыль');
+AddNameTheme('Розовая пыль');
+AddNameTheme('Зеленая пыль');
+AddNameTheme('Оранжевая пыль');
+
 Manda:=TSGFractalMandelbrod.Create(FContext);
 Manda.Width:=StartDepth;
 Manda.Height:=StartDepth;
@@ -543,13 +572,8 @@ SGScreen.CreateChild(TSGComboBox.Create);
 SGScreen.LastChild.SetBounds(Context.Width-50-125+45,5{+Context.TopShift},120,20);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Цвет №1');
-SGScreen.LastChild.AsComboBox.CreateItem('Цвет №2');
-SGScreen.LastChild.AsComboBox.CreateItem('Цвет №3');
-SGScreen.LastChild.AsComboBox.CreateItem('Монохромный');
-SGScreen.LastChild.AsComboBox.CreateItem('Дьявол');
-SGScreen.LastChild.AsComboBox.CreateItem('Желтая пыль');
-SGScreen.LastChild.AsComboBox.CreateItem('Роза');
+for i:=0 to High(VNameThemes) do
+	SGScreen.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 ColorComboBox:=SGScreen.LastChild.AsComboBox;
@@ -633,7 +657,7 @@ FButtonEnableCurve:=TSGButton.Create();
 SGScreen.CreateChild(FButtonEnableCurve);
 SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,150,20);
 SGScreen.LastChild.AutoTopShift:=False;
-SGScreen.LastChild.Anchors:=[SGAnchRight];
+SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 SGScreen.LastChild.Caption:='On видео панель';
 FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -649,15 +673,11 @@ SGScreen.LastChild.FUserPointer1:=Self;
 
 FCurvePointPanel.CreateChild(TSGComboBox.Create);
 FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №1');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №2');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Цвет №3');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Монохромный');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Дьявол');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Желтая пыль');
-FCurvePointPanel.LastChild.AsComboBox.CreateItem('Роза');
+for i:=0 to High(VNameThemes) do
+	FCurvePointPanel.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
 FCurvePointPanel.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@CurveColorComboBoxProcedure);
-FCurvePointPanel.LastChild.AsComboBox.FSelectItem:=0;
+FCurvePointPanel.LastChild.AsComboBox.SelectItem:=0;
+FCurvePointPanel.LastChild.AsComboBox.MaxLines:=5;
 FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
 FCurvePointPanel.LastChild.FUserPointer1:=Self;
 
@@ -717,6 +737,13 @@ FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 FBezierCurveEditKadr.FUserPointer2:=Pointer(FBezierCurvePanel.LastChild);
 
+if VNameThemes<>nil then
+	begin
+	for i:=0 to High(VNameThemes) do
+		VNameThemes[i]:='';
+	SetLength(VNameThemes,0);
+	end;
+		
 end;
 
 procedure BeginInitMand(Button:TSGButton);
@@ -804,14 +831,13 @@ SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.CreateChild(TSGComboBox.Create);
 SGScreen.LastChild.LastChild.Visible:=True;
 SGScreen.LastChild.LastChild.SetBounds(5,80,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
+SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=4;
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('64');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('128');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('256');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('512');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('1024');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('2048');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('4096');
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 
@@ -825,6 +851,8 @@ SGScreen.LastChild.LastChild.AsComboBox.CreateItem('3');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('4');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('6');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('8');
+SGScreen.LastChild.LastChild.AsComboBox.CreateItem('10');
+SGScreen.LastChild.LastChild.AsComboBox.CreateItem('12');
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 
@@ -1479,14 +1507,51 @@ end;
 function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
 var
 	Color:Byte;
+
+function YellowPil():TSGMandaPixel;
+begin
+	Result.r := trunc(abs(cos(Color) * Color));
+	Result.g := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * Result.r)));
+	if Color <> 0 then
+		Result.b := GetColor(
+			Result.g, 
+			Result.r, 
+			(sqr(Result.r)
+		) DIV Color) DIV 128
+	else
+		Result.b := GetColor(
+			Result.g, 
+			Result.r, 
+			(sqr(Result.r)
+		) DIV 255) DIV 158;
+end;
+
+procedure SwapByte(var a,b:byte);inline;
+var 
+	c:byte;
+begin
+c:=a;
+a:=b;
+b:=c;
+end;
+
 begin
 Color:=Round((RecNumber/20)*255);
 case VColorSceme of
 1:
 	begin
-	Result.r:=GetColor(0,383,Color) div 2;
-	Result.g:=GetColor(128,896,Color);
-	Result.b:=GetColor(0,383,Color);
+	if RecNumber=FZQuantityRec then
+		begin
+		Result.r:=200;
+		Result.g:=0;
+		Result.b:=255;
+		end
+	else
+		begin
+		Result.r:=GetColor(0,383,Color) div 2;
+		Result.g:=GetColor(128,896,Color);
+		Result.b:=GetColor(0,383,Color);
+		end;
 	end;
 2:
 	begin
@@ -1511,20 +1576,7 @@ case VColorSceme of
 
 5:
 	begin
-		Result.r := trunc(abs(cos(Color) * Color));
-		Result.g := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * Result.r)));
-		if Color <> 0 then
-			Result.b := GetColor(
-				Result.g, 
-				Result.r, 
-				(sqr(Result.r)
-			) DIV Color) DIV 128
-		else
-			Result.b := GetColor(
-				Result.g, 
-				Result.r, 
-				(sqr(Result.r)
-			) DIV 255) DIV 158;
+		Result:=YellowPil();
 	end;
 
 6:
@@ -1541,6 +1593,63 @@ case VColorSceme of
 		else
 			Result.b := 
 				(sqr(Result.g)) DIV 255;
+	end;
+7:
+	begin
+	Result.b:=GetColor(0,383,Color) div 2;
+	Result.r:=GetColor(128,896,Color);
+	Result.g:=GetColor(0,383,Color);
+	end;
+8:
+	begin
+	Result.g:=GetColor(0,383,Color) div 2;
+	Result.r:=GetColor(128,896,Color);
+	Result.b:=GetColor(0,383,Color);
+	end;
+9:
+	begin
+	Result.g:=GetColor(0,383,Color) div 2;
+	Result.b:=GetColor(128,896,Color);
+	Result.r:=GetColor(0,383,Color);
+	end;
+10:
+	begin
+	Result.r:=GetColor(0,383,Color) div 2;
+	Result.b:=GetColor(128,896,Color);
+	Result.g:=GetColor(0,383,Color);
+	end;
+11:
+	begin
+	Result.b:=GetColor(0,383,Color) div 2;
+	Result.g:=GetColor(128,896,Color);
+	Result.r:=GetColor(0,383,Color);
+	end;
+12:
+	begin
+		Result:=YellowPil();
+		SwapByte(Result.r,Result.b);
+	end;
+13:
+	begin
+		Result:=YellowPil();
+		SwapByte(Result.g,Result.b);
+	end;
+14:
+	begin
+		Result:=YellowPil();
+		SwapByte(Result.r,Result.b);
+		SwapByte(Result.g,Result.r);
+	end;
+15:
+	begin
+		Result:=YellowPil();
+		SwapByte(Result.r,Result.b);
+		SwapByte(Result.g,Result.b);
+	end;
+16:
+	begin
+		Result:=YellowPil();
+		SwapByte(Result.r,Result.g);
 	end;
 else
 	begin

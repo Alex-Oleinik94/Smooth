@@ -453,6 +453,7 @@ type
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGGLImage = nil;const FIdent:Int = -1);
 			public
 		property SelectItem:LongInt read FSelectItem write FSelectItem;
+		property MaxLines:LongWord read FMaxColumns write FMaxColumns;
 		end;
 	
 	TSGGrid=class(TSGComponent)
