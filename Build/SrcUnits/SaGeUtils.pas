@@ -715,6 +715,8 @@ PBits[a].g:=trunc(PBits[a].g*(255-PFontBits[b].a)/255+(SumG)*(PFontBits[b].a)/25
 PBits[a].b:=trunc(PBits[a].b*(255-PFontBits[b].a)/255+(SumB)*(PFontBits[b].a)/255);
 end;
 
+var
+	TempR:real;
 begin
 if (Image=nil) or (Channels<>3) or (VFont.Channels<>4) or (VFont.Image=nil)or (VFont.Image.BitMap=nil) then
 	begin
@@ -723,6 +725,11 @@ if (Image=nil) or (Channels<>3) or (VFont.Channels<>4) or (VFont.Image=nil)or (V
 	end;
 PBits:=PSGPixel3b(Image.BitMap);
 StrL:=VFont.StringLength(VString);
+if (StrL>Width) or (VFont.FontHeight>Height) then
+	begin
+	SGLog.Sourse('TSGGLImage__AddWaterString : Error : for this image ('+SGStr(Width)+','+SGStr(Height)+') water string "'+VString+'" is not portable!');
+	Exit;
+	end;
 PW:=Width-StrL-5;
 PH:=Height-VFont.FontHeight-4;
 PFontBits:=PSGPixel4b(VFont.FImage.BitMap);
@@ -751,6 +758,10 @@ if VType=0 then
 	SumR:=255-SumR;
 	SumG:=255-SumG;
 	SumB:=255-SumB;
+	TempR:=sqrt(sqr(SumB)+sqr(SumG)+sqr(SumB));
+	SumR:=round(255*SumR/TempR);
+	SumG:=round(255*SumG/TempR);
+	SumB:=round(255*SumB/TempR);
 	PW:=Width-StrL-5;
 	end;
 

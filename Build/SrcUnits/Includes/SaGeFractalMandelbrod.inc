@@ -943,6 +943,25 @@ Result.Import(
 	);
 end;
 
+function QuantityNumbers(a:TSGMaxEnum):byte;inline;
+begin
+Result:=0;
+while a>0 do
+	begin
+	a:=a div 10;
+	Inc(Result);
+	end;
+end;
+
+function GetZeros(const QZ:byte):string;
+var
+	i:byte;
+begin
+Result:='';
+for i:=1 to QZ do
+	Result+='0';
+end;
+
 procedure TSGFractalMandelbrodRelease.Draw();
 var
 	i,ii:LongInt;
@@ -993,7 +1012,9 @@ if MandaInitialized then
 					begin
 					if not DirectoryExists(DataDirectory+Slash+'Videos') then
 						MkDir(DataDirectory+Slash+'Videos');
-					Manda.FImage.Way:=FVideoBuffer+Slash+SGStr(FNowKadr)+'.png';
+					Manda.FImage.Way:=FVideoBuffer+Slash+
+						GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
+						SGStr(FNowKadr)+'.png';
 					end;
 				Manda.FImage.AddWaterString('made by SaGe',FTNRF,0);
 				Manda.FImage.Saveing(SGI_PNG);
