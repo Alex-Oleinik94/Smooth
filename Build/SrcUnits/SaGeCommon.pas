@@ -619,7 +619,7 @@ Result.Import(
 	(a.y*b.x-a.x*b.y)/(b.x*b.x-b.y*b.y));
 end;
 
-operator * (const a,b:TSGComplexNumber):TSGComplexNumber;inline;
+operator * (const a,b:TSGComplexNumber):TSGComplexNumber;inline;overload;
 begin
 result.Import(a.x*b.x-a.y*b.y,a.x*b.y+b.x*a.y);
 end;
@@ -645,7 +645,7 @@ LongInt1:=LongInt2;
 LongInt2:=a;
 end;
 
-operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;inline;
+operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;inline;overload;
 var
 	i:LongInt;
 begin

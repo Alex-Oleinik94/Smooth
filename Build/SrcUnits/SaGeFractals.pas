@@ -1,8 +1,8 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeFractals;
 interface
 uses 
-	crt
+	 crt
 	,SaGeCommon
 	,SaGeContext
 	,SaGeBase
@@ -45,14 +45,14 @@ type
 				end;
 		
 			public
-		function ThreadsReady:Boolean;virtual;
-		procedure Calculate;virtual;
-		procedure Draw;override;
+		function ThreadsReady():Boolean;virtual;
+		procedure Calculate();virtual;
+		procedure Draw();override;
 		procedure CreateThreads(const a:Byte);virtual;
 		procedure ThreadsBoolean(const b:boolean = false);virtual;
-		procedure DestroyThreads;virtual;
-		procedure AfterCalculate;virtual;
-		procedure BeginCalculate;virtual;
+		procedure DestroyThreads();virtual;
+		procedure AfterCalculate();virtual;
+		procedure BeginCalculate();virtual;
 		procedure SetThreadsQuantity(NewQuantity:LongWord);
 		function GetThreadsQuantity():LongWord;inline;
 			public
@@ -497,20 +497,26 @@ procedure TSGFractal.AfterCalculate;
 begin 
 end;
 
-procedure TSGFractal.BeginCalculate; 
+procedure TSGFractal.BeginCalculate(); 
 begin 
 end;
 
-procedure TSGFractal.DestroyThreads;
+procedure TSGFractal.DestroyThreads();
 var
 	i:LongInt;
 begin
 for i:=0 to High(FThreadsData) do
 	begin
 	if FThreadsData[i].FData<>nil then
-		FThreadsData[i].FData.Destroy;
+		begin
+		FThreadsData[i].FData.Destroy();
+		FThreadsData[i].FData:=nil;
+		end;
 	if FThreadsData[i].FThread<>nil then
-		FThreadsData[i].FThread.Destroy;
+		begin
+		FThreadsData[i].FThread.Destroy();
+		FThreadsData[i].FThread:=nil;
+		end;
 	end;
 SetLength(FThreadsData,0);
 FThreadsData:=nil;

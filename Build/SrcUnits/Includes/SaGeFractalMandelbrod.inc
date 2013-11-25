@@ -142,6 +142,8 @@ type
 		FCurveBeginDataTime:TSGDataTime;
 		
 		FTNRF:TSGFont;
+		
+		FOldView:TSGScreenVertexes;
 			public
 		procedure UnDatePointCurvePanel();inline;
 		procedure DrawBezierPoints();inline;
@@ -194,6 +196,7 @@ if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 		Render.Vertex2f(A.x-S,A.y+S);
 		Render.Vertex2f(A.x-S,A.y-S);
 		Render.Vertex2f(A.x+S,A.y-S);
+		if not FNowRenderitsiaVideo then
 		if (Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey) then
 			begin
 			PC:=GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition));
@@ -347,6 +350,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
+	FOldView:=Manda.FView;
 	end;
 end;
 
@@ -431,6 +435,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	OffComponents();
 	FCurveInfoLbl.Visible:=True;
+	FCurveInfoLbl.Caption:='Тут будет отображаться информация!!!';
 	FBezierCurveKadrProgressBar.Visible:=True;
 	FBezierCurveKadrProgressBar.Progress:=0;
 	FNowKadr:=0;
@@ -1272,6 +1277,7 @@ if MandaInitialized then
 				SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
 			if SelectPoint.y>SelectSecondPoint.y then
 				SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
+			FOldView:=Manda.FView;
 			Manda.FView.Import(
 				GetPointOnPosOnMand(SelectPoint).x,
 				GetPointOnPosOnMand(SelectSecondPoint).y,
@@ -1310,6 +1316,31 @@ if MandaInitialized then
 			end;
 		end;
 	
+	if (not FNowRenderitsiaVideo) and LabelProcent.Visible and ( not Manda.ThreadsReady) then
+	if (Context.KeyPressedByte=27) and 
+		(Context.KeyPressedType=SGUpKey) and (SecondImage<>nil) then
+			begin
+			for i:=0 to High(Manda.FThreadsData) do
+				begin
+				if Manda.FThreadsData[i].FThread<>nil then
+					begin
+					Manda.FThreadsData[i].FThread.Destroy;
+					Manda.FThreadsData[i].FThread:=nil;
+					end;
+				if Manda.FThreadsData[i].FData<>nil then
+					begin
+					Manda.FThreadsData[i].FData.Destroy;
+					Manda.FThreadsData[i].FData:=nil;
+					end;
+				Manda.FThreadsData[i].FFinished:=True;
+				end;
+			if Manda.FImage<>nil then
+				Manda.FImage.Destroy();
+			Manda.FImage:=SecondImage;
+			SecondImage:=nil;
+			Manda.FView := FOldView;
+			end;
+	
 	if FEnablePictureStripAddingPoints  and 
 		(Context.KeyPressedChar='A') and 
 		(Context.KeyPressedType=SGUpKey) then
@@ -1330,22 +1361,25 @@ if MandaInitialized then
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSGEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
 	
-	if FEnablePictureStripPanel  then
+	if FNowRenderitsiaVideo or 
+	(FEnablePictureStripPanel and FKomponentsNowOffOn)  then
 		begin
 		//Manda.FView.Write();
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
-		if FBezierCurve<>nil then
+		if (FBezierCurve<>nil) then
 			begin
 			FBezierCurve.Draw();
-			Render.Color3f(1,0,1);
-			Render.PointSize(5);
-			Render.BeginScene(SGR_POINTS);
-			Manda.FZNumber.Vertex(Render);
-			Render.EndScene();
-			Render.PointSize(1);
+			if FNowRenderitsiaVideo then
+				begin
+				Render.Color3f(1,0,1);
+				Render.PointSize(5);
+				Render.BeginScene(SGR_POINTS);
+				Manda.FZNumber.Vertex(Render);
+				Render.EndScene();
+				Render.PointSize(1);
+				end;
 			end;
-		if FKomponentsNowOffOn then
-			DrawBezierPoints();
+		DrawBezierPoints();
 		end;
 	
 	if Changet then
@@ -1413,7 +1447,7 @@ if MandaInitialized then
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;
 		FBeginCalc.Get;
-		Manda.ThreadsBoolean();
+		Manda.ThreadsBoolean(False);
 		for i:=0 to QuantityThreads-1 do
 			begin
 			with FArProgressBar[i] do
