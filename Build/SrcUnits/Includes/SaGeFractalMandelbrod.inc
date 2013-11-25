@@ -138,6 +138,8 @@ type
 		
 		FCurvePointPanel:TSGPanel;
 		FCurvePCB:TSGCOmboBox;
+		FCurveInfoLbl:TSGLabel;
+		FCurveBeginDataTime:TSGDataTime;
 		
 		FTNRF:TSGFont;
 			public
@@ -428,6 +430,7 @@ begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	OffComponents();
+	FCurveInfoLbl.Visible:=True;
 	FBezierCurveKadrProgressBar.Visible:=True;
 	FBezierCurveKadrProgressBar.Progress:=0;
 	FNowKadr:=0;
@@ -441,6 +444,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SGMakeDirectory(FVideoBuffer);
 	Manda.Width:=1920;
 	Manda.Height:=1080;
+	FCurveBeginDataTime.Get();
 	end;
 end;
 
@@ -644,7 +648,12 @@ while i<=13 do
 		end;
 	i+=1;
 	end;
-	
+
+FCurveInfoLbl:=TSGLabel.Create();
+SGScreen.CreateChild(FCurveInfoLbl);
+SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30-25,-(-(130+140+10)-150-5),20);
+SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
+
 FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
 SGScreen.CreateChild(FBezierCurveKadrProgressBar);
 SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,-(-(130+140+10)-150-5),20);
@@ -670,7 +679,6 @@ SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.FUserPointer1:=Self;
 
-
 FCurvePointPanel.CreateChild(TSGComboBox.Create);
 FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
 for i:=0 to High(VNameThemes) do
@@ -680,8 +688,6 @@ FCurvePointPanel.LastChild.AsComboBox.SelectItem:=0;
 FCurvePointPanel.LastChild.AsComboBox.MaxLines:=5;
 FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
 FCurvePointPanel.LastChild.FUserPointer1:=Self;
-
-
 
 FBezierCurvePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FBezierCurvePanel);
@@ -743,7 +749,6 @@ if VNameThemes<>nil then
 		VNameThemes[i]:='';
 	SetLength(VNameThemes,0);
 	end;
-		
 end;
 
 procedure BeginInitMand(Button:TSGButton);
@@ -796,6 +801,7 @@ ButtonSelectZNumber:=nil;
 MandaInitialized:=False;
 VideoPanel:=nil;
 fmStartPanel:=nil;
+FCurveInfoLbl:=nil;
 
 SGScreen.CreateChild(TSGPanel.Create);
 SGScreen.LastChild.SetMiddleBounds(300,Context.Height-200);
@@ -865,6 +871,8 @@ destructor TSGFractalMandelbrodRelease.Destroy();
 var
 	i:TSGMaxEnum;
 begin
+if FCurveInfoLbl<>nil then
+	FCurveInfoLbl.Destroy();
 if FTNRF<>nil then
 	FTNRF.Destroy();
 if FCurvePointPanel<>nil then
@@ -965,6 +973,7 @@ end;}
 procedure TSGFractalMandelbrodRelease.Draw();
 var
 	i,ii:LongInt;
+	TDT:TSGDateTime;
 begin
 if MandaInitialized then
 	begin
@@ -1352,10 +1361,11 @@ if MandaInitialized then
 				SecondImage:=nil;
 				FBezierCurveKadrProgressBar.Visible:=False;
 				Manda.FAttitudeForThemeEnable:=False;
+				FCurveInfoLbl.Visible:=False;
 				Exit;
 				end
 			else
-				FBezierCurveKadrProgressBar.Progress:=FNowKadr/FAllKadrs;
+				FBezierCurveKadrProgressBar.Progress:=(FNowKadr-1)/FAllKadrs;
 			end;
 		OffComponents();
 		if not FNowRenderitsiaVideo then
@@ -1382,6 +1392,15 @@ if MandaInitialized then
 				Manda.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
 				Manda.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex];
 				end;
+			TDT.Get();
+			if FNowKadr<>1 then
+				FCurveInfoLbl.Caption:='Прошло: '+
+					SGSecondsToStringTime((TDT-FCurveBeginDataTime).GetPastSeconds)
+					+', Осталось: '+
+					SGSecondsToStringTime(Trunc(
+					(TDT-FCurveBeginDataTime).GetPastSeconds/((FNowKadr-1)/FAllKadrs)*(1-(FNowKadr-1)/FAllKadrs)
+					))
+					+', FPS: '+SGStrReal(FNowKadr/(TDT-FCurveBeginDataTime).GetPastSeconds,3)+' к/с';
 			end;
 		if (not FNowRenderitsiaVideo) and (not NowSave) then
 			begin
