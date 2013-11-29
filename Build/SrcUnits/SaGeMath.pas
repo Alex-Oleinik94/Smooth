@@ -57,7 +57,7 @@ type
 	TSGExpressionFunc3f = function (Chunk1,Chunk2,Chunk3:TSGExpressionChunk):TSGExpressionChunk;
 	TSGExpressionFunc3 = TSGExpressionFunc3f;
 	
-	TSGExpressionObject = class(TObject)
+	TSGExpressionObject = class(TSGObject)
 			public
 		constructor Create(
 			const That:SGByte = SG_OPERATOR;
@@ -92,7 +92,7 @@ type
 	
 	PTSGExpression = ^TSGExpression;
 	PSGExpression = PTSGExpression;
-	TSGExpression=class(TObject)
+	TSGExpression=class(TSGObject)
 			public
 		constructor Create;
 		destructor Destroy;override;

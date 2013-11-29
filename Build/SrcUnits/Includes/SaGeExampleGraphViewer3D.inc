@@ -4,16 +4,13 @@ type
 	TSGGraphViewer3D=class(TSG3DFractal)
 			public
 		constructor Create(const VContext:PSGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		destructor Destroy();override;
+		class function ClassName():string;override;
 		procedure Draw();override;
 			public
-		Mesh:TSG3DObject;
 		FFunction:string;
-		FEF:TSGEdit;
-		FCBF:TSGComboBox;
-		FBF:TSGButton;
-		procedure Calculate;override;
+		FExpression:TSGExpression;
+		procedure Calculate();override;
 		end;
 {$ENDIF}
 
@@ -21,57 +18,54 @@ type
 {$IFDEF SGREADIMPLEMENTATION}
 procedure TSGGraphViewer3D.Draw();
 begin
-FCamera.CallAction();
-FSunTrigonometry[0]+=pi/90		/20;
-FSunTrigonometry[1]-=pi/60		/20;
-FSunTrigonometry[2]+=pi/180		/20;
-FSun.Import(cos(FSunTrigonometry[0]),sin(FSunTrigonometry[1]),cos(FSunTrigonometry[2]));
-FSun*=FSunAbs;
-Render.Color3f(1,1,1);
-Render.BeginScene(SGR_POINTS);
-FSun.Vertex(Render);
-Render.EndScene();
-Render.Enable(SGR_LIGHTING);
-Render.Enable(SGR_LIGHT0);
-	FSun.LightPosition(Render);
-if Mesh<>nil then
-	Mesh.Draw();
-Render.Disable(SGR_LIGHT0);
-Render.Disable(SGR_LIGHTING);
+inherited;
 end;
 
-procedure TSGGraphViewer3D.Calculate;
+procedure TSGGraphViewer3D.Calculate();
+var
+	i,ii:LongWord;
+	rx,ry,rd:single;
 begin
 inherited;
+ClearMesh();
+CalculateMeshes(Sqr(Depth),SGR_QUADS,TSGMeshVertexType3f);
+rx:=-4;
+rd:=8/Depth;
+for i:=0 to Depth-1 do
+	begin
+	ry:=-4;
+	for ii:=0 to Depth-1 do
+		begin
+		FExpression.BeginCalculate();
+		FExpression.ChangeVariables('x',TSGExpressionChunkCreateReal(rx));
+		FExpression.ChangeVariables('y',TSGExpressionChunkCreateReal(ry));
+		FExpression.Calculate();
+		//FExpression.Resultat.FConst
+		ry+=rd;
+		end;
+	rx+=rd;
+	end;
 end;
 
 constructor TSGGraphViewer3D.Create(const VContext:PSGContext);
-var
-	Stream:TFileStream = nil;
 begin
 inherited Create(VContext);
+Depth:=1000;
+Threads:=0;
+FEnableNormals:=True;
+FEnableColors:=True;
 FFunction:='x*y';
-Mesh:=TSG3DObject.Create();
-Mesh.SetContext(FContext);
-//Mesh.LoadFromOBJ('./plants1.obj');
-//Mesh.AddNormals();
-//Stream:=TFileStream.Create('./plant4_j.sgof',fmCreate);//plant4_with_normals.sgof
-//Stream:=TFileStream.Create('./plant4_with_normals.sgof',fmOpenRead);//fmCreate);plant4_with_normals.sgof
-//Mesh.SaveToStream(Stream);
-//Stream.Destroy();
-Stream:=TFileStream.Create('./plant4.sgof',fmOpenRead);
-Mesh.LoadFromStream(Stream);
-Stream.Destroy();
-Mesh.LoadToVBO();
-//Calculate;
+FExpression:=TSGExpression.Create();
+FExpression.Expression:=SGStringToPChar(FFunction);
+Calculate();
 end;
 
-destructor TSGGraphViewer3D.Destroy;
+destructor TSGGraphViewer3D.Destroy();
 begin
 inherited;
 end;
 
-class function TSGGraphViewer3D.ClassName:string;
+class function TSGGraphViewer3D.ClassName():string;
 begin
 Result:='Graph Viewer 3D';
 end;

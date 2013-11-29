@@ -147,8 +147,8 @@ var
 	c,// c - 1st position
 	d,// d - 2nd position
 	e
-	:real;
-	i:LongInt;
+		:single;
+	i:Word;
 begin
 SetLength(FArray,0);
 a:=Position;
@@ -180,13 +180,13 @@ i:=0;
 while i<=High(FArray) do
 	begin
 	e+=FArray[i].FProcent;
-	i+=1;
+	Inc(i);
 	end;
 i:=0;
 while i<=High(FArray) do
 	begin
 	FArray[i].FProcent:=FArray[i].FProcent/e;
-	i+=1;
+	Inc(i);
 	end;
 end;
 
@@ -206,7 +206,7 @@ var
 	NewBitMap:PByte = nil;
 	I,II,III,IIII:LongWord;
 	Info:TSGPixelInfo = (FArray:nil);
-	a:real;
+	a:single;
 begin
 SGLog.Sourse('TSGBitMap : Beginning to set new Height "'+SGStr(FHeight)+'" -> "'+SGStr(NewHeight)+'" (Width = '+SGStr(FWidth)+').');
 if NewHeight=FHeight then
@@ -254,7 +254,7 @@ var
 	NewBitMap:PByte = nil;
 	I,II,III,IIII:LongWord;
 	Info:TSGPixelInfo = (FArray:nil);
-	a:real;
+	a:single;
 begin
 SGLog.Sourse('TSGBitMap : Beginning to set new Width "'+SGStr(FWidth)+'" -> "'+SGStr(NewWidth)+'" (Height = '+SGStr(FHeight)+').');
 if NewWidth=FWidth then

@@ -447,8 +447,8 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	Manda.FZMand:=False;
 	FVideoBuffer:=SGGetFreeDirectoryName(DataDirectory+Slash+'Images'+Slash+'Manda Buffer','Part');
 	SGMakeDirectory(FVideoBuffer);
-	Manda.Width:=1920;
-	Manda.Height:=1080;
+	Manda.Width:=1920;//*5;
+	Manda.Height:=1080;//*5;
 	FCurveBeginDataTime.Get();
 	end;
 end;
@@ -1024,6 +1024,7 @@ if MandaInitialized then
 					MkDir(DataDirectory+Slash+'Images');
 				if FNowRenderitsiaVideo then
 					begin
+					//Manda.FImage.Image.SetBounds(1920,1080);
 					if not DirectoryExists(DataDirectory+Slash+'Videos') then
 						MkDir(DataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+

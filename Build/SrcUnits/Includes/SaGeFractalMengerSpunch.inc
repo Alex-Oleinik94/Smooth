@@ -10,8 +10,8 @@ type
 	TSGFractalMengerSpunch=class(TSG3DFractal)
 			public
 		constructor Create(const VContext:PSGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		destructor Destroy();override;
+		class function ClassName():string;override;
 			public
 		FDeep:TSGMengerType;
 		Ar6Normals:packed array [0..5] of  TSGVertex;
@@ -22,15 +22,15 @@ type
 			Arr6:TSGMengerSpunchBoolAr6;
 			Point:TSGVertex;
 			end;
-		procedure CalculateArray;
-		procedure Calculate;override;
+		procedure CalculateArray();
+		procedure Calculate();override;
 		procedure CalculateFromThread(var MeshID,ThreadArB,ThreadArE:LongWord);
 		function RecQuantity(const ArTP:TSGMengerSpunchBoolAr6;const NowDepth:LongInt):int64;
 		function GetArTP(const OldArTP:TSGMengerSpunchBoolAr6;const i,ii,iii: byte;const ThisDepth:LongWord = 0):TSGMengerSpunchBoolAr6;inline;
 		class function DoOrNotDo(const i,ii,iii:Byte):boolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:Byte):boolean;inline;
 		procedure PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
-		function DoAtThreads:boolean;inline;
+		function DoAtThreads():boolean;inline;
 		end;
 		
 	TSGMengerSpunchFractal=TSGFractalMengerSpunch;
