@@ -19,8 +19,11 @@ type
 		FAttitudeForThemeEnable:Boolean;
 		FTheme1,FTheme2:SGByte;
 		FFAttitudeForTheme:Real;
+		
+		FSmosh:Byte;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
 		function Rec(Number:TSGComplexNumber):Word;inline;
+		function MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
 			public
 		function GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
@@ -1577,6 +1580,7 @@ FZMand:=False;
 FZDegree:=2;
 FZQuantityRec:=256;
 FColorScheme:=0;
+FSmosh:=1;
 end;
 
 function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
@@ -1765,10 +1769,23 @@ FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=MandaPixel1.g;
 FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=MandaPixel1.b;
 end;
 
+function TSGFractalMandelbrod.MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
+var
+	i,ii:Byte;
+begin
+Result:=0;
+for i:=0 to FSmosh-1 do
+	for ii:=0 to FSmosh-1 do
+		Result+=Rec(SGComplexNumberImport(Number.x+i*dx/FSmosh,Number.y+ii*dy/FSmosh));
+Result:=Round(Result/sqr(FSmosh));
+if Result>FZQuantityRec then
+	Result:=FZQuantityRec;
+end;
+
 procedure TSGFractalMandelbrod.CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 var
 	i,ii:Word;
-	rY,rX:System.Real;//По идее это Wight и Height
+	rY,rX,dX,dY:System.Real;//По идее это Wight и Height
 	
 	VReady:Boolean = False;
 	VBufferNow:Boolean = False;
@@ -1780,6 +1797,8 @@ if Data.FPoint<>nil then
 	IsComponent:=TSGComponent(Data.FPoint) is TSGProgressBar;
 rY:=abs(FView.y1-FView.y2);
 rX:=abs(FView.x1-FView.x2);
+dX:=rX/Width;
+dY:=rY/Height;
 //i:=Data.h1;
 //От h1 горизонтальной линии пикселей до h2 делаем
 for i:=Data.h1 to Data.h2 do
@@ -1790,7 +1809,7 @@ for i:=Data.h1 to Data.h2 do
 	ii:=Byte(VBufferNow);
 	while (ii<Width) do
 		begin
-		VKolRec:=Rec(SGComplexNumberImport(FView.x1+rX/Width*ii,FView.y1+rY/Height*i));//(ii/FDepth)*r?
+		VKolRec:=MandaRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*i),dx,dy);//(ii/FDepth)*r?
 		InitColor(ii,i,VKolRec);
 		Data.VBuffer[VBufferNow][ii div 2]:=VKolRec=FZQuantityRec;
 		if (VReady) then
@@ -1802,7 +1821,7 @@ for i:=Data.h1 to Data.h2 do
 					InitColor(ii,i-1,FZQuantityRec)
 			else
 				InitColor(ii,i-1,
-					Rec(SGComplexNumberImport(FView.x1+rX/Width*ii,FView.y1+rY/Height*(i-1))));
+					MandaRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*(i-1)),dx,dy));
 			end;
 		ii+=2;
 		end;
@@ -1835,7 +1854,7 @@ for i:=Data.h1 to Data.h2 do
 ii:=Byte(VBufferNow);
 while ii<Width do
 	begin
-	VKolRec:=Rec(SGComplexNumberImport(FView.x1+rX/Width*ii,FView.y1+rY/Height*i));
+	VKolRec:=Rec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*i));
 	InitColor(ii,i,VKolRec);
 	ii+=2;
 	end;
@@ -1862,9 +1881,9 @@ end;
 procedure TSGFractalMandelbrod.Calculate;
 begin
 inherited;
-BeginCalculate;
+BeginCalculate();
 CalculateFromThread(TSGFractalMandelbrodThreadData.Create(Self,0,Depth-1,nil,-1));
-ToTexture;
+ToTexture();
 end;
 
 
