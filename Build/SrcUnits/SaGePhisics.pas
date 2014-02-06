@@ -19,10 +19,10 @@ type
 		function GetArVertexes2f():PTSGVertex2f;inline;
 		function GetArVertexes3f():PTSGVertex3f;inline;
 			protected
-		FTurn:TSGVertex3f;				//РџРѕРІРѕСЂРѕС‚ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ
-		FPosition:TSGVertex3f;			//РџРѕР·РёС†РёСЏ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ
-		FDistance:Single;				//Р”РёСЃС‚Р°РЅС†РёСЏ, РЅСѓР¶РЅР° РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ 
-										//СЃРїРѕРєРѕР№РЅРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РјРµР¶РґСѓ РѕР±СЊРµРєС‚Р°РјРё
+		FTurn:TSGVertex3f;				//Поворот в пространстве
+		FPosition:TSGVertex3f;			//Позиция в пространстве
+		FDistance:Single;				//Дистанция, нужна для определения минимального 
+										//спокойного состояния между обьектами
 			public
 		procedure TransfomMatrix();virtual;
 		end;
@@ -32,9 +32,9 @@ type
 			public
 		constructor Create();override;
 			protected
-		FMassa:TSGSingle;				//РњР°СЃСЃР° РѕР±СЊРµРєС‚Р°
-		FDirection:TSGVertex3f;			//РќР°РїСЂР°РІР»РµРЅРёРµ РґРІРёР¶РµРЅРёСЏ (Р”Р»РёРЅРЅР° СЌС‚Рѕ СЃРєРѕСЂРѕСЃС‚СЊ)
-		FTurnDirection:TSGVertex3f;		//РќР°РїСЂР°РІР»РµРЅРёРµ РїРѕРІРѕСЂР°С‡РёРІР°РЅРёСЏ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ (Р”Р»РёРЅРЅР° СЌС‚Рѕ СЃРєРѕСЂРѕСЃС‚СЊ)
+		FMassa:TSGSingle;				//Масса обьекта
+		FDirection:TSGVertex3f;			//Направление движения (Длинна это скорость)
+		FTurnDirection:TSGVertex3f;		//Направление поворачивания в пространстве (Длинна это скорость)
 		end;
 
 function SGGetCollizionVertexGJK( const O1,O2:TSGCollizable; var CollizionVertex:TSGVertex3f):Boolean;inline;
@@ -42,16 +42,18 @@ function SGGetCollizionVertexGJK( const O1,O2:TSGCollizable; var CollizionVertex
 implementation
 
 function SGGetCollizionVertex2fGJK( const O1,O2:TSGCollizable; var CollizionVertex:TSGVertex3f):Boolean;inline;
+//Если обьекты пересекаются, то Result = True, если нет, то Result = false. 
+//CollizionVertex - Это точка нашего столкновения.
 var
 	O1Vertexes,O2Vertexes:PTSGVertex2f;
-	ArMinkVertexes:packed array of TSGVertex2f;
+	ArMinkVertexes:packed array of TSGVertex2f;//Разность минковского...
 	ArMinkConnect:
 		packed array of 
 			packed record
 				p0,p1:LongWord;
-				end;
+				end;//тут для каждого индекса массива разности минковского мы запомнили, что и из чего мы отнимаем
 	i,ii,iii:TSGMaxEnum;
-	ArMinkIndexes:TSGArLongWord;
+	ArMinkIndexes:TSGArLongWord;//Это индексы кругового обхода точек разности минковского
 	R1,R2:Single;
 begin
 Result:=False;
@@ -74,7 +76,7 @@ if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
 	begin
 	ii:=0;
 	R1:=Abs(ArMinkVertexes[ArMinkIndexes[0]]);
-	for i:=1 to Length(ArMinkIndexes)-1 do
+	for i:=1 to Length(ArMinkIndexes)-1 do//В этом цикле мы ищем самую приближенную к началу координат точку
 		begin
 		R2:=Abs(ArMinkVertexes[ArMinkIndexes[i]]);
 		if R1>R2 then
@@ -83,6 +85,7 @@ if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
 			ii:=i;
 			end;
 		end;
+	
 	if ii=0 then
 		i:=Length(ArMinkIndexes)-1
 	else
@@ -91,10 +94,12 @@ if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
 		iii:=0
 	else
 		iii:=ii+1;
+	//И получается что после этих 2х ифов у нас i=ii. =) Хз наф это надо было мне тут.
+	// В общем это нужно дописать
 	
-	
-	SetLength(ArMinkIndexes,0);
 	end;
+if ArMinkIndexes<>nil then
+	SetLength(ArMinkIndexes,0);
 SetLength(ArMinkVertexes,0);
 SetLength(ArMinkConnect,0);
 end;

@@ -7,7 +7,7 @@ uses
 	,SaGeContext
 	,SaGeModel;
 type
-	TSGGameTron=class(TSGDrawClass)
+	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -19,6 +19,7 @@ implementation
 constructor TSGGameTron.Create();
 begin
 inherited;
+//Тут у нас начинается писец...
 end;
 
 destructor TSGGameTron.Destroy();
