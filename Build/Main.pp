@@ -70,6 +70,7 @@ with TSGDrawClasses.Create(MyContext) do
 	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
+	Add(TSGGameTron);
 	
 	Initialize();
 	end;
