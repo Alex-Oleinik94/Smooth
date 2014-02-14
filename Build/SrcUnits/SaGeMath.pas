@@ -1,4 +1,4 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeMath;
 
@@ -110,7 +110,7 @@ type
 		function GetResultFunction(const ArEC:TArTSGExpressionChunk;const VFunction:LongWord;const VParams:packed array of LongWord):TSGExpressionChunk;
 		function IsOperator(var MayBeOperator:PChar):SGByte;
 		function IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:SGByte;const VWasObject:Boolean):Boolean;
-		procedure CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk = nil);
+		procedure CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk );
 		procedure AddExpressionChunk(const Chunk:TSGExpressionChunk);
 		procedure DebugSteak(const Steak:TArTSGExpressionChunk;const Color:byte = 10;VChar:Char = '-');
 		function GetVariables:TArPChar;
@@ -1410,7 +1410,7 @@ if FCalculateForGraph then
 	CalculateExpressionForGraph;
 end;
 
-procedure TSGExpression.CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk = nil);
+procedure TSGExpression.CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk);
 var
 	I:LongInt = 0;
 	II:LongInt = 0;

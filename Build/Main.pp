@@ -3,23 +3,25 @@
 	{$APPTYPE CONSOLE}
 	//{$APPTYPE GUI}
 	program Main;
-	{$ENDIF}
-{$IFDEF ANDROID}
+{$ELSE}
 	library Main;
 	{$ENDIF}
 uses
 	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			SaGeContextUnix,
-			Unix,
-			{$ENDIF}
+		cthreads,
+		unix,
 		{$ENDIF}
 	crt
 	{$IFDEF MSWINDOWS}
-		,windows
+		,Windows
 		,SaGeRenderDirectX
 		,SaGeContextWinAPI
+	{$ENDIF}
+	{$IFDEF LINUX}
+		,SaGeContextUnix
+		{$ENDIF}
+	{$IFDEF ANDROID}
+		,SaGeContextAndroid
 		{$ENDIF}
 	,dos
 	,Classes
@@ -59,7 +61,7 @@ with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
-	Add(TSGFractalKohTriangle);//РўСЂРµСѓРіРѕР»СЊРЅРёРє РЎРµСЂРїРёРЅСЃРєРѕРіРѕ
+	Add(TSGFractalKohTriangle);//Треугольник Серпинского
 	Add(TSGFractalTetraider);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
@@ -158,7 +160,7 @@ Context:=
 			TSGContextGLUT
 		{$ELSE}
 			{$IFDEF MSWINDOWS}TSGContextWinAPI{$ENDIF}
-			{$IFDEF UNIX}     TSGContextUnix   {$ENDIF}
+			{$IFDEF LINUX}     TSGContextUnix   {$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -216,8 +218,17 @@ Context.Destroy;
 end;
 
 {$IFDEF ANDROID}
+	function OnLoad():integer; cdecl; export;//Тут код при старте приложения
+	begin
+	
+	end;
+	function OnUnLoad():integer; cdecl; export;//А тут при его завершении (по идее)
+	begin
+	
+	end;
 	exports
-		//ANativeActivity_onCreate name 'ANativeActivity_onCreate'//On Activate
+		OnLoad name 'OnLoad',
+		OnUnLoad name 'OnUnLoad'
 		;
 	end.
 {$ELSE}
@@ -273,7 +284,7 @@ end;
 			F.ReadBuffer(b,2);
 			F.Destroy;
 			case b of
-			22339:;//С…Р·
+			22339:;//хз
 			0:
 				begin
 				F:=TFileStream.Create('.'+Slash+Cache+Slash+sr.Name,fmOpenRead);
@@ -334,8 +345,9 @@ end;
 		if ViewerImage.LoadToBitMap() then
 			begin
 			Context:=
-				   {$IFDEF MSWINDOWS}TSGContextWinAPI{$ENDIF}
-				   {$IFDEF UNIX}     TSGContextUnix   {$ENDIF}
+				   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
+				   {$IFDEF LINUX}     TSGContextUnix   {$ENDIF}
+				   {$IFDEF ANDROID}   TSGContextAndroid{$ENDIF}
 					.Create();
 			Context.Width:=ViewerImage.Width;
 			Context.Height:=ViewerImage.Height;

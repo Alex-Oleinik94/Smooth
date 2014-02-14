@@ -1,19 +1,18 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeContextUnix;
 interface
 
 uses 
-	SaGeBase, SaGeBased
+	SaGeBase
+	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
-	{$IFDEF UNIX}
-		,unix
-		,x
-		,xlib
-		,xutil
-		,glx
-		{$ENDIF}
+	,unix
+	,x
+	,xlib
+	,xutil
+	,glx
 	;
 type
 	TSGContextUnix=class(TSGContext)

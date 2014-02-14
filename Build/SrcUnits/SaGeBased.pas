@@ -1,6 +1,6 @@
-unit SaGeBased;
-
 {$I Includes\SaGe.inc}
+
+unit SaGeBased;
 
 {
  *	@Author, REZ1DENT3
@@ -35,10 +35,10 @@ type
  procedure Windows1251ToOEM866(var Str: TSGString);
  
  { Swap }
- procedure Swap(var x, y : TSGInteger); assembler; register; overload;
+ procedure Swap(var x, y : TSGInteger); {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
  
  { TYPE To TYPE }
- function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; assembler; register; overload;
+ function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
  
  { Operator's ** }
  operator ** (const a, b: TSGFloat) 	: TSGFloat; 	inline; overload; 
@@ -711,20 +711,36 @@ begin
   Str := NStr;
 end;
 
-procedure Swap(var x, y : TSGInteger); assembler; register; overload;
-asm
+procedure Swap(var x, y : TSGInteger); {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
+{$IFDEF ANDROID}
+	var
+		z:TSGInteger;
+	begin
+	z:=x;
+	x:=y;
+	y:=z;
+	end;
+{$ELSE}
+	asm
 	{$ifdef Cpu386}
-	xchg [edx], ecx
-	xchg [eax], ecx
-	xchg [edx], ecx
-	{$endif}
-end;
+		xchg [edx], ecx
+		xchg [eax], ecx
+		xchg [edx], ecx
+		{$endif}
+	end;
+	{$ENDIF}
 
-function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; assembler; register; overload;
-asm
-	cbw
-    cwde
-end;
+function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFNDEF ANDROID} assembler; register; {$ENDIF}  overload;
+{$IFNDEF ANDROID}
+	asm
+		cbw
+		cwde
+	end;
+{$ELSE}
+	begin
+	Result:=Value;
+	end;
+	{$ENDIF}
 
 operator ** (const a, b: TSGFloat) 		: TSGFloat; 	inline; overload; 
 begin

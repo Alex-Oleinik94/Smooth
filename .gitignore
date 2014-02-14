@@ -1,5 +1,7 @@
+FPC
 Data/EngineLog.log
 Build/CompiledUnits/*
+Build/CompiledUnits/*/*
 Build/SrcUnits/*.o
 Build/SrcUnits/*.a
 Build/SrcUnits/*.ppu

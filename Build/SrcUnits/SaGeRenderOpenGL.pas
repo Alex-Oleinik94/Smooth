@@ -12,8 +12,12 @@ uses
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,Dl
-		,glx
 		,unix
+		{$ENDIF}
+	{$IFDEF ANDROID}
+		{$ENDIF}
+	{$IFDEF LINUX}
+		,glx
 		,x
 		,xlib
 		,xutil
@@ -27,14 +31,19 @@ type
 		destructor Destroy;override;
 			protected
 		FContext:
-		{$IFDEF UNIX}
-			GLXContext;
+		{$IFDEF LINUX}
+			GLXContext
 		{$ELSE}
 			{$IFDEF MSWINDOWS}
-				HGLRC;
+				HGLRC
 			{$ELSE}
+				{$IFDEF ANDROID}
+					integer
+				{$ELSE}
+					integer
+					{$ENDIF}
 				{$ENDIF}
-			 {$ENDIF}
+			 {$ENDIF};
 			public
 		{$DEFINE SG_RENDER_EIC}
 		{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
@@ -103,7 +112,7 @@ begin
 	x:=-7*Byte(not VFullscreen);
 	y:=5*Byte(not VFullscreen);
 {$ELSE}
-	{$IFDEF UNIX}
+	{$IFDEF LINUX}
 		x:=0;
 		y:=0;
 		{$ENDIF}
@@ -115,7 +124,7 @@ begin
 {$IFDEF MSWINDOWS}
 	Result:=28*Byte(not VFullscreen);
 {$ELSE}
-	{$IFDEF UNIX}
+	{$IFDEF LINUX}
 		Result:=0;
 		{$ENDIF}
 	{$ENDIF}
@@ -126,7 +135,7 @@ begin
 {$IFDEF MSWINDOWS}
 	Windows.SwapBuffers( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
 {$ELSE}
-	{$IFDEF UNIX}
+	{$IFDEF LINUX}
 		glXSwapBuffers(
 			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')));
@@ -385,7 +394,7 @@ constructor TSGRenderOpenGL.Create();
 begin
 inherited Create();
 FType:=SGRenderOpenGL;
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 	FContext:=nil;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
@@ -399,7 +408,7 @@ end;
 
 destructor TSGRenderOpenGL.Destroy;
 begin
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
@@ -468,7 +477,7 @@ end;
 function TSGRenderOpenGL.CreateContext():Boolean;
 begin
 Result:=False;
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 	initGlx();
 	FContext := glXCreateContext(
 		PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
@@ -492,7 +501,7 @@ end;
 
 procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(
 			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
@@ -525,14 +534,14 @@ begin
 	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), @pfd );
 	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), iFormat, @pfd );
 	{$ENDIF}
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 	Result:=True;
 	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.MakeCurrent();
 begin
-{$IFDEF UNIX}
+{$IFDEF LINUX}
 	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(
 			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),

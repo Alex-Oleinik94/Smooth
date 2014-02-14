@@ -1,6 +1,6 @@
 echo off
 echo "======================================="
-echo "| Compiling Release Version for Unix  |"
+echo "|Compiling  Debug  Version for Android|"
 echo "======================================="
-make release
-strip ../Binaries/Main
+make android
+pause

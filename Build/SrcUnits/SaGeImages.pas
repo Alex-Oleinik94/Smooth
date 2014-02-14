@@ -127,12 +127,8 @@ else
 end;
 
 procedure TGACopySwapPixel(const Source, Destination: Pointer);
-{$IFNDEF CPU32}
-	var
-		bl,bh:byte;
-	{$ENDIF}
-begin
-{$IFDEF CPU32}
+{$IF defined(CPU32) and (not defined(ANDROID))}
+	assembler;
 	asm
 	push eax
 	push edx
@@ -152,6 +148,9 @@ begin
 	pop eax
 	end;
 {$ELSE}
+	var
+			bl,bh:byte;
+	begin
 	bl:=PByte(Source)[0];
 	bh:=PByte(Source)[1];
 	PByte(Destination)[2]:=bl;
@@ -160,8 +159,8 @@ begin
 	bh:=PByte(Source)[3];
 	PByte(Destination)[0]:=bl;
 	PByte(Destination)[3]:=bh;
+	end;
 	{$ENDIF}
-end;
 
 function LoadTGA(const Stream:TStream):TSGBitmap;
 var

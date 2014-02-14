@@ -2,7 +2,6 @@ echo off
 echo "======================================="
 echo "|Compiling Release Version for Windows|"
 echo "======================================="
-MKDIR CompiledUnits
 make release
 echo "============================================="
 echo "|Сейчас вылетит программа "enigmavbconsole",|"
