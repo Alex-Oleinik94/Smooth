@@ -2,11 +2,18 @@
 unit SaGeRenderOpenGL;
 interface
 uses
-	SaGeBase, SaGeBased
+	SaGeBase
+	,SaGeBased
 	,SaGeRender
-	,gl
-	,glu
-	,glext
+	{$IFNDEF ANDROID}
+		,gl
+		,glu
+		,glext
+	{$ELSE}
+		,gles
+		,egl
+		,android_native_app_glue
+		{$ENDIF}
 	{$IFDEF MSWINDOWS}
 		,windows
 		{$ENDIF}
@@ -160,20 +167,36 @@ end;
 
 procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
 begin
-if IsEnabled(GL_BLEND) then
+{$IFNDEF ANDROID}
+	if IsEnabled(GL_BLEND) then
+		glColor4f(r,g,b,1)
+	else
+		glColor3f(r,g,b);
+{$ELSE}
 	glColor4f(r,g,b,1)
-else
-	glColor3f(r,g,b);
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
 begin 
-glTexCoord2f(x,y);
+{$IFNDEF ANDROID}
+	glTexCoord2f(x,y);
+{$ELSE}
+	//glTexCoord3f(x,y,0);
+	//glTexCoord2f(x,y);
+	//Не так не так не хочет... странно, посмотрим потом как сделать..
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
 begin
-glVertex2f(x,y);
+{$IFNDEF ANDROID}
+	glVertex2f(x,y);
+{$ELSE}
+	//glVertex3f(x,y,0);
+	//glVertex2f(x,y);
+	//нихера...
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single); 
@@ -268,22 +291,38 @@ end;
 
 procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
 begin 
-glGenBuffersARB(VQ,PT);
+{$IFNDEF ANDROID}
+	glGenBuffersARB(VQ,PT);
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
 begin 
-glDeleteBuffersARB(VQuantity,VPoint);
+{$IFNDEF ANDROID}
+	glDeleteBuffersARB(VQuantity,VPoint);
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
 begin 
-glBindBufferARB(VParam,VParam2);
+{$IFNDEF ANDROID}
+	glBindBufferARB(VParam,VParam2);
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal); 
 begin 
-glBufferDataARB(VParam,VSize,VBuffer,VParam2);
+{$IFNDEF ANDROID}
+	glBufferDataARB(VParam,VSize,VBuffer,VParam2);
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer); 
@@ -327,15 +366,23 @@ end;
 
 procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
-glBegin(VPrimitiveType);
+{$IFNDEF ANDROID}
+	glBegin(VPrimitiveType);
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.EndScene();
 begin
-glEnd();
+{$IFNDEF ANDROID}
+	glEnd();
+{$ELSE}
+	//хз
+	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Init;
+procedure TSGRenderOpenGL.Init();
 var
 	AmbientLight : array[0..3] of glFloat = (0.5,0.5,0.5,1.0);
 	DiffuseLight : array[0..3] of glFloat = (1.0,1.0,1.0,1.0);
@@ -346,7 +393,7 @@ var
 begin
 
 glEnable(GL_FOG);
-glFogi(GL_FOG_MODE, GL_LINEAR);
+{$IFNDEF ANDROID} glFogi(GL_FOG_MODE, GL_LINEAR);{$ELSE} {хз} {$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);
 glFogf (GL_FOG_START, 300);
@@ -356,15 +403,15 @@ glFogf(GL_FOG_DENSITY, 0.55);
 
 glClearColor(0,0,0,0);
 glEnable(GL_DEPTH_TEST);
-glClearDepth(1.0);
+{$IFNDEF ANDROID} glClearDepth(1.0);{$ELSE} {хз} {$ENDIF}
 glDepthFunc(GL_LEQUAL);
 
 glEnable(GL_LINE_SMOOTH);
-glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+{$IFNDEF ANDROID}glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);{$ELSE} {хз} {$ENDIF}
 glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
-glEnable(GL_TEXTURE_1D);
+{$IFNDEF ANDROID}glEnable(GL_TEXTURE_1D);{$ELSE} {хз} {$ENDIF}
 glEnable(GL_TEXTURE_2D);
 glEnable(GL_TEXTURE);
 glEnable (GL_BLEND);
@@ -381,9 +428,9 @@ glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
 glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
-glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+{$IFNDEF ANDROID}glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);{$ELSE} {хз} {$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
-glMateriali(GL_FRONT,GL_SHININESS,100);
+{$IFNDEF ANDROID}glMateriali(GL_FRONT,GL_SHININESS,100);{$ELSE} {хз} {$ENDIF}
 
 glDisable(GL_LIGHTING);
 
@@ -427,7 +474,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-glOrtho(x0,x1,y0,y1,0,0.1);
+{$IFNDEF ANDROID}glOrtho(x0,x1,y0,y1,0,0.1); {$ELSE} {хз} {$ENDIF}
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -445,15 +492,15 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	glOrtho(0,CWidth,CHeight,0,0,0.1);
+	{$IFNDEF ANDROID}glOrtho(0,CWidth,CHeight,0,0,0.1);{$ELSE} {хз} {$ENDIF}
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500)
+		{$IFNDEF ANDROID}glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500){$ELSE} {хз} {$ENDIF}
 		end
 	else
-		gluPerspective(45, CWidth / CHeight, 0.0011, 500);
+		{$IFNDEF ANDROID}gluPerspective(45, CWidth / CHeight, 0.0011, 500){$ELSE} {хз} {$ENDIF};
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -471,7 +518,11 @@ end;
 
 procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
 begin
-glVertex3f(x,y,z);
+{$IFNDEF ANDROID}
+	glVertex3f(x,y,z);
+{$ELSE} 
+	{хз} 
+	{$ENDIF}
 end;
 
 function TSGRenderOpenGL.CreateContext():Boolean;

@@ -9,7 +9,17 @@ uses
 	,SaGeRender
 	,SaGeContext
 	,unix
-	
+		//android units:
+	,cmem
+	,gles
+	,egl
+	,ctypes
+	,native_activity
+	,native_window
+	,looper
+	,input
+	,android_native_app_glue
+	,log
 	;
 type
 	TSGContextAndroid=class(TSGContext)

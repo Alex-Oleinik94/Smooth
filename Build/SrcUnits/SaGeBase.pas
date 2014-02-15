@@ -1490,7 +1490,14 @@ constructor TSGLog.Create;
 begin
 inherited;
 if SGLogEnable then
-	FFileStream:=TFileStream.Create(DataDirectory+Slash+'EngineLog.log',fmCreate);
+	FFileStream:=TFileStream.Create(
+		{$IFNDEF ANDROID}
+			DataDirectory
+		{$ELSE}
+			'\storage\emulated\0'
+			{$ENDIF}
+		+Slash+'EngineLog.log'
+		,fmCreate);
 end;
 
 destructor TSGLog.Destroy;

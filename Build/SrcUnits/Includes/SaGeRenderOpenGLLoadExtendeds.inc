@@ -434,8 +434,10 @@
 	SGIsSuppored_GL_VERSION_4_0:Boolean {= False};
 {$ENDIF}
 
+
 {$IFDEF SG_RENDER_EP}
-procedure TSGRenderOpenGL.LoadExtendeds;
+{$IFNDEF ANDROID}
+procedure TSGRenderOpenGL.LoadExtendeds();
 var
 	Extendeds:packed array of string;
 	i,ii:LongWord;
@@ -2822,4 +2824,10 @@ SGLog.Sourse('SGOpenGLInit : Total : Suppored '+SGStr(i)+' extendeds, not supppo
 
 SetLength(Extendeds,0);
 end;
+{$ELSE}
+procedure TSGRenderOpenGL.LoadExtendeds();
+begin
+
+end;
+{$ENDIF}
 {$ENDIF}
