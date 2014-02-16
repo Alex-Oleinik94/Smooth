@@ -136,11 +136,16 @@ const
 			{$IFDEF UNIX}
 				UnixSlash
 			{$ELSE}
-				''
+				'/'
 				{$ENDIF}
 			{$ENDIF}
 		;
-	DataDirectory = '.'+Slash+'..'+Slash+'Data';
+	DataDirectory = 
+		{$IFNDEF ANDROID}
+			'.'+Slash+'..'+Slash+'Data'
+		{$ELSE}
+			'/storage/emulated/0/.SaGe/Data'
+			{$ENDIF};
 	FontDirectory = DataDirectory + Slash +'Fonts';
 	TextureDirectory = DataDirectory + Slash +'Textures';
 	TexturesDirectory = TextureDirectory;
@@ -1490,14 +1495,7 @@ constructor TSGLog.Create;
 begin
 inherited;
 if SGLogEnable then
-	FFileStream:=TFileStream.Create(
-		{$IFNDEF ANDROID}
-			DataDirectory
-		{$ELSE}
-			'\storage\emulated\0'
-			{$ENDIF}
-		+Slash+'EngineLog.log'
-		,fmCreate);
+	FFileStream:=TFileStream.Create(DataDirectory+Slash+'EngineLog.log',fmCreate);
 end;
 
 destructor TSGLog.Destroy;
@@ -2387,9 +2385,17 @@ Nan:=sqrt(-1);
 Inf:=1/0;
 RandomIze;
 
+{$IFDEF ANDROID}
+	SGMakeDirectory('/storage/emulated/0/.SaGe');
+	SGMakeDirectory('/storage/emulated/0/.SaGe/Data');
+	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Fonts');
+	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Images');
+	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Textures');
+	{$ENDIF}
+
 try
 SGLog:=TSGLog.Create;
-SGLog.Sourse('(***) SaGe OpenGL Engine Log(***)',False);
+SGLog.Sourse('(***) SaGe Engine Log (***)',False);
 SGLog.Sourse('  << Create Log >>');
 except
 SGLogEnable:=False;

@@ -22,6 +22,7 @@ uses
 		{$ENDIF}
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
+		,jni
 		{$ENDIF}
 	,dos
 	,Classes
@@ -218,18 +219,20 @@ Context.Destroy;
 end;
 
 {$IFDEF ANDROID}
-	function OnLoad():integer; cdecl; export;//Тут код при старте приложения
+	function OnLoad(vm:PJavaVM;reserved:pointer):jint; cdecl; export;//Тут код при старте приложения
 	begin
-	
+	SGLog.Sourse('Main.pp : Calling "function OnLoad"..');
+	Result:=JNI_OnLoad(vm,reserved);
+	//GoGUI(''); //-- На будущее
 	end;
-	function OnUnLoad():integer; cdecl; export;//А тут при его завершении (по идее)
+	procedure OnUnLoad(vm:PJavaVM;reserved:pointer); cdecl; export;//А тут при его завершении (по идее)
 	begin
-	
+	SGLog.Sourse('Main.pp : Calling "procedure OnUnLoad"..');
+	JNI_OnLoad(vm,reserved);
 	end;
 	exports
-		OnLoad name 'OnLoad',
-		OnUnLoad name 'OnUnLoad'
-		;
+		OnLoad name 'JNI_OnLoad',
+		OnUnLoad name 'JNI_OnUnload';
 	end.
 {$ELSE}
 	procedure FPCTCTransliater();

@@ -1,7 +1,7 @@
+Build/AndroidTools/Libs/platforms
 FPC
 Data/EngineLog.log
-Build/CompiledUnits/*
-Build/CompiledUnits/*/*
+Build/CompiledUnits
 Build/SrcUnits/*.o
 Build/SrcUnits/*.a
 Build/SrcUnits/*.ppu
@@ -10,6 +10,7 @@ Build/*.o
 Build/Main.res
 Binaries/Main.exe
 Binaries/Main
+Binaries/SaGe.apk
 Binaries/Main_Release.exe
 Binaries/Main_Lazarus.exe
 Others/DirectX/*.o

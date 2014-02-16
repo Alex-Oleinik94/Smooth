@@ -2,8 +2,8 @@
 SET PATH=C:\Android\android-sdk\tools;C:\Android\android-sdk\platform-tools\;C:\Progra~1\Java\jdk1.7.0_25\bin;C:\Android\android-sdk\build-tools\19.0.1
 SET APP_NAME=SaGe
 SET ANDROID_HOME=C:\Android\android-sdk
-SET APK_SDK_PLATFORM=C:\Android\android-sdk\platforms\android-8
-SET APK_PROJECT_PATH=C:\Android\androidlcl\android
+SET APK_SDK_PLATFORM=C:\Android\android-sdk\platforms\android-14
+SET APK_PROJECT_PATH=C:\Programming\SaGe\Build\CompiledUnits\arm-android\android
 del bin\%APP_NAME%.ap_
 del bin\%APP_NAME%.apk
 del raw\lib\armeabi\*.so
