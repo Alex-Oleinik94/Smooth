@@ -1,5 +1,5 @@
 {$INCLUDE Includes\SaGe.inc}
-unit SaGeContextUnix;
+unit SaGeContextLinux;
 interface
 
 uses 
@@ -15,7 +15,7 @@ uses
 	,glx
 	;
 type
-	TSGContextUnix=class(TSGContext)
+	TSGContextLinux=class(TSGContext)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -45,7 +45,7 @@ type
 		end;
 implementation
 
-procedure TSGContextUnix.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
+procedure TSGContextLinux.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 {
 	* }(*WinAPI Codes*){
 	* 8 - Tab
@@ -207,7 +207,7 @@ if NormalKey<>0 then
 	SetKey(VKeyType,NormalKey);
 end;
 
-function TSGContextUnix.Get(const What:string):Pointer;
+function TSGContextLinux.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=Pointer(win)
@@ -219,18 +219,17 @@ else
 	Result:=Inherited Get(What);
 end;
 
-procedure TSGContextUnix.SetCursorPosition(const a:TSGPoint2f);
+procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
 begin
-
-
+SGLog.Sourse('"TSGContextLinux.SetCursorPosition" isn''t possible!');
 end;
 
-procedure TSGContextUnix.ShowCursor(const b:Boolean);
+procedure TSGContextLinux.ShowCursor(const b:Boolean);
 begin
-
+SGLog.Sourse('"TSGContextLinux.ShowCursor" isn''t possible!');
 end;
 
-function TSGContextUnix.GetScreenResolution:TSGPoint2f;
+function TSGContextLinux.GetScreenResolution:TSGPoint2f;
 begin
 if dpy = nil then
 	begin
@@ -246,17 +245,17 @@ else
 	end;
 end;
 
-function TSGContextUnix.GetCursorPosition:TSGPoint2f;
+function TSGContextLinux.GetCursorPosition:TSGPoint2f;
 begin
 Result.Import(FCursorX,FCursorY)
 end;
 
-function TSGContextUnix.GetWindowRect():TSGPoint2f;
+function TSGContextLinux.GetWindowRect():TSGPoint2f;
 begin
 Result.Import();
 end;
 
-constructor TSGContextUnix.Create();
+constructor TSGContextLinux.Create();
 begin
 inherited;
 FillChar(winAttr,sizeof(winAttr),0);
@@ -268,13 +267,13 @@ FCursorY:=0;
 FCursorX:=0;
 end;
 
-destructor TSGContextUnix.Destroy();
+destructor TSGContextLinux.Destroy();
 begin
 XCloseDisplay(dpy);
 inherited;
 end;
 
-procedure TSGContextUnix.Initialize();
+procedure TSGContextLinux.Initialize();
 begin
 Active:=CreateWindow();
 if Active then
@@ -286,7 +285,7 @@ if Active then
 	end;
 end;
 
-procedure TSGContextUnix.Run;
+procedure TSGContextLinux.Run;
 var
 	FDT:TSGDateTime;
 begin
@@ -314,12 +313,12 @@ while FActive and (FNewContextType=nil) do
 	end;
 end;
 
-procedure TSGContextUnix.SwapBuffers();
+procedure TSGContextLinux.SwapBuffers();
 begin
 Render.SwapBuffers();
 end;
 
-procedure TSGContextUnix.Messages();
+procedure TSGContextLinux.Messages();
 var 
 	Event: TXEvent;
     KeySum:TKeySym;
@@ -370,7 +369,7 @@ While XPending(dpy)<>0 do
 		end;
 	DestroyNotify:
 		begin
-		SGLog.Sourse('TSGContextUnix__Messages : Note : Window is closed for API.');
+		SGLog.Sourse('TSGContextLinux__Messages : Note : Window is closed for API.');
 		Active:=False;
 		end;
 	end;
@@ -380,7 +379,7 @@ end;
 
 
 
-function TSGContextUnix.CreateWindow():Boolean;
+function TSGContextLinux.CreateWindow():Boolean;
 var
 	errorBase,eventBase: integer;
 	window_title_property: TXTextProperty;
@@ -392,18 +391,18 @@ Result:=False;
 dpy := XOpenDisplay(nil);
 if dpy = nil then
 	begin
-	SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not connect to X server!');
+	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not connect to X server!');
 	Exit;
 	end;
 if not (glXQueryExtension(dpy,errorBase,eventBase)) then
 	begin
-	SGLog.Sourse('TSGContextUnix__CreateWindow : Error : GLX extension not supported!');
+	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : GLX extension not supported!');
 	Exit;
 	end;
 visinfo := glXChooseVisual(dpy,DefaultScreen(dpy), Attr);
 if(visinfo = nil) then
 	begin
-	SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not find visual!');
+	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not find visual!');
 	Exit;
 	end;
 cm := XCreateColormap(dpy,RootWindow(dpy,visinfo^.screen),visinfo^.visual,AllocNone);
@@ -414,7 +413,7 @@ winAttr.event_mask := ExposureMask or PointerMotionMask or ButtonPressMask or Bu
 win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
 if win = 0 then
 	begin
-	SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not create window!');
+	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
 	Exit;
 	end;
 Name:=SGStringAsPChar(FTittle);
@@ -439,8 +438,7 @@ else
 		Render.MakeCurrent();
 	end;
 end;
-
-procedure TSGContextUnix.InitFullscreen(const b:boolean); 
+procedure TSGContextLinux.InitFullscreen(const b:boolean); 
 begin
 
 inherited InitFullscreen(b);

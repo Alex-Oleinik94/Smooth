@@ -47,7 +47,7 @@ type
 				{$IFDEF ANDROID}
 					EGLContext
 				{$ELSE}
-					integer
+					Pointer
 					{$ENDIF}
 				{$ENDIF}
 			 {$ENDIF};
@@ -58,7 +58,7 @@ type
 			public
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
-		procedure MakeCurrent();override;
+		function MakeCurrent():Boolean;override;
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure LoadExtendeds();
@@ -391,6 +391,7 @@ var
 	LightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
+glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 glEnable(GL_FOG);
 {$IFNDEF ANDROID} glFogi(GL_FOG_MODE, GL_LINEAR);{$ELSE} {å§} {$ENDIF}
@@ -428,9 +429,9 @@ glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
 glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
-{$IFNDEF ANDROID}glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);{$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID}glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);{$ELSE} {õç} {$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
-{$IFNDEF ANDROID}glMateriali(GL_FRONT,GL_SHININESS,100);{$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID}glMateriali(GL_FRONT,GL_SHININESS,100);{$ELSE} {õç} {$ENDIF}
 
 glDisable(GL_LIGHTING);
 
@@ -446,6 +447,10 @@ FType:=SGRenderOpenGL;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		FContext:=0;
+	{$ELSE}
+		{$IFDEF ANDROID}
+			FContext:=nil;
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 {$DEFINE SG_RENDER_EICR}
@@ -465,6 +470,11 @@ begin
 			CloseHandle(FContext);
 			FContext:=0;
 			end;
+	{$ELSE}
+		{$IFDEF ANDROID}
+			if (FContext <> EGL_NO_CONTEXT) then
+				eglDestroyContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FContext);
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 inherited;
@@ -544,10 +554,14 @@ Result:=False;
 		if SetPixelFormat() then
 			FContext := wglCreateContext( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
 		Result:=FContext<>0;
+	{$ELSE}
+		{$IFDEF ANDROID}
+			FContext := eglCreateContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 if Result then
-	MakeCurrent();
+	Result:=MakeCurrent();
 end;
 
 procedure TSGRenderOpenGL.ReleaseCurrent();
@@ -562,6 +576,11 @@ begin
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil)  then 
 			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
+	{$ELSE}
+		{$IFDEF ANDROID}
+			if FWindow<>nil then
+				eglMakeCurrent(FWindow.Get('DESCTOP WINDOW HANDLE'), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 end;
@@ -588,20 +607,47 @@ begin
 {$IFDEF LINUX}
 	Result:=True;
 	{$ENDIF}
+{$IFDEF ANDROID}
+	Result:=True;
+	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.MakeCurrent();
+function TSGRenderOpenGL.MakeCurrent():Boolean;
 begin
 {$IFDEF LINUX}
 	if (FWindow<>nil) and (FContext<>nil) then 
+		begin
 		glXMakeCurrent(
 			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')),
 			FContext);
+		Result:=True;
+		end
+	else
+		Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil) and (FContext<>0) then 
+			begin
 			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), FContext );
+			Result:=True;
+			end
+		else
+			Result:=False;
+	{$ELSE}
+		{$IFDEF ANDROID}
+			if (FWindow<>nil) and (FContext<>nil) then 
+				if eglMakeCurrent(
+					FWindow.Get('DESCTOP WINDOW HANDLE'), 
+					FWindow.Get('SURFACE'), 
+					FWindow.Get('SURFACE'), 
+					FContext)  = EGL_FALSE then
+					Result:=False
+				else
+					Result:=True
+			else
+				Result:=False;
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 end;

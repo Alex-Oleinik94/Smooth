@@ -38,7 +38,7 @@ type
 			public
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
-		procedure MakeCurrent();override;
+		function MakeCurrent():Boolean;override;
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure Viewport(const a,b,c,d:LongWord);override;
@@ -1120,9 +1120,9 @@ begin
 Result:=True;
 end;
 
-procedure TSGRenderDirectX.MakeCurrent();
+function TSGRenderDirectX.MakeCurrent():Boolean;
 begin
-
+Result:=True;
 end;
 
 end.

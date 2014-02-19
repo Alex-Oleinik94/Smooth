@@ -20,7 +20,7 @@ uses
 		,SaGeContextWinAPI
 	{$ENDIF}
 	{$IFDEF LINUX}
-		,SaGeContextUnix
+		,SaGeContextLinux
 		{$ENDIF}
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
@@ -96,13 +96,7 @@ var //for cmd
 		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN) = SGBR_OPENGL;
 		{$ENDIF}
 	FGoToExit:Boolean = False;
-	VFullscreen:Boolean = 
-		{$IFDEF ANDROID}
-			True
-			{$ENDIF}
-		{$IFNDEF ANDROID}
-			False
-			{$ENDIF};
+	VFullscreen:Boolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
 begin
 {$IFNDEF ANDROID}
 if (Prt='CMD') and (argc>2) then
@@ -154,18 +148,15 @@ if FGoToExit then
 {$ENDIF}
 
 Context:=
-{$IFDEF ANDROID}
-	TSGContextAndroid
+{$IFDEF LAZARUS}
+	TSGContextLazarus
 {$ELSE}
-	{$IFDEF LAZARUS}
-		TSGContextLazarus
+	{$IFDEF GLUT}
+		TSGContextGLUT
 	{$ELSE}
-		{$IFDEF GLUT}
-			TSGContextGLUT
-		{$ELSE}
-			{$IFDEF MSWINDOWS}TSGContextWinAPI{$ENDIF}
-			{$IFDEF LINUX}     TSGContextUnix   {$ENDIF}
-			{$ENDIF}
+		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}
+		{$IFDEF LINUX}    TSGContextLinux  {$ENDIF}
+		{$IFDEF ANDROID}  TSGContextAndroid{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 		.Create();

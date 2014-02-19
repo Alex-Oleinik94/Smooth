@@ -165,16 +165,16 @@ if Active then
 	end;
 end;
 
-procedure TSGContextWinAPI.Run;
+procedure TSGContextWinAPI.Run();
 var
 	FDT:TSGDateTime;
 begin
-Messages;
-FElapsedDateTime.Get;
+Messages();
+FElapsedDateTime.Get();
 while FActive and (FNewContextType=nil) do
 	begin
 	//Calc ElapsedTime
-	FDT.Get;
+	FDT.Get();
 	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
 	FElapsedDateTime:=FDT;
 	

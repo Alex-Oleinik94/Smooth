@@ -41,6 +41,8 @@ type
 		FDisplay:Pointer;
 		FSurface: EGLSurface;
 		FAndroidApp:Pandroid_app;
+		FConfig: EGLConfig;
+		FAnimating:cint;
 			private
 		FLastTouch:TSGPoint2f;
 		FInitialized:Boolean;
@@ -58,9 +60,16 @@ implementation
 
 function TSGContextAndroid.Get(const What:string):Pointer;
 begin
-//if What='WINDOW HANDLE' then
-//else if What='DESCTOP WINDOW HANDLE' then
-//else if What = 'VISUAL INFO' then
+if What='WINDOW HANDLE' then
+	Result:=AndroidApp^.Window
+else if What='DESCTOP WINDOW HANDLE' then
+	Result:=FDisplay
+else if What='VISUAL INFO' then
+	Result:=FConfig
+else if What = 'SURFACE' then
+	Result:=FSurface
+else
+	Result:=inherited Get(What);
 end;
 
 procedure TSGContextAndroid.SetCursorPosition(const a:TSGPoint2f);
@@ -100,23 +109,25 @@ end;
 constructor TSGContextAndroid.Create();
 begin
 inherited;
+FAnimating:=0;
 FAndroidApp:=nil;
 FSurface:=nil;
 FDisplay:=nil;
 FLastTouch.Import();
 FInitialized:=False;
+FConfig:=nil;
 end;
 
 destructor TSGContextAndroid.Destroy();
 begin
-if (Fdisplay <> EGL_NO_DISPLAY) then
+if (FDisplay <> EGL_NO_DISPLAY) then
 	begin
-	eglMakeCurrent(Fdisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	{if (Fcontext <> EGL_NO_CONTEXT) then
-		eglDestroyContext(Fdisplay, Fcontext);}
-	if (Fsurface <> EGL_NO_SURFACE) then
-		eglDestroySurface(Fdisplay, Fsurface);
-	eglTerminate(Fdisplay);
+	FRender.ReleaseCurrent();
+	FRender.Destroy();
+	FRender:=nil;
+	if (FSurface <> EGL_NO_SURFACE) then
+		eglDestroySurface(FDisplay, FSurface);
+	eglTerminate(FDisplay);
 	end;
 inherited;
 end;
@@ -136,16 +147,35 @@ const
 		EGL_NONE);
 var
 	Format,NumConfigs: EGLint;
-	Config: EGLConfig;
 begin
 FDisplay:=eglGetDisplay(EGL_DEFAULT_DISPLAY);
 eglInitialize(FDisplay, nil,nil);
-eglChooseConfig(FDisplay, Attribs, @Config, 1, @NumConfigs); 
-eglGetConfigAttrib(FDisplay, Config, EGL_NATIVE_VISUAL_ID, @Format);
+eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs); 
+eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
 
 ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
+FSurface:=eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.window, nil);
 
+if FRender=nil then
+	begin
+	FRender:=FRenderClass.Create();
+	FRender.Window:=Self;
+	if FRender.CreateContext() then 
+		FRender.Init()
+	else
+		Active:=False;
+	end
+else
+	begin
+	FRender.Window:=Self;
+	if FRender.SetPixelFormat() then
+		Render.MakeCurrent()
+	else
+		Active:=False;
+	end;
 
+Width:=GetScreenResolution().x;
+Width:=GetScreenResolution().y;
 
 if SGCLLoadProcedure<>nil then
 	SGCLLoadProcedure(FSelfPoint);
@@ -156,16 +186,24 @@ end;
 procedure TSGContextAndroid.HandleComand(const Comand:cint32);
 begin
 case Comand of
-APP_CMD_SAVE_STATE://В душе не ебу
-	;
+APP_CMD_SAVE_STATE://Наверное сохранить память приложения, для очестки оперы...
+	begin
+	//хз
+	end;
+(*
+// The system has asked us to save our current state.  Do so.
+engine^.app^.savedState := malloc(sizeof(Tsaved_state));
+Psaved_state(engine^.app^.savedState)^ := engine^.state;
+engine^.app^.savedStateSize := sizeof(Tsaved_state); 
+*)
 APP_CMD_INIT_WINDOW://Иницианализируем окно
 	InitWindow();
 APP_CMD_TERM_WINDOW://Убиваем окно
 	Active:=False;
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
-	;
+	FAnimating:=1;
 APP_CMD_LOST_FOCUS://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
-	;
+	FAnimating:=0;
 end;
 end;
 
@@ -177,6 +215,7 @@ AINPUT_EVENT_TYPE_MOTION:
 	FLastTouch.Import(
 		Round(AMotionEvent_getX(event, 0)),
 		Round(AMotionEvent_getY(event, 0)));
+	FAnimating:=1;
 	end;
 else
 	begin
@@ -203,7 +242,42 @@ begin
 FAndroidApp^.UserData := Self;
 FAndroidApp^.OnAppCmd:=@TSGContextAndroid_HandleComand;
 FAndroidApp^.OnInputEvent:=@TSGContextAndroid_HandleInput;
-
+Messages();
+while FActive and (FNewContextType=nil) do
+	begin
+	//Calc ElapsedTime
+	FDT.Get();
+	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
+	FElapsedDateTime:=FDT;
+	if FDisplay<>nil then
+		if FAnimating<>0 then
+			begin
+			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+			Render.InitMatrixMode(SG_3D);
+			if FCallDraw<>nil then
+				FCallDraw(FSelfPoint);
+			//SGIIdleFunction;
+			
+			ClearKeys();
+			Messages();
+			
+			if SGCLPaintProcedure<>nil then
+				SGCLPaintProcedure(FSelfPoint);
+			SwapBuffers();
+			end
+		else
+			begin
+			ClearKeys();
+			Messages();
+			
+			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+			SwapBuffers();
+			end
+	else
+		begin
+		Messages();
+		end;
+	end;
 end;
 
 procedure TSGContextAndroid.SwapBuffers();
@@ -212,8 +286,43 @@ eglSwapBuffers(FDisplay,FSurface);
 end;
 
 procedure TSGContextAndroid.Messages();
+var
+	Ident, Events, Val: cint;
+	source: PAndroid_Poll_Source;
 begin
-
+if FAnimating<>0 then
+	Val:=0
+else
+	Val:=-1;
+Ident := ALooper_PollAll(Val, nil, @Events,@Source);
+while (Ident >= 0) do
+	begin
+	 if (Source <> nil) then
+		Source^.Process(FAndroidApp, Source);
+	 if (Ident = LOOPER_ID_USER) then
+		begin
+		{if (engine.accelerometerSensor != nil) then
+		begin
+		   ASensorEvent event;
+		   while (ASensorEventQueue_getEvents(engine.sensorEventQueue, &event, 1) > 0) do
+		   begin
+			  LOGI("accelerometer: x=%f y=%f z=%f",
+					  [event.acceleration.x, event.acceleration.y,
+					  event.acceleration.z]);
+		   end;
+		end;}
+		end;
+	if (FAndroidApp^.DestroyRequested <> 0) then
+		begin
+		LOGW('Destroy requested');
+		Active:=False;
+		end;
+	if FAnimating<>0 then
+		Val := 0
+	else
+		Val := -1;
+	Ident := ALooper_pollAll(Val, nil, @Events,@Source);
+	end; 
 inherited;
 end;
 

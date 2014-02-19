@@ -25,7 +25,7 @@ type
 			public
 		property RenderType:TSGRenderType read FType;
 		function SetPixelFormat():Boolean;virtual;abstract;overload;
-		procedure MakeCurrent();virtual;
+		function MakeCurrent():Boolean;virtual;
 		procedure ReleaseCurrent();virtual;abstract;
 		function CreateContext():Boolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
@@ -93,9 +93,9 @@ begin
 Result:=0;
 end;
 
-procedure TSGRender.MakeCurrent();
+function TSGRender.MakeCurrent():Boolean;
 begin
-SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited methad!!');
+SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited method!!');
 end;
 
 procedure TSGRender.Enable(VParam:Cardinal);
