@@ -34,5 +34,5 @@ CD ..
 
 DEL ..\Binaries\SaGe.apk
 COPY AndroidTools\SaGe\bin\SaGe-release.apk ..\Binaries\SaGe.apk
-pause
+PAUSE
 DEL AndroidTools\SaGe /F/S/Q

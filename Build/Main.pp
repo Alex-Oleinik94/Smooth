@@ -84,7 +84,7 @@ with TSGDrawClasses.Create(MyContext) do
 	end;
 end;
 
-procedure GoGUI(const Prt:string = '');
+procedure GoGUI(const{$IFNDEF ANDROID}Prt:string = ''{$ELSE}State:PAndroid_App{$ENDIF});
 var
 	Context:TSGContext = nil;
 var
@@ -168,13 +168,16 @@ Context:=
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
-		.Create;
-
+		.Create();
+	
 with Context do
 	begin
 	Width:=GetScreenResolution.x;
 	Height:=GetScreenResolution.y;
 	Fullscreen:=VFullscreen;
+	{$IFDEF ANDROID}
+		(Context as TSGContextAndroid).AndroidApp:=State;
+		{$ENDIF}
 	
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then
@@ -198,35 +201,41 @@ with Context do
 			RenderClass:=TSGRenderOpenGL;
 	end;
 
-Context.Initialize;
+Context.Initialize();
 
 repeat
 
-Context.Run;
+Context.Run();
 
 if Context.Active and (Context.FNewContextType<>nil) then
 	begin
-	NewContext:=Context.FNewContextType.Create;
+	NewContext:=Context.FNewContextType.Create();
 	NewContext.CopyInfo(Context);
 	NewContext.FCallInitialize:=nil;
 	Pointer(Context.FRender):=nil;
-	Context.Destroy;
+	Context.Destroy();
 	Context:=NewContext;
 	NewContext:=nil;
-	Context.Initialize;
+	Context.Initialize();
 	end;
 
 until (Context.Active = False);
 
-Context.Destroy;
+Context.Destroy();
 end;
 
 {$IFDEF ANDROID}
-	
+	procedure android_main(State: PAndroid_App); cdecl; export;
+	begin
+	SGLog.Sourse('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
+	GoGUI(State);
+	end;
 	
 	exports 
 			ANativeActivity_onCreate name 'ANativeActivity_onCreate';
-
+	
+	begin
+	
 	end.
 {$ELSE}
 	procedure FPCTCTransliater();

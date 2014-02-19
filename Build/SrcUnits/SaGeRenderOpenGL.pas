@@ -45,7 +45,7 @@ type
 				HGLRC
 			{$ELSE}
 				{$IFDEF ANDROID}
-					integer
+					EGLContext
 				{$ELSE}
 					integer
 					{$ENDIF}
