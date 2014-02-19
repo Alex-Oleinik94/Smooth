@@ -1,36 +1,38 @@
-echo off
+@echo off
+DEL AndroidTools\SaGe /F/S/Q
+CALL FPC_Make_Android cmd
 echo "================"
 echo "| Building APK |"
 echo "================"
-CD CompiledUnits\arm-android\android
+CD AndroidTools\SaGe
 MKDIR bin
-MKDIR bin\classes
-MKDIR gen
-MKDIR gen\com
-MKDIR gen\com\pascal
-MKDIR gen\com\pascal\lcltest
-MKDIR raw
-MKDIR raw\lib
-MKDIR raw\lib\armeabi
 MKDIR res
+MKDIR src
 MKDIR res\drawable-hdpi
 MKDIR res\drawable-ldpi
 MKDIR res\drawable-mdpi
 MKDIR res\values
-MKDIR src
-MKDIR src\com
-MKDIR src\com\pascal
-MKDIR src\com\pascal\lcltest
-CD ..\..\..
-COPY AndroidTools\AndroidManifest.xml CompiledUnits\arm-android\android\AndroidManifest.xml
-COPY AndroidTools\LCLActivity.java CompiledUnits\arm-android\android\src\com\pascal\lcltest\LCLActivity.java
-COPY AndroidTools\SaGeDebugKey.keystore CompiledUnits\arm-android\android\bin\SaGeDebugKey.keystore
-COPY AndroidTools\icon-hdpi.png CompiledUnits\arm-android\android\res\drawable-hdpi\icon.png
-COPY AndroidTools\icon-ldpi.png CompiledUnits\arm-android\android\res\drawable-ldpi\icon.png
-COPY AndroidTools\icon-mdpi.png CompiledUnits\arm-android\android\res\drawable-mdpi\icon.png
-COPY AndroidTools\strings.xml CompiledUnits\arm-android\android\res\values\strings.xml
-CD CompiledUnits\arm-android\android
-CALL ..\..\..\AndroidTools\BuildDebugApk
-CD ..\..\..
-COPY CompiledUnits\arm-android\android\bin\SaGe.apk ..\Binaries\SaGe.apk
+CD ..\..
+
+COPY AndroidTools\Android\AndroidManifest.xml AndroidTools\SaGe\AndroidManifest.xml
+
+COPY AndroidTools\SaGeDebugKey.keystore AndroidTools\SaGe\bin\SaGeDebugKey.keystore
+
+COPY AndroidTools\Android\icon-hdpi.png AndroidTools\SaGe\res\drawable-hdpi\icon.png
+COPY AndroidTools\Android\icon-ldpi.png AndroidTools\SaGe\res\drawable-ldpi\icon.png
+COPY AndroidTools\Android\icon-mdpi.png AndroidTools\SaGe\res\drawable-mdpi\icon.png
+COPY AndroidTools\Android\strings.xml AndroidTools\SaGe\res\values\strings.xml
+
+COPY AndroidTools\Android\build.xml AndroidTools\SaGe\build.xml
+COPY AndroidTools\Android\build.properties AndroidTools\SaGe\build.properties
+COPY AndroidTools\Android\default.properties AndroidTools\SaGe\default.properties
+COPY AndroidTools\Android\local.properties AndroidTools\SaGe\local.properties
+
+CD AndroidTools
+CALL BuildApk.bat
+CD ..
+
+DEL ..\Binaries\SaGe.apk
+COPY AndroidTools\SaGe\bin\SaGe-release.apk ..\Binaries\SaGe.apk
 pause
+DEL AndroidTools\SaGe /F/S/Q

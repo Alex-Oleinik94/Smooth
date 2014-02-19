@@ -8,8 +8,10 @@
 	{$ENDIF}
 uses
 	{$IFDEF UNIX}
-		cthreads,
-		unix,
+		{$IFNDEF ANDROID}
+			cthreads,
+			unix,
+			{$ENDIF}
 		{$ENDIF}
 	crt
 	{$IFDEF MSWINDOWS}
@@ -23,6 +25,7 @@ uses
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
 		,jni
+		,android_native_app_glue
 		{$ENDIF}
 	,dos
 	,Classes
@@ -219,20 +222,11 @@ Context.Destroy;
 end;
 
 {$IFDEF ANDROID}
-	function OnLoad(vm:PJavaVM;reserved:pointer):jint; cdecl; export;//Тут код при старте приложения
-	begin
-	SGLog.Sourse('Main.pp : Calling "function OnLoad"..');
-	Result:=JNI_OnLoad(vm,reserved);
-	//GoGUI(''); //-- На будущее
-	end;
-	procedure OnUnLoad(vm:PJavaVM;reserved:pointer); cdecl; export;//А тут при его завершении (по идее)
-	begin
-	SGLog.Sourse('Main.pp : Calling "procedure OnUnLoad"..');
-	JNI_OnLoad(vm,reserved);
-	end;
-	exports
-		OnLoad name 'JNI_OnLoad',
-		OnUnLoad name 'JNI_OnUnload';
+	
+	
+	exports 
+			ANativeActivity_onCreate name 'ANativeActivity_onCreate';
+
 	end.
 {$ELSE}
 	procedure FPCTCTransliater();

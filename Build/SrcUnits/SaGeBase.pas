@@ -144,7 +144,7 @@ const
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
 		{$ELSE}
-			'/storage/emulated/0/.SaGe/Data'
+			'/storage/emulated/0'
 			{$ENDIF};
 	FontDirectory = DataDirectory + Slash +'Fonts';
 	TextureDirectory = DataDirectory + Slash +'Textures';
@@ -1491,7 +1491,7 @@ else
 	end;
 end;
 
-constructor TSGLog.Create;
+constructor TSGLog.Create();
 begin
 inherited;
 if SGLogEnable then
@@ -2381,26 +2381,26 @@ end;
 
 initialization
 begin
-Nan:=sqrt(-1);
-Inf:=1/0;
-RandomIze;
-
-{$IFDEF ANDROID}
+{{$IFDEF ANDROID}
 	SGMakeDirectory('/storage/emulated/0/.SaGe');
 	SGMakeDirectory('/storage/emulated/0/.SaGe/Data');
 	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Fonts');
 	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Images');
 	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Textures');
-	{$ENDIF}
+	{$ENDIF}}
 
 try
-SGLog:=TSGLog.Create;
+SGLog:=TSGLog.Create();
 SGLog.Sourse('(***) SaGe Engine Log (***)',False);
 SGLog.Sourse('  << Create Log >>');
 except
 SGLogEnable:=False;
 SGLog:=TSGLog.Create;
 end;
+
+Nan:=sqrt(-1);
+Inf:=1/0;
+RandomIze();
 end;
 
 finalization

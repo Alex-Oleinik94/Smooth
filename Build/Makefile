@@ -2,9 +2,9 @@ PP=fpc
 PP271=..\FPC\2.7.1\bin\i386-win32\fpc
 BASEARGS= -FuSrcUnits\Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FiSrcUnits/Includes -Sm 
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
-ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools\Libs\toolchains -FlAndroidTools\Libs\platforms
+ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools\Libs\toolchains -FlAndroidTools\Libs\platforms 
 OUTPUTUNIXORWIN= -FUCompiledUnits\i386-other -FE./../Binaries
-OUTPUTANDROID= -FUCompiledUnits\arm-android -oCompiledUnits\arm-android\android\libs\armeabi\liblclapp.so
+OUTPUTANDROID= -FUCompiledUnits\arm-android -oAndroidTools\SaGe\libs\armeabi\libmain.so
 OUTPUTLIBRARY= -FUCompiledUnits\i386-other -FE./../Binaries 
 DODEBUG= -gl
 DORELEASE= -XX -O3 -CX -dRELEASE
@@ -21,8 +21,7 @@ android:
 lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
 clear:
-	rm -f CompiledUnits/arm-android/*.ppu
-	rm -f CompiledUnits/arm-android/*.o
+	rm -f CompiledUnits/arm-android/*
 	rm -f CompiledUnits/i386-other/*
 	rm -f *.o
 	rm -f *.ppu
