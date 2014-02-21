@@ -343,7 +343,7 @@ end;
 			begin
 			Context:=
 				   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
-				   {$IFDEF LINUX}     TSGContextUnix   {$ENDIF}
+				   {$IFDEF LINUX}     TSGContextLinux  {$ENDIF}
 				   {$IFDEF ANDROID}   TSGContextAndroid{$ENDIF}
 					.Create();
 			Context.Width:=ViewerImage.Width;

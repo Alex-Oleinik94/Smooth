@@ -294,7 +294,7 @@ begin
 {$IFNDEF ANDROID}
 	glGenBuffersARB(VQ,PT);
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -303,7 +303,7 @@ begin
 {$IFNDEF ANDROID}
 	glDeleteBuffersARB(VQuantity,VPoint);
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -312,7 +312,7 @@ begin
 {$IFNDEF ANDROID}
 	glBindBufferARB(VParam,VParam2);
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -321,7 +321,7 @@ begin
 {$IFNDEF ANDROID}
 	glBufferDataARB(VParam,VSize,VBuffer,VParam2);
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -369,7 +369,7 @@ begin
 {$IFNDEF ANDROID}
 	glBegin(VPrimitiveType);
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -378,7 +378,7 @@ begin
 {$IFNDEF ANDROID}
 	glEnd();
 {$ELSE}
-	//å§
+	//õç
 	{$ENDIF}
 end;
 
@@ -394,7 +394,11 @@ begin
 glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 glEnable(GL_FOG);
-{$IFNDEF ANDROID} glFogi(GL_FOG_MODE, GL_LINEAR);{$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID} 
+	glFogi(GL_FOG_MODE, GL_LINEAR);
+{$ELSE} 
+	{ÕÇ} 
+	{$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);
 glFogf (GL_FOG_START, 300);
@@ -403,16 +407,30 @@ glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);
 
 glClearColor(0,0,0,0);
-glEnable(GL_DEPTH_TEST);
-{$IFNDEF ANDROID} glClearDepth(1.0);{$ELSE} {å§} {$ENDIF}
-glDepthFunc(GL_LEQUAL);
+{$IFNDEF LINUX}
+	glEnable(GL_DEPTH_TEST);
+	{$IFNDEF ANDROID} 
+		glClearDepth(1.0);
+	{$ELSE} 
+		{õç} 
+		{$ENDIF}
+	glDepthFunc(GL_LEQUAL);
+{$ENDIF}
 
 glEnable(GL_LINE_SMOOTH);
-{$IFNDEF ANDROID}glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);{$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID}
+	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+{$ELSE} 
+	{õç} 
+	{$ENDIF}
 glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
-{$IFNDEF ANDROID}glEnable(GL_TEXTURE_1D);{$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID}
+	glEnable(GL_TEXTURE_1D);
+{$ELSE} 
+	{õç} 
+	{$ENDIF}
 glEnable(GL_TEXTURE_2D);
 glEnable(GL_TEXTURE);
 glEnable (GL_BLEND);
@@ -429,9 +447,17 @@ glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
 glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
-{$IFNDEF ANDROID}glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);{$ELSE} {õç} {$ENDIF}
+{$IFNDEF ANDROID}
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+{$ELSE}
+	{õç} 
+	{$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
-{$IFNDEF ANDROID}glMateriali(GL_FRONT,GL_SHININESS,100);{$ELSE} {õç} {$ENDIF}
+{$IFNDEF ANDROID}
+	glMateriali(GL_FRONT,GL_SHININESS,100);
+{$ELSE} 
+	{õç} 
+	{$ENDIF}
 
 glDisable(GL_LIGHTING);
 
@@ -484,7 +510,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-{$IFNDEF ANDROID}glOrtho(x0,x1,y0,y1,0,0.1); {$ELSE} {å§} {$ENDIF}
+{$IFNDEF ANDROID}glOrtho(x0,x1,y0,y1,0,0.1); {$ELSE} {õç} {$ENDIF}
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -502,15 +528,15 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	{$IFNDEF ANDROID}glOrtho(0,CWidth,CHeight,0,0,0.1);{$ELSE} {å§} {$ENDIF}
+	{$IFNDEF ANDROID}glOrtho(0,CWidth,CHeight,0,0,0.1);{$ELSE} {õç} {$ENDIF}
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		{$IFNDEF ANDROID}glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500){$ELSE} {å§} {$ENDIF}
+		{$IFNDEF ANDROID}glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500){$ELSE} {õç} {$ENDIF}
 		end
 	else
-		{$IFNDEF ANDROID}gluPerspective(45, CWidth / CHeight, 0.0011, 500){$ELSE} {å§} {$ENDIF};
+		{$IFNDEF ANDROID}gluPerspective(45, CWidth / CHeight, 0.0011, 500){$ELSE} {õç} {$ENDIF};
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -531,7 +557,7 @@ begin
 {$IFNDEF ANDROID}
 	glVertex3f(x,y,z);
 {$ELSE} 
-	{å§} 
+	{õç} 
 	{$ENDIF}
 end;
 
