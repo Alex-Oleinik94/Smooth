@@ -28,6 +28,12 @@ COPY AndroidTools\Android\build.properties AndroidTools\SaGe\build.properties
 COPY AndroidTools\Android\default.properties AndroidTools\SaGe\default.properties
 COPY AndroidTools\Android\local.properties AndroidTools\SaGe\local.properties
 
+REM for adding user resourses
+if "%1"=="res" ( 
+	ECHO Push!!!!!!!!!!!!!!!
+	pause 
+	)
+
 CD AndroidTools
 CALL BuildApk.bat
 CD ..
