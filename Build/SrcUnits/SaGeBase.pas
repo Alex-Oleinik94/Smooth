@@ -144,7 +144,7 @@ const
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
 		{$ELSE}
-			'/storage/emulated/0'
+			'/sdcard'
 			{$ENDIF};
 	FontDirectory = DataDirectory + Slash +'Fonts';
 	TextureDirectory = DataDirectory + Slash +'Textures';

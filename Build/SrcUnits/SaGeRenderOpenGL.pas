@@ -582,7 +582,9 @@ Result:=False;
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
+			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Before creating context');
 			FContext := eglCreateContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : After creating context');
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -662,6 +664,7 @@ begin
 			Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
+			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Before creating current');
 			if (FWindow<>nil) and (FContext<>nil) then 
 				if eglMakeCurrent(
 					FWindow.Get('DESCTOP WINDOW HANDLE'), 
@@ -673,6 +676,7 @@ begin
 					Result:=True
 			else
 				Result:=False;
+			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : After creating current');
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}

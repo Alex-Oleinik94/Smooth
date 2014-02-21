@@ -1,6 +1,6 @@
 @echo off
 DEL AndroidTools\SaGe /F/S/Q
-CALL FPC_Make_Android cmd
+CALL FPC_Make_Android apk
 echo "================"
 echo "| Building APK |"
 echo "================"
@@ -16,7 +16,7 @@ CD ..\..
 
 COPY AndroidTools\Android\AndroidManifest.xml AndroidTools\SaGe\AndroidManifest.xml
 
-COPY AndroidTools\SaGeDebugKey.keystore AndroidTools\SaGe\bin\SaGeDebugKey.keystore
+COPY AndroidTools\SaGeKeystore.keystore AndroidTools\SaGe\bin\SaGeKeystore.keystore
 
 COPY AndroidTools\Android\icon-hdpi.png AndroidTools\SaGe\res\drawable-hdpi\icon.png
 COPY AndroidTools\Android\icon-ldpi.png AndroidTools\SaGe\res\drawable-ldpi\icon.png
@@ -39,6 +39,6 @@ CALL BuildApk.bat
 CD ..
 
 DEL ..\Binaries\SaGe.apk
-COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+COPY AndroidTools\SaGe\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
 PAUSE
 DEL AndroidTools\SaGe /F/S/Q

@@ -7,8 +7,8 @@ CD SaGe
 
 CALL ..\AntRelease.bat
 
-del bin\%APP_NAME%-unaligned.apk
-jarsigner -verbose -keystore bin\SaGeDebugKey.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SaGeDebugKey
-C:\Android\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
+REM del bin\%APP_NAME%-unaligned.apk
+REM jarsigner -verbose -keystore bin\SaGeKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SaGeKeystore
+REM C:\Android\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
 
 CD ..

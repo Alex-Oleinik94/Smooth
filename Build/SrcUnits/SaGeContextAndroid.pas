@@ -120,6 +120,7 @@ end;
 
 destructor TSGContextAndroid.Destroy();
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.Destroy".');
 if (FDisplay <> EGL_NO_DISPLAY) then
 	begin
 	FRender.ReleaseCurrent();
@@ -130,6 +131,7 @@ if (FDisplay <> EGL_NO_DISPLAY) then
 	eglTerminate(FDisplay);
 	end;
 inherited;
+SGLog.Sourse('Leaving "TSGContextAndroid.Destroy".');
 end;
 
 procedure TSGContextAndroid.Initialize();
@@ -148,14 +150,19 @@ const
 var
 	Format,NumConfigs: EGLint;
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.InitWindow".');
 FDisplay:=eglGetDisplay(EGL_DEFAULT_DISPLAY);
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 eglInitialize(FDisplay, nil,nil);
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs); 
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
-
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 FSurface:=eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.window, nil);
-
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -173,18 +180,20 @@ else
 	else
 		Active:=False;
 	end;
-
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 Width:=GetScreenResolution().x;
 Width:=GetScreenResolution().y;
-
+SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 if SGCLLoadProcedure<>nil then
 	SGCLLoadProcedure(FSelfPoint);
 if FCallInitialize<>nil then
 	FCallInitialize(FSelfPoint);
+SGLog.Sourse('Leaving "TSGContextAndroid.InitWindow".');
 end;
 
 procedure TSGContextAndroid.HandleComand(const Comand:cint32);
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.HandleCommand".');
 case Comand of
 APP_CMD_SAVE_STATE://Наверное сохранить память приложения, для очестки оперы...
 	begin
@@ -205,10 +214,12 @@ APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
 APP_CMD_LOST_FOCUS://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
 	FAnimating:=0;
 end;
+SGLog.Sourse('Leaving "TSGContextAndroid.HandleCommand".');
 end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent".');
 case AInputEvent_getType(event) of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
@@ -224,6 +235,7 @@ else
 	end;
 end;
 Result:=1;
+SGLog.Sourse('Leaving "TSGContextAndroid.HandleEvent".');
 end;
 
 function TSGContextAndroid_HandleInput(Application: PAndroid_App; Event: PAInputEvent): cint32;cdecl;
@@ -239,6 +251,7 @@ procedure TSGContextAndroid.Run();
 var
 	FDT:TSGDateTime;
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.Run".');
 FAndroidApp^.UserData := Self;
 FAndroidApp^.OnAppCmd:=@TSGContextAndroid_HandleComand;
 FAndroidApp^.OnInputEvent:=@TSGContextAndroid_HandleInput;
@@ -278,6 +291,7 @@ while FActive and (FNewContextType=nil) do
 		Messages();
 		end;
 	end;
+SGLog.Sourse('Leaving "TSGContextAndroid.Run".');
 end;
 
 procedure TSGContextAndroid.SwapBuffers();
@@ -290,6 +304,7 @@ var
 	Ident, Events, Val: cint;
 	source: PAndroid_Poll_Source;
 begin
+SGLog.Sourse('Entering "TSGContextAndroid.Messages".');
 if FAnimating<>0 then
 	Val:=0
 else
@@ -324,6 +339,7 @@ while (Ident >= 0) do
 	Ident := ALooper_pollAll(Val, nil, @Events,@Source);
 	end; 
 inherited;
+SGLog.Sourse('Leaving "TSGContextAndroid.Messages".');
 end;
 
 procedure TSGContextAndroid.InitFullscreen(const b:boolean); 
