@@ -448,7 +448,7 @@ function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
 function SGRealsEqual(const r1,r2:real):Boolean;inline;
 function SGRealExists(const r:real):Boolean;inline;
 procedure SGQuickRePlaceReals(var Real1,Real2:Real);inline;
-function SGRandomMinus:Int;inline;
+function SGRandomMinus():Int;inline;
 function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
 function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
@@ -463,11 +463,78 @@ function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):stri
 procedure SGSetCLProcedure(const p:Pointer = nil);
 procedure SCSetCLScreenBounds(const p:Pointer = nil);
 procedure SGSetCLLoadProcedure(p:Pointer);
+
 function SGGetComand(const comand:string):string;inline;
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
 function SGGetCurrentDirectory():string;inline;
 
+procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
+
 implementation
+
+procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
+var
+	Step:LongWord = 100;
+var
+	OutStream:TStream = nil;
+	InStream:TStream = nil;
+	A:array of Byte;
+	I,iiii,i5:LongWord;
+procedure WriteProc(const ThisStep:LongWord);
+var
+	III,II:LongWord;
+begin
+InStream.ReadBuffer(A[0],ThisStep);
+SGWriteStringToStream('procedure '+NameUnit+'_LoadToStream_'+SGStr(I)+'(const Stream:TStream);'+#13+#10,OutStream,False);
+I+=1;
+SGWriteStringToStream('var'+#13+#10,OutStream,False);
+SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+#13+#10+'	',OutStream,False);
+II:=0;
+for iii:=0 to ThisStep-1 do
+	begin
+	if II=10 then
+		begin
+		SGWriteStringToStream(''+#13+#10+'	',OutStream,False);
+		II:=0;
+		end;
+	SGWriteStringToStream(SGStr(A[iIi]),OutStream,False);
+	if III<>ThisStep-1 then
+		SGWriteStringToStream(', ',OutStream,False);
+	II+=1;
+	end;
+SGWriteStringToStream(');'+#13+#10,OutStream,False);
+SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+#13+#10,OutStream,False);
+SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+end;
+begin
+I:=0;
+SetLength(A,Step);
+OutStream:=TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
+InStream:=TFileStream.Create(FileName,fmOpenRead);
+SGWriteStringToStream('{$MODE OBJFPC}'+#13+#10,OutStream,False);
+SGWriteStringToStream('unit '+NameUnit+';'+#13+#10,OutStream,False);
+SGWriteStringToStream('interface'+#13+#10,OutStream,False);
+SGWriteStringToStream('uses'+#13+#10,OutStream,False);
+SGWriteStringToStream('	Classes;'+#13+#10,OutStream,False);
+SGWriteStringToStream('function '+NameUnit+'_LoadToStream():TMemoryStream;'+#13+#10,OutStream,False);
+SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
+while InStream.Position<=InStream.Size-Step do
+	WriteProc(Step);
+if InStream.Position<>InStream.Size then
+	begin
+	IIii:=InStream.Size-InStream.Position;
+	WriteProc(IIii);
+	end;
+SGWriteStringToStream('function '+NameUnit+'_LoadToStream():TMemoryStream;'+#13+#10,OutStream,False);
+SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+SGWriteStringToStream('Result:=TMemoryStream.Create();'+#13+#10,OutStream,False);
+for i5:=0 to i-1 do
+	SGWriteStringToStream(NameUnit+'_LoadToStream_'+SGStr(i5)+'(Result);'+#13+#10,OutStream,False);
+SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+SGWriteStringToStream('end.'+#13+#10,OutStream,False);
+SetLength(A,0);
+end;
 
 function SGGetCurrentDirectory():string;inline;
 begin

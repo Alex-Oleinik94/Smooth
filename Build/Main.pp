@@ -478,7 +478,11 @@ end;
 		if s[1]='-' then
 			begin
 			s:=SGGetComand(s);
-			if s='FPCTC' then
+			if s='RM' then
+				begin
+				SGResourseManager(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
+				end
+			else if s='FPCTC' then
 				begin
 				//WriteLn('Beginning FPC to C transliater.');
 				FPCTCTransliater;
