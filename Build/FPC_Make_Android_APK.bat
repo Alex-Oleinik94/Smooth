@@ -39,6 +39,6 @@ CALL BuildApk.bat
 CD ..
 
 DEL ..\Binaries\SaGe.apk
-COPY AndroidTools\SaGe\bin\SaGe-release.apk ..\Binaries\SaGe.apk
+COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
 PAUSE
 DEL AndroidTools\SaGe /F/S/Q
