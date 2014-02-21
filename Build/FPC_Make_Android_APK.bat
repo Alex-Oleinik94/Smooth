@@ -34,11 +34,18 @@ if "%1"=="res" (
 	pause 
 	)
 
-CD AndroidTools
-CALL BuildApk.bat
-CD ..
-
 DEL ..\Binaries\SaGe.apk
+
+CD AndroidTools
+IF "%1"=="" (
+CALL BuildApk.bat debug
+CD ..
 COPY AndroidTools\SaGe\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
+) ELSE (
+CALL BuildApk.bat release
+CD ..
+COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+)
+
 PAUSE
 DEL AndroidTools\SaGe /F/S/Q
