@@ -13,9 +13,7 @@ uses
 	,SaGeBase, SaGeBased
 	,SaGeImagesBase
 	,SaGeImagesJpeg
-	{$IFNDEF ANDROID}
-		,SaGeImagesPng
-		{$ENDIF}
+	,SaGeImagesPng
 	,SaGeImagesBmp
 	,SaGeRender
 	,SaGeContext
@@ -105,7 +103,7 @@ var
 begin
 if (FImage<>nil) and (FImage.FBitMap<>nil) then
 	begin
-	{$IFNDEF ANDROID}SavePNG(FImage,Stream);{$ENDIF}
+	SavePNG(FImage,Stream);
 	end
 else
 	if (FWay<>'') and FileExists(FWay) then
@@ -296,7 +294,7 @@ SGI_PNG:
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
 		{$ENDIF}
-	{$IFNDEF ANDROID}SavePNG(FImage,Stream);{$ENDIF}
+	SavePNG(FImage,Stream);
 	end;
 SGI_JPEG:
 	begin
@@ -330,7 +328,7 @@ end;
 
 procedure TSGImage.LoadPNGToBitMap;
 begin
-{$IFNDEF ANDROID}SaGeImagesPng.LoadPNG(FStream,FImage);{$ENDIF}
+SaGeImagesPng.LoadPNG(FStream,FImage);
 end;
 
 procedure TSGImage.LoadJPEGToBitMap;
