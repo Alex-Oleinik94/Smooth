@@ -391,7 +391,9 @@ var
 	LightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
-glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+{$IFDEF ANDROID}
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+	{$ENDIF}
 
 glEnable(GL_FOG);
 {$IFNDEF ANDROID} 
@@ -407,15 +409,13 @@ glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);
 
 glClearColor(0,0,0,0);
-{$IFNDEF LINUX}
-	glEnable(GL_DEPTH_TEST);
-	{$IFNDEF ANDROID} 
-		glClearDepth(1.0);
-	{$ELSE} 
-		{õç} 
-		{$ENDIF}
-	glDepthFunc(GL_LEQUAL);
-{$ENDIF}
+glEnable(GL_DEPTH_TEST);
+{$IFNDEF ANDROID} 
+	glClearDepth(1.0);
+{$ELSE} 
+	{õç} 
+	{$ENDIF}
+glDepthFunc(GL_LEQUAL);
 
 glEnable(GL_LINE_SMOOTH);
 {$IFNDEF ANDROID}
@@ -426,11 +426,6 @@ glEnable(GL_LINE_SMOOTH);
 glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
-{$IFNDEF ANDROID}
-	glEnable(GL_TEXTURE_1D);
-{$ELSE} 
-	{õç} 
-	{$ENDIF}
 glEnable(GL_TEXTURE_2D);
 glEnable(GL_TEXTURE);
 glEnable (GL_BLEND);
@@ -468,15 +463,11 @@ constructor TSGRenderOpenGL.Create();
 begin
 inherited Create();
 FType:=SGRenderOpenGL;
-{$IFDEF LINUX}
+{$IF defined(LINUX) or defined(ANDROID)}
 	FContext:=nil;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		FContext:=0;
-	{$ELSE}
-		{$IFDEF ANDROID}
-			FContext:=nil;
-			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 {$DEFINE SG_RENDER_EICR}
@@ -510,7 +501,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-{$IFNDEF ANDROID}glOrtho(x0,x1,y0,y1,0,0.1); {$ELSE} {õç} {$ENDIF}
+{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1); 
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -528,15 +519,20 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	{$IFNDEF ANDROID}glOrtho(0,CWidth,CHeight,0,0,0.1);{$ELSE} {õç} {$ENDIF}
+	{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		{$IFNDEF ANDROID}glOrtho(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500){$ELSE} {õç} {$ENDIF}
+		{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthof{$ENDIF}
+			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500)
 		end
 	else
-		{$IFNDEF ANDROID}gluPerspective(45, CWidth / CHeight, 0.0011, 500){$ELSE} {õç} {$ENDIF};
+		{$IFNDEF ANDROID}
+			gluPerspective(45, CWidth / CHeight, 0.0011, 500)
+		{$ELSE} 
+			{õç} 
+			{$ENDIF};
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -620,6 +616,7 @@ function TSGRenderOpenGL.SetPixelFormat():Boolean;overload;
 		iFormat : integer;
 	{$ENDIF}
 begin
+Result:=False;	
 {$IFDEF MSWINDOWS}
 	FillChar(pfd, sizeof(pfd), 0);
 	pfd.nSize         := sizeof(pfd);
@@ -632,10 +629,7 @@ begin
 	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), @pfd );
 	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), iFormat, @pfd );
 	{$ENDIF}
-{$IFDEF LINUX}
-	Result:=True;
-	{$ENDIF}
-{$IFDEF ANDROID}
+{$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;
 	{$ENDIF}
 end;
