@@ -429,7 +429,7 @@ function SGGetStringFromConstArray(const Ar:packed array of const):String;
 function SGGetFileName(const WayName:string):string;
 procedure SGReleaseFileWay(WAy:string);
 function SGGetFileWay(const Way:String):String;
-procedure SGMakeDirectory(const DirWay:String);inline;
+function SGMakeDirectory(const DirWay:String):Boolean;inline;
 procedure FindInPas(const Cmd:Boolean = False);
 function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
 function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
@@ -1178,11 +1178,13 @@ SetLength(ArF,0);
 SetLength(ArWords,0);
 end;
 
-procedure SGMakeDirectory(const DirWay:String);inline;
+function SGMakeDirectory(const DirWay:String):Boolean;inline;
 begin
+Result:=True;
 try
-MKDir(DirWay);
+	MKDir(DirWay);
 except
+	Result:=False;
 end;
 end;
 
@@ -2448,13 +2450,15 @@ end;
 
 initialization
 begin
-{{$IFDEF ANDROID}
-	SGMakeDirectory('/storage/emulated/0/.SaGe');
-	SGMakeDirectory('/storage/emulated/0/.SaGe/Data');
-	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Fonts');
-	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Images');
-	SGMakeDirectory('/storage/emulated/0/.SaGe/Data/Textures');
-	{$ENDIF}}
+(*
+{$IFDEF ANDROID}
+	SGMakeDirectory('/sdcard/SaGe');
+	SGMakeDirectory('/sdcard/SaGe/Data');
+	SGMakeDirectory('/sdcard/SaGe/Data/Fonts');
+	SGMakeDirectory('/sdcard/SaGe/Data/Images');
+	SGMakeDirectory('/sdcard/SaGe/Data/Textures');
+	{$ENDIF}
+*)
 
 try
 SGLog:=TSGLog.Create();
