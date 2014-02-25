@@ -190,6 +190,9 @@ operator / (const a:SGColor;const b:real):SGColor;inline;overload;
 operator * (const a:TSGColor3f;const b:real):SGColor;inline;overload;
 operator / (const a:TSGColor3f;const b:real):SGColor;inline;overload;
 
+//¬екторное произведение двух векторов трехмерного пространства
+operator * (const a,b:SGVertex):SGVertex;inline;overload;
+
 operator + (const a,b:SGVertex):SGVertex;inline;overload;
 operator - (const a,b:SGVertex):SGVertex;inline;overload;
 operator / (const a:SGVertex;const b:real):SGVertex;inline;overload;
@@ -264,6 +267,11 @@ function SGZ(const v:Single):TSGVertex3f;inline;
 function Abs(const a:TSGVertex2f):extended;overload;inline;
 
 implementation
+
+operator * (const a,b:SGVertex):SGVertex;inline;overload;
+begin
+Result.Import(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);
+end;
 
 operator := (const b:single):TSGVertex3f;overload;inline;
 begin

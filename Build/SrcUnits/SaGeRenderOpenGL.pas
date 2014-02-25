@@ -5,6 +5,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeRender
+	,SaGeCommon
 	,Math
 	{$IFNDEF ANDROID}
 		,gl
@@ -124,6 +125,7 @@ type
 function SGRGLMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:SGRGLMatrix4Type):SGRGLMatrix4;inline;
 function SGRGLGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
 function SGRGLGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+function SGRGLGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):SGRGLMatrix4;inline;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
 //в соответствии с типом SGRGLMatrix4.
@@ -132,7 +134,31 @@ procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
 //Это функция - собственная замена gluPerspective в движке.
 procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
 
+//Перемножение матриц (нужно для Rotate, Translate и Scale)
+//Так же нужно для LookAt так как там нужно делать Translate.
+operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
+
+//Эта функция - собственная замена gluLookAt в движке.
+procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
+
 implementation
+
+procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
+begin
+glMatrixMode(GL_PROJECTION);
+SGRSetMatrix(SGRGLGetLookAtMatrix(Eve,At,Up));
+end;
+
+operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
+var
+	i,j,k:Word;
+begin
+FillChar(Result,Sizeof(Result),0);
+for i:=0 to 3 do
+	for j:=0 to 3 do
+		for k:=0 to 3 do
+			Result[i,j]+=A[i,k]*B[k,j];
+end;
 
 procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
 begin
@@ -142,6 +168,7 @@ end;
 
 procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
 begin
+//Это потому что glLoadMatrixd нету в GL ES, и поэтому я думаю, что в GL ES все хранится во Float.
 {$IFDEF MOBILE}glLoadMatrixf{$ELSE}glLoadMatrixd{$ENDIF}(@vMatrix);
 end;
 
@@ -183,24 +210,26 @@ Result:=SGRGLGetFrustumMatrix(
 	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
 end;
 
-(*
-На будущее можно/нужно сделать.
-Matrix4 _getLookAtMatrix(Vector3 eye, Vector3 at, Vector3 up){
-    Vector3 forward, side;
-    forward = at - eye;
-    forward.normalize();
-    side = forward ^ up;
-    side.normalize();
-    up = side ^ forward;
-
-    Matrix4 res = Matrix4(side.x, up.x, -forward.x, 0,
-                          side.y, up.y, -forward.y, 0,
-                          side.z, up.z, -forward.z, 0,
-                          0, 0, 0, 1);
-    res.translate(Vector3(0 - eye));
-    return res;
-}
-*)
+function SGRGLGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):SGRGLMatrix4;inline;
+var
+	vForward,vSide:TSGVertex3f;
+begin
+vForward := At - Eve;
+vForward.Normalize();
+vSide := vForward * Up;
+vSide.Normalize();
+Up := vSide * vForward;
+Result := SGRGLMatrix4Import(
+	vside.x, up.x, -vforward.x, 0,
+	vside.y, up.y, -vforward.y, 0,
+	vside.z, up.z, -vforward.z, 0,
+	0, 0, 0, 1);
+Result *= SGRGLMatrix4Import(
+	1,0,0,-Eve.x,
+	0,1,0,-Eve.y,
+	0,0,1,-Eve.z,
+	0,0,0,1);
+end;
 
 procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
