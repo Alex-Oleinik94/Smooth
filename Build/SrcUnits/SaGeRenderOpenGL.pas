@@ -5,6 +5,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeRender
+	,Math
 	{$IFNDEF ANDROID}
 		,gl
 		,glu
@@ -111,7 +112,95 @@ type
 		procedure PointSize(const PS:Single);override;
 		end;
 
+//Я так понял, что на нормальном компьютере все матрици хранятся в Double, 
+//	а в GL ES (На мобтльных устройствах) во Float.
+//И если эти функции понадобятся не в GL ES, то нужно передефайнить тип элементов матрици.
+type
+	SGRGLMatrix4Type = {$IFDEF MOBILE} Single {$ELSE} Real {$ENDIF};
+type
+	SGRGLMatrix4=array [0..3,0..3] of SGRGLMatrix4Type;
+
+(*Эти функциии для того, чтобы определять gluLookAt и gluPerspective на мобильных платформах типа Android или iOS*)
+function SGRGLMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+function SGRGLGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+function SGRGLGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+
+//Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
+//в соответствии с типом SGRGLMatrix4.
+procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
+
+//Это функция - собственная замена gluPerspective в движке.
+procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
+
 implementation
+
+procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
+begin
+glMatrixMode(GL_PROJECTION);
+SGRSetMatrix(SGRGLGetPerspectiveMatrix(vAngle,vAspectRatio,vNear,vFar));
+end;
+
+procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
+begin
+{$IFDEF MOBILE}glLoadMatrixf{$ELSE}glLoadMatrixd{$ENDIF}(@vMatrix);
+end;
+
+function SGRGLMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+begin
+Result[0,0]:=_0x0;
+Result[0,1]:=_0x1;
+Result[0,2]:=_0x2;
+Result[0,3]:=_0x3;
+Result[1,0]:=_1x0;
+Result[1,1]:=_1x1;
+Result[1,2]:=_1x2;
+Result[1,3]:=_1x3;
+Result[2,0]:=_2x0;
+Result[2,1]:=_2x1;
+Result[2,2]:=_2x2;
+Result[2,3]:=_2x3;
+Result[3,0]:=_3x0;
+Result[3,1]:=_3x1;
+Result[3,2]:=_3x2;
+Result[3,3]:=_3x3;
+end;
+
+function SGRGLGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+begin
+Result:=SGRGLMatrix4Import(
+	2.0 * vnear / (vright - vleft), 0, 0, 0,
+	0, 2.0 * vnear / (vtop - vbottom), 0, 0,
+	(vright + vleft) / (vright - vleft), (vtop + vbottom) / (vtop - vbottom), -(vfar + vnear) / (vfar - vnear), -1.0,
+	0,0, -2.0 * vfar * vnear / (vfar - vnear), 0);
+end;
+
+function SGRGLGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
+var
+	vTop:Single;
+begin
+vTop := vNear * Math.tan(vAngle * 3.1415927 / 360.0);
+Result:=SGRGLGetFrustumMatrix(
+	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
+end;
+
+(*
+На будущее можно/нужно сделать.
+Matrix4 _getLookAtMatrix(Vector3 eye, Vector3 at, Vector3 up){
+    Vector3 forward, side;
+    forward = at - eye;
+    forward.normalize();
+    side = forward ^ up;
+    side.normalize();
+    up = side ^ forward;
+
+    Matrix4 res = Matrix4(side.x, up.x, -forward.x, 0,
+                          side.y, up.y, -forward.y, 0,
+                          side.z, up.z, -forward.z, 0,
+                          0, 0, 0, 1);
+    res.translate(Vector3(0 - eye));
+    return res;
+}
+*)
 
 procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
@@ -391,12 +480,12 @@ var
 	LightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
-{$IFDEF ANDROID}
+{$IFDEF MOBILE}
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 	{$ENDIF}
 
 glEnable(GL_FOG);
-{$IFNDEF ANDROID} 
+{$IFNDEF MOBILE} 
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 {$ELSE} 
 	{ХЗ} 
@@ -410,7 +499,7 @@ glFogf(GL_FOG_DENSITY, 0.55);
 
 glClearColor(0,0,0,0);
 glEnable(GL_DEPTH_TEST);
-{$IFNDEF ANDROID} 
+{$IFNDEF MOBILE} 
 	glClearDepth(1.0);
 {$ELSE} 
 	{хз} 
@@ -418,7 +507,7 @@ glEnable(GL_DEPTH_TEST);
 glDepthFunc(GL_LEQUAL);
 
 glEnable(GL_LINE_SMOOTH);
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 {$ELSE} 
 	{хз} 
@@ -442,13 +531,13 @@ glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
 glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 {$ELSE}
 	{хз} 
 	{$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glMateriali(GL_FRONT,GL_SHININESS,100);
 {$ELSE} 
 	{хз} 
@@ -501,7 +590,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1); 
+{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1); 
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -519,27 +608,25 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
+	{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		{$IFNDEF ANDROID}glOrtho{$ELSE}glOrthof{$ENDIF}
+		{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthof{$ENDIF}
 			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500)
 		end
 	else
-		{$IFNDEF ANDROID}
-			gluPerspective(45, CWidth / CHeight, 0.0011, 500)
-		{$ELSE} 
-			{хз} 
-			{$ENDIF};
+		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я 
+		//Думаю все таки надуюсь, что gluPerspective будет работать чуть чуть быстрее чем моя процедурка.
+		{$IFNDEF MOBILE}gluPerspective{$ELSE}SGRGLPerspective{$ENDIF}
+			(45, CWidth / CHeight, 0.0011, 500);
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
 
 procedure TSGRenderOpenGL.Viewport(const a,b,c,d:LongWord);
 begin
-//SGLog.Sourse([a,',',b,',',c,',',d,'- VIEWPORT']);
 glViewport(a,b,c,d);
 end;
 
@@ -550,7 +637,7 @@ end;
 
 procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
 begin
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glVertex3f(x,y,z);
 {$ELSE} 
 	{хз} 

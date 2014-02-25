@@ -4,6 +4,11 @@
 		{$ENDIF}
 	{$ENDIF}
 
+//Это на будущее, если будим прогать под iOS
+{$IFDEF ANDROID}
+	{$DEFINE MOBILE}
+	{$ENDIF}
+
 {$MODE OBJFPC}
 {$IFNDEF ANDROID}
 	{$ASMMODE INTEL}
