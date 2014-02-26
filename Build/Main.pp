@@ -14,6 +14,7 @@ uses
 			{$ENDIF}
 		{$ENDIF}
 	crt
+	,SaGeBase
 	{$IFDEF MSWINDOWS}
 		,Windows
 		,SaGeRenderDirectX
@@ -32,7 +33,6 @@ uses
 	,SysUtils
 	,SaGeContext
 	,SaGeCommon
-	,SaGeBase
 	,SaGeFractals
 	,SaGeUtils
 	,SaGeScreen

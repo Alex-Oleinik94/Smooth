@@ -21,6 +21,7 @@ uses
 	,SaGeBased
 	,SysUtils
 	,Classes
+	//,uSMBIOS
 	;
 
 const 
@@ -468,9 +469,37 @@ function SGGetComand(const comand:string):string;inline;
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
 function SGGetCurrentDirectory():string;inline;
 
+//Это тупая и очень тупая процедура, сделал ее специально для андроида.
+(*Скорее всего она не найдет свое применение, но для начала не помешает*)
+//В общем ты ей задаешь файл, а она тебе пишет модуль на паскале
+//И при вызове особой процедурки из этого модуля при включении 
+//Этого модуля в программу у тебя конструируется TMemoryStream,
+//В котором и будет тот файл, который ты задал в FileName
 procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
 
+//Возвращает количество логических ядер процессора
+//function SGGetCoreCount():Byte;inline;
+
 implementation
+
+{
+function SGGetCoreCount():Byte;inline;
+Var
+  SMBios             : TSMBios;
+  LProcessorInfo     : TProcessorInformation;
+begin
+Result:=0;
+SMBios:=TSMBios.Create();
+try
+	if SMBios.HasProcessorInfo then
+		for LProcessorInfo in SMBios.ProcessorInfo do
+			if SMBios.SmbiosVersion>='2.5' then
+				Result:=LProcessorInfo.RAWProcessorInformation^.CoreCount;
+finally
+	SMBios.Free;
+	end;
+end;
+}
 
 procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
 var
