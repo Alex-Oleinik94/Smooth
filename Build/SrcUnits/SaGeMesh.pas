@@ -771,12 +771,12 @@ end;
 
 function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
-Result:=PTSGVertex3f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PTSGVertex3f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
 function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
 begin
-Result:=PTSGVertex2f(LongWord(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PTSGVertex2f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
 procedure TSG3DObject.LoadFromFile(const FileWay:string);
