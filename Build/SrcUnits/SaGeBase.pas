@@ -21,7 +21,7 @@ uses
 	,SaGeBased
 	,SysUtils
 	,Classes
-	//,uSMBIOS
+	,uSMBIOS
 	;
 
 const 
@@ -478,11 +478,11 @@ function SGGetCurrentDirectory():string;inline;
 procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
 
 //Возвращает количество логических ядер процессора
-//function SGGetCoreCount():Byte;inline;
+function SGGetCoreCount():Byte;inline;
 
 implementation
 
-{
+
 function SGGetCoreCount():Byte;inline;
 Var
   SMBios             : TSMBios;
@@ -499,7 +499,7 @@ finally
 	SMBios.Free;
 	end;
 end;
-}
+
 
 procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
 var
