@@ -773,6 +773,8 @@ end;
 
 
 constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
+var
+	i:Byte;
 begin
 inherited Create(VContext);
 FTNRF:=nil;
@@ -822,14 +824,14 @@ fmStartPanel:=SGScreen.LastChild;
 
 SGScreen.LastChild.CreateChild(TSGLabel.Create);
 SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.Caption:='Количество потоков';
+SGScreen.LastChild.LastChild.Caption:='Количество потоков:';
 SGScreen.LastChild.LastChild.SetBounds(5,5,SGScreen.LastChild.Width-10,20);
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 
 SGScreen.LastChild.CreateChild(TSGLabel.Create);
 SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.Caption:='Разрешение текстуры';
+SGScreen.LastChild.LastChild.Caption:='Разрешение текстуры:';
 SGScreen.LastChild.LastChild.SetBounds(5,55,SGScreen.LastChild.Width-10,20);
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
@@ -858,7 +860,6 @@ SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.CreateChild(TSGComboBox.Create);
 SGScreen.LastChild.LastChild.Visible:=True;
 SGScreen.LastChild.LastChild.SetBounds(5,30,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('1');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('2');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('3');
@@ -867,8 +868,20 @@ SGScreen.LastChild.LastChild.AsComboBox.CreateItem('6');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('8');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('10');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('12');
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
+SGScreen.LastChild.LastChild.AsComboBox.CreateItem('16');
+SGScreen.LastChild.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+case SGGetCoreCount() of 
+2:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=1;
+3:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=2;
+4:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
+6:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=4;
+8:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=5;
+10:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=6;
+12:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=7;
+16:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=8;
+else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=0;
+end;
 
 FTNRF:=TSGFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
 FTNRF.SetContext(FContext);
