@@ -999,10 +999,19 @@ procedure TSGRenderDirectX.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 var
 	Matrix:D3DMATRIX;
 begin
-LoadIdentity();
-D3DXMatrixOrthoOffCenterRH(Matrix,x0,x1,y0,y1,0.0011,500);
+if x0<x1 then
+	if y0<y1 then
+		D3DXMatrixOrthoLH(Matrix,Abs(x1-x0),Abs(y1-y0),-0.001,0.1)
+	else
+		D3DXMatrixOrthoLH(Matrix,Abs(x1-x0),-Abs(y1-y0),-0.001,0.1)
+else
+	if y0<y1 then
+		D3DXMatrixOrthoLH(Matrix,-Abs(x1-x0),Abs(y1-y0),-0.001,0.1)
+	else
+		D3DXMatrixOrthoLH(Matrix,-Abs(x1-x0),-Abs(y1-y0),-0.001,0.1);
 pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
-D3DXMatrixScaling(Matrix,1,1,-1);
+
+D3DXMatrixTranslation(Matrix,-(x0+x1)/2,-(y0+y1)/2,0);
 pDevice.SetTransform(D3DTS_VIEW, Matrix);
 end;
 
