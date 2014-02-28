@@ -384,7 +384,7 @@ var
 	errorBase,eventBase: integer;
 	window_title_property: TXTextProperty;
 var
-	attr: Array[0..8] of integer = (GLX_RGBA,GLX_RED_SIZE,1,GLX_GREEN_SIZE,1,GLX_BLUE_SIZE,1,GLX_DOUBLEBUFFER,none);
+	attr: Array[0..10] of integer = (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,GLX_DEPTH_SIZE,24,GLX_DOUBLEBUFFER,none);
 	Name:PChar = nil;
 begin 
 Result:=False;

@@ -489,8 +489,9 @@ Var
   LProcessorInfo     : TProcessorInformation;
 begin
 Result:=0;
-SMBios:=TSMBios.Create();
+{$IFDEF MSWINDOWS}
 try
+	SMBios:=TSMBios.Create();
 	if SMBios.HasProcessorInfo then
 		for LProcessorInfo in SMBios.ProcessorInfo do
 			if SMBios.SmbiosVersion>='2.5' then
@@ -498,6 +499,7 @@ try
 finally
 	SMBios.Free;
 	end;
+{$ENDIF}
 end;
 
 
