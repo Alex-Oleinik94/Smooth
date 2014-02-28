@@ -3,7 +3,7 @@
 type
 	TSGFractalTetraider=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -200,7 +200,7 @@ with TSGFractalTetraider(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalTetraider.Create(const VContext:PSGContext);
+constructor TSGFractalTetraider.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FEnableColors:=True;

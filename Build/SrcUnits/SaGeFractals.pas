@@ -29,7 +29,7 @@ type
 	
 	TSGFractal = class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -64,7 +64,7 @@ type
 	
 	TSG3DFractal=class (TSGFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
@@ -105,7 +105,7 @@ type
 	
 	TSGImageFractal=class(TSGFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 			public
 		FImage:TSGImage;
 		FView:TSGScreenVertexes;
@@ -241,7 +241,7 @@ begin
 if FMesh=nil then
 	begin
 	FMesh:=TSGModel.Create;
-	FMesh.SetContext(FContext);
+	FMesh.SetContext(Context);
 	end
 else
 	if FMesh.NOfObjects>0 then
@@ -296,7 +296,7 @@ while Quantity<>0 do
 	SetLength(FMesh.ArObjects,FMesh.NOfObjects+1);
 	FMesh.NOfObjects+=1;
 	FMesh.ArObjects[FMesh.NOfObjects-1]:=TSG3DObject.Create;
-	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(FContext);
+	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(Context);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
 	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
@@ -344,7 +344,7 @@ FFractal:=Fractal;
 FThreadID:=ThreadID;
 end;
 
-constructor TSG3DFractal.Create(const VContext:PSGContext);
+constructor TSG3DFractal.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FSunAbs:=10;
@@ -366,7 +366,7 @@ FMeshesReady:=True;
 FEnableColors:=True;
 FEnableNormals:=True;
 FCamera:=TSGCamera.Create();
-FCamera.SetContext(FContext);
+FCamera.SetContext(Context);
 FCamera.MatrixMode:=SG_3D;
 FProjectionComboBox:=nil;
 FSizeLabel:=nil;
@@ -573,7 +573,7 @@ else
 end;
 
 
-constructor TSGImageFractal.Create(const VContext:PSGContext);
+constructor TSGImageFractal.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDepthHeight:=0;
@@ -588,7 +588,7 @@ if FImage=nil then
 	FImage:=TSGImage.Create
 else
 	FImage.FreeAll;
-FImage.SetContext(FContext);
+FImage.SetContext(Context);
 FImage.FImage.Clear;
 FImage.Width:=FDepth;
 FImage.Height:=FDepth*Byte(FDepthHeight=0)+FDepthHeight;
@@ -644,7 +644,7 @@ begin
 Result:=Length(FThreadsData);
 end;
 
-constructor TSGFractal.Create(const VContext:PSGContext);
+constructor TSGFractal.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDepth:=3;

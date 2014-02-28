@@ -9,7 +9,7 @@ const
 type
 	TSGFractalMengerSpunch=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
@@ -44,7 +44,7 @@ type
 		
 	TSGFractalMengerSpunchRelease=class(TSGFractalMengerSpunch)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 			public
 		FComboBox1,FComboBox2:TSGComboBox;
@@ -146,13 +146,13 @@ inherited Calculate;
 WriteSize;
 end;
 
-constructor TSGFractalMengerSpunchRelease.Create(const VContext:PSGContext);
+constructor TSGFractalMengerSpunchRelease.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FSizeWriteTrue:=False;
 
 FFont1:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
-FFont1.SetContext(FContext);
+FFont1.SetContext(Context);
 FFont1.Loading;
 
 InitProjectionComboBox(Context.Width-250-90-125-155,5{+Context.TopShift},150,30,[SGAnchRight],true);
@@ -385,7 +385,7 @@ else
 	end;
 end;
 
-constructor TSGFractalMengerSpunch.Create(const VContext:PSGContext);
+constructor TSGFractalMengerSpunch.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDeep:=FMengerCube;

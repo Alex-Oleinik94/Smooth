@@ -20,7 +20,7 @@ uses
 type
 	TSGDrawClasses=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -67,7 +67,7 @@ const
 type
 	TSGKillKostia=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -306,7 +306,7 @@ with TSGKillKostia(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGKillKostia.Create(const VContext:PSGContext);
+constructor TSGKillKostia.Create(const VContext:TSGContext);
 var
 	i:LongWord;
 begin
@@ -560,7 +560,7 @@ if (FImageBlock=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageBlock<>nil then
 		FImageBlock.Destroy;
 	FImageBlock:=TSGImage.Create;
-	FImageBlock.SetContext(FContext);
+	FImageBlock.SetContext(Context);
 	with FImageBlock do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Block.png';
@@ -576,7 +576,7 @@ if (FImageBullet=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageBullet<>nil then
 		FImageBullet.Destroy;
 	FImageBullet:=TSGImage.Create;
-	FImageBullet.SetContext(FContext);
+	FImageBullet.SetContext(Context);
 	with FImageBullet do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Bullet.png';
@@ -595,7 +595,7 @@ if (FImageKostia=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageKostia<>nil then
 		FImageKostia.Destroy;
 	FImageKostia:=TSGImage.Create;
-	FImageKostia.SetContext(FContext);
+	FImageKostia.SetContext(Context);
 	with FImageKostia do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Standart Kostia.png';
@@ -611,7 +611,7 @@ if (FImageYou=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageYou<>nil then
 		FImageYou.Destroy;
 	FImageYou:=TSGImage.Create;
-	FImageYou.SetContext(FContext);
+	FImageYou.SetContext(Context);
 	with FImageYou do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'You.png';
@@ -627,7 +627,7 @@ if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	if FImageSkull<>nil then
 		FImageSkull.Destroy;
 	FImageSkull:=TSGImage.Create;
-	FImageSkull.SetContext(FContext);
+	FImageSkull.SetContext(Context);
 	with FImageSkull do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
@@ -1064,7 +1064,7 @@ constructor TSGMeshViever.Create;
 begin
 inherited;
 FCamera:=TSGCamera.Create();
-FCamera.SetContext(FContext);
+FCamera.SetContext(Context);
 FMesh:=nil;
 
 
@@ -1111,7 +1111,7 @@ if a<>b then
 	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy;
 	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw:=
 	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].Create(
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FContext
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).Context
 	);
 	end;
 end;
@@ -1132,7 +1132,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Font:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
-SGScreen.LastChild.Font.SetContext(FContext);
+SGScreen.LastChild.Font.SetContext(Context);
 SGScreen.LastChild.Font.Loading;
 SGScreen.LastChild.Active:=Length(FArClasses)>1;
 FComboBox2.FDrawClass:=Self;
@@ -1142,7 +1142,7 @@ if (FArClasses<>nil) and (Length(FArClasses)>0) then
 	for i:=0 to High(FArClasses) do
 		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].ClassName));
 if (FArClasses<>nil) and (Length(FArClasses)>0) then
-	FNowDraw:=FArClasses[0].Create(FContext);
+	FNowDraw:=FArClasses[0].Create(Context);
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
@@ -1177,7 +1177,7 @@ if FComboBox2<>nil then
 	FComboBox2.Active:=Length(FArClasses)>1;
 end;
 
-constructor TSGDrawClasses.Create(const VContext:PSGContext);
+constructor TSGDrawClasses.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FNowDraw:=nil;

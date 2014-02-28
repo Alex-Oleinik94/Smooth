@@ -11,7 +11,7 @@ uses
 type
 	TSGLoading=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 		procedure Draw();override;
@@ -24,8 +24,8 @@ type
 		FNapAngleShift:Boolean;             //В какую сторону крутиться
 		FArrayOfLines:packed array of       //Массив дорожкок
 			packed record
-			FLengths:packed array of Word;  //Длины кусочков дорожкок экрана
-			FSpeed:Word;                    //Скорость убывания в середину экрана
+			FLengths:packed array of Single;//Длины кусочков дорожкок экрана
+			FSpeed:Single;                  //Скорость убывания в середину экрана
 			FWidth:Single;                  //Ширина дорожки в градусах
 			end;
 		procedure CallAction();             //Тут обрабатываются дорожки, их кусочки и ширины
@@ -44,35 +44,35 @@ for i:=0 to FCountLines-1 do
 	begin
 	if FArrayOfLines[i].FLengths<>nil then
 		begin
-		ii:=FArrayOfLines[i].FSpeed*Context.ElapsedTime;
-		while ii<>0 do
+		iiii:=FArrayOfLines[i].FSpeed*Context.ElapsedTime;
+		while iiii<>0 do
 			begin
-			if FArrayOfLines[i].FLengths[0]>ii then
+			if FArrayOfLines[i].FLengths[0]>iiii then
 				begin
-				FArrayOfLines[i].FLengths[0]-=ii;
-				ii:=0;
+				FArrayOfLines[i].FLengths[0]-=iiii;
+				iiii:=0;
 				end
 			else
 				begin
-				ii-=FArrayOfLines[i].FLengths[0];
+				iiii-=FArrayOfLines[i].FLengths[0];
 				for iii:=0 to High(FArrayOfLines[i].FLengths)-1 do
 					FArrayOfLines[i].FLengths[iii]:=FArrayOfLines[i].FLengths[iii+1];
 				SetLength(FArrayOfLines[i].FLengths,Length(FArrayOfLines[i].FLengths)-1);
 				end;
 			end;
 		end;
-	ii:=0;
+	iiii:=0;
 	if FArrayOfLines[i].FLengths<>nil then
 	for iii:=0 to High(FArrayOfLines[i].FLengths) do
-		ii+=FArrayOfLines[i].FLengths[iii];
-	while ii<1000 do
+		iiii+=FArrayOfLines[i].FLengths[iii];
+	while iiii<1000 do
 		begin
 		if FArrayOfLines[i].FLengths<>nil then
 			SetLength(FArrayOfLines[i].FLengths,Length(FArrayOfLines[i].FLengths)+1)
 		else
 			SetLength(FArrayOfLines[i].FLengths,1);
 		FArrayOfLines[i].FLengths[High(FArrayOfLines[i].FLengths)]:=Random(100)+6;
-		ii+=FArrayOfLines[i].FLengths[High(FArrayOfLines[i].FLengths)];
+		iiii+=FArrayOfLines[i].FLengths[High(FArrayOfLines[i].FLengths)];
 		end;
 	if i mod 2 = 0 then
 		begin
@@ -87,7 +87,7 @@ for i:=0 to FCountLines-1 do
 end;
 
 
-constructor TSGLoading.Create(const VContext:PSGContext);
+constructor TSGLoading.Create(const VContext:TSGContext);
 var
 	i:LongWord;
 begin
@@ -102,11 +102,11 @@ SetLength(FArrayOfLines,FCountLines);
 for i:=0 to FCountLines-1 do
 	begin
 	FArrayOfLines[i].FLengths:=nil;
-	FArrayOfLines[i].FSpeed:=Random(2)+1;
+	FArrayOfLines[i].FSpeed:=(Random(400)+100)/200;
 	FArrayOfLines[i].FWidth:=360/FCountLines;
 	end;
 FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
-FFont.SetContext(FContext);
+FFont.SetContext(Context);
 FFont.Loading();
 FNapAngleShift:=Boolean(Random(2));
 end;
@@ -128,7 +128,8 @@ end;
 
 procedure TSGLoading.Draw();
 var
-	i,ii,iii:Word;
+	i,ii:Word;
+	iii:Single;
 function DrawFirst():Boolean;
 begin
 Result:=FArrayOfLines[i].FLengths[0]>6;

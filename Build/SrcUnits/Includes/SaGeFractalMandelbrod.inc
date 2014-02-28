@@ -7,7 +7,7 @@ type
 	TSGFractalMandelbrodThreadData=class;
 	TSGFractalMandelbrod=class(TSGImageFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		//destructor Destroy;override;
 			public
 		FZNumber:TSGComplexNumber;
@@ -62,7 +62,7 @@ procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadDat
 type
 	TSGFractalMandelbrodRelease=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -411,7 +411,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 		begin
 		Button.Caption:='Off видео панель';
 		FBezierCurve:=TSGBezierCurve.Create();
-		FBezierCurve.SetContext(FContext);
+		FBezierCurve.SetContext(Context);
 		FBezierCurveGoButton.Active:=False;
 		end
 	else
@@ -502,7 +502,7 @@ AddNameTheme('Розовая пыль');
 AddNameTheme('Зеленая пыль');
 AddNameTheme('Оранжевая пыль');
 
-Manda:=TSGFractalMandelbrod.Create(FContext);
+Manda:=TSGFractalMandelbrod.Create(Context);
 Manda.Width:=StartDepth;
 Manda.Height:=StartDepth;
 Manda.FZNumber.Import(-0.181,0.66);
@@ -772,7 +772,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 end;
 
 
-constructor TSGFractalMandelbrodRelease.Create(const VContext:PSGContext);
+constructor TSGFractalMandelbrodRelease.Create(const VContext:TSGContext);
 var
 	i:Byte;
 begin
@@ -884,7 +884,7 @@ else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=0;
 end;
 
 FTNRF:=TSGFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
-FTNRF.SetContext(FContext);
+FTNRF.SetContext(Context);
 FTNRF.Loading;
 end;
 
@@ -1579,7 +1579,7 @@ if FImage.Ready then
 end;
 
 
-constructor TSGFractalMandelbrod.Create(const VContext:PSGContext);
+constructor TSGFractalMandelbrod.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FTheme1:=0;

@@ -3,7 +3,7 @@
 type
 	TSGGraphViewer3D=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 		procedure Draw();override;
@@ -47,7 +47,7 @@ for i:=0 to Depth-1 do
 	end;
 end;
 
-constructor TSGGraphViewer3D.Create(const VContext:PSGContext);
+constructor TSGGraphViewer3D.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 Depth:=1000;

@@ -37,7 +37,7 @@ type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
-	TSGContextProcedure = procedure(const a:PSGContext);
+	TSGContextProcedure = procedure(const a:TSGContext);
 	TSGContext=class(TSGClass)
 			public
 		constructor Create;override;
@@ -124,6 +124,7 @@ type
 			public
 		property RenderClass:TSGRenderClass read FRenderClass write FRenderClass;
 		property Render:TSGRender read FRender write FRender;
+		property SelfPoint:PSGContext read FSelfPoint write FSelfPoint;
 			public
 		function Get(const What:string):Pointer;override;
 		end;
@@ -132,11 +133,11 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
-		constructor Create(const VContext:PSGContext);virtual;overload;
+		constructor Create(const VContext:TSGContext);virtual;overload;
 			public
 		FContext:PSGContext;
 			public
-		procedure SetContext(const VContext:PSGContext);inline;
+		procedure SetContext(const VContext:TSGContext);inline;
 		function GetContext():TSGContext;inline;
 		function GetRender():TSGRender;inline;
 			public
@@ -176,7 +177,7 @@ implementation
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
-constructor TSGContextObject.Create(const VContext:PSGContext);overload;
+constructor TSGContextObject.Create(const VContext:TSGContext);overload;
 begin
 Create();
 FContext:=nil;
@@ -188,14 +189,17 @@ begin
 Result:=FContext^.Render;
 end;
 
-procedure TSGContextObject.SetContext(const VContext:PSGContext);inline;
+procedure TSGContextObject.SetContext(const VContext:TSGContext);inline;
 begin
-FContext:=VContext;
+if VContext<>nil then
+	FContext:=VContext.SelfPoint
+else
+	FContext:=nil;
 end;
 
 function TSGContextObject.GetContext():TSGContext;inline;
 begin
-Result:=FContext[0];
+Result:=FContext^;
 end;
 
 constructor TSGContextObject.Create();
@@ -313,10 +317,10 @@ else
 	end;
 end;
 
-procedure TSGContext.Resize;
+procedure TSGContext.Resize();
 begin
 if SGCLForReSizeScreenProcedure<>nil then
-	SGCLForReSizeScreenProcedure(FSelfPoint);
+	SGCLForReSizeScreenProcedure(Self);
 end;
 
 function TSGContext.GetWidth():LongWord;

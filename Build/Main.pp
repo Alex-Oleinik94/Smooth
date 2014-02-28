@@ -54,11 +54,11 @@ uses
 	//,SaGeX264Encoder;
 
 
-procedure Draw(const Context:PSGContext);
+procedure Draw(const Context:TSGContext);
 begin
 end;
 
-procedure Init(const MyContext:PSGContext);
+procedure Init(const MyContext:TSGContext);
 begin
 SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
@@ -187,7 +187,7 @@ with Context do
 	IconIdentifier:=5;
 	CursorIdentifier:=5;
 	
-	FSelfPoint:=@Context;
+	SelfPoint:=@Context;
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then
 			RenderClass:=TSGRenderDirectX
@@ -359,9 +359,9 @@ end;
 					//{$IFDEF MSWINDOWS}TSGRenderDirectX{$ENDIF}
 					//{$IFDEF UNIX}     
 					TSGRenderOpenGL;// {$ENDIF};
-			Context.FSelfPoint:=@Context;
+			Context.SelfPoint:=@Context;
 			Context.Initialize();
-			ViewerImage.SetContext(@Context);
+			ViewerImage.SetContext(Context);
 			ViewerImage.ToTexture();
 			Context.Run();
 			Context.Destroy();

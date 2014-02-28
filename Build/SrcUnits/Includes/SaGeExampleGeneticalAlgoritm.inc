@@ -3,7 +3,7 @@
 type
 	TSGGenAlg=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -171,7 +171,7 @@ with TSGGenAlg(Button.FUserPointer1) do
 	
 	if FG<>nil then
 		FG.Destroy;
-	FG:=TSGGraphic.Create(FContext);
+	FG:=TSGGraphic.Create(Context);
 	FG.MathGraphic.Expression:=SGStringToPChar(FE1.Caption);
 	Max:=FResultFP+Abs(b-a)/2;
 	Min:=FResultFP-Abs(b-a)/2;
@@ -237,7 +237,7 @@ if FG<>nil then
 	end;
 end;
 
-constructor TSGGenAlg.Create(const VContext:PSGContext);
+constructor TSGGenAlg.Create(const VContext:TSGContext);
 const
 	QQQ=35;
 begin

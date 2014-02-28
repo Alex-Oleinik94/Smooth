@@ -159,9 +159,9 @@ Active:=CreateOGLWindow();
 if Active then
 	begin
 	if SGCLLoadProcedure<>nil then
-		SGCLLoadProcedure(FSelfPoint);
+		SGCLLoadProcedure(Self);
 	if FCallInitialize<>nil then
-		FCallInitialize(FSelfPoint);
+		FCallInitialize(Self);
 	end;
 end;
 
@@ -181,14 +181,14 @@ while FActive and (FNewContextType=nil) do
 	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 	Render.InitMatrixMode(SG_3D);
 	if FCallDraw<>nil then
-		FCallDraw(FSelfPoint);
+		FCallDraw(Self);
 	//SGIIdleFunction;
 	
 	ClearKeys();
 	Messages();
 	
 	if SGCLPaintProcedure<>nil then
-		SGCLPaintProcedure(FSelfPoint);
+		SGCLPaintProcedure(Self);
 	SwapBuffers();
 	end;
 end;

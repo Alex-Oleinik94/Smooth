@@ -9,7 +9,7 @@ uses
 type
 	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():string;override;
@@ -28,7 +28,7 @@ begin
 
 end;
 
-constructor TSGGameTron.Create(const VContext:PSGContext);
+constructor TSGGameTron.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FModel:=nil;

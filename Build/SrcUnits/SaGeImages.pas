@@ -763,7 +763,7 @@ else
 FStream.LoadFromFile(Way);
 end;
 
-procedure TSGImage.ToTexture;
+procedure TSGImage.ToTexture();
 begin
 if FTexture<>0 then
 	FreeTexture();

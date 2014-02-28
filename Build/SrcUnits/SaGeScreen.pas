@@ -487,7 +487,7 @@ type
 var
 	SGScreen:TSGComponent = nil;
 
-procedure SGCLLoad(const Context:PSGCOntext);
+procedure SGCLLoad(const Context:TSGCOntext);
 
 implementation
 
@@ -2052,7 +2052,7 @@ if (Child<>nil) and FCanHaveChildren then
 	begin
 	SetLength(FChildren,Length(FChildren)+1);
 	FChildren[High(FChildren)]:=Child;
-	Child.SetContext(FContext);
+	Child.SetContext(Context);
 	Child.FParent:=Self;
 	if Child.FFont=nil then
 		Child.FFont:=FFont;
@@ -3030,14 +3030,12 @@ FCanHaveChildren:=False;
 FViewImage1:=nil;
 end;
 
-procedure SGCLPaint(const FContext:PSGContext);
+procedure SGCLPaint(const Context:TSGContext);
 var
 	CanRePleace:Boolean = True;
 	i:LongWord;
 	Render:TSGRender = nil;
-	Context:TSGContext;
 begin
-Context:=FContext^;
 Render:=Context.Render;
 if FNewPosition<>FOldPosition then
 	begin
@@ -3170,7 +3168,7 @@ if FNewPosition=FOldPosition then
 			3:FMoveVector.Import(0,-1);
 			end;
 			
-			Context.InitializeProcedure(FContext);
+			Context.InitializeProcedure(Context);
 			
 			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 			Context.Render.InitMatrixMode(SG_3D);
@@ -3200,24 +3198,24 @@ begin
 inherited Destroy;
 end;
 
-procedure SGCLResizeScreen(const Context:PSGContext);
+procedure SGCLResizeScreen(const Context:TSGContext);
 begin
 if SGScreen<>nil then
 	begin
-	SGScreen.SetBounds(0,0,Context^.Width,Context^.Height);
+	SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 	SGScreen.BoundsToNeedBounds;
 	SGScreen.FromResize();
 	end;
 end;
 
-procedure SGCLLoad(const Context:PSGContext);
+procedure SGCLLoad(const Context:TSGContext);
 begin
 if SGScreen<>nil then
 	Exit;
 
 SGScreen:=SGComponent.Create;
 SGScreen.SetContext(Context);
-SGScreen.SetBounds(0,0,Context^.Width,Context^.Height);
+SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
 SGScreen.Visible:=True;
 SGScreen.BoundsToNeedBounds;

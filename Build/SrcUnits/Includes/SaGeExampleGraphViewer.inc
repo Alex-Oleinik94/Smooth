@@ -3,7 +3,7 @@
 type
 	TSGGraphic=class(TSGDrawClass)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -26,7 +26,7 @@ type
 	//==============
 	TSGGraphViewer=class(TSGGraphic)
 			public
-		constructor Create(const VContext:PSGContext);override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Draw;override;
@@ -66,13 +66,13 @@ begin
 Result:=(MathGraphic<>nil) and(MathGraphic.Assigned); 
 end;
 
-constructor TSGGraphic.Create(const VContext:PSGContext);
+constructor TSGGraphic.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 MathGraphic:=nil;
 NotUsedInGraphic:=True;
 MathGraphic:=TSGMathGraphic.Create;
-MathGraphic.SetContext(FContext);
+MathGraphic.SetContext(Context);
 MathGraphic.Expression:='x*sinx';
 MathGraphic.Complexity:=Context.Width;
 MathGraphic.VertexFunction:=@VertexFunction;
@@ -339,7 +339,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGGraphViewer.Create(const VContext:PSGContext);
+constructor TSGGraphViewer.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 SelectPointEnabled:=False;
@@ -348,7 +348,7 @@ EulatuonEdit:=nil;
 EulatuonLabel:=nil;
 
 Image:=TSGImage.Create(SGTextureDirectory+Slash+'IconArea-hover.png');
-Image.SetContext(FContext);
+Image.SetContext(Context);
 Image.Loading;
 
 Fb2:=TSGButton.Create;
@@ -367,7 +367,7 @@ SGScreen.LastChild.Caption:=SGStringToPChar(SGPCharToString(MathGraphic.Expressi
 EulatuonLabel.TextPosition:=True;
 EulatuonLabel.TextColor.Import(0.7,0,0.7);
 EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
-EulatuonLabel.Font.SetContext(FCOntext);
+EulatuonLabel.Font.SetContext(Context);
 EulatuonLabel.Font.Loading;
 EulatuonLabel.AutoTopShift:=True;
 
