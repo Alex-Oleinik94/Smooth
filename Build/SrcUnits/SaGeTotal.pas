@@ -15,6 +15,7 @@ uses
 	,SaGeContext
 	,SaGeScreen
 	,SaGeRender
+	,SaGeImages
 	;
 type
 	TSGDrawClasses=class(TSGDrawClass)
@@ -133,7 +134,7 @@ type
 		FTimerLabel,FLabebYouLose:TSGLabel;
 		FComboBoxRespamn,FGroundComboBox:TSGComboBox;
 			private
-		FImageKostia,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSGGLImage;
+		FImageKostia,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSGImage;
 		end;
 
 implementation
@@ -323,24 +324,24 @@ FImageKostia:=nil;
 FImageYou:=nil;
 FImageBullet:=nil;
 
-{FImageBlock:=TSGGLImage.Create;
-FImageBlock.Way:=TextureDirectory+Slash+'KillKostia'+Slash+'KKK1.png';
+{FImageBlock:=TSGImage.Create;
+FImageBlock.Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'KKK1.png';
 FImageBlock.Loading;
 
-FImageSkull:=TSGGLImage.Create;
-FImageSkull.Way:=TextureDirectory+Slash+'KillKostia'+Slash+'KKK4.png';
+FImageSkull:=TSGImage.Create;
+FImageSkull.Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'KKK4.png';
 FImageSkull.Loading;
 
-FImageKostia:=TSGGLImage.Create;
-FImageKostia.Way:=TextureDirectory+Slash+'KillKostia'+Slash+'KKK0.png';
+FImageKostia:=TSGImage.Create;
+FImageKostia.Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'KKK0.png';
 FImageKostia.Loading;
 
-FImageYou:=TSGGLImage.Create;
-FImageYou.Way:=TextureDirectory+Slash+'KillKostia'+Slash+'KKK2.png';
+FImageYou:=TSGImage.Create;
+FImageYou.Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'KKK2.png';
 FImageYou.Loading;
 
-FImageBullet:=TSGGLImage.Create;
-FImageBullet.Way:=TextureDirectory+Slash+'KillKostia'+Slash+'KKK3.png';
+FImageBullet:=TSGImage.Create;
+FImageBullet.Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'KKK3.png';
 FImageBullet.Loading;}
 
 SetLength(FKosties,1);
@@ -558,11 +559,11 @@ if (FImageBlock=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	begin
 	if FImageBlock<>nil then
 		FImageBlock.Destroy;
-	FImageBlock:=TSGGLImage.Create;
+	FImageBlock:=TSGImage.Create;
 	FImageBlock.SetContext(FContext);
 	with FImageBlock do
 		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Block.png';
+		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Block.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -574,11 +575,11 @@ if (FImageBullet=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	begin
 	if FImageBullet<>nil then
 		FImageBullet.Destroy;
-	FImageBullet:=TSGGLImage.Create;
+	FImageBullet:=TSGImage.Create;
 	FImageBullet.SetContext(FContext);
 	with FImageBullet do
 		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Bullet.png';
+		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Bullet.png';
 		LoadToMemory;
 		LoadToBitMap;
 		if ii>64 then
@@ -593,11 +594,11 @@ if (FImageKostia=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	begin
 	if FImageKostia<>nil then
 		FImageKostia.Destroy;
-	FImageKostia:=TSGGLImage.Create;
+	FImageKostia:=TSGImage.Create;
 	FImageKostia.SetContext(FContext);
 	with FImageKostia do
 		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Standart Kostia.png';
+		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Standart Kostia.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -609,11 +610,11 @@ if (FImageYou=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	begin
 	if FImageYou<>nil then
 		FImageYou.Destroy;
-	FImageYou:=TSGGLImage.Create;
+	FImageYou:=TSGImage.Create;
 	FImageYou.SetContext(FContext);
 	with FImageYou do
 		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'You.png';
+		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'You.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -625,11 +626,11 @@ if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	begin
 	if FImageSkull<>nil then
 		FImageSkull.Destroy;
-	FImageSkull:=TSGGLImage.Create;
+	FImageSkull:=TSGImage.Create;
 	FImageSkull.SetContext(FContext);
 	with FImageSkull do
 		begin
-		Way:=TextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
+		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
 		LoadToMemory;
 		LoadToBitMap;
 		Image.SetBounds(ii,ii);
@@ -1130,7 +1131,7 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
 SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+SGScreen.LastChild.Font:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 SGScreen.LastChild.Font.SetContext(FContext);
 SGScreen.LastChild.Font.Loading;
 SGScreen.LastChild.Active:=Length(FArClasses)>1;

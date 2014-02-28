@@ -47,7 +47,10 @@ uses
 	,SaGeRender
 	,SaGeRenderOpenGL
 	,SaGeModel
-	,SaGeTron;
+	,SaGeTron
+	,SaGeLoading
+	,SaGeImages
+	;
 	//,SaGeX264Encoder;
 
 
@@ -57,12 +60,13 @@ end;
 
 procedure Init(const MyContext:PSGContext);
 begin
-SGScreen.Font:=TSGGLFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
 SGScreen.Font.Loading;
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGLoading);
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
 	Add(TSGFractalKohTriangle);//Треугольник Серпинского
@@ -315,7 +319,7 @@ end;
 	end;
 
 	var
-		ViewerImage:TSGGLImage = nil;
+		ViewerImage:TSGImage = nil;
 	procedure ViewerDraw(const Context:PSGContext);
 	begin
 	Context^.Render.InitMatrixMode(SG_2D);
@@ -336,7 +340,7 @@ end;
 	(SGGetFileExpansion(FileWay)='BMP') or 
 	(SGGetFileExpansion(FileWay)='TGA') then
 		begin
-		ViewerImage:=TSGGLImage.Create();
+		ViewerImage:=TSGImage.Create();
 		ViewerImage.Way:=FileWay;
 		ViewerImage.LoadToMemory();
 		if ViewerImage.LoadToBitMap() then

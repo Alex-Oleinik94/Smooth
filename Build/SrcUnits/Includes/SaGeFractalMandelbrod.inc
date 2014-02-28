@@ -78,7 +78,7 @@ type
 		NowSave:Boolean;
 		NowSaveLastView:TSGScreenVertexes;
 		
-		SecondImage:TSGGLImage;
+		SecondImage:TSGImage;
 		
 		LabelProcent:TSGProgressBar;
 		LblProcent:TSGLabel;
@@ -448,7 +448,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SelectPoint.Import();
 	SelectSecondPoint.Import();
 	Manda.FZMand:=False;
-	FVideoBuffer:=SGGetFreeDirectoryName(DataDirectory+Slash+'Images'+Slash+'Manda Buffer','Part');
+	FVideoBuffer:=SGGetFreeDirectoryName(SGDataDirectory+Slash+'Images'+Slash+'Manda Buffer','Part');
 	SGMakeDirectory(FVideoBuffer);
 	Manda.Width:=1920;//*5;
 	Manda.Height:=1080;//*5;
@@ -511,7 +511,7 @@ Manda.FZDegree:=2;
 Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
-Manda.FImage.Way:=DataDirectory+Slash+'Images'+Slash+'Mand New.png';
+Manda.FImage.Way:=SGDataDirectory+Slash+'Images'+Slash+'Mand New.png';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -1036,18 +1036,18 @@ if MandaInitialized then
 		else 
 			if Manda.FImage<>nil then
 				begin
-				if not DirectoryExists(DataDirectory+Slash+'Images') then
-					MkDir(DataDirectory+Slash+'Images');
+				if not DirectoryExists(SGDataDirectory+Slash+'Images') then
+					MkDir(SGDataDirectory+Slash+'Images');
 				if FNowRenderitsiaVideo then
 					begin
 					//Manda.FImage.Image.SetBounds(1920,1080);
-					if not DirectoryExists(DataDirectory+Slash+'Videos') then
-						MkDir(DataDirectory+Slash+'Videos');
+					if not DirectoryExists(SGDataDirectory+Slash+'Videos') then
+						MkDir(SGDataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SGStr(FNowKadr)+'.png';
 					end;
-				Manda.FImage.AddWaterString('made by SaGe',FTNRF,0);
+				FTNRF.AddWaterString('made by SaGe',Manda.FImage,0);
 				Manda.FImage.Saveing(SGI_PNG);
 				if not FNowRenderitsiaVideo then
 					begin
@@ -1459,7 +1459,7 @@ if MandaInitialized then
 			Manda.Height:=StartDepth;
 			end;
 		Manda.BeginCalculate();
-		Manda.FImage.Way:=SGGetFreeFileName(DataDirectory+Slash+'Images'+Slash+'Mand New.png');
+		Manda.FImage.Way:=SGGetFreeFileName(SGDataDirectory+Slash+'Images'+Slash+'Mand New.png');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;

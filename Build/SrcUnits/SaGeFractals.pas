@@ -107,7 +107,7 @@ type
 			public
 		constructor Create(const VContext:PSGContext);override;
 			public
-		FImage:TSGGLImage;
+		FImage:TSGImage;
 		FView:TSGScreenVertexes;
 		FDepthHeight:LongWord;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);virtual;
@@ -585,7 +585,7 @@ procedure TSGImageFractal.BeginCalculate;
 begin
 inherited;
 if FImage=nil then
-	FImage:=TSGGLImage.Create
+	FImage:=TSGImage.Create
 else
 	FImage.FreeAll;
 FImage.SetContext(FContext);

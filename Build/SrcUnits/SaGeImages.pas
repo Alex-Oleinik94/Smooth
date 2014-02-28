@@ -17,6 +17,7 @@ uses
 	,SaGeImagesBmp
 	,SaGeRender
 	,SaGeContext
+	,SaGeCommon
 	;
 type
 	SGIByte = type byte;
@@ -83,6 +84,14 @@ type
 		property ReadyToGoToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyGoToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
+			public //Render Functions:
+		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+		procedure ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
+		procedure ImportFromDispley(const NeedAlpha:Boolean = True);
+		class function UnProjectShift:TSGPoint2f;
+		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
+		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
 		end;
 	SGImage=TSGImage;
 	ArTSGImage = type packed array of TSGImage;
@@ -96,6 +105,133 @@ procedure SGIIdleFunction;
 function LoadTGA(const Stream:TStream):TSGBitmap;
 
 implementation
+
+(****************************)
+(*RENDER FUNCTIONS FOR IMAGE*)
+(****************************)
+
+
+procedure TSGImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+begin
+DrawImageFromTwoVertex2f(SGPoint2fToVertex2f(Vertex1),SGPoint2fToVertex2f(Vertex2),RePlace,RePlaceY,Rotation);
+end;
+
+procedure TSGImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+procedure DoTexCoord(const NowRotation:Byte);inline;
+begin
+case (NowRotation mod 4) of
+0:Render.TexCoord2f(0,1);
+1:Render.TexCoord2f(1,1);
+2:Render.TexCoord2f(1,0);
+3:Render.TexCoord2f(0,0);
+end;
+end;
+begin
+if RePlace then
+	begin
+	RePlacVertex(Vertex1,Vertex2,rePlaceY);
+	end;
+BindTexture();
+Render.BeginScene(SGR_QUADS);
+DoTexCoord(Rotation);
+Vertex1.Vertex(Render);
+DoTexCoord(Rotation+1);
+Render.Vertex2f(Vertex2.x,Vertex1.y);
+DoTexCoord(Rotation+2);
+Vertex2.Vertex(Render);
+DoTexCoord(Rotation+3);
+Render.Vertex2f(Vertex1.x,Vertex2.y);
+Render.EndScene();
+DisableTexture();
+end;
+
+procedure TSGImage.DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
+begin
+if RePlace then
+	RePlacVertex(Vertex1,Vertex2,SG_2D);
+DrawImageFromTwoVertex2f(
+	SGVertex2fImport(
+		Vertex1.x+abs(Vertex1.x-Vertex2.x)*((1-Ratio)/2),
+		Vertex1.y+abs(Vertex1.y-Vertex2.y)*((1-Ratio)/2)),
+	SGVertex2fImport(
+		Vertex2.x-abs(Vertex1.x-Vertex2.x)*((1-Ratio)/2),
+		Vertex2.y-abs(Vertex1.y-Vertex2.y)*((1-Ratio)/2)),
+	RePlace,SG_2D);
+end;
+
+procedure TSGImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
+begin
+if Vertex1.x>Vertex2.x then
+	SGQuickRePlaceVertexType(Vertex1.x,Vertex2.x);
+case RePlaceY of
+SG_2D:
+	begin
+	if Vertex1.y>Vertex2.y then
+		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
+	end;
+else
+	begin
+	if Vertex1.y<Vertex2.y then
+		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
+	end;
+end;
+end;
+
+class function TSGImage.UnProjectShift:TSGPoint2f;
+begin
+//Result:=TSGViewportObject.Smezhenie;
+	//onu:{$}
+	Result.Import();
+end;
+
+procedure TSGImage.ImportFromDispley(const NeedAlpha:Boolean = True);
+begin
+ImportFromDispley(
+	SGPointImport(1,1),
+	SGPointImport(Render.Width,Render.Height),
+	NeedAlpha);
+end;
+
+procedure TSGImage.ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
+begin
+if Self<>nil then
+	FreeAll
+else
+	Self:=TSGImage.Create;
+if NeedAlpha then
+	begin
+	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*4);
+	Render.ReadPixels(
+		Point1.x-1,//+ReadPixelsShift.x,
+		Point1.y-1,//+ReadPixelsShift.y,
+		Point2.x-Point1.x+1, 
+		Point2.y-Point1.y+1, 
+		SGR_RGBA, 
+		SGR_UNSIGNED_BYTE, 
+		FImage.FBitMap);
+	Bits:=32;
+	end
+else
+	begin
+	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*3);
+	Render.ReadPixels(
+		Point1.x-1,//+ReadPixelsShift.x,
+		Point1.y-1,//+ReadPixelsShift.y,
+		Point2.x-Point1.x+1, 
+		Point2.y-Point1.y+1, 
+		SGR_RGB, 
+		SGR_UNSIGNED_BYTE, 
+		FImage.FBitMap);
+	Bits:=24;
+	end;
+Height:=Point2.y-Point1.y+1;
+Width:=Point2.x-Point1.x+1;
+FReadyToGoToTexture:=True;
+end;
+
+(****************************)
+(*OTHERS FUNCTIONS FOR IMAGE*)
+(****************************)
 
 procedure TSGImage.SaveToStream(const Stream:TStream);
 var

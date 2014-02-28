@@ -141,16 +141,16 @@ const
 				{$ENDIF}
 			{$ENDIF}
 		;
-	DataDirectory = 
+	SGDataDirectory = 
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
 		{$ELSE}
 			'/sdcard'
 			{$ENDIF};
-	FontDirectory = DataDirectory + Slash +'Fonts';
-	TextureDirectory = DataDirectory + Slash +'Textures';
-	TexturesDirectory = TextureDirectory;
-	FontsDirectory = FontDirectory;
+	SGFontDirectory = SGDataDirectory + Slash +'Fonts';
+	SGTextureDirectory = SGDataDirectory + Slash +'Textures';
+	SGTexturesDirectory = SGTextureDirectory;
+	SGFontsDirectory = SGFontDirectory;
 var
 	SGLogEnable:Boolean = True;
 type
@@ -1595,7 +1595,7 @@ constructor TSGLog.Create();
 begin
 inherited;
 if SGLogEnable then
-	FFileStream:=TFileStream.Create(DataDirectory+Slash+'EngineLog.log',fmCreate);
+	FFileStream:=TFileStream.Create(SGDataDirectory+Slash+'EngineLog.log',fmCreate);
 end;
 
 destructor TSGLog.Destroy;

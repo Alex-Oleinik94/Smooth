@@ -17,7 +17,9 @@ uses
 	,SaGeGeneticalAlgoritm
 	,SaGeBase
 	,SaGeBased
-	,SaGeRender;
+	,SaGeRender
+	,SaGeImages
+	;
 {type
 	TSGExampleShader=class(TSGDrawClass)
 			public

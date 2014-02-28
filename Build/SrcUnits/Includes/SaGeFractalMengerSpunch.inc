@@ -51,7 +51,7 @@ type
 		FButtonDepthPlus,FButtonDepthMinus:TSGButton;
 		FLabelDepth,FLabelDepthCaption,FLabelSize:TSGLabel;
 		FSizeWriteTrue:Boolean;
-		FFont1:TSGGLFont;
+		FFont1:TSGFont;
 		procedure Calculate;override;
 		procedure WriteSize;inline;
 		procedure Draw;override;
@@ -151,7 +151,7 @@ begin
 inherited Create(VContext);
 FSizeWriteTrue:=False;
 
-FFont1:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+FFont1:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
 FFont1.SetContext(FContext);
 FFont1.Loading;
 

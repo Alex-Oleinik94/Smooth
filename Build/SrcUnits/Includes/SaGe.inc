@@ -21,8 +21,8 @@
 //{$DEFINE GLUT}
 
 {$WARNINGS OFF}
-{$NOTES ON}
 {$NOTES OFF}
+{$HINTS OFF}
 
 //{$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}

@@ -124,7 +124,7 @@ type
 		FActiveTimer : real;
 		
 		FCaption:SGCaption;
-		FFont:TSGGLFont;
+		FFont:TSGFont;
 		
 		procedure UpgradeTimers;virtual;
 		procedure UpgradeTimer(const Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
@@ -140,7 +140,7 @@ type
 		property Caption : SGCaption read FCaption write FCaption;
 		property FText : SGCaption read FCaption write FCaption;
 		property Text : SGCaption read FCaption write FCaption;
-		property Font: TSGGLFont read FFont write FFont;
+		property Font: TSGFont read FFont write FFont;
 		property Visible : Boolean read FVisible write SetVisible;
 		property Active : Boolean read FActive write FActive default False;
 		property Anchors : SGSetOfByte read FAnchors write FAnchors;
@@ -212,7 +212,7 @@ type
 		destructor Destroy;override;
 			public
 		FButtonsType:SGFrameButtonsType;
-		FIcon:TSGGLImage;
+		FIcon:TSGImage;
 		FRePlace:Boolean;
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -232,7 +232,7 @@ type
 		FCursorOnButton:Boolean;
 		FChangingButton:Boolean;
 		FChangingButtonTimer:Real;
-		FViewImage1:TSGGLImage;
+		FViewImage1:TSGImage;
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -295,7 +295,7 @@ type
 		constructor Create;
 		destructor Destroy;override;
 			public
-		FImage:TSGGLImage;
+		FImage:TSGImage;
 			public
 		procedure FromDraw;override;
 		end;
@@ -422,7 +422,7 @@ type
 		FOpen:boolean;
 		FItems:packed array of
 			packed record
-				FImage:TSGGLImage;
+				FImage:TSGImage;
 				FCaption:TSGCaption;
 				FID:Int;
 				end;
@@ -450,7 +450,7 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
-		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGGLImage = nil;const FIdent:Int = -1);
+		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1);
 			public
 		property SelectItem:LongInt read FSelectItem write FSelectItem;
 		property MaxLines:LongWord read FMaxColumns write FMaxColumns;
@@ -495,7 +495,7 @@ var
 	SGScreens:packed array of 
 			packed record 
 			FScreen:TSGComponent;
-			FImage:TSGGLImage;
+			FImage:TSGImage;
 			end = nil;
 	FOldPosition,FNewPosition:LongWord;
 	FMoveProgress:Real = 0;
@@ -646,7 +646,7 @@ end;
 	{$NOTE ComboBox}
 	{$ENDIF}
 var
-	ComboBoxImage:TSGGLImage = nil;
+	ComboBoxImage:TSGImage = nil;
 
 function TSGComboBox.CursorInComponent():boolean;
 begin
@@ -963,7 +963,7 @@ FBackLight:=False;
 inherited;
 end;
 
-procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGGLImage = nil;const FIdent:Int = -1);
+procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1);
 begin
 if Self<>nil then
 	begin
@@ -3104,7 +3104,7 @@ if FNewPosition=FOldPosition then
 			SGScreens[FNewPosition].FScreen:=nil;
 			if SGScreens[FNewPosition].FImage<>nil then
 				SGScreens[FNewPosition].FImage.Destroy;
-			SGScreens[FNewPosition].FImage:=TSGGLImage.Create;
+			SGScreens[FNewPosition].FImage:=TSGImage.Create;
 			SGScreens[FNewPosition].FImage.ImportFromDispley(False);
 			SGScreens[FNewPosition].FImage.ToTexture;
 			if Length(SGScreens) = 1 then
@@ -3158,7 +3158,7 @@ if FNewPosition=FOldPosition then
 			
 			if SGScreens[FOldPosition].FImage<>nil then
 				SGScreens[FOldPosition].FImage.Destroy;
-			SGScreens[FOldPosition].FImage:=TSGGLImage.Create;
+			SGScreens[FOldPosition].FImage:=TSGImage.Create;
 			SGScreens[FOldPosition].FImage.ImportFromDispley(False);
 			SGScreens[FOldPosition].FImage.Image.SetBounds(1024,512);
 			SGScreens[FOldPosition].FImage.ToTexture;
@@ -3179,7 +3179,7 @@ if FNewPosition=FOldPosition then
 			Context.Render.InitMatrixMode(SG_2D);
 			SGScreen.FromDraw;
 			
-			SGScreens[FNewPosition].FImage:=TSGGLImage.Create;
+			SGScreens[FNewPosition].FImage:=TSGImage.Create;
 			SGScreens[FNewPosition].FImage.ImportFromDispley(False);
 			SGScreens[FNewPosition].FImage.Image.SetBounds(1024,512);
 			SGScreens[FNewPosition].FImage.ToTexture;
@@ -3226,7 +3226,7 @@ SetLength(SGScreens,1);
 SGScreens[Low(SGScreens)].FScreen:=SGScreen;
 SGScreens[Low(SGScreens)].FImage:=nil;
 
-ComboBoxImage:=TSGGLImage.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Textures'+Slash+'ComboBoxImage.png');
+ComboBoxImage:=TSGImage.Create(SGDataDirectory+Slash+'Textures'+Slash+'ComboBoxImage.png');
 ComboBoxImage.SetContext(Context);
 ComboBoxImage.Loading;
 end;

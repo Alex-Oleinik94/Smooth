@@ -66,35 +66,18 @@ type
 		procedure Draw();override;
 		function VertexQuantity:TSGMaxEnum;inline;
 		end;
-	
-(*====================================================================*)
-(*============================TSGGLImage==============================*)
-(*====================================================================*)
-
-	SGImage = SaGeImages.TSGImage;
-	TSGImage = SaGeImages.TSGImage;
-	TStringParams=packed array of packed array [0..1] of string;
-	TSGGLImage=class(TSGImage)
-			public
-		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
-		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
-		procedure ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
-		procedure ImportFromDispley(const NeedAlpha:Boolean = True);
-		class function UnProjectShift:TSGPoint2f;
-		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
-		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
-		procedure AddWaterString(const VString:String;const VFont:TSGFont;const VType:LongWord = 0);
-		end;
 
 (*====================================================================*)
 (*=============================TSGFont================================*)
 (*====================================================================*)
-
+	
+	TStringParams=packed array of packed array [0..1] of string;
+	
 	TSGSimbolParam=object
 		X,Y,Width:LongInt;
 		end;
 	
-	TSGFont=class(TSGGLImage)
+	TSGFont=class(TSGImage)
 			public
 		constructor Create(const FileName:string = '');
 		destructor Destroy;override;
@@ -116,18 +99,14 @@ type
 		function StringLength(const S:string ):LongWord;overload;
 		property FontReady:Boolean read FFontReady;
 		function Ready:Boolean;override;
-		end;
-
-(*====================================================================*)
-(*=============================TSGGLFont==============================*)
-(*====================================================================*)
-
-	TSGGLFont=class(TSGFont)
+			public
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 		end;
+
 		
 	{PSGViewportObject = ^ TSGViewportObject;
 	TSGViewportObject=class(TSGRenderObject)
@@ -430,7 +409,7 @@ begin
 Result:=FSimbolParams[Index].Width
 end;
 
-procedure TSGGLFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	P:PChar;
 begin
@@ -439,7 +418,7 @@ DrawFontFromTwoVertex2f(P,Vertex1,Vertex2,AutoXShift,AutoYShift);
 FreeMem(P,SGPCharLength(P)+1);
 end;
 
-procedure TSGGLFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	P:PChar;
 begin
@@ -606,7 +585,7 @@ begin
 inherited;
 end;
 
-procedure TSGGLFont.DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	i:LongInt = 0;
 	StringWidth:LongInt = 0;
@@ -684,11 +663,7 @@ for i:=1 to Length(S) do
 	end;
 end;
 
-(*====================================================================*)
-(*============================TSGGLImage==============================*)
-(*====================================================================*)
-
-procedure TSGGLImage.AddWaterString(const VString:String;const VFont:TSGFont;const VType:LongWord = 0);
+procedure TSGFont.AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 var
 	PBits:PSGPixel3b;
 	StrL:LongWord;
@@ -718,21 +693,21 @@ end;
 var
 	TempR:real;
 begin
-if (Image=nil) or (Channels<>3) or (VFont.Channels<>4) or (VFont.Image=nil)or (VFont.Image.BitMap=nil) then
+if (VImage.Image=nil) or (VImage.Channels<>3) or (Channels<>4) or (Image=nil)or (Image.BitMap=nil) then
 	begin
-	SGLog.Sourse('TSGGLImage__AddWaterString : Error : Invalid arametrs!');
+	SGLog.Sourse('TSGExImage__AddWaterString : Error : Invalid arametrs!');
 	Exit;
 	end;
-PBits:=PSGPixel3b(Image.BitMap);
-StrL:=VFont.StringLength(VString);
-if (StrL>Width) or (VFont.FontHeight>Height) then
+PBits:=PSGPixel3b(VImage.Image.BitMap);
+StrL:=StringLength(VString);
+if (StrL>VImage.Width) or (FontHeight>Height) then
 	begin
-	SGLog.Sourse('TSGGLImage__AddWaterString : Error : for this image ('+SGStr(Width)+','+SGStr(Height)+') water string "'+VString+'" is not portable!');
+	SGLog.Sourse('TSGExImage__AddWaterString : Error : for this image ('+SGStr(VImage.Width)+','+SGStr(VImage.Height)+') water string "'+VString+'" is not portable!');
 	Exit;
 	end;
-PW:=Width-StrL-5;
-PH:=Height-VFont.FontHeight-4;
-PFontBits:=PSGPixel4b(VFont.FImage.BitMap);
+PW:=VImage.Width-StrL-5;
+PH:=VImage.Height-FontHeight-4;
+PFontBits:=PSGPixel4b(FImage.BitMap);
 if VType=0 then
 	begin
 	SumB:=0;
@@ -741,16 +716,16 @@ if VType=0 then
 	SumG:=0;
 	for i:=1 to Length(VString) do
 		begin
-		SI:=VFont.GetSimbolInfo(VString[i]);
-		for iw:=0 to VFont.SimbolWidth[VString[i]]-1 do
-			for ih:=1 to VFont.FontHeight do
+		SI:=GetSimbolInfo(VString[i]);
+		for iw:=0 to SimbolWidth[VString[i]]-1 do
+			for ih:=1 to FontHeight do
 				begin
 				Sum+=1;
-				SumR+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].r;
-				SumG+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].g;
-				SumB+=PBits[Width*Height+(PW+iw)-(PH+ih)*Width].b;
+				SumR+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].r;
+				SumG+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].g;
+				SumB+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].b;
 				end;
-		PW+=VFont.SimbolWidth[VString[i]];
+		PW+=SimbolWidth[VString[i]];
 		end;
 	SumR:=Trunc(SumR/Sum);
 	SumG:=Trunc(SumG/Sum);
@@ -762,151 +737,34 @@ if VType=0 then
 	SumR:=round(255*SumR/TempR);
 	SumG:=round(255*SumG/TempR);
 	SumB:=round(255*SumB/TempR);
-	PW:=Width-StrL-5;
+	PW:=VImage.Width-StrL-5;
 	end;
 
 for i:=1 to Length(VString) do
 	begin
-	SI:=VFont.GetSimbolInfo(VString[i]);
-	for iw:=0 to VFont.SimbolWidth[VString[i]]-1 do
-		for ih:=1 to VFont.FontHeight do
+	SI:=GetSimbolInfo(VString[i]);
+	for iw:=0 to SimbolWidth[VString[i]]-1 do
+		for ih:=1 to FontHeight do
 			begin
 			case VType of
 			0:
 				begin
 				AddSum(
-					Width*Height+(PW+iw)-(PH+ih)*Width,
-					VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+					VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width,
+					Width*Height+(SI.x+iw)-(SI.y+ih)*Width);
 				end;
 			else
 				Invert(
-					Width*Height+(PW+iw)-(PH+ih)*Width,
-					VFont.Width*VFont.Height+(SI.x+iw)-(SI.y+ih)*VFont.Width);
+					VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width,
+					Width*Height+(SI.x+iw)-(SI.y+ih)*Width);
 			end;
 			end;
-	PW+=VFont.SimbolWidth[VString[i]];
+	PW+=SimbolWidth[VString[i]];
 	end;
 end;
 
-procedure TSGGLImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
-begin
-DrawImageFromTwoVertex2f(SGPoint2fToVertex2f(Vertex1),SGPoint2fToVertex2f(Vertex2),RePlace,RePlaceY,Rotation);
-end;
 
-procedure TSGGLImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
-procedure DoTexCoord(const NowRotation:Byte);inline;
-begin
-case (NowRotation mod 4) of
-0:Render.TexCoord2f(0,1);
-1:Render.TexCoord2f(1,1);
-2:Render.TexCoord2f(1,0);
-3:Render.TexCoord2f(0,0);
-end;
-end;
-begin
-if RePlace then
-	begin
-	RePlacVertex(Vertex1,Vertex2,rePlaceY);
-	end;
-BindTexture();
-Render.BeginScene(SGR_QUADS);
-DoTexCoord(Rotation);
-Vertex1.Vertex(Render);
-DoTexCoord(Rotation+1);
-Render.Vertex2f(Vertex2.x,Vertex1.y);
-DoTexCoord(Rotation+2);
-Vertex2.Vertex(Render);
-DoTexCoord(Rotation+3);
-Render.Vertex2f(Vertex1.x,Vertex2.y);
-Render.EndScene();
-DisableTexture();
-end;
-
-procedure TSGGLImage.DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
-begin
-if RePlace then
-	RePlacVertex(Vertex1,Vertex2,SG_2D);
-DrawImageFromTwoVertex2f(
-	SGVertex2fImport(
-		Vertex1.x+abs(Vertex1.x-Vertex2.x)*((1-Ratio)/2),
-		Vertex1.y+abs(Vertex1.y-Vertex2.y)*((1-Ratio)/2)),
-	SGVertex2fImport(
-		Vertex2.x-abs(Vertex1.x-Vertex2.x)*((1-Ratio)/2),
-		Vertex2.y-abs(Vertex1.y-Vertex2.y)*((1-Ratio)/2)),
-	RePlace,SG_2D);
-end;
-
-procedure TSGGLImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
-begin
-if Vertex1.x>Vertex2.x then
-	SGQuickRePlaceVertexType(Vertex1.x,Vertex2.x);
-case RePlaceY of
-SG_2D:
-	begin
-	if Vertex1.y>Vertex2.y then
-		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
-	end;
-else
-	begin
-	if Vertex1.y<Vertex2.y then
-		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
-	end;
-end;
-end;
-
-class function TSGGLImage.UnProjectShift:TSGPoint2f;
-begin
-//Result:=TSGViewportObject.Smezhenie;
-	//onu:{$}
-	Result.Import();
-end;
-
-procedure TSGGLImage.ImportFromDispley(const NeedAlpha:Boolean = True);
-begin
-ImportFromDispley(
-	SGPointImport(1,1),
-	SGPointImport(Render.Width,Render.Height),
-	NeedAlpha);
-end;
-
-procedure TSGGLImage.ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
-begin
-if Self<>nil then
-	FreeAll
-else
-	Self:=TSGGLImage.Create;
-if NeedAlpha then
-	begin
-	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*4);
-	Render.ReadPixels(
-		Point1.x-1,//+ReadPixelsShift.x,
-		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1, 
-		Point2.y-Point1.y+1, 
-		SGR_RGBA, 
-		SGR_UNSIGNED_BYTE, 
-		FImage.FBitMap);
-	Bits:=32;
-	end
-else
-	begin
-	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*3);
-	Render.ReadPixels(
-		Point1.x-1,//+ReadPixelsShift.x,
-		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1, 
-		Point2.y-Point1.y+1, 
-		SGR_RGB, 
-		SGR_UNSIGNED_BYTE, 
-		FImage.FBitMap);
-	Bits:=24;
-	end;
-Height:=Point2.y-Point1.y+1;
-Width:=Point2.x-Point1.x+1;
-FReadyToGoToTexture:=True;
-end;
-
-procedure TSGGLFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	i:LongInt = 0;
 	StringWidth:LongInt = 0;

@@ -33,7 +33,7 @@ type
 			public
 		SelectPoint,SelectSecondPoint:SGPoint;
 		SelectPointEnabled:Boolean ;
-		Image:TSGGLImage;
+		Image:TSGImage;
 		
 		EulatuonEdit:TSGEdit ;
 		EulatuonLabel:TSGLabel ;
@@ -347,7 +347,7 @@ Image:=nil;
 EulatuonEdit:=nil;
 EulatuonLabel:=nil;
 
-Image:=TSGGLImage.Create(TextureDirectory+Slash+'IconArea-hover.png');
+Image:=TSGImage.Create(SGTextureDirectory+Slash+'IconArea-hover.png');
 Image.SetContext(FContext);
 Image.Loading;
 
@@ -366,7 +366,7 @@ SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Caption:=SGStringToPChar(SGPCharToString(MathGraphic.Expression)) ;
 EulatuonLabel.TextPosition:=True;
 EulatuonLabel.TextColor.Import(0.7,0,0.7);
-EulatuonLabel.Font:=TSGGLFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
+EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
 EulatuonLabel.Font.SetContext(FCOntext);
 EulatuonLabel.Font.Loading;
 EulatuonLabel.AutoTopShift:=True;
