@@ -87,20 +87,22 @@ type
 		procedure Clear(const VParam:Cardinal);override;
 		procedure LineWidth(const VLW:Single);override;
 		procedure PointSize(const PS:Single);override;
+		procedure PushMatrix();override;
+		procedure PopMatrix();override;
 			private
 			//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
 			//приведение цветов и полигонов к Vertex-ам опенжл-я
-		FPrimetiveType:LongWord;
-		FPrimetivePrt:LongWord;
-		FNowColor:LongWord;
+		FPrimetiveType : LongWord;
+		FPrimetivePrt  : LongWord;
+		FNowColor      : LongWord;
 		FArPoints:array[0..2]of 
 			packed record
-				x,y,z:single;
-				Color:LongWord;
-				tx,ty:Single;
+				x,y,z : single;
+				Color : LongWord;
+				tx,ty : Single;
 				end;
-		FNumberOfPoints:LongWord;
+		FNumberOfPoints : LongWord;
 			//Textures
 		FNowTexture:LongWord;
 		FArTextures:packed array of IDirect3DTexture9;
@@ -111,10 +113,10 @@ type
 			FResourseSize:QWord;
 			FVertexDeclaration:IDirect3DVertexDeclaration9;
 			end;
-		FEnabledClientStateVertex:Boolean;
-		FEnabledClientStateColor:Boolean;
-		FEnabledClientStateNormal:Boolean;
-		FEnabledClientStateTexVertex:Boolean;
+		FEnabledClientStateVertex    : Boolean;
+		FEnabledClientStateColor     : Boolean;
+		FEnabledClientStateNormal    : Boolean;
+		FEnabledClientStateTexVertex : Boolean;
 		// 0 - SGR_ARRAY_BUFFER_ARB
 		// 1 - SGR_ELEMENT_ARRAY_BUFFER_ARB
 		FVBOData:packed array [0..1] of LongWord;
@@ -126,8 +128,12 @@ type
 			FSizeOfOneVertex:Byte;
 			FShift:Cardinal;
 			end;
-		// Light
-		FLigth:D3DLIGHT9;
+			// Light
+		FLigth               : D3DLIGHT9;
+			//PushMatrix/PopMatrix
+		FQuantitySavedMatrix : LongWord;
+		FLengthArSavedMatrix : LongWord;
+		FArSavedMatrix       : packed array of D3DMATRIX;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -145,6 +151,34 @@ D3DXMATRIX V;
 D3DXMatrixLookAtLH(&V, &position, &target, &up); 
 //� ������ ��� ������� ���� 
 pDevice->SetTransform(D3DTS_VIEW, &V);}
+
+procedure TSGRenderDirectX.PushMatrix();
+begin
+if FQuantitySavedMatrix+1<=FLengthArSavedMatrix then
+	begin
+	pDevice.GetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix]);
+	FQuantitySavedMatrix+=1;
+	end
+else
+	begin
+	FQuantitySavedMatrix+=1;
+	FLengthArSavedMatrix+=1;
+	SetLength(FArSavedMatrix,FLengthArSavedMatrix);
+	pDevice.GetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix-1]);
+	end;
+end;
+
+procedure TSGRenderDirectX.PopMatrix();
+begin
+if FQuantitySavedMatrix=0 then
+	SGLog.Sourse('TSGRenderDirectX.PopMatrix : Pop matrix before pushing')
+else
+	begin
+	pDevice.SetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix-1]);
+	FQuantitySavedMatrix-=1;
+	end;
+
+end;
 
 procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
@@ -964,6 +998,9 @@ FEnabledClientStateTexVertex:=False;
 FVBOData[0]:=0;
 FVBOData[1]:=0;
 FillChar(FArDataBuffers,SizeOf(FArDataBuffers),0);
+FArSavedMatrix:=nil;
+FQuantitySavedMatrix:=0;
+FLengthArSavedMatrix:=0;
 end;
 
 destructor TSGRenderDirectX.Destroy();

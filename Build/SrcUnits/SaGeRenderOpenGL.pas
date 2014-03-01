@@ -111,6 +111,8 @@ type
 		procedure Clear(const VParam:Cardinal);override;
 		procedure LineWidth(const VLW:Single);override;
 		procedure PointSize(const PS:Single);override;
+		procedure PushMatrix();override;
+		procedure PopMatrix();override;
 		end;
 
 //Я так понял, что на нормальном компьютере все матрици хранятся в Double, 
@@ -142,6 +144,16 @@ operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.PushMatrix();
+begin
+glPushMatrix();
+end;
+
+procedure TSGRenderOpenGL.PopMatrix();
+begin
+glPopMatrix();
+end;
 
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 begin
@@ -264,6 +276,10 @@ begin
 		glXSwapBuffers(
 			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')));
+	{$ELSE}
+		{$IFDEF ANDROID}
+			(*Already exists in SaGeContextAndroid*)
+			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 end;

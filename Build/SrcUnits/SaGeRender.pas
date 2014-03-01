@@ -76,6 +76,8 @@ type
 		procedure Clear(const VParam:Cardinal);virtual;abstract;
 		procedure LineWidth(const VLW:Single);virtual;abstract;
 		procedure PointSize(const PS:Single);virtual;abstract;
+		procedure PopMatrix();virtual;abstract;
+		procedure PushMatrix();virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
