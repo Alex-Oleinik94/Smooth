@@ -1,3 +1,4 @@
+//Файлик ресурсов для винды (Иконка  + Курсор + Manifest)
 {$IFDEF MSWINDOWS}
 	{$R .\..\SaGe.res}
 	{$ENDIF}
@@ -10,7 +11,7 @@ uses
 	crt
 	,dos
 	{$IFDEF MSWINDOWS}
-		,windows
+		,Windows
 		,MMSystem
 		{$ENDIF}
 	{$IFDEF UNIX}
@@ -24,7 +25,7 @@ uses
 	,uSMBIOS
 	;
 
-const 
+const
 	{$IFDEF MSWINDOWS}
 		SGLibraryNameBegin = '';
 		SGLibraryNameEnd = '.dll';
@@ -38,6 +39,7 @@ const
 			{$ENDIF}
 		{$ENDIF}
 const
+	//Табкица перевода символов изт кодировки WINDOWS1251 в CP866
 	SGAnsiToASCII: packed array[char] of char = {Ansi - WINDOWS1251(CP1251); ASCII - CP866 }
     (#$00, #$01, #$02, #$03, #$04, #$05, #$06, #$07,   { $00 - $07 }
      #$08, #$09, #$0a, #$0b, #$0c, #$0d, #$0e, #$0f,   { $08 - $0f }
@@ -83,6 +85,7 @@ const
 	SGFrameFObject = 5;
 	SGFrameFNObject = 1;
 	
+	//Это для SaGeScreen.TSGComponent
 	SGAlignNone =                        $000006;
 	SGAlignLeft =                        $000007;
 	SGAlignRight =                       $000008;
@@ -90,16 +93,21 @@ const
 	SGAlignBottom =                      $00000A;
 	SGAlignClient =                      $00000B;
 	
+	//Это для SaGeScreen.TSGComponent
 	SGAnchorRight =                      $00000D;
 	SGAnchorLeft =                       $00000E;
 	SGAnchorTop =                        $00000F;
 	SGAnchorBottom =                     $000010;
 	
+	//Типы проэкции для SaGeRender
 	SG_3D =                              $000011;
 	SG_3D_ORTHO =                        $000012;
+	
+	//Это для SaGeScreen
 	SG_VERTEX_FOR_CHILDREN =             $000013;
 	SG_VERTEX_FOR_PARENT =               $000014;
 	
+	//Это для SaGeScreen
 	SG_LEFT =                            $000015;
 	SG_TOP =                             $000016;
 	SG_HEIGHT =                          $000017;
@@ -107,6 +115,7 @@ const
 	SG_RIGHT =                           $000019;
 	SG_BOTTOM =                          $00001A;
 	
+	//Это для SaGeMath
 	SG_VARIABLE =                        $00001B;
 	SG_CONST =                           $00001C;
 	SG_OPERATOR =                        $00001D;
@@ -119,12 +128,15 @@ const
 	SG_NOTHINK = SG_NONE;
 	SG_FUNCTION =                        $000023;
 	
+	//Это для SaGeMath
 	SG_ERROR =                           $000024;
 	SG_WARNING =                         $000025;
 	SG_NOTE =                            $000026;
 	
+	//Тип проэкции для SaGeRender
 	SG_2D =                              $000027;
 	
+	//Это для SaGeShaders
 	SG_GLSL_3_0 =                        $000028;
 	SG_GLSL_ARB =                        $000029;
 const
@@ -152,8 +164,12 @@ const
 	SGTexturesDirectory = SGTextureDirectory;
 	SGFontsDirectory = SGFontDirectory;
 var
+	//Если эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
+	//и самого файлика лога SGLog.Create не создаст
 	SGLogEnable:Boolean = True;
 type
+	//Это для приведения приведения типов к общему виду относительно х32 и х64
+	//Так как Pointer на х32 занимает 4 байта, а на х64 - 8 байтов
 	TSGEnumPointer = 
 		{$IFDEF CPU64}
 			QWord;
@@ -167,78 +183,87 @@ type
 				{$ENDIF}
 			{$ENDIF}
 	TSGMaxEnum = TSGEnumPointer;
-	Float = Single;
-	Double = Real;
 	
-	SGUint = type LongWord;
-	PSGUInt = ^ SGUint;
-	SGInt = Int64;
-	TSGHandle = type LongInt;
+	//Типы C++
+	Float  = type Single;
+	Double = type Real;
+	Int    = type LongInt;
+	
+	//SaGe Unsigned Integer
+	SGUint       = type LongWord;
+	//Pointer for SaGe Unsigned Integer
+	PSGUInt      = ^ SGUint;
+	SGInt        = Int64;
+	TSGHandle    = type LongInt;
 	TSGLibHandle = type TSGHandle;
-	TSGLibrary = TSGLibHandle;
-	FileOfByte = type File Of Byte;
-	PFileOfByte = ^ FileOfByte;
+	TSGLibrary   = TSGLibHandle;
+	FileOfByte   = type File Of Byte;
+	PFileOfByte  = ^ FileOfByte;
 	
-	TSGIdentifier = LongWord;
+	TSGIdentifier = type LongWord;
 	
-	PReal=^real;
-	Int = type LongInt;
-	TSGByte = type Int64;
-	SGByte = TSGByte;
-	SGSetOfByte = type packed set of byte;
-	TArBoolean = type packed array of boolean;
-	TArString = type packed array of string;
-	TArLongint = type packed array of longint;
+	PReal     = ^ real;
+	TSGExByte = type Int64;
+	
+	TSGSetOfByte = type packed set  of byte;
+	TArBoolean  = type packed array of boolean;
+	TArString   = type packed array of string;
+	TArLongint  = type packed array of longint;
 	TArLongword = type packed array of longword;
-	TArByte = type packed array of byte;
-	TArInteger = type packed array of integer;
-	TArWord = type packed array of word;
-	TArInt64 = type packed array of int64;
-	TArReal = type packed array of real;
+	TArByte     = type packed array of byte;
+	TArInteger  = type packed array of integer;
+	TArWord     = type packed array of word;
+	TArInt64    = type packed array of int64;
+	TArReal     = type packed array of real;
 	TArExtended = type packed array of extended;
-	
-	PTArLongint = ^ TArLongint;
-	PTArLongword = ^ TArLongword;
-	PTArByte = ^ TArByte;
-	PTArInteger = ^ TArInteger;
-	PTArWord = ^ TArWord;
-	PTArInt64 = ^ TArInt64;
-	
 	TArTArLongWord = type packed array of TArLongWord;
 	
-	PChar=^Char;
-	SGPChar = PChar;
+	PTArLongint  = ^ TArLongint;
+	PTArLongword = ^ TArLongword;
+	PTArByte     = ^ TArByte;
+	PTArInteger  = ^ TArInteger;
+	PTArWord     = ^ TArWord;
+	PTArInt64    = ^ TArInt64;
+	
+	//Строки C++
+	PChar    = ^ Char;
+	SGPChar  = PChar;
 	TArPChar = type packed array of PChar;
-	TArChar = type packed array of Char;
+	TArChar  = type packed array of Char;
 	
-	PText=^TextFile;
-	Text=TextFile;
-	PTextFile=^TextFile;
+	//Файлики
+	PText     = ^ TextFile;
+	Text      = TextFile;
+	PTextFile = ^ TextFile;
 	
+	//Это для SaGeScreen
 	TSGCaption =  string;
 	SGCaption = TSGCaption;
 	
-	SGProcedure = type TProcedure;
+	SGProcedure  = type TProcedure;
+	TSGProcedure = type SGProcedure;
 	
-	SGFrameButtonsType = type TSGByte;
-	
-	TSGProcedure = TProcedure;
+	SGFrameButtonsType = type TSGExByte;
 type
+	//Тип плоскости. Так как он не может Draw(), то он описан сдесь, а не в SaGeCommon
+	//Указательна обьект плоскости
 	PTSGPlane = ^ TSGPlane;
-	TSGPlane=object
-		a,b,c,d:real;
+	TSGPlane  = object
+		a, b, c, d : TSGReal;
 		procedure Import(const a1:real = 0; const b1:real = 0; const c1:real = 0; const d1:real = 0);inline;
 		procedure Write;inline;
 		end;
 	PSGPlane = PTSGPlane;
-	SGPlane = TSGPlane;
+	SGPlane  = TSGPlane;
 type
-	ArLong01=packed array [0..1] of LongWord;
-	PArLong01 = ^ArLong01;
+	ArLong01          = packed array [0..1] of LongWord;
+	PArLong01         = ^ ArLong01;
 	SGObjectProcedure = ArLong01;
 	
-	TSGBoolean = type TSGByte;
+	//Расширение TSGBoolean. Тут есть SG_TRUE, SG_FALSE и SG_UNKNOWN
+	TSGExBoolean = type TSGByte;
 	
+	//Класс, который позволяет загружать динамические библиотеки
 	TSGLibraryClass=class
 			public
 		constructor Create;
@@ -254,8 +279,9 @@ type
 	
 	TSGArTObject = type packed array of TObject;
 	
-	TSGObject=class(TObject);
+	TSGObject = class(TObject);
 	
+	//Начальный класс SaGe
 	TSGClass=class;
 	TSGClassClass = class of TSGClass;
 	TSGClassOfClass = TSGClassClass;
@@ -267,10 +293,15 @@ type
 		function Get(const What:string):Pointer;virtual;abstract;
 		end;
 	
+	//Это для того, чтобы можно было использовать в других модулях Streams,
+	//Не подключая там Classes
 	TMemoryStream = Classes.TMemoryStream;
+	TStream       = Classes.TStream;
+	TFileStream   = Classes.TFileStream;
 	
+	//Класс даты и времени
 	TArFrom1To8OfLongInt = array[1..8] of LongInt;
-	PArFrom1To8OfLongInt = ^TArFrom1To8OfLongInt;
+	PArFrom1To8OfLongInt = ^ TArFrom1To8OfLongInt;
 	TSGDateTime=object
 		Years,Month,Day,Week:LongInt;
 		Hours,Minutes,Seconds,Sec100:LongInt;
@@ -286,7 +317,8 @@ type
 		end;
 	TSGDataTime=TSGDateTime;
 	
-	TSGThreadProcedure = procedure ( p : pointer );
+	//Это для потоков
+	TSGThreadProcedure     = procedure ( p : Pointer );
 	TSGThreadFunctionResult = 
 	{$IFDEF MSWINDOWS}
 		LongWord;
@@ -301,6 +333,7 @@ type
 			{$ENDIF}
 		{$ENDIF}
 	TSGThreadFunction = function ( p:pointer ) : TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
+	//Это класс, при помощью которого можно создать поток
 	TSGThread=class(TSGObject)
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
@@ -321,11 +354,12 @@ type
 	ArTSGThread = type packed array of TSGThread;
 	TArTSGThread = ArTSGThread; 
 const
-	SGSetExists:TSGByte = 100;
-	SGSetNote:TSGByte = 101;
-	SGSetExistsNext:TSGByte = 102;
-	SGSetExistsAndExistsNext:TSGByte = 103;
+	SGSetExists               : TSGExByte = 100;
+	SGSetNote                 : TSGExByte = 101;
+	SGSetExistsNext           : TSGExByte = 102;
+	SGSetExistsAndExistsNext  : TSGExByte = 103;
 type
+	//Множество строк
 	TSGSetOfString=class
 			public
 		constructor Create;
@@ -334,11 +368,12 @@ type
 		FArray:packed array of string;
 			public
 		procedure AddItem(const FItem:string);inline;
-		function HaveItem(const FItem:String):Boolean;overload;inline;
-		function ExistsItem(const FItem:String):TSGByte;overload;
+		function  HaveItem(const FItem:String):Boolean;overload;inline;
+		function  ExistsItem(const FItem:String):TSGExByte;overload;
 		procedure KillItem(const FItem:string);
 		end;
-	TSGLog=class(TObject)
+	//Лог программы
+	TSGLog = class(TObject)
 			public
 		constructor Create;
 		destructor Destroy;override;
@@ -347,126 +382,274 @@ type
 			private
 		FFileStream:TFileStream;
 		end;
-	TSGConsoleRecord=packed record
-			FTittle:string;
-			FProcedure:TSGProcedure;
+	TSGConsoleRecord = packed record
+			FTittle : string;
+			FProcedure : TSGProcedure;
 			end;
-	TSGConsoleMenuArray=packed array of TSGConsoleRecord;
+	TSGConsoleMenuArray = packed array of TSGConsoleRecord;
 const 
-	SG_TRUE = TSGBoolean(1);
-	SG_FALSE = TSGBoolean(0);
-	SG_UNKNOWN = TSGBoolean(2);
+	//Значения, которые может принимать type TSGExBoolean
+	SG_TRUE = TSGExBoolean(1);
+	SG_FALSE = TSGExBoolean(0);
+	SG_UNKNOWN = TSGExBoolean(2);
 
 var
+	//Используется для вычисления с Эпсилон 
 	SGZero:extended = 0.00001;
+	//Экземпляр класса лога программы
 	SGLog:TSGLog = nil;
+	//Несуществующее значение
 	Nan:real;
+	//Бесконечное значение
 	Inf:real;
 type
-	SGCLProcedureWC =  procedure ( Context:Pointer) ;
+	//Тип процедурок для SaGeScreen
+	SGScreenProcedureWC =  procedure ( Context : Pointer ) ;
 var
-	SGCLPaintProcedure : SGCLProcedureWC = nil;
-	SGCLForReSizeScreenProcedure : SGCLProcedureWC = nil;
-	SGCLLoadProcedure : SGCLProcedureWC = nil;
+	//Это указатели на процедуры SaGeScreen, которые SaGeScreen
+	//Присваивает при инициализации. Эти процедуры в дальнейшем 
+	//Использует SaGeContext и SaGeRender для отрисовки,... окон
+	SGScreenPaintProcedure           : SGScreenProcedureWC = nil;
+	SGScreenForReSizeScreenProcedure : SGScreenProcedureWC = nil;
+	SGScreenLoadProcedure            : SGScreenProcedureWC = nil;
+
+//Тут задаются преведущие переменные
+procedure SGSetScreenProcedure(const p:Pointer = nil);
+procedure SCSetScreenScreenBounds(const p:Pointer = nil);
+procedure SGSetScreenLoadProcedure(p:Pointer);
+
+//Сливает массивы Real-ов
 operator + (a,b:TArReal):TArReal;inline;
+
+//Вычитает одну дату их другой. Из результата можно
+//Вызвать функцию, возвращающую прошедшые (мили)секунды
+//И получить разницу во времени этих дат в (мили)секундах
+operator - (a,b:TSGDateTime):TSGDateTime;inline;
+
+//Загружает библиотеку с именем AName
 function LoadLibrary(AName: PChar): TSGLibHandle;
+
+//Возвращает указатель на процедуру в библиотеке Lib с названием VPChar
 function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
-function SGTruncUp(const t:real):LongInt;inline;
-operator -(a,b:TSGDateTime):TSGDateTime;inline;
+
+//Result := Trunc(T)+1
+function SGTruncUp(const T : Real):LongInt;inline;
+
+//Из потока считывается сткока, пока не будет найден нулевой байт
 function SGReadStringFromStream(const Stream:TStream):String;inline;
+
+//Записывает строку в поток. Если (Stavit00 = True), то в конце записывается нулевой байт.
 procedure SGWriteStringToStream(const String1:String;const Stream:TStream;const Stavit00:Boolean = True);inline;
+
+//Читает изтекстовова файла строку, находящиюся в двойных кавычках
 function SGReadStringInQuotesFromTextFile(const TextFile:PText):String;
+
+//Читает слово из файла. (В слове нету пробелов)
 function SGReadWordFromTextFile(const TextFile:PTextFile):String;
+
+//Обращает строку в верхний регистр
 function SGUpCaseString(const S:String):String;
+
+//Добавляет в конце строки нулевой байт, и возвращает указатель на строку
 function SGStringAsPChar(var Str:String):PChar;
+
+//Если ( Bool = True ), то Result := Строка, нежели Result := ''.
 function SGPCharIf(const Bool:Boolean;const VPChar:PChar):PChar;
+function SGStringIf(const B:Boolean;const s:string):string;inline;
+
+//Возвращает имена всех файлов в этом каталоге
 function SGGetFileNames(const Catalog:String;const What:String = ''):TArString;
+
+//Возвращает указатель на нулевой байт
 function SGPCharNil:PChar;inline;
+
+//Переводит LongInt в String
 function SGStr(const Number : LongInt = 0):String;inline;overload;
+
+//Переводит секунды в строку, где они будут уже распределены на года, месяца и т д
 function SGSecondsToStringTime(VSeconds:Int64):string;inline;
+
+//Это функции для отладки WinAPI функций, связанных с символами, получиными в SaGeContextWinAPI как коды клавиш
 function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;inline;
 function SGGetLanguage:String;inline;
 function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
 function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
+
+//Вычисление максимального или минимального значения из заданых
 function SGMax(const a,b:single):single;inline;overload;
 function SGMax(const a,b:real):real;inline;overload;
 function SGMax(const a,b:extended):extended;inline;overload;
+function SGMax(const a,b:Int64):Int64;inline;overload;
 function SGMin(const a,b:single):single;inline;overload;
 function SGMin(const a,b:real):real;inline;overload;
 function SGMin(const a,b:extended):extended;inline;overload;
+function SGMin(const a,b:LongInt):LongInt;overload;inline;
+function SGMin(const a,b:LongWord):LongWord;overload;inline;
+function SGMin(const a,b:Int64):Int64;overload;inline;
+function SGMin(const a,b:QWord):QWord;overload;inline;
+
+//Возвращает расширение файла в верхнем регистре
 function SGGetFileExpansion(const FileName:string):string;inline;
+
+//Проверяет, не образована ли строка AString как Part + [хз]
 function SGExistsFirstPartString(const AString:String;const Part:String):Boolean;
+
+//Читает строку из потока, находящиюся между символами Quote
 function SGReadStringInQuotesFromStream(Const Stream:TStream;const Quote:char = #39):string;inline;
+
+//Загружает часть потока в другой поток
 procedure SGLoadLoadPartStreamToStream(const StreamIn,StreamOut:TStream; const Size:Int64);overload;inline;
+
+//Загружает часть потока в другой поток. Оптимизировано под TMemoryStream
 procedure SGLoadLoadPartStreamToStream(const StreamIn:TStream;StreamOut:TMemoryStream; const Size:Int64);overload;inline;
+
+//Вычисления логорифма
 function Log(const a,b:real):real;inline;
+
+//Возвращает длинну строки
 function SGPCharLength(const pc:PChar):int64;inline;
+
+//Перевод Boolean в String
 function SGStr(const b:boolean):String;overload;inline;
+
+//Возвращает строку, гду красивенько написан размер файла, занимающего Size байт
 function SGGetSizeString(const Size:Int64):String;inline;
+
+//Переводит действительное число в строку, оставив после запятой l цифр
 function SGStrReal(r:real;const l:longint):string;
-function SGMax(const a,b:Int64):Int64;inline;overload;
+function SGStrExtended(r:Extended;const l:longint):string;inline;
+function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
+
+//перевод строки в строку С++. При этом выбеляется память (Length(s)+1) под указатель на строк С++.
 function SGStringToPChar(const s:string):PCHAR;
+
+//Проверяет наличие файла на диске
 function SGFileExists(const FileName:string = ''):boolean;
+
+//Это для SGConsoleMenu
 operator + (const a,b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
 operator + (const a:TSGConsoleMenuArray;b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
+
+//Псевдографическое меню в консоли.
 procedure SGConsoleMenu(const Ar:TSGConsoleMenuArray;
 	const VBackGround:LongWord = 0;
 	const VText:LongWord = 15;
 	const VActiveBackGround:LongWord = 0;
 	const VActiveText:LongWord = 10;
 	const Koima:Boolean = True);
+
+//Перевод строки C++ в строку
 function SGPCharToString(const VChar:PChar):string;inline;
-function SGMin(const a,b:LongInt):LongInt;overload;inline;
-function SGMin(const a,b:LongWord):LongWord;overload;inline;
-function SGMin(const a,b:Int64):Int64;overload;inline;
-function SGMin(const a,b:QWord):QWord;overload;inline;
-function SGStrExtended(r:Extended;const l:longint):string;inline;
+
+//Переводит строку в число
 function SGVal(const Text:string = '0'):Int64;inline;overload;
-function SGStringIf(const B:Boolean;const s:string):string;inline;
+
+//Возвращаето часть строки, находящуюся между [a..b] включительно
 function SGStringGetPart(const S:string;const a,b:LongWord):String;
+
+//Самая быстрая сортировка
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
+
+//Переводит тип (array of const) в строку
+//(array of const) можно задавать как ['dsdas',123,'a',#34,123.5].
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
+
+//Возвращает краткое имя файла, из полного имени файла
 function SGGetFileName(const WayName:string):string;
-procedure SGReleaseFileWay(WAy:string);
+
+//Реализует путь Way
+procedure SGReleazeFileWay(WAy:string);
+
+//Возвращает путь к файлу из полного имени файла
 function SGGetFileWay(const Way:String):String;
+
+//Создает папку. 
 function SGMakeDirectory(const DirWay:String):Boolean;inline;
+
+//Поисковик вхождения строк во все файлы, находящаиси в этом и вложеных катологах, и не только
 procedure FindInPas(const Cmd:Boolean = False);
+
+//Вычисление матриц
 function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
 function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
+
+//Добавляет к строке С++ символ в конец строки
 function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
 
+//Проверяет эквивалентность строк С++
 function SGPCharsEqual(const PChar1,PChar2:PChar):Boolean;inline;
+
+//Возвращает индекс последнего элемента строки
 function SGPCharHigh(const VPChar:PChar):LongInt;inline;
+
+//Возвращает длинну строки
 function SGPCharLength(const VPChar:PChar):LongWord;inline;
+
+//Урезает строку С++ на Number символов с конца
 function SGPCharDecFromEnd(var VPChar:PChar; const Number:LongWord = 1):PChar;
+
+//Возвращает строку С++ в верхнем регистре
 function SGPCharUpCase(const VPChar:PChar):PChar;inline;
-function SGPCharRead:PChar;inline;
+
+//Чистает строку С++ с клавиатуры
+function SGPCharRead():PChar;inline;
+
+//Читает один символ с клавиатуры
 function SGCharRead:Char;inline;
+
+//Удаляет все пробелы в строке С++
 function SGPCharDeleteSpaces(const VPChar:PCHAR):PChar;inline;
+
+//Возвращает конкютинацию строк С++
 function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
 
+//Проверяет, не находятся ли значения параметров функции в одной Эпсилон окресности какой-то точки
 function SGRealsEqual(const r1,r2:real):Boolean;inline;
+
+//Проверяет, не является ли параметр функции больше любого наперед заданного числа
 function SGRealExists(const r:real):Boolean;inline;
+
+//Быстро поменять местами параметры процедуры
 procedure SGQuickRePlaceReals(var Real1,Real2:Real);inline;
-function SGRandomMinus():Int;inline;
-function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
+
+//Случайно возвращает либо (-1) либо (1)
+function SGRandomMinus():Int;inline;
+
+//Возвращает обьект плоскости, полученый вт результате приобразования трех точек
+function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
+
+//Возвращает часть строки С++, находящуюся между позициями включительно
 function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
+
+//Возвразает количество цифр в числе
 function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
+
+//Возвращает свободное имя файла. 
+//Catalog - это полный путь папки, где он будет его искать.
+//Sl - это то, что он будлет каждый раз прибавлять в конец имени файла в скобойкой и с нумерацией
 function SGGetFreeFileName(const Name:string;const sl:string = 'Copy'):string;inline;
+
+//Возвращает имя файла без его расширения
 function SGGetFileNameWithoutExpansion(const FileName:string):string;inline;
-function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
-function SGReadLnString:String;
-function SGReadLnByte:Byte;
+
+//Читает строку из консольки
+function SGReadLnString():String;
+
+//Читает один байт из консольки
+function SGReadLnByte():Byte;
+
+//Аналог SGGetFreeFileName, только для каталогов (папок)
 function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):string;inline;
 
-procedure SGSetCLProcedure(const p:Pointer = nil);
-procedure SCSetCLScreenBounds(const p:Pointer = nil);
-procedure SGSetCLLoadProcedure(p:Pointer);
-
+//Если в начале строки стоит '-' то функция возвращает строку без '-' в начале, ежели возвращает ''
 function SGGetComand(const comand:string):string;inline;
+
+//Проверяет, существует ли директория(каталог,папка)
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
+
+//Возвращает директорию, в которой запужена программа
 function SGGetCurrentDirectory():string;inline;
 
 //Это тупая и очень тупая процедура, сделал ее специально для андроида.
@@ -602,20 +785,20 @@ else
 	Result:=Comand;
 end;
 
-procedure SGSetCLLoadProcedure(p:Pointer);
+procedure SGSetScreenLoadProcedure(p:Pointer);
 begin
-SGCLLoadProcedure:=SGCLProcedureWC(p);
+SGScreenLoadProcedure:=SGScreenProcedureWC(p);
 end;
 
 
-procedure SGSetCLProcedure(const p:Pointer = nil);
+procedure SGSetScreenProcedure(const p:Pointer = nil);
 begin
-SGCLPaintProcedure:=SGCLProcedureWC(p);
+SGScreenPaintProcedure:=SGScreenProcedureWC(p);
 end;
 
-procedure SCSetCLScreenBounds(const p:Pointer = nil);
+procedure SCSetScreenScreenBounds(const p:Pointer = nil);
 begin
-SGCLForReSizeScreenProcedure:=SGCLProcedureWC(p);
+SGScreenForReSizeScreenProcedure:=SGScreenProcedureWC(p);
 end;
 
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;
@@ -1240,7 +1423,7 @@ else
 	end;
 end;
 
-procedure SGReleaseFileWay(WAy:string);
+procedure SGReleazeFileWay(WAy:string);
 var
 	ArF:packed array of string = nil;
 	i:LongWord = 0;
@@ -1837,7 +2020,7 @@ SetLength(FArray,Length(FArray)+1);
 FArray[High(FArray)]:=FItem;
 end;
 
-function TSGSetOfString.ExistsItem(const FItem:String):TSGByte;overload;
+function TSGSetOfString.ExistsItem(const FItem:String):TSGExByte;overload;
 var
 	i:LongInt;
 begin

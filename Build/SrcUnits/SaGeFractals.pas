@@ -68,20 +68,20 @@ type
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
-		FMesh:TSGModel;
-		FMeshesInfo:packed array of TSGBoolean;
-		FMeshesReady:Boolean;
-		FShift:int64;
+		FMesh        : TSGModel;
+		FMeshesInfo  : packed array of TSGExBoolean;
+		FMeshesReady : Boolean;
+		FShift       : int64;
 		
-		FSun:TSGVertex;
-		FSunAbs:real;
-		FSunTrigonometry:packed array[0..2] of real;
-		FLightingEnable:Boolean;
-		FCamera:TSGCamera;
+		FSun              : TSGVertex;
+		FSunAbs           : real;
+		FSunTrigonometry  : packed array[0..2] of real;
+		FLightingEnable   : Boolean;
+		FCamera           : TSGCamera;
 		
-		FEnableVBO:Boolean;
-		FEnableColors:boolean;
-		FEnableNormals:Boolean;
+		FEnableVBO      :Boolean;
+		FEnableColors   :boolean;
+		FEnableNormals  :Boolean;
 		
 			public
 		procedure Draw();override;
@@ -97,9 +97,9 @@ type
 		FSizeLabel:TSGLabel;
 		FSizeLabelFlag:Boolean;
 			public
-		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
-		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
-		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
 		end;
 	TSGFractal3D=TSG3DFractal;
 	
@@ -188,7 +188,7 @@ with TSG3DFractal(VComboBox.FUserPointer1) do
 	end;
 end;
 
-procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
 begin
 FSizeLabel:=TSGLabel.Create;
 SGScreen.CreateChild(FSizeLabel);
@@ -200,7 +200,7 @@ SGScreen.LastChild.Visible:=True;
 FSizeLabel.FTextPosition:=0;
 end;
 
-procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
 begin
 FEffectsComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FEffectsComboBox);
@@ -217,7 +217,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 end;
 
-procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:SGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
 begin
 if FProjectionComboBox<>nil then
 	Exit;

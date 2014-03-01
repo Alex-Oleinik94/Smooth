@@ -319,8 +319,8 @@ end;
 
 procedure TSGContext.Resize();
 begin
-if SGCLForReSizeScreenProcedure<>nil then
-	SGCLForReSizeScreenProcedure(Self);
+if SGScreenForReSizeScreenProcedure<>nil then
+	SGScreenForReSizeScreenProcedure(Self);
 end;
 
 function TSGContext.GetWidth():LongWord;

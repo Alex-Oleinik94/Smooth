@@ -1,14 +1,16 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeLoading;
 interface
 uses
 	SaGeBase
+	,SaGeBased
 	,SaGeRender
 	,SaGeContext
 	,SaGeCommon
 	,SaGeUtils
 	;
 type
+	//Класс загрузки.
 	TSGLoading=class(TSGDrawClass)
 			public
 		constructor Create(const VContext:TSGContext);override;
@@ -16,30 +18,41 @@ type
 		class function ClassName():string;override;
 		procedure Draw();override;
 			private
-		FProjectionAngle:Single;            //Угол поворота центра
-		FProjectionAngleShift:Single;       //Скорость узманения угла поворота центра
-		FAngle:Single;                      //Начальный угол поворота
-		FAngleShift:Single;                 //Срорость кручения
-		FProgress:Single;                   //[0..1]
-		FCountLines:LongWord;               //Количество разделений экранчика
-		FFont:TSGFont;                      //Шрифт для надписи процентов
-		FArrayOfLines:packed array of       //Массив дорожкок
+		FProjectionAngle:TSGSingle;            //Угол поворота центра
+		FProjectionAngleShift:TSGSingle;       //Скорость узманения угла поворота центра
+		FAngle:TSGSingle;                      //Начальный угол поворота
+		FAngleShift:TSGSingle;                 //Срорость кручения
+		FProgress:TSGSingle;                   //[0..1]
+		FCountLines:TSGLongWord;               //Количество разделений экранчика
+		FFont:TSGFont;                         //Шрифт для надписи процентов
+		FArrayOfLines:packed array of          //Массив дорожкок
 			packed record
-			FLengths:packed array of Single;//Длины кусочков дорожкок экрана
-			FSpeed:Single;                  //Скорость убывания в середину экрана
-			FWidth:Single;                  //Ширина дорожки в градусах
-			end;
-		procedure CallAction();             //Тут обрабатываются дорожки, их кусочки и ширины
+			FLengths:packed array of TSGSingle;//Длины кусочков дорожкок экрана
+			FSpeed:TSGSingle;                  //Скорость убывания в середину экрана
+			FWidth:TSGSingle;                  //Ширина дорожки в градусах
+		    end;
+		FProgressIsSet:Boolean;                //Если пользователь не устанавливал не разу прогресс, то
+		                                       //Запускатеся режим, где просто показывается работа этой программы,
+		                                       //Если установил, то отображается прогресс пользователя
+		procedure CallAction();                //Тут обрабатываются дорожки, их кусочки и ширины
+		procedure SetProgress(const NewProgress:TSGSingle);
 			public
-		property Progress:Single read FProgress write FProgress;
+		property Progress:TSGSingle read FProgress write SetProgress;
 		end;
 
 implementation
 
+procedure TSGLoading.SetProgress(const NewProgress:TSGSingle);
+begin
+if not FProgressIsSet then
+	FProgressIsSet:=True;
+FProgress:=NewProgress;
+end;
+
 procedure TSGLoading.CallAction();
 var
-	i,ii,iii:Word;
-	iiii:Single;
+	i,ii,iii :    TSGWord;
+	iiii :        TSGSingle;
 begin
 for i:=0 to FCountLines-1 do
 	begin
@@ -90,11 +103,11 @@ end;
 
 constructor TSGLoading.Create(const VContext:TSGContext);
 var
-	i:LongWord;
+	i :    TSGLongWord;
 begin
 inherited Create(VContext);
 FProgress:=0;
-FCountLines:=15;
+FCountLines:=18;
 if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
@@ -111,12 +124,13 @@ for i:=0 to FCountLines-1 do
 FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
 FFont.SetContext(Context);
 FFont.Loading();
+FProgressIsSet:=False;
 end;
 
 
 destructor TSGLoading.Destroy();
 var
-	i,ii:Word;
+	i,ii : TSGWord;
 begin
 if FArrayOfLines<>nil then
 	begin
@@ -130,12 +144,14 @@ end;
 
 procedure TSGLoading.Draw();
 var
-	i,ii:Word;
-	iii:Single;
+	i,ii : TSGWord;
+	iii  : TSGSingle;
+
 function DrawFirst():Boolean;
 begin
 Result:=FArrayOfLines[i].FLengths[0]>6;
 end;
+
 var
 	FCOlor:TSGColor4f;
 begin
@@ -178,7 +194,8 @@ for i:=0 to FCountLines-1 do
 	end;
 FAngle+=FAngleShift*Context.ElapsedTime;
 FProjectionAngle+=FProjectionAngleShift*Context.ElapsedTime;
-(*FAKE, NEED TO ERASE*)FProgress+=0.001; if FProgress>1 then FProgress:=0;
+if not FProgressIsSet then
+	FProgress+=0.001; if FProgress>1 then FProgress:=0;
 end;
 
 class function TSGLoading.ClassName():string;

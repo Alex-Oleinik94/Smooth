@@ -1,4 +1,4 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeImages;
 interface
 uses 
@@ -44,7 +44,7 @@ type
 		procedure LoadJPEGToBitMap;
 		procedure LoadMBMToBitMap(const Position:LongWord = 20);
 		procedure LoadPNGToBitMap;
-		procedure Saveing(const Format:SGByte = SGI_PNG);
+		procedure Saveing(const Format:TSGExByte = SGI_PNG);
 			public
 		procedure LoadToMemory;virtual;
 		function LoadToBitMap:Boolean;virtual;
@@ -85,13 +85,13 @@ type
 		property ReadyGoToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
 			public //Render Functions:
-		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
-		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
+		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 		procedure ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
 		procedure ImportFromDispley(const NeedAlpha:Boolean = True);
 		class function UnProjectShift:TSGPoint2f;
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
-		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
+		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);inline;
 		end;
 	SGImage=TSGImage;
 	ArTSGImage = type packed array of TSGImage;
@@ -111,12 +111,12 @@ implementation
 (****************************)
 
 
-procedure TSGImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+procedure TSGImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 begin
 DrawImageFromTwoVertex2f(SGPoint2fToVertex2f(Vertex1),SGPoint2fToVertex2f(Vertex2),RePlace,RePlaceY,Rotation);
 end;
 
-procedure TSGImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:SGByte = SG_3D;const Rotation:Byte = 0);
+procedure TSGImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 procedure DoTexCoord(const NowRotation:Byte);inline;
 begin
 case (NowRotation mod 4) of
@@ -159,7 +159,7 @@ DrawImageFromTwoVertex2f(
 	RePlace,SG_2D);
 end;
 
-procedure TSGImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:SGByte = SG_3D);inline;
+procedure TSGImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);inline;
 begin
 if Vertex1.x>Vertex2.x then
 	SGQuickRePlaceVertexType(Vertex1.x,Vertex2.x);
@@ -417,7 +417,7 @@ except
 	end;
 end;
 
-procedure TSGImage.Saveing(const Format:SGByte = SGI_PNG);
+procedure TSGImage.Saveing(const Format:TSGExByte = SGI_PNG);
 var
 	Stream:TMemoryStream = nil;
 	BmpStream:TMemoryStream = nil;

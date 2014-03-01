@@ -17,39 +17,38 @@ uses
 	;
 
 type
-	TSGAnchors = type TSGByte;
+	TSGAnchors = type TSGExByte;
 const
-	SGAnchRight :TSGAnchors =  $11;
-	SGAnchLeft :TSGAnchors =   $12;
-	SGAnchTop :TSGAnchors =    $13;
+	SGAnchRight  : TSGAnchors =  $11;
+	SGAnchLeft   : TSGAnchors =   $12;
+	SGAnchTop    : TSGAnchors =    $13;
 	SGAnchBottom :TSGAnchors = $14;
 	
-	SGS_LEFT = 1;
+	SGS_LEFT   = 1;
 	SGS_BOTTOM = 2;
-	SGS_RIGHT = 3;
-	SGS_TOP = 4;
+	SGS_RIGHT  = 3;
+	SGS_TOP    = 4;
 type
-	TSGForm=class;
+	TSGForm             = class;
+	TSGButton           = class;
+	TSGEdit             = class;
+	TSGLabel            = class;
+	TSGProgressBar      = class;
+	TSGPanel            = class;
+	TSGPicture          = class;
+	TSGButtonMenu       = class;
+	TSGScrollBar        = class;
+	TSGComboBox         = class;
+	TSGGrid             = class;
+	TSGButtonMenuButton = class;
 	
-	TSGButton=class;
-	TSGEdit=class;
-	TSGLabel=class;
-	TSGProgressBar=class;
-	TSGPanel=class;
-	TSGPicture=class;
-	TSGButtonMenu=class;
-	TSGScrollBar = class;
-	TSGComboBox = class;
-	TSGGrid=class;
-	TSGButtonMenuButton=class;
-	
-	TSGComponent = class;
-	PTSGComponent = ^ TSGComponent;
-	TSGArTSGComponent =type packed array of TSGComponent;
-	TArTSGComponent = TSGArTSGComponent;
-	TArTArTSGComponent = type packed array of TArTSGComponent;
+	TSGComponent          = class;
+	PTSGComponent         = ^ TSGComponent;
+	TSGArTSGComponent     = type packed array of TSGComponent;
+	TArTSGComponent       = TSGArTSGComponent;
+	TArTArTSGComponent    = type packed array of TArTSGComponent;
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
-	TSGComponent=class(TSGContextObject)
+	TSGComponent = class(TSGContextObject)
 			public
 		constructor Create;
 		destructor Destroy;override;
@@ -113,8 +112,8 @@ type
 		procedure AddToHeight(const Value:LongInt);
 		procedure AddToTop(const Value:LongInt);
 			public
-		FAlign:SGByte;
-		FAnchors:SGSetOfByte;
+		FAlign:TSGExByte;
+		FAnchors:TSGSetOfByte;
 		FAnchorsData:packed record
 			FParentWidth,FParentHeight:LongWord;
 			end;
@@ -143,7 +142,7 @@ type
 		property Font: TSGFont read FFont write FFont;
 		property Visible : Boolean read FVisible write SetVisible;
 		property Active : Boolean read FActive write FActive default False;
-		property Anchors : SGSetOfByte read FAnchors write FAnchors;
+		property Anchors : TSGSetOfByte read FAnchors write FAnchors;
 		function NotVisible:boolean;virtual;
 			public
 		FChildren:TSGArTSGComponent;
@@ -156,7 +155,7 @@ type
 		procedure MakePriority();
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
-		function GetVertex(const THAT:SGSetOfByte;const FOR_THAT:SGByte):SGPoint;inline;
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;inline;
 		function BottomShift:LongInt;
 		function RightShift:LongInt;
 			public
@@ -167,14 +166,14 @@ type
 		property Children[Index : Int ]:TSGComponent read GetChild;
 		procedure CreateChild(const Child:TSGComponent);
 		function LastChild():TSGComponent;
-		procedure CreateAlign(const NewAllign:SGByte);
+		procedure CreateAlign(const NewAllign:TSGExByte);
 		function CursorPosition():TSGPoint;
 		procedure DestroyAlign();
 		procedure DestroyParent;
 		procedure KillChildren;inline;
 		procedure VisibleAll;
 			public
-		property Align : SGByte read FAlign write CreateAlign;
+		property Align : TSGExByte read FAlign write CreateAlign;
 			public
 		function AsButton:TSGButton;inline;
 		function AsForm:TSGForm;inline;
@@ -300,13 +299,13 @@ type
 		procedure FromDraw;override;
 		end;
 	
-	TSGEditTextType=TSGByte;
+	TSGEditTextType         = TSGExByte;
 	TSGEditTextTypeFunction = function (const s:TSGEdit):boolean;
 const
-	SGEditTypeText = 0;
-	SGEditTypeSingle = 1;
-	SGEditTypeNumber = 2;
-	SGEditTypeUser = 3;
+	SGEditTypeText    = 0;
+	SGEditTypeSingle  = 1;
+	SGEditTypeNumber  = 2;
+	SGEditTypeUser    = 3;
 	SGEditTypeInteger = 4;
 
 function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
@@ -395,13 +394,13 @@ type
 		end;
 	TSGScrollBar=class(TSGComponent)
 			public
-		constructor Create(const NewType:SGByte  = SGScrollBarVertical);
+		constructor Create(const NewType:TSGExByte  = SGScrollBarVertical);
 		destructor Destroy;override;
 			public
 		FScrollMax:Int64;
 		FScrollHigh:Int64;
 		FScrollLow:Int64;
-		FScroolType:SGByte;
+		FScroolType:TSGExByte;
 		FBeginingPosition:Int64;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
 		procedure UpDateScrollBounds;
@@ -487,7 +486,7 @@ type
 var
 	SGScreen:TSGComponent = nil;
 
-procedure SGCLLoad(const Context:TSGCOntext);
+procedure SGScreenLoad(const Context:TSGCOntext);
 
 implementation
 
@@ -1168,7 +1167,7 @@ begin
 Inherited;
 end;
 
-constructor TSGScrollBar.Create(const NewType:SGByte  = SGScrollBarVertical);
+constructor TSGScrollBar.Create(const NewType:TSGExByte  = SGScrollBarVertical);
 begin
 inherited Create;
 FBeginingPosition:=0;
@@ -1989,15 +1988,15 @@ if FParent<>nil then
 	{$ENDIF}
 end;
 
-destructor TSGComponent.Destroy;
+destructor TSGComponent.Destroy();
 begin
 if FDrawClass<>nil then
-	FDrawClass.Destroy;
-DestroyParent;
-inherited Destroy;
+	FDrawClass.Destroy();
+DestroyParent();
+inherited Destroy();
 end;
 
-function TSGComponent.GetVertex(const THAT:SGSetOfByte;const FOR_THAT:SGByte):SGPoint;inline;
+function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;inline;
 begin
 if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	begin
@@ -2326,7 +2325,7 @@ begin
 Result:=Context.CursorPosition(SGNowCursorPosition);
 end;
 
-procedure TSGComponent.CreateAlign(const NewAllign:SGByte);
+procedure TSGComponent.CreateAlign(const NewAllign:TSGExByte);
 begin
 FAlign:=NewAllign;
 end;
@@ -3030,7 +3029,7 @@ FCanHaveChildren:=False;
 FViewImage1:=nil;
 end;
 
-procedure SGCLPaint(const Context:TSGContext);
+procedure SGScreenPaint(const Context:TSGContext);
 var
 	CanRePleace:Boolean = True;
 	i:LongWord;
@@ -3198,7 +3197,7 @@ begin
 inherited Destroy;
 end;
 
-procedure SGCLResizeScreen(const Context:TSGContext);
+procedure SGScreenResizeScreen(const Context:TSGContext);
 begin
 if SGScreen<>nil then
 	begin
@@ -3208,7 +3207,7 @@ if SGScreen<>nil then
 	end;
 end;
 
-procedure SGCLLoad(const Context:TSGContext);
+procedure SGScreenLoad(const Context:TSGContext);
 begin
 if SGScreen<>nil then
 	Exit;
@@ -3233,9 +3232,9 @@ initialization
 begin
 FNewPosition:=0;
 FNewPosition:=0;
-SGSetCLProcedure(@SGCLPaint);
-SGSetCLLoadProcedure(@SGCLLoad);
-SCSetCLScreenBounds(@SGCLResizeScreen);
+SGSetScreenProcedure(@SGScreenPaint);
+SGSetScreenLoadProcedure(@SGScreenLoad);
+SCSetScreenScreenBounds(@SGScreenResizeScreen);
 end;
 
 end.

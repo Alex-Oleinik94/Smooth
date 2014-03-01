@@ -10,22 +10,22 @@ type
 		constructor Create(const VContext:TSGContext);override;
 		//destructor Destroy;override;
 			public
-		FZNumber:TSGComplexNumber;
-		FZDegree:LongInt;
-		FZMand:Boolean;
-		FZQuantityRec:LongInt;
-		FColorScheme:SGByte;
+		FZNumber      : TSGComplexNumber;
+		FZDegree      : LongInt;
+		FZMand        : Boolean;
+		FZQuantityRec : LongInt;
+		FColorScheme  : TSGExByte;
 		
-		FAttitudeForThemeEnable:Boolean;
-		FTheme1,FTheme2:SGByte;
-		FFAttitudeForTheme:Real;
+		FAttitudeForThemeEnable : Boolean;
+		FTheme1,FTheme2         : TSGExByte;
+		FFAttitudeForTheme      : Real;
 		
-		FSmosh:Byte;
+		FSmosh : Byte;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
 		function Rec(Number:TSGComplexNumber):Word;inline;
 		function MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
 			public
-		function GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
+		function GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 		procedure Calculate;override;
 		procedure Draw;override;
@@ -136,7 +136,7 @@ type
 		FNowKadr:QWord;
 		FAllKadrs:QWOrd;
 		
-		FCurveArPoints:packed array of SGByte;
+		FCurveArPoints:packed array of TSGExByte;
 		FCurveSelectPoint:Int64;
 		
 		FCurvePointPanel:TSGPanel;
@@ -1596,7 +1596,7 @@ FColorScheme:=0;
 FSmosh:=1;
 end;
 
-function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:SGByte;const RecNumber:Word):TSGMandaPixel;inline;
+function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
 var
 	Color:Byte;
 

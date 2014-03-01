@@ -184,8 +184,8 @@ SGLog.Sourse('"TSGContextAndroid.InitWindow"');
 Width:=GetScreenResolution().x;
 Width:=GetScreenResolution().y;
 SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-if SGCLLoadProcedure<>nil then
-	SGCLLoadProcedure(Self);
+if SGScreenLoadProcedure<>nil then
+	SGScreenLoadProcedure(Self);
 if FCallInitialize<>nil then
 	FCallInitialize(Self);
 SGLog.Sourse('Leaving "TSGContextAndroid.InitWindow".');
@@ -274,8 +274,8 @@ while FActive and (FNewContextType=nil) do
 			ClearKeys();
 			Messages();
 			
-			if SGCLPaintProcedure<>nil then
-				SGCLPaintProcedure(Self);
+			if SGScreenPaintProcedure<>nil then
+				SGScreenPaintProcedure(Self);
 			SwapBuffers();
 			end
 		else

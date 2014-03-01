@@ -23,14 +23,14 @@ type
 			public
 		constructor Create();override;
 			protected
-		FMatrixMode,FViewMode:TSGByte;
+		FMatrixMode,FViewMode:TSGExByte;
 		FRotateX,FRotateY,FTranslateX,FTranslateY,FZum:TSGSingle;
-		procedure SetViewMode(const NewViewMode:TSGByte);virtual;abstract;
+		procedure SetViewMode(const NewViewMode:TSGExByte);virtual;abstract;
 		procedure Change();inline;
 		procedure InitMatrix();inline;
 			public
-		property MatrixMode:TSGByte read FMatrixMode write FMatrixMode;
-		property ViewMode:TSGByte read FViewMode write SetViewMode;
+		property MatrixMode:TSGExByte read FMatrixMode write FMatrixMode;
+		property ViewMode:TSGExByte read FViewMode write SetViewMode;
 		procedure Clear();inline;
 		procedure CallAction();inline;
 		//procedure InitViewModeComboBox();inline;

@@ -28,7 +28,7 @@ type
 	PSGPixel = PSGPixel3b;
 	TSGPixel3b=object
 		r,g,b:Byte;
-		procedure Import(const r1:SGByte = 0;const g1:SGByte = 0;const b1:SGByte = 0);inline;
+		procedure Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);inline;
 		procedure Write;inline;
 		procedure WriteLn;inline;
 		end;
@@ -115,7 +115,7 @@ Result.Import(
 	SGTruncUp((a.b+b.b)/2));
 end;
 
-procedure TSGPixel3b.Import(const r1:SGByte = 0;const g1:SGByte = 0;const b1:SGByte = 0);inline;
+procedure TSGPixel3b.Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);inline;
 begin
 r:=r1;
 g:=g1;

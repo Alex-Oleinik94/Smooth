@@ -1220,7 +1220,7 @@ var
 	i:LongWord;
 	FSGH:SGTWriteClass = nil;
 begin
-SGReleaseFileWay(FOutWay);
+SGReleazeFileWay(FOutWay);
 
 FSGH:=SGTWriteClass.Create(FOutWay+'SaGeHeader.h');
 FSGH.WriteLn('#ifndef sageheader_included');

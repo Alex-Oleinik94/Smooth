@@ -24,7 +24,7 @@ type
 	TSGWord	    = Word;
 	TSGSingle	= Single;
 	TSGChar		= Char;
-	//TSGBoolean	= Boolean;
+	TSGBoolean	= Boolean;
 
  { encoding }
  procedure Windows1251ToUTF8(var Str: TSGString);
@@ -45,7 +45,7 @@ type
  operator ** (const a, b: TSGByte) 		: TSGByte; 		inline; overload;
  operator ** (const a, b: TSGLongWord) 	: TSGInt64;		inline; overload;
  operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	inline;	overload; 
- operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload; 
+ operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload;
 
  {
  *	Author: 	Sanches
@@ -58,13 +58,15 @@ type
  * 		operator ** [TSGSingle, TSGLongInt To TSGSingle]
  *  ]
  }
- operator ** (const a : TSGReal; 	const b : TSGLongInt) : TSGReal; 	inline; overload;
- operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
- operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
+ operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       inline; overload;
+ operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload; 
+ operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
  
 implementation
 
-uses math;
+uses 
+	Math
+	;
 
 procedure Windows1251ToUTF8(var Str: TSGString);
 const
@@ -557,7 +559,7 @@ end;
 
 procedure OEM866ToWindows1251(var Str: TSGString);  
 const
-  Ap: TSGByte = ($C0 - $80);
+  Ap : TSGByte = ($C0 - $80);
   rya: TSGByte = ($F0 - $E0);
 var
   iFor, xL: TSGInteger;
@@ -711,8 +713,15 @@ begin
   Str := NStr;
 end;
 
-procedure Swap(var x, y : TSGInteger); {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
-{$IFDEF ANDROID}
+procedure Swap(var x, y : TSGInteger); 
+{$IF defined(CPU386) and (not defined(ANDROID))} assembler; register; {$ENDIF} overload;
+{$IF defined(CPU386) and (not defined(ANDROID))}
+	asm
+	xchg [edx], ecx
+	xchg [eax], ecx
+	xchg [edx], ecx
+	end;
+{$ELSE}
 	var
 		z:TSGInteger;
 	begin
@@ -720,18 +729,11 @@ procedure Swap(var x, y : TSGInteger); {$IFNDEF ANDROID} assembler; register; {$
 	x:=y;
 	y:=z;
 	end;
-{$ELSE}
-	asm
-	{$ifdef Cpu386}
-		xchg [edx], ecx
-		xchg [eax], ecx
-		xchg [edx], ecx
-		{$endif}
-	end;
 	{$ENDIF}
 
-function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFNDEF ANDROID} assembler; register; {$ENDIF}  overload;
-{$IFNDEF ANDROID}
+function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; 
+{$IF defined(CPU386) and (not defined(ANDROID))} assembler; register; {$ENDIF}  overload;
+{$IF defined(CPU386) and (not defined(ANDROID))}
 	asm
 		cbw
 		cwde

@@ -16,10 +16,10 @@ uses
 type
 	TSGExpressionError=class
 			public
-		constructor Create(const VPChar:PChar;const VType:SGByte = SG_ERROR);
+		constructor Create(const VPChar:PChar;const VType:TSGExByte = SG_ERROR);
 		destructor Destroy;override;
 			public
-		FType:SGByte;
+		FType:TSGExByte;
 		FPChar:PChar;
 		end;
 	TArTSGExpressionError = type packed array of TSGExpressionError;
@@ -30,7 +30,7 @@ type
 			public
 		destructor Destroy;
 			public
-		FType:SGByte;
+		FType:TSGExByte;
 		FConst:Real;
 		FVariable:PChar;
 		FQuantity:Longint;
@@ -60,7 +60,7 @@ type
 	TSGExpressionObject = class(TSGObject)
 			public
 		constructor Create(
-			const That:SGByte = SG_OPERATOR;
+			const That:TSGExByte = SG_OPERATOR;
 			const NewName:PChar = '';
 			const NewParametrs:LongWord = 0;  
 			const NewFunction:Pointer = nil;
@@ -68,7 +68,7 @@ type
 			const NewMove:Boolean = True);
 		destructor Destroy;override;
 			public
-		FType:SGByte;
+		FType:TSGExByte;
 		FName:PChar;
 		FParametrs:LongWord;
 		FFunction:Pointer;
@@ -108,20 +108,20 @@ type
 		FCalculateForGraph:Boolean;
 		FCalculateAlgoritm:TSGCalculateAlgoritm;
 		function GetResultFunction(const ArEC:TArTSGExpressionChunk;const VFunction:LongWord;const VParams:packed array of LongWord):TSGExpressionChunk;
-		function IsOperator(var MayBeOperator:PChar):SGByte;
-		function IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:SGByte;const VWasObject:Boolean):Boolean;
+		function IsOperator(var MayBeOperator:PChar):TSGExByte;
+		function IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGExByte;const VWasObject:Boolean):Boolean;
 		procedure CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk );
 		procedure AddExpressionChunk(const Chunk:TSGExpressionChunk);
 		procedure DebugSteak(const Steak:TArTSGExpressionChunk;const Color:byte = 10;VChar:Char = '-');
 		function GetVariables:TArPChar;
-		procedure AddError(const VPChar:PChar = 'Error';const VType:SGByte = SG_ERROR);
-		function GetType(const VType:SGByte ):PChar;
-		function FindObject(const Chunk:TSGExpressionChunk; const VType:SGByte):Boolean;
+		procedure AddError(const VPChar:PChar = 'Error';const VType:TSGExByte = SG_ERROR);
+		function GetType(const VType:TSGExByte ):PChar;
+		function FindObject(const Chunk:TSGExpressionChunk; const VType:TSGExByte):Boolean;
 		function GetVariable:PChar;
 			public
 		function GetObjectPrioritete(const Chunk:TSGExpressionChunk):LongInt;
-		function GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:SGByte = SG_OBJECT):Boolean;
-		function GetObjectParatemetrs(const VPChar:PChar;const VType:SGByte = SG_OBJECT):LongInt;
+		function GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGExByte = SG_OBJECT):Boolean;
+		function GetObjectParatemetrs(const VPChar:PChar;const VType:TSGExByte = SG_OBJECT):LongInt;
 		procedure NewObject(const VOperator:TSGExpressionObject);
 		procedure CanculateExpression;
 		procedure BeginCalculate;
@@ -725,7 +725,7 @@ while (Length(FResultat[Number])>1) or ((Length(FResultat[Number])=1) and (FResu
 	end;
 end;
 
-function TSGExpression.GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:SGByte = SG_OBJECT):Boolean;
+function TSGExpression.GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGExByte = SG_OBJECT):Boolean;
 var
 	I:LongInt;
 begin
@@ -762,7 +762,7 @@ with Result do
 	end;
 end;
 
-function TSGExpression.FindObject(const Chunk:TSGExpressionChunk; const VType:SGByte):Boolean;
+function TSGExpression.FindObject(const Chunk:TSGExpressionChunk; const VType:TSGExByte):Boolean;
 var
 	I:LongInt;
 begin
@@ -775,7 +775,7 @@ for i:=0 to High(FOperators) do
 		end;
 end;
 
-constructor TSGExpressionError.Create(const VPChar:PChar;const VType:SGByte = SG_ERROR);
+constructor TSGExpressionError.Create(const VPChar:PChar;const VType:TSGExByte = SG_ERROR);
 begin
 inherited Create;
 FPChar:=VPChar;
@@ -819,7 +819,7 @@ for i:=0 to High(FErrors) do
 textcolor(white);
 end;
 
-function TSGExpression.GetType(const VType:SGByte ):PChar;
+function TSGExpression.GetType(const VType:TSGExByte ):PChar;
 begin
 case VType of
 0:
@@ -843,7 +843,7 @@ else
 END;
 end;
 
-procedure TSGExpression.AddError(const VPChar:PChar = 'Error';const VType:SGByte = SG_ERROR);
+procedure TSGExpression.AddError(const VPChar:PChar = 'Error';const VType:TSGExByte = SG_ERROR);
 begin
 SetLength(FErrors,Length(FErrors)+1);
 FErrors[High(FErrors)]:=TSGExpressionError.Create(VPChar,VType);;
@@ -1002,7 +1002,7 @@ textcolor(white);
 writeln;
 end;
 
-function TSGExpression.GetObjectParatemetrs(const VPChar:PChar;const VType:SGByte = SG_OBJECT):LongInt;
+function TSGExpression.GetObjectParatemetrs(const VPChar:PChar;const VType:TSGExByte = SG_OBJECT):LongInt;
 var
 	I:LongInt = 0;
 begin
@@ -1056,7 +1056,7 @@ else
 		end;
 end;
 
-function TSGExpression.IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:SGByte;const VWasObject:Boolean):Boolean;
+function TSGExpression.IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGExByte;const VWasObject:Boolean):Boolean;
 var
 	Points:LongWord = 0;
 	PointPosition:LongInt = -1;
@@ -1162,7 +1162,7 @@ else
 end;
 
 constructor TSGExpressionObject.Create(
-	const That:SGByte = SG_OPERATOR;
+	const That:TSGExByte = SG_OPERATOR;
 	const NewName:PChar = '';
 	const NewParametrs:LongWord = 0;  
 	const NewFunction:Pointer = nil;
@@ -1189,7 +1189,7 @@ begin
 inherited;
 end;
 
-function TSGExpression.IsOperator(var MayBeOperator:PChar):SGByte;
+function TSGExpression.IsOperator(var MayBeOperator:PChar):TSGExByte;
 (*
 0 - Not operator
 1 - Is operator
@@ -1259,7 +1259,7 @@ var
 	NewChunk:TSGExpressionChunk;
 	OldChunk:TSGExpressionChunk;
 	NewChunkString:PChar = '';
-	ChunkState:SGByte = 0;
+	ChunkState:TSGExByte = 0;
 	I:LongInt = 0;
 	IfStringWasObj:packed record
 		Was:Boolean;

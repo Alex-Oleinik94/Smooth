@@ -278,8 +278,8 @@ begin
 Active:=CreateWindow();
 if Active then
 	begin
-	if SGCLLoadProcedure<>nil then
-		SGCLLoadProcedure(Self);
+	if SGScreenLoadProcedure<>nil then
+		SGScreenLoadProcedure(Self);
 	if FCallInitialize<>nil then
 		FCallInitialize(Self);
 	end;
@@ -307,8 +307,8 @@ while FActive and (FNewContextType=nil) do
 	ClearKeys();
 	Messages();
 	
-	if SGCLPaintProcedure<>nil then
-		SGCLPaintProcedure(Self);
+	if SGScreenPaintProcedure<>nil then
+		SGScreenPaintProcedure(Self);
 	SwapBuffers();
 	end;
 end;
