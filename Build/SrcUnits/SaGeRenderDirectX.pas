@@ -177,7 +177,6 @@ else
 	pDevice.SetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix-1]);
 	FQuantitySavedMatrix-=1;
 	end;
-
 end;
 
 procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
