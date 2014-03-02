@@ -10,7 +10,8 @@ uses
 		{$ENDIF}
 	,Classes
 	,SysUtils
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeImagesBase
 	,SaGeImagesJpeg
 	,SaGeImagesPng
@@ -20,70 +21,77 @@ uses
 	,SaGeCommon
 	;
 type
-	SGIByte = type byte;
+	TSGIByte = type TSGByte;
 	
-	PSGImage = ^TSGImage;
+	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
-	TSGImage=class(TSGContextObject)
+	// Класс изображения, или текстуры
+	TSGImage = class(TSGContextObject)
 			public
 		constructor Create(const NewWay:string = '');
 		destructor Destroy;override;
 			public
-		FImage:TSGBitMap;
+		// А это само изображение ( в оперативной памяти, в виде последовательности байнов, и свойств изобрадения )
+		// В общем это BitMap (битовая карта)
+		FImage   : TSGBitMap;
 		
-		FStream:TMemoryStream;
+		// Поток, в которы подгружается изобрадения, при его загрузке. Сделано чтобы очень быстро грузилось.
+		FStream  : TMemoryStream;
 		
-		FTexture : SGUint;
+		// Идентификатор текстуры
+		FTexture : SGUInt;
 		
-		FReadyToGoToTexture:boolean;
-		FWay:string;
+		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
+		FReadyToGoToTexture : TSGBoolean;
+		//Путь в файлу
+		FWay                : TSGString;
+		//ФОрмат, в который сохранится изображзение прии его сохранении
+		FSaveFormat:TSGIByte;
 		
-		FSaveFormat:SGIByte;
-		
-		procedure LoadBMPToBitMap;
-		procedure LoadJPEGToBitMap;
+		procedure LoadBMPToBitMap();
+		procedure LoadJPEGToBitMap();
 		procedure LoadMBMToBitMap(const Position:LongWord = 20);
-		procedure LoadPNGToBitMap;
+		procedure LoadPNGToBitMap();
 		procedure Saveing(const Format:TSGExByte = SGI_PNG);
 			public
-		procedure LoadToMemory;virtual;
-		function LoadToBitMap:Boolean;virtual;
-		procedure Loading;
-		procedure ToTexture;virtual;
-		procedure LoadTextureMainThread;
+		procedure LoadToMemory();virtual;
+		function LoadToBitMap():TSGBoolean;virtual;
+		procedure Loading();
+		procedure ToTexture();virtual;
+		procedure LoadTextureMainThread();
 		procedure SaveToStream(const Stream:TStream);
-		class function IsBMP(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-		class function IsMBM(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-		class function IsPNG(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-		class function IsJPEG(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-		class function GetLongWord(const FileBits:PByte;const Position:LongInt):LongWord;
-		class function GetLongWordBack(const FileBits:PByte;const Position:LongInt):LongWord;
-		procedure BindTexture;
-		procedure DisableTexture;
-		function ReadyTexture:Boolean;
-		procedure FreeSream;
-		procedure FreeBits;
-		procedure FreeSome;
-		procedure FreeTexture;
-		procedure FreeAll;
-		function Ready:Boolean;virtual;
-		function GetBitMapBits:Cardinal;
-		procedure SetBitMapBits(const Value:Cardinal);
+		class function IsBMP(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
+		class function IsMBM(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
+		class function IsPNG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
+		class function IsJPEG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
+		class function GetLongWord(const FileBits:PByte;const Position:TSGLongInt):LongWord;
+		class function GetLongWordBack(const FileBits:PByte;const Position:TSGLongInt):LongWord;
+		procedure BindTexture();
+		procedure DisableTexture();
+		function ReadyTexture():TSGBoolean;
+		procedure FreeSream();
+		procedure FreeBits();
+		procedure FreeSome();
+		procedure FreeTexture();
+		procedure FreeAll();
+		function Ready():TSGBoolean;virtual;
+		function GetBitMapBits():TSGCardinal;
+		procedure SetBitMapBits(const Value:TSGCardinal);
 			public 
-		property FormatType : Cardinal read FImage.FFormatType write FImage.FFormatType;
-		property DataType : Cardinal read FImage.FDataType write FImage.FDataType;
-		property Channels : Cardinal read FImage.FChannels write FImage.FChannels;
-		property BitDepth: Cardinal read FImage.FSizeChannel write FImage.FSizeChannel;
-		property Texture : SGUint read FTexture write FTexture;
-		property Height : Cardinal read FImage.FHeight write FImage.FHeight;
-		property Width : Cardinal read FImage.FWidth write FImage.FWidth;
-		property Bits : Cardinal read GetBitMapBits write SetBitMapBits;
-		property BitMap : PByte read FImage.FBitMap write FImage.FBitMap;
-		property Image : TSGBitMap read FImage;
-		property Way:string read FWay write FWay;
-		property ReadyToGoToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
-		property ReadyGoToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
-		property ReadyToTexture:boolean read FReadyToGoToTexture write FReadyToGoToTexture;
+		property FormatType         : TSGCardinal read FImage.FFormatType  write FImage.FFormatType;
+		property DataType           : TSGCardinal read FImage.FDataType    write FImage.FDataType;
+		property Channels           : TSGCardinal read FImage.FChannels    write FImage.FChannels;
+		property BitDepth           : TSGCardinal read FImage.FSizeChannel write FImage.FSizeChannel;
+		property Texture            : SGUint      read FTexture            write FTexture;
+		property Height             : TSGCardinal read FImage.FHeight      write FImage.FHeight;
+		property Width              : TSGCardinal read FImage.FWidth       write FImage.FWidth;
+		property Bits               : TSGCardinal read GetBitMapBits       write SetBitMapBits;
+		property BitMap             : PByte       read FImage.FBitMap      write FImage.FBitMap;
+		property Image              : TSGBitMap   read FImage;
+		property Way                : TSGString   read FWay                write FWay;
+		property ReadyToGoToTexture : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
+		property ReadyGoToTexture   : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
+		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 			public //Render Functions:
 		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
@@ -93,8 +101,8 @@ type
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
 		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);inline;
 		end;
-	SGImage=TSGImage;
-	ArTSGImage = type packed array of TSGImage;
+	SGImage     = TSGImage;
+	ArTSGImage  = type packed array of TSGImage;
 	TArTSGImage = ArTSGImage;
 
 var

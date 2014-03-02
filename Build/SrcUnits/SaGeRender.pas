@@ -3,78 +3,105 @@
 unit SaGeRender;
 
 interface
+
 uses 
 	 SaGeBase
 	,SaGeBased;
-{$include Includes\SaGeRenderConstants.inc}
+
+// Это включаются в текст программы константы,типа SGR_TRIANGLES
+{$INCLUDE Includes\SaGeRenderConstants.inc}
+
 type
-	TSGMatrixMode=LongWord;
-	TSGPrimtiveType=LongWord;
-	TSGRenderType=(SGRenderNone,SGRenderOpenGL,SGRenderDirectX);
-	TSGRender=class;
-	TSGRenderClass=class of TSGRender;
-	TSGRender=class(TSGClass)
+	TSGMatrixMode   = TSGLongWord;
+	TSGPrimtiveType = TSGLongWord;
+	// Это те виды рендеров, которые есть, точнее идентификаторы
+	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX);
+	TSGRender       = class;
+	// Тип класса рендера
+	TSGRenderClass  = class of TSGRender;
+	// Класс рендера
+	TSGRender = class(TSGClass)
 			public
+		// Конструктор
 		constructor Create();override;
+		// Деструктор
 		destructor Destroy();override;
-		function Width():LongWord;inline;
-		function Height():LongWord;inline;
+		function Width():TSGLongWord;inline;
+		function Height():TSGLongWord;inline;
 			protected
-		FType:TSGRenderType;
-		FWindow:TSGClass;
+		// Тут содержится инфа, что это за рендер такой..
+		FType   : TSGRenderType;
+		// Это наш экземпляр класса контекста
+		FWindow : TSGClass;
 			public
-		property RenderType:TSGRenderType read FType;
-		function SetPixelFormat():Boolean;virtual;abstract;overload;
-		function MakeCurrent():Boolean;virtual;
+		// Возвращает тип рендера
+		property RenderType : TSGRenderType read FType;
+		// Эту процедурку вызывает экземпляр класса контерста при его инициазизации
+		// Она устанавливает формат пикселов в окне для этого рендера
+		function SetPixelFormat():TSGBoolean;virtual;abstract;overload;
+		// Связывает окно с рендером OpenGL или DirectX
+		function MakeCurrent():TSGBoolean;virtual;
+		// Разрывается связь между окном и рендером OpenGL или DirectX
 		procedure ReleaseCurrent();virtual;abstract;
-		function CreateContext():Boolean;virtual;abstract;
-		procedure Viewport(const a,b,c,d:LongWord);virtual;abstract;
+		// Открывает контекст устройства. Возвращает удалось ли ему это сделать, или нет.
+		function CreateContext():TSGBoolean;virtual;abstract;
+		// Устанавливает граници рисования на окне
+		procedure Viewport(const a,b,c,d:TSGLongWord);virtual;abstract;
+		// Инициализирует рендер
 		procedure Init();virtual;abstract;
-		function SupporedVBOBuffers():Boolean;virtual;
+		// Возвращает, можно ли отправить в видуху на хранение данные, которые нужно отобразить на экране
+		function SupporedVBOBuffers():TSGBoolean;virtual;
+		// Выводит на экран буфер
 		procedure SwapBuffers();virtual;abstract;
-		function TopShift(const VFullscreen:Boolean = False):LongWord;virtual;
-		procedure MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);virtual;
+		// Верхная граница отрисовывания может быть смещена вниз, по каким либо причинам. 
+		// Эта функция возвращает на скользо пекселов она смещена.
+		function TopShift(const VFullscreen:TSGBoolean = False):TSGLongWord;virtual;
+		// Смещение указателя мышы от того, тна что она указывает на окне
+		procedure MouseShift(Var x,y:TSGLongInt; const VFullscreen:TSGBoolean = False);virtual;
 			public
+		// Устанавливает 2D отроганальную проэкцию между двумя точками экрана (нижней левой и верхней правой)
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);virtual;abstract;
-		procedure LoadIdentity();virtual;abstract;
-		procedure Vertex3f(const x,y,z:single);virtual;abstract;
+		// Устанавливает режим матрици проэкции
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:TSGReal = 1);virtual;abstract;
+		//Это аналог glBegin\glEnd
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;
 		procedure EndScene();virtual;abstract;
-		
-		procedure Color3f(const r,g,b:single);virtual;abstract;
-		procedure TexCoord2f(const x,y:single);virtual;abstract;
-		procedure Vertex2f(const x,y:single);virtual;abstract;
-		procedure Color4f(const r,g,b,a:single);virtual;abstract;
-		procedure Normal3f(const x,y,z:single);virtual;abstract;
-		procedure Translatef(const x,y,z:single);virtual;abstract;
-		procedure Rotatef(const angle:single;const x,y,z:single);virtual;abstract;
-		procedure Enable(VParam:Cardinal);virtual;
-		procedure Disable(const VParam:Cardinal);virtual;abstract;
-		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
-		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);virtual;abstract;
-		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);virtual;abstract;
-		procedure BindTexture(const VParam:Cardinal;const VTexture:Cardinal);virtual;abstract;
-		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);virtual;abstract;
-		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);virtual;abstract;
-		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);virtual;abstract;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);virtual;abstract;
-		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);virtual;abstract;
-		procedure CullFace(const VParam:Cardinal);virtual;abstract;
-		procedure EnableClientState(const VParam:Cardinal);virtual;abstract;
-		procedure DisableClientState(const VParam:Cardinal);virtual;abstract;
-		procedure GenBuffersARB(const VQ:Integer;const PT:PCardinal);virtual;abstract;
-		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);virtual;abstract;
-		procedure BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);virtual;abstract;
-		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal);virtual;abstract;
-		procedure DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer);virtual;abstract;
-		procedure ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
-		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
-		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
-		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);virtual;abstract;
-		function IsEnabled(const VParam:Cardinal):Boolean;virtual;abstract;
-		procedure Clear(const VParam:Cardinal);virtual;abstract;
-		procedure LineWidth(const VLW:Single);virtual;abstract;
+		// Все остальные функции тут - аналоги своих функций в OpenGL, за исклбчением немногих.
+		procedure LoadIdentity();virtual;abstract;
+		procedure Vertex3f(const x,y,z:TSGSingle);virtual;abstract;
+		procedure Color3f(const r,g,b:TSGSingle);virtual;abstract;
+		procedure TexCoord2f(const x,y:TSGSingle);virtual;abstract;
+		procedure Vertex2f(const x,y:TSGSingle);virtual;abstract;
+		procedure Color4f(const r,g,b,a:TSGSingle);virtual;abstract;
+		procedure Normal3f(const x,y,z:TSGSingle);virtual;abstract;
+		procedure Translatef(const x,y,z:TSGSingle);virtual;abstract;
+		procedure Rotatef(const angle:TSGSingle;const x,y,z:TSGSingle);virtual;abstract;
+		procedure Enable(VParam:TSGCardinal);virtual;
+		procedure Disable(const VParam:TSGCardinal);virtual;abstract;
+		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure Lightfv(const VLight,VParam:TSGCardinal;const VParam2:TSGPointer);virtual;abstract;
+		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure BindTexture(const VParam:TSGCardinal;const VTexture:TSGCardinal);virtual;abstract;
+		procedure TexParameteri(const VP1,VP2,VP3:TSGCardinal);virtual;abstract;
+		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:SGInt);virtual;abstract;
+		procedure TexEnvi(const VP1,VP2,VP3:TSGCardinal);virtual;abstract;
+		procedure TexImage2D(const VTextureType:TSGCardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:TSGCardinal;var VBitMap:TSGPointer);virtual;abstract;
+		procedure ReadPixels(const x,y:TSGInteger;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: TSGPointer);virtual;abstract;
+		procedure CullFace(const VParam:TSGCardinal);virtual;abstract;
+		procedure EnableClientState(const VParam:TSGCardinal);virtual;abstract;
+		procedure DisableClientState(const VParam:TSGCardinal);virtual;abstract;
+		procedure GenBuffersARB(const VQ:TSGInteger;const PT:PCardinal);virtual;abstract;
+		procedure DeleteBuffersARB(const VQuantity:TSGLongWord;VPoint:TSGPointer);virtual;abstract;
+		procedure BindBufferARB(const VParam:TSGCardinal;const VParam2:TSGCardinal);virtual;abstract;
+		procedure BufferDataARB(const VParam:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer;const VParam2:TSGCardinal);virtual;abstract;
+		procedure DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:TSGCardinal;VBuffer:TSGPointer);virtual;abstract;
+		procedure ColorPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);virtual;abstract;
+		procedure TexCoordPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);virtual;abstract;
+		procedure NormalPointer(const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);virtual;abstract;
+		procedure VertexPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);virtual;abstract;
+		function IsEnabled(const VParam:TSGCardinal):Boolean;virtual;abstract;
+		procedure Clear(const VParam:TSGCardinal);virtual;abstract;
+		procedure LineWidth(const VLW:TSGSingle);virtual;abstract;
 		procedure PointSize(const PS:Single);virtual;abstract;
 		procedure PopMatrix();virtual;abstract;
 		procedure PushMatrix();virtual;abstract;

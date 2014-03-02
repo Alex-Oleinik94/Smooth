@@ -21,10 +21,14 @@ type
 	TSGByte		= Byte;
 	TSGInt64	= Int64;
 	TSGLongWord	= LongWord;
+	TSGQuadWord	= QWord;
 	TSGWord	    = Word;
+	TSGQWord	= QWord;
 	TSGSingle	= Single;
 	TSGChar		= Char;
 	TSGBoolean	= Boolean;
+	TSGPointer  = Pointer;
+	TSGCardinal = Cardinal;
 
  { encoding }
  procedure Windows1251ToUTF8(var Str: TSGString);

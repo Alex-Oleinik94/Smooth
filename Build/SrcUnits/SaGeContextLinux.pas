@@ -27,7 +27,9 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+			protected
 		procedure InitFullscreen(const b:boolean); override;
+			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);

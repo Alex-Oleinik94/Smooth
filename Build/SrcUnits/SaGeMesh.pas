@@ -1,4 +1,4 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeMesh;
 
@@ -15,21 +15,27 @@ uses
     , SaGeContext;
 
 type
-	TSGMeshColorType=(TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
-	TSGMeshVertexType=TSGVertexFormat;
+	// Это тип типа хранения цветов в нашей модели
+	TSGMeshColorType = (TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
+	// Это тип типа хранения вершин в нашей модели
+	TSGMeshVertexType = TSGVertexFormat;
 const
+	// Типы вершин
 	TSGMeshVertexType2f = SG_VERTEX_2F;
 	TSGMeshVertexType3f = SG_VERTEX_3F;
 type
-	TSGFaceType = type word;//type longword;
+	// Типы индексов вершин
+	TSGFaceType = type TSGWord;//type TSGLongWord;
 	TSGArTSGFaceType = packed array of TSGFaceType;
 	TSGArTSGArTSGFaceType = packed array of TSGArTSGFaceType;
-	TSGFaceLine=record
+	
+	// ======== Дальше идут структуры индексов веpшин  ========
+	TSGFaceLine = record
 		case byte of
 		0:  ( p0,p1: TSGFaceType );
 		1:  ( p:packed array [0..1] of TSGFaceType );
 		end;
-	PTSGFaceLine = ^TSGFaceLine;
+	PTSGFaceLine = ^ TSGFaceLine;
 	
     TSGFaceTriangle = record
 	case byte of
@@ -37,63 +43,65 @@ type
 	1: ( p:packed array[0..2] of TSGFaceType );
 	2: ( v:packed array[0..2] of TSGFaceType );
     end;
-    PTSGFaceTriangle = ^TSGFaceTriangle;
+    PTSGFaceTriangle = ^ TSGFaceTriangle;
 	
 	TSGFaceQuad = record
 	case byte of
 	0: ( p0, p1, p2, p3: TSGFaceType );
-	1: ( p:packed array[0..3] of TSGFaceType );
+	1: ( p : packed array[0..3] of TSGFaceType );
     end;
 	PTSGFaceQuad = ^ TSGFaceQuad;
 	
 	TSGFacePoint = record
 	case byte of
 	0: ( p0: TSGFaceType );
-	1: ( p:packed array[0..0] of TSGFaceType );
+	1: ( p : packed array[0..0] of TSGFaceType );
     end;
 	PTSGFacePoint = ^ TSGFacePoint;
 	
-	PTSGColor3b = ^TSGColor3b;
+	// Структуры цветов...
+	PTSGColor3b = ^ TSGColor3b;
 	TSGColor3b = record
 	case byte of
-	0 : (b,g,r:byte);
-	1 : (p:packed array[0..2] of byte);
+	0 : (b,g,r: TSGByte);
+	1 : (p:packed array[0..2] of TSGByte);
 	end;
 	
-	PTSGColor4b = ^TSGColor4b;
+	PTSGColor4b = ^ TSGColor4b;
 	TSGColor4b = record
 	case byte of
-	0 : (b,g,r,a:byte);
+	0 : (b,g,r,a : TSGByte);
 	1 : (p:packed array[0..3] of byte);
 	end;
-	
-    TSGMaterialInfo = class//(TSGGLImage)
-        constructor Create;
-    public
-        strName, strFile: string;
-    end;
-
-    PSGMaterialInfo = ^TSGMaterialInfo;
 
     { TSG3dObject }
-
+    // Наша моделька..
     TSG3DObject = class(TSGDrawClass)
     public
         constructor Create(); override;
         destructor Destroy(); override;
         class function ClassName():string;override;
     protected
-        FNOfVerts: LongWord;
-        FNOfFaces: LongWord;
+        // Количество вершин
+        FNOfVerts : TSGLongWord;
+        // Количество структур индексов вершин
+        FNOfFaces : TSGLongWord;
         
-        FHasTexture: Boolean;
-        FHasNormals: Boolean;
-        FHasColors: Boolean;
+        // Есть ли у модельки текстурка
+        FHasTexture : TSGBoolean;
+        // Есть ли нормали у модельки
+        FHasNormals : TSGBoolean;
+        // Если ли у нее цвета
+        FHasColors  : TSGBoolean;
     protected
-        FQuantityTextures:LongWord;
-        FPoligonesType:LongWord;
-        FVertexType:TSGMeshVertexType;
-        FColorType:TSGMeshColorType;
+        // Количество текстур, индексы на которые в себе седержит моделька
+        FQuantityTextures : TSGLongWord;
+        // Тип полигонов в модельки (SGR_QUADS, SGR_TRIANGLES, SGR_LINES, SGR_LINE_LOOP ....)
+        FPoligonesType    : TSGLongWord;
+        // Тип вершин в модельке
+        FVertexType       : TSGMeshVertexType;
+        // Тип хранение цветов
+        FColorType        : TSGMeshColorType;
     private
 		procedure SetColorType(const VNewColorType:TSGMeshColorType);
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
@@ -101,6 +109,7 @@ type
 		function GetSizeOfOneVertex():LongWord;inline;
 		function GetVertexLength():QWord;inline;
     public
+        // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
 		property QuantityVertexes:LongWord read FNOfVerts;
 		property HasTexture:Boolean read FHasTexture write FHasTexture;
 		property HasColors:Boolean read FHasColors write FHasColors;
@@ -109,74 +118,139 @@ type
 		property VertexType:TSGMeshVertexType read FVertexType write SetVertexType;
 		property PoligonesType:LongWord read FPoligonesType write FPoligonesType;
     protected
+        // А это у нас массив индексов
 		ArFaces:packed array of TSGFaceType;
-		// array of [Vertexes, Colors, Normals, TexVertexes]
-		ArVertex:Pointer;
+		
+		// А это у нас массив самих вершин. Его пришлось сделать таким. 
+		// Не смотри что он такой ебанутый (TSGPointer). 
+		// Он в себе содерщит пиздец сколько всего, но обрабатывается по другому...
+		//! B каком порядке записывается в памяти информация о вершине
+		(* Vertex = [Vertexes, Colors, Normals, TexVertexes] *)
+		//! Что предстваляет из себя этот массив
+		(* Array of Vertex *)
+		ArVertex:TSGPointer;
 	public
-		function GetArVertexes():Pointer;inline;
-		function GetArFaces():Pointer;inline;
+		// Возвращает указатель на первый элемент массива вершин
+		function GetArVertexes():TSGPointer;inline;
+		// Возвращает указатель на первый элемент массива 
+		function GetArFaces():TSGPointer;inline;
 		
-		function GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
-		function GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
+	private
+		function GetVertex3f(const Index : TSGMaxEnum):PTSGVertex3f;inline;
+		function GetVertex2f(const Index : TSGMaxEnum):PTSGVertex2f;inline;
 		
+	public
+		// Эти совйтсва возвращают указатель на Index-ый элемент массива вершин 
+		//! Это можно пользоваться только когда, когда FVertexType = SG_VERTEX_3F, иначе Result = nil
 		property ArVertex3f[Index : TSGMaxEnum]:PTSGVertex3f read GetVertex3f;
+		//! Это можно пользоваться только когда, когда FVertexType = SG_VERTEX_2F, иначе Result = nil
 		property ArVertex2f[Index : TSGMaxEnum]:PTSGVertex2f read GetVertex2f;
 		
+		// Добавляет пустую(ые) вершины в массив вершин
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
+		// Добавляет еще элемент(ы) в массив индексов
 		procedure AddFace(const FQuantityNewFaces:LongWord = 1);
-		
+	
+	private
 		function GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
 		function GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
 		function GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
 		function GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
 		
+	public
+		// Возвращает указатель на структуру данных,
+		// к которой хранится информация о цвете вершины с индексом Index
+		// Каждую функцию можно использовать только когда установлен соответствующий тип формата цветов
+		// Иначе Result = nil.
+		(* Для установки цвета лучше использовать процедуру SetColor, описанную ниже *)
 		property ArColor3f[Index : TSGMaxEnum]:PTSGColor3f read GetColor3f;
 		property ArColor4f[Index : TSGMaxEnum]:PTSGColor4f read GetColor4f;
 		property ArColor3b[Index : TSGMaxEnum]:PTSGColor3b read GetColor3b;
 		property ArColor4b[Index : TSGMaxEnum]:PTSGColor4b read GetColor4b;
 		
-		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
+		// Эта процедура устанавливает цвет вершины. Работает для любого формата хранение цвета.
+		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1);inline;
+		// Автоматически определяет нужный формат хранения цветов. (В зависимости от рендера)
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
-		
+	
+	private
 		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+	
+	public
+		// Свойства для редактирования нормалей
 		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
 		
-		procedure SetVertexLength(const NewVertexLength:QWord);inline;
+		// Устанавливает количество вершин
+		procedure SetVertexLength(const NewVertexLength:TSGQuadWord);inline;
+		
+		// Возвращает сколько в байтах занимают массив вершин
 		function GetVertexesSize():TSGMaxEnum;overload;inline;
 		
+		// Эта процедура для DirectX. Дело в том, что там нету SGR_QUADS. Так что он разбивается на 2 треугольника.
 		procedure SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
-		function ArFacesLines():PTSGFaceLine;inline;
-		function ArFacesQuads():PTSGFaceQuad;inline;
-		function ArFacesTriangles():PTSGFaceTriangle;inline;
-		function ArFacesPoints():PTSGFacePoint;inline;
 		
+		// Возвращает индекс на первый элемент массива индексов. Не просто возвращает, а хитро возвращает.
+		// Теперь эти функции можно использовать как массивы. Так что их очень просто использовать.
+		// Но нужно соблюдать тип хранения индексов
+		function ArFacesLines()     : PTSGFaceLine;     inline;
+		function ArFacesQuads()     : PTSGFaceQuad;     inline;
+		function ArFacesTriangles() : PTSGFaceTriangle; inline;
+		function ArFacesPoints()    : PTSGFacePoint;    inline;
+		
+		// Устанавливает длинну массива индексов
 		procedure SetFaceLength(const NewLength:TSGMaxEnum);inline;
+		// Возвращает действительную длинну массива индексов
 		function GetFaceLength():TSGMaxEnum;overload;inline;
+		// Возвращает действительную длинну массива индексов в зависимости он их длинны, заданой параметром
 		function GetFaceLength(const FaceLength:TSGMaxEnum):TSGMaxEnum;overload;inline;
+		// Возвращает действительную длинну массива индексов в зависимости он их длинны и их типа, заданых параметрами
 		class function GetFaceLength(const FaceLength:TSGMaxEnum; const ThisPoligoneType:LongWord):TSGMaxEnum;overload;inline;
+		// Возвращает, сколько в TSGFaceType*Result байтов занимает одна структура индексов. Очень прикольная функция.
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
 	public
-		property Faces:TSGMaxEnum read GetFaceLength write SetFaceLength;
-		property Vertexes:QWord read GetVertexLength write SetVertexLength;
+		// Ствойства для получения и редактирования длинн массивов
+		property Faces    :TSGMaxEnum read GetFaceLength   write SetFaceLength;
+		property Vertexes :TSGQuadWord read GetVertexLength write SetVertexLength;
     public
-		FEnableVBO:Boolean;
+		// Вклбючено ли VBO
+		// VBO - Vertex Buffer Object
+		// Vertex Buffer Object - это такая технология, при которой можно рисовать, 
+		//    держа все массивы в памяти видеокарте, а не в оперативной памяти
+		FEnableVBO      : TSGBoolean;
 		
-        FVBOVertexes:LongWord;
-        FVBOFaces:LongWord;
+		// Идентификатор массива вершин в видюхе
+        FVBOVertexes    : TSGLongWord;
+        // Идентификатор массива индексов в текстуре
+        FVBOFaces       : TSGLongWord;
     public
-        FEnableCullFace: Boolean;
-        FObjectColor: TSGColor4f;
+		// Включен ли Cull Face
+        FEnableCullFace : TSGBoolean;
+        // Цвет обьекта
+        FObjectColor    : TSGColor4f;
     public
+        // Догадайся с 3х раз
         procedure Draw(); override;
+        // Дело в том, что если включен Cull Face, то Draw нужно делать 2 раза.
+        // Так что вод тут делается Draw, а в Draw просто проверяется, включен или не  Cull Face, 
+        //   и в зависимости от этого он вызывает эту процедуду 1 или 2 раза
         procedure BasicDraw(); inline;
+        // Подгрузка массивов в память видеокарты
         procedure LoadToVBO();
+        // Очищение памяти видеокарты от массивов этого класса
         procedure ClearVBO();
+        // Процедурка очищает оперативную память от массивов этого класса
         procedure ClearArrays(const ClearN:Boolean = True);
 			public
+		// Сохраняет модельку в поток
         procedure SaveToStream(const Stream: TStream);virtual;
+        // Зашружает модельку из потока
         procedure LoadFromStream(const Stream: TStream);virtual;
+        // Эта процедурка автоматически выделяет память под нормали и вычесляет их, исходя из данных вершин
         procedure AddNormals();virtual;
+        // =) Subserf
         procedure CatmulClark();virtual;
+        
+        (* Я ж переписывал этот класс. Это то, что я не написал. *)
 		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
 		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
@@ -184,16 +258,25 @@ type
 		//procedure Im;
 		//procedure CalculateDependensies(var VertexesAndTriangles:TSGArTSGArTSGFaceType);
 		//procedure Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
+		
+		// Выводит полную информацию о характеристиках модельки
 		procedure WriteInfo(const PredStr:string = '');
+		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
+		// Загрузка из текстовова формата файлов *.obj
 		procedure LoadFromOBJ(const FFileName:string);virtual;
 	public
+		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
+		// Возвращает, сколько занимают байтов индексы
 		function FacesSize():QWord;inline;
+		// Возвращает, сколько занимают байтов вершины и индексы
 		function Size():QWord;inline;
 	protected 
-		FName:String;
+		// Имя модельки
+		FName : TSGString;
 	public
+		// Свойство : имя модельки
 		property Name:string read FName write FName;
     end;
 
@@ -209,7 +292,7 @@ type
         NOfObjects:   word;
         NOfMaterials: word;
 	
-        ArMaterials: packed array of TSGMaterialInfo;
+        ArMaterials: packed array of Pointer;
         ArObjects: packed array of TSG3dObject;
     protected
         procedure AddObjectColor(const ObjColor: TSGColor4f);
@@ -1169,8 +1252,8 @@ if NOfObjects>0 then
 	end;
 if NOfMaterials>0 then
 	begin
-	for i:=0 to NOfMaterials-1 do
-		ArMaterials[i].Destroy;
+	{for i:=0 to NOfMaterials-1 do
+		ArMaterials[i].Destroy;}
 	SetLength(ArMaterials,0);
 	NOfMaterials:=0;
 	end;
@@ -1276,12 +1359,7 @@ for i:=0 to NOfObjects-1 do
 	Result+=ArObjects[i].Size();
 end;
 
-constructor TSGMaterialInfo.Create;
-begin
-    inherited Create;
-    strFile:='';
-    strName:='';
-end;
+
 procedure TSGModel.AddObjectColor(const ObjColor: TSGColor4f);
 var
     i: longint;
@@ -1313,9 +1391,9 @@ var
     i: longint;
 begin
     for i := 0 to High(ArObjects) do
-        ArObjects[i].Destroy;
-    for i := 0 to High(ArMaterials) do
-        ArMaterials[i].Destroy;
+        ArObjects[i].Destroy();
+    {for i := 0 to High(ArMaterials) do
+        ArMaterials[i].Destroy();}
     inherited;
 end;
 

@@ -18,22 +18,23 @@ type
 		class function ClassName():string;override;
 		procedure Draw();override;
 			private
-		FProjectionAngle:TSGSingle;            //Угол поворота центра
-		FProjectionAngleShift:TSGSingle;       //Скорость узманения угла поворота центра
-		FAngle:TSGSingle;                      //Начальный угол поворота
-		FAngleShift:TSGSingle;                 //Срорость кручения
-		FProgress:TSGSingle;                   //[0..1]
-		FCountLines:TSGLongWord;               //Количество разделений экранчика
-		FFont:TSGFont;                         //Шрифт для надписи процентов
+		FProjectionAngle      : TSGSingle;     //Угол поворота центра
+		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
+		FAngle                : TSGSingle;     //Начальный угол поворота
+		FAngleShift           : TSGSingle;     //Срорость кручения
+		FProgress             : TSGSingle;     //[0..1]
+		FCountLines           : TSGLongWord;   //Количество разделений экранчика
+		FFont                 : TSGFont;       //Шрифт для надписи процентов
 		FArrayOfLines:packed array of          //Массив дорожкок
 			packed record
 			FLengths:packed array of TSGSingle;//Длины кусочков дорожкок экрана
-			FSpeed:TSGSingle;                  //Скорость убывания в середину экрана
-			FWidth:TSGSingle;                  //Ширина дорожки в градусах
+			FSpeed  :TSGSingle;                //Скорость убывания в середину экрана
+			FWidth  :TSGSingle;                //Ширина дорожки в градусах
 		    end;
-		FProgressIsSet:Boolean;                //Если пользователь не устанавливал не разу прогресс, то
+		FProgressIsSet        : Boolean;       //Если пользователь не устанавливал не разу прогресс, то
 		                                       //Запускатеся режим, где просто показывается работа этой программы,
 		                                       //Если установил, то отображается прогресс пользователя
+		FMaxRadius            : TSGSingle;     //Максимальный радиус (максимальная длинна дорожек)
 		procedure CallAction();                //Тут обрабатываются дорожки, их кусочки и ширины
 		procedure SetProgress(const NewProgress:TSGSingle);
 			public
@@ -79,7 +80,7 @@ for i:=0 to FCountLines-1 do
 	if FArrayOfLines[i].FLengths<>nil then
 	for iii:=0 to High(FArrayOfLines[i].FLengths) do
 		iiii+=FArrayOfLines[i].FLengths[iii];
-	while iiii<300 do
+	while iiii<FMaxRadius do
 		begin
 		if FArrayOfLines[i].FLengths<>nil then
 			SetLength(FArrayOfLines[i].FLengths,Length(FArrayOfLines[i].FLengths)+1)
@@ -107,13 +108,14 @@ var
 begin
 inherited Create(VContext);
 FProgress:=0;
-FCountLines:=18;
+FCountLines:=25;
 if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
 FProjectionAngle:=Random(360);
 FProjectionAngleShift:=SGRandomMinus()*0.01; //Тут в радианах, поэтому так мало
 FAngleShift:=SGRandomMinus()*0.7;            //А тут в градусах
+FMaxRadius:=280;
 SetLength(FArrayOfLines,FCountLines);
 for i:=0 to FCountLines-1 do
 	begin
@@ -182,11 +184,13 @@ for i:=0 to FCountLines-1 do
 	for ii:=Byte(not DrawFirst()) to High(FArrayOfLines[i].FLengths) do
 		begin
 		Render.BeginScene(SGR_LINE_LOOP);
-		Render.Vertex2f(iii,6);
+		FColor.WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius).Color(Render);
 		Render.Vertex2f(iii+FArrayOfLines[i].FLengths[ii]-6,6);
 		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*cos(FArrayOfLines[i].FWidth/180*pi),
 			(iii+FArrayOfLines[i].FLengths[ii]-6)*sin(FArrayOfLines[i].FWidth/180*pi));
+		FColor.WithAlpha(1-iii/FMaxRadius+50/FMaxRadius).Color(Render);
 		Render.Vertex2f(iii*cos(FArrayOfLines[i].FWidth/180*pi),iii*sin(FArrayOfLines[i].FWidth/180*pi));
+		Render.Vertex2f(iii,6);
 		iii+=FArrayOfLines[i].FLengths[ii];
 		Render.EndScene();
 		end;

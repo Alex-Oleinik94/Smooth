@@ -93,24 +93,24 @@ type
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);override;
-		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);override;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);override;
+		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: Pointer);override;
 		procedure CullFace(const VParam:Cardinal);override;
-		procedure EnableClientState(const VParam:Cardinal);override;
-		procedure DisableClientState(const VParam:Cardinal);override;
-		procedure GenBuffersARB(const VQ:Integer;const PT:PCardinal);override;
-		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);override;
-		procedure BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);override;
-		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal);override;
-		procedure DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer);override;
-		procedure ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
-		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
-		procedure NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
-		procedure VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
-		function IsEnabled(const VParam:Cardinal):Boolean;override;
-		procedure Clear(const VParam:Cardinal);override;
-		procedure LineWidth(const VLW:Single);override;
-		procedure PointSize(const PS:Single);override;
+		procedure EnableClientState(const VParam:TSGCardinal);override;
+		procedure DisableClientState(const VParam:TSGCardinal);override;
+		procedure GenBuffersARB(const VQ:TSGInteger;const PT:PCardinal);override;
+		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:TSGPointer);override;
+		procedure BindBufferARB(const VParam:TSGCardinal;const VParam2:TSGCardinal);override;
+		procedure BufferDataARB(const VParam:TSGCardinal;const VSize:TSGInt64;VBuffer:Pointer;const VParam2:Cardinal);override;
+		procedure DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer);override;
+		procedure ColorPointer(const VQChannels:TSGLongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		procedure TexCoordPointer(const VQChannels:TSGLongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
+		procedure NormalPointer(const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);override;
+		procedure VertexPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);override;
+		function IsEnabled(const VParam:TSGCardinal):TSGBoolean;override;
+		procedure Clear(const VParam:TSGCardinal);override;
+		procedure LineWidth(const VLW:TSGSingle);override;
+		procedure PointSize(const PS:TSGSingle);override;
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
 		end;
@@ -318,7 +318,7 @@ begin
 {$ELSE}
 	//glTexCoord3f(x,y,0);
 	//glTexCoord2f(x,y);
-	//Не так не так не хочет... странно, посмотрим потом как сделать..
+	//═шўхую эх їюўхЄ фхырЄ№ё  эр ¤Єюь Gl ES... 
 	{$ENDIF}
 end;
 
@@ -329,7 +329,7 @@ begin
 {$ELSE}
 	//glVertex3f(x,y,0);
 	//glVertex2f(x,y);
-	//нихера...
+	//═шЇшур...
 	{$ENDIF}
 end;
 
@@ -459,7 +459,7 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer); 
+procedure TSGRenderOpenGL.DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer); 
 begin 
 glDrawElements(VParam,VSize,VParam2,VBuffer);
 end;

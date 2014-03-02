@@ -12,8 +12,8 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	;
-//Р“РґРµ РєСѓРїРёС‚СЊ РїРёРІРѕ? РћС‚РІРµС‚: РІ РјР°РіР°Р·РёРЅРµ. (РЎРїРµС†РёР°Р»СЊРЅРѕ РґР»СЏ РјР°РєСЃР°)
-// РўР°Рј Р¶Рµ РјРѕР¶РЅРѕ РєСѓРїРёС‚СЊ Рё Р·Р°РєСѓСЃСЊ (РњР°РєСЃ Р±РµР· СЌС‚РѕРіРѕ РїСЂРѕСЃС‚Рѕ РЅРµ РјРѕР¶РµС‚ РїРѕС…РѕРґСѓ РїРёС‚СЊ РїРёРІРѕ)
+//Где купить пиво? Ответ: в магазине. (Специально для макса)
+// Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
 
 
 type
@@ -42,11 +42,15 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+			protected
 		procedure InitFullscreen(const b:boolean); override;
+			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
-			public
+		// If function need puplic, becourse it calls in WinAPI procedure without whis class
+		function WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+			protected
 		hWindow:HWnd;
 		dcWindow:hDc;
 		clWindow:LongWord;
@@ -61,11 +65,15 @@ type
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
-function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
-procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
+function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
+//procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
 
 implementation
 
+// А вод это жесткий костыль. 
+// Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
+// например указатель на контекст, и поэтому процедура отловления сообщений системы
+// Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
 
@@ -234,75 +242,60 @@ end;
 	* 
 	* 
 	* }
-function StandartGLWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
+function TSGContextWinAPI.WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 var
 	mRect:Windows.TRect;
-	SGContext:TSGContext;
-	i:LongWord;
-begin 
-SGContext:=nil;
-Result:=0;
-DoExit:=False;
-if SGContexts<>nil then
-for i:=0 to High(SGContexts) do
-	if SGContexts[i].hWindow = Window then
-		begin
-		SGContext:=SGContexts[i];
-		Break;
-		end;
-if SGContext=nil then
-	Exit;
-DoExit:=True;
+begin
 case AMessage of
 wm_create:
 	begin
-	SGContext.Active:=True;
+	Active:=True;
 	Exit;
 	end;
 wm_paint:
 	begin
-	exit;
+	Exit;
 	end;
 260: //Alt Down
-	SGContext.SetKey(SGDownKey,SG_ALT_KEY);
+	SetKey(SGDownKey,SG_ALT_KEY);
 261: //Alt Up
-	SGContext.SetKey(SGUpKey,SG_ALT_KEY);
+	SetKey(SGUpKey,SG_ALT_KEY);
 262: // Key & Alt
 	begin
-	SGContext.SetKey(SGDownKey,WParam);
-	SGContext.FKeysPressed[WParam]:=False;
+	SetKey(SGDownKey,WParam);
+	FKeysPressed[WParam]:=False;
 	end;
 wm_keydown:
-	SGContext.SetKey(SGDownKey,WParam);
+	SetKey(SGDownKey,WParam);
 wm_keyup:
-	SGContext.SetKey(SGUpKey,WParam);
+	SetKey(SGUpKey,WParam);
 wm_mousewheel:
 	begin
 	if PByte(@WParam)[3]>128 then
 		begin
-		SGContext.FCursorWheel:=SGDownCursorWheel;
+		FCursorWheel:=SGDownCursorWheel;
 		end
 	else
 		begin
-		SGContext.FCursorWheel:=SGUpCursorWheel;
+		FCursorWheel:=SGUpCursorWheel;
 		end;
 	end;
 wm_lbuttondown:
-	SGContext.SetCursorKey(SGDownKey,SGLeftCursorButton);
+	SetCursorKey(SGDownKey,SGLeftCursorButton);
 wm_rbuttondown:
-	SGContext.SetCursorKey(SGDownKey,SGRightCursorButton);
+	SetCursorKey(SGDownKey,SGRightCursorButton);
 wm_mbuttondown:
-	SGContext.SetCursorKey(SGDownKey,SGMiddleCursorButton);
+	SetCursorKey(SGDownKey,SGMiddleCursorButton);
 wm_lbuttonup:
-	SGContext.SetCursorKey(SGUpKey,SGLeftCursorButton);
+	SetCursorKey(SGUpKey,SGLeftCursorButton);
 wm_rbuttonup:
-	SGContext.SetCursorKey(SGUpKey,SGRightCursorButton);
+	SetCursorKey(SGUpKey,SGRightCursorButton);
 wm_mbuttonup:
-	SGContext.SetCursorKey(SGUpKey,SGMiddleCursorButton);
+	SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
 	begin 
 	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed for API.');
-	SGContext.Active:=False;
+	Active:=False;
 	PostQuitMessage(0);
 	Exit;
 	end;
@@ -317,25 +310,49 @@ wm_syscommand:
 		end;
 		end;
 	end;
-wm_size,wm_sizing
-,wm_move,wm_moving,
-WM_WINDOWPOSCHANGED,WM_WINDOWPOSCHANGING
-: if (SGContext is TSGContextWinAPI) and (SGContext as TSGContextWinAPI).Active
-	and (Window<>0) and ((SGContext as TSGContextWinAPI).hWindow=Window) then
-	begin
-	Windows.GetWindowRect(Window,mRect);
-	(SGContext as TSGContextWinAPI).Width:=mRect.Right-mRect.Left;
-	(SGContext as TSGContextWinAPI).Height:=mRect.Bottom-mRect.Top;
-	(SGContext as TSGContextWinAPI).Resize;
-	end;
+ wm_size
+,wm_sizing
+,wm_move
+,wm_moving
+,WM_WINDOWPOSCHANGED
+,WM_WINDOWPOSCHANGING:
+	if Active and (Window<>0) and (hWindow=Window) then
+		begin
+		Windows.GetWindowRect(Window,mRect);
+		Width:=mRect.Right-mRect.Left;
+		Height:=mRect.Bottom-mRect.Top;
+		Resize();
+		end;
 else
 	begin
 	{$IFDEF SGWinAPIDebugB}
-		SGLog.Sourse('StandartGLWndProc : Unknown Message : Window="'+SGSTr(Window)+'" Message="'+SGStr(AMessage)+'" wParam="'+SGStr(wParam)+'" lParam="'+SGStr(lParam)+'"');
+		SGLog.Sourse('StandartWndProc : Unknown Message : Window="'+SGSTr(Window)+'" Message="'+SGStr(AMessage)+'" wParam="'+SGStr(wParam)+'" lParam="'+SGStr(lParam)+'"');
 		{$ENDIF}
 	end;
 end;
+end;
+
+function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
+var
+	SGContext:TSGContextWinAPI;
+	i:TSGLongWord;
+begin 
+SGContext:=nil;
+Result:=0;
 DoExit:=False;
+if SGContexts<>nil then
+for i:=0 to High(SGContexts) do
+	if SGContexts[i].hWindow = Window then
+		begin
+		SGContext:=SGContexts[i];
+		Break;
+		end;
+if SGContext<>nil then
+	begin
+	DoExit:=True;
+	Result:=SGContext.WndMessagesProc(Window,AMessage,WParam,LParam);
+	DoExit:=False;
+	end;
 end;
 
 function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinAPIParam):WinAPIParam;  stdcall; export;
@@ -345,15 +362,15 @@ begin
 //WriteLn(LongWord(LParam));
 DoExit:=False;
 {$IFDEF SGWinAPIDebugB}
-	SGLog.Sourse('MyGLWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
+	SGLog.Sourse('MyWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
 	{$ENDIF}
-Result:=StandartGLWndProc(Window,AMessage,WParam,LParam,DoExit);
+Result:=StandartWndProc(Window,AMessage,WParam,LParam,DoExit);
 if DoExit then
 	Exit
 else
 	Result := DefWindowProc(Window, AMessage, WParam, LParam);
 {$IFDEF SGWinAPIDebugB}
-	SGLog.Sourse('MyGLWndProc : Exit (Result='+SGStr(Result)+')');
+	SGLog.Sourse('MyWndProc : Exit (Result='+SGStr(Result)+')');
 	{$ENDIF}
 end;
 
@@ -526,14 +543,14 @@ if longint(hWindow) = 0 then
 	begin
 	ThrowError('Could not create Application Window!');
 	SGLog.Sourse('Could not create Application Window!');
-	CreateOGLWindow := false;
+	Result := false;
 	Exit;
 	end;
 if not WindowInit(hWindow) then 
 	begin
 	ThrowError('Could not initialise Application Window!');
 	SGLog.Sourse('Could not initialise Application Window!');
-	CreateOGLWindow := false;
+	Result := false;
 	Exit;
 	end;
 Result := true;
