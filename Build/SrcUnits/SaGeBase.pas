@@ -1822,65 +1822,59 @@ else
 end;
 
 function SGStrReal(r:real;const l:longint):string;inline;
-label 1;
 var
-	i:longint;
-	st:string;
+	i     : TSGLongInt;
 begin
-if r<0 then  st:='-' else st:='';
+if r<0 then 
+	Result:='-' 
+else 
+	Result:='';
 r:=abs(r);
-if r=0 then 
-	goto 1;
-st+=SGStr(trunc(r));
-if r=0 then 
-	goto 1;
+Result+=SGStr(Trunc(r));
 r-=trunc(r);
 r:=abs(r);
-if r=0 then 
-	goto 1;
-st+='.';
-for i:=1 to l do
+if R>1/(10**l) then
 	begin
-	if r=0 then 
-		goto 1;
-	r*=10;
-	st+=SGStr(trunc(r));
-	r-=trunc(r);
+	Result+='.';
+	for i:=1 to l do
+		begin
+		if r=0 then 
+			Break;
+		r*=10;
+		Result+=SGStr(trunc(r));
+		r-=trunc(r);
+		end;
 	end;
-1:
-	if st='' then st:='0';
-	Result:=st;
+if (Result='') or (Result='-') then 
+	Result+='0';
 end;
 
 function SGStrExtended(r:Extended;const l:longint):string;inline;
-label 1;
 var
-	i:longint;
-	st:string;
+	i     : TSGLongInt;
 begin
-if r<0 then  st:='-' else st:='';
+if r<0 then 
+	Result:='-' 
+else 
+	Result:='';
 r:=abs(r);
-if r=0 then 
-	goto 1;
-st+=SGStr(trunc(r));
-if r=0 then 
-	goto 1;
+Result+=SGStr(Trunc(r));
 r-=trunc(r);
 r:=abs(r);
-if r=0 then 
-	goto 1;
-st+='.';
-for i:=1 to l do
+if R>1/(10**l) then
 	begin
-	if r=0 then 
-		goto 1;
-	r*=10;
-	st+=SGStr(trunc(r));
-	r-=trunc(r);
+	Result+='.';
+	for i:=1 to l do
+		begin
+		if r=0 then 
+			Break;
+		r*=10;
+		Result+=SGStr(trunc(r));
+		r-=trunc(r);
+		end;
 	end;
-1:
-	if st='' then st:='0';
-	Result:=st;
+if (Result='') or (Result='-') then 
+	Result+='0';
 end;
 
 function SGGetSizeString(const Size:Int64):String;inline;

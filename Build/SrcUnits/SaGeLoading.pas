@@ -10,6 +10,7 @@ uses
 	,SaGeUtils
 	;
 type
+	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
 	//Класс загрузки.
 	TSGLoading=class(TSGDrawClass)
 			public
@@ -35,6 +36,8 @@ type
 		                                       //Запускатеся режим, где просто показывается работа этой программы,
 		                                       //Если установил, то отображается прогресс пользователя
 		FMaxRadius            : TSGSingle;     //Максимальный радиус (максимальная длинна дорожек)
+		FAlpha                : TSGSingle;     //Это для начала и конца загрузки. ЧТобы плавно уходило.
+		FType                 : TSGLType;      //Тип работы загрузки в данный момент времени.
 		procedure CallAction();                //Тут обрабатываются дорожки, их кусочки и ширины
 		procedure SetProgress(const NewProgress:TSGSingle);
 			public
@@ -108,7 +111,7 @@ var
 begin
 inherited Create(VContext);
 FProgress:=0;
-FCountLines:=25;
+FCountLines:=14;
 if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
@@ -127,6 +130,8 @@ FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
 FFont.SetContext(Context);
 FFont.Loading();
 FProgressIsSet:=False;
+FAlpha:=0;
+FType:=SGBeforeLoading;
 end;
 
 
@@ -146,49 +151,47 @@ end;
 
 procedure TSGLoading.Draw();
 var
+	FCOlor:TSGColor4f;
+
+procedure MiniDraw(VProjectionAngle, VRadius:TSGSingle);
+var
 	i,ii : TSGWord;
 	iii  : TSGSingle;
 
-function DrawFirst():Boolean;
+function DrawFirst():TSGBoolean;
 begin
 Result:=FArrayOfLines[i].FLengths[0]>6;
 end;
 
-var
-	FCOlor:TSGColor4f;
 begin
-CallAction();
-
-FCOlor:=(SGColorImport(1,0,0)*(1-FProgress)+SGColorImport(0,1,0)*FProgress);
-FCOlor.Normalize();
 FColor.Color(Render);
 
 Render.InitOrtho2d(
-	-Context.Width/2-sin(FProjectionAngle)*150,
-	Context.Height/2+cos(FProjectionAngle)*150,
-	Context.Width/2-sin(FProjectionAngle)*150,
-	-Context.Height/2+cos(FProjectionAngle)*150);
-FFont.DrawFontFromTwoVertex2f(SGStrReal(100*FProgress,1)+'%',
+	-Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
+	Context.Height/2+cos(VProjectionAngle)*VRadius+cos(Pi*FProjectionAngle)*VRadius,
+	Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
+	-Context.Height/2+cos(VProjectionAngle)*VRadius+cos(Pi*FProjectionAngle)*VRadius);
+FFont.DrawFontFromTwoVertex2f(SGStrReal(100*FProgress,0)+'%',
 	SGVertex2fImport(-35,-FFont.FontHeight/2),
 	SGVertex2fImport(35,FFont.FontHeight/2));
 
 Render.InitOrtho2d(
-	-Context.Width/2-sin(FProjectionAngle)*150,
-	-Context.Height/2-cos(FProjectionAngle)*150,
-	Context.Width/2-sin(FProjectionAngle)*150,
-	Context.Height/2-cos(FProjectionAngle)*150);
-Render.Rotatef(FAngle,0,0,1);
+	-Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
+	-Context.Height/2-cos(VProjectionAngle)*VRadius-cos(Pi*FProjectionAngle)*VRadius,
+	Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
+	Context.Height/2-cos(VProjectionAngle)*VRadius-cos(Pi*FProjectionAngle)*VRadius);
+Render.Rotatef(FAngle*FAlpha,0,0,1);
 for i:=0 to FCountLines-1 do
 	begin
 	iii:=50+Byte(not DrawFirst())*FArrayOfLines[i].FLengths[0];
 	for ii:=Byte(not DrawFirst()) to High(FArrayOfLines[i].FLengths) do
 		begin
 		Render.BeginScene(SGR_LINE_LOOP);
-		FColor.WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius).Color(Render);
+		FColor.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius).Color(Render);
 		Render.Vertex2f(iii+FArrayOfLines[i].FLengths[ii]-6,6);
 		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*cos(FArrayOfLines[i].FWidth/180*pi),
 			(iii+FArrayOfLines[i].FLengths[ii]-6)*sin(FArrayOfLines[i].FWidth/180*pi));
-		FColor.WithAlpha(1-iii/FMaxRadius+50/FMaxRadius).Color(Render);
+		FColor.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius).Color(Render);
 		Render.Vertex2f(iii*cos(FArrayOfLines[i].FWidth/180*pi),iii*sin(FArrayOfLines[i].FWidth/180*pi));
 		Render.Vertex2f(iii,6);
 		iii+=FArrayOfLines[i].FLengths[ii];
@@ -196,10 +199,69 @@ for i:=0 to FCountLines-1 do
 		end;
 	Render.Rotatef(FArrayOfLines[i].FWidth,0,0,1);
 	end;
+end;
+
+const
+	RadiusCentre      = 200;
+	QuantityMiniDraws = 3;
+
+var
+	i : TSGWord;
+	r : TSGSingle;
+begin
+CallAction();
+FCOlor:=(SGColorImport(1,0,0)*(1-FProgress)+SGColorImport(0,1,0)*FProgress);
+FCOlor.Normalize();
+FColor.AddAlpha(FAlpha);
+
+r:=FProjectionAngle;
+for i:=1 to QuantityMiniDraws do
+	begin
+	r+=2*pi/QuantityMiniDraws;
+	MiniDraw(r,RadiusCentre*(1-FProgress));
+	end;
+
 FAngle+=FAngleShift*Context.ElapsedTime;
 FProjectionAngle+=FProjectionAngleShift*Context.ElapsedTime;
+case FType of
+SGBeforeLoading:
+	begin
+	if FAlpha<1 then
+		begin
+		FAlpha+=0.01;
+		if FAlpha>1 then
+			begin
+			FAlpha:=1.00001;
+			FType:=SGInLoading;
+			end;
+		end;
+	end;
+SGInLoading:
+	begin
+	if FProgress >= 1 then
+		FType:=SGAfterLoading;
+	end;
+SGAfterLoading:
+	begin
+	if FAlpha>0 then
+		begin
+		FAlpha-=0.01;
+		if FAlpha<0 then
+			FAlpha:=-0.00001;
+		end;
+	end;
+end;
+
 if not FProgressIsSet then
-	FProgress+=0.001; if FProgress>1 then FProgress:=0;
+	begin
+	if FType = SGInLoading then
+		FProgress+=0.001; 
+	if (FType = SGAfterLoading) and (FAlpha<0) then
+		begin
+		FProgress:=0;
+		FType:=SGBeforeLoading;
+		end;
+	end;
 end;
 
 class function TSGLoading.ClassName():string;
