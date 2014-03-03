@@ -5,7 +5,8 @@ uses
 	 SaGeBase
 	,SaGeGameMesh
 	,SaGeContext
-	,SaGeModel;
+	,SaGeModel
+	,SaGeScene;
 type
 	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
 			public
@@ -14,6 +15,7 @@ type
 		procedure Draw();override;
 		class function ClassName():string;override;
 			protected
+		FScene: TSGScene;
 		end;
 implementation
 
@@ -30,6 +32,7 @@ end;
 constructor TSGGameTron.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
+FScene := TSGScene.Create(VContext);
 //Тут у нас начинается писец...
 end;
 

@@ -30,6 +30,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 	,dos
+	,SaGeBased
 	,Classes
 	,SysUtils
 	,SaGeContext
@@ -95,13 +96,13 @@ var
 var
 	NewContext:TSGContext;
 var //for cmd
-	S:String;
-	i:longWord;
+	S:TSGString;
+	i:TSGLongWord;
 	{$IFDEF MSWINDOWS}
 		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN) = SGBR_OPENGL;
 		{$ENDIF}
-	FGoToExit:Boolean = False;
-	VFullscreen:Boolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
+	FGoToExit:TSGBoolean = False;
+	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
 begin
 {$IFNDEF ANDROID}
 if (Prt='CMD') and (argc>2) then

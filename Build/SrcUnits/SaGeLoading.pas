@@ -163,39 +163,52 @@ begin
 Result:=FArrayOfLines[i].FLengths[0]>6;
 end;
 
+// For quik job
+var
+	VVCosAngle, VVSinAngle, VVCosAngle2, VVSinAngle2 : TSGSingle;
+
 begin
 FColor.Color(Render);
 
+VVSinAngle:=sin(VProjectionAngle);
+VVSinAngle2:=sin(Pi*FProjectionAngle);
+VVCosAngle:=cos(VProjectionAngle);
+VVCosAngle2:=cos(Pi*FProjectionAngle);
+
 Render.InitOrtho2d(
-	-Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
-	Context.Height/2+cos(VProjectionAngle)*VRadius+cos(Pi*FProjectionAngle)*VRadius,
-	Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
-	-Context.Height/2+cos(VProjectionAngle)*VRadius+cos(Pi*FProjectionAngle)*VRadius);
+	-Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	Context.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
+	Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	-Context.Height/2+(VVCosAngle+VVCosAngle2)*VRadius);
 FFont.DrawFontFromTwoVertex2f(SGStrReal(100*FProgress,0)+'%',
 	SGVertex2fImport(-35,-FFont.FontHeight/2),
 	SGVertex2fImport(35,FFont.FontHeight/2));
 
 Render.InitOrtho2d(
-	-Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
-	-Context.Height/2-cos(VProjectionAngle)*VRadius-cos(Pi*FProjectionAngle)*VRadius,
-	Context.Width/2-sin(VProjectionAngle)*VRadius-sin(Pi*FProjectionAngle)*VRadius,
-	Context.Height/2-cos(VProjectionAngle)*VRadius-cos(Pi*FProjectionAngle)*VRadius);
+	-Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	-Context.Height/2-(VVCosAngle+VVCosAngle2)*VRadius,
+	Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	Context.Height/2-(VVCosAngle+VVCosAngle2)*VRadius);
 Render.Rotatef(FAngle*FAlpha,0,0,1);
 for i:=0 to FCountLines-1 do
 	begin
 	iii:=50+Byte(not DrawFirst())*FArrayOfLines[i].FLengths[0];
 	for ii:=Byte(not DrawFirst()) to High(FArrayOfLines[i].FLengths) do
 		begin
+		VVCosAngle:=cos(FArrayOfLines[i].FWidth/180*pi);
+		VVSinAngle:=sin(FArrayOfLines[i].FWidth/180*pi);
+		
 		Render.BeginScene(SGR_LINE_LOOP);
 		FColor.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius).Color(Render);
 		Render.Vertex2f(iii+FArrayOfLines[i].FLengths[ii]-6,6);
-		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*cos(FArrayOfLines[i].FWidth/180*pi),
-			(iii+FArrayOfLines[i].FLengths[ii]-6)*sin(FArrayOfLines[i].FWidth/180*pi));
+		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*VVCosAngle,
+			(iii+FArrayOfLines[i].FLengths[ii]-6)*VVSinAngle);
 		FColor.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius).Color(Render);
-		Render.Vertex2f(iii*cos(FArrayOfLines[i].FWidth/180*pi),iii*sin(FArrayOfLines[i].FWidth/180*pi));
+		Render.Vertex2f(iii*VVCosAngle,iii*VVSinAngle);
 		Render.Vertex2f(iii,6);
-		iii+=FArrayOfLines[i].FLengths[ii];
 		Render.EndScene();
+		
+		iii+=FArrayOfLines[i].FLengths[ii];
 		end;
 	Render.Rotatef(FArrayOfLines[i].FWidth,0,0,1);
 	end;
@@ -208,11 +221,13 @@ const
 var
 	i : TSGWord;
 	r : TSGSingle;
+
 begin
 CallAction();
 FCOlor:=(SGColorImport(1,0,0)*(1-FProgress)+SGColorImport(0,1,0)*FProgress);
 FCOlor.Normalize();
 FColor.AddAlpha(FAlpha);
+Render.LineWidth(1);
 
 r:=FProjectionAngle;
 for i:=1 to QuantityMiniDraws do
@@ -255,7 +270,7 @@ end;
 if not FProgressIsSet then
 	begin
 	if FType = SGInLoading then
-		FProgress+=0.0001*(Random(5)+1); 
+		FProgress+=0.0001*(Random(5)+1)*Context.ElapsedTime; 
 	if (FType = SGAfterLoading) and (FAlpha<0) then
 		begin
 		FProgress:=0;
