@@ -14,7 +14,6 @@ type
 		procedure Draw();override;
 		class function ClassName():string;override;
 			protected
-		FModel:TSGGameModel;
 		end;
 implementation
 
@@ -31,14 +30,11 @@ end;
 constructor TSGGameTron.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FModel:=nil;
 //Тут у нас начинается писец...
 end;
 
 destructor TSGGameTron.Destroy();
 begin
-if FModel<>nil then
-	FModel.Destroy();
 inherited Destroy();
 end;
 

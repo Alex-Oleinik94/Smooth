@@ -4,6 +4,7 @@
 	//{$APPTYPE GUI}
 	program Main;
 {$ELSE}
+	// Дело в том, что на андроиде наше приложение загружается как библиотека к приложению, написанному на Java
 	library Main;
 	{$ENDIF}
 uses

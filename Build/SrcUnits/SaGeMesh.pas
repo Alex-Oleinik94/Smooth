@@ -282,8 +282,8 @@ type
 
     PSG3dObject = ^TSG3dObject;
 
-    { TSGModel }
-    TSGModel = class(TSGDrawClass)
+    { TSGCustomModel }
+    TSGCustomModel = class(TSGDrawClass)
     public
         constructor Create;override;
         destructor Destroy; override;
@@ -306,25 +306,21 @@ type
         //procedure SaveToSaGe3DObjFile(const FileWay: string);
         //procedure LoadWRLFromFile(const FileWay: string);
         //procedure LoadOFFFromFile(const FileWay: string);
-		procedure SaveToFile(const FileWay: string);
+		procedure SaveToFile(const FileWay: TSGString);
         class function GetWRLNextIdentity(const Text:PTextFile):string;
-        procedure Load3DSFromFile(const FileWay:string);
+        procedure Load3DSFromFile(const FileWay:TSGString);
         procedure Stripificate();
-        procedure Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
+        procedure Optimization(const SaveColors:TSGBoolean = True;const SaveNormals:TSGBoolean = False);
         procedure WriteInfo();
-        procedure LoadFromFile(const FileWay:string);
+        procedure LoadFromFile(const FileWay:TSGString);
         procedure Clear();virtual;
     public
-		function VertexesSize():QWord;
-		function FacesSize():QWord;
-		function Size():QWord;
+		function VertexesSize():TSGQWord;
+		function FacesSize():TSGQWord;
+		function Size():TSGQWord;
     end;
-    PSGModel = ^TSGModel;
+    PSGCustomModel = ^TSGCustomModel;
     
-    TSG3DCollisionObject=class(TSG3DObject)
-		
-		end;
-
 //{$DEFINE SGREADINTERFACE}      {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
@@ -1234,12 +1230,12 @@ end;
 (************************************){TSGModel}(************************************)
 (************************************************************************************)
 
-procedure TSGModel.SaveToFile(const FileWay: string);
+procedure TSGCustomModel.SaveToFile(const FileWay: string);
 begin
 ;//SaveToSaGe3DObjFile(FileWay);
 end;
 
-procedure TSGModel.Clear;
+procedure TSGCustomModel.Clear;
 var
 	i:LongWord;
 begin
@@ -1259,7 +1255,7 @@ if NOfMaterials>0 then
 	end;
 end;
 
-procedure TSGModel.LoadToVBO;
+procedure TSGCustomModel.LoadToVBO;
 var	
 	i:LongInt;
 begin
@@ -1269,13 +1265,13 @@ for i:=0 to NOfObjects-1 do
 	end;
 end;
 
-class function TSGModel.GetWRLNextIdentity(const Text:PTextFile):string;
+class function TSGCustomModel.GetWRLNextIdentity(const Text:PTextFile):string;
 begin
 Result:='';
 (**)
 end;
 
-procedure TSGModel.LoadFromFile(const FileWay:string);
+procedure TSGCustomModel.LoadFromFile(const FileWay:string);
 begin
 if SGFileExists(FileWay) then
 	begin
@@ -1300,12 +1296,12 @@ if SGFileExists(FileWay) then
 	end;
 end;
 
-class function TSGModel.ClassName():String;
+class function TSGCustomModel.ClassName():String;
 begin
 Result:='TSGModel';
 end;
 
-procedure TSGModel.WriteInfo();
+procedure TSGCustomModel.WriteInfo();
 var
 	i:LongWord;
 begin
@@ -1316,7 +1312,7 @@ for i:=0 to NOfObjects-1 do
 	ArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
 end;
 
-procedure TSGModel.Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
+procedure TSGCustomModel.Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
 var
 	i:LongWord;
 begin
@@ -1324,7 +1320,7 @@ for i:=0 to NOfObjects-1 do
 	;//ArObjects[i].Optimization(SaveColors,SaveNormals);
 end;
 
-procedure TSGModel.Stripificate;
+procedure TSGCustomModel.Stripificate;
 var
 	i:LongWord;
 begin
@@ -1332,7 +1328,7 @@ for i:=0 to NOfObjects-1 do
 	;//ArObjects[i].Stripificate;
 end;
 
-function TSGModel.VertexesSize():QWord;Inline;
+function TSGCustomModel.VertexesSize():QWord;Inline;
 var
 	i:LongWord;
 begin
@@ -1341,7 +1337,7 @@ for i:=0 to NOfObjects-1 do
 	Result+=ArObjects[i].VertexesSize();
 end;
 
-function TSGModel.FacesSize():QWord;inline;
+function TSGCustomModel.FacesSize():QWord;inline;
 var
 	i:LongWord;
 begin
@@ -1350,7 +1346,7 @@ for i:=0 to NOfObjects-1 do
 	Result+=ArObjects[i].FacesSize();
 end;
 
-function TSGModel.Size():QWord;inline;
+function TSGCustomModel.Size():QWord;inline;
 var
 	i:LongWord;
 begin
@@ -1360,7 +1356,7 @@ for i:=0 to NOfObjects-1 do
 end;
 
 
-procedure TSGModel.AddObjectColor(const ObjColor: TSGColor4f);
+procedure TSGCustomModel.AddObjectColor(const ObjColor: TSGColor4f);
 var
     i: longint;
 begin
@@ -1368,7 +1364,7 @@ begin
         ArObjects[i].FObjectColor := ObjColor;
 end;
 
-procedure TSGModel.Load3DSFromFile(const FileWay:string);
+procedure TSGCustomModel.Load3DSFromFile(const FileWay:string);
 begin
 {with TSGLoad3DS.Create do
 	begin
@@ -1377,7 +1373,7 @@ begin
 	end;}
 end;
 
-constructor TSGModel.Create;
+constructor TSGCustomModel.Create();
 begin
     inherited;
     NOfObjects := 0;
@@ -1386,7 +1382,7 @@ begin
     ArObjects := nil;
 end;
 
-destructor TSGModel.Destroy;
+destructor TSGCustomModel.Destroy();
 var
     i: longint;
 begin
@@ -1397,7 +1393,7 @@ begin
     inherited;
 end;
 
-procedure TSGModel.Draw;
+procedure TSGCustomModel.Draw();
 var
     i: longword;
 begin

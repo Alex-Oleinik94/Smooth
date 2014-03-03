@@ -11,73 +11,57 @@ uses
 	, SaGeUtils
 	, SaGeImages
 	, SaGeRender
-	, Crt
 	, SaGeContext
 	, SaGeMesh
 	, SaGeGameMesh;
 type
-	TSGGameModel=class(TSGDrawClass)
+	TSGCustomPosition = record
+		case byte of
+		0: (FVertex : TSGVertex3f; FAngles : TSGVertex3f);
+		1: (X, Y, Z:TSGSingle; A, B, G : TSGSingle);
+		end;
+	
+	TSGPosition = object
+		FPosition : TSGCustomPosition;
+		end;
+	
+	TSGModel=class(TSGDrawClass)
 			public
 		constructor Create();override;
 		destructor Destroy(); override;
 		class function ClassName():String;override;
 			protected
-		FQuantityMeshes:LongWord;
-		FMeshes:packed array of TSGGameMesh;
+		FMesh          : TSG3DObject;
+		FColizableMesh : TSG3DObject;
+		FPosition      : TSGPosition;
+		FPositionShift : TSGPosition;
+		FDistance      : TSGSingle;
 			public
 		procedure Draw();override;
-		procedure FindCollision();virtual;
 		end;
 
 implementation
 
-procedure TSGGameModel.FindCollision();
-var
-	i,ii:TSGMaxEnum;
+procedure TSGModel.Draw();
 begin
-if FMeshes<>nil then
-	for i:=0 to FQuantityMeshes-2 do
-		if FMeshes[i]<>nil then
-			for ii:=i+1 to FQuantityMeshes-1 do
-				if FMeshes[ii]<>nil then
-					//if SGPInSphere(FMeshes[ii].FCo) then
-						begin
-						//Вод тут ищем колизии
-						end;
+
 end;
 
-procedure TSGGameModel.Draw();
-var
-	i:TSGMaxEnum;
-begin
-if FMeshes<>nil then
-	for i:=0 to FQuantityMeshes-1 do
-		begin
-		if FMeshes[i]<>nil then
-			begin
-			//!Render.PushMatrix();
-			FMeshes[i].TransfomMatrix();
-			FMeshes[i].Draw();
-			//!Render.PopMatrix();
-			end;
-		end;
-end;
-
-constructor TSGGameModel.Create();
+constructor TSGModel.Create();
 begin
 inherited;
-FQuantityMeshes:=0;
-FMeshes:=nil;
+FMesh:=nil;
+FColizableMesh:=nil;
 end;
 
-destructor TSGGameModel.Destroy(); 
+destructor TSGModel.Destroy(); 
 begin
 inherited;
 end;
 
-class function TSGGameModel.ClassName():String;
+class function TSGModel.ClassName():String;
 begin
-Result:='Game Model';
+Result:='TSGModel';
 end;
 
 end.

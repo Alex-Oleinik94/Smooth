@@ -51,7 +51,7 @@ type
 		class function ClassName:string;override;
 		procedure Draw;override;
 			protected
-		FMesh:TSGModel;
+		FMesh:TSGCustomModel;
 		FCamera:TSGCamera;
 		end;
 type

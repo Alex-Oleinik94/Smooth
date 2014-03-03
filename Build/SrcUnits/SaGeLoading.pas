@@ -255,7 +255,7 @@ end;
 if not FProgressIsSet then
 	begin
 	if FType = SGInLoading then
-		FProgress+=0.001*(Random(5)+1); 
+		FProgress+=0.0001*(Random(5)+1); 
 	if (FType = SGAfterLoading) and (FAlpha<0) then
 		begin
 		FProgress:=0;

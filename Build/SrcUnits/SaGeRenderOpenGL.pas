@@ -119,7 +119,7 @@ type
 //	а в GL ES (На мобтльных устройствах) во Float.
 //И если эти функции понадобятся не в GL ES, то нужно передефайнить тип элементов матрици.
 type
-	SGRGLMatrix4Type = {$IFDEF MOBILE} Single {$ELSE} Real {$ENDIF};
+	SGRGLMatrix4Type = {$IFDEF MOBILE} TSGSingle {$ELSE} TSGReal {$ENDIF};
 type
 	SGRGLMatrix4=array [0..3,0..3] of SGRGLMatrix4Type;
 
@@ -425,12 +425,12 @@ end;
 
 procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
 begin 
-{$IFNDEF ANDROID}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(VQ,PT);
+{$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(VQ,PT);
 end;
 
 procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
 begin 
-{$IFNDEF ANDROID}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(VQuantity,VPoint);
+{$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(VQuantity,VPoint);
 end;
 
 procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
@@ -484,7 +484,7 @@ end;
 
 procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glBegin(VPrimitiveType);
 {$ELSE}
 	//хз
@@ -493,7 +493,7 @@ end;
 
 procedure TSGRenderOpenGL.EndScene();
 begin
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glEnd();
 {$ELSE}
 	//хз
@@ -517,7 +517,7 @@ glEnable(GL_FOG);
 {$IFNDEF MOBILE} 
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 {$ELSE} 
-	{ХЗ} 
+	{хз} 
 	{$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);

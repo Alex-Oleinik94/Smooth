@@ -68,7 +68,7 @@ type
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
-		FMesh        : TSGModel;
+		FMesh        : TSGCustomModel;
 		FMeshesInfo  : packed array of TSGExBoolean;
 		FMeshesReady : Boolean;
 		FShift       : int64;
@@ -240,7 +240,7 @@ var
 begin
 if FMesh=nil then
 	begin
-	FMesh:=TSGModel.Create;
+	FMesh:=TSGCustomModel.Create;
 	FMesh.SetContext(Context);
 	end
 else
