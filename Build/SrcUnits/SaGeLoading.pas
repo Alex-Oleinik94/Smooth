@@ -255,11 +255,13 @@ end;
 if not FProgressIsSet then
 	begin
 	if FType = SGInLoading then
-		FProgress+=0.001; 
+		FProgress+=0.001*(Random(5)+1); 
 	if (FType = SGAfterLoading) and (FAlpha<0) then
 		begin
 		FProgress:=0;
 		FType:=SGBeforeLoading;
+		FProjectionAngleShift:=SGRandomMinus()*0.01;
+		FAngleShift:=SGRandomMinus()*0.7;
 		end;
 	end;
 end;

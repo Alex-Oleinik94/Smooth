@@ -7,7 +7,7 @@ uses
 	,SaGeRender
 	,SaGeCommon
 	,Math
-	{$IFNDEF ANDROID}
+	{$IFNDEF MOBILE}
 		,gl
 		,glu
 		,glext
@@ -245,24 +245,24 @@ end;
 
 procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
 begin
+x:=0;
+y:=0;
 {$IFDEF MSWINDOWS}
 	x:=-7*Byte(not VFullscreen);
 	y:=5*Byte(not VFullscreen);
 {$ELSE}
 	{$IFDEF LINUX}
-		x:=0;
-		y:=0;
 		{$ENDIF}
 	{$ENDIF}
 end;
 
 function TSGRenderOpenGL.TopShift(const VFullscreen:Boolean = False):LongWord;
 begin
+Result:=0;
 {$IFDEF MSWINDOWS}
 	Result:=28*Byte(not VFullscreen);
 {$ELSE}
 	{$IFDEF LINUX}
-		Result:=0;
 		{$ENDIF}
 	{$ENDIF}
 end;
@@ -301,7 +301,7 @@ end;
 
 procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
 begin
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	if IsEnabled(GL_BLEND) then
 		glColor4f(r,g,b,1)
 	else
@@ -313,7 +313,7 @@ end;
 
 procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
 begin 
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glTexCoord2f(x,y);
 {$ELSE}
 	//glTexCoord3f(x,y,0);
@@ -324,7 +324,7 @@ end;
 
 procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
 begin
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	glVertex2f(x,y);
 {$ELSE}
 	//glVertex3f(x,y,0);
@@ -425,38 +425,22 @@ end;
 
 procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
 begin 
-{$IFNDEF ANDROID}
-	glGenBuffersARB(VQ,PT);
-{$ELSE}
-	//õç
-	{$ENDIF}
+{$IFNDEF ANDROID}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(VQ,PT);
 end;
 
 procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
 begin 
-{$IFNDEF ANDROID}
-	glDeleteBuffersARB(VQuantity,VPoint);
-{$ELSE}
-	//õç
-	{$ENDIF}
+{$IFNDEF ANDROID}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(VQuantity,VPoint);
 end;
 
 procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
 begin 
-{$IFNDEF ANDROID}
-	glBindBufferARB(VParam,VParam2);
-{$ELSE}
-	//õç
-	{$ENDIF}
+{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,VParam2);
 end;
 
 procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal); 
 begin 
-{$IFNDEF ANDROID}
-	glBufferDataARB(VParam,VSize,VBuffer,VParam2);
-{$ELSE}
-	//õç
-	{$ENDIF}
+{$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
 end;
 
 procedure TSGRenderOpenGL.DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer); 
@@ -544,11 +528,7 @@ glFogf(GL_FOG_DENSITY, 0.55);
 
 glClearColor(0,0,0,0);
 glEnable(GL_DEPTH_TEST);
-{$IFNDEF MOBILE} 
-	glClearDepth(1.0);
-{$ELSE} 
-	{õç} 
-	{$ENDIF}
+{$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
 glDepthFunc(GL_LEQUAL);
 
 glEnable(GL_LINE_SMOOTH);
