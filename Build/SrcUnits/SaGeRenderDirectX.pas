@@ -90,9 +90,9 @@ type
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
 			private
-			//С†РІРµС‚, РІ РєРѕС‚РѕСЂС‹Р№ РѕРєСЂР°С€РёРІР°РµС‚СЃСЏ Р±СѓС„РµСЂ РїСЂРё РѕС‡РёСЃС‚РєРµ
+			//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
-			//РїСЂРёРІРµРґРµРЅРёРµ С†РІРµС‚РѕРІ Рё РїРѕР»РёРіРѕРЅРѕРІ Рє Vertex-Р°Рј РѕРїРµРЅР¶Р»-СЏ
+			//приведение цветов и полигонов к Vertex-ам опенжл-я
 		FPrimetiveType : LongWord;
 		FPrimetivePrt  : LongWord;
 		FNowColor      : LongWord;
@@ -711,7 +711,7 @@ end;
 
 procedure TSGRenderDirectX.DrawElements(
 	const VParam:Cardinal;
-	const VSize:int64;// РЅРµ РІ Р±Р°Р№С‚Р°С… Р° РІ 4*Р±Р°Р№С‚
+	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
 	VBuffer:Pointer); 
 {var
@@ -915,7 +915,7 @@ FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
 FNowTexture:=0;
 
-//Р’РєР»СЋС‡Р°РµРј Z-Р±СѓС„РµСЂ
+//Включаем Z-буфер
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
 //Устанавливаем материал
@@ -952,34 +952,44 @@ pDevice.SetRenderState(D3DRS_AMBIENT, 0);
 //Отключаем свет
 pDevice.SetRenderState(D3DRS_LIGHTING,0);
 
-//========РїР°СЂР°РјРµС‚СЂС‹ С‚РµРєСЃС‚СѓСЂ
-//Р’РєР»СЋС‡РёР»Рё РІС‹С‡РёСЃР»РµРЅРёРµ С†РІРµС‚Р° РёР· С‚РµРєСЃС‚СѓСЂС‹ RGB РєР°РЅР°Р»РѕРІ
+//========Параметры текстур
+//Включили вычисление цвета из текстуры RGB каналов
 pDevice.SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 pDevice.SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 pDevice.SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-//Р’РєР»СЋС‡РµРЅРёРµ ALPHA РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё С‚РµРєСЃС‚СѓСЂС‹(Р’РєР»СЋС‡РёР»Рё РІС‹С‡РёСЃР»РµРЅРёРµ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё РёР· Alpha РєР°РЅР°Р»Р°)
+//Включение ALPHA прозрачности текстуры(Включили вычисление прозрачности из Alpha канала)
 pDevice.SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
-//============РџСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ
-pDevice.SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
+//============Прозрачность
+pDevice.SetRenderState( D3DRS_ALPHABLENDENABLE, 1);
 pDevice.SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
 //===========CULL FACE
-//С‡С‚РѕР±С‹ СЂРёСЃРѕРІР°Р»РёСЃСЊ РІСЃРµ РїРѕРґР»РёРіРѕРЅС‹, Р° РЅРµ С‚РѕР»СЊРєРѕ С‚Рµ, Сѓ РєРѕС‚РѕСЂС‹С…
-//РЅРѕСЂРјР°Р»СЊ РЅР°РїСЂР°РІР»РµРЅР° РІ СЃС‚РѕСЂРѕРЅСѓ РєР°РјРµСЂС‹
+//чтобы рисовались все подлигоны, а не только те, у которых
+//нормаль направлена в сторону камеры
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
-//===================РЎР“Р›РђР–Р?Р’РђРќР?Р• 
+//===================Р–Р?Р’РђРќР?Р• 
+//===================Ж ? В А Н ? E
 //pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
-//Р§РµС‚Рѕ СЌС‚Рѕ СЃРёР»СЊРЅРѕ РјСѓС‚РёС‚, Р»РёРЅРёРё РєРѕР»Р±Р°СЃСѓ РЅР°РїРѕРјРёРЅР°СЋС‚ РѕС‚ СЌС‚РѕРіРѕ РїР°СЂР°РјРµС‚СЂР°
+//Чето это сильно мутит, линии колбасу напоминают от этого параметра
 //pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
+
+//Линейная фильтрация текстур
 pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
-pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR); 
-//РћС‚ MIP С„РёР»СЊС‚РѕСЂР° Сѓ С‚РµРєСЃС‚СѓСЂ РІРѕР·РЅРёРєР°СЋС‚ Р°РЅРѕРјР°Р»РёРё
+pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+//От MIP фильтора у текстур возникают аномалии
 //pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
-//РќР°СЃС‚СЂРѕР№РєР° СЂРµР¶РёРјР° Р°РЅРёР·РѕС‚СЂРѕРїРЅРѕР№ С„РёР»СЊС‚СЂР°С†РёРё (x1, x2 ,x4, x8, x16)
-//pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 1);
+
+//Tочечьная фильтрация текстур
+(*pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
+pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);*)
+
+//Анизатропная фильтрация текстур
+(*pDevice.SetSamplerState(0,D3DSAMP_MAGFILTER,D3DTEXF_ANISOTROPIC);
+pDevice.SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_ANISOTROPIC);
+pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 4);*)
 end;
 
 constructor TSGRenderDirectX.Create();
@@ -1062,11 +1072,11 @@ CHeight:=LongWord(FWindow.Get('HEIGHT'));
 LoadIdentity();
 if Mode=SG_3D then
 	begin
-	D3DXMatrixPerspectiveFovLH(Matrix,            // РїРѕР»СѓС‡РµРЅРЅР°СЏ РёС‚РѕРіРѕРІР°СЏ РјР°С‚СЂРёС†Р° РїСЂРѕРµРєС†РёРё
-		D3DX_PI/4,                                // РїРѕР»Рµ Р·СЂРµРЅРёСЏ РІ РЅР°РїСЂР°РІР»РµРЅРёРё РѕСЃРё Y РІ СЂР°РґРёР°РЅР°С…
-		CWidth/CHeight,                           // СЃРѕРѕС‚РЅРѕС€РµРЅРёСЏ СЃС‚РѕСЂРѕРЅ СЌРєСЂР°РЅР° Width/Height
-		0.0011,                                   // РїРµСЂРµРґРЅРёР№ РїР»Р°РЅ РѕС‚СЃРµС‡РµРЅРёСЏ СЃС†РµРЅС‹
-		500);                                     // Р·Р°РґРЅРёР№ РїР»Р°РЅ РѕС‚СЃРµС‡РµРЅРёСЏ СЃС†РµРЅС‹
+	D3DXMatrixPerspectiveFovLH(Matrix,            // Перспективная проэкция
+		D3DX_PI/4,                                // Угол зрения 
+		CWidth/CHeight,                           // Отношение сторон экрана
+		0.0011,                                   // Передняя плоскость отсечения
+		500);                                     // Задняя плоскость отсечения
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 	D3DXMatrixScaling(Matrix,1,1,-1);
 	pDevice.SetTransform(D3DTS_VIEW, Matrix);
@@ -1136,7 +1146,7 @@ if (pD3D=nil) then
 	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
 	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 
-	//РЈ РјРµРЅСЏ РЅР°  РЅРµС‚Р±СѓРєРµ РІС‹Р»РµС‚Р°РµС‚ СЃ СЌС‚РёРј РїРѕСЂР°РјРµС‚СЂРѕРј
+	//У меня на  нетбуке вылетает с этим пораметром
 	//d3dpp.MultiSampleType:=D3DMULTISAMPLE_4_SAMPLES;
 
 	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
