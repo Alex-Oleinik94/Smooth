@@ -16,7 +16,7 @@ type
 			public
 		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
-		class function ClassName():string;override;
+		class function ClassName():TSGString;override;
 		procedure Draw();override;
 			private
 		FProjectionAngle      : TSGSingle;     //Угол поворота центра
@@ -115,7 +115,7 @@ FCountLines:=14;
 if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
-FProjectionAngle:=Random(360);
+FProjectionAngle:=600;
 FProjectionAngleShift:=SGRandomMinus()*0.01; //Тут в радианах, поэтому так мало
 FAngleShift:=SGRandomMinus()*0.7;            //А тут в градусах
 FMaxRadius:=280;
@@ -243,7 +243,7 @@ SGBeforeLoading:
 	begin
 	if FAlpha<1 then
 		begin
-		FAlpha+=0.01;
+		FAlpha+=0.007*Context.ElapsedTime;
 		if FAlpha>1 then
 			begin
 			FAlpha:=1.00001;
@@ -254,13 +254,16 @@ SGBeforeLoading:
 SGInLoading:
 	begin
 	if FProgress >= 1 then
+		begin
 		FType:=SGAfterLoading;
+		FProjectionAngle:=600;
+		end;
 	end;
 SGAfterLoading:
 	begin
 	if FAlpha>0 then
 		begin
-		FAlpha-=0.01;
+		FAlpha-=0.007*Context.ElapsedTime;
 		if FAlpha<0 then
 			FAlpha:=-0.00001;
 		end;
@@ -270,20 +273,21 @@ end;
 if not FProgressIsSet then
 	begin
 	if FType = SGInLoading then
-		FProgress+=0.0001*(Random(5)+1)*Context.ElapsedTime; 
+		FProgress+=0.0003*(Random(5)+1)*Context.ElapsedTime; 
 	if (FType = SGAfterLoading) and (FAlpha<0) then
 		begin
 		FProgress:=0;
 		FType:=SGBeforeLoading;
 		FProjectionAngleShift:=SGRandomMinus()*0.01;
 		FAngleShift:=SGRandomMinus()*0.7;
+		FProjectionAngle:=600;
 		end;
 	end;
 end;
 
 class function TSGLoading.ClassName():string;
 begin
-Result:='Загрузка...';
+Result:='Модель загрузки';
 end;
 
 end.

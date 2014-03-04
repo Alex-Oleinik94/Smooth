@@ -1,12 +1,15 @@
 {$INCLUDE Includes\SaGe.inc}
+
 unit SaGeTron;
+
 interface
+
 uses 
 	 SaGeBase
-	,SaGeGameMesh
 	,SaGeContext
 	,SaGeModel
 	,SaGeScene;
+
 type
 	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
 			public
@@ -17,6 +20,7 @@ type
 			protected
 		FScene: TSGScene;
 		end;
+
 implementation
 
 class function TSGGameTron.ClassName():string;
