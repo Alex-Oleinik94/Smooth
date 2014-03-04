@@ -6,7 +6,8 @@ interface
 
 uses
 	crt
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeCommon
 	,lNet
 	,lCommon
@@ -22,7 +23,7 @@ type
 	
 	TSGReceiveProcedure=procedure(Parant:Pointer;AStream:TMemoryStream; aSocket: TSGSocket);
 	
-	TSGConnectionMode = (TSGServerMode,TSGClientMode);
+	TSGConnectionMode = (SGServerMode,SGClientMode);
 	
 	TSGUDPConnection=class
 			public
@@ -75,8 +76,8 @@ end;
 procedure TSGUDPConnection.Start;inline;
 begin
 case FConnectionMode of
-TSGClientMode:Connect;
-TSGServerMode:Listen;
+SGClientMode:Connect;
+SGServerMode:Listen;
 end;
 end;
 
@@ -100,7 +101,7 @@ FConnection.Timeout := 100;
 FParent:=nil;
 FAddress:='localhost';
 FPort:=5233;
-FConnectionMode:=TSGClientMode;
+FConnectionMode:=SGClientMode;
 FConnectionResult:=False;
 end;
 

@@ -8,7 +8,10 @@ uses
 	 SaGeBase
 	,SaGeContext
 	,SaGeModel
-	,SaGeScene;
+	,SaGeScene
+	,SaGePhisics
+	,SaGeGameNet
+	,SaGeNet;
 
 type
 	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
@@ -37,6 +40,8 @@ constructor TSGGameTron.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FScene := TSGScene.Create(VContext);
+FScene.AddMutator(TSGPhisics2D);
+(FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
 //Тут у нас начинается писец...
 end;
 

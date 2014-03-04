@@ -22,9 +22,15 @@ type
 		FPhysicDistance : TSGSingle;   // ƒл€ не напр€гани€ физики
 		end;
 	
-	TSGPhisic = class(TSGMutator)
+	TSGPhisics2D = class(TSGMutator)
+		procedure UpDate();override;
 		end;
 
 implementation
+
+procedure TSGPhisics2D.UpDate();
+begin
+
+end;
 
 end.
