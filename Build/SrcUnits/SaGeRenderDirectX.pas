@@ -138,6 +138,8 @@ type
 		procedure AfterVertexProc();inline;
 		end;
 
+function GetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
+
 implementation
 
 (*for look at*)
@@ -151,6 +153,14 @@ D3DXMATRIX V;
 D3DXMatrixLookAtLH(&V, &position, &target, &up); 
 //и задаем как матрицу вида 
 pDevice->SetTransform(D3DTS_VIEW, &V);}
+
+function GetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
+begin
+Result.r:=r;
+Result.b:=b;
+Result.g:=g;
+Result.a:=a;
+end;
 
 procedure TSGRenderDirectX.PushMatrix();
 begin
@@ -416,6 +426,8 @@ SGR_LIGHT0:
 		begin
 		FLigth._Type:=D3DLIGHT_POINT;
 		FLigth.Attenuation0:=1;
+		//FLigth.Attenuation1:=0;
+		//FLigth.Attenuation2:=0.01;
 		FLigth.Position.x:=PArS(VParam2)[0];
 		FLigth.Position.y:=PArS(VParam2)[1];
 		FLigth.Position.z:=PArS(VParam2)[2];
@@ -919,29 +931,29 @@ FNowTexture:=0;
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
 //Устанавливаем материал
+(*Справка!*)
+{Diffuse - рассеиваемый свет. 
+Ambient - фоновый свет. 
+Specular - отражаемый свет. 
+Emissive - собственное свечение объекта. 
+Power - резкость отражений.}
 FillChar(Material,SizeOf(Material),0);
-Material.Diffuse.r := 1;
-Material.Diffuse.g := 1;
-Material.Diffuse.b := 1;
-Material.Diffuse.a := 1;
-Material.Ambient.r := 0;
-Material.Ambient.g := 0;
-Material.Ambient.b := 0;
-Material.Ambient.a := 0;
-Material.Specular.r:=0.4;
-Material.Specular.g:=0.4;
-Material.Specular.b:=0.4;
-Material.Specular.a:=1;
+Material.Diffuse:=GetD3DCOLORVALUE(1,1,1,1);
+Material.Ambient:=GetD3DCOLORVALUE(0,0,0,0);
+Material.Specular:=GetD3DCOLORVALUE(0.4,0.4,0.4,1);
+Material.Emissive:=GetD3DCOLORVALUE(0,0,0,0);
 Material.Power:=2;
 pDevice.SetMaterial(Material);
 
 //Устанавливаем освящение
 FillChar(FLigth,SizeOf(FLigth),0);
 FLigth._Type:=D3DLIGHT_POINT;
-FLigth.Diffuse.r := 1 ;
-FLigth.Diffuse.g := 1 ;
-FLigth.Diffuse.b := 1 ;
-FLigth.Range := 1000;// предел расстояния, на котором освещаются примитивы, смотря от камеры.
+FLigth.Diffuse:=GetD3DCOLORVALUE(1,1,1,1);
+FLigth.Ambient:=GetD3DCOLORVALUE(0.5,0.5,0.5,1.0);
+FLigth.Specular:=GetD3DCOLORVALUE(1.0,1.0,1.0,1.0);
+// предел расстояния, на котором освещаются примитивы, смотря от камеры.
+FLigth.Range := 1000;
+// Направление (Только для directional and spotlights)
 {FLigth.Direction.x:=0;
 FLigth.Direction.y:=1;
 FLigth.Direction.z:=0;}
@@ -970,8 +982,7 @@ pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 //нормаль направлена в сторону камеры
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
-//===================Р–Р?Р’РђРќР?Р• 
-//===================Ж ? В А Н ? E
+//===================Сглаживание
 //pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
 //Чето это сильно мутит, линии колбасу напоминают от этого параметра
 //pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
@@ -990,6 +1001,18 @@ pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);*)
 (*pDevice.SetSamplerState(0,D3DSAMP_MAGFILTER,D3DTEXF_ANISOTROPIC);
 pDevice.SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_ANISOTROPIC);
 pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 4);*)
+
+//Фильтр детализации текстур 
+//(Чтобы при загрузке текстур генерировались несколько текстур, разного расширения)
+pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_NONE);
+//pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_POINT);
+//pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_LINEAR);
+
+//=====Заливка полигонов цветами
+//Сплошная заливка
+//pDevice.SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+//Заливка по методу Гюро (нормальная)
+pDevice.SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
 end;
 
 constructor TSGRenderDirectX.Create();

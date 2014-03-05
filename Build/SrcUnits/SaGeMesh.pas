@@ -76,6 +76,7 @@ type
 
     { TSG3dObject }
     // Ќаша моделька..
+type
     TSG3DObject = class(TSGDrawClass)
     public
         constructor Create(); override;
@@ -110,13 +111,13 @@ type
 		function GetVertexLength():QWord;inline;
     public
         // Ёти свойства уже были прокоментированы выше (см на что эти свойства ссылаютс€)
-		property QuantityVertexes:LongWord read FNOfVerts;
-		property HasTexture:Boolean read FHasTexture write FHasTexture;
-		property HasColors:Boolean read FHasColors write FHasColors;
-		property HasNormals:Boolean read FHasNormals write FHasNormals;
-		property ColorType:TSGMeshColorType read FColorType write SetColorType;
-		property VertexType:TSGMeshVertexType read FVertexType write SetVertexType;
-		property PoligonesType:LongWord read FPoligonesType write FPoligonesType;
+		property QuantityVertexes : LongWord          read FNOfVerts;
+		property HasTexture       : Boolean           read FHasTexture    write FHasTexture;
+		property HasColors        : Boolean           read FHasColors     write FHasColors;
+		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
+		property ColorType        : TSGMeshColorType  read FColorType     write SetColorType;
+		property VertexType       : TSGMeshVertexType read FVertexType    write SetVertexType;
+		property PoligonesType    : LongWord          read FPoligonesType write FPoligonesType;
     protected
         // ј это у нас массив индексов
 		ArFaces:packed array of TSGFaceType;
@@ -277,7 +278,7 @@ type
 		FName : TSGString;
 	public
 		// —войство : им€ модельки
-		property Name:string read FName write FName;
+		property Name:TSGString read FName write FName;
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -321,11 +322,11 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-//{$DEFINE SGREADINTERFACE}      {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+//{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-//{$DEFINE SGREADIMPLEMENTATION} {$i Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+//{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
 function TSG3DObject.GetVertexLength():QWord;inline;
 begin

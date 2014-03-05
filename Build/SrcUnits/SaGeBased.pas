@@ -25,6 +25,7 @@ type
 	TSGWord	    = Word;
 	TSGQWord	= QWord;
 	TSGSingle	= Single;
+	TSGDouble   = TSGReal;
 	TSGChar		= Char;
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;

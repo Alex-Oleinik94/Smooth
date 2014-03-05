@@ -1,31 +1,31 @@
 {$IFDEF SGREADINTERFACE}
 
 const
-	//>------ Р“Р»Р°РІРЅС‹Р№ Chunk, РІ РЅР°С‡Р°Р»Рµ РєР°Р¶РґРѕРіРѕ 3ds-С„Р°Р№Р»Р°
+	//>------ Главный Chunk, в начале каждого 3ds-файла
 	MAIN3DS       		=$4D4D;
 
-	//>------ Р“Р»Р°РІРЅС‹Рє Chunk-Рё
-	EDIT3DS    			=$3D3D;            // Р­С‚Рѕ РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёСЋ РјРµС€Р° РїРµСЂРµРґ РёРЅС„РѕСЂРјР°С†РёРµР№ РѕР± РѕР±СЊРµРєС‚Рµ
-	cVERSION       		=$0002;            // РџСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёСЋ .3ds С„Р°Р№Р»Р°
-	cEDITKEYFRAME  		=$B000;            // РҐРёРґРµСЂ РґР»СЏ РІСЃРµР№ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РєР°РґСЂР°С…
+	//>------ Главнык Chunk-и
+	EDIT3DS    			=$3D3D;            // Это предоставляет версию меша перед информацией об обьекте
+	cVERSION       		=$0002;            // Предоставляет версию .3ds файла
+	cEDITKEYFRAME  		=$B000;            // Хидер для всей информации о кадрах
 
-	//>------ РїРѕРґ-РґРµС„Р°Р№РЅС‹ OBJECTINFO
-	cMATERIAL      		=$AFFF;        // РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚РµРєСЃС‚СѓСЂР°С…
-	EDIT_OBJECT        	=$4000;        // РџРѕР»РёРіРѕРЅС‹, РІРµСЂС€РёРЅС‹, Рё С‚.Рґ...
+	//>------ под-дефайны OBJECTINFO
+	cMATERIAL      		=$AFFF;        // Информация о текстурах
+	EDIT_OBJECT        	=$4000;        // Полигоны, вершины, и т.д...
 
-	//>------ РїРѕРґ-РґРµС„Р°Р№РЅС‹ РґР»СЏ MATERIAL
-	cMATNAME       		=$A000;            // РќР°Р·РІР°РЅРёРµ РјР°С‚РµСЂРёР°Р»Р°
-	cMATDIFFUSE   		=$A020;            // РҐСЂР°РЅРёС‚ С†РІРµС‚ РѕР±СЊРµРєС‚Р°/РјР°С‚РµСЂРёР°Р»Р°
-	cMATMAP        		=$A200;            // РҐРёРґРµСЂ РґР»СЏ РЅРѕРІРѕРіРѕ РјР°С‚РµСЂРёР°Р»Р°
-	cMATMAPFILE    		=$A300;            // РҐСЂР°РЅРёС‚ РёРјСЏ С„Р°Р№Р»Р° С‚РµРєСЃС‚СѓСЂС‹
+	//>------ под-дефайны для MATERIAL
+	cMATNAME       		=$A000;            // Название материала
+	cMATDIFFUSE   		=$A020;            // Хранит цвет обьекта/материала
+	cMATMAP        		=$A200;            // Хидер для нового материала
+	cMATMAPFILE    		=$A300;            // Хранит имя файла текстуры
 
-	OBJ_TRIMESH   		=$4100;            // Р”Р°С‘С‚ РЅР°Рј Р·РЅР°С‚СЊ, С‡С‚Рѕ РЅР°С‡РёРЅР°РµРј СЃС‡РёС‚С‹РІР°С‚СЊ РЅРѕРІС‹Р№ РѕР±СЊРµРєС‚
+	OBJ_TRIMESH   		=$4100;            // Даёт нам знать, что начинаем считывать новый обьект
 
-	//>------ РїРѕРґ-РґРµС„Р°Р№РЅС‹ РґР»СЏ OBJECT_MESH
-	TRI_VERTEXLIST     	=$4110;      // Р’РµСЂС€РёРЅС‹ РѕР±СЊРµРєС‚Р°
-	TRI_FACELIST        =$4120;      // РџРѕР»РёРіРѕРЅС‹ РѕР±СЊРµРєС‚Р°
-	TRI_MATERIAL     	=$4130;      // Р”РµС„Р°Р№РЅ РЅР°С…РѕРґРёС‚СЃСЏ, РµСЃР»Рё РѕР±СЊРµРєС‚ РёРјРµРµС‚ РјР°С‚РµСЂРёР°Р», РёРЅР°С‡Рµ С†РІРµС‚/С‚РµРєСЃС‚СѓСЂР°
-	TRI_MAPPINGCOORS   	=$4140;      // UV С‚РµРєСЃС‚СѓСЂРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
+	//>------ под-дефайны для OBJECT_MESH
+	TRI_VERTEXLIST     	=$4110;      // Вершины обьекта
+	TRI_FACELIST        =$4120;      // Полигоны обьекта
+	TRI_MATERIAL     	=$4130;      // Дефайн находится, если обьект имеет материал, иначе цвет/текстура
+	TRI_MAPPINGCOORS   	=$4140;      // UV текстурные координаты
 	TRI_LOCAL 			=$4160;
 
 type 
@@ -91,27 +91,27 @@ begin
     if Tfile=nil then
     begin
         {$IFDEF SGDebuging}
-			Writeln('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» "',FileName,'"');
+			Writeln('Не удалось открыть файл "',FileName,'"');
 			{$ENDIF}
         exit;
     end;
-    //Р§РёС‚Р°РµРј Р·Р°РіРѕР»РѕРІРѕРє
+    //Читаем заголовок
     Tfile.Read(Ch.ID,2);
     Tfile.Read(Ch.Length,4);
     Tfile.Position:=Tfile.Position-6;
     if Ch.ID<>MAIN3DS then
     begin
         {$IFDEF SGDebuging}
-			Writeln('Р­С‚Рѕ РЅРµ 3d С„Р°Р№Р»! "',FileName,'"');
+			Writeln('Это не 3d файл! "',FileName,'"');
 			{$ENDIF}
         exit;
     end;
-    //РЅР°С…РѕРґРёРј Р±Р»РѕРє СЂРµРґР°РєС‚РѕСЂР°
+    //находим блок редактора
     ChPos:=self.FindChunk(EDIT3DS,true);    
 	//==================================================================
-	//========================Р§РёС‚Р°РµРј РјР°С‚РµСЂРёР°Р»С‹==========================
+	//========================Читаем материалы==========================
 	//==================================================================
-    //РС‰РµРј РјР°С‚РµСЂРёР°Р»С‹
+    //Ищем материалы
     c3dPos:=ChPos;
     ChPos:=self.FindChunk(cMATERIAL,true);
     ObjectsPos:=ChPos;
@@ -158,7 +158,7 @@ begin
 			writeln('Material: "',AModel^.ArMaterials[high(AModel^.ArMaterials)].strName,
 					'"; In file: "',AModel^.ArMaterials[high(AModel^.ArMaterials)].Way,'"');
 			{$ENDIF}
-        //РС‰РµРј РЅРѕРІС‹Р№ РјР°С‚РµСЂРёР°Р»
+        //Ищем новый материал
 		Tfile.Position:=ObjectsPos;
 		Tfile.Read(Ch.ID,2);
 		Tfile.Read(Ch.Length,4);
@@ -169,17 +169,17 @@ begin
 		Tfile.Position:=ObjectsPos;
     end;
 	//==================================================================
-	//========================Р§РёС‚Р°РµРј РіРµРѕРјРµС‚СЂРёСЋ==========================
+	//========================Читаем геометрию==========================
 	//==================================================================
     Tfile.Position:=c3dPos;
-	//РџСЂРѕРїСѓСЃРєР°РµРј РІСЃРµ РєСЂРѕРјРµ Р±Р»РѕРєР° РѕР±СЉРµРєС‚Р°
+	//Пропускаем все кроме блока объекта
 	ChPos:=self.FindChunk(EDIT_OBJECT,true);
     ObjectsPos:=ChPos;
     Tfile.Read(Ch.ID,2);
     Tfile.Position:=Tfile.Position-2;
     while Ch.ID=EDIT_OBJECT do
     begin
-		//РЎРѕР·РґР°РµРј РѕР±СЉРµРєС‚ РІ РјРѕРґРµР»Рё
+		//Создаем объект в модели
         SetLength(AModel^.ArObjects,Length(AModel^.ArObjects)+1);
 		AModel^.NOfObjects+=1;
 		AModel^.ArObjects[high(AModel^.ArObjects)]:=TSG3dObject.Create;
@@ -194,14 +194,14 @@ begin
 			writeln('Object: "',AModel^.ArObjects[high(AModel^.ArObjects)].FName,'"');
 			{$ENDIF}
         Tfile.Position:=ObjectsPos;
-		//РќР°С…РѕРґРёРј Р±Р»РѕРє СЃРµС‚РєРё
+		//Находим блок сетки
 		ChPos:=self.FindChunk(OBJ_TRIMESH,true);
-		TempPos:=ChPos; //Р—Р°РїРѕРјРЅРёРј РїРѕР·РёС†РёСЋ Р±Р»РѕРєР° РґР»СЏ РїРѕРёСЃРєР° РїРѕРґР±Р»РѕРєРѕРІ
-		//РќР°С…РѕРґРёРј СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ
+		TempPos:=ChPos; //Запомним позицию блока для поиска подблоков
+		//Находим список вершин
 		ChPos:=self.FindChunk(TRI_VERTEXLIST,true);
 		with AModel^.ArObjects[high(AModel^.ArObjects)] do
 		begin
-			//СЃС‡РёС‚Р°РµРј РєРѕР»-РІРѕ РІРµСЂС‚РµРєСЃРѕРІ
+			//считаем кол-во вертексов
 			SkipHeader;
 			TFile.Read(iii,2);
 			FNOfVerts:=iii;
@@ -212,7 +212,7 @@ begin
 				Tfile.Read(ArVertexes[i].z,4);
 				Tfile.Read(ArVertexes[i].y,4);
 			end;
-			//РџРµСЂРµР№РґРµРј Рє СЃРїРёСЃРєСѓ С‚РµРєСЃС‚СѓСЂРЅС‹С… РІРµСЂС€РёРЅ
+			//Перейдем к списку текстурных вершин
 			Tfile.Position:=TempPos;
 			ChPos:=self.FindChunk(TRI_MAPPINGCOORS,true);
 			SkipHeader;
@@ -224,7 +224,7 @@ begin
 				Tfile.Read(ArTexVertexes[i].x,4);
 				Tfile.Read(ArTexVertexes[i].y,4);
 			end;
-			//РїРµСЂРµР№РґРµРј Рє СЃРїРёСЃРєСѓ РіСЂР°РЅРµР№
+			//перейдем к списку граней
 			Tfile.Position:=TempPos;
 			ChPos:=self.FindChunk(TRI_FACELIST,true);
 			SkipHeader;
@@ -239,12 +239,12 @@ begin
 				Tfile.Read(ArFacesTriangles[i].p2,2);
 				Tfile.Position:=Tfile.Position+2;
 			end;
-			//Р”РѕР№РґРµРј Рє РґР°РЅРЅС‹Рј Рѕ Р»РѕРєР°Р»СЊРЅРѕР№ СЃРёСЃС‚РµРјРµ РѕР±СЉРµРєС‚Р°
+			//Дойдем к данным о локальной системе объекта
 			Tfile.Position:=TempPos;
 			ChPos:=self.FindChunk(TRI_LOCAL,true);
 			SkipHeader;
 			TFile.Read(Local,sizeof(single)*12);
-			//РЎРѕРІРµСЂС€Р°РµРј РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ
+			//Совершаем преобразования
 			for i:=0 to FNofVerts-1 do
 			begin
 				ArVertexes[i].x-=Local[9];
@@ -307,7 +307,7 @@ begin
     begin
         TFile.Read(CuCh.ID,2);
         Tfile.Read(CuCh.Length,4);
-        //Р•СЃР»Рё СЌС‚Рѕ Р±Р»РѕРє РѕР±СЉРµРєС‚Р°, С‚Рѕ РЅСѓР¶РЅРѕ РїСЂРѕРїСѓСЃС‚РёС‚СЊ СЃС‚СЂРѕРєСѓ РёРјРµРЅРё РѕР±СЉРµРєС‚Р°
+        //Если это блок объекта, то нужно пропустить строку имени объекта
         if CuCh.ID=EDIT_OBJECT then
         begin
             repeat
@@ -315,7 +315,7 @@ begin
             until c=#0;
         end;
     end;
-    //РќР°С‡РёРЅР°РµРј РїРѕРёСЃРє РІРЅСѓС‚СЂРё СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ Р±Р»РѕРєР°
+    //Начинаем поиск внутри родительского блока
     repeat
         TFile.Read(CuCh.ID,2);
         TFile.Read(CuCh.Length,4);
