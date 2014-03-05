@@ -250,14 +250,14 @@ if (not FSizeWriteTrue) and (FMesh<>nil) then
 			'Size-(All: '+SGGetSizeString(FMesh.Size)+
 			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
 			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
-			' );LenArObj='+SGStr(FMesh.NOfObjects)+'.'
+			' );LenArObj='+SGStr(FMesh.QuantityObjects)+'.'
 			);
 		FSizeWriteTrue:=True;
 		end
 	else
 		begin
 		FLabelSize.Caption:=SGStringToPChar(
-			'Загрузка... (NOfObjects='+SGStr(Length(FMesh.ArObjects))+';Threads='+SGStr(Threads)
+			'Загрузка... (NOfObjects='+SGStr(FMesh.QuantityObjects)+';Threads='+SGStr(Threads)
 			);
 		if DoAtThreads then
 			begin
@@ -354,7 +354,7 @@ if DoAtThreads then
 				begin
 				Quantity+=RecQuantity(FThreadsArray[ii].Arr6,FDepth-1);
 				end;
-			iii:=Length(FMesh.ArObjects);
+			iii:=FMesh.QuantityObjects;
 			CalculateMeshes(Quantity,SGR_QUADS);
 			FThreadsData[i].FData:=TSGMengerSpunchFractalData.Create(iii,i*(20 div Length(FThreadsData)),(i+1)*(20 div Length(FThreadsData))-1,Self,i);
 			FThreadsData[i].FFinished:=False;
@@ -502,7 +502,7 @@ if DoAtThreads then
 		end;
 	//except 
 	//end;
-	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
+	if (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) then
 		if FMeshesInfo[MeshID]=SG_FALSE then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 	end
@@ -514,7 +514,7 @@ else
 		-5.2,-5.2,
 		FDepth);
 	if FEnableVBO and (FMesh<>nil) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO();
+		FMesh.LastObject().LoadToVBO();
 	end;
 end;
 
@@ -688,28 +688,28 @@ procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const a
 //abnu:	B:boolean = False;
 begin
 FVertexIndex+=4;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-4]^:=i1;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^:=i2;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-2]^:=i3;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-1]^:=i4;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-4]^:=i1;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-3]^:=i2;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-2]^:=i3;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-1]^:=i4;
 
 if FEnableColors then
 	begin
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-4,abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-3,abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-2,abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex-1,abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
+	FMesh.Objects[MeshID].SetColor(FVertexIndex-4,abs((i1.x+AllQ/2)/AllQ),abs((i1.y+AllQ/2)/AllQ),abs((i1.z+AllQ/2)/AllQ));
+	FMesh.Objects[MeshID].SetColor(FVertexIndex-3,abs((i2.x+AllQ/2)/AllQ),abs((i2.y+AllQ/2)/AllQ),abs((i2.z+AllQ/2)/AllQ));
+	FMesh.Objects[MeshID].SetColor(FVertexIndex-2,abs((i3.x+AllQ/2)/AllQ),abs((i3.y+AllQ/2)/AllQ),abs((i3.z+AllQ/2)/AllQ));
+	FMesh.Objects[MeshID].SetColor(FVertexIndex-1,abs((i4.x+AllQ/2)/AllQ),abs((i4.y+AllQ/2)/AllQ),abs((i4.z+AllQ/2)/AllQ));
 	end;
 
 if FEnableNormals then
 	begin
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-4]^:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-3]^:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-2]^:=Ar6Normals[ai];
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex-4]^:=Ar6Normals[ai];
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex-3]^:=Ar6Normals[ai];
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex-2]^:=Ar6Normals[ai];
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.ArObjects[MeshID].SetFaceQuad(FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
+FMesh.Objects[MeshID].SetFaceQuad(FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);

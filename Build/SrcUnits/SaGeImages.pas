@@ -25,7 +25,7 @@ type
 	
 	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
-	// Класс изображения, или текстуры
+	// Класс изображения и текстуры
 	TSGImage = class(TSGContextObject)
 			public
 		constructor Create(const NewWay:string = '');
@@ -35,7 +35,8 @@ type
 		// В общем это BitMap (битовая карта)
 		FImage   : TSGBitMap;
 		
-		// Поток, в которы подгружается изобрадения, при его загрузке. Сделано чтобы очень быстро грузилось.
+		// Поток, в которы подгружается изобрадения, при его загрузке. 
+		// Сделано MemoryStream чтобы очень быстро грузилось.
 		FStream  : TMemoryStream;
 		
 		// Идентификатор текстуры
@@ -47,6 +48,9 @@ type
 		FWay                : TSGString;
 		//ФОрмат, в который сохранится изображзение прии его сохранении
 		FSaveFormat:TSGIByte;
+		
+		//Имя изображения/материала и тп 
+		FName : TSGString;
 		
 		procedure LoadBMPToBitMap();
 		procedure LoadJPEGToBitMap();
@@ -92,6 +96,7 @@ type
 		property ReadyToGoToTexture : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyGoToTexture   : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
+		property Name               : TSGString   read FName               write FName;
 			public //Render Functions:
 		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
@@ -829,6 +834,7 @@ FReadyToGoToTexture:=False;
 Way:=NewWay;
 FImage:=TSGBitMap.Create;
 FStream:=nil;
+FName:='';
 end;
 
 

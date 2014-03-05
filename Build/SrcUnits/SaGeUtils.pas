@@ -214,8 +214,8 @@ if (FStartArray=nil) or (Length(FStartArray)=0) then
 	Exit;
 FMesh:=TSG3DObject.Create();
 FMesh.SetContext(Context);
-FMesh.FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
-FMesh.FEnableCullFace:=False;
+FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+FMesh.EnableCullFace:=False;
 FMesh.PoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType:=TSGMeshVertexType3f;
 FMesh.SetFaceLength(FDetalization);

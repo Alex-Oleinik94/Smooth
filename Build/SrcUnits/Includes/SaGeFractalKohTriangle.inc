@@ -31,26 +31,26 @@ begin
 FVertexIndex+=3;
 if Render.RenderType<>SGRenderDirectX then
 	begin
-	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
-	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
-	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex-1]^:=v3;
+	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
+	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
+	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex-1]^:=v3;
 	end
 else
 	begin
-	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-3]^.Import(v1.x,v1.y);
-	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-2]^.Import(v2.x,v2.y);
-	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex-1]^.Import(v3.x,v3.y);
+	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-3]^.Import(v1.x,v1.y);
+	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-2]^.Import(v2.x,v2.y);
+	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-1]^.Import(v3.x,v3.y);
 	end;
 
 
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+0].p[0]:=FVertexIndex-1;
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+0].p[1]:=FVertexIndex-2;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+0].p[0]:=FVertexIndex-1;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+0].p[1]:=FVertexIndex-2;
 
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+1].p[0]:=FVertexIndex-3;
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+1].p[1]:=FVertexIndex-2;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+1].p[0]:=FVertexIndex-3;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+1].p[1]:=FVertexIndex-2;
 
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+2].p[0]:=FVertexIndex-1;
-FMesh.ArObjects[MeshID].ArFacesLines[FFaceIndex+2].p[1]:=FVertexIndex-3;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+2].p[0]:=FVertexIndex-1;
+FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+2].p[1]:=FVertexIndex-3;
 FFaceIndex+=3;
 
 AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
@@ -95,7 +95,7 @@ if FDepth>0 then
 		FDepth)
 	end;
 if FThreadsEnable then
-	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
+	if (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) then
 		if FMeshesInfo[MeshID]=SG_FALSE then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 end;
@@ -128,8 +128,8 @@ if FThreadsEnable then
 else
 	begin
 	CalculateFromThread;
-	if FEnableVBO and (not FMesh.ArObjects[FMesh.NOfObjects-1].FEnableVBO) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO;
+	if FEnableVBO and (not FMesh.LastObject().EnableVBO) then
+		FMesh.LastObject().LoadToVBO();
 	end;
 end;
 

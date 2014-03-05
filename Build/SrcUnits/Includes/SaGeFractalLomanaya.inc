@@ -30,10 +30,10 @@ end;
 procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
 if Render.RenderType=SGRenderOpenGL then
-	FMesh.ArObjects[MeshID].ArVertex2f[FVertexIndex]^:=v
+	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v
 else
-	FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
-FMesh.ArObjects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex;
+	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
+FMesh.Objects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex;
 
 FFaceIndex+=1;
 FVertexIndex+=1;
@@ -79,7 +79,7 @@ FVI:=0;
 PushIndexes(MeshID,SGVertex2fImport(-6,-3.5),FVI,FFI);
 Rec(SGVertex2fImport(-6,-3.5),SGVertex2fImport(6,3.5),Depth);
 if FThreadsEnable then
-	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
+	if (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) then
 		if FMeshesInfo[MeshID]=SG_FALSE then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 end;
@@ -104,8 +104,8 @@ if FThreadsEnable then
 else
 	begin
 	CalculateFromThread();
-	if FEnableVBO and (not FMesh.ArObjects[FMesh.NOfObjects-1].FEnableVBO) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO();
+	if FEnableVBO and (not FMesh.LastObject().EnableVBO) then
+		FMesh.LastObject().LoadToVBO();
 	end;
 end;
 

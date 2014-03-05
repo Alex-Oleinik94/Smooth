@@ -112,6 +112,7 @@ type
     public
         // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
 		property QuantityVertexes : LongWord          read FNOfVerts;
+		property QuantityFaces    : LongWord          read FNOfFaces;
 		property HasTexture       : Boolean           read FHasTexture    write FHasTexture;
 		property HasColors        : Boolean           read FHasColors     write FHasColors;
 		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
@@ -181,6 +182,12 @@ type
 		// Свойства для редактирования нормалей
 		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
 		
+	private
+		function GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
+		
+	public
+		property ArTexVertex[Index : TSGMaxEnum] : PTSGVertex2f read GetTexVertex;
+		
 		// Устанавливает количество вершин
 		procedure SetVertexLength(const NewVertexLength:TSGQuadWord);inline;
 		
@@ -212,22 +219,27 @@ type
 		// Ствойства для получения и редактирования длинн массивов
 		property Faces    :TSGMaxEnum read GetFaceLength   write SetFaceLength;
 		property Vertexes :TSGQuadWord read GetVertexLength write SetVertexLength;
-    public
+    protected
 		// Вклбючено ли VBO
 		// VBO - Vertex Buffer Object
 		// Vertex Buffer Object - это такая технология, при которой можно рисовать, 
 		//    держа все массивы в памяти видеокарте, а не в оперативной памяти
+		// Если на вашем устройстве нету видеокарты (типо нетбук), то массивы будут копироваться в оперативку
 		FEnableVBO      : TSGBoolean;
 		
 		// Идентификатор массива вершин в видюхе
         FVBOVertexes    : TSGLongWord;
-        // Идентификатор массива индексов в текстуре
+        // Идентификатор массива индексов в видюхе
         FVBOFaces       : TSGLongWord;
-    public
+        
 		// Включен ли Cull Face
         FEnableCullFace : TSGBoolean;
         // Цвет обьекта
         FObjectColor    : TSGColor4f;
+    public
+		property EnableVBO      : TSGBoolean read FEnableVBO      write FEnableVBO;
+		property ObjectColor    : TSGColor4f read FObjectColor    write FObjectColor;
+		property EnableCullFace : TSGBoolean read FEnableCullFace write FEnableCullFace;
     public
         // Догадайся с 3х раз
         procedure Draw(); override;
@@ -276,9 +288,12 @@ type
 	protected 
 		// Имя модельки
 		FName : TSGString;
+		// Идентификатор материала
+		FMaterialID : TSGInt64;
 	public
 		// Свойство : имя модельки
-		property Name:TSGString read FName write FName;
+		property Name       : TSGString read FName       write FName;
+		property MaterialID : TSGInt64  read FMaterialID write FMaterialID;
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -289,14 +304,26 @@ type
         constructor Create;override;
         destructor Destroy; override;
         class function ClassName:String;override;
-    public
-        NOfObjects:   word;
-        NOfMaterials: word;
+    protected
+        FQuantityObjects   : TSGQuadWord;
+        FQuantityMaterials : TSGQuadWord;
 	
-        ArMaterials: packed array of Pointer;
-        ArObjects: packed array of TSG3dObject;
+        FArMaterials : packed array of TSGImage;
+        FArObjects   : packed array of TSG3dObject;
+    private
+		function GetObject(const Index : TSGMaxEnum):TSG3dObject;inline;
+    public
+		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
+		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
+		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
     protected
         procedure AddObjectColor(const ObjColor: TSGColor4f);
+    public
+		function AddMaterial():TSGImage;inline;
+		function LastMaterial():TSGImage;inline;
+		function AddObject():TSG3DObject;inline;
+		function LastObject():TSG3DObject;inline;
+		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
     public
         procedure Draw(); override;
         property FObjectColor: TSGColor4f write AddObjectColor;
@@ -309,7 +336,7 @@ type
         //procedure LoadOFFFromFile(const FileWay: string);
 		procedure SaveToFile(const FileWay: TSGString);
         class function GetWRLNextIdentity(const Text:PTextFile):string;
-        procedure Load3DSFromFile(const FileWay:TSGString);
+        function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
         procedure Stripificate();
         procedure Optimization(const SaveColors:TSGBoolean = True;const SaveNormals:TSGBoolean = False);
         procedure WriteInfo();
@@ -322,11 +349,11 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-//{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-//{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
 function TSG3DObject.GetVertexLength():QWord;inline;
 begin
@@ -741,6 +768,20 @@ else if (FColorType=TSGMeshColorType4b) then
 	end;
 end;
 
+function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
+begin
+Result:=PTSGVertex2f(
+	TSGMaxEnum(ArVertex)
+	+GetSizeOfOneVertex()*Index
+	+(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	+Byte(FHasColors)*( 
+		byte(FColorType=TSGMeshColorType3b)*3+
+		byte(FColorType=TSGMeshColorType4b)*4+
+		byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+		byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+	+Byte(FHasNormals)*3*SizeOf(Single));
+end;
+
 function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f( 
@@ -839,9 +880,9 @@ Result:=
 	byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
 	byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
 
-+Byte(FHasTexture)*2*SizeOf(Single)*FQuantityTextures
++Byte(FHasNormals)*3*SizeOf(Single)
 
-+Byte(FHasNormals)*3*SizeOf(Single);
++Byte(FHasTexture)*2*SizeOf(Single)*FQuantityTextures;
 end;
 
 function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload;inline;
@@ -996,7 +1037,7 @@ begin
     FNOfVerts := 0;
     ArVertex := nil;
     ArFaces := nil;
-    //FMaterialID := -1;
+    FMaterialID := -1;
     FPoligonesType:=SGR_TRIANGLES;
     FColorType:=TSGMeshColorType3b;
     FVertexType:=TSGMeshVertexType3f;
@@ -1238,31 +1279,33 @@ end;
 
 procedure TSGCustomModel.Clear;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
-if NOfObjects>0 then
+if FQuantityObjects>0 then
 	begin
-	for i:=0 to NOfObjects-1 do
-		ArObjects[i].Destroy;
-	SetLength(ArObjects,0);
-	NOfObjects:=0;
+	for i:=0 to FQuantityObjects-1 do
+		FArObjects[i].Destroy();
+	SetLength(FArObjects,0);
+	FQuantityObjects:=0;
 	end;
-if NOfMaterials>0 then
+FArObjects:=nil;
+if FQuantityMaterials>0 then
 	begin
-	{for i:=0 to NOfMaterials-1 do
-		ArMaterials[i].Destroy;}
-	SetLength(ArMaterials,0);
-	NOfMaterials:=0;
+	for i:=0 to FQuantityMaterials-1 do
+		FArMaterials[i].Destroy;
+	SetLength(FArMaterials,0);
+	FQuantityMaterials:=0;
 	end;
+FArMaterials:=nil;
 end;
 
-procedure TSGCustomModel.LoadToVBO;
+procedure TSGCustomModel.LoadToVBO();
 var	
-	i:LongInt;
+	i : TSGLongWord;
 begin
-for i:=0 to NOfObjects-1 do
+for i:=0 to FQuantityObjects-1 do
 	begin
-	ArObjects[i].LoadToVBO;
+	FArObjects[i].LoadToVBO();
 	end;
 end;
 
@@ -1299,115 +1342,164 @@ end;
 
 class function TSGCustomModel.ClassName():String;
 begin
-Result:='TSGModel';
+Result:='TSGCustomModel';
 end;
 
 procedure TSGCustomModel.WriteInfo();
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 WriteLn('TSGModel.WriteInfo');
-WriteLn('  NOfObjects = ',NOfObjects);
-WriteLn('  NOfMaterials = ',NOfMaterials);
-for i:=0 to NOfObjects-1 do
-	ArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
+WriteLn('  QuantityObjects = ',FQuantityObjects);
+WriteLn('  QuantityMaterials = ',FQuantityMaterials);
+for i:=0 to FQuantityObjects-1 do
+	FArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
 end;
 
 procedure TSGCustomModel.Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
-for i:=0 to NOfObjects-1 do
+for i:=0 to FQuantityObjects-1 do
 	;//ArObjects[i].Optimization(SaveColors,SaveNormals);
 end;
 
 procedure TSGCustomModel.Stripificate;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
-for i:=0 to NOfObjects-1 do
+for i:=0 to FQuantityObjects-1 do
 	;//ArObjects[i].Stripificate;
 end;
 
 function TSGCustomModel.VertexesSize():QWord;Inline;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 Result:=0;
-for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].VertexesSize();
+for i:=0 to FQuantityObjects-1 do
+	Result+=FArObjects[i].VertexesSize();
 end;
 
 function TSGCustomModel.FacesSize():QWord;inline;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 Result:=0;
-for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].FacesSize();
+for i:=0 to FQuantityObjects-1 do
+	Result+=FArObjects[i].FacesSize();
 end;
 
 function TSGCustomModel.Size():QWord;inline;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 Result:=0;
-for i:=0 to NOfObjects-1 do
-	Result+=ArObjects[i].Size();
+for i:=0 to FQuantityObjects-1 do
+	Result+=FArObjects[i].Size();
 end;
 
 
 procedure TSGCustomModel.AddObjectColor(const ObjColor: TSGColor4f);
 var
-    i: longint;
+    i: TSGLongWord;
 begin
-    for i := 0 to High(ArObjects) do
-        ArObjects[i].FObjectColor := ObjColor;
+    for i := 0 to High(FArObjects) do
+        FArObjects[i].FObjectColor := ObjColor;
 end;
 
-procedure TSGCustomModel.Load3DSFromFile(const FileWay:string);
+function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
+var
+	Sucsses : TSGBoolean = False;
 begin
-{with TSGLoad3DS.Create do
-	begin
-	//Import3DS(@Self,FileWay);
-	Destroy;
-	end;}
+TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
 end;
 
 constructor TSGCustomModel.Create();
 begin
-    inherited;
-    NOfObjects := 0;
-    NOfMaterials := 0;
-    ArMaterials := nil;
-    ArObjects := nil;
+inherited;
+FQuantityMaterials := 0;
+FQuantityObjects := 0;
+FArMaterials := nil;
+FArObjects := nil;
 end;
 
 destructor TSGCustomModel.Destroy();
 var
-    i: longint;
+    i: TSGLongWord;
 begin
-    for i := 0 to High(ArObjects) do
-        ArObjects[i].Destroy();
-    {for i := 0 to High(ArMaterials) do
-        ArMaterials[i].Destroy();}
-    inherited;
+Clear();
+inherited;
 end;
 
 procedure TSGCustomModel.Draw();
 var
-    i: longword;
+    i: TSGLongWord;
 begin
-for i := 0 to NOfObjects - 1 do
-	begin
-	{if ArObjects[i].FHasTexture then
-		ArMaterials[ArObjects[i].FMaterialID].BindTexture;}
-	ArObjects[i].Draw;
-	{if ArObjects[i].FHasTexture and ArMaterials[ArObjects[i].FMaterialID].Ready then
-		ArMaterials[ArObjects[i].FMaterialID].DisableTexture;}
-	end;
+for i := 0 to FQuantityObjects - 1 do
+	if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and (FArMaterials[FArObjects[i].MaterialID].Ready()) then
+		begin
+		FArMaterials[FArObjects[i].MaterialID].BindTexture();
+		FArObjects[i].Draw();
+		FArMaterials[FArObjects[i].MaterialID].DisableTexture();
+		end
+	else
+		FArObjects[i].Draw();
 end;
 
+function TSGCustomModel.AddMaterial():TSGImage;inline;
+begin
+FQuantityMaterials+=1;
+SetLength(FArMaterials,FQuantityMaterials);
+FArMaterials[FQuantityMaterials-1]:=TSGImage.Create();
+Result:=FArMaterials[FQuantityMaterials-1];
+Result.Context := Context;
+end;
+
+function TSGCustomModel.LastMaterial():TSGImage;inline;
+begin
+if (FArMaterials=nil) or (FQuantityMaterials=0) then
+	Result:=nil
+else
+	Result:=FArMaterials[High(FArMaterials)];
+end;
+
+function TSGCustomModel.AddObject():TSG3DObject;inline;
+begin
+FQuantityObjects+=1;
+SetLength(FArObjects,FQuantityObjects);
+Result:=TSG3DObject.Create();
+Result.Context := Context;
+FArObjects[FQuantityObjects-1]:=Result;
+end;
+
+function TSGCustomModel.LastObject():TSG3DObject;inline;
+begin
+if (FQuantityObjects=0) or(FArObjects=nil) then
+	Result:=nil
+else
+	Result:=FArObjects[FQuantityObjects-1];
+end;
+
+function TSGCustomModel.CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
+var
+	i : TSGLongWord;
+begin
+Result:=False;
+for i := 0 to FQuantityMaterials - 1 do
+	if FArMaterials[i].Name = VMaterialName then
+		begin
+		LastObject().MaterialID := i;
+		LastObject().HasTexture := True;
+		Result:=True;
+		Break;
+		end;
+end;
+
+function TSGCustomModel.GetObject(const Index : TSGMaxEnum):TSG3dObject;inline;
+begin
+Result:=FArObjects[Index];
+end;
 
 end.
 

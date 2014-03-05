@@ -240,17 +240,14 @@ var
 begin
 if FMesh=nil then
 	begin
-	FMesh:=TSGCustomModel.Create;
+	FMesh:=TSGCustomModel.Create();
 	FMesh.SetContext(Context);
 	end
 else
-	if FMesh.NOfObjects>0 then
+	if FMesh.QuantityObjects>0 then
 		begin
 		SetLength(FMeshesInfo,0);
-		for i:=0 to FMesh.NOfObjects-1 do
-			FMesh.ArObjects[i].Destroy;
-		SetLEngth(FMesh.ArObjects,0);
-		FMesh.NOfObjects:=0;
+		FMesh.Clear();
 		end;
 end;
 
@@ -260,14 +257,14 @@ if FFaceIndex>=FShift then
 	begin
 	if (not DoAtThreads) and FEnableVBO then
 		begin
-		FMesh.ArObjects[MeshID].LoadToVBO;
+		FMesh.Objects[MeshID].LoadToVBO();
 		end;
-	if FThreadsEnable and (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) and (FMeshesInfo[MeshID]=SG_FALSE) then
+	if FThreadsEnable and (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) and (FMeshesInfo[MeshID]=SG_FALSE) then
 		FMeshesInfo[MeshID]:=SG_TRUE;
 	MeshID+=1;
 	FVertexIndex:=0;
 	FFaceIndex:=0;
-	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.NOfObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.ArObjects[MeshID].QuantityVertexes=0) then
+	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.Objects[MeshID].QuantityVertexes=0) then
 		begin
 		{if DoAtThreads then
 			begin
@@ -282,7 +279,7 @@ if FFaceIndex>=FShift then
 					end;
 				end;
 			end;}
-		SetMeshArLength(MeshID,FShift,FMesh.ArObjects[MeshID].GetFaceLength(FShift));
+		SetMeshArLength(MeshID,FShift,FMesh.Objects[MeshID].GetFaceLength(FShift));
 		end;
 	end;
 end;
@@ -293,39 +290,36 @@ while Quantity<>0 do
 	begin
 	SetLength(FMeshesInfo,Length(FMeshesInfo)+1);
 	FMeshesInfo[High(FMeshesInfo)]:=SG_FALSE;
-	SetLength(FMesh.ArObjects,FMesh.NOfObjects+1);
-	FMesh.NOfObjects+=1;
-	FMesh.ArObjects[FMesh.NOfObjects-1]:=TSG3DObject.Create;
-	FMesh.ArObjects[FMesh.NOfObjects-1].SetContext(Context);
-	FMesh.ArObjects[FMesh.NOfObjects-1].FObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
-	FMesh.ArObjects[FMesh.NOfObjects-1].FEnableCullFace:=False;
+	FMesh.AddObject();
+	FMesh.LastObject().ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+	FMesh.LastObject().EnableCullFace:=False;
 	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=SGR_TRIANGLES
+		FMesh.LastObject().PoligonesType:=SGR_TRIANGLES
 	else
-		FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType:=PoligoneType;
-	FMesh.ArObjects[FMesh.NOfObjects-1].VertexType:=VVertexType;
+		FMesh.LastObject().PoligonesType:=PoligoneType;
+	FMesh.LastObject().VertexType:=VVertexType;
 	if FEnableColors then
-		FMesh.ArObjects[FMesh.NOfObjects-1].AutoSetColorType();
+		FMesh.LastObject().AutoSetColorType();
 	if FEnableNormals then
-		FMesh.ArObjects[FMesh.NOfObjects-1].HasNormals:=True;
+		FMesh.LastObject().HasNormals:=True;
 	if Quantity<=FShift then
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-			SetMeshArLength(FMesh.NOfObjects-1,Quantity*2,
+			SetMeshArLength(FMesh.QuantityObjects-1,Quantity*2,
 				TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
 		else
-			SetMeshArLength(FMesh.NOfObjects-1,Quantity,
-				TSG3DObject.GetFaceLength(Quantity,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
+			SetMeshArLength(FMesh.QuantityObjects-1,Quantity,
+				TSG3DObject.GetFaceLength(Quantity,FMesh.Objects[FMesh.QuantityObjects-1].PoligonesType));
 		Quantity:=0;
 		end
 	else
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-			SetMeshArLength(FMesh.NOfObjects-1,FShift*2,
+			SetMeshArLength(FMesh.QuantityObjects-1,FShift*2,
 				TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
 		else
-			SetMeshArLength(FMesh.NOfObjects-1,FShift,
-				TSG3DObject.GetFaceLength(FShift,FMesh.ArObjects[FMesh.NOfObjects-1].PoligonesType));
+			SetMeshArLength(FMesh.QuantityObjects-1,FShift,
+				TSG3DObject.GetFaceLength(FShift,FMesh.Objects[FMesh.QuantityObjects-1].PoligonesType));
 		Quantity-=FShift;
 		end;
 	end;
@@ -333,8 +327,8 @@ end;
 
 procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 begin
-FMesh.ArObjects[MID].SetFaceLength(LFaces);
-FMesh.ArObjects[MID].SetVertexLength(LVertexes);
+FMesh.Objects[MID].SetFaceLength(LFaces);
+FMesh.Objects[MID].SetVertexLength(LVertexes);
 end;
 
 constructor TSGFractalData.Create(const Fractal:TSGFractal; const ThreadID:LongWord);
@@ -406,7 +400,7 @@ if (Not FMeshesReady) and FThreadsEnable and FEnableVBO then
 		if FMeshesInfo[i]=SG_TRUE then
 			begin
 			FMeshesInfo[i]:=SG_UNKNOWN;
-			FMesh.ArObjects[i].LoadToVBO();
+			FMesh.Objects[i].LoadToVBO();
 			end
 		else
 			if FMeshesInfo[i]=SG_FALSE then
@@ -449,13 +443,13 @@ else
 		Render.Disable(SGR_LIGHTING);
 if FEnableVBO then
 	begin
-	if (FMesh<>nil) and (FMesh.NOfObjects<>0) then
-	for i:=0 to FMesh.NOfObjects-1 do
+	if (FMesh<>nil) and (FMesh.QuantityObjects<>0) then
+	for i:=0 to FMesh.QuantityObjects-1 do
 		begin
-		if FMesh.ArObjects[i].FEnableVBO then
-			FMesh.ArObjects[i].Draw;
+		if FMesh.Objects[i].EnableVBO then
+			FMesh.Objects[i].Draw();
 		{$IFDEF SGMoreDebuging}
-			WriteLn('FMesh.ArObjects[',i,'].FEnableVBO=',FMesh.ArObjects[i].FEnableVBO);
+			WriteLn('FMesh.ArObjects[',i,'].FEnableVBO=',FMesh.Objects[i].EnableVBO);
 			{$ENDIF}
 		end;
 	end
@@ -476,7 +470,7 @@ if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
 			'Size-(All: '+SGGetSizeString(FMesh.Size)+
 			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
 			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
-			' );LenArObj='+SGStr(FMesh.NOfObjects)+'.'
+			' );LenArObj='+SGStr(FMesh.QuantityObjects)+'.'
 			);
 		FSizeLabelFlag:=True;
 		//WriteLn(FSizeLabel.Caption);
@@ -484,7 +478,7 @@ if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
 	else
 		begin
 		FSizeLabel.Caption:=SGStringToPChar(
-			'Загрузка... (NOfObjects='+SGStr(Length(FMesh.ArObjects))+';Threads='+SGStr(Threads)
+			'Загрузка... (NOfObjects='+SGStr(FMesh.QuantityObjects)+';Threads='+SGStr(Threads)
 			);
 		FSizeLabel.Caption:=FSizeLabel.Caption+')';
 		end;

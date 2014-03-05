@@ -35,9 +35,9 @@ var
 	c:TSGColor3f;
 	v:TSGVertex3f;
 begin
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex]^:=v0;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex+1]^:=v1;
-FMesh.ArObjects[MeshID].ArVertex3f[FVertexIndex+2]^:=v2;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^:=v0;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex+1]^:=v1;
+FMesh.Objects[MeshID].ArVertex3f[FVertexIndex+2]^:=v2;
 if FEnableColors then
 	begin
 	v:=v0;
@@ -46,7 +46,7 @@ if FEnableColors then
 		c2*SGAbsTwoVertex(v,bb2)/h+
 		c3*SGAbsTwoVertex(v,bb3)/h);
 	C.Normalize();
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex,
+	FMesh.Objects[MeshID].SetColor(FVertexIndex,
 		c.r,c.g,c.b);
 	v:=v1;
 	C:=(c0*SGAbsTwoVertex(v,bb0)/h+
@@ -54,7 +54,7 @@ if FEnableColors then
 		c2*SGAbsTwoVertex(v,bb2)/h+
 		c3*SGAbsTwoVertex(v,bb3)/h);
 	C.Normalize();
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex+1,
+	FMesh.Objects[MeshID].SetColor(FVertexIndex+1,
 		c.r,c.g,c.b);
 	v:=v2;
 	C:=(c0*SGAbsTwoVertex(v,bb0)/h+
@@ -62,20 +62,20 @@ if FEnableColors then
 		c2*SGAbsTwoVertex(v,bb2)/h+
 		c3*SGAbsTwoVertex(v,bb3)/h);
 	C.Normalize();
-	FMesh.ArObjects[MeshID].SetColor(FVertexIndex+2,
+	FMesh.Objects[MeshID].SetColor(FVertexIndex+2,
 		c.r,c.g,c.b);
 	end;
 if FEnableNormals then
 	begin
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex]^:=n;
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex+1]^:=n;
-	FMesh.ArObjects[MeshID].ArNormal[FVertexIndex+2]^:=n;
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex]^:=n;
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex+1]^:=n;
+	FMesh.Objects[MeshID].ArNormal[FVertexIndex+2]^:=n;
 	end;
 FVertexIndex+=3;
 
-FMesh.ArObjects[MeshID].ArFacesTriangles[FFaceIndex].p[0]:=FVertexIndex-1;
-FMesh.ArObjects[MeshID].ArFacesTriangles[FFaceIndex].p[1]:=FVertexIndex-2;
-FMesh.ArObjects[MeshID].ArFacesTriangles[FFaceIndex].p[2]:=FVertexIndex-3;
+FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[0]:=FVertexIndex-1;
+FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[1]:=FVertexIndex-2;
+FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[2]:=FVertexIndex-3;
 FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
@@ -138,7 +138,7 @@ FArNor[3]:=SGGetVertexWhichNormalFromThreeVertex(bb0,bb2,bb1);
 b:=(bb0+bb1+bb2+bb3)/4;
 Rec(bb0-b,bb1-b,bb2-b,bb3-b,FDepth);
 if FThreadsEnable then
-	if (MeshID>=0) and (MeshID<=FMesh.NOfObjects-1) then
+	if (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) then
 		if FMeshesInfo[MeshID]=SG_FALSE then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 end;
@@ -168,8 +168,8 @@ if FThreadsEnable then
 else
 	begin
 	CalculateFromThread();
-	if FEnableVBO and (not FMesh.ArObjects[FMesh.NOfObjects-1].FEnableVBO) then
-		FMesh.ArObjects[FMesh.NOfObjects-1].LoadToVBO;
+	if FEnableVBO and (not FMesh.LastObject().EnableVBO) then
+		FMesh.LastObject().LoadToVBO();
 	end;
 end;
 
