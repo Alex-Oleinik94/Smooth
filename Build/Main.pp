@@ -55,16 +55,39 @@ uses
 	;
 	//,SaGeX264Encoder;
 
-
+var
+	Model:TSGCustomModel;
+	Caamera:SaGeUtils.TSGCamera;
 procedure Draw(const Context:TSGContext);
+var
+	Render:TSGRender;
 begin
+Render:=Context.Render;
+Caamera.CallAction();
+Model.Draw();
+Render.BeginScene(SGR_TRIANGLES);
+Render.Color3f(1,1,1);
+Render.Vertex2f(0,1);
+Render.Vertex2f(1,1);
+Render.Vertex2f(1,0);
+Render.EndScene();
 end;
 
 procedure Init(const MyContext:TSGContext);
 begin
+Caamera:=TSGCamera.Create();
+Caamera.SetContext(MyContext);
+
+Model := TSGCustomModel.Create();
+Model.Context := MyContext;
+Model.Load3DSFromFile(SGModelsDirectory+Slash+'motoBike.3ds');
+Model.WriteInfo();
+Model.LoadToVBO();
+//Model.WriteInfo();
+
 SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
-SGScreen.Font.Loading;
+SGScreen.Font.Loading();
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
