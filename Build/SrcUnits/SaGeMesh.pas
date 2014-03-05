@@ -13,7 +13,8 @@ uses
     , SaGeRender
     , Crt
     , SaGeContext;
-
+const
+	SGMeshVersion : TSGQuadWord = 169;
 type
 	// Ёто тип типа хранени€ цветов в нашей модели
 	TSGMeshColorType = (TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
@@ -264,14 +265,14 @@ type
         // =) Subserf
         procedure CatmulClark();virtual;
         
+		procedure SaveToSaGe3DObjFile(const FileWay:TSGString);
+		procedure LoadFromSaGe3DObjFile(const FileWay:TSGString);
+		
+		procedure SaveToSaGe3DObj(const Stream:TStream);
+		procedure LoadFromSaGe3DObj(const Stream:TStream);
         (* я ж переписывал этот класс. Ёто то, что € не написал. *)
-		//procedure SaveFromSaGe3DObjFile(const FileWay:string);
-		//procedure LoadFromSaGe3DObjFile(const FileWay:string);
 		//procedure Stripificate;overload;inline;
 		//procedure Stripificate(var VertexesAndTriangles:TSGArTSGArTSGFaceType;var OutputStrip:TSGArTSGFaceType);overload;
-		//procedure Im;
-		//procedure CalculateDependensies(var VertexesAndTriangles:TSGArTSGArTSGFaceType);
-		//procedure Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
 		
 		// ¬ыводит полную информацию о характеристиках модельки
 		procedure WriteInfo(const PredStr:string = '');
@@ -337,14 +338,14 @@ type
 		procedure SaveToFile(const FileWay: TSGString);
         procedure LoadFromFile(const FileWay:TSGString);
     public
-        //procedure LoadFromSaGe3DObjFile(const FileWay: string);
-        //procedure SaveToSaGe3DObjFile(const FileWay: string);
-        //procedure LoadWRLFromFile(const FileWay: string);
-        //procedure LoadOFFFromFile(const FileWay: string);
-        class function GetWRLNextIdentity(const Text:PTextFile):string;
+        procedure LoadFromSaGe3DModelFile(const FileWay: TSGString);
+        procedure SaveToSaGe3DModelFile(const FileWay: TSGString);
+        procedure LoadFromSaGe3DModel(const Stream : TStream);
+        procedure SaveToSaGe3DModel(const Stream : TStream);
+        // «агрузить формат 3DS-Max-а
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
+        // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
-        procedure Optimization(const SaveColors:TSGBoolean = True;const SaveNormals:TSGBoolean = False);
     public
 		function VertexesSize():TSGQWord;
 		function FacesSize():TSGQWord;
@@ -1108,26 +1109,82 @@ if ClearN then
 	end;
 end;
 
-{procedure TSG3dObject.SaveFromSaGe3DObjFile(const FileWay:string);
+procedure TSG3DObject.SaveToSaGe3DObjFile(const FileWay:TSGString);
 var
 	Stream:TStream = nil;
 begin
 Stream:=TFileStream.Create(FileWay,fmCreate);
-SaveToStream(Stream);
-Stream.Destroy;
-end;}
+if Stream<>nil then
+	begin
+	SaveToSaGe3DObj(Stream);
+	Stream.Destroy();
+	end;
+end;
 
-{procedure TSG3dObject.LoadFromSaGe3DObjFile(const FileWay:string);
+procedure TSG3DObject.LoadFromSaGe3DObjFile(const FileWay:TSGString);
 var
 	Stream:TStream = nil;
 begin
 if SGFileExists(FileWay) then
 	begin
 	Stream:=TFileStream.Create(FileWay,fmOpenRead);
-	LoadFromStream(Stream);
-	Stream.Destroy;
+	if Stream<>nil then
+		begin
+		LoadFromSaGe3DObj(Stream);
+		Stream.Destroy();
+		end;
 	end;
-end;}
+end;
+
+procedure TSG3DObject.SaveToSaGe3DObj(const Stream:TStream);
+var
+	S:array[0..8] of TSGChar = 'SaGe3DObj';
+begin
+Stream.WriteBuffer(S,SizeOf(S));
+Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
+Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
+Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
+Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
+Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
+Stream.WriteBuffer(FColorType,SizeOf(FColorType));
+Stream.WriteBuffer(ArFaces[0],FacesSize());
+Stream.WriteBuffer(ArVertex^,VertexesSize());
+end;
+
+procedure TSG3DObject.LoadFromSaGe3DObj(const Stream:TStream);
+var
+	S,S2:array[0..8] of TSGChar;
+	Version : TSGQuadWord = 0;
+begin
+S2:='SaGe3DObj';
+Stream.ReadBuffer(S,SizeOf(S));
+if S<>S2 then
+	begin
+	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : It is not "SaGe3DObj" file!']);
+	Exit;
+	end;
+Stream.ReadBuffer(Version,SizeOf(Version));
+if Version <> SGMeshVersion then
+	begin
+	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : (Program.MeshVersion!=Mesh.MeshVersion) !']);
+	Exit;
+	end;
+Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
+Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
+Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
+Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
+Stream.ReadBuffer(FColorType,SizeOf(FColorType));
+Stream.ReadBuffer(ArFaces[0],FacesSize());
+Stream.ReadBuffer(ArVertex^,VertexesSize());
+end;
 
 procedure TSG3dObject.BasicDraw(); inline;
 const
@@ -1288,9 +1345,62 @@ end;
 (************************************){TSGModel}(************************************)
 (************************************************************************************)
 
+procedure TSGCustomModel.LoadFromSaGe3DModelFile(const FileWay: TSGString);
+var
+	Stream : TStream = nil;
+begin
+Stream := TFileStream.Create(FileWay,fmOpenRead);
+if Stream<>nil then
+	begin
+	LoadFromSaGe3DModel(Stream);
+	Stream.Destroy();
+	end;
+end;
+
+procedure TSGCustomModel.SaveToSaGe3DModelFile(const FileWay: TSGString);
+var
+	Stream : TStream = nil;
+begin
+Stream := TFileStream.Create(FileWay,fmCreate);
+if Stream<>nil then
+	begin
+	SaveToSaGe3DModel(Stream);
+	Stream.Destroy();
+	end;
+end;
+
+procedure TSGCustomModel.LoadFromSaGe3DModel(const Stream : TStream);
+var
+	i : TSGLongWord;
+begin
+Stream.ReadBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
+Stream.ReadBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
+for i:=0 to FQuantityObjects-1 do
+	AddObject();
+	Objects[i].LoadFromSaGe3DObj(Stream);
+for i:=0 to FQuantityMaterials-1 do
+	begin
+	AddMaterial();
+	FArMaterials[i].Way:=SGReadStringFromStream(Stream);
+	LastMaterial().Loading();
+	end;
+end;
+
+procedure TSGCustomModel.SaveToSaGe3DModel(const Stream : TStream);
+var
+	i : TSGLongWord;
+begin
+Stream.WriteBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
+Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
+for i:=0 to FQuantityObjects-1 do
+	Objects[i].SaveToSaGe3DObj(Stream);
+for i:=0 to FQuantityMaterials-1 do
+	SGWriteStringToStream(FArMaterials[i].Way,Stream);
+end;
+
 procedure TSGCustomModel.SaveToFile(const FileWay: string);
 begin
-;//SaveToSaGe3DObjFile(FileWay);
+SaveToSaGe3DModelFile(FileWay);
 end;
 
 procedure TSGCustomModel.Clear;
@@ -1323,12 +1433,6 @@ for i:=0 to FQuantityObjects-1 do
 	begin
 	FArObjects[i].LoadToVBO();
 	end;
-end;
-
-class function TSGCustomModel.GetWRLNextIdentity(const Text:PTextFile):string;
-begin
-Result:='';
-(**)
 end;
 
 procedure TSGCustomModel.LoadFromFile(const FileWay:string);
@@ -1372,13 +1476,6 @@ for i:=0 to FQuantityObjects-1 do
 	FArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
 end;
 
-procedure TSGCustomModel.Optimization(const SaveColors:Boolean = True;const SaveNormals:Boolean = False);
-var
-	i : TSGLongWord;
-begin
-for i:=0 to FQuantityObjects-1 do
-	;//ArObjects[i].Optimization(SaveColors,SaveNormals);
-end;
 
 procedure TSGCustomModel.Stripificate;
 var
