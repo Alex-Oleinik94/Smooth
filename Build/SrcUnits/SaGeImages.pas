@@ -62,7 +62,6 @@ type
 		function LoadToBitMap():TSGBoolean;virtual;
 		procedure Loading();
 		procedure ToTexture();virtual;
-		procedure LoadTextureMainThread();
 		procedure SaveToStream(const Stream:TStream);
 		class function IsBMP(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
 		class function IsMBM(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
@@ -110,11 +109,6 @@ type
 	ArTSGImage  = type packed array of TSGImage;
 	TArTSGImage = ArTSGImage;
 
-var
-	ArWaitImages:TArTSGImage = nil;
-	WhisImageNowLoading:SGImage = nil;
-
-procedure SGIIdleFunction;
 function LoadTGA(const Stream:TStream):TSGBitmap;
 
 implementation
@@ -262,17 +256,6 @@ else
 		Stream2.SaveToStream(Stream);
 		Stream2.Destroy;
 		end;
-end;
-
-procedure TSGImage.LoadTextureMainThread;
-begin
-if WhisImageNowLoading = nil then
-	WhisImageNowLoading:=Self
-else
-	begin
-	SetLength(ArWaitImages,Length(ArWaitImages)+1);
-	ArWaitImages[High(ArWaitImages)]:=Self;
-	end;
 end;
 
 procedure TGACopySwapPixel(const Source, Destination: Pointer);
@@ -642,33 +625,20 @@ FreeTexture;
 FImage.Clear;
 end;
 
-procedure SGImageThreadProcedure(P:Pointer);
-begin
-while true do
-	begin
-	if (WhisImageNowLoading <> nil) and (WhisImageNowLoading.ReadyToGoToTexture=False) then
-		begin
-		WhisImageNowLoading.LoadToMemory;
-		WhisImageNowLoading.LoadToBitMap;
-		end
-	else
-		Delay(100);
-	end;
-end;
-
-
 procedure TSGImage.DisableTexture;inline;
 begin
 Render.Disable(SGR_TEXTURE_2D);
-//glDisable(GL_TEXTURE_2D);
 end;
 
 procedure TSGImage.BindTexture;inline;
 begin
+if (FTexture=0) and (FReadyToGoToTexture) then
+	begin
+	ToTexture();
+	FreeBits();
+	end;
 Render.Enable(SGR_TEXTURE_2D);
 Render.BindTexture(SGR_TEXTURE_2D,FTexture);
-{glEnable(GL_TEXTURE_2D);
-glBindTexture(GL_TEXTURE_2D,FTexture);}
 end;
 
 procedure TSGImage.LoadBMPToBitMap;
@@ -741,16 +711,16 @@ FReadyToGoToTexture:=Loaded;
 Result:=Loaded;
 end;
 
-procedure TSGImage.FreeSream;
+procedure TSGImage.FreeSream();
 begin
 if FStream<>nil then
 	begin
-	FStream.Destroy;
+	FStream.Destroy();
 	FStream:=nil;
 	end;
 end;
 
-procedure TSGImage.FreeBits;
+procedure TSGImage.FreeBits();
 begin
 if FImage.FBitMap<>nil then
 	begin
@@ -800,25 +770,6 @@ FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
 	SGLog.Sourse('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
-end;
-
-procedure SGIIdleFunction;
-begin
-if WhisImageNowLoading <> nil then
-	if WhisImageNowLoading.ReadyToGoToTexture then
-		begin
-		WhisImageNowLoading.ToTexture;
-		WhisImageNowLoading.FreeSome;
-		Pointer(WhisImageNowLoading):=nil;
-		end;
-if WhisImageNowLoading = nil then
-	begin
-	if Length(ArWaitImages)>0 then
-		begin
-		WhisImageNowLoading:=ArWaitImages[High(ArWaitImages)];
-		SetLength(ArWaitImages,Length(ArWaitImages)-1);
-		end;
-	end;
 end;
 
 

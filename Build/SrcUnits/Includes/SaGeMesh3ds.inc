@@ -82,206 +82,227 @@ end;
 
 function TSGLoad3DS.Import3DS(const AModel:TSGCustomModel;out Sucsses : TSGBoolean): TSGLoad3DS;
 var Ch:TSGChunk;
-	ChPos,TempPos,ObjectsPos,c3dPos:longword;
-	Local:array[0..11] of single;
-	x0,x1,x2:single;
-	i:word;
-	c:char;
-	s:string = '';
-	iii:word;
+	ChPos,TempPos,ObjectsPos,c3dPos:TSGLongWord;
+	Local:array[0..11] of TSGSingle;
+	x0,x1,x2:TSGSingle;
+	i:TSGWord;
+	c:TSGChar;
+	s:TSGString = '';
+	iii:TSGWord;
 begin
-	Result:=Self;
-	Sucsses:=False;
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
-	if TFile= nil then
-		Tfile:=TFileStream.Create(FFileName,fmOpenRead);
-	if Tfile=nil then
+Result:=Self;
+Sucsses:=False;
+SGLog.Sourse(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
+if TFile= nil then
+	Tfile:=TFileStream.Create(FFileName,fmOpenRead);
+if Tfile=nil then
+	begin
+	SGLog.Sourse(['TSGLoad3DS.Import3DS : Не удалось открыть файл "',FFileName,'"']);
+	exit;
+	end;
+//Читаем заголовок
+Tfile.Read(Ch.ID,2);
+Tfile.Read(Ch.Length,4);
+Tfile.Position:=Tfile.Position-6;
+if Ch.ID<>MAIN3DS then
+	begin
+	SGLog.Sourse(['TSGLoad3DS.Import3DS : Это не 3d файл! "',FFileName,'"']);
+	exit;
+	end;
+//находим блок редактора
+ChPos:=Self.FindChunk(EDIT3DS,true);
+c3dPos:=ChPos;
+//==================================================================
+//========================Читаем материалы==========================
+//==================================================================
+//Ищем материалы
+ChPos:=Self.FindChunk(cMATERIAL,true);
+ObjectsPos:=ChPos;
+Tfile.Read(Ch.ID,2); 
+Tfile.Position:=Tfile.Position-2;
+while Ch.ID=cMATERIAL do
+	begin
+	AModel.AddMaterial();
+	TempPos:=ChPos;
+	ChPos:=Self.FindChunk(cMATNAME,true);
+	Tfile.Position:=Tfile.Position+6;
+	Tfile.Read(c,1);
+	while c<>#0 do
 		begin
-		SGLog.Sourse(['Не удалось открыть файл "',FFileName,'"']);
-		exit;
+		AModel.LastMaterial().Name := AModel.LastMaterial().Name + C;
+		Tfile.Read(c,1);
 		end;
-	//Читаем заголовок
+	//Tfile.Position:=ObjectsPos;
+	ChPos:=Self.FindChunk(cMATMAP,true);
+	ReadHeader(@Ch);
+	if Ch.ID=cMATMAP then
+		begin
+		ChPos:=Self.FindChunk(cMATMAPFILE,true);
+		ReadHeader(@Ch);
+		if Ch.ID=cMATMAPFILE then
+			begin
+			Tfile.Position:=Tfile.Position+6;
+			Tfile.Read(c,1);
+			while c<>#0 do
+				begin
+				AModel.LastMaterial().Way := AModel.LastMaterial().Way + C;
+				Tfile.Read(c,1);
+				end;
+			AModel.LastMaterial().Way := SGGetFileWay(FFileName)+ AModel.LastMaterial().Way;
+			AModel.LastMaterial().LoadToMemory();
+			AModel.LastMaterial().LoadToBitMap();
+			end;
+		end;
+	SGLog.Sourse(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,
+				'"; In file: "',AModel.LastMaterial().Way,'"']);
+	//Ищем новый материал
+	Tfile.Position:=ObjectsPos;
 	Tfile.Read(Ch.ID,2);
 	Tfile.Read(Ch.Length,4);
-	Tfile.Position:=Tfile.Position-6;
-	if Ch.ID<>MAIN3DS then
-		begin
-		SGLog.Sourse(['Это не 3d файл! "',FFileName,'"']);
-		exit;
-		end;
-	//находим блок редактора
-	ChPos:=self.FindChunk(EDIT3DS,true);	
-	//==================================================================
-	//========================Читаем материалы==========================
-	//==================================================================
-	//Ищем материалы
-	c3dPos:=ChPos;
-	ChPos:=self.FindChunk(cMATERIAL,true);
-	ObjectsPos:=ChPos;
-	Tfile.Read(Ch.ID,2); 
-	Tfile.Position:=Tfile.Position-2;
-	while Ch.ID=cMATERIAL do
-		begin
-		AModel.AddMaterial();
-		TempPos:=ChPos;
-		ChPos:=self.FindChunk(cMATNAME,true);
-		Tfile.Position:=Tfile.Position+6;
-		Tfile.Read(c,1);
-		while c<>#0 do
-			begin
-			AModel.LastMaterial().Name := AModel.LastMaterial().Name + C;
-			Tfile.Read(c,1);
-			end;
-		//Tfile.Position:=ObjectsPos;
-		ChPos:=self.FindChunk(cMATMAP,true);
-		ReadHeader(@Ch);
-		if Ch.ID=cMATMAP then
-			begin
-			ChPos:=self.FindChunk(cMATMAPFILE,true);
-			ReadHeader(@Ch);
-			if Ch.ID=cMATMAPFILE then
-				begin
-				Tfile.Position:=Tfile.Position+6;
-				Tfile.Read(c,1);
-				while c<>#0 do
-					begin
-					AModel.LastMaterial().Way := AModel.LastMaterial().Way + C;
-					Tfile.Read(c,1);
-					end;
-				AModel.LastMaterial().Way := 'models/'+ AModel.LastMaterial().Way;
-				AModel.LastMaterial().LoadToMemory();
-				AModel.LastMaterial().LoadToBitMap();
-				AModel.LastMaterial().LoadTextureMainThread();
-				end;
-			end;
-		SGLog.Sourse(['Material: "',AModel.LastMaterial().Name,
-					'"; In file: "',AModel.LastMaterial().Way,'"']);
-		//Ищем новый материал
-		Tfile.Position:=ObjectsPos;
-		Tfile.Read(Ch.ID,2);
-		Tfile.Read(Ch.Length,4);
-		Tfile.Position:=Tfile.Position-6+Ch.Length;
-		ObjectsPos:=Tfile.Position;
-		if TFile.Position=Tfile.Size then break;
-		Tfile.Read(Ch.ID,2);
-		Tfile.Position:=ObjectsPos;
-		end;
-	//==================================================================
-	//========================Читаем геометрию==========================
-	//==================================================================
-	Tfile.Position:=c3dPos;
-	//Пропускаем все кроме блока объекта
-	ChPos:=self.FindChunk(EDIT_OBJECT,true);
-	ObjectsPos:=ChPos;
+	Tfile.Position:=Tfile.Position-6+Ch.Length;
+	ObjectsPos:=Tfile.Position;
+	if TFile.Position=Tfile.Size then break;
 	Tfile.Read(Ch.ID,2);
-	Tfile.Position:=Tfile.Position-2;
-	while Ch.ID=EDIT_OBJECT do
-		begin
-		//Создаем объект в модели
-		AModel.AddObject();
-		Tfile.Position:=Tfile.Position+6;
-		Tfile.Read(c,1);
-		while c<>#0 do
-			begin
-			AModel.LastObject().Name := AModel.LastObject().Name + C;
-			Tfile.Read(c,1);
-			end;
-		SGLog.Sourse(['Object: "',AModel.LastObject().Name,'"']);
-		Tfile.Position:=ObjectsPos;
-		//Находим блок сетки
-		ChPos:=self.FindChunk(OBJ_TRIMESH,true);
-		TempPos:=ChPos; //Запомним позицию блока для поиска подблоков
-		//Находим список вершин
-		ChPos:=self.FindChunk(TRI_VERTEXLIST,true);
-		with AModel.LastObject() do
-			begin
-			//считаем кол-во вертексов
-			SkipHeader;
-			TFile.Read(iii,2);
-			SetVertexLength(iii);
-			for i:=0 to QuantityVertexes-1 do
-				with ArVertex3f[i]^ do
-					begin
-					Tfile.Read(x,4);
-					Tfile.Read(z,4);
-					Tfile.Read(y,4);
-					end;
-			//Перейдем к списку текстурных вершин
-			Tfile.Position:=TempPos;
-			ChPos:=self.FindChunk(TRI_MAPPINGCOORS,true);
-			SkipHeader;
-			TFile.Read(iii,2);
-			//FNOfTexVertex:=iii;
-			//SetLength(ArTexVertexes,FNOfTexVertex);
-			for i:=0 to QuantityVertexes-1 do
-				with ArTexVertex[i]^ do
-					begin
-					Tfile.Read(x,4);
-					Tfile.Read(y,4);
-					end;
-			//перейдем к списку граней
-			Tfile.Position:=TempPos;
-			ChPos:=self.FindChunk(TRI_FACELIST,true);
-			SkipHeader;
-			TFile.Read(iii,2);
-			//FNOfFaces:=iii;
-			//SetLength(ArFaces,FNOfFaces);
-			SetFaceLength(iii);
-			for i:=0 to QuantityFaces-1 do
-				with ArFacesTriangles()[iii] do
-					begin
-					Tfile.Read(p0,2);
-					Tfile.Read(p1,2);
-					Tfile.Read(p2,2);
-					Tfile.Position:=Tfile.Position+2;
-					end;
-			//Дойдем к данным о локальной системе объекта
-			Tfile.Position:=TempPos;
-			ChPos:=self.FindChunk(TRI_LOCAL,true);
-			SkipHeader;
-			TFile.Read(Local,sizeof(single)*12);
-			//Совершаем преобразования
-			for i:=0 to QuantityVertexes-1 do
-				begin
-				ArVertex3f[i]^.x-=Local[9];
-				ArVertex3f[i]^.z-=Local[10];
-				ArVertex3f[i]^.y-=Local[11];
-				x0:=ArVertex3f[i]^.x;
-				x1:=ArVertex3f[i]^.y;
-				x2:=ArVertex3f[i]^.z;
-				ArVertex3f[i]^.x:=Local[0]*x0+Local[2]*x1+Local[1]*x2;
-				ArVertex3f[i]^.z:=Local[3]*x0+Local[5]*x1+Local[4]*x2;
-				ArVertex3f[i]^.y:=Local[6]*x0+Local[8]*x1+Local[7]*x2;
-				end;
-			Tfile.Position:=TempPos;
-			ChPos:=self.FindChunk(TRI_FACELIST,true);
-			Tfile.Position:=Tfile.Position+2+6+FNOfFaces*4*2;
-			ChPos:=self.FindChunk(TRI_MATERIAL,false);
-			ReadHeader(@Ch);
-			if Ch.ID=TRI_MATERIAL then
-				begin
-				TFile.Position:=TFile.Position+6;
-				Tfile.Read(c,1);
-				s:='';
-				while c<>#0 do
-					begin
-		   	 		s+=c;
-					Tfile.Read(c,1);
-					end;
-		  		AModel.CreateMaterialIDInLastObject(s);
-				end;
-		end;
-		Tfile.Position:=ObjectsPos;
-		Tfile.Read(Ch.ID,2);
-		Tfile.Read(Ch.Length,4);
-		Tfile.Position:=Tfile.Position-6+Ch.Length;
-		ObjectsPos:=Tfile.Position;
-		if TFile.Position=Tfile.Size then break;
-		Tfile.Read(Ch.ID,2);
-		Tfile.Position:=ObjectsPos;
+	Tfile.Position:=ObjectsPos;
 	end;
-	ComputeNormals(AModel);
-	Sucsses:=True;
+//==================================================================
+//========================Читаем геометрию==========================
+//==================================================================
+Tfile.Position:=c3dPos;
+//Пропускаем все кроме блока объекта
+ChPos:=Self.FindChunk(EDIT_OBJECT,true);
+ObjectsPos:=ChPos;
+Tfile.Read(Ch.ID,2);
+Tfile.Position:=Tfile.Position-2;
+while Ch.ID=EDIT_OBJECT do
+	begin
+	//Создаем объект в модели
+	AModel.AddObject();
+	AModel.LastObject().HasNormals := True;
+	AModel.LastObject().HasColors  := False;
+	AModel.LastObject().EnableCullFace:=True;
+	AModel.LastObject().PoligonesType:=SGR_TRIANGLES;
+	AModel.LastObject().VertexType:=TSGMeshVertexType3f;
+	Tfile.Position:=Tfile.Position+6;
+	Tfile.Read(c,1);
+	while c<>#0 do
+		begin
+		AModel.LastObject().Name := AModel.LastObject().Name + C;
+		Tfile.Read(c,1);
+		end;
+	SGLog.Sourse(['TSGLoad3DS.Import3DS : Object: "',AModel.LastObject().Name,'"']);
+	Tfile.Position:=ObjectsPos;
+	//Находим блок сетки
+	ChPos:=Self.FindChunk(OBJ_TRIMESH,true);
+	TempPos:=ChPos; //Запомним позицию блока для поиска подблоков
+	
+	// Проверяем, есть ли у обьекта текстурные координаты 
+	// нужно проверить до того, как мы займем в оперативной памяти память на вршины
+	Tfile.Position:=TempPos;
+	ChPos:=Self.FindChunk(TRI_MAPPINGCOORS,true);
+	SkipHeader;
+	TFile.Read(iii,2);
+	AModel.LastObject().HasTexture := iii<>0;
+	
+	//Находим список вершин
+	Tfile.Position:=TempPos;
+	ChPos:=Self.FindChunk(TRI_VERTEXLIST,true);
+	with AModel.LastObject() do
+		begin
+		//считаем кол-во вертексов
+		SkipHeader;
+		TFile.Read(iii,2);
+		SetVertexLength(iii);
+		for i:=0 to QuantityVertexes-1 do
+			with ArVertex3f[i]^ do
+				begin
+				Tfile.Read(x,4);
+				Tfile.Read(z,4);
+				Tfile.Read(y,4);
+				end;
+		
+		//Перейдем к списку текстурных вершин
+		Tfile.Position:=TempPos;
+		ChPos:=Self.FindChunk(TRI_MAPPINGCOORS,true);
+		SkipHeader;
+		TFile.Read(iii,2);
+		if iii<>QuantityVertexes then
+			begin
+			SGLog.Sourse('TSGLoad3DS.Import3DS : Fatal : Quantity Vrtexes <> Quantity Texture Vertexes!');
+			AModel.Clear();
+			Exit;
+			end;
+		for i:=0 to QuantityVertexes-1 do
+			with ArTexVertex[i]^ do
+				begin
+				Tfile.Read(x,4);
+				Tfile.Read(y,4);
+				end;
+		
+		//перейдем к списку граней
+		Tfile.Position:=TempPos;
+		ChPos:=Self.FindChunk(TRI_FACELIST,true);
+		SkipHeader;
+		TFile.Read(iii,2);
+		//FNOfFaces:=iii;
+		//SetLength(ArFaces,FNOfFaces);
+		SetFaceLength(iii div 3);
+		for i:=0 to QuantityFaces-1 do
+			with ArFacesTriangles()[iii] do
+				begin
+				Tfile.Read(p0,2);
+				Tfile.Read(p1,2);
+				Tfile.Read(p2,2);
+				Tfile.Position:=Tfile.Position+2;
+				end;
+		
+		//Дойдем к данным о локальной системе объекта
+		Tfile.Position:=TempPos;
+		ChPos:=Self.FindChunk(TRI_LOCAL,true);
+		SkipHeader;
+		TFile.Read(Local,sizeof(single)*12);
+		//Совершаем преобразования
+		for i:=0 to QuantityVertexes-1 do
+			begin
+			ArVertex3f[i]^.x-=Local[9];
+			ArVertex3f[i]^.z-=Local[10];
+			ArVertex3f[i]^.y-=Local[11];
+			x0:=ArVertex3f[i]^.x;
+			x1:=ArVertex3f[i]^.y;
+			x2:=ArVertex3f[i]^.z;
+			ArVertex3f[i]^.x:=Local[0]*x0+Local[2]*x1+Local[1]*x2;
+			ArVertex3f[i]^.z:=Local[3]*x0+Local[5]*x1+Local[4]*x2;
+			ArVertex3f[i]^.y:=Local[6]*x0+Local[8]*x1+Local[7]*x2;
+			end;
+		Tfile.Position:=TempPos;
+		ChPos:=Self.FindChunk(TRI_FACELIST,true);
+		Tfile.Position:=Tfile.Position+2+6+FNOfFaces*4*2;
+		ChPos:=Self.FindChunk(TRI_MATERIAL,false);
+		ReadHeader(@Ch);
+		if Ch.ID=TRI_MATERIAL then
+			begin
+			TFile.Position:=TFile.Position+6;
+			Tfile.Read(c,1);
+			s:='';
+			while c<>#0 do
+				begin
+				s+=c;
+				Tfile.Read(c,1);
+				end;
+			AModel.CreateMaterialIDInLastObject(s);
+			end;
+		end;
+	Tfile.Position:=ObjectsPos;
+	Tfile.Read(Ch.ID,2);
+	Tfile.Read(Ch.Length,4);
+	Tfile.Position:=Tfile.Position-6+Ch.Length;
+	ObjectsPos:=Tfile.Position;
+	if TFile.Position=Tfile.Size then break;
+	Tfile.Read(Ch.ID,2);
+	Tfile.Position:=ObjectsPos;
+	end;
+ComputeNormals(AModel);
+Sucsses:=True;
 end;
 
 function TSGLoad3DS.FindChunk(ID: word; IsParent: boolean=false): longword;inline;
@@ -330,8 +351,11 @@ begin
 	result.y:=((vVector1.z * vVector2.x) - (vVector1.x * vVector2.z));
 	result.z:=((vVector1.x * vVector2.y) - (vVector1.y * vVector2.x));
 end;
-
+var
+	DT,DT2:TSGDateTime;
 begin
+DT.Get();
+SGLog.Sourse('TSGLoad3DS.ComputeNormals : Started');
 if AModel.QuantityObjects>0 then
 	begin
 	for iObject:=0 to AModel.QuantityObjects-1 do
@@ -377,6 +401,9 @@ if AModel.QuantityObjects>0 then
 		SetLength(pTempNormals,0);
 		end;
 	end;
+DT2.Get();
+SGLog.Sourse('TSGLoad3DS.ComputeNormals : Endng ( '+
+	SGSecondsToStringTime((DT2-DT).GetPastSeconds)+' '+SGStr((DT2-DT).GetPastMiliSeconds div 100)+' милисек'+' )');
 end;
 
 procedure TSGLoad3DS.SkipHeader;inline;

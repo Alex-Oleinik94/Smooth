@@ -22,7 +22,7 @@ type
 		destructor Destroy(); override;
 		class function ClassName():String;override;
 			protected
-		FMesh           : TSG3DObject;
+		FMesh           : TSGCustomModel;
 		FPosition       : TSGPosition;
 			public
 		procedure Draw();override;

@@ -109,11 +109,12 @@ type
 		procedure SetHasTesture(const VHasTexture:Boolean);
 		function GetSizeOfOneVertex():LongWord;inline;
 		function GetVertexLength():QWord;inline;
+		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
     public
         // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
 		property QuantityVertexes : LongWord          read FNOfVerts;
 		property QuantityFaces    : LongWord          read FNOfFaces;
-		property HasTexture       : Boolean           read FHasTexture    write FHasTexture;
+		property HasTexture       : Boolean           read FHasTexture    write SetHasTexture;
 		property HasColors        : Boolean           read FHasColors     write FHasColors;
 		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
 		property ColorType        : TSGMeshColorType  read FColorType     write SetColorType;
@@ -291,14 +292,16 @@ type
 		// Идентификатор материала
 		FMaterialID : TSGInt64;
 	public
-		// Свойство : имя модельки
+		// Свойство : Имя модельки
 		property Name       : TSGString read FName       write FName;
+		// Свойство : Идентификатор материала
 		property MaterialID : TSGInt64  read FMaterialID write FMaterialID;
     end;
 
     PSG3dObject = ^TSG3dObject;
 
     { TSGCustomModel }
+type
     TSGCustomModel = class(TSGDrawClass)
     public
         constructor Create;override;
@@ -312,12 +315,11 @@ type
         FArObjects   : packed array of TSG3dObject;
     private
 		function GetObject(const Index : TSGMaxEnum):TSG3dObject;inline;
+        procedure AddObjectColor(const ObjColor: TSGColor4f);
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
 		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
-    protected
-        procedure AddObjectColor(const ObjColor: TSGColor4f);
     public
 		function AddMaterial():TSGImage;inline;
 		function LastMaterial():TSGImage;inline;
@@ -326,22 +328,23 @@ type
 		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
     public
         procedure Draw(); override;
-        property FObjectColor: TSGColor4f write AddObjectColor;
         property ObjectColor: TSGColor4f write AddObjectColor;
 		procedure LoadToVBO();
+        procedure WriteInfo();
+        procedure Clear();virtual;
+    public
+		// Загрузка и соxранение
+		procedure SaveToFile(const FileWay: TSGString);
+        procedure LoadFromFile(const FileWay:TSGString);
     public
         //procedure LoadFromSaGe3DObjFile(const FileWay: string);
         //procedure SaveToSaGe3DObjFile(const FileWay: string);
         //procedure LoadWRLFromFile(const FileWay: string);
         //procedure LoadOFFFromFile(const FileWay: string);
-		procedure SaveToFile(const FileWay: TSGString);
         class function GetWRLNextIdentity(const Text:PTextFile):string;
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
         procedure Stripificate();
         procedure Optimization(const SaveColors:TSGBoolean = True;const SaveNormals:TSGBoolean = False);
-        procedure WriteInfo();
-        procedure LoadFromFile(const FileWay:TSGString);
-        procedure Clear();virtual;
     public
 		function VertexesSize():TSGQWord;
 		function FacesSize():TSGQWord;
@@ -354,6 +357,18 @@ type
 implementation
 
 {$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+
+procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean);inline;
+begin
+if not VHasTexture then
+	FHasTexture:=False
+else
+	begin
+	FHasTexture:=True;
+	if FQuantityTextures=0 then
+		FQuantityTextures:=1;
+	end;
+end;
 
 function TSG3DObject.GetVertexLength():QWord;inline;
 begin
@@ -938,6 +953,8 @@ TSGMeshColorType4f:WriteLn('TSGMeshColorType4f');
 end;
 WriteLn(PredStr,'FQuantityTextures = ',FQuantityTextures);
 WriteLn(PredStr,'FEnableVBO = ',FEnableVBO);
+WriteLn(PredStr,'FMaterialID = ',FMaterialID);
+WriteLn(PredStr,'FName = ',FName);
 end;
 
 function TSG3DObject.VertexesSize():QWord;Inline;
@@ -1121,7 +1138,6 @@ const
 begin
 
 FObjectColor.Color(Render);
-
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then

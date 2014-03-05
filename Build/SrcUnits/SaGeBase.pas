@@ -163,6 +163,7 @@ const
 	SGTextureDirectory = SGDataDirectory + Slash +'Textures';
 	SGTexturesDirectory = SGTextureDirectory;
 	SGFontsDirectory = SGFontDirectory;
+	SGModelsDirectory = SGDataDirectory + Slash +'Models';
 var
 	//≈сли эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
 	//и самого файлика лога SGLog.Create не создаст

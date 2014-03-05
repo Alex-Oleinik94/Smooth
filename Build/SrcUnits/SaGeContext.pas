@@ -292,7 +292,7 @@ constructor TSGContextObject.Create();
 begin
 inherited;
 FContext:=nil;
-SGLog.Sourse('TSGContextObject__Create : Warning : Create without Context!!');
+//SGLog.Sourse('TSGContextObject__Create : Warning : Create without Context!!');
 end;
 
 destructor TSGContextObject.Destroy();
