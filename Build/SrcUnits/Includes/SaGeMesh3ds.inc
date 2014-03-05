@@ -244,11 +244,9 @@ while Ch.ID=EDIT_OBJECT do
 		ChPos:=Self.FindChunk(TRI_FACELIST,true);
 		SkipHeader;
 		TFile.Read(iii,2);
-		//FNOfFaces:=iii;
-		//SetLength(ArFaces,FNOfFaces);
-		SetFaceLength(iii div 3);
+		SetFaceLength(iii);
 		for i:=0 to QuantityFaces-1 do
-			with ArFacesTriangles()[iii] do
+			with ArFacesTriangles()[i] do
 				begin
 				Tfile.Read(p0,2);
 				Tfile.Read(p1,2);
@@ -276,7 +274,7 @@ while Ch.ID=EDIT_OBJECT do
 			end;
 		Tfile.Position:=TempPos;
 		ChPos:=Self.FindChunk(TRI_FACELIST,true);
-		Tfile.Position:=Tfile.Position+2+6+FNOfFaces*4*2;
+		Tfile.Position:=Tfile.Position+2+6+QuantityFaces*4*2;
 		ChPos:=Self.FindChunk(TRI_MATERIAL,false);
 		ReadHeader(@Ch);
 		if Ch.ID=TRI_MATERIAL then

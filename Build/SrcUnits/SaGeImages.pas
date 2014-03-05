@@ -483,7 +483,7 @@ procedure TSGImage.Loading;
 begin
 LoadToMemory;
 LoadToBitMap;
-ToTexture;
+//ToTexture;
 end;
 
 procedure TSGImage.SetBitMapBits(const Value:Cardinal);

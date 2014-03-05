@@ -1453,7 +1453,8 @@ var
     i: TSGLongWord;
 begin
 for i := 0 to FQuantityObjects - 1 do
-	if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and (FArMaterials[FArObjects[i].MaterialID].Ready()) then
+	if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and 
+	((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or(FArMaterials[FArObjects[i].MaterialID].Ready)) then
 		begin
 		FArMaterials[FArObjects[i].MaterialID].BindTexture();
 		FArObjects[i].Draw();
