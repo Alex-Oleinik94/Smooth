@@ -17,13 +17,18 @@ uses
 type
 	TSGCollidableModel=class(TSGNod)
 			protected
-		FColidableMesh  : TSG3DObject;
-		FWeight         : TSGSingle;   // ћасса 
+		FCollidableMesh : TSG3DObject; // Ётот мешь будет использоватьс€ дл€ вычислени€ физики
 		FFriction       : TSGSingle;   // “рение
-		FPositionShift  : TSGPosition; // »зменение позиции с течением времени (скорость с ее направлением)
-		FPhysicDistance : TSGSingle;   // ƒл€ не напр€гани€ физики
+		FPhysicDistance : TSGSingle;   // ƒл€ не напр€гани€ физики (ћаксимальное рассто€ние между центром и вершиной)
 			public
 		property PhysicDistance : TSGSingle read FPhysicDistance;
+		property Mesh : TSG3DObject read FCollidableMesh;
+		end;
+type
+	TSGDinamycCollidableModel=class(TSGCollidableModel)
+			protected
+		FWeight         : TSGSingle;   // ћасса 
+		FPositionShift  : TSGPosition; // »зменение позиции с течением времени (скорость с ее направлением)
 		end;
 type
 	TSGPCollidableMember = packed record
@@ -39,14 +44,77 @@ type
 		procedure ProcessingCollidableGroup(const Player,QuantityCollidables:TSGLongWord;var CollidableGroup : TSGPCollidableGroup);virtual;abstract;
 			public
 		procedure UpDate();override;
-type
 		end;
+type
 	TSGPhisics2D = class(TSGCustomPhisics)
 			private
 		procedure ProcessingCollidableGroup(const Player,QuantityCollidables:TSGLongWord;var CollidableGroup : TSGPCollidableGroup);override;
 		end;
 
+// ј это определение касани€, точки касани€ и глубины проникновени€ обьектов
+function SGGetCollizionVertex2fGJK( const O1,O2:TSGCollidableModel; out CollizionVertex:TSGVertex3f; out CollidableDepth:TSGSingle):TSGBoolean;inline;
+
 implementation
+
+function SGGetCollizionVertex2fGJK( const O1,O2:TSGCollidableModel; out CollizionVertex:TSGVertex3f; out CollidableDepth:TSGSingle):TSGBoolean;inline;
+//≈сли обьекты пересекаютс€, то Result = True, если нет, то Result = false. 
+//CollizionVertex - Ёто точка нашего столкновени€.
+var
+	ArMinkVertexes:packed array of TSGVertex2f;//–азность минковского...
+	ArMinkConnect:
+		packed array of 
+			packed record
+				p0,p1:LongWord;
+				end;//тут дл€ каждого индекса массива разности минковского мы запомнили, что и из чего мы отнимаем
+	i,ii,iii:TSGMaxEnum;
+	ArMinkIndexes:TSGArLongWord;//Ёто индексы кругового обхода точек разности минковского
+	R1,R2:Single;
+begin
+Result:=False;
+CollizionVertex:=0;
+SetLength(ArMinkVertexes,O1.Mesh.Vertexes*O2.Mesh.Vertexes);
+SetLength(ArMinkConnect,O1.Mesh.Vertexes*O2.Mesh.Vertexes);
+iii:=0;
+for i:=0 to O1.Mesh.Vertexes-1 do
+	for ii:=0 to O2.Mesh.Vertexes-1 do
+		begin
+		ArMinkVertexes[iii]:=O1.Mesh.ArVertex2f[i]^-O2.Mesh.ArVertex2f[ii]^;
+		ArMinkConnect[iii].p0:=i;
+		ArMinkConnect[iii].p1:=ii;
+		iii+=1;
+		end;
+ArMinkIndexes:=SGGetPointsCirclePoints(ArMinkVertexes);
+if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
+	begin
+	ii:=0;
+	R1:=Abs(ArMinkVertexes[ArMinkIndexes[0]]);
+	for i:=1 to Length(ArMinkIndexes)-1 do//¬ этом цикле мы ищем самую приближенную к началу координат точку
+		begin
+		R2:=Abs(ArMinkVertexes[ArMinkIndexes[i]]);
+		if R1>R2 then
+			begin
+			R1:=R2;
+			ii:=i;
+			end;
+		end;
+	//ќпредел€ем соседние точки дл€ ii-ой точки.
+	if ii=0 then
+		i:=Length(ArMinkIndexes)-1
+	else
+		i:=ii-1;
+	if ii=Length(ArMinkIndexes)-1 then
+		iii:=0
+	else
+		iii:=ii+1;
+	// ¬ общем это нужно дописать
+	// ........
+	
+	end;
+if ArMinkIndexes<>nil then
+	SetLength(ArMinkIndexes,0);
+SetLength(ArMinkVertexes,0);
+SetLength(ArMinkConnect,0);
+end;
 
 // Processing CollidableGroup which indexes of collidable models of scene
 procedure TSGPhisics2D.ProcessingCollidableGroup(const Player,QuantityCollidables:TSGLongWord;var CollidableGroup : TSGPCollidableGroup);

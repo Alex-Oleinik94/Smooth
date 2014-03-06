@@ -1,7 +1,10 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
 {$IFNDEF ANDROID}
-	{$APPTYPE CONSOLE}
-	//{$APPTYPE GUI}
+	{$IFDEF RELEASE}
+		{$APPTYPE GUI}
+	{$ELSE}
+		{$APPTYPE CONSOLE}
+		{$ENDIF}
 	program Main;
 {$ELSE}
 	// Дело в том, что на андроиде наше приложение загружается как библиотека к приложению, написанному на Java
@@ -53,7 +56,6 @@ uses
 	,SaGeLoading
 	,SaGeImages
 	;
-	//,SaGeX264Encoder;
 
 
 procedure Draw(const Context:TSGContext);
@@ -64,7 +66,7 @@ procedure Init(const MyContext:TSGContext);
 begin
 SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
-SGScreen.Font.Loading;
+SGScreen.Font.Loading();
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
