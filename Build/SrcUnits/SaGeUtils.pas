@@ -18,13 +18,22 @@ type
 (*====================================================================*)
 (*============================TSGCamera===============================*)
 (*====================================================================*)
-	
+const
+	SG_VIEW_WATCH_OBJECT       = $001001;
+	SG_VIEW_FOLLOW_OBJECT      = $001002;
+	SG_VIEW_BEFORE_OBJECT      = $001003;
+	SG_VIEW_AFAR_FOLLOW_OBJECT = $001004;
+type
 	TSGCamera=class(TSGContextObject)
 			public
 		constructor Create();override;
 			protected
-		FMatrixMode,FViewMode:TSGExByte;
+		FMatrixMode: TSGExByte; // SG_3D, SG_2D, SG_ORTHO_3D
+		FViewMode  : TSGExByte; // SG_VIEW_...
+			// for SG_VIEW_WATCH_OBJECT
 		FRotateX,FRotateY,FTranslateX,FTranslateY,FZum:TSGSingle;
+			// for SG_VIEW_FOLLOW_OBJECT, SG_VIEW_BEFORE_OBJECT, SG_VIEW_AFAR_FOLLOW_OBJECT
+		FPosition,FPositionShift:PSGPosition;
 		procedure SetViewMode(const NewViewMode:TSGExByte);virtual;abstract;
 		procedure Change();inline;
 		procedure InitMatrix();inline;
@@ -274,37 +283,53 @@ constructor TSGCamera.Create();
 begin
 inherited;
 FMatrixMode:=SG_3D;
+FViewMode:=SG_VIEW_WATCH_OBJECT;
+FPositionShift:=nil;
+FPosition:=nil;
 Clear();
 end;
 
 procedure TSGCamera.Change();inline;
 begin
-if Context.CursorWheel=SGUpCursorWheel then
+case FViewMode of
+SG_VIEW_WATCH_OBJECT:
 	begin
-	FZum*=0.9;
+	if Context.CursorWheel=SGUpCursorWheel then
+		begin
+		FZum*=0.9;
+		end;
+	if Context.CursorWheel=SGDownCursorWheel then
+		begin
+		FZum*=1/0.9;
+		end;
+	if Context.CursorKeysPressed(SGLeftCursorButton) then
+		begin
+		FRotateY+=Context.CursorPosition(SGDeferenseCursorPosition).x/3;
+		FRotateX+=Context.CursorPosition(SGDeferenseCursorPosition).y/3;
+		end;
+	if Context.CursorKeysPressed(SGRightCursorButton) then
+		begin
+		FTranslateY+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*FZum;
+		FTranslateX+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*FZum;
+		end;
+	if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
+		begin
+		FZum*=1/0.89;
+		end;
+	if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
+		begin
+		FZum*=0.89;
+		end;
 	end;
-if Context.CursorWheel=SGDownCursorWheel then
+SG_VIEW_FOLLOW_OBJECT,SG_VIEW_AFAR_FOLLOW_OBJECT:
 	begin
-	FZum*=1/0.9;
+	
 	end;
-if Context.CursorKeysPressed(SGLeftCursorButton) then
+SG_VIEW_BEFORE_OBJECT:
 	begin
-	FRotateY+=Context.CursorPosition(SGDeferenseCursorPosition).x/3;
-	FRotateX+=Context.CursorPosition(SGDeferenseCursorPosition).y/3;
+	
 	end;
-if Context.CursorKeysPressed(SGRightCursorButton) then
-	begin
-	FTranslateY+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*FZum;
-	FTranslateX+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*FZum;
-	end;
-if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then
-	begin
-	FZum*=1/0.89;
-	end;
-if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
-	begin
-	FZum*=0.89;
-	end;
+end;
 end;
 
 procedure TSGCamera.InitMatrix();inline;

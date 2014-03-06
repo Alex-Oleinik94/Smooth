@@ -2,10 +2,11 @@
 unit SaGeCommon;
 interface 
 uses
-	SaGeBase, SaGeBased,
-	SaGeRender,
-	Classes,
-	SysUtils;
+	 SaGeBase
+	,SaGeBased
+	,SaGeRender
+	,Classes
+	,SysUtils;
 	
 type
 	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);
@@ -171,8 +172,11 @@ type
 		1: (X, Y, Z   : TSGSingle;   A, B, G : TSGSingle);
 		end;
 	
+	PSGPosition = ^ TSGPosition;
 	TSGPosition = object
+			protected
 		FPosition : TSGCustomPosition;
+			public
 		property x         : TSGSingle   read FPosition.x         write FPosition.x;
 		property y         : TSGSingle   read FPosition.y         write FPosition.y;
 		property z         : TSGSingle   read FPosition.z         write FPosition.z;
@@ -253,7 +257,7 @@ function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline
 function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
 //procedure SGQuad(const Vertex1:SGVertex;const Vertex2:SGVertex;const Vertex3:SGVertex;const Vertex4:SGVertex);
 function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;inline;
-function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):real;inline;
+function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;inline;
 function SGTreugPlosh(const a1,a2,a3:SGVertex):real;inline;
 function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;inline;
 function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;inline;
@@ -270,7 +274,7 @@ procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVe
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
 	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);inline;
 procedure SGConstructRoundQuad(const VRender:TSGRender;const ArVertex:SGArSGVertex;const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):real;inline;
+function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;inline;
 procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); inline;
 function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;inline;
 function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;inline;
@@ -368,7 +372,7 @@ Vertexes[1].x:=x2;
 Vertexes[1].y:=y2;
 end;
 
-function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):real;inline;
+function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;inline;
 begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y));
 end;
@@ -1077,7 +1081,7 @@ Result.y:=a.y+b.y;
 Result.z:=a.z+b.z;
 end;
 
-function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):real;inline;
+function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;inline;
 begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y)+sqr(Vertex1.z-Vertex2.z));
 end;

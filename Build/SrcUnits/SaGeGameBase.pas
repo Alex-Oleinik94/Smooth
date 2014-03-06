@@ -29,6 +29,12 @@ type
 		function  AddNod(const NewNodClass : TSGNodClass):TSGNod;virtual;
 		function DeleteNod(const Nod : TSGNod):TSGBoolean;virtual;
 		procedure SetParent(const Nod : TSGNod );
+			private
+		function GetNod(const Index : TSGLongWord):TSGNod;inline;
+		function GetQuantityNods():TSGLongWord;inline;
+			public
+		property Nods[Index : TSGLongWord]:TSGNod read GetNod;
+		property QuantityNods : TSGLongWord read GetQuantityNods;
 		end;
 type
 	(******************************************************************)
@@ -46,6 +52,22 @@ implementation
 (******************************************************************)
 (****************************){NOD}(*******************************)
 (******************************************************************)
+
+function TSGNod.GetNod(const Index : TSGLongWord):TSGNod;inline;
+begin
+if (FNods<>nil) then
+	Result:=FNods[Index]
+else
+	Result:=nil;
+end;
+
+function TSGNod.GetQuantityNods():TSGLongWord;inline;
+begin
+if FNods=nil then
+	Result:=0
+else
+	Result:=Length(FNods);
+end;
 
 procedure TSGNod.SetParent(const Nod : TSGNod );
 begin

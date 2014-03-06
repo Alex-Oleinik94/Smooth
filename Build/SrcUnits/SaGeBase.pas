@@ -2,7 +2,7 @@
 {$IFDEF MSWINDOWS}
 	{$R .\..\SaGe.res}
 	{$ENDIF}
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeBase;
 
 interface
@@ -206,17 +206,18 @@ type
 	PReal     = ^ real;
 	TSGExByte = type Int64;
 	
-	TSGSetOfByte = type packed set  of byte;
-	TArBoolean  = type packed array of boolean;
-	TArString   = type packed array of string;
-	TArLongint  = type packed array of longint;
-	TArLongword = type packed array of longword;
-	TArByte     = type packed array of byte;
-	TArInteger  = type packed array of integer;
-	TArWord     = type packed array of word;
-	TArInt64    = type packed array of int64;
-	TArReal     = type packed array of real;
-	TArExtended = type packed array of extended;
+	TSGSetOfByte   = type packed set  of byte;
+	TArBoolean     = type packed array of boolean;
+	TSGArBoolean   = type packed array of TSGBoolean;
+	TArString      = type packed array of string;
+	TArLongint     = type packed array of longint;
+	TArLongword    = type packed array of longword;
+	TArByte        = type packed array of byte;
+	TArInteger     = type packed array of integer;
+	TArWord        = type packed array of word;
+	TArInt64       = type packed array of int64;
+	TArReal        = type packed array of real;
+	TArExtended    = type packed array of extended;
 	TArTArLongWord = type packed array of TArLongWord;
 	
 	PTArLongint  = ^ TArLongint;

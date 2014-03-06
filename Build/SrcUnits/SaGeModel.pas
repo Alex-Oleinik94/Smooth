@@ -8,7 +8,6 @@ uses
 	, SaGeCommon
 	, SaGeBase
 	, SaGeBased
-	, SaGeUtils
 	, SaGeImages
 	, SaGeRender
 	, SaGeContext
@@ -27,9 +26,29 @@ type
 			public
 		procedure Draw();override;
 		procedure InitMatrixForPosition();
+		function FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
+			public
+		property Position : TSGPosition read FPosition;
 		end;
 
 implementation
+
+function TSGModel.FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
+var
+	Index : TSGLongWord;
+begin
+if FNods <> nil then
+	begin
+	for Index := 0 to QuantityNods-1 do
+		if Nods[Index] is PropertyClass then
+			begin
+			Result:=Nods[Index];
+			Break;
+			end;
+	end
+else
+	Result:=nil;
+end;
 
 procedure TSGModel.InitMatrixForPosition();
 begin

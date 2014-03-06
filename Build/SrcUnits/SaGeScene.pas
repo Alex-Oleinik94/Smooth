@@ -11,7 +11,6 @@ uses
 	,SaGeMesh
 	,SaGeModel
 	,SaGeUtils
-	,SaGePhisics
 	,SaGeGameBase
 	;
 
@@ -25,11 +24,25 @@ type
 			protected
 		FCamera : TSGCamera;
 		FMutators : TSGArMutators;
+		FPlayerModel : TSGInt64;
+			protected
+		function GetModel(const Index : TSGLongWord):TSGModel;inline;
 			public
 		function AddMutator( const NewMutatorClass : TSGMutatorClass ):TSGMutator;
+			public
+		property Player : TSGInt64 read FPlayerModel;
+		property Models[Index : TSGLongWord]:TSGModel read GetModel;
 		end;
 
 implementation
+
+function TSGScene.GetModel(const Index : TSGLongWord):TSGModel;inline;
+begin
+if (FNods<>nil) and (FNods[Index]<>nil) then
+	Result:=FNods[Index] as TSGModel
+else
+	Result:=nil;
+end;
 
 function TSGScene.AddMutator( const NewMutatorClass : TSGMutatorClass ):TSGMutator;
 begin
@@ -48,6 +61,7 @@ inherited Create(VContext);
 FCamera := TSGCamera.Create();
 FCamera.SetContext(Context);
 FMutators := nil;
+FPlayerModel:=-1;
 end;
 
 destructor TSGScene.Destroy();
