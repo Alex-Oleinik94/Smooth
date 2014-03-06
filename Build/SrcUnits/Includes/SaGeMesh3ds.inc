@@ -86,8 +86,6 @@ var Ch:TSGChunk;
 	Local:array[0..11] of TSGSingle;
 	x0,x1,x2:TSGSingle;
 	i:TSGWord;
-	c:TSGChar;
-	s:TSGString = '';
 	iii:TSGWord;
 begin
 Result:=Self;
@@ -126,12 +124,7 @@ while Ch.ID=cMATERIAL do
 	TempPos:=ChPos;
 	ChPos:=Self.FindChunk(cMATNAME,true);
 	Tfile.Position:=Tfile.Position+6;
-	Tfile.Read(c,1);
-	while c<>#0 do
-		begin
-		AModel.LastMaterial().Name := AModel.LastMaterial().Name + C;
-		Tfile.Read(c,1);
-		end;
+	AModel.LastMaterial().Name := SGReadStringFromStream(TFile);
 	//Tfile.Position:=ObjectsPos;
 	ChPos:=Self.FindChunk(cMATMAP,true);
 	ReadHeader(@Ch);
@@ -142,12 +135,7 @@ while Ch.ID=cMATERIAL do
 		if Ch.ID=cMATMAPFILE then
 			begin
 			Tfile.Position:=Tfile.Position+6;
-			Tfile.Read(c,1);
-			while c<>#0 do
-				begin
-				AModel.LastMaterial().Way := AModel.LastMaterial().Way + C;
-				Tfile.Read(c,1);
-				end;
+			AModel.LastMaterial().Way := SGReadStringFromStream(TFile);
 			AModel.LastMaterial().Way := SGGetFileWay(FFileName)+ AModel.LastMaterial().Way;
 			AModel.LastMaterial().LoadToMemory();
 			AModel.LastMaterial().LoadToBitMap();
@@ -184,12 +172,7 @@ while Ch.ID=EDIT_OBJECT do
 	AModel.LastObject().PoligonesType:=SGR_TRIANGLES;
 	AModel.LastObject().VertexType:=TSGMeshVertexType3f;
 	Tfile.Position:=Tfile.Position+6;
-	Tfile.Read(c,1);
-	while c<>#0 do
-		begin
-		AModel.LastObject().Name := AModel.LastObject().Name + C;
-		Tfile.Read(c,1);
-		end;
+	AModel.LastObject().Name := SGReadStringFromStream(TFile);
 	SGLog.Sourse(['TSGLoad3DS.Import3DS : Object: "',AModel.LastObject().Name,'"']);
 	Tfile.Position:=ObjectsPos;
 	//Находим блок сетки
@@ -280,14 +263,7 @@ while Ch.ID=EDIT_OBJECT do
 		if Ch.ID=TRI_MATERIAL then
 			begin
 			TFile.Position:=TFile.Position+6;
-			Tfile.Read(c,1);
-			s:='';
-			while c<>#0 do
-				begin
-				s+=c;
-				Tfile.Read(c,1);
-				end;
-			AModel.CreateMaterialIDInLastObject(s);
+			AModel.CreateMaterialIDInLastObject(SGReadStringFromStream(TFile));
 			end;
 		end;
 	Tfile.Position:=ObjectsPos;

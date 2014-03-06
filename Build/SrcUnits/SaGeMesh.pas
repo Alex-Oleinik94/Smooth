@@ -85,9 +85,9 @@ type
         class function ClassName():string;override;
     protected
         // Количество вершин
-        FNOfVerts : TSGLongWord;
+        FNOfVerts : TSGQuadWord;
         // Количество структур индексов вершин
-        FNOfFaces : TSGLongWord;
+        FNOfFaces : TSGQuadWord;
         
         // Есть ли у модельки текстурка
         FHasTexture : TSGBoolean;
@@ -113,8 +113,8 @@ type
 		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
     public
         // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
-		property QuantityVertexes : LongWord          read FNOfVerts;
-		property QuantityFaces    : LongWord          read FNOfFaces;
+		property QuantityVertexes : TSGQuadWord       read FNOfVerts;
+		property QuantityFaces    : TSGQuadWord       read FNOfFaces;
 		property HasTexture       : Boolean           read FHasTexture    write SetHasTexture;
 		property HasColors        : Boolean           read FHasColors     write FHasColors;
 		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
@@ -1140,10 +1140,9 @@ procedure TSG3DObject.SaveToSaGe3DObj(const Stream:TStream);
 var
 	S:array[0..8] of TSGChar = 'SaGe3DObj';
 begin
-Stream.WriteBuffer(S,SizeOf(S));
+Stream.WriteBuffer(S[0],SizeOf(S[0])*9);
 Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
-Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
+
 Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
 Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
@@ -1151,6 +1150,13 @@ Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
 Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
 Stream.WriteBuffer(FColorType,SizeOf(FColorType));
+Stream.WriteBuffer(FMaterialID,SizeOf(FMaterialID));
+Stream.WriteBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
+SGWriteStringToStream(FName,Stream);
+
+Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
+
 Stream.WriteBuffer(ArFaces[0],FacesSize());
 Stream.WriteBuffer(ArVertex^,VertexesSize());
 end;
@@ -1161,7 +1167,7 @@ var
 	Version : TSGQuadWord = 0;
 begin
 S2:='SaGe3DObj';
-Stream.ReadBuffer(S,SizeOf(S));
+Stream.ReadBuffer(S[0],SizeOf(S[0])*9);
 if S<>S2 then
 	begin
 	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : It is not "SaGe3DObj" file!']);
@@ -1170,11 +1176,9 @@ if S<>S2 then
 Stream.ReadBuffer(Version,SizeOf(Version));
 if Version <> SGMeshVersion then
 	begin
-	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : (Program.MeshVersion!=Mesh.MeshVersion) !']);
+	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
 	Exit;
 	end;
-Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
 Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
 Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
@@ -1182,6 +1186,16 @@ Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
 Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
 Stream.ReadBuffer(FColorType,SizeOf(FColorType));
+Stream.ReadBuffer(FMaterialID,SizeOf(FMaterialID));
+Stream.ReadBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
+FName := SGReadStringFromStream(Stream);
+
+Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
+Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
+
+SetVertexLength(FNOfVerts);
+SetFaceLength(FNOfFaces);
+
 Stream.ReadBuffer(ArFaces[0],FacesSize());
 Stream.ReadBuffer(ArVertex^,VertexesSize());
 end;
@@ -1372,17 +1386,22 @@ end;
 procedure TSGCustomModel.LoadFromSaGe3DModel(const Stream : TStream);
 var
 	i : TSGLongWord;
+	QuantityO,QuantityM : TSGQuadWord;
 begin
-Stream.ReadBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
-Stream.ReadBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
-for i:=0 to FQuantityObjects-1 do
-	AddObject();
-	Objects[i].LoadFromSaGe3DObj(Stream);
-for i:=0 to FQuantityMaterials-1 do
+Stream.ReadBuffer(QuantityO,SizeOf(QuantityO));
+Stream.ReadBuffer(QuantityM,SizeOf(QuantityM));
+for i:=0 to QuantityO-1 do
 	begin
-	AddMaterial();
-	FArMaterials[i].Way:=SGReadStringFromStream(Stream);
-	LastMaterial().Loading();
+	AddObject().LoadFromSaGe3DObj(Stream);
+	end;
+for i:=0 to QuantityM-1 do
+	begin
+	AddMaterial().Way:=SGReadStringFromStream(Stream);
+	LastMaterial().Name:=SGReadStringFromStream(Stream);
+	if SGFileExists(LastMaterial().Way) then
+		begin
+		LastMaterial().Loading();
+		end;
 	end;
 end;
 
@@ -1395,7 +1414,10 @@ Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
 for i:=0 to FQuantityObjects-1 do
 	Objects[i].SaveToSaGe3DObj(Stream);
 for i:=0 to FQuantityMaterials-1 do
+	begin
 	SGWriteStringToStream(FArMaterials[i].Way,Stream);
+	SGWriteStringToStream(FArMaterials[i].Name,Stream);
+	end;
 end;
 
 procedure TSGCustomModel.SaveToFile(const FileWay: string);
