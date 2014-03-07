@@ -2,14 +2,55 @@
 unit SaGeImagesPng;
 
 interface
+
 uses 
 	crt
 	,png
 	,Classes
 	,SaGeImagesBase
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeRender
+	,SaGeResourseManager
 	;
+procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);
+procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);
+
+implementation
+
+
+
+type
+	TSGResourseManipulatorImagesPNG=class(TSGResourseManipulator)
+			public
+		constructor Create();override;
+		function LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;override;
+		function SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;override;
+		end;
+
+constructor TSGResourseManipulatorImagesPNG.Create();
+begin
+inherited;
+AddExpansion('PNG',True,True);
+end;
+
+function TSGResourseManipulatorImagesPNG.LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;
+begin
+Result := TSGBitMap.Create();
+LoadPNG(VStream,Result as TSGBitMap);
+end;
+
+function TSGResourseManipulatorImagesPNG.SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+begin 
+if (VExpansion<>'PNG') or (not(VResourse is TSGBitMap)) then
+	Result:=False
+else
+	begin
+	SavePNG(VResourse as TSGBitMap,VStream);
+	Result:=True;
+	end;
+end;
+
 type
 	TDynStringArray = packed array of string;
 const 
@@ -36,11 +77,6 @@ const
 	PNG_INTERLACE_NONE = 0;
 	PNG_INTERLACE_ADAM7 = 1;
 	PNG_INTERLACE_LAST = 2;     
-procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);
-procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);
-
-
-implementation
 
 {$DEFINE LIBPNG_CDECL}
 
@@ -211,4 +247,8 @@ finally
 	end;
 end;            
 
+initialization
+begin
+SGResourseManager.AddManipulator(TSGResourseManipulatorImagesPNG);
+end;
 end.

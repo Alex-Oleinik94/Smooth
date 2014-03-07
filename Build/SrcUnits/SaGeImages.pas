@@ -247,7 +247,11 @@ var
 begin
 if (FImage<>nil) and (FImage.FBitMap<>nil) then
 	begin
-	SavePNG(FImage,Stream);
+	if SGResourseManager.SaveingIsSuppored('PNG') then
+		SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage)
+	else
+		if SGResourseManager.SaveingIsSuppored('BMP') then
+			SGResourseManager.SaveResourseToStream(Stream,'BMP',FImage);
 	end
 else
 	if (FWay<>'') and FileExists(FWay) then
@@ -427,7 +431,11 @@ SGI_PNG:
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
 		{$ENDIF}
-	SavePNG(FImage,Stream);
+	if SGResourseManager.SaveingIsSuppored('PNG') then
+		SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage)
+	else
+		if SGResourseManager.SaveingIsSuppored('BMP') then
+			SGResourseManager.SaveResourseToStream(Stream,'BMP',FImage);
 	end;
 SGI_JPEG:
 	begin
@@ -461,7 +469,9 @@ end;
 
 procedure TSGImage.LoadPNGToBitMap;
 begin
-SaGeImagesPng.LoadPNG(FStream,FImage);
+//SaGeImagesPng.LoadPNG(FStream,FImage);
+if SGResourseManager.LoadingIsSuppored('PNG') then
+	FImage:=SGResourseManager.LoadResourseFromStream(FStream,'PNG') as TSGBitMap;
 end;
 
 procedure TSGImage.LoadJPEGToBitMap;

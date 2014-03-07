@@ -1,4 +1,4 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeImagesBase;
 
 interface
@@ -8,6 +8,7 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeRender
+	,SaGeResourseManager
 	;
 
 const 
@@ -52,7 +53,7 @@ type
 		procedure Clear;inline;
 		end;
 	
-	TSGBitMap=class
+	TSGBitMap=class(TSGResourse)
 			public
 		FBitMap:PByte;
 		
@@ -65,8 +66,8 @@ type
 		FFormatType:Cardinal;
 		FDataType:Cardinal;
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			public
 		procedure Clear;
 		procedure CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
