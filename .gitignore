@@ -21,5 +21,8 @@ Others/DirectX/*.a
 Others/DirectX/*.exe
 Data/Images/*/*.png
 Data/Images/*.png
+Examples/*.exe
+Examples/*.dll
+Examples/*.so
 *.bak
 
