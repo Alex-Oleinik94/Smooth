@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-program Example1;
+program Example2;
 uses
 	{$IFDEF UNIX}
 		{$IFNDEF ANDROID}
@@ -15,7 +15,7 @@ uses
 type
 	TSGExample=class(TSGDrawClass)
 			public
-		constructor Create(const VContext : TSGContext);
+		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():TSGString;override;

@@ -289,10 +289,10 @@ type
 	TSGClassOfClass = TSGClassClass;
 	TSGClass=class(TSGObject)
 			public
-		constructor Create;virtual;
-		destructor Destroy;override;
-		class function ClassName:String;virtual;abstract;
-		function Get(const What:string):Pointer;virtual;abstract;
+		constructor Create();virtual;
+		destructor Destroy();override;
+		class function ClassName():TSGString;virtual;
+		function Get(const What:string):TSGPointer;virtual;
 		end;
 	
 	//Это для того, чтобы можно было использовать в других модулях Streams,
@@ -1794,6 +1794,17 @@ function SGFileExists(const FileName:string = ''):boolean;
 begin
 Result:=FileExists(FileName);
 end;
+
+class function TSGClass.ClassName():TSGString;
+begin
+Result:='';
+end;
+
+function TSGClass.Get(const What:string):TSGPointer;
+begin
+Result:=nil;
+end;
+
 
 constructor TSGClass.Create;
 begin

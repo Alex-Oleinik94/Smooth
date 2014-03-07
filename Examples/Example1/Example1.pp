@@ -13,7 +13,7 @@ uses
 type
 	TSGExample1=class(TSGDrawClass)
 			public
-		constructor Create(const VContext : TSGContext);
+		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():TSGString;override;

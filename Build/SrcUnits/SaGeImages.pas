@@ -19,6 +19,7 @@ uses
 	,SaGeRender
 	,SaGeContext
 	,SaGeCommon
+	,SaGeResourseManager
 	;
 type
 	TSGIByte = type TSGByte;
