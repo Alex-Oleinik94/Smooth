@@ -346,8 +346,7 @@ end;
 		begin
 		ViewerImage:=TSGImage.Create();
 		ViewerImage.Way:=FileWay;
-		ViewerImage.LoadToMemory();
-		if ViewerImage.LoadToBitMap() then
+		if ViewerImage.Loading() then
 			begin
 			Context:=
 				   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
@@ -457,8 +456,7 @@ end;
 		begin
 		Image:=TSGImage.Create();
 		Image.Way:=argv[2];
-		Image.LoadToMemory();
-		Image.LoadToBitMap();
+		Image.Loading();
 		Image.Image.SetBounds(
 			SGVal(SGPCharToString(argv[3])),
 			SGVal(SGPCharToString(argv[4])));

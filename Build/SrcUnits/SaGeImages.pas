@@ -22,7 +22,7 @@ uses
 	,SaGeResourseManager
 	;
 type
-	TSGIByte = type TSGByte;
+	TSGIByte = type TSGExByte;
 	
 	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
@@ -52,24 +52,26 @@ type
 		
 		//Имя изображения/материала и тп 
 		FName : TSGString;
-		
+			protected
 		procedure LoadBMPToBitMap();
 		procedure LoadJPEGToBitMap();
 		procedure LoadMBMToBitMap(const Position:LongWord = 20);
 		procedure LoadPNGToBitMap();
-		procedure Saveing(const Format:TSGExByte = SGI_PNG);
-			public
 		procedure LoadToMemory();virtual;
 		function LoadToBitMap():TSGBoolean;virtual;
-		procedure Loading();
-		procedure ToTexture();virtual;
-		procedure SaveToStream(const Stream:TStream);
+		function GetBitMapBits():TSGCardinal;
+		procedure SetBitMapBits(const Value:TSGCardinal);
 		class function IsBMP(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
 		class function IsMBM(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
 		class function IsPNG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
 		class function IsJPEG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
 		class function GetLongWord(const FileBits:PByte;const Position:TSGLongInt):LongWord;
 		class function GetLongWordBack(const FileBits:PByte;const Position:TSGLongInt):LongWord;
+			public
+		procedure Saveing(const Format:TSGExByte = SGI_PNG);
+		function Loading():TSGBoolean;virtual;
+		procedure SaveToStream(const Stream:TStream);
+		procedure ToTexture();virtual;
 		procedure BindTexture();
 		procedure DisableTexture();
 		function ReadyTexture():TSGBoolean;
@@ -79,8 +81,6 @@ type
 		procedure FreeTexture();
 		procedure FreeAll();
 		function Ready():TSGBoolean;virtual;
-		function GetBitMapBits():TSGCardinal;
-		procedure SetBitMapBits(const Value:TSGCardinal);
 			public 
 		property FormatType         : TSGCardinal read FImage.FFormatType  write FImage.FFormatType;
 		property DataType           : TSGCardinal read FImage.FDataType    write FImage.FDataType;
@@ -490,11 +490,15 @@ LoadBMPToBitMap;
 end;
 end;
 
-procedure TSGImage.Loading;
+function TSGImage.Loading():TSGBoolean;
 begin
-LoadToMemory;
-LoadToBitMap;
-//ToTexture;
+Result:=False;
+LoadToMemory();
+if (FStream<>nil) and (FStream.Size<>0) then
+	LoadToBitMap()
+else
+	Exit;
+Result:=ReadyToGoToTexture;
 end;
 
 procedure TSGImage.SetBitMapBits(const Value:Cardinal);
@@ -745,14 +749,14 @@ begin
 Result:=(FileBits[0]=66) and (FileBits[1]=77);
 end;
 
-procedure TSGImage.LoadToMemory;
+procedure TSGImage.LoadToMemory();
 begin
 if FStream=nil then
-	FStream:=TMemoryStream.Create
+	FStream:=TMemoryStream.Create()
 else
 	begin
-	FStream.Free;
-	FStream:=TMemoryStream.Create;
+	FStream.Free();
+	FStream:=TMemoryStream.Create();
 	end;
 FStream.LoadFromFile(Way);
 end;

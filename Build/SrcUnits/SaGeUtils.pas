@@ -101,13 +101,14 @@ type
 		function GetSimbolWidth(const Index:char):LongInt;inline;
 			public
 		function GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
-		property FontHeight:LongInt read FFontHeight;
-		property SimbolWidth[Index:char]:LongInt read GetSimbolWidth;
-		procedure ToTexture;override;
+		function Loading():TSGBoolean;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:string ):LongWord;overload;
-		property FontReady:Boolean read FFontReady;
-		function Ready:Boolean;override;
+		function Ready():Boolean;override;
+			public
+		property FontReady :Boolean read FFontReady;
+		property FontHeight:LongInt read FFontHeight;
+		property SimbolWidth[Index:char]:LongInt read GetSimbolWidth;
 			public
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -431,7 +432,7 @@ end;
 
 function TSGFont.GetSimbolWidth(const Index:char):LongInt;inline;
 begin
-Result:=FSimbolParams[Index].Width
+Result:=FSimbolParams[Index].Width;
 end;
 
 procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -575,12 +576,15 @@ FFontHeight:=GetLongInt(FFontParams,'Height');
 FFontReady:=True;
 end;
 
-procedure TSGFont.ToTexture;
+function TSGFont.Loading():TSGBoolean;
 var
 	FontWay:string = '';
 	i:LongInt = 0;
 	ii:LongInt = 0;
 begin
+Result:=inherited Loading();
+if not Result then 
+	Exit;
 i:=Length(FWay);
 while (FWay[i]<>'.')and(FWay[i]<>'/')and(i>0)do
 	i-=1;
@@ -594,7 +598,6 @@ if (i>0)and (FWay[i]='.') then
 		LoadFont(FontWay);
 		end;
 	end;
-inherited ToTexture;
 end;
 
 constructor TSGFont.Create(const FileName:string = '');
@@ -718,16 +721,21 @@ end;
 var
 	TempR:real;
 begin
+if (Self=nil) or (not(FontReady)) then
+	begin
+	SGLog.Sourse('TSGFont__AddWaterString : Error : Font not ready!');
+	Exit;
+	end;
 if (VImage.Image=nil) or (VImage.Channels<>3) or (Channels<>4) or (Image=nil)or (Image.BitMap=nil) then
 	begin
-	SGLog.Sourse('TSGExImage__AddWaterString : Error : Invalid arametrs!');
+	SGLog.Sourse('TSGFont__AddWaterString : Error : Invalid arametrs!');
 	Exit;
 	end;
 PBits:=PSGPixel3b(VImage.Image.BitMap);
 StrL:=StringLength(VString);
-if (StrL>VImage.Width) or (FontHeight>Height) then
+if (StrL>VImage.Width) or (FontHeight>VImage.Height) then
 	begin
-	SGLog.Sourse('TSGExImage__AddWaterString : Error : for this image ('+SGStr(VImage.Width)+','+SGStr(VImage.Height)+') water string "'+VString+'" is not portable!');
+	SGLog.Sourse('TSGFont__AddWaterString : Error : for this image ('+SGStr(VImage.Width)+','+SGStr(VImage.Height)+') water string "'+VString+'" is not portable!');
 	Exit;
 	end;
 PW:=VImage.Width-StrL-5;
@@ -743,6 +751,7 @@ if VType=0 then
 		begin
 		SI:=GetSimbolInfo(VString[i]);
 		for iw:=0 to SimbolWidth[VString[i]]-1 do
+			begin
 			for ih:=1 to FontHeight do
 				begin
 				Sum+=1;
@@ -750,6 +759,7 @@ if VType=0 then
 				SumG+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].g;
 				SumB+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].b;
 				end;
+			end;
 		PW+=SimbolWidth[VString[i]];
 		end;
 	SumR:=Trunc(SumR/Sum);

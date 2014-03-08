@@ -564,10 +564,9 @@ if (FImageBlock=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	with FImageBlock do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Block.png';
-		LoadToMemory;
-		LoadToBitMap;
+		Loading();
 		Image.SetBounds(ii,ii);
-		ToTexture;
+		ToTexture();
 		end;
 	end;
 
@@ -580,13 +579,12 @@ if (FImageBullet=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	with FImageBullet do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Bullet.png';
-		LoadToMemory;
-		LoadToBitMap;
+		Loading();
 		if ii>64 then
 			Image.SetBounds(64,64)
 		else
 			Image.SetBounds(ii,ii);
-		ToTexture;
+		ToTexture();
 		end;
 	end;
 
@@ -599,10 +597,9 @@ if (FImageKostia=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	with FImageKostia do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Standart Kostia.png';
-		LoadToMemory;
-		LoadToBitMap;
+		Loading();
 		Image.SetBounds(ii,ii);
-		ToTexture;
+		ToTexture();
 		end;
 	end;
 
@@ -615,10 +612,9 @@ if (FImageYou=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	with FImageYou do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'You.png';
-		LoadToMemory;
-		LoadToBitMap;
+		Loading();
 		Image.SetBounds(ii,ii);
-		ToTexture;
+		ToTexture();
 		end;
 	end;
 	
@@ -631,10 +627,9 @@ if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
 	with FImageSkull do
 		begin
 		Way:=SGTextureDirectory+Slash+'KillKostia'+Slash+'Skull.png';
-		LoadToMemory;
-		LoadToBitMap;
+		Loading();
 		Image.SetBounds(ii,ii);
-		ToTexture;
+		ToTexture();
 		end;
 	end;
 

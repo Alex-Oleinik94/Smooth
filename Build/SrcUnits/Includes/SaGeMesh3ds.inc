@@ -137,8 +137,7 @@ while Ch.ID=cMATERIAL do
 			Tfile.Position:=Tfile.Position+6;
 			AModel.LastMaterial().Way := SGReadStringFromStream(TFile);
 			AModel.LastMaterial().Way := SGGetFileWay(FFileName)+ AModel.LastMaterial().Way;
-			AModel.LastMaterial().LoadToMemory();
-			AModel.LastMaterial().LoadToBitMap();
+			AModel.LastMaterial().Loading();
 			end;
 		end;
 	SGLog.Sourse(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,

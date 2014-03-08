@@ -13,12 +13,11 @@ uses
 	,SaGeRender
 	,SaGeResourseManager
 	;
-procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);
-procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);
 
 implementation
-
-
+ 
+procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);forward;
+procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);forward;
 
 type
 	TSGResourseManipulatorImagesPNG=class(TSGResourseManipulator)
