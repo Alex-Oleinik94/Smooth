@@ -136,7 +136,7 @@ type
 	public
 		// ¬озвращает указатель на первый элемент массива вершин
 		function GetArVertexes():TSGPointer;inline;
-		// ¬озвращает указатель на первый элемент массива 
+		// ¬озвращает указатель на первый элемент массива индексов
 		function GetArFaces():TSGPointer;inline;
 		
 	private
@@ -270,6 +270,7 @@ type
 		
 		procedure SaveToSaGe3DObj(const Stream:TStream);
 		procedure LoadFromSaGe3DObj(const Stream:TStream);
+		
         (* я ж переписывал этот класс. Ёто то, что € не написал. *)
 		//procedure Stripificate;overload;inline;
 		//procedure Stripificate(var VertexesAndTriangles:TSGArTSGArTSGFaceType;var OutputStrip:TSGArTSGFaceType);overload;

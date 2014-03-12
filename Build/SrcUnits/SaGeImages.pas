@@ -13,13 +13,16 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
-	,SaGeImagesJpeg
-	,SaGeImagesPng
-	,SaGeImagesBmp
 	,SaGeRender
 	,SaGeContext
 	,SaGeCommon
 	,SaGeResourseManager
+		// formats
+	,SaGeImagesJpeg
+	{$IFNDEF ANDROID}
+		,SaGeImagesPng
+		{$ENDIF}
+	,SaGeImagesBmp
 	;
 type
 	TSGIByte = type TSGExByte;
@@ -263,6 +266,8 @@ else
 		end;
 end;
 
+function LoadTGA(const Stream:TStream):TSGBitmap;
+
 procedure TGACopySwapPixel(const Source, Destination: Pointer);
 {$IF defined(CPU32) and (not defined(ANDROID))}
 	assembler;
@@ -299,7 +304,6 @@ procedure TGACopySwapPixel(const Source, Destination: Pointer);
 	end;
 	{$ENDIF}
 
-function LoadTGA(const Stream:TStream):TSGBitmap;
 var
 	TGAHeader : packed record
 		FileType     : Byte;

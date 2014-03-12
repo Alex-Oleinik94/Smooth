@@ -29,6 +29,8 @@ type
 			protected
 		FWeight         : TSGSingle;   // Масса 
 		FPositionShift  : TSGPosition; // Изменение позиции с течением времени (скорость с ее направлением)
+			public
+		property PositionShift : TSGPosition read FPositionShift write FPositionShift;
 		end;
 type
 	TSGPCollidableMember = packed record
@@ -129,39 +131,58 @@ var
 	CollidableGroup : TSGPCollidableGroup = nil;
 	PlayerCollidableModel, IndexCollidableModel : TSGCollidableModel;
 	QuantityCollidables : TSGLongWord = 0;
+	Model : TSGModel = nil;
 begin
 Scene := FParent as TSGScene;
-if (Scene <> nil) and (Scene.Player <> -1) then
+if Scene <> nil then
 	begin
-	PlayerCollidableModel := Scene.Models[Scene.Player].FindProperty(TSGCollidableModel) as TSGCollidableModel;
-	if PlayerCollidableModel <>nil then
+	for Index := 0 to Scene.QuantityNods-1 do
 		begin
-		SetLength(CollidableGroup,Scene.QuantityNods);
-		FillChar(CollidableGroup[0],Scene.QuantityNods*SizeOf(CollidableGroup[0]),0);
-		for Index := 0 to Scene.QuantityNods-1 do
-			if (Scene.Models[Index] <> nil) and (Scene.Player <> Index) then
+		Model := Scene.Models[Index];
+		if (Model <> nil) then
+			begin
+			IndexCollidableModel := Model.FindProperty(TSGCollidableModel) as TSGCollidableModel;
+			if (IndexCollidableModel <> nil) and (IndexCollidableModel is TSGDinamycCollidableModel) then
 				begin
-				IndexCollidableModel := Scene.Models[Index].FindProperty(TSGCollidableModel) as TSGCollidableModel;
-				if IndexCollidableModel <> nil then
+				Model.Position := Model.Position + (IndexCollidableModel as TSGDinamycCollidableModel).PositionShift;
+				end;
+			end;
+		end;
+	if (Scene.Player <> -1) then
+		begin
+		PlayerCollidableModel := Scene.Models[Scene.Player].FindProperty(TSGCollidableModel) as TSGCollidableModel;
+		if PlayerCollidableModel <> nil then
+			begin
+			SetLength(CollidableGroup,Scene.QuantityNods);
+			FillChar(CollidableGroup[0], Scene.QuantityNods*SizeOf(CollidableGroup[0]), 0);
+			for Index := 0 to Scene.QuantityNods-1 do
+				begin
+				Model := Scene.Models[Index];
+				if (Model <> nil) and (Scene.Player <> Index) then
 					begin
-					if SGAbsTwoVertex(Scene.Models[Index].Position.Location, Scene.Models[Scene.Player].Position.Location) < 
-						PlayerCollidableModel.PhysicDistance+IndexCollidableModel.PhysicDistance then
-							begin
-							CollidableGroup[Index].RIncluded := True;
-							CollidableGroup[Index].RCollidableModel := IndexCollidableModel;
-							CollidableGroup[Index].RModel := Scene.Models[Index];
-							QuantityCollidables +=1;
-							end;
+					IndexCollidableModel := Model.FindProperty(TSGCollidableModel) as TSGCollidableModel;
+					if IndexCollidableModel <> nil then
+						begin
+						if SGAbsTwoVertex(Model.Position.Location, Scene.Models[Scene.Player].Position.Location) < 
+							PlayerCollidableModel.PhysicDistance+IndexCollidableModel.PhysicDistance then
+								begin
+								CollidableGroup[Index].RIncluded := True;
+								CollidableGroup[Index].RCollidableModel := IndexCollidableModel;
+								CollidableGroup[Index].RModel := Model;
+								QuantityCollidables +=1;
+								end;
+						end;
 					end;
 				end;
-		if QuantityCollidables<>0 then
-			begin
-			CollidableGroup[Scene.Player].RIncluded := False;
-			CollidableGroup[Scene.Player].RCollidableModel := PlayerCollidableModel;
-			CollidableGroup[Scene.Player].RModel := Scene.Models[Scene.Player];
-			ProcessingCollidableGroup(Scene.Player,QuantityCollidables,CollidableGroup);
+			if QuantityCollidables<>0 then
+				begin
+				CollidableGroup[Scene.Player].RIncluded := False;
+				CollidableGroup[Scene.Player].RCollidableModel := PlayerCollidableModel;
+				CollidableGroup[Scene.Player].RModel := Scene.Models[Scene.Player];
+				ProcessingCollidableGroup(Scene.Player,QuantityCollidables,CollidableGroup);
+				end;
+			SetLength(CollidableGroup,0);
 			end;
-		SetLength(CollidableGroup,0);
 		end;
 	end;
 end;

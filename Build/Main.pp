@@ -145,10 +145,16 @@ if (Prt='CMD') and (argc>2) then
 			else
 				begin
 				WriteLn('Unknown comand "',S,'"!');
+				WriteLn('Use "-help" for help!');
+				Exit;
 				end;
 			end
 		else
-			WriteLn('Unknown comand "',argv[i],'"!');
+			begin
+			WriteLn('Unknown comand string "',SGUpCaseString(SGPCharToString(argv[i])),'"!');
+			WriteLn('Use "-help" for help!');
+			Exit;
+			end;
 	end;
 
 if FGoToExit then
@@ -481,6 +487,7 @@ end;
 		begin
 		//WriteLn('Entered ',argc-1,' parametrs.');
 		s:=SGPCharToString(argv[1]);
+		s:=SGUpCaseString(s);
 		if s[1]='-' then
 			begin
 			s:=SGGetComand(s);
@@ -522,14 +529,20 @@ end;
 				WriteLn('   -GRNC                        : for run "Google ReName Cashe" program');
 				WriteLn('   -DLLSCAN                     : for run scanning dll for procedures');
 				WriteLn('   -IR                          : for run image resizer');
-				WriteLn('   -H;-HELP                     : for run help');
+				WriteLn('   -H;-HELP                     : for view help');
 				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 				end
 			else
+				begin
 				WriteLn('Unknown command "',s,'".');
+				WriteLn('Use "-help" for help!');
+				end;
 			end
 		else
-			WriteLn('Error sintexis command "',s,'". Befor cjmand must be simbol "''".');
+			begin
+			WriteLn('Error sintexis command string "',s,'". Befor cjmand must be simbol "-".');
+			WriteLn('Use "-help" for help!');
+			end;
 		end
 	else
 		GoGUI();

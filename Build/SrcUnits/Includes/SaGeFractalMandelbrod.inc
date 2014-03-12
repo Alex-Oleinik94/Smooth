@@ -885,7 +885,7 @@ end;
 
 FTNRF:=TSGFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
 FTNRF.SetContext(Context);
-FTNRF.Loading;
+FTNRF.Loading();
 end;
 
 destructor TSGFractalMandelbrodRelease.Destroy();

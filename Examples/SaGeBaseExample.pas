@@ -187,6 +187,7 @@ begin
 if argc>1 then
 	begin
 	s:=SGPCharToString(argv[1]);
+	s:=SGUpCaseString(s);
 	if s[1]='-' then
 		begin
 		s:=SGGetComand(s);
@@ -200,10 +201,16 @@ if argc>1 then
 			WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 			end
 		else
+			begin
 			WriteLn('Unknown command "',s,'".');
+			WriteLn('Use "-help" for help!');
+			end;
 		end
 	else
-		WriteLn('Error sintexis command "',s,'". Befor cjmand must be simbol "''".');
+		begin
+		WriteLn('Error sintexis command "',s,'". Befor cjmand must be simbol "-".');
+		WriteLn('Use "-help" for help!');
+		end;
 	end
 else
 	GoGUI();

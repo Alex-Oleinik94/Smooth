@@ -25,12 +25,13 @@ type
 		FCamera : TSGCamera;
 		FMutators : TSGArMutators;
 		FPlayerModel : TSGInt64;
-			protected
+			private
 		function GetModel(const Index : TSGLongWord):TSGModel;inline;
 			public
 		function AddMutator( const NewMutatorClass : TSGMutatorClass ):TSGMutator;
 			public
-		property Player : TSGInt64 read FPlayerModel;
+		property Player : TSGInt64  read FPlayerModel;
+		property Camera : TSGCamera read FCamera;
 		property Models[Index : TSGLongWord]:TSGModel read GetModel;
 		end;
 

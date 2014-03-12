@@ -1,7 +1,10 @@
-{$MODE OBJFPC}
+{$INCLUDE Includes\SaGe.inc}
+
 unit SaGeImagesPng;
 
 interface
+
+implementation
 
 uses 
 	crt
@@ -14,10 +17,8 @@ uses
 	,SaGeResourseManager
 	;
 
-implementation
- 
-procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);forward;
-procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);forward;
+procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;
+procedure SavePNG(const BitMap: TSGBitMap;const Stream: TStream;const  Interlaced: boolean = false);forward;
 
 type
 	TSGResourseManipulatorImagesPNG=class(TSGResourseManipulator)
@@ -125,13 +126,13 @@ begin
   but there is no "flush" method in TStream or any of its descendant; }
 end;
 
-procedure LoadPNG(Stream: TStream;BitMap:TSGBitMap);
+procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);
 
 var
   png_ptr: png_structp;
   info_ptr: png_infop;
 var
-	row_pointers: packed array of pointer;
+	row_pointers: packed array of pointer = nil;
 	i: Cardinal;
 	warningslist: TDynStringArray;
 begin
@@ -150,7 +151,7 @@ try
 	BitMap.FHeight := png_get_image_height(png_ptr, info_ptr);
 	BitMap.FChannels:=png_get_channels(png_ptr, info_ptr);
 	BitMap.FSizeChannel:=png_get_bit_depth(png_ptr, info_ptr);
-	BitMap.CreateTypes;
+	BitMap.CreateTypes();
 	
 	png_read_update_info(png_ptr, info_ptr);
 	
@@ -174,7 +175,7 @@ try
 		end;
 except
 	SGLog.Sourse('SaGeImagesPNG : Exeption in loading pnd!');
-	BitMap.Clear;
+	BitMap.Clear();
 	end;
 
 if (WarningsList<>nil) or (Length(WarningsList)<>0) then
@@ -185,7 +186,7 @@ if (WarningsList<>nil) or (Length(WarningsList)<>0) then
 	end;
 end;
 
-procedure SavePNG(BitMap: TSGBitMap; Stream: TStream;const  Interlaced: boolean = false);
+procedure SavePNG(const BitMap: TSGBitMap; const Stream: TStream;const  Interlaced: boolean = false);
 var png_ptr: png_structp;
     info_ptr: png_infop;
     warningslist: TDynStringArray = nil;
@@ -241,10 +242,10 @@ finally
 		end;
 	if WarningsList<>nil then
 		for i:= 0 to High(WarningsList) do
-			SGLog.Sourse('LoadPNG(TStream,TBiyMap) WarningsList : '+WarningsList[i]);
+			SGLog.Sourse('LoadPNG(TStream,TBitMap) WarningsList : '+WarningsList[i]);
 	SetLength(warningslist,0);
 	end;
-end;            
+end;
 
 initialization
 begin

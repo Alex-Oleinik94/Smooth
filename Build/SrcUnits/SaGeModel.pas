@@ -28,7 +28,7 @@ type
 		procedure InitMatrixForPosition();
 		function FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
 			public
-		property Position : TSGPosition read FPosition;
+		property Position : TSGPosition read FPosition write FPosition;
 		end;
 
 implementation

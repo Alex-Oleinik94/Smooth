@@ -1,4 +1,5 @@
 {$INCLUDE Includes\SaGe.inc}
+
 unit SaGeImagesBase;
 
 interface

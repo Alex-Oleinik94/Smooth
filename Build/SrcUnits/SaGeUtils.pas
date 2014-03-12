@@ -31,18 +31,22 @@ type
 		FMatrixMode: TSGExByte; // SG_3D, SG_2D, SG_ORTHO_3D
 		FViewMode  : TSGExByte; // SG_VIEW_...
 			// for SG_VIEW_WATCH_OBJECT
-		FRotateX,FRotateY,FTranslateX,FTranslateY,FZum:TSGSingle;
+		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSGSingle;
 			// for SG_VIEW_FOLLOW_OBJECT, SG_VIEW_BEFORE_OBJECT, SG_VIEW_AFAR_FOLLOW_OBJECT
-		FPosition,FPositionShift:PSGPosition;
-		procedure SetViewMode(const NewViewMode:TSGExByte);virtual;abstract;
+		FPosition : TSGPosition;
+		FUp : TSGVertex3f;
 		procedure Change();inline;
 		procedure InitMatrix();inline;
 			public
-		property MatrixMode:TSGExByte read FMatrixMode write FMatrixMode;
-		property ViewMode:TSGExByte read FViewMode write SetViewMode;
 		procedure Clear();inline;
 		procedure CallAction();inline;
-		//procedure InitViewModeComboBox();inline;
+			public
+		procedure InitViewModeComboBox();virtual;abstract;
+			public
+		property Up        : TSGVertex3f read FUp         write FUp;
+		property Position  : TSGPosition read FPosition   write FPosition;
+		property MatrixMode: TSGExByte   read FMatrixMode write FMatrixMode;
+		property ViewMode  : TSGExByte   read FViewMode   write FViewMode;
 		end;
 
 (*====================================================================*)
@@ -285,8 +289,8 @@ begin
 inherited;
 FMatrixMode:=SG_3D;
 FViewMode:=SG_VIEW_WATCH_OBJECT;
-FPositionShift:=nil;
-FPosition:=nil;
+Fillchar(FPosition,SizeOf(FPosition),0);
+FUp.Import(0,0,0);
 Clear();
 end;
 

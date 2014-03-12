@@ -177,14 +177,15 @@ type
 			protected
 		FPosition : TSGCustomPosition;
 			public
-		property x         : TSGSingle   read FPosition.x         write FPosition.x;
-		property y         : TSGSingle   read FPosition.y         write FPosition.y;
-		property z         : TSGSingle   read FPosition.z         write FPosition.z;
-		property a         : TSGSingle   read FPosition.a         write FPosition.a;
-		property b         : TSGSingle   read FPosition.b         write FPosition.b;
-		property g         : TSGSingle   read FPosition.g         write FPosition.g;
-		property Location  : TSGVertex3f read FPosition.FLocation write FPosition.FLocation;
-		property Turn      : TSGVertex3f read FPosition.FTurn     write FPosition.FTurn;
+		property x         : TSGSingle         read FPosition.x         write FPosition.x;
+		property y         : TSGSingle         read FPosition.y         write FPosition.y;
+		property z         : TSGSingle         read FPosition.z         write FPosition.z;
+		property a         : TSGSingle         read FPosition.a         write FPosition.a;
+		property b         : TSGSingle         read FPosition.b         write FPosition.b;
+		property g         : TSGSingle         read FPosition.g         write FPosition.g;
+		property Location  : TSGVertex3f       read FPosition.FLocation write FPosition.FLocation;
+		property Turn      : TSGVertex3f       read FPosition.FTurn     write FPosition.FTurn;
+		property CustomPos : TSGCustomPosition read FPosition           write FPosition;
 		end;
 const
 	NilVertex:SGVertex = (x:0;y:0;z:0);
@@ -250,6 +251,9 @@ operator := (const a:TSGPoint2f):TSGVertex2f;overload;inline;
 
 operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
 
+operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
+operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
+
 function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
 function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
 function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
@@ -286,9 +290,20 @@ function SGGetPointsCirclePoints(const FPoints:TArTSGVertex2f):TSGArLongWord;
 function SGX(const v:Single):TSGVertex3f;inline;
 function SGY(const v:Single):TSGVertex3f;inline;
 function SGZ(const v:Single):TSGVertex3f;inline;
-function Abs(const a:TSGVertex2f):extended;overload;inline;
+function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
 
 implementation
+
+operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
+begin
+Result.CustomPos := a.CustomPos + b.CustomPos;
+end;
+
+operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
+begin
+Result.FLocation := a.FLocation + b.FLocation;
+Result.FTurn := a.FTurn + b.FTurn;
+end;
 
 operator * (const a,b:SGVertex):SGVertex;inline;overload;
 begin
@@ -300,7 +315,7 @@ begin
 Result.Import(b,b,b);
 end;
 
-function Abs(const a:TSGVertex2f):extended;overload;inline;
+function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
 begin
 Result:=sqrt(sqr(a.x)+sqr(a.y));
 end;

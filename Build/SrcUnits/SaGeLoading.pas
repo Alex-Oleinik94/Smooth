@@ -12,7 +12,7 @@ uses
 type
 	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
 	//Класс загрузки.
-	TSGLoading=class(TSGDrawClass)
+	TSGLoading = class(TSGDrawClass)
 			public
 		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
