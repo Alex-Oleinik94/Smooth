@@ -90,7 +90,7 @@ if not ((ArMinkIndexes=nil) or (Length(ArMinkIndexes)<3)) then
 	begin
 	ii:=0;
 	R1:=Abs(ArMinkVertexes[ArMinkIndexes[0]]);
-	for i:=1 to Length(ArMinkIndexes)-1 do//В этом цикле мы ищем самую приближенную к началу координат точку
+	for i:=1 to Length(ArMinkIndexes)-1 do//В этом цикле мы ищем самую приближенную к началу координат точку (R1)
 		begin
 		R2:=Abs(ArMinkVertexes[ArMinkIndexes[i]]);
 		if R1>R2 then
@@ -134,7 +134,7 @@ var
 	Model : TSGModel = nil;
 begin
 Scene := FParent as TSGScene;
-if Scene <> nil then
+if (Scene <> nil) and (Scene.QuantityNods <> 0)then
 	begin
 	for Index := 0 to Scene.QuantityNods-1 do
 		begin

@@ -58,6 +58,8 @@ type
 		function TopShift(const VFullscreen:TSGBoolean = False):TSGLongWord;virtual;
 		// Смещение указателя мышы от того, тна что она указывает на окне
 		procedure MouseShift(Var x,y:TSGLongInt; const VFullscreen:TSGBoolean = False);virtual;
+		procedure UnLockResourses();virtual;
+		procedure LockResourses();virtual;
 			public
 		// Устанавливает 2D отроганальную проэкцию между двумя точками экрана (нижней левой и верхней правой)
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
@@ -110,6 +112,14 @@ type
 		end;
 
 implementation
+
+procedure TSGRender.UnLockResourses();
+begin
+end;
+
+procedure TSGRender.LockResourses();
+begin
+end;
 
 procedure TSGRender.MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);
 begin

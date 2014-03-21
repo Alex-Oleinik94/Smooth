@@ -1162,9 +1162,12 @@ if (pD3D=nil) then
 
 	FillChar(d3dpp,SizeOf(d3dpp),0);
 
-	d3dpp.Windowed := True;
+	d3dpp.Windowed := False;
 	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-	d3dpp.BackBufferFormat := d3ddm.Format;
+	d3dpp.hDeviceWindow := LongWord(FWindow.Get('WINDOW HANDLE'));
+	d3dpp.BackBufferFormat := D3DFMT_X8R8G8B8;
+	d3dpp.BackBufferWidth :=  LongWord(FWindow.Get('WIDTH'));
+	d3dpp.BackBufferHeight := LongWord(FWindow.Get('HEIGHT'));
 	d3dpp.EnableAutoDepthStencil:= True;
 	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
 	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;

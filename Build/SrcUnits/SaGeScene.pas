@@ -85,14 +85,21 @@ procedure TSGScene.Draw();
 var
 	i : TSGLongWord;
 begin
+//SGLog.Sourse('TSGScene.Draw : Processing mutators..');
 if FMutators <> nil then
 	for i := 0 to High ( FMutators ) do
 		if FMutators[i]<>nil then
 			FMutators[i].UpDate();
+//SGLog.Sourse('TSGScene.Draw : Draw nods..');
+FCamera.InitMatrix();
 if FNods<>nil then
 	for i:=0 to High(FNods) do
 		if FNods[i]<>nil then
+			begin
+			Render.PushMatrix();
 			FNods[i].Draw();
+			Render.PopMatrix()
+			end;
 end;
 
 class function TSGScene.ClassName():TSGString;

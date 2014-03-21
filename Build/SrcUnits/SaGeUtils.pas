@@ -36,8 +36,8 @@ type
 		FPosition : TSGPosition;
 		FUp : TSGVertex3f;
 		procedure Change();inline;
-		procedure InitMatrix();inline;
 			public
+		procedure InitMatrix();inline;
 		procedure Clear();inline;
 		procedure CallAction();inline;
 			public

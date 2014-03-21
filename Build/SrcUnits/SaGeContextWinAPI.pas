@@ -58,8 +58,8 @@ type
 		function  WindowRegister(): Boolean;
 		function  WindowCreate(): HWnd;
 		function  WindowInit(hParent : HWnd): Boolean;
-		procedure KillOGLWindow(const KillRC:Boolean = True);
-		function  CreateOGLWindow():Boolean;
+		procedure KillWindow(const KillRC:Boolean = True);
+		function  CreateWindow():Boolean;
 			public
 		function Get(const What:string):Pointer;override;
 		end;
@@ -156,14 +156,14 @@ end;
 
 destructor TSGContextWinAPI.Destroy;
 begin
-KillOGLWindow();
+KillWindow();
 SetLength(SGContexts,0);
 inherited;
 end;
 
 procedure TSGContextWinAPI.Initialize();
 begin
-Active:=CreateOGLWindow();
+Active:=CreateWindow();
 if Active then
 	begin
 	if SGScreenLoadProcedure<>nil then
@@ -427,7 +427,7 @@ begin
 	{$ENDIF}
 if not FFullscreen then 
 	begin	
-	hWindow2 := CreateWindow('SaGe Window Class',
+	hWindow2 := Windows.CreateWindow('SaGe Window Class',
 			  SGStringToPChar(FTittle),
 			  WS_CAPTION OR 
 			  WS_POPUPWINDOW OR
@@ -463,7 +463,7 @@ else
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
 		'SaGe Window Class',
 		SGStringToPChar(FTittle),
-		WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
+		WS_EX_TOPMOST OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
 		0, 0,
 		FWidth,
 		FHeight,
@@ -519,19 +519,19 @@ else
 	{$ENDIF}
 end;
 
-function TSGContextWinAPI.CreateOGLWindow():Boolean;
+function TSGContextWinAPI.CreateWindow():Boolean;
 begin 
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('TSGContextWinAPI__CreateOGLWindow : Enter');
+	SGLog.Sourse('TSGContextWinAPI__CreateWindow : Enter');
 	{$ENDIF}
 if not WindowRegister then
 		begin
 		ThrowError('Could not register the Application Window!');
 		SGLog.Sourse('Could not register the Application Window!');
-		CreateOGLWindow := false;
+		Result := false;
 		Exit;
 		end;
-hWindow := WindowCreate;
+hWindow := WindowCreate();
 
 if SGContexts=nil then
 	SetLength(SGContexts,1)
@@ -555,11 +555,11 @@ if not WindowInit(hWindow) then
 	end;
 Result := true;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__CreateOGLWindow : Exit (Result=',Result,')']);
+	SGLog.Sourse(['TSGContextWinAPI__CreateWindow : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
-procedure TSGContextWinAPI.KillOGLWindow(const KillRC:Boolean = True);
+procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
 begin
 if (FRender<>nil) and (KillRC) then
 	begin
@@ -593,11 +593,15 @@ procedure TSGContextWinAPI.InitFullscreen(const b:boolean);
 begin
 if hWindow=0 then
 	inherited InitFullscreen(b)
-else if Fullscreen<> b then
+else if Fullscreen<>b then
 	begin
-	KillOGLWindow(False);
+	if FRender<>nil then
+		FRender.UnLockResourses();
+	KillWindow(False);
 	inherited InitFullscreen(b);
-	Active:=CreateOGLWindow();
+	Active:=CreateWindow();
+	if FRender<>nil then
+		FRender.LockResourses();
 	end;
 end;
 

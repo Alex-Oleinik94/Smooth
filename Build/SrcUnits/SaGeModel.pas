@@ -57,11 +57,9 @@ end;
 
 procedure TSGModel.Draw();
 begin
-Render.PushMatrix();
 InitMatrixForPosition();
 if FMesh<>nil then
 	FMesh.Draw();
-Render.PopMatrix();
 end;
 
 constructor TSGModel.Create();

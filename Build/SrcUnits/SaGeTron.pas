@@ -40,17 +40,20 @@ end;
 
 procedure TSGGameTron.Draw();
 begin
-if (FLoadClass <> nil) and (FLoadClass.Progress<>1) then
+if (FLoadClass <> nil) then
 	FLoadClass.Draw();
+if (FScene<>nil) then
+	FScene.Draw();
 end;
 
 procedure TSGGameTron.Load();
 begin
-while true do
+while FLoadClass.Progress < 1 do
 	begin
 	FLoadClass.Progress := FLoadClass.Progress + 0.01;
 	Delay(1);
 	end;
+FLoadClass.Progress:=1.0001;
 end;
 
 procedure LoadThread(VThronClass:TSGGameTron);
@@ -77,6 +80,12 @@ end;
 
 destructor TSGGameTron.Destroy();
 begin
+if FLoadThread<>nil then
+	FLoadThread.Destroy();
+if FLoadClass<>nil then
+	FLoadClass.Destroy();
+if FScene<>nil then
+	FScene.Destroy();
 inherited Destroy();
 end;
 

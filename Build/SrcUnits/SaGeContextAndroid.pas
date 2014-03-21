@@ -142,29 +142,32 @@ Active:=True;
 end;
 
 procedure TSGContextAndroid.InitWindow();
+//{$DEFINE SGDEPTHANDROID24}
 const
-	Attribs: array[0..8] of EGLint = (
+	Attribs: array[0..{$IFDEF SGDEPTHANDROID24}10{$ELSE}8{$ENDIF}] of EGLint = (
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_BLUE_SIZE, 8,
 		EGL_GREEN_SIZE, 8,
 		EGL_RED_SIZE, 8,
+		{$IFDEF SGDEPTHANDROID24}EGL_DEPTH_SIZE, 24,{$ENDIF}
 		EGL_NONE);
 var
 	Format,NumConfigs: EGLint;
+	FunctiosResult : TSGMaxEnum;
 begin
 SGLog.Sourse('Entering "TSGContextAndroid.InitWindow".');
 FDisplay:=eglGetDisplay(EGL_DEFAULT_DISPLAY);
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-eglInitialize(FDisplay, nil,nil);
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs); 
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
-FSurface:=eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.window, nil);
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
+FunctiosResult := eglInitialize(FDisplay, nil,nil);
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SGStr(FunctiosResult)+'".');
+FunctiosResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs); 
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SGStr(FunctiosResult)+'".');
+FunctiosResult := eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SGStr(FunctiosResult)+'".');
+FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
+FSurface:=eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.Window, nil);
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglCreateWindowSurface". Result="'+SGStr(FunctiosResult)+'"');
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -182,23 +185,30 @@ else
 	else
 		Active:=False;
 	end;
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Render created!');
 Width:=GetScreenResolution().x;
-Width:=GetScreenResolution().y;
-SGLog.Sourse('"TSGContextAndroid.InitWindow"');
+Height:=GetScreenResolution().y;
+SGLog.Sourse('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
 if SGScreenLoadProcedure<>nil then
+	begin
 	SGScreenLoadProcedure(Self);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "SGScreenLoadProcedure(Self)".');
+	end;
 if FCallInitialize<>nil then
+	begin
 	FCallInitialize(Self);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "FCallInitialize(Self)".');
+	end;
 SGLog.Sourse('Leaving "TSGContextAndroid.InitWindow".');
 end;
 
 procedure TSGContextAndroid.HandleComand(const Comand:cint32);
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.HandleCommand".');
+SGLog.Sourse('Entering "TSGContextAndroid.HandleCommand" : Comand="'+SGStr(Comand)+'"');
 case Comand of
-APP_CMD_SAVE_STATE://Наверное сохранить память приложения, для очестки оперы...
+APP_CMD_SAVE_STATE://Наверное сохранить память приложения, для очистки оперы...
 	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_SAVE_STATE"');
 	//хз
 	end;
 (*
@@ -208,23 +218,36 @@ Psaved_state(engine^.app^.savedState)^ := engine^.state;
 engine^.app^.savedStateSize := sizeof(Tsaved_state); 
 *)
 APP_CMD_INIT_WINDOW://Иницианализируем окно
+	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_INIT_WINDOW"');
 	InitWindow();
+	end;
 APP_CMD_TERM_WINDOW://Убиваем окно
+	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_TERM_WINDOW"');
 	Active:=False;
+	end;
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
+	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_GAINED_FOCUS"');
 	FAnimating:=1;
+	end;
 APP_CMD_LOST_FOCUS://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
+	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_LOST_FOCUS"');
 	FAnimating:=0;
+	end;
 end;
 SGLog.Sourse('Leaving "TSGContextAndroid.HandleCommand".');
 end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent".');
+SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+SGStr(AInputEvent_getType(event))+'"');
 case AInputEvent_getType(event) of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Event is "AINPUT_EVENT_TYPE_MOTION"');
 	FLastTouch.Import(
 		Round(AMotionEvent_getX(event, 0)),
 		Round(AMotionEvent_getY(event, 0)));
@@ -232,6 +255,7 @@ AINPUT_EVENT_TYPE_MOTION:
 	end;
 else
 	begin
+	SGLog.Sourse('Leaving "TSGContextAndroid.HandleEvent" : Program don''t know what is the event!');
 	Result:=0;
 	Exit;
 	end;
@@ -346,9 +370,8 @@ end;
 
 procedure TSGContextAndroid.InitFullscreen(const b:boolean); 
 begin
-
-inherited InitFullscreen(b);
-
+FFullscreen := True;
+//inherited InitFullscreen(b);
 end;
 
 end.

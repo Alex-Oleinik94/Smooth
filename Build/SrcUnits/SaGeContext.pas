@@ -315,6 +315,8 @@ else if What='CURPOSY' then
 	Result:=Pointer(FCursorPosition[SGNowCursorPosition].y)
 else if What='CURPOSX' then
 	Result:=Pointer(FCursorPosition[SGNowCursorPosition].x)
+else if What='FULLSCREEN' then
+	Result:=Pointer(Byte(FFullscreen))
 else
 	Result:=nil;
 end;

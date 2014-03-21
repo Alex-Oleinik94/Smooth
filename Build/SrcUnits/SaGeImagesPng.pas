@@ -251,4 +251,5 @@ initialization
 begin
 SGResourseManager.AddManipulator(TSGResourseManipulatorImagesPNG);
 end;
+
 end.

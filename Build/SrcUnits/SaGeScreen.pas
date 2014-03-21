@@ -3217,7 +3217,7 @@ SGScreen.SetContext(Context);
 SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
 SGScreen.Visible:=True;
-SGScreen.BoundsToNeedBounds;
+SGScreen.BoundsToNeedBounds();
 
 SetLength(SGScreens,1);
 SGScreens[Low(SGScreens)].FScreen:=SGScreen;
@@ -3225,7 +3225,9 @@ SGScreens[Low(SGScreens)].FImage:=nil;
 
 ComboBoxImage:=TSGImage.Create(SGDataDirectory+Slash+'Textures'+Slash+'ComboBoxImage.png');
 ComboBoxImage.SetContext(Context);
-ComboBoxImage.Loading;
+{$IFNDEF ANDROID}
+	ComboBoxImage.Loading();
+	{$ENDIF}
 end;
 
 initialization

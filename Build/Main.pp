@@ -1,5 +1,5 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 	{$IFDEF RELEASE}
 		{$APPTYPE GUI}
 	{$ELSE}
@@ -66,10 +66,13 @@ procedure Init(const MyContext:TSGContext);
 begin
 SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
 SGScreen.Font.SetContext(MyContext);
-SGScreen.Font.Loading();
+{$IFNDEF ANDROID}
+	SGScreen.Font.Loading();
+	{$ENDIF}
 
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGGameTron);
 	Add(TSGLoading);
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
@@ -86,7 +89,7 @@ with TSGDrawClasses.Create(MyContext) do
 	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
-	Add(TSGGameTron);
+	
 	
 	Initialize();
 	end;
