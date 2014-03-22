@@ -300,7 +300,10 @@ type
 	TMemoryStream = Classes.TMemoryStream;
 	TStream       = Classes.TStream;
 	TFileStream   = Classes.TFileStream;
-	
+const
+	fmCreate = Classes.fmCreate;
+	fmOpenRead = Classes.fmOpenRead;
+type
 	//Класс даты и времени
 	TArFrom1To8OfLongInt = array[1..8] of LongInt;
 	PArFrom1To8OfLongInt = ^ TArFrom1To8OfLongInt;

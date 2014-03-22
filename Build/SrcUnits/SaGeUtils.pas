@@ -87,19 +87,21 @@ type
 	TStringParams=packed array of packed array [0..1] of string;
 	
 	TSGSimbolParam=object
-		X,Y,Width:LongInt;
+		X,Y,Width:Word;
 		end;
+	
+	TSGSimbolParams = packed array[#0..#255] of TSGSimbolParam;
 	
 	TSGFont=class(TSGImage)
 			public
 		constructor Create(const FileName:string = '');
 		destructor Destroy;override;
 			protected
-		FSimbolParams:packed array[#0..#255] of TSGSimbolParam;
+		FSimbolParams:TSGSimbolParams;
 		FFontParams:TStringParams;
 		FTextureParams:TStringParams;
 		FFontReady:Boolean;
-		FFontHeight:LongInt;
+		FFontHeight:Byte;
 		procedure LoadFont(const FontWay:string);
 		class function GetLongInt(var Params:TStringParams;const Param:string):LongInt;
 		function GetSimbolWidth(const Index:char):LongInt;inline;
@@ -111,8 +113,11 @@ type
 		function Ready():Boolean;override;
 			public
 		property FontReady :Boolean read FFontReady;
-		property FontHeight:LongInt read FFontHeight;
+		property FontHeight:Byte read FFontHeight;
 		property SimbolWidth[Index:char]:LongInt read GetSimbolWidth;
+		property FontParams:TStringParams read FFontParams;
+		property TextureParams:TStringParams read FTextureParams;
+		property SimbolParams:TSGSimbolParams read FSimbolParams;
 			public
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -145,7 +150,187 @@ type
 	
 function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;}
 
+// Эта процедура переводит шрифт в формат PNG
+procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
+
 implementation
+
+procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
+var
+	Font:TSGFont = nil;
+	BitMap:PByte = nil;
+	Colors : array [0..255] of TSGMaxEnum;
+	ObrColors : array [0..255] of Byte;
+	//TudaColors : array of byte = nil;
+	QuantityColors : Byte = 0;
+	ColorBits : Byte = 0;
+	ColorBitMap : PByte = nil;
+var
+	i,q : TSGMaxEnum;
+procedure WriteFileToStream();
+var
+	OutStream : TFileStream = nil;
+	Header:packed record
+		s,g,f:Char;
+		end = (s:'S';g:'G';f:'F');
+	Quantity:TSGWord;
+	SP:TSGSimbolParams;
+	i:TSGLongWord;
+begin
+OutStream := TFileStream.Create(FontOutWay,fmCreate);
+if OutStream = nil then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Can''t open file "',FontOutWay,'"']);
+	Exit;
+	end;
+OutStream.WriteBuffer(Header,SizeOf(Header));
+Quantity:=Length(Font.TextureParams);
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+for i:=0 to High(Font.TextureParams) do
+	begin
+	SGWriteStringToStream(Font.TextureParams[i][0],OutStream);
+	SGWriteStringToStream(Font.TextureParams[i][1],OutStream);
+	end;
+Quantity:=Length(Font.FontParams);
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+for i:=0 to High(Font.FontParams) do
+	begin
+	SGWriteStringToStream(Font.FontParams[i][0],OutStream);
+	SGWriteStringToStream(Font.FontParams[i][1],OutStream);
+	end;
+Quantity:=Font.Width;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.Height;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.FontHeight;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.Channels;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.Image.BitDepth;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.Image.PixelFormat;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=Font.Image.PixelType;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+SP:=Font.SimbolParams;
+OutStream.WriteBuffer(SP,SizeOf(SP));
+OutStream.WriteBuffer(ColorBitMap^,ColorBits*Font.Width*Font.Height div 8);
+OutStream.Destroy();
+end;
+
+procedure SetColor(const Index : TSGMaxEnum;const Number:Byte);
+var
+	m:Byte;
+	d:TSGMaxEnum;
+begin
+m:=(Index*ColorBits) mod 8;
+d:=(Index*ColorBits) div 8;
+ColorBitMap[d] := 255 and (ColorBitMap[d] or (Number shl m));
+if m+ColorBits>8 then
+	begin
+	ColorBitMap[d+1] := 255 and (ColorBitMap[d+1] or (Number shr (8-m)));
+	end;
+{SGLog.Sourse(['SGTranslateFont : SetColor : Index=',Index,', Number=',Number,
+	', m=',m,', d=',d,
+	', Color=',ColorBitMap[d],', NextColor=',ColorBitMap[d+1],'.']);}
+end;
+
+begin
+Fillchar(Colors,SizeOf(Colors),0);
+if RunInConsole then
+	SGLog.Sourse(['SGTranslateFont : Translete "',FontInWay,'" to "',FontOutWay,'".']);
+Font := TSGFont.Create(FontInWay);
+if Font.Loading() then
+	if RunInConsole then
+		SGLog.Sourse(['SGTranslateFont : Font loaded!'])
+	else
+else
+	begin
+	if RunInConsole then
+		SGLog.Sourse(['SGTranslateFont : While loading font exeption error!']);
+	Exit;
+	end;
+if Font.Channels <> 4 then
+	begin
+	if RunInConsole then
+		SGLog.Sourse(['SGTranslateFont : (Font.Channels!=4), exiting!']);
+	Exit;
+	end;
+BitMap := Font.BitMap;
+q:=0;
+Fillchar(Colors,SizeOf(Colors),0);
+for i:=0 to Font.Width*Font.Height*Font.Channels-1 do
+	begin
+	Colors[BitMap[i]]+=1;
+	case BitMap[i] of
+	0,255:;
+	else
+		q+=1;
+	end;
+	end;
+if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Font : Total [1..254] variables quantyti : "',q,'" of "'+SGStr(Font.Width*Font.Height*Font.Channels)+'" ('+SGStrReal(q/(Font.Width*Font.Height*Font.Channels)*100,2)+' per cent)!']);
+	for i:=0 to 255 do 
+		if Colors[i]<>0 then
+			begin
+			SGLog.Sourse(['SGTranslateFont : Colors[',i,']="',Colors[i],'".']);
+			end;
+	end;
+q:=0;
+for i:=0 to Font.Width*Font.Height-1 do
+	begin
+	if (BitMap[i*Font.Channels+0]<>255) then q+=1;
+	if (BitMap[i*Font.Channels+1]<>255) then q+=1;
+	if (BitMap[i*Font.Channels+2]<>255) then q+=1;
+	end;
+if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Font : RGB [0..254] variables quantyti : "',q,'" of "'+SGStr(Font.Width*Font.Height*3)+'" ('+SGStrReal(q/(Font.Width*Font.Height*3)*100,2)+' per cent)!']);
+	end;
+if q<>0 then
+	Exit;
+Fillchar(Colors,SizeOf(Colors),0);
+Fillchar(ObrColors,SizeOf(ObrColors),0);
+for i:=0 to Font.Width*Font.Height-1 do
+	begin
+	Colors[BitMap[i*Font.Channels+3]]+=1;
+	end;
+for i:=0 to 255 do 
+	if Colors[i]<>0 then
+		begin
+		ObrColors[i]:=QuantityColors;
+		QuantityColors+=1;
+		end;
+if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Font : Quantity colors = "',QuantityColors,'"!']);
+	for i:=0 to 255 do 
+		if Colors[i]<>0 then
+			begin
+			SGLog.Sourse(['SGTranslateFont : Colors[',i,']="',Colors[i],'" ('+SGStrReal(Colors[i]/(Font.Width*Font.Height)*100,2)+' per cent).']);
+			end;
+	end;
+ColorBits:=0;
+while QuantityColors>2**ColorBits do
+	ColorBits+=1;
+if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Color bits = "',ColorBits,'"']);
+	end;
+GetMem(ColorBitMap,ColorBits*Font.Width*Font.Height div 8);
+Fillchar(ColorBitMap^,ColorBits*Font.Width*Font.Height div 8,0);
+if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Sizeof color bit map = "',ColorBits*Font.Width*Font.Height div 8,'" (',ColorBits*Font.Width*Font.Height mod 8,')']);
+	end;
+for i:=0 to Font.Width*Font.Height-1 do
+	begin
+	SetColor(i,ObrColors[BitMap[i*Font.Channels+3]]);
+	end;
+WriteFileToStream();
+SGLog.Sourse(['SGTranslateFont : Exit.']);
+end;
 
 (*====================================================================*)
 (*==========================TSGBezierCurve============================*)

@@ -113,6 +113,7 @@ type
 	ArTSGImage  = type packed array of TSGImage;
 	TArTSGImage = ArTSGImage;
 
+// Загрузка формата TGA
 function LoadTGA(const Stream:TStream):TSGBitmap;
 
 implementation
