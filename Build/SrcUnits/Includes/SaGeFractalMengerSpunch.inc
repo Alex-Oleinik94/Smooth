@@ -151,15 +151,15 @@ begin
 inherited Create(VContext);
 FSizeWriteTrue:=False;
 
-FFont1:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+FFont1:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FFont1.SetContext(Context);
-FFont1.Loading;
+FFont1.Loading();
 
-InitProjectionComboBox(Context.Width-250-90-125-155,5{+Context.TopShift},150,30,[SGAnchRight],true);
+InitProjectionComboBox(Context.Width-250-90-125-155,5,150,30,[SGAnchRight],true);
 
 FComboBox2:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox2);
-SGScreen.LastChild.SetBounds(Context.Width-250,40{+Context.TopShift},230,30);
+SGScreen.LastChild.SetBounds(Context.Width-250,40,230,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Нормали и Цвета');

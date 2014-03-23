@@ -126,7 +126,7 @@ for i:=0 to FCountLines-1 do
 	FArrayOfLines[i].FSpeed:=(Random(400)+100)/200;
 	FArrayOfLines[i].FWidth:=360/FCountLines;
 	end;
-FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
+FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
 FFont.SetContext(Context);
 FFont.Loading();
 FProgressIsSet:=False;

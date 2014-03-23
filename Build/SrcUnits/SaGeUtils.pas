@@ -83,11 +83,13 @@ type
 (*====================================================================*)
 (*=============================TSGFont================================*)
 (*====================================================================*)
+	TSGFontInt = TSGLongWord;
+	TSGSimbolParamType = TSGWord;
 	
 	TStringParams=packed array of packed array [0..1] of string;
 	
 	TSGSimbolParam=object
-		X,Y,Width:Word;
+		X,Y,Width:TSGSimbolParamType;
 		end;
 	
 	TSGSimbolParams = packed array[#0..#255] of TSGSimbolParam;
@@ -100,11 +102,12 @@ type
 		FSimbolParams:TSGSimbolParams;
 		FFontParams:TStringParams;
 		FTextureParams:TStringParams;
-		FFontReady:Boolean;
+		FFontReady:TSGBoolean;
 		FFontHeight:Byte;
 		procedure LoadFont(const FontWay:string);
 		class function GetLongInt(var Params:TStringParams;const Param:string):LongInt;
 		function GetSimbolWidth(const Index:char):LongInt;inline;
+		function LoadSGF():TSGBoolean;
 			public
 		function GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
 		function Loading():TSGBoolean;override;
@@ -161,7 +164,7 @@ var
 	BitMap:PByte = nil;
 	Colors : array [0..255] of TSGMaxEnum;
 	ObrColors : array [0..255] of Byte;
-	//TudaColors : array of byte = nil;
+	TudaColors : array of byte = nil;
 	QuantityColors : Byte = 0;
 	ColorBits : Byte = 0;
 	ColorBitMap : PByte = nil;
@@ -173,7 +176,7 @@ var
 	Header:packed record
 		s,g,f:Char;
 		end = (s:'S';g:'G';f:'F');
-	Quantity:TSGWord;
+	Quantity:TSGFontInt;
 	SP:TSGSimbolParams;
 	i:TSGLongWord;
 begin
@@ -198,11 +201,24 @@ for i:=0 to High(Font.FontParams) do
 	SGWriteStringToStream(Font.FontParams[i][0],OutStream);
 	SGWriteStringToStream(Font.FontParams[i][1],OutStream);
 	end;
+{if RunInConsole then
+	begin
+	SGLog.Sourse(['SGTranslateFont : Writing info (ColorBits=',ColorBits,',QuantityColors=',QuantityColors,')']);
+	SGLog.Sourse(['SGTranslateFont : TudaColors=['],False);
+	for i:=0 to High(TudaColors) do
+		SGLog.Sourse([TudaColors[i]],False);
+	SGLog.Sourse('].');
+	end;}
+Quantity:=ColorBits;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+Quantity:=QuantityColors;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
+OutStream.WriteBuffer(TudaColors[0],QuantityColors);
+Quantity:=Font.FontHeight;
+OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 Quantity:=Font.Width;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 Quantity:=Font.Height;
-OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-Quantity:=Font.FontHeight;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 Quantity:=Font.Channels;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
@@ -230,9 +246,6 @@ if m+ColorBits>8 then
 	begin
 	ColorBitMap[d+1] := 255 and (ColorBitMap[d+1] or (Number shr (8-m)));
 	end;
-{SGLog.Sourse(['SGTranslateFont : SetColor : Index=',Index,', Number=',Number,
-	', m=',m,', d=',d,
-	', Color=',ColorBitMap[d],', NextColor=',ColorBitMap[d+1],'.']);}
 end;
 
 begin
@@ -296,10 +309,13 @@ for i:=0 to Font.Width*Font.Height-1 do
 	begin
 	Colors[BitMap[i*Font.Channels+3]]+=1;
 	end;
+SetLength(TudaColors,0);
 for i:=0 to 255 do 
 	if Colors[i]<>0 then
 		begin
 		ObrColors[i]:=QuantityColors;
+		SetLength(TudaColors,Length(TudaColors)+1);
+		TudaColors[High(TudaColors)]:=i;
 		QuantityColors+=1;
 		end;
 if RunInConsole then
@@ -329,7 +345,11 @@ for i:=0 to Font.Width*Font.Height-1 do
 	SetColor(i,ObrColors[BitMap[i*Font.Channels+3]]);
 	end;
 WriteFileToStream();
-SGLog.Sourse(['SGTranslateFont : Exit.']);
+FreeMem(ColorBitMap);
+if Font<>nil then
+	Font.Destroy();
+if TudaColors<>nil then
+	SetLength(TudaColors,0);
 end;
 
 (*====================================================================*)
@@ -614,6 +634,120 @@ end;}
 (*=============================TSGFont================================*)
 (*====================================================================*)
 
+function TSGFont.LoadSGF():TSGBoolean;
+var
+	Stream         : TFileStream = nil;
+	Quantity       : TSGFontInt;
+	ColorBits      : TSGByte;
+	QuantityColors : TSGWord;
+	ArColors       : packed array of TSGByte = nil;
+	ColorBitMap    : PByte = nil;
+	Mask           : TSGByte = 0;
+function GetColor(const Index : TSGMaxEnum):TSGByte;
+var
+	m : TSGByte;
+	d : TSGMaxEnum;
+begin
+Result:=0;
+m:=Index*ColorBits mod 8;
+d:=Index*ColorBits div 8;
+Result := Mask and (ColorBitMap[d] shr m);
+if m+ColorBits>8 then
+	Result:= Result or ((ColorBitMap[d+1] shl (8-m)) and Mask);
+//SGLog.Sourse(['Index=',Index,', Result=',Result]);
+end;
+
+procedure CalcucateBitMap();
+var
+	i      : TSGMaxEnum;
+	BitMap : PByte;
+begin
+GetMem(BitMap,Width*Height*Channels);
+FImage.BitMap := BitMap;
+Mask := 0;
+for i:=0 to ColorBits-1 do
+	Mask += 2**i;
+for i:=0 to Width*Height-1 do
+	begin
+	BitMap[i*Channels+0]:=255;
+	BitMap[i*Channels+1]:=255;
+	BitMap[i*Channels+2]:=255;
+	BitMap[i*Channels+3]:=ArColors[GetColor(i)];
+	end;
+end;
+
+function ValidateHeader():TSGBoolean;
+var
+	C1,C2,C3:Char;
+begin
+Stream.ReadBuffer(C1,1);
+Stream.ReadBuffer(C2,1);
+Stream.ReadBuffer(C3,1);
+Result:=(C1+C2+C3)='SGF';
+end;
+
+var
+	i:TSGMaxEnum;
+begin
+Result:=False;
+Stream := TFileStream.Create(FWay,fmOpenRead);
+if Stream = nil then
+	Exit;
+if not ValidateHeader() then
+	begin
+	Stream.Destroy();
+	Exit;
+	end;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+SetLength(FTextureParams,Quantity);
+for i:=0 to Quantity-1 do
+	begin
+	FTextureParams[i][0]:=SGReadStringFromStream(Stream);
+	FTextureParams[i][1]:=SGReadStringFromStream(Stream);
+	end;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+SetLength(FFontParams,Quantity);
+for i:=0 to Quantity-1 do
+	begin
+	FFontParams[i][0]:=SGReadStringFromStream(Stream);
+	FFontParams[i][1]:=SGReadStringFromStream(Stream);
+	end;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+ColorBits:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+QuantityColors:=Quantity;
+SetLength(ArColors,QuantityColors);
+Stream.ReadBuffer(ArColors[0],QuantityColors);
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FFontHeight:=Quantity;
+if FImage<>nil then
+	FImage.Destroy();
+FImage:=TSGBitMap.Create();
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.Width:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.Height:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.Channels:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.BitDepth:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.PixelFormat:=Quantity;
+Stream.ReadBuffer(Quantity,SizeOf(Quantity));
+FImage.PixelType:=Quantity;
+Stream.ReadBuffer(FSimbolParams,SizeOf(FSimbolParams));
+GetMem(ColorBitMap,ColorBits*Width*Height div 8);
+Stream.ReadBuffer(ColorBitMap^,ColorBits*Width*Height div 8);
+Stream.Destroy();
+Stream:=nil;
+CalcucateBitMap();
+FreeMem(ColorBitMap,ColorBits*Width*Height div 8);
+SetLength(ArColors,0);
+Result:=True;
+FReadyToGoToTexture := True;
+FFontReady := True;
+end;
+
 function TSGFont.GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
 begin
 Result.Import(FSimbolParams[VSimbol].x,FSimbolParams[VSimbol].y);
@@ -771,6 +905,11 @@ var
 	i:LongInt = 0;
 	ii:LongInt = 0;
 begin
+if SGGetFileExpansion(FWay)='SGF' then
+	begin
+	Result:=LoadSGF();
+	Exit;
+	end;
 Result:=inherited Loading();
 if not Result then 
 	Exit;

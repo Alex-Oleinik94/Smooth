@@ -3223,7 +3223,11 @@ SetLength(SGScreens,1);
 SGScreens[Low(SGScreens)].FScreen:=SGScreen;
 SGScreens[Low(SGScreens)].FImage:=nil;
 
-ComboBoxImage:=TSGImage.Create(SGDataDirectory+Slash+'Textures'+Slash+'ComboBoxImage.png');
+SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
+SGScreen.Font.SetContext(Context);
+SGScreen.Font.Loading();
+
+ComboBoxImage:=TSGImage.Create(SGTextureDirectory+Slash+'ComboBoxImage.png');
 ComboBoxImage.SetContext(Context);
 {$IFNDEF ANDROID}
 	ComboBoxImage.Loading();

@@ -57,19 +57,12 @@ uses
 	,SaGeImages
 	;
 
-
 procedure Draw(const Context:TSGContext);
 begin
 end;
 
 procedure Init(const MyContext:TSGContext);
 begin
-SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
-SGScreen.Font.SetContext(MyContext);
-{$IFNDEF ANDROID}
-	SGScreen.Font.Loading();
-	{$ENDIF}
-
 with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGGameTron);
@@ -86,11 +79,8 @@ with TSGDrawClasses.Create(MyContext) do
 	
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);
-	
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
-	
-	
 	Initialize();
 	end;
 end;

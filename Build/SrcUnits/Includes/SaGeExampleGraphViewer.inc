@@ -366,7 +366,7 @@ SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Caption:=SGStringToPChar(SGPCharToString(MathGraphic.Expression)) ;
 EulatuonLabel.TextPosition:=True;
 EulatuonLabel.TextColor.Import(0.7,0,0.7);
-EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.bmp');
+EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
 EulatuonLabel.Font.SetContext(Context);
 EulatuonLabel.Font.Loading;
 EulatuonLabel.AutoTopShift:=True;

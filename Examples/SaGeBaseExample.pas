@@ -57,10 +57,6 @@ end;
 
 procedure Init(const MyContext:TSGContext);
 begin
-SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.bmp');
-SGScreen.Font.SetContext(MyContext);
-SGScreen.Font.Loading();
-
 if ExampleClass<>nil then
 	DrawClass:=ExampleClass.Create(MyContext);
 end;

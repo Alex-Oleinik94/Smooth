@@ -157,17 +157,20 @@ const
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
 		{$ELSE}
-			'/sdcard'
+			'/data/data'
 			{$ENDIF};
 	SGFontDirectory = SGDataDirectory + Slash +'Fonts';
 	SGTextureDirectory = SGDataDirectory + Slash +'Textures';
 	SGTexturesDirectory = SGTextureDirectory;
 	SGFontsDirectory = SGFontDirectory;
 	SGModelsDirectory = SGDataDirectory + Slash +'Models';
+	SGImagesDirectory = {$IFDEF ANDROID}'/sdcard/Images'{$ELSE}SGDataDirectory + Slash +'Images'{$ENDIF};
 var
 	//Если эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
 	//и самого файлика лога SGLog.Create не создаст
-	SGLogEnable:Boolean = True;
+	SGLogEnable:Boolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
+const
+	SGLogDirectory = {$IFDEF ANDROID}'/sdcard'{$ELSE}SGDataDirectory{$ENDIF};
 type
 	//Это для приведения приведения типов к общему виду относительно х32 и х64
 	//Так как Pointer на х32 занимает 4 байта, а на х64 - 8 байтов
@@ -1359,6 +1362,7 @@ if Cmd and (argc>2) then
 					Write('    -FD');TextColor(13);Write('($directory)');TextColor(15);WriteLn(' : for change find directory.');
 					WriteLn('    -H; -HELP : for run help.');
 					WriteLn('    -VIEWEXP : for view expansion for find');
+					Exit;
 					end
 				else
 					WriteLn('Erroe syntax comand "',argv[i],'"')
@@ -1371,26 +1375,29 @@ if Cmd and (argc>2) then
 	end;
 PF:=0;PS:=0;OY:=0;
 NameFolder:=SGGetFreeDirectoryName('Find In Pas Results','Part');
-Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
 SGMakeDirectory(NameFolder);
-ConstWords;
-SkanWords;
-writeln('Find was begining... Psess any key to stop him...');
-Oy:=WhereY;
-DoDirectories(FDir);
-if FArF<>nil then
+Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
+ConstWords();
+if Length(ArWords)<>0 then
 	begin
-	for i:=0 to High(FArF) do
-		if FArF[i]<>nil then
-			begin
-			FArF[i].Destroy;
-			end;
-	SetLength(FArF,0);
+	SkanWords;
+	writeln('Find was begining... Psess any key to stop him...');
+	Oy:=WhereY;
+	DoDirectories(FDir);
+	if FArF<>nil then
+		begin
+		for i:=0 to High(FArF) do
+			if FArF[i]<>nil then
+				begin
+				FArF[i].Destroy;
+				end;
+		SetLength(FArF,0);
+		end;
 	end;
 if PS=0 then
 	begin
 	RMDIR(NameFolder);
-	TextColor(12);Writeln('Matches don''t exists...');
+	if Length(ArWords)<>0 then begin TextColor(12);Writeln('Matches don''t exists...'); end;
 	TextColor(15);Write('Deleted results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
 	end;
 SetLength(ArF,0);
@@ -1783,7 +1790,7 @@ constructor TSGLog.Create();
 begin
 inherited;
 if SGLogEnable then
-	FFileStream:=TFileStream.Create(SGDataDirectory+Slash+'EngineLog.log',fmCreate);
+	FFileStream:=TFileStream.Create(SGLogDirectory+Slash+'EngineLog.log',fmCreate);
 end;
 
 destructor TSGLog.Destroy;

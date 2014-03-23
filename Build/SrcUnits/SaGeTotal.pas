@@ -1126,13 +1126,12 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
 SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Font:=TSGFont.Create('.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Tahoma.bmp');
+SGScreen.LastChild.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 SGScreen.LastChild.Font.SetContext(Context);
-SGScreen.LastChild.Font.Loading;
+SGScreen.LastChild.Font.Loading();
 SGScreen.LastChild.Active:=Length(FArClasses)>1;
 FComboBox2.FDrawClass:=Self;
-FComboBox2.BoundsToNeedBounds;
-
+FComboBox2.BoundsToNeedBounds();
 if (FArClasses<>nil) and (Length(FArClasses)>0) then
 	for i:=0 to High(FArClasses) do
 		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].ClassName));

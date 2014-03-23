@@ -448,7 +448,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SelectPoint.Import();
 	SelectSecondPoint.Import();
 	Manda.FZMand:=False;
-	FVideoBuffer:=SGGetFreeDirectoryName(SGDataDirectory+Slash+'Images'+Slash+'Manda Buffer','Part');
+	FVideoBuffer:=SGGetFreeDirectoryName(SGImagesDirectory+Slash+'Manda Buffer','Part');
 	SGMakeDirectory(FVideoBuffer);
 	Manda.Width:=1920;//*5;
 	Manda.Height:=1080;//*5;
@@ -511,7 +511,7 @@ Manda.FZDegree:=2;
 Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
-Manda.FImage.Way:=SGDataDirectory+Slash+'Images'+Slash+'Mand New.png';
+Manda.FImage.Way:=SGImagesDirectory+Slash+'Mand New.png';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -883,7 +883,7 @@ case SGGetCoreCount() of
 else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=0;
 end;
 
-FTNRF:=TSGFont.Create(SGGetCurrentDirectory()+'.'+Slash+'..'+Slash+'Data'+Slash+'Fonts'+Slash+'Times New Roman.bmp');
+FTNRF:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
 FTNRF.SetContext(Context);
 FTNRF.Loading();
 end;
@@ -1036,13 +1036,11 @@ if MandaInitialized then
 		else 
 			if Manda.FImage<>nil then
 				begin
-				if not DirectoryExists(SGDataDirectory+Slash+'Images') then
-					MkDir(SGDataDirectory+Slash+'Images');
+				if not SGExistsDirectory(SGImagesDirectory) then
+					SGMakeDirectory(SGImagesDirectory);
 				if FNowRenderitsiaVideo then
 					begin
 					//Manda.FImage.Image.SetBounds(1920,1080);
-					if not DirectoryExists(SGDataDirectory+Slash+'Videos') then
-						MkDir(SGDataDirectory+Slash+'Videos');
 					Manda.FImage.Way:=FVideoBuffer+Slash+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SGStr(FNowKadr)+'.png';
@@ -1459,7 +1457,7 @@ if MandaInitialized then
 			Manda.Height:=StartDepth;
 			end;
 		Manda.BeginCalculate();
-		Manda.FImage.Way:=SGGetFreeFileName(SGDataDirectory+Slash+'Images'+Slash+'Mand New.png');
+		Manda.FImage.Way:=SGGetFreeFileName(SGImagesDirectory+Slash+'Mand New.png');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;
