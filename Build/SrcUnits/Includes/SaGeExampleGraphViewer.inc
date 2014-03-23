@@ -368,7 +368,7 @@ EulatuonLabel.TextPosition:=True;
 EulatuonLabel.TextColor.Import(0.7,0,0.7);
 EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
 EulatuonLabel.Font.SetContext(Context);
-EulatuonLabel.Font.Loading;
+EulatuonLabel.Font.Loading();
 EulatuonLabel.AutoTopShift:=True;
 
 EulatuonEdit:=TSGEdit.Create;

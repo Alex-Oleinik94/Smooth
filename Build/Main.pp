@@ -55,6 +55,7 @@ uses
 	,SaGeTron
 	,SaGeLoading
 	,SaGeImages
+	,SaGeImagesBase
 	;
 
 procedure Draw(const Context:TSGContext);

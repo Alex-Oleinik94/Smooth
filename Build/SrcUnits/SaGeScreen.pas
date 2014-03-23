@@ -3227,11 +3227,9 @@ SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 SGScreen.Font.SetContext(Context);
 SGScreen.Font.Loading();
 
-ComboBoxImage:=TSGImage.Create(SGTextureDirectory+Slash+'ComboBoxImage.png');
+ComboBoxImage:=TSGImage.Create(SGTextureDirectory+Slash+'ComboBoxImage.sgia');
 ComboBoxImage.SetContext(Context);
-{$IFNDEF ANDROID}
-	ComboBoxImage.Loading();
-	{$ENDIF}
+ComboBoxImage.Loading();
 end;
 
 initialization

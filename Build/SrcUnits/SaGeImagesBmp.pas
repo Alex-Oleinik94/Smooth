@@ -3,7 +3,8 @@ unit SaGeImagesBmp;
 interface
 uses
 	crt
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeImagesBase
 	,Classes
 	,SysUtils
@@ -63,6 +64,9 @@ const
   BI_RLE8 = 1;
   BI_RLE4 = 2;
   BI_BITFIELDS = 3;
+  BI_JPEG = 4;
+  BI_PNG = 5;
+  BI_ALPHABITFIELDS = 6;
 
 procedure LoadBMP(Stream: TStream; BitMap: TSGBitMap);
 var fhead: TBitmapFileHeader;
@@ -189,14 +193,17 @@ begin
     16: begin rowLength := biWidth * 2 end;
     24: begin rowLength := biWidth * 3 end;
     32: begin rowLength := biWidth * 4 end;
-    (*!!!!!!!!!!!!else raise EInvalidBMP.Create('Wrong bitmap : biBitCount doesn''t match any allowed value');*)
+    else SGLog.Sourse('LoadBMP : Wrong bitmap : biBitCount doesn''t match any allowed value');
    end;
 
    if (paletteSize <> 0 {paletted format}) and (biClrUsed <> 0) then
     paletteSize := biClrUsed;
 
-   (*!!!!!!!!!!!!!!!!!!!!!if biCompression <> BI_RGB then
-    raise EInvalidBMP.Create('TODO: RLE compressed and bitfields bitmaps not implemented yet');*)
+   if biCompression <> BI_RGB then
+	begin
+    SGLog.Sourse('LoadBMP : TODO : RLE compressed and bitfields bitmaps not implemented yet');
+    Exit;
+    end;
 
    palette := nil;
    rowdata := nil;
@@ -244,13 +251,14 @@ begin
        after reading BMP file. }
        BitMap.Width:=biWidth;
        BitMap.Height:=biHeight;
-       if biBitCount=32 then
-         BitMap.Channels:=4
-       else
-         BitMap.FSizeChannel:=3;
+       case biBitCount of
+       32:BitMap.Channels:=4;
+       24:BitMap.Channels:=3;
+       8:BitMap.Channels:=1;
+       end;
        BitMap.BitDepth:=biBitCount div BitMap.Channels;
        GetMem(BitMap.FBitMap,biWidth*biHeight*BitMap.Channels);
-       BitMap.CreateTypes;
+       BitMap.CreateTypes();
        
      for i := 0 to biHeight - 1 do
      begin
@@ -280,13 +288,12 @@ end;
 procedure SaveBMP(BitMap: TSGBitMap; Stream: TStream);
 var fhead: TBitmapFileHeader;
     ihead: TBitmapInfoHeader;
-    i, j, rowPaddedLength, PadSize: cardinal;
-    p :PVector3Byte;
-    row, rowdata :PRGB_BMP24;
+    rowPaddedLength, PadSize: cardinal;
+    i : TSGMaxEnum;
 begin
- rowPaddedLength := BitMap.Width*SizeOf(TRGB_BMP24);
+ rowPaddedLength := BitMap.Width*BitMap.Channels;
  if rowPaddedLength mod 4 <> 0 then
-  padsize := 4-rowPaddedLength mod 4 else
+  padsize := 4-(rowPaddedLength mod 4) else
   padsize := 0;
  rowPaddedLength := rowPaddedLength + padsize;
 
@@ -303,33 +310,47 @@ begin
  ihead.biPlanes := 1;
  ihead.biBitCount := BitMap.Channels*BitMap.BitDepth;
  ihead.biCompression := BI_RGB;
- ihead.biSizeImage := 0;
- ihead.biXPelsPerMeter := 3779;
- ihead.biYPelsPerMeter := 3779;
- ihead.biClrUsed := 0;
- ihead.biClrImportant := 0;
+ ihead.biSizeImage := BitMap.Channels*BitMap.Height*BitMap.Width;
 
- Stream.WriteBuffer(fhead, SizeOf(fhead));
- Stream.WriteBuffer(ihead, SizeOf(ihead));
+if BitMap.Channels = 4 then
+	begin
+	ihead.biXPelsPerMeter := 2834;
+	ihead.biYPelsPerMeter := 2834;
+	end
+else
+	begin
+	ihead.biXPelsPerMeter := 3779;
+	ihead.biYPelsPerMeter := 3779;
+	end; 
 
- rowdata := GetMem(rowPaddedLength);
- try
-  for j := 0 to BitMap.Height-1 do
-  begin
-   p := PVector3Byte(@BitMap.FBitMap[j*(BitMap.FWidth)*BitMap.FChannels]);
-   row := rowdata;
-   for i := 0 to BitMap.Width - 1 do
-   begin
-    row^.r := p^[0];
-    row^.g := p^[1];
-    row^.b := p^[2];
-    Inc(p);
-    Inc(row);
-   end;
-   FillChar(row^, padsize, 0);
-   Stream.WriteBuffer(rowdata^, rowPaddedLength);
-  end;
- finally FreeMem(rowdata) end;
+ihead.biClrUsed := 0;
+ihead.biClrImportant := 0;
+
+Stream.WriteBuffer(fhead, SizeOf(fhead));
+Stream.WriteBuffer(ihead, SizeOf(ihead));
+
+if BitMap.Channels=4 then
+	begin
+	for i:=0 to BitMap.Width*BitMap.Height-1 do
+		begin
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+2],1);
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+1],1);
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+0],1);
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+3],1);
+		end;
+	end
+else if BitMap.Channels=3 then
+	begin
+	for i:=0 to BitMap.Width*BitMap.Height-1 do
+		begin
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+2],1);
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+1],1);
+		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+0],1);
+		end;
+	end
+else
+	Stream.WriteBuffer(BitMap.BitMap^, rowPaddedLength*BitMap.Height);
+
 end;
 
 

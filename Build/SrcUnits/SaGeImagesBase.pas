@@ -25,6 +25,9 @@ const
 	SGI_JPG =               $00000006;
 	SGI_JPEG = SGI_JPG;
 	SGI_TGA =               $00000007;
+	SGI_SGIA =              $00000008;
+const
+	SGI_DEFAULT = {$IFNDEF ANDROID}SGI_PNG{$ELSE}SGI_JPEG{$ENDIF};
 type
 	PSGPixel3b=^TSGPixel3b;
 	PSGPixel = PSGPixel3b;
