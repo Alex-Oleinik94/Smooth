@@ -32,6 +32,8 @@ type
 			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
+		procedure SetTittle(const NewTittle:TSGString);override;
+			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
 		winAttr: TXSetWindowAttributes;
@@ -46,6 +48,13 @@ type
 		function Get(const What:string):Pointer;override;
 		end;
 implementation
+
+procedure TSGContextLinux.SetTittle(const NewTittle:TSGString);
+begin
+{FTittle:=NewTittle;
+Windows1251ToOEM866(FTittle);}
+FTittle:=SGConvertAnsiToASCII(NewTittle);
+end;
 
 procedure TSGContextLinux.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 {

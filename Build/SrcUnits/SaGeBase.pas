@@ -668,7 +668,22 @@ function SGGetCoreCount():Byte;inline;
 
 function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
 
+function SGConvertAnsiToASCII(const s:TSGString):TSGString;
+
 implementation
+
+function SGConvertAnsiToASCII(const s:TSGString):TSGString;
+var
+	i,ii,iii:TSGLongWord;
+begin
+Result:='';
+for i:=1 to Length(s) do
+	begin
+	for ii:=0 to 255 do
+		if Char(ii)=
+	Result+=SGAnsiToASCII[s[i]];
+	end;
+end;
 
 function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
 begin

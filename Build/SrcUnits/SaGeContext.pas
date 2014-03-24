@@ -100,6 +100,7 @@ type
 			public
 		// Устанавливает значение параметра, влияющего на видимость курсора над окном
 		procedure ShowCursor(const b:Boolean);virtual;abstract;
+		procedure SetTittle(const NewTittle:TSGString);virtual;
 			protected
 		// Тут хнанятся ширина и высота экраза
 		FWidth, FHeight  : TSGLongWord;
@@ -144,7 +145,7 @@ type
 		// Иконка
 		property IconIdentifier      : TSGLongWord         read FIconIdentifier  write FIconIdentifier;
 		// Заголовок окна
-		property Tittle              : TSGString           read FTittle          write FTittle;
+		property Tittle              : TSGString           read FTittle          write SetTittle;
 			public
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
@@ -303,6 +304,11 @@ end;
 class function TSGDrawClass.ClassName():String;
 begin
 Result:='SaGe Draw Class';
+end;
+
+procedure TSGContext.SetTittle(const NewTittle:TSGString);
+begin
+FTittle:=NewTittle;
 end;
 
 function TSGContext.Get(const What:string):Pointer;

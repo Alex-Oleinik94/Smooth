@@ -4,6 +4,6 @@ RENDERARGS= -Fu./../Build/SrcUnits/DirectX -Fu./../Build/SrcUnits/OpenGL
 OUTPUTUNIXORWIN= -FU./../Build/CompiledUnits/i386-other -FE.
 
 default:
-	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example3/Example3
-	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example2/Example2
-	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example1/Example1
+	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example3/Ex3
+	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example2/Ex2
+	$(PP) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Example1/Ex1
