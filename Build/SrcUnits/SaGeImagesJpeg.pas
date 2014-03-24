@@ -192,7 +192,11 @@ unit SaGeImagesJpeg;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils
+	,SaGeBase
+	,SaGeBased
+	,SaGeImagesBmp
+	,SaGeImagesBase;
 
 type
   { }
@@ -216,9 +220,13 @@ procedure StoreJPEG(
   {progress monitor}
   callback: JPEG_ProgressMonitor);
 
-procedure SaveJPEG(const infile, outfile: TStream);
+procedure SaveJPEG(const infile, outfile: TStream);overload;
+
+procedure LoadJPEGToBitMap(const FStream:TStream;var FBitMap:TSGBitMap);
+procedure SaveJPEGFromBitMap(const FStream:TStream;var FBitMap:TSGBitMap);
 
 implementation
+
 uses
   {PASJPG10 library}
   jmorecfg,
@@ -233,6 +241,29 @@ uses
   jcapimin,
   jcapistd,
   jcomapi;
+
+procedure SaveJPEGFromBitMap(const FStream:TStream;var FBitMap:TSGBitMap);
+var
+	Stream:TMemoryStream = nil;
+begin
+Stream:=TMemoryStream.Create();
+SaveBMP(FBitMap,Stream);
+Stream.Position:=0;
+SaveJPEG(Stream,FStream);
+Stream.Destroy();
+end;
+
+procedure LoadJPEGToBitMap(const FStream:TStream;var FBitMap:TSGBitMap);
+var
+	Stream:TMemoryStream = nil;
+begin
+Stream:=TMemoryStream.Create();
+LoadJPEG(FStream,Stream, true, 0, nil);
+Stream.Position:=0;
+LoadBMP(Stream,FBitMap);
+Stream.Destroy();
+end;
+
  type
   { }
   passtream_source_mgr = record
@@ -1288,7 +1319,7 @@ begin
 end;
 
 
-procedure SaveJPEG(const infile, outfile: TStream);
+procedure SaveJPEG(const infile, outfile: TStream);overload;
 begin
 StoreJPEG(infile,outfile,False,90,nil);
 end;

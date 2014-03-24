@@ -5,6 +5,7 @@ unit SaGeUtils;
 interface
 uses
 	 SaGeBase
+	,Classes
 	,SaGeBased
 	,SaGeCommon
 	,SaGeContext

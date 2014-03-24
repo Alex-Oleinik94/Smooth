@@ -307,7 +307,7 @@ a1:=a;
 b1:=b;
 c1:=c;
 FFractal:=d;
-ThreadID:=TID;
+FThreadID:=TID;
 end;
 
 procedure NewMengerThread(Klass:TSGMengerSpunchFractalData) ;
@@ -315,7 +315,7 @@ begin
 (Klass.FFractal as TSGFractalMengerSpunch).CalculateFromThread(Klass.a1,Klass.b1,Klass.c1);
 Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
 Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy;
+Klass.Destroy();
 end;
 
 function TSGFractalMengerSpunch.DoAtThreads:boolean;inline;

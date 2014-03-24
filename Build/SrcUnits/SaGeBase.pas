@@ -297,12 +297,6 @@ type
 		class function ClassName():TSGString;virtual;
 		function Get(const What:string):TSGPointer;virtual;
 		end;
-	
-	//Это для того, чтобы можно было использовать в других модулях Streams,
-	//Не подключая там Classes
-	TMemoryStream = Classes.TMemoryStream;
-	TStream       = Classes.TStream;
-	TFileStream   = Classes.TFileStream;
 const
 	fmCreate = Classes.fmCreate;
 	fmOpenRead = Classes.fmOpenRead;
@@ -671,8 +665,14 @@ procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
 //Возвращает количество логических ядер процессора
 function SGGetCoreCount():Byte;inline;
 
+function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
+
 implementation
 
+function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
+begin
+Result:= SGGetFileWay(FileName)+SGGetFileNameWithoutExpansion(SGGetFileName(FileName))+'.'+Expansion;
+end;
 
 function SGGetCoreCount():Byte;inline;
 Var

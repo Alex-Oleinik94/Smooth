@@ -26,8 +26,7 @@ const
 	SGI_JPEG = SGI_JPG;
 	SGI_TGA =               $00000007;
 	SGI_SGIA =              $00000008;
-const
-	SGI_DEFAULT = {$IFNDEF ANDROID}SGI_PNG{$ELSE}SGI_JPEG{$ENDIF};
+	SGI_DEFAULT =           $00000009;
 type
 	PSGPixel3b=^TSGPixel3b;
 	PSGPixel = PSGPixel3b;
@@ -95,7 +94,22 @@ operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;inline;
 operator + (const a,b:TSGPixel3b):TSGPixel3b;inline;
 operator not (const a:TSGPixel3b):TSGPixel3b;inline;
 
+function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
+
 implementation
+
+function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
+begin
+case Fromat of
+SGI_TGA:Result:='tga';
+SGI_BMP:Result:='bmp';
+SGI_JPG:Result:='jpg';
+SGI_SGIA:Result:='sgia';
+SGI_PNG:Result:='png';
+else
+	Result:='';
+end;
+end;
 
 procedure TSGPixel3b.Write;inline;
 begin
