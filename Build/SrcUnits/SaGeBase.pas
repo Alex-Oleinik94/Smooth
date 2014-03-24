@@ -334,6 +334,7 @@ type
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
+	TSGThreadID = {$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF};
 	TSGThreadFunction = function ( p:pointer ) : TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
 	TSGThread=class(TSGObject)
@@ -341,7 +342,7 @@ type
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 		destructor Destroy;override;
 			public
-		FHandle:LongWord;
+		FHandle:TSGThreadID;
 		FFinished:Boolean;
 		FProcedure:TSGThreadProcedure;
 		FParametr:Pointer;
@@ -2188,7 +2189,7 @@ inherited Create;
 FFinished:=true;
 FParametr:=Para;
 FProcedure:=Proc;
-FHandle:=0;
+FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 if QuickStart then
 	Start;
@@ -2236,7 +2237,7 @@ begin
 	if not FFinished then
 		KillThread(FHandle);
 	{$ENDIF}
-FHandle:=0;
+FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 inherited;
 end;
