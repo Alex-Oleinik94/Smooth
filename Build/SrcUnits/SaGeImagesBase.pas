@@ -21,7 +21,9 @@ const
 	SGI_BMP =               $00000003;
 	SGI_SAVEING_COMPLITE =  $00000004;
 	SGI_SAVE_COMPLITE =  SGI_SAVEING_COMPLITE;
-	SGI_PNG =               $00000005;
+	{$IFDEF WITHLIBPNG}
+		SGI_PNG =               $00000005;
+		{$ENDIF}
 	SGI_JPG =               $00000006;
 	SGI_JPEG = SGI_JPG;
 	SGI_TGA =               $00000007;
@@ -105,7 +107,9 @@ SGI_TGA:Result:='tga';
 SGI_BMP:Result:='bmp';
 SGI_JPG:Result:='jpg';
 SGI_SGIA:Result:='sgia';
-SGI_PNG:Result:='png';
+{$IFDEF WITHLIBPNG}
+	SGI_PNG:Result:='png';
+	{$ENDIF}
 else
 	Result:='';
 end;

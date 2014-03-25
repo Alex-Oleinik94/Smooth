@@ -13,6 +13,7 @@ uses
 	,SaGeImages
 	,SaGeMesh
 	,SaGeImagesBase
+	,SaGeResourseManager
 	;
 type
 	TSGFont=class;
@@ -637,7 +638,7 @@ end;}
 
 function TSGFont.LoadSGF():TSGBoolean;
 var
-	Stream         : TFileStream = nil;
+	Stream         : TMemoryStream = nil;
 	Quantity       : TSGFontInt;
 	ColorBits      : TSGByte;
 	QuantityColors : TSGWord;
@@ -691,9 +692,14 @@ var
 	i:TSGMaxEnum;
 begin
 Result:=False;
-Stream := TFileStream.Create(FWay,fmOpenRead);
-if Stream = nil then
+Stream := TMemoryStream.Create();
+SGResourseFiles.LoadMemoryStreamFromFile(Stream,FWay);
+Stream.Position:=0;
+if Stream.Size=0 then
+	begin
+	Stream.Destroy();
 	Exit;
+	end;
 if not ValidateHeader() then
 	begin
 	Stream.Destroy();

@@ -6,4 +6,5 @@ MKDIR CompiledUnits
 MKDIR CompiledUnits\i386-other
 CALL SG_MAKE_FILES.bat
 make debug
+CALL SG_MAKE_FILES_CLEAR.bat
 pause

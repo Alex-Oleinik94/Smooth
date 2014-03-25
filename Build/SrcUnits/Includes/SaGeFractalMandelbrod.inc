@@ -511,7 +511,7 @@ Manda.FZDegree:=2;
 Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
-Manda.FImage.Way:=SGImagesDirectory+Slash+'Mand New.png';
+Manda.FImage.Way:=SGImagesDirectory+Slash+'Mand New.jpg';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -1043,10 +1043,10 @@ if MandaInitialized then
 					//Manda.FImage.Image.SetBounds(1920,1080);
 					Manda.FImage.Way:=FVideoBuffer+Slash+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
-						SGStr(FNowKadr)+'.png';
+						SGStr(FNowKadr)+'.jpg';
 					end;
 				FTNRF.AddWaterString('made by SaGe',Manda.FImage,0);
-				Manda.FImage.Saveing(SGI_PNG);
+				Manda.FImage.Saveing(SGI_JPEG);
 				if not FNowRenderitsiaVideo then
 					begin
 					Manda.Width:=StartDepth;
@@ -1457,7 +1457,7 @@ if MandaInitialized then
 			Manda.Height:=StartDepth;
 			end;
 		Manda.BeginCalculate();
-		Manda.FImage.Way:=SGGetFreeFileName(SGImagesDirectory+Slash+'Mand New.png');
+		Manda.FImage.Way:=SGGetFreeFileName(SGImagesDirectory+Slash+'Mand New.jpg');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;

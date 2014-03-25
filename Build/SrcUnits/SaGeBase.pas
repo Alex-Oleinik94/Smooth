@@ -22,7 +22,9 @@ uses
 	,SaGeBased
 	,SysUtils
 	,Classes
-	,uSMBIOS
+	{$IFDEF MSWINDOWS}
+		,uSMBIOS
+		{$ENDIF}
 	;
 
 const
@@ -164,7 +166,16 @@ const
 	SGTexturesDirectory = SGTextureDirectory;
 	SGFontsDirectory = SGFontDirectory;
 	SGModelsDirectory = SGDataDirectory + Slash +'Models';
-	SGImagesDirectory = {$IFDEF ANDROID}'/sdcard/Images'{$ELSE}SGDataDirectory + Slash +'Images'{$ENDIF};
+	SGImagesDirectory = 
+		{$IFDEF ANDROID}
+			'/sdcard/Images'
+		{$ELSE}
+			{$IFDEF RELEASE}
+				'.'
+			{$ELSE}
+				SGDataDirectory + Slash +'Images'
+			{$ENDIF}
+		{$ENDIF};
 var
 	//≈сли эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
 	//и самого файлика лога SGLog.Create не создаст
@@ -681,9 +692,11 @@ Result:= SGGetFileWay(FileName)+SGGetFileNameWithoutExpansion(SGGetFileName(File
 end;
 
 function SGGetCoreCount():Byte;inline;
+{$IFDEF MSWINDOWS}
 Var
   SMBios             : TSMBios;
   LProcessorInfo     : TProcessorInformation;
+{$ENDIF}
 begin
 Result:=0;
 {$IFDEF MSWINDOWS}

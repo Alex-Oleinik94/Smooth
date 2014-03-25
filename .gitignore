@@ -4,6 +4,7 @@ Build/AndroidTools/Libs/platforms
 FPC
 Data/EngineLog.log
 Build/CompiledUnits
+Build/SrcUnits/Temp
 Build/SrcUnits/*.o
 Build/SrcUnits/*.a
 Build/SrcUnits/*.ppu
@@ -21,6 +22,8 @@ Others/DirectX/*.a
 Others/DirectX/*.exe
 Data/Images/*/*.png
 Data/Images/*.png
+Data/Images/*/*.jpg
+Data/Images/*.jpg
 Examples/*.exe
 Examples/*.dll
 Examples/*.so

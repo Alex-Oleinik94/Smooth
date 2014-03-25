@@ -66,6 +66,9 @@ type
 		destructor Destroy();
 			public
 		procedure AddFile(const FileWay:TSGString;const Proc : TSGPointer);
+		function LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
+		function ExistsInFile(const Name:TSGString):TSGBoolean;
+		function WaysEqual(w1,w2:TSGString):TSGBoolean;
 			private
 		FArFiles:packed array of
 			packed record
@@ -195,14 +198,14 @@ if IsInc then
 SGWriteStringToStream('end.'+#13+#10,OutStream,False);
 SetLength(A,0);
 Write('Converted');
-TextColor(11);
+TextColor(14);
 Write('"',SGGetFileName(FileName)+SGGetFileExpansion(FileName),'"');
 TextColor(7);
-Write(':filesize:');
+Write(':in:');
 TextColor(10);
 Write(SGGetSizeString(InStream.Size,'EN'));
 TextColor(7);
-Write(',unitsize:');
+Write(',out:');
 TextColor(12);
 Write(SGGetSizeString(OutStream.Size,'EN'));
 TextColor(7);
@@ -212,6 +215,75 @@ OutStream.Destroy();
 end;
 
 (*===========TSGResourseFiles===========*)
+
+function TSGResourseFiles.WaysEqual(w1,w2:TSGString):TSGBoolean;
+var
+	i:TSGMaxEnum;
+function SimbolsEqual(const s1,s2:TSGChar):TSGBoolean;
+begin
+if ((s1=UnixSlash) or (s1=WinSlash)) and ((s2=UnixSlash) or (s2=WinSlash)) then
+	Result:=True
+else
+	Result:=s1=s2;
+end;
+begin
+if Length(w1)=Length(w2) then
+	begin
+	w1:=SGUpCaseString(w1);
+	w2:=SGUpCaseString(w2);
+	Result:=True;
+	for i:=1 to Length(w1) do
+		if not SimbolsEqual(w1[i],w2[i]) then
+			begin
+			Result:=False;
+			Break;
+			end;
+	end
+else
+	Result:=False;
+end;
+
+function TSGResourseFiles.ExistsInFile(const Name:TSGString):TSGBoolean;
+var
+	i:TSGMaxEnum;
+begin
+Result:=False;
+if FArFiles=nil then
+	Exit;
+for i:=0 to High(FArFiles) do
+	begin
+	if WaysEqual(FArFiles[i].FWay,Name) then
+		begin
+		Result:=True;
+		Break;
+		end;
+	end;
+end;
+
+function TSGResourseFiles.LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
+var
+	i : TSGMaxEnum;
+begin
+Result:=False;
+if Stream=nil then
+	Exit;
+if ExistsInFile(FileName) then
+	begin
+	for i:=0 to High(FArFiles) do
+		if WaysEqual(FileName,FArFiles[i].FWay) then
+			begin
+			FArFiles[i].FSelf(Stream);
+			Break;
+			end;
+	Result:=True;
+	end
+else
+	if SGFileExists(FileName) then
+		begin
+		Stream.LoadFromFile(FileName);
+		Result:=True;
+		end;
+end;
 
 constructor TSGResourseFiles.Create();
 begin

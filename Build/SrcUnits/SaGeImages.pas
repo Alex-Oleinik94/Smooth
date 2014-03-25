@@ -295,9 +295,9 @@ if (FImage=nil) or (FImage.BitMap=nil) then
 	Exit;
 if Format=SGI_DEFAULT then
 	if Channels=3 then
-		SaveFormat:={$IFDEF MOBILE}SGI_JPEG{$ELSE}SGI_PNG{$ENDIF}
+		SaveFormat:={$IFNDEF WITHLIBPNG}SGI_JPEG{$ELSE}SGI_PNG{$ENDIF}
 	else if Channels=4 then
-		SaveFormat:={$IFDEF MOBILE}SGI_SGIA{$ELSE}SGI_PNG{$ENDIF}
+		SaveFormat:={$IFNDEF WITHLIBPNG}SGI_SGIA{$ELSE}SGI_PNG{$ENDIF}
 	else 
 		SaveFormat:=SGI_JPEG
 else
@@ -308,17 +308,16 @@ SGI_SGIA:
 	begin
 	SaveSGIA(Stream,FImage);
 	end;
-SGI_PNG:
-	begin
-	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
-		{$ENDIF}
-	if SGResourseManager.SaveingIsSuppored('PNG') then
-		SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage)
-	else
-		if SGResourseManager.SaveingIsSuppored('BMP') then
-			SGResourseManager.SaveResourseToStream(Stream,'BMP',FImage);
-	end;
+{$IFDEF WITHLIBPNG}
+	SGI_PNG:
+		begin
+		{$IFDEF SGDebuging}
+			SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
+			{$ENDIF}
+		if SGResourseManager.SaveingIsSuppored('PNG') then
+			SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage);
+		end;
+	{$ENDIF}
 SGI_JPEG:
 	begin
 	{$IFDEF SGDebuging}
@@ -625,7 +624,7 @@ else
 	FStream.Free();
 	FStream:=TMemoryStream.Create();
 	end;
-FStream.LoadFromFile(Way);
+SGResourseFiles.LoadMemoryStreamFromFile(FStream,FWay);
 end;
 
 procedure TSGImage.ToTexture();
