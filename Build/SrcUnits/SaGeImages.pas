@@ -20,7 +20,7 @@ uses
 		// formats
 	,SaGeImagesJpeg
 	,SaGeImagesBmp
-	{$IFNDEF MOBILE},SaGeImagesPng{$ENDIF}
+	{$IFDEF WITHLIBPNG},SaGeImagesPng{$ENDIF}
 	,SaGeImagesTga
 	,SaGeImagesSgia
 	;
@@ -111,7 +111,21 @@ type
 	ArTSGImage  = type packed array of TSGImage;
 	TArTSGImage = ArTSGImage;
 
+procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
+
 implementation
+
+procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
+var
+	Image: TSGImage = nil;
+begin
+Image:=TSGImage.Create();
+Image.Way := InFile;
+Image.Loading();
+Image.Way := OutFile;
+Image.Saveing(SGI_SGIA);
+Image.Destroy();
+end;
 
 (****************************)
 (*RENDER FUNCTIONS FOR IMAGE*)

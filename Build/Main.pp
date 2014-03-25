@@ -56,6 +56,8 @@ uses
 	,SaGeLoading
 	,SaGeImages
 	,SaGeImagesBase
+	,SaGeResourseManager
+	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
 	;
 
 procedure Draw(const Context:TSGContext);
@@ -485,9 +487,31 @@ end;
 		if s[1]='-' then
 			begin
 			s:=SGGetComand(s);
-			if s='RM' then
+			if s='CTSGIA' then
 				begin
-				SGResourseManager(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
+				SGConvertToSGIA(SGPCharToString(argv[2]),SGPCharToString(argv[3]));
+				end
+			else if s='CRF' then
+				begin
+				SGClearRFFile(SGPCharToString(argv[2]));
+				end
+			else if s='CFTPUARU' then
+				begin
+				SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
+				SGRegisterUnit(SGPCharToString(argv[4]),SGPCharToString(argv[5]));
+				end
+			else if s='CFTPU' then
+				begin
+				if (SGUpCaseString(SGPCharToString(argv[2]))='-H') or (SGUpCaseString(SGPCharToString(argv[2]))='-HELP') then
+					begin
+					WriteLn('This help for SaGe program : "ConvertFileToPascalUnit".');
+					WriteLn('   Use: "-CFTPU P1 P2 P3"');
+					WriteLn('   P1 is way to input file');
+					WriteLn('   P2 is way to output file');
+					WriteLn('   P3 is name of pascal unit');
+					end
+				else
+					SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
 				end
 			else if s='FPCTC' then
 				begin
@@ -525,6 +549,7 @@ end;
 				WriteLn('   -IR                          : for run image resizer');
 				WriteLn('   -H;-HELP                     : for view help');
 				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
+				WriteLn('   -CFTPU                       : for convert file to pascal unit');
 				end
 			else
 				begin

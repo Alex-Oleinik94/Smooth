@@ -516,7 +516,7 @@ function SGPCharLength(const pc:PChar):int64;inline;
 function SGStr(const b:boolean):String;overload;inline;
 
 //Возвращает строку, гду красивенько написан размер файла, занимающего Size байт
-function SGGetSizeString(const Size:Int64):String;inline;
+function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):String;inline;
 
 //Переводит действительное число в строку, оставив после запятой l цифр
 function SGStrReal(r:real;const l:longint):string;
@@ -655,14 +655,6 @@ function SGExistsDirectory(const DirWay:String):Boolean;inline;
 //Возвращает директорию, в которой запужена программа
 function SGGetCurrentDirectory():string;inline;
 
-//Это тупая и очень тупая процедура, сделал ее специально для андроида.
-(*Скорее всего она не найдет свое применение, но для начала не помешает*)
-//В общем ты ей задаешь файл, а она тебе пишет модуль на паскале
-//И при вызове особой процедурки из этого модуля при включении 
-//Этого модуля в программу у тебя конструируется TMemoryStream,
-//В котором и будет тот файл, который ты задал в FileName
-procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
-
 //Возвращает количество логических ядер процессора
 function SGGetCoreCount():Byte;inline;
 
@@ -679,8 +671,6 @@ begin
 Result:='';
 for i:=1 to Length(s) do
 	begin
-	for ii:=0 to 255 do
-		if Char(ii)=
 	Result+=SGAnsiToASCII[s[i]];
 	end;
 end;
@@ -707,71 +697,6 @@ finally
 	SMBios.Free;
 	end;
 {$ENDIF}
-end;
-
-
-procedure SGResourseManager(const FileName,UnitWay,NameUnit:string);
-var
-	Step:LongWord = 100;
-var
-	OutStream:TStream = nil;
-	InStream:TStream = nil;
-	A:array of Byte;
-	I,iiii,i5:LongWord;
-procedure WriteProc(const ThisStep:LongWord);
-var
-	III,II:LongWord;
-begin
-InStream.ReadBuffer(A[0],ThisStep);
-SGWriteStringToStream('procedure '+NameUnit+'_LoadToStream_'+SGStr(I)+'(const Stream:TStream);'+#13+#10,OutStream,False);
-I+=1;
-SGWriteStringToStream('var'+#13+#10,OutStream,False);
-SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+#13+#10+'	',OutStream,False);
-II:=0;
-for iii:=0 to ThisStep-1 do
-	begin
-	if II=10 then
-		begin
-		SGWriteStringToStream(''+#13+#10+'	',OutStream,False);
-		II:=0;
-		end;
-	SGWriteStringToStream(SGStr(A[iIi]),OutStream,False);
-	if III<>ThisStep-1 then
-		SGWriteStringToStream(', ',OutStream,False);
-	II+=1;
-	end;
-SGWriteStringToStream(');'+#13+#10,OutStream,False);
-SGWriteStringToStream('begin'+#13+#10,OutStream,False);
-SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+#13+#10,OutStream,False);
-SGWriteStringToStream('end;'+#13+#10,OutStream,False);
-end;
-begin
-I:=0;
-SetLength(A,Step);
-OutStream:=TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
-InStream:=TFileStream.Create(FileName,fmOpenRead);
-SGWriteStringToStream('{$MODE OBJFPC}'+#13+#10,OutStream,False);
-SGWriteStringToStream('unit '+NameUnit+';'+#13+#10,OutStream,False);
-SGWriteStringToStream('interface'+#13+#10,OutStream,False);
-SGWriteStringToStream('uses'+#13+#10,OutStream,False);
-SGWriteStringToStream('	Classes;'+#13+#10,OutStream,False);
-SGWriteStringToStream('function '+NameUnit+'_LoadToStream():TMemoryStream;'+#13+#10,OutStream,False);
-SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
-while InStream.Position<=InStream.Size-Step do
-	WriteProc(Step);
-if InStream.Position<>InStream.Size then
-	begin
-	IIii:=InStream.Size-InStream.Position;
-	WriteProc(IIii);
-	end;
-SGWriteStringToStream('function '+NameUnit+'_LoadToStream():TMemoryStream;'+#13+#10,OutStream,False);
-SGWriteStringToStream('begin'+#13+#10,OutStream,False);
-SGWriteStringToStream('Result:=TMemoryStream.Create();'+#13+#10,OutStream,False);
-for i5:=0 to i-1 do
-	SGWriteStringToStream(NameUnit+'_LoadToStream_'+SGStr(i5)+'(Result);'+#13+#10,OutStream,False);
-SGWriteStringToStream('end;'+#13+#10,OutStream,False);
-SGWriteStringToStream('end.'+#13+#10,OutStream,False);
-SetLength(A,0);
 end;
 
 function SGGetCurrentDirectory():string;inline;
@@ -1916,13 +1841,19 @@ if (Result='') or (Result='-') then
 	Result+='0';
 end;
 
-function SGGetSizeString(const Size:Int64):String;inline;
+function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):String;inline;
 var
 	e:extended;
 	d:LongWord = 0;
 begin
 if Size<1024 then
-	Result:=SGStr(Size)+' байт'
+	begin
+	Result:=SGStr(Size);
+	if Language='RU' then
+		Result+=' байт'
+	else
+		Result+=' byte';
+	end
 else
 	begin
 	e:=Size;
@@ -1933,13 +1864,25 @@ else
 	Result:=SGStrReal(e,2);
 	case d of
 	1:
-		Result+=' КБайт';
+		if Language='RU' then
+			Result+=' КБайт'
+		else
+			Result+=' KByte';
 	2:
-		Result+=' MБайт';
+		if Language='RU' then
+			Result+=' MБайт'
+		else
+			Result+=' MByte';
 	3:
-		Result+=' ГБайт';
+		if Language='RU' then
+			Result+=' ГБайт'
+		else
+			Result+=' GByte';
 	4:
-		Result+=' ТБайт';
+		if Language='RU' then
+			Result+=' ТБайт'
+		else
+			Result+=' TByte';
 	end;
 	end;
 end;

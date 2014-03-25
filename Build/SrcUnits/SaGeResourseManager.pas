@@ -1,5 +1,4 @@
 {$INCLUDE Includes\SaGe.inc}
-
 unit SaGeResourseManager;
 
 interface
@@ -8,6 +7,7 @@ uses
 	 SaGeBase
 	 ,SaGeBased
 	 ,Classes
+	 ,Crt
 	 ,SysUtils;
 type
 	TSGResourse=class(TSGClass)
@@ -58,8 +58,182 @@ type
 		end;
 var
 	SGResourseManager : TSGResourseManager = nil;
+type
+	TSGResourseFilesProcedure = procedure (const Stream:TStream);
+	TSGResourseFiles = class(TSGClass)
+			public
+		constructor Create();
+		destructor Destroy();
+			public
+		procedure AddFile(const FileWay:TSGString;const Proc : TSGPointer);
+			private
+		FArFiles:packed array of
+			packed record
+				FWay:TSGString;
+				FSelf:TSGResourseFilesProcedure;
+				end;
+		end;
+var
+	SGResourseFiles:TSGResourseFiles = nil;
+
+//Это тупая и очень тупая процедура, сделал ее специально для андроида.
+(*Скорее всего она не найдет свое применение, но для начала не помешает*)
+//В общем ты ей задаешь файл, а она тебе пишет модуль на паскале
+//И при вызове особой процедурки из этого модуля при включении 
+//Этого модуля в программу у тебя конструируется TMemoryStream,
+//В котором и будет тот файл, который ты задал в FileName
+const
+	SGConvertFileToPascalUnitDefInc = True;
+procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
+procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
+procedure SGClearRFFile(const RFFile:TSGString);
 
 implementation
+
+procedure SGClearRFFile(const RFFile:TSGString);
+var
+	Stream:TFileStream = nil;
+begin
+Stream:=TFileStream.Create(RFFile,fmCreate);
+SGWriteStringToStream('(*This patr from SaGe*)'+#13+#10,Stream,False);
+SGWriteStringToStream('//RF file. Files:'+#13+#10,Stream,False);
+Stream.Destroy();
+end;
+
+procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
+var
+	Stream:TFileStream = nil;
+	MemStream:TMemoryStream = nil;
+begin
+MemStream:=TMemoryStream.Create();
+MemStream.LoadFromFile(RFFile);
+Stream:=TFileStream.Create(RFFile,fmCreate);
+MemStream.Position:=0;
+MemStream.SaveToStream(Stream);
+MemStream.Destroy();
+SGWriteStringToStream('	,'+UnitName+#13+#10,Stream,False);
+Stream.Destroy();
+end;
+
+procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
+var
+	Step:LongWord = 1000000;
+var
+	OutStream:TStream = nil;
+	InStream:TStream = nil;
+	A:array of Byte;
+	I,iiii,i5:LongWord;
+procedure WriteProc(const ThisStep:LongWord);
+var
+	III,II:LongWord;
+begin
+InStream.ReadBuffer(A[0],ThisStep);
+SGWriteStringToStream('procedure '+'LoadToStream_'+NameUnit+'_'+SGStr(I)+'(const Stream:TStream);'+#13+#10,OutStream,False);
+I+=1;
+SGWriteStringToStream('var'+#13+#10,OutStream,False);
+SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+#13+#10+'	',OutStream,False);
+II:=0;
+for iii:=0 to ThisStep-1 do
+	begin
+	if II=10 then
+		begin
+		SGWriteStringToStream(''+#13+#10+'	',OutStream,False);
+		II:=0;
+		end;
+	SGWriteStringToStream(SGStr(A[iIi]),OutStream,False);
+	if III<>ThisStep-1 then
+		SGWriteStringToStream(', ',OutStream,False);
+	II+=1;
+	end;
+SGWriteStringToStream(');'+#13+#10,OutStream,False);
+SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+#13+#10,OutStream,False);
+SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+end;
+begin
+I:=0;
+SetLength(A,Step);
+OutStream:=TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
+InStream:=TFileStream.Create(FileName,fmOpenRead);
+if IsInc then
+	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+#13+#10,OutStream,False)
+else
+	SGWriteStringToStream('{$MODE OBJFPC}'+#13+#10,OutStream,False);
+SGWriteStringToStream('//"'+FileName+'"'+#13+#10,OutStream,False);
+SGWriteStringToStream('unit '+NameUnit+';'+#13+#10,OutStream,False);
+SGWriteStringToStream('interface'+#13+#10,OutStream,False);
+if IsInc then
+	SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
+SGWriteStringToStream('uses'+#13+#10,OutStream,False);
+if IsInc then
+	SGWriteStringToStream('	SaGeResourseManager,'+#13+#10,OutStream,False);
+SGWriteStringToStream('	Classes;'+#13+#10,OutStream,False);
+if not IsInc then
+	begin
+	SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+#13+#10,OutStream,False);
+	SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
+	end;
+while InStream.Position<=InStream.Size-Step do
+	WriteProc(Step);
+if InStream.Position<>InStream.Size then
+	begin
+	IIii:=InStream.Size-InStream.Position;
+	WriteProc(IIii);
+	end;
+SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+#13+#10,OutStream,False);
+SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+for i5:=0 to i-1 do
+	SGWriteStringToStream('LoadToStream_'+NameUnit+'_'+SGStr(i5)+'(Stream);'+#13+#10,OutStream,False);
+SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+if IsInc then
+	begin
+	SGWriteStringToStream('initialization'+#13+#10,OutStream,False);
+	SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+	SGWriteStringToStream('SGResourseFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+#13+#10,OutStream,False);
+	SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+	end;
+SGWriteStringToStream('end.'+#13+#10,OutStream,False);
+SetLength(A,0);
+Write('Converted');
+TextColor(11);
+Write('"',SGGetFileName(FileName)+SGGetFileExpansion(FileName),'"');
+TextColor(7);
+Write(':filesize:');
+TextColor(10);
+Write(SGGetSizeString(InStream.Size,'EN'));
+TextColor(7);
+Write(',unitsize:');
+TextColor(12);
+Write(SGGetSizeString(OutStream.Size,'EN'));
+TextColor(7);
+WriteLn('.');
+InStream.Destroy();
+OutStream.Destroy();
+end;
+
+(*===========TSGResourseFiles===========*)
+
+constructor TSGResourseFiles.Create();
+begin
+inherited;
+FArFiles:=nil;
+end;
+
+destructor TSGResourseFiles.Destroy();
+begin
+SetLength(FArFiles,0);
+inherited;
+end;
+
+procedure TSGResourseFiles.AddFile(const FileWay:TSGString;const Proc : TSGPointer);
+begin
+if FArFiles=nil then
+	SetLength(FArFiles,1)
+else
+	SetLength(FArFiles,Length(FArFiles)+1);
+FArFiles[High(FArFiles)].FWay:=FileWay;
+FArFiles[High(FArFiles)].FSelf:=TSGResourseFilesProcedure(Proc);
+end;
 
 (*===========TSGResourseManipulator===========*)
 
@@ -276,11 +450,13 @@ end;
 initialization
 begin
 SGResourseManager := TSGResourseManager.Create();
+SGResourseFiles:=TSGResourseFiles.Create();
 end;
 
 finalization
 begin
 SGResourseManager.Destroy();
+SGResourseFiles.Destroy();
 end;
 
 end.
