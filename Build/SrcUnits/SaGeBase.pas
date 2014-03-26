@@ -673,7 +673,28 @@ function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;
 
 function SGConvertAnsiToASCII(const s:TSGString):TSGString;
 
+function SGDownCaseString(const str:TSGString):TSGString;
+function DownCase(const c:TSGChar):TSGChar;
+
 implementation
+
+function DownCase(const c:TSGChar):TSGChar;
+begin
+if c in ['A'..'Z'] then
+	begin
+	Result:=TSGChar(TSGByte(c)-(TSGByte('A')-TSGByte('a')))
+	end
+else
+	Result:=c;
+end;
+
+function SGDownCaseString(const str:TSGString):TSGString;
+var
+	i:TSGMaxEnum;
+begin
+for i:=1 to Length(str) do
+	Result+=DownCase(str[i]);
+end;
 
 function SGConvertAnsiToASCII(const s:TSGString):TSGString;
 var

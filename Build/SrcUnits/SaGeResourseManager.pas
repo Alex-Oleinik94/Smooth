@@ -199,7 +199,7 @@ SGWriteStringToStream('end.'+#13+#10,OutStream,False);
 SetLength(A,0);
 Write('Converted');
 TextColor(14);
-Write('"',SGGetFileName(FileName)+SGGetFileExpansion(FileName),'"');
+Write('"',SGGetFileName(FileName)+'.'+SGDownCaseString(SGGetFileExpansion(FileName)),'"');
 TextColor(7);
 Write(':in:');
 TextColor(10);
