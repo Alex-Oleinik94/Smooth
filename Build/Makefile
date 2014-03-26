@@ -32,7 +32,6 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Skull.sgia"           ../build/srcunits/temp KillKostia_Skull     ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/Main.exe"             ../build/srcunits/temp main_123       ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
 	@MKDIR -p SrcUnits/Temp
 	@rm -f SrcUnits/Temp/*

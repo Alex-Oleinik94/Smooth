@@ -31,6 +31,10 @@ uses
 		,xlib
 		,xutil
 		{$ENDIF}
+	{$IFDEF DARWIN}
+		,AGL
+		,MacOSAll
+		{$ENDIF}
 	,DynLibs
 	;
 type
@@ -49,10 +53,17 @@ type
 				{$IFDEF ANDROID}
 					EGLContext
 				{$ELSE}
-					Pointer
+					{$IFDEF DARWIN}
+						TAGLContext
+					{$ELSE}
+						Pointer
+						{$ENDIF}
 					{$ENDIF}
 				{$ENDIF}
 			 {$ENDIF};
+		{$IFDEF DARWIN}
+			ogl_Format  : TAGLPixelFormat;
+			{$ENDIF}
 			public
 		{$DEFINE SG_RENDER_EIC}
 		{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
@@ -279,6 +290,10 @@ begin
 	{$ELSE}
 		{$IFDEF ANDROID}
 			(*Already exists in SaGeContextAndroid*)
+		{$ELSE}
+			{$IFDEF DARWIN}
+				aglSwapBuffers( FContext );
+				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -592,6 +607,7 @@ end;
 destructor TSGRenderOpenGL.Destroy;
 begin
 {$IFDEF LINUX}
+	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
@@ -605,6 +621,12 @@ begin
 		{$IFDEF ANDROID}
 			if (FContext <> EGL_NO_CONTEXT) then
 				eglDestroyContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FContext);
+		{$ELSE}
+			{$IFDEF DARWIN}
+				aglSetCurrentContext( nil );
+				aglDestroyContext( FContext );
+				FillChar(FContext,Sizeof(FContext),0);
+				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -692,6 +714,23 @@ Result:=False;
 		{$IFDEF ANDROID}
 			FContext := eglCreateContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+		{$ELSE}
+			{$IFDEF DARWIN}
+				FContext := aglCreateContext( ogl_Format, nil );
+				Result:= Assigned( FContext );
+				if Result then
+					begin
+					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESCTOP WINDOW HANDLE'))) <> GL_FALSE Then
+						begin
+						if aglSetCurrentContext( FContext ) <> GL_FALSE Then
+							begin
+							aglDestroyPixelFormat( ogl_Format );
+							FillChar(ogl_Format,Sizeof(ogl_Format),0);
+							Result:=True;
+							end;
+						end;
+					end;
+				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -715,6 +754,10 @@ begin
 		{$IFDEF ANDROID}
 			if FWindow<>nil then
 				eglMakeCurrent(FWindow.Get('DESCTOP WINDOW HANDLE'), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		{$ELSE}
+			{$IFDEF DARWIN}
+				aglSetDrawable( nil, FWindow.Get('DESCTOP WINDOW HANDLE'));
+				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
@@ -726,8 +769,21 @@ function TSGRenderOpenGL.SetPixelFormat():Boolean;overload;
 		pfd : PIXELFORMATDESCRIPTOR;
 		iFormat : integer;
 	{$ENDIF}
+{$IFDEF DARWIN}
+	var
+		ogl_Attr    : array[ 0..31 ] of DWORD;
+	{$ENDIF}
 begin
-Result:=False;	
+Result:=False;
+{$IFDEF DARWIN}
+	ogl_Attr[ 0 ] := AGL_RGBA;
+	ogl_Attr[ 1 ] := AGL_DOUBLEBUFFER;
+	ogl_Attr[ 2 ] := AGL_DEPTH_SIZE;
+	ogl_Attr[ 3 ] := 24;
+	ogl_Attr[ 6 ] := AGL_NONE;
+	ogl_Format := aglChoosePixelFormat( nil, 0, @ogl_Attr[ 0 ] );
+	Result:=Assigned( ogl_Format );
+	{$ENDIF}
 {$IFDEF MSWINDOWS}
 	FillChar(pfd, sizeof(pfd), 0);
 	pfd.nSize         := sizeof(pfd);
@@ -781,6 +837,10 @@ begin
 			else
 				Result:=False;
 			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
+		{$ELSE}
+			{$IFDEF DARWIN}
+				Result:=aglSetDrawable( FContext, FWindow.Get('DESCTOP WINDOW HANDLE')) <> GL_FALSE;
+				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}

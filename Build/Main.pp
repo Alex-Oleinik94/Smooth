@@ -1,5 +1,5 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
-{$IFNDEF MOBILE}
+{$IFNDEF DARWIN AND MOBILE}
 	{$IFDEF RELEASE}
 		{$APPTYPE GUI}
 	{$ELSE}
@@ -26,6 +26,7 @@ uses
 	{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux
+		,SaGeContextMacOSX
 		{$ENDIF}
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
@@ -167,6 +168,7 @@ Context:=
 		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}
 		{$IFDEF LINUX}    TSGContextLinux  {$ENDIF}
 		{$IFDEF ANDROID}  TSGContextAndroid{$ENDIF}
+		{$IFDEF DARWIN}   TSGContextMacOSX {$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
 		.Create();
@@ -353,7 +355,7 @@ end;
 			Context:=
 				   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
 				   {$IFDEF LINUX}     TSGContextLinux  {$ENDIF}
-				   {$IFDEF ANDROID}   TSGContextAndroid{$ENDIF}
+				   {$IFDEF DARWIN}    TSGContextMacOSX {$ENDIF}
 					.Create();
 			Context.Width:=ViewerImage.Width;
 			Context.Height:=ViewerImage.Height;
