@@ -124,6 +124,7 @@ type
 		procedure PointSize(const PS:TSGSingle);override;
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
+		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 		end;
 
 //Я так понял, что на нормальном компьютере все матрици хранятся в Double, 
@@ -252,6 +253,11 @@ Result *= SGRGLMatrix4Import(
 	0,1,0,-Eve.y,
 	0,0,1,-Eve.z,
 	0,0,0,1);
+end;
+
+procedure TSGRenderOpenGL.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
+begin
+glDrawArrays(VParam,VFirst,VCount);
 end;
 
 procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);

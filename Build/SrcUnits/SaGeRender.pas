@@ -58,8 +58,10 @@ type
 		function TopShift(const VFullscreen:TSGBoolean = False):TSGLongWord;virtual;
 		// Смещение указателя мышы от того, тна что она указывает на окне
 		procedure MouseShift(Var x,y:TSGLongInt; const VFullscreen:TSGBoolean = False);virtual;
-		procedure UnLockResourses();virtual;
+		// Сохранения ресурсов рендера и убивание самого рендера
 		procedure LockResourses();virtual;
+		// Инициализация рендера и загрузка сохраненных ресурсов
+		procedure UnLockResourses();virtual;
 			public
 		// Устанавливает 2D отроганальную проэкцию между двумя точками экрана (нижней левой и верхней правой)
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
@@ -107,6 +109,7 @@ type
 		procedure PointSize(const PS:Single);virtual;abstract;
 		procedure PopMatrix();virtual;abstract;
 		procedure PushMatrix();virtual;abstract;
+		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

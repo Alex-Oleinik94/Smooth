@@ -170,11 +170,7 @@ const
 		{$IFDEF ANDROID}
 			'/sdcard/Images'
 		{$ELSE}
-			{$IFDEF RELEASE}
-				'.'
-			{$ELSE}
-				SGDataDirectory + Slash +'Images'
-			{$ENDIF}
+			SGDataDirectory + Slash +'Images'
 		{$ENDIF};
 var
 	//Если эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 

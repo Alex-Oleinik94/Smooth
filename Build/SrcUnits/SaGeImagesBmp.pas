@@ -1,4 +1,4 @@
-{$MODE OBJFPC}
+{$INCLUDE Includes\SaGe.inc}
 unit SaGeImagesBmp;
 interface
 uses

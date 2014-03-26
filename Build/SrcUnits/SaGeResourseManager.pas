@@ -79,15 +79,15 @@ type
 var
 	SGResourseFiles:TSGResourseFiles = nil;
 
+
+const
+	SGConvertFileToPascalUnitDefInc = True;
 //Это тупая и очень тупая процедура, сделал ее специально для андроида.
 (*Скорее всего она не найдет свое применение, но для начала не помешает*)
 //В общем ты ей задаешь файл, а она тебе пишет модуль на паскале
 //И при вызове особой процедурки из этого модуля при включении 
 //Этого модуля в программу у тебя конструируется TMemoryStream,
 //В котором и будет тот файл, который ты задал в FileName
-const
-	SGConvertFileToPascalUnitDefInc = True;
-
 procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
 procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
 procedure SGClearRFFile(const RFFile:TSGString);

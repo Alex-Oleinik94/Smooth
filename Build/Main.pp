@@ -1,9 +1,11 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
-{$IFNDEF DARWIN AND MOBILE}
-	{$IFDEF RELEASE}
-		{$APPTYPE GUI}
-	{$ELSE}
-		{$APPTYPE CONSOLE}
+{$IFNDEF MOBILE}
+	{$IFNDEF DARWIN}
+		{$IFDEF RELEASE}
+			{$APPTYPE GUI}
+		{$ELSE}
+			{$APPTYPE CONSOLE}
+			{$ENDIF}
 		{$ENDIF}
 	program Main;
 {$ELSE}
@@ -39,6 +41,9 @@ uses
 	,SaGeBased
 	,Classes
 	,SysUtils
+	,SaGeResourseManager
+	,SaGeImagesBase
+	,SaGeImages
 	,SaGeContext
 	,SaGeCommon
 	,SaGeFractals
@@ -57,9 +62,6 @@ uses
 	,SaGeModel
 	,SaGeTron
 	,SaGeLoading
-	,SaGeImages
-	,SaGeImagesBase
-	,SaGeResourseManager
 	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
 	;
 

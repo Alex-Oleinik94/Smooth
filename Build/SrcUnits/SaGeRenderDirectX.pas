@@ -52,6 +52,10 @@ type
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
+		// Сохранения ресурсов рендера и убивание самого рендера
+		procedure LockResourses();override;
+		// Инициализация рендера и загрузка сохраненных ресурсов
+		procedure UnLockResourses();override;
 		
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
@@ -89,48 +93,86 @@ type
 		procedure PointSize(const PS:Single);override;
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
+		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 			private
-			//цвет, в который окрашивается буфер при очистке
+		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
+		
+			(*glBegin ... glEnd*)
 			//приведение цветов и полигонов к Vertex-ам опенжл-я
+		// Текуший тип приметивов (задается в BeginScene)
 		FPrimetiveType : LongWord;
+		// Для некоторых типов (SGR_QUADS,..) приметивов необходим дополнительный параметр. Этим и является FPrimetivePrt
 		FPrimetivePrt  : LongWord;
+		// Текущий цвет
 		FNowColor      : LongWord;
+		// Массив, который в последущем раендерится с помощью pDevice.DrawPrimitiveUP(..)
 		FArPoints:array[0..2]of 
 			packed record
 				x,y,z : single;
 				Color : LongWord;
 				tx,ty : Single;
 				end;
+		// Количество вершин, которые в данный момент уже записаны массив FArPoints
 		FNumberOfPoints : LongWord;
-			//Textures
+		
+			(* Textures *)
+		// Индекс массива FArTextures[] активной в данный момент текстуры
 		FNowTexture:LongWord;
-		FArTextures:packed array of IDirect3DTexture9;
-			// ===VBO=== 
+		// Массив текстур
+		FArTextures:packed array of 
+			packed record
+			// texture
+			FTexture:IDirect3DTexture9;
+			// for change fullscreen
+			FBufferChangeFullscreen:PByte;
+			// image info
+			FWidth,FHeight,FChannels,FFormat:TSGLongWord;
+			end;
+		
+			(* ===VBO=== or arrays *)
+		// FArBuffers[i-1] содержит информацию о i-ом буфере.
 		FArBuffers:packed array of 
 			packed record 
+			// Тип ресурса SGR_ARRAY_BUFFER_ARB or SGR_ELEMENT_ARRAY_BUFFER_ARB
+			FType:TSGLongWord;
+			// Ресурс. (Он IDirect3DVertexBuffer9 или IDirect3DIndexBuffer9)
 			FResourse:IDirect3DResource9;
+			// Его размер
 			FResourseSize:QWord;
+			// Эта структура создается при первом его рендеринге.
 			FVertexDeclaration:IDirect3DVertexDeclaration9;
+			// Это используется для хранения буфера при закрывании контекста.
+			FBufferChangeFullscreen:PByte;
 			end;
 		FEnabledClientStateVertex    : Boolean;
 		FEnabledClientStateColor     : Boolean;
 		FEnabledClientStateNormal    : Boolean;
 		FEnabledClientStateTexVertex : Boolean;
-		// 0 - SGR_ARRAY_BUFFER_ARB
-		// 1 - SGR_ELEMENT_ARRAY_BUFFER_ARB
 		FVBOData:packed array [0..1] of LongWord;
+		// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
+		// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
 		FArDataBuffers:packed array[TSGRDTypeDataBuffer] of 
 			packed record
+			// Состояние на момент регестрирования буфера FVBOData[0]
 			FVBOBuffer:LongWord;
+			// В FVBOData записывается текущий вершинный буфер.
+			// Если некакой не включен, но устанавливается значение, которое находится в FVBOData[0]
 			FQuantityParams:Byte;
+			// FQuantityParams --- Количество параметров (первый параметр в gl*Pointer (для нормалей по дефолту 3)
 			FDataType:LongWOrd;
+			// FDataType --- Тип данных. Типа Float, Unsigned_byte или т п
 			FSizeOfOneVertex:Byte;
-			FShift:Cardinal;
+			// FSizeOfOneVertex --- размер одного элемента в массиве
+			FShift:TSGMaxEnum;
+			// FShift --- Если VBO - смещение в байтах относительно начала этого компонента массива.
+			// А если не VBO - указатель на первый элемент массива. (Это не получится запрогать походу)
 			end;
-			// Light
+		
+			(* Light *)
 		FLigth               : D3DLIGHT9;
-			//PushMatrix/PopMatrix
+		
+			(* PushMatrix/PopMatrix *)
 		FQuantitySavedMatrix : LongWord;
 		FLengthArSavedMatrix : LongWord;
 		FArSavedMatrix       : packed array of D3DMATRIX;
@@ -384,10 +426,13 @@ var
 begin 
 for i:=0 to VQuantity-1 do
 	begin
-	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1]<>nil) then
+	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1].FTexture<>nil) then
 		begin
-		FArTextures[VTextures[i]-1]._Release();
-		FArTextures[VTextures[i]-1]:=nil;
+		FArTextures[VTextures[i]-1].FTexture._Release();
+		FArTextures[VTextures[i]-1].FTexture:=nil;
+		if FArTextures[VTextures[i]-1].FBufferChangeFullscreen<>nil then
+			FreeMem(FArTextures[VTextures[i]-1].FBufferChangeFullscreen);
+		FArTextures[VTextures[i]-1].FBufferChangeFullscreen:=nil;
 		end;
 	end;
 end;
@@ -457,7 +502,8 @@ for i:=0 to VQuantity-1 do
 		SetLength(FArTextures,1)
 	else
 		SetLength(FArTextures,Length(FArTextures)+1);
-	FArTextures[High(FArTextures)]:=nil;
+	FArTextures[High(FArTextures)].FTexture:=nil;
+	FArTextures[High(FArTextures)].FBufferChangeFullscreen:=nil;
 	VTextures[i]:=Length(FArTextures);
 	end;
 end;
@@ -465,11 +511,11 @@ end;
 procedure TSGRenderDirectX.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
 begin 
 FNowTexture:=VTexture;
-if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1]<>nil) then
-	pDevice.SetTexture(0, FArTextures[FNowTexture-1]);
+if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1].FTexture<>nil) then
+	pDevice.SetTexture(0, FArTextures[FNowTexture-1].FTexture);
 end;
 
-procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal); 
+procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal);
 begin 
 if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then//or (VP1 = SGR_TEXTURE_3D) then
 	begin
@@ -547,15 +593,16 @@ SGR_INTENSITY:;
 SGR_ALPHA:VTFormat:=D3DFMT_A8;
 SGR_LUMINANCE:VTFormat:=D3DFMT_L8;
 end;
-if VTFormat=D3DFMT_R8G8B8 then
-	WriteLn('D3DFMT_R8G8B8');
-if pDevice.CreateTexture(VWidth,VHeight,VChannels,D3DUSAGE_DYNAMIC, VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1],nil)<> D3D_OK then
-	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "D3DXCreateTexture" failed...')
+FArTextures[FNowTexture-1].FWidth:=VWidth;
+FArTextures[FNowTexture-1].FHeight:=VHeight;
+FArTextures[FNowTexture-1].FChannels:=VChannels;
+FArTextures[FNowTexture-1].FFormat:=VTFormat;
+if pDevice.CreateTexture(VWidth,VHeight,VChannels,D3DUSAGE_DYNAMIC,VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1].FTexture,nil)<> D3D_OK then
+	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pDevice__CreateTexture" failed...')
 else
 	begin
 	fillchar(rcLockedRect,sizeof(rcLockedRect),0);
-
-	if FArTextures[FNowTexture-1].LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
+	if FArTextures[FNowTexture-1].FTexture.LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__LockRect" failed...')
 	else
 		begin
@@ -569,7 +616,7 @@ else
 			end
 		else
 			Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
-		if FArTextures[FNowTexture-1].UnlockRect(0) <> D3D_OK then
+		if FArTextures[FNowTexture-1].FTexture.UnlockRect(0) <> D3D_OK then
 			SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
 		end;
 	end;
@@ -621,6 +668,8 @@ for i:=0 to VQ-1 do
 	FArBuffers[High(FArBuffers)].FResourse:=nil;
 	FArBuffers[High(FArBuffers)].FResourseSize:=0;
 	FArBuffers[High(FArBuffers)].FVertexDeclaration:=nil;
+	FArBuffers[High(FArBuffers)].FBufferChangeFullscreen:=nil;
+	FArBuffers[High(FArBuffers)].FType:=0;
 	PT[i]:=Length(FArBuffers);
 	end;
 end;
@@ -635,6 +684,7 @@ for i:=0 to VQuantity-1 do
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourseSize:=0;
+		FArBuffers[PLongWord(VPoint)[i]-1].FType:=0;
 		if FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration<>nil then
 			begin
 			FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration._Release();
@@ -644,9 +694,7 @@ for i:=0 to VQuantity-1 do
 		end;
 end;
 
-procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
-//SGR_ELEMENT_ARRAY_BUFFER_ARB
-//SGR_ARRAY_BUFFER_ARB
+procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
 begin 
 case VParam of
 SGR_ARRAY_BUFFER_ARB:FVBOData[0]:=VParam2;
@@ -655,10 +703,10 @@ end;
 end;
 
 procedure TSGRenderDirectX.BufferDataARB(
-	const VParam:Cardinal;
-	const VSize:int64;
-	VBuffer:Pointer;
-	const VParam2:Cardinal); 
+	const VParam:Cardinal;   // SGR_ARRAY_BUFFER_ARB or SGR_ELEMENT_ARRAY_BUFFER_ARB
+	const VSize:int64;       // Размер в байтах
+	VBuffer:Pointer;         // Буфер
+	const VParam2:Cardinal);
 var
 	VVBuffer:PByte = nil;
 begin 
@@ -673,6 +721,7 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 		end
 	else
 		begin
+		FArBuffers[FVBOData[0]-1].FType:=VParam;
 		if (FArBuffers[FVBOData[0]-1].FResourse as IDirect3DVertexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock vertex buffer!');
@@ -687,7 +736,7 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock vertex buffer!');
 				Exit;
 				end;
-			SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[0],' vertex buffer!']);
+			//SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[0],' vertex buffer!']);
 			end;
 		end;
 	end
@@ -701,6 +750,7 @@ else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 		end
 	else
 		begin
+		FArBuffers[FVBOData[1]-1].FType:=VParam;
 		if (FArBuffers[FVBOData[1]-1].FResourse as IDirect3DIndexBuffer9).Lock(0,VSize,VVBuffer,0)<>D3D_OK then
 			begin
 			SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock index buffer!');
@@ -715,19 +765,18 @@ else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 				SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock index buffer!');
 				Exit;
 				end;
-			SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[1],' indexes buffer!']);
+			//SGLog.Sourse(['TSGRenderDirectX__BufferDataARB : Sucssesful create and lock data to ',FVBOData[1],' indexes buffer!']);
 			end;
 		end;
-	end;
+	end
+else SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Some params incorect!');
 end;
 
 procedure TSGRenderDirectX.DrawElements(
 	const VParam:Cardinal;
 	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
-	VBuffer:Pointer); 
-{var
-	VVMyVertexType:Cardinal = 0;}
+	VBuffer:Pointer);
 
 function GetNumPrimetives:LongWord;inline;
 begin
@@ -766,7 +815,7 @@ FillChar(VFVFArray[High(VFVFArray)],SizeOf(_D3DVERTEXELEMENT9),0);
 end;
 
 begin 
-if VBuffer<>nil then
+if (VBuffer<>nil) or (not FEnabledClientStateVertex) then
 	Exit;
 if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
 	begin
@@ -806,22 +855,13 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 			end;
 		AddElVFVF();
 		VFVFArray[High(VFVFArray)]:=D3DDECL_END;
+		//Set format of vertex
 		pDevice.CreateVertexDeclaration(@VFVFArray[0],FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
+		SetLength(VFVFArray,0);
 		end;
-	
-	{if FEnabledClientStateVertex then
-		VVMyVertexType:=VVMyVertexType or D3DFVF_XYZ;
-	if FEnabledClientStateColor then
-		VVMyVertexType:=VVMyVertexType or D3DFVF_DIFFUSE;
-	if FEnabledClientStateNormal then
-		VVMyVertexType:=VVMyVertexType or D3DFVF_NORMAL;
-	if FEnabledClientStateTexVertex then
-		VVMyVertexType:=VVMyVertexType or D3DFVF_TEX1;}
 	pDevice.BeginScene();
-	//Set format of vertex
-	//------pDevice.SetFVF(VVMyVertexType);
-	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
 	//Set vertex buffer
+	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
 	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
 	//Set Index buffer
@@ -832,19 +872,37 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div 
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex
 		,0,GetNumPrimetives())<>D3D_OK then
-			begin
 			SGLog.Sourse('TSGRenderDirectX__DrawElements : DrawIndexedPrimitive : Draw Failed!! ');
-			SGLog.Sourse('<<<<<<<<<<<<<<');
-			SGLog.Sourse(['FPT()=',Byte(FPT()),
-				';div = ',
-					FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize  div 
-					FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex,', ',
-					FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize  ,', ', 
-					FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex,
-				';GetNumPrimetives()=',GetNumPrimetives()]);
-			SGLog.Sourse('>>>>>>>>>>>>>>');
-			end;
 	pDevice.EndScene();
+	end
+else
+	begin
+	
+	end;
+end;
+
+procedure TSGRenderDirectX.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
+
+function FPT:_D3DPRIMITIVETYPE;inline;
+begin
+case VParam of
+SGR_LINES:Result:=D3DPT_LINELIST;
+SGR_TRIANGLES:Result:=D3DPT_TRIANGLELIST;
+SGR_POINTS:Result:=D3DPT_POINTLIST;
+SGR_LINE_STRIP:Result:=D3DPT_LINESTRIP;
+SGR_TRIANGLE_STRIP:Result:=D3DPT_TRIANGLESTRIP;
+else 
+	Result:=D3DPT_INVALID_0;
+end;
+end;
+
+begin
+if not FEnabledClientStateVertex then
+	Exit;
+if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
+	begin
+	//pDevice.DrawPrimitiveUP( FPT(VParam), VCount-VFirst+1, TSGPointer()^,);
+	// Недописано. В общем нужно сделать простой рендуринг массивомиз оперы.
 	end
 else
 	begin
@@ -858,7 +916,7 @@ FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferColor].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferColor].FDataType:=VType;
 FArDataBuffers[SGRDTypeDataBufferColor].FSizeOfOneVertex:=VSize;
-FArDataBuffers[SGRDTypeDataBufferColor].FShift:=Cardinal(VBuffer);
+FArDataBuffers[SGRDTypeDataBufferColor].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 procedure TSGRenderDirectX.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
@@ -867,7 +925,7 @@ FArDataBuffers[SGRDTypeDataBufferTexVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FDataType:=VType;
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FSizeOfOneVertex:=VSize;
-FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift:=Cardinal(VBuffer);
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 procedure TSGRenderDirectX.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
@@ -876,7 +934,7 @@ FArDataBuffers[SGRDTypeDataBufferNormal].FQuantityParams:=3;
 FArDataBuffers[SGRDTypeDataBufferNormal].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferNormal].FDataType:=VType;
 FArDataBuffers[SGRDTypeDataBufferNormal].FSizeOfOneVertex:=VSize;
-FArDataBuffers[SGRDTypeDataBufferNormal].FShift:=Cardinal(VBuffer);
+FArDataBuffers[SGRDTypeDataBufferNormal].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 procedure TSGRenderDirectX.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
@@ -885,12 +943,12 @@ FArDataBuffers[SGRDTypeDataBufferVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferVertex].FDataType:=VType;
 FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex:=VSize;
-FArDataBuffers[SGRDTypeDataBufferVertex].FShift:=Cardinal(VBuffer);
+FArDataBuffers[SGRDTypeDataBufferVertex].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 function TSGRenderDirectX.IsEnabled(const VParam:Cardinal):Boolean; 
 begin 
-
+Result:=False;
 end;
 
 procedure TSGRenderDirectX.Clear(const VParam:Cardinal); 
@@ -933,10 +991,10 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 //Устанавливаем материал
 (*Справка!*)
 {Diffuse - рассеиваемый свет. 
-Ambient - фоновый свет. 
-Specular - отражаемый свет. 
-Emissive - собственное свечение объекта. 
-Power - резкость отражений.}
+ Ambient - фоновый свет. 
+ Specular - отражаемый свет. 
+ Emissive - собственное свечение объекта. 
+ Power - резкость отражений.}
 FillChar(Material,SizeOf(Material),0);
 Material.Diffuse:=GetD3DCOLORVALUE(1,1,1,1);
 Material.Ambient:=GetD3DCOLORVALUE(0,0,0,0);
@@ -1053,14 +1111,18 @@ if FArBuffers<>nil then
 if FArTextures<>nil then
 	begin
 	for i:=0 to High(FArTextures) do
-		if FArTextures[i]<>nil then
-			FArTextures[i]._Release;
+		begin
+		if FArTextures[i].FTexture<>nil then
+			FArTextures[i].FTexture._Release;
+		if FArTextures[i].FBufferChangeFullscreen<>nil then
+			FreeMem(FArTextures[i].FBufferChangeFullscreen);
+		end;
 	SetLength(FArTextures,0);
 	end;
-if(pD3d<>nil) then
-	pD3d._Release();
 if (pDevice<>nil)  then
 	pDevice._Release();
+if(pD3d<>nil) then
+	pD3d._Release();
 inherited Destroy();
 end;
 
@@ -1204,6 +1266,28 @@ end;
 function TSGRenderDirectX.MakeCurrent():Boolean;
 begin
 Result:=True;
+end;
+
+// Сохранения ресурсов рендера и убивание самого рендера
+procedure TSGRenderDirectX.LockResourses();
+var
+	i:TSGMaxEnum;
+begin
+
+
+{if (pDevice<>nil)  then
+	pDevice._Release();
+if (pD3d<>nil)  then
+	pD3d._Release();}
+end;
+
+// Инициализация рендера и загрузка сохраненных ресурсов
+procedure TSGRenderDirectX.UnLockResourses();
+begin
+if CreateContext() then
+	begin
+	
+	end;
 end;
 
 end.

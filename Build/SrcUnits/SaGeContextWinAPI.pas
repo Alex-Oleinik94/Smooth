@@ -15,7 +15,6 @@ uses
 //Где купить пиво? Ответ: в магазине. (Специально для макса)
 // Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
 
-
 type
 	WinAPIParam = 
 		{$IFDEF CPU32}
@@ -596,12 +595,12 @@ if hWindow=0 then
 else if Fullscreen<>b then
 	begin
 	if FRender<>nil then
-		FRender.UnLockResourses();
+		FRender.LockResourses();
 	KillWindow(False);
 	inherited InitFullscreen(b);
 	Active:=CreateWindow();
 	if FRender<>nil then
-		FRender.LockResourses();
+		FRender.UnLockResourses();
 	end;
 end;
 

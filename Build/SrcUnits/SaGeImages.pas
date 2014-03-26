@@ -18,8 +18,8 @@ uses
 	,SaGeCommon
 	,SaGeResourseManager
 		// formats
-	,SaGeImagesJpeg
 	,SaGeImagesBmp
+	,SaGeImagesJpeg
 	{$IFDEF WITHLIBPNG},SaGeImagesPng{$ENDIF}
 	,SaGeImagesTga
 	,SaGeImagesSgia
