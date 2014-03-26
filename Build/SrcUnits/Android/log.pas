@@ -32,12 +32,12 @@ implementation
 
 function __android_log_write(prio:longint;tag,text:pchar):longint; cdecl;
 begin
-SGLog.Sourse([Prio,SGPCharToString(tag),SGPCharToString(text)]);
+SGLog.Sourse(['Android log:"',Prio,' ',SGPCharToString(tag),' ',SGPCharToString(text),'".']);
 end;
 
 procedure LOGW(Text: pchar);
 begin
-   SGLog.Sourse(['ANDROID_LOG_FATAL','crap',SGPCharToString(text)]);
+   SGLog.Sourse(['Android log:"','ANDROID_LOG_FATAL ','crap',SGPCharToString(text),'".']);
 end;
 
 end.

@@ -26,6 +26,8 @@ uses
 	{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux
+		{$ENDIF}
+	{$IFDEF DARWIN}
 		,SaGeContextMacOSX
 		{$ENDIF}
 	{$IFDEF ANDROID}
