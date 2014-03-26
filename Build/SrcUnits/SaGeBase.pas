@@ -397,7 +397,7 @@ type
 		FFileStream:TFileStream;
 		end;
 	TSGConsoleRecord = packed record
-			FTittle : string;
+			FTitle : string;
 			FProcedure : TSGProcedure;
 			end;
 	TSGConsoleMenuArray = packed array of TSGConsoleRecord;
@@ -1619,7 +1619,7 @@ end;
 
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
 begin
-Result.FTittle:=s;
+Result.FTitle:=s;
 Result.FProcedure:=TSGProcedure(p);
 end;
 
@@ -1660,7 +1660,7 @@ if DAll then
 i:=2;
 for ii:=0 to High(Ar) do
 	begin
-	iiii:=3+((MaxLength - Length(Ar[ii].FTittle))div 2);
+	iiii:=3+((MaxLength - Length(Ar[ii].FTitle))div 2);
 	Crt.GoToXY(iiii,i);
 	Crt.TextColor(VActiveText*Byte(NowActive=ii)+VText*Byte((NowActive<>ii)));
 	Crt.TextBackGround(VActiveBackGround*Byte(NowActive=ii)+VBackGround*Byte((NowActive<>ii)));
@@ -1669,25 +1669,25 @@ for ii:=0 to High(Ar) do
 			begin
 			if ii=NowActive then
 				begin
-				Write(#218);for iii:=1 to Length(Ar[ii].FTittle) do Write(#196);Write(#191);
+				Write(#218);for iii:=1 to Length(Ar[ii].FTitle) do Write(#196);Write(#191);
 				i+=1;Crt.GoToXY(iiii,i);
-				Write(#179);Write(Ar[ii].FTittle);Write(#179);
+				Write(#179);Write(Ar[ii].FTitle);Write(#179);
 				i+=1;Crt.GoToXY(iiii,i);
-				Write(#192);for iii:=1 to Length(Ar[ii].FTittle) do Write(#196);Write(#217);
+				Write(#192);for iii:=1 to Length(Ar[ii].FTitle) do Write(#196);Write(#217);
 				end
 			else
 				begin
-				Write(#201);for iii:=1 to Length(Ar[ii].FTittle) do Write(#205);Write(#187);
+				Write(#201);for iii:=1 to Length(Ar[ii].FTitle) do Write(#205);Write(#187);
 				i+=1;Crt.GoToXY(iiii,i);
-				Write(#186);Write(Ar[ii].FTittle);Write(#186);
+				Write(#186);Write(Ar[ii].FTitle);Write(#186);
 				i+=1;Crt.GoToXY(iiii,i);
-				Write(#200);for iii:=1 to Length(Ar[ii].FTittle) do Write(#205);Write(#188);
+				Write(#200);for iii:=1 to Length(Ar[ii].FTitle) do Write(#205);Write(#188);
 				end;
 			i+=1;
 			end
 		else
 			begin
-			Write(Ar[ii].FTittle);
+			Write(Ar[ii].FTitle);
 			i+=1;
 			end
 	else
@@ -1702,8 +1702,8 @@ end;
 
 begin
 for OldActive:=0  to High(Ar) do
-	if MaxLength<Length(Ar[OldActive].FTittle) then
-		MaxLength:=Length(Ar[OldActive].FTittle);
+	if MaxLength<Length(Ar[OldActive].FTitle) then
+		MaxLength:=Length(Ar[OldActive].FTitle);
 OldActive:=0;
 NowActive:=Random(Length(Ar));
 DS;

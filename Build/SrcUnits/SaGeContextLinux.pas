@@ -51,9 +51,9 @@ implementation
 
 procedure TSGContextLinux.SetTittle(const NewTittle:TSGString);
 begin
-{FTittle:=NewTittle;
-Windows1251ToOEM866(FTittle);}
-FTittle:=SGConvertAnsiToASCII(NewTittle);
+{FTitle:=NewTittle;
+Windows1251ToOEM866(FTitle);}
+FTitle:=SGConvertAnsiToASCII(NewTittle);
 end;
 
 procedure TSGContextLinux.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
@@ -222,7 +222,7 @@ function TSGContextLinux.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=Pointer(win)
-else if What='DESCTOP WINDOW HANDLE' then
+else if What='DESKTOP WINDOW HANDLE' then
 	Result:=Pointer(dpy)
 else if What = 'VISUAL INFO' then
 	Result:=visinfo
@@ -427,7 +427,7 @@ if win = 0 then
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
 	Exit;
 	end;
-Name:=SGStringAsPChar(FTittle);
+Name:=SGStringAsPChar(FTitle);
 XStringListToTextProperty(@Name,1,@window_title_property);
 XSetWMName(dpy,win,@window_title_property);
 

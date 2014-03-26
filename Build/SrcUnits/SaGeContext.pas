@@ -111,7 +111,7 @@ type
 			FNotFullscreenWidth, FNotFullscreenHeight : TSGLongWord;
 			end;
 		// Заголовок окна
-		FTittle          : TSGString;
+		FTitle          : TSGString;
 		// Будет ли окно закрыто после этого шага главного его цикла
 		FActive          : TSGBoolean;
 		// Курсор приложения
@@ -145,7 +145,7 @@ type
 		// Иконка
 		property IconIdentifier      : TSGLongWord         read FIconIdentifier  write FIconIdentifier;
 		// Заголовок окна
-		property Tittle              : TSGString           read FTittle          write SetTittle;
+		property Tittle              : TSGString           read FTitle          write SetTittle;
 			public
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
@@ -308,7 +308,7 @@ end;
 
 procedure TSGContext.SetTittle(const NewTittle:TSGString);
 begin
-FTittle:=NewTittle;
+FTitle:=NewTittle;
 end;
 
 function TSGContext.Get(const What:string):Pointer;
@@ -336,7 +336,7 @@ Render:=C.Render;
 FWidth:=C.FWidth;
 FHeight:=C.FHeight;
 FFullscreen:=C.FFullscreen;
-FTittle:=C.FTittle;
+FTitle:=C.FTitle;
 FCursorIdenifier:=C.FCursorIdenifier;
 FIconIdentifier:=C.FIconIdentifier;
 FCallDraw:=C.FCallDraw;
@@ -497,7 +497,7 @@ FWidth:=0;
 FHeight:=0;
 FCallDraw:=nil;
 FCallInitialize:=nil;
-FTittle:='SaGe Window';
+FTitle:='SaGe Window';
 FFullscreen:=False;
 FCursorIdenifier:=0;
 FIconIdentifier:=0;

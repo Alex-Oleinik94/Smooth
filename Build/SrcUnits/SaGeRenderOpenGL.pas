@@ -281,11 +281,11 @@ end;
 procedure TSGRenderOpenGL.SwapBuffers();
 begin
 {$IFDEF MSWINDOWS}
-	Windows.SwapBuffers( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
+	Windows.SwapBuffers( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')) );
 {$ELSE}
 	{$IFDEF LINUX}
 		glXSwapBuffers(
-			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')));
 	{$ELSE}
 		{$IFDEF ANDROID}
@@ -610,7 +610,7 @@ begin
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
+		wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), 0 );
 		if FContext<>0 then
 			begin
 			wglDeleteContext( FContext );
@@ -620,7 +620,7 @@ begin
 	{$ELSE}
 		{$IFDEF ANDROID}
 			if (FContext <> EGL_NO_CONTEXT) then
-				eglDestroyContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FContext);
+				eglDestroyContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FContext);
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSetCurrentContext( nil );
@@ -697,7 +697,7 @@ Result:=False;
 {$IFDEF LINUX}
 	initGlx();
 	FContext := glXCreateContext(
-		PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+		PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
 		PXVisualInfo(FWindow.Get('VISUAL INFO')),nil,true);
 	if FContext = nil then
 		begin
@@ -708,11 +708,11 @@ Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
-			FContext := wglCreateContext( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')) );
+			FContext := wglCreateContext( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')) );
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			FContext := eglCreateContext(FWindow.Get('DESCTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+			FContext := eglCreateContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 		{$ELSE}
 			{$IFDEF DARWIN}
@@ -720,7 +720,7 @@ Result:=False;
 				Result:= Assigned( FContext );
 				if Result then
 					begin
-					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESCTOP WINDOW HANDLE'))) <> GL_FALSE Then
+					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESKTOP WINDOW HANDLE'))) <> GL_FALSE Then
 						begin
 						if aglSetCurrentContext( FContext ) <> GL_FALSE Then
 							begin
@@ -743,20 +743,20 @@ begin
 {$IFDEF LINUX}
 	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(
-			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')),
 			nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil)  then 
-			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), 0 );
+			wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
 			if FWindow<>nil then
-				eglMakeCurrent(FWindow.Get('DESCTOP WINDOW HANDLE'), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+				eglMakeCurrent(FWindow.Get('DESKTOP WINDOW HANDLE'), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 		{$ELSE}
 			{$IFDEF DARWIN}
-				aglSetDrawable( nil, FWindow.Get('DESCTOP WINDOW HANDLE'));
+				aglSetDrawable( nil, FWindow.Get('DESKTOP WINDOW HANDLE'));
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
@@ -793,8 +793,8 @@ Result:=False;
 	pfd.cColorBits    := 32;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), @pfd );
-	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), iFormat, @pfd );
+	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), @pfd );
+	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), iFormat, @pfd );
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;
@@ -807,7 +807,7 @@ begin
 	if (FWindow<>nil) and (FContext<>nil) then 
 		begin
 		glXMakeCurrent(
-			PDisplay(FWindow.Get('DESCTOP WINDOW HANDLE')),
+			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
 			LongWord(FWindow.Get('WINDOW HANDLE')),
 			FContext);
 		Result:=True;
@@ -818,7 +818,7 @@ begin
 	{$IFDEF MSWINDOWS}
 		if (FWindow<>nil) and (FContext<>0) then 
 			begin
-			wglMakeCurrent( LongWord(FWindow.Get('DESCTOP WINDOW HANDLE')), FContext );
+			wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), FContext );
 			Result:=True;
 			end
 		else
@@ -827,7 +827,7 @@ begin
 		{$IFDEF ANDROID}
 			if (FWindow<>nil) and (FContext<>nil) then 
 				if eglMakeCurrent(
-					FWindow.Get('DESCTOP WINDOW HANDLE'), 
+					FWindow.Get('DESKTOP WINDOW HANDLE'), 
 					FWindow.Get('SURFACE'), 
 					FWindow.Get('SURFACE'), 
 					FContext)  = EGL_FALSE then
@@ -839,7 +839,7 @@ begin
 			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
 		{$ELSE}
 			{$IFDEF DARWIN}
-				Result:=aglSetDrawable( FContext, FWindow.Get('DESCTOP WINDOW HANDLE')) <> GL_FALSE;
+				Result:=aglSetDrawable( FContext, FWindow.Get('DESKTOP WINDOW HANDLE')) <> GL_FALSE;
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}

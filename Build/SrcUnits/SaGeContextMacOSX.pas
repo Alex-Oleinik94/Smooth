@@ -9,7 +9,9 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
-	,MacOSAll;
+	,MacOSAll
+	,unix;
+	
 type
 	TSGContextMacOSX=class(TSGContext)
 			public
@@ -44,8 +46,8 @@ end;
 
 function TSGContextMacOSX.Get(const What:string):Pointer;
 begin
-IF What='DESCTOP WINDOW HANDLE' then
-	Result:=Pointer(wnd_Handle);
+IF What='DESKTOP WINDOW HANDLE' then
+	Result:=Pointer(wnd_Handle)
 else
 	Result:=Inherited Get(What);
 end;
@@ -181,7 +183,7 @@ else
 	if Result then
 		Render.MakeCurrent();
 	end;
-SetWTitle(wnd_Handle,FTittle);
+SetWTitle(wnd_Handle,FTitle);
 end;
 
 procedure TSGContextMacOSX.InitFullscreen(const b:boolean); 

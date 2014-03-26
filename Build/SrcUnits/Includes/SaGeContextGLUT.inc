@@ -209,7 +209,7 @@ else
 	begin
 	glutInitWindowSize(Width, Height);
 	glutInitWindowPosition((GetScreenResolution.x - Width) div 2,(GetScreenResolution.y - Height) div 2);
-	glutCreateWindow(SGStringToPChar(FTittle));
+	glutCreateWindow(SGStringToPChar(FTitle));
 	end;
 
 glutSetCursor(GLUT_CURSOR_LEFT_ARROW);

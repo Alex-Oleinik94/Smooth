@@ -64,7 +64,7 @@ function TSGContextAndroid.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=AndroidApp^.Window
-else if What='DESCTOP WINDOW HANDLE' then
+else if What='DESKTOP WINDOW HANDLE' then
 	Result:=FDisplay
 else if What='VISUAL INFO' then
 	Result:=FConfig

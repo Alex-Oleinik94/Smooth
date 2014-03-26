@@ -81,7 +81,7 @@ function TSGContextWinAPI.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=Pointer(hWindow)
-else if What='DESCTOP WINDOW HANDLE' then
+else if What='DESKTOP WINDOW HANDLE' then
 	Result:=Pointer(dcWindow)
 else
 	Result:=Inherited Get(What);
@@ -428,7 +428,7 @@ begin
 if not FFullscreen then 
 	begin	
 	hWindow2 := Windows.CreateWindow('SaGe Window Class',
-			  SGStringToPChar(FTittle),
+			  SGStringToPChar(FTitle),
 			  WS_CAPTION OR 
 			  WS_POPUPWINDOW OR
 			   WS_TILEDWINDOW OR 
@@ -462,7 +462,7 @@ else
 		end;
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
 		'SaGe Window Class',
-		SGStringToPChar(FTittle),
+		SGStringToPChar(FTitle),
 		WS_EX_TOPMOST OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
 		0, 0,
 		FWidth,
