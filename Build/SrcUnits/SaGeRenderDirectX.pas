@@ -1,5 +1,5 @@
 {$IFDEF UNIX}
-	NOTE "Ты что долбаеб????"
+	{$ERROR "Ты что долбаеб????"}
 {$ELSE}
 	{$IFDEF MSWINDOW}
 		{$ENDIF}
@@ -29,9 +29,6 @@ type
 		constructor Create;override;
 		destructor Destroy;override;
 			protected
-			//for init
-		d3ddm:D3DDISPLAYMODE;
-		d3dpp:D3DPRESENT_PARAMETERS;
 			//FOR USE
 		pD3D:IDirect3D9;
 		pDevice:IDirect3DDevice9;
@@ -586,7 +583,7 @@ begin
 VTFormat:=0;
 case VFormatType of
 SGR_RGBA:VTFormat:=D3DFMT_A8R8G8B8;
-SGR_RGB:VTFormat:=D3DFMT_X8R8G8B8;//D3DFMT_R8G8B8;
+SGR_RGB:VTFormat:=D3DFMT_X8R8G8B8;//замена вод этому --- D3DFMT_R8G8B8;
 SGR_LUMINANCE_ALPHA:VTFormat:=D3DFMT_A8L8;
 SGR_RED:;
 SGR_INTENSITY:;
@@ -598,12 +595,12 @@ FArTextures[FNowTexture-1].FHeight:=VHeight;
 FArTextures[FNowTexture-1].FChannels:=VChannels;
 FArTextures[FNowTexture-1].FFormat:=VTFormat;
 if pDevice.CreateTexture(VWidth,VHeight,VChannels,D3DUSAGE_DYNAMIC,VTFormat,D3DPOOL_DEFAULT,FArTextures[FNowTexture-1].FTexture,nil)<> D3D_OK then
-	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pDevice__CreateTexture" failed...')
+	SGLog.Sourse('TSGRenderDirectX__TexImage2D : "IDirect3DDevice9__CreateTexture" failed...')
 else
 	begin
 	fillchar(rcLockedRect,sizeof(rcLockedRect),0);
 	if FArTextures[FNowTexture-1].FTexture.LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__LockRect" failed...')
+		SGLog.Sourse('TSGRenderDirectX__TexImage2D : "IDirect3DTexture9__LockRect" failed...')
 	else
 		begin
 		if (VTFormat=D3DFMT_A8R8G8B8) and (VFormatType=SGR_RGBA) then
@@ -617,7 +614,7 @@ else
 		else
 			System.Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
 		if FArTextures[FNowTexture-1].FTexture.UnlockRect(0) <> D3D_OK then
-			SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
+			SGLog.Sourse('TSGRenderDirectX__TexImage2D : "IDirect3DTexture9__UnlockRect" failed...');
 		end;
 	end;
 end;
@@ -1100,13 +1097,13 @@ begin
 if FArBuffers<>nil then
 	begin
 	for i:=0 to High(FArBuffers) do
+		begin
 		if FArBuffers[i].FResourse<>nil then
 			FArBuffers[i].FResourse._Release();
-	try
+		if FArBuffers[i].FVertexDeclaration<>nil then
+			FArBuffers[i].FVertexDeclaration._Release();
+		end;
 	SetLength(FArBuffers,0);
-	except
-	SGLog.Sourse('TSGRenderDirectX__Destroy : Error : Exception with "SetLength(FArBuffers,0);"');
-	end;
 	end;
 if FArTextures<>nil then
 	begin
@@ -1210,20 +1207,25 @@ AfterVertexProc();
 end;
 
 function TSGRenderDirectX.CreateContext():Boolean;
+var
+	//d3ddm:D3DDISPLAYMODE;
+	d3dpp:D3DPRESENT_PARAMETERS;
 begin
 if (pD3D=nil) then
 	begin
 	pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
-	SGLog.Sourse(['TSGRenderDirectX__CreateContext : pD3D="',LongWord(Pointer(pD3D)),'"']);
+	SGLog.Sourse(['TSGRenderDirectX__CreateContext : IDirect3D9="',TSGMaxEnum(Pointer(pD3D)),'"']);
 	if pD3d = nil then
 		begin
 		Result:=False;
 		exit;
 		end;
-	pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
-
+	end;
+if pDevice=nil then
+	begin
+	//pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
+	
 	FillChar(d3dpp,SizeOf(d3dpp),0);
-
 	d3dpp.Windowed := True;
 	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
 	d3dpp.hDeviceWindow := LongWord(FWindow.Get('WINDOW HANDLE'));
@@ -1240,21 +1242,17 @@ if (pD3D=nil) then
 	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
 		begin
-		SGLog.Sourse(['TSGRenderDirectX__CreateContext : pDevice="',LongWord(Pointer(pDevice)),'"']);
+		SGLog.Sourse(['TSGRenderDirectX__CreateContext : IDirect3DDevice9="',TSGMaxEnum(Pointer(pDevice)),'"']);
 		Result:=False;
 		exit;
 		end;
-	SGLog.Sourse(['TSGRenderDirectX__CreateContext : pDevice="',LongWord(Pointer(pDevice)),'"']);
+	SGLog.Sourse(['TSGRenderDirectX__CreateContext : IDirect3DDevice9="',TSGMaxEnum(Pointer(pDevice)),'"']);
 	Result:=True;
 	end
 else
 	begin
-	if (pDevice<>nil)  then
-		pDevice._Release();
+	pDevice._Release();
 	pDevice:=nil;
-	if (pD3d<>nil)  then
-		pD3d._Release();
-	pD3D:=nil;
 	Result:=CreateContext();
 	end;
 end;
@@ -1262,11 +1260,10 @@ end;
 procedure TSGRenderDirectX.ReleaseCurrent();
 begin
 if (pDevice<>nil)  then
+	begin
 	pDevice._Release();
-pDevice:=nil;
-if (pD3d<>nil)  then
-	pD3d._Release();
-pD3D:=nil;
+	pDevice:=nil;
+	end;
 end;
 
 function TSGRenderDirectX.SetPixelFormat():Boolean;overload;
@@ -1276,12 +1273,14 @@ end;
 
 function TSGRenderDirectX.MakeCurrent():Boolean;
 begin
-Result:=True;
-if pD3D=nil then
-	begin
-	Result:=CreateContext();
-	Init();
-	end;
+Result:=False;
+if FWindow<>nil then
+	if ((pD3D=nil) and (pDevice=nil)) or ((pD3D<>nil) and (pDevice=nil)) then
+		begin
+		Result:=CreateContext();
+		if Result then
+			Init();
+		end;
 end;
 
 // Сохранения ресурсов рендера и убивание самого рендера
@@ -1297,12 +1296,12 @@ begin
 SGLog.Sourse('TSGRenderDirectX__LockResourses : Entering!');
 if FArTextures<>nil then
 	begin
-	SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock textures!');
+	//SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock textures!');
 	for i:=0 to High(FArTextures) do
 		begin
 		if (FArTextures[i].FTexture<>nil) then
 			begin
-			SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock texture "'+SGStr(i)+'"!');
+			//SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock texture "'+SGStr(i)+'"!');
 			FillChar(rcLockedRect,SizeOf(rcLockedRect),0);
 			if FArTextures[i].FTexture.LockRect(0, rcLockedRect, nil, D3DLOCK_READONLY) <> D3D_OK then
 				begin
@@ -1334,7 +1333,7 @@ if FArBuffers<>nil then
 				FArBuffers[i].FVertexDeclaration._Release();
 				FArBuffers[i].FVertexDeclaration:=nil;
 				end;
-			SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock buffer "'+SGStr(i)+'"!');
+			//SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock buffer "'+SGStr(i)+'"!');
 			if FArBuffers[i].FType=SGR_ELEMENT_ARRAY_BUFFER_ARB then 
 				begin
 				if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
