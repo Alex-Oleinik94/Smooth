@@ -615,7 +615,7 @@ else
 			RGBToD3D_XRGB();
 			end
 		else
-			Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
+			System.Move(VBitMap^,rcLockedRect.pBits^,VWidth*VHeight*VChannels);
 		if FArTextures[FNowTexture-1].FTexture.UnlockRect(0) <> D3D_OK then
 			SGLog.Sourse('TSGRenderDirectX__TexImage2D : "pTexture__UnlockRect" failed...');
 		end;
@@ -1013,8 +1013,8 @@ FLigth.Specular:=GetD3DCOLORVALUE(1.0,1.0,1.0,1.0);
 FLigth.Range := 1000;
 // Направление (Только для directional and spotlights)
 {FLigth.Direction.x:=0;
-FLigth.Direction.y:=1;
-FLigth.Direction.z:=0;}
+ FLigth.Direction.y:=1;
+ FLigth.Direction.z:=0;}
 pDevice.SetLight(0, FLigth);
 pDevice.LightEnable(0, True);
 pDevice.SetRenderState(D3DRS_LIGHTING,1);
@@ -1224,7 +1224,7 @@ if (pD3D=nil) then
 
 	FillChar(d3dpp,SizeOf(d3dpp),0);
 
-	d3dpp.Windowed := False;
+	d3dpp.Windowed := True;
 	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
 	d3dpp.hDeviceWindow := LongWord(FWindow.Get('WINDOW HANDLE'));
 	d3dpp.BackBufferFormat := D3DFMT_X8R8G8B8;
@@ -1249,13 +1249,24 @@ if (pD3D=nil) then
 	end
 else
 	begin
-	
+	if (pDevice<>nil)  then
+		pDevice._Release();
+	pDevice:=nil;
+	if (pD3d<>nil)  then
+		pD3d._Release();
+	pD3D:=nil;
+	Result:=CreateContext();
 	end;
 end;
 
 procedure TSGRenderDirectX.ReleaseCurrent();
 begin
-
+if (pDevice<>nil)  then
+	pDevice._Release();
+pDevice:=nil;
+if (pD3d<>nil)  then
+	pD3d._Release();
+pD3D:=nil;
 end;
 
 function TSGRenderDirectX.SetPixelFormat():Boolean;overload;
@@ -1266,28 +1277,210 @@ end;
 function TSGRenderDirectX.MakeCurrent():Boolean;
 begin
 Result:=True;
+if pD3D=nil then
+	begin
+	Result:=CreateContext();
+	Init();
+	end;
 end;
 
 // Сохранения ресурсов рендера и убивание самого рендера
 procedure TSGRenderDirectX.LockResourses();
 var
+	// Счетчик
 	i:TSGMaxEnum;
+	//Буфер
+	VVBuffer: PByte = nil;
+	// Для Lock текстур
+	rcLockedRect:D3DLOCKED_RECT;
 begin
-
-
-{if (pDevice<>nil)  then
-	pDevice._Release();
-if (pD3d<>nil)  then
-	pD3d._Release();}
+SGLog.Sourse('TSGRenderDirectX__LockResourses : Entering!');
+if FArTextures<>nil then
+	begin
+	SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock textures!');
+	for i:=0 to High(FArTextures) do
+		begin
+		if (FArTextures[i].FTexture<>nil) then
+			begin
+			SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock texture "'+SGStr(i)+'"!');
+			FillChar(rcLockedRect,SizeOf(rcLockedRect),0);
+			if FArTextures[i].FTexture.LockRect(0, rcLockedRect, nil, D3DLOCK_READONLY) <> D3D_OK then
+				begin
+				SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DTexture9__LockRect');
+				end
+			else
+				begin
+				System.GetMem(VVBuffer,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
+				System.Move(rcLockedRect.pBits^,VVBuffer^,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
+				FArTextures[i].FBufferChangeFullscreen:=VVBuffer;
+				VVBuffer:=nil;
+				if FArTextures[i].FTexture.UnlockRect(0) <> D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DTexture9__UnlockRect');
+					end;
+				end;
+			FArTextures[i].FTexture._Release();
+			FArTextures[i].FTexture:=nil;
+			end;
+		end;
+	end;
+if FArBuffers<>nil then
+	begin
+	for i:=0 to High(FArBuffers) do
+		if (FArBuffers[i].FResourse<>nil) and (FArBuffers[i].FType<>0) then
+			begin
+			if FArBuffers[i].FVertexDeclaration <> nil then
+				begin
+				FArBuffers[i].FVertexDeclaration._Release();
+				FArBuffers[i].FVertexDeclaration:=nil;
+				end;
+			SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock buffer "'+SGStr(i)+'"!');
+			if FArBuffers[i].FType=SGR_ELEMENT_ARRAY_BUFFER_ARB then 
+				begin
+				if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DIndexBuffer9__Lock');
+					end
+				else
+					begin
+					System.GetMem(FArBuffers[i].FBufferChangeFullscreen,FArBuffers[i].FResourseSize);
+					System.Move(VVBuffer^,FArBuffers[i].FBufferChangeFullscreen^,FArBuffers[i].FResourseSize);
+					if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
+						begin
+						SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DIndexBuffer9__UnLock');
+						if VVBuffer<>nil then
+							FreeMem(VVBuffer);
+						end;
+					VVBuffer:=nil;
+					end;
+				end
+			else if FArBuffers[i].FType=SGR_ARRAY_BUFFER_ARB then
+				begin
+				if (FArBuffers[i].FResourse as IDirect3DVertexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DIndexBuffer9__Lock');
+					end
+				else
+					begin
+					System.GetMem(FArBuffers[i].FBufferChangeFullscreen,FArBuffers[i].FResourseSize);
+					System.Move(VVBuffer^,FArBuffers[i].FBufferChangeFullscreen^,FArBuffers[i].FResourseSize);
+					if (FArBuffers[i].FResourse as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
+						begin
+						SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DIndexBuffer9__UnLock');
+						if VVBuffer<>nil then
+							FreeMem(VVBuffer);
+						end;
+					VVBuffer:=nil;
+					end;
+				end;
+			FArBuffers[i].FResourse._Release();
+			FArBuffers[i].FResourse:=nil;
+			end;
+	end;
+SGLog.Sourse('TSGRenderDirectX__LockResourses : Leaving!');
 end;
 
 // Инициализация рендера и загрузка сохраненных ресурсов
 procedure TSGRenderDirectX.UnLockResourses();
+var
+	i:TSGMaxEnum;
+	//Буфер
+	VVBuffer: PByte = nil;
+	// Для Lock текстур
+	rcLockedRect:D3DLOCKED_RECT;
 begin
-if CreateContext() then
+SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Entering!');
+if FArTextures<>nil then
 	begin
-	
+	for i:=0 to High(FArTextures) do
+		if (FArTextures[i].FBufferChangeFullscreen<>nil) then
+			begin
+			if pDevice.CreateTexture(FArTextures[i].FWidth,FArTextures[i].FHeight,FArTextures[i].FChannels,
+					D3DUSAGE_DYNAMIC,FArTextures[i].FFormat,D3DPOOL_DEFAULT,FArTextures[i].FTexture,nil)<> D3D_OK then
+				begin
+				SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Errior while IDirect3DDevice9__CreateTexture');
+				end
+			else
+				begin
+				FillChar(rcLockedRect,SizeOf(rcLockedRect),0);
+				if FArTextures[i].FTexture.LockRect(0, rcLockedRect, nil, D3DLOCK_DISCARD or D3DLOCK_NOOVERWRITE) <> D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Errior while IDirect3DTexture9__LockRect');
+					end
+				else
+					begin
+					System.Move(FArTextures[i].FBufferChangeFullscreen^,rcLockedRect.pBits^,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
+					System.FreeMem(FArTextures[i].FBufferChangeFullscreen);
+					FArTextures[i].FBufferChangeFullscreen:=nil;
+					if FArTextures[i].FTexture.UnlockRect(0) <> D3D_OK then
+						begin
+						SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Errior while IDirect3DTexture9__UnlockRect');
+						end;
+					end;
+				end;
+			end;
 	end;
+if FArBuffers<>nil then
+	begin
+	for i:=0 to High(FArBuffers) do
+		if FArBuffers[i].FBufferChangeFullscreen<>nil then
+			begin
+			case FArBuffers[i].FType of
+			SGR_ARRAY_BUFFER_ARB:
+				begin
+				if pDevice.CreateVertexBuffer(FArBuffers[i].FResourseSize,0,0,D3DPOOL_DEFAULT,
+					IDirect3DVertexBuffer9(Pointer(FArBuffers[i].FResourse)),
+					nil)<>D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create vertex buffer!');
+					end
+				else
+					begin
+					if (FArBuffers[i].FResourse as IDirect3DVertexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
+						begin
+						SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Lock vertex buffer!');
+						end
+					else
+						begin
+						System.Move(FArBuffers[i].FBufferChangeFullscreen^,VVBuffer^,FArBuffers[i].FResourseSize);
+						System.FreeMem(FArBuffers[i].FBufferChangeFullscreen);
+						FArBuffers[i].FBufferChangeFullscreen:=nil;
+						if (FArBuffers[i].FResourse as IDirect3DVertexBuffer9).UnLock()<>D3D_OK then
+							begin
+							SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to UnLock vertex buffer!');
+							end;
+						end;
+					end;
+				end;
+			SGR_ELEMENT_ARRAY_BUFFER_ARB:
+				begin
+				if pDevice.CreateIndexBuffer(FArBuffers[i].FResourseSize,0,D3DFMT_INDEX16,D3DPOOL_DEFAULT,
+						IDirect3DIndexBuffer9(Pointer(FArBuffers[i].FResourse)),nil)<>D3D_OK then
+					begin
+					SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Errior while IDirect3DDevice9__CreateIndexBuffer');
+					end
+				else
+					begin
+					if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
+						begin
+						SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Failed to Lock index buffer!');
+						end
+					else
+						begin
+						System.Move(FArBuffers[i].FBufferChangeFullscreen^,VVBuffer^,FArBuffers[i].FResourseSize);
+						System.FreeMem(FArBuffers[i].FBufferChangeFullscreen);
+						FArBuffers[i].FBufferChangeFullscreen:=nil;
+						if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).UnLock()<>D3D_OK then
+							begin
+							SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Failed to UnLock index buffer!');
+							end;
+						end;
+					end;
+				end;
+			end;
+			end;
+	end;
+SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Leaving!');
 end;
 
 end.

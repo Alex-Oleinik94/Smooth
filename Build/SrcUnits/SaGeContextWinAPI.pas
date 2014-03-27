@@ -595,7 +595,10 @@ if hWindow=0 then
 else if Fullscreen<>b then
 	begin
 	if FRender<>nil then
+		begin
 		FRender.LockResourses();
+		FRender.ReleaseCurrent();
+		end;
 	KillWindow(False);
 	inherited InitFullscreen(b);
 	Active:=CreateWindow();
