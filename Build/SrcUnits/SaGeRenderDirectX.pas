@@ -176,11 +176,69 @@ type
 			private
 		procedure AfterVertexProc();inline;
 		end;
-
-function GetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
+type
+	TSGRDXVertexDeclarationManipulator=class
+			public
+		constructor Create();
+		destructor Destroy();override;
+		procedure AddElement(const VOffset:TSGLongWord;const VType:_D3DDECLTYPE;const VUsage:_D3DDECLUSAGE);
+		function CreateVertexDeclaration(const pDevice:IDirect3DDevice9):IDirect3DVertexDeclaration9;inline;
+			private
+		FEVArray:packed array of _D3DVERTEXELEMENT9;
+		end;
+function SGRDXGetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
+function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
+function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 
 implementation
 
+constructor TSGRDXVertexDeclarationManipulator.Create();
+begin
+FEVArray:=nil;
+end;
+
+destructor TSGRDXVertexDeclarationManipulator.Destroy();
+begin
+if FEVArray<>nil then
+	SetLength(FEVArray,0);
+inherited;
+end;
+
+procedure TSGRDXVertexDeclarationManipulator.AddElement(const VOffset:TSGLongWord;const VType:_D3DDECLTYPE;const VUsage:_D3DDECLUSAGE);
+begin
+if FEVArray=nil then
+	SetLength(FEVArray,1)
+else
+	SetLength(FEVArray,Length(FEVArray)+1);
+FEVArray[High(FEVArray)]._Type:=VType;
+FEVArray[High(FEVArray)].Offset:=VOffset;
+FEVArray[High(FEVArray)].Usage:=VUsage;
+FEVArray[High(FEVArray)].Method:=D3DDECLMETHOD_DEFAULT;
+end;
+
+function TSGRDXVertexDeclarationManipulator.CreateVertexDeclaration(const pDevice:IDirect3DDevice9):IDirect3DVertexDeclaration9;inline;
+begin
+Result:=nil;
+if FEVArray<>nil then
+	begin
+	SetLength(FEVArray,Length(FEVArray)+1);
+	FEVArray[High(FEVArray)]:=D3DDECL_END;
+	pDevice.CreateVertexDeclaration(@FEVArray[0],Result);
+	end;
+end;
+
+function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
+begin
+case VParam of
+SGR_LINES:Result:=D3DPT_LINELIST;
+SGR_TRIANGLES:Result:=D3DPT_TRIANGLELIST;
+SGR_POINTS:Result:=D3DPT_POINTLIST;
+SGR_LINE_STRIP:Result:=D3DPT_LINESTRIP;
+SGR_TRIANGLE_STRIP:Result:=D3DPT_TRIANGLESTRIP;
+else 
+	Result:=D3DPT_INVALID_0;
+end;
+end;
 (*for look at*)
 {//задаем соответствующие вектора 
 D3DXVECTOR3 position(5.0f, 3.0f, –10.0f); 
@@ -193,7 +251,17 @@ D3DXMatrixLookAtLH(&V, &position, &target, &up);
 //и задаем как матрицу вида 
 pDevice->SetTransform(D3DTS_VIEW, &V);}
 
-function GetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
+function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
+begin
+case VParam of
+SGR_LINES:Result:=VSize div 2;
+SGR_TRIANGLES:Result:=VSize div 3;
+SGR_LINE_STRIP:Result:=VSize - 1;
+else Result:=VSize;
+end;
+end;
+
+function SGRDXGetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
 begin
 Result.r:=r;
 Result.b:=b;
@@ -774,43 +842,8 @@ procedure TSGRenderDirectX.DrawElements(
 	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
 	VBuffer:Pointer);
-
-function GetNumPrimetives:LongWord;inline;
-begin
-case VParam of
-SGR_LINES:Result:=VSize div 2;
-SGR_TRIANGLES:Result:=VSize div 3;
-SGR_LINE_STRIP:Result:=VSize -1;
-else
-	Result:=VSize;
-end;
-end;
-
-function FPT:_D3DPRIMITIVETYPE;inline;
-begin
-case VParam of
-SGR_LINES:Result:=D3DPT_LINELIST;
-SGR_TRIANGLES:Result:=D3DPT_TRIANGLELIST;
-SGR_POINTS:Result:=D3DPT_POINTLIST;
-SGR_LINE_STRIP:Result:=D3DPT_LINESTRIP;
-SGR_TRIANGLE_STRIP:Result:=D3DPT_TRIANGLESTRIP;
-else 
-	Result:=D3DPT_INVALID_0;
-end;
-end;
-
 var
-	VFVFArray:packed array of _D3DVERTEXELEMENT9 = nil;
-
-procedure AddElVFVF();inline;
-begin
-if VFVFArray= nil then
-	SetLength(VFVFArray,1)
-else
-	SetLength(VFVFArray,Length(VFVFArray)+1);
-FillChar(VFVFArray[High(VFVFArray)],SizeOf(_D3DVERTEXELEMENT9),0);
-end;
-
+	VertexManipulator:TSGRDXVertexDeclarationManipulator = nil;
 begin 
 if (VBuffer<>nil) or (not FEnabledClientStateVertex) then
 	Exit;
@@ -818,92 +851,137 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 	begin
 	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration = nil then
 		begin
+		VertexManipulator:=TSGRDXVertexDeclarationManipulator.Create();
 		if FEnabledClientStateVertex then
-			begin
-			AddElVFVF();
-			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferVertex].FShift;
-			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT3;
-			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
-			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_POSITION;
-			end;
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferVertex].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_POSITION);
 		if FEnabledClientStateColor then
-			begin
-			AddElVFVF();
-			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferColor].FShift;
-			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_D3DCOLOR;
-			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
-			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_COLOR;
-			end;
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift,D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
 		if FEnabledClientStateNormal then
-			begin
-			AddElVFVF();
-			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
-			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT3;
-			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
-			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_NORMAL;
-			end;
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
 		if FEnabledClientStateTexVertex then
-			begin
-			AddElVFVF();
-			VFVFArray[High(VFVFArray)].Offset:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
-			VFVFArray[High(VFVFArray)]._Type:=D3DDECLTYPE_FLOAT2;
-			VFVFArray[High(VFVFArray)].Method:=D3DDECLMETHOD_DEFAULT;
-			VFVFArray[High(VFVFArray)].Usage:=D3DDECLUSAGE_TEXCOORD;
-			end;
-		AddElVFVF();
-		VFVFArray[High(VFVFArray)]:=D3DDECL_END;
-		//Set format of vertex
-		pDevice.CreateVertexDeclaration(@VFVFArray[0],FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
-		SetLength(VFVFArray,0);
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
+		//Create format of vertex
+		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
+		VertexManipulator.Destroy();
+		VertexManipulator:=nil;
 		end;
 	pDevice.BeginScene();
-	//Set vertex buffer
+	//Set format of vertex
 	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
+	//Set vertex buffer
 	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
 	//Set Index buffer
 	if pDevice.SetIndices(IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]-1].FResourse))) <> D3D_OK then
 		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetIndices : Failed!!');
 	//Draw
-	if pDevice.DrawIndexedPrimitive(FPT(),0,0,
+	if pDevice.DrawIndexedPrimitive(SGRDXConvertPrimetiveType(VParam),0,0,
 		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div 
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex
-		,0,GetNumPrimetives())<>D3D_OK then
+		,0,SGRDXGetNumPrimetives(VParam,VSize))<>D3D_OK then
 			SGLog.Sourse('TSGRenderDirectX__DrawElements : DrawIndexedPrimitive : Draw Failed!! ');
 	pDevice.EndScene();
 	end
 else
 	begin
-	
+	SGLog.Sourse('TSGRenderDirectX__DrawElements : Draw indexed primitive without VBO not possible!');
 	end;
 end;
 
 procedure TSGRenderDirectX.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
-
-function FPT:_D3DPRIMITIVETYPE;inline;
-begin
-case VParam of
-SGR_LINES:Result:=D3DPT_LINELIST;
-SGR_TRIANGLES:Result:=D3DPT_TRIANGLELIST;
-SGR_POINTS:Result:=D3DPT_POINTLIST;
-SGR_LINE_STRIP:Result:=D3DPT_LINESTRIP;
-SGR_TRIANGLE_STRIP:Result:=D3DPT_TRIANGLESTRIP;
-else 
-	Result:=D3DPT_INVALID_0;
-end;
-end;
-
+var
+	VertexDeclaration : IDirect3DVertexDeclaration9 = nil;
+	VertexManipulator : TSGRDXVertexDeclarationManipulator = nil;
+	BeginArray:TSGMaxEnum;
 begin
 if not FEnabledClientStateVertex then
 	Exit;
+
 if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 	begin
-	//pDevice.DrawPrimitiveUP( FPT(VParam), VCount-VFirst+1, TSGPointer()^,);
-	// Недописано. В общем нужно сделать простой рендуринг массивомиз оперы.
+	BeginArray := FArDataBuffers[SGRDTypeDataBufferVertex].FShift;
+	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferColor].FShift) then
+		BeginArray:=FArDataBuffers[SGRDTypeDataBufferColor].FShift;
+	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferNormal].FShift) then
+		BeginArray:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
+	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift) then
+		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
+	VertexManipulator:=TSGRDXVertexDeclarationManipulator.Create();
+	if FEnabledClientStateVertex then
+		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferVertex].FShift - BeginArray,
+			D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_POSITION);
+	if FEnabledClientStateColor then
+		if FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams = 3 then
+			if FArDataBuffers[SGRDTypeDataBufferColor].FDataType = SGR_FLOAT then
+				VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
+					D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_COLOR)
+			else
+				// Дело в том, что нельзя задать цвет в DirectX тремя байтами
+				{VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
+					}(*D3DDECLTYPE_UBYTE3*){,D3DDECLUSAGE_COLOR)}
+		else
+			if FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams = 4 then
+				if FArDataBuffers[SGRDTypeDataBufferColor].FDataType = SGR_FLOAT then
+					VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
+						D3DDECLTYPE_FLOAT4,D3DDECLUSAGE_COLOR)
+				else
+					VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
+						D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
+	if FEnabledClientStateNormal then
+		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift - BeginArray,
+			D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
+	if FEnabledClientStateTexVertex then
+		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift - BeginArray,
+			D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
+	//Create format of vertex
+	writeln(1);
+	VertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
+	VertexManipulator.Destroy();
+	
+	pDevice.BeginScene();
+	writeln(2);
+	pDevice.SetVertexDeclaration(VertexDeclaration);
+	writeln(3);
+	try
+	pDevice.DrawPrimitiveUP(SGRDXConvertPrimetiveType(VParam),SGRDXGetNumPrimetives(VParam,VCount), 
+		TSGPointer(BeginArray+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex*VFirst)^,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex);
+	except
+	end;
+	writeln(4);
+	pDevice.EndScene();
+	writeln(5);
+	VertexDeclaration._Release();
+	writeln(6);
 	end
 else
 	begin
-	
+	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration = nil then
+		begin
+		VertexManipulator:=TSGRDXVertexDeclarationManipulator.Create();
+		if FEnabledClientStateVertex then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferVertex].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_POSITION);
+		if FEnabledClientStateColor then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift,D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
+		if FEnabledClientStateNormal then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
+		if FEnabledClientStateTexVertex then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
+		//Create format of vertex
+		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
+		VertexManipulator.Destroy();
+		VertexManipulator:=nil;
+		end;
+	pDevice.BeginScene();
+	//Set format of vertex
+	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
+	//Set vertex buffer
+	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
+	//Set Index buffer
+	if pDevice.SetIndices(nil) <> D3D_OK then
+		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetIndices(nil) : Failed!!');
+	pDevice.DrawPrimitive(SGRDXConvertPrimetiveType(VParam),VFirst,SGRDXGetNumPrimetives(VParam,VCount));
+	pDevice.EndScene();
 	end;
 end;
 
@@ -993,19 +1071,19 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
  Emissive - собственное свечение объекта. 
  Power - резкость отражений.}
 FillChar(Material,SizeOf(Material),0);
-Material.Diffuse:=GetD3DCOLORVALUE(1,1,1,1);
-Material.Ambient:=GetD3DCOLORVALUE(0,0,0,0);
-Material.Specular:=GetD3DCOLORVALUE(0.4,0.4,0.4,1);
-Material.Emissive:=GetD3DCOLORVALUE(0,0,0,0);
+Material.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
+Material.Ambient:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
+Material.Specular:=SGRDXGetD3DCOLORVALUE(0.4,0.4,0.4,1);
+Material.Emissive:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
 Material.Power:=2;
 pDevice.SetMaterial(Material);
 
 //Устанавливаем освящение
 FillChar(FLigth,SizeOf(FLigth),0);
 FLigth._Type:=D3DLIGHT_POINT;
-FLigth.Diffuse:=GetD3DCOLORVALUE(1,1,1,1);
-FLigth.Ambient:=GetD3DCOLORVALUE(0.5,0.5,0.5,1.0);
-FLigth.Specular:=GetD3DCOLORVALUE(1.0,1.0,1.0,1.0);
+FLigth.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
+FLigth.Ambient:=SGRDXGetD3DCOLORVALUE(0.5,0.5,0.5,1.0);
+FLigth.Specular:=SGRDXGetD3DCOLORVALUE(1.0,1.0,1.0,1.0);
 // предел расстояния, на котором освещаются примитивы, смотря от камеры.
 FLigth.Range := 1000;
 // Направление (Только для directional and spotlights)
@@ -1292,6 +1370,15 @@ var
 	VVBuffer: PByte = nil;
 	// Для Lock текстур
 	rcLockedRect:D3DLOCKED_RECT;
+
+function GetRealChannels(const Format,Channels:TSGLongWord):TSGLongWord;inline;
+begin
+if (Format=D3DFMT_X8R8G8B8) then
+	Result:=4
+else
+	Result:=Channels;
+end;
+
 begin
 SGLog.Sourse('TSGRenderDirectX__LockResourses : Entering!');
 if FArTextures<>nil then
@@ -1309,8 +1396,8 @@ if FArTextures<>nil then
 				end
 			else
 				begin
-				System.GetMem(VVBuffer,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
-				System.Move(rcLockedRect.pBits^,VVBuffer^,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
+				System.GetMem(VVBuffer,FArTextures[i].FWidth*FArTextures[i].FHeight*GetRealChannels(FArTextures[i].FFormat,FArTextures[i].FChannels));
+				System.Move(rcLockedRect.pBits^,VVBuffer^,FArTextures[i].FWidth*FArTextures[i].FHeight*GetRealChannels(FArTextures[i].FFormat,FArTextures[i].FChannels));
 				FArTextures[i].FBufferChangeFullscreen:=VVBuffer;
 				VVBuffer:=nil;
 				if FArTextures[i].FTexture.UnlockRect(0) <> D3D_OK then
@@ -1387,6 +1474,15 @@ var
 	VVBuffer: PByte = nil;
 	// Для Lock текстур
 	rcLockedRect:D3DLOCKED_RECT;
+
+function GetRealChannels(const Format,Channels:TSGLongWord):TSGLongWord;inline;
+begin
+if (Format=D3DFMT_X8R8G8B8) then
+	Result:=4
+else
+	Result:=Channels;
+end;
+
 begin
 SGLog.Sourse('TSGRenderDirectX__UnLockResourses : Entering!');
 if FArTextures<>nil then
@@ -1408,7 +1504,8 @@ if FArTextures<>nil then
 					end
 				else
 					begin
-					System.Move(FArTextures[i].FBufferChangeFullscreen^,rcLockedRect.pBits^,FArTextures[i].FWidth*FArTextures[i].FHeight*FArTextures[i].FChannels);
+					System.Move(FArTextures[i].FBufferChangeFullscreen^,rcLockedRect.pBits^,
+						FArTextures[i].FWidth*FArTextures[i].FHeight*GetRealChannels(FArTextures[i].FFormat,FArTextures[i].FChannels));
 					System.FreeMem(FArTextures[i].FBufferChangeFullscreen);
 					FArTextures[i].FBufferChangeFullscreen:=nil;
 					if FArTextures[i].FTexture.UnlockRect(0) <> D3D_OK then

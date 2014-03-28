@@ -58,6 +58,17 @@ type
 	TSGComplexNumber = object(TSGVertex2f)
 		end;
 	
+	TSGColor3b=object
+		b,g,r:TSGByte;
+		end;
+	PTSGColor3b=^TSGColor3b;
+	
+	TSGColor4b=object(TSGColor3b)
+		a:TSGByte;
+		procedure Import(const nr,ng,nb:TSGByte;const na:TSGByte = 255);
+		end;
+	PTSGColor4b=^TSGColor4b;
+	
 	TSGVertex3f=object(TSGVertex2f)
 		z:TSGVertexType;
 		procedure Vertex(const VRender:TSGRender);inline;
@@ -293,6 +304,14 @@ function SGZ(const v:Single):TSGVertex3f;inline;
 function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
 
 implementation
+
+procedure TSGColor4b.Import(const nr,ng,nb:TSGByte;const na:TSGByte = 255);
+begin
+r:=nr;
+g:=ng;
+b:=nb;
+a:=na;
+end;
 
 operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
 begin

@@ -59,21 +59,6 @@ type
 	1: ( p : packed array[0..0] of TSGFaceType );
     end;
 	PTSGFacePoint = ^ TSGFacePoint;
-	
-	// Структуры цветов...
-	PTSGColor3b = ^ TSGColor3b;
-	TSGColor3b = record
-	case byte of
-	0 : (b,g,r: TSGByte);
-	1 : (p:packed array[0..2] of TSGByte);
-	end;
-	
-	PTSGColor4b = ^ TSGColor4b;
-	TSGColor4b = record
-	case byte of
-	0 : (b,g,r,a : TSGByte);
-	1 : (p:packed array[0..3] of byte);
-	end;
 
     { TSG3dObject }
     // Наша моделька..
@@ -95,6 +80,7 @@ type
         FHasNormals : TSGBoolean;
         // Если ли у нее цвета
         FHasColors  : TSGBoolean;
+        FHasIndexes : TSGBoolean;
     protected
         // Количество текстур, индексы на которые в себе седержит моделька
         FQuantityTextures : TSGLongWord;
@@ -116,6 +102,7 @@ type
 		property QuantityVertexes : TSGQuadWord       read FNOfVerts;
 		property QuantityFaces    : TSGQuadWord       read FNOfFaces;
 		property HasTexture       : Boolean           read FHasTexture    write SetHasTexture;
+		property HasIndexes       : Boolean           read FHasIndexes    write FHasIndexes;
 		property HasColors        : Boolean           read FHasColors     write FHasColors;
 		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
 		property ColorType        : TSGMeshColorType  read FColorType     write SetColorType;
@@ -1052,6 +1039,7 @@ begin
     FHasTexture := False;
     FHasNormals := False;
     FHasColors  := False;
+    FHasIndexes := True;
     FNOfFaces := 0;
     FNOfVerts := 0;
     ArVertex := nil;
@@ -1263,11 +1251,17 @@ if FEnableVBO then
 				));
 		end;
 	
-	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-	Render.DrawElements(FPoligonesType, GetFaceLength() ,FaceFormat,nil);
+	if FHasIndexes then
+		begin
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
+		Render.DrawElements(FPoligonesType, GetFaceLength() ,FaceFormat,nil);
+		end
+	else
+		Render.DrawArrays(FPoligonesType,0,FNOfVerts);
 	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
+	if FHasIndexes then
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
@@ -1311,7 +1305,10 @@ else
 					byte(FColorType = TSGMeshColorType4f)*4*SizeOf(Single)+
 					byte(FColorType = TSGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
-    Render.DrawElements(FPoligonesType, GetFaceLength() , FaceFormat, @ArFaces[0]);
+	if FHasIndexes then
+		Render.DrawElements(FPoligonesType, GetFaceLength() , FaceFormat, @ArFaces[0])
+	else
+		Render.DrawArrays(FPoligonesType,0,FNOfVerts);
     end;
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1326,16 +1323,21 @@ procedure TSG3dObject.LoadToVBO;
 begin
 	//WriteInfo();WriteLn('Press enter. Tyta  vcio OK!');readln;
 	Render.GenBuffersARB(1, @FVBOVertexes);
-	Render.GenBuffersARB(1, @FVBOFaces);
+	if FHasIndexes then
+		Render.GenBuffersARB(1, @FVBOFaces);
 
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.BufferDataARB (SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
-	//WriteInfo('  ');
-	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
-	Render.BufferDataARB (SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
-
+	Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
+	
+	if FHasIndexes then
+		begin
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
+		Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
+		end;
+	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
+	if FHasIndexes then
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	
 	ClearArrays(False);
 	FEnableVBO:=True;
