@@ -890,9 +890,9 @@ end;
 
 procedure TSGRenderDirectX.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
 var
-	VertexDeclaration : IDirect3DVertexDeclaration9 = nil;
 	VertexManipulator : TSGRDXVertexDeclarationManipulator = nil;
 	BeginArray:TSGMaxEnum;
+	VertexType:LongWord = D3DFVF_XYZ;
 begin
 if not FEnabledClientStateVertex then
 	Exit;
@@ -902,56 +902,23 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 	BeginArray := FArDataBuffers[SGRDTypeDataBufferVertex].FShift;
 	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferColor].FShift) then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferColor].FShift;
-	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferNormal].FShift) then
+	if FEnabledClientStateNormal and (BeginArray>FArDataBuffers[SGRDTypeDataBufferNormal].FShift) then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
-	if FEnabledClientStateColor and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift) then
+	if FEnabledClientStateTexVertex and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift) then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
-	VertexManipulator:=TSGRDXVertexDeclarationManipulator.Create();
-	if FEnabledClientStateVertex then
-		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferVertex].FShift - BeginArray,
-			D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_POSITION);
-	if FEnabledClientStateColor then
-		if FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams = 3 then
-			if FArDataBuffers[SGRDTypeDataBufferColor].FDataType = SGR_FLOAT then
-				VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
-					D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_COLOR)
-			else
-				// Дело в том, что нельзя задать цвет в DirectX тремя байтами
-				{VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
-					}(*D3DDECLTYPE_UBYTE3*){,D3DDECLUSAGE_COLOR)}
-		else
-			if FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams = 4 then
-				if FArDataBuffers[SGRDTypeDataBufferColor].FDataType = SGR_FLOAT then
-					VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
-						D3DDECLTYPE_FLOAT4,D3DDECLUSAGE_COLOR)
-				else
-					VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift - BeginArray,
-						D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
-	if FEnabledClientStateNormal then
-		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift - BeginArray,
-			D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
-	if FEnabledClientStateTexVertex then
-		VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift - BeginArray,
-			D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-	//Create format of vertex
-	writeln(1);
-	VertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
-	VertexManipulator.Destroy();
 	
+	if FEnabledClientStateColor then
+		VertexType:=VertexType or D3DFVF_DIFFUSE;
+	if FEnabledClientStateTexVertex then
+		VertexType:=VertexType or D3DFVF_TEX1;
+	if FEnabledClientStateNormal then
+		VertexType:=VertexType or D3DFVF_NORMAL;
 	pDevice.BeginScene();
-	writeln(2);
-	pDevice.SetVertexDeclaration(VertexDeclaration);
-	writeln(3);
-	try
+	pDevice.SetFVF( VertexType );
 	pDevice.DrawPrimitiveUP(SGRDXConvertPrimetiveType(VParam),SGRDXGetNumPrimetives(VParam,VCount), 
-		TSGPointer(BeginArray+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex*VFirst)^,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex);
-	except
-	end;
-	writeln(4);
+		TSGPointer(BeginArray+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex*VFirst)^,
+		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex);
 	pDevice.EndScene();
-	writeln(5);
-	VertexDeclaration._Release();
-	writeln(6);
 	end
 else
 	begin
@@ -976,10 +943,10 @@ else
 	pDevice.SetVertexDeclaration(FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration);
 	//Set vertex buffer
 	if pDevice.SetStreamSource(0,IDirect3DVertexBuffer9(Pointer(FArBuffers[FVBOData[0]-1].FResourse)),0,FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex)<>D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetStreamSource : Failed!!');
+		SGLog.Sourse('TSGRenderDirectX__DrawArrays : SetStreamSource : Failed!!');
 	//Set Index buffer
 	if pDevice.SetIndices(nil) <> D3D_OK then
-		SGLog.Sourse('TSGRenderDirectX__DrawElements : SetIndices(nil) : Failed!!');
+		SGLog.Sourse('TSGRenderDirectX__DrawArrays : SetIndices(nil) : Failed!!');
 	pDevice.DrawPrimitive(SGRDXConvertPrimetiveType(VParam),VFirst,SGRDXGetNumPrimetives(VParam,VCount));
 	pDevice.EndScene();
 	end;

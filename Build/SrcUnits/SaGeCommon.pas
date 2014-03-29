@@ -66,6 +66,7 @@ type
 	TSGColor4b=object(TSGColor3b)
 		a:TSGByte;
 		procedure Import(const nr,ng,nb:TSGByte;const na:TSGByte = 255);
+		procedure ConvertType();
 		end;
 	PTSGColor4b=^TSGColor4b;
 	
@@ -304,6 +305,15 @@ function SGZ(const v:Single):TSGVertex3f;inline;
 function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
 
 implementation
+
+procedure TSGColor4b.ConvertType();
+var
+	d:TSGByte;
+begin
+d:=b;
+b:=r;
+r:=d;
+end;
 
 procedure TSGColor4b.Import(const nr,ng,nb:TSGByte;const na:TSGByte = 255);
 begin

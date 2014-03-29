@@ -78,8 +78,9 @@ type
         FHasTexture : TSGBoolean;
         // Есть ли нормали у модельки
         FHasNormals : TSGBoolean;
-        // Если ли у нее цвета
+        // Есть ли у нее цвета
         FHasColors  : TSGBoolean;
+        // Используется ли у нее индексированный рендеринг
         FHasIndexes : TSGBoolean;
     protected
         // Количество текстур, индексы на которые в себе седержит моделька
