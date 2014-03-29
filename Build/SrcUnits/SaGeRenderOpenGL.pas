@@ -125,6 +125,9 @@ type
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
+		procedure Vertex3fv(const Variable : TSGPointer);override;
+		procedure Normal3fv(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Variable : TSGPointer);override;
 		end;
 
 //Я так понял, что на нормальном компьютере все матрици хранятся в Double, 
@@ -156,6 +159,21 @@ operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.Vertex3fv(const Variable : TSGPointer);
+begin
+glVertex3fv(Variable);
+end;
+
+procedure TSGRenderOpenGL.Normal3fv(const Variable : TSGPointer);
+begin
+glNormal3fv(Variable);
+end;
+
+procedure TSGRenderOpenGL.MultMatrixf(const Variable : TSGPointer);
+begin
+glMultMatrixf(Variable);
+end;
 
 procedure TSGRenderOpenGL.PushMatrix();
 begin

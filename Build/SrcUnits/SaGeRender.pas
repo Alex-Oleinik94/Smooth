@@ -110,6 +110,9 @@ type
 		procedure PopMatrix();virtual;abstract;
 		procedure PushMatrix();virtual;abstract;
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);virtual;abstract;
+		procedure Vertex3fv(const Variable : TSGPointer);virtual;abstract;
+		procedure Normal3fv(const Variable : TSGPointer);virtual;abstract;
+		procedure MultMatrixf(const Variable : TSGPointer);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

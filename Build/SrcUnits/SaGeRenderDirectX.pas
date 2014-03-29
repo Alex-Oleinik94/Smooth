@@ -91,6 +91,9 @@ type
 		procedure PushMatrix();override;
 		procedure PopMatrix();override;
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
+		procedure Vertex3fv(const Variable : TSGPointer);override;
+		procedure Normal3fv(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Variable : TSGPointer);override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -419,9 +422,13 @@ FNowColor:=D3DCOLOR_ARGB(
 	Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b));
 end;
 
-procedure TSGRenderDirectX.Normal3f(const x,y,z:single); 
+procedure TSGRenderDirectX.MultMatrixf(const Variable : TSGPointer);
+var
+	Matrix1,MatrixOut:D3DMATRIX;
 begin 
-
+pDevice.GetTransform(D3DTS_VIEW,Matrix1);
+D3DXMatrixMultiply(MatrixOut,PD3DMATRIX(Variable)^,Matrix1);
+pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Translatef(const x,y,z:single); 
@@ -1239,6 +1246,25 @@ D3DXMatrixIdentity(Matrix);
 pDevice.SetTransform(D3DTS_WORLD,Matrix);
 pDevice.SetTransform(D3DTS_VIEW,Matrix);
 pDevice.SetTransform(D3DTS_PROJECTION,Matrix);
+end;
+
+
+procedure TSGRenderDirectX.Vertex3fv(const Variable : TSGPointer);
+begin
+FArPoints[FNumberOfPoints].Color:=FNowColor;
+System.Move(Variable^,FArPoints[FNumberOfPoints].x,SizeOf(Single)*3);
+FNumberOfPoints+=1;
+AfterVertexProc();
+end;
+
+procedure TSGRenderDirectX.Normal3f(const x,y,z:single); 
+begin 
+
+end;
+
+procedure TSGRenderDirectX.Normal3fv(const Variable : TSGPointer);
+begin
+
 end;
 
 procedure TSGRenderDirectX.Vertex3f(const x,y,z:single);

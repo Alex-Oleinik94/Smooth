@@ -29,7 +29,7 @@ type
 	TSGCamera=class(TSGContextObject)
 			public
 		constructor Create();override;
-			protected
+			public
 		FMatrixMode: TSGExByte; // SG_3D, SG_2D, SG_ORTHO_3D
 		FViewMode  : TSGExByte; // SG_VIEW_...
 			// for SG_VIEW_WATCH_OBJECT
