@@ -253,11 +253,11 @@ type
         // =) Subserf
         procedure CatmulClark();virtual;
         
-		procedure SaveToSaGe3DObjFile(const FileWay:TSGString);
-		procedure LoadFromSaGe3DObjFile(const FileWay:TSGString);
+		procedure SaveToSG3DOFile(const FileWay:TSGString);
+		procedure LoadFromSG3DOFile(const FileWay:TSGString);
 		
-		procedure SaveToSaGe3DObj(const Stream:TStream);
-		procedure LoadFromSaGe3DObj(const Stream:TStream);
+		procedure SaveToSG3DO(const Stream:TStream);
+		procedure LoadFromSG3DO(const Stream:TStream);
 		
         (* Я ж переписывал этот класс. Это то, что я не написал. *)
 		//procedure Stripificate;overload;inline;
@@ -327,10 +327,10 @@ type
 		procedure SaveToFile(const FileWay: TSGString);
         procedure LoadFromFile(const FileWay:TSGString);
     public
-        procedure LoadFromSaGe3DModelFile(const FileWay: TSGString);
-        procedure SaveToSaGe3DModelFile(const FileWay: TSGString);
-        procedure LoadFromSaGe3DModel(const Stream : TStream);
-        procedure SaveToSaGe3DModel(const Stream : TStream);
+        procedure LoadFromSG3DMFile(const FileWay: TSGString);
+        procedure SaveToSG3DMFile(const FileWay: TSGString);
+        procedure LoadFromSG3DM(const Stream : TStream);
+        procedure SaveToSG3DM(const Stream : TStream);
         // Загрузить формат 3DS-Max-а
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
@@ -1099,19 +1099,19 @@ if ClearN then
 	end;
 end;
 
-procedure TSG3DObject.SaveToSaGe3DObjFile(const FileWay:TSGString);
+procedure TSG3DObject.SaveToSG3DOFile(const FileWay:TSGString);
 var
 	Stream:TStream = nil;
 begin
 Stream:=TFileStream.Create(FileWay,fmCreate);
 if Stream<>nil then
 	begin
-	SaveToSaGe3DObj(Stream);
+	SaveToSG3DO(Stream);
 	Stream.Destroy();
 	end;
 end;
 
-procedure TSG3DObject.LoadFromSaGe3DObjFile(const FileWay:TSGString);
+procedure TSG3DObject.LoadFromSG3DOFile(const FileWay:TSGString);
 var
 	Stream:TStream = nil;
 begin
@@ -1120,13 +1120,13 @@ if SGFileExists(FileWay) then
 	Stream:=TFileStream.Create(FileWay,fmOpenRead);
 	if Stream<>nil then
 		begin
-		LoadFromSaGe3DObj(Stream);
+		LoadFromSG3DO(Stream);
 		Stream.Destroy();
 		end;
 	end;
 end;
 
-procedure TSG3DObject.SaveToSaGe3DObj(const Stream:TStream);
+procedure TSG3DObject.SaveToSG3DO(const Stream:TStream);
 var
 	S:array[0..8] of TSGChar = 'SaGe3DObj';
 begin
@@ -1151,7 +1151,7 @@ Stream.WriteBuffer(ArFaces[0],FacesSize());
 Stream.WriteBuffer(ArVertex^,VertexesSize());
 end;
 
-procedure TSG3DObject.LoadFromSaGe3DObj(const Stream:TStream);
+procedure TSG3DObject.LoadFromSG3DO(const Stream:TStream);
 var
 	S,S2:array[0..8] of TSGChar;
 	Version : TSGQuadWord = 0;
@@ -1160,13 +1160,13 @@ S2:='SaGe3DObj';
 Stream.ReadBuffer(S[0],SizeOf(S[0])*9);
 if S<>S2 then
 	begin
-	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : It is not "SaGe3DObj" file!']);
+	SGLog.Sourse(['TSG3DObject.LoadFromSG3DO : Fatal : It is not "SaGe3DObj" file!']);
 	Exit;
 	end;
 Stream.ReadBuffer(Version,SizeOf(Version));
 if Version <> SGMeshVersion then
 	begin
-	SGLog.Sourse(['TSG3DObject.LoadFromSaGe3DObj : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
+	SGLog.Sourse(['TSG3DObject.LoadFromSG3DO : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
 	Exit;
 	end;
 Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
@@ -1192,7 +1192,7 @@ end;
 
 procedure TSG3dObject.BasicDraw(); inline;
 const
-	FaceFormat = SGR_UNSIGNED_SHORT; 
+	FaceFormat = SGR_UNSIGNED_SHORT;
 // GL_UNSIGNED_INT - LongWord - 4
 // GL_UNSIGNED_SHORT - Word - 2
 // GL_UNSIGNED_BYTE - Byte - 1
@@ -1320,29 +1320,32 @@ if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
 end;
 
-procedure TSG3dObject.LoadToVBO;
+procedure TSG3dObject.LoadToVBO();
 begin
-	//WriteInfo();WriteLn('Press enter. Tyta  vcio OK!');readln;
-	Render.GenBuffersARB(1, @FVBOVertexes);
-	if FHasIndexes then
-		Render.GenBuffersARB(1, @FVBOFaces);
+if FEnableVBO then
+	begin
+	SGLog.Sourse('TSG3dObject__LoadToVBO : It is not possible to do this several times!');
+	Exit;
+	end;
+Render.GenBuffersARB(1, @FVBOVertexes);
+if FHasIndexes then
+	Render.GenBuffersARB(1, @FVBOFaces);
 
-	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
-	Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
-	
-	if FHasIndexes then
-		begin
-		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
-		Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
-		end;
-	
-	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-	if FHasIndexes then
-		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
-	
-	ClearArrays(False);
-	FEnableVBO:=True;
-	//WriteLn(123);
+Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
+Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
+
+if FHasIndexes then
+	begin
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
+	Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
+	end;
+
+Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+if FHasIndexes then
+	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
+
+ClearArrays(False);
+FEnableVBO:=True;
 end;
 
 procedure TSG3DObject.ClearVBO();inline;
@@ -1363,31 +1366,31 @@ end;
 (************************************){TSGModel}(************************************)
 (************************************************************************************)
 
-procedure TSGCustomModel.LoadFromSaGe3DModelFile(const FileWay: TSGString);
+procedure TSGCustomModel.LoadFromSG3DMFile(const FileWay: TSGString);
 var
 	Stream : TStream = nil;
 begin
 Stream := TFileStream.Create(FileWay,fmOpenRead);
 if Stream<>nil then
 	begin
-	LoadFromSaGe3DModel(Stream);
+	LoadFromSG3DM(Stream);
 	Stream.Destroy();
 	end;
 end;
 
-procedure TSGCustomModel.SaveToSaGe3DModelFile(const FileWay: TSGString);
+procedure TSGCustomModel.SaveToSG3DMFile(const FileWay: TSGString);
 var
 	Stream : TStream = nil;
 begin
 Stream := TFileStream.Create(FileWay,fmCreate);
 if Stream<>nil then
 	begin
-	SaveToSaGe3DModel(Stream);
+	SaveToSG3DM(Stream);
 	Stream.Destroy();
 	end;
 end;
 
-procedure TSGCustomModel.LoadFromSaGe3DModel(const Stream : TStream);
+procedure TSGCustomModel.LoadFromSG3DM(const Stream : TStream);
 var
 	i : TSGLongWord;
 	QuantityO,QuantityM : TSGQuadWord;
@@ -1396,7 +1399,7 @@ Stream.ReadBuffer(QuantityO,SizeOf(QuantityO));
 Stream.ReadBuffer(QuantityM,SizeOf(QuantityM));
 for i:=0 to QuantityO-1 do
 	begin
-	AddObject().LoadFromSaGe3DObj(Stream);
+	AddObject().LoadFromSG3DO(Stream);
 	end;
 for i:=0 to QuantityM-1 do
 	begin
@@ -1409,14 +1412,14 @@ for i:=0 to QuantityM-1 do
 	end;
 end;
 
-procedure TSGCustomModel.SaveToSaGe3DModel(const Stream : TStream);
+procedure TSGCustomModel.SaveToSG3DM(const Stream : TStream);
 var
 	i : TSGLongWord;
 begin
 Stream.WriteBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
 Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
 for i:=0 to FQuantityObjects-1 do
-	Objects[i].SaveToSaGe3DObj(Stream);
+	Objects[i].SaveToSG3DO(Stream);
 for i:=0 to FQuantityMaterials-1 do
 	begin
 	SGWriteStringToStream(FArMaterials[i].Way,Stream);
@@ -1426,7 +1429,7 @@ end;
 
 procedure TSGCustomModel.SaveToFile(const FileWay: string);
 begin
-SaveToSaGe3DModelFile(FileWay);
+SaveToSG3DMFile(FileWay);
 end;
 
 procedure TSGCustomModel.Clear;
@@ -1503,7 +1506,7 @@ for i:=0 to FQuantityObjects-1 do
 end;
 
 
-procedure TSGCustomModel.Stripificate;
+procedure TSGCustomModel.Stripificate();
 var
 	i : TSGLongWord;
 begin

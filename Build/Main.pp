@@ -63,6 +63,7 @@ uses
 	,SaGeTron
 	,SaGeLoading
 	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
+	,PAPPE
 	;
 
 procedure Draw(const Context:TSGContext);
