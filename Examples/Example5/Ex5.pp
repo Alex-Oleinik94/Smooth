@@ -217,12 +217,9 @@ PAPPE.PhysicsInterpolate(Physics,PhysicsTiks/Physics.TimeStep);
 
 FCamera.CallAction();
 
-if Render.RenderType = SGRenderOpenGL then
-	begin
-	Render.Enable (SGR_LIGHTING);
-	Render.Enable (SGR_LIGHT0);
-	Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @Licht0Pos);
-	end;
+Render.Enable (SGR_LIGHTING);
+Render.Enable (SGR_LIGHT0);
+Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @Licht0Pos);
 
 Render.Color4f(1,1,1,1);
 DrawObject(Object0);
@@ -237,11 +234,8 @@ DrawObject(Object1);
 Render.Color4f(0.5,0.1,1,1);
 DrawObject(Object2);
 
-if Render.RenderType = SGRenderOpenGL then
-	begin
-	Render.Disable(SGR_LIGHT0);
-	Render.Disable(SGR_LIGHTING);
-	end;
+Render.Disable(SGR_LIGHT0);
+Render.Disable(SGR_LIGHTING);
 end;
 
 begin

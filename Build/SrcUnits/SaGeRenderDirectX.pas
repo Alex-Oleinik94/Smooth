@@ -106,12 +106,17 @@ type
 		FPrimetivePrt  : LongWord;
 		// Текущий цвет
 		FNowColor      : LongWord;
+		// Текушая нормаль
+		FNowNormal     : packed record
+			x,y,z:TSGSingle;
+			end;
 		// Массив, который в последущем раендерится с помощью pDevice.DrawPrimitiveUP(..)
 		FArPoints:array[0..2]of 
 			packed record
-				x,y,z : single;
+				x,y,z : TSGSingle;
+				Normalx,Normaly,Normalz: TSGSingle;
 				Color : LongWord;
-				tx,ty : Single;
+				tx,ty : TSGSingle;
 				end;
 		// Количество вершин, которые в данный момент уже записаны массив FArPoints
 		FNumberOfPoints : LongWord;
@@ -1007,7 +1012,7 @@ end;
 
 procedure TSGRenderDirectX.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 const
-	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_DIFFUSE or D3DFVF_TEX1;
+	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_NORMAL or D3DFVF_DIFFUSE  or D3DFVF_TEX1;
 begin
 FPrimetiveType:=VPrimitiveType;
 FPrimetivePrt:=0;
@@ -1252,24 +1257,28 @@ end;
 procedure TSGRenderDirectX.Vertex3fv(const Variable : TSGPointer);
 begin
 FArPoints[FNumberOfPoints].Color:=FNowColor;
-System.Move(Variable^,FArPoints[FNumberOfPoints].x,SizeOf(Single)*3);
+System.Move(FNowNormal,FArPoints[FNumberOfPoints].Normalx,3*SizeOf(TSGSingle));
+System.Move(Variable^,FArPoints[FNumberOfPoints].x,SizeOf(TSGSingle)*3);
 FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
 procedure TSGRenderDirectX.Normal3f(const x,y,z:single); 
 begin 
-
+FNowNormal.x:=x;
+FNowNormal.y:=y;
+FNowNormal.z:=z;
 end;
 
 procedure TSGRenderDirectX.Normal3fv(const Variable : TSGPointer);
 begin
-
+System.Move(Variable^,FNowNormal,3*SizeOf(TSGSingle));
 end;
 
 procedure TSGRenderDirectX.Vertex3f(const x,y,z:single);
 begin
 FArPoints[FNumberOfPoints].Color:=FNowColor;
+System.Move(FNowNormal,FArPoints[FNumberOfPoints].Normalx,3*SizeOf(TSGSingle));
 FArPoints[FNumberOfPoints].x:=x;
 FArPoints[FNumberOfPoints].y:=y;
 FArPoints[FNumberOfPoints].z:=z;
