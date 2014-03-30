@@ -326,9 +326,22 @@ begin
 glDeleteTextures(VQuantity,VTextures);
 end;
 
-procedure TSGRenderOpenGL.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer); 
+procedure TSGRenderOpenGL.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);
+type
+	PSingle = ^ Single;
+var
+	Ar:TSGPointer = nil;
 begin 
-glLightfv(VLight,VParam,VParam2);
+if VParam=SGR_POSITION then
+	begin
+	System.GetMem(Ar,4*Sizeof(TSGSingle));
+	System.Move(VParam2^,Ar^,3*Sizeof(TSGSingle));
+	PSingle(Ar)[3]:=1;
+	glLightfv(VLight,VParam,Ar);
+	System.FreeMem(Ar,4*Sizeof(TSGSingle));
+	end
+else
+	glLightfv(VLight,VParam,VParam2);
 end;
 
 procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 

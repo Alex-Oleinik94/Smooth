@@ -13,6 +13,8 @@ uses
 	,SaGeUtils
 	,SaGeRender
 	,PAPPE
+	,SaGeCommon
+	,crt
 	;
 const
 	QuantityObjects = 16;
@@ -156,7 +158,7 @@ end;
 procedure TSGExample5.Draw();
 var
 	i         : TSGLongWord;
-	Licht0Pos : array[0..3] of TSGSingle = (0,160,160,1);
+	Licht0Pos : TSGVertex3f;
 
 procedure DrawObjectMesh(var AObjectMesh: TPhysicsObjectMesh); register;
 var
@@ -186,10 +188,12 @@ end;
 procedure DrawObject(var AObject: TPhysicsObject); register;
 var
 	I: TSGLongWord;
+	FNowLightPos : TSGVertex3f;
 begin
 Render.PushMatrix();
 Render.MultMatrixf(@AObject.InterpolatedTransform);
-Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @Licht0Pos);
+FNowLightPos := Licht0Pos*TSGMatrix4(AObject.InterpolatedTransform);
+Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FNowLightPos);
 for I:=0 to AObject.NumMeshs-1 do
 	DrawObjectMesh(AObject.Meshs^[i]^);
 Render.PopMatrix();
@@ -218,9 +222,10 @@ PAPPE.PhysicsInterpolate(Physics,PhysicsTiks/Physics.TimeStep);
 
 FCamera.CallAction();
 
+Licht0Pos.Import(2,45,160);
+
 Render.Enable (SGR_LIGHTING);
 Render.Enable (SGR_LIGHT0);
-Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @Licht0Pos);
 
 Render.Color4f(1,1,1,1);
 DrawObject(Object0);

@@ -7,7 +7,8 @@ uses
 	,SaGeRender
 	,Classes
 	,SysUtils
-	,Math;
+	,Math
+	,Crt;
 	
 type
 	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);
@@ -107,6 +108,12 @@ type
 	PTArTSGVertex3f = ^TArTSGVertex3f;
 	TSGVertexFunction = function (a:SGVertex):SGVertex;
 	TSGShodowVertexProcedure=procedure (Param1,Param2,Param3:single);cdecl;
+	
+	TSGVertex4f=object(TSGVertex3f)
+		w:TSGVertexType;
+		procedure Import(const x1,y1,z1,w1:TSGVertexType);inline;
+		end;
+	
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes=object
 		Vertexes:array[0..1] of TSGVertex2f;
@@ -274,6 +281,8 @@ operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
 //Перемножение матриц (нужно для Rotate, Translate и Scale)
 //Так же нужно для LookAt так как там нужно делать Translate.
 operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
+operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;inline;
+operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;inline;
 
 function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
 function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
@@ -319,6 +328,7 @@ function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix
 function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
 function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
 function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+procedure SGWriteMatrix4(const P:TSGPointer);
 
 implementation
 
@@ -336,6 +346,51 @@ for i:=0 to 3 do
 	for ii:=0 to 3 do
 		m[i,ii]:=Result[ii,i];
 Result:=m;
+end;
+
+procedure SGWriteMatrix4(const P:TSGPointer);
+type
+	PTSGMatrix4Type=^TSGMatrix4Type;
+var
+	i : TSGByte;
+begin
+textcolor(10);
+for i:=0 to 15 do
+	begin
+	Write(PTSGMatrix4Type(P)[i]:0:10,' ');
+	if (i+1)mod 4 = 0 then
+		WriteLn();
+	end;
+Textcolor(7);
+end;
+
+operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;inline;
+var
+	C:TSGVertex4f;
+begin
+C.Import(A.x,A.y,A.z,1);
+Result:=C*B;
+end;
+
+procedure TSGVertex4f.Import(const x1,y1,z1,w1:TSGVertexType);inline;
+begin
+x:=x1;
+y:=y1;
+z:=z1;
+w:=w1;
+end;
+
+operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;inline;
+type
+	PTSGVertexType = ^ TSGVertexType;
+var
+	i,j,k:TSGWord;
+begin
+FillChar(Result,Sizeof(Result),0);
+for i:=0 to 3 do
+	for j:=0 to 3 do
+		for k:=0 to 3 do
+			PTSGVertexType(@Result)[i]+=PTSGVertexType(@A)[k]*B[i,k];
 end;
 
 operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
@@ -407,7 +462,6 @@ Result *= SGMatrix4Import(
 	0,0,1,-Eve.z,
 	0,0,0,1);
 end;
-
 
 procedure TSGColor4b.ConvertType();inline;
 var

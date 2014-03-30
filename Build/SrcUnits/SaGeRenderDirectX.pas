@@ -1203,8 +1203,6 @@ pDevice.SetTransform(D3DTS_VIEW, Matrix);
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
-type
-	PSingle=^TSGSingle;
 var
 	Matrix,Matrix1,Matrix2:D3DMATRIX;
 var
