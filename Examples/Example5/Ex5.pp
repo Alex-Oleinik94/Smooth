@@ -15,9 +15,10 @@ uses
 	,PAPPE
 	,SaGeCommon
 	,crt
+	,SaGeScreen
 	;
 const
-	QuantityObjects = 16;
+	QuantityObjects = 15;
 type
 	TSGExample5=class(TSGDrawClass)
 			public
@@ -40,6 +41,10 @@ type
 		Object1RigidBody  : PAPPE.TPhysicsRigidBody;
 		Objects           : array[0..QuantityObjects-1] of PAPPE.TPhysicsObject;
 		ObjectRigidBodies : array[0..QuantityObjects-1] of PAPPE.TPhysicsRigidBody;
+		
+		FPhysicsTime      : array of TSGWord;
+		FPhysicsTimeCount : TSGLongWord;
+		FPhysicsTimeIndex : TSGLongWord;
 		end;
 
 class function TSGExample5.ClassName():TSGString;
@@ -59,7 +64,7 @@ sx:=0;
 x:=0;
 y:=0;
 j:=0;
-kk:=9;
+kk:=4;
 k:=kk;
 r:=0;
 for i:=0 to length(Objects)-1 do 
@@ -95,6 +100,10 @@ FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.FZum := 6;
 FCamera.FRotateX := 90;
+FPhysicsTimeCount:=Context.Width;
+SetLength(FPhysicsTime,FPhysicsTimeCount);
+FillChar(FPhysicsTime[0],FPhysicsTimeCount*SizeOf(FPhysicsTime[0]),0);
+FPhysicsTimeIndex:=0;
 
 PAPPE.PhysicsInit(Physics);
 
@@ -157,12 +166,13 @@ end;
 
 procedure TSGExample5.Draw();
 var
-	i         : TSGLongWord;
+	i,ii      : TSGLongWord;
 	Licht0Pos : TSGVertex3f;
+	dt1,dt2   : TSGDataTime;
 
 procedure DrawObjectMesh(var AObjectMesh: TPhysicsObjectMesh); register;
 var
-	I: integer;
+	I : integer;
 	N: PAPPE.TPhysicsVector3;
 begin
 Render.BeginScene(SGR_TRIANGLES);
@@ -200,7 +210,7 @@ Render.PopMatrix();
 end;
 
 begin
-FGravitationAngle += Context.ElapsedTime;
+FGravitationAngle += Context.ElapsedTime/100;
 if FGravitationAngle>2*pi then
 	FGravitationAngle -= 2*pi;
 Physics.Gravitation:=Vector3(
@@ -209,6 +219,7 @@ Physics.Gravitation:=Vector3(
 	9.81*9*sin(FGravitationAngle*3));
 
 // Прощет физики
+dt1.Get();
 PhysicsTiks += Context.ElapsedTime*0.003;
 if PhysicsTiks > 0.25 then
 	PhysicsTiks := 0.25;
@@ -219,6 +230,7 @@ while PhysicsTiks >= Physics.TimeStep do
 	PAPPE.PhysicsUpdate(Physics,Physics.TimeStep);
 	end;
 PAPPE.PhysicsInterpolate(Physics,PhysicsTiks/Physics.TimeStep);
+dt2.Get();
 
 FCamera.CallAction();
 
@@ -242,6 +254,43 @@ DrawObject(Object2);
 
 Render.Disable(SGR_LIGHT0);
 Render.Disable(SGR_LIGHTING);
+
+Render.InitMatrixMode(SG_2D);
+FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
+FPhysicsTimeIndex+=1;
+if FPhysicsTimeIndex=FPhysicsTimeCount then
+	FPhysicsTimeIndex:=0;
+if FPhysicsTimeIndex=0 then
+	i:=FPhysicsTimeCount-1
+else
+	i:=FPhysicsTimeIndex-1;
+ii:=10;
+Render.Color3f(1,0,0);
+Render.BeginScene(SGR_LINE_STRIP);
+while i<>FPhysicsTimeIndex do
+	begin
+	Render.Vertex2f(ii/1.5,Context.Height-20*FPhysicsTime[i]-10/1.5);
+	if i = 0 then
+		i:= FPhysicsTimeCount -1
+	else
+		i-=1;
+	ii+=1;
+	end;
+Render.EndScene();
+Render.Color3f(0,0,0);
+Render.BeginScene(SGR_LINE_STRIP);
+Render.Vertex2f(5/1.5,Context.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Context.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5);
+Render.EndScene();
+Render.Color3f(0,0,0);
+SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-50-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Context.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
+SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
 end;
 
 begin
