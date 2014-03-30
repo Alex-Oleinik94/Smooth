@@ -130,35 +130,25 @@ type
 		procedure MultMatrixf(const Variable : TSGPointer);override;
 		end;
 
-//Я так понял, что на нормальном компьютере все матрици хранятся в Double, 
-//	а в GL ES (На мобтльных устройствах) во Float.
-//И если эти функции понадобятся не в GL ES, то нужно передефайнить тип элементов матрици.
-type
-	SGRGLMatrix4Type = {$IFDEF MOBILE} TSGSingle {$ELSE} TSGReal {$ENDIF};
-type
-	SGRGLMatrix4=array [0..3,0..3] of SGRGLMatrix4Type;
-
-(*Эти функциии для того, чтобы определять gluLookAt и gluPerspective на мобильных платформах типа Android или iOS*)
-function SGRGLMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-function SGRGLGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-function SGRGLGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-function SGRGLGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):SGRGLMatrix4;inline;
-
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
-//в соответствии с типом SGRGLMatrix4.
-procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
+//в соответствии с типом TSGMatrix4.
+procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
 
 //Это функция - собственная замена gluPerspective в движке.
-procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
-
-//Перемножение матриц (нужно для Rotate, Translate и Scale)
-//Так же нужно для LookAt так как там нужно делать Translate.
-operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
+procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type);inline;
 
 //Эта функция - собственная замена gluLookAt в движке.
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 
+procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
+
 implementation
+
+procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
+begin
+glMatrixMode(GL_PROJECTION);
+SGRGLSetMatrix(SGGetOrthoMatrix(l,r,b,t,vNear,vFar));
+end;
 
 procedure TSGRenderOpenGL.Vertex3fv(const Variable : TSGPointer);
 begin
@@ -188,89 +178,18 @@ end;
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 begin
 glMatrixMode(GL_PROJECTION);
-SGRSetMatrix(SGRGLGetLookAtMatrix(Eve,At,Up));
+SGRGLSetMatrix(SGGetLookAtMatrix(Eve,At,Up));
 end;
 
-operator * (A,B:SGRGLMatrix4):SGRGLMatrix4;overload;inline;
-var
-	i,j,k:Word;
-begin
-FillChar(Result,Sizeof(Result),0);
-for i:=0 to 3 do
-	for j:=0 to 3 do
-		for k:=0 to 3 do
-			Result[i,j]+=A[i,k]*B[k,j];
-end;
-
-procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type);inline;
+procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type);inline;
 begin
 glMatrixMode(GL_PROJECTION);
-SGRSetMatrix(SGRGLGetPerspectiveMatrix(vAngle,vAspectRatio,vNear,vFar));
+SGRGLSetMatrix(SGGetPerspectiveMatrix(vAngle,vAspectRatio,vNear,vFar));
 end;
 
-procedure SGRSetMatrix( vMatrix:SGRGLMatrix4);inline;
+procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
 begin
-//Это потому что glLoadMatrixd нету в GL ES, и поэтому я думаю, что в GL ES все хранится во Float.
-{$IFDEF MOBILE}glLoadMatrixf{$ELSE}glLoadMatrixd{$ENDIF}(@vMatrix);
-end;
-
-function SGRGLMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-begin
-Result[0,0]:=_0x0;
-Result[0,1]:=_0x1;
-Result[0,2]:=_0x2;
-Result[0,3]:=_0x3;
-Result[1,0]:=_1x0;
-Result[1,1]:=_1x1;
-Result[1,2]:=_1x2;
-Result[1,3]:=_1x3;
-Result[2,0]:=_2x0;
-Result[2,1]:=_2x1;
-Result[2,2]:=_2x2;
-Result[2,3]:=_2x3;
-Result[3,0]:=_3x0;
-Result[3,1]:=_3x1;
-Result[3,2]:=_3x2;
-Result[3,3]:=_3x3;
-end;
-
-function SGRGLGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-begin
-Result:=SGRGLMatrix4Import(
-	2.0 * vnear / (vright - vleft), 0, 0, 0,
-	0, 2.0 * vnear / (vtop - vbottom), 0, 0,
-	(vright + vleft) / (vright - vleft), (vtop + vbottom) / (vtop - vbottom), -(vfar + vnear) / (vfar - vnear), -1.0,
-	0,0, -2.0 * vfar * vnear / (vfar - vnear), 0);
-end;
-
-function SGRGLGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:SGRGLMatrix4Type):SGRGLMatrix4;inline;
-var
-	vTop:Single;
-begin
-vTop := vNear * Math.tan(vAngle * 3.1415927 / 360.0);
-Result:=SGRGLGetFrustumMatrix(
-	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
-end;
-
-function SGRGLGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):SGRGLMatrix4;inline;
-var
-	vForward,vSide:TSGVertex3f;
-begin
-vForward := At - Eve;
-vForward.Normalize();
-vSide := vForward * Up;
-vSide.Normalize();
-Up := vSide * vForward;
-Result := SGRGLMatrix4Import(
-	vside.x, up.x, -vforward.x, 0,
-	vside.y, up.y, -vforward.y, 0,
-	vside.z, up.z, -vforward.z, 0,
-	0, 0, 0, 1);
-Result *= SGRGLMatrix4Import(
-	1,0,0,-Eve.x,
-	0,1,0,-Eve.y,
-	0,0,1,-Eve.z,
-	0,0,0,1);
+glLoadMatrixf(@vMatrix);
 end;
 
 procedure TSGRenderOpenGL.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
@@ -661,7 +580,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1); 
+{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1);
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
@@ -679,13 +598,13 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
+	{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		{$IFNDEF MOBILE}glOrtho{$ELSE}glOrthof{$ENDIF}
-			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500)
+		{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthof{$ENDIF}
+			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500);
 		end
 	else
 		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я 

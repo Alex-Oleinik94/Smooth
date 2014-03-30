@@ -189,6 +189,7 @@ var
 begin
 Render.PushMatrix();
 Render.MultMatrixf(@AObject.InterpolatedTransform);
+Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @Licht0Pos);
 for I:=0 to AObject.NumMeshs-1 do
 	DrawObjectMesh(AObject.Meshs^[i]^);
 Render.PopMatrix();

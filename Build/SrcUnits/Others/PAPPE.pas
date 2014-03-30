@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (*  Benjamin Rosseaux <benjamin@rosseaux.com>                                   *)
 (*                                                                              *)
 (********************************************************************************)
-//{$DEFINE physicsregister}
+
 unit PAPPE;
 {$mode delphi}
 {$warnings off}
@@ -72,11 +72,6 @@ unit PAPPE;
 	{$define CPU386}
 	{$asmmode intel}
 	{$endif}
-{$ifndef CPU64}
-	{$define CPU32}
-	{$endif}
-
-//{$define caninline}
 
 {$optimization on}
 {$extendedsyntax on}
@@ -90,11 +85,10 @@ unit PAPPE;
 {$longstrings on}
 {$booleval off}
 
+//{$DEFINE physicsregister}
+//{$define caninline}
 interface
 
-{$ifdef CPUX86_64}
-{-$fpumode sse64}
-{$endif}
 
 uses Math;
 

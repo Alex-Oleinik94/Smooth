@@ -10,6 +10,7 @@ unit SaGeRenderDirectX;
 interface
 uses
 	 SaGeBase
+	,crt
 	,SaGeBased
 	,SaGeRender
 	,windows
@@ -17,6 +18,7 @@ uses
 	,DXTypes
 	,D3DX9
 	,Direct3D9
+	,SaGeCommon
 	;
 
 type
@@ -441,7 +443,7 @@ var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 begin 
 pDevice.GetTransform(D3DTS_VIEW,Matrix1);
-D3DXMatrixTranslation(Matrix2,x,y,-z);
+D3DXMatrixTranslation(Matrix2,x,y,z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
 pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
 end;
@@ -1182,7 +1184,7 @@ end;
 
 procedure TSGRenderDirectX.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 var
-	Matrix:D3DMATRIX;
+	Matrix,Matrix1,Matrix2:D3DMATRIX;
 begin
 if x0<x1 then
 	if y0<y1 then
@@ -1201,8 +1203,10 @@ pDevice.SetTransform(D3DTS_VIEW, Matrix);
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
+type
+	PSingle=^TSGSingle;
 var
-	Matrix:D3DMATRIX;
+	Matrix,Matrix1,Matrix2:D3DMATRIX;
 var
 	CWidth,CHeight:LongWord;
 begin
@@ -1211,30 +1215,23 @@ CHeight:=LongWord(FWindow.Get('HEIGHT'));
 LoadIdentity();
 if Mode=SG_3D then
 	begin
-	D3DXMatrixPerspectiveFovLH(Matrix,            // Перспективная проэкция
-		D3DX_PI/4,                                // Угол зрения 
-		CWidth/CHeight,                           // Отношение сторон экрана
-		0.0011,                                   // Передняя плоскость отсечения
-		500);                                     // Задняя плоскость отсечения
+	Matrix:=D3DMATRIX(SGGetPerspectiveMatrix(45,CWidth/CHeight,0.0011,500));
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
-	D3DXMatrixScaling(Matrix,1,1,-1);
-	pDevice.SetTransform(D3DTS_VIEW, Matrix);
 	end
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixOrthoLH(Matrix,D3DX_PI/4*dncht*30,D3DX_PI/4*dncht*30/CWidth*CHeight,0.0011,500);
+		D3DXMatrixOrthoLH(Matrix1,D3DX_PI/4*dncht*30,D3DX_PI/4*dncht*30/CWidth*CHeight,0.0011,500);
+		D3DXMatrixScaling(Matrix2,1,1,-1);
+		D3DXMatrixMultiply(Matrix,Matrix1,Matrix2);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
-		D3DXMatrixScaling(Matrix,1,1,-1);
-		pDevice.SetTransform(D3DTS_VIEW, Matrix);
 		end
 	else if Mode=SG_2D then
 		begin
-		D3DXMatrixOrthoLH(Matrix,CWidth,-CHeight,-0.001,0.1);
+		D3DXMatrixOrthoLH(Matrix1,CWidth,-CHeight,-0.001,0.1);
+		D3DXMatrixTranslation(Matrix2,-CWidth/2,-CHeight/2,0);
+		D3DXMatrixMultiply(Matrix,Matrix2,Matrix1);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
-		
-		D3DXMatrixTranslation(Matrix,-CWidth/2,-CHeight/2,0);
-		pDevice.SetTransform(D3DTS_VIEW, Matrix);
 		end;
 end;
 

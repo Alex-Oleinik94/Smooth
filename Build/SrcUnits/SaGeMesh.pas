@@ -1432,7 +1432,7 @@ begin
 SaveToSG3DMFile(FileWay);
 end;
 
-procedure TSGCustomModel.Clear;
+procedure TSGCustomModel.Clear();
 var
 	i : TSGLongWord;
 begin

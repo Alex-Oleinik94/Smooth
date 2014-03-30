@@ -6,7 +6,8 @@ uses
 	,SaGeBased
 	,SaGeRender
 	,Classes
-	,SysUtils;
+	,SysUtils
+	,Math;
 	
 type
 	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);
@@ -199,6 +200,10 @@ type
 		property Turn      : TSGVertex3f       read FPosition.FTurn     write FPosition.FTurn;
 		property CustomPos : TSGCustomPosition read FPosition           write FPosition;
 		end;
+type
+	TSGMatrix4Type = TSGSingle;
+type
+	TSGMatrix4 = array [0..3,0..3] of TSGMatrix4Type;
 const
 	NilVertex:SGVertex = (x:0;y:0;z:0);
 	NilColor:SGColor = (r:0;g:0;b:0;a:0);
@@ -266,6 +271,10 @@ operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;ove
 operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
 operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
 
+//Перемножение матриц (нужно для Rotate, Translate и Scale)
+//Так же нужно для LookAt так как там нужно делать Translate.
+operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
+
 function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
 function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
 function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
@@ -304,7 +313,101 @@ function SGY(const v:Single):TSGVertex3f;inline;
 function SGZ(const v:Single):TSGVertex3f;inline;
 function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
 
+(*Эти функциии для того, чтобы определять gluLookAt и gluPerspective на мобильных платформах типа Android или iOS*)
+function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
+function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+
 implementation
+
+function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+var
+	m:TSGMatrix4;
+	i,ii:byte;
+begin
+Result:=SGMatrix4Import(
+	2/(r-l),0,0,-((r+l)/(r-l)),
+	0,2/(t-b),0,-((t+b)/(t-b)),
+	0,0,-2/(vFar-vNear),-((vFar+vNear)/(vFar-vNear)),
+	0,0,0,1);
+for i:=0 to 3 do
+	for ii:=0 to 3 do
+		m[i,ii]:=Result[ii,i];
+Result:=m;
+end;
+
+operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
+var
+	i,j,k:byte;
+begin
+FillChar(Result,Sizeof(Result),0);
+for i:=0 to 3 do
+	for j:=0 to 3 do
+		for k:=0 to 3 do
+			Result[i,j]+=A[i,k]*B[k,j];
+end;
+
+function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;inline;
+begin
+Result[0,0]:=_0x0;
+Result[0,1]:=_0x1;
+Result[0,2]:=_0x2;
+Result[0,3]:=_0x3;
+Result[1,0]:=_1x0;
+Result[1,1]:=_1x1;
+Result[1,2]:=_1x2;
+Result[1,3]:=_1x3;
+Result[2,0]:=_2x0;
+Result[2,1]:=_2x1;
+Result[2,2]:=_2x2;
+Result[2,3]:=_2x3;
+Result[3,0]:=_3x0;
+Result[3,1]:=_3x1;
+Result[3,2]:=_3x2;
+Result[3,3]:=_3x3;
+end;
+
+function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;inline;
+begin
+Result:=SGMatrix4Import(
+	2.0 * vnear / (vright - vleft), 0, 0, 0,
+	0, 2.0 * vnear / (vtop - vbottom), 0, 0,
+	(vright + vleft) / (vright - vleft), (vtop + vbottom) / (vtop - vbottom), -(vfar + vnear) / (vfar - vnear), -1.0,
+	0,0, -2.0 * vfar * vnear / (vfar - vnear), 0);
+end;
+
+function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+var
+	vTop:Single;
+begin
+vTop := vNear * Math.tan(vAngle * 3.1415927 / 360.0);
+Result:=SGGetFrustumMatrix(
+	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
+end;
+
+function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
+var
+	vForward,vSide:TSGVertex3f;
+begin
+vForward := At - Eve;
+vForward.Normalize();
+vSide := vForward * Up;
+vSide.Normalize();
+Up := vSide * vForward;
+Result := SGMatrix4Import(
+	vside.x, up.x, -vforward.x, 0,
+	vside.y, up.y, -vforward.y, 0,
+	vside.z, up.z, -vforward.z, 0,
+	0, 0, 0, 1);
+Result *= SGMatrix4Import(
+	1,0,0,-Eve.x,
+	0,1,0,-Eve.y,
+	0,0,1,-Eve.z,
+	0,0,0,1);
+end;
+
 
 procedure TSGColor4b.ConvertType();inline;
 var
