@@ -113,6 +113,7 @@ type
 		procedure Vertex3fv(const Variable : TSGPointer);virtual;abstract;
 		procedure Normal3fv(const Variable : TSGPointer);virtual;abstract;
 		procedure MultMatrixf(const Variable : TSGPointer);virtual;abstract;
+		procedure ColorMaterial(const r,g,b,a:TSGSingle);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

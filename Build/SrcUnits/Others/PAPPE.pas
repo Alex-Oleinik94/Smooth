@@ -13943,4 +13943,16 @@ end;
 
 {$endif}
 
+procedure InitHZ();assembler;
+const
+	asd :word = $F7B;
+asm
+FLDCW asd 
+end;
+
+initialization
+begin
+InitHZ();
+end;
+
 end.

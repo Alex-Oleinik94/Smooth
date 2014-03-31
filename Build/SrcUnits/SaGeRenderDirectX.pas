@@ -96,6 +96,7 @@ type
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
 		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -183,6 +184,9 @@ type
 		FQuantitySavedMatrix : LongWord;
 		FLengthArSavedMatrix : LongWord;
 		FArSavedMatrix       : packed array of D3DMATRIX;
+		
+			(* Material *)
+		FMaterial            : D3DMATERIAL9;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -201,6 +205,12 @@ function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 
 implementation
+
+procedure TSGRenderDirectX.ColorMaterial(const r,g,b,a : TSGSingle);
+begin
+FMaterial.Diffuse:=SGRDXGetD3DCOLORVALUE(r,g,b,a);
+pDevice.SetMaterial(FMaterial);
+end;
 
 constructor TSGRDXVertexDeclarationManipulator.Create();
 begin
@@ -1034,7 +1044,6 @@ end;
 
 procedure TSGRenderDirectX.Init();
 var
-	Material:D3DMATERIAL9;
 	VectorDir:D3DXVECTOR3;
 begin
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
@@ -1051,13 +1060,13 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
  Specular - отражаемый свет. 
  Emissive - собственное свечение объекта. 
  Power - резкость отражений.}
-FillChar(Material,SizeOf(Material),0);
-Material.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
-Material.Ambient:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
-Material.Specular:=SGRDXGetD3DCOLORVALUE(0.4,0.4,0.4,1);
-Material.Emissive:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
-Material.Power:=2;
-pDevice.SetMaterial(Material);
+FillChar(FMaterial,SizeOf(FMaterial),0);
+FMaterial.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
+FMaterial.Ambient:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
+FMaterial.Specular:=SGRDXGetD3DCOLORVALUE(0.4,0.4,0.4,1);
+FMaterial.Emissive:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
+FMaterial.Power:=2;
+pDevice.SetMaterial(FMaterial);
 
 //Устанавливаем освящение
 FillChar(FLigth,SizeOf(FLigth),0);

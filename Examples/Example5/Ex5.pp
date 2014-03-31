@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-program Example1;
+program Example5;
 uses
 	{$IFDEF UNIX}
 		{$IFNDEF ANDROID}
@@ -53,8 +53,6 @@ Result := 'Пример физического движка';
 end;
 
 constructor TSGExample5.Create(const VContext : TSGContext);
-const
-	cwChop : word = $F7B;
 procedure InitCubes();
 var
 	i,j,r,x,k,y,kk:TSGLongWord;
@@ -93,9 +91,6 @@ end;
 
 begin
 inherited Create(VContext);
-asm
-FLDCW cwChop 
-end;
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.FZum := 6;
@@ -107,7 +102,7 @@ FPhysicsTimeIndex:=0;
 
 PAPPE.PhysicsInit(Physics);
 
-PhysicsInstance:=@Physics;
+PAPPE.PhysicsInstance:=@Physics;
 Physics.SweepAndPruneWorkMode:=PAPPE.sapwmAXISAUTO;
 Physics.VelocityMax:=240;
 Physics.AngularVelocityMax:=pi*8;
@@ -139,7 +134,7 @@ PAPPE.PhysicsRigidBodyInit          (Object2RigidBody,@Object2,10,0.5,0.8);
 InitCubes();
 
 Physics.Gravitation:=PAPPE.Vector3(0,-9.81*4,0);
-PhysicsStart(Physics);
+PAPPE.PhysicsStart(Physics);
 
 PhysicsTiks:=0;
 FGravitationAngle:=pi;
@@ -291,6 +286,10 @@ SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
 SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
+SGScreen.Font.DrawFontFromTwoVertex2f('Physics Time',
+	SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+	
 end;
 
 begin

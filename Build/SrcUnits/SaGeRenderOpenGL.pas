@@ -128,6 +128,7 @@ type
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
 		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -143,6 +144,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.ColorMaterial(const r,g,b,a : TSGSingle);
+begin
+Color4f(r,g,b,a);
+end;
 
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 begin

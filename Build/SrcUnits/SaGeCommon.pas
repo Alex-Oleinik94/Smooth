@@ -242,7 +242,7 @@ operator * (const a,b:SGVertex):SGVertex;inline;overload;
 
 operator + (const a,b:SGVertex):SGVertex;inline;overload;
 operator - (const a,b:SGVertex):SGVertex;inline;overload;
-operator / (const a:SGVertex;const b:real):SGVertex;inline;overload;
+operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;inline;overload;
 operator * (const a:SGVertex;const b:real):SGVertex;inline;overload;
 operator * (const b:real;const a:SGVertex):SGVertex;inline;overload;
 operator + (const a:SGVertex;const b:SGVertex2f):SGVertex;inline;overload;
@@ -286,7 +286,7 @@ operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;inline;
 
 function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
 function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
-function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
+function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;inline;
 function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline;
 function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
 //procedure SGQuad(const Vertex1:SGVertex;const Vertex2:SGVertex;const Vertex3:SGVertex;const Vertex4:SGVertex);
@@ -518,34 +518,33 @@ Vertexes[0].y+=r;
 Vertexes[1].y+=r;
 end;
 
-procedure TSGVertex3f.WriteLn;inline;
+procedure TSGVertex3f.WriteLn();inline;
 begin
-Write;
+Self.Write();
 System.WriteLn()
 end;
 
-procedure TSGVertex3f.Write;inline;
+procedure TSGVertex3f.Write();inline;
 begin
-inherited Write;
-System.Write(' ',z:0:10)
+System.Write(x:0:10,' ',y:0:10,' ',z:0:10)
 end;
 
-procedure TSGVertex2f.Write;inline;
+procedure TSGVertex2f.Write();inline;
 begin
 System.Write(x:0:10,' ',y:0:10);
 end;
 
-procedure TSGVertex2f.WriteLn;inline;
+procedure TSGVertex2f.WriteLn();inline;
 begin
-Write;
-System.Writeln;
+Self.Write();
+System.Writeln();
 end;
 
 procedure TSGScreenVertexes.Write;inline;
 begin
-Vertexes[0].Write;
+Vertexes[0].Write();
 System.Write(' ');
-Vertexes[1].WriteLn;
+Vertexes[1].WriteLn();
 end;
 
 operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
@@ -1245,14 +1244,14 @@ y:=y1;
 z:=z1;
 end;
 
-function SGVertexImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
+function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;inline;
 begin
-Result.x:=x;
-Result.y:=y;
-Result.z:=z;
+Result.x:=vx;
+Result.y:=vy;
+Result.z:=vz;
 end;
 
-operator / (const a:SGVertex;const b:real):SGVertex;inline;
+operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;inline;
 begin
 Result.x:=a.x/b;
 Result.y:=a.y/b;

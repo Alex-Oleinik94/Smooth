@@ -6,11 +6,11 @@ interface
 
 uses 
 	 crt
-	 ,SaGeBase
+	,SaGeBase
 	,SaGeContext
 	,SaGeModel
 	,SaGeScene
-	,SaGePhisics
+	,SaGeGamePhysics
 	,SaGeGameNet
 	,SaGeNet
 	,SaGeLoading
@@ -51,7 +51,7 @@ begin
 while FLoadClass.Progress < 1 do
 	begin
 	FLoadClass.Progress := FLoadClass.Progress + 0.01;
-	Delay(1);
+	Crt.Delay(1);
 	end;
 FLoadClass.Progress:=1.0001;
 end;
@@ -68,7 +68,7 @@ FScene:=nil;
 FLoadClass:=nil;
 FLoadThread:=nil;
 FScene := TSGScene.Create(VContext);
-FScene.AddMutator(TSGPhisics2D);
+FScene.AddMutator(TSGPhysics3D);
 (FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
 FScene.Camera.ViewMode := SG_VIEW_FOLLOW_OBJECT;
 FLoadClass := TSGLoading.Create(Context);

@@ -1197,8 +1197,7 @@ const
 // GL_UNSIGNED_SHORT - Word - 2
 // GL_UNSIGNED_BYTE - Byte - 1
 begin
-
-FObjectColor.Color(Render);
+Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1318,6 +1317,8 @@ if FHasTexture then
 	Render.DisableClientState(SGR_TEXTURE_COORD_ARRAY);
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
+
+Render.ColorMaterial(1,1,1,1);
 end;
 
 procedure TSG3dObject.LoadToVBO();
