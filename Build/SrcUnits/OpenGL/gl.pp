@@ -2257,7 +2257,7 @@ initialization
   LoadOpenGL('opengl32.dll');
   {$ELSE}
   {$ifdef darwin}
-  LoadOpenGL('/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib');
+  LoadOpenGL('/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib');
   {$ELSE}
   {$IFDEF MorphOS}
   InitTinyGLLibrary;

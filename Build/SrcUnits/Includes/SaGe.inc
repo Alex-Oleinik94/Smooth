@@ -30,5 +30,5 @@
 {$NOTES OFF}
 {$HINTS OFF}
 
-//{$DEFINE SGDebuging}
+{$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
