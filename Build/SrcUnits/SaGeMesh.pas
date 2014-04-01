@@ -244,10 +244,6 @@ type
         // Процедурка очищает оперативную память от массивов этого класса
         procedure ClearArrays(const ClearN:Boolean = True);
 			public
-		// Сохраняет модельку в поток
-        procedure SaveToStream(const Stream: TStream);virtual;
-        // Зашружает модельку из потока
-        procedure LoadFromStream(const Stream: TStream);virtual;
         // Эта процедурка автоматически выделяет память под нормали и вычесляет их, исходя из данных вершин
         procedure AddNormals();virtual;
         // =) Subserf
@@ -446,20 +442,23 @@ var
 	Plane:SGPlane;
 	Vertex:TSGVertex;
 begin
-if FHasNormals or (FPoligonesType<>SGR_TRIANGLES) then
+if (FPoligonesType<>SGR_TRIANGLES) then
 	Exit;
-ii:=GetSizeOfOneVertex();
-iii:=ii+3*SizeOf(Single);
-GetMem(SecondArVertex,iii*FNOfVerts);
-for i:=0 to FNOfVerts-1 do
-	Move(
-		PByte(ArVertex)[i*ii],
-		PByte(SecondArVertex)[i*iii],
-		ii);
-FreeMem(ArVertex);
-ArVertex:=SecondArVertex;
-SecondArVertex:=nil;
-FHasNormals:=True;
+if not FHasNormals then
+	begin
+	ii:=GetSizeOfOneVertex();
+	iii:=ii+3*SizeOf(Single);
+	GetMem(SecondArVertex,iii*FNOfVerts);
+	for i:=0 to FNOfVerts-1 do
+		Move(
+			PByte(ArVertex)[i*ii],
+			PByte(SecondArVertex)[i*iii],
+			ii);
+	FreeMem(ArVertex);
+	ArVertex:=SecondArVertex;
+	SecondArVertex:=nil;
+	FHasNormals:=True;
+	end;
 SetLength(ArPoligonesNormals,FNOfFaces);
 for i:=0 to FNOfFaces-1 do
 	begin
@@ -489,47 +488,6 @@ for i:=0 to FNOfVerts-1 do
 	ArNormal[i]^:=Vertex;
 	end;
 SetLength(ArPoligonesNormals,0);
-end;
-
-procedure TSG3DObject.LoadFromStream(const Stream: TStream);
-begin
-Stream.ReadBuffer(FObjectColor,SizeOf(FObjectColor));
-Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
-Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
-Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
-Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
-Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
-Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
-Stream.ReadBuffer(FColorType,SizeOf(FColorType));
-
-FName:=SGReadStringFromStream(Stream);
-
-if ArVertex<>nil then
-	FreeMem(ArVertex);
-GetMem(ArVertex,GetSizeOfOneVertex()*FNOfVerts);
-Stream.ReadBuffer(PByte(ArVertex)^,FNOfVerts*GetSizeOfOneVertex());
-
-SetFaceLength(FNOfFaces);
-Stream.ReadBuffer(ArFaces[0],Length(ArFaces)*SizeOf(TSGFaceType));
-end;
-
-procedure TSG3DObject.SaveToStream(const Stream: TStream);
-begin
-Stream.WriteBuffer(FObjectColor,SizeOf(FObjectColor));
-Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
-Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
-Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
-Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
-Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
-Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
-Stream.WriteBuffer(FColorType,SizeOf(FColorType));
-SGWriteStringToStream(FName,Stream);
-Stream.WriteBuffer(PByte(ArVertex)^,FNOfVerts*GetSizeOfOneVertex());
-Stream.WriteBuffer(ArFaces[0],Length(ArFaces)*SizeOf(TSGFaceType));
 end;
 
 procedure TSG3DObject.AddFace(const FQuantityNewFaces:LongWord = 1);
@@ -1136,6 +1094,7 @@ Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
 Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
 Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.WriteBuffer(FHasIndexes,SizeOf(FHasIndexes));
 Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
 Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
@@ -1172,6 +1131,7 @@ if Version <> SGMeshVersion then
 Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
 Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
+Stream.ReadBuffer(FHasIndexes,SizeOf(FHasIndexes));
 Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
 Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));

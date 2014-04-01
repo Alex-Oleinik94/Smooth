@@ -2,6 +2,7 @@ Build/AndroidTools/CodeResourses
 Build/AndroidTools/SaGe
 Build/AndroidTools/Libs/platforms
 FPC
+Temp
 Data/EngineLog.log
 Build/CompiledUnits
 Build/SrcUnits/Temp

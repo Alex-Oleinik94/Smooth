@@ -172,6 +172,9 @@ const
 		{$ELSE}
 			SGDataDirectory + Slash +'Images'
 		{$ENDIF};
+	{$IF (not defined(RELEASE)) and (not defined(MOBILE))}
+		SGTempDirectory = '.'+Slash+'..'+Slash+'Temp';
+		{$ENDIF}
 var
 	//≈сли эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
 	//и самого файлика лога SGLog.Create не создаст
