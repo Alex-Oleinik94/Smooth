@@ -40,6 +40,10 @@ clear:
 	@$(MAKE) clear_files
 	@rm -f CompiledUnits/arm-android/*
 	@rm -f CompiledUnits/i386-other/*
+	@rm -f CompiledUnits/*.o
+	@rm -f CompiledUnits/*.ppu
+	@rm -f CompiledUnits/*.res
+	@rm -f CompiledUnits/*.or
 	@rm -f *.o
 	@rm -f *.ppu
 	@rm -f *.or

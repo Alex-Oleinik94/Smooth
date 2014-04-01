@@ -210,9 +210,9 @@ type
 		constructor Create;
 		destructor Destroy;override;
 			public
-		FButtonsType:SGFrameButtonsType;
-		FIcon:TSGImage;
-		FRePlace:Boolean;
+		FButtonsType : SGFrameButtonsType;
+		FIcon        : TSGImage;
+		FRePlace     : Boolean;
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
@@ -1565,27 +1565,34 @@ procedure TSGForm.FromDraw;
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
-	SGRoundWindowQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_CHILDREN)),
-		SGAbsTwoVertex(
-			SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
-			SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
-		SGAbsTwoVertex(
-			SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
-			SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
-		10,
-		SGColorImport(
-			1,1,1,0.5*FVisibleTimer),
-		SGColorImport(
-			0,1,1,0.3*FVisibleTimer),
-		True,
-		SGColorImport(
-			1,1,1,0.5*FVisibleTimer)*1.3,
-		SGColorImport(
-			0,1,1,0.3*FVisibleTimer)*1.3);
+	if FVisibleTimer>SGZero then
+		begin
+		SGRoundWindowQuad(Render,
+			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)),
+			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_CHILDREN)),
+			SGAbsTwoVertex(
+				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
+				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
+			SGAbsTwoVertex(
+				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
+				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
+			10,
+			SGColorImport(
+				0,1,1,0.5*FVisibleTimer),
+			SGColorImport(
+				1,1,1,0.3*FVisibleTimer),
+			True,
+			SGColorImport(
+				0,1,1,0.5*FVisibleTimer)*1.3,
+			SGColorImport(
+				1,1,1,0.3*FVisibleTimer)*1.3);
+		Render.Color4f(1,1,1,FVisibleTimer);
+		Font.DrawFontFromTwoVertex2f(FCaption,
+			SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
+		end;
 	end;
 inherited FromDraw;
 end;

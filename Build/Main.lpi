@@ -96,7 +96,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="SrcUnits;$(ProjOutDir);SrcUnits\Includes;SrcUnits\Inet\sys"/>
-      <OtherUnitFiles Value="SrcUnits;SrcUnits\Inet;SrcUnits\Inet\sys;SrcUnits\Includes;SrcUnits\DirectX;SrcUnits\OpenGL"/>
+      <OtherUnitFiles Value="SrcUnits;SrcUnits\Inet;SrcUnits\Inet\sys;SrcUnits\Includes;SrcUnits\DirectX;SrcUnits\OpenGL;SrcUnits\Others"/>
       <UnitOutputDirectory Value="CompiledUnits"/>
       <SrcPath Value="$(ProjOutDir)"/>
     </SearchPaths>

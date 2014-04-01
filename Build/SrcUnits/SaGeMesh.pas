@@ -1547,16 +1547,17 @@ procedure TSGCustomModel.Draw();
 var
     i: TSGLongWord;
 begin
-for i := 0 to FQuantityObjects - 1 do
-	if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and 
-	((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or(FArMaterials[FArObjects[i].MaterialID].Ready)) then
-		begin
-		FArMaterials[FArObjects[i].MaterialID].BindTexture();
-		FArObjects[i].Draw();
-		FArMaterials[FArObjects[i].MaterialID].DisableTexture();
-		end
-	else
-		FArObjects[i].Draw();
+if FQuantityObjects<>0 then
+	for i := 0 to FQuantityObjects - 1 do
+		if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and 
+		((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or(FArMaterials[FArObjects[i].MaterialID].Ready)) then
+			begin
+			FArMaterials[FArObjects[i].MaterialID].BindTexture();
+			FArObjects[i].Draw();
+			FArMaterials[FArObjects[i].MaterialID].DisableTexture();
+			end
+		else
+			FArObjects[i].Draw();
 end;
 
 function TSGCustomModel.AddMaterial():TSGImage;inline;

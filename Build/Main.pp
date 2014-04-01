@@ -64,6 +64,7 @@ uses
 	,SaGeLoading
 	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
 	,PAPPE
+	,SaGeModelRedactor
 	;
 
 procedure Draw(const Context:TSGContext);
@@ -74,6 +75,7 @@ procedure Init(const MyContext:TSGContext);
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGModelRedactor);
 	Add(TSGGameTron);
 	Add(TSGLoading);
 	Add(TSGFractalMengerSpunchRelease);
