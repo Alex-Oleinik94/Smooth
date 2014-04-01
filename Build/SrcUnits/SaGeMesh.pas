@@ -880,7 +880,7 @@ end;
 
 procedure TSG3DObject.WriteInfo(const PredStr:string = '');
 begin
-WriteLn('TSG3DObject__WriteInfo(string)');
+WriteLn('TSG3DObject__WriteInfo()');
 WriteLn(PredStr,'FNOfVerts = ',FNOfVerts);
 WriteLn(PredStr,'FNOfFaces = ',FNOfFaces,'; RealFaceLength = ',GetFaceLength);
 WriteLn(PredStr,'FHasColors = ',FHasColors);
@@ -1459,11 +1459,19 @@ procedure TSGCustomModel.WriteInfo();
 var
 	i : TSGLongWord;
 begin
-WriteLn('TSGModel.WriteInfo');
-WriteLn('  QuantityObjects = ',FQuantityObjects);
+WriteLn('TSGModel.WriteInfo()');
 WriteLn('  QuantityMaterials = ',FQuantityMaterials);
-for i:=0 to FQuantityObjects-1 do
-	FArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
+if FQuantityMaterials<>0 then
+	for i:=0 to FQuantityMaterials-1 do
+		begin
+		WriteLn('  ',I+1,')');
+		if (FArMaterials[i]<>nil) and (FArMaterials[i].Image<>nil) then
+			FArMaterials[i].Image.WriteInfo();
+		end;
+WriteLn('  QuantityObjects = ',FQuantityObjects);
+if FQuantityObjects <> 0 then
+	for i:=0 to FQuantityObjects-1 do
+		FArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
 end;
 
 

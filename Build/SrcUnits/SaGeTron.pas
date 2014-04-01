@@ -70,7 +70,7 @@ FLoadThread:=nil;
 FScene := TSGScene.Create(VContext);
 FScene.AddMutator(TSGPhysics3D);
 (FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
-FScene.Camera.ViewMode := SG_VIEW_FOLLOW_OBJECT;
+FScene.Camera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 FLoadClass := TSGLoading.Create(Context);
 FLoadClass.Progress := 0;
 FLoadThread := TSGThread.Create(TSGThreadProcedure(@LoadThread),Self,False);

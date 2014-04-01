@@ -97,6 +97,8 @@ type
 		procedure Normal3fv(const Variable : TSGPointer);override;
 		procedure MultMatrixf(const Variable : TSGPointer);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
+		procedure MatrixMode(const Par:TSGLongWord);override;
+		procedure LoadMatrixf(const Variable : TSGPointer);override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -187,6 +189,9 @@ type
 		
 			(* Material *)
 		FMaterial            : D3DMATERIAL9;
+		
+			(* Matrix Mode *)
+		FNowMatrixMode : TSGLongWord;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -293,7 +298,7 @@ procedure TSGRenderDirectX.PushMatrix();
 begin
 if FQuantitySavedMatrix+1<=FLengthArSavedMatrix then
 	begin
-	pDevice.GetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix]);
+	pDevice.GetTransform(FNowMatrixMode,FArSavedMatrix[FQuantitySavedMatrix]);
 	FQuantitySavedMatrix+=1;
 	end
 else
@@ -301,7 +306,7 @@ else
 	FQuantitySavedMatrix+=1;
 	FLengthArSavedMatrix+=1;
 	SetLength(FArSavedMatrix,FLengthArSavedMatrix);
-	pDevice.GetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix-1]);
+	pDevice.GetTransform(FNowMatrixMode,FArSavedMatrix[FQuantitySavedMatrix-1]);
 	end;
 end;
 
@@ -311,7 +316,7 @@ if FQuantitySavedMatrix=0 then
 	SGLog.Sourse('TSGRenderDirectX.PopMatrix : Pop matrix before pushing')
 else
 	begin
-	pDevice.SetTransform(D3DTS_VIEW,FArSavedMatrix[FQuantitySavedMatrix-1]);
+	pDevice.SetTransform(FNowMatrixMode,FArSavedMatrix[FQuantitySavedMatrix-1]);
 	FQuantitySavedMatrix-=1;
 	end;
 end;
@@ -439,23 +444,28 @@ FNowColor:=D3DCOLOR_ARGB(
 	Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b));
 end;
 
+procedure TSGRenderDirectX.LoadMatrixf(const Variable : TSGPointer);
+begin
+pDevice.SetTransform(FNowMatrixMode,PD3DMATRIX(Variable)^);
+end;
+
 procedure TSGRenderDirectX.MultMatrixf(const Variable : TSGPointer);
 var
 	Matrix1,MatrixOut:D3DMATRIX;
 begin 
-pDevice.GetTransform(D3DTS_VIEW,Matrix1);
+pDevice.GetTransform(FNowMatrixMode,Matrix1);
 D3DXMatrixMultiply(MatrixOut,PD3DMATRIX(Variable)^,Matrix1);
-pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
+pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Translatef(const x,y,z:single); 
 var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 begin 
-pDevice.GetTransform(D3DTS_VIEW,Matrix1);
+pDevice.GetTransform(FNowMatrixMode,Matrix1);
 D3DXMatrixTranslation(Matrix2,x,y,z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
-pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
+pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Rotatef(const angle:single;const x,y,z:single); 
@@ -466,10 +476,10 @@ begin
 v.x:=x;
 v.y:=y;
 v.z:=z;
-pDevice.GetTransform(D3DTS_VIEW,Matrix1);
+pDevice.GetTransform(FNowMatrixMode,Matrix1);
 D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
 D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
-pDevice.SetTransform(D3DTS_VIEW,MatrixOut);
+pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
@@ -1217,6 +1227,21 @@ pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 
 D3DXMatrixTranslation(Matrix,-(x0+x1)/2,-(y0+y1)/2,0);
 pDevice.SetTransform(D3DTS_VIEW, Matrix);
+FNowMatrixMode:=D3DTS_WORLD;
+LoadIdentity();
+FNowMatrixMode:=D3DTS_VIEW;
+end;
+
+procedure TSGRenderDirectX.MatrixMode(const Par:TSGLongWord);
+begin
+case Par of
+SGR_PROJECTION:
+	FNowMatrixMode:=D3DTS_PROJECTION;
+SGR_MODELVIEW:
+	FNowMatrixMode:=D3DTS_VIEW;
+else 
+	FNowMatrixMode:=D3DTS_WORLD;
+end;
 end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
@@ -1227,6 +1252,9 @@ var
 begin
 CWidth:=LongWord(FWindow.Get('WIDTH'));
 CHeight:=LongWord(FWindow.Get('HEIGHT'));
+FNowMatrixMode:=D3DTS_WORLD;
+LoadIdentity();
+FNowMatrixMode:=D3DTS_VIEW;
 LoadIdentity();
 if Mode=SG_3D then
 	begin
@@ -1263,9 +1291,7 @@ var
 	Matrix:D3DMATRIX;
 begin
 D3DXMatrixIdentity(Matrix);
-pDevice.SetTransform(D3DTS_WORLD,Matrix);
-pDevice.SetTransform(D3DTS_VIEW,Matrix);
-pDevice.SetTransform(D3DTS_PROJECTION,Matrix);
+pDevice.SetTransform(FNowMatrixMode,Matrix);
 end;
 
 

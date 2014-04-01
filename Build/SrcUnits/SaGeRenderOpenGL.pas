@@ -129,6 +129,8 @@ type
 		procedure Normal3fv(const Variable : TSGPointer);override;
 		procedure MultMatrixf(const Variable : TSGPointer);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
+		procedure MatrixMode(const Par:TSGLongWord);override;
+		procedure LoadMatrixf(const Variable : TSGPointer);override;
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -164,6 +166,11 @@ end;
 procedure TSGRenderOpenGL.Normal3fv(const Variable : TSGPointer);
 begin
 glNormal3fv(Variable);
+end;
+
+procedure TSGRenderOpenGL.LoadMatrixf(const Variable : TSGPointer);
+begin
+glLoadMatrixf(Variable);
 end;
 
 procedure TSGRenderOpenGL.MultMatrixf(const Variable : TSGPointer);
@@ -593,6 +600,11 @@ begin
 		{$ENDIF}
 	{$ENDIF}
 inherited;
+end;
+
+procedure TSGRenderOpenGL.MatrixMode(const Par:TSGLongWord);
+begin
+glMatrixMode(Par);
 end;
 
 procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);

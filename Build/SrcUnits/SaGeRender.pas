@@ -114,6 +114,8 @@ type
 		procedure Normal3fv(const Variable : TSGPointer);virtual;abstract;
 		procedure MultMatrixf(const Variable : TSGPointer);virtual;abstract;
 		procedure ColorMaterial(const r,g,b,a:TSGSingle);virtual;abstract;
+		procedure MatrixMode(const Par:TSGLongWord);virtual;abstract;
+		procedure LoadMatrixf(const Variable : TSGPointer);virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

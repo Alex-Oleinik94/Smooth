@@ -16,6 +16,7 @@ const
 	SGPBodySphere  = PAPPE.BodySphere;
 	SGPBodyBox     = PAPPE.BodyBox;
 	SGPBodyCapsule = PAPPE.BodyCapsule;
+	SGPBodyMesh    = PAPPE.BodyMesh;
 type
 	TSGPhysics=class;
 	
@@ -36,6 +37,7 @@ type
 		procedure InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
 		procedure InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
 		procedure InitMesh (const Mesh : TSG3DObject);
+		procedure SetDrawableMesh(const Mesh : TSG3DObject);
 		procedure SetVertex( const x,y,z : TSGVertexType );inline;overload;
 		procedure SetVertex( const v : TSGVertex3f );inline;overload;
 		procedure RotateX(const rx : TSGVertexType );inline;overload;
@@ -65,6 +67,8 @@ type
 		FDrawable : TSGBoolean;
 			private
 		function  GetGravitation():TSGVertex3f;inline;
+		function GetObjectCount():TSGLongWord;inline;
+		function GetObject(const Index : TSGLongWord):TSGPhysicsObject;inline;
 			public
 		procedure AddObjectBegin(const VType : TSGLongWord; const VDynamic: TSGBoolean);
 		function LastObject():TSGPhysicsObject;inline;
@@ -76,9 +80,24 @@ type
 		property AngularVelocityMax : TSGSingle   read FPhysics.AngularVelocityMax write FPhysics.AngularVelocityMax;
 		property Gravitation        : TSGVertex3f read GetGravitation;
 		property Drawable           : TSGBoolean  read FDrawable                   write FDrawable;
+		property Objects[Index : TSGLongWord]:TSGPhysicsObject read GetObject;
+		property ObjectsCount       : TSGLongWord read GetObjectCount;
 		end;
 
 implementation
+
+function TSGPhysics.GetObjectCount():TSGLongWord;inline;
+begin
+if FObjects<>nil then
+	Result:=Length(FObjects)
+else
+	Result:=0;
+end;
+
+function TSGPhysics.GetObject(const Index : TSGLongWord):TSGPhysicsObject;inline;
+begin
+Result:=FObjects[Index];
+end;
 
 procedure TSGPhysics.AddLigth(const VNumber : TSGLongWord;const VLocation : TSGVertex3f);inline;
 begin
@@ -133,6 +152,7 @@ else
 FObjects[High(FObjects)]:=TSGPhysicsObject.Create(Context);
 FObjects[High(FObjects)].FDynamic := VDynamic;
 FObjects[High(FObjects)].FType := VType;
+FObjects[High(FObjects)].PhysicsClass:=Self;
 if VDynamic then
 	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType)
 else
@@ -311,7 +331,7 @@ end;
 begin
 if FDynamic then
 	PAPPE.PhysicsRigidBodyInit(FRigidBody,@FObject,x,y,z);
-if FPhysicsClass.Drawable then
+if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	begin
 	FMesh := TSG3DObject.Create();
 	FMesh.Context := Context;
@@ -401,5 +421,11 @@ PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[ii]^);
 PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
+procedure TSGPhysicsObject.SetDrawableMesh(const Mesh : TSG3DObject);
+begin
+if (FMesh<>nil) and (FMesh<>Mesh) then
+	FMesh.Destroy();
+FMesh:=Mesh;
+end;
 
 end.

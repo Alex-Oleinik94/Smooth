@@ -496,7 +496,14 @@ end;
 			s:=SGGetComand(s);
 			if s='CTSGIA' then
 				begin
-				SGConvertToSGIA(SGPCharToString(argv[2]),SGPCharToString(argv[3]));
+				if (SGUpCaseString(SGPCharToString(argv[2]))='-H') or (SGUpCaseString(SGPCharToString(argv[2]))='-HELP') then
+					begin
+					WriteLn('Use "-CTSGIA P1 P2".');
+					WriteLn('    P1 is way to input file, for example "/images/qwerty/asdfgh.png".');
+					WriteLn('    P2 is way to output file, for example "/images/qwerty/asdfgh.sgia".');
+					end
+				else
+					SGConvertToSGIA(SGPCharToString(argv[2]),SGPCharToString(argv[3]));
 				end
 			else if s='CRF' then
 				begin
@@ -555,8 +562,9 @@ end;
 				WriteLn('   -DLLSCAN                     : for run scanning dll for procedures');
 				WriteLn('   -IR                          : for run image resizer');
 				WriteLn('   -H;-HELP                     : for view help');
-				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 				WriteLn('   -CFTPU                       : for convert file to pascal unit');
+				WriteLn('   -CTSGIA                      : for convert image to SGIA format');
+				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 				end
 			else
 				begin

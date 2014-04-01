@@ -14,6 +14,7 @@ uses
 	,SaGeMesh
 	,SaGeImagesBase
 	,SaGeResourseManager
+	,PAPPE
 	;
 type
 	TSGFont=class;
@@ -21,10 +22,8 @@ type
 (*============================TSGCamera===============================*)
 (*====================================================================*)
 const
-	SG_VIEW_WATCH_OBJECT       = $001001;
-	SG_VIEW_FOLLOW_OBJECT      = $001002;
-	SG_VIEW_BEFORE_OBJECT      = $001003;
-	SG_VIEW_AFAR_FOLLOW_OBJECT = $001004;
+	SG_VIEW_WATCH_OBJECT        = $001001;
+	SG_VIEW_LOOK_AT_OBJECT      = $001002;
 type
 	TSGCamera=class(TSGContextObject)
 			public
@@ -34,8 +33,9 @@ type
 		FViewMode  : TSGExByte; // SG_VIEW_...
 			// for SG_VIEW_WATCH_OBJECT
 		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSGSingle;
-			// for SG_VIEW_FOLLOW_OBJECT, SG_VIEW_BEFORE_OBJECT, SG_VIEW_AFAR_FOLLOW_OBJECT
-		FPosition : TSGPosition;
+			// for SG_VIEW_LOOK_AT_OBJECT
+		FLocation : TSGVertex3f;
+		FView   :TSGVertex3f;
 		FUp : TSGVertex3f;
 		procedure Change();inline;
 			public
@@ -46,7 +46,8 @@ type
 		procedure InitViewModeComboBox();virtual;abstract;
 			public
 		property Up        : TSGVertex3f read FUp         write FUp;
-		property Position  : TSGPosition read FPosition   write FPosition;
+		property Location  : TSGVertex3f read FLocation   write FLocation;
+		property View      : TSGVertex3f read FView       write FView;
 		property MatrixMode: TSGExByte   read FMatrixMode write FMatrixMode;
 		property ViewMode  : TSGExByte   read FViewMode   write FViewMode;
 		end;
@@ -496,7 +497,8 @@ begin
 inherited;
 FMatrixMode:=SG_3D;
 FViewMode:=SG_VIEW_WATCH_OBJECT;
-Fillchar(FPosition,SizeOf(FPosition),0);
+FLocation.Import();
+FView.Import();
 FUp.Import(0,0,0);
 Clear();
 end;
@@ -533,23 +535,38 @@ SG_VIEW_WATCH_OBJECT:
 		FZum*=0.89;
 		end;
 	end;
-SG_VIEW_FOLLOW_OBJECT,SG_VIEW_AFAR_FOLLOW_OBJECT:
-	begin
-	
-	end;
-SG_VIEW_BEFORE_OBJECT:
-	begin
-	
-	end;
 end;
 end;
 
 procedure TSGCamera.InitMatrix();inline;
+var
+	Matrix:TSGMatrix4;
 begin
-Render.InitMatrixMode(FMatrixMode,FZum);
-Render.Translatef(FTranslateX,FTranslateY,-10*FZum);
-Render.Rotatef(FRotateX,1,0,0);
-Render.Rotatef(FRotateY,0,1,0);
+case FViewMode of
+SG_VIEW_WATCH_OBJECT:
+	begin
+	Render.InitMatrixMode(FMatrixMode,FZum);
+	Render.Translatef(FTranslateX,FTranslateY,-10*FZum);
+	Render.Rotatef(FRotateX,1,0,0);
+	Render.Rotatef(FRotateY,0,1,0);
+	end;
+SG_VIEW_LOOK_AT_OBJECT:
+	begin
+	FLocation.Normalize();
+	FView.Normalize();
+	FUp.Normalize();
+	Matrix:=SGGetLookAtMatrix(FLocation,FView,FUp);
+	{Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(
+		TPhysicsVector3(FLocation),TPhysicsVector3(FView),TPhysicsVector3(FUp)
+		));}
+	Render.MatrixMode(SGR_PROJECTION);
+	Render.LoadIdentity();
+	Render.LoadMatrixf(@Matrix);
+	Render.MatrixMode(SGR_MODELVIEW);
+	Render.LoadIdentity();
+	Render.Enable(SGR_DEPTH_TEST);
+	end;
+end;
 end;
 
 procedure TSGCamera.CallAction();inline;
@@ -955,7 +972,10 @@ var
 	Otstup:SGVertex2f = (x:0;y:0);
 	ToExit:Boolean = False;
 	ThisSimbolWidth:LongWord = 0;
+	DXShift : TSGSingle = 0;
 begin
+if Render.RenderType=SGRenderDirectX then
+	DXShift:=0.5;
 BindTexture();
 StringWidth:=StringLength(S);
 if AutoXShift then
@@ -978,17 +998,17 @@ while (s[i]<>#0) and (not ToExit) do
 		ThisSimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
 		end;
 	Render.BeginScene(SGR_QUADS);
-	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
+	Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
 	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth)/Self.Width,
+		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
 		1-(Self.FSimbolParams[s[i]].y/Self.Height));
 	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
 	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth)/Self.Width,
+		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
 		1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
 	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	Render.TexCoord2f(Self.FSimbolParams[s[i]].x/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
+	Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
 	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
 	Render.EndScene();
 	Otstup.x+=FSimbolParams[s[i]].Width;
