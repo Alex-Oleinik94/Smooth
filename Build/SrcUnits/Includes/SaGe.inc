@@ -30,7 +30,7 @@
 {$NOTES OFF}
 {$HINTS OFF}
 
-//{$DEFINE SGDebuging}
+{$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
 
 {$IF defined(CPU386) and (not defined(ANDROID)) and defined(CPU32)}

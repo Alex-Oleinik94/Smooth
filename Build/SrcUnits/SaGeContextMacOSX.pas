@@ -10,7 +10,8 @@ uses
 	,SaGeRender
 	,SaGeContext
 	,MacOSAll
-	,unix;
+	,unix
+	,agl;
 	
 type
 	TSGContextMacOSX=class(TSGContext)
@@ -64,9 +65,7 @@ end;
 
 function TSGContextMacOSX.GetScreenResolution:TSGPoint2f;
 begin
-Result.Import(
-	XWidthOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)),
-	XHeightOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)));
+
 end;
 
 function TSGContextMacOSX.GetCursorPosition:TSGPoint2f;
@@ -153,7 +152,7 @@ var
 	status : OSStatus;
 	ScreenRS:TSGPoint2f;
 begin 
-Result:=InitAGL();
+Result:=agl.InitAGL();
 if not Result then
 	Exit;
 ScreenRS:=GetScreenResolution();
