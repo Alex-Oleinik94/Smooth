@@ -1,6 +1,13 @@
-* Phisics
+* Model to Physics
+* Camera
+* Редактор сцены (
+	* Точки превязки камеры
+	* Загрузка и связка физической модели и графической
+	)
+* Game Thron (
+	* Редактор интерфейса
+	)
 * Fullscreen on Linux
-* Game Thron
 * Sceletal Animation
 * COntext Android
 * Context iOS

@@ -1,4 +1,4 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeBased;
 
@@ -40,10 +40,10 @@ type
  procedure Windows1251ToOEM866(var Str: TSGString);
  
  { Swap }
- procedure Swap(var x, y : TSGInteger); {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
+ procedure Swap(var x, y : TSGInteger); {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
  
  { TYPE To TYPE }
- function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFNDEF ANDROID} assembler; register; {$ENDIF} overload;
+ function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
  
  { Operator's ** }
  operator ** (const a, b: TSGFloat) 	: TSGFloat; 	inline; overload; 
@@ -719,8 +719,8 @@ begin
 end;
 
 procedure Swap(var x, y : TSGInteger); 
-{$IF defined(CPU386) and (not defined(ANDROID))} assembler; register; {$ENDIF} overload;
-{$IF defined(CPU386) and (not defined(ANDROID))}
+{$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
+{$IFDEF WITHASMINC}
 	asm
 	xchg [edx], ecx
 	xchg [eax], ecx
@@ -737,8 +737,8 @@ procedure Swap(var x, y : TSGInteger);
 	{$ENDIF}
 
 function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; 
-{$IF defined(CPU386) and (not defined(ANDROID))} assembler; register; {$ENDIF}  overload;
-{$IF defined(CPU386) and (not defined(ANDROID))}
+{$IFDEF WITHASMINC} assembler; register; {$ENDIF}  overload;
+{$IFDEF WITHASMINC}
 	asm
 		cbw
 		cwde

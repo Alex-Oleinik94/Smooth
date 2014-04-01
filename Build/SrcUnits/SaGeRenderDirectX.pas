@@ -475,6 +475,10 @@ end;
 procedure TSGRenderDirectX.Enable(VParam:Cardinal); 
 begin
 case VParam of
+SGR_DEPTH_TEST:
+	begin
+	pDevice.SetRenderState(D3DRS_ZENABLE, 1);
+	end;
 SGR_LIGHTING:
 	begin
 	pDevice.SetRenderState(D3DRS_LIGHTING,1);
@@ -489,6 +493,10 @@ end;
 procedure TSGRenderDirectX.Disable(const VParam:Cardinal); 
 begin 
 case VParam of
+SGR_DEPTH_TEST:
+	begin
+	pDevice.SetRenderState(D3DRS_ZENABLE, 0);
+	end;
 SGR_TEXTURE_2D:
 	begin
 	FNowTexture:=0;
@@ -1050,10 +1058,10 @@ FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
 FNowTexture:=0;
 
-//Включаем Z-буфер
+//==========Включаем Z-буфер
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
-//Устанавливаем материал
+//==========Устанавливаем материал
 (*Справка!*)
 {Diffuse - рассеиваемый свет. 
  Ambient - фоновый свет. 
@@ -1068,7 +1076,7 @@ FMaterial.Emissive:=SGRDXGetD3DCOLORVALUE(0,0,0,0);
 FMaterial.Power:=2;
 pDevice.SetMaterial(FMaterial);
 
-//Устанавливаем освящение
+//=========Устанавливаем освящение
 FillChar(FLigth,SizeOf(FLigth),0);
 FLigth._Type:=D3DLIGHT_POINT;
 FLigth.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
@@ -1110,23 +1118,23 @@ pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 //Чето это сильно мутит, линии колбасу напоминают от этого параметра
 //pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
 
-//Линейная фильтрация текстур
+//========Линейная фильтрация текстур
 pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 //От MIP фильтора у текстур возникают аномалии
 //pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
 
-//Tочечьная фильтрация текстур
+//========Tочечьная фильтрация текстур
 (*pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);*)
 
-//Анизатропная фильтрация текстур
+//=========Анизатропная фильтрация текстур
 (*pDevice.SetSamplerState(0,D3DSAMP_MAGFILTER,D3DTEXF_ANISOTROPIC);
 pDevice.SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_ANISOTROPIC);
 pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 4);*)
 
-//Фильтр детализации текстур 
-//(Чтобы при загрузке текстур генерировались несколько текстур, разного расширения)
+//========Фильтр детализации текстур 
+//(Чтобы при загрузке текстур генерировались несколько текстур, разного разрешения)
 pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_NONE);
 //pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_POINT);
 //pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_LINEAR);
@@ -1224,6 +1232,7 @@ if Mode=SG_3D then
 	begin
 	Matrix:=D3DMATRIX(SGGetPerspectiveMatrix(45,CWidth/CHeight,0.0011,500));
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+	Enable(SGR_DEPTH_TEST);
 	end
 else
 	if Mode=SG_3D_ORTHO then
@@ -1232,6 +1241,7 @@ else
 		D3DXMatrixScaling(Matrix2,1,1,-1);
 		D3DXMatrixMultiply(Matrix,Matrix1,Matrix2);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+		Enable(SGR_DEPTH_TEST);
 		end
 	else if Mode=SG_2D then
 		begin
@@ -1239,6 +1249,7 @@ else
 		D3DXMatrixTranslation(Matrix2,-CWidth/2,-CHeight/2,0);
 		D3DXMatrixMultiply(Matrix,Matrix2,Matrix1);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
+		Disable(SGR_DEPTH_TEST);
 		end;
 end;
 

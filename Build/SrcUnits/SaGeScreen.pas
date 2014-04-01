@@ -3080,7 +3080,7 @@ if FNewPosition=FOldPosition then
 		SGScreen.FromUpDate(CanRePleace);
 	
 	if SGScreen<>nil then
-		SGScreen.DrawDrawClasses;
+		SGScreen.DrawDrawClasses();
 	
 	Render.LineWidth(1);
 	Render.InitMatrixMode(SG_2D);

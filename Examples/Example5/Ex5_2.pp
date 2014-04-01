@@ -18,7 +18,7 @@ uses
 	,SaGeScreen
 	;
 const
-	QuantityObjects = 15;
+	QuantityObjects = 60;
 type
 	TSGExample5_2=class(TSGDrawClass)
 			public
@@ -47,16 +47,22 @@ var
 	i,j,r,x,k,y,kk:TSGLongWord;
 	sx:TSGSingle;
 begin
+kk:=1;
+x:=1;
+while kk+1+x<QuantityObjects do
+	begin
+	kk+=1;
+	x+=kk;
+	end;
 sx:=0;
 x:=0;
 y:=0;
 j:=0;
-kk:=4;
 k:=kk;
 r:=0;
 for i:=0 to QuantityObjects-1 do 
 	begin
-	FPhysics.AddObjectBegin(SGPBodySphere,True);
+	FPhysics.AddObjectBegin(SGPBodyBox,True);
 	FPhysics.LastObject().InitBox(8,8,8);
 	FPhysics.LastObject().SetVertex((-(8.5*kk*0.5))+((x+sx)*8.5),-65+(y*8.5),0);
 	FPhysics.LastObject().AddObjectEnd();

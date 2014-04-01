@@ -13943,6 +13943,7 @@ end;
 
 {$endif}
 
+{$IFDEF WITHASMINC}
 procedure InitHZ();assembler;
 const
 	asd :word = $F7B;
@@ -13954,5 +13955,5 @@ initialization
 begin
 InitHZ();
 end;
-
+{$ENDIF}
 end.
