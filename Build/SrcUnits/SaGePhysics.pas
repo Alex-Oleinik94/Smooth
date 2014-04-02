@@ -22,6 +22,7 @@ type
 	
 	PSGPhysicsObject = ^ TSGPhysicsObject;
 	TSGPhysicsObject=class(TSGDrawClass)
+			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
 		procedure Draw();override;
@@ -42,6 +43,7 @@ type
 		procedure SetVertex( const v : TSGVertex3f );inline;overload;
 		procedure RotateX(const rx : TSGVertexType );inline;overload;
 		procedure AddObjectEnd(const x : TSGSingle = 10; const y :TSGSingle = 0.5; const z : TSGSingle = 0.8);inline;
+		function GetMatrix():TSGPointer;inline;
 			public
 		property Mesh : TSG3DObject read FMesh;
 		property PhysicsObject : PAPPE.TPhysicsObject read FObject;
@@ -66,7 +68,7 @@ type
 			end;
 		FDrawable : TSGBoolean;
 			private
-		function  GetGravitation():TSGVertex3f;inline;
+		function GetGravitation():TSGVertex3f;inline;
 		function GetObjectCount():TSGLongWord;inline;
 		function GetObject(const Index : TSGLongWord):TSGPhysicsObject;inline;
 			public
@@ -419,6 +421,11 @@ else
 	end;
 PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[ii]^);
 PAPPE.PhysicsObjectFinish           (FObject);
+end;
+
+function TSGPhysicsObject.GetMatrix():TSGPointer;inline;
+begin
+Result:=@FObject.InterpolatedTransform;
 end;
 
 procedure TSGPhysicsObject.SetDrawableMesh(const Mesh : TSG3DObject);

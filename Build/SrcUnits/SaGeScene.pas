@@ -27,8 +27,12 @@ type
 		FPlayerModel : TSGInt64;
 			private
 		function GetModel(const Index : TSGLongWord):TSGModel;inline;
+		procedure InitCameraPosition();inline;
 			public
 		function AddMutator( const NewMutatorClass : TSGMutatorClass ):TSGMutator;
+		procedure Start();
+			public
+		function AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGBoolean = False):TSGModel;
 			public
 		property Player : TSGInt64  read FPlayerModel;
 		property Camera : TSGCamera read FCamera;
@@ -36,6 +40,34 @@ type
 		end;
 
 implementation
+
+function TSGScene.AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGBoolean = False):TSGModel;
+var
+	i : TSGLongWord;
+begin
+Result:=TSGModel.Create(Context);
+Result.Context:=Context;
+Result.Mesh := NewModel;
+AddNod(Result);
+for i := 0 to High(FMutators) do
+	if FMutators[i] <> nil then
+		begin
+		FMutators[i].AddNodProperty(Result);
+		end;
+end;
+
+procedure TSGScene.Start();
+var
+	i : TSGLongWord;
+begin
+if FNods<>nil then
+	for i:=0 to High(FNods) do
+		if (FNods[i] as TSGModel)<>nil then
+			Models[i].LoadToVBO();
+for i := 0 to High(FMutators) do
+	if FMutators[i] <> nil then
+		FMutators[i].Start();
+end;
 
 function TSGScene.GetModel(const Index : TSGLongWord):TSGModel;inline;
 begin
@@ -81,6 +113,11 @@ if FMutators <> nil then
 inherited;
 end;
 
+procedure TSGScene.InitCameraPosition();
+begin
+FCamera.InitMatrix();
+end;
+
 procedure TSGScene.Draw();
 var
 	i : TSGLongWord;
@@ -91,7 +128,7 @@ if FMutators <> nil then
 		if FMutators[i]<>nil then
 			FMutators[i].UpDate();
 //SGLog.Sourse('TSGScene.Draw : Draw nods..');
-FCamera.InitMatrix();
+InitCameraPosition();
 if FNods<>nil then
 	for i:=0 to High(FNods) do
 		if FNods[i]<>nil then

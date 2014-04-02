@@ -17,21 +17,28 @@ uses
 type
 	TSGModel=class(TSGNod)
 			public
-		constructor Create();override;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy(); override;
-		class function ClassName():String;override;
+		class function ClassName():TSGString;override;
 			protected
 		FMesh           : TSGCustomModel;
-		FPosition       : TSGPosition;
+		FMatrix         : TSGPointer;
 			public
 		procedure Draw();override;
-		procedure InitMatrixForPosition();
+		procedure InitModelMatrix();
 		function FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
+		procedure LoadToVBO();inline;
 			public
-		property Position : TSGPosition read FPosition write FPosition;
+		property Mesh   : TSGCustomModel write FMesh;
+		property Matrix : TSGPointer     write FMatrix;
 		end;
 
 implementation
+
+procedure TSGModel.LoadToVBO();
+begin
+FMesh.LoadToVBO();
+end;
 
 function TSGModel.FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
 var
@@ -39,34 +46,36 @@ var
 begin
 if FNods <> nil then
 	begin
-	for Index := 0 to QuantityNods-1 do
-		if Nods[Index] is PropertyClass then
-			begin
-			Result:=Nods[Index];
-			Break;
-			end;
+	if QuantityNods<>0 then
+		for Index := 0 to QuantityNods-1 do
+			if Nods[Index] is PropertyClass then
+				begin
+				Result:=Nods[Index];
+				Break;
+				end;
 	end
 else
 	Result:=nil;
 end;
 
-procedure TSGModel.InitMatrixForPosition();
+procedure TSGModel.InitModelMatrix();
 begin
-
+if FMatrix<>nil then
+	Render.MultMatrixf(FMatrix);
 end;
 
 procedure TSGModel.Draw();
 begin
-InitMatrixForPosition();
+InitModelMatrix();
 if FMesh<>nil then
 	FMesh.Draw();
 end;
 
-constructor TSGModel.Create();
+constructor TSGModel.Create(const VContext:TSGContext);
 begin
-inherited;
+inherited Create(VContext);
 FMesh:=nil;
-FillChar(FPosition,SizeOf(FPosition),0);
+FMatrix:=nil;
 end;
 
 destructor TSGModel.Destroy(); 

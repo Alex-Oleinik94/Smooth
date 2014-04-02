@@ -7,6 +7,7 @@ interface
 uses 
 	 crt
 	,SaGeBase
+	,SaGeBased
 	,SaGeContext
 	,SaGeModel
 	,SaGeScene
@@ -16,6 +17,10 @@ uses
 	,SaGeLoading
 	,SaGeUtils;
 
+const
+	SGTStateLoading  = $006001;
+	SGTStateStarting = $006002;
+	SGTStateViewing  = $006003;
 type
 	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
 			public
@@ -24,9 +29,10 @@ type
 		procedure Draw();override;
 		class function ClassName():string;override;
 			protected
-		FScene: TSGScene;
+		FScene      : TSGScene;
 		FLoadThread : TSGThread;
 		FLoadClass  : TSGLoading;
+		FState      : TSGLongWord;
 			private
 		procedure Load();
 		end;
@@ -42,8 +48,15 @@ procedure TSGGameTron.Draw();
 begin
 if (FLoadClass <> nil) then
 	FLoadClass.Draw();
-if (FScene<>nil) then
+case FState of
+SGTStateStarting:
+	begin
+	FScene.Start();
+	FState:=SGTStateViewing;
+	end;
+SGTStateViewing:
 	FScene.Draw();
+end;
 end;
 
 procedure TSGGameTron.Load();
@@ -51,9 +64,10 @@ begin
 while FLoadClass.Progress < 1 do
 	begin
 	FLoadClass.Progress := FLoadClass.Progress + 0.01;
-	Crt.Delay(1);
+	Crt.Delay(5);
 	end;
 FLoadClass.Progress:=1.0001;
+FState:=SGTStateStarting;
 end;
 
 procedure LoadThread(VThronClass:TSGGameTron);
@@ -67,15 +81,19 @@ inherited Create(VContext);
 FScene:=nil;
 FLoadClass:=nil;
 FLoadThread:=nil;
+FState := SGTStateLoading;
+
 FScene := TSGScene.Create(VContext);
-FScene.AddMutator(TSGPhysics3D);
-(FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
 FScene.Camera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
+
+FScene.AddMutator(TSGPhysics3D);
+
+(FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
+
 FLoadClass := TSGLoading.Create(Context);
 FLoadClass.Progress := 0;
 FLoadThread := TSGThread.Create(TSGThreadProcedure(@LoadThread),Self,False);
 FLoadThread.Start();
-//Тут у нас начинается писец...
 end;
 
 destructor TSGGameTron.Destroy();

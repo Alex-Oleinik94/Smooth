@@ -13,25 +13,17 @@ uses
 	,SaGeGameBase
 	,SaGeScene
 	,SaGePhysics
+	,SaGeContext
 	;
 
 type
-	TSGCollidableModel=class(TSGNod)
-			protected
-		FCollidableMesh : TSG3DObject; // Ётот мешь будет использоватьс€ дл€ вычислени€ физики
-		FFriction       : TSGSingle;   // “рение
-		FPhysicDistance : TSGSingle;   // ƒл€ не напр€гани€ физики (ћаксимальное рассто€ние между центром и вершиной)
+	TSGPhysicsModel=class(TSGNod)
 			public
-		property PhysicDistance : TSGSingle read FPhysicDistance;
-		property Mesh : TSG3DObject read FCollidableMesh;
-		end;
-type
-	TSGDinamycCollidableModel=class(TSGCollidableModel)
-			protected
-		FWeight         : TSGSingle;   // ћасса 
-		FPositionShift  : TSGPosition; // »зменение позиции с течением времени (скорость с ее направлением)
+		constructor Create(const VContext:TSGContext);override;
+			private
+		FPhysicsObject : TSGPhysicsObject;
 			public
-		property PositionShift : TSGPosition read FPositionShift write FPositionShift;
+		property PhysicsObject : TSGPhysicsObject read FPhysicsObject write FPhysicsObject;
 		end;
 type
 	TSGCustomPhysics = class(TSGMutator)
@@ -39,14 +31,65 @@ type
 type
 	TSGPhysics3D = class(TSGCustomPhysics)
 			public
+		constructor Create(const VContext:TSGContext);override;
+		destructor Destroy();override;
+		procedure Draw();override;
+			private
+		FPhysics : TSGPhysics;
+			public
 		procedure UpDate();override;
+		procedure Start();override;
+		procedure AddNodProperty(const NewParentNod:TSGNod);override;
 		end;
 
 implementation
 
-procedure TSGPhysics3D.UpDate();
+constructor TSGPhysicsModel.Create(const VContext:TSGContext);
+begin
+inherited Create(VContext);
+FPhysicsObject:=nil;
+end;
+
+procedure TSGPhysics3D.AddNodProperty(const NewParentNod:TSGNod);
 begin
 
+end;
+
+procedure TSGPhysics3D.Start();
+var
+	i : TSGLongWord;
+	m : TSGPhysicsModel;
+begin
+FPhysics.Start();
+if FParent.QuantityNods <> 0 then
+	for i:=0 to FParent.QuantityNods-1 do
+		begin
+		m:=((FParent.Nods[i] as TSGModel).FindProperty(TSGPhysicsModel)) as TSGPhysicsModel;
+		if m<>nil then
+			(FParent.Nods[i] as TSGModel).Matrix:=m.PhysicsObject.GetMatrix();
+		end;
+end;
+
+constructor TSGPhysics3D.Create(const VContext:TSGContext);
+begin
+inherited Create(VContext);
+FPhysics:=TSGPhysics.Create(Context);
+FPhysics.Drawable:=False;
+end;
+
+destructor TSGPhysics3D.Destroy();
+begin
+FPhysics.Destroy();
+inherited;
+end;
+
+procedure TSGPhysics3D.Draw();
+begin
+end;
+
+procedure TSGPhysics3D.UpDate();
+begin
+FPhysics.Draw();
 end;
 
 end.

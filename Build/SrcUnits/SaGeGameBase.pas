@@ -26,7 +26,8 @@ type
 		FNods   : TSGArNod;
 		FParent : TSGNod;
 			public
-		function  AddNod(const NewNodClass : TSGNodClass):TSGNod;virtual;
+		function  AddNod(const NewNodClass : TSGNodClass):TSGNod;virtual;overload;
+		procedure AddNod(const NewNod : TSGNod);virtual;overload;
 		function DeleteNod(const Nod : TSGNod):TSGBoolean;virtual;
 		procedure SetParent(const Nod : TSGNod );
 			private
@@ -44,7 +45,10 @@ type
 	TSGArMutators = packed array of TSGMutator;
 	TSGMutatorClass = class of TSGMutator;
 	TSGMutator = class(TSGNod)
+			public
 		procedure UpDate();virtual;abstract;
+		procedure Start();virtual;abstract;
+		procedure AddNodProperty(const NewParentNod:TSGNod);virtual;abstract;
 		end;
 
 implementation
@@ -102,14 +106,24 @@ begin
 Result:='TSGNod';
 end;
 
-function TSGNod.AddNod(const NewNodClass : TSGNodClass):TSGNod;
+procedure TSGNod.AddNod(const NewNod : TSGNod);overload;
+begin
+if FNods=nil then
+	SetLength(FNods,1)
+else
+	SetLength(FNods,Length(FNods)+1);
+FNods[High(FNods)]:=NewNod;
+NewNod.SetParent(Self);
+end;
+
+function TSGNod.AddNod(const NewNodClass : TSGNodClass):TSGNod;overload;
 begin
 if FNods=nil then
 	SetLength(FNods,1)
 else
 	SetLength(FNods,Length(FNods)+1);
 Result:=NewNodClass.Create(Context);
-Result.
+Result.SetParent(Self);
 FNods[High(FNods)]:=Result;
 end;
 
