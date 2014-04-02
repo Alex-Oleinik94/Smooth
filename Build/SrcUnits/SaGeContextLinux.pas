@@ -85,7 +85,7 @@ var
 	NormalKey:Byte = 0;
 begin
 PKey := PByte(@VKey);
-//WriteLn(PKey[0],' ',PKey[1]);
+WriteLn(PKey[0],'=',char(PKey[0]),' ',PKey[1],'=',char(PKey[1]));
 case PKey[1] of
 0://English
 	begin
@@ -139,7 +139,8 @@ case PKey[1] of
 	
 	
 	32:NormalKey:=32;// Space
-	
+	92:NormalKey:=220;// \
+	47:NormalKey:=191;// /
 	// =====0..9====
 	48,49,50,51,52,53,54,55,56,57: // - Normal
 		NormalKey:=PKey[0];
@@ -199,6 +200,10 @@ case PKey[1] of
 	19 - Pause | Break
 	*)
 	case PKey[0] of
+	80:NormalKey:=36;// Home
+	87:NormalKey:=35;// End
+	85:NormalKey:=33;// Page Up
+	86:NormalKey:=34;// Page Down
 	82:NormalKey:=38;// Up
 	81:NormalKey:=37;// Left
 	83:NormalKey:=39;// Right
