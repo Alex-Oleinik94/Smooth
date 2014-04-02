@@ -2242,7 +2242,6 @@ begin
 	{$ENDIF}
 end;
 
-
 function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
 begin
 SGWhatIsTheSimbolEN:='';
@@ -2267,7 +2266,7 @@ case l of
 71:if Shift xor Caps then Result:='G' else Result:='g';
 72:if Shift xor Caps then Result:='H' else Result:='h';
 73:if Shift xor Caps then Result:='I' else Result:='i';
-74:if Shift xor Caps then Result:='G' else Result:='g';
+74:if Shift xor Caps then Result:='J' else Result:='j';
 75:if Shift xor Caps then Result:='K' else Result:='k';
 76:if Shift xor Caps then Result:='L' else Result:='l';
 77:if Shift xor Caps then Result:='M' else Result:='m';

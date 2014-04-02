@@ -63,12 +63,13 @@ type
 	TSGResourseFiles = class(TSGClass)
 			public
 		constructor Create();
-		destructor Destroy();
+		destructor Destroy();override;
 			public
 		procedure AddFile(const FileWay:TSGString;const Proc : TSGPointer);
 		function LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
 		function ExistsInFile(const Name:TSGString):TSGBoolean;
 		function WaysEqual(w1,w2:TSGString):TSGBoolean;
+		function FileExists(const FileName : TSGString):TSGBoolean;inline;
 			private
 		FArFiles:packed array of
 			packed record
@@ -242,6 +243,11 @@ if Length(w1)=Length(w2) then
 	end
 else
 	Result:=False;
+end;
+
+function TSGResourseFiles.FileExists(const FileName : TSGString):TSGBoolean;inline;
+begin
+Result:=ExistsInFile(FileName) or SGFileExists(FileName);
 end;
 
 function TSGResourseFiles.ExistsInFile(const Name:TSGString):TSGBoolean;

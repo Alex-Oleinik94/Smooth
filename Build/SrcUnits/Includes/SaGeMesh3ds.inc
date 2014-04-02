@@ -41,20 +41,29 @@ type
 			destructor Destroy(); override;
 			function Import3DS(const AModel:TSGCustomModel;out Sucsses : TSGBoolean):TSGLoad3DS;
 			function SetFileName(const VFileName : TSGString):TSGLoad3DS;
+			function SetStream(const VStream : TStream):TSGLoad3DS;
 		private
 			function FindChunk(ID:word;IsParent:boolean=false):longword;
 			procedure ComputeNormals(const AModel:TSGCustomModel);
 			procedure SkipHeader;
 			procedure ReadHeader(AC:PSGChunk);
 		private
-			TFile	 : TFileStream;
+			TFile	 : TStream;
 			FFileName : TSGString;
+			StrimIsSet : TSGBoolean;
 	end;
 {$ENDIF}
 
 {$IFDEF SGREADIMPLEMENTATION}
 
 { TSGLoad3DS }
+
+function TSGLoad3DS.SetStream(const VStream : TStream):TSGLoad3DS;
+begin
+TFile := VStream;
+Result:=Self;
+StrimIsSet:=True;
+end;
 
 function TSGLoad3DS.SetFileName(const VFileName : TSGString):TSGLoad3DS;
 begin
@@ -71,11 +80,12 @@ if VStream<>nil then
 		TFile.Destroy;
 	TFile:=VStream;
 	end;
+StrimIsSet:=False;
 end;
 
 destructor TSGLoad3DS.Destroy;
 begin
-	if Tfile<>nil then
+	if (Tfile<>nil) and (not StrimIsSet) then
 		TFile.Destroy;
 	inherited Destroy;
 end;

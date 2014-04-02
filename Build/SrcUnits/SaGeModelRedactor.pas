@@ -5,6 +5,7 @@ unit SaGeModelRedactor;
 interface
 uses
 	crt
+	,Classes
 	,SaGeBase
 	,SaGeBased
 	,SaGeCommon
@@ -14,6 +15,7 @@ uses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
+	,SaGeResourseManager
 	;
 type
 	TSGModelRedactor=class(TSGDrawClass)
@@ -41,10 +43,42 @@ with TSGModelRedactor(Button.FUserPointer1) do
 	end;
 end;
 
+procedure mmmButtonFormGo(Button:TSGButton);
+var
+	Stream : TMemoryStream = nil;
+	Suc : TSGBoolean = False;
+begin
+if not TSGEdit(Button.FUserPointer2).TextComplite then
+	Exit;
+with TSGModelRedactor(Button.FUserPointer1) do
+	begin
+	Stream := TMemoryStream.Create();
+	SGResourseFiles.LoadMemoryStreamFromFile(Stream,TSGEdit(Button.FUserPointer2).Caption);
+	Stream.Position:=0;
+	if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='3DS' then
+		Suc:=FCustomModel.Load3DSFromStream(Stream,TSGEdit(Button.FUserPointer2).Caption)
+	else
+		begin
+		FCustomModel.LoadFromSG3DM(Stream);
+		Suc:=FCustomModel.QuantityObjects+FCustomModel.QuantityMaterials<>0;
+		end;
+	Stream.Destroy();
+	
+	if Suc then
+		begin
+		FCustomModel.LoadToVBO();
+		Button.Parent.Visible:=False;
+		Button.Parent.Active :=False;
+		FOperatingComboCox.Active:=True;
+		end;
+	end;
+end;
+
 procedure OperCBP(a,b:LongInt;ComboBox:TSGComboBox);
 var
 	Form : TSGForm;
 	EscButton , GoButton : TSGButton;
+	Edit : TSGEdit;
 begin
 with TSGModelRedactor(ComboBox.FUserPointer1) do
 	begin
@@ -54,22 +88,35 @@ with TSGModelRedactor(ComboBox.FUserPointer1) do
 		
 		Form := TSGForm.Create();
 		SGScreen.CreateChild(Form);
-		Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,300);
+		Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,100);
 		Form.Caption := 'Загрузка обьекта';
 		Form.FUserPointer1:=ComboBox.FUserPointer1;
 		
+		Edit := TSGEdit.Create();
+		Form.CreateChild(Edit);
+		Form.LastChild.SetBounds(5,5,575,20);
+		Form.LastChild.BoundsToNeedBounds();
+		Form.LastChild.FUserPointer1:=ComboBox.FUserPointer1;
+		Form.LastChild.FUserPointer2:=Edit;
+		(Form.LastChild as TSGEdit).TextType:=SGEditTypeWay;
+		Form.LastChild.Caption:='../Temp\motobike.3dss';//SGModelsDirectory+Slash;
+		//(Form.LastChild as TSGEdit).TextComplite:=False;
+		
 		EscButton:=TSGButton.Create();
 		Form.CreateChild(EscButton);
-		EscButton.SetBounds(375,235,100,24);
+		EscButton.SetBounds(375,35,100,24);
 		EscButton.Caption:='Отмена';
 		EscButton.OnChange:=TSGComponentProcedure(@mmmButtonFormEsc);
 		EscButton.FUserPointer1:=ComboBox.FUserPointer1;
+		EscButton.FUserPointer2:=Edit;
 		
 		GoButton:=TSGButton.Create();
 		Form.CreateChild(GoButton);
-		GoButton.SetBounds(485,235,100,24);
+		GoButton.SetBounds(485,35,100,24);
 		GoButton.Caption:='Загрузить';
+		GoButton.OnChange:=TSGComponentProcedure(@mmmButtonFormGo);
 		GoButton.FUserPointer1:=ComboBox.FUserPointer1;
+		GoButton.FUserPointer2:=Edit;
 		
 		Form.Active:=True;
 		Form.Visible:=True;

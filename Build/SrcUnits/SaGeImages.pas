@@ -539,7 +539,7 @@ if (FStream.Size<2) then
 if (not Result) and IsBMP(FStream.Memory,FStream.Size) then
 	begin
 	LoadBMP(FStream,FImage);
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as BMP is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -547,7 +547,7 @@ if (not Result) and IsBMP(FStream.Memory,FStream.Size) then
 if (not Result) and IsSGIA(FStream.Memory,FStream.Size) then
 	begin
 	LoadSGIAToBitMap(FStream,FImage);
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as SGIA is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -555,7 +555,7 @@ if (not Result) and IsSGIA(FStream.Memory,FStream.Size) then
 if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
 	begin
 	LoadMBMToBitMap;
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as MBM is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -563,7 +563,7 @@ if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
 if (not Result) and IsJPEG(FStream.Memory,FStream.Size) then
 	begin
 	LoadJPEGToBitMap(FStream,FImage);
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as JPEG is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -572,7 +572,7 @@ if (not Result) and IsPNG(FStream.Memory,FStream.Size) then
 	begin
 	if SGResourseManager.LoadingIsSuppored('PNG') then
 		FImage:=SGResourseManager.LoadResourseFromStream(FStream,'PNG') as TSGBitMap;
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as PNG is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -584,7 +584,7 @@ if (not Result) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
 	FImage:=LoadTGA(FStream);
 	if FImage=nil then
 		FImage:=TSGBitMap.Create;
-	Result:=FImage.FBitMap<>nil;
+	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as TGA is "'+SGStr(Result)+'"');
 		{$ENDIF}
@@ -625,6 +625,7 @@ else
 	FStream:=TMemoryStream.Create();
 	end;
 SGResourseFiles.LoadMemoryStreamFromFile(FStream,FWay);
+FStream.Position:=0;
 end;
 
 procedure TSGImage.ToTexture();

@@ -329,6 +329,7 @@ type
         procedure SaveToSG3DM(const Stream : TStream);
         // Загрузить формат 3DS-Max-а
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
+        function Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
     public
@@ -1519,9 +1520,12 @@ begin
         FArObjects[i].FObjectColor := ObjColor;
 end;
 
+function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
+begin
+TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
+end;
+
 function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
-var
-	Sucsses : TSGBoolean = False;
 begin
 TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
 end;
@@ -1549,8 +1553,10 @@ var
 begin
 if FQuantityObjects<>0 then
 	for i := 0 to FQuantityObjects - 1 do
+		begin
 		if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and 
-		((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or(FArMaterials[FArObjects[i].MaterialID].Ready)) then
+			((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or
+			(FArMaterials[FArObjects[i].MaterialID].Ready)) then
 			begin
 			FArMaterials[FArObjects[i].MaterialID].BindTexture();
 			FArObjects[i].Draw();
@@ -1558,6 +1564,7 @@ if FQuantityObjects<>0 then
 			end
 		else
 			FArObjects[i].Draw();
+		end;
 end;
 
 function TSGCustomModel.AddMaterial():TSGImage;inline;

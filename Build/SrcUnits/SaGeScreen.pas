@@ -9,11 +9,13 @@ interface
 uses
 	 Crt
 	,SaGeCommon
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeImages
 	,SaGeContext
 	,SaGeUtils
 	,SaGeRender
+	,SaGeResourseManager
 	;
 
 type
@@ -41,6 +43,7 @@ type
 	TSGComboBox         = class;
 	TSGGrid             = class;
 	TSGButtonMenuButton = class;
+	TSGScreen=class;
 	
 	TSGComponent          = class;
 	PTSGComponent         = ^ TSGComponent;
@@ -192,17 +195,32 @@ type
 		FUserPointer1,FUserPointer2,FUserPointer3:Pointer;
 		FDrawClass:TSGDrawClass;
 			public
-		procedure DrawDrawClasses;virtual;
-			public //Это для TopShift, что б не прописывать хз де
+		procedure DrawDrawClasses();virtual;
+			protected //Это для TopShift, что б не прописывать хз де
 		FTopShiftStatus:Packed Record
 			FEnable:Boolean;
 			FNowTopShift:LongWord;
 			end;
 		procedure SetTopShiftStatus(const b:Boolean);
+			public
 		property AutoTopShift:Boolean read FTopShiftStatus.FEnable write SetTopShiftStatus;
+			private
+		FNeedToDestroy : TSGBoolean;
+			public
+		property NeedToDestroy : TSGBoolean read FNeedToDestroy write FNeedToDestroy;
 		end;
 	SGComponent = TSGComponent;
 	PSGComponent = PTSGComponent;
+	
+	TSGScreen=class(TSGComponent)
+			public
+		constructor Create();
+		destructor Destroy();override;
+			private
+		FInProcessing : TSGBoolean;
+			public
+		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
+		end;
 	
 	PSGForm = ^ TSGForm;
 	TSGForm=class(TSGComponent)
@@ -307,10 +325,11 @@ const
 	SGEditTypeNumber  = 2;
 	SGEditTypeUser    = 3;
 	SGEditTypeInteger = 4;
+	SGEditTypeWay     = 5;
 
 function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
-
+function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
 type
 	TSGEdit=class(TSGComponent)
 			public
@@ -484,7 +503,7 @@ type
 		procedure SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);inline;
 		end;
 var
-	SGScreen:TSGComponent = nil;
+	SGScreen:TSGScreen = nil;
 
 procedure SGScreenLoad(const Context:TSGCOntext);
 
@@ -493,7 +512,7 @@ implementation
 var
 	SGScreens:packed array of 
 			packed record 
-			FScreen:TSGComponent;
+			FScreen:TSGScreen;
 			FImage:TSGImage;
 			end = nil;
 	FOldPosition,FNewPosition:LongWord;
@@ -2197,6 +2216,7 @@ end;
 constructor TSGComponent.Create();
 begin
 inherited Create();
+FNeedToDestroy:=False;
 FChildrenPriority:=0;
 FDrawClass:=nil;
 FUnLimited:=False;
@@ -2538,10 +2558,17 @@ else
 	end;
 end;
 
+function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
+begin
+Result:=SGResourseFiles.FileExists(s.Caption);
+end;
+
 procedure TSGEdit.SetTextType(const NewTextType:TSGEditTextType);
 begin
 FTextType:=NewTextType;
 case FTextType of
+SGEditTypeWay:
+	FTextTypeFunction:=TSGEditTextTypeFunction(@TSGEditTextTypeFunctionWay);
 SGEditTypeSingle:
 	begin
 	
@@ -2775,9 +2802,8 @@ if FCanChange then
 			begin
 			if FCaption='' then
 				begin
-				{FCaption:=SGStringToPChar(SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
-					Context.KeysPressed(16) , Context.KeysPressed(20)));}
-				FCaption:=SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+				FCaption:=
+					SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
 					Context.KeysPressed(16) , Context.KeysPressed(20));
 				FCursorPosition:=1;
 				CaptionCharget:=True;
@@ -2785,12 +2811,7 @@ if FCanChange then
 			else
 				begin
 				FCursorPosition+=1;
-				FCaption:={SGPCharTotal(
-					SGPCharGetPart(FCaption,0,FCursorPosition-2),
-					SGPCharTotal(
-						SGStringToPChar(SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
-							Context.KeysPressed(16) , Context.KeysPressed(20))),
-						SGPCharGetPart(FCaption,FCursorPosition-1,SGPCharHigh(FCaption))));}
+				FCaption:=
 						SGStringGetPart(FCaption,1,FCursorPosition-1)+
 						SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
 							Context.KeysPressed(16) , Context.KeysPressed(20))+
@@ -3036,6 +3057,22 @@ FCanHaveChildren:=False;
 FViewImage1:=nil;
 end;
 
+destructor TSGButton.Destroy;
+begin
+inherited Destroy;
+end;
+
+constructor TSGScreen.Create();
+begin
+inherited Create();
+FInProcessing := False;
+end;
+
+destructor TSGScreen.Destroy();
+begin
+inherited;
+end;
+
 procedure SGScreenPaint(const Context:TSGContext);
 var
 	CanRePleace:Boolean = True;
@@ -3081,6 +3118,8 @@ if FNewPosition<>FOldPosition then
 	end;
 if FNewPosition=FOldPosition then
 	begin
+	SGScreen.InProcessing := True;
+	
 	if SGScreen<>nil then
 		SGScreen.FromUpDateUnderCursor(CanRePleace);
 	if SGScreen<>nil then
@@ -3099,6 +3138,8 @@ if FNewPosition=FOldPosition then
 
 	if SGScreen<>nil then
 		SGScreen.FromDraw(); // -- рендеринг всего
+	
+	SGScreen.InProcessing := False;
 	
 	if (Context.KeysPressed(SG_CTRL_KEY)) and (Context.KeysPressed(SG_ALT_KEY)) and (Context.KeyPressedType=SGDownKey) then
 		begin
@@ -3124,7 +3165,7 @@ if FNewPosition=FOldPosition then
 				FMoveProgress:=0;
 				SGScreen.Destroy;
 				
-				SGScreen:=SGComponent.Create;
+				SGScreen:=TSGScreen.Create;
 				SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 				SGScreen.SetShifts(0,0,0,0);
 				SGScreen.Visible:=True;
@@ -3151,7 +3192,7 @@ if FNewPosition=FOldPosition then
 					end;
 			FMoveProgress:=0;
 			
-			SGScreen:=SGComponent.Create;
+			SGScreen:=TSGScreen.Create;
 			SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 			SGScreen.SetShifts(0,0,0,0);
 			SGScreen.Visible:=True;
@@ -3199,11 +3240,6 @@ if FNewPosition=FOldPosition then
 	end;
 end;
 
-destructor TSGButton.Destroy;
-begin
-inherited Destroy;
-end;
-
 procedure SGScreenResizeScreen(const Context:TSGContext);
 begin
 if SGScreen<>nil then
@@ -3219,7 +3255,7 @@ begin
 if SGScreen<>nil then
 	Exit;
 
-SGScreen:=SGComponent.Create;
+SGScreen:=TSGScreen.Create();
 SGScreen.SetContext(Context);
 SGScreen.SetBounds(0,0,Context.Width,Context.Height);
 SGScreen.SetShifts(0,0,0,0);
