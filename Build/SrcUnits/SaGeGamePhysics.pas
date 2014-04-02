@@ -17,7 +17,7 @@ uses
 	;
 
 type
-	TSGPhysicsModel=class(TSGNod)
+	TSGPhysicsModel=class(TSGNodProperty)
 			public
 		constructor Create(const VContext:TSGContext);override;
 			private
@@ -52,7 +52,8 @@ end;
 
 procedure TSGPhysics3D.AddNodProperty(const NewParentNod:TSGNod);
 begin
-
+FLastNodProperty:=TSGPhysicsModel.Create(Context);
+NewParentNod.AddNod(FLastNodProperty);
 end;
 
 procedure TSGPhysics3D.Start();
@@ -75,6 +76,7 @@ begin
 inherited Create(VContext);
 FPhysics:=TSGPhysics.Create(Context);
 FPhysics.Drawable:=False;
+FLastNodProperty:=nil;
 end;
 
 destructor TSGPhysics3D.Destroy();

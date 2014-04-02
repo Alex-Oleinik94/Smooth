@@ -41,17 +41,32 @@ type
 	(******************************************************************)
 	(**************************){MUTATOR}(*****************************)
 	(******************************************************************)
+	TSGNodProperty = class(TSGNod) 
+		end;
+	
 	TSGMutator = class;
 	TSGArMutators = packed array of TSGMutator;
 	TSGMutatorClass = class of TSGMutator;
 	TSGMutator = class(TSGNod)
 			public
+		constructor Create(const VContext:TSGContext);override;
+			protected
+		FLastNodProperty : TSGNodProperty;
+			public
 		procedure UpDate();virtual;abstract;
 		procedure Start();virtual;abstract;
 		procedure AddNodProperty(const NewParentNod:TSGNod);virtual;abstract;
+			public
+		property LastNodProperty : TSGNodProperty read FLastNodProperty;
 		end;
 
 implementation
+
+constructor TSGMutator.Create(const VContext:TSGContext);
+begin
+inherited Create(VContext);
+FLastNodProperty:=nil;
+end;
 
 (******************************************************************)
 (****************************){NOD}(*******************************)

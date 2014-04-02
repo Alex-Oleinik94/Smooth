@@ -51,6 +51,7 @@ type
 			TFile	 : TStream;
 			FFileName : TSGString;
 			StrimIsSet : TSGBoolean;
+			FQO : TSGLongWord;
 	end;
 {$ENDIF}
 
@@ -99,6 +100,7 @@ var Ch:TSGChunk;
 	iii:TSGWord;
 begin
 Result:=Self;
+FQO := AModel.QuantityObjects;
 Sucsses:=False;
 SGLog.Sourse(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
 if TFile= nil then
@@ -341,7 +343,7 @@ DT.Get();
 SGLog.Sourse('TSGLoad3DS.ComputeNormals : Started');
 if AModel.QuantityObjects>0 then
 	begin
-	for iObject:=0 to AModel.QuantityObjects-1 do
+	for iObject:=FQO to AModel.QuantityObjects-1 do
 		begin
 		with AModel.Objects[iObject] do
 			begin

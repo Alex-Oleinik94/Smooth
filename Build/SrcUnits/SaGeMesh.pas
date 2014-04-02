@@ -288,6 +288,12 @@ type
 
     { TSGCustomModel }
 type
+	TSGCustomModelMesh = record
+		FMesh    : TSG3DObject;
+		FCopired : TSGInt64;
+		FMatrix  : TSGMatrix4;
+		end;
+	
     TSGCustomModel = class(TSGDrawClass)
     public
         constructor Create;override;
@@ -298,9 +304,9 @@ type
         FQuantityMaterials : TSGQuadWord;
 	
         FArMaterials : packed array of TSGImage;
-        FArObjects   : packed array of TSG3dObject;
+        FArObjects   : packed array of TSGCustomModelMesh;
     private
-		function GetObject(const Index : TSGMaxEnum):TSG3dObject;inline;
+		function GetObject(const Index : TSGMaxEnum):TSG3dObject;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
@@ -332,6 +338,9 @@ type
         function Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
+    public
+		procedure Dublicate(const Index:TSGLongWord);
+		procedure Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
     public
 		function VertexesSize():TSGQWord;
 		function FacesSize():TSGQWord;
@@ -1361,7 +1370,16 @@ Stream.ReadBuffer(QuantityO,SizeOf(QuantityO));
 Stream.ReadBuffer(QuantityM,SizeOf(QuantityM));
 for i:=0 to QuantityO-1 do
 	begin
-	AddObject().LoadFromSG3DO(Stream);
+	AddObject().Destroy();
+	FArObjects[i].FMesh:=nil;
+	Stream.ReadBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
+	Stream.ReadBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
+	if FArObjects[i].FCopired=-1 then
+		begin
+		FArObjects[i].FMesh:=TSG3DObject.Create();
+		FArObjects[i].FMesh.Context := Context;
+		Objects[i].LoadFromSG3DO(Stream);
+		end;
 	end;
 for i:=0 to QuantityM-1 do
 	begin
@@ -1381,7 +1399,12 @@ begin
 Stream.WriteBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
 Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
 for i:=0 to FQuantityObjects-1 do
-	Objects[i].SaveToSG3DO(Stream);
+	begin
+	Stream.WriteBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
+	Stream.WriteBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
+	if FArObjects[i].FCopired=-1 then
+		Objects[i].SaveToSG3DO(Stream);
+	end;
 for i:=0 to FQuantityMaterials-1 do
 	begin
 	SGWriteStringToStream(FArMaterials[i].Way,Stream);
@@ -1401,7 +1424,7 @@ begin
 if FQuantityObjects>0 then
 	begin
 	for i:=0 to FQuantityObjects-1 do
-		FArObjects[i].Destroy();
+		FArObjects[i].FMesh.Destroy();
 	SetLength(FArObjects,0);
 	FQuantityObjects:=0;
 	end;
@@ -1422,7 +1445,7 @@ var
 begin
 for i:=0 to FQuantityObjects-1 do
 	begin
-	FArObjects[i].LoadToVBO();
+	FArObjects[i].FMesh.LoadToVBO();
 	end;
 end;
 
@@ -1472,7 +1495,7 @@ if FQuantityMaterials<>0 then
 WriteLn('  QuantityObjects = ',FQuantityObjects);
 if FQuantityObjects <> 0 then
 	for i:=0 to FQuantityObjects-1 do
-		FArObjects[i].WriteInfo('   '+SGStr(i+1)+') ');
+		FArObjects[i].FMesh.WriteInfo('   '+SGStr(i+1)+') ');
 end;
 
 
@@ -1490,7 +1513,7 @@ var
 begin
 Result:=0;
 for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].VertexesSize();
+	Result+=FArObjects[i].FMesh.VertexesSize();
 end;
 
 function TSGCustomModel.FacesSize():QWord;inline;
@@ -1499,7 +1522,7 @@ var
 begin
 Result:=0;
 for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].FacesSize();
+	Result+=FArObjects[i].FMesh.FacesSize();
 end;
 
 function TSGCustomModel.Size():QWord;inline;
@@ -1508,7 +1531,7 @@ var
 begin
 Result:=0;
 for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].Size();
+	Result+=FArObjects[i].FMesh.Size();
 end;
 
 
@@ -1517,7 +1540,7 @@ var
     i: TSGLongWord;
 begin
     for i := 0 to High(FArObjects) do
-        FArObjects[i].FObjectColor := ObjColor;
+        FArObjects[i].FMesh.FObjectColor := ObjColor;
 end;
 
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
@@ -1550,20 +1573,30 @@ end;
 procedure TSGCustomModel.Draw();
 var
     i: TSGLongWord;
+    CurrentMesh : TSG3DObject;
 begin
 if FQuantityObjects<>0 then
 	for i := 0 to FQuantityObjects - 1 do
 		begin
-		if (FArObjects[i].HasTexture) and (FArObjects[i].MaterialID <> -1) and 
-			((FArMaterials[FArObjects[i].MaterialID].ReadyToGoToTexture)or
-			(FArMaterials[FArObjects[i].MaterialID].Ready)) then
+		CurrentMesh:=FArObjects[i].FMesh;
+		if (CurrentMesh<>nil) or (FArObjects[i].FCopired<>-1) then
 			begin
-			FArMaterials[FArObjects[i].MaterialID].BindTexture();
-			FArObjects[i].Draw();
-			FArMaterials[FArObjects[i].MaterialID].DisableTexture();
-			end
-		else
-			FArObjects[i].Draw();
+			if FArObjects[i].FCopired<>-1 then
+				CurrentMesh := FArObjects[FArObjects[i].FCopired].FMesh;
+			Render.PushMatrix();
+			Render.MultMatrixf(@FArObjects[i].FMatrix);
+			if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
+				((FArMaterials[CurrentMesh.MaterialID].ReadyToGoToTexture)or
+				(FArMaterials[CurrentMesh.MaterialID].Ready)) then
+				begin
+				FArMaterials[CurrentMesh.MaterialID].BindTexture();
+				CurrentMesh.Draw();
+				FArMaterials[CurrentMesh.MaterialID].DisableTexture();
+				end
+			else
+				CurrentMesh.Draw();
+			end;
+		Render.PopMatrix();
 		end;
 end;
 
@@ -1590,7 +1623,9 @@ FQuantityObjects+=1;
 SetLength(FArObjects,FQuantityObjects);
 Result:=TSG3DObject.Create();
 Result.Context := Context;
-FArObjects[FQuantityObjects-1]:=Result;
+FArObjects[FQuantityObjects-1].FMesh:=Result;
+FArObjects[FQuantityObjects-1].FCopired:=-1;
+FArObjects[FQuantityObjects-1].FMatrix:=SGGetIdentityMatrix();
 end;
 
 function TSGCustomModel.LastObject():TSG3DObject;inline;
@@ -1598,7 +1633,7 @@ begin
 if (FQuantityObjects=0) or(FArObjects=nil) then
 	Result:=nil
 else
-	Result:=FArObjects[FQuantityObjects-1];
+	Result:=FArObjects[FQuantityObjects-1].FMesh;
 end;
 
 function TSGCustomModel.CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
@@ -1616,9 +1651,37 @@ for i := 0 to FQuantityMaterials - 1 do
 		end;
 end;
 
-function TSGCustomModel.GetObject(const Index : TSGMaxEnum):TSG3dObject;inline;
+function TSGCustomModel.GetObject(const Index : TSGMaxEnum):TSG3dObject;
+function FindIndex(const NowIndex : TSGLongWord):TSGLongWord;
 begin
-Result:=FArObjects[Index];
+if FArObjects[NowIndex].FCopired<>-1 then
+	Result:=FindIndex(FArObjects[NowIndex].FCopired)
+else
+	Result:=NowIndex;
+end;
+begin
+Result:=FArObjects[FindIndex(Index)].FMesh;
+end;
+
+procedure TSGCustomModel.Dublicate(const Index:TSGLongWord);
+function FindIndex(const NowIndex : TSGLongWord):TSGLongWord;
+begin
+if FArObjects[NowIndex].FCopired<>-1 then
+	Result:=FindIndex(FArObjects[NowIndex].FCopired)
+else
+	Result:=NowIndex;
+end;
+begin
+FQuantityObjects+=1;
+SetLength(FArObjects,FQuantityObjects);
+FArObjects[FQuantityObjects-1].FMesh:=nil;
+FArObjects[FQuantityObjects-1].FCopired:=FindIndex(Index);
+FArObjects[FQuantityObjects-1].FMatrix:=FArObjects[Index].FMatrix;
+end;
+
+procedure TSGCustomModel.Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
+begin
+FArObjects[Index].FMatrix:= FArObjects[Index].FMatrix * SGGetTranslateMatrix(Vertex);
 end;
 
 end.

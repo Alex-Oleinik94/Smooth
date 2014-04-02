@@ -218,6 +218,7 @@ type
 	
 	PReal     = ^ real;
 	TSGExByte = type Int64;
+	PSingle = ^ single;
 	
 	TSGSetOfByte   = type packed set  of byte;
 	TArBoolean     = type packed array of boolean;

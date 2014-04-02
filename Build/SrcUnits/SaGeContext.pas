@@ -31,6 +31,7 @@ uses
 const
 	SG_ALT_KEY = 18;
 	SG_CTRL_KEY = 17;
+	SG_SHIFT_KEY = 16;
 type
 	//Типы нажатий клавиш мышки
 	TSGCursorButtons = (SGNoCursorButton,SGMiddleCursorButton,SGLeftCursorButton,SGRightCursorButton);

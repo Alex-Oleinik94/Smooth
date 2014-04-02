@@ -329,8 +329,31 @@ function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4T
 function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
 function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
 procedure SGWriteMatrix4(const P:TSGPointer);
+function SGGetIdentityMatrix():TSGMatrix4;inline;
+function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;
 
 implementation
+
+function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;
+var
+	i : TSGByte;
+begin
+FillChar(Result,SizeOf(Result),0);
+for i:=0 to 3 do
+	Result[i,i]:=1;
+PSingle(@Result)[12]:=Vertex.x;
+PSingle(@Result)[13]:=Vertex.y;
+PSingle(@Result)[14]:=Vertex.z;
+end;
+
+function SGGetIdentityMatrix():TSGMatrix4;inline;
+var
+	i : TSGByte;
+begin
+FillChar(Result,SizeOf(Result),0);
+for i:=0 to 3 do
+	Result[i,i]:=1;
+end;
 
 function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
 var
