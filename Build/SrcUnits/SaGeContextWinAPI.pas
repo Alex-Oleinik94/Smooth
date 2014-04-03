@@ -117,6 +117,7 @@ end;
 
 procedure TSGContextWinAPI.ShowCursor(const b:Boolean);
 begin
+FShowCursor:=B;
 Windows.ShowCursor(B);
 end;
 
@@ -469,7 +470,7 @@ else
 		0, 0,
 		system.MainInstance,
 		nil );
-	ShowCursor(true);
+	ShowCursor(FShowCursor);
 	end;
 if hWindow2 <> 0 then 
 	begin

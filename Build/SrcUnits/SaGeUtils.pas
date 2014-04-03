@@ -44,9 +44,13 @@ type
 		procedure CallAction();inline;
 			public
 		procedure InitViewModeComboBox();virtual;abstract;
+		procedure Move(const Param : TSGSingle);
+		procedure MoveSidewards(const Param : TSGSingle);
+		procedure Rotate(const x, y, z : TSGSingle);
 			public
 		property Up        : TSGVertex3f read FUp         write FUp;
 		property Location  : TSGVertex3f read FLocation   write FLocation;
+		property Position  : TSGVertex3f read FLocation   write FLocation;
 		property View      : TSGVertex3f read FView       write FView;
 		property MatrixMode: TSGExByte   read FMatrixMode write FMatrixMode;
 		property ViewMode  : TSGExByte   read FViewMode   write FViewMode;
@@ -552,21 +556,64 @@ SG_VIEW_WATCH_OBJECT:
 	end;
 SG_VIEW_LOOK_AT_OBJECT:
 	begin
-	FLocation.Normalize();
-	FView.Normalize();
 	FUp.Normalize();
-	Matrix:=SGGetLookAtMatrix(FLocation,FView,FUp);
-	{Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(
-		TPhysicsVector3(FLocation),TPhysicsVector3(FView),TPhysicsVector3(FUp)
-		));}
-	Render.MatrixMode(SGR_PROJECTION);
-	Render.LoadIdentity();
-	Render.LoadMatrixf(@Matrix);
-	Render.MatrixMode(SGR_MODELVIEW);
-	Render.LoadIdentity();
-	Render.Enable(SGR_DEPTH_TEST);
+	Render.InitMatrixMode(SG_3D);
+	//Matrix:=SGGetLookAtMatrix(FLocation,FView,FUp);
+	Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(TPhysicsVector3(FLocation),TPhysicsVector3(FView),TPhysicsVector3(FUp)));
+	Render.MultMatrixf(@Matrix);
 	end;
 end;
+end;
+
+procedure TSGCamera.Move(const Param : TSGSingle);
+var
+	a : TSGVertex3f;
+begin
+a := Position - View;
+a. Normalize();
+Position := Position + a * Param;
+View := View + a * Param;
+end;
+
+procedure TSGCamera.Rotate(const x, y, z : TSGSingle);
+var
+	v : TSGVertex3f;
+	s, c : TSGSingle;
+begin
+v := View - Position;
+if x<>0 then
+	begin
+	c := cos(x);
+	s := sin(x);
+	FView.Z:=Position.Z+s*v.Y+c*v.Z;
+	FView.Y:=Position.Y+c*v.Y-s*v.Z;
+	end;
+if y<>0 then
+	begin
+	c := cos(y);
+	s := sin(y);
+	FView.Z:=Position.Z+s*v.X+c*v.Z;
+	FView.X:=Position.X+c*v.X-s*v.Z;
+	end;
+if z<>0 then
+	begin
+	c := cos(z);
+	s := sin(z);
+	FView.X:=Position.X+s*v.Y+c*v.X;
+	FView.Y:=Position.Y+c*v.Y-s*v.X;
+	end;
+end;
+
+procedure TSGCamera.MoveSidewards(const Param : TSGSingle);
+var
+	a : TSGVertex3f;
+begin
+a := View - Position;
+a. Normalize();
+a := (a * Up);
+a. Normalize();
+Position := Position + a * Param;
+View := View + a * Param;
 end;
 
 procedure TSGCamera.CallAction();inline;

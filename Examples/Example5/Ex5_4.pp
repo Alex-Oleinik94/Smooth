@@ -81,6 +81,8 @@ end;
 
 begin
 inherited Create(VContext);
+Context.ShowCursor(False);
+Context.CursorInCentre:=True;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -205,6 +207,16 @@ SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
 SGScreen.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
 	SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+
+if (Context.KeysPressed('W')) then
+	FCamera.Move(-Context.ElapsedTime*0.7);
+if (Context.KeysPressed('S')) then
+	FCamera.Move(Context.ElapsedTime*0.7);
+if (Context.KeysPressed('A')) then
+	FCamera.MoveSidewards(-Context.ElapsedTime*0.7);
+if (Context.KeysPressed('D')) then
+	FCamera.MoveSidewards(Context.ElapsedTime*0.7);
+FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*0.003,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*0.003,0);
 end;
 
 begin

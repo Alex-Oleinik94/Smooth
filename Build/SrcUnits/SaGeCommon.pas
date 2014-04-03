@@ -269,6 +269,7 @@ operator div (const a:SGPoint;const b:Int64):SGPoint;overload;inline;
 operator = (const a,b:TSGPoint2f):Boolean;overload;inline;
 operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;inline;
 operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;inline;
+operator := (const a:TSGWord):TSGPoint2f;overload;inline;
 
 operator + (const a:TSGVertex2f;const b:TSGPoint2f):TSGVertex2f;overload;inline;
 operator := (const a:TSGPoint2f):TSGVertex2f;overload;inline;
@@ -1387,6 +1388,11 @@ operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;inline;
 begin
 Result.x:=a.x*b;
 Result.y:=a.y*b;
+end;
+
+operator := (const a:TSGWord):TSGPoint2f;overload;inline;
+begin
+Result.Import(a,a);
 end;
 
 operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;inline;

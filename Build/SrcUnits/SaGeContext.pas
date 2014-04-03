@@ -126,6 +126,7 @@ type
 		FElapsedTime     : TSGLongWord;
 		// Время в данный момент времени
 		FElapsedDateTime : TSGDateTime;
+		FShowCursor : TSGBoolean;
 			public
 		// Разница в милесекундах между этим и преведущим шагами главного цикле приложения
 		property ElapsedTime         : TSGLongWord         read FElapsedTime;
@@ -157,6 +158,9 @@ type
 		FCursorKeyPressedType : TSGCursorButtonType;
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
 		FCursorWheel          : TSGCursorWheel;
+		FCursorInCentre       : TSGBoolean;
+			public
+		property CursorInCentre : TSGBoolean read FCursorInCentre write FCursorInCentre;
 			public
 		// Возвращает, зажата ли клавиша
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;virtual;overload;
@@ -449,6 +453,12 @@ Point+=MouseShift();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
 FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]-FCursorPosition[SGLastCursorPosition];
+if CursorInCentre and (@SetCursorPosition<>nil) then
+	begin
+	SetCursorPosition(SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5))-MouseShift());
+	FCursorPosition[SGLastCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	FCursorPosition[SGNowCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	end;
 
 if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyPressedType=SGDownKey)) or
 	((KeyPressed) and (KeyPressedByte=122)  and (KeyPressedType=SGDownKey))then
@@ -494,6 +504,8 @@ var
 	i:LongWord;
 begin
 inherited;
+FShowCursor:=True;
+FCursorInCentre:=False;
 FWidth:=0;
 FHeight:=0;
 FCallDraw:=nil;
