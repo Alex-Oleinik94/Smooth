@@ -158,9 +158,11 @@ type
 		FCursorKeyPressedType : TSGCursorButtonType;
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
 		FCursorWheel          : TSGCursorWheel;
-		FCursorInCentre       : TSGBoolean;
+		FCursorInCenter       : TSGBoolean;
+			private
+		procedure SetCursorInCenter(const NP : TSGBoolean);
 			public
-		property CursorInCentre : TSGBoolean read FCursorInCentre write FCursorInCentre;
+		property CursorInCenter : TSGBoolean read FCursorInCenter write SetCursorInCenter;
 			public
 		// Возвращает, зажата ли клавиша
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;virtual;overload;
@@ -442,6 +444,18 @@ begin
 Result:=FCursorWheel;
 end;
 
+procedure TSGContext.SetCursorInCenter(const NP : TSGBoolean);
+begin
+FCursorInCenter:=NP;
+if (@SetCursorPosition<>nil) and NP then
+	begin
+	SetCursorPosition(SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5))-MouseShift());
+	FCursorPosition[SGLastCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	FCursorPosition[SGNowCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	FCursorPosition[SGDeferenseCursorPosition]:=0;
+	end;
+end;
+
 procedure TSGContext.Messages();
 var
 	Point:TSGPoint2f;
@@ -453,7 +467,7 @@ Point+=MouseShift();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
 FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]-FCursorPosition[SGLastCursorPosition];
-if CursorInCentre and (@SetCursorPosition<>nil) then
+if CursorInCenter and (@SetCursorPosition<>nil) then
 	begin
 	SetCursorPosition(SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5))-MouseShift());
 	FCursorPosition[SGLastCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
@@ -505,7 +519,7 @@ var
 begin
 inherited;
 FShowCursor:=True;
-FCursorInCentre:=False;
+FCursorInCenter:=False;
 FWidth:=0;
 FHeight:=0;
 FCallDraw:=nil;

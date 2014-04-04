@@ -149,6 +149,8 @@ Result:='Редактор моделей';
 end;
 
 procedure TSGModelRedactor.Draw();
+var
+	i : TSGLongWord;
 begin
 if FCustomModel<>nil then
 	begin
@@ -156,7 +158,10 @@ if FCustomModel<>nil then
 	FCustomModel.Draw();
 	if FSelectMesh<>-1 then
 		begin
+		Render.PushMatrix();
+		Render.MultMatrixf(FCustomModel.ObjectMatrix[FSelectMesh]);
 		
+		Render.PopMatrix();
 		end;
 	end;
 if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and Context.KeysPressed(SG_CTRL_KEY) then

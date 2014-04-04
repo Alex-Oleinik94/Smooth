@@ -82,7 +82,7 @@ end;
 begin
 inherited Create(VContext);
 Context.ShowCursor(False);
-Context.CursorInCentre:=True;
+Context.CursorInCenter:=True;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);

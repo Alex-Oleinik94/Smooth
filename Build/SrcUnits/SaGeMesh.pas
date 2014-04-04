@@ -307,11 +307,14 @@ type
         FArObjects   : packed array of TSGCustomModelMesh;
     private
 		function GetObject(const Index : TSGMaxEnum):TSG3dObject;
+		function GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
 		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
+		property ObjectMatrix[Index : TSGMaxEnum]:TSGPointer read GetObjectMatrix;
+		property ObjectColor: TSGColor4f write AddObjectColor;
     public
 		function AddMaterial():TSGImage;inline;
 		function LastMaterial():TSGImage;inline;
@@ -319,11 +322,13 @@ type
 		function LastObject():TSG3DObject;inline;
 		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
     public
+		procedure DrawObject(const Index : TSGLongWord);
         procedure Draw(); override;
-        property ObjectColor: TSGColor4f write AddObjectColor;
 		procedure LoadToVBO();
         procedure WriteInfo();
         procedure Clear();virtual;
+        // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
+        procedure Stripificate();
     public
 		// Загрузка и соxранение
 		procedure SaveToFile(const FileWay: TSGString);
@@ -336,8 +341,6 @@ type
         // Загрузить формат 3DS-Max-а
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
         function Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
-        // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
-        procedure Stripificate();
     public
 		procedure Dublicate(const Index:TSGLongWord);
 		procedure Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
@@ -1570,34 +1573,38 @@ Clear();
 inherited;
 end;
 
+procedure TSGCustomModel.DrawObject(const Index : TSGLongWord);
+var
+    CurrentMesh : TSG3DObject;
+begin
+CurrentMesh:=FArObjects[Index].FMesh;
+if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
+	begin
+	if FArObjects[Index].FCopired<>-1 then
+		CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh;
+	Render.PushMatrix();
+	Render.MultMatrixf(@FArObjects[Index].FMatrix);
+	if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
+		((FArMaterials[CurrentMesh.MaterialID].ReadyToGoToTexture)or
+		(FArMaterials[CurrentMesh.MaterialID].Ready)) then
+		begin
+		FArMaterials[CurrentMesh.MaterialID].BindTexture();
+		CurrentMesh.Draw();
+		FArMaterials[CurrentMesh.MaterialID].DisableTexture();
+		end
+	else
+		CurrentMesh.Draw();
+	Render.PopMatrix();
+	end;
+end;
+
 procedure TSGCustomModel.Draw();
 var
     i: TSGLongWord;
-    CurrentMesh : TSG3DObject;
 begin
 if FQuantityObjects<>0 then
 	for i := 0 to FQuantityObjects - 1 do
-		begin
-		CurrentMesh:=FArObjects[i].FMesh;
-		if (CurrentMesh<>nil) or (FArObjects[i].FCopired<>-1) then
-			begin
-			if FArObjects[i].FCopired<>-1 then
-				CurrentMesh := FArObjects[FArObjects[i].FCopired].FMesh;
-			Render.PushMatrix();
-			Render.MultMatrixf(@FArObjects[i].FMatrix);
-			if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
-				((FArMaterials[CurrentMesh.MaterialID].ReadyToGoToTexture)or
-				(FArMaterials[CurrentMesh.MaterialID].Ready)) then
-				begin
-				FArMaterials[CurrentMesh.MaterialID].BindTexture();
-				CurrentMesh.Draw();
-				FArMaterials[CurrentMesh.MaterialID].DisableTexture();
-				end
-			else
-				CurrentMesh.Draw();
-			end;
-		Render.PopMatrix();
-		end;
+		DrawObject(i);
 end;
 
 function TSGCustomModel.AddMaterial():TSGImage;inline;
@@ -1682,6 +1689,11 @@ end;
 procedure TSGCustomModel.Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
 begin
 FArObjects[Index].FMatrix:= FArObjects[Index].FMatrix * SGGetTranslateMatrix(Vertex);
+end;
+
+function TSGCustomModel.GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
+begin
+Result:=@FArObjects[Index].FMatrix;
 end;
 
 end.
