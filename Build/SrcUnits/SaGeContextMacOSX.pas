@@ -65,7 +65,10 @@ end;
 
 function TSGContextMacOSX.GetScreenResolution:TSGPoint2f;
 begin
-
+Result.Import(
+	CGDisplayPixelsWide(CGMainDisplayID()),
+	CGDisplayPixelsHigh(CGMainDisplayID())
+);
 end;
 
 function TSGContextMacOSX.GetCursorPosition:TSGPoint2f;
