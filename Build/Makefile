@@ -9,6 +9,7 @@ OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
 DODEBUG= -gl
 DORELEASE= -XX -O3 -CX -dRELEASE
 DOANDROID= -Sc -Sg -Si -Sh -Tandroid -Parm -dANDROID -Xd -CpARMV6 -Mobjfpc
+DODARWIN=-k-framework -kOpenGL
 
 enigma:
 	./EnigmaVB/enigmavbconsole.exe Main.evb
@@ -18,6 +19,10 @@ debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
 android:
 	$(PP271) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
+darwin_debug:
+	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main 
+darwin_release:
+	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main
 ios:
 	
 lib:
