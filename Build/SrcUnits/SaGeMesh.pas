@@ -18,6 +18,7 @@ const
 type
 	// Это тип типа хранения цветов в нашей модели
 	TSGMeshColorType = (TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
+	TSGMeshIndexFormat = (SGMeshIndexFormat1b,SGMeshIndexFormat2b,SGMeshIndexFormat4b);
 	// Это тип типа хранения вершин в нашей модели
 	TSGMeshVertexType = TSGVertexFormat;
 const
@@ -25,40 +26,102 @@ const
 	TSGMeshVertexType2f = SG_VERTEX_2F;
 	TSGMeshVertexType3f = SG_VERTEX_3F;
 type
-	// Типы индексов вершин
-	TSGFaceType = type TSGWord;//type TSGLongWord;
-	TSGArTSGFaceType = packed array of TSGFaceType;
-	TSGArTSGArTSGFaceType = packed array of TSGArTSGFaceType;
+	TSGCustomModel = class;
 	
 	// ======== Дальше идут структуры индексов веpшин  ========
-	TSGFaceLine = record
+	
+	(**=========================1b===========================**)
+	
+	TSGFaceLine1b = record
 		case byte of
-		0:  ( p0,p1: TSGFaceType );
-		1:  ( p:packed array [0..1] of TSGFaceType );
+		0:  ( p0,p1: TSGByte );
+		1:  ( p:packed array [0..1] of TSGByte );
 		end;
-	PTSGFaceLine = ^ TSGFaceLine;
+	PTSGFaceLine1b = ^ TSGFaceLine1b;
 	
-    TSGFaceTriangle = record
+    TSGFaceTriangle1b = record
 	case byte of
-	0: ( p0, p1, p2: TSGFaceType );
-	1: ( p:packed array[0..2] of TSGFaceType );
-	2: ( v:packed array[0..2] of TSGFaceType );
+	0: ( p0, p1, p2: TSGByte );
+	1: ( p:packed array[0..2] of TSGByte );
+	2: ( v:packed array[0..2] of TSGByte );
     end;
-    PTSGFaceTriangle = ^ TSGFaceTriangle;
+    PTSGFaceTriangle1b = ^ TSGFaceTriangle1b;
 	
-	TSGFaceQuad = record
+	TSGFaceQuad1b = record
 	case byte of
-	0: ( p0, p1, p2, p3: TSGFaceType );
-	1: ( p : packed array[0..3] of TSGFaceType );
+	0: ( p0, p1, p2, p3: TSGByte );
+	1: ( p : packed array[0..3] of TSGByte );
     end;
-	PTSGFaceQuad = ^ TSGFaceQuad;
+	PTSGFaceQuad1b = ^ TSGFaceQuad1b;
 	
-	TSGFacePoint = record
+	TSGFacePoint1b = record
 	case byte of
-	0: ( p0: TSGFaceType );
-	1: ( p : packed array[0..0] of TSGFaceType );
+	0: ( p0: TSGByte );
+	1: ( p : packed array[0..0] of TSGByte );
     end;
-	PTSGFacePoint = ^ TSGFacePoint;
+	PTSGFacePoint1b = ^ TSGFacePoint1b;
+	
+	(**=========================2b===========================**)
+	
+	TSGFaceLine2b = record
+		case byte of
+		0:  ( p0,p1: TSGWord );
+		1:  ( p:packed array [0..1] of TSGWord );
+		end;
+	PTSGFaceLine2b = ^ TSGFaceLine2b;
+	
+    TSGFaceTriangle2b = record
+	case byte of
+	0: ( p0, p1, p2: TSGWord );
+	1: ( p:packed array[0..2] of TSGWord );
+	2: ( v:packed array[0..2] of TSGWord );
+    end;
+    PTSGFaceTriangle2b = ^ TSGFaceTriangle2b;
+	
+	TSGFaceQuad2b = record
+	case byte of
+	0: ( p0, p1, p2, p3: TSGWord );
+	1: ( p : packed array[0..3] of TSGWord );
+    end;
+	PTSGFaceQuad2b = ^ TSGFaceQuad2b;
+	
+	TSGFacePoint2b = record
+	case byte of
+	0: ( p0: TSGWord );
+	1: ( p : packed array[0..0] of TSGWord );
+    end;
+	PTSGFacePoint2b = ^ TSGFacePoint2b;
+	
+	(**=========================4b===========================**)
+	
+	TSGFaceLine4b = record
+		case byte of
+		0:  ( p0,p1: TSGLongWord );
+		1:  ( p:packed array [0..1] of TSGLongWord );
+		end;
+	PTSGFaceLine4b = ^ TSGFaceLine4b;
+	
+    TSGFaceTriangle4b = record
+	case byte of
+	0: ( p0, p1, p2: TSGLongWord );
+	1: ( p:packed array[0..2] of TSGLongWord );
+	2: ( v:packed array[0..2] of TSGLongWord );
+    end;
+    PTSGFaceTriangle4b = ^ TSGFaceTriangle4b;
+	
+	TSGFaceQuad4b = record
+	case byte of
+	0: ( p0, p1, p2, p3: TSGLongWord );
+	1: ( p : packed array[0..3] of TSGLongWord );
+    end;
+	PTSGFaceQuad4b = ^ TSGFaceQuad4b;
+	
+	TSGFacePoint4b = record
+	case byte of
+	0: ( p0: TSGLongWord );
+	1: ( p : packed array[0..0] of TSGLongWord );
+    end;
+	PTSGFacePoint4b = ^ TSGFacePoint4b;
 
     { TSG3dObject }
     // Наша моделька..
@@ -71,8 +134,6 @@ type
     protected
         // Количество вершин
         FNOfVerts : TSGQuadWord;
-        // Количество структур индексов вершин
-        FNOfFaces : TSGQuadWord;
         
         // Есть ли у модельки текстурка
         FHasTexture : TSGBoolean;
@@ -81,7 +142,7 @@ type
         // Есть ли у нее цвета
         FHasColors  : TSGBoolean;
         // Используется ли у нее индексированный рендеринг
-        FHasIndexes : TSGBoolean;
+        FQuantityFaceArrays : TSGLongWord;
     protected
         // Количество текстур, индексы на которые в себе седержит моделька
         FQuantityTextures : TSGLongWord;
@@ -91,6 +152,8 @@ type
         FVertexType       : TSGMeshVertexType;
         // Тип хранение цветов
         FColorType        : TSGMeshColorType;
+        // 
+        FIndexFormat      : TSGMeshIndexFormat;
     private
 		procedure SetColorType(const VNewColorType:TSGMeshColorType);
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
@@ -103,7 +166,7 @@ type
 		property QuantityVertexes : TSGQuadWord       read FNOfVerts;
 		property QuantityFaces    : TSGQuadWord       read FNOfFaces;
 		property HasTexture       : Boolean           read FHasTexture    write SetHasTexture;
-		property HasIndexes       : Boolean           read FHasIndexes    write FHasIndexes;
+		property QuantityFaceArrays: TSGLongWord      read FQuantityFaceArrays write FQuantityFaceArrays;
 		property HasColors        : Boolean           read FHasColors     write FHasColors;
 		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
 		property ColorType        : TSGMeshColorType  read FColorType     write SetColorType;
@@ -111,7 +174,14 @@ type
 		property PoligonesType    : LongWord          read FPoligonesType write FPoligonesType;
     protected
         // А это у нас массив индексов
-		ArFaces:packed array of TSGFaceType;
+		ArFaces : packed array of 
+			packed record 
+				FNOfFaces : TSGQuadWord;
+				// Указательл на первый элемент области памяти, где находятся наши индексы
+				FArray:TSGPointer;
+				// Идентификатор материала
+				FMaterialID : TSGInt64;
+				end;
 		
 		// А это у нас массив самих вершин. Его пришлось сделать таким. 
 		// Не смотри что он такой ебанутый (TSGPointer). 
@@ -141,7 +211,7 @@ type
 		// Добавляет пустую(ые) вершины в массив вершин
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
 		// Добавляет еще элемент(ы) в массив индексов
-		procedure AddFace(const FQuantityNewFaces:LongWord = 1);
+		procedure AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 	
 	private
 		function GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
@@ -185,30 +255,40 @@ type
 		function GetVertexesSize():TSGMaxEnum;overload;inline;
 		
 		// Эта процедура для DirectX. Дело в том, что там нету SGR_QUADS. Так что он разбивается на 2 треугольника.
-		procedure SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
+		procedure SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGLongWord);
 		
 		// Возвращает индекс на первый элемент массива индексов. Не просто возвращает, а хитро возвращает.
 		// Теперь эти функции можно использовать как массивы. Так что их очень просто использовать.
 		// Но нужно соблюдать тип хранения индексов
-		function ArFacesLines()     : PTSGFaceLine;     inline;
-		function ArFacesQuads()     : PTSGFaceQuad;     inline;
-		function ArFacesTriangles() : PTSGFaceTriangle; inline;
-		function ArFacesPoints()    : PTSGFacePoint;    inline;
+		function ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;     inline;
+		function ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;     inline;
+		function ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b; inline;
+		function ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;    inline;
+		
+		function ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;     inline;
+		function ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;     inline;
+		function ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b; inline;
+		function ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;    inline;
+		
+		function ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;     inline;
+		function ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;     inline;
+		function ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b; inline;
+		function ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;    inline;
 		
 		// Устанавливает длинну массива индексов
-		procedure SetFaceLength(const NewLength:TSGMaxEnum);inline;
+		procedure SetFaceLength(const Index:TSGLongWord;const NewLength:TSGQuadWord);inline;
 		// Возвращает действительную длинну массива индексов
-		function GetFaceLength():TSGMaxEnum;overload;inline;
+		function GetFaceLength(const Index:TSGLongWord):TSGQuadWord;overload;inline;
 		// Возвращает действительную длинну массива индексов в зависимости он их длинны, заданой параметром
-		function GetFaceLength(const FaceLength:TSGMaxEnum):TSGMaxEnum;overload;inline;
+		function GetFaceLength(const Index:TSGLongWord;const FaceLength:TSGQuadWord):TSGQuadWord;overload;inline;
 		// Возвращает действительную длинну массива индексов в зависимости он их длинны и их типа, заданых параметрами
-		class function GetFaceLength(const FaceLength:TSGMaxEnum; const ThisPoligoneType:LongWord):TSGMaxEnum;overload;inline;
+		class function GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
 		// Возвращает, сколько в TSGFaceType*Result байтов занимает одна структура индексов. Очень прикольная функция.
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
 	public
 		// Ствойства для получения и редактирования длинн массивов
-		property Faces    :TSGMaxEnum read GetFaceLength   write SetFaceLength;
-		property Vertexes :TSGQuadWord read GetVertexLength write SetVertexLength;
+		property Faces[Index:TSGLongWord] : TSGQuadWord read GetFaceLength   write SetFaceLength;
+		property Vertexes                 : TSGQuadWord read GetVertexLength write SetVertexLength;
     protected
 		// Вклбючено ли VBO
 		// VBO - Vertex Buffer Object
@@ -218,9 +298,9 @@ type
 		FEnableVBO      : TSGBoolean;
 		
 		// Идентификатор массива вершин в видюхе
-        FVBOVertexes    : TSGLongWord;
+        FVertexesBuffer    : TSGLongWord;
         // Идентификатор массива индексов в видюхе
-        FVBOFaces       : TSGLongWord;
+        FFacesBuffers      : packed array of TSGLongWord;
         
 		// Включен ли Cull Face
         FEnableCullFace : TSGBoolean;
@@ -246,8 +326,6 @@ type
 			public
         // Эта процедурка автоматически выделяет память под нормали и вычесляет их, исходя из данных вершин
         procedure AddNormals();virtual;
-        // =) Subserf
-        procedure CatmulClark();virtual;
         
 		procedure SaveToSG3DOFile(const FileWay:TSGString);
 		procedure LoadFromSG3DOFile(const FileWay:TSGString);
@@ -275,19 +353,18 @@ type
 	protected 
 		// Имя модельки
 		FName : TSGString;
-		// Идентификатор материала
-		FMaterialID : TSGInt64;
+		FParent : TSGCustomModel;
+		FObjectMaterialID : TSGInt64;
 	public
 		// Свойство : Имя модельки
 		property Name       : TSGString read FName       write FName;
 		// Свойство : Идентификатор материала
-		property MaterialID : TSGInt64  read FMaterialID write FMaterialID;
+		property ObjectMaterialID : TSGInt64  read FObjectMaterialID write FObjectMaterialID;
     end;
 
     PSG3dObject = ^TSG3dObject;
 
     { TSGCustomModel }
-type
 	TSGCustomModelMesh = record
 		FMesh    : TSG3DObject;
 		FCopired : TSGInt64;
@@ -351,11 +428,11 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+//{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+//{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean);inline;
 begin
@@ -374,81 +451,70 @@ begin
 Result:=FNOfVerts;
 end;
 
-procedure TSG3DObject.SetFaceQuad(const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGFaceType);
+procedure TSG3DObject.SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGLongWord);
 begin
 if Render.RenderType=SGRenderDirectX then
 	begin
-	ArFacesTriangles[Index*2].p[0]:=p0;
-	ArFacesTriangles[Index*2].p[1]:=p1;
-	ArFacesTriangles[Index*2].p[2]:=p2;
-	ArFacesTriangles[Index*2+1].p[0]:=p2;
-	ArFacesTriangles[Index*2+1].p[1]:=p3;
-	ArFacesTriangles[Index*2+1].p[2]:=p0;
+	case FIndexFormat of
+	SGMeshIndexFormat1b:
+		begin
+		ArFacesTriangles1b(ArIndex)[Index*2].p[0]:=p0;
+		ArFacesTriangles1b(ArIndex)[Index*2].p[1]:=p1;
+		ArFacesTriangles1b(ArIndex)[Index*2].p[2]:=p2;
+		ArFacesTriangles1b(ArIndex)[Index*2+1].p[0]:=p2;
+		ArFacesTriangles1b(ArIndex)[Index*2+1].p[1]:=p3;
+		ArFacesTriangles1b(ArIndex)[Index*2+1].p[2]:=p0;
+		end;
+	SGMeshIndexFormat2b:
+		begin
+		ArFacesTriangles2b(ArIndex)[Index*2].p[0]:=p0;
+		ArFacesTriangles2b(ArIndex)[Index*2].p[1]:=p1;
+		ArFacesTriangles2b(ArIndex)[Index*2].p[2]:=p2;
+		ArFacesTriangles2b(ArIndex)[Index*2+1].p[0]:=p2;
+		ArFacesTriangles2b(ArIndex)[Index*2+1].p[1]:=p3;
+		ArFacesTriangles2b(ArIndex)[Index*2+1].p[2]:=p0;
+		end;
+	SGMeshIndexFormat4b:
+		begin
+		ArFacesTriangles4b(ArIndex)[Index*2].p[0]:=p0;
+		ArFacesTriangles4b(ArIndex)[Index*2].p[1]:=p1;
+		ArFacesTriangles4b(ArIndex)[Index*2].p[2]:=p2;
+		ArFacesTriangles4b(ArIndex)[Index*2+1].p[0]:=p2;
+		ArFacesTriangles4b(ArIndex)[Index*2+1].p[1]:=p3;
+		ArFacesTriangles4b(ArIndex)[Index*2+1].p[2]:=p0;
+		end;
+	end;
 	end
 else
 	begin
-	ArFacesQuads[Index].p[0]:=p0;
-	ArFacesQuads[Index].p[1]:=p1;
-	ArFacesQuads[Index].p[2]:=p2;
-	ArFacesQuads[Index].p[3]:=p3;
-	end;
-end;
-
-procedure TSG3DObject.CatmulClark();
-var
-	ArMiddlePointsPol:packed array of TSGVertex3f = nil;
-	ii,iii,i:LongWord;
-	ArNeighbourPoligons:packed array of array [0..2] of LongWord;
-
-function FindNeighbour(const p1,p2:TSGFaceType; const Pol:LongWord):LongWord;
-var
-	i,ii,iii:LongWord;
-begin
-Result:=FNOfFaces;
-for i:=0 to FNOfFaces-1 do
-	if i<>Pol then
+	case FIndexFormat of
+	SGMeshIndexFormat1b:
 		begin
-		iii:=0;
-		for ii:=0 to 2 do
-			if (ArFacesTriangles[i].p[ii]=p1) or (ArFacesTriangles[i].p[ii]=p2) then
-				iii+=1;
-		if iii=2 then
-			begin
-			Result:=i;
-			Break;
-			end;
+		ArFacesQuads1b(ArIndex)[Index].p[0]:=p0;
+		ArFacesQuads1b(ArIndex)[Index].p[1]:=p1;
+		ArFacesQuads1b(ArIndex)[Index].p[2]:=p2;
+		ArFacesQuads1b(ArIndex)[Index].p[3]:=p3;
 		end;
-end;
-
-begin
-SetLength(ArMiddlePointsPol,FNOfFaces);
-For i:=0 to FNOfFaces-1 do
-	begin
-	case FPoligonesType of
-	SGR_TRIANGLES:
+	SGMeshIndexFormat2b:
 		begin
-		ArMiddlePointsPol[i]:=
-			(ArVertex3f[ArFacesTriangles[i].p[0]]^+
-			ArVertex3f[ArFacesTriangles[i].p[1]]^+
-			ArVertex3f[ArFacesTriangles[i].p[2]]^)/3;
+		ArFacesQuads2b(ArIndex)[Index].p[0]:=p0;
+		ArFacesQuads2b(ArIndex)[Index].p[1]:=p1;
+		ArFacesQuads2b(ArIndex)[Index].p[2]:=p2;
+		ArFacesQuads2b(ArIndex)[Index].p[3]:=p3;
+		end;
+	SGMeshIndexFormat4b:
+		begin
+		ArFacesQuads4b(ArIndex)[Index].p[0]:=p0;
+		ArFacesQuads4b(ArIndex)[Index].p[1]:=p1;
+		ArFacesQuads4b(ArIndex)[Index].p[2]:=p2;
+		ArFacesQuads4b(ArIndex)[Index].p[3]:=p3;
 		end;
 	end;
 	end;
-SetLength(ArNeighbourPoligons,FNOfFaces);
-for i:=0 to FNOfFaces-1 do
-	begin
-	ArNeighbourPoligons[i][0]:=FindNeighbour(
-		ArFacesTriangles[i].p[0],ArFacesTriangles[i].p[1],i);
-	ArNeighbourPoligons[i][1]:=FindNeighbour(
-		ArFacesTriangles[i].p[2],ArFacesTriangles[i].p[1],i);
-	ArNeighbourPoligons[i][2]:=FindNeighbour(
-		ArFacesTriangles[i].p[0],ArFacesTriangles[i].p[2],i);
-	end;
-	
 end;
 
 procedure TSG3DObject.AddNormals();
-var
+begin end;{var
 	SecondArVertex:Pointer = nil;
 	i,ii,iiii,iii:TSGMaxEnum;
 	ArPoligonesNormals:packed array of TSGVertex3f = nil;
@@ -501,11 +567,11 @@ for i:=0 to FNOfVerts-1 do
 	ArNormal[i]^:=Vertex;
 	end;
 SetLength(ArPoligonesNormals,0);
-end;
+end;}
 
-procedure TSG3DObject.AddFace(const FQuantityNewFaces:LongWord = 1);
+procedure TSG3DObject.AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 begin
-SetFaceLength(FQuantityNewFaces+FNOfFaces);
+SetFaceLength(ArIndex,FQuantityNewFaces+FNOfFaces);
 end;
 
 procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
@@ -1011,7 +1077,7 @@ begin
     FHasTexture := False;
     FHasNormals := False;
     FHasColors  := False;
-    FHasIndexes := True;
+    FQuantityFaceArrays := 0;
     FNOfFaces := 0;
     FNOfVerts := 0;
     ArVertex := nil;
@@ -1100,6 +1166,7 @@ end;
 procedure TSG3DObject.SaveToSG3DO(const Stream:TStream);
 var
 	S:array[0..8] of TSGChar = 'SaGe3DObj';
+	i : TSGLongWord;
 begin
 Stream.WriteBuffer(S[0],SizeOf(S[0])*9);
 Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
@@ -1107,7 +1174,7 @@ Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
 Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
 Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.WriteBuffer(FHasIndexes,SizeOf(FHasIndexes));
+Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
 Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
 Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
@@ -1119,7 +1186,9 @@ SGWriteStringToStream(FName,Stream);
 Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
 Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
 
-Stream.WriteBuffer(ArFaces[0],FacesSize());
+if FQuantityFaceArrays<>0 then
+	for i:=0 to FQuantityFaceArrays-1 do
+		;//Stream.WriteBuffer(ArFaces[i]^,);
 Stream.WriteBuffer(ArVertex^,VertexesSize());
 end;
 
@@ -1166,9 +1235,6 @@ end;
 procedure TSG3dObject.BasicDraw(); inline;
 const
 	FaceFormat = SGR_UNSIGNED_SHORT;
-// GL_UNSIGNED_INT - LongWord - 4
-// GL_UNSIGNED_SHORT - Word - 2
-// GL_UNSIGNED_BYTE - Byte - 1
 begin
 Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
 
