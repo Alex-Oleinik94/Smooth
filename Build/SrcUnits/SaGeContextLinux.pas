@@ -84,7 +84,7 @@ var
 	NormalKey:Byte = 0;
 begin
 PKey := PByte(@VKey);
-WriteLn(PKey[0],'=',char(PKey[0]),' ',PKey[1],'=',char(PKey[1]));
+//WriteLn(PKey[0],'=',char(PKey[0]),' ',PKey[1],'=',char(PKey[1]));
 case PKey[1] of
 0://English
 	begin
@@ -425,11 +425,10 @@ cm := XCreateColormap(dpy,RootWindow(dpy,visinfo^.screen),visinfo^.visual,AllocN
 FillChar(winAttr,sizeof(winAttr),0);
 winAttr.colormap := cm;
 winAttr.border_pixel := 0;
-winAttr.background_pixel := Byte(not FullScreen);
-winAttr.override_redirect := Byte(FullScreen);
+winAttr.background_pixel := 0;
 winAttr.event_mask := ExposureMask or PointerMotionMask or ButtonPressMask or ButtonReleaseMask or StructureNotifyMask or KeyPressMask or KeyReleaseMask;
 win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,
-	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask {or CWOverrideRed},@winAttr);
+	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
 if win = 0 then
 	begin
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
@@ -438,7 +437,6 @@ if win = 0 then
 Name:=SGStringAsPChar(FTitle);
 XStringListToTextProperty(@Name,1,@window_title_property);
 XSetWMName(dpy,win,@window_title_property);
-
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -447,10 +445,7 @@ if FRender=nil then
 	if Result then 
 		FRender.Init();
 	
-	if FullScreen then 
-		XMapRaised(dpy, win)
-	else
-		XMapWindow(dpy,win);
+	XMapWindow(dpy,win);
 	end
 else
 	begin
@@ -459,12 +454,64 @@ else
 	if Result then
 		Render.MakeCurrent();
 	end;
+if FullScreen then
+	begin
+	FFullscreen:=False;
+	FullScreen:=True;
+	end;
 end;
+
 procedure TSGContextLinux.InitFullscreen(const b:boolean); 
+var
+	Event:TXEvent;
 begin
+if FullScreen<>b then
+	begin
+	if win <> 0 then
+		if b then
+			begin
+			XMoveWindow(dpy, win, 0, 0);
+			XFlush(dpy);
+			
+			FillChar(Event,SizeOf(Event),0);
+			event._type := ClientMessage;
+			event.xclient.window := win;
+			event.xclient.display := dpy;
+			event.xclient.format := 32; // Data is 32-bit longs
+			event.xclient.message_type := XInternAtom( dpy, '_NET_WM_STATE', false );
+			event.xclient.data.l[0] := 1;
+			event.xclient.data.l[1] := XInternAtom( dpy, '_NET_WM_STATE_FULLSCREEN', false );
+			event.xclient.data.l[2] := 0; // No secondary property
+			event.xclient.data.l[3] := 1; // Sender is a normal application
 
-inherited InitFullscreen(b);
-
+			XSendEvent(dpy,
+			   RootWindow(dpy,visinfo^.screen),
+			   False,
+			   SubstructureNotifyMask or SubstructureRedirectMask,
+			   @event);
+			end
+		else
+			begin
+			FillChar(Event,SizeOf(Event),0);
+			
+			event._type := ClientMessage;
+			event.xclient.window := win;
+			event.xclient.display := dpy;
+			event.xclient.format := 32; // Data is 32-bit longs
+			event.xclient.message_type := XInternAtom( dpy, '_NET_WM_STATE', false );
+			event.xclient.data.l[0] := 0;
+			event.xclient.data.l[1] := XInternAtom( dpy, '_NET_WM_STATE_FULLSCREEN', false );
+			event.xclient.data.l[2] := 0; // No secondary property
+			event.xclient.data.l[3] := 1; // Sender is a normal application
+			
+			XSendEvent(dpy,
+			   RootWindow(dpy,visinfo^.screen),
+			   False,
+			   SubstructureNotifyMask or SubstructureRedirectMask,
+			   @event);
+			end;
+	inherited InitFullscreen(b);
+	end;
 end;
 
 end.
