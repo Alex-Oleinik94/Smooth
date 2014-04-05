@@ -1,7 +1,7 @@
 echo off
-echo "======================================="
+echo "=========================================="
 echo "| Compiling  Debug  Version for Mac OSX  |"
-echo "======================================="
+echo "=========================================="
 mkdir CompiledUnits
 mkdir CompiledUnits/i386-other
 make darwin_debug

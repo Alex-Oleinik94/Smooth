@@ -36,7 +36,6 @@ type
 			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
-		winAttr: TXSetWindowAttributes;
 		dpy: PDisplay;
 		win: TWindow;
 		visinfo: PXVisualInfo;
@@ -248,17 +247,10 @@ end;
 function TSGContextLinux.GetScreenResolution:TSGPoint2f;
 begin
 if dpy = nil then
-	begin
-	Result.Import(
-		XWidthOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)),
-		XHeightOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)));
-	end
-else
-	begin
-	Result.Import(
-		XWidthOfScreen(XScreenOfDisplay(dpy,0)),
-		XHeightOfScreen(XScreenOfDisplay(dpy,0)));
-	end;
+	dpy:=XOpenDisplay(nil);
+Result.Import(
+	XWidthOfScreen(XScreenOfDisplay(dpy,0)),
+	XHeightOfScreen(XScreenOfDisplay(dpy,0)));
 end;
 
 function TSGContextLinux.GetCursorPosition:TSGPoint2f;
@@ -274,7 +266,6 @@ end;
 constructor TSGContextLinux.Create();
 begin
 inherited;
-FillChar(winAttr,sizeof(winAttr),0);
 dpy:=nil;
 win:=0;
 visinfo:=nil;
@@ -285,7 +276,16 @@ end;
 
 destructor TSGContextLinux.Destroy();
 begin
-XCloseDisplay(dpy);
+if (win<>0) and (dpy<>nil) then
+	begin
+	XDestroyWindow(dpy,win);
+	win:=0;
+	end;
+if dpy<>nil then
+	begin
+	XCloseDisplay(dpy);
+	dpy:=nil;
+	end;
 inherited;
 end;
 
@@ -393,18 +393,18 @@ While XPending(dpy)<>0 do
 inherited;
 end;
 
-
-
 function TSGContextLinux.CreateWindow():Boolean;
 var
 	errorBase,eventBase: integer;
 	window_title_property: TXTextProperty;
+		winAttr: TXSetWindowAttributes;
 var
 	attr: Array[0..10] of integer = (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,GLX_DEPTH_SIZE,24,GLX_DOUBLEBUFFER,none);
 	Name:PChar = nil;
 begin 
 Result:=False;
-dpy := XOpenDisplay(nil);
+if dpy = nil then
+	dpy := XOpenDisplay(nil);
 if dpy = nil then
 	begin
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not connect to X server!');
@@ -422,11 +422,14 @@ if(visinfo = nil) then
 	Exit;
 	end;
 cm := XCreateColormap(dpy,RootWindow(dpy,visinfo^.screen),visinfo^.visual,AllocNone);
+FillChar(winAttr,sizeof(winAttr),0);
 winAttr.colormap := cm;
 winAttr.border_pixel := 0;
-winAttr.background_pixel := 0;
+winAttr.background_pixel := Byte(not FullScreen);
+winAttr.override_redirect := Byte(FullScreen);
 winAttr.event_mask := ExposureMask or PointerMotionMask or ButtonPressMask or ButtonReleaseMask or StructureNotifyMask or KeyPressMask or KeyReleaseMask;
-win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
+win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,
+	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask {or CWOverrideRed},@winAttr);
 if win = 0 then
 	begin
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
@@ -444,7 +447,10 @@ if FRender=nil then
 	if Result then 
 		FRender.Init();
 	
-	XMapWindow(dpy,win);
+	if FullScreen then 
+		XMapRaised(dpy, win)
+	else
+		XMapWindow(dpy,win);
 	end
 else
 	begin

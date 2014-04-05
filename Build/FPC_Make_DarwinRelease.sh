@@ -1,7 +1,7 @@
 echo off
-echo "======================================="
+echo "=========================================="
 echo "| Compiling Release Version for Mac OSX  |"
-echo "======================================="
+echo "=========================================="
 MKDIR CompiledUnits
 MKDIR CompiledUnits/i386-other
 make darwin_release

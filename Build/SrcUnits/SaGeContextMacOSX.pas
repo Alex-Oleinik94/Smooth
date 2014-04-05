@@ -184,6 +184,7 @@ else
 	Result:=FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
+	
 	end;
 SetWTitle(wnd_Handle,FTitle);
 end;
