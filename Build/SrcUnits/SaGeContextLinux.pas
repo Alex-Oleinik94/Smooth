@@ -236,7 +236,11 @@ end;
 
 procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
 begin
-SGLog.Sourse('"TSGContextLinux.SetCursorPosition" isn''t possible!');
+if dpy = nil then
+	dpy := XOpenDisplay(nil);
+XSelectInput(dpy, RootWindow(dpy, 0), KeyReleaseMask);
+XWarpPointer(dpy, None, RootWindow(dpy, 0), 0, 0, 0, 0, a.x, a.y);
+XFlush(dpy);
 end;
 
 procedure TSGContextLinux.ShowCursor(const b:Boolean);
