@@ -27,6 +27,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+		class function RectInCoords:Boolean;override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -46,7 +47,13 @@ type
 			public
 		function Get(const What:string):Pointer;override;
 		end;
+
 implementation
+
+class function TSGContextLinux.RectInCoords:Boolean;
+begin
+Result:=False;
+end;
 
 procedure TSGContextLinux.SetTittle(const NewTittle:TSGString);
 begin
@@ -235,29 +242,72 @@ else
 end;
 
 procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
+var
+	xwa : TXWindowAttributes;
 begin
 if dpy = nil then
 	dpy := XOpenDisplay(nil);
+if (dpy=nil) or(win=0) then 
+	Exit;
 XSelectInput(dpy, RootWindow(dpy, 0), KeyReleaseMask);
-XWarpPointer(dpy, None, RootWindow(dpy, 0), 0, 0, 0, 0, a.x, a.y);
+if FullScreen then
+	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x, a.y)
+else
+	begin
+	XGetWindowAttributes(dpy, win, @xwa);
+	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x+xwa.x, a.y+xwa.y+25);
+	end;
 XFlush(dpy);
 end;
 
 procedure TSGContextLinux.ShowCursor(const b:Boolean);
+const
+	XC_left_ptr = 68;
+var
+	Cursor          : TCursor;
+	bitmapNoData    : TPixmap;
+	black           : TXColor;
+	noData          : packed array[0..7] of byte = (0,0,0,0,0,0,0,0);
 begin
-SGLog.Sourse('"TSGContextLinux.ShowCursor" isn''t possible!');
+if dpy = nil then
+	dpy := XOpenDisplay(nil);
+if (dpy = nil) or (win=0) then
+	Exit;
+if not b then
+	begin
+	black.red := 0;
+	black.green := 0;
+	black.blue :=0;
+	bitmapNoData    := XCreateBitmapFromData(dpy, win, PChar(@noData), 8, 8);
+	cursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
+		@black, @black, 0, 0);
+	XDefineCursor(dpy,win, cursor);
+	XFreeCursor(dpy, cursor);
+	end
+else
+	begin
+	cursor := XCreateFontCursor(dpy,XC_left_ptr);
+	XDefineCursor(dpy, win, cursor);
+	XFreeCursor(dpy, cursor);
+	end;
+	// XUndefineCursor(dpy, win); Это что то интересное из этой темы
 end;
 
-function TSGContextLinux.GetScreenResolution:TSGPoint2f;
+function TSGContextLinux.GetScreenResolution():TSGPoint2f;
 begin
 if dpy = nil then
 	dpy:=XOpenDisplay(nil);
+if dpy = nil then
+	begin
+	Result.Import(0,0);
+	Exit;
+	end;
 Result.Import(
 	XWidthOfScreen(XScreenOfDisplay(dpy,0)),
 	XHeightOfScreen(XScreenOfDisplay(dpy,0)));
 end;
 
-function TSGContextLinux.GetCursorPosition:TSGPoint2f;
+function TSGContextLinux.GetCursorPosition():TSGPoint2f;
 begin
 Result.Import(FCursorX,FCursorY)
 end;
@@ -305,7 +355,7 @@ if Active then
 	end;
 end;
 
-procedure TSGContextLinux.Run;
+procedure TSGContextLinux.Run();
 var
 	FDT:TSGDateTime;
 begin
