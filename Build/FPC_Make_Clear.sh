@@ -1,4 +1,4 @@
-MKDIR CompiledUnits
-MKDIR CompiledUnits\i386-other
-MKDIR CompiledUnits\arm-android
+mkdir "CompiledUnits"
+mkdir "CompiledUnits/i386-other"
+mkdir "CompiledUnits/arm-android"
 make clear

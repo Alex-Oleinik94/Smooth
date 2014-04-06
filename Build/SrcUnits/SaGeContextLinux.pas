@@ -27,6 +27,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+		class function RectInCoords:Boolean;override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -36,7 +37,6 @@ type
 			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
-		winAttr: TXSetWindowAttributes;
 		dpy: PDisplay;
 		win: TWindow;
 		visinfo: PXVisualInfo;
@@ -47,7 +47,13 @@ type
 			public
 		function Get(const What:string):Pointer;override;
 		end;
+
 implementation
+
+class function TSGContextLinux.RectInCoords:Boolean;
+begin
+Result:=False;
+end;
 
 procedure TSGContextLinux.SetTittle(const NewTittle:TSGString);
 begin
@@ -85,7 +91,7 @@ var
 	NormalKey:Byte = 0;
 begin
 PKey := PByte(@VKey);
-WriteLn(PKey[0],'=',char(PKey[0]),' ',PKey[1],'=',char(PKey[1]));
+//WriteLn(PKey[0],'=',char(PKey[0]),' ',PKey[1],'=',char(PKey[1]));
 case PKey[1] of
 0://English
 	begin
@@ -236,32 +242,72 @@ else
 end;
 
 procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
+var
+	xwa : TXWindowAttributes;
 begin
-SGLog.Sourse('"TSGContextLinux.SetCursorPosition" isn''t possible!');
+if dpy = nil then
+	dpy := XOpenDisplay(nil);
+if (dpy=nil) or(win=0) then 
+	Exit;
+XSelectInput(dpy, RootWindow(dpy, 0), KeyReleaseMask);
+if FullScreen then
+	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x, a.y)
+else
+	begin
+	XGetWindowAttributes(dpy, win, @xwa);
+	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x+xwa.x, a.y+xwa.y+25);
+	end;
+XFlush(dpy);
 end;
 
 procedure TSGContextLinux.ShowCursor(const b:Boolean);
-begin
-SGLog.Sourse('"TSGContextLinux.ShowCursor" isn''t possible!');
-end;
-
-function TSGContextLinux.GetScreenResolution:TSGPoint2f;
+const
+	XC_left_ptr = 68;
+var
+	Cursor          : TCursor;
+	bitmapNoData    : TPixmap;
+	black           : TXColor;
+	noData          : packed array[0..7] of byte = (0,0,0,0,0,0,0,0);
 begin
 if dpy = nil then
+	dpy := XOpenDisplay(nil);
+if (dpy = nil) or (win=0) then
+	Exit;
+if not b then
 	begin
-	Result.Import(
-		XWidthOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)),
-		XHeightOfScreen(XScreenOfDisplay(XOpenDisplay(nil),0)));
+	black.red := 0;
+	black.green := 0;
+	black.blue :=0;
+	bitmapNoData    := XCreateBitmapFromData(dpy, win, PChar(@noData), 8, 8);
+	cursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
+		@black, @black, 0, 0);
+	XDefineCursor(dpy,win, cursor);
+	XFreeCursor(dpy, cursor);
 	end
 else
 	begin
-	Result.Import(
-		XWidthOfScreen(XScreenOfDisplay(dpy,0)),
-		XHeightOfScreen(XScreenOfDisplay(dpy,0)));
+	cursor := XCreateFontCursor(dpy,XC_left_ptr);
+	XDefineCursor(dpy, win, cursor);
+	XFreeCursor(dpy, cursor);
 	end;
+	// XUndefineCursor(dpy, win); Это что то интересное из этой темы
 end;
 
-function TSGContextLinux.GetCursorPosition:TSGPoint2f;
+function TSGContextLinux.GetScreenResolution():TSGPoint2f;
+begin
+if dpy = nil then
+	dpy:=XOpenDisplay(nil);
+if dpy = nil then
+	begin
+	Result.Import(0,0);
+	Exit;
+	end;
+Result.Import(
+	XWidthOfScreen(XScreenOfDisplay(dpy,0)),
+	XHeightOfScreen(XScreenOfDisplay(dpy,0)));
+end;
+
+function TSGContextLinux.GetCursorPosition():TSGPoint2f;
 begin
 Result.Import(FCursorX,FCursorY)
 end;
@@ -274,7 +320,6 @@ end;
 constructor TSGContextLinux.Create();
 begin
 inherited;
-FillChar(winAttr,sizeof(winAttr),0);
 dpy:=nil;
 win:=0;
 visinfo:=nil;
@@ -285,7 +330,16 @@ end;
 
 destructor TSGContextLinux.Destroy();
 begin
-XCloseDisplay(dpy);
+if (win<>0) and (dpy<>nil) then
+	begin
+	XDestroyWindow(dpy,win);
+	win:=0;
+	end;
+if dpy<>nil then
+	begin
+	XCloseDisplay(dpy);
+	dpy:=nil;
+	end;
 inherited;
 end;
 
@@ -301,7 +355,7 @@ if Active then
 	end;
 end;
 
-procedure TSGContextLinux.Run;
+procedure TSGContextLinux.Run();
 var
 	FDT:TSGDateTime;
 begin
@@ -393,18 +447,18 @@ While XPending(dpy)<>0 do
 inherited;
 end;
 
-
-
 function TSGContextLinux.CreateWindow():Boolean;
 var
 	errorBase,eventBase: integer;
 	window_title_property: TXTextProperty;
+		winAttr: TXSetWindowAttributes;
 var
 	attr: Array[0..10] of integer = (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,GLX_DEPTH_SIZE,24,GLX_DOUBLEBUFFER,none);
 	Name:PChar = nil;
 begin 
 Result:=False;
-dpy := XOpenDisplay(nil);
+if dpy = nil then
+	dpy := XOpenDisplay(nil);
 if dpy = nil then
 	begin
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not connect to X server!');
@@ -422,11 +476,13 @@ if(visinfo = nil) then
 	Exit;
 	end;
 cm := XCreateColormap(dpy,RootWindow(dpy,visinfo^.screen),visinfo^.visual,AllocNone);
+FillChar(winAttr,sizeof(winAttr),0);
 winAttr.colormap := cm;
 winAttr.border_pixel := 0;
 winAttr.background_pixel := 0;
 winAttr.event_mask := ExposureMask or PointerMotionMask or ButtonPressMask or ButtonReleaseMask or StructureNotifyMask or KeyPressMask or KeyReleaseMask;
-win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
+win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,
+	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
 if win = 0 then
 	begin
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
@@ -435,7 +491,6 @@ if win = 0 then
 Name:=SGStringAsPChar(FTitle);
 XStringListToTextProperty(@Name,1,@window_title_property);
 XSetWMName(dpy,win,@window_title_property);
-
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -453,12 +508,64 @@ else
 	if Result then
 		Render.MakeCurrent();
 	end;
+if FullScreen then
+	begin
+	FFullscreen:=False;
+	FullScreen:=True;
+	end;
 end;
+
 procedure TSGContextLinux.InitFullscreen(const b:boolean); 
+var
+	Event:TXEvent;
 begin
+if FullScreen<>b then
+	begin
+	if win <> 0 then
+		if b then
+			begin
+			XMoveWindow(dpy, win, 0, 0);
+			XFlush(dpy);
+			
+			FillChar(Event,SizeOf(Event),0);
+			event._type := ClientMessage;
+			event.xclient.window := win;
+			event.xclient.display := dpy;
+			event.xclient.format := 32; // Data is 32-bit longs
+			event.xclient.message_type := XInternAtom( dpy, '_NET_WM_STATE', false );
+			event.xclient.data.l[0] := 1;
+			event.xclient.data.l[1] := XInternAtom( dpy, '_NET_WM_STATE_FULLSCREEN', false );
+			event.xclient.data.l[2] := 0; // No secondary property
+			event.xclient.data.l[3] := 1; // Sender is a normal application
 
-inherited InitFullscreen(b);
-
+			XSendEvent(dpy,
+			   RootWindow(dpy,visinfo^.screen),
+			   False,
+			   SubstructureNotifyMask or SubstructureRedirectMask,
+			   @event);
+			end
+		else
+			begin
+			FillChar(Event,SizeOf(Event),0);
+			
+			event._type := ClientMessage;
+			event.xclient.window := win;
+			event.xclient.display := dpy;
+			event.xclient.format := 32; // Data is 32-bit longs
+			event.xclient.message_type := XInternAtom( dpy, '_NET_WM_STATE', false );
+			event.xclient.data.l[0] := 0;
+			event.xclient.data.l[1] := XInternAtom( dpy, '_NET_WM_STATE_FULLSCREEN', false );
+			event.xclient.data.l[2] := 0; // No secondary property
+			event.xclient.data.l[3] := 1; // Sender is a normal application
+			
+			XSendEvent(dpy,
+			   RootWindow(dpy,visinfo^.screen),
+			   False,
+			   SubstructureNotifyMask or SubstructureRedirectMask,
+			   @event);
+			end;
+	inherited InitFullscreen(b);
+	end;
 end;
 
 end.

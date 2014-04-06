@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 unit SaGeContextMacOSX;
-
+// просто текст для автоматического определения кодировки компелятором FPC ;)
 interface
 
 uses 
@@ -65,7 +65,10 @@ end;
 
 function TSGContextMacOSX.GetScreenResolution:TSGPoint2f;
 begin
-
+Result.Import(
+	CGDisplayPixelsWide(CGMainDisplayID()),
+	CGDisplayPixelsHigh(CGMainDisplayID())
+);
 end;
 
 function TSGContextMacOSX.GetCursorPosition:TSGPoint2f;
@@ -181,6 +184,7 @@ else
 	Result:=FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
+	
 	end;
 SetWTitle(wnd_Handle,FTitle);
 end;

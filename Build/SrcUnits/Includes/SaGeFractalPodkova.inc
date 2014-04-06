@@ -9,7 +9,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -26,23 +26,21 @@ Result:='Кривая Леви/Дракон Хартера';
 end;
 
 
-procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 begin
 if Render.RenderType=SGRenderOpenGL then
 	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v
 else
 	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
-FMesh.Objects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex;
-FFaceIndex+=1;
 FVertexIndex+=1;
 
-AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSGFractalPodkova.CalculateFromThread();
 var
 	MeshID:LongWord;
-	FVI,FFI:LongWord;
+	FVI:LongWord;
 
 procedure Rec(const t1,t2:TSGVertex2f;const NowDepth:LongWord;const b:integer = 1);
 var
@@ -61,17 +59,16 @@ if NowDepth>0 then
 		Rec(v,t2,NowDepth-1,-1);
 	end
 else
-	PushIndexes(MeshID,t2,FVI,FFI);
+	PushIndexes(MeshID,t2,FVI);
 end;
 
 begin
 MeshID:=0;
-FFI:=0;
 FVI:=0;
-PushIndexes(MeshID,SGVertex2fImport(-3,-2),FVI,FFI);
+PushIndexes(MeshID,SGVertex2fImport(-3,-2),FVI);
 if FDepth=0 then
 	begin
-	PushIndexes(MeshID,SGVertex2fImport(3,-2),FVI,FFI);
+	PushIndexes(MeshID,SGVertex2fImport(3,-2),FVI);
 	end;
 if FDepth>0 then
 	begin
@@ -163,13 +160,14 @@ FEnableNormals:=False;
 Threads:=1;
 Depth:=3;
 FLightingEnable:=False;
+HasIndexes := False;
 
-InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
+InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],true);
 InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FLDC:=TSGLabel.Create;
 SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5{+Context.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
@@ -179,7 +177,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBPD:=TSGButton.Create;
 SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(Context.Width-160-30,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-30,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -189,7 +187,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create;
 SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(Context.Width-160-60,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-60,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -198,7 +196,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create;
 SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(Context.Width-160-90,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
@@ -220,7 +218,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
-Calculate;
+Calculate();
 end;
 
 destructor TSGFractalPodkova.Destroy;

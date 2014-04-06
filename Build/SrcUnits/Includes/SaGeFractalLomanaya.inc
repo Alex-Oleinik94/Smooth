@@ -9,7 +9,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -27,24 +27,21 @@ Result:='Кривая Миньковского';
 end;
 
 
-procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 begin
 if Render.RenderType=SGRenderOpenGL then
 	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v
 else
 	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
-FMesh.Objects[MeshID].ArFacesPoints[FFaceIndex].p[0]:=FVertexIndex;
-
-FFaceIndex+=1;
 FVertexIndex+=1;
 
-AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSGFractalLomanaya.CalculateFromThread();
 var
 	MeshID:LongWord;
-	FVI,FFI:LongWord;
+	FVI:LongWord;
 
 procedure Rec(const t1,t2:TSGVertex2f;const NowDepth:LongWord);
 var
@@ -69,14 +66,13 @@ if NowDepth>0 then
 	Rec(e3,t2,NowDepth-1);
 	end
 else
-	PushIndexes(MeshID,t2,FVI,FFI);
+	PushIndexes(MeshID,t2,FVI);
 end;
 
 begin
 MeshID:=0;
-FFI:=0;
 FVI:=0;
-PushIndexes(MeshID,SGVertex2fImport(-6,-3.5),FVI,FFI);
+PushIndexes(MeshID,SGVertex2fImport(-6,-3.5),FVI);
 Rec(SGVertex2fImport(-6,-3.5),SGVertex2fImport(6,3.5),Depth);
 if FThreadsEnable then
 	if (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) then
@@ -144,17 +140,19 @@ c27:=2/7;
 c37:=3/7;
 c57:=5/7;
 
-FEnableColors:=False;
-FEnableNormals:=False;
+EnableColors:=False;
+EnableNormals:=False;
 Threads:=1;
 Depth:=3;
-FLightingEnable:=False;
-InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
+LightingEnable:=False;
+HasIndexes := False;
+
+InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],true);
 InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FLDC:=TSGLabel.Create();
 SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5{+Context.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
@@ -164,7 +162,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBPD:=TSGButton.Create();
 SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(Context.Width-160-30,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-30,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -174,7 +172,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create();
 SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(Context.Width-160-60,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-60,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -183,7 +181,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create();
 SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(Context.Width-160-90,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
@@ -198,10 +196,10 @@ end;
 
 destructor TSGFractalLomanaya.Destroy();
 begin
-FBMD.Destroy;
-FLD.Destroy;
-FLDC.Destroy;
-FBPD.Destroy;
+FBMD.Destroy();
+FLD.Destroy();
+FLDC.Destroy();
+FBPD.Destroy();
 inherited;
 end;
 
