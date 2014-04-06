@@ -258,7 +258,7 @@ end;
 
 procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
 begin
-if (FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].PoligonesType))>=FShift then
+if (FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].PoligonesType[0]))>=FShift then
 	begin
 	if (not DoAtThreads) and FEnableVBO then
 		begin
@@ -305,15 +305,20 @@ while Quantity<>0 do
 	FMesh.LastObject().ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.LastObject().EnableCullFace:=False;
 	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-		FMesh.LastObject().PoligonesType:=SGR_TRIANGLES
+		FMesh.LastObject().ObjectPoligonesType:=SGR_TRIANGLES
 	else
-		FMesh.LastObject().PoligonesType:=PoligoneType;
+		FMesh.LastObject().ObjectPoligonesType:=PoligoneType;
 	FMesh.LastObject().VertexType:=VVertexType;
 	if FEnableColors then
 		FMesh.LastObject().AutoSetColorType();
 	if FEnableNormals then
 		FMesh.LastObject().HasNormals:=True;
-	FMesh.LastObject().HasIndexes := FHasIndexes;
+	FMesh.LastObject().QuantityFaceArrays := Byte(FHasIndexes);
+	if FHasIndexes then
+		begin
+		FMesh.LastObject().PoligonesType[0]:=FMesh.LastObject().ObjectPoligonesType;
+		
+		end;
 	if Quantity<=FShift then
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
@@ -321,7 +326,7 @@ while Quantity<>0 do
 				TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
 		else
 			SetMeshArLength(FMesh.QuantityObjects-1,Quantity,
-				TSG3DObject.GetFaceLength(Quantity,FMesh.Objects[FMesh.QuantityObjects-1].PoligonesType));
+				TSG3DObject.GetFaceLength(Quantity,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType));
 		Quantity:=0;
 		end
 	else
@@ -331,7 +336,7 @@ while Quantity<>0 do
 				TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
 		else
 			SetMeshArLength(FMesh.QuantityObjects-1,FShift,
-				TSG3DObject.GetFaceLength(FShift,FMesh.Objects[FMesh.QuantityObjects-1].PoligonesType));
+				TSG3DObject.GetFaceLength(FShift,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType));
 		Quantity-=FShift;
 		end;
 	end;
@@ -340,7 +345,10 @@ end;
 procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 begin
 if FHasIndexes then
-	FMesh.Objects[MID].SetFaceLength(LFaces);
+	begin
+	FMesh.Objects[MID].AutoSetIndexFormat(0,LVertexes);
+	FMesh.Objects[MID].SetFaceLength(0,LFaces);
+	end;
 FMesh.Objects[MID].SetVertexLength(LVertexes);
 end;
 

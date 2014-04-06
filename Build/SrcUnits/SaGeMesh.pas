@@ -100,6 +100,8 @@ type
 		1:  ( p:packed array [0..1] of TSGLongWord );
 		end;
 	PTSGFaceLine4b = ^ TSGFaceLine4b;
+	TSGFaceLine = TSGFaceLine4b;
+	PTSGFaceLine = PTSGFaceLine4b;
 	
     TSGFaceTriangle4b = record
 	case byte of
@@ -108,6 +110,8 @@ type
 	2: ( v:packed array[0..2] of TSGLongWord );
     end;
     PTSGFaceTriangle4b = ^ TSGFaceTriangle4b;
+    TSGFaceTriangle = TSGFaceTriangle4b;
+	PTSGFaceTriangle = PTSGFaceTriangle4b;
 	
 	TSGFaceQuad4b = record
 	case byte of
@@ -115,6 +119,8 @@ type
 	1: ( p : packed array[0..3] of TSGLongWord );
     end;
 	PTSGFaceQuad4b = ^ TSGFaceQuad4b;
+	TSGFaceQuad = TSGFaceQuad4b;
+	PTSGFaceQuad = PTSGFaceQuad4b;
 	
 	TSGFacePoint4b = record
 	case byte of
@@ -122,7 +128,9 @@ type
 	1: ( p : packed array[0..0] of TSGLongWord );
     end;
 	PTSGFacePoint4b = ^ TSGFacePoint4b;
-
+	TSGFacePoint = TSGFacePoint4b;
+	PTSGFacePoint = PTSGFacePoint4b;
+	
     { TSG3dObject }
     // Наша моделька..
 type
@@ -147,13 +155,11 @@ type
         // Количество текстур, индексы на которые в себе седержит моделька
         FQuantityTextures : TSGLongWord;
         // Тип полигонов в модельки (SGR_QUADS, SGR_TRIANGLES, SGR_LINES, SGR_LINE_LOOP ....)
-        FPoligonesType    : TSGLongWord;
+        FObjectPoligonesType    : TSGLongWord;
         // Тип вершин в модельке
         FVertexType       : TSGMeshVertexType;
         // Тип хранение цветов
         FColorType        : TSGMeshColorType;
-        // 
-        FIndexFormat      : TSGMeshIndexFormat;
     private
 		procedure SetColorType(const VNewColorType:TSGMeshColorType);
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
@@ -161,26 +167,31 @@ type
 		function GetSizeOfOneVertex():LongWord;inline;
 		function GetVertexLength():QWord;inline;
 		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
+		function GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
+		function GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord;inline;
+		procedure SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
     public
         // Эти свойства уже были прокоментированы выше (см на что эти свойства ссылаются)
-		property QuantityVertexes : TSGQuadWord       read FNOfVerts;
-		property QuantityFaces    : TSGQuadWord       read FNOfFaces;
-		property HasTexture       : Boolean           read FHasTexture    write SetHasTexture;
-		property QuantityFaceArrays: TSGLongWord      read FQuantityFaceArrays write FQuantityFaceArrays;
-		property HasColors        : Boolean           read FHasColors     write FHasColors;
-		property HasNormals       : Boolean           read FHasNormals    write FHasNormals;
-		property ColorType        : TSGMeshColorType  read FColorType     write SetColorType;
-		property VertexType       : TSGMeshVertexType read FVertexType    write SetVertexType;
-		property PoligonesType    : LongWord          read FPoligonesType write FPoligonesType;
+        property PoligonesType[Index:TSGLongWord]  : TSGLongWord       read GetPoligonesType     write SetPoligonesType;
+		property QuantityVertexes                  : TSGQuadWord       read FNOfVerts;
+		property QuantityFaces[Index : TSGLongWord]: TSGQuadWord       read GetQuantityFaces;
+		property HasTexture                        : Boolean           read FHasTexture          write SetHasTexture;
+		property HasColors                         : Boolean           read FHasColors           write FHasColors;
+		property HasNormals                        : Boolean           read FHasNormals          write FHasNormals;
+		property ColorType                         : TSGMeshColorType  read FColorType           write SetColorType;
+		property VertexType                        : TSGMeshVertexType read FVertexType          write SetVertexType;
+		property ObjectPoligonesType               : LongWord          read FObjectPoligonesType write FObjectPoligonesType;
     protected
         // А это у нас массив индексов
 		ArFaces : packed array of 
 			packed record 
-				FNOfFaces : TSGQuadWord;
+				FIndexFormat      : TSGMeshIndexFormat;
+				FPoligonesType    : TSGLongWord;
+				FNOfFaces         : TSGQuadWord;
 				// Указательл на первый элемент области памяти, где находятся наши индексы
-				FArray:TSGPointer;
+				FArray            : TSGPointer;
 				// Идентификатор материала
-				FMaterialID : TSGInt64;
+				FMaterialID       : TSGInt64;
 				end;
 		
 		// А это у нас массив самих вершин. Его пришлось сделать таким. 
@@ -234,7 +245,7 @@ type
 		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1);inline;
 		// Автоматически определяет нужный формат хранения цветов. (В зависимости от рендера)
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
-	
+		procedure AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
 	private
 		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 	
@@ -256,6 +267,9 @@ type
 		
 		// Эта процедура для DirectX. Дело в том, что там нету SGR_QUADS. Так что он разбивается на 2 треугольника.
 		procedure SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGLongWord);
+		procedure SetFaceTriangle(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2:TSGLongWord);
+		procedure SetFaceLine(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1:TSGLongWord);
+		procedure SetFacePoint(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0:TSGLongWord);
 		
 		// Возвращает индекс на первый элемент массива индексов. Не просто возвращает, а хитро возвращает.
 		// Теперь эти функции можно использовать как массивы. Так что их очень просто использовать.
@@ -275,20 +289,27 @@ type
 		function ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b; inline;
 		function ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;    inline;
 		
+		function ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
+		function ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
+		function ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
+		function ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
+		
+		procedure SetFaceArLength(const NewArLength : TSGLongWord);
+		procedure AddFaceArray(const QuantityNewArrays : TSGLongWord = 1);
 		// Устанавливает длинну массива индексов
-		procedure SetFaceLength(const Index:TSGLongWord;const NewLength:TSGQuadWord);inline;
+		procedure SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord);inline;
 		// Возвращает действительную длинну массива индексов
 		function GetFaceLength(const Index:TSGLongWord):TSGQuadWord;overload;inline;
-		// Возвращает действительную длинну массива индексов в зависимости он их длинны, заданой параметром
-		function GetFaceLength(const Index:TSGLongWord;const FaceLength:TSGQuadWord):TSGQuadWord;overload;inline;
 		// Возвращает действительную длинну массива индексов в зависимости он их длинны и их типа, заданых параметрами
 		class function GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
 		// Возвращает, сколько в TSGFaceType*Result байтов занимает одна структура индексов. Очень прикольная функция.
 		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
+		class function GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte;inline;
 	public
 		// Ствойства для получения и редактирования длинн массивов
-		property Faces[Index:TSGLongWord] : TSGQuadWord read GetFaceLength   write SetFaceLength;
-		property Vertexes                 : TSGQuadWord read GetVertexLength write SetVertexLength;
+		property QuantityFaceArrays       : TSGLongWord read FQuantityFaceArrays  write SetFaceArLength;
+		property Faces[Index:TSGLongWord] : TSGQuadWord read GetFaceLength        write SetFaceLength;
+		property Vertexes                 : TSGQuadWord read GetVertexLength      write SetVertexLength;
     protected
 		// Вклбючено ли VBO
 		// VBO - Vertex Buffer Object
@@ -342,7 +363,7 @@ type
 		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
 		// Загрузка из текстовова формата файлов *.obj
-		procedure LoadFromOBJ(const FFileName:string);virtual;
+		//procedure LoadFromOBJ(const FFileName:string);virtual;
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
@@ -434,6 +455,171 @@ implementation
 
 //{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
+function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
+begin
+FillChar(Result,SizeOf(Result),0);
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b: 
+	begin
+	Result.p0:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+SGMeshIndexFormat2b: 
+	begin
+	Result.p0:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+SGMeshIndexFormat4b: 
+	begin
+	Result.p0:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+end;
+end;
+
+function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
+begin
+FillChar(Result,SizeOf(Result),0);
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b: 
+	begin
+	Result.p0:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+SGMeshIndexFormat2b: 
+	begin
+	Result.p0:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+SGMeshIndexFormat4b: 
+	begin
+	Result.p0:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p1;
+	end;
+end;
+end;
+
+function TSG3DObject.ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
+begin
+
+end;
+
+function TSG3DObject.ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
+begin
+
+end;
+
+
+procedure TSG3DObject.SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
+begin
+ArFaces[ArIndex].FPoligonesType:=NewPoligonesType;
+end;
+
+function TSG3DObject.GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord;inline;
+begin
+Result:=ArFaces[ArIndex].FPoligonesType;
+end;
+
+procedure TSG3DObject.AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
+begin
+if (MaxVertexLength<=255) then
+	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat1b
+else if MaxVertexLength<=255*255 then
+	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat2b
+else 
+	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat4b;
+end;
+
+procedure TSG3DObject.SetFaceTriangle(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2:TSGLongWord);
+begin
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b: 
+	begin
+	ArFacesTriangles1b(Index)^.p[0]:=p0;
+	ArFacesTriangles1b(Index)^.p[1]:=p1;
+	ArFacesTriangles1b(Index)^.p[2]:=p2;
+	end;
+SGMeshIndexFormat2b: 
+	begin
+	ArFacesTriangles2b(Index)^.p[0]:=p0;
+	ArFacesTriangles2b(Index)^.p[1]:=p1;
+	ArFacesTriangles2b(Index)^.p[2]:=p2;
+	end;
+SGMeshIndexFormat4b: 
+	begin
+	ArFacesTriangles4b(Index)^.p[0]:=p0;
+	ArFacesTriangles4b(Index)^.p[1]:=p1;
+	ArFacesTriangles4b(Index)^.p[2]:=p2;
+	end;
+end;
+end;
+
+procedure TSG3DObject.SetFaceLine(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1:TSGLongWord);
+begin
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b: 
+	begin
+	ArFacesLines1b(Index)^.p[0]:=p0;
+	ArFacesLines1b(Index)^.p[1]:=p1;
+	end;
+SGMeshIndexFormat2b: 
+	begin
+	ArFacesLines2b(Index)^.p[0]:=p0;
+	ArFacesLines2b(Index)^.p[1]:=p1;
+	end;
+SGMeshIndexFormat4b: 
+	begin
+	ArFacesLines4b(Index)^.p[0]:=p0;
+	ArFacesLines4b(Index)^.p[1]:=p1;
+	end;
+end;
+end;
+
+procedure TSG3DObject.SetFacePoint(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0:TSGLongWord);
+begin
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b:
+	ArFacesPoints1b(Index)^.p[0]:=p0;
+SGMeshIndexFormat2b:
+	ArFacesPoints2b(Index)^.p[0]:=p0;
+SGMeshIndexFormat4b:
+	ArFacesPoints4b(Index)^.p[0]:=p0;
+end;
+end;
+
+procedure TSG3DObject.SetFaceArLength(const NewArLength : TSGLongWord);
+var
+	Index : TSGLongWord;
+begin
+SetLength(ArFaces,NewArLength);
+for Index := FQuantityFaceArrays to NewArLength - 1 do
+	begin
+	ArFaces[Index].FMaterialID:=-1;
+	ArFaces[Index].FIndexFormat:=SGMeshIndexFormat2b;
+	ArFaces[Index].FPoligonesType:=SGR_TRIANGLES;
+	ArFaces[Index].FArray:=nil;
+	ArFaces[Index].FNOfFaces:=0;
+	end;
+end;
+
+procedure TSG3DObject.AddFaceArray(const QuantityNewArrays : TSGLongWord = 1);
+begin
+SetFaceArLength(FQuantityFaceArrays+QuantityNewArrays);
+end;
+
+class function  TSG3DObject.GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte;inline;
+begin
+Result:=
+	TSGByte(ThisFaceFormat=SGMeshIndexFormat1b)+
+	TSGByte(ThisFaceFormat=SGMeshIndexFormat2b)*2+
+	TSGByte(ThisFaceFormat=SGMeshIndexFormat4b)*4;
+end;
+
+function TSG3DObject.GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
+begin
+Result := ArFaces[Index].FNOfFaces;
+end;
+
 procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean);inline;
 begin
 if not VHasTexture then
@@ -455,7 +641,7 @@ procedure TSG3DObject.SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxE
 begin
 if Render.RenderType=SGRenderDirectX then
 	begin
-	case FIndexFormat of
+	case ArFaces[ArIndex].FIndexFormat of
 	SGMeshIndexFormat1b:
 		begin
 		ArFacesTriangles1b(ArIndex)[Index*2].p[0]:=p0;
@@ -487,7 +673,7 @@ if Render.RenderType=SGRenderDirectX then
 	end
 else
 	begin
-	case FIndexFormat of
+	case ArFaces[ArIndex].FIndexFormat of
 	SGMeshIndexFormat1b:
 		begin
 		ArFacesQuads1b(ArIndex)[Index].p[0]:=p0;
@@ -571,10 +757,10 @@ end;}
 
 procedure TSG3DObject.AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 begin
-SetFaceLength(ArIndex,FQuantityNewFaces+FNOfFaces);
+SetFaceLength(ArIndex,QuantityFaces[ArIndex]+FQuantityNewFaces);
 end;
 
-procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
+{procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
 var
 	f:TextFile;
 	C:TSGChar;
@@ -754,7 +940,7 @@ while not SeekEof(f) do
 		ReadLn(f);
 	end;
 Close(f);
-end;
+end;}
 
 procedure TSG3DObject.AddVertex(const FQuantityNewVertexes:LongWord = 1);
 begin
@@ -947,7 +1133,7 @@ begin
 (**)
 end;
 
-class function TSG3DObject.GetFaceLength(const FaceLength:TSGMaxEnum; const ThisPoligoneType:LongWord):TSGMaxEnum;overload;inline;
+class function TSG3DObject.GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
 begin
 Result:=FaceLength*GetPoligoneInt(ThisPoligoneType);
 end;
@@ -958,13 +1144,52 @@ Result:='TSG3dObject';
 end;
 
 procedure TSG3DObject.WriteInfo(const PredStr:string = '');
+var
+	Index : TSGLongWord;
 begin
 WriteLn('TSG3DObject__WriteInfo()');
-WriteLn(PredStr,'FNOfVerts = ',FNOfVerts);
-WriteLn(PredStr,'FNOfFaces = ',FNOfFaces,'; RealFaceLength = ',GetFaceLength);
-WriteLn(PredStr,'FHasColors = ',FHasColors);
-WriteLn(PredStr,'FHasNormals = ',FHasNormals);
-WriteLn(PredStr,'FHasTexture = ',FHasTexture);
+WriteLn(PredStr,'NOfVerts = ',FNOfVerts);
+WriteLn(PredStr,'HasColors = ',FHasColors);
+WriteLn(PredStr,'HasNormals = ',FHasNormals);
+WriteLn(PredStr,'HasTexture = ',FHasTexture);
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	WriteLn(PredStr,'ArFacesLenght = 0')
+else
+	begin
+	WriteLn(PredStr,'ArFacesLenght = ',Length(ArFaces));
+	for Index:=0 to High(ArFaces) do
+		begin
+		WriteLn(PredStr,PredStr,'Index = ',Index);
+		WriteLn(PredStr,PredStr,'NOfFaces = ',ArFaces[Index].FNOfFaces);
+		WriteLn(PredStr,PredStr,'RealFaceLength = ',GetFaceLength(Index));
+		WriteLn(PredStr,PredStr,'MaterialID = ',ArFaces[Index].FMaterialID);
+		case ArFaces[Index].FIndexFormat of
+		SGMeshIndexFormat1b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat1b');
+		SGMeshIndexFormat2b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat2b');
+		SGMeshIndexFormat4b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat4b');
+		end;
+		Write(PredStr,PredStr,'PoligonesType = ');
+		case ArFaces[Index].FPoligonesType of
+		SGR_LINES:WriteLn('SGR_LINES');
+		SGR_TRIANGLES:WriteLn('SGR_TRIANGLES');
+		SGR_QUADS:WriteLn('SGR_QUADS');
+		SGR_POINTS:WriteLn('SGR_POINTS');
+		SGR_LINE_STRIP:WriteLn('SGR_LINE_STRIP');
+		SGR_LINE_LOOP:WriteLn('SGR_LINE_LOOP');
+		else WriteLn('SGR_INVALID');
+		end;
+		end;
+	end;
+Write(PredStr,'ObjectPoligonesType = ');
+case FObjectPoligonesType of
+SGR_LINES:WriteLn('SGR_LINES');
+SGR_TRIANGLES:WriteLn('SGR_TRIANGLES');
+SGR_QUADS:WriteLn('SGR_QUADS');
+SGR_POINTS:WriteLn('SGR_POINTS');
+SGR_LINE_STRIP:WriteLn('SGR_LINE_STRIP');
+SGR_LINE_LOOP:WriteLn('SGR_LINE_LOOP');
+else WriteLn('SGR_INVALID');
+end;
 WriteLn(PredStr,'GetSizeOfOneVertex() = ',GetSizeOfOneVertex());
 Write(PredStr,'FVertexFormat = ');
 if FVertexType=TSGMeshVertexType2f then
@@ -978,10 +1203,10 @@ TSGMeshColorType4b:WriteLn('TSGMeshColorType4b');
 TSGMeshColorType3f:WriteLn('TSGMeshColorType3f');
 TSGMeshColorType4f:WriteLn('TSGMeshColorType4f');
 end;
-WriteLn(PredStr,'FQuantityTextures = ',FQuantityTextures);
-WriteLn(PredStr,'FEnableVBO = ',FEnableVBO);
-WriteLn(PredStr,'FMaterialID = ',FMaterialID);
-WriteLn(PredStr,'FName = ',FName);
+WriteLn(PredStr,'QuantityTextures = ',FQuantityTextures);
+WriteLn(PredStr,'EnableVBO = ',FEnableVBO);
+WriteLn(PredStr,'ObjectMaterialID = ',FObjectMaterialID);
+WriteLn(PredStr,'Name = ',FName);
 end;
 
 function TSG3DObject.VertexesSize():QWord;Inline;
@@ -990,8 +1215,14 @@ Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
 
 function TSG3DObject.FacesSize():QWord;inline;
+var
+	Index : TSGLongWord;
 begin
-Result:=SizeOf(TSGFaceType)*GetFaceLength();
+Result:=0;
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Exit;
+for Index := 0 to High(ArFaces) do
+	Result += GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index);
 end;
 
 function TSG3DObject.Size():QWord;inline;
@@ -1014,81 +1245,140 @@ Result:=
 	+2*Byte( ThisPoligoneType = SGR_LINES );
 end;
 
-function TSG3DObject.GetFaceLength(const FaceLength:TSGMaxEnum):TSGMaxEnum;overload;inline;
+function TSG3DObject.GetFaceLength(const Index : TSGLongWord):TSGQuadWord;overload;inline;
 begin
-Result:=GetFaceLength(FaceLength,FPoligonesType);
+Result:=GetFaceLength(ArFaces[Index].FPoligonesType,ArFaces[Index].FNOfFaces);
 end;
 
-function TSG3DObject.GetFaceLength:TSGMaxEnum;overload;inline;
+procedure TSG3DObject.SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord);inline;
 begin
-Result:=GetFaceLength(FNOfFaces);
-end;
-
-procedure TSG3DObject.SetFaceLength(const NewLength:TSGMaxEnum);inline;
-begin
-FNOfFaces:=NewLength;
-SetLength(ArFaces ,GetFaceLength(NewLength));
-end;
-
-function TSG3DObject.ArFacesLines:PTSGFaceLine;inline;
-begin
-if FPoligonesType=SGR_LINES then
-	Result:=PTSGFaceLine(Pointer(@ArFaces[0]))
+if (ArFaces[ArIndex].FNOfFaces=0) or (ArFaces[ArIndex].FArray=nil) then
+	GetMem(ArFaces[ArIndex].FArray,
+		GetPoligoneInt(ArFaces[ArIndex].FPoligonesType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength))
 else
-	Result:=nil;
+	ReAllocMem(ArFaces[ArIndex].FArray,
+		GetPoligoneInt(ArFaces[ArIndex].FPoligonesType)*GetFaceInt(ArFaces[ArIndex].FIndexFormat)*(NewLength));
+ArFaces[ArIndex].FNOfFaces:=NewLength;
 end;
 
-function TSG3DObject.ArFacesPoints:PTSGFacePoint;inline;
+function TSG3DObject.ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;     inline;
 begin
-if (
-	(FPoligonesType=SGR_POINTS) or
-	(FPoligonesType=SGR_LINE_STRIP) or
-	(FPoligonesType=SGR_LINE_LOOP) or
-	(FPoligonesType=SGR_TRIANGLE_STRIP)
-	)  then
-	Result:=PTSGFacePoint(Pointer(@ArFaces[0]))
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
 else
-	Result:=nil;
+	Result:=PTSGFaceLine1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesQuads:PTSGFaceQuad;inline;
+function TSG3DObject.ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;     inline;
 begin
-if FPoligonesType=SGR_QUADS then
-	Result:=PTSGFaceQuad(Pointer(@ArFaces[0]))
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
 else
-	Result:=nil;
+	Result:=PTSGFaceQuad1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesTriangles:PTSGFaceTriangle;inline;
+function TSG3DObject.ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b; inline;
 begin
-if FPoligonesType=SGR_TRIANGLES then
-	Result:=PTSGFaceTriangle(Pointer(@ArFaces[0]))
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
 else
-	Result:=nil;
+	Result:=PTSGFaceTriangle1b(TSGPointer(ArFaces[Index].FArray));
 end;
+
+function TSG3DObject.ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;    inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFacePoint1b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;     inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceLine2b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;     inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceQuad2b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b; inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceTriangle2b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;    inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFacePoint2b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;     inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceLine4b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;     inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceQuad4b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b; inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFaceTriangle4b(TSGPointer(ArFaces[Index].FArray));
+end;
+
+function TSG3DObject.ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;    inline;
+begin
+if (ArFaces=nil) or (Length(ArFaces)=0) then
+	Result:=nil
+else
+	Result:=PTSGFacePoint4b(TSGPointer(ArFaces[Index].FArray));
+end;
+
 
 constructor TSG3dObject.Create();
 begin
-    inherited Create();
-    FName:='';
-    FQuantityTextures:=0;
-    FEnableCullFace := False;
-    FObjectColor.Import(1, 1, 1, 1);
-    FHasTexture := False;
-    FHasNormals := False;
-    FHasColors  := False;
-    FQuantityFaceArrays := 0;
-    FNOfFaces := 0;
-    FNOfVerts := 0;
-    ArVertex := nil;
-    ArFaces := nil;
-    FMaterialID := -1;
-    FPoligonesType:=SGR_TRIANGLES;
-    FColorType:=TSGMeshColorType3b;
-    FVertexType:=TSGMeshVertexType3f;
-    FEnableVBO:=False;
-    FVBOFaces:=0;
-    FVBOVertexes:=0;
+inherited Create();
+FName:='';
+FQuantityTextures:=0;
+FEnableCullFace := False;
+FObjectColor.Import(1, 1, 1, 1);
+FHasTexture := False;
+FHasNormals := False;
+FHasColors  := False;
+FQuantityFaceArrays := 0;
+FNOfVerts := 0;
+ArVertex := nil;
+ArFaces := nil;
+FObjectMaterialID := -1;
+FObjectPoligonesType:=SGR_TRIANGLES;
+FColorType:=TSGMeshColorType3b;
+FVertexType:=TSGMeshVertexType3f;
+FEnableVBO:=False;
+FVertexesBuffer := 0;
+FFacesBuffers := nil;
 end;
 
 destructor TSG3dObject.Destroy();
@@ -1118,6 +1408,8 @@ begin
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
+var
+	Index : TSGLongWord;
 begin
 if ArVertex<>nil then
 	begin
@@ -1126,13 +1418,20 @@ if ArVertex<>nil then
 	end;
 if ArFaces<>nil then
 	begin 
-	SetLength(ArFaces,0);
-	ArFaces:=nil;
+	if (ArFaces<>nil) and (Length(ArFaces)<>0) then
+		for Index := 0 to High(ArFaces) do
+			if (ArFaces[Index].FArray<>nil) then
+				begin
+				FreeMem(ArFaces[Index].FArray);
+				ArFaces[Index].FArray:=nil;
+				end;
 	end;
 if ClearN then
 	begin
-	FNOfFaces:=0;
 	FNOfVerts:=0;
+	if (ArFaces<>nil) and (Length(ArFaces)<>0) then
+		for Index := 0 to High(ArFaces) do
+			ArFaces[Index].FNOfFaces:=0;
 	end;
 end;
 
@@ -1176,19 +1475,26 @@ Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
 Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
 Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
 Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
-Stream.WriteBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.WriteBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
 Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
 Stream.WriteBuffer(FColorType,SizeOf(FColorType));
-Stream.WriteBuffer(FMaterialID,SizeOf(FMaterialID));
+Stream.WriteBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
 Stream.WriteBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
 SGWriteStringToStream(FName,Stream);
 
 Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.WriteBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
 
 if FQuantityFaceArrays<>0 then
 	for i:=0 to FQuantityFaceArrays-1 do
-		;//Stream.WriteBuffer(ArFaces[i]^,);
+		begin
+		Stream.WriteBuffer(ArFaces[i].FPoligonesType,SizeOf(ArFaces[i].FPoligonesType));
+		Stream.WriteBuffer(ArFaces[i].FIndexFormat,SizeOf(ArFaces[i].FIndexFormat));
+		Stream.WriteBuffer(ArFaces[i].FNOfFaces,SizeOf(ArFaces[i].FNOfFaces));
+		Stream.WriteBuffer(ArFaces[i].FMaterialID,SizeOf(ArFaces[i].FMaterialID));
+		Stream.WriteBuffer(ArFaces[i].FArray^,GetFaceLength(i)*GetFaceInt(ArFaces[i].FIndexFormat));
+		end;
+
 Stream.WriteBuffer(ArVertex^,VertexesSize());
 end;
 
@@ -1196,6 +1502,7 @@ procedure TSG3DObject.LoadFromSG3DO(const Stream:TStream);
 var
 	S,S2:array[0..8] of TSGChar;
 	Version : TSGQuadWord = 0;
+	i : TSGLongWord;
 begin
 S2:='SaGe3DObj';
 Stream.ReadBuffer(S[0],SizeOf(S[0])*9);
@@ -1213,28 +1520,36 @@ if Version <> SGMeshVersion then
 Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
 Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.ReadBuffer(FHasIndexes,SizeOf(FHasIndexes));
+Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
 Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
-Stream.ReadBuffer(FPoligonesType,SizeOf(FPoligonesType));
+Stream.ReadBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
 Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
 Stream.ReadBuffer(FColorType,SizeOf(FColorType));
-Stream.ReadBuffer(FMaterialID,SizeOf(FMaterialID));
+Stream.ReadBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
 Stream.ReadBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
 FName := SGReadStringFromStream(Stream);
 
 Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.ReadBuffer(FNOfFaces,SizeOf(FNOfFaces));
+Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
 
 SetVertexLength(FNOfVerts);
-SetFaceLength(FNOfFaces);
 
-Stream.ReadBuffer(ArFaces[0],FacesSize());
+if FQuantityFaceArrays<>0 then
+	for i:=0 to FQuantityFaceArrays-1 do
+		begin
+		Stream.ReadBuffer(ArFaces[i].FPoligonesType,SizeOf(ArFaces[i].FPoligonesType));
+		Stream.ReadBuffer(ArFaces[i].FIndexFormat,SizeOf(ArFaces[i].FIndexFormat));
+		Stream.ReadBuffer(ArFaces[i].FNOfFaces,SizeOf(ArFaces[i].FNOfFaces));
+		Stream.ReadBuffer(ArFaces[i].FMaterialID,SizeOf(ArFaces[i].FMaterialID));
+		Stream.ReadBuffer(ArFaces[i].FArray^,GetFaceLength(i)*GetFaceInt(ArFaces[i].FIndexFormat));
+		end;
+
 Stream.ReadBuffer(ArVertex^,VertexesSize());
 end;
 
 procedure TSG3dObject.BasicDraw(); inline;
-const
-	FaceFormat = SGR_UNSIGNED_SHORT;
+var
+	Index : TSGLongWord;
 begin
 Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
 
@@ -1248,7 +1563,7 @@ if FHasColors then
 
 if FEnableVBO then
 	begin
-	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVertexesBuffer);
 	Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f),SGR_FLOAT,GetSizeOfOneVertex(),nil);
 	
 	if FHasColors then
@@ -1290,16 +1605,27 @@ if FEnableVBO then
 				));
 		end;
 	
-	if FHasIndexes then
+	if FQuantityFaceArrays<>0 then
 		begin
-		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FVBOFaces);
-		Render.DrawElements(FPoligonesType, GetFaceLength() ,FaceFormat,nil);
+		for Index := 0 to FQuantityFaceArrays-1 do
+			begin
+			if ArFaces[Index].FMaterialID<>-1 then
+				begin
+				
+				end;
+			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FFacesBuffers[Index]);
+			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) ,
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT
+				,nil);
+			end;
 		end
 	else
-		Render.DrawArrays(FPoligonesType,0,FNOfVerts);
+		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
 	
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-	if FHasIndexes then
+	if FQuantityFaceArrays<>0 then
 		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	end
 else
@@ -1344,10 +1670,15 @@ else
 					byte(FColorType = TSGMeshColorType4f)*4*SizeOf(Single)+
 					byte(FColorType = TSGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
-	if FHasIndexes then
-		Render.DrawElements(FPoligonesType, GetFaceLength() , FaceFormat, @ArFaces[0])
+	if FQuantityFaceArrays<>0 then
+		for Index := 0 to FQuantityFaceArrays-1 do
+			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) , 
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
+				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT, 
+				ArFaces[Index].FArray)
 	else
-		Render.DrawArrays(FPoligonesType,0,FNOfVerts);
+		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
     end;
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1361,43 +1692,53 @@ Render.ColorMaterial(1,1,1,1);
 end;
 
 procedure TSG3dObject.LoadToVBO();
+var
+	Index : TSGLongWord;
 begin
 if FEnableVBO then
 	begin
-	SGLog.Sourse('TSG3dObject__LoadToVBO : It is not possible to do this several times!');
+	SGLog.Sourse('TSG3dObject__LoadToVBO : It is not possible to do this several counts!');
 	Exit;
 	end;
-Render.GenBuffersARB(1, @FVBOVertexes);
-if FHasIndexes then
-	Render.GenBuffersARB(1, @FVBOFaces);
-
-Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVBOVertexes);
+Render.GenBuffersARB(1, @FVertexesBuffer);
+Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVertexesBuffer);
 Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB,FNOfVerts*GetSizeOfOneVertex(),ArVertex, SGR_STATIC_DRAW_ARB);
-
-if FHasIndexes then
-	begin
-	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FVBOFaces);
-	Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,GetFaceLength()*SizeOf(TSGFaceType),@ArFaces[0], SGR_STATIC_DRAW_ARB);
-	end;
-
 Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-if FHasIndexes then
+
+if FQuantityFaceArrays<>0 then
+	begin
+	SetLength(FFacesBuffers,FQuantityFaceArrays);
+	for Index := 0 to FQuantityFaceArrays-1 do
+		begin
+		Render.GenBuffersARB(1, @FFacesBuffers[Index]);
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FFacesBuffers[Index]);
+		Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,
+			GetFaceLength(Index)*GetFaceInt(ArFaces[Index].FIndexFormat),ArFaces[Index].FArray,
+			SGR_STATIC_DRAW_ARB);
+		end;
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
+	end;
 
 ClearArrays(False);
 FEnableVBO:=True;
 end;
 
 procedure TSG3DObject.ClearVBO();inline;
+var
+	Index : TSGLongWord;
 begin
 if FEnableVBO and (Render<>nil) then
 	begin
-	if FVBOFaces <> 0 then
-		Render.DeleteBuffersARB(1,@FVBOFaces);
-	FVBOFaces:=0;
-	if FVBOVertexes<>0 then
-		Render.DeleteBuffersARB(1,@FVBOVertexes);
-	FVBOVertexes:=0;
+	if FQuantityFaceArrays<>0 then
+		for Index := 0 to FQuantityFaceArrays-1 do
+			if FFacesBuffers[Index]<>0 then
+				begin
+				Render.DeleteBuffersARB(1,@FFacesBuffers[Index]);
+				FFacesBuffers[Index]:=0;
+				end;
+	if FVertexesBuffer<>0 then
+		Render.DeleteBuffersARB(1,@FVertexesBuffer);
+	FVertexesBuffer:=0;
 	FEnableVBO:=False;
 	end;
 end;
@@ -1614,12 +1955,12 @@ end;
 
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
 begin
-TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
+//TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
 end;
 
 function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
 begin
-TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
+//TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
 end;
 
 constructor TSGCustomModel.Create();
@@ -1650,7 +1991,7 @@ if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
 		CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh;
 	Render.PushMatrix();
 	Render.MultMatrixf(@FArObjects[Index].FMatrix);
-	if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
+	{if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
 		((FArMaterials[CurrentMesh.MaterialID].ReadyToGoToTexture)or
 		(FArMaterials[CurrentMesh.MaterialID].Ready)) then
 		begin
@@ -1658,7 +1999,7 @@ if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
 		CurrentMesh.Draw();
 		FArMaterials[CurrentMesh.MaterialID].DisableTexture();
 		end
-	else
+	else}
 		CurrentMesh.Draw();
 	Render.PopMatrix();
 	end;
@@ -1717,7 +2058,7 @@ Result:=False;
 for i := 0 to FQuantityMaterials - 1 do
 	if FArMaterials[i].Name = VMaterialName then
 		begin
-		LastObject().MaterialID := i;
+		LastObject().ObjectMaterialID := i;
 		LastObject().HasTexture := True;
 		Result:=True;
 		Break;

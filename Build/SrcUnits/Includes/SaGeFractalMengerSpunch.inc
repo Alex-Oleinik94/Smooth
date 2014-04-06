@@ -646,7 +646,7 @@ if FEnableNormals then
 	FMesh.Objects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.Objects[MeshID].SetFaceQuad(FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
+FMesh.Objects[MeshID].SetFaceQuad(0,FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);

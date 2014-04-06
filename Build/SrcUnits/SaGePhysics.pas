@@ -337,9 +337,9 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	begin
 	FMesh := TSG3DObject.Create();
 	FMesh.Context := Context;
-	FMesh.HasIndexes := False;
+	FMesh.QuantityFaceArrays := 0;
 	FMesh.HasColors := False;
-	FMesh.PoligonesType:=SGR_TRIANGLES;
+	FMesh.ObjectPoligonesType:=SGR_TRIANGLES;
 	FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.EnableCullFace:=False;
 	FMesh.HasNormals:=True;
