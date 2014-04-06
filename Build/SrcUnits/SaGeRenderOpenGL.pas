@@ -555,6 +555,16 @@ glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
 glDisable(GL_LIGHTING);
 
 LoadExtendeds();
+
+{$IF defined(MSWINDOWS) and defined(CPU32)}
+	// Enable V-Sync
+	// ¬ключаем вертикальную синхронизацию кадров
+	if SGIsSuppored_WGL_EXT_swap_control then
+		begin
+		if wglGetSwapIntervalEXT()=0 then
+			wglSwapIntervalEXT(1);
+		end;
+	{$ENDIF}
 end;
 
 constructor TSGRenderOpenGL.Create();
