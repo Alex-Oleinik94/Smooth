@@ -581,7 +581,7 @@ end;
 
 procedure TSG3DObject.AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
 begin
-if (MaxVertexLength<=255) then
+if (MaxVertexLength<=255) and (Render.RenderType=SGRenderOpenGL) then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat1b
 else if MaxVertexLength<=255*255 then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat2b
@@ -1771,7 +1771,10 @@ if FQuantityFaceArrays<>0 then
 		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,FFacesBuffers[Index]);
 		Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,
 			GetFaceLength(Index)*GetFaceInt(ArFaces[Index].FIndexFormat),ArFaces[Index].FArray,
-			SGR_STATIC_DRAW_ARB);
+			SGR_STATIC_DRAW_ARB,
+			TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
+			TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
+			TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT);
 		end;
 	Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	end;

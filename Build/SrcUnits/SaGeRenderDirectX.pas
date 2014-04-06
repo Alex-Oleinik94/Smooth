@@ -80,7 +80,7 @@ type
 		procedure GenBuffersARB(const VQ:Integer;const PT:PCardinal);override;
 		procedure DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);override;
 		procedure BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);override;
-		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal);override;
+		procedure BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal;const VIndexPrimetiveType : TSGLongWord = 0);override;
 		procedure DrawElements(const VParam:Cardinal;const VSize:int64;const VParam2:Cardinal;VBuffer:Pointer);override;
 		procedure ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
 		procedure TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);override;
@@ -813,7 +813,8 @@ procedure TSGRenderDirectX.BufferDataARB(
 	const VParam:Cardinal;   // SGR_ARRAY_BUFFER_ARB or SGR_ELEMENT_ARRAY_BUFFER_ARB
 	const VSize:int64;       // Размер в байтах
 	VBuffer:Pointer;         // Буфер
-	const VParam2:Cardinal);
+	const VParam2:Cardinal;
+	const VIndexPrimetiveType : TSGLongWord = 0);
 var
 	VVBuffer:PByte = nil;
 begin 
@@ -849,7 +850,10 @@ if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	end
 else if (VParam=SGR_ELEMENT_ARRAY_BUFFER_ARB) and (FVBOData[1]>0) then
 	begin
-	if pDevice.CreateIndexBuffer(VSize,0,D3DFMT_INDEX16,D3DPOOL_DEFAULT,
+	if pDevice.CreateIndexBuffer(VSize,0,
+		TSGByte(VIndexPrimetiveType=SGR_UNSIGNED_SHORT)*D3DFMT_INDEX16+
+		TSGByte(VIndexPrimetiveType=SGR_UNSIGNED_INT)*D3DFMT_INDEX32
+		,D3DPOOL_DEFAULT,
 		IDirect3DIndexBuffer9(Pointer(FArBuffers[FVBOData[1]-1].FResourse)),nil)<>D3D_OK then
 		begin
 		SGLog.Sourse('TSGRenderDirectX__BufferDataARB : Failed to Create index buffer!');
