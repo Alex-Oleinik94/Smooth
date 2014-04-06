@@ -258,7 +258,9 @@ end;
 
 procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
 begin
-if (FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].PoligonesType[0]))>=FShift then
+if ((HasIndexes) and ((FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].PoligonesType[0]))>=FShift))
+or ((not HasIndexes) and ((FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].ObjectPoligonesType))>=FShift))
+ then
 	begin
 	if (not DoAtThreads) and FEnableVBO then
 		begin
@@ -317,7 +319,6 @@ while Quantity<>0 do
 	if FHasIndexes then
 		begin
 		FMesh.LastObject().PoligonesType[0]:=FMesh.LastObject().ObjectPoligonesType;
-		
 		end;
 	if Quantity<=FShift then
 		begin
@@ -340,6 +341,7 @@ while Quantity<>0 do
 		Quantity-=FShift;
 		end;
 	end;
+FMesh.WriteInfo();
 end;
 
 procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;

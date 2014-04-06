@@ -594,21 +594,21 @@ begin
 case ArFaces[ArIndex].FIndexFormat of
 SGMeshIndexFormat1b: 
 	begin
-	ArFacesTriangles1b(Index)^.p[0]:=p0;
-	ArFacesTriangles1b(Index)^.p[1]:=p1;
-	ArFacesTriangles1b(Index)^.p[2]:=p2;
+	ArFacesTriangles1b(ArIndex)[Index].p[0]:=p0;
+	ArFacesTriangles1b(ArIndex)[Index].p[1]:=p1;
+	ArFacesTriangles1b(ArIndex)[Index].p[2]:=p2;
 	end;
 SGMeshIndexFormat2b: 
 	begin
-	ArFacesTriangles2b(Index)^.p[0]:=p0;
-	ArFacesTriangles2b(Index)^.p[1]:=p1;
-	ArFacesTriangles2b(Index)^.p[2]:=p2;
+	ArFacesTriangles2b(ArIndex)[Index].p[0]:=p0;
+	ArFacesTriangles2b(ArIndex)[Index].p[1]:=p1;
+	ArFacesTriangles2b(ArIndex)[Index].p[2]:=p2;
 	end;
 SGMeshIndexFormat4b: 
 	begin
-	ArFacesTriangles4b(Index)^.p[0]:=p0;
-	ArFacesTriangles4b(Index)^.p[1]:=p1;
-	ArFacesTriangles4b(Index)^.p[2]:=p2;
+	ArFacesTriangles4b(ArIndex)[Index].p[0]:=p0;
+	ArFacesTriangles4b(ArIndex)[Index].p[1]:=p1;
+	ArFacesTriangles4b(ArIndex)[Index].p[2]:=p2;
 	end;
 end;
 end;
@@ -618,18 +618,18 @@ begin
 case ArFaces[ArIndex].FIndexFormat of
 SGMeshIndexFormat1b: 
 	begin
-	ArFacesLines1b(Index)^.p[0]:=p0;
-	ArFacesLines1b(Index)^.p[1]:=p1;
+	ArFacesLines1b(ArIndex)[Index].p[0]:=p0;
+	ArFacesLines1b(ArIndex)[Index].p[1]:=p1;
 	end;
 SGMeshIndexFormat2b: 
 	begin
-	ArFacesLines2b(Index)^.p[0]:=p0;
-	ArFacesLines2b(Index)^.p[1]:=p1;
+	ArFacesLines2b(ArIndex)[Index].p[0]:=p0;
+	ArFacesLines2b(ArIndex)[Index].p[1]:=p1;
 	end;
 SGMeshIndexFormat4b: 
 	begin
-	ArFacesLines4b(Index)^.p[0]:=p0;
-	ArFacesLines4b(Index)^.p[1]:=p1;
+	ArFacesLines4b(ArIndex)[Index].p[0]:=p0;
+	ArFacesLines4b(ArIndex)[Index].p[1]:=p1;
 	end;
 end;
 end;
@@ -638,11 +638,11 @@ procedure TSG3DObject.SetFacePoint(const ArIndex:TSGLongWord;const Index :TSGMax
 begin
 case ArFaces[ArIndex].FIndexFormat of
 SGMeshIndexFormat1b:
-	ArFacesPoints1b(Index)^.p[0]:=p0;
+	ArFacesPoints1b(ArIndex)[Index].p[0]:=p0;
 SGMeshIndexFormat2b:
-	ArFacesPoints2b(Index)^.p[0]:=p0;
+	ArFacesPoints2b(ArIndex)[Index].p[0]:=p0;
 SGMeshIndexFormat4b:
-	ArFacesPoints4b(Index)^.p[0]:=p0;
+	ArFacesPoints4b(ArIndex)[Index].p[0]:=p0;
 end;
 end;
 
@@ -650,6 +650,8 @@ procedure TSG3DObject.SetFaceArLength(const NewArLength : TSGLongWord);
 var
 	Index : TSGLongWord;
 begin
+if (FQuantityFaceArrays>=NewArLength) then
+	Exit;
 SetLength(ArFaces,NewArLength);
 for Index := FQuantityFaceArrays to NewArLength - 1 do
 	begin
@@ -659,6 +661,7 @@ for Index := FQuantityFaceArrays to NewArLength - 1 do
 	ArFaces[Index].FArray:=nil;
 	ArFaces[Index].FNOfFaces:=0;
 	end;
+FQuantityFaceArrays := NewArLength;
 end;
 
 procedure TSG3DObject.AddFaceArray(const QuantityNewArrays : TSGLongWord = 1);
@@ -1207,81 +1210,76 @@ var
 	Index : TSGLongWord;
 begin
 WriteLn('TSG3DObject__WriteInfo()');
-WriteLn(PredStr,'NOfVerts = ',FNOfVerts);
-WriteLn(PredStr,'HasColors = ',FHasColors);
-WriteLn(PredStr,'HasNormals = ',FHasNormals);
-WriteLn(PredStr,'HasTexture = ',FHasTexture);
-if (ArFaces=nil) or (Length(ArFaces)=0) then
-	WriteLn(PredStr,'ArFacesLenght = 0')
-else
-	begin
-	WriteLn(PredStr,'ArFacesLenght = ',Length(ArFaces));
-	for Index:=0 to High(ArFaces) do
+WriteLn(PredStr,'NOfVerts           = "',FNOfVerts,'"');
+WriteLn(PredStr,'HasColors          = "',FHasColors,'"');
+WriteLn(PredStr,'HasNormals         = "',FHasNormals,'"');
+WriteLn(PredStr,'HasTexture         = "',FHasTexture,'"');
+WriteLn(PredStr,'QuantityFaceArrays = "',FQuantityFaceArrays,'"');
+if FQuantityFaceArrays<>0 then
+	for Index:=0 to FQuantityFaceArrays-1 do
 		begin
-		WriteLn(PredStr,PredStr,'Index = ',Index);
-		WriteLn(PredStr,PredStr,'NOfFaces = ',ArFaces[Index].FNOfFaces);
-		WriteLn(PredStr,PredStr,'RealFaceLength = ',GetFaceLength(Index));
-		WriteLn(PredStr,PredStr,'MaterialID = ',ArFaces[Index].FMaterialID);
+		WriteLn(PredStr,PredStr,'Index          = "',Index,'"');
+		WriteLn(PredStr,PredStr,'NOfFaces       = "',ArFaces[Index].FNOfFaces,'"');
+		WriteLn(PredStr,PredStr,'RealFaceLength = "',GetFaceLength(Index),'"');
+		WriteLn(PredStr,PredStr,'MaterialID     = "',ArFaces[Index].FMaterialID,'"');
 		case ArFaces[Index].FIndexFormat of
-		SGMeshIndexFormat1b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat1b');
-		SGMeshIndexFormat2b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat2b');
-		SGMeshIndexFormat4b: WriteLn(PredStr,PredStr,'IndexFormat = SGMeshIndexFormat4b');
+		SGMeshIndexFormat1b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat1b"');
+		SGMeshIndexFormat2b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat2b"');
+		SGMeshIndexFormat4b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat4b"');
 		end;
-		Write(PredStr,PredStr,'PoligonesType = ');
+		Write(PredStr,PredStr,'PoligonesType  = ');
 		case ArFaces[Index].FPoligonesType of
-		SGR_LINES:WriteLn('SGR_LINES');
-		SGR_TRIANGLES:WriteLn('SGR_TRIANGLES');
-		SGR_QUADS:WriteLn('SGR_QUADS');
-		SGR_POINTS:WriteLn('SGR_POINTS');
-		SGR_LINE_STRIP:WriteLn('SGR_LINE_STRIP');
-		SGR_LINE_LOOP:WriteLn('SGR_LINE_LOOP');
-		else WriteLn('SGR_INVALID');
+		SGR_LINES:WriteLn('"SGR_LINES"');
+		SGR_TRIANGLES:WriteLn('"SGR_TRIANGLES"');
+		SGR_QUADS:WriteLn('"SGR_QUADS"');
+		SGR_POINTS:WriteLn('"SGR_POINTS"');
+		SGR_LINE_STRIP:WriteLn('"SGR_LINE_STRIP"');
+		SGR_LINE_LOOP:WriteLn('"SGR_LINE_LOOP"');
+		else WriteLn('"SGR_INVALID"');
 		end;
 		end;
-	end;
 Write(PredStr,'ObjectPoligonesType = ');
 case FObjectPoligonesType of
-SGR_LINES:WriteLn('SGR_LINES');
-SGR_TRIANGLES:WriteLn('SGR_TRIANGLES');
-SGR_QUADS:WriteLn('SGR_QUADS');
-SGR_POINTS:WriteLn('SGR_POINTS');
-SGR_LINE_STRIP:WriteLn('SGR_LINE_STRIP');
-SGR_LINE_LOOP:WriteLn('SGR_LINE_LOOP');
-else WriteLn('SGR_INVALID');
+SGR_LINES:WriteLn('"SGR_LINES"');
+SGR_TRIANGLES:WriteLn('"SGR_TRIANGLES"');
+SGR_QUADS:WriteLn('"SGR_QUADS"');
+SGR_POINTS:WriteLn('"SGR_POINTS"');
+SGR_LINE_STRIP:WriteLn('"SGR_LINE_STRIP"');
+SGR_LINE_LOOP:WriteLn('"SGR_LINE_LOOP"');
+else WriteLn('"SGR_INVALID"');
 end;
-WriteLn(PredStr,'GetSizeOfOneVertex() = ',GetSizeOfOneVertex());
-Write(PredStr,'FVertexFormat = ');
+WriteLn(PredStr,'GetSizeOfOneVertex  = "',GetSizeOfOneVertex(),'"');
+Write(PredStr,'FVertexFormat       = ');
 if FVertexType=TSGMeshVertexType2f then
-	WriteLn('TSGMeshVertexType2f')
+	WriteLn('"SGMeshVertexType2f"')
 else if FVertexType=TSGMeshVertexType3f then
-	WriteLn('TSGMeshVertexType3f');
-Write(PredStr,'FColorType = ');
+	WriteLn('"SGMeshVertexType3f"');
+Write(PredStr,'FColorType          = ');
 case FColorType of
-TSGMeshColorType3b:WriteLn('TSGMeshColorType3b');
-TSGMeshColorType4b:WriteLn('TSGMeshColorType4b');
-TSGMeshColorType3f:WriteLn('TSGMeshColorType3f');
-TSGMeshColorType4f:WriteLn('TSGMeshColorType4f');
+TSGMeshColorType3b:WriteLn('"SGMeshColorType3b"');
+TSGMeshColorType4b:WriteLn('"SGMeshColorType4b"');
+TSGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
+TSGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
 end;
-WriteLn(PredStr,'QuantityTextures = ',FQuantityTextures);
-WriteLn(PredStr,'EnableVBO = ',FEnableVBO);
-WriteLn(PredStr,'ObjectMaterialID = ',FObjectMaterialID);
-WriteLn(PredStr,'Name = ',FName);
+WriteLn(PredStr,'QuantityTextures    = "',FQuantityTextures,'"');
+WriteLn(PredStr,'EnableVBO           = "',FEnableVBO,'"');
+WriteLn(PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"');
+WriteLn(PredStr,'Name                = "',FName,'"');
 end;
 
-function TSG3DObject.VertexesSize():QWord;Inline;
+function TSG3DObject.VertexesSize():TSGQuadWord;Inline;
 begin
 Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
 
-function TSG3DObject.FacesSize():QWord;inline;
+function TSG3DObject.FacesSize():TSGQuadWord;inline;
 var
 	Index : TSGLongWord;
 begin
 Result:=0;
-if (ArFaces=nil) or (Length(ArFaces)=0) then
-	Exit;
-for Index := 0 to High(ArFaces) do
-	Result += GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index);
+if FQuantityFaceArrays<>0 then
+	for Index := 0 to FQuantityFaceArrays-1 do
+		Result += GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index);
 end;
 
 function TSG3DObject.Size():QWord;inline;
@@ -1306,7 +1304,7 @@ end;
 
 function TSG3DObject.GetFaceLength(const Index : TSGLongWord):TSGQuadWord;overload;inline;
 begin
-Result:=GetFaceLength(ArFaces[Index].FPoligonesType,ArFaces[Index].FNOfFaces);
+Result:=GetFaceLength(ArFaces[Index].FNOfFaces,ArFaces[Index].FPoligonesType);
 end;
 
 procedure TSG3DObject.SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord);inline;
@@ -1985,13 +1983,14 @@ for i:=0 to FQuantityObjects-1 do
 	Result+=FArObjects[i].FMesh.VertexesSize();
 end;
 
-function TSGCustomModel.FacesSize():QWord;inline;
+function TSGCustomModel.FacesSize():TSGQuadWord;inline;
 var
 	i : TSGLongWord;
 begin
 Result:=0;
-for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].FMesh.FacesSize();
+if FQuantityObjects<>0 then
+	for i:=0 to FQuantityObjects-1 do
+		Result+=Objects[i].FacesSize();
 end;
 
 function TSGCustomModel.Size():QWord;inline;
