@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 unit SaGeContextMacOSX;
-
+// просто текст для автоматического определения кодировки компелятором FPC ;)
 interface
 
 uses 

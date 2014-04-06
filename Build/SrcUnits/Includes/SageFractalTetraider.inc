@@ -9,7 +9,7 @@ type
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+		procedure PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
 			public
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
@@ -30,7 +30,7 @@ Result:='Тетраидер Серпинского';
 end;
 
 
-procedure TSGFractalTetraider.PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex,FFaceIndex:LongWord);Inline;
+procedure TSGFractalTetraider.PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
 var
 	c:TSGColor3f;
 	v:TSGVertex3f;
@@ -73,28 +73,23 @@ if FEnableNormals then
 	end;
 FVertexIndex+=3;
 
-FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[0]:=FVertexIndex-1;
-FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[1]:=FVertexIndex-2;
-FMesh.Objects[MeshID].ArFacesTriangles[FFaceIndex].p[2]:=FVertexIndex-3;
-FFaceIndex+=1;
-
-AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);
+AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex);
 end;
 
 procedure TSGFractalTetraider.CalculateFromThread();
 var
 	MeshID:LongWord;
-	FVI,FFI:LongWord;
+	FVI:LongWord;
 
 procedure Rec(const t0,t1,t2,t3:TSGVertex3f;const NowDepth:LongWord);
 
 begin
 if NowDepth=0 then
 	begin
-	PushIndexes(MeshID,FArNor[3],t0,t1,t2,FVI,FFI);
-	PushIndexes(MeshID,FArNor[0],t0,t1,t3,FVI,FFI);
-	PushIndexes(MeshID,FArNor[2],t0,t2,t3,FVI,FFI);
-	PushIndexes(MeshID,FArNor[1],t1,t2,t3,FVI,FFI);
+	PushIndexes(MeshID,FArNor[3],t0,t1,t2,FVI);
+	PushIndexes(MeshID,FArNor[0],t0,t1,t3,FVI);
+	PushIndexes(MeshID,FArNor[2],t0,t2,t3,FVI);
+	PushIndexes(MeshID,FArNor[1],t1,t2,t3,FVI);
 	end
 else
 	begin
@@ -129,7 +124,6 @@ bb1:=SGVertexImport(cos(2*pi/3)*Radius, sin(2*pi/3)*Radius,-Radius*0.6);
 bb2:=SGVertexImport(cos(4*pi/3)*Radius, sin(4*pi/3)*Radius,-Radius*0.6);
 bb3:=SGVertexImport(0, 0, Radius*0.6);
 MeshID:=0;
-FFI:=0;
 FVI:=0;
 FArNor[0]:=SGGetVertexWhichNormalFromThreeVertex(bb0,bb1,bb3);
 FArNor[1]:=SGGetVertexWhichNormalFromThreeVertex(bb1,bb2,bb3);
@@ -143,20 +137,12 @@ if FThreadsEnable then
 			FMeshesInfo[MeshID]:=SG_TRUE;
 end;
 
-{procedure NewPodkovaThreadTet(Klass:TSGFractalData) ;
-begin
-(Klass.FFractal as TSGFractalTetraider).CalculateFromThread();
-Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
-Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy;
-end;}
-
-procedure TSGFractalTetraider.Calculate;
+procedure TSGFractalTetraider.Calculate();
 var
 	Quantity:Int64;
 begin
 inherited;
-ClearMesh;
+ClearMesh();
 Quantity:=(4**(1+FDepth));
 CalculateMeshes(Quantity,SGR_TRIANGLES,TSGMeshVertexType3f);
 if FThreadsEnable then
@@ -203,11 +189,12 @@ end;
 constructor TSGFractalTetraider.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FEnableColors:=True;
-FEnableNormals:=True;
+EnableColors   := True;
+EnableNormals  := True;
+LightingEnable := True;
+HasIndexes     := False;
 Threads:=1;
 Depth:=3;
-FLightingEnable:=True;
 Radius:=5;
 h:=sqrt(3)*Radius/2;
 c0:=SGGetColor4fFromLongWord($FF00FF);

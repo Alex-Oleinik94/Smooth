@@ -67,31 +67,36 @@ type
 		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
-			public
+			protected
 		FMesh        : TSGCustomModel;
 		FMeshesInfo  : packed array of TSGExBoolean;
-		FMeshesReady : Boolean;
-		FShift       : int64;
+		FMeshesReady : TSGBoolean;
+		FShift       : TSGInt64;
 		
 		FSun              : TSGVertex;
-		FSunAbs           : real;
-		FSunTrigonometry  : packed array[0..2] of real;
-		FLightingEnable   : Boolean;
+		FSunAbs           : TSGSingle;
+		FSunTrigonometry  : packed array[0..2] of TSGSingle;
+		FLightingEnable   : TSGBoolean;
 		FCamera           : TSGCamera;
 		
-		FEnableVBO      :Boolean;
-		FEnableColors   :boolean;
-		FEnableNormals  :Boolean;
-		
+		FEnableVBO      : TSGBoolean;
+		FEnableColors   : TSGBoolean;
+		FEnableNormals  : TSGBoolean;
+		FHasIndexes     : TSGBoolean;
 			public
 		procedure Draw();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
 		procedure ClearMesh();inline;
-		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;
+		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;overload;
+		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
 			public
-		property LightingEnable:Boolean read FLightingEnable write FLightingEnable;
+		property LightingEnable : TSGBoolean read FLightingEnable write FLightingEnable;
+		property HasIndexes     : TSGBoolean read FHasIndexes     write FHasIndexes;
+		property EnableVBO      : TSGBoolean read FEnableVBO      write FEnableVBO;
+		property EnableNormals  : TSGBoolean read FEnableNormals  write FEnableNormals;
+		property EnableColors   : TSGBoolean read FEnableColors   write FEnableColors;
 			public
 		FProjectionComboBox,FEffectsComboBox:TSGComboBox;
 		FSizeLabel:TSGLabel;
@@ -251,7 +256,26 @@ else
 		end;
 end;
 
-procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;
+procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
+begin
+if (FVertexIndex div FMesh.Objects[MeshID].GetPoligoneInt(FMesh.Objects[MeshID].PoligonesType))>=FShift then
+	begin
+	if (not DoAtThreads) and FEnableVBO then
+		begin
+		FMesh.Objects[MeshID].LoadToVBO();
+		end;
+	if FThreadsEnable and (MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1) and (FMeshesInfo[MeshID]=SG_FALSE) then
+		FMeshesInfo[MeshID]:=SG_TRUE;
+	MeshID+=1;
+	FVertexIndex:=0;
+	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.Objects[MeshID].QuantityVertexes=0) then
+		begin
+		SetMeshArLength(MeshID,FShift,FMesh.Objects[MeshID].GetFaceLength(FShift));
+		end;
+	end;
+end;
+
+procedure TSG3DFractal.AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;overload;
 begin
 if FFaceIndex>=FShift then
 	begin
@@ -266,19 +290,6 @@ if FFaceIndex>=FShift then
 	FFaceIndex:=0;
 	if FEnableVBO and ((MeshID>=0) and (MeshID<=FMesh.QuantityObjects-1)) and (FMeshesInfo[MeshID]=SG_FALSE) and (FMesh.Objects[MeshID].QuantityVertexes=0) then
 		begin
-		{if DoAtThreads then
-			begin
-			while not b do
-				begin
-				b:=True;
-				try
-				while FMesh.RealSize>1024*1024*256 do
-					Delay(1);
-				except 
-					B:=False;
-					end;
-				end;
-			end;}
 		SetMeshArLength(MeshID,FShift,FMesh.Objects[MeshID].GetFaceLength(FShift));
 		end;
 	end;
@@ -302,6 +313,7 @@ while Quantity<>0 do
 		FMesh.LastObject().AutoSetColorType();
 	if FEnableNormals then
 		FMesh.LastObject().HasNormals:=True;
+	FMesh.LastObject().HasIndexes := FHasIndexes;
 	if Quantity<=FShift then
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
@@ -327,7 +339,8 @@ end;
 
 procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 begin
-FMesh.Objects[MID].SetFaceLength(LFaces);
+if FHasIndexes then
+	FMesh.Objects[MID].SetFaceLength(LFaces);
 FMesh.Objects[MID].SetVertexLength(LVertexes);
 end;
 
@@ -349,6 +362,7 @@ FSunTrigonometry[2]:=pi+pi;
 FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedVBOBuffers();
+FHasIndexes:=True;
 
 //Размерность максимального сегмента данных мешей модели
 FShift:=4608*2;
@@ -466,14 +480,19 @@ if FLightingEnable then
 if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (FMesh<>nil) then
 	if (not ((FThreadsEnable))) or (((FThreadsEnable)) and FMeshesReady) then
 		begin
-		FSizeLabel.Caption:=(
-			'Size-(All: '+SGGetSizeString(FMesh.Size)+
-			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
-			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
-			' );LenArObj='+SGStr(FMesh.QuantityObjects)+'.'
-			);
+		if HasIndexes then
+			FSizeLabel.Caption:=(
+				'Size : All: '+SGGetSizeString(FMesh.Size)+
+				' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
+				' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
+				' ;LenArObj: '+SGStr(FMesh.QuantityObjects)+'.'
+				)
+		else
+			FSizeLabel.Caption:=(
+				'Size : Vert: '+SGGetSizeString(FMesh.VertexesSize)+
+				' ;LenArObj: '+SGStr(FMesh.QuantityObjects)+'.'
+				);
 		FSizeLabelFlag:=True;
-		//WriteLn(FSizeLabel.Caption);
 		end
 	else
 		begin
