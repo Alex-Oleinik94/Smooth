@@ -42,15 +42,9 @@ else
 	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex-1]^.Import(v3.x,v3.y);
 	end;
 
-
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+0].p[0]:=FVertexIndex-1;
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+0].p[1]:=FVertexIndex-2;
-
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+1].p[0]:=FVertexIndex-3;
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+1].p[1]:=FVertexIndex-2;
-
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+2].p[0]:=FVertexIndex-1;
-FMesh.Objects[MeshID].ArFacesLines[FFaceIndex+2].p[1]:=FVertexIndex-3;
+FMesh.Objects[MeshID].SetFaceLine(0,FFaceIndex+0,FVertexIndex-1,FVertexIndex-2);
+FMesh.Objects[MeshID].SetFaceLine(0,FFaceIndex+1,FVertexIndex-3,FVertexIndex-2);
+FMesh.Objects[MeshID].SetFaceLine(0,FFaceIndex+2,FVertexIndex-1,FVertexIndex-3);
 FFaceIndex+=3;
 
 AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex,FFaceIndex);

@@ -326,8 +326,8 @@ constructor TSGFractalMengerSpunch.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDeep:=FMengerCube;
-FEnableColors:=True;
-FEnableNormals:=True;
+EnableColors:=True;
+EnableNormals:=True;
 if FEnableNormals then
 	begin
 	Ar6Normals[0].Import(0,1,0);
@@ -343,7 +343,7 @@ if FEnableNormals then
 	Ar6Normals[5].Import(0,-1,0);
 	Ar6Normals[5].Normalize;
 	end;
-CalculateArray;
+CalculateArray();
 end;
 
 procedure TSGFractalMengerSpunch.CalculateFromThread(var MeshID,ThreadArB,ThreadArE:LongWord);
@@ -646,7 +646,7 @@ if FEnableNormals then
 	FMesh.Objects[MeshID].ArNormal[FVertexIndex-1]^:=Ar6Normals[ai];
 	end;
 
-FMesh.Objects[MeshID].SetFaceQuad(FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
+FMesh.Objects[MeshID].SetFaceQuad(0,FFaceIndex,FVertexIndex-1,FVertexIndex-2,FVertexIndex-3,FVertexIndex-4);
 FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);

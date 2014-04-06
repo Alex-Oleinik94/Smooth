@@ -337,9 +337,9 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	begin
 	FMesh := TSG3DObject.Create();
 	FMesh.Context := Context;
-	FMesh.HasIndexes := False;
+	FMesh.QuantityFaceArrays := 0;
 	FMesh.HasColors := False;
-	FMesh.PoligonesType:=SGR_TRIANGLES;
+	FMesh.ObjectPoligonesType:=SGR_TRIANGLES;
 	FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.EnableCullFace:=False;
 	FMesh.HasNormals:=True;
@@ -397,17 +397,18 @@ end;
 
 procedure TSGPhysicsObject.InitMesh (const Mesh : TSG3DObject);
 var
-	i,ii: TSGLongWord;
+	i, ii, iii: TSGLongWord;
 begin
 ii:=PAPPE.PhysicsObjectAddMesh(FObject);
-if Mesh.HasIndexes then
+if Mesh.QuantityFaceArrays<>0 then
 	begin
-	if Mesh.QuantityFaces<>0 then
-		for i:=0 to Mesh.QuantityFaces-1 do
-			PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
-				TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles()[i].p[0]]^),
-				TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles()[i].p[1]]^),
-				TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles()[i].p[2]]^));
+	for iii:=0 to FMesh.QuantityFaceArrays-1 do
+		if Mesh.QuantityFaces[iii]<>0 then
+			for i:=0 to Mesh.QuantityFaces[iii]-1 do
+				PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
+					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[0]]^),
+					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[1]]^),
+					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[2]]^));
 	end
 else
 	begin

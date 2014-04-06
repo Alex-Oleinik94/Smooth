@@ -442,14 +442,12 @@ FMesh:=TSG3DObject.Create();
 FMesh.SetContext(Context);
 FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 FMesh.EnableCullFace:=False;
-FMesh.PoligonesType:=SGR_LINE_STRIP;
+FMesh.ObjectPoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType:=TSGMeshVertexType3f;
-FMesh.SetFaceLength(FDetalization);
 FMesh.SetVertexLength(FDetalization);
 for i:=0 to FDetalization-1 do
 	begin
 	FMesh.ArVertex3f[i]^:=GetResultVertex(i/(Detalization-1));
-	FMesh.ArFacesPoints[i].p[0]:=i;
 	end;
 FMesh.LoadToVBO();
 end;

@@ -38,11 +38,10 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
-	@MKDIR -p SrcUnits/Temp
+	@mkdir -p SrcUnits/Temp
 	@rm -f SrcUnits/Temp/*
-	@"./../Binaries/Main" -crf ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 clear:
-	@$(MAKE) clear_files
 	@rm -f CompiledUnits/arm-android/*
 	@rm -f CompiledUnits/i386-other/*
 	@rm -f CompiledUnits/*.o
@@ -58,3 +57,4 @@ clear:
 	@rm -f SrcUnits/*.o
 	@rm -f SrcUnits/*.ppu
 	@rm -f Main.res
+	@$(MAKE) clear_files
