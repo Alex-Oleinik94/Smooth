@@ -480,33 +480,92 @@ end;
 function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
 begin
 FillChar(Result,SizeOf(Result),0);
-case ArFaces[ArIndex].FIndexFormat of
-SGMeshIndexFormat1b: 
-	begin
-	Result.p0:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p0;
-	Result.p1:=PTSGFaceLine1b(ArFaces[ArIndex].FArray)[Index].p1;
+if Render.RenderType=SGRenderDirectX then
+	case ArFaces[ArIndex].FIndexFormat of
+	SGMeshIndexFormat1b: 
+		begin
+		Result.p0:=ArFacesTriangles1b(ArIndex)[Index*2].p[0];
+		Result.p1:=ArFacesTriangles1b(ArIndex)[Index*2].p[1];
+		Result.p2:=ArFacesTriangles1b(ArIndex)[Index*2].p[2];
+		Result.p3:=ArFacesTriangles1b(ArIndex)[Index*2+1].p[1];
+		end;
+	SGMeshIndexFormat2b: 
+		begin
+		Result.p0:=ArFacesTriangles2b(ArIndex)[Index*2].p[0];
+		Result.p1:=ArFacesTriangles2b(ArIndex)[Index*2].p[1];
+		Result.p2:=ArFacesTriangles2b(ArIndex)[Index*2].p[2];
+		Result.p3:=ArFacesTriangles2b(ArIndex)[Index*2+1].p[1];
+		end;
+	SGMeshIndexFormat4b: 
+		begin
+		Result.p0:=ArFacesTriangles4b(ArIndex)[Index*2].p[0];
+		Result.p1:=ArFacesTriangles4b(ArIndex)[Index*2].p[1];
+		Result.p2:=ArFacesTriangles4b(ArIndex)[Index*2].p[2];
+		Result.p3:=ArFacesTriangles4b(ArIndex)[Index*2+1].p[1];
+		end;
+	end
+else
+	case ArFaces[ArIndex].FIndexFormat of
+	SGMeshIndexFormat1b: 
+		begin
+		Result.p0:=ArFacesQuads1b(ArIndex)[Index].p[0];
+		Result.p1:=ArFacesQuads1b(ArIndex)[Index].p[1];
+		Result.p2:=ArFacesQuads1b(ArIndex)[Index].p[2];
+		Result.p3:=ArFacesQuads1b(ArIndex)[Index].p[3];
+		end;
+	SGMeshIndexFormat2b:
+		begin
+		Result.p0:=ArFacesQuads2b(ArIndex)[Index].p[0];
+		Result.p1:=ArFacesQuads2b(ArIndex)[Index].p[1];
+		Result.p2:=ArFacesQuads2b(ArIndex)[Index].p[2];
+		Result.p3:=ArFacesQuads2b(ArIndex)[Index].p[3];
+		end;
+	SGMeshIndexFormat4b:
+		begin
+		Result.p0:=ArFacesQuads4b(ArIndex)[Index].p[0];
+		Result.p1:=ArFacesQuads4b(ArIndex)[Index].p[1];
+		Result.p2:=ArFacesQuads4b(ArIndex)[Index].p[2];
+		Result.p3:=ArFacesQuads4b(ArIndex)[Index].p[3];
+		end;
 	end;
-SGMeshIndexFormat2b: 
-	begin
-	Result.p0:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p0;
-	Result.p1:=PTSGFaceLine2b(ArFaces[ArIndex].FArray)[Index].p1;
-	end;
-SGMeshIndexFormat4b: 
-	begin
-	Result.p0:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p0;
-	Result.p1:=PTSGFaceLine4b(ArFaces[ArIndex].FArray)[Index].p1;
-	end;
-end;
 end;
 
 function TSG3DObject.ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
 begin
-
+FillChar(Result,SizeOf(Result),0);
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b: 
+	begin
+	Result.p0:=PTSGFaceTriangle1b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceTriangle1b(ArFaces[ArIndex].FArray)[Index].p1;
+	Result.p2:=PTSGFaceTriangle1b(ArFaces[ArIndex].FArray)[Index].p2;
+	end;
+SGMeshIndexFormat2b: 
+	begin
+	Result.p0:=PTSGFaceTriangle2b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceTriangle2b(ArFaces[ArIndex].FArray)[Index].p1;
+	Result.p2:=PTSGFaceTriangle2b(ArFaces[ArIndex].FArray)[Index].p2;
+	end;
+SGMeshIndexFormat4b: 
+	begin
+	Result.p0:=PTSGFaceTriangle4b(ArFaces[ArIndex].FArray)[Index].p0;
+	Result.p1:=PTSGFaceTriangle4b(ArFaces[ArIndex].FArray)[Index].p1;
+	Result.p2:=PTSGFaceTriangle4b(ArFaces[ArIndex].FArray)[Index].p2;
+	end;
+end;
 end;
 
 function TSG3DObject.ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
 begin
-
+FillChar(Result,SizeOf(Result),0);
+case ArFaces[ArIndex].FIndexFormat of
+SGMeshIndexFormat1b:
+	Result.p0:=PTSGFacePoint1b(ArFaces[ArIndex].FArray)[Index].p0;
+SGMeshIndexFormat2b:
+	Result.p0:=PTSGFacePoint2b(ArFaces[ArIndex].FArray)[Index].p0;
+SGMeshIndexFormat4b:
+	Result.p0:=PTSGFacePoint4b(ArFaces[ArIndex].FArray)[Index].p0;
+end;
 end;
 
 
