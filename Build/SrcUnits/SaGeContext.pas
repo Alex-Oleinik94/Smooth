@@ -554,6 +554,11 @@ end;
 
 destructor TSGContext.Destroy();
 begin
+if FRender<>nil then
+	begin
+	FRender.Destroy();
+	FRender:=nil;
+	end;
 inherited;
 end;
 

@@ -695,13 +695,15 @@ Result:=False;
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 		{$ELSE}
 			{$IFDEF DARWIN}
-				FContext := aglCreateContext( ogl_Format, nil );
-				Result:= Assigned( FContext );
+				if SetPixelFormat() then begin
+					FContext := aglCreateContext( ogl_Format, nil );
+					Result:= Assigned( FContext );
+				end;
 				if Result then
 					begin
-					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESKTOP WINDOW HANDLE'))) <> GL_FALSE Then
+					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESKTOP WINDOW HANDLE'))) = GL_TRUE Then
 						begin
-						if aglSetCurrentContext( FContext ) <> GL_FALSE Then
+						if aglSetCurrentContext( FContext ) = GL_TRUE Then
 							begin
 							aglDestroyPixelFormat( ogl_Format );
 							FillChar(ogl_Format,Sizeof(ogl_Format),0);
@@ -713,8 +715,10 @@ Result:=False;
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
+{$IFNDEF DARWIN}
 if Result then
 	Result:=MakeCurrent();
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.ReleaseCurrent();
@@ -759,9 +763,9 @@ Result:=False;
 	ogl_Attr[ 1 ] := AGL_DOUBLEBUFFER;
 	ogl_Attr[ 2 ] := AGL_DEPTH_SIZE;
 	ogl_Attr[ 3 ] := 24;
-	ogl_Attr[ 6 ] := AGL_NONE;
+	ogl_Attr[ 4 ] := AGL_NONE;
 	ogl_Format := aglChoosePixelFormat( nil, 0, @ogl_Attr[ 0 ] );
-	Result:=Assigned( ogl_Format );
+        	Result:=Assigned( ogl_Format );
 	{$ENDIF}
 {$IFDEF MSWINDOWS}
 	FillChar(pfd, sizeof(pfd), 0);
@@ -818,7 +822,7 @@ begin
 			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
 		{$ELSE}
 			{$IFDEF DARWIN}
-				Result:=aglSetDrawable( FContext, FWindow.Get('DESKTOP WINDOW HANDLE')) <> GL_FALSE;
+				//Result:=aglSetDrawable( FContext, FWindow.Get('DESKTOP WINDOW HANDLE')) <> GL_FALSE;
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}

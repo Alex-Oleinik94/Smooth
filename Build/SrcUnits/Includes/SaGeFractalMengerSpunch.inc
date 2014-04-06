@@ -49,11 +49,9 @@ type
 			public
 		FComboBox1,FComboBox2:TSGComboBox;
 		FButtonDepthPlus,FButtonDepthMinus:TSGButton;
-		FLabelDepth,FLabelDepthCaption,FLabelSize:TSGLabel;
-		FSizeWriteTrue:Boolean;
+		FLabelDepth,FLabelDepthCaption:TSGLabel;
 		FFont1:TSGFont;
 		procedure Calculate;override;
-		procedure WriteSize;inline;
 		procedure Draw;override;
 		end;
 {$ENDIF}
@@ -70,8 +68,6 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 		begin
 		FDepth+=1;
 		Calculate;
-		FSizeWriteTrue:=False;
-		WriteSize;
 		FButtonDepthMinus.Active:=True;
 		end;
 	end;
@@ -85,8 +81,6 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 		begin
 		FDepth-=1;
 		Calculate;
-		FSizeWriteTrue:=False;
-		WriteSize;
 		if Depth=0 then
 			FButtonDepthMinus.Active:=False;
 		end;
@@ -108,9 +102,8 @@ with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 			1:FDeep:=FMengerStar;
 			2:FDeep:=FMengerPlus;
 			3:FDeep:=FMengerExtendedCube;
-			end;Calculate;
-			FSizeWriteTrue:=False;
-			WriteSize;
+			end;
+			Calculate;
 			end;
 		end;
 	end;
@@ -127,8 +120,6 @@ with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 			FEnableColors:=(b=0) or (b=2);
 			FLightingEnable:=FEnableNormals;
 			Calculate;
-			FSizeWriteTrue:=False;
-			WriteSize;
 			end;
 	end;
 end;
@@ -136,26 +127,25 @@ end;
 procedure TSGFractalMengerSpunchRelease.Draw;
 begin
 inherited;
-WriteSize;
 end;
 
 procedure TSGFractalMengerSpunchRelease.Calculate;
 begin
 FLabelDepth.Caption:=SGStringToPChar(SGStr(FDepth));
 inherited Calculate;
-WriteSize;
+FSizeLabelFlag := False;
 end;
 
 constructor TSGFractalMengerSpunchRelease.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FSizeWriteTrue:=False;
 
 FFont1:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FFont1.SetContext(Context);
 FFont1.Loading();
 
 InitProjectionComboBox(Context.Width-250-90-125-155,5,150,30,[SGAnchRight],true);
+InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FComboBox2:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox2);
@@ -173,7 +163,7 @@ SGScreen.LastChild.Visible:=True;
 
 FComboBox1:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox1);
-SGScreen.LastChild.SetBounds(Context.Width-250,5{+Context.TopShift},230,30);
+SGScreen.LastChild.SetBounds(Context.Width-250,5,230,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Звездочка');
@@ -187,7 +177,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthPlus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthPlus);
-SGScreen.LastChild.SetBounds(Context.Width-250-30,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-30,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -197,7 +187,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepth:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepth);
-SGScreen.LastChild.SetBounds(Context.Width-250-60,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-60,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -206,7 +196,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthMinus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthMinus);
-SGScreen.LastChild.SetBounds(Context.Width-250-90,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-90,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
@@ -216,72 +206,20 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepthCaption:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepthCaption);
-SGScreen.LastChild.SetBounds(Context.Width-250-90-125,5{+Context.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-250-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
-FLabelSize:=TSGLabel.Create();
-SGScreen.CreateChild(FLabelSize);
-SGScreen.LastChild.SetBounds(5,Context.Height-25,Context.Width-20,20);
-SGScreen.LastChild.Caption:='Загрузка...';
-SGScreen.LastChild.Anchors:=[SGAnchBottom];
-SGScreen.LastChild.FUserPointer1:=Self;
-FLabelSize.FTextPosition:=0;
-FLabelSize.Font:=FFont1;
-SGScreen.LastChild.Visible:=True;
-
 Depth:=2;
 Threads:=1;
-Calculate();
-WriteSize();
-end;
-
-procedure TSGFractalMengerSpunchRelease.WriteSize;inline;
-var
-	I:LongWord;
-begin
-if (not FSizeWriteTrue) and (FMesh<>nil) then
-	if (not DoAtThreads) or (DoAtThreads and FMeshesReady) then
-		begin
-		FLabelSize.Caption:=SGStringToPChar(
-			'Size-(All: '+SGGetSizeString(FMesh.Size)+
-			' ;Face: '+SGGetSizeString(FMesh.FacesSize)+
-			' ;Vert: '+SGGetSizeString(FMesh.VertexesSize)+
-			' );LenArObj='+SGStr(FMesh.QuantityObjects)+'.'
-			);
-		FSizeWriteTrue:=True;
-		end
-	else
-		begin
-		FLabelSize.Caption:=SGStringToPChar(
-			'Загрузка... (NOfObjects='+SGStr(FMesh.QuantityObjects)+';Threads='+SGStr(Threads)
-			);
-		if DoAtThreads then
-			begin
-			for i:=0 to Threads-1 do
-				begin
-				if not FThreadsData[i].FFinished then
-					begin
-					//FLabelSize.Caption:=
-						{SGPCharTotal(FLabelSize.Caption,
-						SGStringToPChar(';Threads(MeshId'+SGStr(i)+'='+SGStr(TSGMengerSpunchFractalData(Pointer(FThreadsData[i].FData)).a1+1)+')')
-						);}
-					FLabelSize.Caption:=FLabelSize.Caption+';Threads(MeshId'+SGStr(i)+'='+SGStr(TSGMengerSpunchFractalData(Pointer(FThreadsData[i].FData)).a1+1)+')';
-					end;
-				end;
-			end;
-		//FLabelSize.Caption:=SGPCharTotal(FLabelSize.Caption,')');
-		FLabelSize.Caption:=FLabelSize.Caption+')';
-		end;
+Calculate()
 end;
 
 destructor TSGFractalMengerSpunchRelease.Destroy;
 begin
-if FLabelSize<>nil then 
-	FLabelSize.Font:=nil;
 if FComboBox1<>nil then FComboBox1.Destroy;
 if FButtonDepthMinus<>nil then FButtonDepthMinus.Destroy;
 if FButtonDepthPlus<>nil then FButtonDepthPlus.Destroy;
@@ -289,7 +227,6 @@ if FLabelDepth<>nil then FLabelDepth.Destroy;
 if FComboBox2<>nil then FComboBox2.Destroy;
 if FFont1<>nil then FFont1.Destroy;
 if FLabelDepthCaption<>nil then FLabelDepthCaption.Destroy;
-if FLabelSize<>nil then FLabelSize.Destroy;
 inherited;
 end;
 
