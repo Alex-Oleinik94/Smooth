@@ -142,6 +142,9 @@ type
 		FName : TSGString;
 		FEnableBump, FEnableTexture : TSGBoolean;
 			public
+		procedure SetColorAmbient(const r,g,b :TSGSingle);
+		procedure SetColorSpecular(const r,g,b :TSGSingle);
+		procedure SetColorDiffuse(const r,g,b :TSGSingle);
 		procedure AddDiffuseMap(const VFileName : TSGString);
 		procedure AddBumpMap(const VFileName : TSGString);
 		function MapDiffuseWay():TSGString;inline;
@@ -150,7 +153,9 @@ type
 		procedure Bind();
 		procedure UnBind();
 			public
-		property Name : TSGString read FName write FName;
+		property Name  : TSGString read FName  write FName;
+		property Illum : TSGSingle read FIllum write FIllum;
+		property Ns    : TSGSingle read FNS    write FNS;
 		end;
 	
     { TSG3dObject }
@@ -316,6 +321,7 @@ type
 		function ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
 		function ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
 		
+		procedure CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
 		procedure SetFaceArLength(const NewArLength : TSGLongWord);
 		procedure AddFaceArray(const QuantityNewArrays : TSGLongWord = 1);
 		// Устанавливает длинну массива индексов
@@ -480,6 +486,22 @@ implementation
 
 {$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 {$INCLUDE Includes\SaGeMeshObj.inc}
+
+procedure TSG3DObject.CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
+var
+	i : TSGLongWord;
+begin
+if (FParent<>nil) then
+	begin
+	if FParent.QuantityMaterials<>0 then
+		for i := 0 to FParent.QuantityMaterials - 1 do
+			if FParent.Materials[i].Name = VMAterialName then
+				begin
+				ArFaces[FQuantityFaceArrays - 1].FMaterialID := i;
+				Break;
+				end;
+	end;
+end;
 
 function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
 begin
@@ -1557,15 +1579,15 @@ if FEnableVBO then
 		for Index := 0 to FQuantityFaceArrays-1 do
 			begin
 			if ArFaces[Index].FMaterialID<>-1 then
-				begin
-				
-				end;
+				FParent.Materials[ArFaces[Index].FMaterialID].Bind();
 			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FFacesBuffers[Index]);
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) ,
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT
 				,nil);
+			if ArFaces[Index].FMaterialID<>-1 then
+				FParent.Materials[ArFaces[Index].FMaterialID].UnBind();
 			end;
 		end
 	else
@@ -1619,11 +1641,17 @@ else
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
 	if FQuantityFaceArrays<>0 then
 		for Index := 0 to FQuantityFaceArrays-1 do
+			begin
+			if ArFaces[Index].FMaterialID<>-1 then
+				FParent.Materials[ArFaces[Index].FMaterialID].Bind();
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) , 
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT, 
-				ArFaces[Index].FArray)
+				ArFaces[Index].FArray);
+			if ArFaces[Index].FMaterialID<>-1 then
+				FParent.Materials[ArFaces[Index].FMaterialID].UnBind();
+			end
 	else
 		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
     end;
@@ -2126,6 +2154,22 @@ if FMapBump<>nil then
 else
 	Result:='';
 end;
+
+procedure TSGMaterial.SetColorAmbient(const r,g,b :TSGSingle);
+begin
+FColorAmbient.Import(r,g,b);
+end;
+
+procedure TSGMaterial.SetColorSpecular(const r,g,b :TSGSingle);
+begin
+FColorSpecular.Import(r,g,b);
+end;
+
+procedure TSGMaterial.SetColorDiffuse(const r,g,b :TSGSingle);
+begin
+FColorDiffuse.Import(r,g,b);
+end;
+
 
 end.
 
