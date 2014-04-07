@@ -131,6 +131,24 @@ type
 	TSGFacePoint = TSGFacePoint4b;
 	PTSGFacePoint = PTSGFacePoint4b;
 	
+	TSGMaterial = class (TSGContextObject)
+			public
+		constructor Create(const VContext : TSGContext);override;
+		destructor Destroy();override;
+			private
+		FColorDiffuse, FColorSpecular, FColorAmbient : TSGColor4f;
+		FIllum, FNS : TSGSingle;
+		FMapDiffuse, FMapBump, FMapOpacity, FMapSpecular, FMapAmbient : TSGImage;
+		FName : TSGString;
+		FEnableBump, FEnableTexture : TSGBoolean;
+			public
+		procedure AddDiffuseMap(const VFileName : TSGString);
+		procedure AddBumpMap(const VFileName : TSGString);
+			public
+		procedure Bind();
+		procedure UnBind();
+		end;
+	
     { TSG3dObject }
     // Наша моделька..
 type
@@ -2032,6 +2050,69 @@ end;
 function TSGCustomModel.GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
 begin
 Result:=@FArObjects[Index].FMatrix;
+end;
+
+(************************************************************************************)
+(*********************************){TSGMaterial}(************************************)
+(************************************************************************************)
+
+constructor TSGMaterial.Create(const VContext : TSGContext);
+begin
+inherited Create(VContext);
+FColorAmbient.Import(0,0,0,0);
+FColorDiffuse.Import(0,0,0,0);
+FColorSpecular.Import(0,0,0,0);
+FEnableBump:=False;
+FEnableTexture:=False;
+FNS:=0;
+FIllum:=0;
+FName:='';
+FMapAmbient:=nil;
+FMapBump:=nil;
+FMapDiffuse:=nil;
+FMapOpacity:=nil;
+FMapSpecular:=nil;
+end;
+
+destructor TSGMaterial.Destroy();
+begin
+inherited;
+end;
+
+procedure TSGMaterial.AddDiffuseMap(const VFileName : TSGString);
+begin
+FMapDiffuse:=TSGImage.Create();
+FMapDiffuse.Context := Context;
+FMapDiffuse.Way := VFileName;
+FEnableTexture := FMapDiffuse.Loading();
+end;
+
+procedure TSGMaterial.AddBumpMap(const VFileName : TSGString);
+begin
+FMapBump:=TSGImage.Create();
+FMapBump.Context := Context;
+FMapBump.Way := VFileName;
+FEnableBump := FMapBump.Loading();
+end;
+
+procedure TSGMaterial.Bind();
+begin
+if FEnableTexture and (FMapDiffuse<>nil) then
+	FMapDiffuse.BindTexture();
+if FEnableBump and (FMapBump<>nil) then
+	begin
+	
+	end;
+end;
+
+procedure TSGMaterial.UnBind();
+begin
+if FEnableBump and (FMapBump<>nil) then
+	begin
+	
+	end;
+if FEnableTexture and (FMapDiffuse<>nil) then
+	FMapDiffuse.DisableTexture();
 end;
 
 end.
