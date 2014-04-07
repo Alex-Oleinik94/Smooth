@@ -29,6 +29,9 @@ type
 		FCustomModel : TSGCustomModel;
 		FSelectMesh  : TSGInteger;
 		FLastColorMesh : TSGColor4f;
+		
+		FSun : TSGVertex3f;
+		FSunAngle : TSGSingle;
 			private
 		procedure StartLoadForm();
 		end;
@@ -127,6 +130,7 @@ end;
 constructor TSGModelRedactor.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
+FSunAngle := 0;
 FCustomModel := TSGCustomModel.Create();
 FCustomModel.Context := Context;
 FCamera := TSGCamera.Create();
@@ -155,7 +159,24 @@ begin
 if FCustomModel<>nil then
 	begin
 	FCamera.CallAction();
+	
+	FSunAngle += Context.ElapsedTime*0.01;
+	FSun.Import(cos(FSunAngle),sin(FSunAngle),cos(FSunAngle*3));
+	FSun *= 7;
+	
+	Render.Color3f(1,1,1);
+	Render.BeginScene(SGR_POINTS);
+	FSun.Vertex(Render);
+	Render.EndScene();
+	
+	Render.Enable(SGR_LIGHTING);
+	Render.Enable(SGR_LIGHT0);
+	Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@FSun);
+	
 	FCustomModel.Draw();
+	
+	Render.Disable(SGR_LIGHTING);
+	Render.Disable(SGR_LIGHT0);
 	if FSelectMesh<>-1 then
 		begin
 		Render.PushMatrix();
