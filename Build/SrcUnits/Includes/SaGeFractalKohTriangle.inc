@@ -22,7 +22,7 @@ type
 
 class function TSGFractalKohTriangle.ClassName:string;
 begin
-Result:='Треугольник Серпинского';
+Result:='пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ';
 end;
 
 
@@ -110,9 +110,9 @@ inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
 if Render.RenderType = SGRenderDirectX then 
-	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType3f)
+	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType3f,1)
 else
-	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f);
+	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f,1);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;
@@ -131,13 +131,14 @@ function TSGFractalKohTriangle.RecQuantity(const ThisDepth:Int64):Int64;
 var
 	i,ii:LongWord;
 begin
-Result:=0;
-ii:=3;
-for i:=0 to ThisDepth do
-	begin
-	Result+=ii;
-	ii*=3;
-	end;
+Result:=3;
+ii:=1;
+if ThisDepth>=1 then
+	for i:=1 to ThisDepth do
+		begin
+		ii*=3;
+		Result+=ii;
+		end;
 end;
 
 procedure mmmFButtonDepthPlusOnChangeKT(Button:TSGButton);
@@ -184,7 +185,7 @@ SGScreen.CreateChild(FLDC);
 SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Итерация:';
+SGScreen.LastChild.Caption:='пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 

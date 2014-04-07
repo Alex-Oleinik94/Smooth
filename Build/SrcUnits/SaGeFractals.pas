@@ -87,7 +87,7 @@ type
 		procedure Draw();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
-		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
+		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f;const VertexMn : TSGByte = 0);
 		procedure ClearMesh();inline;
 		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;overload;
 		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
@@ -297,7 +297,7 @@ if FFaceIndex>=FShift then
 	end;
 end;
 
-procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f);
+procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f;const VertexMn : TSGByte = 0);
 begin
 while Quantity<>0 do
 	begin
@@ -323,21 +323,37 @@ while Quantity<>0 do
 	if Quantity<=FShift then
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-			SetMeshArLength(FMesh.QuantityObjects-1,Quantity*2,
-				TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
+			if VertexMn = 0 then
+				SetMeshArLength(FMesh.QuantityObjects-1,Quantity*2,
+					TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
+			else
+				SetMeshArLength(FMesh.QuantityObjects-1,Quantity*2,
+					Quantity*VertexMn)
 		else
-			SetMeshArLength(FMesh.QuantityObjects-1,Quantity,
-				TSG3DObject.GetFaceLength(Quantity,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType));
+			if VertexMn = 0 then
+				SetMeshArLength(FMesh.QuantityObjects-1,Quantity,
+					TSG3DObject.GetFaceLength(Quantity,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType))
+			else
+				SetMeshArLength(FMesh.QuantityObjects-1,Quantity,
+					Quantity*VertexMn);
 		Quantity:=0;
 		end
 	else
 		begin
 		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
-			SetMeshArLength(FMesh.QuantityObjects-1,FShift*2,
-				TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
+			if VertexMn = 0 then
+				SetMeshArLength(FMesh.QuantityObjects-1,FShift*2,
+					TSG3DObject.GetFaceLength(FShift,SGR_QUADS))
+			else
+				SetMeshArLength(FMesh.QuantityObjects-1,FShift*2,
+					FShift*VertexMn)
 		else
-			SetMeshArLength(FMesh.QuantityObjects-1,FShift,
-				TSG3DObject.GetFaceLength(FShift,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType));
+			if VertexMn = 0 then
+				SetMeshArLength(FMesh.QuantityObjects-1,FShift,
+					TSG3DObject.GetFaceLength(FShift,FMesh.Objects[FMesh.QuantityObjects-1].ObjectPoligonesType))
+			else
+				SetMeshArLength(FMesh.QuantityObjects-1,FShift,
+					FShift*VertexMn);
 		Quantity-=FShift;
 		end;
 	end;
@@ -373,12 +389,7 @@ FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedVBOBuffers();
 FHasIndexes:=True;
-
-//Размерность максимального сегмента данных мешей модели
-FShift:=4608*2;
-// 2 2 2 2 2 2 2 2 2 3 3 73
-///336384; - былоа до того как я изметил тип индексов на word (норм для лонгворд)
-
+FShift:=336384;
 FMeshesInfo:=nil;
 FMeshesReady:=True;
 FEnableColors:=True;

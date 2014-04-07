@@ -1209,25 +1209,28 @@ procedure TSG3DObject.WriteInfo(const PredStr:string = '');
 var
 	Index : TSGLongWord;
 begin
+TextColor(7);
 WriteLn('TSG3DObject__WriteInfo()');
-WriteLn(PredStr,'NOfVerts           = "',FNOfVerts,'"');
-WriteLn(PredStr,'HasColors          = "',FHasColors,'"');
-WriteLn(PredStr,'HasNormals         = "',FHasNormals,'"');
-WriteLn(PredStr,'HasTexture         = "',FHasTexture,'"');
-WriteLn(PredStr,'QuantityFaceArrays = "',FQuantityFaceArrays,'"');
+WriteLn(PredStr,'NOfVerts            = "',FNOfVerts,'"');
+WriteLn(PredStr,'HasColors           = "',FHasColors,'"');
+WriteLn(PredStr,'HasNormals          = "',FHasNormals,'"');
+WriteLn(PredStr,'HasTexture          = "',FHasTexture,'"');
+if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
+WriteLn(PredStr,'QuantityFaceArrays  = "',FQuantityFaceArrays,'"');
+TextColor(7);
 if FQuantityFaceArrays<>0 then
 	for Index:=0 to FQuantityFaceArrays-1 do
 		begin
-		WriteLn(PredStr,PredStr,'Index          = "',Index,'"');
-		WriteLn(PredStr,PredStr,'NOfFaces       = "',ArFaces[Index].FNOfFaces,'"');
-		WriteLn(PredStr,PredStr,'RealFaceLength = "',GetFaceLength(Index),'"');
-		WriteLn(PredStr,PredStr,'MaterialID     = "',ArFaces[Index].FMaterialID,'"');
+		WriteLn(PredStr,'  ',Index+1,')','Index           = "',Index,'"');
+		WriteLn(PredStr,'  ',Index+1,')','NOfFaces        = "',ArFaces[Index].FNOfFaces,'"');
+		WriteLn(PredStr,'  ',Index+1,')','RealFaceLength  = "',GetFaceLength(Index),'"');
+		WriteLn(PredStr,'  ',Index+1,')','MaterialID      = "',ArFaces[Index].FMaterialID,'"');
 		case ArFaces[Index].FIndexFormat of
-		SGMeshIndexFormat1b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat1b"');
-		SGMeshIndexFormat2b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat2b"');
-		SGMeshIndexFormat4b: WriteLn(PredStr,PredStr,'IndexFormat    = "SGMeshIndexFormat4b"');
+		SGMeshIndexFormat1b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat1b"');
+		SGMeshIndexFormat2b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat2b"');
+		SGMeshIndexFormat4b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat4b"');
 		end;
-		Write(PredStr,PredStr,'PoligonesType  = ');
+		Write(PredStr,'  ',Index+1,')','PoligonesType   = ');
 		case ArFaces[Index].FPoligonesType of
 		SGR_LINES:WriteLn('"SGR_LINES"');
 		SGR_TRIANGLES:WriteLn('"SGR_TRIANGLES"');
@@ -1237,6 +1240,9 @@ if FQuantityFaceArrays<>0 then
 		SGR_LINE_LOOP:WriteLn('"SGR_LINE_LOOP"');
 		else WriteLn('"SGR_INVALID"');
 		end;
+		TextColor(15);
+		WriteLn(PredStr,'  ',Index+1,')','FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index),'EN'),'"');
+		TextColor(7);
 		end;
 Write(PredStr,'ObjectPoligonesType = ');
 case FObjectPoligonesType of
@@ -1262,9 +1268,15 @@ TSGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
 TSGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
 end;
 WriteLn(PredStr,'QuantityTextures    = "',FQuantityTextures,'"');
+TextColor(15);
+WriteLn(PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"');
+if FQuantityFaceArrays>0 then
+	WriteLn(PredStr,'AllSize             = "',SGGetSizeString(Size(),'EN'),'"');
+TextColor(7);
 WriteLn(PredStr,'EnableVBO           = "',FEnableVBO,'"');
 WriteLn(PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"');
 WriteLn(PredStr,'Name                = "',FName,'"');
+TextColor(7);
 end;
 
 function TSG3DObject.VertexesSize():TSGQuadWord;Inline;
@@ -1953,7 +1965,7 @@ procedure TSGCustomModel.WriteInfo();
 var
 	i : TSGLongWord;
 begin
-WriteLn('TSGModel.WriteInfo()');
+WriteLn('TSGModel__WriteInfo()');
 WriteLn('  QuantityMaterials = ',FQuantityMaterials);
 if FQuantityMaterials<>0 then
 	for i:=0 to FQuantityMaterials-1 do
