@@ -62,13 +62,21 @@ else if Comand = 'Ns' then
 	ReadLn(f);
 	end
 else if Comand = 'map_Kd' then
-	FParent.LastMaterial().AddDiffuseMap(SGGetFileWay(MaterialFileName)+ObjReadLnString(f))
+	begin
+	Comand := ObjReadLnString(f);
+	if Comand <> '' then
+		FParent.LastMaterial().AddDiffuseMap(SGGetFileWay(MaterialFileName)+Comand)
+	end
 else if Comand = 'map_bump' then
 	begin
 	ObjReadLnString(f);
 	end
 else if Comand = 'bump' then
-	FParent.LastMaterial().AddBumpMap(SGGetFileWay(MaterialFileName)+ObjReadLnString(f))
+	begin
+	Comand := ObjReadLnString(f);
+	if Comand <> '' then
+		FParent.LastMaterial().AddBumpMap(SGGetFileWay(MaterialFileName)+Comand)
+	end
 else if Comand = 'map_opacity' then
 	begin
 	ObjReadLnString(f);

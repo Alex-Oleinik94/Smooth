@@ -361,7 +361,6 @@ while Quantity<>0 do
 		Quantity-=FShift;
 		end;
 	end;
-FMesh.WriteInfo();
 end;
 
 procedure TSG3DFractal.SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
