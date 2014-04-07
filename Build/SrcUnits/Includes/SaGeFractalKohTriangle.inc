@@ -22,7 +22,7 @@ type
 
 class function TSGFractalKohTriangle.ClassName:string;
 begin
-Result:='пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ';
+Result:='Треугольник серпинского';
 end;
 
 
@@ -185,7 +185,7 @@ SGScreen.CreateChild(FLDC);
 SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:';
+SGScreen.LastChild.Caption:='Итерация:';
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 

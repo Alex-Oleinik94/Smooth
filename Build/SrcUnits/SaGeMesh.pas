@@ -609,7 +609,7 @@ procedure TSG3DObject.AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxV
 begin
 if (MaxVertexLength<=255) and (Render.RenderType=SGRenderOpenGL) then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat1b
-else if MaxVertexLength<=255*255 then
+else if (MaxVertexLength<=255*255) or (Render.RenderType=SGRenderDirectX) then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat2b
 else 
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat4b;

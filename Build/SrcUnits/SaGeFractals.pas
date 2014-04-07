@@ -299,6 +299,10 @@ end;
 
 procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f;const VertexMn : TSGByte = 0);
 begin
+if (Render = nil) or (Render.RenderType = SGRenderDirectX) then
+	FShift := 4608*2
+else
+	FShift:=336384;
 while Quantity<>0 do
 	begin
 	SetLength(FMeshesInfo,Length(FMeshesInfo)+1);
@@ -389,7 +393,10 @@ FLightingEnable:=True;
 FMesh:=nil;
 FEnableVBO:=Render.SupporedVBOBuffers();
 FHasIndexes:=True;
-FShift:=336384;
+if (Render = nil) or (Render.RenderType = SGRenderDirectX) then
+	FShift := 4608*2
+else
+	FShift:=336384;
 FMeshesInfo:=nil;
 FMeshesReady:=True;
 FEnableColors:=True;

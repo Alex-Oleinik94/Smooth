@@ -925,7 +925,7 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div 
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex
 		,0,SGRDXGetNumPrimetives(VParam,VSize))<>D3D_OK then
-			SGLog.Sourse('TSGRenderDirectX__DrawElements : DrawIndexedPrimitive : Draw Failed!! ');
+			SGLog.Sourse('TSGRenderDirectX__DrawElements : DrawIndexedPrimitive : Draw Failed!!');
 	pDevice.EndScene();
 	end
 else
