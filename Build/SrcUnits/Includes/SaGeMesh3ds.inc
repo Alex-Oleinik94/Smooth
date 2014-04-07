@@ -147,13 +147,10 @@ while Ch.ID=cMATERIAL do
 		if Ch.ID=cMATMAPFILE then
 			begin
 			Tfile.Position:=Tfile.Position+6;
-			AModel.LastMaterial().Way := SGReadStringFromStream(TFile);
-			AModel.LastMaterial().Way := SGGetFileWay(FFileName)+ AModel.LastMaterial().Way;
-			AModel.LastMaterial().Loading();
+			AModel.LastMaterial().AddDiffuseMap(SGGetFileWay(FFileName) + SGReadStringFromStream(TFile));
 			end;
 		end;
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,
-				'"; In file: "',AModel.LastMaterial().Way,'"']);
+	SGLog.Sourse(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'.']);
 	//»щем новый материал
 	Tfile.Position:=ObjectsPos;
 	Tfile.Read(Ch.ID,2);

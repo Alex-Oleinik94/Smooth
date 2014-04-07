@@ -144,9 +144,13 @@ type
 			public
 		procedure AddDiffuseMap(const VFileName : TSGString);
 		procedure AddBumpMap(const VFileName : TSGString);
+		function MapDiffuseWay():TSGString;inline;
+		function MapBumpWay():TSGString;inline;
 			public
 		procedure Bind();
 		procedure UnBind();
+			public
+		property Name : TSGString read FName write FName;
 		end;
 	
     { TSG3dObject }
@@ -420,23 +424,23 @@ type
         FQuantityObjects   : TSGQuadWord;
         FQuantityMaterials : TSGQuadWord;
 	
-        FArMaterials : packed array of TSGImage;
+        FArMaterials : packed array of TSGMaterial;
         FArObjects   : packed array of TSGCustomModelMesh;
     private
 		function GetObject(const Index : TSGMaxEnum):TSG3dObject;
 		function GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
-        function GetMaterial(const Index : TSGMaxEnum):TSGImage;
+        function GetMaterial(const Index : TSGMaxEnum):TSGMaterial;
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
 		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
 		property ObjectMatrix[Index : TSGMaxEnum]:TSGPointer read GetObjectMatrix;
 		property ObjectColor: TSGColor4f write AddObjectColor;
-		property Materials[Index : TSGMaxEnum] : TSGImage read GetMaterial;
+		property Materials[Index : TSGMaxEnum] : TSGMaterial read GetMaterial;
     public
-		function AddMaterial():TSGImage;inline;
-		function LastMaterial():TSGImage;inline;
+		function AddMaterial():TSGMaterial;inline;
+		function LastMaterial():TSGMaterial;inline;
 		function AddObject():TSG3DObject;inline;
 		function LastObject():TSG3DObject;inline;
 		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
@@ -1333,7 +1337,7 @@ begin
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
 	if (FObjectMaterialID<>-1) and (FParent<>nil) then
-		FParent.Materials[ObjectMaterialID].BindTexture();
+		FParent.Materials[ObjectMaterialID].Bind();
     if FEnableCullFace then
     begin
         Render.Enable(SGR_CULL_FACE);
@@ -1347,7 +1351,7 @@ begin
         Render.Disable(SGR_CULL_FACE);
     end;
     if (FObjectMaterialID<>-1) and (FParent<>nil) then
-		FParent.Materials[ObjectMaterialID].DisableTexture();
+		FParent.Materials[ObjectMaterialID].UnBind();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
@@ -1740,12 +1744,8 @@ for i:=0 to QuantityO-1 do
 	end;
 for i:=0 to QuantityM-1 do
 	begin
-	AddMaterial().Way:=SGReadStringFromStream(Stream);
-	LastMaterial().Name:=SGReadStringFromStream(Stream);
-	if SGFileExists(LastMaterial().Way) then
-		begin
-		LastMaterial().Loading();
-		end;
+	AddMaterial().Name:=SGReadStringFromStream(Stream);
+	LastMaterial().AddDiffuseMap(SGReadStringFromStream(Stream));
 	end;
 end;
 
@@ -1764,7 +1764,7 @@ for i:=0 to FQuantityObjects-1 do
 	end;
 for i:=0 to FQuantityMaterials-1 do
 	begin
-	SGWriteStringToStream(FArMaterials[i].Way,Stream);
+	SGWriteStringToStream(FArMaterials[i].MapDiffuseWay,Stream);
 	SGWriteStringToStream(FArMaterials[i].Name,Stream);
 	end;
 end;
@@ -1841,10 +1841,7 @@ WriteLn('  QuantityMaterials = ',FQuantityMaterials);
 WriteLn('  QuantityObjects   = ',FQuantityObjects);
 if FQuantityMaterials<>0 then
 	for i:=0 to FQuantityMaterials-1 do
-		begin
-		if (FArMaterials[i]<>nil) and (FArMaterials[i].Image<>nil) then
-			FArMaterials[i].Image.WriteInfo('  '+SGStr(i+1)+')');
-		end;
+		;//FArMaterials[i].WriteInfo('  '+SGStr(i+1)+')');
 if FQuantityObjects <> 0 then
 	for i:=0 to FQuantityObjects-1 do
 		FArObjects[i].FMesh.WriteInfo('  '+SGStr(i+1)+') ');
@@ -1957,21 +1954,20 @@ if FQuantityObjects<>0 then
 		DrawObject(i);
 end;
 
-function TSGCustomModel.AddMaterial():TSGImage;inline;
+function TSGCustomModel.AddMaterial():TSGMaterial;inline;
 begin
 FQuantityMaterials+=1;
 SetLength(FArMaterials,FQuantityMaterials);
-FArMaterials[FQuantityMaterials-1]:=TSGImage.Create();
+FArMaterials[FQuantityMaterials-1]:=TSGMaterial.Create(Context);
 Result:=FArMaterials[FQuantityMaterials-1];
-Result.Context := Context;
 end;
 
-function TSGCustomModel.LastMaterial():TSGImage;inline;
+function TSGCustomModel.LastMaterial():TSGMaterial;inline;
 begin
 if (FArMaterials=nil) or (FQuantityMaterials=0) then
 	Result:=nil
 else
-	Result:=FArMaterials[High(FArMaterials)];
+	Result:=FArMaterials[FQuantityMaterials-1];
 end;
 
 function TSGCustomModel.AddObject():TSG3DObject;inline;
@@ -2009,7 +2005,7 @@ for i := 0 to FQuantityMaterials - 1 do
 		end;
 end;
 
-function TSGCustomModel.GetMaterial(const Index : TSGMaxEnum):TSGImage;
+function TSGCustomModel.GetMaterial(const Index : TSGMaxEnum):TSGMaterial;
 begin
 Result:=FArMaterials[Index];
 end;
@@ -2113,6 +2109,22 @@ if FEnableBump and (FMapBump<>nil) then
 	end;
 if FEnableTexture and (FMapDiffuse<>nil) then
 	FMapDiffuse.DisableTexture();
+end;
+
+function TSGMaterial.MapDiffuseWay():TSGString;inline;
+begin
+if FMapDiffuse<>nil then
+	Result:=FMapDiffuse.Way
+else
+	Result:='';
+end;
+
+function TSGMaterial.MapBumpWay():TSGString;inline;
+begin
+if FMapBump<>nil then
+	Result:=FMapBump.Way
+else
+	Result:='';
 end;
 
 end.
