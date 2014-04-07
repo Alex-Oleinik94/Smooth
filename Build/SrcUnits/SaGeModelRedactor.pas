@@ -94,8 +94,8 @@ Form.LastChild.BoundsToNeedBounds();
 Form.LastChild.FUserPointer1:=Self;
 Form.LastChild.FUserPointer2:=Edit;
 (Form.LastChild as TSGEdit).TextType:=SGEditTypeWay;
-Form.LastChild.Caption:='./../Temp/motoBike.3ds';//SGModelsDirectory+Slash;
-//(Form.LastChild as TSGEdit).TextComplite:=False;
+Form.LastChild.Caption:='./../Temp/motoBike.3dss';//SGModelsDirectory+Slash;
+(Form.LastChild as TSGEdit).TextComplite:=TSGEditTextTypeFunctionWay((Form.LastChild as TSGEdit));
 
 EscButton:=TSGButton.Create();
 Form.CreateChild(EscButton);

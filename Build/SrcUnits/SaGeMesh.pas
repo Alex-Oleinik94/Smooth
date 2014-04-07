@@ -363,7 +363,7 @@ type
 		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
 		// Загрузка из текстовова формата файлов *.obj
-		//procedure LoadFromOBJ(const FFileName:string);virtual;
+		procedure LoadFromOBJ(const FFileName:string);virtual;
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
@@ -457,6 +457,7 @@ type
 implementation
 
 {$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+{$INCLUDE Includes\SaGeMeshObj.inc}
 
 function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
 begin
@@ -765,48 +766,78 @@ else
 end;
 
 procedure TSG3DObject.AddNormals();
-begin end;{var
+var
 	SecondArVertex:Pointer = nil;
 	i,ii,iiii,iii:TSGMaxEnum;
 	ArPoligonesNormals:packed array of TSGVertex3f = nil;
 	Plane:SGPlane;
 	Vertex:TSGVertex;
 begin
-if (FPoligonesType<>SGR_TRIANGLES) then
+if (FObjectPoligonesType<>SGR_TRIANGLES) then
 	Exit;
+if FQuantityFaceArrays<>0 then
+	for i := 0 to FQuantityFaceArrays - 1 do
+		if ArFaces[i].FPoligonesType<>SGR_TRIANGLES then
+			Exit;
 if not FHasNormals then
 	begin
 	ii:=GetSizeOfOneVertex();
 	iii:=ii+3*SizeOf(Single);
 	GetMem(SecondArVertex,iii*FNOfVerts);
 	for i:=0 to FNOfVerts-1 do
+		begin
 		Move(
 			PByte(ArVertex)[i*ii],
 			PByte(SecondArVertex)[i*iii],
-			ii);
+			SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType=TSGMeshColorType3b)*3+
+					byte(FColorType=TSGMeshColorType4b)*4+
+					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single)));
+		if FHasTexture then
+			Move(
+				PByte(ArVertex)[i*ii+
+					SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+					Byte(FHasColors)*(
+						byte(FColorType=TSGMeshColorType3b)*3+
+						byte(FColorType=TSGMeshColorType4b)*4+
+						byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+						byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))],
+				PByte(SecondArVertex)[i*iii+
+					SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+					Byte(FHasColors)*(
+						byte(FColorType=TSGMeshColorType3b)*3+
+						byte(FColorType=TSGMeshColorType4b)*4+
+						byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
+						byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+						3*SizeOf(TSGSingle)],
+				FQuantityTextures*SizeOf(TSGSingle));
+		end;
+				
 	FreeMem(ArVertex);
 	ArVertex:=SecondArVertex;
 	SecondArVertex:=nil;
 	FHasNormals:=True;
 	end;
-SetLength(ArPoligonesNormals,FNOfFaces);
-for i:=0 to FNOfFaces-1 do
+SetLength(ArPoligonesNormals,QuantityFaces[0]);
+for i:=0 to QuantityFaces[0]-1 do
 	begin
 	Plane:=SGGetPlaneFromThreeVertex(
-		ArVertex3f[ArFacesTriangles[i].p[0]]^,
-		ArVertex3f[ArFacesTriangles[i].p[1]]^,
-		ArVertex3f[ArFacesTriangles[i].p[2]]^);
+		ArVertex3f[ArFacesTriangles(0,i).p[0]]^,
+		ArVertex3f[ArFacesTriangles(0,i).p[1]]^,
+		ArVertex3f[ArFacesTriangles(0,i).p[2]]^);
 	ArPoligonesNormals[i].Import(
 		Plane.a,Plane.b,Plane.c);
 	end;
-for i:=0 to FNOfVerts-1 do
+for i:=0 to QuantityVertexes-1 do
 	begin
 	Vertex.Import(0,0,0);
-	for ii:=0 to FNOfFaces-1 do
+	for ii:=0 to QuantityFaces[0]-1 do
 		begin
 		iii:=0;
 		for iiii:=0 to 2 do
-			if ArFacesTriangles[ii].p[iiii]=i then
+			if ArFacesTriangles(0,ii).p[iiii]=i then
 				begin
 				iii:=1;
 				Break;
@@ -818,194 +849,12 @@ for i:=0 to FNOfVerts-1 do
 	ArNormal[i]^:=Vertex;
 	end;
 SetLength(ArPoligonesNormals,0);
-end;}
+end;
 
 procedure TSG3DObject.AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 begin
 SetFaceLength(ArIndex,QuantityFaces[ArIndex]+FQuantityNewFaces);
 end;
-
-{procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
-var
-	f:TextFile;
-	C:TSGChar;
-	Comand:String = '';
-	ArMaterials:packed array of 
-		packed record 
-		Color:TSGColor3f;
-		Name:String;
-		end = nil;
-	NowMatCOlor:TSGColor3f = (r:1;g:1;b:1);
-
-procedure LoadingMaterials(const FMaterialsFileName:String);
-var
-	fm:TextFile;
-	Comand:string = '';
-	NowSelectMaterial:LongWord;
-begin
-if not SGFileExists(SGGetFileWay(FFileName)+FMaterialsFileName) then
-	Exit;
-Assign(fm,SGGetFileWay(FFileName)+FMaterialsFileName);
-Reset(fm);
-NowSelectMaterial:=0;
-while not SeekEof(fm) do
-	begin
-	c:=#0;
-	Comand:='';
-	while SeekEoln(fm) do
-		begin
-		ReadLn(fm);
-		end;
-	while c<>' ' do
-		begin
-		Read(fm,C);
-		if C<>' ' then
-			Comand+=C;
-		end;
-	if Comand = '#' then
-		begin
-		ReadLn(fm);
-		end
-	else if Comand = 'illum' then
-		begin
-		ReadLn(fm);
-		end
-	else if Comand = 'd' then
-		begin
-		ReadLn(fm);
-		end
-	else if Comand = 'Ks' then
-		begin
-		ReadLn(fm);
-		end
-	else if Comand = 'Ka' then
-		begin
-		ReadLn(fm);
-		end
-	else if Comand = 'Kd' then
-		begin
-		ReadLn(fm,
-			ArMaterials[NowSelectMaterial].Color.r,
-			ArMaterials[NowSelectMaterial].Color.g,
-			ArMaterials[NowSelectMaterial].Color.b);
-		end
-	else if Comand='newmtl' then
-		begin
-		ReadLn(fm,Comand);
-		if ArMaterials=nil then
-			SetLength(ArMaterials,1)
-		else
-			SetLength(ArMaterials,Length(ArMaterials)+1);
-		NowSelectMaterial:=High(ArMaterials);
-		ArMaterials[NowSelectMaterial].Name:=Comand;
-		end
-	else
-		ReadLn(fm);
-	end;
-Close(fm);
-end;
-
-function FindMaterial(const FMaterialName:String):TSGColor3f;
-var
-	i,ii:LongWord;
-begin
-ii:=0;
-if ArMaterials<>nil then
-for i:=0 to High(ArMaterials) do
-	if ArMaterials[i].Name=FMaterialName then
-		begin
-		Result:=ArMaterials[i].Color;
-		ii:=1;
-		Break;
-		end;
-if ii=0 then
-	Result.Import(1,1,1);
-end;
-
-procedure AddV();
-var
-	x0,y0,z0:Single;
-begin
-ReadLn(f,x0,y0,z0);
-AddVertex(1);
-ArVertex3f[QuantityVertexes-1]^.x:=x0;
-ArVertex3f[QuantityVertexes-1]^.y:=y0;
-ArVertex3f[QuantityVertexes-1]^.z:=z0;
-SetColor(QuantityVertexes-1,NowMatCOlor.r,NowMatCOlor.g,NowMatCOlor.b);
-end;
-
-procedure AddF();
-var
-	a1,a2,a3:LongInt;
-begin
-ReadLn(f,a1,a2,a3);
-AddFace(1);
-ArFacesTriangles[FNOfFaces-1].p0:=QuantityVertexes+a1;
-ArFacesTriangles[FNOfFaces-1].p1:=QuantityVertexes+a2;
-ArFacesTriangles[FNOfFaces-1].p2:=QuantityVertexes+a3;
-end;
-
-begin
-AutoSetColorType();
-SetVertexType(TSGMeshVertexType3f);
-PoligonesType:=SGR_TRIANGLES;
-NowMatCOlor.Import(1,1,1);
-
-Assign(f,FFileName);
-Reset(f);
-while not SeekEof(f) do
-	begin
-	c:=#0;
-	Comand:='';
-	while SeekEoln(f) do
-		begin
-		ReadLn(f);
-		end;
-	while c<>' ' do
-		begin
-		Read(f,C);
-		if C<>' ' then
-			Comand+=C;
-		end;
-	if Comand = '#' then
-		begin
-		ReadLn(f);
-		end
-	else if Comand='v' then
-		begin
-		AddV();
-		end
-	else if Comand='f' then
-		begin
-		AddF();
-		end
-	else if Comand='o' then
-		begin
-		ReadLn(f);//Name of model
-		end
-	else if Comand='usemtl' then
-		begin
-		ReadLn(f,Comand);
-		NowMatCOlor:=FindMaterial(Comand);
-		end
-	else if Comand='mtllib' then
-		begin
-		ReadLn(f,Comand);
-		LoadingMaterials(Comand);
-		end
-	else if Comand='g' then
-		begin
-		ReadLn(f);//Name now mesh
-		end
-	else if Comand='s' then
-		begin
-		ReadLn(f);
-		end
-	else
-		ReadLn(f);
-	end;
-Close(f);
-end;}
 
 procedure TSG3DObject.AddVertex(const FQuantityNewVertexes:LongWord = 1);
 begin
@@ -1943,23 +1792,18 @@ procedure TSGCustomModel.LoadFromFile(const FileWay:string);
 begin
 if SGFileExists(FileWay) then
 	begin
-	if SGUpCaseString(SGGetFileExpansion(FileWay))='WRL' then
-		begin
-		;//LoadWRLFromFile(FileWay);
-		end
-	else
 		if SGUpCaseString(SGGetFileExpansion(FileWay))='3DS' then
 			begin
 			Load3DSFromFile(FileWay);
 			end
 		else
-			if SGUpCaseString(SGGetFileExpansion(FileWay))='OFF' then
+			if SGUpCaseString(SGGetFileExpansion(FileWay))='OBJ' then
 				begin
-				;//LoadOFFFromFile(FileWay);
+				AddObject().LoadFromOBJ(FileWay);
 				end
 			else
 				begin
-				;//LoadFromSaGe3DObjFile(FileWay);
+				LoadFromSG3DMFile(FileWay);
 				end;
 	end;
 end;
@@ -1974,7 +1818,7 @@ var
 	i : TSGLongWord;
 begin
 TextColor(7);
-WriteLn('TSGModel__WriteInfo()');
+WriteLn('TSGCustomModel__WriteInfo()');
 WriteLn('  QuantityMaterials = ',FQuantityMaterials);
 WriteLn('  QuantityObjects   = ',FQuantityObjects);
 if FQuantityMaterials<>0 then
