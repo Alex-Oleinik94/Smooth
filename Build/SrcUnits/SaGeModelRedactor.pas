@@ -94,7 +94,7 @@ Form.LastChild.BoundsToNeedBounds();
 Form.LastChild.FUserPointer1:=Self;
 Form.LastChild.FUserPointer2:=Edit;
 (Form.LastChild as TSGEdit).TextType:=SGEditTypeWay;
-Form.LastChild.Caption:='../Temp\motobike.3ds';//SGModelsDirectory+Slash;
+Form.LastChild.Caption:='./../Temp/motoBike.3ds';//SGModelsDirectory+Slash;
 //(Form.LastChild as TSGEdit).TextComplite:=False;
 
 EscButton:=TSGButton.Create();
@@ -209,6 +209,8 @@ if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and Context.KeysPre
 		else
 			FCustomModel.Translate(FSelectMesh,SGVertexImport(0,0,-0.5));
 		end;
+	Byte('I'): if FCustomModel<>nil then
+		FCustomModel.WriteInfo();
 	end;
 	end;
 end;

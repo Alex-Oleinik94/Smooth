@@ -378,9 +378,10 @@ type
 		FObjectMaterialID : TSGInt64;
 	public
 		// Свойство : Имя модельки
-		property Name       : TSGString read FName       write FName;
+		property Name             : TSGString      read FName             write FName;
 		// Свойство : Идентификатор материала
-		property ObjectMaterialID : TSGInt64  read FObjectMaterialID write FObjectMaterialID;
+		property ObjectMaterialID : TSGInt64       read FObjectMaterialID write FObjectMaterialID;
+		property Parent           : TSGCustomModel read FParent           write FParent;
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -407,12 +408,14 @@ type
 		function GetObject(const Index : TSGMaxEnum):TSG3dObject;
 		function GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
+        function GetMaterial(const Index : TSGMaxEnum):TSGImage;
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
 		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
 		property ObjectMatrix[Index : TSGMaxEnum]:TSGPointer read GetObjectMatrix;
 		property ObjectColor: TSGColor4f write AddObjectColor;
+		property Materials[Index : TSGMaxEnum] : TSGImage read GetMaterial;
     public
 		function AddMaterial():TSGImage;inline;
 		function LastMaterial():TSGImage;inline;
@@ -449,11 +452,11 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-//{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-//{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
 
 function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
 begin
@@ -1462,6 +1465,8 @@ begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
+	if (FObjectMaterialID<>-1) and (FParent<>nil) then
+		FParent.Materials[ObjectMaterialID].BindTexture();
     if FEnableCullFace then
     begin
         Render.Enable(SGR_CULL_FACE);
@@ -1474,6 +1479,8 @@ begin
         BasicDraw();
         Render.Disable(SGR_CULL_FACE);
     end;
+    if (FObjectMaterialID<>-1) and (FParent<>nil) then
+		FParent.Materials[ObjectMaterialID].DisableTexture();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
@@ -1860,6 +1867,7 @@ for i:=0 to QuantityO-1 do
 		begin
 		FArObjects[i].FMesh:=TSG3DObject.Create();
 		FArObjects[i].FMesh.Context := Context;
+		FArObjects[i].FMesh.Parent := Self;
 		Objects[i].LoadFromSG3DO(Stream);
 		end;
 	end;
@@ -1965,19 +1973,19 @@ procedure TSGCustomModel.WriteInfo();
 var
 	i : TSGLongWord;
 begin
+TextColor(7);
 WriteLn('TSGModel__WriteInfo()');
 WriteLn('  QuantityMaterials = ',FQuantityMaterials);
+WriteLn('  QuantityObjects   = ',FQuantityObjects);
 if FQuantityMaterials<>0 then
 	for i:=0 to FQuantityMaterials-1 do
 		begin
-		WriteLn('  ',I+1,')');
 		if (FArMaterials[i]<>nil) and (FArMaterials[i].Image<>nil) then
-			FArMaterials[i].Image.WriteInfo();
+			FArMaterials[i].Image.WriteInfo('  '+SGStr(i+1)+')');
 		end;
-WriteLn('  QuantityObjects = ',FQuantityObjects);
 if FQuantityObjects <> 0 then
 	for i:=0 to FQuantityObjects-1 do
-		FArObjects[i].FMesh.WriteInfo('   '+SGStr(i+1)+') ');
+		FArObjects[i].FMesh.WriteInfo('  '+SGStr(i+1)+') ');
 end;
 
 
@@ -2028,12 +2036,12 @@ end;
 
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
 begin
-//TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
+TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
 end;
 
 function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
 begin
-//TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
+TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
 end;
 
 constructor TSGCustomModel.Create();
@@ -2110,6 +2118,7 @@ FQuantityObjects+=1;
 SetLength(FArObjects,FQuantityObjects);
 Result:=TSG3DObject.Create();
 Result.Context := Context;
+Result.Parent := Self;
 FArObjects[FQuantityObjects-1].FMesh:=Result;
 FArObjects[FQuantityObjects-1].FCopired:=-1;
 FArObjects[FQuantityObjects-1].FMatrix:=SGGetIdentityMatrix();
@@ -2136,6 +2145,11 @@ for i := 0 to FQuantityMaterials - 1 do
 		Result:=True;
 		Break;
 		end;
+end;
+
+function TSGCustomModel.GetMaterial(const Index : TSGMaxEnum):TSGImage;
+begin
+Result:=FArMaterials[Index];
 end;
 
 function TSGCustomModel.GetObject(const Index : TSGMaxEnum):TSG3dObject;

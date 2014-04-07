@@ -97,7 +97,7 @@ var Ch:TSGChunk;
 	Local:array[0..11] of TSGSingle;
 	x0,x1,x2:TSGSingle;
 	i:TSGWord;
-	iii:TSGWord;
+	iii,t1,t2,t3:TSGWord;
 begin
 Result:=Self;
 FQO := AModel.QuantityObjects;
@@ -180,7 +180,7 @@ while Ch.ID=EDIT_OBJECT do
 	AModel.LastObject().HasNormals := True;
 	AModel.LastObject().HasColors  := False;
 	AModel.LastObject().EnableCullFace:=True;
-	AModel.LastObject().PoligonesType:=SGR_TRIANGLES;
+	AModel.LastObject().ObjectPoligonesType:=SGR_TRIANGLES;
 	AModel.LastObject().VertexType:=TSGMeshVertexType3f;
 	Tfile.Position:=Tfile.Position+6;
 	AModel.LastObject().Name := SGReadStringFromStream(TFile);
@@ -238,15 +238,17 @@ while Ch.ID=EDIT_OBJECT do
 		ChPos:=Self.FindChunk(TRI_FACELIST,true);
 		SkipHeader;
 		TFile.Read(iii,2);
-		SetFaceLength(iii);
-		for i:=0 to QuantityFaces-1 do
-			with ArFacesTriangles()[i] do
-				begin
-				Tfile.Read(p0,2);
-				Tfile.Read(p1,2);
-				Tfile.Read(p2,2);
-				Tfile.Position:=Tfile.Position+2;
-				end;
+		AddFaceArray();
+		AutoSetIndexFormat(0,Vertexes);
+		SetFaceLength(0,iii);
+		for i:=0 to QuantityFaces[0]-1 do
+			begin
+			TFile.Read(t1,2);
+			TFile.Read(t2,2);
+			TFile.Read(t3,2);
+			Tfile.Position:=Tfile.Position+2;
+			SetFaceTriangle(0,i,t1,t2,t3);
+			end;
 		
 		//Дойдем к данным о локальной системе объекта
 		Tfile.Position:=TempPos;
@@ -268,7 +270,7 @@ while Ch.ID=EDIT_OBJECT do
 			end;
 		Tfile.Position:=TempPos;
 		ChPos:=Self.FindChunk(TRI_FACELIST,true);
-		Tfile.Position:=Tfile.Position+2+6+QuantityFaces*4*2;
+		Tfile.Position:=Tfile.Position+2+6+QuantityFaces[0]*4*2;
 		ChPos:=Self.FindChunk(TRI_MATERIAL,false);
 		ReadHeader(@Ch);
 		if Ch.ID=TRI_MATERIAL then
@@ -348,13 +350,13 @@ if AModel.QuantityObjects>0 then
 		with AModel.Objects[iObject] do
 			begin
 			//SetLength(ArNormals,FNOfVerts);
-			SetLength(pNormals,FNOfFaces);
-			SetLength(pTempNormals,FNOfFaces);
-			for i:=0 to QuantityFaces-1 do
+			SetLength(pNormals,QuantityFaces[0]);
+			SetLength(pTempNormals,QuantityFaces[0]);
+			for i:=0 to QuantityFaces[0]-1 do
 				begin
-				vPoly[0]:=ArVertex3f[ArFacesTriangles[i].p0]^;
-				vPoly[1]:=ArVertex3f[ArFacesTriangles[i].p1]^;
-				vPoly[2]:=ArVertex3f[ArFacesTriangles[i].p2]^;
+				vPoly[0]:=ArVertex3f[ArFacesTriangles(0,i).p0]^;
+				vPoly[1]:=ArVertex3f[ArFacesTriangles(0,i).p1]^;
+				vPoly[2]:=ArVertex3f[ArFacesTriangles(0,i).p2]^;
 				
 				vVector1:=vPoly[0]-vPoly[2];
 				vVector2:=vPoly[1]-vPoly[2];
@@ -368,9 +370,9 @@ if AModel.QuantityObjects>0 then
 			shared:=0;
 			for i:=0 to QuantityVertexes-1 do
 				begin
-				for ii:=0 to QuantityFaces-1 do
+				for ii:=0 to QuantityFaces[0]-1 do
 					begin
-					if (ArFacesTriangles[ii].p0=i)or(ArFacesTriangles[ii].p1=i)or(ArFacesTriangles[ii].p2=i) then
+					if (ArFacesTriangles(0,ii).p0=i)or(ArFacesTriangles(0,ii).p1=i)or(ArFacesTriangles(0,ii).p2=i) then
 						begin
 						vSum+=pTempNormals[ii];
 						shared+=1;

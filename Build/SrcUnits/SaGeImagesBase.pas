@@ -76,7 +76,7 @@ type
 			public
 		procedure Clear;
 		procedure CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
-		procedure WriteInfo;
+		procedure WriteInfo(const PredStr : TSGString = '');
 		procedure SetWidth(const NewWidth:LongInt);
 		procedure SetHeight(const NewHeight:LongInt);
 		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;inline;
@@ -312,12 +312,16 @@ case FChannels*FSizeChannel of
 end;
 end;
 
-procedure TSGBitMap.WriteInfo;
+procedure TSGBitMap.WriteInfo(const PredStr : TSGString = '');
 begin
-writeln('Width = ',FWidth);
-writeln('Height = ',FHeight);
-writeln('Channels = ',FChannels);
-writeln('BitDepth = ',FSizeChannel);
+WriteLn('TSGBitMap__WriteInfo()');
+WriteLn(PredStr,' Width    = ',FWidth);
+WriteLn(PredStr,' Height   = ',FHeight);
+WriteLn(PredStr,' Channels = ',FChannels);
+WriteLn(PredStr,' BitDepth = ',FSizeChannel);
+TextColor(15);
+WriteLn(PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN'));
+TextColor(7);
 end;
 
 procedure TSGBitMap.CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
