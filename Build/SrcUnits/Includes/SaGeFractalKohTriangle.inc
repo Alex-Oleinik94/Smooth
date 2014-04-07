@@ -176,12 +176,12 @@ Threads:=1;
 Depth:=3;
 FLightingEnable:=False;
 
-InitProjectionComboBox(Context.Width-160,5{+Context.TopShift},150,30,[SGAnchRight],true);
+InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],true);
 InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
 
 FLDC:=TSGLabel.Create;
 SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5{+Context.TopShift},115,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
@@ -191,7 +191,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBPD:=TSGButton.Create;
 SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(Context.Width-160-30,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-30,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
@@ -201,7 +201,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create;
 SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(Context.Width-160-60,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-60,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
@@ -210,7 +210,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create;
 SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(Context.Width-160-90,5{+Context.TopShift},20,30);
+SGScreen.LastChild.SetBounds(Context.Width-160-90,5,20,30);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';

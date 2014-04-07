@@ -155,6 +155,19 @@ const
 				{$ENDIF}
 			{$ENDIF}
 		;
+	SGUnixEoln = #10;
+	SGWinEoln  = #13+#10;
+	SGMacEoln  = #13;
+	SGEoln     = 
+		{$IFDEF MSWINDOWS}
+			SGWinEoln
+		{$ELSE}
+			{$IFDEF DARWIN}
+				SGMacEoln
+			{$ELSE}
+				SGUnixEoln
+				{$ENDIF}
+			{$ENDIF};
 	SGDataDirectory = 
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
@@ -1183,7 +1196,7 @@ while not eof(f) do
 			end;
 		if FArF[iii-1]=nil then
 			FArF[iii-1]:=TFileStream.Create(NameFolder+Slash+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
-		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+#13+#10,FArF[iii-1],False);
+		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+SGEoln,FArF[iii-1],False);
 		end;
 	end;
 close(f);
@@ -1215,7 +1228,7 @@ for i:=0 to High(ArF) do
 	dos.findfirst(VDir+Slash+'*.'+ArF[i],$3F,sr);
 	while DosError<>18 do
 		begin
-		//SGWriteStringToStream('Do file "'+VDir+sr.name+'".'+#13+#10,Stream);
+		//SGWriteStringToStream('Do file "'+VDir+sr.name+'".'+SGEoln,Stream);
 		FindInFile(VDir+sr.name);
 		dos.findnext(sr);
 		end;
@@ -1271,7 +1284,7 @@ procedure DoDirectories(const VDir:string);
 var
 	sr:dos.searchrec;
 begin
-//SGWriteStringToStream('Do dir "'+VDir+'".'+#13+#10,Stream);
+//SGWriteStringToStream('Do dir "'+VDir+'".'+SGEoln,Stream);
 DoFiles(VDir+Slash);
 dos.findfirst(VDir+Slash+'*',$10,sr);
 while DosError<>18 do
@@ -1745,7 +1758,7 @@ begin
 if SGLogEnable then
 if not WithTime then
 	begin
-	pc:=SGStringToPChar(s+#13+#10);
+	pc:=SGStringToPChar(s+SGEoln);
 	FFileStream.WriteBuffer(pc^,Length(s)+2);
 	FreeMem(pc,Length(s)+3);
 	end
@@ -1755,7 +1768,7 @@ else
 	with a do
 		ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
 			'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
-	pc:=SGStringToPChar(ss+#13+#10);
+	pc:=SGStringToPChar(ss+SGEoln);
 	FFileStream.WriteBuffer(pc^,Length(ss)+2);
 	FreeMem(pc,Length(ss)+3);
 	end;

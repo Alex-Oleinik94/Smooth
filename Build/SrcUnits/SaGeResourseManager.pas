@@ -100,8 +100,8 @@ var
 	Stream:TFileStream = nil;
 begin
 Stream:=TFileStream.Create(RFFile,fmCreate);
-SGWriteStringToStream('(*This patr from SaGe*)'+#13+#10,Stream,False);
-SGWriteStringToStream('//RF file. Files:'+#13+#10,Stream,False);
+SGWriteStringToStream('(*This patr from SaGe*)'+SGEoln,Stream,False);
+SGWriteStringToStream('//RF file. Files:'+SGEoln,Stream,False);
 Stream.Destroy();
 end;
 
@@ -116,7 +116,7 @@ Stream:=TFileStream.Create(RFFile,fmCreate);
 MemStream.Position:=0;
 MemStream.SaveToStream(Stream);
 MemStream.Destroy();
-SGWriteStringToStream('	,'+UnitName+#13+#10,Stream,False);
+SGWriteStringToStream('	,'+UnitName+SGEoln,Stream,False);
 Stream.Destroy();
 end;
 
@@ -133,16 +133,16 @@ var
 	III,II:LongWord;
 begin
 InStream.ReadBuffer(A[0],ThisStep);
-SGWriteStringToStream('procedure '+'LoadToStream_'+NameUnit+'_'+SGStr(I)+'(const Stream:TStream);'+#13+#10,OutStream,False);
+SGWriteStringToStream('procedure '+'LoadToStream_'+NameUnit+'_'+SGStr(I)+'(const Stream:TStream);'+SGEoln,OutStream,False);
 I+=1;
-SGWriteStringToStream('var'+#13+#10,OutStream,False);
-SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+#13+#10+'	',OutStream,False);
+SGWriteStringToStream('var'+SGEoln,OutStream,False);
+SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+SGEoln+'	',OutStream,False);
 II:=0;
 for iii:=0 to ThisStep-1 do
 	begin
 	if II=10 then
 		begin
-		SGWriteStringToStream(''+#13+#10+'	',OutStream,False);
+		SGWriteStringToStream(''+SGEoln+'	',OutStream,False);
 		II:=0;
 		end;
 	SGWriteStringToStream(SGStr(A[iIi]),OutStream,False);
@@ -150,10 +150,10 @@ for iii:=0 to ThisStep-1 do
 		SGWriteStringToStream(', ',OutStream,False);
 	II+=1;
 	end;
-SGWriteStringToStream(');'+#13+#10,OutStream,False);
-SGWriteStringToStream('begin'+#13+#10,OutStream,False);
-SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+#13+#10,OutStream,False);
-SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+SGWriteStringToStream(');'+SGEoln,OutStream,False);
+SGWriteStringToStream('begin'+SGEoln,OutStream,False);
+SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+SGEoln,OutStream,False);
+SGWriteStringToStream('end;'+SGEoln,OutStream,False);
 end;
 begin
 I:=0;
@@ -161,22 +161,22 @@ SetLength(A,Step);
 OutStream:=TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
 InStream:=TFileStream.Create(FileName,fmOpenRead);
 if IsInc then
-	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+#13+#10,OutStream,False)
+	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+SGEoln,OutStream,False)
 else
-	SGWriteStringToStream('{$MODE OBJFPC}'+#13+#10,OutStream,False);
-SGWriteStringToStream('//"'+FileName+'"'+#13+#10,OutStream,False);
-SGWriteStringToStream('unit '+NameUnit+';'+#13+#10,OutStream,False);
-SGWriteStringToStream('interface'+#13+#10,OutStream,False);
+	SGWriteStringToStream('{$MODE OBJFPC}'+SGEoln,OutStream,False);
+SGWriteStringToStream('//"'+FileName+'"'+SGEoln,OutStream,False);
+SGWriteStringToStream('unit '+NameUnit+';'+SGEoln,OutStream,False);
+SGWriteStringToStream('interface'+SGEoln,OutStream,False);
 if IsInc then
-	SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
-SGWriteStringToStream('uses'+#13+#10,OutStream,False);
+	SGWriteStringToStream('implementation'+SGEoln,OutStream,False);
+SGWriteStringToStream('uses'+SGEoln,OutStream,False);
 if IsInc then
-	SGWriteStringToStream('	SaGeResourseManager,'+#13+#10,OutStream,False);
-SGWriteStringToStream('	Classes;'+#13+#10,OutStream,False);
+	SGWriteStringToStream('	SaGeResourseManager,'+SGEoln,OutStream,False);
+SGWriteStringToStream('	Classes;'+SGEoln,OutStream,False);
 if not IsInc then
 	begin
-	SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+#13+#10,OutStream,False);
-	SGWriteStringToStream('implementation'+#13+#10,OutStream,False);
+	SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGEoln,OutStream,False);
+	SGWriteStringToStream('implementation'+SGEoln,OutStream,False);
 	end;
 while InStream.Position<=InStream.Size-Step do
 	WriteProc(Step);
@@ -185,19 +185,19 @@ if InStream.Position<>InStream.Size then
 	IIii:=InStream.Size-InStream.Position;
 	WriteProc(IIii);
 	end;
-SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+#13+#10,OutStream,False);
-SGWriteStringToStream('begin'+#13+#10,OutStream,False);
+SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGEoln,OutStream,False);
+SGWriteStringToStream('begin'+SGEoln,OutStream,False);
 for i5:=0 to i-1 do
-	SGWriteStringToStream('LoadToStream_'+NameUnit+'_'+SGStr(i5)+'(Stream);'+#13+#10,OutStream,False);
-SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+	SGWriteStringToStream('LoadToStream_'+NameUnit+'_'+SGStr(i5)+'(Stream);'+SGEoln,OutStream,False);
+SGWriteStringToStream('end;'+SGEoln,OutStream,False);
 if IsInc then
 	begin
-	SGWriteStringToStream('initialization'+#13+#10,OutStream,False);
-	SGWriteStringToStream('begin'+#13+#10,OutStream,False);
-	SGWriteStringToStream('SGResourseFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+#13+#10,OutStream,False);
-	SGWriteStringToStream('end;'+#13+#10,OutStream,False);
+	SGWriteStringToStream('initialization'+SGEoln,OutStream,False);
+	SGWriteStringToStream('begin'+SGEoln,OutStream,False);
+	SGWriteStringToStream('SGResourseFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SGEoln,OutStream,False);
+	SGWriteStringToStream('end;'+SGEoln,OutStream,False);
 	end;
-SGWriteStringToStream('end.'+#13+#10,OutStream,False);
+SGWriteStringToStream('end.'+SGEoln,OutStream,False);
 SetLength(A,0);
 Write('Converted');
 TextColor(14);
