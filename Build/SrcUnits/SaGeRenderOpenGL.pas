@@ -135,6 +135,7 @@ type
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
 		procedure ActiveTextureBump();override;
+		procedure SetTextureFactor(const Point : Pointer );override;
 			private
 		FNowActiveNumberTexture : TSGLongWord;
 		end;
@@ -152,6 +153,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.SetTextureFactor(const Point : Pointer );
+begin
+
+end;
 
 procedure TSGRenderOpenGL.ActiveTextureDiffuse();
 begin

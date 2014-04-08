@@ -103,6 +103,7 @@ type
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
 		procedure ActiveTextureBump();override;
+		procedure SetTextureFactor(const Point : Pointer );override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -215,8 +216,27 @@ type
 function SGRDXGetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
 function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
+function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
+
+function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
+begin
+Result := 
+	(Round(255.0 * 1.0) shl 24) +
+	(Round(127.0 * v.x + 128.0) shl 16) +
+	(Round(127.0 * v.y + 128.0) shl 8) +
+	(Round(127.0 * v.z + 128.0) shl 0);
+end;
+
+procedure TSGRenderDirectX.SetTextureFactor(const Point : Pointer );
+var
+	v : TSGVertex3f;
+begin
+v := TSGVertex3f(Point^);
+v.Normalize();
+pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, SGRDXVertex3fToRGBA(v));
+end;
 
 procedure TSGRenderDirectX.ActiveTexture(const VTexture : TSGLongWord);
 begin
@@ -234,7 +254,6 @@ if FNowActiveNumberTexture = 0 then
 else if FNowActiveNumberTexture = 1 then
 	begin
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0);
-	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_ADD);
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	end;
 end;
@@ -540,6 +559,10 @@ SGR_LIGHT0..SGR_LIGHT7:
 	begin
 	pDevice.LightEnable(VParam-SGR_LIGHT0,True);
 	end;
+SGR_BLEND:
+	begin
+	pDevice.SetRenderState( D3DRS_ALPHABLENDENABLE, 1);
+	end;
 end;
 end;
 
@@ -566,6 +589,10 @@ SGR_LIGHTING:
 SGR_LIGHT0..SGR_LIGHT7:
 	begin
 	pDevice.LightEnable(VParam-SGR_LIGHT0,False);
+	end;
+SGR_BLEND:
+	begin
+	pDevice.SetRenderState( D3DRS_ALPHABLENDENABLE, 0);
 	end;
 end;
 end;

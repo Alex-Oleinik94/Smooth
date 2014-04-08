@@ -144,12 +144,15 @@ if FMesh<>nil then
 	FSun.Vertex(Render);
 	Render.EndScene();
 	
+	Render.Disable(SGR_BLEND);
 	Render.Enable(SGR_LIGHTING);
 	Render.Enable(SGR_LIGHT0);
 	Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FSun);
+	Render.SetTextureFactor(@FSun);
 	
 	FMesh.Draw();
 	
+	Render.Enable(SGR_BLEND);
 	Render.Disable(SGR_LIGHTING);
 	Render.Disable(SGR_LIGHT0);
 	

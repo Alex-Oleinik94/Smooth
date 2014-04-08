@@ -120,6 +120,7 @@ type
 		procedure ActiveTexture(const VTexture : TSGLongWord);virtual;abstract;
 		procedure ActiveTextureDiffuse();virtual;abstract;
 		procedure ActiveTextureBump();virtual;abstract;
+		procedure SetTextureFactor(const Point : Pointer );virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;
