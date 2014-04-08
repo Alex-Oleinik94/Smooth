@@ -221,17 +221,32 @@ implementation
 procedure TSGRenderDirectX.ActiveTexture(const VTexture : TSGLongWord);
 begin
 FNowActiveNumberTexture := VTexture;
-
 end;
 
 procedure TSGRenderDirectX.ActiveTextureDiffuse();
 begin
-
+if FNowActiveNumberTexture = 0 then
+	begin
+	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	end
+else if FNowActiveNumberTexture = 1 then
+	begin
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_ADD);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	end;
 end;
 
 procedure TSGRenderDirectX.ActiveTextureBump();
 begin
-
+if FNowActiveNumberTexture = 0 then
+	begin
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0 );
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_DOTPRODUCT3);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+	end;
 end;
 
 procedure TSGRenderDirectX.ClientActiveTexture(const VTexture : TSGLongWord);
@@ -538,7 +553,7 @@ SGR_DEPTH_TEST:
 SGR_TEXTURE_2D:
 	begin
 	FNowTexture:=0;
-	pDevice.SetTexture(0,nil);
+	pDevice.SetTexture(FNowActiveNumberTexture,nil);
 	end;
 SGR_CULL_FACE:
 	begin
@@ -576,7 +591,6 @@ procedure TSGRenderDirectX.Lightfv(const VLight,VParam:Cardinal;const VParam2:Po
 type
 	PArS = ^ Single;
 begin 
-{FLigth._Type:=D3DLIGHT_POINT;}
 case VLight of
 SGR_LIGHT0:
 	begin
@@ -606,8 +620,6 @@ SGR_LIGHT0:
 		begin
 		FLigth._Type:=D3DLIGHT_POINT;
 		FLigth.Attenuation0:=1;
-		//FLigth.Attenuation1:=0;
-		//FLigth.Attenuation2:=0.01;
 		FLigth.Position.x:=PArS(VParam2)[0];
 		FLigth.Position.y:=PArS(VParam2)[1];
 		FLigth.Position.z:=PArS(VParam2)[2];
@@ -647,7 +659,7 @@ procedure TSGRenderDirectX.BindTexture(const VParam:Cardinal;const VTexture:Card
 begin 
 FNowTexture:=VTexture;
 if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1].FTexture<>nil) then
-	pDevice.SetTexture(0, FArTextures[FNowTexture-1].FTexture);
+	pDevice.SetTexture(FNowActiveNumberTexture, FArTextures[FNowTexture-1].FTexture);
 end;
 
 procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal);
@@ -657,14 +669,14 @@ if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then//or (VP1 = SGR_TEXTURE_
 	case VP2 of
 	SGR_TEXTURE_MIN_FILTER:
 		if VP3 = SGR_LINEAR then
-			pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR)
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_LINEAR)
 		else if VP3 = SGR_NEAREST then
-			pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
 	SGR_TEXTURE_MAG_FILTER:
 		if VP3 = SGR_LINEAR then
-			pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR)
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR)
 		else if VP3 = SGR_NEAREST then
-			pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT); 
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_POINT); 
 	end;
 	end;
 end;
@@ -765,7 +777,7 @@ end;
 procedure TSGRenderDirectX.CullFace(const VParam:Cardinal); 
 begin 
 case VParam of
-SGR_BACK:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CW );
+SGR_BACK :pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CW );
 SGR_FRONT:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
 end;
 end;
@@ -832,7 +844,7 @@ end;
 procedure TSGRenderDirectX.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
 begin 
 case VParam of
-SGR_ARRAY_BUFFER_ARB:FVBOData[0]:=VParam2;
+SGR_ARRAY_BUFFER_ARB        :FVBOData[0]:=VParam2;
 SGR_ELEMENT_ARRAY_BUFFER_ARB:FVBOData[1]:=VParam2;
 end;
 end;
@@ -1099,6 +1111,7 @@ begin
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
 FNowTexture:=0;
+FNowActiveNumberTexture:=0;
 
 //==========Включаем Z-буфер
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
@@ -1191,6 +1204,7 @@ end;
 constructor TSGRenderDirectX.Create();
 begin
 inherited Create();
+FNowActiveNumberTexture:=0;
 FType:=SGRenderDirectX;
 FArTextures:=nil;
 pDevice:=nil;

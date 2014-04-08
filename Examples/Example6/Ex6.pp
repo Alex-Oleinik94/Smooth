@@ -87,7 +87,7 @@ if not ((not SGFileExists('Ex6_D.jpg')) or (not SGFileExists('Ex6_N.jpg'))) then
 	FImageBump := FMesh.LastMaterial().ImageBump;
 	FImageTexture := FMesh.LastMaterial().ImageTexture;
 	
-	FMesh.WriteInfo();
+	//FMesh.WriteInfo();
 	end;
 end;
 

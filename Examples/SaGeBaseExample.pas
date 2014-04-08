@@ -133,8 +133,8 @@ with Context do
 	Height:=GetScreenResolution.y;
 	Fullscreen:=VFullscreen;
 	
-	if (ExampleClass = nil) or (ExampleClass.ClassName()='SaGe Draw Class') then
-		Tittle:='SaGe Example'
+	if (ExampleClass = nil) or (ExampleClass.ClassName()=TSGDrawClass.ClassName()) then
+		Tittle:='An Example'
 	else
 		Tittle:=ExampleClass.ClassName();
 	
@@ -151,6 +151,13 @@ with Context do
 		else
 		{$ENDIF}
 			RenderClass:=TSGRenderOpenGL;
+	
+	{$IFDEF MSWINDOWS}
+		if FRenderState=SGBR_DIRECTX then
+			Tittle := Tittle + ' - SaGe - Render "DirectX 9"'
+		else
+			{$ENDIF}
+	Tittle := Tittle + ' - SaGe - Render "OpenGL"';
 	end;
 
 Context.Initialize();
