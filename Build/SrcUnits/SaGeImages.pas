@@ -26,6 +26,7 @@ uses
 	;
 type
 	TSGIByte = type TSGExByte;
+	TSGITextureType = (SGITextureTypeTexture,SGITextureTypeBump);
 	
 	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
@@ -45,6 +46,10 @@ type
 		
 		// Идентификатор текстуры
 		FTexture : SGUInt;
+		// for ActiveTexture
+		FTextureNumber : TSGInteger;
+		// what it the texture
+		FTextureType   : TSGITextureType;
 		
 		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
 		FReadyToGoToTexture : TSGBoolean;
@@ -55,6 +60,9 @@ type
 		
 		//Имя изображения/материала и тп 
 		FName : TSGString;
+			public
+		property TextureNumber : TSGInteger      read FTextureNumber write FTextureNumber;
+		property TextureType   : TSGITextureType read FTextureType   write FTextureType;
 			protected
 		procedure LoadMBMToBitMap(const Position:LongWord = 20);
 		procedure LoadToMemory();virtual;
@@ -504,20 +512,46 @@ FreeTexture;
 FImage.Clear;
 end;
 
-procedure TSGImage.DisableTexture;inline;
+procedure TSGImage.DisableTexture();inline;
 begin
-Render.Disable(SGR_TEXTURE_2D);
+if FTextureNumber = -1 then
+	begin
+	Render.BindTexture(SGR_TEXTURE_2D,0);
+	Render.Disable(SGR_TEXTURE_2D);
+	end
+else
+	begin
+	Render.ActiveTexture(FTextureNumber);
+	Render.BindTexture(SGR_TEXTURE_2D,0);
+	Render.Disable(SGR_TEXTURE_2D);
+	Render.ActiveTexture(0);
+	end;
 end;
 
-procedure TSGImage.BindTexture;inline;
+procedure TSGImage.BindTexture();inline;
 begin
 if (FTexture=0) and (FReadyToGoToTexture) then
 	begin
 	ToTexture();
 	FreeBits();
 	end;
-Render.Enable(SGR_TEXTURE_2D);
-Render.BindTexture(SGR_TEXTURE_2D,FTexture);
+if FTextureNumber = -1 then
+	begin
+	Render.Enable(SGR_TEXTURE_2D);
+	Render.BindTexture(SGR_TEXTURE_2D,FTexture);
+	Render.ActiveTextureDiffuse();
+	end
+else
+	begin
+	Render.ActiveTexture(FTextureNumber);
+	Render.BindTexture(SGR_TEXTURE_2D,FTexture);
+	Render.Enable(SGR_TEXTURE_2D);
+	if FTextureType = SGITextureTypeBump then
+		Render.ActiveTextureBump()
+	else
+		Render.ActiveTextureDiffuse();
+	Render.ActiveTexture(0);
+	end;
 end;
 
 class function TSGImage.GetLongWordBack(const FileBits:PByte;const Position:LongInt):LongWord;
@@ -662,6 +696,8 @@ end;
 
 constructor TSGImage.Create(const NewWay:string = '');
 begin
+FTextureNumber := -1;
+FTextureType := SGITextureTypeTexture;
 FTexture:=0;
 FReadyToGoToTexture:=False;
 Way:=NewWay;

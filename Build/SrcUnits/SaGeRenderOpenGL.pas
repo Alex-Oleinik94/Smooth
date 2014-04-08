@@ -131,6 +131,12 @@ type
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
 		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
+		procedure ActiveTexture(const VTexture : TSGLongWord);override;
+		procedure ActiveTextureDiffuse();override;
+		procedure ActiveTextureBump();override;
+			private
+		FNowActiveNumberTexture : TSGLongWord;
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -146,6 +152,55 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.ActiveTextureDiffuse();
+begin
+if FNowActiveNumberTexture = 0 then
+	begin
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+	end
+else if FNowActiveNumberTexture = 1 then
+	begin
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PREVIOUS_ARB);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+	end;
+end;
+
+procedure TSGRenderOpenGL.ActiveTextureBump();
+begin
+if FNowActiveNumberTexture = 0 then
+	begin
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB_ARB);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PRIMARY_COLOR_ARB);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+	end;
+end;
+
+procedure TSGRenderOpenGL.ActiveTexture(const VTexture : TSGLongWord);
+begin
+FNowActiveNumberTexture := VTexture;
+glActiveTextureARB(GL_TEXTURE0_ARB + VTexture);
+end;
+
+procedure TSGRenderOpenGL.ClientActiveTexture(const VTexture : TSGLongWord);
+begin
+glClientActiveTextureARB(GL_TEXTURE0_ARB + VTexture);
+end;
 
 procedure TSGRenderOpenGL.ColorMaterial(const r,g,b,a : TSGSingle);
 begin

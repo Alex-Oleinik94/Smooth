@@ -21,13 +21,15 @@ type
 	TSGMeshIndexFormat = (SGMeshIndexFormat1b,SGMeshIndexFormat2b,SGMeshIndexFormat4b);
 	// Ёто тип типа хранени€ вершин в нашей модели
 	TSGMeshVertexType = TSGVertexFormat;
-	TSGMeshBumpType = (SGMeshBumpTypeNone,SGMeshBumpTypeCopyTexture2f,SGMeshBumpTypeCubeMap3f,SGMeshBump2f);
+	TSGMeshBumpType = (SGMeshBumpTypeNone,SGMeshBumpTypeCopyTexture2f,SGMeshBumpTypeCubeMap3f,SGMeshBumpType2f);
 const
 	// “ипы вершин
 	SGMeshVertexType2f = SG_VERTEX_2F;
 	SGMeshVertexType3f = SG_VERTEX_3F;
 type
 	TSGCustomModel = class;
+	TSG3dObject    = class;
+	TSGMaterial    = class;
 	
 	// ======== ƒальше идут структуры индексов веpшин  ========
 	
@@ -151,8 +153,8 @@ type
 		function MapDiffuseWay():TSGString;inline;
 		function MapBumpWay():TSGString;inline;
 			public
-		procedure Bind();
-		procedure UnBind();
+		procedure Bind(const VObject : TSG3DObject);
+		procedure UnBind(const VObject : TSG3DObject);
 			public
 		property Name  : TSGString read FName  write FName;
 		property Illum : TSGSingle read FIllum write FIllum;
@@ -179,6 +181,7 @@ type
         FHasColors  : TSGBoolean;
         // »спользуетс€ ли у нее индексированный рендеринг
         FQuantityFaceArrays : TSGLongWord;
+        FBumpFormat : TSGMeshBumpType;
     protected
         // “ип полигонов в модельки (SGR_QUADS, SGR_TRIANGLES, SGR_LINES, SGR_LINE_LOOP ....)
         FObjectPoligonesType    : TSGLongWord;
@@ -197,6 +200,7 @@ type
 		procedure SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
     public
         // Ёти свойства уже были прокоментированы выше (см на что эти свойства ссылаютс€)
+        property BumpFormat                        : TSGMeshBumpType   read FBumpFormat          write FBumpFormat;
         property PoligonesType[Index:TSGLongWord]  : TSGLongWord       read GetPoligonesType     write SetPoligonesType;
 		property QuantityVertexes                  : TSGQuadWord       read FNOfVerts;
 		property QuantityFaces[Index : TSGLongWord]: TSGQuadWord       read GetQuantityFaces;
@@ -1309,6 +1313,7 @@ end;
 constructor TSG3dObject.Create();
 begin
 inherited Create();
+FBumpFormat := SGMeshBumpTypeNone;
 FName:='';
 FEnableCullFace := False;
 FObjectColor.Import(1, 1, 1, 1);
@@ -1502,7 +1507,17 @@ Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
 	Render.EnableClientState(SGR_NORMAL_ARRAY);
 if FHasTexture then
+	begin
+	if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+		Render.ClientActiveTexture(1);
 	Render.EnableClientState(SGR_TEXTURE_COORD_ARRAY);
+	if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+		Render.ClientActiveTexture(0);
+	end;
+if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
+	begin
+	Render.EnableClientState(SGR_TEXTURE_COORD_ARRAY);
+	end;
 if FHasColors then
 	Render.EnableClientState(SGR_COLOR_ARRAY);
 
@@ -1538,6 +1553,24 @@ if FEnableVBO then
 	
 	if FHasTexture then
 		begin
+		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+			Render.ClientActiveTexture(1);
+		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
+			Pointer(
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
+				Byte(FHasNormals)*(SizeOf(Single)*3)
+				));
+		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+			Render.ClientActiveTexture(0);
+		end;
+	
+	if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
+		begin
 		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
 			Pointer(
 				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
@@ -1556,9 +1589,9 @@ if FEnableVBO then
 			begin
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
-					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+					FParent.Materials[ArFaces[Index].FMaterialID].Bind(Self)
 				else if (FObjectMaterialID <> -1) then
-					FParent.Materials[FObjectMaterialID].Bind();
+					FParent.Materials[FObjectMaterialID].Bind(Self);
 			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FFacesBuffers[Index]);
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) ,
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
@@ -1567,9 +1600,9 @@ if FEnableVBO then
 				,nil);
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
-					FParent.Materials[ArFaces[Index].FMaterialID].UnBind()
+					FParent.Materials[ArFaces[Index].FMaterialID].UnBind(Self)
 				else if (FObjectMaterialID <> -1) then
-					FParent.Materials[FObjectMaterialID].UnBind();
+					FParent.Materials[FObjectMaterialID].UnBind(Self);
 			end;
 		end
 	else
@@ -1607,7 +1640,11 @@ else
 					byte(FColorType = SGMeshColorType4b)*4+
 					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
 					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))));
+	
     if FHasTexture then
+		begin
+		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+			Render.ClientActiveTexture(1);
         Render.TexCoordPointer(
 			2,
 			SGR_FLOAT, 
@@ -1621,14 +1658,35 @@ else
 					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
 					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
+		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+			Render.ClientActiveTexture(0);
+		end;
+	
+	if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
+		begin
+		Render.TexCoordPointer(
+			2,
+			SGR_FLOAT, 
+			GetSizeOfOneVertex(), 
+			Pointer(
+				TSGMaxEnum(ArVertex)+
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
+				Byte(FHasColors)*(
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
+				Byte(FHasNormals)*(SizeOf(Single)*3)));
+		end;
+	
 	if FQuantityFaceArrays<>0 then
 		for Index := 0 to FQuantityFaceArrays-1 do
 			begin
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
-					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+					FParent.Materials[ArFaces[Index].FMaterialID].Bind(Self)
 				else if (FObjectMaterialID <> -1) then
-					FParent.Materials[FObjectMaterialID].Bind();
+					FParent.Materials[FObjectMaterialID].Bind(Self);
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) , 
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
@@ -1636,9 +1694,9 @@ else
 				ArFaces[Index].FArray);
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
-					FParent.Materials[ArFaces[Index].FMaterialID].UnBind()
+					FParent.Materials[ArFaces[Index].FMaterialID].UnBind(Self)
 				else if (FObjectMaterialID <> -1) then
-					FParent.Materials[FObjectMaterialID].UnBind();
+					FParent.Materials[FObjectMaterialID].UnBind(Self);
 			end
 	else
 		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
@@ -1647,7 +1705,17 @@ Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
 	Render.DisableClientState(SGR_NORMAL_ARRAY);
 if FHasTexture then
+	begin
+	if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+		Render.ClientActiveTexture(1);
 	Render.DisableClientState(SGR_TEXTURE_COORD_ARRAY);
+	if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
+		Render.ClientActiveTexture(0);
+	end;
+if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
+	begin
+	Render.DisableClientState(SGR_TEXTURE_COORD_ARRAY);
+	end;
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
 
@@ -2098,24 +2166,60 @@ FMapBump.Way := VFileName;
 FEnableBump := FMapBump.Loading();
 end;
 
-procedure TSGMaterial.Bind();
+procedure TSGMaterial.Bind(const VObject : TSG3DObject);
 begin
-if FEnableTexture and (FMapDiffuse<>nil) then
-	FMapDiffuse.BindTexture();
-if FEnableBump and (FMapBump<>nil) then
+if (VObject.BumpFormat = SGMeshBumpTypeNone) and (VObject.HasTexture) then
 	begin
-	
+	if FEnableTexture and (FMapDiffuse<>nil) then
+		begin
+		FMapDiffuse.TextureNumber := -1;
+		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		FMapDiffuse.BindTexture();
+		end;
+	end
+else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTexture) then
+	begin
+	if FEnableBump and (FMapBump<>nil) then
+		begin
+		FMapBump.TextureNumber := 0;
+		FMapBump.TextureType := SGITextureTypeBump;
+		FMapBump.BindTexture();
+		end;
+	if FEnableTexture and (FMapDiffuse<>nil) then
+		begin
+		FMapDiffuse.TextureNumber := 1;
+		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		FMapDiffuse.BindTexture();
+		end;
 	end;
 end;
 
-procedure TSGMaterial.UnBind();
+procedure TSGMaterial.UnBind(const VObject : TSG3DObject);
 begin
-if FEnableBump and (FMapBump<>nil) then
+if (VObject.BumpFormat = SGMeshBumpTypeNone) and (VObject.HasTexture) then
 	begin
-	
+	if FEnableTexture and (FMapDiffuse<>nil) then
+		begin
+		FMapDiffuse.TextureNumber := -1;
+		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		FMapDiffuse.DisableTexture();
+		end;
+	end
+else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTexture) then
+	begin
+	if FEnableBump and (FMapBump<>nil) then
+		begin
+		FMapBump.TextureNumber := 0;
+		FMapBump.TextureType := SGITextureTypeBump;
+		FMapBump.DisableTexture();
+		end;
+	if FEnableTexture and (FMapDiffuse<>nil) then
+		begin
+		FMapDiffuse.TextureNumber := 1;
+		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		FMapDiffuse.DisableTexture();
+		end;
 	end;
-if FEnableTexture and (FMapDiffuse<>nil) then
-	FMapDiffuse.DisableTexture();
 end;
 
 function TSGMaterial.MapDiffuseWay():TSGString;inline;

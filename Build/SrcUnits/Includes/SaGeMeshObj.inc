@@ -174,6 +174,8 @@ HasNormals := True;
 HasTexture := True;
 VertexType := SGMeshVertexType3f;
 Vertexes := ObjQuantityAllVertexes;
+//if Render.CanBumpMapping then
+	BumpFormat := SGMeshBumpTypeCopyTexture2f;
 for i:= 0 to ObjQuantityAllVertexes-1 do
 	begin
 	ArVertex3f [i]^ := ObjArVertex  [ObjArAllVertexes[i][0] - 1];

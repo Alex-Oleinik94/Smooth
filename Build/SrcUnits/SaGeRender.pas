@@ -116,6 +116,10 @@ type
 		procedure ColorMaterial(const r,g,b,a:TSGSingle);virtual;abstract;
 		procedure MatrixMode(const Par:TSGLongWord);virtual;abstract;
 		procedure LoadMatrixf(const Variable : TSGPointer);virtual;abstract;
+		procedure ClientActiveTexture(const VTexture : TSGLongWord);virtual;abstract;
+		procedure ActiveTexture(const VTexture : TSGLongWord);virtual;abstract;
+		procedure ActiveTextureDiffuse();virtual;abstract;
+		procedure ActiveTextureBump();virtual;abstract;
 			public
 		property Window:TSGClass read FWindow write FWindow;
 		end;

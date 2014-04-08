@@ -99,6 +99,10 @@ type
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
 		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
+		procedure ActiveTexture(const VTexture : TSGLongWord);override;
+		procedure ActiveTextureDiffuse();override;
+		procedure ActiveTextureBump();override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -192,6 +196,9 @@ type
 		
 			(* Matrix Mode *)
 		FNowMatrixMode : TSGLongWord;
+		
+			(* MultiTexturing *)
+		FNowActiveNumberTexture : TSGLongWord;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -210,6 +217,27 @@ function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 
 implementation
+
+procedure TSGRenderDirectX.ActiveTexture(const VTexture : TSGLongWord);
+begin
+FNowActiveNumberTexture := VTexture;
+
+end;
+
+procedure TSGRenderDirectX.ActiveTextureDiffuse();
+begin
+
+end;
+
+procedure TSGRenderDirectX.ActiveTextureBump();
+begin
+
+end;
+
+procedure TSGRenderDirectX.ClientActiveTexture(const VTexture : TSGLongWord);
+begin
+
+end;
 
 procedure TSGRenderDirectX.ColorMaterial(const r,g,b,a : TSGSingle);
 begin
