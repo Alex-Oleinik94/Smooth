@@ -156,9 +156,13 @@ type
 		procedure Bind(const VObject : TSG3DObject);
 		procedure UnBind(const VObject : TSG3DObject);
 			public
-		property Name  : TSGString read FName  write FName;
-		property Illum : TSGSingle read FIllum write FIllum;
-		property Ns    : TSGSingle read FNS    write FNS;
+		property Name          : TSGString  read FName          write FName;
+		property Illum         : TSGSingle  read FIllum         write FIllum;
+		property Ns            : TSGSingle  read FNS            write FNS;
+		property EnableBump    : TSGBoolean read FEnableBump    write FEnableBump;
+		property EnableTexture : TSGBoolean read FEnableTexture write FEnableTexture;
+		property ImageBump     : TSGImage   read FMapBump       write FMapBump;
+		property ImageTexture  : TSGImage   read FMapDiffuse    write FMapDiffuse;
 		end;
 	
     { TSG3dObject }
@@ -2184,12 +2188,15 @@ else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTextu
 		FMapBump.TextureNumber := 0;
 		FMapBump.TextureType := SGITextureTypeBump;
 		FMapBump.BindTexture();
+		FMapBump.TextureNumber := -1;
+		FMapBump.TextureType := SGITextureTypeTexture;
 		end;
 	if FEnableTexture and (FMapDiffuse<>nil) then
 		begin
 		FMapDiffuse.TextureNumber := 1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
 		FMapDiffuse.BindTexture();
+		FMapDiffuse.TextureNumber := -1;
 		end;
 	end;
 end;
@@ -2212,12 +2219,15 @@ else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTextu
 		FMapBump.TextureNumber := 0;
 		FMapBump.TextureType := SGITextureTypeBump;
 		FMapBump.DisableTexture();
+		FMapBump.TextureNumber := -1;
+		FMapBump.TextureType := SGITextureTypeTexture;
 		end;
 	if FEnableTexture and (FMapDiffuse<>nil) then
 		begin
 		FMapDiffuse.TextureNumber := 1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
 		FMapDiffuse.DisableTexture();
+		FMapDiffuse.TextureNumber := -1;
 		end;
 	end;
 end;
