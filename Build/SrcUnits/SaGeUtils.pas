@@ -443,7 +443,7 @@ FMesh.SetContext(Context);
 FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 FMesh.EnableCullFace:=False;
 FMesh.ObjectPoligonesType:=SGR_LINE_STRIP;
-FMesh.VertexType:=TSGMeshVertexType3f;
+FMesh.VertexType := SGMeshVertexType3f;
 FMesh.SetVertexLength(FDetalization);
 for i:=0 to FDetalization-1 do
 	begin

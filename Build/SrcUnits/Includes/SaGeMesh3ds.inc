@@ -178,7 +178,7 @@ while Ch.ID=EDIT_OBJECT do
 	AModel.LastObject().HasColors  := False;
 	AModel.LastObject().EnableCullFace:=True;
 	AModel.LastObject().ObjectPoligonesType:=SGR_TRIANGLES;
-	AModel.LastObject().VertexType:=TSGMeshVertexType3f;
+	AModel.LastObject().VertexType:=SGMeshVertexType3f;
 	Tfile.Position:=Tfile.Position+6;
 	AModel.LastObject().Name := SGReadStringFromStream(TFile);
 	SGLog.Sourse(['TSGLoad3DS.Import3DS : Object: "',AModel.LastObject().Name,'"']);

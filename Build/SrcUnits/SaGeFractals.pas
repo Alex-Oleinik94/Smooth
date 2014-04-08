@@ -87,7 +87,7 @@ type
 		procedure Draw();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
-		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f;const VertexMn : TSGByte = 0);
+		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = SGMeshVertexType3f;const VertexMn : TSGByte = 0);
 		procedure ClearMesh();inline;
 		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex,FFaceIndex:LongWord);inline;overload;
 		procedure AfterPushIndexes(var MeshID:LongWord;const DoAtThreads:Boolean;var FVertexIndex:LongWord);inline;overload;
@@ -297,7 +297,7 @@ if FFaceIndex>=FShift then
 	end;
 end;
 
-procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = TSGMeshVertexType3f;const VertexMn : TSGByte = 0);
+procedure TSG3DFractal.CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = SGMeshVertexType3f;const VertexMn : TSGByte = 0);
 begin
 if (Render = nil) or (Render.RenderType = SGRenderDirectX) then
 	FShift := 4608*2

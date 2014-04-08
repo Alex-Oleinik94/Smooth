@@ -144,7 +144,7 @@ begin
 inherited;
 ClearMesh();
 Quantity:=(4**(1+FDepth));
-CalculateMeshes(Quantity,SGR_TRIANGLES,TSGMeshVertexType3f);
+CalculateMeshes(Quantity,SGR_TRIANGLES,SGMeshVertexType3f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

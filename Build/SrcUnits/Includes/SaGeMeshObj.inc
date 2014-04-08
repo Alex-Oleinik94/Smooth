@@ -172,7 +172,7 @@ for i := 0 to ObjQuantityFaces-1 do
 		end;
 HasNormals := True;
 HasTexture := True;
-VertexType := TSGMeshVertexType3f;
+VertexType := SGMeshVertexType3f;
 Vertexes := ObjQuantityAllVertexes;
 for i:= 0 to ObjQuantityAllVertexes-1 do
 	begin

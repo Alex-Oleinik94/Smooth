@@ -88,9 +88,9 @@ inherited;
 ClearMesh();
 Quantity:=(8**FDepth)+1;
 if Render.RenderType = SGRenderDirectX then 
-	CalculateMeshes(Quantity,SGR_LINE_STRIP,TSGMeshVertexType3f)
+	CalculateMeshes(Quantity,SGR_LINE_STRIP,SGMeshVertexType3f)
 else
-	CalculateMeshes(Quantity,SGR_LINE_STRIP,TSGMeshVertexType2f);
+	CalculateMeshes(Quantity,SGR_LINE_STRIP,SGMeshVertexType2f);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

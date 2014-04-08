@@ -110,9 +110,9 @@ inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
 if Render.RenderType = SGRenderDirectX then 
-	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType3f,1)
+	CalculateMeshes(Quantity,SGR_LINES,SGMeshVertexType3f,1)
 else
-	CalculateMeshes(Quantity,SGR_LINES,TSGMeshVertexType2f,1);
+	CalculateMeshes(Quantity,SGR_LINES,SGMeshVertexType2f,1);
 if FThreadsEnable then
 	begin
 	FThreadsData[0].FFinished:=False;

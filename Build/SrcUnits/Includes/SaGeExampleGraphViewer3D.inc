@@ -28,7 +28,7 @@ var
 begin
 inherited;
 ClearMesh();
-CalculateMeshes(Sqr(Depth),SGR_QUADS,TSGMeshVertexType3f);
+CalculateMeshes(Sqr(Depth),SGR_QUADS,SGMeshVertexType3f);
 rx:=-4;
 rd:=8/Depth;
 for i:=0 to Depth-1 do

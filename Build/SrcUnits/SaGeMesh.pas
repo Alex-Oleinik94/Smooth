@@ -17,14 +17,15 @@ const
 	SGMeshVersion : TSGQuadWord = 169;
 type
 	// Это тип типа хранения цветов в нашей модели
-	TSGMeshColorType = (TSGMeshColorType3f,TSGMeshColorType4f,TSGMeshColorType3b,TSGMeshColorType4b);
+	TSGMeshColorType = (SGMeshColorType3f,SGMeshColorType4f,SGMeshColorType3b,SGMeshColorType4b);
 	TSGMeshIndexFormat = (SGMeshIndexFormat1b,SGMeshIndexFormat2b,SGMeshIndexFormat4b);
 	// Это тип типа хранения вершин в нашей модели
 	TSGMeshVertexType = TSGVertexFormat;
+	TSGMeshBumpType = (SGMeshBumpTypeNone,SGMeshBumpTypeCopyTexture2f,SGMeshBumpTypeCubeMap3f,SGMeshBump2f);
 const
 	// Типы вершин
-	TSGMeshVertexType2f = SG_VERTEX_2F;
-	TSGMeshVertexType3f = SG_VERTEX_3F;
+	SGMeshVertexType2f = SG_VERTEX_2F;
+	SGMeshVertexType3f = SG_VERTEX_3F;
 type
 	TSGCustomModel = class;
 	
@@ -823,28 +824,28 @@ if not FHasNormals then
 		Move(
 			PByte(ArVertex)[i*ii],
 			PByte(SecondArVertex)[i*iii],
-			SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+			SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType=TSGMeshColorType3b)*3+
-					byte(FColorType=TSGMeshColorType4b)*4+
-					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single)));
+					byte(FColorType=SGMeshColorType3b)*3+
+					byte(FColorType=SGMeshColorType4b)*4+
+					byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single)));
 		if FHasTexture then
 			Move(
 				PByte(ArVertex)[i*ii+
-					SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+					SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
 					Byte(FHasColors)*(
-						byte(FColorType=TSGMeshColorType3b)*3+
-						byte(FColorType=TSGMeshColorType4b)*4+
-						byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-						byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))],
+						byte(FColorType=SGMeshColorType3b)*3+
+						byte(FColorType=SGMeshColorType4b)*4+
+						byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+						byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))],
 				PByte(SecondArVertex)[i*iii+
-					SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+					SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
 					Byte(FHasColors)*(
-						byte(FColorType=TSGMeshColorType3b)*3+
-						byte(FColorType=TSGMeshColorType4b)*4+
-						byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-						byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+						byte(FColorType=SGMeshColorType3b)*3+
+						byte(FColorType=SGMeshColorType4b)*4+
+						byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+						byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))+
 						3*SizeOf(TSGSingle)],
 				2*TSGByte(FHasTexture)*SizeOf(TSGSingle));
 		end;
@@ -903,39 +904,39 @@ if Render<>nil then
 	if Render.RenderType=SGRenderOpenGL then
 		begin
 		if VWithAlpha then
-			SetColorType(TSGMeshColorType4f)
+			SetColorType(SGMeshColorType4f)
 		else
-			SetColorType(TSGMeshColorType3f);
+			SetColorType(SGMeshColorType3f);
 		end
 	else if Render.RenderType=SGRenderDirectX then
 		begin
-		SetColorType(TSGMeshColorType4b);
+		SetColorType(SGMeshColorType4b);
 		end;
 	end;
 end;
 
 procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
 begin
-if (FColorType=TSGMeshColorType3f) then
+if (FColorType=SGMeshColorType3f) then
 	begin
 	ArColor3f[Index]^.r:=r;
 	ArColor3f[Index]^.g:=g;
 	ArColor3f[Index]^.b:=b;
 	end
-else if (FColorType=TSGMeshColorType4f) then
+else if (FColorType=SGMeshColorType4f) then
 	begin
 	ArColor4f[Index]^.r:=r;
 	ArColor4f[Index]^.g:=g;
 	ArColor4f[Index]^.b:=b;
 	ArColor4f[Index]^.a:=a;
 	end
-else if (FColorType=TSGMeshColorType3b) then
+else if (FColorType=SGMeshColorType3b) then
 	begin
 	ArColor3b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
 	ArColor3b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
 	ArColor3b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
 	end
-else if (FColorType=TSGMeshColorType4b) then
+else if (FColorType=SGMeshColorType4b) then
 	begin
 	ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
 	ArColor4b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
@@ -949,12 +950,12 @@ begin
 Result:=PTSGVertex2f(
 	TSGMaxEnum(ArVertex)
 	+GetSizeOfOneVertex()*Index
-	+(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	+(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	+Byte(FHasColors)*( 
-		byte(FColorType=TSGMeshColorType3b)*3+
-		byte(FColorType=TSGMeshColorType4b)*4+
-		byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-		byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+		byte(FColorType=SGMeshColorType3b)*3+
+		byte(FColorType=SGMeshColorType4b)*4+
+		byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+		byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
 	+Byte(FHasNormals)*3*SizeOf(Single));
 end;
 
@@ -963,12 +964,12 @@ begin
 Result:=PTSGVertex3f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	+Byte(FHasColors)*( //Цвета
-	byte(FColorType=TSGMeshColorType3b)*3+
-	byte(FColorType=TSGMeshColorType4b)*4+
-	byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-	byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+	byte(FColorType=SGMeshColorType3b)*3+
+	byte(FColorType=SGMeshColorType4b)*4+
+	byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+	byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
 	);
 end;
 
@@ -977,7 +978,7 @@ begin
 Result:=PTSGColor4f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	);
 end;
 
@@ -986,7 +987,7 @@ begin
 Result:=PTSGColor3b( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	);
 end;
 
@@ -995,7 +996,7 @@ begin
 Result:=PTSGColor4b(Pointer(
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	));
 end;
 
@@ -1004,7 +1005,7 @@ begin
 Result:=PTSGColor3f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)
+	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
 	);
 end;
 
@@ -1041,13 +1042,13 @@ end;
 function TSG3DObject.GetSizeOfOneVertex():LongWord;
 begin
 Result:=
-(2+Byte(FVertexType=TSGMeshVertexType3f))*SizeOf(Single)//Вершины
+(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)//Вершины
  
 +Byte(FHasColors)*( //Цвета
-	byte(FColorType=TSGMeshColorType3b)*3+
-	byte(FColorType=TSGMeshColorType4b)*4+
-	byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-	byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+	byte(FColorType=SGMeshColorType3b)*3+
+	byte(FColorType=SGMeshColorType4b)*4+
+	byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
+	byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
 
 +Byte(FHasNormals)*3*SizeOf(Single)
 
@@ -1135,16 +1136,16 @@ else WriteLn('"SGR_INVALID"');
 end;
 WriteLn(PredStr,'GetSizeOfOneVertex  = "',GetSizeOfOneVertex(),'"');
 Write(PredStr,'FVertexFormat       = ');
-if FVertexType=TSGMeshVertexType2f then
+if FVertexType = SGMeshVertexType2f then
 	WriteLn('"SGMeshVertexType2f"')
-else if FVertexType=TSGMeshVertexType3f then
+else if FVertexType = SGMeshVertexType3f then
 	WriteLn('"SGMeshVertexType3f"');
 Write(PredStr,'FColorType          = ');
 case FColorType of
-TSGMeshColorType3b:WriteLn('"SGMeshColorType3b"');
-TSGMeshColorType4b:WriteLn('"SGMeshColorType4b"');
-TSGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
-TSGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
+SGMeshColorType3b:WriteLn('"SGMeshColorType3b"');
+SGMeshColorType4b:WriteLn('"SGMeshColorType4b"');
+SGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
+SGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
 end;
 TextColor(15);
 WriteLn(PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"');
@@ -1320,8 +1321,8 @@ ArVertex := nil;
 ArFaces := nil;
 FObjectMaterialID := -1;
 FObjectPoligonesType:=SGR_TRIANGLES;
-FColorType:=TSGMeshColorType3b;
-FVertexType:=TSGMeshVertexType3f;
+FColorType:=SGMeshColorType3b;
+FVertexType:=SGMeshVertexType3f;
 FEnableVBO:=False;
 FVertexesBuffer := 0;
 FFacesBuffers := nil;
@@ -1508,16 +1509,16 @@ if FHasColors then
 if FEnableVBO then
 	begin
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVertexesBuffer);
-	Render.VertexPointer(2+Byte(FVertexType=TSGMeshVertexType3f),SGR_FLOAT,GetSizeOfOneVertex(),nil);
+	Render.VertexPointer(2+Byte(FVertexType = SGMeshVertexType3f),SGR_FLOAT,GetSizeOfOneVertex(),nil);
 	
 	if FHasColors then
 		begin
 		Render.ColorPointer(
-			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
-			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
-				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
+			3+Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType4f)),
+			SGR_FLOAT*Byte((FColorType = SGMeshColorType3f) or (FColorType = SGMeshColorType4f))+
+				SGR_UNSIGNED_BYTE*Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType3b)),
 			GetSizeOfOneVertex(),
-			Pointer(SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
+			Pointer(SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))));
 		end;
 	
 	if FHasNormals then
@@ -1526,12 +1527,12 @@ if FEnableVBO then
 			SGR_FLOAT,
 			GetSizeOfOneVertex(),
 			Pointer(
-				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType=TSGMeshColorType3b)*3+
-					byte(FColorType=TSGMeshColorType4b)*4+
-					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))
 				));
 		end;
 	
@@ -1539,12 +1540,12 @@ if FEnableVBO then
 		begin
 		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
 			Pointer(
-				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType=TSGMeshColorType3b)*3+
-					byte(FColorType=TSGMeshColorType4b)*4+
-					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)
 				));
 		end;
@@ -1581,31 +1582,31 @@ if FEnableVBO then
 else
 	begin
     Render.VertexPointer(
-		2+Byte(FVertexType=TSGMeshVertexType3f),
+		2+Byte(FVertexType = SGMeshVertexType3f),
 		SGR_FLOAT, 
 		GetSizeOfOneVertex(), 
 		ArVertex);
     if FHasColors then
 		Render.ColorPointer(
-			3+Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType4f)),
-			SGR_FLOAT*Byte((FColorType=TSGMeshColorType3f) or (FColorType=TSGMeshColorType4f))+
-				SGR_UNSIGNED_BYTE*Byte((FColorType=TSGMeshColorType4b) or (FColorType=TSGMeshColorType3b)),
+			3+Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType4f)),
+			SGR_FLOAT*Byte((FColorType = SGMeshColorType3f) or (FColorType = SGMeshColorType4f))+
+				SGR_UNSIGNED_BYTE*Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType3b)),
 			GetSizeOfOneVertex(),
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))));
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))));
 	if FHasNormals then
 		Render.NormalPointer(
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType=TSGMeshColorType3b)*3+
-					byte(FColorType=TSGMeshColorType4b)*4+
-					byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))));
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))));
     if FHasTexture then
         Render.TexCoordPointer(
 			2,
@@ -1613,12 +1614,12 @@ else
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType=TSGMeshVertexType3f))+
+				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
 				Byte(FHasColors)*(
-					byte(FColorType = TSGMeshColorType3b)*3+
-					byte(FColorType = TSGMeshColorType4b)*4+
-					byte(FColorType = TSGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = TSGMeshColorType3f)*3*SizeOf(Single))+
+					byte(FColorType = SGMeshColorType3b)*3+
+					byte(FColorType = SGMeshColorType4b)*4+
+					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
+					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
 				Byte(FHasNormals)*(SizeOf(Single)*3)));
 	if FQuantityFaceArrays<>0 then
 		for Index := 0 to FQuantityFaceArrays-1 do
@@ -1635,7 +1636,7 @@ else
 				ArFaces[Index].FArray);
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
-					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+					FParent.Materials[ArFaces[Index].FMaterialID].UnBind()
 				else if (FObjectMaterialID <> -1) then
 					FParent.Materials[FObjectMaterialID].UnBind();
 			end
