@@ -179,8 +179,6 @@ type
         // »спользуетс€ ли у нее индексированный рендеринг
         FQuantityFaceArrays : TSGLongWord;
     protected
-        //  оличество текстур, индексы на которые в себе седержит моделька
-        FQuantityTextures : TSGLongWord;
         // “ип полигонов в модельки (SGR_QUADS, SGR_TRIANGLES, SGR_LINES, SGR_LINE_LOOP ....)
         FObjectPoligonesType    : TSGLongWord;
         // “ип вершин в модельке
@@ -190,7 +188,6 @@ type
     private
 		procedure SetColorType(const VNewColorType:TSGMeshColorType);
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
-		procedure SetHasTesture(const VHasTexture:Boolean);
 		function GetSizeOfOneVertex():LongWord;inline;
 		function GetVertexLength():QWord;inline;
 		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
@@ -732,14 +729,7 @@ end;
 
 procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean);inline;
 begin
-if not VHasTexture then
-	FHasTexture:=False
-else
-	begin
-	FHasTexture:=True;
-	if FQuantityTextures=0 then
-		FQuantityTextures:=1;
-	end;
+FHasTexture:=VHasTexture;
 end;
 
 function TSG3DObject.GetVertexLength():QWord;inline;
@@ -856,7 +846,7 @@ if not FHasNormals then
 						byte(FColorType=TSGMeshColorType4f)*4*SizeOf(Single)+
 						byte(FColorType=TSGMeshColorType3f)*3*SizeOf(Single))+
 						3*SizeOf(TSGSingle)],
-				FQuantityTextures*SizeOf(TSGSingle));
+				2*TSGByte(FHasTexture)*SizeOf(TSGSingle));
 		end;
 				
 	FreeMem(ArVertex);
@@ -1042,13 +1032,6 @@ FHasColors:=True;
 FColorType:=VNewColorType;
 end;
 
-procedure TSG3DObject.SetHasTesture(const VHasTexture:Boolean);
-begin
-if VHasTexture and (FQuantityTextures=0) then
-	FQuantityTextures:=1;
-FHasTexture:=VHasTexture;
-end;
-
 procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord);inline;
 begin
 FNOfVerts:=NewVertexLength;
@@ -1068,7 +1051,7 @@ Result:=
 
 +Byte(FHasNormals)*3*SizeOf(Single)
 
-+Byte(FHasTexture)*2*SizeOf(Single)*FQuantityTextures;
++Byte(FHasTexture)*2*SizeOf(Single);
 end;
 
 function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload;inline;
@@ -1163,7 +1146,6 @@ TSGMeshColorType4b:WriteLn('"SGMeshColorType4b"');
 TSGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
 TSGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
 end;
-WriteLn(PredStr,'QuantityTextures    = "',FQuantityTextures,'"');
 TextColor(15);
 WriteLn(PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"');
 if FQuantityFaceArrays>0 then
@@ -1327,7 +1309,6 @@ constructor TSG3dObject.Create();
 begin
 inherited Create();
 FName:='';
-FQuantityTextures:=0;
 FEnableCullFace := False;
 FObjectColor.Import(1, 1, 1, 1);
 FHasTexture := False;
@@ -1358,8 +1339,6 @@ begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
-	if (FObjectMaterialID<>-1) and (FParent<>nil) then
-		FParent.Materials[ObjectMaterialID].Bind();
     if FEnableCullFace then
     begin
         Render.Enable(SGR_CULL_FACE);
@@ -1372,8 +1351,6 @@ begin
         BasicDraw();
         Render.Disable(SGR_CULL_FACE);
     end;
-    if (FObjectMaterialID<>-1) and (FParent<>nil) then
-		FParent.Materials[ObjectMaterialID].UnBind();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
@@ -1443,7 +1420,6 @@ Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
 Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
 Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-Stream.WriteBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.WriteBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
 Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
 Stream.WriteBuffer(FColorType,SizeOf(FColorType));
@@ -1490,7 +1466,6 @@ Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
 Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
 Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
 Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-Stream.ReadBuffer(FQuantityTextures,SizeOf(FQuantityTextures));
 Stream.ReadBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
 Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
 Stream.ReadBuffer(FColorType,SizeOf(FColorType));
@@ -1578,16 +1553,22 @@ if FEnableVBO then
 		begin
 		for Index := 0 to FQuantityFaceArrays-1 do
 			begin
-			if ArFaces[Index].FMaterialID<>-1 then
-				FParent.Materials[ArFaces[Index].FMaterialID].Bind();
+			if (FParent<>nil) then
+				if (ArFaces[Index].FMaterialID <> -1) then
+					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+				else if (FObjectMaterialID <> -1) then
+					FParent.Materials[FObjectMaterialID].Bind();
 			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FFacesBuffers[Index]);
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) ,
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT
 				,nil);
-			if ArFaces[Index].FMaterialID<>-1 then
-				FParent.Materials[ArFaces[Index].FMaterialID].UnBind();
+			if (FParent<>nil) then
+				if (ArFaces[Index].FMaterialID <> -1) then
+					FParent.Materials[ArFaces[Index].FMaterialID].UnBind()
+				else if (FObjectMaterialID <> -1) then
+					FParent.Materials[FObjectMaterialID].UnBind();
 			end;
 		end
 	else
@@ -1642,15 +1623,21 @@ else
 	if FQuantityFaceArrays<>0 then
 		for Index := 0 to FQuantityFaceArrays-1 do
 			begin
-			if ArFaces[Index].FMaterialID<>-1 then
-				FParent.Materials[ArFaces[Index].FMaterialID].Bind();
+			if (FParent<>nil) then
+				if (ArFaces[Index].FMaterialID <> -1) then
+					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+				else if (FObjectMaterialID <> -1) then
+					FParent.Materials[FObjectMaterialID].Bind();
 			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index) , 
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat1b)*SGR_UNSIGNED_BYTE+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat2b)*SGR_UNSIGNED_SHORT+
 				TSGByte(ArFaces[Index].FIndexFormat=SGMeshIndexFormat4b)*SGR_UNSIGNED_INT, 
 				ArFaces[Index].FArray);
-			if ArFaces[Index].FMaterialID<>-1 then
-				FParent.Materials[ArFaces[Index].FMaterialID].UnBind();
+			if (FParent<>nil) then
+				if (ArFaces[Index].FMaterialID <> -1) then
+					FParent.Materials[ArFaces[Index].FMaterialID].Bind()
+				else if (FObjectMaterialID <> -1) then
+					FParent.Materials[FObjectMaterialID].UnBind();
 			end
 	else
 		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
@@ -1959,16 +1946,7 @@ if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
 		CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh;
 	Render.PushMatrix();
 	Render.MultMatrixf(@FArObjects[Index].FMatrix);
-	{if (CurrentMesh.HasTexture) and (CurrentMesh.MaterialID <> -1) and 
-		((FArMaterials[CurrentMesh.MaterialID].ReadyToGoToTexture)or
-		(FArMaterials[CurrentMesh.MaterialID].Ready)) then
-		begin
-		FArMaterials[CurrentMesh.MaterialID].BindTexture();
-		CurrentMesh.Draw();
-		FArMaterials[CurrentMesh.MaterialID].DisableTexture();
-		end
-	else}
-		CurrentMesh.Draw();
+	CurrentMesh.Draw();
 	Render.PopMatrix();
 	end;
 end;
