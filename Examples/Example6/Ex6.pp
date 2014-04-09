@@ -148,9 +148,14 @@ if FMesh<>nil then
 	Render.Enable(SGR_LIGHTING);
 	Render.Enable(SGR_LIGHT0);
 	Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FSun);
-	Render.SetTextureFactor(@FSun);
+	
+	if FMesh.LastMaterial().EnableBump then
+		Render.BeginBumpMapping(@FSun);
 	
 	FMesh.Draw();
+	
+	if FMesh.LastMaterial().EnableBump then
+		Render.EndBumpMapping();
 	
 	Render.Enable(SGR_BLEND);
 	Render.Disable(SGR_LIGHTING);

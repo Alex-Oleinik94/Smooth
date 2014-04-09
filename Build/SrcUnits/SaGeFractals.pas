@@ -482,6 +482,8 @@ if FLightingEnable then
 else
 	if Render.IsEnabled(SGR_LIGHTING) then
 		Render.Disable(SGR_LIGHTING);
+Render.Color4f(1,1,1,1);
+Render.LineWidth(1);
 if FEnableVBO then
 	begin
 	if (FMesh<>nil) and (FMesh.QuantityObjects<>0) then

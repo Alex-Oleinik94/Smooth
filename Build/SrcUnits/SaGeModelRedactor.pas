@@ -160,8 +160,8 @@ if FCustomModel<>nil then
 	begin
 	FCamera.CallAction();
 	
-	FSunAngle += Context.ElapsedTime*0.01;
-	FSun.Import(cos(FSunAngle),sin(FSunAngle),cos(FSunAngle*3));
+	FSunAngle += Context.ElapsedTime*0.005;
+	FSun.Import(cos(FSunAngle),sin(FSunAngle),cos(FSunAngle*1.5));
 	FSun *= 7;
 	
 	Render.Color3f(1,1,1);
@@ -169,12 +169,16 @@ if FCustomModel<>nil then
 	FSun.Vertex(Render);
 	Render.EndScene();
 	
+	Render.Disable(SGR_BLEND);
 	Render.Enable(SGR_LIGHTING);
 	Render.Enable(SGR_LIGHT0);
 	Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@FSun);
+	Render.BeginBumpMapping(@FSun);
 	
 	FCustomModel.Draw();
 	
+	Render.EndBumpMapping();
+	Render.Enable(SGR_BLEND);
 	Render.Disable(SGR_LIGHTING);
 	Render.Disable(SGR_LIGHT0);
 	if FSelectMesh<>-1 then

@@ -135,9 +135,14 @@ type
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
 		procedure ActiveTextureBump();override;
-		procedure SetTextureFactor(const Point : Pointer );override;
+		procedure BeginBumpMapping(const Point : Pointer );override;
+		procedure EndBumpMapping();override;
 			private
+			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
+		
+			(* Bump Mapping *)
+		FNowInBumpMapping       : TSGBoolean;
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -154,20 +159,47 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
 
-procedure TSGRenderOpenGL.SetTextureFactor(const Point : Pointer );
+procedure TSGRenderOpenGL.EndBumpMapping();
 begin
+FNowInBumpMapping := False;
+end;
 
+procedure TSGRenderOpenGL.BeginBumpMapping(const Point : Pointer );
+var
+	v : TSGVertex3f;
+begin
+v:=TSGVertex3f(Point^);
+v.Normalize();
+Color4f(
+	v.x *0.5 + 0.5,
+	v.y *0.5 + 0.5,
+	v.z *0.5 + 0.5,1);
+FNowInBumpMapping := True;
 end;
 
 procedure TSGRenderOpenGL.ActiveTextureDiffuse();
-begin
+begin 
 if FNowActiveNumberTexture = 0 then
 	begin
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+	if FNowInBumpMapping then
+		begin
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
 
-	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+		end
+	else
+		begin
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+		
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PRIMARY_COLOR_ARB);
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+		end;
 	end
 else if FNowActiveNumberTexture = 1 then
 	begin
@@ -209,8 +241,11 @@ glClientActiveTextureARB(GL_TEXTURE0_ARB + VTexture);
 end;
 
 procedure TSGRenderOpenGL.ColorMaterial(const r,g,b,a : TSGSingle);
+var
+	c : TSGColor4f;
 begin
-Color4f(r,g,b,a);
+c.Import(r,g,b,a);
+glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, @c);
 end;
 
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
@@ -554,6 +589,7 @@ var
 	LightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
+FNowInBumpMapping:=False;
 {$IFDEF MOBILE}
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 	{$ENDIF}
@@ -642,6 +678,7 @@ FType:=SGRenderOpenGL;
 {$DEFINE SG_RENDER_EICR}
 {$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
 {$UNDEF SG_RENDER_EICR}
+FNowInBumpMapping:=False;
 end;
 
 destructor TSGRenderOpenGL.Destroy;

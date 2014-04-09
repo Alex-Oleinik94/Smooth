@@ -103,7 +103,8 @@ type
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
 		procedure ActiveTextureBump();override;
-		procedure SetTextureFactor(const Point : Pointer );override;
+		procedure BeginBumpMapping(const Point : Pointer );override;
+		procedure EndBumpMapping();override;
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -160,26 +161,26 @@ type
 			// Это используется для хранения буфера при закрывании контекста.
 			FBufferChangeFullscreen:PByte;
 			end;
-		FEnabledClientStateVertex    : Boolean;
-		FEnabledClientStateColor     : Boolean;
-		FEnabledClientStateNormal    : Boolean;
+		FEnabledClientStateVertex    : TSGBoolean;
+		FEnabledClientStateColor     : TSGBoolean;
+		FEnabledClientStateNormal    : TSGBoolean;
 		FEnabledClientStateTexVertex : Boolean;
-		FVBOData:packed array [0..1] of LongWord;
+		FVBOData:packed array [0..1] of TSGLongWord;
 		// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
 		// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
 		FArDataBuffers:packed array[TSGRDTypeDataBuffer] of 
 			packed record
 			// Состояние на момент регестрирования буфера FVBOData[0]
-			FVBOBuffer:LongWord;
+			FVBOBuffer      : TSGLongWord;
 			// В FVBOData записывается текущий вершинный буфер.
 			// Если некакой не включен, но устанавливается значение, которое находится в FVBOData[0]
-			FQuantityParams:Byte;
+			FQuantityParams : TSGByte;
 			// FQuantityParams --- Количество параметров (первый параметр в gl*Pointer (для нормалей по дефолту 3)
-			FDataType:LongWOrd;
+			FDataType       : TSGLongWord;
 			// FDataType --- Тип данных. Типа Float, Unsigned_byte или т п
-			FSizeOfOneVertex:Byte;
+			FSizeOfOneVertex: TSGByte;
 			// FSizeOfOneVertex --- размер одного элемента в массиве
-			FShift:TSGMaxEnum;
+			FShift          : TSGMaxEnum;
 			// FShift --- Если VBO - смещение в байтах относительно начала этого компонента массива.
 			// А если не VBO - указатель на первый элемент массива. (Это не получится запрогать походу)
 			end;
@@ -200,6 +201,7 @@ type
 		
 			(* MultiTexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
+		FNowActiveClientNumberTexture : TSGLongWord;
 			private
 		procedure AfterVertexProc();inline;
 		end;
@@ -229,13 +231,18 @@ Result :=
 	(Round(127.0 * v.z + 128.0) shl 0);
 end;
 
-procedure TSGRenderDirectX.SetTextureFactor(const Point : Pointer );
+procedure TSGRenderDirectX.BeginBumpMapping(const Point : Pointer );
 var
 	v : TSGVertex3f;
 begin
 v := TSGVertex3f(Point^);
 v.Normalize();
 pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, SGRDXVertex3fToRGBA(v));
+end;
+
+procedure TSGRenderDirectX.EndBumpMapping();
+begin
+pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, 0);
 end;
 
 procedure TSGRenderDirectX.ActiveTexture(const VTexture : TSGLongWord);
@@ -247,14 +254,17 @@ procedure TSGRenderDirectX.ActiveTextureDiffuse();
 begin
 if FNowActiveNumberTexture = 0 then
 	begin
-	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	pDevice.SetTextureStageState(FNowActiveNumberTexture, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG1,     D3DTA_TEXTURE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG2,     D3DTA_DIFFUSE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP,       D3DTOP_MODULATE);
 	end
 else if FNowActiveNumberTexture = 1 then
 	begin
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0);
-	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP,       D3DTOP_MODULATE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG1,     D3DTA_TEXTURE);
+	//D3DTSS_COLORARG2 передается с преведущего этапа обработки изображения (c 0)
 	end;
 end;
 
@@ -263,14 +273,15 @@ begin
 if FNowActiveNumberTexture = 0 then
 	begin
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0 );
-	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP, D3DTOP_DOTPRODUCT3);
-	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG2, D3DTA_TFACTOR);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLOROP,       D3DTOP_DOTPRODUCT3);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG1,     D3DTA_TEXTURE);
+	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_COLORARG2,     D3DTA_TFACTOR);
 	end;
 end;
 
 procedure TSGRenderDirectX.ClientActiveTexture(const VTexture : TSGLongWord);
 begin
-
+FNowActiveClientNumberTexture := VTexture;
 end;
 
 procedure TSGRenderDirectX.ColorMaterial(const r,g,b,a : TSGSingle);
@@ -1139,6 +1150,7 @@ FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
 FNowTexture:=0;
 FNowActiveNumberTexture:=0;
+FNowActiveClientNumberTexture:=0;
 
 //==========Включаем Z-буфер
 pDevice.SetRenderState(D3DRS_ZENABLE, 1);
@@ -1232,6 +1244,7 @@ constructor TSGRenderDirectX.Create();
 begin
 inherited Create();
 FNowActiveNumberTexture:=0;
+FNowActiveClientNumberTexture:=0;
 FType:=SGRenderDirectX;
 FArTextures:=nil;
 pDevice:=nil;
