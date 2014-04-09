@@ -25,9 +25,7 @@ type
 	D3DXVector3 = TD3DXVector3;
 	D3DVector = D3DXVector3;
 	
-	TSGRDTypeDataBuffer=(SGRDTypeDataBufferVertex,SGRDTypeDataBufferColor,SGRDTypeDataBufferNormal,
-		SGRDTypeDataBufferTexVertex0,SGRDTypeDataBufferTexVertex1,SGRDTypeDataBufferTexVertex2,SGRDTypeDataBufferTexVertex3,
-		SGRDTypeDataBufferTexVertex4,SGRDTypeDataBufferTexVertex5,SGRDTypeDataBufferTexVertex6,SGRDTypeDataBufferTexVertex7);
+	TSGRDTypeDataBuffer=(SGRDTypeDataBufferVertex,SGRDTypeDataBufferColor,SGRDTypeDataBufferNormal,SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX=class(TSGRender)
 			public
 		constructor Create;override;
@@ -166,7 +164,7 @@ type
 		FEnabledClientStateVertex    : TSGBoolean;
 		FEnabledClientStateColor     : TSGBoolean;
 		FEnabledClientStateNormal    : TSGBoolean;
-		FEnabledClientStateTexVertex : array[0..7]of TSGBoolean;
+		FEnabledClientStateTexVertex : Boolean;
 		FVBOData:packed array [0..1] of TSGLongWord;
 		// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
 		// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
@@ -827,7 +825,7 @@ begin
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=True;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=True;
-SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex[FNowActiveClientNumberTexture]:=True;
+SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex:=True;
 SGR_COLOR_ARRAY:FEnabledClientStateColor:=True;
 end;
 end;
@@ -837,7 +835,7 @@ begin
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=False;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=False;
-SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex[FNowActiveClientNumberTexture]:=False;
+SGR_TEXTURE_COORD_ARRAY:FEnabledClientStateTexVertex:=False;
 SGR_COLOR_ARRAY:FEnabledClientStateColor:=False;
 end;
 end;
@@ -984,22 +982,8 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift,D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
 		if FEnabledClientStateNormal then
 			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
-		if FEnabledClientStateTexVertex[0] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex0].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[1] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex1].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[2] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex2].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[3] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex3].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[4] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex4].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[5] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex5].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[6] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex6].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[7] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex7].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
+		if FEnabledClientStateTexVertex then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
 		//Create format of vertex
 		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
 		VertexManipulator.Destroy();
@@ -1044,41 +1028,13 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferColor].FShift;
 	if FEnabledClientStateNormal and (BeginArray>FArDataBuffers[SGRDTypeDataBufferNormal].FShift) then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
-	if FEnabledClientStateTexVertex[0] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex0].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex0].FShift;
-	if FEnabledClientStateTexVertex[1] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex1].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex1].FShift;
-	if FEnabledClientStateTexVertex[2] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex2].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex2].FShift;
-	if FEnabledClientStateTexVertex[3] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex3].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex3].FShift;
-	if FEnabledClientStateTexVertex[4] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex4].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex4].FShift;
-	if FEnabledClientStateTexVertex[5] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex5].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex5].FShift;
-	if FEnabledClientStateTexVertex[6] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex6].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex6].FShift;
-	if FEnabledClientStateTexVertex[7] and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex7].FShift) then
-		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex7].FShift;
+	if FEnabledClientStateTexVertex and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift) then
+		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
 	
 	if FEnabledClientStateColor then
 		VertexType:=VertexType or D3DFVF_DIFFUSE;
-	if FEnabledClientStateTexVertex[0] then
-		VertexType:=VertexType or D3DFVF_TEX0;
-	if FEnabledClientStateTexVertex[1] then
+	if FEnabledClientStateTexVertex then
 		VertexType:=VertexType or D3DFVF_TEX1;
-	if FEnabledClientStateTexVertex[2] then
-		VertexType:=VertexType or D3DFVF_TEX2;
-	if FEnabledClientStateTexVertex[3] then
-		VertexType:=VertexType or D3DFVF_TEX3;
-	if FEnabledClientStateTexVertex[4] then
-		VertexType:=VertexType or D3DFVF_TEX4;
-	if FEnabledClientStateTexVertex[5] then
-		VertexType:=VertexType or D3DFVF_TEX5;
-	if FEnabledClientStateTexVertex[6] then
-		VertexType:=VertexType or D3DFVF_TEX6;
-	if FEnabledClientStateTexVertex[7] then
-		VertexType:=VertexType or D3DFVF_TEX7;
 	if FEnabledClientStateNormal then
 		VertexType:=VertexType or D3DFVF_NORMAL;
 	pDevice.BeginScene();
@@ -1099,22 +1055,8 @@ else
 			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferColor].FShift,D3DDECLTYPE_D3DCOLOR,D3DDECLUSAGE_COLOR);
 		if FEnabledClientStateNormal then
 			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferNormal].FShift,D3DDECLTYPE_FLOAT3,D3DDECLUSAGE_NORMAL);
-		if FEnabledClientStateTexVertex[0] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex0].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[1] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex1].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[2] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex2].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[3] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex3].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[4] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex4].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[5] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex5].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[6] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex6].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
-		if FEnabledClientStateTexVertex[7] then
-			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex7].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
+		if FEnabledClientStateTexVertex then
+			VertexManipulator.AddElement(FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift,D3DDECLTYPE_FLOAT2,D3DDECLUSAGE_TEXCOORD);
 		//Create format of vertex
 		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration:=VertexManipulator.CreateVertexDeclaration(pDevice);
 		VertexManipulator.Destroy();
@@ -1144,24 +1086,12 @@ FArDataBuffers[SGRDTypeDataBufferColor].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 procedure TSGRenderDirectX.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-var
-	a : TSGRDTypeDataBuffer;
-begin
-case FNowActiveClientNumberTexture of
-0 : a := SGRDTypeDataBufferTexVertex0;
-1 : a := SGRDTypeDataBufferTexVertex1;
-2 : a := SGRDTypeDataBufferTexVertex2;
-3 : a := SGRDTypeDataBufferTexVertex3;
-4 : a := SGRDTypeDataBufferTexVertex4;
-5 : a := SGRDTypeDataBufferTexVertex5;
-6 : a := SGRDTypeDataBufferTexVertex6;
-7 : a := SGRDTypeDataBufferTexVertex7;
-end;
-FArDataBuffers[a].FQuantityParams:=VQChannels;
-FArDataBuffers[a].FVBOBuffer:=FVBOData[0];
-FArDataBuffers[a].FDataType:=VType;
-FArDataBuffers[a].FSizeOfOneVertex:=VSize;
-FArDataBuffers[a].FShift:=TSGMaxEnum(VBuffer);
+begin 
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FQuantityParams:=VQChannels;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FVBOBuffer:=FVBOData[0];
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FDataType:=VType;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FSizeOfOneVertex:=VSize;
+FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift:=TSGMaxEnum(VBuffer);
 end;
 
 procedure TSGRenderDirectX.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
@@ -1323,14 +1253,7 @@ FArBuffers:=nil;
 FEnabledClientStateVertex:=False;
 FEnabledClientStateColor:=False;
 FEnabledClientStateNormal:=False;
-FEnabledClientStateTexVertex[0]:=False;
-FEnabledClientStateTexVertex[1]:=False;
-FEnabledClientStateTexVertex[2]:=False;
-FEnabledClientStateTexVertex[3]:=False;
-FEnabledClientStateTexVertex[4]:=False;
-FEnabledClientStateTexVertex[5]:=False;
-FEnabledClientStateTexVertex[6]:=False;
-FEnabledClientStateTexVertex[7]:=False;
+FEnabledClientStateTexVertex:=False;
 FVBOData[0]:=0;
 FVBOData[1]:=0;
 FillChar(FArDataBuffers,SizeOf(FArDataBuffers),0);
