@@ -53,6 +53,8 @@ procedure Draw(const Context:TSGContext);
 begin
 if DrawClass<>nil then
 	DrawClass.Draw();
+if Context.KeyPressed and (Context.KeyPressedChar=#27) then
+	Context.Close();
 end;
 
 procedure Init(const MyContext:TSGContext);

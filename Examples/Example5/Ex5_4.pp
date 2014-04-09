@@ -81,8 +81,8 @@ end;
 
 begin
 inherited Create(VContext);
-Context.ShowCursor(False);
 Context.CursorInCenter:=True;
+Context.ShowCursor(False);
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -154,6 +154,7 @@ var
 
 begin
 FCamera.CallAction();
+Render.Color3f(1,1,1);
 
 dt1.Get();
 if FPhysics<>nil then

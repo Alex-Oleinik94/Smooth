@@ -513,7 +513,7 @@ end;
 				end
 			else if s='CFTPUARU' then
 				begin
-				SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
+				SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]),True);
 				SGRegisterUnit(SGPCharToString(argv[4]),SGPCharToString(argv[5]));
 				end
 			else if s='CFTPU' then
@@ -521,13 +521,19 @@ end;
 				if (SGUpCaseString(SGPCharToString(argv[2]))='-H') or (SGUpCaseString(SGPCharToString(argv[2]))='-HELP') then
 					begin
 					WriteLn('This help for SaGe program : "ConvertFileToPascalUnit".');
-					WriteLn('   Use: "-CFTPU P1 P2 P3"');
+					WriteLn('   Use: "-CFTPU P1 P2 P3 P4"');
 					WriteLn('   P1 is way to input file');
-					WriteLn('   P2 is way to output file');
+					WriteLn('   P2 is way to output file directory');
 					WriteLn('   P3 is name of pascal unit');
+					WriteLn('   P4 is FALSE or TRUE');
 					end
 				else
-					SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]));
+					begin
+					if (SGUpCaseString(SGPCharToString(argv[5]))='FALSE') then
+						SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]),False)
+					else
+						SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]),True);
+					end;
 				end
 			else if s='FPCTC' then
 				begin

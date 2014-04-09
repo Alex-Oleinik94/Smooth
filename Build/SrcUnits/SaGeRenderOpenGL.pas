@@ -241,11 +241,8 @@ glClientActiveTextureARB(GL_TEXTURE0_ARB + VTexture);
 end;
 
 procedure TSGRenderOpenGL.ColorMaterial(const r,g,b,a : TSGSingle);
-var
-	c : TSGColor4f;
 begin
-c.Import(r,g,b,a);
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, @c);
+glColor4f(r,g,b,a);
 end;
 
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;

@@ -1505,7 +1505,8 @@ procedure TSG3dObject.BasicDraw(); inline;
 var
 	Index : TSGLongWord;
 begin
-Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
+if (FObjectMaterialID=-1) and (FQuantityFaceArrays=0) then
+	Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1723,7 +1724,8 @@ if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
 
-Render.ColorMaterial(1,1,1,1);
+if (FObjectMaterialID=-1) and (FQuantityFaceArrays=0) then
+	Render.ColorMaterial(1,1,1,1);
 end;
 
 procedure TSG3dObject.LoadToVBO();

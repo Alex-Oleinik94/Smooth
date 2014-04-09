@@ -138,7 +138,7 @@ var
 
 begin
 FCamera.CallAction();
-
+Render.Color3f(1,1,1);
 dt1.Get();
 if FPhysics<>nil then
 	FPhysics.Draw();
