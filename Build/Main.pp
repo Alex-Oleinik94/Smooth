@@ -110,6 +110,7 @@ var //for cmd
 	FGoToExit:TSGBoolean = False;
 	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
 begin
+SGLog.Sourse('sadasdasdas');
 {$IFNDEF ANDROID}
 if (Prt='CMD') and (argc>2) then
 	begin
@@ -179,7 +180,7 @@ Context:=
 		{$ENDIF}
 	{$ENDIF}
 		.Create();
-	
+SGLog.Sourse('sadasdasdas');
 with Context do
 	begin
 	Width:=GetScreenResolution.x;
@@ -211,10 +212,11 @@ with Context do
 			RenderClass:=TSGRenderOpenGL;
 	end;
 
+SGLog.Sourse('sadasdasdas');
 Context.Initialize();
-
+SGLog.Sourse('sadasdasdas');
 repeat
-
+SGLog.Sourse('sadasdasdas');
 Context.Run();
 
 if Context.Active and (Context.FNewContextType<>nil) then

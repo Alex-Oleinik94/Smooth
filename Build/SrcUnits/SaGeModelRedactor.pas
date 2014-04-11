@@ -62,10 +62,15 @@ with TSGModelRedactor(Button.FUserPointer1) do
 	if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='3DS' then
 		Suc:=FCustomModel.Load3DSFromStream(Stream,TSGEdit(Button.FUserPointer2).Caption)
 	else
-		begin
-		FCustomModel.LoadFromSG3DM(Stream);
-		Suc:=FCustomModel.QuantityObjects+FCustomModel.QuantityMaterials<>0;
-		end;
+		if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='OBJ' then
+			begin
+			FCustomModel.AddObject().LoadFromOBJ(TSGEdit(Button.FUserPointer2).Caption);
+			end
+		else
+			begin
+			FCustomModel.LoadFromSG3DM(Stream);
+			Suc:=FCustomModel.QuantityObjects+FCustomModel.QuantityMaterials<>0;
+			end;
 	Stream.Destroy();
 	
 	if Suc then

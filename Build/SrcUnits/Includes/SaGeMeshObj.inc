@@ -1,4 +1,4 @@
-procedure TSG3DObject.LoadFromOBJ(const FFileName:string);
+procedure TSG3DObject.LoadFromOBJ(const FFileName:string;const opf : PTextFile = nil);
 
 function ObjReadComand(var pf:TextFile):TSGString;
 var
@@ -279,7 +279,7 @@ else if Comand = 'v' then
 	ObjAddVertex()
 else if Comand = 'vn' then
 	ObjAddNormal()
-else if Comand = 'g' then
+else if (Comand = 'g') or (Comand='o') then
 	Name := ObjReadLnString(f)
 else if Comand = 'vt' then
 	ObjAddTexCoord()

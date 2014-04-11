@@ -4,19 +4,24 @@ unit SaGePhysics;
 interface
 
 uses 
-	SaGeBase
+	Crt
+	,SysUtils
+	,Classes
+	,SaGeBase
 	,SaGeBased
 	,SaGeMesh
 	,PAPPE
 	,SaGeContext
 	,SaGeCommon
 	,SaGeRender
+	,SaGeImages
 	;
 const
 	SGPBodySphere  = PAPPE.BodySphere;
 	SGPBodyBox     = PAPPE.BodyBox;
 	SGPBodyCapsule = PAPPE.BodyCapsule;
 	SGPBodyMesh    = PAPPE.BodyMesh;
+	SGPBodyHeightMap = PAPPE.BodyHeightMap;
 type
 	TSGPhysics=class;
 	
@@ -38,6 +43,7 @@ type
 		procedure InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
 		procedure InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
 		procedure InitMesh (const Mesh : TSG3DObject);
+		procedure InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);register;//inline;
 		procedure SetDrawableMesh(const Mesh : TSG3DObject);
 		procedure SetVertex( const x,y,z : TSGVertexType );inline;overload;
 		procedure SetVertex( const v : TSGVertex3f );inline;overload;
@@ -155,7 +161,7 @@ FObjects[High(FObjects)]:=TSGPhysicsObject.Create(Context);
 FObjects[High(FObjects)].FDynamic := VDynamic;
 FObjects[High(FObjects)].FType := VType;
 FObjects[High(FObjects)].PhysicsClass:=Self;
-if VDynamic then
+if VDynamic or (VType=SGPBodyHeightMap) then
 	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType)
 else
 	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType,PAPPE.BodyMesh);
@@ -377,6 +383,41 @@ PAPPE.PhysicsObjectAddMesh          (FObject);
 PAPPE.PhysicsObjectMeshCreateBox    (FObject.Meshs^[0]^,x,y,z);
 PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
 PAPPE.PhysicsObjectFinish           (FObject);
+end;
+
+procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);register;//inline;
+var
+	Image : TSGImage = nil;
+procedure GoMap();
+var
+	i, ii, iii : TSGWord;
+	HMD : array of TSGSingle;
+begin
+WriteLn(Image.Width * Image.Height);
+Image.Image.WriteInfo();
+SetLength(HMD,Image.Width * Image.Height);
+Image.Image.WriteInfo();
+for i := 0 to Image.Width * Image.Height - 1 do
+	begin
+	iii :=0;
+	for ii := 0 to Image.Channels - 1 do
+		iii += Image.Image.BitMap[i * Image.Channels + ii];
+	HMD[i] := md + (iii/(Image.Channels*255))*Abs(mt-md);
+	end;
+PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
+SetLength(HMD,0);
+end;
+begin
+Image := TSGImage.Create();
+Image .Context := Context;
+Image .Way := VFileName;
+if Image.Loading() then
+	begin
+	PAPPE.PhysicsObjectAddMesh(FObject);
+	GoMap();
+	PAPPE.PhysicsObjectFinish(FObject);
+	end;
+Image.Destroy();
 end;
 
 procedure TSGPhysicsObject.InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;

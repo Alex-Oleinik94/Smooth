@@ -397,7 +397,7 @@ type
 		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
 		// Загрузка из текстовова формата файлов *.obj
-		procedure LoadFromOBJ(const FFileName:string);virtual;
+		procedure LoadFromOBJ(const FFileName:string;const opf : PTextFile = nil);virtual;
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
