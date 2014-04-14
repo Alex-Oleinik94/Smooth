@@ -43,7 +43,7 @@ type
 		procedure InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
 		procedure InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
 		procedure InitMesh (const Mesh : TSG3DObject);
-		procedure InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);register;//inline;
+		procedure InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
 		procedure SetDrawableMesh(const Mesh : TSG3DObject);
 		procedure SetVertex( const x,y,z : TSGVertexType );inline;overload;
 		procedure SetVertex( const v : TSGVertex3f );inline;overload;
@@ -385,28 +385,11 @@ PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
 PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
-procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);register;//inline;
+procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
 var
 	Image : TSGImage = nil;
-procedure GoMap();
-var
 	i, ii, iii : TSGWord;
-	HMD : array of TSGSingle;
-begin
-WriteLn(Image.Width * Image.Height);
-Image.Image.WriteInfo();
-SetLength(HMD,Image.Width * Image.Height);
-Image.Image.WriteInfo();
-for i := 0 to Image.Width * Image.Height - 1 do
-	begin
-	iii :=0;
-	for ii := 0 to Image.Channels - 1 do
-		iii += Image.Image.BitMap[i * Image.Channels + ii];
-	HMD[i] := md + (iii/(Image.Channels*255))*Abs(mt-md);
-	end;
-PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
-SetLength(HMD,0);
-end;
+	HMD : packed array of TSGSingle = nil;
 begin
 Image := TSGImage.Create();
 Image .Context := Context;
@@ -414,8 +397,17 @@ Image .Way := VFileName;
 if Image.Loading() then
 	begin
 	PAPPE.PhysicsObjectAddMesh(FObject);
-	GoMap();
+	SetLength(HMD,Image.Width * Image.Height);
+	for i := 0 to Image.Width * Image.Height - 1 do
+		begin
+		iii :=0;
+		for ii := 0 to Image.Channels - 1 do
+			iii += Image.Image.BitMap[i * Image.Channels + ii];
+		HMD[i] := md + (iii/(Image.Channels*255))*Abs(mt-md);
+		end;
+	PAPPE.PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
 	PAPPE.PhysicsObjectFinish(FObject);
+	SetLength(HMD,0);
 	end;
 Image.Destroy();
 end;

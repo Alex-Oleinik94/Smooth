@@ -64,7 +64,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (*                                                                              *)
 (********************************************************************************)
 
+{$IF defined(CPU386) and defined(CPU32)}
+	{$DEFINE WITHASMINC}
+	{$ENDIF}
+
 unit PAPPE;
+
 {$mode delphi}
 {$warnings off}
 {$hints off}
@@ -1411,7 +1416,7 @@ begin
  result:=sin(Angle)/cos(Angle);
 end;
 
-{$if defined(CPU386) and defined(CPU32)}
+{$IFDEF WITHASMINC}
 function Frac(x:TPhysicsFloat):TPhysicsFloat; assembler; {$ifdef physicsstdcall}stdcall;{$else}{$ifdef physicscdecl}cdecl;{$else}{$ifdef physicsregister}register;{$endif}{$endif}{$endif}
 asm
  fld x

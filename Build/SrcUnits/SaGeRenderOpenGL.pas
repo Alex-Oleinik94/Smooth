@@ -621,6 +621,8 @@ glFogf (GL_FOG_END, 400);
 glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);
 
+glDisable(GL_FOG);
+
 glClearColor(0,0,0,0);
 glEnable(GL_DEPTH_TEST);
 {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
@@ -758,7 +760,7 @@ else
 	if Mode = SG_3D_ORTHO then
 		begin
 		{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthof{$ENDIF}
-			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),0,500);
+			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),TSGRenderNear,TSGRenderFar);
 		Enable(SGR_DEPTH_TEST);
 		end
 	else
@@ -766,7 +768,7 @@ else
 		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я 
 		//Думаю все таки надуюсь, что gluPerspective будет работать чуть чуть быстрее чем моя процедурка.
 		{$IFNDEF MOBILE}gluPerspective{$ELSE}SGRGLPerspective{$ENDIF}
-			(45, CWidth / CHeight, 0.0011, 500);
+			(45, CWidth / CHeight, TSGRenderNear, TSGRenderFar);
 		Enable(SGR_DEPTH_TEST);
 		end;
 glMatrixMode(GL_MODELVIEW);

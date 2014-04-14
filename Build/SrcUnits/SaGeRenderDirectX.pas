@@ -1344,14 +1344,14 @@ FNowMatrixMode:=D3DTS_VIEW;
 LoadIdentity();
 if Mode=SG_3D then
 	begin
-	Matrix:=D3DMATRIX(SGGetPerspectiveMatrix(45,CWidth/CHeight,0.0011,500));
+	Matrix:=D3DMATRIX(SGGetPerspectiveMatrix(45,CWidth/CHeight,TSGRenderNear,TSGRenderFar));
 	pDevice.SetTransform(D3DTS_PROJECTION, Matrix);
 	Enable(SGR_DEPTH_TEST);
 	end
 else
 	if Mode=SG_3D_ORTHO then
 		begin
-		D3DXMatrixOrthoLH(Matrix1,D3DX_PI/4*dncht*30,D3DX_PI/4*dncht*30/CWidth*CHeight,0.0011,500);
+		D3DXMatrixOrthoLH(Matrix1,D3DX_PI/4*dncht*30,D3DX_PI/4*dncht*30/CWidth*CHeight,TSGRenderNear,TSGRenderFar);
 		D3DXMatrixScaling(Matrix2,1,1,-1);
 		D3DXMatrixMultiply(Matrix,Matrix1,Matrix2);
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix);

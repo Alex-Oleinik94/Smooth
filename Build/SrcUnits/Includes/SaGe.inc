@@ -33,6 +33,6 @@
 {$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
 
-{$IF defined(CPU386) and (not defined(ANDROID)) and defined(CPU32)}
+{$IF defined(CPU386) and defined(CPU32)}
 	{$DEFINE WITHASMINC}
 	{$ENDIF}

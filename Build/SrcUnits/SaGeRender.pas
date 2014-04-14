@@ -11,6 +11,9 @@ uses
 // Это включаются в текст программы константы,типа SGR_TRIANGLES
 {$INCLUDE Includes\SaGeRenderConstants.inc}
 
+const
+	TSGRenderFar = 10000;
+	TSGRenderNear = 0.001;
 type
 	TSGMatrixMode   = TSGLongWord;
 	TSGPrimtiveType = TSGLongWord;
