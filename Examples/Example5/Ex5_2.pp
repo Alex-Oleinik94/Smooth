@@ -98,7 +98,7 @@ FPhysicsTimeIndex:=0;
 FPhysics:=TSGPhysics.Create(Context);
 
 FPhysics.AddObjectBegin(SGPBodyHeightMap,False);
-FPhysics.LastObject().InitHeightMapFromImage('Map.bmp',20,0,1024,1024);
+FPhysics.LastObject().InitHeightMapFromImage('Map.jpg',50,0,1024,1024);
 FPhysics.LastObject().AddObjectEnd();
 FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(1,1,1);
 

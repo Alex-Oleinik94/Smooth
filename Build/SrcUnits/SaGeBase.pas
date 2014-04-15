@@ -2702,7 +2702,7 @@ SGLog.Sourse('(***) SaGe Engine Log (***)',False);
 SGLog.Sourse('  << Create Log >>');
 except
 SGLogEnable:=False;
-SGLog:=TSGLog.Create;
+SGLog:=TSGLog.Create();
 end;
 
 Nan:=sqrt(-1);
@@ -2713,7 +2713,7 @@ end;
 finalization
 begin
 SGLog.Sourse('  << Destroy Log >>');
-SGLog.Destroy;
+SGLog.Destroy();
 end;
 
 end.

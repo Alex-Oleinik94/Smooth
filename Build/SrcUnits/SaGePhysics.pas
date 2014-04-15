@@ -388,7 +388,7 @@ end;
 procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
 var
 	Image : TSGImage = nil;
-	i, ii, iii : TSGWord;
+	i, ii, iii : TSGMaxEnum;
 	HMD : packed array of TSGSingle = nil;
 begin
 Image := TSGImage.Create();
