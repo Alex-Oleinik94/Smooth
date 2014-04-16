@@ -356,13 +356,15 @@ end;
 
 function TSGImage.Loading():TSGBoolean;
 begin
+{$IFDEF ANDROID}SGLog.Sourse('Enterind "TSGImage__Loading".');{$ENDIF}
+
 Result:=False;
 LoadToMemory();
 if (FStream<>nil) and (FStream.Size<>0) then
-	LoadToBitMap()
-else
-	Exit;
+	LoadToBitMap();
 Result:=ReadyToGoToTexture;
+
+{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__Loading". Result = "'+SGStr(Result)+'"');{$ENDIF}
 end;
 
 procedure TSGImage.SetBitMapBits(const Value:Cardinal);
@@ -564,8 +566,9 @@ begin
 Result:=FileBits[Position]+FileBits[Position+1]*256+FileBits[Position+2]*256*256+FileBits[Position+3]*256*256*256;
 end;
 
-function TSGImage.LoadToBitMap:TSGBoolean;
+function TSGImage.LoadToBitMap():TSGBoolean;
 begin
+{$IFDEF ANDROID}SGLog.Sourse('Enterind "TSGImage__LoadToBitMap".');{$ENDIF}
 Result:=False;
 FStream.Position:=0;
 if (FStream.Size<2) then
@@ -624,6 +627,7 @@ if (not Result) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
 		{$ENDIF}
 	end;
 FReadyToGoToTexture:=Result;
+{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
 end;
 
 procedure TSGImage.FreeSream();
@@ -660,6 +664,7 @@ else
 	end;
 SGResourseFiles.LoadMemoryStreamFromFile(FStream,FWay);
 FStream.Position:=0;
+{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__LoadToMemory". Way="'+FWay+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
 end;
 
 procedure TSGImage.ToTexture();

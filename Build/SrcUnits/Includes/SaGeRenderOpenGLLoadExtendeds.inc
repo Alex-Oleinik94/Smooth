@@ -1,4 +1,5 @@
 {$IFDEF SG_RENDER_EICR}
+{$IFNDEF MOBILE}
 	SGIsSuppored_GL_version_1_2:= False;
 	SGIsSuppored_GL_version_1_3:= False;
 	SGIsSuppored_GL_ARB_imaging:= False;
@@ -214,10 +215,12 @@
 	SGIsSuppored_GL_VERSION_3_3:= False;
 	SGIsSuppored_GL_VERSION_4_0:= False;
 {$ENDIF}
+{$ENDIF}
 
 
 
 {$IFDEF SG_RENDER_EIC}
+{$IFNDEF MOBILE}
 	SGIsSuppored_GL_version_1_2:Boolean {= False};
 	SGIsSuppored_GL_version_1_3:Boolean {= False};
 	SGIsSuppored_GL_ARB_imaging:Boolean {= False};
@@ -433,10 +436,11 @@
 	SGIsSuppored_GL_VERSION_3_3:Boolean {= False};
 	SGIsSuppored_GL_VERSION_4_0:Boolean {= False};
 {$ENDIF}
+{$ENDIF}
 
 
 {$IFDEF SG_RENDER_EP}
-{$IFNDEF ANDROID}
+{$IFNDEF MOBILE}
 procedure TSGRenderOpenGL.LoadExtendeds();
 var
 	Extendeds:packed array of string;

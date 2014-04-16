@@ -3079,6 +3079,7 @@ var
 	i:LongWord;
 	Render:TSGRender = nil;
 begin
+//{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenPaint". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
 Render:=Context.Render;
 if FNewPosition<>FOldPosition then
 	begin
@@ -3118,6 +3119,7 @@ if FNewPosition<>FOldPosition then
 	end;
 if FNewPosition=FOldPosition then
 	begin
+	//{$IFDEF ANDROID}SGLog.Sourse('"SGScreenPaint" : Enter if "FNewPosition=FOldPosition".');{$ENDIF}
 	SGScreen.InProcessing := True;
 	
 	if SGScreen<>nil then
@@ -3237,6 +3239,7 @@ if FNewPosition=FOldPosition then
 			end;
 		end;
 		end;
+	//{$IFDEF ANDROID}SGLog.Sourse('"SGScreenPaint" : Leav if "FNewPosition=FOldPosition".');{$ENDIF}
 	end;
 end;
 
@@ -3252,6 +3255,8 @@ end;
 
 procedure SGScreenLoad(const Context:TSGContext);
 begin
+{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
+
 if SGScreen<>nil then
 	Exit;
 
@@ -3273,12 +3278,14 @@ SGScreen.Font.Loading();
 ComboBoxImage:=TSGImage.Create(SGTextureDirectory+Slash+'ComboBoxImage.sgia');
 ComboBoxImage.SetContext(Context);
 ComboBoxImage.Loading();
+
+{$IFDEF ANDROID}SGLog.Sourse('Leaving "SGScreenLoad".');{$ENDIF}
 end;
 
 initialization
 begin
 FNewPosition:=0;
-FNewPosition:=0;
+FOldPosition:=0;
 SGSetScreenProcedure(@SGScreenPaint);
 SGSetScreenLoadProcedure(@SGScreenLoad);
 SCSetScreenScreenBounds(@SGScreenResizeScreen);

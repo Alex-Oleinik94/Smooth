@@ -158,12 +158,7 @@ const
 	SGUnixEoln = #10;
 	SGWinEoln  = #13+#10;
 	SGMacEoln  = #13;
-	SGDataDirectory = 
-		{$IFNDEF ANDROID}
-			'.'+Slash+'..'+Slash+'Data'
-		{$ELSE}
-			'/data/data'
-			{$ENDIF};
+	SGDataDirectory = '.'+Slash+'..'+Slash+'Data';
 	SGFontDirectory = SGDataDirectory + Slash +'Fonts';
 	SGTextureDirectory = SGDataDirectory + Slash +'Textures';
 	SGTexturesDirectory = SGTextureDirectory;

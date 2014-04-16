@@ -48,7 +48,7 @@ type
 			private
 		FLastTouch:TSGPoint2f;
 		FInitialized:Boolean;
-		procedure InitWindow();
+		function InitWindow():TSGBoolean;
 			public
 		function Get(const What:string):Pointer;override;
 			public
@@ -141,8 +141,8 @@ begin
 Active:=True;
 end;
 
-procedure TSGContextAndroid.InitWindow();
-//{$DEFINE SGDEPTHANDROID24}
+function TSGContextAndroid.InitWindow():TSGBoolean;
+{$DEFINE SGDEPTHANDROID24}
 const
 	Attribs: array[0..{$IFDEF SGDEPTHANDROID24}10{$ELSE}8{$ENDIF}] of EGLint = (
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -155,6 +155,7 @@ var
 	Format,NumConfigs: EGLint;
 	FunctiosResult : TSGMaxEnum;
 begin
+Result:=False;
 SGLog.Sourse('Entering "TSGContextAndroid.InitWindow".');
 FDisplay:=eglGetDisplay(EGL_DEFAULT_DISPLAY);
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
@@ -173,7 +174,10 @@ if FRender=nil then
 	FRender:=FRenderClass.Create();
 	FRender.Window:=Self;
 	if FRender.CreateContext() then 
-		FRender.Init()
+		begin
+		FRender.Init();
+		Result:=True;
+		end
 	else
 		Active:=False;
 	end
@@ -184,6 +188,7 @@ else
 		Render.MakeCurrent()
 	else
 		Active:=False;
+	Result:=True;
 	end;
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Render created!');
 Width:=GetScreenResolution().x;
@@ -220,7 +225,7 @@ engine^.app^.savedStateSize := sizeof(Tsaved_state);
 APP_CMD_INIT_WINDOW://Иницианализируем окно
 	begin
 	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_INIT_WINDOW"');
-	InitWindow();
+	Active:=InitWindow();
 	end;
 APP_CMD_TERM_WINDOW://Убиваем окно
 	begin
@@ -236,6 +241,12 @@ APP_CMD_LOST_FOCUS://Тогда когда приложение свернуто/блакировка экрана или т п, 
 	begin
 	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_LOST_FOCUS"');
 	FAnimating:=0;
+	end;
+APP_CMD_CONFIG_CHANGED://Поворот экрана и т п
+	begin
+	SGLog.Sourse('"TSGContextAndroid.HandleCommand" : Comand is "APP_CMD_CONFIG_CHANGED"');
+	FAnimating:=1;
+	///.......
 	end;
 end;
 SGLog.Sourse('Leaving "TSGContextAndroid.HandleCommand".');
@@ -282,38 +293,35 @@ FAndroidApp^.UserData := Self;
 FAndroidApp^.OnAppCmd:=@TSGContextAndroid_HandleComand;
 FAndroidApp^.OnInputEvent:=@TSGContextAndroid_HandleInput;
 Messages();
+SGLog.Sourse('"TSGContextAndroid.Run" : before circle Active="'+SGStr(Active)+'".');
 while FActive and (FNewContextType=nil) do
 	begin
 	//Calc ElapsedTime
 	FDT.Get();
-	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
+	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds();
 	FElapsedDateTime:=FDT;
-	if FDisplay<>nil then
-		if FAnimating<>0 then
-			begin
-			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			Render.InitMatrixMode(SG_3D);
-			if FCallDraw<>nil then
-				FCallDraw(Self);
-			//SGIIdleFunction;
-			
-			ClearKeys();
-			Messages();
-			
-			if SGScreenPaintProcedure<>nil then
-				SGScreenPaintProcedure(Self);
-			SwapBuffers();
-			end
-		else
-			begin
-			ClearKeys();
-			Messages();
-			
-			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			SwapBuffers();
-			end
+	
+	if (FDisplay<>nil) and (FAnimating<>0) then
+		begin
+		//SGLog.Sourse('"TSGContextAndroid.Run" : Begin paint!');
+		Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+		Render.InitMatrixMode(SG_3D);
+		if FCallDraw<>nil then
+			FCallDraw(Self);
+		//SGIIdleFunction;
+		
+		ClearKeys();
+		Messages();
+		
+		if SGScreenPaintProcedure<>nil then
+			SGScreenPaintProcedure(Self);
+		//SGLog.Sourse('"TSGContextAndroid.Run" : go SwapBuffers()...');
+		SwapBuffers();
+		//SGLog.Sourse('"TSGContextAndroid.Run" : End paint...');
+		end
 	else
 		begin
+		//SGLog.Sourse('"TSGContextAndroid.Run" : Wait!');
 		Messages();
 		end;
 	end;
@@ -330,7 +338,7 @@ var
 	Ident, Events, Val: cint;
 	source: PAndroid_Poll_Source;
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.Messages".');
+//SGLog.Sourse('Entering "TSGContextAndroid.Messages".');
 if FAnimating<>0 then
 	Val:=0
 else
@@ -364,14 +372,14 @@ while (Ident >= 0) do
 		Val := -1;
 	Ident := ALooper_pollAll(Val, nil, @Events,@Source);
 	end; 
-inherited;
-SGLog.Sourse('Leaving "TSGContextAndroid.Messages".');
+if FAnimating <> 0 then
+	inherited;
+//SGLog.Sourse('Leaving "TSGContextAndroid.Messages".');
 end;
 
 procedure TSGContextAndroid.InitFullscreen(const b:boolean); 
 begin
 FFullscreen := True;
-//inherited InitFullscreen(b);
 end;
 
 end.

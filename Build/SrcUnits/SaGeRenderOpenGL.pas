@@ -2,19 +2,21 @@
 unit SaGeRenderOpenGL;
 interface
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeRender
 	,SaGeCommon
 	,Math
+	{$IFDEF ANDROID}
+		,egl
+		,android_native_app_glue
+		{$ENDIF}
 	{$IFNDEF MOBILE}
 		,gl
 		,glu
 		,glext
 	{$ELSE}
 		,gles
-		,egl
-		,android_native_app_glue
 		{$ENDIF}
 	{$IFDEF MSWINDOWS}
 		,windows
@@ -22,8 +24,6 @@ uses
 	{$IFDEF UNIX}
 		,Dl
 		,unix
-		{$ENDIF}
-	{$IFDEF ANDROID}
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,glx
@@ -367,7 +367,11 @@ end;
 
 function TSGRenderOpenGL.SupporedVBOBuffers:Boolean;
 begin
-Result:=SGIsSuppored_GL_ARB_vertex_buffer_object;
+{$IFDEF MOBILE}
+	Result:=True;
+{$ELSE}
+	Result:=SGIsSuppored_GL_ARB_vertex_buffer_object;
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.PointSize(const PS:Single);
@@ -817,6 +821,7 @@ Result:=False;
 		{$IFDEF ANDROID}
 			FContext := eglCreateContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+			Result:=TSGMaxEnum(FContext)<>0;
 		{$ELSE}
 			{$IFDEF DARWIN}
 				if SetPixelFormat() then begin
@@ -932,6 +937,7 @@ begin
 			Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
+			
 			if (FWindow<>nil) and (FContext<>nil) then 
 				if eglMakeCurrent(
 					FWindow.Get('DESKTOP WINDOW HANDLE'), 
