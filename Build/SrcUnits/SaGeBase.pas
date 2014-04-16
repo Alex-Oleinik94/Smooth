@@ -158,16 +158,6 @@ const
 	SGUnixEoln = #10;
 	SGWinEoln  = #13+#10;
 	SGMacEoln  = #13;
-	SGEoln     = 
-		{$IFDEF MSWINDOWS}
-			SGWinEoln
-		{$ELSE}
-			{$IFDEF DARWIN}
-				SGMacEoln
-			{$ELSE}
-				SGUnixEoln
-				{$ENDIF}
-			{$ENDIF};
 	SGDataDirectory = 
 		{$IFNDEF ANDROID}
 			'.'+Slash+'..'+Slash+'Data'
@@ -1196,7 +1186,7 @@ while not eof(f) do
 			end;
 		if FArF[iii-1]=nil then
 			FArF[iii-1]:=TFileStream.Create(NameFolder+Slash+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
-		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+SGEoln,FArF[iii-1],False);
+		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+SGWinEoln,FArF[iii-1],False);
 		end;
 	end;
 close(f);
@@ -1758,7 +1748,7 @@ begin
 if SGLogEnable then
 if not WithTime then
 	begin
-	pc:=SGStringToPChar(s+SGEoln);
+	pc:=SGStringToPChar(s+SGWinEoln);
 	FFileStream.WriteBuffer(pc^,Length(s)+2);
 	FreeMem(pc,Length(s)+3);
 	end
@@ -1768,7 +1758,7 @@ else
 	with a do
 		ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
 			'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
-	pc:=SGStringToPChar(ss+SGEoln);
+	pc:=SGStringToPChar(ss+SGWinEoln);
 	FFileStream.WriteBuffer(pc^,Length(ss)+2);
 	FreeMem(pc,Length(ss)+3);
 	end;

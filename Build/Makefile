@@ -28,7 +28,6 @@ ios:
 lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
 build_files:
-sd:
 	@$(MAKE) clear_files
 	@"./../Binaries/Main" -CFTPUARU "./../data/fonts/Tahoma.sgf"                         ../build/srcunits/temp tahoma_font          ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/fonts/Times New Roman.sgf"                ../build/srcunits/temp times_new_roman_font ../build/srcunits/temp/SaGeRMFiles.inc
