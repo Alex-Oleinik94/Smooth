@@ -33,6 +33,7 @@ type
 		procedure Start();
 			public
 		function AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGBoolean = False):TSGModel;
+		function LastModel():TSGModel;inline;
 			public
 		property Player : TSGInt64  read FPlayerModel;
 		property Camera : TSGCamera read FCamera;
@@ -40,6 +41,14 @@ type
 		end;
 
 implementation
+
+function TSGScene.LastModel():TSGModel;inline;
+begin
+if FNods=nil then
+	Result:=nil
+else
+	Result:=FNods[High(FNods)] as TSGModel;
+end;
 
 function TSGScene.AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGBoolean = False):TSGModel;
 var

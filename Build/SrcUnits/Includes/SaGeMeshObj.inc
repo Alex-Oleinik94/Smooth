@@ -280,7 +280,16 @@ else if Comand = 'v' then
 else if Comand = 'vn' then
 	ObjAddNormal()
 else if (Comand = 'g') or (Comand='o') then
-	Name := ObjReadLnString(f)
+	begin
+	Comand := ObjReadLnString(f);
+	if Name = '' then
+		Name := Comand
+	else
+		begin
+		FParent.AddObject().Name := Comand;
+		FParent.LastObject().LoadFromOBJ(FFileName,@f);
+		end;
+	end
 else if Comand = 'vt' then
 	ObjAddTexCoord()
 else if Comand = 'usemtl' then

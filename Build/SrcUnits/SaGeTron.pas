@@ -60,7 +60,11 @@ end;
 end;
 
 procedure TSGGameTron.Load();
+var
+	Model : TSGCustomModel;
 begin
+Model:=TSGCustomModel.Create();
+
 while FLoadClass.Progress < 1 do
 	begin
 	FLoadClass.Progress := FLoadClass.Progress + 0.01;

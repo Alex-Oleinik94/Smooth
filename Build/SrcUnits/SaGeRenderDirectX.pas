@@ -1177,7 +1177,7 @@ FLigth.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
 FLigth.Ambient:=SGRDXGetD3DCOLORVALUE(0.5,0.5,0.5,1.0);
 FLigth.Specular:=SGRDXGetD3DCOLORVALUE(1.0,1.0,1.0,1.0);
 // предел рассто€ни€, на котором освещаютс€ примитивы, смотр€ от камеры.
-FLigth.Range := 1000;
+FLigth.Range := TSGRenderFar;
 // Ќаправление (“олько дл€ directional and spotlights)
 {FLigth.Direction.x:=0;
  FLigth.Direction.y:=1;
