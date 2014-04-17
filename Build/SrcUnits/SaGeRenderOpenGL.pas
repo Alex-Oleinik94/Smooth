@@ -1,6 +1,14 @@
 {$INCLUDE Includes\SaGe.inc}
+
+(*{$IFDEF MOBILE}
+	{$DEFINE SGINTERPRITATEBEGINEND}
+	{$DEFINE SGINTERPRITATEBEGINENDWITHVBO}
+	{$ENDIF}*)
+
 unit SaGeRenderOpenGL;
+
 interface
+
 uses
 	 SaGeBase
 	,SaGeBased
@@ -143,6 +151,24 @@ type
 		
 			(* Bump Mapping *)
 		FNowInBumpMapping       : TSGBoolean;
+		
+		{$IFDEF SGINTERPRITATEBEGINEND}
+			(* GLES BeginScene\EndScene*)
+		FNowPrimetiveType  : TSGLongWord;
+		FNowNormal         : TSGVertex3f;
+		FNowColor          : TSGColor4b;
+		FNowTexCoord       : TSGVertex2f;
+		
+		FMaxLengthArPoints : TSGLongWord;
+		FNowPosArPoints    : TSGInteger;
+		FArPoints : packed array of 
+			packed record
+				FVertex   : TSGVertex3f;
+				FNormal   : TSGVertex3f;
+				FTexCoord : TSGVertex2f;
+				FColor    : TSGColor4b;
+				end;
+		{$ENDIF}
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -365,7 +391,7 @@ begin
 	{$ENDIF}
 end;
 
-function TSGRenderOpenGL.SupporedVBOBuffers:Boolean;
+function TSGRenderOpenGL.SupporedVBOBuffers():Boolean;
 begin
 {$IFDEF MOBILE}
 	Result:=True;
@@ -384,48 +410,139 @@ begin
 glLineWidth(VLW);
 end;
 
+procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
+begin
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	glVertex3f(x,y,z);
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowPosArPoints+=1;
+	if FNowPosArPoints=FMaxLengthArPoints then
+		begin
+		FMaxLengthArPoints+=1;
+		SetLength(FArPoints,FMaxLengthArPoints);
+		end;
+	FArPoints[FNowPosArPoints].FVertex.Import(x,y,z);
+	FArPoints[FNowPosArPoints].FColor    := FNowColor;
+	FArPoints[FNowPosArPoints].FNormal   := FNowNormal;
+	FArPoints[FNowPosArPoints].FTexCoord := FNowTexCoord;
+	{$ENDIF}
+end;
+
 procedure TSGRenderOpenGL.Color3f(const r,g,b:single);
 begin
-{$IFNDEF MOBILE}
-	if IsEnabled(GL_BLEND) then
+{$IFNDEF SGINTERPRITATEBEGINEND}
+	{$IFNDEF MOBILE}
+		if IsEnabled(GL_BLEND) then
+			glColor4f(r,g,b,1)
+		else
+			glColor3f(r,g,b);
+	{$ELSE}
 		glColor4f(r,g,b,1)
-	else
-		glColor3f(r,g,b);
+		{$ENDIF}
 {$ELSE}
-	glColor4f(r,g,b,1)
+	Color4f(r,g,b,1);
 	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
 begin 
-{$IFNDEF MOBILE}
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	glTexCoord2f(x,y);
-{$ELSE}
-	//glTexCoord3f(x,y,0);
-	//glTexCoord2f(x,y);
-	//Ничего не хочет делаться на этом Gl ES... 
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowTexCoord.Import(x,y);
 	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
 begin
-{$IFNDEF MOBILE}
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	glVertex2f(x,y);
 {$ELSE}
-	//glVertex3f(x,y,0);
-	//glVertex2f(x,y);
-	//Нифига...
+	Vertex3f(x,y,0);
 	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single); 
 begin 
-glColor4f(r,g,b,a);
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	glColor4f(r,g,b,a);
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowColor.Import(
+		Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b),
+		Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g),
+		Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r),
+		Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a))
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Normal3f(const x,y,z:single); 
-begin 
-glNormal3f(x,y,z);
+begin
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	glNormal3f(x,y,z);
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowNormal.Import(x,y,z);
+	{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
+begin
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	glBegin(VPrimitiveType);
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowPrimetiveType := VPrimitiveType;
+	FNowPosArPoints := -1;
+	{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.EndScene();
+{$IF defined(SGINTERPRITATEBEGINENDWITHVBO) and defined(SGINTERPRITATEBEGINEND)}
+	var
+		FBuffer : TSGLongWord;
+	{$ENDIF}
+begin
+{$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	glEnd();
+	{$ENDIF}
+{$IFDEF SGINTERPRITATEBEGINEND}
+	{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
+		GenBuffersARB(1,@FBuffer);
+		BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
+		BufferDataARB(SGR_ARRAY_BUFFER_ARB,SizeOf(FArPoints[0])*(FNowPosArPoints+1),@FArPoints[0], SGR_STATIC_DRAW_ARB);
+		BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
+		{$ENDIF}
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glVertexPointer  (3, GL_FLOAT,          SizeOf(FArPoints[0]), 
+		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}nil{$ELSE}@FArPoints[0].FVertex{$ENDIF});
+	glColorPointer   (4, GL_UNSIGNED_BYTE,  SizeOf(FArPoints[0]),
+		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
+			TSGPointer(TSGMaxEnum(@FArPoints[0].FColor)   -TSGMaxEnum(@FArPoints[0].FVertex))
+				{$ELSE}@FArPoints[0].FColor{$ENDIF});
+	glTexCoordPointer(2, GL_FLOAT,          SizeOf(FArPoints[0]),
+		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
+			TSGPointer(TSGMaxEnum(@FArPoints[0].FTexCoord)-TSGMaxEnum(@FArPoints[0].FVertex))
+				{$ELSE}@FArPoints[0].FTexCoord{$ENDIF});
+	glNormalPointer  (   GL_FLOAT,          SizeOf(FArPoints[0]), 
+		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
+			TSGPointer(TSGMaxEnum(@FArPoints[0].FNormal) -TSGMaxEnum(@FArPoints[0].FVertex))
+				{$ELSE}@FArPoints[0].FNormal{$ENDIF});
+	glDrawArrays(FNowPrimetiveType, 0, FNowPosArPoints+1);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
+		DeleteBuffersARB(1, @FBuffer);
+		BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+		{$ENDIF}
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Translatef(const x,y,z:single); 
@@ -580,24 +697,6 @@ end;
 {$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
 {$UNDEF SG_RENDER_EP}
 
-procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
-begin
-{$IFNDEF MOBILE}
-	glBegin(VPrimitiveType);
-{$ELSE}
-	//хз
-	{$ENDIF}
-end;
-
-procedure TSGRenderOpenGL.EndScene();
-begin
-{$IFNDEF MOBILE}
-	glEnd();
-{$ELSE}
-	//хз
-	{$ENDIF}
-end;
-
 procedure TSGRenderOpenGL.Init();
 var
 	AmbientLight : array[0..3] of glFloat = (0.5,0.5,0.5,1.0);
@@ -688,6 +787,11 @@ constructor TSGRenderOpenGL.Create();
 begin
 inherited Create();
 FType:=SGRenderOpenGL;
+{$IFDEF SGINTERPRITATEBEGINEND}
+	FNowPosArPoints:=-1;
+	FMaxLengthArPoints:=0;
+	FArPoints:=nil;
+	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	FContext:=nil;
 {$ELSE}
@@ -787,15 +891,6 @@ end;
 procedure TSGRenderOpenGL.LoadIdentity();
 begin
 glLoadIdentity();
-end;
-
-procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
-begin
-{$IFNDEF MOBILE}
-	glVertex3f(x,y,z);
-{$ELSE} 
-	{хз} 
-	{$ENDIF}
 end;
 
 function TSGRenderOpenGL.CreateContext():Boolean;

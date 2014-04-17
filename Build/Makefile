@@ -1,6 +1,6 @@
 PP=fpc
 PP271=../FPC/2.7.1/bin/i386-win32/fpc
-BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Others -FiSrcUnits/Includes -Sm
+BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Others -FiSrcUnits/Includes -FuExamples -Sm
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
 ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs/platforms 
 OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries

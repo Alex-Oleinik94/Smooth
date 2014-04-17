@@ -1,6 +1,10 @@
 @echo off
 DEL AndroidTools\SaGe /F/S/Q
+make build_files
+@echo off
 CALL FPC_Make_Android apk
+make clear_files
+@echo off
 echo "================"
 echo "| Building APK |"
 echo "================"
@@ -38,13 +42,13 @@ DEL ..\Binaries\SaGe.apk
 
 CD AndroidTools
 IF "%1"=="" (
-CALL BuildApk.bat debug
-CD ..
-COPY AndroidTools\SaGe\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
+	CALL BuildApk.bat debug
+	CD ..
+	COPY AndroidTools\SaGe\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
 ) ELSE (
-CALL BuildApk.bat release
-CD ..
-COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+	CALL BuildApk.bat release
+	CD ..
+	COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
 )
 
 PAUSE
