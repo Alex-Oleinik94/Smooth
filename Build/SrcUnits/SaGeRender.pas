@@ -125,11 +125,20 @@ type
 		procedure ActiveTextureBump();virtual;abstract;
 		procedure BeginBumpMapping(const Point : Pointer );virtual;abstract;
 		procedure EndBumpMapping();virtual;abstract;
+		{$IFDEF MOBILE}
+			procedure GenerateMipmap(const Param : TSGCardinal);virtual;
+			{$ENDIF}
 			public
-		property Window:TSGClass read FWindow write FWindow;
+		property Window : TSGClass read FWindow write FWindow;
 		end;
 
 implementation
+
+{$IFDEF MOBILE}
+procedure TSGRender.GenerateMipmap(const Param : TSGCardinal);
+begin
+end;
+{$ENDIF}
 
 procedure TSGRender.UnLockResourses();
 begin

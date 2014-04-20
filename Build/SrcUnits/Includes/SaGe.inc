@@ -16,13 +16,16 @@
 	//{$DEFINE WITHLIBPNG}
 	{$ENDIF}
 
-{$MODE OBJFPC}
-{$IFNDEF ANDROID}
-	{$ASMMODE INTEL}
-{$ELSE}
-	//{$ASMMODE ?} - Я не знаю, какой нужен для arm-android
+{$IFDEF FPC}
+	{$PACKRECORDS C}
+	{$MODE OBJFPC}
+	{$IFNDEF ANDROID}
+		{$ASMMODE INTEL}
+	{$ELSE}
+		//{$ASMMODE ?} - Я не знаю, какой нужен для arm-android
+		{$ENDIF}
+	{$H+}
 	{$ENDIF}
-{$H+}
 
 //{$DEFINE LAZARUS}
 //{$DEFINE GLUT}
@@ -34,6 +37,6 @@
 {$DEFINE SGDebuging}
 //{$DEFINE SGMoreDebuging}
 
-{$IF defined(CPU386) and defined(CPU32)}
+{$IF defined(CPU386) and defined(CPU32) and (not defined(DARWIN))}
 	{$DEFINE WITHASMINC}
 	{$ENDIF}

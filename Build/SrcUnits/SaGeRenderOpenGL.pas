@@ -25,6 +25,8 @@ uses
 		,glext
 	{$ELSE}
 		,gles
+		//,gles11
+		//,gles20
 		{$ENDIF}
 	{$IFDEF MSWINDOWS}
 		,windows
@@ -145,6 +147,9 @@ type
 		procedure ActiveTextureBump();override;
 		procedure BeginBumpMapping(const Point : Pointer );override;
 		procedure EndBumpMapping();override;
+		{$IFDEF MOBILE}
+			procedure GenerateMipmap(const Param : TSGCardinal);override;
+			{$ENDIF}
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
@@ -185,6 +190,13 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
 
+{$IFDEF MOBILE}
+procedure TSGRenderOpenGL.GenerateMipmap(const Param : TSGCardinal);
+begin
+//glGenerateMipmap(Param);
+end;
+{$ENDIF}
+
 procedure TSGRenderOpenGL.EndBumpMapping();
 begin
 FNowInBumpMapping := False;
@@ -209,8 +221,8 @@ if FNowActiveNumberTexture = 0 then
 	begin
 	if FNowInBumpMapping then
 		begin
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	{$IFNDEF MOBILE}
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
@@ -219,8 +231,8 @@ if FNowActiveNumberTexture = 0 then
 		end
 	else
 		begin
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	{$IFNDEF MOBILE}
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
@@ -233,8 +245,8 @@ if FNowActiveNumberTexture = 0 then
 	end
 else if FNowActiveNumberTexture = 1 then
 	begin
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	{$IFNDEF MOBILE}
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
@@ -248,11 +260,10 @@ end;
 
 procedure TSGRenderOpenGL.ActiveTextureBump();
 begin
-WriteLn(GL_COMBINE_RGB,' ',GL_COMBINE);
 if FNowActiveNumberTexture = 0 then
 	begin
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	{$IFNDEF MOBILE}
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR);

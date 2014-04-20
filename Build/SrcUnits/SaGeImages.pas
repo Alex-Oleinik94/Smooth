@@ -674,18 +674,26 @@ if FTexture<>0 then
 
 Render.Enable(SGR_TEXTURE_2D);
 Render.GenTextures(1, @FTexture);
+
+if FTexture = 0 then
+	Exit;
+
 Render.BindTexture(SGR_TEXTURE_2D, FTexture);
-Render.PixelStorei(SGR_UNPACK_ALIGNMENT, 4);
-Render.PixelStorei(SGR_UNPACK_ROW_LENGTH, 0);
-Render.PixelStorei(SGR_UNPACK_SKIP_ROWS, 0);
-Render.PixelStorei(SGR_UNPACK_SKIP_PIXELS, 0);
+{$IFNDEF MOBILE}
+	Render.PixelStorei(SGR_UNPACK_ALIGNMENT, 4);
+	Render.PixelStorei(SGR_UNPACK_ROW_LENGTH, 0);
+	Render.PixelStorei(SGR_UNPACK_SKIP_ROWS, 0);
+	Render.PixelStorei(SGR_UNPACK_SKIP_PIXELS, 0);
+	{$ENDIF}
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
-Render.TexEnvi(SGR_TEXTURE_ENV, SGR_TEXTURE_ENV_MODE, SGR_MODULATE);
 Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
-Render.BindTexture(SGR_TEXTURE_2D, FTexture);
+Render.BindTexture(SGR_TEXTURE_2D, 0);
+{$IFDEF MOBILE}
+	Render.GenerateMipmap(SGR_TEXTURE_2D);
+	{$ENDIF}
 Render.Disable(SGR_TEXTURE_2D);
 FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
