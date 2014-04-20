@@ -311,7 +311,7 @@ end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
 var 
-	EventType : Int64;
+	EventType, EventAction : TSGLongWord;
 
 function WITE():TSGString;inline;
 begin
@@ -322,16 +322,36 @@ else Result := 'UNKNOWN('+SGStr(EventType)+')';
 end;
 end;
 
+function WITA():TSGString;inline;
+begin
+case EventAction of
+AKEY_EVENT_ACTION_DOWN : Result := 'AKEY_EVENT_ACTION_DOWN';
+AKEY_EVENT_ACTION_UP    : Result := 'AKEY_EVENT_ACTION_UP';
+AKEY_EVENT_ACTION_MULTIPLE : Result := 'AKEY_EVENT_ACTION_MULTIPLE';
+else Result := 'UNKNOWN('+SGStr(EventAction)+')';
+end;
+end;
+
 begin
 EventType := AInputEvent_getType(event);
 SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
 case EventType of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
+	EventAction := AMotionEvent_getAction(event);
 	FLastTouch.Import(
 		Round(AMotionEvent_getX(event, 0)),
 		Round(AMotionEvent_getY(event, 0)));
-	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+').');
+	if EventAction = AKEY_EVENT_ACTION_UP then
+		SetCursorKey(SGUpKey,SGLeftCursorButton)
+	else if EventAction = AKEY_EVENT_ACTION_DOWN then
+		begin
+		SetCursorKey(SGDownKey,SGLeftCursorButton);
+		FCursorPosition[SGDeferenseCursorPosition].Import(0,0);
+		FCursorPosition[SGNowCursorPosition]:=FLastTouch;
+		FCursorPosition[SGLastCursorPosition]:=FLastTouch;
+		end;
+	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+'), Action = "'+WITA()+'"');
 	FAnimating:=1;
 	end;
 else

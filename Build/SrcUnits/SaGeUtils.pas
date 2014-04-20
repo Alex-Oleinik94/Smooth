@@ -187,6 +187,7 @@ procedure TSGStaticString.Draw();
 begin
 if (FMesh<>nil) and (FFont<>nil) then
 	begin
+	Render.Color4f(1,1,1,1);
 	FFont.BindTexture();
 	FMesh.Draw();
 	FFont.DisableTexture();

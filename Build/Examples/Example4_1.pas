@@ -130,8 +130,6 @@ end;
 
 procedure TSGExample4_1.Draw();
 begin
-FCamera.FRotateX += Context.ElapsedTime;
-FCamera.FRotateY += Context.ElapsedTime;
 FCamera.CallAction();
 
 Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
