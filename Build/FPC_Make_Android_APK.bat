@@ -1,5 +1,6 @@
 @echo off
 DEL AndroidTools\SaGe /F/S/Q
+cls
 make build_files
 @echo off
 CALL FPC_Make_Android apk

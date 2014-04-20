@@ -9,6 +9,7 @@
 //Это на будущее, если будим прогать под iOS
 {$IFDEF ANDROID}
 	{$DEFINE MOBILE}
+	//{$ASMMODE DIRECT}
 	{$ENDIF}
 
 {$IFNDEF MOBILE}

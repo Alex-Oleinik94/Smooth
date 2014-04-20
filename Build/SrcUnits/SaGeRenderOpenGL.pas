@@ -861,13 +861,13 @@ glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then
 	begin
-	{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthox{$ENDIF}(0,CWidth,CHeight,0,0,1);
+	SGRGLOrtho(0,CWidth,CHeight,0,0,1);
 	Disable(SGR_DEPTH_TEST);
 	end
 else
 	if Mode = SG_3D_ORTHO then
 		begin
-		{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthof{$ENDIF}
+		SGRGLOrtho
 			(-(CWidth / (1/dncht*120)),CWidth / (1/dncht*120),-CHeight / (1/dncht*120),(CHeight / (1/dncht*120)),TSGRenderNear,TSGRenderFar);
 		Enable(SGR_DEPTH_TEST);
 		end
