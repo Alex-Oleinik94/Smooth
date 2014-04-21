@@ -115,6 +115,9 @@ type
 			end; //-
 		
 		FBulletsGos:LongWord;
+		{$IFDEF MOBILE}
+			FWayShift : TSGVertex2f;
+			{$ENDIF}
 			private
 		procedure DoQuad(const i,ii:LongWord);inline;
 		procedure GoKostia;
@@ -311,6 +314,11 @@ var
 	i:LongWord;
 begin
 inherited Create (VContext);
+
+{$IFDEF MOBILE}
+	FWayShift.Import(0,0);
+	{$ENDIF}
+
 FStartDeep:=8;
 FSkulls:=nil;
 FRespamn:=True;
@@ -824,6 +832,65 @@ if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and (Context.KeyPre
 	Reset;
 if FActive then
 	begin
+	{$IFDEF MOBILE}
+	if Context.CursorKeysPressed(SGLeftCursorButton) then
+		FWayShift += Context.CursorPosition(SGDeferenseCursorPosition);
+	if FWayShift.x <= - FR.x then
+		begin
+		if FYou.x<>0 then
+			if FArray[FYou.x-1,FYou.y].FType=0 then
+				begin
+				FChanget:=True;
+				FYou.x-=1;
+				end;
+		FWayShift.x += FR.x;
+		end;
+	if FWayShift.y <= - FR.y then
+		begin
+		if FYou.y<>0 then
+			if FArray[FYou.x,FYou.y-1].FType=0 then
+				begin
+				FYou.y-=1;
+				FChanget:=True;
+				end;
+		FWayShift.y += FR.y;
+		end;
+	if FWayShift.x >=  FR.x then
+		begin
+		if FYou.x<>High(FArray) then
+			if FArray[FYou.x+1,FYou.y].FType=0 then
+				begin
+				FYou.x+=1;
+				FChanget:=True;
+				end;
+		FWayShift.x -= FR.x;
+		end;
+	if FWayShift.y >= FR.y then
+		begin
+		if FYou.y<>High(FArray[0]) then
+			if FArray[FYou.x,FYou.y+1].FType=0 then
+				begin
+				FYou.y+=1;
+				FChanget:=True;
+				end;
+		FWayShift.y -= FR.y;
+		end;
+	if (Context.CursorKeyPressed=SGLeftCursorButton)and (Context.CursorKeyPressedType=SGUpKey) then
+		for i:=0 to 2 do
+				for ii:=0 to 2 do
+					if ((i=1) or (ii=1)) and (not ((i=1) and (ii=1))) then
+						begin
+						Any.Import(FYou.x+i-1,FYou.y+ii-1);
+						if Proverka(Any,0) then
+							begin
+							FBulletsGos+=1;
+							SetLength(FBullets,Length(FBullets)+1);
+							FBullets[High(FBullets)][0].Import(Any.x,Any.y);
+							FBullets[High(FBullets)][1].Import(i-1,ii-1);
+							FBullets[High(FBullets)][0]-=FBullets[High(FBullets)][1]*0.3;
+							end;
+						end;
+	{$ELSE}
 	if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
 		begin
 		case Context.KeyPressedByte of
@@ -860,6 +927,7 @@ if FActive then
 		if Context.KeyPressedByte in [37,65,38,87,39,68,40,83] then
 			FChanget:=True;
 		end;
+	{$ENDIF}
 	
 	if FChanget then
 		Calculate;

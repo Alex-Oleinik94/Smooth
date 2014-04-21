@@ -344,12 +344,12 @@ type
 			{$ENDIF}
 		{$ENDIF};
 	TSGThreadID = {$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF};
-	TSGThreadFunction = function ( p:pointer ) : TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
+	TSGThreadFunction = function ( p : TSGPointer ) : TSGThreadFunctionResult; {$IF defined(MSWINDOWS) or defined(ANDROID)}stdcall;{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
 	TSGThread=class(TSGObject)
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
-		destructor Destroy;override;
+		destructor Destroy();override;
 			public
 		FHandle:TSGThreadID;
 		FFinished:Boolean;
@@ -436,7 +436,7 @@ operator + (a,b:TArReal):TArReal;inline;
 //Вычитает одну дату их другой. Из результата можно
 //Вызвать функцию, возвращающую прошедшые (мили)секунды
 //И получить разницу во времени этих дат в (мили)секундах
-operator - (a,b:TSGDateTime):TSGDateTime;inline;
+operator - (const a,b:TSGDateTime):TSGDateTime;inline;
 
 //Загружает библиотеку с именем AName
 function LoadLibrary(AName: PChar): TSGLibHandle;
@@ -2203,7 +2203,7 @@ begin
 FParametr:=Pointer;
 end;
 
-function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
+function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult; {$IF defined(MSWINDOWS) or defined(ANDROID)}stdcall;{$ENDIF}
 begin
 Result:=0;
 ThreadClass.Execute;
@@ -2598,9 +2598,9 @@ begin
 writeln(Years,' ',Month,' ',Day,' ',Week,' ',Hours,' ',Minutes,' ',Seconds,' ',Sec100);
 end;
 
-operator - ( a,b:TSGDateTime):TSGDateTime;inline;
+operator - (const a,b:TSGDateTime):TSGDateTime;inline;
 var
-	i:LongInt;
+	i:TSGByte;
 begin
 for i:=1 to 8 do
 	PArFrom1To8OfLongInt(@Result)^[i]:=PArFrom1To8OfLongInt(@a)^[i]-PArFrom1To8OfLongInt(@b)^[i];
@@ -2677,16 +2677,6 @@ end;
 
 initialization
 begin
-(*
-{$IFDEF ANDROID}
-	SGMakeDirectory('/sdcard/SaGe');
-	SGMakeDirectory('/sdcard/SaGe/Data');
-	SGMakeDirectory('/sdcard/SaGe/Data/Fonts');
-	SGMakeDirectory('/sdcard/SaGe/Data/Images');
-	SGMakeDirectory('/sdcard/SaGe/Data/Textures');
-	{$ENDIF}
-*)
-
 try
 SGLog:=TSGLog.Create();
 SGLog.Sourse('(***) SaGe Engine Log (***)',False);

@@ -17,7 +17,6 @@ uses
 		{$IF defined(ANDROID) or defined(UseCThreads)}
 			cthreads,
 			{$ENDIF}
-		unix,
 		{$ENDIF}
 	crt
 	,SaGeBase
@@ -36,6 +35,9 @@ uses
 		,SaGeContextAndroid
 		,jni
 		,android_native_app_glue
+		{$ENDIF}
+	{$IFDEF UNIX}
+		,unix
 		{$ENDIF}
 	,dos
 	,SaGeBased
