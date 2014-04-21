@@ -80,7 +80,7 @@ with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGExample4_1);
 	Add(TSGExample5_4);
-	{$IFNDEF ANDROID}
+	
 	Add(TSGLoading);
 	Add(TSGModelRedactor);
 	Add(TSGGameTron);
@@ -99,7 +99,7 @@ with TSGDrawClasses.Create(MyContext) do
 	//Add(TSGGraphViewer3D);
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
-	{$ENDIF}
+	
 	Initialize();
 	end;
 end;

@@ -534,7 +534,7 @@ end;
 function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
 begin
 FillChar(Result,SizeOf(Result),0);
-if Render.RenderType=SGRenderDirectX then
+if Render.RenderType<>SGRenderOpenGL then
 	case ArFaces[ArIndex].FIndexFormat of
 	SGMeshIndexFormat1b: 
 		begin
@@ -748,7 +748,7 @@ end;
 
 procedure TSG3DObject.SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGLongWord);
 begin
-if Render.RenderType=SGRenderDirectX then
+if Render.RenderType<>SGRenderOpenGL then
 	begin
 	case ArFaces[ArIndex].FIndexFormat of
 	SGMeshIndexFormat1b:
@@ -916,7 +916,7 @@ if Render<>nil then
 		else
 			SetColorType(SGMeshColorType3f);
 		end
-	else if Render.RenderType=SGRenderDirectX then
+	else
 		begin
 		SetColorType(SGMeshColorType4b);
 		end;
@@ -946,9 +946,17 @@ else if (FColorType=SGMeshColorType3b) then
 	end
 else if (FColorType=SGMeshColorType4b) then
 	begin
-	ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+	if Render.RenderType = SGRenderDirectX then
+		begin
+		ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+		ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+		end
+	else
+		begin
+		ArColor4b[Index]^.b:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+		ArColor4b[Index]^.r:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+		end;
 	ArColor4b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
-	ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
 	ArColor4b[Index]^.a:=Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a);
 	end;
 end;

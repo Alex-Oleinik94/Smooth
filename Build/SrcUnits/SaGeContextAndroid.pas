@@ -311,7 +311,7 @@ end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
 var 
-	EventType, EventAction : TSGLongWord;
+	EventType, EventAction, EventCode, EventScanCode, PointersCount : TSGLongInt;
 
 function WITE():TSGString;inline;
 begin
@@ -332,13 +332,17 @@ else Result := 'UNKNOWN('+SGStr(EventAction)+')';
 end;
 end;
 
+var
+	i: TSGLongWord;
+
 begin
 EventType := AInputEvent_getType(event);
-SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
+//SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
 case EventType of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
 	EventAction := AMotionEvent_getAction(event);
+	//PointersCount := 
 	FLastTouch.Import(
 		Round(AMotionEvent_getX(event, 0)),
 		Round(AMotionEvent_getY(event, 0)));
@@ -351,8 +355,14 @@ AINPUT_EVENT_TYPE_MOTION:
 		FCursorPosition[SGNowCursorPosition]:=FLastTouch;
 		FCursorPosition[SGLastCursorPosition]:=FLastTouch;
 		end;
-	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+'), Action = "'+WITA()+'"');
+	//SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+'), Action = "'+WITA()+'"');
 	FAnimating:=1;
+	end;
+AINPUT_EVENT_TYPE_KEY:
+	begin
+	EventCode     := AKeyEvent_getKeyCode(event);
+	EventScanCode := AKeyEvent_getScanCode(event);
+	
 	end;
 else
 	begin

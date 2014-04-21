@@ -1,9 +1,9 @@
 {$INCLUDE Includes\SaGe.inc}
 
-(*{$IFDEF MOBILE}
+{$IFDEF MOBILE}
 	{$DEFINE SGINTERPRITATEBEGINEND}
-	{$DEFINE SGINTERPRITATEBEGINENDWITHVBO}
-	{$ENDIF}*)
+	//{$DEFINE SGINTERPRITATEBEGINENDWITHVBO}
+	{$ENDIF}
 
 unit SaGeRenderOpenGL;
 
@@ -164,6 +164,8 @@ type
 		FNowColor          : TSGColor4b;
 		FNowTexCoord       : TSGVertex2f;
 		
+		FFragmentInfo      : TSGByte;
+		
 		FMaxLengthArPoints : TSGLongWord;
 		FNowPosArPoints    : TSGInteger;
 		FArPoints : packed array of 
@@ -191,6 +193,16 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 implementation
 
 {$IFDEF MOBILE}
+	const
+		GL_SOURCE0_RGB = GL_SRC0_RGB;
+		GL_SOURCE1_RGB = GL_SRC1_RGB;
+		GL_SOURCE2_RGB = GL_SRC2_RGB;
+		GL_SOURCE0_ALPHA = GL_SRC0_ALPHA;
+		GL_SOURCE1_ALPHA = GL_SRC1_ALPHA;
+		GL_SOURCE2_ALPHA = GL_SRC2_ALPHA;
+	{$ENDIF}
+
+{$IFDEF MOBILE}
 procedure TSGRenderOpenGL.GenerateMipmap(const Param : TSGCardinal);
 begin
 //glGenerateMipmap(Param);
@@ -216,36 +228,31 @@ FNowInBumpMapping := True;
 end;
 
 procedure TSGRenderOpenGL.ActiveTextureDiffuse();
-begin 
+begin
 if FNowActiveNumberTexture = 0 then
 	begin
 	if FNowInBumpMapping then
 		begin
-	{$IFNDEF MOBILE}
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
 
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
-	{$ENDIF}
 		end
 	else
 		begin
-	{$IFNDEF MOBILE}
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-
+		
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
 		
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-	{$ENDIF}
-		end;
+		end; 	
 	end
 else if FNowActiveNumberTexture = 1 then
 	begin
-	{$IFNDEF MOBILE}
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
@@ -254,7 +261,6 @@ else if FNowActiveNumberTexture = 1 then
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_TEXTURE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-	{$ENDIF}
 	end;
 end;
 
@@ -262,7 +268,6 @@ procedure TSGRenderOpenGL.ActiveTextureBump();
 begin
 if FNowActiveNumberTexture = 0 then
 	begin
-	{$IFNDEF MOBILE}
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
 
@@ -271,7 +276,6 @@ if FNowActiveNumberTexture = 0 then
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_TEXTURE);
 	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-	{$ENDIF}
 	end;
 end;
 
@@ -427,16 +431,46 @@ begin
 	glVertex3f(x,y,z);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
-	FNowPosArPoints+=1;
-	if FNowPosArPoints=FMaxLengthArPoints then
+	{$IFDEF MOBILE}
+	if (FNowPrimetiveType=SGR_QUADS) and (FFragmentInfo=1) then
 		begin
-		FMaxLengthArPoints+=1;
-		SetLength(FArPoints,FMaxLengthArPoints);
+		FNowPosArPoints += 3;
+		if FNowPosArPoints >= FMaxLengthArPoints then
+			begin
+			FMaxLengthArPoints := FNowPosArPoints + 1;
+			SetLength(FArPoints,FMaxLengthArPoints);
+			end;
+		
+		FArPoints[FNowPosArPoints].FVertex.Import(x,y,z);
+		FArPoints[FNowPosArPoints].FColor    := FNowColor;
+		FArPoints[FNowPosArPoints].FNormal   := FNowNormal;
+		FArPoints[FNowPosArPoints].FTexCoord := FNowTexCoord;
+		
+		FArPoints[FNowPosArPoints-1] := FArPoints[FNowPosArPoints-3];
+		FArPoints[FNowPosArPoints-2] := FArPoints[FNowPosArPoints-5];
+		
+		FFragmentInfo := 0;
+		end
+	else
+		begin
+		{$ENDIF}
+		FNowPosArPoints+=1;
+		if FNowPosArPoints=FMaxLengthArPoints then
+			begin
+			FMaxLengthArPoints+=1;
+			SetLength(FArPoints,FMaxLengthArPoints);
+			end;
+		FArPoints[FNowPosArPoints].FVertex.Import(x,y,z);
+		FArPoints[FNowPosArPoints].FColor    := FNowColor;
+		FArPoints[FNowPosArPoints].FNormal   := FNowNormal;
+		FArPoints[FNowPosArPoints].FTexCoord := FNowTexCoord;
+		{$IFDEF MOBILE}
+			if (FNowPrimetiveType = SGR_QUADS) and (FNowPosArPoints mod 3 = 2) then
+				begin
+				FFragmentInfo := 1;
+				end;
 		end;
-	FArPoints[FNowPosArPoints].FVertex.Import(x,y,z);
-	FArPoints[FNowPosArPoints].FColor    := FNowColor;
-	FArPoints[FNowPosArPoints].FNormal   := FNowNormal;
-	FArPoints[FNowPosArPoints].FTexCoord := FNowTexCoord;
+			{$ENDIF}
 	{$ENDIF}
 end;
 
@@ -506,7 +540,8 @@ begin
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
 	FNowPrimetiveType := VPrimitiveType;
-	FNowPosArPoints := -1;
+	FNowPosArPoints   := -1;
+	FFragmentInfo     := 0;
 	{$ENDIF}
 end;
 
@@ -544,7 +579,14 @@ begin
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FNormal) -TSGMaxEnum(@FArPoints[0].FVertex))
 				{$ELSE}@FArPoints[0].FNormal{$ENDIF});
-	glDrawArrays(FNowPrimetiveType, 0, FNowPosArPoints+1);
+	
+	{$IFDEF MOBILE}
+		if FNowPrimetiveType = SGR_QUADS then
+			glDrawArrays(GL_TRIANGLES, 0, FNowPosArPoints+1)
+		else
+		{$ENDIF}
+			glDrawArrays(FNowPrimetiveType, 0, FNowPosArPoints+1);
+	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -626,7 +668,7 @@ end;
 
 procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
 begin 
-glTexImage2D(VTextureType,VP1,VChannels,VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
+glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
 
 procedure TSGRenderOpenGL.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
@@ -680,7 +722,7 @@ glColorPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
 procedure TSGRenderOpenGL.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+begin
 glTexCoordPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
@@ -725,8 +767,6 @@ FNowInBumpMapping:=False;
 glEnable(GL_FOG);
 {$IFNDEF MOBILE} 
 	glFogi(GL_FOG_MODE, GL_LINEAR);
-{$ELSE} 
-	{õç} 
 	{$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
 //glHint(GL_FOG_HINT, GL_DONT_CARE);
@@ -742,17 +782,13 @@ glEnable(GL_DEPTH_TEST);
 {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
 glDepthFunc(GL_LESS);
 
-glEnable(GL_LINE_SMOOTH);
 {$IFNDEF MOBILE}
+	glEnable(GL_LINE_SMOOTH);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-{$ELSE} 
-	{õç} 
 	{$ENDIF}
 glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
-glEnable(GL_TEXTURE_2D);
-glEnable(GL_TEXTURE);
 glEnable (GL_BLEND);
 glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
 glEnable (GL_LINE_SMOOTH);
@@ -769,14 +805,10 @@ glDisable(GL_LIGHT0);
 glEnable(GL_COLOR_MATERIAL);
 {$IFNDEF MOBILE}
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-{$ELSE}
-	{õç} 
 	{$ENDIF}
 glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
 {$IFNDEF MOBILE}
 	glMateriali(GL_FRONT,GL_SHININESS,100);
-{$ELSE} 
-	{õç} 
 	{$ENDIF}
 
 glDisable(GL_LIGHTING);
@@ -797,12 +829,13 @@ end;
 constructor TSGRenderOpenGL.Create();
 begin
 inherited Create();
-FType:=SGRenderOpenGL;
+FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
 {$IFDEF SGINTERPRITATEBEGINEND}
 	FNowPosArPoints:=-1;
 	FMaxLengthArPoints:=0;
 	FArPoints:=nil;
 	{$ENDIF}
+
 {$IF defined(LINUX) or defined(ANDROID)}
 	FContext:=nil;
 {$ELSE}
@@ -810,13 +843,15 @@ FType:=SGRenderOpenGL;
 		FContext:=0;
 		{$ENDIF}
 	{$ENDIF}
+
 {$DEFINE SG_RENDER_EICR}
 {$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
 {$UNDEF SG_RENDER_EICR}
+
 FNowInBumpMapping:=False;
 end;
 
-destructor TSGRenderOpenGL.Destroy;
+destructor TSGRenderOpenGL.Destroy();
 begin
 {$IFDEF LINUX}
 	
@@ -832,7 +867,10 @@ begin
 	{$ELSE}
 		{$IFDEF ANDROID}
 			if (FContext <> EGL_NO_CONTEXT) then
+				begin
 				eglDestroyContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FContext);
+				FContext := EGL_NO_CONTEXT;
+				end;
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSetCurrentContext( nil );
@@ -854,7 +892,7 @@ procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
-{$IFNDEF MOBILE}SGRGLOrtho{$ELSE}glOrthof{$ENDIF}(x0,x1,y0,y1,0,0.1);
+SGRGLOrtho(x0,x1,y0,y1,0,0.1);
 glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;

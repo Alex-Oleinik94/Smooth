@@ -310,7 +310,7 @@ while Quantity<>0 do
 	FMesh.AddObject();
 	FMesh.LastObject().ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
 	FMesh.LastObject().EnableCullFace:=False;
-	if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+	if (PoligoneType=SGR_QUADS) and (Render.RenderType<>SGRenderOpenGL) then
 		FMesh.LastObject().ObjectPoligonesType:=SGR_TRIANGLES
 	else
 		FMesh.LastObject().ObjectPoligonesType:=PoligoneType;
@@ -326,7 +326,7 @@ while Quantity<>0 do
 		end;
 	if Quantity<=FShift then
 		begin
-		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+		if (PoligoneType=SGR_QUADS) and (Render.RenderType<>SGRenderOpenGL) then
 			if VertexMn = 0 then
 				SetMeshArLength(FMesh.QuantityObjects-1,Quantity*2,
 					TSG3DObject.GetFaceLength(Quantity,SGR_QUADS))
@@ -344,7 +344,7 @@ while Quantity<>0 do
 		end
 	else
 		begin
-		if (PoligoneType=SGR_QUADS) and (Render.RenderType=SGRenderDirectX) then
+		if (PoligoneType=SGR_QUADS) and (Render.RenderType<>SGRenderOpenGL) then
 			if VertexMn = 0 then
 				SetMeshArLength(FMesh.QuantityObjects-1,FShift*2,
 					TSG3DObject.GetFaceLength(FShift,SGR_QUADS))

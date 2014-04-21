@@ -18,7 +18,7 @@ type
 	TSGMatrixMode   = TSGLongWord;
 	TSGPrimtiveType = TSGLongWord;
 	// Это те виды рендеров, которые есть, точнее идентификаторы
-	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX);
+	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX,SGRenderGLES);
 	TSGRender       = class;
 	// Тип класса рендера
 	TSGRenderClass  = class of TSGRender;

@@ -332,17 +332,17 @@ type
 	TSGThreadProcedure     = procedure ( p : Pointer );
 	TSGThreadFunctionResult = 
 	{$IFDEF MSWINDOWS}
-		LongWord;
+		LongWord
 	{$ELSE}
 		{$IFDEF UNIX}
 			{$IFDEF CPU32}
-				LongInt;
+				LongInt
 				{$ENDIF}
 			{$IFDEF CPU64}
-				Int64;
+				Int64
 				{$ENDIF}
 			{$ENDIF}
-		{$ENDIF}
+		{$ENDIF};
 	TSGThreadID = {$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF};
 	TSGThreadFunction = function ( p:pointer ) : TSGThreadFunctionResult; {$IFDEF MSWINDOWS}stdcall;{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
@@ -2237,7 +2237,13 @@ begin
 {$IFDEF MSWINDOWS}
 	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
 {$ELSE}
-	FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+	{$IFDEF ANDROID}
+		SGLog.Sourse('Start thread');
+		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+		SGLog.Sourse('End start thread'+SGStr(FHandle));
+		{$ELSE}
+		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+		{$ENDIF}
 	{$ENDIF}
 end;
 
