@@ -175,6 +175,9 @@ type
 				FTexCoord : TSGVertex2f;
 				FColor    : TSGColor4b;
 				end;
+		
+		FLightingEnabled : TSGBoolean;
+		FTextureEnabled  : TSGBoolean;
 		{$ENDIF}
 		end;
 
@@ -571,10 +574,12 @@ begin
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FColor)   -TSGMaxEnum(@FArPoints[0].FVertex))
 				{$ELSE}@FArPoints[0].FColor{$ENDIF});
+	if FTextureEnabled then
 	glTexCoordPointer(2, GL_FLOAT,          SizeOf(FArPoints[0]),
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FTexCoord)-TSGMaxEnum(@FArPoints[0].FVertex))
 				{$ELSE}@FArPoints[0].FTexCoord{$ENDIF});
+	if FLightingEnabled then
 	glNormalPointer  (   GL_FLOAT,          SizeOf(FArPoints[0]), 
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FNormal) -TSGMaxEnum(@FArPoints[0].FVertex))
@@ -610,11 +615,23 @@ end;
 
 procedure TSGRenderOpenGL.Enable(VParam:Cardinal); 
 begin
+{$IFDEF SGINTERPRITATEBEGINEND}
+	case VParam of
+	GL_LIGHTING   : FLightingEnabled := True;
+	GL_TEXTURE_2D : FTextureEnabled := True;
+	end;
+	{$ENDIF}
 glEnable(VParam);
 end;
 
 procedure TSGRenderOpenGL.Disable(const VParam:Cardinal); 
-begin 
+begin
+{$IFDEF SGINTERPRITATEBEGINEND}
+	case VParam of
+	GL_LIGHTING   : FLightingEnabled := False;
+	GL_TEXTURE_2D : FTextureEnabled := False;
+	end;
+	{$ENDIF}
 glDisable(VParam);
 end;
 
@@ -834,6 +851,8 @@ FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
 	FNowPosArPoints:=-1;
 	FMaxLengthArPoints:=0;
 	FArPoints:=nil;
+	FLightingEnabled := False;
+	FTextureEnabled  := False;
 	{$ENDIF}
 
 {$IF defined(LINUX) or defined(ANDROID)}

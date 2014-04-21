@@ -14,10 +14,10 @@
 	{$ENDIF}
 uses
 	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
+		{$IF defined(ANDROID) or defined(UseCThreads)}
 			cthreads,
-			unix,
 			{$ENDIF}
+		unix,
 		{$ENDIF}
 	crt
 	,SaGeBase
