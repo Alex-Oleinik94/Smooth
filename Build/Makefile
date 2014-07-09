@@ -1,6 +1,6 @@
 PP=fpc
 PP271=../FPC/2.7.1/bin/i386-win32/fpc
-BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Others -FiSrcUnits/Includes -FuExamples -Sm
+BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -FuExamples -Sm
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
 ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs/platforms -FuSrcUnits/OpenGL 
 OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries
@@ -8,7 +8,7 @@ OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/lib
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
 DODEBUG= -gl
 DORELEASE= -XX -O3 -CX -dRELEASE
-DOANDROID= -Sc -Sg -Si -Sh -Tandroid -Parm -dANDROID -Xd -CpARMV6 -Mobjfpc
+DOANDROID= -Tandroid -Parm -dANDROID  -CpARMV6 -CfVFPV3 -Xs -Sgic -XParm-linux-androideabi- $(DORELEASE)
 DODARWIN=-k-framework -kOpenGL
 
 enigma:

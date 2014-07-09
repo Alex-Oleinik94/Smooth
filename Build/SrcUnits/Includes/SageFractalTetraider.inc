@@ -193,7 +193,9 @@ EnableColors   := True;
 EnableNormals  := True;
 LightingEnable := True;
 HasIndexes     := False;
-Threads:=1;
+{$IFNDEF ANDROID}
+	Threads:=1;
+	{$ENDIF}
 Depth:=3;
 Radius:=5;
 h:=sqrt(3)*Radius/2;

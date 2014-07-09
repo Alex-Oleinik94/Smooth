@@ -157,7 +157,9 @@ begin
 inherited Create(VContext);
 FEnableColors:=False;
 FEnableNormals:=False;
-Threads:=1;
+{$IFNDEF ANDROID}
+	Threads:=1;
+	{$ENDIF}
 Depth:=3;
 FLightingEnable:=False;
 HasIndexes := False;

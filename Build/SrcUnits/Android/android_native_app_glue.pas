@@ -14,7 +14,7 @@
  * limitations under the License.
  *
   *)
-
+{$MODE OBJFPC}
 unit android_native_app_glue;
 
 interface

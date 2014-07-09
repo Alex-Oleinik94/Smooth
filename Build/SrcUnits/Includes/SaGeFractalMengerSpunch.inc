@@ -214,11 +214,13 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
 Depth:=2;
-Threads:=1;
-Calculate()
+{$IFNDEF ANDROID}
+	Threads:=1;
+	{$ENDIF}
+Calculate();
 end;
 
-destructor TSGFractalMengerSpunchRelease.Destroy;
+destructor TSGFractalMengerSpunchRelease.Destroy();
 begin
 if FComboBox1<>nil then FComboBox1.Destroy;
 if FButtonDepthMinus<>nil then FButtonDepthMinus.Destroy;

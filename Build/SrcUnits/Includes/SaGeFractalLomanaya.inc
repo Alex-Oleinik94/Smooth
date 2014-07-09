@@ -142,7 +142,9 @@ c57:=5/7;
 
 EnableColors:=False;
 EnableNormals:=False;
-Threads:=1;
+{$IFNDEF ANDROID}
+	Threads:=1;
+	{$ENDIF}
 Depth:=3;
 LightingEnable:=False;
 HasIndexes := False;
