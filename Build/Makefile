@@ -38,7 +38,8 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
-	@mkdir -p SrcUnits/Temp
+	@if (FolderExists("SrcUnits") == false) (mkdir SrcUnits)
+	@if (FolderExists("SrcUnits/Temp") == false) (mkdir SrcUnits/Temp)
 	@rm -f SrcUnits/Temp/*
 	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 clear:
