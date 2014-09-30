@@ -67,6 +67,7 @@ uses
 	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
 	,PAPPE
 	,SaGeModelRedactor
+	,SaGeGasDiffusion
 	
 	,Example5_4
 	,Example4_1
@@ -80,6 +81,7 @@ procedure Init(const MyContext:TSGContext);
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGGasDiffusion);
 	Add(TSGExample4_1);
 	Add(TSGExample5_4);
 	

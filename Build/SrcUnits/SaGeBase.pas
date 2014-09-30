@@ -476,7 +476,7 @@ function SGGetFileNames(const Catalog:String;const What:String = ''):TArString;
 function SGPCharNil:PChar;inline;
 
 //ѕереводит LongInt в String
-function SGStr(const Number : LongInt = 0):String;inline;overload;
+function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
 
 //ѕереводит секунды в строку, где они будут уже распределены на года, мес€ца и т д
 function SGSecondsToStringTime(VSeconds:Int64):string;inline;
@@ -2452,7 +2452,7 @@ if ((Result='') or (Seconds<>0)) and (QWr<=2) then
 	end;
 end;
 
-function SGStr(const Number : LongInt = 0):String;inline;overload;
+function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
 begin
 Str(Number,Result);
 end;

@@ -1,14 +1,15 @@
 PP=fpc
-PP271=../FPC/2.7.1/bin/i386-win32/fpc
+CROSSPP=../FPC/bin/i386-win32/$(PP)
 BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -FuExamples -Sm
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
-ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs/platforms -FuSrcUnits/OpenGL 
+ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSrcUnits/OpenGL 
 OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries
 OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
 DODEBUG= -gl
 DORELEASE= -XX -O3 -CX -dRELEASE
-DOANDROID= -Tandroid -Parm -dANDROID  -CpARMV6 -CfVFPV3 -Xs -Sgic -XParm-linux-androideabi- $(DORELEASE)
+DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- $(DORELEASE)
+DOWITHFPU= -CfVFPV3
 DODARWIN=-k-framework -kOpenGL
 
 enigma:
@@ -18,7 +19,7 @@ release:
 debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
 android:
-	$(PP271) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
+	$(CROSSPP) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
 darwin_debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main 
 darwin_release:
@@ -38,8 +39,6 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
-	@if (FolderExists("SrcUnits") == false) (mkdir SrcUnits)
-	@if (FolderExists("SrcUnits/Temp") == false) (mkdir SrcUnits/Temp)
 	@rm -f SrcUnits/Temp/*
 	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 clear:
