@@ -52,7 +52,7 @@ type
 		FLoadComboBox : TSGComboBox;
 		FBackButton, FUpdateButton, FLoadButton : TSGButton;
 		
-		
+		FCube : TSGGasDiffusionCube;
 		end;
 
 implementation
@@ -99,7 +99,51 @@ end;
 
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 begin
+Result:=TSGCustomModel.Create();
+Result.Context := Context;
 
+Result.AddObject();
+Result.LastObject().HasNormals := False;
+Result.LastObject().HasTexture := False;
+Result.LastObject().HasColors  := True;
+Result.LastObject().VertexType := SGMeshVertexType3f;
+Result.LastObject().Vertexes   := 8;
+Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
+Result.LastObject().ArVertex3f[1]^.Import(-1,-1,1);
+Result.LastObject().ArVertex3f[2]^.Import(-1,1,1);
+Result.LastObject().ArVertex3f[3]^.Import(-1,1,-1);
+Result.LastObject().ArVertex3f[4]^.Import(1,-1,-1);
+Result.LastObject().ArVertex3f[5]^.Import(1,-1,1);
+Result.LastObject().ArVertex3f[6]^.Import(1,1,1);
+Result.LastObject().ArVertex3f[7]^.Import(1,1,-1);
+Result.LastObject().AutoSetColorType(False);
+Result.LastObject().SetColor(0,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(1,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(2,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(3,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(4,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(5,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(6,$0A/256,$C7/256,$F5/256);
+Result.LastObject().SetColor(7,$0A/256,$C7/256,$F5/256);
+Result.LastObject().AddFaceArray();
+Result.LastObject().AutoSetIndexFormat(0,8);
+Result.LastObject().PoligonesType[0] := SGR_LINES;
+Result.LastObject().Faces [0] := 12;
+Result.LastObject().SetFaceLine(0,  0,  0,1);
+Result.LastObject().SetFaceLine(0,  1,  1,2);
+Result.LastObject().SetFaceLine(0,  2,  2,3);
+Result.LastObject().SetFaceLine(0,  3,  3,0);
+
+Result.LastObject().SetFaceLine(0,  4,  4,5);
+Result.LastObject().SetFaceLine(0,  5,  5,6);
+Result.LastObject().SetFaceLine(0,  6,  6,7);
+Result.LastObject().SetFaceLine(0,  7,  7,4);
+
+Result.LastObject().SetFaceLine(0,  8,  0,4);
+Result.LastObject().SetFaceLine(0,  9,  1,5);
+Result.LastObject().SetFaceLine(0,  10,  2,6);
+Result.LastObject().SetFaceLine(0,  11,  3,7);
+Result.LoadToVBO();
 end;
 
 // Release
@@ -109,6 +153,8 @@ begin
 FNewScenePanel.Destroy();
 FLoadScenePanel.Destroy();
 FTahomaFont.Destroy();
+if FCube<>nil then
+	FCube.Destroy();
 inherited;
 end;
 
@@ -122,7 +168,19 @@ begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
 	FNewScenePanel.Visible := False;
-	
+	if FCube<>nil then
+		begin
+		FCube.Destroy();
+		FCube:=nil;
+		end;
+	FCube:=TSGGasDiffusionCube.Create(Context);
+	FCube.InitCube(SGVal(FEdgeEdit.Caption));
+	if FMesh<>nil then
+		begin
+		FMesh.Destroy();
+		FMesh:=nil;
+		end;
+	FMesh:=FCube.CalculateMesh();
 	end;
 end;
 
@@ -190,6 +248,7 @@ constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FMesh := nil;
+FCube := nil;
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 
