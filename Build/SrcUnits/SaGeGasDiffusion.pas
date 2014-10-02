@@ -90,6 +90,10 @@ if FCube<>nil then
 	end;
 GetMem(FCube,Edge*Edge*Edge);
 FEdge := Edge;
+FillChar(FCube^,Edge*Edge*Edge,0);
+FCube[167]:=1;
+FCube[385]:=1;
+FCube[165]:=1;
 end;
 
 procedure TSGGasDiffusionCube.UpDateCube();
@@ -98,15 +102,20 @@ begin
 end;
 
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
+var
+	n : TSGQuadWord = 0;
+	i : TSGLongWord;
 begin
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
-
 Result.AddObject();
+Result.LastObject().ObjectPoligonesType := SGR_LINES;
 Result.LastObject().HasNormals := False;
 Result.LastObject().HasTexture := False;
 Result.LastObject().HasColors  := True;
+Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := SGMeshVertexType3f;
+Result.LastObject().AutoSetColorType(False);
 Result.LastObject().Vertexes   := 8;
 Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
 Result.LastObject().ArVertex3f[1]^.Import(-1,-1,1);
@@ -116,7 +125,6 @@ Result.LastObject().ArVertex3f[4]^.Import(1,-1,-1);
 Result.LastObject().ArVertex3f[5]^.Import(1,-1,1);
 Result.LastObject().ArVertex3f[6]^.Import(1,1,1);
 Result.LastObject().ArVertex3f[7]^.Import(1,1,-1);
-Result.LastObject().AutoSetColorType(False);
 Result.LastObject().SetColor(0,$0A/256,$C7/256,$F5/256);
 Result.LastObject().SetColor(1,$0A/256,$C7/256,$F5/256);
 Result.LastObject().SetColor(2,$0A/256,$C7/256,$F5/256);
@@ -128,7 +136,7 @@ Result.LastObject().SetColor(7,$0A/256,$C7/256,$F5/256);
 Result.LastObject().AddFaceArray();
 Result.LastObject().AutoSetIndexFormat(0,8);
 Result.LastObject().PoligonesType[0] := SGR_LINES;
-Result.LastObject().Faces [0] := 12;
+Result.LastObject().Faces        [0] := 12;
 Result.LastObject().SetFaceLine(0,  0,  0,1);
 Result.LastObject().SetFaceLine(0,  1,  1,2);
 Result.LastObject().SetFaceLine(0,  2,  2,3);
@@ -143,6 +151,45 @@ Result.LastObject().SetFaceLine(0,  8,  0,4);
 Result.LastObject().SetFaceLine(0,  9,  1,5);
 Result.LastObject().SetFaceLine(0,  10,  2,6);
 Result.LastObject().SetFaceLine(0,  11,  3,7);
+
+Result.AddObject();
+Result.LastObject().ObjectPoligonesType := SGR_POINTS;
+Result.LastObject().HasNormals := False;
+Result.LastObject().HasTexture := False;
+Result.LastObject().HasColors  := True;
+Result.LastObject().EnableCullFace := False;
+Result.LastObject().VertexType := SGMeshVertexType3f;
+Result.LastObject().AutoSetColorType(False);
+
+for i:=0 to FEdge*FEdge*FEdge -1 do
+	begin
+	if FCube[i]<>0 then
+		Inc(n);
+	end;
+
+Result.LastObject().Vertexes   := n;
+
+n:=0;
+for i:=0 to FEdge*FEdge*FEdge -1 do
+	begin
+	if FCube[i]<>0 then
+		begin
+		Result.LastObject().SetColor(n,1,1,1);
+		Result.LastObject().ArVertex3f[n]^.Import(
+			2*(i mod FEdge)/FEdge-1,
+			2*((i div FEdge) mod FEdge)/FEdge-1,
+			2*((i div FEdge) div FEdge)/FEdge-1
+			);
+		{Result.LastObject().ArVertex3f[n]^.Write();
+		WriteLn(
+			' x:',i mod FEdge,
+			' y:',(i div FEdge) mod FEdge,
+			' z:',(i div FEdge) div FEdge,
+			' ',i, ' ',n);}
+		Inc(n);
+		end;
+	end;
+
 Result.LoadToVBO();
 end;
 
