@@ -12,6 +12,14 @@ uses
 	,SaGeUtils
 	,SaGeScreen;
 type
+	TSGGazType = object
+		FColor : TSGColor4f;
+		end;
+	TSGSourseType = object
+		FGazTypeIndex : TSGLongWord;
+		FCoord : TSGPoint3f;
+		FRadius : TSGLongWord;
+		end;
 	TSGGGDC = ^byte;
 	TSGGasDiffusionCube = class(TSGDrawClass)
 			public
@@ -24,8 +32,12 @@ type
 		procedure UpDateCube();
 		function CalculateMesh():TSGCustomModel;
 			public
+		function Cube (const x,y,z:TSGLongWord):TSGGGDC;
+			public
 		FCube : TSGGGDC;
 		FEdge : TSGLongWord;
+		FGazes : packed array of TSGGazType;
+		FSourses : packed array of TSGSourseType;
 		end;
 type
 	TSGGasDiffusion=class(TSGDrawClass)
@@ -37,7 +49,7 @@ type
 			private
 		FCamera : TSGCamera;
 		FMesh   : TSGCustomModel;
-		
+		FCube : TSGGasDiffusionCube;
 		
 		//Панели,кнопки и т п
 		FTahomaFont : TSGFont;
@@ -52,7 +64,8 @@ type
 		FLoadComboBox : TSGComboBox;
 		FBackButton, FUpdateButton, FLoadButton : TSGButton;
 		
-		FCube : TSGGasDiffusionCube;
+		//Экран
+		FAddNewSourseButton,FAddNewGazButton,FStartEmulatingButton : TSGButton;
 		end;
 
 implementation
@@ -62,8 +75,10 @@ implementation
 constructor TSGGasDiffusionCube.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FEdge:=0;
-FCube:=nil;
+FEdge   := 0;
+FCube   := nil;
+FSourses:= nil;
+FGazes  := nil;
 end;
 
 procedure TSGGasDiffusionCube.Draw();
@@ -88,19 +103,186 @@ if FCube<>nil then
 	FreeMem(FCube);
 	FCube:=nil;
 	end;
-GetMem(FCube,Edge*Edge*Edge);
 FEdge := Edge;
+if FEdge mod 2 = 1 then
+	FEdge +=1;
+GetMem(FCube,Edge*Edge*Edge);
 FillChar(FCube^,Edge*Edge*Edge,0);
-FCube[167]:=1;
-FCube[385]:=1;
-FCube[165]:=1;
+
+SetLength(FGazes,3);
+FGazes[0].FColor.Import(0,1,0,0.5);
+FGazes[1].FColor.Import(1,0,0,0.5);
+FGazes[2].FColor.Import(1,1,0,0.5);
+SetLength(FSourses,3);
+FSourses[0].FGazTypeIndex:=0;
+FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 4),FEdge div 2,FEdge div 2);
+FSourses[0].FRadius:=1;
+FSourses[1].FGazTypeIndex:=1;
+FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 4),FEdge div 2,FEdge div 2);
+FSourses[1].FRadius:=1;
+FSourses[2].FGazTypeIndex:=2;
+FSourses[2].FCoord.Import(FEdge div 2,FEdge div 2,FEdge div 2);
+FSourses[2].FRadius:=1;
+
+UpDateCube();
+end;
+
+function TSGGasDiffusionCube.Cube (const x,y,z:TSGLongWord):TSGGGDC;
+begin
+Result:=@FCube[x*FEdge*FEdge+y*FEdge+z];
 end;
 
 procedure TSGGasDiffusionCube.UpDateCube();
+procedure UpDateSourses();
+var
+	I : TSGLongWord;
+	j1,j2,j3 : integer;
 begin
-
+if FSourses<>nil then
+	for i:=0 to High(FSourses) do
+		begin
+		for j1:=-FSourses[i].FRadius to FSourses[i].FRadius do
+		for j2:=-FSourses[i].FRadius to FSourses[i].FRadius do
+		for j3:=-FSourses[i].FRadius to FSourses[i].FRadius do
+			if Cube(FSourses[i].FCoord.x+j1,FSourses[i].FCoord.y+j2,FSourses[i].FCoord.z+j3)^=0 then
+				Cube(FSourses[i].FCoord.x+j1,FSourses[i].FCoord.y+j2,FSourses[i].FCoord.z+j3)^:=FSourses[i].FGazTypeIndex+1;
+		end;
 end;
-
+procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);inline;
+var
+	b1,b2:Byte;
+begin
+case random(3) of
+0://x
+	begin
+	if TSGBoolean(Random(2)) then
+		begin// x 1
+		b1 := Cube(i1+0,i2,i3)^;
+		b2 := Cube(i1+1,i2,i3)^;
+		Cube(i1+0,i2,i3)^ := Cube(i1+0,i2,i3+1)^;
+		Cube(i1+1,i2,i3)^ := Cube(i1+1,i2,i3+1)^;
+		Cube(i1+0,i2,i3+1)^ := Cube(i1+0,i2+1,i3+1)^; 
+		Cube(i1+1,i2,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+0,i2+1,i3+1)^ := Cube(i1+0,i2+1,i3)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3)^;
+		Cube(i1+0,i2+1,i3)^ := b1;
+		Cube(i1+1,i2+1,i3)^ := b2;
+		end
+	else
+		begin// x 0
+		b1 := Cube(i1+0,i2,i3)^;
+		b2 := Cube(i1+1,i2,i3)^;
+		Cube(i1+0,i2,i3)^ := Cube(i1+0,i2+1,i3)^;
+		Cube(i1+1,i2,i3)^ := Cube(i1+1,i2+1,i3)^;
+		Cube(i1+0,i2+1,i3)^ := Cube(i1+0,i2+1,i3+1)^; 
+		Cube(i1+1,i2+1,i3)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+0,i2+1,i3+1)^ := Cube(i1+0,i2,i3+1)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2,i3+1)^;
+		Cube(i1+0,i2,i3+1)^ := b1;
+		Cube(i1+1,i2,i3+1)^ := b2;
+		end;
+	end;
+1://y
+	begin
+	if Boolean(Random(2)) then
+		begin// y 1
+		b1 := Cube(i1,i2+0,i3)^;
+		b2 := Cube(i1,i2+1,i3)^;
+		Cube(i1,i2+0,i3)^ := Cube(i1,i2+0,i3+1)^;
+		Cube(i1,i2+1,i3)^ := Cube(i1,i2+1,i3+1)^;
+		Cube(i1,i2+0,i3+1)^ := Cube(i1+1,i2+0,i3+1)^; 
+		Cube(i1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+1,i2+0,i3+1)^ := Cube(i1+1,i2+0,i3)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3)^;
+		Cube(i1+1,i2+0,i3)^ := b1;
+		Cube(i1+1,i2+1,i3)^ := b2;
+		end
+	else
+		begin// y 0
+		b1 := Cube(i1,i2+0,i3)^;
+		b2 := Cube(i1,i2+1,i3)^;
+		Cube(i1,i2+0,i3)^ := Cube(i1+1,i2+0,i3)^;
+		Cube(i1,i2+1,i3)^ := Cube(i1+1,i2+1,i3)^;
+		Cube(i1+1,i2+0,i3)^ := Cube(i1+1,i2+0,i3+1)^; 
+		Cube(i1+1,i2+1,i3)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+1,i2+0,i3+1)^ := Cube(i1,i2+0,i3+1)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1,i2+1,i3+1)^;
+		Cube(i1,i2+0,i3+1)^ := b1;
+		Cube(i1,i2+1,i3+1)^ := b2;
+		end;
+	end;
+2://z
+	begin
+	if Boolean(Random(2)) then
+		begin// z 1
+		b1 := Cube(i1,i2,i3+0)^;
+		b2 := Cube(i1,i2,i3+1)^;
+		Cube(i1,i2,i3+0)^ := Cube(i1,i2+1,i3+0)^;
+		Cube(i1,i2,i3+1)^ := Cube(i1,i2+1,i3+1)^;
+		Cube(i1,i2+1,i3+0)^ := Cube(i1+1,i2+1,i3+0)^; 
+		Cube(i1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+1,i2+1,i3+0)^ := Cube(i1+1,i2,i3+0)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2,i3+1)^;
+		Cube(i1+1,i2,i3+0)^ := b1;
+		Cube(i1+1,i2,i3+1)^ := b2;
+		end
+	else
+		begin//z 0
+		b1 := Cube(i1,i2,i3+0)^;
+		b2 := Cube(i1,i2,i3+1)^;
+		Cube(i1,i2,i3+0)^ := Cube(i1+1,i2,i3+0)^;
+		Cube(i1,i2,i3+1)^ := Cube(i1+1,i2,i3+1)^;
+		Cube(i1+1,i2,i3+0)^ := Cube(i1+1,i2+1,i3+0)^; 
+		Cube(i1+1,i2,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
+		Cube(i1+1,i2+1,i3+0)^ := Cube(i1,i2+1,i3+0)^;
+		Cube(i1+1,i2+1,i3+1)^ := Cube(i1,i2+1,i3+1)^;
+		Cube(i1,i2+1,i3+0)^ := b1;
+		Cube(i1,i2+1,i3+1)^ := b2;
+		end;
+	end;
+end;
+end;
+procedure UpDateGaz();
+var
+	i1,i2,i3:TSGLongWord;
+begin
+i1:=0;
+while i1<FEdge do
+	begin
+	i2:=0;
+	while i2<FEdge do
+		begin
+		i3:=0;
+		while i3<FEdge do
+			begin
+			MoveGazInSmallCube(i1,i2,i3);
+			i3+=2;
+			end;
+		i2+=2;
+		end;
+	i1+=2;
+	end;
+i1:=1;
+while i1<FEdge-1 do
+	begin
+	i2:=1;
+	while i2<FEdge-1 do
+		begin
+		i3:=1;
+		while i3<FEdge-1 do
+			begin
+			MoveGazInSmallCube(i1,i2,i3);
+			i3+=2;
+			end;
+		i2+=2;
+		end;
+	i1+=2;
+	end;
+end;
+begin
+UpDateGaz();
+UpDateSourses();
+end;
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 var
 	n : TSGQuadWord = 0;
@@ -174,18 +356,14 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 	begin
 	if FCube[i]<>0 then
 		begin
-		Result.LastObject().SetColor(n,1,1,1);
+		Result.LastObject().SetColor(n,
+			FGazes[FCube[i]-1].FColor.r,
+			FGazes[FCube[i]-1].FColor.g,
+			FGazes[FCube[i]-1].FColor.b);
 		Result.LastObject().ArVertex3f[n]^.Import(
 			2*(i mod FEdge)/FEdge-1,
 			2*((i div FEdge) mod FEdge)/FEdge-1,
-			2*((i div FEdge) div FEdge)/FEdge-1
-			);
-		{Result.LastObject().ArVertex3f[n]^.Write();
-		WriteLn(
-			' x:',i mod FEdge,
-			' y:',(i div FEdge) mod FEdge,
-			' z:',(i div FEdge) div FEdge,
-			' ',i, ' ',n);}
+			2*((i div FEdge) div FEdge)/FEdge-1);
 		Inc(n);
 		end;
 	end;
@@ -202,6 +380,12 @@ FLoadScenePanel.Destroy();
 FTahomaFont.Destroy();
 if FCube<>nil then
 	FCube.Destroy();
+if FStartEmulatingButton<>nil then
+	FStartEmulatingButton.Destroy();
+if FAddNewGazButton<>nil then
+	FAddNewGazButton.Destroy();
+if FAddNewSourseButton<>nil then
+	FAddNewSourseButton.Destroy();
 inherited;
 end;
 
@@ -211,6 +395,8 @@ Result := 'Диффузия в газах';
 end;
 
 procedure FStartSceneNuttonProcedure(Button:TSGButton);
+const
+	W = 200;
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -228,6 +414,38 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FMesh:=nil;
 		end;
 	FMesh:=FCube.CalculateMesh();
+	
+	FAddNewGazButton:=TSGButton.Create();
+	SGScreen.CreateChild(FAddNewGazButton);
+	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5,W,20);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.Visible:=True;
+	SGScreen.LastChild.Active :=False;
+	SGScreen.LastChild.Font := FTahomaFont;
+	SGScreen.LastChild.Caption:='Добавить новый тип газа';
+	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+	FAddNewGazButton.OnChange:=TSGComponentProcedure(nil);
+	
+	FAddNewSourseButton:=TSGButton.Create();
+	SGScreen.CreateChild(FAddNewSourseButton);
+	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,30,W,20);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.Visible:=True;
+	SGScreen.LastChild.Active :=False;
+	SGScreen.LastChild.Font := FTahomaFont;
+	SGScreen.LastChild.Caption:='Добавитьт источник газа';
+	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+	FAddNewSourseButton.OnChange:=TSGComponentProcedure(nil);
+	
+	FStartEmulatingButton:=TSGButton.Create();
+	SGScreen.CreateChild(FStartEmulatingButton);
+	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,55,W,20);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.Visible:=True;
+	SGScreen.LastChild.Font := FTahomaFont;
+	SGScreen.LastChild.Caption:='Начать эмуляцию';
+	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+	FStartEmulatingButton.OnChange:=TSGComponentProcedure(nil);
 	end;
 end;
 
@@ -296,6 +514,10 @@ begin
 inherited Create(VContext);
 FMesh := nil;
 FCube := nil;
+FAddNewSourseButton   := nil;
+FStartEmulatingButton := nil;
+FAddNewGazButton      := nil;
+
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 
@@ -351,7 +573,7 @@ FNewScenePanel.LastChild.SetBounds(118,19,50,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FNewScenePanel.LastChild.Caption:='200';
+FNewScenePanel.LastChild.Caption:='70';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
 FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@FEdgeEditTextTypeFunction);
 FEdgeEdit.TextType:=SGEditTypeUser;
@@ -432,6 +654,12 @@ if FMesh <> nil then
 	begin
 	FCamera.CallAction();
 	FMesh.Draw();
+	
+	//if random(5) = 0 then begin
+		FCube.UpDateCube();
+		FMesh.Destroy();
+		FMesh:=FCube.CalculateMesh;
+		//end;
 	end;
 end;
 
