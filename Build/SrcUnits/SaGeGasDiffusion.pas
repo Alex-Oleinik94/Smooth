@@ -4,6 +4,7 @@ unit SaGeGasDiffusion;
 interface
 uses
 	 SaGeBase
+	,Classes
 	,SaGeBased
 	,SaGeMesh
 	,SaGeContext
@@ -50,6 +51,8 @@ type
 		FCamera : TSGCamera;
 		FMesh   : TSGCustomModel;
 		FCube : TSGGasDiffusionCube;
+		FFileName : TSGString;
+		FFileStream : TFileStream;
 		
 		//Панели,кнопки и т п
 		FTahomaFont : TSGFont;
@@ -66,6 +69,8 @@ type
 		
 		//Экран
 		FAddNewSourseButton,FAddNewGazButton,FStartEmulatingButton : TSGButton;
+			private
+		procedure SaveStageToStream();
 		end;
 
 implementation
@@ -367,11 +372,15 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 		Inc(n);
 		end;
 	end;
-
-Result.LoadToVBO();
 end;
 
 // Release
+
+procedure TSGGasDiffusion.SaveStageToStream();
+begin
+if FFileStream<>nil then
+	FMesh.SaveToSG3DM(FFileStream);
+end;
 
 destructor TSGGasDiffusion.Destroy();
 begin
@@ -386,6 +395,8 @@ if FAddNewGazButton<>nil then
 	FAddNewGazButton.Destroy();
 if FAddNewSourseButton<>nil then
 	FAddNewSourseButton.Destroy();
+if FFileStream<>nil then
+	FFileStream.Destroy();
 inherited;
 end;
 
@@ -414,6 +425,12 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FMesh:=nil;
 		end;
 	FMesh:=FCube.CalculateMesh();
+	
+	SGMakeDirectory('Gaz Diffusion Saves');
+	FFileName := SGGetFreeFileName('Gaz Diffusion Saves'+Slash+'Save.gds','number');
+	FFileStream := TFileStream.Create(FFileName,fmCreate);
+	
+	//SaveStageToStream();
 	
 	FAddNewGazButton:=TSGButton.Create();
 	SGScreen.CreateChild(FAddNewGazButton);
@@ -517,6 +534,8 @@ FCube := nil;
 FAddNewSourseButton   := nil;
 FStartEmulatingButton := nil;
 FAddNewGazButton      := nil;
+FFileName:='';
+FFileStream:=nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -658,7 +677,8 @@ if FMesh <> nil then
 	//if random(5) = 0 then begin
 		FCube.UpDateCube();
 		FMesh.Destroy();
-		FMesh:=FCube.CalculateMesh;
+		FMesh:=FCube.CalculateMesh();
+		//SaveStageToStream();
 		//end;
 	end;
 end;
