@@ -363,6 +363,7 @@ AINPUT_EVENT_TYPE_KEY:
 	EventCode     := AKeyEvent_getKeyCode(event);
 	EventScanCode := AKeyEvent_getScanCode(event);
 	
+	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Key = (Code:'+SGStr(EventCode)+';ScanCode:'+SGStr(EventScanCode)+'), Action = "'+WITA()+'"');
 	end;
 else
 	begin

@@ -32,6 +32,7 @@ type
 		procedure InitCube(const Edge : TSGLongWord);
 		procedure UpDateCube();
 		function CalculateMesh():TSGCustomModel;
+		procedure ClearGaz();
 			public
 		function Cube (const x,y,z:TSGLongWord):TSGGGDC;
 			public
@@ -53,6 +54,8 @@ type
 		FCube : TSGGasDiffusionCube;
 		FFileName : TSGString;
 		FFileStream : TFileStream;
+		FDiffusionRuned : TSGBoolean;
+		FEnableSaving : TSGBoolean;
 		
 		//Панели,кнопки и т п
 		FTahomaFont : TSGFont;
@@ -62,14 +65,23 @@ type
 		FEdgeEdit : TSGEdit;
 		FNumberLabel : TSGLabel;
 		FStartSceneNutton,FEnableLoadButton : TSGButton;
+		FEnableOutputComboBox : TSGComboBox;
 		
 		//Load Panel
 		FLoadComboBox : TSGComboBox;
 		FBackButton, FUpdateButton, FLoadButton : TSGButton;
 		
 		//Экран
-		FAddNewSourseButton,FAddNewGazButton,FStartEmulatingButton : TSGButton;
+		FAddNewSourseButton,
+			FAddNewGazButton,
+			FStartEmulatingButton,
+			FPauseEmulatingButton,
+			FDeleteSechenieButton,
+			FAddSechenieButton,
+			FBackToMenuButton,
+			FStopEmulatingButton : TSGButton;
 			private
+		procedure ClearDisplayButtons();
 		procedure SaveStageToStream();
 		end;
 
@@ -101,6 +113,12 @@ begin
 Result:='TSGGasDiffusionCube';
 end;
 
+procedure TSGGasDiffusionCube.ClearGaz();
+begin
+FillChar(FCube^,FEdge*FEdge*FEdge,0);
+UpDateCube();
+end;
+
 procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord);
 begin
 if FCube<>nil then
@@ -111,13 +129,13 @@ if FCube<>nil then
 FEdge := Edge;
 if FEdge mod 2 = 1 then
 	FEdge +=1;
-GetMem(FCube,Edge*Edge*Edge);
-FillChar(FCube^,Edge*Edge*Edge,0);
+GetMem(FCube,FEdge*FEdge*FEdge);
+FillChar(FCube^,FEdge*FEdge*FEdge,0);
 
 SetLength(FGazes,3);
-FGazes[0].FColor.Import(0,1,0,0.5);
-FGazes[1].FColor.Import(1,0,0,0.5);
-FGazes[2].FColor.Import(1,1,0,0.5);
+FGazes[0].FColor.Import(0,1,0,1);
+FGazes[1].FColor.Import(1,0,0,1);
+FGazes[2].FColor.Import(1,1,0,1);
 SetLength(FSourses,3);
 FSourses[0].FGazTypeIndex:=0;
 FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 4),FEdge div 2,FEdge div 2);
@@ -247,6 +265,7 @@ case random(3) of
 	end;
 end;
 end;
+
 procedure UpDateGaz();
 var
 	i1,i2,i3:TSGLongWord;
@@ -382,6 +401,50 @@ if FFileStream<>nil then
 	FMesh.SaveToSG3DM(FFileStream);
 end;
 
+procedure TSGGasDiffusion.ClearDisplayButtons();
+begin
+if FStartEmulatingButton<>nil then
+	begin
+	FStartEmulatingButton.Destroy();
+	FStartEmulatingButton:=nil;
+	end;
+if FAddNewGazButton<>nil then
+	begin
+	FAddNewGazButton.Destroy();
+	FAddNewGazButton:=nil;
+	end;
+if FAddNewSourseButton<>nil then
+	begin
+	FAddNewSourseButton.Destroy();
+	FAddNewSourseButton:=nil;
+	end;
+if FPauseEmulatingButton<>nil then
+	begin
+	FPauseEmulatingButton.Destroy();
+	FPauseEmulatingButton:=nil;
+	end;
+if FStopEmulatingButton<>nil then
+	begin
+	FStopEmulatingButton.Destroy();
+	FStopEmulatingButton:=nil;
+	end;
+if FDeleteSechenieButton<>nil then
+	begin
+	FDeleteSechenieButton.Destroy();
+	FDeleteSechenieButton:=nil;
+	end;
+if FAddSechenieButton<>nil then
+	begin
+	FAddSechenieButton.Destroy();
+	FAddSechenieButton:=nil;
+	end;
+if FBackToMenuButton<>nil then
+	begin
+	FBackToMenuButton.Destroy();
+	FBackToMenuButton:=nil;
+	end;
+end;
+
 destructor TSGGasDiffusion.Destroy();
 begin
 FNewScenePanel.Destroy();
@@ -389,14 +452,9 @@ FLoadScenePanel.Destroy();
 FTahomaFont.Destroy();
 if FCube<>nil then
 	FCube.Destroy();
-if FStartEmulatingButton<>nil then
-	FStartEmulatingButton.Destroy();
-if FAddNewGazButton<>nil then
-	FAddNewGazButton.Destroy();
-if FAddNewSourseButton<>nil then
-	FAddNewSourseButton.Destroy();
 if FFileStream<>nil then
 	FFileStream.Destroy();
+ClearDisplayButtons();
 inherited;
 end;
 
@@ -405,12 +463,78 @@ begin
 Result := 'Диффузия в газах';
 end;
 
-procedure FStartSceneNuttonProcedure(Button:TSGButton);
+procedure mmmFBackToMenuButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FAddNewSourseButton.Visible := False;
+	FAddNewGazButton.Visible := False;
+	FStartEmulatingButton.Visible := False;
+	FPauseEmulatingButton.Visible := False;
+	FDeleteSechenieButton.Visible := False;
+	FAddSechenieButton.Visible := False;
+	FBackToMenuButton.Visible := False;
+	FStopEmulatingButton.Visible := False;
+	
+	if FCube<>nil then
+		begin
+		FCube.Destroy();
+		FCube:=nil;
+		end;
+	if FFileStream<>nil then
+		begin
+		FFileStream.Destroy();
+		FFileStream:=nil;
+		end;
+	if FMesh<>nil then
+		begin
+		FMesh.Destroy();
+		FMesh:=nil;
+		end;
+	FDiffusionRuned := False;
+	FNewScenePanel.Visible:=True;
+end; end;
+procedure mmmFPauseDiffusionButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FDiffusionRuned := False;
+	Button.Active := False;
+	FStopEmulatingButton.Active := True;
+	FStartEmulatingButton.Active := True;
+end; end;
+procedure mmmFAddSechenieButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FDeleteSechenieButton.Active:=True;
+	Button.Active:=False;
+end; end;
+procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FAddSechenieButton.Active:=True;
+	Button.Active:=False;
+end; end;
+procedure mmmFStopDiffusionButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FDiffusionRuned := False;
+	Button.Active := False;
+	FStartEmulatingButton.Active := True;
+	FPauseEmulatingButton.Active := False;
+	FCube.ClearGaz();
+	FMesh:=FCube.CalculateMesh();
+end; end;
+
+procedure mmmFRunDiffusionButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FDiffusionRuned := True;
+	Button.Active := False;
+	FStopEmulatingButton.Active := True;
+	FPauseEmulatingButton.Active := True;
+end; end;
+
+procedure mmmFStartSceneNuttonProcedure(Button:TSGButton);
 const
 	W = 200;
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
+	FEnableSaving := not Boolean(FEnableOutputComboBox.FSelectItem);
+	
 	FNewScenePanel.Visible := False;
 	if FCube<>nil then
 		begin
@@ -426,47 +550,170 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		end;
 	FMesh:=FCube.CalculateMesh();
 	
-	SGMakeDirectory('Gaz Diffusion Saves');
-	FFileName := SGGetFreeFileName('Gaz Diffusion Saves'+Slash+'Save.gds','number');
-	FFileStream := TFileStream.Create(FFileName,fmCreate);
+	if FEnableSaving then
+		begin
+		SGMakeDirectory('Gaz Diffusion Saves');
+		FFileName := SGGetFreeFileName('Gaz Diffusion Saves'+Slash+'Save.gds','number');
+		FFileStream := TFileStream.Create(FFileName,fmCreate);
+		
+		//SaveStageToStream();
+		end;
 	
-	//SaveStageToStream();
+	if FBackToMenuButton = nil then
+		begin
+		FBackToMenuButton:=TSGButton.Create();
+		SGScreen.CreateChild(FBackToMenuButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*0,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible := True;
+		SGScreen.LastChild.Active  := True;
+		SGScreen.LastChild.Font    := FTahomaFont;
+		SGScreen.LastChild.Caption :='В "главное меню"';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFBackToMenuButtonProcedure);
+		end
+	else
+		begin
+		FBackToMenuButton.Visible := True;
+		FBackToMenuButton.Active  := True;
+		end;
 	
-	FAddNewGazButton:=TSGButton.Create();
-	SGScreen.CreateChild(FAddNewGazButton);
-	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5,W,20);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Visible:=True;
-	SGScreen.LastChild.Active :=False;
-	SGScreen.LastChild.Font := FTahomaFont;
-	SGScreen.LastChild.Caption:='Добавить новый тип газа';
-	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
-	FAddNewGazButton.OnChange:=TSGComponentProcedure(nil);
+	if FAddNewGazButton=nil then
+		begin
+		FAddNewGazButton:=TSGButton.Create();
+		SGScreen.CreateChild(FAddNewGazButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*1,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		FAddNewGazButton.Active  := True;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Добавить новый тип газа';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FAddNewGazButton.OnChange:=TSGComponentProcedure(nil);
+		end
+	else
+		begin
+		FAddNewGazButton.Visible := True;
+		FAddNewGazButton.Active  := True;
+		end;
 	
-	FAddNewSourseButton:=TSGButton.Create();
-	SGScreen.CreateChild(FAddNewSourseButton);
-	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,30,W,20);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Visible:=True;
-	SGScreen.LastChild.Active :=False;
-	SGScreen.LastChild.Font := FTahomaFont;
-	SGScreen.LastChild.Caption:='Добавитьт источник газа';
-	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
-	FAddNewSourseButton.OnChange:=TSGComponentProcedure(nil);
+	if FAddNewSourseButton = nil then
+		begin
+		FAddNewSourseButton:=TSGButton.Create();
+		SGScreen.CreateChild(FAddNewSourseButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*2,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		FAddNewSourseButton.Active  := True;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Добавитьт источник газа';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FAddNewSourseButton.OnChange:=TSGComponentProcedure(nil);
+		end
+	else
+		begin
+		FAddNewSourseButton.Visible := True;
+		FAddNewSourseButton.Active  := True;
+		end;
 	
-	FStartEmulatingButton:=TSGButton.Create();
-	SGScreen.CreateChild(FStartEmulatingButton);
-	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,55,W,20);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Visible:=True;
-	SGScreen.LastChild.Font := FTahomaFont;
-	SGScreen.LastChild.Caption:='Начать эмуляцию';
-	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
-	FStartEmulatingButton.OnChange:=TSGComponentProcedure(nil);
+	if FStartEmulatingButton=nil then
+		begin
+		FStartEmulatingButton:=TSGButton.Create();
+		SGScreen.CreateChild(FStartEmulatingButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*3,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		FStartEmulatingButton.Active  := True;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Эмурировать';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FStartEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFRunDiffusionButtonProcedure);
+		end
+	else
+		begin
+		FStartEmulatingButton.Visible := True;
+		FStartEmulatingButton.Active  := True;
+		end;
+	
+	if FPauseEmulatingButton = nil then
+		begin
+		FPauseEmulatingButton:=TSGButton.Create();
+		SGScreen.CreateChild(FPauseEmulatingButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*4,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		SGScreen.LastChild.Active :=False;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Приостановить эмуляцию';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FPauseEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFPauseDiffusionButtonProcedure);
+		end
+	else
+		begin
+		FPauseEmulatingButton.Visible := True;
+		FPauseEmulatingButton.Active  := False;
+		end;
+	
+	if FStopEmulatingButton = nil then
+		begin
+		FStopEmulatingButton:=TSGButton.Create();
+		SGScreen.CreateChild(FStopEmulatingButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*5,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		SGScreen.LastChild.Active :=False;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Ocтановить эмуляцию';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FStopEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFStopDiffusionButtonProcedure);
+		end
+	else
+		begin
+		FStopEmulatingButton.Visible := True;
+		FStopEmulatingButton.Active  := False;
+		end;
+	
+	if FAddSechenieButton = nil then 
+		begin
+		FAddSechenieButton:=TSGButton.Create();
+		SGScreen.CreateChild(FAddSechenieButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*6,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		SGScreen.LastChild.Active :=True;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Рассмотреть сечение';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FAddSechenieButton.OnChange:=TSGComponentProcedure(@mmmFAddSechenieButtonProcedure);
+		end
+	else
+		begin
+		FAddSechenieButton.Visible := True;
+		FAddSechenieButton.Active  := True;
+		end;
+	
+	if FDeleteSechenieButton = nil then
+		begin
+		FDeleteSechenieButton:=TSGButton.Create();
+		SGScreen.CreateChild(FDeleteSechenieButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*7,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible:=True;
+		SGScreen.LastChild.Active :=False;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Не рассмотривать сечение';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FDeleteSechenieButton.OnChange:=TSGComponentProcedure(@mmmFDeleteSechenieButtonProcedure);
+		end
+	else
+		begin
+		FDeleteSechenieButton.Visible := True;
+		FDeleteSechenieButton.Active  := False;
+		end;
 	end;
 end;
 
-procedure FUpdateButtonProcedure(Button:TSGButton);
+procedure mmmFUpdateButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -474,7 +721,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	end;
 end;
 
-procedure FLoadButtonProcedure(Button:TSGButton);
+procedure mmmFLoadButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -482,7 +729,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	end;
 end;
 
-procedure FEnableLoadButtonProcedure(Button:TSGButton);
+procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -491,7 +738,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	end;
 end;
 
-procedure FBackButtonProcedure(Button:TSGButton);
+procedure mmmFBackButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -500,7 +747,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	end;
 end;
 
-function FEdgeEditTextTypeFunction(const Self:TSGEdit):TSGBoolean;
+function mmmFEdgeEditTextTypeFunction(const Self:TSGEdit):TSGBoolean;
 var
 	i : TSGQuadWord;
 begin
@@ -534,11 +781,21 @@ FCube := nil;
 FAddNewSourseButton   := nil;
 FStartEmulatingButton := nil;
 FAddNewGazButton      := nil;
+FStopEmulatingButton  := nil;
+FPauseEmulatingButton := nil;
+FDeleteSechenieButton := nil;
+FAddSechenieButton    := nil;
+FBackToMenuButton     := nil;
 FFileName:='';
 FFileStream:=nil;
+FDiffusionRuned:=False;
+FEnableSaving := True;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
+{$IFDEF ANDROID}
+	FCamera.FZum := 0.45;
+	{$ENDIF}
 
 FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FTahomaFont.SetContext(Context);
@@ -547,7 +804,7 @@ FTahomaFont.ToTexture();
 
 FNewScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FNewScenePanel);
-SGScreen.LastChild.SetMiddleBounds(400,80);
+SGScreen.LastChild.SetMiddleBounds(400,110);
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
@@ -584,7 +841,7 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
 FNewScenePanel.LastChild.Caption:='Старт';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
-FStartSceneNutton.OnChange:=TSGComponentProcedure(@FStartSceneNuttonProcedure);
+FStartSceneNutton.OnChange:=TSGComponentProcedure(@mmmFStartSceneNuttonProcedure);
 
 FEdgeEdit:=TSGEdit.Create();
 FNewScenePanel.CreateChild(FEdgeEdit);
@@ -594,9 +851,9 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
 FNewScenePanel.LastChild.Caption:='70';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
-FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@FEdgeEditTextTypeFunction);
+FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction);
 FEdgeEdit.TextType:=SGEditTypeUser;
-FEdgeEditTextTypeFunction(FEdgeEdit);
+mmmFEdgeEditTextTypeFunction(FEdgeEdit);
 
 FEnableLoadButton:=TSGButton.Create();
 FNewScenePanel.CreateChild(FEnableLoadButton);
@@ -606,7 +863,19 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
 FNewScenePanel.LastChild.Caption:='Загрузка сохраненной сцены/повтора';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
-FEnableLoadButton.OnChange:=TSGComponentProcedure(@FEnableLoadButtonProcedure);
+FEnableLoadButton.OnChange:=TSGComponentProcedure(@mmmFEnableLoadButtonProcedure);
+
+FEnableOutputComboBox := TSGComboBox.Create();
+FNewScenePanel.CreateChild(FEnableOutputComboBox);
+FEnableOutputComboBox.SetBounds(5,44+26,380,19);
+FNewScenePanel.LastChild.Visible:=True;
+FNewScenePanel.LastChild.BoundsToNeedBounds();
+FNewScenePanel.LastChild.Font := FTahomaFont;
+FEnableOutputComboBox.CreateItem('Включить непрерывное сохранение эмуляции');
+FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
+//FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
+FEnableOutputComboBox.FSelectItem:=0;
+FEnableOutputComboBox.FUserPointer1:=Self;
 
 FLoadScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FLoadScenePanel);
@@ -644,7 +913,7 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadScenePanel.LastChild.Caption:='Назад';
 FLoadScenePanel.LastChild.FUserPointer1:=Self;
-FBackButton.OnChange:=TSGComponentProcedure(@FBackButtonProcedure);
+FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
 
 FUpdateButton:=TSGButton.Create();
 FLoadScenePanel.CreateChild(FUpdateButton);
@@ -654,7 +923,7 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadScenePanel.LastChild.Caption:='Обновить';
 FLoadScenePanel.LastChild.FUserPointer1:=Self;
-FUpdateButton.OnChange:=TSGComponentProcedure(@FUpdateButtonProcedure);
+FUpdateButton.OnChange:=TSGComponentProcedure(@mmmFUpdateButtonProcedure);
 
 FLoadButton:=TSGButton.Create();
 FLoadScenePanel.CreateChild(FLoadButton);
@@ -664,7 +933,7 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadScenePanel.LastChild.Caption:='Загрузить';
 FLoadScenePanel.LastChild.FUserPointer1:=Self;
-FLoadButton.OnChange:=TSGComponentProcedure(@FLoadButtonProcedure);
+FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
 end;
 
 procedure TSGGasDiffusion.Draw();
@@ -673,13 +942,17 @@ if FMesh <> nil then
 	begin
 	FCamera.CallAction();
 	FMesh.Draw();
-	
-	//if random(5) = 0 then begin
-		FCube.UpDateCube();
-		FMesh.Destroy();
-		FMesh:=FCube.CalculateMesh();
-		//SaveStageToStream();
-		//end;
+	if FDiffusionRuned then
+		begin
+		//if random(5) = 0 then begin
+			FCube.UpDateCube();
+			FMesh.Destroy();
+			FMesh:=FCube.CalculateMesh();
+			
+			//if FEnableSaving then 
+				//FESaveStageToStream();
+			//end;
+		end;
 	end;
 end;
 

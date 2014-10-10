@@ -808,7 +808,10 @@ glLineWidth (1.0);
 glShadeModel(GL_SMOOTH);
 glEnable (GL_BLEND);
 glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-glEnable (GL_LINE_SMOOTH);
+//Если включить GL_LINE_SMOOTH в GLES без шeйдеров то линии криво отображаются
+{$IFNDEF ANDROID}
+	glEnable (GL_LINE_SMOOTH);
+	{$ENDIF}
 //glEnable (GL_POLYGON_SMOOTH);
 
 glEnable(GL_LIGHTING);
