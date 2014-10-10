@@ -36,10 +36,11 @@ type
 			public
 		function Cube (const x,y,z:TSGLongWord):TSGGGDC;
 			public
-		FCube : TSGGGDC;
-		FEdge : TSGLongWord;
-		FGazes : packed array of TSGGazType;
-		FSourses : packed array of TSGSourseType;
+		FCube       : TSGGGDC;
+		FEdge       : TSGLongWord;
+		FBoundsOpen : TSGBoolean;
+		FGazes      : packed array of TSGGazType;
+		FSourses    : packed array of TSGSourseType;
 		end;
 type
 	TSGGasDiffusion=class(TSGDrawClass)
@@ -49,27 +50,32 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			private
-		FCamera : TSGCamera;
-		FMesh   : TSGCustomModel;
-		FCube : TSGGasDiffusionCube;
-		FFileName : TSGString;
-		FFileStream : TFileStream;
+		FCamera         : TSGCamera;
+		FMesh           : TSGCustomModel;
+		FCube           : TSGGasDiffusionCube;
+		FFileName       : TSGString;
+		FFileStream     : TFileStream;
 		FDiffusionRuned : TSGBoolean;
-		FEnableSaving : TSGBoolean;
+		FEnableSaving   : TSGBoolean;
 		
 		//Панели,кнопки и т п
-		FTahomaFont : TSGFont;
-		FLoadScenePanel,FNewScenePanel:TSGPanel;
+		FTahomaFont        : TSGFont;
+		FLoadScenePanel,
+			FNewScenePanel :TSGPanel;
 		
 		//New Pabel
-		FEdgeEdit : TSGEdit;
-		FNumberLabel : TSGLabel;
-		FStartSceneNutton,FEnableLoadButton : TSGButton;
-		FEnableOutputComboBox : TSGComboBox;
+		FEdgeEdit               : TSGEdit;
+		FNumberLabel            : TSGLabel;
+		FStartSceneButton,
+			FEnableLoadButton   : TSGButton;
+		FEnableOutputComboBox,
+			FBoundsTypeComboBox : TSGComboBox;
 		
 		//Load Panel
-		FLoadComboBox : TSGComboBox;
-		FBackButton, FUpdateButton, FLoadButton : TSGButton;
+		FLoadComboBox      : TSGComboBox;
+		FBackButton, 
+			FUpdateButton, 
+			FLoadButton    : TSGButton;
 		
 		//Экран
 		FAddNewSourseButton,
@@ -79,7 +85,7 @@ type
 			FDeleteSechenieButton,
 			FAddSechenieButton,
 			FBackToMenuButton,
-			FStopEmulatingButton : TSGButton;
+			FStopEmulatingButton    : TSGButton;
 			private
 		procedure ClearDisplayButtons();
 		procedure SaveStageToStream();
@@ -96,6 +102,7 @@ FEdge   := 0;
 FCube   := nil;
 FSourses:= nil;
 FGazes  := nil;
+FBoundsOpen:=False;
 end;
 
 procedure TSGGasDiffusionCube.Draw();
@@ -303,15 +310,41 @@ while i1<FEdge-1 do
 	i1+=2;
 	end;
 end;
+procedure UpDateIfOpenBounds();
+var
+	i,ii:TSGLongWord;
+begin
+i := 0;
+while i<FEdge do
+	begin
+	ii := 0;
+	while ii<FEdge do
+		begin
+		Cube(i,ii,0)^:=0;
+		Cube(i,ii,FEdge-1)^:=0;
+		Cube(0,i,ii)^:=0;
+		Cube(FEdge-1,i,ii)^:=0;
+		Cube(i,0,ii)^:=0;
+		Cube(i,FEdge-1,ii)^:=0;
+		Inc(ii);
+		end;
+	Inc(i);
+	end;
+end;
 begin
 UpDateGaz();
 UpDateSourses();
+if FBoundsOpen then
+	UpDateIfOpenBounds();
 end;
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 var
 	n : TSGQuadWord = 0;
 	i : TSGLongWord;
+	Smeshenie : TSGSingle;
 begin
+Smeshenie:=1/FEdge;
+
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
 Result.AddObject();
@@ -322,41 +355,47 @@ Result.LastObject().HasColors  := True;
 Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := SGMeshVertexType3f;
 Result.LastObject().AutoSetColorType(False);
-Result.LastObject().Vertexes   := 8;
+Result.LastObject().Vertexes   := 24;
+
 Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
-Result.LastObject().ArVertex3f[1]^.Import(-1,-1,1);
-Result.LastObject().ArVertex3f[2]^.Import(-1,1,1);
-Result.LastObject().ArVertex3f[3]^.Import(-1,1,-1);
-Result.LastObject().ArVertex3f[4]^.Import(1,-1,-1);
-Result.LastObject().ArVertex3f[5]^.Import(1,-1,1);
-Result.LastObject().ArVertex3f[6]^.Import(1,1,1);
+Result.LastObject().ArVertex3f[1]^.Import(1,-1,-1);
+
+Result.LastObject().ArVertex3f[2]^.Import(-1,-1,1);
+Result.LastObject().ArVertex3f[3]^.Import(1,-1,1);
+
+Result.LastObject().ArVertex3f[4]^.Import(-1,1,1);
+Result.LastObject().ArVertex3f[5]^.Import(1,1,1);
+
+Result.LastObject().ArVertex3f[6]^.Import(-1,1,-1);
 Result.LastObject().ArVertex3f[7]^.Import(1,1,-1);
-Result.LastObject().SetColor(0,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(1,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(2,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(3,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(4,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(5,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(6,$0A/256,$C7/256,$F5/256);
-Result.LastObject().SetColor(7,$0A/256,$C7/256,$F5/256);
-Result.LastObject().AddFaceArray();
-Result.LastObject().AutoSetIndexFormat(0,8);
-Result.LastObject().PoligonesType[0] := SGR_LINES;
-Result.LastObject().Faces        [0] := 12;
-Result.LastObject().SetFaceLine(0,  0,  0,1);
-Result.LastObject().SetFaceLine(0,  1,  1,2);
-Result.LastObject().SetFaceLine(0,  2,  2,3);
-Result.LastObject().SetFaceLine(0,  3,  3,0);
 
-Result.LastObject().SetFaceLine(0,  4,  4,5);
-Result.LastObject().SetFaceLine(0,  5,  5,6);
-Result.LastObject().SetFaceLine(0,  6,  6,7);
-Result.LastObject().SetFaceLine(0,  7,  7,4);
+Result.LastObject().ArVertex3f[8]^.Import(-1,-1,-1);
+Result.LastObject().ArVertex3f[9]^.Import(-1,1,-1);
 
-Result.LastObject().SetFaceLine(0,  8,  0,4);
-Result.LastObject().SetFaceLine(0,  9,  1,5);
-Result.LastObject().SetFaceLine(0,  10,  2,6);
-Result.LastObject().SetFaceLine(0,  11,  3,7);
+Result.LastObject().ArVertex3f[10]^.Import(-1,-1,-1);
+Result.LastObject().ArVertex3f[11]^.Import(-1,-1,1);
+
+Result.LastObject().ArVertex3f[12]^.Import(-1,-1,1);
+Result.LastObject().ArVertex3f[13]^.Import(-1,1,1);
+
+Result.LastObject().ArVertex3f[14]^.Import(-1,1,1);
+Result.LastObject().ArVertex3f[15]^.Import(-1,1,-1);
+
+
+Result.LastObject().ArVertex3f[16]^.Import(1,-1,-1);
+Result.LastObject().ArVertex3f[17]^.Import(1,-1,1);
+
+Result.LastObject().ArVertex3f[18]^.Import(1,-1,1);
+Result.LastObject().ArVertex3f[19]^.Import(1,1,1);
+
+Result.LastObject().ArVertex3f[20]^.Import(1,1,1);
+Result.LastObject().ArVertex3f[21]^.Import(1,1,-1);
+
+Result.LastObject().ArVertex3f[22]^.Import(1,1,-1);
+Result.LastObject().ArVertex3f[23]^.Import(1,-1,-1);
+
+for i:=0 to 23 do
+	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
 
 Result.AddObject();
 Result.LastObject().ObjectPoligonesType := SGR_POINTS;
@@ -385,9 +424,9 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 			FGazes[FCube[i]-1].FColor.g,
 			FGazes[FCube[i]-1].FColor.b);
 		Result.LastObject().ArVertex3f[n]^.Import(
-			2*(i mod FEdge)/FEdge-1,
-			2*((i div FEdge) mod FEdge)/FEdge-1,
-			2*((i div FEdge) div FEdge)/FEdge-1);
+			Smeshenie+2*(i mod FEdge)/FEdge-1,
+			Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
+			Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
 		Inc(n);
 		end;
 	end;
@@ -527,7 +566,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FPauseEmulatingButton.Active := True;
 end; end;
 
-procedure mmmFStartSceneNuttonProcedure(Button:TSGButton);
+procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
 const
 	W = 200;
 begin
@@ -542,6 +581,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FCube:=nil;
 		end;
 	FCube:=TSGGasDiffusionCube.Create(Context);
+	FCube.FBoundsOpen := Boolean(FBoundsTypeComboBox.FSelectItem);
 	FCube.InitCube(SGVal(FEdgeEdit.Caption));
 	if FMesh<>nil then
 		begin
@@ -769,7 +809,7 @@ with TSGGasDiffusion(Self.FUserPointer1) do
 		begin
 		TSGGasDiffusion(Self.FUserPointer1).FNumberLabel.Caption:='^3= ...';
 		end;
-	FStartSceneNutton.Active := Result;
+	FStartSceneButton.Active := Result;
 	end;
 end;
 
@@ -788,8 +828,8 @@ FAddSechenieButton    := nil;
 FBackToMenuButton     := nil;
 FFileName:='';
 FFileStream:=nil;
-FDiffusionRuned:=False;
-FEnableSaving := True;
+FDiffusionRuned:= False;
+FEnableSaving  := True;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -804,7 +844,7 @@ FTahomaFont.ToTexture();
 
 FNewScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FNewScenePanel);
-SGScreen.LastChild.SetMiddleBounds(400,110);
+SGScreen.LastChild.SetMiddleBounds(400,110+26);
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
@@ -833,15 +873,15 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
 FNewScenePanel.LastChild.AsLabel.FTextPosition:=0;
 
-FStartSceneNutton:=TSGButton.Create();
-FNewScenePanel.CreateChild(FStartSceneNutton);
+FStartSceneButton:=TSGButton.Create();
+FNewScenePanel.CreateChild(FStartSceneButton);
 FNewScenePanel.LastChild.SetBounds(10,44,80,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
 FNewScenePanel.LastChild.Caption:='Старт';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
-FStartSceneNutton.OnChange:=TSGComponentProcedure(@mmmFStartSceneNuttonProcedure);
+FStartSceneButton.OnChange:=TSGComponentProcedure(@mmmFStartSceneButtonProcedure);
 
 FEdgeEdit:=TSGEdit.Create();
 FNewScenePanel.CreateChild(FEdgeEdit);
@@ -857,7 +897,7 @@ mmmFEdgeEditTextTypeFunction(FEdgeEdit);
 
 FEnableLoadButton:=TSGButton.Create();
 FNewScenePanel.CreateChild(FEnableLoadButton);
-FNewScenePanel.LastChild.SetBounds(100,44,270,20);
+FNewScenePanel.LastChild.SetBounds(100,44,278,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
@@ -867,7 +907,7 @@ FEnableLoadButton.OnChange:=TSGComponentProcedure(@mmmFEnableLoadButtonProcedure
 
 FEnableOutputComboBox := TSGComboBox.Create();
 FNewScenePanel.CreateChild(FEnableOutputComboBox);
-FEnableOutputComboBox.SetBounds(5,44+26,380,19);
+FEnableOutputComboBox.SetBounds(10,44+26,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Font := FTahomaFont;
@@ -876,6 +916,18 @@ FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
 FEnableOutputComboBox.FSelectItem:=0;
 FEnableOutputComboBox.FUserPointer1:=Self;
+
+FBoundsTypeComboBox := TSGComboBox.Create();
+FNewScenePanel.CreateChild(FBoundsTypeComboBox);
+FBoundsTypeComboBox.SetBounds(10,44+26+25,380-10,19);
+FNewScenePanel.LastChild.Visible:=True;
+FNewScenePanel.LastChild.BoundsToNeedBounds();
+FNewScenePanel.LastChild.Font := FTahomaFont;
+FBoundsTypeComboBox.CreateItem('Замкнутое пространство');
+FBoundsTypeComboBox.CreateItem(' Открытое пространство');
+//FBoundsTypeComboBox.FProcedure:=TSGComboBoxProcedure(@FFBoundsTypeComboBoxProcedure);
+FBoundsTypeComboBox.FSelectItem:=0;
+FBoundsTypeComboBox.FUserPointer1:=Self;
 
 FLoadScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FLoadScenePanel);
