@@ -25,6 +25,10 @@ uses
 	{$IFDEF MSWINDOWS}
 		,uSMBIOS
 		{$ENDIF}
+	{$IFDEF ANDROID}
+		,android_native_app_glue
+		,ctypes
+		{$ENDIF}
 	;
 
 const
@@ -343,8 +347,11 @@ type
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF};
-	TSGThreadID = {$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF};
-	TSGThreadFunction = function ( p : TSGPointer ) : TSGThreadFunctionResult; {$IF defined(MSWINDOWS) or defined(ANDROID)}stdcall;{$ENDIF}
+	TSGThreadID = {$IFDEF ANDROID} pthread_t {$ELSE}{$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF}{$ENDIF};
+	TSGThreadFunction =
+		{$IFDEF ANDROID}procedure{$ELSE}function{$ENDIF}
+		( p : TSGPointer ){$IFNDEF ANDROID} : TSGThreadFunctionResult{$ENDIF};
+		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
 	TSGThread=class(TSGObject)
 			public
@@ -2203,16 +2210,19 @@ begin
 FParametr:=Pointer;
 end;
 
-function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult; {$IF defined(MSWINDOWS) or defined(ANDROID)}stdcall;{$ENDIF}
+{$IFDEF ANDROID}procedure{$ELSE}function{$ENDIF}
+TSGThreadStart(ThreadClass:TSGThread)
+{$IFNDEF ANDROID}:TSGThreadFunctionResult{$ENDIF};
+{$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:=0;
-ThreadClass.Execute;
+ThreadClass.Execute();
 end;
 
-destructor TSGThread.Destroy;
+destructor TSGThread.Destroy();
 {$IFDEF MSWINDOWS}
 	var
-		i:Boolean;
+		i:TSGBoolean;
 	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
@@ -2224,23 +2234,28 @@ begin
 	if FHandle<>0 then
 		CloseHandle(FHandle);
 {$ELSE}
+	{$IFDEF ANDROID}
+		if not FFinished then
+			pthread_cancel(@FHandle);
+	{$ELSE}
 	if not FFinished then
 		KillThread(FHandle);
+		{$ENDIF}
 	{$ENDIF}
 FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 inherited;
 end;
 
-procedure TSGThread.Start;
+procedure TSGThread.Start();
 begin
 {$IFDEF MSWINDOWS}
 	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
 {$ELSE}
 	{$IFDEF ANDROID}
 		SGLog.Sourse('Start thread');
-		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
-		SGLog.Sourse('End start thread'+SGStr(FHandle));
+		FThreadID:=pthread_create(@FHandle,nil,TSGThreadFunction(@TSGThreadStart),Self);
+		SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+'.');
 		{$ELSE}
 		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
 		{$ENDIF}
