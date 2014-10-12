@@ -33,7 +33,9 @@ uses
 	;
 
 {$IFDEF ANDROID}
-	{*=POSIX Thread=*}
+				{*========POSIX Thread=========*}
+	const
+	 PTHREAD_CREATE_DETACHED = 1;
 	type
 	 ppthread_t = ^pthread_t;
 	 ppthread_attr_t = ^pthread_attr_t;
@@ -43,8 +45,11 @@ uses
 	 ppthread_condattr_t = ^pthread_condattr_t;
 
 	 __start_routine_t = pointer;
-	function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
+	function  pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
 	procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
+	function  pthread_attr_init(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
+	function  pthread_attr_destroy(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
+	function  pthread_attr_setdetachstate(__attr:ppthread_attr_t; __detachstate:longint):longint;cdecl;external 'libc.so';
 	//function pthread_cancel(__thread:pthread_t):LongInt;cdecl;external 'libc.so';
 	{$ENDIF}
 
@@ -378,6 +383,9 @@ type
 		FProcedure:TSGThreadProcedure;
 		FParametr:Pointer;
 		FThreadID:LongWord;
+		{$IFDEF ANDROID} 
+			attr : pthread_attr_t;
+			{$ENDIF}
 		procedure Execute;virtual;
 		procedure Start;virtual;
 		property Finished: boolean read FFinished write FFinished;
@@ -2203,6 +2211,9 @@ FParametr:=Para;
 FProcedure:=Proc;
 FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
+{$IFDEF ANDROID}
+	attr := nil;
+	{$ENDIF}
 if QuickStart then
 	Start;
 end;
@@ -2251,6 +2262,7 @@ begin
 	{$IFDEF ANDROID}
 		{if not FFinished then
 			pthread_cancel(FHandle);}
+		pthread_attr_destroy(@attr);
 	{$ELSE}
 	if not FFinished then
 		KillThread(FHandle);
@@ -2268,7 +2280,9 @@ begin
 {$ELSE}
 	{$IFDEF ANDROID}
 		SGLog.Sourse('Start thread');
-		FThreadID:=pthread_create(@FHandle,nil,TSGThreadFunction(@TSGThreadStart),Self);
+		pthread_attr_init(@atr);
+		pthread_attr_setdetachstate(@atr,PTHREAD_CREATE_DETACHED);
+		FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
 		SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+'.');
 		{$ELSE}
 		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
