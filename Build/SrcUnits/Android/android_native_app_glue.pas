@@ -303,6 +303,7 @@ procedure app_dummy;
 procedure android_main(app: Pandroid_app); cdecl; external;
 procedure ANativeActivity_onCreate(activity: PANativeActivity; savedState: Pointer; savedStateSize: csize_t); cdecl;
 
+implementation
 
 uses cmem;
 
@@ -336,9 +337,6 @@ function pthread_cond_destroy(__cond:ppthread_cond_t):longint;cdecl;external 'li
 function pthread_cond_signal(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
 function pthread_cond_broadcast(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
 function pthread_cond_wait(__cond:ppthread_cond_t; __mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
-
-
-implementation
 
 
 procedure free_saved_state(android_app: Pandroid_app);

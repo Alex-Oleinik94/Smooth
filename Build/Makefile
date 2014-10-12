@@ -8,7 +8,7 @@ OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/lib
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
 DODEBUG= -gl
 DORELEASE= -XX -O3 -CX -dRELEASE
-DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- $(DORELEASE)
+DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 DOWITHFPU= -CfVFPV3
 DODARWIN=-k-framework -kOpenGL
 

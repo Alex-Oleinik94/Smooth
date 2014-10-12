@@ -26,10 +26,27 @@ uses
 		,uSMBIOS
 		{$ENDIF}
 	{$IFDEF ANDROID}
-		,android_native_app_glue
 		,ctypes
+		,cmem
+		,unixtype
 		{$ENDIF}
 	;
+
+{$IFDEF ANDROID}
+	{*=POSIX Thread=*}
+	type
+	 ppthread_t = ^pthread_t;
+	 ppthread_attr_t = ^pthread_attr_t;
+	 ppthread_mutex_t = ^pthread_mutex_t;
+	 ppthread_cond_t = ^pthread_cond_t;
+	 ppthread_mutexattr_t = ^pthread_mutexattr_t;
+	 ppthread_condattr_t = ^pthread_condattr_t;
+
+	 __start_routine_t = pointer;
+	function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
+	procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
+	//function pthread_cancel(__thread:pthread_t):LongInt;cdecl;external 'libc.so';
+	{$ENDIF}
 
 const
 	{$IFDEF MSWINDOWS}
@@ -348,9 +365,7 @@ type
 			{$ENDIF}
 		{$ENDIF};
 	TSGThreadID = {$IFDEF ANDROID} pthread_t {$ELSE}{$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF}{$ENDIF};
-	TSGThreadFunction =
-		{$IFDEF ANDROID}procedure{$ELSE}function{$ENDIF}
-		( p : TSGPointer ){$IFNDEF ANDROID} : TSGThreadFunctionResult{$ENDIF};
+	TSGThreadFunction = function ( p : TSGPointer ): TSGThreadFunctionResult;
 		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
 	TSGThread=class(TSGObject)
@@ -2192,14 +2207,6 @@ if QuickStart then
 	Start;
 end;
 
-procedure TSGThread.Execute;
-begin
-FFinished:=False;
-if Pointer(FProcedure)<>nil then
-	FProcedure(FParametr);
-FFinished:=True;
-end;
-
 procedure TSGThread.SetProcedure(const Proc:TSGThreadProcedure);
 begin
 FProcedure:=Proc;
@@ -2210,13 +2217,20 @@ begin
 FParametr:=Pointer;
 end;
 
-{$IFDEF ANDROID}procedure{$ELSE}function{$ENDIF}
-TSGThreadStart(ThreadClass:TSGThread)
-{$IFNDEF ANDROID}:TSGThreadFunctionResult{$ENDIF};
+procedure TSGThread.Execute();
+begin
+FFinished:=False;
+if Pointer(FProcedure)<>nil then
+	FProcedure(FParametr);
+FFinished:=True;
+end;
+
+function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:=0;
 ThreadClass.Execute();
+pthread_exit(nil);
 end;
 
 destructor TSGThread.Destroy();
@@ -2235,8 +2249,8 @@ begin
 		CloseHandle(FHandle);
 {$ELSE}
 	{$IFDEF ANDROID}
-		if not FFinished then
-			pthread_cancel(@FHandle);
+		{if not FFinished then
+			pthread_cancel(FHandle);}
 	{$ELSE}
 	if not FFinished then
 		KillThread(FHandle);
