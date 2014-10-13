@@ -4,6 +4,9 @@
 	{$DEFINE SGINTERPRITATEBEGINEND}
 	//{$DEFINE SGINTERPRITATEBEGINENDWITHVBO}
 	{$ENDIF}
+{$IFDEF ANDROID}
+	{$DEFINE NEEDRESOURSES}
+	{$ENDIF}
 
 unit SaGeRenderOpenGL;
 
@@ -46,7 +49,13 @@ uses
 		,MacOSAll
 		{$ENDIF}
 	,DynLibs
+	,SysUtils
+	,Classes
 	;
+{$IFDEF NEEDRESOURSES}
+	const 
+		TempDir = {$IFDEF ANDROID}'/sdcard/.SaGe/Temp'{$ELSE}'Temp'{$ENDIF};
+	{$ENDIF}
 type
 	TSGRenderOpenGL=class(TSGRender)
 			public
@@ -97,6 +106,10 @@ type
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
+		// Сохранения ресурсов рендера и убивание самого рендера
+		procedure LockResourses();override;
+		// Инициализация рендера и загрузка сохраненных ресурсов
+		procedure UnLockResourses();override;
 		
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
@@ -179,6 +192,15 @@ type
 		FLightingEnabled : TSGBoolean;
 		FTextureEnabled  : TSGBoolean;
 		{$ENDIF}
+		
+		{$IFDEF NEEDRESOURSES}
+			FArTextures : packed array of
+				packed record
+					FSaved : Boolean;
+					FTexture : SGUInt;
+					end;
+			FBindedTexture : Cardinal;
+			{$ENDIF}
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -636,8 +658,26 @@ glDisable(VParam);
 end;
 
 procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+{$IFDEF NEEDRESOURSES}
+var
+	i : LongWord;
+{$ENDIF}
 begin 
+{$IFDEF NEEDRESOURSES}
+for i:=0 to VQuantity-1 do
+	begin
+	if FArTextures[VTextures[i]-1].FSaved then
+		begin
+		if FileExists(TempDir+'/t'+SGStr(VTextures[i]-1)) then
+			DeleteFile(TempDir+'/t'+SGStr(VTextures[i]-1));
+		FArTextures[VTextures[i]-1].FSaved:=False;
+		end;
+	glDeleteTextures(1,@FArTextures[VTextures[i]-1].FTexture);
+	FArTextures[VTextures[i]-1].FTexture:=0;
+	end;
+{$ELSE}
 glDeleteTextures(VQuantity,VTextures);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);
@@ -659,13 +699,36 @@ else
 end;
 
 procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+{$IFDEF NEEDRESOURSES}
+var
+	i : TSGMaxEnum;
+	{$ENDIF}
 begin 
+{$IFDEF NEEDRESOURSES}
+for i:=0 to VQuantity-1 do
+	begin
+	if FArTextures=nil then
+		SetLength(FArTextures,1)
+	else
+		SetLength(FArTextures,Length(FArTextures)+1);
+	FArTextures[High(FArTextures)].FTexture:=0;
+	FArTextures[High(FArTextures)].FSaved:=False;
+	VTextures[i]:=Length(FArTextures);
+	glGenTextures(1,@FArTextures[High(FArTextures)].FTexture);
+	end;
+{$ELSE}
 glGenTextures(VQuantity,VTextures);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
 begin 
+{$IFDEF NEEDRESOURSES}
+FBindedTexture := VTexture-1;
+glBindTexture(VParam,FArTextures[FBindedTexture].FTexture);
+{$ELSE}
 glBindTexture(VParam,VTexture);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.TexParameteri(const VP1,VP2,VP3:Cardinal); 
@@ -684,7 +747,26 @@ glTexEnvi(VP1,VP2,VP3);
 end;
 
 procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
-begin 
+{$IFDEF NEEDRESOURSES}
+var
+	FS : TFileStream = nil;
+{$ENDIF}
+begin
+{$IFDEF NEEDRESOURSES}
+FS := TFileStream.Create(TempDir+'/t'+SGStr(FBindedTexture),fmCreate);
+FS.WriteBuffer(VTextureType,SizeOf(VTextureType));
+FS.WriteBuffer(VP1,SizeOf(VP1));
+FS.WriteBuffer(VChannels,SizeOf(VChannels));
+FS.WriteBuffer(VWidth,SizeOf(VWidth));
+FS.WriteBuffer(VHeight,SizeOf(VHeight));
+FS.WriteBuffer(VFormatType,SizeOf(VFormatType));
+FS.WriteBuffer(VP2,SizeOf(VP2));
+FS.WriteBuffer(VDataType,SizeOf(VDataType));
+FS.WriteBuffer(VBitMap^,VChannels*VWidth*VHeight);
+FS.Destroy();
+FArTextures[FBindedTexture].FSaved := True;
+SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
+{$ENDIF}
 glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
 
@@ -799,6 +881,8 @@ glEnable(GL_DEPTH_TEST);
 {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
 glDepthFunc(GL_LESS);
 
+//Если включить GL_LINE_SMOOTH в GLES без шeйдеров то линии криво отображаются
+//glEnable (GL_POLYGON_SMOOTH);
 {$IFNDEF MOBILE}
 	glEnable(GL_LINE_SMOOTH);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
@@ -807,12 +891,7 @@ glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
 glEnable (GL_BLEND);
-glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-//Если включить GL_LINE_SMOOTH в GLES без шeйдеров то линии криво отображаются
-{$IFNDEF ANDROID}
-	glEnable (GL_LINE_SMOOTH);
-	{$ENDIF}
-//glEnable (GL_POLYGON_SMOOTH);
+glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 glEnable(GL_LIGHTING);
 glLightfv(GL_LIGHT0,GL_AMBIENT, @AmbientLight);
@@ -847,6 +926,20 @@ LoadExtendeds();
 end;
 
 constructor TSGRenderOpenGL.Create();
+{$IFDEF NEEDRESOURSES}
+procedure FreeMemTemp();
+var
+	ar : TArString = nil;
+	i : TSGMaxEnum;
+begin
+ar := SGGetFileNames(TempDir+'/','*');
+if ar <> nil then
+	for i:= 0 to High(ar) do
+		if (ar[i]<>'.') and (ar[i]<>'..') then
+			DeleteFile(TempDir + '/' + ar[i]);
+SetLength(ar,0);
+end;
+{$ENDIF}
 begin
 inherited Create();
 FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
@@ -857,7 +950,17 @@ FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
 	FLightingEnabled := False;
 	FTextureEnabled  := False;
 	{$ENDIF}
-
+{$IFDEF NEEDRESOURSES}
+	FArTextures := nil;
+	{$IFDEF ANDROID}
+		SGMakeDirectory('/sdcard/.SaGe');
+		SGMakeDirectory('/sdcard/.SaGe/Temp');
+	{$ELSE}
+		SGMakeDirectory('Temp');
+		{$ENDIF}
+	FreeMemTemp();
+	FBindedTexture := 0;
+	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	FContext:=nil;
 {$ELSE}
@@ -874,7 +977,24 @@ FNowInBumpMapping:=False;
 end;
 
 destructor TSGRenderOpenGL.Destroy();
+{$IFDEF NEEDRESOURSES}
+procedure FreeMemTemp();
+var
+	ar : TArString = nil;
+	i : TSGMaxEnum;
 begin
+ar := SGGetFileNames(TempDir+'/','*');
+if ar <> nil then
+	for i:= 0 to High(ar) do
+		if (ar[i]<>'.') and (ar[i]<>'..') then
+			DeleteFile(TempDir + '/' + ar[i]);
+SetLength(ar,0);
+end;
+{$ENDIF}
+begin
+{$IFDEF NEEDRESOURSES}
+	FreeMemTemp();
+	{$ENDIF}
 {$IFDEF LINUX}
 	
 {$ELSE}
@@ -1030,8 +1150,7 @@ begin
 			wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
-			if FWindow<>nil then
-				eglMakeCurrent(FWindow.Get('DESKTOP WINDOW HANDLE'), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+			
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSetDrawable( nil, FWindow.Get('DESKTOP WINDOW HANDLE'));
@@ -1103,25 +1222,121 @@ begin
 			Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			
 			if (FWindow<>nil) and (FContext<>nil) then 
+				begin
 				if eglMakeCurrent(
 					FWindow.Get('DESKTOP WINDOW HANDLE'), 
 					FWindow.Get('SURFACE'), 
 					FWindow.Get('SURFACE'), 
 					FContext)  = EGL_FALSE then
-					Result:=False
+						begin
+						Result:=False;
+						SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : EGL Error : "'+SGGetEGLError()+'"');
+						end
 				else
-					Result:=True
+					Result:=True;
+				SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
+				end
 			else
 				Result:=False;
-			SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
 		{$ELSE}
 			{$IFDEF DARWIN}
 				//Result:=aglSetDrawable( FContext, FWindow.Get('DESKTOP WINDOW HANDLE')) <> GL_FALSE;
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
+	{$ENDIF}
+end;
+
+// Сохранения ресурсов рендера и убивание самого рендера
+procedure TSGRenderOpenGL.LockResourses();
+{$IFDEF NEEDRESOURSES}
+var
+	i : LongWord;
+	{$ENDIF}
+begin
+{$IFDEF NEEDRESOURSES}
+	if FArTextures <> nil then
+		for i:= 0 to High(FArTextures) do
+			if FArTextures[i].FTexture <> 0 then
+				begin
+				glDeleteTextures(1,@FArTextures[i].FTexture);
+				FArTextures[i].FTexture:=0;
+				end;
+	{$ENDIF}
+{$IFDEF ANDROID}
+	if (FContext <> EGL_NO_CONTEXT) then
+		begin
+		if eglDestroyContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FContext) = EGL_FALSE then
+			SGLog.Sourse('"TSGRenderOpenGL.LockResourses" : EGL Error : "'+SGGetEGLError()+'"');
+		FContext := EGL_NO_CONTEXT;
+		end;
+	{$ENDIF}
+end;
+
+// Инициализация рендера и загрузка сохраненных ресурсов
+procedure TSGRenderOpenGL.UnLockResourses();
+{$IFDEF NEEDRESOURSES}
+procedure LoadTexture(const i : LongWord);
+var
+	VTextureType,VP1,VChannels,VWidth,VHeight,VFormatType,VDataType,VP2:Cardinal;
+	VBitMap : Pointer = nil;
+	FS : TFileStream = nil;
+begin
+FS := TFileStream.Create(TempDir+'/t'+SGStr(i),fmOpenRead);
+FS.ReadBuffer(VTextureType,SizeOf(VTextureType));
+FS.ReadBuffer(VP1,SizeOf(VP1));
+FS.ReadBuffer(VChannels,SizeOf(VChannels));
+FS.ReadBuffer(VWidth,SizeOf(VWidth));
+FS.ReadBuffer(VHeight,SizeOf(VHeight));
+FS.ReadBuffer(VP2,SizeOf(VP2));
+FS.ReadBuffer(VFormatType,SizeOf(VFormatType));
+FS.ReadBuffer(VDataType,SizeOf(VDataType));
+GetMem(VBitMap,VChannels*VWidth*VHeight);
+FS.ReadBuffer(VBitMap^,VChannels*VWidth*VHeight);
+FS.Destroy();
+
+FArTextures[i].FTexture:=0;
+glEnable(VTextureType);
+glGenTextures(1,@FArTextures[i].FTexture);
+glBindTexture(VTextureType,FArTextures[i].FTexture);
+ActiveTextureDiffuse();
+
+TexParameteri(VTextureType, SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
+TexParameteri(VTextureType, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+TexParameteri(VTextureType, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
+TexParameteri(VTextureType, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
+
+glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
+glBindTexture(VTextureType,0);
+glDisable(VTextureType);
+
+FreeMem(VBitMap,VChannels*VWidth*VHeight);
+SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
+end;
+var
+	i : LongWord;
+{$ENDIF}
+begin
+{$IFDEF ANDROID}
+	FContext := eglCreateContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+	if FContext = EGL_NO_CONTEXT then
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
+	SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+	if eglMakeCurrent(FWindow.Get('DESKTOP WINDOW HANDLE'),FWindow.Get('SURFACE'),FWindow.Get('SURFACE'),FContext)  = EGL_FALSE then
+		begin
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="FALSE"');
+		end
+	else
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="TRUE"');
+	{$ENDIF}
+Init();
+{$IFDEF NEEDRESOURSES}
+	if FArTextures<>nil then
+		for i:=0 to High(FArTextures) do
+			if FArTextures[i].FSaved then
+				LoadTexture(i);
 	{$ENDIF}
 end;
 

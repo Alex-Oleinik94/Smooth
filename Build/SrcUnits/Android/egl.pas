@@ -20,7 +20,7 @@
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 }
-
+{$MODE OBJFPC}
 unit egl;
 
 interface
@@ -317,7 +317,36 @@ type
   __eglMustCastToProperFunctionPointerType = procedure; cdecl;
 
 function eglGetProcAddress(procname: Pchar): __eglMustCastToProperFunctionPointerType; cdecl; external LibName;
+function SGGetEGLError():String;
 
 implementation
+
+function SGGetEGLError():String;
+var
+	i:Integer;
+begin
+i:=eglGetError();
+case i of
+EGL_SUCCESS:Result:='EGL_SUCCESS';
+EGL_NOT_INITIALIZED:Result:='EGL_NOT_INITIALIZED';
+EGL_BAD_ACCESS:Result:='EGL_BAD_ACCESS';
+EGL_BAD_ALLOC:Result:='EGL_BAD_ALLOC';
+EGL_BAD_ATTRIBUTE:Result:='EGL_BAD_ATTRIBUTE';
+EGL_BAD_CONFIG:Result:='EGL_BAD_CONFIG';
+EGL_BAD_CONTEXT:Result:='EGL_BAD_CONTEXT';
+EGL_BAD_CURRENT_SURFACE:Result:='EGL_BAD_CURRENT_SURFACE';
+EGL_BAD_DISPLAY:Result:='EGL_BAD_DISPLAY';
+EGL_BAD_MATCH:Result:='EGL_BAD_MATCH';
+EGL_BAD_NATIVE_PIXMAP:Result:='EGL_BAD_NATIVE_PIXMAP';
+EGL_BAD_NATIVE_WINDOW:Result:='EGL_BAD_NATIVE_WINDOW';
+EGL_BAD_PARAMETER:Result:='EGL_BAD_PARAMETER';
+EGL_BAD_SURFACE:Result:='EGL_BAD_SURFACE';
+EGL_CONTEXT_LOST:Result:='EGL_CONTEXT_LOST';
+else
+	begin
+	Result := 'UNCNOWN('+')';
+	end;
+end;
+end;
 
 end.

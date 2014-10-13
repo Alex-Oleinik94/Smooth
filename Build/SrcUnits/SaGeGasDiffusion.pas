@@ -592,8 +592,8 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	
 	if FEnableSaving then
 		begin
-		SGMakeDirectory('Gaz Diffusion Saves');
-		FFileName := SGGetFreeFileName('Gaz Diffusion Saves'+Slash+'Save.gds','number');
+		SGMakeDirectory('Gas Diffusion Saves');
+		FFileName := SGGetFreeFileName('Gas Diffusion Saves'+Slash+'Save.gds','number');
 		FFileStream := TFileStream.Create(FFileName,fmCreate);
 		
 		//SaveStageToStream();
@@ -914,7 +914,7 @@ FNewScenePanel.LastChild.Font := FTahomaFont;
 FEnableOutputComboBox.CreateItem('¬ключить непрерывное сохранение эмул€ции');
 FEnableOutputComboBox.CreateItem('Ќе включать непрерывное сохранение эмул€ции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
-FEnableOutputComboBox.FSelectItem:=0;
+FEnableOutputComboBox.FSelectItem:={$IFDEF MOBILE}1{$ELSE}0{$ENDIF};
 FEnableOutputComboBox.FUserPointer1:=Self;
 
 FBoundsTypeComboBox := TSGComboBox.Create();

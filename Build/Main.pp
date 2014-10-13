@@ -14,7 +14,7 @@
 	{$ENDIF}
 uses
 	{$IFDEF UNIX}
-		{$IF defined(ANDROID) or defined(UseCThreads)}
+		{$IF defined(UseCThreads)}
 			cthreads,
 			{$ENDIF}
 		{$ENDIF}

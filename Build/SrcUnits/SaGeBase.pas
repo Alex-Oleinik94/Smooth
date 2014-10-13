@@ -2212,7 +2212,7 @@ FProcedure:=Proc;
 FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 {$IFDEF ANDROID}
-	attr := nil;
+	fillchar(attr,sizeof(attr),0);
 	{$ENDIF}
 if QuickStart then
 	Start;
@@ -2240,14 +2240,17 @@ function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:=0;
+SGLog.Sourse('12345 : 01, Param = '+SGStr(TSGLongWord(ThreadClass)));
 ThreadClass.Execute();
-pthread_exit(nil);
+SGLog.Sourse('12345 : 02');
+//pthread_exit(nil);
+SGLog.Sourse('12345 : 03');
 end;
 
 destructor TSGThread.Destroy();
 {$IFDEF MSWINDOWS}
 	var
-		i:TSGBoolean;
+		i : TSGBoolean;
 	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
@@ -2256,7 +2259,7 @@ begin
 		i:=TerminateThread(FHandle,0);
 		SGLog.Sourse(['TSGThread__Destroy : FHandle=',FHandle,',FThreadID=',FThreadID,',Terminate Result=',i,'.']);
 		end;
-	if FHandle<>0 then
+	if FHandle <> 0 then
 		CloseHandle(FHandle);
 {$ELSE}
 	{$IFDEF ANDROID}
@@ -2279,13 +2282,13 @@ begin
 	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
 {$ELSE}
 	{$IFDEF ANDROID}
-		SGLog.Sourse('Start thread');
-		pthread_attr_init(@atr);
-		pthread_attr_setdetachstate(@atr,PTHREAD_CREATE_DETACHED);
-		FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
-		SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+'.');
+			SGLog.Sourse('Start thread');
+			pthread_attr_init(@attr);
+			pthread_attr_setdetachstate(@attr,0);
+			FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
+			SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 		{$ELSE}
-		FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+			FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
 		{$ENDIF}
 	{$ENDIF}
 end;

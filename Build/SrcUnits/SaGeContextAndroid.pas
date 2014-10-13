@@ -126,10 +126,9 @@ begin
 SGLog.Sourse('Entering "TSGContextAndroid.Destroy".');
 if (FDisplay <> EGL_NO_DISPLAY) then
 	begin
-	FRender.ReleaseCurrent();
+	DestroyWondow();
 	FRender.Destroy();
 	FRender:=nil;
-	DestroyWondow();
 	end;
 inherited;
 SGLog.Sourse('Leaving "TSGContextAndroid.Destroy".');
@@ -142,9 +141,18 @@ end;
 
 procedure TSGContextAndroid.DestroyWondow();
 begin
+if Render<>nil then
+	Render.LockResourses();
 if (FSurface <> EGL_NO_SURFACE) then
+	begin
 	eglDestroySurface(FDisplay, FSurface);
-eglTerminate(FDisplay);
+	FSurface := EGL_NO_SURFACE;
+	end;
+if FDisplay<> EGL_NO_DISPLAY then
+	begin
+	eglTerminate(FDisplay);
+	FDisplay:= EGL_NO_DISPLAY;
+	end;
 end;
 
 function TSGContextAndroid.InitWindow():TSGBoolean;
@@ -175,32 +183,35 @@ end;
 begin
 Result:=False;
 SGLog.Sourse('Entering "TSGContextAndroid.InitWindow".');
-FDisplay       := eglGetDisplay(EGL_DEFAULT_DISPLAY);
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
-FunctiosResult := eglInitialize(FDisplay, nil,nil);
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SGStr(FunctiosResult)+'".');
-InitPixelFormat();
-{$IFDEF SGDEPTHANDROID}
-	while (FunctiosResult = 0) and (Attribs[9]<>8) do
-		begin
-		Attribs[9] -= 8;
-		InitPixelFormat();
-		end;
+if FDisplay = EGL_NO_DISPLAY then
+	begin
+	FDisplay       := eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
+	FunctiosResult := eglInitialize(FDisplay, nil,nil);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SGStr(FunctiosResult)+'".');
+	InitPixelFormat();
+	{$IFDEF SGDEPTHANDROID}
+		while (FunctiosResult = 0) and (Attribs[9]<>8) do
+			begin
+			Attribs[9] -= 8;
+			InitPixelFormat();
+			end;
+		if FunctiosResult = 0 then
+			begin
+			Attribs[8] := EGL_NONE;
+			InitPixelFormat();
+			end;
+		{$ENDIF}
 	if FunctiosResult = 0 then
 		begin
-		Attribs[8] := EGL_NONE;
-		InitPixelFormat();
+		SGLog.Sourse('"TSGContextAndroid.InitWindow" : FATAL : Can''t initialize pixel formats.');
+		Result := False;
+		Active := False;
+		Exit;
 		end;
-	{$ENDIF}
-if FunctiosResult = 0 then
-	begin
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : FATAL : Can''t initialize pixel formats.');
-	Result := False;
-	Active := False;
-	Exit;
+	FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
 	end;
-FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
 FSurface       := eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.Window, nil);
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglCreateWindowSurface". Result="'+SGStr(FunctiosResult)+'"');
 if FRender=nil then
@@ -218,10 +229,7 @@ if FRender=nil then
 else
 	begin
 	FRender.Window:=Self;
-	if FRender.SetPixelFormat() then
-		Render.MakeCurrent()
-	else
-		Active:=False;
+	FRender.UnLockResourses();
 	Result:=True;
 	end;
 FWidth :=GetScreenResolution().x;
@@ -284,13 +292,13 @@ engine^.app^.savedStateSize := sizeof(Tsaved_state);
 *)
 APP_CMD_INIT_WINDOW://Иницианализируем окно
 	begin
-	if not FInitialized then
-		Active:=InitWindow();
+	Active:=InitWindow();
 	FAnimating:=1;
 	end;
 APP_CMD_TERM_WINDOW://Убиваем окно
 	begin
 	FAnimating:=0;
+	DestroyWondow();
 	end;
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
 	begin
@@ -305,6 +313,13 @@ APP_CMD_CONFIG_CHANGED://Поворот экрана и т п
 	FAnimating:=1;
 	///.......
 	///AConfiguration_getOrientation(..)
+	end;
+APP_CMD_STOP://Завершение работы приложения
+	begin
+	if Render<>nil then
+		Render.Destroy();
+	Active:=False;
+	FAnimating:=0;
 	end;
 end;
 end;
