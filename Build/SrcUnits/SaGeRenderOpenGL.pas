@@ -199,7 +199,16 @@ type
 					FSaved : Boolean;
 					FTexture : SGUInt;
 					end;
-			FBindedTexture : Cardinal;
+			FBindedTexture : TSGLongWord;
+			
+			FArBuffers : packed array of
+				packed record
+					FSaved : Boolean;
+					FBuffer : SGUInt;
+					end;
+			FVBOData:packed array [0..1] of TSGLongWord;
+			// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
+			// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
 			{$ENDIF}
 		end;
 
@@ -581,14 +590,16 @@ begin
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
 	{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
-		GenBuffersARB(1,@FBuffer);
-		BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
-		BufferDataARB(SGR_ARRAY_BUFFER_ARB,SizeOf(FArPoints[0])*(FNowPosArPoints+1),@FArPoints[0], SGR_STATIC_DRAW_ARB);
-		BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
+		{$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(1,@FBuffer);
+		{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(SGR_ARRAY_BUFFER_ARB,FBuffer);
+		{$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(SGR_ARRAY_BUFFER_ARB,SizeOf(FArPoints[0])*(FNowPosArPoints+1),@FArPoints[0], SGR_STATIC_DRAW_ARB);
+		{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(SGR_ARRAY_BUFFER_ARB,FBuffer);
 		{$ENDIF}
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
+	if FLightingEnabled then
 	glEnableClientState(GL_NORMAL_ARRAY);
+	if FTextureEnabled then
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glVertexPointer  (3, GL_FLOAT,          SizeOf(FArPoints[0]), 
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}nil{$ELSE}@FArPoints[0].FVertex{$ENDIF});
@@ -616,11 +627,13 @@ begin
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
+	if FLightingEnabled then
 	glDisableClientState(GL_NORMAL_ARRAY);
+	if FTextureEnabled then
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
-		DeleteBuffersARB(1, @FBuffer);
-		BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+		{$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(1, @FBuffer);
+		{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(SGR_ARRAY_BUFFER_ARB,0);
 		{$ENDIF}
 	{$ENDIF}
 end;
@@ -713,8 +726,8 @@ for i:=0 to VQuantity-1 do
 		SetLength(FArTextures,Length(FArTextures)+1);
 	FArTextures[High(FArTextures)].FTexture:=0;
 	FArTextures[High(FArTextures)].FSaved:=False;
-	VTextures[i]:=Length(FArTextures);
 	glGenTextures(1,@FArTextures[High(FArTextures)].FTexture);
+	VTextures[i]:=Length(FArTextures);
 	end;
 {$ELSE}
 glGenTextures(VQuantity,VTextures);
@@ -724,8 +737,16 @@ end;
 procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
 begin 
 {$IFDEF NEEDRESOURSES}
-FBindedTexture := VTexture-1;
-glBindTexture(VParam,FArTextures[FBindedTexture].FTexture);
+if VTexture = 0 then
+	begin
+	glBindTexture(VParam,0);
+	FBindedTexture:=0;
+	end
+else
+	begin
+	FBindedTexture := VTexture-1;
+	glBindTexture(VParam,FArTextures[FBindedTexture].FTexture);
+	end;
 {$ELSE}
 glBindTexture(VParam,VTexture);
 {$ENDIF}
@@ -759,13 +780,13 @@ FS.WriteBuffer(VP1,SizeOf(VP1));
 FS.WriteBuffer(VChannels,SizeOf(VChannels));
 FS.WriteBuffer(VWidth,SizeOf(VWidth));
 FS.WriteBuffer(VHeight,SizeOf(VHeight));
-FS.WriteBuffer(VFormatType,SizeOf(VFormatType));
 FS.WriteBuffer(VP2,SizeOf(VP2));
+FS.WriteBuffer(VFormatType,SizeOf(VFormatType));
 FS.WriteBuffer(VDataType,SizeOf(VDataType));
 FS.WriteBuffer(VBitMap^,VChannels*VWidth*VHeight);
 FS.Destroy();
 FArTextures[FBindedTexture].FSaved := True;
-SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
+SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : Saved : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
 {$ENDIF}
 glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
@@ -791,22 +812,84 @@ glDisableClientState(VParam);
 end;
 
 procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
-begin 
+{$IFDEF NEEDRESOURSES}
+var
+	i : LongWord;
+{$ENDIF}
+begin
+{$IFDEF NEEDRESOURSES}
+for i:=0 to VQ-1 do
+	begin
+	if FArBuffers = nil then
+		SetLength(FArBuffers,1)
+	else
+		SetLength(FArBuffers,Length(FArBuffers)+1);
+	{$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(1,@FArBuffers[High(FArBuffers)].FBuffer);
+	PT[i]:=Length(FArBuffers);
+	end;
+{$ELSE}
 {$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(VQ,PT);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
+{$IFDEF NEEDRESOURSES}
+var
+	i : LongWord;
+{$ENDIF}
 begin 
+{$IFDEF NEEDRESOURSES}
+for i:=0 to VQuantity-1 do
+	begin
+	{$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(1,@FArBuffers[PCardinal(VPoint)[i]-1].FBuffer);
+	FArBuffers[PCardinal(VPoint)[i]-1].FBuffer:=0;
+	if SGFileExists(TempDir+'/b'+SGStr(PCardinal(VPoint)[i]-1)) then
+		DeleteFile (TempDir+'/b'+SGStr(PCardinal(VPoint)[i]-1));
+	FArBuffers[PCardinal(VPoint)[i]-1].FSaved:=False;
+	end;
+{$ELSE}
 {$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(VQuantity,VPoint);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
-begin 
+begin
+{$IFDEF NEEDRESOURSES}
+case VParam of
+SGR_ARRAY_BUFFER_ARB : FVBOData[0] := VParam2-1;
+SGR_ELEMENT_ARRAY_BUFFER_ARB : FVBOData[1] := VParam2-1;
+end;
+if VParam2 = 0 then
+	{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,0)
+else
+	{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,FArBuffers[VParam2-1].FBuffer);
+{$ELSE}
 {$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,VParam2);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal;const VIndexPrimetiveType : TSGLongWord = 0); 
-begin 
+{$IFDEF NEEDRESOURSES}
+var
+	FS : TFileStream = nil;
+	i : Cardinal;
+	ii : TSGQuadWord;
+{$ENDIF}
+begin
+{$IFDEF NEEDRESOURSES}
+i := Byte(VParam = SGR_ARRAY_BUFFER_ARB)*FVBOData[0]+Byte(VParam = SGR_ELEMENT_ARRAY_BUFFER_ARB)*FVBOData[1];
+FS := TFileStream.Create(TempDir+'/b'+SGStr(i),fmCreate);
+ii:= VParam;
+FS.WriteBuffer(ii,SizeOf(ii));
+ii := VSize;
+FS.WriteBuffer(ii,SizeOf(ii));
+ii := VParam2;
+FS.WriteBuffer(ii,SizeOf(ii));
+FS.WriteBuffer(VBuffer^,VSize);
+FS.Destroy();
+FArBuffers[i].FSaved := True;
+SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(FBindedTexture)+'", Size='+SGStr(VSize)+'.');
+{$ENDIF}
 {$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
 end;
 
@@ -952,6 +1035,10 @@ FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
 	{$ENDIF}
 {$IFDEF NEEDRESOURSES}
 	FArTextures := nil;
+	FBindedTexture := 0;
+	FArBuffers :=nil;
+	FVBOData[0]:=0;
+	FVBOData[1]:=0;
 	{$IFDEF ANDROID}
 		SGMakeDirectory('/sdcard/.SaGe');
 		SGMakeDirectory('/sdcard/.SaGe/Temp');
@@ -959,7 +1046,6 @@ FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
 		SGMakeDirectory('Temp');
 		{$ENDIF}
 	FreeMemTemp();
-	FBindedTexture := 0;
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	FContext:=nil;
@@ -993,6 +1079,8 @@ end;
 {$ENDIF}
 begin
 {$IFDEF NEEDRESOURSES}
+	SetLength(FArTextures,0);
+	SetLength(FArBuffers,0);
 	FreeMemTemp();
 	{$ENDIF}
 {$IFDEF LINUX}
@@ -1258,10 +1346,17 @@ begin
 {$IFDEF NEEDRESOURSES}
 	if FArTextures <> nil then
 		for i:= 0 to High(FArTextures) do
-			if FArTextures[i].FTexture <> 0 then
+			if (FArTextures[i].FTexture <> 0) and (FArTextures[i].FSaved) then
 				begin
 				glDeleteTextures(1,@FArTextures[i].FTexture);
 				FArTextures[i].FTexture:=0;
+				end;
+	if FArBuffers <> nil then
+		for i:= 0 to High(FArBuffers) do
+			if (FArBuffers[i].FBuffer <> 0) and (FArBuffers[i].FSaved) then
+				begin
+				{$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(1,@FArBuffers[i].FBuffer);
+				FArBuffers[i].FBuffer:=0;
 				end;
 	{$ENDIF}
 {$IFDEF ANDROID}
@@ -1296,7 +1391,6 @@ GetMem(VBitMap,VChannels*VWidth*VHeight);
 FS.ReadBuffer(VBitMap^,VChannels*VWidth*VHeight);
 FS.Destroy();
 
-FArTextures[i].FTexture:=0;
 glEnable(VTextureType);
 glGenTextures(1,@FArTextures[i].FTexture);
 glBindTexture(VTextureType,FArTextures[i].FTexture);
@@ -1313,6 +1407,28 @@ glDisable(VTextureType);
 
 FreeMem(VBitMap,VChannels*VWidth*VHeight);
 SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
+end;
+procedure LoadBuffer(const i : LongWord);
+var
+	VBuffer : Pointer = nil;
+	FS : TFileStream = nil;
+	VType,VSize,VParam2 : TSGQWord;
+begin
+FS := TFileStream.Create(TempDir+'/b'+SGStr(i),fmOpenRead);
+FS.ReadBuffer(VType,SizeOf(VType));
+FS.ReadBuffer(VSize,SizeOf(VSize));
+FS.ReadBuffer(VParam2,SizeOf(VParam2));
+GetMem(VBuffer,VSize);
+FS.ReadBuffer(VBuffer^,VSize);
+FS.Destroy();
+
+FArBuffers[i].FBuffer:=0;
+{$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(1,@FArBuffers[i].FBuffer);
+{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VType,FArBuffers[i].FBuffer);
+{$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VType,VSize,VBuffer,VParam2);
+{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VType,0);
+
+FreeMem(VBuffer,VSize);
 end;
 var
 	i : LongWord;
@@ -1337,6 +1453,10 @@ Init();
 		for i:=0 to High(FArTextures) do
 			if FArTextures[i].FSaved then
 				LoadTexture(i);
+	if FArBuffers<>nil then
+		for i:=0 to High(FArBuffers) do
+			if FArBuffers[i].FSaved then
+				LoadBuffer(i);
 	{$ENDIF}
 end;
 

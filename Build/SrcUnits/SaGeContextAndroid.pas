@@ -314,7 +314,7 @@ APP_CMD_CONFIG_CHANGED://Поворот экрана и т п
 	///.......
 	///AConfiguration_getOrientation(..)
 	end;
-APP_CMD_STOP://Завершение работы приложения
+APP_CMD_DESTROY://Завершение работы приложения
 	begin
 	if Render<>nil then
 		Render.Destroy();

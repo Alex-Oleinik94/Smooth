@@ -204,7 +204,7 @@ var
 	//и самого файлика лога SGLog.Create не создаст
 	SGLogEnable:Boolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
 const
-	SGLogDirectory = {$IFDEF ANDROID}'/sdcard'{$ELSE}SGDataDirectory{$ENDIF};
+	SGLogDirectory = {$IFDEF ANDROID}'/sdcard/.SaGe'{$ELSE}SGDataDirectory{$ENDIF};
 type
 	//Это для приведения приведения типов к общему виду относительно х32 и х64
 	//Так как Pointer на х32 занимает 4 байта, а на х64 - 8 байтов
@@ -2723,6 +2723,7 @@ end;
 
 initialization
 begin
+{$IFDEF ANDROID}SGMakeDirectory('/sdcard/.SaGe');{$ENDIF}
 try
 SGLog:=TSGLog.Create();
 SGLog.Sourse('(***) SaGe Engine Log (***)',False);
