@@ -1826,25 +1826,27 @@ var
 begin
 Stream.ReadBuffer(QuantityO,SizeOf(QuantityO));
 Stream.ReadBuffer(QuantityM,SizeOf(QuantityM));
-for i:=0 to QuantityO-1 do
-	begin
-	AddObject().Destroy();
-	FArObjects[i].FMesh:=nil;
-	Stream.ReadBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
-	Stream.ReadBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
-	if FArObjects[i].FCopired=-1 then
+if QuantityO>0 then
+	for i:=0 to QuantityO-1 do
 		begin
-		FArObjects[i].FMesh:=TSG3DObject.Create();
-		FArObjects[i].FMesh.Context := Context;
-		FArObjects[i].FMesh.Parent := Self;
-		Objects[i].LoadFromSG3DO(Stream);
+		AddObject().Destroy();
+		FArObjects[i].FMesh:=nil;
+		Stream.ReadBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
+		Stream.ReadBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
+		if FArObjects[i].FCopired=-1 then
+			begin
+			FArObjects[i].FMesh:=TSG3DObject.Create();
+			FArObjects[i].FMesh.Context := Context;
+			FArObjects[i].FMesh.Parent := Self;
+			Objects[i].LoadFromSG3DO(Stream);
+			end;
 		end;
-	end;
-for i:=0 to QuantityM-1 do
-	begin
-	AddMaterial().Name:=SGReadStringFromStream(Stream);
-	LastMaterial().AddDiffuseMap(SGReadStringFromStream(Stream));
-	end;
+if QuantityM>0 then
+	for i:=0 to QuantityM-1 do
+		begin
+		AddMaterial().Name:=SGReadStringFromStream(Stream);
+		LastMaterial().AddDiffuseMap(SGReadStringFromStream(Stream));
+		end;
 end;
 
 procedure TSGCustomModel.SaveToSG3DM(const Stream : TStream);
@@ -1853,18 +1855,20 @@ var
 begin
 Stream.WriteBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
 Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
-for i:=0 to FQuantityObjects-1 do
-	begin
-	Stream.WriteBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
-	Stream.WriteBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
-	if FArObjects[i].FCopired=-1 then
-		Objects[i].SaveToSG3DO(Stream);
-	end;
-for i:=0 to FQuantityMaterials-1 do
-	begin
-	SGWriteStringToStream(FArMaterials[i].MapDiffuseWay,Stream);
-	SGWriteStringToStream(FArMaterials[i].Name,Stream);
-	end;
+if FQuantityObjects>0 then
+	for i:=0 to FQuantityObjects-1 do
+		begin
+		Stream.WriteBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
+		Stream.WriteBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
+		if FArObjects[i].FCopired=-1 then
+			Objects[i].SaveToSG3DO(Stream);
+		end;
+if FQuantityMaterials>0 then
+	for i:=0 to FQuantityMaterials-1 do
+		begin
+		SGWriteStringToStream(FArMaterials[i].MapDiffuseWay,Stream);
+		SGWriteStringToStream(FArMaterials[i].Name,Stream);
+		end;
 end;
 
 procedure TSGCustomModel.SaveToFile(const FileWay: string);

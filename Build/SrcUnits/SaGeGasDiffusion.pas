@@ -12,6 +12,14 @@ uses
 	,SaGeCommon
 	,SaGeUtils
 	,SaGeScreen;
+const
+	PredStr = 
+		{$IFDEF ANDROID}
+			'sdcard/.SaGe/'
+		{$ELSE}
+			''
+			{$ENDIF};
+	Catalog = 'Gas Diffusion Saves';
 type
 	TSGGazType = object
 		FColor : TSGColor4f;
@@ -77,7 +85,7 @@ type
 			FUpdateButton, 
 			FLoadButton    : TSGButton;
 		
-		//Экран
+		//Экран моделирования
 		FAddNewSourseButton,
 			FAddNewGazButton,
 			FStartEmulatingButton,
@@ -86,9 +94,18 @@ type
 			FAddSechenieButton,
 			FBackToMenuButton,
 			FStopEmulatingButton    : TSGButton;
+		
+		(*Повтор*)
+		//FFileName       : TSGString;
+		FArCadrs     : packed array of TSGQuadWord;
+		FNowCadr     : TSGLongWord;
+		FMoviePlayed : TSGBoolean;
+		//Экран повтора
+		
 			private
 		procedure ClearDisplayButtons();
 		procedure SaveStageToStream();
+		procedure UpDateSavesComboBox();
 		end;
 
 implementation
@@ -554,6 +571,11 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	Button.Active := False;
 	FStartEmulatingButton.Active := True;
 	FPauseEmulatingButton.Active := False;
+	if FFileStream<>nil then
+		begin
+		FFileStream.Destroy();
+		FFileStream:=nil;
+		end;
 	FCube.ClearGaz();
 	FMesh:=FCube.CalculateMesh();
 end; end;
@@ -564,6 +586,12 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	Button.Active := False;
 	FStopEmulatingButton.Active := True;
 	FPauseEmulatingButton.Active := True;
+	if FEnableSaving then
+		begin
+		FFileName   := SGGetFreeFileName(PredStr+Catalog+Slash+'Save.GDS','number');
+		FFileStream := TFileStream.Create(FFileName,fmCreate);
+		SaveStageToStream();
+		end;
 end; end;
 
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
@@ -572,7 +600,7 @@ const
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
-	FEnableSaving := not Boolean(FEnableOutputComboBox.FSelectItem);
+	FEnableSaving := not Boolean(FEnableOutputComboBox.SelectItem);
 	
 	FNewScenePanel.Visible := False;
 	if FCube<>nil then
@@ -581,7 +609,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FCube:=nil;
 		end;
 	FCube:=TSGGasDiffusionCube.Create(Context);
-	FCube.FBoundsOpen := Boolean(FBoundsTypeComboBox.FSelectItem);
+	FCube.FBoundsOpen := Boolean(FBoundsTypeComboBox.SelectItem);
 	FCube.InitCube(SGVal(FEdgeEdit.Caption));
 	if FMesh<>nil then
 		begin
@@ -592,11 +620,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	
 	if FEnableSaving then
 		begin
-		SGMakeDirectory('Gas Diffusion Saves');
-		FFileName := SGGetFreeFileName('Gas Diffusion Saves'+Slash+'Save.gds','number');
-		FFileStream := TFileStream.Create(FFileName,fmCreate);
-		
-		//SaveStageToStream();
+		SGMakeDirectory(PredStr+Catalog);
 		end;
 	
 	if FBackToMenuButton = nil then
@@ -757,17 +781,43 @@ procedure mmmFUpdateButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
-	
+	UpDateSavesComboBox();
 	end;
 end;
 
 procedure mmmFLoadButtonProcedure(Button:TSGButton);
-begin
-with TSGGasDiffusion(Button.FUserPointer1) do
+procedure ReadCadrs();
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+FFileStream.Position := 0;
+SetLength(FArCadrs,0);
+while FFileStream.Position<>FFileStream.Size do
 	begin
+	SetLength(FArCadrs,Length(FArCadrs)+1);
+	FArCadrs[High(FArCadrs)]:=FFileStream.Position;
 	
+	FMesh:=TSGCustomModel.Create();
+	FMesh.Context := Context;
+	FMesh.LoadFromSG3DM(FFileStream);
+	FMesh.Destroy();
+	FMesh:=nil;
 	end;
-end;
+FFileStream.Position := 0;
+end; end;
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FLoadScenePanel.Visible := False;
+	FFileName := FLoadComboBox.Items(FLoadComboBox.SelectItem);
+	FFileName := PredStr+Catalog+Slash+FFileName;
+	FFileStream := TFileStream.Create(FFileName,fmOpenRead);
+	FEnableSaving := False;
+	ReadCadrs();
+	FNowCadr:=0;
+	FMoviePlayed:=True;
+	
+	FMesh:=TSGCustomModel.Create();
+	FMesh.Context := Context;
+	FFileStream.Position:=FArCadrs[FNowCadr];
+	FMesh.LoadFromSG3DM(FFileStream);
+end;end;
 
 procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
 begin
@@ -775,6 +825,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
 	FLoadScenePanel.Visible := True;
 	FNewScenePanel .Visible := False;
+	UpDateSavesComboBox();
 	end;
 end;
 
@@ -813,11 +864,43 @@ with TSGGasDiffusion(Self.FUserPointer1) do
 	end;
 end;
 
+procedure TSGGasDiffusion.UpDateSavesComboBox();
+var
+	ar : TArString = nil;
+	i : TSGLongWord;
+	ExC : Boolean = False;
+begin
+FLoadComboBox.ClearItems();
+ar := SGGetFileNames(PredStr+Catalog+'/','*.GDS');
+if ar <> nil then
+	begin
+	for i:=0 to High(ar) do
+		if (ar[i]<>'.') and (ar[i]<>'..') then
+			begin
+			FLoadComboBox.CreateItem(ar[i]);
+			ExC := True;
+			end;
+	SetLength(ar,0);
+	end;
+if ExC then
+	begin
+	FLoadComboBox.SelectItem := 0;
+	FLoadComboBox.Active := True;
+	FLoadButton.Active   := True;
+	end
+else
+	begin
+	FLoadComboBox.Active := False;
+	FLoadButton.Active   := False;
+	FLoadComboBox.SelectItem := -1;
+	end;
+end;
+
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FMesh := nil;
-FCube := nil;
+FMesh                 := nil;
+FCube                 := nil;
 FAddNewSourseButton   := nil;
 FStartEmulatingButton := nil;
 FAddNewGazButton      := nil;
@@ -826,10 +909,13 @@ FPauseEmulatingButton := nil;
 FDeleteSechenieButton := nil;
 FAddSechenieButton    := nil;
 FBackToMenuButton     := nil;
-FFileName:='';
-FFileStream:=nil;
-FDiffusionRuned:= False;
-FEnableSaving  := True;
+FFileName             := '';
+FFileStream           := nil;
+FDiffusionRuned       := False;
+FEnableSaving         := True;
+FMoviePlayed          := False;
+FArCadrs              := nil;
+FNowCadr              := 0;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -914,7 +1000,7 @@ FNewScenePanel.LastChild.Font := FTahomaFont;
 FEnableOutputComboBox.CreateItem('Включить непрерывное сохранение эмуляции');
 FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
-FEnableOutputComboBox.FSelectItem:={$IFDEF MOBILE}1{$ELSE}0{$ENDIF};
+FEnableOutputComboBox.SelectItem:={$IFDEF MOBILE}1{$ELSE}0{$ENDIF};
 FEnableOutputComboBox.FUserPointer1:=Self;
 
 FBoundsTypeComboBox := TSGComboBox.Create();
@@ -926,7 +1012,7 @@ FNewScenePanel.LastChild.Font := FTahomaFont;
 FBoundsTypeComboBox.CreateItem('Замкнутое пространство');
 FBoundsTypeComboBox.CreateItem(' Открытое пространство');
 //FBoundsTypeComboBox.FProcedure:=TSGComboBoxProcedure(@FFBoundsTypeComboBoxProcedure);
-FBoundsTypeComboBox.FSelectItem:=0;
+FBoundsTypeComboBox.SelectItem:=0;
 FBoundsTypeComboBox.FUserPointer1:=Self;
 
 FLoadScenePanel:=TSGPanel.Create();
@@ -949,11 +1035,8 @@ FLoadComboBox.SetBounds(5,21,480-60,19);
 FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Font := FTahomaFont;
-FLoadComboBox.CreateItem('109');
-FLoadComboBox.CreateItem('109');
-FLoadComboBox.CreateItem('109');
 //FLoadComboBox.FProcedure:=TSGComboBoxProcedure(@FLoadComboBoxProcedure);
-FLoadComboBox.FSelectItem:=0;
+FLoadComboBox.SelectItem:=-1;
 FLoadComboBox.FUserPointer1:=Self;
 
 
@@ -996,14 +1079,24 @@ if FMesh <> nil then
 	FMesh.Draw();
 	if FDiffusionRuned then
 		begin
-		//if random(5) = 0 then begin
-			FCube.UpDateCube();
+		FCube.UpDateCube();
+		FMesh.Destroy();
+		FMesh:=FCube.CalculateMesh();
+		
+		if FEnableSaving then 
+			SaveStageToStream();
+		end;
+	if FMoviePlayed then
+		begin
+		if FMesh<>nil then
 			FMesh.Destroy();
-			FMesh:=FCube.CalculateMesh();
-			
-			//if FEnableSaving then 
-				//FESaveStageToStream();
-			//end;
+		FMesh:=TSGCustomModel.Create();
+		FMesh.Context := Context;
+		FNowCadr+=1;
+		if FNowCadr > High(FArCadrs) then
+			FNowCadr:=0;
+		FFileStream.Position:=FArCadrs[FNowCadr];
+		FMesh.LoadFromSG3DM(FFileStream);
 		end;
 	end;
 end;

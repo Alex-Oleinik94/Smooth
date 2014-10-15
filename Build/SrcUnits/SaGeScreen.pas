@@ -431,8 +431,8 @@ type
 	TSGComboBoxProcedure = TSGButtonMenuProcedure;
 	TSGComboBox=class(TSGComponent)
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();
+		destructor Destroy();override;
 			public
 		FBackLight:Boolean;
 		FBackLightTimer:real;
@@ -469,9 +469,11 @@ type
 		function CursorInComponent():boolean;override;
 			public
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1);
+		procedure ClearItems();
+		function Items(const Index : TSGLongWord):TSGString;
 			public
-		property SelectItem:LongInt read FSelectItem write FSelectItem;
-		property MaxLines:LongWord read FMaxColumns write FMaxColumns;
+		property SelectItem : LongInt read FSelectItem write FSelectItem;
+		property MaxLines   : LongWord read FMaxColumns write FMaxColumns;
 		end;
 	
 	TSGGrid=class(TSGComponent)
@@ -658,13 +660,26 @@ for i:=0 to High(FItems) do
 inherited;
 end;
 
-
-
 {$IFDEF CLHINTS}
 	{$NOTE ComboBox}
 	{$ENDIF}
 var
 	ComboBoxImage:TSGImage = nil;
+
+function TSGComboBox.Items(const Index : TSGLongWord):TSGString;
+begin
+if FItems<>nil then
+	Result:=FItems[Index].FCaption
+else
+	Result:='';
+end;
+
+procedure TSGComboBox.ClearItems();
+begin
+SetLength(FItems,0);
+FItems:=nil;
+FSelectItem := -1;
+end;
 
 function TSGComboBox.CursorInComponent():boolean;
 begin
@@ -686,12 +701,15 @@ Result:=
 FCursorOnComponent:=Result;
 end;
 
-function TSGComboBox.Colums:LongInt;
+function TSGComboBox.Colums():LongInt;
 begin
-if FMaxColumns>Length(FItems) then
-	Result:=Length(FItems)
+if FItems<>nil then
+	if FMaxColumns>Length(FItems) then
+		Result:=Length(FItems)
+	else
+		Result:=FMaxColumns
 else
-	Result:=FMaxColumns;
+	Result:=0;
 end;
 
 procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
@@ -1007,8 +1025,8 @@ FCursorOnThisItem:=0;
 FScrollWidth:=20;
 FRCAr1:=nil;
 FRCAr2:=nil;
-FRCV1.Import;
-FRCV2.Import;
+FRCV1.Import();
+FRCV2.Import();
 end;
 
 destructor TSGComboBox.Destroy;
