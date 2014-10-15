@@ -280,7 +280,7 @@ end;
 begin
 SGLog.Sourse('Entering "TSGContextAndroid.HandleCommand" : New comand = "'+WITC()+'"');
 case Comand of
-APP_CMD_SAVE_STATE://Наверное сохранить память приложения, для очистки оперы...
+APP_CMD_SAVE_STATE://Cохранить память приложения...
 	begin
 	//хз
 	end;
@@ -300,6 +300,8 @@ APP_CMD_TERM_WINDOW://Убиваем окно
 	FAnimating:=0;
 	DestroyWondow();
 	end;
+APP_CMD_RESUME:
+	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
 	begin
 	FAnimating:=1;
@@ -373,13 +375,13 @@ AINPUT_EVENT_TYPE_MOTION:
 	//SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+'), Action = "'+WITA()+'"');
 	FAnimating:=1;
 	end;
-AINPUT_EVENT_TYPE_KEY:
+{AINPUT_EVENT_TYPE_KEY:
 	begin
 	EventCode     := AKeyEvent_getKeyCode(event);
 	EventScanCode := AKeyEvent_getScanCode(event);
 	
 	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Key = (Code:'+SGStr(EventCode)+';ScanCode:'+SGStr(EventScanCode)+'), Action = "'+WITA()+'"');
-	end;
+	end;}
 else
 	begin
 	Result:=0;
@@ -454,7 +456,7 @@ end;
 
 procedure TSGContextAndroid.SwapBuffers();
 begin
-eglSwapBuffers(FDisplay,FSurface);
+Render.SwapBuffers();
 end;
 
 procedure TSGContextAndroid.Messages();

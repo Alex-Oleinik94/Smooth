@@ -430,7 +430,7 @@ begin
 			LongWord(FWindow.Get('WINDOW HANDLE')));
 	{$ELSE}
 		{$IFDEF ANDROID}
-			(*Already exists in SaGeContextAndroid*)
+			eglSwapBuffers(FWindow.Get('DESKTOP WINDOW HANDLE'),FWindow.Get('SURFACE'));
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSwapBuffers( FContext );
@@ -888,7 +888,7 @@ FS.WriteBuffer(ii,SizeOf(ii));
 FS.WriteBuffer(VBuffer^,VSize);
 FS.Destroy();
 FArBuffers[i].FSaved := True;
-SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(FBindedTexture)+'", Size='+SGStr(VSize)+'.');
+SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(i)+'", Size='+SGStr(VSize)+'.');
 {$ENDIF}
 {$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
 end;

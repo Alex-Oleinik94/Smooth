@@ -5,8 +5,8 @@ unit log;
 
 interface
 
-uses
-	SaGeBase;
+(*uses
+	SaGeBase;*)
 
 const libname='liblog.so';
 
@@ -22,7 +22,7 @@ const libname='liblog.so';
 
 type android_LogPriority=integer;
 
-function __android_log_write(prio:longint;tag,text:pchar):longint; cdecl; //external libname name '__android_log_write';
+function __android_log_write(prio:longint;tag,text:pchar):longint; cdecl; external libname name '__android_log_write';
 function LOGI(prio:longint;tag,text:pchar):longint; cdecl; varargs; external libname name '__android_log_print';
 
 procedure LOGW(Text: pchar);
@@ -30,14 +30,15 @@ procedure LOGW(Text: pchar);
   
 implementation
 
-function __android_log_write(prio:longint;tag,text:pchar):longint; cdecl;
+(*function __android_log_write(prio:longint;tag,text:pchar):longint; cdecl;
 begin
 SGLog.Sourse(['Android log:"',Prio,' ',SGPCharToString(tag),' ',SGPCharToString(text),'".']);
-end;
+end;*)
 
 procedure LOGW(Text: pchar);
 begin
-   SGLog.Sourse(['Android log:"','ANDROID_LOG_FATAL ','crap',SGPCharToString(text),'".']);
+__android_log_write(ANDROID_LOG_FATAL,'crap',text);
+(*SGLog.Sourse(['Android log:"','ANDROID_LOG_FATAL ','crap',SGPCharToString(text),'".']);*)
 end;
 
 end.
