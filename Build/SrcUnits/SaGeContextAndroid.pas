@@ -300,13 +300,11 @@ APP_CMD_TERM_WINDOW://Убиваем окно
 	FAnimating:=0;
 	DestroyWondow();
 	end;
-APP_CMD_RESUME:
-	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 APP_CMD_GAINED_FOCUS://Тогда когда приложение используется
 	begin
 	FAnimating:=1;
 	end;
-APP_CMD_LOST_FOCUS://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
+APP_CMD_LOST_FOCUS,APP_CMD_PAUSE,APP_CMD_STOP://Тогда когда приложение свернуто/блакировка экрана или т п, в общем ради батарейки
 	begin
 	FAnimating:=0;
 	end;

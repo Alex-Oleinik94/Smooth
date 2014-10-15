@@ -95,12 +95,18 @@ type
 			FBackToMenuButton,
 			FStopEmulatingButton    : TSGButton;
 		
-		(*Повтор*)
-		//FFileName       : TSGString;
-		FArCadrs     : packed array of TSGQuadWord;
-		FNowCadr     : TSGLongWord;
-		FMoviePlayed : TSGBoolean;
+			(*Повтор*)
+		
+		//FFileStream  : TFileStream;
+		//FFileName    : TSGString;
+		FArCadrs       : packed array of TSGQuadWord;
+		FNowCadr       : TSGLongWord;
+		FMoviePlayed   : TSGBoolean;
+		
 		//Экран повтора
+		FMoviePauseButton,
+			FMovieBackToMenuButton,
+			FMoviePlayButton : TSGButton;
 		
 			private
 		procedure ClearDisplayButtons();
@@ -459,6 +465,21 @@ end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
 begin
+if FMovieBackToMenuButton <> nil then
+	begin
+	FMovieBackToMenuButton.Destroy();
+	FMovieBackToMenuButton:=nil;
+	end;
+if FMoviePlayButton <> nil then
+	begin
+	FMoviePlayButton.Destroy();
+	FMoviePlayButton:=nil;
+	end;
+if FMoviePauseButton <> nil then
+	begin
+	FMoviePauseButton.Destroy();
+	FMoviePauseButton:=nil;
+	end;
 if FStartEmulatingButton<>nil then
 	begin
 	FStartEmulatingButton.Destroy();
@@ -503,6 +524,10 @@ end;
 
 destructor TSGGasDiffusion.Destroy();
 begin
+if FMesh<>nil then
+	FMesh.Destroy();
+if FArCadrs <> nil then
+	SetLength(FArCadrs,0);
 FNewScenePanel.Destroy();
 FLoadScenePanel.Destroy();
 FTahomaFont.Destroy();
@@ -586,7 +611,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	Button.Active := False;
 	FStopEmulatingButton.Active := True;
 	FPauseEmulatingButton.Active := True;
-	if FEnableSaving then
+	if FEnableSaving and (FFileStream=nil) then
 		begin
 		FFileName   := SGGetFreeFileName(PredStr+Catalog+Slash+'Save.GDS','number');
 		FFileStream := TFileStream.Create(FFileName,fmCreate);
@@ -632,7 +657,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
 		SGScreen.LastChild.Font    := FTahomaFont;
-		SGScreen.LastChild.Caption :='В "главное меню"';
+		SGScreen.LastChild.Caption :='В главное меню';
 		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
 		FBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFBackToMenuButtonProcedure);
 		end
@@ -778,12 +803,47 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 end;
 
 procedure mmmFUpdateButtonProcedure(Button:TSGButton);
-begin
-with TSGGasDiffusion(Button.FUserPointer1) do
-	begin
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	UpDateSavesComboBox();
-	end;
-end;
+end;end;
+
+procedure mmmFMovieBackToMenuButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FMoviePlayed := False;
+	FMovieBackToMenuButton.Visible:=False;
+	FMoviePauseButton.Visible:=False;
+	FMoviePlayButton.Visible:=False;
+	FLoadScenePanel.Visible := True;
+	if FMesh<>nil then
+		begin
+		FMesh.Destroy();
+		FMesh:=nil;
+		end;
+	if FArCadrs<>nil then
+		begin
+		SetLength(FArCadrs,0);
+		FArCadrs:=nil;
+		end;
+	if FFileStream<>nil then
+		begin
+		FFileStream.Destroy();
+		FFileStream:=nil;
+		end;
+end;end;
+
+procedure mmmFMoviePauseButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FMoviePlayed := False;
+	FMoviePauseButton.Active := False;
+	FMoviePlayButton.Active := True;
+end;end;
+
+procedure mmmFMoviePlayButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FMoviePlayed := True;
+	FMoviePauseButton.Active := True;
+	FMoviePlayButton.Active := False;
+end;end;
 
 procedure mmmFLoadButtonProcedure(Button:TSGButton);
 procedure ReadCadrs();
@@ -803,6 +863,8 @@ while FFileStream.Position<>FFileStream.Size do
 	end;
 FFileStream.Position := 0;
 end; end;
+const
+	W = 200;
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FLoadScenePanel.Visible := False;
 	FFileName := FLoadComboBox.Items(FLoadComboBox.SelectItem);
@@ -817,6 +879,63 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FMesh.Context := Context;
 	FFileStream.Position:=FArCadrs[FNowCadr];
 	FMesh.LoadFromSG3DM(FFileStream);
+	
+	if FMovieBackToMenuButton = nil then
+		begin
+		FMovieBackToMenuButton:=TSGButton.Create();
+		SGScreen.CreateChild(FMovieBackToMenuButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*0,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible := True;
+		SGScreen.LastChild.Active  := True;
+		SGScreen.LastChild.Font    := FTahomaFont;
+		SGScreen.LastChild.Caption :='В меню загрузок';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FMovieBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFMovieBackToMenuButtonProcedure);
+		end
+	else
+		begin
+		FMovieBackToMenuButton.Visible := True;
+		FMovieBackToMenuButton.Active  := True;
+		end;
+	
+	if FMoviePlayButton = nil then
+		begin
+		FMoviePlayButton:=TSGButton.Create();
+		SGScreen.CreateChild(FMoviePlayButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*1,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible := True;
+		SGScreen.LastChild.Active  := False;
+		SGScreen.LastChild.Font    := FTahomaFont;
+		SGScreen.LastChild.Caption :='Воспроизведение';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FMoviePlayButton.OnChange:=TSGComponentProcedure(@mmmFMoviePlayButtonProcedure);
+		end
+	else
+		begin
+		FMoviePlayButton.Visible := True;
+		FMoviePlayButton.Active  := False;
+		end;
+	if FMoviePauseButton = nil then
+		begin
+		FMoviePauseButton:=TSGButton.Create();
+		SGScreen.CreateChild(FMoviePauseButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*2,W,20);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.Visible := True;
+		SGScreen.LastChild.Active  := True;
+		SGScreen.LastChild.Font    := FTahomaFont;
+		SGScreen.LastChild.Caption :='Пауза';
+		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+		FMoviePauseButton.OnChange:=TSGComponentProcedure(@mmmFMoviePauseButtonProcedure);
+		end
+	else
+		begin
+		FMoviePauseButton.Visible := True;
+		FMoviePauseButton.Active  := True;
+		end;
+	
 end;end;
 
 procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
@@ -916,12 +1035,13 @@ FEnableSaving         := True;
 FMoviePlayed          := False;
 FArCadrs              := nil;
 FNowCadr              := 0;
+FMovieBackToMenuButton:= nil;
+FMoviePlayButton      := nil;
+FMoviePauseButton     := nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
-{$IFDEF ANDROID}
-	FCamera.FZum := 0.45;
-	{$ENDIF}
+FCamera.FZum := Context.Height/Context.Width;
 
 FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FTahomaFont.SetContext(Context);

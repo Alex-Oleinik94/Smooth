@@ -1448,6 +1448,8 @@ begin
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="TRUE"');
 	{$ENDIF}
 Init();
+Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+SwapBuffers();
 {$IFDEF NEEDRESOURSES}
 	if FArTextures<>nil then
 		for i:=0 to High(FArTextures) do
