@@ -33,34 +33,30 @@ end;
 procedure TSGFractalTetraider.PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
 var
 	c:TSGColor3f;
-	v:TSGVertex3f;
+
+function GetColor(const v : TSGVertex3f):TSGColor3f;
+begin
+Result:=c0*(SGAbsTwoVertex(v,bb0)/h)+
+		c1*(SGAbsTwoVertex(v,bb1)/h)+
+		c2*(SGAbsTwoVertex(v,bb2)/h)+
+		c3*(SGAbsTwoVertex(v,bb3)/h);
+end;
+
 begin
 FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^:=v0;
 FMesh.Objects[MeshID].ArVertex3f[FVertexIndex+1]^:=v1;
 FMesh.Objects[MeshID].ArVertex3f[FVertexIndex+2]^:=v2;
 if FEnableColors then
 	begin
-	v:=v0;
-	C:=(c0*SGAbsTwoVertex(v,bb0)/h+
-		c1*SGAbsTwoVertex(v,bb1)/h+
-		c2*SGAbsTwoVertex(v,bb2)/h+
-		c3*SGAbsTwoVertex(v,bb3)/h);
+	c:=GetColor(v0);
 	C.Normalize();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex,
 		c.r,c.g,c.b);
-	v:=v1;
-	C:=(c0*SGAbsTwoVertex(v,bb0)/h+
-		c1*SGAbsTwoVertex(v,bb1)/h+
-		c2*SGAbsTwoVertex(v,bb2)/h+
-		c3*SGAbsTwoVertex(v,bb3)/h);
+	C:=GetColor(v1);
 	C.Normalize();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex+1,
 		c.r,c.g,c.b);
-	v:=v2;
-	C:=(c0*SGAbsTwoVertex(v,bb0)/h+
-		c1*SGAbsTwoVertex(v,bb1)/h+
-		c2*SGAbsTwoVertex(v,bb2)/h+
-		c3*SGAbsTwoVertex(v,bb3)/h);
+	C:=GetColor(v2);
 	C.Normalize();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex+2,
 		c.r,c.g,c.b);
@@ -193,9 +189,7 @@ EnableColors   := True;
 EnableNormals  := True;
 LightingEnable := True;
 HasIndexes     := False;
-{$IFNDEF ANDROID}
-	Threads:=1;
-	{$ENDIF}
+Threads:={$IFDEF ANDROID}0{$ELSE}1{$ENDIF};
 Depth:=3;
 Radius:=5;
 h:=sqrt(3)*Radius/2;
@@ -249,15 +243,15 @@ SGScreen.LastChild.Visible:=True;
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
-Calculate;
+Calculate();
 end;
 
 destructor TSGFractalTetraider.Destroy;
 begin
-FBMD.Destroy;
-FLD.Destroy;
-FLDC.Destroy;
-FBPD.Destroy;
+FBMD.Destroy();
+FLD.Destroy();
+FLDC.Destroy();
+FBPD.Destroy();
 inherited;
 end;
 

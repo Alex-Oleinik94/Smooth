@@ -208,7 +208,29 @@ const
      * The bits in AMOTION_EVENT_ACTION_POINTER_INDEX_MASK indicate which pointer changed.
       *)
   AMOTION_EVENT_ACTION_POINTER_UP = 6;
+(* A change happened but the pointer is not down (unlike AMOTION_EVENT_ACTION_MOVE).
+     * The motion contains the most recent point, as well as any intermediate points since
+     * the last hover move event.
+     *)
+	AMOTION_EVENT_ACTION_HOVER_MOVE = 7;
 
+    (* The motion event contains relative vertical and/or horizontal scroll offsets.
+     * Use getAxisValue to retrieve the information from AMOTION_EVENT_AXIS_VSCROLL
+     * and AMOTION_EVENT_AXIS_HSCROLL.
+     * The pointer may or may not be down when this event is dispatched.
+     * This action is always delivered to the winder under the pointer, which
+     * may not be the window currently touched.
+     *)
+    AMOTION_EVENT_ACTION_SCROLL = 8;
+
+    (* The pointer is not down but has entered the boundaries of a window or view.
+     *)
+    AMOTION_EVENT_ACTION_HOVER_ENTER = 9;
+
+    (* The pointer is not down but has exited the boundaries of a window or view.
+     *)
+    AMOTION_EVENT_ACTION_HOVER_EXIT = 10;
+    
 (*
  * Motion event flags.
   *)

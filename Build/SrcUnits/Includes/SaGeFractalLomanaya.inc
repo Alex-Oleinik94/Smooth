@@ -20,7 +20,6 @@ type
 
 
 {$IFDEF SGREADIMPLEMENTATION}
-
 class function TSGFractalLomanaya.ClassName:string;
 begin
 Result:='Кривая Миньковского';
@@ -29,10 +28,11 @@ end;
 
 procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 begin
-if Render.RenderType=SGRenderOpenGL then
-	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v
+if Render.RenderType=SGRenderDirectX then
+	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
 else
-	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y);
+	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v;
+
 FVertexIndex+=1;
 
 AfterPushIndexes(MeshID,FThreadsEnable,FVertexIndex);
@@ -49,7 +49,7 @@ var
 begin
 if NowDepth>0 then
 	begin
-	e1:=SGVertexImport(t2.y-t1.y,t1.x-t2.x)*0.25;
+	e1:=SGVertex2fImport(t2.y-t1.y,t1.x-t2.x)*0.25;
 	e2:=t1+(t2-t1)*1/4;
 	e3:=t1+(t2-t1)*3/4;
 	v1:=e2-e1;

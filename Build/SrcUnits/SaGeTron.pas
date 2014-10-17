@@ -6,6 +6,7 @@ interface
 
 uses 
 	 crt
+	,SysUtils
 	,SaGeBase
 	,SaGeBased
 	,SaGeContext
@@ -69,7 +70,7 @@ Model:=TSGCustomModel.Create();
 while FLoadClass.Progress < 1 do
 	begin
 	FLoadClass.Progress := FLoadClass.Progress + 0.01;
-	Crt.Delay(5);
+	Sleep(20);
 	end;
 FLoadClass.Progress:=1.0001;
 FState:=SGTStateStarting;

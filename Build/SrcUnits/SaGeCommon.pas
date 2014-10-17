@@ -19,9 +19,9 @@ type
 	
 	TSGPoint2f=object
 		x,y:longint;
-		procedure Import(const x1:longint = 0; const y1:longint = 0);inline;
-		procedure Write;inline;
-		procedure Vertex(const VRender:TSGRender);inline;
+		procedure Import(const x1:longint = 0; const y1:longint = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	TSGPoint = TSGPoint2f;
 	SGPoint = TSGPoint2f;
@@ -32,8 +32,8 @@ type
 			public
 		z:longint;
 			public
-		procedure Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);inline;
-		procedure Vertex(const VRender:TSGRender);inline;
+		procedure Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGPoint3f = TSGPoint3f;
 	PSGPoint3f = ^ SGPoint3f;
@@ -42,14 +42,14 @@ type
 	
 	TSGVertex2f=object
 		x,y:TSGVertexType;
-		procedure Vertex(const VRender:TSGRender);inline;
-		procedure TexCoord(const VRender:TSGRender);inline;
-		procedure SetVariables(const x1:real = 0; const y1:real = 0);inline;
-		procedure Import(const x1:real = 0;const y1:real = 0);inline;
-		procedure Write;inline;
-		procedure WriteLn;inline;
-		procedure Round;inline;overload;
-		procedure Translate(const VRender:TSGRender);inline;
+		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure TexCoord(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetVariables(const x1:real = 0; const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Import(const x1:real = 0;const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Round;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	PTSGVertex2f=^TSGVertex2f;
 	TArTSGVertex2f = type packed array of TSGVertex2f;
@@ -68,25 +68,25 @@ type
 	TSGColor4b=object(TSGColor3b)
 		a:TSGByte;
 		procedure Import(const nr,ng,nb:TSGByte;const na:TSGByte = 255);
-		procedure ConvertType();inline;
+		procedure ConvertType();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	PTSGColor4b=^TSGColor4b;
 	
 	TSGVertex3f=object(TSGVertex2f)
 		z:TSGVertexType;
-		procedure Vertex(const VRender:TSGRender);inline;
-		procedure SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
-		procedure Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
-		procedure Normal(const VRender:TSGRender);inline;
-		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);inline;
-		procedure VertexPoint(const VRender:TSGRender);inline;
-		procedure Write;inline;
-		procedure WriteLn;inline;
-		procedure Vertex(const VRender:TSGRender;Const P:Pointer);inline;
-		procedure Normalize;inline;
-		procedure ReadFromTextFile(const Fail:PTextFile);inline;
-		procedure ReadLnFromTextFile(const Fail:PTextFile);inline;
-		procedure Translate(const VRender:TSGRender);inline;
+		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Normal(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure VertexPoint(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:TSGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Normalize;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ReadFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ReadLnFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGVertex3f=TSGVertex3f;
 	SGVertex=SGVertex3f;
@@ -111,25 +111,25 @@ type
 	
 	TSGVertex4f=object(TSGVertex3f)
 		w:TSGVertexType;
-		procedure Import(const x1,y1,z1,w1:TSGVertexType);inline;
+		procedure Import(const x1,y1,z1,w1:TSGVertexType);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes=object
 		Vertexes:array[0..1] of TSGVertex2f;
 		procedure Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);
-		procedure Write;inline;
-		procedure ProcSumX(r:Real);inline;
-		procedure ProcSumY(r:Real);inline;
+		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ProcSumX(r:Real);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ProcSumY(r:Real);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		property SumX:real write ProcSumX;
 		property SumY:real write ProcSumY;
 		property X1:TSGVertexType read Vertexes[0].x write Vertexes[0].x;
 		property Y1:TSGVertexType read Vertexes[0].y write Vertexes[0].y;
 		property X2:TSGVertexType read Vertexes[1].x write Vertexes[1].x;
 		property Y2:TSGVertexType read Vertexes[1].y write Vertexes[1].y;
-		function VertexInView(const Vertex:TSGVertex2f):Boolean;inline;
-		function AbsX:TSGVertexType;inline;
-		function AbsY:TSGVertexType;inline;
+		function VertexInView(const Vertex:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AbsX:TSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AbsY:TSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGVisibleVertex=object(TSGVertex3f)
@@ -146,12 +146,12 @@ type
 	PTSGColor3f=^TSGColor3f;
 	TSGColor3f=object
 		r,g,b:single;
-		procedure Color(const VRender:TSGRender);inline;
-		procedure SetColor(const VRender:TSGRender);inline;
+		procedure Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Import(const r1:single = 0; const g1:single = 0; const b1:single = 0);
-		procedure ReadFromStream(const Stream:TStream);inline;
-		procedure WriteToStream(const Stream:TStream);inline;
-		procedure Normalize();inline;
+		procedure ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Normalize();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	PTArTSGColor3f = ^TArTSGColor3f;
 	TArTSGColor3f = array of TSGColor3f;
@@ -165,8 +165,8 @@ type
 		function AddAlpha(const NewAlpha:real = 1):TSGColor4f;
 		function WithAlpha(const NewAlpha:real = 1):TSGColor4f;
 		procedure Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);
-		procedure ReadFromStream(const Stream:TStream);inline;
-		procedure WriteToStream(const Stream:TStream);inline;
+		procedure ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGColor4f = TSGColor4f;
 	SGColor = TSGColor4f;
@@ -215,122 +215,124 @@ const
 	NilVertex:SGVertex = (x:0;y:0;z:0);
 	NilColor:SGColor = (r:0;g:0;b:0;a:0);
 
-operator + (const a,b:TSGComplexNumber):TSGComplexNumber;overload;inline;
-operator * (const a,b:TSGComplexNumber):TSGComplexNumber;inline;overload;
-operator - (const a,b:TSGComplexNumber):TSGComplexNumber;overload;inline;
-operator / (const a,b:TSGComplexNumber):TSGComplexNumber;inline;overload;
-operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;inline;overload;
-operator = (const a,b:TSGComplexNumber):Boolean;overload;inline;
+operator + (const a,b:TSGComplexNumber):TSGComplexNumber;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const a,b:TSGComplexNumber):TSGComplexNumber;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator / (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator = (const a,b:TSGComplexNumber):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-operator * (const a:SGColor;const b:real):SGColor;inline;overload;
-operator * (const b:extended;const a:SGColor):SGColor;inline;overload;
-operator * (const a:SGColor;const b:byte):SGColor;inline;overload;
-operator * (const a:SGColor;const b:longint):SGColor;inline;overload;
-operator * (const a:SGColor;const b:int64):SGColor;inline;overload;
-operator * (const b:int64;const a:SGColor):SGColor;inline;overload;
-operator * (const b:longint;const a:SGColor):SGColor;inline;overload;
-operator * (const b:byte;const a:SGColor):SGColor;inline;overload;
-operator + (const a,b:SGColor):SGColor;inline;overload;
-operator - (const a,b:SGColor):SGColor;inline;overload;
-operator / (const a:SGColor;const b:real):SGColor;inline;overload;
+operator * (const a:SGColor;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:SGColor;const b:single):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const b:extended;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:SGColor;const b:byte):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:SGColor;const b:longint):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:SGColor;const b:int64):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const b:int64;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const b:longint;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const b:byte;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const a,b:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const a,b:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator / (const a:SGColor;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
-operator * (const a:TSGColor3f;const b:real):SGColor;inline;overload;
-operator / (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+operator + (const a,b:TSGColor3f):TSGColor3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:TSGColor3f;const b:real):TSGColor3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator / (const a:TSGColor3f;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 //Векторное произведение двух векторов трехмерного пространства
-operator * (const a,b:SGVertex):SGVertex;inline;overload;
+operator * (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
-operator + (const a,b:SGVertex):SGVertex;inline;overload;
-operator - (const a,b:SGVertex):SGVertex;inline;overload;
-operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;inline;overload;
-operator * (const a:SGVertex;const b:real):SGVertex;inline;overload;
-operator * (const b:real;const a:SGVertex):SGVertex;inline;overload;
-operator + (const a:SGVertex;const b:SGVertex2f):SGVertex;inline;overload;
-operator + (const a:SGVertex2f;const b:SGVertex):SGVertex;inline;overload;
-operator + (const a,b:SGVertex2f):SGVertex2f;overload;inline;overload;
-operator + (const a,b:SGVertex2f):SGVertex;inline;overload;
-operator - (const a:TSGVertex):TSGVertex;overload;inline;
-operator * (const a:SGVertex2f;const b:real):SGVertex2f;overload;inline;
-operator / (const a:SGVertex2f;const b:real):SGVertex2f;overload;inline;
-operator * (const b:real;const a:SGVertex2f):SGVertex2f;overload;inline;
-operator / (const b:real;const a:SGVertex2f):SGVertex2f;overload;inline;
-operator = (const a,b:TSGVertex3f):Boolean;overload;inline;
-operator - (const a,b:TSGVertex2f):TSGVertex2f;overload;inline;
-operator - (const a:TSGVertex2f):TSGVertex2f;overload;inline;
-operator * (const a,b:TSGVertex2f):TSGVertex2f;overload;inline;
-operator + (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
-operator - (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
-operator := (const b:single):TSGVertex3f;overload;inline;
+operator + (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const a:SGVertex;const b:real):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const b:real;const a:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const a:SGVertex;const b:SGVertex2f):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const a:SGVertex2f;const b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const a,b:SGVertex2f):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const a,b:SGVertex2f):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const a:TSGVertex):TSGVertex;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a:SGVertex2f;const b:real):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator / (const a:SGVertex2f;const b:real):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const b:real;const a:SGVertex2f):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator / (const b:real;const a:SGVertex2f):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const a,b:TSGVertex3f):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator - (const a,b:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator - (const a:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a,b:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator - (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator := (const b:single):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-operator + (const a,b:SGPoint):SGPoint;inline;overload;
-operator - (const a,b:SGPoint):SGPoint;inline;overload;
-operator / (const a:SGPoint;const b:Int64):SGPoint;overload;inline;
-operator div (const a:SGPoint;const b:Int64):SGPoint;overload;inline;
-operator = (const a,b:TSGPoint2f):Boolean;overload;inline;
-operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;inline;
-operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;inline;
-operator := (const a:TSGWord):TSGPoint2f;overload;inline;
+operator + (const a,b:SGPoint):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const a,b:SGPoint):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator / (const a:SGPoint;const b:Int64):SGPoint;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator div (const a:SGPoint;const b:Int64):SGPoint;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const a,b:TSGPoint2f):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator := (const a:TSGWord):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-operator + (const a:TSGVertex2f;const b:TSGPoint2f):TSGVertex2f;overload;inline;
-operator := (const a:TSGPoint2f):TSGVertex2f;overload;inline;
+operator + (const a:TSGVertex2f;const b:TSGPoint2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator := (const a:TSGPoint2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
+operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
-operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
-operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
+operator + (const a,b:TSGPosition):TSGPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Перемножение матриц (нужно для Rotate, Translate и Scale)
 //Так же нужно для LookAt так как там нужно делать Translate.
-operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
-operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;inline;
-operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;inline;
+operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
-function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
-function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;inline;
-function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline;
-function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
+function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 //procedure SGQuad(const Vertex1:SGVertex;const Vertex2:SGVertex;const Vertex3:SGVertex;const Vertex4:SGVertex);
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;inline;
-function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;inline;
-function SGTreugPlosh(const a1,a2,a3:SGVertex):real;inline;
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;inline;
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;inline;
-function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;inline;
-function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;inline;
-function Random(const lx,ly:LongWord):TSGPoint2f;overload;inline;
-function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;inline;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTreugPlosh(const a1,a2,a3:SGVertex):real;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Random(const lx,ly:LongWord):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRoundQuad(const VRender:TSGRender;const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;inline;
-function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;inline;
-function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;inline;
+function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetArrayOfRoundQuad(const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt):SGArVertex;
 procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
-	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);inline;
+	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConstructRoundQuad(const VRender:TSGRender;const ArVertex:SGArSGVertex;const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;inline;
-procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); inline;
-function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;inline;
-function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;inline;
-function SGComplexNumberImport(const x:real = 0;const y:real = 0):TSGComplexNumber;inline;
-function SGPoint2fImport(const x1:int64 = 0; const y1:int64 = 0):TSGPoint2f;overload;inline;
-function SGPoint2fImport(const x1:extended = 0; const y1:extended = 0):TSGPoint2f;overload;inline;
-function SGGetColor4fFromLongWord(const LongWordColor:LongWord;const WithAlpha:Boolean = False):SGColor4f;inline;
+function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGComplexNumberImport(const x:real = 0;const y:real = 0):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPoint2fImport(const x1:int64 = 0; const y1:int64 = 0):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPoint2fImport(const x1:extended = 0; const y1:extended = 0):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetColor4fFromLongWord(const LongWordColor:LongWord;const WithAlpha:Boolean = False):SGColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPointsCirclePoints(const FPoints:TArTSGVertex2f):TSGArLongWord;
-function SGX(const v:Single):TSGVertex3f;inline;
-function SGY(const v:Single):TSGVertex3f;inline;
-function SGZ(const v:Single):TSGVertex3f;inline;
-function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
+function SGX(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGY(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGZ(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Abs(const a:TSGVertex2f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (*Эти функциии для того, чтобы определять gluLookAt и gluPerspective на мобильных платформах типа Android или iOS*)
-function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;inline;
-function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;inline;
-function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
-function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
-function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteMatrix4(const P:TSGPointer);
-function SGGetIdentityMatrix():TSGMatrix4;inline;
+function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;
 
 implementation
@@ -347,7 +349,7 @@ PSingle(@Result)[13]:=Vertex.y;
 PSingle(@Result)[14]:=Vertex.z;
 end;
 
-function SGGetIdentityMatrix():TSGMatrix4;inline;
+function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGByte;
 begin
@@ -356,7 +358,7 @@ for i:=0 to 3 do
 	Result[i,i]:=1;
 end;
 
-function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	m:TSGMatrix4;
 	i,ii:byte;
@@ -388,7 +390,7 @@ for i:=0 to 15 do
 Textcolor(7);
 end;
 
-operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;inline;
+operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	C:TSGVertex4f;
 begin
@@ -396,7 +398,7 @@ C.Import(A.x,A.y,A.z,1);
 Result:=C*B;
 end;
 
-procedure TSGVertex4f.Import(const x1,y1,z1,w1:TSGVertexType);inline;
+procedure TSGVertex4f.Import(const x1,y1,z1,w1:TSGVertexType);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
@@ -404,7 +406,7 @@ z:=z1;
 w:=w1;
 end;
 
-operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;inline;
+operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 type
 	PTSGVertexType = ^ TSGVertexType;
 var
@@ -417,7 +419,7 @@ for i:=0 to 3 do
 			PTSGVertexType(@Result)[i]+=PTSGVertexType(@A)[k]*B[i,k];
 end;
 
-operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;inline;
+operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i,j,k:byte;
 begin
@@ -428,7 +430,7 @@ for i:=0 to 3 do
 			Result[i,j]+=A[i,k]*B[k,j];
 end;
 
-function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;inline;
+function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result[0,0]:=_0x0;
 Result[0,1]:=_0x1;
@@ -448,7 +450,7 @@ Result[3,2]:=_3x2;
 Result[3,3]:=_3x3;
 end;
 
-function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=SGMatrix4Import(
 	2.0 * vnear / (vright - vleft), 0, 0, 0,
@@ -457,7 +459,7 @@ Result:=SGMatrix4Import(
 	0,0, -2.0 * vfar * vnear / (vfar - vnear), 0);
 end;
 
-function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;inline;
+function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	vTop:Single;
 begin
@@ -466,7 +468,7 @@ Result:=SGGetFrustumMatrix(
 	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
 end;
 
-function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;inline;
+function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	vForward,vSide:TSGVertex3f;
 begin
@@ -487,7 +489,7 @@ Result *= SGMatrix4Import(
 	0,0,0,1);
 end;
 
-procedure TSGColor4b.ConvertType();inline;
+procedure TSGColor4b.ConvertType();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	d:TSGByte;
 begin
@@ -504,74 +506,74 @@ b:=nb;
 a:=na;
 end;
 
-operator + (const a,b:TSGPosition):TSGPosition;overload;inline;
+operator + (const a,b:TSGPosition):TSGPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.CustomPos := a.CustomPos + b.CustomPos;
 end;
 
-operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;inline;
+operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.FLocation := a.FLocation + b.FLocation;
 Result.FTurn := a.FTurn + b.FTurn;
 end;
 
-operator * (const a,b:SGVertex):SGVertex;inline;overload;
+operator * (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);
 end;
 
-operator := (const b:single):TSGVertex3f;overload;inline;
+operator := (const b:single):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(b,b,b);
 end;
 
-function Abs(const a:TSGVertex2f):TSGSingle;overload;inline;
+function Abs(const a:TSGVertex2f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=sqrt(sqr(a.x)+sqr(a.y));
 end;
 
-procedure TSGScreenVertexes.ProcSumX(r:Real);inline;
+procedure TSGScreenVertexes.ProcSumX(r:Real);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertexes[0].x+=r;
 Vertexes[1].x+=r;
 end;
 
-procedure TSGScreenVertexes.ProcSumY(r:Real);inline;
+procedure TSGScreenVertexes.ProcSumY(r:Real);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertexes[0].y+=r;
 Vertexes[1].y+=r;
 end;
 
-procedure TSGVertex3f.WriteLn();inline;
+procedure TSGVertex3f.WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Self.Write();
 System.WriteLn()
 end;
 
-procedure TSGVertex3f.Write();inline;
+procedure TSGVertex3f.Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 System.Write(x:0:10,' ',y:0:10,' ',z:0:10)
 end;
 
-procedure TSGVertex2f.Write();inline;
+procedure TSGVertex2f.Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 System.Write(x:0:10,' ',y:0:10);
 end;
 
-procedure TSGVertex2f.WriteLn();inline;
+procedure TSGVertex2f.WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Self.Write();
 System.Writeln();
 end;
 
-procedure TSGScreenVertexes.Write;inline;
+procedure TSGScreenVertexes.Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertexes[0].Write();
 System.Write(' ');
 Vertexes[1].WriteLn();
 end;
 
-operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;inline;overload;
+operator * (const a:TSGScreenVertexes;const b:real):TSGScreenVertexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	x,y,x1,y1:real;
 begin
@@ -588,7 +590,7 @@ Result.Import(
 	y+y1);
 end;
 
-procedure TSGScreenVertexes.Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);inline;
+procedure TSGScreenVertexes.Import(const x1:real = 0;const y1:real = 0;const x2:real = 0;const y2:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Vertexes[0].x:=x1;
 Vertexes[0].y:=y1;
@@ -596,19 +598,19 @@ Vertexes[1].x:=x2;
 Vertexes[1].y:=y2;
 end;
 
-function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;inline;
+function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y));
 end;
 
-procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);inline;
+procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.BeginScene(SGR_POINTS);
 Vertex(VRender);
 VRender.EndScene();
 end;
 
-procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);inline;
+procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Light:array[0..3] of TSGVertexType;
 	AmbientLight : array[0..3] of TSGVertexType = (0.5,0.5,0.5,1.0);
@@ -626,12 +628,12 @@ VRender.Lightfv(Ligth,SGR_SPECULAR, @SpecularLight);
 VRender.Lightfv(Ligth,SGR_POSITION,@Light);
 end;
 
-procedure TSGVertex3f.Normal(const VRender:TSGRender);inline;
+procedure TSGVertex3f.Normal(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Normal3f(x,y,z);
 end;
 
-procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:TSGRender);inline;
+procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	b,d:SGVertex;
 begin
@@ -645,27 +647,27 @@ VRender.TexCoord2f(0,0);d.Vertex(VRender);
 VRender.EndScene();
 end;
 
-operator + (const a:SGVertex;const b:SGVertex2f):SGVertex;inline;
+operator + (const a:SGVertex;const b:SGVertex2f):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y,a.z);
 end;
 
-operator + (const a:SGVertex2f;const b:SGVertex):SGVertex;inline;
+operator + (const a:SGVertex2f;const b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y,b.z);
 end;
 
-operator + (const a,b:SGVertex2f):SGVertex2f;inline;
+operator + (const a,b:SGVertex2f):SGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-operator + (const a,b:SGVertex2f):SGVertex;inline;
+operator + (const a,b:SGVertex2f):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);inline;
+procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.BeginScene(SGR_QUADS);
 VRender.TexCoord2f(vl.x, vl.y);
@@ -681,7 +683,7 @@ end;
 
 procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
-	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);inline;
+	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SGRoundQuad(VRender,Vertex11,Vertex13,Radius1,Interval,QuadColor1,LinesColor1,WithLines);
 SGRoundQuad(VRender,Vertex21,Vertex23,Radius2,Interval,QuadColor2,LinesColor2,WithLines);
@@ -695,7 +697,7 @@ procedure SGRoundQuad(
 	const QuadColor:SGColor; 
 	const LinesColor:SGColor4f; 
 	const WithLines:boolean = False;
-	const WithQuad:boolean = True);inline;
+	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	ArVertex:TSGArTSGVertex = nil;
 begin
@@ -786,38 +788,43 @@ if WithLines then
 	end;
 end;
 
-function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;inline;
+function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(Point.x,Point.y,0);
 end;
 
-operator * (const a:SGColor;const b:real):SGColor;inline;
+operator * (const a:SGColor;const b:single):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.SetVariables(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;inline;
+operator * (const a:SGColor;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.SetVariables(a.r*b,a.g*b,a.b*b,a.a*b);
+end;
+
+function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.SetVariables(r1,g1,b1,a1);
 end;
 
-function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;inline;
+function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(Point.x,Point.y);
 end;
 
-procedure TSGVertex2f.Import(const x1:real = 0;const y1:real = 0);inline;
+procedure TSGVertex2f.Import(const x1:real = 0;const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
 end;
 
-procedure TSGPoint2f.Vertex(const VRender:TSGRender);inline;
+procedure TSGPoint2f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex2f(x,y);
 end;
 
-procedure TSGColor3f.Normalize();inline;
+procedure TSGColor3f.Normalize();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	kk:single;
 begin
@@ -827,7 +834,7 @@ g/=kk;
 b/=kk;
 end;
 
-procedure TSGVertex3f.Normalize();inline;
+procedure TSGVertex3f.Normalize();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	vabs:real;
 begin
@@ -837,7 +844,7 @@ y/=vabs;
 z/=vabs;
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender;Const P:Pointer);inline;
+procedure TSGVertex3f.Vertex(const VRender:TSGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if p=nil then
 	VRender.Vertex3f(x,y,z)
@@ -845,52 +852,52 @@ else
 	TSGShodowVertexProcedure(p)(x,y,z);
 end;
 
-function TSGColor4f.AddAlpha(const NewAlpha:real = 1):TSGColor4f;inline;
+function TSGColor4f.AddAlpha(const NewAlpha:real = 1):TSGColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 a*=NewAlpha;
 Result:=Self;
 end;
 
-function SGComplexNumberImport(const x:real = 0;const y:real = 0):TSGComplexNumber;inline;
+function SGComplexNumberImport(const x:real = 0;const y:real = 0):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(x,y);
 end;
 
-function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;inline;
+function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(x,y);
 end;
 
-operator - (const a,b:TSGComplexNumber):TSGComplexNumber;inline;
+operator - (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x-b.x,a.y-b.y);
 end;
 
-operator / (const a,b:TSGComplexNumber):TSGComplexNumber;inline;
+operator / (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(
 	(a.x*b.x+a.y*b.y)/(b.x*b.x-b.y*b.y),
 	(a.y*b.x-a.x*b.y)/(b.x*b.x-b.y*b.y));
 end;
 
-operator * (const a,b:TSGComplexNumber):TSGComplexNumber;inline;overload;
+operator * (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 result.Import(a.x*b.x-a.y*b.y,a.x*b.y+b.x*a.y);
 end;
 
-operator + (const a,b:TSGComplexNumber):TSGComplexNumber;inline;
+operator + (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;inline;
+function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(
 	Round(Vertex.X),
 	Round(Vertex.Y));
 end;
 
-procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType);inline;
+procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	a:TSGVertexType;
 begin
@@ -899,7 +906,7 @@ LongInt1:=LongInt2;
 LongInt2:=a;
 end;
 
-operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;inline;overload;
+operator ** (const a:TSGComplexNumber;const b:LongInt):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	i:LongInt;
 begin
@@ -909,17 +916,17 @@ for i:=1 to b do
 end;
 
 
-function TSGScreenVertexes.AbsX:TSGVertexType;inline;
+function TSGScreenVertexes.AbsX:TSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=Abs(X1-X2);
 end;
 
-function TSGScreenVertexes.AbsY:TSGVertexType;inline;
+function TSGScreenVertexes.AbsY:TSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=Abs(Y1-Y2);
 end;
 
-function TSGScreenVertexes.VertexInView(const Vertex:TSGVertex2f):Boolean;inline;
+function TSGScreenVertexes.VertexInView(const Vertex:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=(Vertex.x<SGMax(X1,X2)) and 
 	(Vertex.y<SGMax(Y1,Y2)) and 
@@ -927,7 +934,7 @@ Result:=(Vertex.x<SGMax(X1,X2)) and
 	(Vertex.y>SGMin(Y1,Y2));
 end;
 
-operator + (const a,b:SGColor):SGColor;inline;
+operator + (const a,b:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.r:=a.r+b.r;
 Result.g:=a.g+b.g;
@@ -935,7 +942,7 @@ Result.b:=a.b+b.b;
 Result.a:=a.a+b.a;
 end;
 
-operator - (const a,b:SGColor):SGColor;inline;
+operator - (const a,b:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.r:=a.r-b.r;
 Result.g:=a.g-b.g;
@@ -943,21 +950,28 @@ Result.b:=a.b-b.b;
 Result.a:=a.a-b.a;
 end;
 
-operator * (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+operator + (const a,b:TSGColor3f):TSGColor3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.r:=a.r+b.r;
+Result.g:=a.g+b.g;
+Result.b:=a.b+b.b;
+end;
+
+operator * (const a:TSGColor3f;const b:real):TSGColor3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.r:=a.r*b;
 Result.g:=a.g*b;
 Result.b:=a.b*b;
 end;
 
-operator / (const a:TSGColor3f;const b:real):SGColor;inline;overload;
+operator / (const a:TSGColor3f;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.r:=a.r/b;
 Result.g:=a.g/b;
 Result.b:=a.b/b;
 end;
 
-operator / (const a:SGColor;const b:real):SGColor;inline;overload;
+operator / (const a:SGColor;const b:real):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.r:=a.r/b;
 Result.g:=a.g/b;
@@ -965,7 +979,7 @@ Result.b:=a.b/b;
 Result.a:=a.a/b;
 end;
 
-function SGGetColor4fFromLongWord(const LongWordColor:LongWord;const WithAlpha:Boolean = False):SGColor4f;inline;
+function SGGetColor4fFromLongWord(const LongWordColor:LongWord;const WithAlpha:Boolean = False):SGColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 type
 	LongWordByteArray = packed array [0..3] of byte;
 begin
@@ -988,25 +1002,25 @@ else
 	end;
 end;
 
-function SGPoint2fImport(const x1:extended = 0; const y1:extended = 0):TSGPoint2f;overload;inline;
+function SGPoint2fImport(const x1:extended = 0; const y1:extended = 0):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=Round(x1);
 Result.y:=Round(y1);
 end;
 
-function SGPoint2fImport(const x1:int64 = 0; const y1:int64 = 0):TSGPoint2f;overload;inline;
+function SGPoint2fImport(const x1:int64 = 0; const y1:int64 = 0):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=x1;
 Result.y:=y1;
 end;
 
-procedure TSGVertex2f.Round;inline;overload;
+procedure TSGVertex2f.Round;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 x:=System.Round(x);
 y:=System.Round(y);
 end;
 
-procedure TSGColor4f.Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);inline;
+procedure TSGColor4f.Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 r:=r1;
 b:=b1;
@@ -1014,89 +1028,89 @@ g:=g1;
 a:=a1;
 end;
 
-function TSGColor4f.WithAlpha(const NewAlpha:real = 1):TSGColor4f;inline;
+function TSGColor4f.WithAlpha(const NewAlpha:real = 1):TSGColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=Self;
 Result.a*=NewAlpha;
 end;
 
-procedure TSGVertex3f.Translate(const VRender:TSGRender);inline;
+procedure TSGVertex3f.Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Translatef(x,y,z);
 end;
 
-procedure TSGVertex2f.Translate(const VRender:TSGRender);inline;
+procedure TSGVertex2f.Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Translatef(x,y,0);
 end;
 
-procedure TSGVertex3f.ReadFromTextFile(const Fail:PTextFile);inline;
+procedure TSGVertex3f.ReadFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Read(Fail^,x,y,z);
 end;
 
-procedure TSGVertex3f.ReadLnFromTextFile(const Fail:PTextFile);inline;
+procedure TSGVertex3f.ReadLnFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 ReadFromTextFile(Fail);
 ReadLn(Fail^);
 end;
 
-operator = (const a,b:TSGComplexNumber):Boolean;overload;inline;
+operator = (const a,b:TSGComplexNumber):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=(a.x=b.x) and (b.y=a.y);
 end;
 
-operator * (const b:real;const a:SGVertex2f):SGVertex2f;overload;inline;
+operator * (const b:real;const a:SGVertex2f):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x*b,a.y*b);
 end;
 
-operator / (const b:real;const a:SGVertex2f):SGVertex2f;overload;inline;
+operator / (const b:real;const a:SGVertex2f):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(b/a.x,b/a.y);
 end;
 
-operator * (const b:extended;const a:SGColor):SGColor;inline;overload;
+operator * (const b:extended;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const a:SGColor;const b:byte):SGColor;inline;overload;
+operator * (const a:SGColor;const b:byte):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const a:SGColor;const b:longint):SGColor;inline;overload;
+operator * (const a:SGColor;const b:longint):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const a:SGColor;const b:int64):SGColor;inline;overload;
+operator * (const a:SGColor;const b:int64):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const b:byte;const a:SGColor):SGColor;inline;overload;
+operator * (const b:byte;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const b:longint;const a:SGColor):SGColor;inline;overload;
+operator * (const b:longint;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-operator * (const b:int64;const a:SGColor):SGColor;inline;overload;
+operator * (const b:int64;const a:SGColor):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-procedure TSGPoint3f.Vertex(const VRender:TSGRender);inline;
+procedure TSGPoint3f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex3f(x,y,z);
 end;
 
-procedure TSGPoint3f.Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);inline;
+procedure TSGPoint3f.Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=x2;
@@ -1162,24 +1176,24 @@ SetLength(Result,Length(Result)-i-1);
 end;
 
 
-operator + (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
+operator + (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b,a.y+b);
 end;
 
-operator - (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;inline;
+operator - (const a:SGVertex2f;const b:TSGVertexType):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x-b,a.y-b);
 end;
 
-function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;inline;
+function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=x;
 Result.y:=y;
 Result.z:=z;
 end;
 
-function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;inline;
+function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.SetVariables(
 	-r*(t1.x-t2.x)+t1.x,
@@ -1188,7 +1202,7 @@ Result.SetVariables(
 end;
 
 
-function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;inline;
+function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	q3:SGVertex;
 begin
@@ -1200,47 +1214,47 @@ Result:=SGGetVertexOnIntersectionOfThreePlane(
 	SGGetPlaneFromThreeVertex(SGGetVertexInAttitude(q1,q3),w1,w2));
 end;
 
-function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;inline;
+function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=SGGetPlaneFromNineReals(a1.x,a1.y,a1.z,a2.x,a2.y,a2.z,a3.x,a3.y,a3.z);
 end;
 
-procedure SGPoint.Import(const x1:longint = 0; const y1:longint = 0);inline;
+procedure SGPoint.Import(const x1:longint = 0; const y1:longint = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
 end;
 
-operator + (const a,b:SGPoint):SGPoint;inline;
+operator + (const a,b:SGPoint):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x+b.x;
 Result.y:=a.y+b.y;
 end;
 
-operator - (const a,b:SGPoint):SGPoint;inline;
+operator - (const a,b:SGPoint):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x-b.x;
 Result.y:=a.y-b.y;
 end;
 
-procedure TSGColor3f.Color(const VRender:TSGRender);inline;
+procedure TSGColor3f.Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetColor(VRender);
 end;
 
-procedure TSGColor3f.SetColor(const VRender:TSGRender);inline;
+procedure TSGColor3f.SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Color3f(r,g,b);
 end;
 
-procedure TSGColor3f.Import(const r1: single; const g1: single; const b1: single);inline;
+procedure TSGColor3f.Import(const r1: single; const g1: single; const b1: single);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
   r:=r1;
   g:=g1;
   b:=b1;
 end;
 
-function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;inline;
+function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var a,b,c:real;
 begin
 a:=p1.y*(p2.z-p3.z)+p2.y*(p3.z-p1.z)+p3.y*(p1.z-p2.z);
@@ -1249,40 +1263,40 @@ c:=p1.x*(p2.y-p3.y)+p2.x*(p3.y-p1.y)+p3.x*(p1.y-p2.y);
 Result.Import(a/(sqrt(a*a+b*b+c*c)),b/(sqrt(a*a+b*b+c*c)),c/(sqrt(a*a+b*b+c*c)));
 end;
 
-function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;inline;
+function SGPointImport(const NewX:LongInt = 0; const NewY:LongInt = 0 ):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=NewX;
 Result.y:=NewY;
 end;
 
-function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;inline;
+function SGPointImport(const NewX:Real = 0; const NewY:Real = 0 ):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=Round(NewX);
 Result.y:=Round(NewY);
 end;
 
-procedure TSGVertex3f.Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
+procedure TSGVertex3f.Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
 z:=z1;
 end;
 
-function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;inline;
+function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=vx;
 Result.y:=vy;
 Result.z:=vz;
 end;
 
-operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;inline;
+operator / (const a:SGVertex;const b:TSGVertexType):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x/b;
 Result.y:=a.y/b;
 Result.z:=a.z/b;
 end;
 
-operator * (const a:SGVertex;const b:real):SGVertex;inline;
+operator * (const a:SGVertex;const b:real):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x*b;
 Result.y:=a.y*b;
@@ -1291,26 +1305,26 @@ end;
 
 
 
-operator - (const a,b:SGVertex):SGVertex;inline;
+operator - (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x-b.x;
 Result.y:=a.y-b.y;
 Result.z:=a.z-b.z;
 end;
 
-operator + (const a,b:SGVertex):SGVertex;inline;
+operator + (const a,b:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x+b.x;
 Result.y:=a.y+b.y;
 Result.z:=a.z+b.z;
 end;
 
-function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;inline;
+function SGAbsTwoVertex(const Vertex1:SGVertex;const Vertex2:SGVertex):TSGSingle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y)+sqr(Vertex1.z-Vertex2.z));
 end;
 
-function SGTreugPlosh(const a1,a2,a3:SGVertex):real;inline;
+function SGTreugPlosh(const a1,a2,a3:SGVertex):real;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	p:real;
 begin
@@ -1318,7 +1332,7 @@ p:=(SGAbsTwoVertex(a1,a2)+SGAbsTwoVertex(a1,a3)+SGAbsTwoVertex(a3,a2))/2;
 SGTreugPlosh:=sqrt(p*(p-SGAbsTwoVertex(a1,a2))*(p-SGAbsTwoVertex(a3,a2))*(p-SGAbsTwoVertex(a1,a3)));
 end;
 
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;inline;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex3:SGVertex):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=SGVertexOnQuad(
 	Vertex,
@@ -1334,7 +1348,7 @@ Result:=SGVertexOnQuad(
 		QuadVertex3.z));
 end;
 
-function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;inline;
+function SGVertexOnQuad(const Vertex:SGVertex; const QuadVertex1:SGVertex;const QuadVertex2:SGVertex;const QuadVertex3:SGVertex;const QuadVertex4:SGVertex):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if abs(
 	(SGAbsTwoVertex(QuadVertex1,QuadVertex2)*SGAbsTwoVertex(QuadVertex2,QuadVertex3))
@@ -1350,7 +1364,7 @@ else
 	Result:=True;
 end;
 
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;inline;
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var de,de1,de2,de3:real;
 begin
 p1.d:=-1*(p1.d);
@@ -1363,152 +1377,152 @@ de3:=SGGetMatrix3x3(p1.a,p1.b,p1.d,p2.a,p2.b,p2.d,p3.a,p3.b,p3.d);
 Result.Import(de1/de,de2/de,de3/de);
 end;
 
-procedure TSGPoint2f.Write;inline;
+procedure TSGPoint2f.Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 writeln(x,' ',y);
 end;
 
 
-function Random(const lx,ly:LongWord):TSGPoint2f;overload;inline;
+function Random(const lx,ly:LongWord):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(Random(lx),Random(ly));
 end;
 
-operator := (const a:TSGPoint2f):TSGVertex2f;overload;inline;
+operator := (const a:TSGPoint2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x,a.y); 
 end;
 
-operator * (const a,b:TSGVertex2f):TSGVertex2f;overload;inline;
+operator * (const a,b:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x*b.x,a.y*b.y);
 end;
 
-operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;inline;
+operator * (const a:TSGPoint2f;const b:real):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x*b;
 Result.y:=a.y*b;
 end;
 
-operator := (const a:TSGWord):TSGPoint2f;overload;inline;
+operator := (const a:TSGWord):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a,a);
 end;
 
-operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;inline;
+operator + (const a:TSGPoint2f;const b:integer):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b,a.y+b);
 end;
 
-operator + (const a:TSGVertex2f;const b:TSGPoint2f):TSGVertex2f;overload;inline;
+operator + (const a:TSGVertex2f;const b:TSGPoint2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-operator - (const a,b:TSGVertex2f):TSGVertex2f;overload;inline;
+operator - (const a,b:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x-b.x;
 Result.y:=a.y-b.y;
 end;
 
-operator - (const a:TSGVertex2f):TSGVertex2f;overload;inline;
+operator - (const a:TSGVertex2f):TSGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=-a.x;
 Result.y:=-a.y;
 end;
 
-operator * (const a:SGVertex2f;const b:real):SGVertex2f;overload;inline;
+operator * (const a:SGVertex2f;const b:real):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x*b,a.y*b);
 end;
 
-operator / (const a:SGVertex2f;const b:real):SGVertex2f;overload;inline;
+operator / (const a:SGVertex2f;const b:real):SGVertex2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(a.x/b,a.y/b);
 end;
 
-operator = (const a,b:TSGPoint2f):Boolean;overload;inline;
+operator = (const a,b:TSGPoint2f):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=(a.x=b.x) and (a.y=b.y);
 end;
 
-operator = (const a,b:TSGVertex3f):Boolean;overload;inline;
+operator = (const a,b:TSGVertex3f):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=(Abs(a.x-b.x)+Abs(a.y-b.y)+Abs(a.z-b.z))<SGZero;
 end;
 
-operator / (const a:SGPoint;const b:Int64):SGPoint;overload;inline;
+operator / (const a:SGPoint;const b:Int64):SGPoint;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=a div b;
 end;
 
-operator div (const a:SGPoint;const b:Int64):SGPoint;overload;inline;
+operator div (const a:SGPoint;const b:Int64):SGPoint;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=a.x div b;
 Result.y:=a.y div b;
 end;
 
-procedure TSGColor3f.ReadFromStream(const Stream:TStream);inline;
+procedure TSGColor3f.ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Stream.ReadBuffer(Self,SizeOf(r)*3);
 end;
 
-procedure TSGColor3f.WriteToStream(const Stream:TStream);inline;
+procedure TSGColor3f.WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Stream.WriteBuffer(Self,SizeOf(r)*3);
 end;
 
-procedure TSGColor4f.ReadFromStream(const Stream:TStream);inline;
+procedure TSGColor4f.ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Stream.ReadBuffer(Self,SizeOf(r)*4);
 end;
 
-procedure TSGColor4f.WriteToStream(const Stream:TStream);inline;
+procedure TSGColor4f.WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Stream.WriteBuffer(Self,SizeOf(r)*4);
 end;
 
-operator - (const a:TSGVertex):TSGVertex;overload;inline;
+operator - (const a:TSGVertex):TSGVertex;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.x:=-a.x;
 Result.y:=-a.y;
 Result.z:=-a.z;
 end;
 
-operator * (const b:real;const a:SGVertex):SGVertex;inline;overload;
+operator * (const b:real;const a:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=a*b;
 end;
 
-function SGX(const v:Single):TSGVertex3f;inline;
+function SGX(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(v,0,0);
 end;
 
-function SGY(const v:Single):TSGVertex3f;inline;
+function SGY(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(0,v,0);
 end;
 
-function SGZ(const v:Single):TSGVertex3f;inline;
+function SGZ(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(0,0,v);
 end;
 
-procedure TSGVertex2f.SetVariables(const x1:real = 0; const y1:real = 0);inline;
+procedure TSGVertex2f.SetVariables(const x1:real = 0; const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
 end;
 
-procedure TSGVertex3f.SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);inline;
+procedure TSGVertex3f.SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 x:=x1;
 y:=y1;
 z:=z1;
 end;
 
-procedure TSGColor4f.SetVariables(const r1:real = 0; const g1:real = 0; const b1:real = 0; const a1:real = 1);inline;
+procedure TSGColor4f.SetVariables(const r1:real = 0; const g1:real = 0; const b1:real = 0; const a1:real = 1);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 r:=r1;
 g:=g1;
@@ -1516,27 +1530,27 @@ b:=b1;
 a:=a1;
 end;
 
-procedure TSGVertex2f.TexCoord(const VRender:TSGRender);inline;
+procedure TSGVertex2f.TexCoord(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.TexCoord2f(x,y);
 end;
 
-procedure TSGColor4f.SetColor(const VRender:TSGRender);inline;
+procedure TSGColor4f.SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Color(VRender);
 end;
 
-procedure TSGColor4f.Color(const VRender:TSGRender);inline;
+procedure TSGColor4f.Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Color4f(r,g,b,a);
 end;
 
-procedure TSGVertex2f.Vertex(const VRender:TSGRender);inline;
+procedure TSGVertex2f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex2f(x,y);
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender);inline;
+procedure TSGVertex3f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex3f(x,y,z);
 end;

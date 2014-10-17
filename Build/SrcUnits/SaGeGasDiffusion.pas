@@ -94,6 +94,7 @@ type
 			FAddSechenieButton,
 			FBackToMenuButton,
 			FStopEmulatingButton    : TSGButton;
+		FAddSecheniePanel           : TSGPanel;
 		
 			(*Повтор*)
 		
@@ -465,6 +466,11 @@ end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
 begin
+if FAddSecheniePanel<> nil then
+	begin
+	FAddSecheniePanel.Destroy();
+	FAddSecheniePanel:=nil;
+	end;
 if FMovieBackToMenuButton <> nil then
 	begin
 	FMovieBackToMenuButton.Destroy();
@@ -799,6 +805,19 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FDeleteSechenieButton.Visible := True;
 		FDeleteSechenieButton.Active  := False;
 		end;
+	
+	{if FAddSecheniePanel = nil then
+		begin
+		FAddSecheniePanel:=TSGPanel.Create();
+		SGScreen.CreateChild(FAddSecheniePanel);
+		FAddSecheniePanel.Visible := False;
+		FAddSecheniePanel.Active := False;
+		end
+	else
+		begin
+		FAddSecheniePanel.Visible := False;
+		FAddSecheniePanel.Active := False;
+		end;}
 	end;
 end;
 
@@ -1018,26 +1037,27 @@ end;
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FMesh                 := nil;
-FCube                 := nil;
-FAddNewSourseButton   := nil;
-FStartEmulatingButton := nil;
-FAddNewGazButton      := nil;
-FStopEmulatingButton  := nil;
-FPauseEmulatingButton := nil;
-FDeleteSechenieButton := nil;
-FAddSechenieButton    := nil;
-FBackToMenuButton     := nil;
-FFileName             := '';
-FFileStream           := nil;
-FDiffusionRuned       := False;
-FEnableSaving         := True;
-FMoviePlayed          := False;
-FArCadrs              := nil;
-FNowCadr              := 0;
-FMovieBackToMenuButton:= nil;
-FMoviePlayButton      := nil;
-FMoviePauseButton     := nil;
+FMesh                  	:= nil;
+FCube                  	:= nil;
+FAddNewSourseButton    	:= nil;
+FStartEmulatingButton  	:= nil;
+FAddNewGazButton       	:= nil;
+FStopEmulatingButton   	:= nil;
+FPauseEmulatingButton  	:= nil;
+FDeleteSechenieButton  	:= nil;
+FAddSechenieButton     	:= nil;
+FBackToMenuButton      	:= nil;
+FFileName              	:= '';
+FFileStream            	:= nil;
+FDiffusionRuned        	:= False;
+FEnableSaving          	:= True;
+FMoviePlayed           	:= False;
+FArCadrs               	:= nil;
+FNowCadr               	:= 0;
+FMovieBackToMenuButton 	:= nil;
+FMoviePlayButton       	:= nil;
+FMoviePauseButton      	:= nil;
+FAddSecheniePanel      	:= nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);

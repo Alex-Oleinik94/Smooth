@@ -326,7 +326,7 @@ end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
 var 
-	EventType, EventAction, EventCode, EventScanCode, PointersCount : TSGLongInt;
+	EventType, EventActionAndMask,EventAction,EventPointerIndex, EventCode, EventScanCode, PointersCount : TSGLongInt;
 
 function WITE():TSGString;inline;
 begin
@@ -347,30 +347,56 @@ else Result := 'UNKNOWN('+SGStr(EventAction)+')';
 end;
 end;
 
+
+function WITAM():TSGString;inline;
+begin
+case EventAction of
+AMOTION_EVENT_ACTION_DOWN : Result := 'AMOTION_EVENT_ACTION_DOWN';
+AMOTION_EVENT_ACTION_UP : Result := 'AMOTION_EVENT_ACTION_UP';
+AMOTION_EVENT_ACTION_MOVE : Result := 'AMOTION_EVENT_ACTION_MOVE';
+AMOTION_EVENT_ACTION_CANCEL : Result := 'AMOTION_EVENT_ACTION_CANCEL';
+AMOTION_EVENT_ACTION_POINTER_DOWN : Result := 'AMOTION_EVENT_ACTION_POINTER_DOWN';
+AMOTION_EVENT_ACTION_OUTSIDE : Result := 'AMOTION_EVENT_ACTION_OUTSIDE';
+AMOTION_EVENT_ACTION_POINTER_UP : Result := 'AMOTION_EVENT_ACTION_POINTER_UP';
+AMOTION_EVENT_ACTION_HOVER_MOVE : Result := 'AMOTION_EVENT_ACTION_HOVER_MOVE';
+AMOTION_EVENT_ACTION_SCROLL : Result := 'AMOTION_EVENT_ACTION_SCROLL';
+AMOTION_EVENT_ACTION_HOVER_ENTER : Result := 'AMOTION_EVENT_ACTION_HOVER_ENTER';
+AMOTION_EVENT_ACTION_HOVER_EXIT : Result := 'AMOTION_EVENT_ACTION_HOVER_EXIT';
+else Result := 'UNKNOWN('+SGStr(EventAction)+')';
+end;
+end;
+
 var
 	i: TSGLongWord;
-
+	S : STRING = '';
 begin
 EventType := AInputEvent_getType(event);
 //SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
 case EventType of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
-	EventAction := AMotionEvent_getAction(event);
-	//PointersCount := 
+	EventActionAndMask := AMotionEvent_getAction(event);
+	EventAction := AMOTION_EVENT_ACTION_MASK and EventActionAndMask;
+	EventPointerIndex := (AMOTION_EVENT_ACTION_POINTER_INDEX_MASK and EventActionAndMask) shr AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+	PointersCount := AMotionEvent_getPointerCount(event);
 	FLastTouch.Import(
 		Round(AMotionEvent_getX(event, 0)),
 		Round(AMotionEvent_getY(event, 0)));
-	if EventAction = AKEY_EVENT_ACTION_UP then
-		SetCursorKey(SGUpKey,SGLeftCursorButton)
-	else if EventAction = AKEY_EVENT_ACTION_DOWN then
+	case EventAction of
+	AMOTION_EVENT_ACTION_UP:
+			SetCursorKey(SGUpKey,SGLeftCursorButton);
+	AMOTION_EVENT_ACTION_DOWN:
 		begin
 		SetCursorKey(SGDownKey,SGLeftCursorButton);
 		FCursorPosition[SGDeferenseCursorPosition].Import(0,0);
 		FCursorPosition[SGNowCursorPosition]:=FLastTouch;
 		FCursorPosition[SGLastCursorPosition]:=FLastTouch;
 		end;
-	//SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Motion = ('+SGStr(FLastTouch.x)+','+SGStr(FLastTouch.y)+'), Action = "'+WITA()+'"');
+	end;
+	{S+= '"TSGContextAndroid.HandleEvent" : Action = "'+WITAM()+'", PointerIndex = "'+SGStr(EventPointerIndex)+'", PointersCount = "'+SGStr(PointersCount)+'"';
+	for i := 0 to PointersCount-1 do
+		S+=', Pointer'+SGStr(i+1)+':('+SGStr(Round(AMotionEvent_getX(event, i)))+','+SGStr(Round(AMotionEvent_getY(event, i)))+')';
+	SGLog.Sourse(s);}
 	FAnimating:=1;
 	end;
 {AINPUT_EVENT_TYPE_KEY:

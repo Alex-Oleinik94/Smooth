@@ -40,3 +40,7 @@
 {$IF defined(CPU386) and defined(CPU32) and (not defined(DARWIN))}
 	{$DEFINE WITHASMINC}
 	{$ENDIF}
+
+//{$IFNDEF ANDROID}
+	{$DEFINE SUPPORTINLINE}
+	//{$ENDIF}}

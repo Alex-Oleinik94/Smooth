@@ -45,11 +45,20 @@ uses
 	 ppthread_condattr_t = ^pthread_condattr_t;
 
 	 __start_routine_t = pointer;
-	function  pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
-	procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
-	function  pthread_attr_init(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
+	function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
+	function pthread_attr_init(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
+	function pthread_attr_setdetachstate(__attr:ppthread_attr_t; __detachstate:longint):longint;cdecl;external 'libc.so';
+	function pthread_mutex_init(__mutex:ppthread_mutex_t; __mutex_attr:ppthread_mutexattr_t):longint;cdecl;external 'libc.so';
+	function pthread_mutex_destroy(__mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
+	function pthread_mutex_lock(__mutex: ppthread_mutex_t):longint;cdecl;external 'libc.so';
+	function pthread_mutex_unlock(__mutex: ppthread_mutex_t):longint;cdecl;external 'libc.so';
+	function pthread_cond_init(__cond:ppthread_cond_t; __cond_attr:ppthread_condattr_t):longint;cdecl;external 'libc.so';
+	function pthread_cond_destroy(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
+	function pthread_cond_signal(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
+	function pthread_cond_broadcast(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
+	function pthread_cond_wait(__cond:ppthread_cond_t; __mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
+	//procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
 	function  pthread_attr_destroy(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
-	function  pthread_attr_setdetachstate(__attr:ppthread_attr_t; __detachstate:longint):longint;cdecl;external 'libc.so';
 	//function pthread_cancel(__thread:pthread_t):LongInt;cdecl;external 'libc.so';
 	{$ENDIF}
 
@@ -385,6 +394,8 @@ type
 		FThreadID:LongWord;
 		{$IFDEF ANDROID} 
 			attr : pthread_attr_t;
+			mutex : pthread_mutex_t;
+			cond : pthread_cond_t;
 			{$ENDIF}
 		procedure Execute;virtual;
 		procedure Start;virtual;
@@ -2213,6 +2224,8 @@ FillChar(FHandle,SizeOf(FHandle),0);
 FThreadID:=0;
 {$IFDEF ANDROID}
 	fillchar(attr,sizeof(attr),0);
+	fillchar(cond,sizeof(cond),0);
+	fillchar(mutex,sizeof(mutex),0);
 	{$ENDIF}
 if QuickStart then
 	Start;
@@ -2240,11 +2253,7 @@ function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:=0;
-SGLog.Sourse('12345 : 01, Param = '+SGStr(TSGLongWord(ThreadClass)));
 ThreadClass.Execute();
-SGLog.Sourse('12345 : 02');
-//pthread_exit(nil);
-SGLog.Sourse('12345 : 03');
 end;
 
 destructor TSGThread.Destroy();
@@ -2265,6 +2274,8 @@ begin
 	{$IFDEF ANDROID}
 		{if not FFinished then
 			pthread_cancel(FHandle);}
+		pthread_cond_destroy(@cond);
+		pthread_mutex_destroy(@mutex);
 		pthread_attr_destroy(@attr);
 	{$ELSE}
 	if not FFinished then
@@ -2283,9 +2294,15 @@ begin
 {$ELSE}
 	{$IFDEF ANDROID}
 			SGLog.Sourse('Start thread');
+			{pthread_mutex_init(@mutex, nil);
+			pthread_cond_init(@cond, nil);}
 			pthread_attr_init(@attr);
-			pthread_attr_setdetachstate(@attr,0);
+			pthread_attr_setdetachstate(@attr,PTHREAD_CREATE_DETACHED);
 			FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
+			{pthread_mutex_lock(@mutex);
+			while FFinished do
+				pthread_cond_wait(@cond, @mutex);
+			pthread_mutex_unlock(@mutex);}
 			SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 		{$ELSE}
 			FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
