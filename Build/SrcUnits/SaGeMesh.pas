@@ -194,14 +194,16 @@ type
         // “ип хранение цветов
         FColorType        : TSGMeshColorType;
     private
-		procedure SetColorType(const VNewColorType:TSGMeshColorType);
-		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
 		function GetSizeOfOneVertex():LongWord;inline;
 		function GetVertexLength():QWord;inline;
 		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
 		function GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
 		function GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord;inline;
 		procedure SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
+	public
+		procedure SetColorType(const VNewColorType:TSGMeshColorType);
+		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
+		procedure ChangeMeshColorType4b();
     public
         // Ёти свойства уже были прокоментированы выше (см на что эти свойства ссылаютс€)
         property BumpFormat                        : TSGMeshBumpType   read FBumpFormat          write FBumpFormat;
@@ -905,6 +907,19 @@ FNOfVerts+=FQuantityNewVertexes;
 ReAllocMem(ArVertex,GetVertexesSize());
 end;
 
+procedure TSG3DObject.ChangeMeshColorType4b();
+var
+	i : TSGMaxEnum;
+	c : byte;
+begin
+for i:=0 to Vertexes - 1 do
+	begin
+	c:=ArColor4b[i]^.r;
+	ArColor4b[i]^.r:=ArColor4b[i]^.b;
+	ArColor4b[i]^.b:=c;
+	end;
+end;
+
 procedure TSG3DObject.AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 begin
 if Render<>nil then
@@ -1044,9 +1059,29 @@ FVertexType:=VNewVertexType;
 end;
 
 procedure TSG3DObject.SetColorType(const VNewColorType:TSGMeshColorType);
+(*procedure OToD();
+var
+	NewArray : Pointer;
+	MeshCT:TSGMeshColorType;
 begin
-FHasColors:=True;
-FColorType:=VNewColorType;
+NewArray:=ArVertex;
+ArVertex:=nil;
+MeshCT:=FColorType;
+Vertexes := Vertexes;
+
+end;*)
+begin
+(*if (ArVertex <> nil) and (Render<>nil)  then
+	begin
+	if (VNewColorType=SGMeshColorType4b) and (Render.RenderType=SGRenderDirectX) and ((FColorType=SGMeshVertexType3f) or (FColorType=SGMeshColorType4f)) then
+		OToD();
+	
+	end
+else
+	begin*)
+	FHasColors:=True;
+	FColorType:=VNewColorType;
+	(*end;*)
 end;
 
 procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord);inline;

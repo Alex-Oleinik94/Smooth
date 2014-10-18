@@ -85,7 +85,11 @@ type
 			FUpdateButton, 
 			FLoadButton    : TSGButton;
 		
-		//Экран моделирования
+		//Экран
+		FInfoLabel : TSGLabel;
+		
+			(*Экран моделирования*)
+		
 		FAddNewSourseButton,
 			FAddNewGazButton,
 			FStartEmulatingButton,
@@ -113,6 +117,7 @@ type
 		procedure ClearDisplayButtons();
 		procedure SaveStageToStream();
 		procedure UpDateSavesComboBox();
+		procedure UpDateInfoLabel();
 		end;
 
 implementation
@@ -378,7 +383,7 @@ Result.LastObject().HasTexture := False;
 Result.LastObject().HasColors  := True;
 Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := SGMeshVertexType3f;
-Result.LastObject().AutoSetColorType(False);
+Result.LastObject().SetColorType(SGMeshColorType4b);
 Result.LastObject().Vertexes   := 24;
 
 Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
@@ -428,7 +433,7 @@ Result.LastObject().HasTexture := False;
 Result.LastObject().HasColors  := True;
 Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := SGMeshVertexType3f;
-Result.LastObject().AutoSetColorType(False);
+Result.LastObject().SetColorType(SGMeshColorType4b);
 
 for i:=0 to FEdge*FEdge*FEdge -1 do
 	begin
@@ -461,7 +466,10 @@ end;
 procedure TSGGasDiffusion.SaveStageToStream();
 begin
 if FFileStream<>nil then
+	begin
 	FMesh.SaveToSG3DM(FFileStream);
+	FNowCadr+=1;
+	end;
 end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
@@ -542,6 +550,8 @@ if FCube<>nil then
 if FFileStream<>nil then
 	FFileStream.Destroy();
 ClearDisplayButtons();
+if FInfoLabel<>nil then
+	FInfoLabel.Destroy();
 inherited;
 end;
 
@@ -560,7 +570,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FAddSechenieButton.Visible := False;
 	FBackToMenuButton.Visible := False;
 	FStopEmulatingButton.Visible := False;
-	
+	FInfoLabel.Caption:='';
 	if FCube<>nil then
 		begin
 		FCube.Destroy();
@@ -621,7 +631,6 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		begin
 		FFileName   := SGGetFreeFileName(PredStr+Catalog+Slash+'Save.GDS','number');
 		FFileStream := TFileStream.Create(FFileName,fmCreate);
-		SaveStageToStream();
 		end;
 end; end;
 
@@ -652,6 +661,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	if FEnableSaving then
 		begin
 		SGMakeDirectory(PredStr+Catalog);
+		FNowCadr:=0;
 		end;
 	
 	if FBackToMenuButton = nil then
@@ -833,6 +843,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FMoviePauseButton.Visible:=False;
 	FMoviePlayButton.Visible:=False;
 	FLoadScenePanel.Visible := True;
+	FInfoLabel.Caption:='';
 	if FMesh<>nil then
 		begin
 		FMesh.Destroy();
@@ -1058,6 +1069,7 @@ FMovieBackToMenuButton 	:= nil;
 FMoviePlayButton       	:= nil;
 FMoviePauseButton      	:= nil;
 FAddSecheniePanel      	:= nil;
+FInfoLabel             	:= nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -1209,6 +1221,14 @@ FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadScenePanel.LastChild.Caption:='Загрузить';
 FLoadScenePanel.LastChild.FUserPointer1:=Self;
 FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
+
+FInfoLabel := TSGLabel.Create();
+SGScreen.CreateChild(FInfoLabel);
+SGScreen.LastChild.Caption := '';
+SGScreen.LastChild.SetBounds(5,Context.Height-25,Context.Width-10,20);
+SGScreen.LastChild.BoundsToNeedBounds();
+SGScreen.LastChild.Visible:=True;
+SGScreen.LastChild.Font := FTahomaFont;
 end;
 
 procedure TSGGasDiffusion.Draw();
@@ -1219,12 +1239,18 @@ if FMesh <> nil then
 	FMesh.Draw();
 	if FDiffusionRuned then
 		begin
+		if FEnableSaving then 
+			begin
+			if (Render.RenderType=SGRenderDirectX) then
+				begin
+				FMesh.Objects[0].ChangeMeshColorType4b();
+				FMesh.LastObject().ChangeMeshColorType4b();
+				end;
+			SaveStageToStream();
+			end;
 		FCube.UpDateCube();
 		FMesh.Destroy();
 		FMesh:=FCube.CalculateMesh();
-		
-		if FEnableSaving then 
-			SaveStageToStream();
 		end;
 	if FMoviePlayed then
 		begin
@@ -1237,7 +1263,30 @@ if FMesh <> nil then
 			FNowCadr:=0;
 		FFileStream.Position:=FArCadrs[FNowCadr];
 		FMesh.LoadFromSG3DM(FFileStream);
+		if Render.RenderType=SGRenderDirectX then
+			begin
+			FMesh.Objects[0].ChangeMeshColorType4b();
+			FMesh.LastObject().ChangeMeshColorType4b();
+			end;
 		end;
+	if FDiffusionRuned or FMoviePlayed then
+		UpDateInfoLabel();
+	end;
+end;
+
+procedure TSGGasDiffusion.UpDateInfoLabel();
+begin
+if FMoviePlayed then
+	begin
+	FInfoLabel.Caption:='Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", Кадров: "'+SGStr(Length(FArCadrs))+'", Позиция: "'+SGStrReal(FNowCadr/Length(FArCadrs)*100,2)+'%"';
+	end
+else if FDiffusionRuned then
+	begin
+	FInfoLabel.Caption:='';
+	if FEnableSaving and (FFileStream<>nil)then
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", Кадр: "'+SGStr(FNowCadr)+'", ';
+	if (FMesh<>nil) and (FMesh.LastObject()<>nil) then
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Количество точек: "'+SGStr(FMesh.LastObject().Vertexes)+'"'
 	end;
 end;
 

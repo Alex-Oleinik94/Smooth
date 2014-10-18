@@ -366,15 +366,19 @@ type
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
 	TSGThreadFunctionResult = 
-	{$IFDEF MSWINDOWS}
-		LongWord
+	{$IFDEF ANDROID}
+		Pointer
 	{$ELSE}
-		{$IFDEF UNIX}
-			{$IFDEF CPU32}
-				LongInt
-				{$ENDIF}
-			{$IFDEF CPU64}
-				Int64
+		{$IFDEF MSWINDOWS}
+			LongWord
+		{$ELSE}
+			{$IFDEF UNIX}
+				{$IFDEF CPU32}
+					LongInt
+					{$ENDIF}
+				{$IFDEF CPU64}
+					Int64
+					{$ENDIF}
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF};
@@ -2252,7 +2256,7 @@ end;
 function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
-Result:=0;
+Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
 ThreadClass.Execute();
 end;
 
@@ -2274,8 +2278,8 @@ begin
 	{$IFDEF ANDROID}
 		{if not FFinished then
 			pthread_cancel(FHandle);}
-		pthread_cond_destroy(@cond);
-		pthread_mutex_destroy(@mutex);
+		{pthread_cond_destroy(@cond);
+		pthread_mutex_destroy(@mutex);}
 		pthread_attr_destroy(@attr);
 	{$ELSE}
 	if not FFinished then
