@@ -14,11 +14,26 @@ type
 		function GraphicAssigned:Boolean;
 		procedure VertexOnScreen(const Vertex:TSGVertex2f);inline;
 		procedure Messages(const VB123:Boolean = False);
+			private
+		FArMathGraphic : packed array of 
+			TSGMathGraphic;
 			public
-		MathGraphic:TSGMathGraphic;
 		View:TSGScreenVertexes;
 		Changet:boolean;
 		NotUsedInGraphic:Boolean;
+		Colors: packed array of
+			TSGColor4f;
+			private
+		function GetMathGraphic():TSGMathGraphic;
+		function GetArMathGraphic(Index : TSGLongWord):TSGMathGraphic;
+		procedure SetLengthGraphics(Index : TSGLongWord);
+		function GetLengthGraphics():TSGLongWord;
+		procedure SetArMathGraphic(Index : TSGLongWord;Gr : TSGMathGraphic);
+		procedure SetMathGraphic(Gr : TSGMathGraphic);
+			public
+		property MathGraphic : TSGMathGraphic read GetMathGraphic write SetMathGraphic;
+		property ArMathGraphics [ Index : TSGLongWord ] : TSGMathGraphic read GetArMathGraphic write SetArMathGraphic;
+		property MathGraphics : TSGLongWord read GetLengthGraphics write SetLengthGraphics;
 		end;
 	
 	//==============
@@ -66,24 +81,76 @@ begin
 Result:=(MathGraphic<>nil) and(MathGraphic.Assigned); 
 end;
 
+function TSGGraphic.GetMathGraphic():TSGMathGraphic;
+begin
+Result:=FArMathGraphic[0];
+end;
+
+function TSGGraphic.GetArMathGraphic(Index : TSGLongWord):TSGMathGraphic;
+begin
+Result:=FArMathGraphic[Index];
+end;
+
+procedure TSGGraphic.SetLengthGraphics(Index : TSGLongWord);
+var
+	i,ii : TSGLongWord;
+begin
+ii := MathGraphics;
+SetLength(FArMathGraphic,Index);
+SetLength(Colors,Index);
+if ii<MathGraphics then
+	for i:=ii to MathGraphics-1 do
+		begin
+		Colors[i].Import(1,1,1,1);
+		FArMathGraphic[i] := TSGMathGraphic.Create;
+		FArMathGraphic[i].SetContext(Context);
+		FArMathGraphic[i].Expression := 'x*sin(x)';
+		FArMathGraphic[i].Complexity:= Context.Width;
+		FArMathGraphic[i].VertexFunction:=@VertexFunction;
+		FArMathGraphic[i].VertexFunctionPointer:=Self;
+		end;
+end;
+
+function TSGGraphic.GetLengthGraphics():TSGLongWord;
+begin
+if FArMathGraphic = nil then
+	Result:=0
+else
+	Result := Length(FArMathGraphic);
+end;
+
+procedure TSGGraphic.SetArMathGraphic(Index : TSGLongWord;Gr : TSGMathGraphic);
+begin
+FArMathGraphic[Index]:=Gr;
+end;
+
+procedure TSGGraphic.SetMathGraphic(Gr : TSGMathGraphic);
+begin
+FArMathGraphic[0]:=Gr;
+end;
+
 constructor TSGGraphic.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-MathGraphic:=nil;
+FArMathGraphic:=nil;
 NotUsedInGraphic:=True;
-MathGraphic:=TSGMathGraphic.Create;
-MathGraphic.SetContext(Context);
-MathGraphic.Expression:='x*sinx';
-MathGraphic.Complexity:=Context.Width;
-MathGraphic.VertexFunction:=@VertexFunction;
-MathGraphic.VertexFunctionPointer:=Self;
+
+MathGraphics:=1;
+
 View.Import(-15,-15*(Context.Height/Context.Width),15,15*(Context.Height/Context.Width));
+
 Changet:=False;
 end;
 
-destructor TSGGraphic.Destroy;
+destructor TSGGraphic.Destroy();
+var
+	i  : TSGLongWord;
 begin
-MathGraphic.Destroy;
+for i:=0 to MathGraphics-1 do
+	if ArMathGraphics[i] <> nil then
+		ArMathGraphics[i].Destroy;
+SetLength(Colors,0);
+MathGraphics := 0;
 inherited;
 end;
 
@@ -143,10 +210,15 @@ if Context.CursorKeysPressed(SGLeftCursorButton) then
 end;
 
 procedure TSGGraphic.Construct(const VB:Boolean = False);
+var
+	i : TSGLongWord;
 begin
 if Changet or VB then
 	begin
-	MathGraphic.Construct(View.x1,View.x2);
+	if MathGraphics<>0 then
+		for i:=0 to MathGraphics-1 do
+			if ArMathGraphics[i]<>nil then
+				ArMathGraphics[i].Construct(View.x1,View.x2);
 	Changet:=False;
 	end;
 end;
@@ -272,9 +344,13 @@ Render.Vertex3f(Context.Width-Round(View.x2/absx*Context.Width),0,0);
 Render.Vertex3f(Context.Width-Round(View.x2/absx*Context.Width),Context.Height,0);
 Render.EndScene();
 
-Render.Color4f(1,1,1,1);
-if MathGraphic<>nil then
-	MathGraphic.Draw;
+if MathGraphics<>0 then
+	for i:=0 to MathGraphics-1 do
+		if ArMathGraphics[i]<>nil then
+			begin
+			Colors[i].Color(Render);
+			ArMathGraphics[i].Draw();
+			end;
 
 if Abs(q1-View.y1)<c*0.2 then
 	q1+=c*0.5;

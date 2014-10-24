@@ -55,9 +55,14 @@ SGTStateStarting:
 	begin
 	FScene.Start();
 	FState:=SGTStateViewing;
+	{$IFDEF ANDROID}SGLog.Sourse('SGTStateStarting');{$ENDIF}
 	end;
 SGTStateViewing:
+	begin
+	{$IFDEF ANDROID}SGLog.Sourse('SGTStateViewing');{$ENDIF}
 	FScene.Draw();
+	{$IFDEF ANDROID}SGLog.Sourse('SGTStateViewing');{$ENDIF}
+	end;
 end;
 end;
 

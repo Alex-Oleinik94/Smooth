@@ -29,12 +29,14 @@ uses
 		,ctypes
 		,cmem
 		,unixtype
+		,android_native_app_glue
 		{$ENDIF}
 	;
 
 {$IFDEF ANDROID}
 				{*========POSIX Thread=========*}
 	const
+	 PTHREAD_CREATE_JOINABLE = 0;
 	 PTHREAD_CREATE_DETACHED = 1;
 	type
 	 ppthread_t = ^pthread_t;
@@ -60,6 +62,7 @@ uses
 	//procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
 	function  pthread_attr_destroy(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
 	//function pthread_cancel(__thread:pthread_t):LongInt;cdecl;external 'libc.so';
+	function pthread_join(thread:pthread_t; a:pointer):LongInt;cdecl;external 'libc.so';
 	{$ENDIF}
 
 const
@@ -2221,7 +2224,7 @@ end;
 constructor TSGThread.Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 begin
 inherited Create;
-FFinished:=true;
+FFinished:=True;
 FParametr:=Para;
 FProcedure:=Proc;
 FillChar(FHandle,SizeOf(FHandle),0);
@@ -2247,10 +2250,23 @@ end;
 
 procedure TSGThread.Execute();
 begin
+{$IFDEF ANDROID}
+	pthread_mutex_lock(@mutex);
+	{$ENDIF}
 FFinished:=False;
+{$IFDEF ANDROID}
+	pthread_cond_broadcast(@cond);
+	pthread_mutex_unlock(@mutex);
+	{$ENDIF}
 if Pointer(FProcedure)<>nil then
 	FProcedure(FParametr);
+{$IFDEF ANDROID}
+	pthread_mutex_lock(@mutex);
+	{$ENDIF}
 FFinished:=True;
+{$IFDEF ANDROID}
+	pthread_mutex_unlock(@mutex);
+	{$ENDIF}
 end;
 
 function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
@@ -2258,6 +2274,12 @@ function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 begin
 Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
 ThreadClass.Execute();
+{$IFDEF ANDROID}
+	while true do
+		begin
+		Sleep(10000); 
+		end;
+	{$ENDIF}
 end;
 
 destructor TSGThread.Destroy();
@@ -2278,8 +2300,8 @@ begin
 	{$IFDEF ANDROID}
 		{if not FFinished then
 			pthread_cancel(FHandle);}
-		{pthread_cond_destroy(@cond);
-		pthread_mutex_destroy(@mutex);}
+		pthread_cond_destroy(@cond);
+		pthread_mutex_destroy(@mutex);
 		pthread_attr_destroy(@attr);
 	{$ELSE}
 	if not FFinished then
@@ -2298,15 +2320,15 @@ begin
 {$ELSE}
 	{$IFDEF ANDROID}
 			SGLog.Sourse('Start thread');
-			{pthread_mutex_init(@mutex, nil);
-			pthread_cond_init(@cond, nil);}
+			pthread_mutex_init(@mutex, nil);
+			pthread_cond_init(@cond, nil);
 			pthread_attr_init(@attr);
 			pthread_attr_setdetachstate(@attr,PTHREAD_CREATE_DETACHED);
 			FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
-			{pthread_mutex_lock(@mutex);
+			pthread_mutex_lock(@mutex);
 			while FFinished do
 				pthread_cond_wait(@cond, @mutex);
-			pthread_mutex_unlock(@mutex);}
+			pthread_mutex_unlock(@mutex);
 			SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 		{$ELSE}
 			FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);

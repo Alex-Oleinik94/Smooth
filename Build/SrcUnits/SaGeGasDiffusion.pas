@@ -11,7 +11,9 @@ uses
 	,SaGeRender
 	,SaGeCommon
 	,SaGeUtils
-	,SaGeScreen;
+	,SaGeScreen
+	,SaGeImages
+	,SaGeImagesBase;
 const
 	PredStr = 
 		{$IFDEF ANDROID}
@@ -49,6 +51,8 @@ type
 		FBoundsOpen : TSGBoolean;
 		FGazes      : packed array of TSGGazType;
 		FSourses    : packed array of TSGSourseType;
+			public
+		property Edge : TSGLongWord read FEdge;
 		end;
 type
 	TSGGasDiffusion=class(TSGDrawClass)
@@ -88,6 +92,10 @@ type
 		//Ёкран
 		FInfoLabel : TSGLabel;
 		
+		FNewSecheniePanel, FSecheniePanel : TSGPanel;
+		FPlaneComboBox : TSGComboBox;
+		FPointerSecheniePlace : TSGSingle;
+		FSechenieImage : TSGImage;
 			(*Ёкран моделировани€*)
 		
 		FAddNewSourseButton,
@@ -118,6 +126,7 @@ type
 		procedure SaveStageToStream();
 		procedure UpDateSavesComboBox();
 		procedure UpDateInfoLabel();
+		procedure UpDateSechenie();
 		end;
 
 implementation
@@ -597,15 +606,118 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FStartEmulatingButton.Active := True;
 end; end;
 procedure mmmFAddSechenieButtonProcedure(Button:TSGButton);
+var
+	a : LongWord;
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FDeleteSechenieButton.Active:=True;
 	Button.Active:=False;
+	
+	a := FTahomaFont.FontHeight*3 + 2*3 + 20;
+	
+	FNewSecheniePanel := TSGPanel.Create();
+	SGScreen.CreateChild(FNewSecheniePanel);
+	SGScreen.LastChild.SetBounds(Context.Width-210,Context.Height-10-a,200,a);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+	SGScreen.LastChild.Visible:=True;
+	
+	FPlaneComboBox := TSGComboBox.Create();
+	FNewSecheniePanel.CreateChild(FPlaneComboBox);
+	FNewSecheniePanel.LastChild.SetBounds(5,5,190,FTahomaFont.FontHeight+2);
+	FNewSecheniePanel.LastChild.BoundsToNeedBounds();
+	FNewSecheniePanel.LastChild.FUserPointer1:=Button.FUserPointer1;
+	FNewSecheniePanel.LastChild.Visible:=True;
+	FPlaneComboBox.CreateItem('XoY');
+	FPlaneComboBox.CreateItem('XoZ');
+	FPlaneComboBox.CreateItem('ZoY');
+	FPlaneComboBox.SelectItem := 0;
+	
+	a := 170;
+	
+	FSecheniePanel := TSGPanel.Create();
+	SGScreen.CreateChild(FSecheniePanel);
+	SGScreen.LastChild.SetBounds(5,Context.Height-10-a-FTahomaFont.FontHeight-10,a,a+FTahomaFont.FontHeight+5);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
+	SGScreen.LastChild.Visible:=True;
+	
+	FSechenieImage:=TSGImage.Create();
+	FSechenieImage.Context := Context;
+	FSechenieImage.Image.BitMap := GetMem(FCube.Edge*FCube.Edge*3);
+	FSechenieImage.Image.Width := FCube.Edge;
+	FSechenieImage.Image.Height := FCube.Edge;
+	FSechenieImage.Image.Channels:=3;
+	FSechenieImage.Image.BitDepth:=8;
+	FSechenieImage.Image.CreateTypes();
+	
+	FSecheniePanel.CreateChild(TSGPicture.Create());
+	FSecheniePanel.LastChild.SetBounds(5,5,a-10,a-10);
+	(FSecheniePanel.LastChild as TSGPicture).Image := FSechenieImage;
 end; end;
 procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FAddSechenieButton.Active:=True;
 	Button.Active:=False;
+	
+	if FNewSecheniePanel<>nil then
+		begin
+		FNewSecheniePanel.Destroy();
+		FNewSecheniePanel:=nil;
+		FPlaneComboBox   :=nil;
+		end;
+	if FSecheniePanel<>nil then
+		begin
+		(FSecheniePanel.LastChild as TSGPicture).Image := nil;
+		FSecheniePanel.Destroy();
+		FSecheniePanel:=nil;
+		end;
+	if FSechenieImage<>nil then
+		begin
+		FSechenieImage.Destroy();
+		FSechenieImage:=nil;
+		end;
 end; end;
+
+procedure TSGGasDiffusion.UpDateSechenie();
+var
+	i,ii:LongWord;
+	BitMap : TSGBitMap;
+	iii : LongWord;
+	iiii : byte;
+begin
+iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
+FSechenieImage.FreeTexture();
+BitMap := FSechenieImage.Image;
+fillchar(BitMap.BitMap^,FCube.Edge*FCube.Edge*3,0);
+case FPlaneComboBox.SelectItem of
+0:
+	for i:=0 to FCube.Edge - 1 do
+		for ii:=0 to FCube.Edge - 1 do
+			begin
+			iiii := FCube.Cube(i,ii,iii)^;
+			if iiii <> 0 then
+				begin
+				BitMap.BitMap[(i*FCube.Edge + ii)*3+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
+				BitMap.BitMap[(i*FCube.Edge + ii)*3+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
+				BitMap.BitMap[(i*FCube.Edge + ii)*3+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+				end;
+			end;
+1:
+	for i:=0 to FCube.Edge - 1 do
+		for ii:=0 to FCube.Edge - 1 do
+			begin
+			
+			end;
+2:
+	for i:=0 to FCube.Edge - 1 do
+		for ii:=0 to FCube.Edge - 1 do
+			begin
+			
+			end;
+end;
+FSechenieImage.ToTexture();
+end;
+
 procedure mmmFStopDiffusionButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FDiffusionRuned := False;
@@ -668,7 +780,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FBackToMenuButton:=TSGButton.Create();
 		SGScreen.CreateChild(FBackToMenuButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*0,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
@@ -687,7 +799,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FAddNewGazButton:=TSGButton.Create();
 		SGScreen.CreateChild(FAddNewGazButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*1,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		FAddNewGazButton.Active  := True;
@@ -706,7 +818,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FAddNewSourseButton:=TSGButton.Create();
 		SGScreen.CreateChild(FAddNewSourseButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*2,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		FAddNewSourseButton.Active  := True;
@@ -725,7 +837,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FStartEmulatingButton:=TSGButton.Create();
 		SGScreen.CreateChild(FStartEmulatingButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*3,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*3,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		FStartEmulatingButton.Active  := True;
@@ -744,7 +856,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FPauseEmulatingButton:=TSGButton.Create();
 		SGScreen.CreateChild(FPauseEmulatingButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*4,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*4,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=False;
@@ -763,7 +875,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FStopEmulatingButton:=TSGButton.Create();
 		SGScreen.CreateChild(FStopEmulatingButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*5,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*5,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=False;
@@ -782,7 +894,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FAddSechenieButton:=TSGButton.Create();
 		SGScreen.CreateChild(FAddSechenieButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*6,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*6,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=True;
@@ -801,7 +913,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		begin
 		FDeleteSechenieButton:=TSGButton.Create();
 		SGScreen.CreateChild(FDeleteSechenieButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*7,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*7,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=False;
@@ -914,7 +1026,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		begin
 		FMovieBackToMenuButton:=TSGButton.Create();
 		SGScreen.CreateChild(FMovieBackToMenuButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*0,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
@@ -933,7 +1045,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		begin
 		FMoviePlayButton:=TSGButton.Create();
 		SGScreen.CreateChild(FMoviePlayButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*1,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := False;
@@ -951,7 +1063,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		begin
 		FMoviePauseButton:=TSGButton.Create();
 		SGScreen.CreateChild(FMoviePauseButton);
-		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+25*2,W,20);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
@@ -965,7 +1077,6 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		FMoviePauseButton.Visible := True;
 		FMoviePauseButton.Active  := True;
 		end;
-	
 end;end;
 
 procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
@@ -1048,6 +1159,11 @@ end;
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
+FSechenieImage          := nil;
+FPointerSecheniePlace   := 0;
+FPlaneComboBox          := nil;
+FNewSecheniePanel       := nil;
+FSecheniePanel          := nil;
 FMesh                  	:= nil;
 FCube                  	:= nil;
 FAddNewSourseButton    	:= nil;
@@ -1075,7 +1191,7 @@ FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.FZum := Context.Height/Context.Width;
 
-FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
+FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 FTahomaFont.SetContext(Context);
 FTahomaFont.Loading();
 FTahomaFont.ToTexture();
@@ -1248,6 +1364,8 @@ if FMesh <> nil then
 				end;
 			SaveStageToStream();
 			end;
+		if FSecheniePanel<>nil then
+			UpDateSechenie();
 		FCube.UpDateCube();
 		FMesh.Destroy();
 		FMesh:=FCube.CalculateMesh();

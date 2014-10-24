@@ -87,7 +87,7 @@ if not Result then
 	begin
 	Ex:=TSGExpression.Create;
 	Ex.Expression:=SGStringToPChar(S.Caption);
-	Ex.CanculateExpression;
+	Ex.CanculateExpression();
 	if (Ex.ErrorsQuantity=0) and (Length(Ex.Variables)<=1) then
 		begin
 		Ex.BeginCalculate;

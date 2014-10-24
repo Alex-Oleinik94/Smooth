@@ -309,12 +309,15 @@ type
 	
 	TSGPicture=class(TSGComponent)
 			public
-		constructor Create;
-		destructor Destroy;override;
-			public
+		constructor Create();
+		destructor Destroy();override;
+			private
 		FImage:TSGImage;
 			public
-		procedure FromDraw;override;
+		property Image : TSGImage read FImage write FImage;
+		property Picture : TSGImage read FImage write FImage;
+			public
+		procedure FromDraw();override;
 		end;
 	
 	TSGEditTextType         = TSGExByte;

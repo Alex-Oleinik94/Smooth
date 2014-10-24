@@ -323,6 +323,7 @@ type
  __start_routine_t = pointer;
 
 const
+ PTHREAD_CREATE_JOINABLE = 0;
  PTHREAD_CREATE_DETACHED = 1;
 
 function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
@@ -337,7 +338,6 @@ function pthread_cond_destroy(__cond:ppthread_cond_t):longint;cdecl;external 'li
 function pthread_cond_signal(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
 function pthread_cond_broadcast(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
 function pthread_cond_wait(__cond:ppthread_cond_t; __mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
-
 
 procedure free_saved_state(android_app: Pandroid_app);
 begin
@@ -597,7 +597,7 @@ begin
     pthread_attr_init(@attr);
     pthread_attr_setdetachstate(@attr, PTHREAD_CREATE_DETACHED);
     pthread_create(@android_app^.thread, @attr, @android_app_entry, android_app);
-
+	
     // Wait for thread to start.
     pthread_mutex_lock(@android_app^.mutex);
     while android_app^.running = 0 do

@@ -487,21 +487,21 @@ begin
 Result:=(FileBits[0]=$37) and (FileBits[1]=$0) and (FileBits[2]=$0) and (FileBits[3]=$10);
 end;
 
-procedure TSGImage.FreeTexture;
+procedure TSGImage.FreeTexture();
 begin
 if (FTexture<>0) and (FCOntext<>nil) and (Context<>nil) and (Render<>nil) then
 	Render.DeleteTextures(1,@FTexture);
 FTexture:=0;
 end;
 
-destructor TSGImage.Destroy;
+destructor TSGImage.Destroy();
 begin
 FreeAll;
 FImage.Destroy;
 inherited;
 end;
 
-procedure TSGImage.FreeSome;
+procedure TSGImage.FreeSome();
 begin
 FreeBits;
 FreeSream;
@@ -714,7 +714,7 @@ FTextureType := SGITextureTypeTexture;
 FTexture:=0;
 FReadyToGoToTexture:=False;
 Way:=NewWay;
-FImage:=TSGBitMap.Create;
+FImage:=TSGBitMap.Create();
 FStream:=nil;
 FName:='';
 end;
