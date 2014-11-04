@@ -34,20 +34,66 @@ type
 		FGraphic : TSGGraphic;
 		FArPoints : packed array of TSGVertex2f;
 		end;
-	TSGGaussType = extended;
-	TSGGauss = class
+	
+	TSGLineSystemType = extended;
+	TSGLineSystem = class
 			public
 		constructor Create(const nn : TSGLongWord);
 		destructor Destroy();override;
-		procedure Calculate();
+		procedure CalculateGauss();
+		procedure CalculateRotate();
+		procedure View();
 			public
-		a : array of array of TSGGaussType;
-		b : array of TSGGaussType;
+		a : array of array of TSGLineSystemType;
+		b : array of TSGLineSystemType;
 		n : LongWord;
-		x : array of TSGGaussType;
+		x : array of TSGLineSystemType;
 		end;
 
-constructor TSGGauss.Create(const nn : TSGLongWord);
+procedure TSGLineSystem.View();
+var
+	i,ii : LongWord;
+begin
+for i:=0 to n-1 do
+	begin
+	for ii:=0 to n-1 do
+		Write(a[i,ii]:0:4,' ');
+	WriteLn('| ',b[i]:0:4);
+	end;
+end;
+
+procedure TSGLineSystem.CalculateRotate();
+var
+	i, ii, iii : TSGLongWord;
+	C, S, r, ai, aii : TSGLineSystemType;
+begin
+for i:=0 to n-2 do
+	for ii:=i+1 to n-1 do
+		begin
+		C := a[i,i]/sqrt(sqr(a[ii,i])+sqr(a[i,i]));
+		S := a[ii,i] /sqrt(sqr(a[ii,i])+sqr(a[i,i]));
+		for iii := i to n - 1 do
+			begin
+			ai  := a[ i,iii];
+			aii := a[ii,iii];
+			a[i,iii]  := C*ai+S*aii;
+			a[ii,iii] := -S*ai+C*aii;
+			end;
+		ai := b[i];
+		aii := b[ii];
+		b[i] := C*ai+S*aii;
+		b[ii]:= -S*ai+C*aii;
+		end;
+for i:=n-1 downto 0 do
+	begin
+	r:=b[i];
+	for ii:=n-1 downto i do
+		r-=x[ii]*a[i,ii];
+	x[i]:=r/a[i,i];
+	end;
+end;
+
+constructor TSGLineSystem.Create(const nn : TSGLongWord);
 var
 	i : TSGLongWord;
 begin
@@ -59,7 +105,7 @@ for i:=0 to n-1 do
 	SetLength(a[i],n);
 end;
 
-destructor TSGGauss.Destroy();
+destructor TSGLineSystem.Destroy();
 var
 	i : TSGLongWord;
 begin
@@ -71,9 +117,9 @@ SetLength(a,0);
 inherited;
 end;
 
-procedure TSGGauss.Calculate();
+procedure TSGLineSystem.CalculateGauss();
 var
-	r : TSGGaussType;
+	r : TSGLineSystemType;
 	i, ii,iii:LongWord;
 begin
 for i:=1 to n-1 do
@@ -157,10 +203,10 @@ function GetInterPaliasionMnogoclen():TSGString;
 const
 	tttt = 18;
 var
-	Gauss : TSGGauss = nil;
+	Gauss : TSGLineSystem = nil;
 	i, ii, iii : LongWord;
 begin with TSGApprFunction(Self.FUserPointer1) do begin
-Gauss := TSGGauss.Create(n);
+Gauss := TSGLineSystem.Create(n);
 for i:=0 to n-1 do
 	begin
 	Gauss.a[i,0] := 1;
@@ -173,7 +219,7 @@ for i:=1 to n-1 do
 		Gauss.a[i,ii] := FArPoints[i].x**Single(ii);
 		end;
 	end;
-Gauss.Calculate();
+Gauss.CalculateRotate();
 Result := SGStrExtended(Gauss.x[0],tttt);
 for i := 1 to n-1 do
 	begin

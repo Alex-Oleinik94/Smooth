@@ -561,6 +561,12 @@ if FFileStream<>nil then
 ClearDisplayButtons();
 if FInfoLabel<>nil then
 	FInfoLabel.Destroy();
+if FNewSecheniePanel<>nil then
+	FNewSecheniePanel.Destroy();
+if FSecheniePanel<>nil then
+	FSecheniePanel.Destroy();
+if FSechenieImage<>nil then
+	FSechenieImage.Destroy();
 inherited;
 end;
 
@@ -597,6 +603,23 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		end;
 	FDiffusionRuned := False;
 	FNewScenePanel.Visible:=True;
+	if FNewSecheniePanel<>nil then
+		begin
+		FNewSecheniePanel.Destroy();
+		FNewSecheniePanel:=nil;
+		FPlaneComboBox   :=nil;
+		end;
+	if FSecheniePanel<>nil then
+		begin
+		(FSecheniePanel.LastChild as TSGPicture).Image := nil;
+		FSecheniePanel.Destroy();
+		FSecheniePanel:=nil;
+		end;
+	if FSechenieImage<>nil then
+		begin
+		FSechenieImage.Destroy();
+		FSechenieImage:=nil;
+		end;
 end; end;
 procedure mmmFPauseDiffusionButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
@@ -632,6 +655,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FPlaneComboBox.CreateItem('ZoY');
 	FPlaneComboBox.SelectItem := 0;
 	
+	
 	a := 170;
 	
 	FSecheniePanel := TSGPanel.Create();
@@ -643,16 +667,22 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	
 	FSechenieImage:=TSGImage.Create();
 	FSechenieImage.Context := Context;
-	FSechenieImage.Image.BitMap := GetMem(FCube.Edge*FCube.Edge*3);
-	FSechenieImage.Image.Width := FCube.Edge;
-	FSechenieImage.Image.Height := FCube.Edge;
-	FSechenieImage.Image.Channels:=3;
-	FSechenieImage.Image.BitDepth:=8;
+	FSechenieImage.Image.Clear();
+	FSechenieImage.Width          := FCube.Edge;
+	FSechenieImage.Height         := FCube.Edge;
+	FSechenieImage.Image.Channels := 4;
+	FSechenieImage.Image.BitDepth := 8;
+	FSechenieImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
 	FSechenieImage.Image.CreateTypes();
 	
 	FSecheniePanel.CreateChild(TSGPicture.Create());
 	FSecheniePanel.LastChild.SetBounds(5,5,a-10,a-10);
-	(FSecheniePanel.LastChild as TSGPicture).Image := FSechenieImage;
+	FSecheniePanel.LastChild.BoundsToNeedBounds();
+	FSecheniePanel.LastChild.Visible:=True;
+	(FSecheniePanel.LastChild as TSGPicture).Image       := FSechenieImage;
+	(FSecheniePanel.LastChild as TSGPicture).EnableLines := True;
+	
+	UpDateSechenie();
 end; end;
 procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
@@ -681,40 +711,49 @@ end; end;
 procedure TSGGasDiffusion.UpDateSechenie();
 var
 	i,ii:LongWord;
-	BitMap : TSGBitMap;
+function GetPointColor( const iii : LongWord):Byte;inline;
+begin
+case FPlaneComboBox.SelectItem of
+0:Result := FCube.Cube(i,ii,iii)^;
+1:Result := FCube.Cube(i,iii,ii)^;
+2:Result := FCube.Cube(iii,i,ii)^;
+end;
+end;
+var
+	BitMap : PByte;
 	iii : LongWord;
 	iiii : byte;
 begin
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
-BitMap := FSechenieImage.Image;
-fillchar(BitMap.BitMap^,FCube.Edge*FCube.Edge*3,0);
-case FPlaneComboBox.SelectItem of
-0:
-	for i:=0 to FCube.Edge - 1 do
-		for ii:=0 to FCube.Edge - 1 do
+BitMap := FSechenieImage.Image.BitMap;
+fillchar(BitMap^,FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels,0);
+for i:=0 to FCube.Edge - 1 do
+	for ii:=0 to FCube.Edge - 1 do
+		begin
+		iiii := GetPointColor(iii);
+		if iiii <> 0 then
 			begin
-			iiii := FCube.Cube(i,ii,iii)^;
-			if iiii <> 0 then
+			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
+			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
+			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+3]:=255;
+			end
+		else
+			begin
+			if iii>0 then
+				iiii:=GetPointColor(iii-1);
+			if (iiii=0) and (iii<FCube.Edge-1) then
+				iiii:=GetPointColor(iii+1);
+			if iiii<>0 then
 				begin
-				BitMap.BitMap[(i*FCube.Edge + ii)*3+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
-				BitMap.BitMap[(i*FCube.Edge + ii)*3+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
-				BitMap.BitMap[(i*FCube.Edge + ii)*3+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
+				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
+				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+3]:=127;
 				end;
 			end;
-1:
-	for i:=0 to FCube.Edge - 1 do
-		for ii:=0 to FCube.Edge - 1 do
-			begin
-			
-			end;
-2:
-	for i:=0 to FCube.Edge - 1 do
-		for ii:=0 to FCube.Edge - 1 do
-			begin
-			
-			end;
-end;
+		end;
 FSechenieImage.ToTexture();
 end;
 
@@ -1243,7 +1282,7 @@ FNewScenePanel.LastChild.SetBounds(118,19,50,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FNewScenePanel.LastChild.Caption:='70';
+FNewScenePanel.LastChild.Caption:='64';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
 FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction);
 FEdgeEdit.TextType:=SGEditTypeUser;
@@ -1307,7 +1346,6 @@ FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadComboBox.SelectItem:=-1;
 FLoadComboBox.FUserPointer1:=Self;
 
-
 FBackButton:=TSGButton.Create();
 FLoadScenePanel.CreateChild(FBackButton);
 FLoadScenePanel.LastChild.SetBounds(10,44,130,20);
@@ -1348,11 +1386,48 @@ SGScreen.LastChild.Font := FTahomaFont;
 end;
 
 procedure TSGGasDiffusion.Draw();
+procedure DrawSechenie();
+var
+	a,b,c,d : TSGVertex3f;
+procedure DrawQuadSec(const Primitive : TSGLongWord);inline;
+begin
+Render.BeginScene(Primitive);
+a.Vertex(Render);
+b.Vertex(Render);
+c.Vertex(Render);
+d.Vertex(Render);
+Render.EndScene();
+end;
+begin
+case FPlaneComboBox.SelectItem of
+0:
+	begin
+	a.Import(1,FPointerSecheniePlace,1);
+	b.Import(1,FPointerSecheniePlace,-1);
+	c.Import(-1,FPointerSecheniePlace,-1);
+	d.Import(-1,FPointerSecheniePlace,1);
+	end;
+1:
+	begin
+	
+	end;
+2:
+	begin
+	
+	end;
+end;
+Render.Color4f($80/255,0,$80/255,0.3);
+DrawQuadSec(SGR_QUADS);
+Render.Color4f($80/255,0,$80/255,0.7);
+DrawQuadSec(SGR_LINE_LOOP);
+end;
 begin
 if FMesh <> nil then
 	begin
 	FCamera.CallAction();
 	FMesh.Draw();
+	if (FSecheniePanel<>nil) then
+		DrawSechenie();
 	if FDiffusionRuned then
 		begin
 		if FEnableSaving then 

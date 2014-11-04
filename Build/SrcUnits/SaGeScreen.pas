@@ -312,10 +312,14 @@ type
 		constructor Create();
 		destructor Destroy();override;
 			private
-		FImage:TSGImage;
+		FImage       : TSGImage;
+		FEnableLines : TSGBoolean;
+		FLinesColor  : TSGColor4f;
 			public
-		property Image : TSGImage read FImage write FImage;
-		property Picture : TSGImage read FImage write FImage;
+		property Image       : TSGImage read FImage write FImage;
+		property Picture     : TSGImage read FImage write FImage;
+		property EnableLines : TSGBoolean read FEnableLines write FEnableLines;
+		property LinesColor  : TSGColor4f read FLinesColor write FLinesColor;
 			public
 		procedure FromDraw();override;
 		end;
@@ -1415,13 +1419,25 @@ end;
 	{$ENDIF}
 
 procedure TSGPicture.FromDraw;
+var
+	a,b: TSGVertex3f;
 begin
 if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
 	begin
 	Render.Color4f(1,1,1,FVisibleTimer);
-	FImage.DrawImageFromTwoVertex2f(
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
+	a := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+	b := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
+	FImage.DrawImageFromTwoVertex2f(a,b);
+	if FEnableLines then
+		begin
+		FLinesColor.Color(Render);
+		Render.BeginScene(SGR_LINE_LOOP);
+		a.Vertex(Render);
+		Render.Vertex2f(a.x,b.y);
+		b.Vertex(Render);
+		Render.Vertex2f(b.x,a.y);
+		Render.EndScene();
+		end;
 	end;
 inherited;
 end;
@@ -1430,6 +1446,8 @@ constructor TSGPicture.Create;
 begin
 inherited;
 FImage:=nil;
+FEnableLines := False;
+FLinesColor.Import(1,1,1,1);
 end;
 
 destructor TSGPicture.Destroy;
