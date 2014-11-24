@@ -96,6 +96,7 @@ type
 		FPlaneComboBox : TSGComboBox;
 		FPointerSecheniePlace : TSGSingle;
 		FSechenieImage : TSGImage;
+		FImageSechenieBounds : LongWord;
 			(*Ёкран моделировани€*)
 		
 		FAddNewSourseButton,
@@ -635,6 +636,10 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FDeleteSechenieButton.Active:=True;
 	Button.Active:=False;
 	
+	FImageSechenieBounds :=1;
+	while FImageSechenieBounds < FCube.Edge do
+		FImageSechenieBounds *= 2;
+	
 	a := FTahomaFont.FontHeight*3 + 2*3 + 20;
 	
 	FNewSecheniePanel := TSGPanel.Create();
@@ -668,8 +673,8 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FSechenieImage:=TSGImage.Create();
 	FSechenieImage.Context := Context;
 	FSechenieImage.Image.Clear();
-	FSechenieImage.Width          := FCube.Edge;
-	FSechenieImage.Height         := FCube.Edge;
+	FSechenieImage.Width          := FImageSechenieBounds;
+	FSechenieImage.Height         := FImageSechenieBounds;
 	FSechenieImage.Image.Channels := 4;
 	FSechenieImage.Image.BitDepth := 8;
 	FSechenieImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
@@ -727,17 +732,17 @@ begin
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
 BitMap := FSechenieImage.Image.BitMap;
-fillchar(BitMap^,FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels,0);
+fillchar(BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
 for i:=0 to FCube.Edge - 1 do
 	for ii:=0 to FCube.Edge - 1 do
 		begin
 		iiii := GetPointColor(iii);
 		if iiii <> 0 then
 			begin
-			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
-			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
-			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
-			BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+3]:=255;
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=255;
 			end
 		else
 			begin
@@ -747,10 +752,10 @@ for i:=0 to FCube.Edge - 1 do
 				iiii:=GetPointColor(iii+1);
 			if iiii<>0 then
 				begin
-				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
-				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
-				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
-				BitMap[(i*FCube.Edge + ii)*FSechenieImage.Image.Channels+3]:=127;
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=127;
 				end;
 			end;
 		end;
@@ -1282,7 +1287,7 @@ FNewScenePanel.LastChild.SetBounds(118,19,50,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FNewScenePanel.LastChild.Caption:='64';
+FNewScenePanel.LastChild.Caption:='75';
 FNewScenePanel.LastChild.FUserPointer1:=Self;
 FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction);
 FEdgeEdit.TextType:=SGEditTypeUser;
@@ -1409,11 +1414,17 @@ case FPlaneComboBox.SelectItem of
 	end;
 1:
 	begin
-	
+	a.Import(FPointerSecheniePlace,1,1);
+	b.Import(FPointerSecheniePlace,1,-1);
+	c.Import(FPointerSecheniePlace,-1,-1);
+	d.Import(FPointerSecheniePlace,-1,1);
 	end;
 2:
 	begin
-	
+	a.Import(1,1,FPointerSecheniePlace);
+	b.Import(1,-1,FPointerSecheniePlace);
+	c.Import(-1,-1,FPointerSecheniePlace);
+	d.Import(-1,1,FPointerSecheniePlace);
 	end;
 end;
 Render.Color4f($80/255,0,$80/255,0.3);

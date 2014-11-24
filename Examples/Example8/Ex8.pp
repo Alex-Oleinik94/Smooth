@@ -1,3 +1,4 @@
+// Use CP866
 //Решение нелинейных систему. Метод простой итерации + delta^2 процесс Эйткена.
 {$INCLUDE SaGe.inc}
 program Example8;
@@ -199,8 +200,8 @@ var
 	r : Extended = 999;
 	xs : packed array of 
 		packed array of Extended = nil;
-	OldIndex : LongWord = 0;
-	Index : LongWord = 1;
+	OldIndex : LongWord;
+	Index : LongWord;
 
 function SysFunc(const ExIndex : LongWord; const ID : LongWord):Extended;
 var
@@ -209,7 +210,36 @@ begin
 NotLineSystem[ExIndex].BeginCalculate();
 for h:=0 to High(Variables) do
 	NotLineSystem[ExIndex].ChangeVariables(SGStringToPChar(Variables[h]),TSGExpressionChunkCreateReal(Xs[ID][h]));
+NotLineSystem[ExIndex].Calculate();
 Result:=NotLineSystem[ExIndex].Resultat.FConst;
+end;
+
+function PrivFunc(const ExIndex : LongWord; const ID : LongWord):Extended;
+var
+	h : LongWord;
+begin
+IterationSystem[ExIndex].BeginCalculate();
+for h:=0 to High(Variables) do
+	IterationSystem[ExIndex].ChangeVariables(SGStringToPChar(Variables[h]),TSGExpressionChunkCreateReal(Xs[ID][h]));
+IterationSystem[ExIndex].Calculate();
+Result:=IterationSystem[ExIndex].Resultat.FConst;
+end;
+
+procedure WriteXs(const Ind : LongWord;const s : string);
+var
+	i : LongWord;
+begin
+TextColor(7);
+WriteLn(s,':');
+for i:=0 to High(Xs[Ind]) do
+	begin
+	TextColor(15);
+	Write('  ',Variables[i],'=');
+	TextColor(10);
+	WriteLn(SGStrExtended(Xs[Ind,i],10));
+	end;
+TextColor(7);
+ReadLn();
 end;
 
 begin
@@ -231,44 +261,25 @@ for i:=0 to High(Xs) do
 	SetLength(Xs[i],Length(Variables));
 for i:=0 to High(Xs[0]) do
 	Xs[0][i]:=random();
+Index := 1;
+OldIndex := 0;
+WriteXs(OldIndex,'Начальное приближение');
 while abs(r) > 0.001 do
 	begin
 	for i:=0 to High(NotLineSystem) do
-		begin
-		NotLineSystem[i].BeginCalculate();
-		for ii:=0 to High(Variables) do
-			NotLineSystem[i].ChangeVariables(SGStringToPChar(Variables[ii]),TSGExpressionChunkCreateReal(Xs[OldIndex][ii]));
-		NotLineSystem[i].Calculate();
-		Xs[Index][i] := NotLineSystem[i].Resultat.FConst - Xs[OldIndex][i];
-		end;
+		Xs[Index][i] := PrivFunc(i,OldIndex) - Xs[OldIndex][i];
 	r := 0;
 	for i := 0 to High(Xs[Index]) do
 		r += Abs(SysFunc(i,Index));
-	TextColor(7);
-	WriteLn('В итоге получается ответ:');
-	for i:=0 to Length(Xs[Index])-1 do
-		begin
-		TextColor(15);
-		Write('  ',Variables[i],'=');
-		TextColor(10);
-		WriteLn(SGStrExtended(Xs[Index,i],10));
-		end;
-	TextColor(7);
-	ReadLn();
+	
+	WriteLn('rrrr=',r:0:10);
+	WriteXs(Index,'Промежуточные корни');
+		
 	OldIndex := Index;
 	if Index = High(Xs) then Index := 0
 	else Index += 1;
 	end;
-TextColor(7);
-WriteLn('В итоге получается ответ:');
-for i:=0 to Length(Xs[Index])-1 do
-	begin
-	TextColor(15);
-	Write('  ',Variables[i],'=');
-	TextColor(10);
-	WriteLn(SGStrExtended(Xs[Index,i],10));
-	end;
-TextColor(7);
+WriteXs(OldIndex,'Окончательный ответ');
 end;
 
 begin

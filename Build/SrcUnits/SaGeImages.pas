@@ -503,8 +503,8 @@ end;
 
 procedure TSGImage.FreeSome();
 begin
-FreeBits;
-FreeSream;
+FreeBits();
+FreeSream();
 end;
 
 procedure TSGImage.FreeAll;
