@@ -23,6 +23,14 @@ var
 	Variables : packed array of TSGString = nil;
 	IterationSystem : packed array of TSGExpression = nil;
 
+function abs(const a : Extended):Extended;inline;
+begin
+if a<0 then
+	Result := -a
+else
+	Result:=a;
+end;
+
 procedure WriteF(const i : LongWord; const kk : boolean = True);
 var
 	ii : LongWord;
@@ -198,10 +206,12 @@ procedure DoIneration();
 var
 	i, ii : LongWord;
 	r : Extended = 999;
+	eps : Extended = 0.01;
 	xs : packed array of 
 		packed array of Extended = nil;
 	OldIndex : LongWord;
 	Index : LongWord;
+	CountIterations : LongWord = 0;
 
 function SysFunc(const ExIndex : LongWord; const ID : LongWord):Extended;
 var
@@ -239,47 +249,173 @@ for i:=0 to High(Xs[Ind]) do
 	WriteLn(SGStrExtended(Xs[Ind,i],10));
 	end;
 TextColor(7);
-ReadLn();
+end;
+
+procedure ProcessMatrix();
+var
+	f1,f2,f3 : Extended;
+	x1,x2,x3 : Extended;
+	Matrix : array of
+		array of
+			Extended = nil;
+	i,ii,iii : LongWord;
+	pr1,pr2,pr: Extended;
+	s : string;
+procedure Inverse(const n : LongInt);
+var
+    i, j, k: LongInt;
+    t: Extended;
+begin
+for i := 0 to n-1 do
+	SetLength(Matrix[i],n+n);
+
+//====  скопипастеный код который находит обратную матрицу (бээ)
+    for i := 1 to n do begin
+        for j := 1 to n do Matrix[i-1,n+j-1] := 0.0;
+        Matrix[i-1,n+i-1] := 1.0;
+    end;
+    for i := 1 to n do begin
+        t := abs(Matrix[i-1,i-1]);
+        k := i;
+        for j := i+1 to n do
+            if abs(Matrix[j-1,i-1]) > t then begin
+                t := abs(Matrix[j-1,i-1]);
+                k := j;
+            end;
+        for j := 1 to 2*n do begin
+            t := Matrix[i-1,j-1];
+            Matrix[i-1,j-1] := Matrix[k-1,j-1];
+            Matrix[k-1,j-1] := t;
+        end;
+        t := 1.0/Matrix[i-1,i-1];
+        for j := 1 to 2*n do Matrix[i-1,j-1] := Matrix[i-1,j-1]*t;
+        for j := i+1 to n do begin
+            t := Matrix[j-1,i-1];
+            for k := 1 to 2*n do
+                Matrix[j-1,k-1] := Matrix[j-1,k-1]-Matrix[i-1,k-1]*t;
+        end
+    end;
+    for i := n downto 2 do begin
+        for j := i-1 downto 1 do begin
+            t := Matrix[j-1,i-1];
+            for k := i to 2*n do
+                Matrix[j-1,k-1] := Matrix[j-1,k-1]-Matrix[i-1,k-1]*t;
+        end;
+    end;
+//=====
+for i := 0 to n-1 do
+	for j := 0 to n-1 do
+		Matrix[i][j] := Matrix[i][n+j];
+for i := 0 to n-1 do
+	SetLength(Matrix[i],n);
 end;
 
 begin
-WriteLn('Приводим систему к нужному нам виду.');
+SetLength(Matrix,Length(Variables));
+for i:=0 to High(Matrix) do
+	SetLength(Matrix[i],Length(Variables));
+
+for i:=0 to High(Variables) do
+	for ii := 0 to High(Variables) do
+		begin
+		x2 := Xs[OldIndex][ii];
+		x1 := Xs[OldIndex][ii] - eps;
+		x3 := Xs[OldIndex][ii] + eps;
+		
+		f2 := SysFunc(i,OldIndex);
+		Xs[OldIndex][ii] := x1;
+		f1 := SysFunc(i,OldIndex);
+		Xs[OldIndex][ii] := x3;
+		f3 := SysFunc(i,OldIndex);
+		Xs[OldIndex][ii] := x2;
+		
+		Pr1 := (f2-f1)/eps;
+		Pr2 := (f3-f2)/eps;
+		Pr := (Pr1 + Pr2) / 2;
+		
+		Matrix[i][ii] := Pr;
+		end;
+
+Inverse(Length(Variables));
+
+for i := 0 to High(Variables) do
+	for ii:= 0 to High(Variables) do
+		Matrix[i][ii]*=-1;
+
 SetLength(IterationSystem,Length(NotLineSystem));
 for i:= 0 to High(NotLineSystem) do
 	begin
+	s := Variables[i];
+	for ii := 0 to High(Variables) do
+		if abs(Matrix[i][ii])>eps*eps then
+			s += '+('+SGStrExtended(Matrix[i][ii],10)+')*('+SGPCharToString(NotLineSystem[ii].Expression)+')';
+	
 	IterationSystem[i]:= TSGExpression.Create();
-	IterationSystem[i].Expression := 
-		SGStringToPChar(Variables[i]+'+('+SGPCharToString(NotLineSystem[i].Expression)+')');
+	IterationSystem[i].Expression := SGStringToPChar(s);
 	IterationSystem[i].CanculateExpression();
 	end;
-TextColor(15);
-for i := 0 to High(NotLineSystem) do
-	WriteLn('  ',Variables[i],'=',IterationSystem[i].Expression);
-TextColor(7);
+
+for i:=0 to High(Matrix) do
+	SetLength(Matrix[i],0);
+SetLength(Matrix,0);
+Matrix := nil;
+end;
+
+var
+	d1,d2,d3 : TSGDateTime;
+	S:TSGString;
+begin
 SetLength(Xs,20);
 for i:=0 to High(Xs) do
 	SetLength(Xs[i],Length(Variables));
 for i:=0 to High(Xs[0]) do
-	Xs[0][i]:=random();
+	Xs[0][i]:=(random()-0.5)*20;
 Index := 1;
 OldIndex := 0;
 WriteXs(OldIndex,'Начальное приближение');
+
+WriteLn('Приводим систему к нужному нам виду.');
+//Находим матрицу Якоби, состоящую из часных произодных в точках начального приближения, находим ей обратную, и умножаем на "-1".');
+ProcessMatrix();
+
+TextColor(15);
+for i := 0 to High(NotLineSystem) do
+	WriteLn('  ',Variables[i],'=',IterationSystem[i].Expression);
+TextColor(7);
+
+d1.Get();
+d3 := d1;
+
 while abs(r) > 0.001 do
 	begin
 	for i:=0 to High(NotLineSystem) do
-		Xs[Index][i] := PrivFunc(i,OldIndex) - Xs[OldIndex][i];
+		Xs[Index][i] := PrivFunc(i,OldIndex);
 	r := 0;
 	for i := 0 to High(Xs[Index]) do
 		r += Abs(SysFunc(i,Index));
 	
-	WriteLn('rrrr=',r:0:10);
-	WriteXs(Index,'Промежуточные корни');
-		
+	{WriteLn('rrrr=',r:0:10);
+	WriteXs(Index,'Промежуточные корни');}
+	
 	OldIndex := Index;
 	if Index = High(Xs) then Index := 0
 	else Index += 1;
+	CountIterations += 1;
+	
+	d2.Get();
+	if (d2-d3).GetPastSeconds() >= 3 then
+		begin
+		S:=SGSecondsToStringTime((d2-d1).GetPastSeconds());
+		Windows1251ToOEM866(s);
+		if S[Length(S)]=' ' then
+			SetLength(S,Length(S)-1);
+		WriteLn('Брооо, шота долговато...  Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',r:0:10);
+		WriteXs(Index,'Промежуточные корни');
+		d3 := d2;
+		end;
 	end;
 WriteXs(OldIndex,'Окончательный ответ');
+WriteLn('Количество итераций: ',CountIterations,'.');
 end;
 
 begin

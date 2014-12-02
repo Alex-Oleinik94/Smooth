@@ -527,7 +527,7 @@ function SGPCharNil:PChar;inline;
 function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
 
 //ѕереводит секунды в строку, где они будут уже распределены на года, мес€ца и т д
-function SGSecondsToStringTime(VSeconds:Int64):string;inline;
+function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;inline;
 
 //Ёто функции дл€ отладки WinAPI функций, св€занных с символами, получиными в SaGeContextWinAPI как коды клавиш
 function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;inline;
@@ -2479,7 +2479,7 @@ else
 		Result:=char(l);
 end;
 
-function SGSecondsToStringTime(VSeconds:Int64):string;inline;
+function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;inline;
 var
 	Seconds:Int64 = 0;
 	Minutes:Int64 = 0;
@@ -2508,7 +2508,6 @@ Monthes:=VSeconds mod 12;
 VSeconds:=VSeconds div 12;
 
 Years:=VSeconds;
-
 if (Years<>0) and (QWr<=2) then
 	begin
 	Result+=SGStr(Years)+' г ';
