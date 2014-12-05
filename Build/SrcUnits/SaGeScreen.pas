@@ -315,11 +315,13 @@ type
 		FImage       : TSGImage;
 		FEnableLines : TSGBoolean;
 		FLinesColor  : TSGColor4f;
+		FSecondPoint : TSGVertex2f;
 			public
 		property Image       : TSGImage read FImage write FImage;
 		property Picture     : TSGImage read FImage write FImage;
 		property EnableLines : TSGBoolean read FEnableLines write FEnableLines;
 		property LinesColor  : TSGColor4f read FLinesColor write FLinesColor;
+		property SecondPoint : TSGVertex2f read FSecondPoint write FSecondPoint;
 			public
 		procedure FromDraw();override;
 		end;
@@ -1427,7 +1429,7 @@ if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
 	Render.Color4f(1,1,1,FVisibleTimer);
 	a := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	b := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
-	FImage.DrawImageFromTwoVertex2f(a,b);
+	FImage.DrawImageFromTwoVertex2fWithTexPoint(a,b,FSecondPoint);
 	if FEnableLines then
 		begin
 		FLinesColor.Color(Render);
@@ -1448,6 +1450,7 @@ inherited;
 FImage:=nil;
 FEnableLines := False;
 FLinesColor.Import(1,1,1,1);
+FSecondPoint.Import(1,1);
 end;
 
 destructor TSGPicture.Destroy;

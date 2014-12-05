@@ -684,8 +684,12 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FSecheniePanel.LastChild.SetBounds(5,5,a-10,a-10);
 	FSecheniePanel.LastChild.BoundsToNeedBounds();
 	FSecheniePanel.LastChild.Visible:=True;
+	
 	(FSecheniePanel.LastChild as TSGPicture).Image       := FSechenieImage;
 	(FSecheniePanel.LastChild as TSGPicture).EnableLines := True;
+	(FSecheniePanel.LastChild as TSGPicture).SecondPoint.Import(
+		FCube.Edge/FImageSechenieBounds,
+		FCube.Edge/FImageSechenieBounds);
 	
 	UpDateSechenie();
 end; end;
@@ -729,9 +733,12 @@ var
 	iii : LongWord;
 	iiii : byte;
 begin
+//WriteLn('In "TSGGasDiffusion.UpDateSechenie"');
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
-BitMap := FSechenieImage.Image.BitMap;
+FreeMem(FSechenieImage.Image.BitMap);
+GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
+FSechenieImage.Image.BitMap := BitMap;
 fillchar(BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
 for i:=0 to FCube.Edge - 1 do
 	for ii:=0 to FCube.Edge - 1 do
@@ -760,6 +767,7 @@ for i:=0 to FCube.Edge - 1 do
 			end;
 		end;
 FSechenieImage.ToTexture();
+//WriteLn('Out "TSGGasDiffusion.UpDateSechenie"');
 end;
 
 procedure mmmFStopDiffusionButtonProcedure(Button:TSGButton);
@@ -1450,11 +1458,11 @@ if FMesh <> nil then
 				end;
 			SaveStageToStream();
 			end;
+		FMesh.Destroy();
+		FCube.UpDateCube();
+		FMesh:=FCube.CalculateMesh();
 		if FSecheniePanel<>nil then
 			UpDateSechenie();
-		FCube.UpDateCube();
-		FMesh.Destroy();
-		FMesh:=FCube.CalculateMesh();
 		end;
 	if FMoviePlayed then
 		begin

@@ -113,6 +113,7 @@ type
 		procedure ImportFromDispley(const NeedAlpha:Boolean = True);
 		class function UnProjectShift:TSGPoint2f;
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);inline;
+		procedure DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);inline;
 		end;
 	SGImage     = TSGImage;
@@ -152,6 +153,35 @@ case (NowRotation mod 4) of
 0:Render.TexCoord2f(0,1);
 1:Render.TexCoord2f(1,1);
 2:Render.TexCoord2f(1,0);
+3:Render.TexCoord2f(0,0);
+end;
+end;
+begin
+if RePlace then
+	begin
+	RePlacVertex(Vertex1,Vertex2,rePlaceY);
+	end;
+BindTexture();
+Render.BeginScene(SGR_QUADS);
+DoTexCoord(Rotation);
+Vertex1.Vertex(Render);
+DoTexCoord(Rotation+1);
+Render.Vertex2f(Vertex2.x,Vertex1.y);
+DoTexCoord(Rotation+2);
+Vertex2.Vertex(Render);
+DoTexCoord(Rotation+3);
+Render.Vertex2f(Vertex1.x,Vertex2.y);
+Render.EndScene();
+DisableTexture();
+end;
+
+procedure TSGImage.DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
+procedure DoTexCoord(const NowRotation:Byte);inline;
+begin
+case (NowRotation mod 4) of
+0:Render.TexCoord2f(0,TexPoint.y);
+1:Render.TexCoord2f(TexPoint.x,TexPoint.y);
+2:Render.TexCoord2f(TexPoint.x,0);
 3:Render.TexCoord2f(0,0);
 end;
 end;
