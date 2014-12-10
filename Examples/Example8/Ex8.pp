@@ -66,14 +66,20 @@ if kk then
 TextColor(7);
 end;
 
-procedure ReadSystem();
+procedure ReadSystemFromKeyborad(const FileName : String = '');
 var
 	n,i,ii,iii: LongWord;
 	s:String;
 	c,c1 : TSGBoolean;
 	Ex : TSGExpression  = nil;
 	ExVariables : TArPChar = nil;
+	f : TextFile;
 begin
+if FileName<>'' then
+	begin
+	Assign(f,FileName);
+	Reset(f);
+	end;
 c:= True;
 while c do
 	begin
@@ -416,6 +422,37 @@ while abs(r) > 0.001 do
 	end;
 WriteXs(OldIndex,'Окончательный ответ');
 WriteLn('Количество итераций: ',CountIterations,'.');
+end;
+
+procedure ReadSystemFromFile();
+var
+	FileName : String = '';
+	F : TextFile;
+	N,i: LongWord;
+begin
+Write('Введите имя файла:');
+while (not SGFileExists(FileName)) or (FileName='')do
+	begin
+	ReadLn(FileName);
+	if not SGFileExists(FileName) then
+		Write('Файл "',FileName,'" не существует. Введите еще раз:');
+	end;
+ReadSystemFromKeyborad(FileName);
+end;
+
+procedure ReadSystem();
+var
+	s : String = '12';
+begin
+while (Length(s)>=2)or((Length(s)=1) and (not((s[1]='y') or (s[1]='Y') or (s[1]='N') or (s[1]='n')))) do
+	begin
+	Write('Хотите ввести данные с файла? [y/N]:');
+	ReadLn(s);
+	end;
+if (Length(s)=0) or (s[1]='n')or (s[1]='N') then
+	ReadSystemFromKeyborad()
+else
+	ReadSystemFromFile();
 end;
 
 begin
