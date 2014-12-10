@@ -83,9 +83,15 @@ if FileName<>'' then
 c:= True;
 while c do
 	begin
-	Write('Введите размерность системы:');
+	Write('Pазмерность системы:');
 	TextColor(10);
-	ReadLn(n);
+	if FileName<>'' then
+		begin
+		ReadLn(f,n);
+		WriteLn(n);
+		end
+	else
+		ReadLn(n);
 	TextColor(7);
 	SetLength(NotLineSystem,n);
 	for i:=0 to n-1 do
@@ -104,9 +110,22 @@ while c do
 			while s = '' do
 				begin
 				WriteF(i);
-				ReadLn(s);
+				if FileName<>'' then
+					begin
+					ReadLn(f,s);
+					WriteLn(s);
+					end
+				else
+					ReadLn(s);
 				if S = '' then
-					WriteLn('Вы ничего не ввели. Попробуйте снова.');
+					if FileName='' then
+						WriteLn('Вы ничего не ввели. Попробуйте снова.')
+					else
+						begin
+						WriteLn('В файле содержится ненужный Enter. Программа будет прервана после нажатия любой клавиши.');
+						ReadKey();
+						Halt(0);
+						end;
 				end;
 			Ex.Expression := SGStringToPChar(s);
 			Ex.CanculateExpression();
@@ -130,7 +149,14 @@ while c do
 					WriteLn(Ex.Errors(ii));
 					end;
 				TextColor(7);
-				WriteLn('В вырожении содержится ошибка. Попробуйте снова.');
+				if FileName='' then
+					WriteLn('В вырожении содержится ошибка. Попробуйте снова.')
+				else
+					begin
+					WriteLn('В вырожении содержится ошибка. Программа будет прервана после нажатия любой клавиши.');
+					ReadKey();
+					Halt(0);
+					end;
 				end;
 			if C then
 				begin
@@ -155,7 +181,14 @@ while c do
 							if not c1 then
 								begin
 								C := False;
-								WriteLn('У Вас что то не так с переменными. Попробуйте ввести выражение снова.');
+								if FileName='' then
+									WriteLn('У Вас что то не так с переменными. Попробуйте ввести выражение снова.')
+								else
+									begin
+									WriteLn('У Вас что то не так с переменными. Программа будет прервана после нажатия любой клавиши.');
+									ReadKey();
+									Halt(0);
+									end;
 								end
 							else
 								Variables[iii] := SGPCharToString(ExVariables[ii]);
@@ -186,7 +219,14 @@ while c do
 			end;
 	if C then
 		begin
-		WriteLn('Дело в том, что вы использовали мало переменных. Количество переменных должно совподать с размерностью системы. Попробуйте ввести систему заного.');
+		if FileName='' then
+			WriteLn('Дело в том, что вы использовали мало переменных. Количество переменных должно совподать с размерностью системы. Попробуйте ввести систему заного.')
+		else
+			begin
+			WriteLn('Дело в том, что вы использовали мало переменных. Количество переменных должно совподать с размерностью системы. Программа будет прервана после нажатия любой клавиши.');
+			ReadKey();
+			Halt(0);
+			end;
 		for i:=0 to n-1 do
 			Variables[i] := #0;
 		for i:=0 to n-1 do
@@ -206,6 +246,8 @@ for i := 0 to n-1 do
 	WriteLn(NotLineSystem[i].Expression,'=0');
 	end;
 TextColor(7);
+if FileName<>'' then
+	Close(f);
 end;
 
 procedure DoIneration();
@@ -239,6 +281,22 @@ for h:=0 to High(Variables) do
 	IterationSystem[ExIndex].ChangeVariables(SGStringToPChar(Variables[h]),TSGExpressionChunkCreateReal(Xs[ID][h]));
 IterationSystem[ExIndex].Calculate();
 Result:=IterationSystem[ExIndex].Resultat.FConst;
+end;
+
+procedure ReadXs(const Ind : LongWord;const s : string);
+var
+	i : LongWord;
+begin
+TextColor(7);
+WriteLn(s,':');
+for i:=0 to High(Xs[Ind]) do
+	begin
+	TextColor(15);
+	Write('  ',Variables[i],'=');
+	TextColor(10);
+	ReadLn(Xs[Ind,i]);
+	end;
+TextColor(7);
 end;
 
 procedure WriteXs(const Ind : LongWord;const s : string);
@@ -374,11 +432,24 @@ begin
 SetLength(Xs,20);
 for i:=0 to High(Xs) do
 	SetLength(Xs[i],Length(Variables));
-for i:=0 to High(Xs[0]) do
-	Xs[0][i]:=(random()-0.5)*20;
 Index := 1;
 OldIndex := 0;
-WriteXs(OldIndex,'Начальное приближение');
+repeat
+WriteLn('Желаете сами ввести начальное приближение? В противном случае оно задастся случайно в промежутке (-10;10). [y/N]');
+ReadLn(S);
+if (S='') or (S='N') or (S='n') then
+	begin
+	for i:=0 to High(Xs[0]) do
+		Xs[0][i]:=(random()-0.5)*20;
+	WriteXs(OldIndex,'Начальное приближение');
+	end
+else if (S='y') or (S='Y') then
+	begin
+	ReadXs(OldIndex,'Начальное приближение');
+	end
+else
+	S := #13;
+until S<>#13;
 
 WriteLn('Приводим систему к нужному нам виду.');
 //Находим матрицу Якоби, состоящую из часных произодных в точках начального приближения, находим ей обратную, и умножаем на "-1".');
@@ -433,7 +504,9 @@ begin
 Write('Введите имя файла:');
 while (not SGFileExists(FileName)) or (FileName='')do
 	begin
+	TextColor(10);
 	ReadLn(FileName);
+	TextColor(7);
 	if not SGFileExists(FileName) then
 		Write('Файл "',FileName,'" не существует. Введите еще раз:');
 	end;
@@ -447,7 +520,9 @@ begin
 while (Length(s)>=2)or((Length(s)=1) and (not((s[1]='y') or (s[1]='Y') or (s[1]='N') or (s[1]='n')))) do
 	begin
 	Write('Хотите ввести данные с файла? [y/N]:');
+	TextColor(10);
 	ReadLn(s);
+	TextColor(7);
 	end;
 if (Length(s)=0) or (s[1]='n')or (s[1]='N') then
 	ReadSystemFromKeyborad()

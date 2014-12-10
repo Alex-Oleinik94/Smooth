@@ -1,0 +1,4 @@
+3
+cos(x)+sin(z)+tg(gggg)
+gggg*5+z-x^3
+gggg
