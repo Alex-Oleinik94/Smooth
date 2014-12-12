@@ -260,6 +260,8 @@ var
 	OldIndex : LongWord;
 	Index : LongWord;
 	CountIterations : LongWord = 0;
+	CountDelta2ProcessEitckena : LongWord = 0;
+	Delta2ProcessEitckenaEnable : Boolean = False;
 
 function SysFunc(const ExIndex : LongWord; const ID : LongWord):Extended;
 var
@@ -425,19 +427,46 @@ SetLength(Matrix,0);
 Matrix := nil;
 end;
 
+function Prib(const NumberXIndex : LongInt = 0;const NumberPribIndex : LongInt = 0):Extended;
+var
+	i : LongInt;
+begin
+i := Index + NumberPribIndex;
+if i < 0 then
+	i += Length(Xs)
+else if i>High(Xs) then
+	i-= Length(Xs);
+Result := Xs[i][NumberXIndex];
+end;
+
+procedure Delta2ProcessEitckena();
+var
+	i : LongWord;
+begin
+for i:=0 to High(Xs[Index]) do
+	Xs[Index][i] := (Prib(i,-3)*Prib(i,-1)-Prib(i,-2)*Prib(i,-2))/(Prib(i,-1)-2*Prib(i,-2)+Prib(i,-3));
+CountDelta2ProcessEitckena +=1;
+
+OldIndex := Index;
+if Index = High(Xs) then Index := 0
+else Index += 1;
+end;
+
 var
 	d1,d2,d3 : TSGDateTime;
 	S:TSGString;
 begin
-SetLength(Xs,20);
+SetLength(Xs,5);
 for i:=0 to High(Xs) do
 	SetLength(Xs[i],Length(Variables));
 Index := 1;
 OldIndex := 0;
+
 Write('Введите точность:');
 TextColor(10);
 ReadLn(eps);
 TextColor(7);
+
 repeat
 Write('Желаете сами ввести начальное приближение? В противном случае оно задастся случайно в промежутке (0;10). [y/N]:');
 TextColor(10);
@@ -452,6 +481,23 @@ if (S='') or (S='N') or (S='n') then
 else if (S='y') or (S='Y') then
 	begin
 	ReadXs(OldIndex,'Начальное приближение');
+	end
+else
+	S := #13;
+until S<>#13;
+
+repeat
+Write('Включить "Дельта^2 процесс Эйткена"? [Y/n]:');
+TextColor(10);
+ReadLn(S);
+TextColor(7);
+if (S='N') or (S='n') then
+	begin
+	Delta2ProcessEitckenaEnable := False;
+	end
+else if (S='') or (S='y') or (S='Y') then
+	begin
+	Delta2ProcessEitckenaEnable := True;
 	end
 else
 	S := #13;
@@ -477,13 +523,13 @@ while abs(r) > eps do
 	for i := 0 to High(Xs[Index]) do
 		r += Abs(SysFunc(i,Index));
 	
-	{WriteLn('rrrr=',r:0:10);
-	WriteXs(Index,'Промежуточные корни');}
-	
 	OldIndex := Index;
 	if Index = High(Xs) then Index := 0
 	else Index += 1;
 	CountIterations += 1;
+	
+	if Delta2ProcessEitckenaEnable and (CountIterations>3) and (CountIterations mod 3 = 0) then
+		Delta2ProcessEitckena();
 	
 	d2.Get();
 	if (d2-d3).GetPastSeconds() >= 3 then
@@ -492,14 +538,16 @@ while abs(r) > eps do
 		Windows1251ToOEM866(s);
 		if S[Length(S)]=' ' then
 			SetLength(S,Length(S)-1);
-		WriteLn('Брооо, шота долговато...  Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrExtended(r,10));
-		WriteXs(Index,'Промежуточные корни');
+		Write('Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrExtended(r,10),'. ');
+		WriteXs(Index,'Промежуточные корни(-ень)');
 		d3 := d2;
 		end;
 	end;
 d2.Get();
 WriteXs(OldIndex,'Окончательный ответ');
 WriteLn('Количество итераций: ',CountIterations,'.');
+if Delta2ProcessEitckenaEnable then
+	WriteLn('Количество вызовов Дельта^2 процесса Эйткена: ',CountDelta2ProcessEitckena,'.');
 S:=SGSecondsToStringTime((d2-d1).GetPastSeconds());
 Windows1251ToOEM866(s);
 WriteLn('Прошло: ',s,' ',(d2-d1).GetPastMiliSeconds() mod 100,' милисек.');
