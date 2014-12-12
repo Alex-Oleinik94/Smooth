@@ -1901,6 +1901,14 @@ if r<0 then
 	Result:='-' 
 else 
 	Result:='';
+if ((SGStr(Trunc(abs(r)))='9223372036854775808') and
+	((SGStr(Trunc(abs(r/100)))='9223372036854775808'))) or
+	((SGStr(Trunc(abs(r)))='-9223372036854775808') and
+	((SGStr(Trunc(abs(r/100)))='-9223372036854775808'))) then
+		begin
+		Result+='Inf';
+		Exit();
+		end;
 r:=abs(r);
 Result+=SGStr(Trunc(r));
 r-=trunc(r);

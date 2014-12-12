@@ -434,13 +434,19 @@ for i:=0 to High(Xs) do
 	SetLength(Xs[i],Length(Variables));
 Index := 1;
 OldIndex := 0;
+Write('Введите точность:');
+TextColor(10);
+ReadLn(eps);
+TextColor(7);
 repeat
-WriteLn('Желаете сами ввести начальное приближение? В противном случае оно задастся случайно в промежутке (-10;10). [y/N]');
+Write('Желаете сами ввести начальное приближение? В противном случае оно задастся случайно в промежутке (0;10). [y/N]:');
+TextColor(10);
 ReadLn(S);
+TextColor(7);
 if (S='') or (S='N') or (S='n') then
 	begin
 	for i:=0 to High(Xs[0]) do
-		Xs[0][i]:=(random()-0.5)*20;
+		Xs[0][i]:=(random())*10;
 	WriteXs(OldIndex,'Начальное приближение');
 	end
 else if (S='y') or (S='Y') then
@@ -463,7 +469,7 @@ TextColor(7);
 d1.Get();
 d3 := d1;
 
-while abs(r) > 0.001 do
+while abs(r) > eps do
 	begin
 	for i:=0 to High(NotLineSystem) do
 		Xs[Index][i] := PrivFunc(i,OldIndex);
@@ -486,13 +492,17 @@ while abs(r) > 0.001 do
 		Windows1251ToOEM866(s);
 		if S[Length(S)]=' ' then
 			SetLength(S,Length(S)-1);
-		WriteLn('Брооо, шота долговато...  Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',r:0:10);
+		WriteLn('Брооо, шота долговато...  Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrExtended(r,10));
 		WriteXs(Index,'Промежуточные корни');
 		d3 := d2;
 		end;
 	end;
+d2.Get();
 WriteXs(OldIndex,'Окончательный ответ');
 WriteLn('Количество итераций: ',CountIterations,'.');
+S:=SGSecondsToStringTime((d2-d1).GetPastSeconds());
+Windows1251ToOEM866(s);
+WriteLn('Прошло: ',s,' ',(d2-d1).GetPastMiliSeconds() mod 100,' милисек.');
 end;
 
 procedure ReadSystemFromFile();

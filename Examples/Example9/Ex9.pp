@@ -72,6 +72,7 @@ Write('Введите порядок точности {numeric}:');
 ReadLn(p);
 Write('Введите порядок производной {numeric}:');
 ReadLn(n);
+p += n;
 end;
 
 function MyFunc(const x : Extended):Extended;inline;
