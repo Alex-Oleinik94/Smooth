@@ -413,6 +413,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	ArMathGraphics[MathGraphics - 1].Expression:=SGSTringToPChar(EulatuonEdit2.Caption);
 	View.Import(-15,-15*(Context.Height/Context.Width),15,15*(Context.Height/Context.Width));
 	MathGraphic.Construct(View.x1,View.x2);
+	Changet := True;
 	EulatuonEdit2.Caption:='';
 	
 	Button.Parent.Active := False;
@@ -495,7 +496,7 @@ Image.Loading;
 
 FNewFunctionButton:=TSGButton.Create;
 SGScreen.CreateChild(FNewFunctionButton);
-SGScreen.LastChild.SetBounds(Context.Width-30,Context.Height-28-40,130,23);
+SGScreen.LastChild.SetBounds(Context.Width-140,Context.Height-28,130,23);
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Caption:='Добавить функцию';
 SGScreen.LastChild.OnChange:=TSGComponentProcedure(@GoNewFunction);

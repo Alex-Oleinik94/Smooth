@@ -21,6 +21,7 @@ var
 	Func : TSGExpression = nil;
 	x0 : Extended = 0;
 	n,p : LongWord;
+	S : TSGLineSystem = nil;
 procedure ReadAll();
 var
 	S : String;
@@ -83,9 +84,59 @@ Func.Calculate();
 Result:=Func.Resultat.FConst;
 end;
 
+type
+	TSGApprFunction=class(TSGDrawClass)
+			public
+		constructor Create(const VContext : TSGContext);override;
+		destructor Destroy();override;
+		procedure Draw();override;
+		class function ClassName():TSGString;override;
+			private
+		FGraphic : TSGGraphic;
+		end;
+
+procedure TSGApprFunction.Draw();
+begin
+FGraphic.Draw();
+end;
+
+destructor TSGApprFunction.Destroy();
+begin
+FGraphic.Destroy();
+end;
+
+constructor TSGApprFunction.Create(const VContext : TSGContext);
+function GetInterPaliasionMnogoclen():TSGString;
+var
+	i : LongWord;
+begin
+Result:='';
+for i := 0 to p do
+	Result += '('+SGStrExtended(S.x[i],16)+')*(x^'+SGStr(i)+')+';
+Result+='0';
+WriteLn(Result);
+end;
+
+begin
+inherited Create(VContext);
+
+FGraphic:=TSGGraphic.Create(Context);
+FGraphic.MathGraphics := 2;
+FGraphic.Colors[0].Import(0,1,1,1);
+FGraphic.ArMathGraphics[0].Expression := Func.Expression;
+FGraphic.Colors[1].Import(1,1,0,1);
+FGraphic.ArMathGraphics[1].Expression := SGStringToPChar(GetInterPaliasionMnogoclen());
+FGraphic.Changet := True;
+//InitGraphicView();
+end;
+
+class function TSGApprFunction.ClassName():TSGString;
+begin
+Result := 'Геометрическая интерпритация';
+end;
+
 procedure Go();
 var
-	S : TSGLineSystem = nil;
 	e : Extended = 0.1;
 	xx : Extended;
 	i,ii : LongWord;
@@ -110,6 +161,10 @@ xx := 0;
 for i := 0 to p do
 	xx += S.x[i]*(x0**Extended(i));
 WriteLn('Ответ: ',xx:0:15);
+
+ExampleClass := TSGApprFunction;
+RunApplication();
+
 S.Destroy();
 end;
 
