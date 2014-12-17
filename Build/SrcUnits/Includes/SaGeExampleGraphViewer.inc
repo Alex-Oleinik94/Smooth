@@ -50,9 +50,7 @@ type
 		SelectPointEnabled:Boolean ;
 		Image:TSGImage;
 		
-		EulatuonEdit:TSGEdit ;
-		EulatuonLabel:TSGLabel ;
-		Fb2:TSGButton;
+		FNewFunctionButton : TSGButton;
 		end;
 {$ENDIF}
 
@@ -101,8 +99,8 @@ SetLength(Colors,Index);
 if ii<MathGraphics then
 	for i:=ii to MathGraphics-1 do
 		begin
-		Colors[i].Import(1,1,1,1);
-		FArMathGraphic[i] := TSGMathGraphic.Create;
+		Colors[i].Import(random,random,random,1);
+		FArMathGraphic[i] := TSGMathGraphic.Create();
 		FArMathGraphic[i].SetContext(Context);
 		FArMathGraphic[i].Expression := 'x*sin(x)';
 		FArMathGraphic[i].Complexity:= Context.Width;
@@ -403,15 +401,85 @@ end;
 //====================================TSGGraphViewer====================================
 //======================================================================================
 //======================================================================================
-procedure GoNewGrafic(Button:TSGComponent);
+
+procedure GoNewGrafic2(Button:TSGComponent);
+var
+	EulatuonEdit2 : TSGEdit = nil;
 begin
 with TSGGraphViewer(Button.FUserPointer1) do
 	begin
-	MathGraphic.Expression:=SGSTringToPChar(EulatuonEdit.Caption);
+	EulatuonEdit2 := (Button.Parent.Children[1] as TSGEdit);
+	MathGraphics := MathGraphics + 1;
+	ArMathGraphics[MathGraphics - 1].Expression:=SGSTringToPChar(EulatuonEdit2.Caption);
 	View.Import(-15,-15*(Context.Height/Context.Width),15,15*(Context.Height/Context.Width));
 	MathGraphic.Construct(View.x1,View.x2);
-	EulatuonLabel.Caption:=EulatuonEdit.Caption;
-	EulatuonEdit.Caption:='';
+	EulatuonEdit2.Caption:='';
+	
+	Button.Parent.Active := False;
+	Button.Parent.Visible := False;
+	FNewFunctionButton.Active := True;
+	end;
+end;
+
+procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSGComboBox);
+begin with TSGGraphViewer(VComboBox.FUserPointer1) do begin
+	(VComboBox.Parent.Children[3] as TSGEdit).Active := Boolean(b);
+end; end;
+
+
+procedure GoNewFunction(Button:TSGComponent);
+var
+	Form : TSGForm = nil;
+begin
+with TSGGraphViewer(Button.FUserPointer1) do
+	begin
+	Button.Active := False;
+	
+	Form := TSGForm.Create();
+	SGScreen.CreateChild(Form);
+	Form.SetMiddleBounds(400,133);
+	Form.BoundsToNeedBounds();
+	Form.Visible := True;
+	Form.Active := True;
+	Form.Caption := 'Добавление функции';
+	Form.FUserPointer1 := Button.FUserPointer1;
+	
+	Form.CreateChild(TSGEdit.Create());
+	Form.LastChild.SetBounds(5,5,380,25);
+	Form.LastChild.Visible:=True;
+	Form.LastChild.Active:=True;
+	Form.LastChild.Caption := 'x*sin(x)';
+	
+	Form.CreateChild(TSGComboBox.Create());
+	Form.LastChild.SetBounds(5,35,300,25);
+	Form.LastChild.Visible:=True;
+	Form.LastChild.Active:=True;
+	(Form.LastChild as TSGComboBox).CreateItem('Функция');
+	(Form.LastChild as TSGComboBox).CreateItem('Производная функции');
+	(Form.LastChild as TSGComboBox).SelectItem := 0;
+	(Form.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
+	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
+	
+	Form.CreateChild(TSGEdit.Create());
+	Form.LastChild.SetBounds(310,35,75,25);
+	Form.LastChild.Visible:=True;
+	Form.LastChild.Active:=False;
+	Form.LastChild.Caption := '0';
+	(Form.LastChild as TSGEdit).TextType := SGEditTypeNumber;
+	
+	Form.CreateChild(TSGButton.Create());
+	Form.LastChild.SetBounds(5,65,188,25);
+	Form.LastChild.Visible := True;
+	Form.LastChild.Active  := True;
+	Form.LastChild.Caption := 'Добавить';
+	(Form.LastChild as TSGButton).OnChange := TSGComponentProcedure(@GoNewGrafic2);
+	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
+	
+	Form.CreateChild(TSGButton.Create());
+	Form.LastChild.SetBounds(195,65,190,25);
+	Form.LastChild.Visible := True;
+	Form.LastChild.Active  := True;
+	Form.LastChild.Caption := 'Отмена';
 	end;
 end;
 
@@ -420,53 +488,29 @@ begin
 inherited Create(VContext);
 SelectPointEnabled:=False;
 Image:=nil;
-EulatuonEdit:=nil;
-EulatuonLabel:=nil;
 
 Image:=TSGImage.Create(SGTextureDirectory+Slash+'IconArea-hover.png');
 Image.SetContext(Context);
 Image.Loading;
 
-Fb2:=TSGButton.Create;
-SGScreen.CreateChild(Fb2);
-SGScreen.LastChild.SetBounds(Context.Width-85,Context.Height-28,80,23);
+FNewFunctionButton:=TSGButton.Create;
+SGScreen.CreateChild(FNewFunctionButton);
+SGScreen.LastChild.SetBounds(Context.Width-30,Context.Height-28-40,130,23);
 SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption:='Построить';
-SGScreen.LastChild.OnChange:=TSGComponentProcedure(@GoNewGrafic);
+SGScreen.LastChild.Caption:='Добавить функцию';
+SGScreen.LastChild.OnChange:=TSGComponentProcedure(@GoNewFunction);
 SGScreen.LastChild.FUserPointer1:=Self;
-
-EulatuonLabel:=TSGLabel.Create;
-SGScreen.CreateChild(EulatuonLabel);
-SGScreen.LastChild.SetBounds(Context.Width div 2 ,2,Context.Width div 2  -20,23);
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption:=SGStringToPChar(SGPCharToString(MathGraphic.Expression)) ;
-EulatuonLabel.TextPosition:=True;
-EulatuonLabel.TextColor.Import(0.7,0,0.7);
-EulatuonLabel.Font:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
-EulatuonLabel.Font.SetContext(Context);
-EulatuonLabel.Font.Loading();
-EulatuonLabel.AutoTopShift:=True;
-
-EulatuonEdit:=TSGEdit.Create;
-SGScreen.CreateChild(EulatuonEdit);
-SGScreen.LastChild.SetBounds(Context.Width div 2,Context.Height-28,Context.Width div 2 -95,23);
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption:='';
 end;
 
 destructor TSGGraphViewer.Destroy;
 begin
-EulatuonLabel.Font.Destroy;
-EulatuonLabel.Font:=nil;
-EulatuonEdit.Destroy;
-EulatuonLabel.Destroy ;
-Fb2.Destroy;
+FNewFunctionButton.Destroy();
 Image.Destroy;
 inherited;
 end;
 
 
-class function TSGGraphViewer.ClassName:string;
+class function TSGGraphViewer.ClassName():TSGString;
 begin
 Result:='Graphic Viewer';
 end;
