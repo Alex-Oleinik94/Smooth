@@ -127,6 +127,8 @@ type
 		procedure EndBumpMapping();virtual;abstract;
 		{$IFDEF MOBILE}
 			procedure GenerateMipmap(const Param : TSGCardinal);virtual;
+		{$ELSE}
+			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);virtual;abstract;
 			{$ENDIF}
 			public
 		property Window : TSGClass read FWindow write FWindow;

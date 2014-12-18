@@ -162,6 +162,8 @@ type
 		procedure EndBumpMapping();override;
 		{$IFDEF MOBILE}
 			procedure GenerateMipmap(const Param : TSGCardinal);override;
+		{$ELSE}
+			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
 			private
 			(* Multitexturing *)
@@ -240,6 +242,35 @@ implementation
 procedure TSGRenderOpenGL.GenerateMipmap(const Param : TSGCardinal);
 begin
 //glGenerateMipmap(Param);
+end;
+{$ELSE}
+procedure TSGRenderOpenGL.GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);
+var
+	depth:Single;
+	viewportarray:TViewPortArray;
+	mv_matrix,proj_matrix:T16DArray;
+begin
+glGetIntegerv(GL_VIEWPORT,viewportarray);
+glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
+glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
+glReadPixels(
+	px,
+	LongWord(FWindow.Get('HEIGHT'))-py-1,
+	1, 
+	1, 
+	GL_DEPTH_COMPONENT, 
+	GL_FLOAT, 
+	@depth);
+gluUnProject(
+	px,
+	LongWord(FWindow.Get('HEIGHT'))-py-1,
+	depth,
+	mv_matrix,
+	proj_matrix,
+	viewportarray,
+	@x,
+	@y,
+	@z);
 end;
 {$ENDIF}
 

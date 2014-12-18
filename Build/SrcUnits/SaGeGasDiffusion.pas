@@ -97,6 +97,7 @@ type
 		FPointerSecheniePlace : TSGSingle;
 		FSechenieImage : TSGImage;
 		FImageSechenieBounds : LongWord;
+		FSechenieUnProjectVertex : TSGVertex3f;
 			(*Ёкран моделировани€*)
 		
 		FAddNewSourseButton,
@@ -718,6 +719,83 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 end; end;
 
 procedure TSGGasDiffusion.UpDateSechenie();
+procedure DrawComplexCube();
+var
+	FArray  : packed array[0..35] of 
+			packed record
+				FVertex:TSGVertex3f;
+				FColor:TSGColor4b;
+				end;
+	I : Byte;
+begin
+Render.Color4f(0,0,0,0);
+i:=0;
+FArray[i+0].FVertex.Import(1,1,1);
+FArray[i+0].FColor .Import(0,0,0,0);
+FArray[i+1].FVertex.Import(1,1,-1);
+FArray[i+1].FColor .Import(0,0,0,0);
+FArray[i+2].FVertex.Import(1,-1,-1);
+FArray[i+2].FColor .Import(0,0,0,0);
+FArray[i+3].FVertex.Import(1,-1,1);
+FArray[i+3].FColor .Import(0,0,0,0);
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+i+=6;
+FArray[i+0]:=FArray[0];
+FArray[i+1]:=FArray[3];
+FArray[i+2].FVertex.Import(-1,-1,1);
+FArray[i+2].FColor .Import(0,0,0,0);
+FArray[i+3].FVertex.Import(-1,1,1);
+FArray[i+3].FColor .Import(0,0,0,0);
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+i+=6;
+FArray[i+0]:=FArray[3];
+FArray[i+1]:=FArray[2];
+FArray[i+2].FVertex.Import(-1,-1,-1);
+FArray[i+2].FColor .Import(0,0,0,0);
+FArray[i+3]:=FArray[8];
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+i+=6;
+FArray[i+0]:=FArray[0];
+FArray[i+1]:=FArray[9];
+FArray[i+2].FVertex.Import(-1,1,-1);
+FArray[i+2].FColor .Import(0,0,0,0);
+FArray[i+3]:=FArray[1];
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+i+=6;
+FArray[i+0]:=FArray[9];
+FArray[i+1]:=FArray[3*6+2];
+FArray[i+2]:=FArray[2*6+2];
+FArray[i+3]:=FArray[8];
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+i+=6;
+FArray[i+0]:=FArray[1];
+FArray[i+1]:=FArray[2];
+FArray[i+2]:=FArray[2*6+2];
+FArray[i+3]:=FArray[3*6+2];
+FArray[i+4]:=FArray[i+0];
+FArray[i+5]:=FArray[i+2];
+
+Render.EnableClientState(SGR_VERTEX_ARRAY);
+Render.EnableClientState(SGR_COLOR_ARRAY);
+
+Render.VertexPointer(3, SGR_FLOAT,         SizeOf(FArray[0]), @FArray[0].FVertex);
+Render.ColorPointer (4, SGR_UNSIGNED_BYTE, SizeOf(FArray[0]), @FArray[0].FColor);
+
+Render.DrawArrays(SGR_TRIANGLES, 0, Length(FArray));
+
+Render.DisableClientState(SGR_COLOR_ARRAY);
+Render.DisableClientState(SGR_VERTEX_ARRAY);
+end;
 var
 	i,ii:LongWord;
 function GetPointColor( const iii : LongWord):Byte;inline;
@@ -732,8 +810,24 @@ var
 	BitMap : PByte;
 	iii : LongWord;
 	iiii : byte;
+	a : record x,y,z:Real; end;
+
 begin
-//WriteLn('In "TSGGasDiffusion.UpDateSechenie"');
+DrawComplexCube();
+Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
+FSechenieUnProjectVertex.Import(a.x,a.y,a.z);
+if Abs(FSechenieUnProjectVertex) < 2 then
+	begin
+	case FPlaneComboBox.SelectItem of
+	0: FPointerSecheniePlace := FSechenieUnProjectVertex.y;
+	1: FPointerSecheniePlace := FSechenieUnProjectVertex.x;
+	2: FPointerSecheniePlace := FSechenieUnProjectVertex.z;
+	end;
+	if FPointerSecheniePlace > 1 then
+		FPointerSecheniePlace := 0.9999
+	else if FPointerSecheniePlace < -1 then
+		FPointerSecheniePlace := -0.9999;
+	end;
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
 FreeMem(FSechenieImage.Image.BitMap);
@@ -767,7 +861,6 @@ for i:=0 to FCube.Edge - 1 do
 			end;
 		end;
 FSechenieImage.ToTexture();
-//WriteLn('Out "TSGGasDiffusion.UpDateSechenie"');
 end;
 
 procedure mmmFStopDiffusionButtonProcedure(Button:TSGButton);
@@ -1461,9 +1554,9 @@ if FMesh <> nil then
 		FMesh.Destroy();
 		FCube.UpDateCube();
 		FMesh:=FCube.CalculateMesh();
-		if FSecheniePanel<>nil then
-			UpDateSechenie();
 		end;
+	if FSecheniePanel<>nil then
+		UpDateSechenie();
 	if FMoviePlayed then
 		begin
 		if FMesh<>nil then
