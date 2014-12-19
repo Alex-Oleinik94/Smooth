@@ -75,7 +75,7 @@ type
 		FLoadScenePanel,
 			FNewScenePanel :TSGPanel;
 		
-		//New Pabel
+		//New Panel
 		FEdgeEdit               : TSGEdit;
 		FNumberLabel            : TSGLabel;
 		FStartSceneButton,
@@ -92,24 +92,29 @@ type
 		//Экран
 		FInfoLabel : TSGLabel;
 		
-		FNewSecheniePanel, FSecheniePanel : TSGPanel;
-		FPlaneComboBox : TSGComboBox;
-		FPointerSecheniePlace : TSGSingle;
-		FSechenieImage : TSGImage;
-		FImageSechenieBounds : LongWord;
-		FSechenieUnProjectVertex : TSGVertex3f;
+			(* Сечение *)
+		
+		FNewSecheniePanel, // Содержит кнопку и FPlaneComboBox
+			FSecheniePanel : TSGPanel; // Cодержит картинку сечения
+		FPlaneComboBox : TSGComboBox; // вычесление осей координат для FPointerSecheniePlace
+		FPointerSecheniePlace : TSGSingle; // (-1..1) значение места сечения
+		FSechenieImage : TSGImage; // Картинка сечения
+		FImageSechenieBounds : LongWord; // Действительное расширение картинки сечения
+		FSechenieUnProjectVertex : TSGVertex3f; // For Un Project
+		
 			(*Экран моделирования*)
 		
-		FAddNewSourseButton,
-			FAddNewGazButton,
+		FAddNewSourseButton, // новый источник газа
+			FAddNewGazButton, // навый тип газа
 			FStartEmulatingButton,
 			FPauseEmulatingButton,
 			FDeleteSechenieButton,
 			FAddSechenieButton,
 			FBackToMenuButton,
 			FStopEmulatingButton    : TSGButton;
-		FAddSecheniePanel           : TSGPanel;
 		
+		FAddNewSoursePanel : TSGPanel;
+		FAddNewGazPanel : TSGPanel;
 			(*Повтор*)
 		
 		//FFileStream  : TFileStream;
@@ -485,11 +490,6 @@ end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
 begin
-if FAddSecheniePanel<> nil then
-	begin
-	FAddSecheniePanel.Destroy();
-	FAddSecheniePanel:=nil;
-	end;
 if FMovieBackToMenuButton <> nil then
 	begin
 	FMovieBackToMenuButton.Destroy();
@@ -505,6 +505,7 @@ if FMoviePauseButton <> nil then
 	FMoviePauseButton.Destroy();
 	FMoviePauseButton:=nil;
 	end;
+
 if FStartEmulatingButton<>nil then
 	begin
 	FStartEmulatingButton.Destroy();
@@ -544,6 +545,26 @@ if FBackToMenuButton<>nil then
 	begin
 	FBackToMenuButton.Destroy();
 	FBackToMenuButton:=nil;
+	end;
+if FAddNewGazPanel <> nil then
+	begin
+	FAddNewGazPanel.Destroy();
+	FAddNewGazPanel:=nil;
+	end;
+if FAddNewSoursePanel <> nil then
+	begin
+	FAddNewSoursePanel.Destroy();
+	FAddNewSoursePanel:=nil;
+	end;
+if FSecheniePanel <> nil then
+	begin
+	FSecheniePanel.Destroy();
+	FSecheniePanel:=nil;
+	end;
+if FNewSecheniePanel <> nil then
+	begin
+	FNewSecheniePanel.Destroy();
+	FNewSecheniePanel:=nil;
 	end;
 end;
 
@@ -630,22 +651,30 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FStopEmulatingButton.Active := True;
 	FStartEmulatingButton.Active := True;
 end; end;
+procedure mmmFNewSecheniePanelButtonOnChange(Button:TSGButton);
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+	FAddNewSourseButton.Active := True;
+	FAddNewGazButton.Active := True;
+	FNewSecheniePanel.Visible := False;
+end; end;
 procedure mmmFAddSechenieButtonProcedure(Button:TSGButton);
 var
 	a : LongWord;
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FDeleteSechenieButton.Active:=True;
 	Button.Active:=False;
+	FAddNewSourseButton.Active := False;
+	FAddNewGazButton.Active := False;
 	
 	FImageSechenieBounds :=1;
 	while FImageSechenieBounds < FCube.Edge do
 		FImageSechenieBounds *= 2;
 	
-	a := FTahomaFont.FontHeight*3 + 2*3 + 20;
+	a := FTahomaFont.FontHeight*2 + 2*2 + 20;
 	
 	FNewSecheniePanel := TSGPanel.Create();
 	SGScreen.CreateChild(FNewSecheniePanel);
-	SGScreen.LastChild.SetBounds(Context.Width-210,Context.Height-10-a,200,a);
+	SGScreen.LastChild.SetBounds(Context.Width-10-a,Context.Height-10-a,a,a);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
 	SGScreen.LastChild.Visible:=True;
@@ -661,6 +690,13 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FPlaneComboBox.CreateItem('ZoY');
 	FPlaneComboBox.SelectItem := 0;
 	
+	FNewSecheniePanel.CreateChild(TSGButton.Create());
+	FNewSecheniePanel.LastChild.SetBounds(5,FTahomaFont.FontHeight+10,190,FTahomaFont.FontHeight+2);
+	FNewSecheniePanel.LastChild.BoundsToNeedBounds();
+	FNewSecheniePanel.LastChild.FUserPointer1:=Button.FUserPointer1;
+	FNewSecheniePanel.LastChild.Visible:=True;
+	FNewSecheniePanel.LastChild.Caption := 'ОК';
+	(FNewSecheniePanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFNewSecheniePanelButtonOnChange);
 	
 	a := 170;
 	
@@ -813,20 +849,23 @@ var
 	a : record x,y,z:Real; end;
 
 begin
-DrawComplexCube();
-Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
-FSechenieUnProjectVertex.Import(a.x,a.y,a.z);
-if Abs(FSechenieUnProjectVertex) < 2 then
+if FNewSecheniePanel.Visible then
 	begin
-	case FPlaneComboBox.SelectItem of
-	0: FPointerSecheniePlace := FSechenieUnProjectVertex.y;
-	1: FPointerSecheniePlace := FSechenieUnProjectVertex.x;
-	2: FPointerSecheniePlace := FSechenieUnProjectVertex.z;
-	end;
-	if FPointerSecheniePlace > 1 then
-		FPointerSecheniePlace := 0.9999
-	else if FPointerSecheniePlace < -1 then
-		FPointerSecheniePlace := -0.9999;
+	DrawComplexCube();
+	Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
+	FSechenieUnProjectVertex.Import(a.x,a.y,a.z);
+	if Abs(FSechenieUnProjectVertex) < 2 then
+		begin
+		case FPlaneComboBox.SelectItem of
+		0: FPointerSecheniePlace := FSechenieUnProjectVertex.y;
+		1: FPointerSecheniePlace := FSechenieUnProjectVertex.x;
+		2: FPointerSecheniePlace := FSechenieUnProjectVertex.z;
+		end;
+		if FPointerSecheniePlace > 1 then
+			FPointerSecheniePlace := 0.9999
+		else if FPointerSecheniePlace < -1 then
+			FPointerSecheniePlace := -0.9999;
+		end;
 	end;
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
@@ -1072,19 +1111,6 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		FDeleteSechenieButton.Visible := True;
 		FDeleteSechenieButton.Active  := False;
 		end;
-	
-	{if FAddSecheniePanel = nil then
-		begin
-		FAddSecheniePanel:=TSGPanel.Create();
-		SGScreen.CreateChild(FAddSecheniePanel);
-		FAddSecheniePanel.Visible := False;
-		FAddSecheniePanel.Active := False;
-		end
-	else
-		begin
-		FAddSecheniePanel.Visible := False;
-		FAddSecheniePanel.Active := False;
-		end;}
 	end;
 end;
 
@@ -1243,6 +1269,13 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 	end;
 end;
 
+procedure mmmFOpenSaveDir(Button:TSGButton);
+begin
+{$IFDEF MSWINDOWS}
+	Exec('explorer.exe','"."');
+	{$ENDIF}
+end;
+
 function mmmFEdgeEditTextTypeFunction(const Self:TSGEdit):TSGBoolean;
 var
 	i : TSGQuadWord;
@@ -1329,7 +1362,6 @@ FNowCadr               	:= 0;
 FMovieBackToMenuButton 	:= nil;
 FMoviePlayButton       	:= nil;
 FMoviePauseButton      	:= nil;
-FAddSecheniePanel      	:= nil;
 FInfoLabel             	:= nil;
 
 FCamera:=TSGCamera.Create();
@@ -1430,7 +1462,7 @@ FBoundsTypeComboBox.FUserPointer1:=Self;
 
 FLoadScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FLoadScenePanel);
-SGScreen.LastChild.SetMiddleBounds(440,80);
+SGScreen.LastChild.SetMiddleBounds(440,105);
 SGScreen.LastChild.Visible:=False;
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -1481,6 +1513,15 @@ FLoadScenePanel.LastChild.Font := FTahomaFont;
 FLoadScenePanel.LastChild.Caption:='Загрузить';
 FLoadScenePanel.LastChild.FUserPointer1:=Self;
 FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
+
+FLoadScenePanel.CreateChild(TSGButton.Create());
+FLoadScenePanel.LastChild.SetBounds(5,44+22,385,20);
+FLoadScenePanel.LastChild.BoundsToNeedBounds();
+FLoadScenePanel.LastChild.Visible:=False;
+FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Caption:='Открыть папку с сохранениями';
+FLoadScenePanel.LastChild.FUserPointer1:=Self;
+(FLoadScenePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFOpenSaveDir);
 
 FInfoLabel := TSGLabel.Create();
 SGScreen.CreateChild(FInfoLabel);

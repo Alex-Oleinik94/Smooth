@@ -105,6 +105,9 @@ type
 		procedure ActiveTextureBump();override;
 		procedure BeginBumpMapping(const Point : Pointer );override;
 		procedure EndBumpMapping();override;
+		{$IFNDEF MOBILE}
+			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
+			{$ENDIF}
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -221,6 +224,31 @@ function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;i
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
+
+{$IFNDEF MOBILE}
+procedure TSGRenderDirectX.GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);
+var
+	pProjection,pView,pWorld : D3DMATRIX;
+	pViewport : D3DVIEWPORT9;
+	a,b : D3DXVector3;
+begin
+pDevice.GetViewport(pViewport);
+
+a.x := px;
+a.y := py;
+a.z := 0;//depth
+pDevice.GetTransform(D3DTS_PROJECTION, pProjection);
+pDevice.GetTransform(D3DTS_VIEW, pView);
+pDevice.GetTransform(D3DTS_WORLD, pWorld);
+D3DXVec3UnProject(
+	b,
+	a,
+	pViewport,
+	pProjection,
+	pView,
+	pWorld);
+end;
+{$ENDIF}
 
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 begin
