@@ -3,7 +3,8 @@ unit SaGeGasDiffusion;
 
 interface
 uses
-	 SaGeBase
+	 dos
+	,SaGeBase
 	,Classes
 	,SaGeBased
 	,SaGeMesh
@@ -556,6 +557,11 @@ if FAddNewSoursePanel <> nil then
 	FAddNewSoursePanel.Destroy();
 	FAddNewSoursePanel:=nil;
 	end;
+if FAddNewGazPanel <> nil then
+	begin
+	FAddNewGazPanel.Destroy();
+	FAddNewGazPanel:=nil;
+	end;
 if FSecheniePanel <> nil then
 	begin
 	FSecheniePanel.Destroy();
@@ -565,6 +571,11 @@ if FNewSecheniePanel <> nil then
 	begin
 	FNewSecheniePanel.Destroy();
 	FNewSecheniePanel:=nil;
+	end;
+if FAddNewGazPanel <> nil then
+	begin
+	FAddNewGazPanel.Destroy();
+	FAddNewGazPanel := nil;
 	end;
 end;
 
@@ -849,6 +860,7 @@ var
 	a : record x,y,z:Real; end;
 
 begin
+{$IFNDEF MOBILE}
 if FNewSecheniePanel.Visible then
 	begin
 	DrawComplexCube();
@@ -867,6 +879,7 @@ if FNewSecheniePanel.Visible then
 			FPointerSecheniePlace := -0.9999;
 		end;
 	end;
+	{$ENDIF}
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
 FreeMem(FSechenieImage.Image.BitMap);
@@ -930,6 +943,32 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		end;
 end; end;
 
+procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
+const
+	pw = 200;
+	ph = 200;
+begin with TSGGasDiffusion(Button.FUserPointer1) do begin
+Button.Active := False;
+FAddNewSourseButton.Active := False;
+FAddSechenieButton.Active := False;
+
+if FAddNewGazPanel = nil then
+	begin
+	FAddNewGazPanel := TSGPanel.Create();
+	SGScreen.CreateChild(FAddNewGazPanel);
+	FAddNewGazPanel.SetBounds(Context.Width - pw - 10, Context.Height - ph - 10, pw, ph);
+	FAddNewGazPanel.BoundsToNeedBounds();
+	FAddNewGazPanel.Visible := True;
+	FAddNewGazPanel.Active := True;
+	
+	end
+else
+	begin
+	FAddNewGazPanel.Visible := True;
+	FAddNewGazPanel.Active := True;
+	end;
+end; end;
+
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
 const
 	W = 200;
@@ -990,7 +1029,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		SGScreen.LastChild.Font := FTahomaFont;
 		SGScreen.LastChild.Caption:='Добавить новый тип газа';
 		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
-		FAddNewGazButton.OnChange:=TSGComponentProcedure(nil);
+		FAddNewGazButton.OnChange:=TSGComponentProcedure(@mmmFAddNewGazButtonProcedure);
 		end
 	else
 		begin
@@ -1272,7 +1311,7 @@ end;
 procedure mmmFOpenSaveDir(Button:TSGButton);
 begin
 {$IFDEF MSWINDOWS}
-	Exec('explorer.exe','"."');
+	Exec('explorer.exe','"'+PredStr+Catalog+'"');
 	{$ENDIF}
 end;
 
@@ -1363,6 +1402,7 @@ FMovieBackToMenuButton 	:= nil;
 FMoviePlayButton       	:= nil;
 FMoviePauseButton      	:= nil;
 FInfoLabel             	:= nil;
+FAddNewGazPanel        	:= nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -1515,7 +1555,7 @@ FLoadScenePanel.LastChild.FUserPointer1:=Self;
 FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
 
 FLoadScenePanel.CreateChild(TSGButton.Create());
-FLoadScenePanel.LastChild.SetBounds(5,44+22,385,20);
+FLoadScenePanel.LastChild.SetBounds(5,44+24,420,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Font := FTahomaFont;

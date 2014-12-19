@@ -251,19 +251,19 @@ var
 	mv_matrix,proj_matrix:T16DArray;
 begin
 glGetIntegerv(GL_VIEWPORT,viewportarray);
-glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
-glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
 glReadPixels(
 	px,
-	LongWord(FWindow.Get('HEIGHT'))-py-1,
+	LongInt(LongWord(FWindow.Get('HEIGHT')))-LongInt(py)-1,
 	1, 
 	1, 
 	GL_DEPTH_COMPONENT, 
 	GL_FLOAT, 
 	@depth);
+glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
+glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
 gluUnProject(
 	px,
-	LongWord(FWindow.Get('HEIGHT'))-py-1,
+	LongInt(LongWord(FWindow.Get('HEIGHT')))-LongInt(py)-1,
 	depth,
 	mv_matrix,
 	proj_matrix,
