@@ -26,6 +26,8 @@ const
 type
 	TSGGazType = object
 		FColor : TSGColor4f;
+		FArParents: array[0..1] of LongInt;
+		procedure Create(const r,g,b: Single;const a: Single = 1;const p1 : LongInt = -1; const p2: LongInt = -1);
 		end;
 	TSGSourseType = object
 		FGazTypeIndex : TSGLongWord;
@@ -45,7 +47,7 @@ type
 		function CalculateMesh():TSGCustomModel;
 		procedure ClearGaz();
 			public
-		function Cube (const x,y,z:TSGLongWord):TSGGGDC;
+		function Cube (const x,y,z:Word):TSGGGDC;inline;
 			public
 		FCube       : TSGGGDC;
 		FEdge       : TSGLongWord;
@@ -95,18 +97,18 @@ type
 		
 			(* Сечение *)
 		
-		FNewSecheniePanel, // Содержит кнопку и FPlaneComboBox
-			FSecheniePanel : TSGPanel; // Cодержит картинку сечения
-		FPlaneComboBox : TSGComboBox; // вычесление осей координат для FPointerSecheniePlace
-		FPointerSecheniePlace : TSGSingle; // (-1..1) значение места сечения
-		FSechenieImage : TSGImage; // Картинка сечения
-		FImageSechenieBounds : LongWord; // Действительное расширение картинки сечения
+		FNewSecheniePanel, 						// Содержит кнопку и FPlaneComboBox
+			FSecheniePanel : TSGPanel; 			// Cодержит картинку сечения
+		FPlaneComboBox : TSGComboBox;			// вычесление осей координат для FPointerSecheniePlace
+		FPointerSecheniePlace : TSGSingle;		// (-1..1) значение места сечения
+		FSechenieImage : TSGImage; 				// Картинка сечения
+		FImageSechenieBounds : LongWord; 		// Действительное расширение картинки сечения
 		FSechenieUnProjectVertex : TSGVertex3f; // For Un Project
 		
 			(*Экран моделирования*)
 		
-		FAddNewSourseButton, // новый источник газа
-			FAddNewGazButton, // навый тип газа
+		FAddNewSourseButton, 					// новый источник газа
+			FAddNewGazButton,					// навый тип газа
 			FStartEmulatingButton,
 			FPauseEmulatingButton,
 			FDeleteSechenieButton,
@@ -140,6 +142,13 @@ type
 implementation
 
 //Algorithm
+
+procedure TSGGazType.Create(const r,g,b: Single;const a: Single = 1;const p1 : LongInt = -1; const p2: LongInt = -1);
+begin
+FColor.Import(r,g,b,a);
+FArParents[0]:=p1;
+FArParents[1]:=p2;
+end;
 
 constructor TSGGasDiffusionCube.Create(const VContext:TSGContext);
 begin
@@ -186,24 +195,21 @@ GetMem(FCube,FEdge*FEdge*FEdge);
 FillChar(FCube^,FEdge*FEdge*FEdge,0);
 
 SetLength(FGazes,3);
-FGazes[0].FColor.Import(0,1,0,1);
-FGazes[1].FColor.Import(1,0,0,1);
-FGazes[2].FColor.Import(1,1,0,1);
-SetLength(FSourses,3);
+FGazes[0].Create(0,1,0);
+FGazes[1].Create(1,0,0);
+FGazes[2].Create(1,1,1,1,0,1);
+SetLength(FSourses,2);
 FSourses[0].FGazTypeIndex:=0;
-FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 4),FEdge div 2,FEdge div 2);
+FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 8),FEdge div 2,FEdge div 2);
 FSourses[0].FRadius:=1;
 FSourses[1].FGazTypeIndex:=1;
-FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 4),FEdge div 2,FEdge div 2);
+FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2,FEdge div 2);
 FSourses[1].FRadius:=1;
-FSourses[2].FGazTypeIndex:=2;
-FSourses[2].FCoord.Import(FEdge div 2,FEdge div 2,FEdge div 2);
-FSourses[2].FRadius:=1;
 
 UpDateCube();
 end;
 
-function TSGGasDiffusionCube.Cube (const x,y,z:TSGLongWord):TSGGGDC;
+function TSGGasDiffusionCube.Cube (const x,y,z:Word):TSGGGDC;inline;
 begin
 Result:=@FCube[x*FEdge*FEdge+y*FEdge+z];
 end;
@@ -225,95 +231,123 @@ if FSourses<>nil then
 		end;
 end;
 procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);inline;
+procedure ProvSmesh(const a,b : TSGGGDC);inline;
+var
+	i : LongWord;
+begin
+for i:=0 to High(FGazes) do
+	if (FGazes[i].FArParents[0]<>-1) and (FGazes[i].FArParents[1]<>-1) and 
+		(((a^-1 = FGazes[i].FArParents[0]) and (b^-1 = FGazes[i].FArParents[1])) or 
+		((b^-1 = FGazes[i].FArParents[0]) and (a^-1 = FGazes[i].FArParents[1]))) then
+			begin
+			a^ := i + 1;
+			b^ := 0;
+			Exit;
+			end;
+end;
+procedure QuadricMove(const a,b,c,d : TSGGGDC);inline;
+var 
+	eee : Byte;
+begin
+eee := a^;
+a^ := b^;
+b^ := c^;
+c^ := d^;
+d^ := eee;
+ProvSmesh(a,b);
+ProvSmesh(b,c);
+ProvSmesh(c,d);
+ProvSmesh(d,a);
+end;
 var
 	b1,b2:Byte;
 begin
-case random(3) of
-0://x
+case random(5) of
+1,2://x
 	begin
 	if TSGBoolean(Random(2)) then
 		begin// x 1
-		b1 := Cube(i1+0,i2,i3)^;
-		b2 := Cube(i1+1,i2,i3)^;
-		Cube(i1+0,i2,i3)^ := Cube(i1+0,i2,i3+1)^;
-		Cube(i1+1,i2,i3)^ := Cube(i1+1,i2,i3+1)^;
-		Cube(i1+0,i2,i3+1)^ := Cube(i1+0,i2+1,i3+1)^; 
-		Cube(i1+1,i2,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+0,i2+1,i3+1)^ := Cube(i1+0,i2+1,i3)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3)^;
-		Cube(i1+0,i2+1,i3)^ := b1;
-		Cube(i1+1,i2+1,i3)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1  ,i2  ,i3+1),
+			Cube(i1  ,i2+1,i3+1),
+			Cube(i1  ,i2+1,i3  ));
+		QuadricMove(
+			Cube(i1+1,i2  ,i3  ),
+			Cube(i1+1,i2  ,i3+1),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1+1,i2+1,i3  ));
 		end
 	else
 		begin// x 0
-		b1 := Cube(i1+0,i2,i3)^;
-		b2 := Cube(i1+1,i2,i3)^;
-		Cube(i1+0,i2,i3)^ := Cube(i1+0,i2+1,i3)^;
-		Cube(i1+1,i2,i3)^ := Cube(i1+1,i2+1,i3)^;
-		Cube(i1+0,i2+1,i3)^ := Cube(i1+0,i2+1,i3+1)^; 
-		Cube(i1+1,i2+1,i3)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+0,i2+1,i3+1)^ := Cube(i1+0,i2,i3+1)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2,i3+1)^;
-		Cube(i1+0,i2,i3+1)^ := b1;
-		Cube(i1+1,i2,i3+1)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1  ,i2+1,i3  ),
+			Cube(i1  ,i2+1,i3+1),
+			Cube(i1  ,i2  ,i3+1));
+		QuadricMove(
+			Cube(i1+1,i2  ,i3  ),
+			Cube(i1+1,i2+1,i3  ),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1+1,i2  ,i3+1));
 		end;
 	end;
-1://y
+3,4://y
 	begin
 	if Boolean(Random(2)) then
 		begin// y 1
-		b1 := Cube(i1,i2+0,i3)^;
-		b2 := Cube(i1,i2+1,i3)^;
-		Cube(i1,i2+0,i3)^ := Cube(i1,i2+0,i3+1)^;
-		Cube(i1,i2+1,i3)^ := Cube(i1,i2+1,i3+1)^;
-		Cube(i1,i2+0,i3+1)^ := Cube(i1+1,i2+0,i3+1)^; 
-		Cube(i1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+1,i2+0,i3+1)^ := Cube(i1+1,i2+0,i3)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3)^;
-		Cube(i1+1,i2+0,i3)^ := b1;
-		Cube(i1+1,i2+1,i3)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1  ,i2  ,i3+1),
+			Cube(i1+1,i2  ,i3+1),
+			Cube(i1+1,i2  ,i3  ));
+		QuadricMove(
+			Cube(i1  ,i2+1,i3  ),
+			Cube(i1  ,i2+1,i3+1),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1+1,i2+1,i3  ));
 		end
 	else
 		begin// y 0
-		b1 := Cube(i1,i2+0,i3)^;
-		b2 := Cube(i1,i2+1,i3)^;
-		Cube(i1,i2+0,i3)^ := Cube(i1+1,i2+0,i3)^;
-		Cube(i1,i2+1,i3)^ := Cube(i1+1,i2+1,i3)^;
-		Cube(i1+1,i2+0,i3)^ := Cube(i1+1,i2+0,i3+1)^; 
-		Cube(i1+1,i2+1,i3)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+1,i2+0,i3+1)^ := Cube(i1,i2+0,i3+1)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1,i2+1,i3+1)^;
-		Cube(i1,i2+0,i3+1)^ := b1;
-		Cube(i1,i2+1,i3+1)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1+1,i2  ,i3  ),
+			Cube(i1+1,i2  ,i3+1),
+			Cube(i1  ,i2  ,i3+1));
+		QuadricMove(
+			Cube(i1  ,i2+1,i3  ),
+			Cube(i1+1,i2+1,i3  ),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1  ,i2+1,i3+1));
 		end;
 	end;
-2://z
+0://z
 	begin
 	if Boolean(Random(2)) then
 		begin// z 1
-		b1 := Cube(i1,i2,i3+0)^;
-		b2 := Cube(i1,i2,i3+1)^;
-		Cube(i1,i2,i3+0)^ := Cube(i1,i2+1,i3+0)^;
-		Cube(i1,i2,i3+1)^ := Cube(i1,i2+1,i3+1)^;
-		Cube(i1,i2+1,i3+0)^ := Cube(i1+1,i2+1,i3+0)^; 
-		Cube(i1,i2+1,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+1,i2+1,i3+0)^ := Cube(i1+1,i2,i3+0)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1+1,i2,i3+1)^;
-		Cube(i1+1,i2,i3+0)^ := b1;
-		Cube(i1+1,i2,i3+1)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1  ,i2+1,i3  ),
+			Cube(i1+1,i2+1,i3  ),
+			Cube(i1+1,i2  ,i3  ));
+		QuadricMove(
+			Cube(i1  ,i2  ,i3+1),
+			Cube(i1  ,i2+1,i3+1),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1+1,i2  ,i3+1));
 		end
 	else
 		begin//z 0
-		b1 := Cube(i1,i2,i3+0)^;
-		b2 := Cube(i1,i2,i3+1)^;
-		Cube(i1,i2,i3+0)^ := Cube(i1+1,i2,i3+0)^;
-		Cube(i1,i2,i3+1)^ := Cube(i1+1,i2,i3+1)^;
-		Cube(i1+1,i2,i3+0)^ := Cube(i1+1,i2+1,i3+0)^; 
-		Cube(i1+1,i2,i3+1)^ := Cube(i1+1,i2+1,i3+1)^;
-		Cube(i1+1,i2+1,i3+0)^ := Cube(i1,i2+1,i3+0)^;
-		Cube(i1+1,i2+1,i3+1)^ := Cube(i1,i2+1,i3+1)^;
-		Cube(i1,i2+1,i3+0)^ := b1;
-		Cube(i1,i2+1,i3+1)^ := b2;
+		QuadricMove(
+			Cube(i1  ,i2  ,i3  ),
+			Cube(i1+1,i2  ,i3  ),
+			Cube(i1+1,i2+1,i3  ),
+			Cube(i1  ,i2+1,i3  ));
+		QuadricMove(
+			Cube(i1  ,i2  ,i3+1),
+			Cube(i1+1,i2  ,i3+1),
+			Cube(i1+1,i2+1,i3+1),
+			Cube(i1  ,i2+1,i3+1));
 		end;
 	end;
 end;
@@ -1609,8 +1643,11 @@ case FPlaneComboBox.SelectItem of
 	d.Import(-1,1,FPointerSecheniePlace);
 	end;
 end;
-Render.Color4f($80/255,0,$80/255,0.3);
-DrawQuadSec(SGR_QUADS);
+if (FNewSecheniePanel<>nil) and FNewSecheniePanel.Visible then
+	begin
+	Render.Color4f($80/255,0,$80/255,0.3);
+	DrawQuadSec(SGR_QUADS);
+	end;
 Render.Color4f($80/255,0,$80/255,0.7);
 DrawQuadSec(SGR_LINE_LOOP);
 end;
