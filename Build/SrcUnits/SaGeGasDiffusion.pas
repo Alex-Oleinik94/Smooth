@@ -54,6 +54,7 @@ type
 		FBoundsOpen : TSGBoolean;
 		FGazes      : packed array of TSGGazType;
 		FSourses    : packed array of TSGSourseType;
+		FArRandomSm : array [0..9] of TSGVertex3f;
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -182,6 +183,8 @@ UpDateCube();
 end;
 
 procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord);
+var
+	i : LongWord;
 begin
 if FCube<>nil then
 	begin
@@ -205,6 +208,9 @@ FSourses[0].FRadius:=1;
 FSourses[1].FGazTypeIndex:=1;
 FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2,FEdge div 2);
 FSourses[1].FRadius:=1;
+
+for i:=0 to 9 do
+	FArRandomSm[i].Import(random*(0.9/Edge),random*(0.9/Edge),random*(0.9/Edge));
 
 UpDateCube();
 end;
@@ -435,7 +441,7 @@ Result.LastObject().HasColors  := True;
 Result.LastObject().EnableCullFace := False;
 Result.LastObject().VertexType := SGMeshVertexType3f;
 Result.LastObject().SetColorType(SGMeshColorType4b);
-Result.LastObject().Vertexes   := 24;
+Result.LastObject().Vertexes   := 28;
 
 Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
 Result.LastObject().ArVertex3f[1]^.Import(1,-1,-1);
@@ -474,7 +480,13 @@ Result.LastObject().ArVertex3f[21]^.Import(1,1,-1);
 Result.LastObject().ArVertex3f[22]^.Import(1,1,-1);
 Result.LastObject().ArVertex3f[23]^.Import(1,-1,-1);
 
-for i:=0 to 23 do
+Result.LastObject().ArVertex3f[24]^.Import(1,-1,1);
+Result.LastObject().ArVertex3f[25]^.Import(-1,-1,-1);
+
+Result.LastObject().ArVertex3f[26]^.Import(1,-1,-1);
+Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
+
+for i:=0 to Result.LastObject().Vertexes - 1 do
 	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
 
 Result.AddObject();
@@ -507,6 +519,8 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 			Smeshenie+2*(i mod FEdge)/FEdge-1,
 			Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
 			Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
+		Result.LastObject().ArVertex3f[n]^+=
+			FArRandomSm[Random(10)];
 		Inc(n);
 		end;
 	end;
@@ -977,10 +991,65 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		end;
 end; end;
 
+procedure UpdateNewGasPanel(Panel:TSGComponent);
+var
+	g,i : LongWord;
+	r,gg,b: Byte;
+	Image:TSGImage = nil;
+begin with TSGGasDiffusion(Panel.FUserPointer1) do begin
+g  := (Panel.Children[1] as TSGComboBox).SelectItem;
+r  := Byte(FCube.FGazes[g].FColor.r>=1)*255+Byte((FCube.FGazes[g].FColor.r<1) and (FCube.FGazes[g].FColor.r>0))*round(255*FCube.FGazes[g].FColor.r);
+gg := Byte(FCube.FGazes[g].FColor.g>=1)*255+Byte((FCube.FGazes[g].FColor.g<1) and (FCube.FGazes[g].FColor.g>0))*round(255*FCube.FGazes[g].FColor.g);
+b  := Byte(FCube.FGazes[g].FColor.b>=1)*255+Byte((FCube.FGazes[g].FColor.b<1) and (FCube.FGazes[g].FColor.b>0))*round(255*FCube.FGazes[g].FColor.b);
+if (Panel.Children[4] as TSGPicture).Image <> nil then
+	(Panel.Children[4] as TSGPicture).Image.Destroy();
+{Image := TSGImage.Create();
+Image.Context := Context;
+Image.Image.Width := 32;
+Image.Image.Height := 32;
+Image.Image.Channels := 3;
+Image.Image.BitDepth := 8;
+(Panel.Children[4] as TSGPicture).Image := Image;
+Image.Image.BitMap := GetMem(32*32*3);
+Image.Image.CreateTypes();
+for i:=0 to 32*32*3-1 do
+	begin
+	Image.Image.BitMap[i*3+0] := r;
+	Image.Image.BitMap[i*3+1] := gg;
+	Image.Image.BitMap[i*3+2] := b;
+	end;
+Image.ToTexture();}
+if (FCube.FGazes[g].FArParents[0]<>-1) and (FCube.FGazes[g].FArParents[1]<>-1) then
+	begin
+	(Panel.Children[6] as TSGComboBox).SelectItem := 0;
+	Panel.Children[7].Caption := SGStr(FCube.FGazes[g].FArParents[0]+1);
+	Panel.Children[8].Caption := SGStr(FCube.FGazes[g].FArParents[1]+1);
+	Panel.Children[7].Active:=True;
+	Panel.Children[8].Active:=True;
+	end
+else
+	begin
+	(Panel.Children[6] as TSGComboBox).SelectItem := 1;
+	Panel.Children[7].Active:=False;
+	Panel.Children[8].Active:=False;
+	Panel.Children[7].Caption := '';
+	Panel.Children[8].Caption := '';
+	end;
+end;end;
+
+procedure mmmGasCBProc(b,c : LongInt;a : TSGComboBox);
+begin
+a.SelectItem := c;
+UpdateNewGasPanel(a.Parent);
+end;
+
 procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
 const
 	pw = 200;
-	ph = 200;
+	ph = 143+20;
+var
+	i : LongWord;
+	Image:TSGImage = nil;
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 Button.Active := False;
 FAddNewSourseButton.Active := False;
@@ -992,20 +1061,82 @@ if FAddNewGazPanel = nil then
 	SGScreen.CreateChild(FAddNewGazPanel);
 	FAddNewGazPanel.SetBounds(Context.Width - pw - 10, Context.Height - ph - 10, pw, ph);
 	FAddNewGazPanel.BoundsToNeedBounds();
+	FAddNewGazPanel.FUserPointer1 := Button.FUserPointer1;
 	FAddNewGazPanel.Visible := True;
 	FAddNewGazPanel.Active := True;
 	
-	end
-else
-	begin
-	FAddNewGazPanel.Visible := True;
-	FAddNewGazPanel.Active := True;
+	FAddNewGazPanel.CreateChild(TSGComboBox.Create());//1
+	FAddNewGazPanel.LastChild.SetBounds(0,4,pw - 10 - 25,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	for i:=0 to High(FCube.FGazes) do
+		(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
+	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
+	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
+	
+	FAddNewGazPanel.CreateChild(TSGButton.Create());//2
+	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='+';
+	
+	FAddNewGazPanel.CreateChild(TSGLabel.Create());//3
+	FAddNewGazPanel.LastChild.SetBounds(0,25,50,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='Цвет:';
+	
+	FAddNewGazPanel.CreateChild(TSGPicture.Create());//4
+	FAddNewGazPanel.LastChild.SetBounds(50,25,75,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	(FAddNewGazPanel.LastChild as TSGPicture).Image := nil;
+	
+	FAddNewGazPanel.CreateChild(TSGButton.Create());//5
+	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2-40,25,60,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='Править';
+	
+	FAddNewGazPanel.CreateChild(TSGComboBox.Create());//6
+	FAddNewGazPanel.LastChild.SetBounds(3,48,pw - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Как результат диффузии');
+	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Небудет получаться');
+	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
+	
+	FAddNewGazPanel.CreateChild(TSGEdit.Create());//7
+	FAddNewGazPanel.LastChild.SetBounds(3,69,(pw div 2) - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	(FAddNewGazPanel.LastChild as TSGEdit).TextType := SGEditTypeUser;
+	
+	FAddNewGazPanel.CreateChild(TSGEdit.Create());//8
+	FAddNewGazPanel.LastChild.SetBounds(3+(pw div 2)+3,69,(pw div 2) - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	(FAddNewGazPanel.LastChild as TSGEdit).TextType := SGEditTypeUser;
+	
+	FAddNewGazPanel.CreateChild(TSGButton.Create());//9
+	FAddNewGazPanel.LastChild.SetBounds(3,90,pw - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='Удалить этот газ';
+	
+	FAddNewGazPanel.CreateChild(TSGButton.Create());//10
+	FAddNewGazPanel.LastChild.SetBounds(3,111+21,pw - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='Закрыть это окно';
+	
+	FAddNewGazPanel.CreateChild(TSGButton.Create());//11
+	FAddNewGazPanel.LastChild.SetBounds(3,111,pw - 10,18);
+	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
+	FAddNewGazPanel.LastChild.Caption:='Применить';
+	
 	end;
+FAddNewGazPanel.Visible := True;
+FAddNewGazPanel.Active := True;
+
+UpdateNewGasPanel(FAddNewGazPanel);
 end; end;
 
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
 const
 	W = 200;
+var
+	i : LongWord;
 begin
 with TSGGasDiffusion(Button.FUserPointer1) do
 	begin
@@ -1061,7 +1192,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		SGScreen.LastChild.Visible:=True;
 		FAddNewGazButton.Active  := True;
 		SGScreen.LastChild.Font := FTahomaFont;
-		SGScreen.LastChild.Caption:='Добавить новый тип газа';
+		SGScreen.LastChild.Caption:='Править типы газа';
 		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
 		FAddNewGazButton.OnChange:=TSGComponentProcedure(@mmmFAddNewGazButtonProcedure);
 		end
@@ -1080,7 +1211,7 @@ with TSGGasDiffusion(Button.FUserPointer1) do
 		SGScreen.LastChild.Visible:=True;
 		FAddNewSourseButton.Active  := True;
 		SGScreen.LastChild.Font := FTahomaFont;
-		SGScreen.LastChild.Caption:='Добавитьт источник газа';
+		SGScreen.LastChild.Caption:='Править източники газа';
 		SGScreen.LastChild.FUserPointer1:=Button.FUserPointer1;
 		FAddNewSourseButton.OnChange:=TSGComponentProcedure(nil);
 		end
