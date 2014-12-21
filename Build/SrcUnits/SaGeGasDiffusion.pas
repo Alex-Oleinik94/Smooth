@@ -539,6 +539,11 @@ end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
 begin
+if FAddNewGazPanel <> nil then
+	begin
+	FAddNewGazPanel.Destroy();
+	FAddNewGazPanel:=nil;
+	end;
 if FMovieBackToMenuButton <> nil then
 	begin
 	FMovieBackToMenuButton.Destroy();
@@ -791,7 +796,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 end; end;
 procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
-	FAddSechenieButton.Active:=True;
+	FAddSechenieButton.Active:= (FAddNewGazPanel=nil) or ((FAddNewGazPanel<>nil) and (FAddNewGazPanel.Visible = False));
 	Button.Active:=False;
 	
 	if FNewSecheniePanel<>nil then
@@ -991,34 +996,36 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		end;
 end; end;
 
+type
+	TSGGDrawColor=class(TSGComponent)
+			public
+		Color : TSGColor4f;
+			public
+		procedure FromDraw();override;
+		end;
+
+procedure TSGGDrawColor.FromDraw();
+begin
+if (FVisible) or (FVisibleTimer>SGZero) then
+	begin
+	Color.a := FVisibleTimer;
+	SGRoundQuad(Render,
+		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		5,10,
+		Color,
+		Color,
+		not True,not False);
+	end;
+inherited;
+end;
+
 procedure UpdateNewGasPanel(Panel:TSGComponent);
 var
 	g,i : LongWord;
-	r,gg,b: Byte;
-	Image:TSGImage = nil;
 begin with TSGGasDiffusion(Panel.FUserPointer1) do begin
 g  := (Panel.Children[1] as TSGComboBox).SelectItem;
-r  := Byte(FCube.FGazes[g].FColor.r>=1)*255+Byte((FCube.FGazes[g].FColor.r<1) and (FCube.FGazes[g].FColor.r>0))*round(255*FCube.FGazes[g].FColor.r);
-gg := Byte(FCube.FGazes[g].FColor.g>=1)*255+Byte((FCube.FGazes[g].FColor.g<1) and (FCube.FGazes[g].FColor.g>0))*round(255*FCube.FGazes[g].FColor.g);
-b  := Byte(FCube.FGazes[g].FColor.b>=1)*255+Byte((FCube.FGazes[g].FColor.b<1) and (FCube.FGazes[g].FColor.b>0))*round(255*FCube.FGazes[g].FColor.b);
-if (Panel.Children[4] as TSGPicture).Image <> nil then
-	(Panel.Children[4] as TSGPicture).Image.Destroy();
-{Image := TSGImage.Create();
-Image.Context := Context;
-Image.Image.Width := 32;
-Image.Image.Height := 32;
-Image.Image.Channels := 3;
-Image.Image.BitDepth := 8;
-(Panel.Children[4] as TSGPicture).Image := Image;
-Image.Image.BitMap := GetMem(32*32*3);
-Image.Image.CreateTypes();
-for i:=0 to 32*32*3-1 do
-	begin
-	Image.Image.BitMap[i*3+0] := r;
-	Image.Image.BitMap[i*3+1] := gg;
-	Image.Image.BitMap[i*3+2] := b;
-	end;
-Image.ToTexture();}
+(Panel.Children[4] as TSGGDrawColor).Color := FCube.FGazes[g].FColor;
 if (FCube.FGazes[g].FArParents[0]<>-1) and (FCube.FGazes[g].FArParents[1]<>-1) then
 	begin
 	(Panel.Children[6] as TSGComboBox).SelectItem := 0;
@@ -1042,6 +1049,16 @@ begin
 a.SelectItem := c;
 UpdateNewGasPanel(a.Parent);
 end;
+
+procedure mmmFCloseAddNewGazButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.Parent.FUserPointer1) do begin
+FAddNewGazPanel.Visible := False;
+FAddNewGazPanel.Active := False;
+FAddNewSourseButton.Active := True;
+FAddNewGazButton.Active := True;
+FAddSechenieButton.Active := FSecheniePanel=nil;
+FDeleteSechenieButton.Active := FSecheniePanel<>nil;
+end; end;
 
 procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
 const
@@ -1083,10 +1100,9 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Цвет:';
 	
-	FAddNewGazPanel.CreateChild(TSGPicture.Create());//4
-	FAddNewGazPanel.LastChild.SetBounds(50,25,75,18);
+	FAddNewGazPanel.CreateChild(TSGGDrawColor.Create());//4
+	FAddNewGazPanel.LastChild.SetBounds(50,26,75,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	(FAddNewGazPanel.LastChild as TSGPicture).Image := nil;
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//5
 	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2-40,25,60,18);
@@ -1119,6 +1135,7 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.LastChild.SetBounds(3,111+21,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Закрыть это окно';
+	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFCloseAddNewGazButtonProcedure);
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//11
 	FAddNewGazPanel.LastChild.SetBounds(3,111,pw - 10,18);
