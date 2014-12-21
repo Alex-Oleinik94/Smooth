@@ -203,6 +203,7 @@ type
 			end;
 		procedure SetTopShiftStatus(const b:Boolean);
 			public
+		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
 		property AutoTopShift:Boolean read FTopShiftStatus.FEnable write SetTopShiftStatus;
 			private
 		FNeedToDestroy : TSGBoolean;
