@@ -1071,6 +1071,80 @@ FAddSechenieButton.Active := FSecheniePanel=nil;
 FDeleteSechenieButton.Active := FSecheniePanel<>nil;
 end; end;
 
+procedure mmmGas123Proc(b,c : LongInt;a : TSGComboBox);
+begin with TSGGasDiffusion(a.Parent.FUserPointer1) do begin
+a.Parent.Children[7].Active:=not Boolean(c);
+a.Parent.Children[8].Active:=not Boolean(c);
+a.Parent.Children[8].Caption := '';
+a.Parent.Children[7].Caption := '';
+(a.Parent.Children[7] as TSGEdit).TextComplite := False;
+(a.Parent.Children[8] as TSGEdit).TextComplite := False;
+end; end;
+
+procedure mmmFAddAddNewGazButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.Parent.FUserPointer1) do begin
+SetLength(FCube.FGazes,Length(FCube.FGazes)+1);
+FCube.FGazes[High(FCube.FGazes)].Create(random,random,random,1,-1,-1);
+if (Button.Parent.Children[1] as TSGComboBox).Active = False then
+	(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(Length(FCube.FGazes)));
+(Button.Parent.Children[1] as TSGComboBox).Active := True;
+(Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
+UpdateNewGasPanel(Button.Parent);
+end;end;
+
+procedure mmmGas1234Proc(Button:TSGButton);
+var
+	i,ii,iii : LongWord;
+begin with TSGGasDiffusion(Button.Parent.FUserPointer1) do begin
+if Length(FCube.FGazes)=0 then
+	Exit;
+ii := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
+for i:= ii to High(FCube.FGazes)-1 do
+	FCube.FGazes[i] := FCube.FGazes[i+1];
+SetLength(FCube.FGazes,Length(FCube.FGazes)-1);
+for i := 0 to High(FCube.FGazes) do
+	begin
+	if FCube.FGazes[i].FArParents[0]>ii then
+		FCube.FGazes[i].FArParents[0] -= 1;
+	if FCube.FGazes[i].FArParents[1]>ii then
+		FCube.FGazes[i].FArParents[1] -= 1;
+	end;
+i := 0;
+while i<=High(FCube.FSourses) do
+	begin
+	if FCube.FSourses[i].FGazTypeIndex = ii then
+		begin
+		for iii:=i to High(FCube.FSourses)-1 do
+			FCube.FSourses[iii]:=FCube.FSourses[iii+1];
+		SetLength(FCube.FSourses,Length(FCube.FSourses)-1);
+		end
+	else if FCube.FSourses[i].FGazTypeIndex > ii then
+		begin
+		FCube.FSourses[i].FGazTypeIndex -= 1;
+		i +=1;
+		end
+	else
+		i +=1;
+	end;
+
+(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+if Length(FCube.FGazes)=0 then
+	begin
+	(Button.Parent.Children[1] as TSGComboBox).CreateItem('');
+	(Button.Parent.Children[1] as TSGComboBox).SelectItem := 0;
+	(Button.Parent.Children[1] as TSGComboBox).Active := False;
+	end
+else
+	begin
+	for i:=0 to High(FCube.FGazes) do
+		(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
+	(Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
+	end;
+
+UpdateNewGasPanel(Button.Parent);
+end;end;
+
 procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
 const
 	pw = 200;
@@ -1100,11 +1174,13 @@ if FAddNewGazPanel = nil then
 		(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
+	(FAddNewGazPanel.LastChild as TSGComboBox).FMaxColumns := 5;
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//2
 	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='+';
+	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFAddAddNewGazButtonProcedure);
 	
 	FAddNewGazPanel.CreateChild(TSGLabel.Create());//3
 	FAddNewGazPanel.LastChild.SetBounds(0,25,50,18);
@@ -1126,6 +1202,7 @@ if FAddNewGazPanel = nil then
 	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Как результат диффузии');
 	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Небудет получаться');
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
+	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGas123Proc);
 	
 	FAddNewGazPanel.CreateChild(TSGEdit.Create());//7
 	FAddNewGazPanel.LastChild.SetBounds(3,69,(pw div 2) - 10,18);
@@ -1141,6 +1218,7 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.LastChild.SetBounds(3,90,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Удалить этот газ';
+	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmGas1234Proc);
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//10
 	FAddNewGazPanel.LastChild.SetBounds(3,111+21,pw - 10,18);
