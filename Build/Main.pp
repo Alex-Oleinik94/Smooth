@@ -68,6 +68,7 @@ uses
 	,PAPPE
 	,SaGeModelRedactor
 	,SaGeGasDiffusion
+	,SaGeClientMaxWeb
 	
 	,Example5_4
 	,Example4_1

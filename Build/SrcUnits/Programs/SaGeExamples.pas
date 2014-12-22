@@ -1,4 +1,4 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeExamples;
 
@@ -30,17 +30,17 @@ uses
 		end;}
 	
 {$DEFINE SGREADINTERFACE}
-{$i Includes\SaGeExampleGraphViewer.inc}
-{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
-{$i Includes\SaGeExampleGraphViewer3D.inc}
+{$INCLUDE SaGeExampleGraphViewer.inc}
+{$INCLUDE SaGeExampleGeneticalAlgoritm.inc}
+{$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADINTERFACE}
 
 implementation
 
 {$DEFINE SGREADIMPLEMENTATION}
-{$i Includes\SaGeExampleGraphViewer.inc}
-{$i Includes\SaGeExampleGeneticalAlgoritm.inc}
-{$i Includes\SaGeExampleGraphViewer3D.inc}
+{$INCLUDE SaGeExampleGraphViewer.inc}
+{$INCLUDE SaGeExampleGeneticalAlgoritm.inc}
+{$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 {constructor TSGExampleShader.Create;

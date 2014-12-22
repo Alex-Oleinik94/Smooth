@@ -1,4 +1,4 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 Unit SaGeGeneticalAlgoritm;
 interface
 uses 

@@ -5,14 +5,21 @@ unit SaGeNet;
 interface
 
 uses
-	crt
+	Crt
+	,SysUtils
+	,Classes
+	,StrUtils
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeCommon
-	,lNet
+	
 	,lCommon
-	,SysUtils
-	,Classes
+	,lhttp
+	,lnetSSL
+	,lNet
+	,URIParser
+	,lHTTPUtil
 	;
 
 type
@@ -54,9 +61,102 @@ type
 		property Address:String read FAddress write FAddress;
 		property Ready:boolean read FConnectionResult;
 		end;
-	
+
+	TSGHTTPHandler=class
+			public
+		Done : Boolean;
+		Stream : TMemoryStream;
+			public
+		procedure ClientDisconnect(ASocket: TLSocket);
+		procedure ClientDoneInput(ASocket: TLHTTPClientSocket);
+		procedure ClientError(const Msg: string; aSocket: TLSocket);
+		function ClientInput(ASocket: TLHTTPClientSocket; ABuffer: pchar; ASize: Integer): Integer;
+		procedure ClientProcessHeaders(ASocket: TLHTTPClientSocket);
+		end;
+
+function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
 
 implementation
+
+procedure TSGHTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
+begin
+  {write('Response: ', HTTPStatusCodes[ASocket.ResponseStatus], ' ', 
+    ASocket.ResponseReason, ', data...');}
+end;
+
+procedure TSGHTTPHandler.ClientError(const Msg: string; aSocket: TLSocket);
+begin
+  {writeln('Error: ', Msg);}
+end;
+
+procedure TSGHTTPHandler.ClientDisconnect(ASocket: TLSocket);
+begin
+  {writeln('Disconnected.');}
+  done := true;
+end;
+  
+procedure TSGHTTPHandler.ClientDoneInput(ASocket: TLHTTPClientSocket);
+begin
+  //writeln('done.');
+  //close(OutputFile);
+  Stream.Position := 0;
+  ASocket.Disconnect;
+end;
+
+function TSGHTTPHandler.ClientInput(ASocket: TLHTTPClientSocket;
+  ABuffer: pchar; ASize: Integer): Integer;
+begin
+  {blockwrite(outputfile, ABuffer^, ASize, Result);
+  write(IntToStr(ASize) + '...');}
+  Stream.WriteBuffer(ABuffer^,ASize);
+  Result := ASize;
+end;
+
+function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
+var
+	Client : TSGHTTPHandler = nil;
+	HttpClient : TLHTTPClient = nil;
+	UseSSL : Boolean;
+	Port : Word;
+	Host, URI : STring;
+begin
+Result:=nil;
+
+UseSSL := DecomposeURL(Way, Host, URI, Port);
+if UseSSL then
+	Exit;
+
+Client := TSGHTTPHandler.Create();
+Client.Done := False;
+Client.Stream := TMemoryStream.Create();
+
+HttpClient := TLHTTPClient.Create(nil);
+HttpClient.Session := nil;
+HttpClient.Host := Host;
+HttpClient.Method := hmGet;
+HttpClient.Port := Port;
+HttpClient.URI := URI;
+HttpClient.Timeout := Timeout;
+HttpClient.OnDisconnect := @Client.ClientDisconnect;
+HttpClient.OnDoneInput := @Client.ClientDoneInput;
+HttpClient.OnError := @Client.ClientError;
+HttpClient.OnInput := @Client.ClientInput;
+HttpClient.OnProcessHeaders := @Client.ClientProcessHeaders;
+HttpClient.SendRequest;
+Client.Done := false;
+
+while not Client.Done do
+	HttpClient.CallAction;
+
+HttpClient.Free;
+
+if Client.Done then
+	Result := Client.Stream
+else
+	Client.Stream.Destroy();
+
+Client.Destroy();
+end;
 
 function TSGUDPConnection.SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
 begin

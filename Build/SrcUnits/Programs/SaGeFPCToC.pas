@@ -1,4 +1,4 @@
-{$i Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 unit SaGeFPCToC;
 interface
 uses
