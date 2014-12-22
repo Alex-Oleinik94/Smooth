@@ -138,6 +138,8 @@ type
 		procedure UpDateSavesComboBox();
 		procedure UpDateInfoLabel();
 		procedure UpDateSechenie();
+		procedure UpDateChangeSourses();
+		procedure DrawComplexCube();
 		end;
 
 implementation
@@ -829,8 +831,7 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		end;
 end; end;
 
-procedure TSGGasDiffusion.UpDateSechenie();
-procedure DrawComplexCube();
+procedure TSGGasDiffusion.DrawComplexCube();
 var
 	FArray  : packed array[0..35] of 
 			packed record
@@ -907,6 +908,8 @@ Render.DrawArrays(SGR_TRIANGLES, 0, Length(FArray));
 Render.DisableClientState(SGR_COLOR_ARRAY);
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 end;
+
+procedure TSGGasDiffusion.UpDateSechenie();
 var
 	i,ii:LongWord;
 function GetPointColor( const iii : LongWord):Byte;inline;
@@ -1916,6 +1919,31 @@ SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Font := FTahomaFont;
 end;
 
+procedure TSGGasDiffusion.UpDateChangeSourses();
+var
+	a : record x,y,z:Real; end;
+	b : TSGVertex3f;
+	s : LongWord;
+	c : TSGColor4f;
+begin
+s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+DrawComplexCube();
+Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
+b.Import(a.x,a.y,a.z);
+if Abs(b) <2 then
+	begin
+	
+	end;
+Render.BeginScene(SGR_QUADS);
+C.Import(1,1,1,0.5);
+C.Color(Render);
+Render.Vertex3f(1,-1,FCube.FSourses[s].FCoord.z);
+Render.Vertex3f(-1,-1,FCube.FSourses[s].FCoord.z);
+Render.Vertex3f(-1,1,FCube.FSourses[s].FCoord.z);
+Render.Vertex3f(1,1,FCube.FSourses[s].FCoord.z);
+Render.EndScene();
+end;
+
 procedure TSGGasDiffusion.Draw();
 procedure DrawSechenie();
 var
@@ -1985,6 +2013,8 @@ if FMesh <> nil then
 		end;
 	if FSecheniePanel<>nil then
 		UpDateSechenie();
+	if (FAddNewSoursePanel<>nil) and FAddNewSoursePanel.Visible then
+		UpDateChangeSourses();
 	if FMoviePlayed then
 		begin
 		if FMesh<>nil then
