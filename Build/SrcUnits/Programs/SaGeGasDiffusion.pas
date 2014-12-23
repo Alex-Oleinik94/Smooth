@@ -27,6 +27,7 @@ type
 	TSGGazType = object
 		FColor : TSGColor4f;
 		FArParents: array[0..1] of LongInt;
+		FDinamicQuantity : LongWord;
 		procedure Create(const r,g,b: Single;const a: Single = 1;const p1 : LongInt = -1; const p2: LongInt = -1);
 		end;
 	TSGSourseType = object
@@ -55,6 +56,7 @@ type
 		FGazes      : packed array of TSGGazType;
 		FSourses    : packed array of TSGSourseType;
 		FArRandomSm : array [0..9] of TSGVertex3f;
+		FDinamicQuantityMoleculs : LongWord;
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -107,7 +109,8 @@ type
 		FSechenieUnProjectVertex : TSGVertex3f; // For Un Project
 		
 			(*Экран моделирования*)
-		
+		FConchLabels : packed array of
+			TSGLabel;
 		FAddNewSourseButton, 					// новый источник газа
 			FAddNewGazButton,					// навый тип газа
 			FStartEmulatingButton,
@@ -140,6 +143,8 @@ type
 		procedure UpDateSechenie();
 		procedure UpDateChangeSourses();
 		procedure DrawComplexCube();
+		procedure UpDateSoursePanel();
+		procedure UpDateConchLabels();
 		end;
 
 implementation
@@ -205,10 +210,10 @@ FGazes[1].Create(1,0,0);
 FGazes[2].Create(1,1,1,1,0,1);
 SetLength(FSourses,2);
 FSourses[0].FGazTypeIndex:=0;
-FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 8),FEdge div 2,FEdge div 2);
+FSourses[0].FCoord.Import(FEdge div 2 + (FEdge div 8),FEdge div 2+ (FEdge div 8),FEdge div 2+ (FEdge div 8));
 FSourses[0].FRadius:=1;
 FSourses[1].FGazTypeIndex:=1;
-FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2,FEdge div 2);
+FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8));
 FSourses[1].FRadius:=1;
 
 for i:=0 to 9 do
@@ -427,7 +432,6 @@ if FBoundsOpen then
 end;
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 var
-	n : TSGQuadWord = 0;
 	i : TSGLongWord;
 	Smeshenie : TSGSingle;
 begin
@@ -491,12 +495,22 @@ Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
 for i:=0 to Result.LastObject().Vertexes - 1 do
 	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
 
+for i:= 0 to High(FGazes) do
+	FGazes[i].FDinamicQuantity := 0;
+
 for i:=0 to FEdge*FEdge*FEdge -1 do
 	begin
 	if FCube[i]<>0 then
-		Inc(n);
+		begin
+		Inc(FGazes[FCube[i]-1].FDinamicQuantity);
+		end;
 	end;
-if n <> 0 then
+
+FDinamicQuantityMoleculs := 0;
+for i:= 0 to High(FGazes) do
+	FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
+
+if FDinamicQuantityMoleculs <> 0 then
 	begin
 	Result.AddObject();
 	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
@@ -509,24 +523,24 @@ if n <> 0 then
 
 
 
-	Result.LastObject().Vertexes   := n;
+	Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
 
-	n:=0;
+	FDinamicQuantityMoleculs:=0;
 	for i:=0 to FEdge*FEdge*FEdge -1 do
 		begin
 		if FCube[i]<>0 then
 			begin
-			Result.LastObject().SetColor(n,
+			Result.LastObject().SetColor(FDinamicQuantityMoleculs,
 				FGazes[FCube[i]-1].FColor.r,
 				FGazes[FCube[i]-1].FColor.g,
 				FGazes[FCube[i]-1].FColor.b);
-			Result.LastObject().ArVertex3f[n]^.Import(
+			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^.Import(
 				Smeshenie+2*(i mod FEdge)/FEdge-1,
 				Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
 				Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
-			Result.LastObject().ArVertex3f[n]^+=
+			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^+=
 				FArRandomSm[Random(10)];
-			Inc(n);
+			Inc(FDinamicQuantityMoleculs);
 			end;
 		end;
 	end;
@@ -544,7 +558,12 @@ if FFileStream<>nil then
 end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
+var
+	i : LongWord;
 begin
+for i:=0 to High(FConchLabels) do
+	FConchLabels[i].Destroy();
+SetLength(FConchLabels,0);
 if FAddNewGazPanel <> nil then
 	begin
 	FAddNewGazPanel.Destroy();
@@ -669,6 +688,8 @@ Result := 'Диффузия в газах';
 end;
 
 procedure mmmFBackToMenuButtonProcedure(Button:TSGButton);
+var
+	i : LongWord;
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 	FAddNewSourseButton.Visible := False;
 	FAddNewGazButton.Visible := False;
@@ -724,6 +745,8 @@ begin with TSGGasDiffusion(Button.FUserPointer1) do begin
 		FSechenieImage.Destroy();
 		FSechenieImage:=nil;
 		end;
+	for i:=0 to High(FConchLabels) do
+		FConchLabels[i].Visible:=False;
 end; end;
 procedure mmmFPauseDiffusionButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.FUserPointer1) do begin
@@ -1270,6 +1293,42 @@ FAddSechenieButton.Active := FSecheniePanel=nil;
 FDeleteSechenieButton.Active := FSecheniePanel<>nil;
 end; end;
 
+procedure mmmSourseChageGasProc(b,c : LongInt;a : TSGComboBox);
+var
+	o,i : LongWord;
+	j1,j2,j3 : LongInt;
+begin with TSGGasDiffusion(a.Parent.FUserPointer1) do begin
+if b = c then
+	Exit;
+a.SelectItem:=c;
+i := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+o := FCube.FSourses[i].FGazTypeIndex;
+FCube.FSourses[i].FGazTypeIndex := c;
+for j1:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
+for j2:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
+for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
+	if FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^=o+1 then
+		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=c+1;
+FMesh.Destroy();
+FMesh:=FCube.CalculateMesh();
+end; end;
+
+procedure mmmSourseChageSourseProc(b,c : LongInt;a : TSGComboBox);
+begin with TSGGasDiffusion(a.Parent.FUserPointer1) do begin
+a.SelectItem:=c;
+UpDateSoursePanel();
+end;end;
+
+procedure TSGGasDiffusion.UpDateSoursePanel();
+var
+	s : LongWord;
+begin
+s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := FCube.FSourses[s].FGazTypeIndex;
+(FAddNewSoursePanel.Children[4] as TSGEdit).Caption := SGStr(FCube.FSourses[s].FRadius);
+(FAddNewSoursePanel.Children[4] as TSGEdit).TextComplite := True;
+end;
+
 procedure FAddNewSourseButtonProcedure(Button:TSGButton);
 const
 	pw = 200;
@@ -1295,7 +1354,7 @@ if FAddNewSoursePanel = nil then
 	for i:=0 to High(FCube.FSourses) do
 		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(nil);
+	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageSourseProc);
 	
 	FAddNewSoursePanel.CreateChild(TSGButton.Create());//2
 	FAddNewSoursePanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
@@ -1308,7 +1367,7 @@ if FAddNewSoursePanel = nil then
 	for i:=0 to High(FCube.FGazes) do
 		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(nil);
+	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageGasProc);
 	
 	FAddNewSoursePanel.CreateChild(TSGEdit.Create());//4
 	FAddNewSoursePanel.LastChild.SetBounds(3+(pw div 2)+3,69-21,(pw div 2) - 10,18);
@@ -1334,6 +1393,7 @@ if FAddNewSoursePanel = nil then
 
 FAddNewSoursePanel.Active  := True;
 FAddNewSoursePanel.Visible := True;
+UpDateSoursePanel();
 end; end;
 
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
@@ -1740,6 +1800,58 @@ else
 	end;
 end;
 
+procedure TSGGasDiffusion.UpDateConchLabels();
+function lghl : LongWord;inline;
+begin
+if (FConchLabels=nil) then
+	Result:=0
+else
+	Result := Length(FConchLabels);
+end;
+function lghg : LongWord;inline;
+begin
+if (FCube.FGazes=nil) then
+	Result:=0
+else
+	Result := Length(FCube.FGazes);
+end;
+var
+	i,j : LongWord;
+begin
+if FCube = nil then
+	Exit;
+if lghl < lghg + 1 then
+	begin
+	j := lghl;
+	SetLength(FConchLabels,lghg + 1);
+	for i := j to lghg do
+		begin
+		writeln(i,' +');
+		FConchLabels[i] := TSGLabel.Create();
+		SGScreen.CreateChild(FConchLabels[i]);
+		FConchLabels[i].SetBounds(5,50+i*22,400,20);
+		FConchLabels[i].BoundsToNeedBounds();
+		FConchLabels[i].Visible:=True;
+		FConchLabels[i].Active:=True;
+		FConchLabels[i].TextPosition := False;
+		FConchLabels[i].Font := FTahomaFont;
+		end;
+	end
+else while lghl > lghg + 1 do
+	begin
+	FConchLabels[High(FConchLabels)].Destroy();
+	SetLength(FConchLabels,lghl-1);
+	end;
+j := FCube.Edge*FCube.Edge*FCube.Edge;
+FConchLabels[0].Caption := 'Концентрация всех газов: '+SGStrReal(100*FCube.FDinamicQuantityMoleculs/j,4) + '%';
+FConchLabels[0].Visible:=True;
+for i:=1 to High(FConchLabels) do
+	begin
+	FConchLabels[i].Caption := 'Концентрация газа №'+SGStr(i)+': '+SGStrReal(100*FCube.FGazes[i-1].FDinamicQuantity/j,4) + '%';
+	FConchLabels[i].Visible:=True;
+	end;
+end;
+
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
@@ -1770,6 +1882,7 @@ FMoviePlayButton       	:= nil;
 FMoviePauseButton      	:= nil;
 FInfoLabel             	:= nil;
 FAddNewGazPanel        	:= nil;
+FConchLabels           	:= nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -2025,6 +2138,8 @@ if (FNewSecheniePanel<>nil) and FNewSecheniePanel.Visible then
 Render.Color4f($80/255,0,$80/255,0.7);
 DrawQuadSec(SGR_LINE_LOOP);
 end;
+var
+	i : LongWord;
 begin
 if FMesh <> nil then
 	begin
@@ -2037,10 +2152,9 @@ if FMesh <> nil then
 		if FEnableSaving then 
 			begin
 			if (Render.RenderType=SGRenderDirectX) then
-				begin
-				FMesh.Objects[0].ChangeMeshColorType4b();
-				FMesh.LastObject().ChangeMeshColorType4b();
-				end;
+				if FMesh.QuantityObjects<>0 then
+					for i := 0 to FMesh.QuantityObjects-1 do 
+						FMesh.Objects[i].ChangeMeshColorType4b();
 			SaveStageToStream();
 			end;
 		FMesh.Destroy();
@@ -2062,14 +2176,14 @@ if FMesh <> nil then
 			FNowCadr:=0;
 		FFileStream.Position:=FArCadrs[FNowCadr];
 		FMesh.LoadFromSG3DM(FFileStream);
-		if Render.RenderType=SGRenderDirectX then
-			begin
-			FMesh.Objects[0].ChangeMeshColorType4b();
-			FMesh.LastObject().ChangeMeshColorType4b();
-			end;
+		if (Render.RenderType=SGRenderDirectX) then
+			if FMesh.QuantityObjects<>0 then
+				for i := 0 to FMesh.QuantityObjects-1 do 
+					FMesh.Objects[i].ChangeMeshColorType4b();
 		end;
 	if FDiffusionRuned or FMoviePlayed then
 		UpDateInfoLabel();
+	UpDateConchLabels();
 	end;
 end;
 
