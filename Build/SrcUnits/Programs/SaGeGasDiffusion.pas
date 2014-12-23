@@ -561,9 +561,12 @@ procedure TSGGasDiffusion.ClearDisplayButtons();
 var
 	i : LongWord;
 begin
-for i:=0 to High(FConchLabels) do
-	FConchLabels[i].Destroy();
-SetLength(FConchLabels,0);
+if FConchLabels<>nil then
+	begin
+	for i:=0 to High(FConchLabels) do
+		FConchLabels[i].Destroy();
+	SetLength(FConchLabels,0);
+	end;
 if FAddNewGazPanel <> nil then
 	begin
 	FAddNewGazPanel.Destroy();
