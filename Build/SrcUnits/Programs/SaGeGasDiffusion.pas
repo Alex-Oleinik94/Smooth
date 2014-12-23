@@ -2194,13 +2194,15 @@ Render.Vertex3f(a.x,-1,1);
 Render.Vertex3f(a.x,1,1);
 Render.EndScene();
 
-DrawComplexCube();
-Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
-b.Import(a.x,a.y,a.z);
-if Abs(b) <2 then
-	begin
-	
-	end;
+{$IFNDEF MOBILE}
+	DrawComplexCube();
+	Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
+	b.Import(a.x,a.y,a.z);
+	if Abs(b) <2 then
+		begin
+		
+		end;
+	{$ENDIF}
 end;
 
 procedure TSGGasDiffusion.Draw();

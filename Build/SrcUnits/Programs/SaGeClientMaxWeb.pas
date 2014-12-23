@@ -59,7 +59,11 @@ var
 	DT : TSGDataTime;
 begin
 inherited Create(VContext);
+SGLog.Sourse('Begin get HTTP');
 MS := SGGetFromHTTP('http://fpm.babichev.net/schedule/32/k/mathmod?api=json');
+SGLog.Sourse(['End get HTTP "',LongWord(MS),'"']);
+if MS = nil then 
+	Exit;
 i := 0;
 while i<>MS.Size do
 	begin
@@ -67,9 +71,9 @@ while i<>MS.Size do
 	i+=1;
 	end;
 MS.Destroy();
-J := GetJSON(S);
+{J := GetJSON(S);
 DT.Get();
-Schedules := J.FindPath('schedules');
+Schedules := J.FindPath('schedules');}
 //WriteLn(J.FindPath('schdule_title').AsString);
 end;
 

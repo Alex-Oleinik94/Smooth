@@ -83,6 +83,7 @@ begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGGasDiffusion);
+	Add(TSGClientMaxWeb);
 	Add(TSGExample4_1);
 	Add(TSGExample5_4);
 	

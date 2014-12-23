@@ -64,7 +64,7 @@ type
 
 	TSGHTTPHandler=class
 			public
-		Done : Boolean;
+		Done, Error : Boolean;
 		Stream : TMemoryStream;
 			public
 		procedure ClientDisconnect(ASocket: TLSocket);
@@ -80,19 +80,22 @@ implementation
 
 procedure TSGHTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 begin
-  {write('Response: ', HTTPStatusCodes[ASocket.ResponseStatus], ' ', 
-    ASocket.ResponseReason, ', data...');}
+    SGLog.Sourse(['in TSGHTTPHandler.ClientProcessHeaders : "'+'Response: ', HTTPStatusCodes[ASocket.ResponseStatus], ' ', 
+    ASocket.ResponseReason, ', data...'+'"']);
 end;
 
 procedure TSGHTTPHandler.ClientError(const Msg: string; aSocket: TLSocket);
 begin
   {writeln('Error: ', Msg);}
+  SGLog.Sourse('in TSGHTTPHandler.ClientError : "'+Msg+'"');
+  Error := True;
 end;
 
 procedure TSGHTTPHandler.ClientDisconnect(ASocket: TLSocket);
 begin
   {writeln('Disconnected.');}
   done := true;
+  SGLog.Sourse('in TSGHTTPHandler.ClientDisconnect');
 end;
   
 procedure TSGHTTPHandler.ClientDoneInput(ASocket: TLHTTPClientSocket);
@@ -101,6 +104,7 @@ begin
   //close(OutputFile);
   Stream.Position := 0;
   ASocket.Disconnect;
+  SGLog.Sourse('in TSGHTTPHandler.ClientDoneInput');
 end;
 
 function TSGHTTPHandler.ClientInput(ASocket: TLHTTPClientSocket;
@@ -110,6 +114,7 @@ begin
   write(IntToStr(ASize) + '...');}
   Stream.WriteBuffer(ABuffer^,ASize);
   Result := ASize;
+  SGLog.Sourse('in TSGHTTPHandler.ClientInput');
 end;
 
 function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
@@ -144,8 +149,10 @@ HttpClient.OnInput := @Client.ClientInput;
 HttpClient.OnProcessHeaders := @Client.ClientProcessHeaders;
 HttpClient.SendRequest;
 Client.Done := false;
+Client.Error := false;
 
-while not Client.Done do
+SGLog.Sourse('Begin circle');
+while (not Client.Done) and (not Client.Error) do
 	HttpClient.CallAction;
 
 HttpClient.Free;
