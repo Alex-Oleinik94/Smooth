@@ -491,39 +491,43 @@ Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
 for i:=0 to Result.LastObject().Vertexes - 1 do
 	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
 
-Result.AddObject();
-Result.LastObject().ObjectPoligonesType := SGR_POINTS;
-Result.LastObject().HasNormals := False;
-Result.LastObject().HasTexture := False;
-Result.LastObject().HasColors  := True;
-Result.LastObject().EnableCullFace := False;
-Result.LastObject().VertexType := SGMeshVertexType3f;
-Result.LastObject().SetColorType(SGMeshColorType4b);
-
 for i:=0 to FEdge*FEdge*FEdge -1 do
 	begin
 	if FCube[i]<>0 then
 		Inc(n);
 	end;
-
-Result.LastObject().Vertexes   := n;
-
-n:=0;
-for i:=0 to FEdge*FEdge*FEdge -1 do
+if n <> 0 then
 	begin
-	if FCube[i]<>0 then
+	Result.AddObject();
+	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
+	Result.LastObject().HasNormals := False;
+	Result.LastObject().HasTexture := False;
+	Result.LastObject().HasColors  := True;
+	Result.LastObject().EnableCullFace := False;
+	Result.LastObject().VertexType := SGMeshVertexType3f;
+	Result.LastObject().SetColorType(SGMeshColorType4b);
+
+
+
+	Result.LastObject().Vertexes   := n;
+
+	n:=0;
+	for i:=0 to FEdge*FEdge*FEdge -1 do
 		begin
-		Result.LastObject().SetColor(n,
-			FGazes[FCube[i]-1].FColor.r,
-			FGazes[FCube[i]-1].FColor.g,
-			FGazes[FCube[i]-1].FColor.b);
-		Result.LastObject().ArVertex3f[n]^.Import(
-			Smeshenie+2*(i mod FEdge)/FEdge-1,
-			Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
-			Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
-		Result.LastObject().ArVertex3f[n]^+=
-			FArRandomSm[Random(10)];
-		Inc(n);
+		if FCube[i]<>0 then
+			begin
+			Result.LastObject().SetColor(n,
+				FGazes[FCube[i]-1].FColor.r,
+				FGazes[FCube[i]-1].FColor.g,
+				FGazes[FCube[i]-1].FColor.b);
+			Result.LastObject().ArVertex3f[n]^.Import(
+				Smeshenie+2*(i mod FEdge)/FEdge-1,
+				Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
+				Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
+			Result.LastObject().ArVertex3f[n]^+=
+				FArRandomSm[Random(10)];
+			Inc(n);
+			end;
 		end;
 	end;
 end;
@@ -1096,9 +1100,9 @@ if (Button.Parent.Children[1] as TSGComboBox).Active = False then
 UpdateNewGasPanel(Button.Parent);
 end;end;
 
-procedure mmmGas1234Proc(Button:TSGButton);
+procedure mmmGas1234Proc(Button:TSGButton);//Удаление
 var
-	i,ii,iii : LongWord;
+	i,ii,iii,j : LongWord;
 begin with TSGGasDiffusion(Button.Parent.FUserPointer1) do begin
 if Length(FCube.FGazes)=0 then
 	Exit;
@@ -1108,11 +1112,25 @@ for i:= ii to High(FCube.FGazes)-1 do
 SetLength(FCube.FGazes,Length(FCube.FGazes)-1);
 for i := 0 to High(FCube.FGazes) do
 	begin
-	if FCube.FGazes[i].FArParents[0]>ii then
-		FCube.FGazes[i].FArParents[0] -= 1;
-	if FCube.FGazes[i].FArParents[1]>ii then
-		FCube.FGazes[i].FArParents[1] -= 1;
+	if (FCube.FGazes[i].FArParents[0]=ii) or (FCube.FGazes[i].FArParents[1]=ii) then
+		begin
+		FCube.FGazes[i].FArParents[0]:=-1;
+		FCube.FGazes[i].FArParents[1]:=-1;
+		end
+	else
+		begin
+		if FCube.FGazes[i].FArParents[0]>ii then
+			FCube.FGazes[i].FArParents[0] -= 1;
+		if FCube.FGazes[i].FArParents[1]>ii then
+			FCube.FGazes[i].FArParents[1] -= 1;
+		end;
 	end;
+
+for i:=0 to FCube.Edge*FCube.Edge*FCube.Edge-1 do
+	if FCube.FCube[i]=ii+1 then
+		FCube.FCube[i]:=0
+	else if FCube.FCube[i]>ii+1 then
+		FCube.FCube[i]-=1;
 i := 0;
 while i<=High(FCube.FSourses) do
 	begin
@@ -1146,6 +1164,8 @@ else
 	end;
 
 UpdateNewGasPanel(Button.Parent);
+FMesh.Destroy();
+FMesh:=FCube.CalculateMesh();
 end;end;
 
 procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
@@ -1927,6 +1947,30 @@ var
 	c : TSGColor4f;
 begin
 s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+a.x :=2*FCube.FSourses[s].FCoord.y/FCube.Edge-1;
+a.y :=2*FCube.FSourses[s].FCoord.z/FCube.Edge-1;
+a.z :=2*FCube.FSourses[s].FCoord.x/FCube.Edge-1;
+C.Import(1,$A5/256,0,1);
+C.Color(Render);
+Render.BeginScene(SGR_LINE_LOOP);
+Render.Vertex3f(1,-1,a.z);
+Render.Vertex3f(-1,-1,a.z);
+Render.Vertex3f(-1,1,a.z);
+Render.Vertex3f(1,1,a.z);
+Render.EndScene();
+Render.BeginScene(SGR_LINE_LOOP);
+Render.Vertex3f(1,a.y,-1);
+Render.Vertex3f(-1,a.y,-1);
+Render.Vertex3f(-1,a.y,1);
+Render.Vertex3f(1,a.y,1);
+Render.EndScene();
+Render.BeginScene(SGR_LINE_LOOP);
+Render.Vertex3f(a.x,1,-1);
+Render.Vertex3f(a.x,-1,-1);
+Render.Vertex3f(a.x,-1,1);
+Render.Vertex3f(a.x,1,1);
+Render.EndScene();
+
 DrawComplexCube();
 Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
 b.Import(a.x,a.y,a.z);
@@ -1934,14 +1978,6 @@ if Abs(b) <2 then
 	begin
 	
 	end;
-Render.BeginScene(SGR_QUADS);
-C.Import(1,1,1,0.5);
-C.Color(Render);
-Render.Vertex3f(1,-1,FCube.FSourses[s].FCoord.z);
-Render.Vertex3f(-1,-1,FCube.FSourses[s].FCoord.z);
-Render.Vertex3f(-1,1,FCube.FSourses[s].FCoord.z);
-Render.Vertex3f(1,1,FCube.FSourses[s].FCoord.z);
-Render.EndScene();
 end;
 
 procedure TSGGasDiffusion.Draw();
