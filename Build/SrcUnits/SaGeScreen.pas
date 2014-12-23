@@ -998,7 +998,9 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			end;
 		end;
 	if  (1-FOpenTimer>SGZero) and
-		(FVisibleTimer>SGZero) then
+		(FVisibleTimer>SGZero) and 
+		(FSelectItem>=0) and 
+		(FSelectItem<=High(FItems)) then
 	DrawItem(
 		GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT),
 		GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT),
