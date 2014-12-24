@@ -248,15 +248,16 @@ procedure ProvSmesh(const a,b : TSGGGDC);inline;
 var
 	i : LongWord;
 begin
-for i:=0 to High(FGazes) do
-	if (FGazes[i].FArParents[0]<>-1) and (FGazes[i].FArParents[1]<>-1) and 
-		(((a^-1 = FGazes[i].FArParents[0]) and (b^-1 = FGazes[i].FArParents[1])) or 
-		((b^-1 = FGazes[i].FArParents[0]) and (a^-1 = FGazes[i].FArParents[1]))) then
-			begin
-			a^ := i + 1;
-			b^ := 0;
-			Exit;
-			end;
+if FGazes<>nil then
+	for i:=0 to High(FGazes) do
+		if (FGazes[i].FArParents[0]<>-1) and (FGazes[i].FArParents[1]<>-1) and 
+			(((a^-1 = FGazes[i].FArParents[0]) and (b^-1 = FGazes[i].FArParents[1])) or 
+			((b^-1 = FGazes[i].FArParents[0]) and (a^-1 = FGazes[i].FArParents[1]))) then
+				begin
+				a^ := i + 1;
+				b^ := 0;
+				Exit;
+				end;
 end;
 procedure QuadricMove(const a,b,c,d : TSGGGDC);inline;
 var 
@@ -495,8 +496,9 @@ Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
 for i:=0 to Result.LastObject().Vertexes - 1 do
 	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
 
-for i:= 0 to High(FGazes) do
-	FGazes[i].FDinamicQuantity := 0;
+if FGazes<>nil then
+	for i:= 0 to High(FGazes) do
+		FGazes[i].FDinamicQuantity := 0;
 
 for i:=0 to FEdge*FEdge*FEdge -1 do
 	begin
@@ -507,8 +509,9 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 	end;
 
 FDinamicQuantityMoleculs := 0;
-for i:= 0 to High(FGazes) do
-	FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
+if FGazes<>nil then
+	for i:= 0 to High(FGazes) do
+		FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
 
 if FDinamicQuantityMoleculs <> 0 then
 	begin
@@ -809,7 +812,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	FSecheniePanel := TSGPanel.Create();
 	SGScreen.CreateChild(FSecheniePanel);
-	SGScreen.LastChild.SetBounds(5,Context.Height-10-a-FTahomaFont.FontHeight-10,a,a+FTahomaFont.FontHeight+5);
+	SGScreen.LastChild.SetBounds(5,Context.Height-10-a,a,a);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
 	SGScreen.LastChild.Visible:=True;
@@ -1068,9 +1071,29 @@ procedure UpdateNewGasPanel(Panel:TSGComponent);
 var
 	g,i : LongWord;
 begin with TSGGasDiffusion(Panel.UserPointer) do begin
-g  := (Panel.Children[1] as TSGComboBox).SelectItem;
-(Panel.Children[4] as TSGGDrawColor).Color := FCube.FGazes[g].FColor;
-if (FCube.FGazes[g].FArParents[0]<>-1) and (FCube.FGazes[g].FArParents[1]<>-1) then
+if not ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
+	begin
+	g  := (Panel.Children[1] as TSGComboBox).SelectItem;
+	(Panel.Children[4] as TSGGDrawColor).Color := FCube.FGazes[g].FColor;
+	Panel.Children[1].Active := True;
+	Panel.Children[5].Active := True;
+	Panel.Children[6].Active := True;
+	Panel.Children[7].Active := True;
+	Panel.Children[11].Active := True;
+	Panel.Children[9].Active := True;
+	Panel.Children[4].Visible := True;
+	end
+else
+	begin
+	Panel.Children[1].Active := False;
+	Panel.Children[5].Active := False;
+	Panel.Children[6].Active := False;
+	Panel.Children[7].Active := False;
+	Panel.Children[11].Active := False;
+	Panel.Children[9].Active := False;
+	Panel.Children[4].Visible := False;
+	end;
+if (not ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0))) and ((FCube.FGazes[g].FArParents[0]<>-1) and (FCube.FGazes[g].FArParents[1]<>-1)) then
 	begin
 	(Panel.Children[6] as TSGComboBox).SelectItem := 0;
 	Panel.Children[7].Caption := SGStr(FCube.FGazes[g].FArParents[0]+1);
@@ -1115,12 +1138,14 @@ a.Parent.Children[7].Caption := '';
 end; end;
 
 procedure mmmFAddAddNewGazButtonProcedure(Button:TSGButton);
+var
+	i : LongWord;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
 SetLength(FCube.FGazes,Length(FCube.FGazes)+1);
 FCube.FGazes[High(FCube.FGazes)].Create(random,random,random,1,-1,-1);
-if (Button.Parent.Children[1] as TSGComboBox).Active = False then
-	(Button.Parent.Children[1] as TSGComboBox).ClearItems();
-(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(Length(FCube.FGazes)));
+(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+for i := 0 to High(FCube.FGazes) do
+	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 (Button.Parent.Children[1] as TSGComboBox).Active := True;
 (Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
 UpdateNewGasPanel(Button.Parent);
@@ -1130,55 +1155,59 @@ procedure mmmGas1234Proc(Button:TSGButton);//Удаление
 var
 	i,ii,iii,j : LongWord;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
-if Length(FCube.FGazes)=0 then
+if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 	Exit;
 ii := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
-for i:= ii to High(FCube.FGazes)-1 do
-	FCube.FGazes[i] := FCube.FGazes[i+1];
+if Length(FCube.FGazes)<>1 then
+	for i:= ii to High(FCube.FGazes)-1 do
+		FCube.FGazes[i] := FCube.FGazes[i+1];
 SetLength(FCube.FGazes,Length(FCube.FGazes)-1);
-for i := 0 to High(FCube.FGazes) do
-	begin
-	if (FCube.FGazes[i].FArParents[0]=ii) or (FCube.FGazes[i].FArParents[1]=ii) then
+if ((FCube.FGazes<>nil) and (Length(FCube.FGazes)<>0)) then
+	for i := 0 to High(FCube.FGazes) do
 		begin
-		FCube.FGazes[i].FArParents[0]:=-1;
-		FCube.FGazes[i].FArParents[1]:=-1;
-		end
-	else
-		begin
-		if FCube.FGazes[i].FArParents[0]>ii then
-			FCube.FGazes[i].FArParents[0] -= 1;
-		if FCube.FGazes[i].FArParents[1]>ii then
-			FCube.FGazes[i].FArParents[1] -= 1;
+		if (FCube.FGazes[i].FArParents[0]=ii) or (FCube.FGazes[i].FArParents[1]=ii) then
+			begin
+			FCube.FGazes[i].FArParents[0]:=-1;
+			FCube.FGazes[i].FArParents[1]:=-1;
+			end
+		else
+			begin
+			if FCube.FGazes[i].FArParents[0]>ii then
+				FCube.FGazes[i].FArParents[0] -= 1;
+			if FCube.FGazes[i].FArParents[1]>ii then
+				FCube.FGazes[i].FArParents[1] -= 1;
+			end;
 		end;
-	end;
-
 for i:=0 to FCube.Edge*FCube.Edge*FCube.Edge-1 do
 	if FCube.FCube[i]=ii+1 then
 		FCube.FCube[i]:=0
 	else if FCube.FCube[i]>ii+1 then
 		FCube.FCube[i]-=1;
-i := 0;
-while i<=High(FCube.FSourses) do
+if ((FCube.FSourses<>nil) and (Length(FCube.FSourses)<>0)) then
 	begin
-	if FCube.FSourses[i].FGazTypeIndex = ii then
+	i := 0;
+	while i<=High(FCube.FSourses) do
 		begin
-		for iii:=i to High(FCube.FSourses)-1 do
-			FCube.FSourses[iii]:=FCube.FSourses[iii+1];
-		SetLength(FCube.FSourses,Length(FCube.FSourses)-1);
-		end
-	else if FCube.FSourses[i].FGazTypeIndex > ii then
-		begin
-		FCube.FSourses[i].FGazTypeIndex -= 1;
-		i +=1;
-		end
-	else
-		i +=1;
+		if FCube.FSourses[i].FGazTypeIndex = ii then
+			begin
+			if Length(FCube.FSourses)>1 then
+				for iii:=i to High(FCube.FSourses)-1 do
+					FCube.FSourses[iii]:=FCube.FSourses[iii+1];
+			SetLength(FCube.FSourses,Length(FCube.FSourses)-1);
+			end
+		else if FCube.FSourses[i].FGazTypeIndex > ii then
+			begin
+			FCube.FSourses[i].FGazTypeIndex -= 1;
+			i +=1;
+			end
+		else
+			i +=1;
+		end;
 	end;
-
 (Button.Parent.Children[1] as TSGComboBox).ClearItems();
-if Length(FCube.FGazes)=0 then
+if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 	begin
-	(Button.Parent.Children[1] as TSGComboBox).CreateItem('');
+	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Добавьте газы');
 	(Button.Parent.Children[1] as TSGComboBox).SelectItem := 0;
 	(Button.Parent.Children[1] as TSGComboBox).Active := False;
 	end
@@ -1188,7 +1217,6 @@ else
 		(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
 	end;
-
 UpdateNewGasPanel(Button.Parent);
 FMesh.Destroy();
 FMesh:=FCube.CalculateMesh();
@@ -1242,8 +1270,11 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.CreateChild(TSGComboBox.Create());//1
 	FAddNewGazPanel.LastChild.SetBounds(0,4,pw - 10 - 25,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	for i:=0 to High(FCube.FGazes) do
-		(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
+	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
+		(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Добавьте газы')
+	else
+		for i:=0 to High(FCube.FGazes) do
+			(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
 	(FAddNewGazPanel.LastChild as TSGComboBox).FMaxColumns := 5;
@@ -1350,7 +1381,7 @@ procedure TSGGasDiffusion.UpDateSoursePanel();
 var
 	s : LongWord;
 begin
-if (Length(FCube.FSourses)=0) then
+if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 	begin
 	(FAddNewSoursePanel.Children[1]).Active := False;
 	(FAddNewSoursePanel.Children[3]).Active := False;
@@ -1359,6 +1390,8 @@ if (Length(FCube.FSourses)=0) then
 	(FAddNewSoursePanel.Children[7]).Active := False;
 	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := 0;
 	(FAddNewSoursePanel.Children[4] as TSGEdit).Caption := '';
+	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
+		(FAddNewSoursePanel.Children[2]).Active := False;
 	end
 else
 	begin
@@ -1367,6 +1400,7 @@ else
 	(FAddNewSoursePanel.Children[4]).Active := True;
 	(FAddNewSoursePanel.Children[5]).Active := True;
 	(FAddNewSoursePanel.Children[7]).Active := True;
+	(FAddNewSoursePanel.Children[2]).Active := True;
 	s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
 	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := FCube.FSourses[s].FGazTypeIndex;
 	(FAddNewSoursePanel.Children[4] as TSGEdit).Caption := SGStr(FCube.FSourses[s].FRadius);
@@ -1457,7 +1491,7 @@ if FAddNewSoursePanel = nil then
 	FAddNewSoursePanel.CreateChild(TSGComboBox.Create());//1
 	FAddNewSoursePanel.LastChild.SetBounds(0,4,pw - 10 - 25,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
-	if Length(FCube.FSourses)=0 then
+	if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Нету источников')
 	else
 		for i:=0 to High(FCube.FSourses) do
@@ -1474,8 +1508,13 @@ if FAddNewSoursePanel = nil then
 	FAddNewSoursePanel.CreateChild(TSGComboBox.Create());//3
 	FAddNewSoursePanel.LastChild.SetBounds(0,4+21,pw - 10,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
-	for i:=0 to High(FCube.FGazes) do
-		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
+	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
+		begin
+		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Добавьте газы');
+		end
+	else
+		for i:=0 to High(FCube.FGazes) do
+			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageGasProc);
 	
@@ -2169,9 +2208,11 @@ var
 	s : LongWord;
 	c : TSGColor4f;
 begin
+if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
+	Exit;
 s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
-a.x :=2*FCube.FSourses[s].FCoord.y/FCube.Edge-1;
-a.y :=2*FCube.FSourses[s].FCoord.z/FCube.Edge-1;
+a.x :=2*FCube.FSourses[s].FCoord.z/FCube.Edge-1;
+a.y :=2*FCube.FSourses[s].FCoord.y/FCube.Edge-1;
 a.z :=2*FCube.FSourses[s].FCoord.x/FCube.Edge-1;
 C.Import(1,$A5/256,0,1);
 C.Color(Render);
