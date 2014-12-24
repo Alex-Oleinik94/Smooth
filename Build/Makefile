@@ -1,6 +1,6 @@
 PP=fpc
 CROSSPP=../FPC/bin/i386-win32/$(PP)
-BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/Inet -FuSrcUnits/Inet/sys -FuSrcUnits -FuSrcUnits/Programs -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -FuExamples -Sm
+BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Includes -FuSrcUnits/lNet -FuSrcUnits/lNet/sys -FuSrcUnits -FuSrcUnits/Programs -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -FuExamples -Sm
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
 ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSrcUnits/OpenGL 
 OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries
