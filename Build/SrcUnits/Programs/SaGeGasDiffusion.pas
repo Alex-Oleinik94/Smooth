@@ -51,6 +51,8 @@ type
 		function Cube (const x,y,z:Word):TSGGGDC;inline;
 			public
 		FCube       : TSGGGDC;
+		FCubeCoords : packed array of
+			TSGVertex3f;
 		FEdge       : TSGLongWord;
 		FBoundsOpen : TSGBoolean;
 		FGazes      : packed array of TSGGazType;
@@ -166,6 +168,7 @@ FCube   := nil;
 FSourses:= nil;
 FGazes  := nil;
 FBoundsOpen:=False;
+FCubeCoords := nil;
 end;
 
 procedure TSGGasDiffusionCube.Draw();
@@ -175,6 +178,13 @@ end;
 
 destructor TSGGasDiffusionCube.Destroy();
 begin
+if FCubeCoords<>nil then
+	SetLength(FCubeCoords,0);
+if FCube<>nil then
+	begin
+	FreeMem(FCube);
+	FCube:=nil;
+	end;
 inherited;
 end;
 
@@ -192,6 +202,7 @@ end;
 procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord);
 var
 	i : LongWord;
+	Smeshenie : TSGSingle;
 begin
 if FCube<>nil then
 	begin
@@ -201,8 +212,10 @@ if FCube<>nil then
 FEdge := Edge;
 if FEdge mod 2 = 1 then
 	FEdge +=1;
+Smeshenie:=1/FEdge;
 GetMem(FCube,FEdge*FEdge*FEdge);
 FillChar(FCube^,FEdge*FEdge*FEdge,0);
+SetLength(FCubeCoords,FEdge*FEdge*FEdge);
 
 SetLength(FGazes,3);
 FGazes[0].Create(0,1,0);
@@ -219,6 +232,15 @@ FSourses[1].FRadius:=1;
 for i:=0 to 9 do
 	FArRandomSm[i].Import(random*(0.99/Edge),random*(0.99/Edge),random*(0.99/Edge));
 
+for i := 0 to Edge*Edge*Edge-1 do
+	begin
+	FCubeCoords[i].Import(
+		Smeshenie+2*(i mod FEdge)/FEdge-1,
+		Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
+		Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
+	FCubeCoords[i]+=
+		FArRandomSm[Random(10)];
+	end;
 UpDateCube();
 end;
 
@@ -434,10 +456,7 @@ end;
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 var
 	i : TSGLongWord;
-	Smeshenie : TSGSingle;
 begin
-Smeshenie:=1/FEdge;
-
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
 Result.AddObject();
@@ -537,12 +556,14 @@ if FDinamicQuantityMoleculs <> 0 then
 				FGazes[FCube[i]-1].FColor.r,
 				FGazes[FCube[i]-1].FColor.g,
 				FGazes[FCube[i]-1].FColor.b);
-			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^.Import(
+			{Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^.Import(
 				Smeshenie+2*(i mod FEdge)/FEdge-1,
 				Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
 				Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
 			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^+=
-				FArRandomSm[Random(10)];
+				FArRandomSm[Random(10)];}
+			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
+				FCubeCoords[i];
 			Inc(FDinamicQuantityMoleculs);
 			end;
 		end;
@@ -556,7 +577,6 @@ begin
 if FFileStream<>nil then
 	begin
 	FMesh.SaveToSG3DM(FFileStream);
-	FNowCadr+=1;
 	end;
 end;
 
@@ -1162,6 +1182,8 @@ if Length(FCube.FGazes)<>1 then
 	for i:= ii to High(FCube.FGazes)-1 do
 		FCube.FGazes[i] := FCube.FGazes[i+1];
 SetLength(FCube.FGazes,Length(FCube.FGazes)-1);
+if Length(FCube.FGazes)=0 then
+	FCube.FGazes := nil;
 if ((FCube.FGazes<>nil) and (Length(FCube.FGazes)<>0)) then
 	for i := 0 to High(FCube.FGazes) do
 		begin
@@ -1570,11 +1592,9 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		end;
 	FMesh:=FCube.CalculateMesh();
 	
+	FNowCadr := 0;
 	if FEnableSaving then
-		begin
 		SGMakeDirectory(PredStr+Catalog);
-		FNowCadr:=0;
-		end;
 	
 	if FBackToMenuButton = nil then
 		begin
@@ -2313,6 +2333,7 @@ if FMesh <> nil then
 		FMesh.Destroy();
 		FCube.UpDateCube();
 		FMesh:=FCube.CalculateMesh();
+		FNowCadr+=1;
 		end;
 	if FSecheniePanel<>nil then
 		UpDateSechenie();
@@ -2344,15 +2365,15 @@ procedure TSGGasDiffusion.UpDateInfoLabel();
 begin
 if FMoviePlayed then
 	begin
-	FInfoLabel.Caption:='Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", Кадров: "'+SGStr(Length(FArCadrs))+'", Позиция: "'+SGStrReal(FNowCadr/Length(FArCadrs)*100,2)+'%"';
+	FInfoLabel.Caption:='Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", Итераций: "'+SGStr(Length(FArCadrs))+'", Позиция: "'+SGStrReal(FNowCadr/Length(FArCadrs)*100,2)+'%"';
 	end
 else if FDiffusionRuned then
 	begin
 	FInfoLabel.Caption:='';
 	if FEnableSaving and (FFileStream<>nil)then
-		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", Кадр: "'+SGStr(FNowCadr)+'", ';
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", ';
 	if (FMesh<>nil) and (FMesh.LastObject()<>nil) then
-		FInfoLabel.Caption:=FInfoLabel.Caption+'Количество точек: "'+SGStr(FMesh.LastObject().Vertexes)+'"'
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Итерация: "'+SGStr(FNowCadr)+'", Количество точек: "'+SGStr(FMesh.LastObject().Vertexes)+'"'
 	end;
 end;
 
