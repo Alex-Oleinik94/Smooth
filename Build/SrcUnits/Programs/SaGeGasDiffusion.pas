@@ -59,6 +59,7 @@ type
 		FSourses    : packed array of TSGSourseType;
 		FArRandomSm : array [0..9] of TSGVertex3f;
 		FDinamicQuantityMoleculs : LongWord;
+		FFlag       : Boolean;
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -204,6 +205,7 @@ var
 	i : LongWord;
 	Smeshenie : TSGSingle;
 begin
+FFlag := True;
 if FCube<>nil then
 	begin
 	FreeMem(FCube);
@@ -270,7 +272,7 @@ procedure ProvSmesh(const a,b : TSGGGDC);inline;
 var
 	i : LongWord;
 begin
-if FGazes<>nil then
+if (FGazes<>nil) and (not((a^=0) or (b^=0))) then
 	for i:=0 to High(FGazes) do
 		if (FGazes[i].FArParents[0]<>-1) and (FGazes[i].FArParents[1]<>-1) and 
 			(((a^-1 = FGazes[i].FArParents[0]) and (b^-1 = FGazes[i].FArParents[1])) or 
@@ -285,6 +287,8 @@ procedure QuadricMove(const a,b,c,d : TSGGGDC);inline;
 var 
 	eee : Byte;
 begin
+if not((a^=0) or (b^=0) or (c^=0) or (d^=0)) then
+	Exit;
 eee := a^;
 a^ := b^;
 b^ := c^;
@@ -393,38 +397,45 @@ procedure UpDateGaz();
 var
 	i1,i2,i3:TSGLongWord;
 begin
-i1:=0;
-while i1<FEdge do
+if FFlag then
 	begin
-	i2:=0;
-	while i2<FEdge do
+	i1:=0;
+	while i1<FEdge do
 		begin
-		i3:=0;
-		while i3<FEdge do
+		i2:=0;
+		while i2<FEdge do
 			begin
-			MoveGazInSmallCube(i1,i2,i3);
-			i3+=2;
+			i3:=0;
+			while i3<FEdge do
+				begin
+				MoveGazInSmallCube(i1,i2,i3);
+				i3+=2;
+				end;
+			i2+=2;
 			end;
-		i2+=2;
+		i1+=2;
 		end;
-	i1+=2;
-	end;
-i1:=1;
-while i1<FEdge-1 do
+	end
+else
 	begin
-	i2:=1;
-	while i2<FEdge-1 do
+	i1:=1;
+	while i1<FEdge-1 do
 		begin
-		i3:=1;
-		while i3<FEdge-1 do
+		i2:=1;
+		while i2<FEdge-1 do
 			begin
-			MoveGazInSmallCube(i1,i2,i3);
-			i3+=2;
+			i3:=1;
+			while i3<FEdge-1 do
+				begin
+				MoveGazInSmallCube(i1,i2,i3);
+				i3+=2;
+				end;
+			i2+=2;
 			end;
-		i2+=2;
+		i1+=2;
 		end;
-	i1+=2;
 	end;
+FFlag := not FFlag;
 end;
 procedure UpDateIfOpenBounds();
 var
