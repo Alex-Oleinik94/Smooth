@@ -81,6 +81,7 @@ type
 		procedure SetHeight(const NewHeight:LongInt);
 		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;inline;
 		procedure SetBounds(const NewBound:LongWord);overload;inline;
+		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;inline;
 			public
 		property Width : Cardinal read FWidth write FWidth;
 		property Height : Cardinal read FHeight write FHeight;
@@ -99,6 +100,11 @@ operator not (const a:TSGPixel3b):TSGPixel3b;inline;
 function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
 
 implementation
+
+function TSGBitMap.PixelsRGBA(const x,y:LongWord):PSGPixel4b;inline;
+begin
+Result := @PSGPixel4b(FBitMap)[y* FWidth + x];
+end;
 
 function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
 begin
