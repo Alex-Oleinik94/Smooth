@@ -1677,7 +1677,7 @@ for i := -range to range do
 	begin
 	px := LongInt(x) + i;
 	py := LongInt(y) + ii;
-	if ((px >= 0) and (py >= 0) and (px < FCube.Edge) and ( py < FCube.Edge)) then
+	if ((px >= 0) and (py >= 0) and (px < FImageSechenieBounds) and ( py < FImageSechenieBounds)) then
 		begin
 		total += 1;
 		pixel := FCopiedSechenieImage.Image.PixelsRGBA(px,py);
@@ -1706,9 +1706,9 @@ FTempImage.Width          := FImageSechenieBounds;
 FTempImage.Height         := FImageSechenieBounds;
 FTempImage.Image.Channels := 4;
 FTempImage.Image.BitDepth := 8;
-FTempImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
+FTempImage.Image.BitMap   := GetMem(FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
 FTempImage.Image.CreateTypes();
-fillchar(FTempImage.Image.BitMap^,FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels,0);
+fillchar(FTempImage.Image.BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
 i := 0;
 while i < FCube.Edge do
 	begin
@@ -1728,11 +1728,11 @@ end; end;
 
 procedure TSGGasDiffusion.UpDateUsrSech();
 var
-	BitMap : PByte;
+	BitMap : PByte = nil;
 begin
 Move(FSechenieImage.Image.BitMap^,
 	FCopiedSechenieImage.Image.BitMap^,
-	FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
+	FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
 
 FUsrImageThreadProcedure(Self);
 
@@ -1742,7 +1742,7 @@ GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Cha
 FUsrSechImage.Image.BitMap := BitMap;
 Move(FCopiedSechenieImage.Image.BitMap^,
 	FUsrSechImage.Image.BitMap^,
-	FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
+	FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
 FUsrSechImage.ToTexture();
 
 //FUsrImageThread := TSGThread.Create(TSGPointerProcedure(@FUsrImageThreadProcedure), Self);
@@ -2279,7 +2279,7 @@ FConchLabels           	:= nil;
 FAddSechSecondPanelButton := nil;
 FCopiedSechenieImage := nil;
 FUsrImageThread := nil;
-FUsrRange := 3;
+FUsrRange := 5;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -2564,9 +2564,17 @@ if FMesh <> nil then
 		FNowCadr+=1;
 		end;
 	if FSecheniePanel<>nil then
+		begin
 		UpDateSechenie();
+		if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
+			begin
+			UpDateUsrSech();
+			end;
+		end;
 	if (FAddNewSoursePanel<>nil) and FAddNewSoursePanel.Visible then
+		begin
 		UpDateChangeSourses();
+		end;
 	if FMoviePlayed then
 		begin
 		if FMesh<>nil then
