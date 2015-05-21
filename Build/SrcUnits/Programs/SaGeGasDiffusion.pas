@@ -114,7 +114,6 @@ type
 		FUsrSechPanel  : TSGPanel;
 		FUsrSechImage : TSGImage;
 		FUsrImageThread : TSGThread;
-		FCopiedSechenieImage : TSGImage;
 		FUsrRange: LongWord;
 		
 			(*Экран моделирования*)
@@ -156,6 +155,7 @@ type
 		procedure UpDateSoursePanel();
 		procedure UpDateConchLabels();
 		procedure UpDateUsrSech();
+		function GetPointColor( const i,ii,iii : LongWord):Byte;inline;
 		end;
 
 implementation
@@ -996,10 +996,7 @@ Render.DisableClientState(SGR_COLOR_ARRAY);
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 end;
 
-procedure TSGGasDiffusion.UpDateSechenie();
-var
-	i,ii:LongWord;
-function GetPointColor( const iii : LongWord):Byte;inline;
+function TSGGasDiffusion.GetPointColor( const i,ii,iii : LongWord):Byte;inline;
 begin
 case FPlaneComboBox.SelectItem of
 0:Result := FCube.Cube(i,ii,iii)^;
@@ -1007,12 +1004,16 @@ case FPlaneComboBox.SelectItem of
 2:Result := FCube.Cube(iii,i,ii)^;
 end;
 end;
+
+procedure TSGGasDiffusion.UpDateSechenie();
+var
+	i,ii:LongWord;
 var
 	BitMap : PByte;
 	iii : LongWord;
 	iiii : byte;
 	a : record x,y,z:Real; end;
-
+	color : TSGColor4f;
 begin
 {$IFNDEF MOBILE}
 if FNewSecheniePanel.Visible then
@@ -1043,25 +1044,27 @@ fillchar(BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.
 for i:=0 to FCube.Edge - 1 do
 	for ii:=0 to FCube.Edge - 1 do
 		begin
-		iiii := GetPointColor(iii);
+		iiii := GetPointColor(i,ii,iii);
 		if iiii <> 0 then
 			begin
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+			color := FCube.FGazes[iiii-1].FColor;
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(color.r*255);
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(color.g*255);
+			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(color.b*255);
 			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=255;
 			end
 		else
 			begin
 			if iii>0 then
-				iiii:=GetPointColor(iii-1);
+				iiii:=GetPointColor(i,ii,iii-1);
 			if (iiii=0) and (iii<FCube.Edge-1) then
-				iiii:=GetPointColor(iii+1);
+				iiii:=GetPointColor(i,ii,iii+1);
 			if iiii<>0 then
 				begin
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(FCube.FGazes[iiii-1].FColor.r*255);
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(FCube.FGazes[iiii-1].FColor.g*255);
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(FCube.FGazes[iiii-1].FColor.b*255);
+				color := FCube.FGazes[iiii-1].FColor;
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(color.r*255);
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(color.g*255);
+				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(color.b*255);
 				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=127;
 				end;
 			end;
@@ -1608,144 +1611,121 @@ procedure mmmFAddSechSecondPanelButtonProcedure(Button:TSGButton);
 var
 	a : LongWord;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FAddSechSecondPanelButton.Active := False;
-if FUsrSechPanel <> nil then
+if FUsrSechPanel = nil then
 	begin
-	FUsrSechPanel.Destroy();
-	FUsrSechPanel:=nil;
+	a := (FCube.Edge+1)*2;
+	FUsrSechPanel := TSGPanel.Create();
+	SGScreen.CreateChild(FUsrSechPanel);
+	FUsrSechPanel.SetBounds(a + 10,Context.Height - a - 10, a, a);
+	FUsrSechPanel.BoundsToNeedBounds();
+	FUsrSechPanel.Anchors:=[SGAnchBottom];
+	FUsrSechPanel.UserPointer := Button.UserPointer;
+	FUsrSechPanel.Visible := True;
+
+	FUsrSechImage:=TSGImage.Create();
+	FUsrSechImage.Context := Context;
+	FUsrSechImage.Image.Clear();
+	FUsrSechImage.Width          := FImageSechenieBounds;
+	FUsrSechImage.Height         := FImageSechenieBounds;
+	FUsrSechImage.Image.Channels := 4;
+	FUsrSechImage.Image.BitDepth := 8;
+	FUsrSechImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
+	FUsrSechImage.Image.CreateTypes();
+
+	FUsrSechPanel.CreateChild(TSGPicture.Create());
+	FUsrSechPanel.LastChild.SetBounds(5,5,a-10,a-10);
+	FUsrSechPanel.LastChild.BoundsToNeedBounds();
+	FUsrSechPanel.LastChild.Visible:=True;
+
+	(FUsrSechPanel.LastChild as TSGPicture).Image       := FUsrSechImage;
+	(FUsrSechPanel.LastChild as TSGPicture).EnableLines := True;
+	(FUsrSechPanel.LastChild as TSGPicture).SecondPoint.Import(
+		FCube.Edge/FImageSechenieBounds,
+		FCube.Edge/FImageSechenieBounds);
 	end;
-
-a := (FCube.Edge+1)*2;
-
-FUsrSechPanel := TSGPanel.Create();
-SGScreen.CreateChild(FUsrSechPanel);
-FUsrSechPanel.SetBounds(a + 10,Context.Height - a - 10, a, a);
-FUsrSechPanel.BoundsToNeedBounds();
-FUsrSechPanel.Anchors:=[SGAnchBottom];
-FUsrSechPanel.UserPointer := Button.UserPointer;
-FUsrSechPanel.Visible := True;
-
-FUsrSechImage:=TSGImage.Create();
-FUsrSechImage.Context := Context;
-FUsrSechImage.Image.Clear();
-FUsrSechImage.Width          := FImageSechenieBounds;
-FUsrSechImage.Height         := FImageSechenieBounds;
-FUsrSechImage.Image.Channels := 4;
-FUsrSechImage.Image.BitDepth := 8;
-FUsrSechImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
-FUsrSechImage.Image.CreateTypes();
-
-FUsrSechPanel.CreateChild(TSGPicture.Create());
-FUsrSechPanel.LastChild.SetBounds(5,5,a-10,a-10);
-FUsrSechPanel.LastChild.BoundsToNeedBounds();
-FUsrSechPanel.LastChild.Visible:=True;
-
-(FUsrSechPanel.LastChild as TSGPicture).Image       := FUsrSechImage;
-(FUsrSechPanel.LastChild as TSGPicture).EnableLines := True;
-(FUsrSechPanel.LastChild as TSGPicture).SecondPoint.Import(
-	FCube.Edge/FImageSechenieBounds,
-	FCube.Edge/FImageSechenieBounds);
-
-FCopiedSechenieImage:=TSGImage.Create();
-FCopiedSechenieImage.Context := Context;
-FCopiedSechenieImage.Image.Clear();
-FCopiedSechenieImage.Width          := FImageSechenieBounds;
-FCopiedSechenieImage.Height         := FImageSechenieBounds;
-FCopiedSechenieImage.Image.Channels := 4;
-FCopiedSechenieImage.Image.BitDepth := 8;
-FCopiedSechenieImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
-FCopiedSechenieImage.Image.CreateTypes();
-fillchar(FCopiedSechenieImage.Image.BitMap^,FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels,0);
 
 UpDateUsrSech();
 end; end;
 
 procedure FUsrImageThreadProcedure(Klass : TSGGasDiffusion);
-function InitPixel(const x,y : LongWord;const range : LongInt):TSGPixel4b;
+function InitPixel(const x,y,z : LongWord;const range : LongInt):TSGPixel4b;
 var
-	i, ii, total, totalAlpha: LongInt;
-	px, py : LongInt;
+	i, ii, iii, total, totalAlpha: LongInt;
+	px, py, pz : LongInt;
 	totalPixel : packed record 
 					r,g,b,a : LongWord;
 					end = (r : 0; g : 0; b: 0; a : 0);
-	pixel : PSGPixel4b;
+	colorIndex : byte;
+	color : TSGColor4f;
 begin with Klass do begin 
 total :=0;
 totalAlpha := 0;
 for i := -range to range do
 	for ii := -range to range do
+		for iii := -range to range do
+			begin
+			px := LongInt(x) + i;
+			py := LongInt(y) + ii;
+			pz := LongInt(z) + iii;
+			if ((px >= 0) and (py >= 0) and (pz >= 0) and (px < FImageSechenieBounds) and ( py < FImageSechenieBounds) and ( pz < FImageSechenieBounds)) then
+				begin
+				total += 1;
+				colorIndex := GetPointColor(px,py,pz);
+				color := FCube.FGazes[colorIndex-1].FColor;
+				totalPixel.r += trunc(color.r*255);
+				totalPixel.g += trunc(color.g*255);
+				totalPixel.b += trunc(color.b*255);
+				totalPixel.a += trunc(color.a*255);
+				if (color.a>0) then
+					totalAlpha += 1;
+				end;
+			end;
+if (total = 0) then
 	begin
-	px := LongInt(x) + i;
-	py := LongInt(y) + ii;
-	if ((px >= 0) and (py >= 0) and (px < FImageSechenieBounds) and ( py < FImageSechenieBounds)) then
-		begin
-		total += 1;
-		pixel := FCopiedSechenieImage.Image.PixelsRGBA(px,py);
-		totalPixel.r += pixel^.r;
-		totalPixel.g += pixel^.g;
-		totalPixel.b += pixel^.b;
-		totalPixel.a += pixel^.a;
-		if (pixel^.a>0) then
-			totalAlpha += 1;
-		end;
+	Result.a := 0;
+	Result.r := 0;
+	Result.g := 0;
+	Result.b := 0;
+	end
+else
+	begin
+	Result.r := trunc(Single(totalPixel.r/total));
+	Result.g := trunc(Single(totalPixel.g/total));
+	Result.b := trunc(Single(totalPixel.b/total));
+	Result.a := 255;
 	end;
-Result.r := trunc(Single(totalPixel.r/total));
-Result.g := trunc(Single(totalPixel.g/total));
-Result.b := trunc(Single(totalPixel.b/total));
-Result.a := 255;
 end; end;
 var
-	i,ii,range : LongInt;
-	FTempImage : TSGImage;
+	i,ii,z,range : LongInt;
+	BitMap : PByte;
 begin with Klass do begin 
+z := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 range := FUsrRange;
-FTempImage:=TSGImage.Create();
-FTempImage.Context := Context;
-FTempImage.Image.Clear();
-FTempImage.Width          := FImageSechenieBounds;
-FTempImage.Height         := FImageSechenieBounds;
-FTempImage.Image.Channels := 4;
-FTempImage.Image.BitDepth := 8;
-FTempImage.Image.BitMap   := GetMem(FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FTempImage.Image.CreateTypes();
-fillchar(FTempImage.Image.BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
+
+FUsrSechImage.FreeTexture();
+FreeMem(FUsrSechImage.Image.BitMap);
+GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
+FUsrSechImage.Image.BitMap := BitMap;
+
 i := 0;
 while i < FCube.Edge do
 	begin
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
-		FTempImage.Image.PixelsRGBA(i,ii)^ := InitPixel(i,ii,range);
+		FUsrSechImage.Image.PixelsRGBA(i,ii)^ := InitPixel(i,ii,z,range);
 		ii += 1;
 		end;
 	i +=1;
 	end;
-FreeMem(FCopiedSechenieImage.Image.BitMap);
-FCopiedSechenieImage.Image.BitMap := FTempImage.Image.BitMap;
-FTempImage.Image.BitMap := nil;
-FTempImage.Destroy();
+FUsrSechImage.ToTexture();
 end; end;
 
 procedure TSGGasDiffusion.UpDateUsrSech();
 var
 	BitMap : PByte = nil;
 begin
-Move(FSechenieImage.Image.BitMap^,
-	FCopiedSechenieImage.Image.BitMap^,
-	FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-
 FUsrImageThreadProcedure(Self);
-
-FUsrSechImage.FreeTexture();
-FreeMem(FUsrSechImage.Image.BitMap);
-GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FUsrSechImage.Image.BitMap := BitMap;
-Move(FCopiedSechenieImage.Image.BitMap^,
-	FUsrSechImage.Image.BitMap^,
-	FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FUsrSechImage.ToTexture();
-
-//FUsrImageThread := TSGThread.Create(TSGPointerProcedure(@FUsrImageThreadProcedure), Self);
 end;
 
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
@@ -1955,7 +1935,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=False;
 		SGScreen.LastChild.Font := FTahomaFont;
-		SGScreen.LastChild.Caption:='Усреднение сечения';
+		SGScreen.LastChild.Caption:='Прощет усреднения';
 		SGScreen.LastChild.UserPointer:=Button.UserPointer;
 		FAddSechSecondPanelButton.OnChange:=TSGComponentProcedure(@mmmFAddSechSecondPanelButtonProcedure);
 		end
@@ -2277,7 +2257,6 @@ FInfoLabel             	:= nil;
 FAddNewGazPanel        	:= nil;
 FConchLabels           	:= nil;
 FAddSechSecondPanelButton := nil;
-FCopiedSechenieImage := nil;
 FUsrImageThread := nil;
 FUsrRange := 5;
 
@@ -2563,13 +2542,13 @@ if FMesh <> nil then
 		FMesh:=FCube.CalculateMesh();
 		FNowCadr+=1;
 		end;
-	if FSecheniePanel<>nil then
+	if (FSecheniePanel<>nil) and (FDiffusionRuned) and (FSecheniePanel.Visible) then
 		begin
 		UpDateSechenie();
-		if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
+		{if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
 			begin
 			UpDateUsrSech();
-			end;
+			end;}
 		end;
 	if (FAddNewSoursePanel<>nil) and FAddNewSoursePanel.Visible then
 		begin
