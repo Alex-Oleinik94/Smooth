@@ -127,7 +127,8 @@ type
 			FAddSechenieButton,
 			FBackToMenuButton,
 			FStopEmulatingButton,
-			FAddSechSecondPanelButton : TSGButton;
+			FAddSechSecondPanelButton,
+			FSaveImageButton : TSGButton;
 		
 		FAddNewSoursePanel : TSGPanel;
 		FAddNewGazPanel : TSGPanel;
@@ -650,6 +651,11 @@ if FPauseEmulatingButton<>nil then
 	FPauseEmulatingButton.Destroy();
 	FPauseEmulatingButton:=nil;
 	end;
+if FSaveImageButton<> nil then
+	begin
+	FSaveImageButton.Destroy();
+	FSaveImageButton:=nil;
+	end;
 if FAddSechSecondPanelButton<>nil then
 	begin
 	FAddSechSecondPanelButton.Destroy();
@@ -812,6 +818,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddNewGazButton.Active := True;
 	FNewSecheniePanel.Visible := False;
 	FAddSechSecondPanelButton.Active := True;
+	FSaveImageButton.Active := True;
 end; end;
 procedure mmmFAddSechenieButtonProcedure(Button:TSGButton);
 var
@@ -891,6 +898,7 @@ end; end;
 procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddSechSecondPanelButton.Active := False;
+	FSaveImageButton.Active := False;
 	if FUsrSechPanel <> nil then
 		begin
 		FUsrSechPanel.Destroy();
@@ -1607,6 +1615,55 @@ FAddNewSoursePanel.Visible := True;
 UpDateSoursePanel();
 end; end;
 
+procedure mmmFSaveImageButtonProcedure(Button:TSGButton);
+var
+	Image : TSGImage = nil;
+	i, ii, d : LongWord;
+	p : TSGPixel4b;
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
+	d := 2
+else
+	d := 1;
+Image := TSGImage.Create();
+Image.Context := Context;
+Image.Image.Clear();
+Image.Width          := FCube.Edge*d;
+Image.Height         := FCube.Edge;
+Image.Image.Channels := 3;
+Image.Image.BitDepth := 8;
+Image.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*Image.Image.Channels*d);
+Image.Image.CreateTypes();
+fillchar(Image.Image.BitMap^,FCube.Edge*FCube.Edge*Image.Image.Channels*d,0);
+
+for i := 0 to FCube.Edge-1 do
+	for ii := 0 to FCube.Edge-1 do
+		begin
+		p := FSechenieImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^;
+		Image.Image.BitMap[(i*Image.Width+ii)*3+0] := trunc(p.a*p.r/255);
+		Image.Image.BitMap[(i*Image.Width+ii)*3+1] := trunc(p.a*p.g/255);
+		Image.Image.BitMap[(i*Image.Width+ii)*3+2] := trunc(p.a*p.b/255);
+		end;
+
+if d = 2 then
+	for i := 0 to FCube.Edge-1 do
+		for ii := 0 to FCube.Edge-1 do
+			begin
+			p := FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^;
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+0] := p.r;
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+1] := p.g;
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+2] := p.b;
+			end;
+
+SGMakeDirectory(PredStr+Catalog);
+Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.jpg','number');
+Image.Saveing(SGI_JPEG);
+
+FreeMem(Image.Image.BitMap);
+Image.Image.BitMap := nil;
+Image.Destroy();
+end;end;
+
 procedure mmmFAddSechSecondPanelButtonProcedure(Button:TSGButton);
 var
 	a : LongWord;
@@ -1713,7 +1770,7 @@ while i < FCube.Edge do
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
-		FUsrSechImage.Image.PixelsRGBA(i,ii)^ := InitPixel(i,ii,z,range);
+		FUsrSechImage.Image.PixelsRGBA(i,ii)^ := InitPixel(ii,i,z,range);
 		ii += 1;
 		end;
 	i +=1;
@@ -1945,6 +2002,26 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FAddSechSecondPanelButton.Active  := False;
 		end;
 	
+	if FSaveImageButton = nil then
+		begin
+		FSaveImageButton:=TSGButton.Create();
+		SGScreen.CreateChild(FSaveImageButton);
+		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*9,W,FTahomaFont.FontHeight+2);
+		SGScreen.LastChild.BoundsToNeedBounds();
+		SGScreen.LastChild.AutoTopShift:=True;
+		SGScreen.LastChild.Anchors:=[SGAnchRight];
+		SGScreen.LastChild.Visible:=True;
+		SGScreen.LastChild.Active :=False;
+		SGScreen.LastChild.Font := FTahomaFont;
+		SGScreen.LastChild.Caption:='Сoхранить картинку';
+		SGScreen.LastChild.UserPointer:=Button.UserPointer;
+		FSaveImageButton.OnChange:=TSGComponentProcedure(@mmmFSaveImageButtonProcedure);
+		end
+	else
+		begin
+		FSaveImageButton.Visible := True;
+		FSaveImageButton.Active  := False;
+		end;
 	end;
 end;
 
