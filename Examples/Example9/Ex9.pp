@@ -31,6 +31,7 @@ begin
 ClrScr();
 Write('Введите функцию: f(?)=');
 repeat
+i := 1;
 ReadLn(S);
 Ex := TSGExpression.Create();
 Ex.QuickCalculation := False;
@@ -38,6 +39,13 @@ Ex.Expression := SGStringToPChar(S);
 Ex.CanculateExpression();
 if (Ex.ErrorsQuantity=0) then
 	begin
+	if (Length(Ex.Variables) <> 1) then
+		begin
+		TextColor(15);
+		WriteLn('Ошибка: Введите функцию одной переменной!');
+		TextColor(7);
+		i := 0;
+		end;
 	Ex.BeginCalculate();
 	Ex.ChangeVariables(Ex.Variable,TSGExpressionChunkCreateReal(random));
 	Ex.Calculate();
@@ -53,9 +61,7 @@ if not (Ex.ErrorsQuantity = 0) then
 		end;
 	TextColor(7);
 	i := 0;
-	end
-else
-	i := 1;
+	end;
 if i = 0 then
 	Write('Братишка давайка еще раз: f(?)=')
 else
@@ -133,6 +139,7 @@ end;
 class function TSGApprFunction.ClassName():TSGString;
 begin
 Result := 'Геометрическая интерпритация';
+OEM866ToWindows1251(Result);
 end;
 
 procedure Go();

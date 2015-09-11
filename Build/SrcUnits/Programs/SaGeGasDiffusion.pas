@@ -1992,7 +1992,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		SGScreen.LastChild.Visible:=True;
 		SGScreen.LastChild.Active :=False;
 		SGScreen.LastChild.Font := FTahomaFont;
-		SGScreen.LastChild.Caption:='Прощет усреднения';
+		SGScreen.LastChild.Caption:='Вычисление концентрации';
 		SGScreen.LastChild.UserPointer:=Button.UserPointer;
 		FAddSechSecondPanelButton.OnChange:=TSGComponentProcedure(@mmmFAddSechSecondPanelButtonProcedure);
 		end
