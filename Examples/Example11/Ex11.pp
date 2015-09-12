@@ -49,8 +49,8 @@ if (Ex.ErrorsQuantity=0) then
 	begin
 	Ex.BeginCalculate();
 	iii := Length(Ex.Variables);
-	if (iii>n) then
-		iii := n;
+	if (iii>cout_variables) then
+		iii := cout_variables;
 	if (iii <> 0) then
 		for ii := 0 to LongInt(iii)-1 do
 			if (Length(Ex.Variables) >= ii+1) then
@@ -73,7 +73,7 @@ if i = 0 then
 	begin
 	Write('Братишка давайка еще раз: ');
 	Write(ss+'(?');
-	for iii:= 2 to n do
+	for iii:= 2 to cout_variables do
 		Write(',?');
 	Write(')=');
 	end
