@@ -63,6 +63,19 @@ if (LongInt(nsystem) - 1 >= 0) then
 		Functions[index_of_function].ChangeVariables(SGStringToPChar('y'+SGStr(i)),TSGExpressionChunkCreateReal(Coords[index_of_array][i]));
 Functions[index_of_function].ChangeVariables('x',TSGExpressionChunkCreateReal(Coords[index_of_array][nsystem]));
 Functions[index_of_function].Calculate();
+if not (Functions[index_of_function].ErrorsQuantity = 0) then
+	begin
+	for i:=1 to Functions[index_of_function].ErrorsQuantity do
+		begin
+		TextColor(12);
+		Write('Error:  ');
+		TextColor(15);
+		WriteLn(Functions[index_of_function].Errors(i));
+		end;
+	TextColor(7);
+	Write('Press any key to continue...');
+	ReadLn();
+	end;
 Result:=Functions[index_of_function].Resultat.FConst;
 end;
 
@@ -109,17 +122,17 @@ for i := 1 to npoints do
 	for ii := 0 to nsystem - 1 do
 		Coords[2][ii] := Coords[0][ii] + h * MyFunc(ii,0);
 	Coords[2][nsystem] := x(i);
-	repeat
-	if (KeyPressed and (ReadKey = #13)) then begin for ii := 0 to nsystem do Write(Coords[2][ii]:0:5,' ');  WriteLn(); end;
-	for ii := 0 to nsystem do
-		Coords[1][ii] := Coords[2][ii];
-	for ii := 0 to nsystem - 1 do
-		Coords[2][ii] := Coords[1][ii] + h * MyFunc(ii,1);
-	max_eps := 0;
-	for ii := 0 to nsystem - 1 do
-		if max_eps < abs(Coords[1][ii] - Coords[2][ii]) then
-			max_eps := abs(Coords[1][ii] - Coords[2][ii]);
-	until max_eps < Epsilon;
+		repeat
+		if (KeyPressed and (ReadKey = #13)) then begin for ii := 0 to nsystem do Write(Coords[2][ii]:0:5,' ');  WriteLn(); end;
+		for ii := 0 to nsystem do
+			Coords[1][ii] := Coords[2][ii];
+		for ii := 0 to nsystem - 1 do
+			Coords[2][ii] := Coords[0][ii] + h * MyFunc(ii,2);
+		max_eps := 0;
+		for ii := 0 to nsystem - 1 do
+			if max_eps < abs(Coords[1][ii] - Coords[2][ii]) then
+				max_eps := abs(Coords[1][ii] - Coords[2][ii]);
+		until max_eps < Epsilon;
 	for ii := 0 to nsystem do
 		Coords[0][ii] := Coords[2][ii];
 	if (FileNameToOut <> '') then
