@@ -16,11 +16,11 @@ uses
 	,SaGeExamples
 	,SaGeCommon
 	,Crt
+	,SaGeAdamsSystemExample
 	;
 var
-	Functions : array of TSGExpression = nil;
-	Coords : array[0..2] of array of Extended;
-	Y0 : array of Extended;
+	Functions : TSGFunctionArray = nil;
+	Y0 : TSGExtenededArray;
 	a, b, eps : Extended;
 	n, ns: LongWord;
 
@@ -103,9 +103,6 @@ for i := 0 to ns - 1 do
 
 SetLength(Functions,ns);
 SetLength(Y0,ns);
-SetLength(Coords[0],ns+1);
-SetLength(Coords[1],ns+1);
-SetLength(Coords[2],ns+1);
 
 Write('Введите начало отрезка {float}: a=');
 ReadLn(a);
@@ -128,74 +125,15 @@ Write('Введите эпсилон {float}:');
 ReadLn(eps);
 end;
 
-function MyFunc(const index_of_function : LongWord; const index_of_array : LongWord):Extended;inline;
+procedure Go();
 var
+	AdamsResult : TSGExtenededArrayArray;
 	i : LongWord;
 begin
-Functions[index_of_function].BeginCalculate();
-if (LongInt(ns) - 1 >= 0) then 
-	for i := 0 to ns - 1 do
-		Functions[index_of_function].ChangeVariables(SGStringToPChar('y'+SGStr(i)),TSGExpressionChunkCreateReal(Coords[index_of_array][i]));
-Functions[index_of_function].ChangeVariables('x',TSGExpressionChunkCreateReal(Coords[index_of_array][n-1]));
-Functions[index_of_function].Calculate();
-Result:=Functions[index_of_function].Resultat.FConst;
-end;
-
-procedure Go();
-
-function x(const i: LongWord):Extended;
-begin
-Result := a + abs(b-a)*(i/n)
-end;
-
-var
-	max_eps : Extended;
-	i, ii : LongWord;
-	h : Extended;
-var
-	f : TextFile;
-
-procedure OutToFile();
-var
-	q : LongWord;
-begin
-for q := 0 to ns do
-	Write(f,Coords[0][q]:0:5,' ');
-WriteLn(f);
-end;
-
-begin
-Assign(f,'Ex10_Output.txt');
-Rewrite(f);
-h := abs(b-a)/n;
-for i := 0 to ns - 1 do
-	Coords[0][i] := y0[i];
-Coords[0][ns] := a;
-OutToFile();
-for i := 1 to n do
-	begin
-	Coords[0][ns] := x(i);
-	for ii := 0 to ns - 1 do
-		Coords[2][ii] := Coords[0][ii] + h * MyFunc(ii,0);
-	Coords[2][ns] := x(i);
-	repeat
-	for ii := 0 to ns do
-		Write(Coords[2][ii]:0:5,' ');
-	ReadLn();
-	for ii := 0 to ns do
-		Coords[1][ii] := Coords[2][ii];
-	for ii := 0 to ns - 1 do
-		Coords[2][ii] := Coords[1][ii] + h * MyFunc(ii,1);
-	max_eps := 0;
-	for ii := 0 to ns - 1 do
-		if max_eps < abs(Coords[1][ii] - Coords[2][ii]) then
-			max_eps := abs(Coords[1][ii] - Coords[2][ii]);
-	until max_eps < eps;
-	for ii := 0 to ns do
-		Coords[0][ii] := Coords[2][ii];
-	OutToFile();
-	end;
-Close(f);
+AdamsResult := SaGeAdamsSystemExample.AdamsSystem(a, b, eps, ns, n, Functions, Y0, 'Ex10_output.txt');
+for i := 0 to High(AdamsResult) do
+	SetLength(AdamsResult[i],0);
+SetLength(AdamsResult,0);
 end;
 
 begin

@@ -16,6 +16,7 @@ uses
 	,SaGeExamples
 	,SaGeCommon
 	,Crt
+	,SaGeAdamsSystemExample
 	;
 var
 	FuncP : TSGExpression = nil;
