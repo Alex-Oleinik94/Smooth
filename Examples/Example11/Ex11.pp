@@ -93,7 +93,7 @@ procedure ReadAll();
 begin
 ClrScr();
 WriteLn('Программа решает уравнение:');
-WriteLn('     "y''''+p(?)*y''+q(?)*y=f(?)" в инретвале "? in [a; b]".');
+WriteLn('     "y''''+p(x)*y''+q(x)*y=f(x)" в инретвале "x in [a; b]".');
 WriteLn('C начальными условиями:');
 Writeln('     "alpha_1*y''(a)+alpha_2*y(a)=y_a" и "betta_1*y''(b)+betta_2*y(b)=y_b".');
 FuncF := EnterFunction('f',1);
@@ -121,30 +121,6 @@ Write('Введите y_b {float}:');
 ReadLn(y_b);
 end;
 
-function FF(const x : Extended):Extended;inline;
-begin
-FuncF.BeginCalculate();
-FuncF.ChangeVariables(FuncF.Variables[0],TSGExpressionChunkCreateReal(x));
-FuncF.Calculate();
-Result:=FuncF.Resultat.FConst;
-end;
-
-function FQ(const x : Extended):Extended;inline;
-begin
-FuncQ.BeginCalculate();
-FuncQ.ChangeVariables(FuncQ.Variables[0],TSGExpressionChunkCreateReal(x));
-FuncQ.Calculate();
-Result:=FuncQ.Resultat.FConst;
-end;
-
-function FP(const x : Extended):Extended;inline;
-begin
-FuncP.BeginCalculate();
-FuncP.ChangeVariables(FuncP.Variables[0],TSGExpressionChunkCreateReal(x));
-FuncP.Calculate();
-Result:=FuncP.Resultat.FConst;
-end;
-
 function x(const i: LongWord):Extended;
 begin
 Result := a + abs(b-a)*(i/n)
@@ -152,15 +128,60 @@ end;
 
 procedure Go();
 var
-	ps : array of record 
-		a : Extended;
-		r : Extended;
-		end = nil;
-	s : array [0..2] of
-		array of Extended;
+	Expressions : TSGFunctionArray = nil;
+	FR, SR, TR : TSGExtenededArrayArray;
+	BeginningParams:TSGExtenededArray;
+	Point1,Point2, TotalPoint, Coord1, Coord2: Extended;
+procedure UpdateBeginningParams(const Point : Extended);
 begin
-SetLength(ps,0);
+if(abs(alpha_1) > eps) then
+	begin
+	BeginningParams[0] := Point;
+	BeginningParams[1] := (y_a-alpha_2*Point)/alpha_1;
+	end
+else if(abs(alpha_2) > eps)then
+	begin
+	BeginningParams[0] := y_a/alpha_2;
+	BeginningParams[1] := Point;
+	end
+else 
+	WriteLn('|alpha1|+|alpha2| ~ 0');
+end;
 
+begin
+SetLength(Expressions,2);
+SetLength(BeginningParams,2);
+Expressions[0] := TSGExpression.Create();
+Expressions[0].Expression := 'y1';
+Expressions[0].CanculateExpression();
+Expressions[1] := TSGExpression.Create();
+Expressions[1].Expression := 
+	SGStringToPChar('('+
+		SGPCharToString(FuncF.Expression)+')-y1*('+
+		SGPCharToString(FuncP.Expression)+')-y0*('+
+		SGPCharToString(FuncQ.Expression)+')');
+Expressions[1].CanculateExpression();
+
+Point1 := Random()*10 - 5;
+
+UpdateBeginningParams(Point1);
+
+FR := AdamsSystem(a,b,eps,2,n,Expressions,BeginningParams);//,'Ex11_Output1.txt');
+
+Point2 := random()*20 - 10;
+
+UpdateBeginningParams(Point2);
+
+SR := AdamsSystem(a,b,eps,2,n,Expressions,BeginningParams);//,'Ex11_Output2.txt');
+
+Coord1 := betta_1 * FR[High(FR)][1] + betta_2 * FR[High(FR)][0] - y_b;
+Coord2 := betta_1 * SR[High(FR)][1] + betta_2 * SR[High(FR)][0] - y_b;
+
+TotalPoint := Point2 - Coord1 * (Point2 - Point1) / (Coord2 - Coord1);
+
+UpdateBeginningParams(TotalPoint);
+
+TR := AdamsSystem(a,b,eps,2,n,Expressions,BeginningParams,'Ex11_Output.txt');
 end;
 
 begin
