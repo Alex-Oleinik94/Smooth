@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -52,7 +52,6 @@
       <Unit0>
         <Filename Value="Main.pp"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Main"/>
       </Unit0>
       <Unit1>
         <Filename Value="SrcUnits\Includes\SaGeContextLazarus.inc"/>
@@ -65,7 +64,6 @@
       <Unit3>
         <Filename Value="SrcUnits\SaGeBase.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SaGeBase"/>
       </Unit3>
       <Unit4>
         <Filename Value="SrcUnits\Includes\SaGe.inc"/>
@@ -74,17 +72,14 @@
       <Unit5>
         <Filename Value="SrcUnits\SaGeContextWinAPI.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SaGeContextWinAPI"/>
       </Unit5>
       <Unit6>
         <Filename Value="SrcUnits\SaGeBased.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SaGeBased"/>
       </Unit6>
       <Unit7>
         <Filename Value="SrcUnits\SaGeCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SaGeCommon"/>
       </Unit7>
     </Units>
   </ProjectOptions>
@@ -96,7 +91,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="SrcUnits;$(ProjOutDir);SrcUnits\Includes;SrcUnits\Inet\sys"/>
-      <OtherUnitFiles Value="SrcUnits;SrcUnits\Inet;SrcUnits\Inet\sys;SrcUnits\Includes;SrcUnits\DirectX;SrcUnits\OpenGL;SrcUnits\Others"/>
+      <OtherUnitFiles Value="SrcUnits;SrcUnits\lNet;SrcUnits\lNet\sys;SrcUnits\Includes;SrcUnits\DirectX;SrcUnits\OpenGL;SrcUnits\Others;SrcUnits\Programs;Examples"/>
       <UnitOutputDirectory Value="CompiledUnits"/>
       <SrcPath Value="$(ProjOutDir)"/>
     </SearchPaths>
@@ -106,8 +101,8 @@
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
       <Optimizations>
-        <UncertainOptimizations Value="True"/>
         <OptimizationLevel Value="3"/>
+        <UncertainOptimizations Value="True"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
@@ -126,10 +121,6 @@
       <ConfigFile>
         <StopAfterErrCount Value="20"/>
       </ConfigFile>
-      <CompilerMessages>
-        <MsgFileName Value=""/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
   <Debugging>
