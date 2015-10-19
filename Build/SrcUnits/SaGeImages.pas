@@ -613,6 +613,9 @@ if (not Result) and IsBMP(FStream.Memory,FStream.Size) then
 	end;
 if (not Result) and IsSGIA(FStream.Memory,FStream.Size) then
 	begin
+	{$IFDEF SGDebuging}
+		SGLog.Sourse('TSGImage  : Begin loading "'+FWay+'" as SGIA.');
+		{$ENDIF}
 	LoadSGIAToBitMap(FStream,FImage);
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
@@ -629,6 +632,9 @@ if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
 	end;
 if (not Result) and IsJPEG(FStream.Memory,FStream.Size) then
 	begin
+	{$IFDEF SGDebuging}
+		SGLog.Sourse('TSGImage  : Begin loading "'+FWay+'" as JPEG.');
+		{$ENDIF}
 	LoadJPEGToBitMap(FStream,FImage);
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}

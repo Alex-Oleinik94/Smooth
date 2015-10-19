@@ -12,7 +12,7 @@ uses
 	,dos
 	{$IFDEF MSWINDOWS}
 		,Windows
-		,MMSystem
+		//,MMSystem
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,unix

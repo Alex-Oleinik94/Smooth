@@ -299,7 +299,7 @@ type
     saved : savable_state;              { Other state at start of MCU }
 
     { These fields are NOT loaded into local working state. }
-    restarts_to_go : uInt;              { MCUs left in this restart interval }
+    restarts_to_go : LongInt;              { MCUs left in this restart interval }
 
     { Pointers to derived tables (these workspaces have image lifespan) }
     dc_derived_tbls : array[0..NUM_HUFF_TBLS] of d_derived_tbl_ptr;
