@@ -50,16 +50,15 @@ type
 			public
 		function Cube (const x,y,z:Word):TSGGGDC;inline;
 			public
-		FCube       : TSGGGDC;
+		FCube       : TSGGGDC;						// ^byte - кубик
 		FCubeCoords : packed array of
-			TSGVertex3f;
-		FEdge       : TSGLongWord;
-		FBoundsOpen : TSGBoolean;
-		FGazes      : packed array of TSGGazType;
-		FSourses    : packed array of TSGSourseType;
-		FArRandomSm : array [0..9] of TSGVertex3f;
-		FDinamicQuantityMoleculs : LongWord;
-		FFlag       : Boolean;
+			TSGVertex3f;							// 3хмерные координаты каждой точки из FCube
+		FEdge       : TSGLongWord;					// размерность FCube (FEdge * FEdge * FEdge)
+		//FBoundsOpen : TSGBoolean;
+		FGazes      : packed array of TSGGazType;	// типы газа
+		FSourses    : packed array of TSGSourseType;// источники газа
+		FDinamicQuantityMoleculs : LongWord;		// количество точек газа на данный момент
+		FFlag       : Boolean;						// флажок этапа итерации. этот алгоритм работает в 2 этапа
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -80,17 +79,18 @@ type
 		FEnableSaving   : TSGBoolean;
 		
 		//Панели,кнопки и т п
-		FTahomaFont        : TSGFont;
-		FLoadScenePanel,
-			FNewScenePanel :TSGPanel;
+		FTahomaFont        : TSGFont; 						// шрифт
+		FLoadScenePanel,									// панель загрузки повтора
+		FBoundsOptionsPanel,								// панель опций границ
+			FNewScenePanel :TSGPanel;						// панель нового проэкта
 		
 		//New Panel
 		FEdgeEdit               : TSGEdit;
 		FNumberLabel            : TSGLabel;
 		FStartSceneButton,
+		FBoundsTypeButton,
 			FEnableLoadButton   : TSGButton;
-		FEnableOutputComboBox,
-			FBoundsTypeComboBox : TSGComboBox;
+		FEnableOutputComboBox   : TSGComboBox;
 		
 		//Load Panel
 		FLoadComboBox      : TSGComboBox;
@@ -121,14 +121,14 @@ type
 			TSGLabel;
 		FAddNewSourseButton, 					// новый источник газа
 			FAddNewGazButton,					// навый тип газа
-			FStartEmulatingButton,
-			FPauseEmulatingButton,
-			FDeleteSechenieButton,
-			FAddSechenieButton,
-			FBackToMenuButton,
-			FStopEmulatingButton,
-			FAddSechSecondPanelButton,
-			FSaveImageButton : TSGButton;
+			FStartEmulatingButton,				// пуск эмуляции
+			FPauseEmulatingButton,				// пауза эмуляции
+			FDeleteSechenieButton,				// отмена показа сечения
+			FAddSechenieButton,					// начало показа сечения
+			FBackToMenuButton,					// кнопка выхода (в меню)
+			FStopEmulatingButton,				// остановка эмуляции
+			FAddSechSecondPanelButton,			// включение отображение усредненного сечения
+			FSaveImageButton : TSGButton;		// сохранить картинку сечения
 		
 		FAddNewSoursePanel : TSGPanel;
 		FAddNewGazPanel : TSGPanel;
@@ -177,7 +177,7 @@ FEdge   := 0;
 FCube   := nil;
 FSourses:= nil;
 FGazes  := nil;
-FBoundsOpen:=False;
+//FBoundsOpen:=False;
 FCubeCoords := nil;
 end;
 
@@ -213,7 +213,10 @@ procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord);
 var
 	i : LongWord;
 	Smeshenie : TSGSingle;
+	FArRandomSm : array [0..9] of TSGVertex3f;
 begin
+for i:=0 to 9 do
+	FArRandomSm[i].Import(random*(0.99/Edge),random*(0.99/Edge),random*(0.99/Edge));
 FFlag := True;
 if FCube<>nil then
 	begin
@@ -239,9 +242,6 @@ FSourses[0].FRadius:=1;
 FSourses[1].FGazTypeIndex:=1;
 FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8));
 FSourses[1].FRadius:=1;
-
-for i:=0 to 9 do
-	FArRandomSm[i].Import(random*(0.99/Edge),random*(0.99/Edge),random*(0.99/Edge));
 
 for i := 0 to Edge*Edge*Edge-1 do
 	begin
@@ -470,8 +470,8 @@ end;
 begin
 UpDateGaz();
 UpDateSourses();
-if FBoundsOpen then
-	UpDateIfOpenBounds();
+//if FBoundsOpen then
+	//UpDateIfOpenBounds();
 end;
 function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
 var
@@ -576,12 +576,6 @@ if FDinamicQuantityMoleculs <> 0 then
 				FGazes[FCube[i]-1].FColor.r,
 				FGazes[FCube[i]-1].FColor.g,
 				FGazes[FCube[i]-1].FColor.b);
-			{Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^.Import(
-				Smeshenie+2*(i mod FEdge)/FEdge-1,
-				Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
-				Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
-			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^+=
-				FArRandomSm[Random(10)];}
 			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
 				FCubeCoords[i];
 			Inc(FDinamicQuantityMoleculs);
@@ -756,6 +750,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddSechenieButton.Visible := False;
 	FBackToMenuButton.Visible := False;
 	FStopEmulatingButton.Visible := False;
+	FSaveImageButton.Visible := False;
 	FInfoLabel.Caption:='';
 	if FCube<>nil then
 		begin
@@ -1800,7 +1795,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FCube:=nil;
 		end;
 	FCube:=TSGGasDiffusionCube.Create(Context);
-	FCube.FBoundsOpen := Boolean(FBoundsTypeComboBox.SelectItem);
+	//FCube.FBoundsOpen := Boolean(FBoundsTypeButton.SelectItem);
 	FCube.InitCube(SGVal(FEdgeEdit.Caption));
 	if FMesh<>nil then
 		begin
@@ -2166,7 +2161,6 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FMoviePauseButton.Active  := True;
 		end;
 end;end;
-
 procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.UserPointer) do
@@ -2176,7 +2170,90 @@ with TSGGasDiffusion(Button.UserPointer) do
 	UpDateSavesComboBox();
 	end;
 end;
+procedure mmmFBoundsTypeButtonProcedure(Button:TSGButton);
+var
+	FConstWidth : LongWord = 500;
+	FConstLoadMeshButtonWidth : LongWord = 120;
+	FConstLabelsWidth : LongWOrd = 90;
 
+procedure CreteCOmboBox(const vIndex : LongWord; const vPanel : TSGPanel);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FBoundsOptionsPanel.CreateChild(TSGComboBox.Create());
+FBoundsOptionsPanel.LastChild.SetBounds(10 + FConstLabelsWidth + 10,5+(19+5)*vIndex,FConstWidth-50-FConstLoadMeshButtonWidth - FConstLabelsWidth,19);
+FBoundsOptionsPanel.LastChild.Visible:=True;
+FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
+FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa пропускают газ');
+(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa не пропускают газ');
+(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Газ липнет к стенкe');
+//FBoundsOptionsPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
+(FBoundsOptionsPanel.LastChild as TSGComboBox).SelectItem:=0;
+FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
+end;end;
+
+
+procedure CreteLabel(const vIndex : LongWord; const vPanel : TSGPanel);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FBoundsOptionsPanel.CreateChild(TSGLabel.Create());
+FBoundsOptionsPanel.LastChild.SetBounds(10 ,5+(19+5)*vIndex,FConstLabelsWidth,19);
+FBoundsOptionsPanel.LastChild.Visible:=True;
+FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
+FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
+case vIndex of
+0 : FBoundsOptionsPanel.LastChild.Caption := 'Верхняя';
+1 : FBoundsOptionsPanel.LastChild.Caption := 'Нижня';
+2 : FBoundsOptionsPanel.LastChild.Caption := 'Левая';
+3 : FBoundsOptionsPanel.LastChild.Caption := 'Правая';
+4 : FBoundsOptionsPanel.LastChild.Caption := 'Задняя';
+5 : FBoundsOptionsPanel.LastChild.Caption := 'Передняя';
+end;
+end;end;
+
+procedure CreteLoadMeshButton(const vIndex : LongWord; const vPanel : TSGPanel);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FBoundsOptionsPanel.CreateChild(TSGButton.Create());
+FBoundsOptionsPanel.LastChild.SetBounds(FConstWidth - 20 - FConstLoadMeshButtonWidth,5+(19+5)*vIndex,FConstLoadMeshButtonWidth,19);
+FBoundsOptionsPanel.LastChild.Visible:=True;
+FBoundsOptionsPanel.LastChild.Active := False;
+FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
+FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
+FBoundsOptionsPanel.LastChild.Caption := 'Настроить рельеф';
+end;end;
+
+var
+	i : LongWOrd;
+
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FNewScenePanel.SetBounds(FNewScenePanel.Left - ((FNewScenePanel.Width + FConstWidth)div 2) - 5,FNewScenePanel.Top,FNewScenePanel.Width,FNewScenePanel.Height);
+FNewScenePanel.Active := False;
+if FBoundsOptionsPanel = nil then
+	begin
+	FBoundsOptionsPanel:=TSGPanel.Create();
+	SGScreen.CreateChild(FBoundsOptionsPanel);
+	SGScreen.LastChild.SetMiddleBounds(FConstWidth,200);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left + FConstWidth + 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left - FConstWidth - 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	SGScreen.LastChild.UserPointer:=Button.UserPointer;
+	SGScreen.LastChild.Visible:=True;
+	SGScreen.LastChild.VisibleTimer := 0.3;
+	
+	for i := 0 to 5 do
+		CreteCOmboBox(i,FBoundsOptionsPanel);
+	for i := 0 to 5 do
+		CreteLoadMeshButton(i,FBoundsOptionsPanel);
+	for i := 0 to 5 do
+		CreteLabel(i,FBoundsOptionsPanel);
+	end
+else
+	begin
+	FBoundsOptionsPanel.Visible := True;
+	end;
+
+end; end;
 procedure mmmFBackButtonProcedure(Button:TSGButton);
 begin
 with TSGGasDiffusion(Button.UserPointer) do
@@ -2185,7 +2262,6 @@ with TSGGasDiffusion(Button.UserPointer) do
 	FNewScenePanel .Visible := True;
 	end;
 end;
-
 procedure mmmFOpenSaveDir(Button:TSGButton);
 begin
 {$IFDEF MSWINDOWS}
@@ -2305,37 +2381,38 @@ end;
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
-FSechenieImage          := nil;
-FPointerSecheniePlace   := 0;
-FPlaneComboBox          := nil;
-FNewSecheniePanel       := nil;
-FSecheniePanel          := nil;
-FMesh                  	:= nil;
-FCube                  	:= nil;
-FAddNewSourseButton    	:= nil;
-FStartEmulatingButton  	:= nil;
-FAddNewGazButton       	:= nil;
-FStopEmulatingButton   	:= nil;
-FPauseEmulatingButton  	:= nil;
-FDeleteSechenieButton  	:= nil;
-FAddSechenieButton     	:= nil;
-FBackToMenuButton      	:= nil;
-FFileName              	:= '';
-FFileStream            	:= nil;
-FDiffusionRuned        	:= False;
-FEnableSaving          	:= True;
-FMoviePlayed           	:= False;
-FArCadrs               	:= nil;
-FNowCadr               	:= 0;
-FMovieBackToMenuButton 	:= nil;
-FMoviePlayButton       	:= nil;
-FMoviePauseButton      	:= nil;
-FInfoLabel             	:= nil;
-FAddNewGazPanel        	:= nil;
-FConchLabels           	:= nil;
+FSechenieImage            := nil;
+FPointerSecheniePlace     := 0;
+FPlaneComboBox            := nil;
+FNewSecheniePanel         := nil;
+FSecheniePanel            := nil;
+FMesh                     := nil;
+FCube                     := nil;
+FAddNewSourseButton       := nil;
+FStartEmulatingButton     := nil;
+FAddNewGazButton          := nil;
+FStopEmulatingButton      := nil;
+FPauseEmulatingButton     := nil;
+FDeleteSechenieButton     := nil;
+FAddSechenieButton        := nil;
+FBackToMenuButton         := nil;
+FFileName                 := '';
+FFileStream               := nil;
+FDiffusionRuned           := False;
+FEnableSaving             := True;
+FMoviePlayed              := False;
+FArCadrs                  := nil;
+FNowCadr                  := 0;
+FMovieBackToMenuButton    := nil;
+FMoviePlayButton          := nil;
+FMoviePauseButton         := nil;
+FInfoLabel                := nil;
+FAddNewGazPanel           := nil;
+FConchLabels              := nil;
 FAddSechSecondPanelButton := nil;
-FUsrImageThread := nil;
-FUsrRange := 5;
+FBoundsOptionsPanel       := nil;
+FUsrImageThread           := nil;
+FUsrRange                 := 5;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -2421,17 +2498,15 @@ FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
 FEnableOutputComboBox.SelectItem:={$IFDEF MOBILE}1{$ELSE}0{$ENDIF};
 FEnableOutputComboBox.UserPointer:=Self;
 
-FBoundsTypeComboBox := TSGComboBox.Create();
-FNewScenePanel.CreateChild(FBoundsTypeComboBox);
-FBoundsTypeComboBox.SetBounds(10,44+26+25,380-10,19);
+FBoundsTypeButton := TSGButton.Create();
+FNewScenePanel.CreateChild(FBoundsTypeButton);
+FBoundsTypeButton.SetBounds(10,44+26+25,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FBoundsTypeComboBox.CreateItem('Замкнутое пространство');
-FBoundsTypeComboBox.CreateItem(' Открытое пространство');
-//FBoundsTypeComboBox.FProcedure:=TSGComboBoxProcedure(@FFBoundsTypeComboBoxProcedure);
-FBoundsTypeComboBox.SelectItem:=0;
-FBoundsTypeComboBox.UserPointer:=Self;
+FNewScenePanel.LastChild.Caption := 'Настроить поведение газа на границах';
+FBoundsTypeButton.OnChange:=TSGComponentProcedure(@mmmFBoundsTypeButtonProcedure);
+FBoundsTypeButton.UserPointer:=Self;
 
 FLoadScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FLoadScenePanel);

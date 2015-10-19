@@ -139,6 +139,10 @@ type
 		procedure SetVisible(const b:Boolean);virtual;
 		procedure SetCaption(const NewCaption:SGCaption);virtual;
 			public
+		function ReqursiveActive():Boolean;
+			public
+		property VisibleTimer : real read FVisibleTimer write FVisibleTimer;
+		property ActiveTimer : real read FActiveTimer write FActiveTimer;
 		property Caption : SGCaption read FCaption write FCaption;
 		property FText : SGCaption read FCaption write FCaption;
 		property Text : SGCaption read FCaption write FCaption;
@@ -2012,6 +2016,14 @@ else
 	end;
 end;
 
+function TSGComponent.ReqursiveActive():Boolean;
+begin
+if (not FActive) or (FParent = nil) then
+	Result := FActive
+else
+	Result := FParent.ReqursiveActive();
+end;
+
 procedure TSGComponent.UpgradeTimers;
 begin
 UpgradeTimer(FVisible,FVisibleTimer);
@@ -2669,6 +2681,9 @@ var
 	
 	FirsColor4:TSGColor4f = (r:0;g:0.8;b:0;a:0.8);
 	SecondColor4:TSGColor4f = (r:0;g:0.8;b:0;a:1);
+	
+	ReqAct : Boolean = false;
+	TempTimer : Real = 0;
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
@@ -2683,20 +2698,25 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			ThreeColor2.AddAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
 			True);
 		end;
-	if (1-FCursorOnComponentTimer>SGZero) and 
-		(1-FNowChangetTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		2,10,
-		((FirsColor1*Byte(FTextType=SGEditTypeText)+
-			Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-				.AddAlpha(0.3*FVisibleTimer*(1-FCursorOnComponentTimer)*(1-FNowChangetTimer)*FActiveTimer),
-		((FirsColor2*Byte(FTextType=SGEditTypeText)+
-			Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
-				.AddAlpha(0.3*FVisibleTimer*(1-FCursorOnComponentTimer)*(1-FNowChangetTimer)*FActiveTimer)*1.3,
-		True);
-	if (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
+	ReqAct := ReqursiveActive();
+	if (1-FNowChangetTimer>SGZero) then
+			begin
+			TempTimer := (1-FCursorOnComponentTimer)*(1-FNowChangetTimer);
+			if not ReqAct then
+				TempTimer := 1;
+			SGRoundQuad(Render,
+				SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+				SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+				2,10,
+				((FirsColor1*Byte(FTextType=SGEditTypeText)+
+					Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
+						.AddAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
+				((FirsColor2*Byte(FTextType=SGEditTypeText)+
+					Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
+						.AddAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
+				True);
+			end;
+	if ReqAct and (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
 	SGRoundQuad(Render,
 		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
 		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
