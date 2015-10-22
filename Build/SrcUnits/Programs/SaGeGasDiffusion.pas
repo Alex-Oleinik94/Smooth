@@ -2170,6 +2170,15 @@ with TSGGasDiffusion(Button.UserPointer) do
 	UpDateSavesComboBox();
 	end;
 end;
+procedure mmmFBoundsBackButtonProcedure(Button:TSGButton);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FNewScenePanel.SetBounds(FNewScenePanel.Left + ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5,FNewScenePanel.Top,FNewScenePanel.Width,FNewScenePanel.Height);
+FNewScenePanel.Active := True;
+FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left + ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+FBoundsOptionsPanel.Active := False;
+FBoundsOptionsPanel.Visible := False;
+FBoundsOptionsPanel.VisibleTimer := 0.7;
+end; end;
 procedure mmmFBoundsTypeButtonProcedure(Button:TSGButton);
 var
 	FConstWidth : LongWord = 500;
@@ -2247,10 +2256,23 @@ if FBoundsOptionsPanel = nil then
 		CreteLoadMeshButton(i,FBoundsOptionsPanel);
 	for i := 0 to 5 do
 		CreteLabel(i,FBoundsOptionsPanel);
+	
+	FBoundsOptionsPanel.CreateChild(TSGButton.Create());
+	FBoundsOptionsPanel.LastChild.SetBounds((FConstWidth - FConstLoadMeshButtonWidth )div 2,149,FConstLoadMeshButtonWidth,19);
+	FBoundsOptionsPanel.LastChild.Visible:=True;
+	FBoundsOptionsPanel.LastChild.Active := True;
+	FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
+	FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+	FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
+	FBoundsOptionsPanel.LastChild.Caption := 'Назад';
+	(FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFBoundsBackButtonProcedure);
 	end
 else
 	begin
 	FBoundsOptionsPanel.Visible := True;
+	FBoundsOptionsPanel.Active := True;
+	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left - ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) - 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	FBoundsOptionsPanel.VisibleTimer := 0.3;
 	end;
 
 end; end;

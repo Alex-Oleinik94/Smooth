@@ -1100,8 +1100,8 @@ if MandaInitialized then
 						) and
 						(
 						(
-						FDateTime.GetPastMiliSeconds-
-						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FBeginData.GetPastMiliSeconds
+						(FDateTime-
+						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FBeginData).GetPastMiliSeconds
 						)/FArProgressBar[ii].FNeedProgress*(1 - FArProgressBar[ii].FNeedProgress)
 						>150
 						) then

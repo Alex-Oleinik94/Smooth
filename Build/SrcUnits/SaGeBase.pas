@@ -2706,10 +2706,10 @@ function TSGDateTime.GetPastSeconds:int64;
 begin
 Result:=Seconds;
 Result+=Minutes*60;
-Result+=Hours*60*60;
-Result+=Day*60*60*24;
-Result+=Month*60*60*24*30;
-Result+=Years*60*60*24*365;
+Result+=Hours  *60*60;
+Result+=Day    *60*60*24;
+Result+=Month  *60*60*24*30;
+Result+=Years  *60*60*24*365;
 end;
 
 function TSGDateTime.GetPastSecondsFrom(const a:TSGDateTime):int64;
