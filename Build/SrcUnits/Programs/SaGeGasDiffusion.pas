@@ -82,6 +82,7 @@ type
 		FTahomaFont        : TSGFont; 						// шрифт
 		FLoadScenePanel,									// панель загрузки повтора
 		FBoundsOptionsPanel,								// панель опций границ
+			FRelefOptionPanel,								// опции рельефа границы
 			FNewScenePanel :TSGPanel;						// панель нового проэкта
 		
 		//New Panel
@@ -104,7 +105,7 @@ type
 			(* Сечение *)
 		
 		FNewSecheniePanel, 						// Содержит кнопку и FPlaneComboBox
-			FSecheniePanel : TSGPanel; 			// Cодержит картинку сечения
+			FSecheniePanel : TSGPanel;			// Cодержит картинку сечения
 		FPlaneComboBox : TSGComboBox;			// вычесление осей координат для FPointerSecheniePlace
 		FPointerSecheniePlace : TSGSingle;		// (-1..1) значение места сечения
 		FSechenieImage : TSGImage; 				// Картинка сечения
@@ -2170,11 +2171,96 @@ with TSGGasDiffusion(Button.UserPointer) do
 	UpDateSavesComboBox();
 	end;
 end;
+// =====================================================================
+// =====================================================================
+// =====================================================================
+procedure mmmFRedactrReliefBackButton(Button:TSGButton);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FRelefOptionPanel.AddToLeft  (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+FRelefOptionPanel.Visible := False;
+FBoundsOptionsPanel.Active := True;
+FNewScenePanel.AddToLeft     (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+FBoundsOptionsPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+end;end;
+procedure mmmFRedactrRelief(Button:TSGButton);
+var
+	FConstWidth : LongWOrd = 300;
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+if (FRelefOptionPanel = nil) then
+	begin
+	FRelefOptionPanel := TSGPanel.Create();
+	SGScreen.CreateChild(FRelefOptionPanel);
+	SGScreen.LastChild.SetMiddleBounds(FConstWidth,155);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	FRelefOptionPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
+	SGScreen.LastChild.UserPointer:=Button.UserPointer;
+	SGScreen.LastChild.Visible:=True;
+	SGScreen.LastChild.VisibleTimer := 0.3;
+	
+	FRelefOptionPanel.CreateChild(TSGLabel.Create());
+	FRelefOptionPanel.LastChild.Caption := 'Статус рельефа:Неопределен';
+	FRelefOptionPanel.LastChild.Visible := True;
+	FRelefOptionPanel.LastChild.SetBounds(10,10,FRelefOptionPanel.Width - 30,19);
+	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	
+	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.LastChild.Caption := 'Загрузить рельеф из файла';
+	FRelefOptionPanel.LastChild.Visible := True;
+	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*1,FRelefOptionPanel.Width - 30,19);
+	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	
+	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.LastChild.Caption := 'Сохранить рельеф в файл';
+	FRelefOptionPanel.LastChild.Visible := True;
+	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*2,FRelefOptionPanel.Width - 30,19);
+	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	
+	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.LastChild.Caption := 'Создать новый рельеф';
+	FRelefOptionPanel.LastChild.Visible := True;
+	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*3,FRelefOptionPanel.Width - 30,19);
+	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	
+	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.LastChild.Caption := 'Назад';
+	FRelefOptionPanel.LastChild.Visible := True;
+	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*4,FRelefOptionPanel.Width - 30,19);
+	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefBackButton);
+	end
+else
+	begin
+	FRelefOptionPanel.Visible := True;
+	FRelefOptionPanel.Active := True;
+	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
+	FRelefOptionPanel.VisibleTimer := 0.3;
+	end;
+FNewScenePanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
+FBoundsOptionsPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
+FBoundsOptionsPanel.Active := False;
+end; end;
+procedure mmmChangeBoundTypeComboBoxProcedure(b,c : LongInt;a : TSGComboBox);
+var
+	index : LongInt;
+begin with TSGGasDiffusion(a.UserPointer) do begin
+index := a.Parent.IndexOf(a);
+if index <> -1 then
+	begin
+	(a.Parent.Children[index + 7] as TSGButton).Active := c > 0;
+	end;
+end; end;
 procedure mmmFBoundsBackButtonProcedure(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FNewScenePanel.SetBounds(FNewScenePanel.Left + ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5,FNewScenePanel.Top,FNewScenePanel.Width,FNewScenePanel.Height);
+FNewScenePanel.AddToLeft(((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
 FNewScenePanel.Active := True;
-FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left + ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+FBoundsOptionsPanel.AddToLeft(((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
 FBoundsOptionsPanel.Active := False;
 FBoundsOptionsPanel.Visible := False;
 FBoundsOptionsPanel.VisibleTimer := 0.7;
@@ -2195,12 +2281,10 @@ FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa не пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Газ липнет к стенкe');
-//FBoundsOptionsPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
+(FBoundsOptionsPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmChangeBoundTypeComboBoxProcedure);
 (FBoundsOptionsPanel.LastChild as TSGComboBox).SelectItem:=0;
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 end;end;
-
-
 procedure CreteLabel(const vIndex : LongWord; const vPanel : TSGPanel);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FBoundsOptionsPanel.CreateChild(TSGLabel.Create());
@@ -2229,23 +2313,24 @@ FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
 FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 FBoundsOptionsPanel.LastChild.Caption := 'Настроить рельеф';
+(FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrRelief);
 end;end;
 
 var
 	i : LongWOrd;
 
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FNewScenePanel.SetBounds(FNewScenePanel.Left - ((FNewScenePanel.Width + FConstWidth)div 2) - 5,FNewScenePanel.Top,FNewScenePanel.Width,FNewScenePanel.Height);
+FNewScenePanel.AddToLeft(- ((FNewScenePanel.Width + FConstWidth)div 2) - 5);
 FNewScenePanel.Active := False;
 if FBoundsOptionsPanel = nil then
 	begin
 	FBoundsOptionsPanel:=TSGPanel.Create();
 	SGScreen.CreateChild(FBoundsOptionsPanel);
-	SGScreen.LastChild.SetMiddleBounds(FConstWidth,200);
+	SGScreen.LastChild.SetMiddleBounds(FConstWidth,185);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left + FConstWidth + 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	FBoundsOptionsPanel.AddToLeft( FConstWidth + 5);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left - FConstWidth - 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	FBoundsOptionsPanel.AddToLeft(- FConstWidth - 5);
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.VisibleTimer := 0.3;
@@ -2271,7 +2356,7 @@ else
 	begin
 	FBoundsOptionsPanel.Visible := True;
 	FBoundsOptionsPanel.Active := True;
-	FBoundsOptionsPanel.SetBounds(FBoundsOptionsPanel.Left - ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) - 5,FBoundsOptionsPanel.Top,FBoundsOptionsPanel.Width,FBoundsOptionsPanel.Height);
+	FBoundsOptionsPanel.AddToLeft(- ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	FBoundsOptionsPanel.VisibleTimer := 0.3;
 	end;
 
@@ -2435,6 +2520,7 @@ FAddSechSecondPanelButton := nil;
 FBoundsOptionsPanel       := nil;
 FUsrImageThread           := nil;
 FUsrRange                 := 5;
+FRelefOptionPanel         := nil;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);

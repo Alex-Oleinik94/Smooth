@@ -122,8 +122,6 @@ const
 	SGObjectTimerConst : real = 0.02;
 	
 	SGFrameAnimationConst = 200;
-	SGFrameFObject = 5;
-	SGFrameFNObject = 1;
 	
 	//Это для SaGeScreen.TSGComponent
 	SGAlignNone =                        $000006;

@@ -53,8 +53,8 @@ type
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
 	TSGComponent = class(TSGContextObject)
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();
+		destructor Destroy();override;
 			private
 		FWidth:LongInt;
 		FHeight:LongInt;
@@ -89,7 +89,7 @@ type
 		function GetBottom : LongInt;
 		function GetScreenWidth : longint;
 		function GetScreenHeight : longint;
-		class function UpDateObj(var Obj,NObj:LongInt):Longint;
+		function UpDateObj(var Obj,NObj:LongInt):Longint;
 		procedure UpDateObjects;virtual;
 		procedure TestCoords;virtual;
 			public
@@ -104,12 +104,12 @@ type
 		property ScreenHeight : longint read GetScreenHeight;
 		property UnLimited : boolean read FUnLimited write fUnLimited;
 			public
-		procedure BoundsToNeedBounds;virtual;
+		procedure BoundsToNeedBounds();virtual;
 		procedure SetShifts(const NL,NT,NR,NB:LongInt);virtual;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);virtual;
 		procedure SetMiddleBounds(const NewWidth,NewHeight:LongInt);virtual;
-		procedure WriteBounds;
-		class function RandomOne:LongInt;
+		procedure WriteBounds();
+		class function RandomOne():LongInt;
 		procedure AddToLeft(const Value:LongInt);
 		procedure AddToWidth(const Value:LongInt);
 		procedure AddToHeight(const Value:LongInt);
@@ -128,9 +128,9 @@ type
 		FCaption:SGCaption;
 		FFont:TSGFont;
 		
-		procedure UpgradeTimers;virtual;
+		procedure UpgradeTimers();virtual;
 		procedure UpgradeTimer(const Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
-		procedure FromDraw;virtual;
+		procedure FromDraw();virtual;
 		procedure FromResize();virtual;
 		procedure FromUpDate(var FCanChange:Boolean);virtual;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);virtual;
@@ -163,8 +163,8 @@ type
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;inline;
-		function BottomShift:LongInt;
-		function RightShift:LongInt;
+		function BottomShift():LongInt;
+		function RightShift():LongInt;
 			public
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
@@ -176,9 +176,10 @@ type
 		procedure CreateAlign(const NewAllign:TSGExByte);
 		function CursorPosition():TSGPoint;
 		procedure DestroyAlign();
-		procedure DestroyParent;
-		procedure KillChildren;inline;
-		procedure VisibleAll;
+		procedure DestroyParent();
+		procedure KillChildren();inline;
+		procedure VisibleAll();
+		function IndexOf( VComponent : TSGComponent ): LongInt;inline;
 			public
 		property Align : TSGExByte read FAlign write CreateAlign;
 			public
@@ -1768,6 +1769,19 @@ else
 	Result:=nil;
 end;
 
+function TSGComponent.IndexOf( VComponent : TSGComponent ): LongInt;inline;
+var 
+	i : LongInt;
+begin
+Result := -1;
+for i := 0 to High(FChildren) do
+	if FChildren[i] = VComponent then
+		begin
+		Result := i;
+		break;
+		end;
+end;
+
 procedure TSGComponent.VisibleAll;
 var
 	i:LongInt;
@@ -1950,22 +1964,25 @@ if Length(FChildren)>0 then
 	Result:=FChildren[High(FChildren)];
 end;
 
-class function TSGComponent.UpDateObj(var Obj,NObj:LongInt):LongInt;
+function TSGComponent.UpDateObj(var Obj,NObj:LongInt):LongInt;
+const 
+	Speed = 2;
 var
 	Value:LongInt = 0;
 	OldObj:Longint;
 begin
-OldObj:=Obj;
-Value+=Obj*SGFrameFObject;
-Value+=NObj*SGFrameFNObject;
-Value:=round(Value / (SGFrameFNObject+SGFrameFObject));
-Result:=Value-Obj;
-Obj:=Value;
-if (Obj=OldObj) and (NObj<>Obj) then
-	if NObj>Obj then
-		Obj+=1
-	else
-		Obj-=1;
+if Obj <> NObj then
+	begin
+	OldObj:=Obj;
+	Value:=round((NObj * Context.ElapsedTime / Speed + Obj * 5) / (5 + Context.ElapsedTime / Speed));
+	Result:=Value-Obj;
+	Obj:=Value;
+	if (Obj=OldObj) and (NObj<>Obj) then
+		if NObj>Obj then
+			Obj+=1
+		else
+			Obj-=1;
+	end;
 end;
 
 procedure TSGComponent.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);
@@ -2446,7 +2463,7 @@ begin
 FCaption:=NewCaption;
 end;
 
-procedure TSGComponent.UpDateObjects;
+procedure TSGComponent.UpDateObjects();
 var
 	I:longint;
 	ValueHeight:LOngInt = 0;
@@ -2498,7 +2515,7 @@ UpDateObj(FHeight,FNeedHeight);
 UpDateObj(FTop,FNeedTop);
 UpDateObj(FLeft,FNeedLeft);
 UpDateObj(FWidth,FNeedWidth);
-TestCoords;
+TestCoords();
 ValueHeight:=FHeight-ValueHeight;
 ValueLeft:=FLeft-ValueLeft;
 ValueTop:=FTop-ValueTop;
