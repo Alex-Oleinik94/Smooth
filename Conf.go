@@ -2,7 +2,7 @@
 //output-ppm-stream=Video.ppm
 output-framerate=25
 multi-sampling=true
-viewport=1024x600
+viewport=1366x768
 fullscreen=true
 
 [gource]

@@ -11,6 +11,7 @@ uses
 	,SaGeContext
 	,SaGeCommon
 	,SaGeRender
+	,commdlg
 	;
 //Где купить пиво? Ответ: в магазине. (Специально для макса)
 // Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
@@ -61,6 +62,7 @@ type
 		function  CreateWindow():Boolean;
 			public
 		function Get(const What:string):Pointer;override;
+		function FileOpenDlg():String;override;
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
@@ -75,6 +77,33 @@ implementation
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+function TSGContextWinAPI.FileOpenDlg():String;
+var
+	ofn : LPOPENFILENAME;
+begin
+New(ofn);
+fillchar(ofn^,sizeof(ofn^),0);
+ofn^.lStructSize       := sizeof(ofn^);
+ofn^.hInstance         := System.MainInstance;
+ofn^.hwndOwner         := hWindow;
+ofn^.lpstrFilter       := nil;//'Bitmap files(*.bmp)\0*.bmp\0JPEG files(*.jpg)\0*.jpg\0All files(*.*)\0*.*\0\0';
+ofn^.lpstrFile         := nil;
+ofn^.lpstrFileTitle    := nil;
+ofn^.Flags             := OFN_PATHMUSTEXIST or OFN_FILEMUSTEXIST or OFN_HIDEREADONLY;
+ofn^.nMaxFile          := 1000;
+ofn^.lpstrFile         := GetMem(1000);
+ofn^.lpstrTitle        := 'Please Select a File';
+ofn^.nFilterIndex      := 1;
+fillchar(ofn^.lpstrFile^,1000,0);
+
+WriteLn('Result=',GetOpenFileName (ofn) );
+WriteLn('sizeof(ofn^)=',sizeof(ofn^));
+Writeln('lpTemplateName=',ofn^.lpTemplateName);
+WriteLn('lpstrFile=',ofn^.lpstrFile);
+
+FreeMem(ofn,sizeof(ofn^));
+end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;
 begin

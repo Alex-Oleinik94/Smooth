@@ -212,6 +212,7 @@ type
 			public
 		// Получить определенную имнформацию, заключенную в индентификаторе What
 		function Get(const What:string):Pointer;override;
+		function FileOpenDlg():String;virtual;abstract;
 		end;
 type
 	// Это тип, с которого пишутся все классы, которые используют Context

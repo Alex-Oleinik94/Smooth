@@ -2302,7 +2302,6 @@ case vIndex of
 5 : FBoundsOptionsPanel.LastChild.Caption := 'ֿונוהםÿÿ';
 end;
 end;end;
-
 procedure CreteLoadMeshButton(const vIndex : LongWord; const vPanel : TSGPanel);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FBoundsOptionsPanel.CreateChild(TSGButton.Create());
@@ -2315,10 +2314,8 @@ FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 FBoundsOptionsPanel.LastChild.Caption := 'ֽאסענמטעü נוכüופ';
 (FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrRelief);
 end;end;
-
 var
 	i : LongWOrd;
-
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FNewScenePanel.AddToLeft(- ((FNewScenePanel.Width + FConstWidth)div 2) - 5);
 FNewScenePanel.Active := False;
