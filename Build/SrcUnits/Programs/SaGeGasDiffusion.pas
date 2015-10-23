@@ -2174,6 +2174,17 @@ end;
 // =====================================================================
 // =====================================================================
 // =====================================================================
+procedure mmmFRedactrReliefOpenFileButton(Button:TSGButton);
+var
+	FileWay : String = '';
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FileWay := Context.FileOpenDlg('Выберите файл рельефа','Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
+if (FileWay <> '') and (SGFileExists(FileWay)) then
+	begin
+	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
+	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
+	end;
+end; end;
 procedure mmmFRedactrReliefBackButton(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FRelefOptionPanel.AddToLeft  (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
@@ -2212,6 +2223,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*1,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Font := FTahomaFont;
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefOpenFileButton);
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Сохранить рельеф в файл';
@@ -2242,6 +2254,7 @@ else
 	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	FRelefOptionPanel.VisibleTimer := 0.3;
 	end;
+(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(1,0,0,1);
 FNewScenePanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.Active := False;

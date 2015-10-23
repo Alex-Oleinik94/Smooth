@@ -170,7 +170,7 @@ type
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
 		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
 		function GetChild(a:Int):TSGComponent;
-		property Children[Index : Int ]:TSGComponent read GetChild;
+		property Children[Index : Int (* Indexing [1..Size] *)]:TSGComponent read GetChild;
 		procedure CreateChild(const Child:TSGComponent);
 		function LastChild():TSGComponent;
 		procedure CreateAlign(const NewAllign:TSGExByte);

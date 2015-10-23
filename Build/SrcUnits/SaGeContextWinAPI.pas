@@ -62,7 +62,7 @@ type
 		function  CreateWindow():Boolean;
 			public
 		function Get(const What:string):Pointer;override;
-		function FileOpenDlg():String;override;
+		function FileOpenDlg(const VTittle: String; const VFilter : String):String;override;
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
@@ -78,7 +78,9 @@ implementation
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
 
-function TSGContextWinAPI.FileOpenDlg():String;
+function TSGContextWinAPI.FileOpenDlg(const VTittle: String; const VFilter : String):String;
+const
+	sizeOfResult = 1000;
 var
 	ofn : LPOPENFILENAME;
 begin
@@ -87,22 +89,31 @@ fillchar(ofn^,sizeof(ofn^),0);
 ofn^.lStructSize       := sizeof(ofn^);
 ofn^.hInstance         := System.MainInstance;
 ofn^.hwndOwner         := hWindow;
-ofn^.lpstrFilter       := nil;//'Bitmap files(*.bmp)\0*.bmp\0JPEG files(*.jpg)\0*.jpg\0All files(*.*)\0*.*\0\0';
+if (VFilter <> '') then
+	ofn^.lpstrFilter   := SGStringToPChar(VFilter);
 ofn^.lpstrFile         := nil;
 ofn^.lpstrFileTitle    := nil;
 ofn^.Flags             := OFN_PATHMUSTEXIST or OFN_FILEMUSTEXIST or OFN_HIDEREADONLY;
-ofn^.nMaxFile          := 1000;
-ofn^.lpstrFile         := GetMem(1000);
-ofn^.lpstrTitle        := 'Please Select a File';
+ofn^.nMaxFile          := sizeOfResult;
+ofn^.lpstrFile         := GetMem(sizeOfResult);
+if (VTittle <> '') then
+	ofn^.lpstrTitle    := SGStringToPChar(VTittle);
 ofn^.nFilterIndex      := 1;
 fillchar(ofn^.lpstrFile^,1000,0);
 
-WriteLn('Result=',GetOpenFileName (ofn) );
-WriteLn('sizeof(ofn^)=',sizeof(ofn^));
-Writeln('lpTemplateName=',ofn^.lpTemplateName);
-WriteLn('lpstrFile=',ofn^.lpstrFile);
-
+if not GetOpenFileName (ofn) then
+	begin
+	{$IFDEF SGDebuging}
+		SGLog.Sourse('TSGContextWinAPI.FileOpenDlg - GetOpenFileName() results with FALSE');
+		{$ENDIF}
+	end;
+Result := SGPCharToString(ofn^.lpstrFile);
 FreeMem(ofn,sizeof(ofn^));
+FreeMem(ofn^.lpstrFile,sizeof(sizeOfResult));
+if ofn^.lpstrFilter <> nil then
+	FreeMem(ofn^.lpstrFilter,Length(VFilter));
+if ofn^.lpstrTitle <> nil then
+	FreeMem(ofn^.lpstrTitle,Length(VTittle));
 end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;
