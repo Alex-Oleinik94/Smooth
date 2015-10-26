@@ -1168,17 +1168,17 @@ end;
 procedure FindInPas(const Cmd:Boolean = False);
 var
 	ArWords:array of string = nil;
-//nu:	Stream:TFileStream = nil;
 	Oy:LongWord;
 	PF,PS:LongWord;
 	FArF:packed array of TFileStream = nil;
-	i,ii:LongWord;
+	i,ii,iii:LongWord;
 	ArF:packed array of string = nil;
 	FDir:string = '.';
 var
 	TempS,TempS2:String;
 	NameFolder:string = '';
 	ChisFi:LongWord = 0;
+	StartingNow : Boolean = False;
 procedure FindInFile(const VFile:String);
 var
 	f:text;
@@ -1210,10 +1210,6 @@ while not eof(f) do
 		end;
 	if iii<>0 then
 		begin
-		{SetLength(ArResults,Length(ArResults)+1);
-		ArResults[High(ArResults)].Kol:=iii;
-		ArResults[High(ArResults)].Str:=KolStr;
-		ArResults[High(ArResults)].Fail:=ArFiles[i];}
 		PS+=iii;
 		if FArF=nil then
 			iiii:=0
@@ -1259,7 +1255,6 @@ for i:=0 to High(ArF) do
 	dos.findfirst(VDir+Slash+'*.'+ArF[i],$3F,sr);
 	while DosError<>18 do
 		begin
-		//SGWriteStringToStream('Do file "'+VDir+sr.name+'".'+SGEoln,Stream);
 		FindInFile(VDir+sr.name);
 		dos.findnext(sr);
 		end;
@@ -1271,21 +1266,27 @@ procedure ConstWords;
 var
 	l:longint;
 	i:longint;
+	ii : LongWord;
 begin
 textcolor(15);
 write('Enter words quantity:');
 textcolor(10);
 readln(l);
 textcolor(15);
-SetLength(ArWords,l);
-for i:=Low(ArWords) to High(ArWords) do
-	begin
-	textcolor(15);
-	write('Enter ',i+1,' word:');
-	textcolor(10);
-	readln(ArWords[i]);
-	textcolor(15);
-	end;
+if (ArWords = nil) then
+	ii := 0
+else
+	ii := Length(ArWords);
+SetLength(ArWords,ii+l);
+if (l>0) then
+	for i:=ii to High(ArWords) do
+		begin
+		textcolor(15);
+		write('Enter ',i+1,' word:');
+		textcolor(10);
+		readln(ArWords[i]);
+		textcolor(15);
+		end;
 end;
 
 procedure SkanWords;
@@ -1315,7 +1316,6 @@ procedure DoDirectories(const VDir:string);
 var
 	sr:dos.searchrec;
 begin
-//SGWriteStringToStream('Do dir "'+VDir+'".'+SGEoln,Stream);
 DoFiles(VDir+Slash);
 dos.findfirst(VDir+Slash+'*',$10,sr);
 while DosError<>18 do
@@ -1332,7 +1332,7 @@ dos.findclose(sr);
 end;
 
 begin
-SetLength(ArF,9);
+SetLength(ArF,10);
 ArF[0]:='pas';
 ArF[1]:='pp';
 ArF[2]:='inc';
@@ -1342,6 +1342,7 @@ ArF[5]:='h';
 ArF[6]:='hpp';
 ArF[7]:='hxx';
 ArF[8]:='c';
+ArF[9]:='html';
 textcolor(15);
 if Cmd and (argc>2) then
 	begin
@@ -1383,6 +1384,32 @@ if Cmd and (argc>2) then
 					WriteLn('    -VIEWEXP : for view expansion for find');
 					Exit;
 					end
+				else if (Length(TempS)>4) and (TempS[1]='W')and (TempS[2]='O')and (TempS[3]='R')and (TempS[4]='D') then
+					begin
+					if (ArWords = nil) then
+						SetLength(ArWords,1)
+					else
+						SetLength(ArWords,Length(ArWords)+1);
+					
+					if (TempS[5] = '"') then
+						begin
+						TempS2 := '';
+						for ii := 6 to Length(TempS)-1 do
+							TempS2+=TempS[ii];
+						end
+					else
+						begin
+						TempS2 := '';
+						for ii := 5 to Length(TempS) do
+							TempS2+=TempS[ii];
+						end;
+					ArWords[High(ArWords)] := TempS2;
+					TempS2:='';
+					end
+				else if (TempS='START') then
+					begin
+					StartingNow := True;
+					end
 				else
 					WriteLn('Erroe syntax comand "',argv[i],'"')
 			else
@@ -1396,7 +1423,8 @@ PF:=0;PS:=0;OY:=0;
 NameFolder:=SGGetFreeDirectoryName('Find In Pas Results','Part');
 SGMakeDirectory(NameFolder);
 Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
-ConstWords();
+if (not StartingNow) then
+	ConstWords();
 if Length(ArWords)<>0 then
 	begin
 	SkanWords;
