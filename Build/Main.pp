@@ -493,159 +493,10 @@ end;
 	else
 		WriteLn('Error in parameters You must rnter @filename, @new_width and @new_height!');
 	end;
-
-	procedure FindMyIp();
-	function FindIp(var S:String):Boolean;
-	var
-		i,ii : LongWord;
-		filename, line : string;
-		f : TextFile;
-	begin
-	Result := False;
-	ii := 0;
-	for i := 1 to Length(S) do
-		begin
-		if S[i] = '"' then
-			ii+=1;
-		end;
-	if ii = 4 then
-		begin
-		ii := 0;
-		line := '';
-		filename := '';
-		for i := 1 to Length(S) do
-			begin
-			if S[i] = '"' then
-				ii+=1;
-			case ii of
-			1 : if S[i] <> '"' then
-				filename += S[i];
-			3 : if S[i] <> '"' then
-				line += S[i];
-			end;
-			end;
-		assign(f,filename);
-		reset(f);
-		for i := 1 to SGVal(line) do
-			ReadLn(f,s);
-		close(f);
-		ii := 0;
-		line := '';
-		for i := 1 to Length(S) do
-			begin
-			if S[i] = '''' then
-				ii+=1;
-			if (ii = 1) and (S[i] <> '''') then
-				line +=S[i];
-			end;
-		S := line;
-		Result := True;
-		end;
-	end;
-	var
-		f : TextFile;
-		s : String;
-		to_ext : Boolean = False;
-		AProcess: TProcess;
-		DatTime : TSGDateTime;
-	begin
-	Assign(f,'l_i.txt');
-	Reset(f);
-	while (not seekeof(f)) and (not to_ext) do
-		begin
-		ReadLn(f,S);
-		to_ext := FindIp(S);
-		end;
-	close(f);
-	if (to_ext) then
-		begin
-		assign(f,'ip');
-		rewrite(f);
-		DatTime.Get();
-		WriteLn(f,'[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',S,'".');
-		close(f);
-		AProcess := TProcess.Create(nil);
-		AProcess.CommandLine := 'curl -s "for-alexander-oleynikov.net46.net/?data='+S+'"';
-		AProcess.Options := AProcess.Options + [poWaitOnExit];
-		AProcess.Execute;
-		//AStringList.LoadFromStream(AProcess.Output);
-		AProcess.Free; 
-		end;
-	end;
-
-	procedure IPSERVER();
-	procedure RunComand(const S : String;const vl : Boolean = false);
-	var
-		AProcess: TProcess;
-		AStringList: TStringList;
-		i : LongInt;
-	begin
-	AStringList := TStringList.Create;
-	AProcess := TProcess.Create(nil);
-	AProcess.CommandLine := S;
-	AProcess.Options := AProcess.Options + [poWaitOnExit, poUsePipes];
-	AProcess.Execute;
-	AStringList.LoadFromStream(AProcess.Output);
-	
-	if vl then
-		begin
-		for i := 1 to AStringList.Count do
-			begin
-			WriteLn(AStringList[i]);
-			end;
-		end;
-	
-	AStringList.Free;
-	AProcess.Free; 
-	end;
-	procedure RunCmd();
-	var
-		f : TextFile;
-		s : String;
-	begin
-	assign(f,'check_ip.bat');
-	rewrite(f);
-	WriteLn(f,'rm "myip.html"');
-	WriteLn(f,'curl -s "2ip.ru" >> "myip.html"');
-	WriteLn(f,'"Main.exe" -FIP -WORDclip.settext -START ');
-	WriteLn(f,'delete "l_i.txt" ');
-	WriteLn(f,'copy "Find In Pas Results\Results of 1 matches.txt" "l_i.txt" ');
-	WriteLn(f,'rm "Find In Pas Results\Results of 1 matches.txt" ');
-	WriteLn(f,'rmdir "Find In Pas Results" ');
-	WriteLn(f,'rm "old.ip.txt" ');
-	WriteLn(f,'curl -s "for-alexander-oleynikov.net46.net" >> "old.ip.txt"');
-	WriteLn(f,'"Main.exe" -FINDMYIP');
-	WriteLn(f,'rm "old.ip.txt"');
-	WriteLn(f,'rm "myip.html"');
-	WriteLn(f,'rm "l_i.txt');
-	close(f);
-	RunComand('check_ip.bat');
-	RunComand('rm "check_ip.bat"');
-	assign(f,'ip');
-	reset(f);
-	ReadLn(f,s);
-	close(f);
-	RunComand('rm "ip"');
-	WriteLn(s);
-	end;
-	var
-		to_ext : Boolean = False;
-	begin
-	ClrScr();
-	WriteLn('SaGe IP Server is running....');
-	while not to_ext do
-		begin
-		RunCmd();
-		sysutils.sleep(300000);
-		end;
-	end;
 	
 	var
 		s:string;
-		AStringList : TStringList;
 	begin
-	AStringList := TStringList.Create();
-	
 	if (argc=2) and (SGFileExists(SGPCharToString(argv[1]))) and 
 		(SGGetFileExpansion(argv[1])='PNG') then
 		begin
@@ -727,6 +578,10 @@ end;
 				begin
 				DllScan();
 				end
+			else if s='ATRD' then
+				begin
+				SGAttachToMyRemoteDesktop();
+				end
 			else if s='GRNC' then
 				begin
 				//WriteLn('Beginning Google ReName Cashe.');
@@ -746,6 +601,7 @@ end;
 				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 				WriteLn('   -IPSERVER');
 				WriteLn('   -FINDMYIP');
+				WriteLn('   -ATRD                        : for attach to my remote desktop');
 				end
 			else
 				begin

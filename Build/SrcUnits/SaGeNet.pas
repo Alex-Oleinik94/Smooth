@@ -9,6 +9,7 @@ uses
 	,SysUtils
 	,Classes
 	,StrUtils
+	,Process
 	
 	,SaGeBase
 	,SaGeBased
@@ -21,7 +22,9 @@ uses
 	,URIParser
 	,lHTTPUtil
 	;
-
+const 
+	SGGetDynamicIPAdres = 'for-alexander-oleynikov.net46.net';
+	SGSetDynamicIPAdres = SGGetDynamicIPAdres + '/?data=';
 type
 	TSGSocket = TLSocket;
 	TSGUDPConnectionClass=class(TLUDP)
@@ -75,8 +78,70 @@ type
 		end;
 
 function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
+function SGGetDynamicIPFromStaticServer(const StaticServerIP : String = SGGetDynamicIPAdres):String;
+function SGSetDynamicIPToStaticServer(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
+procedure FindMyIp();
+procedure IPSERVER();
+procedure SGAttachToMyRemoteDesktop();
 
 implementation
+
+function SGSetDynamicIPToStaticServer(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
+var
+	a : TProcess;
+	s : TStringList;
+	i : LongWord;
+begin
+a := TProcess.Create(nil);
+a.Executable := 'curl';
+a.Parameters.Add('-s');
+a.Parameters.Add(StaticServerIP+DynamicIP);
+a.Options := a.Options + [poUsePipes];
+a.Execute;
+a.WaitOnExit();
+Result:= False;
+if (a.ExitStatus = 0) then
+	begin
+	s := TStringList.Create;
+	s.LoadFromStream(a.Output);
+	if (S.Count = 1) then
+		if (S[0] = 'success') then
+			Result := True;
+	s.Free;
+	end;
+a.Free; 
+end;
+
+function SGGetDynamicIPFromStaticServer(const StaticServerIP : String = SGGetDynamicIPAdres):String;
+var
+	a : TProcess;
+	s : TStringList;
+	i : LongWord;
+begin
+a := TProcess.Create(nil);
+a.Executable := 'curl';
+a.Parameters.Add('-s');
+a.Parameters.Add(StaticServerIP);
+a.Options := a.Options + [poUsePipes];
+a.Execute;
+a.WaitOnExit();
+if (a.ExitStatus = 0) then
+	begin
+	s := TStringList.Create;
+	Result:= '';
+	s.LoadFromStream(a.Output);
+	for i := 0 to s.Count-1 do
+		begin
+		if Result <> '' then
+			Result += SGWinEoln;
+		Result += s[i];
+		end;
+	s.Free;
+	end
+else
+	Result := 'error';
+a.Free; 
+end;
 
 procedure TSGHTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 begin
@@ -240,6 +305,123 @@ Stream.Position:=0;
 if FReceiveProcedure<>nil then
 	FReceiveProcedure(FParent,Stream,aSocket);
 Stream.Free;
+end;
+
+// IP SERVER
+
+procedure FindMyIp();
+function FindIp(var S:String):Boolean;
+var
+	i,ii : LongWord;
+	filename, line : string;
+	f : TextFile;
+begin
+Result := False;
+ii := 0;
+for i := 1 to Length(S) do
+	begin
+	if S[i] = '"' then
+		ii+=1;
+	end;
+if ii = 4 then
+	begin
+	ii := 0;
+	line := '';
+	filename := '';
+	for i := 1 to Length(S) do
+		begin
+		if S[i] = '"' then
+			ii+=1;
+		case ii of
+		1 : if S[i] <> '"' then
+			filename += S[i];
+		3 : if S[i] <> '"' then
+			line += S[i];
+		end;
+		end;
+	assign(f,filename);
+	reset(f);
+	for i := 1 to SGVal(line) do
+		ReadLn(f,s);
+	close(f);
+	ii := 0;
+	line := '';
+	for i := 1 to Length(S) do
+		begin
+		if S[i] = '''' then
+			ii+=1;
+		if (ii = 1) and (S[i] <> '''') then
+			line +=S[i];
+		end;
+	S := line;
+	Result := True;
+	end;
+end;
+var
+	f : TextFile;
+	s : String;
+	to_ext : Boolean = False;
+	AProcess: TProcess;
+	DatTime : TSGDateTime;
+begin
+Assign(f,'l_i.txt');
+Reset(f);
+while (not seekeof(f)) and (not to_ext) do
+	begin
+	ReadLn(f,S);
+	to_ext := FindIp(S);
+	end;
+close(f);
+if (to_ext) then
+	begin
+	DatTime.Get();
+	WriteLn('[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',S,'".');
+	SGSetDynamicIPToStaticServer(S);
+	end;
+end;
+
+procedure IPSERVER();
+function  RunCmd():Boolean;
+begin
+Result := False;
+
+if (SGFileExists('myip.html')) then DeleteFile('myip.html');
+SGRunComand('curl -s "2ip.ru" -o "myip.html"',[poWaitOnExit,poUsePipes]);
+
+if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then DeleteFile('Find In Pas Results\Results of 1 matches.txt');
+if (SGExistsDirectory('Find In Pas Results')) then RemoveDir('Find In Pas Results');
+if (SGFileExists('myip.html')) then SGRunComand('main -FIP -WORDclip.settext -START',[poWaitOnExit,poUsePipes],True);
+
+if (SGFileExists('l_i.txt')) then DeleteFile('l_i.txt');
+if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then RenameFile('Find In Pas Results\Results of 1 matches.txt','l_i.txt');
+if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then DeleteFile('Find In Pas Results\Results of 1 matches.txt');
+if (SGExistsDirectory('Find In Pas Results')) then RemoveDir('Find In Pas Results');
+if (SGFileExists('myip.html')and SGFileExists('l_i.txt')) then FindMyIp();
+
+if (SGFileExists('myip.html')) then DeleteFile('myip.html');
+if (SGFileExists('l_i.txt')) then DeleteFile('l_i.txt');
+end;
+var
+	to_ext : Boolean = False;
+begin
+ClrScr();
+WriteLn('SaGe IP Server is running....');
+while not to_ext do
+	begin
+	RunCmd();
+	sysutils.sleep(100000);
+	end;
+end;
+
+procedure SGAttachToMyRemoteDesktop();
+var
+	IP : String;
+begin
+IP := SGGetDynamicIPFromStaticServer();
+if (IP <> 'error') then
+	SGRunComand('mstsc "/v:'+IP+':4000"')
+else
+	Writeln('Somethink error..');
 end;
 
 end.

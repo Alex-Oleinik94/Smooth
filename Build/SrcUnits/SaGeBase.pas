@@ -22,6 +22,7 @@ uses
 	,SaGeBased
 	,SysUtils
 	,Classes
+	,Process
 	{$IFDEF MSWINDOWS}
 		,uSMBIOS
 		{$ENDIF}
@@ -720,7 +721,34 @@ function SGConvertAnsiToASCII(const s:TSGString):TSGString;
 function SGDownCaseString(const str:TSGString):TSGString;
 function DownCase(const c:TSGChar):TSGChar;
 
+procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptions = []; const ViewOutput : Boolean = false);
+
 implementation
+
+procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptions = []; const ViewOutput : Boolean = false);
+var
+	AProcess: TProcess;
+	AStringList: TStringList;
+	i : LongInt;
+begin
+AProcess := TProcess.Create(nil);
+AProcess.CommandLine := Comand;
+AProcess.Options := AProcess.Options + ProcessOptions;
+AProcess.Execute();
+
+if (poUsePipes in ProcessOptions) and ViewOutput then
+	begin
+	AStringList := TStringList.Create;
+	AStringList.LoadFromStream(AProcess.Output);
+	for i := 0 to AStringList.Count - 1 do
+		begin
+		WriteLn(AStringList[i]);
+		end;
+	AStringList.Free;
+	end;
+
+AProcess.Free(); 
+end;
 
 function DownCase(const c:TSGChar):TSGChar;
 begin
