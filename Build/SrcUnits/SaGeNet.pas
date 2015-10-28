@@ -23,8 +23,8 @@ uses
 	,lHTTPUtil
 	;
 const 
-	SGGetDynamicIPAdres = 'for-alexander-oleynikov.net46.net';
-	SGSetDynamicIPAdres = SGGetDynamicIPAdres + '/?data=';
+	SGGetDynamicIPAdres = 'http://for-alexander-oleynikov.net46.net/';
+	SGSetDynamicIPAdres = SGGetDynamicIPAdres + '?data=';
 type
 	TSGSocket = TLSocket;
 	TSGUDPConnectionClass=class(TLUDP)
@@ -77,16 +77,68 @@ type
 		procedure ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 		end;
 
-function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
-function SGGetDynamicIPFromStaticServer(const StaticServerIP : String = SGGetDynamicIPAdres):String;
-function SGSetDynamicIPToStaticServer(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
+
 procedure FindMyIp();
 procedure IPSERVER();
+
+function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
+function SGGetDynamicIPFromStaticServerWithCurl(const StaticServerIP : String = SGGetDynamicIPAdres):String;
+function SGSetDynamicIPToStaticServerWithCurl(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
 procedure SGAttachToMyRemoteDesktop();
+function SGMemoryStreamToString(MS : TMemoryStream;const DestroyStream : Boolean = False):String;
+function SGGetSelfIP():String;
 
 implementation
 
-function SGSetDynamicIPToStaticServer(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
+function SGGetSelfIP():String;
+var 
+	Response : String = '';
+	i,ii,iii : LongInt;
+begin
+Response := SGMemoryStreamToString(SGGetFromHTTP('http://checkip.dyndns.org/'),True);
+Result := '';
+if (Response <> '') and (Response <> 'error')then
+	begin
+	iii := 0;
+	for i := 1 to Length(Response) do
+		begin
+		if Response[i] = ':' then
+			begin
+			iii := i;
+			break;
+			end;
+		end;
+	if iii <> 0 then
+		begin
+		Inc(iii,2);
+		while Response[iii] <> '<' do
+			begin
+			Result += Response[iii];
+			Inc(iii);
+			end;
+		end;
+	end;
+end;
+
+function SGMemoryStreamToString(MS : TMemoryStream;const DestroyStream : Boolean = False):String;
+var
+	c : char;
+begin
+Result := '';
+if MS <> nil then
+	begin
+	MS.Position := 0;
+	while MS.Position <> MS.Size do
+		begin
+		MS.ReadBuffer(c,1);
+		Result += c;
+		end;
+	if DestroyStream then
+		MS.Destroy();
+	end;
+end;
+
+function SGSetDynamicIPToStaticServerWithCurl(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
 var
 	a : TProcess;
 	s : TStringList;
@@ -112,7 +164,7 @@ if (a.ExitStatus = 0) then
 a.Free; 
 end;
 
-function SGGetDynamicIPFromStaticServer(const StaticServerIP : String = SGGetDynamicIPAdres):String;
+function SGGetDynamicIPFromStaticServerWithCurl(const StaticServerIP : String = SGGetDynamicIPAdres):String;
 var
 	a : TProcess;
 	s : TStringList;
@@ -145,41 +197,44 @@ end;
 
 procedure TSGHTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 begin
-    SGLog.Sourse(['in TSGHTTPHandler.ClientProcessHeaders : "'+'Response: ', HTTPStatusCodes[ASocket.ResponseStatus], ' ', 
-    ASocket.ResponseReason, ', data...'+'"']);
+{$IFDEF SGDebuging}
+	SGLog.Sourse(['TSGHTTPHandler.ClientProcessHeaders - "'+'ResponseStatus="', HTTPStatusCodes[ASocket.ResponseStatus],'", ResponseReason="',ASocket.ResponseReason, '"']);
+	{$ENDIF}
 end;
 
 procedure TSGHTTPHandler.ClientError(const Msg: string; aSocket: TLSocket);
 begin
-  {writeln('Error: ', Msg);}
-  SGLog.Sourse('in TSGHTTPHandler.ClientError : "'+Msg+'"');
-  Error := True;
+{$IFDEF SGDebuging}
+	SGLog.Sourse('TSGHTTPHandler.ClientError - Error="'+Msg+'"');
+	{$ENDIF}
+Error := True;
 end;
 
 procedure TSGHTTPHandler.ClientDisconnect(ASocket: TLSocket);
 begin
-  {writeln('Disconnected.');}
-  done := true;
-  SGLog.Sourse('in TSGHTTPHandler.ClientDisconnect');
+Done := true;
+{$IFDEF SGDebuging}
+	SGLog.Sourse('TSGHTTPHandler.ClientDisconnect');
+	{$ENDIF}
 end;
   
 procedure TSGHTTPHandler.ClientDoneInput(ASocket: TLHTTPClientSocket);
 begin
-  //writeln('done.');
-  //close(OutputFile);
-  Stream.Position := 0;
-  ASocket.Disconnect;
-  SGLog.Sourse('in TSGHTTPHandler.ClientDoneInput');
+Stream.Position := 0;
+ASocket.Disconnect;
+{$IFDEF SGDebuging}
+	SGLog.Sourse('TSGHTTPHandler.ClientDoneInput');
+	{$ENDIF}
 end;
 
 function TSGHTTPHandler.ClientInput(ASocket: TLHTTPClientSocket;
   ABuffer: pchar; ASize: Integer): Integer;
 begin
-  {blockwrite(outputfile, ABuffer^, ASize, Result);
-  write(IntToStr(ASize) + '...');}
-  Stream.WriteBuffer(ABuffer^,ASize);
-  Result := ASize;
-  SGLog.Sourse('in TSGHTTPHandler.ClientInput');
+Stream.WriteBuffer(ABuffer^,ASize);
+Result := ASize;
+{$IFDEF SGDebuging}
+	SGLog.Sourse('TSGHTTPHandler.ClientInput');
+	{$ENDIF}
 end;
 
 function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
@@ -195,6 +250,10 @@ Result:=nil;
 UseSSL := DecomposeURL(Way, Host, URI, Port);
 if UseSSL then
 	Exit;
+
+{$IFDEF SGDebuging}
+	SGLog.Sourse(['SGGetFromHTTP - Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"']);
+	{$ENDIF}
 
 Client := TSGHTTPHandler.Create();
 Client.Done := False;
@@ -216,9 +275,15 @@ HttpClient.SendRequest;
 Client.Done := false;
 Client.Error := false;
 
-SGLog.Sourse('Begin circle');
+{$IFDEF SGDebuging}
+	SGLog.Sourse('SGGetFromHTTP - Begin looping...');
+	{$ENDIF}
+
 while (not Client.Done) and (not Client.Error) do
+	begin
 	HttpClient.CallAction;
+	SysUtils.Sleep(5);
+	end;
 
 HttpClient.Free;
 
@@ -228,6 +293,10 @@ else
 	Client.Stream.Destroy();
 
 Client.Destroy();
+
+{$IFDEF SGDebuging}
+	SGLog.Sourse(['SGGetFromHTTP - Done with  Result="',TSGMaxEnum(Result),'"']);
+	{$ENDIF}
 end;
 
 function TSGUDPConnection.SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
@@ -376,7 +445,7 @@ if (to_ext) then
 	begin
 	DatTime.Get();
 	WriteLn('[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',S,'".');
-	SGSetDynamicIPToStaticServer(S);
+	SGSetDynamicIPToStaticServerWithCurl(S);
 	end;
 end;
 
@@ -415,13 +484,29 @@ end;
 
 procedure SGAttachToMyRemoteDesktop();
 var
-	IP : String;
+	ServerIP : String;
+	SelfIP : String;
+	Port : String = '4000';
 begin
-IP := SGGetDynamicIPFromStaticServer();
-if (IP <> 'error') then
-	SGRunComand('mstsc "/v:'+IP+':4000"')
+ServerIP := SGMemoryStreamToString(SGGetFromHTTP(SGGetDynamicIPAdres),True);
+if (ServerIP <> '') then
+	SelfIP := SGGetSelfIP();
+if (SelfIP <> '') and (ServerIP <> '') then
+	begin
+	if (SelfIP = ServerIP) then
+		begin
+		Port := '3389';
+		ServerIP := '192.168.0.92';
+		end;
+	SGRunComand('mstsc /v:'+ServerIP+':'+Port);
+	end
 else
-	Writeln('Somethink error..');
+	begin
+	WriteLn('Error!');
+	WriteLn('Check your internet connection.');
+	WriteLn('Press any key to continue...');
+	ReadLn();
+	end;
 end;
 
 end.
