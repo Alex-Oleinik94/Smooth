@@ -78,7 +78,6 @@ type
 		end;
 
 
-procedure FindMyIp();
 procedure IPSERVER();
 
 function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
@@ -378,107 +377,44 @@ end;
 
 // IP SERVER
 
-procedure FindMyIp();
-function FindIp(var S:String):Boolean;
-var
-	i,ii : LongWord;
-	filename, line : string;
-	f : TextFile;
-begin
-Result := False;
-ii := 0;
-for i := 1 to Length(S) do
-	begin
-	if S[i] = '"' then
-		ii+=1;
-	end;
-if ii = 4 then
-	begin
-	ii := 0;
-	line := '';
-	filename := '';
-	for i := 1 to Length(S) do
-		begin
-		if S[i] = '"' then
-			ii+=1;
-		case ii of
-		1 : if S[i] <> '"' then
-			filename += S[i];
-		3 : if S[i] <> '"' then
-			line += S[i];
-		end;
-		end;
-	assign(f,filename);
-	reset(f);
-	for i := 1 to SGVal(line) do
-		ReadLn(f,s);
-	close(f);
-	ii := 0;
-	line := '';
-	for i := 1 to Length(S) do
-		begin
-		if S[i] = '''' then
-			ii+=1;
-		if (ii = 1) and (S[i] <> '''') then
-			line +=S[i];
-		end;
-	S := line;
-	Result := True;
-	end;
-end;
-var
-	f : TextFile;
-	s : String;
-	to_ext : Boolean = False;
-	AProcess: TProcess;
-	DatTime : TSGDateTime;
-begin
-Assign(f,'l_i.txt');
-Reset(f);
-while (not seekeof(f)) and (not to_ext) do
-	begin
-	ReadLn(f,S);
-	to_ext := FindIp(S);
-	end;
-close(f);
-if (to_ext) then
-	begin
-	DatTime.Get();
-	WriteLn('[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',S,'".');
-	SGSetDynamicIPToStaticServerWithCurl(S);
-	end;
-end;
-
 procedure IPSERVER();
-function  RunCmd():Boolean;
-begin
-Result := False;
-
-if (SGFileExists('myip.html')) then DeleteFile('myip.html');
-SGRunComand('curl -s "2ip.ru" -o "myip.html"',[poWaitOnExit,poUsePipes]);
-
-if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then DeleteFile('Find In Pas Results\Results of 1 matches.txt');
-if (SGExistsDirectory('Find In Pas Results')) then RemoveDir('Find In Pas Results');
-if (SGFileExists('myip.html')) then SGRunComand('main -FIP -WORDclip.settext -START',[poWaitOnExit,poUsePipes],True);
-
-if (SGFileExists('l_i.txt')) then DeleteFile('l_i.txt');
-if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then RenameFile('Find In Pas Results\Results of 1 matches.txt','l_i.txt');
-if (SGFileExists('Find In Pas Results\Results of 1 matches.txt')) then DeleteFile('Find In Pas Results\Results of 1 matches.txt');
-if (SGExistsDirectory('Find In Pas Results')) then RemoveDir('Find In Pas Results');
-if (SGFileExists('myip.html')and SGFileExists('l_i.txt')) then FindMyIp();
-
-if (SGFileExists('myip.html')) then DeleteFile('myip.html');
-if (SGFileExists('l_i.txt')) then DeleteFile('l_i.txt');
-end;
+const
+	ErrorSleepInterval = 100;
+	SuccessSleepInterval = 100000;
 var
-	to_ext : Boolean = False;
+	SelfIP, ServerIP, s: String;
+	DatTime : TSGDateTime;
 begin
 ClrScr();
 WriteLn('SaGe IP Server is running....');
-while not to_ext do
+while True do
 	begin
-	RunCmd();
-	sysutils.sleep(100000);
+	SelfIP := SGGetSelfIP();
+	if SelfIP = '' then
+		SysUtils.Sleep(ErrorSleepInterval)
+	else
+		begin
+		ServerIP := SGMemoryStreamToString(SGGetFromHTTP(SGGetDynamicIPAdres),True);
+		if ServerIP = '' then
+			SysUtils.Sleep(ErrorSleepInterval)
+		else
+			begin
+			if ServerIP <> SelfIP then
+				begin
+				s := SGMemoryStreamToString(SGGetFromHTTP(SGSetDynamicIPAdres+SelfIP),True);
+				if (s = 'success') then
+					begin
+					DatTime.Get();
+					WriteLn('[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',SelfIP,'".');
+					SysUtils.Sleep(SuccessSleepInterval);
+					end
+				else
+					SysUtils.Sleep(ErrorSleepInterval)
+				end
+			else
+				SysUtils.Sleep(SuccessSleepInterval);
+			end;
+		end
 	end;
 end;
 

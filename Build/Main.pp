@@ -559,10 +559,6 @@ end;
 				//WriteLn('Beginning Find in pas.');
 				FindInPas(True);
 				end
-			else if s='FINDMYIP' then
-				begin
-				FindMyIp();
-				end
 			else if s='IPSERVER' then
 				begin
 				IPSERVER();
@@ -600,7 +596,6 @@ end;
 				WriteLn('   -CTSGIA                      : for convert image to SGIA format');
 				WriteLn('   -GUI or don''t use parametrs  : for run Grafical Interface');
 				WriteLn('   -IPSERVER');
-				WriteLn('   -FINDMYIP');
 				WriteLn('   -ATRD                        : for attach to my remote desktop');
 				end
 			else
