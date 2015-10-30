@@ -31,6 +31,8 @@ type
 		procedure Draw;override;
 		procedure Add(const NewClass:TSGClassOfDrawClass);
 		procedure Initialize;
+			public
+		property ComboBox : TSGComboBox read FComboBox2;
 		end;
 	
 	TSGND=class(TSGDrawClass)
@@ -1186,7 +1188,7 @@ begin
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('Begin of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
-FComboBox2:=TSGComboBox.Create;
+FComboBox2:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox2);
 SGScreen.LastChild.SetBounds(5,5{+Context.TopShift},230,18);
 SGScreen.LastChild.AutoTopShift:=True;

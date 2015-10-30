@@ -1,21 +1,28 @@
 {$INCLUDE SaGe.inc}
-program Example2;
+{$IFDEF ENGINE}
+	unit Ex2_2;
+	interface
+{$ELSE}
+	program Example2_2;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeCommon
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample2_2=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -26,12 +33,16 @@ type
 		FLightAngle : TSGSingle;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample2_2.ClassName():TSGString;
 begin
-Result := '';
+Result := 'Освещение';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample2_2.Create(const VContext : TSGContext);
 begin
 inherited Create(VContext);
 FCamera := TSGCamera.Create();
@@ -39,12 +50,12 @@ FCamera.Context := VContext;
 FLightAngle := 0;
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample2_2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample2_2.Draw();
 var
 	Light : TSGVertex3f;
 begin
@@ -52,8 +63,14 @@ FCamera.CallAction();
 Light.Import(cos(FLightAngle),sin(FLightAngle),sin(FLightAngle*2));
 Light *= 7;
 FLightAngle += Context.ElapsedTime * 0.01;
+
 with Render do
 	begin
+	Color3f(0,1,0);
+	BeginScene(SGR_POINTS);
+	Light.Vertex(Render);
+	EndScene();
+	
 	Color3f(1,1,1);
 	Enable(SGR_LIGHTING);
 	Enable(SGR_LIGHT0);
@@ -101,7 +118,11 @@ with Render do
 	end;
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
-end.
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample2_2;
+	RunApplication();
+	end.
+{$ELSE}
+	end.
+	{$ENDIF}

@@ -1,25 +1,34 @@
 {$INCLUDE SaGe.inc}
-program Example6;
+{$IFDEF ENGINE}
+	unit Ex6;
+	interface
+{$ELSE}
+	program Example6;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeMesh
 	,SaGeImages
-	,Ex6_D,Ex6_N
+	
+	,Ex6_D
+	,Ex6_N
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample6=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -33,12 +42,16 @@ type
 		FImageBump, FImageTexture : TSGImage;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample6.ClassName():TSGString;
 begin
 Result := 'Bump Mapping';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample6.Create(const VContext : TSGContext);
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
@@ -87,12 +100,12 @@ FImageBump    := FMesh.LastMaterial().ImageBump;
 FImageTexture := FMesh.LastMaterial().ImageTexture;
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample6.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample6.Draw();
 procedure DrawHints();
 var
 	i : TSGWord;
@@ -178,7 +191,9 @@ case Context.KeyPressedChar of
 end;
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample6;
+	RunApplication();
+	{$ENDIF}
 end.

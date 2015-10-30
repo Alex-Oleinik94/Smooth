@@ -52,7 +52,7 @@ type
 
 class function TSGExample5_4.ClassName():TSGString;
 begin
-Result := 'Пример физического движка';
+Result := 'Пример физического движка №4';
 end;
 
 constructor TSGExample5_4.Create(const VContext : TSGContext);

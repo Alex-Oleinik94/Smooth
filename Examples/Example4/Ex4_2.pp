@@ -1,22 +1,29 @@
 {$INCLUDE SaGe.inc}
-program Example4_2;
+{$IFDEF ENGINE}
+	unit Ex4_2;
+	interface
+{$ELSE}
+	program Example4_2;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample4_2=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -31,12 +38,16 @@ type
 				end;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample4_2.ClassName():TSGString;
 begin
 Result := 'Вывод неиндексированым массивом из оперативки';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample4_2.Create(const VContext : TSGContext);
 var
 	i:TSGByte;
 begin
@@ -111,12 +122,12 @@ if Render.RenderType=SGRenderOpenGL then
 		FArray[i].FColor.ConvertType();
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample4_2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample4_2.Draw();
 begin
 FCamera.CallAction();
 
@@ -132,7 +143,9 @@ Render.DisableClientState(SGR_COLOR_ARRAY);
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample4_2;
+	RunApplication();
+	{$ENDIF}
 end.

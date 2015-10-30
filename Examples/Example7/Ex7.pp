@@ -1,15 +1,22 @@
 {$INCLUDE SaGe.inc}
-program Example7;
+{$IFDEF ENGINE}
+	unit Ex7;
+	interface
+{$ELSE}
+	program Example7;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBased
 	,SaGeBase
-	,SaGeBaseExample
 	,SaGeScreen
 	,SaGeUtils
 	,SaGeMath
@@ -34,6 +41,10 @@ type
 		FGraphic : TSGGraphic;
 		FArPoints : packed array of TSGVertex2f;
 		end;
+
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
 
 class function TSGApprFunction.ClassName():TSGString;
 begin
@@ -191,7 +202,7 @@ FFont.ToTexture();
 
 FBackButton := TSGButton.Create();
 SGScreen.CreateChild(FBackButton);
-FBackButton.SetBounds(Context.Width - 230,5,220,FFont.FontHeight+4);
+FBackButton.SetBounds(Context.Width - 230,5 {$IFDEF ENGINE} + FFont.FontHeight + 4 {$ENDIF},220,FFont.FontHeight+4);
 FBackButton.BoundsToNeedBounds();
 FBackButton.Caption := 'Назад';
 FBackButton.Visible:=False;
@@ -311,7 +322,10 @@ if FGraphic<>nil then
 	end;
 end;
 
-begin
-ExampleClass := TSGApprFunction;
-RunApplication();
+
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGApprFunction;
+	RunApplication();
+	{$ENDIF}
 end.

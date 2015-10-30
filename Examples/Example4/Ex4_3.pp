@@ -1,22 +1,29 @@
 {$INCLUDE SaGe.inc}
-program Example4_3;
+{$IFDEF ENGINE}
+	unit Ex4_3;
+	interface
+{$ELSE}
+	program Example4_3;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample4_3=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -28,12 +35,16 @@ type
 		FBufferIndexes:LongWord;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample4_3.ClassName():TSGString;
 begin
 Result := 'Вывод индексированым массивом с VBO';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample4_3.Create(const VContext : TSGContext);
 var
 	FArray  : packed array of 
 		packed record
@@ -149,14 +160,14 @@ SetLength(FIndexes,0);
 SetLength(FArray,0);
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample4_3.Destroy();
 begin
 Render.DeleteBuffersARB(1,@FBufferArray);
 Render.DeleteBuffersARB(1,@FBufferIndexes);
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample4_3.Draw();
 begin
 FCamera.CallAction();
 
@@ -178,7 +189,9 @@ Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,         0);
 Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB, 0);
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample4_3;
+	RunApplication();
+	{$ENDIF}
 end.

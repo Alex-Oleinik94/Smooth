@@ -1,14 +1,21 @@
 {$INCLUDE SaGe.inc}
-program Example1;
+{$IFDEF ENGINE}
+	unit Ex1;
+	interface
+{$ELSE}
+	program Example1;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
-	,SaGeBaseExample
 	;
 type
 	TSGExample1=class(TSGDrawClass)
@@ -18,6 +25,10 @@ type
 		procedure Draw();override;
 		class function ClassName():TSGString;override;
 		end;
+
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
 
 class function TSGExample1.ClassName():TSGString;
 begin
@@ -40,7 +51,9 @@ begin
 
 end;
 
-begin
-ExampleClass := TSGExample1;
-RunApplication();
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample1;
+	RunApplication();
+	{$ENDIF}
 end.

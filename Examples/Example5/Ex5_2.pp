@@ -1,15 +1,22 @@
 {$INCLUDE SaGe.inc}
-program Example5_2;
+{$IFDEF ENGINE}
+	unit Ex5_2;
+	interface
+{$ELSE}
+	program Example5_2;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeRender
 	,SaGeCommon
@@ -36,9 +43,13 @@ type
 		FPhysicsTimeIndex : TSGLongWord;
 		end;
 
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
 class function TSGExample5_2.ClassName():TSGString;
 begin
-Result := 'Пример физического движка';
+Result := 'Пример физического движка №2';
 end;
 
 constructor TSGExample5_2.Create(const VContext : TSGContext);
@@ -193,7 +204,9 @@ SGScreen.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
 end;
 
-begin
-ExampleClass := TSGExample5_2;
-RunApplication();
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample5_2;
+	RunApplication();
+	{$ENDIF}
 end.

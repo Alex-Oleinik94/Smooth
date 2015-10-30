@@ -70,9 +70,7 @@ uses
 	,SaGeModelRedactor
 	,SaGeGasDiffusion
 	,SaGeClientMaxWeb
-	
-	,Ex5_4
-	,Ex4_1
+	,SaGeAllExamples
 	;
 
 procedure Draw(const Context:TSGContext);
@@ -80,32 +78,31 @@ begin
 end;
 
 procedure Init(const MyContext:TSGContext);
+var
+	ExsDrawClasses : TSGDrawClasses = nil;
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGGasDiffusion);
-	Add(TSGClientMaxWeb);
-	Add(TSGExample4_1);
-	Add(TSGExample5_4);
-	
 	Add(TSGLoading);
-	Add(TSGModelRedactor);
-	Add(TSGGameTron);
-	
 	Add(TSGFractalMengerSpunchRelease);
 	Add(TSGFractalMandelbrodRelease);
-	Add(TSGFractalKohTriangle);//Треугольник Серпинского
+	Add(TSGFractalKohTriangle);
 	Add(TSGFractalTetraider);
 	Add(TSGFractalLomanaya);
 	Add(TSGFractalPodkova);
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
 	Add(TSGGenAlg);
+	Add(TSGAllExamples);
 	
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
+	//Add(TSGModelRedactor);
+	//Add(TSGGameTron);
+	//Add(TSGClientMaxWeb);
 	
 	Initialize();
 	end;

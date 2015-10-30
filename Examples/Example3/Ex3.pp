@@ -1,21 +1,28 @@
 {$INCLUDE SaGe.inc}
-program Example3;
+{$IFDEF ENGINE}
+	unit Ex3;
+	interface
+{$ELSE}
+	program Example3;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeScreen
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample3=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -25,24 +32,28 @@ type
 		FCamera : TSGCamera;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample3.ClassName():TSGString;
 begin
 Result := 'Кубики и текстура шрифта вместе с камерой';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample3.Create(const VContext : TSGContext);
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample3.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample3.Draw();
 
 procedure DrawCube(const x,y,z,r,a: Single);
 begin
@@ -108,7 +119,11 @@ Render.EndScene();
 SGScreen.Font.DisableTexture();
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
-end.
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample3;
+	RunApplication();
+	end.
+{$ELSE}
+	end.
+	{$ENDIF}

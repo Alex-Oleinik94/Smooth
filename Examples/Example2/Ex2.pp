@@ -1,19 +1,26 @@
 {$INCLUDE SaGe.inc}
-program Example2;
+{$IFDEF ENGINE}
+	unit Ex2;
+	interface
+{$ELSE}
+	program Example2;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeBaseExample
 	;
 type
-	TSGExample=class(TSGDrawClass)
+	TSGExample2=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
@@ -23,23 +30,27 @@ type
 		FAngle : TSGSingle;
 		end;
 
-class function TSGExample.ClassName():TSGString;
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
+
+class function TSGExample2.ClassName():TSGString;
 begin
 Result := 'Крутящиеся треугольники';
 end;
 
-constructor TSGExample.Create(const VContext : TSGContext);
+constructor TSGExample2.Create(const VContext : TSGContext);
 begin
 inherited Create(VContext);
 FAngle:=0;
 end;
 
-destructor TSGExample.Destroy();
+destructor TSGExample2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample.Draw();
+procedure TSGExample2.Draw();
 begin
 Render.InitMatrixMode(SG_3D);
 Render.Translatef(2,0,-6);
@@ -68,7 +79,11 @@ Render.EndScene();
 FAngle += Context.ElapsedTime ;
 end;
 
-begin
-ExampleClass := TSGExample;
-RunApplication();
-end.
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample2;
+	RunApplication();
+	end.
+{$ELSE}
+	end.
+	{$ENDIF}
