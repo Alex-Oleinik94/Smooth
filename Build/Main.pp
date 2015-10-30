@@ -71,8 +71,8 @@ uses
 	,SaGeGasDiffusion
 	,SaGeClientMaxWeb
 	
-	,Example5_4
-	,Example4_1
+	,Ex5_4
+	,Ex4_1
 	;
 
 procedure Draw(const Context:TSGContext);

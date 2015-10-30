@@ -1,15 +1,22 @@
 {$INCLUDE SaGe.inc}
-program Example5_4;
+{$IFDEF ENGINE}
+	unit Ex5_4;
+	interface
+{$ELSE}
+	program Example5_4;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
+	{$IFNDEF ENGINE}
+		{$IFDEF UNIX}
+			{$IFNDEF ANDROID}
+				cthreads,
+				{$ENDIF}
 			{$ENDIF}
+		SaGeBaseExample,
 		{$ENDIF}
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
-	,SaGeBaseExample
 	,SaGeUtils
 	,SaGeRender
 	,SaGeCommon
@@ -38,6 +45,10 @@ type
 		
 		FBike             : TSGCustomModel;
 		end;
+
+{$IFDEF ENGINE}
+	implementation
+	{$ENDIF}
 
 class function TSGExample5_4.ClassName():TSGString;
 begin
@@ -220,7 +231,11 @@ if (Context.KeysPressed('D')) then
 FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*0.003,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*0.003,0);
 end;
 
-begin
-ExampleClass := TSGExample5_4;
-RunApplication();
-end.
+{$IFNDEF ENGINE}
+	begin
+	ExampleClass := TSGExample5_4;
+	RunApplication();
+	end.
+{$ELSE}
+	end.
+	{$ENDIF}
