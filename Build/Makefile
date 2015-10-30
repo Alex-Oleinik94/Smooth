@@ -19,13 +19,11 @@ release:
 debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
 android:
-	$(CROSSPP) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
+	@$(CROSSPP) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
 darwin_debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main 
 darwin_release:
 	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main
-ios:
-	
 lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
 build_files:
@@ -58,3 +56,5 @@ clear:
 	@rm -f SrcUnits/*.ppu
 	@rm -f Main.res
 	@$(MAKE) clear_files
+ios:
+	
