@@ -46,6 +46,7 @@ type
 		procedure InitViewModeComboBox();virtual;abstract;
 		procedure Move(const Param : TSGSingle);
 		procedure MoveSidewards(const Param : TSGSingle);
+		procedure MoveUp(const Param : TSGSingle);
 		procedure Rotate(const x, y, z : TSGSingle);
 			public
 		property Up        : TSGVertex3f read FUp         write FUp;
@@ -661,61 +662,41 @@ SG_VIEW_LOOK_AT_OBJECT:
 	FUp.Normalize();
 	Render.InitMatrixMode(SG_3D);
 	//Matrix:=SGGetLookAtMatrix(FLocation,FView,FUp);
-	Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(TPhysicsVector3(FLocation),TPhysicsVector3(FView),TPhysicsVector3(FUp)));
+	Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(TPhysicsVector3(FLocation),TPhysicsVector3(FView+FLocation),TPhysicsVector3(FUp)));
 	Render.MultMatrixf(@Matrix);
 	end;
 end;
 end;
 
 procedure TSGCamera.Move(const Param : TSGSingle);
-var
-	a : TSGVertex3f;
 begin
-a := Position - View;
-a. Normalize();
-Position := Position + a * Param;
-View := View + a * Param;
+Position := Position + FView * Param;
 end;
 
 procedure TSGCamera.Rotate(const x, y, z : TSGSingle);
 var
-	v : TSGVertex3f;
-	s, c : TSGSingle;
+	Sidewards : TSGVertex3f;
 begin
-v := View - Position;
 if x<>0 then
 	begin
-	c := cos(x);
-	s := sin(x);
-	FView.Z:=Position.Z+s*v.Y+c*v.Z;
-	FView.Y:=Position.Y+c*v.Y-s*v.Z;
+	Sidewards := (View * Up).Normalized();
+	View := SGRotatePoint(View, Sidewards, -X).Normalized();
+	Up := (Sidewards * View).Normalized();
 	end;
 if y<>0 then
-	begin
-	c := cos(y);
-	s := sin(y);
-	FView.Z:=Position.Z+s*v.X+c*v.Z;
-	FView.X:=Position.X+c*v.X-s*v.Z;
-	end;
+	View := SGRotatePoint(View, Up, -Y).Normalized();
 if z<>0 then
-	begin
-	c := cos(z);
-	s := sin(z);
-	FView.X:=Position.X+s*v.Y+c*v.X;
-	FView.Y:=Position.Y+c*v.Y-s*v.X;
-	end;
+	Up := SGRotatePoint(Up, View, -Z).Normalized();
+end;
+
+procedure TSGCamera.MoveUp(const Param : TSGSingle);
+begin
+Position := Position + Up * Param;
 end;
 
 procedure TSGCamera.MoveSidewards(const Param : TSGSingle);
-var
-	a : TSGVertex3f;
 begin
-a := View - Position;
-a. Normalize();
-a := (a * Up);
-a. Normalize();
-Position := Position + a * Param;
-View := View + a * Param;
+Position := Position + (View * Up).Normalized() * Param;
 end;
 
 procedure TSGCamera.CallAction();inline;

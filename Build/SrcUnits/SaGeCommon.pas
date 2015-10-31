@@ -87,6 +87,7 @@ type
 		procedure ReadFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ReadLnFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Normalized():TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGVertex3f=TSGVertex3f;
 	SGVertex=SGVertex3f;
@@ -331,13 +332,48 @@ function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix
 function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGWriteMatrix4(const P:TSGPointer);
+procedure SGWriteMatrix4(const P:TSGPointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;
-
+function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+ 
 implementation
 
-function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;
+function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+Procedure RotatePoint(Var Xp, Yp, Zp: TSGSingle;const Xv, Yv, Zv, Angle: TSGSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var 
+	Temp, TempV, Nx, Ny, Nz: TSGSingle;
+	C, S : TSGSingle;
+Begin 
+C := Cos(Angle);
+S := Sin(Angle);
+Temp := 1.0 - C;
+
+TempV := Temp * Xv;
+Nx:=Xp * (Xv * TempV + C) +
+	Yp * (Yv * TempV - S * Zv) +
+	Zp * (Zv * TempV + S * Yv);
+
+TempV := Temp * Yv;
+Ny:=Xp * (Xv * TempV + S * Zv) +
+	Yp * (Yv * TempV + C) +
+	Zp * (Zv * TempV - S * Xv);
+
+TempV := Temp * Zv;
+Nz:=Xp * (Xv * TempV - S * Yv) +
+	Yp * (Yv * TempV + S * Xv) +
+	Zp * (Zv * TempV + C);
+
+Xp:=Nx; 
+Yp:=Ny; 
+Zp:=Nz; 
+End;
+begin
+Result := Point;
+RotatePoint (Result.x, Result.y, Result.z, Os.x, Os.y, Os.z, Angle);
+end;
+
+function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGByte;
 begin
@@ -374,7 +410,7 @@ for i:=0 to 3 do
 Result:=m;
 end;
 
-procedure SGWriteMatrix4(const P:TSGPointer);
+procedure SGWriteMatrix4(const P:TSGPointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 type
 	PTSGMatrix4Type=^TSGMatrix4Type;
 var
@@ -608,6 +644,12 @@ begin
 VRender.BeginScene(SGR_POINTS);
 Vertex(VRender);
 VRender.EndScene();
+end;
+
+function TSGVertex3f.Normalized():TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Self;
+Result.Normalize();
 end;
 
 procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
