@@ -62,6 +62,7 @@ type
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():TSGString;override;
+		procedure Update();virtual;
 			private
 		FObjects : packed array of TSGPhysicsObject;
 		FPhysics : PAPPE.TPhysics;
@@ -199,12 +200,7 @@ PAPPE.PhysicsDone       (FPhysics);
 inherited;
 end;
 
-procedure TSGPhysics.Draw();
-var
-	II : TSGLongWord;
-var
-	I : TSGLongWord;
-	LigthPos : TSGVertex3f;
+procedure TSGPhysics.Update();
 begin
 PAPPE.PhysicsInstance:=@FPhysics;
 
@@ -218,7 +214,15 @@ while FPhysicsTiks >= FPhysics.TimeStep do
 	PAPPE.PhysicsUpdate(FPhysics,FPhysics.TimeStep);
 	end;
 PAPPE.PhysicsInterpolate(FPhysics,FPhysicsTiks/FPhysics.TimeStep);
+end;
 
+procedure TSGPhysics.Draw();
+var
+	II : TSGLongWord;
+var
+	I : TSGLongWord;
+	LigthPos : TSGVertex3f;
+begin
 if FDrawable then
 	begin
 	if FLigths<>nil then

@@ -1035,6 +1035,7 @@ LoadExtendeds();
 		begin
 		if wglGetSwapIntervalEXT()=0 then
 			wglSwapIntervalEXT(1);
+		SGLog.Sourse(['TSGRenderOpenGL.Init - V-Sync is "',TSGBoolean(wglGetSwapIntervalEXT()),'"']);
 		end;
 	{$ENDIF}
 end;
@@ -1298,7 +1299,7 @@ Result:=False;
 	ogl_Attr[ 3 ] := 24;
 	ogl_Attr[ 4 ] := AGL_NONE;
 	ogl_Format := aglChoosePixelFormat( nil, 0, @ogl_Attr[ 0 ] );
-        	Result:=Assigned( ogl_Format );
+	Result:=Assigned( ogl_Format );
 	{$ENDIF}
 {$IFDEF MSWINDOWS}
 	FillChar(pfd, sizeof(pfd), 0);
@@ -1310,7 +1311,9 @@ Result:=False;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
 	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), @pfd );
+	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
 	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), iFormat, @pfd );
+	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;
