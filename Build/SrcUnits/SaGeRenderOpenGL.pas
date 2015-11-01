@@ -28,8 +28,8 @@ uses
 		,glext
 	{$ELSE}
 		,gles
-		//,gles11
-		//,gles20
+		,gles11
+		,gles20
 		{$ENDIF}
 	{$IFDEF MSWINDOWS}
 		,windows
@@ -244,48 +244,52 @@ implementation
 
 function TSGRenderOpenGL.ShadersSuppored() : TSGBoolean;
 begin
-Result := SGIsSuppored_GL_ARB_shader_objects;
+Result := {$IFDEF MOBILE}False{$ELSE}SGIsSuppored_GL_ARB_shader_objects{$ENDIF};
 end;
 
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
 begin
-Result := glCreateShaderObjectARB(VShaderType);
+Result := {$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType);
 end;
 
 procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
 begin
-glShaderSourceARB(VShader,1,@VSourse,@VSourseLength);
+{$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}(VShader,1,@VSourse,@VSourseLength);
 end;
 
 procedure TSGRenderOpenGL.CompileShader(const VShader : TSGLongWord);
 begin
-glCompileShaderARB(VShader);
+{$IFDEF MOBILE}glCompileShader{$ELSE}glCompileShaderARB{$ENDIF}(VShader);
 end;
 
 procedure TSGRenderOpenGL.GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);
 begin
-glGetObjectParameterivARB(VObject,VParamName,VResult);
+//glGetProgramiv - GLES
+//glGetShaderiv - GLES
+{$IFNDEF MOBILE}glGetObjectParameterivARB(VObject,VParamName,VResult);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
 begin
-glGetInfoLogARB(VHandle,VMaxLength,@VLength,VLog);
+//glGetShaderInfoLog - GLES
+//glGetProgramInfoLog - GLES
+{$IFNDEF MOBILE}glGetInfoLogARB(VHandle,VMaxLength,@VLength,VLog);{$ENDIF}
 end;
 
 
 function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
 begin
-Result := glCreateProgramObjectARB();
+Result := {$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}();
 end;
 
 procedure TSGRenderOpenGL.AttachShader(const VProgram, VShader : TSGLongWord);
 begin
-glAttachObjectARB(VProgram,VShader);
+{$IFDEF MOBILE}glAttachShader{$ELSE}glAttachObjectARB{$ENDIF}(VProgram,VShader);
 end;
 
 procedure TSGRenderOpenGL.LinkShaderProgram(const VProgram : TSGLongWord);
 begin
-glLinkProgramARB(VProgram);
+{$IFNDEF MOBILE}glLinkProgramARB{$ELSE}glLinkProgram{$ENDIF}(VProgram);
 end;
 
 procedure TSGRenderOpenGL.DeleteShader(const VProgram : TSGLongWord);
