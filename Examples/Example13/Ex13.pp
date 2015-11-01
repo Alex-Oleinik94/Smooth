@@ -104,6 +104,9 @@ type
 		FShaderProgram : TSGShaderProgram;
 		FVertexShader, FFragmentShader : TSGShader;
 		FRotateAngle : TSGFloat;
+		
+		F_ShaderBoneMat  : TSGLongWord;
+		F_ShaderTextures : array[0..7] of TSGLongWord;
 		end;
 
 {$IFDEF ENGINE}
@@ -116,6 +119,9 @@ Result := 'Скелетная анимация';
 end;
 
 constructor TSGExample13.Create(const VContext : TSGContext);
+var
+	i : TSGWord;
+	TempPChar : PChar;
 begin
 inherited Create(VContext);
 FRotateAngle := 0;
@@ -142,10 +148,26 @@ FShaderProgram.Attach(FVertexShader);
 FShaderProgram.Attach(FFragmentShader);
 if not FShaderProgram.Link() then
 	FShaderProgram.PrintInfoLog();
+
+F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
+for i := 0 to 7 do
+	begin
+	TempPChar := SGStringToPChar('myTexture'+SGStr(i));
+	F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
+	FreeMem(TempPChar)
+	end;
+
+
 end;
 
 destructor TSGExample13.Destroy();
 begin
+FShaderProgram.Destroy();
+
+//    allready processed in TSGShaderProgram.Destroy()
+//FVertexShader.Destroy();
+//FFragmentShader.Destroy();
+
 inherited;
 end;
 

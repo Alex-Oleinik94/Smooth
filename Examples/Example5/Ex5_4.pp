@@ -251,6 +251,12 @@ var
 	Q, E : TSGBoolean;
 	RotateZ : TSGFloat = 0;
 begin
+if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
+	begin
+	Context.CursorInCenter := not Context.CursorInCenter;
+	Context.ShowCursor(not Context.CursorInCenter);
+	end;
+
 Q := Context.KeysPressed('Q');
 E := Context.KeysPressed('E');
 if (Q xor E) then

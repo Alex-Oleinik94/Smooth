@@ -25,7 +25,8 @@ type
 		FShader : TSGLongWord;
 		FType   : TSGLongWord;
 			public
-		property Shader:LongWord read FShader;
+		property Shader : TSGLongWord read FShader;
+		property Handle : TSGLongWord read FShader;
 		end;
 	TSGShaderProgram=class(TSGContextObject)
 			public
@@ -34,14 +35,22 @@ type
 		procedure Attach(const NewShader:TSGShader);
 		function Link():Boolean;
 		procedure PrintInfoLog();
+		procedure Use();
 			private
-		FProgram:LongWord;
-		FShaders:
+		FProgram : TSGLongWord;
+		FShaders :
 			packed array of
 				TSGShader;
+			public
+		property Handle : TSGLongWord read FProgram;
 		end;
 
 implementation
+
+procedure TSGShaderProgram.Use();
+begin
+Render.UseProgram(Handle);
+end;
 
 constructor TSGShaderProgram.Create(const VContext:TSGContext);
 begin

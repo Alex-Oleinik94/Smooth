@@ -179,6 +179,11 @@ type
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
+		
+		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;override;
+		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
+		procedure UseProgram(const VProgram : TSGLongWord);override;
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
@@ -241,6 +246,26 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
+begin
+{$IFDEF MOBILE}glUniform1i{$ELSE}glUniform1iARB{$ENDIF}(VLocationName,VData);
+end;
+
+procedure TSGRenderOpenGL.UseProgram(const VProgram : TSGLongWord);
+begin
+{$IFDEF MOBILE}glUseProgram{$ELSE}glUseProgramObjectARB{$ENDIF}(VProgram);
+end;
+
+procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
+begin
+glUniformMatrix4fv(VLocationName,VCount,Byte(VTranspose),VData);
+end;
+
+function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
+begin
+{$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}(VProgram,VLocationName);
+end;
 
 function TSGRenderOpenGL.ShadersSuppored() : TSGBoolean;
 begin

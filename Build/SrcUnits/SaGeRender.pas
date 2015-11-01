@@ -146,6 +146,11 @@ type
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);virtual;abstract;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
+		
+		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;virtual;abstract;
+		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);virtual;abstract;
+		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);virtual;abstract;
 			public
 		property Window : TSGClass read FWindow write FWindow;
 		end;
