@@ -134,7 +134,7 @@ type
 			{$ENDIF}
 		
 			(* Shaders *)
-		function ShadersSuppored() : TSGBoolean;virtual;abstract;
+		function SupporedShaders() : TSGBoolean;virtual;abstract;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;virtual;abstract;
 		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);virtual;abstract;
 		procedure CompileShader(const VShader : TSGLongWord);virtual;abstract;

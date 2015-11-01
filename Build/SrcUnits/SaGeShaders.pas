@@ -168,7 +168,7 @@ else
 end;
 begin
 (Self as TSGContextObject).Create(VContext);
-if Render.ShadersSuppored() then
+if Render.SupporedShaders() then
 	begin
 	FShader:=Render.CreateShader(ShaderType);
 	end

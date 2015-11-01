@@ -100,6 +100,7 @@ end;
 
 begin
 inherited Create(VContext);
+FBike := nil;
 FGravitationFlag := False;
 
 Context.CursorInCenter:=True;
@@ -166,6 +167,10 @@ end;
 
 destructor TSGExample5_4.Destroy();
 begin
+if FBike <> nil then
+	FBike.Destroy();
+if FCamera <> nil then
+	FCamera.Destroy();
 if FPhysics<>nil then
 	FPhysics.Destroy();
 inherited;

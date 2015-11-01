@@ -108,6 +108,25 @@ type
 		{$IFNDEF MOBILE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
+		
+		function SupporedShaders() : TSGBoolean;override;
+		// Остальное потом
+		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
+		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);override;
+		procedure CompileShader(const VShader : TSGLongWord);override;
+		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
+		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;
+		procedure DeleteShader(const VProgram : TSGLongWord);override;
+		
+		function CreateShaderProgram() : TSGLongWord;override;
+		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
+		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
+		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
+		
+		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;override;
+		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
+		procedure UseProgram(const VProgram : TSGLongWord);override;
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;}
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
@@ -224,6 +243,11 @@ function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;i
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
+
+function TSGRenderDirectX.SupporedShaders() : TSGBoolean;
+begin
+Result := False;
+end;
 
 {$IFNDEF MOBILE}
 procedure TSGRenderDirectX.GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);

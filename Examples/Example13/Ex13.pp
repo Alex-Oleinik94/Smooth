@@ -107,6 +107,7 @@ type
 		
 		F_ShaderBoneMat  : TSGLongWord;
 		F_ShaderTextures : array[0..7] of TSGLongWord;
+		
 		end;
 
 {$IFDEF ENGINE}
@@ -125,45 +126,55 @@ var
 begin
 inherited Create(VContext);
 FRotateAngle := 0;
+FCamera := nil;
+FVertexShader := nil;
+FFragmentShader := nil;
+FShaderProgram := nil;
 
-FCamera:=TSGCamera.Create();
-FCamera.SetContext(Context);
-FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
-FCamera.Up:=SGVertexImport(0,0,1);
-FCamera.Location:=SGVertexImport(0,-10,-10);
-FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
-
-FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
-FVertexShader.Sourse(VertexShaderSourse);
-if not FVertexShader.Compile() then
-	FVertexShader.PrintInfoLog();
-
-FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
-FFragmentShader.Sourse(FragmentShaderSourse);
-if not FFragmentShader.Compile() then
-	FFragmentShader.PrintInfoLog();
-
-FShaderProgram := TSGShaderProgram.Create(Context);
-FShaderProgram.Attach(FVertexShader);
-FShaderProgram.Attach(FFragmentShader);
-if not FShaderProgram.Link() then
-	FShaderProgram.PrintInfoLog();
-
-F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
-for i := 0 to 7 do
+if Render.SupporedShaders() then
 	begin
-	TempPChar := SGStringToPChar('myTexture'+SGStr(i));
-	F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
-	FreeMem(TempPChar)
+	FCamera:=TSGCamera.Create();
+	FCamera.SetContext(Context);
+	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
+	FCamera.Up:=SGVertexImport(0,0,1);
+	FCamera.Location:=SGVertexImport(0,-10,-10);
+	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
+
+	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
+	FVertexShader.Sourse(VertexShaderSourse);
+	if not FVertexShader.Compile() then
+		FVertexShader.PrintInfoLog();
+
+	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
+	FFragmentShader.Sourse(FragmentShaderSourse);
+	if not FFragmentShader.Compile() then
+		FFragmentShader.PrintInfoLog();
+
+	FShaderProgram := TSGShaderProgram.Create(Context);
+	FShaderProgram.Attach(FVertexShader);
+	FShaderProgram.Attach(FFragmentShader);
+	if not FShaderProgram.Link() then
+		FShaderProgram.PrintInfoLog();
+
+	F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
+	for i := 0 to 7 do
+		begin
+		TempPChar := SGStringToPChar('myTexture'+SGStr(i));
+		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
+		FreeMem(TempPChar)
+		end;
 	end;
-
-
 end;
 
 destructor TSGExample13.Destroy();
 begin
-FShaderProgram.Destroy();
-Render.UseProgram(0);
+if FCamera <> nil then
+	FCamera.Destroy();
+if FShaderProgram <> nil then
+	begin
+	FShaderProgram.Destroy();
+	Render.UseProgram(0);
+	end;
 
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
@@ -173,11 +184,33 @@ inherited;
 end;
 
 procedure TSGExample13.Draw();
+const
+	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
+	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
+var
+	VStringLength : TSGLongWord;
 begin
-FCamera.CallAction();
-FRotateAngle += Context.ElapsedTime/100;
-Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
+if Render.SupporedShaders() then
+	begin
+	FCamera.CallAction();
+	FRotateAngle += Context.ElapsedTime/100;
+	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 
+	end
+else
+	begin
+	Render.InitMatrixMode(SG_2D);
+	
+	Render.Color3f(1,0,0);
+	VStringLength := SGScreen.Font.StringLength(WarningString1);
+	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
+		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height - 20) div 2),
+		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 00) div 2));
+	VStringLength := SGScreen.Font.StringLength(WarningString2);
+	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
+		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
+		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
+	end;
 end;
 
 {$IFNDEF ENGINE}

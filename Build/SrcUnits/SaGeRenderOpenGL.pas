@@ -167,7 +167,7 @@ type
 			{$ENDIF}
 		
 			(* Shaders *)
-		function ShadersSuppored() : TSGBoolean;override;
+		function SupporedShaders() : TSGBoolean;override;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
 		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);override;
 		procedure CompileShader(const VShader : TSGLongWord);override;
@@ -267,7 +267,7 @@ begin
 {$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}(VProgram,VLocationName);
 end;
 
-function TSGRenderOpenGL.ShadersSuppored() : TSGBoolean;
+function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
 begin
 Result := {$IFDEF MOBILE}False{$ELSE}SGIsSuppored_GL_ARB_shader_objects{$ENDIF};
 end;
