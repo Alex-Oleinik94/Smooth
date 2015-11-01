@@ -163,6 +163,7 @@ end;
 destructor TSGExample13.Destroy();
 begin
 FShaderProgram.Destroy();
+Render.UseProgram(0);
 
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();

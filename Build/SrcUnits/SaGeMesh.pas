@@ -917,7 +917,7 @@ FNOfVerts+=FQuantityNewVertexes;
 ReAllocMem(ArVertex,GetVertexesSize());
 end;
 
-procedure TSG3DObject.ChangeMeshColorType4b();
+procedure TSG3DObject.ChangeMeshColorType4b(); // BGRA to RGBA
 var
 	i : TSGMaxEnum;
 	c : byte;
@@ -1102,9 +1102,7 @@ end;
 
 function TSG3DObject.GetCountOfOneColorCoord():TSGLongWord;inline;
 begin
-Result := Byte(FHasColors)*(
-	byte((FColorType=SGMeshColorType3b) or (FColorType=SGMeshColorType3f))*3+
-	byte((FColorType=SGMeshColorType4b) or (FColorType=SGMeshColorType4f))*4);
+Result := Byte(FHasColors)*(3+byte((FColorType=SGMeshColorType4b) xor (FColorType=SGMeshColorType4f)));
 end;
 
 function TSG3DObject.GetCountOfOneNormalCoord():TSGLongWord;inline;
@@ -1124,9 +1122,7 @@ end;
 
 function TSG3DObject.GetSizeOfOneColorCoord():TSGLongWord;inline;
 begin
-Result := GetCountOfOneColorCoord() * (
-	byte((FColorType=SGMeshColorType3b) or (FColorType=SGMeshColorType4b))+
-	byte((FColorType=SGMeshColorType3f) or (FColorType=SGMeshColorType4f))*SizeOf(TSGSingle));
+Result := GetCountOfOneColorCoord() * (1 + byte((FColorType=SGMeshColorType3f) xor (FColorType=SGMeshColorType4f))*(SizeOf(TSGSingle)-1));
 end;
 
 function TSG3DObject.GetSizeOfOneNormalCoord():TSGLongWord;inline;
@@ -1702,7 +1698,7 @@ else
 			GetSizeOfOneVertex(),
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				GetCountOfOneVertexCoord()));
+				GetSizeOfOneVertexCoord()));
 	if FHasNormals then
 		Render.NormalPointer(
 			SGR_FLOAT, 
