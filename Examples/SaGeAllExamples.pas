@@ -60,8 +60,9 @@ FDrawClasses.Add(TSGExample6_2);
 FDrawClasses.Add(TSGApprFunction{Ex7});
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.BoundsToNeedBounds();
-FDrawClasses.ComboBox.SetBounds(Context.Width - FDrawClasses.ComboBox.Width - 80 - 10,FDrawClasses.ComboBox.Top,FDrawClasses.ComboBox.Width + 80,FDrawClasses.ComboBox.Height);
+FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
 FDrawClasses.ComboBox.BoundsToNeedBounds();
+FDrawClasses.ComboBox.SetBounds(5,28,SGDrawClassesComboBoxWidth,18);
 end;
 
 destructor TSGAllExamples.Destroy();

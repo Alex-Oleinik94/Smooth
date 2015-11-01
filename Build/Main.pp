@@ -84,14 +84,9 @@ begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
 	Add(TSGAllExamples,False);
+	Add(TSGAllFractals,False);
 	Add(TSGGasDiffusion);
 	Add(TSGLoading);
-	Add(TSGFractalMengerSpunchRelease);
-	Add(TSGFractalMandelbrodRelease);
-	Add(TSGFractalKohTriangle);
-	Add(TSGFractalTetraider);
-	Add(TSGFractalLomanaya);
-	Add(TSGFractalPodkova);
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
 	Add(TSGGenAlg);

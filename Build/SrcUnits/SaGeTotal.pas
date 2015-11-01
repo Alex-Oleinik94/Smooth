@@ -17,6 +17,9 @@ uses
 	,SaGeRender
 	,SaGeImages
 	;
+
+const
+	SGDrawClassesComboBoxWidth = 300;
 type
 	TSGDrawClasses=class(TSGDrawClass)
 			public
@@ -33,7 +36,7 @@ type
 				end;
 		FComboBox2:TSGComboBox;
 			public
-		procedure Draw;override;
+		procedure Draw();override;
 		procedure Add(const NewClass:TSGClassOfDrawClass; const Dravable : TSGBoolean = True);
 		procedure Initialize();
 			public
@@ -42,9 +45,9 @@ type
 	
 	TSGND=class(TSGDrawClass)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		constructor Create();override;
+		destructor Destroy();override;
+		class function ClassName():string;override;
 			public
 		FDimention:LongInt;
 			public
@@ -1197,7 +1200,7 @@ begin
 	{$ENDIF}
 FComboBox2:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox2);
-SGScreen.LastChild.SetBounds(5,5{+Context.TopShift},230,18);
+SGScreen.LastChild.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
 SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;

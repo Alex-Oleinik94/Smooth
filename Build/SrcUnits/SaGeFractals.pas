@@ -15,6 +15,7 @@ uses
 	,SaGeImages
 	,SaGeImagesBase
 	,SaGeRender
+	,SaGeTotal
 	;
 type
 	TSGFractal = class;
@@ -134,7 +135,55 @@ type
 {$i Includes\SageFractalTetraider.inc}
 {$UNDEF SGREADINTERFACE}
 
+type
+	TSGAllFractals = class(TSGDrawClass)
+			public
+		constructor Create(const VContext:TSGContext);override;
+		destructor Destroy();override;
+		class function ClassName():string;override;
+			public
+		FDrawClasses : TSGDrawClasses;
+			public
+		procedure Draw();override;
+		end;
+
 implementation
+
+
+constructor TSGAllFractals.Create(const VContext:TSGContext);
+begin
+inherited Create(VContext);
+FDrawClasses := TSGDrawClasses.Create(Context);
+FDrawClasses.Add(TSGFractalMengerSpunchRelease);
+FDrawClasses.Add(TSGFractalMandelbrodRelease);
+FDrawClasses.Add(TSGFractalKohTriangle);
+FDrawClasses.Add(TSGFractalTetraider);
+FDrawClasses.Add(TSGFractalLomanaya);
+FDrawClasses.Add(TSGFractalPodkova);
+FDrawClasses.Initialize();
+FDrawClasses.ComboBox.BoundsToNeedBounds();
+FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
+FDrawClasses.ComboBox.BoundsToNeedBounds();
+FDrawClasses.ComboBox.SetBounds(5,28,SGDrawClassesComboBoxWidth,18);
+end;
+
+destructor TSGAllFractals.Destroy();
+begin
+FDrawClasses.Destroy();
+FDrawClasses:=nil;
+inherited;
+end;
+
+class function TSGAllFractals.ClassName():string;
+begin
+Result := 'Фракталы';
+end;
+
+procedure TSGAllFractals.Draw();
+begin
+if FDrawClasses<>nil then
+	FDrawClasses.Draw();
+end;
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$i Includes\SaGeFractalMengerSpunch.inc}
