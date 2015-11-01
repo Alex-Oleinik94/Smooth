@@ -165,6 +165,20 @@ type
 		{$ELSE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
+		
+			(* Shaders *)
+		function ShadersSuppored() : TSGBoolean;override;
+		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
+		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);override;
+		procedure CompileShader(const VShader : TSGLongWord);override;
+		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
+		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;
+		procedure DeleteShader(const VProgram : TSGLongWord);override;
+		
+		function CreateShaderProgram() : TSGLongWord;override;
+		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
+		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
+		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
@@ -227,6 +241,62 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+function TSGRenderOpenGL.ShadersSuppored() : TSGBoolean;
+begin
+Result := SGIsSuppored_GL_ARB_shader_objects;
+end;
+
+function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
+begin
+Result := glCreateShaderObjectARB(VShaderType);
+end;
+
+procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
+begin
+glShaderSourceARB(VShader,1,@VSourse,@VSourseLength);
+end;
+
+procedure TSGRenderOpenGL.CompileShader(const VShader : TSGLongWord);
+begin
+glCompileShaderARB(VShader);
+end;
+
+procedure TSGRenderOpenGL.GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);
+begin
+glGetObjectParameterivARB(VObject,VParamName,VResult);
+end;
+
+procedure TSGRenderOpenGL.GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
+begin
+glGetInfoLogARB(VHandle,VMaxLength,@VLength,VLog);
+end;
+
+
+function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
+begin
+Result := glCreateProgramObjectARB();
+end;
+
+procedure TSGRenderOpenGL.AttachShader(const VProgram, VShader : TSGLongWord);
+begin
+glAttachObjectARB(VProgram,VShader);
+end;
+
+procedure TSGRenderOpenGL.LinkShaderProgram(const VProgram : TSGLongWord);
+begin
+glLinkProgramARB(VProgram);
+end;
+
+procedure TSGRenderOpenGL.DeleteShader(const VProgram : TSGLongWord);
+begin
+glDeleteShader(VProgram);
+end;
+
+procedure TSGRenderOpenGL.DeleteShaderProgram(const VProgram : TSGLongWord);
+begin
+glDeleteProgram(VProgram);
+end;
 
 {$IFDEF MOBILE}
 	const

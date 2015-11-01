@@ -23,6 +23,7 @@ uses
 	,Ex6
 	,Ex6_2
 	,Ex7
+	,Ex13
 	;
 
 type
@@ -43,6 +44,7 @@ constructor TSGAllExamples.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDrawClasses := TSGDrawClasses.Create(Context);
+FDrawClasses.Add(TSGExample13);
 FDrawClasses.Add(TSGExample1);
 FDrawClasses.Add(TSGExample2);
 FDrawClasses.Add(TSGExample2_2);
@@ -55,7 +57,7 @@ FDrawClasses.Add(TSGExample5_2);
 FDrawClasses.Add(TSGExample5_4);
 FDrawClasses.Add(TSGExample6);
 FDrawClasses.Add(TSGExample6_2);
-FDrawClasses.Add(TSGApprFunction);
+FDrawClasses.Add(TSGApprFunction{Ex7});
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.BoundsToNeedBounds();
 FDrawClasses.ComboBox.SetBounds(Context.Width - FDrawClasses.ComboBox.Width - 80 - 10,FDrawClasses.ComboBox.Top,FDrawClasses.ComboBox.Width + 80,FDrawClasses.ComboBox.Height);

@@ -56,7 +56,7 @@ uses
 	,SaGeMesh
 	,SaGeMath
 	,SaGeExamples
-	//,SaGeShaders
+	,SaGeShaders
 	,SaGeFPCToC
 	,SaGeNet
 	,SaGeGeneticalAlgoritm
@@ -83,6 +83,7 @@ var
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGAllExamples,False);
 	Add(TSGGasDiffusion);
 	Add(TSGLoading);
 	Add(TSGFractalMengerSpunchRelease);
@@ -94,7 +95,6 @@ with TSGDrawClasses.Create(MyContext) do
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
 	Add(TSGGenAlg);
-	Add(TSGAllExamples);
 	
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);

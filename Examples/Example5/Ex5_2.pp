@@ -152,7 +152,10 @@ FCamera.CallAction();
 Render.Color3f(1,1,1);
 dt1.Get();
 if FPhysics<>nil then
+	begin
+	FPhysics.UpDate();
 	FPhysics.Draw();
+	end;
 dt2.Get();
 
 FGravitationAngle += Context.ElapsedTime/100;

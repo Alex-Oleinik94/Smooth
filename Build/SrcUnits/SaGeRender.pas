@@ -15,6 +15,8 @@ const
 	TSGRenderFar = 10000;
 	TSGRenderNear = 0.001;
 type
+	TSGRPInteger = ^ integer;
+	
 	TSGMatrixMode   = TSGLongWord;
 	TSGPrimtiveType = TSGLongWord;
 	// Это те виды рендеров, которые есть, точнее идентификаторы
@@ -130,6 +132,20 @@ type
 		{$ELSE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);virtual;abstract;
 			{$ENDIF}
+		
+			(* Shaders *)
+		function ShadersSuppored() : TSGBoolean;virtual;abstract;
+		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;virtual;abstract;
+		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);virtual;abstract;
+		procedure CompileShader(const VShader : TSGLongWord);virtual;abstract;
+		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);virtual;abstract;
+		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);virtual;abstract;
+		procedure DeleteShader(const VProgram : TSGLongWord);virtual;abstract;
+		
+		function CreateShaderProgram() : TSGLongWord;virtual;abstract;
+		procedure AttachShader(const VProgram, VShader : TSGLongWord);virtual;abstract;
+		procedure LinkShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
+		procedure DeleteShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
 			public
 		property Window : TSGClass read FWindow write FWindow;
 		end;

@@ -1,66 +1,99 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE Includes\SaGe.inc}
 
 unit SaGeShaders;
 
 interface
 uses
 	crt
-	,SaGeBase, SaGeBased
+	,SaGeBase
+	,SaGeBased
 	,SaGeCommon
 	,SysUtils
 	,SaGeRender
+	,SaGeContext
 	;
 type
-	{
-	GL_VERTEX_SHADER
-	GL_FRAGMENT_SHADER
-	GL_VERTEX_SHADER_ARB = GL_VERTEX_SHADER
-	GL_FRAGMENT_SHADER_ARB = GL_FRAGMENT_SHADER
-	}
-	TSGProgram=class;
-	TSGShader=class(TObject)
+	TSGShaderProgram=class;
+	TSGShader=class(TSGContextObject)
 			public
-		constructor Create(const ShaderType:LongWord = SGR_VERTEX_SHADER;const Version:LongWord = SG_GLSL_ARB);
-		destructor Destroy;override;
-		procedure Compile;inline;
+		constructor Create(const VContext:TSGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
+		destructor Destroy();override;
+		function Compile():Boolean;inline;
 		procedure Sourse(const s:string);overload;
-		procedure PrintInfoLog;
+		procedure PrintInfoLog();
 			private
-		FShader:LongWord;
-		FType:LongWord;
-		FVersion:LongWord;
+		FShader : TSGLongWord;
+		FType   : TSGLongWord;
 			public
 		property Shader:LongWord read FShader;
 		end;
-	TSGProgram=class(TObject)
+	TSGShaderProgram=class(TSGContextObject)
 			public
-		constructor Create;
+		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
 		procedure Attach(const NewShader:TSGShader);
+		function Link():Boolean;
+		procedure PrintInfoLog();
 			private
 		FProgram:LongWord;
 		FShaders:
 			packed array of
 				TSGShader;
 		end;
+
 implementation
 
-constructor TSGProgram.Create;
+constructor TSGShaderProgram.Create(const VContext:TSGContext);
 begin
-inherited;
-FProgram:=glCreateProgram();
+inherited Create(VContext);
+FProgram:=Render.CreateShaderProgram();
 FShaders:=nil;
 end;
-procedure TSGProgram.Attach(const NewShader:TSGShader);
+
+procedure TSGShaderProgram.Attach(const NewShader:TSGShader);
 begin
 if FShaders=nil then
 	SetLength(FShaders,1)
 else
 	SetLength(FShaders,Length(FShaders)+1);
 FShaders[High(FShaders)]:=NewShader;
-glAttachShader(FProgram,NewShader.Shader);
+Render.AttachShader(FProgram,NewShader.Shader);
 end;
-destructor TSGProgram.Destroy;
+
+procedure TSGShaderProgram.PrintInfoLog();
+var
+	MaxLength, Length: Integer;
+	InfoLog: array of Char;
+	i : LongInt;
+	Log : String = '';
+begin
+Render.GetObjectParameteriv(FProgram, SGR_OBJECT_INFO_LOG_LENGTH_ARB, @MaxLength);
+if MaxLength > 1 then
+	begin
+	Length := MaxLength;
+	SetLength(InfoLog, MaxLength);
+	Render.GetInfoLog(FProgram, MaxLength, Length, @infolog[0]);
+	for i := 0 to High(InfoLog) do
+		if (InfoLog[i] = #13) then
+			Log += '/n'
+		else if (InfoLog[i] <> #10) then
+			Log += InfoLog[i];
+	SGLog.Sourse('TSGShaderProgram.PrintInfoLog : Program="'+SGStr(FProgram)+'", Log="'+Log+'".');
+	SetLength(InfoLog, 0);
+	end;
+end;
+
+function TSGShaderProgram.Link():Boolean;
+var
+	linked : integer;
+begin
+Render.LinkShaderProgram(FProgram);
+Render.GetObjectParameteriv(FProgram, SGR_OBJECT_LINK_STATUS_ARB, @linked);
+Result := linked = SGR_TRUE;
+SGLog.Sourse('TSGShaderProgram.Link : Program="'+SGStr(FProgram)+'", Result="'+SGStr(Result)+'".');
+end;
+
+destructor TSGShaderProgram.Destroy;
 var
 	i:LongWord;
 begin
@@ -70,7 +103,7 @@ if FShaders<>nil then
 		FShaders[i].Destroy;
 	SetLength(FShaders,0);
 	end;
-glDeleteProgram(FProgram);
+Render.DeleteShaderProgram(FProgram);
 inherited;
 end;
 
@@ -82,112 +115,66 @@ var
 var
 	Success:Boolean = False;
 begin
-if FVersion=SG_GLSL_3_0 then
+Render.GetObjectParameteriv(FShader, SGR_INFO_LOG_LENGTH,@InfoLogLength);
+if InfoLogLength>0 then
 	begin
-	glGetProgramiv(FShader, GL_INFO_LOG_LENGTH,@InfoLogLength);
-	if InfoLogLength>0 then
-		begin
-		GetMem(InfoLog,InfoLogLength);
-		glGetProgramInfoLog(FShader, InfoLogLength, @CharsWritten, InfoLog);
-		SGLog.Sourse('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');
-		FreeMem(InfoLog,InfoLogLength);
-		end;
-	end
-else
-	begin
-	glGetObjectParameterivARB(FShader,GL_OBJECT_COMPILE_STATUS_ARB,@Success);
-	if not Success then
-		begin
-		glGetObjectParameterivARB(FShader, GL_OBJECT_INFO_LOG_LENGTH_ARB,@InfoLogLength);
-		GetMem(InfoLog,InfoLogLength);
-		glGetInfoLogARB(FShader, InfoLogLength, @CharsWritten, InfoLog);
-		SGLog.Sourse('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');//915
-		FreeMem(InfoLog,InfoLogLength);
-		end;
+	GetMem(InfoLog,InfoLogLength);
+	Render.GetInfoLog(FShader, InfoLogLength, CharsWritten, InfoLog);
+	SGLog.Sourse('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');
+	FreeMem(InfoLog,InfoLogLength);
 	end;
 end;
 procedure TSGShader.Sourse(const s:string);
 var
 	pc:PChar = nil;
-	pcl:GLInt = 0;
+	pcl:integer = 0;
 begin
 SGLog.Sourse('TSGShader.Sourse : Begin to sourse shader "'+SGStr(FShader)+'"');// : "'+s+'"');
 pc:=SGStringToPChar(s);
-pcl:=SGPCharLength(pc);
-if FVersion=SG_GLSL_3_0 then
-	glShaderSource(FShader,1,@pc,@pcl)
-else if FVersion=SG_GLSL_ARB then
-	glShaderSourceARB(FShader,1,@pc,@pcl);
-SGLog.Sourse('TSGShader.Sourse : Shader soursed "'+SGStr(FShader)+'"');// : "'+s+'"');
+Render.ShaderSource(FShader,pc,SGPCharLength(pc));
+SGLog.Sourse('TSGShader.Sourse : Shader soursed "'+SGStr(FShader)+'"');
 FreeMem(pc);
 end;
 
-procedure TSGShader.Compile;inline;
+function TSGShader.Compile():Boolean;inline;
+var
+	compiled : integer;
 begin
-if FVersion=SG_GLSL_3_0 then
-	glCompileShader(FShader)
-else if FVersion=SG_GLSL_ARB then
-	begin
-	glCompileShaderARB(FShader);
-	PrintInfoLog;
-	end;
+Result := False;
+Render.CompileShader(FShader);
+Render.GetObjectParameteriv(FShader, SGR_OBJECT_COMPILE_STATUS_ARB, @compiled);
+Result := compiled = SGR_TRUE;
+SGLog.Sourse('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'"');
 end;
 
-constructor TSGShader.Create(const ShaderType:LongWord = GL_VERTEX_SHADER;const Version:LongWord = SG_GLSL_ARB);
+constructor TSGShader.Create(const VContext:TSGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 function WTS:string;
 begin
-if ShaderType=GL_VERTEX_SHADER then
-	Result:='GL_VERTEX_SHADER'
-else if ShaderType=GL_FRAGMENT_SHADER then
-	Result:='GL_FRAGMENT_SHADER'
+if ShaderType=SGR_VERTEX_SHADER then
+	Result:='SGR_VERTEX_SHADER'
+else if ShaderType=SGR_FRAGMENT_SHADER then
+	Result:='SGR_FRAGMENT_SHADER'
 else
 	Result:='UNKNOWN';
 end;
 begin
-inherited Create;
-if Version=SG_GLSL_ARB then
+(Self as TSGContextObject).Create(VContext);
+if Render.ShadersSuppored() then
 	begin
-	if not SGIsSuppored_GL_ARB_shader_objects then
-		begin
-		SGLog.Sourse('Fatal error: TSGShader.Create : "GL_ARB_shader_objects" is not suppored!');
-		raise Exception.Create('TSGShader : "GL_ARB_shader_objects" is not suppored!');
-		end
-	else
-		begin
-		FShader:=glCreateShaderObjectARB(ShaderType);
-		end;
-	end
-else if Version = SG_GLSL_3_0 then
-	begin
-	if not SGIsSuppored_GL_version_3_0 then
-		begin
-		SGLog.Sourse('Fatal error: TSGShader.Create : "GL_version_3_0" is not suppored!');
-		raise Exception.Create('TSGShader : "GL_version_3_0" is not suppored!');
-		end
-	else
-		begin
-		FShader:=glCreateShader(ShaderType);
-		end;
+	FShader:=Render.CreateShader(ShaderType);
 	end
 else
 	begin
-	SGLog.Sourse('Fatal error: TSGShader.Create : Unknown Version format!');
-	raise Exception.Create('TSGShader.Create : Unknown Version format!');
+	SGLog.Sourse('Fatal error: TSGShader.Create : Shaders not suppored!');
 	end;
 FType:=ShaderType;
-FVersion:=Version;
 SGLog.Sourse('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+WTS+'"');
 end;
 destructor TSGShader.Destroy;
 begin
-if FVersion=SG_GLSL_3_0 then
-	glDeleteShader(FShader)
-else if FVersion=SG_GLSL_ARB then
-	glDeleteObjectARB(FShader);
+Render.DeleteShader(FShader);
 FType:=0;
-FVersion:=0;
 inherited;
 end;
-
 
 end.

@@ -24,13 +24,18 @@ type
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
-		FNowDraw:TSGDrawClass;
-		FArClasses:packed array of TSGClassOfDrawClass;
+		FNowDraw     : TSGDrawClass;
+		FNowDrawable : TSGBoolean;
+		FArClasses:packed array of
+			packed record 
+				FClass    : TSGClassOfDrawClass;
+				FDrawable : TSGBoolean;
+				end;
 		FComboBox2:TSGComboBox;
 			public
 		procedure Draw;override;
-		procedure Add(const NewClass:TSGClassOfDrawClass);
-		procedure Initialize;
+		procedure Add(const NewClass:TSGClassOfDrawClass; const Dravable : TSGBoolean = True);
+		procedure Initialize();
 			public
 		property ComboBox : TSGComboBox read FComboBox2;
 		end;
@@ -1173,15 +1178,17 @@ procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSGComboBox);
 begin
 if a<>b then
 	begin
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy;
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw:=
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].Create(
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy();
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw :=
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FClass.Create(
 	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).Context
 	);
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDrawable :=
+	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FDrawable;
 	end;
 end;
 
-procedure TSGDrawClasses.Initialize;
+procedure TSGDrawClasses.Initialize();
 var
 	i:LongWord;
 begin
@@ -1204,15 +1211,18 @@ FComboBox2.FDrawClass:=Self;
 FComboBox2.BoundsToNeedBounds();
 if (FArClasses<>nil) and (Length(FArClasses)>0) then
 	for i:=0 to High(FArClasses) do
-		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].ClassName));
+		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
 if (FArClasses<>nil) and (Length(FArClasses)>0) then
-	FNowDraw:=FArClasses[0].Create(Context);
+	begin
+	FNowDraw     := FArClasses[0].FClass.Create(Context);
+	FNowDrawable := FArClasses[0].FDrawable;
+	end;
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
-class function TSGDrawClasses.ClassName:string;
+class function TSGDrawClasses.ClassName():string;
 begin
 Result:='SaGe Draw Classes';
 end;
@@ -1226,17 +1236,18 @@ if FNowDraw=nil then
 	begin
 	Initialize();
 	end
-else
+else if FNowDrawable then
 	FNowDraw.Draw();
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
-procedure TSGDrawClasses.Add(const NewClass:TSGClassOfDrawClass);
+procedure TSGDrawClasses.Add(const NewClass:TSGClassOfDrawClass; const Dravable : TSGBoolean = True);
 begin
 SetLength(FArClasses,Length(FArClasses)+1);
-FArClasses[High(FArClasses)]:=NewClass;
+FArClasses[High(FArClasses)].FClass:=NewClass;
+FArClasses[High(FArClasses)].FDrawable:=Dravable;
 if FComboBox2<>nil then
 	FComboBox2.Active:=Length(FArClasses)>1;
 end;

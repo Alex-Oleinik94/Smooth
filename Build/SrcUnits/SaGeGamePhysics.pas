@@ -87,11 +87,14 @@ end;
 
 procedure TSGPhysics3D.Draw();
 begin
+if FPhysics <> nil then
+	FPhysics.Draw();
 end;
 
 procedure TSGPhysics3D.UpDate();
 begin
-FPhysics.Draw();
+if FPhysics <> nil then
+	FPhysics.UpDate();
 end;
 
 end.
