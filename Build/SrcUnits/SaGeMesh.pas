@@ -24,8 +24,9 @@ type
 	TSGMeshBumpType = (SGMeshBumpTypeNone,SGMeshBumpTypeCopyTexture2f,SGMeshBumpTypeCubeMap3f,SGMeshBumpType2f);
 const
 	// “ипы вершин
-	SGMeshVertexType2f = SG_VERTEX_2F;
-	SGMeshVertexType3f = SG_VERTEX_3F;
+	SGMeshVertexType2f = SGVertexFormat2f;
+	SGMeshVertexType3f = SGVertexFormat3f;
+	SGMeshVertexType4f = SGVertexFormat4f;
 type
 	TSGCustomModel = class;
 	TSG3dObject    = class;
@@ -179,6 +180,7 @@ type
         
         // ≈сть ли у модельки текстурка
         FHasTexture : TSGBoolean;
+        FCountTextureFloatsInVertexArray : TSGLongWord;
         // ≈сть ли нормали у модельки
         FHasNormals : TSGBoolean;
         // ≈сть ли у нее цвета
@@ -195,6 +197,17 @@ type
         FColorType        : TSGMeshColorType;
     private
 		function GetSizeOfOneVertex():LongWord;inline;
+		
+		function GetSizeOfOneTextureCoord():TSGLongWord;inline;
+		function GetSizeOfOneVertexCoord():TSGLongWord;inline;
+		function GetSizeOfOneColorCoord():TSGLongWord;inline;
+		function GetSizeOfOneNormalCoord():TSGLongWord;inline;
+		
+		function GetCountOfOneTextureCoord():TSGLongWord;inline;
+		function GetCountOfOneVertexCoord():TSGLongWord;inline;
+		function GetCountOfOneColorCoord():TSGLongWord;inline;
+		function GetCountOfOneNormalCoord():TSGLongWord;inline;
+		
 		function GetVertexLength():QWord;inline;
 		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
 		function GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
@@ -206,6 +219,7 @@ type
 		procedure ChangeMeshColorType4b();
     public
         // Ёти свойства уже были прокоментированы выше (см на что эти свойства ссылаютс€)
+        property CountTextureFloatsInVertexArray   : TSGLongWord       read FCountTextureFloatsInVertexArray write FCountTextureFloatsInVertexArray;
         property BumpFormat                        : TSGMeshBumpType   read FBumpFormat          write FBumpFormat;
         property PoligonesType[Index:TSGLongWord]  : TSGLongWord       read GetPoligonesType     write SetPoligonesType;
 		property QuantityVertexes                  : TSGQuadWord       read FNOfVerts;
@@ -246,13 +260,16 @@ type
 	private
 		function GetVertex3f(const Index : TSGMaxEnum):PTSGVertex3f;inline;
 		function GetVertex2f(const Index : TSGMaxEnum):PTSGVertex2f;inline;
+		function GetVertex4f(const Index : TSGMaxEnum):PTSGVertex4f;inline;
 		
 	public
 		// Ёти совйтсва возвращают указатель на Index-ый элемент массива вершин 
-		//! Ёто можно пользоватьс€ только когда, когда FVertexType = SG_VERTEX_3F, иначе Result = nil
+		//! Ёто можно пользоватьс€ только когда, когда FVertexType = SGMeshVertexType3f, иначе Result = nil
 		property ArVertex3f[Index : TSGMaxEnum]:PTSGVertex3f read GetVertex3f;
-		//! Ёто можно пользоватьс€ только когда, когда FVertexType = SG_VERTEX_2F, иначе Result = nil
+		//! Ёто можно пользоватьс€ только когда, когда FVertexType = SGMeshVertexType2f, иначе Result = nil
 		property ArVertex2f[Index : TSGMaxEnum]:PTSGVertex2f read GetVertex2f;
+		//! Ёто можно пользоватьс€ только когда, когда FVertexType = SGMeshVertexType4f, иначе Result = nil
+		property ArVertex4f[Index : TSGMaxEnum]:PTSGVertex4f read GetVertex4f;
 		
 		// ƒобавл€ет пустую(ые) вершины в массив вершин
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
@@ -290,9 +307,14 @@ type
 		
 	private
 		function GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
+		function GetTexVertex3f(const Index : TSGMaxEnum): PTSGVertex3f;inline;
+		function GetTexVertex4f(const Index : TSGMaxEnum): PTSGVertex4f;inline;
 		
 	public
 		property ArTexVertex[Index : TSGMaxEnum] : PTSGVertex2f read GetTexVertex;
+		property ArTexVertex2f[Index : TSGMaxEnum] : PTSGVertex2f read GetTexVertex;
+		property ArTexVertex3f[Index : TSGMaxEnum] : PTSGVertex3f read GetTexVertex3f;
+		property ArTexVertex4f[Index : TSGMaxEnum] : PTSGVertex4f read GetTexVertex4f;
 		
 		// ”станавливает количество вершин
 		procedure SetVertexLength(const NewVertexLength:TSGQuadWord);inline;
@@ -834,32 +856,20 @@ if not FHasNormals then
 		Move(
 			PByte(ArVertex)[i*ii],
 			PByte(SecondArVertex)[i*iii],
-			SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType=SGMeshColorType3b)*3+
-					byte(FColorType=SGMeshColorType4b)*4+
-					byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single)));
+			GetSizeOfOneVertexCoord() + 
+				GetSizeOfOneColorCoord());
 		if FHasTexture then
 			Move(
 				PByte(ArVertex)[i*ii+
-					SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
-					Byte(FHasColors)*(
-						byte(FColorType=SGMeshColorType3b)*3+
-						byte(FColorType=SGMeshColorType4b)*4+
-						byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-						byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))],
+					GetSizeOfOneVertexCoord() + 
+					GetSizeOfOneColorCoord()],
 				PByte(SecondArVertex)[i*iii+
-					SizeOf(Single)*(2+Byte(FVertexType=SGMeshVertexType3f))+
-					Byte(FHasColors)*(
-						byte(FColorType=SGMeshColorType3b)*3+
-						byte(FColorType=SGMeshColorType4b)*4+
-						byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-						byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))+
-						3*SizeOf(TSGSingle)],
-				2*TSGByte(FHasTexture)*SizeOf(TSGSingle));
+					GetSizeOfOneVertexCoord() + 
+					GetSizeOfOneColorCoord() +
+					3*SizeOf(TSGSingle)],
+				GetSizeOfOneTextureCoord());
 		end;
-				
+	
 	FreeMem(ArVertex);
 	ArVertex:=SecondArVertex;
 	SecondArVertex:=nil;
@@ -976,32 +986,43 @@ else if (FColorType=SGMeshColorType4b) then
 	end;
 end;
 
+function TSG3DObject.GetTexVertex3f(const Index : TSGMaxEnum): PTSGVertex3f;inline;
+begin
+Result:=PTSGVertex3f(
+	TSGMaxEnum(ArVertex)
+	+GetSizeOfOneVertex()*Index
+	+GetSizeOfOneVertexCoord()
+	+GetSizeOfOneColorCoord()
+	+GetSizeOfOneNormalCoord());
+end;
+
+function TSG3DObject.GetTexVertex4f(const Index : TSGMaxEnum): PTSGVertex4f;inline;
+begin
+Result:=PTSGVertex4f(
+	TSGMaxEnum(ArVertex)
+	+GetSizeOfOneVertex()*Index
+	+GetSizeOfOneVertexCoord()
+	+GetSizeOfOneColorCoord()
+	+GetSizeOfOneNormalCoord());
+end;
+
 function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
 begin
 Result:=PTSGVertex2f(
 	TSGMaxEnum(ArVertex)
 	+GetSizeOfOneVertex()*Index
-	+(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	+Byte(FHasColors)*( 
-		byte(FColorType=SGMeshColorType3b)*3+
-		byte(FColorType=SGMeshColorType4b)*4+
-		byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-		byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
-	+Byte(FHasNormals)*3*SizeOf(Single));
+	+GetSizeOfOneVertexCoord()
+	+GetSizeOfOneColorCoord()
+	+GetSizeOfOneNormalCoord());
 end;
 
 function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f( 
 	TSGMaxEnum(ArVertex)+
-	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	+Byte(FHasColors)*( //÷вета
-	byte(FColorType=SGMeshColorType3b)*3+
-	byte(FColorType=SGMeshColorType4b)*4+
-	byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-	byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
-	);
+	GetSizeOfOneVertex()*Index
+	+GetSizeOfOneVertexCoord()
+	+GetSizeOfOneColorCoord());
 end;
 
 function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
@@ -1009,8 +1030,7 @@ begin
 Result:=PTSGColor4f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	);
+	GetSizeOfOneVertexCoord());
 end;
 
 function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
@@ -1018,8 +1038,7 @@ begin
 Result:=PTSGColor3b( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	);
+	GetSizeOfOneVertexCoord());
 end;
 
 function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
@@ -1027,8 +1046,7 @@ begin
 Result:=PTSGColor4b(Pointer(
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	));
+	GetSizeOfOneVertexCoord()));
 end;
 
 function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
@@ -1036,8 +1054,7 @@ begin
 Result:=PTSGColor3f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
-	(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)
-	);
+	GetSizeOfOneVertexCoord());
 end;
 
 function TSG3DObject.GetArFaces():Pointer;inline;
@@ -1059,51 +1076,70 @@ FVertexType:=VNewVertexType;
 end;
 
 procedure TSG3DObject.SetColorType(const VNewColorType:TSGMeshColorType);
-(*procedure OToD();
-var
-	NewArray : Pointer;
-	MeshCT:TSGMeshColorType;
 begin
-NewArray:=ArVertex;
-ArVertex:=nil;
-MeshCT:=FColorType;
-Vertexes := Vertexes;
-
-end;*)
-begin
-(*if (ArVertex <> nil) and (Render<>nil)  then
-	begin
-	if (VNewColorType=SGMeshColorType4b) and (Render.RenderType=SGRenderDirectX) and ((FColorType=SGMeshVertexType3f) or (FColorType=SGMeshColorType4f)) then
-		OToD();
-	
-	end
-else
-	begin*)
-	FHasColors:=True;
-	FColorType:=VNewColorType;
-	(*end;*)
+FHasColors:=True;
+FColorType:=VNewColorType;
 end;
 
 procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord);inline;
 begin
 FNOfVerts:=NewVertexLength;
-GetMem(ArVertex,GetVertexesSize());
+if ArVertex = nil then
+	GetMem(ArVertex,GetVertexesSize())
+else
+	ReallocMem(ArVertex,GetVertexesSize());
+end;
+
+function TSG3DObject.GetCountOfOneTextureCoord():TSGLongWord;inline;
+begin
+Result := Byte(FHasTexture)*FCountTextureFloatsInVertexArray;
+end;
+
+function TSG3DObject.GetCountOfOneVertexCoord():TSGLongWord;inline;
+begin
+Result := (2 + Byte(FVertexType=SGMeshVertexType3f) + 2 * Byte(FVertexType = SGMeshVertexType4f));
+end;
+
+function TSG3DObject.GetCountOfOneColorCoord():TSGLongWord;inline;
+begin
+Result := Byte(FHasColors)*(
+	byte((FColorType=SGMeshColorType3b) or (FColorType=SGMeshColorType3f))*3+
+	byte((FColorType=SGMeshColorType4b) or (FColorType=SGMeshColorType4f))*4);
+end;
+
+function TSG3DObject.GetCountOfOneNormalCoord():TSGLongWord;inline;
+begin
+Result := Byte(FHasNormals)*3;
+end;
+
+function TSG3DObject.GetSizeOfOneTextureCoord():TSGLongWord;inline;
+begin
+Result := GetCountOfOneTextureCoord()*SizeOf(Single);
+end;
+
+function TSG3DObject.GetSizeOfOneVertexCoord():TSGLongWord;inline;
+begin
+Result := GetCountOfOneVertexCoord()*SizeOf(Single);
+end;
+
+function TSG3DObject.GetSizeOfOneColorCoord():TSGLongWord;inline;
+begin
+Result := GetCountOfOneColorCoord() * (
+	byte((FColorType=SGMeshColorType3b) or (FColorType=SGMeshColorType4b))+
+	byte((FColorType=SGMeshColorType3f) or (FColorType=SGMeshColorType4f))*SizeOf(TSGSingle));
+end;
+
+function TSG3DObject.GetSizeOfOneNormalCoord():TSGLongWord;inline;
+begin
+Result := GetCountOfOneNormalCoord()*SizeOf(Single);
 end;
 
 function TSG3DObject.GetSizeOfOneVertex():LongWord;
 begin
-Result:=
-(2+Byte(FVertexType=SGMeshVertexType3f))*SizeOf(Single)//¬ершины
- 
-+Byte(FHasColors)*( //÷вета
-	byte(FColorType=SGMeshColorType3b)*3+
-	byte(FColorType=SGMeshColorType4b)*4+
-	byte(FColorType=SGMeshColorType4f)*4*SizeOf(Single)+
-	byte(FColorType=SGMeshColorType3f)*3*SizeOf(Single))
-
-+Byte(FHasNormals)*3*SizeOf(Single)
-
-+Byte(FHasTexture)*2*SizeOf(Single);
+Result:= GetSizeOfOneVertexCoord() +
+	GetSizeOfOneColorCoord() +
+	GetSizeOfOneNormalCoord() +
+	GetSizeOfOneTextureCoord();
 end;
 
 function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload;inline;
@@ -1114,6 +1150,11 @@ end;
 function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 begin
 Result:=PTSGVertex3f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
+end;
+
+function TSG3DObject.GetVertex4f(const Index : TSGMaxEnum):PTSGVertex4f;inline;
+begin
+Result:=PTSGVertex4f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
 function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
@@ -1360,6 +1401,7 @@ end;
 constructor TSG3dObject.Create();
 begin
 inherited Create();
+FCountTextureFloatsInVertexArray := 2;
 FBumpFormat := SGMeshBumpTypeNone;
 FName:='';
 FEnableCullFace := False;
@@ -1572,16 +1614,16 @@ if FHasColors then
 if FEnableVBO then
 	begin
 	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVertexesBuffer);
-	Render.VertexPointer(2+Byte(FVertexType = SGMeshVertexType3f),SGR_FLOAT,GetSizeOfOneVertex(),nil);
+	Render.VertexPointer(GetCountOfOneVertexCoord(),SGR_FLOAT,GetSizeOfOneVertex(),nil);
 	
 	if FHasColors then
 		begin
 		Render.ColorPointer(
-			3+Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType4f)),
+			GetCountOfOneColorCoord(),
 			SGR_FLOAT*Byte((FColorType = SGMeshColorType3f) or (FColorType = SGMeshColorType4f))+
 				SGR_UNSIGNED_BYTE*Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType3b)),
 			GetSizeOfOneVertex(),
-			Pointer(SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))));
+			Pointer(GetSizeOfOneVertexCoord()));
 		end;
 	
 	if FHasNormals then
@@ -1590,45 +1632,30 @@ if FEnableVBO then
 			SGR_FLOAT,
 			GetSizeOfOneVertex(),
 			Pointer(
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))
-				));
+				GetSizeOfOneVertexCoord()+
+				GetSizeOfOneColorCoord()));
 		end;
 	
 	if FHasTexture then
 		begin
 		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
 			Render.ClientActiveTexture(1);
-		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
+		Render.TexCoordPointer(GetCountOfOneTextureCoord(), SGR_FLOAT, GetSizeOfOneVertex(),
 			Pointer(
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
-				Byte(FHasNormals)*(SizeOf(Single)*3)
-				));
+				GetSizeOfOneVertexCoord() +
+				GetSizeOfOneColorCoord() +
+				GetSizeOfOneNormalCoord()));
 		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
 			Render.ClientActiveTexture(0);
 		end;
 	
 	if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
 		begin
-		Render.TexCoordPointer(2, SGR_FLOAT, GetSizeOfOneVertex(),
+		Render.TexCoordPointer(GetCountOfOneTextureCoord(), SGR_FLOAT, GetSizeOfOneVertex(),
 			Pointer(
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
-				Byte(FHasNormals)*(SizeOf(Single)*3)
-				));
+				GetSizeOfOneVertexCoord()+
+				GetSizeOfOneColorCoord()+
+				GetSizeOfOneNormalCoord()));
 		end;
 	
 	if FQuantityFaceArrays<>0 then
@@ -1663,49 +1690,41 @@ if FEnableVBO then
 else
 	begin
     Render.VertexPointer(
-		2+Byte(FVertexType = SGMeshVertexType3f),
+		GetCountOfOneVertexCoord(),
 		SGR_FLOAT, 
 		GetSizeOfOneVertex(), 
 		ArVertex);
     if FHasColors then
 		Render.ColorPointer(
-			3+Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType4f)),
+			GetCountOfOneColorCoord(),
 			SGR_FLOAT*Byte((FColorType = SGMeshColorType3f) or (FColorType = SGMeshColorType4f))+
 				SGR_UNSIGNED_BYTE*Byte((FColorType = SGMeshColorType4b) or (FColorType = SGMeshColorType3b)),
 			GetSizeOfOneVertex(),
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))));
+				GetCountOfOneVertexCoord()));
 	if FHasNormals then
 		Render.NormalPointer(
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))));
+				GetCountOfOneVertexCoord()+
+				GetCountOfOneColorCoord()));
 	
     if FHasTexture then
 		begin
 		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
 			Render.ClientActiveTexture(1);
         Render.TexCoordPointer(
-			2,
+			GetCountOfOneTextureCoord(),
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
-				Byte(FHasNormals)*(SizeOf(Single)*3)));
+				GetCountOfOneVertexCoord()+
+				GetCountOfOneColorCoord()+
+				GetCountOfOneNormalCoord()));
 		if FBumpFormat = SGMeshBumpTypeCopyTexture2f then
 			Render.ClientActiveTexture(0);
 		end;
@@ -1713,18 +1732,14 @@ else
 	if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2f) then
 		begin
 		Render.TexCoordPointer(
-			2,
+			GetCountOfOneTextureCoord(),
 			SGR_FLOAT, 
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				SizeOf(Single)*(2+Byte(FVertexType = SGMeshVertexType3f))+
-				Byte(FHasColors)*(
-					byte(FColorType = SGMeshColorType3b)*3+
-					byte(FColorType = SGMeshColorType4b)*4+
-					byte(FColorType = SGMeshColorType4f)*4*SizeOf(Single)+
-					byte(FColorType = SGMeshColorType3f)*3*SizeOf(Single))+
-				Byte(FHasNormals)*(SizeOf(Single)*3)));
+				GetCountOfOneVertexCoord()+
+				GetCountOfOneColorCoord()+
+				GetCountOfOneNormalCoord()));
 		end;
 	
 	if FQuantityFaceArrays<>0 then

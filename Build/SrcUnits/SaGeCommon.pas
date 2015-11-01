@@ -11,7 +11,7 @@ uses
 	,Crt;
 	
 type
-	TSGVertexFormat=(SG_VERTEX_3F,SG_VERTEX_2F);
+	TSGVertexFormat = (SGVertexFormat2f,SGVertexFormat3f,SGVertexFormat4f);
 	
 	TSGThreadProcedure = SaGeBase.TSGThreadProcedure;
 	TSGThread = SaGeBase.TSGThread;
@@ -114,6 +114,8 @@ type
 		w:TSGVertexType;
 		procedure Import(const x1,y1,z1,w1:TSGVertexType);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
+	PSGVertex4f = ^ TSGVertex4f;
+	PTSGVertex4f = ^ TSGVertex4f;
 	
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes=object
