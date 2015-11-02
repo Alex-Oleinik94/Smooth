@@ -13,6 +13,9 @@ uses
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeImages
+	,Classes
+	,SysUtils
+	,StrMan
 	;
 
 type
@@ -132,13 +135,152 @@ type
 implementation
 
 procedure TModel.Load(const VFileName : TSGString);
+var 
+	f     : TextFile;
+	s     : string;
+	i,j,k : TIndex;
 begin
+Assign(f,VFileName);
+Reset(f);
 
+repeat
+	ReadLn(f,s);
+until s='nodes';
+
+i:=0;
+SetLength(FAnimation.FNodes,0);
+repeat
+	ReadLn(f,s);
+	if s<>'end' then
+		begin
+		SetLength(FAnimation.FNodes, i+1);
+		FAnimation.FNodes[i].FName   := StringWordGet(s, '"', 2);
+		FAnimation.FNodes[i].FParent := StrToInt(StringWordGet(s, '"', 3));
+		Inc(i);
+		end;
+until s='end';
+
+FAnimation.FNodesNum :=Length(FAnimation.FNodes);
+SetLength(FAnimation.FReferencePos,FAnimation.FNodesNum);
+
+repeat
+	ReadLn(f,s);
+until s='time 0';
+
+i:=0;
+repeat
+	ReadLn(f,s);
+	if s<>'end' then
+	with FAnimation.FReferencePos[i] do
+		begin
+		FTrans.Import(
+			StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
+			StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
+			StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+		FRot.Import(
+			StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
+			StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
+			StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+		FQuat := SGGetQuaternionFromAngleVector3f(FRot);
+		Inc(i);
+		end;
+until s='end';
+
+
+repeat
+ReadLn(f,s);
+until s='triangles';
+
+i := 0;
+SetLength(FPoligons,0);
+SetLength(FVertexes,0);
+repeat
+	ReadLn(f,s);
+	if s<>'end' then
+		begin
+		SetLength(FPoligons,i+1);
+		FPoligons[i].FTextureName := s;
+		FPoligons[i].FVertexCoordNum := 3;
+		for j:=0 to 2 do
+			begin
+			SetLength(FVertexes,Length(FVertexes)+1);
+			k := High(FVertexes);
+			ReadLn(f,s);
+			SetLength(FVertexes[k].FParents,1);
+			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(trim(s),' ',1));
+			FVertexes[k].FParents[0].FWeight  := 1;
+			FVertexes[k].FCoord.Import(
+				StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+			FVertexes[k].FNorm.Import(
+				StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+			FPoligons[i].FTexCoord[j].Import(
+				StrToFloatDef(StringWordGet(Trim(s),' ',8),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',9),0));
+			FPoligons[i].FVertexIndexes[j] := k;
+			end;
+		Inc(i);
+		end;
+until s='end';
+
+Close(f);
 end;
 
 procedure TModel.LoadAnimation(const VFileName : TSGString);
+var f            : TextFile;
+    s            : string;
+    i, j         : TIndex;
+    ActionIndex  : TIndex;
 begin
+Assign(f,VFileName);
+Reset(f);
+SetLength(FAnimation.FActions,Length(FAnimation.FActions)+1);
+ActionIndex := High(FAnimation.FActions);
 
+FAnimation.FActions[ActionIndex].FName  := VFileName;
+FAnimation.FActions[ActionIndex].FSpeed := 15; //default
+
+repeat
+ReadLn(f,s);
+until s='skeleton';
+
+s:='';
+i:=0;
+j:=0;
+repeat
+	readln(f,s);
+	if s='end' then
+		break;
+	if StringWordGet (s, ' ', 1) = 'time' then
+		begin
+		i:=0;
+		Inc(j);
+		SetLength(FAnimation.FActions[ActionIndex].FFrames,j);
+		end
+	else
+		begin
+		Inc(i);
+		SetLength(FAnimation.FActions[ActionIndex].FFrames[j - 1].FBones, i);
+		with FAnimation.FActions[ActionIndex].FFrames[j - 1] do
+			begin
+			FBones[i - 1].FTrans.Import(
+				StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+			FBones[i - 1].FRot.Import(
+				StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
+				StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+			FBones[i - 1].FQuat := SGGetQuaternionFromAngleVector3f(FBones[i - 1].FRot);
+			end;
+		end;
+	FAnimation.FActions[ActionIndex].FFramesCount := Length(FAnimation.FActions[ActionIndex].FFrames);
+until False;
+
+Close(f);
 end;
 
 procedure TModel.LoadTextures(const VPath : TSGString);
