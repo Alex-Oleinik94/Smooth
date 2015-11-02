@@ -39,9 +39,12 @@ type
 	PSGPoint3f = ^ SGPoint3f;
 	
 	TSGVertexType = type single;
+	PTSGVertexType = ^ TSGVertexType;
 	
+	PTSGVertex2f=^TSGVertex2f;
 	TSGVertex2f=object
 		x,y:TSGVertexType;
+		
 		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure TexCoord(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetVariables(const x1:real = 0; const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -50,8 +53,10 @@ type
 		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Round;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function FloatArray():PTSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		
+		property Data : PTSGVertexType read FloatArray;
 		end;
-	PTSGVertex2f=^TSGVertex2f;
 	TArTSGVertex2f = type packed array of TSGVertex2f;
 	PTArTSGVertex2f = ^TArTSGVertex2f;
 	SGVertex2f = TSGVertex2f;
@@ -110,12 +115,17 @@ type
 	TSGVertexFunction = function (a:SGVertex):SGVertex;
 	TSGShodowVertexProcedure=procedure (Param1,Param2,Param3:single);cdecl;
 	
-	TSGVertex4f=object(TSGVertex3f)
+	TSGVertex4f = object(TSGVertex3f)
 		w:TSGVertexType;
 		procedure Import(const x1,y1,z1,w1:TSGVertexType);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	PSGVertex4f = ^ TSGVertex4f;
 	PTSGVertex4f = ^ TSGVertex4f;
+	
+	TSGQuaternion = object(TSGVertex4f)
+		procedure Inverse();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Intersed():TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		end;
 	
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes=object
@@ -290,6 +300,13 @@ operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;{$IFDEF SUPPORTINLINE}inli
 operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+// Quaternion
+operator + (const A,B : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator - (const A   : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator - (const A,B : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const A : TSGQuaternion;const B:TSGVertexType):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const A,B : TSGQuaternion):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 function SGGetVertexInAttitude(const t1,t2:TSGVertex3f; const r:real = 0.5):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGVertexImport(const vx:TSGVertexType = 0;const vy:TSGVertexType = 0;const vz:TSGVertexType = 0):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -337,9 +354,257 @@ function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$
 procedure SGWriteMatrix4(const P:TSGPointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
- 
+function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGQuaternionSlerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGQuaternionLerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSetMatrixRotation(var Matrix : TSGMatrix4;const Angles : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSetMatrixRotationQuaternion(var Matrix : TSGMatrix4;const Quat : TSGQuaternion);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSetMatrixTranslation(var Matrix : TSGMatrix4; const Trans : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGMultiplyPartMatrix(const m1:TSGMatrix4;const m2:TSGMatrix4):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGRotateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTranslateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTransformVector(const Matrix : TSGMatrix4; const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGQuaternionLerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if ((q1 * q2) < 0) then
+	Result := (q1 - ((q2 + q1) * interp))
+else
+	Result := (q1 + ((q2 - q1) * interp));
+end;
+
+operator + (const A,B : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0] := A.Data[0] + B.Data[0];
+Result.Data[1] := A.Data[1] + B.Data[1];
+Result.Data[2] := A.Data[2] + B.Data[2];
+Result.Data[3] := A.Data[3] + B.Data[3];
+end;
+
+operator - (const A   : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0] := - A.Data[0];
+Result.Data[1] := - A.Data[1];
+Result.Data[2] := - A.Data[2];
+Result.Data[3] := - A.Data[3];
+end;
+
+operator - (const A,B : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0] := A.Data[0] - B.Data[0];
+Result.Data[1] := A.Data[1] - B.Data[1];
+Result.Data[2] := A.Data[2] - B.Data[2];
+Result.Data[3] := A.Data[3] - B.Data[3];
+end;
+
+operator * (const A : TSGQuaternion;const B:TSGVertexType):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0] := A.Data[0] * B;
+Result.Data[1] := A.Data[1] * B;
+Result.Data[2] := A.Data[2] * B;
+Result.Data[3] := A.Data[3] * B;
+end;
+
+operator * (const A,B : TSGQuaternion):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := A.Data[0] * B.Data[0] + A.Data[1] * B.Data[1] + A.Data[2] * B.Data[2] + A.Data[3] * B.Data[3];
+end;
+
+procedure SGSetMatrixRotationQuaternion(var Matrix : TSGMatrix4;const Quat : TSGQuaternion);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Matrix[0,0]:= ( 1.0 - 2.0*Quat.Data[1]*Quat.Data[1] - 2.0*Quat.Data[2]*Quat.Data[2]);
+Matrix[0,1]:= ( 2.0*Quat.Data[0]*Quat.Data[1] + 2.0*Quat.Data[3]*Quat.Data[2] );
+Matrix[0,2]:= ( 2.0*Quat.Data[0]*Quat.Data[2] - 2.0*Quat.Data[3]*Quat.Data[1] );
+
+Matrix[1,0]:= ( 2.0*Quat.Data[0]*Quat.Data[1] - 2.0*Quat.Data[3]*Quat.Data[2] );
+Matrix[1,1]:= ( 1.0 - 2.0*Quat.Data[0]*Quat.Data[0] - 2.0*Quat.Data[2]*Quat.Data[2] );
+Matrix[1,2]:= ( 2.0*Quat.Data[1]*Quat.Data[2] + 2.0*Quat.Data[3]*Quat.Data[0] );
+
+Matrix[2,0]:= ( 2.0*Quat.Data[0]*Quat.Data[2] + 2.0*Quat.Data[3]*Quat.Data[1] );
+Matrix[2,1]:= ( 2.0*Quat.Data[1]*Quat.Data[2] - 2.0*Quat.Data[3]*Quat.Data[0] );
+Matrix[2,2]:= ( 1.0 - 2.0*Quat.Data[0]*Quat.Data[0] - 2.0*Quat.Data[1]*Quat.Data[1] );
+end;
+
+function SGTransformVector(const Matrix : TSGMatrix4; const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0]:= Vec.Data[0]*Matrix[0,0]+Vec.Data[1]*Matrix[1,0]+Vec.Data[2]*Matrix[2,0]+Matrix[3,0];
+Result.Data[1]:= Vec.Data[0]*Matrix[0,1]+Vec.Data[1]*Matrix[1,1]+Vec.Data[2]*Matrix[2,1]+Matrix[3,1];
+Result.Data[2]:= Vec.Data[0]*Matrix[0,2]+Vec.Data[1]*Matrix[1,2]+Vec.Data[2]*Matrix[2,2]+Matrix[3,2];
+end;
+
+function SGTranslateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0]:= Vec.Data[0]-Matrix[3,0];
+Result.Data[1]:= Vec.Data[1]-Matrix[3,1];
+Result.Data[2]:= Vec.Data[2]-Matrix[3,2];
+end;
+
+function SGRotateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Data[0]:= Vec.Data[0]*Matrix[0,0]+Vec.Data[1]*Matrix[0,1]+Vec.Data[2]*Matrix[0,2];
+Result.Data[1]:= Vec.Data[0]*Matrix[1,0]+Vec.Data[1]*Matrix[1,1]+Vec.Data[2]*Matrix[1,2];
+Result.Data[2]:= Vec.Data[0]*Matrix[2,0]+Vec.Data[1]*Matrix[2,1]+Vec.Data[2]*Matrix[2,2];
+end;
+
+function SGMultiplyPartMatrix(const m1:TSGMatrix4;const m2:TSGMatrix4):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result[0,0]:= m1[0,0]*m2[0,0] + m1[1,0]*m2[0,1] + m1[2,0]*m2[0,2];
+Result[0,1]:= m1[0,1]*m2[0,0] + m1[1,1]*m2[0,1] + m1[2,1]*m2[0,2];
+Result[0,2]:= m1[0,2]*m2[0,0] + m1[1,2]*m2[0,1] + m1[2,2]*m2[0,2];
+Result[0,3]:= 0;
+
+Result[1,0]:= m1[0,0]*m2[1,0] + m1[1,0]*m2[1,1] + m1[2,0]*m2[1,2];
+Result[1,1]:= m1[0,1]*m2[1,0] + m1[1,1]*m2[1,1] + m1[2,1]*m2[1,2];
+Result[1,2]:= m1[0,2]*m2[1,0] + m1[1,2]*m2[1,1] + m1[2,2]*m2[1,2];
+Result[1,3]:= 0;
+
+Result[2,0]:= m1[0,0]*m2[2,0] + m1[1,0]*m2[2,1] + m1[2,0]*m2[2,2];
+Result[2,1]:= m1[0,1]*m2[2,0] + m1[1,1]*m2[2,1] + m1[2,1]*m2[2,2];
+Result[2,2]:= m1[0,2]*m2[2,0] + m1[1,2]*m2[2,1] + m1[2,2]*m2[2,2];
+Result[2,3]:= 0;
+
+Result[3,0]:= m1[0,0]*m2[3,0] + m1[1,0]*m2[3,1] + m1[2,0]*m2[3,2] + m1[3,0];
+Result[3,1]:= m1[0,1]*m2[3,0] + m1[1,1]*m2[3,1] + m1[2,1]*m2[3,2] + m1[3,1];
+Result[3,2]:= m1[0,2]*m2[3,0] + m1[1,2]*m2[3,1] + m1[2,2]*m2[3,2] + m1[3,2];
+Result[3,3]:= 1;
+end;
+
+procedure SGSetMatrixRotation(var Matrix : TSGMatrix4;const Angles : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var cr,sr,cp,sp,cy,sy,
+	srsp,crsp         : single;
+begin
+cr:= cos(angles.Data[0]);
+sr:= sin(angles.Data[0]);
+cp:= cos(angles.Data[1]);
+sp:= sin(angles.Data[1]);
+cy:= cos(angles.Data[2]);
+sy:= sin(angles.Data[2]);
+
+matrix[0][0]:=cp*cy;
+matrix[0][1]:=cp*sy;
+matrix[0][2]:=-sp;
+
+srsp:= sr*sp;
+crsp:= cr*sp;
+
+matrix[1][0]:= srsp*cy-cr*sy;
+matrix[1][1]:= srsp*sy+cr*cy;
+matrix[1][2]:= sr*cp;
+
+matrix[2][0]:= crsp*cy+sr*sy;
+matrix[2][1]:= crsp*sy-sr*cy;
+matrix[2][2]:= cr*cp;
+end;
+
+procedure SGSetMatrixTranslation(var Matrix : TSGMatrix4; const Trans : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+ matrix[3,0]:=trans.x;
+ matrix[3,1]:=trans.y;
+ matrix[3,2]:=trans.z;
+end;
+
+function TSGVertex2f.FloatArray():PTSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := @Self;
+end;
+
+function SGQuaternionSlerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;
+var i           : integer;
+	a,b         : single;
+	cosom       : single;
+	sclq1,sclq2 : single;
+	omega,sinom : single;
+
+begin
+a:=0;
+b:=0;
+for i:=0 to 3 do 
+	begin
+	a:=a+( q1.Data[i]-q2.Data[i] )*( q1.Data[i]-q2.Data[i] );
+	b:=b+( q1.Data[i]+q2.Data[i] )*( q1.Data[i]+q2.Data[i] );
+	end;
+if ( a > b ) then 
+	q2.Inverse();
+
+cosom:=q1.Data[0]*q2.Data[0]+q1.Data[1]*q2.Data[1]
+	+q1.Data[2]*q2.Data[2]+q1.Data[3]*q2.Data[3];
+
+if (( 1.0+cosom ) > 0.00000001 ) then 
+	begin
+	if (( 1.0-cosom ) > 0.00000001 ) then 
+		begin
+		omega:= arccos( cosom );
+		sinom:= sin( omega );
+		sclq1:= sin(( 1.0-interp )*omega )/sinom;
+		sclq2:= sin( interp*omega )/sinom;
+		end 
+	else
+		begin
+		sclq1:= 1.0-interp;
+		sclq2:= interp;
+		end;
+	for i:=0 to 3 do
+		result.data[i]:=sclq1*q1.data[i]
+			+sclq2*q2.data[i];
+	end
+else
+	with result do
+		begin
+		data[0]:=-q1.data[1];
+		data[1]:=q1.data[0];
+		data[2]:=-q1.data[3];
+		data[3]:=q1.data[2];
+		sclq1:= sin(( 1.0-interp )*0.5*PI );
+		sclq2:= sin( interp*0.5*PI );
+		for i:=0 to 2 do
+			data[i]:=sclq1*q1.data[i]
+				+sclq2*data[i];
+		end;
+end;
+
+
+
+function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var angle             : single;
+    sr,sp,sy,cr,cp,cy : single;
+    crcp,srsp         : single;
+begin
+angle:=angles.z*0.5;
+sy:=sin( angle );
+cy:=cos( angle );
+angle:= angles.y*0.5;
+sp:= sin( angle );
+cp:= cos( angle );
+angle:= angles.x*0.5;
+sr:= sin( angle );
+cr:= cos( angle );
+
+crcp:= cr*cp;
+srsp:= sr*sp;
+
+Result.Import(
+	sr*cp*cy-cr*sp*sy,
+	cr*sp*cy+sr*cp*sy,
+	crcp*sy -srsp*cy,
+	crcp*cy +srsp*sy);
+end;
+
+procedure TSGQuaternion.Inverse();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+x := -x;
+y := -y;
+z := -z;
+w := -w;
+end;
+
+function TSGQuaternion.Intersed():TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(-x,-y,-z,-w);
+end;
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 Procedure RotatePoint(Var Xp, Yp, Zp: TSGSingle;const Xv, Yv, Zv, Angle: TSGSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

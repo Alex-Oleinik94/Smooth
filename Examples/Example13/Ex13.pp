@@ -108,6 +108,7 @@ type
 		F_ShaderBoneMat  : TSGLongWord;
 		F_ShaderTextures : array[0..7] of TSGLongWord;
 		
+		FMesh : TSG3DObject;
 		end;
 
 {$IFDEF ENGINE}
@@ -130,6 +131,7 @@ FCamera := nil;
 FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
+FMesh := nil;
 
 if Render.SupporedShaders() then
 	begin
@@ -189,13 +191,17 @@ const
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
 var
 	VStringLength : TSGLongWord;
+	i : LongWord;
 begin
 if Render.SupporedShaders() then
 	begin
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/100;
 	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
-
+	
+	for i := 0 to 7 do
+		Render.Uniform1i(F_ShaderTextures[i],0);
+	
 	end
 else
 	begin
