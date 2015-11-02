@@ -309,7 +309,9 @@ for i := 0 to High(FPoligons) do
 			else
 				SetLength(FTextures,Length(FTextures)+1);
 			FTextures[High(FTextures)] := TSGImage.Create(VPath+FPoligons[i].FTextureName);
+			FTextures[High(FTextures)].Context := Context;
 			FTextures[High(FTextures)].Loading();
+			FTextures[High(FTextures)].ToTexture();
 			FTextures[High(FTextures)].Name := FPoligons[i].FTextureName;
 			FPoligons[i].FTexture := FTextures[High(FTextures)].Texture;
 			end;

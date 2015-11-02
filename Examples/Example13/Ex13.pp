@@ -139,7 +139,7 @@ FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 21;
+FQuantityModels := 280;
 
 if Render.SupporedShaders() then
 	begin
@@ -147,7 +147,7 @@ if Render.SupporedShaders() then
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 	FCamera.Up:=SGVertexImport(0,0,1);
-	FCamera.Location:=SGVertexImport(0,-10,-10);
+	FCamera.Location:=SGVertexImport(0,-350,100);
 	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
 
 	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
@@ -227,6 +227,10 @@ if Render.SupporedShaders() then
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/100;
 	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
+	Render.Color3f(1,1,1);
+	Render.Enable(SGR_TEXTURE_2D);
+	Render.Disable(SGR_BLEND);
+	Render.Disable(SGR_COLOR_MATERIAL);
 	
 	for i := 0 to 7 do
 		begin
@@ -257,6 +261,9 @@ if Render.SupporedShaders() then
 		Render.BindTexture(SGR_TEXTURE_2D,0);
 		end;
 	Render.UseProgram(0);
+	Render.Disable(SGR_TEXTURE_2D);
+	Render.Enable(SGR_BLEND);
+	
 	end
 else
 	begin

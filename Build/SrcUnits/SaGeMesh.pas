@@ -1227,7 +1227,12 @@ Write(PredStr,'FVertexFormat       = ');
 if FVertexType = SGMeshVertexType2f then
 	WriteLn('"SGMeshVertexType2f"')
 else if FVertexType = SGMeshVertexType3f then
-	WriteLn('"SGMeshVertexType3f"');
+	WriteLn('"SGMeshVertexType3f"')
+else if FVertexType = SGMeshVertexType4f then
+	WriteLn('"SGMeshVertexType4f"')
+else
+	WriteLn('Unknown! "',TSGMaxEnum(FVertexType),'"');
+WriteLn(PredStr,'FCountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"');
 Write(PredStr,'FColorType          = ');
 case FColorType of
 SGMeshColorType3b:WriteLn('"SGMeshColorType3b"');
@@ -1241,6 +1246,15 @@ if FQuantityFaceArrays>0 then
 	WriteLn(PredStr,'AllSize             = "',SGGetSizeString(Size(),'EN'),'"');
 TextColor(7);
 WriteLn(PredStr,'EnableVBO           = "',FEnableVBO,'"');
+Write(PredStr,  'LinksVBO            = "',FVertexesBuffer,'", (');
+if FFacesBuffers <> nil then
+	for Index := 0 to High(FFacesBuffers) do
+		begin
+		Write(FFacesBuffers[Index]);
+		if Index <> High(FFacesBuffers) then
+			Write(',');
+		end;
+WriteLn(')');
 WriteLn(PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"');
 WriteLn(PredStr,'Name                = "',FName,'"');
 TextColor(7);
