@@ -24,6 +24,7 @@ uses
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
+	,Ex13_Model
 	;
 
 const
@@ -108,7 +109,13 @@ type
 		F_ShaderBoneMat  : TSGLongWord;
 		F_ShaderTextures : array[0..7] of TSGLongWord;
 		
-		FMesh : TSG3DObject;
+		// массив с меняющимися данными скелетной анимации
+		// (в данном случае всего 21 персонаж)
+		FAnimationStates  : array[0..300-1] of TSkelAnimState;
+		
+		FModel : TModel;
+		
+		FQuantityModels : TSGLongWord;
 		end;
 
 {$IFDEF ENGINE}
@@ -131,7 +138,8 @@ FCamera := nil;
 FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
-FMesh := nil;
+FModel := nil;
+FQuantityModels := 21;
 
 if Render.SupporedShaders() then
 	begin
@@ -165,6 +173,25 @@ if Render.SupporedShaders() then
 		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
 		FreeMem(TempPChar)
 		end;
+	
+	FModel := TModel.Create(Context);
+	
+	(*TODO*)
+	
+	FModel.PrepareSkeletalAnimation();
+	
+	// для каждого персонажа делаем случайный номер начального кадра
+	for i := 0 to length(FAnimationStates) - 1 do
+		begin
+		FAnimationStates[i].ResetState(FModel.Animation^.FNodesNum);
+		FAnimationStates[i].FPrevFrame:=0;
+		FAnimationStates[i].FNextFrame:=random(21);     // номер случайного кадра
+		FAnimationStates[i].FPrevAction:=0;
+		FAnimationStates[i].FNextAction:=0;
+		FAnimationStates[i].FSkelTime:=random(100)/100; // случайный сдвиг анимации
+		end;
+	
+	FModel.MakeMesh();
 	end;
 end;
 
@@ -177,6 +204,8 @@ if FShaderProgram <> nil then
 	FShaderProgram.Destroy();
 	Render.UseProgram(0);
 	end;
+if FModel <> nil then
+	FModel.Destroy();
 
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
@@ -200,8 +229,34 @@ if Render.SupporedShaders() then
 	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	
 	for i := 0 to 7 do
-		Render.Uniform1i(F_ShaderTextures[i],0);
+		begin
+		Render.Uniform1i(F_ShaderTextures[i],i);
+		Render.ActiveTexture(i);
+		Render.BindTexture(SGR_TEXTURE_2D,i+1);
+		end;
 	
+	FShaderProgram.Use();
+	
+	for i := 0 to FQuantityModels - 1 do
+		begin
+		
+		FAnimationStates[i].Animate(FModel,0,1,False);
+		FAnimationStates[i].CopyBonesForShader();
+		
+		Render.UniformMatrix4fv(F_ShaderBoneMat, 32, false, @FAnimationStates[i].FShaderAbsoluteMatrixes[0]);
+		Render.PushMatrix();
+		Render.Translatef((30+5*i)*sin((FQuantityModels+6.28)*i/FQuantityModels),
+						  (30+5*i)*cos((FQuantityModels+6.28)*i/FQuantityModels),0);
+		FModel.Draw();
+		Render.PopMatrix();
+		end;
+	
+	for i := 7 downto 0 do
+		begin
+		Render.ActiveTexture(i);
+		Render.BindTexture(SGR_TEXTURE_2D,0);
+		end;
+	Render.UseProgram(0);
 	end
 else
 	begin
