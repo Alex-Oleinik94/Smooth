@@ -12,6 +12,7 @@ uses
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
+	,SaGeImages
 	;
 
 type
@@ -115,9 +116,13 @@ type
 		FLocalized : array of TVertex;  // вывернутая модель (инверсно преобразованная)
 		FAnimation : TSkelAnimation;    // скелетная анимация модели
 		FMesh      : TSG3DObject;
+		FTextures  : array of TSGImage;
 			public
 		procedure MakeMesh();
 		procedure PrepareSkeletalAnimation();
+		procedure LoadTextures(const VPath : TSGString);
+		procedure Load(const VFileName : TSGString);
+		procedure LoadAnimation(const VFileName : TSGString);
 			private
 		function GetAnimation():PTSkelAnimation;inline;
 			public
@@ -125,6 +130,50 @@ type
 		end;
 
 implementation
+
+procedure TModel.Load(const VFileName : TSGString);
+begin
+
+end;
+
+procedure TModel.LoadAnimation(const VFileName : TSGString);
+begin
+
+end;
+
+procedure TModel.LoadTextures(const VPath : TSGString);
+var
+	i, j: TIndex;
+	Loaded : TSGBoolean;
+begin
+for i := 0 to High(FPoligons) do
+	begin
+	Loaded := False;
+	if FTextures <> nil then
+		for j := 0 to High(FTextures) do
+			if FTextures[j].Name = FPoligons[i].FTextureName then
+				begin
+				Loaded := True;
+				FPoligons[i].FTexture := FTextures[j].Texture;
+				break
+				end;
+	if not Loaded then
+		begin
+		FPoligons[i].FHasTexture := FPoligons[i].FTextureName <> 'NOTEXTURE';
+		if FPoligons[i].FHasTexture then
+			begin
+			if FTextures = nil then
+				SetLength(FTextures,1)
+			else
+				SetLength(FTextures,Length(FTextures)+1);
+			FTextures[High(FTextures)] := TSGImage.Create(VPath+FPoligons[i].FTextureName);
+			FTextures[High(FTextures)].Loading();
+			FTextures[High(FTextures)].Name := FPoligons[i].FTextureName;
+			FPoligons[i].FTexture := FTextures[High(FTextures)].Texture;
+			end;
+		end;
+	end;
+end;
 
 procedure TSkelAnimState.CopyBonesForShader();
 var
@@ -295,6 +344,7 @@ for i := 0 to Length(FPoligons) - 1 do
 			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FBoneNum/255,
 			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FWeight);
 		end;
+FMesh.LoadToVBO();
 end;
 
 procedure TSkelAnimState.ResetState(const VNodesNum : TIndex);
@@ -316,6 +366,7 @@ constructor TModel.Create(const VContext : TSGContext);
 begin
 inherited Create(VContext);
 FMesh := nil;
+FTextures := nil;
 end;
 
 destructor TModel.Destroy();

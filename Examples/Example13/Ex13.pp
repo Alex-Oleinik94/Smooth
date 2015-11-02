@@ -175,9 +175,9 @@ if Render.SupporedShaders() then
 		end;
 	
 	FModel := TModel.Create(Context);
-	
-	(*TODO*)
-	
+	FModel.Load('.\models\c_marine.smd');
+	FModel.LoadAnimation('.\models\run.smd');
+	FModel.LoadTextures('.\textures\');
 	FModel.PrepareSkeletalAnimation();
 	
 	// для каждого персонажа делаем случайный номер начального кадра
