@@ -114,6 +114,7 @@ type
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
 		procedure Vertex2f(const x,y:single);override;
+		procedure Scale(const x,y,z : TSGSingle);override;
 		procedure Color4f(const r,g,b,a:single);override;
 		procedure Normal3f(const x,y,z:single);override;
 		procedure Translatef(const x,y,z:single);override;
@@ -246,6 +247,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.Scale(const x,y,z : TSGSingle);
+begin
+glScalef(x,y,z);
+end;
 
 procedure TSGRenderOpenGL.Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
 begin

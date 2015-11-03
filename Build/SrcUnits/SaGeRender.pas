@@ -78,6 +78,7 @@ type
 		// Все остальные функции тут - аналоги своих функций в OpenGL, за исклбчением немногих.
 		procedure LoadIdentity();virtual;abstract;
 		procedure Vertex3f(const x,y,z:TSGSingle);virtual;abstract;
+		procedure Scale(const x,y,z : TSGSingle);virtual;abstract;
 		procedure Color3f(const r,g,b:TSGSingle);virtual;abstract;
 		procedure TexCoord2f(const x,y:TSGSingle);virtual;abstract;
 		procedure Vertex2f(const x,y:TSGSingle);virtual;abstract;

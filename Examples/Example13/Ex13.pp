@@ -28,67 +28,7 @@ uses
 	;
 
 const
-	VertexShaderSourse = '// Vertex Shader '+#13+#10+
-		'uniform mat4 boneMat[32]; '+#13+#10+
-		'varying float texNum; '+#13+#10+
-		'void main() '+#13+#10+
-		'{ '+#13+#10+
-		'float boneIndex[3]; '+#13+#10+
-		'float boneWeight[3]; '+#13+#10+
-		'texNum = gl_Vertex[3]; '+#13+#10+
-		'vec4 fixedTexCoord = gl_MultiTexCoord0; '+#13+#10+
-		'vec4 fixedColor = gl_Color; '+#13+#10+
-		'vec4 fixedVertex = gl_Vertex; '+#13+#10+
-		'vec4 finalVertex = vec4(0,0,0,1); '+#13+#10+
-		'boneIndex[0] = floor(fixedTexCoord[2]*255.0+0.001); '+#13+#10+
-		'boneWeight[0] = fixedTexCoord[3]; '+#13+#10+
-		'boneIndex[1] = floor(fixedColor[0]*255.0+0.001); '+#13+#10+
-		'boneWeight[1] = fixedColor[1]; '+#13+#10+
-		'boneIndex[2] = floor(fixedColor[2]*255.0+0.001); '+#13+#10+
-		'boneWeight[2] = fixedColor[3]; '+#13+#10+
-		'fixedTexCoord[2] = 0.0; '+#13+#10+
-		'fixedTexCoord[3] = 1.0; '+#13+#10+
-		'fixedColor[0] = 1.0; '+#13+#10+
-		'fixedColor[1] = 1.0; '+#13+#10+
-		'fixedColor[2] = 1.0; '+#13+#10+
-		'fixedColor[3] = 1.0; '+#13+#10+
-		'fixedVertex[3] = 1.0; '+#13+#10+
-		'mat4 finalMatrix = mat4(0); '+#13+#10+
-		'for (int i = 0; i < 3; i++) '+#13+#10+
-			'finalMatrix += boneWeight[i]*boneMat[int(boneIndex[i])]; '+#13+#10+
-		'finalVertex = finalMatrix*fixedVertex; '+#13+#10+
-		'finalVertex[3] = 1.0; '+#13+#10+
-		'gl_Position = gl_ModelViewProjectionMatrix * finalVertex; '+#13+#10+
-		'gl_FrontColor = fixedColor; '+#13+#10+
-		'gl_TexCoord[0] = fixedTexCoord; '+#13+#10+
-		'}';
-	FragmentShaderSourse = '// Fragment Shader '+#13+#10+
-		'uniform sampler2D myTexture0; '+#13+#10+
-		'uniform sampler2D myTexture1; '+#13+#10+
-		'uniform sampler2D myTexture2; '+#13+#10+
-		'uniform sampler2D myTexture3; '+#13+#10+
-		'uniform sampler2D myTexture4; '+#13+#10+
-		'uniform sampler2D myTexture5; '+#13+#10+
-		'uniform sampler2D myTexture6; '+#13+#10+
-		'varying float texNum; '+#13+#10+
-		'void main() '+#13+#10+
-		'{ '+#13+#10+
-		' float texNum2 = floor(texNum*255.0-1.0+0.001); '+#13+#10+
-		' if (texNum2==0.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture0, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==1.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture1, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==2.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture2, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==3.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture3, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==4.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture4, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==5.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture5, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==6.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture6, gl_TexCoord[0].st );  '+#13+#10+
-		'}';
+	ScaleForDepth = 12;
 
 type
 	TSGExample13=class(TSGDrawClass)
@@ -97,6 +37,9 @@ type
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():TSGString;override;
+		procedure KeyControl();
+		function GetVertexShaderSourse():TSGString;
+		function GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
 			private
 		FCamera : TSGCamera;
 		FShaderProgram : TSGShaderProgram;
@@ -110,7 +53,7 @@ type
 		
 		// массив с меняющимися данными скелетной анимации
 		// (в данном случае всего 21 персонаж)
-		FAnimationStates  : array[0..600] of TSkelAnimState;
+		FAnimationStates  : array[0..20] of TSkelAnimState;
 		
 		FModel : TModel;
 		
@@ -120,6 +63,67 @@ type
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
+
+function TSGExample13.GetVertexShaderSourse():TSGString;
+begin
+Result := '// Vertex Shader '+#13+#10+
+	'uniform mat4 boneMat[32]; '+#13+#10+
+	'varying float texNum; '+#13+#10+
+	'void main() '+#13+#10+
+	'{ '+#13+#10+
+	'float boneIndex[3]; '+#13+#10+
+	'float boneWeight[3]; '+#13+#10+
+	'texNum = gl_Vertex[3]; '+#13+#10+
+	'vec4 fixedTexCoord = gl_MultiTexCoord0; '+#13+#10+
+	'vec4 fixedColor = gl_Color; '+#13+#10+
+	'vec4 fixedVertex = gl_Vertex; '+#13+#10+
+	'vec4 finalVertex = vec4(0,0,0,1); '+#13+#10+
+	'boneIndex[0] = floor(fixedTexCoord[2]*255.0+0.001); '+#13+#10+
+	'boneWeight[0] = fixedTexCoord[3]; '+#13+#10+
+	'boneIndex[1] = floor(fixedColor[0]*255.0+0.001); '+#13+#10+
+	'boneWeight[1] = fixedColor[1]; '+#13+#10+
+	'boneIndex[2] = floor(fixedColor[2]*255.0+0.001); '+#13+#10+
+	'boneWeight[2] = fixedColor[3]; '+#13+#10+
+	'fixedTexCoord[2] = 0.0; '+#13+#10+
+	'fixedTexCoord[3] = 1.0; '+#13+#10+
+	'fixedColor[0] = 1.0; '+#13+#10+
+	'fixedColor[1] = 1.0; '+#13+#10+
+	'fixedColor[2] = 1.0; '+#13+#10+
+	'fixedColor[3] = 1.0; '+#13+#10+
+	'fixedVertex[3] = 1.0; '+#13+#10+
+	'mat4 finalMatrix = mat4(0); '+#13+#10+
+	'for (int i = 0; i < 3; i++) '+#13+#10+
+		'finalMatrix += boneWeight[i]*boneMat[int(boneIndex[i])]; '+#13+#10+
+	'finalVertex = finalMatrix*fixedVertex; '+#13+#10+
+	'finalVertex[3] = 1.0; '+#13+#10+
+	'gl_Position = gl_ModelViewProjectionMatrix * finalVertex; '+#13+#10+
+	'gl_FrontColor = fixedColor; '+#13+#10+
+	'gl_TexCoord[0] = fixedTexCoord; '+#13+#10+
+	'}';
+end;
+
+function TSGExample13.GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
+var
+	i : TSGLongWord;
+begin
+Result := 
+	'// Fragment Shader '+#13+#10;
+for i := 0 to VTexturesCount - 1 do
+	Result += 'uniform sampler2D myTexture'+SGStr(i)+'; '+#13+#10;
+Result += 
+	'varying float texNum; '+#13+#10+
+	'void main() '+#13+#10+
+	'{ '+#13+#10+
+	' float texNum2 = floor(texNum*255.0-1.0+0.001); '+#13+#10;
+for i := 0 to VTexturesCount - 1 do
+	begin
+	if (i <> 0) then
+		Result += ' else';
+	Result += ' if (texNum2=='+SGStr(i)+'.0) '+#13+#10;
+	Result += '  gl_FragColor = texture2D( myTexture'+SGStr(i)+', gl_TexCoord[0].st );  '+#13+#10;
+	end;
+Result += '}';
+end;
 
 class function TSGExample13.ClassName():TSGString;
 begin
@@ -138,7 +142,7 @@ FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 600;
+FQuantityModels := 21;
 
 if Render.SupporedShaders() then
 	begin
@@ -148,14 +152,15 @@ if Render.SupporedShaders() then
 	FCamera.Up:=SGVertexImport(0,0,1);
 	FCamera.Location:=SGVertexImport(0,-350,100);
 	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
-
+	FCamera.Location := FCamera.Location / ScaleForDepth;
+	
 	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
-	FVertexShader.Sourse(VertexShaderSourse);
+	FVertexShader.Sourse(GetVertexShaderSourse());
 	if not FVertexShader.Compile() then
 		FVertexShader.PrintInfoLog();
 
 	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
-	FFragmentShader.Sourse(FragmentShaderSourse);
+	FFragmentShader.Sourse(GetFragmentShaderSourse(7));
 	if not FFragmentShader.Compile() then
 		FFragmentShader.PrintInfoLog();
 
@@ -214,6 +219,8 @@ if FShaderProgram <> nil then
 if FModel <> nil then
 	FModel.Destroy();
 
+Context.CursorInCenter := False;
+
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
 //FFragmentShader.Destroy();
@@ -233,9 +240,12 @@ if Render.SupporedShaders() then
 	begin
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/10;
-	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
+	if (not Context.CursorInCenter) then
+		Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	Render.Color3f(1,1,1);
 	Render.Disable(SGR_BLEND);
+	FShaderProgram.Use();
+	Render.Scale(1/ScaleForDepth,1/ScaleForDepth,1/ScaleForDepth);
 	
 	for i := 0 to High(F_ShaderTextures) do
 		begin
@@ -245,11 +255,9 @@ if Render.SupporedShaders() then
 		Render.BindTexture(SGR_TEXTURE_2D,FTexturesHandles[i]);
 		end;
 	
-	FShaderProgram.Use();
 	
 	for i := 0 to FQuantityModels - 1 do
 		begin
-		
 		FAnimationStates[i].Animate(FModel,0,1,False);
 		FAnimationStates[i].CopyBonesForShader();
 		
@@ -267,9 +275,12 @@ if Render.SupporedShaders() then
 		Render.BindTexture(SGR_TEXTURE_2D,0);
 		Render.Disable(SGR_TEXTURE_2D);
 		end;
+	
+	Render.Scale(1,1,1);
 	Render.UseProgram(0);
 	Render.Enable(SGR_BLEND);
 	
+	//KeyControl();
 	end
 else
 	begin
@@ -285,6 +296,45 @@ else
 		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
 		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
 	end;
+end;
+
+procedure TSGExample13.KeyControl();
+const
+	RotateConst = 0.002;
+var
+	Q, E : TSGBoolean;
+	RotateZ : TSGFloat = 0;
+begin
+if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
+	begin
+	Context.CursorInCenter := not Context.CursorInCenter;
+	Context.ShowCursor(not Context.CursorInCenter);
+	end;
+
+Q := Context.KeysPressed('Q');
+E := Context.KeysPressed('E');
+if (Q xor E) then
+	begin
+	if Q then
+		RotateZ := Context.ElapsedTime*2
+	else
+		RotateZ := -Context.ElapsedTime*2;
+	end;
+
+if (Context.KeysPressed('W')) then
+	FCamera.Move(Context.ElapsedTime*0.7);
+if (Context.KeysPressed('S')) then
+	FCamera.Move(-Context.ElapsedTime*0.7);
+if (Context.KeysPressed('A')) then
+	FCamera.MoveSidewards(-Context.ElapsedTime*0.7);
+if (Context.KeysPressed('D')) then
+	FCamera.MoveSidewards(Context.ElapsedTime*0.7);
+if (Context.KeysPressed(' ')) then
+	FCamera.MoveUp(Context.ElapsedTime*0.7);
+if (Context.KeysPressed('X')) then
+	FCamera.MoveUp(-Context.ElapsedTime*0.7);
+if (Context.CursorInCenter) then
+	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}
