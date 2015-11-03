@@ -70,7 +70,6 @@ const
 		'uniform sampler2D myTexture4; '+#13+#10+
 		'uniform sampler2D myTexture5; '+#13+#10+
 		'uniform sampler2D myTexture6; '+#13+#10+
-		'uniform sampler2D myTexture7; '+#13+#10+
 		'varying float texNum; '+#13+#10+
 		'void main() '+#13+#10+
 		'{ '+#13+#10+
@@ -89,8 +88,6 @@ const
 		'  gl_FragColor = texture2D( myTexture5, gl_TexCoord[0].st );  '+#13+#10+
 		' else if (texNum2==6.0) '+#13+#10+
 		'  gl_FragColor = texture2D( myTexture6, gl_TexCoord[0].st );  '+#13+#10+
-		' else if (texNum2==7.0) '+#13+#10+
-		'  gl_FragColor = texture2D( myTexture7, gl_TexCoord[0].st );  '+#13+#10+
 		'}';
 
 type
@@ -107,11 +104,13 @@ type
 		FRotateAngle : TSGFloat;
 		
 		F_ShaderBoneMat  : TSGLongWord;
-		F_ShaderTextures : array[0..7] of TSGLongWord;
+		F_ShaderTextures : array[0..6] of TSGLongWord;
+		
+		FTexturesHandles : array[0..6] of TSGLongWord;
 		
 		// массив с меняющимися данными скелетной анимации
 		// (в данном случае всего 21 персонаж)
-		FAnimationStates  : array[0..300-1] of TSkelAnimState;
+		FAnimationStates  : array[0..600] of TSkelAnimState;
 		
 		FModel : TModel;
 		
@@ -139,7 +138,7 @@ FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 150;
+FQuantityModels := 600;
 
 if Render.SupporedShaders() then
 	begin
@@ -167,7 +166,7 @@ if Render.SupporedShaders() then
 		FShaderProgram.PrintInfoLog();
 
 	F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
-	for i := 0 to 7 do
+	for i := 0 to High(F_ShaderTextures) do
 		begin
 		TempPChar := SGStringToPChar('myTexture'+SGStr(i));
 		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
@@ -179,6 +178,14 @@ if Render.SupporedShaders() then
 	FModel.LoadAnimation('.\models\run.smd');
 	FModel.LoadTextures('.\textures\');
 	FModel.PrepareSkeletalAnimation();
+	
+	FTexturesHandles[0] := FModel.GetTextureHandle('SM_4B.jpg');
+	FTexturesHandles[1] := FModel.GetTextureHandle('pants23.jpg');
+	FTexturesHandles[2] := FModel.GetTextureHandle('SM_1pNEW.jpg');
+	FTexturesHandles[3] := FModel.GetTextureHandle('body12.jpg');
+	FTexturesHandles[4] := FModel.GetTextureHandle('accs.jpg');
+	FTexturesHandles[5] := FModel.GetTextureHandle('face.jpg');
+	FTexturesHandles[6] := FModel.GetTextureHandle('PC_soldier_beret_red.jpg');
 	
 	// для каждого персонажа делаем случайный номер начального кадра
 	for i := 0 to length(FAnimationStates) - 1 do
@@ -225,18 +232,17 @@ begin
 if Render.SupporedShaders() then
 	begin
 	FCamera.CallAction();
-	FRotateAngle += Context.ElapsedTime/100;
+	FRotateAngle += Context.ElapsedTime/10;
 	Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	Render.Color3f(1,1,1);
-	Render.Enable(SGR_TEXTURE_2D);
 	Render.Disable(SGR_BLEND);
-	Render.Disable(SGR_COLOR_MATERIAL);
 	
-	for i := 0 to 7 do
+	for i := 0 to High(F_ShaderTextures) do
 		begin
 		Render.Uniform1i(F_ShaderTextures[i],i);
 		Render.ActiveTexture(i);
-		Render.BindTexture(SGR_TEXTURE_2D,i+1);
+		Render.Enable(SGR_TEXTURE_2D);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexturesHandles[i]);
 		end;
 	
 	FShaderProgram.Use();
@@ -255,13 +261,13 @@ if Render.SupporedShaders() then
 		Render.PopMatrix();
 		end;
 	
-	for i := 7 downto 0 do
+	for i := High(F_ShaderTextures) downto 0 do
 		begin
 		Render.ActiveTexture(i);
 		Render.BindTexture(SGR_TEXTURE_2D,0);
+		Render.Disable(SGR_TEXTURE_2D);
 		end;
 	Render.UseProgram(0);
-	Render.Disable(SGR_TEXTURE_2D);
 	Render.Enable(SGR_BLEND);
 	
 	end

@@ -126,6 +126,7 @@ type
 		procedure LoadTextures(const VPath : TSGString);
 		procedure Load(const VFileName : TSGString);
 		procedure LoadAnimation(const VFileName : TSGString);
+		function GetTextureHandle (const FileName : String):LongWord;
 			private
 		function GetAnimation():PTSkelAnimation;inline;
 			public
@@ -135,6 +136,21 @@ type
 function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 
 implementation
+
+function TModel.GetTextureHandle (const FileName : String):LongWord;
+var
+	i : TIndex;
+begin
+Result := 0;
+
+if FTextures <> nil then
+	for i := 0 to High(FTextures) do
+		if FTextures[i].Name = FileName then
+			begin
+			Result := FTextures[i].Texture;
+			break;
+			end;
+end;
 
 function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 var
@@ -358,7 +374,7 @@ FNextAction := VActionNum;
 if FPrevAction = -1 then
 	FPrevAction := VActionNum;
 
-Delta := VModel.Context.ElapsedTime * VModel.FAnimation.FActions[FNextAction].FSpeed / 1000;
+Delta := VModel.Context.ElapsedTime * VModel.FAnimation.FActions[FNextAction].FSpeed / 100;
 FSkelTime += Delta;
 
 if FSkelTime > 1 then
