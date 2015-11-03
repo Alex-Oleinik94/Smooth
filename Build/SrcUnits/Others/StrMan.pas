@@ -24,6 +24,17 @@
    http://sbis.komi.ru/picoder
  *)
 
+{$IFDEF FPC}
+	{$MODE DELPHI}
+	{$IFNDEF ANDROID}
+		{$ASMMODE INTEL}
+	{$ELSE}
+		//{$ASMMODE ?} - Я не знаю, какой нужен для arm-android
+		{$ENDIF}
+	{$H+}
+	{$PACKRECORDS C}
+	{$ENDIF}
+
 UNIT StrMan;
 
 INTERFACE

@@ -132,7 +132,22 @@ type
 		property Animation : PTSkelAnimation read GetAnimation;
 		end;
 
+function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
+
 implementation
+
+function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
+var
+	S : String;
+begin
+S := String(S1);
+S := Trim(S);
+S := StringWordGet(S,' ',Index);
+{$IFDEF FPC}
+	S := StringReplace(S, '.', ',', [rfReplaceAll]);
+	{$ENDIF}
+Result := StrToFloatDef(S,0);
+end;
 
 procedure TModel.Load(const VFileName : TSGString);
 var 
@@ -174,13 +189,13 @@ repeat
 	with FAnimation.FReferencePos[i] do
 		begin
 		FTrans.Import(
-			StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
-			StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
-			StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+			GetValue(S,2),
+			GetValue(S,3),
+			GetValue(S,4));
 		FRot.Import(
-			StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
-			StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
-			StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+			GetValue(S,5),
+			GetValue(S,6),
+			GetValue(S,7));
 		FQuat := SGGetQuaternionFromAngleVector3f(FRot);
 		Inc(i);
 		end;
@@ -207,19 +222,19 @@ repeat
 			k := High(FVertexes);
 			ReadLn(f,s);
 			SetLength(FVertexes[k].FParents,1);
-			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(trim(s),' ',1));
+			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(Trim(s),' ',1));
 			FVertexes[k].FParents[0].FWeight  := 1;
 			FVertexes[k].FCoord.Import(
-				StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+				GetValue(S,2),
+				GetValue(S,3),
+				GetValue(S,4));
 			FVertexes[k].FNorm.Import(
-				StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+				GetValue(S,5),
+				GetValue(S,6),
+				GetValue(S,7));
 			FPoligons[i].FTexCoord[j].Import(
-				StrToFloatDef(StringWordGet(Trim(s),' ',8),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',9),0));
+				GetValue(S,8),
+				GetValue(S,9));
 			FPoligons[i].FVertexIndexes[j] := k;
 			end;
 		Inc(i);
@@ -267,13 +282,14 @@ repeat
 		with FAnimation.FActions[ActionIndex].FFrames[j - 1] do
 			begin
 			FBones[i - 1].FTrans.Import(
-				StrToFloatDef(StringWordGet(Trim(s),' ',2),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',3),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',4),0));
+				GetValue(S,2),
+				GetValue(S,3),
+				GetValue(S,4));
+				
 			FBones[i - 1].FRot.Import(
-				StrToFloatDef(StringWordGet(Trim(s),' ',5),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',6),0),
-				StrToFloatDef(StringWordGet(Trim(s),' ',7),0));
+				GetValue(S,5),
+				GetValue(S,6),
+				GetValue(S,7));
 			FBones[i - 1].FQuat := SGGetQuaternionFromAngleVector3f(FBones[i - 1].FRot);
 			end;
 		end;

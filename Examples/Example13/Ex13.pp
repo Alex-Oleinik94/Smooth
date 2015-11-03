@@ -139,7 +139,7 @@ FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 280;
+FQuantityModels := 150;
 
 if Render.SupporedShaders() then
 	begin
