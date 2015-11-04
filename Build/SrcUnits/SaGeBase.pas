@@ -201,6 +201,7 @@ const
 	SGTexturesDirectory = SGTextureDirectory;
 	SGFontsDirectory = SGFontDirectory;
 	SGModelsDirectory = SGDataDirectory + Slash +'Models';
+	SGExamplesDirectory = SGDataDirectory + Slash +'Examples';
 	SGImagesDirectory = 
 		{$IFDEF ANDROID}
 			'/sdcard/Images'

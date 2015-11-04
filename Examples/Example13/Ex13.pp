@@ -179,9 +179,9 @@ if Render.SupporedShaders() then
 		end;
 	
 	FModel := TModel.Create(Context);
-	FModel.Load('.\models\c_marine.smd');
-	FModel.LoadAnimation('.\models\run.smd');
-	FModel.LoadTextures('.\textures\');
+	FModel.Load(SGExamplesDirectory + Slash + '13' + Slash + 'c_marine.smd');
+	FModel.LoadAnimation(SGExamplesDirectory + Slash + '13' + Slash + 'run.smd');
+	FModel.LoadTextures(SGExamplesDirectory + Slash + '13' + Slash);
 	FModel.PrepareSkeletalAnimation();
 	
 	FTexturesHandles[0] := FModel.GetTextureHandle('SM_4B.jpg');
@@ -208,6 +208,8 @@ if Render.SupporedShaders() then
 end;
 
 destructor TSGExample13.Destroy();
+var
+	i : TIndex;
 begin
 if FCamera <> nil then
 	FCamera.Destroy();
@@ -218,6 +220,9 @@ if FShaderProgram <> nil then
 	end;
 if FModel <> nil then
 	FModel.Destroy();
+
+for i := 0 to High(FAnimationStates) do
+	FAnimationStates[i].ResetState(0);
 
 Context.CursorInCenter := False;
 

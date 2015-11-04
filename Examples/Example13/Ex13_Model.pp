@@ -30,14 +30,16 @@ type
 
 	// Вершина имеет координату, нормаль и данные о
 	// прикреплённых влияющих на неё костях
-	TVertex = record
+	TVertex = object
 		FCoord   : TSGVertex3f;              // координата вершины
 		FNorm    : TSGVertex3f;              // нормаль, выходящая из вершины
 		FParents : packed array  of TWeight; // список костей, влияющих на вершину
+		
+		procedure Clear();
 		end;
 
 	// Полигон
-	TPoligon=record
+	TPoligon = record
 		FTextureName      : string;                      // имя файла с текстурой
 		FVertexCoordNum   : TIndex;                      // количество вершин (3 ил 4)
 		FVertexIndexes    : array [0..3] of TIndex;      // ссылки на индексы массива с вершинами
@@ -62,16 +64,20 @@ type
 		end;
 
 	// Кадр анимации
-	TFrame = record
+	TFrame = object
 		FBones : packed array of TBonePos; // массив с позициями костей
+		
+		procedure Clear();
 		end;
 
 	// Действие персонажа
-	TAction = record
+	TAction = object
 		FName        : string;                 // название анимации для этого действия
 		FSpeed       : single;                 // скорость анимации
 		FFramesCount : TIndex;                 // количество кадров анимации
 		FFrames      : packed array of TFrame; // массив с кадрами анимации
+		
+		procedure Clear();
 		end;
 
 	// Состояние анимации
@@ -99,6 +105,7 @@ type
 		
 		procedure MakeReferenceMatrixes();
 		procedure MakeBoneMatrixes();
+		procedure Clear();
 		end;
 
 	// Модель персонажа состоит из:
@@ -136,6 +143,78 @@ type
 function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 
 implementation
+
+procedure TFrame.Clear();
+begin
+if FBones <> nil then
+	SetLength(FBones,0);
+end;
+
+procedure TAction.Clear();
+var
+	i : TIndex;
+begin
+if FFrames <> nil then
+	begin
+	for i := 0 to High(FFrames) do
+		FFrames[i].Clear();
+	SetLength(FFrames,0);
+	end;
+FName := '';
+FFramesCount := 0;
+end;
+
+procedure TSkelAnimation.Clear();
+var
+	i : TIndex;
+begin
+if FActions <> nil then
+	begin
+	for i := 0 to High(FActions) do
+		FActions[i].Clear();
+	SetLength(FActions,0);
+	end;
+if FNodes <> nil then
+	SetLength(FNodes,0);
+if FReferencePos <> nil then
+	SetLength(FReferencePos,0);
+FNodesNum := 0;
+end;
+
+destructor TModel.Destroy();
+var
+	i : TIndex;
+begin
+if FMesh <> nil then
+	FMesh.Destroy();
+if FVertexes <> nil then
+	begin
+	for i := 0 to High(FVertexes) do
+		FVertexes[i].Clear();
+	SetLength(FVertexes,0);
+	end;
+if FLocalized <> nil then
+	begin
+	for i := 0 to High(FLocalized) do
+		FLocalized[i].Clear();
+	SetLength(FLocalized,0);
+	end;
+if FTextures <> nil then
+	begin
+	for i := 0 to High(FTextures) do
+		FTextures[i].Destroy();
+	SetLength(FTextures,0);
+	end;
+if FPoligons <> nil then
+	SetLength(FPoligons,0);
+FAnimation.Clear();
+inherited;
+end;
+
+procedure TVertex.Clear();
+begin
+SetLength(FParents,0);
+end;
 
 function TModel.GetTextureHandle (const FileName : String):LongWord;
 var
@@ -543,11 +622,6 @@ begin
 inherited Create(VContext);
 FMesh := nil;
 FTextures := nil;
-end;
-
-destructor TModel.Destroy();
-begin
-inherited;
 end;
 
 procedure TModel.Draw();
