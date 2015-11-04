@@ -104,22 +104,28 @@ end;
 
 function TSGExample13.GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
 var
-	i : TSGLongWord;
+	i : TIndex;
+	MinTextureHandle : TSGLongWord;
 begin
 Result := 
 	'// Fragment Shader '+#13+#10;
 for i := 0 to VTexturesCount - 1 do
 	Result += 'uniform sampler2D myTexture'+SGStr(i)+'; '+#13+#10;
+MinTextureHandle := FTexturesHandles[0];
+for i := 1 to High(FTexturesHandles) do
+	if FTexturesHandles[i] < MinTextureHandle then
+		MinTextureHandle := FTexturesHandles[i];
 Result += 
 	'varying float texNum; '+#13+#10+
 	'void main() '+#13+#10+
 	'{ '+#13+#10+
-	' float texNum2 = floor(texNum*255.0-1.0+0.001); '+#13+#10;
+	' float texNum2 = floor(texNum*255 - '+SGStr(MinTextureHandle)+'.0 + 0.001); '+#13+#10;
 for i := 0 to VTexturesCount - 1 do
 	begin
 	if (i <> 0) then
 		Result += ' else';
-	Result += ' if (texNum2=='+SGStr(i)+'.0) '+#13+#10;
+	if i <> VTexturesCount - 1 then
+		Result += ' if (texNum2=='+SGStr(i)+'.0) '+#13+#10;
 	Result += '  gl_FragColor = texture2D( myTexture'+SGStr(i)+', gl_TexCoord[0].st );  '+#13+#10;
 	end;
 Result += '}';
@@ -154,30 +160,6 @@ if Render.SupporedShaders() then
 	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
-	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
-	FVertexShader.Sourse(GetVertexShaderSourse());
-	if not FVertexShader.Compile() then
-		FVertexShader.PrintInfoLog();
-
-	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
-	FFragmentShader.Sourse(GetFragmentShaderSourse(7));
-	if not FFragmentShader.Compile() then
-		FFragmentShader.PrintInfoLog();
-
-	FShaderProgram := TSGShaderProgram.Create(Context);
-	FShaderProgram.Attach(FVertexShader);
-	FShaderProgram.Attach(FFragmentShader);
-	if not FShaderProgram.Link() then
-		FShaderProgram.PrintInfoLog();
-
-	F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
-	for i := 0 to High(F_ShaderTextures) do
-		begin
-		TempPChar := SGStringToPChar('myTexture'+SGStr(i));
-		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
-		FreeMem(TempPChar)
-		end;
-	
 	FModel := TModel.Create(Context);
 	FModel.Load(SGExamplesDirectory + Slash + '13' + Slash + 'c_marine.smd');
 	FModel.LoadAnimation(SGExamplesDirectory + Slash + '13' + Slash + 'run.smd');
@@ -204,6 +186,30 @@ if Render.SupporedShaders() then
 		end;
 	
 	FModel.MakeMesh();
+	
+	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
+	FVertexShader.Sourse(GetVertexShaderSourse());
+	if not FVertexShader.Compile() then
+		FVertexShader.PrintInfoLog();
+
+	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
+	FFragmentShader.Sourse(GetFragmentShaderSourse(FModel.GetTexturesCount()));
+	if not FFragmentShader.Compile() then
+		FFragmentShader.PrintInfoLog();
+
+	FShaderProgram := TSGShaderProgram.Create(Context);
+	FShaderProgram.Attach(FVertexShader);
+	FShaderProgram.Attach(FFragmentShader);
+	if not FShaderProgram.Link() then
+		FShaderProgram.PrintInfoLog();
+
+	F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
+	for i := 0 to High(F_ShaderTextures) do
+		begin
+		TempPChar := SGStringToPChar('myTexture'+SGStr(i));
+		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
+		FreeMem(TempPChar)
+		end;
 	end;
 end;
 

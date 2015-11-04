@@ -134,6 +134,7 @@ type
 		procedure Load(const VFileName : TSGString);
 		procedure LoadAnimation(const VFileName : TSGString);
 		function GetTextureHandle (const FileName : String):LongWord;
+		function GetTexturesCount():TSGLongWord;inline;
 			private
 		function GetAnimation():PTSkelAnimation;inline;
 			public
@@ -143,6 +144,14 @@ type
 function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 
 implementation
+
+function TModel.GetTexturesCount():TSGLongWord;inline;
+begin
+if FTextures <> nil then
+	Result := Length(FTextures)
+else
+	Result := 0;
+end;
 
 procedure TFrame.Clear();
 begin
