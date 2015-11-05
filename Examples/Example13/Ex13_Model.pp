@@ -4,7 +4,8 @@ unit Ex13_Model;
 interface
 
 uses
-	SaGeContext
+	crt
+	,SaGeContext
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
@@ -407,6 +408,7 @@ procedure TModel.LoadTextures(const VPath : TSGString);
 var
 	i, j: TIndex;
 	Loaded : TSGBoolean;
+	TexturesBlock : TSGTextureBlock;
 begin
 for i := 0 to High(FPoligons) do
 	begin
@@ -431,12 +433,26 @@ for i := 0 to High(FPoligons) do
 			FTextures[High(FTextures)] := TSGImage.Create(VPath+FPoligons[i].FTextureName);
 			FTextures[High(FTextures)].Context := Context;
 			FTextures[High(FTextures)].Loading();
-			FTextures[High(FTextures)].ToTexture();
 			FTextures[High(FTextures)].Name := FPoligons[i].FTextureName;
-			FPoligons[i].FTexture := FTextures[High(FTextures)].Texture;
 			end;
 		end;
 	end;
+TexturesBlock := TSGTextureBlock.Create(Context);
+TexturesBlock.Size := Length(FTextures);
+TexturesBlock.Generate();
+for i := 0 to High(FTextures) do
+	FTextures[i].ToTextureWithBlock(TexturesBlock);
+TexturesBlock.Destroy();
+for i := 0 to High(FPoligons) do
+	begin
+	for j := 0 to High(FTextures) do
+		if FTextures[j].FName = FPoligons[i].FTextureName then
+			begin
+			FPoligons[i].FTexture := FTextures[j].Texture;
+			break;
+			end;
+	end;
+
 end;
 
 procedure TSkelAnimState.CopyBonesForShader();

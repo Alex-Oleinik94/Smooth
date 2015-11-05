@@ -25,6 +25,9 @@ uses
 	,SaGeImagesSgia
 	;
 type
+	TSGImage = class;
+	TSGTextureBlock = class;
+	
 	TSGIByte = type TSGExByte;
 	TSGITextureType = (SGITextureTypeTexture,SGITextureTypeBump);
 	
@@ -81,6 +84,7 @@ type
 		function Loading():TSGBoolean;virtual;
 		procedure SaveToStream(const Stream:TStream);
 		procedure ToTexture();virtual;
+		procedure ToTextureWithBlock(var VTexturesBlock : TSGTextureBlock);
 		procedure BindTexture();
 		procedure DisableTexture();
 		function ReadyTexture():TSGBoolean;
@@ -95,7 +99,7 @@ type
 		property DataType           : TSGCardinal read FImage.FDataType    write FImage.FDataType;
 		property Channels           : TSGCardinal read FImage.FChannels    write FImage.FChannels;
 		property BitDepth           : TSGCardinal read FImage.FSizeChannel write FImage.FSizeChannel;
-		property Texture            : SGUint      read FTexture            write FTexture;
+		property Texture            : SGUInt      read FTexture            write FTexture;
 		property Height             : TSGCardinal read FImage.FHeight      write FImage.FHeight;
 		property Width              : TSGCardinal read FImage.FWidth       write FImage.FWidth;
 		property Bits               : TSGCardinal read GetBitMapBits       write SetBitMapBits;
@@ -120,9 +124,112 @@ type
 	ArTSGImage  = type packed array of TSGImage;
 	TArTSGImage = ArTSGImage;
 
+type
+	TSGTextureBlock = class(TSGContextObject)
+			public
+		constructor Create(const VContext : TSGContext);override;
+		destructor Destroy();override;
+			private
+		FTextures : packed array of
+			packed record
+				FHandle : TSGLongWord;
+				FWasUsed : TSGBoolean;
+				end;
+			private
+		procedure SetSize(const VSize : TSGLongWord);inline;
+		function GetSize():TSGLongWord;inline;
+			public
+		procedure Generate();inline;
+		function GetNextUnusebleTexture():TSGLongWord;inline;
+			public
+		property Size : TSGLongWord read GetSize write SetSize;
+		end;
+
 procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
 
 implementation
+
+
+constructor TSGTextureBlock.Create(const VContext : TSGContext);
+begin
+inherited Create(VContext);
+FTextures := nil;
+end;
+
+destructor TSGTextureBlock.Destroy();
+var
+	i : TSGLongWord;
+begin
+if FTextures <> nil then
+	begin
+	if Length(FTextures) > 0 then
+		for i := 0 to High(FTextures) do
+			if (not FTextures[i].FWasUsed) and (FTextures[i].FHandle > 0) then
+				Render.DeleteTextures(1,@FTextures[i].FHandle);
+	SetLength(FTextures,0);
+	end;
+inherited;
+end;
+
+procedure TSGTextureBlock.SetSize(const VSize : TSGLongWord);inline;
+var
+	OldSize, i : TSGLongWord;
+begin
+OldSize := Size;
+if VSize > OldSize then
+	begin
+	SetLength(FTextures,VSize);
+	for i := OldSize to Size - 1 do
+		begin
+		FTextures[i].FHandle := 0;
+		FTextures[i].FWasUsed := False;
+		end;
+	end;
+end;
+
+function TSGTextureBlock.GetSize():TSGLongWord;inline;
+begin
+if FTextures = nil then
+	Result := 0
+else
+	Result := Length(FTextures);
+end;
+
+procedure TSGTextureBlock.Generate();inline;
+var
+	Ar : packed array of SGUInt;
+	i : TSGLongWord;
+begin
+if Size > 0 then
+	begin
+	SetLength(Ar,Size);
+	Render.Enable(SGR_TEXTURE_2D);
+	Render.GenTextures(Size,@Ar[0]);
+	Render.Disable(SGR_TEXTURE_2D);
+	for i := 0 to Size - 1 do
+		begin
+		FTextures[i].FWasUsed := False;
+		FTextures[i].FHandle := Ar[i];
+		end;
+	SetLength(Ar,0);
+	end;
+end;
+
+function TSGTextureBlock.GetNextUnusebleTexture():TSGLongWord;inline;
+var
+	i : TSGLongWord;
+begin
+Result := 0;
+if (FTextures <> nil) then
+	if (Length(FTextures) > 0) then
+		for i := 0 to Size - 1 do
+			if (not FTextures[i].FWasUsed) and (FTextures[i].FHandle > 0) then
+				begin
+				Result := FTextures[i].FHandle;
+				FTextures[i].FWasUsed := True;
+				break;
+				end;
+end;
 
 procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
 var
@@ -140,6 +247,13 @@ end;
 (*RENDER FUNCTIONS FOR IMAGE*)
 (****************************)
 
+procedure TSGImage.ToTextureWithBlock(var VTexturesBlock : TSGTextureBlock);
+begin
+if FTexture <> 0 then
+	FreeTexture();
+FTexture := VTexturesBlock.GetNextUnusebleTexture();
+ToTexture();
+end;
 
 procedure TSGImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);
 begin
@@ -705,11 +819,10 @@ end;
 
 procedure TSGImage.ToTexture();
 begin
-if FTexture<>0 then
-	FreeTexture();
-
 Render.Enable(SGR_TEXTURE_2D);
-Render.GenTextures(1, @FTexture);
+
+if FTexture = 0 then
+	Render.GenTextures(1, @FTexture);
 
 if FTexture = 0 then
 	Exit;
