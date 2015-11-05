@@ -452,7 +452,6 @@ for i := 0 to High(FPoligons) do
 			break;
 			end;
 	end;
-
 end;
 
 procedure TSkelAnimState.CopyBonesForShader();

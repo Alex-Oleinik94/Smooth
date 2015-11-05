@@ -40,6 +40,7 @@ type
 		procedure KeyControl();
 		function GetVertexShaderSourse():TSGString;
 		function GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
+		procedure AddModels(const VCount : TIndex);
 			private
 		FCamera : TSGCamera;
 		FShaderProgram : TSGShaderProgram;
@@ -58,11 +59,51 @@ type
 		FModel : TModel;
 		
 		FQuantityModels : TSGLongWord;
+		
+		FP1Button, 
+			FM1Button,
+			FP5Button,
+			FM5Button,
+			FP15Button,
+			FM15Button,
+			FP100Button,
+			FM100Button : TSGButton;
+		FFont : TSGFont;
+		FCountLabel : TSGLabel;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
+
+procedure TSGExample13.AddModels(const VCount : TIndex);
+var
+	NewLength, i, Temp : TIndex;
+begin
+NewLength := FQuantityModels + VCount;
+if NewLength < 1 then
+	FQuantityModels := 1
+else if FQuantityModels >= NewLength then
+	FQuantityModels := NewLength
+else if Length(FAnimationStates) < NewLength then
+	begin
+	Temp := FQuantityModels;
+	FQuantityModels := NewLength;
+	SetLength(FAnimationStates,FQuantityModels);
+	for i := Temp to FQuantityModels - 1 do
+		begin
+		FAnimationStates[i].ResetState(FModel.Animation^.FNodesNum);
+		FAnimationStates[i].FPrevFrame:=0;
+		FAnimationStates[i].FNextFrame:=random(21);     // номер случайного кадра
+		FAnimationStates[i].FPrevAction:=0;
+		FAnimationStates[i].FNextAction:=0;
+		FAnimationStates[i].FSkelTime:=random(100)/100; // случайный сдвиг анимации
+		end;
+	end
+else if Length(FAnimationStates) >= NewLength then
+	FQuantityModels := NewLength;
+FCountLabel.Caption := ' оличество моделей: ' + SGStr(FQuantityModels);
+end;
 
 function TSGExample13.GetVertexShaderSourse():TSGString;
 begin
@@ -136,7 +177,30 @@ begin
 Result := '—келетна€ анимаци€';
 end;
 
+procedure mmmFP1ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(1); end;
+procedure mmmFM1ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-1); end;
+procedure mmmFP5ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(5); end;
+procedure mmmFM5ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-5); end;
+procedure mmmFP15ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(15); end;
+procedure mmmFM15ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-15); end;
+procedure mmmFP100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(100); end;
+procedure mmmFM100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-100); end;
+
 constructor TSGExample13.Create(const VContext : TSGContext);
+
+procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
+begin
+VButton := TSGButton.Create();
+SGScreen.CreateChild(VButton);
+SGScreen.LastChild.Font := FFont;
+SGScreen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
+SGScreen.LastChild.BoundsToNeedBounds();
+SGScreen.LastChild.UserPointer:=Self;
+SGScreen.LastChild.Visible:=True;
+SGScreen.LastChild.Caption := VCaption;
+(SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+end;
+
 var
 	i : TSGWord;
 	TempPChar : PChar;
@@ -148,10 +212,25 @@ FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 400;
+FQuantityModels := 21;
+FP1Button := nil;
+FM1Button := nil;
+FP5Button := nil;
+FM5Button := nil;
+FP15Button := nil;
+FM15Button := nil;
+FP100Button := nil;
+FM100Button := nil;
+FFont := nil;
+FCountLabel := nil;
 
 if Render.SupporedShaders() then
 	begin
+	FFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+	FFont.SetContext(Context);
+	FFont.Loading();
+	FFont.ToTexture();
+	
 	FCamera:=TSGCamera.Create();
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
@@ -211,6 +290,24 @@ if Render.SupporedShaders() then
 		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
 		FreeMem(TempPChar)
 		end;
+	
+	CreateButton(FP1Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
+	CreateButton(FM1Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
+	CreateButton(FP5Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
+	CreateButton(FM5Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
+	CreateButton(FP15Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
+	CreateButton(FM15Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
+	CreateButton(FP100Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
+	CreateButton(FM100Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	
+	FCountLabel := TSGLabel.Create();
+	SGScreen.CreateChild(FCountLabel);
+	SGScreen.LastChild.Font := FFont;
+	SGScreen.LastChild.Caption := ' оличество моделей: ' + SGStr(FQuantityModels);
+	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.Visible := True;
+	
 	end;
 end;
 
@@ -234,6 +331,27 @@ SetLength(FAnimationStates,0);
 
 Context.CursorInCenter := False;
 
+if (FP1Button <> nil) then
+	FP1Button.Destroy();
+if (FM1Button <> nil) then
+	FM1Button.Destroy();
+if (FP5Button <> nil) then
+	FP5Button.Destroy();
+if (FM5Button <> nil) then
+	FM5Button.Destroy();
+if (FP15Button <> nil) then
+	FP15Button.Destroy();
+if (FM15Button <> nil) then
+	FM15Button.Destroy();
+if (FP100Button <> nil) then
+	FP100Button.Destroy();
+if (FM100Button <> nil) then
+	FM100Button.Destroy();
+if (FCountLabel <> nil) then
+	FCountLabel.Destroy();
+
+if FFont <> nil then
+	FFont.Destroy();
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
 //FFragmentShader.Destroy();
