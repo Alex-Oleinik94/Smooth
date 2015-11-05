@@ -52,8 +52,8 @@ type
 		FTexturesHandles : array[0..6] of TSGLongWord;
 		
 		// массив с меняющимися данными скелетной анимации
-		// (в данном случае всего 21 персонаж)
-		FAnimationStates  : array[0..20] of TSkelAnimState;
+		// (сначала всего 21 персонаж)
+		FAnimationStates  : array of TSkelAnimState;
 		
 		FModel : TModel;
 		
@@ -142,13 +142,13 @@ var
 	TempPChar : PChar;
 begin
 inherited Create(VContext);
-FRotateAngle := 0;
+FRotateAngle := Random()*360;
 FCamera := nil;
 FVertexShader := nil;
 FFragmentShader := nil;
 FShaderProgram := nil;
 FModel := nil;
-FQuantityModels := 21;
+FQuantityModels := 400;
 
 if Render.SupporedShaders() then
 	begin
@@ -174,8 +174,9 @@ if Render.SupporedShaders() then
 	FTexturesHandles[5] := FModel.GetTextureHandle('face.jpg');
 	FTexturesHandles[6] := FModel.GetTextureHandle('PC_soldier_beret_red.jpg');
 	
+	SetLength(FAnimationStates,FQuantityModels);
 	// для каждого персонажа делаем случайный номер начального кадра
-	for i := 0 to length(FAnimationStates) - 1 do
+	for i := 0 to FQuantityModels - 1 do
 		begin
 		FAnimationStates[i].ResetState(FModel.Animation^.FNodesNum);
 		FAnimationStates[i].FPrevFrame:=0;
@@ -229,13 +230,13 @@ if FModel <> nil then
 
 for i := 0 to High(FAnimationStates) do
 	FAnimationStates[i].ResetState(0);
+SetLength(FAnimationStates,0);
 
 Context.CursorInCenter := False;
 
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
 //FFragmentShader.Destroy();
-
 inherited;
 end;
 
@@ -260,10 +261,10 @@ if Render.SupporedShaders() then
 	
 	for i := 0 to High(F_ShaderTextures) do
 		begin
-		Render.Uniform1i(F_ShaderTextures[i],i);
 		Render.ActiveTexture(i);
 		Render.Enable(SGR_TEXTURE_2D);
 		Render.BindTexture(SGR_TEXTURE_2D,FTexturesHandles[i]);
+		Render.Uniform1i(F_ShaderTextures[i],i);
 		end;
 	
 	
