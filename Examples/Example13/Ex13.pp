@@ -43,6 +43,7 @@ type
 		procedure AddModels(const VCount : TIndex);
 			private
 		FCamera : TSGCamera;
+		FFPS : TSGFPSViewer;
 		FShaderProgram : TSGShaderProgram;
 		FVertexShader, FFragmentShader : TSGShader;
 		FRotateAngle : TSGFloat;
@@ -231,6 +232,10 @@ if Render.SupporedShaders() then
 	FFont.Loading();
 	FFont.ToTexture();
 	
+	FFPS := TSGFPSViewer.Create(Context);
+	FFPS.X := Context.Width div 2;
+	FFPS.Y := 5;
+	
 	FCamera:=TSGCamera.Create();
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
@@ -352,6 +357,8 @@ if (FCountLabel <> nil) then
 
 if FFont <> nil then
 	FFont.Destroy();
+if FFPS <> nil then
+	FFPS.Destroy();
 //    allready processed in TSGShaderProgram.Destroy()
 //FVertexShader.Destroy();
 //FFragmentShader.Destroy();
@@ -411,6 +418,8 @@ if Render.SupporedShaders() then
 	Render.Enable(SGR_BLEND);
 	
 	//KeyControl();
+	
+	FFPS.Draw();
 	end
 else
 	begin

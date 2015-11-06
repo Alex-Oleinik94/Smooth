@@ -17,8 +17,28 @@ uses
 	,PAPPE
 	;
 type
-	TSGFont=class;
-
+	TSGFont = class;
+	TSGFPSViewer = class;
+type
+	TSGFPSViewer = class(TSGDrawClass)
+			public
+		constructor Create(const VContext : TSGContext);override;
+		destructor Destroy();override;
+		procedure Draw();override;
+		class function ClassName():TSGString;override;
+			private
+		FFont : TSGFont;
+		FX, FY : TSGWord;
+		
+		FFrameArray : packed array of TSGWord;
+		FFrameCount : TSGWord;
+		FFrameIndex : TSGWord;
+		
+		function FrameSum():TSGWord;inline;
+			public
+		property X : TSGWord read FX write FX;
+		property Y : TSGWord read FY write FY;
+		end;
 (*====================================================================*)
 (*============================TSGCamera===============================*)
 (*====================================================================*)
@@ -184,6 +204,54 @@ type
 procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
 
 implementation
+
+function TSGFPSViewer.FrameSum():TSGWord;inline;
+var
+	i : TSGWord;
+begin
+Result := 0;
+if FFrameCount <> 0 then
+	for i := 0 to FFrameCount - 1 do
+		Result += FFrameArray[i];
+end;
+
+constructor TSGFPSViewer.Create(const VContext : TSGContext);
+begin
+inherited Create(VContext);
+FFont := TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FFont.Context := Context;
+FFont.Loading();
+FFrameCount := 30;
+SetLength(FFrameArray,FFrameCount);
+FFrameIndex := 0;
+end;
+
+destructor TSGFPSViewer.Destroy();
+begin
+FFont.Destroy();
+inherited;
+end;
+
+procedure TSGFPSViewer.Draw();
+var
+	FPSString : string = '';
+begin
+FFrameArray[FFrameIndex] := Context.ElapsedTime;
+FFrameIndex += 1;
+if FFrameIndex = FFrameCount then
+	FFrameIndex := 0;
+FPSString := 'FPS ' + SGStrReal(100/(FrameSum()/Real(FFrameCount)),2);
+Render.InitMatrixMode(SG_2D);
+FFont.DrawFontFromTwoVertex2f(FPSString,
+	SGVertex2fImport(FX, FY),
+	SGVertex2fImport(FX + FFont.StringLength(FPSString), FY + FFont.FFontHeight),
+	False, False);
+end;
+
+class function TSGFPSViewer.ClassName():TSGString;
+begin
+Result := 'FPS Viwer';
+end;
 
 procedure TSGStaticString.Draw();
 begin
