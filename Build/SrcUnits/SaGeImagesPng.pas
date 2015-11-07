@@ -158,7 +158,7 @@ try
 	SetLEngth(row_pointers,BitMap.FHeight);
 	GetMem(BitMap.FBitMap,BitMap.FWidth*BitMap.FHeight*BitMap.FChannels);
 	
-	for i := 0 to BitMap.FHeight-1 do
+	for i := BitMap.FHeight-1 downto 0 do
 		row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
 	
 	png_read_image(png_ptr, @row_pointers[0]);
@@ -225,8 +225,8 @@ try
 	png_write_info(png_ptr, info_ptr);
 	SetLength(row_pointers,BitMap.Height);
 	try
-		for i := 0 to BitMap.FHeight-1 do
-		row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
+		for i := BitMap.FHeight-1 downto 0 do
+			row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
 		png_write_image(png_ptr, @row_pointers[0]);
 	finally
 		SetLength(row_pointers,0);
