@@ -255,7 +255,7 @@ type
 		// Возвращает указатель на первый элемент массива вершин
 		function GetArVertexes():TSGPointer;inline;
 		// Возвращает указатель на первый элемент массива индексов
-		function GetArFaces():TSGPointer;inline;
+		function GetArFaces(const Index : LongWord = 0):TSGPointer;inline;
 		
 	private
 		function GetVertex3f(const Index : TSGMaxEnum):PTSGVertex3f;inline;
@@ -1057,12 +1057,12 @@ Result:=PTSGColor3f(
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetArFaces():Pointer;inline;
+function TSG3DObject.GetArFaces(const Index : LongWord = 0):Pointer;inline;
 begin
 if ArFaces=nil then
 	Result:=nil
 else
-	Result:=@ArFaces[0];
+	Result:=@ArFaces[Index].FArray;
 end;
 
 function TSG3DObject.GetArVertexes():Pointer;inline;

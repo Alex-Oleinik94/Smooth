@@ -45,7 +45,7 @@ type
 			public
 		procedure InitCube(const Edge : TSGLongWord);
 		procedure UpDateCube();
-		function CalculateMesh():TSGCustomModel;
+		function CalculateMesh() : TSGCustomModel;
 		procedure ClearGaz();
 			public
 		function Cube (const x,y,z:Word):TSGGGDC;inline;
