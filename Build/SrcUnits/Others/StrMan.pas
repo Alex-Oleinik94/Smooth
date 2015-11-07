@@ -502,7 +502,7 @@ IMPLEMENTATION
 
 PROCEDURE SetStringLength (VAR s: String; NewLength: Byte);
 BEGIN
-  {$IFDEF WIN32}
+  {$IFDEF FPC}
     SetLength (s, NewLength);
   {$ELSE}
     s [0] := Char (NewLength);
