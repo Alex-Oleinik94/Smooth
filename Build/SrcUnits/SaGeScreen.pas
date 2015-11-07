@@ -1437,7 +1437,7 @@ if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
 	Render.Color4f(1,1,1,FVisibleTimer);
 	a := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	b := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
-	FImage.DrawImageFromTwoVertex2fWithTexPoint(a,b,FSecondPoint);
+	FImage.DrawImageFromTwoVertex2fWithTexPoint(a,b,FSecondPoint,True,SG_2D);
 	if FEnableLines then
 		begin
 		FLinesColor.Color(Render);
