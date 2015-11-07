@@ -23,6 +23,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 	{$IFNDEF MOBILE}
+		,dglOpenGL
 		,gl
 		,glu
 		,glext
