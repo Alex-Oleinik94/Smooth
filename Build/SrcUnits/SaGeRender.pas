@@ -152,6 +152,16 @@ type
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);virtual;abstract;
 		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);virtual;abstract;
+		
+		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
+		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); virtual;abstract;
+		procedure DrawBuffer(const VType : TSGCardinal);virtual;abstract;
+		procedure ReadBuffer(const VType : TSGCardinal);virtual;abstract;
+		procedure GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); virtual;abstract;
+		procedure BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
+		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
+		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
+		procedure RenderBufferStorage(const VTarget, VAttachment, VTexType: TSGCardinal; const VTexture, VLevel: TSGLongWord);virtual;abstract;
 			public
 		property Window : TSGClass read FWindow write FWindow;
 		end;

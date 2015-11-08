@@ -45,7 +45,49 @@ type
 		property Handle : TSGLongWord read FProgram;
 		end;
 
+function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;
+function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;
+
 implementation
+
+function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;
+var
+	FFragmentShader, FVertexShader : TSGShader;
+begin
+FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
+FVertexShader.Sourse(VVertexSourse);
+if not FVertexShader.Compile() then
+	FVertexShader.PrintInfoLog();
+
+FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
+FFragmentShader.Sourse(VFragmentSourse);
+if not FFragmentShader.Compile() then
+	FFragmentShader.PrintInfoLog();
+
+Result := TSGShaderProgram.Create(Context);
+Result.Attach(FVertexShader);
+Result.Attach(FFragmentShader);
+if not Result.Link() then
+	Result.PrintInfoLog();
+end;
+
+function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;
+var
+	f : TextFile;
+	TempString : TSGString = '';
+begin
+Result := '';
+Assign(f, VFileName);
+Reset(f);
+while not SeekEof(f) do
+	begin
+	ReadLn(f,TempString);
+	Result += TempString;
+	if not SeekEof ( f ) then
+		Result += #13 + #10;
+	end;
+Close(f);
+end;
 
 procedure TSGShaderProgram.Use();
 begin

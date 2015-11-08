@@ -24,6 +24,7 @@ uses
 	,SaGeCommon
 	,Classes
 	,SysUtils
+	,SaGeShaders
 	;
 type
 	TSGExample14 = class(TSGDrawClass)
@@ -39,8 +40,47 @@ type
 		FModelBBoxMin,
 			FModelBBoxMax,
 			FModelCenter : TSGVertex3f;
-			public
+		
+		FLightAngle : TSGFloat;
+		FLightPos : TSGVertex3f;
+		FLightEye : TSGVertex3f;
+		FLightUp  : TSGVertex3f;
+		
+		FTexDepthSizeX, FTexDepthSizeY : TSGLongWord;
+		FFrameBufferDepth, 
+			FFrameBufferDepth2,
+			FRenderBufferDepth : TSGLongWord;
+		// Шейдерные программы и uniform'ы
+		FCurrentShader,
+			FShaderDepth,
+			FShaderShadowTex2D,
+			FShaderShadowShad2D : TSGShaderProgram;
+		
+		FUniformShadowTex2D_shadowMap,
+			FUniformShadowTex2D_lightMatrix,
+			FUniformShadowTex2D_lightPos,
+			FUniformShadowTex2D_lightDir,
+			FUniformShadowShad2D_shadowMap,
+			FUniformShadowShad2D_lightMatrix,
+			FUniformShadowShad2D_lightPos,
+			FUniformShadowShad2D_lightDir : TSGLongWord;
+		
+		// Матрицы
+		FCameraProjectionMatrix,
+			FCameraModelViewMatrix,
+			FCameraInverseModelViewMatrix,
+			FLightProjectionMatrix,
+			FLightModelViewMatrix,
+			FLightMatrix : TSGMatrix4;
+		
+		FUseLightAnimation,
+			FShadowRenderType,
+			FShadowFilter : TSGBoolean;
+		
+			private
 		procedure LoadModel(const FileName : TSGString);
+		procedure RenderToShadowMap();
+		procedure RenderShadowedScene();
 		end;
 
 {$IFDEF ENGINE}
@@ -105,22 +145,93 @@ inherited Create(VContext);
 FCamera:=TSGCamera.Create();
 FCamera.Context := Context;
 
+FLightPos.Import(0,0,0);
+FLightUp.Import(0,1,0);
+FLightEye.Import(0,0,0);
+FLightAngle := 0;
+
+FFrameBufferDepth  := 0;
+FFrameBufferDepth2 := 0;
+FRenderBufferDepth := 0;
+
+FUseLightAnimation := True;
+FShadowFilter      := False;
+FShadowRenderType  := True;
+
+FCurrentShader      := nil;
+FShaderShadowShad2D := nil;
+FShaderShadowTex2D  := nil;
+
+FUniformShadowShad2D_lightDir    := 0;
+FUniformShadowShad2D_lightMatrix := 0;
+FUniformShadowShad2D_lightPos    := 0;
+FUniformShadowShad2D_shadowMap   := 0;
+FUniformShadowTex2D_lightDir     := 0;
+FUniformShadowTex2D_lightMatrix  := 0;
+FUniformShadowTex2D_lightPos     := 0;
+FUniformShadowTex2D_shadowMap    := 0;
+
+FTexDepthSizeX := 1024;
+FTexDepthSizeY := 1024;
+
+
+
+
+FShaderDepth := SGCreateShaderProgramFromSourses(Context,
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.vert'),
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.frag'));
+FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_tex2D.frag'));
+FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
+	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_shad2D.frag'));
+
 LoadModel(SGExamplesDirectory + Slash + '14' + Slash + 'model.bin');
 end;
 
 destructor TSGExample14.Destroy();
 begin
+FShaderDepth.Destroy();
+FShaderShadowTex2D.Destroy();
+FShaderShadowShad2D.Destroy();
+FModel.Destroy();
+FCamera.Destroy();
 inherited;
+end;
+
+procedure TSGExample14.RenderToShadowMap();
+begin
+Render.Viewport(0,0,FTexDepthSizeX,FTexDepthSizeY);
+if (FShadowRenderType) then
+	begin // Вариант #1
+	
+	end
+else
+	begin // Вариант #2
+	
+	end;
+end;
+
+procedure TSGExample14.RenderShadowedScene();
+begin
+
 end;
 
 procedure TSGExample14.Draw();
 begin
+FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
+
 FCamera.CallAction();
+
 Render.Color4f(1,1,1,1);
 Render.PushMatrix();
-Render.Scale(0.05,0.05,0.05);
+Render.Scale(0.005,0.005,0.005);
 FModel.Draw();
 Render.PopMatrix();
+
+if (FUseLightAnimation) then
+	FLightAngle += Context.ElapsedTime;
 end;
 
 {$IFNDEF ENGINE}
