@@ -63,6 +63,8 @@ type
 		procedure InitMatrix();inline;
 		procedure Clear();inline;
 		procedure CallAction();inline;
+		function GetProjectionMatrix() : TSGMatrix4;inline;
+		function GetModelViewMatrix() : TSGMatrix4;inline;
 			public
 		procedure InitViewModeComboBox();virtual;abstract;
 		procedure Move(const Param : TSGSingle);
@@ -204,6 +206,16 @@ type
 procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
 
 implementation
+
+function TSGCamera.GetProjectionMatrix() : TSGMatrix4;inline;
+begin
+Render.GetFloatv(SGR_PROJECTION_MATRIX, @Result);
+end;
+
+function TSGCamera.GetModelViewMatrix() : TSGMatrix4;inline;
+begin
+Render.GetFloatv(SGR_MODELVIEW_MATRIX, @Result);
+end;
 
 function TSGFPSViewer.FrameSum():TSGWord;inline;
 var
@@ -730,8 +742,7 @@ SG_VIEW_LOOK_AT_OBJECT:
 	begin
 	FUp.Normalize();
 	Render.InitMatrixMode(SG_3D);
-	//Matrix:=SGGetLookAtMatrix(FLocation,FView,FUp);
-	Matrix:=TSGMatrix4(PAPPE.Matrix4x4LookAt(TPhysicsVector3(FLocation),TPhysicsVector3(FView+FLocation),TPhysicsVector3(FUp)));
+	Matrix:=SGGetLookAtMatrix(FLocation,FView + FLocation,FUp);
 	Render.MultMatrixf(@Matrix);
 	end;
 end;

@@ -104,6 +104,7 @@ type
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
 		procedure LoadIdentity();override;
+		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);override;
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
@@ -145,6 +146,7 @@ type
 		procedure VertexPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);override;
 		function IsEnabled(const VParam:TSGCardinal):TSGBoolean;override;
 		procedure Clear(const VParam:TSGCardinal);override;
+		procedure ClearColor(const r,g,b,a : TSGFloat);override;
 		procedure LineWidth(const VLW:TSGSingle);override;
 		procedure PointSize(const PS:TSGSingle);override;
 		procedure PushMatrix();override;
@@ -186,6 +188,7 @@ type
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 		procedure UseProgram(const VProgram : TSGLongWord);override;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
+		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);override;
 		
 		function SupporedDepthTextures():TSGBoolean;override;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
@@ -197,6 +200,7 @@ type
 		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer, VLevel: TSGLongWord);override;
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);override;
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);override;
+		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);override;
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
@@ -259,6 +263,26 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
+begin
+glUniform3f(VLocationName,VX,VY,VZ);
+end;
+
+procedure TSGRenderOpenGL.GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);
+begin
+glGetFloatv(VType, VPointer);
+end;
+
+procedure TSGRenderOpenGL.Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);
+begin
+SGRGLPerspective(vAngle,vAspectRatio,vNear,vFar);
+end;
+
+procedure TSGRenderOpenGL.ClearColor(const r,g,b,a : TSGFloat);
+begin
+glClearColor(r,g,b,a);
+end;
 
 function TSGRenderOpenGL.SupporedDepthTextures():TSGBoolean;
 begin

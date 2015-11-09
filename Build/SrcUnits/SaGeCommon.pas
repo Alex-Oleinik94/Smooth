@@ -354,6 +354,8 @@ function SGGetOrthoMatrix(const l,r,b,t,vNear,vFar:TSGMatrix4Type):TSGMatrix4;{$
 procedure SGWriteMatrix4(const P:TSGPointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTranslateMatrix(const VMatrix : TSGMatrix4; const VVertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -367,7 +369,47 @@ function SGRotateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f
 function SGTranslateVectorInverse(const Matrix : TSGMatrix4;const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTransformVector(const Matrix : TSGMatrix4; const Vec : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGGetIdentityMatrix();
+Result[0][0] := VVertex.x;
+Result[1][1] := VVertex.y;
+Result[2][2] := VVertex.z;
+end;
+
+// Инвертирование матрицы
+function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+type
+	TMatrix = array [0..15] of TSGMatrix4Type;
+begin
+TMatrix(Result)[0] := TMatrix(VSourseMatrix)[0];
+TMatrix(Result)[0] := TMatrix(VSourseMatrix)[0];
+TMatrix(Result)[1] := TMatrix(VSourseMatrix)[4];
+TMatrix(Result)[2] := TMatrix(VSourseMatrix)[8];
+TMatrix(Result)[3] := 0.0;
+TMatrix(Result)[4] := TMatrix(VSourseMatrix)[1];
+TMatrix(Result)[5] := TMatrix(VSourseMatrix)[5];
+TMatrix(Result)[6]  := TMatrix(VSourseMatrix)[9];
+TMatrix(Result)[7] := 0.0;
+TMatrix(Result)[8] := TMatrix(VSourseMatrix)[2];
+TMatrix(Result)[9] := TMatrix(VSourseMatrix)[6];
+TMatrix(Result)[10] := TMatrix(VSourseMatrix)[10];
+TMatrix(Result)[11] := 0.0;
+TMatrix(Result)[12] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[0]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[1]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[2]);
+TMatrix(Result)[13] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[4]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[5]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[6]);
+TMatrix(Result)[14] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[8]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[9]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[10]);
+TMatrix(Result)[15] := 1.0;
+end;
+
+procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+VRender.MultMatrixf(@Matrix);
+end;
 
 function SGQuaternionLerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -771,25 +813,28 @@ Result:=SGGetFrustumMatrix(
 	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
 end;
 
+function SGTranslateMatrix(const VMatrix : TSGMatrix4; const VVertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := VMatrix;
+Result[3,0]:=Result[0,0]*VVertex.x+Result[1,0]*VVertex.y+Result[2,0]*VVertex.z+Result[3,0];
+Result[3,1]:=Result[0,1]*VVertex.x+Result[1,1]*VVertex.y+Result[2,1]*VVertex.z+Result[3,1];
+Result[3,2]:=Result[0,2]*VVertex.x+Result[1,2]*VVertex.y+Result[2,2]*VVertex.z+Result[3,2];
+Result[3,3]:=Result[0,3]*VVertex.x+Result[1,3]*VVertex.y+Result[2,3]*VVertex.z+Result[3,3];
+end;
+
 function SGGetLookAtMatrix(const Eve, At:TSGVertex3f;Up:TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	vForward,vSide:TSGVertex3f;
 begin
-vForward := At - Eve;
-vForward.Normalize();
-vSide := vForward * Up;
-vSide.Normalize();
-Up := vSide * vForward;
+vForward :=   (Eve - At).Normalized();
+vSide := (Up * vForward).Normalized();
+Up := (vForward * vSide).Normalized();
 Result := SGMatrix4Import(
-	vside.x, up.x, -vforward.x, 0,
-	vside.y, up.y, -vforward.y, 0,
-	vside.z, up.z, -vforward.z, 0,
+	vside.x, up.x, vforward.x, 0,
+	vside.y, up.y, vforward.y, 0,
+	vside.z, up.z, vforward.z, 0,
 	0, 0, 0, 1);
-Result *= SGMatrix4Import(
-	1,0,0,-Eve.x,
-	0,1,0,-Eve.y,
-	0,0,1,-Eve.z,
-	0,0,0,1);
+Result := SGTranslateMatrix(Result, -Eve);
 end;
 
 procedure TSGColor4b.ConvertType();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

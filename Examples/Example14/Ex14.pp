@@ -84,6 +84,8 @@ type
 		procedure LoadModel(const FileName : TSGString);
 		procedure RenderToShadowMap();
 		procedure RenderShadowedScene();
+		procedure DrawModel();
+		procedure DrawPlane();
 		end;
 
 {$IFDEF ENGINE}
@@ -251,38 +253,161 @@ FCamera.Destroy();
 inherited;
 end;
 
+procedure TSGExample14.DrawPlane();
+begin
+// Плоскость не отбрасывает тень, поэтому она не рендерится в текстуру глубины
+Render.Color3f(0.4,0.5,0.6);
+Render.BeginScene(SGR_QUADS);
+Render.Normal3f(0,1,0);
+Render.Vertex3f(-1000, 0, -1000);
+Render.Vertex3f(-1000, 0, 1000);
+Render.Vertex3f(1000, 0, 1000);
+Render.Vertex3f(1000, 0, -1000);
+Render.EndScene();
+end;
+
 procedure TSGExample14.RenderToShadowMap();
 begin
 Render.Viewport(0,0,FTexDepthSizeX,FTexDepthSizeY);
 if (FShadowRenderType) then
 	begin // Вариант #1
-	
+	Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth);
+	// Очищать текстуру нужно значением соответствующим дальней плоскости отсечения
+	Render.ClearColor(1,1,1,1);
+	Render.Clear(SGR_COLOR_BUFFER_BIT or SGR_DEPTH_BUFFER_BIT);
 	end
 else
 	begin // Вариант #2
-	
+	Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT,FFrameBufferDepth2);
+	// В этом случае у нас нет буфера цвета, поэтому очищать его не нужно
+	Render.Clear(SGR_DEPTH_BUFFER_BIT);
 	end;
+// Сдвиг полигонов - нужен для того, чтобы не было z-fighting'а
+Render.Enable(SGR_POLYGON_OFFSET_FILL);
+//-Render.PolygonOffset ( 2, 500);
+
+// Сохраняем эти матрицы, они нам понадобятся для расчёта матрицы света
+FLightProjectionMatrix := SGGetPerspectiveMatrix(90.0, 1.0, 30.0, 300.0);
+FLightModelViewMatrix  := SGGetLookAtMatrix(FLightPos, FLightEye, FLightUp);
+
+// Установить матрицы камеры света
+Render.MatrixMode(SGR_PROJECTION);
+Render.LoadIdentity();
+Render.MultMatrixf(@FLightProjectionMatrix);
+Render.MatrixMode(SGR_MODELVIEW);
+Render.LoadIdentity();
+Render.MultMatrixf(@FLightModelViewMatrix);
+
+// Напомню, что в первом варианте нам нужен шейдер, чтобы сохранить глубину в текстуру, во втором это не к чему.
+if FShadowRenderType then
+	begin // Вариант #1
+	FShaderDepth.Use();
+	DrawModel();
+	Render.UseProgram(0);
+	end
+else
+	begin // Вариант #2
+	DrawModel();
+	end;
+
+Render.Disable(SGR_POLYGON_OFFSET_FILL);
+Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
+end;
+
+procedure TSGExample14.DrawModel();
+begin
+Render.Color3f(0.9,0.9,0.9);
+Render.PushMatrix();
+Render.Scale(0.005,0.005,0.005);
+FModel.Draw();
+Render.PopMatrix();
 end;
 
 procedure TSGExample14.RenderShadowedScene();
+var
+	FShaderShadow : TSGShaderProgram = nil;
+	FUniformShadow_lightDir : TSGLongWord = 0;
+	FUniformShadow_lightMatrix : TSGLongWord = 0;
+	FUniformShadow_lightPos : TSGLongWord = 0;
+	FUniformShadow_shadowMap : TSGLongWord = 0;
+	FMVLightPos, FLightDir : TSGVertex3f;
 begin
+Render.Viewport(0,0,Context.Width,Context.Height);
+Render.ClearColor(0,0,0,1);
+Render.Clear(SGR_COLOR_BUFFER_BIT or SGR_DEPTH_BUFFER_BIT);
 
+// Устанавливаем матрицы камеры
+FCamera.CallAction();
+
+// Сохраняем матрицы, они нам нужны для вычисления освещения
+// Инвертированная матрица используется в расчёте матрицы источника света
+FCameraProjectionMatrix := FCamera.GetProjectionMatrix();
+FCameraModelViewMatrix := FCamera.GetModelViewMatrix();
+FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
+
+FLightMatrix := SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5)) *
+	SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5)) * 
+	FLightProjectionMatrix *
+	FLightModelViewMatrix *
+	FCameraInverseModelViewMatrix;
+
+if FShadowRenderType then
+	begin // Вариант #1
+	Render.BindTexture(SGR_TEXTURE_2D, FTexDepth);
+	
+	FShaderShadow := FShaderShadowTex2D;
+	FUniformShadow_lightDir    := FUniformShadowTex2D_lightDir;
+	FUniformShadow_lightMatrix := FUniformShadowTex2D_lightMatrix;
+	FUniformShadow_lightPos    := FUniformShadowTex2D_lightPos;
+	FUniformShadow_shadowMap   := FUniformShadowTex2D_shadowMap;
+	end
+else
+	begin // Вариант #2
+	Render.BindTexture(SGR_TEXTURE_2D, FTexDepth2);
+	
+	// Для второго варианта включаем режим сравнения текстуры
+	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE, SGR_COMPARE_R_TO_TEXTURE);
+	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_FUNC, SGR_LEQUAL);
+	
+	FShaderShadow := FShaderShadowShad2D;
+	FUniformShadow_lightDir    := FUniformShadowShad2D_lightDir;
+	FUniformShadow_lightMatrix := FUniformShadowShad2D_lightMatrix;
+	FUniformShadow_lightPos    := FUniformShadowShad2D_lightPos;
+	FUniformShadow_shadowMap   := FUniformShadowShad2D_shadowMap;
+	end;
+
+FShaderShadow.Use();
+Render.Uniform1i(FUniformShadow_shadowMap, 0);
+Render.UniformMatrix4fv(FUniformShadow_lightMatrix, 1, False, @FLightMatrix );
+FMVLightPos := SGTransformVector(FCameraModelViewMatrix, FLightPos);
+Render.Uniform3f(FUniformShadow_lightPos, FLightPos.x, FLightPos.y, FLightPos.z);
+FLightDir := FLightEye - FLightPos;
+Render.Uniform3f(FUniformShadow_lightDir, FLightDir.x, FLightDir.y, FLightDir.z);
+
+// Рисуем плоскость и модель
+DrawPlane();
+DrawModel();
+
+Render.UseProgram(0);
+
+if (not FShadowRenderType) then
+	begin // Вариант #2
+	// Не забываем выключать режим сравнения
+	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE,SGR_NONE);
+	end;
+Render.BindTexture(SGR_TEXTURE_2D, 0);
 end;
 
 procedure TSGExample14.Draw();
 begin
 FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
 
-FCamera.CallAction();
-
-Render.Color4f(1,1,1,1);
-Render.PushMatrix();
-Render.Scale(0.005,0.005,0.005);
-FModel.Draw();
-Render.PopMatrix();
+// Рисование происходит в два этапа:
+RenderToShadowMap();				// 1) Рисуем в текстуру глубины с позиции источника света
+RenderShadowedScene();				// 2) Рисуем нашу сцену на экран
 
 if (FUseLightAnimation) then
-	FLightAngle += Context.ElapsedTime;
+	FLightAngle += Context.ElapsedTime / 100;
 end;
 
 {$IFNDEF ENGINE}

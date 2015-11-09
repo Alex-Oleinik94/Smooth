@@ -45,8 +45,8 @@ constructor TSGAllExamples.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FDrawClasses := TSGDrawClasses.Create(Context);
-FDrawClasses.Add(TSGExample14);
 FDrawClasses.Add(TSGExample1);
+FDrawClasses.Add(TSGExample14);
 FDrawClasses.Add(TSGExample2);
 FDrawClasses.Add(TSGExample2_2);
 FDrawClasses.Add(TSGExample3);

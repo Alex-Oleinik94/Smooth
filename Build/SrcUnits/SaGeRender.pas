@@ -76,7 +76,9 @@ type
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;
 		procedure EndScene();virtual;abstract;
 		// Все остальные функции тут - аналоги своих функций в OpenGL, за исклбчением немногих.
+		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
+		procedure ClearColor(const r,g,b,a : TSGFloat);virtual;abstract;
 		procedure Vertex3f(const x,y,z:TSGSingle);virtual;abstract;
 		procedure Scale(const x,y,z : TSGSingle);virtual;abstract;
 		procedure Color3f(const r,g,b:TSGSingle);virtual;abstract;
@@ -152,6 +154,7 @@ type
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);virtual;abstract;
 		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);virtual;abstract;
+		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);virtual;abstract;
 		
 		function SupporedDepthTextures():TSGBoolean;virtual;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
@@ -163,6 +166,7 @@ type
 		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer, VLevel: TSGLongWord);virtual;abstract;
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);virtual;abstract;
+		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);virtual;abstract;
 			public
 		property Window : TSGClass read FWindow write FWindow;
 		end;
