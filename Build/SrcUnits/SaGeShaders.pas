@@ -36,6 +36,7 @@ type
 		function Link():Boolean;
 		procedure PrintInfoLog();
 		procedure Use();
+		function GetUniformLocation(const VLocationName : PChar): TSGLongWord;
 			private
 		FProgram : TSGLongWord;
 		FShaders :
@@ -49,6 +50,11 @@ function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVert
 function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;
 
 implementation
+
+function TSGShaderProgram.GetUniformLocation(const VLocationName : PChar): TSGLongWord;
+begin
+Result := Render.GetUniformLocation(FProgram,VLocationName);
+end;
 
 function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;
 var

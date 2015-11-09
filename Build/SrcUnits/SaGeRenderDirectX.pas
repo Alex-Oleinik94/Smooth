@@ -72,7 +72,7 @@ type
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);override;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);override;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);override;
 		procedure CullFace(const VParam:Cardinal);override;
 		procedure EnableClientState(const VParam:Cardinal);override;
@@ -781,7 +781,7 @@ begin
 
 end;
 
-procedure TSGRenderDirectX.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
+procedure TSGRenderDirectX.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer); 
 var
 	VTFormat:LongWord;
 	rcLockedRect:D3DLOCKED_RECT; 

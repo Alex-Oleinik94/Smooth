@@ -129,7 +129,7 @@ type
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
 		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
-		procedure TexImage2D(const VTextureType:Cardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer);override;
+		procedure TexImage2D(const VTextureType:Cardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);override;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: Pointer);override;
 		procedure CullFace(const VParam:Cardinal);override;
 		procedure EnableClientState(const VParam:TSGCardinal);override;
@@ -186,6 +186,17 @@ type
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 		procedure UseProgram(const VProgram : TSGLongWord);override;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
+		
+		function SupporedDepthTextures():TSGBoolean;override;
+		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
+		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); override;
+		procedure DrawBuffer(const VType : TSGCardinal);override;
+		procedure ReadBuffer(const VType : TSGCardinal);override;
+		procedure GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); override;
+		procedure BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
+		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer, VLevel: TSGLongWord);override;
+		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);override;
+		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);override;
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
@@ -248,6 +259,56 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+function TSGRenderOpenGL.SupporedDepthTextures():TSGBoolean;
+begin
+Result := {$IFDEF MOBILE} False {$ELSE} dglOpenGL.GL_ARB_texture_rg {$ENDIF};
+end;
+
+procedure TSGRenderOpenGL.BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
+begin
+{$IFNDEF MOBILE} glBindFramebufferEXT(VType,VHandle);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
+begin
+{$IFNDEF MOBILE} glGenFrameBuffersEXT(VCount,VBuffers);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.DrawBuffer(const VType : TSGCardinal);
+begin
+{$IFNDEF MOBILE}glDrawBuffer(VType);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.ReadBuffer(const VType : TSGCardinal);
+begin
+{$IFNDEF MOBILE}glReadBuffer(VType);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+begin
+{$IFNDEF MOBILE}glGenRenderBuffersEXT(VCount,VBuffers);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
+begin
+{$IFNDEF MOBILE}glBindRenderBufferEXT(VType,VHandle);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer,VLevel: TSGLongWord);
+begin
+{$IFNDEF MOBILE}glFrameBufferTexture2DEXT(VTarget,VAttachment,VRenderbuffertarget,VRenderbuffer,VLevel);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);
+begin
+{$IFNDEF MOBILE}glFrameBufferRenderBufferEXT(VTarget,VAttachment,VRenderbuffertarget,VRenderbuffer);{$ENDIF}
+end;
+
+procedure TSGRenderOpenGL.RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);
+begin
+{$IFNDEF MOBILE}glRenderBufferStorageEXT(VTarget,VAttachment,VWidth,VHeight);{$ENDIF}
+end;
 
 procedure TSGRenderOpenGL.Scale(const x,y,z : TSGSingle);
 begin
@@ -904,7 +965,7 @@ begin
 glTexEnvi(VP1,VP2,VP3);
 end;
 
-procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;var VBitMap:Pointer); 
+procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer); 
 {$IFDEF NEEDRESOURSES}
 var
 	FS : TFileStream = nil;
@@ -1133,6 +1194,12 @@ glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
 glDisable(GL_LIGHTING);
 
 LoadExtendeds();
+
+{$IFNDEF MOBILE}
+	dglOpenGL.InitOpenGL();
+	dglOpenGL.ReadExtensions();
+	dglOpenGL.ReadImplementationProperties();
+	{$ENDIF}
 
 {$IF defined(MSWINDOWS) and defined(CPU32)}
 	// Enable V-Sync

@@ -41,6 +41,9 @@ type
 			FModelBBoxMax,
 			FModelCenter : TSGVertex3f;
 		
+		FTexDepth  : TSGLongWord;
+		FTexDepth2 : TSGLongWord;
+		
 		FLightAngle : TSGFloat;
 		FLightPos : TSGVertex3f;
 		FLightEye : TSGVertex3f;
@@ -113,13 +116,11 @@ Stream.ReadBuffer(FModelBBoxMin,SizeOf(FModelBBoxMin));
 Stream.ReadBuffer(FModelBBoxMax,SizeOf(FModelBBoxMax));
 FModelCenter := (FModelBBoxMax + FModelBBoxMin)/2;
 
-FModelBBoxMin.WriteLn(); FModelBBoxMax.WriteLn(); FModelCenter.WriteLn(); 
-
-Stream.ReadBuffer(CountOfIndexes,SizeOf(CountOfIndexes)); WriteLn(CountOfIndexes);
+Stream.ReadBuffer(CountOfIndexes,SizeOf(CountOfIndexes));
 SetLength(Indexes,CountOfIndexes);
 Stream.ReadBuffer(Indexes[0],(CountOfIndexes * SizeOf(Indexes[0])) div 3);
 
-Stream.ReadBuffer(CountOfVertexes,SizeOf(CountOfVertexes));WriteLn(CountOfVertexes); WriteLn(' -- ',CountOfVertexes * (6 * SizeOf(SIngle)) + SizeOf(CountOfVertexes) + SizeOf(CountOfIndexes) + ((CountOfIndexes * SizeOf(Indexes[0])) div 3) + SizeOf(FModelBBoxMax)*2);
+Stream.ReadBuffer(CountOfVertexes,SizeOf(CountOfVertexes));
 FModel.Vertexes   := CountOfVertexes;
 Stream.ReadBuffer(FModel.GetArVertexes()^, CountOfVertexes * (6 * SizeOf(SIngle)));
 
@@ -173,9 +174,48 @@ FUniformShadowTex2D_shadowMap    := 0;
 
 FTexDepthSizeX := 1024;
 FTexDepthSizeY := 1024;
+FTexDepth  := 0;
+FTexDepth2 := 0;
 
-
-
+// Создаём текстуру FTexDepth - текстура прикреплённая как буффер цвета, для теста глубины мы создадим рендербуффер
+Render.GenTextures(1, @FTexDepth);
+Render.BindTexture(SGR_TEXTURE_2D, FTexDepth);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_CLAMP);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_CLAMP);
+if Render.SupporedDepthTextures() then
+	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_R16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RED, SGR_UNSIGNED_SHORT, nil)
+else
+	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_RGBA16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RGBA, SGR_UNSIGNED_SHORT, nil);
+Render.BindTexture(SGR_TEXTURE_2D,0);
+// Создаём рендербуффер глубины
+Render.GenRenderBuffers(1,@FRenderBufferDepth);
+Render.BindRenderBuffer(SGR_RENDERBUFFER_EXT, FRenderBufferDepth);
+Render.RenderBufferStorage(SGR_RENDERBUFFER_EXT, SGR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY);
+Render.BindRenderBuffer(SGR_RENDERBUFFER_EXT, 0);
+// Создаём фреймбуффер
+Render.GenFrameBuffers(1, @FFrameBufferDepth);
+Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth);
+Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_COLOR_ATTACHMENT0_EXT, SGR_TEXTURE_2D, FTexDepth, 0);
+Render.FrameBufferRenderBuffer(SGR_FRAMEBUFFER_EXT,SGR_DEPTH_ATTACHMENT_EXT, SGR_RENDERBUFFER_EXT, FRenderBufferDepth);
+Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
+// Создаём текстуру FTexDepth2 - текстура прикреплённая как буффер глубины
+Render.GenTextures(1, @FTexDepth2);
+Render.BindTexture(SGR_TEXTURE_2D, FTexDepth2);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_CLAMP);
+Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_CLAMP);
+Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_DEPTH_COMPONENT, SGR_UNSIGNED_SHORT, nil);
+Render.BindTexture(SGR_TEXTURE_2D, 0);
+// Создаём фреймбуффер
+Render.GenFrameBuffers(1, @FFrameBufferDepth2);
+Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth2);
+Render.DrawBuffer(SGR_NONE);
+Render.ReadBuffer(SGR_NONE);
+Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_DEPTH_ATTACHMENT_EXT, SGR_TEXTURE_2D, FTexDepth2, 0);
+Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
 
 FShaderDepth := SGCreateShaderProgramFromSourses(Context,
 	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.vert'),
@@ -186,6 +226,17 @@ FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
 FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
 	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
 	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_shad2D.frag'));
+
+
+FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap');
+FUniformShadowTex2D_lightMatrix  := FShaderShadowTex2D.GetUniformLocation('lightMatrix');
+FUniformShadowTex2D_lightPos     := FShaderShadowTex2D.GetUniformLocation('lightPos');
+FUniformShadowTex2D_lightDir     := FShaderShadowTex2D.GetUniformLocation('lightDir');
+
+FUniformShadowShad2D_shadowMap   := FShaderShadowShad2D.GetUniformLocation('shadowMap');
+FUniformShadowShad2D_lightMatrix := FShaderShadowShad2D.GetUniformLocation('lightMatrix');
+FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('lightPos');
+FUniformShadowShad2D_lightDir    := FShaderShadowShad2D.GetUniformLocation('lightDir');
 
 LoadModel(SGExamplesDirectory + Slash + '14' + Slash + 'model.bin');
 end;
