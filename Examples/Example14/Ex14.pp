@@ -86,6 +86,7 @@ type
 		procedure RenderShadowedScene();
 		procedure DrawModel();
 		procedure DrawPlane();
+		procedure KeyboardUpCallback();
 		end;
 
 {$IFDEF ENGINE}
@@ -351,6 +352,7 @@ FLightMatrix := SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5)) *
 	FLightModelViewMatrix *
 	FCameraInverseModelViewMatrix;
 
+Render.Enable(SGR_TEXTURE_2D);
 if FShadowRenderType then
 	begin // Вариант #1
 	Render.BindTexture(SGR_TEXTURE_2D, FTexDepth);
@@ -396,6 +398,7 @@ if (not FShadowRenderType) then
 	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE,SGR_NONE);
 	end;
 Render.BindTexture(SGR_TEXTURE_2D, 0);
+Render.Disable(SGR_TEXTURE_2D);
 end;
 
 procedure TSGExample14.Draw();
@@ -407,7 +410,43 @@ RenderToShadowMap();				// 1) Рисуем в текстуру глубины с позиции источника свет
 RenderShadowedScene();				// 2) Рисуем нашу сцену на экран
 
 if (FUseLightAnimation) then
-	FLightAngle += Context.ElapsedTime / 100;
+	FLightAngle += Context.ElapsedTime / 200;
+
+KeyboardUpCallback();
+end;
+
+procedure TSGExample14.KeyboardUpCallback();
+begin
+if (Context.KeyPressed and (Context.KeyPressedType = SGUpKey)) then
+	case Context.KeyPressedChar of
+	' ' : FUseLightAnimation := not FUseLightAnimation;
+	'1' : FShadowRenderType := True;
+	'2' : FShadowRenderType := False;
+	'3' : 
+		begin
+		Render.Enable(SGR_TEXTURE_2D);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_LINEAR);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth2);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_LINEAR);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
+		Render.BindTexture(SGR_TEXTURE_2D,0);
+		Render.Disable(SGR_TEXTURE_2D);
+		end;
+	'4' : 
+		begin
+		Render.Enable(SGR_TEXTURE_2D);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth2);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
+		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
+		Render.BindTexture(SGR_TEXTURE_2D,0);
+		Render.Disable(SGR_TEXTURE_2D);
+		end;
+	end;
 end;
 
 {$IFNDEF ENGINE}
