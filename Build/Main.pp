@@ -559,7 +559,6 @@ end;
 				ImageResizer()
 			else if s='GUI' then
 				begin
-				//WriteLn('Beginning Grafical Interface.');
 				GoGUI('CMD');
 				end
 			else if s='DLLSCAN' then
@@ -572,8 +571,12 @@ end;
 				end
 			else if s='GRNC' then
 				begin
-				//WriteLn('Beginning Google ReName Cashe.');
 				GoogleReNameCache;
+				end
+			else if s = 'BUILD' then
+				begin
+				WriteLn('Building SaGe...');
+				SGRunComand('cmd /c "cd ./../Build & FPC_Make_Debug.bat"');
 				end
 			else if (s='H') or (s='HELP') then
 				begin

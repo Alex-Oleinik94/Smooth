@@ -51,7 +51,7 @@ type
 		procedure AddObjectEnd(const x : TSGSingle = 10; const y :TSGSingle = 0.5; const z : TSGSingle = 0.8);inline;
 		function GetMatrix():TSGPointer;inline;
 			public
-		property Mesh : TSG3DObject read FMesh;
+		property Mesh : TSG3DObject read FMesh write FMesh;
 		property PhysicsObject : PAPPE.TPhysicsObject read FObject;
 		property PhysicsClass  : TSGPhysics           read FPhysicsClass  write FPhysicsClass;
 		end;

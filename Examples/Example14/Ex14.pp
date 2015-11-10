@@ -25,6 +25,7 @@ uses
 	,Classes
 	,SysUtils
 	,SaGeShaders
+	,SaGePhysics
 	;
 
 const
@@ -39,7 +40,7 @@ type
 			private
 		FCamera : TSGCamera;
 		
-		FModel : TSG3DObject;
+		FModel, FLigthSphere: TSG3DObject;
 		FModelBBoxMin,
 			FModelBBoxMax,
 			FModelCenter : TSGVertex3f;
@@ -110,7 +111,7 @@ FModel.HasNormals := True;
 FModel.SetColorType(SGMeshColorType4f);
 FModel.HasTexture := False;
 FModel.HasColors  := False;
-FModel.EnableCullFace := False;
+FModel.EnableCullFace := True;
 FModel.VertexType := SGMeshVertexType3f;
 FModel.CountTextureFloatsInVertexArray := 4;
 
@@ -147,6 +148,26 @@ Result := 'Shadow Mapping';
 end;
 
 constructor TSGExample14.Create(const VContext : TSGContext);
+
+procedure LoadLigthModel();
+var
+	FPhysics : TSGPhysics;
+begin
+FPhysics:=TSGPhysics.Create(Context);
+
+FPhysics.AddObjectBegin(SGPBodySphere,True);
+FPhysics.LastObject().InitSphere(1,30);
+FPhysics.LastObject().SetVertex(0,-56,18);
+FPhysics.LastObject().AddObjectEnd(50);
+
+FLigthSphere := FPhysics.LastObject().Mesh;
+FPhysics.LastObject().Mesh := nil;
+FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.EnableCullFace := True;
+
+FPhysics.Destroy();
+end;
+
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
@@ -245,6 +266,7 @@ FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('ligh
 FUniformShadowShad2D_lightDir    := FShaderShadowShad2D.GetUniformLocation('lightDir');
 
 LoadModel(SGExamplesDirectory + Slash + '14' + Slash + 'model.bin');
+LoadLigthModel();
 end;
 
 destructor TSGExample14.Destroy();
@@ -338,6 +360,7 @@ var
 	FUniformShadow_lightPos    : TSGLongWord = 0;
 	FUniformShadow_shadowMap   : TSGLongWord = 0;
 	FMVLightPos, FLightDir     : TSGVertex3f;
+	FLightInverseModelViewMatrix : TSGMatrix4;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
 Render.ClearColor(0,0,0,1);
@@ -386,7 +409,7 @@ else
 FShaderShadow.Use();
 Render.Uniform1i(FUniformShadow_shadowMap, 0);
 Render.UniformMatrix4fv(FUniformShadow_lightMatrix, 1, False, @FLightMatrix );
-FMVLightPos := SGTransformVector(FCameraModelViewMatrix, FLightPos);
+FMVLightPos := FLightPos * FCameraModelViewMatrix;
 Render.Uniform3f(FUniformShadow_lightPos, FLightPos.x, FLightPos.y, FLightPos.z);
 FLightDir := (FLightEye - FLightPos).Normalized();
 Render.Uniform3f(FUniformShadow_lightDir, FLightDir.x, FLightDir.y, FLightDir.z);
@@ -403,6 +426,13 @@ if (not FShadowRenderType) then
 	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE,SGR_NONE);
 	end;
 Render.BindTexture(SGR_TEXTURE_2D, 0);
+
+// Отображаем положение источника света
+Render.PushMatrix();
+FLightInverseModelViewMatrix := SGInverseMatrix(FLightModelViewMatrix);
+Render.MultMatrixf(@FLightInverseModelViewMatrix);
+FLigthSphere.Draw();
+Render.PopMatrix();
 end;
 
 procedure TSGExample14.Draw();
