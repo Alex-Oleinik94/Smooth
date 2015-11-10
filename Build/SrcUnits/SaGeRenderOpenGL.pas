@@ -164,6 +164,7 @@ type
 		procedure ActiveTextureBump();override;
 		procedure BeginBumpMapping(const Point : Pointer );override;
 		procedure EndBumpMapping();override;
+		procedure PolygonOffset(const VFactor, VUnits : TSGFloat);override;
 		{$IFDEF MOBILE}
 			procedure GenerateMipmap(const Param : TSGCardinal);override;
 		{$ELSE}
@@ -263,6 +264,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
+begin
+glPolygonOffset(VFactor,VUnits);
+end;
 
 procedure TSGRenderOpenGL.Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
 begin

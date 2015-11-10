@@ -130,6 +130,7 @@ type
 		procedure ActiveTextureBump();virtual;abstract;
 		procedure BeginBumpMapping(const Point : Pointer );virtual;abstract;
 		procedure EndBumpMapping();virtual;abstract;
+		procedure PolygonOffset(const VFactor, VUnits : TSGFloat);virtual;abstract;
 		{$IFDEF MOBILE}
 			procedure GenerateMipmap(const Param : TSGCardinal);virtual;
 		{$ELSE}
