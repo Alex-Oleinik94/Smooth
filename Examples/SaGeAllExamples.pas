@@ -25,6 +25,7 @@ uses
 	,Ex7
 	,Ex13
 	,Ex14
+	,Ex15
 	;
 
 type
@@ -46,7 +47,7 @@ begin
 inherited Create(VContext);
 FDrawClasses := TSGDrawClasses.Create(Context);
 FDrawClasses.Add(TSGExample1);
-FDrawClasses.Add(TSGExample14);
+FDrawClasses.Add(TSGExample15);
 FDrawClasses.Add(TSGExample2);
 FDrawClasses.Add(TSGExample2_2);
 FDrawClasses.Add(TSGExample3);
@@ -60,6 +61,7 @@ FDrawClasses.Add(TSGExample6);
 FDrawClasses.Add(TSGExample6_2);
 FDrawClasses.Add(TSGApprFunction{Ex7});
 FDrawClasses.Add(TSGExample13);
+FDrawClasses.Add(TSGExample14);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.BoundsToNeedBounds();
 FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
