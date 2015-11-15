@@ -383,12 +383,15 @@ type
         
 		// Включен ли Cull Face
         FEnableCullFace : TSGBoolean;
+        FEnableCullFaceFront, FEnableCullFaceBack : TSGBoolean;
         // Цвет обьекта
         FObjectColor    : TSGColor4f;
     public
 		property EnableVBO      : TSGBoolean read FEnableVBO      write FEnableVBO;
 		property ObjectColor    : TSGColor4f read FObjectColor    write FObjectColor;
 		property EnableCullFace : TSGBoolean read FEnableCullFace write FEnableCullFace;
+		property EnableCullFaceFront : TSGBoolean read FEnableCullFaceFront write FEnableCullFaceFront;
+		property EnableCullFaceBack  : TSGBoolean read FEnableCullFaceBack  write FEnableCullFaceBack;
     public
         // Догадайся с 3х раз
         procedure Draw(); override;
@@ -1411,6 +1414,8 @@ end;
 constructor TSG3dObject.Create();
 begin
 inherited Create();
+FEnableCullFaceFront := True;
+FEnableCullFaceBack  := True;
 FCountTextureFloatsInVertexArray := 2;
 FBumpFormat := SGMeshBumpTypeNone;
 FName:='';
@@ -1444,18 +1449,32 @@ begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
-    if FEnableCullFace then
-    begin
-        Render.Enable(SGR_CULL_FACE);
-        Render.CullFace(SGR_BACK);
-    end;
-    BasicDraw;
-    if FEnableCullFace then
-    begin
-        Render.CullFace(SGR_FRONT);
-        BasicDraw();
-        Render.Disable(SGR_CULL_FACE);
-    end;
+if FEnableCullFace then
+	begin
+	if (FEnableCullFaceBack or FEnableCullFaceFront) then
+		begin
+		Render.Enable(SGR_CULL_FACE);
+		if FEnableCullFaceBack then
+			begin
+			Render.CullFace(SGR_BACK);
+			BasicDraw;
+			end;
+		if FEnableCullFaceFront then
+			begin
+			Render.CullFace(SGR_FRONT);
+			BasicDraw();
+			end;
+		Render.Disable(SGR_CULL_FACE);
+		end
+	else
+		begin
+		{$IFDEF SGDebuging}
+			WriteLn('"TSG3dObject.Draw" : "'+ClassName+'" - CullFace enabled, but Front and Back node disabled...');
+			{$ENDIF}
+		end;
+	end
+else
+	BasicDraw();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);

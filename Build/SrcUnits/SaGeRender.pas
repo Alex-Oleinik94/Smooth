@@ -12,8 +12,8 @@ uses
 {$INCLUDE Includes\SaGeRenderConstants.inc}
 
 const
-	TSGRenderFar = 10000;
-	TSGRenderNear = 0.001;
+	TSGRenderFar = 5000;
+	TSGRenderNear = 1;
 type
 	TSGRPInteger = ^ integer;
 	

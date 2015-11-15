@@ -386,24 +386,43 @@ end;
 function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 type
 	TMatrix = array [0..15] of TSGMatrix4Type;
+
+function mat(const  i : Byte) : TSGFloat; inline;
 begin
-TMatrix(Result)[0] := TMatrix(VSourseMatrix)[0];
-TMatrix(Result)[0] := TMatrix(VSourseMatrix)[0];
-TMatrix(Result)[1] := TMatrix(VSourseMatrix)[4];
-TMatrix(Result)[2] := TMatrix(VSourseMatrix)[8];
-TMatrix(Result)[3] := 0.0;
-TMatrix(Result)[4] := TMatrix(VSourseMatrix)[1];
-TMatrix(Result)[5] := TMatrix(VSourseMatrix)[5];
-TMatrix(Result)[6]  := TMatrix(VSourseMatrix)[9];
-TMatrix(Result)[7] := 0.0;
-TMatrix(Result)[8] := TMatrix(VSourseMatrix)[2];
-TMatrix(Result)[9] := TMatrix(VSourseMatrix)[6];
-TMatrix(Result)[10] := TMatrix(VSourseMatrix)[10];
-TMatrix(Result)[11] := 0.0;
-TMatrix(Result)[12] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[0]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[1]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[2]);
-TMatrix(Result)[13] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[4]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[5]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[6]);
-TMatrix(Result)[14] := -(TMatrix(VSourseMatrix)[12] * TMatrix(VSourseMatrix)[8]) - (TMatrix(VSourseMatrix)[13] * TMatrix(VSourseMatrix)[9]) - (TMatrix(VSourseMatrix)[14] * TMatrix(VSourseMatrix)[10]);
-TMatrix(Result)[15] := 1.0;
+Result := TMatrix(VSourseMatrix)[i];
+end;
+
+procedure ret(const i : byte; const f : TSGFloat); inline; overload;
+begin
+TMatrix(Result)[i] := f;
+end;
+
+var
+	det,idet : TSGFloat;
+begin
+det:=((((((((mat(0)*mat(5)*mat(10))+(mat(4)*mat(9)*mat(2))))+(mat(8)*mat(1)*mat(6)))-(mat(8)*mat(5)*mat(2))))-(mat(4)*mat(1)*mat(10)))-(mat(0)*mat(9)*mat(6)));
+if abs(det) < 0.0000001 then
+	Result := SGGetIdentityMatrix()
+else
+	begin
+	idet := 1/det;
+	ret(0,(mat(5)*mat(10)-mat(9)*mat(6))*idet);
+	ret(1,-(mat(1)*mat(10)-mat(9)*mat(2))*idet);
+	ret(2, (mat(1)*mat(6)-mat(5)*mat(2))*idet);
+	ret(3,0.0);
+	ret(4,-(mat(4)*mat(10)-mat(8)*mat(6))*idet);
+	ret(5, (mat(0)*mat(10)-mat(8)*mat(2))*idet);
+	ret(6,-(mat(0)*mat(6)-mat(4)*mat(2))*idet);
+	ret(7,0.0);
+	ret(8, (mat(4)*mat(9)-mat(8)*mat(5))*idet);
+	ret(9,-(mat(0)*mat(9)-mat(8)*mat(1))*idet);
+	ret(10, (mat(0)*mat(5)-mat(4)*mat(1))*idet);
+	ret(11,0.0);
+	ret(12,-(mat(12)*TMatrix(Result)[0]+mat(13)*TMatrix(Result)[4]+mat(14)*TMatrix(Result)[8]));
+	ret(13,-(mat(12)*TMatrix(Result)[1]+mat(13)*TMatrix(Result)[5]+mat(14)*TMatrix(Result)[9]));
+	ret(14,-(mat(12)*TMatrix(Result)[2]+mat(13)*TMatrix(Result)[6]+mat(14)*TMatrix(Result)[10]));
+	ret(15,1.0);
+	end;
 end;
 
 procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

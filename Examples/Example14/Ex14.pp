@@ -29,7 +29,7 @@ uses
 	;
 
 const
-	TextureSize = 2048;
+	TextureSize = 1024;
 type
 	TSGExample14 = class(TSGDrawClass)
 			public
@@ -106,14 +106,16 @@ var
 begin
 FModel := TSG3DObject.Create();
 FModel.Context := Context;
+FModel.CountTextureFloatsInVertexArray := 2;
 FModel.ObjectPoligonesType := SGR_TRIANGLES;
 FModel.HasNormals := True;
 FModel.SetColorType(SGMeshColorType4f);
 FModel.HasTexture := False;
 FModel.HasColors  := False;
 FModel.EnableCullFace := True;
+FModel.EnableCullFaceFront := False;
+FModel.EnableCullFaceBack := True;
 FModel.VertexType := SGMeshVertexType3f;
-FModel.CountTextureFloatsInVertexArray := 4;
 
 FModel.QuantityFaceArrays := 1;
 FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
@@ -280,18 +282,32 @@ inherited;
 end;
 
 procedure TSGExample14.DrawPlane();
-const
-	PlaneSize = 5000.0;
-	PlaneHeight = 5;
-begin
 // Плоскость не отбрасывает тень, поэтому она не рендерится в текстуру глубины
+const
+	PlaneSize = 35.0;
+	NumTriangles = 50;
+var
+	PlaneHeight : TSGFloat;
+	x,y,a : TSGFloat;
+	i : TSGLongWord;
+begin
+PlaneHeight := FModelCenter.y * 0.005 + 4.36;
 Render.Color3f(0.4,0.5,0.6);
-Render.BeginScene(SGR_QUADS);
+
+x := sin(0) * PlaneSize;
+y := cos(0) * PlaneSize;
+a := PI*2/50;
+Render.BeginScene(SGR_TRIANGLES);
 Render.Normal3f(0,1,0);
-Render.Vertex3f(-PlaneSize, -PlaneHeight, -PlaneSize);
-Render.Vertex3f(-PlaneSize, -PlaneHeight, PlaneSize);
-Render.Vertex3f(PlaneSize, -PlaneHeight, PlaneSize);
-Render.Vertex3f(PlaneSize, -PlaneHeight, -PlaneSize);
+for i := 0 to 49 do
+	begin
+	Render.Vertex3f(x, -PlaneHeight,y);
+	Render.Vertex3f(0, -PlaneHeight,0);
+	x := sin(a) * PlaneSize;
+	y := cos(a) * PlaneSize;
+	a += PI*2/50;
+	Render.Vertex3f(x, -PlaneHeight, y);
+	end;
 Render.EndScene();
 end;
 
@@ -316,7 +332,7 @@ Render.Enable(SGR_POLYGON_OFFSET_FILL);
 Render.PolygonOffset ( 2, 500);
 
 // Сохраняем эти матрицы, они нам понадобятся для расчёта матрицы света
-FLightProjectionMatrix := SGGetPerspectiveMatrix(90.0, 1.0, 30.0, 300.0);
+FLightProjectionMatrix := SGGetPerspectiveMatrix(90.0, 1.0, TSGRenderNear, TSGRenderFar);
 FLightModelViewMatrix  := SGGetLookAtMatrix(FLightPos, FLightEye, FLightUp);
 
 // Установить матрицы камеры света
@@ -348,6 +364,7 @@ begin
 Render.Color3f(0.9,0.9,0.9);
 Render.PushMatrix();
 Render.Scale(0.005,0.005,0.005);
+Render.Translatef(-FModelCenter.x,-FModelCenter.y,-FModelCenter.z);
 FModel.Draw();
 Render.PopMatrix();
 end;
@@ -375,10 +392,10 @@ FCameraProjectionMatrix := FCamera.GetProjectionMatrix();
 FCameraModelViewMatrix := FCamera.GetModelViewMatrix();
 FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
 
-FLightMatrix := (((FCameraInverseModelViewMatrix *
-	FLightModelViewMatrix) * 
-	FLightProjectionMatrix) *
-	SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5))) *
+FLightMatrix := FCameraInverseModelViewMatrix *
+	FLightModelViewMatrix * 
+	FLightProjectionMatrix *
+	SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5)) *
 	SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5));
 
 if FShadowRenderType then
@@ -438,7 +455,6 @@ end;
 procedure TSGExample14.Draw();
 begin
 FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
-
 
 // Рисование происходит в два этапа:
 RenderToShadowMap();				// 1) Рисуем в текстуру глубины с позиции источника света
