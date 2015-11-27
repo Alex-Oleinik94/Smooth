@@ -27,7 +27,9 @@ uses
 	,SaGeShaders
 	,SaGePhysics
 	;
+
 {-$DEFINE USEINLINE}
+
 type
 	TSGExample15 = class;
 	TGasSourse = packed record
@@ -42,7 +44,7 @@ type
 		FNeedExit : TSGBoolean;
 		FClass : TSGExample15;
 		end;
-	TArray = packed array of TSGLongWord;
+	TArray = packed array of TSGLongInt;
 	TSGExample15 = class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
@@ -94,20 +96,54 @@ procedure TSGExample15.CalcuteteShader();{$IFDEF USEINLINE}inline;{$ENDIF}
 
 function CalcVertexShader(): TSGString;  {$IFDEF USEINLINE}inline;{$ENDIF}
 begin
-Result := '';
+WriteLn(SGStr(FSize * FSize * FSize));
+Result := '#version 120' + SGWinEoln + 
+	'uniform int ar['+SGStr(FSize * FSize * FSize)+'];' + SGWinEoln + 
+	'uniform vec3 gases['+SGStr(Length(FGases))+'];' + SGWinEoln + 
+	'varying float needtodraw;' + SGWinEoln + 
+	'varying vec3 gascolor;' + SGWinEoln + 
+	'void main(void)' + SGWinEoln + 
+	'{' + SGWinEoln + 
+	'    int gasindex = array[int(floor(gl_Vertex.w * 255 + 0.001))];' + SGWinEoln +
+	'    if (gasindex == 0)' + SGWinEoln + 
+	'    {' + SGWinEoln + 
+	'        needtodraw = 0.0; ' + SGWinEoln +
+	'    } else {' + SGWinEoln + 
+	'        needtodraw = 1.0; ' + SGWinEoln +
+	'    }' + SGWinEoln + 
+	'    if (gasindex != 0)' + SGWinEoln + 
+	'    {' + SGWinEoln + 
+	'        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;' + SGWinEoln + 
+	'        gascolor = gases[gasindex - 1];' + SGWinEoln +
+	'    } else {' + SGWinEoln + 
+	'        gl_Position = vec3(0,0,0);' + SGWinEoln + 
+	'    }' + SGWinEoln + 
+	'}' + SGWinEoln + 
+	';';
 end;
 
 function CalcFragmentShader(): TSGString; {$IFDEF USEINLINE}inline;{$ENDIF}
 begin
-Result := '';
+Result := '#version 120' + SGWinEoln + 
+	'varying bool needtodraw;' + SGWinEoln + 
+	'varying vec3 gascolor;' + SGWinEoln + 
+	'void main(void)' + SGWinEoln + 
+	'{' + SGWinEoln + 
+	'    if (needtodraw)' + SGWinEoln +
+	'    {' + SGWinEoln + 
+	'        gl_FragColor = vec4(gascolor);' + SGWinEoln +
+	'    } else {' + SGWinEoln +
+	'        gl_FragColor = vec4(0);' + SGWinEoln +
+	'    }' + SGWinEoln + 
+	'}';
 end;
 
 begin
 if FShader <> nil then
 	FShader.Destroy();
 FShader := SGCreateShaderProgramFromSourses(Context,
-	CalcVertexShader(),
-	CalcFragmentShader());
+	SGReadShaderSourseFromFile('123.vert'),
+	SGReadShaderSourseFromFile('123.frag'));
 end;
 
 procedure TSGExample15.Calculate(const VBeginPos, VEndPos : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
@@ -218,11 +254,11 @@ end;
 
 procedure TSGExample15.Uniform(const VUseGeses : Boolean = False);{$IFDEF USEINLINE}inline;{$ENDIF}
 begin
-if VUseGeses then
+if VUseGeses and (FGases <> nil) and (Length(FGases) <> 0) then
 	begin
-	
+	Render.Uniform3fv(FShader.GetUniformLocation('gases'), Length(FGases), @FGases[0]);
 	end;
-
+Render.Uniform1iv(FShader.GetUniformLocation('ar'), FSize * FSize * FSize, @FArray[0]);
 end;
 
 procedure TSGExample15.CalculateMesh(const VSize : TSGFloat = 1);{$IFDEF USEINLINE}inline;{$ENDIF}

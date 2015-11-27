@@ -190,6 +190,9 @@ type
 		procedure UseProgram(const VProgram : TSGLongWord);override;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);override;
+		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
+		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
+		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		
 		function SupporedDepthTextures():TSGBoolean;override;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
@@ -264,6 +267,21 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+procedure TSGRenderOpenGL.Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
+begin
+glUniform1iv(VLocationName,VCount,VValue);
+end;
+
+procedure TSGRenderOpenGL.Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer); 
+begin
+glUniform1uiv(VLocationName,VCount,VValue);
+end;
+
+procedure TSGRenderOpenGL.Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
+begin
+glUniform3fv(VLocationName,VCount,VValue);
+end;
 
 procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
 begin

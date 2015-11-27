@@ -156,6 +156,9 @@ type
 		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);virtual;abstract;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);virtual;abstract;
+		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
+		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
+		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
 		
 		function SupporedDepthTextures():TSGBoolean;virtual;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
