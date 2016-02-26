@@ -200,6 +200,8 @@ type
 		FUserPointer1,FUserPointer2,FUserPointer3:Pointer;
 		FDrawClass:TSGDrawClass;
 			public
+		property DrawClass : TSGDrawClass read FDrawClass write FDrawClass;
+			public
 		procedure DrawDrawClasses();virtual;
 			protected //Это для TopShift, что б не прописывать хз де
 		FTopShiftStatus:Packed Record

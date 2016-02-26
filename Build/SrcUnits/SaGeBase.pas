@@ -3,6 +3,8 @@
 	{$R .\..\SaGe.res}
 	{$ENDIF}
 {$INCLUDE Includes\SaGe.inc}
+//{$DEFINE USE_uSMBIOS}
+
 unit SaGeBase;
 
 interface
@@ -23,7 +25,7 @@ uses
 	,SysUtils
 	,Classes
 	,Process
-	{$IFDEF MSWINDOWS}
+	{$IFDEF USE_uSMBIOS}
 		,uSMBIOS
 		{$ENDIF}
 	{$IFDEF ANDROID}
@@ -786,14 +788,14 @@ Result:= SGGetFileWay(FileName)+SGGetFileNameWithoutExpansion(SGGetFileName(File
 end;
 
 function SGGetCoreCount():Byte;inline;
-{$IFDEF MSWINDOWS}
+{$IFDEF USE_uSMBIOS}
 Var
   SMBios             : TSMBios;
   LProcessorInfo     : TProcessorInformation;
 {$ENDIF}
 begin
 Result:=0;
-{$IFDEF MSWINDOWS}
+{$IFDEF USE_uSMBIOS}
 try
 	SMBios:=TSMBios.Create();
 	if SMBios.HasProcessorInfo then

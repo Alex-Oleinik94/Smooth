@@ -14,7 +14,8 @@ uses
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeImages
-	,SaGeImagesBase;
+	,SaGeImagesBase
+	,SaGeGasDiffusionReliefRedactor;
 const
 	PredStr = 
 		{$IFDEF ANDROID}
@@ -77,8 +78,10 @@ type
 		FFileStream     : TFileStream;
 		FDiffusionRuned : TSGBoolean;
 		FEnableSaving   : TSGBoolean;
+		FRelefRedactor  : TSGGasDiffusionReliefRedactor;
+		FRelief         : TSGGasDiffusionRelief;
 		
-		//Панели,кнопки и т п
+		//Панели, кнопки и т п
 		FTahomaFont        : TSGFont; 						// шрифт
 		FLoadScenePanel,									// панель загрузки повтора
 		FBoundsOptionsPanel,								// панель опций границ
@@ -2177,26 +2180,39 @@ end;
 procedure mmmFRedactrReliefOpenFileButton(Button:TSGButton);
 var
 	FileWay : String = '';
+	IsInFullscreen : Boolean = False;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
+IsInFullscreen := Context.Fullscreen;
+if IsInFullscreen then
+	begin
+	Context.Fullscreen := False;
+	Context.Messages(); //Обязательно 3 раза, иначе hWindow не обновляется
+	Context.Messages();
+	Context.Messages();
+	end;
 FileWay := Context.FileOpenDlg('Выберите файл рельефа','Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
 if (FileWay <> '') and (SGFileExists(FileWay)) then
 	begin
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
 	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
 	end;
+if IsInFullscreen then
+	Context.Fullscreen := True;
 end; end;
 procedure mmmFRedactrReliefBackButton(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FRelefOptionPanel.AddToLeft  (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+FRelefRedactor.SetActiveSingleRelief();
+FRelefOptionPanel.AddToLeft  (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
 FRelefOptionPanel.Visible := False;
 FBoundsOptionsPanel.Active := True;
-FNewScenePanel.AddToLeft     (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
-FBoundsOptionsPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+FNewScenePanel.AddToLeft     (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
+FBoundsOptionsPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
 end;end;
 procedure mmmFRedactrRelief(Button:TSGButton);
 var
 	FConstWidth : LongWOrd = 300;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
+FRelefRedactor.SetActiveSingleRelief(Button.Parent.IndexOf(Button) - 6);
 if (FRelefOptionPanel = nil) then
 	begin
 	FRelefOptionPanel := TSGPanel.Create();
@@ -2204,6 +2220,7 @@ if (FRelefOptionPanel = nil) then
 	SGScreen.LastChild.SetMiddleBounds(FConstWidth,155);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	FRelefOptionPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
+	FRelefOptionPanel.AddToTop(285);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
@@ -2233,7 +2250,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
-	FRelefOptionPanel.LastChild.Caption := 'Создать новый рельеф';
+	FRelefOptionPanel.LastChild.Caption := 'Редактировать рельеф';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*3,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Font := FTahomaFont;
@@ -2267,16 +2284,21 @@ index := a.Parent.IndexOf(a);
 if index <> -1 then
 	begin
 	(a.Parent.Children[index + 7] as TSGButton).Active := c > 0;
+	FRelief.FData[index].FEnabled := c > 0;
 	end;
 end; end;
 procedure mmmFBoundsBackButtonProcedure(Button:TSGButton);
+const
+	FConstHeight : LongWord = 280;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FNewScenePanel.AddToLeft(((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
 FNewScenePanel.Active := True;
+FNewScenePanel.AddToTop( - FConstHeight - 5);
 FBoundsOptionsPanel.AddToLeft(((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) + 5);
 FBoundsOptionsPanel.Active := False;
 FBoundsOptionsPanel.Visible := False;
 FBoundsOptionsPanel.VisibleTimer := 0.7;
+FBoundsOptionsPanel.DrawClass := nil;
 end; end;
 procedure mmmFBoundsTypeButtonProcedure(Button:TSGButton);
 var
@@ -2327,10 +2349,13 @@ FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 FBoundsOptionsPanel.LastChild.Caption := 'Настроить рельеф';
 (FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrRelief);
 end;end;
+const
+	FConstHeight : LongWord = 280;
 var
-	i : LongWOrd;
+	i : LongWord;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FNewScenePanel.AddToLeft(- ((FNewScenePanel.Width + FConstWidth)div 2) - 5);
+FNewScenePanel.AddToTop(FConstHeight + 5);
 FNewScenePanel.Active := False;
 if FBoundsOptionsPanel = nil then
 	begin
@@ -2339,6 +2364,7 @@ if FBoundsOptionsPanel = nil then
 	SGScreen.LastChild.SetMiddleBounds(FConstWidth,185);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	FBoundsOptionsPanel.AddToLeft( FConstWidth + 5);
+	FBoundsOptionsPanel.AddToTop( FConstHeight + 5);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	FBoundsOptionsPanel.AddToLeft(- FConstWidth - 5);
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
@@ -2369,6 +2395,7 @@ else
 	FBoundsOptionsPanel.AddToLeft(- ((FNewScenePanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	FBoundsOptionsPanel.VisibleTimer := 0.3;
 	end;
+FBoundsOptionsPanel.DrawClass := FRelefRedactor;
 
 end; end;
 procedure mmmFBackButtonProcedure(Button:TSGButton);
@@ -2390,7 +2417,7 @@ function mmmFEdgeEditTextTypeFunction(const Self:TSGEdit):TSGBoolean;
 var
 	i : TSGQuadWord;
 begin
-Result:=TSGEditTextTypeFunctionNumber(Self);
+Result := TSGEditTextTypeFunctionNumber(Self);
 with TSGGasDiffusion(Self.UserPointer) do
 	begin
 	if Result then
@@ -2531,6 +2558,11 @@ FBoundsOptionsPanel       := nil;
 FUsrImageThread           := nil;
 FUsrRange                 := 5;
 FRelefOptionPanel         := nil;
+
+FRelief.Clear();
+FRelief.InitBase();
+FRelefRedactor := TSGGasDiffusionReliefRedactor.Create(VContext);
+FRelefRedactor.Relief := @FRelief;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -2801,7 +2833,7 @@ if FMesh <> nil then
 		begin
 		if FEnableSaving then 
 			begin
-			if (Render.RenderType=SGRenderDirectX) then
+			if (Render.RenderType = SGRenderDirectX) then
 				if FMesh.QuantityObjects<>0 then
 					for i := 0 to FMesh.QuantityObjects-1 do 
 						FMesh.Objects[i].ChangeMeshColorType4b();
