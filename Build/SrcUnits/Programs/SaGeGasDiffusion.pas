@@ -4,6 +4,7 @@ unit SaGeGasDiffusion;
 interface
 uses
 	 dos
+	,SysUtils
 	,SaGeBase
 	,Classes
 	,SaGeBased
@@ -50,6 +51,7 @@ type
 		procedure ClearGaz();
 			public
 		function Cube (const x,y,z:Word):TSGGGDC;inline;
+		function Copy() : TSGGasDiffusionCube;
 			public
 		FCube       : TSGGGDC;						// ^byte - кубик
 		FCubeCoords : packed array of
@@ -117,8 +119,12 @@ type
 		
 		FUsrSechPanel  : TSGPanel;
 		FUsrSechImage : TSGImage;
+		FUsrSechImageForThread : TSGImage;
 		FUsrImageThread : TSGThread;
 		FUsrRange: LongWord;
+		FUsrSechThread : TSGThread;
+		FCubeForUsr : TSGGasDiffusionCube;
+		FUpdateUsrAfterThread : Boolean;
 		
 			(*Ёкран моделировани€*)
 		FConchLabels : packed array of
@@ -161,6 +167,7 @@ type
 		procedure UpDateConchLabels();
 		procedure UpDateUsrSech();
 		function GetPointColor( const i,ii,iii : LongWord):Byte;inline;
+		function GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;inline;
 		end;
 
 implementation
@@ -188,6 +195,29 @@ end;
 procedure TSGGasDiffusionCube.Draw();
 begin
 
+end;
+
+function TSGGasDiffusionCube.Copy() : TSGGasDiffusionCube;
+var
+	i : LongWord;
+begin
+Result := TSGGasDiffusionCube.Create(Context);
+Result.InitCube(Edge);
+Move(FCube^,Result.FCube^,Edge * Edge * Edge);
+if FGazes <> nil then
+	begin
+	SetLength(Result.FGazes,Length(FGazes));
+	if Length(FGazes) > 0 then
+		for i := 0 to High(FGazes) do
+			Result.FGazes[i] := FGazes[i];
+	end;
+if FSourses <> nil then
+	begin
+	SetLength(Result.FSourses,Length(FSourses));
+	if Length(FSourses) > 0 then
+		for i := 0 to High(FSourses) do
+			Result.FSourses[i] := FSourses[i];
+	end;
 end;
 
 destructor TSGGasDiffusionCube.Destroy();
@@ -774,6 +804,11 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FDiffusionRuned := False;
 	FNewScenePanel.Visible:=True;
 	
+	if FUsrSechPanel <> nil then
+		begin
+		FUsrSechPanel.Destroy();
+		FUsrSechPanel := nil;
+		end;
 	if FAddNewGazPanel<>nil then
 		begin
 		FAddNewGazPanel.Destroy();
@@ -1009,6 +1044,15 @@ case FPlaneComboBox.SelectItem of
 0:Result := FCube.Cube(i,ii,iii)^;
 1:Result := FCube.Cube(i,iii,ii)^;
 2:Result := FCube.Cube(iii,i,ii)^;
+end;
+end;
+
+function TSGGasDiffusion.GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;inline;
+begin
+case FPlaneComboBox.SelectItem of
+0:Result := VCube.Cube(i,ii,iii)^;
+1:Result := VCube.Cube(i,iii,ii)^;
+2:Result := VCube.Cube(iii,i,ii)^;
 end;
 end;
 
@@ -1692,12 +1736,20 @@ if FUsrSechPanel = nil then
 	FUsrSechPanel.LastChild.SetBounds(5,5,a-10,a-10);
 	FUsrSechPanel.LastChild.BoundsToNeedBounds();
 	FUsrSechPanel.LastChild.Visible:=True;
-
+	
 	(FUsrSechPanel.LastChild as TSGPicture).Image       := FUsrSechImage;
 	(FUsrSechPanel.LastChild as TSGPicture).EnableLines := True;
 	(FUsrSechPanel.LastChild as TSGPicture).SecondPoint.Import(
 		FCube.Edge/FImageSechenieBounds,
 		FCube.Edge/FImageSechenieBounds);
+	
+	FUsrSechPanel.CreateChild(TSGProgressBar.Create());
+	FUsrSechPanel.LastChild.Font := FTahomaFont;
+	FUsrSechPanel.LastChild.SetBounds(
+		10,FUsrSechPanel.Height div 2 - FUsrSechPanel.LastChild.Font.FontHeight div 2,
+		FUsrSechPanel.Width - 30,FUsrSechPanel.LastChild.Font.FontHeight);
+	FUsrSechPanel.LastChild.BoundsToNeedBounds();
+	FUsrSechPanel.LastChild.Visible := False;
 	end;
 
 UpDateUsrSech();
@@ -1726,8 +1778,8 @@ for i := -range to range do
 			if ((px >= 0) and (py >= 0) and (pz >= 0) and (px < FImageSechenieBounds) and ( py < FImageSechenieBounds) and ( pz < FImageSechenieBounds)) then
 				begin
 				total += 1;
-				colorIndex := GetPointColor(px,py,pz);
-				color := FCube.FGazes[colorIndex-1].FColor;
+				colorIndex := GetPointColorCube(px,py,pz,FCubeForUsr);
+				color := FCubeForUsr.FGazes[colorIndex-1].FColor;
 				totalPixel.r += trunc(color.r*255);
 				totalPixel.g += trunc(color.g*255);
 				totalPixel.b += trunc(color.b*255);
@@ -1758,30 +1810,46 @@ begin with Klass do begin
 z := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 range := FUsrRange;
 
-FUsrSechImage.FreeTexture();
-FreeMem(FUsrSechImage.Image.BitMap);
-GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FUsrSechImage.Image.BitMap := BitMap;
-
 i := 0;
 while i < FCube.Edge do
-	begin
+	begin WriteLn(i);
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
-		FUsrSechImage.Image.PixelsRGBA(i,ii)^ := InitPixel(ii,i,z,range);
+		FUsrSechImageForThread.Image.PixelsRGBA(i,ii)^ := InitPixel(ii,i,z,range);
 		ii += 1;
 		end;
 	i +=1;
 	end;
-FUsrSechImage.ToTexture();
+FUpdateUsrAfterThread := True;
 end; end;
 
 procedure TSGGasDiffusion.UpDateUsrSech();
 var
 	BitMap : PByte = nil;
 begin
-FUsrImageThreadProcedure(Self);
+if (FUsrSechThread = nil) and (not FUpdateUsrAfterThread) then
+	begin
+	if FUsrSechImageForThread <> nil then
+		begin
+		FUsrSechImageForThread.Destroy();
+		FUsrSechImageForThread := nil;
+		end;
+	FUsrSechImageForThread:=TSGImage.Create();
+	FUsrSechImageForThread.Context := Context;
+	FUsrSechImageForThread.Image.Clear();
+	FUsrSechImageForThread.Width          := FImageSechenieBounds;
+	FUsrSechImageForThread.Height         := FImageSechenieBounds;
+	FUsrSechImageForThread.Image.Channels := 4;
+	FUsrSechImageForThread.Image.BitDepth := 8;
+	GetMem(BitMap, FCube.Edge * FCube.Edge * FUsrSechImageForThread.Image.Channels);
+	FUsrSechImageForThread.Image.BitMap   := BitMap;
+	FUsrSechImageForThread.Image.CreateTypes();
+	
+	FCubeForUsr := FCube.Copy();
+	FUsrSechThread := TSGThread.Create(TSGThreadProcedure(@FUsrImageThreadProcedure),Self);
+	Sleep(100);
+	end;
 end;
 
 procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
@@ -1806,7 +1874,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FMesh.Destroy();
 		FMesh:=nil;
 		end;
-	FMesh:=FCube.CalculateMesh();
+	FMesh := FCube.CalculateMesh();
 	
 	FNowCadr := 0;
 	if FEnableSaving then
@@ -2285,6 +2353,7 @@ if index <> -1 then
 	begin
 	(a.Parent.Children[index + 7] as TSGButton).Active := c > 0;
 	FRelief.FData[index].FEnabled := c > 0;
+	FRelief.FData[index].FType := c > 1
 	end;
 end; end;
 procedure mmmFBoundsBackButtonProcedure(Button:TSGButton);
@@ -2558,6 +2627,9 @@ FBoundsOptionsPanel       := nil;
 FUsrImageThread           := nil;
 FUsrRange                 := 5;
 FRelefOptionPanel         := nil;
+FCubeForUsr               := nil;
+FUpdateUsrAfterThread     := False;
+FUsrSechImageForThread    := nil;
 
 FRelief.Clear();
 FRelief.InitBase();
@@ -2820,9 +2892,33 @@ if (FNewSecheniePanel<>nil) and FNewSecheniePanel.Visible then
 Render.Color4f($80/255,0,$80/255,0.7);
 DrawQuadSec(SGR_LINE_LOOP);
 end;
+procedure UpDateAfterUsrThread();
+var
+	BitMap : PByte;
+begin
+WriteLn('qwe');
+FUsrSechImage.FreeTexture();
+FreeMem(FUsrSechImage.Image.BitMap);
+GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
+FUsrSechImage.Image.BitMap := BitMap;
+Move(FUsrSechImageForThread.Image.BitMap^,FUsrSechImage.Image.BitMap^, FUsrSechImage.Width * FUsrSechImage.Height * FUsrSechImage.Channels);
+FUsrSechImage.ToTexture();
+WriteLn('qwe');
+FUsrSechImageForThread.Destroy();
+FUsrSechImageForThread := nil;
+FUpdateUsrAfterThread := False;
+if (FUsrSechThread <> nil) then
+	begin
+	FUsrSechThread.Destroy();
+	FUsrSechThread := nil;
+	end;
+WriteLn('qwe');
+end;
 var
 	i : LongWord;
 begin
+if FUpdateUsrAfterThread then
+	UpDateAfterUsrThread();
 if FMesh <> nil then
 	begin
 	FCamera.CallAction();

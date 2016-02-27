@@ -20,6 +20,7 @@ uses
 type
 	TSGGasDiffusionSingleRelief = object
 		FEnabled : Boolean;
+		FType : Boolean;
 		FPoints : packed array of TSGVertex;
 		FPolygones : packed array of packed array of LongWord;
 		
@@ -103,7 +104,10 @@ var
 begin
 if (FPolygones <> nil) and FEnabled then
 	begin
-	VRender.Color4f(0,0.5,1,0.2);
+	if FType then
+		VRender.Color4f(0,1,1,0.2)
+	else
+		VRender.Color4f(0,0.5,1,0.2);
 	for i := 0 to High(FPolygones) do
 		begin
 		VRender.BeginScene(SGR_POLYGON);
@@ -189,6 +193,7 @@ if FPolygones <> nil then
 		SetLength(FPolygones[i],0);
 SetLength(FPoints,0);
 FEnabled := False;
+FType := False;
 end;
 
 procedure TSGGasDiffusionRelief.Clear();
