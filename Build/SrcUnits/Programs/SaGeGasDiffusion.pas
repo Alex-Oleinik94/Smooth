@@ -1721,17 +1721,19 @@ if FUsrSechPanel = nil then
 	FUsrSechPanel.Anchors:=[SGAnchBottom];
 	FUsrSechPanel.UserPointer := Button.UserPointer;
 	FUsrSechPanel.Visible := True;
-
+	
 	FUsrSechImage:=TSGImage.Create();
 	FUsrSechImage.Context := Context;
 	FUsrSechImage.Image.Clear();
 	FUsrSechImage.Width          := FImageSechenieBounds;
 	FUsrSechImage.Height         := FImageSechenieBounds;
-	FUsrSechImage.Image.Channels := 4;
+	FUsrSechImage.Image.Channels := FSechenieImage.Image.Channels;
 	FUsrSechImage.Image.BitDepth := 8;
-	FUsrSechImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
+	FUsrSechImage.Image.BitMap   := GetMem(FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
 	FUsrSechImage.Image.CreateTypes();
-
+	fillchar(FUsrSechImage.Image.BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
+	FUsrSechImage.ToTexture();
+	
 	FUsrSechPanel.CreateChild(TSGPicture.Create());
 	FUsrSechPanel.LastChild.SetBounds(5,5,a-10,a-10);
 	FUsrSechPanel.LastChild.BoundsToNeedBounds();
@@ -1749,7 +1751,7 @@ if FUsrSechPanel = nil then
 		10,FUsrSechPanel.Height div 2 - FUsrSechPanel.LastChild.Font.FontHeight div 2,
 		FUsrSechPanel.Width - 30,FUsrSechPanel.LastChild.Font.FontHeight);
 	FUsrSechPanel.LastChild.BoundsToNeedBounds();
-	FUsrSechPanel.LastChild.Visible := False;
+	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
 	end;
 
 UpDateUsrSech();
@@ -1760,13 +1762,10 @@ function InitPixel(const x,y,z : LongWord;const range : LongInt):TSGPixel4b;
 var
 	i, ii, iii, total, totalAlpha: LongInt;
 	px, py, pz : LongInt;
-	totalPixel : packed record 
-					r,g,b,a : LongWord;
-					end = (r : 0; g : 0; b: 0; a : 0);
 	colorIndex : byte;
-	color : TSGColor4f;
+	color : TSGColor4f = ( r : 0; g : 0; b : 0; a : 0);
 begin with Klass do begin 
-total :=0;
+total := 0;
 totalAlpha := 0;
 for i := -range to range do
 	for ii := -range to range do
@@ -1777,15 +1776,14 @@ for i := -range to range do
 			pz := LongInt(z) + iii;
 			if ((px >= 0) and (py >= 0) and (pz >= 0) and (px < FImageSechenieBounds) and ( py < FImageSechenieBounds) and ( pz < FImageSechenieBounds)) then
 				begin
-				total += 1;
 				colorIndex := GetPointColorCube(px,py,pz,FCubeForUsr);
-				color := FCubeForUsr.FGazes[colorIndex-1].FColor;
-				totalPixel.r += trunc(color.r*255);
-				totalPixel.g += trunc(color.g*255);
-				totalPixel.b += trunc(color.b*255);
-				totalPixel.a += trunc(color.a*255);
-				if (color.a>0) then
-					totalAlpha += 1;
+				total += 1;
+				if colorIndex <> 0 then
+					begin
+					color += FCubeForUsr.FGazes[colorIndex-1].FColor * 255;
+					if (color.a>0) then
+						totalAlpha += 1;
+					end;
 				end;
 			end;
 if (total = 0) then
@@ -1797,10 +1795,11 @@ if (total = 0) then
 	end
 else
 	begin
-	Result.r := trunc(Single(totalPixel.r/total));
-	Result.g := trunc(Single(totalPixel.g/total));
-	Result.b := trunc(Single(totalPixel.b/total));
+	Result.r := trunc(color.r/total);
+	Result.g := trunc(color.g/total);
+	Result.b := trunc(color.b/total);
 	Result.a := 255;
+	Result.RGBToAlpha();
 	end;
 end; end;
 var
@@ -1812,7 +1811,7 @@ range := FUsrRange;
 
 i := 0;
 while i < FCube.Edge do
-	begin WriteLn(i);
+	begin
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
@@ -1820,6 +1819,7 @@ while i < FCube.Edge do
 		ii += 1;
 		end;
 	i +=1;
+	(FUsrSechPanel.Children[2] as TSGProgressBar).Progress := i/(FCube.Edge - 1);
 	end;
 FUpdateUsrAfterThread := True;
 end; end;
@@ -1842,13 +1842,22 @@ if (FUsrSechThread = nil) and (not FUpdateUsrAfterThread) then
 	FUsrSechImageForThread.Height         := FImageSechenieBounds;
 	FUsrSechImageForThread.Image.Channels := 4;
 	FUsrSechImageForThread.Image.BitDepth := 8;
-	GetMem(BitMap, FCube.Edge * FCube.Edge * FUsrSechImageForThread.Image.Channels);
+	GetMem(BitMap, FImageSechenieBounds * FImageSechenieBounds * FUsrSechImageForThread.Image.Channels);
 	FUsrSechImageForThread.Image.BitMap   := BitMap;
 	FUsrSechImageForThread.Image.CreateTypes();
 	
+	if FCubeForUsr <> nil then
+		begin
+		FCubeForUsr.Destroy();
+		FCubeForUsr := nil;
+		end;
 	FCubeForUsr := FCube.Copy();
 	FUsrSechThread := TSGThread.Create(TSGThreadProcedure(@FUsrImageThreadProcedure),Self);
-	Sleep(100);
+	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
+	(FUsrSechPanel.Children[2] as TSGProgressBar).FProgress := 0;
+	(FUsrSechPanel.Children[2] as TSGProgressBar).Progress := 0;
+	
+	FAddSechSecondPanelButton.Active := False;
 	end;
 end;
 
@@ -2625,7 +2634,7 @@ FConchLabels              := nil;
 FAddSechSecondPanelButton := nil;
 FBoundsOptionsPanel       := nil;
 FUsrImageThread           := nil;
-FUsrRange                 := 5;
+FUsrRange                 := 2;
 FRelefOptionPanel         := nil;
 FCubeForUsr               := nil;
 FUpdateUsrAfterThread     := False;
@@ -2896,23 +2905,25 @@ procedure UpDateAfterUsrThread();
 var
 	BitMap : PByte;
 begin
-WriteLn('qwe');
 FUsrSechImage.FreeTexture();
 FreeMem(FUsrSechImage.Image.BitMap);
 GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
 FUsrSechImage.Image.BitMap := BitMap;
 Move(FUsrSechImageForThread.Image.BitMap^,FUsrSechImage.Image.BitMap^, FUsrSechImage.Width * FUsrSechImage.Height * FUsrSechImage.Channels);
 FUsrSechImage.ToTexture();
-WriteLn('qwe');
-FUsrSechImageForThread.Destroy();
-FUsrSechImageForThread := nil;
+if FUsrSechImageForThread <> nil then
+	begin
+	FUsrSechImageForThread.Destroy();
+	FUsrSechImageForThread := nil;
+	end;
 FUpdateUsrAfterThread := False;
 if (FUsrSechThread <> nil) then
 	begin
 	FUsrSechThread.Destroy();
 	FUsrSechThread := nil;
 	end;
-WriteLn('qwe');
+FAddSechSecondPanelButton.Active := True;
+(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := False;
 end;
 var
 	i : LongWord;

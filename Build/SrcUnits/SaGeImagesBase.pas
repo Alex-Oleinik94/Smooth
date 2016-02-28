@@ -34,9 +34,9 @@ type
 	PSGPixel = PSGPixel3b;
 	TSGPixel3b=object
 		r,g,b:Byte;
-		procedure Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);inline;
-		procedure Write;inline;
-		procedure WriteLn;inline;
+		procedure Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	TSGColor3b=TSGPixel3b;
 	TSGPixel=TSGPixel3b;
@@ -46,6 +46,9 @@ type
 	PSGPixel4b=^TSGPixel4b;
 	TSGPixel4b=object(TSGPixel3b)
 		a:Byte;
+		procedure WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure RGBToAlpha();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGPixelInfo=object
@@ -54,8 +57,8 @@ type
 				FProcent:real;
 				FIdentifity:LongWord;
 				end;
-		procedure Get(const Old,New,Position:LongWord);inline;
-		procedure Clear;inline;
+		procedure Get(const Old,New,Position:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGBitMap=class(TSGResourse)
@@ -79,9 +82,9 @@ type
 		procedure WriteInfo(const PredStr : TSGString = '');
 		procedure SetWidth(const NewWidth:LongInt);
 		procedure SetHeight(const NewHeight:LongInt);
-		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;inline;
-		procedure SetBounds(const NewBound:LongWord);overload;inline;
-		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;inline;
+		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Width : Cardinal read FWidth write FWidth;
 		property Height : Cardinal read FHeight write FHeight;
@@ -92,21 +95,55 @@ type
 		property BitMap : PByte read FBitMap write FBitMap;
 		end;
 
-operator = (const a,b:TSGPixel3b):Boolean;inline;
-operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;inline;
-operator + (const a,b:TSGPixel3b):TSGPixel3b;inline;
-operator not (const a:TSGPixel3b):TSGPixel3b;inline;
+operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a,b:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
+function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
-function TSGBitMap.PixelsRGBA(const x,y:LongWord):PSGPixel4b;inline;
+procedure TSGPixel4b.RGBToAlpha();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	max : byte;
+	s : single;
+begin
+if (r >= b) and (r >= g) then
+	max := r
+else if (b >= r) and (b >= g) then
+	max := b
+else
+	max := g;
+if max = 0 then
+	a := 0
+else
+	begin
+	s := 255/max;
+	r := trunc(s * r);
+	g := trunc(s * g);
+	b := trunc(s * b);
+	a := max;
+	end;
+end;
+
+procedure TSGPixel4b.Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+System.Write(r,' ',g,' ',b,' ',a);
+end;
+
+procedure TSGPixel4b.WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Write();
+System.WriteLn();
+end;
+
+function TSGBitMap.PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := @PSGPixel4b(FBitMap)[y* FWidth + x];
 end;
 
-function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;inline;
+function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Fromat of
 SGI_TGA:Result:='tga';
@@ -121,22 +158,22 @@ else
 end;
 end;
 
-procedure TSGPixel3b.Write;inline;
+procedure TSGPixel3b.Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 System.Write(r,' ',g,' ',b);
 end;
-procedure TSGPixel3b.WriteLn;inline;
+procedure TSGPixel3b.WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Write;
 System.WriteLn;
 end;
 
-operator not (const a:TSGPixel3b):TSGPixel3b;inline;
+operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(255-a.r,255-a.g,255-a.b);
 end;
 
-operator + (const a,b:TSGPixel3b):TSGPixel3b;inline;
+operator + (const a,b:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(
 	SGTruncUp((a.r+b.r)/2),
@@ -144,30 +181,30 @@ Result.Import(
 	SGTruncUp((a.b+b.b)/2));
 end;
 
-procedure TSGPixel3b.Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);inline;
+procedure TSGPixel3b.Import(const r1:Byte = 0;const g1:Byte = 0;const b1:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 r:=r1;
 g:=g1;
 b:=b1;
 end;
 
-operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;inline;
+operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(SGTruncUp(a.r*b),SGTruncUp(a.g*b),SGTruncUp(a.b*b));
 end;
 
-operator = (const a,b:TSGPixel3b):Boolean;inline;
+operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin 
 Result:=(a.r=b.r) and (a.g=b.g) and (a.b=b.b);
 end;
 
-procedure TSGPixelInfo.Clear;inline;
+procedure TSGPixelInfo.Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetLength(FArray,0);
 FArray:=nil;
 end;
 
-procedure TSGPixelInfo.Get(const Old,New,Position:LongWord);inline;
+procedure TSGPixelInfo.Get(const Old,New,Position:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 // Old - Old Width; 
 // New - New Width;
 // Position - i
@@ -219,12 +256,12 @@ while i<=High(FArray) do
 	end;
 end;
 
-procedure TSGBitMap.SetBounds(const NewBound:LongWord);overload;inline;
+procedure TSGBitMap.SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetBounds(NewBound,NewBound);
 end;
 
-procedure TSGBitMap.SetBounds(const NewWidth,NewHeight:LongWord);overload;inline;
+procedure TSGBitMap.SetBounds(const NewWidth,NewHeight:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetHeight(NewHeight);
 SetWidth(NewWidth);

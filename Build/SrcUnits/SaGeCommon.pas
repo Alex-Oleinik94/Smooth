@@ -180,6 +180,8 @@ type
 		procedure Import(const r1:real = 0; const g1:real = 0; const b1:real = 0;const a1:real = 1);
 		procedure ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGColor4f = TSGColor4f;
 	SGColor = TSGColor4f;
@@ -373,6 +375,17 @@ function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF 
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure TSGColor4f.WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Write();
+System.WriteLn();
+end;
+
+procedure TSGColor4f.Write();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+System.Write(r:0:5,' ',g:0:5,' ',b:0:5);
+end;
 
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
