@@ -1693,9 +1693,9 @@ if d = 2 then
 		for ii := 0 to FCube.Edge-1 do
 			begin
 			p := FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^;
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+0] := p.r;
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+1] := p.g;
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+2] := p.b;
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+0] := trunc(p.a*p.r/255);
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+1] := trunc(p.a*p.g/255);
+			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+2] := trunc(p.a*p.b/255);
 			end;
 
 SGMakeDirectory(PredStr+Catalog);
