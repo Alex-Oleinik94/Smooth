@@ -47,7 +47,7 @@ type
 			public
 		procedure InitCube(const Edge : TSGLongWord);
 		procedure UpDateCube();
-		function CalculateMesh() : TSGCustomModel;
+		function CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil) : TSGCustomModel;
 		procedure ClearGaz();
 			public
 		function Cube (const x,y,z:Word):TSGGGDC;inline;
@@ -507,67 +507,73 @@ UpDateSourses();
 //if FBoundsOpen then
 	//UpDateIfOpenBounds();
 end;
-function TSGGasDiffusionCube.CalculateMesh():TSGCustomModel;
+function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil):TSGCustomModel;
 var
 	i : TSGLongWord;
 begin
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
-Result.AddObject();
-Result.LastObject().ObjectPoligonesType := SGR_LINES;
-Result.LastObject().HasNormals := False;
-Result.LastObject().HasTexture := False;
-Result.LastObject().HasColors  := True;
-Result.LastObject().EnableCullFace := False;
-Result.LastObject().VertexType := SGMeshVertexType3f;
-Result.LastObject().SetColorType(SGMeshColorType4b);
-Result.LastObject().Vertexes   := 28;
 
-Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
-Result.LastObject().ArVertex3f[1]^.Import(1,-1,-1);
+if VRelief = nil then
+	begin
+	Result.AddObject();
+	Result.LastObject().ObjectPoligonesType := SGR_LINES;
+	Result.LastObject().HasNormals := False;
+	Result.LastObject().HasTexture := False;
+	Result.LastObject().HasColors  := True;
+	Result.LastObject().EnableCullFace := False;
+	Result.LastObject().VertexType := SGMeshVertexType3f;
+	Result.LastObject().SetColorType(SGMeshColorType4b);
+	Result.LastObject().Vertexes := 28;
 
-Result.LastObject().ArVertex3f[2]^.Import(-1,-1,1);
-Result.LastObject().ArVertex3f[3]^.Import(1,-1,1);
+	Result.LastObject().ArVertex3f[0]^.Import(-1,-1,-1);
+	Result.LastObject().ArVertex3f[1]^.Import(1,-1,-1);
 
-Result.LastObject().ArVertex3f[4]^.Import(-1,1,1);
-Result.LastObject().ArVertex3f[5]^.Import(1,1,1);
+	Result.LastObject().ArVertex3f[2]^.Import(-1,-1,1);
+	Result.LastObject().ArVertex3f[3]^.Import(1,-1,1);
 
-Result.LastObject().ArVertex3f[6]^.Import(-1,1,-1);
-Result.LastObject().ArVertex3f[7]^.Import(1,1,-1);
+	Result.LastObject().ArVertex3f[4]^.Import(-1,1,1);
+	Result.LastObject().ArVertex3f[5]^.Import(1,1,1);
 
-Result.LastObject().ArVertex3f[8]^.Import(-1,-1,-1);
-Result.LastObject().ArVertex3f[9]^.Import(-1,1,-1);
+	Result.LastObject().ArVertex3f[6]^.Import(-1,1,-1);
+	Result.LastObject().ArVertex3f[7]^.Import(1,1,-1);
 
-Result.LastObject().ArVertex3f[10]^.Import(-1,-1,-1);
-Result.LastObject().ArVertex3f[11]^.Import(-1,-1,1);
+	Result.LastObject().ArVertex3f[8]^.Import(-1,-1,-1);
+	Result.LastObject().ArVertex3f[9]^.Import(-1,1,-1);
 
-Result.LastObject().ArVertex3f[12]^.Import(-1,-1,1);
-Result.LastObject().ArVertex3f[13]^.Import(-1,1,1);
+	Result.LastObject().ArVertex3f[10]^.Import(-1,-1,-1);
+	Result.LastObject().ArVertex3f[11]^.Import(-1,-1,1);
 
-Result.LastObject().ArVertex3f[14]^.Import(-1,1,1);
-Result.LastObject().ArVertex3f[15]^.Import(-1,1,-1);
+	Result.LastObject().ArVertex3f[12]^.Import(-1,-1,1);
+	Result.LastObject().ArVertex3f[13]^.Import(-1,1,1);
+
+	Result.LastObject().ArVertex3f[14]^.Import(-1,1,1);
+	Result.LastObject().ArVertex3f[15]^.Import(-1,1,-1);
 
 
-Result.LastObject().ArVertex3f[16]^.Import(1,-1,-1);
-Result.LastObject().ArVertex3f[17]^.Import(1,-1,1);
+	Result.LastObject().ArVertex3f[16]^.Import(1,-1,-1);
+	Result.LastObject().ArVertex3f[17]^.Import(1,-1,1);
 
-Result.LastObject().ArVertex3f[18]^.Import(1,-1,1);
-Result.LastObject().ArVertex3f[19]^.Import(1,1,1);
+	Result.LastObject().ArVertex3f[18]^.Import(1,-1,1);
+	Result.LastObject().ArVertex3f[19]^.Import(1,1,1);
 
-Result.LastObject().ArVertex3f[20]^.Import(1,1,1);
-Result.LastObject().ArVertex3f[21]^.Import(1,1,-1);
+	Result.LastObject().ArVertex3f[20]^.Import(1,1,1);
+	Result.LastObject().ArVertex3f[21]^.Import(1,1,-1);
 
-Result.LastObject().ArVertex3f[22]^.Import(1,1,-1);
-Result.LastObject().ArVertex3f[23]^.Import(1,-1,-1);
+	Result.LastObject().ArVertex3f[22]^.Import(1,1,-1);
+	Result.LastObject().ArVertex3f[23]^.Import(1,-1,-1);
 
-Result.LastObject().ArVertex3f[24]^.Import(1,-1,1);
-Result.LastObject().ArVertex3f[25]^.Import(-1,-1,-1);
+	Result.LastObject().ArVertex3f[24]^.Import(1,-1,1);
+	Result.LastObject().ArVertex3f[25]^.Import(-1,-1,-1);
 
-Result.LastObject().ArVertex3f[26]^.Import(1,-1,-1);
-Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
-
-for i:=0 to Result.LastObject().Vertexes - 1 do
-	Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
+	Result.LastObject().ArVertex3f[26]^.Import(1,-1,-1);
+	Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
+	
+	for i:=0 to Result.LastObject().Vertexes - 1 do
+		Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
+	end
+else
+	VRelief^.ExportToMesh(Result);
 
 if FGazes<>nil then
 	for i:= 0 to High(FGazes) do
@@ -1135,7 +1141,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FFileStream:=nil;
 		end;
 	FCube.ClearGaz();
-	FMesh:=FCube.CalculateMesh();
+	FMesh:=FCube.CalculateMesh(@FRelief);
 end; end;
 
 procedure mmmFRunDiffusionButtonProcedure(Button:TSGButton);
@@ -1329,7 +1335,7 @@ else
 	end;
 UpdateNewGasPanel(Button.Parent);
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh();
+FMesh:=FCube.CalculateMesh(@FRelief);
 end;end;
 
 procedure mmmGasChangeProc(Button:TSGButton);
@@ -1479,7 +1485,7 @@ for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
 	if FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^=o+1 then
 		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=c+1;
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh();
+FMesh:=FCube.CalculateMesh(@FRelief);
 end; end;
 
 procedure mmmSourseChageSourseProc(b,c : LongInt;a : TSGComboBox);
@@ -1540,7 +1546,7 @@ for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
 		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=FCube.FSourses[i].FGazTypeIndex +1;
 UpDateSoursePanel();
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh();
+FMesh:=FCube.CalculateMesh(@FRelief);
 end;end;
 
 procedure mmmFDleteSourseAddNewSourseButtonProcedure(Button:TSGButton);
@@ -1577,7 +1583,7 @@ else
 
 UpDateSoursePanel();
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh();
+FMesh:=FCube.CalculateMesh(@FRelief);
 end; end;
 
 procedure FAddNewSourseButtonProcedure(Button:TSGButton);
@@ -1681,7 +1687,7 @@ else
 Image := TSGImage.Create();
 Image.Context := Context;
 Image.Image.Clear();
-Image.Width          := FCube.Edge*d;
+Image.Width          := FCube.Edge * d;
 Image.Height         := FCube.Edge;
 {$IFDEF WITHLIBPNG}
 	Image.Image.Channels := 4;
@@ -1892,7 +1898,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FMesh.Destroy();
 		FMesh:=nil;
 		end;
-	FMesh := FCube.CalculateMesh();
+	FMesh := FCube.CalculateMesh(@FRelief);
 	
 	FNowCadr := 0;
 	if FEnableSaving then
@@ -2957,7 +2963,7 @@ if FMesh <> nil then
 			end;
 		FMesh.Destroy();
 		FCube.UpDateCube();
-		FMesh:=FCube.CalculateMesh();
+		FMesh:=FCube.CalculateMesh(@FRelief);
 		FNowCadr+=1;
 		end;
 	if (FSecheniePanel<>nil) and (FDiffusionRuned) and (FSecheniePanel.Visible) then

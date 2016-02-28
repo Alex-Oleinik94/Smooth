@@ -358,6 +358,7 @@ function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTranslateMatrix(const VMatrix : TSGMatrix4; const VVertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetRotateMatrix(const Angle:Single;const Axis:TSGVertex3f) : TSGMatrix4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -375,6 +376,24 @@ function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF 
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGGetRotateMatrix(const Angle:Single;const Axis:TSGVertex3f) : TSGMatrix4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+    CosinusAngle, SinusAngle : Single;
+begin
+ Result:=SGGetIdentityMatrix();
+ CosinusAngle:=cos(Angle);
+ SinusAngle:=sin(Angle);    
+ Result[0,0]:=CosinusAngle+((1-CosinusAngle)*Axis.x*Axis.x);
+ Result[1,0]:=((1-CosinusAngle)*Axis.x*Axis.y)-(Axis.z*SinusAngle);
+ Result[2,0]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.y*SinusAngle);
+ Result[0,1]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.z*SinusAngle);
+ Result[1,1]:=CosinusAngle+((1-CosinusAngle)*Axis.y*Axis.y);
+ Result[2,1]:=((1-CosinusAngle)*Axis.y*Axis.z)-(Axis.x*SinusAngle);
+ Result[0,2]:=((1-CosinusAngle)*Axis.x*Axis.z)-(Axis.y*SinusAngle);
+ Result[1,2]:=((1-CosinusAngle)*Axis.y*Axis.z)+(Axis.x*SinusAngle);
+ Result[2,2]:=CosinusAngle+((1-CosinusAngle)*Axis.z*Axis.z);
+end;
 
 procedure TSGColor4f.WriteLn();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -721,9 +740,9 @@ begin
 FillChar(Result,SizeOf(Result),0);
 for i:=0 to 3 do
 	Result[i,i]:=1;
-PSingle(@Result)[12]:=Vertex.x;
-PSingle(@Result)[13]:=Vertex.y;
-PSingle(@Result)[14]:=Vertex.z;
+Result[3,0]:=Vertex.x;
+Result[3,1]:=Vertex.y;
+Result[3,2]:=Vertex.z;
 end;
 
 function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

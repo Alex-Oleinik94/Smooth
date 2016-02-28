@@ -27,6 +27,7 @@ type
 		procedure Draw(const VRender : TSGRender);
 		procedure DrawLines(const VRender : TSGRender);
 		procedure DrawPolygones(const VRender : TSGRender);
+		procedure ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
 		procedure Clear();
 		procedure InitBase();
 		end;
@@ -37,6 +38,7 @@ type
 		procedure Draw(const VRender : TSGRender);
 		procedure Clear();
 		procedure InitBase();
+		procedure ExportToMesh(const VMesh : TSGCustomModel);
 		end;
 	PSGGasDiffusionSingleRelief = ^ TSGGasDiffusionSingleRelief;
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
@@ -58,6 +60,67 @@ type
 		end;
 
 implementation
+
+var
+	Matrixes : array[-1..5] of TSGMatrix4;
+
+procedure TSGGasDiffusionSingleRelief.ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
+var
+	i,ii : LongWord;
+begin
+if FPoints <> nil then if Length(FPoints) <> 0 then
+	begin
+	VMesh.AddObject();
+	VMesh.LastObject().ObjectPoligonesType := SGR_LINE_LOOP;
+	VMesh.LastObject().HasNormals := False;
+	VMesh.LastObject().HasTexture := False;
+	VMesh.LastObject().HasColors  := True;
+	VMesh.LastObject().EnableCullFace := False;
+	VMesh.LastObject().VertexType := SGMeshVertexType3f;
+	VMesh.LastObject().SetColorType(SGMeshColorType4b);
+	VMesh.LastObject().Vertexes := Length(FPoints);
+	
+	for i := 0 to High(FPoints) do
+		begin
+		VMesh.LastObject().ArVertex3f[i]^ := FPoints[i] * Matrixes[index];
+		VMesh.LastObject().SetColor(i,0,0.5,1,1);
+		end;
+	
+	if FEnabled then if FPolygones <> nil then if Length(FPolygones) <> 0 then
+		for i := 0 to High(FPolygones) do
+			if FPolygones[i] <> nil then if Length(FPolygones[i]) <> 0 then
+				begin
+				VMesh.AddObject();
+				VMesh.LastObject().ObjectPoligonesType := SGR_TRIANGLES;
+				VMesh.LastObject().HasNormals := False;
+				VMesh.LastObject().HasTexture := False;
+				VMesh.LastObject().HasColors  := True;
+				VMesh.LastObject().EnableCullFace := False;
+				VMesh.LastObject().VertexType := SGMeshVertexType3f;
+				VMesh.LastObject().SetColorType(SGMeshColorType4b);
+				VMesh.LastObject().Vertexes := 3*(Length(FPolygones[i]) - 2);
+				
+				for ii := 0 to Length(FPolygones[i])-3 do
+					begin
+					VMesh.LastObject().ArVertex3f[ii*3+0]^ := FPoints[FPolygones[i][0]] * Matrixes[index];
+					VMesh.LastObject().ArVertex3f[ii*3+1]^ := FPoints[FPolygones[i][ii+1]]* Matrixes[index];
+					VMesh.LastObject().ArVertex3f[ii*3+2]^ := FPoints[FPolygones[i][ii+2]]* Matrixes[index];
+					if FType then
+						begin
+						VMesh.LastObject().SetColor(ii*3+0,0,  1,1,0.2);
+						VMesh.LastObject().SetColor(ii*3+1,0,  1,1,0.2);
+						VMesh.LastObject().SetColor(ii*3+2,0,  1,1,0.2);
+						end
+					else
+						begin
+						VMesh.LastObject().SetColor(ii*3+0,0,0.5,1,0.2);
+						VMesh.LastObject().SetColor(ii*3+1,0,0.5,1,0.2);
+						VMesh.LastObject().SetColor(ii*3+2,0,0.5,1,0.2);
+						end;
+					end;
+				end;
+	end;
+end;
 
 procedure TSGGasDiffusionSingleRelief.InitBase();
 begin
@@ -115,6 +178,16 @@ if (FPolygones <> nil) and FEnabled then
 			FPoints[FPolygones[i][ii]].Vertex(VRender);
 		VRender.EndScene();
 		end;
+	end;
+end;
+
+procedure TSGGasDiffusionRelief.ExportToMesh(const VMesh : TSGCustomModel);
+var
+	i : LongWord;
+begin
+for i := 0 to 5 do
+	begin
+	FData[i].ExportToMesh(VMesh,i);
 	end;
 end;
 
@@ -242,6 +315,22 @@ end;
 class function TSGGasDiffusionReliefRedactor.ClassName():TSGString;
 begin
 Result := 'TSGGasDiffusionReliefRedactor';
+end;
+
+initialization
+begin
+Matrixes[-1] := SGGetIdentityMatrix();
+Matrixes[0] := SGGetRotateMatrix(pi/2,SGVertexImport(1,0,0)) * SGGetTranslateMatrix(SGVertexImport(0,1,0));
+Matrixes[1] := SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0)) * SGGetTranslateMatrix(SGVertexImport(0,-1,0));
+Matrixes[2] := SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)) * SGGetTranslateMatrix(SGVertexImport(-1,0,0));
+Matrixes[3] := SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) * SGGetTranslateMatrix(SGVertexImport(1,0,0));
+Matrixes[4] := SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) * SGGetTranslateMatrix(SGVertexImport(0,0,-1));
+Matrixes[5] := SGGetRotateMatrix(pi/2,SGVertexImport(0,0,1)) * SGGetTranslateMatrix(SGVertexImport(0,0,1));
+end;
+
+finalization
+begin
+
 end;
 
 end.
