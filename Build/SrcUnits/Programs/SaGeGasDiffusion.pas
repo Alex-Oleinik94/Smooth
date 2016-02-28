@@ -1659,6 +1659,16 @@ UpDateSoursePanel();
 end; end;
 
 procedure mmmFSaveImageButtonProcedure(Button:TSGButton);
+procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+{$IFDEF WITHLIBPNG}
+	PSGPixel4b(Destination)^ := p;
+{$ELSE}
+	Destination[0] := trunc(p.a*p.r/255);
+	Destination[1] := trunc(p.a*p.g/255);
+	Destination[2] := trunc(p.a*p.b/255);
+	{$ENDIF}
+end;
 var
 	Image : TSGImage = nil;
 	i, ii, d : LongWord;
@@ -1673,34 +1683,33 @@ Image.Context := Context;
 Image.Image.Clear();
 Image.Width          := FCube.Edge*d;
 Image.Height         := FCube.Edge;
-Image.Image.Channels := 3;
+{$IFDEF WITHLIBPNG}
+	Image.Image.Channels := 4;
+{$ELSE}
+	Image.Image.Channels := 3;
+	{$ENDIF}
 Image.Image.BitDepth := 8;
-Image.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*Image.Image.Channels*d);
+Image.Image.BitMap   := GetMem(FCube.Edge * FCube.Edge * Image.Image.Channels * d);
 Image.Image.CreateTypes();
-fillchar(Image.Image.BitMap^,FCube.Edge*FCube.Edge*Image.Image.Channels*d,0);
+fillchar(Image.Image.BitMap^, FCube.Edge * FCube.Edge * Image.Image.Channels * d, 0);
 
 for i := 0 to FCube.Edge-1 do
 	for ii := 0 to FCube.Edge-1 do
-		begin
-		p := FSechenieImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^;
-		Image.Image.BitMap[(i*Image.Width+ii)*3+0] := trunc(p.a*p.r/255);
-		Image.Image.BitMap[(i*Image.Width+ii)*3+1] := trunc(p.a*p.g/255);
-		Image.Image.BitMap[(i*Image.Width+ii)*3+2] := trunc(p.a*p.b/255);
-		end;
+		PutPixel(FSechenieImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^,@Image.Image.BitMap[(i*Image.Width+ii)*Image.Image.Channels]);
 
 if d = 2 then
 	for i := 0 to FCube.Edge-1 do
 		for ii := 0 to FCube.Edge-1 do
-			begin
-			p := FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^;
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+0] := trunc(p.a*p.r/255);
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+1] := trunc(p.a*p.g/255);
-			Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*3+2] := trunc(p.a*p.b/255);
-			end;
+			PutPixel(FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^,@Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*Image.Image.Channels]);
 
 SGMakeDirectory(PredStr+Catalog);
-Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.jpg','number');
-Image.Saveing(SGI_JPEG);
+{$IFDEF WITHLIBPNG}
+	Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.png','number');
+	Image.Saveing(SGI_PNG);
+{$ELSE}
+	Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.jpg','number');
+	Image.Saveing(SGI_JPEG);
+	{$ENDIF}
 
 FreeMem(Image.Image.BitMap);
 Image.Image.BitMap := nil;
