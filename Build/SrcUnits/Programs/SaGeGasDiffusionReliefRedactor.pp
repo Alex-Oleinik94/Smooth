@@ -79,10 +79,11 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 	VMesh.LastObject().VertexType := SGMeshVertexType3f;
 	VMesh.LastObject().SetColorType(SGMeshColorType4b);
 	VMesh.LastObject().Vertexes := Length(FPoints);
+	VMesh.LastObject().ObjectMatrix := Matrixes[index];
 	
 	for i := 0 to High(FPoints) do
 		begin
-		VMesh.LastObject().ArVertex3f[i]^ := FPoints[i] * Matrixes[index];
+		VMesh.LastObject().ArVertex3f[i]^ := FPoints[i];
 		VMesh.LastObject().SetColor(i,0,0.5,1,1);
 		end;
 	
@@ -99,12 +100,13 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 				VMesh.LastObject().VertexType := SGMeshVertexType3f;
 				VMesh.LastObject().SetColorType(SGMeshColorType4b);
 				VMesh.LastObject().Vertexes := 3*(Length(FPolygones[i]) - 2);
+				VMesh.LastObject().ObjectMatrix := Matrixes[index];
 				
 				for ii := 0 to Length(FPolygones[i])-3 do
 					begin
-					VMesh.LastObject().ArVertex3f[ii*3+0]^ := FPoints[FPolygones[i][0]] * Matrixes[index];
-					VMesh.LastObject().ArVertex3f[ii*3+1]^ := FPoints[FPolygones[i][ii+1]]* Matrixes[index];
-					VMesh.LastObject().ArVertex3f[ii*3+2]^ := FPoints[FPolygones[i][ii+2]]* Matrixes[index];
+					VMesh.LastObject().ArVertex3f[ii*3+0]^ := FPoints[FPolygones[i][0]];
+					VMesh.LastObject().ArVertex3f[ii*3+1]^ := FPoints[FPolygones[i][ii+1]];
+					VMesh.LastObject().ArVertex3f[ii*3+2]^ := FPoints[FPolygones[i][ii+2]];
 					if FType then
 						begin
 						VMesh.LastObject().SetColor(ii*3+0,0,  1,1,0.2);
@@ -320,12 +322,12 @@ end;
 initialization
 begin
 Matrixes[-1] := SGGetIdentityMatrix();
-Matrixes[0] := SGGetRotateMatrix(pi/2,SGVertexImport(1,0,0)) * SGGetTranslateMatrix(SGVertexImport(0,1,0));
-Matrixes[1] := SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0)) * SGGetTranslateMatrix(SGVertexImport(0,-1,0));
-Matrixes[2] := SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)) * SGGetTranslateMatrix(SGVertexImport(-1,0,0));
-Matrixes[3] := SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) * SGGetTranslateMatrix(SGVertexImport(1,0,0));
-Matrixes[4] := SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) * SGGetTranslateMatrix(SGVertexImport(0,0,-1));
-Matrixes[5] := SGGetRotateMatrix(pi/2,SGVertexImport(0,0,1)) * SGGetTranslateMatrix(SGVertexImport(0,0,1));
+Matrixes[0] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(1,0,0)),SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[1] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,1)) , SGGetTranslateMatrix(SGVertexImport(0,0,1)));
 end;
 
 finalization

@@ -299,6 +299,7 @@ operator + (const a,b:TSGCustomPosition):TSGCustomPosition;overload;{$IFDEF SUPP
 //Перемножение матриц (нужно для Rotate, Translate и Scale)
 //Так же нужно для LookAt так как там нужно делать Translate.
 operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const A,B:TSGMatrix4):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -376,6 +377,20 @@ function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF 
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+operator = (const A,B:TSGMatrix4):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i,ii : LongWord;
+begin
+Result := True;
+for i := 0 to 3 do
+	for ii := 0 to 3 do
+		if A[i][ii] <> B[i][ii] then
+			begin
+			Result := False;
+			break;
+			end;
+end;
 
 function SGGetRotateMatrix(const Angle:Single;const Axis:TSGVertex3f) : TSGMatrix4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

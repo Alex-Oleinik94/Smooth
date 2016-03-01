@@ -514,6 +514,55 @@ begin
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
 
+if FGazes<>nil then
+	for i:= 0 to High(FGazes) do
+		FGazes[i].FDinamicQuantity := 0;
+
+for i:=0 to FEdge*FEdge*FEdge -1 do
+	begin
+	if FCube[i]<>0 then
+		begin
+		Inc(FGazes[FCube[i]-1].FDinamicQuantity);
+		end;
+	end;
+
+FDinamicQuantityMoleculs := 0;
+if FGazes<>nil then
+	for i:= 0 to High(FGazes) do
+		FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
+
+if FDinamicQuantityMoleculs <> 0 then
+	begin
+	Result.AddObject();
+	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
+	Result.LastObject().HasNormals := False;
+	Result.LastObject().HasTexture := False;
+	Result.LastObject().HasColors  := True;
+	Result.LastObject().EnableCullFace := False;
+	Result.LastObject().VertexType := SGMeshVertexType3f;
+	Result.LastObject().SetColorType(SGMeshColorType4b);
+
+
+
+	Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
+
+	FDinamicQuantityMoleculs:=0;
+	for i:=0 to FEdge*FEdge*FEdge -1 do
+		begin
+		if FCube[i]<>0 then
+			begin
+			Result.LastObject().SetColor(FDinamicQuantityMoleculs,
+				FGazes[FCube[i]-1].FColor.r,
+				FGazes[FCube[i]-1].FColor.g,
+				FGazes[FCube[i]-1].FColor.b);
+			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
+				FCubeCoords[i];
+			Inc(FDinamicQuantityMoleculs);
+			end;
+		end;
+	end;
+
+
 if VRelief = nil then
 	begin
 	Result.AddObject();
@@ -574,54 +623,6 @@ if VRelief = nil then
 	end
 else
 	VRelief^.ExportToMesh(Result);
-
-if FGazes<>nil then
-	for i:= 0 to High(FGazes) do
-		FGazes[i].FDinamicQuantity := 0;
-
-for i:=0 to FEdge*FEdge*FEdge -1 do
-	begin
-	if FCube[i]<>0 then
-		begin
-		Inc(FGazes[FCube[i]-1].FDinamicQuantity);
-		end;
-	end;
-
-FDinamicQuantityMoleculs := 0;
-if FGazes<>nil then
-	for i:= 0 to High(FGazes) do
-		FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
-
-if FDinamicQuantityMoleculs <> 0 then
-	begin
-	Result.AddObject();
-	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
-	Result.LastObject().HasNormals := False;
-	Result.LastObject().HasTexture := False;
-	Result.LastObject().HasColors  := True;
-	Result.LastObject().EnableCullFace := False;
-	Result.LastObject().VertexType := SGMeshVertexType3f;
-	Result.LastObject().SetColorType(SGMeshColorType4b);
-
-
-
-	Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
-
-	FDinamicQuantityMoleculs:=0;
-	for i:=0 to FEdge*FEdge*FEdge -1 do
-		begin
-		if FCube[i]<>0 then
-			begin
-			Result.LastObject().SetColor(FDinamicQuantityMoleculs,
-				FGazes[FCube[i]-1].FColor.r,
-				FGazes[FCube[i]-1].FColor.g,
-				FGazes[FCube[i]-1].FColor.b);
-			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
-				FCubeCoords[i];
-			Inc(FDinamicQuantityMoleculs);
-			end;
-		end;
-	end;
 end;
 
 // Release

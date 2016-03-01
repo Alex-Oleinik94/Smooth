@@ -437,12 +437,18 @@ type
 		FName : TSGString;
 		FParent : TSGCustomModel;
 		FObjectMaterialID : TSGInt64;
+		
+		FEnableObjectMatrix : Boolean;
+		FObjectMatrix : TSGMatrix4;
+	public
+		procedure SetMatrix(const m : TSGMatrix4);
 	public
 		// Свойство : Имя модельки
 		property Name             : TSGString      read FName             write FName;
 		// Свойство : Идентификатор материала
 		property ObjectMaterialID : TSGInt64       read FObjectMaterialID write FObjectMaterialID;
 		property Parent           : TSGCustomModel read FParent           write FParent;
+		property ObjectMatrix     : TSGMatrix4     read FObjectMatrix     write SetMatrix;
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -1435,6 +1441,14 @@ FVertexType:=SGMeshVertexType3f;
 FEnableVBO:=False;
 FVertexesBuffer := 0;
 FFacesBuffers := nil;
+FEnableObjectMatrix := False;
+FObjectMatrix := SGGetIdentityMatrix();
+end;
+
+procedure TSG3dObject.SetMatrix(const m : TSGMatrix4);
+begin
+FEnableObjectMatrix := m <> SGGetIdentityMatrix();
+FObjectMatrix := m;
 end;
 
 destructor TSG3dObject.Destroy();
@@ -1449,6 +1463,11 @@ begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
+if FEnableObjectMatrix then
+	begin
+	Render.PushMatrix();
+	Render.MultMatrixf(@FObjectMatrix);
+	end;
 if FEnableCullFace then
 	begin
 	if (FEnableCullFaceBack or FEnableCullFaceFront) then
@@ -1475,6 +1494,8 @@ if FEnableCullFace then
 	end
 else
 	BasicDraw();
+if FEnableObjectMatrix then
+	Render.PopMatrix();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
