@@ -47,13 +47,16 @@ type
 			public
 		procedure InitCube(const Edge : TSGLongWord);
 		procedure UpDateCube();
-		function CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil) : TSGCustomModel;
+		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil) : TSGCustomModel;
 		procedure ClearGaz();
+		procedure InitReliefIndexes();
 			public
-		function Cube (const x,y,z:Word):TSGGGDC;inline;
+		function Cube (const x,y,z:Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ReliefCubeIndex (const x,y,z : Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Copy() : TSGGasDiffusionCube;
 			public
 		FCube       : TSGGGDC;						// ^byte - кубик
+		FReliefCubeIndex : TSGGGDC;
 		FCubeCoords : packed array of
 			TSGVertex3f;							// 3хмерные координаты каждой точки из FCube
 		FEdge       : TSGLongWord;					// размерность FCube (FEdge * FEdge * FEdge)
@@ -62,6 +65,7 @@ type
 		FSourses    : packed array of TSGSourseType;// источники газа
 		FDinamicQuantityMoleculs : LongWord;		// количество точек газа на данный момент
 		FFlag       : Boolean;						// флажок этапа итерации. этот алгоритм работает в 2 этапа
+		FRelief     : PSGGasDiffusionRelief;
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -166,8 +170,8 @@ type
 		procedure UpDateSoursePanel();
 		procedure UpDateConchLabels();
 		procedure UpDateUsrSech();
-		function GetPointColor( const i,ii,iii : LongWord):Byte;inline;
-		function GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;inline;
+		function GetPointColor( const i,ii,iii : LongWord):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
 implementation
@@ -188,8 +192,8 @@ FEdge   := 0;
 FCube   := nil;
 FSourses:= nil;
 FGazes  := nil;
-//FBoundsOpen:=False;
 FCubeCoords := nil;
+FRelief := nil;
 end;
 
 procedure TSGGasDiffusionCube.Draw();
@@ -262,7 +266,9 @@ if FEdge mod 2 = 1 then
 	FEdge +=1;
 Smeshenie:=1/FEdge;
 GetMem(FCube,FEdge*FEdge*FEdge);
+GetMem(FReliefCubeIndex,FEdge*FEdge*FEdge);
 FillChar(FCube^,FEdge*FEdge*FEdge,0);
+FillChar(FReliefCubeIndex^,FEdge*FEdge*FEdge,1);
 SetLength(FCubeCoords,FEdge*FEdge*FEdge);
 
 SetLength(FGazes,3);
@@ -286,12 +292,122 @@ for i := 0 to Edge*Edge*Edge-1 do
 	FCubeCoords[i]+=
 		FArRandomSm[Random(10)];
 	end;
+
+InitReliefIndexes();
+
 UpDateCube();
 end;
 
-function TSGGasDiffusionCube.Cube (const x,y,z:Word):TSGGGDC;inline;
+function TSGGasDiffusionCube.ReliefCubeIndex (const x,y,z : Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=@FCube[x*FEdge*FEdge+y*FEdge+z];
+Result:=@FReliefCubeIndex[(x*FEdge+y)*FEdge+z];
+end;
+
+function TSGGasDiffusionCube.Cube (const x,y,z:Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result:=@FCube[(x*FEdge+y)*FEdge+z];
+end;
+
+procedure TSGGasDiffusionCube.InitReliefIndexes();
+
+function CoordFromXYZ(const x,y,z : LongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(x/(Edge-1)*2-1,y/(Edge-1)*2-1,z/(Edge-1)*2-1);
+end;
+
+function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : LongWord; const v : TSGVertex3f; const n : TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointInTriangle(const t1,t2,t3,v,n:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+
+end;
+
+function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := PointInTriangle2D( 
+	SGVertex2fImport(t1.x,t1.y),
+	SGVertex2fImport(t2.x,t2.y),
+	SGVertex2fImport(t3.x,t3.y),
+	SGVertex2fImport(v.x,v.y));
+end;
+
+function PointInTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := PointInTriangle2D( 
+	SGVertex2fImport(t1.z,t1.y),
+	SGVertex2fImport(t2.z,t2.y),
+	SGVertex2fImport(t3.z,t3.y),
+	SGVertex2fImport(v.z,v.y));
+end;
+
+function PointInTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := PointInTriangle2D( 
+	SGVertex2fImport(t1.x,t1.z),
+	SGVertex2fImport(t2.x,t2.z),
+	SGVertex2fImport(t3.x,t3.z),
+	SGVertex2fImport(v.x,v.z));
+end;
+
+begin
+if (n.x=0) and (n.y=0) then
+	Result := PointInTriangleZ(t1,t2,t3,v,n.z>0)
+else if (n.z=0) and (n.y=0) then
+	Result := PointInTriangleX(t1,t2,t3,v,n.x>0)
+else if (n.x=0) and (n.z=0) then
+	Result := PointInTriangleX(t1,t2,t3,v,n.y>0);
+end;
+var
+	i : LongWord;
+begin
+Result := False;
+for i := 1 to High(sr^.FPolygones[index]) - 1 do
+	begin
+	if PointInTriangle(
+		sr^.FPoints[sr^.FPolygones[index][0]],
+		sr^.FPoints[sr^.FPolygones[index][i]],
+		sr^.FPoints[sr^.FPolygones[index][i+1]],
+		v,n) then
+			begin
+			Result := True;
+			Break;
+			end;
+	end;
+end;
+
+function VertexFromIndex(const index : LongWord):TSGVertex3f;
+begin
+case index of
+0:Result.Import(1,0,0);
+1:Result.Import(-1,0,0);
+2:Result.Import(0,1,0);
+3:Result.Import(1,-1,0);
+4:Result.Import(0,0,1);
+5:Result.Import(0,0,-1);
+end;
+end;
+
+var
+	i,j : LongWord;
+	i1,i2,i3 : LongWord;
+begin
+if FRelief <> nil then
+	begin
+	for j := 0 to 5 do
+		if FRelief^.FData[j].FEnabled then
+			begin
+			if FRelief^.FData[j].FPolygones <> nil then if Length(FRelief^.FData[j].FPolygones) <> 0 then
+				begin
+				for i := 0 to High(FRelief^.FData[j].FPolygones) do
+					begin
+					for i1 := 0 to Edge - 1 do for i2 := 0 to Edge - 1 do for i3 := 0 to Edge - 1 do
+						begin
+						ReliefCubeIndex(i1,i2,i3)^ := Byte(Boolean(ReliefCubeIndex(i1,i2,i3)^) and (not PointInPolygone(@FRelief^.FData[j],i,CoordFromXYZ(i1,i2,i3),VertexFromIndex(j))));
+						end;
+					end;
+				end;
+			end;
+	end;
 end;
 
 procedure TSGGasDiffusionCube.UpDateCube();
@@ -310,8 +426,8 @@ if FSourses<>nil then
 				Cube(FSourses[i].FCoord.x+j1,FSourses[i].FCoord.y+j2,FSourses[i].FCoord.z+j3)^:=FSourses[i].FGazTypeIndex+1;
 		end;
 end;
-procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);inline;
-procedure ProvSmesh(const a,b : TSGGGDC);inline;
+procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure ProvSmesh(const a,b : TSGGGDC);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : LongWord;
 begin
@@ -326,7 +442,7 @@ if (FGazes<>nil) and (not((a^=0) or (b^=0))) then
 				Exit;
 				end;
 end;
-procedure QuadricMove(const a,b,c,d : TSGGGDC);inline;
+procedure QuadricMove(const a,b,c,d : TSGGGDC);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var 
 	eee : Byte;
 begin
@@ -451,7 +567,8 @@ if FFlag then
 			i3:=0;
 			while i3<FEdge do
 				begin
-				MoveGazInSmallCube(i1,i2,i3);
+				if Boolean(ReliefCubeIndex(i1,i2,i3)^) then
+					MoveGazInSmallCube(i1,i2,i3);
 				i3+=2;
 				end;
 			i2+=2;
@@ -470,7 +587,8 @@ else
 			i3:=1;
 			while i3<FEdge-1 do
 				begin
-				MoveGazInSmallCube(i1,i2,i3);
+				if Boolean(ReliefCubeIndex(i1,i2,i3)^) then
+					MoveGazInSmallCube(i1,i2,i3);
 				i3+=2;
 				end;
 			i2+=2;
@@ -1045,7 +1163,7 @@ Render.DisableClientState(SGR_COLOR_ARRAY);
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 end;
 
-function TSGGasDiffusion.GetPointColor( const i,ii,iii : LongWord):Byte;inline;
+function TSGGasDiffusion.GetPointColor( const i,ii,iii : LongWord):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case FPlaneComboBox.SelectItem of
 0:Result := FCube.Cube(i,ii,iii)^;
@@ -1054,7 +1172,7 @@ case FPlaneComboBox.SelectItem of
 end;
 end;
 
-function TSGGasDiffusion.GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;inline;
+function TSGGasDiffusion.GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case FPlaneComboBox.SelectItem of
 0:Result := VCube.Cube(i,ii,iii)^;
@@ -1666,7 +1784,7 @@ UpDateSoursePanel();
 end; end;
 
 procedure mmmFSaveImageButtonProcedure(Button:TSGButton);
-procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
 begin
 {$IFDEF WITHLIBPNG}
 	PSGPixel4b(Destination)^ := p;
@@ -1892,7 +2010,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FCube:=nil;
 		end;
 	FCube:=TSGGasDiffusionCube.Create(Context);
-	//FCube.FBoundsOpen := Boolean(FBoundsTypeButton.SelectItem);
+	FCube.FRelief := @FRelief;
 	FCube.InitCube(SGVal(FEdgeEdit.Caption));
 	if FMesh<>nil then
 		begin
@@ -2566,14 +2684,14 @@ else
 end;
 
 procedure TSGGasDiffusion.UpDateConchLabels();
-function lghl : LongWord;inline;
+function lghl : LongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FConchLabels=nil) then
 	Result:=0
 else
 	Result := Length(FConchLabels);
 end;
-function lghg : LongWord;inline;
+function lghg : LongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FCube.FGazes=nil) then
 	Result:=0
@@ -2876,7 +2994,7 @@ procedure TSGGasDiffusion.Draw();
 procedure DrawSechenie();
 var
 	a,b,c,d : TSGVertex3f;
-procedure DrawQuadSec(const Primitive : TSGLongWord);inline;
+procedure DrawQuadSec(const Primitive : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.BeginScene(Primitive);
 a.Vertex(Render);

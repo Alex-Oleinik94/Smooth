@@ -1498,7 +1498,7 @@ if FEnableObjectMatrix then
 	Render.PopMatrix();
 end;
 
-procedure TSG3DObject.ClearArrays(const ClearN:boolean = True);
+procedure TSG3DObject.ClearArrays(const ClearN : boolean = True);
 var
 	Index : TSGLongWord;
 begin
@@ -1570,7 +1570,11 @@ Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
 Stream.WriteBuffer(FColorType,SizeOf(FColorType));
 Stream.WriteBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
 Stream.WriteBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
+Stream.WriteBuffer(FEnableObjectMatrix,SizeOf(FEnableObjectMatrix));
 SGWriteStringToStream(FName,Stream);
+
+if FEnableObjectMatrix then
+	Stream.WriteBuffer(FObjectMatrix,SizeOf(FObjectMatrix));
 
 Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
 Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
@@ -1616,7 +1620,11 @@ Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
 Stream.ReadBuffer(FColorType,SizeOf(FColorType));
 Stream.ReadBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
 Stream.ReadBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
+Stream.ReadBuffer(FEnableObjectMatrix,SizeOf(FEnableObjectMatrix));
 FName := SGReadStringFromStream(Stream);
+
+if FEnableObjectMatrix then
+	Stream.ReadBuffer(FObjectMatrix,SizeOf(FObjectMatrix));
 
 Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
 Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
