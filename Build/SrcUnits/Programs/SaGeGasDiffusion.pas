@@ -324,41 +324,71 @@ Result :=   ((v.x-t1.x)*(t1.y-t2.y)-(v.x-t1.y)*(t1.x-t2.x)>=0) and
 			((v.x-t2.x)*(t2.y-t3.y)-(v.x-t2.y)*(t2.x-t3.x)>=0) and
 			((v.x-t3.x)*(t3.y-t1.y)-(v.x-t3.y)*(t3.x-t1.x)>=0);
 end;
-
-function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function ScalePointToTriangle3D(const t1,t2,t3,v:TSGVertex2f; const t1z,t2z,t3z : Single):Single;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	a,b,c,s:TSGFloat;
+begin
+a := SGAbsTwoVertex2f(t1,v);
+b := SGAbsTwoVertex2f(t2,v);
+c := SGAbsTwoVertex2f(t3,v);
+s := a + b + c;
+Result := (1-a/s)*t1z + (1-b/s)*t2z + (1-c/s)*t3z;
+end;
+function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PointInTriangle2D( 
 	SGVertex2fImport(t1.x,t1.y),
 	SGVertex2fImport(t2.x,t2.y),
 	SGVertex2fImport(t3.x,t3.y),
 	SGVertex2fImport(v.x,v.y));
+if Result then
+	Result := ScalePointToTriangle3D(
+		SGVertex2fImport(t1.x,t1.y),
+		SGVertex2fImport(t2.x,t2.y),
+		SGVertex2fImport(t3.x,t3.y),
+		SGVertex2fImport(v.x,v.y),
+		t1.z,t2.z,t3.z)>b;
 end;
 
-function PointInTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointInTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PointInTriangle2D( 
 	SGVertex2fImport(t1.z,t1.y),
 	SGVertex2fImport(t2.z,t2.y),
 	SGVertex2fImport(t3.z,t3.y),
 	SGVertex2fImport(v.z,v.y));
+if Result then
+	Result := ScalePointToTriangle3D(
+		SGVertex2fImport(t1.z,t1.y),
+		SGVertex2fImport(t2.z,t2.y),
+		SGVertex2fImport(t3.z,t3.y),
+		SGVertex2fImport(v.z,v.y),
+		t1.x,t2.x,t3.x)>b;
 end;
 
-function PointInTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointInTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PointInTriangle2D( 
 	SGVertex2fImport(t1.x,t1.z),
 	SGVertex2fImport(t2.x,t2.z),
 	SGVertex2fImport(t3.x,t3.z),
 	SGVertex2fImport(v.x,v.z));
+if Result then
+	Result := ScalePointToTriangle3D(
+		SGVertex2fImport(t1.x,t1.z),
+		SGVertex2fImport(t2.x,t2.z),
+		SGVertex2fImport(t3.x,t3.z),
+		SGVertex2fImport(v.x,v.z),
+		t1.y,t2.y,t3.y)>b;
 end;
 
 begin
 if (n.x=0) and (n.y=0) then
-	Result := PointInTriangleZ(t1,t2,t3,v,n.z>0)
+	Result := PointInTriangleZ(t1,t2,t3,v,n.z)
 else if (n.z=0) and (n.y=0) then
-	Result := PointInTriangleX(t1,t2,t3,v,n.x>0)
+	Result := PointInTriangleX(t1,t2,t3,v,n.x)
 else if (n.x=0) and (n.z=0) then
-	Result := PointInTriangleX(t1,t2,t3,v,n.y>0);
+	Result := PointInTriangleX(t1,t2,t3,v,n.y);
 end;
 var
 	i : LongWord;
@@ -392,23 +422,31 @@ end;
 
 var
 	i,j : LongWord;
-	i1,i2,i3 : LongWord;
+	i1,i2,i3,c : LongWord;
 begin
 if FRelief <> nil then
 	begin
 	for j := 0 to 5 do
 		if FRelief^.FData[j].FEnabled then
 			begin
+			c := 0;
 			if FRelief^.FData[j].FPolygones <> nil then if Length(FRelief^.FData[j].FPolygones) <> 0 then
 				begin
 				for i := 0 to High(FRelief^.FData[j].FPolygones) do
 					begin
 					for i1 := 0 to Edge - 1 do for i2 := 0 to Edge - 1 do for i3 := 0 to Edge - 1 do
 						begin
-						ReliefCubeIndex(i1,i2,i3)^ := Byte(Boolean(ReliefCubeIndex(i1,i2,i3)^) and (not PointInPolygone(@FRelief^.FData[j],i,CoordFromXYZ(i1,i2,i3),VertexFromIndex(j))));
+						ReliefCubeIndex(i1,i2,i3)^ := 
+							Byte(
+							Boolean(ReliefCubeIndex(i1,i2,i3)^)
+							and 
+							(not PointInPolygone(@FRelief^.FData[j],i,CoordFromXYZ(i1,i2,i3),VertexFromIndex(j))));
+						c += Byte(not Boolean(ReliefCubeIndex(i1,i2,i3)^));
 						end;
 					end;
 				end;
+			WriteLn(j,' ',c);
+			FillChar(FReliefCubeIndex^,SizeOf(FReliefCubeIndex),1);
 			end;
 	end;
 end;
@@ -625,8 +663,7 @@ end;
 begin
 UpDateGaz();
 UpDateSourses();
-//if FBoundsOpen then
-	//UpDateIfOpenBounds();
+UpDateIfOpenBounds();
 end;
 function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil):TSGCustomModel;
 var
