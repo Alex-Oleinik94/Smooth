@@ -142,7 +142,8 @@ type
 			FBackToMenuButton,					// кнопка выхода (в меню)
 			FStopEmulatingButton,				// остановка эмуляции
 			FAddSechSecondPanelButton,			// включение отображение усредненного сечения
-			FSaveImageButton : TSGButton;		// сохранить картинку сечения
+			FSaveImageButton,					// сохранить картинку сечения
+			FRedactorBackButton: TSGButton;
 		
 		FAddNewSoursePanel : TSGPanel;
 		FAddNewGazPanel : TSGPanel;
@@ -319,7 +320,9 @@ function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : L
 function PointInTriangle(const t1,t2,t3,v,n:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-
+Result :=   ((v.x-t1.x)*(t1.y-t2.y)-(v.x-t1.y)*(t1.x-t2.x)>=0) and
+			((v.x-t2.x)*(t2.y-t3.y)-(v.x-t2.y)*(t2.x-t3.x)>=0) and
+			((v.x-t3.x)*(t3.y-t1.y)-(v.x-t3.y)*(t3.x-t1.x)>=0);
 end;
 
 function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Boolean):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -888,6 +891,15 @@ if FSecheniePanel<>nil then
 	FSecheniePanel.Destroy();
 if FSechenieImage<>nil then
 	FSechenieImage.Destroy();
+if FBoundsOptionsPanel <> nil then
+	FBoundsOptionsPanel.Destroy();
+
+// allready in FBoundsOptionsPanel.Destroy();
+//if FRelefRedactor <> nil then
+//	FRelefRedactor.Destroy();
+
+if FRedactorBackButton <> nil then
+	FRedactorBackButton.Destroy();
 inherited;
 end;
 
@@ -2419,6 +2431,49 @@ FBoundsOptionsPanel.Active := True;
 FNewScenePanel.AddToLeft     (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
 FBoundsOptionsPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
 end;end;
+
+procedure mmmFRedactorBackButton(Button:TSGButton);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+Button.Visible := False;
+Button.Active := False;
+if FRelefOptionPanel <> nil then
+	begin
+	FRelefOptionPanel.Visible := True;
+	FRelefOptionPanel.AddToTop(-300);
+	end;
+if FBoundsOptionsPanel <> nil then
+	begin
+	FBoundsOptionsPanel.Visible := True;
+	FBoundsOptionsPanel.AddToTop(-300);
+	end;
+if FNewScenePanel <> nil then
+	begin
+	FNewScenePanel.Visible := True;
+	FNewScenePanel.AddToTop(-300);
+	end;
+end; end;
+
+procedure mmmFRedactrReliefRedactrReliefButton(Button:TSGButton);
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+FRedactorBackButton.Visible := True;
+FRedactorBackButton.Active := True;
+if FRelefOptionPanel <> nil then
+	begin
+	FRelefOptionPanel.Visible := False;
+	FRelefOptionPanel.AddToTop(300);
+	end;
+if FBoundsOptionsPanel <> nil then
+	begin
+	FBoundsOptionsPanel.Visible := False;
+	FBoundsOptionsPanel.AddToTop(300);
+	end;
+if FNewScenePanel <> nil then
+	begin
+	FNewScenePanel.Visible := False;
+	FNewScenePanel.AddToTop(300);
+	end;
+end; end;
+
 procedure mmmFRedactrRelief(Button:TSGButton);
 var
 	FConstWidth : LongWOrd = 300;
@@ -2466,6 +2521,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*3,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Font := FTahomaFont;
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefRedactrReliefButton);
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Назад';
@@ -2512,6 +2568,7 @@ FBoundsOptionsPanel.Visible := False;
 FBoundsOptionsPanel.VisibleTimer := 0.7;
 FBoundsOptionsPanel.DrawClass := nil;
 end; end;
+
 procedure mmmFBoundsTypeButtonProcedure(Button:TSGButton);
 var
 	FConstWidth : LongWord = 500;
@@ -2773,6 +2830,7 @@ FRelefOptionPanel         := nil;
 FCubeForUsr               := nil;
 FUpdateUsrAfterThread     := False;
 FUsrSechImageForThread    := nil;
+FRedactorBackButton       := nil;
 
 FRelief.Clear();
 FRelief.InitBase();
@@ -2787,6 +2845,16 @@ FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roma
 FTahomaFont.SetContext(Context);
 FTahomaFont.Loading();
 FTahomaFont.ToTexture();
+
+FRedactorBackButton:=TSGButton.Create();
+SGScreen.CreateChild(FRedactorBackButton);
+SGScreen.LastChild.SetBounds(Context.Width div 2 - 75,5,130,20);
+SGScreen.LastChild.BoundsToNeedBounds();
+SGScreen.LastChild.Visible:=False;
+SGScreen.LastChild.Font := FTahomaFont;
+SGScreen.LastChild.Caption:='Назад';
+SGScreen.LastChild.UserPointer:=Self;
+FRedactorBackButton.OnChange:=TSGComponentProcedure(@mmmFRedactorBackButton);
 
 FNewScenePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FNewScenePanel);

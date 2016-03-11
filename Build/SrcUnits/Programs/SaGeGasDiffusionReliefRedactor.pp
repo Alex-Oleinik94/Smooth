@@ -28,6 +28,8 @@ type
 		procedure DrawLines(const VRender : TSGRender);
 		procedure DrawPolygones(const VRender : TSGRender);
 		procedure ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
+		procedure ExportToMeshLines(const VMesh : TSGCustomModel;const index : byte = -1;const WithVector : Boolean = False);
+		procedure ExportToMeshPolygones(const VMesh : TSGCustomModel;const index : byte = -1);
 		procedure Clear();
 		procedure InitBase();
 		end;
@@ -55,6 +57,8 @@ type
 		FSingleRelief : PSGGasDiffusionSingleRelief;
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
+		procedure StartRedactoring();
+		procedure StopRedactoring();
 			public
 		property Relief : PSGGasDiffusionRelief read FRelief write FRelief;
 		end;
@@ -64,9 +68,20 @@ implementation
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
 
-procedure TSGGasDiffusionSingleRelief.ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
+procedure TSGGasDiffusionReliefRedactor.StartRedactoring();
+begin
+
+end;
+
+procedure TSGGasDiffusionReliefRedactor.StopRedactoring();
+begin
+
+end;
+
+
+procedure TSGGasDiffusionSingleRelief.ExportToMeshLines(const VMesh : TSGCustomModel;const index : byte = -1;const WithVector : Boolean = False);
 var
-	i,ii : LongWord;
+	i : LongWord;
 begin
 if FPoints <> nil then if Length(FPoints) <> 0 then
 	begin
@@ -86,7 +101,15 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 		VMesh.LastObject().ArVertex3f[i]^ := FPoints[i];
 		VMesh.LastObject().SetColor(i,0,0.5,1,1);
 		end;
-	
+	end;
+end;
+
+procedure TSGGasDiffusionSingleRelief.ExportToMeshPolygones(const VMesh : TSGCustomModel;const index : byte = -1);
+var
+	i,ii : LongWord;
+begin
+if FPoints <> nil then if Length(FPoints) <> 0 then
+	begin	
 	if FEnabled then if FPolygones <> nil then if Length(FPolygones) <> 0 then
 		for i := 0 to High(FPolygones) do
 			if FPolygones[i] <> nil then if Length(FPolygones[i]) <> 0 then
@@ -122,6 +145,12 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 					end;
 				end;
 	end;
+end;
+
+procedure TSGGasDiffusionSingleRelief.ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
+begin
+ExportToMeshLines(VMesh,index,False);
+ExportToMeshPolygones(VMesh,index);
 end;
 
 procedure TSGGasDiffusionSingleRelief.InitBase();
@@ -160,6 +189,14 @@ if FPolygones <> nil then
 			FPoints[FPolygones[i][ii]].Vertex(VRender);
 		VRender.EndScene();
 		end;
+	if FEnabled then
+		begin
+		VRender.Color4f(1,1,1,0.7);
+		VRender.BeginScene(SGR_LINES);
+		VRender.Vertex3f(0,0,0);
+		VRender.Vertex3f(0,0,0.8);
+		VRender.EndScene();
+		end;
 	end;
 end;
 
@@ -189,7 +226,11 @@ var
 begin
 for i := 0 to 5 do
 	begin
-	FData[i].ExportToMesh(VMesh,i);
+	FData[i].ExportToMeshLines(VMesh,i,False);
+	end;
+for i := 0 to 5 do
+	begin
+	FData[i].ExportToMeshPolygones(VMesh,i);
 	end;
 end;
 
@@ -204,55 +245,20 @@ for i := 0 to 5 do
 end;
 
 procedure TSGGasDiffusionRelief.Draw(const VRender : TSGRender);
-procedure InitMatrix(const i : byte);
-begin
-case i of
-0 :  // верх
-	begin 
-	VRender.Translatef(0,1,0);
-	VRender.Rotatef(90,1,0,0);
-	end;
-1 : // низ
-	begin
-	VRender.Translatef(0,-1,0);
-	VRender.Rotatef(90,-1,0,0);
-	end;
-2 : // лево
-	begin
-	VRender.Translatef(-1,0,0);
-	VRender.Rotatef(90,0,1,0);
-	end;
-3 : // право
-	begin
-	VRender.Translatef(1,0,0);
-	VRender.Rotatef(90,0,-1,0);
-	end;
-4 : // зад
-	begin
-	VRender.Translatef(0,0,-1);
-	VRender.Rotatef(90,0,0,-1);
-	end;
-5 : // перед
-	begin
-	VRender.Translatef(0,0,1);
-	VRender.Rotatef(90,0,0,1);
-	end;
-end;
-end;
 var
 	i : LongWord;
 begin
 for i := 0 to 5 do
 	begin
 	VRender.PushMatrix();
-	InitMatrix(i);
+	VRender.MultMatrixf(@Matrixes[i]);
 	FData[i].DrawLines(VRender);
 	VRender.PopMatrix();
 	end;
 for i := 0 to 5 do
 	begin
 	VRender.PushMatrix();
-	InitMatrix(i);
+	VRender.MultMatrixf(@Matrixes[i]);
 	FData[i].DrawPolygones(VRender);
 	VRender.PopMatrix();
 	end;
@@ -327,8 +333,8 @@ Matrixes[1] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0
 Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
 Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
 Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,1)) , SGGetTranslateMatrix(SGVertexImport(0,0,1)));
-end;
+Matrixes[5] := {SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) ,} SGGetTranslateMatrix(SGVertexImport(0,0,1));
+end
 
 finalization
 begin
