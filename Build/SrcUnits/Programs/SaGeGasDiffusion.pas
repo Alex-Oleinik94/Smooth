@@ -316,14 +316,23 @@ begin
 Result.Import(x/(Edge-1)*2-1,y/(Edge-1)*2-1,z/(Edge-1)*2-1);
 end;
 
-function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : LongWord; const v : TSGVertex3f; const n : TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : LongWord; const v : TSGVertex3f; const n : TSGVertex3f;const ReliefIndex : Byte):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 function PointInTriangle(const t1,t2,t3,v,n:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function PointBeetWeen(const a,b,p:Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+WriteLn('pbw',p:0:5,' ',a:0:5,' ',b:0:5);
+Result := abs(abs(p-a) + abs(p-b) - abs(b-a)) < SGZero;
+end;
+
 function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result :=   ((v.x-t1.x)*(t1.y-t2.y)-(v.x-t1.y)*(t1.x-t2.x)>=0) and
 			((v.x-t2.x)*(t2.y-t3.y)-(v.x-t2.y)*(t2.x-t3.x)>=0) and
 			((v.x-t3.x)*(t3.y-t1.y)-(v.x-t3.y)*(t3.x-t1.x)>=0);
 end;
+
 function ScalePointToTriangle3D(const t1,t2,t3,v:TSGVertex2f; const t1z,t2z,t3z : Single):Single;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	a,b,c,s:TSGFloat;
@@ -334,6 +343,7 @@ c := SGAbsTwoVertex2f(t3,v);
 s := a + b + c;
 Result := (1-a/s)*t1z + (1-b/s)*t2z + (1-c/s)*t3z;
 end;
+
 function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PointInTriangle2D( 
@@ -342,12 +352,13 @@ Result := PointInTriangle2D(
 	SGVertex2fImport(t3.x,t3.y),
 	SGVertex2fImport(v.x,v.y));
 if Result then
-	Result := ScalePointToTriangle3D(
-		SGVertex2fImport(t1.x,t1.y),
-		SGVertex2fImport(t2.x,t2.y),
-		SGVertex2fImport(t3.x,t3.y),
-		SGVertex2fImport(v.x,v.y),
-		t1.z,t2.z,t3.z)>b;
+	Result := PointBeetWeen(b,
+		ScalePointToTriangle3D(
+			SGVertex2fImport(t1.x,t1.y),
+			SGVertex2fImport(t2.x,t2.y),
+			SGVertex2fImport(t3.x,t3.y),
+			SGVertex2fImport(v.x,v.y),
+			t1.z,t2.z,t3.z),v.z);
 end;
 
 function PointInTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -358,12 +369,13 @@ Result := PointInTriangle2D(
 	SGVertex2fImport(t3.z,t3.y),
 	SGVertex2fImport(v.z,v.y));
 if Result then
-	Result := ScalePointToTriangle3D(
-		SGVertex2fImport(t1.z,t1.y),
-		SGVertex2fImport(t2.z,t2.y),
-		SGVertex2fImport(t3.z,t3.y),
-		SGVertex2fImport(v.z,v.y),
-		t1.x,t2.x,t3.x)>b;
+	Result := PointBeetWeen(b,
+		ScalePointToTriangle3D(
+			SGVertex2fImport(t1.z,t1.y),
+			SGVertex2fImport(t2.z,t2.y),
+			SGVertex2fImport(t3.z,t3.y),
+			SGVertex2fImport(v.z,v.y),
+			t1.x,t2.x,t3.x),v.x);
 end;
 
 function PointInTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -374,21 +386,32 @@ Result := PointInTriangle2D(
 	SGVertex2fImport(t3.x,t3.z),
 	SGVertex2fImport(v.x,v.z));
 if Result then
-	Result := ScalePointToTriangle3D(
-		SGVertex2fImport(t1.x,t1.z),
-		SGVertex2fImport(t2.x,t2.z),
-		SGVertex2fImport(t3.x,t3.z),
-		SGVertex2fImport(v.x,v.z),
-		t1.y,t2.y,t3.y)>b;
+	Result := PointBeetWeen(
+		b,
+		ScalePointToTriangle3D(
+			SGVertex2fImport(t1.x,t1.z),
+			SGVertex2fImport(t2.x,t2.z),
+			SGVertex2fImport(t3.x,t3.z),
+			SGVertex2fImport(v.x,v.z),
+			t1.y,t2.y,t3.y),
+		v.y);
 end;
 
 begin
-if (n.x=0) and (n.y=0) then
+if (abs(n.x)<SGZero) and (abs(n.y)<SGZero) then
 	Result := PointInTriangleZ(t1,t2,t3,v,n.z)
-else if (n.z=0) and (n.y=0) then
+else if (abs(n.z)<SGZero) and (abs(n.y)<SGZero) then
 	Result := PointInTriangleX(t1,t2,t3,v,n.x)
-else if (n.x=0) and (n.z=0) then
-	Result := PointInTriangleX(t1,t2,t3,v,n.y);
+else if (abs(n.x)<SGZero) and (abs(n.z)<SGZero) then
+	Result := PointInTriangleY(t1,t2,t3,v,n.y);
+
+t1.WriteLn();
+t2.WriteLn();
+t3.WriteLn();
+v.WriteLn();
+n.WriteLn();
+WriteLn(Result);
+ReadLn();
 end;
 var
 	i : LongWord;
@@ -397,9 +420,9 @@ Result := False;
 for i := 1 to High(sr^.FPolygones[index]) - 1 do
 	begin
 	if PointInTriangle(
-		sr^.FPoints[sr^.FPolygones[index][0]],
-		sr^.FPoints[sr^.FPolygones[index][i]],
-		sr^.FPoints[sr^.FPolygones[index][i+1]],
+		sr^.FPoints[sr^.FPolygones[index][0]] * GetReliefMatrix(ReliefIndex),
+		sr^.FPoints[sr^.FPolygones[index][i]] * GetReliefMatrix(ReliefIndex),
+		sr^.FPoints[sr^.FPolygones[index][i+1]] * GetReliefMatrix(ReliefIndex),
 		v,n) then
 			begin
 			Result := True;
@@ -408,15 +431,15 @@ for i := 1 to High(sr^.FPolygones[index]) - 1 do
 	end;
 end;
 
-function VertexFromIndex(const index : LongWord):TSGVertex3f;
+function VertexFromIndex(const index : LongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case index of
-0:Result.Import(1,0,0);
-1:Result.Import(-1,0,0);
-2:Result.Import(0,1,0);
-3:Result.Import(1,-1,0);
-4:Result.Import(0,0,1);
-5:Result.Import(0,0,-1);
+0:Result.Import(0,-1,0);
+1:Result.Import(0,1,0);
+2:Result.Import(0,0,1);
+3:Result.Import(0,0,-1);
+4:Result.Import(1,0,0);
+5:Result.Import(-1,0,0);
 end;
 end;
 
@@ -440,7 +463,7 @@ if FRelief <> nil then
 							Byte(
 							Boolean(ReliefCubeIndex(i1,i2,i3)^)
 							and 
-							(not PointInPolygone(@FRelief^.FData[j],i,CoordFromXYZ(i1,i2,i3),VertexFromIndex(j))));
+							(not PointInPolygone(@FRelief^.FData[j],i,CoordFromXYZ(i1,i2,i3),VertexFromIndex(j),j)));
 						c += Byte(not Boolean(ReliefCubeIndex(i1,i2,i3)^));
 						end;
 					end;

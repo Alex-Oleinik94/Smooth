@@ -821,13 +821,12 @@ operator * (const A:TSGVertex4f;const B:TSGMatrix4):TSGVertex4f;overload;{$IFDEF
 type
 	PTSGVertexType = ^ TSGVertexType;
 var
-	i,j,k:TSGWord;
+	i,k:TSGWord;
 begin
 FillChar(Result,Sizeof(Result),0);
 for i:=0 to 3 do
-	for j:=0 to 3 do
-		for k:=0 to 3 do
-			PTSGVertexType(@Result)[i]+=PTSGVertexType(@A)[k]*B[i,k];
+	for k:=0 to 3 do
+		PTSGVertexType(@Result)[i]+=PTSGVertexType(@A)[k]*B[i,k];
 end;
 
 operator * (const A,B:TSGMatrix4):TSGMatrix4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
