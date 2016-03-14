@@ -495,8 +495,8 @@ type
 	
 	TSGGrid=class(TSGComponent)
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();
+		destructor Destroy();override;
 			public
 		FItems:TArTArTSGComponent;
 		FSelectItems:
@@ -521,6 +521,40 @@ type
 		property QuantityYs:LongInt read FQuantityYs write SetQuantityYs;
 		procedure SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);inline;
 		end;
+		
+	TSGRCButtonType = (SGRadioButton,SGCkeckButton);
+	TSGRadioButton = class;
+	TSGRadioGroup = class
+			public
+		constructor Create();
+		destructor Destroy();override;
+			private
+		FGroup : packed array of TSGRadioButton;
+			public
+		procedure Add(const RB : TSGRadioButton);
+		procedure Del(const RB : TSGRadioButton);
+		procedure KillChecked();
+		function CheckedIndex() : LongInt;
+		end;
+	TSGRadioButton = class(TSGComponent)
+			public
+		constructor Create();
+		destructor Destroy();override;
+			public
+		procedure FromUpDate(var FCanChange:Boolean);override;
+		procedure FromDraw;override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+			private
+		FChecked : TSGBoolean;
+		FGroup : TSGRadioGroup;
+		FType : TSGRCButtonType;
+		FImage : TSGImage;
+			public
+		procedure SetChecked(const c : TSGBoolean;const WithRec : Boolean = True);
+			public
+		property Checked : TSGBoolean read FChecked write SetChecked;
+		property Group : TSGRadioGroup read FGroup;
+		end;
 var
 	SGScreen:TSGScreen = nil;
 
@@ -537,6 +571,148 @@ var
 	FOldPosition,FNewPosition:LongWord;
 	FMoveProgress:Real = 0;
 	FMoveVector:TSGVertex2f = (x:0;y:0);
+
+{$IFDEF CLHINTS}
+	{$NOTE RadioButton}
+	{$ENDIF}
+
+procedure TSGRadioGroup.KillChecked();
+var
+	i : LongWord;
+begin
+if FGroup <> nil then if Length(FGroup)<>0 then
+	begin
+	for i := 0 to High(FGroup) do
+		FGroup[i].SetChecked(False,False);
+	end;
+end;
+
+function TSGRadioGroup.CheckedIndex() : LongInt;
+var
+	i : LongWord;
+begin
+Result := -1;
+if FGroup <> nil then if Length(FGroup) <> 0 then
+	for i := 0 to High(FGroup) do
+		if FGroup[i].Checked then
+			begin
+			Result := i;
+			break;
+			end;
+end;
+
+procedure TSGRadioButton.SetChecked(const c : TSGBoolean;const WithRec : Boolean = True);
+begin
+if (c) then if FGroup <> nil then if WithRec then
+	FGroup.KillChecked();
+FChecked := c;
+end;
+
+procedure TSGRadioGroup.Add(const RB : TSGRadioButton);
+var
+	i,ii : LongWord;
+begin
+if FGroup = nil then
+	begin
+	SetLength(FGroup,1);
+	FGroup[0] := RB;
+	end
+else if Length(FGroup) = 0 then
+	begin
+	SetLength(FGroup,1);
+	FGroup[0] := RB;
+	end
+else
+	begin
+	ii := Length(FGroup);
+	for i := 0 to High(FGroup) do
+		if FGroup[i] = RB then
+			begin
+			ii := i;
+			break;
+			end;
+	if ii = Length(FGroup) then
+		begin
+		SetLength(FGroup,Length(FGroup)+1);
+		FGroup[High(FGroup)] := RB;
+		end;
+	end;
+end;
+
+procedure TSGRadioGroup.Del(const RB : TSGRadioButton);
+var
+	i,ii : LongWord;
+begin
+if FGroup <> nil then if Length(FGroup)<>0 then
+	begin
+	ii := Length(FGroup);
+	for i := 0 to High(FGroup) do
+		begin
+		if FGroup[i] = RB then
+			begin
+			ii := i;
+			break;
+			end;
+		end;
+	if ii <> Length(FGroup) then
+		begin
+		for i := ii to High(FGroup)-1 do
+			FGroup[i] := FGroup[i+1];
+		SetLength(FGroup,Length(FGroup)-1);
+		if Length(FGroup) = 0 then
+			FGroup := nil;
+		end;
+	end;
+end;
+
+constructor TSGRadioGroup.Create();
+begin
+FGroup := nil;
+end;
+
+destructor TSGRadioGroup.Destroy();
+begin
+while FGroup <> nil do
+	Del(FGroup[0]);
+inherited;
+end;
+
+constructor TSGRadioButton.Create();
+begin
+FGroup := nil;
+FChecked := False;
+FType := SGCkeckButton;
+FImage := nil;
+end;
+
+destructor TSGRadioButton.Destroy();
+begin
+if FGroup <> nil then
+	FGroup.Del(Self);
+inherited;
+end;
+
+procedure TSGRadioButton.FromUpDate(var FCanChange:Boolean);
+begin
+inherited FromUpDate(FCanChange);
+end;
+
+procedure TSGRadioButton.FromDraw();
+begin
+inherited FromDraw();
+end;
+
+procedure TSGRadioButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+begin
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+if CursorInComponentNow then
+	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and CanRePleace then
+		begin
+		CanRePleace:=False;
+		Context.FCursorKeyPressed:=SGNoCursorButton;
+		SetChecked(not Checked,True);
+		end
+end;
 
 {$IFDEF CLHINTS}
 	{$NOTE Grid}
