@@ -1,5 +1,9 @@
 {$INCLUDE Includes\SaGe.inc}
 
+//{$DEFINE SGIA_DEBUG}
+
+// SGIA Image = ['SGIA',QuadWordJpegImage1Size,JpegImage1(RGB(3)),QuadWordJpegImage2Size,JpegImage2(Alpha(3))]
+
 unit SaGeImagesSgia;
 
 interface
@@ -83,6 +87,11 @@ var
 begin
 if FImage.Channels<>4 then
 	Exit;
+
+{$IFDEF SGIA_DEBUG}
+	FImage.WriteInfo('Total Image: ');
+	{$ENDIF}
+
 ImageBitMap:=TSGBitMap.Create();
 ImageBitMap.Width:=FImage.Width;
 ImageBitMap.Height:=FImage.Height;
@@ -97,6 +106,10 @@ for i:=0 to FImage.Width*FImage.Height-1 do
 	PBits[i*3+1]:=FImage.BitMap[i*4+1];
 	PBits[i*3+2]:=FImage.BitMap[i*4+2];
 	end;
+
+{$IFDEF SGIA_DEBUG}
+	ImageBitMap.WriteInfo('1'' Image: ');
+	{$ENDIF}
 
 MemStream2 := TMemoryStream.Create();
 SaveJPEGFromBitMap(MemStream2,ImageBitMap);
@@ -127,6 +140,11 @@ for i:=0 to FImage.Width*FImage.Height-1 do
 	PBits[i*3+1]:=FImage.BitMap[i*4+3];
 	PBits[i*3+2]:=FImage.BitMap[i*4+3];
 	end;
+
+{$IFDEF SGIA_DEBUG}
+	ImageBitMap.WriteInfo('2'' Image: ');
+	{$ENDIF}
+
 MemStream2 := TMemoryStream.Create();
 SaveJPEGFromBitMap(MemStream2,ImageBitMap);
 FreeMem(PBits,FImage.Width*FImage.Height*3);

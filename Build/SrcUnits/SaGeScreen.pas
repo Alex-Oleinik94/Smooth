@@ -162,7 +162,7 @@ type
 		procedure MakePriority();
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
-		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;inline;
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function BottomShift():LongInt;
 		function RightShift():LongInt;
 			public
@@ -177,24 +177,24 @@ type
 		function CursorPosition():TSGPoint;
 		procedure DestroyAlign();
 		procedure DestroyParent();
-		procedure KillChildren();inline;
+		procedure KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure VisibleAll();
-		function IndexOf( VComponent : TSGComponent ): LongInt;inline;
+		function IndexOf( VComponent : TSGComponent ): LongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Align : TSGExByte read FAlign write CreateAlign;
 			public
-		function AsButton:TSGButton;inline;
-		function AsForm:TSGForm;inline;
-		function AsProgressBar:TSGProgressBar;inline;
-		function AsPanel:TSGPanel;inline;
-		function AsLabel:TSGLabel;inline;
-		function AsPicture:TSGPicture;inline;
-		function AsButtonMenu:TSGButtonMenu;inline;
-		function AsScrollBar:TSGScrollBar;inline;
-		function AsComboBox:TSGComboBox;inline;
-		function AsGrid:TSGGrid;inline;
-		function AsButtonMenuButton:TSGButtonMenuButton;inline;
-		function AsEdit:TSGEdit;inline;
+		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsPanel:TSGPanel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsLabel:TSGLabel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsPicture:TSGPicture;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public 
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1,FUserPointer2,FUserPointer3:Pointer;
@@ -271,8 +271,8 @@ type
 		procedure FromDraw;override;
 		constructor Create;
 			private
-		function GetTextPosition : Boolean;inline;
-		procedure SetTextPosition(const Pos:Boolean);inline;
+		function GetTextPosition : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetTextPosition(const Pos:Boolean);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property TextPosition:boolean read GetTextPosition write SetTextPosition;
 		property TextColor :TSGColor4f read FTextColor write FTextColor;
@@ -298,7 +298,7 @@ type
 		property ViewCaption:Boolean read FViewCaption write FViewCaption;
 		property Color1:TSGColor4f read FColor1 write FColor1;
 		property Color2:TSGColor4f read FColor2 write FColor2;
-		procedure DefaultColor;inline;
+		procedure DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGPanel=class(TSGComponent)
@@ -370,7 +370,7 @@ type
 		procedure FromDraw;override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
-		procedure TextTypeEvent;inline;
+		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		procedure SetCaption(const NewCaption:SGCaption);override;
 		procedure SetTextType(const NewTextType:TSGEditTextType);virtual;
@@ -410,7 +410,7 @@ type
 			public
 		procedure AddButton(const s:string;const FFActive:boolean = False);
 		procedure SetButton(const l:LongInt);
-		procedure GetMiddleTop;inline;
+		procedure GetMiddleTop;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		property ButtonTop:LongInt read FButtonTop write FButtonTop;
 		property ActiveButtonTop:LongInt read FActiveButtonTop write FActiveButtonTop;
 		procedure DetectActiveButton;virtual;
@@ -477,7 +477,7 @@ type
 		
 		FClickOnOpenBox:Boolean;
 			public
-		procedure DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);inline;
+		procedure DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Colums:LongInt;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -514,15 +514,15 @@ type
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
 			public
 		procedure CreateItem(const ItemX,ItemY:LongInt;const ItemComponent:TSGComponent);
-		function Items(const ItemX,ItemY:LongInt):TSGComponent;inline;
-		procedure SetQuantityXs(const VQuantityXs:LongInt);inline;
-		procedure SetQuantityYs(const VQuantityYs:LongInt);inline;
+		function Items(const ItemX,ItemY:LongInt):TSGComponent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetQuantityXs(const VQuantityXs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetQuantityYs(const VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		property QuantityXs:LongInt read FQuantityXs write SetQuantityXs;
 		property QuantityYs:LongInt read FQuantityYs write SetQuantityYs;
-		procedure SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);inline;
+		procedure SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 		
-	TSGRCButtonType = (SGRadioButton,SGCkeckButton);
+	TSGRCButtonType = (SGNoneRadioCheckButton,SGRadioButton,SGCkeckButton);
 	TSGRadioButton = class;
 	TSGRadioGroup = class
 			public
@@ -549,11 +549,17 @@ type
 		FGroup : TSGRadioGroup;
 		FType : TSGRCButtonType;
 		FImage : TSGImage;
+		FCursorOnButton : TSGBoolean;
+			private
+		procedure DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
 			public
 		procedure SetChecked(const c : TSGBoolean;const WithRec : Boolean = True);
+		procedure SetCheckedTrue(const c : TSGBoolean);
+		procedure SetType(const t : TSGRCButtonType);
 			public
-		property Checked : TSGBoolean read FChecked write SetChecked;
+		property Checked : TSGBoolean read FChecked write SetCheckedTrue;
 		property Group : TSGRadioGroup read FGroup;
+		property ButtonType : TSGRCButtonType read FType write SetType;
 		end;
 var
 	SGScreen:TSGScreen = nil;
@@ -599,6 +605,26 @@ if FGroup <> nil then if Length(FGroup) <> 0 then
 			Result := i;
 			break;
 			end;
+end;
+
+procedure TSGRadioButton.SetType(const t : TSGRCButtonType);
+begin
+if t <> FType then
+	begin
+	FType := t;
+	if FImage <> nil then
+		FImage.Destroy();
+	FImage := TSGImage.Create();
+	FImage.Context := Context;
+	FImage.Way := '../Data/Textures/' + Iff(FType <> SGCkeckButton ,'radiobox','checkbox') + '.sgia';
+	FImage.Loading();
+	FImage.ToTexture();
+	end;
+end;
+
+procedure TSGRadioButton.SetCheckedTrue(const c : TSGBoolean);
+begin
+SetChecked(c,True);
 end;
 
 procedure TSGRadioButton.SetChecked(const c : TSGBoolean;const WithRec : Boolean = True);
@@ -683,12 +709,16 @@ FGroup := nil;
 FChecked := False;
 FType := SGCkeckButton;
 FImage := nil;
+FType := SGNoneRadioCheckButton;
+FCursorOnButton := False;
 end;
 
 destructor TSGRadioButton.Destroy();
 begin
 if FGroup <> nil then
 	FGroup.Del(Self);
+if FImage <> nil then
+	FImage.Destroy();
 inherited;
 end;
 
@@ -697,28 +727,66 @@ begin
 inherited FromUpDate(FCanChange);
 end;
 
+procedure TSGRadioButton.DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
+begin
+Render.Color4f(1,1,1,FVisibleTimer);
+FImage.DrawImageFromTwoVertex2fWith2TexPoint(
+	SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+	SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+	SGVertex2fImport(0,x),
+	SGVertex2fImport(1,y),
+	True,SG_2D);
+end;
+
 procedure TSGRadioButton.FromDraw();
 begin
+if Checked and (FImage <> nil) then
+	begin
+	if FCursorOnButton then
+		begin
+		DrawImage(0.25,0.5);
+		end
+	else
+		begin
+		DrawImage(0,0.25);
+		end;
+	end
+else
+	begin
+	if FCursorOnButton then
+		begin
+		DrawImage(0.75,1);
+		end
+	else
+		begin
+		DrawImage(0.5,0.75);
+		end;
+	end;
+FCursorOnButton := False;
 inherited FromDraw();
 end;
 
 procedure TSGRadioButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 if CursorInComponentNow then
-	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and CanRePleace then
+	begin
+	FCursorOnButton := True; writeln(1);
+	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) and CanRePleace then
 		begin
+		writeln(2);
 		CanRePleace:=False;
-		Context.FCursorKeyPressed:=SGNoCursorButton;
-		SetChecked(not Checked,True);
+		Context.FCursorKeyPressed := SGNoCursorButton;
+		SetChecked(not Checked, True);
 		end
+	end;
+inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 {$IFDEF CLHINTS}
 	{$NOTE Grid}
 	{$ENDIF}
 
-procedure TSGGrid.SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);inline;
+procedure TSGGrid.SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 QuantityXs:=VQuantityXs;
 QuantityYs:=VQuantityYs;
@@ -731,13 +799,13 @@ QuantityXs:=QuantityXs;
 QuantityYs:=QuantityYs;
 end;
 
-procedure TSGGrid.SetQuantityXs(const VQuantityXs:LongInt);inline;
+procedure TSGGrid.SetQuantityXs(const VQuantityXs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FQuantityXs:=VQuantityXs;
 FItemWidth:=Round(FNeedWidth/FQuantityXs);
 end;
 
-procedure TSGGrid.SetQuantityYs(const VQuantityYs:LongInt);inline;
+procedure TSGGrid.SetQuantityYs(const VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FQuantityYs:=VQuantityYs;
 FItemHeight:=Round(FNeedHeight/FQuantityYs);
@@ -822,7 +890,7 @@ FItems[ItemX][ItemY]:=ItemComponent;
 ItemComponent.Parent:=Self;
 end;
 
-function TSGGrid.Items(const ItemX,ItemY:LongInt):TSGComponent;inline;
+function TSGGrid.Items(const ItemX,ItemY:LongInt):TSGComponent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (Length(FItems)<>0) and (ItemX<=High(FItems)) and (ItemX>=0) and (ItemY>=0) and (ItemY<=High(FItems[0])) then
 	begin
@@ -991,7 +1059,7 @@ UpgradeTimer(FBackLight,FBackLightTimer,3,2);
 inherited;
 end;
 
-procedure TSGComboBox.DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);inline;
+procedure TSGComboBox.DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if IDItem<>-1 then
 	begin
@@ -1463,7 +1531,7 @@ for i:=0 to High(FChildren) do
 	FChildren[i].BoundsToNeedBounds;
 end;
 
-procedure TSGButtonMenu.GetMiddleTop;inline;
+procedure TSGButtonMenu.GetMiddleTop;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Length(FChildren)>0 then
 	FMiddleTop:=Round((Height-(LastChild.Top+LastChild.Height-FChildren[0].Top))/2)
@@ -1693,7 +1761,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 inherited;
 end;
 
-procedure TSGProgressBar.DefaultColor;inline;
+procedure TSGProgressBar.DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FColor1.SetVariables(0,0.5,1,1);
 FColor2.SetVariables(0,0.75,1,1);
@@ -1918,7 +1986,7 @@ if not b then
 	end;
 end;
 
-function TSGComponent.AsEdit:TSGEdit;inline;
+function TSGComponent.AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGEdit then
 	Result:=TSGEdit(Pointer(Self))
@@ -1931,7 +1999,7 @@ begin
 Result:=FVisibleTimer<0.05;
 end;
 
-function TSGComponent.AsButtonMenuButton:TSGButtonMenuButton;inline;
+function TSGComponent.AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGButtonMenuButton then
 	Result:=TSGButtonMenuButton(Pointer(Self))
@@ -1939,7 +2007,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsGrid:TSGGrid;inline;
+function TSGComponent.AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGGrid then
 	Result:=TSGGrid(Pointer(Self))
@@ -1947,7 +2015,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.IndexOf( VComponent : TSGComponent ): LongInt;inline;
+function TSGComponent.IndexOf( VComponent : TSGComponent ): LongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var 
 	i : LongInt;
 begin
@@ -1969,7 +2037,7 @@ for i:=0 to High(FChildren) do
 	FChildren[i].VisibleAll;
 end;
 
-procedure TSGComponent.KillChildren;inline;
+procedure TSGComponent.KillChildren;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 while Length(FChildren)>0 do
 	begin
@@ -1985,7 +2053,7 @@ FLeft:=FNeedLeft;
 FTop:=FNeedTop;
 end;
 
-function TSGComponent.AsComboBox:TSGComboBox;inline;
+function TSGComponent.AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGComboBox then
 	Result:=TSGComboBox(Pointer(Self))
@@ -1993,7 +2061,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsScrollBar:TSGScrollBar;inline;
+function TSGComponent.AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGScrollBar then
 	Result:=TSGScrollBar(Pointer(Self))
@@ -2025,7 +2093,7 @@ for i:=0 to High(FChildren) do
 	FChildren[i].Visible:=b;
 end;
 
-function TSGComponent.AsButtonMenu:TSGButtonMenu;inline;
+function TSGComponent.AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGButtonMenu then
 	Result:=TSGButtonMenu(Pointer(Self))
@@ -2033,7 +2101,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsPicture:TSGPicture;inline;
+function TSGComponent.AsPicture:TSGPicture;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGPicture then
 	Result:=TSGPicture(Pointer(Self))
@@ -2041,7 +2109,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsLabel:TSGLabel;inline;
+function TSGComponent.AsLabel:TSGLabel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGLabel then
 	Result:=TSGLabel(Pointer(Self))
@@ -2057,7 +2125,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsPanel:TSGPanel;inline;
+function TSGComponent.AsPanel:TSGPanel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGPanel then
 	Result:=TSGPanel(Pointer(Self))
@@ -2065,7 +2133,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsProgressBar:TSGProgressBar;inline;
+function TSGComponent.AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGProgressBar then
 	Result:=TSGProgressBar(Pointer(Self))
@@ -2073,7 +2141,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsButton:TSGButton;inline;
+function TSGComponent.AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGButton then
 	Result:=TSGButton(Pointer(Self))
@@ -2081,7 +2149,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsForm:TSGForm;inline;
+function TSGComponent.AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGForm then
 	Result:=TSGForm(Pointer(Self))
@@ -2274,7 +2342,7 @@ DestroyParent();
 inherited Destroy();
 end;
 
-function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;inline;
+function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	begin
@@ -2853,7 +2921,7 @@ if not CC then
 	end;
 end;
 
-procedure TSGEdit.TextTypeEvent;inline;
+procedure TSGEdit.TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FTextType<>SGEditTypeText) and (FTextTypeFunction<>nil) then
 	begin
@@ -3163,12 +3231,12 @@ FTextColor.a:=1;
 FTextPosition:=1;
 end;
 
-function TSGLabel.GetTextPosition : Boolean;inline;
+function TSGLabel.GetTextPosition : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=Boolean(FTextPosition);
 end;
 
-procedure TSGLabel.SetTextPosition(const Pos:Boolean);inline;
+procedure TSGLabel.SetTextPosition(const Pos:Boolean);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FTextPosition:=Byte(Pos);
 end;

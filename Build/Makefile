@@ -36,6 +36,8 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Skull.sgia"           ../build/srcunits/temp KillKostia_Skull     ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../data/textures/radiobox.sgia"                   ../build/srcunits/temp radio_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../data/textures/checkbox.sgia"                   ../build/srcunits/temp check_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
 	@rm -f SrcUnits/Temp/*
 	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc

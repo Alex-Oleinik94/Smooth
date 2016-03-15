@@ -71,6 +71,7 @@ uses
 	,SaGeGasDiffusion
 	,SaGeClientMaxWeb
 	,SaGeAllExamples
+	,SaGeUserTesting
 	;
 
 procedure Draw(const Context:TSGContext);
@@ -83,6 +84,7 @@ var
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
+	Add(TSGUserTesting);
 	Add(TSGGasDiffusion);
 	Add(TSGAllExamples,False);
 	Add(TSGAllFractals,False);
@@ -90,6 +92,7 @@ with TSGDrawClasses.Create(MyContext) do
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
 	Add(TSGGenAlg);
+	
 	
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);

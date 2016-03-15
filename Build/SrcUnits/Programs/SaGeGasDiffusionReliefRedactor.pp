@@ -352,7 +352,7 @@ InversedMatrixes[2] := SGInverseMatrix(SGMultiplyPartMatrix(SGGetTranslateMatrix
 InversedMatrixes[3] := SGInverseMatrix(Matrixes[3]);
 InversedMatrixes[4] := SGInverseMatrix(Matrixes[4]);
 InversedMatrixes[5] := SGInverseMatrix(Matrixes[5]);
-SGWriteMatrix4(@Matrixes[0]);
+//SGWriteMatrix4(@Matrixes[0]);
 end;
 
 initialization

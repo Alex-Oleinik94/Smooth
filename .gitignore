@@ -10,6 +10,7 @@ Build/SrcUnits/Temp/*.pas
 Build/SrcUnits/*.o
 Build/SrcUnits/*.a
 Build/SrcUnits/*.ppu
+Build/SrcUnits/Others/Imaging/*
 Build/*.ppu
 Build/*.o
 Build/Main.res
