@@ -522,7 +522,7 @@ type
 		procedure SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 		
-	TSGRCButtonType = (SGNoneRadioCheckButton,SGRadioButton,SGCkeckButton);
+	TSGRCButtonType = (SGNoneRadioCheckButton,SGRadioButton,SGCheckButton);
 	TSGRadioButton = class;
 	TSGRadioGroup = class
 			public
@@ -616,7 +616,7 @@ if t <> FType then
 		FImage.Destroy();
 	FImage := TSGImage.Create();
 	FImage.Context := Context;
-	FImage.Way := '../Data/Textures/' + Iff(FType <> SGCkeckButton ,'radiobox','checkbox') + '.sgia';
+	FImage.Way := '../Data/Textures/' + Iff(FType <> SGCheckButton ,'radiobox','checkbox') + '.sgia';
 	FImage.Loading();
 	FImage.ToTexture();
 	end;
@@ -705,9 +705,15 @@ end;
 
 constructor TSGRadioButton.Create();
 begin
+inherited Create();
+FLeftShiftForChilds:=0;
+FTopShiftForChilds:=0;
+FRightShiftForChilds:=0;
+FBottomShiftForChilds:=0;
+FCanHaveChildren:=False;
 FGroup := nil;
 FChecked := False;
-FType := SGCkeckButton;
+FType := SGCheckButton;
 FImage := nil;
 FType := SGNoneRadioCheckButton;
 FCursorOnButton := False;
@@ -740,9 +746,9 @@ end;
 
 procedure TSGRadioButton.FromDraw();
 begin
-if Checked and (FImage <> nil) then
+if (not Checked) and (FImage <> nil) then
 	begin
-	if FCursorOnButton then
+	if not FCursorOnButton then
 		begin
 		DrawImage(0.25,0.5);
 		end
@@ -753,7 +759,7 @@ if Checked and (FImage <> nil) then
 	end
 else
 	begin
-	if FCursorOnButton then
+	if not FCursorOnButton then
 		begin
 		DrawImage(0.75,1);
 		end
@@ -770,10 +776,9 @@ procedure TSGRadioButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const Cur
 begin
 if CursorInComponentNow then
 	begin
-	FCursorOnButton := True; writeln(1);
+	FCursorOnButton := True;
 	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) and CanRePleace then
 		begin
-		writeln(2);
 		CanRePleace:=False;
 		Context.FCursorKeyPressed := SGNoCursorButton;
 		SetChecked(not Checked, True);
