@@ -319,7 +319,10 @@ procedure TSGGasDiffusionCube.InitReliefIndexes();
 
 function CoordFromXYZ(const x,y,z : LongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result.Import(x/(Edge-1)*2-1,y/(Edge-1)*2-1,z/(Edge-1)*2-1);
+Result.Import(
+	(FEdge - 1 - z)/(Edge-1)*2 - 1,
+	(FEdge - 1 - y)/(Edge-1)*2 - 1,
+	(FEdge - 1 - x)/(Edge-1)*2 - 1);
 end;
 
 function PointBeetWeen(const a,b,p:Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
