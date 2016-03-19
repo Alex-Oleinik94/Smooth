@@ -278,27 +278,31 @@ type
 		property TextColor :TSGColor4f read FTextColor write FTextColor;
 		end;
 	
+	TSGProgressBarFloat = real;
+	PSGProgressBarFloat = ^ TSGProgressBarFloat;
 	TSGProgressBar=class(TSGComponent)
 			public
-		constructor Create;
-		destructor Destroy;override;
-			public
-		FProgress:Real;
-		FNeedProgress:Real;
+		constructor Create();
+		destructor Destroy();override;
+			private
+		FProgress:TSGProgressBarFloat;
+		FNeedProgress:TSGProgressBarFloat;
 		FViewProgress:Boolean;
 		FColor1:TSGColor4f;
 		FColor2:TSGColor4f;
 		FViewCaption:Boolean;
 			public
-		procedure FromDraw;override;
+		procedure FromDraw();override;
 			public
-		property RealProgress:real read FProgress write FProgress;
-		property Progress:real read FNeedProgress write FNeedProgress;
+		property RealProgress:TSGProgressBarFloat read FProgress write FProgress;
+		property Progress:TSGProgressBarFloat read FNeedProgress write FNeedProgress;
 		property ViewProgress:Boolean read FViewProgress write FViewProgress;
 		property ViewCaption:Boolean read FViewCaption write FViewCaption;
 		property Color1:TSGColor4f read FColor1 write FColor1;
 		property Color2:TSGColor4f read FColor2 write FColor2;
-		procedure DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		procedure DefaultColor();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGPanel=class(TSGComponent)
@@ -1764,6 +1768,11 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		end;
 	end;
 inherited;
+end;
+
+function TSGProgressBar.GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := @FNeedProgress;
 end;
 
 procedure TSGProgressBar.DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

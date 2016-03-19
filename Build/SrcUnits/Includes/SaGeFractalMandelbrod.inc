@@ -541,8 +541,8 @@ LabelProcent:=TSGProgressBar.Create;
 SGScreen.CreateChild(LabelProcent);
 SGScreen.LastChild.AutoTopShift:=True;
 LabelProcent.SetBounds(10,ii,300,20);
-LabelProcent.FColor2.Import(1,0,0,0.8);
-LabelProcent.FColor1.Import(0.5,0,0,0.8);
+LabelProcent.Color2 := SGColorImport(1,0,0,0.8);
+LabelProcent.Color1 := SGColorImport(0.5,0,0,0.8);
 LabelProcent.Caption:='';
 LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
@@ -666,8 +666,8 @@ FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
 SGScreen.CreateChild(FBezierCurveKadrProgressBar);
 SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,-(-(130+140+10)-150-5),20);
 SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
-SGScreen.LastChild.AsProgressBar.FColor1:=SGColorImport(1,1,0,0.7);
-SGScreen.LastChild.AsProgressBar.FColor2:=SGColorImport(1,1/3,0,0.9);
+SGScreen.LastChild.AsProgressBar.Color1:=SGColorImport(1,1,0,0.7);
+SGScreen.LastChild.AsProgressBar.Color2:=SGColorImport(1,1/3,0,0.9);
 SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FButtonEnableCurve:=TSGButton.Create();
@@ -1075,7 +1075,7 @@ if MandaInitialized then
 		for i:=0 to QuantityThreads-1 do
 			begin
 			Procent+=
-				FArProgressBar[i].FNeedProgress*(
+				FArProgressBar[i].Progress*(
 				(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h2-
 				(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h1
 				)+(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr;
@@ -1102,7 +1102,7 @@ if MandaInitialized then
 						(
 						(FDateTime-
 						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FBeginData).GetPastMiliSeconds
-						)/FArProgressBar[ii].FNeedProgress*(1 - FArProgressBar[ii].FNeedProgress)
+						)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
 						>150
 						) then
 						// i - Только что Завершивший свою работу поток
@@ -1113,10 +1113,10 @@ if MandaInitialized then
 						if (Manda.FThreadsData[ii].FFinished=False) then
 			begin
 						
-						FArProgressBar[ii].FColor2:=(FArProgressBar[ii].FColor2+SGColorImport(0.9,0.45,0,0.8))/2;
-						FArProgressBar[ii].FColor1:=(FArProgressBar[ii].FColor1+SGColorImport(1,0.5,0,1))/2;
-						FArProgressBar[i].FColor2:=(FArProgressBar[i].FColor2+SGColorImport(0.1,1,0.1,0.7))/2;
-						FArProgressBar[i].FColor1:=(FArProgressBar[i].FColor1+SGColorImport(0,1,0,1))/2;
+						FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SGColorImport(0.9,0.45,0,0.8))/2;
+						FArProgressBar[ii].Color1:=(FArProgressBar[ii].Color1+SGColorImport(1,0.5,0,1))/2;
+						FArProgressBar[i].Color2:=(FArProgressBar[i].Color2+SGColorImport(0.1,1,0.1,0.7))/2;
+						FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SGColorImport(0,1,0,1))/2;
 						
 						iiiC:=0;
 						if Manda.FThreadsData[i].FData<>nil then
@@ -1145,7 +1145,7 @@ if MandaInitialized then
 							),
 								
 							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2,
-							@FArProgressBar[i].FNeedProgress,i);
+							FArProgressBar[i].GetProgressPointer,i);
 
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NewPos:=0;
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NowPos:=0;
@@ -1153,8 +1153,8 @@ if MandaInitialized then
 						Manda.FThreadsData[i].FFinished:=False;
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FBeginData.Get;
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr:=iiiC;
-						FArProgressBar[i].FNeedProgress:=0;
-						FArProgressBar[i].FProgress:=0;
+						FArProgressBar[i].Progress:=0;
+						FArProgressBar[i].RealProgress:=0;
 						
 						Manda.FThreadsData[i].FThread:=
 							TSGThread.Create(
@@ -1177,7 +1177,7 @@ if MandaInitialized then
 				end;
 			end;
 		Procent/=Manda.Height;
-		LabelProcent.FNeedProgress:=Procent;
+		LabelProcent.Progress:=Procent;
 		FDateTime.Get;
 		///FDateTime.ImportFromSeconds((FDateTime-FBeginCalc).GetPastSeconds);
 		LblProcent.Caption:=SGStringToPChar(SGFloatToString(Procent*100,2)+'%,Прошло '+
@@ -1467,15 +1467,15 @@ if MandaInitialized then
 			begin
 			with FArProgressBar[i] do
 				begin
-				FNeedProgress:=0;
-				FProgress:=0;
+				Progress:=0;
+				RealProgress:=0;
 				Visible:=true;
 				AutoTopShift:=False;
 				FNeedTop:=ii;
 				AutoTopShift:=True;
 				ii+=25;
 				DefaultColor;
-				Manda.BeginThread(i,@FNeedProgress);
+				Manda.BeginThread(i,GetProgressPointer());
 				end;
 			end;
 		LabelProcent.AutoTopShift:=False;
@@ -1843,7 +1843,7 @@ for i:=Data.h1 to Data.h2 do
 	
 	if PReal(Data.FPoint)<>nil then
 		if IsComponent then
-			TSGProgressBar(Data.FPoint).FNeedProgress:=(i-Data.h1)/(Data.h2-Data.h1)
+			TSGProgressBar(Data.FPoint).Progress:=(i-Data.h1)/(Data.h2-Data.h1)
 		else
 			PReal(Data.FPoint)^:=(i-Data.h1)/(Data.h2-Data.h1);
 	
