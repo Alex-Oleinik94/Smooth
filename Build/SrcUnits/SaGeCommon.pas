@@ -347,6 +347,7 @@ function SGX(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGY(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGZ(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function Abs(const a:TSGVertex2f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Abs(const a:TSGVertex3f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (*Эти функциии для того, чтобы определять gluLookAt и gluPerspective на мобильных платформах типа Android или iOS*)
 function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4Type):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -377,6 +378,11 @@ function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF 
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function Abs(const a:TSGVertex3f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Sqrt(Sqr(a.x) + Sqr(a.y) + Sqr(a.z))
+end;
 
 operator = (const A,B:TSGMatrix4):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

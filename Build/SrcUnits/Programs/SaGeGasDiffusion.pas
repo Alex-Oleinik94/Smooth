@@ -249,28 +249,34 @@ UpDateCube();
 end;
 
 procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord);
+const
+	o = 1.98;
 var
 	i : LongWord;
 	Smeshenie : TSGSingle;
 	FArRandomSm : array [0..9] of TSGVertex3f;
+	Edge3 : LongWord;
 begin
 for i:=0 to 9 do
 	FArRandomSm[i].Import(random*(0.99/Edge),random*(0.99/Edge),random*(0.99/Edge));
 FFlag := True;
-if FCube<>nil then
+if FCube <> nil then
 	begin
 	FreeMem(FCube);
 	FCube:=nil;
 	end;
+
 FEdge := Edge;
 if FEdge mod 2 = 1 then
 	FEdge +=1;
-Smeshenie:=1/FEdge;
-GetMem(FCube,FEdge*FEdge*FEdge);
-GetMem(FReliefCubeIndex,FEdge*FEdge*FEdge);
-FillChar(FCube^,FEdge*FEdge*FEdge,0);
-FillChar(FReliefCubeIndex^,FEdge*FEdge*FEdge,1);
-SetLength(FCubeCoords,FEdge*FEdge*FEdge);
+Smeshenie:= 1/FEdge;
+Edge3 := FEdge * FEdge * FEdge;
+
+GetMem(FCube, Edge3);
+GetMem(FReliefCubeIndex, Edge3);
+FillChar(FCube^, Edge3, 0);
+FillChar(FReliefCubeIndex^, Edge3, 1);
+SetLength(FCubeCoords, Edge3);
 
 SetLength(FGazes,3);
 FGazes[0].Create(0,1,0);
@@ -284,14 +290,14 @@ FSourses[1].FGazTypeIndex:=1;
 FSourses[1].FCoord.Import(FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8),FEdge div 2 - (FEdge div 8));
 FSourses[1].FRadius:=1;
 
-for i := 0 to Edge*Edge*Edge-1 do
+for i := 0 to Edge3 - 1 do
 	begin
 	FCubeCoords[i].Import(
-		Smeshenie+2*(i mod FEdge)/FEdge-1,
-		Smeshenie+2*((i div FEdge) mod FEdge)/FEdge-1,
-		Smeshenie+2*((i div FEdge) div FEdge)/FEdge-1);
-	//FCubeCoords[i]+=
-		//FArRandomSm[Random(10)];
+		Smeshenie + o*(i mod FEdge)/(FEdge - 1) - 1,
+		Smeshenie + o*((i div FEdge) mod FEdge)/(FEdge - 1) - 1,
+		Smeshenie + o*((i div FEdge) div FEdge)/(FEdge - 1) - 1);
+	FCubeCoords[i]+=
+		FArRandomSm[Random(10)];
 	end;
 
 InitReliefIndexes();
@@ -317,8 +323,19 @@ Result.Import(x/(Edge-1)*2-1,y/(Edge-1)*2-1,z/(Edge-1)*2-1);
 end;
 
 function PointBeetWeen(const a,b,p:Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	ab : TSGFloat;
 begin
-Result := abs(abs(p-a) + abs(p-b) - abs(b-a)) < SGZero * 3;
+ab := Abs(b-a);
+Result := Abs(Abs(p-a) + Abs(p-b) - ab) < ab * SGZero * 200;
+end;
+
+function PointBeetWeen3D(const a,b,p:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	ab : TSGFloat;
+begin
+ab := Abs(b-a);
+Result := Abs(Abs(p-a) + Abs(p-b) - ab) < ab * SGZero;
 end;
 
 function ProshTreug(const a, b, c : TSGFloat):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -332,7 +349,7 @@ end;
 function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
-begin 
+begin
 t1t2 := Abs(t1 - t2);
 t2t3 := Abs(t2 - t3);
 t3t1 := Abs(t3 - t1);
@@ -348,7 +365,7 @@ Result := Abs(
 	- ProshTreug(t1t2, vt1, vt2)
 	- ProshTreug(t2t3, vt3, vt2)
 	- ProshTreug(t3t1, vt1, vt3)
-		) < SGZero * s * 12;
+		) < SGZero * s * 100000;
 end;
 
 function ScalePointToTriangle3D(const t1,t2,t3,v:TSGVertex2f; const t1z,t2z,t3z : Single):Single;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -430,6 +447,11 @@ end;
 
 function PointInTriangle(const t1,t2,t3,v,n:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
+if PointBeetWeen3D(t1,t2,v) or PointBeetWeen3D(t1,t3,v) or PointBeetWeen3D(t2,t3,v) then
+	begin
+	Result := True;
+	Exit;
+	end;
 if (abs(n.x)<SGZero) and (abs(n.y)<SGZero) then
 	Result := PointInTriangleZ(t1,t2,t3,v,n.z)
 else if (abs(n.z)<SGZero) and (abs(n.y)<SGZero) then
@@ -439,6 +461,8 @@ else if (abs(n.x)<SGZero) and (abs(n.z)<SGZero) then
 end;
 
 function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : LongWord; const v : TSGVertex3f; const n : TSGVertex3f;const ReliefIndex : Byte):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+const
+	o = 4;
 var
 	i : LongWord;
 begin
@@ -470,16 +494,22 @@ end;
 end;
 
 var
+	FRCI : TSGGGDC = nil;
+
+function RCI (const x,y,z : Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result:=@FRCI[(x*FEdge+y)*FEdge+z];
+end;
+
+var
 	i,j : LongWord;
-	i1,i2,i3,c : LongWord;
-	c1 : LongWord = 0;
+	i1,i2,i3 : LongWord;
 begin
 if FRelief <> nil then
 	begin
 	for j := 0 to 5 do
 		if FRelief^.FData[j].FEnabled then
 			begin
-			c := 0;
 			if FRelief^.FData[j].FPolygones <> nil then if Length(FRelief^.FData[j].FPolygones) <> 0 then
 				begin
 				for i := 0 to High(FRelief^.FData[j].FPolygones) do
@@ -498,14 +528,67 @@ if FRelief <> nil then
 									VertexFromIndex(j),
 									j))
 								);
-						c += Byte(not Boolean(ReliefCubeIndex(i1, i2, i3)^));
 						end;
 					end;
 				end;
-			WriteLn(j, ' ', c, ' ', c - c1);
-			c1 := c;
 			end;
 	end;
+FRCI := GetMem(Edge * Edge * Edge);
+FillChar(FRCI^, Edge * Edge * Edge, 1);
+i1:=0;
+while i1<FEdge do
+	begin
+	i2:=0;
+	while i2<FEdge do
+		begin
+		i3:=0;
+		while i3<FEdge do
+			begin
+			RCI(i1,i2,i3)^ := 
+				Byte(
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3  )^)
+				);
+			i3+=2;
+			end;
+		i2+=2;
+		end;
+	i1+=2;
+	end;
+i1:=1;
+while i1<FEdge-3 do
+	begin
+	i2:=1;
+	while i2<FEdge-3 do
+		begin
+		i3:=1;
+		while i3<FEdge-3 do
+			begin
+			RCI(i1,i2,i3)^ :=
+				Byte(
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3  )^)
+				);
+			i3+=2;
+			end;
+		i2+=2;
+		end;
+	i1+=2;
+	end;
+Move(FRCI^,FReliefCubeIndex^, Edge * Edge * Edge);
+FreeMem(FRCI);
 end;
 
 procedure TSGGasDiffusionCube.UpDateCube();
@@ -722,6 +805,7 @@ UpDateGaz();
 UpDateSourses();
 UpDateIfOpenBounds();
 end;
+
 function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil):TSGCustomModel;
 var
 	i : TSGLongWord;
@@ -733,7 +817,7 @@ if FGazes<>nil then
 	for i:= 0 to High(FGazes) do
 		FGazes[i].FDinamicQuantity := 0;
 
-for i:=0 to FEdge*FEdge*FEdge -1 do
+for i:=0 to FEdge * FEdge * FEdge -1 do
 	begin
 	if FCube[i]<>0 then
 		begin
@@ -741,11 +825,10 @@ for i:=0 to FEdge*FEdge*FEdge -1 do
 		end;
 	end;
 
-
 FDinamicQuantityMoleculs := 0;
 if FGazes<>nil then
 	for i:= 0 to High(FGazes) do
-		FDinamicQuantityMoleculs+=FGazes[i].FDinamicQuantity;
+		FDinamicQuantityMoleculs += FGazes[i].FDinamicQuantity;
 
 if FDinamicQuantityMoleculs <> 0 then
 	begin
@@ -756,7 +839,7 @@ if FDinamicQuantityMoleculs <> 0 then
 	Result.LastObject().HasColors  := True;
 	Result.LastObject().EnableCullFace := False;
 	Result.LastObject().VertexType := SGMeshVertexType3f;
-	Result.LastObject().SetColorType(SGMeshColorType4b);
+	Result.LastObject().SetColorType (SGMeshColorType4b);
 
 
 
@@ -777,37 +860,6 @@ if FDinamicQuantityMoleculs <> 0 then
 			end;
 		end;
 	end;
-{
-FDinamicQuantityMoleculs := Edge * Edge * Edge;
-
-if FDinamicQuantityMoleculs <> 0 then
-	begin
-	Result.AddObject();
-	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
-	Result.LastObject().HasNormals := False;
-	Result.LastObject().HasTexture := False;
-	Result.LastObject().HasColors  := True;
-	Result.LastObject().EnableCullFace := False;
-	Result.LastObject().VertexType := SGMeshVertexType3f;
-	Result.LastObject().SetColorType(SGMeshColorType4b);
-
-
-
-	Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
-
-	FDinamicQuantityMoleculs:=0;
-	for i:=0 to FEdge*FEdge*FEdge -1 do
-		begin
-		Result.LastObject().SetColor(FDinamicQuantityMoleculs,
-			FGazes[FReliefCubeIndex[i]+1].FColor.r,
-			FGazes[FReliefCubeIndex[i]+1].FColor.g,
-			FGazes[FReliefCubeIndex[i]+1].FColor.b);
-		Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
-			FCubeCoords[i];
-		Inc(FDinamicQuantityMoleculs);
-		end;
-	end;
-}
 
 if VRelief = nil then
 	begin
