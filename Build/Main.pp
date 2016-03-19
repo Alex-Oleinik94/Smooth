@@ -84,7 +84,6 @@ var
 begin
 with TSGDrawClasses.Create(MyContext) do
 	begin
-	Add(TSGUserTesting);
 	Add(TSGGasDiffusion);
 	Add(TSGAllExamples,False);
 	Add(TSGAllFractals,False);
@@ -92,7 +91,7 @@ with TSGDrawClasses.Create(MyContext) do
 	Add(TSGGraphViewer);
 	Add(TSGKillKostia);
 	Add(TSGGenAlg);
-	
+	Add(TSGUserTesting);
 	
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);

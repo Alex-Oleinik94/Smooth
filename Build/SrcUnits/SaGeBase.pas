@@ -727,8 +727,17 @@ function DownCase(const c:TSGChar):TSGChar;
 procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptions = []; const ViewOutput : Boolean = false);
 
 function Iff(const b : TSGBoolean;const s1,s2:TSGString):TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if b then
+	Result := s1
+else
+	Result := s2;
+end;
 
 function Iff(const b : TSGBoolean;const s1,s2:TSGString):TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

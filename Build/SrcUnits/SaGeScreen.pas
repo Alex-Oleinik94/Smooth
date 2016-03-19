@@ -750,7 +750,7 @@ if (not Checked) and (FImage <> nil) then
 	begin
 	if not FCursorOnButton then
 		begin
-		DrawImage(0.25,0.5);
+		DrawImage(Iff(FType = SGCheckButton,0.27,0.25),0.5);
 		end
 	else
 		begin
@@ -761,7 +761,7 @@ else
 	begin
 	if not FCursorOnButton then
 		begin
-		DrawImage(0.75,1);
+		DrawImage(Iff(FType = SGCheckButton,0.77,0.75),1);
 		end
 	else
 		begin
