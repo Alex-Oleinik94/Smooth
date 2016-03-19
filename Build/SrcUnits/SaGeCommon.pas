@@ -376,8 +376,21 @@ function SGTransformVector(const Matrix : TSGMatrix4; const Vec : TSGVertex3f):T
 
 function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$IFNDEF MOBILE}
+function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$ENDIF}
 
 implementation
+
+{$IFNDEF MOBILE}
+function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	x,y,z : Real;
+begin
+VRender.GetVertexUnderPixel(Pixel.x,Pixel.y,x,y,z);
+Result.Import(x,y,z);
+end;
+{$ENDIF}
 
 function Abs(const a:TSGVertex3f):TSGSingle;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

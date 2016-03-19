@@ -1409,8 +1409,7 @@ begin
 if FNewSecheniePanel.Visible then
 	begin
 	DrawComplexCube();
-	Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
-	FSechenieUnProjectVertex.Import(a.x,a.y,a.z);
+	FSechenieUnProjectVertex := SGGetVertexUnderPixel(Render,Context.CursorPosition());
 	if Abs(FSechenieUnProjectVertex) < 2 then
 		begin
 		case FPlaneComboBox.SelectItem of
@@ -2754,6 +2753,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.Font := FTahomaFont;
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefRedactrReliefButton);
+	FRelefOptionPanel.LastChild.Active := {$IFDEF MOBILE}False{$ELSE}True{$ENDIF};
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Назад';
