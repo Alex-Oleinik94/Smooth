@@ -1125,12 +1125,12 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FStopEmulatingButton.Visible := False;
 	FSaveImageButton.Visible := False;
 	FInfoLabel.Caption:='';
-	if FCube<>nil then
+	if FCube <> nil then
 		begin
 		FCube.Destroy();
 		FCube:=nil;
 		end;
-	if FFileStream<>nil then
+	if FFileStream <> nil then
 		begin
 		FFileStream.Destroy();
 		FFileStream:=nil;
@@ -2664,6 +2664,8 @@ procedure mmmFRedactorBackButton(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 Button.Visible := False;
 Button.Active := False;
+if FRelefRedactor <> nil then
+	FRelefRedactor.StopRedactoring();
 if FRelefOptionPanel <> nil then
 	begin
 	FRelefOptionPanel.Visible := True;
@@ -2685,6 +2687,8 @@ procedure mmmFRedactrReliefRedactrReliefButton(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FRedactorBackButton.Visible := True;
 FRedactorBackButton.Active := True;
+if FRelefRedactor <> nil then
+	FRelefRedactor.StartRedactoring();
 if FRelefOptionPanel <> nil then
 	begin
 	FRelefOptionPanel.Visible := False;
