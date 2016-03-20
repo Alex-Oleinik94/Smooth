@@ -68,8 +68,10 @@ type
 		FInRedactoring : TSGBoolean;
 		FSelectedPrimetives : TSGGDRSelectedPrimetives;
 		FPixelPrimitive : LongInt;
+		FInCutting : TSGBoolean;
 			private
 		procedure UpDate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure UpDatePointsShifting();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DrawRedactoringRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ProcessPixelPrimitive();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
@@ -121,6 +123,10 @@ else if Button = FPrimetiveTypeButtonPolygones then
 	FPrimetiveTypeButtonPoints.Active := True;
 	FPrimetiveTypeButtonPolygones.Active := False;
 	FRedactingType := TSGGDRRedactingPolygones;
+	end
+else if Button = FCutPolygoneButton then
+	begin
+	FCutPolygoneButton.Active := False;
 	end;
 end;end;
 
@@ -184,6 +190,7 @@ if FCutPolygoneButton = nil then
 	FCutPolygoneButton.BoundsToNeedBounds();
 	FCutPolygoneButton.Font := FFont;
 	FCutPolygoneButton.UserPointer := Self;
+	FCutPolygoneButton.OnChange := TSGComponentProcedure(@mmmFPrimetiveTypeButton);
 	end;
 FCutPolygoneButton.Visible := True;
 FCutPolygoneButton.Active := True;
@@ -482,13 +489,13 @@ if FSingleRelief^.FPolygones <> nil then
 			begin
 			if FRedactingType = TSGGDRRedactingPoints then
 				if FSingleRelief^.FPolygones[i][ii] = FPixelPrimitive then
-					if ExistsInSelectedPrimetives(ii) then
-						((SGColorImport(1,0,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
+					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
+						((SGColorImport(1,0.3,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
 					else
 						((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
 				else 
-					if ExistsInSelectedPrimetives(ii) then
-						((SGColorImport(1,0,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
+					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
+						((SGColorImport(1,0.3,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
 					else
 						Render.Color4f(0,0.5,1,1);
 			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]].Vertex(Render);
@@ -513,22 +520,22 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 			begin
 			if FRedactingType = TSGGDRRedactingPoints then
 				if FSingleRelief^.FPolygones[i][ii] = FPixelPrimitive then
-					if ExistsInSelectedPrimetives(ii) then
+					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
 						if FSingleRelief^.FType then
-							((SGColorImport(1,0,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,1,1,0.2))/3).Color(Render)
+							((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/3).Color(Render)
 						else
-							((SGColorImport(1,0,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,0.2))/3).Color(Render)
+							((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/3).Color(Render)
 					else
 						if FSingleRelief^.FType then
-							((SGColorImport(1,1,1,1) + SGColorImport(0,1,1,0.2))/2).Color(Render)
+							((SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/2).Color(Render)
 						else
-							((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+							((SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
 				else
-					if ExistsInSelectedPrimetives(ii) then
+					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
 						if FSingleRelief^.FType then
-							((SGColorImport(1,0,0,1) + SGColorImport(0,1,1,0.2))/2).Color(Render)
+							((SGColorImport(1,0,0,0.3) + SGColorImport(0,1,1,0.2))/2).Color(Render)
 						else
-							((SGColorImport(1,0,0,1) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+							((SGColorImport(1,0,0,0.3) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
 					else
 						if FSingleRelief^.FType then
 							Render.Color4f(0,1,1,0.2)
@@ -607,22 +614,41 @@ else
 	end;
 end;
 
+procedure TSGGasDiffusionReliefRedactor.UpDatePointsShifting();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : LongWord;
+begin
+if (Context.KeysPressed(SG_CTRL_KEY) and (Context.CursorWheel() <> SGNoCursorWheel)) then 
+	if FSelectedPrimetives <> nil then
+		if Length(FSelectedPrimetives)<>0 then
+			begin
+			for i := 0 to High(FSelectedPrimetives) do
+				FSingleRelief^.FPoints[FSelectedPrimetives[i]] += SGZ((Byte(Context.CursorWheel() = SGUpCursorWheel)-0.5)*0.1);
+			Context.FCursorWheel := SGNoCursorWheel;
+			end;
+end;
+
 procedure TSGGasDiffusionReliefRedactor.Draw();
 begin
-FCamera.CallAction();
 if FSingleRelief = nil then
 	begin
+	FCamera.CallAction();
 	FRelief^.Draw(Render);
 	end
 else if FRelief <> nil then
 	begin
 	if FInRedactoring then
 		begin
+		UpDatePointsShifting();
+		FCamera.CallAction();
 		DrawRedactoringRelief();
 		UpDate();
 		end
 	else
+		begin
+		FCamera.CallAction();
 		FSingleRelief^.Draw(Render);
+		end;
 	end;
 end;
 
