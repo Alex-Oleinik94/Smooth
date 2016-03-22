@@ -1,4 +1,7 @@
 {$INCLUDE SaGe.inc}
+
+{$DEFINE RELIEFDEBUG}
+
 unit SaGeGasDiffusion;
 
 interface
@@ -47,7 +50,7 @@ type
 			public
 		procedure InitCube(const Edge : TSGLongWord; const VProgress : PSGProgressBarFloat = nil);
 		procedure UpDateCube();
-		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil) : TSGCustomModel;
+		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGBoolean = False{$ENDIF}) : TSGCustomModel;
 		procedure ClearGaz();
 		procedure InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
 			public
@@ -163,6 +166,11 @@ type
 		FMoviePauseButton,
 			FMovieBackToMenuButton,
 			FMoviePlayButton : TSGButton;
+		
+		{$IFDEF RELIEFDEBUG}
+			private
+		FInReliafDebug : TSGBoolean;
+		{$ENDIF}
 		
 			private
 		procedure ClearDisplayButtons();
@@ -300,8 +308,10 @@ for i := 0 to Edge3 - 1 do
 		Smeshenie + o*(i mod FEdge)/(FEdge - 1) - 1,
 		Smeshenie + o*((i div FEdge) mod FEdge)/(FEdge - 1) - 1,
 		Smeshenie + o*((i div FEdge) div FEdge)/(FEdge - 1) - 1);
+	{$IFNDEF RELIEFDEBUG}
 	FCubeCoords[i]+=
 		FArRandomSm[Random(10)];
+		{$ENDIF}
 	end;
 
 InitReliefIndexes(VProgress);
@@ -831,60 +841,105 @@ UpDateSourses();
 UpDateIfOpenBounds();
 end;
 
-function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil):TSGCustomModel;
+function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGBoolean = False{$ENDIF}):TSGCustomModel;
 var
 	i : TSGLongWord;
 begin
 Result:=TSGCustomModel.Create();
 Result.Context := Context;
 
+FDinamicQuantityMoleculs := 0;
 if FGazes<>nil then
 	for i:= 0 to High(FGazes) do
 		FGazes[i].FDinamicQuantity := 0;
 
-for i:=0 to FEdge * FEdge * FEdge -1 do
+{$IFDEF RELIEFDEBUG}
+if FInReliafDebug then
 	begin
-	if FCube[i]<>0 then
+	for i:=0 to FEdge * FEdge * FEdge -1 do
 		begin
-		Inc(FGazes[FCube[i]-1].FDinamicQuantity);
-		end;
-	end;
-
-FDinamicQuantityMoleculs := 0;
-if FGazes<>nil then
-	for i:= 0 to High(FGazes) do
-		FDinamicQuantityMoleculs += FGazes[i].FDinamicQuantity;
-
-if FDinamicQuantityMoleculs <> 0 then
-	begin
-	Result.AddObject();
-	Result.LastObject().ObjectPoligonesType := SGR_POINTS;
-	Result.LastObject().HasNormals := False;
-	Result.LastObject().HasTexture := False;
-	Result.LastObject().HasColors  := True;
-	Result.LastObject().EnableCullFace := False;
-	Result.LastObject().VertexType := SGMeshVertexType3f;
-	Result.LastObject().SetColorType (SGMeshColorType4b);
-
-
-
-	Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
-
-	FDinamicQuantityMoleculs:=0;
-	for i:=0 to FEdge*FEdge*FEdge -1 do
-		begin
-		if FCube[i]<>0 then
+		if FReliefCubeIndex[i]<>0 then
 			begin
-			Result.LastObject().SetColor(FDinamicQuantityMoleculs,
-				FGazes[FCube[i]-1].FColor.r,
-				FGazes[FCube[i]-1].FColor.g,
-				FGazes[FCube[i]-1].FColor.b);
-			Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
-				FCubeCoords[i];
 			Inc(FDinamicQuantityMoleculs);
 			end;
 		end;
+	
+	if FDinamicQuantityMoleculs <> 0 then
+		begin
+		Result.AddObject();
+		Result.LastObject().ObjectPoligonesType := SGR_POINTS;
+		Result.LastObject().HasNormals := False;
+		Result.LastObject().HasTexture := False;
+		Result.LastObject().HasColors  := True;
+		Result.LastObject().EnableCullFace := False;
+		Result.LastObject().VertexType := SGMeshVertexType3f;
+		Result.LastObject().SetColorType (SGMeshColorType4b);
+		Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
+
+		FDinamicQuantityMoleculs:=0;
+		for i:=0 to FEdge*FEdge*FEdge -1 do
+			begin
+			if FReliefCubeIndex[i]=0 then
+				begin
+				Result.LastObject().SetColor(FDinamicQuantityMoleculs,
+					1,
+					0,
+					0);
+				Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
+					FCubeCoords[i];
+				Inc(FDinamicQuantityMoleculs);
+				end;
+			end;
+		end;
+	end
+else
+	begin
+	{$ENDIF}
+	for i:=0 to FEdge * FEdge * FEdge -1 do
+		begin
+		if FCube[i]<>0 then
+			begin
+			Inc(FGazes[FCube[i]-1].FDinamicQuantity);
+			end;
+		end;
+	
+	if FGazes<>nil then
+		for i:= 0 to High(FGazes) do
+			FDinamicQuantityMoleculs += FGazes[i].FDinamicQuantity;
+
+	if FDinamicQuantityMoleculs <> 0 then
+		begin
+		Result.AddObject();
+		Result.LastObject().ObjectPoligonesType := SGR_POINTS;
+		Result.LastObject().HasNormals := False;
+		Result.LastObject().HasTexture := False;
+		Result.LastObject().HasColors  := True;
+		Result.LastObject().EnableCullFace := False;
+		Result.LastObject().VertexType := SGMeshVertexType3f;
+		Result.LastObject().SetColorType (SGMeshColorType4b);
+
+
+
+		Result.LastObject().Vertexes   := FDinamicQuantityMoleculs;
+
+		FDinamicQuantityMoleculs:=0;
+		for i:=0 to FEdge*FEdge*FEdge -1 do
+			begin
+			if FCube[i]<>0 then
+				begin
+				Result.LastObject().SetColor(FDinamicQuantityMoleculs,
+					FGazes[FCube[i]-1].FColor.r,
+					FGazes[FCube[i]-1].FColor.g,
+					FGazes[FCube[i]-1].FColor.b);
+				Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
+					FCubeCoords[i];
+				Inc(FDinamicQuantityMoleculs);
+				end;
+			end;
+		end;
+{$IFDEF RELIEFDEBUG}
 	end;
+{$ENDIF}
 
 if VRelief = nil then
 	begin
@@ -1473,7 +1528,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FFileStream:=nil;
 		end;
 	FCube.ClearGaz();
-	FMesh:=FCube.CalculateMesh(@FRelief);
+	FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
 procedure mmmFRunDiffusionButtonProcedure(Button:TSGButton);
@@ -1667,7 +1722,7 @@ else
 	end;
 UpdateNewGasPanel(Button.Parent);
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh(@FRelief);
+FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end;end;
 
 procedure mmmGasChangeProc(Button:TSGButton);
@@ -1817,7 +1872,7 @@ for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
 	if FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^=o+1 then
 		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=c+1;
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh(@FRelief);
+FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
 procedure mmmSourseChageSourseProc(b,c : LongInt;a : TSGComboBox);
@@ -1878,7 +1933,7 @@ for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
 		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=FCube.FSourses[i].FGazTypeIndex +1;
 UpDateSoursePanel();
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh(@FRelief);
+FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end;end;
 
 procedure mmmFDleteSourseAddNewSourseButtonProcedure(Button:TSGButton);
@@ -1915,7 +1970,7 @@ else
 
 UpDateSoursePanel();
 FMesh.Destroy();
-FMesh:=FCube.CalculateMesh(@FRelief);
+FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
 procedure FAddNewSourseButtonProcedure(Button:TSGButton);
@@ -2224,7 +2279,7 @@ if FMesh<>nil then
 	FMesh.Destroy();
 	FMesh:=nil;
 	end;
-FMesh := FCube.CalculateMesh(@FRelief);
+FMesh := FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 FNowCadr := 0;
 if FEnableSaving then
 	SGMakeDirectory(PredStr+Catalog);
@@ -3026,6 +3081,9 @@ end;
 constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
+{$IFDEF RELIEFDEBUG}
+	FInReliafDebug        := False;
+	{$ENDIF}
 FStartingFlag             := 0;
 FStartingThread           := nil;
 FStartingProgressBar      := nil;
@@ -3397,7 +3455,7 @@ if FMesh <> nil then
 			end;
 		FMesh.Destroy();
 		FCube.UpDateCube();
-		FMesh:=FCube.CalculateMesh(@FRelief);
+		FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 		FNowCadr+=1;
 		end;
 	if (FSecheniePanel<>nil) and (FDiffusionRuned) and (FSecheniePanel.Visible) then
@@ -3431,6 +3489,14 @@ if FMesh <> nil then
 	if FDiffusionRuned or FMoviePlayed then
 		UpDateInfoLabel();
 	UpDateConchLabels();
+	{$IFDEF RELIEFDEBUG}
+		if Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'D') then
+			begin
+			FInReliafDebug := not FInReliafDebug;
+			FMesh.Destroy();
+			FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
+			end;
+		{$ENDIF}
 	end;
 end;
 
