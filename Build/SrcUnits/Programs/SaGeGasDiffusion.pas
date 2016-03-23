@@ -509,8 +509,8 @@ case index of
 1:Result.Import(0,1,0);
 2:Result.Import(1,0,0);
 3:Result.Import(-1,0,0);
-4:Result.Import(0,0,1);
-5:Result.Import(0,0,-1);
+4:Result.Import(0,0,-1);
+5:Result.Import(0,0,1);
 end;
 end;
 

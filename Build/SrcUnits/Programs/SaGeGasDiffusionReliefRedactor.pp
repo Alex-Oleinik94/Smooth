@@ -83,18 +83,11 @@ type
 		end;
 
 function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function GetReliefInversedMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
-	InversedMatrixes : array[-1..5] of TSGMatrix4;
-
-function GetReliefInversedMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := InversedMatrixes[i];
-end;
 
 function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -672,22 +665,6 @@ begin
 Result := 'TSGGasDiffusionReliefRedactor';
 end;
 
-procedure InverseMtrixess();
-var
-	v : TSGVertex3f;
-begin
-InversedMatrixes[-1] := SGInverseMatrix(Matrixes[-1]);
-InversedMatrixes[0] := SGInverseMatrix(Matrixes[0]);// SGSetMatrixTranslation(InversedMatrixes[0],SGVertexImport(0,-1,0));
-// SGMultiplyPartMatrix(SGInverseMatrix(Matrixes[0]), SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-// := SGInverseMatrix(SGMultiplyPartMatrix(SGGetTranslateMatrix(SGVertexImport(0,0,-1)),SGGetRotateMatrix(pi/2,SGVertexImport(1,0,0))));
-InversedMatrixes[1] := SGInverseMatrix(SGMultiplyPartMatrix(SGGetTranslateMatrix(SGVertexImport(0,0,-1)),SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0))));
-InversedMatrixes[2] := SGInverseMatrix(SGMultiplyPartMatrix(SGGetTranslateMatrix(SGVertexImport(0,0,-1)),SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0))));
-InversedMatrixes[3] := SGInverseMatrix(Matrixes[3]);
-InversedMatrixes[4] := SGInverseMatrix(Matrixes[4]);
-InversedMatrixes[5] := SGInverseMatrix(Matrixes[5]);
-//SGWriteMatrix4(@Matrixes[0]);
-end;
-
 initialization
 begin
 Matrixes[-1] := SGGetIdentityMatrix();
@@ -697,7 +674,6 @@ Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)
 Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
 Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
 Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(2*pi/2,SGVertexImport(1,0,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-InverseMtrixess();
 end
 
 finalization
