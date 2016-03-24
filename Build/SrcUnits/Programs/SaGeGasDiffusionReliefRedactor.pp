@@ -18,11 +18,13 @@ uses
 	,SaGeImages
 	,SaGeImagesBase;
 type
+	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
+type
 	TSGGasDiffusionSingleRelief = object
 		FEnabled : Boolean;
 		FType : Boolean;
 		FPoints : packed array of TSGVertex;
-		FPolygones : packed array of packed array of LongWord;
+		FPolygones : packed array of TSGGDRPrimetiveIndexes;
 		
 		procedure Draw(const VRender : TSGRender);
 		procedure DrawLines(const VRender : TSGRender);
@@ -46,7 +48,6 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
 	TSGGasDiffusionReliefRedactor = class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
@@ -75,10 +76,12 @@ type
 		procedure DrawRedactoringRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ProcessPixelPrimitives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SelectAllPrimetives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure UpdateCutPolygone();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
 		class function ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure AddIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
 		procedure StartRedactoring();
@@ -93,6 +96,204 @@ implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
+
+procedure TSGGasDiffusionReliefRedactor.UpdateCutPolygone();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+
+end;
+
+class procedure TSGGasDiffusionReliefRedactor.CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii, iii, i1, i2, i11,i12,i21,i22 : TSGLongWord;
+	p1, p2 : TSGGDRPrimetiveIndexes;
+begin
+iii := Length(sr.FPolygones);
+for i := 0 to High(sr.FPolygones) do
+	begin
+	i1 := Length(sr.FPolygones[i]);
+	i2 := Length(sr.FPolygones[i]);
+	for ii := 1 to High(sr.FPolygones[i])-1 do
+		begin
+		if  i1 = Length(sr.FPolygones[i]) then
+			if  SGIsVertexOnTriangle(
+					sr.FPoints[sr.FPolygones[i][0]],
+					sr.FPoints[sr.FPolygones[i][ii]],
+					sr.FPoints[sr.FPolygones[i][ii+1]],
+					v1) then
+						i1 := ii;
+		if  i2 = Length(sr.FPolygones[i]) then
+			if  SGIsVertexOnTriangle(
+					sr.FPoints[sr.FPolygones[i][0]],
+					sr.FPoints[sr.FPolygones[i][ii]],
+					sr.FPoints[sr.FPolygones[i][ii+1]],
+					v2) then
+						i2 := ii;
+		if (i1 <> Length(sr.FPolygones[i])) and (i2 <> Length(sr.FPolygones[i])) then
+			break;
+		end;
+	if (i1 <> Length(sr.FPolygones[i])) and (i2 <> Length(sr.FPolygones[i])) then
+		begin
+		iii := i;
+		break;
+		end;
+	end;
+if iii <> Length(sr.FPolygones) then
+	begin
+	i1 := Length(sr.FPolygones[iii]);
+	i2 := Length(sr.FPolygones[iii]);
+	for i := 0 to High(sr.FPolygones[iii]) do
+		if Abs(sr.FPoints[sr.FPolygones[iii][i]] - v1) < SGZero then
+			begin
+			i1 := i;
+			break;
+			end;
+	for i := 0 to High(sr.FPolygones[iii]) do
+		if Abs(sr.FPoints[sr.FPolygones[iii][i]] - v2) < SGZero then
+			begin
+			i2 := i;
+			break;
+			end;
+	if i1 = Length(sr.FPolygones[iii]) then
+		begin
+		for i := 0 to High(sr.FPolygones[iii]) do
+			if i = High(sr.FPolygones[iii]) then
+				begin
+				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][0]],
+					sr.FPoints[sr.FPolygones[iii][High(sr.FPolygones[iii])]],
+					v1) then
+						begin
+						i11 := High(sr.FPolygones[iii]);
+						i12 := 0;
+						break;
+						end;
+				end
+			else
+				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][i]],
+					sr.FPoints[sr.FPolygones[iii][i+1]],
+					v1) then
+						begin
+						i11 := i;
+						i12 := i+1;
+						break;
+						end;
+		end;
+	if i2 = Length(sr.FPolygones[iii]) then
+		begin
+		for i := 0 to High(sr.FPolygones[iii]) do
+			if i = High(sr.FPolygones[iii]) then
+				begin
+				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][0]],
+					sr.FPoints[sr.FPolygones[iii][High(sr.FPolygones[iii])]],
+					v2) then
+						begin
+						i21 := High(sr.FPolygones[iii]);
+						i22 := 0;
+						break;
+						end;
+				end
+			else
+				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][i]],
+					sr.FPoints[sr.FPolygones[iii][i+1]],
+					v2) then
+						begin
+						i21 := i;
+						i22 := i+1;
+						break;
+						end;
+		end;
+	p1 := nil;
+	if i1 = Length(sr.FPolygones[iii]) then
+		begin
+		SetLength(sr.FPoints,Length(sr.FPoints)+1);
+		i1 := High(sr.FPoints);
+		sr.FPoints[High(sr.FPoints)] := v1;
+		end
+	else
+		begin
+		if i1 = High(sr.FPolygones[iii]) then
+			begin
+			i11 := i1 - 1;
+			i12 := 0;
+			end
+		else if i1 = 0 then
+			begin
+			i11 := High(sr.FPolygones[iii]);
+			i12 := 1;
+			end
+		else
+			begin
+			i11 := i1 - 1;
+			i12 := i1 + 1;
+			end;
+		end;
+	p2 := nil;
+	if i2 = Length(sr.FPolygones[iii]) then
+		begin
+		SetLength(sr.FPoints,Length(sr.FPoints)+1);
+		i2 := High(sr.FPoints);
+		sr.FPoints[High(sr.FPoints)] := v2;
+		end
+	else
+		begin
+		if i2 = High(sr.FPolygones[iii]) then
+			begin
+			i21 := i2 - 1;
+			i22 := 0;
+			end
+		else if i2 = 0 then
+			begin
+			i21 := High(sr.FPolygones[iii]);
+			i22 := 1;
+			end
+		else
+			begin
+			i21 := i2 - 1;
+			i22 := i2 + 1;
+			end;
+		end;
+	AddIndexInPrimetiveIndexes(p1,i1);
+	AddIndexInPrimetiveIndexes(p1,i12);
+	i := i12;
+	while (i <> i21) do
+		begin
+		if i = High(sr.FPolygones[iii]) then
+			i := 0
+		else
+			i += 1;
+		AddIndexInPrimetiveIndexes(p1,i);
+		end;
+	AddIndexInPrimetiveIndexes(p1,i2);
+	
+	AddIndexInPrimetiveIndexes(p2,i2);
+	AddIndexInPrimetiveIndexes(p2,i22);
+	i := i22;
+	while (i <> i11) do
+		begin
+		if i = High(sr.FPolygones[iii]) then
+			i := 0
+		else
+			i += 1;
+		AddIndexInPrimetiveIndexes(p2,i);
+		end;
+	AddIndexInPrimetiveIndexes(p2,i1);
+	
+	SetLength(sr.FPolygones[iii],0);
+	if iii <> High(sr.FPolygones) then
+		for i := iii to High(sr.FPolygones) - 1 do
+			sr.FPolygones[i] := sr.FPolygones[i+1];
+	SetLength(sr.FPolygones,Length(sr.FPolygones)-1);
+	
+	SetLength(sr.FPolygones,Length(sr.FPolygones)+2);
+	sr.FPolygones[High(sr.FPolygones)-0] := p1;
+	sr.FPolygones[High(sr.FPolygones)-1] := p2;
+	p1 := nil;
+	p2 := nil;
+	end;
+end;
 
 class procedure TSGGasDiffusionReliefRedactor.DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -603,124 +804,95 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 end;
 
 procedure TSGGasDiffusionReliefRedactor.UpDate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function ProshTreug(const a, b, c : TSGFloat):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	p : TSGFloat;
-begin
-p := (a + b + c) / 2;
-Result := sqrt(p*(p-a)*(p-b)*(p-c));
-end;
-
-function PointInTriangle(const t1,t2,t3,v : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	t1t2,t2t3,t3t1,t1v,t2v,t3v : TSGFloat;
-begin
-t1t2 := Abs(t1-t2);
-t2t3 := Abs(t2-t3);
-t3t1 := Abs(t3-t1);
-
-t1v := Abs(t1-v);
-t2v := Abs(t2-v);
-t3v := Abs(t3-v);
-
-Result := Abs(
-	ProshTreug(t1t2,t2t3,t3t1)
-	-ProshTreug(t1t2,t1v,t2v)
-	-ProshTreug(t2v,t2t3,t3v)
-	-ProshTreug(t3v,t1v,t3t1)) < SGZero * 5;
-end;
-
-function PointInLine(const t1,t2,v : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	t1t2 : TSGFloat;
-begin
-t1t2 := Abs(t2-t1);
-Result := ProshTreug(t1t2,Abs(t1-v),Abs(t2-v))/t1t2 < 0.1;
-end;
-
 var
 	Vertex : TSGVertex3f;
 	i, ii, iii : LongWord;
 begin
 Vertex {$IFNDEF MOBILE}:= SGGetVertexUnderPixel(Render,Context.CursorPosition()){$ELSE}.Import(){$ENDIF};
-if FPixelPrimitives <> nil then
+if FCutPolygoneButton.Active then
 	begin
-	SetLength(FPixelPrimitives,0);
-	FPixelPrimitives := nil;
-	end;
-case FRedactingType of
-TSGGDRRedactingLines :
-	begin
-	for i := 0 to High(FSingleRelief^.FPolygones) do
+	if FPixelPrimitives <> nil then
 		begin
-		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
-			if ii = High(FSingleRelief^.FPolygones[i]) then
-				begin
-				if PointInLine(
+		SetLength(FPixelPrimitives,0);
+		FPixelPrimitives := nil;
+		end;
+	case FRedactingType of
+	TSGGDRRedactingLines :
+		begin
+		for i := 0 to High(FSingleRelief^.FPolygones) do
+			begin
+			for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
+				if ii = High(FSingleRelief^.FPolygones[i]) then
+					begin
+					if SGIsVertexOnLine(
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][0]],
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
+						Vertex) then
+							begin
+							SetLength(FPixelPrimitives,2);
+							FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][0];
+							FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii];
+							break;
+							end;
+					end
+				else
+					if SGIsVertexOnLine(
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii+1]],
+						Vertex) then
+							begin
+							SetLength(FPixelPrimitives,2);
+							FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][ii];
+							FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii+1];
+							break;
+							end;
+			if FPixelPrimitives <> nil then
+				break;
+			end;
+		end;
+	TSGGDRRedactingPoints :
+		begin
+		if FSingleRelief^.FPoints <> nil then if Length(FSingleRelief^.FPoints) <> 0 then
+			begin
+			for i := 0 to High(FSingleRelief^.FPoints) do
+				if Abs(Vertex - FSingleRelief^.FPoints[i]) < 0.1 then
+					begin
+					SetLength(FPixelPrimitives,1);
+					FPixelPrimitives[0] := i;
+					Break;
+					end;
+			end;
+		end;
+	TSGGDRRedactingPolygones :
+		begin
+		for i := 0 to High(FSingleRelief^.FPolygones) do
+			begin
+			for ii := 1 to High(FSingleRelief^.FPolygones[i])-1 do
+				if SGIsVertexOnTriangle(
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][0]],
-					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
-					Vertex) then
-						begin
-						SetLength(FPixelPrimitives,2);
-						FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][0];
-						FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii];
-						break;
-						end;
-				end
-			else
-				if PointInLine(
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii+1]],
 					Vertex) then
 						begin
-						SetLength(FPixelPrimitives,2);
-						FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][ii];
-						FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii+1];
+						SetLength(FPixelPrimitives,Length(FSingleRelief^.FPolygones[i]));
+						for iii := 0 to High(FSingleRelief^.FPolygones[i]) do
+							FPixelPrimitives[iii] := FSingleRelief^.FPolygones[i][iii];
 						break;
 						end;
-		if FPixelPrimitives <> nil then
-			break;
+			if FPixelPrimitives <> nil then
+				break;
+			end;
 		end;
 	end;
-TSGGDRRedactingPoints :
+	if (FPixelPrimitives <> nil) and (Context.CursorKeyPressedType() = SGUpKey) and (Context.CursorKeyPressed() = SGLeftCursorButton) then
+		ProcessPixelPrimitives();
+	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
+		SelectAllPrimetives();
+	end
+else
 	begin
-	if FSingleRelief^.FPoints <> nil then if Length(FSingleRelief^.FPoints) <> 0 then
-		begin
-		for i := 0 to High(FSingleRelief^.FPoints) do
-			if Abs(Vertex - FSingleRelief^.FPoints[i]) < 0.1 then
-				begin
-				SetLength(FPixelPrimitives,1);
-				FPixelPrimitives[0] := i;
-				Break;
-				end;
-		end;
+	
 	end;
-TSGGDRRedactingPolygones :
-	begin
-	for i := 0 to High(FSingleRelief^.FPolygones) do
-		begin
-		for ii := 1 to High(FSingleRelief^.FPolygones[i])-1 do
-			if PointInTriangle(
-				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][0]],
-				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
-				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii+1]],
-				Vertex) then
-					begin
-					SetLength(FPixelPrimitives,Length(FSingleRelief^.FPolygones[i]));
-					for iii := 0 to High(FSingleRelief^.FPolygones[i]) do
-						FPixelPrimitives[iii] := FSingleRelief^.FPolygones[i][iii];
-					break;
-					end;
-		if FPixelPrimitives <> nil then
-			break;
-		end;
-	end;
-end;
-if (FPixelPrimitives <> nil) and (Context.CursorKeyPressedType() = SGUpKey) and (Context.CursorKeyPressed() = SGLeftCursorButton) then
-	ProcessPixelPrimitives();
-if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
-	SelectAllPrimetives();
 end;
 
 procedure TSGGasDiffusionReliefRedactor.ProcessPixelPrimitives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

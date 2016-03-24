@@ -360,44 +360,6 @@ ab := Abs(b-a);
 Result := Abs(Abs(p-a) + Abs(p-b) - ab) < ab * SGZero * 200;
 end;
 
-function PointBeetWeen3D(const a,b,p:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	ab : TSGFloat;
-begin
-ab := Abs(b-a);
-Result := Abs(Abs(p-a) + Abs(p-b) - ab) < ab * SGZero;
-end;
-
-function ProshTreug(const a, b, c : TSGFloat):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	p : TSGFloat;
-begin
-p := (a + b + c) / 2;
-Result := sqrt(p*(p-a)*(p-b)*(p-c));
-end;
-
-function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
-begin
-t1t2 := Abs(t1 - t2);
-t2t3 := Abs(t2 - t3);
-t3t1 := Abs(t3 - t1);
-
-vt1 := Abs(v - t1);
-vt2 := Abs(v - t2);
-vt3 := Abs(v - t3);
-
-s := ProshTreug(t1t2, t2t3, t3t1);
-
-Result := Abs(
-	  s
-	- ProshTreug(t1t2, vt1, vt2)
-	- ProshTreug(t2t3, vt3, vt2)
-	- ProshTreug(t3t1, vt1, vt3)
-		) < SGZero * s * 100000;
-end;
-
 function ScalePointToTriangle3D(const t1,t2,t3,v:TSGVertex2f; const t1z,t2z,t3z : Single):Single;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	t1t2, t2t3, t3t1, vt1, vt2, vt3, s : TSGFloat;
@@ -410,17 +372,17 @@ vt1 := Abs(v - t1);
 vt2 := Abs(v - t2);
 vt3 := Abs(v - t3);
 
-s := ProshTreug(t1t2, t2t3, t3t1);
+s := SGTriangleSize(t1t2, t2t3, t3t1);
 
 Result := 
-	(ProshTreug(t2t3, vt3, vt2)/s)*t1z + 
-	(ProshTreug(t3t1, vt1, vt3)/s)*t2z + 
-	(ProshTreug(t1t2, vt1, vt2)/s)*t3z;
+	(SGTriangleSize(t2t3, vt3, vt2)/s)*t1z + 
+	(SGTriangleSize(t3t1, vt1, vt3)/s)*t2z + 
+	(SGTriangleSize(t1t2, vt1, vt2)/s)*t3z;
 end;
 
 function PointInTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := PointInTriangle2D( 
+Result := SGIsVertexOnTriangle( 
 	SGVertex2fImport(t1.x,t1.y),
 	SGVertex2fImport(t2.x,t2.y),
 	SGVertex2fImport(t3.x,t3.y),
@@ -439,7 +401,7 @@ end;
 
 function PointInTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := PointInTriangle2D( 
+Result := SGIsVertexOnTriangle( 
 	SGVertex2fImport(t1.z,t1.y),
 	SGVertex2fImport(t2.z,t2.y),
 	SGVertex2fImport(t3.z,t3.y),
@@ -458,7 +420,7 @@ end;
 
 function PointInTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin 
-Result := PointInTriangle2D( 
+Result := SGIsVertexOnTriangle( 
 	SGVertex2fImport(t1.x,t1.z),
 	SGVertex2fImport(t2.x,t2.z),
 	SGVertex2fImport(t3.x,t3.z),
@@ -477,7 +439,7 @@ end;
 
 function PointInTriangle(const t1,t2,t3,v,n:TSGVertex3f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if PointBeetWeen3D(t1,t2,v) or PointBeetWeen3D(t1,t3,v) or PointBeetWeen3D(t2,t3,v) then
+if SGIsVertexOnLine(t1,t2,v) or SGIsVertexOnLine(t1,t3,v) or SGIsVertexOnLine(t2,t3,v) then
 	begin
 	Result := True;
 	Exit;

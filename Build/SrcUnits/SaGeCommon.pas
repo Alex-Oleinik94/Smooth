@@ -379,8 +379,102 @@ function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPO
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF}
+function SGTriangleSize(const a,b,c:TSGVertex3f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGTriangleSize(const a,b,c:TSGVertex2f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGTriangleSize(const a,b,c:TSGFloat)   :TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	l : TSGFloat;
+begin
+l := Abs(t2-t1);
+Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
+end;
+
+function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	l : TSGFloat;
+begin
+l := Abs(t2-t1);
+Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
+end;
+
+function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	l : TSGFloat;
+begin
+l := Abs(t2-t1);
+Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
+end;
+
+function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
+begin
+t1t2 := Abs(t1 - t2);
+t2t3 := Abs(t2 - t3);
+t3t1 := Abs(t3 - t1);
+
+vt1 := Abs(v - t1);
+vt2 := Abs(v - t2);
+vt3 := Abs(v - t3);
+
+s := SGTriangleSize(t1t2, t2t3, t3t1);
+
+Result := Abs(
+	  s
+	- SGTriangleSize(t1t2, vt1, vt2)
+	- SGTriangleSize(t2t3, vt3, vt2)
+	- SGTriangleSize(t3t1, vt1, vt3)
+		) < Zero * s;
+end;
+
+function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
+begin
+t1t2 := Abs(t1 - t2);
+t2t3 := Abs(t2 - t3);
+t3t1 := Abs(t3 - t1);
+
+vt1 := Abs(v - t1);
+vt2 := Abs(v - t2);
+vt3 := Abs(v - t3);
+
+s := SGTriangleSize(t1t2, t2t3, t3t1);
+
+Result := Abs(
+	  s
+	- SGTriangleSize(t1t2, vt1, vt2)
+	- SGTriangleSize(t2t3, vt3, vt2)
+	- SGTriangleSize(t3t1, vt1, vt3)
+		) < Zero * s;
+end;
+
+function SGTriangleSize(const a,b,c:TSGFloat)   :TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	p : TSGFloat;
+begin
+p := (a + b + c) / 2;
+Result := sqrt(p*(p-a)*(p-b)*(p-c));
+end;
+
+function SGTriangleSize(const a,b,c:TSGVertex2f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGTriangleSize(Abs(a-c),Abs(c-b),Abs(b-a));
+end;
+
+function SGTriangleSize(const a,b,c:TSGVertex3f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGTriangleSize(Abs(a-c),Abs(c-b),Abs(b-a));
+end;
 
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

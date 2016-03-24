@@ -454,10 +454,10 @@ const
 	SG_TRUE = TSGExBoolean(1);
 	SG_FALSE = TSGExBoolean(0);
 	SG_UNKNOWN = TSGExBoolean(2);
-
-var
+const
 	//»спользуетс€ дл€ вычислени€ с Ёпсилон 
-	SGZero:Single = 0.0001;
+	SGZero = 0.0001;
+var
 	//Ёкземпл€р класса лога программы
 	SGLog:TSGLog = nil;
 	//Ќесуществующее значение
