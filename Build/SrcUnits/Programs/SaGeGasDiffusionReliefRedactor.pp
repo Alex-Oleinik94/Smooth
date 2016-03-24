@@ -46,7 +46,7 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGDRSelectedPrimetives = packed array of TSGLongWord;
+	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
 	TSGGasDiffusionReliefRedactor = class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
@@ -66,14 +66,19 @@ type
 		
 		FRedactingType : TSGGDRRedactingType;
 		FInRedactoring : TSGBoolean;
-		FSelectedPrimetives : TSGGDRSelectedPrimetives;
-		FPixelPrimitive : LongInt;
+		FSelectedPrimetives : TSGGDRPrimetiveIndexes;
+		FPixelPrimitives : TSGGDRPrimetiveIndexes;
 		FInCutting : TSGBoolean;
 			private
 		procedure UpDate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure UpDatePointsShifting();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DrawRedactoringRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ProcessPixelPrimitive();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ProcessPixelPrimitives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SelectAllPrimetives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			private
+		class function ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure AddIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
 		procedure StartRedactoring();
@@ -88,6 +93,64 @@ implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
+
+class procedure TSGGasDiffusionReliefRedactor.DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii : LongWord;
+begin
+if VIndexes <> nil then if Length(VIndexes)>0 then
+	begin
+	ii := Length(VIndexes);
+	for i := 0 to High(VIndexes) do
+		if VIndexes[i] = VIndex then
+			begin
+			ii := i;
+			break;
+			end;
+	if ii <> Length(VIndexes) then
+		begin
+		if ii <> High(VIndexes) then
+			for i := ii to High(VIndexes)-1 do
+				VIndexes[i] := VIndexes[i + 1];
+		SetLength(VIndexes,Length(VIndexes)-1);
+		if Length(VIndexes)=0 then
+			VIndexes := nil;
+		end;
+	end;
+end;
+
+class procedure TSGGasDiffusionReliefRedactor.AddIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if VIndexes = nil then
+	SetLength(VIndexes,1)
+else
+	SetLength(VIndexes,Length(VIndexes)+1);
+VIndexes[High(VIndexes)] := VIndex;
+end;
+
+class function TSGGasDiffusionReliefRedactor.ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := False;
+if VIndexes <> nil then if (Length(VIndexes)>0) then
+	for i := 0 to High(VIndexes) do
+		if VIndexes[i] = VIndex then
+			begin
+			Result := True;
+			break;
+			end;
+end;
+
+procedure TSGGasDiffusionReliefRedactor.SelectAllPrimetives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+SetLength(FPixelPrimitives,Length(FSingleRelief^.FPoints));
+for i := 0 to High(FPixelPrimitives) do
+	FPixelPrimitives[i] := i;
+ProcessPixelPrimitives();
+end;
 
 function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -441,7 +504,7 @@ constructor TSGGasDiffusionReliefRedactor.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 FSelectedPrimetives := nil;
-FPixelPrimitive := -1;
+FPixelPrimitives := nil;
 FCamera := TSGCamera.Create();
 FCamera.Context := Context;
 FSingleRelief := nil;
@@ -480,17 +543,16 @@ if FSingleRelief^.FPolygones <> nil then
 		Render.BeginScene(SGR_LINE_LOOP);
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
-			if FRedactingType = TSGGDRRedactingPoints then
-				if FSingleRelief^.FPolygones[i][ii] = FPixelPrimitive then
-					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
-						((SGColorImport(1,0.3,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
-					else
-						((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
-				else 
-					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
-						((SGColorImport(1,0.3,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
-					else
-						Render.Color4f(0,0.5,1,1);
+			if ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
+				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+					((SGColorImport(1,0.3,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
+				else
+					((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
+			else 
+				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+					((SGColorImport(1,0.3,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
+				else
+					Render.Color4f(0,0.5,1,1);
 			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]].Vertex(Render);
 			end;
 		Render.EndScene();
@@ -511,29 +573,28 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 		Render.BeginScene(SGR_POLYGON);
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
-			if FRedactingType = TSGGDRRedactingPoints then
-				if FSingleRelief^.FPolygones[i][ii] = FPixelPrimitive then
-					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
-						if FSingleRelief^.FType then
-							((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/3).Color(Render)
-						else
-							((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/3).Color(Render)
+			if ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
+				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+					if FSingleRelief^.FType then
+						((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/3).Color(Render)
 					else
-						if FSingleRelief^.FType then
-							((SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/2).Color(Render)
-						else
-							((SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+						((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/3).Color(Render)
 				else
-					if ExistsInSelectedPrimetives(FSingleRelief^.FPolygones[i][ii]) then
-						if FSingleRelief^.FType then
-							((SGColorImport(1,0,0,0.3) + SGColorImport(0,1,1,0.2))/2).Color(Render)
-						else
-							((SGColorImport(1,0,0,0.3) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+					if FSingleRelief^.FType then
+						((SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/2).Color(Render)
 					else
-						if FSingleRelief^.FType then
-							Render.Color4f(0,1,1,0.2)
-						else
-							Render.Color4f(0,0.5,1,0.2);
+						((SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+			else
+				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+					if FSingleRelief^.FType then
+						((SGColorImport(1,0,0,0.3) + SGColorImport(0,1,1,0.2))/2).Color(Render)
+					else
+						((SGColorImport(1,0,0,0.3) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+				else
+					if FSingleRelief^.FType then
+						Render.Color4f(0,1,1,0.2)
+					else
+						Render.Color4f(0,0.5,1,0.2);
 			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]].Vertex(Render);
 			end;
 		Render.EndScene();
@@ -547,7 +608,11 @@ var
 	i : LongWord;
 begin
 Vertex {$IFNDEF MOBILE}:= SGGetVertexUnderPixel(Render,Context.CursorPosition()){$ELSE}.Import(){$ENDIF};
-FPixelPrimitive := -1;
+if FPixelPrimitives <> nil then
+	begin
+	SetLength(FPixelPrimitives,0);
+	FPixelPrimitives := nil;
+	end;
 case FRedactingType of
 TSGGDRRedactingPoints :
 	begin
@@ -556,7 +621,8 @@ TSGGDRRedactingPoints :
 		for i := 0 to High(FSingleRelief^.FPoints) do
 			if Abs(Vertex - FSingleRelief^.FPoints[i]) < 0.1 then
 				begin
-				FPixelPrimitive := i;
+				SetLength(FPixelPrimitives,1);
+				FPixelPrimitives[0] := i;
 				Break;
 				end;
 		end;
@@ -570,39 +636,33 @@ TSGGDRRedactingLines :
 	
 	end;
 end;
-if (FPixelPrimitive <> -1) and (Context.CursorKeyPressedType() = SGUpKey) and (Context.CursorKeyPressed() = SGLeftCursorButton) then
-	ProcessPixelPrimitive();
+if (FPixelPrimitives <> nil) and (Context.CursorKeyPressedType() = SGUpKey) and (Context.CursorKeyPressed() = SGLeftCursorButton) then
+	ProcessPixelPrimitives();
+if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
+	SelectAllPrimetives();
 end;
 
-procedure TSGGasDiffusionReliefRedactor.ProcessPixelPrimitive();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGGasDiffusionReliefRedactor.ProcessPixelPrimitives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i, ii : LongWord;
+	i,ii : LongWord;
 begin
-if (FSelectedPrimetives = nil) then
-	begin
-	SetLength(FSelectedPrimetives,1);
-	FSelectedPrimetives[0] := FPixelPrimitive;
-	end
-else
+if FPixelPrimitives <> nil then if Length(FPixelPrimitives)>0 then
 	begin
 	ii := 0;
-	if Length(FSelectedPrimetives) <> 0 then
-		for i := 0 to High(FSelectedPrimetives) do
-			if FSelectedPrimetives[i] = FPixelPrimitive then
-				begin
-				ii := i + 1;
-				Break;
-				end;
-	if ii = 0 then
+	for i := 0 to High(FPixelPrimitives) do
+		if not ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FPixelPrimitives[i]) then
+			ii := 1;
+	if TSGBoolean(ii) then
 		begin
-		SetLength(FSelectedPrimetives,Length(FSelectedPrimetives)+1);
-		FSelectedPrimetives[High(FSelectedPrimetives)] := FPixelPrimitive;
+		for i := 0 to High(FPixelPrimitives) do
+			if not ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FPixelPrimitives[i]) then
+				AddIndexInPrimetiveIndexes(FSelectedPrimetives,FPixelPrimitives[i]);
 		end
 	else
 		begin
-		for i := ii to High(FSelectedPrimetives) do
-			FSelectedPrimetives[i - 1] := FSelectedPrimetives[i];
-		SetLength(FSelectedPrimetives,Length(FSelectedPrimetives)-1);
+		for i := 0 to High(FPixelPrimitives) do
+			if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FPixelPrimitives[i]) then
+				DelIndexInPrimetiveIndexes(FSelectedPrimetives,FPixelPrimitives[i]);
 		end;
 	end;
 end;
