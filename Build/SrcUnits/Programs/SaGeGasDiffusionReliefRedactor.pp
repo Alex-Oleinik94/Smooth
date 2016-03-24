@@ -603,9 +603,45 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 end;
 
 procedure TSGGasDiffusionReliefRedactor.UpDate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ProshTreug(const a, b, c : TSGFloat):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	p : TSGFloat;
+begin
+p := (a + b + c) / 2;
+Result := sqrt(p*(p-a)*(p-b)*(p-c));
+end;
+
+function PointInTriangle(const t1,t2,t3,v : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	t1t2,t2t3,t3t1,t1v,t2v,t3v : TSGFloat;
+begin
+t1t2 := Abs(t1-t2);
+t2t3 := Abs(t2-t3);
+t3t1 := Abs(t3-t1);
+
+t1v := Abs(t1-v);
+t2v := Abs(t2-v);
+t3v := Abs(t3-v);
+
+Result := Abs(
+	ProshTreug(t1t2,t2t3,t3t1)
+	-ProshTreug(t1t2,t1v,t2v)
+	-ProshTreug(t2v,t2t3,t3v)
+	-ProshTreug(t3v,t1v,t3t1)) < SGZero * 5;
+end;
+
+function PointInLine(const t1,t2,v : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	t1t2 : TSGFloat;
+begin
+t1t2 := Abs(t2-t1);
+Result := ProshTreug(t1t2,Abs(t1-v),Abs(t2-v))/t1t2 < 0.1;
+end;
+
 var
 	Vertex : TSGVertex3f;
-	i : LongWord;
+	i, ii, iii : LongWord;
 begin
 Vertex {$IFNDEF MOBILE}:= SGGetVertexUnderPixel(Render,Context.CursorPosition()){$ELSE}.Import(){$ENDIF};
 if FPixelPrimitives <> nil then
@@ -614,6 +650,39 @@ if FPixelPrimitives <> nil then
 	FPixelPrimitives := nil;
 	end;
 case FRedactingType of
+TSGGDRRedactingLines :
+	begin
+	for i := 0 to High(FSingleRelief^.FPolygones) do
+		begin
+		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
+			if ii = High(FSingleRelief^.FPolygones[i]) then
+				begin
+				if PointInLine(
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][0]],
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
+					Vertex) then
+						begin
+						SetLength(FPixelPrimitives,2);
+						FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][0];
+						FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii];
+						break;
+						end;
+				end
+			else
+				if PointInLine(
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii+1]],
+					Vertex) then
+						begin
+						SetLength(FPixelPrimitives,2);
+						FPixelPrimitives[0] := FSingleRelief^.FPolygones[i][ii];
+						FPixelPrimitives[1] := FSingleRelief^.FPolygones[i][ii+1];
+						break;
+						end;
+		if FPixelPrimitives <> nil then
+			break;
+		end;
+	end;
 TSGGDRRedactingPoints :
 	begin
 	if FSingleRelief^.FPoints <> nil then if Length(FSingleRelief^.FPoints) <> 0 then
@@ -629,11 +698,23 @@ TSGGDRRedactingPoints :
 	end;
 TSGGDRRedactingPolygones :
 	begin
-	
-	end;
-TSGGDRRedactingLines :
-	begin
-	
+	for i := 0 to High(FSingleRelief^.FPolygones) do
+		begin
+		for ii := 1 to High(FSingleRelief^.FPolygones[i])-1 do
+			if PointInTriangle(
+				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][0]],
+				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]],
+				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii+1]],
+				Vertex) then
+					begin
+					SetLength(FPixelPrimitives,Length(FSingleRelief^.FPolygones[i]));
+					for iii := 0 to High(FSingleRelief^.FPolygones[i]) do
+						FPixelPrimitives[iii] := FSingleRelief^.FPolygones[i][iii];
+					break;
+					end;
+		if FPixelPrimitives <> nil then
+			break;
+		end;
 	end;
 end;
 if (FPixelPrimitives <> nil) and (Context.CursorKeyPressedType() = SGUpKey) and (Context.CursorKeyPressed() = SGLeftCursorButton) then
