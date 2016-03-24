@@ -48,9 +48,10 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			public
+		procedure UpDateSourses();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitCube(const Edge : TSGLongWord; const VProgress : PSGProgressBarFloat = nil);
 		procedure UpDateCube();
-		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGBoolean = False{$ENDIF}) : TSGCustomModel;
+		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGLongWord = 0{$ENDIF}) : TSGCustomModel;
 		procedure ClearGaz();
 		procedure InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
 			public
@@ -169,7 +170,7 @@ type
 		
 		{$IFDEF RELIEFDEBUG}
 			private
-		FInReliafDebug : TSGBoolean;
+		FInReliafDebug : TSGLongWord;
 		{$ENDIF}
 		
 			private
@@ -630,15 +631,16 @@ while i1<FEdge-3 do
 		VProgress^ := 0.75 + 0.25 * i1 / FEdge;
 	i1+=2;
 	end;
-Move(FRCI^,FReliefCubeIndex^, Edge * Edge * Edge);
+for i := 0 to Edge * Edge * Edge - 1 do
+	if (not TSGBoolean(FRCI[i])) then
+		FReliefCubeIndex[i] := 0;
 FreeMem(FRCI);
 end;
 
-procedure TSGGasDiffusionCube.UpDateCube();
-procedure UpDateSourses();
+procedure TSGGasDiffusionCube.UpDateSourses();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	I : TSGLongWord;
-	j1,j2,j3 : integer;
+	j1,j2,j3,j1d,j2d,j3d : integer;
 begin
 if FSourses<>nil then
 	for i:=0 to High(FSourses) do
@@ -646,10 +648,17 @@ if FSourses<>nil then
 		for j1:=-FSourses[i].FRadius to FSourses[i].FRadius do
 		for j2:=-FSourses[i].FRadius to FSourses[i].FRadius do
 		for j3:=-FSourses[i].FRadius to FSourses[i].FRadius do
-			if Cube(FSourses[i].FCoord.x+j1,FSourses[i].FCoord.y+j2,FSourses[i].FCoord.z+j3)^=0 then
-				Cube(FSourses[i].FCoord.x+j1,FSourses[i].FCoord.y+j2,FSourses[i].FCoord.z+j3)^:=FSourses[i].FGazTypeIndex+1;
+			begin
+			j1d := FSourses[i].FCoord.x+j1;
+			j2d := FSourses[i].FCoord.y+j2;
+			j3d := FSourses[i].FCoord.z+j3;
+			if (Cube(j1d,j2d,j3d)^=0) and TSGBoolean(ReliefCubeIndex(j1d,j2d,j3d)) then
+				Cube(j1d,j2d,j3d)^:=FSourses[i].FGazTypeIndex+1;
+			end;
 		end;
 end;
+
+procedure TSGGasDiffusionCube.UpDateCube();
 procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure ProvSmesh(const a,b : TSGGGDC);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -849,7 +858,7 @@ UpDateSourses();
 UpDateIfOpenBounds();
 end;
 
-function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGBoolean = False{$ENDIF}):TSGCustomModel;
+function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGLongWord = 0{$ENDIF}):TSGCustomModel;
 var
 	i : TSGLongWord;
 begin
@@ -862,11 +871,12 @@ if FGazes<>nil then
 		FGazes[i].FDinamicQuantity := 0;
 
 {$IFDEF RELIEFDEBUG}
-if FInReliafDebug then
+if FInReliafDebug<>0 then
 	begin
 	for i:=0 to FEdge * FEdge * FEdge -1 do
 		begin
-		if FReliefCubeIndex[i]<>0 then
+		if  ((FInReliafDebug=1) and (FReliefCubeIndex[i]=1)) or
+			((FInReliafDebug=2) and (FReliefCubeIndex[i]=0)) then
 			begin
 			Inc(FDinamicQuantityMoleculs);
 			end;
@@ -887,12 +897,13 @@ if FInReliafDebug then
 		FDinamicQuantityMoleculs:=0;
 		for i:=0 to FEdge*FEdge*FEdge -1 do
 			begin
-			if FReliefCubeIndex[i]=0 then
+			if  ((FInReliafDebug=1) and (FReliefCubeIndex[i]=1)) or
+				((FInReliafDebug=2) and (FReliefCubeIndex[i]=0)) then
 				begin
-				Result.LastObject().SetColor(FDinamicQuantityMoleculs,
-					1,
-					0,
-					0);
+				if (FInReliafDebug=2) then
+					Result.LastObject().SetColor(FDinamicQuantityMoleculs,1,0,0)
+				else
+					Result.LastObject().SetColor(FDinamicQuantityMoleculs,0,1,0);
 				Result.LastObject().ArVertex3f[FDinamicQuantityMoleculs]^:=
 					FCubeCoords[i];
 				Inc(FDinamicQuantityMoleculs);
@@ -1934,11 +1945,7 @@ for i:=0 to High(FCube.FSourses) do
 	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
 i := High(FCube.FSourses);
 (Button.Parent.Children[1] as TSGComboBox).SelectItem := i;
-for j1:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
-for j2:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
-for j3:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
-	if FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^=0 then
-		FCube.Cube(FCube.FSourses[i].FCoord.x+j1,FCube.FSourses[i].FCoord.y+j2,FCube.FSourses[i].FCoord.z+j3)^:=FCube.FSourses[i].FGazTypeIndex +1;
+FCube.UpDateSourses();
 UpDateSoursePanel();
 FMesh.Destroy();
 FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
@@ -3090,7 +3097,7 @@ constructor TSGGasDiffusion.Create(const VContext:TSGContext);
 begin
 inherited Create(VContext);
 {$IFDEF RELIEFDEBUG}
-	FInReliafDebug        := False;
+	FInReliafDebug        := 0;
 	{$ENDIF}
 FStartingFlag             := 0;
 FStartingThread           := nil;
@@ -3236,7 +3243,7 @@ FNewScenePanel.LastChild.Font := FTahomaFont;
 FEnableOutputComboBox.CreateItem('Включить непрерывное сохранение эмуляции');
 FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
-FEnableOutputComboBox.SelectItem:={$IFDEF MOBILE}1{$ELSE}0{$ENDIF};
+FEnableOutputComboBox.SelectItem:={$IFDEF SUPPORTINLINE}1{$ELSE}{$IFDEF MOBILE}1{$ELSE}0{$ENDIF}{$ENDIF};
 FEnableOutputComboBox.UserPointer:=Self;
 
 FBoundsTypeButton := TSGButton.Create();
@@ -3500,7 +3507,9 @@ if FMesh <> nil then
 	{$IFDEF RELIEFDEBUG}
 		if Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'D') then
 			begin
-			FInReliafDebug := not FInReliafDebug;
+			FInReliafDebug += 1;
+			if FInReliafDebug = 3 then
+				FInReliafDebug := 0;
 			FMesh.Destroy();
 			FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 			end;
