@@ -333,14 +333,22 @@ end;
 
 procedure TSGGasDiffusionCube.InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
 
-function Invert(const i : LongWord) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Invert(const i : LongWord; const Inverting : TSGBoolean = True) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := (FEdge - 1 - i)/(Edge-1)*2 - 1;
+if Inverting then
+	Result := (FEdge - 1 - i)/(Edge-1)*2 - 1
+else
+	Result := i/(Edge-1)*2 - 1
 end;
 
-function CoordFromXYZ(const x,y,z : LongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function CoordFromXYZ(const x,y,z : LongWord; const n : LongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result.Import(Invert(z),Invert(y),Invert(x));
+case n of
+0,1: Result.Import(Invert(z,False),Invert(y),Invert(x));
+2,3: Result.Import(Invert(z),Invert(y,False),Invert(x));
+4: Result.Import(Invert(z),Invert(y),Invert(x,False));
+5: Result.Import(Invert(z,False),Invert(y,False),Invert(x,False));
+end;
 end;
 
 function PointBeetWeen(const a,b,p:Single):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -549,7 +557,7 @@ if FRelief <> nil then
 									(not PointInPolygone(
 										@FRelief^.FData[j],
 										i,
-										CoordFromXYZ(i1,i2,i3),
+										CoordFromXYZ(i1,i2,i3,j),
 										VertexFromIndex(j),
 										j))
 									);
