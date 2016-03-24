@@ -69,14 +69,17 @@ type
 		FInRedactoring : TSGBoolean;
 		FSelectedPrimetives : TSGGDRPrimetiveIndexes;
 		FPixelPrimitives : TSGGDRPrimetiveIndexes;
+		
 		FInCutting : TSGBoolean;
+		FCuttingVertex1,FCuttingVertex2 : TSGVertex3f;
+		FCuttingIndex : TSGLongWord;
 			private
 		procedure UpDate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure UpDatePointsShifting();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DrawRedactoringRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ProcessPixelPrimitives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SelectAllPrimetives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure UpdateCutPolygone();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure UpDateCutPolygone(const Vertex : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
 		class function ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure AddIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -97,9 +100,110 @@ implementation
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
 
-procedure TSGGasDiffusionReliefRedactor.UpdateCutPolygone();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
+procedure TSGGasDiffusionReliefRedactor.UpDateCutPolygone(const Vertex : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function TriangleHeight(const t1,t2,v : TSGVertex3f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGTriangleSize(t1,t2,v) / Abs(t2 - t1) * 2;
+end;
+
+function TriangleHeightVertex(const t1,t2,v : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	th,c  : TSGFloat;
+begin
+th := TriangleHeight(t1,t2,v);
+c :=sqrt(sqr(Abs(v-t1)) - sqr(th));
+Result := t1 + (t2 - t1) * (c / Abs(t1-t2));
+end;
+
+var
+	i, ii, iii, i1, i2, ii1, ii2 : TSGLongWord;
+	b : TSGBoolean;
+	l, th : TSGFloat;
+begin
+case FCuttingIndex of
+1 : 
+	begin
+	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGDownKey) then
+		begin
+		ii := Length(FSingleRelief^.FPoints);
+		for i := 0 to High(FSingleRelief^.FPoints) do
+			if Abs(Vertex - FSingleRelief^.FPoints[i]) < 0.1 then
+				begin
+				ii := i;
+				break;
+				end;
+		if ii <> Length(FSingleRelief^.FPoints) then
+			begin
+			FCuttingVertex1 := FSingleRelief^.FPoints[i];
+			FCuttingIndex := 2;
+			end
+		else
+			begin
+			l := 0;
+			b := False;
+			for i := 0 to High(FSingleRelief^.FPolygones) do
+				for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
+					begin
+					if ii = High(FSingleRelief^.FPolygones) then
+						begin
+						i1 := High(FSingleRelief^.FPolygones);
+						i2 := 0;
+						end
+					else
+						begin
+						i1 := ii;
+						i2 := ii + 1;
+						end;
+					th := TriangleHeight(
+						FSingleRelief^.FPoints[i1],
+						FSingleRelief^.FPoints[i2],
+						Vertex);
+					if (th < 0.1) and ((not b) or (b and (l > th))) then
+						begin
+						b := True;
+						l := th;
+						ii1 := i1;
+						ii2 := i2;
+						end;
+					end;
+			if b then
+				begin
+				FCuttingVertex1 := TriangleHeightVertex(
+					FSingleRelief^.FPoints[i1],
+					FSingleRelief^.FPoints[i2],
+					Vertex);
+				FCuttingIndex := 2;
+				end;
+			end;
+		end;
+	end;
+2 :
+	begin
+	if Abs(Vertex) < 20 then
+		begin
+		Render.Color3f(0,1,0);
+		Render.BeginScene(SGR_LINES);
+		FCuttingVertex1.Vertex(Render);
+		Vertex.Vertex(Render);
+		Render.EndScene();
+		end;
+	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGUpKey) then
+		begin
+		FCuttingIndex := 1;
+		FCuttingVertex1.Import();
+		FCuttingVertex2.Import();
+		end;
+	if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) and (Context.KeyPressedType() = SGUpKey) then
+		begin
+		FInCutting := False;
+		FCuttingIndex := 0;
+		FCutPolygoneButton.Active := True;
+		FCuttingVertex1.Import();
+		FCuttingVertex2.Import();
+		end;
+	end;
+end;
 end;
 
 class procedure TSGGasDiffusionReliefRedactor.CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -384,6 +488,9 @@ else if Button = FPrimetiveTypeButtonPolygones then
 else if Button = FCutPolygoneButton then
 	begin
 	FCutPolygoneButton.Active := False;
+	FCuttingIndex := 1;
+	FCuttingVertex1 . Import();
+	FCuttingVertex2 . Import();
 	end;
 end;end;
 
@@ -452,6 +559,9 @@ if FCutPolygoneButton = nil then
 FCutPolygoneButton.Visible := True;
 FCutPolygoneButton.Active := True;
 FRedactingType := TSGGDRRedactingPoints;
+FCuttingIndex := 0;
+FCuttingVertex1.Import();
+FCuttingVertex2.Import();
 end;
 
 procedure TSGGasDiffusionReliefRedactor.StopRedactoring();
@@ -891,7 +1001,7 @@ if FCutPolygoneButton.Active then
 	end
 else
 	begin
-	
+	UpDateCutPolygone(Vertex);
 	end;
 end;
 

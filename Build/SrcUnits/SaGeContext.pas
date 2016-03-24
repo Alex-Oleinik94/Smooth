@@ -32,11 +32,13 @@ const
 	SG_ALT_KEY = 18;
 	SG_CTRL_KEY = 17;
 	SG_SHIFT_KEY = 16;
+	SG_ESC_KEY = 27;
+	SG_ESCAPE_KEY = SG_ESC_KEY;
 type
 	//“ипы нажатий клавиш мышки
 	TSGCursorButtons = (SGNoCursorButton,SGMiddleCursorButton,SGLeftCursorButton,SGRightCursorButton);
 	//“ип "нажати€"
-	TSGCursorButtonType = (SGDownKey,SGUpKey);
+	TSGCursorButtonType = (SGDownKey, SGUpKey);
 	//“ип использовани€ колесика
 	TSGCursorWheel = (SGNoCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
 	//Ёто тип, по которому раздел€ютс€ хран€щиес€ в последующем классе координаты мышы
