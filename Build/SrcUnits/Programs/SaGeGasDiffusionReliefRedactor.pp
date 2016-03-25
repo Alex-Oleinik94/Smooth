@@ -81,10 +81,13 @@ type
 		procedure SelectAllPrimetives();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure UpDateCutPolygone(const Vertex : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
-		class function ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  ExistsIndexInPrimetiveIndexes(const VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure AddIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		class procedure CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure CutPolygone(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  PointLineIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  PrimetiveIndexesEquals(const p1,p2:TSGGDRPrimetiveIndexes):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
 		procedure StartRedactoring();
@@ -99,6 +102,84 @@ implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
+
+class function  TSGGasDiffusionReliefRedactor.PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := Length(sr.FPoints);
+for i := 0 to High(sr.FPoints) do
+	if Abs(v - sr.FPoints[i]) < SGZero then
+		begin
+		Result := i;
+		break;
+		end;
+end;
+
+class function  TSGGasDiffusionReliefRedactor.PointLineIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii, i1, i2 : TSGLongWord;
+begin
+Result := nil;
+for i := 0 to High(sr.FPolygones) do
+	begin
+	for ii := 0 to High(sr.FPolygones[i]) do
+		begin
+		i1 := ii;
+		if ii = High(sr.FPolygones[i]) then
+			i2 := 0
+		else
+			i2 := ii + 1;
+		if  SGIsVertexOnLine(
+				sr.FPoints[sr.FPolygones[i][i1]],
+				sr.FPoints[sr.FPolygones[i][i2]],
+				v) then
+					begin
+					SetLength(Result,2);
+					Result[0] := i1;
+					Result[1] := i2;
+					break;
+					end;
+		end;
+	if Result <> nil then
+		break;
+	end;
+end;
+
+class function  TSGGasDiffusionReliefRedactor.PrimetiveIndexesEquals(const p1,p2:TSGGDRPrimetiveIndexes):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii, iii : TSGLongWord;
+begin
+Result := True;
+if p1 = nil then
+	i := 0
+else
+	i := Length(p1);
+if p2 = nil then
+	i := 0
+else
+	i := Length(p2);
+if i <> ii then
+	Result := False
+else if i <> 0 then
+	begin
+	for i := 0 to High(p1) do
+		begin
+		iii := 0;
+		for ii := 0 to High(p2) do
+			if p1[i] = p2[ii] then
+				begin
+				iii := 1;
+				break;
+				end;
+		if iii = 0 then
+			begin
+			Result := False;
+			break;
+			end;
+		end;
+	end;
+end;
 
 procedure TSGGasDiffusionReliefRedactor.UpDateCutPolygone(const Vertex : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -116,94 +197,125 @@ c :=sqrt(sqr(Abs(v-t1)) - sqr(th));
 Result := t1 + (t2 - t1) * (c / Abs(t1-t2));
 end;
 
+function PointNearly(const v  : TSGVertex3f; const pv : PSGVertex3f = nil):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i, ii, iii, i1, i2, ii1, ii2 : TSGLongWord;
 	b : TSGBoolean;
 	l, th : TSGFloat;
+begin
+Result.Import(1000,1000,1000);
+ii := Length(FSingleRelief^.FPoints);
+for i := 0 to High(FSingleRelief^.FPoints) do
+	if Abs(v - FSingleRelief^.FPoints[i]) < 0.1 then
+		begin
+		b := True;
+		if pv <> nil then
+			begin
+			
+			end;
+		if b then
+			begin
+			ii := i;
+			break;
+			end;
+		end;
+if ii <> Length(FSingleRelief^.FPoints) then
+	Result := FSingleRelief^.FPoints[ii]
+else
+	begin
+	l := 0;
+	b := False;
+	for i := 0 to High(FSingleRelief^.FPolygones) do
+		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
+			begin
+			if ii = High(FSingleRelief^.FPolygones) then
+				begin
+				i1 := High(FSingleRelief^.FPolygones);
+				i2 := 0;
+				end
+			else
+				begin
+				i1 := ii;
+				i2 := ii + 1;
+				end;
+			th := TriangleHeight(
+				FSingleRelief^.FPoints[i1],
+				FSingleRelief^.FPoints[i2],
+				v);
+			if (th < 0.3) and ((not b) or (b and (l > th))) then
+				begin
+				b := True;
+				l := th;
+				ii1 := i1;
+				ii2 := i2;
+				end;
+			end;
+	if b then
+		Result := TriangleHeightVertex(
+			FSingleRelief^.FPoints[i1],
+			FSingleRelief^.FPoints[i2],
+			v);
+	end;
+end;
+
+var
+	pi1, pi2 : TSGGDRPrimetiveIndexes;
 begin
 case FCuttingIndex of
 1 : 
 	begin
 	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGDownKey) then
 		begin
-		ii := Length(FSingleRelief^.FPoints);
-		for i := 0 to High(FSingleRelief^.FPoints) do
-			if Abs(Vertex - FSingleRelief^.FPoints[i]) < 0.1 then
-				begin
-				ii := i;
-				break;
-				end;
-		if ii <> Length(FSingleRelief^.FPoints) then
-			begin
-			FCuttingVertex1 := FSingleRelief^.FPoints[i];
-			FCuttingIndex := 2;
-			end
+		FCuttingVertex1 := PointNearly(Vertex);
+		if Abs(FCuttingVertex1) < 100 then
+			FCuttingIndex := 2
 		else
-			begin
-			l := 0;
-			b := False;
-			for i := 0 to High(FSingleRelief^.FPolygones) do
-				for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
-					begin
-					if ii = High(FSingleRelief^.FPolygones) then
-						begin
-						i1 := High(FSingleRelief^.FPolygones);
-						i2 := 0;
-						end
-					else
-						begin
-						i1 := ii;
-						i2 := ii + 1;
-						end;
-					th := TriangleHeight(
-						FSingleRelief^.FPoints[i1],
-						FSingleRelief^.FPoints[i2],
-						Vertex);
-					if (th < 0.1) and ((not b) or (b and (l > th))) then
-						begin
-						b := True;
-						l := th;
-						ii1 := i1;
-						ii2 := i2;
-						end;
-					end;
-			if b then
-				begin
-				FCuttingVertex1 := TriangleHeightVertex(
-					FSingleRelief^.FPoints[i1],
-					FSingleRelief^.FPoints[i2],
-					Vertex);
-				FCuttingIndex := 2;
-				end;
-			end;
+			FCuttingVertex1.Import();
 		end;
 	end;
 2 :
 	begin
-	if Abs(Vertex) < 20 then
+	if Abs(Vertex) < 100 then
 		begin
-		Render.Color3f(0,1,0);
-		Render.BeginScene(SGR_LINES);
-		FCuttingVertex1.Vertex(Render);
-		Vertex.Vertex(Render);
-		Render.EndScene();
-		end;
+		FCuttingVertex2 := PointNearly(Vertex,@FCuttingVertex1);
+		if Abs(FCuttingVertex2) < 100 then
+			begin
+			Render.Color3f(0,1,0);
+			Render.BeginScene(SGR_LINES);
+			FCuttingVertex1.Vertex(Render);
+			FCuttingVertex2.Vertex(Render);
+			Render.EndScene();
+			end;
+		end
+	else
+		FCuttingVertex2.Import(1000,1000,1000);
 	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGUpKey) then
 		begin
+		if (Abs(FCuttingVertex1) < 100) and (Abs(FCuttingVertex2)<100) then
+			begin
+			pi1 := PointLineIndex(FCuttingVertex1,FSingleRelief^);
+			pi2 := PointLineIndex(FCuttingVertex2,FSingleRelief^);
+			if not PrimetiveIndexesEquals(pi1,pi2) then
+				CutPolygone(FCuttingVertex1,FCuttingVertex2,FSingleRelief^);
+			if pi1 <> nil then
+				SetLength(pi1,0);
+			if pi2 <> nil then
+				SetLength(pi2,0);
+			end;
 		FCuttingIndex := 1;
-		FCuttingVertex1.Import();
-		FCuttingVertex2.Import();
-		end;
-	if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) and (Context.KeyPressedType() = SGUpKey) then
-		begin
-		FInCutting := False;
-		FCuttingIndex := 0;
-		FCutPolygoneButton.Active := True;
 		FCuttingVertex1.Import();
 		FCuttingVertex2.Import();
 		end;
 	end;
 end;
+if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) then
+	begin
+	FInCutting := False;
+	FCuttingIndex := 0;
+	FCutPolygoneButton.Active := True;
+	FCuttingVertex1.Import();
+	FCuttingVertex2.Import();
+	end;
 end;
 
 class procedure TSGGasDiffusionReliefRedactor.CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1056,7 +1168,9 @@ else if FRelief <> nil then
 	if FInRedactoring then
 		begin
 		UpDatePointsShifting();
-		FCamera.CallAction();
+		if FCutPolygoneButton.Active then
+			FCamera.Change();
+		FCamera.InitMatrix();
 		DrawRedactoringRelief();
 		UpDate();
 		end
