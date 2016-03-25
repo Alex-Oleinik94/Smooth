@@ -89,6 +89,7 @@ type
 		class function  PointsLineIndex(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PrimetiveIndexesEquals(const p1,p2:TSGGDRPrimetiveIndexes):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure TestPolygones(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
 		procedure StartRedactoring();
@@ -301,7 +302,7 @@ else
 end;
 
 var
-	pi1, pi2 : TSGGDRPrimetiveIndexes;
+	pi : TSGGDRPrimetiveIndexes;
 begin
 case FCuttingIndex of
 1 : 
@@ -340,14 +341,11 @@ case FCuttingIndex of
 		begin
 		if (Abs(FCuttingVertex1) < 100) and (Abs(FCuttingVertex2)<100) then
 			begin
-			pi1 := PointLineIndex(FCuttingVertex1,FSingleRelief^);
-			pi2 := PointLineIndex(FCuttingVertex2,FSingleRelief^);
-			if not PrimetiveIndexesEquals(pi1,pi2) then
+			pi := PointsLineIndex(FCuttingVertex1,FCuttingVertex2,FSingleRelief^);
+			if pi = nil then
 				CutPolygone(FCuttingVertex1,FCuttingVertex2,FSingleRelief^);
-			if pi1 <> nil then
-				SetLength(pi1,0);
-			if pi2 <> nil then
-				SetLength(pi2,0);
+			if pi <> nil then
+				SetLength(pi,0);
 			end;
 		FCuttingIndex := 1;
 		FCuttingVertex1.Import();
@@ -362,6 +360,68 @@ if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) then
 	FCutPolygoneButton.Active := True;
 	FCuttingVertex1.Import();
 	FCuttingVertex2.Import();
+	end;
+end;
+
+class procedure TSGGasDiffusionReliefRedactor.TestPolygones(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	v1i, v2i, i, ii, i1, i2, iii : TSGLongWord;
+begin
+v1i := PointIndex(v1,sr);
+v2i := PointIndex(v2,sr);
+WriteLn(v1i,' ',v2i,' ',Length(sr.FPoints));
+for i := 0 to High(sr.FPolygones) do
+	begin
+	WriteLn('i',i);
+	for ii := 0 to High(sr.FPolygones[i]) do
+		begin
+		WriteLn('ii',ii);
+		i1 := ii;
+		if ii = High(sr.FPolygones[i]) then
+			i2 := 0
+		else
+			i2 := ii + 1;
+		WriteLn('i12 ',i1,' ',i2);
+		if  SGIsVertexOnLine(
+				sr.FPoints[sr.FPolygones[i][i1]],
+				sr.FPoints[sr.FPolygones[i][i2]],
+				v1) and 
+			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v1) > SGZero) and
+			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v2) > SGZero) then
+				begin
+				SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
+				if ii <> High(sr.FPolygones[i]) then
+					for iii :=  High(sr.FPolygones[i]) downto i1 + 1 do
+						sr.FPolygones[iii] := sr.FPolygones[iii - 1];
+				sr.FPolygones[i][i1] := v1i;
+				break;
+				end;
+		end;
+	WriteLn('i',i);
+	for ii := 0 to High(sr.FPolygones[i]) do
+		begin
+		WriteLn('ii',ii);
+		i1 := ii;
+		if ii = High(sr.FPolygones[i]) then
+			i2 := 0
+		else
+			i2 := ii + 1;
+		WriteLn('i12 ',i1,' ',i2);
+		if  SGIsVertexOnLine(
+				sr.FPoints[sr.FPolygones[i][i1]],
+				sr.FPoints[sr.FPolygones[i][i2]],
+				v2) and 
+			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v1) > SGZero) and
+			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v2) > SGZero) then
+				begin
+				SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
+				if ii <> High(sr.FPolygones[i]) then
+					for iii :=  High(sr.FPolygones[i]) downto i1 + 1 do
+						sr.FPolygones[iii] := sr.FPolygones[iii - 1];
+				sr.FPolygones[i][i1] := v2i;
+				break;
+				end;
+		end;
 	end;
 end;
 
@@ -558,6 +618,8 @@ if iii <> Length(sr.FPolygones) then
 	sr.FPolygones[High(sr.FPolygones)-1] := p2;
 	p1 := nil;
 	p2 := nil;
+	
+	//TestPolygones(v1,v2,sr);
 	end;
 end;
 
