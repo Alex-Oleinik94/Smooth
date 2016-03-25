@@ -86,6 +86,7 @@ type
 		class procedure DelIndexInPrimetiveIndexes(var VIndexes : TSGGDRPrimetiveIndexes; const VIndex : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure CutPolygone(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PointLineIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  PointsLineIndex(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PrimetiveIndexesEquals(const p1,p2:TSGGDRPrimetiveIndexes):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
@@ -114,6 +115,41 @@ for i := 0 to High(sr.FPoints) do
 		Result := i;
 		break;
 		end;
+end;
+
+class function  TSGGasDiffusionReliefRedactor.PointsLineIndex(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+var
+	i, ii, i1, i2 : TSGLongWord;
+begin
+Result := nil;
+for i := 0 to High(sr.FPolygones) do
+	begin
+	for ii := 0 to High(sr.FPolygones[i]) do
+		begin
+		i1 := ii;
+		if ii = High(sr.FPolygones[i]) then
+			i2 := 0
+		else
+			i2 := ii + 1;
+		if  SGIsVertexOnLine(
+				sr.FPoints[sr.FPolygones[i][i1]],
+				sr.FPoints[sr.FPolygones[i][i2]],
+				v1) and 
+			SGIsVertexOnLine(
+				sr.FPoints[sr.FPolygones[i][i1]],
+				sr.FPoints[sr.FPolygones[i][i2]],
+				v2) then
+					begin
+					SetLength(Result,2);
+					Result[0] := i1;
+					Result[1] := i2;
+					break;
+					end;
+		end;
+	if Result <> nil then
+		break;
+	end;
 end;
 
 class function  TSGGasDiffusionReliefRedactor.PointLineIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGGDRPrimetiveIndexes;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -202,6 +238,7 @@ var
 	i, ii, iii, i1, i2, ii1, ii2 : TSGLongWord;
 	b : TSGBoolean;
 	l, th : TSGFloat;
+	pi : TSGGDRPrimetiveIndexes;
 begin
 Result.Import(1000,1000,1000);
 ii := Length(FSingleRelief^.FPoints);
@@ -211,7 +248,12 @@ for i := 0 to High(FSingleRelief^.FPoints) do
 		b := True;
 		if pv <> nil then
 			begin
-			
+			pi := PointsLineIndex(pv^,FSingleRelief^.FPoints[i],FSingleRelief^);
+			if pi <> nil then
+				begin
+				b := False;
+				SetLength(pi,0);
+				end;
 			end;
 		if b then
 			begin
@@ -228,21 +270,20 @@ else
 	for i := 0 to High(FSingleRelief^.FPolygones) do
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
+			i1 := ii;
 			if ii = High(FSingleRelief^.FPolygones) then
-				begin
-				i1 := High(FSingleRelief^.FPolygones);
-				i2 := 0;
-				end
+				i2 := 0
 			else
-				begin
-				i1 := ii;
 				i2 := ii + 1;
-				end;
 			th := TriangleHeight(
 				FSingleRelief^.FPoints[i1],
 				FSingleRelief^.FPoints[i2],
 				v);
-			if (th < 0.3) and ((not b) or (b and (l > th))) then
+			if (th < 0.3) and ((not b) or (b and (l > th))) and 
+				((pv = nil) or ((pv <> nil) and (not SGIsVertexOnLine(
+					FSingleRelief^.FPoints[i1],
+					FSingleRelief^.FPoints[i2],
+					pv^)))) then
 				begin
 				b := True;
 				l := th;
@@ -275,17 +316,22 @@ case FCuttingIndex of
 	end;
 2 :
 	begin
-	if Abs(Vertex) < 100 then
+	if (Abs(Vertex) < 100) and (Abs(FCuttingVertex1) < 100) then
 		begin
 		FCuttingVertex2 := PointNearly(Vertex,@FCuttingVertex1);
+		Render.BeginScene(SGR_LINES);
 		if Abs(FCuttingVertex2) < 100 then
 			begin
 			Render.Color3f(0,1,0);
-			Render.BeginScene(SGR_LINES);
-			FCuttingVertex1.Vertex(Render);
 			FCuttingVertex2.Vertex(Render);
-			Render.EndScene();
+			end
+		else
+			begin
+			Render.Color3f(1,0,0);
+			Vertex.Vertex(Render);
 			end;
+		FCuttingVertex1.Vertex(Render);
+		Render.EndScene();
 		end
 	else
 		FCuttingVertex2.Import(1000,1000,1000);
@@ -941,21 +987,6 @@ FRedactingType := TSGGDRRedactingPoints;
 end;
 
 procedure TSGGasDiffusionReliefRedactor.DrawRedactoringRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function ExistsInSelectedPrimetives(const i : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	ii : TSGLongWord;
-begin
-Result := False;
-if FSelectedPrimetives <> nil then if Length(FSelectedPrimetives) <> 0 then
-	for ii := 0 to High(FSelectedPrimetives) do
-		if FSelectedPrimetives[ii] = i then
-			begin
-			Result := True;
-			Break;
-			end;
-end;
-
 var
 	i, ii : LongWord;
 begin
@@ -966,13 +997,13 @@ if FSingleRelief^.FPolygones <> nil then
 		Render.BeginScene(SGR_LINE_LOOP);
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
-			if ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
-				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+			if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
+				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					((SGColorImport(1,0.3,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
 				else
 					((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
 			else 
-				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					((SGColorImport(1,0.3,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
 				else
 					Render.Color4f(0,0.5,1,1);
@@ -996,8 +1027,8 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 		Render.BeginScene(SGR_POLYGON);
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
-			if ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
-				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+			if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
+				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					if FSingleRelief^.FType then
 						((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/3).Color(Render)
 					else
@@ -1008,7 +1039,7 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 					else
 						((SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
 			else
-				if ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
+				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					if FSingleRelief^.FType then
 						((SGColorImport(1,0,0,0.3) + SGColorImport(0,1,1,0.2))/2).Color(Render)
 					else
@@ -1110,6 +1141,9 @@ if FCutPolygoneButton.Active then
 		ProcessPixelPrimitives();
 	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
 		SelectAllPrimetives();
+	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'D')) then
+		for i := 0 to High(FSingleRelief^.FPoints) do
+			FSingleRelief^.FPoints[i].z := 0;
 	end
 else
 	begin
