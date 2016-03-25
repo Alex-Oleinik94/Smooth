@@ -142,8 +142,8 @@ for i := 0 to High(sr.FPolygones) do
 				v2) then
 					begin
 					SetLength(Result,2);
-					Result[0] := i1;
-					Result[1] := i2;
+					Result[0] := sr.FPolygones[i][i1];
+					Result[1] := sr.FPolygones[i][i2];
 					break;
 					end;
 		end;
@@ -172,8 +172,8 @@ for i := 0 to High(sr.FPolygones) do
 				v) then
 					begin
 					SetLength(Result,2);
-					Result[0] := i1;
-					Result[1] := i2;
+					Result[0] := sr.FPolygones[i][i1];
+					Result[1] := sr.FPolygones[i][i2];
 					break;
 					end;
 		end;
@@ -271,20 +271,21 @@ else
 		for ii := 0 to High(FSingleRelief^.FPolygones[i]) do
 			begin
 			i1 := ii;
-			if ii = High(FSingleRelief^.FPolygones) then
+			if ii = High(FSingleRelief^.FPolygones[i]) then
 				i2 := 0
 			else
 				i2 := ii + 1;
 			th := TriangleHeight(
-				FSingleRelief^.FPoints[i1],
-				FSingleRelief^.FPoints[i2],
+				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
+				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
 				v);
 			if (th < 0.3) and ((not b) or (b and (l > th))) and 
 				((pv = nil) or ((pv <> nil) and (not SGIsVertexOnLine(
-					FSingleRelief^.FPoints[i1],
-					FSingleRelief^.FPoints[i2],
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
 					pv^)))) then
 				begin
+				iii := i;
 				b := True;
 				l := th;
 				ii1 := i1;
@@ -293,8 +294,8 @@ else
 			end;
 	if b then
 		Result := TriangleHeightVertex(
-			FSingleRelief^.FPoints[i1],
-			FSingleRelief^.FPoints[i2],
+			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[iii][ii1]],
+			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[iii][ii2]],
 			v);
 	end;
 end;
@@ -421,11 +422,11 @@ if iii <> Length(sr.FPolygones) then
 			if i = High(sr.FPolygones[iii]) then
 				begin
 				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][i]],
 					sr.FPoints[sr.FPolygones[iii][0]],
-					sr.FPoints[sr.FPolygones[iii][High(sr.FPolygones[iii])]],
 					v1) then
 						begin
-						i11 := High(sr.FPolygones[iii]);
+						i11 := i;
 						i12 := 0;
 						break;
 						end;
@@ -447,11 +448,11 @@ if iii <> Length(sr.FPolygones) then
 			if i = High(sr.FPolygones[iii]) then
 				begin
 				if SGIsVertexOnLine(
+					sr.FPoints[sr.FPolygones[iii][i]],
 					sr.FPoints[sr.FPolygones[iii][0]],
-					sr.FPoints[sr.FPolygones[iii][High(sr.FPolygones[iii])]],
 					v2) then
 						begin
-						i21 := High(sr.FPolygones[iii]);
+						i21 := i;
 						i22 := 0;
 						break;
 						end;
@@ -484,13 +485,14 @@ if iii <> Length(sr.FPolygones) then
 		else if i1 = 0 then
 			begin
 			i11 := High(sr.FPolygones[iii]);
-			i12 := 1;
+			i12 := i1 + 1;
 			end
 		else
 			begin
 			i11 := i1 - 1;
 			i12 := i1 + 1;
 			end;
+		i1 := sr.FPolygones[iii][i1];
 		end;
 	p2 := nil;
 	if i2 = Length(sr.FPolygones[iii]) then
@@ -509,16 +511,18 @@ if iii <> Length(sr.FPolygones) then
 		else if i2 = 0 then
 			begin
 			i21 := High(sr.FPolygones[iii]);
-			i22 := 1;
+			i22 := i2 + 1;
 			end
 		else
 			begin
 			i21 := i2 - 1;
 			i22 := i2 + 1;
 			end;
+		i2 := sr.FPolygones[iii][i2];
 		end;
+	
 	AddIndexInPrimetiveIndexes(p1,i1);
-	AddIndexInPrimetiveIndexes(p1,i12);
+	AddIndexInPrimetiveIndexes(p1,sr.FPolygones[iii][i12]);
 	i := i12;
 	while (i <> i21) do
 		begin
@@ -526,12 +530,12 @@ if iii <> Length(sr.FPolygones) then
 			i := 0
 		else
 			i += 1;
-		AddIndexInPrimetiveIndexes(p1,i);
+		AddIndexInPrimetiveIndexes(p1,sr.FPolygones[iii][i]);
 		end;
 	AddIndexInPrimetiveIndexes(p1,i2);
 	
 	AddIndexInPrimetiveIndexes(p2,i2);
-	AddIndexInPrimetiveIndexes(p2,i22);
+	AddIndexInPrimetiveIndexes(p2,sr.FPolygones[iii][i22]);
 	i := i22;
 	while (i <> i11) do
 		begin
@@ -539,7 +543,7 @@ if iii <> Length(sr.FPolygones) then
 			i := 0
 		else
 			i += 1;
-		AddIndexInPrimetiveIndexes(p2,i);
+		AddIndexInPrimetiveIndexes(p2,sr.FPolygones[iii][i]);
 		end;
 	AddIndexInPrimetiveIndexes(p2,i1);
 	
@@ -738,12 +742,61 @@ end;
 
 procedure TSGGasDiffusionSingleRelief.ExportToMeshLines(const VMesh : TSGCustomModel;const index : byte = -1;const WithVector : Boolean = False);
 var
+	LinesIndexes : packed array of
+		packed record
+			i1, i2 : TSGLongWord;
+			end = nil;
+
+procedure ConstructLinesIndexes();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ExistsInLinesIndexes(const p1, p2 : TSGLongWord):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := False;
+if LinesIndexes <> nil then if Length(LinesIndexes) > 0 then
+	for i := 0 to High(LinesIndexes) do
+		if ((p1 = LinesIndexes[i].i1) and (p2 = LinesIndexes[i].i2)) or
+			((p2 = LinesIndexes[i].i1) and (p1 = LinesIndexes[i].i2))then
+			begin
+			Result := True;
+			break;
+			end;
+end;
+
+procedure AddToLinesIndexes(const p1, p2 : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if LinesIndexes = nil then
+	SetLength(LinesIndexes,1)
+else
+	SetLength(LinesIndexes,Length(LinesIndexes)+1);
+LinesIndexes[High(LinesIndexes)].i1 := p1;
+LinesIndexes[High(LinesIndexes)].i2 := p2;
+end;
+
+var
+	i, ii, i1, i2 : TSGLongWord;
+begin
+for i := 0 to High(FPolygones) do
+	for ii := 0 to High(FPolygones[i]) do
+		begin
+		i1 := ii;
+		if ii = High(FPolygones[i]) then
+			i2 := 0
+		else
+			i2 := ii + 1;
+		if not ExistsInLinesIndexes(FPolygones[i][i1],FPolygones[i][i2]) then
+			AddToLinesIndexes(FPolygones[i][i1],FPolygones[i][i2]);
+		end;
+end;
+
+var
 	i : LongWord;
 begin
 if FPoints <> nil then if Length(FPoints) <> 0 then
 	begin
 	VMesh.AddObject();
-	VMesh.LastObject().ObjectPoligonesType := SGR_LINE_LOOP;
+	VMesh.LastObject().ObjectPoligonesType := SGR_LINES;
 	VMesh.LastObject().HasNormals := False;
 	VMesh.LastObject().HasTexture := False;
 	VMesh.LastObject().HasColors  := True;
@@ -758,6 +811,16 @@ if FPoints <> nil then if Length(FPoints) <> 0 then
 		VMesh.LastObject().ArVertex3f[i]^ := FPoints[i];
 		VMesh.LastObject().SetColor(i,0,0.5,1,1);
 		end;
+	
+	ConstructLinesIndexes();
+	
+	VMesh.LastObject().AddFaceArray();
+	VMesh.LastObject().PoligonesType[0] := SGR_LINES;
+	VMesh.LastObject().Faces[0] := Length(LinesIndexes);
+	for i := 0 to High(LinesIndexes) do
+		VMesh.LastObject().SetFaceLine(0,i,LinesIndexes[i].i1,LinesIndexes[i].i2);
+	
+	SetLength(LinesIndexes,0);
 	end;
 end;
 
