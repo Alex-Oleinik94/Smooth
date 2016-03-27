@@ -525,9 +525,9 @@ if FRelief <> nil then
 										j))
 									);
 							end;
-						if VProgress <> nil then
-							VProgress ^ := 0.1 + j * 0.4 / 6 + 0.4 / 6 * i2 / Edge;
 						end;
+					if VProgress <> nil then
+						VProgress ^ := 0.1 + j * 0.4 / 6 + 0.4 / 6 * i / High(FRelief^.FData[j].FPolygones);
 					end;
 				end;
 			end;
@@ -3205,7 +3205,7 @@ FNewScenePanel.LastChild.Font := FTahomaFont;
 FEnableOutputComboBox.CreateItem('¬ключить непрерывное сохранение эмул€ции');
 FEnableOutputComboBox.CreateItem('Ќе включать непрерывное сохранение эмул€ции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
-FEnableOutputComboBox.SelectItem:={$IFDEF SUPPORTINLINE}1{$ELSE}{$IFDEF MOBILE}1{$ELSE}0{$ENDIF}{$ENDIF};
+FEnableOutputComboBox.SelectItem:={$IFDEF RELIEFDEBUG}1{$ELSE}{$IFDEF MOBILE}1{$ELSE}0{$ENDIF}{$ENDIF};
 FEnableOutputComboBox.UserPointer:=Self;
 
 FBoundsTypeButton := TSGButton.Create();

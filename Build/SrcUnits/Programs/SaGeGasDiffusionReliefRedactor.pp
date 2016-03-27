@@ -364,61 +364,54 @@ if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) then
 end;
 
 class procedure TSGGasDiffusionReliefRedactor.TestPolygones(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	v1i, v2i, i, ii, i1, i2, iii : TSGLongWord;
+
+function IsPointInLine(const i, i1, i2 : TSGLongWord; const v1, v2 : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-v1i := PointIndex(v1,sr);
-v2i := PointIndex(v2,sr);
-WriteLn(v1i,' ',v2i,' ',Length(sr.FPoints));
-for i := 0 to High(sr.FPolygones) do
-	begin
-	WriteLn('i',i);
-	for ii := 0 to High(sr.FPolygones[i]) do
-		begin
-		WriteLn('ii',ii);
-		i1 := ii;
-		if ii = High(sr.FPolygones[i]) then
-			i2 := 0
-		else
-			i2 := ii + 1;
-		WriteLn('i12 ',i1,' ',i2);
-		if  SGIsVertexOnLine(
+Result :=   SGIsVertexOnLine(
 				sr.FPoints[sr.FPolygones[i][i1]],
 				sr.FPoints[sr.FPolygones[i][i2]],
 				v1) and 
 			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v1) > SGZero) and
-			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v2) > SGZero) then
+			(Abs(sr.FPoints[sr.FPolygones[i][i2]] - v2) > SGZero) and
+			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v2) > SGZero) and
+			(Abs(sr.FPoints[sr.FPolygones[i][i2]] - v1) > SGZero);
+end;
+
+procedure InsertPointInLine(const i, li, vi : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	iii : TSGLongWord;
+begin
+SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
+if li <> High(sr.FPolygones[i]) then
+	for iii :=  High(sr.FPolygones[i]) downto li + 2 do
+		sr.FPolygones[iii] := sr.FPolygones[iii - 1];
+sr.FPolygones[i][li + 1] := vi;
+end;
+
+var
+	v1i, v2i, i, ii, i1, i2 : TSGLongWord;
+begin
+v1i := PointIndex(v1,sr);
+v2i := PointIndex(v2,sr);
+for i := 0 to High(sr.FPolygones) do
+	begin
+	for ii := 0 to High(sr.FPolygones[i]) do
+		begin
+		i1 := ii;
+		i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+		if IsPointInLine(i,i1,i2,v1,v2) then
 				begin
-				SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
-				if ii <> High(sr.FPolygones[i]) then
-					for iii :=  High(sr.FPolygones[i]) downto i1 + 1 do
-						sr.FPolygones[iii] := sr.FPolygones[iii - 1];
-				sr.FPolygones[i][i1] := v1i;
+				InsertPointInLine(i, i1, v1i);
 				break;
 				end;
 		end;
-	WriteLn('i',i);
 	for ii := 0 to High(sr.FPolygones[i]) do
 		begin
-		WriteLn('ii',ii);
 		i1 := ii;
-		if ii = High(sr.FPolygones[i]) then
-			i2 := 0
-		else
-			i2 := ii + 1;
-		WriteLn('i12 ',i1,' ',i2);
-		if  SGIsVertexOnLine(
-				sr.FPoints[sr.FPolygones[i][i1]],
-				sr.FPoints[sr.FPolygones[i][i2]],
-				v2) and 
-			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v1) > SGZero) and
-			(Abs(sr.FPoints[sr.FPolygones[i][i1]] - v2) > SGZero) then
+		i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+		if IsPointInLine(i,i1,i2,v2,v1) then
 				begin
-				SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
-				if ii <> High(sr.FPolygones[i]) then
-					for iii :=  High(sr.FPolygones[i]) downto i1 + 1 do
-						sr.FPolygones[iii] := sr.FPolygones[iii - 1];
-				sr.FPolygones[i][i1] := v2i;
+				InsertPointInLine(i, i1, v2i);
 				break;
 				end;
 		end;
@@ -619,7 +612,7 @@ if iii <> Length(sr.FPolygones) then
 	p1 := nil;
 	p2 := nil;
 	
-	//TestPolygones(v1,v2,sr);
+	TestPolygones(v1,v2,sr);
 	end;
 end;
 
@@ -1267,8 +1260,9 @@ if FCutPolygoneButton.Active then
 	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
 		SelectAllPrimetives();
 	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'D')) then
-		for i := 0 to High(FSingleRelief^.FPoints) do
-			FSingleRelief^.FPoints[i].z := 0;
+		if FSelectedPrimetives <> nil then if Length(FSelectedPrimetives)<>0 then
+			for i := 0 to High(FSelectedPrimetives) do
+				FSingleRelief^.FPoints[FSelectedPrimetives[i]].z := 0;
 	end
 else
 	begin

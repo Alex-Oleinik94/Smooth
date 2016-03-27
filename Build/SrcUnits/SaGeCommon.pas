@@ -387,8 +387,14 @@ function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloa
 function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGGetNextDynamicArrayIndex(const Index, HighOfArray : TSGLongWord): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGGetNextDynamicArrayIndex(const Index, HighOfArray : TSGLongWord): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (Index + 1) * Byte(Index <> HighOfArray);
+end;
 
 function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
@@ -418,44 +424,52 @@ function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex2f; const Zero : TSGFloa
 var
 	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
 begin
-t1t2 := Abs(t1 - t2);
-t2t3 := Abs(t2 - t3);
-t3t1 := Abs(t3 - t1);
+Result := SGIsVertexOnLine(t1,t2,v) or SGIsVertexOnLine(t1,t3,v) or SGIsVertexOnLine(t3,t2,v);
+if not Result then
+	begin
+	t1t2 := Abs(t1 - t2);
+	t2t3 := Abs(t2 - t3);
+	t3t1 := Abs(t3 - t1);
 
-vt1 := Abs(v - t1);
-vt2 := Abs(v - t2);
-vt3 := Abs(v - t3);
+	vt1 := Abs(v - t1);
+	vt2 := Abs(v - t2);
+	vt3 := Abs(v - t3);
 
-s := SGTriangleSize(t1t2, t2t3, t3t1);
+	s := SGTriangleSize(t1t2, t2t3, t3t1);
 
-Result := Abs(
-	  s
-	- SGTriangleSize(t1t2, vt1, vt2)
-	- SGTriangleSize(t2t3, vt3, vt2)
-	- SGTriangleSize(t3t1, vt1, vt3)
-		) < Zero * s;
+	Result := Abs(
+		  s
+		- SGTriangleSize(t1t2, vt1, vt2)
+		- SGTriangleSize(t2t3, vt3, vt2)
+		- SGTriangleSize(t3t1, vt1, vt3)
+			) < Zero * s;
+	end;
 end;
 
 function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
 begin
-t1t2 := Abs(t1 - t2);
-t2t3 := Abs(t2 - t3);
-t3t1 := Abs(t3 - t1);
+Result := SGIsVertexOnLine(t1,t2,v) or SGIsVertexOnLine(t1,t3,v) or SGIsVertexOnLine(t3,t2,v);
+if not Result then
+	begin
+	t1t2 := Abs(t1 - t2);
+	t2t3 := Abs(t2 - t3);
+	t3t1 := Abs(t3 - t1);
 
-vt1 := Abs(v - t1);
-vt2 := Abs(v - t2);
-vt3 := Abs(v - t3);
+	vt1 := Abs(v - t1);
+	vt2 := Abs(v - t2);
+	vt3 := Abs(v - t3);
 
-s := SGTriangleSize(t1t2, t2t3, t3t1);
+	s := SGTriangleSize(t1t2, t2t3, t3t1);
 
-Result := Abs(
-	  s
-	- SGTriangleSize(t1t2, vt1, vt2)
-	- SGTriangleSize(t2t3, vt3, vt2)
-	- SGTriangleSize(t3t1, vt1, vt3)
-		) < Zero * s;
+	Result := Abs(
+		  s
+		- SGTriangleSize(t1t2, vt1, vt2)
+		- SGTriangleSize(t2t3, vt3, vt2)
+		- SGTriangleSize(t3t1, vt1, vt3)
+			) < Zero * s;
+	end;
 end;
 
 function SGTriangleSize(const a,b,c:TSGFloat)   :TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
