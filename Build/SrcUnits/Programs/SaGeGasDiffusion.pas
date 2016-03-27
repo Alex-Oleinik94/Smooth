@@ -494,13 +494,17 @@ Result:=@FRCI[(x*FEdge+y)*FEdge+z];
 end;
 
 var
-	i,j : LongWord;
-	i1,i2,i3 : LongWord;
+	i, j : LongWord;
+	i1, i2, i3, AllPolygoneSize, PolygoneIndex : LongWord;
 begin
-if VProgress <> nil then
-	VProgress ^ := 0.1;
 if FRelief <> nil then
 	begin
+	PolygoneIndex := 0;
+	AllPolygoneSize := 0; 
+	for j := 0 to 5 do
+		if FRelief^.FData[j].FEnabled then
+			if FRelief^.FData[j].FPolygones <> nil then if Length(FRelief^.FData[j].FPolygones) <> 0 then
+				AllPolygoneSize += Length(FRelief^.FData[j].FPolygones);
 	for j := 0 to 5 do
 		begin
 		if FRelief^.FData[j].FEnabled then
@@ -525,14 +529,13 @@ if FRelief <> nil then
 										j))
 									);
 							end;
+						if VProgress <> nil then
+							VProgress ^ := PolygoneIndex / AllPolygoneSize + (1 / AllPolygoneSize) * (i2 / (Edge - 1));
 						end;
-					if VProgress <> nil then
-						VProgress ^ := 0.1 + j * 0.4 / 6 + 0.4 / 6 * i / High(FRelief^.FData[j].FPolygones);
+					PolygoneIndex += 1;
 					end;
 				end;
 			end;
-		if VProgress <> nil then
-			VProgress ^ := 0.1 + (j+1) * 0.4 / 6;
 		end;
 	end;
 FRCI := GetMem(Edge * Edge * Edge);
@@ -561,8 +564,6 @@ while i1<FEdge do
 			end;
 		i2+=2;
 		end;
-	if VProgress <> nil then
-		VProgress^ := 0.5 + 0.25 * i1 / FEdge;
 	i1+=2;
 	end;
 i1:=1;
@@ -589,8 +590,6 @@ while i1<FEdge-3 do
 			end;
 		i2+=2;
 		end;
-	if VProgress <> nil then
-		VProgress^ := 0.75 + 0.25 * i1 / FEdge;
 	i1+=2;
 	end;
 for i := 0 to Edge * Edge * Edge - 1 do

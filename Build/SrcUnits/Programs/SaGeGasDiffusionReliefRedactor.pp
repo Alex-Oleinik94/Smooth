@@ -1,11 +1,14 @@
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE REDACTORDEBUG}
+
 unit SaGeGasDiffusionReliefRedactor;
 
 interface
 
 uses
 	 dos
+	,crt
 	,SaGeBase
 	,Classes
 	,SaGeBased
@@ -33,7 +36,8 @@ type
 		procedure ExportToMeshLines(const VMesh : TSGCustomModel;const index : byte = -1;const WithVector : Boolean = False);
 		procedure ExportToMeshPolygones(const VMesh : TSGCustomModel;const index : byte = -1);
 		procedure Clear();
-		procedure InitBase();
+		procedure InitBase(const VEnabled : TSGBoolean = False);
+		procedure Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 type
 	TSGGasDiffusionRelief = object
@@ -90,6 +94,8 @@ type
 		class function  PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  PrimetiveIndexesEquals(const p1,p2:TSGGDRPrimetiveIndexes):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure TestPolygones(const v1, v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function IncorrectPoint() : TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function IsPointCorrect(const p : TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure SetActiveSingleRelief(const index : LongInt = -1);
 		procedure StartRedactoring();
@@ -104,6 +110,85 @@ implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
+
+procedure TSGGasDiffusionSingleRelief.Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+const
+	PredSt = '   ';
+var
+	i, ii, iii, iiii : TSGLongWord;
+begin
+if S <> '' then
+	begin
+	TextColor(10);
+	System.WriteLn(s);
+	TextColor(7);
+	end;
+WriteLn('PSGGasDiffusionSingleRelief(',TSGLongWord(@Self),')^ = {');
+WriteLn(PredSt,'FEnabled = ',FEnabled,',');
+WriteLn(PredSt,'FType = ',FType,',');
+iii := 0;
+if FPoints <> nil then if Length(FPoints)<>0 then
+	iii := Length(FPoints);
+System.Write(PredSt,'FPoints[',iii,']');
+if wp then
+	begin
+	WriteLn(' = [');
+	if iii <> 0 then
+		for i := 0 to iii - 1 do
+			begin
+			System.Write(PredSt,PredSt,'{x = ',FPoints[i].x:3:3,', y = ',FPoints[i].y:3:3,', z = ',FPoints[i].z:3:3,'}');
+			if i = iii - 1 then
+				System.Write(' ]');
+			WriteLn(',');
+			end;
+	end
+else
+	begin
+	WriteLn(',');
+	end;
+iii := 0;
+if FPolygones <> nil then
+	iii := Length(FPolygones);
+WriteLn(PredSt,'FPolygones[',iii,'] = [');
+if iii <> 0 then
+	for i := 0 to iii - 1 do
+		begin
+		iiii := 0;
+		if FPolygones[i] <> nil then
+			iiii := Length(FPolygones[i]);
+		System.Write(PredSt,PredSt,'[');
+		for ii := 0 to iiii - 1 do
+			begin
+			System.Write(FPolygones[i][ii]:2);
+			if ii <> iiii - 1 then
+				System.Write(',');
+			end;
+		System.Write(']');
+		if i = iii - 1 then
+			System.Write(' ]')
+		else
+			System.Write(',');
+		WriteLn();
+		end;
+WriteLn('}');
+if b then
+	begin
+	TextColor(10);
+	System.Write('PressEnter...');
+	TextColor(7);
+	ReadLn();
+	end;
+end;
+
+class function TSGGasDiffusionReliefRedactor.IncorrectPoint() : TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(1000,1000,1000);
+end;
+
+class function TSGGasDiffusionReliefRedactor.IsPointCorrect(const p : TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Abs(p) < 20;
+end;
 
 class function  TSGGasDiffusionReliefRedactor.PointIndex(const v : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -310,19 +395,19 @@ case FCuttingIndex of
 	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGDownKey) then
 		begin
 		FCuttingVertex1 := PointNearly(Vertex);
-		if Abs(FCuttingVertex1) < 100 then
+		if IsPointCorrect(FCuttingVertex1) then
 			FCuttingIndex := 2
 		else
-			FCuttingVertex1.Import();
+			FCuttingVertex1 := IncorrectPoint();
 		end;
 	end;
 2 :
 	begin
-	if (Abs(Vertex) < 100) and (Abs(FCuttingVertex1) < 100) then
+	if IsPointCorrect(Vertex) and IsPointCorrect(FCuttingVertex1) then
 		begin
 		FCuttingVertex2 := PointNearly(Vertex,@FCuttingVertex1);
 		Render.BeginScene(SGR_LINES);
-		if Abs(FCuttingVertex2) < 100 then
+		if IsPointCorrect(FCuttingVertex2) then
 			begin
 			Render.Color3f(0,1,0);
 			FCuttingVertex2.Vertex(Render);
@@ -336,20 +421,20 @@ case FCuttingIndex of
 		Render.EndScene();
 		end
 	else
-		FCuttingVertex2.Import(1000,1000,1000);
+		FCuttingVertex2 := IncorrectPoint();
 	if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGUpKey) then
 		begin
-		if (Abs(FCuttingVertex1) < 100) and (Abs(FCuttingVertex2)<100) then
+		if IsPointCorrect(FCuttingVertex2) and IsPointCorrect(FCuttingVertex1) then
 			begin
 			pi := PointsLineIndex(FCuttingVertex1,FCuttingVertex2,FSingleRelief^);
 			if pi = nil then
-				CutPolygone(FCuttingVertex1,FCuttingVertex2,FSingleRelief^);
-			if pi <> nil then
+				CutPolygone(FCuttingVertex1,FCuttingVertex2,FSingleRelief^)
+			else
 				SetLength(pi,0);
 			end;
 		FCuttingIndex := 1;
-		FCuttingVertex1.Import();
-		FCuttingVertex2.Import();
+		FCuttingVertex1 := IncorrectPoint();
+		FCuttingVertex2 := IncorrectPoint();
 		end;
 	end;
 end;
@@ -358,8 +443,8 @@ if Context.KeyPressed() and (Context.KeyPressedByte() = SG_ESC_KEY) then
 	FInCutting := False;
 	FCuttingIndex := 0;
 	FCutPolygoneButton.Active := True;
-	FCuttingVertex1.Import();
-	FCuttingVertex2.Import();
+	FCuttingVertex1 := IncorrectPoint();
+	FCuttingVertex2 := IncorrectPoint();
 	end;
 end;
 
@@ -612,7 +697,14 @@ if iii <> Length(sr.FPolygones) then
 	p1 := nil;
 	p2 := nil;
 	
+	
+	{$IFDEF REDACTORDEBUG}
+		sr.Write('        In "CutPolygone" before "TestPolygones"',True,False);
+		{$ENDIF}
 	TestPolygones(v1,v2,sr);
+	{$IFDEF REDACTORDEBUG}
+		sr.Write('        In "CutPolygone" after "TestPolygones"',True,False);
+		{$ENDIF}
 	end;
 end;
 
@@ -706,8 +798,8 @@ else if Button = FCutPolygoneButton then
 	begin
 	FCutPolygoneButton.Active := False;
 	FCuttingIndex := 1;
-	FCuttingVertex1 . Import();
-	FCuttingVertex2 . Import();
+	FCuttingVertex1 := IncorrectPoint();
+	FCuttingVertex2 := IncorrectPoint();
 	end;
 end;end;
 
@@ -777,8 +869,12 @@ FCutPolygoneButton.Visible := True;
 FCutPolygoneButton.Active := True;
 FRedactingType := TSGGDRRedactingPoints;
 FCuttingIndex := 0;
-FCuttingVertex1.Import();
-FCuttingVertex2.Import();
+FCuttingVertex1 := IncorrectPoint();
+FCuttingVertex2 := IncorrectPoint();
+SetLength(FPixelPrimitives,0);
+FPixelPrimitives := nil;
+SetLength(FSelectedPrimetives,0);
+FSelectedPrimetives := nil;
 end;
 
 procedure TSGGasDiffusionReliefRedactor.StopRedactoring();
@@ -928,9 +1024,9 @@ ExportToMeshLines(VMesh,index,False);
 ExportToMeshPolygones(VMesh,index);
 end;
 
-procedure TSGGasDiffusionSingleRelief.InitBase();
+procedure TSGGasDiffusionSingleRelief.InitBase(const VEnabled : TSGBoolean = False);
 begin
-FEnabled := False;
+FEnabled := VEnabled;
 SetLength(FPoints,4);
 SetLength(FPolygones,1);
 SetLength(FPolygones[0],4);
@@ -942,6 +1038,9 @@ FPolygones[0][0] := 0;
 FPolygones[0][1] := 1;
 FPolygones[0][2] := 2;
 FPolygones[0][3] := 3;
+{$IFDEF REDACTORDEBUG}
+	Write();
+	{$ENDIF}
 end;
 
 procedure TSGGasDiffusionSingleRelief.Draw(const VRender : TSGRender);
@@ -1063,10 +1162,10 @@ var
 	i : integer;
 begin
 SetLength(FPoints,0);
-if FPolygones <> nil then
+if FPolygones <> nil then if Length(FPolygones)<>0 then
 	for i := 0 to High(FPolygones) do
 		SetLength(FPolygones[i],0);
-SetLength(FPoints,0);
+SetLength(FPolygones,0);
 FEnabled := False;
 FType := False;
 end;
@@ -1259,6 +1358,18 @@ if FCutPolygoneButton.Active then
 		ProcessPixelPrimitives();
 	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'A')) then
 		SelectAllPrimetives();
+	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'S')) then
+		begin
+		i := Byte(FSingleRelief^.FEnabled) + 2 * Byte(FSingleRelief^.FType);
+		FSingleRelief^.Clear();
+		FSingleRelief^.InitBase();
+		FSingleRelief^.FEnabled := TSGBoolean(i mod 2);
+		FSingleRelief^.FType := TSGBoolean((i div 2) mod 2);
+		SetLength(FPixelPrimitives,0);
+		FPixelPrimitives := nil;
+		SetLength(FSelectedPrimetives,0);
+		FSelectedPrimetives := nil;
+		end;
 	if (Context.KeyPressed() and (Context.KeyPressedType() = SGUpKey) and (Context.KeyPressedChar() = 'D')) then
 		if FSelectedPrimetives <> nil then if Length(FSelectedPrimetives)<>0 then
 			for i := 0 to High(FSelectedPrimetives) do
