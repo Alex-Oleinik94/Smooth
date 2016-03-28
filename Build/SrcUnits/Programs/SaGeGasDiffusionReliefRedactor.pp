@@ -326,7 +326,7 @@ var
 	l, th : TSGFloat;
 	pi : TSGGDRPrimetiveIndexes;
 begin
-Result.Import(1000,1000,1000);
+Result := IncorrectPoint();
 ii := Length(FSingleRelief^.FPoints);
 for i := 0 to High(FSingleRelief^.FPoints) do
 	if Abs(v - FSingleRelief^.FPoints[i]) < 0.1 then
@@ -361,11 +361,11 @@ else
 				i2 := 0
 			else
 				i2 := ii + 1;
-			th := TriangleHeight(
+			th := Abs(TriangleHeightVertex(
 				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
 				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
-				v);
-			if (th < 0.3) and ((not b) or (b and (l > th))) and 
+				v) - v);
+			if  (th < 0.3) and ((not b) or (b and (l > th))) and 
 				((pv = nil) or ((pv <> nil) and (not SGIsVertexOnLine(
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],

@@ -388,8 +388,28 @@ function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = S
 function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGGetNextDynamicArrayIndex(const Index, HighOfArray : TSGLongWord): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIsTriangleConvex(const v1,v2,v3:TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	sv1, sv2, sv3 : TSGFloat;
+begin
+sv1 := Sqr(v1);
+sv2 := Sqr(v2);
+sv3 := Sqr(v3);
+Result := 
+	(sv1 < sv2 + sv3) and 
+	(sv2 < sv1 + sv3) and 
+	(sv3 < sv2 + sv1);
+end;
+
+function SGIsTriangleConvex(const v1,v2,v3:TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGIsTriangleConvex(Abs(v3-v2),Abs(v3-v1),Abs(v1-v2));
+end;
 
 function SGGetNextDynamicArrayIndex(const Index, HighOfArray : TSGLongWord): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
