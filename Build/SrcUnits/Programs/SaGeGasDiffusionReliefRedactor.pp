@@ -38,6 +38,8 @@ type
 		procedure Clear();
 		procedure InitBase(const VEnabled : TSGBoolean = False);
 		procedure Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Save(const VFileName : TSGString);
+		procedure Load(const VFileName : TSGString);
 		end;
 type
 	TSGGasDiffusionRelief = object
@@ -110,6 +112,61 @@ implementation
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
+
+procedure TSGGasDiffusionSingleRelief.Load(const VFileName : TSGString);
+var
+	fs : TMemoryStream;
+	i, ii : TSGLongWord;
+begin
+fs := TMemoryStream.Create();
+fs.LoadFromFile(VFileName);
+fs.Position := 0;
+if fs.Size > 0 then
+	begin
+	fs.ReadBuffer(FType,SizeOf(FType));
+	fs.ReadBuffer(FEnabled,SizeOf(FEnabled));
+	fs.ReadBuffer(i,SizeOf(i));
+	SetLength(FPoints,i);
+	for i := 0 to High(FPoints) do
+		fs.ReadBuffer(FPoints[i],SizeOf(FPoints[i]));
+	fs.ReadBuffer(i,SizeOf(i));
+	SetLength(FPolygones,i);
+	for i := 0 to High(FPolygones) do
+		begin
+		fs.ReadBuffer(ii,SizeOf(ii));
+		SetLength(FPolygones[i],ii);
+		for ii := 0 to High(FPolygones[i]) do
+			fs.ReadBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
+		end;
+	end;
+fs.Destroy();
+end;
+
+procedure TSGGasDiffusionSingleRelief.Save(const VFileName : TSGString);
+var
+	fs : TMemoryStream;
+	i, ii : TSGLongWord;
+begin
+fs := TMemoryStream.Create();
+fs.Position := 0;
+fs.WriteBuffer(FType,SizeOf(FType));
+fs.WriteBuffer(FEnabled,SizeOf(FEnabled));
+i := Length(FPoints);
+fs.WriteBuffer(i,SizeOf(i));
+for i := 0 to High(FPoints) do
+	fs.WriteBuffer(FPoints[i],SizeOf(FPoints[i]));
+i := Length(FPolygones);
+fs.WriteBuffer(i,SizeOf(i));
+for i := 0 to High(FPolygones) do
+	begin
+	ii := Length(FPolygones[i]);
+	fs.WriteBuffer(ii,SizeOf(ii));
+	for ii := 0 to High(FPolygones[i]) do
+		fs.WriteBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
+	end;
+fs.SaveToFile(VFileName);
+fs.Destroy();
+end;
 
 procedure TSGGasDiffusionSingleRelief.Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 const
@@ -365,7 +422,14 @@ else
 				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
 				FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
 				v) - v);
-			if  (th < 0.3) and ((not b) or (b and (l > th))) and 
+			if  SGIsVertexOnLine(
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
+					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
+					TriangleHeightVertex(
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
+						FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
+						v)
+				) and (th < 0.3) and ((not b) or (b and (l > th))) and 
 				((pv = nil) or ((pv <> nil) and (not SGIsVertexOnLine(
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i1]],
 					FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][i2]],
@@ -469,7 +533,7 @@ begin
 SetLength(sr.FPolygones[i],Length(sr.FPolygones[i]) + 1);
 if li <> High(sr.FPolygones[i]) then
 	for iii :=  High(sr.FPolygones[i]) downto li + 2 do
-		sr.FPolygones[iii] := sr.FPolygones[iii - 1];
+		sr.FPolygones[i][iii] := sr.FPolygones[i][iii - 1];
 sr.FPolygones[i][li + 1] := vi;
 end;
 
@@ -478,29 +542,34 @@ var
 begin
 v1i := PointIndex(v1,sr);
 v2i := PointIndex(v2,sr);
-for i := 0 to High(sr.FPolygones) do
-	begin
-	for ii := 0 to High(sr.FPolygones[i]) do
+if (v1i <> Length(sr.FPoints)) and (v2i <> Length(sr.FPoints)) then
+	for i := 0 to High(sr.FPolygones) do
 		begin
-		i1 := ii;
-		i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
-		if IsPointInLine(i,i1,i2,v1,v2) then
+		ii := 0;
+		while (ii < Length(sr.FPolygones[i])) do
+			begin
+			i1 := ii;
+			i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+			ii += 1;
+			if IsPointInLine(i,i1,i2,v1,v2) then
 				begin
 				InsertPointInLine(i, i1, v1i);
-				break;
+				ii := 0;
 				end;
-		end;
-	for ii := 0 to High(sr.FPolygones[i]) do
-		begin
-		i1 := ii;
-		i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
-		if IsPointInLine(i,i1,i2,v2,v1) then
+			end;
+		ii := 0;
+		while (ii < Length(sr.FPolygones[i])) do
+			begin
+			i1 := ii;
+			i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+			ii += 1;
+			if IsPointInLine(i,i1,i2,v2,v1) then
 				begin
 				InsertPointInLine(i, i1, v2i);
-				break;
+				ii := 0;
 				end;
+			end;
 		end;
-	end;
 end;
 
 class procedure TSGGasDiffusionReliefRedactor.CutPolygone(const v1,v2 : TSGVertex3f; var sr : TSGGasDiffusionSingleRelief);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -508,6 +577,7 @@ var
 	i, ii, iii, i1, i2, i11,i12,i21,i22 : TSGLongWord;
 	p1, p2 : TSGGDRPrimetiveIndexes;
 begin
+//определение полигона, который должен быть разрезан
 iii := Length(sr.FPolygones);
 for i := 0 to High(sr.FPolygones) do
 	begin
@@ -538,8 +608,10 @@ for i := 0 to High(sr.FPolygones) do
 		break;
 		end;
 	end;
+//Если такой полигон существует, то
 if iii <> Length(sr.FPolygones) then
 	begin
+	// определяем возможность совпадения точек с существующими точками в рельефе
 	i1 := Length(sr.FPolygones[iii]);
 	i2 := Length(sr.FPolygones[iii]);
 	for i := 0 to High(sr.FPolygones[iii]) do
@@ -554,6 +626,7 @@ if iii <> Length(sr.FPolygones) then
 			i2 := i;
 			break;
 			end;
+	// если точка не совпала, то тогда нужно найти линию, на которой она лежит
 	if i1 = Length(sr.FPolygones[iii]) then
 		begin
 		for i := 0 to High(sr.FPolygones[iii]) do
@@ -580,6 +653,7 @@ if iii <> Length(sr.FPolygones) then
 						break;
 						end;
 		end;
+	// если точка не совпала, то тогда нужно найти линию, на которой она лежит
 	if i2 = Length(sr.FPolygones[iii]) then
 		begin
 		for i := 0 to High(sr.FPolygones[iii]) do
@@ -606,6 +680,8 @@ if iii <> Length(sr.FPolygones) then
 						break;
 						end;
 		end;
+	// если для разрезающей точки найдена линия, то добавляется точка в рельеф и созраняется ее индекс
+	// ежели разезающая точка совподала с одной из точек полигона, то вычисляются ее предшествующий и послешедствующий индекс
 	p1 := nil;
 	if i1 = Length(sr.FPolygones[iii]) then
 		begin
@@ -632,6 +708,8 @@ if iii <> Length(sr.FPolygones) then
 			end;
 		i1 := sr.FPolygones[iii][i1];
 		end;
+	// если для разрезающей точки найдена линия, то добавляется точка в рельеф и созраняется ее индекс
+	// ежели разезающая точка совподала с одной из точек полигона, то вычисляются ее предшествующий и послешедствующий индекс
 	p2 := nil;
 	if i2 = Length(sr.FPolygones[iii]) then
 		begin
@@ -658,7 +736,7 @@ if iii <> Length(sr.FPolygones) then
 			end;
 		i2 := sr.FPolygones[iii][i2];
 		end;
-	
+	// сохранение полигона в память машины, вычисленного по вычисленным перед этим данным
 	AddIndexInPrimetiveIndexes(p1,i1);
 	AddIndexInPrimetiveIndexes(p1,sr.FPolygones[iii][i12]);
 	i := i12;
@@ -671,7 +749,7 @@ if iii <> Length(sr.FPolygones) then
 		AddIndexInPrimetiveIndexes(p1,sr.FPolygones[iii][i]);
 		end;
 	AddIndexInPrimetiveIndexes(p1,i2);
-	
+	// сохранение полигона в память машины, вычисленного по вычисленным перед этим данным
 	AddIndexInPrimetiveIndexes(p2,i2);
 	AddIndexInPrimetiveIndexes(p2,sr.FPolygones[iii][i22]);
 	i := i22;
@@ -684,13 +762,14 @@ if iii <> Length(sr.FPolygones) then
 		AddIndexInPrimetiveIndexes(p2,sr.FPolygones[iii][i]);
 		end;
 	AddIndexInPrimetiveIndexes(p2,i1);
-	
+	//удаление полигона с этими двумя точками
 	SetLength(sr.FPolygones[iii],0);
+	sr.FPolygones[iii] := nil;
 	if iii <> High(sr.FPolygones) then
 		for i := iii to High(sr.FPolygones) - 1 do
 			sr.FPolygones[i] := sr.FPolygones[i+1];
 	SetLength(sr.FPolygones,Length(sr.FPolygones)-1);
-	
+	//добавление вместо него двух полигонов
 	SetLength(sr.FPolygones,Length(sr.FPolygones)+2);
 	sr.FPolygones[High(sr.FPolygones)-0] := p1;
 	sr.FPolygones[High(sr.FPolygones)-1] := p2;
