@@ -3512,7 +3512,7 @@ else if FDiffusionRuned then
 	if FEnableSaving and (FFileStream<>nil)then
 		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SGGetSizeString(FFileStream.Size,'RU')+'", ';
 	if (FMesh<>nil) and (FMesh.LastObject()<>nil) then
-		FInfoLabel.Caption:=FInfoLabel.Caption+'Итерация: "'+SGStr(FNowCadr)+'", Количество точек: "'+SGStr(FMesh.LastObject().Vertexes)+'"'
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Итерация: "'+SGStr(FNowCadr)+'", Количество точек: "'+SGStr(FCube.FDinamicQuantityMoleculs)+'"'
 	end;
 end;
 
