@@ -38,8 +38,10 @@ type
 		procedure Clear();
 		procedure InitBase(const VEnabled : TSGBoolean = False);
 		procedure Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Save(const VFileName : TSGString);
-		procedure Load(const VFileName : TSGString);
+		function Saved():TMemoryStream;
+		procedure Load(const ms : TMemoryStream);overload;
+		procedure Save(const VFileName : TSGString);overload;
+		procedure Load(const VFileName : TSGString);overload;
 		end;
 type
 	TSGGasDiffusionRelief = object
@@ -49,6 +51,10 @@ type
 		procedure Clear();
 		procedure InitBase();
 		procedure ExportToMesh(const VMesh : TSGCustomModel);
+		function Saved():TMemoryStream;
+		procedure Load(const ms : TMemoryStream);overload;
+		procedure Save(const VFileName : TSGString);overload;
+		procedure Load(const VFileName : TSGString);overload;
 		end;
 	PSGGasDiffusionSingleRelief = ^ TSGGasDiffusionSingleRelief;
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
@@ -104,6 +110,7 @@ type
 		procedure StopRedactoring();
 			public
 		property Relief : PSGGasDiffusionRelief read FRelief write FRelief;
+		property SingleRelief : PSGGasDiffusionSingleRelief read FSingleRelief;
 		end;
 
 function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -113,59 +120,117 @@ implementation
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
 
-procedure TSGGasDiffusionSingleRelief.Load(const VFileName : TSGString);
+
+function TSGGasDiffusionRelief.Saved():TMemoryStream;
+var
+	i : TSGLongWord;
+	ms : TMemoryStream;
+begin
+Result := TMemoryStream.Create();
+for i := 0 to 5 do
+	begin
+	ms := FData[i].Saved();
+	ms.Position := 0;
+	ms.SaveToStream(Result);
+	ms.Destroy();
+	end;
+end;
+
+procedure TSGGasDiffusionRelief.Load(const ms : TMemoryStream);overload;
+var
+	i : TSGLongWord;
+begin
+for i := 0 to 5 do
+	FData[i].Load(ms);
+end;
+
+procedure TSGGasDiffusionRelief.Save(const VFileName : TSGString);overload;
+var
+	ms : TMemoryStream;
+begin
+ms := Saved();
+ms.Position := 0;
+ms.SaveToFile(VFileName);
+ms.Destroy();
+end;
+
+procedure TSGGasDiffusionRelief.Load(const VFileName : TSGString);overload;
+var
+	ms : TMemoryStream;
+begin
+ms := TMemoryStream.Create();
+ms.LoadFromFile(VFileName);
+ms.Position := 0;
+Load(ms);
+ms.Destroy();
+end;
+
+procedure TSGGasDiffusionSingleRelief.Load(const VFileName : TSGString);overload;
 var
 	fs : TMemoryStream;
-	i, ii : TSGLongWord;
 begin
 fs := TMemoryStream.Create();
 fs.LoadFromFile(VFileName);
 fs.Position := 0;
-if fs.Size > 0 then
+Load(fs);
+fs.Destroy();
+end;
+
+procedure TSGGasDiffusionSingleRelief.Load(const ms : TMemoryStream);overload;
+var
+	i, ii : TSGLongWord;
+begin
+if ms.Size <> ms.Position then
 	begin
-	fs.ReadBuffer(FType,SizeOf(FType));
-	fs.ReadBuffer(FEnabled,SizeOf(FEnabled));
-	fs.ReadBuffer(i,SizeOf(i));
+	ms.ReadBuffer(FType,SizeOf(FType));
+	ms.ReadBuffer(FEnabled,SizeOf(FEnabled));
+	ms.ReadBuffer(i,SizeOf(i));
 	SetLength(FPoints,i);
 	for i := 0 to High(FPoints) do
-		fs.ReadBuffer(FPoints[i],SizeOf(FPoints[i]));
-	fs.ReadBuffer(i,SizeOf(i));
+		ms.ReadBuffer(FPoints[i],SizeOf(FPoints[i]));
+	ms.ReadBuffer(i,SizeOf(i));
 	SetLength(FPolygones,i);
 	for i := 0 to High(FPolygones) do
 		begin
-		fs.ReadBuffer(ii,SizeOf(ii));
+		ms.ReadBuffer(ii,SizeOf(ii));
 		SetLength(FPolygones[i],ii);
 		for ii := 0 to High(FPolygones[i]) do
-			fs.ReadBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
+			ms.ReadBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
 		end;
 	end;
-fs.Destroy();
 end;
 
 procedure TSGGasDiffusionSingleRelief.Save(const VFileName : TSGString);
 var
-	fs : TMemoryStream;
+	ms : TMemoryStream;
+begin
+ms := Saved();
+ms.Position := 0;
+ms.SaveToFile(VFileName);
+ms.Destroy();
+end;
+
+function TSGGasDiffusionSingleRelief.Saved():TMemoryStream;
+var
 	i, ii : TSGLongWord;
 begin
-fs := TMemoryStream.Create();
-fs.Position := 0;
-fs.WriteBuffer(FType,SizeOf(FType));
-fs.WriteBuffer(FEnabled,SizeOf(FEnabled));
+Result := TMemoryStream.Create();
+Result.Position := 0;
+Result.WriteBuffer(FType,SizeOf(FType));
+Result.WriteBuffer(FEnabled,SizeOf(FEnabled));
 i := Length(FPoints);
-fs.WriteBuffer(i,SizeOf(i));
+Result.WriteBuffer(i,SizeOf(i));
 for i := 0 to High(FPoints) do
-	fs.WriteBuffer(FPoints[i],SizeOf(FPoints[i]));
+	Result.WriteBuffer(FPoints[i],SizeOf(FPoints[i]));
 i := Length(FPolygones);
-fs.WriteBuffer(i,SizeOf(i));
+Result.WriteBuffer(i,SizeOf(i));
 for i := 0 to High(FPolygones) do
 	begin
 	ii := Length(FPolygones[i]);
-	fs.WriteBuffer(ii,SizeOf(ii));
+	Result.WriteBuffer(ii,SizeOf(ii));
 	for ii := 0 to High(FPolygones[i]) do
-		fs.WriteBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
+		Result.WriteBuffer(FPolygones[i][ii],SizeOf(FPolygones[i][ii]));
 	end;
-fs.SaveToFile(VFileName);
-fs.Destroy();
 end;
 
 procedure TSGGasDiffusionSingleRelief.Write(const s : TSGString = '';const b : TSGBoolean = False; const wp : TSGBoolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

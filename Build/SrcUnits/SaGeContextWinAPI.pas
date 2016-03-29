@@ -63,6 +63,7 @@ type
 			public
 		function Get(const What:string):Pointer;override;
 		function FileOpenDlg(const VTittle: String; const VFilter : String):String;override;
+		function FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
@@ -77,6 +78,47 @@ implementation
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+function TSGContextWinAPI.FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;
+const
+	sizeOfResult = 1000;
+var
+	ofn : LPOPENFILENAME;
+begin
+New(ofn);
+fillchar(ofn^,sizeof(ofn^),0);
+ofn^.lStructSize       := sizeof(ofn^);
+ofn^.hInstance         := System.MainInstance;
+ofn^.hwndOwner         := hWindow;
+if (VFilter <> '') then
+	ofn^.lpstrFilter   := SGStringToPChar(VFilter);
+ofn^.lpstrFile         := nil;
+ofn^.lpstrFileTitle    := nil;
+ofn^.Flags             := OFN_PATHMUSTEXIST or OFN_FILEMUSTEXIST or OFN_HIDEREADONLY;
+ofn^.nMaxFile          := sizeOfResult;
+ofn^.lpstrFile         := GetMem(sizeOfResult);
+if (VTittle <> '') then
+	ofn^.lpstrTitle    := SGStringToPChar(VTittle);
+ofn^.nFilterIndex      := 1;
+fillchar(ofn^.lpstrFile^,1000,0);
+ofn^.lpstrDefExt := SGStringToPChar(extension);
+
+if not GetSaveFileName (ofn) then
+	begin
+	{$IFDEF SGDebuging}
+		SGLog.Sourse('TSGContextWinAPI.FileSaveDlg - GetSaveFileName(...) results with FALSE');
+		{$ENDIF}
+	end;
+Result := SGPCharToString(ofn^.lpstrFile);
+FreeMem(ofn^.lpstrFile,sizeof(sizeOfResult));
+if ofn^.lpstrFilter <> nil then
+	FreeMem(ofn^.lpstrFilter,Length(VFilter));
+if ofn^.lpstrTitle <> nil then
+	FreeMem(ofn^.lpstrTitle,Length(VTittle));
+if ofn^.lpstrDefExt <> nil then
+	FreeMem(ofn^.lpstrDefExt,Length(extension));
+FreeMem(ofn,sizeof(ofn^));
+end;
 
 function TSGContextWinAPI.FileOpenDlg(const VTittle: String; const VFilter : String):String;
 const
@@ -104,16 +146,16 @@ fillchar(ofn^.lpstrFile^,1000,0);
 if not GetOpenFileName (ofn) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGContextWinAPI.FileOpenDlg - GetOpenFileName() results with FALSE');
+		SGLog.Sourse('TSGContextWinAPI.FileOpenDlg - GetOpenFileName(...) results with FALSE');
 		{$ENDIF}
 	end;
 Result := SGPCharToString(ofn^.lpstrFile);
-FreeMem(ofn,sizeof(ofn^));
 FreeMem(ofn^.lpstrFile,sizeof(sizeOfResult));
 if ofn^.lpstrFilter <> nil then
 	FreeMem(ofn^.lpstrFilter,Length(VFilter));
 if ofn^.lpstrTitle <> nil then
 	FreeMem(ofn^.lpstrTitle,Length(VTittle));
+FreeMem(ofn,sizeof(ofn^));
 end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;

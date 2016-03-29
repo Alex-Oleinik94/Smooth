@@ -1414,18 +1414,14 @@ end;
 
 function TSGGasDiffusion.GetPointColor( const i,ii,iii : LongWord):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-case FPlaneComboBox.SelectItem of
-0:Result := FCube.Cube(i,ii,iii)^;
-1:Result := FCube.Cube(i,iii,ii)^;
-2:Result := FCube.Cube(iii,i,ii)^;
-end;
+Result := GetPointColorCube(i,ii,iii,FCube);
 end;
 
 function TSGGasDiffusion.GetPointColorCube( const i,ii,iii : LongWord; const VCube : TSGGasDiffusionCube):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case FPlaneComboBox.SelectItem of
-0:Result := VCube.Cube(i,ii,iii)^;
-1:Result := VCube.Cube(i,iii,ii)^;
+1:Result := VCube.Cube(ii,i,iii)^;
+0:Result := VCube.Cube(ii,iii,i)^;
 2:Result := VCube.Cube(iii,i,ii)^;
 end;
 end;
@@ -2674,8 +2670,32 @@ if IsInFullscreen then
 FileWay := Context.FileOpenDlg('Выберите файл рельефа','Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
 if (FileWay <> '') and (SGFileExists(FileWay)) then
 	begin
+	FRelefRedactor.SingleRelief^.Clear();
+	FRelefRedactor.SingleRelief^.Load(FileWay);
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
 	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
+	end;
+if IsInFullscreen then
+	Context.Fullscreen := True;
+end; end;
+procedure mmmFRedactrReliefSaveFileButton(Button:TSGButton);
+var
+	FileWay : String = '';
+	IsInFullscreen : Boolean = False;
+begin with TSGGasDiffusion(Button.UserPointer) do begin
+IsInFullscreen := Context.Fullscreen;
+if IsInFullscreen then
+	begin
+	Context.Fullscreen := False;
+	Context.Messages(); //Обязательно 3 раза, иначе hWindow не обновляется
+	Context.Messages();
+	Context.Messages();
+	end;
+FileWay := Context.FileSaveDlg('Выберите имя файла для сохранения рельефа','Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0,'sggdrf');
+WriteLn('FileWay=',FileWay);
+if (FileWay <> '') then
+	begin
+	FRelefRedactor.SingleRelief^.Save(FileWay);
 	end;
 if IsInFullscreen then
 	Context.Fullscreen := True;
@@ -2694,6 +2714,11 @@ procedure mmmFRedactorBackButton(Button:TSGButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 Button.Visible := False;
 Button.Active := False;
+if FRelefOptionPanel <> nil then
+	begin
+	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:теоритически изменен';
+	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
+	end;
 if FRelefRedactor <> nil then
 	FRelefRedactor.StopRedactoring();
 if FRelefOptionPanel <> nil then
@@ -2776,6 +2801,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*2,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Font := FTahomaFont;
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefSaveFileButton);
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Редактировать рельеф';
@@ -3434,13 +3460,9 @@ if FMesh <> nil then
 		FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 		FNowCadr+=1;
 		end;
-	if (FSecheniePanel<>nil) and (FDiffusionRuned) and (FSecheniePanel.Visible) then
+	if (FSecheniePanel<>nil)  and (FSecheniePanel.Visible) then
 		begin
 		UpDateSechenie();
-		{if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
-			begin
-			UpDateUsrSech();
-			end;}
 		end;
 	if (FAddNewSoursePanel<>nil) and FAddNewSoursePanel.Visible then
 		begin

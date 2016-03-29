@@ -215,6 +215,7 @@ type
 		// Получить определенную имнформацию, заключенную в индентификаторе What
 		function Get(const What:string):Pointer;override;
 		function FileOpenDlg(const VTittle: String; const VFilter : String):String;virtual;abstract;
+		function FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;virtual;abstract;
 		end;
 type
 	// Это тип, с которого пишутся все классы, которые используют Context
