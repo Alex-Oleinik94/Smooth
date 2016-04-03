@@ -102,6 +102,10 @@ type
 		FStartingThread      : TSGThread;
 		FStartingFlag        : LongInt;
 		
+		// Перетаскивание источников
+		FSourseChangeFlag    : TSGLongWord;                 //Number of sourse + 1
+		FSourseChangeFlag2   : TSGLongWord;                 //Plane(0,1,2)
+		
 		//New Panel
 		FEdgeEdit               : TSGEdit;
 		FNumberLabel            : TSGLabel;
@@ -599,6 +603,10 @@ FreeMem(FRCI);
 end;
 
 procedure TSGGasDiffusionCube.UpDateSourses();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function IsInRange(const i : integer):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (i>=0) and (i<=Edge - 1);
+end;
 var
 	I : TSGLongWord;
 	j1,j2,j3,j1d,j2d,j3d : integer;
@@ -613,8 +621,9 @@ if FSourses<>nil then
 			j1d := FSourses[i].FCoord.x+j1;
 			j2d := FSourses[i].FCoord.y+j2;
 			j3d := FSourses[i].FCoord.z+j3;
-			if (Cube(j1d,j2d,j3d)^=0) and TSGBoolean(ReliefCubeIndex(j1d,j2d,j3d)) then
-				Cube(j1d,j2d,j3d)^:=FSourses[i].FGazTypeIndex+1;
+			if IsInRange(j1d) and IsInRange(j2d) and (IsInRange(j3d)) then
+				if (Cube(j1d,j2d,j3d)^=0) and TSGBoolean(ReliefCubeIndex(j1d,j2d,j3d)) then
+					Cube(j1d,j2d,j3d)^:=FSourses[i].FGazTypeIndex+1;
 			end;
 		end;
 end;
@@ -1975,6 +1984,7 @@ if FAddNewSoursePanel = nil then
 			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageSourseProc);
+	(FAddNewSoursePanel.LastChild as TSGComboBox).MaxLines := 6;
 	
 	FAddNewSoursePanel.CreateChild(TSGButton.Create());//2
 	FAddNewSoursePanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
@@ -3086,6 +3096,8 @@ inherited Create(VContext);
 {$IFDEF RELIEFDEBUG}
 	FInReliafDebug        := 0;
 	{$ENDIF}
+FSourseChangeFlag         := 0;
+FSourseChangeFlag2        := 0;
 FStartingFlag             := 0;
 FStartingThread           := nil;
 FStartingProgressBar      := nil;
@@ -3317,19 +3329,25 @@ end;
 
 procedure TSGGasDiffusion.UpDateChangeSourses();
 var
-	a : record x,y,z:Real; end;
-	b : TSGVertex3f;
-	s : LongWord;
-	c : TSGColor4f;
+	b, a : TSGVertex3f;
+	s, Plane : TSGLongWord;
+function Range(const i : TSGLongInt):TSGLongWord;
+begin
+if i >= FCube.Edge then
+	Result := FCube.Edge - 1
+else if i < 0 then
+	Result := 0
+else
+	Result := i;
+end;
 begin
 if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 	Exit;
 s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
-a.x :=2*FCube.FSourses[s].FCoord.z/FCube.Edge-1;
-a.y :=2*FCube.FSourses[s].FCoord.y/FCube.Edge-1;
-a.z :=2*FCube.FSourses[s].FCoord.x/FCube.Edge-1;
-C.Import(1,$A5/256,0,1);
-C.Color(Render);
+a.Import(2*FCube.FSourses[s].FCoord.z/FCube.Edge-1,
+		 2*FCube.FSourses[s].FCoord.y/FCube.Edge-1,
+		 2*FCube.FSourses[s].FCoord.x/FCube.Edge-1);
+Render.Color3f(1,$A5/256,0);
 Render.BeginScene(SGR_LINE_LOOP);
 Render.Vertex3f(1,-1,a.z);
 Render.Vertex3f(-1,-1,a.z);
@@ -3351,12 +3369,50 @@ Render.EndScene();
 
 {$IFNDEF MOBILE}
 	DrawComplexCube();
-	Render.GetVertexUnderPixel(Context.CursorPosition().x,Context.CursorPosition().y,a.x,a.y,a.z);
-	b.Import(a.x,a.y,a.z);
-	if Abs(b) <2 then
+	b := SGGetVertexUnderPixel(Render,Context.CursorPosition());
+	if Abs(b) < 2 then
 		begin
-		
-		end;
+		if FSourseChangeFlag = 0 then
+			begin
+			Plane := Byte(Abs(a.y-b.y) < 0.11);
+			if Plane=0 then
+				Plane := Byte(Abs(a.z-b.z) < 0.11)*2;
+			if Plane=0 then
+				Plane := Byte(Abs(a.x-b.x) < 0.11)*3;
+			if (Context.CursorKeyPressed() = SGLeftCursorButton) and (Context.CursorKeyPressedType() = SGDownKey) then
+				begin
+				if Plane <> 0 then
+					begin
+					FSourseChangeFlag := s + 1;
+					FSourseChangeFlag2 := Plane - 1;
+					end;
+				end;
+			end
+		else if (Context.CursorKeyPressedType() <> SGUpKey) then
+			begin
+			case FSourseChangeFlag2 of
+			0:FCube.FSourses[FSourseChangeFlag-1].FCoord.Import(
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.x,
+				Range(Trunc((b.y+0.99)/2*FCube.Edge)),
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.z);
+			1:FCube.FSourses[FSourseChangeFlag-1].FCoord.Import(
+				Range(Trunc((b.z+0.99)/2*FCube.Edge)),
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.y,
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.z);
+			2:FCube.FSourses[FSourseChangeFlag-1].FCoord.Import(
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.x,
+				FCube.FSourses[FSourseChangeFlag-1].FCoord.y,
+				Range(Trunc((b.x+0.99)/2*FCube.Edge)));
+			end;
+			FCube.UpDateSourses();
+			FMesh.Destroy();
+			FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
+			end
+		else
+			FSourseChangeFlag := 0;
+		end
+	else
+		FSourseChangeFlag := 0;
 	{$ENDIF}
 end;
 
@@ -3441,7 +3497,9 @@ if FStartingFlag = 2 then
 	end;
 if FMesh <> nil then
 	begin
-	FCamera.CallAction();
+	if FSourseChangeFlag=0 then
+		FCamera.Change();
+	FCamera.InitMatrix();
 	FMesh.Draw();
 	if (FSecheniePanel<>nil) then
 		DrawSechenie();
