@@ -302,7 +302,7 @@ type
 		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
 	
 	public
-		// Свойства для редактирования нормалей
+		// Свойство для редактирования нормалей
 		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
 		
 	private
@@ -438,7 +438,7 @@ type
 		FParent : TSGCustomModel;
 		FObjectMaterialID : TSGInt64;
 		
-		FEnableObjectMatrix : Boolean;
+		FEnableObjectMatrix : TSGBoolean;
 		FObjectMatrix : TSGMatrix4;
 	public
 		procedure SetMatrix(const m : TSGMatrix4);
@@ -449,6 +449,8 @@ type
 		property ObjectMaterialID : TSGInt64       read FObjectMaterialID write FObjectMaterialID;
 		property Parent           : TSGCustomModel read FParent           write FParent;
 		property ObjectMatrix     : TSGMatrix4     read FObjectMatrix     write SetMatrix;
+	public
+		procedure CopyTo(const Destination : TSG3dObject);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
     end;
 
     PSG3dObject = ^TSG3dObject;
@@ -1551,6 +1553,45 @@ if SGFileExists(FileWay) then
 		Stream.Destroy();
 		end;
 	end;
+end;
+
+procedure TSG3DObject.CopyTo(const Destination : TSG3dObject);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Destination.Context := Context;
+Destination.HasNormals := HasTexture;
+Destination.HasColors := HasColors;
+Destination.HasNormals := HasNormals;
+Destination.ObjectPoligonesType := ObjectPoligonesType;
+Destination.EnableCullFace := EnableCullFace;
+Destination.VertexType := VertexType;
+Destination.ColorType := ColorType;
+Destination.ObjectMatrix := ObjectMatrix;
+Destination.CountTextureFloatsInVertexArray := CountTextureFloatsInVertexArray;
+Destination.BumpFormat := BumpFormat;
+Destination.ObjectColor := ObjectColor;
+Destination.EnableCullFaceFront := EnableCullFaceFront;
+Destination.EnableCullFaceBack := EnableCullFaceBack;
+Destination.Name := Name;
+//Destination.Parent := Parent;
+Destination.ObjectMaterialID := ObjectMaterialID;
+
+Destination.Vertexes := Vertexes;
+Move(ArVertex^,Destination.ArVertex^,VertexesSize());
+
+if QuantityFaceArrays <> 0 then
+	for i := 0 to QuantityFaceArrays - 1 do
+		begin
+		Destination.AddFaceArray();
+		Destination.ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat := ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat;
+		Destination.PoligonesType[Destination.QuantityFaceArrays - 1] := PoligonesType[Destination.QuantityFaceArrays - 1];
+		Destination.Faces[Destination.QuantityFaceArrays - 1] := Faces[Destination.QuantityFaceArrays - 1];
+		Move(
+			Destination.ArFaces[Destination.QuantityFaceArrays - 1].FArray^,
+			ArFaces[Destination.QuantityFaceArrays - 1].FArray^,
+			GetFaceInt(ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat)*GetFaceLength(Destination.QuantityFaceArrays - 1));
+		end;
 end;
 
 procedure TSG3DObject.SaveToSG3DO(const Stream:TStream);

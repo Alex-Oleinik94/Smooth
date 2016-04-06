@@ -24,10 +24,18 @@ type
 	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
 type
 	TSGGasDiffusionSingleRelief = object
-		FEnabled : Boolean;
-		FType : Boolean;
+		FEnabled : TSGBoolean;
+		FType : TSGBoolean;
 		FPoints : packed array of TSGVertex;
 		FPolygones : packed array of TSGGDRPrimetiveIndexes;
+		
+		FMesh : TSG3DObject;
+		FMeshArray : packed array of
+					 packed record
+						FCoords : TSGPoint3f;
+						FCount  : TSGLongWord;
+						FIndex  : TSGLongWord;
+						end;
 		
 		procedure Draw(const VRender : TSGRender);
 		procedure DrawLines(const VRender : TSGRender);
@@ -179,11 +187,12 @@ end;
 procedure TSGGasDiffusionSingleRelief.Load(const ms : TMemoryStream);overload;
 var
 	i, ii : TSGLongWord;
+	B : TSGBoolean;
 begin
 if ms.Size <> ms.Position then
 	begin
-	ms.ReadBuffer(FType,SizeOf(FType));
-	ms.ReadBuffer(FEnabled,SizeOf(FEnabled));
+	ms.ReadBuffer(B,SizeOf(B));
+	ms.ReadBuffer(B,SizeOf(B));
 	ms.ReadBuffer(i,SizeOf(i));
 	SetLength(FPoints,i);
 	for i := 0 to High(FPoints) do
@@ -1123,48 +1132,56 @@ procedure TSGGasDiffusionSingleRelief.ExportToMeshPolygones(const VMesh : TSGCus
 var
 	i,ii : LongWord;
 begin
-if FPoints <> nil then if Length(FPoints) <> 0 then
-	begin	
-	if FEnabled then if FPolygones <> nil then if Length(FPolygones) <> 0 then
-		for i := 0 to High(FPolygones) do
-			if FPolygones[i] <> nil then if Length(FPolygones[i]) <> 0 then
-				begin
-				VMesh.AddObject();
-				VMesh.LastObject().ObjectPoligonesType := SGR_TRIANGLES;
-				VMesh.LastObject().HasNormals := False;
-				VMesh.LastObject().HasTexture := False;
-				VMesh.LastObject().HasColors  := True;
-				VMesh.LastObject().EnableCullFace := False;
-				VMesh.LastObject().VertexType := SGMeshVertexType3f;
-				VMesh.LastObject().SetColorType(SGMeshColorType4b);
-				VMesh.LastObject().Vertexes := 3*(Length(FPolygones[i]) - 2);
-				VMesh.LastObject().ObjectMatrix := Matrixes[index];
-				
-				for ii := 0 to Length(FPolygones[i])-3 do
+if FMesh = nil then
+	begin
+	if FPoints <> nil then if Length(FPoints) <> 0 then
+		begin
+		if FEnabled then if FPolygones <> nil then if Length(FPolygones) <> 0 then
+			for i := 0 to High(FPolygones) do
+				if FPolygones[i] <> nil then if Length(FPolygones[i]) <> 0 then
 					begin
-					VMesh.LastObject().ArVertex3f[ii*3+0]^ := FPoints[FPolygones[i][0]];
-					VMesh.LastObject().ArVertex3f[ii*3+1]^ := FPoints[FPolygones[i][ii+1]];
-					VMesh.LastObject().ArVertex3f[ii*3+2]^ := FPoints[FPolygones[i][ii+2]];
-					if FType then
+					VMesh.AddObject();
+					VMesh.LastObject().ObjectPoligonesType := SGR_TRIANGLES;
+					VMesh.LastObject().HasNormals := False;
+					VMesh.LastObject().HasTexture := False;
+					VMesh.LastObject().HasColors  := True;
+					VMesh.LastObject().EnableCullFace := False;
+					VMesh.LastObject().VertexType := SGMeshVertexType3f;
+					VMesh.LastObject().SetColorType(SGMeshColorType4b);
+					VMesh.LastObject().Vertexes := 3*(Length(FPolygones[i]) - 2);
+					VMesh.LastObject().ObjectMatrix := Matrixes[index];
+					
+					for ii := 0 to Length(FPolygones[i])-3 do
 						begin
-						VMesh.LastObject().SetColor(ii*3+0,0,  1,1,0.2);
-						VMesh.LastObject().SetColor(ii*3+1,0,  1,1,0.2);
-						VMesh.LastObject().SetColor(ii*3+2,0,  1,1,0.2);
-						end
-					else
-						begin
-						VMesh.LastObject().SetColor(ii*3+0,0,0.5,1,0.2);
-						VMesh.LastObject().SetColor(ii*3+1,0,0.5,1,0.2);
-						VMesh.LastObject().SetColor(ii*3+2,0,0.5,1,0.2);
+						VMesh.LastObject().ArVertex3f[ii*3+0]^ := FPoints[FPolygones[i][0]];
+						VMesh.LastObject().ArVertex3f[ii*3+1]^ := FPoints[FPolygones[i][ii+1]];
+						VMesh.LastObject().ArVertex3f[ii*3+2]^ := FPoints[FPolygones[i][ii+2]];
+						if FType then
+							begin
+							VMesh.LastObject().SetColor(ii*3+0,0,  1,1,0.2);
+							VMesh.LastObject().SetColor(ii*3+1,0,  1,1,0.2);
+							VMesh.LastObject().SetColor(ii*3+2,0,  1,1,0.2);
+							end
+						else
+							begin
+							VMesh.LastObject().SetColor(ii*3+0,0,0.5,1,0.2);
+							VMesh.LastObject().SetColor(ii*3+1,0,0.5,1,0.2);
+							VMesh.LastObject().SetColor(ii*3+2,0,0.5,1,0.2);
+							end;
 						end;
 					end;
-				end;
+		end;
+	end
+else
+	begin
+	FMesh.CopyTo(VMesh.AddObject());
 	end;
 end;
 
 procedure TSGGasDiffusionSingleRelief.ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
 begin
-ExportToMeshLines(VMesh,index,False);
+if FMesh = nil then
+	ExportToMeshLines(VMesh,index,False);
 ExportToMeshPolygones(VMesh,index);
 end;
 
@@ -1182,6 +1199,8 @@ FPolygones[0][0] := 0;
 FPolygones[0][1] := 1;
 FPolygones[0][2] := 2;
 FPolygones[0][3] := 3;
+FMesh := nil;
+FMeshArray := nil;
 {$IFDEF REDACTORDEBUG}
 	Write();
 	{$ENDIF}
@@ -1263,7 +1282,8 @@ var
 begin
 for i := 0 to 5 do
 	begin
-	FData[i].ExportToMeshLines(VMesh,i,False);
+	if FData[i].FMesh = nil then
+		FData[i].ExportToMeshLines(VMesh,i,False);
 	end;
 for i := 0 to 5 do
 	begin
@@ -1305,6 +1325,10 @@ procedure TSGGasDiffusionSingleRelief.Clear();
 var
 	i : integer;
 begin
+if FMesh is TSG3DObject then
+	FMesh.Destroy();
+FMesh := nil;
+SetLength(FMeshArray,0);
 SetLength(FPoints,0);
 if FPolygones <> nil then if Length(FPolygones)<>0 then
 	for i := 0 to High(FPolygones) do

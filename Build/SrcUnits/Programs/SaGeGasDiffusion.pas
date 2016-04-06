@@ -456,9 +456,57 @@ else if (abs(n.x)<SGZero) and (abs(n.z)<SGZero) then
 	Result := PointInTriangleY(t1,t2,t3,v,n.y);
 end;
 
+
+function PointToTriangleZ(const t1,t2,t3,v:TSGVertex3f;const b : Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(
+	v.x, v.y, 
+	ScalePointToTriangle3D(
+		SGVertex2fImport(t1.x,t1.y),
+		SGVertex2fImport(t2.x,t2.y),
+		SGVertex2fImport(t3.x,t3.y),
+		SGVertex2fImport(v.x,v.y),
+		t1.z,t2.z,t3.z)
+	);
+end;
+
+function PointToTriangleX(const t1,t2,t3,v:TSGVertex3f;const b : Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(
+	ScalePointToTriangle3D(
+			SGVertex2fImport(t1.z,t1.y),
+			SGVertex2fImport(t2.z,t2.y),
+			SGVertex2fImport(t3.z,t3.y),
+			SGVertex2fImport(v.z,v.y),
+			t1.x,t2.x,t3.x),
+	v.y, v.z);
+end;
+
+function PointToTriangleY(const t1,t2,t3,v:TSGVertex3f;const b : Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin 
+Result.Import( v.x,
+	ScalePointToTriangle3D(
+			SGVertex2fImport(t1.x,t1.z),
+			SGVertex2fImport(t2.x,t2.z),
+			SGVertex2fImport(t3.x,t3.z),
+			SGVertex2fImport(v.x,v.z),
+			t1.y,t2.y,t3.y),
+	v.z);
+end;
+
+function PointToTriangle(const t1,t2,t3,v,n:TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (abs(n.x)<SGZero) and (abs(n.y)<SGZero) then
+	Result := PointToTriangleZ(t1,t2,t3,v,n.z)
+else if (abs(n.z)<SGZero) and (abs(n.y)<SGZero) then
+	Result := PointToTriangleX(t1,t2,t3,v,n.x)
+else if (abs(n.x)<SGZero) and (abs(n.z)<SGZero) then
+	Result := PointToTriangleY(t1,t2,t3,v,n.y)
+else
+	Result.Import();
+end;
+
 function PointInPolygone(const sr : PSGGasDiffusionSingleRelief; const index : LongWord; const v : TSGVertex3f; const n : TSGVertex3f;const ReliefIndex : Byte):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-const
-	o = 4;
 var
 	i : LongWord;
 begin
@@ -466,9 +514,9 @@ Result := False;
 for i := 1 to High(sr^.FPolygones[index]) - 1 do
 	begin
 	if PointInTriangle(
-		sr^.FPoints[sr^.FPolygones[index][0]] * GetReliefMatrix(ReliefIndex) + n,
-		sr^.FPoints[sr^.FPolygones[index][i]] * GetReliefMatrix(ReliefIndex) + n,
-		sr^.FPoints[sr^.FPolygones[index][i+1]] * GetReliefMatrix(ReliefIndex) + n,
+		sr^.FPoints[sr^.FPolygones[index][0]] * GetReliefMatrix(ReliefIndex) + n * 0.95,
+		sr^.FPoints[sr^.FPolygones[index][i]] * GetReliefMatrix(ReliefIndex) + n * 0.95,
+		sr^.FPoints[sr^.FPolygones[index][i+1]] * GetReliefMatrix(ReliefIndex) + n * 0.95,
 		v,n) then
 			begin
 			Result := True;
@@ -489,6 +537,30 @@ case index of
 end;
 end;
 
+function ProjectingPointToRelief(const v,n : TSGVertex3f;const sr : PSGGasDiffusionSingleRelief;const ReliefIndex : TSGLongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, index : LongWord;
+begin
+Result.Import(0,0,0);
+for index := 0 to High(sr^.FPolygones) do
+	for i := 1 to High(sr^.FPolygones[index]) - 1 do
+		begin
+		if PointInTriangle(
+			sr^.FPoints[sr^.FPolygones[index][0]]   * GetReliefMatrix(ReliefIndex) + n * 0.95,
+			sr^.FPoints[sr^.FPolygones[index][i]]   * GetReliefMatrix(ReliefIndex) + n * 0.95,
+			sr^.FPoints[sr^.FPolygones[index][i+1]] * GetReliefMatrix(ReliefIndex) + n * 0.95,
+			v,n) then
+				begin
+				Result := PointToTriangle(
+						sr^.FPoints[sr^.FPolygones[index][0]]   * GetReliefMatrix(ReliefIndex) + n * 0.95,
+						sr^.FPoints[sr^.FPolygones[index][i]]   * GetReliefMatrix(ReliefIndex) + n * 0.95,
+						sr^.FPoints[sr^.FPolygones[index][i+1]] * GetReliefMatrix(ReliefIndex) + n * 0.95,
+						v,n);
+				Break;
+				end;
+		end;
+end;
+
 var
 	FRCI : TSGGGDC = nil;
 
@@ -498,9 +570,13 @@ Result:=@FRCI[(x*FEdge+y)*FEdge+z];
 end;
 
 var
-	i, j : LongWord;
-	i1, i2, i3, AllPolygoneSize, PolygoneIndex : LongWord;
+	i, j : TSGLongWord;
+	i1, i2, i3, AllPolygoneSize, PolygoneIndex, ii : TSGLongWord;
+	l, k : integer;
+	a1,a2,a3 : byte;
 begin
+//Алгоритм разбивающий все точки пространства на 2 множества.
+//По точкам одного множества газ может перемещаться, а по точкам другого множества - нет. 
 if FRelief <> nil then
 	begin
 	PolygoneIndex := 0;
@@ -508,7 +584,7 @@ if FRelief <> nil then
 	for j := 0 to 5 do
 		if FRelief^.FData[j].FEnabled then
 			if FRelief^.FData[j].FPolygones <> nil then if Length(FRelief^.FData[j].FPolygones) <> 0 then
-				AllPolygoneSize += Length(FRelief^.FData[j].FPolygones);
+				AllPolygoneSize += Length(FRelief^.FData[j].FPolygones)*(1+Byte(FRelief^.FData[j].FType));
 	for j := 0 to 5 do
 		begin
 		if FRelief^.FData[j].FEnabled then
@@ -542,34 +618,9 @@ if FRelief <> nil then
 			end;
 		end;
 	end;
+//Соседние точки тоже помещаем как негодные для перемещения газа.
 FRCI := GetMem(Edge * Edge * Edge);
 FillChar(FRCI^, Edge * Edge * Edge, 1);
-i1:=0;
-while i1<FEdge do
-	begin
-	i2:=0;
-	while i2<FEdge do
-		begin
-		i3:=0;
-		while i3<FEdge do
-			begin
-			RCI(i1,i2,i3)^ := 
-				Byte(
-					Boolean(ReliefCubeIndex(i1,  i2+1,i3+1)^) and
-					Boolean(ReliefCubeIndex(i1+1,i2+1,i3+1)^) and
-					Boolean(ReliefCubeIndex(i1,  i2  ,i3+1)^) and
-					Boolean(ReliefCubeIndex(i1+1,i2  ,i3+1)^) and
-					Boolean(ReliefCubeIndex(i1,  i2+1,i3  )^) and
-					Boolean(ReliefCubeIndex(i1+1,i2+1,i3  )^) and
-					Boolean(ReliefCubeIndex(i1,  i2  ,i3  )^) and
-					Boolean(ReliefCubeIndex(i1+1,i2  ,i3  )^)
-				);
-			i3+=2;
-			end;
-		i2+=2;
-		end;
-	i1+=2;
-	end;
 i1:=1;
 while i1<FEdge-3 do
 	begin
@@ -590,6 +641,48 @@ while i1<FEdge-3 do
 					Boolean(ReliefCubeIndex(i1,  i2  ,i3  )^) and
 					Boolean(ReliefCubeIndex(i1+1,i2  ,i3  )^)
 				);
+			RCI(i1  ,i2  ,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2  ,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2+1,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2+1,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2  ,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2  ,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2+1,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2+1,i3  )^ := RCI(i1,i2,i3)^;
+			i3+=2;
+			end;
+		i2+=2;
+		end;
+	i1+=2;
+	end;
+i1:=0;
+while i1<FEdge do
+	begin
+	i2:=0;
+	while i2<FEdge do
+		begin
+		i3:=0;
+		while i3<FEdge do
+			begin
+			RCI(i1,i2,i3)^ := 
+				Byte(
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3+1)^) and
+					Boolean(ReliefCubeIndex(i1,  i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2+1,i3  )^) and
+					Boolean(ReliefCubeIndex(i1,  i2  ,i3  )^) and
+					Boolean(ReliefCubeIndex(i1+1,i2  ,i3  )^)
+				);
+			RCI(i1  ,i2  ,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2  ,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2+1,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2+1,i3+1)^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2  ,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2  ,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1  ,i2+1,i3  )^ := RCI(i1,i2,i3)^;
+			RCI(i1+1,i2+1,i3  )^ := RCI(i1,i2,i3)^;
 			i3+=2;
 			end;
 		i2+=2;
@@ -600,6 +693,76 @@ for i := 0 to Edge * Edge * Edge - 1 do
 	if (not TSGBoolean(FRCI[i])) then
 		FReliefCubeIndex[i] := 0;
 FreeMem(FRCI);
+// Алгоритм для оседающих граней
+if FRelief <> nil then
+	begin
+	for j := 0 to 5 do
+		begin
+		if FRelief^.FData[j].FEnabled and FRelief^.FData[j].FType then
+			begin
+			
+			FRelief^.FData[j].FMesh := TSG3DObject.Create();
+			FRelief^.FData[j].FMesh.Context := Context;
+			FRelief^.FData[j].FMesh.HasNormals := False;
+			FRelief^.FData[j].FMesh.HasTexture := False;
+			FRelief^.FData[j].FMesh.HasColors  := True;
+			FRelief^.FData[j].FMesh.EnableCullFace := False;
+			FRelief^.FData[j].FMesh.VertexType := SGMeshVertexType3f;
+			FRelief^.FData[j].FMesh.SetColorType (SGMeshColorType4b);
+			FRelief^.FData[j].FMesh.Vertexes   := Edge * Edge;
+			FRelief^.FData[j].FMesh.AddFaceArray();
+			FRelief^.FData[j].FMesh.PoligonesType[0] := SGR_TRIANGLES;
+			
+			FRelief^.FData[j].FMesh.Faces[0] := (Edge-1) * (Edge-1) * 2;
+			for i := 0 to Edge - 2 do 
+				for ii := 0 to Edge - 2 do
+					begin
+					FRelief^.FData[j].FMesh.SetFaceTriangle
+						(0,(i * (Edge - 1) + ii) * 2 + 0, i * Edge + ii, i * Edge + (ii+1), (i+1) * Edge + ii+1);
+					FRelief^.FData[j].FMesh.SetFaceTriangle
+						(0,(i * (Edge - 1) + ii) * 2 + 1, i * Edge + ii, (i+1) * Edge + ii, (i+1) * Edge + ii+1);
+					end;
+			
+			for i := 0 to Edge - 1 do 
+				for ii := 0 to Edge - 1 do
+					begin
+					case j of
+					0 : begin l:=0;      k:= 1;   a1:=0; a2:=0; a3:=0;   i1:=i; i2:=0; i3:=ii; end;
+					1 : begin l:=Edge-1; k:=-1;   a1:=0; a2:=0; a3:=0;   i1:=i; i2:=0; i3:=ii; end;
+					2 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
+					3 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
+					4 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
+					5 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
+					end;
+					
+					while (not TSGBoolean(ReliefCubeIndex(i1+a1*l,i2+a2*l,i3+a3*l))) and (l>=0) and (l<=Edge - 1) do
+						l += k;
+					
+					if (l>=0) and (l<=Edge - 1) then
+						begin
+						if FRelief^.FData[j].FMeshArray = nil then
+							SetLength(FRelief^.FData[j].FMeshArray,1)
+						else
+							SetLength(FRelief^.FData[j].FMeshArray,Length(FRelief^.FData[j].FMeshArray)+1);
+						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCoords.Import(i1+a1*l,i2+a2*l,i3+a3*l);
+						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCount := 0;
+						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FIndex := i * Edge + ii;
+						end;
+					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := ProjectingPointToRelief(
+						SGVertexImport(
+							(i1+a1*l)/(Edge-1)*2-1,
+							(i2+a2*l)/(Edge-1)*2-1,
+							(i3+a3*l)/(Edge-1)*2-1),
+						VertexFromIndex(j),
+						@FRelief^.FData[j],
+						j);
+					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, 1, 1, 0, 0.3);
+					end;
+			end;
+		if VProgress <> nil then
+			VProgress ^ := PolygoneIndex / AllPolygoneSize + ((AllPolygoneSize - PolygoneIndex) / AllPolygoneSize) * (j / 5);
+		end;
+	end;
 end;
 
 procedure TSGGasDiffusionCube.UpDateSourses();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2668,6 +2831,7 @@ procedure mmmFRedactrReliefOpenFileButton(Button:TSGButton);
 var
 	FileWay : String = '';
 	IsInFullscreen : Boolean = False;
+	T, E : TSGBoolean;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 IsInFullscreen := Context.Fullscreen;
 if IsInFullscreen then
@@ -2680,8 +2844,12 @@ if IsInFullscreen then
 FileWay := Context.FileOpenDlg('Выберите файл рельефа','Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
 if (FileWay <> '') and (SGFileExists(FileWay)) then
 	begin
+	T := FRelefRedactor.SingleRelief^.FType;
+	E := FRelefRedactor.SingleRelief^.FEnabled;
 	FRelefRedactor.SingleRelief^.Clear();
 	FRelefRedactor.SingleRelief^.Load(FileWay);
+	FRelefRedactor.SingleRelief^.FType := T;
+	FRelefRedactor.SingleRelief^.FEnabled := E;
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
 	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
 	end;
