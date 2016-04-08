@@ -223,7 +223,6 @@ type
         property BumpFormat                        : TSGMeshBumpType   read FBumpFormat          write FBumpFormat;
         property PoligonesType[Index:TSGLongWord]  : TSGLongWord       read GetPoligonesType     write SetPoligonesType;
 		property QuantityVertexes                  : TSGQuadWord       read FNOfVerts;
-		property QuantityFaces[Index : TSGLongWord]: TSGQuadWord       read GetQuantityFaces;
 		property HasTexture                        : Boolean           read FHasTexture          write SetHasTexture;
 		property HasColors                         : Boolean           read FHasColors           write FHasColors;
 		property HasNormals                        : Boolean           read FHasNormals          write FHasNormals;
@@ -366,8 +365,9 @@ type
 	public
 		// Ствойства для получения и редактирования длинн массивов
 		property QuantityFaceArrays       : TSGLongWord read FQuantityFaceArrays  write SetFaceArLength;
-		property Faces[Index:TSGLongWord] : TSGQuadWord read GetFaceLength        write SetFaceLength;
+		property Faces[Index:TSGLongWord] : TSGQuadWord read GetQuantityFaces     write SetFaceLength;
 		property Vertexes                 : TSGQuadWord read GetVertexLength      write SetVertexLength;
+		property RealQuantityFaces[Index : TSGLongWord]: TSGQuadWord   read GetFaceLength;
     protected
 		// Вклбючено ли VBO
 		// VBO - Vertex Buffer Object
@@ -886,8 +886,8 @@ if not FHasNormals then
 	SecondArVertex:=nil;
 	FHasNormals:=True;
 	end;
-SetLength(ArPoligonesNormals,QuantityFaces[0]);
-for i:=0 to QuantityFaces[0]-1 do
+SetLength(ArPoligonesNormals,Faces[0]);
+for i:=0 to Faces[0]-1 do
 	begin
 	Plane:=SGGetPlaneFromThreeVertex(
 		ArVertex3f[ArFacesTriangles(0,i).p[0]]^,
@@ -899,7 +899,7 @@ for i:=0 to QuantityFaces[0]-1 do
 for i:=0 to QuantityVertexes-1 do
 	begin
 	Vertex.Import(0,0,0);
-	for ii:=0 to QuantityFaces[0]-1 do
+	for ii:=0 to Faces[0]-1 do
 		begin
 		iii:=0;
 		for iiii:=0 to 2 do
@@ -919,7 +919,7 @@ end;
 
 procedure TSG3DObject.AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 begin
-SetFaceLength(ArIndex,QuantityFaces[ArIndex]+FQuantityNewFaces);
+SetFaceLength(ArIndex,Faces[ArIndex]+FQuantityNewFaces);
 end;
 
 procedure TSG3DObject.AddVertex(const FQuantityNewVertexes:LongWord = 1);
@@ -1557,7 +1557,7 @@ end;
 
 procedure TSG3DObject.CopyTo(const Destination : TSG3dObject);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSGLongWord;
+	i: TSGLongWord;
 begin
 Destination.Context := Context;
 Destination.HasNormals := HasTexture;
@@ -1584,13 +1584,14 @@ if QuantityFaceArrays <> 0 then
 	for i := 0 to QuantityFaceArrays - 1 do
 		begin
 		Destination.AddFaceArray();
-		Destination.ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat := ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat;
-		Destination.PoligonesType[Destination.QuantityFaceArrays - 1] := PoligonesType[Destination.QuantityFaceArrays - 1];
-		Destination.Faces[Destination.QuantityFaceArrays - 1] := Faces[Destination.QuantityFaceArrays - 1];
+		Destination.ArFaces[i].FIndexFormat := ArFaces[i].FIndexFormat;
+		Destination.PoligonesType[i] := PoligonesType[i];
+		Destination.Faces[i] := Faces[i];
+		Destination.ArFaces[i].FMaterialID := ArFaces[i].FMaterialID;
 		Move(
-			Destination.ArFaces[Destination.QuantityFaceArrays - 1].FArray^,
-			ArFaces[Destination.QuantityFaceArrays - 1].FArray^,
-			GetFaceInt(ArFaces[Destination.QuantityFaceArrays - 1].FIndexFormat)*GetFaceLength(Destination.QuantityFaceArrays - 1));
+			ArFaces[i].FArray^,
+			Destination.ArFaces[i].FArray^,
+			GetFaceInt(ArFaces[i].FIndexFormat) * GetFaceLength(i) );
 		end;
 end;
 

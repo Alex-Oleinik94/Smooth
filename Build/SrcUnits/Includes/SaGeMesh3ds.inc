@@ -238,7 +238,7 @@ while Ch.ID=EDIT_OBJECT do
 		AddFaceArray();
 		AutoSetIndexFormat(0,Vertexes);
 		SetFaceLength(0,iii);
-		for i:=0 to QuantityFaces[0]-1 do
+		for i:=0 to Faces[0]-1 do
 			begin
 			TFile.Read(t1,2);
 			TFile.Read(t2,2);
@@ -267,7 +267,7 @@ while Ch.ID=EDIT_OBJECT do
 			end;
 		Tfile.Position:=TempPos;
 		ChPos:=Self.FindChunk(TRI_FACELIST,true);
-		Tfile.Position:=Tfile.Position+2+6+QuantityFaces[0]*4*2;
+		Tfile.Position:=Tfile.Position+2+6+Faces[0]*4*2;
 		ChPos:=Self.FindChunk(TRI_MATERIAL,false);
 		ReadHeader(@Ch);
 		if Ch.ID=TRI_MATERIAL then
@@ -347,9 +347,9 @@ if AModel.QuantityObjects>0 then
 		with AModel.Objects[iObject] do
 			begin
 			//SetLength(ArNormals,FNOfVerts);
-			SetLength(pNormals,QuantityFaces[0]);
-			SetLength(pTempNormals,QuantityFaces[0]);
-			for i:=0 to QuantityFaces[0]-1 do
+			SetLength(pNormals,Faces[0]);
+			SetLength(pTempNormals,Faces[0]);
+			for i:=0 to Faces[0]-1 do
 				begin
 				vPoly[0]:=ArVertex3f[ArFacesTriangles(0,i).p0]^;
 				vPoly[1]:=ArVertex3f[ArFacesTriangles(0,i).p1]^;
@@ -367,7 +367,7 @@ if AModel.QuantityObjects>0 then
 			shared:=0;
 			for i:=0 to QuantityVertexes-1 do
 				begin
-				for ii:=0 to QuantityFaces[0]-1 do
+				for ii:=0 to Faces[0]-1 do
 					begin
 					if (ArFacesTriangles(0,ii).p0=i)or(ArFacesTriangles(0,ii).p1=i)or(ArFacesTriangles(0,ii).p2=i) then
 						begin

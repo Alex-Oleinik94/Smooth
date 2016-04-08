@@ -440,8 +440,8 @@ ii:=PAPPE.PhysicsObjectAddMesh(FObject);
 if Mesh.QuantityFaceArrays<>0 then
 	begin
 	for iii:=0 to FMesh.QuantityFaceArrays-1 do
-		if Mesh.QuantityFaces[iii]<>0 then
-			for i:=0 to Mesh.QuantityFaces[iii]-1 do
+		if Mesh.Faces[iii]<>0 then
+			for i:=0 to Mesh.Faces[iii]-1 do
 				PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
 					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[0]]^),
 					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[1]]^),
