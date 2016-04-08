@@ -727,12 +727,12 @@ if FRelief <> nil then
 				for ii := 0 to Edge - 1 do
 					begin
 					case j of
-					0 : begin l:=0;      k:= 1;   a1:=0; a2:=0; a3:=0;   i1:=i; i2:=0; i3:=ii; end;
-					1 : begin l:=Edge-1; k:=-1;   a1:=0; a2:=0; a3:=0;   i1:=i; i2:=0; i3:=ii; end;
-					2 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
-					3 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
-					4 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
-					5 : begin l:=0; k:=1; a1:=0; a2:=0; a3:=0; i1:=0; i2:=0; i3:=0; end;
+					0 : begin l:=0;      k:= 1;   a1:=0; a2:=1; a3:=0;   i1:=i; i2:=0;  i3:=ii; end;
+					1 : begin l:=Edge-1; k:=-1;   a1:=0; a2:=1; a3:=0;   i1:=i; i2:=0;  i3:=ii; end;
+					2 : begin l:=0;      k:= 1;   a1:=1; a2:=0; a3:=0;   i1:=0; i2:=i;  i3:=ii; end;
+					3 : begin l:=Edge-1; k:=-1;   a1:=1; a2:=0; a3:=0;   i1:=0; i2:=i;  i3:=ii; end;
+					4 : begin l:=0;      k:= 1;   a1:=0; a2:=0; a3:=1;   i1:=i; i2:=ii; i3:=0;  end;
+					5 : begin l:=Edge-1; k:=-1;   a1:=0; a2:=0; a3:=1;   i1:=i; i2:=ii; i3:=0;  end;
 					end;
 					
 					while (not TSGBoolean(ReliefCubeIndex(i1+a1*l,i2+a2*l,i3+a3*l))) and (l>=0) and (l<=Edge - 1) do
@@ -748,7 +748,7 @@ if FRelief <> nil then
 						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCount := 0;
 						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FIndex := i * Edge + ii;
 						end;
-					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := ProjectingPointToRelief(
+					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := (-1) * ProjectingPointToRelief(
 						SGVertexImport(
 							(i1+a1*l)/(Edge-1)*2-1,
 							(i2+a2*l)/(Edge-1)*2-1,
@@ -756,8 +756,19 @@ if FRelief <> nil then
 						VertexFromIndex(j),
 						@FRelief^.FData[j],
 						j);
-					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, 1, 1, 0, 0.3);
+					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^.x := (-1) * FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^.x;
+					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, Byte(not((l>=0) and (l<=Edge - 1))), Byte((l>=0) and (l<=Edge - 1)), 0, 0.3)
 					end;
+			
+			for i := 0 to FRelief^.FData[j].FMesh.Faces[0] - 1 do
+				begin
+				if (Abs(FRelief^.FData[j].FMesh.ArVertex3f[FRelief^.FData[j].FMesh.ArFacesTriangles(0,i).p0]^) < SGZero) or 
+				   (Abs(FRelief^.FData[j].FMesh.ArVertex3f[FRelief^.FData[j].FMesh.ArFacesTriangles(0,i).p1]^) < SGZero) or 
+				   (Abs(FRelief^.FData[j].FMesh.ArVertex3f[FRelief^.FData[j].FMesh.ArFacesTriangles(0,i).p2]^) < SGZero) then
+						begin
+						FRelief^.FData[j].FMesh.SetFaceTriangle(0,i,0,0,0);
+						end;
+				end;
 			end;
 		if VProgress <> nil then
 			VProgress ^ := PolygoneIndex / AllPolygoneSize + ((AllPolygoneSize - PolygoneIndex) / AllPolygoneSize) * (j / 5);
