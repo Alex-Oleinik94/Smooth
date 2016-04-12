@@ -729,7 +729,34 @@ procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptio
 function Iff(const b : TSGBoolean;const s1,s2:TSGString):TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+procedure AddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+procedure AddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	ss:string;
+	a:TSGDateTime;
+	pc:PChar;
+	FFileStream : TMemoryStream;
+begin
+FFileStream := TMemoryStream.Create();
+if SGFileExists(FileName) then
+	begin
+	FFileStream.LoadFromFile(FileName);
+	FFileStream.Position := FFileStream.Size;
+	end;
+a.Get;
+with a do
+	ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
+		'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+Line;
+pc:=SGStringToPChar(ss+SGWinEoln);
+FFileStream.WriteBuffer(pc^,Length(ss)+2);
+FreeMem(pc,Length(ss)+3);
+FFileStream.Position := 0;
+FFileStream.SaveToFile(FileName);
+FFileStream.Destroy();
+end;
 
 function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -1865,22 +1892,22 @@ var
 	pc:PChar;
 begin
 if SGLogEnable then
-if not WithTime then
-	begin
-	pc:=SGStringToPChar(s+SGWinEoln);
-	FFileStream.WriteBuffer(pc^,Length(s)+2);
-	FreeMem(pc,Length(s)+3);
-	end
-else
-	begin
-	a.Get;
-	with a do
-		ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
-			'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
-	pc:=SGStringToPChar(ss+SGWinEoln);
-	FFileStream.WriteBuffer(pc^,Length(ss)+2);
-	FreeMem(pc,Length(ss)+3);
-	end;
+	if not WithTime then
+		begin
+		pc:=SGStringToPChar(s+SGWinEoln);
+		FFileStream.WriteBuffer(pc^,Length(s)+2);
+		FreeMem(pc,Length(s)+3);
+		end
+	else
+		begin
+		a.Get;
+		with a do
+			ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
+				'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
+		pc:=SGStringToPChar(ss+SGWinEoln);
+		FFileStream.WriteBuffer(pc^,Length(ss)+2);
+		FreeMem(pc,Length(ss)+3);
+		end;
 end;
 
 constructor TSGLog.Create();

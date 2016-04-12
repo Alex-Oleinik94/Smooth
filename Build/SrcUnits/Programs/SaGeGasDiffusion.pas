@@ -561,6 +561,15 @@ for index := 0 to High(sr^.FPolygones) do
 		end;
 end;
 
+function PostInvert(const index : TSGLongWord; const v : TSGVertex3f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case index of
+0,1:Result.Import(v.x,(-1)*v.y,(-1)*v.z);
+2,3:Result.Import(v.x,v.y,v.z);
+4,5:Result.Import(v.x,v.y,v.z);
+end;
+end;
+
 var
 	FRCI : TSGGGDC = nil;
 
@@ -748,15 +757,11 @@ if FRelief <> nil then
 						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCount := 0;
 						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FIndex := i * Edge + ii;
 						end;
-					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := (-1) * ProjectingPointToRelief(
-						SGVertexImport(
-							(i1+a1*l)/(Edge-1)*2-1,
-							(i2+a2*l)/(Edge-1)*2-1,
-							(i3+a3*l)/(Edge-1)*2-1),
+					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := PostInvert(j, ProjectingPointToRelief(
+						CoordFromXYZ(i1+a1*l,i2+a2*l,i3+a3*l,j),
 						VertexFromIndex(j),
 						@FRelief^.FData[j],
-						j);
-					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^.x := (-1) * FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^.x;
+						j));
 					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, Byte(not((l>=0) and (l<=Edge - 1))), Byte((l>=0) and (l<=Edge - 1)), 0, 0.3)
 					end;
 			

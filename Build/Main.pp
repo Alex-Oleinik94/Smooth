@@ -543,6 +543,10 @@ end;
 						SGConvertFileToPascalUnit(SGPCharToString(argv[2]),SGPCharToString(argv[3]),SGPCharToString(argv[4]),True);
 					end;
 				end
+			else if s='ATL' then
+				begin
+				AddToLog(SGPCharToString(argv[2]),SGPCharToString(argv[3]));
+				end
 			else if s='FPCTC' then
 				begin
 				//WriteLn('Beginning FPC to C transliater.');
