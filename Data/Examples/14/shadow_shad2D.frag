@@ -1,5 +1,3 @@
-#version 120
-
 uniform sampler2DShadow shadowMap;
 
 varying vec4 lpos;

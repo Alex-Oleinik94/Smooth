@@ -33,6 +33,7 @@ type
 		FFrameArray : packed array of TSGWord;
 		FFrameCount : TSGWord;
 		FFrameIndex : TSGWord;
+		FFrameReady : TSGBoolean;
 		
 		function FrameSum():TSGWord;inline;
 			public
@@ -52,6 +53,7 @@ type
 			public
 		FMatrixMode: TSGExByte; // SG_3D, SG_2D, SG_ORTHO_3D
 		FViewMode  : TSGExByte; // SG_VIEW_...
+		FChangingLookAtObject : TSGBoolean;
 			// for SG_VIEW_WATCH_OBJECT
 		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSGSingle;
 			// for SG_VIEW_LOOK_AT_OBJECT
@@ -78,6 +80,7 @@ type
 		property View      : TSGVertex3f read FView       write FView;
 		property MatrixMode: TSGExByte   read FMatrixMode write FMatrixMode;
 		property ViewMode  : TSGExByte   read FViewMode   write FViewMode;
+		property ChangingLookAtObject : TSGBoolean write FChangingLookAtObject;
 		end;
 
 (*====================================================================*)
@@ -223,8 +226,16 @@ var
 begin
 Result := 0;
 if FFrameCount <> 0 then
-	for i := 0 to FFrameCount - 1 do
-		Result += FFrameArray[i];
+	begin
+	if FFrameReady then
+		for i := 0 to FFrameCount - 1 do
+			Result += FFrameArray[i]
+	else
+		for i := 0 to FFrameIndex do
+			Result += FFrameArray[i];
+	end
+else
+	Result := 1;
 end;
 
 constructor TSGFPSViewer.Create(const VContext : TSGContext);
@@ -236,6 +247,7 @@ FFont.Loading();
 FFrameCount := 30;
 SetLength(FFrameArray,FFrameCount);
 FFrameIndex := 0;
+FFrameReady := False;
 end;
 
 destructor TSGFPSViewer.Destroy();
@@ -251,8 +263,14 @@ begin
 FFrameArray[FFrameIndex] := Context.ElapsedTime;
 FFrameIndex += 1;
 if FFrameIndex = FFrameCount then
+	begin
 	FFrameIndex := 0;
-FPSString := 'FPS ' + SGStrReal(100/(FrameSum()/Real(FFrameCount)),2);
+	FFrameReady := True;
+	end;
+if FFrameReady or (FFrameIndex > 2) then
+	FPSString := 'FPS ' + SGStrReal(100/(FrameSum()/(Real(FFrameCount)+0.01)),2)
+else
+	FPSString := 'FPS ?';
 Render.InitMatrixMode(SG_2D);
 FFont.DrawFontFromTwoVertex2f(FPSString,
 	SGVertex2fImport(FX, FY),
@@ -689,11 +707,45 @@ FLocation.Import();
 FView.Import();
 FUp.Import(0,0,0);
 Clear();
+FChangingLookAtObject := False;
 end;
 
 procedure TSGCamera.Change();inline;
+const
+	RotateConst = 0.002;
+var
+	Q, E : TSGBoolean;
+	RotateZ : TSGFloat = 0;
+	o : TSGFloat;
 begin
 case FViewMode of
+SG_VIEW_LOOK_AT_OBJECT: if FChangingLookAtObject then
+	begin
+	Q := Context.KeysPressed('Q');
+	E := Context.KeysPressed('E');
+	o := Byte(not Context.KeysPressed(SG_SHIFT_KEY))*0.6+0.02+0.07*Byte(not Context.KeysPressed(SG_CTRL_KEY));
+	if (Q xor E) then
+		begin
+		if Q then
+			RotateZ := Context.ElapsedTime*o*4
+		else
+			RotateZ := -Context.ElapsedTime*o*4;
+		end;
+	
+	if (Context.KeysPressed('W')) then
+		Move(Context.ElapsedTime*o);
+	if (Context.KeysPressed('S')) then
+		Move(-Context.ElapsedTime*o);
+	if (Context.KeysPressed('A')) then
+		MoveSidewards(-Context.ElapsedTime*o);
+	if (Context.KeysPressed('D')) then
+		MoveSidewards(Context.ElapsedTime*o);
+	if (Context.KeysPressed(' ')) then
+		MoveUp(Context.ElapsedTime*o);
+	if (Context.KeysPressed('X')) then
+		MoveUp(-Context.ElapsedTime*o);
+	Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+	end;
 SG_VIEW_WATCH_OBJECT:
 	begin
 	if Context.CursorWheel=SGUpCursorWheel then
@@ -711,7 +763,7 @@ SG_VIEW_WATCH_OBJECT:
 		end;
 	if Context.CursorKeysPressed(SGRightCursorButton) then
 		begin
-		FTranslateY+=    (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*FZum;
+		FTranslateY+=   (-Context.CursorPosition(SGDeferenseCursorPosition).y/100)*FZum;
 		FTranslateX+=   ( Context.CursorPosition(SGDeferenseCursorPosition).x/100)*FZum;
 		end;
 	if (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedChar=char(189)) and (Context.KeyPressedType=SGDownKey)) then

@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeClientMaxWeb;
+unit SaGeClientWeb;
 
 interface
 
@@ -17,7 +17,7 @@ uses
 	;
 
 type
-	TSGClientMaxWeb=class(TSGDrawClass)
+	TSGClientWeb=class(TSGDrawClass)
 			private
 		J : TJSONData;
 		Schedules : TJSONData;
@@ -51,7 +51,7 @@ Property AsBoolean : Boolean Read GetAsBoolean Write SetAsBoolean;
 Property IsNull : Boolean Read GetIsNull;
 Property AsJSON : TJSONStringType Read GetAsJSON;}
 
-constructor TSGClientMaxWeb.Create(const VContext:TSGContext);
+constructor TSGClientWeb.Create(const VContext:TSGContext);
 var
 	S : String = '';
 	MS : TMemoryStream = nil;
@@ -77,19 +77,19 @@ Schedules := J.FindPath('schedules');}
 //WriteLn(J.FindPath('schdule_title').AsString);
 end;
 
-procedure TSGClientMaxWeb.Draw();
+procedure TSGClientWeb.Draw();
 begin
 
 end;
 
-destructor TSGClientMaxWeb.Destroy();
+destructor TSGClientWeb.Destroy();
 begin
 inherited;
 end;
 
-class function TSGClientMaxWeb.ClassName():TSGString;
+class function TSGClientWeb.ClassName():TSGString;
 begin
-Result := 'Расписание КубГУ';
+Result := 'WEB Client';
 end;
 
 end.

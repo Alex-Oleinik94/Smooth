@@ -2,7 +2,6 @@
 library SaGeLib;
 uses
 	crt
-	,SaGe
 	,SaGeBase
 	,SaGeFractals
 	,SaGeImages

@@ -54,6 +54,7 @@ type
 		procedure Round;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function FloatArray():PTSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Normalized():TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		
 		property Data : PTSGVertexType read FloatArray;
 		end;
@@ -391,7 +392,25 @@ function SGGetNextDynamicArrayIndex(const Index, HighOfArray : TSGLongWord): TSG
 function SGIsTriangleConvex(const v1,v2,v3:TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
+function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Coodrs.x = -1 then
+	Result := PI
+else if Coodrs.x = 1 then
+	Result := 0
+else if Coodrs.y = -1 then
+	Result := 3*PI/2
+else if Coodrs.y = 1 then
+	Result := PI/2
+else if Coodrs.y > SGZero then
+	Result := ArcCos(Coodrs.x) 
+else
+	Result := ArcCos(-Coodrs.x) + PI;
+end;
 
 function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
@@ -2073,6 +2092,14 @@ end;
 function SGZ(const v:Single):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(0,0,v);
+end;
+
+function TSGVertex2f.Normalized():TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	m : TSGFloat;
+begin
+m := Abs(Self);
+Result.Import(x/m,y/m);
 end;
 
 procedure TSGVertex2f.SetVariables(const x1:real = 0; const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

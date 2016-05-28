@@ -204,6 +204,7 @@ const
 	SGFontsDirectory = SGFontDirectory;
 	SGModelsDirectory = SGDataDirectory + Slash +'Models';
 	SGExamplesDirectory = SGDataDirectory + Slash +'Examples';
+	SGEngineDirectory = SGDataDirectory + Slash +'Engine';
 	SGImagesDirectory = 
 		{$IFDEF ANDROID}
 			'/sdcard/Images'
@@ -258,7 +259,7 @@ type
 	TSGExByte = type Int64;
 	PSingle = ^ single;
 	
-	TSGSetOfByte   = type packed set  of byte;
+	TSGSetOfByte   = type packed set   of byte;
 	TArBoolean     = type packed array of boolean;
 	TSGArBoolean   = type packed array of TSGBoolean;
 	TArString      = type packed array of string;
@@ -271,6 +272,8 @@ type
 	TArReal        = type packed array of real;
 	TArExtended    = type packed array of extended;
 	TArTArLongWord = type packed array of TArLongWord;
+	//TSGArConst     = type packed array of const;
+	TSGArString    = type packed array of TSGString;
 	
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
@@ -499,6 +502,7 @@ function SGTruncUp(const T : Real):LongInt;inline;
 
 //Из потока считывается сткока, пока не будет найден нулевой байт
 function SGReadStringFromStream(const Stream:TStream):String;inline;
+function SGReadLnStringFromStream(const Stream:TStream):String;inline;
 
 //Записывает строку в поток. Если (Stavit00 = True), то в конце записывается нулевой байт.
 procedure SGWriteStringToStream(const String1:String;const Stream:TStream;const Stavit00:Boolean = True);inline;
@@ -617,6 +621,8 @@ procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFun
 //(array of const) можно задавать как ['dsdas',123,'a',#34,123.5].
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
 
+function SGArConstToArString(const Ar:packed array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 //Возвращает краткое имя файла, из полного имени файла
 function SGGetFileName(const WayName:string):string;
 
@@ -731,7 +737,19 @@ function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDE
 
 procedure AddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := VString;
+for i := 1 to Length(Result) do
+	if Result[i] = C1 then
+		Result[i] := C2;
+end;
 
 procedure AddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -1620,6 +1638,31 @@ Result:='';
 for i:=Length(S) downto 1 do
 	Result+=S[i];
 SetLength(S,0);
+end;
+
+function SGArConstToArString(const Ar : packed array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+SetLength(Result, Length(Ar));
+if High(Ar)>=0 then 
+	begin
+	for i := 0 to High(Ar) do
+		case Ar[i].vtype of
+		vtInteger: 
+			Result[i] := SGStr(Ar[i].vinteger);
+		vtString: 
+			Result[i] := (Ar[i].vstring^);
+		vtAnsiString: 
+			Result[i] := (AnsiString(Ar[i].vpointer));
+		vtBoolean: 
+			Result[i] := SGStr(Ar[i].vboolean);
+		vtChar: 
+			Result[i] := Ar[i].vchar;
+		vtExtended: 
+			Result[i] := SGStrReal(Extended(Ar[i].vpointer^),5);
+		end;
+	end;
 end;
 
 function SGGetStringFromConstArray(const Ar:packed array of const):String;
@@ -2749,6 +2792,29 @@ if Stavit00 then
 	Stream.WriteBuffer(c,SizeOf(Char));
 end;
 
+function SGReadLnStringFromStream(const Stream:TStream):String;inline;
+
+function EolnChars(const c : char):TSGBoolean; inline;
+begin
+Result := (c = #13) or (c = #0) or (c = #10) or (c = #27);
+end;
+
+var
+	c:char = #1;
+	ToOut : TSGBoolean = False;
+begin
+Result:='';
+while (Stream.Position < Stream.Size) and ((not ToOut) or EolnChars(c))  do
+	begin
+	Stream.ReadBuffer(c,1);
+	if EolnChars(c) then
+		ToOut := True
+	else if (not ToOut) then
+		Result += c;
+	end;
+if Stream.Position <> Stream.Size then
+	Stream.Position := Stream.Position - 1;
+end;
 
 function SGReadStringFromStream(const Stream:TStream):String;inline;
 var

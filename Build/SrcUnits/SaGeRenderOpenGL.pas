@@ -190,6 +190,7 @@ type
 		procedure UseProgram(const VProgram : TSGLongWord);override;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);override;
+		procedure Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);override;
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
@@ -286,6 +287,11 @@ end;
 procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
 begin
 glPolygonOffset(VFactor,VUnits);
+end;
+
+procedure TSGRenderOpenGL.Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);
+begin
+glUniform1f(VLocationName,V);
 end;
 
 procedure TSGRenderOpenGL.Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);

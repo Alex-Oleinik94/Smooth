@@ -84,7 +84,7 @@ type
 		function Loading():TSGBoolean;virtual;
 		procedure SaveToStream(const Stream:TStream);
 		procedure ToTexture();virtual;
-		procedure ToTextureWithBlock(var VTexturesBlock : TSGTextureBlock);
+		procedure ToTextureWithBlock(const VTexturesBlock : TSGTextureBlock);
 		procedure BindTexture();
 		procedure DisableTexture();
 		function ReadyTexture():TSGBoolean;
@@ -197,6 +197,8 @@ else
 end;
 
 procedure TSGTextureBlock.Generate();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+const
+	Show = False;
 var
 	Ar : packed array of SGUInt;
 	i : TSGLongWord;
@@ -211,7 +213,11 @@ if Size > 0 then
 		begin
 		FTextures[i].FWasUsed := False;
 		FTextures[i].FHandle := Ar[i];
+		if Show then
+			Write(Ar[i],' ');
 		end;
+	if Show then
+		WriteLn();
 	SetLength(Ar,0);
 	end;
 end;
@@ -248,7 +254,7 @@ end;
 (*RENDER FUNCTIONS FOR IMAGE*)
 (****************************)
 
-procedure TSGImage.ToTextureWithBlock(var VTexturesBlock : TSGTextureBlock);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.ToTextureWithBlock(const VTexturesBlock : TSGTextureBlock);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if FTexture <> 0 then
 	FreeTexture();

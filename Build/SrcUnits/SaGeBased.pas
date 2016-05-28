@@ -21,6 +21,7 @@ type
 	TSGByte		= Byte;
 	TSGInt64	= Int64;
 	TSGLongWord	= LongWord;
+	PSGLongWord	= ^LongWord;
 	TSGQuadWord	= QWord;
 	TSGWord	    = Word;
 	TSGQWord	= QWord;

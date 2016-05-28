@@ -54,7 +54,6 @@ type
 		FTexturesHandles : array[0..6] of TSGLongWord;
 		
 		// массив с меняющимися данными скелетной анимации
-		// (сначала всего 21 персонаж)
 		FAnimationStates  : array of TSkelAnimState;
 		
 		FModel : TModel;
@@ -147,21 +146,16 @@ end;
 function TSGExample13.GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
 var
 	i : TIndex;
-	MinTextureHandle : TSGLongWord;
 begin
 Result := 
 	'// Fragment Shader '+#13+#10;
 for i := 0 to VTexturesCount - 1 do
 	Result += 'uniform sampler2D myTexture'+SGStr(i)+'; '+#13+#10;
-MinTextureHandle := FTexturesHandles[0];
-for i := 1 to High(FTexturesHandles) do
-	if FTexturesHandles[i] < MinTextureHandle then
-		MinTextureHandle := FTexturesHandles[i];
 Result += 
 	'varying float texNum; '+#13+#10+
 	'void main() '+#13+#10+
 	'{ '+#13+#10+
-	' float texNum2 = floor(texNum*255 - '+SGStr(MinTextureHandle)+'.0 + 0.001); '+#13+#10;
+	' float texNum2 = floor(texNum*255 + 0.001); '+#13+#10;
 for i := 0 to VTexturesCount - 1 do
 	begin
 	if (i <> 0) then
@@ -312,7 +306,6 @@ if Render.SupporedShaders() then
 	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.Visible := True;
-	
 	end;
 end;
 

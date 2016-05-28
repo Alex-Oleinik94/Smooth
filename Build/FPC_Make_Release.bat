@@ -4,6 +4,7 @@ echo "|Compiling Release Version for Windows|"
 echo "======================================="
 MKDIR CompiledUnits
 MKDIR CompiledUnits\i386-other
+make inc_version_release
 make build_files
 @echo off
 make release

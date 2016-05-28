@@ -15,6 +15,10 @@ Build/*.ppu
 Build/*.o
 Build/Main.res
 Binaries/Main.exe
+Binaries/SaGeLib.dll
+Binaries/SaGeLib.so
+Binaries/SaGe.dll
+Binaries/SaGe.so
 Binaries/Main
 Binaries/Main.dbg
 Binaries/Main_Lazarus.dbg

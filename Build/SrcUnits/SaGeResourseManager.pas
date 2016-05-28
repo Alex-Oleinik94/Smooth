@@ -8,7 +8,11 @@ uses
 	 ,SaGeBased
 	 ,Classes
 	 ,Crt
-	 ,SysUtils;
+	 ,SysUtils
+	 ,Dos
+	 ,StrMan
+	 ;
+
 type
 	TSGResourse=class(TSGClass)
 		end;
@@ -70,6 +74,7 @@ type
 		function ExistsInFile(const Name:TSGString):TSGBoolean;
 		function WaysEqual(w1,w2:TSGString):TSGBoolean;
 		function FileExists(const FileName : TSGString):TSGBoolean;inline;
+		procedure ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
 			private
 		FArFiles:packed array of
 			packed record
@@ -90,10 +95,71 @@ const
 //Этого модуля в программу у тебя конструируется TMemoryStream,
 //В котором и будет тот файл, который ты задал в FileName
 procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
+procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);
 procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
 procedure SGClearRFFile(const RFFile:TSGString);
 
 implementation
+
+procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);
+
+function CalcUnitName(const FileName : TSGString):TSGString;
+var
+	i : TSGLongWord;
+begin
+Result := 'AutomaticUnit_';
+for i := Length(DirName)+2 to Length(FileName) do
+	if (FileName[i] = WinSlash) or (FileName[i] = UnixSlash) or (FileName[i] = '.') then
+		Result += '_'
+	else
+		Result += FileName[i];
+end;
+
+procedure ProcessFile(const FileName : TSGString);
+var
+	UnitName : TSGString;
+begin
+UnitName := CalcUnitName(FileName);
+SGConvertFileToPascalUnit(FileName,UnitsWay,UnitName);
+SGRegisterUnit(UnitName,RFFile);
+end;
+
+procedure ProcessDirectoryFiles(const VDir : TSGString);
+var
+	sr:dos.searchrec;
+begin
+dos.findfirst(VDir+Slash+'*',$3F,sr);
+while DosError<>18 do
+	begin
+	if (sr.name<>'.') and (sr.name<>'..') and SGFileExists(VDir+Slash+sr.name) then
+		begin
+		ProcessFile(VDir+sr.name);
+		end;
+	dos.findnext(sr);
+	end;
+dos.findclose(sr);
+end;
+
+procedure ProcessDirectory(const VDir : TSGString);
+var
+	sr:dos.searchrec;
+begin
+ProcessDirectoryFiles(VDir+Slash);
+dos.findfirst(VDir+Slash+'*',$10,sr);
+while DosError<>18 do
+	begin
+	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir+Slash+sr.name))) then
+		begin
+		ProcessDirectory(VDir+Slash+sr.name);
+		end;
+	dos.findnext(sr);
+	end;
+dos.findclose(sr);
+end;
+
+begin
+ProcessDirectory(DirName);
+end;
 
 procedure SGClearRFFile(const RFFile:TSGString);
 var
@@ -109,15 +175,19 @@ procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
 var
 	Stream:TFileStream = nil;
 	MemStream:TMemoryStream = nil;
+	Exists : TSGBoolean = False;
 begin
 MemStream:=TMemoryStream.Create();
 MemStream.LoadFromFile(RFFile);
-Stream:=TFileStream.Create(RFFile,fmCreate);
-MemStream.Position:=0;
-MemStream.SaveToStream(Stream);
+MemStream.Position := 0;
+while (MemStream.Position <> MemStream.Size) and (not Exists) do
+	Exists := StringTrimAll(SGReadLnStringFromStream(MemStream),' 	,') = UnitName;
+if not Exists then
+	begin
+	SGWriteStringToStream('	,' + UnitName + SGWinEoln, MemStream, False);
+	MemStream.SaveToFile(RFFile);
+	end;
 MemStream.Destroy();
-SGWriteStringToStream('	,'+UnitName+SGWinEoln,Stream,False);
-Stream.Destroy();
 end;
 
 procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
@@ -218,6 +288,42 @@ end;
 
 (*===========TSGResourseFiles===========*)
 
+procedure TSGResourseFiles.ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
+
+function ConvertFileName( const FileName : TSGString):TSGString;
+var
+	i : TSGLongWord;
+begin
+Result := '';
+for i := 1 to Length(FileName) do
+	if (FileName[i] = WinSlash) or (FileName[i] = UnixSlash) then
+		Result += '{DS}'
+	else
+		Result += FileName[i];
+end;
+
+var
+	i : TSGLongWord;
+	Stream : TMemoryStream;
+begin
+if WithDirs then
+	begin
+	// TODO
+	end
+else
+	begin
+	for i:=0 to High(FArFiles) do
+		begin
+		Stream := TMemoryStream.Create();
+		FArFiles[i].FSelf(Stream);
+		Stream.Position := 0;
+		Stream.SaveToFile(Dir + Slash + ConvertFileName(FArFiles[i].FWay));
+		Stream.Destroy();
+		end;
+	WriteLn('Total files : ',Length(FArFiles));
+	end;
+end;
+
 function TSGResourseFiles.WaysEqual(w1,w2:TSGString):TSGBoolean;
 var
 	i:TSGMaxEnum;
@@ -290,6 +396,8 @@ else
 		Stream.LoadFromFile(FileName);
 		Result:=True;
 		end;
+if Result then
+	Stream.Position := 0;
 end;
 
 constructor TSGResourseFiles.Create();

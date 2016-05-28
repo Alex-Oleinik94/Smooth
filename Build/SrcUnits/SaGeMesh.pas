@@ -657,7 +657,6 @@ SGMeshIndexFormat4b:
 end;
 end;
 
-
 procedure TSG3DObject.SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
 begin
 ArFaces[ArIndex].FPoligonesType:=NewPoligonesType;

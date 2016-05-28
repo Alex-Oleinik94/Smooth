@@ -222,7 +222,37 @@ type
 		x : array of TSGLineSystemType;
 		end;
 
+function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Ex : TSGExpression;
+begin
+Result := VExpression;
+Ex := TSGExpression.Create();
+Ex.Expression := SGStringToPChar(VExpression);
+Ex.CanculateExpression();
+if Ex.ErrorsQuantity=0 then
+	begin
+	Ex.BeginCalculate();
+	Ex.Calculate();
+	if Ex.ErrorsQuantity=0 then
+		case Ex.Resultat.FType of
+		SG_REAL : 
+			begin
+			if Abs(Ex.Resultat.FConst - Round(Ex.Resultat.FConst)) < SGZero then
+				Result := SGStr(Round(Ex.Resultat.FConst))
+			else
+				Result := SGStrReal(Ex.Resultat.FConst, 7);
+			end;
+		SG_BOOLEAN : Result := SGStr(TSGBoolean(Trunc(Ex.Resultat.FConst)));
+		SG_NUMERIC : Result := SGStr(Round(Ex.Resultat.FConst));
+		end;
+	end;
+Ex.Destroy();
+end;
 
 procedure TSGLineSystem.View();
 var

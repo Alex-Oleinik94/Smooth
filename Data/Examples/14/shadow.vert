@@ -1,5 +1,3 @@
-#version 120
-
 uniform mat4 lightMatrix;
 uniform vec3 lightPos;
 uniform vec3 lightDir;

@@ -1,5 +1,5 @@
 {$IFDEF UNIX}
-	{$ERROR "Òû קעמ המכבאוב????"}
+	{$ERROR "Òû המכבאוב????"}
 {$ELSE}
 	{$IFDEF MSWINDOW}
 		{$ENDIF}

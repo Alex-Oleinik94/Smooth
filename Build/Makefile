@@ -26,6 +26,12 @@ darwin_release:
 	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main
 lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
+inc_version_debug:
+	@"./../Binaries/Main" -iv 0
+	@"./../Binaries/Main" -CFTPUARU "./../data/engine/version.txt" ../build/srcunits/temp SaGeVersionFile ../build/srcunits/temp/SaGeRMFiles.inc
+inc_version_release:
+	@"./../Binaries/Main" -iv 1
+	@"./../Binaries/Main" -CFTPUARU "./../data/engine/version.txt" ../build/srcunits/temp SaGeVersionFile ../build/srcunits/temp/SaGeRMFiles.inc
 build_files:
 	@$(MAKE) clear_files
 	@"./../Binaries/Main" -CFTPUARU "./../data/fonts/Tahoma.sgf"                         ../build/srcunits/temp tahoma_font          ../build/srcunits/temp/SaGeRMFiles.inc
@@ -38,6 +44,7 @@ build_files:
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/radiobox.sgia"                   ../build/srcunits/temp radio_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
 	@"./../Binaries/Main" -CFTPUARU "./../data/textures/checkbox.sgia"                   ../build/srcunits/temp check_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CDTPUARU "./../data/examples" ../build/srcunits/temp ../build/srcunits/temp/SaGeRMFiles.inc
 clear_files:
 	@rm -f SrcUnits/Temp/*
 	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc

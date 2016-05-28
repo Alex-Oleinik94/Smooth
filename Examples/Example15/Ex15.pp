@@ -17,332 +17,571 @@ uses
 	SaGeContext
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
 	,SaGeUtils
+	,SaGeRender
+	,SaGeCommon
+	,crt
 	,SaGeScreen
 	,SaGeMesh
-	,SaGeCommon
-	,Classes
-	,SysUtils
 	,SaGeShaders
 	,SaGePhysics
+	,Ex13_Model
+	,Ex15_Shadow
+	,Ex6_D
+	,Ex6_N
+	,Math
+	,SaGeImages
 	;
 
-{-$DEFINE USEINLINE}
+const
+	ScaleForDepth = 12;
 
 type
-	TSGExample15 = class;
-	TGasSourse = packed record
-		FPosition : TSGPoint3f;
-		FSize : TSGByte;
-		FGasPointer : TSGLongWord;
-		end;
-	TThread = packed record
-		FThread : TSGThread;
-		FRunning : TSGBoolean;
-		FBeginPointer, FEndPointer : TSGLongWord;
-		FNeedExit : TSGBoolean;
-		FClass : TSGExample15;
-		end;
-	TArray = packed array of TSGLongInt;
-	TSGExample15 = class(TSGDrawClass)
+	TSGExample15=class(TSGDrawClass)
 			public
 		constructor Create(const VContext : TSGContext);override;
 		destructor Destroy();override;
 		procedure Draw();override;
 		class function ClassName():TSGString;override;
+		procedure KeyControl();
+		procedure AddModels(const VCount : TIndex);
 			private
 		FCamera : TSGCamera;
+		FFPS : TSGFPSViewer;
+		FRotateAngleCamera, FRotateAngleLight : TSGFloat;
+		FLigthCameraAngle : TSGFloat;
 		
-		FSize  : TSGLongWord; 
-		FArray : TArray;
-		FGases : packed array of TSGColor3f;
-		FSourses : packed array of TGasSourse;
-		FFlag : TSGBoolean;
+		FLigthSphere: TSG3DObject;
 		
-		FMesh : TSG3DObject;
-		FShader : TSGShaderProgram;
+		FTexturesHandles : array[0..6] of TSGLongWord;
+		FStoneImageD,FStoneImageB : TSGImage;
 		
-		FThreadsCount : TSGLongWord;
-		FThreads : packed array of TThread;
-			public
-		procedure Calculate(const VBeginPos, VEndPos : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
+		// массив с меняющимися данными скелетной анимации
+		FAnimationStates  : array of TSkelAnimState;
+		
+		FModel : TModel;
+		
+		FQuantityModels : TSGLongWord;
+		
+		FP1Button, 
+			FM1Button,
+			FP5Button,
+			FM5Button,
+			FP15Button,
+			FM15Button,
+			FP100Button,
+			FM100Button : TSGButton;
+		FFont : TSGFont;
+		FCountLabel : TSGLabel;
+		
+		FLightsCount : TSGLongWord;
+		FLightsSettings : packed array of
+			packed record
+				FMn : TSGFloat;
+				end;
+		FShadow : TSGExample15_Shadow;
+		FBigRad : TSGFloat;
+		
+		FUseCameraAnimation,
+			FUseLightAnimation,
+			FUseSkeletonAnimation : TSGBoolean;
 			private
-		procedure WaitForThreads();{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure ResumeThreads();{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure Uniform(const VUseGeses : Boolean = False);{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure CalculateMesh(const VSize : TSGFloat = 1);{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure AddGasSourse(const VPosition : TSGPoint3f; const VSize : TSGLongWord; const VGas : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-		function AddGasType(const VColor : TSGColor3f):TSGLongWord;{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure SetSize(const FNewSize : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure StartThreads(const VCount : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-		procedure CalcuteteShader();{$IFDEF USEINLINE}inline;{$ENDIF}
+		procedure DrawPlane(const PlaneSize, PlaneHeight : TSGFloat);
+		procedure AnimateModels();
+		procedure DrawModels();
 		end;
 
-
-
 {$IFDEF ENGINE}
-	function SGPoint3fImport(const x1,y1,z1 : TSGLongInt):TSGPoint3f;{$IFDEF USEINLINE}inline;{$ENDIF}
-	
 	implementation
 	{$ENDIF}
 
-function SGPoint3fImport(const x1,y1,z1 : TSGLongInt):TSGPoint3f;{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-Result.Import(x1,y1,z1);
-end;
-
-procedure TSGExample15.CalcuteteShader();{$IFDEF USEINLINE}inline;{$ENDIF}
-
-function CalcVertexShader(): TSGString;  {$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-WriteLn(SGStr(FSize * FSize * FSize));
-Result := '#version 120' + SGWinEoln + 
-	'uniform int ar['+SGStr(FSize * FSize * FSize)+'];' + SGWinEoln + 
-	'uniform vec3 gases['+SGStr(Length(FGases))+'];' + SGWinEoln + 
-	'varying float needtodraw;' + SGWinEoln + 
-	'varying vec3 gascolor;' + SGWinEoln + 
-	'void main(void)' + SGWinEoln + 
-	'{' + SGWinEoln + 
-	'    int gasindex = array[int(floor(gl_Vertex.w * 255 + 0.001))];' + SGWinEoln +
-	'    if (gasindex == 0)' + SGWinEoln + 
-	'    {' + SGWinEoln + 
-	'        needtodraw = 0.0; ' + SGWinEoln +
-	'    } else {' + SGWinEoln + 
-	'        needtodraw = 1.0; ' + SGWinEoln +
-	'    }' + SGWinEoln + 
-	'    if (gasindex != 0)' + SGWinEoln + 
-	'    {' + SGWinEoln + 
-	'        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;' + SGWinEoln + 
-	'        gascolor = gases[gasindex - 1];' + SGWinEoln +
-	'    } else {' + SGWinEoln + 
-	'        gl_Position = vec3(0,0,0);' + SGWinEoln + 
-	'    }' + SGWinEoln + 
-	'}' + SGWinEoln + 
-	';';
-end;
-
-function CalcFragmentShader(): TSGString; {$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-Result := '#version 120' + SGWinEoln + 
-	'varying bool needtodraw;' + SGWinEoln + 
-	'varying vec3 gascolor;' + SGWinEoln + 
-	'void main(void)' + SGWinEoln + 
-	'{' + SGWinEoln + 
-	'    if (needtodraw)' + SGWinEoln +
-	'    {' + SGWinEoln + 
-	'        gl_FragColor = vec4(gascolor);' + SGWinEoln +
-	'    } else {' + SGWinEoln +
-	'        gl_FragColor = vec4(0);' + SGWinEoln +
-	'    }' + SGWinEoln + 
-	'}';
-end;
-
-begin
-if FShader <> nil then
-	FShader.Destroy();
-FShader := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile('123.vert'),
-	SGReadShaderSourseFromFile('123.frag'));
-end;
-
-procedure TSGExample15.Calculate(const VBeginPos, VEndPos : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-
-end;
-
-procedure TSGExample15ThreadProc(var VThread : TThread);
-
-procedure WaitForMainThread();{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-while not VThread.FRunning do
-	SysUtils.Sleep(2);
-end;
-
-begin
-while not VThread.FNeedExit do
-	begin
-	WaitForMainThread();
-	VThread.FClass.Calculate(VThread.FBeginPointer,VThread.FEndPointer);
-	VThread.FRunning := False;
-	end;
-end;
-
-procedure TSGExample15.StartThreads(const VCount : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
+procedure TSGExample15.AddModels(const VCount : TIndex);
 var
-	i, ii, iii, iiii : TSGLongWord;
+	NewLength, i, Temp : TIndex;
 begin
-iiii := FSize * FSize;
-FThreadsCount := VCount;
-SetLength(FThreads, FThreadsCount);
-if FThreadsCount <> 0 then
-	for i := 0 to FThreadsCount - 1 do
+NewLength := FQuantityModels + VCount;
+if NewLength < 1 then
+	FQuantityModels := 1
+else if FQuantityModels >= NewLength then
+	FQuantityModels := NewLength
+else if Length(FAnimationStates) < NewLength then
+	begin
+	Temp := FQuantityModels;
+	FQuantityModels := NewLength;
+	SetLength(FAnimationStates,FQuantityModels);
+	for i := Temp to FQuantityModels - 1 do
 		begin
-		FThreads[i].FThread := TSGThread.Create(TSGThreadProcedure(@TSGExample15ThreadProc), @FThreads[i], False);
-		FThreads[i].FRunning := False;
-		FThreads[i].FNeedExit := False;
-		ii := Round(iiii / FThreadsCount * i);
-		iii := Round(iiii / FThreadsCount * (i + 1));
-		FThreads[i].FBeginPointer := ii;
-		FThreads[i].FEndPointer := iii - 1;
-		FThreads[i].FClass := Self;
-		FThreads[i].FThread.Start();
+		FAnimationStates[i].ResetState(FModel.Animation^.FNodesNum);
+		FAnimationStates[i].FPrevFrame:=0;
+		FAnimationStates[i].FNextFrame:=random(21);     // номер случайного кадра
+		FAnimationStates[i].FPrevAction:=0;
+		FAnimationStates[i].FNextAction:=0;
+		FAnimationStates[i].FSkelTime:=random(100)/100; // случайный сдвиг анимации
+		FAnimationStates[i].Animate(FModel,0,1,False);
+		FAnimationStates[i].CopyBonesForShader();
 		end;
-end;
-
-procedure TSGExample15.SetSize(const FNewSize : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-FSize := FNewSize;
-i := FSize * FSize * FSize;
-SetLength(FArray, i);
-if (i <> 0) then
-	FillChar(FArray[0],4 * i, 0);
-end;
-
-procedure TSGExample15.AddGasSourse(const VPosition : TSGPoint3f; const VSize : TSGLongWord; const VGas : TSGLongWord);{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-if FSourses <> nil then
-	SetLength(FSourses,Length(FSourses)+1)
-else
-	SetLength(FSourses,1);
-FSourses[High(FSourses)].FPosition := VPosition;
-FSourses[High(FSourses)].FSize := VSize;
-FSourses[High(FSourses)].FGasPointer := VGas;
-end;
-
-function TSGExample15.AddGasType(const VColor : TSGColor3f):TSGLongWord;{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-if FGases <> nil then
-	SetLength(FGases,Length(FGases)+1)
-else
-	SetLength(FGases,1);
-FGases[High(FGases)] := VColor;
-Result := Length(FGases);
-end;
-
-procedure TSGExample15.WaitForThreads();{$IFDEF USEINLINE}inline;{$ENDIF}
-
-function ThreadsReady() : TSGBoolean;{$IFDEF USEINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-Result := True;
-for i := 0 to FThreadsCount - 1 do
-	begin
-	if FThreads[i].FRunning then
-		begin
-		Result := False;
-		break;
-		end;
-	end;
-end;
-
-begin
-while not ThreadsReady() do
-	SysUtils.Sleep(2);
-end;
-
-procedure TSGExample15.ResumeThreads();{$IFDEF USEINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-for i := 0 to FThreadsCount - 1 do
-	FThreads[i].FRunning := True;
-end;
-
-procedure TSGExample15.Uniform(const VUseGeses : Boolean = False);{$IFDEF USEINLINE}inline;{$ENDIF}
-begin
-if VUseGeses and (FGases <> nil) and (Length(FGases) <> 0) then
-	begin
-	Render.Uniform3fv(FShader.GetUniformLocation('gases'), Length(FGases), @FGases[0]);
-	end;
-Render.Uniform1iv(FShader.GetUniformLocation('ar'), FSize * FSize * FSize, @FArray[0]);
-end;
-
-procedure TSGExample15.CalculateMesh(const VSize : TSGFloat = 1);{$IFDEF USEINLINE}inline;{$ENDIF}
-var
-	i, ii, iii : TSGLongWord;
-	d : TSGFloat;
-begin
-d := VSize / 2.0;
-
-FMesh := TSG3DObject.Create();
-FMesh.Context := Context;
-FMesh.CountTextureFloatsInVertexArray := 2;
-FMesh.ObjectPoligonesType := SGR_POINTS;
-FMesh.HasNormals := False;
-FMesh.SetColorType(SGMeshColorType3f);
-FMesh.HasTexture := False;
-FMesh.HasColors  := False;
-FMesh.EnableCullFace := True;
-FMesh.EnableCullFaceFront := False;
-FMesh.EnableCullFaceBack := True;
-FMesh.VertexType := SGMeshVertexType4f;
-
-FMesh.Vertexes   := FSize * FSize * FSize;
-for i := 0 to FSize - 1 do
-	for ii := 0 to FSize - 1 do
-		for iii := 0 to FSize - 1 do
-			begin
-			FMesh.ArVertex4f[i + ii * FSize + iii * FSize * FSize]^.Import(
-				- d + VSize * (i / (FSize - 1)),
-				- d + VSize * (i / (FSize - 1)),
-				- d + VSize * (i / (FSize - 1)),
-				(i + ii * FSize + iii * FSize * FSize) / 255);
-			end;
-
-FMesh.LoadToVBO();
+	end
+else if Length(FAnimationStates) >= NewLength then
+	FQuantityModels := NewLength;
+FCountLabel.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+FBigRad := (30+5*(FQuantityModels - 1)) / 12 + 10;
 end;
 
 class function TSGExample15.ClassName():TSGString;
 begin
-Result := 'Test Gas Diffusion With Shaders';
+Result := 'Скелетная анимация + Shadow & Bump Mapping';
+end;
+
+procedure mmmFP1ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(1); end;
+procedure mmmFM1ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-1); end;
+procedure mmmFP5ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(5); end;
+procedure mmmFM5ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-5); end;
+procedure mmmFP15ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(15); end;
+procedure mmmFM15ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-15); end;
+procedure mmmFP100ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(100); end;
+procedure mmmFM100ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-100); end;
+
+procedure TSGExample15.DrawPlane(const PlaneSize, PlaneHeight : TSGFloat);
+const
+	NumTriangles = 100;
+	TextureSize = 4.2;
+var
+	x,y,x0,y0,a : TSGFloat;
+	i : TSGLongWord;
+begin
+Render.Color3f(0.4,0.6,0.3);
+
+x0 := cos(0);
+y0 := sin(0);
+x := x0 * PlaneSize;
+y := y0 * PlaneSize;
+a := PI*2/50;
+Render.BeginScene(SGR_TRIANGLES);
+SGVertexImport(0,0,1).Normalized().Normal(Render);
+for i := 0 to 49 do
+	begin
+	Render.TexCoord2f(x / TextureSize, y / TextureSize);
+	Render.Vertex3f(x, y, -PlaneHeight);
+	Render.TexCoord2f(0, 0);
+	Render.Vertex3f(0, 0, -PlaneHeight);
+	x0 := cos(a);
+	y0 := sin(a);
+	x := x0 * PlaneSize;
+	y := y0 * PlaneSize;
+	a += PI*2/50;
+	Render.TexCoord2f(x / TextureSize, y / TextureSize);
+	Render.Vertex3f(x, y, -PlaneHeight);
+	end;
+Render.EndScene();
 end;
 
 constructor TSGExample15.Create(const VContext : TSGContext);
+
+procedure LoadLigthModel();
 var
-	i : TSGLongWord;
+	FPhysics : TSGPhysics;
+begin
+FPhysics:=TSGPhysics.Create(Context);
+
+FPhysics.AddObjectBegin(SGPBodySphere,True);
+FPhysics.LastObject().InitSphere(1,30);
+FPhysics.LastObject().SetVertex(0,-56,18);
+FPhysics.LastObject().AddObjectEnd(50);
+
+FLigthSphere := FPhysics.LastObject().Mesh;
+FPhysics.LastObject().Mesh := nil;
+FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.EnableCullFace := True;
+
+FPhysics.Destroy();
+end;
+
+procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
+begin
+VButton := TSGButton.Create();
+SGScreen.CreateChild(VButton);
+SGScreen.LastChild.Font := FFont;
+SGScreen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
+SGScreen.LastChild.BoundsToNeedBounds();
+SGScreen.LastChild.UserPointer:=Self;
+SGScreen.LastChild.Visible:=True;
+SGScreen.LastChild.Caption := VCaption;
+(SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+end;
+
+var
+	i : TSGWord;
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
-FCamera.Context := Context;
+FStoneImageD := nil;
+FStoneImageB := nil;
+FRotateAngleCamera := Random()*360;
+FRotateAngleLight := Random()*360;
+FCamera := nil;
+FModel := nil;
+FQuantityModels := 21;
+FP1Button := nil;
+FM1Button := nil;
+FP5Button := nil;
+FM5Button := nil;
+FP15Button := nil;
+FM15Button := nil;
+FP100Button := nil;
+FM100Button := nil;
+FFont := nil;
+FCountLabel := nil;
+FUseCameraAnimation := True;
+FUseLightAnimation := True;
+FUseSkeletonAnimation := True;
+FLigthCameraAngle := 50/180*PI;
+FShadow := nil;
+LoadLigthModel();
+FLightsCount := 2;
+FShadow := nil;
 
-FMesh := nil;
-FShader := nil;
-FGases := nil;
-FSourses := nil;
-FFlag := False;
+SetLength(FLightsSettings,FLightsCount);
+if FLightsCount > 0 then
+	for i := 0 to FLightsCount - 1 do
+		begin
+		FLightsSettings[i].FMn := Random(200)/60+1;
+		if boolean(random(2)) then
+			FLightsSettings[i].FMn *= -1;
+		end;
 
-SetSize(75);
-AddGasSourse(SGPoint3fImport(trunc(FSize * 0.33),trunc(FSize * 0.33),trunc(FSize * 0.33)),5,AddGasType(SGColorImport(1,0,0)));
-AddGasSourse(SGPoint3fImport(trunc(FSize * 0.66),trunc(FSize * 0.66),trunc(FSize * 0.66)),5,AddGasType(SGColorImport(0,1,0)));
-
-CalcuteteShader();
-
-FShader.Use();
-Uniform(True);
-Render.UseProgram(0);
-
-CalculateMesh(5);
+if Render.SupporedShaders() then
+	begin
+	FFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+	FFont.SetContext(Context);
+	FFont.Loading();
+	FFont.ToTexture();
+	
+	FFPS := TSGFPSViewer.Create(Context);
+	FFPS.X := Context.Width div 2;
+	FFPS.Y := 5;
+	
+	FCamera:=TSGCamera.Create();
+	FCamera.SetContext(Context);
+	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
+	FCamera.ChangingLookAtObject := False;
+	FCamera.Up       := SGVertexImport(0,0,1);
+	FCamera.Location := SGVertexImport(0,-350,100);
+	FCamera.View     := (SGVertexImport(0,0,0)-FCamera.Location).Normalized();
+	FCamera.Location := FCamera.Location / ScaleForDepth;
+	
+	FModel := TModel.Create(Context);
+	FModel.Load(SGExamplesDirectory + Slash + '13' + Slash + 'c_marine.smd');
+	FModel.LoadAnimation(SGExamplesDirectory + Slash + '13' + Slash + 'run.smd');
+	FModel.LoadTextures(SGExamplesDirectory + Slash + '13' + Slash, 2 * FLightsCount + 2);
+	FModel.PrepareSkeletalAnimation();
+	
+	FTexturesHandles[0] := FModel.GetTextureHandle('SM_4B.jpg');
+	FTexturesHandles[1] := FModel.GetTextureHandle('pants23.jpg');
+	FTexturesHandles[2] := FModel.GetTextureHandle('SM_1pNEW.jpg');
+	FTexturesHandles[3] := FModel.GetTextureHandle('body12.jpg');
+	FTexturesHandles[4] := FModel.GetTextureHandle('accs.jpg');
+	FTexturesHandles[5] := FModel.GetTextureHandle('face.jpg');
+	FTexturesHandles[6] := FModel.GetTextureHandle('PC_soldier_beret_red.jpg');
+	
+	SetLength(FAnimationStates,FQuantityModels);
+	// для каждого персонажа делаем случайный номер начального кадра
+	for i := 0 to FQuantityModels - 1 do
+		begin
+		FAnimationStates[i].ResetState(FModel.Animation^.FNodesNum);
+		FAnimationStates[i].FPrevFrame:=0;
+		FAnimationStates[i].FNextFrame:=random(21);     // номер случайного кадра
+		FAnimationStates[i].FPrevAction:=0;
+		FAnimationStates[i].FNextAction:=0;
+		FAnimationStates[i].FSkelTime:=random(100)/100; // случайный сдвиг анимации
+		FAnimationStates[i].Animate(FModel,0,1,False);
+		FAnimationStates[i].CopyBonesForShader();
+		end;
+	FBigRad := (30+5*(FQuantityModels - 1)) / 12 + 10;
+	
+	FModel.MakeMesh();
+	
+	FShadow := TSGExample15_Shadow.Create(Context, FLightsCount, FModel.Animation^.FNodesNum, FModel.TexturesBlock);
+	
+	CreateButton(FP1Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
+	CreateButton(FM1Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
+	CreateButton(FP5Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
+	CreateButton(FM5Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
+	CreateButton(FP15Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
+	CreateButton(FM15Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
+	CreateButton(FP100Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
+	CreateButton(FM100Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	
+	FCountLabel := TSGLabel.Create();
+	SGScreen.CreateChild(FCountLabel);
+	SGScreen.LastChild.Font := FFont;
+	SGScreen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	SGScreen.LastChild.BoundsToNeedBounds();
+	SGScreen.LastChild.Visible := True;
+	
+	FStoneImageD := TSGImage.Create('Ex6_D.jpg');
+	FStoneImageD.Context := Context;
+	FStoneImageD.Loading();
+	FStoneImageD.ToTextureWithBlock(FModel.TexturesBlock);
+	
+	FStoneImageB := TSGImage.Create('Ex6_N.jpg');
+	FStoneImageB.Loading();
+	FStoneImageB.Context := Context;
+	FStoneImageB.ToTextureWithBlock(FModel.TexturesBlock);
+	end;
 end;
 
 destructor TSGExample15.Destroy();
+var
+	i : TIndex;
 begin
-FCamera.Destroy();
+if FCamera <> nil then
+	FCamera.Destroy();
+if FModel <> nil then
+	FModel.Destroy();
+if FShadow <> nil then
+	FShadow.Destroy();
+if FLigthSphere <> nil then
+	FLigthSphere.Destroy();
+if FLightsSettings <> nil then
+	SetLength(FLightsSettings,0);
+
+for i := 0 to High(FAnimationStates) do
+	FAnimationStates[i].ResetState(0);
+SetLength(FAnimationStates,0);
+
+Context.CursorInCenter := False;
+
+if (FP1Button <> nil) then
+	FP1Button.Destroy();
+if (FM1Button <> nil) then
+	FM1Button.Destroy();
+if (FP5Button <> nil) then
+	FP5Button.Destroy();
+if (FM5Button <> nil) then
+	FM5Button.Destroy();
+if (FP15Button <> nil) then
+	FP15Button.Destroy();
+if (FM15Button <> nil) then
+	FM15Button.Destroy();
+if (FP100Button <> nil) then
+	FP100Button.Destroy();
+if (FM100Button <> nil) then
+	FM100Button.Destroy();
+if (FCountLabel <> nil) then
+	FCountLabel.Destroy();
+
+if FFont <> nil then
+	FFont.Destroy();
+if FFPS <> nil then
+	FFPS.Destroy();
+if FStoneImageD <> nil then
+	FStoneImageD.Destroy();
+if FStoneImageB <> nil then
+	FStoneImageB.Destroy();
 inherited;
 end;
 
-procedure TSGExample15.Draw();
+procedure TSGExample15.AnimateModels();
+var
+	i : LongWord;
 begin
-WaitForThreads();
-FShader.Use();
-Uniform();
-ResumeThreads();
-FCamera.CallAction();
-FMesh.Draw();
-Render.UseProgram(0);
+for i := 0 to FQuantityModels - 1 do
+	begin
+	FAnimationStates[i].Animate(FModel,0,1,False);
+	FAnimationStates[i].CopyBonesForShader();
+	end;
+end;
+
+procedure TSGExample15.DrawModels();
+var
+	i : LongWord;
+	x, y, angle : TSGFloat;
+	F_ShaderBoneMat  : TSGLongWord;
+	F_ShaderTextures : array[0..6] of TSGLongWord;
+begin
+F_ShaderBoneMat := FShadow.GetCurrentShader().GetUniformLocation('boneMat');
+if FShadow.DrawingScene then
+	for i := 0 to High(F_ShaderTextures) do
+		begin
+		F_ShaderTextures[i] := FShadow.GetCurrentShader().GetUniformLocation('myTexture'+SGStr(i));
+		end;
+
+Render.Color3f(1,1,1);
+Render.Disable(SGR_BLEND);
+Render.PushMatrix();
+Render.Scale(1/ScaleForDepth,1/ScaleForDepth,1/ScaleForDepth);
+
+if FShadow.DrawingScene then
+	for i := 0 to High(F_ShaderTextures) do
+		begin
+		Render.ActiveTexture(i);
+		Render.BindTexture(SGR_TEXTURE_2D,FTexturesHandles[i]);
+		Render.Uniform1i(F_ShaderTextures[i],i);
+		end;
+
+for i := 0 to FQuantityModels - 1 do
+	begin
+	Render.UniformMatrix4fv(F_ShaderBoneMat, 32, false, @FAnimationStates[i].FShaderAbsoluteMatrixes[0]);
+	Render.PushMatrix();
+	angle := (FQuantityModels+6.28)*i/FQuantityModels;
+	x := (30+5*i)*sin(angle);
+	y := (30+5*i)*cos(angle);
+	FAnimationStates[i].FSpeed := (30+5*i) * 0.01;
+	Render.Translatef(x,y,0);
+	Render.Rotatef(-angle / PI * 180 + 90,0,0,1);
+	FModel.Draw();
+	Render.PopMatrix();
+	end;
+
+if FShadow.DrawingScene then
+	for i := High(F_ShaderTextures) downto 0 do
+		begin
+		Render.ActiveTexture(i);
+		Render.BindTexture(SGR_TEXTURE_2D,0);
+		end;
+
+Render.PopMatrix();
+Render.Enable(SGR_BLEND);
+end;
+
+procedure TSGExample15.Draw();
+const
+	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
+	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
+var
+	VStringLength, i : TSGLongWord;
+	FLightInverseModelViewMatrix : TSGMatrix4;
+begin
+if Render.SupporedShaders() then
+	begin
+	if FUseLightAnimation then
+		FRotateAngleLight += Context.ElapsedTime/10;
+	if FUseSkeletonAnimation then
+		AnimateModels();
+	if FUseCameraAnimation then
+		FRotateAngleCamera += Context.ElapsedTime/10;
+	
+	for i := 0 to FLightsCount - 1 do
+		begin
+		FShadow.LightPos[i]   := SGVertexImport(
+			cos(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
+			sin(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
+			FBigRad * 1.6);
+		FShadow.LightUp[i]    := SGVertexImport(0,0,1);
+		FShadow.LightEye[i]   := SGVertexImport(0,0,0) + SGVertexImport(FShadow.LightPos[i].x,FShadow.LightPos[i].y,0)*0.2;
+		FShadow.LightAngle[i] := FLigthCameraAngle;
+		end;
+	
+	for i := 0 to FLightsCount - 1 do
+		begin
+		FShadow.BeginDrawToShadow(i);
+		Render.Rotatef(-FRotateAngleCamera*5,0,0,1);
+		DrawModels();
+		FShadow.EndDrawToShadow();
+		end;
+	
+	Render.ClearColor(0,0,0,0);
+	if not FUseCameraAnimation then
+		FCamera.Change();
+	FCamera.InitMatrix();
+	Render.Rotatef(-FRotateAngleCamera*5,0,0,1);
+	FShadow.CameraProjectionMatrix := FCamera.GetProjectionMatrix();
+	FShadow.CameraModelViewMatrix  := FCamera.GetModelViewMatrix();
+	
+	FShadow.BeginDrawScene();
+	i := FShadow.GetCurrentShader().GetUniformLocation('renderType');
+	Render.Uniform1i(i,0);
+	DrawModels();
+	Render.Uniform1i(i,2);
+	
+	FCamera.InitMatrix();
+	FShadow.CameraProjectionMatrix := FCamera.GetProjectionMatrix();
+	FShadow.CameraModelViewMatrix  := FCamera.GetModelViewMatrix();
+	FShadow.UniformScrene();
+	
+	Render.ActiveTexture(0);
+	Render.BindTexture(SGR_TEXTURE_2D,FStoneImageD.Texture);
+	Render.Uniform1i(FShadow.GetCurrentShader().GetUniformLocation('myTexture0'),0);
+	Render.ActiveTexture(1);
+	Render.BindTexture(SGR_TEXTURE_2D,FStoneImageB.Texture);
+	Render.Uniform1i(FShadow.GetCurrentShader().GetUniformLocation('myTexture1'),1);
+	
+	DrawPlane(FBigRad,3);
+	
+	Render.ActiveTexture(0);
+	Render.BindTexture(SGR_TEXTURE_2D,0);
+	Render.ActiveTexture(1);
+	Render.BindTexture(SGR_TEXTURE_2D,0);
+	
+	FShadow.EndDrawScene();
+	
+	for i := 0 to FLightsCount - 1 do
+		begin
+		Render.PushMatrix();
+		FLightInverseModelViewMatrix := SGInverseMatrix(FShadow.LightModelViewMatrix[i]);
+		Render.MultMatrixf(@FLightInverseModelViewMatrix);
+		FLigthSphere.Draw();
+		Render.PopMatrix();
+		
+		Render.BeginScene(SGR_LINES);
+		FShadow.LightPos[i].Vertex(Render);
+		(FShadow.LightPos[i] + FShadow.LightDir[i] * 10).Vertex(Render);
+		Render.EndScene();
+		end;
+	
+	FShadow.KeyboardCallback();
+	KeyControl();
+	FFPS.Draw();
+	end
+else
+	begin
+	Render.InitMatrixMode(SG_2D);
+	
+	Render.Color3f(1,0,0);
+	VStringLength := SGScreen.Font.StringLength(WarningString1);
+	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
+		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height - 20) div 2),
+		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 00) div 2));
+	VStringLength := SGScreen.Font.StringLength(WarningString2);
+	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
+		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
+		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
+	end;
+end;
+
+procedure TSGExample15.KeyControl();
+begin
+if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SGUpKey)) then
+	begin
+	FUseCameraAnimation := not FUseCameraAnimation;
+	FCamera.ChangingLookAtObject := not FUseCameraAnimation;
+	Context.CursorInCenter := not FUseCameraAnimation;
+	Context.ShowCursor(not Context.CursorInCenter);
+	if FUseCameraAnimation then
+		begin
+		FCamera.Up   := SGVertexImport(0,0,1);
+		FCamera.View := (-FCamera.Location).Normalized();
+		end;
+	end;
+if (Context.KeyPressed and (Context.KeyPressedChar = 'L') and (Context.KeyPressedType = SGUpKey)) then
+	begin
+	FUseLightAnimation := not FUseLightAnimation;
+	end;
+if (Context.KeyPressed and (Context.KeyPressedChar = 'K') and (Context.KeyPressedType = SGUpKey)) then
+	begin
+	FUseSkeletonAnimation := not FUseSkeletonAnimation;
+	end;
+if Context.KeysPressed('T') then
+	begin
+	if (Context.CursorWheel() = SGUpCursorWheel) then
+		FLigthCameraAngle += 0.1
+	else if (Context.CursorWheel() = SGDownCursorWheel) then
+		FLigthCameraAngle -= 0.1;
+	if FLigthCameraAngle < 0.1 then
+		FLigthCameraAngle := 0.1
+	else if FLigthCameraAngle > PI then
+		FLigthCameraAngle := PI*0.99;
+	end;
 end;
 
 {$IFNDEF ENGINE}

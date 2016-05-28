@@ -26,6 +26,7 @@ uses
 	,SysUtils
 	,SaGeShaders
 	,SaGePhysics
+	,SaGeResourseManager
 	;
 
 const
@@ -99,7 +100,7 @@ type
 
 procedure TSGExample14.LoadModel(const FileName : TSGString);
 var
-	Stream : TFileStream = nil;
+	Stream : TMemoryStream = nil;
 	CountOfVertexes, CountOfIndexes : Integer;
 	Indexes : packed array of packed array [0..2] of TSGLongWord;
 	i : LongWord;
@@ -120,7 +121,8 @@ FModel.VertexType := SGMeshVertexType3f;
 FModel.QuantityFaceArrays := 1;
 FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
 
-Stream := TFileStream.Create(FileName,fmOpenRead);
+Stream := TMemoryStream.Create();
+SGResourseFiles.LoadMemoryStreamFromFile(Stream,FileName);
 Stream.ReadBuffer(FModelBBoxMin,SizeOf(FModelBBoxMin));
 Stream.ReadBuffer(FModelBBoxMax,SizeOf(FModelBBoxMax));
 FModelCenter := (FModelBBoxMax + FModelBBoxMin)/2;
@@ -174,6 +176,8 @@ begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
 FCamera.Context := Context;
+FCamera.FZum := 10;
+FCamera.FRotateX := 50;
 
 FLightPos.Import(0,0,0);
 FLightUp.Import(0,1,0);
@@ -273,6 +277,8 @@ end;
 
 destructor TSGExample14.Destroy();
 begin
+Render.DeleteTextures(1,@FTexDepth);
+Render.DeleteTextures(1,@FTexDepth2);
 FShaderDepth.Destroy();
 FShaderShadowTex2D.Destroy();
 FShaderShadowShad2D.Destroy();
@@ -332,7 +338,7 @@ Render.Enable(SGR_POLYGON_OFFSET_FILL);
 Render.PolygonOffset ( 2, 500);
 
 // Сохраняем эти матрицы, они нам понадобятся для расчёта матрицы света
-FLightProjectionMatrix := SGGetPerspectiveMatrix(90.0, 1.0, TSGRenderNear, TSGRenderFar);
+FLightProjectionMatrix := SGGetPerspectiveMatrix(50.0, 1.0, TSGRenderNear, TSGRenderFar);
 FLightModelViewMatrix  := SGGetLookAtMatrix(FLightPos, FLightEye, FLightUp);
 
 // Установить матрицы камеры света
@@ -450,6 +456,13 @@ FLightInverseModelViewMatrix := SGInverseMatrix(FLightModelViewMatrix);
 Render.MultMatrixf(@FLightInverseModelViewMatrix);
 FLigthSphere.Draw();
 Render.PopMatrix();
+
+{
+Render.BeginScene(SGR_LINES);
+FLightPos.Vertex(Render);
+(FLightPos + FLightDir * 10).Vertex(Render);
+Render.EndScene();
+}
 end;
 
 procedure TSGExample14.Draw();

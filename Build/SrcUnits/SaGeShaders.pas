@@ -11,10 +11,15 @@ uses
 	,SysUtils
 	,SaGeRender
 	,SaGeContext
+	,Classes
+	,SaGeResourseManager
+	,StrMan
+	,SaGeMath
 	;
 type
-	TSGShaderProgram=class;
-	TSGShader=class(TSGContextObject)
+	TSGShaderParams = TSGArString;
+	TSGShaderProgram = class;
+	TSGShader = class(TSGContextObject)
 			public
 		constructor Create(const VContext:TSGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 		destructor Destroy();override;
@@ -28,6 +33,7 @@ type
 		property Shader : TSGLongWord read FShader;
 		property Handle : TSGLongWord read FShader;
 		end;
+	
 	TSGShaderProgram=class(TSGContextObject)
 			public
 		constructor Create(const VContext:TSGContext);override;
@@ -36,7 +42,8 @@ type
 		function Link():Boolean;
 		procedure PrintInfoLog();
 		procedure Use();
-		function GetUniformLocation(const VLocationName : PChar): TSGLongWord;
+		function GetUniformLocation(const VLocationName : PChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function GetUniformLocation(const VLocationName : TSGString): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 			private
 		FProgram : TSGLongWord;
 		FShaders :
@@ -45,18 +52,171 @@ type
 			public
 		property Handle : TSGLongWord read FProgram;
 		end;
+	
+	TSGShaderReader = class
+		public
+	constructor Create();
+	destructor Destroy();override;
+		private
+	FStandartParams : packed array of
+		packed record
+			FNumber : TSGLongWord;
+			FParam  : TSGString;
+			end;
+	FStream : TMemoryStream;
+	FFileParams : TSGShaderParams;
+	FFileName : TSGString;
+		public
+	function IdentifierValue(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ProcessString(const VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ProcessFor(const VVariable : TSGString; const VBegin, VEnd : TSGLongInt; const VString : TSGString;const NeedEolns : TSGBoolean = False;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ProcessComand(const VComand : TSGString; VParams : TSGShaderParams;const Stream : TMemoryStream;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function FindComand(VString : TSGString; out VParams : TSGShaderParams; out ComandShift : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ProcessCustomString(const S : TSGString; const Stream : TMemoryStream; const VAditionalParams : TSGString = '';const UseEoln : TSGBoolean = True):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function Process():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ProcessStrings(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	
+	function WithParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+	function WithParam(const VAditionalParams : TSGString; const VParam, VValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+	function DelParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function GetParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function ConqutinateParam(const VAditionalParams : TSGString; const VParam, VConqutinateValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	
+	function WithComandShift(const VAditionalParams : TSGString; const VShift:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	function GetComandShift(const VAditionalParams : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		public
+	property FileName : TSGString write FFileName;
+	property FileParams : TSGShaderParams write FFileParams;
+	end;
 
-function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;
-function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;
+function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
-function TSGShaderProgram.GetUniformLocation(const VLocationName : PChar): TSGLongWord;
+function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i : TSGLongWord;
+	FileParams : TSGShaderParams;
+begin
+Result:='';
+FileParams := SGArConstToArString(VFileParams);
+Result := SGReadShaderSourseFromFile(VFileName,FileParams);
+SetLength(FileParams,0);
+end;
+
+function TSGShaderReader.DelParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+	S, P : TSGString;
+begin
+Result := '';
+for i := 1 to StringWordCount(VAditionalParams,',') do
+	begin
+	S := StringWordGet(VAditionalParams,',',i);
+	P := StringWordGet(S,'=',1);
+	if P <> VParam then
+		begin
+		if Result <> '' then
+			Result += ',';
+		Result += S;
+		end;
+	end;
+end;
+
+function TSGShaderReader.GetParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+	S, P : TSGString;
+	Pattern : TSGBoolean;
+begin
+Result := '';
+for i := 1 to StringWordCount(VAditionalParams,',') do
+	begin
+	S := StringWordGet(VAditionalParams,',',i);
+	Pattern := StringMatching(S,'*=*');
+	P := StringWordGet(S,'=',1);
+	if (not Pattern) and (P=VParam) then
+		begin
+		Result := '1';
+		break;
+		end
+	else if (Pattern) and (P=VParam) then
+		begin
+		Result := StringWordGet(S,'=',2);
+		break;
+		end;
+	end;
+end;
+
+function TSGShaderReader.WithComandShift(const VAditionalParams : TSGString; const VShift:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result:=WithParam(VAditionalParams,'ComandShift', SGStringReplace(SGStringReplace(GetComandShift(VAditionalParams) + VShift,' ','S'),'	','T'));
+end;
+
+function TSGShaderReader.GetComandShift(const VAditionalParams : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGStringReplace(SGStringReplace(GetParam(VAditionalParams,'ComandShift'),'S',' '),'T','	');
+end;
+
+function TSGShaderReader.ConqutinateParam(const VAditionalParams : TSGString; const VParam, VConqutinateValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := WithParam(VAditionalParams,VParam,GetParam(VAditionalParams,VParam) + VConqutinateValue);
+end;
+
+function TSGShaderReader.WithParam(const VAditionalParams : TSGString; const VParam, VValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := WithParam(VAditionalParams,VParam + '=' + VValue);
+end;
+
+function TSGShaderReader.WithParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := DelParam(VAditionalParams,VParam);
+if Result <> '' then
+	Result += ',';
+Result += VParam;
+end;
+
+constructor TSGShaderReader.Create();
+begin
+FStandartParams := nil;
+end;
+
+destructor TSGShaderReader.Destroy();
+begin
+SetLength(FStandartParams,0);
+SetLength(FFileParams,0);
+inherited;
+end;
+
+procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	f : TextFile;
+begin
+Assign(f, VFileName);
+Rewrite(f);
+Write(f,VSourse);
+Close(f);
+end;
+
+function TSGShaderProgram.GetUniformLocation(const VLocationName : TSGString): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	c : PChar;
+begin
+c := SGStringToPChar(VLocationName);
+Result := Render.GetUniformLocation(FProgram,c);
+FreeMem(c,Length(VLocationName));
+end;
+
+function TSGShaderProgram.GetUniformLocation(const VLocationName : PChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := Render.GetUniformLocation(FProgram,VLocationName);
 end;
 
-function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;
+function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	FFragmentShader, FVertexShader : TSGShader;
 begin
@@ -77,22 +237,461 @@ if not Result.Link() then
 	Result.PrintInfoLog();
 end;
 
-function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;
+function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	f : TextFile;
-	TempString : TSGString = '';
+	VFileParams : TSGShaderParams;
+begin
+Result := SGReadShaderSourseFromFile(VFileName,VFileParams);
+end;
+
+function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	Reader : TSGShaderReader = nil;
+begin
+Reader := TSGShaderReader.Create();
+Reader.FileName := VFileName;
+Reader.FileParams := VFileParams;
+Result := Reader.Process();
+Reader.Destroy();
+end;
+
+function TSGShaderReader.ProcessStrings(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Stream : TMemoryStream;
+	S : TSGString;
 begin
 Result := '';
-Assign(f, VFileName);
-Reset(f);
-while not SeekEof(f) do
+Stream := TMemoryStream.Create();
+Stream.WriteBuffer(VString[1],Length(VString));
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
 	begin
-	ReadLn(f,TempString);
-	Result += TempString;
-	if not SeekEof ( f ) then
-		Result += #13 + #10;
+	S := SGReadLnStringFromStream(Stream);
+	if Stream.Position = Stream.Size then
+		Result += ProcessCustomString(S,Stream,VAditionalParams,False)
+	else
+		Result += ProcessCustomString(S,Stream,VAditionalParams,True);
 	end;
-Close(f);
+Stream.Destroy();
+end;
+
+function TSGShaderReader.IdentifierValue(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii : TSGLongWord;
+	S : TSGString;
+begin
+Result := VString;
+if (Length(VString)>5) then
+	begin
+	VString := StringTrimAll(VString,' 	');
+	VString := StringTrimAll(VString,'/');
+	VString := StringTrimAll(VString,'*');
+	VString := StringTrimLeft(VString,'#');
+	VString := StringTrimAll(VString,' 	');
+	i := SGVal(VString);
+	if (i<>0) or ((i=0) and (StringTrimAll(VString,'0') = '')) then
+		begin
+		if (FFileParams = nil) or (Length(FFileParams)<i+1) then
+			begin
+			if (FStandartParams<>nil) and (Length(FStandartParams)>0) then
+				for ii := 0 to High(FStandartParams) do
+					if FStandartParams[ii].FNumber = i then
+						begin
+						Result := FStandartParams[ii].FParam;
+						break;
+						end;
+			end
+		else
+			Result := FFileParams[i];
+		end
+	else if 'RI' = SGUpCaseString(VString) then
+		begin
+		Result := 'RandomIdentifier_';
+		for i := 0 to random(10)+5 do
+			begin
+			ii := Random(3);
+			if ii = 0 then
+				Result += Char(Random(26)+Byte('a'))
+			else if ii = 1 then
+				Result += Char(Random(26)+Byte('A'))
+			else
+				Result += Char(Random(10)+Byte('0'));
+			end;
+		end
+	else if SGUpCaseString(VString) = 'EOLN' then
+		begin
+		Result := SGWinEoln;
+		end
+	else if SGUpCaseString(VString) = 'NOTHINK' then
+		begin
+		Result := '';
+		end
+	else
+		begin
+		i := StringWordCount(VAditionalParams,',');
+		if i <> 0 then
+			for ii := 1 to i do
+				begin
+				S := StringWordGet(VAditionalParams,',',ii);
+				S := StringTrimAll(S,' 	');
+				i := StringWordCount(S,'=');
+				if i = 2 then
+					begin
+					if StringTrimAll(StringWordGet(S,'=',1),' 	') = VString then
+						begin
+						Result := StringTrimAll(StringWordGet(S,'=',2),' 	');
+						break;
+						end;
+					end
+				else
+					begin
+					end;
+				end;
+		end;
+	end;
+end;
+
+function TSGShaderReader.ProcessString(const VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii, iii : TSGLongWord;
+	S : TSGString;
+begin
+Result := '';
+i := 1;
+while i <= Length(VString) do
+	begin
+	if (VString[i]='/') and (i + 5 <= Length(VString)) and (VString[i+1]='*')and (VString[i+2]='#') then
+		begin
+		S := '/*#';
+		ii := i+3;
+		while (VString[ii] <> '*') and (VString[ii]<>'/') and (i <= Length(VString)) do
+			begin
+			S += VString[ii];
+			ii += 1;
+			end;
+		if (VString[ii]='*') and (i+1<=Length(VString)) and (VString[ii+1]='/') then
+			begin
+			i := ii + 2;
+			S += '*/';
+			Result += IdentifierValue(S,VAditionalParams);
+			end
+		else
+			begin
+			Result += S;
+			i := ii;
+			end;
+		end
+	else
+		begin
+		Result += VString[i];
+		i += 1;
+		end;
+	end;
+end;
+
+function TSGShaderReader.ProcessFor(const VVariable : TSGString; const VBegin, VEnd : TSGLongInt; const VString : TSGString;const NeedEolns : TSGBoolean = False;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongInt;
+	S : TSGString;
+begin
+Result := '';
+if VString <> '' then
+	for i := VBegin to VEnd do
+		begin
+		S := ProcessStrings(VString,WithParam(VAditionalParams,VVariable,SGStr(i)));
+		Result += S;
+		if NeedEolns and (i <> VEnd) and (S <> SGWinEoln) then
+			Result += SGWinEoln;
+		end;
+end;
+
+function TSGShaderReader.ProcessComand(const VComand : TSGString; VParams : TSGShaderParams;const Stream : TMemoryStream;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii, iii : LongWord;
+	S, S1, S2, C, CS : TSGString;
+	CH : TSGChar;
+	Params : TSGShaderParams;
+begin
+Result := '';
+if VComand='IF' then
+	begin
+	S := '';
+	iii := 0;
+	if (VParams<>nil) and (Length(VParams)>0) then
+		for i := 0 to High(VParams) do
+			begin
+			if i <> 0 then
+				S += ' ';
+			S += VParams[i];
+			end;
+	S := ProcessString(S, VAditionalParams);
+	if StringWordCount(S,'==') = 2 then
+		begin
+		iii := Byte((StringTrimAll(StringWordGet(S,'==',1),' 	') = StringTrimAll(StringWordGet(S,'==',2),' 	')) and (StringTrimAll(StringWordGet(S,'==',1),' 	') <> ''));
+		end
+	else
+		begin
+		//TODO
+		end;
+	S := ''; S1 := ''; S2 := '';
+	ii := 1;
+	i := 1;
+	while i <> 0 do
+		begin
+		S := SGReadLnStringFromStream(Stream);
+		C := SGUpCaseString(FindComand(S,Params,CS));
+		if C = 'IF' then
+			i += 1
+		else if C = 'ENDIF' then
+			i -= 1;
+		if (C='ELSE') and (i = 1) then
+			ii := byte(not(boolean(ii)));
+		if (C = '') or ((C <> '') and (
+			(((C='IF') or (C='ENDIF')) and (i>=1)) or
+			((C='ELSE') and (i>=2))
+			)) then
+			begin
+			if ii = 1 then
+				S1 += S
+			else
+				S2 += S;
+			end;
+		end;
+	if boolean(iii) then
+		begin
+		if S1 <> '' then
+			Result := ProcessStrings(S1,VAditionalParams);
+		end
+	else
+		begin
+		if S2 <> '' then
+			Result := ProcessStrings(S2,VAditionalParams);
+		end;
+	end
+else if VComand='FOR' then
+	begin
+	if (VParams=nil) or (Length(VParams)<3) then
+		begin
+		S := FFileName+'(for) Error: Syntax error count of params';
+		{$IFNDEF RELEASE}
+			WriteLn(S);
+			{$ENDIF}
+		SGLog.Sourse(S);
+		S := '';
+		end
+	else
+		begin
+		S := '';
+		if Length(VParams)>3 then
+			for i := 3 to High(VParams) do
+				begin
+				if i <> 3 then
+					S += ' ';
+				S += VParams[i];
+				end;
+		iii := 0;
+		if S <> '' then
+			for i := 1 to Length(S) do
+				if S[i] = '{' then
+					iii += 1
+				else if S[i] = '}' then
+					iii -= 1;
+		if (Length(S)>0) and (S[Length(S)] <> '}') then
+			S += SGWinEoln;
+		while (iii > 0) and (FStream.Position <> FStream.Size) do
+			begin
+			FStream.ReadBuffer(CH,1);
+			if CH = '{' then
+				iii += 1
+			else if CH = '}' then
+				iii -= 1;
+			S += CH;
+			end;
+		ii := 0;
+		if Length(S)>=2 then
+			begin
+			if (S[1] = '{') and (S[Length(S)] = '}') then
+				begin
+				S1 := '';
+				for i := 2 to Length(S)-1 do
+					S1 += S[i];
+				S := S1;
+				ii += 1;
+				end;
+			end;
+		Result += ProcessFor(
+			VParams[0],
+			SGVal(SGCalculateExpression(ProcessString(VParams[1],VAditionalParams))),
+			SGVal(SGCalculateExpression(ProcessString(VParams[2],VAditionalParams))),
+			S,
+			ii = 0,
+			VAditionalParams);
+		end;
+	end
+else if (VComand = SGUpCaseString('standartparam')) or (VComand='SP') then
+	begin
+	i := 0;
+	if FStandartParams <> nil then
+		i := Length(FStandartParams);
+	SetLength(FStandartParams, i + 1);
+	FStandartParams[High(FStandartParams)].FNumber := SGVal(SGCalculateExpression(ProcessString(VParams[0])));
+	FStandartParams[High(FStandartParams)].FParam  := SGCalculateExpression(ProcessString(VParams[1]));
+	end
+else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
+	begin
+	S := '';
+	if (VParams<> nil) and (Length(VParams)>0) then
+		begin
+		if (SGResourseFiles.FileExists(SGGetFileWay(FFileName) + VParams[0])) then
+			S := SGGetFileWay(FFileName) + VParams[0]
+		else if SGResourseFiles.FileExists(VParams[0]) then
+			S := VParams[0]
+		else
+			begin
+			S := FFileName+'(include) Error: Syntax error, filename expected but "identifier '+SGUpCaseString(VParams[0])+'" found';
+			{$IFNDEF RELEASE}
+				WriteLn(S);
+				{$ENDIF}
+			SGLog.Sourse(S);
+			S := '';
+			end;
+		end
+	else
+		begin
+		S := FFileName+'(include) Error: Syntax error, filename expected but nothink found';
+		{$IFNDEF RELEASE}
+			WriteLn(S);
+			{$ENDIF}
+		SGLog.Sourse(S);
+		S := '';
+		end;
+	if SGResourseFiles.FileExists(S) then
+		begin
+		if (VParams <> nil) and (Length(VParams)>1) then
+			for i := 1 to High(VParams) do
+				VParams[i-1] := ProcessString(VParams[i],VAditionalParams);
+		if (VParams <> nil) and (Length(VParams)>0) then
+			SetLength(VParams,Length(VParams)-1);
+		Result += SGReadShaderSourseFromFile(S,VParams);
+		end
+	else
+		begin
+		S := FFileName+'(include) Fatal: Filename don''t found';
+		{$IFNDEF RELEASE}
+			WriteLn(S);
+			{$ENDIF}
+		SGLog.Sourse(S);
+		S := '';
+		end;
+	end
+else
+	begin
+	Result += '#' + VComand;
+	if (VParams <> nil) and (Length(VParams)<>0) then
+	for i := 0 to High(VParams) do
+		Result += ' ' + VParams[i];
+	end;
+end;
+
+function TSGShaderReader.FindComand(VString : TSGString; out VParams : TSGShaderParams; out ComandShift : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function IsBadSimbol(const Simbol : TSGChar):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (Simbol = ' ') or (Simbol = '	') or (Simbol = #27) or (Simbol = #13) or (Simbol = #10) or (Simbol = #0);
+end;
+
+function ReadParam(var i : TSGLongWord):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := '';
+while (not IsBadSimbol(VString[i])) and (Length(VString)>=i) do
+	begin
+	Result += VString[i];
+	i += 1;
+	end;
+end;
+
+procedure FindParams(var i : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SetLength(VParams,0);
+while i <= Length(VString) do
+	begin
+	while IsBadSimbol(VString[i]) and (Length(VString)>=i) do
+		i += 1;
+	if Length(VString)>=i then
+		begin
+		SetLength(VParams,Length(VParams)+1);
+		VParams[High(VParams)] := ReadParam(i);
+		end;
+	end;
+end;
+
+var
+	i : TSGLongWord;
+
+begin
+Result := '';
+ComandShift := '';
+i := 1;
+while (i <= Length(VString)) and (VString[i] <> '#') do
+	begin
+	ComandShift += VString[i];
+	i += 1;
+	end;
+VString := StringTrimLeft(VString,' 	');
+if Length(VString)>=2 then
+	if VString[1] = '#' then
+		begin
+		i := 2;
+		Result := ReadParam(i);
+		FindParams(i);
+		end
+	else
+		ComandShift := ''
+else
+	ComandShift := '';
+end;
+
+function TSGShaderReader.ProcessCustomString(const S : TSGString; const Stream : TMemoryStream;const VAditionalParams : TSGString = '';const UseEoln : TSGBoolean = True):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	C, S1, CS : TSGString;
+	Params : TSGShaderParams;
+	CH : TSGChar;
+	ii : TSGLongWord;
+begin
+Result := '';
+C := FindComand(S,Params,CS);
+if C='' then
+	begin
+	S1 := ProcessString(S,VAditionalParams);
+	S1 := GetComandShift(VAditionalParams) + S1;
+	if StringTrimAll(S1,' 	') <> '' then
+		begin
+		Result += S1;
+		if UseEoln and (StringTrimAll(S1,' 	') <> SGWinEoln) then
+			Result += SGWinEoln;
+		end;
+	end
+else
+	begin
+	S1 := ProcessComand(SGUpCaseString(C),Params,Stream,WithComandShift(VAditionalParams,CS));
+	if StringTrimAll(S1,' 	') <> '' then
+		Result += S1;
+	if (StringTrimAll(S1,' 	') <> '') and UseEoln and (S1 <> SGWinEoln) then
+		Result += SGWinEoln;
+	SetLength(Params,0);
+	end;
+end;
+
+function TSGShaderReader.Process():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := '';
+FStream := TMemoryStream.Create();
+if SGResourseFiles.LoadMemoryStreamFromFile(FStream,FFileName) then
+	begin
+	FStream.Position := 0;
+	while FStream.Position <> FStream.Size do
+		Result += ProcessCustomString(SGReadLnStringFromStream(FStream),FStream);
+	end;
+FStream.Destroy();
 end;
 
 procedure TSGShaderProgram.Use();
@@ -227,6 +826,7 @@ else
 FType:=ShaderType;
 SGLog.Sourse('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+WTS+'"');
 end;
+
 destructor TSGShader.Destroy;
 begin
 Render.DeleteShader(FShader);

@@ -17,6 +17,7 @@ uses
 	,Classes
 	,SysUtils
 	,StrMan
+	,SaGeResourseManager
 	;
 
 type
@@ -90,6 +91,7 @@ type
 		FSkelTime   : single;  // время (меняется от нуля до единицы между предыдущим и следующим кадром)
 		FCurrentPos : TFrame;  // текущая поза персонажа с учётом интерполяции по времени skelTime
 		FShaderAbsoluteMatrixes : packed array[0..31] of TSGMatrix4; // массив абсолютных матриц для передачи в шейдер
+		FSpeed      : TSGFloat;
 		
 		procedure ResetState(const VNodesNum : TIndex);
 		procedure Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSGBoolean);
@@ -128,10 +130,11 @@ type
 		FAnimation : TSkelAnimation;    // скелетная анимация модели
 		FMesh      : TSG3DObject;
 		FTextures  : array of TSGImage;
+		FTexturesBlock :  TSGTextureBlock;
 			public
 		procedure MakeMesh();
 		procedure PrepareSkeletalAnimation();
-		procedure LoadTextures(const VPath : TSGString);
+		procedure LoadTextures(const VPath : TSGString;const EnafTexCount : LongWord = 0);
 		procedure Load(const VFileName : TSGString);
 		procedure LoadAnimation(const VFileName : TSGString);
 		function GetTextureHandle (const FileName : String):LongWord;
@@ -139,6 +142,7 @@ type
 			private
 		function GetAnimation():PTSkelAnimation;inline;
 			public
+		property TexturesBlock : TSGTextureBlock read FTexturesBlock;
 		property Animation : PTSkelAnimation read GetAnimation;
 		end;
 
@@ -218,6 +222,8 @@ if FTextures <> nil then
 if FPoligons <> nil then
 	SetLength(FPoligons,0);
 FAnimation.Clear();
+if FTexturesBlock <> nil then
+	FTexturesBlock.Destroy();
 inherited;
 end;
 
@@ -256,21 +262,20 @@ end;
 
 procedure TModel.Load(const VFileName : TSGString);
 var 
-	f     : TextFile;
+	Stream: TMemoryStream;
 	s     : string;
 	i,j,k : TIndex;
 begin
-Assign(f,VFileName);
-Reset(f);
+Stream := TMemoryStream.Create();
+SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+Stream.Position := 0;
 
-repeat
-	ReadLn(f,s);
-until s='nodes';
+while SGReadLnStringFromStream(Stream) <> 'nodes' do ;
 
 i:=0;
 SetLength(FAnimation.FNodes,0);
 repeat
-	ReadLn(f,s);
+	s := SGReadLnStringFromStream(Stream);
 	if s<>'end' then
 		begin
 		SetLength(FAnimation.FNodes, i+1);
@@ -283,13 +288,11 @@ until s='end';
 FAnimation.FNodesNum :=Length(FAnimation.FNodes);
 SetLength(FAnimation.FReferencePos,FAnimation.FNodesNum);
 
-repeat
-	ReadLn(f,s);
-until s='time 0';
+while SGReadLnStringFromStream(Stream) <> 'time 0' do ;
 
 i:=0;
 repeat
-	ReadLn(f,s);
+	s := SGReadLnStringFromStream(Stream);
 	if s<>'end' then
 	with FAnimation.FReferencePos[i] do
 		begin
@@ -306,16 +309,13 @@ repeat
 		end;
 until s='end';
 
-
-repeat
-ReadLn(f,s);
-until s='triangles';
+while SGReadLnStringFromStream(Stream) <> 'triangles' do ;
 
 i := 0;
 SetLength(FPoligons,0);
 SetLength(FVertexes,0);
 repeat
-	ReadLn(f,s);
+	s := SGReadLnStringFromStream(Stream);
 	if s<>'end' then
 		begin
 		SetLength(FPoligons,i+1);
@@ -325,7 +325,7 @@ repeat
 			begin
 			SetLength(FVertexes,Length(FVertexes)+1);
 			k := High(FVertexes);
-			ReadLn(f,s);
+			s := SGReadLnStringFromStream(Stream);
 			SetLength(FVertexes[k].FParents,1);
 			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(Trim(s),' ',1));
 			FVertexes[k].FParents[0].FWeight  := 1;
@@ -346,32 +346,32 @@ repeat
 		end;
 until s='end';
 
-Close(f);
+Stream.Destroy();
 end;
 
 procedure TModel.LoadAnimation(const VFileName : TSGString);
-var f            : TextFile;
+var Stream       : TMemoryStream;
     s            : string;
     i, j         : TIndex;
     ActionIndex  : TIndex;
 begin
-Assign(f,VFileName);
-Reset(f);
+Stream := TMemoryStream.Create();
+SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+Stream.Position := 0;
+
 SetLength(FAnimation.FActions,Length(FAnimation.FActions)+1);
 ActionIndex := High(FAnimation.FActions);
 
 FAnimation.FActions[ActionIndex].FName  := VFileName;
 FAnimation.FActions[ActionIndex].FSpeed := 15; //default
 
-repeat
-ReadLn(f,s);
-until s='skeleton';
+while SGReadLnStringFromStream(Stream) <> 'skeleton' do ;
 
 s:='';
 i:=0;
 j:=0;
 repeat
-	readln(f,s);
+	s := SGReadLnStringFromStream(Stream);
 	if s='end' then
 		break;
 	if StringWordGet (s, ' ', 1) = 'time' then
@@ -401,14 +401,13 @@ repeat
 	FAnimation.FActions[ActionIndex].FFramesCount := Length(FAnimation.FActions[ActionIndex].FFrames);
 until False;
 
-Close(f);
+Stream.Destroy();
 end;
 
-procedure TModel.LoadTextures(const VPath : TSGString);
+procedure TModel.LoadTextures(const VPath : TSGString;const EnafTexCount : LongWord = 0);
 var
 	i, j: TIndex;
 	Loaded : TSGBoolean;
-	TexturesBlock : TSGTextureBlock;
 begin
 for i := 0 to High(FPoligons) do
 	begin
@@ -437,12 +436,11 @@ for i := 0 to High(FPoligons) do
 			end;
 		end;
 	end;
-TexturesBlock := TSGTextureBlock.Create(Context);
-TexturesBlock.Size := Length(FTextures);
-TexturesBlock.Generate();
+FTexturesBlock := TSGTextureBlock.Create(Context);
+FTexturesBlock.Size := Length(FTextures) + EnafTexCount;
+FTexturesBlock.Generate();
 for i := 0 to High(FTextures) do
-	FTextures[i].ToTextureWithBlock(TexturesBlock);
-TexturesBlock.Destroy();
+	FTextures[i].ToTextureWithBlock(FTexturesBlock);
 for i := 0 to High(FPoligons) do
 	begin
 	for j := 0 to High(FTextures) do
@@ -477,7 +475,7 @@ FNextAction := VActionNum;
 if FPrevAction = -1 then
 	FPrevAction := VActionNum;
 
-Delta := VModel.Context.ElapsedTime * VModel.FAnimation.FActions[FNextAction].FSpeed / 100;
+Delta := VModel.Context.ElapsedTime * VModel.FAnimation.FActions[FNextAction].FSpeed / 100 * FSpeed;
 FSkelTime += Delta;
 
 if FSkelTime > 1 then
@@ -561,7 +559,7 @@ end;
 procedure TModel.PrepareSkeletalAnimation();
 var
 	i, k : TIndex;
-	FinalVertex, TempVertex : TSGVertex3f;
+	FinalVertex, FinalNormal, TempVertex : TSGVertex3f;
 	Matrix : TSGMatrix4;
 begin
 FAnimation.MakeReferenceMatrixes();
@@ -572,19 +570,38 @@ for i := 0 to High(FLocalized) do
 	begin
 	FLocalized[i] := FVertexes[i];
 	FinalVertex.Import();
+	FinalNormal.Import();
 	for k := 0 to High(FLocalized[i].FParents) do
 		begin
-		TempVertex := FVertexes[i].FCoord;
 		Matrix := FAnimation.FReferencePos[FVertexes[i].FParents[k].FBoneNum].FAbsoluteMatrix;
-		TempVertex := SGTranslateVectorInverse(Matrix,TempVertex);
-		TempVertex := SGRotateVectorInverse(Matrix, TempVertex);
+		
+		TempVertex  := SGTranslateVectorInverse(Matrix, FVertexes[i].FCoord);
+		TempVertex  := SGRotateVectorInverse   (Matrix, TempVertex);
 		FinalVertex += TempVertex * FLocalized[i].FParents[k].FWeight;
+		
+		FinalNormal += SGRotateVectorInverse   (Matrix, FVertexes[i].FNorm);
 		end;
 	FLocalized[i].FCoord := FinalVertex;
+	FLocalized[i].FNorm  := FinalNormal;
 	end;
 end;
 
 procedure TModel.MakeMesh();
+
+function TexNum(const Texture : TSGLongWord):TSGLongWord;
+var
+	i : TSGLongWord;
+begin
+Result := 0;
+if (FTextures <> nil) and (Length(FTextures)>0) then
+	for i := 0 to High(FTextures) do
+		if FTextures[i].Texture = Texture then
+			begin
+			Result := i;
+			break;
+			end;
+end;
+
 var
 	i, j : TIndex;
 	TotalBones : TIndex;
@@ -610,7 +627,7 @@ for i := 0 to Length(FPoligons) - 1 do
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.x,
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.y,
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.z,
-			FPoligons[i].FTexture/255);
+			TexNum(FPoligons[i].FTexture)/255);
 		FMesh.ArTexVertex4f[3*i+j]^.Import(
 			FPoligons[i].FTexCoord[j].x,
 			FPoligons[i].FTexCoord[j].y,
@@ -633,6 +650,7 @@ FNextAction := -1;
 FSkelTime   := 0;
 FPrevFrame  := 0;
 FNextFrame  := 1;
+FSpeed      := 1;
 SetLength(FCurrentPos.FBones,VNodesNum);
 end;
 
@@ -646,6 +664,7 @@ begin
 inherited Create(VContext);
 FMesh := nil;
 FTextures := nil;
+FTexturesBlock := nil;
 end;
 
 procedure TModel.Draw();
