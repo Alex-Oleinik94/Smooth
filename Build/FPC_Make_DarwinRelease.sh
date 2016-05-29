@@ -1,4 +1,4 @@
-echo off
+#echo off
 echo "=========================================="
 echo "| Compiling Release Version for Mac OSX  |"
 echo "=========================================="
@@ -8,3 +8,4 @@ make inc_version_release
 make darwin_release
 strip ../Binaries/Main
 make clear_files
+read -p "Press enter to continue..." nothing
