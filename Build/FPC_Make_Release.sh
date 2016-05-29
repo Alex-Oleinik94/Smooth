@@ -8,4 +8,5 @@ make inc_version_release
 make build_files
 make release
 strip ../Binaries/Main
+make clear_files
 read -p "Press enter to continue..." nothing

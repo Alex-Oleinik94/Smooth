@@ -6,7 +6,7 @@ ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Lib
 OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries
 OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
-DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -gc
+DODEBUG= -Ci -Ct -Co -Sa -gl -Xg
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 DOWITHFPU= -CfVFPV3
@@ -28,23 +28,23 @@ lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
 inc_version_debug:
 	@"./../Binaries/Main" -iv 0
-	@"./../Binaries/Main" -CFTPUARU "./../data/engine/version.txt" ../build/srcunits/temp SaGeVersionFile ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Engine/version.txt" ./../Build/SrcUnits/Temp SaGeVersionFile ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 inc_version_release:
 	@"./../Binaries/Main" -iv 1
-	@"./../Binaries/Main" -CFTPUARU "./../data/engine/version.txt" ../build/srcunits/temp SaGeVersionFile ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Engine/version.txt" ./../Build/SrcUnits/Temp SaGeVersionFile ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 build_files:
 	@$(MAKE) clear_files
-	@"./../Binaries/Main" -CFTPUARU "./../data/fonts/Tahoma.sgf"                         ../build/srcunits/temp tahoma_font          ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/fonts/Times New Roman.sgf"                ../build/srcunits/temp times_new_roman_font ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/ComboBoxImage.sgia"              ../build/srcunits/temp combo_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Block.sgia"           ../build/srcunits/temp KillKostia_Block     ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Bullet.sgia"          ../build/srcunits/temp KillKostia_Bullet    ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Skull.sgia"           ../build/srcunits/temp KillKostia_Skull     ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/Standart Kostia.sgia" ../build/srcunits/temp KillKostia_sk        ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/KillKostia/You.sgia"             ../build/srcunits/temp KillKostia_You       ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/radiobox.sgia"                   ../build/srcunits/temp radio_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../data/textures/checkbox.sgia"                   ../build/srcunits/temp check_box_image      ../build/srcunits/temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CDTPUARU "./../data/examples" ../build/srcunits/temp ../build/srcunits/temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Fonts/Tahoma.sgf"                         ../Build/SrcUnits/Temp tahoma_font          ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Fonts/Times New Roman.sgf"                ../Build/SrcUnits/Temp times_new_roman_font ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/ComboBoxImage.sgia"              ../Build/SrcUnits/Temp combo_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Block.sgia"           ../Build/SrcUnits/Temp KillKostia_Block     ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Bullet.sgia"          ../Build/SrcUnits/Temp KillKostia_Bullet    ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Skull.sgia"           ../Build/SrcUnits/Temp KillKostia_Skull     ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Standart Kostia.sgia" ../Build/SrcUnits/Temp KillKostia_sk        ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/You.sgia"             ../Build/SrcUnits/Temp KillKostia_You       ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/radiobox.sgia"                   ../Build/SrcUnits/Temp radio_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/checkbox.sgia"                   ../Build/SrcUnits/Temp check_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@"./../Binaries/Main" -CDTPUARU "./../Data/Examples" ../Build/SrcUnits/Temp ../Build/SrcUnits/Temp/SaGeRMFiles.inc
 clear_files:
 	@rm -f SrcUnits/Temp/*
 	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc

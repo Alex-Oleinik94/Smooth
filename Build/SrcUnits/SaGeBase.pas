@@ -882,14 +882,14 @@ end;
 
 function SGExistsDirectory(const DirWay:String):Boolean;inline;
 begin
-Result:=False;
-try
+Result:=DirectoryExists(DirWay);
+{try
 MKDir(DirWay);
 except
 Result:=True;
 end;
 if Result=False then
-	RMDIR(DirWay);
+	RMDIR(DirWay);}
 end;
 
 function SGGetComand(const comand:string):string;inline;

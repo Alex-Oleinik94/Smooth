@@ -131,9 +131,9 @@ begin
 dos.findfirst(VDir+Slash+'*',$3F,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and SGFileExists(VDir+Slash+sr.name) then
+	if (sr.name<>'.') and (sr.name<>'..') and SGFileExists(VDir+Slash+sr.name) and (not SGExistsDirectory(VDir+Slash+sr.name)) then
 		begin
-		ProcessFile(VDir+sr.name);
+		ProcessFile(VDir + Slash + sr.name);
 		end;
 	dos.findnext(sr);
 	end;
@@ -148,7 +148,7 @@ ProcessDirectoryFiles(VDir+Slash);
 dos.findfirst(VDir+Slash+'*',$10,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir+Slash+sr.name))) then
+	if (sr.name<>'.') and (sr.name<>'..') and (SGExistsDirectory(VDir+Slash+sr.name)) then
 		begin
 		ProcessDirectory(VDir+Slash+sr.name);
 		end;
@@ -192,12 +192,13 @@ end;
 
 procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
 var
-	Step:LongWord = 1000000;
+	Step : TSGLongWord = 1000000;
 var
-	OutStream:TStream = nil;
-	InStream:TStream = nil;
-	A:array of Byte;
-	I,iiii,i5:LongWord;
+	OutStream : TStream = nil;
+	InStream  : TStream = nil;
+	A: packed array of Byte;
+	I, iiii, i5 : TSGLongWord;
+
 procedure WriteProc(const ThisStep:LongWord);
 var
 	III,II:LongWord;
@@ -225,11 +226,12 @@ SGWriteStringToStream('begin'+SGWinEoln,OutStream,False);
 SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+SGWinEoln,OutStream,False);
 SGWriteStringToStream('end;'+SGWinEoln,OutStream,False);
 end;
+
 begin
 I:=0;
-SetLength(A,Step);
-OutStream:=TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
-InStream:=TFileStream.Create(FileName,fmOpenRead);
+SetLength(A, Step);
+OutStream := TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
+InStream  := TFileStream.Create(FileName,fmOpenRead);
 if IsInc then
 	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+SGWinEoln,OutStream,False)
 else
