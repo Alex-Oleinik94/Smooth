@@ -6,7 +6,6 @@
 		{$ENDIF}
 	{$ENDIF}
 
-//Это на будущее, если будим прогать под iOS
 {$IFDEF ANDROID}
 	{$DEFINE MOBILE}
 	//{$ASMMODE DIRECT}
@@ -28,7 +27,7 @@
 	{$IFNDEF ANDROID}
 		{$ASMMODE INTEL}
 	{$ELSE}
-		//{$ASMMODE ?} - Я не знаю, какой нужен для arm-android
+		//{$ASMMODE ?}
 		{$ENDIF}
 	{$H+}
 	{$ENDIF}
@@ -47,5 +46,7 @@
 	{$DEFINE WITHASMINC}
 	{$ENDIF}
 
-{$OVERFLOWCHECKS OFF} 
+{$IFNDEF MSWINDOWS}
+	{$OVERFLOWCHECKS OFF} 
+	{$ENDIF}
 

@@ -11,6 +11,9 @@ DORELEASE= -XX -O2 -CX -dRELEASE
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 DOWITHFPU= -CfVFPV3
 DODARWIN=-k-framework -kOpenGL
+SGRMFILE=./../Build/SrcUnits/Temp/SaGeRMFiles.inc
+SGTEMPUNITDIR=./../Build/SrcUnits/Temp
+SAGE="./../Binaries/Main"
 
 enigma:
 	./EnigmaVB/enigmavbconsole.exe Main.evb
@@ -27,27 +30,22 @@ darwin_release:
 lib:
 	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
 inc_version_debug:
-	@"./../Binaries/Main" -iv 0
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Engine/version.txt" ./../Build/SrcUnits/Temp SaGeVersionFile ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@$(SAGE) -iv 0
+	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
 inc_version_release:
-	@"./../Binaries/Main" -iv 1
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Engine/version.txt" ./../Build/SrcUnits/Temp SaGeVersionFile ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@$(SAGE) -iv 1
+	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
 build_files:
 	@$(MAKE) clear_files
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Fonts/Tahoma.sgf"                         ../Build/SrcUnits/Temp tahoma_font          ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Fonts/Times New Roman.sgf"                ../Build/SrcUnits/Temp times_new_roman_font ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/ComboBoxImage.sgia"              ../Build/SrcUnits/Temp combo_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Block.sgia"           ../Build/SrcUnits/Temp KillKostia_Block     ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Bullet.sgia"          ../Build/SrcUnits/Temp KillKostia_Bullet    ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Skull.sgia"           ../Build/SrcUnits/Temp KillKostia_Skull     ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/Standart Kostia.sgia" ../Build/SrcUnits/Temp KillKostia_sk        ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/KillKostia/You.sgia"             ../Build/SrcUnits/Temp KillKostia_You       ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/radiobox.sgia"                   ../Build/SrcUnits/Temp radio_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CFTPUARU "./../Data/Textures/checkbox.sgia"                   ../Build/SrcUnits/Temp check_box_image      ../Build/SrcUnits/Temp/SaGeRMFiles.inc
-	@"./../Binaries/Main" -CDTPUARU "./../Data/Examples" ../Build/SrcUnits/Temp ../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@$(SAGE) -CFTPUARU "./../Data/Textures/ComboBoxImage.sgia"              $(SGTEMPUNITDIR) combo_box_image      $(SGRMFILE)
+	@$(SAGE) -CFTPUARU "./../Data/Textures/radiobox.sgia"                   $(SGTEMPUNITDIR) radio_box_image      $(SGRMFILE)
+	@$(SAGE) -CFTPUARU "./../Data/Textures/checkbox.sgia"                   $(SGTEMPUNITDIR) check_box_image      $(SGRMFILE)
+	@$(SAGE) -CDTPUARU "./../Data/Examples"                                 $(SGTEMPUNITDIR)                      $(SGRMFILE)
+	@$(SAGE) -CDTPUARU "./../Data/Textures/KillKostia"                      $(SGTEMPUNITDIR)                      $(SGRMFILE)
+	@$(SAGE) -CDTPUARU "./../Data/Fonts"                                    $(SGTEMPUNITDIR)                      $(SGRMFILE)
 clear_files:
 	@rm -f SrcUnits/Temp/*
-	@"./../Binaries/Main" -crf ./../Build/SrcUnits/Temp/SaGeRMFiles.inc
+	@$(SAGE) -crf $(SGRMFILE)
 clear:
 	@rm -f CompiledUnits/arm-android/*
 	@rm -f CompiledUnits/i386-other/*

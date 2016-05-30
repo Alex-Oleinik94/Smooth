@@ -154,7 +154,7 @@ end;
 
 function TSGShaderReader.WithComandShift(const VAditionalParams : TSGString; const VShift:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=WithParam(VAditionalParams,'ComandShift', SGStringReplace(SGStringReplace(GetComandShift(VAditionalParams) + VShift,' ','S'),'	','T'));
+Result:= WithParam(VAditionalParams, 'ComandShift', SGStringReplace(SGStringReplace(GetComandShift(VAditionalParams) + VShift,' ','S'),'	','T'));
 end;
 
 function TSGShaderReader.GetComandShift(const VAditionalParams : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -277,7 +277,7 @@ end;
 
 function TSGShaderReader.IdentifierValue(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i, ii : TSGLongWord;
+	i, ii, iii : TSGLongWord;
 	S : TSGString;
 begin
 Result := VString;
@@ -328,9 +328,11 @@ if (Length(VString)>5) then
 		end
 	else
 		begin
-		i := StringWordCount(VAditionalParams,',');
-		if i <> 0 then
-			for ii := 1 to i do
+		iii := StringWordCount(VAditionalParams,',');
+		if iii <> 0 then
+			begin
+			ii := 1;
+			while (ii <= iii) do
 				begin
 				S := StringWordGet(VAditionalParams,',',ii);
 				S := StringTrimAll(S,' 	');
@@ -346,7 +348,9 @@ if (Length(VString)>5) then
 				else
 					begin
 					end;
+				ii += 1;
 				end;
+			end;
 		end;
 	end;
 end;

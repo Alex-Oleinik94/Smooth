@@ -85,62 +85,61 @@ type
 var
 	SGResourseFiles:TSGResourseFiles = nil;
 
-
 const
-	SGConvertFileToPascalUnitDefInc = True;
-//Это тупая и очень тупая процедура, сделал ее специально для андроида.
-(*Скорее всего она не найдет свое применение, но для начала не помешает*)
-//В общем ты ей задаешь файл, а она тебе пишет модуль на паскале
-//И при вызове особой процедурки из этого модуля при включении 
-//Этого модуля в программу у тебя конструируется TMemoryStream,
-//В котором и будет тот файл, который ты задал в FileName
-procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
-procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);
-procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
-procedure SGClearRFFile(const RFFile:TSGString);
+	SGConvertFileToPascalUnitDefaultInc = True;
+
+procedure SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterUnit(const UnitName, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGClearRFFile(const RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
-procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);
+procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function CalcUnitName(const FileName : TSGString):TSGString;
+function IsBagSinbol(const Simbol : TSGChar):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (Simbol = WinSlash) or (Simbol = UnixSlash) or (Simbol = '.') or (Simbol = ' ') or (Simbol = '	');
+end;
+
+function CalcUnitName(const FileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGLongWord;
 begin
 Result := 'AutomaticUnit_';
 for i := Length(DirName)+2 to Length(FileName) do
-	if (FileName[i] = WinSlash) or (FileName[i] = UnixSlash) or (FileName[i] = '.') then
+	if IsBagSinbol(FileName[i]) then 
 		Result += '_'
 	else
 		Result += FileName[i];
 end;
 
-procedure ProcessFile(const FileName : TSGString);
+procedure ProcessFile(const FileName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	UnitName : TSGString;
 begin
 UnitName := CalcUnitName(FileName);
-SGConvertFileToPascalUnit(FileName,UnitsWay,UnitName);
-SGRegisterUnit(UnitName,RFFile);
+SGConvertFileToPascalUnit(FileName, UnitsWay, UnitName);
+SGRegisterUnit(UnitName, RFFile);
 end;
 
-procedure ProcessDirectoryFiles(const VDir : TSGString);
+procedure ProcessDirectoryFiles(const VDir : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	sr:dos.searchrec;
 begin
-dos.findfirst(VDir+Slash+'*',$3F,sr);
+dos.findfirst(VDir + '*',$3F,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and SGFileExists(VDir+Slash+sr.name) and (not SGExistsDirectory(VDir+Slash+sr.name)) then
+	if (sr.name<>'.') and (sr.name<>'..') and SGFileExists(VDir + sr.name) and (not SGExistsDirectory(VDir + sr.name)) then
 		begin
-		ProcessFile(VDir + Slash + sr.name);
+		ProcessFile(VDir + sr.name);
 		end;
 	dos.findnext(sr);
 	end;
 dos.findclose(sr);
 end;
 
-procedure ProcessDirectory(const VDir : TSGString);
+procedure ProcessDirectory(const VDir : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	sr:dos.searchrec;
 begin
@@ -161,7 +160,7 @@ begin
 ProcessDirectory(DirName);
 end;
 
-procedure SGClearRFFile(const RFFile:TSGString);
+procedure SGClearRFFile(const RFFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 begin
@@ -171,7 +170,7 @@ SGWriteStringToStream('//RF file. Files:'+SGWinEoln,Stream,False);
 Stream.Destroy();
 end;
 
-procedure SGRegisterUnit(const UnitName,RFFile:TSGString);
+procedure SGRegisterUnit(const UnitName, RFFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 	MemStream:TMemoryStream = nil;
@@ -190,7 +189,7 @@ if not Exists then
 MemStream.Destroy();
 end;
 
-procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefInc);
+procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefaultInc);
 var
 	Step : TSGLongWord = 1000000;
 var

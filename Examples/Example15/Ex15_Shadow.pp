@@ -264,6 +264,7 @@ end;
 constructor TSGExample15_Shadow.Create(const VContext : TSGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
 const
 	TexSize = 4096;
+	Example15Dir = SGExamplesDirectory + Slash + '15' +Slash;
 var
 	i : TSGLongWord;
 begin
@@ -310,17 +311,17 @@ for i := 0 to FLightsCount - 1 do
 	end;
 
 FShaderDepthTex2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main_depth.vert',[BonesCount]),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main_depth.frag',['texture']));
+	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
+	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.frag',['texture']));
 FShaderDepthShad2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main_depth.vert',[BonesCount]),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main_depth.frag',['shadow']));
+	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
+	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.frag',['shadow']));
 FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main.vert',[FLightsCount, BonesCount]),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main.frag',['texture', FLightsCount]));
+	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
+	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['texture', FLightsCount]));
 FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main.vert',[FLightsCount, BonesCount]),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '15' + Slash + 'main.frag',['shadow', FLightsCount]));
+	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
+	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['shadow', FLightsCount]));
 
 for i := 0 to FLightsCount - 1 do
 	begin
