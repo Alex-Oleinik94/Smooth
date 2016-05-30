@@ -165,7 +165,7 @@ var
 	Stream:TFileStream = nil;
 begin
 Stream:=TFileStream.Create(RFFile,fmCreate);
-SGWriteStringToStream('(*This patr from SaGe*)'+SGWinEoln,Stream,False);
+SGWriteStringToStream('(*This is part of SaGe Engine*)'+SGWinEoln,Stream,False);
 SGWriteStringToStream('//RF file. Files:'+SGWinEoln,Stream,False);
 Stream.Destroy();
 end;

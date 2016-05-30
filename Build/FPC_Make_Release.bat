@@ -9,7 +9,7 @@ make inc_version_release
 @echo off
 make release
 @echo off
-REM make clear_files
+make clear_files
 @echo off
 REM echo "============================================="
 REM echo "|Сейчас вылетит программа "enigmavbconsole",|"
