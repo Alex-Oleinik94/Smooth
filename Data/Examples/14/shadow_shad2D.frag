@@ -1,3 +1,5 @@
+#version 120
+/*#eoln*/
 uniform sampler2DShadow shadowMap;
 
 varying vec4 lpos;

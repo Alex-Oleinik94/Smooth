@@ -590,10 +590,10 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 	end
 else
 	begin
-	Result += '#' + VComand;
+	Result += '#' + SGDownCaseString(VComand);
 	if (VParams <> nil) and (Length(VParams)<>0) then
-	for i := 0 to High(VParams) do
-		Result += ' ' + VParams[i];
+		for i := 0 to High(VParams) do
+			Result += ' ' + VParams[i];
 	end;
 end;
 
