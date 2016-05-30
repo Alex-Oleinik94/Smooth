@@ -15,10 +15,10 @@ SGRMFILE=./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 SGTEMPUNITDIR=./../Build/SrcUnits/Temp
 SAGE="./../Binaries/Main"
 
-enigma:
-	./EnigmaVB/enigmavbconsole.exe Main.evb
 release:
 	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
+release_libpng:
+	@$(PP) $(DORELEASE) -dENABLELIBPNG $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
 debug:
 	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
 android:

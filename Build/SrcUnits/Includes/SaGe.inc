@@ -12,7 +12,7 @@
 	{$ENDIF}
 
 {$IFNDEF MOBILE}
-	{$IFNDEF RELEASE}
+	{$IF (not defined(RELEASE)) or defined(ENABLELIBPNG)}
 		{$DEFINE WITHLIBPNG}
 		{$ENDIF}
 	{$ENDIF}
