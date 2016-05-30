@@ -184,9 +184,7 @@ type
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
-		
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;override;
-		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 		procedure UseProgram(const VProgram : TSGLongWord);override;
 		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);override;
@@ -194,6 +192,7 @@ type
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
+		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 		
 		function SupporedDepthTextures():TSGBoolean;override;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
@@ -271,22 +270,17 @@ implementation
 
 procedure TSGRenderOpenGL.Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin
-glUniform1iv(VLocationName,VCount,VValue);
+{$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongInt(VValue)^){$ELSE}glUniform1iv(VLocationName,VCount,VValue){$ENDIF};
 end;
 
 procedure TSGRenderOpenGL.Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer); 
 begin
-glUniform1uiv(VLocationName,VCount,VValue);
+{$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongWord(VValue)^){$ELSE}glUniform1uiv(VLocationName,VCount,VValue){$ENDIF};
 end;
 
 procedure TSGRenderOpenGL.Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin
 glUniform3fv(VLocationName,VCount,VValue);
-end;
-
-procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
-begin
-glPolygonOffset(VFactor,VUnits);
 end;
 
 procedure TSGRenderOpenGL.Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);
@@ -297,6 +291,11 @@ end;
 procedure TSGRenderOpenGL.Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
 begin
 glUniform3f(VLocationName,VX,VY,VZ);
+end;
+
+procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
+begin
+glPolygonOffset(VFactor,VUnits);
 end;
 
 procedure TSGRenderOpenGL.GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);

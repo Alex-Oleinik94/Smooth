@@ -15,13 +15,14 @@ type
 	TSGShortInt	= ShortInt;
 	TSGInteger	= Integer;
 	TSGLongInt	= LongInt;
+	PSGLongInt	= ^ TSGLongInt;
 	TSGExtended	= Extended;
 	TSGFloat	= Double;
 	TSGReal		= Real;
 	TSGByte		= Byte;
 	TSGInt64	= Int64;
 	TSGLongWord	= LongWord;
-	PSGLongWord	= ^LongWord;
+	PSGLongWord	= ^ TSGLongWord;
 	TSGQuadWord	= QWord;
 	TSGWord	    = Word;
 	TSGQWord	= QWord;

@@ -140,7 +140,9 @@ var
 begin
 ConsoleCaller := TSGConsoleCaller.Create(VParams);
 ConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA'], 'Convert image To SaGeImagesAlpha format');
-ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all scenes in this application');
+{$IF not defined(MOBILE)}
+	ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all scenes in this application');
+	{$ENDIF}
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();
 end;
@@ -787,6 +789,7 @@ if
 			   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
 			   {$IFDEF LINUX}     TSGContextLinux  {$ENDIF}
 			   {$IFDEF DARWIN}    TSGContextMacOSX {$ENDIF}
+			   {$IFDEF ANDROID}   TSGContextAndroid{$ENDIF}
 				.Create();
 		Context.Width:=ViewerImage.Width;
 		Context.Height:=ViewerImage.Height;
