@@ -168,7 +168,7 @@ type
 		{$IFDEF MOBILE}
 			procedure GenerateMipmap(const Param : TSGCardinal);override;
 		{$ELSE}
-			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
+			procedure GetVertexUnderPixel(const px, py : LongWord; out x, y, z : Real);override;
 			{$ENDIF}
 		
 			(* Shaders *)

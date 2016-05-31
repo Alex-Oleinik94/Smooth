@@ -23,6 +23,7 @@ uses
 		,jni
 		,android_native_app_glue
 		{$ENDIF}
+	,SNMPsend
 	
 	(* ============ Engine Includes ============ *)
 	{$IFDEF MSWINDOWS}
@@ -158,7 +159,7 @@ ConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA']
 ConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
 ConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it');
 ConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear RF File');
-ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Ynit in rffile');
+ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in rffile');
 ConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
 ConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Inc engine Version');
 ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit');
@@ -434,12 +435,17 @@ if (FParams <> nil) and (Length(FParams)>0) then
 		end
 	else
 		begin
+		SGPrintEngineVersion();
 		TextColor(12);
 		Write('Console caller : error : unknown simbol "');
 		TextColor(15);
 		Write(FParams[0]);
 		TextColor(12);
-		WriteLn('", use "--help"');
+		Write('", use "');
+		TextColor(15);
+		Write('--help');
+		TextColor(12);
+		WriteLn('"');
 		TextColor(7);
 		end;
 	end;
@@ -506,10 +512,11 @@ else
 					begin
 					if FComands[i].FComand = nil then
 						begin
+						SGPrintEngineVersion();
 						TextColor(12);
 						Write('Console caller : error : abstrac comand "');
 						TextColor(15);
-						Write(Comand);
+						Write(SGDownCaseString(Comand));
 						TextColor(12);
 						WriteLn('"!');
 						TextColor(7);
@@ -528,7 +535,18 @@ else
 		if iii = 0 then
 			begin
 			SGPrintEngineVersion();
-			WriteLn('Console caller : error : unknown comand "',SGDownCaseString(Comand),'"!');
+			SGPrintEngineVersion();
+			TextColor(12);
+			Write('Console caller : error : unknown comand "');
+			TextColor(15);
+			Write(SGDownCaseString(Comand));
+			TextColor(12);
+			Write('", use "');
+			TextColor(15);
+			Write('--help');
+			TextColor(12);
+			WriteLn('"');
+			TextColor(7);
 			end;
 		end
 	else if (Comand = '') and (SGCountConsoleParams(FParams) = 0) then
