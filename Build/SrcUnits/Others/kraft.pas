@@ -1,7 +1,7 @@
 (******************************************************************************
  *                            KRAFT PHYSICS ENGINE                            *
  ******************************************************************************
- *                        Version 2015-10-21-16-35-0000                       *
+ *                        Version 2016-03-25-21-31-0000                       *
  ******************************************************************************
  *                                zlib license                                *
  *============================================================================*
@@ -160,7 +160,7 @@ uses {$ifdef windows}
       {$endif}
      {$endif}
      {$ifdef DebugDraw}
-      {$ifdef fpcGL}
+      {$ifdef fpc}
        GL,
        GLext,
       {$else}
@@ -170,6 +170,9 @@ uses {$ifdef windows}
      SysUtils,
      Classes,
      SyncObjs,
+{$ifdef KraftPasMP}
+     PasMP,
+{$endif}
      Math;
 
 const EPSILON={$ifdef UseDouble}1e-14{$else}1e-5{$endif}; // actually {$ifdef UseDouble}1e-16{$else}1e-7{$endif}; but we are conservative here
@@ -288,7 +291,9 @@ type PKraftForceMode=^TKraftForceMode;
                       kstMesh);        // Static only
 
      PKraftShapeFlag=^TKraftShapeFlag;
-     TKraftShapeFlag=(ksfSensor);
+     TKraftShapeFlag=(ksfCollision,
+                      ksfMass,
+                      ksfSensor);
 
      PKraftShapeFlags=^TKraftShapeFlags;
      TKraftShapeFlags=set of TKraftShapeFlag;
@@ -499,7 +504,7 @@ type PKraftForceMode=^TKraftForceMode;
      end;
 
      // This class does exist as workaround for FreePascal, which doesn't support TKraftVector3 as published property (but Delphi does it)
-     TKraftVector3Property=class
+     TKraftVector3Property=class(TPersistent)
       private
        fVector:PKraftVector3;
        function GetX:TKraftScalar;
@@ -946,7 +951,7 @@ type PKraftForceMode=^TKraftForceMode;
 
      TKraftConvexHullEdges=array of TKraftConvexHullEdge;
 
-     TKraftConvexHull=class
+     TKraftConvexHull=class(TPersistent)
       private              
 
        fPhysics:TKraft;
@@ -1059,7 +1064,7 @@ type PKraftForceMode=^TKraftForceMode;
 
      TKraftMeshSkipListNodes=array of TKraftMeshSkipListNode;
 
-     TKraftMesh=class
+     TKraftMesh=class(TPersistent)
       private
 
        fPhysics:TKraft;
@@ -1146,7 +1151,7 @@ type PKraftForceMode=^TKraftForceMode;
      TKraftShapeOnContactEndHook=procedure(const ContactPair:PKraftContactPair;const WithShape:TKraftShape) of object;
      TKraftShapeOnContactStayHook=procedure(const ContactPair:PKraftContactPair;const WithShape:TKraftShape) of object;
 
-     TKraftShape=class
+     TKraftShape=class(TPersistent)
       private
 
        fPhysics:TKraft;
@@ -1768,7 +1773,11 @@ type PKraftForceMode=^TKraftForceMode;
 
        procedure ProcessContactPair(const ContactPair:PKraftContactPair;const ThreadIndex:longint=0);
 
+{$ifdef KraftPasMP}
+       procedure ProcessContactPairParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+{$else}
        procedure ProcessContactPairJob(const JobIndex,ThreadIndex:longint);
+{$endif}
 
        procedure DoNarrowPhase;
 
@@ -1838,7 +1847,12 @@ type PKraftForceMode=^TKraftForceMode;
 
        procedure QueryShapeWithTree(const ThreadIndex:longint;const Shape:TKraftShape;const AABBTree:TKraftDynamicAABBTree);
 
+{$ifdef KraftPasMP}
+       procedure ProcessMoveBufferItemParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+{$else}
        procedure ProcessMoveBufferItem(const JobIndex,ThreadIndex:longint);
+{$endif}
+
 
       public
 
@@ -1869,7 +1883,7 @@ type PKraftForceMode=^TKraftForceMode;
 
      TKraftRigidBodyIslandIndices=array of longint;
 
-     TKraftRigidBody=class
+     TKraftRigidBody=class(TPersistent)
       private
 
        fPhysics:TKraft;
@@ -2186,7 +2200,7 @@ type PKraftForceMode=^TKraftForceMode;
 
      TKraftConstraintOnBreak=procedure(APhysics:TKraft;AConstraint:TKraftConstraint) of object;
 
-     TKraftConstraint=class
+     TKraftConstraint=class(TPersistent)
       private
 
        fPhysics:TKraft;
@@ -2308,6 +2322,7 @@ type PKraftForceMode=^TKraftForceMode;
        fWorldDistance:TKraftScalar;
        fFrequencyHz:TKraftScalar;
        fDampingRatio:TKraftScalar;
+       fInverseInertiaTensorRatio:TKraftScalar;
        fAccumulatedImpulse:TKraftScalar;
        fGamma:TKraftScalar;
        fBias:TKraftScalar;
@@ -2317,7 +2332,7 @@ type PKraftForceMode=^TKraftForceMode;
        fSoftConstraint:boolean;
        fSkip:boolean;
       public
-       constructor Create(const APhysics:TKraft;const ARigidBody:TKraftRigidBody;const ALocalAnchorPoint:TKraftVector3;const AWorldPlane:TKraftPlane;const ADoubleSidedWorldPlane:boolean=true;const AWorldDistance:single=1.0;const ALimitBehavior:TKraftConstraintLimitBehavior=kclbLimitDistance;const AFrequencyHz:TKraftScalar=0.0;const ADampingRatio:TKraftScalar=0.0;const ACollideConnected:boolean=false); reintroduce;
+       constructor Create(const APhysics:TKraft;const ARigidBody:TKraftRigidBody;const ALocalAnchorPoint:TKraftVector3;const AWorldPlane:TKraftPlane;const ADoubleSidedWorldPlane:boolean=true;const AWorldDistance:single=1.0;const ALimitBehavior:TKraftConstraintLimitBehavior=kclbLimitDistance;const AFrequencyHz:TKraftScalar=0.0;const ADampingRatio:TKraftScalar=0.0;const AInverseInertiaTensorRatio:TKraftScalar=1.0;const ACollideConnected:boolean=false); reintroduce;
        destructor Destroy; override;
        procedure InitializeConstraintsAndWarmStart(const Island:TKraftIsland;const TimeStep:TKraftTimeStep); override;
        procedure SolveVelocityConstraint(const Island:TKraftIsland;const TimeStep:TKraftTimeStep); override;
@@ -2858,6 +2873,7 @@ type PKraftForceMode=^TKraftForceMode;
 
      TKraftIslands=array of TKraftIsland;
 
+{$ifndef KraftPasMP}
      TKraftJobManager=class;
 
      TKraftJobManagerOnProcessJob=procedure(const JobIndex,ThreadIndex:longint) of object;
@@ -2892,6 +2908,7 @@ type PKraftForceMode=^TKraftForceMode;
        fThreadsTerminated:boolean;
        fOnProcessJob:TKraftJobManagerOnProcessJob;
        fCountRemainJobs:longint;
+       fGranularity:longint;
       public
        constructor Create(const APhysics:TKraft);
        destructor Destroy; override;
@@ -2905,10 +2922,18 @@ type PKraftForceMode=^TKraftForceMode;
        property ThreadsTerminated:boolean read fThreadsTerminated write fThreadsTerminated;
        property OnProcessJob:TKraftJobManagerOnProcessJob read fOnProcessJob write fOnProcessJob;
        property CountRemainJobs:longint read fCountRemainJobs write fCountRemainJobs;
+       property Granularity:longint read fGranularity write fGranularity;
      end;
+{$endif}
 
-     TKraft=class
+     TKraft=class(TPersistent)
       private
+
+{$ifdef KraftPasMP}
+       fPasMP:TPasMP;
+{$endif}
+
+       fSingleThreaded:boolean;
 
        fHighResolutionTimer:TKraftHighResolutionTimer;
 
@@ -3043,7 +3068,9 @@ type PKraftForceMode=^TKraftForceMode;
 
        fCountThreads:longint;
 
+{$ifndef KraftPasMP}
        fJobManager:TKraftJobManager;
+{$endif}
 
        fIsSolving:boolean;
        fTriangleShapes:TKraftShapes;
@@ -3053,7 +3080,11 @@ type PKraftForceMode=^TKraftForceMode;
        procedure Integrate(var Position:TKraftVector3;var Orientation:TKraftQuaternion;const LinearVelocity,AngularVelocity:TKraftVector3;const DeltaTime:TKraftScalar);
 
        procedure BuildIslands;
+{$ifdef KraftPasMP}
+       procedure ProcessSolveIslandParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+{$else}
        procedure ProcessSolveIslandJob(const JobIndex,ThreadIndex:longint);
+{$endif}
        procedure SolveIslands(const TimeStep:TKraftTimeStep);
 
        function GetConservativeAdvancementTimeOfImpact(const ShapeA:TKraftShape;const SweepA:TKraftSweep;const ShapeB:TKraftShape;const ShapeBTriangleIndex:longint;const SweepB:TKraftSweep;const TimeStep:TKraftTimeStep;const ThreadIndex:longint;var Beta:TKraftScalar):boolean;
@@ -3076,7 +3107,11 @@ type PKraftForceMode=^TKraftForceMode;
 
       public
 
+{$ifdef KraftPasMP}
+       constructor Create(const APasMP:TPasMP);
+{$else}
        constructor Create(const ACountThreads:longint=-1);
+{$endif}
        destructor Destroy; override;
 
        procedure SetFrequency(const AFrequency:TKraftScalar);
@@ -3156,9 +3191,13 @@ type PKraftForceMode=^TKraftForceMode;
 
        property CountThreads:longint read fCountThreads;
 
+{$ifndef KraftPasMP}
        property JobManager:TKraftJobManager read fJobManager;
+{$endif}
 
       published
+
+       property SingleThreaded:boolean read fSingleThreaded write fSingleThreaded;
 
        property WorldFrequency:TKraftScalar read fWorldFrequency write SetFrequency;
 
@@ -8587,28 +8626,31 @@ end;
 function QuaternionMul(const q1,q2:TKraftQuaternion):TKraftQuaternion; {$ifdef CPU386ASMForSinglePrecision}assembler;
 const XORMaskW:array[0..3] of longword=($00000000,$00000000,$00000000,$80000000);
 asm
- movups xmm0,dqword ptr [q1]
- movups xmm1,dqword ptr [q2]
+ movups xmm4,dqword ptr [q1]
+ movaps xmm0,xmm4
+ shufps xmm0,xmm4,$49
+ movups xmm2,dqword ptr [q2]
+ movaps xmm3,xmm2
+ movaps xmm1,xmm2
+ shufps xmm3,xmm2,$52 // 001010010b
+ mulps xmm3,xmm0
+ movaps xmm0,xmm4
+ shufps xmm0,xmm4,$24 // 000100100b
+ shufps xmm1,xmm2,$3f // 000111111b
  movups xmm5,dqword ptr [XORMaskW]
- movaps xmm2,xmm0
- movaps xmm3,xmm1
- movaps xmm4,xmm1
- shufps xmm0,xmm0,$ff // 011111111b
- shufps xmm1,xmm1,$3f // 000111111b
- shufps xmm2,xmm2,$24 // 000100100b
- mulps xmm0,xmm3
- mulps xmm1,xmm2
- shufps xmm3,xmm3,$52 // 001010010b
- shufps xmm2,xmm2,$49 // 001001001b
- shufps xmm4,xmm4,$89 // 010001001b
- mulps xmm3,xmm2
- shufps xmm2,xmm2,$49 // 001001001b
- addps xmm1,xmm3
- mulps xmm2,xmm4
- xorps xmm1,xmm5
- subps xmm0,xmm2
- addps xmm0,xmm1
- movups dqword ptr [result],xmm0
+ mulps xmm1,xmm0
+ movaps xmm0,xmm4
+ shufps xmm0,xmm4,$92 // 001001001b
+ shufps xmm4,xmm4,$ff // 011111111b
+ mulps xmm4,xmm2
+ addps xmm3,xmm1
+ movaps xmm1,xmm2
+ shufps xmm1,xmm2,$89 // 010001001b
+ mulps xmm1,xmm0
+ xorps xmm3,xmm5
+ subps xmm4,xmm1
+ addps xmm3,xmm4
+ movups dqword ptr [result],xmm3
 end;
 {$else}
 begin
@@ -11277,6 +11319,27 @@ begin
 end;
 {$endif}
 
+procedure MemorySwap(a,b:pointer;Size:longint);
+var Temp:longint;
+begin
+ while Size>=SizeOf(longint) do begin
+  Temp:=longword(a^);
+  longword(a^):=longword(b^);
+  longword(b^):=Temp;
+  inc(PtrUInt(a),SizeOf(longword));
+  inc(PtrUInt(b),SizeOf(longword));
+  dec(Size,SizeOf(longword));
+ end;
+ while Size>=SizeOf(byte) do begin
+  Temp:=byte(a^);
+  byte(a^):=byte(b^);
+  byte(b^):=Temp;
+  inc(PtrUInt(a),SizeOf(byte));
+  inc(PtrUInt(b),SizeOf(byte));
+  dec(Size,SizeOf(byte));
+ end;
+end;
+
 procedure DirectIntroSort(Items:pointer;Left,Right,ElementSize:longint;CompareFunc:TSortCompareFunction);
 type PByteArray=^TByteArray;
      TByteArray=array[0..$3fffffff] of byte;
@@ -11284,132 +11347,122 @@ type PByteArray=^TByteArray;
      TStackItem=record
       Left,Right,Depth:longint;
      end;
-var Depth,i,j,Middle,Size,Parent,Child:longint;
-    Pivot,Temp:pointer;
+var Depth,i,j,Middle,Size,Parent,Child,Pivot,iA,iB,iC:longint;
     StackItem:PStackItem;
     Stack:array[0..31] of TStackItem;
 begin
  if Left<Right then begin
-  GetMem(Temp,ElementSize);
-  GetMem(Pivot,ElementSize);
-  try
-   StackItem:=@Stack[0];
-   StackItem^.Left:=Left;
-   StackItem^.Right:=Right;
-   StackItem^.Depth:=IntLog2((Right-Left)+1) shl 1;
-   inc(StackItem);
-   while ptruint(pointer(StackItem))>ptruint(pointer(@Stack[0])) do begin
-    dec(StackItem);
-    Left:=StackItem^.Left;
-    Right:=StackItem^.Right;
-    Depth:=StackItem^.Depth;
-    if (Right-Left)<16 then begin
-     // Insertion sort
-     for i:=Left+1 to Right do begin
-      j:=i-1;
-      if (j>=Left) and (CompareFunc(pointer(@PByteArray(Items)^[j*ElementSize]),pointer(@PByteArray(Items)^[i*ElementSize]))>0) then begin
-       Move(PByteArray(Items)^[i*ElementSize],Temp^,ElementSize);
-       repeat
-        Move(PByteArray(Items)^[j*ElementSize],PByteArray(Items)^[(j+1)*ElementSize],ElementSize);
-        dec(j);
-       until not ((j>=Left) and (CompareFunc(pointer(@PByteArray(Items)^[j*ElementSize]),Temp)>0));
-       Move(Temp^,PByteArray(Items)^[(j+1)*ElementSize],ElementSize);
-      end;
+  StackItem:=@Stack[0];
+  StackItem^.Left:=Left;
+  StackItem^.Right:=Right;
+  StackItem^.Depth:=IntLog2((Right-Left)+1) shl 1;
+  inc(StackItem);
+  while ptruint(pointer(StackItem))>ptruint(pointer(@Stack[0])) do begin
+   dec(StackItem);
+   Left:=StackItem^.Left;
+   Right:=StackItem^.Right;
+   Depth:=StackItem^.Depth;
+   Size:=(Right-Left)+1;
+   if Size<16 then begin
+    // Insertion sort
+    iA:=Left;
+    iB:=iA+1;
+    while iB<=Right do begin
+     iC:=iB;
+     while (iA>=Left) and
+           (iC>=Left) and
+           (CompareFunc(pointer(@PByteArray(Items)^[iA*ElementSize]),pointer(@PByteArray(Items)^[iC*ElementSize]))>0) do begin
+      MemorySwap(@PByteArray(Items)^[iA*ElementSize],@PByteArray(Items)^[iC*ElementSize],ElementSize);
+      dec(iA);
+      dec(iC);
      end;
-    end else begin
-     if (Depth=0) or (ptruint(pointer(StackItem))>=ptruint(pointer(@Stack[high(Stack)-1]))) then begin
-      // Heap sort
-      Size:=(Right-Left)+1;
-      i:=Size div 2;
-      repeat
-       if i>Left then begin
-        dec(i);
-        Move(PByteArray(Items)^[(Left+i)*ElementSize],Temp^,ElementSize);
+     iA:=iB;
+     inc(iB);
+    end;
+   end else begin
+    if (Depth=0) or (ptruint(pointer(StackItem))>=ptruint(pointer(@Stack[high(Stack)-1]))) then begin
+     // Heap sort
+     i:=Size div 2;
+     repeat
+      if i>0 then begin
+       dec(i);
+      end else begin
+       dec(Size);
+       if Size>0 then begin
+        MemorySwap(@PByteArray(Items)^[(Left+Size)*ElementSize],@PByteArray(Items)^[Left*ElementSize],ElementSize);
        end else begin
-        if Size=0 then begin
-         break;
-        end else begin
-         dec(Size);
-         Move(PByteArray(Items)^[(Left+Size)*ElementSize],Temp^,ElementSize);
-         Move(PByteArray(Items)^[Left*ElementSize],PByteArray(Items)^[(Left+Size)*ElementSize],ElementSize);
-        end;
+        break;
        end;
-       Parent:=i;
-       Child:=(i*2)+1;
-       while Child<Size do begin
-        if ((Child+1)<Size) and (CompareFunc(pointer(@PByteArray(Items)^[((Left+Child)+1)*ElementSize]),pointer(@PByteArray(Items)^[(Left+Child)*ElementSize]))>0) then begin
+      end;
+      Parent:=i;
+      repeat
+       Child:=(Parent*2)+1;
+       if Child<Size then begin
+        if (Child<(Size-1)) and (CompareFunc(pointer(@PByteArray(Items)^[(Left+Child)*ElementSize]),pointer(@PByteArray(Items)^[(Left+Child+1)*ElementSize]))<0) then begin
          inc(Child);
         end;
-        if CompareFunc(pointer(@PByteArray(Items)^[(Left+Child)*ElementSize]),Temp)>0 then begin
-         Move(PByteArray(Items)^[(Left+Child)*ElementSize],PByteArray(Items)^[(Left+Parent)*ElementSize],ElementSize);
+        if CompareFunc(pointer(@PByteArray(Items)^[(Left+Parent)*ElementSize]),pointer(@PByteArray(Items)^[(Left+Child)*ElementSize]))<0 then begin
+         MemorySwap(@PByteArray(Items)^[(Left+Parent)*ElementSize],@PByteArray(Items)^[(Left+Child)*ElementSize],ElementSize);
          Parent:=Child;
-         Child:=(Parent*2)+1;
-        end else begin
-         break;
+         continue;
         end;
        end;
-       Move(Temp^,PByteArray(Items)^[(Left+Parent)*ElementSize],ElementSize);
+       break;
       until false;
-     end else begin
-      // Quick sort width median-of-three optimization
-      Middle:=Left+((Right-Left) shr 1);
-      if (Right-Left)>3 then begin
-       if CompareFunc(pointer(@PByteArray(Items)^[Left*ElementSize]),pointer(@PByteArray(Items)^[Middle*ElementSize]))>0 then begin
-        Move(PByteArray(Items)^[Left*ElementSize],Temp^,ElementSize);
-        Move(PByteArray(Items)^[Middle*ElementSize],PByteArray(Items)^[Left*ElementSize],ElementSize);
-        Move(Temp^,PByteArray(Items)^[Middle*ElementSize],ElementSize);
-       end;
-       if CompareFunc(pointer(@PByteArray(Items)^[Left*ElementSize]),pointer(@PByteArray(Items)^[Right*ElementSize]))>0 then begin
-        Move(PByteArray(Items)^[Left*ElementSize],Temp^,ElementSize);
-        Move(PByteArray(Items)^[Right*ElementSize],PByteArray(Items)^[Left*ElementSize],ElementSize);
-        Move(Temp^,PByteArray(Items)^[Right*ElementSize],ElementSize);
-       end;
-       if CompareFunc(pointer(@PByteArray(Items)^[Middle*ElementSize]),pointer(@PByteArray(Items)^[Right*ElementSize]))>0 then begin
-        Move(PByteArray(Items)^[Middle*ElementSize],Temp^,ElementSize);
-        Move(PByteArray(Items)^[Right*ElementSize],PByteArray(Items)^[Middle*ElementSize],ElementSize);
-        Move(Temp^,PByteArray(Items)^[Right*ElementSize],ElementSize);
-       end;
+     until false;
+    end else begin
+     // Quick sort width median-of-three optimization
+     Middle:=Left+((Right-Left) shr 1);
+     if (Right-Left)>3 then begin
+      if CompareFunc(pointer(@PByteArray(Items)^[Left*ElementSize]),pointer(@PByteArray(Items)^[Middle*ElementSize]))>0 then begin
+       MemorySwap(@PByteArray(Items)^[Left*ElementSize],@PByteArray(Items)^[Middle*ElementSize],ElementSize);
       end;
-      Move(PByteArray(Items)^[Middle*ElementSize],Pivot^,ElementSize);
-      i:=Left;
-      j:=Right;
-      repeat
-       while (i<Right) and (CompareFunc(pointer(@PByteArray(Items)^[i*ElementSize]),Pivot)<0) do begin
-        inc(i);
-       end;
-       while (j>=i) and (CompareFunc(pointer(@PByteArray(Items)^[j*ElementSize]),Pivot)>0) do begin
-        dec(j);
-       end;
-       if i>j then begin
-        break;
-       end else begin
-        if i<>j then begin
-         Move(PByteArray(Items)^[i*ElementSize],Temp^,ElementSize);
-         Move(PByteArray(Items)^[j*ElementSize],PByteArray(Items)^[i*ElementSize],ElementSize);
-         Move(Temp^,PByteArray(Items)^[j*ElementSize],ElementSize);
+      if CompareFunc(pointer(@PByteArray(Items)^[Left*ElementSize]),pointer(@PByteArray(Items)^[Right*ElementSize]))>0 then begin
+       MemorySwap(@PByteArray(Items)^[Left*ElementSize],@PByteArray(Items)^[Right*ElementSize],ElementSize);
+      end;
+      if CompareFunc(pointer(@PByteArray(Items)^[Middle*ElementSize]),pointer(@PByteArray(Items)^[Right*ElementSize]))>0 then begin
+       MemorySwap(@PByteArray(Items)^[Middle*ElementSize],@PByteArray(Items)^[Right*ElementSize],ElementSize);
+      end;
+     end;
+     Pivot:=Middle;
+     i:=Left;
+     j:=Right;
+     repeat
+      while (i<Right) and (CompareFunc(pointer(@PByteArray(Items)^[i*ElementSize]),pointer(@PByteArray(Items)^[Pivot*ElementSize]))<0) do begin
+       inc(i);
+      end;
+      while (j>=i) and (CompareFunc(pointer(@PByteArray(Items)^[j*ElementSize]),pointer(@PByteArray(Items)^[Pivot*ElementSize]))>0) do begin
+       dec(j);
+      end;
+      if i>j then begin
+       break;
+      end else begin
+       if i<>j then begin
+        MemorySwap(@PByteArray(Items)^[i*ElementSize],@PByteArray(Items)^[j*ElementSize],ElementSize);
+        if Pivot=i then begin
+         Pivot:=j;
+        end else if Pivot=j then begin
+         Pivot:=i;
         end;
-        inc(i);
-        dec(j);
        end;
-      until false;
-      if i<Right then begin
-       StackItem^.Left:=i;
-       StackItem^.Right:=Right;
-       StackItem^.Depth:=Depth-1;
-       inc(StackItem);
+       inc(i);
+       dec(j);
       end;
-      if Left<j then begin
-       StackItem^.Left:=Left;
-       StackItem^.Right:=j;
-       StackItem^.Depth:=Depth-1;
-       inc(StackItem);
-      end;
+     until false;
+     if i<Right then begin
+      StackItem^.Left:=i;
+      StackItem^.Right:=Right;
+      StackItem^.Depth:=Depth-1;
+      inc(StackItem);
+     end;
+     if Left<j then begin
+      StackItem^.Left:=Left;
+      StackItem^.Right:=j;
+      StackItem^.Depth:=Depth-1;
+      inc(StackItem);
      end;
     end;
    end;
-  finally
-   FreeMem(Pivot);
-   FreeMem(Temp);
   end;
  end;
 end;
@@ -11437,7 +11490,8 @@ begin
    Left:=StackItem^.Left;
    Right:=StackItem^.Right;
    Depth:=StackItem^.Depth;
-   if (Right-Left)<16 then begin
+   Size:=(Right-Left)+1;
+   if Size<16 then begin
     // Insertion sort
     for i:=Left+1 to Right do begin
      Temp:=PPointers(Items)^[i];
@@ -11453,7 +11507,6 @@ begin
    end else begin
     if (Depth=0) or (ptruint(pointer(StackItem))>=ptruint(pointer(@Stack[high(Stack)-1]))) then begin
      // Heap sort
-     Size:=(Right-Left)+1;
      i:=Size div 2;
      Temp:=nil;
      repeat
@@ -11461,12 +11514,12 @@ begin
        dec(i);
        Temp:=PPointers(Items)^[Left+i];
       end else begin
-       if Size=0 then begin
-        break;
-       end else begin
-        dec(Size);
+       dec(Size);
+       if Size>0 then begin
         Temp:=PPointers(Items)^[Left+Size];
         PPointers(Items)^[Left+Size]:=PPointers(Items)^[Left];
+       end else begin
+        break;
        end;
       end;
       Parent:=i;
@@ -13220,6 +13273,7 @@ begin
 end;
 
 function TKraftDynamicAABBTree.ComputeHeight:longint;
+{$ifdef KraftSingleThreadedUsage}
 var LocalStack:PKraftDynamicAABBTreeLongintArray;
     LocalStackPointer,NodeID,Height:longint;
     Node:PKraftDynamicAABBTreeNode;
@@ -13255,6 +13309,26 @@ begin
   end;
  end;
 end;
+{$else}
+var MaximalHeight:longint;
+ procedure ProcessNode(const NodeID,Height:longint);
+ var Node:PKraftDynamicAABBTreeNode;
+ begin
+  if result<Height then begin
+   result:=Height;
+  end;
+  if NodeID>=0 then begin
+   Node:=@fNodes^[NodeID];
+   ProcessNode(Node^.Children[0],Height+1);
+   ProcessNode(Node^.Children[1],Height+1);
+  end;
+ end;
+begin
+ MaximalHeight:=0;
+ ProcessNode(fRoot,1);
+ result:=MaximalHeight;
+end;
+{$endif}
 
 function TKraftDynamicAABBTree.GetHeight:longint;
 begin
@@ -13298,6 +13372,7 @@ begin
 end;
 
 function TKraftDynamicAABBTree.ValidateStructure:boolean;
+{$ifdef KraftSingleThreadedUsage}
 var LocalStack:PKraftDynamicAABBTreeLongintArray;
     LocalStackPointer,NodeID,Parent:longint;
     Node:PKraftDynamicAABBTreeNode;
@@ -13342,8 +13417,30 @@ begin
   end;
  end;
 end;
+{$else}
+var OK:boolean;
+ procedure ProcessNode(const NodeID,Parent:longint);
+ var Node:PKraftDynamicAABBTreeNode;
+ begin
+  if (NodeID>=0) and (NodeID<fNodeCount) and OK then begin
+   Node:=@fNodes^[NodeID];
+   if Node^.Parent<>Parent then begin
+    OK:=false;
+   end else begin
+    ProcessNode(Node^.Children[0],NodeID);
+    ProcessNode(Node^.Children[1],NodeID);
+   end;
+  end;
+ end;
+begin
+ OK:=true;
+ ProcessNode(fRoot,-1);
+ result:=OK;
+end;
+{$endif}
 
 function TKraftDynamicAABBTree.ValidateMetrics:boolean;
+{$ifdef KraftSingleThreadedUsage}
 var LocalStack:PKraftDynamicAABBTreeLongintArray;
     LocalStackPointer,NodeID{,Height}:longint;
     Node:PKraftDynamicAABBTreeNode;
@@ -13387,6 +13484,29 @@ begin
   end;
  end;
 end;
+{$else}
+var OK:boolean;
+ procedure ProcessNode(const NodeID:longint);
+ var Node:PKraftDynamicAABBTreeNode;
+ begin
+  if (NodeID>=0) and OK then begin
+   Node:=@fNodes^[NodeID];
+   if (((Node^.Children[0]<0) or (Node^.Children[0]>=fNodeCount)) or
+       ((Node^.Children[1]<0) or (Node^.Children[1]>=fNodeCount))) or
+      (Node^.Height<>(1+Max(fNodes[Node^.Children[0]].Height,fNodes[Node^.Children[1]].Height))) then begin
+    OK:=false;
+   end else begin
+    ProcessNode(Node^.Children[0]);
+    ProcessNode(Node^.Children[1]);
+   end;
+  end;
+ end;
+begin
+ OK:=true;
+ ProcessNode(fRoot);
+ result:=OK;
+end;
+{$endif}
 
 function TKraftDynamicAABBTree.Validate:boolean;
 var NodeID,FreeCount:longint;
@@ -13410,6 +13530,7 @@ begin
 end;
 
 function TKraftDynamicAABBTree.GetIntersectionProxy(const AABB:TKraftAABB):pointer;
+{$ifdef KraftSingleThreadedUsage}
 var LocalStack:PKraftDynamicAABBTreeLongintArray;
     LocalStackPointer,NodeID:longint;
     Node:PKraftDynamicAABBTreeNode;
@@ -13443,6 +13564,32 @@ begin
   end;
  end;
 end;
+{$else}
+var Data:pointer;
+    Done:boolean;
+ procedure ProcessNode(const NodeID:longint);
+ var Node:PKraftDynamicAABBTreeNode;
+ begin
+  if (NodeID>=0) and not Done then begin
+   Node:=@fNodes^[NodeID];
+   if AABBIntersect(Node^.AABB,AABB) then begin
+    if Node^.Children[0]<0 then begin
+     Data:=Node^.UserData;
+     Done:=true;
+    end else begin
+     ProcessNode(Node^.Children[0]);
+     ProcessNode(Node^.Children[1]);
+    end;
+   end;
+  end;
+ end;
+begin
+ Data:=nil;
+ Done:=false;
+ ProcessNode(fRoot);
+ result:=Data;
+end;
+{$endif}
 
 type PConvexHullVector=^TConvexHullVector;
      TConvexHullVector=record
@@ -18323,6 +18470,7 @@ begin
 end;
 
 function TKraftMesh.GetSignedDistance(const Position:TKraftVector3):TKraftScalar;
+{$ifdef KraftSingleThreadedUsage}
 type PStackItem=^TStackItem;
      TStackItem=record
       NodeIndex:longint;
@@ -18432,7 +18580,84 @@ begin
   result:=0;
  end;
 end;
-
+{$else}
+var TriangleIndex:longint;
+    Triangle,BestTriangle:PKraftMeshTriangle;
+    SquaredDistances:array[0..1] of TKraftScalar;
+    SquaredThickness,SquaredThicknessEpsilon:TKraftScalar;
+ procedure ProcessNode(const NodeIndex:longint;SquaredDistance:TKraftScalar);
+ var Node:PKraftMeshNode;
+ begin
+  if (NodeIndex>=0) and ((SquaredDistance-SquaredThicknessEpsilon)<result) then begin
+   Node:=@fNodes[NodeIndex];
+   TriangleIndex:=Node^.TriangleIndex;
+   while TriangleIndex>=0 do begin
+    Triangle:=@fTriangles[TriangleIndex];
+    SquaredDistance:=SquaredDistanceFromPointToTriangle(Position,fVertices[Triangle^.Vertices[0]],fVertices[Triangle^.Vertices[1]],fVertices[Triangle^.Vertices[2]]);
+    if result>SquaredDistance then begin
+     result:=SquaredDistance;
+     BestTriangle:=Triangle;
+    end;
+    TriangleIndex:=Triangle^.Next;
+   end;
+   if (Node^.Children[0]>=0) and (Node^.Children[1]>=0) then begin
+    SquaredDistances[0]:=SquaredDistanceFromPointToAABB(fNodes[Node^.Children[0]].AABB,Position);
+    SquaredDistances[1]:=SquaredDistanceFromPointToAABB(fNodes[Node^.Children[1]].AABB,Position);
+    if SquaredDistances[0]<SquaredDistances[1] then begin
+     if (SquaredDistances[0]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[0],SquaredDistances[0]);
+     end;
+     if (SquaredDistances[1]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[1],SquaredDistances[1]);
+     end;
+    end else begin
+     if (SquaredDistances[1]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[1],SquaredDistances[1]);
+     end;
+     if (SquaredDistances[0]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[0],SquaredDistances[0]);
+     end;
+    end;
+   end else begin
+    if Node^.Children[0]>=0 then begin
+     SquaredDistances[0]:=SquaredDistanceFromPointToAABB(fNodes[Node^.Children[0]].AABB,Position);
+     if (SquaredDistances[0]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[0],SquaredDistances[0]);
+     end;
+    end;
+    if Node^.Children[1]>=0 then begin
+     SquaredDistances[1]:=SquaredDistanceFromPointToAABB(fNodes[Node^.Children[1]].AABB,Position);
+     if (SquaredDistances[1]-SquaredThicknessEpsilon)<result then begin
+      ProcessNode(Node^.Children[0],SquaredDistances[1]);
+     end;
+    end;
+   end;
+  end;
+ end;
+begin
+ if fCountNodes>0 then begin
+  result:=MAX_SCALAR;
+  BestTriangle:=nil;
+  if fDoubleSided then begin
+   SquaredThickness:=sqr(2.0*Physics.fLinearSlop);
+  end else begin
+   SquaredThickness:=0.0;
+  end;
+  SquaredThicknessEpsilon:=SquaredThickness+sqr(EPSILON);
+  ProcessNode(0,SquaredDistanceFromPointToAABB(fNodes[0].AABB,Position));
+  result:=sqrt(result);
+  if fDoubleSided then begin
+   result:=result-(2.0*Physics.fLinearSlop);
+  end else begin
+   if assigned(BestTriangle) and (PlaneVectorDistance(BestTriangle^.Plane,Position)<0.0) then begin
+    result:=-result;
+   end;
+  end;
+ end else begin
+  result:=0;
+ end;
+end;
+{$endif}
 
 constructor TKraftShape.Create(const APhysics:TKraft;const ARigidBody:TKraftRigidBody);
 begin
@@ -18460,7 +18685,7 @@ begin
   inc(fRigidBody.fShapeCount);
  end;
 
- fFlags:=[];
+ fFlags:=[ksfCollision,ksfMass];
 
  fIsMesh:=false;
 
@@ -21677,7 +21902,7 @@ var OldManifoldCountContacts:longint;
    end;
 
 {$ifdef DebugDraw}
-    if (ContactManager.fPhysics.fCountThreads<2) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
+    if (ContactManager.fPhysics.SingleThreaded or (ContactManager.fPhysics.fCountThreads<2)) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.r:=0.5;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.g:=1.0;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.b:=0.5;
@@ -21688,7 +21913,7 @@ var OldManifoldCountContacts:longint;
      end;
      inc(ContactManager.fCountDebugClipVertexLists);
     end;
-    if (ContactManager.fPhysics.fCountThreads<2) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
+    if (ContactManager.fPhysics.SingleThreaded or (ContactManager.fPhysics.fCountThreads<2)) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.r:=1.0;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.g:=0.5;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.b:=1.0;
@@ -21752,7 +21977,7 @@ var OldManifoldCountContacts:longint;
    end;
 
 {$ifdef DebugDraw}
-    if (ContactManager.fPhysics.fCountThreads<2) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
+    if (ContactManager.fPhysics.SingleThreaded or (ContactManager.fPhysics.fCountThreads<2)) and (ContactManager.fCountDebugClipVertexLists<length(ContactManager.fDebugClipVertexLists)) then begin
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.r:=0.5;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.g:=0.5;
      ContactManager.fDebugClipVertexLists[ContactManager.fCountDebugClipVertexLists].fColor.b:=1.0;
@@ -22411,7 +22636,10 @@ begin
 
  HasContact:=false;
 
- if (Shapes[0]<>Shapes[1]) and (Shapes[0].fRigidBody<>Shapes[1].fRigidBody) then begin
+ if (Shapes[0]<>Shapes[1]) and
+    (Shapes[0].fRigidBody<>Shapes[1].fRigidBody) and
+    (ksfCollision in Shapes[0].fFlags) and
+    (ksfCollision in Shapes[1].fFlags) then begin
 
   if ContactManager.fPhysics.fPersistentContactManifold then begin
 
@@ -23062,23 +23290,29 @@ begin
 
  RigidBodyA:=AShapeA.fRigidBody;
  RigidBodyB:=AShapeB.fRigidBody;
-                                                                        
- if (not RigidBodyA.CanCollideWith(RigidBodyB)) or (assigned(fOnCanCollide) and not fOnCanCollide(AShapeA,AShapeB)) then begin
+
+ if (not RigidBodyA.CanCollideWith(RigidBodyB)) or
+    (assigned(fOnCanCollide) and not fOnCanCollide(AShapeA,AShapeB)) then begin
   exit;
  end;
 
- if AShapeA.fIsMesh then begin
+ if (ksfCollision in AShapeA.fFlags) and
+    (ksfCollision in AShapeB.fFlags) then begin
 
-  AddMeshContact(RigidBodyB,RigidBodyA,AShapeB,AShapeA);
+  if AShapeA.fIsMesh then begin
 
- end else if AShapeB.fIsMesh then begin
+   AddMeshContact(RigidBodyB,RigidBodyA,AShapeB,AShapeA);
 
-  AddMeshContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB);
+  end else if AShapeB.fIsMesh then begin
 
- end else begin
+   AddMeshContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB);
 
-  if not HasDuplicateContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB,-1) then begin
-   AddConvexContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB,-1);
+  end else begin
+
+   if not HasDuplicateContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB,-1) then begin
+    AddConvexContact(RigidBodyA,RigidBodyB,AShapeA,AShapeB,-1);
+   end;
+
   end;
 
  end;
@@ -23213,10 +23447,20 @@ begin
  ContactPair^.DetectCollisions(self,fPhysics.fTriangleShapes[ThreadIndex],ThreadIndex,true,fPhysics.fWorldDeltaTime);
 end;
 
+{$ifdef KraftPasMP}
+procedure TKraftContactManager.ProcessContactPairParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+var Index:longint;
+begin
+ for Index:=FromIndex to ToIndex do begin
+  ProcessContactPair(fActiveContactPairs[Index],ThreadIndex);
+ end;
+end;
+{$else}
 procedure TKraftContactManager.ProcessContactPairJob(const JobIndex,ThreadIndex:longint);
 begin
  ProcessContactPair(fActiveContactPairs[JobIndex],ThreadIndex);
 end;
+{$endif}
 
 procedure TKraftContactManager.DoNarrowPhase;
 var ActiveContactPairIndex:longint;
@@ -23354,10 +23598,16 @@ begin
 
  fCountRemainActiveContactPairsToDo:=fCountActiveContactPairs;
 
- if assigned(fPhysics.fJobManager) and (fCountActiveContactPairs>64) then begin
+{$ifdef KraftPasMP}
+ if assigned(fPhysics.fPasMP) and (fCountActiveContactPairs>64) and not fPhysics.fSingleThreaded then begin
+  fPhysics.fPasMP.Invoke(fPhysics.fPasMP.ParallelFor(nil,0,fCountActiveContactPairs-1,ProcessContactPairParallelForFunction,Max(64,fCountActiveContactPairs div (fPhysics.fCountThreads*16)),4));
+{$else}
+ if assigned(fPhysics.fJobManager) and (fCountActiveContactPairs>64) and not fPhysics.fSingleThreaded then begin
   fPhysics.fJobManager.fOnProcessJob:=ProcessContactPairJob;
   fPhysics.fJobManager.fCountRemainJobs:=fCountActiveContactPairs;
+  fPhysics.fJobManager.fGranularity:=Max(64,fCountActiveContactPairs div (fPhysics.fCountThreads*16));
   fPhysics.fJobManager.ProcessJobs;
+{$endif}
  end else begin
   for ActiveContactPairIndex:=0 to fCountActiveContactPairs-1 do begin
    ProcessContactPair(fActiveContactPairs[ActiveContactPairIndex],0);
@@ -23834,6 +24084,7 @@ begin
 end;
 
 procedure TKraftBroadPhase.QueryShapeWithTree(const ThreadIndex:longint;const Shape:TKraftShape;const AABBTree:TKraftDynamicAABBTree);
+{$ifdef KraftSingleThreadedUsage}
 var ShapeAABB:PKraftAABB;
     LocalStack:PKraftDynamicAABBTreeLongintArray;
     LocalStackPointer,NodeID:longint;
@@ -23873,38 +24124,74 @@ begin
   end;
  end;
 end;
+{$else}
+var ShapeAABB:PKraftAABB;
+ procedure ProcessNode(const NodeID:longint);
+ var Node:PKraftDynamicAABBTreeNode;
+     OtherShape:TKraftShape;
+ begin
+  if NodeID>=0 then begin
+   Node:=@AABBTree.fNodes[NodeID];
+   if AABBIntersect(Node^.AABB,ShapeAABB^) then begin
+    if Node^.Children[0]<0 then begin
+     OtherShape:=Node^.UserData;
+     if assigned(OtherShape) and (Shape<>OtherShape) then begin
+      AddPair(ThreadIndex,Shape,OtherShape);
+     end;
+    end else begin
+     ProcessNode(Node^.Children[0]);
+     ProcessNode(Node^.Children[1]);
+    end;
+   end;
+  end;
+ end;
+begin
+ if assigned(Shape) and assigned(AABBTree) then begin
+  ShapeAABB:=Shape.ProxyFatWorldAABB;
+  if AABBTree.fRoot>=0 then begin
+   ProcessNode(AABBTree.fRoot);
+  end;
+ end;
+end;
+{$endif}
 
+{$ifdef KraftPasMP}
+procedure TKraftBroadPhase.ProcessMoveBufferItemParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+{$else}
 procedure TKraftBroadPhase.ProcessMoveBufferItem(const JobIndex,ThreadIndex:longint);
-var Index:longint;
+{$endif}
+var {$ifdef KraftPasMP}JobIndex,{$endif}Index:longint;
     Shape:TKraftShape;
 begin
- Index:=JobIndex;
- if Index<fStaticMoveBufferSize then begin
-  // Static shapes against dynamic shapes
-  if fStaticMoveBuffer[Index]>=0 then begin
-   Shape:=fPhysics.fStaticAABBTree.fNodes[fStaticMoveBuffer[Index]].UserData;
-   if assigned(Shape) then begin
-    QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
+{$ifdef KraftPasMP}for JobIndex:=FromIndex to ToIndex do{$endif}begin
+  Index:=JobIndex;
+  if Index<fStaticMoveBufferSize then begin
+   // Static shapes against dynamic shapes
+   if fStaticMoveBuffer[Index]>=0 then begin
+    Shape:=fPhysics.fStaticAABBTree.fNodes[fStaticMoveBuffer[Index]].UserData;
+    if assigned(Shape) then begin
+     QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
+    end;
    end;
-  end;
- end else if Index<(fStaticMoveBufferSize+fDynamicMoveBufferSize) then begin
-  // Dynamic shapes against static, dynamic and kinematic shapes
-  dec(Index,fStaticMoveBufferSize);
-  if fDynamicMoveBuffer[Index]>=0 then begin
-   Shape:=fPhysics.fDynamicAABBTree.fNodes[fDynamicMoveBuffer[Index]].UserData;
-   if assigned(Shape) then begin
-    QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fStaticAABBTree);
-    QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
-    QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fKinematicAABBTree);
+  end else if Index<(fStaticMoveBufferSize+fDynamicMoveBufferSize) then begin
+   // Dynamic shapes against static, dynamic and kinematic shapes
+   dec(Index,fStaticMoveBufferSize);
+   if fDynamicMoveBuffer[Index]>=0 then begin
+    Shape:=fPhysics.fDynamicAABBTree.fNodes[fDynamicMoveBuffer[Index]].UserData;
+    if assigned(Shape) then begin
+     QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fStaticAABBTree);
+     QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
+     QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fKinematicAABBTree);
+    end;
    end;
-  end;
- end else if Index<(fStaticMoveBufferSize+fDynamicMoveBufferSize+fKinematicMoveBufferSize) then begin
-  // Kinematic shapes against dynamic shapes
-  dec(Index,fStaticMoveBufferSize+fDynamicMoveBufferSize);
-  if fKinematicMoveBuffer[Index]>=0 then begin
-   Shape:=fPhysics.fKinematicAABBTree.fNodes[fKinematicMoveBuffer[Index]].UserData;
-   if assigned(Shape) then begin
-    QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
+  end else if Index<(fStaticMoveBufferSize+fDynamicMoveBufferSize+fKinematicMoveBufferSize) then begin
+   // Kinematic shapes against dynamic shapes
+   dec(Index,fStaticMoveBufferSize+fDynamicMoveBufferSize);
+   if fKinematicMoveBuffer[Index]>=0 then begin
+    Shape:=fPhysics.fKinematicAABBTree.fNodes[fKinematicMoveBuffer[Index]].UserData;
+    if assigned(Shape) then begin
+     QueryShapeWithTree(ThreadIndex,Shape,fPhysics.fDynamicAABBTree);
+    end;
    end;
   end;
  end;
@@ -23922,15 +24209,24 @@ begin
 
  // Run the thread jobs
  fAllMoveBufferSize:=fStaticMoveBufferSize+fDynamicMoveBufferSize+fKinematicMoveBufferSize;
- if assigned(fPhysics.fJobManager) and (fAllMoveBufferSize>1024) then begin
+{$ifdef KraftPasMP}
+ if assigned(fPhysics.fPasMP) and (fAllMoveBufferSize>1024) and not fPhysics.fSingleThreaded then begin
+  fPhysics.fPasMP.Invoke(fPhysics.fPasMP.ParallelFor(nil,0,fAllMoveBufferSize-1,ProcessMoveBufferItemParallelForFunction,Max(64,fAllMoveBufferSize div (fPhysics.fCountThreads*16)),4));
+ end else begin
+  ProcessMoveBufferItemParallelForFunction(nil,0,nil,0,fAllMoveBufferSize-1);
+ end;
+{$else}
+ if assigned(fPhysics.fJobManager) and (fAllMoveBufferSize>1024) and not fPhysics.fSingleThreaded then begin
   fPhysics.fJobManager.fOnProcessJob:=ProcessMoveBufferItem;
   fPhysics.fJobManager.fCountRemainJobs:=fAllMoveBufferSize;
+  fPhysics.fJobManager.fGranularity:=Max(64,fAllMoveBufferSize div (fPhysics.fCountThreads*16));
   fPhysics.fJobManager.ProcessJobs;
  end else begin
   for Index:=0 to fAllMoveBufferSize-1 do begin
    ProcessMoveBufferItem(Index,0);
   end;
  end;
+{$endif}
 
  // Reset move buffer sizes
  fStaticMoveBufferSize:=0;
@@ -24470,9 +24766,9 @@ procedure TKraftRigidBody.Finish;
     end else if Shape is TKraftShapeTriangle then begin
      raise EKraftShapeTypeOnlyForStaticRigidBody.Create('Triangle shapes are allowed only at static rigidbodies');
     end else if Shape is TKraftShapeMesh then begin
-     raise EKraftShapeTypeOnlyForStaticRigidBody.Create('Mesh shapes are allowed only at static rigidbodies');
+    raise EKraftShapeTypeOnlyForStaticRigidBody.Create('Mesh shapes are allowed only at static rigidbodies');
     end;
-    if Shape.fDensity>EPSILON then begin
+    if (ksfMass in Shape.fFlags) and (Shape.fDensity>EPSILON) then begin
      fMass:=fMass+Shape.fMassData.Mass;
      Matrix3x3Add(fBodyInertiaTensor,Shape.fMassData.Inertia);
      TempLocalCenter:=Vector3Add(TempLocalCenter,Vector3ScalarMul(Shape.fMassData.Center,Shape.fMassData.Mass));
@@ -24481,8 +24777,6 @@ procedure TKraftRigidBody.Finish;
    end;
 
    if fMass>EPSILON then begin
-
-    fInverseMass:=1.0/fMass;
 
     TempLocalCenter.x:=TempLocalCenter.x/fMass;
     TempLocalCenter.y:=TempLocalCenter.y/fMass;
@@ -24493,6 +24787,13 @@ procedure TKraftRigidBody.Finish;
 {   fBodyInertiaTensor[1,0]:=fBodyInertiaTensor[0,1];
     fBodyInertiaTensor[2,0]:=fBodyInertiaTensor[0,2];
     fBodyInertiaTensor[2,1]:=fBodyInertiaTensor[1,2];{}
+
+    if fForcedMass>EPSILON then begin
+     Matrix3x3ScalarMul(fBodyInertiaTensor,fForcedMass/fMass);
+     fMass:=fForcedMass;
+    end;
+
+    fInverseMass:=1.0/fMass;
 
     Matrix3x3Inverse(fBodyInverseInertiaTensor,fBodyInertiaTensor);
 
@@ -24518,12 +24819,6 @@ procedure TKraftRigidBody.Finish;
 
      Matrix3x3Inverse(fBodyInertiaTensor,fBodyInverseInertiaTensor);
 
-    end;
-
-    if fForcedMass>EPSILON then begin
-     Matrix3x3ScalarMul(fBodyInertiaTensor,fForcedMass/fMass);
-     fMass:=fForcedMass;
-     fInverseMass:=1.0/fMass;
     end;
 
    end else begin
@@ -25393,7 +25688,7 @@ begin
  fMaximalForce:=AMaximalForce;
 end;
 
-constructor TKraftConstraintJointWorldPlaneDistance.Create(const APhysics:TKraft;const ARigidBody:TKraftRigidBody;const ALocalAnchorPoint:TKraftVector3;const AWorldPlane:TKraftPlane;const ADoubleSidedWorldPlane:boolean=true;const AWorldDistance:single=1.0;const ALimitBehavior:TKraftConstraintLimitBehavior=kclbLimitDistance;const AFrequencyHz:TKraftScalar=0.0;const ADampingRatio:TKraftScalar=0.0;const ACollideConnected:boolean=false);
+constructor TKraftConstraintJointWorldPlaneDistance.Create(const APhysics:TKraft;const ARigidBody:TKraftRigidBody;const ALocalAnchorPoint:TKraftVector3;const AWorldPlane:TKraftPlane;const ADoubleSidedWorldPlane:boolean=true;const AWorldDistance:single=1.0;const ALimitBehavior:TKraftConstraintLimitBehavior=kclbLimitDistance;const AFrequencyHz:TKraftScalar=0.0;const ADampingRatio:TKraftScalar=0.0;const AInverseInertiaTensorRatio:TKraftScalar=1.0;const ACollideConnected:boolean=false);
 begin
 
  fLocalAnchor:=ALocalAnchorPoint;
@@ -25412,6 +25707,7 @@ begin
 
  fFrequencyHz:=AFrequencyHz;
  fDampingRatio:=ADampingRatio;
+ fInverseInertiaTensorRatio:=AInverseInertiaTensorRatio;
  fAccumulatedImpulse:=0.0;
  fGamma:=0.0;
  fBias:=0.0;
@@ -25447,7 +25743,7 @@ begin
 
  fInverseMass:=fRigidBodies[0].fInverseMass;
 
- fWorldInverseInertiaTensor:=fRigidBodies[0].fWorldInverseInertiaTensor;
+ fWorldInverseInertiaTensor:=Matrix3x3TermScalarMul(fRigidBodies[0].fWorldInverseInertiaTensor,fInverseInertiaTensorRatio);
 
  fSolverVelocity:=@Island.fSolver.fVelocities[fIslandIndex];
 
@@ -25662,7 +25958,7 @@ begin
 
   rA:=Vector3TermQuaternionRotate(Vector3Sub(fLocalAnchor,fLocalCenter),qA^);
 
-  AbsolutePosition:=Vector3Add(cA^,fRelativePosition);
+  AbsolutePosition:=Vector3Add(cA^,rA);
 
   if fDoubleSidedWorldPlane then begin
 
@@ -29792,6 +30088,7 @@ begin
 
 end;
 
+{$ifndef KraftPasMP}
 constructor TKraftJobThread.Create(const APhysics:TKraft;const AJobManager:TKraftJobManager;const AThreadNumber:longint);
 begin
 //{$ifdef memdebug}ScanMemoryPoolForCorruptions;{$endif}
@@ -29825,7 +30122,7 @@ begin
   if Terminated or fJobManager.fThreadsTerminated then begin
    break;
   end else begin
-   repeat                       
+   repeat
     JobIndex:=InterlockedDecrement(fJobManager.fCountRemainJobs);
     if JobIndex>=0 then begin
      if assigned(fJobManager.fOnProcessJob) then begin
@@ -29850,6 +30147,7 @@ begin
  fCountThreads:=APhysics.fCountThreads;
  SetLength(fThreads,fCountThreads);
  fCountAliveThreads:=0;
+ fGranularity:=1;
  fThreadsTerminated:=false;
  fOnProcessJob:=nil;
  for Index:=0 to fCountThreads-1 do begin
@@ -29893,12 +30191,18 @@ begin
  WakeUp;
  WaitFor;
 end;
+{$endif}
 
+{$ifdef KraftPasMP}
+constructor TKraft.Create(const APasMP:TPasMP);
+{$else}
 constructor TKraft.Create(const ACountThreads:longint=-1);
+{$endif}
 const TriangleVertex0:TKraftVector3=(x:0.0;y:0.0;z:0.0);
       TriangleVertex1:TKraftVector3=(x:1.0;y:0.0;z:0.01);
       TriangleVertex2:TKraftVector3=(x:0.0;y:1.0;z:0.02);
 var Index:longint;
+{$ifndef KraftPasMP}
 {$ifdef win32}
     i,j:longint;
     sinfo:SYSTEM_INFO;
@@ -29979,12 +30283,21 @@ var Index:longint;
   end;
  end;
 {$endif}
+{$endif}
 begin
  inherited Create;
+
+ fSingleThreaded:=false;
 
  fHighResolutionTimer:=TKraftHighResolutionTimer.Create;
 
  fIsSolving:=false;
+
+{$ifdef KraftPasMP}
+ fPasMP:=APasMP;
+
+ fCountThreads:=fPasMP.CountJobWorkerThreads;
+{$else}
 
  fCountThreads:=ACountThreads;
 
@@ -30006,9 +30319,11 @@ begin
    fCountThreads:=j;
   end;
  end;
+//SetThreadIdealProcessor(GetCurrentThread,0);
 {$endif}
 
  fCountThreads:=Min(Max(fCountThreads,0),MAX_THREADS);
+{$endif}
 
  fNewShapes:=false;
 
@@ -30151,11 +30466,13 @@ begin
   fTriangleShapes[Index].CalculateMassData;
  end;
 
+{$ifndef KraftPasMP}
  if fCountThreads>1 then begin
   fJobManager:=TKraftJobManager.Create(self);
  end else begin
   fJobManager:=nil;
  end;
+{$endif}
 
  SIMDSetOurFlags;
 
@@ -30165,9 +30482,11 @@ destructor TKraft.Destroy;
 var Index:longint;
 begin
 
+{$ifndef KraftPasMP}
  if assigned(fJobManager) then begin
   FreeAndNil(fJobManager);
  end;
+{$endif}
 
  for Index:=0 to length(fTriangleShapes)-1 do begin
   fTriangleShapes[Index].Free;
@@ -30445,20 +30764,36 @@ begin
 
 end;
 
+{$ifdef KraftPasMP}
+procedure TKraft.ProcessSolveIslandParallelForFunction(const Job:PPasMPJob;const ThreadIndex:longint;const Data:pointer;const FromIndex,ToIndex:longint);
+var Index:longint;
+begin
+ for Index:=FromIndex to ToIndex do begin
+  fIslands[Index].Solve(fJobTimeStep);
+ end;
+end;
+{$else}
 procedure TKraft.ProcessSolveIslandJob(const JobIndex,ThreadIndex:longint);
 begin
  fIslands[JobIndex].Solve(fJobTimeStep);
 end;
+{$endif}
 
 procedure TKraft.SolveIslands(const TimeStep:TKraftTimeStep);
 var Index:longint;
 begin
  fJobTimeStep:=TimeStep;
  fIsSolving:=true;
- if assigned(fJobManager) and (fCountIslands>1) then begin
+{$ifdef KraftPasMP}
+ if assigned(fPasMP) and (fCountIslands>1) and not fSingleThreaded then begin
+  fPasMP.Invoke(fPasMP.ParallelFor(nil,0,fCountIslands-1,ProcessSolveIslandParallelForFunction,Max(1,fCountIslands div (fCountThreads*16)),4));
+{$else}
+ if assigned(fJobManager) and (fCountIslands>1) and not fSingleThreaded then begin
   fJobManager.fOnProcessJob:=ProcessSolveIslandJob;
   fJobManager.fCountRemainJobs:=fCountIslands;
+  fJobManager.fGranularity:=Max(1,fCountIslands div (fCountThreads*16));
   fJobManager.ProcessJobs;
+{$endif}
  end else begin
   for Index:=0 to fCountIslands-1 do begin
    fIslands[Index].Solve(fJobTimeStep);
@@ -31672,6 +32007,7 @@ end;
 
 function TKraft.TestPoint(const Point:TKraftVector3):TKraftShape;
 var Hit:TKraftShape;
+{$ifdef KraftSingleThreadedUsage}
  procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
  var LocalStack:PKraftDynamicAABBTreeLongintArray;
      LocalStackPointer,NodeID:longint;
@@ -31711,6 +32047,32 @@ var Hit:TKraftShape;
    end;
   end;
  end;
+{$else}
+ procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
+  procedure ProcessNode(NodeID:longint);
+  var Node:PKraftDynamicAABBTreeNode;
+      CurrentShape:TKraftShape;
+  begin
+   if (NodeID>=0) and not assigned(Hit) then begin
+    Node:=@AABBTree.fNodes[NodeID];
+    if AABBContains(Node^.AABB,Point) then begin
+     if Node^.Children[0]<0 then begin
+      CurrentShape:=Node^.UserData;
+      if assigned(CurrentShape) and CurrentShape.TestPoint(Point) then begin
+       Hit:=CurrentShape;
+       exit;
+      end;
+     end else begin
+      ProcessNode(Node^.Children[0]);
+      ProcessNode(Node^.Children[1]);
+     end;
+    end;
+   end;
+  end;
+ begin
+  ProcessNode(AABBTree.fRoot);
+ end;
+{$endif}
 begin
  Hit:=nil;
  QueryTree(fStaticAABBTree);
@@ -31728,6 +32090,7 @@ end;
 
 function TKraft.RayCast(const Origin,Direction:TKraftVector3;const MaxTime:TKraftScalar;var Shape:TKraftShape;var Time:TKraftScalar;var Point,Normal:TKraftVector3;const CollisionGroups:TKraftRigidBodyCollisionGroups=[low(TKraftRigidBodyCollisionGroup)..high(TKraftRigidBodyCollisionGroup)]):boolean;
 var Hit:boolean;
+{$ifdef KraftSingleThreadedUsage}
  procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
  var LocalStack:PKraftDynamicAABBTreeLongintArray;
      LocalStackPointer,NodeID:longint;
@@ -31776,6 +32139,41 @@ var Hit:boolean;
    end;
   end;
  end;
+{$else}
+ procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
+  procedure ProcessNode(NodeID:longint);
+  var Node:PKraftDynamicAABBTreeNode;
+      CurrentShape:TKraftShape;
+      RayCastData:TKraftRaycastData;
+  begin
+   if NodeID>=0 then begin
+    Node:=@AABBTree.fNodes[NodeID];
+    if AABBRayIntersect(Node^.AABB,Origin,Direction) then begin
+     if Node^.Children[0]<0 then begin
+      CurrentShape:=Node^.UserData;
+      RayCastData.Origin:=Origin;
+      RayCastData.Direction:=Direction;
+      RayCastData.MaxTime:=MaxTime;
+      if (assigned(CurrentShape) and (assigned(CurrentShape.fRigidBody) and ((CurrentShape.fRigidBody.fCollisionGroups*CollisionGroups)<>[]))) and CurrentShape.RayCast(RayCastData) then begin
+       if (Hit and (RayCastData.TimeOfImpact<Time)) or not Hit then begin
+        Hit:=true;
+        Time:=RayCastData.TimeOfImpact;
+        Point:=RayCastData.Point;
+        Normal:=RayCastData.Normal;
+        Shape:=CurrentShape;
+       end;
+      end;
+     end else begin
+      ProcessNode(Node^.Children[0]);
+      ProcessNode(Node^.Children[1]);
+     end;
+    end;
+   end;
+  end;
+ begin
+  ProcessNode(AABBTree.fRoot);
+ end;
+{$endif}
 begin
  Hit:=false;
  Time:=MaxTime;
@@ -32143,6 +32541,7 @@ var Hit:boolean;
    end;
   end;
  end;
+{$ifdef KraftSingleThreadedUsage}
  procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
  var LocalStack:PKraftDynamicAABBTreeLongintArray;
      LocalStackPointer,NodeID:longint;
@@ -32203,6 +32602,53 @@ var Hit:boolean;
    end;
   end;
  end;
+{$else}
+ procedure QueryTree(AABBTree:TKraftDynamicAABBTree);
+  procedure ProcessNode(NodeID:longint);
+  var Node:PKraftDynamicAABBTreeNode;
+      CurrentShape:TKraftShape;
+  begin
+   if NodeID>=0 then begin
+    Node:=@AABBTree.fNodes[NodeID];
+    if AABBIntersect(Node^.AABB,AABB) then begin
+     if Node^.Children[0]<0 then begin
+      CurrentShape:=Node^.UserData;
+      if assigned(CurrentShape) and (assigned(CurrentShape.fRigidBody) and ((CurrentShape.fRigidBody.fCollisionGroups*CollisionGroups)<>[])) then begin
+       case CurrentShape.fShapeType of
+        kstSphere:begin
+         CollideSphereWithSphere(TKraftShapeSphere(CurrentShape));
+        end;
+        kstCapsule:begin
+         CollideSphereWithCapsule(TKraftShapeCapsule(CurrentShape));
+        end;
+        kstConvexHull:begin
+         CollideSphereWithConvexHull(TKraftShapeConvexHull(CurrentShape));
+        end;
+        kstBox:begin
+         CollideSphereWithBox(TKraftShapeBox(CurrentShape));
+        end;
+        kstPlane:begin
+         CollideSphereWithPlane(TKraftShapePlane(CurrentShape));
+        end;
+        kstTriangle:begin
+         CollideSphereWithTriangle(TKraftShapeTriangle(CurrentShape));
+        end;
+        kstMesh:begin
+         CollideSphereWithMesh(TKraftShapeMesh(CurrentShape));
+        end;
+       end;
+      end;
+     end else begin
+      ProcessNode(Node^.Children[0]);
+      ProcessNode(Node^.Children[1]);
+     end;
+    end;
+   end;
+  end;
+ begin
+  ProcessNode(AABBTree.fRoot);
+ end;
+{$endif}
 var TryCounter:longint;
 begin
  result:=false;
