@@ -42,6 +42,6 @@ uses
 	end.
 {$ELSE}	
 	begin
-	StandartCallConcoleCaller();
+	SGStandartCallConcoleCaller();
 	end.
 	{$ENDIF}

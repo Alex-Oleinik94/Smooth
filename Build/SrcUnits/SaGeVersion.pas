@@ -57,8 +57,8 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	WriteLn('SaGe Engine version ',SGGetEngineVersion);
-	WriteLn('Copyright (c) 2012-2016 by Alex');
+	WriteLn('SaGe Engine version ',SGGetEngineVersion());
+	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	end;
 VersionPrinted := True;
 end;
