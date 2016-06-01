@@ -1,8 +1,6 @@
 {$DEFINE UnSelectMode}
 
-{$i SaGe.inc}
-
-unit SaGeOpenAL;
+unit OpenAL;
 
 {$IFDEF FPC}
 	// Added by bero

@@ -40,7 +40,7 @@ uses
 	
 	begin
 	end.
-{$ELSE}	
+{$ELSE}
 	begin
 	SGStandartCallConcoleCaller();
 	end.
