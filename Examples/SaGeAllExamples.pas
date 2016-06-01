@@ -26,6 +26,7 @@ uses
 	,Ex13
 	,Ex14
 	,Ex15
+	,ExKraft
 	;
 
 type
@@ -34,10 +35,9 @@ type
 		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
+		procedure Draw();override;
 			public
 		FDrawClasses : TSGDrawClasses;
-			public
-		procedure Draw();override;
 		end;
 
 implementation
@@ -53,6 +53,7 @@ FDrawClasses.Add(TSGExample3);
 FDrawClasses.Add(TSGExample4_1);
 FDrawClasses.Add(TSGExample4_2);
 FDrawClasses.Add(TSGExample4_3);
+FDrawClasses.Add(TSGKraftExamples);
 FDrawClasses.Add(TSGExample5);
 FDrawClasses.Add(TSGExample5_2);
 FDrawClasses.Add(TSGExample5_4);
