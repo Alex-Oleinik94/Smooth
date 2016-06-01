@@ -1,3 +1,4 @@
+@echo off
 cd CompiledUnits
 del Log.log
 cd ..

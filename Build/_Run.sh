@@ -1,3 +1,3 @@
 cd ./../Binaries/
-./Main
+./Main 
 cd ./../Build/
