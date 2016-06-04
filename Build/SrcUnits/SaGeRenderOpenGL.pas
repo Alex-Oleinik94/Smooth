@@ -7,6 +7,9 @@
 {$IFDEF ANDROID}
 	{$DEFINE NEEDRESOURSES}
 	{$ENDIF}
+{$IFDEF DARWIN}
+	{$DEFINE SHADERSISPOINTERS}
+	{$ENDIF}
 
 unit SaGeRenderOpenGL;
 
@@ -375,7 +378,7 @@ end;
 
 procedure TSGRenderOpenGL.UseProgram(const VProgram : TSGLongWord);
 begin
-{$IFDEF MOBILE}glUseProgram{$ELSE}glUseProgramObjectARB{$ENDIF}(VProgram);
+{$IFDEF MOBILE}glUseProgram{$ELSE}glUseProgramObjectARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
@@ -385,7 +388,7 @@ end;
 
 function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
 begin
-{$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}(VProgram,VLocationName);
+{$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF},VLocationName);
 end;
 
 function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
@@ -395,47 +398,53 @@ end;
 
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
 begin
-Result := {$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType);
+Result := 
+{$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
+	{$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType)
+{$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
 end;
 
 procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
 begin
-{$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}(VShader,1,@VSourse,@VSourseLength);
+{$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF},1,@VSourse,@VSourseLength);
 end;
 
 procedure TSGRenderOpenGL.CompileShader(const VShader : TSGLongWord);
 begin
-{$IFDEF MOBILE}glCompileShader{$ELSE}glCompileShaderARB{$ENDIF}(VShader);
+{$IFDEF MOBILE}glCompileShader{$ELSE}glCompileShaderARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);
 begin
 //glGetProgramiv - GLES
 //glGetShaderiv - GLES
-{$IFNDEF MOBILE}glGetObjectParameterivARB(VObject,VParamName,VResult);{$ENDIF}
+{$IFNDEF MOBILE}glGetObjectParameterivARB({$IFDEF SHADERSISPOINTERS}Pointer(VObject){$ELSE}VObject{$ENDIF},VParamName,VResult);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
 begin
 //glGetShaderInfoLog - GLES
 //glGetProgramInfoLog - GLES
-{$IFNDEF MOBILE}glGetInfoLogARB(VHandle,VMaxLength,@VLength,VLog);{$ENDIF}
+{$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,@VLength,VLog);{$ENDIF}
 end;
 
 
 function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
 begin
-Result := {$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}();
+Result := 
+{$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
+	{$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}()
+{$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
 end;
 
 procedure TSGRenderOpenGL.AttachShader(const VProgram, VShader : TSGLongWord);
 begin
-{$IFDEF MOBILE}glAttachShader{$ELSE}glAttachObjectARB{$ENDIF}(VProgram,VShader);
+{$IFDEF MOBILE}glAttachShader{$ELSE}glAttachObjectARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF},{$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.LinkShaderProgram(const VProgram : TSGLongWord);
 begin
-{$IFNDEF MOBILE}glLinkProgramARB{$ELSE}glLinkProgram{$ENDIF}(VProgram);
+{$IFNDEF MOBILE}glLinkProgramARB{$ELSE}glLinkProgram{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.DeleteShader(const VProgram : TSGLongWord);

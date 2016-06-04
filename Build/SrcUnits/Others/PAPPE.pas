@@ -64,8 +64,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (*                                                                              *)
 (********************************************************************************)
 
-{$IF defined(CPU386) and defined(CPU32)}
-	{$DEFINE WITHASMINC}
+{$IF not defined(DARWIN)}
+	{$IF defined(CPU386) and defined(CPU32)}
+		{$DEFINE WITHASMINC}
+		{$ENDIF}
 	{$ENDIF}
 
 unit PAPPE;
