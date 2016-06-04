@@ -18,6 +18,54 @@ function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+const
+	SGVerUnknown = 'unknown';
+
+const
+	SGVerCPU =
+		{$IF defined(CPU64)}
+			'64'
+		{$ELSE}
+			{$IFDEF CPU32}
+				'32'
+			{$ELSE}
+				{$IFDEF CPU16}
+					'16'
+				{$ELSE}
+					SGVerUnknown
+				{$ENDIF}
+			{$ENDIF}
+		{$ENDIF}
+		;
+const
+	SGVerOS =
+		{$IFDEF MSWINDOWS}
+			'Windows'
+		{$ELSE}
+			{$IF defined(ANDROID) or (defined(UNIX) and defined(MOBILE))}
+				'Android'
+			{$ELSE}
+				{$IF defined(DARWIN) and (not defined(MOBILE))}
+					'Mac OS X'
+				{$ELSE}
+					{$IF defined(MOBILE) and defined(DARWIN)}
+						'iOS'
+					{$ELSE}
+						{$IFDEF LINUX}
+							'Linux'
+						{$ELSE}
+							{$IFDEF UNIX}
+								'Unix'
+							{$ELSE}
+								SGVerUnknown
+							{$ENDIF}
+						{$ENDIF}
+					{$ENDIF}
+				{$ENDIF}
+			{$ENDIF}
+		{$ENDIF}
+		;
+
 implementation
 
 function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -57,7 +105,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	WriteLn('SaGe Engine version ',SGGetEngineVersion());
+	WriteLn('SaGe Engine version ',SGGetEngineVersion(),' (',SGVerOS,' ',SGVerCPU,' bit)');
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	end;
 VersionPrinted := True;

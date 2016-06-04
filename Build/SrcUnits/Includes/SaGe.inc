@@ -11,7 +11,7 @@
 	//{$ASMMODE DIRECT}
 	{$ENDIF}
 
-{$IFNDEF MOBILE}
+{$IF (not defined(MOBILE)) and (not defined(WIN64))}
 	{$IF (not defined(RELEASE)) or defined(ENABLELIBPNG)}
 		{$DEFINE WITHLIBPNG}
 		{$ENDIF}

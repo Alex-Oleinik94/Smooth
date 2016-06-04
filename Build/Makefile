@@ -1,34 +1,51 @@
-PP=fpc
-CROSSPP="./../FPC/bin/i386-win32/$(PP)"
+X32=-Pi386 
+X64=-Px86_64
+PASCALCOMPILER=fpc
+CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
+DESKTOPFILE=Main
 BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Others/Synapse -FuSrcUnits/Includes -FuSrcUnits/Others/lNet -FuSrcUnits/Others/lNet/sys -FuSrcUnits -FuSrcUnits/Programs -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
 RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
+DARWINARGS=-k-framework -kOpenGL
+ARGS= $(BASEARGS) $(RENDERARGS)
 ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSrcUnits/OpenGL 
-OUTPUTUNIXORWIN= -FUCompiledUnits/i386-other -FE./../Binaries
+OUTPUTDESKTOP= -FUCompiledUnits/i386-other -FE./../Binaries
 OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
+DESKTOPARGS= $(ARGS) $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg
 DORELEASE= -XX -O2 -CX -dRELEASE
-DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 DOWITHFPU= -CfVFPV3
-DODARWIN=-k-framework -kOpenGL
+DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 SGRMFILE=./../Build/SrcUnits/Temp/SaGeRMFiles.inc
 SGTEMPUNITDIR=./../Build/SrcUnits/Temp
-SAGE="./../Binaries/Main"
+SAGE="./../Binaries/$(DESKTOPFILE)"
 
-release:
-	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
+release release_x32:
+	@$(PASCALCOMPILER) $(X32) $(DORELEASE) $(DESKTOPARGS)
+release_x64:
+	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(DESKTOPARGS)
 release_libpng:
-	@$(PP) $(DORELEASE) -dENABLELIBPNG $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
+	@$(PASCALCOMPILER) $(X32) $(DORELEASE) -dENABLELIBPNG $(DESKTOPARGS)
 debug:
-	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) Main
+	@$(PASCALCOMPILER) $(X32) $(DODEBUG) $(DESKTOPARGS)
+debug_x64:
+	@$(PASCALCOMPILER) $(X64) $(DODEBUG) $(DESKTOPARGS)
+darwin_debug darwin_debug_x32:
+	@$(PASCALCOMPILER) $(X32) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
+darwin_release darwin_release_x32:
+	@$(PASCALCOMPILER) $(X32) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
+darwin_debug_x64:
+	@$(PASCALCOMPILER) $(X64) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
+darwin_release_x64:
+	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
+lib lib_x32:
+	@$(PASCALCOMPILER) $(X32) $(DORELEASE) $(ARGS) $(OUTPUTLIBRARY) SaGeLib
+lib_x64:
+	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(ARGS) $(OUTPUTLIBRARY) SaGeLib
 android:
-	@$(CROSSPP) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(OPT) Main
-darwin_debug:
-	@$(PP) $(DODEBUG) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main 
-darwin_release:
-	@$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTUNIXORWIN) $(OPT) $(DODARWIN) Main
-lib:
-	$(PP) $(DORELEASE) $(BASEARGS) $(RENDERARGS) $(OUTPUTLIBRARY) $(OPT) SaGeLib
+	@$(CROSSPASCALCOMPILER) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(DESKTOPFILE)
+ios:
+	
 inc_version_debug:
 	@$(SAGE) -iv 0
 	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
@@ -63,5 +80,3 @@ clear:
 	@rm -f SrcUnits/*.ppu
 	@rm -f Main.res
 	@$(MAKE) clear_files
-ios:
-	

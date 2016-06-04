@@ -744,7 +744,7 @@ if FRelief <> nil then
 					5 : begin l:=Edge-1; k:=-1;   a1:=0; a2:=0; a3:=1;   i1:=i; i2:=ii; i3:=0;  end;
 					end;
 					
-					while (not TSGBoolean(ReliefCubeIndex(i1+a1*l,i2+a2*l,i3+a3*l))) and (l>=0) and (l<=Edge - 1) do
+					while (not TSGBoolean(ReliefCubeIndex(i1+a1*l, i2+a2*l, i3+a3*l))) and (l>=0) and (l<=Edge - 1) do
 						l += k;
 					
 					if (l>=0) and (l<=Edge - 1) then
@@ -1330,7 +1330,7 @@ end;
 
 class function TSGGasDiffusion.ClassName():TSGString;
 begin
-Result := 'Диффузия в газах';
+Result := 'Моделирование диффузии газа';
 end;
 
 procedure mmmFBackToMenuButtonProcedure(Button:TSGButton);
@@ -1598,6 +1598,8 @@ Render.DrawArrays(SGR_TRIANGLES, 0, Length(FArray));
 
 Render.DisableClientState(SGR_COLOR_ARRAY);
 Render.DisableClientState(SGR_VERTEX_ARRAY);
+
+Render.Color3f(1,1,1);
 end;
 
 function TSGGasDiffusion.GetPointColor( const i,ii,iii : LongWord):Byte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2213,7 +2215,7 @@ UpDateSoursePanel();
 end; end;
 
 procedure mmmFSaveImageButtonProcedure(Button:TSGButton);
-procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
+procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 {$IFDEF WITHLIBPNG}
 	PSGPixel4b(Destination)^ := p;
@@ -2256,7 +2258,7 @@ if d = 2 then
 		for ii := 0 to FCube.Edge-1 do
 			PutPixel(FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^,@Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*Image.Image.Channels]);
 
-SGMakeDirectory(PredStr+Catalog);
+SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
 	Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.png','number');
 	Image.Saveing(SGI_PNG);
@@ -3598,6 +3600,7 @@ Render.EndScene();
 	else
 		FSourseChangeFlag := 0;
 	{$ENDIF}
+Render.Color3f(1,1,1);
 end;
 
 procedure TSGGasDiffusion.Draw();
