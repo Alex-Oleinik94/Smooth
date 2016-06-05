@@ -10,6 +10,7 @@
 {$IFDEF DARWIN}
 	{$DEFINE SHADERSISPOINTERS}
 	{$ENDIF}
+{$DEFINE INTERPRITATEROTATETRANSLATE}
 
 unit SaGeRenderOpenGL;
 
@@ -898,14 +899,34 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Translatef(const x,y,z:single); 
+procedure TSGRenderOpenGL.Translatef(const x, y, z : TSGSingle);
+{$IF defined(INTERPRITATEROTATETRANSLATE)}
+var
+	Matrix : TSGMatrix4;
+{$ENDIF}
 begin 
+{$IF not defined(INTERPRITATEROTATETRANSLATE)}
 glTranslatef(x,y,z);
+{$ELSE}
+Matrix := SGGetTranslateMatrix(SGVertexImport(x, y, z));
+MultMatrixf(@Matrix);
+{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Rotatef(const angle:single;const x,y,z:single); 
+procedure TSGRenderOpenGL.Rotatef(const Angle : TSGSingle; const x, y, z : TSGSingle); 
+{$IF defined(INTERPRITATEROTATETRANSLATE)}
+const
+	DEG2RAD = PI/180;
+var
+	Matrix : TSGMatrix4;
+{$ENDIF}
 begin 
+{$IF not defined(INTERPRITATEROTATETRANSLATE)}
 glRotatef(angle,x,y,z);
+{$ELSE}
+Matrix := SGGetRotateMatrix(Angle * DEG2RAD, SGVertexImport(x, y, z));
+MultMatrixf(@Matrix);
+{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Enable(VParam:Cardinal); 
