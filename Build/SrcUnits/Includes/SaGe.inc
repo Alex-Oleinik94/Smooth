@@ -1,3 +1,7 @@
+{$IFDEF LINUX}
+	{$DEFINE UseCThreads}
+	{$ENDIF}
+
 {$IFNDEF ANDROID}
 	{$IFDEF UNIX}
 		{$IFNDEF DARWIN}

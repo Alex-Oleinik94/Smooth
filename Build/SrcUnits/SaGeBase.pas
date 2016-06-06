@@ -610,6 +610,7 @@ function SGPCharToString(const VChar:PChar):string;inline;
 
 //Переводит строку в число
 function SGVal(const Text:string = '0'):Int64;inline;overload;
+function SGValFloat(const Text : TSGString = '0'):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 //Возвращаето часть строки, находящуюся между [a..b] включительно
 function SGStringGetPart(const S:string;const a,b:LongWord):String;
@@ -737,6 +738,44 @@ procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGValFloat(const Text : TSGString = '0'):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+var
+	i, iii : TSGLongInt;
+	ii : TSGLongWord;
+begin
+Result := 0;
+if Length(Text) = 0 then Exit;
+for i := 1 to Length(Text) do 
+	if (Text[i] = ',') or (Text[i] = '.') then
+		break;
+iii := i;
+if (Text[i] = ',') or (Text[i] = '.') then
+	i -= 1;
+ii := 1;
+while i >= 1 do
+	begin
+	Result += ii * SGVal(Text[i]);
+	ii *= 10;
+	i -= 1;
+	end;
+i := iii;
+i += 1;
+ii := 10;
+while i <= Length(Text) do
+	begin
+	Result += SGVal(Text[i]) / ii;
+	i += 1;
+	ii *= 10;
+	end;
+for i := 1 to Length(Text) do
+	if Text[i] = '-' then
+		begin
+		Result *= -1;
+		break;
+		end;
+end;
+
 
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

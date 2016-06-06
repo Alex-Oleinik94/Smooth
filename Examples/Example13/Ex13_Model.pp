@@ -254,10 +254,7 @@ begin
 S := String(S1);
 S := Trim(S);
 S := StringWordGet(S,' ',Index);
-{$IFDEF FPC}
-	S := StringReplace(S, '.', ',', [rfReplaceAll]);
-	{$ENDIF}
-Result := StrToFloatDef(S,0);
+Result := SGValFloat(S);
 end;
 
 procedure TModel.Load(const VFileName : TSGString);
