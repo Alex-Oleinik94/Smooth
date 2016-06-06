@@ -242,21 +242,13 @@ else
 end;
 
 procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
-var
-	xwa : TXWindowAttributes;
 begin
 if dpy = nil then
 	dpy := XOpenDisplay(nil);
 if (dpy=nil) or(win=0) then 
 	Exit;
 XSelectInput(dpy, RootWindow(dpy, 0), KeyReleaseMask);
-if FullScreen then
-	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x, a.y)
-else
-	begin
-	XGetWindowAttributes(dpy, win, @xwa);
-	XWarpPointer(dpy, 0, RootWindow(dpy, 0), 0, 0, 0, 0, a.x+xwa.x, a.y+xwa.y+25);
-	end;
+XWarpPointer(dpy, win, win, 0, 0, 0, 0, a.x, a.y);
 XFlush(dpy);
 end;
 

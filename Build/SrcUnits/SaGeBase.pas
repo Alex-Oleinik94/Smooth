@@ -2100,7 +2100,7 @@ FThreadID:=0;
 	fillchar(mutex,sizeof(mutex),0);
 	{$ENDIF}
 if QuickStart then
-	Start;
+	Start();
 end;
 
 procedure TSGThread.SetProcedure(const Proc:TSGThreadProcedure);
@@ -2196,7 +2196,7 @@ begin
 			pthread_mutex_unlock(@mutex);
 			SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 		{$ELSE}
-			FHandle:=BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+			FHandle := BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
 		{$ENDIF}
 	{$ENDIF}
 end;
