@@ -272,8 +272,9 @@ type
 	TArReal        = type packed array of real;
 	TArExtended    = type packed array of extended;
 	TArTArLongWord = type packed array of TArLongWord;
-	//TSGArConst     = type packed array of const;
 	TSGArString    = type packed array of TSGString;
+	TArConst       = type packed array of TVarRec;
+	TSGArConst     = type TArConst;
 	
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
@@ -443,7 +444,7 @@ type
 		constructor Create;
 		destructor Destroy;override;
 		procedure Sourse(const s:string;const WithTime:Boolean = True);
-		procedure Sourse(const Ar:array of const;const WithTime:Boolean = True);
+		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);
 			private
 		FFileStream:TFileStream;
 		end;
@@ -620,9 +621,9 @@ procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFun
 
 //Переводит тип (array of const) в строку
 //(array of const) можно задавать как ['dsdas',123,'a',#34,123.5].
-function SGGetStringFromConstArray(const Ar:packed array of const):String;
+function SGGetStringFromConstArray(const Ar : array of const):String;
 
-function SGArConstToArString(const Ar:packed array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGArConstToArString(const Ar : array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Возвращает краткое имя файла, из полного имени файла
 function SGGetFileName(const WayName:string):string;
@@ -1390,7 +1391,7 @@ for i:=Length(S) downto 1 do
 SetLength(S,0);
 end;
 
-function SGArConstToArString(const Ar : packed array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGArConstToArString(const Ar : array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGLongWord;
 begin
@@ -1415,7 +1416,7 @@ if High(Ar)>=0 then
 	end;
 end;
 
-function SGGetStringFromConstArray(const Ar:packed array of const):String;
+function SGGetStringFromConstArray(const Ar: array of const):String;
 var
 	i:LongWord;
 begin
@@ -1547,7 +1548,7 @@ except
 	end;
 end;
 
-procedure TSGLog.Sourse(const Ar:array of const;const WithTime:Boolean = True);
+procedure TSGLog.Sourse(const Ar : array of const; const WithTime:Boolean = True);
 var
 	OutString:String = '';
 begin

@@ -1132,7 +1132,9 @@ procedure TSGGasDiffusionSingleRelief.ExportToMeshPolygones(const VMesh : TSGCus
 var
 	i,ii : LongWord;
 begin
-if FMesh = nil then
+if (FMesh <> nil) and (FEnabled) and (FType) then
+	FMesh.CopyTo(VMesh.AddObject())
+else
 	begin
 	if FPoints <> nil then if Length(FPoints) <> 0 then
 		begin
@@ -1171,10 +1173,6 @@ if FMesh = nil then
 						end;
 					end;
 		end;
-	end
-else
-	begin
-	FMesh.CopyTo(VMesh.AddObject());
 	end;
 end;
 

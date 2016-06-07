@@ -294,6 +294,7 @@ type
 		
 		// Эта процедура устанавливает цвет вершины. Работает для любого формата хранение цвета.
 		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1);inline;
+		function GetColor(const Index:TSGMaxEnum) : TSGColor4f;inline;
 		// Автоматически определяет нужный формат хранения цветов. (В зависимости от рендера)
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 		procedure AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
@@ -954,6 +955,34 @@ if Render<>nil then
 	else
 		begin
 		SetColorType(SGMeshColorType4b);
+		end;
+	end;
+end;
+
+function TSG3DObject.GetColor(const Index:TSGMaxEnum) : TSGColor4f;inline;
+begin
+Result.Import();
+if (FColorType=SGMeshColorType3f) then
+	begin
+	Result.Import(ArColor3f[Index]^.r, ArColor3f[Index]^.g, ArColor3f[Index]^.b, 1);
+	end
+else if (FColorType=SGMeshColorType4f) then
+	begin
+	Result.Import(ArColor4f[Index]^.r, ArColor4f[Index]^.g, ArColor4f[Index]^.b, ArColor4f[Index]^.a);
+	end
+else if (FColorType=SGMeshColorType3b) then
+	begin
+	Result.Import(ArColor3b[Index]^.r / 255, ArColor3b[Index]^.g / 255, ArColor3b[Index]^.b / 255, 1);
+	end
+else if (FColorType=SGMeshColorType4b) then
+	begin
+	if Render.RenderType = SGRenderDirectX then
+		begin
+		Result.Import(ArColor4b[Index]^.r / 255, ArColor4b[Index]^.g / 255, ArColor4b[Index]^.b / 255, ArColor4b[Index]^.a / 255);
+		end
+	else
+		begin
+		Result.Import(ArColor4b[Index]^.b / 255, ArColor4b[Index]^.g / 255, ArColor4b[Index]^.r / 255, ArColor4b[Index]^.a / 255);
 		end;
 	end;
 end;

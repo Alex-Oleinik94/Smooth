@@ -30,17 +30,27 @@ const
 	Catalog = 'Gas Diffusion Saves';
 type
 	TSGGazType = object
-		FColor : TSGColor4f;
-		FArParents: array[0..1] of LongInt;
+		FColor           : TSGColor4f;
+		FArParents       : array[0..1] of LongInt;
 		FDinamicQuantity : LongWord;
 		procedure Create(const r,g,b: Single;const a: Single = 1;const p1 : LongInt = -1; const p2: LongInt = -1);
 		end;
+	
 	TSGSourseType = object
 		FGazTypeIndex : TSGLongWord;
-		FCoord : TSGPoint3f;
-		FRadius : TSGLongWord;
+		FCoord        : TSGPoint3f;
+		FRadius       : TSGLongWord;
 		end;
-	TSGGGDC = ^byte;
+	
+	TSGSubsidenceVertex = object
+		FCount       : TSGLongWord;
+		FCoords      : TSGPoint3f;
+		FVertexIndex : TSGLongWord;
+		FRelief      : TSGLongWord;
+		end;
+	TSGSubsidenceVertexes = type packed array of TSGSubsidenceVertex;
+	
+	TSGGGDC = ^ TSGByte;
 	TSGGasDiffusionCube = class(TSGDrawClass)
 			public
 		constructor Create(const VContext:TSGContext);override;
@@ -55,7 +65,7 @@ type
 		procedure ClearGaz();
 		procedure InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
 			public
-		function Cube (const x,y,z:Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Cube (const x, y, z : Word) : TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ReliefCubeIndex (const x,y,z : Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Copy() : TSGGasDiffusionCube;
 			public
@@ -64,12 +74,12 @@ type
 		FCubeCoords : packed array of
 			TSGVertex3f;							// 3хмерные координаты каждой точки из FCube
 		FEdge       : TSGLongWord;					// размерность FCube (FEdge * FEdge * FEdge)
-		//FBoundsOpen : TSGBoolean;
 		FGazes      : packed array of TSGGazType;	// типы газа
 		FSourses    : packed array of TSGSourseType;// источники газа
 		FDinamicQuantityMoleculs : LongWord;		// количество точек газа на данный момент
 		FFlag       : Boolean;						// флажок этапа итерации. этот алгоритм работает в 2 этапа
 		FRelief     : PSGGasDiffusionRelief;
+		FSubsidenceVertexes : TSGSubsidenceVertexes;
 			public
 		property Edge : TSGLongWord read FEdge;
 		end;
@@ -212,6 +222,7 @@ FSourses:= nil;
 FGazes  := nil;
 FCubeCoords := nil;
 FRelief := nil;
+FSubsidenceVertexes := nil;
 end;
 
 procedure TSGGasDiffusionCube.Draw();
@@ -758,7 +769,10 @@ if FRelief <> nil then
 						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FIndex := i * Edge + ii;
 						end;
 					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := PostInvert(j, ProjectingPointToRelief(
-						CoordFromXYZ(i1+a1*l,i2+a2*l,i3+a3*l,j),
+						SGVertexImport(
+							(i1+a1*l)/(Edge-1)*2-1,
+							(i2+a2*l)/(Edge-1)*2-1,
+							(i3+a3*l)/(Edge-1)*2-1),
 						VertexFromIndex(j),
 						@FRelief^.FData[j],
 						j));
@@ -808,7 +822,9 @@ if FSourses<>nil then
 end;
 
 procedure TSGGasDiffusionCube.UpDateCube();
+
 procedure MoveGazInSmallCube(const i1,i2,i3:TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 procedure ProvSmesh(const a,b : TSGGGDC);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : LongWord;
@@ -824,6 +840,7 @@ if (FGazes<>nil) and (not((a^=0) or (b^=0))) then
 				Exit;
 				end;
 end;
+
 procedure QuadricMove(const a,b,c,d : TSGGGDC);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var 
 	eee : Byte;
@@ -840,6 +857,7 @@ ProvSmesh(b,c);
 ProvSmesh(c,d);
 ProvSmesh(d,a);
 end;
+
 var
 	b1,b2:Byte;
 begin
@@ -936,7 +954,7 @@ end;
 
 procedure UpDateGaz();
 var
-	i1,i2,i3:TSGLongWord;
+	i1, i2, i3 : TSGLongWord;
 begin
 if FFlag then
 	begin
@@ -980,6 +998,28 @@ else
 	end;
 FFlag := not FFlag;
 end;
+
+procedure UpDateSubsidenceRelief();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii : TSGLongWord;
+        c : TSGGGDC;
+        col : TSGColor4f;
+begin
+if (FSubsidenceVertexes <> nil) and (Length(FSubsidenceVertexes)>0) then
+   for i := 0 to High(FSubsidenceVertexes) do
+       begin
+       c := Cube(FSubsidenceVertexes[i].FCoords.x, FSubsidenceVertexes[i].FCoords.y, FSubsidenceVertexes[i].FCoords.z);
+       if c^ <> 0 then
+          begin
+          col := FRelief^.FData[FSubsidenceVertexes[i].FRelief].FMesh.GetColor(FSubsidenceVertexes[i].FVertexIndex);
+          col := (col * FSubsidenceVertexes[i].FCount + FGazes[c^ - 1].FColor) / (FSubsidenceVertexes[i].FCount + 1);
+          FSubsidenceVertexes[i].FCount += 1;
+          FRelief^.FData[FSubsidenceVertexes[i].FRelief].FMesh.SetColor(FSubsidenceVertexes[i].FVertexIndex, col.r, col.g, col.b, col.a);
+          c^ := 0;
+          end;
+       end;
+end;
+
 procedure UpDateIfOpenBounds();
 var
 	i,ii:TSGLongWord;
@@ -1001,9 +1041,11 @@ while i<FEdge do
 	Inc(i);
 	end;
 end;
+
 begin
 UpDateGaz();
 UpDateSourses();
+UpDateSubsidenceRelief();
 UpDateIfOpenBounds();
 end;
 

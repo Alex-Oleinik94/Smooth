@@ -127,7 +127,7 @@ procedure InitAllApplications(const Context:TSGContext);
 begin
 with TSGDrawClasses.Create(Context) do
 	begin
-	Add(TSGExample15);
+	//Add(TSGExample15);
 	Add(TSGGasDiffusion);
 	Add(TSGAllFractals,False);
 	Add(TSGAllExamples,False);
