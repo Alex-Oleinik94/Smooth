@@ -262,6 +262,8 @@ if FCube<>nil then
 	FreeMem(FCube);
 	FCube:=nil;
 	end;
+if FSubsidenceVertexes <> nil then
+	SetLength(FSubsidenceVertexes, 0);
 inherited;
 end;
 
@@ -716,6 +718,9 @@ FreeMem(FRCI);
 // Алгоритм для оседающих граней
 if FRelief <> nil then
 	begin
+	if (FSubsidenceVertexes <> nil) then
+		SetLength(FSubsidenceVertexes, 0);
+	FSubsidenceVertexes := nil;
 	for j := 0 to 5 do
 		begin
 		if FRelief^.FData[j].FEnabled and FRelief^.FData[j].FType then
@@ -776,7 +781,16 @@ if FRelief <> nil then
 						VertexFromIndex(j),
 						@FRelief^.FData[j],
 						j));
-					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, Byte(not((l>=0) and (l<=Edge - 1))), Byte((l>=0) and (l<=Edge - 1)), 0, 0.3)
+					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, 0, 0, 0, 0.6);
+					
+					if (FSubsidenceVertexes = nil) then
+						SetLength(FSubsidenceVertexes, 1)
+					else
+						SetLength(FSubsidenceVertexes, Length(FSubsidenceVertexes) + 1);
+					FSubsidenceVertexes[High(FSubsidenceVertexes)].FCount := 0;
+					FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+					FSubsidenceVertexes[High(FSubsidenceVertexes)].FVertexIndex := i * Edge + ii;
+					FSubsidenceVertexes[High(FSubsidenceVertexes)].FRelief := j;
 					end;
 			
 			for i := 0 to FRelief^.FData[j].FMesh.Faces[0] - 1 do
@@ -1020,7 +1034,7 @@ if (FSubsidenceVertexes <> nil) and (Length(FSubsidenceVertexes)>0) then
        end;
 end;
 
-procedure UpDateIfOpenBounds();
+procedure UpDateOpenBounds();
 var
 	i,ii:TSGLongWord;
 begin
@@ -1046,7 +1060,7 @@ begin
 UpDateGaz();
 UpDateSourses();
 UpDateSubsidenceRelief();
-UpDateIfOpenBounds();
+UpDateOpenBounds();
 end;
 
 function TSGGasDiffusionCube.CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGLongWord = 0{$ENDIF}):TSGCustomModel;
