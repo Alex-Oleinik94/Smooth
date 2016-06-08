@@ -763,16 +763,6 @@ if FRelief <> nil then
 					while (not TSGBoolean(ReliefCubeIndex(i1+a1*l, i2+a2*l, i3+a3*l))) and (l>=0) and (l<=Edge - 1) do
 						l += k;
 					
-					if (l>=0) and (l<=Edge - 1) then
-						begin
-						if FRelief^.FData[j].FMeshArray = nil then
-							SetLength(FRelief^.FData[j].FMeshArray,1)
-						else
-							SetLength(FRelief^.FData[j].FMeshArray,Length(FRelief^.FData[j].FMeshArray)+1);
-						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCoords.Import(i1+a1*l,i2+a2*l,i3+a3*l);
-						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FCount := 0;
-						FRelief^.FData[j].FMeshArray[High(FRelief^.FData[j].FMeshArray)].FIndex := i * Edge + ii;
-						end;
 					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := PostInvert(j, ProjectingPointToRelief(
 						SGVertexImport(
 							(i1+a1*l)/(Edge-1)*2-1,
@@ -783,14 +773,24 @@ if FRelief <> nil then
 						j));
 					FRelief^.FData[j].FMesh.SetColor  (i * Edge + ii, 0, 0, 0, 0.6);
 					
-					if (FSubsidenceVertexes = nil) then
-						SetLength(FSubsidenceVertexes, 1)
-					else
-						SetLength(FSubsidenceVertexes, Length(FSubsidenceVertexes) + 1);
-					FSubsidenceVertexes[High(FSubsidenceVertexes)].FCount := 0;
-					FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
-					FSubsidenceVertexes[High(FSubsidenceVertexes)].FVertexIndex := i * Edge + ii;
-					FSubsidenceVertexes[High(FSubsidenceVertexes)].FRelief := j;
+					if (l>=0) and (l<=Edge - 1) then
+						begin
+						if (FSubsidenceVertexes = nil) then
+							SetLength(FSubsidenceVertexes, 1)
+						else
+							SetLength(FSubsidenceVertexes, Length(FSubsidenceVertexes) + 1);
+						FSubsidenceVertexes[High(FSubsidenceVertexes)].FCount := 0;
+						case j of
+						0 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Up
+						1 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); //Down
+						2 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l); 
+						3 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						4 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						5 : FSubsidenceVertexes[High(FSubsidenceVertexes)].FCoords.Import(i1 + a1 * l, i2 + a2 * l, i3 + a3 * l);
+						end;
+						FSubsidenceVertexes[High(FSubsidenceVertexes)].FVertexIndex := i * Edge + ii;
+						FSubsidenceVertexes[High(FSubsidenceVertexes)].FRelief := j;
+						end;
 					end;
 			
 			for i := 0 to FRelief^.FData[j].FMesh.Faces[0] - 1 do

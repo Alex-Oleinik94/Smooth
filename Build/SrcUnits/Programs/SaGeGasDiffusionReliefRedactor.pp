@@ -30,12 +30,6 @@ type
 		FPolygones : packed array of TSGGDRPrimetiveIndexes;
 		
 		FMesh : TSG3DObject;
-		FMeshArray : packed array of
-					 packed record
-						FCoords : TSGPoint3f;
-						FCount  : TSGLongWord;
-						FIndex  : TSGLongWord;
-						end;
 		
 		procedure Draw(const VRender : TSGRender);
 		procedure DrawLines(const VRender : TSGRender);
@@ -1198,7 +1192,6 @@ FPolygones[0][1] := 1;
 FPolygones[0][2] := 2;
 FPolygones[0][3] := 3;
 FMesh := nil;
-FMeshArray := nil;
 {$IFDEF REDACTORDEBUG}
 	Write();
 	{$ENDIF}
@@ -1326,7 +1319,6 @@ begin
 if FMesh is TSG3DObject then
 	FMesh.Destroy();
 FMesh := nil;
-SetLength(FMeshArray,0);
 SetLength(FPoints,0);
 if FPolygones <> nil then if Length(FPolygones)<>0 then
 	for i := 0 to High(FPolygones) do
