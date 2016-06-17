@@ -1,6 +1,6 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
 {$IF not defined(MOBILE)}
-	{$DEFINE WITHSAGELIBRARY}
+	//{$DEFINE WITHSAGELIBRARY}
 	{$IF not defined(DARWIN)}
 		{$IF defined(RELEASE)}
 			{$APPTYPE GUI}

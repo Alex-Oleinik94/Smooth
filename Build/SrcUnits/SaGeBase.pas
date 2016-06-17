@@ -2712,7 +2712,7 @@ function LoadLibrary(const AName: PChar) : TSGLibHandle;{$IFDEF SUPPORTINLINE}in
 begin
 Result:=
 	{$ifdef UNIX} 
-		TSGLibrary( dlopen(AName, RTLD_LAZY or RTLD_GLOBAL) );
+		TSGLibHandle( dlopen(AName, RTLD_LAZY or RTLD_GLOBAL) );
 	{$else} 
 		Windows.LoadLibrary(AName);
 		{$endif}

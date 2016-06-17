@@ -98,7 +98,6 @@ procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure FPCTCTransliater();
 procedure GoogleReNameCache();
 procedure GoViewer(const FileWay : String);
-procedure DllScan();
 
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1220,75 +1219,6 @@ if
 	end
 else
 	WriteLn('Unknown expansion "',(SGGetFileExpansion(FileWay)),'"!');
-end;
-
-procedure DllScan();
-var
-	FailWay:string;
-	Lib:TSGLibrary;
-	A:array [#0..#255] of Boolean;
-	i,iii:TSGMaxEnum;
-	S:STring;
-	axtung:Boolean;
-	Pc:PChar;
-
-procedure RecDll(const Depth:LongWord);
-var
-	ii:Byte;
-begin
-for ii:=0 to 129 do
-	if  A[char(ii)] then
-	begin
-	S+=Char(ii);
-	if Depth=1 then
-		begin
-		Pc:=SGStringToPChar(S);
-		iii:=0;
-		try
-		iii:=TSGMaxEnum(SaGeBase.GetProcAddress(Lib,Pc));
-		except
-		end;
-		if iii<>0 then
-			WriteLn('Result "',S,'"!!!');
-		FreeMem(Pc);
-		end
-	else
-		begin
-		RecDll(Depth-1);
-		end;
-	SetLength(S,Length(S)-1);
-	end;
-end;
-
-begin
-if argc<=2 then
-	begin
-	Writeln('Enter file please as paramrter!');
-	Exit;
-	end;
-FailWay:=argv[2];
-if not SGFileExists(FailWay) then
-	begin
-	Writeln('File must be exists!');
-	Exit;
-	end;
-Lib:=SaGeBase.LoadLibrary(SGStringToPChar(FailWay));
-WriteLn(Lib);
-if Lib=0 then
-	begin
-	Writeln('Load library failed!');
-	Exit;
-	end;
-FillChar(A[char(0)],256,0);
-for i:=0 to 255 do
-	if char(i) in ['a'..'z','A'..'Z','_','0'..'9'] then
-		A[char(i)]:=True;
-S:='';
-for i:=1 to 255 do
-	begin
-	Writeln('Scaning ',i,' simbol words..');
-	RecDll(i);
-	end;
 end;
 
 end.

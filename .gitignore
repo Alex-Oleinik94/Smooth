@@ -25,6 +25,7 @@ Binaries/Main_Lazarus.dbg
 Binaries/SaGe.apk
 Binaries/Main_Release.exe
 Binaries/Main_Lazarus.exe
+Binaries/Main_Compressed.exe
 Others/DirectX/*.o
 Others/DirectX/*.ppu
 Others/DirectX/*.a
