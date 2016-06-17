@@ -139,4 +139,10 @@ Stream.SaveToFile(VersionFileName);
 Stream.Destroy();
 end;
 
+{$IF defined(LIBRARY)}
+exports
+	SGGetEngineVersion
+	;
+{$ENDIF}
+
 end.

@@ -249,7 +249,6 @@ type
 	SGInt        = Int64;
 	TSGHandle    = type LongInt;
 	TSGLibHandle = type TSGHandle;
-	TSGLibrary   = TSGLibHandle;
 	FileOfByte   = type File Of Byte;
 	PFileOfByte  = ^ FileOfByte;
 	
@@ -275,6 +274,7 @@ type
 	TSGArString    = type packed array of TSGString;
 	TArConst       = type packed array of TVarRec;
 	TSGArConst     = type TArConst;
+	TSGConcoleCallerParams = TSGArString;
 	
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
@@ -322,17 +322,16 @@ type
 	TSGExBoolean = type TSGByte;
 	
 	// ласс, который позвол€ет загружать динамические библиотеки
-	TSGLibraryClass=class
+	TSGLibrary = class
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create(const VLibraryName : TSGString);
+		destructor Destroy();override;
+			private
+		FLibrary : TSGLibHandle;
 			public
-		FSaGeLibrary:TSGLibrary;
+		function GetProcedureAddress(const VProcedureName : TSGString) : Pointer;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property SaGeLibrary : TSGLibrary read FSaGeLibrary;
-		function qwerty(const Index:LongWord):float;virtual;abstract;
-			public
-		property qwertp[Index : LongWord]:float read qwerty;
+		property LibHandle : TSGLibHandle read FLibrary;
 		end;
 	
 	TSGArTObject = type packed array of TObject;
@@ -492,11 +491,9 @@ operator + (a,b:TArReal):TArReal;inline;
 //» получить разницу во времени этих дат в (мили)секундах
 operator - (const a,b:TSGDateTime):TSGDateTime;inline;
 
-//«агружает библиотеку с именем AName
-function LoadLibrary(AName: PChar): TSGLibHandle;
-
-//¬озвращает указатель на процедуру в библиотеке Lib с названием VPChar
-function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
+function LoadLibrary(const AName : PChar): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function UnloadLibrary(const VLib : TSGLibHandle) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function GetProcAddress(const Lib : TSGLibHandle; const VPChar:PChar):Pointer;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Result := Trunc(T)+1
 function SGTruncUp(const T : Real):LongInt;inline;
@@ -738,7 +735,19 @@ procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline
 
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+begin
+SetLength(Result, argc - 1);
+if Length(Result) > 0 then
+	for i := 0 to High(Result) do
+		Result[i] := SGPCharToString(argv[i+1]);
+end;
 
 function SGValFloat(const Text : TSGString = '0'):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 var
@@ -2660,19 +2669,37 @@ begin
 Result:=Trunc(t)+1;
 end;
 
-destructor TSGLibraryClass.Destroy;
+destructor TSGLibrary.Destroy;
 begin
-FreeLibrary(FSaGeLibrary);
+UnloadLibrary(FLibrary);
 inherited;
 end;
 
-constructor TSGLibraryClass.Create;
+constructor TSGLibrary.Create(const VLibraryName : TSGString);
+var
+	p : PChar;
 begin
-inherited;
-FSaGeLibrary:=LoadLibrary(SGLibraryNameBegin+'SaGeLib'+SGLibraryNameEnd);
+inherited Create();
+p := SGStringToPChar(VLibraryName);
+FLibrary := LoadLibrary(p);
+FreeMem(p);
 end;
 
-function GetProcAddress(const Lib:TSGLibrary;const VPChar:PChar):Pointer;
+function TSGLibrary.GetProcedureAddress(const VProcedureName : TSGString) : Pointer;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	p : PChar;
+begin
+p := SGStringToPChar(VProcedureName);
+Result := GetProcAddress(FLibrary, p);
+FreeMem(p);
+end;
+
+function UnloadLibrary(const VLib : TSGLibHandle) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := dynlibs.UnloadLibrary(VLib);
+end;
+
+function GetProcAddress(const Lib:TSGLibHandle; const VPChar:PChar):Pointer;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 {$IFDEF WINDOWS}
 	Result:=Windows.GetProcAddress(Lib,VPChar);
@@ -2681,7 +2708,7 @@ begin
 	{$ENDIF}
 end;
 
-function LoadLibrary(AName: PChar): TSGLibHandle;
+function LoadLibrary(const AName: PChar) : TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=
 	{$ifdef UNIX} 

@@ -6,9 +6,12 @@ interface
 
 uses 
 	 SaGeBase
-	,SaGeBased;
+	,SaGeBased
+	{$IFDEF MSWINDOWS}
+		,multimon
+		{$ENDIF}
+	;
 
-// Это включаются в текст программы константы,типа SGR_TRIANGLES
 {$INCLUDE Includes\SaGeRenderConstants.inc}
 
 const
@@ -19,17 +22,15 @@ type
 	
 	TSGMatrixMode   = TSGLongWord;
 	TSGPrimtiveType = TSGLongWord;
-	// Это те виды рендеров, которые есть, точнее идентификаторы
+	
 	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX,SGRenderGLES);
 	TSGRender       = class;
-	// Тип класса рендера
+	
 	TSGRenderClass  = class of TSGRender;
-	// Класс рендера
+	
 	TSGRender = class(TSGClass)
 			public
-		// Конструктор
 		constructor Create();override;
-		// Деструктор
 		destructor Destroy();override;
 		function Width():TSGLongWord;inline;
 		function Height():TSGLongWord;inline;
@@ -176,7 +177,29 @@ type
 		property Window : TSGClass read FWindow write FWindow;
 		end;
 
+procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$IFDEF MSWINDOWS}
+var
+	lpDisplayDevice : TDisplayDevice;
+	dwFlags : TSGLongWord;
+	cc : TSGLongWord;
+{$ENDIF}
+begin
+{$IFDEF MSWINDOWS}
+lpDisplayDevice.cb := sizeof(lpDisplayDevice);
+dwFlags := 0;
+cc := 0;
+while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
+	begin
+	WriteLn(cc,' - ',lpDisplayDevice.DeviceString,' - ',lpDisplayDevice.DeviceName);
+	cc := cc + 1;
+	end;
+{$ENDIF}
+end;
 
 function TSGRender.SupporedDepthTextures():TSGBoolean;
 begin

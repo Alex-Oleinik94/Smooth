@@ -1,5 +1,6 @@
 {$INCLUDE SrcUnits\Includes\SaGe.inc}
 {$IF not defined(MOBILE)}
+	{$DEFINE WITHSAGELIBRARY}
 	{$IF not defined(DARWIN)}
 		{$IF defined(RELEASE)}
 			{$APPTYPE GUI}
@@ -25,7 +26,12 @@ uses
 	
 	,SaGeResourseManager
 	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
-	,SaGeConsoleTools
+	
+	{$IF defined(WITHSAGELIBRARY)}
+		,SaGeLibrary
+	{$ELSE}
+		,SaGeConsoleTools
+	{$ENDIF}
 	;
 
 {$IF defined(ANDROID)}
@@ -42,6 +48,10 @@ uses
 	end.
 {$ELSE}
 	begin
-	SGStandartCallConcoleCaller();
+	{$IF defined(WITHSAGELIBRARY)}
+		SGStandartLabraryCallConcoleCaller();
+	{$ELSE}
+		SGStandartCallConcoleCaller();
+	{$ENDIF}
 	end.
 	{$ENDIF}

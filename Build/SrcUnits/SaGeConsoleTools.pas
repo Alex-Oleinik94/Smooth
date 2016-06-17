@@ -76,7 +76,6 @@ const
 	SGErrorString = 'Error of parameters, use ';
 
 type
-	TSGConcoleCallerParams = TSGArString;
 	TSGConcoleCallerProcedure = procedure (const VParams : TSGConcoleCallerParams = nil);
 	TSGConsoleCaller = class
 			public
@@ -95,7 +94,6 @@ type
 		end;
 
 procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure FPCTCTransliater();
 procedure GoogleReNameCache();
@@ -105,6 +103,7 @@ procedure DllScan();
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
@@ -577,14 +576,20 @@ else
 	end;
 end;
 
-function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
+	Params : TSGConcoleCallerParams;
 	i : TSGLongWord;
 begin
-SetLength(Result, argc - 1);
-if Length(Result) > 0 then
-	for i := 0 to High(Result) do
-		Result[i] := SGPCharToString(argv[i+1]);
+Params := SGSystemParamsToConcoleCallerParams();
+if Params <> nil then
+	if Length(Params) <> 0 then
+		begin
+		for i := 0 to High(Params) do
+			begin
+			WriteLn(i+1,' - "',Params[i],'"');
+			end;
+		end;
 end;
 
 procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

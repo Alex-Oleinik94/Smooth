@@ -1,10 +1,14 @@
 {$MODE OBJFPC}
-library SaGeLib;
+library SaGe;
 uses
 	crt
 	,SaGeBase
 	,SaGeFractals
 	,SaGeImages
+	,SaGeConsoleTools
+	
+	,SaGeResourseManager
+	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
 	;
 
 function TSGImage_Create:TSGImage;cdecl;
@@ -43,6 +47,11 @@ begin
 Result:=Image.Texture;
 end;
 
+procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);cdecl;
+begin
+SaGeConsoleTools.SGConcoleCaller(VParams);
+end;
+
 exports
 	TSGImage_Create index 1,
 	TSGImage_SetWay index 2,
@@ -50,7 +59,18 @@ exports
 	TSGImage_Loading index 4,
 	TSGImage_BindTexture index 5,
 	TSGImage_DisableTexture index 6,
-	TSGImage_Texture index 7
+	TSGImage_Texture index 7,
+	SGConcoleCaller
 	;
+
+initialization
+begin
+
+end;
+
+finalization
+begin
+
+end;
 
 end.
