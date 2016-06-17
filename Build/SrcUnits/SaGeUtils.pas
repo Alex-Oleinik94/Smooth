@@ -1253,35 +1253,40 @@ if AutoYShift then
 Otstup.Round;
 while (s[i]<>#0) and (not ToExit) do
 	begin
-	ThisSimbolWidth:=FSimbolParams[s[i]].Width;
-	if Otstup.x+FSimbolParams[s[i]].Width>Abs(Vertex2.x-Vertex1.x) then
+	if s[i] <> '	' then
 		begin
-		ToExit:=True;
-		ThisSimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
-		end;
-	Render.BeginScene(SGR_QUADS);
-	Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
-	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
-	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
-		1-(Self.FSimbolParams[s[i]].y/Self.Height));
-	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
-	Render.TexCoord2f(
-		(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
-		1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
-	Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
-	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	Render.EndScene();
-	Otstup.x+=FSimbolParams[s[i]].Width;
+		ThisSimbolWidth := FSimbolParams[s[i]].Width;
+		if Otstup.x+FSimbolParams[s[i]].Width>Abs(Vertex2.x-Vertex1.x) then
+			begin
+			ToExit:=True;
+			ThisSimbolWidth:=Trunc(Abs(Vertex2.x-Vertex1.x)-Otstup.x);
+			end;
+		Render.BeginScene(SGR_QUADS);
+		Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-(Self.FSimbolParams[s[i]].y/Self.Height));
+		Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+Vertex1.y);
+		Render.TexCoord2f(
+			(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
+			1-(Self.FSimbolParams[s[i]].y/Self.Height));
+		Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+Vertex1.y);
+		Render.TexCoord2f(
+			(Self.FSimbolParams[s[i]].x+ThisSimbolWidth+DXShift)/Self.Width,
+			1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
+		Render.Vertex2f(Otstup.x+ThisSimbolWidth+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+		Render.TexCoord2f((Self.FSimbolParams[s[i]].x+DXShift)/Self.Width,1-((Self.FSimbolParams[s[i]].y+FFontHeight)/Self.Height));
+		Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+		Render.EndScene();
+		Otstup.x+=FSimbolParams[s[i]].Width;
+		end
+	else
+		Otstup.x+=FSimbolParams[' '].Width * 4;
 	i+=1;
 	end;
 DisableTexture;
 end;
 
-function TSGFont.StringLength(const S:PChar ):LongWord;overload;
+function TSGFont.StringLength(const S : PChar) : TSGLongWord;overload;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 if S = nil then
 	begin
@@ -1292,19 +1297,25 @@ Result:=0;
 i:=0;
 while s[i]<>#0 do
 	begin
-	Result+=FSimbolParams[s[i]].Width;
+	if s[i] = '	' then
+		Result += FSimbolParams[' '].Width * 4
+	else
+		Result+=FSimbolParams[s[i]].Width;
 	i+=1;
 	end;
 end;
 
-function TSGFont.StringLength(const S:string ):LongWord;overload;
+function TSGFont.StringLength(const S : TSGString) : TSGLongWord;overload;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
 Result:=0;
 for i:=1 to Length(S) do
 	begin
-	Result+=FSimbolParams[s[i]].Width;
+	if s[i] = '	' then
+		Result += FSimbolParams[' '].Width * 4
+	else
+		Result += FSimbolParams[s[i]].Width;
 	end;
 end;
 

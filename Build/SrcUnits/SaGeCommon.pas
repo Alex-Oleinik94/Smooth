@@ -1342,7 +1342,7 @@ begin
 if WithQuad then
 	begin
 	(QuadColor).Color(VRender);
-	VRender.BeginScene(SGR_QUADS);//glBegin(GL_QUADS);
+	VRender.BeginScene(SGR_QUADS);
 	for i:=0 to Interval-1 do
 		begin
 		ArVertex[Interval-i].Vertex(VRender);
@@ -1361,15 +1361,15 @@ if WithQuad then
 		ArVertex[(Interval+1)*4-2-i].Vertex(VRender);
 		ArVertex[(Interval+1)*4-1-i].Vertex(VRender);
 		end;
-	VRender.EndScene();//glEnd();
+	VRender.EndScene();
 	end;
 if WithLines then
 	begin
 	LinesColor.Color(VRender);
-	VRender.BeginScene(SGR_LINE_LOOP);//glBegin(GL_LINE_LOOP);
+	VRender.BeginScene(SGR_LINE_LOOP);
 	for i:=Low(ArVertex) to High(ArVertex) do
 		ArVertex[i].Vertex(VRender);
-	VRender.EndScene();//glEnd();
+	VRender.EndScene();
 	end;
 end;
 

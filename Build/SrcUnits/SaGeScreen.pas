@@ -231,7 +231,7 @@ type
 		end;
 	
 	PSGForm = ^ TSGForm;
-	TSGForm=class(TSGComponent)
+	TSGForm = class(TSGComponent)
 			public
 		constructor Create;
 		destructor Destroy;override;
