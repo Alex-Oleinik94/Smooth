@@ -41,4 +41,6 @@ Examples/*.so
 pp4
 Binaries/Gas Diffusion Saves
 Apache_Ant
-Binaries/Main.dSYM
+Binaries/SaGe*.dll
+Binaries/libSaGe*.so
+

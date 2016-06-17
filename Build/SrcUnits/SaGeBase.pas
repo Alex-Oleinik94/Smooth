@@ -726,15 +726,11 @@ function SGConvertAnsiToASCII(const s:TSGString):TSGString;
 function SGDownCaseString(const str:TSGString):TSGString;
 function DownCase(const c:TSGChar):TSGChar;
 
-procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptions = []; const ViewOutput : Boolean = false);
-
-function Iff(const b : TSGBoolean;const s1,s2:TSGString):TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function Iff(const b : TSGBoolean;const s1,s2:TSGFloat):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
+procedure SGRunComand(const Comand : String; const ViewOutput : Boolean = True);
+function Iff(const b : TSGBoolean; const s1, s2 : TSGString) : TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function Iff(const b : TSGBoolean; const s1, s2 : TSGFloat): TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
@@ -838,26 +834,53 @@ else
 	Result := s2;
 end;
 
-procedure SGRunComand(const Comand : String;const ProcessOptions : TProcessOptions = []; const ViewOutput : Boolean = false);
+procedure SGRunComand(const Comand : String; const ViewOutput : Boolean = True);
 var
 	AProcess: TProcess;
+
+procedure WriteFromStringList();
+var
 	AStringList: TStringList;
 	i : LongInt;
 begin
+AProcess.WaitOnExit();
+AStringList := TStringList.Create;
+AStringList.LoadFromStream(AProcess.Output);
+for i := 0 to AStringList.Count - 1 do
+	begin
+	WriteLn(AStringList[i]);
+	end;
+AStringList.Free;
+end;
+
+procedure WriteFromBytes();
+var
+	Error : TSGBoolean;
+begin
+Error := False;
+while AProcess.Active or (not Error) do
+	begin
+	Error := False;
+	try
+	Write(Char(AProcess.Output.ReadByte));
+	except
+	Error := True;
+	end;
+	if Error then
+		Sleep(10);
+	end;
+end;
+
+begin
 AProcess := TProcess.Create(nil);
 AProcess.CommandLine := Comand;
-AProcess.Options := AProcess.Options + ProcessOptions;
+AProcess.Options := AProcess.Options + [poUsePipes, poStderrToOutPut];
 AProcess.Execute();
 
-if (poUsePipes in ProcessOptions) and ViewOutput then
+if (poUsePipes in AProcess.Options) and ViewOutput then
 	begin
-	AStringList := TStringList.Create;
-	AStringList.LoadFromStream(AProcess.Output);
-	for i := 0 to AStringList.Count - 1 do
-		begin
-		WriteLn(AStringList[i]);
-		end;
-	AStringList.Free;
+	//WriteFromStringList();
+	WriteFromBytes();
 	end;
 
 AProcess.Free(); 
