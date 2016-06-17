@@ -1423,7 +1423,10 @@ var
 begin
 CWidth:=LongWord(FWindow.Get('WIDTH'));
 CHeight:=LongWord(FWindow.Get('HEIGHT'));
-Viewport(0, 0, CWidth, CHeight);
+if TSGBoolean(FWindow.Get('FULLSCREAN')) then
+	Viewport(0, 0, CWidth, CHeight)
+else
+	Viewport(0, 0, CWidth, CHeight - TSGMaxEnum(FWindow.Get('WINDOW CAPTION HEIGHT')));
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then

@@ -13,8 +13,6 @@ uses
 	,SaGeRender
 	,commdlg
 	;
-//Где купить пиво? Ответ: в магазине. (Специально для макса)
-// Там же можно купить и закусь (Макс без этого просто не может походу пить пиво)
 
 type
 	WinAPIParam = 
@@ -160,12 +158,16 @@ end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;
 begin
-if What='WINDOW HANDLE' then
-	Result:=Pointer(hWindow)
-else if What='DESKTOP WINDOW HANDLE' then
-	Result:=Pointer(dcWindow)
+if What = 'WINDOW HANDLE' then
+	Result := Pointer(hWindow)
+else if What = 'DESKTOP WINDOW HANDLE' then
+	Result := Pointer(dcWindow)
+else if What = 'WINDOW CAPTION HEIGHT' then
+	Result := Pointer(GetSystemMetrics(SM_CYSIZE))
+else if What = 'FULLSCREAN' then
+	Result := Pointer(byte(Fullscreen))
 else
-	Result:=Inherited Get(What);
+	Result := inherited Get(What);
 end;
 
 function TSGContextWinAPI.KeysPressed(const  Index : integer ) : Boolean;overload;
