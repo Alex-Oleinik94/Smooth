@@ -732,8 +732,43 @@ function Iff(const b : TSGBoolean; const s1, s2 : TSGFloat): TSGFloat;overload;{
 procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := argv[0];
+end;
+
+function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function LastCharacter(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := '';
+if (S <> '') and (S[Length(S)] = ' ') then
+	Result := ' ';
+end;
+
+var
+	i : TSGLongWord;
+begin
+Result := '';
+if Length(S) > 0 then
+	for i := 1 to Length(S) do
+		begin
+		if S[i] = ' ' then
+			begin
+			if LastCharacter(Result) <> ' ' then
+				Result += S[i];
+			end
+		else
+			begin
+			Result += S[i];
+			end;
+		end;
+end;
 
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

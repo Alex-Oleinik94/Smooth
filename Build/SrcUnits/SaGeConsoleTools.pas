@@ -58,6 +58,7 @@ uses
 	,SaGeNet
 	,SaGeResourseManager
 	,SaGeVersion
+	,SaGeMakefileReader
 	
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
@@ -118,6 +119,7 @@ procedure SGConsoleExtractFiles(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -165,9 +167,24 @@ ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all Files in th
 ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units');
 ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
 ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
+ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
 ConsoleCaller.AddComand(TSGConcoleCallerProcedure(@SGConsoleShowAllApplications), ['GUI',''], 'Shows all scenes in this application');
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();
+end;
+
+procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
+var
+	Make : TSGMakefileReader;
+	Param : TSGString;
+begin
+Make := TSGMakefileReader.Create('./Makefile');
+if (VParams = nil) or (Length(VParams) = 0) then
+	Param := ''
+else
+	Param := VParams[0];
+Make.Execute(Param);
+Make.Destroy();
 end;
 
 procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcoleCallerParams = nil);
