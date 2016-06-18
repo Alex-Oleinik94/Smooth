@@ -182,19 +182,32 @@ procedure TSGNTextInset.FromDraw();
 var
 	i, ii : TSGLongWord;
 	Vertex : TSGVertex3f;
+	MaxLinesShift : TSGLongWord;
 begin
 if FOwner.ActiveInset() = Self then
 	begin
+	MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
 	ii := Trunc(FBegin);
 	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	for i := ii to Trunc(FEnd) do
 		begin
 		if i > CountLines() then
 			break;
+		Render.Color3f(0.9,0.9,0.9);
+		Font.DrawFontFromTwoVertex2f(
+			SGStr(i+1),
+			SGVertex2fImport(
+				Vertex.x,
+				Vertex.y + (i - ii) * Font.FontHeight),
+			SGVertex2fImport(
+				Vertex.x + MaxLinesShift,
+				Vertex.y + (i - ii + 1) * Font.FontHeight),
+			False);
+		Render.Color3f(1,1,1);
 		Font.DrawFontFromTwoVertex2f(
 			FFile[i],
 			SGVertex2fImport(
-				Vertex.x + 0,
+				Vertex.x + MaxLinesShift,
 				Vertex.y + (i - ii) * Font.FontHeight),
 			SGVertex2fImport(
 				Vertex.x + Width,
@@ -403,6 +416,7 @@ if CountInsets() >0 then
 	for i := 0 to CountInsets() - 1 do
 		begin
 		FInsets[i].SetBounds(0, FFont.FontHeight + 10, Width, Height - (FFont.FontHeight + 10));
+		FInsets[i].BoundsToNeedBounds();
 		end;
 inherited;
 end;
