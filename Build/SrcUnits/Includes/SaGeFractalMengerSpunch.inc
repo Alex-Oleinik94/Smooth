@@ -144,13 +144,12 @@ FFont1:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FFont1.SetContext(Context);
 FFont1.Loading();
 
-InitProjectionComboBox(Context.Width-250-90-125-155,5,150,30,[SGAnchRight],true);
-InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
+InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SGAnchRight]);
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 
 FComboBox2:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBox2);
-SGScreen.LastChild.SetBounds(Context.Width-250,40,230,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250,40,230,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Нормали и Цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Только Нормали');
@@ -163,8 +162,7 @@ SGScreen.LastChild.Visible:=True;
 
 FComboBox1:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox1);
-SGScreen.LastChild.SetBounds(Context.Width-250,5,230,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250,5,230,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Звездочка');
 SGScreen.LastChild.AsComboBox.CreateItem('Губка Менгера');
@@ -177,8 +175,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthPlus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthPlus);
-SGScreen.LastChild.SetBounds(Context.Width-250-30,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250-30,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -187,8 +184,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepth:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepth);
-SGScreen.LastChild.SetBounds(Context.Width-250-60,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250-60,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -196,8 +192,7 @@ SGScreen.LastChild.Visible:=True;
 
 FButtonDepthMinus:=TSGButton.Create();
 SGScreen.CreateChild(FButtonDepthMinus);
-SGScreen.LastChild.SetBounds(Context.Width-250-90,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250-90,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
 FButtonDepthMinus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChange);
@@ -206,8 +201,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLabelDepthCaption:=TSGLabel.Create();
 SGScreen.CreateChild(FLabelDepthCaption);
-SGScreen.LastChild.SetBounds(Context.Width-250-90-125,5,115,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-250-90-125,5,115,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
 SGScreen.LastChild.FUserPointer1:=Self;

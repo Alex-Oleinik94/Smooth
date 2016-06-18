@@ -193,6 +193,7 @@ SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.UserPointer:=Self;
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.Caption := VCaption;
+SGScreen.LastChild.Anchors:=[SGAnchRight];
 (SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
 end;
 
@@ -227,7 +228,7 @@ if Render.SupporedShaders() then
 	FFont.ToTexture();
 	
 	FFPS := TSGFPSViewer.Create(Context);
-	FFPS.X := Context.Width div 2;
+	FFPS.X := Render.Width div 2;
 	FFPS.Y := 5;
 	
 	FCamera:=TSGCamera.Create();
@@ -290,22 +291,23 @@ if Render.SupporedShaders() then
 		FreeMem(TempPChar)
 		end;
 	
-	CreateButton(FP1Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
-	CreateButton(FM1Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
-	CreateButton(FP5Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
-	CreateButton(FM5Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
-	CreateButton(FP15Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
-	CreateButton(FM15Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
-	CreateButton(FP100Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
-	CreateButton(FM100Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	CreateButton(FP1Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
+	CreateButton(FM1Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
+	CreateButton(FP5Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
+	CreateButton(FM5Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
+	CreateButton(FP15Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
+	CreateButton(FM15Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
+	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
+	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
 	FCountLabel := TSGLabel.Create();
 	SGScreen.CreateChild(FCountLabel);
 	SGScreen.LastChild.Font := FFont;
 	SGScreen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
-	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	SGScreen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.Visible := True;
+	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	end;
 end;
 
@@ -421,12 +423,12 @@ else
 	Render.Color3f(1,0,0);
 	VStringLength := SGScreen.Font.StringLength(WarningString1);
 	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height - 20) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 00) div 2));
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
 	VStringLength := SGScreen.Font.StringLength(WarningString2);
 	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;
 end;
 
@@ -466,7 +468,7 @@ if (Context.KeysPressed(' ')) then
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
 if (Context.CursorInCenter) then
-	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}

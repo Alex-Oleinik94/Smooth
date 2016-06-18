@@ -467,21 +467,6 @@ var
 	Nan:real;
 	//Бесконечное значение
 	Inf:real;
-type
-	//Тип процедурок для SaGeScreen
-	SGScreenProcedureWC =  procedure ( Context : Pointer ) ;
-var
-	//Это указатели на процедуры SaGeScreen, которые SaGeScreen
-	//Присваивает при инициализации. Эти процедуры в дальнейшем 
-	//Использует SaGeContext и SaGeRender для отрисовки,... окон
-	SGScreenPaintProcedure           : SGScreenProcedureWC = nil;
-	SGScreenForReSizeScreenProcedure : SGScreenProcedureWC = nil;
-	SGScreenLoadProcedure            : SGScreenProcedureWC = nil;
-
-//Тут задаются преведущие переменные
-procedure SGSetScreenProcedure(const p:Pointer = nil);
-procedure SCSetScreenScreenBounds(const p:Pointer = nil);
-procedure SGSetScreenLoadProcedure(p:Pointer);
 
 //Сливает массивы Real-ов
 operator + (a,b:TArReal):TArReal;inline;
@@ -1009,22 +994,6 @@ if comand[1]='-' then
 	end
 else
 	Result:=Comand;
-end;
-
-procedure SGSetScreenLoadProcedure(p:Pointer);
-begin
-SGScreenLoadProcedure:=SGScreenProcedureWC(p);
-end;
-
-
-procedure SGSetScreenProcedure(const p:Pointer = nil);
-begin
-SGScreenPaintProcedure:=SGScreenProcedureWC(p);
-end;
-
-procedure SCSetScreenScreenBounds(const p:Pointer = nil);
-begin
-SGScreenForReSizeScreenProcedure:=SGScreenProcedureWC(p);
 end;
 
 procedure SGQuickRePlaceLongInt(var LongInt1,LongInt2:LongInt);inline;

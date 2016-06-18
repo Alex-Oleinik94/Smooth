@@ -202,10 +202,11 @@ FFont.ToTexture();
 
 FBackButton := TSGButton.Create();
 SGScreen.CreateChild(FBackButton);
-FBackButton.SetBounds(Context.Width - 230,5 ,220,FFont.FontHeight+4);
+FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
 FBackButton.BoundsToNeedBounds();
 FBackButton.Caption := 'Назад';
 FBackButton.Visible:=False;
+FBackButton.Anchors:=[SGAnchRight];
 FBackButton.Active:=True;
 FBackButton.FUserPointer1:=Self;
 FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);

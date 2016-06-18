@@ -70,8 +70,6 @@ type
 		procedure Messages();virtual;
 		// Вывод на экран буфера
 		procedure SwapBuffers();virtual;abstract;
-		// Смещение с верху (если сверху по какой то причине не видно нифига)
-		function TopShift():LongWord;virtual;
 		// Возвращает координаты мыши в данный момент
 		function GetCursorPosition():TSGPoint2f;virtual;abstract;
 		// Устанавливает координаты мышки в данный момент
@@ -90,13 +88,12 @@ type
 			public
 		// Вызывается после того, как ширина или высота окна была изменена
 		procedure Resize();virtual;
-		// Смещение координат мыши, получаемых из системы до координат над чем она остановилась в окне
-		function MouseShift():TSGPoint2f;virtual;
 		// Возвращает, возвращает ли функция GetCursorPosition() вместе с координатами мыши и 
 		// координаты верзхнего левого угла как сумму этих параметров
 		class function RectInCoords:Boolean;virtual;
 		// Нормальное закрытие контекста
 		procedure Close();virtual;
+		function ShiftClientArea() : TSGPoint2f; virtual;
 			protected
 		// Вызывается при изменении режима окна (fullscreen or not fullscreen)
 		procedure InitFullscreen(const b:Boolean);virtual;
@@ -169,27 +166,27 @@ type
 		// Возвращает, зажата ли клавиша
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;virtual;overload;
 		// Возвращает, зажата ли клавиша
-		function KeysPressed(const  Index : TSGChar ) : Boolean;inline;overload;
+		function KeysPressed(const  Index : TSGChar ) : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		// Возвращает, нажата ли любая клавиша
-		function KeyPressed():TSGBoolean;inline;overload;
+		function KeyPressed():TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		// Возвращает тип нажатия клавижи (либо ее отпустили в данный момент, либо нажали)
-		function KeyPressedType():TSGCursorButtonType;inline;overload;
+		function KeyPressedType():TSGCursorButtonType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		// Возвращает клавишу, нажатую в данный момент
-		function KeyPressedChar():TSGChar;inline;overload;
+		function KeyPressedChar():TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		// Возвращает клавишу, нажатую в данный момент
-		function KeyPressedByte():TSGLongWord;inline;overload;
+		function KeyPressedByte():TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		// Эта процедура не для смертных
-		procedure ClearKeys();inline;
+		procedure ClearKeys();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвращает что за кнопка мышки былоа нажата в данный момент
-		function CursorKeyPressed():TSGCursorButtons;overload;inline;
+		function CursorKeyPressed():TSGCursorButtons;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвращает тип нажатия кнопки мышки в данный момент
-		function CursorKeyPressedType():TSGCursorButtonType;overload;inline;
+		function CursorKeyPressedType():TSGCursorButtonType;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвращает, зажата ли определененая параметром Index клавиша мышки в даннный могмент времени
-		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;overload;inline;
+		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвраащет прокрутку колесика мышки
-		function CursorWheel():TSGCursorWheel;overload;inline;
+		function CursorWheel():TSGCursorWheel;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвращает позицию курсора
-		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;inline;
+		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		// Устанавливает указаную операцию с указанной клавишей
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;overload;
@@ -231,11 +228,12 @@ type
 		FContext:PSGContext;
 			public
 		// С помощью этой процедуры можно установить контекст в этом классе (если он был создан без него)
-		procedure SetContext(const VContext:TSGContext);inline;
+		procedure SetContext(const VContext:TSGContext);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		// Возвращает контекст
-		function GetContext():TSGContext;inline;
+		function GetContext() : TSGContext;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		//Возвращает рендер
-		function GetRender():TSGRender;inline;
+		function GetRender() : TSGRender;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ContextAssigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		// Возвращает контекст
 		property Context:TSGContext read GetContext write SetContext;
@@ -266,6 +264,9 @@ type
 
 implementation
 
+uses
+	SaGeScreen;
+
 {$DEFINE SGREADIMPLEMENTATION}
 {$IFDEF GLUT}
 	{$I Includes\SaGeContextGLUT.inc}
@@ -278,16 +279,15 @@ implementation
 constructor TSGContextObject.Create(const VContext:TSGContext);overload;
 begin
 Create();
-FContext:=nil;
 SetContext(VContext);
 end;
 
-function TSGContextObject.GetRender():TSGRender;inline;
+function TSGContextObject.GetRender():TSGRender;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=FContext^.Render;
 end;
 
-procedure TSGContextObject.SetContext(const VContext:TSGContext);inline;
+procedure TSGContextObject.SetContext(const VContext:TSGContext);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if VContext<>nil then
 	FContext:=VContext.SelfPoint
@@ -295,9 +295,17 @@ else
 	FContext:=nil;
 end;
 
-function TSGContextObject.GetContext():TSGContext;inline;
+function TSGContextObject.ContextAssigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=FContext^;
+Result := False;
+if (FContext <> nil) then
+	if (FContext^ <> nil) then
+		Result := True;
+end;
+
+function TSGContextObject.GetContext():TSGContext;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := FContext^;
 end;
 
 constructor TSGContextObject.Create();
@@ -378,7 +386,7 @@ FFullscreen:=b;
 Resize();
 end;
 
-function TSGContext.KeyPressedType():TSGCursorButtonType;inline;overload;
+function TSGContext.KeyPressedType():TSGCursorButtonType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=FKeyPressedType;
 end;
@@ -403,29 +411,19 @@ begin
 FActive:=False;
 end;
 
+function TSGContext.ShiftClientArea() : TSGPoint2f; 
+begin
+Result.Import(0,0);
+end;
+
 class function TSGContext.RectInCoords():Boolean;
 begin
 Result:=True;
 end;
 
-function TSGContext.MouseShift():TSGPoint2f;
-var
-	VA,VB:LongInt;
-begin
-if Render=nil then
-	Result.Import(0,0)
-else
-	begin
-	Render.MouseShift(VA,VB,FFullscreen);
-	Result.x:=VA;
-	Result.y:=VB;
-	end;
-end;
-
 procedure TSGContext.Resize();
 begin
-if SGScreenForReSizeScreenProcedure<>nil then
-	SGScreenForReSizeScreenProcedure(Self);
+SGScreen.Resize();
 end;
 
 function TSGContext.GetWidth():LongWord;
@@ -443,19 +441,22 @@ begin
 FHeight:=NewHeight;
 end;
 
-function TSGContext.CursorWheel():TSGCursorWheel;overload;inline;
+function TSGContext.CursorWheel():TSGCursorWheel;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=FCursorWheel;
 end;
 
 procedure TSGContext.SetCursorInCenter(const NP : TSGBoolean);
+var
+	Point : TSGPoint2f;
 begin
-FCursorInCenter:=NP;
+FCursorInCenter := NP;
 if (@SetCursorPosition<>nil) and NP then
 	begin
-	SetCursorPosition(SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5))-MouseShift());
-	FCursorPosition[SGLastCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
-	FCursorPosition[SGNowCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
+	SetCursorPosition(Point + ShiftClientArea());
+	FCursorPosition[SGLastCursorPosition] := Point;
+	FCursorPosition[SGNowCursorPosition] := Point;
 	FCursorPosition[SGDeferenseCursorPosition]:=0;
 	end;
 end;
@@ -466,16 +467,17 @@ var
 begin
 Point:=GetCursorPosition();
 if RectInCoords() then
-	Point-=GetWindowRect();
-Point+=MouseShift();
+	Point -= GetWindowRect();
+Point -= ShiftClientArea();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
 FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]-FCursorPosition[SGLastCursorPosition];
 if CursorInCenter and (@SetCursorPosition<>nil) then
 	begin
-	SetCursorPosition(SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5))-MouseShift());
-	FCursorPosition[SGLastCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
-	FCursorPosition[SGNowCursorPosition]:=SGPoint2fImport(Trunc(Width*0.5),Trunc(Height*0.5));
+	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
+	SetCursorPosition(Point + ShiftClientArea());
+	FCursorPosition[SGLastCursorPosition] := Point;
+	FCursorPosition[SGNowCursorPosition] := Point;
 	end;
 
 if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyPressedType=SGDownKey)) or
@@ -486,30 +488,22 @@ if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyP
 	end;
 end;
 
-function TSGContext.TopShift():LongWord;
-begin
-if Render = nil then
-	Result:=0
-else
-	Result:=Render.TopShift(FFullscreen);
-end;
-
-function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;inline;
+function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=FCursorPosition[Index];
 end;
 
-function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;inline;
+function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=FCursorKeyPressed;
 end;
 
-function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;inline;
+function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result:=FCursorKeyPressedType;
 end;
 
-function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;overload;inline;
+function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Index=SGNoCursorButton then
 	Result:=False
@@ -549,7 +543,7 @@ FFullscreenData.FNotFullscreenWidth:=0;
 FRender:=nil;
 end;
 
-procedure TSGContext.ClearKeys();inline;
+procedure TSGContext.ClearKeys();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FCursorKeyPressed:=SGNoCursorButton;
 FKeyPressed:=0;
@@ -571,22 +565,22 @@ begin
 Result:=FKeysPressed[Index];
 end;
 
-function TSGContext.KeysPressed(const  Index : char ) : Boolean;inline;overload;
+function TSGContext.KeysPressed(const  Index : char ) : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=KeysPressed(LongWord(Index));
 end;
 
-function TSGContext.KeyPressed:Boolean;inline;overload;
+function TSGContext.KeyPressed:Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=FKeyPressed<>0;
 end;
 
-function TSGContext.KeyPressedChar:Char;inline;overload;
+function TSGContext.KeyPressedChar:Char;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=Char(FKeyPressed);
 end;
 
-function TSGContext.KeyPressedByte:LongWord;inline;overload;
+function TSGContext.KeyPressedByte:LongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=FKeyPressed;
 end;

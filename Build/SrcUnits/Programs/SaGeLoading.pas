@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 unit SaGeLoading;
 interface
 uses
@@ -176,19 +176,19 @@ VVCosAngle:=cos(VProjectionAngle);
 VVCosAngle2:=cos(Pi*FProjectionAngle);
 
 Render.InitOrtho2d(
-	-Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
-	Context.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
-	Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
-	-Context.Height/2+(VVCosAngle+VVCosAngle2)*VRadius);
+	-Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
+	Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	-Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius);
 FFont.DrawFontFromTwoVertex2f(SGStrReal(100*FProgress,0)+'%',
 	SGVertex2fImport(-35,-FFont.FontHeight/2),
 	SGVertex2fImport(35,FFont.FontHeight/2));
 
 Render.InitOrtho2d(
-	-Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
-	-Context.Height/2-(VVCosAngle+VVCosAngle2)*VRadius,
-	Context.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
-	Context.Height/2-(VVCosAngle+VVCosAngle2)*VRadius);
+	-Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	-Render.Height/2-(VVCosAngle+VVCosAngle2)*VRadius,
+	Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	Render.Height/2-(VVCosAngle+VVCosAngle2)*VRadius);
 Render.Rotatef(FAngle*FAlpha,0,0,1);
 for i:=0 to FCountLines-1 do
 	begin

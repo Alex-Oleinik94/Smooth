@@ -176,17 +176,17 @@ with TSGGenAlg(Button.FUserPointer1) do
 	Max:=FResultFP+Abs(b-a)/2;
 	Min:=FResultFP-Abs(b-a)/2;
 	FG.View.Import(
-		a-Abs(b-a)/2*(1/(Context.Height/Context.Width)),
+		a-Abs(b-a)/2*(1/(Render.Height/Render.Width)),
 		Min-Abs(b-a)/2,
-		b+Abs(b-a)/2*(1/(Context.Height/Context.Width)),
+		b+Abs(b-a)/2*(1/(Render.Height/Render.Width)),
 		Max+Abs(b-a)/2);
 	FG.Construct(True);
 	
 	FLPoint.Caption:=SGStringToPChar('('+SGStrReal(FFindPoint,5)+','+SGStrReal(FResultFP,5)+')');
 	FNB.Visible:=True;
 	FLPoint.SetBounds(
-		Context.Width-5-FLPoint.Font.StringLength(FLPoint.Caption),
-		Context.Height-25,
+		Render.Width-5-FLPoint.Font.StringLength(FLPoint.Caption),
+		Render.Height-25,
 		FLPoint.Font.StringLength(FLPoint.Caption),
 		21);
 	FLPoint.Visible:=True;
@@ -209,10 +209,10 @@ if FG<>nil then
 	with FG do
 		begin
 		AbsX:=Abs(View.x1-View.x2);
-		Render.Vertex2f(Round((a-View.x1)/absx*Context.Width),0);
-		Render.Vertex2f(Round((a-View.x1)/absx*Context.Width),Context.Height);
-		Render.Vertex2f(Round((b-View.x1)/absx*Context.Width),Context.Height);
-		Render.Vertex2f(Round((b-View.x1)/absx*Context.Width),0);
+		Render.Vertex2f(Round((a-View.x1)/absx*Render.Width),0);
+		Render.Vertex2f(Round((a-View.x1)/absx*Render.Width),Render.Height);
+		Render.Vertex2f(Round((b-View.x1)/absx*Render.Width),Render.Height);
+		Render.Vertex2f(Round((b-View.x1)/absx*Render.Width),0);
 		end;
 	Render.EndScene();
 	FG.Draw;
@@ -248,17 +248,15 @@ b:=0;
 
 FNB:=TSGButton.Create;
 SGScreen.CreateChild(FNB);
-SGScreen.LastChild.SetBounds(Context.Width-90,1 ,80,15);
+SGScreen.LastChild.SetBounds(Render.Width-90,1 ,80,15);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Заного';
 SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.AutoTopShift:=True;
 FNB.OnChange:=TSGComponentProcedure(@New1234543454354);
 
 FP1:=TSGPanel.Create;
 SGScreen.CreateChild(FP1);
 SGScreen.LastChild.SetMiddleBounds(550,378);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;

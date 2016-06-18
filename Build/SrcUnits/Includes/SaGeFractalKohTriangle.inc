@@ -179,13 +179,12 @@ FEnableNormals:=False;
 Depth:=3;
 FLightingEnable:=False;
 
-InitProjectionComboBox(Context.Width-160,5,150,30,[SGAnchRight],true);
-InitSizeLabel(5,Context.Height-25,Context.Width-20,20,[SGAnchBottom],False);
+InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
+InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 
 FLDC:=TSGLabel.Create;
 SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(Context.Width-160-90-125,5,115,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-160-90-125,5,115,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Итерация:';
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -194,8 +193,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBPD:=TSGButton.Create;
 SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(Context.Width-160-30,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='+';
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -204,8 +202,7 @@ SGScreen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create;
 SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(Context.Width-160-60,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-160-60,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='0';
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -213,8 +210,7 @@ SGScreen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create;
 SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(Context.Width-160-90,5,20,30);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChangeKT);

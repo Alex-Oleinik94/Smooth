@@ -75,8 +75,7 @@ SGInitMatrixMode(SG_3D);
 if SGContext.FCallDraw<>nil then
 	SGContext.FCallDraw();
 SGIIdleFunction;
-if SGCLPaintProcedure<>nil then
-	SGCLPaintProcedure;
+SGScreen.Paint();
 SGContext.SwapBuffers;
 SGContext.ClearKeys;
 SGContext.Messages;

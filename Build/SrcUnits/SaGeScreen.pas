@@ -203,15 +203,8 @@ type
 		property DrawClass : TSGDrawClass read FDrawClass write FDrawClass;
 			public
 		procedure DrawDrawClasses();virtual;
-			protected //Это для TopShift, что б не прописывать хз де
-		FTopShiftStatus:Packed Record
-			FEnable:Boolean;
-			FNowTopShift:LongWord;
-			end;
-		procedure SetTopShiftStatus(const b:Boolean);
 			public
 		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
-		property AutoTopShift:Boolean read FTopShiftStatus.FEnable write SetTopShiftStatus;
 			private
 		FNeedToDestroy : TSGBoolean;
 			public
@@ -220,12 +213,16 @@ type
 	SGComponent = TSGComponent;
 	PSGComponent = PTSGComponent;
 	
-	TSGScreen=class(TSGComponent)
+	TSGScreen = class(TSGComponent)
 			public
 		constructor Create();
 		destructor Destroy();override;
 			private
 		FInProcessing : TSGBoolean;
+			public
+		procedure Load(const VContext : TSGContext);
+		procedure Resize();
+		procedure Paint();
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -567,8 +564,6 @@ type
 		end;
 var
 	SGScreen:TSGScreen = nil;
-
-procedure SGScreenLoad(const Context:TSGCOntext);
 
 implementation
 
@@ -1989,17 +1984,6 @@ if FChildren<>nil then
 			FChildren[i].DrawDrawClasses;
 end;
 
-
-procedure TSGComponent.SetTopShiftStatus(const b:Boolean);
-begin
-FTopShiftStatus.FEnable:=b;
-if not b then
-	begin
-	FNeedTop-=FTopShiftStatus.FNowTopShift;
-	FTopShiftStatus.FNowTopShift:=0;
-	end;
-end;
-
 function TSGComponent.AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Self is TSGEdit then
@@ -2095,8 +2079,8 @@ procedure TSGComponent.SetMiddleBounds(const NewWidth,NewHeight:LongInt);
 begin
 FNeedHeight:=NewHeight;
 FNeedWidth:=NewWidth;
-FNeedLeft:=Round((Context.Width-NewWidth)/2);
-FNeedTop:=Round((Context.Height-NewHeight)/2);
+FNeedLeft:=Round((Render.Width-NewWidth)/2);
+FNeedTop:=Round((Render.Height-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
@@ -2176,7 +2160,7 @@ begin
 if FParent<>nil then
 	Result:=FParent.Width
 else
-	Result:=Context.Width;
+	Result:=Render.Width;
 end;
 
 function TSGComponent.GetScreenHeight : longint;
@@ -2184,7 +2168,7 @@ begin
 if FParent<>nil then
 	Result:=FParent.Height
 else
-	Result:=Context.Height;
+	Result:=Render.Height;
 end;
 
 procedure TSGComponent.SetRight(NewRight:LongInt);
@@ -2470,16 +2454,6 @@ while (Length(FChildren)>0) and (i<=High(FChildren)) do
 	i+=1;
 	end;
 
-if FTopShiftStatus.FEnable then
-	begin
-	if (Context.TopShift<>FTopShiftStatus.FNowTopShift)then
-		begin
-		FNeedTop-=FTopShiftStatus.FNowTopShift;
-		FTopShiftStatus.FNowTopShift:=Context.TopShift();
-		FNeedTop+=FTopShiftStatus.FNowTopShift;
-		end;
-	end;
-
 if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
 end;
@@ -2582,8 +2556,6 @@ ComponentProcedure:=nil;
 FUserPointer1:=nil;
 FUserPointer2:=nil;
 FUserPointer3:=nil;
-FTopShiftStatus.FEnable:=False;
-FTopShiftStatus.FNowTopShift:=0;
 FAnchorsData.FParentHeight:=0;
 FAnchorsData.FParentWidth:=0;
 end;
@@ -3415,14 +3387,42 @@ begin
 inherited;
 end;
 
-procedure SGScreenPaint(const Context:TSGContext);
+procedure TSGScreen.Load(const VContext : TSGContext);
+begin
+{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
+
+SetContext(VContext);
+SetShifts(0, 0, 0, 0);
+Visible := True;
+Resize();
+
+Font := TSGFont.Create(SGFontDirectory + Slash + 'Tahoma.sgf');
+Font.SetContext(VContext);
+Font.Loading();
+
+ComboBoxImage := TSGImage.Create(SGTextureDirectory + Slash + 'ComboBoxImage.sgia');
+ComboBoxImage.SetContext(VContext);
+ComboBoxImage.Loading();
+
+{$IFDEF ANDROID}SGLog.Sourse('Leaving "SGScreenLoad".');{$ENDIF}
+end;
+
+procedure TSGScreen.Resize();
+begin
+if (SGScreen <> nil) then if SGScreen.ContextAssigned()then if Render.Width <> 0 then if Render.Height <> 0 then
+	begin
+	SetBounds(0, 0, Render.Width, Render.Height);
+	BoundsToNeedBounds();
+	FromResize();
+	end;
+end;
+
+procedure TSGScreen.Paint();
 var
-	CanRePleace:Boolean = True;
-	i:LongWord;
-	Render:TSGRender = nil;
+	CanRePleace : TSGBoolean = True;
+	i : TSGLongWord;
 begin
 //{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenPaint". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
-Render:=Context.Render;
 if FNewPosition<>FOldPosition then
 	begin
 	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
@@ -3444,16 +3444,16 @@ if FNewPosition<>FOldPosition then
 		if SGScreens[FOldPosition].FImage <>nil then
 			begin
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height),
-				SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)
+				SGVertex2fImport(0,0)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height),
+				SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)
 				,True,SG_2D);
 			end;
 		
 		if SGScreens[FNewPosition].FImage <>nil then
 			begin
 			SGScreens[FNewPosition].FImage.DrawImageFromTwoVertex2f(
-				(-1)*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height),
-				(-1)*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)+SGVertex2fImport(Context.Width,Context.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Context.Width,Context.Height)
+				(-1)*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height),
+				(-1)*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)+SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)
 				,True,SG_2D);
 			end;
 		
@@ -3510,7 +3510,7 @@ if FNewPosition=FOldPosition then
 				SGScreen.Destroy;
 				
 				SGScreen:=TSGScreen.Create;
-				SGScreen.SetBounds(0,0,Context.Width,Context.Height);
+				SGScreen.SetBounds(0,0,Render.Width,Render.Height);
 				SGScreen.SetShifts(0,0,0,0);
 				SGScreen.Visible:=True;
 				SGScreen.BoundsToNeedBounds;
@@ -3537,7 +3537,7 @@ if FNewPosition=FOldPosition then
 			FMoveProgress:=0;
 			
 			SGScreen:=TSGScreen.Create;
-			SGScreen.SetBounds(0,0,Context.Width,Context.Height);
+			SGScreen.SetBounds(0,0,Render.Width,Render.Height);
 			SGScreen.SetShifts(0,0,0,0);
 			SGScreen.Visible:=True;
 			SGScreen.BoundsToNeedBounds;
@@ -3562,10 +3562,10 @@ if FNewPosition=FOldPosition then
 			Context.InitializeProcedure(Context);
 			
 			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			Context.Render.InitMatrixMode(SG_3D);
+			Render.InitMatrixMode(SG_3D);
 			
 			SGScreen.DrawDrawClasses;
-			Context.Render.InitMatrixMode(SG_2D);
+			Render.InitMatrixMode(SG_2D);
 			SGScreen.FromDraw;
 			
 			SGScreens[FNewPosition].FImage:=TSGImage.Create;
@@ -3574,10 +3574,10 @@ if FNewPosition=FOldPosition then
 			SGScreens[FNewPosition].FImage.ToTexture;
 			
 			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			Context.Render.InitMatrixMode(SG_2D);
+			Render.InitMatrixMode(SG_2D);
 			Render.Color4f(1,1,1,1);
 			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0),SGVertex2fImport(Context.Width,Context.Height),True,SG_2D);
+				SGVertex2fImport(0,0),SGVertex2fImport(Render.Width,Render.Height),True,SG_2D);
 			end;
 		end;
 		end;
@@ -3585,52 +3585,23 @@ if FNewPosition=FOldPosition then
 	end;
 end;
 
-procedure SGScreenResizeScreen(const Context:TSGContext);
-begin
-if SGScreen<>nil then
-	begin
-	SGScreen.SetBounds(0,0,Context.Width,Context.Height);
-	SGScreen.BoundsToNeedBounds;
-	SGScreen.FromResize();
-	end;
-end;
-
-procedure SGScreenLoad(const Context:TSGContext);
-begin
-{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
-
-if SGScreen<>nil then
-	Exit;
-
-SGScreen:=TSGScreen.Create();
-SGScreen.SetContext(Context);
-SGScreen.SetBounds(0,0,Context.Width,Context.Height);
-SGScreen.SetShifts(0,0,0,0);
-SGScreen.Visible:=True;
-SGScreen.BoundsToNeedBounds();
-
-SetLength(SGScreens,1);
-SGScreens[Low(SGScreens)].FScreen:=SGScreen;
-SGScreens[Low(SGScreens)].FImage:=nil;
-
-SGScreen.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
-SGScreen.Font.SetContext(Context);
-SGScreen.Font.Loading();
-
-ComboBoxImage:=TSGImage.Create(SGTextureDirectory+Slash+'ComboBoxImage.sgia');
-ComboBoxImage.SetContext(Context);
-ComboBoxImage.Loading();
-
-{$IFDEF ANDROID}SGLog.Sourse('Leaving "SGScreenLoad".');{$ENDIF}
-end;
-
 initialization
 begin
 FNewPosition:=0;
 FOldPosition:=0;
-SGSetScreenProcedure(@SGScreenPaint);
-SGSetScreenLoadProcedure(@SGScreenLoad);
-SCSetScreenScreenBounds(@SGScreenResizeScreen);
+
+SGScreen := TSGScreen.Create();
+
+SetLength(SGScreens,1);
+SGScreens[Low(SGScreens)].FScreen:=SGScreen;
+SGScreens[Low(SGScreens)].FImage:=nil;
+end;
+
+finalization
+begin
+if SGScreen <> nil then
+	SGScreen.Destroy();
+SGScreen := nil;
 end;
 
 end.

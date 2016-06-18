@@ -40,6 +40,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+		function  ShiftClientArea() : TSGPoint2f; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -70,12 +71,25 @@ function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; co
 
 implementation
 
+uses
+	SaGeScreen;
+
 // А вод это жесткий костыль. 
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
 // например указатель на контекст, и поэтому процедура отловления сообщений системы
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+function  TSGContextWinAPI.ShiftClientArea() : TSGPoint2f;
+begin
+if Fullscreen then
+	Result.Import(0,0)
+else
+	Result.Import(
+		GetSystemMetrics(SM_CXSIZEFRAME),
+		Height - TSGLongWord(Get('CLIENT HEIGHT')) - GetSystemMetrics(SM_CYSIZEFRAME));
+end;
 
 function TSGContextWinAPI.FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;
 const
@@ -157,13 +171,23 @@ FreeMem(ofn,sizeof(ofn^));
 end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;
+var
+	rect : TRect;
 begin
 if What = 'WINDOW HANDLE' then
 	Result := Pointer(hWindow)
 else if What = 'DESKTOP WINDOW HANDLE' then
 	Result := Pointer(dcWindow)
-else if What = 'WINDOW CAPTION HEIGHT' then
-	Result := Pointer(GetSystemMetrics(SM_CYSIZE))
+else if What = 'CLIENT WIDTH' then
+	begin
+	GetClientRect(HWindow,Rect);
+	Result := Pointer(Rect.right);
+	end
+else if What = 'CLIENT HEIGHT' then
+	begin
+	GetClientRect(HWindow,Rect);
+	Result := Pointer(Rect.bottom);
+	end
 else if What = 'FULLSCREAN' then
 	Result := Pointer(byte(Fullscreen))
 else
@@ -193,10 +217,10 @@ end;
 
 procedure TSGContextWinAPI.SetCursorPosition(const a:TSGPoint2f);
 var
-	b:TSGPoint2f;
+	b : TSGPoint2f;
 begin
-b:=GetWindowRect;
-Windows.SetCursorPos(b.x+a.x,b.y+a.y);
+b:=GetWindowRect();
+Windows.SetCursorPos(b.x + a.x, b.y + a.y);
 end;
 
 procedure TSGContextWinAPI.ShowCursor(const b:Boolean);
@@ -225,7 +249,7 @@ function TSGContextWinAPI.GetWindowRect:TSGPoint2f;
 var
 	Rec:TRect;
 begin
-Windows.getWindowRect(HWindow,Rec);
+Windows.GetWindowRect(HWindow,Rec);
 Result.x:=Rec.Left;
 Result.y:=Rec.Top;
 end;
@@ -250,8 +274,7 @@ begin
 Active:=CreateWindow();
 if Active then
 	begin
-	if SGScreenLoadProcedure<>nil then
-		SGScreenLoadProcedure(Self);
+	SGScreen.Load(Self);
 	if FCallInitialize<>nil then
 		FCallInitialize(Self);
 	end;
@@ -279,8 +302,7 @@ while FActive and (FNewContextType=nil) do
 	ClearKeys();
 	Messages();
 	
-	if SGScreenPaintProcedure<>nil then
-		SGScreenPaintProcedure(Self);
+	SGScreen.Paint();
 	SwapBuffers();
 	end;
 end;
@@ -443,7 +465,6 @@ function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinA
 var
 	DoExit:Boolean;
 begin 
-//WriteLn(LongWord(LParam));
 DoExit:=False;
 {$IFDEF SGWinAPIDebugB}
 	SGLog.Sourse('MyWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
@@ -675,7 +696,7 @@ end;
 
 procedure TSGContextWinAPI.InitFullscreen(const b:boolean); 
 begin
-if hWindow=0 then
+if hWindow = 0 then
 	inherited InitFullscreen(b)
 else if Fullscreen<>b then
 	begin
@@ -686,9 +707,10 @@ else if Fullscreen<>b then
 		end;
 	KillWindow(False);
 	inherited InitFullscreen(b);
-	Active:=CreateWindow();
+	Active := CreateWindow();
 	if (FRender<>nil) and Active then
 		FRender.UnLockResourses();
+	Resize();
 	end;
 end;
 

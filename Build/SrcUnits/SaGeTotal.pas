@@ -21,7 +21,7 @@ uses
 const
 	SGDrawClassesComboBoxWidth = 300;
 type
-	TSGDrawClasses=class(TSGDrawClass)
+	TSGDrawClasses = class(TSGDrawClass)
 			public
 		constructor Create(const VContext:TSGContext);override;
 		destructor Destroy;override;
@@ -366,7 +366,6 @@ SetLength(FKosties,1);
 FButtonReset:=TSGButton.Create;
 SGScreen.CreateChild(FButtonReset);
 SGScreen.LastChild.SetBounds(Context.Width-50,5,40,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Reset';
 FButtonReset.OnChange:=TSGComponentProcedure(@mmmFButtonReset);
@@ -376,7 +375,6 @@ SGScreen.LastChild.Visible:=True;
 FDifficultyComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FDifficultyComboBox);
 SGScreen.LastChild.SetBounds(Context.Width-50-125-145,5,118+145,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
 SGScreen.LastChild.AsComboBox.CreateItem('Очень сильно легко');
@@ -396,7 +394,6 @@ SGScreen.LastChild.Visible:=True;
 FQuantityComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FQuantityComboBox);
 SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60,5,55,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to 8 do
 	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
@@ -409,7 +406,6 @@ SGScreen.LastChild.Visible:=True;
 FComboBoxDeep:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBoxDeep);
 SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60,5,55,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=3 to 8 do
 	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
@@ -421,7 +417,6 @@ SGScreen.LastChild.Visible:=True;
 FComboBoxRespamn:=TSGComboBox.Create;
 SGScreen.CreateChild(FComboBoxRespamn);
 SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130,5,125,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
 SGScreen.LastChild.AsComboBox.CreateItem('Респамн Включeн');
@@ -433,7 +428,6 @@ SGScreen.LastChild.Visible:=True;
 FGroundComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FGroundComboBox);
 SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130-140,5,135,20);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Стенок нету');
 SGScreen.LastChild.AsComboBox.CreateItem('Стенок мало');
@@ -1201,7 +1195,6 @@ begin
 FComboBox2:=TSGComboBox.Create();
 SGScreen.CreateChild(FComboBox2);
 SGScreen.LastChild.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
-SGScreen.LastChild.AutoTopShift:=True;
 SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);

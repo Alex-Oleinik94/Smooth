@@ -180,7 +180,7 @@ Render.Color3f(1,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
 while i<>FPhysicsTimeIndex do
 	begin
-	Render.Vertex2f(ii/1.5,Context.Height-20*FPhysicsTime[i]-10/1.5);
+	Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
 	if i = 0 then
 		i:= FPhysicsTimeCount -1
 	else
@@ -190,21 +190,21 @@ while i<>FPhysicsTimeIndex do
 Render.EndScene();
 Render.Color3f(0,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
-Render.Vertex2f(5/1.5,Context.Height-30-5/1.5);
-Render.Vertex2f(5/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
 SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Context.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
 SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
 SGScreen.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
-	SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
 end;
 
 {$IFNDEF ENGINE}

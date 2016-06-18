@@ -1489,7 +1489,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	FNewSecheniePanel := TSGPanel.Create();
 	SGScreen.CreateChild(FNewSecheniePanel);
-	SGScreen.LastChild.SetBounds(Context.Width-10-a,Context.Height-10-a,a,a);
+	SGScreen.LastChild.SetBounds(Render.Width-10-a,Render.Height-10-a,a,a);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
@@ -1518,7 +1518,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	FSecheniePanel := TSGPanel.Create();
 	SGScreen.CreateChild(FSecheniePanel);
-	SGScreen.LastChild.SetBounds(5,Context.Height-10-a,a,a);
+	SGScreen.LastChild.SetBounds(5,Render.Height-10-a,a,a);
 	SGScreen.LastChild.BoundsToNeedBounds();
 	SGScreen.LastChild.Anchors:=[SGAnchBottom];
 	SGScreen.LastChild.UserPointer:=Button.UserPointer;
@@ -1986,7 +1986,7 @@ if FAddNewGazPanel = nil then
 	begin
 	FAddNewGazPanel := TSGPanel.Create();
 	SGScreen.CreateChild(FAddNewGazPanel);
-	FAddNewGazPanel.SetBounds(Context.Width - pw - 10, Context.Height - ph - 10, pw, ph);
+	FAddNewGazPanel.SetBounds(Render.Width - pw - 10, Render.Height - ph - 10, pw, ph);
 	FAddNewGazPanel.BoundsToNeedBounds();
 	FAddNewGazPanel.Anchors:=[SGAnchRight,SGAnchBottom];
 	FAddNewGazPanel.UserPointer := Button.UserPointer;
@@ -2206,7 +2206,7 @@ if FAddNewSoursePanel = nil then
 	begin
 	FAddNewSoursePanel := TSGPanel.Create();
 	SGScreen.CreateChild(FAddNewSoursePanel);
-	FAddNewSoursePanel.SetBounds(Context.Width - pw - 10,Context.Height - ph - 10, pw, ph);
+	FAddNewSoursePanel.SetBounds(Render.Width - pw - 10,Render.Height - ph - 10, pw, ph);
 	FAddNewSoursePanel.BoundsToNeedBounds();
 	FAddNewSoursePanel.Anchors:=[SGAnchRight,SGAnchBottom];
 	FAddNewSoursePanel.UserPointer := Button.UserPointer;
@@ -2337,7 +2337,7 @@ if FUsrSechPanel = nil then
 	a := (FCube.Edge+1)*2;
 	FUsrSechPanel := TSGPanel.Create();
 	SGScreen.CreateChild(FUsrSechPanel);
-	FUsrSechPanel.SetBounds(a + 10,Context.Height - a - 10, a, a);
+	FUsrSechPanel.SetBounds(a + 10,Render.Height - a - 10, a, a);
 	FUsrSechPanel.BoundsToNeedBounds();
 	FUsrSechPanel.Anchors:=[SGAnchBottom];
 	FUsrSechPanel.UserPointer := Button.UserPointer;
@@ -2526,7 +2526,6 @@ if FBackToMenuButton = nil then
 	SGScreen.CreateChild(FBackToMenuButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible := True;
 	SGScreen.LastChild.Active  := True;
@@ -2547,7 +2546,6 @@ if FAddNewGazButton=nil then
 	SGScreen.CreateChild(FAddNewGazButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	FAddNewGazButton.Active  := True;
@@ -2568,7 +2566,6 @@ if FAddNewSourseButton = nil then
 	SGScreen.CreateChild(FAddNewSourseButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	FAddNewSourseButton.Active  := True;
@@ -2589,7 +2586,6 @@ if FStartEmulatingButton=nil then
 	SGScreen.CreateChild(FStartEmulatingButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*3,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	FStartEmulatingButton.Active  := True;
@@ -2610,7 +2606,6 @@ if FPauseEmulatingButton = nil then
 	SGScreen.CreateChild(FPauseEmulatingButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*4,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=False;
@@ -2631,7 +2626,6 @@ if FStopEmulatingButton = nil then
 	SGScreen.CreateChild(FStopEmulatingButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*5,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=False;
@@ -2652,7 +2646,6 @@ if FAddSechenieButton = nil then
 	SGScreen.CreateChild(FAddSechenieButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*6,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=True;
@@ -2673,7 +2666,6 @@ if FDeleteSechenieButton = nil then
 	SGScreen.CreateChild(FDeleteSechenieButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*7,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=False;
@@ -2694,7 +2686,6 @@ if FAddSechSecondPanelButton = nil then
 	SGScreen.CreateChild(FAddSechSecondPanelButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*8,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=False;
@@ -2715,7 +2706,6 @@ if FSaveImageButton = nil then
 	SGScreen.CreateChild(FSaveImageButton);
 	SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*9,W,FTahomaFont.FontHeight+2);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.AutoTopShift:=True;
 	SGScreen.LastChild.Anchors:=[SGAnchRight];
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.Active :=False;
@@ -2833,7 +2823,6 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		SGScreen.CreateChild(FMovieBackToMenuButton);
 		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
-		SGScreen.LastChild.AutoTopShift:=True;
 		SGScreen.LastChild.Anchors:=[SGAnchRight];
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
@@ -2854,7 +2843,6 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		SGScreen.CreateChild(FMoviePlayButton);
 		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
-		SGScreen.LastChild.AutoTopShift:=True;
 		SGScreen.LastChild.Anchors:=[SGAnchRight];
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := False;
@@ -2874,7 +2862,6 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		SGScreen.CreateChild(FMoviePauseButton);
 		SGScreen.LastChild.SetBounds(SGScreen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 		SGScreen.LastChild.BoundsToNeedBounds();
-		SGScreen.LastChild.AutoTopShift:=True;
 		SGScreen.LastChild.Anchors:=[SGAnchRight];
 		SGScreen.LastChild.Visible := True;
 		SGScreen.LastChild.Active  := True;
@@ -3388,7 +3375,7 @@ FRelefRedactor.Relief := @FRelief;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
-FCamera.FZum := Context.Height/Context.Width;
+FCamera.FZum := Render.Height/Render.Width;
 
 FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 FTahomaFont.SetContext(Context);
@@ -3397,14 +3384,14 @@ FTahomaFont.ToTexture();
 
 FStartingProgressBar := TSGProgressBar.Create();
 SGScreen.CreateChild(FStartingProgressBar);
-SGScreen.LastChild.SetBounds(Context.Width div 2 - 151,Context.Height div 2 - 100, 300, 20);
+SGScreen.LastChild.SetBounds(Render.Width div 2 - 151,Render.Height div 2 - 100, 300, 20);
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.Visible:=False;
 FStartingProgressBar.Progress := 0;
 
 FRedactorBackButton:=TSGButton.Create();
 SGScreen.CreateChild(FRedactorBackButton);
-SGScreen.LastChild.SetBounds(Context.Width div 2 - 75,5,130,20);
+SGScreen.LastChild.SetBounds(Render.Width div 2 - 75,5,130,20);
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.Visible:=False;
 SGScreen.LastChild.Font := FTahomaFont;
@@ -3563,9 +3550,10 @@ FLoadScenePanel.LastChild.UserPointer:=Self;
 FInfoLabel := TSGLabel.Create();
 SGScreen.CreateChild(FInfoLabel);
 SGScreen.LastChild.Caption := '';
-SGScreen.LastChild.SetBounds(5,Context.Height-25,Context.Width-10,20);
+SGScreen.LastChild.SetBounds(5,Render.Height-25,Render.Width-10,20);
 SGScreen.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.Visible:=True;
+SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Font := FTahomaFont;
 end;
 

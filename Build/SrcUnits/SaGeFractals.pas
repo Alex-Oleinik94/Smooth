@@ -103,9 +103,9 @@ type
 		FSizeLabel:TSGLabel;
 		FSizeLabelFlag:Boolean;
 			public
-		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
-		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
-		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
+		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
+		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 		end;
 	TSGFractal3D=TSG3DFractal;
 	
@@ -242,24 +242,22 @@ with TSG3DFractal(VComboBox.FUserPointer1) do
 	end;
 end;
 
-procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
 FSizeLabel:=TSGLabel.Create;
 SGScreen.CreateChild(FSizeLabel);
 SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.AutoTopShift:=ATS;
 SGScreen.LastChild.Anchors:=Anch;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 FSizeLabel.FTextPosition:=0;
 end;
 
-procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
 FEffectsComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FEffectsComboBox);
 SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.AutoTopShift:=ATS;
 SGScreen.LastChild.Anchors:=Anch;
 SGScreen.LastChild.AsComboBox.CreateItem('Нормали и цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Только нормали');
@@ -271,14 +269,13 @@ SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 end;
 
-procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = [];const ATS:Boolean = True);
+procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
 if FProjectionComboBox<>nil then
 	Exit;
 FProjectionComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(FProjectionComboBox);
 SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.AutoTopShift:=ATS;
 SGScreen.LastChild.Anchors:=Anch;
 SGScreen.LastChild.AsComboBox.CreateItem('Перспектива');
 SGScreen.LastChild.AsComboBox.CreateItem('Ортогонал');

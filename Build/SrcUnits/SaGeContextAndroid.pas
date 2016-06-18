@@ -61,6 +61,9 @@ type
 
 implementation
 
+uses
+	SaGeScreen;
+
 function TSGContextAndroid.Get(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
@@ -237,11 +240,8 @@ FHeight:=GetScreenResolution().y;
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
 if not FInitialized then
 	begin
-	if SGScreenLoadProcedure<>nil then
-		begin
-		SGScreenLoadProcedure(Self);
-		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "SGScreenLoadProcedure(Self)".');
-		end;
+	SGScreen.Load(Self);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "SGScreen.Load(Self)".');
 	if FCallInitialize<>nil then
 		begin
 		FCallInitialize(Self);
@@ -456,8 +456,8 @@ while FActive and (FNewContextType=nil) do
 		ClearKeys();
 		Messages();
 		
-		if SGScreenPaintProcedure<>nil then
-			SGScreenPaintProcedure(Self);
+		SGScreen.Paint();
+		
 		//SGLog.Sourse('"TSGContextAndroid.Run" : go SwapBuffers()...');
 		SwapBuffers();
 		//SGLog.Sourse('"TSGContextAndroid.Run" : End paint...');

@@ -42,7 +42,6 @@ type
 		procedure Init();override;
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
-		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -444,16 +443,6 @@ else
 	pDevice.SetTransform(FNowMatrixMode,FArSavedMatrix[FQuantitySavedMatrix-1]);
 	FQuantitySavedMatrix-=1;
 	end;
-end;
-
-procedure TSGRenderDirectX.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
-begin
-x:=
-	Byte(not VFullscreen)*(-8+
-	Round(LongWord(FWindow.Get('CURPOSX'))/LongWord(FWindow.Get('WIDTH'))*15));
-y:=
-	Byte(not VFullscreen)*(-28+
-	Round(LongWord(FWindow.Get('CURPOSY'))/LongWord(FWindow.Get('HEIGHT'))*33));
 end;
 
 procedure TSGRenderDirectX.SwapBuffers();
@@ -1384,12 +1373,12 @@ end;
 
 procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
 var
-	Matrix,Matrix1,Matrix2:D3DMATRIX;
+	Matrix, Matrix1, Matrix2 : D3DMATRIX;
 var
-	CWidth,CHeight:LongWord;
+	CWidth, CHeight : TSGLongWord;
 begin
-CWidth:=LongWord(FWindow.Get('WIDTH'));
-CHeight:=LongWord(FWindow.Get('HEIGHT'));
+CWidth := Width;
+CHeight := Height;
 FNowMatrixMode:=D3DTS_WORLD;
 LoadIdentity();
 FNowMatrixMode:=D3DTS_VIEW;
@@ -1518,10 +1507,10 @@ end;
 
 procedure TSGRenderDirectX.ReleaseCurrent();
 begin
-if (pDevice<>nil)  then
+if (pDevice <> nil) then
 	begin
 	pDevice._Release();
-	pDevice:=nil;
+	pDevice := nil;
 	end;
 end;
 

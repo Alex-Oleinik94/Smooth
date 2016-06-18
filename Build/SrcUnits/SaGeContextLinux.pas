@@ -15,7 +15,7 @@ uses
 	,glx
 	;
 type
-	TSGContextLinux=class(TSGContext)
+	TSGContextLinux = class(TSGContext)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -49,6 +49,9 @@ type
 		end;
 
 implementation
+
+uses
+	SaGeScreen;
 
 class function TSGContextLinux.RectInCoords:Boolean;
 begin
@@ -340,8 +343,7 @@ begin
 Active:=CreateWindow();
 if Active then
 	begin
-	if SGScreenLoadProcedure<>nil then
-		SGScreenLoadProcedure(Self);
+	SGScreen.Load(Self);
 	if FCallInitialize<>nil then
 		FCallInitialize(Self);
 	end;
@@ -369,8 +371,7 @@ while FActive and (FNewContextType=nil) do
 	ClearKeys();
 	Messages();
 	
-	if SGScreenPaintProcedure<>nil then
-		SGScreenPaintProcedure(Self);
+	SGScreen.Paint();
 	SwapBuffers();
 	end;
 end;

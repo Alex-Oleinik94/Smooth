@@ -101,8 +101,6 @@ type
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
-		function TopShift(const VFullscreen:Boolean = False):LongWord;override;
-		procedure MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);override;
 		function SupporedVBOBuffers:Boolean;override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -654,30 +652,6 @@ end;
 procedure TSGRenderOpenGL.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
 begin
 glDrawArrays(VParam,VFirst,VCount);
-end;
-
-procedure TSGRenderOpenGL.MouseShift(var x,y:LongInt;const VFullscreen:Boolean = False);
-begin
-x:=0;
-y:=0;
-{$IFDEF MSWINDOWS}
-	x:=-7*Byte(not VFullscreen);
-	y:=5*Byte(not VFullscreen);
-{$ELSE}
-	{$IFDEF LINUX}
-		{$ENDIF}
-	{$ENDIF}
-end;
-
-function TSGRenderOpenGL.TopShift(const VFullscreen:Boolean = False):LongWord;
-begin
-Result:=0;
-{$IFDEF MSWINDOWS}
-	Result:=28*Byte(not VFullscreen);
-{$ELSE}
-	{$IFDEF LINUX}
-		{$ENDIF}
-	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.SwapBuffers();
@@ -1419,14 +1393,12 @@ procedure TSGRenderOpenGL.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const
 const
 	glub = 500;
 var
-	CWidth,CHeight:LongWord;
+	CWidth, CHeight : TSGLongWord;
 begin
-CWidth:=LongWord(FWindow.Get('WIDTH'));
-CHeight:=LongWord(FWindow.Get('HEIGHT'));
-if TSGBoolean(FWindow.Get('FULLSCREAN')) then
-	Viewport(0, 0, CWidth, CHeight)
-else
-	Viewport(0, 0, CWidth, CHeight - TSGMaxEnum(FWindow.Get('WINDOW CAPTION HEIGHT')));
+CWidth := Width;
+CHeight := Height;
+Viewport(0, 0, CWidth, CHeight);
+
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 if  Mode=SG_2D then

@@ -106,16 +106,22 @@ end;
 procedure TSGNTextInset.FromDraw();
 var
 	i, ii : TSGLongWord;
+	Vertex : TSGVertex3f;
 begin
 ii := Trunc(FBegin);
+Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 for i := ii to Trunc(FEnd) do
 	begin
 	if i > CountLines() then
 		break;
 	Font.DrawFontFromTwoVertex2f(
 		FFile[i],
-		SGVertex2fImport(0,(i - ii) * Font.FontHeight),
-		SGVertex2fImport(Width,(i - ii + 1) * Font.FontHeight),
+		SGVertex2fImport(
+			Vertex.x + 0,
+			Vertex.y + (i - ii) * Font.FontHeight),
+		SGVertex2fImport(
+			Vertex.x + Width,
+			Vertex.y + (i - ii + 1) * Font.FontHeight),
 		False);
 	end;
 inherited;

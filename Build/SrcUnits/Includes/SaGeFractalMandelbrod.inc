@@ -299,7 +299,7 @@ begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	Manda.Width:=SGVal((Button.Parent.LastChild.Caption));
-	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Context.Height/Context.Width));
+	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Render.Height/Render.Width));
 	Changet:=True;
 	NowSave:=True;
 	SelectPoint.Import;
@@ -349,7 +349,7 @@ procedure ZumButtonOnChange(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
+	Manda.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -508,7 +508,7 @@ Manda.Height:=StartDepth;
 Manda.FZNumber.Import(-0.181,0.66);
 Manda.FZMand:=False;
 Manda.FZDegree:=2;
-Manda.FView.Import(-2.5,-2.5*(Context.Height/Context.Width),2.5,2.5*(Context.Height/Context.Width));
+Manda.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
 Manda.FImage.Way:=SGImagesDirectory+Slash+'Mand New.jpg';
@@ -522,7 +522,6 @@ for i:=0 to QuantityThreads-1 do
 	SGScreen.CreateChild(FArProgressBar[i]);
 	SGScreen.LastChild.SetBounds(10,ii,300,20);
 	SGScreen.LastChild.BoundsToNeedBounds();
-	FArProgressBar[i].AutoTopShift:=True;
 	ii+=23;
 	SGScreen.LastChild.Visible:=True;
 	SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
@@ -531,7 +530,6 @@ for i:=0 to QuantityThreads-1 do
 
 LblProcent:=TSGLabel.Create;
 SGScreen.CreateChild(LblProcent);
-SGScreen.LastChild.AutoTopShift:=True;
 LblProcent.SetBounds(10,ii,300,20);
 LblProcent.Caption:='';
 LblProcent.Visible:=True;
@@ -539,7 +537,6 @@ LblProcent.FUserPointer1:=Self;
 
 LabelProcent:=TSGProgressBar.Create;
 SGScreen.CreateChild(LabelProcent);
-SGScreen.LastChild.AutoTopShift:=True;
 LabelProcent.SetBounds(10,ii,300,20);
 LabelProcent.Color2 := SGColorImport(1,0,0,0.8);
 LabelProcent.Color1 := SGColorImport(0.5,0,0,0.8);
@@ -549,7 +546,7 @@ LabelProcent.FUserPointer1:=Self;
 
 LabelCoord:=TSGLabel.Create;
 SGScreen.CreateChild(LabelCoord);
-SGScreen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
+SGScreen.LastChild.SetBounds(10,Render.Height-25,Render.Width div 2,20);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.Visible:=True;
@@ -559,7 +556,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 ScreenshotPanel:=TSGPanel.Create;
 SGScreen.CreateChild(ScreenshotPanel);
 SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10),Context.Height-30,130+140+10,25);
+SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-30,130+140+10,25);
 SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -581,8 +578,7 @@ SGScreen.LastChild.LastChild.FUserPointer2:=SGScreen.LastChild.FChildren[High(SG
 SGScreen.LastChild.LastChild.Caption:='4096';
 
 SGScreen.CreateChild(TSGComboBox.Create);
-SGScreen.LastChild.SetBounds(Context.Width-50-125+45,5{+Context.TopShift},120,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125+45,5{+Context.TopShift},120,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to High(VNameThemes) do
 	SGScreen.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
@@ -593,8 +589,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 
 TypeComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(TypeComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125+45-185,5{+Context.TopShift},180,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125+45-185,5,180,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Множество Жюлиа');
 SGScreen.LastChild.AsComboBox.CreateItem('Модель Мандельброта');
@@ -603,8 +598,7 @@ SGScreen.LastChild.AsComboBox.FSelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 
 SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-185+45-105,5{+Context.TopShift},100,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125-185+45-105,5,100,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Сброс зума';
 ZumButton:=SGScreen.LastChild.AsButton;
@@ -612,8 +606,7 @@ ZumButton.OnChange:=TSGComponentProcedure(@ZumButtonOnChange);
 SGScreen.LastChild.FUserPointer1:=Self;
 
 SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Установ. тчк.';
 ButtonSelectZNumber:=SGScreen.LastChild.AsButton;
@@ -622,8 +615,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 
 StepenComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(StepenComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.BoundsToNeedBounds;
@@ -639,8 +631,7 @@ while i<=100 do
 
 QuantityRecComboBox:=TSGComboBox.Create;
 SGScreen.CreateChild(QuantityRecComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
-SGScreen.LastChild.AutoTopShift:=True;
+SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.BoundsToNeedBounds;
@@ -659,12 +650,12 @@ while i<=13 do
 
 FCurveInfoLbl:=TSGLabel.Create();
 SGScreen.CreateChild(FCurveInfoLbl);
-SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30-25,-(-(130+140+10)-150-5),20);
+SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30-25,-(-(130+140+10)-150-5),20);
 SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
 SGScreen.CreateChild(FBezierCurveKadrProgressBar);
-SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,-(-(130+140+10)-150-5),20);
+SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,-(-(130+140+10)-150-5),20);
 SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
 SGScreen.LastChild.AsProgressBar.Color1:=SGColorImport(1,1,0,0.7);
 SGScreen.LastChild.AsProgressBar.Color2:=SGColorImport(1,1/3,0,0.9);
@@ -672,8 +663,7 @@ SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FButtonEnableCurve:=TSGButton.Create();
 SGScreen.CreateChild(FButtonEnableCurve);
-SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10)-150-5,Context.Height-30,150,20);
-SGScreen.LastChild.AutoTopShift:=False;
+SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,150,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 SGScreen.LastChild.Caption:='On видео панель';
 FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
@@ -682,7 +672,7 @@ SGScreen.LastChild.FUserPointer1:=Self;
 FCurvePointPanel:=TSGPanel.Create();
 SGScreen.CreateChild(FCurvePointPanel);
 SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Context.Width-10-(140+10),Context.Height-130-130,140+10,125);
+SGScreen.LastChild.SetBounds(Render.Width-10-(140+10),Render.Height-130-130,140+10,125);
 SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -700,7 +690,7 @@ FCurvePointPanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel:=TSGPanel.Create();
 SGScreen.CreateChild(FBezierCurvePanel);
 SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Context.Width-10-(130+140+10),Context.Height-130,130+140+10,125);
+SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125);
 SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
 SGScreen.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.FUserPointer1:=Self;
@@ -814,7 +804,7 @@ fmStartPanel:=nil;
 FCurveInfoLbl:=nil;
 
 SGScreen.CreateChild(TSGPanel.Create);
-SGScreen.LastChild.SetMiddleBounds(300,Context.Height-200);
+SGScreen.LastChild.SetMiddleBounds(300,Render.Height-200);
 SGScreen.LastChild.Visible:=True;
 SGScreen.LastChild.AsPanel.FViewLines:=False;
 SGScreen.LastChild.AsPanel.FViewQuad:=False;
@@ -967,8 +957,8 @@ end;
 function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;
 begin
 Result.Import(
-	Manda.FView.x1+(Point.x/(Context.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
-	Manda.FView.y1+((Context.Height-Point.y)/(Context.Height)*abs(Manda.FView.y1-Manda.FView.y2))
+	Manda.FView.x1+(Point.x/(Render.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
+	Manda.FView.y1+((Render.Height-Point.y)/(Render.Height)*abs(Manda.FView.y1-Manda.FView.y2))
 	);
 end;
 
@@ -1196,8 +1186,8 @@ if MandaInitialized then
 		//if Manda.FView.VertexInView(Manda.FZNumber) then
 			//begin
 			VtxForZN.Import(
-				abs(Manda.FZNumber.x-SGMin(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Context.Width,
-				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Context.Height
+				abs(Manda.FZNumber.x-SGMin(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Render.Width,
+				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Render.Height
 				);
 			Render.Color3f(1,1,1);
 			Render.BeginScene(SGR_TRIANGLES);
@@ -1235,21 +1225,21 @@ if MandaInitialized then
 				SelectPointEnabled:=False;
 			
 			SelectSecondPoint:=Context.CursorPosition(SGNowCursorPosition);
-			if abs(SelectPoint.x-SelectSecondPoint.x)/abs(SelectPoint.y-SelectSecondPoint.y)>Context.Width/Context.Height then
+			if abs(SelectPoint.x-SelectSecondPoint.x)/abs(SelectPoint.y-SelectSecondPoint.y)>Render.Width/Render.Height then
 				begin
 				SelectSecondNormalPoint.y:=SelectSecondPoint.y;
 				if (SelectPoint.x<SelectSecondPoint.x)then
-					SelectSecondNormalPoint.x:=SelectPoint.x+Round(abs(SelectSecondPoint.y-SelectPoint.y)/Context.Height*Context.Width)
+					SelectSecondNormalPoint.x:=SelectPoint.x+Round(abs(SelectSecondPoint.y-SelectPoint.y)/Render.Height*Render.Width)
 				else
-					SelectSecondNormalPoint.x:=SelectPoint.x-Round(abs(SelectSecondPoint.y-SelectPoint.y)/Context.Height*Context.Width);
+					SelectSecondNormalPoint.x:=SelectPoint.x-Round(abs(SelectSecondPoint.y-SelectPoint.y)/Render.Height*Render.Width);
 				end
 			else
 				begin
 				SelectSecondNormalPoint.x:=SelectSecondPoint.x;
 				if SelectPoint.y<SelectSecondPoint.y then
-					SelectSecondNormalPoint.y:=SelectPoint.y+Round(abs(SelectSecondPoint.x-SelectPoint.x)/Context.Width*Context.Height)
+					SelectSecondNormalPoint.y:=SelectPoint.y+Round(abs(SelectSecondPoint.x-SelectPoint.x)/Render.Width*Render.Height)
 				else
-					SelectSecondNormalPoint.y:=SelectPoint.y-Round(abs(SelectSecondPoint.x-SelectPoint.x)/Context.Width*Context.Height);
+					SelectSecondNormalPoint.y:=SelectPoint.y-Round(abs(SelectSecondPoint.x-SelectPoint.x)/Render.Width*Render.Height);
 				end;
 			
 			Render.Color4f(0,0.5,0.70,0.6);
@@ -1310,7 +1300,7 @@ if MandaInitialized then
 			if SecondImage.Ready then
 				SecondImage.DrawImageFromTwoPoint2f(
 					SGPointImport(1,1),
-					SGPointImport(Context.Width,Context.Height),
+					SGPointImport(Render.Width,Render.Height),
 					True,SG_2D);
 			
 			Render.Color4f(0.1,0.7,0.20,0.6);
@@ -1470,20 +1460,14 @@ if MandaInitialized then
 				Progress:=0;
 				RealProgress:=0;
 				Visible:=true;
-				AutoTopShift:=False;
 				FNeedTop:=ii;
-				AutoTopShift:=True;
 				ii+=25;
 				DefaultColor;
 				Manda.BeginThread(i,GetProgressPointer());
 				end;
 			end;
-		LabelProcent.AutoTopShift:=False;
-		LblProcent.AutoTopShift:=False;
 		LabelProcent.FNeedTop:=ii;
 		LblProcent.FNeedTop:=ii;
-		LabelProcent.AutoTopShift:=True;
-		LblProcent.AutoTopShift:=True;
 		end;
 	Changet:=False;
 	end;
@@ -1572,7 +1556,7 @@ inherited;
 if FImage.Ready then
 	FImage.DrawImageFromTwoPoint2f(
 		SGPointImport(1,1),
-		SGPointImport(Context.Width,Context.Height),
+		SGPointImport(Render.Width,Render.Height),
 		False,SG_3D);
 end;
 
@@ -1586,7 +1570,7 @@ FFAttitudeForTheme:=0;
 FAttitudeForThemeEnable:=False;
 FImage:=nil;
 FZNumber.Import(0,0.65);
-FView.Import(-1.5,-1.5*(Context.Height/Context.Width),1.5,1.5*(Context.Height/Context.Width));
+FView.Import(-1.5,-1.5*(Render.Height/Render.Width),1.5,1.5*(Render.Height/Render.Width));
 FZMand:=False;
 FZDegree:=2;
 FZQuantityRec:=256;

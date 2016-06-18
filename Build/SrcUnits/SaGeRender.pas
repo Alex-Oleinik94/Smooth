@@ -32,8 +32,8 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-		function Width():TSGLongWord;inline;
-		function Height():TSGLongWord;inline;
+		function Width() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Height() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		// Тут содержится инфа, что это за рендер такой..
 		FType   : TSGRenderType;
@@ -59,11 +59,6 @@ type
 		function SupporedVBOBuffers():TSGBoolean;virtual;
 		// Выводит на экран буфер
 		procedure SwapBuffers();virtual;abstract;
-		// Верхная граница отрисовывания может быть смещена вниз, по каким либо причинам. 
-		// Эта функция возвращает на скользо пекселов она смещена.
-		function TopShift(const VFullscreen:TSGBoolean = False):TSGLongWord;virtual;
-		// Смещение указателя мышы от того, тна что она указывает на окне
-		procedure MouseShift(Var x,y:TSGLongInt; const VFullscreen:TSGBoolean = False);virtual;
 		// Сохранения ресурсов рендера и убивание самого рендера
 		procedure LockResourses();virtual;
 		// Инициализация рендера и загрузка сохраненных ресурсов
@@ -220,17 +215,6 @@ procedure TSGRender.LockResourses();
 begin
 end;
 
-procedure TSGRender.MouseShift(Var x,y:LongInt; const VFullscreen:Boolean = False);
-begin
-x:=0;
-y:=0;
-end;
-
-function TSGRender.TopShift(const VFullscreen:Boolean = False):LongWord;
-begin
-Result:=0;
-end;
-
 function TSGRender.MakeCurrent():Boolean;
 begin
 SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited method!!');
@@ -259,14 +243,28 @@ SGLog.Sourse(['TSGRender__Destroy()']);
 inherited Destroy();
 end;
 
-function TSGRender.Width():LongWord;inline;
+function TSGRender.Width() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=LongWord(FWindow.Get('WIDTH'));
+if FWindow = nil then
+	Result := 0
+else
+	begin
+	Result := TSGLongWord(FWindow.Get('CLIENT WIDTH'));
+	if Result = 0 then
+		Result := TSGLongWord(FWindow.Get('WIDTH'));
+	end;
 end;
 
-function TSGRender.Height():LongWord;inline;
+function TSGRender.Height() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=LongWord(FWindow.Get('HEIGHT'));
+if FWindow = nil then
+	Result := 0
+else
+	begin
+	Result := TSGLongWord(FWindow.Get('CLIENT HEIGHT'));
+	if Result = 0 then
+		Result := TSGLongWord(FWindow.Get('HEIGHT'));
+	end;
 end;
 
 end.
