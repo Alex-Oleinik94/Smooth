@@ -77,11 +77,22 @@ type
 		procedure AddInset(const VInset : TSGNInset);
 		function CountInsets() : TSGLongWord;
 		function InsetIndex(const VInset : TSGNInset) : TSGLongWord;
+		function ActiveInset() : TSGNInset;
 		end;
 
 procedure SGRunNotepad(const VFileName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function TSGNotepad.ActiveInset() : TSGNInset;
+begin
+if CountInsets() = 0 then
+	Result := nil
+else if (FActiveInset >= 0) and (FActiveInset <= CountInsets() - 1) then
+	Result := FInsets[FActiveInset]
+else
+	Result := nil;
+end;
 
 procedure TSGNTextInset.GoToPosition(const Line, Column : TSGLongWord);
 var
@@ -108,21 +119,24 @@ var
 	i, ii : TSGLongWord;
 	Vertex : TSGVertex3f;
 begin
-ii := Trunc(FBegin);
-Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-for i := ii to Trunc(FEnd) do
+if FOwner.ActiveInset() = Self then
 	begin
-	if i > CountLines() then
-		break;
-	Font.DrawFontFromTwoVertex2f(
-		FFile[i],
-		SGVertex2fImport(
-			Vertex.x + 0,
-			Vertex.y + (i - ii) * Font.FontHeight),
-		SGVertex2fImport(
-			Vertex.x + Width,
-			Vertex.y + (i - ii + 1) * Font.FontHeight),
-		False);
+	ii := Trunc(FBegin);
+	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+	for i := ii to Trunc(FEnd) do
+		begin
+		if i > CountLines() then
+			break;
+		Font.DrawFontFromTwoVertex2f(
+			FFile[i],
+			SGVertex2fImport(
+				Vertex.x + 0,
+				Vertex.y + (i - ii) * Font.FontHeight),
+			SGVertex2fImport(
+				Vertex.x + Width,
+				Vertex.y + (i - ii + 1) * Font.FontHeight),
+			False);
+		end;
 	end;
 inherited;
 end;
@@ -137,17 +151,17 @@ var
 begin
 if CountInsets() > 0 then
 	begin
-	Shift := 0;
+	Shift := 1;
 	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	for i := 0 to CountInsets() - 1 do
 		begin
 		SGRoundQuad(Render,
 			SGVertexImport(
 				Vertex.x + Shift,
-				Vertex.y),
+				Vertex.y + 1),
 			SGVertexImport(
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
-				Vertex.y + FFont.FontHeight + 10),
+				Vertex.y + FFont.FontHeight + 10 - 3),
 			5,10,
 			SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6),
 			SGGetColor4fFromLongWord($00FFFF).WithAlpha(0.8),
@@ -157,10 +171,11 @@ if CountInsets() > 0 then
 			FInsets[i].Title,
 			SGVertex2fImport(
 				Vertex.x + Shift,
-				Vertex.y),
+				Vertex.y + 1),
 			SGVertex2fImport(
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
-				Vertex.y + FFont.FontHeight + 10));
+				Vertex.y + FFont.FontHeight + 10  - 3));
+		Shift += FInsets[i].TitleWidth + 10 + 2;
 		end;
 	end;
 end;
@@ -324,6 +339,9 @@ SGScreen.CreateChild(Notepad);
 Notepad.SetBounds(0, 0, Notepad.Context.Width, Notepad.Context.Height);
 Notepad.BoundsToNeedBounds();
 Notepad.Visible := True;
+Notepad.AddFile(VFileName);
+Notepad.AddFile(VFileName);
+Notepad.AddFile(VFileName);
 Notepad.AddFile(VFileName);
 end;
 

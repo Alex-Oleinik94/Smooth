@@ -349,10 +349,21 @@ end;
 	* 
 	* }
 function TSGContextWinAPI.WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+type
+	MinMaxInfo = ^ Windows.MINMAXINFO;
 var
 	mRect:Windows.TRect;
+	pInfo : MinMaxInfo;
 begin
 case AMessage of
+WM_GETMINMAXINFO:
+	begin
+	pInfo := MinMaxInfo(lParam);
+	pInfo^.ptMinTrackSize.x := 320;
+	pInfo^.ptMinTrackSize.y := 240;
+	pInfo^.ptMaxTrackSize.x := 1000000;
+	pInfo^.ptMaxTrackSize.y := 1000000;
+	end;
 wm_create:
 	begin
 	Active:=True;
