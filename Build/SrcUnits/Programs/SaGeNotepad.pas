@@ -52,10 +52,15 @@ type
 		procedure LoadFile();
 		function CountLines() : TSGLongWord;
 		procedure GoToPosition(const Line, Column : TSGLongWord);
+		procedure MoveVertical(const Param : TSGFloat);
+		procedure StandardizateView();
 			public
 		property FileName : TSGString write SetFile;
 			public
 		procedure FromDraw();override;
+		procedure FromUpDate(var FCanChange:Boolean);override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromResize();override;
 		end;
 	
 	TSGNInsetList = packed array of TSGNInset;
@@ -68,6 +73,7 @@ type
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
+		procedure FromResize();override;
 			public
 		procedure AddFile(const VFileName : TSGString; const VLine : TSGLongWord = 0; const VColumn : TSGLongWord = 0);
 			private
@@ -84,6 +90,49 @@ procedure SGRunNotepad(const VFileName : TSGString);{$IFDEF SUPPORTINLINE}inline
 
 implementation
 
+procedure TSGNotepad.FromResize();
+begin
+SetBounds(0, 0, ScreenWidth, ScreenHeight);
+inherited;
+end;
+
+procedure TSGNTextInset.FromResize();
+begin
+StandardizateView();
+inherited;
+end;
+
+procedure TSGNTextInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+begin
+inherited;
+end;
+
+procedure TSGNTextInset.MoveVertical(const Param : TSGFloat);
+begin
+FBegin += Param;
+FEnd += Param;
+StandardizateView();
+end;
+
+procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
+begin
+if FOwner.ActiveInset() = Self then if FCanChange then
+	begin
+	if (Context.CursorWheel() <> SGNoCursorWheel)then
+		begin
+		if Context.CursorWheel() = SGUpCursorWheel then
+			begin
+			MoveVertical(-3);
+			end
+		else
+			begin
+			MoveVertical( 3);
+			end;
+		end;
+	end;
+inherited;
+end;
+
 function TSGNotepad.ActiveInset() : TSGNInset;
 begin
 if CountInsets() = 0 then
@@ -94,13 +143,18 @@ else
 	Result := nil;
 end;
 
-procedure TSGNTextInset.GoToPosition(const Line, Column : TSGLongWord);
+procedure TSGNTextInset.StandardizateView();
 var
-	Difference : TSGFloat;
+	Difference, DifferenceOld, Middle : TSGFloat;
 begin
+DifferenceOld := Abs(FEnd - FBegin);
 Difference := Height / Font.FontHeight;
-FBegin := (Line + 0.5) - Difference / 2;
-FEnd := FBegin + Difference;
+if Abs(Difference - DifferenceOld) > SGZero then
+	begin
+	Middle := (FEnd + FBegin) / 2;
+	FBegin := Middle - Difference / 2;
+	FEnd := Middle + Difference / 2;
+	end;
 if FEnd > CountLines() then
 	begin
 	FEnd := CountLines();
@@ -111,6 +165,16 @@ if FBegin < 0 then
 	FBegin := 0;
 	FEnd := Difference;
 	end;
+end;
+
+procedure TSGNTextInset.GoToPosition(const Line, Column : TSGLongWord);
+var
+	Difference : TSGFloat;
+begin
+Difference := Height / Font.FontHeight;
+FBegin := (Line + 0.5) - Difference / 2;
+FEnd := FBegin + Difference;
+StandardizateView();
 FCursorPos.Import(Line, Column);
 end;
 
@@ -148,6 +212,7 @@ var
 	i : TSGLongWord;
 	Shift : TSGLongWord;
 	Vertex : TSGVertex3f;
+	Color1, Color2 : TSGColor4f;
 begin
 if CountInsets() > 0 then
 	begin
@@ -155,6 +220,16 @@ if CountInsets() > 0 then
 	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	for i := 0 to CountInsets() - 1 do
 		begin
+		if FInsets[i] = ActiveInset() then
+			begin
+			Color1 := SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6);
+			Color2 := SGGetColor4fFromLongWord($00FFFF).WithAlpha(0.8);
+			end
+		else
+			begin
+			Color1 := SGGetColor4fFromLongWord($009900).WithAlpha(0.6);
+			Color2 := SGGetColor4fFromLongWord($009999).WithAlpha(0.8);
+			end;
 		SGRoundQuad(Render,
 			SGVertexImport(
 				Vertex.x + Shift,
@@ -163,8 +238,8 @@ if CountInsets() > 0 then
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
 				Vertex.y + FFont.FontHeight + 10 - 3),
 			5,10,
-			SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6),
-			SGGetColor4fFromLongWord($00FFFF).WithAlpha(0.8),
+			Color1,
+			Color2,
 			True);
 		Render.Color4f(1,1,1,1);
 		Font.DrawFontFromTwoVertex2f(
@@ -321,7 +396,14 @@ inherited;
 end;
 
 procedure TSGNotepad.FromUpDate(var FCanChange:Boolean);
+var
+	i : TSGLongWord;
 begin
+if CountInsets() >0 then
+	for i := 0 to CountInsets() - 1 do
+		begin
+		FInsets[i].SetBounds(0, FFont.FontHeight + 10, Width, Height - (FFont.FontHeight + 10));
+		end;
 inherited;
 end;
 
@@ -336,7 +418,7 @@ var
 begin
 Notepad := TSGNotepad.Create();
 SGScreen.CreateChild(Notepad);
-Notepad.SetBounds(0, 0, Notepad.Context.Width, Notepad.Context.Height);
+Notepad.SetBounds(0, 0, Notepad.Render.Width, Notepad.Render.Height);
 Notepad.BoundsToNeedBounds();
 Notepad.Visible := True;
 Notepad.AddFile(VFileName);

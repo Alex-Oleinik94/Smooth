@@ -166,6 +166,7 @@ type
 		function BottomShift():LongInt;
 		function RightShift():LongInt;
 			public
+		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
 		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
