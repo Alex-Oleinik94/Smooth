@@ -14,6 +14,7 @@ uses
 	,SaGeUtils
 	,Classes
 	,SaGeCommon
+	,SaGeRender
 	;
 
 type
@@ -47,6 +48,7 @@ type
 		FFileName : TSGString;
 		FFile : TSGArString;
 		FCursorPos : TSGPoint2f;
+		FScrolTimer : TSGFloat;
 			private
 		procedure SetFile(const VFileName : TSGString);
 		procedure LoadFile();
@@ -104,19 +106,7 @@ end;
 
 procedure TSGNTextInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
-inherited;
-end;
-
-procedure TSGNTextInset.MoveVertical(const Param : TSGFloat);
-begin
-FBegin += Param;
-FEnd += Param;
-StandardizateView();
-end;
-
-procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
-begin
-if FOwner.ActiveInset() = Self then if FCanChange then
+if Visible then if CanRePleace then if CursorInComponentNow then
 	begin
 	if (Context.CursorWheel() <> SGNoCursorWheel)then
 		begin
@@ -130,6 +120,22 @@ if FOwner.ActiveInset() = Self then if FCanChange then
 			end;
 		end;
 	end;
+inherited;
+end;
+
+procedure TSGNTextInset.MoveVertical(const Param : TSGFloat);
+begin
+FBegin += Param;
+FEnd += Param;
+StandardizateView();
+FScrolTimer := 1;
+end;
+
+procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
+begin
+if FOwner <> nil then
+	Visible := FOwner.ActiveInset() = Self;
+FScrolTimer := FScrolTimer * 0.95;
 inherited;
 end;
 
@@ -179,41 +185,85 @@ FCursorPos.Import(Line, Column);
 end;
 
 procedure TSGNTextInset.FromDraw();
+
+procedure DrawTextAndNumLines();
 var
 	i, ii : TSGLongWord;
 	Vertex : TSGVertex3f;
 	MaxLinesShift : TSGLongWord;
 begin
+MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
+ii := Trunc(FBegin);
+Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+for i := ii to Trunc(FEnd) do
+	begin
+	if i > CountLines() then
+		break;
+	Render.Color3f(0.9,0.9,0.9);
+	Font.DrawFontFromTwoVertex2f(
+		SGStr(i+1),
+		SGVertex2fImport(
+			Vertex.x,
+			Vertex.y + (i - ii) * Font.FontHeight),
+		SGVertex2fImport(
+			Vertex.x + MaxLinesShift,
+			Vertex.y + (i - ii + 1) * Font.FontHeight),
+		False);
+	Render.Color3f(1,1,1);
+	Font.DrawFontFromTwoVertex2f(
+		FFile[i],
+		SGVertex2fImport(
+			Vertex.x + MaxLinesShift,
+			Vertex.y + (i - ii) * Font.FontHeight),
+		SGVertex2fImport(
+			Vertex.x + Width,
+			Vertex.y + (i - ii + 1) * Font.FontHeight),
+		False);
+	end;
+end;
+
+procedure DrawScrollBar();
+const
+	ScrollBarWidth = 20;
+var
+	VertexTop, VertexBottom : TSGVertex3f;
+	VertexTopLeft, VertexBottomLeft : TSGVertex3f;
+	AreaAll : TSGFloat;
+begin
+VertexTop := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+VertexBottom := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
+VertexBottomLeft := VertexBottom; VertexBottomLeft.x -= ScrollBarWidth * FScrolTimer;
+VertexTopLeft := VertexTop; VertexTopLeft.x -= ScrollBarWidth * FScrolTimer;
+AreaAll := CountLines();
+Render.BeginScene(SGR_QUADS);
+
+Render.Color4f(0.3,0.3,0.3,FScrolTimer);
+VertexTop.Vertex(Render);
+VertexBottom.Vertex(Render);
+VertexBottomLeft.Vertex(Render);
+VertexTopLeft.Vertex(Render);
+
+Render.Color4f(0.1,0.9,0.1,FScrolTimer);
+Render.Vertex2f(
+	VertexTop.x,
+	VertexTop.y + FBegin / AreaAll * Height);
+Render.Vertex2f(
+	VertexTop.x,
+	VertexTop.y + FEnd / AreaAll * Height);
+Render.Vertex2f(
+	VertexTopLeft.x,
+	VertexTop.y + FEnd / AreaAll * Height);
+Render.Vertex2f(
+	VertexTopLeft.x,
+	VertexTop.y + FBegin / AreaAll * Height);
+Render.EndScene();
+end;
+
+begin
 if FOwner.ActiveInset() = Self then
 	begin
-	MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
-	ii := Trunc(FBegin);
-	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-	for i := ii to Trunc(FEnd) do
-		begin
-		if i > CountLines() then
-			break;
-		Render.Color3f(0.9,0.9,0.9);
-		Font.DrawFontFromTwoVertex2f(
-			SGStr(i+1),
-			SGVertex2fImport(
-				Vertex.x,
-				Vertex.y + (i - ii) * Font.FontHeight),
-			SGVertex2fImport(
-				Vertex.x + MaxLinesShift,
-				Vertex.y + (i - ii + 1) * Font.FontHeight),
-			False);
-		Render.Color3f(1,1,1);
-		Font.DrawFontFromTwoVertex2f(
-			FFile[i],
-			SGVertex2fImport(
-				Vertex.x + MaxLinesShift,
-				Vertex.y + (i - ii) * Font.FontHeight),
-			SGVertex2fImport(
-				Vertex.x + Width,
-				Vertex.y + (i - ii + 1) * Font.FontHeight),
-			False);
-		end;
+	DrawTextAndNumLines();
+	DrawScrollBar();
 	end;
 inherited;
 end;
@@ -286,6 +336,7 @@ begin
 inherited;
 FFileName := '';
 FFile := nil;
+FScrolTimer := 1;
 end;
 
 destructor TSGNTextInset.Destroy();
