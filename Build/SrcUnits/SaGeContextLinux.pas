@@ -350,29 +350,14 @@ if Active then
 end;
 
 procedure TSGContextLinux.Run();
-var
-	FDT:TSGDateTime;
 begin
-Messages;
-FElapsedDateTime.Get;
-while FActive and (FNewContextType=nil) do
+Messages();
+FElapsedDateTime.Get();
+while FActive and (FNewContextType = nil) do
 	begin
-	//Calc ElapsedTime
-	FDT.Get;
-	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
-	FElapsedDateTime:=FDT;
+	UpdateElapsedTime();
 	
-	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-	Render.InitMatrixMode(SG_3D);
-	if FCallDraw<>nil then
-		FCallDraw(Self);
-	//SGIIdleFunction;
-	
-	ClearKeys();
-	Messages();
-	
-	SGScreen.Paint();
-	SwapBuffers();
+	Paint();
 	end;
 end;
 

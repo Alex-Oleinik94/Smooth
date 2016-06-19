@@ -35,56 +35,40 @@ const
 	SG_ESC_KEY = 27;
 	SG_ESCAPE_KEY = SG_ESC_KEY;
 type
-	//Типы нажатий клавиш мышки
 	TSGCursorButtons = (SGNoCursorButton,SGMiddleCursorButton,SGLeftCursorButton,SGRightCursorButton);
-	//Тип "нажатия"
 	TSGCursorButtonType = (SGDownKey, SGUpKey);
-	//Тип использования колесика
 	TSGCursorWheel = (SGNoCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
-	//Это тип, по которому разделяются хранящиеся в последующем классе координаты мышы
 	// SGDeferenseCursorPosition - Это разница между SGNowCursorPosition и SGLastCursorPosition
 	// SGNowCursorPosition       - Координаты мыши в настоящий момент
 	// SGLastCursorPosition      - Координаты мыши, полученые при преведущем этапе цикла
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
-	// Предописание класса контекста
+	
 	TSGContext = class;
-	// Указатель на класс контекста
 	PSGContext = ^ TSGContext;
-	// Тип класса контекста
 	TSGContextClass = class of TSGContext;
-	// Контекстная процедура
 	TSGContextProcedure = procedure(const a:TSGContext);
-	// Класс контекста
+	
 	TSGContext=class(TSGClass)
 			public
-		// Конструктор контекста
-		constructor Create(); override; 
-		// Деструктеор контекста
+		constructor Create(); override;
 		destructor Destroy(); override;
 			public
-		// Процедурка, инициализирующая онко и указаный рендер
-		procedure Initialize();virtual;abstract;
-		// Запускает главный цикл программф
-		procedure Run();virtual;abstract;
-		// Отлов сообщений системы
+		procedure Initialize();virtual;
+		procedure Run();virtual;
 		procedure Messages();virtual;
-		procedure Paint();virtual;
-		// Вывод на экран буфера
 		procedure SwapBuffers();virtual;abstract;
-		// Возвращает координаты мыши в данный момент
+		
 		function GetCursorPosition():TSGPoint2f;virtual;abstract;
-		// Устанавливает координаты мышки в данный момент
 		procedure SetCursorPosition(const a:TSGPoint2f);virtual;abstract;
-		// Устанавливает координаты окна на рабочем столе пользователя
+		
 		function GetWindowRect():TSGPoint2f;virtual;abstract;
-		// Возвращает разрешение экрана
 		function GetScreenResolution():TSGPoint2f;virtual;abstract;
 			protected
-		// Возвращает ширину окна
+		procedure Paint();virtual;
+		procedure UpdateElapsedTime();virtual;
+		
 		function GetWidth():LongWord;virtual;
-		// Устанавливает ширину окна
 		procedure SetWidth(const NewWidth:LongWord);virtual;
-		// Устанавливает высоту окна
 		procedure SetHeight(const NewHeight:LongWord);virtual;
 			public
 		// Вызывается после того, как ширина или высота окна была изменена
@@ -326,6 +310,31 @@ end;
 class function TSGDrawClass.ClassName():String;
 begin
 Result:='SaGe Draw Class';
+end;
+
+procedure TSGContext.Initialize();
+begin
+FElapsedDateTime.Get();
+end;
+
+procedure TSGContext.UpdateElapsedTime();
+var
+	DataTime : TSGDateTime;
+begin
+DataTime.Get();
+FElapsedTime := (DataTime - FElapsedDateTime).GetPastMiliSeconds();
+FElapsedDateTime := DataTime;
+end;
+
+procedure TSGContext.Run();
+begin
+Messages();
+FElapsedDateTime.Get();
+while FActive and (FNewContextType=nil) do
+	begin
+	UpdateElapsedTime();
+	Paint();
+	end;
 end;
 
 procedure TSGContext.Paint();

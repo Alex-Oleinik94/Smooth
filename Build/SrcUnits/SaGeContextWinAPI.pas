@@ -275,28 +275,23 @@ end;
 
 procedure TSGContextWinAPI.Initialize();
 begin
-Active:=CreateWindow();
+Active := CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
 	if FCallInitialize<>nil then
 		FCallInitialize(Self);
+	inherited;
 	end;
 end;
 
 procedure TSGContextWinAPI.Run();
-var
-	FDT:TSGDateTime;
 begin
 Messages();
 FElapsedDateTime.Get();
 while FActive and (FNewContextType=nil) do
 	begin
-	//Calc ElapsedTime
-	FDT.Get();
-	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
-	FElapsedDateTime:=FDT;
-	
+	UpdateElapsedTime();
 	Paint();
 	end;
 end;

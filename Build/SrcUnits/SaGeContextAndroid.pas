@@ -425,9 +425,20 @@ TSGContextAndroid(Application^.UserData).HandleComand(Comand);
 end;
 
 procedure TSGContextAndroid.Run();
+
+procedure ChangingResolution();
 var
-	FDT:TSGDateTime;
 	FPoint : TSGPoint2f;
+begin
+FPoint := GetScreenResolution();
+if (FPoint.x<>FWidth) or (FPoint.y<>FHeight) then
+	begin
+	FWidth :=FPoint.x;
+	FHeight:=FPoint.y;
+	Resize();
+	end;
+end;
+
 begin
 SGLog.Sourse('Entering "TSGContextAndroid.Run".');
 FAndroidApp^.UserData := Self;
@@ -439,35 +450,15 @@ FElapsedDateTime.Get();
 
 while FActive and (FNewContextType=nil) do
 	begin
-	//Calc ElapsedTime
-	FDT.Get();
-	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds();
-	FElapsedDateTime:=FDT;
+	UpdateElapsedTime();
 	
 	if (FDisplay<>nil) and (FAnimating<>0) then
 		begin
 		//SGLog.Sourse('"TSGContextAndroid.Run" : Begin paint!');
-		Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-		Render.InitMatrixMode(SG_3D);
-		if FCallDraw<>nil then
-			FCallDraw(Self);
-		//SGIIdleFunction;
-		
-		ClearKeys();
-		Messages();
-		
-		SGScreen.Paint();
-		
-		//SGLog.Sourse('"TSGContextAndroid.Run" : go SwapBuffers()...');
-		SwapBuffers();
+		Paint();
 		//SGLog.Sourse('"TSGContextAndroid.Run" : End paint...');
-		FPoint := GetScreenResolution();
-		if (FPoint.x<>FWidth) or (FPoint.y<>FHeight) then
-			begin
-			FWidth :=FPoint.x;
-			FHeight:=FPoint.y;
-			Resize();
-			end;
+		
+		ChangingResolution();
 		end
 	else
 		begin

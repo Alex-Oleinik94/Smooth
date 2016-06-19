@@ -212,7 +212,7 @@ ii := Trunc(FBegin);
 Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 for i := ii to Trunc(FEnd) do
 	begin
-	if i > CountLines() then
+	if i >= CountLines() then
 		break;
 	Render.Color3f(0.9,0.9,0.9);
 	Font.DrawFontFromTwoVertex2f(
