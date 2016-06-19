@@ -334,15 +334,11 @@ type
 		property LibHandle : TSGLibHandle read FLibrary;
 		end;
 	
-	TSGArTObject = type packed array of TObject;
-	
-	TSGObject = class(TObject);
-	
 	//Начальный класс SaGe
 	TSGClass=class;
 	TSGClassClass = class of TSGClass;
 	TSGClassOfClass = TSGClassClass;
-	TSGClass=class(TSGObject)
+	TSGClass=class
 			public
 		constructor Create();virtual;
 		destructor Destroy();override;
@@ -394,7 +390,7 @@ type
 	TSGThreadFunction = function ( p : TSGPointer ): TSGThreadFunctionResult;
 		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
-	TSGThread=class(TSGObject)
+	TSGThread=class
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 		destructor Destroy();override;

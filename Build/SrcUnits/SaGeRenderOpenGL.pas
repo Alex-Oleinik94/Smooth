@@ -56,7 +56,9 @@ uses
 	,DynLibs
 	,SysUtils
 	,Classes
+	,SaGeRenderConstants
 	;
+
 {$IFDEF NEEDRESOURSES}
 	const 
 		TempDir = {$IFDEF ANDROID}'/sdcard/.SaGe/Temp'{$ELSE}'Temp'{$ENDIF};

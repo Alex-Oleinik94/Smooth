@@ -41,14 +41,16 @@ type
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
 		function  ShiftClientArea() : TSGPoint2f; override;
-			protected
-		procedure InitFullscreen(const b:boolean); override;
 			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
 		function WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+			protected
+		procedure InitFullscreen(const b : TSGBoolean); override;
+			private
+		procedure ReinitializeRender();override;
 			protected
 		hWindow:HWnd;
 		dcWindow:hDc;
@@ -80,6 +82,15 @@ uses
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+procedure TSGContextWinAPI.ReinitializeRender();
+begin
+Render.Destroy();
+FRender := FRenderClass.Create();
+FRender.Window := Self;
+if FRender.CreateContext() then
+	FRender.Init();
+end;
 
 function  TSGContextWinAPI.ShiftClientArea() : TSGPoint2f;
 begin
@@ -626,9 +637,9 @@ if FRender=nil then
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
 		{$ENDIF}
-	FRender:=FRenderClass.Create();
-	FRender.Window:=Self;
-	Result:=FRender.CreateContext();
+	FRender := FRenderClass.Create();
+	FRender.Window := Self;
+	Result := FRender.CreateContext();
 	if Result then 
 		FRender.Init();
 	{$IFDEF SGWinAPIDebug}
@@ -640,8 +651,8 @@ else
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
 		{$ENDIF}
-	FRender.Window:=Self;
-	Result:=FRender.SetPixelFormat();
+	FRender.Window := Self;
+	Result := FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
 	end;

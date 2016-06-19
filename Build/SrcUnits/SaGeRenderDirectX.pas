@@ -19,6 +19,7 @@ uses
 	,D3DX9
 	,Direct3D9
 	,SaGeCommon
+	,SaGeRenderConstants
 	;
 
 type

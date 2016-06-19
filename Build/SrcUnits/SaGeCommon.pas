@@ -4,13 +4,16 @@ interface
 uses
 	 SaGeBase
 	,SaGeBased
-	,SaGeRender
 	,Classes
 	,SysUtils
 	,Math
-	,Crt;
-	
+	,Crt
+	,SaGeRenderConstants
+	,SaGeBaseClasses;
+
 type
+	ISGRender = interface;
+	
 	TSGVertexFormat = (SGVertexFormat2f,SGVertexFormat3f,SGVertexFormat4f);
 	
 	TSGThreadProcedure = SaGeBase.TSGThreadProcedure;
@@ -21,7 +24,7 @@ type
 		x,y:longint;
 		procedure Import(const x1:longint = 0; const y1:longint = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	TSGPoint = TSGPoint2f;
 	SGPoint = TSGPoint2f;
@@ -33,7 +36,7 @@ type
 		z:longint;
 			public
 		procedure Import(const x1:LongInt = 0;const x2:LongInt = 0;const x3:LongInt = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGPoint3f = TSGPoint3f;
 	PSGPoint3f = ^ SGPoint3f;
@@ -45,14 +48,14 @@ type
 	TSGVertex2f=object
 		x,y:TSGVertexType;
 		
-		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure TexCoord(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure TexCoord(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetVariables(const x1:real = 0; const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Import(const x1:real = 0;const y1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Round;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Translate(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function FloatArray():PTSGVertexType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Normalized():TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		
@@ -80,19 +83,19 @@ type
 	
 	TSGVertex3f=object(TSGVertex2f)
 		z:TSGVertexType;
-		procedure Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetVariables(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Import(const x1:real = 0; const y1:real = 0; const z1:real = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Normal(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure VertexPoint(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Normal(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure LightPosition(const VRender:ISGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure VertexPoint(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Write;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteLn;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Vertex(const VRender:TSGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Vertex(const VRender:ISGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Normalize;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ReadFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ReadLnFromTextFile(const Fail:PTextFile);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Translate(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Normalized():TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGVertex3f=TSGVertex3f;
@@ -160,8 +163,8 @@ type
 	PTSGColor3f=^TSGColor3f;
 	TSGColor3f=object
 		r,g,b:single;
-		procedure Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Color(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetColor(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Import(const r1:single = 0; const g1:single = 0; const b1:single = 0);
 		procedure ReadFromStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteToStream(const Stream:TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -173,8 +176,8 @@ type
 	PTSGColor4f = ^ TSGColor4f;
 	TSGColor4f=object(TSGColor3f)
 		a:single;
-		procedure SetColor(const VRender:TSGRender);
-		procedure Color(const VRender:TSGRender);
+		procedure SetColor(const VRender:ISGRender);
+		procedure Color(const VRender:ISGRender);
 		procedure SetVariables(const r1:real = 0; const g1:real = 0; const b1:real = 0; const a1:real = 1);
 		function AddAlpha(const NewAlpha:real = 1):TSGColor4f;
 		function WithAlpha(const NewAlpha:real = 1):TSGColor4f;
@@ -194,14 +197,14 @@ type
 	ArColor = TArTSGColor4f;
 	ArSGColor = TArTSGColor4f;
 	ArSGColor4f = TArSGColor4f;
-type
+	
 	TSGArFor0To255OfBoolean = type packed array [0..255] of boolean;
 	TSGArFor0To2OfBoolean = type packed array [0..2] of boolean;
 	TSGArFor0To3OfSGPoint = type packed array [0..3]of SGPoint;
 	TSGArFor1To4OfSGVertex = type packed array [1..4] of SGVertex;
 	PTSGArFor1To4OfSGVertex = ^TSGArFor1To4OfSGVertex;
 	PSGArFor1To4OfSGVertex = PTSGArFor1To4OfSGVertex;
-type
+	
 	TSGCustomPosition = record
 		case byte of
 		0: (FLocation : TSGVertex3f; FTurn   : TSGVertex3f);
@@ -223,13 +226,140 @@ type
 		property Turn      : TSGVertex3f       read FPosition.FTurn     write FPosition.FTurn;
 		property CustomPos : TSGCustomPosition read FPosition           write FPosition;
 		end;
-type
+	
 	TSGMatrix4Type = TSGSingle;
-type
+	
 	TSGMatrix4 = array [0..3,0..3] of TSGMatrix4Type;
+
 const
-	NilVertex:SGVertex = (x:0;y:0;z:0);
-	NilColor:SGColor = (r:0;g:0;b:0;a:0);
+	NilVertex : SGVertex = (x:0;y:0;z:0);
+	NilColor  : SGColor  = (r:0;g:0;b:0;a:0);
+
+type
+	ISGRender = interface(ISGRectangle)
+		function SetPixelFormat():TSGBoolean;
+		function MakeCurrent():TSGBoolean;
+		procedure ReleaseCurrent();
+		function CreateContext():TSGBoolean;
+		procedure Viewport(const a,b,c,d:TSGLongWord);
+		procedure Init();
+		function SupporedVBOBuffers():TSGBoolean;
+		procedure SwapBuffers();
+		procedure LockResourses();
+		procedure UnLockResourses();
+		procedure SetContext(const VContext : ISGNearlyContext);
+		function GetContext() : ISGNearlyContext;
+		
+		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:TSGReal = 1);
+		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);
+		procedure EndScene();
+		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);
+		procedure LoadIdentity();
+		procedure ClearColor(const r,g,b,a : TSGFloat);
+		procedure Vertex3f(const x,y,z:TSGSingle);
+		procedure Scale(const x,y,z : TSGSingle);
+		procedure Color3f(const r,g,b:TSGSingle);
+		procedure TexCoord2f(const x,y:TSGSingle);
+		procedure Vertex2f(const x,y:TSGSingle);
+		procedure Color4f(const r,g,b,a:TSGSingle);
+		procedure Normal3f(const x,y,z:TSGSingle);
+		procedure Translatef(const x,y,z:TSGSingle);
+		procedure Rotatef(const angle:TSGSingle;const x,y,z:TSGSingle);
+		procedure Enable(VParam:TSGCardinal);
+		procedure Disable(const VParam:TSGCardinal);
+		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);
+		procedure Lightfv(const VLight,VParam:TSGCardinal;const VParam2:TSGPointer);
+		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);
+		procedure BindTexture(const VParam:TSGCardinal;const VTexture:TSGCardinal);
+		procedure TexParameteri(const VP1,VP2,VP3:TSGCardinal);
+		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:SGInt);
+		procedure TexEnvi(const VP1,VP2,VP3:TSGCardinal);
+		procedure TexImage2D(const VTextureType:TSGCardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:TSGCardinal;VBitMap:TSGPointer);
+		procedure ReadPixels(const x,y:TSGInteger;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: TSGPointer);
+		procedure CullFace(const VParam:TSGCardinal);
+		procedure EnableClientState(const VParam:TSGCardinal);
+		procedure DisableClientState(const VParam:TSGCardinal);
+		procedure GenBuffersARB(const VQ:TSGInteger;const PT:PCardinal);
+		procedure DeleteBuffersARB(const VQuantity:TSGLongWord;VPoint:TSGPointer);
+		procedure BindBufferARB(const VParam:TSGCardinal;const VParam2:TSGCardinal);
+		procedure BufferDataARB(const VParam:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer;const VParam2:TSGCardinal;const VIndexPrimetiveType : TSGLongWord = 0);
+		procedure DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:TSGCardinal;VBuffer:TSGPointer);
+		procedure ColorPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);
+		procedure TexCoordPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);
+		procedure NormalPointer(const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);
+		procedure VertexPointer(const VQChannels:TSGLongWord;const VType:TSGCardinal;const VSize:TSGInt64;VBuffer:TSGPointer);
+		function IsEnabled(const VParam:TSGCardinal):Boolean;
+		procedure Clear(const VParam:TSGCardinal);
+		procedure LineWidth(const VLW:TSGSingle);
+		procedure PointSize(const PS:Single);
+		procedure PopMatrix();
+		procedure PushMatrix();
+		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
+		procedure Vertex3fv(const Variable : TSGPointer);
+		procedure Normal3fv(const Variable : TSGPointer);
+		procedure MultMatrixf(const Variable : TSGPointer);
+		procedure ColorMaterial(const r,g,b,a:TSGSingle);
+		procedure MatrixMode(const Par:TSGLongWord);
+		procedure LoadMatrixf(const Variable : TSGPointer);
+		procedure ClientActiveTexture(const VTexture : TSGLongWord);
+		procedure ActiveTexture(const VTexture : TSGLongWord);
+		procedure ActiveTextureDiffuse();
+		procedure ActiveTextureBump();
+		procedure BeginBumpMapping(const Point : Pointer );
+		procedure EndBumpMapping();
+		procedure PolygonOffset(const VFactor, VUnits : TSGFloat);
+		{$IFDEF MOBILE}
+			procedure GenerateMipmap(const Param : TSGCardinal);
+		{$ELSE}
+			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);
+			{$ENDIF}
+		
+			(* Shaders *)
+		function SupporedShaders() : TSGBoolean;
+		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
+		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
+		procedure CompileShader(const VShader : TSGLongWord);
+		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);
+		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
+		procedure DeleteShader(const VProgram : TSGLongWord);
+		
+		function CreateShaderProgram() : TSGLongWord;
+		procedure AttachShader(const VProgram, VShader : TSGLongWord);
+		procedure LinkShaderProgram(const VProgram : TSGLongWord);
+		procedure DeleteShaderProgram(const VProgram : TSGLongWord);
+		
+		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
+		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
+		procedure UseProgram(const VProgram : TSGLongWord);
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
+		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
+		procedure Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);
+		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
+		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
+		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
+		
+		function SupporedDepthTextures():TSGBoolean;
+		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
+		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+		procedure DrawBuffer(const VType : TSGCardinal);
+		procedure ReadBuffer(const VType : TSGCardinal);
+		procedure GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+		procedure BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
+		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer, VLevel: TSGLongWord);
+		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);
+		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);
+		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);
+		
+		property Width : TSGLongWord read GetWidth write SetWidth;
+		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Context : ISGNearlyContext read GetContext write SetContext;
+		end;
+	
+	ISGRendered = interface
+		function GetRender() : ISGRender;
+		property Render : ISGRender read GetRender;
+		end;
 
 operator + (const a,b:TSGComplexNumber):TSGComplexNumber;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const a,b:TSGComplexNumber):TSGComplexNumber;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -326,15 +456,15 @@ function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3:SGVertex):SGVertex
 function SGGetPlaneFromThreeVertex(const a1,a2,a3:SGVertex):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function Random(const lx,ly:LongWord):TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2:SGVertex):SGVertex;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRoundQuad(const VRender:TSGRender;const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
+procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
 function SGColorImport(const r1:real = 0;const g1:real = 0;const b1:real = 0;const a1:real = 1):SGColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPoint2fToVertex2f(const Point:SGPoint):SGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPoint2fToVertex3f(const Point:SGPoint):SGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetArrayOfRoundQuad(const Vertex1,Vertex3:SGVertex; const Radius:real; const Interval:LongInt):SGArVertex;
-procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
+procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
 	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConstructRoundQuad(const VRender:TSGRender;const ArVertex:SGArSGVertex;const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
+procedure SGConstructRoundQuad(const VRender:ISGRender;const ArVertex:SGArSGVertex;const Interval:LongInt;const QuadColor:SGColor; const LinesColor:SGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
 function SGAbsTwoVertex2f(const Vertex1,Vertex2:SGVertex2f):TSGSingle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGQuickRePlaceVertexType(var LongInt1,LongInt2:TSGVertexType); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGVertex2fToPoint2f(const Vertex:TSGVertex2f):TSGPoint2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -360,7 +490,7 @@ procedure SGWriteMatrix4(const P:TSGPointer);{$IFDEF SUPPORTINLINE}inline;{$ENDI
 function SGGetIdentityMatrix():TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetTranslateMatrix(const Vertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTranslateMatrix(const VMatrix : TSGMatrix4; const VVertex : TSGVertex3f):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGMultMatrixInRender(const VRender : ISGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetRotateMatrix(const Angle:Single;const Axis:TSGVertex3f) : TSGMatrix4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -378,7 +508,7 @@ function SGTransformVector(const Matrix : TSGMatrix4; const Vec : TSGVertex3f):T
 function SGInverseMatrix(const VSourseMatrix : TSGMatrix4) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetScaleMatrix(const VVertex : TSGVertex3f): TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFNDEF MOBILE}
-function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF}
 function SGTriangleSize(const a,b,c:TSGVertex3f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGTriangleSize(const a,b,c:TSGVertex2f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -530,7 +660,7 @@ Result := SGTriangleSize(Abs(a-c),Abs(c-b),Abs(b-a));
 end;
 
 {$IFNDEF MOBILE}
-function SGGetVertexUnderPixel(const VRender : TSGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2f):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	x,y,z : Real;
 begin
@@ -638,7 +768,7 @@ else
 	end;
 end;
 
-procedure SGMultMatrixInRender(const VRender : TSGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGMultMatrixInRender(const VRender : ISGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.MultMatrixf(@Matrix);
 end;
@@ -1182,7 +1312,7 @@ begin
 Result:=sqrt(sqr(Vertex1.x-Vertex2.x)+sqr(Vertex1.y-Vertex2.y));
 end;
 
-procedure TSGVertex3f.VertexPoint(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.VertexPoint(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.BeginScene(SGR_POINTS);
 Vertex(VRender);
@@ -1195,7 +1325,7 @@ Result := Self;
 Result.Normalize();
 end;
 
-procedure TSGVertex3f.LightPosition(const VRender:TSGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.LightPosition(const VRender:ISGRender;const Ligth:LongInt = SGR_LIGHT0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Light:array[0..3] of TSGVertexType;
 	AmbientLight : array[0..3] of TSGVertexType = (0.5,0.5,0.5,1.0);
@@ -1213,12 +1343,12 @@ VRender.Lightfv(Ligth,SGR_SPECULAR, @SpecularLight);
 VRender.Lightfv(Ligth,SGR_POSITION,@Light);
 end;
 
-procedure TSGVertex3f.Normal(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.Normal(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Normal3f(x,y,z);
 end;
 
-procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGWndSomeQuad(const a,c:SGVertex;const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	b,d:SGVertex;
 begin
@@ -1252,7 +1382,7 @@ begin
 Result.Import(a.x+b.x,a.y+b.y);
 end;
 
-procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSomeQuad(a,b,c,d:SGVertex;vl,np:SGPoint;const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.BeginScene(SGR_QUADS);
 VRender.TexCoord2f(vl.x, vl.y);
@@ -1266,7 +1396,7 @@ d.Vertex(VRender);
 VRender.EndScene();
 end;
 
-procedure SGRoundWindowQuad(const VRender:TSGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
+procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13:SGVertex;const Vertex21,Vertex23:SGVertex; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1:SGColor;const QuadColor2:SGColor;
 	const WithLines:boolean; const LinesColor1:SGColor4f; const LinesColor2:SGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -1275,7 +1405,7 @@ SGRoundQuad(VRender,Vertex21,Vertex23,Radius2,Interval,QuadColor2,LinesColor2,Wi
 end;
 
 procedure SGRoundQuad(
-	const VRender:TSGRender;
+	const VRender:ISGRender;
 	const Vertex1,Vertex3:SGVertex; 
 	const Radius:real; 
 	const Interval:LongInt;
@@ -1329,7 +1459,7 @@ For i:=0 to Interval do
 end;
 
 procedure SGConstructRoundQuad(
-	const VRender:TSGRender;
+	const VRender:ISGRender;
 	const ArVertex:SGArSGVertex;
 	const Interval:LongInt;
 	const QuadColor:SGColor; 
@@ -1404,7 +1534,7 @@ x:=x1;
 y:=y1;
 end;
 
-procedure TSGPoint2f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGPoint2f.Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex2f(x,y);
 end;
@@ -1429,7 +1559,7 @@ y/=vabs;
 z/=vabs;
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.Vertex(const VRender:ISGRender;Const P:Pointer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if p=nil then
 	VRender.Vertex3f(x,y,z)
@@ -1619,12 +1749,12 @@ Result:=Self;
 Result.a*=NewAlpha;
 end;
 
-procedure TSGVertex3f.Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.Translate(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Translatef(x,y,z);
 end;
 
-procedure TSGVertex2f.Translate(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex2f.Translate(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Translatef(x,y,0);
 end;
@@ -1690,7 +1820,7 @@ begin
 Result.Import(a.r*b,a.g*b,a.b*b,a.a*b);
 end;
 
-procedure TSGPoint3f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGPoint3f.Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex3f(x,y,z);
 end;
@@ -1822,12 +1952,12 @@ Result.x:=a.x-b.x;
 Result.y:=a.y-b.y;
 end;
 
-procedure TSGColor3f.Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGColor3f.Color(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetColor(VRender);
 end;
 
-procedure TSGColor3f.SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGColor3f.SetColor(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Color3f(r,g,b);
 end;
@@ -2123,27 +2253,27 @@ b:=b1;
 a:=a1;
 end;
 
-procedure TSGVertex2f.TexCoord(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex2f.TexCoord(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.TexCoord2f(x,y);
 end;
 
-procedure TSGColor4f.SetColor(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGColor4f.SetColor(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Color(VRender);
 end;
 
-procedure TSGColor4f.Color(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGColor4f.Color(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Color4f(r,g,b,a);
 end;
 
-procedure TSGVertex2f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex2f.Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex2f(x,y);
 end;
 
-procedure TSGVertex3f.Vertex(const VRender:TSGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGVertex3f.Vertex(const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 VRender.Vertex3f(x,y,z);
 end;

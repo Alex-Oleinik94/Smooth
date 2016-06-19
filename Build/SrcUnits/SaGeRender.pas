@@ -7,71 +7,54 @@ interface
 uses 
 	 SaGeBase
 	,SaGeBased
+	,SaGeBaseClasses
+	,SaGeRenderConstants
+	,SaGeCommon
 	{$IFDEF MSWINDOWS}
 		,multimon
 		{$ENDIF}
 	;
 
-{$INCLUDE Includes\SaGeRenderConstants.inc}
-
-const
-	TSGRenderFar = 5000;
-	TSGRenderNear = 1;
 type
-	TSGRPInteger = ^ integer;
-	
-	TSGMatrixMode   = TSGLongWord;
-	TSGPrimtiveType = TSGLongWord;
-	
-	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX,SGRenderGLES);
-	TSGRender       = class;
-	
-	TSGRenderClass  = class of TSGRender;
-	
-	TSGRender = class(TSGClass)
+	TSGRender = class(TSGNamed, ISGRender)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-		function Width() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function Height() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
-		// Тут содержится инфа, что это за рендер такой..
+		function GetWidth() : TSGLongWord;virtual;
+		function GetHeight() : TSGLongWord;virtual;
+			private
+		procedure SetContext(const VContext : ISGNearlyContext);
+		function  GetContext() : ISGNearlyContext;
+		procedure SetWidth(const VWidth : TSGLongWord);virtual;abstract;
+		procedure SetHeight(const VHeight : TSGLongWord);virtual;abstract;
+		function  GetOption(const VOption : TSGString) : TSGPointer;virtual;abstract;
+		procedure SetOption(const VOption : TSGString; const VValue : TSGPointer);virtual;abstract;
+		procedure Paint();virtual;abstract;
+			protected
 		FType   : TSGRenderType;
-		// Это наш экземпляр класса контекста
-		FWindow : TSGClass;
+		FContext : ISGNearlyContext;
 			public
-		// Возвращает тип рендера
-		property RenderType : TSGRenderType read FType;
-		// Эту процедурку вызывает экземпляр класса контерста при его инициазизации
-		// Она устанавливает формат пикселов в окне для этого рендера
-		function SetPixelFormat():TSGBoolean;virtual;abstract;overload;
-		// Связывает окно с рендером OpenGL или DirectX
+		function SetPixelFormat():TSGBoolean;virtual;abstract;
 		function MakeCurrent():TSGBoolean;virtual;
-		// Разрывается связь между окном и рендером OpenGL или DirectX
 		procedure ReleaseCurrent();virtual;abstract;
-		// Открывает контекст устройства. Возвращает удалось ли ему это сделать, или нет.
 		function CreateContext():TSGBoolean;virtual;abstract;
-		// Устанавливает граници рисования на окне
 		procedure Viewport(const a,b,c,d:TSGLongWord);virtual;abstract;
-		// Инициализирует рендер
 		procedure Init();virtual;abstract;
-		// Возвращает, можно ли отправить в видуху на хранение данные, которые нужно отобразить на экране
 		function SupporedVBOBuffers():TSGBoolean;virtual;
-		// Выводит на экран буфер
 		procedure SwapBuffers();virtual;abstract;
-		// Сохранения ресурсов рендера и убивание самого рендера
 		procedure LockResourses();virtual;
-		// Инициализация рендера и загрузка сохраненных ресурсов
 		procedure UnLockResourses();virtual;
 			public
-		// Устанавливает 2D отроганальную проэкцию между двумя точками экрана (нижней левой и верхней правой)
+		property Width : TSGLongWord read GetWidth write SetWidth;
+		property Height : TSGLongWord read GetHeight write SetHeight;
+		property RenderType : TSGRenderType read FType;
+		property Context : ISGNearlyContext read GetContext write SetContext;
+			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
-		// Устанавливает режим матрици проэкции
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:TSGReal = 1);virtual;abstract;
-		//Это аналог glBegin\glEnd
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;
 		procedure EndScene();virtual;abstract;
-		// Все остальные функции тут - аналоги своих функций в OpenGL, за исклбчением немногих.
 		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);virtual;abstract;
 		procedure LoadIdentity();virtual;abstract;
 		procedure ClearColor(const r,g,b,a : TSGFloat);virtual;abstract;
@@ -168,9 +151,9 @@ type
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);virtual;abstract;
 		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);virtual;abstract;
-			public
-		property Window : TSGClass read FWindow write FWindow;
 		end;
+	
+	TSGRenderClass  = class of TSGRender;
 
 procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -194,6 +177,16 @@ while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
 	cc := cc + 1;
 	end;
 {$ENDIF}
+end;
+
+procedure TSGRender.SetContext(const VContext : ISGNearlyContext);
+begin
+FContext := VContext;
+end;
+
+function TSGRender.GetContext() : ISGNearlyContext;
+begin
+Result := FContext;
 end;
 
 function TSGRender.SupporedDepthTextures():TSGBoolean;
@@ -233,8 +226,8 @@ end;
 constructor TSGRender.Create();
 begin
 inherited Create();
-FWindow:=nil;
-FType:=SGRenderNone;
+FContext := nil;
+FType    := SGRenderNone;
 end;
 
 destructor TSGRender.Destroy();
@@ -243,27 +236,27 @@ SGLog.Sourse(['TSGRender__Destroy()']);
 inherited Destroy();
 end;
 
-function TSGRender.Width() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGRender.GetWidth() : TSGLongWord;
 begin
-if FWindow = nil then
+if FContext = nil then
 	Result := 0
 else
 	begin
-	Result := TSGLongWord(FWindow.Get('CLIENT WIDTH'));
+	Result := Context.ClientWidth;
 	if Result = 0 then
-		Result := TSGLongWord(FWindow.Get('WIDTH'));
+		Result := Context.Width;
 	end;
 end;
 
-function TSGRender.Height() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGRender.GetHeight() : TSGLongWord;
 begin
-if FWindow = nil then
+if FContext = nil then
 	Result := 0
 else
 	begin
-	Result := TSGLongWord(FWindow.Get('CLIENT HEIGHT'));
+	Result := Context.ClientHeight;
 	if Result = 0 then
-		Result := TSGLongWord(FWindow.Get('HEIGHT'));
+		Result := Context.Height;
 	end;
 end;
 

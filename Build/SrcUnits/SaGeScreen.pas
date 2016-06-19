@@ -43,7 +43,7 @@ type
 	TSGComboBox         = class;
 	TSGGrid             = class;
 	TSGButtonMenuButton = class;
-	TSGScreen=class;
+	TSGScreen           = class;
 	
 	TSGComponent          = class;
 	PTSGComponent         = ^ TSGComponent;
@@ -53,7 +53,7 @@ type
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
 	TSGComponent = class(TSGContextObject)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FWidth:LongInt;
@@ -96,7 +96,7 @@ type
 		property Width : LongInt read FNeedWidth write FNeedWidth;
 		property Height : LongInt read FNeedHeight write FNeedHeight;
 		property Left : LongInt read FLeft write FLeft;
-		property Top : LongInt read FTop write FTop;
+		property Top : LongInt read FTop write FNeedTop;
 		property Parent : TSGComponent read FParent write FParent;
 		property Bottom : longint read GetBottom write SetBottom;
 		property Right : longint read GetRight write SetRight;
@@ -172,7 +172,8 @@ type
 		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
 		function GetChild(a:Int):TSGComponent;
 		property Children[Index : Int (* Indexing [1..Size] *)]:TSGComponent read GetChild;
-		procedure CreateChild(const Child:TSGComponent);
+		function CreateChild(const Child : TSGComponent) : TSGComponent;
+		procedure CompleteChild(const VChild : TSGComponent);
 		function LastChild():TSGComponent;
 		procedure CreateAlign(const NewAllign:TSGExByte);
 		function CursorPosition():TSGPoint;
@@ -248,7 +249,7 @@ type
 	
 	TSGButton=class(TSGComponent)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		FCursorOnButtonTimer:Real;
@@ -267,7 +268,7 @@ type
 		FTextColor:TSGColor4f;
 		FTextPosition:Int;
 		procedure FromDraw;override;
-		constructor Create;
+		constructor Create;override;
 			private
 		function GetTextPosition : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetTextPosition(const Pos:Boolean);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -280,7 +281,7 @@ type
 	PSGProgressBarFloat = ^ TSGProgressBarFloat;
 	TSGProgressBar=class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FProgress:TSGProgressBarFloat;
@@ -305,7 +306,7 @@ type
 	
 	TSGPanel=class(TSGComponent)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		FViewLines:Boolean;
@@ -319,7 +320,7 @@ type
 	
 	TSGPicture=class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FImage       : TSGImage;
@@ -352,7 +353,7 @@ function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
 type
 	TSGEdit=class(TSGComponent)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		FCursorOnComponentTimer:Real;
@@ -385,7 +386,7 @@ type
 	TSGButtonMenuProcedure = procedure (a,b:LongInt;p:Pointer);
 	TSGButtonMenuButton=class(TSGButton)
 			public
-		constructor Create;
+		constructor Create;override;
 			public
 		FIdentifity:Int64;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -394,7 +395,7 @@ type
 		end;
 	TSGButtonMenu=class(TSGComponent)
 			public
-		constructor Create;
+		constructor Create;override;
 			public
 		FActiveButton:longint;
 		FButtonTop:longint;
@@ -423,7 +424,7 @@ const
 type
 	TSGScrollBarButton=class(TSGButton)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -450,7 +451,7 @@ type
 	TSGComboBoxProcedure = TSGButtonMenuProcedure;
 	TSGComboBox=class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			public
 		FBackLight:Boolean;
@@ -462,6 +463,7 @@ type
 				FImage:TSGImage;
 				FCaption:TSGCaption;
 				FID:Int;
+				FActive : TSGBoolean;
 				end;
 		FProcedure:TSGComboBoxProcedure;
 		FMaxColumns:longWord;
@@ -487,7 +489,7 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
-		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1);
+		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
 		procedure ClearItems();
 		function Items(const Index : TSGLongWord):TSGString;
 			public
@@ -497,7 +499,7 @@ type
 	
 	TSGGrid=class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			public
 		FItems:TArTArTSGComponent;
@@ -540,7 +542,7 @@ type
 		end;
 	TSGRadioButton = class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -567,6 +569,9 @@ var
 	SGScreen:TSGScreen = nil;
 
 implementation
+
+uses
+	SaGeEngineConfigurationPanel;
 
 var
 	SGScreens:packed array of 
@@ -1033,30 +1038,30 @@ if  FOpen and (FCursorOnComponent) then
 	begin
 	for i:=0 to Colums-1 do
 		begin
-		if 		(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer)
-			and
-				(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer)
-			and
-				(((FMaxColumns<Length(FItems)) and (Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) then
+		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer) and
+			(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer) and
+			(((FMaxColumns<Length(FItems)) and 
+			(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) and
+			FItems[i].FActive then
+				begin
+				FCursorOnThisItem:=FFirstScrollItem+i;
+				if FClickOnOpenBox then
 					begin
-					FCursorOnThisItem:=FFirstScrollItem+i;
-					if FClickOnOpenBox then
-						begin
-						FCanChange:=False;
-						FOpen:=False;
-						ClearPriority();
-						if FProcedure<>nil then
-							FProcedure(FSelectItem,FCursorOnThisItem,Self);
-						FSelectItem:=FCursorOnThisItem;
-						Context.FCursorKeyPressed:=SGNoCursorButton;
-						FTextColor:=SGColorImport();
-						FBodyColor:=SGColorImport();
-						if OnChange<>nil then
-							OnChange(Self);
-						FClickOnOpenBox:=False;
-						end;
-					Break;
+					FCanChange:=False;
+					FOpen:=False;
+					ClearPriority();
+					if FProcedure<>nil then
+						FProcedure(FSelectItem,FCursorOnThisItem,Self);
+					FSelectItem:=FCursorOnThisItem;
+					Context.FCursorKeyPressed:=SGNoCursorButton;
+					FTextColor:=SGColorImport();
+					FBodyColor:=SGColorImport();
+					if OnChange<>nil then
+						OnChange(Self);
+					FClickOnOpenBox:=False;
 					end;
+				Break;
+				end;
 		end;
 	end;
 UpgradeTimer(FOpen,FOpenTimer,5);
@@ -1196,7 +1201,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		begin
 		for i:=0 to Colums-1 do
 			begin
-			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then
+			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then if FItems[FFirstScrollItem+i].FActive then
 				begin
 				if  (FOpenTimer>SGZero)  then
 				SGRoundQuad(Render,
@@ -1211,7 +1216,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 					SGGetColor4fFromLongWord($9740F7).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
 					True);
 				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then
+			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].FActive then
 				begin
 				if  (FOpenTimer>SGZero)  then	
 				SGRoundQuad(Render,
@@ -1226,7 +1231,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 					SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
 					True);
 				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then
+			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].FActive then
 				begin
 				if  (FOpenTimer>SGZero) then
 				SGRoundQuad(Render,
@@ -1242,15 +1247,28 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 					True);
 				end;
 			if FOpenTimer>SGZero then
-			DrawItem(
-				SGPoint2fImport(
-					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-				SGPoint2fImport(
-					GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
-				FTextColor.WithAlpha(FOpenTimer),
-				FFirstScrollItem+i);
+				begin
+				if FItems[FFirstScrollItem+i].FActive then
+					DrawItem(
+						SGPoint2fImport(
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
+						SGPoint2fImport(
+							GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
+						FTextColor.WithAlpha(FOpenTimer),
+						FFirstScrollItem+i)
+				else
+					DrawItem(
+						SGPoint2fImport(
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
+						SGPoint2fImport(
+							GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
+							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
+						SGColorImport(1,0,0).WithAlpha(FOpenTimer * FVisibleTimer),
+						FFirstScrollItem+i);
+				end;
 			end;
 		end;
 	if  (1-FOpenTimer>SGZero) and
@@ -1267,18 +1285,19 @@ FBackLight:=False;
 inherited;
 end;
 
-procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1);
+procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
 begin
-if Self<>nil then
+if Self <> nil then
 	begin
-	SetLEngth(FItems,Length(FItems)+1);
-	FItems[High(FItems)].FCaption:=ItemCaption;
-	FItems[High(FItems)].FImage:=ItemImage;
-	FItems[High(FItems)].FID:=FIdent;
+	SetLEngth(FItems, Length(FItems) + 1);
+	FItems[High(FItems)].FCaption:= ItemCaption;
+	FItems[High(FItems)].FImage  := ItemImage;
+	FItems[High(FItems)].FID     := FIdent;
+	FItems[High(FItems)].FActive := VActive;
 	end;
 end;
 
-constructor TSGComboBox.Create;
+constructor TSGComboBox.Create();
 begin
 inherited;
 FClickOnOpenBox:=False;
@@ -2077,11 +2096,23 @@ writeln('Height = ',Height);
 end;
 
 procedure TSGComponent.SetMiddleBounds(const NewWidth,NewHeight:LongInt);
+var
+	PW, PH : TSGLongWord;
 begin
 FNeedHeight:=NewHeight;
 FNeedWidth:=NewWidth;
-FNeedLeft:=Round((Render.Width-NewWidth)/2);
-FNeedTop:=Round((Render.Height-NewHeight)/2);
+if Parent <> nil then
+	begin
+	PW := Parent.Width;
+	PH := Parent.Height;
+	end
+else
+	begin
+	PW := Render.Width;
+	PH := Render.Height;
+	end;
+FNeedLeft:=Round((PW-NewWidth)/2);
+FNeedTop:=Round((PH-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
@@ -2390,16 +2421,31 @@ else
 				Result.Import(0,0);
 end;
 
-procedure TSGComponent.CreateChild(const Child:TSGComponent);
+procedure TSGComponent.CompleteChild(const VChild : TSGComponent);
+var
+	i : TSGLongWord;
 begin
-if (Child<>nil) and FCanHaveChildren then
+if ContextAssigned() then
+	VChild.SetContext(Context);
+if VChild.Parent = nil then
+	VChild.Parent := Self;
+if VChild.Font = nil then
+	VChild.Font := Font;
+if VChild.FChildren <> nil then
+	if Length(VChild.FChildren) > 0 then
+		for i := 0 to High(VChild.FChildren) do
+			VChild.CompleteChild(VChild.FChildren[i]);
+end;
+
+function TSGComponent.CreateChild(const Child : TSGComponent) : TSGComponent;
+begin
+Result := nil;
+if (Child <> nil) and FCanHaveChildren then
 	begin
-	SetLength(FChildren,Length(FChildren)+1);
-	FChildren[High(FChildren)]:=Child;
-	Child.SetContext(Context);
-	Child.FParent:=Self;
-	if Child.FFont=nil then
-		Child.FFont:=FFont;
+	Result := Child;
+	SetLength(FChildren, Length(FChildren) + 1);
+	FChildren[High(FChildren)] := Result;
+	CompleteChild(Result);
 	end;
 end;
 
@@ -3423,14 +3469,20 @@ var
 	CanRePleace : TSGBoolean = True;
 	i : TSGLongWord;
 begin
+if (Context.KeysPressed(SG_CTRL_KEY)) and 
+   (Context.KeysPressed(SG_ALT_KEY)) and 
+   (Context.KeyPressedType = SGDownKey) and 
+   (Context.KeyPressedChar = 'O') and 
+   TSGEngineConfigurationPanel.CanCreate(Self) then
+	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();
 //{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenPaint". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
-if FNewPosition<>FOldPosition then
+if FNewPosition <> FOldPosition then
 	begin
 	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 	Render.InitMatrixMode(SG_2D);
 	Render.Color4f(1,1,1,1);
 	
-	SGScreen.UpgradeTimer(True,FMoveProgress);
+	UpgradeTimer(True,FMoveProgress);
 	
 	if Abs(1-FMoveProgress)<SGZero then
 		begin
@@ -3463,33 +3515,29 @@ if FNewPosition<>FOldPosition then
 if FNewPosition=FOldPosition then
 	begin
 	//{$IFDEF ANDROID}SGLog.Sourse('"SGScreenPaint" : Enter if "FNewPosition=FOldPosition".');{$ENDIF}
-	SGScreen.InProcessing := True;
+	InProcessing := True;
 	
-	if SGScreen<>nil then
-		SGScreen.FromUpDateUnderCursor(CanRePleace);
-	if SGScreen<>nil then
-		SGScreen.FromUpDate(CanRePleace);
-	
-	if SGScreen<>nil then
-		SGScreen.DrawDrawClasses();
+	FromUpDateUnderCursor(CanRePleace);
+	FromUpDate(CanRePleace);
+	DrawDrawClasses();
 	
 	Render.LineWidth(1);
 	Render.InitMatrixMode(SG_2D);
-
+	
 	CanRePleace:=False;
 	for i:=0 to High(SGScreens) do
-		if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>SGScreen) then
-			SGScreen.FromUpDate(CanRePleace);
-
-	if SGScreen<>nil then
-		SGScreen.FromDraw(); // -- рендеринг всего
+		if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
+			SGScreens[i].FScreen.FromUpDate(CanRePleace);
 	
-	SGScreen.InProcessing := False;
+	FromDraw();
+	
+	InProcessing := False;
 	
 	if (Context.KeysPressed(SG_CTRL_KEY)) and (Context.KeysPressed(SG_ALT_KEY)) and (Context.KeyPressedType=SGDownKey) then
 		begin
 		case Context.KeyPressedByte of
-		87://Close
+		//'W' Close
+		87:
 			begin
 			SGScreens[FNewPosition].FScreen:=nil;
 			if SGScreens[FNewPosition].FImage<>nil then
@@ -3524,7 +3572,8 @@ if FNewPosition=FOldPosition then
 				
 				end;
 			end;
-		78://New Screen
+		//'N' New Screen
+		78:
 			begin
 			SetLength(SGScreens,Length(SGScreens)+1);
 			
@@ -3594,8 +3643,8 @@ FOldPosition:=0;
 SGScreen := TSGScreen.Create();
 
 SetLength(SGScreens,1);
-SGScreens[Low(SGScreens)].FScreen:=SGScreen;
-SGScreens[Low(SGScreens)].FImage:=nil;
+SGScreens[Low(SGScreens)].FScreen := SGScreen;
+SGScreens[Low(SGScreens)].FImage  := nil;
 end;
 
 finalization

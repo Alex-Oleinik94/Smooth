@@ -24,7 +24,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 	,SNMPsend
-	
+	,SaGeContextInterface
 	(* ============ Engine Includes ============ *)
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX
@@ -733,7 +733,7 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ReadParams();
 {$ENDIF}
 
-Context:=
+Context :=
 {$IFDEF LAZARUS}
 	TSGContextLazarus
 {$ELSE}
@@ -750,33 +750,33 @@ Context:=
 
 with Context do
 	begin
-	Width  := GetScreenResolution.x;
-	Height := GetScreenResolution.y;
-	Fullscreen:=VFullscreen;
+	Width  := GetScreenResolution().x;
+	Height := GetScreenResolution().y;
+	Fullscreen := VFullscreen;
 	{$IFDEF ANDROID}
-		(Context as TSGContextAndroid).AndroidApp:=State;
+		(Context as TSGContextAndroid).AndroidApp := State;
 		{$ENDIF}
 	
 	{$IFDEF MSWINDOWS}
-		if FRenderState=SGBR_DIRECTX then
-			Tittle:='SaGe DirectX Window'
+		if FRenderState = SGBR_DIRECTX then
+			Tittle := 'SaGe DirectX Window'
 		else
 		{$ENDIF}
-			Tittle:='SaGe OpenGL Window';
+			Tittle := 'SaGe OpenGL Window';
 		
 	DrawProcedure:=TSGContextProcedure(@DrawAllApplications);
 	//InitializeProcedure:=TSGContextProcedure(@InitAllApplications);
 	
-	IconIdentifier:=5;
-	CursorIdentifier:=5;
+	IconIdentifier   := 5;
+	CursorIdentifier := 5;
 	
 	SelfPoint:=@Context;
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then
-			RenderClass:=TSGRenderDirectX
+			RenderClass := TSGRenderDirectX
 		else
 		{$ENDIF}
-			RenderClass:=TSGRenderOpenGL;
+			RenderClass := TSGRenderOpenGL;
 	end;
 
 Context.Initialize();
@@ -977,6 +977,8 @@ dos.findclose(sr);
 end;
 
 begin
+SGPrintEngineVersion();
+
 SetLength(ArF,10);
 ArF[0]:='pas';
 ArF[1]:='pp';

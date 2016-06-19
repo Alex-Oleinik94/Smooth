@@ -4,7 +4,7 @@ unit SaGeBased;
 
 {
  *	@Author, REZ1DENT3
- * 	@Engine, Sport & SaGe
+ * 	@Engine, SaGe
  * 	@copyright 2013
 }
 
@@ -32,6 +32,7 @@ type
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;
 	TSGCardinal = Cardinal;
+	TSGGuid     = TGuid;
 
  { encoding }
  procedure Windows1251ToUTF8(var Str: TSGString);
@@ -57,7 +58,7 @@ type
  {
  *	Author: 	Sanches
  * 	Modifier:	REZ1DENT3 
- * 	Engine:		eSport & SaGe
+ * 	Engine:		SaGe
  * 
  * 	Developer : 
  *  [

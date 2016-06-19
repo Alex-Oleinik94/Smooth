@@ -206,15 +206,26 @@ var
 	i, ii : TSGLongWord;
 	Vertex : TSGVertex3f;
 	MaxLinesShift : TSGLongWord;
+	Alpha, Shift : TSGFloat;
 begin
 MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
 ii := Trunc(FBegin);
 Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-for i := ii to Trunc(FEnd) do
+Shift := Abs(FBegin - ii);
+Vertex.y -= Shift * Font.FontHeight;
+for i := ii to Trunc(FEnd) + 1 do
 	begin
 	if i >= CountLines() then
 		break;
-	Render.Color3f(0.9,0.9,0.9);
+	
+	if i = ii  then
+		Alpha := (1 - Shift) ** 2
+	else if i - Shift + 1 > FEnd then
+		Alpha := Abs(FEnd - i + Shift - 1) ** 2
+	else
+		Alpha := 1;
+	
+	Render.Color4f(0.9,0.9,0.9,Alpha);
 	Font.DrawFontFromTwoVertex2f(
 		SGStr(i+1),
 		SGVertex2fImport(
@@ -224,7 +235,7 @@ for i := ii to Trunc(FEnd) do
 			Vertex.x + MaxLinesShift,
 			Vertex.y + (i - ii + 1) * Font.FontHeight),
 		False);
-	Render.Color3f(1,1,1);
+	Render.Color4f(1,1,1,Alpha);
 	Font.DrawFontFromTwoVertex2f(
 		FFile[i],
 		SGVertex2fImport(
@@ -334,8 +345,8 @@ if CountInsets() > 0 then
 end;
 
 begin
-DrawInsetsTitles();
 inherited;
+DrawInsetsTitles();
 end;
 
 function TSGNTextInset.CountLines() : TSGLongWord;

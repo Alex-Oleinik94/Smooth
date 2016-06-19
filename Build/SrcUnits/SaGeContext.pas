@@ -11,6 +11,8 @@ uses
 	,SysUtils
 	,crt
 	,SaGeRender
+	,SaGeContextInterface
+	,SaGeBaseClasses
 	{$IFDEF LAZARUS}
 		,Interfaces,
 		LMessages,
@@ -35,20 +37,33 @@ const
 	SG_ESC_KEY = 27;
 	SG_ESCAPE_KEY = SG_ESC_KEY;
 type
-	TSGCursorButtons = (SGNoCursorButton,SGMiddleCursorButton,SGLeftCursorButton,SGRightCursorButton);
-	TSGCursorButtonType = (SGDownKey, SGUpKey);
-	TSGCursorWheel = (SGNoCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
-	// SGDeferenseCursorPosition - Это разница между SGNowCursorPosition и SGLastCursorPosition
-	// SGNowCursorPosition       - Координаты мыши в настоящий момент
-	// SGLastCursorPosition      - Координаты мыши, полученые при преведущем этапе цикла
-	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
-	
+	TSGCursorButtons =            SaGeContextInterface.TSGCursorButtons;
+	TSGCursorButtonType =         SaGeContextInterface.TSGCursorButtonType;
+	TSGCursorWheel =              SaGeContextInterface.TSGCursorWheel;
+	TSGCursorPosition =           SaGeContextInterface.TSGCursorPosition;
+const
+	 SGDeferenseCursorPosition =  SaGeContextInterface.SGDeferenseCursorPosition; // - Это разница между SGNowCursorPosition и SGLastCursorPosition
+	 SGNowCursorPosition =        SaGeContextInterface.SGNowCursorPosition;       //- Координаты мыши в настоящий момент
+	 SGLastCursorPosition =       SaGeContextInterface.SGLastCursorPosition;      // - Координаты мыши, полученые при преведущем этапе цикла
+	 SGNoCursorButton =           SaGeContextInterface.SGNoCursorButton;
+	 
+	 SGMiddleCursorButton =       SaGeContextInterface.SGMiddleCursorButton;
+	 SGLeftCursorButton =         SaGeContextInterface.SGLeftCursorButton;
+	 SGRightCursorButton =        SaGeContextInterface.SGRightCursorButton;
+	 
+	 SGDownKey =                  SaGeContextInterface.SGDownKey;
+	 SGUpKey =                    SaGeContextInterface.SGUpKey;
+	 
+	 SGNoCursorWheel =            SaGeContextInterface.SGNoCursorWheel;
+	 SGUpCursorWheel =            SaGeContextInterface.SGUpCursorWheel;
+	 SGDownCursorWheel =          SaGeContextInterface.SGDownCursorWheel;
+type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
 	TSGContextProcedure = procedure(const a:TSGContext);
 	
-	TSGContext=class(TSGClass)
+	TSGContext = class(TSGNamed, ISGContext)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -56,84 +71,70 @@ type
 		procedure Initialize();virtual;
 		procedure Run();virtual;
 		procedure Messages();virtual;
-		procedure SwapBuffers();virtual;abstract;
-		
-		function GetCursorPosition():TSGPoint2f;virtual;abstract;
-		procedure SetCursorPosition(const a:TSGPoint2f);virtual;abstract;
-		
-		function GetWindowRect():TSGPoint2f;virtual;abstract;
-		function GetScreenResolution():TSGPoint2f;virtual;abstract;
-			protected
 		procedure Paint();virtual;
-		procedure UpdateElapsedTime();virtual;
-		
-		function GetWidth():LongWord;virtual;
-		procedure SetWidth(const NewWidth:LongWord);virtual;
-		procedure SetHeight(const NewHeight:LongWord);virtual;
-			public
-		// Вызывается после того, как ширина или высота окна была изменена
+		procedure UpdateTimer();virtual;
 		procedure Resize();virtual;
-		// Возвращает, возвращает ли функция GetCursorPosition() вместе с координатами мыши и 
-		// координаты верзхнего левого угла как сумму этих параметров
-		class function RectInCoords:Boolean;virtual;
-		// Нормальное закрытие контекста
 		procedure Close();virtual;
 		function ShiftClientArea() : TSGPoint2f; virtual;
 			protected
-		// Вызывается при изменении режима окна (fullscreen or not fullscreen)
-		procedure InitFullscreen(const b:Boolean);virtual;
-			public
-		// Устанавливает значение параметра, влияющего на видимость курсора над окном
-		procedure ShowCursor(const b:Boolean);virtual;abstract;
-		procedure SetTittle(const NewTittle:TSGString);virtual;
-			protected
-		// Тут хнанятся ширина и высота экраза
 		FWidth, FHeight  : TSGLongWord;
-		// Тут режим окна
 		FFullscreen      : TSGBoolean;
-		//Тут хранится значнеия параметров ширины и высоты экрана перед тем, как его развернули на полный экран
 		FFullscreenData  : packed record 
 			FNotFullscreenWidth, FNotFullscreenHeight : TSGLongWord;
 			end;
-		// Заголовок окна
-		FTitle          : TSGString;
-		// Будет ли окно закрыто после этого шага главного его цикла
+		FTitle           : TSGString;
 		FActive          : TSGBoolean;
-		// Курсор приложения
 		FCursorIdenifier : TSGLongWord;
-		// Иконка главного окна
 		FIconIdentifier  : TSGLongWord;
 			public
-		// пользовательские процедуры, которые нужно вызвать во время отрисовки и после инициализации
-		FCallDraw, FCallInitialize : TSGContextProcedure;
-		// Разница в милесекундах между этим и преведущим шагами главного цикле приложения
+		FCallDraw, 
+		 FCallInitialize : TSGContextProcedure;
 		FElapsedTime     : TSGLongWord;
-		// Время в данный момент времени
 		FElapsedDateTime : TSGDateTime;
-		FShowCursor : TSGBoolean;
+		FShowCursor      : TSGBoolean;
 			protected
 		FPaintWithHandlingMessages : TSGBoolean;
+			protected
+		procedure SetRenderClass(const NewRender : TSGRenderClass);virtual;
+		function  GetRender() : ISGRender;virtual;
+		procedure StartComputeTimer();virtual;
+		function  GetElapsedTime() : TSGLongWord;virtual;
+		function  GetTitle() : TSGString;virtual;
+		procedure SetTitle(const VTitle : TSGString);virtual;
+		function  GetWidth() : TSGLongWord;virtual;
+		function  GetHeight() : TSGLongWord;virtual;
+		procedure SetWidth(const VWidth : TSGLongWord);virtual;
+		procedure SetHeight(const VHeight : TSGLongWord);virtual;
+		function  GetLeft() : TSGLongWord;virtual;
+		function  GetTop() : TSGLongWord;virtual;
+		procedure SetLeft(const VLeft : TSGLongWord);virtual;
+		procedure SetTop(const VTop : TSGLongWord);virtual;
+		function  GetFullscreen() : TSGBoolean;virtual;
+		procedure InitFullscreen(const VFullscreen : TSGBoolean);virtual;
+		procedure SetActive(const VActive : TSGBoolean);virtual;
+		function  GetActive():TSGBoolean;virtual;
+		procedure SetCursorCentered(const VCentered : TSGBoolean);virtual;
+		function  GetCursorCentered() : TSGBoolean;virtual;
+		procedure SetSelfLink(const VLink : PISGContext);virtual;
+		function  GetSelfLink() : PISGContext;virtual;
+		function  GetCursorIcon():TSGPointer;virtual;
+		procedure SetCursorIcon(const VIcon : TSGPointer);virtual;
+		function GetIcon():TSGPointer;virtual;
+		procedure SetIcon(const VIcon : TSGPointer);virtual;
 			public
-		// Разница в милесекундах между этим и преведущим шагами главного цикле приложения
-		property ElapsedTime         : TSGLongWord         read FElapsedTime;
-		// Ширина окна
-		property Width               : TSGLongWord         read GetWidth         write SetWidth;
-		// Высота окна
-		property Height              : TSGLongWord         read FHeight          write SetHeight;
-		// Процедура, которую этот класс выполняет при отрисовке окна
-		property DrawProcedure       : TSGContextProcedure read FCallDraw        write FCallDraw;
-		// Процедура, которую этот крассс выполняет после инициализации
-		property InitializeProcedure : TSGContextProcedure read FCallInitialize  write FCallInitialize;
-		// Вызвращает развернуто на полный экран окно, или нет
-		property Fullscreen          : TSGBoolean          read FFullscreen      write InitFullscreen;
-		// Если этот праметр установить как ложь, то программа выйдет из своего главного цикла
-		property Active              : TSGBoolean          read FActive          write FActive;
-		// Курсорчик
-		property CursorIdentifier    : TSGLongWord         read FCursorIdenifier write FCursorIdenifier;
-		// Иконка
-		property IconIdentifier      : TSGLongWord         read FIconIdentifier  write FIconIdentifier;
-		// Заголовок окна
-		property Tittle              : TSGString           read FTitle          write SetTittle;
+		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
+		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
+		property Active : TSGBoolean read GetActive write SetActive;
+		property CursorIcon : TSGPointer read GetCursorIcon write SetCursorIcon;
+		property Icon : TSGPointer read GetIcon write SetIcon;
+		property Left : TSGLongWord read GetLeft write SetLeft;
+		property Top : TSGLongWord read GetTop write SetTop;
+		property Width : TSGLongWord read GetWidth write SetWidth;
+		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Title : TSGString read GetTitle write SetTitle;
+		property Render : ISGRender read GetRender;
+		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
 			public
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
@@ -145,99 +146,33 @@ type
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
 		FCursorWheel          : TSGCursorWheel;
 		FCursorInCenter       : TSGBoolean;
-			private
-		procedure SetCursorInCenter(const NP : TSGBoolean);
 			public
-		property CursorInCenter : TSGBoolean read FCursorInCenter write SetCursorInCenter;
-			public
-		// Возвращает, зажата ли клавиша
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;virtual;overload;
-		// Возвращает, зажата ли клавиша
-		function KeysPressed(const  Index : TSGChar ) : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		// Возвращает, нажата ли любая клавиша
-		function KeyPressed():TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		// Возвращает тип нажатия клавижи (либо ее отпустили в данный момент, либо нажали)
-		function KeyPressedType():TSGCursorButtonType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		// Возвращает клавишу, нажатую в данный момент
-		function KeyPressedChar():TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		// Возвращает клавишу, нажатую в данный момент
-		function KeyPressedByte():TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		// Эта процедура не для смертных
-		procedure ClearKeys();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвращает что за кнопка мышки былоа нажата в данный момент
-		function CursorKeyPressed():TSGCursorButtons;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвращает тип нажатия кнопки мышки в данный момент
-		function CursorKeyPressedType():TSGCursorButtonType;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвращает, зажата ли определененая параметром Index клавиша мышки в даннный могмент времени
-		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвраащет прокрутку колесика мышки
-		function CursorWheel():TSGCursorWheel;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвращает позицию курсора
-		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function KeysPressed(const  Index : TSGChar ) : Boolean;virtual;overload;
+		function KeyPressed():TSGBoolean;virtual;
+		function KeyPressedType():TSGCursorButtonType;virtual;
+		function KeyPressedChar():TSGChar;virtual;
+		function KeyPressedByte():TSGLongWord;virtual;
+		procedure ClearKeys();virtual;
+		function CursorKeyPressed():TSGCursorButtons;virtual;
+		function CursorKeyPressedType():TSGCursorButtonType;virtual;
+		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;virtual;
+		function CursorWheel():TSGCursorWheel;virtual;
+		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;virtual;
 			public
-		// Устанавливает указаную операцию с указанной клавишей
-		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;overload;
-		// Устанавливает указаную операцию с указанной кнопкой мышки
-		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;overload;
+		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;
+		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
 			public
-		// Копирует информацию с другого контекста
-		procedure CopyInfo(const C:TSGContext);virtual;
+		procedure CopyInfo(const C : ISGContext);virtual;
 			public
-		FNewContextType:TSGContextClass;
+		FNewContextType : TSGContextClass;
+		FRenderClass    : TSGRenderClass;
+		FRender         : TSGRender;
+		FSelfLink       : PISGContext;
 			public
-		FRenderClass : TSGRenderClass;
-		FRender      : TSGRender;
-		FSelfPoint   : PSGContext;
+		property RenderClass : TSGRenderClass      read FRenderClass write SetRenderClass;
 			public
-		// В этом свойстве перед инициализацией контекста должен быть установлет тип класса рендера
-		property RenderClass:TSGRenderClass read FRenderClass write FRenderClass;
-		// Возвращает рендер (работает после инициализации и создания самого экземпляра класса реддера из типа класса рендера при инизиализации)
-		property Render:TSGRender read FRender write FRender;
-		// Сюда должен быть присвоен указатель на экземпляр этого класса в том месте, где пользователь его описал
-		property SelfPoint:PSGContext read FSelfPoint write FSelfPoint;
-			public
-		// Получить определенную имнформацию, заключенную в индентификаторе What
 		function Get(const What:string):Pointer;override;
-		function FileOpenDlg(const VTittle: String; const VFilter : String):String;virtual;abstract;
-		function FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;virtual;abstract;
-		end;
-type
-	// Это тип, с которого пишутся все классы, которые используют Context
-	TSGContextObject=class(TSGClass)
-			public
-		// Так как этот класс должен создаваться с готовым экземпляром класса контекста,
-		// то этот конструктор теперь нельзя будет трогать
-		constructor Create();override;deprecated;
-		destructor Destroy();override;
-		constructor Create(const VContext:TSGContext);virtual;overload;
-			public
-		// Указатель на экземпляр класса контекста
-		FContext:PSGContext;
-			public
-		// С помощью этой процедуры можно установить контекст в этом классе (если он был создан без него)
-		procedure SetContext(const VContext:TSGContext);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		// Возвращает контекст
-		function GetContext() : TSGContext;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		//Возвращает рендер
-		function GetRender() : TSGRender;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function ContextAssigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			public
-		// Возвращает контекст
-		property Context:TSGContext read GetContext write SetContext;
-		//Возвращает рендер
-		property Render:TSGRender read GetRender;
-		end;
-	
-	// Это предописание класса
-	TSGDrawClass=class;
-	// Это тип класса
-	TSGClassOfDrawClass = class of TSGDrawClass;
-	TSGDrawClassClass = TSGClassOfDrawClass; 
-	// Это класс, от которого будут наследоваться все классы, которые могут вывести что нить на экран
-	TSGDrawClass=class(TSGContextObject)
-			public
-		procedure Draw();virtual;abstract;
-		class function ClassName():String;override;
 		end;
 
 {$DEFINE SGREADINTERFACE}
@@ -263,58 +198,42 @@ uses
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
-constructor TSGContextObject.Create(const VContext:TSGContext);overload;
+procedure TSGContext.SetRenderClass(const NewRender : TSGRenderClass);
 begin
-Create();
-SetContext(VContext);
+FRenderClass := NewRender;
+if Active and (not (Render is FRenderClass)) then
+	ReinitializeRender();
 end;
 
-function TSGContextObject.GetRender():TSGRender;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result:=FContext^.Render;
-end;
-
-procedure TSGContextObject.SetContext(const VContext:TSGContext);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if VContext<>nil then
-	FContext:=VContext.SelfPoint
-else
-	FContext:=nil;
-end;
-
-function TSGContextObject.ContextAssigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := False;
-if (FContext <> nil) then
-	if (FContext^ <> nil) then
-		Result := True;
-end;
-
-function TSGContextObject.GetContext():TSGContext;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := FContext^;
-end;
-
-constructor TSGContextObject.Create();
-begin
-inherited;
-FContext:=nil;
-//SGLog.Sourse('TSGContextObject__Create : Warning : Create without Context!!');
-end;
-
-destructor TSGContextObject.Destroy();
-begin
-inherited;
-end;
-
-class function TSGDrawClass.ClassName():String;
-begin
-Result:='SaGe Draw Class';
-end;
+function GetRender() : ISGRender;
+procedure StartComputeTimer();
+function GetElapsedTime() : TSGLongWord;
+function GetTitle() : TSGString;
+procedure SetTitle(const VTitle : TSGString);
+function GetWidth() : TSGLongWord;
+function GetHeight() : TSGLongWord;
+procedure SetWidth(const VWidth : TSGLongWord);
+procedure SetHeight(const VHeight : TSGLongWord);
+function GetLeft() : TSGLongWord;virtual;
+function GetTop() : TSGLongWord;virtual;
+procedure SetLeft(const VLeft : TSGLongWord);virtual;
+procedure SetTop(const VTop : TSGLongWord);virtual;
+function  GetFullscreen() : TSGBoolean;virtual;
+procedure InitFullscreen(const VFullscreen : TSGBoolean);virtual;
+procedure SetActive(const VActive : TSGBoolean);virtual;
+function  GetActive():TSGBoolean;virtual;
+procedure SetCursorCentered(const VCentered : TSGBoolean);virtual;
+function GetCursorCentered() : TSGBoolean;virtual;
+procedure SetSelfLink(const VLink : PISGContext);virtual;
+function GetSelfLink() : PISGContext;virtual;
+function GetCursorIcon():TSGPointer;virtual;
+procedure SetCursorIcon(const VIcon : TSGPointer);virtual;
+function GetIcon():TSGPointer;virtual;
+procedure SetIcon(const VIcon : TSGPointer);virtual;
 
 procedure TSGContext.Initialize();
 begin
-FElapsedDateTime.Get();
+StartComputeTimer();
 end;
 
 procedure TSGContext.UpdateElapsedTime();
@@ -352,7 +271,7 @@ SGScreen.Paint();
 SwapBuffers();
 end;
 
-procedure TSGContext.SetTittle(const NewTittle:TSGString);
+procedure TSGContext.SetTitle(const NewTittle:TSGString);
 begin
 FTitle:=NewTittle;
 end;
@@ -373,20 +292,20 @@ else
 	Result:=nil;
 end;
 
-procedure TSGContext.CopyInfo(const C:TSGContext);
+procedure TSGContext.CopyInfo(const C : TSGContextInterface);
 begin
 if C=nil then
 	Exit;
-FSelfPoint:=C.FSelfPoint;
-Render:=C.Render;
-FWidth:=C.FWidth;
-FHeight:=C.FHeight;
-FFullscreen:=C.FFullscreen;
-FTitle:=C.FTitle;
-FCursorIdenifier:=C.FCursorIdenifier;
-FIconIdentifier:=C.FIconIdentifier;
-FCallDraw:=C.FCallDraw;
-FCallInitialize:=C.FCallInitialize;
+FSelfPoint:=C.SelfPoint;
+FRenderClass:=C.RenderClass;
+FWidth:=C.Width;
+FHeight:=C.Height;
+FFullscreen:=C.Fullscreen;
+FTitle:=C.Title;
+FCursorIdenifier:=C.CursorIdenifier;
+FIconIdentifier:=C.IconIdentifier;
+FCallDraw:=C.CallDraw;
+FCallInitialize:=C.CallInitialize;
 end;
 
 procedure TSGContext.InitFullscreen(const b:Boolean);
@@ -413,7 +332,7 @@ FFullscreen:=b;
 Resize();
 end;
 
-function TSGContext.KeyPressedType():TSGCursorButtonType;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGContext.KeyPressedType():TSGCursorButtonType;overload;
 begin
 Result:=FKeyPressedType;
 end;
@@ -468,7 +387,7 @@ begin
 FHeight:=NewHeight;
 end;
 
-function TSGContext.CursorWheel():TSGCursorWheel;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGContext.CursorWheel():TSGCursorWheel;overload;
 begin
 Result:=FCursorWheel;
 end;
@@ -515,22 +434,22 @@ if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyP
 	end;
 end;
 
-function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;
 begin
 Result:=FCursorPosition[Index];
 end;
 
-function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;
 begin
 Result:=FCursorKeyPressed;
 end;
 
-function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;
 begin
 Result:=FCursorKeyPressedType;
 end;
 
-function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;overload;
 begin
 if Index=SGNoCursorButton then
 	Result:=False
@@ -571,7 +490,7 @@ FRender:=nil;
 FPaintWithHandlingMessages := True;
 end;
 
-procedure TSGContext.ClearKeys();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGContext.ClearKeys();
 begin
 FCursorKeyPressed:=SGNoCursorButton;
 FKeyPressed:=0;
@@ -593,22 +512,22 @@ begin
 Result:=FKeysPressed[Index];
 end;
 
-function TSGContext.KeysPressed(const  Index : char ) : Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGContext.KeysPressed(const  Index : char ) : Boolean;overload;
 begin
 Result:=KeysPressed(LongWord(Index));
 end;
 
-function TSGContext.KeyPressed:Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGContext.KeyPressed:Boolean;overload;
 begin
 Result:=FKeyPressed<>0;
 end;
 
-function TSGContext.KeyPressedChar:Char;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGContext.KeyPressedChar:Char;overload;
 begin
 Result:=Char(FKeyPressed);
 end;
 
-function TSGContext.KeyPressedByte:LongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGContext.KeyPressedByte:LongWord;overload;
 begin
 Result:=FKeyPressed;
 end;
