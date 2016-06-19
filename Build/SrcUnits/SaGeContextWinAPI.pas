@@ -171,6 +171,12 @@ FreeMem(ofn,sizeof(ofn^));
 end;
 
 function TSGContextWinAPI.Get(const What:string):Pointer;
+
+function GetClientWindowRect(const VWindow : HWND):TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+GetClientRect(VWindow, Result);
+end;
+
 var
 	rect : TRect;
 begin
@@ -180,13 +186,11 @@ else if What = 'DESKTOP WINDOW HANDLE' then
 	Result := Pointer(dcWindow)
 else if What = 'CLIENT WIDTH' then
 	begin
-	GetClientRect(HWindow,Rect);
-	Result := Pointer(Rect.right);
+	Result := Pointer(GetClientWindowRect(HWindow).right);
 	end
 else if What = 'CLIENT HEIGHT' then
 	begin
-	GetClientRect(HWindow,Rect);
-	Result := Pointer(Rect.bottom);
+	Result := Pointer(GetClientWindowRect(HWindow).bottom);
 	end
 else if What = 'FULLSCREAN' then
 	Result := Pointer(byte(Fullscreen))
@@ -293,17 +297,7 @@ while FActive and (FNewContextType=nil) do
 	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
 	FElapsedDateTime:=FDT;
 	
-	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-	Render.InitMatrixMode(SG_3D);
-	if FCallDraw<>nil then
-		FCallDraw(Self);
-	//SGIIdleFunction;
-	
-	ClearKeys();
-	Messages();
-	
-	SGScreen.Paint();
-	SwapBuffers();
+	Paint();
 	end;
 end;
 
@@ -349,20 +343,48 @@ end;
 	* 
 	* }
 function TSGContextWinAPI.WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+
+procedure HandlingSizing();
+var
+	mRect:Windows.TRect;
+begin
+Windows.GetWindowRect(hWindow, mRect);
+Width:=mRect.Right-mRect.Left;
+Height:=mRect.Bottom-mRect.Top;
+Resize();
+end;
+
+procedure HandlingSizingWithPaint();
+var
+	MainHDC : hDc;
+begin
+HandlingSizing();
+MainHDC := dcWindow;
+dcWindow := wParam;
+FPaintWithHandlingMessages := False;
+Paint();
+FPaintWithHandlingMessages := True;
+dcWindow := MainHDC;
+end;
+
+procedure HandlingMinMaxInfo();
 type
 	MinMaxInfo = ^ Windows.MINMAXINFO;
 var
-	mRect:Windows.TRect;
 	pInfo : MinMaxInfo;
+begin
+pInfo := MinMaxInfo(lParam);
+pInfo^.ptMinTrackSize.x := 320;
+pInfo^.ptMinTrackSize.y := 240;
+pInfo^.ptMaxTrackSize.x := 1000000;
+pInfo^.ptMaxTrackSize.y := 1000000;
+end;
+
 begin
 case AMessage of
 WM_GETMINMAXINFO:
 	begin
-	pInfo := MinMaxInfo(lParam);
-	pInfo^.ptMinTrackSize.x := 320;
-	pInfo^.ptMinTrackSize.y := 240;
-	pInfo^.ptMaxTrackSize.x := 1000000;
-	pInfo^.ptMaxTrackSize.y := 1000000;
+	HandlingMinMaxInfo();
 	end;
 wm_create:
 	begin
@@ -371,7 +393,9 @@ wm_create:
 	end;
 wm_paint:
 	begin
-	Exit;
+	FPaintWithHandlingMessages := False;
+	Paint();
+	FPaintWithHandlingMessages := True;
 	end;
 260: //Alt Down
 	SetKey(SGDownKey,SG_ALT_KEY);
@@ -427,19 +451,23 @@ wm_syscommand:
 		end;
 		end;
 	end;
- wm_size
-,wm_sizing
-,wm_move
+wm_size:
+	begin
+	HandlingSizingWithPaint();
+	Result := 0;
+	end;
+wm_sizing:
+	begin
+	HandlingSizing();
+	Result := 1;
+	end;
+wm_move
 ,wm_moving
 ,WM_WINDOWPOSCHANGED
 ,WM_WINDOWPOSCHANGING:
-	if Active and (Window<>0) and (hWindow=Window) then
-		begin
-		Windows.GetWindowRect(Window,mRect);
-		Width:=mRect.Right-mRect.Left;
-		Height:=mRect.Bottom-mRect.Top;
-		Resize();
-		end;
+	begin
+	HandlingSizing();
+	end;
 else
 	begin
 	{$IFDEF SGWinAPIDebugB}
@@ -522,7 +550,7 @@ WindowClass.cbWndExtra := 0;
 WindowClass.hInstance :=system.MainInstance;
 WindowClass.hIcon := LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
 WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
-WindowClass.hbrBackground := GetStockObject(WHITE_BRUSH);
+WindowClass.hbrBackground := GetStockObject(BLACK_BRUSH);
 WindowClass.lpszMenuName := nil;
 WindowClass.lpszClassName := 'SaGe Window Class';
 WindowClass.hIconSm:=LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));

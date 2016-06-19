@@ -93,6 +93,7 @@ procedure SGRunNotepad(const VFileName : TSGString);{$IFDEF SUPPORTINLINE}inline
 implementation
 
 procedure TSGNotepad.FromResize();
+
 procedure ResizeInsets();
 var
 	i : TSGLongWord;
@@ -102,11 +103,13 @@ if CountInsets() >0 then
 		begin
 		FInsets[i].SetBounds(0, FFont.FontHeight + 10, Width, Height - (FFont.FontHeight + 10));
 		FInsets[i].BoundsToNeedBounds();
+		FInsets[i].FromResize();
 		end;
 end;
+
 begin
-ResizeInsets();
 SetBounds(0, 0, ScreenWidth, ScreenHeight);
+ResizeInsets();
 inherited;
 end;
 

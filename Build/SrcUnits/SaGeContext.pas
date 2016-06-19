@@ -68,6 +68,7 @@ type
 		procedure Run();virtual;abstract;
 		// Отлов сообщений системы
 		procedure Messages();virtual;
+		procedure Paint();virtual;
 		// Вывод на экран буфера
 		procedure SwapBuffers();virtual;abstract;
 		// Возвращает координаты мыши в данный момент
@@ -126,6 +127,8 @@ type
 		// Время в данный момент времени
 		FElapsedDateTime : TSGDateTime;
 		FShowCursor : TSGBoolean;
+			protected
+		FPaintWithHandlingMessages : TSGBoolean;
 			public
 		// Разница в милесекундах между этим и преведущим шагами главного цикле приложения
 		property ElapsedTime         : TSGLongWord         read FElapsedTime;
@@ -323,6 +326,23 @@ end;
 class function TSGDrawClass.ClassName():String;
 begin
 Result:='SaGe Draw Class';
+end;
+
+procedure TSGContext.Paint();
+begin
+Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+if FCallDraw<>nil then
+	begin
+	Render.InitMatrixMode(SG_3D);
+	FCallDraw(Self);
+	end;
+if FPaintWithHandlingMessages then
+	begin
+	ClearKeys();
+	Messages();
+	end;
+SGScreen.Paint();
+SwapBuffers();
 end;
 
 procedure TSGContext.SetTittle(const NewTittle:TSGString);
@@ -541,6 +561,7 @@ FCursorKeysPressed[SGRightCursorButton]:=False;
 FFullscreenData.FNotFullscreenHeight:=0;
 FFullscreenData.FNotFullscreenWidth:=0;
 FRender:=nil;
+FPaintWithHandlingMessages := True;
 end;
 
 procedure TSGContext.ClearKeys();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
