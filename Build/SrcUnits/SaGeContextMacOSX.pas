@@ -38,7 +38,11 @@ type
 			public
 		function Get(const What:string):Pointer;override;
 		end;
+
 implementation
+
+uses
+	SaGeScreen;
 
 procedure TSGContextMacOSX.SetTittle(const NewTittle:TSGString);
 begin
@@ -98,39 +102,18 @@ begin
 Active:=CreateWindow();
 if Active then
 	begin
-	if SGScreenLoadProcedure<>nil then
-		SGScreenLoadProcedure(Self);
+	SGScreen.Load(Self);
 	if FCallInitialize<>nil then
 		FCallInitialize(Self);
 	end;
 end;
 
 procedure TSGContextMacOSX.Run();
-var
-	FDT:TSGDateTime;
 begin
-Messages;
+Messages();
 FElapsedDateTime.Get;
 while FActive and (FNewContextType=nil) do
-	begin
-	//Calc ElapsedTime
-	FDT.Get;
-	FElapsedTime:=(FDT-FElapsedDateTime).GetPastMiliSeconds;
-	FElapsedDateTime:=FDT;
-	
-	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-	Render.InitMatrixMode(SG_3D);
-	if FCallDraw<>nil then
-		FCallDraw(Self);
-	//SGIIdleFunction;
-	
-	ClearKeys();
-	Messages();
-	
-	if SGScreenPaintProcedure<>nil then
-		SGScreenPaintProcedure(Self);
-	SwapBuffers();
-	end;
+	Paint();
 end;
 
 procedure TSGContextMacOSX.SwapBuffers();

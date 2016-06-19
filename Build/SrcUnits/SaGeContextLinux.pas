@@ -354,11 +354,7 @@ begin
 Messages();
 FElapsedDateTime.Get();
 while FActive and (FNewContextType = nil) do
-	begin
-	UpdateElapsedTime();
-	
 	Paint();
-	end;
 end;
 
 procedure TSGContextLinux.SwapBuffers();

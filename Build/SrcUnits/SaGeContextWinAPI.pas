@@ -290,10 +290,7 @@ begin
 Messages();
 FElapsedDateTime.Get();
 while FActive and (FNewContextType=nil) do
-	begin
-	UpdateElapsedTime();
 	Paint();
-	end;
 end;
 
 function SGFullscreenQueschionWinAPIMethod:boolean;
@@ -350,16 +347,11 @@ Resize();
 end;
 
 procedure HandlingSizingWithPaint();
-var
-	MainHDC : hDc;
 begin
 HandlingSizing();
-MainHDC := dcWindow;
-dcWindow := wParam;
 FPaintWithHandlingMessages := False;
 Paint();
 FPaintWithHandlingMessages := True;
-dcWindow := MainHDC;
 end;
 
 procedure HandlingMinMaxInfo();
@@ -383,8 +375,8 @@ WM_GETMINMAXINFO:
 	end;
 wm_create:
 	begin
-	Active:=True;
-	Exit;
+	Active := True;
+	Result := 0;
 	end;
 wm_paint:
 	begin
@@ -538,14 +530,14 @@ end;}
 
 begin
 WindowClass.cbSize := sizeof(WNDCLASSEX);
-WindowClass.Style := cs_hRedraw and cs_vRedraw;
+WindowClass.Style := cs_hRedraw or cs_vRedraw or CS_OWNDC;
 WindowClass.lpfnWndProc := WndProc(@MyGLWndProc);
 WindowClass.cbClsExtra := 0;
 WindowClass.cbWndExtra := 0;
 WindowClass.hInstance :=system.MainInstance;
 WindowClass.hIcon := LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
 WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
-WindowClass.hbrBackground := GetStockObject(BLACK_BRUSH);
+WindowClass.hbrBackground := 0;
 WindowClass.lpszMenuName := nil;
 WindowClass.lpszClassName := 'SaGe Window Class';
 WindowClass.hIconSm:=LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));

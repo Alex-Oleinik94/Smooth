@@ -330,15 +330,13 @@ procedure TSGContext.Run();
 begin
 Messages();
 FElapsedDateTime.Get();
-while FActive and (FNewContextType=nil) do
-	begin
-	UpdateElapsedTime();
+while FActive and (FNewContextType = nil) do
 	Paint();
-	end;
 end;
 
 procedure TSGContext.Paint();
 begin
+UpdateElapsedTime();
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FCallDraw<>nil then
 	begin

@@ -450,8 +450,6 @@ FElapsedDateTime.Get();
 
 while FActive and (FNewContextType=nil) do
 	begin
-	UpdateElapsedTime();
-	
 	if (FDisplay<>nil) and (FAnimating<>0) then
 		begin
 		//SGLog.Sourse('"TSGContextAndroid.Run" : Begin paint!');
@@ -462,6 +460,7 @@ while FActive and (FNewContextType=nil) do
 		end
 	else
 		begin
+		UpdateElapsedTime();
 		//SGLog.Sourse('"TSGContextAndroid.Run" : Wait!');
 		Messages();
 		end;
