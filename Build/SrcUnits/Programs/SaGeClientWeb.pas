@@ -9,7 +9,7 @@ uses
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeNet
 	
 	,fpjson
@@ -17,13 +17,13 @@ uses
 	;
 
 type
-	TSGClientWeb=class(TSGDrawClass)
+	TSGClientWeb=class(TSGDrawable)
 			private
 		J : TJSONData;
 		Schedules : TJSONData;
 			public
-		constructor Create(const VContext:TSGContext);override;
-		procedure Draw();override;
+		constructor Create(const VContext : ISGContext);override;
+		procedure Paint();override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 		end;
@@ -51,7 +51,7 @@ Property AsBoolean : Boolean Read GetAsBoolean Write SetAsBoolean;
 Property IsNull : Boolean Read GetIsNull;
 Property AsJSON : TJSONStringType Read GetAsJSON;}
 
-constructor TSGClientWeb.Create(const VContext:TSGContext);
+constructor TSGClientWeb.Create(const VContext : ISGContext);
 var
 	S : String = '';
 	MS : TMemoryStream = nil;
@@ -77,7 +77,7 @@ Schedules := J.FindPath('schedules');}
 //WriteLn(J.FindPath('schdule_title').AsString);
 end;
 
-procedure TSGClientWeb.Draw();
+procedure TSGClientWeb.Paint();
 begin
 
 end;

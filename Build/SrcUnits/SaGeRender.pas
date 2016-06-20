@@ -20,6 +20,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		function GetRenderType():TSGRenderType;virtual;
 			protected
 		function GetWidth() : TSGLongWord;virtual;
 		function GetHeight() : TSGLongWord;virtual;
@@ -31,9 +32,11 @@ type
 		function  GetOption(const VOption : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VOption : TSGString; const VValue : TSGPointer);virtual;abstract;
 		procedure Paint();virtual;abstract;
-			protected
+			private
 		FType   : TSGRenderType;
 		FContext : ISGNearlyContext;
+			protected
+		procedure SetRenderType(const VType : TSGRenderType);
 			public
 		function SetPixelFormat():TSGBoolean;virtual;abstract;
 		function MakeCurrent():TSGBoolean;virtual;
@@ -177,6 +180,16 @@ while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
 	cc := cc + 1;
 	end;
 {$ENDIF}
+end;
+
+procedure TSGRender.SetRenderType(const VType : TSGRenderType);
+begin
+FType := VType;
+end;
+
+function TSGRender.GetRenderType():TSGRenderType;
+begin
+Result := FType;
 end;
 
 procedure TSGRender.SetContext(const VContext : ISGNearlyContext);

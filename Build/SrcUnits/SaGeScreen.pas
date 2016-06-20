@@ -14,8 +14,9 @@ uses
 	,SaGeImages
 	,SaGeContext
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeResourseManager
+	,SaGeContextInterface
 	;
 
 type
@@ -51,7 +52,7 @@ type
 	TArTSGComponent       = TSGArTSGComponent;
 	TArTArTSGComponent    = type packed array of TArTSGComponent;
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
-	TSGComponent = class(TSGContextObject)
+	TSGComponent = class(TSGContextabled)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -200,9 +201,9 @@ type
 			public 
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1,FUserPointer2,FUserPointer3:Pointer;
-		FDrawClass:TSGDrawClass;
+		FDrawClass:TSGDrawable;
 			public
-		property DrawClass : TSGDrawClass read FDrawClass write FDrawClass;
+		property DrawClass : TSGDrawable read FDrawClass write FDrawClass;
 			public
 		procedure DrawDrawClasses();virtual;
 			public
@@ -785,7 +786,7 @@ if CursorInComponentNow then
 	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) and CanRePleace then
 		begin
 		CanRePleace:=False;
-		Context.FCursorKeyPressed := SGNoCursorButton;
+		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 		SetChecked(not Checked, True);
 		end
 	end;
@@ -992,7 +993,7 @@ if CursorInComponentNow then
 		begin
 		FOpen:=True;
 		CanRePleace:=False;
-		Context.FCursorKeyPressed:=SGNoCursorButton;
+		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 		MakePriority();
 		end
 	else
@@ -1002,9 +1003,9 @@ if CursorInComponentNow then
 			begin
 			CanRePleace:=False;
 			FClickOnOpenBox:=True;
-			Context.FCursorKeyPressed:=SGNoCursorButton;
+			Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 			end;
-	if FOpen and (Context.CursorWheel<>SGNoCursorWheel) then
+	if FOpen and (Context.CursorWheel<>SGNullCursorWheel) then
 		begin
 		if Context.CursorWheel=SGUpCursorWheel then
 			begin
@@ -1018,7 +1019,7 @@ if CursorInComponentNow then
 				FFirstScrollItem+=1;
 				end;
 			end;
-		Context.FCursorWheel:=SGNoCursorWheel;
+		Context.SetCursorWheel(SGNullCursorWheel);
 		CanRePleace:=False;
 		end;
 	end;
@@ -1029,7 +1030,7 @@ procedure TSGComboBox.FromUpDate(var FCanChange:Boolean);
 var
 	i:TSGMaxEnum;
 begin
-if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNoCursorButton)) then
+if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNullCursorButton)) then
 	begin
 	FOpen:=False;
 	ClearPriority();
@@ -1053,7 +1054,7 @@ if  FOpen and (FCursorOnComponent) then
 					if FProcedure<>nil then
 						FProcedure(FSelectItem,FCursorOnThisItem,Self);
 					FSelectItem:=FCursorOnThisItem;
-					Context.FCursorKeyPressed:=SGNoCursorButton;
+					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 					FTextColor:=SGColorImport();
 					FBodyColor:=SGColorImport();
 					if OnChange<>nil then
@@ -1992,16 +1993,16 @@ end;
 {$IFDEF CLHINTS}
 	{$NOTE Component}
 	{$ENDIF}
-procedure TSGComponent.DrawDrawClasses;
+procedure TSGComponent.DrawDrawClasses();
 var
 	i:LongWord;
 begin
 if FDrawClass<>nil then
-	FDrawClass.Draw;
+	FDrawClass.Paint();
 if FChildren<>nil then
 	for i:=0 to  High(FChildren) do
 		if FChildren[i]<>nil then
-			FChildren[i].DrawDrawClasses;
+			FChildren[i].DrawDrawClasses();
 end;
 
 function TSGComponent.AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -3083,7 +3084,7 @@ var
 begin
 if FCanChange then
 	begin
-	if (not CursorInComponent) and ((Context.CursorKeyPressed<>SGNoCursorButton)) then
+	if (not CursorInComponent) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
 		FNowChanget:=False;
 	if FNowChanget then
 		begin
@@ -3608,8 +3609,6 @@ if FNewPosition=FOldPosition then
 			2:FMoveVector.Import(0,1);
 			3:FMoveVector.Import(0,-1);
 			end;
-			
-			Context.InitializeProcedure(Context);
 			
 			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 			Render.InitMatrixMode(SG_3D);

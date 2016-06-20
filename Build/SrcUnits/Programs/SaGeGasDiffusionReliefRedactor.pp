@@ -13,8 +13,9 @@ uses
 	,Classes
 	,SaGeBased
 	,SaGeMesh
+	,SaGeContextInterface
+	,SaGeRenderConstants
 	,SaGeContext
-	,SaGeRender
 	,SaGeCommon
 	,SaGeUtils
 	,SaGeScreen
@@ -31,9 +32,9 @@ type
 		
 		FMesh : TSG3DObject;
 		
-		procedure Draw(const VRender : TSGRender);
-		procedure DrawLines(const VRender : TSGRender);
-		procedure DrawPolygones(const VRender : TSGRender);
+		procedure Draw(const VRender : ISGRender);
+		procedure DrawLines(const VRender : ISGRender);
+		procedure DrawPolygones(const VRender : ISGRender);
 		procedure ExportToMesh(const VMesh : TSGCustomModel;const index : byte = -1);
 		procedure ExportToMeshLines(const VMesh : TSGCustomModel;const index : byte = -1;const WithVector : Boolean = False);
 		procedure ExportToMeshPolygones(const VMesh : TSGCustomModel;const index : byte = -1);
@@ -49,7 +50,7 @@ type
 	TSGGasDiffusionRelief = object
 		FData : packed array [0..5] of TSGGasDiffusionSingleRelief;
 		
-		procedure Draw(const VRender : TSGRender);
+		procedure Draw(const VRender : ISGRender);
 		procedure Clear();
 		procedure InitBase();
 		procedure ExportToMesh(const VMesh : TSGCustomModel);
@@ -62,10 +63,10 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGasDiffusionReliefRedactor = class(TSGDrawClass)
+	TSGGasDiffusionReliefRedactor = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
-		procedure Draw();override;
+		constructor Create(const VContext : ISGContext);override;
+		procedure Paint();override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			private
@@ -1197,13 +1198,13 @@ FMesh := nil;
 	{$ENDIF}
 end;
 
-procedure TSGGasDiffusionSingleRelief.Draw(const VRender : TSGRender);
+procedure TSGGasDiffusionSingleRelief.Draw(const VRender : ISGRender);
 begin
 DrawLines(VRender);
 DrawPolygones(VRender);
 end;
 
-procedure TSGGasDiffusionSingleRelief.DrawLines(const VRender : TSGRender);
+procedure TSGGasDiffusionSingleRelief.DrawLines(const VRender : ISGRender);
 var
 	i,ii:LongWord;
 begin
@@ -1228,7 +1229,7 @@ if FPolygones <> nil then
 	end;
 end;
 
-procedure TSGGasDiffusionSingleRelief.DrawPolygones(const VRender : TSGRender);
+procedure TSGGasDiffusionSingleRelief.DrawPolygones(const VRender : ISGRender);
 var
 	i,ii:LongWord;
 begin
@@ -1292,7 +1293,7 @@ for i := 0 to 5 do
 	end;
 end;
 
-procedure TSGGasDiffusionRelief.Draw(const VRender : TSGRender);
+procedure TSGGasDiffusionRelief.Draw(const VRender : ISGRender);
 var
 	i : LongWord;
 begin
@@ -1344,7 +1345,7 @@ else
 	FSingleRelief := nil;
 end;
 
-constructor TSGGasDiffusionReliefRedactor.Create(const VContext:TSGContext);
+constructor TSGGasDiffusionReliefRedactor.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FSelectedPrimetives := nil;
@@ -1568,17 +1569,17 @@ procedure TSGGasDiffusionReliefRedactor.UpDatePointsShifting();{$IFDEF SUPPORTIN
 var
 	i : LongWord;
 begin
-if (Context.KeysPressed(SG_CTRL_KEY) and (Context.CursorWheel() <> SGNoCursorWheel)) then 
+if (Context.KeysPressed(SG_CTRL_KEY) and (Context.CursorWheel() <> SGNullCursorWheel)) then 
 	if FSelectedPrimetives <> nil then
 		if Length(FSelectedPrimetives)<>0 then
 			begin
 			for i := 0 to High(FSelectedPrimetives) do
 				FSingleRelief^.FPoints[FSelectedPrimetives[i]] += SGZ((Byte(Context.CursorWheel() = SGUpCursorWheel)-0.5)*0.1);
-			Context.FCursorWheel := SGNoCursorWheel;
+			Context.SetCursorWheel(SGNullCursorWheel);
 			end;
 end;
 
-procedure TSGGasDiffusionReliefRedactor.Draw();
+procedure TSGGasDiffusionReliefRedactor.Paint();
 begin
 if FSingleRelief = nil then
 	begin

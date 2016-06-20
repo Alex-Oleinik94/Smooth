@@ -7,7 +7,7 @@ type
 	TSGFractalMandelbrodThreadData=class;
 	TSGFractalMandelbrod=class(TSGImageFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		//destructor Destroy;override;
 			public
 		FZNumber      : TSGComplexNumber;
@@ -28,7 +28,7 @@ type
 		function GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 		procedure Calculate;override;
-		procedure Draw;override;
+		procedure Paint();override;
 		procedure AfterCalculate;override;
 		procedure BeginCalculate;override;
 		procedure BeginThread(const Number:LongInt;const Real:Pointer);
@@ -60,12 +60,12 @@ procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadDat
 
 
 type
-	TSGFractalMandelbrodRelease=class(TSGDrawClass)
+	TSGFractalMandelbrodRelease=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
-		procedure Draw;override;
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
+		class function ClassName() : TSGString;override;
+		procedure Paint();override;
 			protected
 		FNewPotokInit:Boolean;
 		SelectPoint,SelectSecondPoint,SelectSecondNormalPoint:SGPoint;
@@ -206,7 +206,7 @@ if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 			if (abs(PC.x-A.x)<(S)) and ((abs(PC.y-A.y)<(S))) and (FCurveSelectPoint<>i) then
 				begin
 				FCurveSelectPoint:=i;
-				Context.FCursorKeyPressed:=SGNoCursorButton;
+				Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 				UnDatePointCurvePanel();
 				end;
 			end;
@@ -762,7 +762,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 end;
 
 
-constructor TSGFractalMandelbrodRelease.Create(const VContext:TSGContext);
+constructor TSGFractalMandelbrodRelease.Create(const VContext:ISGContext);
 var
 	i:Byte;
 begin
@@ -981,7 +981,7 @@ for i:=1 to QZ do
 	Result+='0';
 end;}
 
-procedure TSGFractalMandelbrodRelease.Draw();
+procedure TSGFractalMandelbrodRelease.Paint();
 var
 	i,ii:LongInt;
 	TDT:TSGDateTime;
@@ -1182,7 +1182,7 @@ if MandaInitialized then
 	if (Manda.FImage<>nil) and Manda.FImage.Ready then
 		begin
 		Render.Color3f(1,1,1);
-		Manda.Draw;
+		Manda.Paint();
 		//if Manda.FView.VertexInView(Manda.FZNumber) then
 			//begin
 			VtxForZN.Import(
@@ -1361,7 +1361,7 @@ if MandaInitialized then
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).y));
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
 		FBezierCurve.Calculate();
-		Context.FKeyPressed:=0;
+		Context.SetKey(SGNullKey, Context.KeyPressedByte());
 		FBezierCurveLabelPoints.Caption:='Количество точек: '+SGStr(FBezierCurve.VertexQuantity);
 		FBezierCurveGoButton.Active:=(FBezierCurve.VertexQuantity>=2) and (TSGEditTextTypeFunctionNumber(FBezierCurveEditKadr));
 		end;
@@ -1373,7 +1373,7 @@ if MandaInitialized then
 		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
 		if (FBezierCurve<>nil) then
 			begin
-			FBezierCurve.Draw();
+			FBezierCurve.Paint();
 			if FNowRenderitsiaVideo then
 				begin
 				Render.Color3f(1,0,1);
@@ -1550,7 +1550,7 @@ GetMem(VBuffer[False],trunc(FFractal.Depth/2)+1);
 FHePr:=0;
 end;
 
-procedure TSGFractalMandelbrod.Draw;
+procedure TSGFractalMandelbrod.Paint();
 begin
 inherited;
 if FImage.Ready then
@@ -1561,7 +1561,7 @@ if FImage.Ready then
 end;
 
 
-constructor TSGFractalMandelbrod.Create(const VContext:TSGContext);
+constructor TSGFractalMandelbrod.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FTheme1:=0;

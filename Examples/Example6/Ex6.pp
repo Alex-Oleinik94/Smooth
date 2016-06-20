@@ -14,10 +14,10 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
@@ -28,11 +28,11 @@ uses
 	,Ex6_N
 	;
 type
-	TSGExample6=class(TSGDrawClass)
+	TSGExample6=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -51,7 +51,7 @@ begin
 Result := 'Bump Mapping';
 end;
 
-constructor TSGExample6.Create(const VContext : TSGContext);
+constructor TSGExample6.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
@@ -105,7 +105,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample6.Draw();
+procedure TSGExample6.Paint();
 procedure DrawHints();
 var
 	i : TSGWord;
@@ -146,7 +146,7 @@ Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FSun);
 if FMesh.LastMaterial().EnableBump then
 	Render.BeginBumpMapping(@FSun);
 
-FMesh.Draw();
+FMesh.Paint();
 
 if FMesh.LastMaterial().EnableBump then
 	Render.EndBumpMapping();

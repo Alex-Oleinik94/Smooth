@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeBased
-	,SaGeContext
+	,SaGeContextInterface
 	;
 
 type
@@ -17,9 +17,9 @@ type
 	TSGNod = class;
 	TSGNodClass = class of TSGNod;
 	TSGArNod = packed array of TSGNod;
-	TSGNod = class(TSGDrawClass)
+	TSGNod = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			protected
@@ -49,7 +49,7 @@ type
 	TSGMutatorClass = class of TSGMutator;
 	TSGMutator = class(TSGNod)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 			protected
 		FLastNodProperty : TSGNodProperty;
 			public
@@ -62,7 +62,7 @@ type
 
 implementation
 
-constructor TSGMutator.Create(const VContext:TSGContext);
+constructor TSGMutator.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FLastNodProperty:=nil;
@@ -93,7 +93,7 @@ begin
 FParent:=Nod;
 end;
 
-constructor TSGNod.Create(const VContext:TSGContext);
+constructor TSGNod.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FNods:=nil;

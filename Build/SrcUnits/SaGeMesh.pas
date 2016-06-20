@@ -11,8 +11,9 @@ uses
     , SaGeBased
     , SaGeImages
     , SaGeRender
+    , SaGeRenderConstants
     , Crt
-    , SaGeContext;
+    , SaGeContextInterface;
 const
 	SGMeshVersion : TSGQuadWord = 169;
 type
@@ -135,9 +136,9 @@ type
 	TSGFacePoint = TSGFacePoint4b;
 	PTSGFacePoint = PTSGFacePoint4b;
 	
-	TSGMaterial = class (TSGContextObject)
+	TSGMaterial = class (TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 			private
 		FColorDiffuse, FColorSpecular, FColorAmbient : TSGColor4f;
@@ -169,7 +170,7 @@ type
     { TSG3dObject }
     // Наша моделька..
 type
-    TSG3DObject = class(TSGDrawClass)
+    TSG3DObject = class(TSGDrawable)
     public
         constructor Create(); override;
         destructor Destroy(); override;
@@ -394,8 +395,7 @@ type
 		property EnableCullFaceFront : TSGBoolean read FEnableCullFaceFront write FEnableCullFaceFront;
 		property EnableCullFaceBack  : TSGBoolean read FEnableCullFaceBack  write FEnableCullFaceBack;
     public
-        // Догадайся с 3х раз
-        procedure Draw(); override;
+        procedure Paint(); override;
         // Дело в том, что если включен Cull Face, то Draw нужно делать 2 раза.
         // Так что вод тут делается Draw, а в Draw просто проверяется, включен или не  Cull Face, 
         //   и в зависимости от этого он вызывает эту процедуду 1 или 2 раза
@@ -463,7 +463,7 @@ type
 		FMatrix  : TSGMatrix4;
 		end;
 	
-    TSGCustomModel = class(TSGDrawClass)
+    TSGCustomModel = class(TSGDrawable)
     public
         constructor Create;override;
         destructor Destroy; override;
@@ -494,7 +494,7 @@ type
 		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
     public
 		procedure DrawObject(const Index : TSGLongWord);
-        procedure Draw(); override;
+        procedure Paint(); override;
 		procedure LoadToVBO();
         procedure WriteInfo();
         procedure Clear();virtual;
@@ -569,8 +569,8 @@ end;
 
 function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
 begin
-FillChar(Result,SizeOf(Result),0);
-if Render.RenderType<>SGRenderOpenGL then
+FillChar(Result, SizeOf(Result), 0);
+if Render.RenderType <> SGRenderOpenGL then
 	case ArFaces[ArIndex].FIndexFormat of
 	SGMeshIndexFormat1b: 
 		begin
@@ -1488,7 +1488,7 @@ ClearVBO();
 inherited Destroy();
 end;
 
-procedure TSG3dObject.Draw(); inline;
+procedure TSG3dObject.Paint();
 begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
@@ -2211,12 +2211,12 @@ if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
 		CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh;
 	Render.PushMatrix();
 	Render.MultMatrixf(@FArObjects[Index].FMatrix);
-	CurrentMesh.Draw();
+	CurrentMesh.Paint();
 	Render.PopMatrix();
 	end;
 end;
 
-procedure TSGCustomModel.Draw();
+procedure TSGCustomModel.Paint();
 var
     i: TSGLongWord;
 begin
@@ -2323,7 +2323,7 @@ end;
 (*********************************){TSGMaterial}(************************************)
 (************************************************************************************)
 
-constructor TSGMaterial.Create(const VContext : TSGContext);
+constructor TSGMaterial.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FColorAmbient.Import(0,0,0,0);

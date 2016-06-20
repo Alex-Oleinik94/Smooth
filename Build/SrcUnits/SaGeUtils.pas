@@ -9,22 +9,23 @@ uses
 	,SaGeBased
 	,SaGeCommon
 	,SaGeContext
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeImages
 	,SaGeMesh
 	,SaGeImagesBase
 	,SaGeResourseManager
+	,SaGeContextInterface
 	,PAPPE
 	;
 type
 	TSGFont = class;
 	TSGFPSViewer = class;
 type
-	TSGFPSViewer = class(TSGDrawClass)
+	TSGFPSViewer = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FFont : TSGFont;
@@ -47,7 +48,7 @@ const
 	SG_VIEW_WATCH_OBJECT        = $001001;
 	SG_VIEW_LOOK_AT_OBJECT      = $001002;
 type
-	TSGCamera=class(TSGContextObject)
+	TSGCamera=class(TSGContextabled)
 			public
 		constructor Create();override;
 			public
@@ -87,7 +88,7 @@ type
 (*==========================TSGBezierCurve============================*)
 (*====================================================================*)
 	TSGBezierCurveType=(SG_Bezier_Curve_High,SG_Bezier_Curve_Low);
-	TSGBezierCurve=class(TSGDrawClass)
+	TSGBezierCurve=class(TSGDrawable)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -110,7 +111,7 @@ type
 		procedure AddVertex(const VVertex:TSGVertex3f);
 		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex; 
 		property Detalization:LongWord read FDetalization write FDetalization;
-		procedure Draw();override;
+		procedure Paint();override;
 		function VertexQuantity:TSGMaxEnum;inline;
 		end;
 
@@ -188,12 +189,12 @@ type
 function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;}
 
 type
-	TSGStaticString=class(TSGDrawClass)
+	TSGStaticString=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
-		procedure Draw();override;
+		procedure Paint();override;
 			private
 		FMesh : TSG3DObject;
 		FText : TSGString;
@@ -238,7 +239,7 @@ else
 	Result := 1;
 end;
 
-constructor TSGFPSViewer.Create(const VContext : TSGContext);
+constructor TSGFPSViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FFont := TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
@@ -256,7 +257,7 @@ FFont.Destroy();
 inherited;
 end;
 
-procedure TSGFPSViewer.Draw();
+procedure TSGFPSViewer.Paint();
 var
 	FPSString : string = '';
 begin
@@ -283,18 +284,18 @@ begin
 Result := 'FPS Viwer';
 end;
 
-procedure TSGStaticString.Draw();
+procedure TSGStaticString.Paint();
 begin
 if (FMesh<>nil) and (FFont<>nil) then
 	begin
 	Render.Color4f(1,1,1,1);
 	FFont.BindTexture();
-	FMesh.Draw();
+	FMesh.Paint();
 	FFont.DisableTexture();
 	end;
 end;
 
-constructor TSGStaticString.Create(const VContext:TSGContext);
+constructor TSGStaticString.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh := nil;
@@ -575,10 +576,10 @@ else
 	Result:=Length(FStartArray);
 end;
 
-procedure TSGBezierCurve.Draw();
+procedure TSGBezierCurve.Paint();
 begin
 if FMesh<>nil then
-	FMesh.Draw();
+	FMesh.Paint();
 end;
 
 function TSGBezierCurve.GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;

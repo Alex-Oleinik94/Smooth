@@ -16,6 +16,8 @@ uses
 	,SaGeImagesBase
 	,SaGeRender
 	,SaGeTotal
+	,SaGeRenderConstants
+	,SaGeContextInterface
 	;
 type
 	TSGFractal = class;
@@ -28,9 +30,9 @@ type
 		FFractal:TSGFractal;
 		end;
 	
-	TSGFractal = class(TSGDrawClass)
+	TSGFractal = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -48,7 +50,7 @@ type
 			public
 		function ThreadsReady():Boolean;virtual;
 		procedure Calculate();virtual;
-		procedure Draw();override;
+		procedure Paint();override;
 		procedure CreateThreads(const a:Byte);virtual;
 		procedure ThreadsBoolean(const b:boolean = false);virtual;
 		procedure DestroyThreads();virtual;
@@ -65,7 +67,7 @@ type
 	
 	TSG3DFractal=class (TSGFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext:ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			protected
@@ -85,7 +87,7 @@ type
 		FEnableNormals  : TSGBoolean;
 		FHasIndexes     : TSGBoolean;
 			public
-		procedure Draw();override;
+		procedure Paint();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
 		procedure CalculateMeshes(Quantity:Int64;const PoligoneType:LongWord;const VVertexType:TSGMeshVertexType = SGMeshVertexType3f;const VertexMn : TSGByte = 0);
@@ -111,17 +113,19 @@ type
 	
 	TSGImageFractal=class(TSGFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
-			public
+		constructor Create(const VContext:ISGContext);override;
+		class function ClassName():string;override;
+			protected
 		FImage:TSGImage;
 		FView:TSGScreenVertexes;
 		FDepthHeight:LongWord;
+			public
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);virtual;
 		class function GetColor(const a,b,color:LongInt):byte;inline;
 		class function GetColorOne(const a,b,color:LongInt):byte;inline;
 		procedure ToTexture();virtual;
 		procedure BeginCalculate();override;
-		class function ClassName():string;override;
+			public
 		property Width:LongInt read FDepth write FDepth;
 		property Height:LongWord read FDepthHeight write FDepthHeight;
 		end;
@@ -136,21 +140,21 @@ type
 {$UNDEF SGREADINTERFACE}
 
 type
-	TSGAllFractals = class(TSGDrawClass)
+	TSGAllFractals = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
 		FDrawClasses : TSGDrawClasses;
 			public
-		procedure Draw();override;
+		procedure Paint();override;
 		end;
 
 implementation
 
 
-constructor TSGAllFractals.Create(const VContext:TSGContext);
+constructor TSGAllFractals.Create(const VContext:ISGContext);
 begin
 inherited Create(VContext);
 FDrawClasses := TSGDrawClasses.Create(Context);
@@ -179,10 +183,10 @@ begin
 Result := 'Фракталы';
 end;
 
-procedure TSGAllFractals.Draw();
+procedure TSGAllFractals.Paint();
 begin
 if FDrawClasses<>nil then
-	FDrawClasses.Draw();
+	FDrawClasses.Paint();
 end;
 
 {$DEFINE SGREADIMPLEMENTATION}
@@ -426,7 +430,7 @@ FFractal:=Fractal;
 FThreadID:=ThreadID;
 end;
 
-constructor TSG3DFractal.Create(const VContext:TSGContext);
+constructor TSG3DFractal.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FSunAbs:=10;
@@ -471,7 +475,7 @@ SetLength(FMeshesInfo,0);
 inherited Destroy();
 end;
 
-procedure TSG3DFractal.Draw();
+procedure TSG3DFractal.Paint();
 var
 	i,ii:LongInt;
 begin
@@ -536,7 +540,7 @@ if FEnableVBO then
 	for i:=0 to FMesh.QuantityObjects-1 do
 		begin
 		if FMesh.Objects[i].EnableVBO then
-			FMesh.Objects[i].Draw();
+			FMesh.Objects[i].Paint();
 		{$IFDEF SGMoreDebuging}
 			WriteLn('FMesh.ArObjects[',i,'].FEnableVBO=',FMesh.Objects[i].EnableVBO);
 			{$ENDIF}
@@ -545,7 +549,7 @@ if FEnableVBO then
 else
 	if FMesh<>nil then
 		begin
-		FMesh.Draw();
+		FMesh.Paint();
 		end;
 if FLightingEnable then
 	begin
@@ -661,7 +665,7 @@ else
 end;
 
 
-constructor TSGImageFractal.Create(const VContext:TSGContext);
+constructor TSGImageFractal.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FDepthHeight:=0;
@@ -712,7 +716,7 @@ begin
 FImage.FImage.FBitMap[((FDepth-Y)*FDepth+X)*3]:=trunc((RecNumber/15)*255);
 end;
 
-procedure TSGFractal.Draw;
+procedure TSGFractal.Paint();
 begin
 Render.Color3f(1,1,1);
 end;
@@ -732,7 +736,7 @@ begin
 Result:=Length(FThreadsData);
 end;
 
-constructor TSGFractal.Create(const VContext:TSGContext);
+constructor TSGFractal.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FDepth:=3;

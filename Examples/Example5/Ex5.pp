@@ -14,11 +14,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,PAPPE
 	,SaGeCommon
 	,crt
@@ -27,11 +27,11 @@ uses
 const
 	QuantityObjects = 15;
 type
-	TSGExample5=class(TSGDrawClass)
+	TSGExample5=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera           : TSGCamera;
@@ -63,7 +63,7 @@ begin
 Result := 'Пример физического движка №1';
 end;
 
-constructor TSGExample5.Create(const VContext : TSGContext);
+constructor TSGExample5.Create(const VContext : ISGContext);
 procedure InitCubes();
 var
 	i,j,r,x,k,y,kk:TSGLongWord;
@@ -170,7 +170,7 @@ PAPPE.PhysicsDone       (Physics);
 inherited;
 end;
 
-procedure TSGExample5.Draw();
+procedure TSGExample5.Paint();
 var
 	i,ii      : TSGLongWord;
 	Licht0Pos : TSGVertex3f;

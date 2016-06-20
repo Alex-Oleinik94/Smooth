@@ -10,21 +10,21 @@ uses
 	, SaGeBased
 	, SaGeImages
 	, SaGeRender
-	, SaGeContext
+	, SaGeContextInterface
 	, SaGeMesh
 	, SaGeGameBase
 	;
 type
 	TSGModel=class(TSGNod)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy(); override;
 		class function ClassName():TSGString;override;
 			protected
 		FMesh           : TSGCustomModel;
 		FMatrix         : TSGPointer;
 			public
-		procedure Draw();override;
+		procedure Paint();override;
 		procedure InitModelMatrix();
 		function FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
 		procedure LoadToVBO();inline;
@@ -64,14 +64,14 @@ if FMatrix<>nil then
 	Render.MultMatrixf(FMatrix);
 end;
 
-procedure TSGModel.Draw();
+procedure TSGModel.Paint();
 begin
 InitModelMatrix();
 if FMesh<>nil then
-	FMesh.Draw();
+	FMesh.Paint();
 end;
 
-constructor TSGModel.Create(const VContext:TSGContext);
+constructor TSGModel.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh:=nil;

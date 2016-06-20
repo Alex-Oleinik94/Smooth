@@ -14,10 +14,10 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeMesh
@@ -32,11 +32,11 @@ uses
 const
 	TextureSize = 1024;
 type
-	TSGExample14 = class(TSGDrawClass)
+	TSGExample14 = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -151,7 +151,7 @@ begin
 Result := 'Shadow Mapping';
 end;
 
-constructor TSGExample14.Create(const VContext : TSGContext);
+constructor TSGExample14.Create(const VContext : ISGContext);
 
 procedure LoadLigthModel();
 var
@@ -371,7 +371,7 @@ Render.Color3f(0.9,0.9,0.9);
 Render.PushMatrix();
 Render.Scale(0.005,0.005,0.005);
 Render.Translatef(-FModelCenter.x,-FModelCenter.y,-FModelCenter.z);
-FModel.Draw();
+FModel.Paint();
 Render.PopMatrix();
 end;
 
@@ -454,7 +454,7 @@ Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.PushMatrix();
 FLightInverseModelViewMatrix := SGInverseMatrix(FLightModelViewMatrix);
 Render.MultMatrixf(@FLightInverseModelViewMatrix);
-FLigthSphere.Draw();
+FLigthSphere.Paint();
 Render.PopMatrix();
 
 {
@@ -465,7 +465,7 @@ Render.EndScene();
 }
 end;
 
-procedure TSGExample14.Draw();
+procedure TSGExample14.Paint();
 begin
 FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
 

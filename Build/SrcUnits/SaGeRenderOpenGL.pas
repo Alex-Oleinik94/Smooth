@@ -66,8 +66,8 @@ uses
 type
 	TSGRenderOpenGL=class(TSGRender)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			protected
 		FContext:
 		{$IFDEF LINUX}
@@ -483,7 +483,7 @@ begin
 glGetIntegerv(GL_VIEWPORT,viewportarray);
 glReadPixels(
 	px,
-	LongInt(LongWord(FWindow.Get('HEIGHT')))-LongInt(py)-1,
+	LongInt(Context.Width)-LongInt(py)-1,
 	1, 
 	1, 
 	GL_DEPTH_COMPONENT, 
@@ -493,7 +493,7 @@ glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
 glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
 gluUnProject(
 	px,
-	LongInt(LongWord(FWindow.Get('HEIGHT')))-LongInt(py)-1,
+	LongInt(Context.Height)-LongInt(py)-1,
 	depth,
 	mv_matrix,
 	proj_matrix,
@@ -659,15 +659,15 @@ end;
 procedure TSGRenderOpenGL.SwapBuffers();
 begin
 {$IFDEF MSWINDOWS}
-	Windows.SwapBuffers( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')) );
+	Windows.SwapBuffers( LongWord(Context.Device) );
 {$ELSE}
 	{$IFDEF LINUX}
 		glXSwapBuffers(
-			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
-			LongWord(FWindow.Get('WINDOW HANDLE')));
+			PDisplay(Context.Device),
+			LongWord(Context.Window));
 	{$ELSE}
 		{$IFDEF ANDROID}
-			eglSwapBuffers(FWindow.Get('DESKTOP WINDOW HANDLE'),FWindow.Get('SURFACE'));
+			eglSwapBuffers(Context.Device,FWindow.Get('SURFACE'));
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSwapBuffers( FContext );
@@ -1289,7 +1289,7 @@ end;
 {$ENDIF}
 begin
 inherited Create();
-FType:={$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF};
+SetRenderType({$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF});
 {$IFDEF SGINTERPRITATEBEGINEND}
 	FNowPosArPoints:=-1;
 	FMaxLengthArPoints:=0;
@@ -1351,7 +1351,7 @@ begin
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), 0 );
+		wglMakeCurrent( LongWord(Context.Device), 0 );
 		if FContext<>0 then
 			begin
 			wglDeleteContext( FContext );
@@ -1362,7 +1362,7 @@ begin
 		{$IFDEF ANDROID}
 			if (FContext <> EGL_NO_CONTEXT) then
 				begin
-				eglDestroyContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FContext);
+				eglDestroyContext(Context.Device, FContext);
 				FContext := EGL_NO_CONTEXT;
 				end;
 		{$ELSE}
@@ -1443,7 +1443,7 @@ Result:=False;
 {$IFDEF LINUX}
 	initGlx();
 	FContext := glXCreateContext(
-		PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
+		PDisplay(Context.Device),
 		PXVisualInfo(FWindow.Get('VISUAL INFO')),nil,true);
 	if FContext = nil then
 		begin
@@ -1454,11 +1454,11 @@ Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
-			FContext := wglCreateContext( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')) );
+			FContext := wglCreateContext( TSGLongWord(Context.Device) );
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			FContext := eglCreateContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+			FContext := eglCreateContext(Context.Device, FWindow.Get('VISUAL INFO'), nil, nil);
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 			Result:=TSGMaxEnum(FContext)<>0;
 		{$ELSE}
@@ -1469,7 +1469,7 @@ Result:=False;
 				end;
 				if Result then
 					begin
-					if aglSetDrawable( FContext, WindowRef(FWindow.Get('DESKTOP WINDOW HANDLE'))) = GL_TRUE Then
+					if aglSetDrawable( FContext, WindowRef(Context.Device)) = GL_TRUE Then
 						begin
 						if aglSetCurrentContext( FContext ) = GL_TRUE Then
 							begin
@@ -1494,19 +1494,19 @@ begin
 {$IFDEF LINUX}
 	if (FWindow<>nil) and (FContext<>nil) then 
 		glXMakeCurrent(
-			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
-			LongWord(FWindow.Get('WINDOW HANDLE')),
+			PDisplay(Context.Device),
+			LongWord(Context.Window),
 			nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		if (FWindow<>nil)  then 
-			wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), 0 );
+		if (Context <> nil)  then 
+			wglMakeCurrent( TSGLongWord(Context.Device), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
 			
 		{$ELSE}
 			{$IFDEF DARWIN}
-				aglSetDrawable( nil, FWindow.Get('DESKTOP WINDOW HANDLE'));
+				aglSetDrawable( nil, Context.Device);
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
@@ -1543,9 +1543,9 @@ Result:=False;
 	pfd.cColorBits    := 32;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), @pfd );
+	iFormat := Windows.ChoosePixelFormat( LongWord(Context.Device), @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
-	Result:=Windows.SetPixelFormat( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), iFormat, @pfd );
+	Result:=Windows.SetPixelFormat( LongWord(Context.Device), iFormat, @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
@@ -1559,8 +1559,8 @@ begin
 	if (FWindow<>nil) and (FContext<>nil) then 
 		begin
 		glXMakeCurrent(
-			PDisplay(FWindow.Get('DESKTOP WINDOW HANDLE')),
-			LongWord(FWindow.Get('WINDOW HANDLE')),
+			PDisplay(Context.Device),
+			LongWord(Context.Window),
 			FContext);
 		Result:=True;
 		end
@@ -1568,9 +1568,9 @@ begin
 		Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		if (FWindow<>nil) and (FContext<>0) then 
+		if (Context<>nil) and (FContext<>0) then 
 			begin
-			wglMakeCurrent( LongWord(FWindow.Get('DESKTOP WINDOW HANDLE')), FContext );
+			wglMakeCurrent( LongWord(Context.Device), FContext );
 			Result:=True;
 			end
 		else
@@ -1580,7 +1580,7 @@ begin
 			if (FWindow<>nil) and (FContext<>nil) then 
 				begin
 				if eglMakeCurrent(
-					FWindow.Get('DESKTOP WINDOW HANDLE'), 
+					Context.Device, 
 					FWindow.Get('SURFACE'), 
 					FWindow.Get('SURFACE'), 
 					FContext)  = EGL_FALSE then
@@ -1596,7 +1596,7 @@ begin
 				Result:=False;
 		{$ELSE}
 			{$IFDEF DARWIN}
-				//Result:=aglSetDrawable( FContext, FWindow.Get('DESKTOP WINDOW HANDLE')) <> GL_FALSE;
+				//Result:=aglSetDrawable( FContext, Context.Device) <> GL_FALSE;
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
@@ -1629,7 +1629,7 @@ begin
 {$IFDEF ANDROID}
 	if (FContext <> EGL_NO_CONTEXT) then
 		begin
-		if eglDestroyContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FContext) = EGL_FALSE then
+		if eglDestroyContext(Context.Device, FContext) = EGL_FALSE then
 			SGLog.Sourse('"TSGRenderOpenGL.LockResourses" : EGL Error : "'+SGGetEGLError()+'"');
 		FContext := EGL_NO_CONTEXT;
 		end;
@@ -1702,11 +1702,11 @@ var
 {$ENDIF}
 begin
 {$IFDEF ANDROID}
-	FContext := eglCreateContext(FWindow.Get('DESKTOP WINDOW HANDLE'), FWindow.Get('VISUAL INFO'), nil, nil);
+	FContext := eglCreateContext(Context.Device, FWindow.Get('VISUAL INFO'), nil, nil);
 	if FContext = EGL_NO_CONTEXT then
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
 	SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
-	if eglMakeCurrent(FWindow.Get('DESKTOP WINDOW HANDLE'),FWindow.Get('SURFACE'),FWindow.Get('SURFACE'),FContext)  = EGL_FALSE then
+	if eglMakeCurrent(Context.Device,FWindow.Get('SURFACE'),FWindow.Get('SURFACE'),FContext)  = EGL_FALSE then
 		begin
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="FALSE"');

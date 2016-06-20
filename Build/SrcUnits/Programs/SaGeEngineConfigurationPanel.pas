@@ -13,6 +13,7 @@ uses
 	,SaGeBased
 	,SaGeRender
 	,SaGeVersion
+	,SaGeRenderConstants
 	;
 
 type
@@ -57,8 +58,11 @@ uses
 	;
 
 procedure TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass);
+var
+	ContextValue : TSGContext;
 begin
-Context.RenderClass := VRenderClass;
+ContextValue := Context as TSGContext;
+ContextValue.RenderClass := VRenderClass;
 end;
 
 procedure TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass);

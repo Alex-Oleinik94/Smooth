@@ -14,20 +14,20 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	;
 type
-	TSGExample4_2=class(TSGDrawClass)
+	TSGExample4_2=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -47,7 +47,7 @@ begin
 Result := 'Вывод неиндексированым массивом из оперативки';
 end;
 
-constructor TSGExample4_2.Create(const VContext : TSGContext);
+constructor TSGExample4_2.Create(const VContext : ISGContext);
 var
 	i:TSGByte;
 begin
@@ -127,7 +127,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample4_2.Draw();
+procedure TSGExample4_2.Paint();
 begin
 FCamera.CallAction();
 

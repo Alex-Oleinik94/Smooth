@@ -16,34 +16,36 @@ uses
 	,SaGeScreen
 	,SaGeRender
 	,SaGeImages
+	,SaGeContextInterface
+	,SaGeRenderConstants
 	;
 
 const
 	SGDrawClassesComboBoxWidth = 300;
 type
-	TSGDrawClasses = class(TSGDrawClass)
+	TSGDrawClasses = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
-		destructor Destroy;override;
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
 		class function ClassName:string;override;
 			public
-		FNowDraw     : TSGDrawClass;
+		FNowDraw     : TSGDrawable;
 		FNowDrawable : TSGBoolean;
 		FArClasses:packed array of
 			packed record 
-				FClass    : TSGClassOfDrawClass;
+				FClass    : TSGDrawableClass;
 				FDrawable : TSGBoolean;
 				end;
 		FComboBox2:TSGComboBox;
 			public
-		procedure Draw();override;
-		procedure Add(const NewClass:TSGClassOfDrawClass; const Dravable : TSGBoolean = True);
+		procedure Paint();override;
+		procedure Add(const NewClass:TSGDrawableClass; const Dravable : TSGBoolean = True);
 		procedure Initialize();
 			public
 		property ComboBox : TSGComboBox read FComboBox2;
 		end;
 	
-	TSGND=class(TSGDrawClass)
+	TSGND=class(TSGDrawable)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -51,15 +53,15 @@ type
 			public
 		FDimention:LongInt;
 			public
-		procedure Draw;override;
+		procedure Paint();override;
 		end;
 type
-	TSGMeshViever=class(TSGDrawClass)
+	TSGMeshViever=class(TSGDrawable)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
-		procedure Draw;override;
+		procedure Paint;override;
 			protected
 		FMesh:TSGCustomModel;
 		FCamera:TSGCamera;
@@ -75,12 +77,12 @@ const
 	TSGKillKostiaStringWin = 'Ты выиграл!!!';
 	TSGKillKostiaStringLose = 'Ты проиграл...';
 type
-	TSGKillKostia=class(TSGDrawClass)
+	TSGKillKostia=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext:ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
-		procedure Draw;override;
+		procedure Paint;override;
 			private
 		FStartDeep:LongWord;
 		FArray:TSGKostiaArray;
@@ -319,7 +321,7 @@ with TSGKillKostia(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGKillKostia.Create(const VContext:TSGContext);
+constructor TSGKillKostia.Create(const VContext:ISGContext);
 var
 	i:LongWord;
 begin
@@ -825,7 +827,7 @@ begin
 Result:=Abs((Bullet*FR)-FKosties[Kostia].FNowPosition)<Abs(FR)/3.9;
 end;
 
-procedure TSGKillKostia.Draw;
+procedure TSGKillKostia.Paint();
 var
 	i,ii,iii:LongWord;
 	FDT:TSGDataTime;
@@ -1120,11 +1122,11 @@ if not FActive then
 	end;
 end;
 
-procedure TSGMeshViever.Draw;
+procedure TSGMeshViever.Paint();
 begin
 FCamera.CallAction();
 if FMesh<>nil then
-	FMesh.Draw;
+	FMesh.Paint();
 end;
 
 constructor TSGMeshViever.Create;
@@ -1165,7 +1167,7 @@ begin
 inherited;
 end;
 
-procedure TSGND.Draw;
+procedure TSGND.Paint();
 begin
 
 end;
@@ -1175,13 +1177,13 @@ procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSGComboBox);
 begin
 if a<>b then
 	begin
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy();
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw :=
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FClass.Create(
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).Context
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw.Destroy();
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDraw :=
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FClass.Create(
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).Context
 	);
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDrawable :=
-	(TSGDrawClass(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FDrawable;
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).FNowDrawable :=
+	(TSGDrawable(VComboBox.FUserPointer1) as TSGDrawClasses).FArClasses[b].FDrawable;
 	end;
 end;
 
@@ -1223,7 +1225,7 @@ begin
 Result:='SaGe Draw Classes';
 end;
 
-procedure TSGDrawClasses.Draw;
+procedure TSGDrawClasses.Paint();
 begin
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('Begin of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
@@ -1233,13 +1235,13 @@ if FNowDraw=nil then
 	Initialize();
 	end
 else if FNowDrawable then
-	FNowDraw.Draw();
+	FNowDraw.Paint();
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
-procedure TSGDrawClasses.Add(const NewClass:TSGClassOfDrawClass; const Dravable : TSGBoolean = True);
+procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Dravable : TSGBoolean = True);
 begin
 SetLength(FArClasses,Length(FArClasses)+1);
 FArClasses[High(FArClasses)].FClass:=NewClass;
@@ -1248,7 +1250,7 @@ if FComboBox2<>nil then
 	FComboBox2.Active:=Length(FArClasses)>1;
 end;
 
-constructor TSGDrawClasses.Create(const VContext:TSGContext);
+constructor TSGDrawClasses.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FNowDraw:=nil;

@@ -13,7 +13,7 @@ uses
 	,SaGeImagesBase
 	,SaGeBase
 	,SaGeBased
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeResourseManager
 	;
 

@@ -237,6 +237,8 @@ const
 
 type
 	ISGRender = interface(ISGRectangle)
+		['{6d0d4eb0-4de7-4000-bf5d-52a069a776d1}']
+		function GetRenderType() : TSGRenderType;
 		function SetPixelFormat():TSGBoolean;
 		function MakeCurrent():TSGBoolean;
 		procedure ReleaseCurrent();
@@ -354,10 +356,14 @@ type
 		property Width : TSGLongWord read GetWidth write SetWidth;
 		property Height : TSGLongWord read GetHeight write SetHeight;
 		property Context : ISGNearlyContext read GetContext write SetContext;
+		property RenderType : TSGRenderType read GetRenderType;
 		end;
 	
 	ISGRendered = interface
+		['{535e900f-03d6-47d1-b2e1-9eadadf877f3}']
 		function GetRender() : ISGRender;
+		function RenderAssigned() : TSGBoolean;
+		
 		property Render : ISGRender read GetRender;
 		end;
 

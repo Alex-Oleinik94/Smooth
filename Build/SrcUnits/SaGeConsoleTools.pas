@@ -647,13 +647,13 @@ begin
 if Context.Active and (Context.FNewContextType<>nil) then
 	begin
 	NewContext:=Context.FNewContextType.Create();
-	NewContext.CopyInfo(Context);
-	NewContext.FCallInitialize:=nil;
-	Pointer(Context.FRender):=nil;
+	//NewContext.CopyInfo(Context);
+	//NewContext.FCallInitialize:=nil;
+	//Pointer(Context.FRender):=nil;
 	Context.Destroy();
-	Context:=NewContext;
-	NewContext:=nil;
-	Context.Initialize();
+	//Context:=NewContext;
+	//NewContext:=nil;
+	//Context.Initialize();
 	end;
 end;
 
@@ -750,8 +750,8 @@ Context :=
 
 with Context do
 	begin
-	Width  := GetScreenResolution().x;
-	Height := GetScreenResolution().y;
+	Width  := GetScreenArea().x;
+	Height := GetScreenArea().y;
 	Fullscreen := VFullscreen;
 	{$IFDEF ANDROID}
 		(Context as TSGContextAndroid).AndroidApp := State;
@@ -759,18 +759,18 @@ with Context do
 	
 	{$IFDEF MSWINDOWS}
 		if FRenderState = SGBR_DIRECTX then
-			Tittle := 'SaGe DirectX Window'
+			Title := 'SaGe DirectX Window'
 		else
 		{$ENDIF}
-			Tittle := 'SaGe OpenGL Window';
+			Title := 'SaGe OpenGL Window';
 		
-	DrawProcedure:=TSGContextProcedure(@DrawAllApplications);
+	//DrawProcedure:=TSGContextProcedure(@DrawAllApplications);
 	//InitializeProcedure:=TSGContextProcedure(@InitAllApplications);
 	
-	IconIdentifier   := 5;
-	CursorIdentifier := 5;
+	Icon       := TSGPointer(5);
+	CursorIcon := TSGPointer(5);
 	
-	SelfPoint:=@Context;
+	SelfLink := @Context;
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then
 			RenderClass := TSGRenderDirectX
@@ -1217,13 +1217,13 @@ if
 		Context.Width:=ViewerImage.Width;
 		Context.Height:=ViewerImage.Height;
 		Context.Fullscreen:=False;
-		Context.DrawProcedure:=TSGContextProcedure(@ViewerDraw);
-		Context.Tittle:='"'+FileWay+'" - SaGe Image Viewer';
+		//Context.DrawProcedure:=TSGContextProcedure(@ViewerDraw);
+		Context.Title:='"'+FileWay+'" - SaGe Image Viewer';
 		Context.RenderClass:=
 				//{$IFDEF MSWINDOWS}TSGRenderDirectX{$ENDIF}
 				//{$IFDEF UNIX}     
 				TSGRenderOpenGL;// {$ENDIF};
-		Context.SelfPoint:=@Context;
+		Context.SelfLink:=@Context;
 		Context.Initialize();
 		ViewerImage.SetContext(Context);
 		ViewerImage.ToTexture();

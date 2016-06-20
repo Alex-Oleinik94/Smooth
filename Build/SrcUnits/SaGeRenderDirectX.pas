@@ -1,13 +1,9 @@
-{$IFDEF UNIX}
-	{$ERROR "Ты долбаеб????"}
-{$ELSE}
-	{$IFDEF MSWINDOW}
-		{$ENDIF}
-	{$ENDIF}
-
 {$INCLUDE Includes\SaGe.inc}
+
 unit SaGeRenderDirectX;
+
 interface
+
 uses
 	 SaGeBase
 	,crt
@@ -26,11 +22,11 @@ type
 	D3DXVector3 = TD3DXVector3;
 	D3DVector = D3DXVector3;
 	
-	TSGRDTypeDataBuffer=(SGRDTypeDataBufferVertex,SGRDTypeDataBufferColor,SGRDTypeDataBufferNormal,SGRDTypeDataBufferTexVertex);
-	TSGRenderDirectX=class(TSGRender)
+	TSGRDTypeDataBuffer = (SGRDTypeDataBufferVertex, SGRDTypeDataBufferColor, SGRDTypeDataBufferNormal, SGRDTypeDataBufferTexVertex);
+	TSGRenderDirectX = class(TSGRender)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			protected
 			//FOR USE
 		pD3D:IDirect3D9;
@@ -1287,7 +1283,7 @@ begin
 inherited Create();
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
-FType:=SGRenderDirectX;
+SetRenderType(SGRenderDirectX);
 FArTextures:=nil;
 pDevice:=nil;
 pD3D:=nil;
@@ -1477,10 +1473,10 @@ if pDevice=nil then
 	FillChar(d3dpp,SizeOf(d3dpp),0);
 	d3dpp.Windowed := True;
 	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-	d3dpp.hDeviceWindow := LongWord(FWindow.Get('WINDOW HANDLE'));
+	d3dpp.hDeviceWindow := TSGLongWord(Context.Window);
 	d3dpp.BackBufferFormat := D3DFMT_X8R8G8B8;
-	d3dpp.BackBufferWidth :=  LongWord(FWindow.Get('WIDTH'));
-	d3dpp.BackBufferHeight := LongWord(FWindow.Get('HEIGHT'));
+	d3dpp.BackBufferWidth :=  Context.Width;
+	d3dpp.BackBufferHeight := Context.Height;
 	d3dpp.EnableAutoDepthStencil:= True;
 	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
 	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -1488,7 +1484,7 @@ if pDevice=nil then
 	//У меня на  нетбуке вылетает с этим пораметром
 	//d3dpp.MultiSampleType:=D3DMULTISAMPLE_4_SAMPLES;
 
-	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, LongWord(FWindow.Get('WINDOW HANDLE')),
+	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGLongWord(Context.Window),
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
 		begin
 		SGLog.Sourse(['TSGRenderDirectX__CreateContext : IDirect3DDevice9="',TSGMaxEnum(Pointer(pDevice)),'"']);
@@ -1522,11 +1518,11 @@ end;
 
 function TSGRenderDirectX.MakeCurrent():Boolean;
 begin
-Result:=False;
-if FWindow<>nil then
+Result := False;
+if Context.Window <> nil then
 	if ((pD3D=nil) and (pDevice=nil)) or ((pD3D<>nil) and (pDevice=nil)) then
 		begin
-		Result:=CreateContext();
+		Result := CreateContext();
 		if Result then
 			Init();
 		end;

@@ -1,12 +1,12 @@
 
 {$IFDEF SGREADINTERFACE}
 type
-	TSGGraphic=class(TSGDrawClass)
+	TSGGraphic=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
-		procedure Draw;override;
+		procedure Paint();override;
 			public
 		function GetFP(const p1,p2:Extended;const st:LongInt):Single;inline;
 		function GetMSD(const r:Extended):LongInt;inline;
@@ -41,10 +41,10 @@ type
 	//==============
 	TSGGraphViewer=class(TSGGraphic)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
-		procedure Draw;override;
+		procedure Paint();override;
 			public
 		SelectPoint,SelectSecondPoint:SGPoint;
 		SelectPointEnabled:Boolean ;
@@ -127,7 +127,7 @@ begin
 FArMathGraphic[0]:=Gr;
 end;
 
-constructor TSGGraphic.Create(const VContext:TSGContext);
+constructor TSGGraphic.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FArMathGraphic:=nil;
@@ -221,7 +221,7 @@ if Changet or VB then
 	end;
 end;
 
-procedure TSGGraphic.Draw;
+procedure TSGGraphic.Paint();
 var
 	msd:LongInt;
 	c,q,q1,q2:TSGExtended;
@@ -347,7 +347,7 @@ if MathGraphics<>0 then
 		if ArMathGraphics[i]<>nil then
 			begin
 			Colors[i].Color(Render);
-			ArMathGraphics[i].Draw();
+			ArMathGraphics[i].Paint();
 			end;
 
 if Abs(q1-View.y1)<c*0.2 then
@@ -484,7 +484,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGGraphViewer.Create(const VContext:TSGContext);
+constructor TSGGraphViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 SelectPointEnabled:=False;
@@ -516,7 +516,7 @@ begin
 Result:='Graphic Viewer';
 end;
 
-procedure TSGGraphViewer.Draw;
+procedure TSGGraphViewer.Paint();
 var
 	Changet2:boolean = False;
 begin

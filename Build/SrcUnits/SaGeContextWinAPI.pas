@@ -12,6 +12,7 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,commdlg
+	,SaGeBaseClasses
 	;
 
 type
@@ -38,19 +39,17 @@ type
 		procedure Messages();override;
 		procedure SwapBuffers();override;
 		function  GetCursorPosition():TSGPoint2f;override;
-		function  GetWindowRect():TSGPoint2f;override;
-		function  GetScreenResolution():TSGPoint2f;override;
+		function  GetWindowArea():TSGPoint2f;override;
+		function  GetScreenArea():TSGPoint2f;override;
 		function  ShiftClientArea() : TSGPoint2f; override;
 			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
-		function WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+		function WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 			protected
 		procedure InitFullscreen(const b : TSGBoolean); override;
-			private
-		procedure ReinitializeRender();override;
 			protected
 		hWindow:HWnd;
 		dcWindow:hDc;
@@ -62,9 +61,8 @@ type
 		procedure KillWindow(const KillRC:Boolean = True);
 		function  CreateWindow():Boolean;
 			public
-		function Get(const What:string):Pointer;override;
-		function FileOpenDlg(const VTittle: String; const VFilter : String):String;override;
-		function FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;override;
+		function FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
+		function FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
@@ -83,15 +81,6 @@ uses
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
 
-procedure TSGContextWinAPI.ReinitializeRender();
-begin
-Render.Destroy();
-FRender := FRenderClass.Create();
-FRender.Window := Self;
-if FRender.CreateContext() then
-	FRender.Init();
-end;
-
 function  TSGContextWinAPI.ShiftClientArea() : TSGPoint2f;
 begin
 if Fullscreen then
@@ -99,10 +88,10 @@ if Fullscreen then
 else
 	Result.Import(
 		GetSystemMetrics(SM_CXSIZEFRAME),
-		Height - TSGLongWord(Get('CLIENT HEIGHT')) - GetSystemMetrics(SM_CYSIZEFRAME));
+		Height - ClientHeight - GetSystemMetrics(SM_CYSIZEFRAME));
 end;
 
-function TSGContextWinAPI.FileSaveDlg(const VTittle: String; const VFilter : String;const extension : String):String;
+function TSGContextWinAPI.FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;
 const
 	sizeOfResult = 1000;
 var
@@ -143,7 +132,7 @@ if ofn^.lpstrDefExt <> nil then
 FreeMem(ofn,sizeof(ofn^));
 end;
 
-function TSGContextWinAPI.FileOpenDlg(const VTittle: String; const VFilter : String):String;
+function TSGContextWinAPI.FileOpenDialog(const VTittle: String; const VFilter : String):String;
 const
 	sizeOfResult = 1000;
 var
@@ -181,34 +170,6 @@ if ofn^.lpstrTitle <> nil then
 FreeMem(ofn,sizeof(ofn^));
 end;
 
-function TSGContextWinAPI.Get(const What:string):Pointer;
-
-function GetClientWindowRect(const VWindow : HWND):TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-GetClientRect(VWindow, Result);
-end;
-
-var
-	rect : TRect;
-begin
-if What = 'WINDOW HANDLE' then
-	Result := Pointer(hWindow)
-else if What = 'DESKTOP WINDOW HANDLE' then
-	Result := Pointer(dcWindow)
-else if What = 'CLIENT WIDTH' then
-	begin
-	Result := Pointer(GetClientWindowRect(HWindow).right);
-	end
-else if What = 'CLIENT HEIGHT' then
-	begin
-	Result := Pointer(GetClientWindowRect(HWindow).bottom);
-	end
-else if What = 'FULLSCREAN' then
-	Result := Pointer(byte(Fullscreen))
-else
-	Result := inherited Get(What);
-end;
-
 function TSGContextWinAPI.KeysPressed(const  Index : integer ) : Boolean;overload;
 var
 	Ar:PByte;
@@ -234,7 +195,7 @@ procedure TSGContextWinAPI.SetCursorPosition(const a:TSGPoint2f);
 var
 	b : TSGPoint2f;
 begin
-b:=GetWindowRect();
+b := GetWindowArea();
 Windows.SetCursorPos(b.x + a.x, b.y + a.y);
 end;
 
@@ -244,7 +205,7 @@ FShowCursor:=B;
 Windows.ShowCursor(B);
 end;
 
-function TSGContextWinAPI.GetScreenResolution:TSGPoint2f;
+function TSGContextWinAPI.GetScreenArea():TSGPoint2f;
 begin
 Result.Import(
 	GetDeviceCaps(GetDC(GetDesktopWindow),HORZRES),
@@ -260,11 +221,11 @@ Result.x:=p.x;
 Result.y:=p.y;
 end;
 
-function TSGContextWinAPI.GetWindowRect:TSGPoint2f;
+function TSGContextWinAPI.GetWindowArea():TSGPoint2f;
 var
 	Rec:TRect;
 begin
-Windows.GetWindowRect(HWindow,Rec);
+Windows.GetWindowRect(hWindow,Rec);
 Result.x:=Rec.Left;
 Result.y:=Rec.Top;
 end;
@@ -290,8 +251,7 @@ Active := CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
-	if FCallInitialize<>nil then
-		FCallInitialize(Self);
+	FPaintable.LoadDeviceResourses();
 	inherited;
 	end;
 end;
@@ -345,7 +305,7 @@ end;
 	* 
 	* 
 	* }
-function TSGContextWinAPI.WndMessagesProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 
 procedure HandlingSizing();
 var
@@ -587,7 +547,7 @@ if not FFullscreen then
 	end 
 else
 	begin
-	if (FWidth<>GetScreenResolution.x) or (FHeight<>GetScreenResolution.y) then
+	if (FWidth<>GetScreenArea().x) or (FHeight<>GetScreenArea().y) then
 		begin
 		dmScreenSettings.dmSize := sizeof(dmScreenSettings);
 		dmScreenSettings.dmPelsWidth := FWidth;
@@ -638,7 +598,7 @@ if FRender=nil then
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
 		{$ENDIF}
 	FRender := FRenderClass.Create();
-	FRender.Window := Self;
+	FRender.Context := Self as ISGNearlyContext;
 	Result := FRender.CreateContext();
 	if Result then 
 		FRender.Init();
@@ -651,7 +611,7 @@ else
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
 		{$ENDIF}
-	FRender.Window := Self;
+	FRender.Context := Self as ISGNearlyContext;
 	Result := FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
@@ -712,7 +672,7 @@ else
 	if (FRender<>nil) and (not KillRC) then
 		begin
 		FRender.ReleaseCurrent();
-		FRender.Window:=nil;
+		FRender.Context := nil;
 		end;
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );

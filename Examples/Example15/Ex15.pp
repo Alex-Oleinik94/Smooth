@@ -14,34 +14,35 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
 	,SaGePhysics
+	,SaGeImages
+	,Math
+	
 	,Ex13_Model
 	,Ex15_Shadow
 	,Ex6_D
 	,Ex6_N
-	,Math
-	,SaGeImages
 	;
 
 const
 	ScaleForDepth = 12;
 
 type
-	TSGExample15=class(TSGDrawClass)
+	TSGExample15=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure KeyControl();
 		procedure AddModels(const VCount : TIndex);
@@ -175,7 +176,7 @@ for i := 0 to 49 do
 Render.EndScene();
 end;
 
-constructor TSGExample15.Create(const VContext : TSGContext);
+constructor TSGExample15.Create(const VContext : ISGContext);
 
 procedure LoadLigthModel();
 var
@@ -351,7 +352,7 @@ for i := 0 to High(FAnimationStates) do
 	FAnimationStates[i].ResetState(0);
 SetLength(FAnimationStates,0);
 
-Context.CursorInCenter := False;
+Context.CursorCentered := False;
 
 if (FP1Button <> nil) then
 	FP1Button.Destroy();
@@ -431,7 +432,7 @@ for i := 0 to FQuantityModels - 1 do
 	FAnimationStates[i].FSpeed := (30+5*i) * 0.01;
 	Render.Translatef(x,y,0);
 	Render.Rotatef(-angle / PI * 180 + 90,0,0,1);
-	FModel.Draw();
+	FModel.Paint();
 	Render.PopMatrix();
 	end;
 
@@ -446,7 +447,7 @@ Render.PopMatrix();
 Render.Enable(SGR_BLEND);
 end;
 
-procedure TSGExample15.Draw();
+procedure TSGExample15.Paint();
 const
 	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
@@ -522,7 +523,7 @@ if Render.SupporedShaders() then
 		Render.PushMatrix();
 		FLightInverseModelViewMatrix := SGInverseMatrix(FShadow.LightModelViewMatrix[i]);
 		Render.MultMatrixf(@FLightInverseModelViewMatrix);
-		FLigthSphere.Draw();
+		FLigthSphere.Paint();
 		Render.PopMatrix();
 		
 		Render.BeginScene(SGR_LINES);
@@ -533,7 +534,7 @@ if Render.SupporedShaders() then
 	
 	FShadow.KeyboardCallback();
 	KeyControl();
-	FFPS.Draw();
+	FFPS.Paint();
 	end
 else
 	begin
@@ -557,8 +558,8 @@ if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPresse
 	begin
 	FUseCameraAnimation := not FUseCameraAnimation;
 	FCamera.ChangingLookAtObject := not FUseCameraAnimation;
-	Context.CursorInCenter := not FUseCameraAnimation;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not FUseCameraAnimation;
+	Context.ShowCursor(not Context.CursorCentered);
 	if FUseCameraAnimation then
 		begin
 		FCamera.Up   := SGVertexImport(0,0,1);

@@ -8,7 +8,7 @@ uses
 	crt
 	,SaGeBase
 	,SaGeBased
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeResourseManager
 	;
 

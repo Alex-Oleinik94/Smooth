@@ -7,7 +7,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeCommon
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeMesh
 	,SaGeModel
 	,SaGeUtils
@@ -17,9 +17,9 @@ uses
 type
 	TSGScene = class(TSGNod)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			protected
 		FCamera : TSGCamera;
@@ -97,7 +97,7 @@ FMutators[High(FMutators)]:=Result;
 Result.SetParent(Self);
 end;
 
-constructor TSGScene.Create(const VContext:TSGContext);
+constructor TSGScene.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FCamera := TSGCamera.Create();
@@ -127,7 +127,7 @@ begin
 FCamera.InitMatrix();
 end;
 
-procedure TSGScene.Draw();
+procedure TSGScene.Paint();
 var
 	i : TSGLongWord;
 begin
@@ -143,7 +143,7 @@ if FNods<>nil then
 		if FNods[i]<>nil then
 			begin
 			Render.PushMatrix();
-			FNods[i].Draw();
+			FNods[i].Paint();
 			Render.PopMatrix()
 			end;
 end;

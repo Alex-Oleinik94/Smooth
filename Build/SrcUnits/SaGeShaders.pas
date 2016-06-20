@@ -10,18 +10,19 @@ uses
 	,SaGeCommon
 	,SysUtils
 	,SaGeRender
-	,SaGeContext
+	,SaGeContextInterface
 	,Classes
 	,SaGeResourseManager
 	,StrMan
 	,SaGeMath
+	,SaGeRenderConstants
 	;
 type
 	TSGShaderParams = TSGArString;
 	TSGShaderProgram = class;
-	TSGShader = class(TSGContextObject)
+	TSGShader = class(TSGContextabled)
 			public
-		constructor Create(const VContext:TSGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
+		constructor Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 		destructor Destroy();override;
 		function Compile():Boolean;inline;
 		procedure Sourse(const s:string);overload;
@@ -34,9 +35,9 @@ type
 		property Handle : TSGLongWord read FShader;
 		end;
 	
-	TSGShaderProgram=class(TSGContextObject)
+	TSGShaderProgram=class(TSGContextabled)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		procedure Attach(const NewShader:TSGShader);
 		function Link():Boolean;
@@ -89,7 +90,7 @@ type
 	property FileParams : TSGShaderParams write FFileParams;
 	end;
 
-function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCreateShaderProgramFromSourses(const Context : ISGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -216,7 +217,7 @@ begin
 Result := Render.GetUniformLocation(FProgram,VLocationName);
 end;
 
-function SGCreateShaderProgramFromSourses(const Context : TSGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCreateShaderProgramFromSourses(const Context : ISGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	FFragmentShader, FVertexShader : TSGShader;
 begin
@@ -703,7 +704,7 @@ begin
 Render.UseProgram(Handle);
 end;
 
-constructor TSGShaderProgram.Create(const VContext:TSGContext);
+constructor TSGShaderProgram.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FProgram:=Render.CreateShaderProgram();
@@ -807,7 +808,7 @@ Result := compiled = SGR_TRUE;
 SGLog.Sourse('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'"');
 end;
 
-constructor TSGShader.Create(const VContext:TSGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
+constructor TSGShader.Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 function WTS:string;
 begin
 if ShaderType=SGR_VERTEX_SHADER then
@@ -818,7 +819,7 @@ else
 	Result:='UNKNOWN';
 end;
 begin
-(Self as TSGContextObject).Create(VContext);
+Create(VContext);
 if Render.SupporedShaders() then
 	begin
 	FShader:=Render.CreateShader(ShaderType);

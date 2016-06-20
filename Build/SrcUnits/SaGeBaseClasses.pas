@@ -10,6 +10,7 @@ uses
 	
 type
 	ISGInterface = interface(IInterface)
+		['{2542664e-68ea-47d7-8f66-67e3143ca7ae}']
 		procedure DestroyFromInterface();
 		end;
 	
@@ -23,7 +24,7 @@ type
 		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 		
 		destructor Destroy(); override;
-		procedure DestroyFromInterface();
+		procedure DestroyFromInterface();virtual;
 		end;
 	
 	TSGNamed = class(TSGInterfacedObject)
@@ -32,15 +33,18 @@ type
 		end;
 	
 	ISGOptionGetSeter = interface
+		['{8c35573c-38fb-43ab-876f-af746af58650}']
 		function GetOption(const VName : TSGString) : TSGPointer;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);
 		end;
 	
 	ISGPaintable = interface(ISGOptionGetSeter)
+		['{7996b748-dd9b-41d5-ac28-7e5529023ef1}']
 		procedure Paint();
 		end;
 	
 	ISGRectangle = interface(ISGPaintable)
+		['{e8662e5e-d8bd-4515-8828-40853a68da8f}']
 		function GetWidth() : TSGLongWord;
 		function GetHeight() : TSGLongWord;
 		procedure SetWidth(const VWidth : TSGLongWord);
@@ -51,6 +55,7 @@ type
 		end;
 	
 	ISGTitledResiseableRectangle = interface(ISGRectangle)
+		['{425e6c53-7a59-4b26-9ed5-eb94879c9f16}']
 		function GetTitle() : TSGString;
 		procedure SetTitle(const VTitle : TSGString);
 		
@@ -62,6 +67,7 @@ type
 		end;
 	
 	ISGArea = interface(ISGTitledResiseableRectangle)
+		['{f1f34026-791d-4476-a5dc-32ecaeec36c8}']
 		function GetLeft() : TSGLongWord;
 		function GetTop() : TSGLongWord;
 		procedure SetLeft(const VLeft : TSGLongWord);
@@ -74,11 +80,14 @@ type
 		property Title : TSGString read GetTitle write SetTitle;
 		end;
 	
-	ISGAreaWithClient = interface(ISGArea)
+	ISGDeviceArea = interface(ISGArea)
+		['{f1abd9e3-5eb3-40ae-9d70-0b28a8d4d68b}']
 		function GetClientWidth() : TSGLongWord;
 		function GetClientHeight() : TSGLongWord;
 		procedure SetClientWidth(const VClientWidth : TSGLongWord);
 		procedure SetClientHeight(const VClientHeight : TSGLongWord);
+		function GetWindow() : TSGPointer;
+		function GetDevice() : TSGPointer;
 		
 		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
 		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
@@ -87,9 +96,12 @@ type
 		property Width : TSGLongWord read GetWidth write SetWidth;
 		property Height : TSGLongWord read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
+		property Device : TSGPointer read GetDevice;
+		property Window : TSGPointer read GetWindow;
 		end;
 	
-	ISGTimerArea = interface(ISGAreaWithClient)
+	ISGTimerArea = interface(ISGDeviceArea)
+		['{2746e985-11ee-4a85-a840-fe89d1d81f0d}']
 		procedure StartComputeTimer();
 		procedure UpdateTimer();
 		function GetElapsedTime() : TSGLongWord;
@@ -100,19 +112,27 @@ type
 		property Height : TSGLongWord read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property Device : TSGPointer read GetDevice;
+		property Window : TSGPointer read GetWindow;
+		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
 		end;
 	
-	ISGNearlyContext = ISGTimerArea;
+	ISGNearlyContext = interface(ISGTimerArea)
+		['{5ae93fd6-88a9-495e-9249-9e3e4cf7f9ac}']
+		end;
 	
 	TSGPaintable = class(TSGNamed, ISGPaintable)
 			public
 		class function ClassName() : TSGString; override;
-		procedure Paint();
-		function GetOption(const VName : TSGString) : TSGPointer;
-		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);
+		procedure Paint();virtual;
+		function GetOption(const VName : TSGString) : TSGPointer;virtual;
+		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;
 		end;
 	
-	ISGDeviceDependent = interface
+	ISGDeviceDependent = interface(ISGPaintable)
+		['{0841a6ed-c09e-4273-965a-c82db11d26ff}']
+		function Suppred() : TSGBoolean;
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
 		end;
@@ -120,8 +140,9 @@ type
 	TSGExtendedPaintable = class(TSGPaintable, ISGDeviceDependent)
 			public
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResourses();
-		procedure LoadDeviceResourses();
+		procedure DeleteDeviceResourses();virtual;
+		procedure LoadDeviceResourses();virtual;
+		function Suppred() : TSGBoolean;virtual;
 		end;
 
 implementation
@@ -148,6 +169,11 @@ procedure TSGInterfacedObject.DestroyFromInterface();
 begin
 if Self <> nil then
 	Self.Destroy();
+end;
+
+function TSGExtendedPaintable.Suppred() : TSGBoolean;
+begin
+Result := True;
 end;
 
 procedure TSGExtendedPaintable.DeleteDeviceResourses();
@@ -179,10 +205,12 @@ end;
 
 function TSGInterfacedObject.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
+WriteLn(S_OK,' ',E_NOINTERFACE);
 if GetInterface(VInterfaceIdentifier, VObject) then
 	Result := S_OK
 else
 	Result := TSGLongInt(E_NOINTERFACE); 
+WriteLn(Result);
 end;
 
 function TSGInterfacedObject._AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};

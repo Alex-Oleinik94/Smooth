@@ -14,19 +14,19 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	;
 type
-	TSGExample3=class(TSGDrawClass)
+	TSGExample3=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -41,7 +41,7 @@ begin
 Result := 'Кубики и текстура шрифта вместе с камерой';
 end;
 
-constructor TSGExample3.Create(const VContext : TSGContext);
+constructor TSGExample3.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
@@ -53,7 +53,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample3.Draw();
+procedure TSGExample3.Paint();
 
 procedure DrawCube(const x,y,z,r,a: Single);
 begin

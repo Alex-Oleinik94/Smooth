@@ -11,6 +11,7 @@ uses
 	,SysUtils
 	,crt
 	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeContextInterface
 	,SaGeBaseClasses
 	{$IFDEF LAZARUS}
@@ -45,7 +46,7 @@ const
 	 SGDeferenseCursorPosition =  SaGeContextInterface.SGDeferenseCursorPosition; // - Это разница между SGNowCursorPosition и SGLastCursorPosition
 	 SGNowCursorPosition =        SaGeContextInterface.SGNowCursorPosition;       //- Координаты мыши в настоящий момент
 	 SGLastCursorPosition =       SaGeContextInterface.SGLastCursorPosition;      // - Координаты мыши, полученые при преведущем этапе цикла
-	 SGNoCursorButton =           SaGeContextInterface.SGNoCursorButton;
+	 SGNullCursorButton =         SaGeContextInterface.SGNullCursorButton;
 	 
 	 SGMiddleCursorButton =       SaGeContextInterface.SGMiddleCursorButton;
 	 SGLeftCursorButton =         SaGeContextInterface.SGLeftCursorButton;
@@ -54,7 +55,7 @@ const
 	 SGDownKey =                  SaGeContextInterface.SGDownKey;
 	 SGUpKey =                    SaGeContextInterface.SGUpKey;
 	 
-	 SGNoCursorWheel =            SaGeContextInterface.SGNoCursorWheel;
+	 SGNullCursorWheel =          SaGeContextInterface.SGNullCursorWheel;
 	 SGUpCursorWheel =            SaGeContextInterface.SGUpCursorWheel;
 	 SGDownCursorWheel =          SaGeContextInterface.SGDownCursorWheel;
 type
@@ -76,19 +77,25 @@ type
 		procedure Resize();virtual;
 		procedure Close();virtual;
 		function ShiftClientArea() : TSGPoint2f; virtual;
+		procedure SwapBuffers();virtual;
+		procedure ReinitializeRender();virtual;
+			public
+		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;abstract;
+		function GetCursorPosition():TSGPoint2f;virtual;abstract;
+		procedure SetCursorPosition(const VPosition : TSGPoint2f);virtual;abstract;
+		function GetWindowArea():TSGPoint2f;virtual;abstract;
+		function GetScreenArea():TSGPoint2f;virtual;abstract;
+		function GetClientArea():TSGPoint2f;virtual;abstract;
+		function GetClientAreaShift() : TSGPoint2f;virtual;abstract;
 			protected
+		FActive          : TSGBoolean;
+		FInitialized     : TSGBoolean;
 		FWidth, FHeight  : TSGLongWord;
 		FFullscreen      : TSGBoolean;
-		FFullscreenData  : packed record 
-			FNotFullscreenWidth, FNotFullscreenHeight : TSGLongWord;
-			end;
 		FTitle           : TSGString;
-		FActive          : TSGBoolean;
 		FCursorIdenifier : TSGLongWord;
 		FIconIdentifier  : TSGLongWord;
-			public
-		FCallDraw, 
-		 FCallInitialize : TSGContextProcedure;
+		FPaintable       : ISGDeviceDependent;
 		FElapsedTime     : TSGLongWord;
 		FElapsedDateTime : TSGDateTime;
 		FShowCursor      : TSGBoolean;
@@ -119,8 +126,19 @@ type
 		function  GetSelfLink() : PISGContext;virtual;
 		function  GetCursorIcon():TSGPointer;virtual;
 		procedure SetCursorIcon(const VIcon : TSGPointer);virtual;
-		function GetIcon():TSGPointer;virtual;
+		function  GetIcon():TSGPointer;virtual;
 		procedure SetIcon(const VIcon : TSGPointer);virtual;
+		
+		function  GetClientWidth() : TSGLongWord;virtual;abstract;
+		function  GetClientHeight() : TSGLongWord;virtual;abstract;
+		function  GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
+		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
+		procedure SetClientWidth(const VClientWidth : TSGLongWord);virtual;abstract;
+		procedure SetClientHeight(const VClientHeight : TSGLongWord);virtual;abstract;
+		function  GetWindow() : TSGPointer;virtual;abstract;
+		function  GetDevice() : TSGPointer;virtual;abstract;
+		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
+		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual;abstract;
 			public
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
@@ -135,7 +153,11 @@ type
 		property Render : ISGRender read GetRender;
 		property ElapsedTime : TSGLongWord read GetElapsedTime;
 		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
-			public
+		property Device : TSGPointer read GetDevice;
+		property Window : TSGPointer read GetWindow;
+		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+			protected
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
 		FKeyPressedType   : TSGCursorButtonType;
@@ -159,9 +181,10 @@ type
 		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;virtual;
 		function CursorWheel():TSGCursorWheel;virtual;
 		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;virtual;
-			public
+		
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
+		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
 		procedure CopyInfo(const C : ISGContext);virtual;
 			public
@@ -170,9 +193,7 @@ type
 		FRender         : TSGRender;
 		FSelfLink       : PISGContext;
 			public
-		property RenderClass : TSGRenderClass      read FRenderClass write SetRenderClass;
-			public
-		function Get(const What:string):Pointer;override;
+		property RenderClass : TSGRenderClass read FRenderClass write SetRenderClass;
 		end;
 
 {$DEFINE SGREADINTERFACE}
@@ -198,45 +219,173 @@ uses
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
+procedure TSGContext.SetCursorWheel(const VCursorWheel : TSGCursorWheel);
+begin
+FCursorWheel := VCursorWheel;
+end;
+
+procedure TSGContext.ReinitializeRender();
+var
+	a : ISGNearlyContext;
+begin
+if FPaintable <> nil then
+	FPaintable.DeleteDeviceResourses();
+if FRender <> nil then
+	FRender.Destroy();
+FRender := FRenderClass.Create();
+Self.QueryInterface(ISGNearlyContext,a);
+FRender.Context := a;
+if FRender.CreateContext() then
+	FRender.Init();
+if FPaintable <> nil then
+	FPaintable.LoadDeviceResourses();
+end;
+
+procedure TSGContext.SwapBuffers();
+begin
+if FRender <> nil then
+	FRender.SwapBuffers();
+end;
+
 procedure TSGContext.SetRenderClass(const NewRender : TSGRenderClass);
 begin
 FRenderClass := NewRender;
-if Active and (not (Render is FRenderClass)) then
+if (not (Render is FRenderClass)) then
 	ReinitializeRender();
 end;
 
-function GetRender() : ISGRender;
-procedure StartComputeTimer();
-function GetElapsedTime() : TSGLongWord;
-function GetTitle() : TSGString;
-procedure SetTitle(const VTitle : TSGString);
-function GetWidth() : TSGLongWord;
-function GetHeight() : TSGLongWord;
-procedure SetWidth(const VWidth : TSGLongWord);
-procedure SetHeight(const VHeight : TSGLongWord);
-function GetLeft() : TSGLongWord;virtual;
-function GetTop() : TSGLongWord;virtual;
-procedure SetLeft(const VLeft : TSGLongWord);virtual;
-procedure SetTop(const VTop : TSGLongWord);virtual;
-function  GetFullscreen() : TSGBoolean;virtual;
-procedure InitFullscreen(const VFullscreen : TSGBoolean);virtual;
-procedure SetActive(const VActive : TSGBoolean);virtual;
-function  GetActive():TSGBoolean;virtual;
-procedure SetCursorCentered(const VCentered : TSGBoolean);virtual;
-function GetCursorCentered() : TSGBoolean;virtual;
-procedure SetSelfLink(const VLink : PISGContext);virtual;
-function GetSelfLink() : PISGContext;virtual;
-function GetCursorIcon():TSGPointer;virtual;
-procedure SetCursorIcon(const VIcon : TSGPointer);virtual;
-function GetIcon():TSGPointer;virtual;
-procedure SetIcon(const VIcon : TSGPointer);virtual;
+function TSGContext.GetRender() : ISGRender;
+begin
+Result := FRender;
+end;
+
+procedure TSGContext.StartComputeTimer();
+begin
+
+end;
+
+function TSGContext.GetElapsedTime() : TSGLongWord;
+begin
+
+end;
+
+function TSGContext.GetTitle() : TSGString;
+begin
+
+end;
+
+function TSGContext.GetWidth() : TSGLongWord;
+begin
+Result := FWidth;
+end;
+
+function TSGContext.GetHeight() : TSGLongWord;
+begin
+
+end;
+
+procedure TSGContext.SetWidth(const VWidth : TSGLongWord);
+begin
+FWidth := VWidth;
+end;
+
+procedure TSGContext.SetHeight(const VHeight : TSGLongWord);
+begin
+FHeight := VHeight;
+end;
+
+function TSGContext.GetLeft() : TSGLongWord;
+begin
+
+end;
+
+function TSGContext.GetTop() : TSGLongWord;
+begin
+
+end;
+
+procedure TSGContext.SetLeft(const VLeft : TSGLongWord);
+begin
+
+end;
+
+procedure TSGContext.SetTop(const VTop : TSGLongWord);
+begin
+
+end;
+
+function  TSGContext.GetFullscreen() : TSGBoolean;
+begin
+
+end;
+
+procedure TSGContext.SetActive(const VActive : TSGBoolean);
+begin
+
+end;
+
+function  TSGContext.GetActive():TSGBoolean;
+begin
+
+end;
+
+procedure TSGContext.SetCursorCentered(const VCentered : TSGBoolean);
+var
+	Point : TSGPoint2f;
+begin
+FCursorInCenter := VCentered;
+if (@SetCursorPosition <> nil) and VCentered then
+	begin
+	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
+	SetCursorPosition(Point + ShiftClientArea());
+	FCursorPosition[SGLastCursorPosition] := Point;
+	FCursorPosition[SGNowCursorPosition] := Point;
+	FCursorPosition[SGDeferenseCursorPosition]:=0;
+	end;
+end;
+
+function TSGContext.GetCursorCentered() : TSGBoolean;
+begin
+
+end;
+
+procedure TSGContext.SetSelfLink(const VLink : PISGContext);
+begin
+
+end;
+
+function TSGContext.GetSelfLink() : PISGContext;
+begin
+
+end;
+
+function TSGContext.GetCursorIcon():TSGPointer;
+begin
+
+end;
+
+procedure TSGContext.SetCursorIcon(const VIcon : TSGPointer);
+begin
+
+end;
+
+function TSGContext.GetIcon():TSGPointer;
+begin
+
+end;
+
+procedure TSGContext.SetIcon(const VIcon : TSGPointer);
+begin
+
+end;
 
 procedure TSGContext.Initialize();
 begin
 StartComputeTimer();
+FInitialized := True;
 end;
 
-procedure TSGContext.UpdateElapsedTime();
+procedure TSGContext.UpdateTimer();
 var
 	DataTime : TSGDateTime;
 begin
@@ -255,12 +404,12 @@ end;
 
 procedure TSGContext.Paint();
 begin
-UpdateElapsedTime();
+UpdateTimer();
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-if FCallDraw<>nil then
+if FPaintable <> nil then
 	begin
 	Render.InitMatrixMode(SG_3D);
-	FCallDraw(Self);
+	FPaintable.Paint();
 	end;
 if FPaintWithHandlingMessages then
 	begin
@@ -271,30 +420,14 @@ SGScreen.Paint();
 SwapBuffers();
 end;
 
-procedure TSGContext.SetTitle(const NewTittle:TSGString);
+procedure TSGContext.SetTitle(const VTitle : TSGString);
 begin
-FTitle:=NewTittle;
+FTitle := VTitle;
 end;
 
-function TSGContext.Get(const What:string):Pointer;
+procedure TSGContext.CopyInfo(const C : ISGContext);
 begin
-if What='HEIGHT' then
-	Result:=Pointer(FHeight)
-else if What='WIDTH' then
-	Result:=Pointer(FWidth)
-else if What='CURPOSY' then
-	Result:=Pointer(FCursorPosition[SGNowCursorPosition].y)
-else if What='CURPOSX' then
-	Result:=Pointer(FCursorPosition[SGNowCursorPosition].x)
-else if What='FULLSCREEN' then
-	Result:=Pointer(Byte(FFullscreen))
-else
-	Result:=nil;
-end;
-
-procedure TSGContext.CopyInfo(const C : TSGContextInterface);
-begin
-if C=nil then
+{if C=nil then
 	Exit;
 FSelfPoint:=C.SelfPoint;
 FRenderClass:=C.RenderClass;
@@ -305,46 +438,28 @@ FTitle:=C.Title;
 FCursorIdenifier:=C.CursorIdenifier;
 FIconIdentifier:=C.IconIdentifier;
 FCallDraw:=C.CallDraw;
-FCallInitialize:=C.CallInitialize;
+FCallInitialize:=C.CallInitialize;}
 end;
 
-procedure TSGContext.InitFullscreen(const b:Boolean);
+procedure TSGContext.InitFullscreen(const VFullscreen : TSGBoolean);
 begin
-if (b=True) and (FFullscreen=False) then
-	begin
-	FFullscreenData.FNotFullscreenHeight:=Height;
-	FFullscreenData.FNotFullscreenWidth:=Width;
-	Width:=GetScreenResolution.x;
-	Height:=GetScreenResolution.y;
-	//WriteLn(FFullscreen,' ',b,' ',Width,' ',Height);
-	end
-else
-	if (not b) and (FFullscreen) then
-		begin
-		if not ((FFullscreenData.FNotFullscreenHeight=0) or (FFullscreenData.FNotFullscreenWidth=0)) then
-			begin
-			Width:=FFullscreenData.FNotFullscreenWidth;
-			Height:=FFullscreenData.FNotFullscreenHeight;
-			//WriteLn(FFullscreen,' ',b,' ',Width,' ',Height);
-			end;
-		end;
-FFullscreen:=b;
+FFullscreen := VFullscreen;
 Resize();
 end;
 
-function TSGContext.KeyPressedType():TSGCursorButtonType;overload;
+function TSGContext.KeyPressedType():TSGCursorButtonType;
 begin
 Result:=FKeyPressedType;
 end;
 
-procedure TSGContext.SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);overload;
+procedure TSGContext.SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
 begin
 FCursorKeyPressed:=Key;
 FCursorKeyPressedType:=ButtonType;
 FCursorKeysPressed[Key]:=ButtonType = SGDownKey;
 end;
 
-procedure TSGContext.SetKey(ButtonType:TSGCursorButtonType;Key:LongInt);overload;
+procedure TSGContext.SetKey(ButtonType:TSGCursorButtonType;Key:LongInt);
 begin
 FKeysPressed[Key]:=ButtonType = SGDownKey;
 FKeyPressedType:=ButtonType;
@@ -362,49 +477,14 @@ begin
 Result.Import(0,0);
 end;
 
-class function TSGContext.RectInCoords():Boolean;
-begin
-Result:=True;
-end;
-
 procedure TSGContext.Resize();
 begin
 SGScreen.Resize();
 end;
 
-function TSGContext.GetWidth():LongWord;
+function TSGContext.CursorWheel():TSGCursorWheel;
 begin
-Result:=FWidth;
-end;
-
-procedure TSGContext.SetWidth(const NewWidth:LongWord);
-begin
-FWidth:=NewWidth;
-end;
-
-procedure TSGContext.SetHeight(const NewHeight:LongWord);
-begin
-FHeight:=NewHeight;
-end;
-
-function TSGContext.CursorWheel():TSGCursorWheel;overload;
-begin
-Result:=FCursorWheel;
-end;
-
-procedure TSGContext.SetCursorInCenter(const NP : TSGBoolean);
-var
-	Point : TSGPoint2f;
-begin
-FCursorInCenter := NP;
-if (@SetCursorPosition<>nil) and NP then
-	begin
-	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
-	SetCursorPosition(Point + ShiftClientArea());
-	FCursorPosition[SGLastCursorPosition] := Point;
-	FCursorPosition[SGNowCursorPosition] := Point;
-	FCursorPosition[SGDeferenseCursorPosition]:=0;
-	end;
+Result := FCursorWheel;
 end;
 
 procedure TSGContext.Messages();
@@ -412,13 +492,12 @@ var
 	Point:TSGPoint2f;
 begin
 Point:=GetCursorPosition();
-if RectInCoords() then
-	Point -= GetWindowRect();
+Point -= GetWindowArea();
 Point -= ShiftClientArea();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
 FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]-FCursorPosition[SGLastCursorPosition];
-if CursorInCenter and (@SetCursorPosition<>nil) then
+if CursorCentered and (@SetCursorPosition<>nil) then
 	begin
 	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
 	SetCursorPosition(Point + ShiftClientArea());
@@ -434,24 +513,24 @@ if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyP
 	end;
 end;
 
-function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;overload;
+function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;
 begin
 Result:=FCursorPosition[Index];
 end;
 
-function TSGContext.CursorKeyPressed():TSGCursorButtons;overload;
+function TSGContext.CursorKeyPressed():TSGCursorButtons;
 begin
 Result:=FCursorKeyPressed;
 end;
 
-function TSGContext.CursorKeyPressedType():TSGCursorButtonType;overload;
+function TSGContext.CursorKeyPressedType():TSGCursorButtonType;
 begin
 Result:=FCursorKeyPressedType;
 end;
 
-function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;overload;
+function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;
 begin
-if Index=SGNoCursorButton then
+if Index = SGNullCursorButton then
 	Result:=False
 else
 	Result:=FCursorKeysPressed[Index];
@@ -462,12 +541,11 @@ var
 	i:LongWord;
 begin
 inherited;
+FInitialized := False;
 FShowCursor:=True;
 FCursorInCenter:=False;
 FWidth:=0;
 FHeight:=0;
-FCallDraw:=nil;
-FCallInitialize:=nil;
 FTitle:='SaGe Window';
 FFullscreen:=False;
 FCursorIdenifier:=0;
@@ -480,21 +558,19 @@ FKeyPressed:=0;
 FCursorPosition[SGDeferenseCursorPosition].Import();
 FCursorPosition[SGNowCursorPosition].Import();
 FCursorPosition[SGLastCursorPosition].Import();
-FCursorKeyPressed:=SGNoCursorButton;
+FCursorKeyPressed:=SGNullCursorButton;
 FCursorKeysPressed[SGMiddleCursorButton]:=False;
 FCursorKeysPressed[SGLeftCursorButton]:=False;
 FCursorKeysPressed[SGRightCursorButton]:=False;
-FFullscreenData.FNotFullscreenHeight:=0;
-FFullscreenData.FNotFullscreenWidth:=0;
 FRender:=nil;
 FPaintWithHandlingMessages := True;
 end;
 
 procedure TSGContext.ClearKeys();
 begin
-FCursorKeyPressed:=SGNoCursorButton;
+FCursorKeyPressed:=SGNullCursorButton;
 FKeyPressed:=0;
-FCursorWheel:=SGNoCursorWheel; 
+FCursorWheel:=SGNullCursorWheel; 
 end;
 
 destructor TSGContext.Destroy();
@@ -517,17 +593,17 @@ begin
 Result:=KeysPressed(LongWord(Index));
 end;
 
-function TSGContext.KeyPressed:Boolean;overload;
+function TSGContext.KeyPressed() : TSGBoolean;
 begin
 Result:=FKeyPressed<>0;
 end;
 
-function TSGContext.KeyPressedChar:Char;overload;
+function TSGContext.KeyPressedChar() : TSGChar;
 begin
 Result:=Char(FKeyPressed);
 end;
 
-function TSGContext.KeyPressedByte:LongWord;overload;
+function TSGContext.KeyPressedByte() : TSGLongWord;
 begin
 Result:=FKeyPressed;
 end;

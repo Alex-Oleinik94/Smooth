@@ -18,6 +18,8 @@ uses
 	,SaGeBased
 	,SaGeRender
 	,SaGeImages
+	,SaGeRenderConstants
+	,SaGeContextInterface
 	;
 
 {$DEFINE SGREADINTERFACE}

@@ -1,12 +1,12 @@
 
 {$IFDEF SGREADINTERFACE}
 type
-	TSGGenAlg=class(TSGDrawClass)
+	TSGGenAlg=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
-		procedure Draw;override;
+		procedure Paint();override;
 			public
 		FLMM,FL1,FL2,FL3,FL4,FL5,FL6,FL7,FL8,FL9,FXL,FLPoint:TSGLabel;
 		FP1:TSGPanel;
@@ -194,7 +194,7 @@ with TSGGenAlg(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGGenAlg.Draw;
+procedure TSGGenAlg.Paint();
 var
 	AbsX:Extended;
 begin
@@ -215,7 +215,7 @@ if FG<>nil then
 		Render.Vertex2f(Round((b-View.x1)/absx*Render.Width),0);
 		end;
 	Render.EndScene();
-	FG.Draw;
+	FG.Paint();
 	Render.InitMatrixMode(SG_2D);
 	Render.LineWidth(3);
 	Render.BeginScene(SGR_LINES);
@@ -237,7 +237,7 @@ if FG<>nil then
 	end;
 end;
 
-constructor TSGGenAlg.Create(const VContext:TSGContext);
+constructor TSGGenAlg.Create(const VContext : ISGContext);
 const
 	QQQ=35;
 begin

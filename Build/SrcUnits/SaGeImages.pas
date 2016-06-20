@@ -13,16 +13,17 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
-	,SaGeRender
 	,SaGeContext
 	,SaGeCommon
 	,SaGeResourseManager
+	,SaGeRenderConstants
 		// formats
 	,SaGeImagesBmp
 	,SaGeImagesJpeg
 	{$IFDEF WITHLIBPNG},SaGeImagesPng{$ENDIF}
 	,SaGeImagesTga
 	,SaGeImagesSgia
+	,SaGeContextInterface
 	;
 type
 	TSGImage = class;
@@ -34,7 +35,7 @@ type
 	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
 	// Класс изображения и текстуры
-	TSGImage = class(TSGContextObject)
+	TSGImage = class(TSGDrawable)
 			public
 		constructor Create(const NewWay:string = '');
 		destructor Destroy;override;
@@ -126,9 +127,9 @@ type
 	TArTSGImage = ArTSGImage;
 
 type
-	TSGTextureBlock = class(TSGContextObject)
+	TSGTextureBlock = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 			private
 		FTextures : packed array of
@@ -151,7 +152,7 @@ procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
 implementation
 
 
-constructor TSGTextureBlock.Create(const VContext : TSGContext);
+constructor TSGTextureBlock.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FTextures := nil;
@@ -622,7 +623,7 @@ end;
 
 procedure TSGImage.FreeTexture();
 begin
-if (FTexture<>0) and (FCOntext<>nil) and (Context<>nil) and (Render<>nil) then
+if (FTexture<>0) and RenderAssigned() then
 	Render.DeleteTextures(1,@FTexture);
 FTexture:=0;
 end;

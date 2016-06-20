@@ -14,11 +14,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGePhysics
 	,crt
@@ -29,11 +29,11 @@ const
 	QuantityObjects = 15;
 	GravitationConst = 9.81*2.25;
 type
-	TSGExample5_4=class(TSGDrawClass)
+	TSGExample5_4 = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera           : TSGCamera;
@@ -60,7 +60,7 @@ begin
 Result := 'Пример физического движка №4';
 end;
 
-constructor TSGExample5_4.Create(const VContext : TSGContext);
+constructor TSGExample5_4.Create(const VContext : ISGContext);
 const 
 	EnableCullFaceInExample = True;
 procedure InitCubes();
@@ -103,7 +103,7 @@ inherited Create(VContext);
 FBike := nil;
 FGravitationFlag := False;
 
-Context.CursorInCenter:=True;
+Context.CursorCentered := True;
 Context.ShowCursor(False);
 
 FCamera:=TSGCamera.Create();
@@ -176,7 +176,7 @@ if FPhysics<>nil then
 inherited;
 end;
 
-procedure TSGExample5_4.Draw();
+procedure TSGExample5_4.Paint();
 var
 	i,ii      : TSGLongWord;
 	dt1,dt2   : TSGDataTime;
@@ -189,7 +189,7 @@ if FPhysics<>nil then
 	dt1.Get();
 	FPhysics.UpDate();
 	dt2.Get();
-	FPhysics.Draw();
+	FPhysics.Paint();
 	end;
 
 if (not FGravitationFlag) then
@@ -258,8 +258,8 @@ var
 begin
 if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
 	begin
-	Context.CursorInCenter := not Context.CursorInCenter;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not Context.CursorCentered;
+	Context.ShowCursor(not Context.CursorCentered);
 	end;
 
 Q := Context.KeysPressed('Q');

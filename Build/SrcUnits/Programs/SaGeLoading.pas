@@ -4,20 +4,20 @@ interface
 uses
 	SaGeBase
 	,SaGeBased
-	,SaGeRender
-	,SaGeContext
+	,SaGeRenderConstants
+	,SaGeContextInterface
 	,SaGeCommon
 	,SaGeUtils
 	;
 type
 	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
 	//Класс загрузки.
-	TSGLoading = class(TSGDrawClass)
+	TSGLoading = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
-		procedure Draw();override;
+		procedure Paint();override;
 			private
 		FProjectionAngle      : TSGSingle;     //Угол поворота центра
 		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
@@ -105,7 +105,7 @@ for i:=0 to FCountLines-1 do
 end;
 
 
-constructor TSGLoading.Create(const VContext:TSGContext);
+constructor TSGLoading.Create(const VContext : ISGContext);
 var
 	i :    TSGLongWord;
 begin
@@ -149,7 +149,7 @@ if FArrayOfLines<>nil then
 inherited Destroy();
 end;
 
-procedure TSGLoading.Draw();
+procedure TSGLoading.Paint();
 var
 	FCOlor:TSGColor4f;
 

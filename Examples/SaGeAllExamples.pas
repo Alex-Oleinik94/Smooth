@@ -6,9 +6,9 @@ interface
 
 uses
 	SaGeBase
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeTotal
-	,SaGeRender
+	,SaGeRenderConstants
 	
 	,Ex1
 	,Ex2_2
@@ -29,20 +29,20 @@ uses
 	;
 
 type
-	TSGAllExamples = class(TSGDrawClass)
+	TSGAllExamples = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
 		FDrawClasses : TSGDrawClasses;
 			public
-		procedure Draw();override;
+		procedure Paint();override;
 		end;
 
 implementation
 
-constructor TSGAllExamples.Create(const VContext:TSGContext);
+constructor TSGAllExamples.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FDrawClasses := TSGDrawClasses.Create(Context);
@@ -81,10 +81,10 @@ begin
 Result := 'Примеры';
 end;
 
-procedure TSGAllExamples.Draw();
+procedure TSGAllExamples.Paint();
 begin
 if FDrawClasses<>nil then
-	FDrawClasses.Draw();
+	FDrawClasses.Paint();
 end;
 
 end.

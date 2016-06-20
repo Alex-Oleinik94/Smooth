@@ -9,7 +9,7 @@ uses
 	,SysUtils
 	,SaGeBase
 	,SaGeBased
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeModel
 	,SaGeScene
 	,SaGeGamePhysics
@@ -24,11 +24,11 @@ const
 	SGTStateStarting = $006002;
 	SGTStateViewing  = $006003;
 type
-	TSGGameTron=class(TSGDrawClass)//Это класс самой игрухи
+	TSGGameTron=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():string;override;
 			protected
 		FScene      : TSGScene;
@@ -46,10 +46,10 @@ begin
 Result := 'Трон';
 end;
 
-procedure TSGGameTron.Draw();
+procedure TSGGameTron.Paint();
 begin
 if (FLoadClass <> nil) then
-	FLoadClass.Draw();
+	FLoadClass.Paint();
 case FState of
 SGTStateStarting:
 	begin
@@ -60,7 +60,7 @@ SGTStateStarting:
 SGTStateViewing:
 	begin
 	{$IFDEF ANDROID}SGLog.Sourse('SGTStateViewing');{$ENDIF}
-	FScene.Draw();
+	FScene.Paint();
 	{$IFDEF ANDROID}SGLog.Sourse('SGTStateViewing');{$ENDIF}
 	end;
 end;
@@ -86,7 +86,7 @@ begin
 VThronClass.Load();
 end;
 
-constructor TSGGameTron.Create(const VContext:TSGContext);
+constructor TSGGameTron.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FScene:=nil;

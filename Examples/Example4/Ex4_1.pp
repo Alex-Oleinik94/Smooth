@@ -14,20 +14,20 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	;
 type
-	TSGExample4_1=class(TSGDrawClass)
+	TSGExample4_1=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -43,7 +43,7 @@ begin
 Result := 'Вывод неиндексированым массивом с VBO';
 end;
 
-constructor TSGExample4_1.Create(const VContext : TSGContext);
+constructor TSGExample4_1.Create(const VContext : ISGContext);
 var
 	i:TSGByte;
 	FArray  : packed array of 
@@ -144,7 +144,7 @@ Render.DeleteBuffersARB(1,@FBuffer);
 inherited;
 end;
 
-procedure TSGExample4_1.Draw();
+procedure TSGExample4_1.Paint();
 begin
 FCamera.CallAction();
 

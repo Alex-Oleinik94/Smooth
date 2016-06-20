@@ -9,7 +9,7 @@ uses
 	,SysUtils
 	,SaGeBase
 	,SaGeBased
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeModel
 	,SaGeScene
 	,SaGeGamePhysics
@@ -19,14 +19,14 @@ uses
 	,SaGeUtils
 	,SaGeMesh
 	,SaGeScreen
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon;
 type
-	TSGUserTesting=class(TSGDrawClass)
+	TSGUserTesting=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():string;override;
 			protected
 		FRadioButton : TSGRadioButton;
@@ -42,7 +42,7 @@ begin
 Result := 'TSGRadioButton';
 end;
 
-procedure TSGUserTesting.Draw();
+procedure TSGUserTesting.Paint();
 function PointInTriangle2D(const t1,t2,t3,v:TSGVertex2f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
@@ -88,7 +88,7 @@ FRadioButton.Checked := PointInTriangle2D(
 	Context.CursorPosition());
 end;
 
-constructor TSGUserTesting.Create(const VContext:TSGContext);
+constructor TSGUserTesting.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FRadioButton := TSGRadioButton.Create();

@@ -14,19 +14,19 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeCommon
 	;
 type
-	TSGExample2_2=class(TSGDrawClass)
+	TSGExample2_2=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -42,7 +42,7 @@ begin
 Result := 'Освещение';
 end;
 
-constructor TSGExample2_2.Create(const VContext : TSGContext);
+constructor TSGExample2_2.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FCamera := TSGCamera.Create();
@@ -55,7 +55,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample2_2.Draw();
+procedure TSGExample2_2.Paint();
 var
 	Light : TSGVertex3f;
 begin

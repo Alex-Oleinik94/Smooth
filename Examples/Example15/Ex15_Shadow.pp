@@ -10,11 +10,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
@@ -26,9 +26,9 @@ uses
 	;
 
 type
-	TSGExample15_Shadow = class(TSGContextObject)
+	TSGExample15_Shadow = class(TSGContextabled)
 			public
-		constructor Create(const VContext : TSGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32;const TextureBlock : TSGTextureBlock = nil);
+		constructor Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32;const TextureBlock : TSGTextureBlock = nil);
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			public
@@ -261,7 +261,7 @@ else
 Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
 end;
 
-constructor TSGExample15_Shadow.Create(const VContext : TSGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
+constructor TSGExample15_Shadow.Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
 const
 	TexSize = 4096;
 	Example15Dir = SGExamplesDirectory + Slash + '15' +Slash;

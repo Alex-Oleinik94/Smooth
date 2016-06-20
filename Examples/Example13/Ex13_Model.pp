@@ -5,11 +5,11 @@ interface
 
 uses
 	crt
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
@@ -116,11 +116,11 @@ type
 	// - полигонов
 	// - вершин
 	// - инверсно преобразованной модели скелетной анимации
-	TModel = class(TSGDrawClass)
+	TModel = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			public
 		FFileName  : string;            // имя файла
@@ -656,7 +656,7 @@ begin
 Result := @FAnimation;
 end;
 
-constructor TModel.Create(const VContext : TSGContext);
+constructor TModel.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh := nil;
@@ -664,10 +664,10 @@ FTextures := nil;
 FTexturesBlock := nil;
 end;
 
-procedure TModel.Draw();
+procedure TModel.Paint();
 begin
 if FMesh <> nil then
-	FMesh.Draw();
+	FMesh.Paint();
 end;
 
 class function TModel.ClassName():TSGString;

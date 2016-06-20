@@ -14,15 +14,15 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	;
 type
-	TSGExample1=class(TSGDrawClass)
+	TSGExample1=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		end;
 
@@ -35,7 +35,7 @@ begin
 Result := 'Пустой пример';
 end;
 
-constructor TSGExample1.Create(const VContext : TSGContext);
+constructor TSGExample1.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 
@@ -46,7 +46,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample1.Draw();
+procedure TSGExample1.Paint();
 begin
 
 end;

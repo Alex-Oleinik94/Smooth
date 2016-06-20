@@ -14,16 +14,17 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
+	
 	,Ex13_Model
 	;
 
@@ -31,11 +32,11 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample13=class(TSGDrawClass)
+	TSGExample13=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure KeyControl();
 		function GetVertexShaderSourse():TSGString;
@@ -181,7 +182,7 @@ procedure mmmFM15ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.Us
 procedure mmmFP100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(100); end;
 procedure mmmFM100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-100); end;
 
-constructor TSGExample13.Create(const VContext : TSGContext);
+constructor TSGExample13.Create(const VContext : ISGContext);
 
 procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
 begin
@@ -329,7 +330,7 @@ for i := 0 to High(FAnimationStates) do
 	FAnimationStates[i].ResetState(0);
 SetLength(FAnimationStates,0);
 
-Context.CursorInCenter := False;
+Context.CursorCentered := False;
 
 if (FP1Button <> nil) then
 	FP1Button.Destroy();
@@ -360,7 +361,7 @@ if FFPS <> nil then
 inherited;
 end;
 
-procedure TSGExample13.Draw();
+procedure TSGExample13.Paint();
 const
 	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
@@ -372,7 +373,7 @@ if Render.SupporedShaders() then
 	begin
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/10;
-	if (not Context.CursorInCenter) then
+	if (not Context.CursorCentered) then
 		Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	Render.Color3f(1,1,1);
 	Render.Disable(SGR_BLEND);
@@ -397,7 +398,7 @@ if Render.SupporedShaders() then
 		Render.PushMatrix();
 		Render.Translatef((30+5*i)*sin((FQuantityModels+6.28)*i/FQuantityModels),
 						  (30+5*i)*cos((FQuantityModels+6.28)*i/FQuantityModels),0);
-		FModel.Draw();
+		FModel.Paint();
 		Render.PopMatrix();
 		end;
 	
@@ -414,7 +415,7 @@ if Render.SupporedShaders() then
 	
 	//KeyControl();
 	
-	FFPS.Draw();
+	FFPS.Paint();
 	end
 else
 	begin
@@ -441,8 +442,8 @@ var
 begin
 if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
 	begin
-	Context.CursorInCenter := not Context.CursorInCenter;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not Context.CursorCentered;
+	Context.ShowCursor(not Context.CursorCentered);
 	end;
 
 Q := Context.KeysPressed('Q');
@@ -467,7 +468,7 @@ if (Context.KeysPressed(' ')) then
 	FCamera.MoveUp(Context.ElapsedTime*0.7);
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-if (Context.CursorInCenter) then
+if (Context.CursorCentered) then
 	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
 end;
 

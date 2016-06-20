@@ -11,9 +11,9 @@ uses
 	,SaGeBased
 	,SaGeMesh
 	,PAPPE
-	,SaGeContext
+	,SaGeContextInterface
 	,SaGeCommon
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeImages
 	;
 const
@@ -26,11 +26,11 @@ type
 	TSGPhysics=class;
 	
 	PSGPhysicsObject = ^ TSGPhysicsObject;
-	TSGPhysicsObject=class(TSGDrawClass)
+	TSGPhysicsObject=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 			private
 		FDynamic : TSGBoolean;
 		FObject : PAPPE.TPhysicsObject;
@@ -56,11 +56,11 @@ type
 		property PhysicsClass  : TSGPhysics           read FPhysicsClass  write FPhysicsClass;
 		end;
 	
-	TSGPhysics=class(TSGDrawClass)
+	TSGPhysics=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure Update();virtual;
 			private
@@ -168,7 +168,7 @@ else
 	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType,PAPPE.BodyMesh);
 end;
 
-constructor TSGPhysics.Create(const VContext:TSGContext);
+constructor TSGPhysics.Create(const VContext : ISGContext);
 begin
 inherited;
 FLigths:=nil;
@@ -216,7 +216,7 @@ while FPhysicsTiks >= FPhysics.TimeStep do
 PAPPE.PhysicsInterpolate(FPhysics,FPhysicsTiks/FPhysics.TimeStep);
 end;
 
-procedure TSGPhysics.Draw();
+procedure TSGPhysics.Paint();
 var
 	II : TSGLongWord;
 var
@@ -244,7 +244,7 @@ if FDrawable then
 					LigthPos := FLigths[ii].FLocation * TSGMatrix4(FObjects[i].PhysicsObject.InterpolatedTransform);
 					Render.Lightfv(FLigths[ii].FNumber, SGR_POSITION, @LigthPos);
 					end;
-			FObjects[i].Draw();
+			FObjects[i].Paint();
 			Render.PopMatrix();
 			end;
 		end;
@@ -266,7 +266,7 @@ end;
 
 (* ======================TSGPhysicsObject====================== *)
 
-constructor TSGPhysicsObject.Create(const VContext : TSGContext);
+constructor TSGPhysicsObject.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh:=nil;
@@ -291,11 +291,11 @@ if FType<>0 then
 inherited;
 end;
 
-procedure TSGPhysicsObject.Draw();
+procedure TSGPhysicsObject.Paint();
 begin
 if FMesh<>nil then
 	begin
-	FMesh.Draw();
+	FMesh.Paint();
 	end;
 end;
 

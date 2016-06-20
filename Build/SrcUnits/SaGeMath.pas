@@ -12,7 +12,10 @@ uses
 	,SaGeBased
 	,Math
 	,SaGeRender
-	,SaGeContext;
+	,SaGeContext
+	,SaGeBaseClasses
+	,SaGeContextInterface
+	,SaGeRenderConstants;
 type
 	TSGMathFloatType = {$IFNDEF ANDROID}Extended{$ELSE}Real{$ENDIF};
 	
@@ -159,7 +162,7 @@ type
 		end;
 	
 
-	TSGMathGraphic=class(TSGDrawClass)
+	TSGMathGraphic=class(TSGDrawable)
 			public
 		constructor Create();override;
 		destructor Destroy;override;
@@ -185,7 +188,7 @@ type
 		procedure RealConstruct(const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
 			public
 		procedure Construct(const VBegin,VEnd:real);
-		procedure Draw;override;
+		procedure Paint();override;
 		procedure ChangeConstruct(const VBegin,VEnd:real);
 			public
 		property VertexFunctionPointer:Pointer read FVertexFunctionPointer write FVertexFunctionPointer;
@@ -429,7 +432,7 @@ if  (i>=3)
 			end;
 end;
 
-procedure TSGMathGraphic.Draw;
+procedure TSGMathGraphic.Paint();
 var
 	I:LongInt;
 	Quantity:LongInt = 0;

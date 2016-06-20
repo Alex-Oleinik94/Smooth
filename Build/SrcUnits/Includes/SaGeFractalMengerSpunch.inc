@@ -9,7 +9,7 @@ const
 type
 	TSGFractalMengerSpunch=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			public
@@ -44,7 +44,7 @@ type
 		
 	TSGFractalMengerSpunchRelease=class(TSGFractalMengerSpunch)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 			public
 		FComboBox1,FComboBox2:TSGComboBox;
@@ -52,7 +52,7 @@ type
 		FLabelDepth,FLabelDepthCaption:TSGLabel;
 		FFont1:TSGFont;
 		procedure Calculate;override;
-		procedure Draw;override;
+		procedure Paint();override;
 		end;
 {$ENDIF}
 
@@ -124,7 +124,7 @@ with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 	end;
 end;
 
-procedure TSGFractalMengerSpunchRelease.Draw;
+procedure TSGFractalMengerSpunchRelease.Paint();
 begin
 inherited;
 end;
@@ -136,7 +136,7 @@ inherited Calculate;
 FSizeLabelFlag := False;
 end;
 
-constructor TSGFractalMengerSpunchRelease.Create(const VContext:TSGContext);
+constructor TSGFractalMengerSpunchRelease.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 
@@ -318,7 +318,7 @@ else
 	end;
 end;
 
-constructor TSGFractalMengerSpunch.Create(const VContext:TSGContext);
+constructor TSGFractalMengerSpunch.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FDeep:=FMengerCube;

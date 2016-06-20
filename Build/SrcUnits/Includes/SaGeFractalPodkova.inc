@@ -3,7 +3,7 @@
 type
 	TSGFractalPodkova=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 			public
@@ -153,7 +153,7 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalPodkova.Create(const VContext:TSGContext);
+constructor TSGFractalPodkova.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FEnableColors:=False;

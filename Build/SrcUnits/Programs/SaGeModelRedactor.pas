@@ -11,19 +11,20 @@ uses
 	,SaGeCommon
 	,SysUtils
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
+	,SaGeContextInterface
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeResourseManager
 	;
 type
-	TSGModelRedactor=class(TSGDrawClass)
+	TSGModelRedactor=class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
-		procedure Draw();override;
+		procedure Paint();override;
 			private
 		FCamera      : TSGCamera;
 		FCustomModel : TSGCustomModel;
@@ -132,7 +133,7 @@ with TSGModelRedactor(ComboBox.FUserPointer1) do
 	end;
 end;
 
-constructor TSGModelRedactor.Create(const VContext:TSGContext);
+constructor TSGModelRedactor.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FSunAngle := 0;
@@ -157,7 +158,7 @@ begin
 Result:='Редактор моделей';
 end;
 
-procedure TSGModelRedactor.Draw();
+procedure TSGModelRedactor.Paint();
 var
 	i : TSGLongWord;
 begin
@@ -180,7 +181,7 @@ if FCustomModel<>nil then
 	Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@FSun);
 	Render.BeginBumpMapping(@FSun);
 	
-	FCustomModel.Draw();
+	FCustomModel.Paint();
 	
 	Render.EndBumpMapping();
 	Render.Enable(SGR_BLEND);

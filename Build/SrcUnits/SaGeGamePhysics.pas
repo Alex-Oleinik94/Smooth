@@ -13,13 +13,13 @@ uses
 	,SaGeGameBase
 	,SaGeScene
 	,SaGePhysics
-	,SaGeContext
+	,SaGeContextInterface
 	;
 
 type
 	TSGPhysicsModel=class(TSGNodProperty)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 			private
 		FPhysicsObject : TSGPhysicsObject;
 			public
@@ -31,9 +31,9 @@ type
 type
 	TSGPhysics3D = class(TSGCustomPhysics)
 			public
-		constructor Create(const VContext:TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 			private
 		FPhysics : TSGPhysics;
 			public
@@ -44,7 +44,7 @@ type
 
 implementation
 
-constructor TSGPhysicsModel.Create(const VContext:TSGContext);
+constructor TSGPhysicsModel.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FPhysicsObject:=nil;
@@ -71,7 +71,7 @@ if FParent.QuantityNods <> 0 then
 		end;
 end;
 
-constructor TSGPhysics3D.Create(const VContext:TSGContext);
+constructor TSGPhysics3D.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FPhysics:=TSGPhysics.Create(Context);
@@ -85,10 +85,10 @@ FPhysics.Destroy();
 inherited;
 end;
 
-procedure TSGPhysics3D.Draw();
+procedure TSGPhysics3D.Paint();
 begin
 if FPhysics <> nil then
-	FPhysics.Draw();
+	FPhysics.Paint();
 end;
 
 procedure TSGPhysics3D.UpDate();

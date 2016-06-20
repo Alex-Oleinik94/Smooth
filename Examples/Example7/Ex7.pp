@@ -14,7 +14,7 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	 SaGeContext
+	 SaGeContextInterface
 	,SaGeBased
 	,SaGeBase
 	,SaGeScreen
@@ -22,14 +22,14 @@ uses
 	,SaGeMath
 	,SaGeExamples
 	,SaGeCommon
-	,SaGeRender
+	,SaGeRenderConstants
 	;
 type
-	TSGApprFunction=class(TSGDrawClass)
+	TSGApprFunction = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			public
 		FFont : TSGFont;
@@ -190,7 +190,7 @@ FPanelStart.Visible:=True;
 FBackButton.Visible:=False;
 end; end;
 
-constructor TSGApprFunction.Create(const VContext : TSGContext);
+constructor TSGApprFunction.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FGraphic:=nil;
@@ -305,13 +305,13 @@ if FGraphic<>nil then
 inherited;
 end;
 
-procedure TSGApprFunction.Draw();
+procedure TSGApprFunction.Paint();
 var
 	i : TSGLongWord;
 begin
 if FGraphic<>nil then
 	begin
-	FGraphic.Draw();
+	FGraphic.Paint();
 	
 	Render.PointSize(5);
 	Render.Color3f(1,0,1);

@@ -13,7 +13,8 @@ uses
 	,SaGeBased
 	,SaGeMesh
 	,SaGeContext
-	,SaGeRender
+	,SaGeContextInterface
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeUtils
 	,SaGeScreen
@@ -51,10 +52,10 @@ type
 	TSGSubsidenceVertexes = type packed array of TSGSubsidenceVertex;
 	
 	TSGGGDC = ^ TSGByte;
-	TSGGasDiffusionCube = class(TSGDrawClass)
+	TSGGasDiffusionCube = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
-		procedure Draw();override;
+		constructor Create(const VContext : ISGContext);override;
+		procedure Paint();override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			public
@@ -84,10 +85,10 @@ type
 		property Edge : TSGLongWord read FEdge;
 		end;
 type
-	TSGGasDiffusion=class(TSGDrawClass)
+	TSGGasDiffusion = class(TSGDrawable)
 			public
-		constructor Create(const VContext:TSGContext);override;
-		procedure Draw();override;
+		constructor Create(const VContext : ISGContext);override;
+		procedure Paint();override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			private
@@ -213,7 +214,7 @@ FArParents[0]:=p1;
 FArParents[1]:=p2;
 end;
 
-constructor TSGGasDiffusionCube.Create(const VContext:TSGContext);
+constructor TSGGasDiffusionCube.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FEdge   := 0;
@@ -225,7 +226,7 @@ FRelief := nil;
 FSubsidenceVertexes := nil;
 end;
 
-procedure TSGGasDiffusionCube.Draw();
+procedure TSGGasDiffusionCube.Paint();
 begin
 
 end;
@@ -2902,7 +2903,7 @@ if IsInFullscreen then
 	Context.Messages();
 	Context.Messages();
 	end;
-FileWay := Context.FileOpenDlg('ֲûבונטעו פאיכ נוכüופא','װאיכû נוכüופא(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
+FileWay := Context.FileOpenDialog('ֲûבונטעו פאיכ נוכüופא','װאיכû נוכüופא(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0);
 if (FileWay <> '') and (SGFileExists(FileWay)) then
 	begin
 	T := FRelefRedactor.SingleRelief^.FType;
@@ -2930,7 +2931,7 @@ if IsInFullscreen then
 	Context.Messages();
 	Context.Messages();
 	end;
-FileWay := Context.FileSaveDlg('ֲûבונטעו טלÿ פאיכא הכÿ סמץנאםוםטÿ נוכüופא','װאיכû נוכüופא(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0,'sggdrf');
+FileWay := Context.FileSaveDialog('ֲûבונטעו טלÿ פאיכא הכÿ סמץנאםוםטÿ נוכüופא','װאיכû נוכüופא(*.sggdrf)'+#0+'*.sggdrf'+#0+'All files(*.*)'+#0+'*.*'+#0+#0,'sggdrf');
 WriteLn('FileWay=',FileWay);
 if (FileWay <> '') then
 	begin
@@ -3319,7 +3320,7 @@ for i:=1 to High(FConchLabels) do
 	end;
 end;
 
-constructor TSGGasDiffusion.Create(const VContext:TSGContext);
+constructor TSGGasDiffusion.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 {$IFDEF RELIEFDEBUG}
@@ -3647,7 +3648,7 @@ Render.EndScene();
 Render.Color3f(1,1,1);
 end;
 
-procedure TSGGasDiffusion.Draw();
+procedure TSGGasDiffusion.Paint();
 procedure DrawSechenie();
 var
 	a,b,c,d : TSGVertex3f;
@@ -3731,7 +3732,7 @@ if FMesh <> nil then
 	if FSourseChangeFlag=0 then
 		FCamera.Change();
 	FCamera.InitMatrix();
-	FMesh.Draw();
+	FMesh.Paint();
 	if (FSecheniePanel<>nil) then
 		DrawSechenie();
 	if FDiffusionRuned then
