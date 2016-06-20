@@ -223,7 +223,7 @@ type
 			private
 		FInProcessing : TSGBoolean;
 			public
-		procedure Load(const VContext : TSGContext);
+		procedure Load(const VContext : ISGContext);
 		procedure Resize();
 		procedure Paint();
 			public
@@ -3435,7 +3435,7 @@ begin
 inherited;
 end;
 
-procedure TSGScreen.Load(const VContext : TSGContext);
+procedure TSGScreen.Load(const VContext : ISGContext);
 begin
 {$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
 

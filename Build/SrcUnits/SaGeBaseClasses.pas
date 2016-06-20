@@ -19,9 +19,9 @@ type
 		end;
 	
 	TSGInterfacedObject = class(TSGObject, ISGInterface)
-		function QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+		function QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
+		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
+		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
 		
 		destructor Destroy(); override;
 		procedure DestroyFromInterface();virtual;
@@ -30,6 +30,7 @@ type
 	TSGNamed = class(TSGInterfacedObject)
 			public
 		class function ClassName() : TSGString; virtual;
+		constructor Create();virtual;
 		end;
 	
 	ISGOptionGetSeter = interface
@@ -147,6 +148,14 @@ type
 
 implementation
 
+uses
+	SysUtils;
+
+constructor TSGNamed.Create();
+begin
+inherited;
+end;
+
 function TSGPaintable.GetOption(const VName : TSGString) : TSGPointer;
 begin
 Result := nil;
@@ -205,12 +214,10 @@ end;
 
 function TSGInterfacedObject.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
-WriteLn(S_OK,' ',E_NOINTERFACE);
-if GetInterface(VInterfaceIdentifier, VObject) then
-	Result := S_OK
-else
-	Result := TSGLongInt(E_NOINTERFACE); 
-WriteLn(Result);
+Result := S_OK;
+if not Supports(Self, VInterfaceIdentifier, VObject) then
+if not GetInterface(VInterfaceIdentifier, VObject) then
+	{$IFNDEF RELEASE}Result := TSGLongInt(E_NOINTERFACE){$ENDIF};
 end;
 
 function TSGInterfacedObject._AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};

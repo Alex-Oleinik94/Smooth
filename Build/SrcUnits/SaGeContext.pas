@@ -225,16 +225,13 @@ FCursorWheel := VCursorWheel;
 end;
 
 procedure TSGContext.ReinitializeRender();
-var
-	a : ISGNearlyContext;
 begin
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
 if FRender <> nil then
 	FRender.Destroy();
 FRender := FRenderClass.Create();
-Self.QueryInterface(ISGNearlyContext,a);
-FRender.Context := a;
+FRender.Context := Self as ISGContext;
 if FRender.CreateContext() then
 	FRender.Init();
 if FPaintable <> nil then
@@ -250,7 +247,7 @@ end;
 procedure TSGContext.SetRenderClass(const NewRender : TSGRenderClass);
 begin
 FRenderClass := NewRender;
-if (not (Render is FRenderClass)) then
+if FInitialized and (not (Render is FRenderClass)) then
 	ReinitializeRender();
 end;
 
@@ -351,12 +348,12 @@ end;
 
 procedure TSGContext.SetSelfLink(const VLink : PISGContext);
 begin
-
+FSelfLink := VLink;
 end;
 
 function TSGContext.GetSelfLink() : PISGContext;
 begin
-
+Result := FSelfLink;
 end;
 
 function TSGContext.GetCursorIcon():TSGPointer;

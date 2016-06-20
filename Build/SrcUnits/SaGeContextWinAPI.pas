@@ -50,6 +50,8 @@ type
 		function WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 			protected
 		procedure InitFullscreen(const b : TSGBoolean); override;
+		function  GetWindow() : TSGPointer; override;
+		function  GetDevice() : TSGPointer; override;
 			protected
 		hWindow:HWnd;
 		dcWindow:hDc;
@@ -60,6 +62,9 @@ type
 		function  WindowInit(hParent : HWnd): Boolean;
 		procedure KillWindow(const KillRC:Boolean = True);
 		function  CreateWindow():Boolean;
+		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function  GetClientWidth() : TSGLongWord;override;
+		function  GetClientHeight() : TSGLongWord;override;
 			public
 		function FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
 		function FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
@@ -72,7 +77,9 @@ function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; co
 implementation
 
 uses
-	SaGeScreen;
+	SaGeScreen
+	,SysUtils
+	,SaGeContextInterface;
 
 // А вод это жесткий костыль. 
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
@@ -80,6 +87,31 @@ uses
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+function  TSGContextWinAPI.GetClientWidth() : TSGLongWord;
+begin
+Result := GetClientWindowRect(hWindow).right;
+end;
+
+function  TSGContextWinAPI.GetClientHeight() : TSGLongWord;
+begin
+Result := GetClientWindowRect(hWindow).bottom;
+end;
+
+class function TSGContextWinAPI.GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+GetClientRect(VWindow, Result);
+end;
+
+function  TSGContextWinAPI.GetWindow() : TSGPointer;
+begin
+Result := TSGPointer(hWindow);
+end;
+
+function  TSGContextWinAPI.GetDevice() : TSGPointer; 
+begin
+Result := TSGPointer(dcWindow);
+end;
 
 function  TSGContextWinAPI.ShiftClientArea() : TSGPoint2f;
 begin
@@ -251,7 +283,8 @@ Active := CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
-	FPaintable.LoadDeviceResourses();
+	if FPaintable <> nil then
+		FPaintable.LoadDeviceResourses();
 	inherited;
 	end;
 end;
@@ -277,7 +310,7 @@ end;
 procedure TSGContextWinAPI.Messages;
 var
 	msg:Windows.TMSG;
-begin
+begin WriteLn(11231);
 Fillchar(msg,sizeof(msg),0);
 if Windows.PeekMessage(@msg,0,0,0,0) = true then
 	begin
@@ -287,7 +320,6 @@ if Windows.PeekMessage(@msg,0,0,0,0) = true then
 	end;
 inherited;
 end;
-
 
 procedure TSGContextWinAPI.ThrowError(pcErrorMessage : pChar);
 begin
@@ -598,7 +630,7 @@ if FRender=nil then
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
 		{$ENDIF}
 	FRender := FRenderClass.Create();
-	FRender.Context := Self as ISGNearlyContext;
+	FRender.Context := Self as ISGContext;
 	Result := FRender.CreateContext();
 	if Result then 
 		FRender.Init();

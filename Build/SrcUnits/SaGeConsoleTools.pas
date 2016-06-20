@@ -726,6 +726,8 @@ if GoToExit then
 	end;
 end;
 
+var
+	IContext : ISGContext;
 begin
 {$IFNDEF ANDROID}
 SGPrintEngineVersion();
@@ -747,6 +749,8 @@ Context :=
 		{$ENDIF}
 	{$ENDIF}
 		.Create();
+
+IContext := Context;
 
 with Context do
 	begin
@@ -770,7 +774,7 @@ with Context do
 	Icon       := TSGPointer(5);
 	CursorIcon := TSGPointer(5);
 	
-	SelfLink := @Context;
+	SelfLink := @IContext;
 	{$IFDEF MSWINDOWS}
 		if FRenderState=SGBR_DIRECTX then
 			RenderClass := TSGRenderDirectX

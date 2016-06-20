@@ -224,7 +224,7 @@ end;
 
 function TSGContextabled.GetRender() : ISGRender;
 begin
-Result:=FContext^.Render;
+Result := FContext^.Render;
 end;
 
 function TSGContextabled.ContextAssigned() : TSGBoolean;

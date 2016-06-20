@@ -835,7 +835,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="SrcUnits;$(ProjOutDir);SrcUnits\Includes;SrcUnits\Inet\sys;SrcUnits\Temp;SrcUnits\Others\PasJpeg;SrcUnits\OpenGL;SrcUnits\lNet\sys;SrcUnits\DirectX"/>
-      <OtherUnitFiles Value="SrcUnits;SrcUnits\lNet;SrcUnits\lNet\sys;SrcUnits\Includes;SrcUnits\DirectX;SrcUnits\OpenGL;SrcUnits\Others;SrcUnits\Programs;Examples;SrcUnits\Others\PasJpeg"/>
+      <OtherUnitFiles Value="SrcUnits\Temp;SrcUnits\Others\Synapse;SrcUnits\Includes;SrcUnits\Others\lNet;SrcUnits\Others\lNet\sys;SrcUnits;SrcUnits\Programs;SrcUnits\Others;SrcUnits\Others\PasJpeg;SrcUnits\Includes;..\Examples\*;..\Examples;SrcUnits\DirectX;SrcUnits\OpenGL"/>
       <UnitOutputDirectory Value="CompiledUnits"/>
       <SrcPath Value="$(ProjOutDir)"/>
     </SearchPaths>
@@ -853,6 +853,7 @@
         <StackChecks Value="True"/>
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
+      <TargetProcessor Value="80386"/>
       <Optimizations>
         <OptimizationLevel Value="0"/>
         <UncertainOptimizations Value="True"/>
@@ -860,7 +861,6 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <DebugInfoType Value="dsDwarf2Set"/>
         <UseValgrind Value="True"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
@@ -879,6 +879,7 @@
       <ConfigFile>
         <StopAfterErrCount Value="20"/>
       </ConfigFile>
+      <CustomOptions Value="-dENGINE"/>
     </Other>
   </CompilerOptions>
   <Debugging>

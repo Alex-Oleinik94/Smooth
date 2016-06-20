@@ -34,6 +34,8 @@
 		//{$ASMMODE ?}
 		{$ENDIF}
 	{$H+}
+	//{$INTERFACES CORBA}
+	//{$INTERFACES COM}
 	{$ENDIF}
 
 //{$DEFINE LAZARUS}
