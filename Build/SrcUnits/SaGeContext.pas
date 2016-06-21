@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 
-{$DEFINE CONTEXT_BEGUNING}
+//{$DEFINE CONTEXT_BEGUNING}
 
 unit SaGeContext;
 

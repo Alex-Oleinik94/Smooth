@@ -1,7 +1,7 @@
 {$INCLUDE Includes\SaGe.inc}
 
 //{$DEFINE CLHINTS}
-{$DEFINE SCREEN_DEBUG}
+//{$DEFINE SCREEN_DEBUG}
 
 unit SaGeScreen;
 
@@ -52,12 +52,25 @@ type
 	
 	// for-in loop enumerator class
 	TSGComponentEnumerator = class
-			private
-		FComponent, FCurrent : TSGComponent;
+			protected
+		FComponent : TSGComponent;
+		FCurrent   : TSGComponent;
+		FIndex     : TSGMaxEnum;
 			public
-		constructor Create(const VComponent : TSGComponent);
-		function MoveNext(): TSGBoolean;
+		constructor Create(const VComponent : TSGComponent); virtual;
+		function MoveNext(): TSGBoolean; virtual;abstract;
+		function GetEnumerator() : TSGComponentEnumerator;virtual;
 		property Current: TSGComponent read FCurrent;
+		end;
+	TSGComponentEnumeratorNormal = class(TSGComponentEnumerator)
+			public
+		constructor Create(const VComponent : TSGComponent); override;
+		function MoveNext(): TSGBoolean; override;
+		end;
+	TSGComponentEnumeratorReverse = class(TSGComponentEnumerator)
+			public
+		constructor Create(const VComponent : TSGComponent); override;
+		function MoveNext(): TSGBoolean; override;
 		end;
 	
 	PTSGComponent         = ^ TSGComponent;
@@ -72,6 +85,7 @@ type
 			public
 		// for-in loop
 		function GetEnumerator(): TSGComponentEnumerator;
+		function GetReverseEnumerator: TSGComponentEnumerator;
 			private
 		function GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
@@ -185,6 +199,7 @@ type
 		FChildrenPriority:TSGMaxEnum;
 		procedure ClearPriority();
 		procedure MakePriority();
+		function GetPriorityComponent() : TSGComponent;
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -206,7 +221,7 @@ type
 		procedure DestroyParent();
 		procedure KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure VisibleAll();
-		function IndexOf( VComponent : TSGComponent ): LongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Align : TSGExByte read FAlign write CreateAlign;
 			public
@@ -2043,20 +2058,40 @@ FComponent := VComponent;
 FCurrent := nil;
 end;
 
-function TSGComponentEnumerator.MoveNext(): TSGBoolean;
-var
-	Index : TSGLongInt;
+function TSGComponentEnumerator.GetEnumerator() : TSGComponentEnumerator;
 begin
-if FCurrent = nil then
-	begin
-	FCurrent := FComponent.Children[1];
-	end
+Result := Self;
+end;
+
+constructor TSGComponentEnumeratorNormal.Create(const VComponent : TSGComponent);
+begin
+inherited Create(VComponent);
+FIndex := 0;
+end;
+
+constructor TSGComponentEnumeratorReverse.Create(const VComponent : TSGComponent);
+begin
+inherited Create(VComponent);
+FIndex := Length(VComponent.FChildren) + 1;
+end;
+
+function TSGComponentEnumeratorNormal.MoveNext(): TSGBoolean;
+begin
+FIndex += 1;
+if (FIndex >= 1) and (FIndex <= Length(FComponent.FChildren)) then
+	FCurrent := FComponent.Children[FIndex]
 else
-	begin
-	Index := FComponent.IndexOf(FCurrent);
-	if Index <> -1 then
-		FCurrent := FComponent.Children[Index + 2];
-	end;
+	FCurrent := nil;
+Result := FCurrent <> nil;
+end;
+
+function TSGComponentEnumeratorReverse.MoveNext(): TSGBoolean;
+begin
+FIndex -= 1;
+if (FIndex >= 1) and (FIndex <= Length(FComponent.FChildren)) then
+	FCurrent := FComponent.Children[FIndex]
+else
+	FCurrent := nil;
 Result := FCurrent <> nil;
 end;
 
@@ -2066,14 +2101,12 @@ end;
 
 procedure TSGComponent.DrawDrawClasses();
 var
-	i:LongWord;
+	Component : TSGComponent;
 begin
-if FDrawClass<>nil then
+if FDrawClass <> nil then
 	FDrawClass.Paint();
-if FChildren<>nil then
-	for i:=0 to  High(FChildren) do
-		if FChildren[i]<>nil then
-			FChildren[i].DrawDrawClasses();
+for Component in Self do
+	Component.DrawDrawClasses();
 end;
 
 function TSGComponent.AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2105,7 +2138,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.IndexOf( VComponent : TSGComponent ): LongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGComponent.IndexOf(const VComponent : TSGComponent ): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var 
 	i : LongInt;
 begin
@@ -2120,11 +2153,11 @@ end;
 
 procedure TSGComponent.VisibleAll;
 var
-	i:LongInt;
+	Component : TSGComponent;
 begin
-FVisibleTimer:=1;
-for i:=0 to High(FChildren) do
-	FChildren[i].VisibleAll;
+FVisibleTimer := 1;
+for Component in Self do
+	Component.VisibleAll();
 end;
 
 procedure TSGComponent.KillChildren;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2188,11 +2221,12 @@ FNeedTop:=Round((PH-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
-var i:Int = 0;
+var
+	Component : TSGComponent;
 begin
-FVisible:=b;
-for i:=0 to High(FChildren) do
-	FChildren[i].Visible:=b;
+FVisible := b;
+for Component in Self do
+	Component.Visible := Visible;
 end;
 
 function TSGComponent.AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2308,8 +2342,8 @@ end;
 function TSGComponent.LastChild:TSGComponent;
 begin
 Result:=Nil;
-if Length(FChildren)>0 then
-	Result:=FChildren[High(FChildren)];
+if FChildren <> nil then
+	Result := FChildren[High(FChildren)];
 end;
 
 function TSGComponent.UpDateObj(var Obj,NObj:LongInt):LongInt;
@@ -2395,9 +2429,10 @@ UpgradeTimer(FVisible,FVisibleTimer);
 UpgradeTimer(FActive,FActiveTimer);
 end;
 
+// Deleted self in parent
 procedure TSGComponent.DestroyParent;
 var
-	ii,i:LongInt;
+	ii, i : TSGLongInt;
 begin
 {$IFDEF SGMoreDebuging}
 	if FParent<>nil then
@@ -2407,25 +2442,18 @@ begin
 	{$ENDIF}
 if FParent<>nil then
 	begin
-	ii:=-1;
-	for i:=0 to High(FParent.FChildren) do
+	ii := FParent.IndexOf(Self);
+	if ii <> -1 then
 		begin
-		if Pointer(FParent.FChildren[i])=Pointer(Self) then
-			begin
-			ii:=i;
-			Break;
-			end;
-		end;
-	if ii<>-1 then
-		begin
-		if ii+1 = FParent.FChildrenPriority then
+		if ii + 1 = FParent.FChildrenPriority then
 			ClearPriority();
 		{$IFDEF SGMoreDebuging}
 			WriteLn('"TSGComponent.DestroyParent" :  Find Self on '+SGStr(ii+1)+' position .');
 			{$ENDIF}
-		for i:=ii to High(FParent.FChildren)-1 do
-			Pointer(FParent.FChildren[i]):=Pointer(FParent.FChildren[i+1]);
-		SetLength(FParent.FChildren,Length(FParent.FChildren)-1);
+		if ii < High(FParent.FChildren) then
+			for i:= ii to High(FParent.FChildren) - 1 do
+				FParent.FChildren[i] := FParent.FChildren[i + 1];
+		SetLength(FParent.FChildren, Length(FParent.FChildren) - 1);
 		end;
 	end;
 {$IFDEF SGMoreDebuging}
@@ -2495,7 +2523,7 @@ end;
 
 procedure TSGComponent.CompleteChild(const VChild : TSGComponent);
 var
-	i : TSGLongWord;
+	Component : TSGComponent;
 begin
 if ContextAssigned() then
 	VChild.SetContext(Context);
@@ -2503,10 +2531,8 @@ if VChild.Parent = nil then
 	VChild.Parent := Self;
 if VChild.Font = nil then
 	VChild.Font := Font;
-if VChild.FChildren <> nil then
-	if Length(VChild.FChildren) > 0 then
-		for i := 0 to High(VChild.FChildren) do
-			VChild.CompleteChild(VChild.FChildren[i]);
+for Component in VChild do
+	VChild.CompleteChild(Component);
 end;
 
 function TSGComponent.CreateChild(const Child : TSGComponent) : TSGComponent;
@@ -2553,29 +2579,22 @@ end;
 
 procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
 var
-	i,ii:TSGMaxEnum;
+	PriorityComponent, Component : TSGComponent;
 begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGComponent.FromUpDate(var FCanChange:Boolean = ', FCanChange, ') : Begining');
 	{$ENDIF}
 
-UpDateObjects;
-UpgradeTimers;
+UpDateObjects();
+UpgradeTimers();
 
-ii:=0;
-if (FChildrenPriority <> 0) and (Length(FChildren)>0) and (ii-1<=High(FChildren)) then
-	begin
-	ii:=FChildrenPriority;
-	FChildren[ii-1].FromUpDate(FCanChange);
-	end;
+PriorityComponent := GetPriorityComponent();
+if PriorityComponent <> nil then
+	PriorityComponent.FromUpDate(FCanChange);
 
-i:=0;
-while (Length(FChildren)>0) and (i<=High(FChildren)) do
-	begin
-	if (ii=0) or ((ii<>0) and (i<>ii-1)) then
-		FChildren[i].FromUpDate(FCanChange);
-	i+=1;
-	end;
+for Component in Self do
+	if Component <> PriorityComponent then
+		Component.FromUpDate(FCanChange);
 
 if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
@@ -2604,7 +2623,12 @@ end;
 
 function TSGComponent.GetEnumerator(): TSGComponentEnumerator;
 begin
-Result := TSGComponentEnumerator.Create(Self);
+Result := TSGComponentEnumeratorNormal.Create(Self);
+end;
+
+function TSGComponent.GetReverseEnumerator(): TSGComponentEnumerator;
+begin
+Result := TSGComponentEnumeratorReverse.Create(Self);
 end;
 
 procedure TSGComponent.Paint();
@@ -2614,22 +2638,19 @@ end;
 
 procedure TSGComponent.FromDraw();
 var
-	i : TSGMaxEnum;
-	Component : TSGComponent;
+	Component, PriorityComponent : TSGComponent;
 begin
-if FChildren<>nil then
-	if (FChildrenPriority=0) or (FChildrenPriority-1>High(FChildren)) then
-		begin
-		for Component in Self do
+PriorityComponent := GetPriorityComponent();
+if PriorityComponent = nil then
+	for Component in Self do
+		Component.FromDraw()
+else
+	begin
+	for Component in Self do
+		if Component <> PriorityComponent then
 			Component.FromDraw();
-		end
-	else
-		begin
-		For i:=Low(FChildren) to High(FChildren) do
-			if i<>FChildrenPriority-1 then
-				FChildren[i].FromDraw();
-		FChildren[FChildrenPriority-1].FromDraw();
-		end;
+	PriorityComponent.FromDraw();
+	end;
 end;
 
 procedure TSGComponent.ClearPriority();
@@ -2639,16 +2660,10 @@ begin
 FChildrenPriority:=0;
 if FParent<>nil then
 	begin
-	if FParent.FChildrenPriority<>0 then
+	if FParent.FChildrenPriority <> 0 then
 		begin
-		ii:=0;
-		for i:=0 to High(FParent.FChildren) do
-			if Pointer(Self)=Pointer(FParent.FChildren) then
-				begin
-				ii:=i+1;
-				Break;
-				end;
-		if (ii=FParent.FChildrenPriority) then
+		ii := Parent.IndexOf(Self) + 1;
+		if (ii = FParent.FChildrenPriority) then
 			FParent.ClearPriority();
 		end;
 	end;
@@ -2656,21 +2671,14 @@ end;
 
 procedure TSGComponent.MakePriority();
 var
-	i,ii:TSGMaxEnum;
+	i, ii : TSGMaxEnum;
 begin
 if FParent<>nil then
 	begin
-	ii:=0;
-	if FParent.FChildren<>nil then
-		for i:=0 to High(FParent.FChildren) do
-			if FParent.FChildren[i]=Self then
-				begin
-				ii:=i+1;
-				Break;
-				end;
-	if ii<>0 then
+	ii := Parent.IndexOf(Self) + 1;
+	if ii <> 0 then
 		begin
-		FParent.FChildrenPriority:=ii;
+		FParent.FChildrenPriority := ii;
 		FParent.MakePriority();
 		end;
 	end;
@@ -2726,6 +2734,7 @@ end;
 procedure TSGComponent.FromResize();
 var
 	I : TSGLongInt;
+	Component : TSGComponent;
 begin
 if SGAnchBottom in FAnchors then
 	begin
@@ -2775,10 +2784,16 @@ if FAlign in [SGAlignClient] then
 	for i:=0 to High(FChildren) do
 		FChildren[i].FromResize(CW,CH);
 	end;}
-if FChildren<>nil then
-	for i:=0 to High(FChildren) do
-		if FChildren[i]<>nil then
-			FChildren[i].FromResize;
+for Component in Self do
+	Component.FromResize();
+end;
+
+function TSGComponent.GetPriorityComponent() : TSGComponent;
+begin
+Result := nil;
+if (FChildrenPriority > 0) and (FChildren <> nil) then
+	if FChildrenPriority <= Length(FChildren) then
+		Result := FChildren[FChildrenPriority - 1];
 end;
 
 function TSGComponent.CursorInComponentCaption():boolean;
@@ -2788,7 +2803,6 @@ end;
 
 procedure TSGComponent.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
 begin
-
 end;
 
 procedure TSGComponent.DestroyAlign;
@@ -2852,11 +2866,11 @@ end;
 
 procedure TSGComponent.UpDateObjects();
 var
-	I:longint;
-	ValueHeight:LOngInt = 0;
-	ValueWidth:LOngInt = 0;
-	ValueLeft:LOngInt = 0;
-	ValueTop:LOngInt = 0;
+	Component : TSGComponent;
+	ValueHeight : TSGLongInt = 0;
+	ValueWidth  : TSGLongInt = 0;
+	ValueLeft   : TSGLongInt = 0;
+	ValueTop    : TSGLongInt = 0;
 begin
 if FParent<>nil then
 	case FAlign of
@@ -2894,73 +2908,70 @@ if FParent<>nil then
 	SGAlignNone: begin end;
 	else begin end;
 	end;
-ValueTop:=FTop;
-ValueHeight:=FHeight;
-ValueWidth:=FWidth;
-ValueLeft:=FLeft;
-UpDateObj(FHeight,FNeedHeight);
-UpDateObj(FTop,FNeedTop);
-UpDateObj(FLeft,FNeedLeft);
-UpDateObj(FWidth,FNeedWidth);
+ValueTop    := FTop;
+ValueHeight := FHeight;
+ValueWidth  := FWidth;
+ValueLeft   := FLeft;
+UpDateObj(FHeight, FNeedHeight);
+UpDateObj(FTop,    FNeedTop);
+UpDateObj(FLeft,   FNeedLeft);
+UpDateObj(FWidth,  FNeedWidth);
 TestCoords();
-ValueHeight:=FHeight-ValueHeight;
-ValueLeft:=FLeft-ValueLeft;
-ValueTop:=FTop-ValueTop;
-ValueWidth:=FWidth-ValueWidth;
-for i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FTop-=ValueTop;
-for i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FWidth-=ValueWidth;
-for i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FHeight-=ValueHeight;
-for i:=Low(FChildren) to High(FChildren) do
-	FChildren[i].FLeft-=ValueLeft;
+ValueHeight := FHeight - ValueHeight;
+ValueLeft   := FLeft   - ValueLeft;
+ValueTop    := FTop    - ValueTop;
+ValueWidth  := FWidth  - ValueWidth;
+for Component in Self do
+	begin
+	Component.FTop    -= ValueTop;
+	Component.FWidth  -= ValueWidth;
+	Component.FHeight -= ValueHeight;
+	Component.FLeft   -= ValueLeft;
+	end;
 if FParent<>nil then
 	begin
-	FRealLeft:=FParent.FRealLeft+FLeft+FParent.FLeftShiftForChilds;
-	FRealTop:=FParent.FRealTop+FTop+FParent.FTopShiftForChilds;
+	FRealLeft := FParent.FRealLeft + FLeft + FParent.FLeftShiftForChilds;
+	FRealTop  := FParent.FRealTop  + FTop  + FParent.FTopShiftForChilds;
 	end;
 end;
 
 procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
-var
-	i:LongInt = -1;
-	IDComponentUnderCursor:LongInt = -1;
-begin
-if (FChildrenPriority>0) and 
-	FChildren[FChildrenPriority-1].FVisible and 
-	FChildren[FChildrenPriority-1].Active then
-	begin
-	FChildren[FChildrenPriority-1].FromUpDateUnderCursor(CanRePleace,
-		FChildren[FChildrenPriority-1].CursorInComponent());
-	if FChildren[FChildrenPriority-1].CursorInComponentCaption() then
-		begin
-		FChildren[FChildrenPriority-1].FromUpDateCaptionUnderCursor(CanRePleace);
-		end;
-	end;
 
-for i:=High(FChildren) downto Low(FChildren) do
-	if  ((FChildrenPriority=0) or ((FChildrenPriority>0) and (i<>FChildrenPriority-1))) and 
-		FChildren[i].CursorInComponent() and 
-		FChildren[i].FVisible and 
-		FChildren[i].Active then
-		begin
-		IDComponentUnderCursor:=i;
-		Break;
-		end;
-if (IDComponentUnderCursor>-1) then
-	begin
-	FChildren[IDComponentUnderCursor].FromUpDateUnderCursor(CanRePleace);
-	if FChildren[IDComponentUnderCursor].CursorInComponentCaption() then
-		begin
-		FChildren[IDComponentUnderCursor].FromUpDateCaptionUnderCursor(CanRePleace);
-		end;
-	end;
+procedure PUpdateComponent(const Component : TSGComponent);
+begin
+Component.FromUpDateUnderCursor(CanRePleace, Component.CursorInComponent());
+if Component.CursorInComponentCaption() then
+	Component.FromUpDateCaptionUnderCursor(CanRePleace);
+end;
+
+var
+	UnderCursorComponent, PriorityComponent, Component : TSGComponent;
+
+begin
+PriorityComponent := GetPriorityComponent();
+if PriorityComponent <> nil then
+	if not (PriorityComponent.Visible and PriorityComponent.Active) then
+		PriorityComponent := nil;
+if PriorityComponent <> nil then
+	PUpdateComponent(PriorityComponent);
+
+UnderCursorComponent := nil;
+for Component in Self.GetReverseEnumerator() do
+	if Component <> PriorityComponent then
+		if Component.CursorInComponent() and Component.Visible and  Component.Active then
+			begin
+			UnderCursorComponent := Component;
+			break;
+			end;
+
+if UnderCursorComponent <> nil then
+	PUpdateComponent(UnderCursorComponent);
 end;
 
 {$IFDEF CLHINTS}
 	{$NOTE Edit}
 	{$ENDIF}
+
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
 var
 	i,ii:LongWord;
