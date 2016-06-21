@@ -40,13 +40,12 @@ type
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
-		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowArea():TSGPoint2f;override;
 		function  GetScreenArea():TSGPoint2f;override;
 		function  ShiftClientArea() : TSGPoint2f; override;
 			public
 		procedure ShowCursor(const b:Boolean);override;
-		procedure SetCursorPosition(const a:TSGPoint2f);override;
+		procedure SetCursorPosition(const VPosition : TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
 		function WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
@@ -65,9 +64,11 @@ type
 		procedure KillWindow(const KillRC:Boolean = True);
 		function  CreateWindow():Boolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function  GetClientWidth() : TSGLongWord;override;
 		function  GetClientHeight() : TSGLongWord;override;
 			public
+		function  GetCursorPosition():TSGPoint2f;override;
 		function FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
 		function FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
@@ -90,6 +91,11 @@ uses
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
 
+class function TSGContextWinAPI.GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Windows.GetWindowRect(VWindow, Result);
+end;
+
 function  TSGContextWinAPI.GetClientWidth() : TSGLongWord;
 begin
 Result := GetClientWindowRect(hWindow).right;
@@ -102,7 +108,7 @@ end;
 
 class function TSGContextWinAPI.GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-GetClientRect(VWindow, Result);
+Windows.GetClientRect(VWindow, Result);
 end;
 
 function  TSGContextWinAPI.GetWindow() : TSGPointer;
@@ -225,12 +231,19 @@ else
 	end;
 end;
 
-procedure TSGContextWinAPI.SetCursorPosition(const a:TSGPoint2f);
+procedure TSGContextWinAPI.SetCursorPosition(const VPosition : TSGPoint2f);
 var
-	b : TSGPoint2f;
+	WindowShift : Windows.TRect;
+	ClientShift : TSGPoint2f;
 begin
-b := GetWindowArea();
-Windows.SetCursorPos(b.x + a.x, b.y + a.y);
+if FFullscreen then
+	Windows.SetCursorPos(VPosition.x, VPosition.y)
+else
+	begin
+	WindowShift := TSGContextWinAPI.GetWindowRect(hWindow);
+	ClientShift := ShiftClientArea();
+	Windows.SetCursorPos(VPosition.x + WindowShift.left + ClientShift.x, VPosition.y + WindowShift.top + ClientShift.y);
+	end;
 end;
 
 procedure TSGContextWinAPI.ShowCursor(const b:Boolean);
@@ -242,17 +255,23 @@ end;
 function TSGContextWinAPI.GetScreenArea():TSGPoint2f;
 begin
 Result.Import(
-	GetDeviceCaps(GetDC(GetDesktopWindow),HORZRES),
-	GetDeviceCaps(GetDC(GetDesktopWindow),VERTRES));
+	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()),HORZRES),
+	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()),VERTRES));
 end;
 
 function TSGContextWinAPI.GetCursorPosition:TSGPoint2f;
 var
-	p:Tpoint;
+	Position : Windows.TPoint;
+	Shift : Windows.TRect;
 begin
-GetCursorPos(p);
-Result.x:=p.x;
-Result.y:=p.y;
+Windows.GetCursorPos(Position);
+if FFullscreen then
+	Result.Import(Position.x, Position.y)
+else
+	begin
+	Shift := TSGContextWinAPI.GetWindowRect(hWindow);
+	Result.Import(Position.x - Shift.left, Position.y - Shift.top);
+	end;
 end;
 
 function TSGContextWinAPI.GetWindowArea():TSGPoint2f;

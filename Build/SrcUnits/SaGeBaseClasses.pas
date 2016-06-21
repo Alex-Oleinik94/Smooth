@@ -133,7 +133,7 @@ type
 	
 	ISGDeviceDependent = interface(ISGPaintable)
 		['{0841a6ed-c09e-4273-965a-c82db11d26ff}']
-		function Suppred() : TSGBoolean;
+		function Suppored() : TSGBoolean;
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
 		end;
@@ -143,7 +143,7 @@ type
 		class function ClassName() : TSGString; override;
 		procedure DeleteDeviceResourses();virtual;
 		procedure LoadDeviceResourses();virtual;
-		function Suppred() : TSGBoolean;virtual;
+		function Suppored() : TSGBoolean;virtual;
 		end;
 
 implementation
@@ -180,7 +180,7 @@ if Self <> nil then
 	Self.Destroy();
 end;
 
-function TSGExtendedPaintable.Suppred() : TSGBoolean;
+function TSGExtendedPaintable.Suppored() : TSGBoolean;
 begin
 Result := True;
 end;

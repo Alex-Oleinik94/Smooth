@@ -162,6 +162,8 @@ with TSGKillKostia(Button.FUserPointer1) do
 	end;
 end;
 
+{$OVERFLOWCHECKS OFF}
+
 procedure TSGKillKostia.CreateKostia(const KostiaID:LongWord);
 var
 	i,ii:LongWord;

@@ -1302,9 +1302,9 @@ end;
 
 destructor TSGRenderDirectX.Destroy();
 var
-	i:Cardinal;
+	i : Cardinal;
 begin
-if FArBuffers<>nil then
+if FArBuffers<>nil then if Length(FArBuffers)>0 then
 	begin
 	for i:=0 to High(FArBuffers) do
 		begin
@@ -1315,7 +1315,7 @@ if FArBuffers<>nil then
 		end;
 	SetLength(FArBuffers,0);
 	end;
-if FArTextures<>nil then
+if FArTextures<>nil then if Length(FArTextures)>0 then
 	begin
 	for i:=0 to High(FArTextures) do
 		begin

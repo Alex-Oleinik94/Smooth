@@ -10,6 +10,7 @@ uses
 	 Crt
 	,SaGeCommon
 	,SaGeBase
+	,SaGeBaseClasses
 	,SaGeBased
 	,SaGeImages
 	,SaGeContext
@@ -47,15 +48,37 @@ type
 	TSGScreen           = class;
 	
 	TSGComponent          = class;
+	
+	// for-in loop enumerator class
+	TSGComponentEnumerator = class
+			private
+		FComponent, FCurrent : TSGComponent;
+			public
+		constructor Create(const VComponent : TSGComponent);
+		function MoveNext(): TSGBoolean;
+		property Current: TSGComponent read FCurrent;
+		end;
+	
 	PTSGComponent         = ^ TSGComponent;
 	TSGArTSGComponent     = type packed array of TSGComponent;
 	TArTSGComponent       = TSGArTSGComponent;
 	TArTArTSGComponent    = type packed array of TArTSGComponent;
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
-	TSGComponent = class(TSGContextabled)
+	TSGComponent = class(TSGContextabled, ISGDeviceDependent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+			public
+		// for-in loop
+		function GetEnumerator(): TSGComponentEnumerator;
+			private
+		function GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
+		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
+			public
+		procedure Paint();virtual;
+		procedure DeleteDeviceResourses();virtual;
+		procedure LoadDeviceResourses();virtual;
+		function Suppored() : TSGBoolean;virtual;
 			private
 		FWidth:LongInt;
 		FHeight:LongInt;
@@ -1991,8 +2014,37 @@ inherited Destroy;
 end;
 
 {$IFDEF CLHINTS}
+	{$NOTE ComponentEnumerator}
+	{$ENDIF}
+
+constructor TSGComponentEnumerator.Create(const VComponent : TSGComponent);
+begin
+inherited Create();
+FComponent := VComponent;
+FCurrent := nil;
+end;
+
+function TSGComponentEnumerator.MoveNext(): TSGBoolean;
+var
+	Index : TSGLongInt;
+begin
+if FCurrent = nil then
+	begin
+	FCurrent := FComponent.Children[1];
+	end
+else
+	begin
+	Index := FComponent.IndexOf(FCurrent);
+	if Index <> -1 then
+		FCurrent := FComponent.Children[Index + 2];
+	end;
+Result := FCurrent <> nil;
+end;
+
+{$IFDEF CLHINTS}
 	{$NOTE Component}
 	{$ENDIF}
+
 procedure TSGComponent.DrawDrawClasses();
 var
 	i:LongWord;
@@ -2506,15 +2558,47 @@ if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
 end;
 
+procedure TSGComponent.DeleteDeviceResourses();
+var
+	Component : TSGComponent;
+begin
+for Component in Self do
+	Component.DeleteDeviceResourses();
+end;
+
+procedure TSGComponent.LoadDeviceResourses();
+var
+	Component : TSGComponent;
+begin
+for Component in Self do
+	Component.LoadDeviceResourses();
+end;
+
+function TSGComponent.Suppored() : TSGBoolean;
+begin
+Result := True;
+end;
+
+function TSGComponent.GetEnumerator(): TSGComponentEnumerator;
+begin
+Result := TSGComponentEnumerator.Create(Self);
+end;
+
+procedure TSGComponent.Paint();
+begin
+FromDraw();
+end;
+
 procedure TSGComponent.FromDraw();
 var
-	i:TSGMaxEnum;
+	i : TSGMaxEnum;
+	Component : TSGComponent;
 begin
 if FChildren<>nil then
 	if (FChildrenPriority=0) or (FChildrenPriority-1>High(FChildren)) then
 		begin
-		For i:=Low(FChildren) to High(FChildren) do
-			FChildren[i].FromDraw();
+		for Component in Self do
+			Component.FromDraw();
 		end
 	else
 		begin

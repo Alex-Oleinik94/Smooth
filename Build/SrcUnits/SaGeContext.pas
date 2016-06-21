@@ -227,16 +227,16 @@ procedure TSGContext.ReinitializeRender();
 begin
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
-//SGScreen.DeleteDeviceResourses();
+SGScreen.DeleteDeviceResourses();
 if FRender <> nil then
-	FRender.Destroy();
+	FRender.Destroy(); WriteLn(12312312,'----------');
 FRender := FRenderClass.Create();
 FRender.Context := Self as ISGContext;
 if FRender.CreateContext() then
 	FRender.Init();
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
-//SGScreen.LoadDeviceResourses();
+SGScreen.LoadDeviceResourses();
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -260,6 +260,7 @@ end;
 procedure TSGContext.StartComputeTimer();
 begin
 FElapsedDateTime.Get();
+FElapsedTime := 0;
 end;
 
 function TSGContext.GetElapsedTime() : TSGLongWord;
@@ -334,8 +335,8 @@ begin
 FCursorInCenter := VCentered;
 if (@SetCursorPosition <> nil) and VCentered then
 	begin
-	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
-	SetCursorPosition(Point + ShiftClientArea());
+	Point.Import(Trunc(Render.Width * 0.5), Trunc(Render.Height * 0.5));
+	SetCursorPosition(Point);
 	FCursorPosition[SGLastCursorPosition] := Point;
 	FCursorPosition[SGNowCursorPosition] := Point;
 	FCursorPosition[SGDeferenseCursorPosition]:=0;
@@ -458,7 +459,6 @@ begin
 FKeysPressed[Key]:=ButtonType = SGDownKey;
 FKeyPressedType:=ButtonType;
 FKeyPressed:=Key;
-//WriteLn(Key);
 end;
 
 procedure TSGContext.Close();
@@ -486,7 +486,6 @@ var
 	Point:TSGPoint2f;
 begin
 Point := GetCursorPosition();
-Point -= GetWindowArea();
 Point -= ShiftClientArea();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
 FCursorPosition[SGNowCursorPosition]:=Point;
@@ -494,7 +493,7 @@ FCursorPosition[SGDeferenseCursorPosition]:=FCursorPosition[SGNowCursorPosition]
 if CursorCentered and (@SetCursorPosition<>nil) then
 	begin
 	Point.Import(Trunc(Render.Width*0.5),Trunc(Render.Height*0.5));
-	SetCursorPosition(Point + ShiftClientArea());
+	SetCursorPosition(Point);
 	FCursorPosition[SGLastCursorPosition] := Point;
 	FCursorPosition[SGNowCursorPosition] := Point;
 	end;
