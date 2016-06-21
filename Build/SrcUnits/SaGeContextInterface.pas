@@ -122,7 +122,9 @@ type
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
 		procedure SetSelfLink(const VLink : PISGContext);
 		function GetSelfLink() : PISGContext;
+		procedure SetRenderClass(const NewRender : TSGPointer);
 		
+		property RenderClass : TSGPointer write SetRenderClass;
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;

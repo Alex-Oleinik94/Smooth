@@ -1,6 +1,6 @@
 {$include Includes\SaGe.inc}
 
-//{$DEFINE SGWinAPIDebug}
+{$DEFINE SGWinAPIDebug}
 
 unit SaGeContextWinAPI;
 

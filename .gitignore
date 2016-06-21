@@ -26,6 +26,7 @@ Binaries/SaGe.apk
 Binaries/Main_Release.exe
 Binaries/Main_Lazarus.exe
 Binaries/Main_Compressed.exe
+Binaries/d3dx9d_33.dll
 Others/DirectX/*.o
 Others/DirectX/*.ppu
 Others/DirectX/*.a
@@ -43,4 +44,3 @@ Binaries/Gas Diffusion Saves
 Apache_Ant
 Binaries/SaGe*.dll
 Binaries/libSaGe*.so
-

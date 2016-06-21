@@ -1,5 +1,7 @@
 {$INCLUDE Includes\SaGe.inc}
 
+{$DEFINE CONTEXT_BEGUNING}
+
 unit SaGeContext;
 
 interface
@@ -78,7 +80,7 @@ type
 		procedure Close();virtual;
 		function ShiftClientArea() : TSGPoint2f; virtual;
 		procedure SwapBuffers();virtual;
-		procedure ReinitializeRender();virtual;
+		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;abstract;
 		function GetCursorPosition():TSGPoint2f;virtual;abstract;
@@ -99,7 +101,7 @@ type
 			protected
 		FPaintWithHandlingMessages : TSGBoolean;
 			protected
-		procedure SetRenderClass(const NewRender : TSGRenderClass);virtual;
+		procedure ReinitializeRender();virtual;
 		function  GetRender() : ISGRender;virtual;
 		procedure StartComputeTimer();virtual;
 		function  GetElapsedTime() : TSGLongWord;virtual;
@@ -192,7 +194,7 @@ type
 		FPaintable       : ISGDeviceDependent;
 			public
 		property Paintable : ISGDeviceDependent write FPaintable;
-		property RenderClass : TSGRenderClass read FRenderClass write SetRenderClass;
+		property RenderClass : TSGPointer write SetRenderClass;
 		end;
 
 {$DEFINE SGREADINTERFACE}
@@ -225,11 +227,14 @@ end;
 
 procedure TSGContext.ReinitializeRender();
 begin
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.ReinitializeRender() : Begining');
+	{$ENDIF}
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
 SGScreen.DeleteDeviceResourses();
 if FRender <> nil then
-	FRender.Destroy(); WriteLn(12312312,'----------');
+	FRender.Destroy();
 FRender := FRenderClass.Create();
 FRender.Context := Self as ISGContext;
 if FRender.CreateContext() then
@@ -237,6 +242,9 @@ if FRender.CreateContext() then
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
 SGScreen.LoadDeviceResourses();
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.ReinitializeRender() : End');
+	{$ENDIF}
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -245,11 +253,19 @@ if FRender <> nil then
 	FRender.SwapBuffers();
 end;
 
-procedure TSGContext.SetRenderClass(const NewRender : TSGRenderClass);
+procedure TSGContext.SetRenderClass(const NewRender : TSGPointer);
 begin
-FRenderClass := NewRender;
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.SetRenderClass(...) : Begining');
+	{$ENDIF}
+FRenderClass := TSGRenderClass(NewRender);
 if FInitialized and (not (Render is FRenderClass)) then
+	begin
 	ReinitializeRender();
+	end;
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.SetRenderClass(...) : End');
+	{$ENDIF}
 end;
 
 function TSGContext.GetRender() : ISGRender;
@@ -399,20 +415,41 @@ end;
 
 procedure TSGContext.Paint();
 begin
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
+	{$ENDIF}
 UpdateTimer(); 
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
+	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
+	{$IFDEF CONTEXT_BEGUNING}
+	WriteLn('TSGContext.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
+		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : Before "ClearKeys();" & "Messages();"');
+	{$ENDIF}
 if FPaintWithHandlingMessages then
 	begin
 	ClearKeys();
 	Messages();
 	end;
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : Before "SGScreen.Paint();"');
+	{$ENDIF}
 SGScreen.Paint();
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
+	{$ENDIF}
 SwapBuffers();
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.Paint() : End');
+	{$ENDIF}
 end;
 
 procedure TSGContext.SetTitle(const VTitle : TSGString);
@@ -449,9 +486,10 @@ end;
 
 procedure TSGContext.SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
 begin
-FCursorKeyPressed:=Key;
-FCursorKeyPressedType:=ButtonType;
-FCursorKeysPressed[Key]:=ButtonType = SGDownKey;
+FCursorKeyPressed     := Key;
+FCursorKeyPressedType := ButtonType;
+if Key <> SGNullCursorButton then
+	FCursorKeysPressed[Key] := ButtonType = SGDownKey;
 end;
 
 procedure TSGContext.SetKey(ButtonType:TSGCursorButtonType;Key:LongInt);

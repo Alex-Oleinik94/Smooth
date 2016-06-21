@@ -1,6 +1,7 @@
 {$INCLUDE Includes\SaGe.inc}
 
 //{$DEFINE CLHINTS}
+{$DEFINE SCREEN_DEBUG}
 
 unit SaGeScreen;
 
@@ -248,7 +249,7 @@ type
 			public
 		procedure Load(const VContext : ISGContext);
 		procedure Resize();
-		procedure Paint();
+		procedure Paint();override;
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -1009,6 +1010,9 @@ end;
 
 procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
+{$IFDEF SCREEN_DEBUG}
+WriteLn('TSGComboBox.FromUpDateUnderCursor() : Begining');
+	{$ENDIF}
 if CursorInComponentNow then
 	begin
 	FBackLight:=True;
@@ -1047,12 +1051,18 @@ if CursorInComponentNow then
 		end;
 	end;
 inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+{$IFDEF SCREEN_DEBUG}
+WriteLn('TSGComboBox.FromUpDateUnderCursor() : End');
+	{$ENDIF}
 end;
 
 procedure TSGComboBox.FromUpDate(var FCanChange:Boolean);
 var
 	i:TSGMaxEnum;
 begin
+{$IFDEF SCREEN_DEBUG}
+WriteLn('TSGComboBox.FromUpDate() : Begining');
+	{$ENDIF}
 if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNullCursorButton)) then
 	begin
 	FOpen:=False;
@@ -1068,14 +1078,20 @@ if  FOpen and (FCursorOnComponent) then
 			(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) and
 			FItems[i].FActive then
 				begin
-				FCursorOnThisItem:=FFirstScrollItem+i;
+				FCursorOnThisItem := FFirstScrollItem + i;
 				if FClickOnOpenBox then
 					begin
 					FCanChange:=False;
 					FOpen:=False;
 					ClearPriority();
+					{$IFDEF SCREEN_DEBUG}
+						WriteLn('TSGComboBox.FromUpDate() : Before calling "FProcedure(...)"');
+						{$ENDIF}
 					if FProcedure<>nil then
 						FProcedure(FSelectItem,FCursorOnThisItem,Self);
+					{$IFDEF SCREEN_DEBUG}
+						WriteLn('TSGComboBox.FromUpDate() : After calling "FProcedure(...)"');
+						{$ENDIF}
 					FSelectItem:=FCursorOnThisItem;
 					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 					FTextColor:=SGColorImport();
@@ -1091,6 +1107,9 @@ if  FOpen and (FCursorOnComponent) then
 UpgradeTimer(FOpen,FOpenTimer,5);
 UpgradeTimer(FBackLight,FBackLightTimer,3,2);
 inherited;
+{$IFDEF SCREEN_DEBUG}
+WriteLn('TSGComboBox.FromUpDate() : End');
+	{$ENDIF}
 end;
 
 procedure TSGComboBox.DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -2536,6 +2555,10 @@ procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
 var
 	i,ii:TSGMaxEnum;
 begin
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComponent.FromUpDate(var FCanChange:Boolean = ', FCanChange, ') : Begining');
+	{$ENDIF}
+
 UpDateObjects;
 UpgradeTimers;
 
@@ -2702,7 +2725,7 @@ end;
 
 procedure TSGComponent.FromResize();
 var
-	I:LongWord;
+	I : TSGLongInt;
 begin
 if SGAnchBottom in FAnchors then
 	begin
@@ -2715,9 +2738,9 @@ if SGAnchBottom in FAnchors then
 			begin
 			if FAnchorsData.FParentHeight<>FParent.Height then
 				begin
-				I:=FAnchorsData.FParentHeight-FParent.Height;
-				FNeedTop-=I;
-				FAnchorsData.FParentHeight:=FParent.Height;
+				I := FAnchorsData.FParentHeight - FParent.Height;
+				FNeedTop -= I;
+				FAnchorsData.FParentHeight := FParent.Height;
 				end;
 			end;
 	end;
@@ -3554,168 +3577,54 @@ var
 	CanRePleace : TSGBoolean = True;
 	i : TSGLongWord;
 begin
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
+	{$ENDIF}
+
 if (Context.KeysPressed(SG_CTRL_KEY)) and 
    (Context.KeysPressed(SG_ALT_KEY)) and 
    (Context.KeyPressedType = SGDownKey) and 
    (Context.KeyPressedChar = 'O') and 
    TSGEngineConfigurationPanel.CanCreate(Self) then
 	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();
-//{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenPaint". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
-if FNewPosition <> FOldPosition then
-	begin
-	Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-	Render.InitMatrixMode(SG_2D);
-	Render.Color4f(1,1,1,1);
-	
-	UpgradeTimer(True,FMoveProgress);
-	
-	if Abs(1-FMoveProgress)<SGZero then
-		begin
-		FOldPosition:=FNewPosition;
-		FMoveProgress:=0;
-		end
-	else
-		begin
-		Render.LineWidth(1);
-		Render.InitMatrixMode(SG_2D);
-		
-		if SGScreens[FOldPosition].FImage <>nil then
-			begin
-			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height),
-				SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)
-				,True,SG_2D);
-			end;
-		
-		if SGScreens[FNewPosition].FImage <>nil then
-			begin
-			SGScreens[FNewPosition].FImage.DrawImageFromTwoVertex2f(
-				(-1)*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height),
-				(-1)*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)+SGVertex2fImport(Render.Width,Render.Height)+FMoveProgress*FMoveVector*SGVertex2fImport(Render.Width,Render.Height)
-				,True,SG_2D);
-			end;
-		
-		end;
-	end;
-if FNewPosition=FOldPosition then
-	begin
-	//{$IFDEF ANDROID}SGLog.Sourse('"SGScreenPaint" : Enter if "FNewPosition=FOldPosition".');{$ENDIF}
-	InProcessing := True;
-	
-	FromUpDateUnderCursor(CanRePleace);
-	FromUpDate(CanRePleace);
-	DrawDrawClasses();
-	
-	Render.LineWidth(1);
-	Render.InitMatrixMode(SG_2D);
-	
-	CanRePleace:=False;
-	for i:=0 to High(SGScreens) do
-		if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
-			SGScreens[i].FScreen.FromUpDate(CanRePleace);
-	
-	FromDraw();
-	
-	InProcessing := False;
-	
-	if (Context.KeysPressed(SG_CTRL_KEY)) and (Context.KeysPressed(SG_ALT_KEY)) and (Context.KeyPressedType=SGDownKey) then
-		begin
-		case Context.KeyPressedByte of
-		//'W' Close
-		87:
-			begin
-			SGScreens[FNewPosition].FScreen:=nil;
-			if SGScreens[FNewPosition].FImage<>nil then
-				SGScreens[FNewPosition].FImage.Destroy;
-			SGScreens[FNewPosition].FImage:=TSGImage.Create;
-			SGScreens[FNewPosition].FImage.ImportFromDispley(False);
-			SGScreens[FNewPosition].FImage.ToTexture;
-			if Length(SGScreens) = 1 then
-				begin
-				SetLength(SGScreens,2);
-				FNewPosition:=1;
-				case Random(4) of
-				0:FMoveVector.Import(1,0);
-				1:FMoveVector.Import(-1,0);
-				2:FMoveVector.Import(0,1);
-				3:FMoveVector.Import(0,-1);
-				end;
-				FMoveProgress:=0;
-				SGScreen.Destroy;
-				
-				SGScreen:=TSGScreen.Create;
-				SGScreen.SetBounds(0,0,Render.Width,Render.Height);
-				SGScreen.SetShifts(0,0,0,0);
-				SGScreen.Visible:=True;
-				SGScreen.BoundsToNeedBounds;
-				
-				SGScreens[1].FScreen:=SGScreen;
-				SGScreens[1].FImage:=nil;
-				end
-			else
-				begin
-				
-				end;
-			end;
-		//'N' New Screen
-		78:
-			begin
-			SetLength(SGScreens,Length(SGScreens)+1);
-			
-			FNewPosition:=High(SGScreens);
-			for i:=0 to High(SGScreens)-1 do
-				if SGScreens[i].FScreen = SGScreen then
-					begin
-					FOldPosition:=i;
-					Break;
-					end;
-			FMoveProgress:=0;
-			
-			SGScreen:=TSGScreen.Create;
-			SGScreen.SetBounds(0,0,Render.Width,Render.Height);
-			SGScreen.SetShifts(0,0,0,0);
-			SGScreen.Visible:=True;
-			SGScreen.BoundsToNeedBounds;
-			
-			SGScreens[FNewPosition].FScreen:=SGScreen;
-			SGScreens[FNewPosition].FImage:=nil;
-			
-			if SGScreens[FOldPosition].FImage<>nil then
-				SGScreens[FOldPosition].FImage.Destroy;
-			SGScreens[FOldPosition].FImage:=TSGImage.Create;
-			SGScreens[FOldPosition].FImage.ImportFromDispley(False);
-			SGScreens[FOldPosition].FImage.Image.SetBounds(1024,512);
-			SGScreens[FOldPosition].FImage.ToTexture;
-			
-			case Random(4) of
-			0:FMoveVector.Import(1,0);
-			1:FMoveVector.Import(-1,0);
-			2:FMoveVector.Import(0,1);
-			3:FMoveVector.Import(0,-1);
-			end;
-			
-			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			Render.InitMatrixMode(SG_3D);
-			
-			SGScreen.DrawDrawClasses;
-			Render.InitMatrixMode(SG_2D);
-			SGScreen.FromDraw;
-			
-			SGScreens[FNewPosition].FImage:=TSGImage.Create;
-			SGScreens[FNewPosition].FImage.ImportFromDispley(False);
-			SGScreens[FNewPosition].FImage.Image.SetBounds(1024,512);
-			SGScreens[FNewPosition].FImage.ToTexture;
-			
-			Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
-			Render.InitMatrixMode(SG_2D);
-			Render.Color4f(1,1,1,1);
-			SGScreens[FOldPosition].FImage.DrawImageFromTwoVertex2f(
-				SGVertex2fImport(0,0),SGVertex2fImport(Render.Width,Render.Height),True,SG_2D);
-			end;
-		end;
-		end;
-	//{$IFDEF ANDROID}SGLog.Sourse('"SGScreenPaint" : Leav if "FNewPosition=FOldPosition".');{$ENDIF}
-	end;
+
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before "FromUpDateUnderCursor(CanRePleace);"');
+	{$ENDIF}
+
+InProcessing := True;
+
+FromUpDateUnderCursor(CanRePleace);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before "FromUpDate(CanRePleace);"');
+	{$ENDIF}
+FromUpDate(CanRePleace);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before "DrawDrawClasses();"');
+	{$ENDIF}
+DrawDrawClasses();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before over updating');
+	{$ENDIF}
+
+Render.LineWidth(1);
+Render.InitMatrixMode(SG_2D);
+
+CanRePleace:=False;
+for i:=0 to High(SGScreens) do
+	if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
+		SGScreens[i].FScreen.FromUpDate(CanRePleace);
+
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before drawing');
+	{$ENDIF}
+
+FromDraw();
+
+InProcessing := False;
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Beining');
+	{$ENDIF}
 end;
 
 initialization

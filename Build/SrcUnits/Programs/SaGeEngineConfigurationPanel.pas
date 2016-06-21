@@ -1,8 +1,11 @@
 {$INCLUDE SaGe.inc}
 
+{$DEFINE CONFIGURATION_DEBUG}
+
 unit SaGeEngineConfigurationPanel;
 
 interface
+
 uses
 	 SaGeCommon
 	,Classes
@@ -58,11 +61,14 @@ uses
 	;
 
 procedure TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass);
-var
-	ContextValue : TSGContext;
 begin
-ContextValue := Context as TSGContext;
-ContextValue.RenderClass := VRenderClass;
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass = ',TSGMaxEnum(VRenderClass),') : Begining');
+	{$ENDIF}
+Context.SetRenderClass(VRenderClass);
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass) : Begining');
+	{$ENDIF}
 end;
 
 procedure TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass);

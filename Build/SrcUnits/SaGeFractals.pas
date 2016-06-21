@@ -653,7 +653,15 @@ for i:=0 to High(FThreadsData) do
 ThreadsBoolean(False);
 end;
 
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
+
 class function TSGImageFractal.GetColorOne(const a,b,color:LongInt):byte;inline;
+var
+	OutPut : TSGMaxEnum;
 begin
 if Color>b then
 	Result:=255
@@ -661,9 +669,19 @@ else
 	if Color<a then
 		Result:=0
 	else
-		Result:=Trunc(((b-a)/(color-a))*255);
+		begin
+		OutPut := Trunc(((b-a)/(color-a))*255);
+		if OutPut > 255 then
+			Result := OutPut mod 256
+		else
+			Result := OutPut;
+		end;
 end;
 
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
 
 constructor TSGImageFractal.Create(const VContext : ISGContext);
 begin
@@ -696,20 +714,35 @@ FImage.ToTexture;
 ThreadsBoolean(False);
 end;
 
-class function TSGImageFractal.GetColor(const a,b,color:LongInt):byte;inline;
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
+
+class function TSGImageFractal.GetColor(const a, b, Color : TSGLongInt) : TSGByte;inline;
 var
-	SR:byte;
+	Middle, OutPut : TSGWord;
 begin
 Result:=0;
 if (color>=a) and (color<=b) then
 	begin
-	sr:=round((a+b)/2);
-	if color<sr then
-		Result:=round((color-a)/(sr-a)*255)
+	Middle := round((a+b)/2);
+	if color < Middle then
+		OutPut := round((color - a) / (Middle - a) * 255)
 	else
-		Result:=round((b-color)/(b-sr)*255);
+		OutPut := round((b - color) / (b - Middle) * 255);
+	if OutPut > 255 then
+		Result := OutPut mod 256
+	else
+		Result := OutPut;
 	end;
 end;
+
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
 
 procedure TSGImageFractal.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
 begin

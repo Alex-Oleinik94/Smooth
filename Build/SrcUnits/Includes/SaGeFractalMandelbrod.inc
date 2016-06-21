@@ -1580,7 +1580,13 @@ end;
 
 function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
 var
-	Color:Byte;
+	Color : TSGLongWord;
+
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
 
 function YellowPil():TSGMandaPixel;
 begin
@@ -1600,6 +1606,11 @@ begin
 		) DIV 255) DIV 158;
 end;
 
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
+
 procedure SwapByte(var a,b:byte);inline;
 var 
 	c:byte;
@@ -1610,7 +1621,7 @@ b:=c;
 end;
 
 begin
-Color:=Round((RecNumber/20)*255);
+Color := Round((RecNumber/20)*255);
 case VColorSceme of
 1:
 	begin
@@ -1643,7 +1654,7 @@ case VColorSceme of
 
 4:
 	begin
-		Result.r := Color;
+		Result.r := Color mod 256;
 		Result.g := (SizeOf(FImage.FImage.FBitMap) * Color) div 255;
 		Result.b := 0;	// nil
 	end;

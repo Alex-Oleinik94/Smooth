@@ -35,7 +35,9 @@
 		{$ENDIF}
 	{$H+}
 	//{$INTERFACES CORBA}
-	//{$INTERFACES COM}
+	{$INTERFACES COM}
+	//{$CALLING Register}
+	{$SMARTLINK ON}
 	{$ENDIF}
 
 //{$DEFINE LAZARUS}
