@@ -1444,7 +1444,7 @@ Result:=False;
 	initGlx();
 	FContext := glXCreateContext(
 		PDisplay(Context.Device),
-		PXVisualInfo(FWindow.Get('VISUAL INFO')),nil,true);
+		PXVisualInfo(Context.GetOption('VISUAL INFO')),nil,true);
 	if FContext = nil then
 		begin
 		SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not create an OpenGL rendering context!');
@@ -1492,7 +1492,7 @@ end;
 procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
 {$IFDEF LINUX}
-	if (FWindow<>nil) and (FContext<>nil) then 
+	if (Context <> nil) and (FContext <> nil) then 
 		glXMakeCurrent(
 			PDisplay(Context.Device),
 			LongWord(Context.Window),
@@ -1556,7 +1556,7 @@ end;
 function TSGRenderOpenGL.MakeCurrent():Boolean;
 begin
 {$IFDEF LINUX}
-	if (FWindow<>nil) and (FContext<>nil) then 
+	if (Context <> nil) and (FContext <> nil) then 
 		begin
 		glXMakeCurrent(
 			PDisplay(Context.Device),

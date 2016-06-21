@@ -89,7 +89,8 @@ for i:=0 to QuantityObjects-1 do
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k > 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;
@@ -291,7 +292,10 @@ if (Context.KeysPressed(' ')) then
 	FCamera.MoveUp(Context.ElapsedTime*0.7);
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+if Context.CursorCentered then
+	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst)
+else
+	FCamera.Rotate(0, 0, RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}

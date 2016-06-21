@@ -91,7 +91,8 @@ for i:=0 to length(Objects)-1 do
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k <> 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;
@@ -176,6 +177,12 @@ var
 	Licht0Pos : TSGVertex3f;
 	dt1,dt2   : TSGDataTime;
 
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
+
 procedure DrawObjectMesh(var AObjectMesh: TPhysicsObjectMesh); register;
 var
 	I : integer;
@@ -200,6 +207,11 @@ for I:=0 to AObjectMesh.NumTriangles-1 do
 	end;
 Render.EndScene();
 end;
+
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
 
 procedure DrawObject(var AObject: TPhysicsObject); register;
 var

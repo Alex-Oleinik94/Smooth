@@ -764,7 +764,8 @@ if FShaders<>nil then
 		FShaders[i].Destroy;
 	SetLength(FShaders,0);
 	end;
-Render.DeleteShaderProgram(FProgram);
+if RenderAssigned() then
+	Render.DeleteShaderProgram(FProgram);
 inherited;
 end;
 
@@ -819,7 +820,7 @@ else
 	Result:='UNKNOWN';
 end;
 begin
-Create(VContext);
+inherited Create(VContext);
 if Render.SupporedShaders() then
 	begin
 	FShader:=Render.CreateShader(ShaderType);
@@ -834,7 +835,8 @@ end;
 
 destructor TSGShader.Destroy;
 begin
-Render.DeleteShader(FShader);
+if RenderAssigned() then
+	Render.DeleteShader(FShader);
 FType:=0;
 inherited;
 end;

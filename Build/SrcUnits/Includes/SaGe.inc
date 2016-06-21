@@ -38,6 +38,7 @@
 	{$INTERFACES COM}
 	//{$CALLING Register}
 	{$SMARTLINK ON}
+	{$R-}
 	{$ENDIF}
 
 //{$DEFINE LAZARUS}

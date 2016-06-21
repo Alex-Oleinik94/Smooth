@@ -314,6 +314,12 @@ if AObjectMesh.NumMeshs<>0 then
 ii+=AObjectMesh.NumTriangles;
 end;
 
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
+
 procedure AddingTriangles(var AObjectMesh: TPhysicsObjectMesh);
 var
 	i:LongWord;
@@ -339,6 +345,11 @@ if AObjectMesh.NumTriangles<>0 then
 		ii+=1;
 		end;
 end;
+
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
 
 begin
 if FDynamic then

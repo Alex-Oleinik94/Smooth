@@ -2517,7 +2517,8 @@ end;
 
 function SGStringAsPChar(var Str:String):PChar;
 begin
-Str[Length(Str)+1]:=#0;
+if (Length(Str) = 0) or ((Length(Str) > 0) and (Str[Length(Str)] <> #0)) then
+	Str += #0;
 Result:=@Str[1];
 end;
 

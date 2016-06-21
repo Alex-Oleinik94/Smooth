@@ -13,6 +13,7 @@ uses
 	,xlib
 	,xutil
 	,glx
+	,SaGeContextInterface
 	;
 type
 	TSGContextLinux = class(TSGContext)
@@ -25,15 +26,14 @@ type
 		procedure Messages();override;
 		procedure SwapBuffers();override;
 		function  GetCursorPosition():TSGPoint2f;override;
-		function  GetWindowRect():TSGPoint2f;override;
-		function  GetScreenResolution():TSGPoint2f;override;
-		class function RectInCoords:Boolean;override;
+		//function  GetWindowRect():TSGPoint2f;override;
+		function  GetScreenArea():TSGPoint2f;override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
 		procedure ShowCursor(const b:Boolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
-		procedure SetTittle(const NewTittle:TSGString);override;
+		procedure SetTitle(const NewTitle:TSGString);override;
 			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
 			public
@@ -45,7 +45,11 @@ type
 		FCursorX,FCursorY:LongWord;
 		function  CreateWindow():Boolean;
 			public
-		function Get(const What:string):Pointer;override;
+		function GetOption(const What:string):Pointer;override;
+		function  GetWindow() : TSGPointer; override;
+		function  GetDevice() : TSGPointer; override;
+		function  GetClientWidth() : TSGLongWord;override;
+		function  GetClientHeight() : TSGLongWord;override;
 		end;
 
 implementation
@@ -53,16 +57,20 @@ implementation
 uses
 	SaGeScreen;
 
-class function TSGContextLinux.RectInCoords:Boolean;
+
+function  TSGContextLinux.GetClientWidth() : TSGLongWord;
 begin
-Result:=False;
+Result := Width;
 end;
 
-procedure TSGContextLinux.SetTittle(const NewTittle:TSGString);
+function  TSGContextLinux.GetClientHeight() : TSGLongWord;
 begin
-{FTitle:=NewTittle;
-Windows1251ToOEM866(FTitle);}
-FTitle:=SGConvertAnsiToASCII(NewTittle);
+Result := Height;
+end;
+
+procedure TSGContextLinux.SetTitle(const NewTitle:TSGString);
+begin
+FTitle := SGConvertAnsiToASCII(NewTitle);
 end;
 
 procedure TSGContextLinux.SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
@@ -232,7 +240,17 @@ if NormalKey<>0 then
 	SetKey(VKeyType,NormalKey);
 end;
 
-function TSGContextLinux.Get(const What:string):Pointer;
+function  TSGContextLinux.GetWindow() : TSGPointer;
+begin
+Result := TSGPointer(win);
+end;
+
+function  TSGContextLinux.GetDevice() : TSGPointer;
+begin
+Result := TSGPointer(dpy);
+end;
+
+function TSGContextLinux.GetOption(const What:string):Pointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=Pointer(win)
@@ -240,8 +258,8 @@ else if What='DESKTOP WINDOW HANDLE' then
 	Result:=Pointer(dpy)
 else if What = 'VISUAL INFO' then
 	Result:=visinfo
-else
-	Result:=Inherited Get(What);
+else if @(inherited GetOption) <> nil then
+	;//Result := inherited GetOption(What);
 end;
 
 procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
@@ -288,7 +306,7 @@ else
 	// XUndefineCursor(dpy, win); Это что то интересное из этой темы
 end;
 
-function TSGContextLinux.GetScreenResolution():TSGPoint2f;
+function TSGContextLinux.GetScreenArea():TSGPoint2f;
 begin
 if dpy = nil then
 	dpy:=XOpenDisplay(nil);
@@ -305,11 +323,6 @@ end;
 function TSGContextLinux.GetCursorPosition():TSGPoint2f;
 begin
 Result.Import(FCursorX,FCursorY)
-end;
-
-function TSGContextLinux.GetWindowRect():TSGPoint2f;
-begin
-Result.Import();
 end;
 
 constructor TSGContextLinux.Create();
@@ -344,15 +357,16 @@ Active:=CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
-	if FCallInitialize<>nil then
-		FCallInitialize(Self);
+	if FPaintable <> nil then
+		FPaintable.LoadDeviceResourses();
+	inherited;
 	end;
 end;
 
 procedure TSGContextLinux.Run();
 begin
 Messages();
-FElapsedDateTime.Get();
+StartComputeTimer();
 while FActive and (FNewContextType = nil) do
 	Paint();
 end;
@@ -462,13 +476,13 @@ if win = 0 then
 	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
 	Exit;
 	end;
-Name:=SGStringAsPChar(FTitle);
+Name := SGStringAsPChar(FTitle);
 XStringListToTextProperty(@Name,1,@window_title_property);
 XSetWMName(dpy,win,@window_title_property);
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
-	FRender.Window:=Self;
+	FRender.Context := Self as ISGContext;
 	Result:=FRender.CreateContext();
 	if Result then 
 		FRender.Init();
@@ -477,8 +491,8 @@ if FRender=nil then
 	end
 else
 	begin
-	FRender.Window:=Self;
-	Result:=FRender.SetPixelFormat();
+	FRender.Context := Self as ISGContext;
+	Result := FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
 	end;

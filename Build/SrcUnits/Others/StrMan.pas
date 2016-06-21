@@ -33,6 +33,7 @@
 		{$ENDIF}
 	{$H+}
 	{$PACKRECORDS C}
+	{$R-}
 	{$ENDIF}
 
 UNIT StrMan;

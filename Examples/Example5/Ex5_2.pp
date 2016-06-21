@@ -84,7 +84,8 @@ for i:=0 to QuantityObjects-1 do
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k > 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;

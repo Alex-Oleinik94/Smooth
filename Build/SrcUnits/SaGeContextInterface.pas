@@ -239,6 +239,7 @@ end;
 
 function TSGContextabled.RenderAssigned() : TSGBoolean;
 begin
+Result := False;
 if (FContext <> nil) then
 	if (FContext^ <> nil) then
 		if FContext^.Render <> nil then
