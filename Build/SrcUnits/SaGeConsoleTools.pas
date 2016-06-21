@@ -123,32 +123,6 @@ procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
-procedure InitAllApplications(const Context:TSGContext);
-begin
-with TSGDrawClasses.Create(Context) do
-	begin
-	//Add(TSGExample15);
-	Add(TSGGasDiffusion);
-	Add(TSGAllFractals,False);
-	Add(TSGAllExamples,False);
-	Add(TSGLoading);
-	Add(TSGGraphViewer);
-	Add(TSGKillKostia);
-	Add(TSGGenAlg);
-	
-	//Add(TSGUserTesting);
-	//Add(TSGGraphic);
-	//Add(TSGGraphViewer3D);
-	//Add(TSGMeshViever);
-	//Add(TSGExampleShader);
-	//Add(TSGModelRedactor);
-	//Add(TSGGameTron);
-	//Add(TSGClientWeb);
-	
-	Initialize();
-	end;
-end;
-
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
@@ -620,16 +594,59 @@ end;
 var
 	InitBe : TSGByte = 0;
 
-procedure DrawAllApplications(const Context:TSGContext);
+type
+	TSGAllApplicationsDrawable = class(TSGDrawable)
+			public
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
+		procedure Paint();override;
+		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResourses();override;
+		end;
+
+constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
 begin
-case InitBe of
-0 : InitBe +=1;
-1 :
+inherited Create(VContext);
+
+with TSGDrawClasses.Create(Context) do
 	begin
-	InitAllApplications(Context);
-	InitBe += 1;
+	//Add(TSGExample15);
+	Add(TSGGasDiffusion);
+	Add(TSGAllFractals,False);
+	Add(TSGAllExamples,False);
+	Add(TSGLoading);
+	Add(TSGGraphViewer);
+	Add(TSGKillKostia);
+	Add(TSGGenAlg);
+	
+	//Add(TSGUserTesting);
+	//Add(TSGGraphic);
+	//Add(TSGGraphViewer3D);
+	//Add(TSGMeshViever);
+	//Add(TSGExampleShader);
+	//Add(TSGModelRedactor);
+	//Add(TSGGameTron);
+	//Add(TSGClientWeb);
+	
+	Initialize();
 	end;
 end;
+
+procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
+begin
+end;
+
+procedure TSGAllApplicationsDrawable.DeleteDeviceResourses();
+begin
+end;
+
+destructor TSGAllApplicationsDrawable.Destroy();
+begin
+inherited;
+end;
+
+procedure TSGAllApplicationsDrawable.Paint();
+begin
 end;
 
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
@@ -644,13 +661,13 @@ procedure ContextTypeWatcherCallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	NewContext:TSGContext = nil;
 begin
-if Context.Active and (Context.FNewContextType<>nil) then
+if Context.Active then//and (Context.FNewContextType<>nil) then
 	begin
-	NewContext:=Context.FNewContextType.Create();
+	//NewContext:=Context.FNewContextType.Create();
 	//NewContext.CopyInfo(Context);
 	//NewContext.FCallInitialize:=nil;
 	//Pointer(Context.FRender):=nil;
-	Context.Destroy();
+	//Context.Destroy();
 	//Context:=NewContext;
 	//NewContext:=nil;
 	//Context.Initialize();
@@ -768,11 +785,6 @@ with Context do
 		{$ENDIF}
 			Title := 'SaGe OpenGL Window';
 		
-	//DrawProcedure:=TSGContextProcedure(@DrawAllApplications);
-	//InitializeProcedure:=TSGContextProcedure(@InitAllApplications);
-	
-	Icon       := TSGPointer(5);
-	CursorIcon := TSGPointer(5);
 	
 	SelfLink := @IContext;
 	{$IFDEF MSWINDOWS}
@@ -784,6 +796,9 @@ with Context do
 	end;
 
 Context.Initialize();
+
+Context.Paintable := TSGAllApplicationsDrawable.Create(Context);
+
 repeat
 Context.Run();
 ContextTypeWatcherCallAction();

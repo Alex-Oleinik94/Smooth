@@ -93,9 +93,6 @@ type
 		FWidth, FHeight  : TSGLongWord;
 		FFullscreen      : TSGBoolean;
 		FTitle           : TSGString;
-		FCursorIdenifier : TSGLongWord;
-		FIconIdentifier  : TSGLongWord;
-		FPaintable       : ISGDeviceDependent;
 		FElapsedTime     : TSGLongWord;
 		FElapsedDateTime : TSGDateTime;
 		FShowCursor      : TSGBoolean;
@@ -187,12 +184,14 @@ type
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
 		procedure CopyInfo(const C : ISGContext);virtual;
-			public
+			protected
 		FNewContextType : TSGContextClass;
 		FRenderClass    : TSGRenderClass;
 		FRender         : TSGRender;
 		FSelfLink       : PISGContext;
+		FPaintable       : ISGDeviceDependent;
 			public
+		property Paintable : ISGDeviceDependent write FPaintable;
 		property RenderClass : TSGRenderClass read FRenderClass write SetRenderClass;
 		end;
 
@@ -228,6 +227,7 @@ procedure TSGContext.ReinitializeRender();
 begin
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
+//SGScreen.DeleteDeviceResourses();
 if FRender <> nil then
 	FRender.Destroy();
 FRender := FRenderClass.Create();
@@ -236,6 +236,7 @@ if FRender.CreateContext() then
 	FRender.Init();
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
+//SGScreen.LoadDeviceResourses();
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -258,17 +259,17 @@ end;
 
 procedure TSGContext.StartComputeTimer();
 begin
-
+FElapsedDateTime.Get();
 end;
 
 function TSGContext.GetElapsedTime() : TSGLongWord;
 begin
-
+Result := FElapsedTime;
 end;
 
 function TSGContext.GetTitle() : TSGString;
 begin
-
+Result := FTitle;
 end;
 
 function TSGContext.GetWidth() : TSGLongWord;
@@ -278,7 +279,7 @@ end;
 
 function TSGContext.GetHeight() : TSGLongWord;
 begin
-
+Result := FHeight;
 end;
 
 procedure TSGContext.SetWidth(const VWidth : TSGLongWord);
@@ -313,17 +314,17 @@ end;
 
 function  TSGContext.GetFullscreen() : TSGBoolean;
 begin
-
+Result := FFullscreen;
 end;
 
 procedure TSGContext.SetActive(const VActive : TSGBoolean);
 begin
-
+FActive := VActive;
 end;
 
 function  TSGContext.GetActive():TSGBoolean;
 begin
-
+Result := FActive;
 end;
 
 procedure TSGContext.SetCursorCentered(const VCentered : TSGBoolean);
@@ -343,7 +344,7 @@ end;
 
 function TSGContext.GetCursorCentered() : TSGBoolean;
 begin
-
+Result := FCursorInCenter;
 end;
 
 procedure TSGContext.SetSelfLink(const VLink : PISGContext);
@@ -358,22 +359,18 @@ end;
 
 function TSGContext.GetCursorIcon():TSGPointer;
 begin
-
 end;
 
 procedure TSGContext.SetCursorIcon(const VIcon : TSGPointer);
 begin
-
 end;
 
 function TSGContext.GetIcon():TSGPointer;
 begin
-
 end;
 
 procedure TSGContext.SetIcon(const VIcon : TSGPointer);
 begin
-
 end;
 
 procedure TSGContext.Initialize();
@@ -394,14 +391,14 @@ end;
 procedure TSGContext.Run();
 begin
 Messages();
-FElapsedDateTime.Get();
+StartComputeTimer();
 while FActive and (FNewContextType = nil) do
 	Paint();
 end;
 
 procedure TSGContext.Paint();
 begin
-UpdateTimer();
+UpdateTimer(); 
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
@@ -488,7 +485,7 @@ procedure TSGContext.Messages();
 var
 	Point:TSGPoint2f;
 begin
-Point:=GetCursorPosition();
+Point := GetCursorPosition();
 Point -= GetWindowArea();
 Point -= ShiftClientArea();
 FCursorPosition[SGLastCursorPosition]:=FCursorPosition[SGNowCursorPosition];
@@ -545,8 +542,6 @@ FWidth:=0;
 FHeight:=0;
 FTitle:='SaGe Window';
 FFullscreen:=False;
-FCursorIdenifier:=0;
-FIconIdentifier:=0;
 FActive:=False;
 FNewContextType:=nil;
 for i:=0 to 255 do

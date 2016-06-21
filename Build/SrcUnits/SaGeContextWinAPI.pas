@@ -1,5 +1,7 @@
 {$include Includes\SaGe.inc}
 
+//{$DEFINE SGWinAPIDebug}
+
 unit SaGeContextWinAPI;
 
 interface
@@ -294,7 +296,9 @@ begin
 Messages();
 FElapsedDateTime.Get();
 while FActive and (FNewContextType=nil) do
+	begin
 	Paint();
+	end;
 end;
 
 function SGFullscreenQueschionWinAPIMethod:boolean;
@@ -303,14 +307,14 @@ Result:=MessageBox(0,'Fullscreen Mode?', 'Question!',MB_YESNO OR MB_ICONQUESTION
 end;
 
 procedure TSGContextWinAPI.SwapBuffers();
-begin
-Render.SwapBuffers();
+begin 
+Render.SwapBuffers(); 
 end;
 
 procedure TSGContextWinAPI.Messages;
 var
 	msg:Windows.TMSG;
-begin WriteLn(11231);
+begin 
 Fillchar(msg,sizeof(msg),0);
 if Windows.PeekMessage(@msg,0,0,0,0) = true then
 	begin
@@ -532,19 +536,21 @@ for i:=0 to SizeOf(Si)-1 do
 end;}
 
 begin
-WindowClass.cbSize := sizeof(WNDCLASSEX);
-WindowClass.Style := cs_hRedraw or cs_vRedraw or CS_OWNDC;
-WindowClass.lpfnWndProc := WndProc(@MyGLWndProc);
-WindowClass.cbClsExtra := 0;
-WindowClass.cbWndExtra := 0;
-WindowClass.hInstance :=system.MainInstance;
-WindowClass.hIcon := LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
-WindowClass.hCursor := LoadCursor(GetModuleHandle(nil),PCHAR(FCursorIdenifier));
+WindowClass.cbSize        := sizeof(WNDCLASSEX);
+WindowClass.Style         := cs_hRedraw or cs_vRedraw or CS_OWNDC;
+WindowClass.lpfnWndProc   := WndProc(@MyGLWndProc);
+WindowClass.cbClsExtra    := 0;
+WindowClass.cbWndExtra    := 0;
+WindowClass.hInstance     := System.MainInstance;
+WindowClass.hIcon         := LoadIcon(GetModuleHandle(nil),PCHAR(5));
+WindowClass.hCursor       := LoadCursor(GetModuleHandle(nil),PCHAR(5));
 WindowClass.hbrBackground := 0;
-WindowClass.lpszMenuName := nil;
+WindowClass.lpszMenuName  := nil;
 WindowClass.lpszClassName := 'SaGe Window Class';
-WindowClass.hIconSm:=LoadIcon(GetModuleHandle(nil),PCHAR(FIconIdentifier));
+WindowClass.hIconSm       := LoadIcon(GetModuleHandle(nil),PCHAR(5));
+
 clWindow:=Windows.RegisterClassEx(WindowClass);
+
 Result := clWindow <> 0;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse(['TSGContextWinAPI__WindowRegister : Exit (Result=',Result,')']);
@@ -624,7 +630,7 @@ begin
 	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent=',hParent,') : Enter']);
 	{$ENDIF}
 dcWindow := GetDC( hParent );
-if FRender=nil then
+if FRender = nil then
 	begin
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
@@ -643,7 +649,7 @@ else
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
 		{$ENDIF}
-	FRender.Context := Self as ISGNearlyContext;
+	FRender.Context := Self as ISGContext;
 	Result := FRender.SetPixelFormat();
 	if Result then
 		Render.MakeCurrent();
