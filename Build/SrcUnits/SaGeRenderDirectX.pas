@@ -39,6 +39,7 @@ type
 		function MakeCurrent():Boolean;override;
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
+		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
@@ -1345,7 +1346,7 @@ if FArTextures <> nil then if Length(FArTextures) > 0 then
 	end;
 end;
 
-destructor TSGRenderDirectX.Destroy();
+procedure TSGRenderDirectX.Kill();
 begin
 DropDeviceResourses();
 if (pDevice<>nil)  then
@@ -1356,6 +1357,11 @@ if(pD3d<>nil) then
 	begin
 	pD3d._Release();
 	end;
+end;
+
+destructor TSGRenderDirectX.Destroy();
+begin
+Kill();
 inherited Destroy();
 {$IFDEF RENDER_DX9_DEBUG}
 	WriteLn('TSGRenderDirectX.Destroy(): End');

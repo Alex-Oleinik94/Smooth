@@ -46,6 +46,7 @@ type
 		function CreateContext():TSGBoolean;virtual;abstract;
 		procedure Viewport(const a,b,c,d:TSGLongWord);virtual;abstract;
 		procedure Init();virtual;abstract;
+		procedure Kill();virtual;abstract;
 		function SupporedVBOBuffers():TSGBoolean;virtual;
 		procedure SwapBuffers();virtual;abstract;
 		procedure LockResourses();virtual;

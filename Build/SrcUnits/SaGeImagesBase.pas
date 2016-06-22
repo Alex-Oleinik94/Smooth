@@ -61,7 +61,7 @@ type
 		procedure Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
-	TSGBitMap=class(TSGResourse)
+	TSGBitMap = class(TSGResourse)
 			public
 		FBitMap:PByte;
 		
@@ -86,13 +86,13 @@ type
 		procedure SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property Width : Cardinal read FWidth write FWidth;
-		property Height : Cardinal read FHeight write FHeight;
-		property Channels : Cardinal read FChannels write FChannels;
-		property BitDepth : Cardinal read FSizeChannel write FSizeChannel;
-		property PixelFormat : Cardinal read FFormatType write FFormatType;
-		property PixelType : Cardinal read FDataType write FDataType;
-		property BitMap : PByte read FBitMap write FBitMap;
+		property Width       : Cardinal read FWidth       write FWidth;
+		property Height      : Cardinal read FHeight      write FHeight;
+		property Channels    : Cardinal read FChannels    write FChannels;
+		property BitDepth    : Cardinal read FSizeChannel write FSizeChannel;
+		property PixelFormat : Cardinal read FFormatType  write FFormatType;
+		property PixelType   : Cardinal read FDataType    write FDataType;
+		property BitMap      : PByte    read FBitMap      write FBitMap;
 		end;
 
 operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

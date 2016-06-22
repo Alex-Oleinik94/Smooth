@@ -8,6 +8,7 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeRender
+	,SaGeImagesBase
 	;
 
 type
@@ -15,6 +16,16 @@ type
 	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey);
 	TSGCursorWheel = (SGNullCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
+	
+	TSGCursor = class(TSGBitMap)
+			public
+		constructor Create();override;
+			private
+		FHotPixel : TSGPoint2f;
+			public
+		property HotPixelX : TSGLongInt read FHotPixel.x write FHotPixel.x;
+		property HotPixelY : TSGLongInt read FHotPixel.y write FHotPixel.y;
+		end;
 	
 	ISGRenderedTimerArea = interface(ISGNearlyContext)
 		['{ed55d22e-7069-46b1-ad39-fb9fcbe63bcb}']
@@ -94,15 +105,15 @@ type
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString;
 		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString;
 		
-		function GetCursorIcon():TSGPointer;
-		procedure SetCursorIcon(const VIcon : TSGPointer);
-		function GetIcon():TSGPointer;
-		procedure SetIcon(const VIcon : TSGPointer);
+		function GetCursor():TSGCursor;
+		procedure SetCursor(const VCursor : TSGCursor);
+		function GetIcon():TSGBitMap;
+		procedure SetIcon(const VIcon : TSGBitMap);
 		
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
-		property CursorIcon : TSGPointer read GetCursorIcon write SetCursorIcon;
-		property Icon : TSGPointer read GetIcon write SetIcon;
+		property Cursor : TSGCursor read GetCursor write SetCursor;
+		property Icon : TSGBitMap read GetIcon write SetIcon;
 		property Left : TSGLongWord read GetLeft write SetLeft;
 		property Top : TSGLongWord read GetTop write SetTop;
 		property Width : TSGLongWord read GetWidth write SetWidth;
@@ -128,8 +139,8 @@ type
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
-		property CursorIcon : TSGPointer read GetCursorIcon write SetCursorIcon;
-		property Icon : TSGPointer read GetIcon write SetIcon;
+		property Cursor : TSGCursor read GetCursor write SetCursor;
+		property Icon : TSGBitMap read GetIcon write SetIcon;
 		property Left : TSGLongWord read GetLeft write SetLeft;
 		property Top : TSGLongWord read GetTop write SetTop;
 		property Width : TSGLongWord read GetWidth write SetWidth;
@@ -193,6 +204,12 @@ type
 		end;
 
 implementation
+
+constructor TSGCursor.Create();
+begin
+inherited;
+FHotPixel.Import(0, 0);
+end;
 
 constructor TSGContextabled.Create();
 begin

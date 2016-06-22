@@ -102,6 +102,7 @@ type
 		function MakeCurrent():Boolean;override;
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
+		procedure Kill();override;
 		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
@@ -1328,7 +1329,7 @@ SetRenderType({$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF});
 FNowInBumpMapping:=False;
 end;
 
-destructor TSGRenderOpenGL.Destroy();
+procedure TSGRenderOpenGL.Kill();
 {$IFDEF NEEDRESOURSES}
 procedure FreeMemTemp();
 var
@@ -1353,12 +1354,13 @@ begin
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		wglMakeCurrent( LongWord(Context.Device), 0 );
-		if FContext<>0 then
+		if Context <> nil then
+			wglMakeCurrent( TSGLongWord(Context.Device), 0 );
+		if FContext <> 0 then
 			begin
 			wglDeleteContext( FContext );
 			CloseHandle(FContext);
-			FContext:=0;
+			FContext := 0;
 			end;
 	{$ELSE}
 		{$IFDEF ANDROID}
@@ -1376,6 +1378,11 @@ begin
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
+end;
+
+destructor TSGRenderOpenGL.Destroy();
+begin
+Kill();
 inherited;
 {$IFDEF RENDER_OGL_DEBUG}
 	WriteLn('TSGRenderOpenGL.Destroy(): End');

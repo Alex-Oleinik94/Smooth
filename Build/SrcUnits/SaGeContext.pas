@@ -16,6 +16,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeClasses
+	,SaGeImagesBase
 	{$IFDEF LAZARUS}
 		,Interfaces,
 		LMessages,
@@ -82,7 +83,7 @@ type
 		procedure SwapBuffers();virtual;
 		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
 			public
-		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;abstract;
+		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2f;virtual;abstract;
 		procedure SetCursorPosition(const VPosition : TSGPoint2f);virtual;abstract;
 		function GetWindowArea():TSGPoint2f;virtual;abstract;
@@ -98,6 +99,8 @@ type
 		FElapsedTime     : TSGLongWord;
 		FElapsedDateTime : TSGDateTime;
 		FShowCursor      : TSGBoolean;
+		FIcon            : TSGBitMap;
+		FCursor          : TSGCursor;
 			protected
 		FPaintWithHandlingMessages : TSGBoolean;
 			protected
@@ -123,10 +126,10 @@ type
 		function  GetCursorCentered() : TSGBoolean;virtual;
 		procedure SetSelfLink(const VLink : PISGContext);virtual;
 		function  GetSelfLink() : PISGContext;virtual;
-		function  GetCursorIcon():TSGPointer;virtual;
-		procedure SetCursorIcon(const VIcon : TSGPointer);virtual;
-		function  GetIcon():TSGPointer;virtual;
-		procedure SetIcon(const VIcon : TSGPointer);virtual;
+		function  GetCursor():TSGCursor;virtual;
+		procedure SetCursor(const VCursor : TSGCursor);virtual;
+		function  GetIcon():TSGBitMap;virtual;
+		procedure SetIcon(const VIcon : TSGBitMap);virtual;
 		
 		function  GetClientWidth() : TSGLongWord;virtual;abstract;
 		function  GetClientHeight() : TSGLongWord;virtual;abstract;
@@ -142,8 +145,8 @@ type
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
-		property CursorIcon : TSGPointer read GetCursorIcon write SetCursorIcon;
-		property Icon : TSGPointer read GetIcon write SetIcon;
+		property Cursor : TSGCursor read GetCursor write SetCursor;
+		property Icon : TSGBitMap read GetIcon write SetIcon;
 		property Left : TSGLongWord read GetLeft write SetLeft;
 		property Top : TSGLongWord read GetTop write SetTop;
 		property Width : TSGLongWord read GetWidth write SetWidth;
@@ -221,6 +224,11 @@ uses
 	{$ENDIF}
 {$UNDEF SGREADIMPLEMENTATION}
 
+procedure TSGContext.ShowCursor(const VVisibility : TSGBoolean);
+begin
+FShowCursor := VVisibility;
+end;
+
 procedure TSGContext.SetCursorWheel(const VCursorWheel : TSGCursorWheel);
 begin
 FCursorWheel := VCursorWheel;
@@ -235,8 +243,13 @@ if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
 SGScreen.DeleteDeviceResourses();
 // After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
-//if FRender <> nil then
+if FRender <> nil then
+	begin
+	FRender.ReleaseCurrent();
+	FRender.Context := nil;
+	FRender.Kill();
 	//FRender.Destroy();
+	end;
 {$IFDEF CONTEXT_BEGUNING}
 WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
 	{$ENDIF}
@@ -379,20 +392,24 @@ begin
 Result := FSelfLink;
 end;
 
-function TSGContext.GetCursorIcon():TSGPointer;
+function TSGContext.GetCursor():TSGCursor;
 begin
+Result := FCursor;
 end;
 
-procedure TSGContext.SetCursorIcon(const VIcon : TSGPointer);
+procedure TSGContext.SetCursor(const VCursor : TSGCursor);
 begin
+FCursor := VCursor;
 end;
 
-function TSGContext.GetIcon():TSGPointer;
+function TSGContext.GetIcon():TSGBitMap;
 begin
+Result := FIcon;
 end;
 
-procedure TSGContext.SetIcon(const VIcon : TSGPointer);
+procedure TSGContext.SetIcon(const VIcon : TSGBitMap);
 begin
+FIcon := VIcon;
 end;
 
 procedure TSGContext.Initialize();
@@ -587,6 +604,8 @@ var
 	i:LongWord;
 begin
 inherited;
+FIcon := nil;
+FCursor := nil;
 FInitialized := False;
 FShowCursor:=True;
 FCursorInCenter:=False;

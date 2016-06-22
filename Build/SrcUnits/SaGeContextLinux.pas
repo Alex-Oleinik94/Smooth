@@ -31,7 +31,7 @@ type
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
-		procedure ShowCursor(const b:Boolean);override;
+		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const a:TSGPoint2f);override;
 		procedure SetTitle(const NewTitle:TSGString);override;
 			private
@@ -273,7 +273,7 @@ XWarpPointer(dpy, win, win, 0, 0, 0, 0, a.x, a.y);
 XFlush(dpy);
 end;
 
-procedure TSGContextLinux.ShowCursor(const b:Boolean);
+procedure TSGContextLinux.ShowCursor(const VVisibility : TSGBoolean);
 const
 	XC_left_ptr = 68;
 var
@@ -286,7 +286,8 @@ if dpy = nil then
 	dpy := XOpenDisplay(nil);
 if (dpy = nil) or (win=0) then
 	Exit;
-if not b then
+inherited;
+if not FShowCursor then
 	begin
 	black.red := 0;
 	black.green := 0;

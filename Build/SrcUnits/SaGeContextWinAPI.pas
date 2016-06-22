@@ -44,13 +44,13 @@ type
 		function  GetScreenArea():TSGPoint2f;override;
 		function  ShiftClientArea() : TSGPoint2f; override;
 			public
-		procedure ShowCursor(const b:Boolean);override;
+		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2f);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
 		function WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 			protected
-		procedure InitFullscreen(const b : TSGBoolean); override;
+		procedure InitFullscreen(const VFullscreen : TSGBoolean); override;
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
 			protected
@@ -249,10 +249,10 @@ else
 	end;
 end;
 
-procedure TSGContextWinAPI.ShowCursor(const b:Boolean);
+procedure TSGContextWinAPI.ShowCursor(const VVisibility : TSGBoolean);
 begin
-FShowCursor:=B;
-Windows.ShowCursor(B);
+inherited;
+Windows.ShowCursor(FShowCursor);
 end;
 
 function TSGContextWinAPI.GetScreenArea():TSGPoint2f;
@@ -293,6 +293,7 @@ hWindow  := 0;
 dcWindow := 0;
 clWindow := 0;
 FNormalCursor := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
+FNullCursor := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -751,24 +752,25 @@ if hWindow<>0 then
 UnregisterClass('SaGe Window Class', System.MainInstance);
 end;
 
-procedure TSGContextWinAPI.InitFullscreen(const b:boolean); 
+procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean); 
 begin
 if hWindow = 0 then
-	inherited InitFullscreen(b)
-else if Fullscreen<>b then
-	begin
-	if (FRender<>nil) then
+	inherited InitFullscreen(VFullscreen)
+else 
+	if Fullscreen <> VFullscreen then
 		begin
-		FRender.LockResourses();
-		FRender.ReleaseCurrent();
+		if (FRender<>nil) then
+			begin
+			FRender.LockResourses();
+			FRender.ReleaseCurrent();
+			end;
+		KillWindow(False);
+		inherited InitFullscreen(VFullscreen);
+		Active := CreateWindow();
+		if (FRender<>nil) and Active then
+			FRender.UnLockResourses();
+		Resize();
 		end;
-	KillWindow(False);
-	inherited InitFullscreen(b);
-	Active := CreateWindow();
-	if (FRender<>nil) and Active then
-		FRender.UnLockResourses();
-	Resize();
-	end;
 end;
 
 end.
