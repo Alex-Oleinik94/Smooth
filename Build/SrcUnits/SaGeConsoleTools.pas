@@ -608,7 +608,7 @@ type
 constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-{
+
 with TSGDrawClasses.Create(Context) do
 	begin
 	//Add(TSGExample15);
@@ -631,8 +631,8 @@ with TSGDrawClasses.Create(Context) do
 	
 	Initialize();
 	end;
-}
-SGRunNotepad('.\..\Build\SrcUnits\SaGeBased.pas');
+
+//SGRunNotepad('.\..\Build\SrcUnits\SaGeBased.pas');
 end;
 
 procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
@@ -777,7 +777,8 @@ with Context do
 	Width  := GetScreenArea().x;
 	Height := GetScreenArea().y;
 	Fullscreen := VFullscreen;
-	//Cursor := SGLoadCursor('ts.sgia',0.5,0.5);
+	Cursor := TSGCursor.Create(SGC_NORMAL);
+	
 	{$IFDEF ANDROID}
 		(Context as TSGContextAndroid).AndroidApp := State;
 		{$ENDIF}
@@ -792,7 +793,7 @@ with Context do
 	
 	SelfLink := @IContext;
 	{$IFDEF MSWINDOWS}
-		if FRenderState=SGBR_DIRECTX then
+		if FRenderState = SGBR_DIRECTX then
 			RenderClass := TSGRenderDirectX
 		else
 		{$ENDIF}
@@ -805,9 +806,11 @@ Context.Initialize();
 
 repeat
 Context.Run();
-SGLog.Sourse('SGConsoleShowAllApplications(...): Out of loop!');
+
 ContextTypeWatcherCallAction();
+
 until (IContext <> nil) and (Context.Active = False);
+
 Context.Destroy();
 end;
 

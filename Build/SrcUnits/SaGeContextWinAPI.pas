@@ -1,5 +1,7 @@
 {$include Includes\SaGe.inc}
 
+{$R .\..\SaGe.res}
+
 //{$DEFINE SGWinAPIDebug}
 
 unit SaGeContextWinAPI;
@@ -19,6 +21,8 @@ uses
 	,SaGeImagesBase
 	;
 
+const
+	SGCWAPI_ICON = 5;
 type
 	WinAPIParam = 
 		{$IFDEF CPU32}
@@ -69,13 +73,18 @@ type
 		function  CreateWindow():Boolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class procedure GetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const  clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
+		class function CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
+		class function CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
+		class function CreateGlassyCursor() : HCURSOR;
 		function  GetClientWidth() : TSGLongWord;override;
 		function  GetClientHeight() : TSGLongWord;override;
 			protected
 		FCursorHandle : Windows.HCURSOR;
 		FIconHandle   : Windows.HICON;
+		FGlassyCursorHandle : Windows.HCURSOR;
 			public
-		function  GetCursorPosition():TSGPoint2f;override;
+		function  GetCursorPosition():TSGPoint2f; override;
 		function  FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
 		function  FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
@@ -97,9 +106,28 @@ uses
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
 
-procedure TSGContextWinAPI.SetCursor(const VCursor : TSGCursor);
+class function TSGContextWinAPI.CreateGlassyCursor() : HCURSOR;
+const
+	SGCWAPI_Glassy_Cursor_Width = 32;
+	SGCWAPI_Glassy_Cursor_Height = 32;
+var
+	hBM : HBITMAP;
+	bm : PByte = nil;
+	i : TSGLongWord;
+begin
+Result := 0;
+hBM := CreateCompatibleBitmap(GetDC(0), SGCWAPI_Glassy_Cursor_Width, SGCWAPI_Glassy_Cursor_Height);
 
-procedure GetMaskBitmaps(hSourceBitmap : HBITMAP; clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
+bm := GetMem(SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3);
+fillchar(bm^, SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3, 0);
+SetBitmapBits(hBM, SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3, bm);
+FreeMem(bm);
+
+Result := CreateCursorFromBitmap(nil, hBM, RGB(0,0,0), 0, 0);
+DeleteObject(hBM);
+end;
+
+class procedure TSGContextWinAPI.GetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
 var
 	hXorMaskDC, hAndMaskDC, hMainDC, hNullDC : HDC;
 	bm : BITMAP;
@@ -127,7 +155,7 @@ for x := 0 to bm.bmWidth - 1 do
 	for y := 0 to bm.bmHeight - 1 do
 		begin
 		MainBitPixel := GetPixel(hMainDC, x, y);
-		if VCursor.Channels = 3 then
+		if (VCursor = nil) or (VCursor.Channels = 3) then
 			if(MainBitPixel = clrTransparent) then
 				begin
 				SetPixel(hAndMaskDC,x,y,RGB(255,255,255));
@@ -166,7 +194,7 @@ DeleteDC(hMainDC);
 ReleaseDC(0, hNullDC);
 end;
 
-function CreateCursorFromBitmap(hSourceBitmap : HBITMAP; clrTransparent : COLORREF; xHotspot : DWORD; yHotspot : DWORD) : HCURSOR;
+class function TSGContextWinAPI.CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
 var
 	hAndMask : HBITMAP = 0;
 	hXorMask : HBITMAP = 0;
@@ -179,7 +207,7 @@ if(0 = hSourceBitmap) then
 	Exit;
 	end;
 
-GetMaskBitmaps(hSourceBitmap, clrTransparent, hAndMask, hXorMask);
+GetMaskBitmaps(VCursor, hSourceBitmap, clrTransparent, hAndMask, hXorMask);
 if((0 = hAndMask) or (0 = hXorMask)) then
 	begin
 	Exit;
@@ -195,12 +223,13 @@ iconinfo.hbmColor	:= hXorMask;
 Result := CreateIconIndirect(@iconinfo);
 end;
 
-function CreateCursor() : HCURSOR;
+class function TSGContextWinAPI.CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
 var
 	hBM : HBITMAP;
 	bm : PByte = nil;
 	i : TSGLongWord;
 begin
+Result := 0;
 hBM := CreateCompatibleBitmap(GetDC(0), VCursor.Width, VCursor.Height);
 if VCursor.Channels = 4 then
 	begin
@@ -216,20 +245,50 @@ if VCursor.Channels = 4 then
 	end
 else
 	SetBitmapBits(hBM, VCursor.Width * VCursor.Height * VCursor.Channels, VCursor.BitMap);
-Result := CreateCursorFromBitmap(hBM, RGB(255,255,255), VCursor.HotPixelX, VCursor.HotPixelY);
+Result := CreateCursorFromBitmap(VCursor,hBM, clrTransparent, VCursor.HotPixelX, VCursor.HotPixelY);
 DeleteObject(hBM);
 end;
 
+procedure TSGContextWinAPI.SetCursor(const VCursor : TSGCursor);
 var
 	NewCursor : HCURSOR;
 begin
-NewCursor := CreateCursor();
-if NewCursor <> 0 then
+if VCursor.StandartHandle <> SGC_NULL then
 	begin
-	FCursorHandle := NewCursor;
-	inherited;
-	if Active then
-		SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+	if VCursor.BitMap = nil then
+		begin
+		NewCursor := LoadCursor(0, MAKEINTRESOURCE(VCursor.StandartHandle));
+		if NewCursor <> SGC_NULL then
+			begin
+			inherited;
+			FCursorHandle := NewCursor;
+			if Active then
+				begin
+				Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+				Windows.SetCursor(FCursorHandle);
+				end;
+			end;
+		end
+	else
+		begin
+		NewCursor := CreateCursor(VCursor,RGB(0,0,0));
+		if NewCursor <> SGC_NULL then
+			Windows.SetSystemCursor(NewCursor, VCursor.StandartHandle);
+		end;
+	end
+else
+	begin
+	NewCursor := CreateCursor(VCursor,RGB(0,0,0));
+	if NewCursor <> SGC_NULL then
+		begin
+		FCursorHandle := NewCursor;
+		inherited;
+		if Active then
+			begin
+			Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+			Windows.SetCursor(FCursorHandle);
+			end;
+		end;
 	end;
 end;
 
@@ -396,6 +455,17 @@ end;
 procedure TSGContextWinAPI.ShowCursor(const VVisibility : TSGBoolean);
 begin
 inherited;
+Windows.ShowCursor(True);
+if FShowCursor then
+	begin
+	Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+	Windows.SetCursor(FCursorHandle);
+	end
+else
+	begin
+	Windows.SetClassLong(hWindow, GCL_HCURSOR, FGlassyCursorHandle);
+	Windows.SetCursor(FGlassyCursorHandle);
+	end;
 Windows.ShowCursor(FShowCursor);
 end;
 
@@ -436,8 +506,9 @@ inherited;
 hWindow  := 0;
 dcWindow := 0;
 clWindow := 0;
-FCursorHandle := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
-FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(5));
+FCursorHandle := LoadCursor(0, IDC_ARROW);
+FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(SGCWAPI_ICON));
+FGlassyCursorHandle := CreateGlassyCursor();
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -497,16 +568,6 @@ MessageBox(0, pcErrorMessage, 'Error', MB_OK);
 Halt(0);
 end;
 
-{
-	* WM_SETCURSOR = 32
-	* WM_MOVE = 3
-	* WM_MOVING = 534
-	* 
-	* 
-	* 
-	* 
-	* 
-	* }
 function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 
 procedure HandlingSizing();
@@ -542,6 +603,11 @@ end;
 
 begin
 case AMessage of
+WM_SETCURSOR:
+	begin
+	Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+	Windows.SetCursor(FCursorHandle);
+	end;
 WM_GETMINMAXINFO:
 	begin
 	HandlingMinMaxInfo();

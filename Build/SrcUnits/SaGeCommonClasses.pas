@@ -12,6 +12,27 @@ uses
 	;
 
 type
+	TSGCursorHandle = type TSGLongWord;
+
+const
+	SGC_NULL = 0;
+	SGC_APPSTARTING = 32650;
+	SGC_NORMAL = 32512;
+	SGC_CROSS = 32515;
+	SGC_HAND = 32649;
+	SGC_HELP = 32651;
+	SGC_IBEAM = 32513;
+	SGC_NO = 32648;
+	SGC_SIZEALL = 32646;
+	SGC_SIZENESW = 32643;
+	SGC_SIZENS = 32645;
+	SGC_SIZENWSE = 32642;
+	SGC_SIZEWE = 32644;
+	SGC_UP = 32516;
+	SGC_WAIT = 32514;
+	SGC_GLASSY = 20000;
+
+type
 	TSGCursorButtons = (SGNullCursorButton, SGMiddleCursorButton, SGLeftCursorButton, SGRightCursorButton);
 	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey);
 	TSGCursorWheel = (SGNullCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
@@ -19,12 +40,15 @@ type
 	
 	TSGCursor = class(TSGBitMap)
 			public
-		constructor Create();override;
+		constructor Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);virtual;
+		function LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;virtual;
 			private
 		FHotPixel : TSGPoint2f;
+		FStandartCursor : TSGCursorHandle;
 			public
 		property HotPixelX : TSGLongInt read FHotPixel.x write FHotPixel.x;
 		property HotPixelY : TSGLongInt read FHotPixel.y write FHotPixel.y;
+		property StandartHandle : TSGCursorHandle read FStandartCursor;
 		end;
 	
 	ISGRenderedTimerArea = interface(ISGNearlyContext)
@@ -203,33 +227,33 @@ type
 		property Render  : ISGRender  read GetRender;
 		end;
 
-function SGLoadCursor(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor;
-
 implementation
 
 uses
 	SaGeImages;
 
-function SGLoadCursor(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor;
+function TSGCursor.LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;
 var
 	Image : TSGImage;
 begin
 Image := TSGImage.Create(VFileName);
 Image.Loading();
 
-Result := TSGCursor.Create();
-Result.CopyFrom(Image.Image);
-Result.HotPixelX := Trunc(HotX * Result.Width );
-Result.HotPixelY := Trunc(HotY * Result.Height);
+CopyFrom(Image.Image);
+HotPixelX := Trunc(HotX * Width );
+HotPixelY := Trunc(HotY * Height);
 
 Image.Destroy();
 Image := nil;
+
+Result := Self;
 end;
 
-constructor TSGCursor.Create();
+constructor TSGCursor.Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);
 begin
-inherited;
+inherited Create();
 FHotPixel.Import(0, 0);
+FStandartCursor := VStandartCursor;
 end;
 
 constructor TSGContextabled.Create();

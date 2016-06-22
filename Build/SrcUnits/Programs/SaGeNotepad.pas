@@ -489,6 +489,7 @@ end;
 
 procedure TSGNotepad.FromUpDate(var FCanChange:Boolean);
 begin
+
 inherited;
 end;
 

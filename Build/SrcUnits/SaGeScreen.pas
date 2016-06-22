@@ -294,11 +294,12 @@ type
 		constructor Create;override;
 		destructor Destroy;override;
 			public
-		FCursorOnButtonTimer:Real;
-		FCursorOnButton:Boolean;
-		FChangingButton:Boolean;
-		FChangingButtonTimer:Real;
-		FViewImage1:TSGImage;
+		FCursorOnButtonTimer : TSGReal;
+		FCursorOnButtonPrev  : TSGBoolean;
+		FCursorOnButton      : TSGBoolean;
+		FChangingButton      : TSGBoolean;
+		FChangingButtonTimer : TSGReal;
+		FViewImage1          : TSGImage;
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -398,6 +399,7 @@ type
 		constructor Create;override;
 		destructor Destroy;override;
 			public
+		FCursorOnComponentPrev : TSGBoolean;
 		FCursorOnComponentTimer:Real;
 		FCursorPosition:LongInt;
 		FNowChanget:Boolean;
@@ -3348,6 +3350,13 @@ if CaptionCharget or CursorChanget then
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
 	end;
+if FCursorOnComponent then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
+		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
+if FCursorOnComponentPrev and (not FCursorOnComponent) then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+FCursorOnComponentPrev := FCursorOnComponent;
 UpgradeTimer(FCursorOnComponent,FCursorOnComponentTimer,3);
 UpgradeTimer(FNowChanget,FNowChangetTimer,3);
 UpgradeTimer(FTextComplite,FTextCompliteTimer,1);
@@ -3358,17 +3367,19 @@ end;
 constructor TSGEdit.Create;
 begin
 inherited;
-FCursorPosition:=0;
-FNowChanget:=False;
-FNowChangetTimer:=0;
-FTextTypeFunction:=nil;
-FTextType:=SGEditTypeText;
-FTextComplite:=True;
-FDrawCursor:=True;
-FDrawCursorTimer:=1;
-FDrawCursorElapsedTime:=0;
-FDrawCursorElapsedTimeChange:=50;
-FDrawCursorElapsedTimeDontChange:=30;
+FCursorOnComponentPrev := False;
+FCursorOnComponent     := False;
+FCursorPosition        := 0;
+FNowChanget            := False;
+FNowChangetTimer       := 0;
+FTextTypeFunction      := nil;
+FTextType              := SGEditTypeText;
+FTextComplite          := True;
+FDrawCursor            := True;
+FDrawCursorTimer       := 1;
+FDrawCursorElapsedTime := 0;
+FDrawCursorElapsedTimeChange     := 50;
+FDrawCursorElapsedTimeDontChange := 30;
 end;
 
 destructor TSGEdit.Destroy;
@@ -3421,10 +3432,17 @@ procedure TSGButton.FromUpDate(var FCanChange:Boolean);
 begin
 if not Active then
 	begin 
-	FCursorOnComponent:=False;
-	FCursorOnButton:=False;
-	FChangingButton:=False;
+	FCursorOnComponent := False;
+	FCursorOnButton    := False;
+	FChangingButton    := False;
 	end;
+if FCursorOnButton then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
+		Context.Cursor := TSGCursor.Create(SGC_HAND);
+if FCursorOnButtonPrev and (not FCursorOnButton) then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_HAND)) then
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+FCursorOnButtonPrev := FCursorOnComponent;
 UpgradeTimer(FCursorOnButton,FCursorOnButtonTimer,3,2);
 UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
 inherited FromUpDate(FCanChange);
@@ -3432,9 +3450,9 @@ end;
 
 procedure TSGButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
+FCursorOnButton     := CursorInComponentNow;
 if CursorInComponentNow then
 	begin
-	FCursorOnButton:=True;
 	if (Context.CursorKeysPressed(SGLeftCursorButton)) then
 		FChangingButton:=True;
 	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
@@ -3532,20 +3550,22 @@ begin
 Result:=False;
 end;
 
-constructor TSGButton.Create;
+constructor TSGButton.Create();
 begin
-inherited Create;
-FLeftShiftForChilds:=0;
-FTopShiftForChilds:=0;
-FRightShiftForChilds:=0;
-FBottomShiftForChilds:=0;
-FCanHaveChildren:=False;
-FViewImage1:=nil;
+inherited Create();
+FLeftShiftForChilds   := 0;
+FTopShiftForChilds    := 0;
+FRightShiftForChilds  := 0;
+FBottomShiftForChilds := 0;
+FCanHaveChildren      := False;
+FViewImage1           := nil;
+FCursorOnButtonPrev   := False;
+FCursorOnButton       := False;
 end;
 
-destructor TSGButton.Destroy;
+destructor TSGButton.Destroy();
 begin
-inherited Destroy;
+inherited Destroy();
 end;
 
 procedure TSGScreen.DeleteDeviceResourses();

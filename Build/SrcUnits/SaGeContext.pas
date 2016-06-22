@@ -399,6 +399,8 @@ end;
 
 procedure TSGContext.SetCursor(const VCursor : TSGCursor);
 begin
+if FCursor <> nil then
+	FCursor.Destroy();
 FCursor := VCursor;
 end;
 
@@ -409,6 +411,8 @@ end;
 
 procedure TSGContext.SetIcon(const VIcon : TSGBitMap);
 begin
+if FIcon <> nil then
+	FIcon.Destroy();
 FIcon := VIcon;
 end;
 
@@ -638,6 +642,16 @@ end;
 
 destructor TSGContext.Destroy();
 begin
+if FCursor <> nil then
+	begin
+	FCursor.Destroy();
+	FCursor := nil;
+	end;
+if FIcon <> nil then
+	begin
+	FIcon.Destroy();
+	FIcon := nil;
+	end;
 if FPaintable <> nil then
 	begin
 	FPaintable.Destroy();

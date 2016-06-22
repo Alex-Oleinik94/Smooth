@@ -1,7 +1,3 @@
-//Файлик ресурсов для винды (Иконка + Курсор + Manifest)
-{$IFDEF MSWINDOWS}
-	{$R .\..\SaGe.res}
-	{$ENDIF}
 {$INCLUDE Includes\SaGe.inc}
 //{$DEFINE USE_uSMBIOS}
 
