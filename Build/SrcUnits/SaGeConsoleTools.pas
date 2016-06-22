@@ -592,9 +592,6 @@ SGConcoleCaller(Params);
 SetLength(Params,0);
 end;
 
-var
-	InitBe : TSGByte = 0;
-
 type
 	TSGAllApplicationsDrawable = class(TSGDrawable)
 			public
@@ -611,7 +608,7 @@ inherited Create(VContext);
 
 with TSGDrawClasses.Create(Context) do
 	begin
-	//Add(TSGExample15);
+	Add(TSGNotepadApplication);
 	Add(TSGGasDiffusion);
 	Add(TSGAllFractals,False);
 	Add(TSGAllExamples,False);
@@ -631,8 +628,6 @@ with TSGDrawClasses.Create(Context) do
 	
 	Initialize();
 	end;
-
-//SGRunNotepad('.\..\Build\SrcUnits\SaGeBased.pas');
 end;
 
 procedure TSGAllApplicationsDrawable.LoadDeviceResourses();

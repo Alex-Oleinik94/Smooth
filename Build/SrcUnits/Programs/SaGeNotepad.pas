@@ -17,6 +17,9 @@ uses
 	,SaGeRender
 	,SaGeRenderConstants
 	,SaGeCommonClasses
+	,SaGeMakefileReader
+	,SaGeResourseManager
+	,StrMan
 	;
 
 type
@@ -26,6 +29,9 @@ type
 			public
 		constructor Create();
 		destructor Destroy();override;
+			public
+		procedure FromDraw();override;
+		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 			private
 		FTitle : TSGString;
 		FTitleWidth : TSGLongWord;
@@ -49,8 +55,17 @@ type
 			private
 		FFileName : TSGString;
 		FFile : TSGArString;
-		FCursorPos : TSGPoint2f;
 		FScrolTimer : TSGFloat;
+		
+		FCursorOnText : TSGBoolean;
+		FCursorOnTextPrev : TSGBoolean;
+		
+		FTextCursor : record
+			FLine : TSGLongWord;
+			FColumn : TSGLongWord;
+			FTimer : TSGFloat;
+			end;
+		
 			private
 		procedure SetFile(const VFileName : TSGString);
 		procedure LoadFile();
@@ -78,21 +93,199 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
 		procedure FromResize();override;
+			private
+		procedure ProcessMakefileComand(const Comand : TSGString);
+		procedure OpenMakefileProjects();
+		procedure AddMakefileDirectory(const VDirName : TSGString);
+		procedure AddMakefileProject(const VProjName : TSGString);
 			public
 		procedure AddFile(const VFileName : TSGString; const VLine : TSGLongWord = 0; const VColumn : TSGLongWord = 0);
+		procedure AddMakeFile(const VFileName : TSGString);
 			private
 		FInsets : TSGNInsetList;
 		FActiveInset : TSGLongWord;
+		FMakefile : TSGMakefileReader;
+		FMakefileDirectories : TSGArString;
+		FMakefileProjects    : TSGArString;
 			private
 		procedure AddInset(const VInset : TSGNInset);
 		function CountInsets() : TSGLongWord;
 		function InsetIndex(const VInset : TSGNInset) : TSGLongWord;
 		function ActiveInset() : TSGNInset;
 		end;
-
-procedure SGRunNotepad(const VFileName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	
+	TSGNotepadApplication = class(TSGDrawable)
+			public
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
+		procedure Paint();override;
+		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResourses();override;
+		class function ClassName() : TSGString;override;
+			private
+		FNotepad : TSGNotepad;
+		end;
 
 implementation
+
+class function TSGNotepadApplication.ClassName() : TSGString;
+begin
+Result := 'Текстовой редактор';
+end;
+
+constructor TSGNotepadApplication.Create(const VContext : ISGContext);
+begin
+inherited Create(VContext);
+FNotepad := TSGNotepad.Create();
+SGScreen.CreateChild(FNotepad);
+FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
+FNotepad.BoundsToNeedBounds();
+FNotepad.Visible := True;
+FNotepad.AddMakeFile('.\..\Build');
+FNotepad.OpenMakefileProjects();
+end;
+
+procedure TSGNotepadApplication.LoadDeviceResourses();
+begin
+end;
+
+procedure TSGNotepadApplication.DeleteDeviceResourses();
+begin
+end;
+
+destructor TSGNotepadApplication.Destroy();
+begin
+if FNotepad <> nil then
+	begin
+	FNotepad.Destroy();
+	FNotepad := nil;
+	end;
+inherited;
+end;
+
+procedure TSGNotepadApplication.Paint();
+begin
+end;
+
+procedure TSGNotepad.AddMakefileDirectory(const VDirName : TSGString);
+
+function NotExistsInSavedDirectories(const VDirectoryName : TSGString) : TSGBoolean;
+var
+	S : TSGString;
+begin
+Result := True;
+for S in FMakefileDirectories do
+	if S = VDirectoryName then
+		begin
+		Result := False;
+		break;
+		end;
+end;
+
+procedure AddToSavedDirectories(const VDirectoryName : TSGString);
+begin
+if FMakefileDirectories = nil then
+	SetLength(FMakefileDirectories, 1)
+else
+	SetLength(FMakefileDirectories, Length(FMakefileDirectories) + 1);
+FMakefileDirectories[High(FMakefileDirectories)] := VDirectoryName;
+end;
+
+var
+	TotalString : TSGString;
+begin
+TotalString := SGGetFileWay(FMakefile.FileName) + VDirName;
+if (not (TotalString in FMakefileDirectories)) then
+	if SGResourseFiles.FileExists(TotalString) then
+		FMakefileDirectories += TotalString;
+end;
+
+procedure TSGNotepad.AddMakefileProject(const VProjName : TSGString);
+
+function ValidProject(const VProjectName : TSGString) : TSGBoolean;
+begin
+Result := False;
+if (not (VProjectName in FMakefileProjects)) then
+	if SGResourseFiles.FileExists(VProjectName) then
+		Result := True;
+end;
+
+var
+	ProjectName : TSGString;
+begin
+ProjectName := SGGetFileWay(FMakefile.FileName) + VProjName;
+if ValidProject(ProjectName) then
+	FMakefileProjects += ProjectName
+else if ValidProject(ProjectName + '.pp') then
+	FMakefileProjects += ProjectName + '.pp'
+else if ValidProject(ProjectName + '.pas') then
+	FMakefileProjects += ProjectName + '.pas'
+else if ValidProject(ProjectName + '.lpr') then
+	FMakefileProjects += ProjectName + '.lpr'
+else if ValidProject(ProjectName + '.dpr') then
+	FMakefileProjects += ProjectName + '.dpr';
+end;
+
+procedure TSGNotepad.OpenMakefileProjects();
+var
+	S : TSGString;
+begin
+for S in FMakefileProjects do
+	AddFile(S);
+end;
+
+procedure TSGNotepad.ProcessMakefileComand(const Comand : TSGString);
+var
+	WordIndex, CountWords : TSGLongWord;
+	S : TSGString;
+begin
+CountWords := StringWordCount(Comand, ' ');
+if (CountWords > 1) and (SGUpCaseString(StringWordGet(Comand, ' 	', 1)) = 'FPC') then
+	begin
+	for WordIndex := 1 to CountWords do
+		begin
+		S := StringWordGet(Comand, ' 	', WordIndex);
+		if Length(S) > 3 then
+			if '-Fu' + StringExtract(S, 3, Length(S) - 3) = S then
+				begin
+				AddMakefileDirectory(StringExtract(S, 3, Length(S) - 3));
+				end;
+		end;
+	AddMakefileProject(StringWordGet(Comand, ' 	', CountWords));
+	end;
+end;
+
+procedure TSGNotepad.AddMakeFile(const VFileName : TSGString);
+var
+	TargetIndex : TSGLongWord;
+	Identifier  : TSGMRIdentifier;
+begin
+if FMakefile <> nil then
+	begin
+	FMakefile.Destroy();
+	FMakefile := nil;
+	end;
+if SGResourseFiles.FileExists(VFileName) then
+	FMakefile := TSGMakefileReader.Create(VFileName)
+else if SGResourseFiles.FileExists(VFileName + 'Makefile') then
+	FMakefile := TSGMakefileReader.Create(VFileName + 'Makefile')
+else if SGResourseFiles.FileExists(VFileName + Slash + 'Makefile') then
+	FMakefile := TSGMakefileReader.Create(VFileName + Slash + 'Makefile');
+if FMakefile <> nil then
+	begin
+	WriteLn(FMakefile.TargetCount() );
+	if FMakefile.TargetCount() <> 0 then
+		begin
+		for TargetIndex := 0 to FMakefile.TargetCount() - 1 do
+			begin
+			for Identifier in FMakefile.GetTarget(TargetIndex).FComands do
+				begin
+				ProcessMakefileComand(Identifier.FAbsoluteIdentifier);
+				end;
+			end;
+		end;
+	end;
+end;
 
 procedure TSGNotepad.FromResize();
 
@@ -110,7 +303,7 @@ if CountInsets() >0 then
 end;
 
 begin
-SetBounds(0, 0, ScreenWidth, ScreenHeight);
+SetBounds(0, 50, ScreenWidth, ScreenHeight - 50);
 ResizeInsets();
 inherited;
 end;
@@ -118,6 +311,17 @@ end;
 procedure TSGNTextInset.FromResize();
 begin
 StandardizateView();
+inherited;
+end;
+
+procedure TSGNInset.FromDraw();
+begin
+FCursorOnComponent := False;
+inherited;
+end;
+
+procedure TSGNInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+begin
 inherited;
 end;
 
@@ -149,10 +353,40 @@ FScrolTimer := 1;
 end;
 
 procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
+
+var
+	Line : TSGLongWord;
+	CursorPos : TSGPoint2f;
+
+function IsCurOnText():TSGBoolean;
+begin
+Result := False;
+if not FCursorOnComponent then
+	Exit;
+CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGPoint2fImport(FRealLeft, FRealTop);
+Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
+Result := (Font.StringLength(FFile[Line]) + Font.StringLength(SGStr(CountLines())) + 5 >= CursorPos.x) and
+		  (Font.StringLength(SGStr(CountLines())) + 5 <= CursorPos.x);
+end;
+
+procedure ProcessCursors();
+begin
+FCursorOnText := IsCurOnText();
+if FCursorOnText then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
+		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
+if FCursorOnTextPrev and (not FCursorOnText) then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+FCursorOnTextPrev := FCursorOnText;
+end;
+
 begin
 if FOwner <> nil then
 	Visible := FOwner.ActiveInset() = Self;
 FScrolTimer := FScrolTimer * 0.95;
+if FCursorOnComponent or FCursorOnText or FCursorOnTextPrev then
+	ProcessCursors();
 inherited;
 end;
 
@@ -198,7 +432,9 @@ Difference := Height / Font.FontHeight;
 FBegin := (Line + 0.5) - Difference / 2;
 FEnd := FBegin + Difference;
 StandardizateView();
-FCursorPos.Import(Line, Column);
+FTextCursor.FLine := Line;
+FTextCursor.FColumn := Column;
+FTextCursor.FTimer := 1;
 end;
 
 procedure TSGNTextInset.FromDraw();
@@ -479,10 +715,15 @@ begin
 inherited;
 FInsets := nil;
 FActiveInset := 0;
+FMakefile := nil;
+FMakefileDirectories := nil;
+FMakefileProjects := nil;
 end;
 
 destructor TSGNotepad.Destroy();
 begin
+SetLength(FMakefileDirectories,0);
+SetLength(FMakefileProjects,0);
 SetLength(FInsets, 0);
 inherited;
 end;
@@ -496,21 +737,6 @@ end;
 procedure TSGNotepad.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
 inherited;
-end;
-
-procedure SGRunNotepad(const VFileName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Notepad : TSGNotepad;
-begin
-Notepad := TSGNotepad.Create();
-SGScreen.CreateChild(Notepad);
-Notepad.SetBounds(0, 0, Notepad.Render.Width, Notepad.Render.Height);
-Notepad.BoundsToNeedBounds();
-Notepad.Visible := True;
-Notepad.AddFile(VFileName);
-Notepad.AddFile(VFileName);
-Notepad.AddFile(VFileName);
-Notepad.AddFile(VFileName);
 end;
 
 end.

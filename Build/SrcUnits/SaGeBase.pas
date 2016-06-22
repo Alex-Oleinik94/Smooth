@@ -272,6 +272,17 @@ type
 	TSGArConst     = type TArConst;
 	TSGConcoleCallerParams = TSGArString;
 	
+	TSGArStringEnumerator = class
+			private
+		FList : TSGArString;
+		FIndex : TSGLongInt;
+			public
+		constructor Create(const List : TSGArString);
+		function GetCurrent(): TSGString;
+		function MoveNext(): TSGBoolean;
+		property Current : TSGString read GetCurrent;
+		end;
+	
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
 	PTArByte     = ^ TArByte;
@@ -711,8 +722,56 @@ function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGS
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := VList;
+if Result = nil then
+	SetLength(Result, 1)
+else
+	SetLength(Result, Length(Result) + 1);
+Result[High(Result)] := VString;
+end;
+
+operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	S : TSGString;
+begin
+Result := False;
+for S in VList do
+	if S = VString then
+		begin
+		Result := True;
+		break;
+		end;
+end;
+
+operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := TSGArStringEnumerator.Create(List);
+end;
+
+constructor TSGArStringEnumerator.Create(const List : TSGArString);
+begin
+FList := List;
+FIndex := -1;
+end;
+
+function TSGArStringEnumerator.GetCurrent(): TSGString;
+begin
+Result := FList[FIndex];
+end;
+
+function TSGArStringEnumerator.MoveNext(): TSGBoolean;
+begin
+FIndex += 1;
+Result := (FList <> nil) and (Length(FList) > FIndex);
+end;
 
 function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

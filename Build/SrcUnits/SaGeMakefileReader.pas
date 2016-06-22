@@ -12,6 +12,7 @@ uses
 	,StrMan
 	,crt
 	,SaGeVersion
+	,SaGeResourseManager
 	;
 
 type
@@ -22,6 +23,17 @@ type
 	
 	TSGMRIdentifierList = packed array of TSGMRIdentifier;
 	
+	TSGMRIdentifierListEnumerator = class
+			private
+		FList : TSGMRIdentifierList;
+		FIndex : TSGLongInt;
+			public
+		constructor Create(const List : TSGMRIdentifierList);
+		function GetCurrent(): TSGMRIdentifier;
+		function MoveNext(): TSGBoolean;
+		property Current : TSGMRIdentifier read GetCurrent;
+		end;
+	
 	TSGMRConstant = object
 		FName : TSGString;
 		FIdentifier : TSGMRIdentifier;
@@ -29,12 +41,34 @@ type
 	
 	TSGMRConstantList = packed array of TSGMRConstant;
 	
+	TSGMRConstantListEnumerator = class
+			private
+		FList : TSGMRConstantList;
+		FIndex : TSGLongInt;
+			public
+		constructor Create(const List : TSGMRConstantList);
+		function GetCurrent(): TSGMRConstant;
+		function MoveNext(): TSGBoolean;
+		property Current : TSGMRConstant read GetCurrent;
+		end;
+	
 	TSGMRTarget = object
 		FName : TSGString;
 		FComands : TSGMRIdentifierList;
 		end;
 	
 	TSGMRTargetList = packed array of TSGMRTarget;
+	
+	TSGMRTargetListEnumerator = class
+			private
+		FList : TSGMRTargetList;
+		FIndex : TSGLongInt;
+			public
+		constructor Create(const List : TSGMRTargetList);
+		function GetCurrent(): TSGMRTarget;
+		function MoveNext(): TSGBoolean;
+		property Current : TSGMRTarget read GetCurrent;
+		end;
 	
 	TSGMakefileReader = class(TSGClass)
 			public
@@ -44,10 +78,16 @@ type
 		FFileName  : TSGString;
 		FConstants : TSGMRConstantList;
 		FTargets   : TSGMRTargetList;
+			public
+		property FileName : TSGString read FFileName;
 			private
 		procedure Read();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ProcessString(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function IndexOfTarget(const VName : TSGString):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
 		function GetConstant(S : TSGString): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetTarget(const VName : TSGString):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function TargetCount() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ConstantCount() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
@@ -55,7 +95,117 @@ type
 		procedure Execute(const VTarget : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
+operator Enumerator(const List : TSGMRIdentifierList): TSGMRIdentifierListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator Enumerator(const List : TSGMRConstantList): TSGMRConstantListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator Enumerator(const List : TSGMRTargetList): TSGMRTargetListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function TSGMakefileReader.GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.FName := '';
+Result.FComands := nil;
+if (VIndex < TargetCount()) and (VIndex >= 0) then
+	Result := FTargets[VIndex];
+end;
+
+function TSGMakefileReader.GetTarget(const VName : TSGString):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Target : TSGMRTarget;
+	UpCasedName : TSGString;
+begin
+Result.FName := '';
+Result.FComands := nil;
+UpCasedName := SGUpCaseString(VName);
+for Target in FTargets do
+	if Target.FName = UpCasedName then
+		begin
+		Result := Target;
+		break;
+		end;
+end;
+
+function TSGMakefileReader.IndexOfTarget(const VName : TSGString):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+	UpCasedName : TSGString;
+begin
+UpCasedName := SGUpCaseString(VName);
+Result := TargetCount();
+if FTargets <> nil then
+	for i := 0 to TargetCount() - 1 do
+		if FTargets[i].FName = UpCasedName then
+			begin
+			Result := i;
+			break;
+			end;
+end;
+
+operator Enumerator(const List : TSGMRIdentifierList): TSGMRIdentifierListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := TSGMRIdentifierListEnumerator.Create(List);
+end;
+
+operator Enumerator(const List : TSGMRConstantList): TSGMRConstantListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := TSGMRConstantListEnumerator.Create(List);
+end;
+
+operator Enumerator(const List : TSGMRTargetList): TSGMRTargetListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := TSGMRTargetListEnumerator.Create(List);
+end;
+
+constructor TSGMRTargetListEnumerator.Create(const List : TSGMRTargetList);
+begin
+FList := List;
+FIndex := -1;
+end;
+
+function TSGMRTargetListEnumerator.GetCurrent(): TSGMRTarget;
+begin
+Result := FList[FIndex];
+end;
+
+function TSGMRTargetListEnumerator.MoveNext(): TSGBoolean;
+begin
+FIndex += 1;
+Result := (FList <> nil) and (Length(FList) > FIndex);
+end;
+
+constructor TSGMRConstantListEnumerator.Create(const List : TSGMRConstantList);
+begin
+FList := List;
+FIndex := -1;
+end;
+
+function TSGMRConstantListEnumerator.GetCurrent(): TSGMRConstant;
+begin
+Result := FList[FIndex];
+end;
+
+function TSGMRConstantListEnumerator.MoveNext(): TSGBoolean;
+begin
+FIndex += 1;
+Result := (FList <> nil) and (Length(FList) > FIndex);
+end;
+
+constructor TSGMRIdentifierListEnumerator.Create(const List : TSGMRIdentifierList);
+begin
+FList := List;
+FIndex := -1;
+end;
+
+function TSGMRIdentifierListEnumerator.GetCurrent(): TSGMRIdentifier;
+begin
+Result := FList[FIndex];
+end;
+
+function TSGMRIdentifierListEnumerator.MoveNext(): TSGBoolean;
+begin
+FIndex += 1;
+Result := (FList <> nil) and (Length(FList) > FIndex);
+end;
 
 procedure TSGMakefileReader.Execute(const VTarget : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -220,7 +370,7 @@ var
 	S : TSGString;
 begin
 Stream := TMemoryStream.Create();
-Stream.LoadFromFile(FFileName);
+SGResourseFiles.LoadMemoryStreamFromFile(Stream, FFileName);
 Stream.Position := 0;
 while Stream.Position <> Stream.Size do
 	begin
