@@ -242,12 +242,12 @@ WriteLn('TSGContext.ReinitializeRender() : Begining');
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
 SGScreen.DeleteDeviceResourses();
-// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
 if FRender <> nil then
 	begin
 	FRender.ReleaseCurrent();
 	FRender.Context := nil;
 	FRender.Kill();
+	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
 	//FRender.Destroy();
 	end;
 {$IFDEF CONTEXT_BEGUNING}
@@ -645,7 +645,9 @@ if FPaintable <> nil then
 	end;
 if FRender <> nil then
 	begin
-	FRender.Destroy();
+	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
+	//FRender.Destroy();
+	FRender.Kill();
 	FRender:=nil;
 	end;
 inherited;

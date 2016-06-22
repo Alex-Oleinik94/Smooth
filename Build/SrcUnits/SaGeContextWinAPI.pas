@@ -15,6 +15,8 @@ uses
 	,SaGeRender
 	,commdlg
 	,SaGeClasses
+	,SaGeCommonClasses
+	,SaGeImagesBase
 	;
 
 type
@@ -31,7 +33,7 @@ type
 			QWord
 			{$ENDIF};
 	
-	TSGContextWinAPI=class(TSGContext)
+	TSGContextWinAPI = class(TSGContext)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -53,6 +55,8 @@ type
 		procedure InitFullscreen(const VFullscreen : TSGBoolean); override;
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
+		procedure SetCursor(const VCursor : TSGCursor); override;
+		procedure SetIcon  (const VIcon   : TSGBitMap); override;
 			protected
 		hWindow  : HWnd;
 		dcWindow : hDc;
@@ -68,12 +72,12 @@ type
 		function  GetClientWidth() : TSGLongWord;override;
 		function  GetClientHeight() : TSGLongWord;override;
 			protected
-		FNormalCursor,
-			FNullCursor : TSGLongWord;
+		FCursorHandle : Windows.HCURSOR;
+		FIconHandle   : Windows.HICON;
 			public
 		function  GetCursorPosition():TSGPoint2f;override;
-		function FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
-		function FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
+		function  FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
+		function  FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
 	
 function SGFullscreenQueschionWinAPIMethod():boolean;
@@ -84,8 +88,7 @@ implementation
 
 uses
 	SaGeScreen
-	,SysUtils
-	,SaGeCommonClasses;
+	,SysUtils;
 
 // А вод это жесткий костыль. 
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
@@ -93,6 +96,147 @@ uses
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+procedure TSGContextWinAPI.SetCursor(const VCursor : TSGCursor);
+
+procedure GetMaskBitmaps(hSourceBitmap : HBITMAP; clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
+var
+	hXorMaskDC, hAndMaskDC, hMainDC, hNullDC : HDC;
+	bm : BITMAP;
+	hOldMainBitmap, hOldAndMaskBitmap, hOldXorMaskBitmap : HBITMAP;
+	x, y, alpha: TSGLongWord;
+	MainBitPixel : COLORREF;
+begin
+hNullDC				:= GetDC(0);
+hMainDC				:= CreateCompatibleDC(hNullDC); 
+hAndMaskDC			:= CreateCompatibleDC(hNullDC); 
+hXorMaskDC			:= CreateCompatibleDC(hNullDC); 
+
+GetObject(hSourceBitmap, sizeof(BITMAP), @bm);
+
+
+hAndMaskBitmap	:= CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
+hXorMaskBitmap	:= CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
+
+hOldMainBitmap      := HBITMAP(SelectObject(hMainDC,   hSourceBitmap ));
+hOldAndMaskBitmap	:= HBITMAP(SelectObject(hAndMaskDC,hAndMaskBitmap));
+hOldXorMaskBitmap	:= HBITMAP(SelectObject(hXorMaskDC,hXorMaskBitmap));
+ 
+for x := 0 to bm.bmWidth - 1 do
+	begin
+	for y := 0 to bm.bmHeight - 1 do
+		begin
+		MainBitPixel := GetPixel(hMainDC, x, y);
+		if VCursor.Channels = 3 then
+			if(MainBitPixel = clrTransparent) then
+				begin
+				SetPixel(hAndMaskDC,x,y,RGB(255,255,255));
+				SetPixel(hXorMaskDC,x,y,RGB(0,0,0));
+				end
+			else
+				begin
+				SetPixel(hAndMaskDC,x,y,RGB(0,0,0));
+				SetPixel(hXorMaskDC,x,y,MainBitPixel);
+				end
+		else
+			begin
+			alpha := VCursor.BitMap[(x + y * bm.bmWidth) * 4 + 3];
+			if alpha < 150 then
+				begin
+				SetPixel(hAndMaskDC,x,y,RGB(255,255,255));
+				SetPixel(hXorMaskDC,x,y,RGB(0,0,0));
+				end
+			else
+				begin
+				SetPixel(hAndMaskDC,x,y,RGB(0,0,0));
+				SetPixel(hXorMaskDC,x,y,RGB(alpha, alpha, alpha));
+				end;
+			end;
+		end;
+	end;
+
+SelectObject(hMainDC,   hOldMainBitmap);
+SelectObject(hAndMaskDC,hOldAndMaskBitmap);
+SelectObject(hXorMaskDC,hOldXorMaskBitmap);
+
+DeleteDC(hXorMaskDC);
+DeleteDC(hAndMaskDC);
+DeleteDC(hMainDC);
+
+ReleaseDC(0, hNullDC);
+end;
+
+function CreateCursorFromBitmap(hSourceBitmap : HBITMAP; clrTransparent : COLORREF; xHotspot : DWORD; yHotspot : DWORD) : HCURSOR;
+var
+	hAndMask : HBITMAP = 0;
+	hXorMask : HBITMAP = 0;
+	iconinfo : _ICONINFO;
+begin
+Result := 0;
+
+if(0 = hSourceBitmap) then
+	begin
+	Exit;
+	end;
+
+GetMaskBitmaps(hSourceBitmap, clrTransparent, hAndMask, hXorMask);
+if((0 = hAndMask) or (0 = hXorMask)) then
+	begin
+	Exit;
+	end;
+
+fillchar(iconinfo, sizeof(iconinfo), 0);
+iconinfo.fIcon		:= False;
+iconinfo.xHotspot	:= xHotspot;
+iconinfo.yHotspot	:= yHotspot;
+iconinfo.hbmMask	:= hAndMask;
+iconinfo.hbmColor	:= hXorMask;
+
+Result := CreateIconIndirect(@iconinfo);
+end;
+
+function CreateCursor() : HCURSOR;
+var
+	hBM : HBITMAP;
+	bm : PByte = nil;
+	i : TSGLongWord;
+begin
+hBM := CreateCompatibleBitmap(GetDC(0), VCursor.Width, VCursor.Height);
+if VCursor.Channels = 4 then
+	begin
+	bm := GetMem(VCursor.Width * VCursor.Height * 3);
+	for i := 0 to VCursor.Width * VCursor.Height - 1 do
+		begin
+		bm[i * 3 + 0] := VCursor.BitMap[i * 4 + 0];
+		bm[i * 3 + 1] := VCursor.BitMap[i * 4 + 1];
+		bm[i * 3 + 2] := VCursor.BitMap[i * 4 + 2];
+		end;
+	SetBitmapBits(hBM, VCursor.Width * VCursor.Height * 3, bm);
+	FreeMem(bm);
+	end
+else
+	SetBitmapBits(hBM, VCursor.Width * VCursor.Height * VCursor.Channels, VCursor.BitMap);
+Result := CreateCursorFromBitmap(hBM, RGB(255,255,255), VCursor.HotPixelX, VCursor.HotPixelY);
+DeleteObject(hBM);
+end;
+
+var
+	NewCursor : HCURSOR;
+begin
+NewCursor := CreateCursor();
+if NewCursor <> 0 then
+	begin
+	FCursorHandle := NewCursor;
+	inherited;
+	if Active then
+		SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+	end;
+end;
+
+procedure TSGContextWinAPI.SetIcon  (const VIcon   : TSGBitMap); 
+begin
+
+end;
 
 class function TSGContextWinAPI.GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -292,8 +436,8 @@ inherited;
 hWindow  := 0;
 dcWindow := 0;
 clWindow := 0;
-FNormalCursor := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
-FNullCursor := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
+FCursorHandle := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
+FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(5));
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -311,7 +455,6 @@ if Active then
 	SGScreen.Load(Self);
 	inherited;
 	end;
-SetClassLong(hWindow, GCL_HCURSOR, FNullCursor);
 end;
 
 procedure TSGContextWinAPI.Run();
@@ -565,8 +708,8 @@ WindowClass.lpfnWndProc   := WndProc(@MyGLWndProc);
 WindowClass.cbClsExtra    := 0;
 WindowClass.cbWndExtra    := 0;
 WindowClass.hInstance     := System.MainInstance;
-WindowClass.hIcon         := LoadIcon(GetModuleHandle(nil),MAKEINTRESOURCE(5));
-WindowClass.hCursor       := FNormalCursor;
+WindowClass.hIcon         := FIconHandle;
+WindowClass.hCursor       := FCursorHandle;
 WindowClass.hbrBackground := 0;
 WindowClass.lpszMenuName  := nil;
 WindowClass.lpszClassName := 'SaGe Window Class';
@@ -726,7 +869,9 @@ procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
 begin
 if (FRender<>nil) and (KillRC) then
 	begin
-	FRender.Destroy();
+	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
+	//FRender.Destroy();
+	FRender.Kill();
 	FRender:=nil;
 	end
 else
@@ -767,7 +912,7 @@ else
 		KillWindow(False);
 		inherited InitFullscreen(VFullscreen);
 		Active := CreateWindow();
-		if (FRender<>nil) and Active then
+		if (FRender <> nil) and Active then
 			FRender.UnLockResourses();
 		Resize();
 		end;

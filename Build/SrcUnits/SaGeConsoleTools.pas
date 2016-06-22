@@ -349,7 +349,7 @@ else if (VParams = nil) or (Length(VParams)<2) then
 	WriteLn('Error count of parameters!');
 	end
 else if (VParams <> nil) and (Length(VParams) = 2) and SGResourseFiles.FileExists(VParams[0]) then
-	SGConvertToSGIA(VParams[1],VParams[2])
+	SGConvertToSGIA(VParams[0],VParams[1])
 else
 	begin
 	SGPrintEngineVersion();
@@ -777,6 +777,7 @@ with Context do
 	Width  := GetScreenArea().x;
 	Height := GetScreenArea().y;
 	Fullscreen := VFullscreen;
+	//Cursor := SGLoadCursor('ts.sgia',0.5,0.5);
 	{$IFDEF ANDROID}
 		(Context as TSGContextAndroid).AndroidApp := State;
 		{$ENDIF}

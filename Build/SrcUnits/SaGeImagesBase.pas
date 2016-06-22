@@ -85,6 +85,7 @@ type
 		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Width       : Cardinal read FWidth       write FWidth;
 		property Height      : Cardinal read FHeight      write FHeight;
@@ -415,13 +416,33 @@ begin
 if FBitMap<>nil then
 	begin
 	FreeMem(FBitMap);
-	FBitMap:=nil;
+	FBitMap := nil;
 	end;
-FWidth:=0;
-FHeight:=0;
-FSizeChannel:=0;
-FFormatType:=0;
-FDataType:=0;
+FWidth      := 0;
+FHeight     := 0;
+FSizeChannel:= 0;
+FFormatType := 0;
+FDataType   := 0;
+FChannels   := 0;
+end;
+
+procedure TSGBitMap.CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Size : TSGMaxEnum;
+begin
+Clear();
+FWidth  := VBitMap.Width;
+FHeight := VBitMap.Height;
+FSizeChannel := VBitMap.BitDepth;
+FChannels := VBitMap.Channels;
+FFormatType := VBitMap.PixelFormat;
+FDataType := VBitMap.PixelType;
+if VBitMap.BitMap <> nil then
+	begin
+	Size := Width * Height * Channels;
+	FBitMap := GetMem(Size);
+	Move(VBitMap.BitMap^, FBitMap^, Size); 
+	end;
 end;
 
 constructor TSGBitMap.Create();

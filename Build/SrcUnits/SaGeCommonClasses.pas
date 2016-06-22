@@ -203,7 +203,28 @@ type
 		property Render  : ISGRender  read GetRender;
 		end;
 
+function SGLoadCursor(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor;
+
 implementation
+
+uses
+	SaGeImages;
+
+function SGLoadCursor(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor;
+var
+	Image : TSGImage;
+begin
+Image := TSGImage.Create(VFileName);
+Image.Loading();
+
+Result := TSGCursor.Create();
+Result.CopyFrom(Image.Image);
+Result.HotPixelX := Trunc(HotX * Result.Width );
+Result.HotPixelY := Trunc(HotY * Result.Height);
+
+Image.Destroy();
+Image := nil;
+end;
 
 constructor TSGCursor.Create();
 begin
