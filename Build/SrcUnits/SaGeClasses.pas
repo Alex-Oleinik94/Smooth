@@ -1,11 +1,12 @@
 {$INCLUDE Includes\SaGe.inc}
 
-unit SaGeBaseClasses;
+unit SaGeClasses;
 
 interface 
 
 uses
 	Classes
+	,SaGeBase
 	,SaGeBased;
 	
 type
@@ -19,10 +20,14 @@ type
 		end;
 	
 	TSGInterfacedObject = class(TSGObject, ISGInterface)
+			private
+		FReferenceCount : TSGLongWord;
+			public
 		function QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
 		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
 		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
-		
+			public
+		constructor Create();override;
 		destructor Destroy(); override;
 		procedure DestroyFromInterface();virtual;
 		end;
@@ -169,6 +174,12 @@ constructor TSGObject.Create();
 begin
 end;
 
+constructor TSGInterfacedObject.Create();
+begin
+inherited;
+FReferenceCount := 1;
+end;
+
 destructor TSGInterfacedObject.Destroy();
 begin
 inherited;
@@ -216,18 +227,23 @@ function TSGInterfacedObject.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$E
 begin
 Result := S_OK;
 if not Supports(Self, VInterfaceIdentifier, VObject) then
-if not GetInterface(VInterfaceIdentifier, VObject) then
-	{$IFNDEF RELEASE}Result := TSGLongInt(E_NOINTERFACE){$ENDIF};
+	if not GetInterface(VInterfaceIdentifier, VObject) then
+		{$IFNDEF RELEASE}Result := TSGLongInt(E_NOINTERFACE){$ENDIF};
 end;
 
 function TSGInterfacedObject._AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
-Result := 1;
+Result := InterlockedIncrement(FReferenceCount);
 end;
 
 function TSGInterfacedObject._Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
-Result := 1;
+Result := InterlockedDecrement(FReferenceCount); 
+if Result = 0 then
+	begin
+	WriteLn('?????._Release = null');
+	Destroy();
+	end;
 end;
 
 end.

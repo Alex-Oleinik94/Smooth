@@ -1,5 +1,7 @@
 {$INCLUDE Includes\SaGe.inc}
 
+{$DEFINE RENDER_DEBUG}
+
 unit SaGeRender;
 
 interface
@@ -7,7 +9,7 @@ interface
 uses 
 	 SaGeBase
 	,SaGeBased
-	,SaGeBaseClasses
+	,SaGeClasses
 	,SaGeRenderConstants
 	,SaGeCommon
 	{$IFDEF MSWINDOWS}
@@ -246,7 +248,13 @@ end;
 destructor TSGRender.Destroy();
 begin
 SGLog.Sourse(['TSGRender__Destroy()']);
+{$IFDEF RENDER_DEBUG}
+	WriteLn('TSGRender.Destroy(): Before "inherited"');
+	{$ENDIF}
 inherited Destroy();
+{$IFDEF RENDER_DEBUG}
+	WriteLn('TSGRender.Destroy(): After "inherited"');
+	{$ENDIF}
 end;
 
 function TSGRender.GetWidth() : TSGLongWord;

@@ -1,5 +1,7 @@
 {$INCLUDE Includes\SaGe.inc}
 
+{$DEFINE RENDER_DX9_DEBUG}
+
 unit SaGeRenderDirectX;
 
 interface
@@ -222,6 +224,7 @@ type
 		FNowActiveClientNumberTexture : TSGLongWord;
 			private
 		procedure AfterVertexProc();inline;
+		procedure DropDeviceResourses();
 		end;
 type
 	TSGRDXVertexDeclarationManipulator=class
@@ -1300,37 +1303,63 @@ FQuantitySavedMatrix:=0;
 FLengthArSavedMatrix:=0;
 end;
 
-destructor TSGRenderDirectX.Destroy();
+procedure TSGRenderDirectX.DropDeviceResourses();
 var
-	i : Cardinal;
+	i : TSGLongWord;
 begin
 if FArBuffers<>nil then if Length(FArBuffers)>0 then
 	begin
 	for i:=0 to High(FArBuffers) do
 		begin
 		if FArBuffers[i].FResourse<>nil then
+			begin
 			FArBuffers[i].FResourse._Release();
+			FArBuffers[i].FResourse := nil;
+			end;
 		if FArBuffers[i].FVertexDeclaration<>nil then
+			begin
 			FArBuffers[i].FVertexDeclaration._Release();
+			FArBuffers[i].FVertexDeclaration := nil;
+			end;
 		end;
-	SetLength(FArBuffers,0);
+	SetLength(FArBuffers, 0);
+	FArBuffers := nil;
 	end;
-if FArTextures<>nil then if Length(FArTextures)>0 then
+if FArTextures <> nil then if Length(FArTextures) > 0 then
 	begin
 	for i:=0 to High(FArTextures) do
 		begin
 		if FArTextures[i].FTexture<>nil then
+			begin
 			FArTextures[i].FTexture._Release;
-		if FArTextures[i].FBufferChangeFullscreen<>nil then
+			FArTextures[i].FTexture := nil;
+			end;
+		if FArTextures[i].FBufferChangeFullscreen <> nil then
+			begin
 			FreeMem(FArTextures[i].FBufferChangeFullscreen);
+			FArTextures[i].FBufferChangeFullscreen := nil;
+			end;
 		end;
-	SetLength(FArTextures,0);
+	SetLength(FArTextures, 0);
+	FArTextures := nil;
 	end;
+end;
+
+destructor TSGRenderDirectX.Destroy();
+begin
+DropDeviceResourses();
 if (pDevice<>nil)  then
+	begin
 	pDevice._Release();
+	end;
 if(pD3d<>nil) then
+	begin
 	pD3d._Release();
+	end;
 inherited Destroy();
+{$IFDEF RENDER_DX9_DEBUG}
+	WriteLn('TSGRenderDirectX.Destroy(): End');
+	{$ENDIF}
 end;
 
 procedure TSGRenderDirectX.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);

@@ -13,7 +13,7 @@ uses
     , SaGeRender
     , SaGeRenderConstants
     , Crt
-    , SaGeContextInterface;
+    , SaGeCommonClasses;
 const
 	SGMeshVersion : TSGQuadWord = 169;
 type

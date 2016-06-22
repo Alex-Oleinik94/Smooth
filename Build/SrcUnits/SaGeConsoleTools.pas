@@ -24,7 +24,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 	,SNMPsend
-	,SaGeContextInterface
+	
 	(* ============ Engine Includes ============ *)
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX
@@ -59,6 +59,7 @@ uses
 	,SaGeResourseManager
 	,SaGeVersion
 	,SaGeMakefileReader
+	,SaGeCommonClasses
 	
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
@@ -70,7 +71,7 @@ uses
 	,SaGeUserTesting
 	,SaGeTron
 	,SaGeLoading
-	,Ex15
+	,SaGeNotepad
 	;
 
 const
@@ -607,7 +608,7 @@ type
 constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-
+{
 with TSGDrawClasses.Create(Context) do
 	begin
 	//Add(TSGExample15);
@@ -630,6 +631,8 @@ with TSGDrawClasses.Create(Context) do
 	
 	Initialize();
 	end;
+}
+SGRunNotepad('.\..\Build\SrcUnits\SaGeBased.pas');
 end;
 
 procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
@@ -793,16 +796,17 @@ with Context do
 		else
 		{$ENDIF}
 			RenderClass := TSGRenderOpenGL;
+	
+	Paintable := TSGAllApplicationsDrawable;
 	end;
 
 Context.Initialize();
 
-Context.Paintable := TSGAllApplicationsDrawable.Create(Context);
-
 repeat
 Context.Run();
+SGLog.Sourse('SGConsoleShowAllApplications(...): Out of loop!');
 ContextTypeWatcherCallAction();
-until (Context.Active = False);
+until (IContext <> nil) and (Context.Active = False);
 Context.Destroy();
 end;
 

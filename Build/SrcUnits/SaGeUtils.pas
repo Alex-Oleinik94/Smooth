@@ -14,7 +14,7 @@ uses
 	,SaGeMesh
 	,SaGeImagesBase
 	,SaGeResourseManager
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,PAPPE
 	;
 type

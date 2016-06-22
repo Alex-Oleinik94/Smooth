@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-{$DEFINE CONFIGURATION_DEBUG}
+//{$DEFINE CONFIGURATION_DEBUG}
 
 unit SaGeEngineConfigurationPanel;
 
@@ -67,7 +67,7 @@ begin
 	{$ENDIF}
 Context.SetRenderClass(VRenderClass);
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass) : Begining');
+	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass) : End');
 	{$ENDIF}
 end;
 

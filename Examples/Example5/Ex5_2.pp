@@ -14,7 +14,7 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContextInterface
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils

@@ -13,8 +13,8 @@ uses
 	,Math
 	,SaGeRender
 	,SaGeContext
-	,SaGeBaseClasses
-	,SaGeContextInterface
+	,SaGeClasses
+	,SaGeCommonClasses
 	,SaGeRenderConstants;
 type
 	TSGMathFloatType = {$IFNDEF ANDROID}Extended{$ELSE}Real{$ENDIF};

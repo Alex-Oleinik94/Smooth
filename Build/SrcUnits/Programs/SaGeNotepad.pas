@@ -15,6 +15,8 @@ uses
 	,Classes
 	,SaGeCommon
 	,SaGeRender
+	,SaGeRenderConstants
+	,SaGeCommonClasses
 	;
 
 type
@@ -69,7 +71,7 @@ type
 	
 	TSGNotepad = class(TSGComponent)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -123,7 +125,7 @@ procedure TSGNTextInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const Curs
 begin
 if Visible then if CanRePleace then if CursorInComponentNow then
 	begin
-	if (Context.CursorWheel() <> SGNoCursorWheel)then
+	if (Context.CursorWheel() <> SGNullCursorWheel)then
 		begin
 		if Context.CursorWheel() = SGUpCursorWheel then
 			begin

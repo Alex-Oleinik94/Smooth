@@ -12,7 +12,7 @@ uses
 	,SysUtils
 	,SaGeUtils
 	,SaGeRenderConstants
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen

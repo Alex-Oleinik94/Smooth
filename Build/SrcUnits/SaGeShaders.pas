@@ -10,7 +10,7 @@ uses
 	,SaGeCommon
 	,SysUtils
 	,SaGeRender
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,Classes
 	,SaGeResourseManager
 	,StrMan

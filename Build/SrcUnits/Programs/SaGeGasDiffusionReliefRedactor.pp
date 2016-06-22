@@ -13,7 +13,7 @@ uses
 	,Classes
 	,SaGeBased
 	,SaGeMesh
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeRenderConstants
 	,SaGeContext
 	,SaGeCommon

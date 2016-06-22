@@ -14,8 +14,8 @@ uses
 	,crt
 	,SaGeRender
 	,SaGeRenderConstants
-	,SaGeContextInterface
-	,SaGeBaseClasses
+	,SaGeCommonClasses
+	,SaGeClasses
 	{$IFDEF LAZARUS}
 		,Interfaces,
 		LMessages,
@@ -40,26 +40,26 @@ const
 	SG_ESC_KEY = 27;
 	SG_ESCAPE_KEY = SG_ESC_KEY;
 type
-	TSGCursorButtons =            SaGeContextInterface.TSGCursorButtons;
-	TSGCursorButtonType =         SaGeContextInterface.TSGCursorButtonType;
-	TSGCursorWheel =              SaGeContextInterface.TSGCursorWheel;
-	TSGCursorPosition =           SaGeContextInterface.TSGCursorPosition;
+	TSGCursorButtons =            SaGeCommonClasses.TSGCursorButtons;
+	TSGCursorButtonType =         SaGeCommonClasses.TSGCursorButtonType;
+	TSGCursorWheel =              SaGeCommonClasses.TSGCursorWheel;
+	TSGCursorPosition =           SaGeCommonClasses.TSGCursorPosition;
 const
-	 SGDeferenseCursorPosition =  SaGeContextInterface.SGDeferenseCursorPosition; // - Это разница между SGNowCursorPosition и SGLastCursorPosition
-	 SGNowCursorPosition =        SaGeContextInterface.SGNowCursorPosition;       //- Координаты мыши в настоящий момент
-	 SGLastCursorPosition =       SaGeContextInterface.SGLastCursorPosition;      // - Координаты мыши, полученые при преведущем этапе цикла
-	 SGNullCursorButton =         SaGeContextInterface.SGNullCursorButton;
+	 SGDeferenseCursorPosition =  SaGeCommonClasses.SGDeferenseCursorPosition; // - Это разница между SGNowCursorPosition и SGLastCursorPosition
+	 SGNowCursorPosition =        SaGeCommonClasses.SGNowCursorPosition;       //- Координаты мыши в настоящий момент
+	 SGLastCursorPosition =       SaGeCommonClasses.SGLastCursorPosition;      // - Координаты мыши, полученые при преведущем этапе цикла
+	 SGNullCursorButton =         SaGeCommonClasses.SGNullCursorButton;
 	 
-	 SGMiddleCursorButton =       SaGeContextInterface.SGMiddleCursorButton;
-	 SGLeftCursorButton =         SaGeContextInterface.SGLeftCursorButton;
-	 SGRightCursorButton =        SaGeContextInterface.SGRightCursorButton;
+	 SGMiddleCursorButton =       SaGeCommonClasses.SGMiddleCursorButton;
+	 SGLeftCursorButton =         SaGeCommonClasses.SGLeftCursorButton;
+	 SGRightCursorButton =        SaGeCommonClasses.SGRightCursorButton;
 	 
-	 SGDownKey =                  SaGeContextInterface.SGDownKey;
-	 SGUpKey =                    SaGeContextInterface.SGUpKey;
+	 SGDownKey =                  SaGeCommonClasses.SGDownKey;
+	 SGUpKey =                    SaGeCommonClasses.SGUpKey;
 	 
-	 SGNullCursorWheel =          SaGeContextInterface.SGNullCursorWheel;
-	 SGUpCursorWheel =            SaGeContextInterface.SGUpCursorWheel;
-	 SGDownCursorWheel =          SaGeContextInterface.SGDownCursorWheel;
+	 SGNullCursorWheel =          SaGeCommonClasses.SGNullCursorWheel;
+	 SGUpCursorWheel =            SaGeCommonClasses.SGUpCursorWheel;
+	 SGDownCursorWheel =          SaGeCommonClasses.SGDownCursorWheel;
 type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
@@ -191,9 +191,10 @@ type
 		FRenderClass    : TSGRenderClass;
 		FRender         : TSGRender;
 		FSelfLink       : PISGContext;
-		FPaintable       : ISGDeviceDependent;
+		FPaintableClass : TSGDrawableClass;
+		FPaintable       : TSGDrawable;
 			public
-		property Paintable : ISGDeviceDependent write FPaintable;
+		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
 		end;
 
@@ -233,8 +234,12 @@ WriteLn('TSGContext.ReinitializeRender() : Begining');
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
 SGScreen.DeleteDeviceResourses();
-if FRender <> nil then
-	FRender.Destroy();
+// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
+//if FRender <> nil then
+	//FRender.Destroy();
+{$IFDEF CONTEXT_BEGUNING}
+WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
+	{$ENDIF}
 FRender := FRenderClass.Create();
 FRender.Context := Self as ISGContext;
 if FRender.CreateContext() then
@@ -394,6 +399,11 @@ procedure TSGContext.Initialize();
 begin
 StartComputeTimer();
 FInitialized := True;
+if FPaintableClass <> nil then
+	begin
+	FPaintable := FPaintableClass.Create(Self);
+	FPaintable.LoadDeviceResourses();
+	end;
 end;
 
 procedure TSGContext.UpdateTimer();
@@ -409,30 +419,35 @@ procedure TSGContext.Run();
 begin
 Messages();
 StartComputeTimer();
-while FActive and (FNewContextType = nil) do
+while Active and (FNewContextType = nil) do
+	begin
 	Paint();
+	{$IFDEF CONTEXT_BEGUNING}
+		WriteLn('TSGContext.Run(): Before continue looping');
+		{$ENDIF}
+	end;
 end;
 
 procedure TSGContext.Paint();
 begin
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
+	WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
 UpdateTimer(); 
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
+	WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
 	{$IFDEF CONTEXT_BEGUNING}
-	WriteLn('TSGContext.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
+		WriteLn('TSGContext.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
 		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : Before "ClearKeys();" & "Messages();"');
+	WriteLn('TSGContext.Paint() : Before "ClearKeys();" & "Messages();"');
 	{$ENDIF}
 if FPaintWithHandlingMessages then
 	begin
@@ -440,15 +455,15 @@ if FPaintWithHandlingMessages then
 	Messages();
 	end;
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : Before "SGScreen.Paint();"');
+	WriteLn('TSGContext.Paint() : Before "SGScreen.Paint();"');
 	{$ENDIF}
 SGScreen.Paint();
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
+	WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
 SwapBuffers();
 {$IFDEF CONTEXT_BEGUNING}
-WriteLn('TSGContext.Paint() : End');
+	WriteLn('TSGContext.Paint() : End');
 	{$ENDIF}
 end;
 
@@ -604,7 +619,12 @@ end;
 
 destructor TSGContext.Destroy();
 begin
-if FRender<>nil then
+if FPaintable <> nil then
+	begin
+	FPaintable.Destroy();
+	FPaintable := nil;
+	end;
+if FRender <> nil then
 	begin
 	FRender.Destroy();
 	FRender:=nil;

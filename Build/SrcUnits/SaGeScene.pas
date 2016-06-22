@@ -7,7 +7,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeCommon
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeMesh
 	,SaGeModel
 	,SaGeUtils

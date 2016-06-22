@@ -10,7 +10,7 @@ uses
 	, SaGeBased
 	, SaGeImages
 	, SaGeRender
-	, SaGeContextInterface
+	, SaGeCommonClasses
 	, SaGeMesh
 	, SaGeGameBase
 	;

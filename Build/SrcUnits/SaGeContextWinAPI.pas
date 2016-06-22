@@ -1,6 +1,6 @@
 {$include Includes\SaGe.inc}
 
-{$DEFINE SGWinAPIDebug}
+//{$DEFINE SGWinAPIDebug}
 
 unit SaGeContextWinAPI;
 
@@ -14,7 +14,7 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,commdlg
-	,SaGeBaseClasses
+	,SaGeClasses
 	;
 
 type
@@ -54,9 +54,9 @@ type
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
 			protected
-		hWindow:HWnd;
-		dcWindow:hDc;
-		clWindow:LongWord;
+		hWindow  : HWnd;
+		dcWindow : hDc;
+		clWindow : LongWord;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  WindowRegister(): Boolean;
 		function  WindowCreate(): HWnd;
@@ -67,6 +67,9 @@ type
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function  GetClientWidth() : TSGLongWord;override;
 		function  GetClientHeight() : TSGLongWord;override;
+			protected
+		FNormalCursor,
+			FNullCursor : TSGLongWord;
 			public
 		function  GetCursorPosition():TSGPoint2f;override;
 		function FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
@@ -82,7 +85,7 @@ implementation
 uses
 	SaGeScreen
 	,SysUtils
-	,SaGeContextInterface;
+	,SaGeCommonClasses;
 
 // А вод это жесткий костыль. 
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
@@ -286,9 +289,10 @@ end;
 constructor TSGContextWinAPI.Create;
 begin
 inherited;
-hWindow:=0;
-dcWindow:=0;
-clWindow:=0;
+hWindow  := 0;
+dcWindow := 0;
+clWindow := 0;
+FNormalCursor := LoadCursor(GetModuleHandle(nil), MAKEINTRESOURCE(5));
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -304,17 +308,16 @@ Active := CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
-	if FPaintable <> nil then
-		FPaintable.LoadDeviceResourses();
 	inherited;
 	end;
+SetClassLong(hWindow, GCL_HCURSOR, FNullCursor);
 end;
 
 procedure TSGContextWinAPI.Run();
 begin
 Messages();
-FElapsedDateTime.Get();
-while FActive and (FNewContextType=nil) do
+StartComputeTimer();
+while Active and (FNewContextType = nil) do
 	begin
 	Paint();
 	end;
@@ -555,18 +558,18 @@ for i:=0 to SizeOf(Si)-1 do
 end;}
 
 begin
-WindowClass.cbSize        := sizeof(WNDCLASSEX);
+WindowClass.cbSize        := SizeOf(WNDCLASSEX);
 WindowClass.Style         := cs_hRedraw or cs_vRedraw or CS_OWNDC;
 WindowClass.lpfnWndProc   := WndProc(@MyGLWndProc);
 WindowClass.cbClsExtra    := 0;
 WindowClass.cbWndExtra    := 0;
 WindowClass.hInstance     := System.MainInstance;
-WindowClass.hIcon         := LoadIcon(GetModuleHandle(nil),PCHAR(5));
-WindowClass.hCursor       := LoadCursor(GetModuleHandle(nil),PCHAR(5));
+WindowClass.hIcon         := LoadIcon(GetModuleHandle(nil),MAKEINTRESOURCE(5));
+WindowClass.hCursor       := FNormalCursor;
 WindowClass.hbrBackground := 0;
 WindowClass.lpszMenuName  := nil;
 WindowClass.lpszClassName := 'SaGe Window Class';
-WindowClass.hIconSm       := LoadIcon(GetModuleHandle(nil),PCHAR(5));
+WindowClass.hIconSm       := WindowClass.hIcon;
 
 clWindow:=Windows.RegisterClassEx(WindowClass);
 

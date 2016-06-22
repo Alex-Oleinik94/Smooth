@@ -5,7 +5,7 @@ interface
 
 uses
 	crt
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils

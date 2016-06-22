@@ -13,7 +13,7 @@ uses
 	,xlib
 	,xutil
 	,glx
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 type
 	TSGContextLinux = class(TSGContext)

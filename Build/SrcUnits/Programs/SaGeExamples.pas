@@ -19,7 +19,7 @@ uses
 	,SaGeRender
 	,SaGeImages
 	,SaGeRenderConstants
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 
 {$DEFINE SGREADINTERFACE}

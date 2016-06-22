@@ -11,7 +11,7 @@ uses
 	,SaGeBased
 	,SaGeMesh
 	,PAPPE
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeImages

@@ -9,7 +9,7 @@ uses
 	,Math
 	,Crt
 	,SaGeRenderConstants
-	,SaGeBaseClasses;
+	,SaGeClasses;
 
 type
 	ISGRender = interface;

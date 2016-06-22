@@ -12,6 +12,8 @@
 	{$ENDIF}
 {$DEFINE INTERPRITATEROTATETRANSLATE}
 
+{$DEFINE RENDER_OGL_DEBUG}
+
 unit SaGeRenderOpenGL;
 
 interface
@@ -1375,6 +1377,9 @@ begin
 		{$ENDIF}
 	{$ENDIF}
 inherited;
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Destroy(): End');
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.MatrixMode(const Par:TSGLongWord);

@@ -17,7 +17,7 @@ uses
 	,SaGeRender
 	,SaGeTotal
 	,SaGeRenderConstants
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 type
 	TSGFractal = class;

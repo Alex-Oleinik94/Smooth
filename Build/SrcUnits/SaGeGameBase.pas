@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeBased
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 
 type

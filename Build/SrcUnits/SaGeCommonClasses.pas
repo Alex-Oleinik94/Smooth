@@ -1,11 +1,11 @@
 {$INCLUDE Includes\SaGe.inc}
 
-unit SaGeContextInterface;
+unit SaGeCommonClasses;
 
 interface
 uses
 	SaGeBased
-	,SaGeBaseClasses
+	,SaGeClasses
 	,SaGeCommon
 	,SaGeRender
 	;

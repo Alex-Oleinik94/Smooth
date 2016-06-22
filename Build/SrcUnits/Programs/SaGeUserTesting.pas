@@ -9,7 +9,7 @@ uses
 	,SysUtils
 	,SaGeBase
 	,SaGeBased
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeModel
 	,SaGeScene
 	,SaGeGamePhysics

@@ -11,14 +11,14 @@ uses
 	 Crt
 	,SaGeCommon
 	,SaGeBase
-	,SaGeBaseClasses
+	,SaGeClasses
 	,SaGeBased
 	,SaGeImages
 	,SaGeContext
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeResourseManager
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 
 type
@@ -265,6 +265,8 @@ type
 		procedure Load(const VContext : ISGContext);
 		procedure Resize();
 		procedure Paint();override;
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -2604,6 +2606,8 @@ procedure TSGComponent.DeleteDeviceResourses();
 var
 	Component : TSGComponent;
 begin
+if FDrawClass <> nil then
+	FDrawClass.DeleteDeviceResourses();
 for Component in Self do
 	Component.DeleteDeviceResourses();
 end;
@@ -2612,6 +2616,8 @@ procedure TSGComponent.LoadDeviceResourses();
 var
 	Component : TSGComponent;
 begin
+if FDrawClass <> nil then
+	FDrawClass.LoadDeviceResourses();
 for Component in Self do
 	Component.LoadDeviceResourses();
 end;
@@ -3540,6 +3546,34 @@ end;
 destructor TSGButton.Destroy;
 begin
 inherited Destroy;
+end;
+
+procedure TSGScreen.DeleteDeviceResourses();
+
+procedure PProcessImage(const VImage : TSGImage);
+begin
+if VImage.Texture <> 0 then
+	VImage.DeleteDeviceResourses();
+end;
+
+begin 
+PProcessImage(Font);
+PProcessImage(ComboBoxImage);
+inherited;
+end;
+
+procedure TSGScreen.LoadDeviceResourses();
+
+procedure PProcessImage(const VImage : TSGImage);
+begin
+if not (VImage.ReadyGoToTexture or (VImage.Texture <> 0)) then
+	VImage.Loading();
+end;
+
+begin
+PProcessImage(Font);
+PProcessImage(ComboBoxImage);
+inherited;
 end;
 
 constructor TSGScreen.Create();

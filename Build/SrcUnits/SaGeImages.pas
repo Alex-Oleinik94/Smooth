@@ -23,7 +23,7 @@ uses
 	{$IFDEF WITHLIBPNG},SaGeImagesPng{$ENDIF}
 	,SaGeImagesTga
 	,SaGeImagesSgia
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	;
 type
 	TSGImage = class;
@@ -38,7 +38,8 @@ type
 	TSGImage = class(TSGDrawable)
 			public
 		constructor Create(const NewWay:string = '');
-		destructor Destroy;override;
+		destructor Destroy();override;
+		procedure DeleteDeviceResourses();override;
 			public
 		// А это само изображение ( в оперативной памяти, в виде последовательности байнов, и свойств изобрадения )
 		// В общем это BitMap (битовая карта)
@@ -151,6 +152,11 @@ procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
 
 implementation
 
+procedure TSGImage.DeleteDeviceResourses();
+begin
+FreeTexture();
+FReadyToGoToTexture := FImage.FBitMap <> nil;
+end;
 
 constructor TSGTextureBlock.Create(const VContext : ISGContext);
 begin
@@ -623,9 +629,11 @@ end;
 
 procedure TSGImage.FreeTexture();
 begin
-if (FTexture<>0) and RenderAssigned() then
+if (FTexture <> 0) and RenderAssigned() then
+	begin
 	Render.DeleteTextures(1,@FTexture);
-FTexture:=0;
+	FTexture := 0;
+	end;
 end;
 
 destructor TSGImage.Destroy();

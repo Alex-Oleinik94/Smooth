@@ -5,7 +5,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeCommon
 	,SaGeUtils
 	;

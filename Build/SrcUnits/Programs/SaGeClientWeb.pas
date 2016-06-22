@@ -9,7 +9,7 @@ uses
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
-	,SaGeContextInterface
+	,SaGeCommonClasses
 	,SaGeNet
 	
 	,fpjson
