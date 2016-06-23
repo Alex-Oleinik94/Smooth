@@ -3350,7 +3350,7 @@ if CaptionCharget or CursorChanget then
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
 	end;
-if FCursorOnComponent then
+if FCursorOnComponent and Active and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
 if FCursorOnComponentPrev and (not FCursorOnComponent) then
@@ -3436,7 +3436,7 @@ if not Active then
 	FCursorOnButton    := False;
 	FChangingButton    := False;
 	end;
-if FCursorOnButton then
+if FCursorOnButton and Active and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
 		Context.Cursor := TSGCursor.Create(SGC_HAND);
 if FCursorOnButtonPrev and (not FCursorOnButton) then

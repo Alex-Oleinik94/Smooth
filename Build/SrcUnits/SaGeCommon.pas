@@ -189,14 +189,7 @@ type
 		end;
 	SGColor4f = TSGColor4f;
 	SGColor = TSGColor4f;
-	PTArTSGColor4f = ^TArTSGColor4f;
-	TArTSGColor4f =type packed array of TSGColor4f;
-	TArSGColor4f = TArTSGColor4f;
-	TArSGColor = TArTSGColor4f;
-	TArColor = TArTSGColor4f;
-	ArColor = TArTSGColor4f;
-	ArSGColor = TArTSGColor4f;
-	ArSGColor4f = TArSGColor4f;
+	TSGArColor4f = type packed array of TSGColor4f;
 	
 	TSGArFor0To255OfBoolean = type packed array [0..255] of boolean;
 	TSGArFor0To2OfBoolean = type packed array [0..2] of boolean;

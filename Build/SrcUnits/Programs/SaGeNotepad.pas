@@ -32,7 +32,7 @@ type
 			public
 		procedure FromDraw();override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
-			private
+			protected
 		FTitle : TSGString;
 		FTitleWidth : TSGLongWord;
 		FOwner : TSGNotepad;
@@ -46,40 +46,6 @@ type
 		property Title : TSGString read GetTitle write SetTitle;
 		property TitleWidth : TSGLongWord read GetTitleWidth;
 		property Owner : TSGNotepad write SetOwner;
-		end;
-	
-	TSGNTextInset = class(TSGNInset)
-			public
-		constructor Create();
-		destructor Destroy();override;
-			private
-		FFileName : TSGString;
-		FFile : TSGArString;
-		FScrolTimer : TSGFloat;
-		
-		FCursorOnText : TSGBoolean;
-		FCursorOnTextPrev : TSGBoolean;
-		
-		FTextCursor : record
-			FLine : TSGLongWord;
-			FColumn : TSGLongWord;
-			FTimer : TSGFloat;
-			end;
-		
-			private
-		procedure SetFile(const VFileName : TSGString);
-		procedure LoadFile();
-		function CountLines() : TSGLongWord;
-		procedure GoToPosition(const Line, Column : TSGLongWord);
-		procedure MoveVertical(const Param : TSGFloat);
-		procedure StandardizateView();
-			public
-		property FileName : TSGString write SetFile;
-			public
-		procedure FromDraw();override;
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
-		procedure FromResize();override;
 		end;
 	
 	TSGNInsetList = packed array of TSGNInset;
@@ -111,6 +77,7 @@ type
 		procedure AddInset(const VInset : TSGNInset);
 		function CountInsets() : TSGLongWord;
 		function InsetIndex(const VInset : TSGNInset) : TSGLongWord;
+			public
 		function ActiveInset() : TSGNInset;
 		end;
 	
@@ -127,6 +94,9 @@ type
 		end;
 
 implementation
+
+uses
+	SaGeNotepadTextInset;
 
 class function TSGNotepadApplication.ClassName() : TSGString;
 begin
@@ -212,6 +182,7 @@ end;
 
 var
 	ProjectName : TSGString;
+
 begin
 ProjectName := SGGetFileWay(FMakefile.FileName) + VProjName;
 if ValidProject(ProjectName) then
@@ -273,7 +244,6 @@ else if SGResourseFiles.FileExists(VFileName + Slash + 'Makefile') then
 	FMakefile := TSGMakefileReader.Create(VFileName + Slash + 'Makefile');
 if FMakefile <> nil then
 	begin
-	WriteLn(FMakefile.TargetCount() );
 	if FMakefile.TargetCount() <> 0 then
 		begin
 		for TargetIndex := 0 to FMakefile.TargetCount() - 1 do
@@ -308,12 +278,6 @@ ResizeInsets();
 inherited;
 end;
 
-procedure TSGNTextInset.FromResize();
-begin
-StandardizateView();
-inherited;
-end;
-
 procedure TSGNInset.FromDraw();
 begin
 FCursorOnComponent := False;
@@ -325,71 +289,6 @@ begin
 inherited;
 end;
 
-procedure TSGNTextInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
-begin
-if Visible then if CanRePleace then if CursorInComponentNow then
-	begin
-	if (Context.CursorWheel() <> SGNullCursorWheel)then
-		begin
-		if Context.CursorWheel() = SGUpCursorWheel then
-			begin
-			MoveVertical(-3);
-			end
-		else
-			begin
-			MoveVertical( 3);
-			end;
-		end;
-	end;
-inherited;
-end;
-
-procedure TSGNTextInset.MoveVertical(const Param : TSGFloat);
-begin
-FBegin += Param;
-FEnd += Param;
-StandardizateView();
-FScrolTimer := 1;
-end;
-
-procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
-
-var
-	Line : TSGLongWord;
-	CursorPos : TSGPoint2f;
-
-function IsCurOnText():TSGBoolean;
-begin
-Result := False;
-if not FCursorOnComponent then
-	Exit;
-CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGPoint2fImport(FRealLeft, FRealTop);
-Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
-Result := (Font.StringLength(FFile[Line]) + Font.StringLength(SGStr(CountLines())) + 5 >= CursorPos.x) and
-		  (Font.StringLength(SGStr(CountLines())) + 5 <= CursorPos.x);
-end;
-
-procedure ProcessCursors();
-begin
-FCursorOnText := IsCurOnText();
-if FCursorOnText then
-	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
-		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
-if FCursorOnTextPrev and (not FCursorOnText) then
-	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
-	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-FCursorOnTextPrev := FCursorOnText;
-end;
-
-begin
-if FOwner <> nil then
-	Visible := FOwner.ActiveInset() = Self;
-FScrolTimer := FScrolTimer * 0.95;
-if FCursorOnComponent or FCursorOnText or FCursorOnTextPrev then
-	ProcessCursors();
-inherited;
-end;
-
 function TSGNotepad.ActiveInset() : TSGNInset;
 begin
 if CountInsets() = 0 then
@@ -398,138 +297,6 @@ else if (FActiveInset >= 0) and (FActiveInset <= CountInsets() - 1) then
 	Result := FInsets[FActiveInset]
 else
 	Result := nil;
-end;
-
-procedure TSGNTextInset.StandardizateView();
-var
-	Difference, DifferenceOld, Middle : TSGFloat;
-begin
-DifferenceOld := Abs(FEnd - FBegin);
-Difference := Height / Font.FontHeight;
-if Abs(Difference - DifferenceOld) > SGZero then
-	begin
-	Middle := (FEnd + FBegin) / 2;
-	FBegin := Middle - Difference / 2;
-	FEnd := Middle + Difference / 2;
-	end;
-if FEnd > CountLines() then
-	begin
-	FEnd := CountLines();
-	FBegin := FEnd - Difference;
-	end;
-if FBegin < 0 then
-	begin
-	FBegin := 0;
-	FEnd := Difference;
-	end;
-end;
-
-procedure TSGNTextInset.GoToPosition(const Line, Column : TSGLongWord);
-var
-	Difference : TSGFloat;
-begin
-Difference := Height / Font.FontHeight;
-FBegin := (Line + 0.5) - Difference / 2;
-FEnd := FBegin + Difference;
-StandardizateView();
-FTextCursor.FLine := Line;
-FTextCursor.FColumn := Column;
-FTextCursor.FTimer := 1;
-end;
-
-procedure TSGNTextInset.FromDraw();
-
-procedure DrawTextAndNumLines();
-var
-	i, ii : TSGLongWord;
-	Vertex : TSGVertex3f;
-	MaxLinesShift : TSGLongWord;
-	Alpha, Shift : TSGFloat;
-begin
-MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
-ii := Trunc(FBegin);
-Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-Shift := Abs(FBegin - ii);
-Vertex.y -= Shift * Font.FontHeight;
-for i := ii to Trunc(FEnd) + 1 do
-	begin
-	if i >= CountLines() then
-		break;
-	
-	if i = ii  then
-		Alpha := (1 - Shift) ** 2
-	else if i - Shift + 1 > FEnd then
-		Alpha := Abs(FEnd - i + Shift - 1) ** 2
-	else
-		Alpha := 1;
-	
-	Render.Color4f(0.9,0.9,0.9,Alpha);
-	Font.DrawFontFromTwoVertex2f(
-		SGStr(i+1),
-		SGVertex2fImport(
-			Vertex.x,
-			Vertex.y + (i - ii) * Font.FontHeight),
-		SGVertex2fImport(
-			Vertex.x + MaxLinesShift,
-			Vertex.y + (i - ii + 1) * Font.FontHeight),
-		False);
-	Render.Color4f(1,1,1,Alpha);
-	Font.DrawFontFromTwoVertex2f(
-		FFile[i],
-		SGVertex2fImport(
-			Vertex.x + MaxLinesShift,
-			Vertex.y + (i - ii) * Font.FontHeight),
-		SGVertex2fImport(
-			Vertex.x + Width,
-			Vertex.y + (i - ii + 1) * Font.FontHeight),
-		False);
-	end;
-end;
-
-procedure DrawScrollBar();
-const
-	ScrollBarWidth = 20;
-var
-	VertexTop, VertexBottom : TSGVertex3f;
-	VertexTopLeft, VertexBottomLeft : TSGVertex3f;
-	AreaAll : TSGFloat;
-begin
-VertexTop := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-VertexBottom := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
-VertexBottomLeft := VertexBottom; VertexBottomLeft.x -= ScrollBarWidth * FScrolTimer;
-VertexTopLeft := VertexTop; VertexTopLeft.x -= ScrollBarWidth * FScrolTimer;
-AreaAll := CountLines();
-Render.BeginScene(SGR_QUADS);
-
-Render.Color4f(0.3,0.3,0.3,FScrolTimer);
-VertexTop.Vertex(Render);
-VertexBottom.Vertex(Render);
-VertexBottomLeft.Vertex(Render);
-VertexTopLeft.Vertex(Render);
-
-Render.Color4f(0.1,0.9,0.1,FScrolTimer);
-Render.Vertex2f(
-	VertexTop.x,
-	VertexTop.y + FBegin / AreaAll * Height);
-Render.Vertex2f(
-	VertexTop.x,
-	VertexTop.y + FEnd / AreaAll * Height);
-Render.Vertex2f(
-	VertexTopLeft.x,
-	VertexTop.y + FEnd / AreaAll * Height);
-Render.Vertex2f(
-	VertexTopLeft.x,
-	VertexTop.y + FBegin / AreaAll * Height);
-Render.EndScene();
-end;
-
-begin
-if FOwner.ActiveInset() = Self then
-	begin
-	DrawTextAndNumLines();
-	DrawScrollBar();
-	end;
-inherited;
 end;
 
 procedure TSGNotepad.FromDraw();
@@ -587,49 +354,6 @@ inherited;
 DrawInsetsTitles();
 end;
 
-function TSGNTextInset.CountLines() : TSGLongWord;
-begin
-if FFile = nil then
-	Result := 0
-else
-	Result := Length(FFile);
-end;
-
-constructor TSGNTextInset.Create();
-begin
-inherited;
-FFileName := '';
-FFile := nil;
-FScrolTimer := 1;
-end;
-
-destructor TSGNTextInset.Destroy();
-begin
-SetLength(FFile, 0);
-inherited;
-end;
-
-procedure TSGNTextInset.SetFile(const VFileName : TSGString);
-begin
-FFileName := VFileName;
-LoadFile();
-end;
-
-procedure TSGNTextInset.LoadFile();
-var
-	Stream : TMemoryStream = nil;
-begin
-Stream := TMemoryStream.Create();
-Stream.LoadFromFile(FFileName);
-Stream.Position := 0;
-while Stream.Position <> Stream.Size do
-	begin
-	SetLength(FFile, CountLines() + 1);
-	FFile[High(FFile)] := SGReadLnStringFromStream(Stream);
-	end;
-Stream.Destroy();
-end;
-
 function TSGNInset.GetTitleWidth() : TSGLongWord;
 begin
 if FTitleWidth = 0 then
@@ -648,6 +372,8 @@ inherited;
 FTitle := '';
 FOwner := nil;
 FTitleWidth := 0;
+FBegin := 0;
+FEnd := 30;
 end;
 
 destructor TSGNInset.Destroy();

@@ -159,8 +159,8 @@ type
 			public
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
+		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 		procedure AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 		end;
 
@@ -1049,17 +1049,20 @@ procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:S
 var
 	P:PChar;
 begin
-P:=SGStringToPChar(S);
-DrawFontFromTwoVertex2f(P,Vertex1,Vertex2,AutoXShift,AutoYShift);
-FreeMem(P,SGPCharLength(P)+1);
+if Length(S) > 0 then
+	begin
+	P:=SGStringToPChar(S);
+	DrawFontFromTwoVertex2f(P,Vertex1,Vertex2,AutoXShift,AutoYShift);
+	FreeMem(P,SGPCharLength(P)+1);
+	end;
 end;
 
-procedure TSGFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 var
 	P:PChar;
 begin
 P:=SGStringToPChar(S);
-DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift);
+DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift,CursorWidth);
 FreeMem(P,SGPCharLength(P)+1);
 end;
 
@@ -1428,12 +1431,11 @@ for i:=1 to Length(VString) do
 end;
 
 
-procedure TSGFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 var
 	i:LongInt = 0;
 	StringWidth:LongInt = 0;
 	Otstup:SGVertex2f = (x:0;y:0);
-	ToExit:Boolean = False;
 begin
 if AutoXShift then
 	begin
@@ -1446,17 +1448,32 @@ if AutoYShift then
 	Otstup.y:=(Abs(Vertex2.y-Vertex1.y)-FFontHeight)/2;
 	end;
 
-while (s[i]<>#0) and (not ToExit) and (CursorPosition>i) do
+while (s[i]<>#0) and (CursorPosition > i) do
 	begin
-	Otstup.x+=FSimbolParams[s[i]].Width;
+	if s[i] = '	' then
+		Otstup.x := FSimbolParams[' '].Width * 4
+	else
+		Otstup.x += FSimbolParams[s[i]].Width;
 	i+=1;
 	end;
 if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
 	begin
-	Render.BeginScene(SGR_LINES);
-	(Vertex1+Otstup).Vertex(Render);
-	Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
-	Render.EndScene();
+	if CursorWidth = 1 then
+		begin
+		Render.BeginScene(SGR_LINES);
+		(Vertex1+Otstup).Vertex(Render);
+		Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
+		Render.EndScene();
+		end
+	else
+		begin
+		Render.BeginScene(SGR_QUADS);
+		Render.Vertex2f(Otstup.x+Vertex1.x-CursorWidth/2,Otstup.y+Vertex1.y);
+		Render.Vertex2f(Otstup.x+Vertex1.x+CursorWidth/2,Otstup.y+Vertex1.y);
+		Render.Vertex2f(Otstup.x+Vertex1.x+CursorWidth/2,Otstup.y+FFontHeight+Vertex1.y);
+		Render.Vertex2f(Otstup.x+Vertex1.x-CursorWidth/2,Otstup.y+FFontHeight+Vertex1.y);
+		Render.EndScene();
+		end;
 	end;
 end;
 
