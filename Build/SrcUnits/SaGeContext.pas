@@ -47,7 +47,7 @@ type
 	TSGCursorPosition =           SaGeCommonClasses.TSGCursorPosition;
 const
 	 SGDeferenseCursorPosition =  SaGeCommonClasses.SGDeferenseCursorPosition; // - Ёто разница между SGNowCursorPosition и SGLastCursorPosition
-	 SGNowCursorPosition =        SaGeCommonClasses.SGNowCursorPosition;       //-  оординаты мыши в насто€щий момент
+	 SGNowCursorPosition =        SaGeCommonClasses.SGNowCursorPosition;       // -  оординаты мыши в насто€щий момент
 	 SGLastCursorPosition =       SaGeCommonClasses.SGLastCursorPosition;      // -  оординаты мыши, полученые при преведущем этапе цикла
 	 SGNullCursorButton =         SaGeCommonClasses.SGNullCursorButton;
 	 

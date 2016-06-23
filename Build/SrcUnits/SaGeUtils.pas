@@ -148,6 +148,7 @@ type
 		function Loading():TSGBoolean;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:string ):LongWord;overload;
+		function CursorPlace(const S : TSGString; const Position : TSGLongWord):TSGLongWord;
 		function Ready():Boolean;override;
 			public
 		property FontReady :Boolean read FFontReady;
@@ -1307,6 +1308,35 @@ while s[i]<>#0 do
 		Result+=FSimbolParams[s[i]].Width;
 	i+=1;
 	end;
+end;
+
+function TSGFont.CursorPlace(const S : TSGString; const Position : TSGLongWord):TSGLongWord;
+var
+	y, oldy, i : TSGLongWord;
+	Placed : TSGBoolean = False;
+begin
+Result := 0;
+y := 0;
+oldy := 0;
+for i:= 1 to Length(S) do
+	begin
+	if s[i] = '	' then
+		y += FSimbolParams[' '].Width * 4
+	else
+		y += FSimbolParams[s[i]].Width;
+	if (Position >= oldy) and (Position <= y) then
+		begin
+		Placed := True;
+		if (Position - oldy) < (y - Position) then
+			Result := i - 1
+		else
+			Result := i;
+		break;
+		end;
+	oldy := y;
+	end;
+if not Placed then
+	Result := Length(S);
 end;
 
 function TSGFont.StringLength(const S : TSGString) : TSGLongWord;overload;

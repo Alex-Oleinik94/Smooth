@@ -112,14 +112,20 @@ Result := False;
 if not FCursorOnComponent then
 	Exit;
 CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGPoint2fImport(FRealLeft, FRealTop);
+CursorPos.x -= Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
-Result := (Font.StringLength(FFile[Line].FString) + Font.StringLength(SGStr(CountLines())) + 5 >= CursorPos.x) and
-		  (Font.StringLength(SGStr(CountLines())) + 5 <= CursorPos.x);
+Result := (Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
+		  (5 <= CursorPos.x);
+end;
+
+procedure PutCursor();
+begin
+GoToPosition(Line, Font.CursorPlace(FFile[Line].FString, CursorPos.x - 5));
 end;
 
 procedure ProcessCursor();
 begin
-FCursorOnText := IsCurOnText();
+FCursorOnText := FCursorOnComponent and IsCurOnText();
 if FCursorOnText then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
@@ -127,6 +133,8 @@ if FCursorOnTextPrev and (not FCursorOnText) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
 FCursorOnTextPrev := FCursorOnText;
+if FCursorOnText and Context.CursorKeysPressed(SGLeftCursorButton) then
+	PutCursor();
 end;
 
 procedure ProcessTyping();
@@ -286,7 +294,7 @@ if FOwner <> nil then
 	Visible := FOwner.ActiveInset() = Self;
 if Visible then
 	begin
-	FScrolTimer := FScrolTimer * 0.95;
+	UpgradeTimer(False, FScrolTimer, 1, 3);
 	if FCursorOnComponent or FCursorOnText or FCursorOnTextPrev then
 		ProcessCursor();
 	ProcessTyping();
@@ -328,7 +336,7 @@ if FTextCursor.FLine < 1 + FBegin then
 	FBegin -= Difference;
 	FEnd -= Difference;
 	end
-else if FTextCursor.FLine + 1 > FEnd then
+else if FTextCursor.FLine + 2 > FEnd then
 	begin
 	Difference := FTextCursor.FLine - FEnd + 2;
 	FBegin += Difference;
