@@ -19,12 +19,14 @@ uses
 	;
 
 type
+	TSGKillerArrayType = packed record
+		FType:Byte;
+		FWay:LongWord;
+		end;
+	
 	TSGKillerArray = packed array of
-			packed array of
-				record
-				FType:Byte;
-				FWay:LongWord;
-				end;
+		packed array of
+			TSGKillerArrayType;
 const
 	TSGKillerStringWin = 'Ты выиграл!!!';
 	TSGKillerStringLose = 'Ты проиграл...';
@@ -36,7 +38,7 @@ type
 		class function ClassName:string;override;
 		procedure Paint;override;
 			private
-		FStartDeep:LongWord;
+		FStartDeep,FStartDeepHeight:LongWord;
 		FArray:TSGKillerArray;
 		FYou:TSGPoint2f;
 		FZombies:packed array of
@@ -83,7 +85,7 @@ type
 			FWayShift : TSGVertex2f;
 			{$ENDIF}
 			private
-		procedure DoQuad(const i,ii:LongWord);inline;
+		procedure DoQuad(const i,ii:LongWord;const artype : TSGKillerArrayType);inline;
 		procedure GoZombies;
 		function Proverka(const KPos:TSGPoint2f;const b:Byte):Boolean;inline;
 		procedure Reset;inline;
@@ -108,7 +110,18 @@ implementation
 
 {$OVERFLOWCHECKS OFF}
 
-procedure mmmFButtonReset(Button:TSGButton);
+function TSGKillerGetColor(const FWay:LongWord):TSGColor4f;
+var 
+	i:Byte;
+begin
+Result.Import(FWay/100,FWay/40,FWay/15,1);
+Result/=1.6;
+for i:=0 to 3 do
+	if PSingle(@Result)[i]>1 then
+		PSingle(@Result)[i]:=1;
+end;
+
+procedure TSGButton_Reset_OnChange(Button:TSGButton);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -324,7 +337,7 @@ SGScreen.CreateChild(FButtonReset);
 SGScreen.LastChild.SetBounds(Context.Width-50,5,40,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='Reset';
-FButtonReset.OnChange:=TSGComponentProcedure(@mmmFButtonReset);
+FButtonReset.OnChange:=TSGComponentProcedure(@TSGButton_Reset_OnChange);
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
@@ -462,12 +475,11 @@ end;
 procedure TSGKiller.InitGame;
 var
 	i,ii,iii:LongWord;
-	TSGKillerHeight:LongWord;
 	OldFR:TSGVertex2f = (x:0;y:0);
 begin
 FChanget:=True;
 FActive:=True;
-TSGKillerHeight:=Trunc(((Context.Height/Context.Width)*FStartDeep))+1;
+FStartDeepHeight:=Trunc(((Context.Height/Context.Width)*FStartDeep))+1;
 FSkullsNowPosition:=FQuantitySkulls;
 
 FBulletsGos:=0;
@@ -478,10 +490,10 @@ SetLength(FBullets,0);
 FInterval:=TSGKillerGetDiffic(FDifficultyComboBox.FSelectItem);
 SetLength(FArray,FStartDeep);
 FForestWidth:=FStartDeep;
-FForestHeight:=TSGKillerHeight;
+FForestHeight:=FStartDeepHeight;
 for i:=0 to High(FArray) do
 	begin
-	SetLength(FArray[i],TSGKillerHeight);
+	SetLength(FArray[i],FStartDeepHeight);
 	FillChar(FArray[i][0],Length(FArray[i])*Sizeof(FArray[0,0]),0);
 	end;
 for i:=0 to High(FArray) do
@@ -638,17 +650,172 @@ end;
 
 class function TSGKiller.ClassName:string;
 begin
-Result:='Киллер';
+Result := 'Киллер';
 end;
 
-procedure TSGKiller.DoQuad(const i,ii:LongWord);inline;
+procedure TSGKiller.DoQuad(const i,ii:LongWord;const artype : TSGKillerArrayType);inline;
+type
+	TSGKQuadArColor = packed array[0..3] of TSGColor4f;
+
+function GetColorArrayFrom(const x, y, thisway : TSGLongWord):TSGKQuadArColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure ProvOne(const One1 : TSGBoolean;var One2 : TSGBoolean; const One1W, One2W : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-//Render.BeginScene(SG_QUADS);
-Render.Vertex2f(FR.x*i,FR.y*ii);
-Render.Vertex2f(FR.x*i,FR.y*(ii+1));
-Render.Vertex2f(FR.x*(i+1),FR.y*(ii+1));
-Render.Vertex2f(FR.x*(i+1),FR.y*ii);
-//Render.EndScene();
+if One2 and One1 then
+	if One2W > One1W then
+		One2 := False;
+end;
+
+var
+	ThisColor, DecColor, IncColor : TSGColor4f;
+	CanMoveRight : TSGBoolean = False;
+	CanMoveUp : TSGBoolean = False;
+	CanMoveLeft : TSGBoolean = False;
+	CanMoveDown : TSGBoolean = False;
+	LeftDeep, RightDeep, UpDeep, DownDeep : TSGLongWord;
+begin
+ThisColor := TSGKillerGetColor(thisway);
+CanMoveRight := (x < FStartDeep - 1) and (FArray[x+1][y].FType <> 1);
+CanMoveLeft := (x > 0) and (FArray[x-1][y].FType <> 1);
+CanMoveUp := (y > 0) and (FArray[x][y-1].FType <> 1);
+CanMoveDown := (x < FStartDeepHeight - 1) and (FArray[x][y+1].FType <> 1);
+if CanMoveRight then
+	RightDeep := FArray[x+1][y].FWay;
+if CanMoveLeft then
+	LeftDeep := FArray[x-1][y].FWay;
+if CanMoveUp then
+	UpDeep := FArray[x][y-1].FWay;
+if CanMoveDown then
+	DownDeep := FArray[x][y+1].FWay;
+DecColor := TSGKillerGetColor(thisway - 1);
+if CanMoveRight then
+	begin
+	ProvOne(CanMoveRight, CanMoveLeft, RightDeep, LeftDeep);
+	ProvOne(CanMoveRight, CanMoveDown, RightDeep, DownDeep);
+	ProvOne(CanMoveRight, CanMoveUp, RightDeep, UpDeep);
+	end;
+if CanMoveUp then
+	begin
+	ProvOne(CanMoveUp, CanMoveLeft,  UpDeep, LeftDeep);
+	ProvOne(CanMoveUp, CanMoveDown,  UpDeep, DownDeep);
+	ProvOne(CanMoveUp, CanMoveRight, UpDeep, RightDeep);
+	end;
+if CanMoveDown then
+	begin
+	ProvOne(CanMoveDown, CanMoveLeft,  DownDeep, LeftDeep);
+	ProvOne(CanMoveDown, CanMoveUp,    DownDeep, UpDeep);
+	ProvOne(CanMoveDown, CanMoveRight, DownDeep, RightDeep);
+	end;
+if CanMoveLeft then
+	begin
+	ProvOne(CanMoveLeft, CanMoveRight, LeftDeep, RightDeep);
+	ProvOne(CanMoveLeft, CanMoveDown,  LeftDeep, DownDeep);
+	ProvOne(CanMoveLeft, CanMoveUp,    LeftDeep, UpDeep);
+	end;
+if CanMoveRight and CanMoveDown then
+	begin
+	IncColor := ThisColor;
+	Result[0] := IncColor;
+	Result[1] := ThisColor;
+	Result[2] := DecColor;
+	Result[3] := ThisColor;
+	end
+else if CanMoveRight and CanMoveUp then
+	begin
+	IncColor := ThisColor;
+	Result[0] := ThisColor;
+	Result[1] := DecColor;
+	Result[2] := ThisColor;
+	Result[3] := IncColor;
+	end
+else if CanMoveLeft and CanMoveDown then
+	begin
+	IncColor := ThisColor;
+	Result[0] := ThisColor;
+	Result[1] := IncColor;
+	Result[2] := ThisColor;
+	Result[3] := DecColor;
+	end
+else if CanMoveLeft and CanMoveUp then
+	begin
+	IncColor := ThisColor;
+	Result[0] := DecColor;
+	Result[1] := ThisColor;
+	Result[2] := IncColor;
+	Result[3] := ThisColor;
+	end
+else
+	begin
+	if CanMoveRight then
+		begin
+		Result[0] := ThisColor;
+		Result[1] := DecColor;
+		Result[2] := DecColor;
+		Result[3] := ThisColor;
+		end
+	else if CanMoveLeft then
+		begin
+		Result[0] := DecColor;
+		Result[1] := ThisColor;
+		Result[2] := ThisColor;
+		Result[3] := DecColor;
+		end
+	else if CanMoveUp then
+		begin
+		Result[0] := DecColor;
+		Result[1] := DecColor;
+		Result[2] := ThisColor;
+		Result[3] := ThisColor;
+		end
+	else if CanMoveDown then
+		begin
+		Result[0] := ThisColor;
+		Result[1] := ThisColor;
+		Result[2] := DecColor;
+		Result[3] := DecColor;
+		end
+	else
+		fillchar(Result,SizeOf(Result), 0);
+	end;
+end;
+
+var
+	NeedsExtension : TSGBoolean = True;
+	Colors : TSGKQuadArColor;
+
+begin
+if artype.FType=2 then
+	begin
+	Render.Color4f(0.8,0,0.8,1);
+	NeedsExtension := False;
+	end
+else if artype.FWay=FForestHeight*FForestWidth then
+	begin
+	SGGetColor4fFromLongWord($FFFF00).Color(Render);
+	NeedsExtension := False;
+	end;
+if not NeedsExtension then
+	begin
+	Render.Vertex2f(FR.x*i,FR.y*ii);
+	Render.Vertex2f(FR.x*i,FR.y*(ii+1));
+	Render.Vertex2f(FR.x*(i+1),FR.y*(ii+1));
+	Render.Vertex2f(FR.x*(i+1),FR.y*ii);
+	end
+else
+	begin
+	if artype.FWay = 0 then
+		fillchar(Colors, SizeOf(Colors), 0)
+	else
+		Colors := GetColorArrayFrom(i, ii, artype.FWay);
+	Colors[0].Color(Render);
+	Render.Vertex2f(FR.x*i,FR.y*ii);
+	Colors[1].Color(Render);
+	Render.Vertex2f(FR.x*(i+1),FR.y*ii);
+	Colors[2].Color(Render);
+	Render.Vertex2f(FR.x*(i+1),FR.y*(ii+1));
+	Colors[3].Color(Render);
+	Render.Vertex2f(FR.x*i,FR.y*(ii+1));
+	end;
 end;
 
 function TSGKiller.Proverka(const KPos:TSGPoint2f;const b:Byte):Boolean;inline;
@@ -742,17 +909,6 @@ for iiiiii:=0 to High(FZombies) do
 			end;
 		end;
 	end;
-end;
-
-function TSGKillerGetColor(const FWay:LongWord):TSGColor4f;
-var 
-	i:Byte;
-begin
-Result.Import(FWay/100,FWay/40,FWay/15,1);
-Result/=1.6;
-for i:=0 to 3 do
-	if PSingle(@Result)[i]>1 then
-		PSingle(@Result)[i]:=1;
 end;
 
 procedure TSGKiller.MayByVictory;
@@ -981,16 +1137,7 @@ for i:=0 to High(FArray) do
 			Render.BeginScene(SGR_QUADS);
 			end
 		else
-			begin
-			if FArray[i][ii].FType=2 then
-					Render.Color4f(0.8,0,0.8,1)
-				else
-					if FArray[i][ii].FWay=FForestHeight*FForestWidth then
-						SGGetColor4fFromLongWord($FFFF00).Color(Render)
-					else
-						TSGKillerGetColor(FArray[i][ii].FWay).Color(Render);
-			DoQuad(i,ii);
-			end;
+			DoQuad(i,ii,FArray[i][ii]);
 		end;
 Render.EndScene;
 
