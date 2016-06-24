@@ -82,6 +82,7 @@ type
 		function ShiftClientArea() : TSGPoint2f; virtual;
 		procedure SwapBuffers();virtual;
 		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
+		procedure Kill();virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2f;virtual;abstract;
@@ -640,7 +641,7 @@ FKeyPressed:=0;
 FCursorWheel:=SGNullCursorWheel; 
 end;
 
-destructor TSGContext.Destroy();
+procedure TSGContext.Kill();
 begin
 if FCursor <> nil then
 	begin
@@ -664,6 +665,11 @@ if FRender <> nil then
 	FRender.Kill();
 	FRender:=nil;
 	end;
+end;
+
+destructor TSGContext.Destroy();
+begin
+Kill();
 inherited;
 end;
 

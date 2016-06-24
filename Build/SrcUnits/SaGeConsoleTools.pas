@@ -807,6 +807,7 @@ ContextTypeWatcherCallAction();
 
 until (IContext <> nil) and (Context.Active = False);
 
+IContext := nil;
 Context.Destroy();
 end;
 

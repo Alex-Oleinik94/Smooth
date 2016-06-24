@@ -49,6 +49,7 @@ type
 		function  GetWindowArea():TSGPoint2f;override;
 		function  GetScreenArea():TSGPoint2f;override;
 		function  ShiftClientArea() : TSGPoint2f; override;
+		procedure Kill();override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2f);override;
@@ -511,10 +512,15 @@ FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(SGCWAPI_ICON));
 FGlassyCursorHandle := CreateGlassyCursor();
 end;
 
-destructor TSGContextWinAPI.Destroy;
+procedure TSGContextWinAPI.Kill();
 begin
 KillWindow();
 SetLength(SGContexts,0);
+inherited;
+end;
+
+destructor TSGContextWinAPI.Destroy;
+begin
 inherited;
 end;
 

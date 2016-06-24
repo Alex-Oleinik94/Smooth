@@ -28,6 +28,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		//function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenArea():TSGPoint2f;override;
+		procedure Kill();override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -337,7 +338,7 @@ FCursorY:=0;
 FCursorX:=0;
 end;
 
-destructor TSGContextLinux.Destroy();
+procedure TSGContextLinux.Kill();
 begin
 if (win<>0) and (dpy<>nil) then
 	begin
@@ -349,6 +350,10 @@ if dpy<>nil then
 	XCloseDisplay(dpy);
 	dpy:=nil;
 	end;
+end;
+
+destructor TSGContextLinux.Destroy();
+begin
 inherited;
 end;
 
