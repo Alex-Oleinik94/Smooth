@@ -197,6 +197,7 @@ type
 		FCanHaveChildren:Boolean;
 		FComponentProcedure:TSGComponentProcedure;
 		FChildrenPriority:TSGMaxEnum;
+		FMarkedForDestroy : TSGBoolean;
 		procedure ClearPriority();
 		procedure MakePriority();
 		function GetPriorityComponent() : TSGComponent;
@@ -206,6 +207,9 @@ type
 		function BottomShift():LongInt;
 		function RightShift():LongInt;
 			public
+		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
+		function MustDestroyed() : TSGBoolean;
+		procedure MarkForDestroy();
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
@@ -247,10 +251,6 @@ type
 		procedure DrawDrawClasses();virtual;
 			public
 		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
-			private
-		FNeedToDestroy : TSGBoolean;
-			public
-		property NeedToDestroy : TSGBoolean read FNeedToDestroy write FNeedToDestroy;
 		end;
 	SGComponent = TSGComponent;
 	PSGComponent = PTSGComponent;
@@ -2584,6 +2584,7 @@ end;
 procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
 var
 	PriorityComponent, Component : TSGComponent;
+	Index : TSGLongWord;
 begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGComponent.FromUpDate(var FCanChange:Boolean = ', FCanChange, ') : Begining');
@@ -2595,10 +2596,20 @@ UpgradeTimers();
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
 	PriorityComponent.FromUpDate(FCanChange);
-
-for Component in Self do
-	if Component <> PriorityComponent then
-		Component.FromUpDate(FCanChange);
+	
+Index := 0;
+while Index < Length(FChildren) do
+	begin
+	Component := FChildren[Index];
+	if Component.MustDestroyed() then
+		Component.Destroy()
+	else
+		begin
+		if Component <> PriorityComponent then
+			Component.FromUpDate(FCanChange);
+		Index += 1;
+		end;
+	end;
 
 if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
@@ -2677,6 +2688,13 @@ if FParent<>nil then
 	end;
 end;
 
+function TSGComponent.MustDestroyed() : TSGBoolean;
+begin
+Result := FMarkedForDestroy;
+if Result then
+	Result := (FVisibleTimer + FActiveTimer) < SGZero;
+end;
+
 procedure TSGComponent.MakePriority();
 var
 	i, ii : TSGMaxEnum;
@@ -2692,10 +2710,17 @@ if FParent<>nil then
 	end;
 end;
 
+procedure TSGComponent.MarkForDestroy();
+begin
+Active := False;
+Visible := False;
+FMarkedForDestroy := True;
+end;
+
 constructor TSGComponent.Create();
 begin
 inherited Create();
-FNeedToDestroy:=False;
+FMarkedForDestroy := False;
 FChildrenPriority:=0;
 FDrawClass:=nil;
 FUnLimited:=False;
@@ -2830,9 +2855,9 @@ FNeedHeight:=FNoneHeight;
 FNeedWidth:=FNoneWidth;
 end;
 
-function TSGComponent.CursorPosition:TSGPoint;
+function TSGComponent.CursorPosition():TSGPoint;
 begin
-Result:=Context.CursorPosition(SGNowCursorPosition);
+Result := Context.CursorPosition(SGNowCursorPosition);
 end;
 
 procedure TSGComponent.CreateAlign(const NewAllign:TSGExByte);
@@ -2869,7 +2894,7 @@ end;
 
 procedure TSGComponent.SetCaption(const NewCaption:SGCaption);
 begin
-FCaption:=NewCaption;
+FCaption := NewCaption;
 end;
 
 procedure TSGComponent.UpDateObjects();

@@ -118,7 +118,7 @@ end;
 
 procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGButton);
 begin
-VButton.Parent.Visible := False;
+VButton.Parent.MarkForDestroy();
 end;
 
 procedure TSGEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGComboBox);

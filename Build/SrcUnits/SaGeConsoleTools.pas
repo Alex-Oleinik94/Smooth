@@ -72,6 +72,7 @@ uses
 	,SaGeTron
 	,SaGeLoading
 	,SaGeNotepad
+	,SaGeKiller
 	;
 
 const
@@ -614,7 +615,7 @@ with TSGDrawClasses.Create(Context) do
 	Add(TSGAllExamples,False);
 	Add(TSGLoading);
 	Add(TSGGraphViewer);
-	Add(TSGKillKostia);
+	Add(TSGKiller);
 	Add(TSGGenAlg);
 	
 	//Add(TSGUserTesting);

@@ -743,20 +743,48 @@ if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTextur
 end;
 
 procedure TSGRenderDirectX.TexParameteri(const VP1,VP2,VP3:Cardinal);
+var
+	Caps : D3DCAPS9;
 begin 
-if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then//or (VP1 = SGR_TEXTURE_3D) then
+if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 	begin
 	case VP2 of
 	SGR_TEXTURE_MIN_FILTER:
-		if VP3 = SGR_LINEAR then
-			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_LINEAR)
-		else if VP3 = SGR_NEAREST then
-			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
+		case VP3 of
+		SGR_POINT:
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+		SGR_LINEAR:
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+		SGR_NEAREST:
+			begin
+			pDevice.GetDeviceCaps(Caps);
+			if Caps.MaxAnisotropy > 0 then
+				begin
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); 
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAXANISOTROPY, Caps.MaxAnisotropy);
+				end
+			else
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			end;
+		end;
 	SGR_TEXTURE_MAG_FILTER:
-		if VP3 = SGR_LINEAR then
-			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR)
-		else if VP3 = SGR_NEAREST then
-			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_POINT); 
+		case VP3 of
+		SGR_POINT:
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+		SGR_LINEAR:
+			pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+		SGR_NEAREST:
+			begin
+			pDevice.GetDeviceCaps(Caps);
+			if Caps.MaxAnisotropy > 0 then
+				begin
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); 
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAXANISOTROPY, Caps.MaxAnisotropy);
+				end
+			else
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			end;
+		end;
 	end;
 	end;
 end;
