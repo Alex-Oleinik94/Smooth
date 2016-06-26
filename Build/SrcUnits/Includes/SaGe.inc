@@ -39,6 +39,7 @@
 	//{$CALLING Register}
 	{$SMARTLINK ON}
 	{$R-}
+	{$MACRO ON}
 	{$ENDIF}
 
 //{$DEFINE LAZARUS}

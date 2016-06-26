@@ -25,6 +25,7 @@ type
 	PSGLongWord	= ^ TSGLongWord;
 	TSGQuadWord	= QWord;
 	TSGWord	    = Word;
+	PSGWord     = ^ TSGWord;
 	TSGQWord	= QWord;
 	TSGSingle	= Single;
 	TSGDouble   = TSGReal;

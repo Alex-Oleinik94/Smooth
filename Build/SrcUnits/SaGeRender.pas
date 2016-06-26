@@ -23,6 +23,8 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 		function GetRenderType():TSGRenderType;virtual;
+		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};override;
+		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};override;
 			protected
 		function GetWidth() : TSGLongWord;virtual;
 		function GetHeight() : TSGLongWord;virtual;
@@ -183,6 +185,16 @@ while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
 	cc := cc + 1;
 	end;
 {$ENDIF}
+end;
+
+function TSGRender._AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+Result := inherited;
+end;
+
+function TSGRender._Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+Result := inherited;
 end;
 
 procedure TSGRender.SetRenderType(const VType : TSGRenderType);

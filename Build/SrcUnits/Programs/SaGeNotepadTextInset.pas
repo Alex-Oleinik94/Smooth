@@ -330,9 +330,12 @@ procedure TSGNTextInset.GoToPosition(const Line, Column : TSGLongWord);
 var
 	Difference : TSGFloat;
 begin
+FTextCursor.FLine := Line;
+FTextCursor.FColumn := Column;
+FTextCursor.FTimer := 1;
 if FTextCursor.FLine < 1 + FBegin then
 	begin
-	Difference := FBegin - FTextCursor.FLine + 2;
+	Difference := FBegin - FTextCursor.FLine + 1;
 	FBegin -= Difference;
 	FEnd -= Difference;
 	end
@@ -343,9 +346,6 @@ else if FTextCursor.FLine + 2 > FEnd then
 	FEnd += Difference;
 	end;
 StandardizateView();
-FTextCursor.FLine := Line;
-FTextCursor.FColumn := Column;
-FTextCursor.FTimer := 1;
 end;
 
 procedure TSGNTextInset.FromDraw();

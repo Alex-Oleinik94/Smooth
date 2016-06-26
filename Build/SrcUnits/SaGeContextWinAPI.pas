@@ -576,19 +576,37 @@ end;
 
 function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 
-procedure HandlingSizing();
+procedure HandlingSizingFromRect();
 var
 	mRect:Windows.TRect;
 begin
 Windows.GetWindowRect(hWindow, mRect);
-Width:=mRect.Right-mRect.Left;
-Height:=mRect.Bottom-mRect.Top;
+Width:=  mRect.Right  - mRect.Left;
+Height:= mRect.Bottom - mRect.Top;
 Resize();
 end;
 
-procedure HandlingSizingWithPaint();
+procedure HandlingSizingFromParam();
+var
+	mRect : Windows.TRect;
+	Shift : TSGPoint2f;
 begin
-HandlingSizing();
+if FFullscreen then
+	begin
+	Width := PSGWord(@LParam)[0];
+	Height := PSGWord(@LParam)[1];
+	end
+else
+	begin
+	Shift  := GetClientAreaShift();
+	Width  := Shift.x * 2;
+	Height := Shift.y + GetSystemMetrics(SM_CYSIZEFRAME);
+	end;
+Resize();
+end;
+
+procedure HandlingPaint();
+begin
 FPaintWithHandlingMessages := False;
 Paint();
 FPaintWithHandlingMessages := True;
@@ -685,12 +703,12 @@ wm_syscommand:
 	end;
 wm_size:
 	begin
-	HandlingSizingWithPaint();
 	Result := 0;
 	end;
 wm_sizing:
 	begin
-	HandlingSizing();
+	HandlingSizingFromRect();
+	HandlingPaint();
 	Result := 1;
 	end;
 wm_move
@@ -698,7 +716,7 @@ wm_move
 ,WM_WINDOWPOSCHANGED
 ,WM_WINDOWPOSCHANGING:
 	begin
-	HandlingSizing();
+	HandlingSizingFromRect();
 	end;
 else
 	begin

@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 
-//{$DEFINE CONTEXT_BEGUNING}
+//{$DEFINE CONTEXT_DEBUGING}
 
 unit SaGeContext;
 
@@ -237,7 +237,7 @@ end;
 
 procedure TSGContext.ReinitializeRender();
 begin
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : Begining');
 	{$ENDIF}
 if FPaintable <> nil then
@@ -250,8 +250,9 @@ if FRender <> nil then
 	FRender.Kill();
 	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
 	//FRender.Destroy();
+	FRender := nil;
 	end;
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
 	{$ENDIF}
 FRender := FRenderClass.Create();
@@ -261,7 +262,7 @@ if FRender.CreateContext() then
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
 SGScreen.LoadDeviceResourses();
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : End');
 	{$ENDIF}
 end;
@@ -274,7 +275,7 @@ end;
 
 procedure TSGContext.SetRenderClass(const NewRender : TSGPointer);
 begin
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.SetRenderClass(...) : Begining');
 	{$ENDIF}
 FRenderClass := TSGRenderClass(NewRender);
@@ -282,7 +283,7 @@ if FInitialized and (not (Render is FRenderClass)) then
 	begin
 	ReinitializeRender();
 	end;
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.SetRenderClass(...) : End');
 	{$ENDIF}
 end;
@@ -444,7 +445,7 @@ StartComputeTimer();
 while Active and (FNewContextType = nil) do
 	begin
 	Paint();
-	{$IFDEF CONTEXT_BEGUNING}
+	{$IFDEF CONTEXT_DEBUGING}
 		WriteLn('TSGContext.Run(): Before continue looping');
 		{$ENDIF}
 	end;
@@ -452,23 +453,23 @@ end;
 
 procedure TSGContext.Paint();
 begin
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
 UpdateTimer(); 
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
-	{$IFDEF CONTEXT_BEGUNING}
+	{$IFDEF CONTEXT_DEBUGING}
 		WriteLn('TSGContext.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
 		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "ClearKeys();" & "Messages();"');
 	{$ENDIF}
 if FPaintWithHandlingMessages then
@@ -476,15 +477,15 @@ if FPaintWithHandlingMessages then
 	ClearKeys();
 	Messages();
 	end;
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "SGScreen.Paint();"');
 	{$ENDIF}
 SGScreen.Paint();
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
 SwapBuffers();
-{$IFDEF CONTEXT_BEGUNING}
+{$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : End');
 	{$ENDIF}
 end;
