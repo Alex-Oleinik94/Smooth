@@ -18,6 +18,7 @@ uses
 	,Direct3D9
 	,SaGeCommon
 	,SaGeRenderConstants
+	,SaGeClasses
 	;
 
 type
@@ -224,7 +225,7 @@ type
 		FNowActiveNumberTexture : TSGLongWord;
 		FNowActiveClientNumberTexture : TSGLongWord;
 			private
-		procedure AfterVertexProc();inline;
+		procedure AfterVertexProc();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DropDeviceResourses();
 		end;
 type
@@ -451,7 +452,7 @@ begin
 pDevice.Present(nil, nil, 0, nil);
 end;
 
-procedure TSGRenderDirectX.AfterVertexProc();inline;
+procedure TSGRenderDirectX.AfterVertexProc();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
@@ -658,8 +659,9 @@ for i:=0 to VQuantity-1 do
 	begin
 	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1].FTexture<>nil) then
 		begin
-		FArTextures[VTextures[i]-1].FTexture._Release();
-		FArTextures[VTextures[i]-1].FTexture:=nil;
+		SGDestroyInterface(FArTextures[VTextures[i]-1].FTexture);
+		if Self <> nil then
+			FArTextures[VTextures[i]-1].FTexture := nil;
 		if FArTextures[VTextures[i]-1].FBufferChangeFullscreen<>nil then
 			FreeMem(FArTextures[VTextures[i]-1].FBufferChangeFullscreen);
 		FArTextures[VTextures[i]-1].FBufferChangeFullscreen:=nil;
@@ -936,14 +938,16 @@ begin
 for i:=0 to VQuantity-1 do
 	if FArBuffers[PLongWord(VPoint)[i]-1].FResourse<>nil then
 		begin
-		FArBuffers[PLongWord(VPoint)[i]-1].FResourse._Release();
-		FArBuffers[PLongWord(VPoint)[i]-1].FResourse:=nil;
+		SGDestroyInterface(FArBuffers[PLongWord(VPoint)[i]-1].FResourse);
+		if Self <> nil then
+			FArBuffers[PLongWord(VPoint)[i]-1].FResourse := nil;
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourseSize:=0;
 		FArBuffers[PLongWord(VPoint)[i]-1].FType:=0;
 		if FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration<>nil then
 			begin
-			FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration._Release();
-			FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration:=nil;
+			SGDestroyInterface(FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration);
+			if Self <> nil then
+				FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration := nil;
 			end;
 		PLongWord(VPoint)[i]:=0;
 		end;
@@ -1342,13 +1346,15 @@ if FArBuffers<>nil then if Length(FArBuffers)>0 then
 		begin
 		if FArBuffers[i].FResourse<>nil then
 			begin
-			FArBuffers[i].FResourse._Release();
-			FArBuffers[i].FResourse := nil;
+			SGDestroyInterface(FArBuffers[i].FResourse);
+			if Self <> nil then
+				FArBuffers[i].FResourse := nil;
 			end;
 		if FArBuffers[i].FVertexDeclaration<>nil then
 			begin
-			FArBuffers[i].FVertexDeclaration._Release();
-			FArBuffers[i].FVertexDeclaration := nil;
+			SGDestroyInterface(FArBuffers[i].FVertexDeclaration);
+			if Self <> nil then
+				FArBuffers[i].FVertexDeclaration := nil;
 			end;
 		end;
 	SetLength(FArBuffers, 0);
@@ -1360,8 +1366,9 @@ if FArTextures <> nil then if Length(FArTextures) > 0 then
 		begin
 		if FArTextures[i].FTexture<>nil then
 			begin
-			FArTextures[i].FTexture._Release;
-			FArTextures[i].FTexture := nil;
+			SGDestroyInterface(FArTextures[i].FTexture);
+			if Self <> nil then
+				FArTextures[i].FTexture := nil;
 			end;
 		if FArTextures[i].FBufferChangeFullscreen <> nil then
 			begin
@@ -1379,11 +1386,15 @@ begin
 DropDeviceResourses();
 if (pDevice<>nil)  then
 	begin
-	pDevice._Release();
+	SGDestroyInterface(pDevice);
+	if Self <> nil then
+		TSGPointer(pDevice) := nil;
 	end;
-if(pD3d<>nil) then
+if (pD3d <> nil) then
 	begin
-	pD3d._Release();
+	SGDestroyInterface(pD3d);
+	if Self <> nil then
+		TSGPointer(pD3d) := nil;
 	end;
 end;
 
@@ -1514,12 +1525,62 @@ FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
+
 function TSGRenderDirectX.CreateContext():Boolean;
 var
-	//d3ddm:D3DDISPLAYMODE;
 	d3dpp:D3DPRESENT_PARAMETERS;
+	MultiSampleType : D3DMULTISAMPLE_TYPE;
+	MultiSampleMaxQuality : TSGLongWord;
+
+procedure FindMaxMultisample();
+var
+	Samples : array[0..16] of D3DMULTISAMPLE_TYPE = (
+		D3DMULTISAMPLE_NONE,
+		D3DMULTISAMPLE_NONMASKABLE,
+		D3DMULTISAMPLE_2_SAMPLES,
+		D3DMULTISAMPLE_3_SAMPLES,
+		D3DMULTISAMPLE_4_SAMPLES,
+		D3DMULTISAMPLE_5_SAMPLES,
+		D3DMULTISAMPLE_6_SAMPLES,
+		D3DMULTISAMPLE_7_SAMPLES,
+		D3DMULTISAMPLE_8_SAMPLES,
+		D3DMULTISAMPLE_9_SAMPLES,
+		D3DMULTISAMPLE_10_SAMPLES,
+		D3DMULTISAMPLE_11_SAMPLES,
+		D3DMULTISAMPLE_12_SAMPLES,
+		D3DMULTISAMPLE_13_SAMPLES,
+		D3DMULTISAMPLE_14_SAMPLES,
+		D3DMULTISAMPLE_15_SAMPLES,
+		D3DMULTISAMPLE_16_SAMPLES );
+	Index : TSGLongWord;
+	Finded : TSGBoolean = False;
 begin
-if (pD3D=nil) then
+for Index := High(Samples) downto Low(Samples) do
+	begin
+	if SUCCEEDED(pD3D.CheckDeviceMultiSampleType(
+          D3DADAPTER_DEFAULT, 
+          D3DDEVTYPE_HAL,
+          D3DFMT_X8R8G8B8, 
+          False, 
+          Samples[Index],
+          @MultiSampleMaxQuality
+       )) then 
+		begin
+		Finded := True;
+		MultiSampleType := Samples[Index];
+		SGLog.Sourse(['TSGRenderDirectX__CreateContext_FindMaxMultisample : ',D3DMULTISAMPLE_16_SAMPLES,'-',MultiSampleMaxQuality,'']);
+		break;
+		end;
+	end;
+if not Finded then
+	begin
+	MultiSampleType := D3DMULTISAMPLE_NONE;
+	MultiSampleMaxQuality := 0;
+	end;
+end;
+
+begin
+if (pD3D = nil) then
 	begin
 	pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
 	SGLog.Sourse(['TSGRenderDirectX__CreateContext : IDirect3D9="',TSGMaxEnum(Pointer(pD3D)),'"']);
@@ -1529,23 +1590,22 @@ if (pD3D=nil) then
 		exit;
 		end;
 	end;
-if pDevice=nil then
+if pDevice = nil then
 	begin
-	//pD3D.GetAdapterDisplayMode( D3DADAPTER_DEFAULT,d3ddm);
+	FindMaxMultisample();
 	
 	FillChar(d3dpp,SizeOf(d3dpp),0);
-	d3dpp.Windowed := True;
-	d3dpp.SwapEffect := D3DSWAPEFFECT_DISCARD;
-	d3dpp.hDeviceWindow := TSGLongWord(Context.Window);
-	d3dpp.BackBufferFormat := D3DFMT_X8R8G8B8;
-	d3dpp.BackBufferWidth :=  Context.Width;
-	d3dpp.BackBufferHeight := Context.Height;
-	d3dpp.EnableAutoDepthStencil:= True;
+	d3dpp.Windowed               := True;
+	d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
+	d3dpp.hDeviceWindow          := TSGLongWord(Context.Window);
+	d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
+	d3dpp.BackBufferWidth        := Context.Width;
+	d3dpp.BackBufferHeight       := Context.Height;
+	d3dpp.EnableAutoDepthStencil := True;
 	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
 	d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
-
-	//У меня на  нетбуке вылетает с этим пораметром
-	//d3dpp.MultiSampleType:=D3DMULTISAMPLE_4_SAMPLES;
+	d3dpp.MultiSampleType        := MultiSampleType;
+	d3dpp.MultiSampleQuality     := 0;
 
 	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGLongWord(Context.Window),
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
@@ -1559,9 +1619,10 @@ if pDevice=nil then
 	end
 else
 	begin
-	pDevice._Release();
-	pDevice:=nil;
-	Result:=CreateContext();
+	SGDestroyInterface(pDevice);
+	if Self <> nil then
+		pDevice:=nil;
+	Result := CreateContext();
 	end;
 end;
 
@@ -1569,8 +1630,9 @@ procedure TSGRenderDirectX.ReleaseCurrent();
 begin
 if (pDevice <> nil) then
 	begin
-	pDevice._Release();
-	pDevice := nil;
+	SGDestroyInterface(pDevice);
+	if Self <> nil then
+		TSGPointer(pDevice) := nil;
 	end;
 end;
 
@@ -1635,8 +1697,9 @@ if FArTextures<>nil then
 					SGLog.Sourse('TSGRenderDirectX__LockResourses : Errior while IDirect3DTexture9__UnlockRect');
 					end;
 				end;
-			FArTextures[i].FTexture._Release();
-			FArTextures[i].FTexture:=nil;
+			SGDestroyInterface(FArTextures[i].FTexture);
+			if Self <> nil then
+				FArTextures[i].FTexture:=nil;
 			end;
 		end;
 	end;
@@ -1647,8 +1710,9 @@ if FArBuffers<>nil then
 			begin
 			if FArBuffers[i].FVertexDeclaration <> nil then
 				begin
-				FArBuffers[i].FVertexDeclaration._Release();
-				FArBuffers[i].FVertexDeclaration:=nil;
+				SGDestroyInterface(FArBuffers[i].FVertexDeclaration);
+				if Self <> nil then
+					FArBuffers[i].FVertexDeclaration:=nil;
 				end;
 			//SGLog.Sourse('TSGRenderDirectX__LockResourses : Begin to lock buffer "'+SGStr(i)+'"!');
 			if FArBuffers[i].FType=SGR_ELEMENT_ARRAY_BUFFER_ARB then 
@@ -1689,8 +1753,9 @@ if FArBuffers<>nil then
 					VVBuffer:=nil;
 					end;
 				end;
-			FArBuffers[i].FResourse._Release();
-			FArBuffers[i].FResourse:=nil;
+			SGDestroyInterface(FArBuffers[i].FResourse);
+			if Self <> nil then
+				FArBuffers[i].FResourse:=nil;
 			end;
 	end;
 SGLog.Sourse('TSGRenderDirectX__LockResourses : Leaving!');

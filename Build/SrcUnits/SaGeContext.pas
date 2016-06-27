@@ -245,7 +245,6 @@ if FPaintable <> nil then
 SGScreen.DeleteDeviceResourses();
 if FRender <> nil then
 	begin
-	FRender.ReleaseCurrent();
 	FRender.Context := nil;
 	FRender.Kill();
 	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck

@@ -151,10 +151,20 @@ type
 		function Suppored() : TSGBoolean;virtual;
 		end;
 
+procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
 	SysUtils;
+
+procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+try
+while i._Release() > 0 do ;
+except
+end;
+end;
 
 constructor TSGNamed.Create();
 begin
