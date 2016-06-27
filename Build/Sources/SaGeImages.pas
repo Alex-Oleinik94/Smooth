@@ -1,6 +1,9 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
 unit SaGeImages;
+
 interface
+
 uses 
 	crt
 	,dos
@@ -13,7 +16,6 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
-	,SaGeContext
 	,SaGeCommon
 	,SaGeResourseManager
 	,SaGeRenderConstants

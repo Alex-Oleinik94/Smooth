@@ -144,7 +144,7 @@ Visible := True;
 
 FCaptionLabel := TSGLabel.Create();
 CreateChild(FCaptionLabel);
-FCaptionLabel.Caption := 'SaGe Engine Configuration';
+FCaptionLabel.Caption := 'SaGe Engine Configuration (x' + SGVerCPU + ')';
 FCaptionLabel.Visible := True;
 
 FVersionLabel := TSGLabel.Create();

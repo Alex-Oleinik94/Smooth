@@ -1,8 +1,6 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
-
-unit SaGeTotal;
-
+unit SaGeCommonUtils;
 
 interface
 
@@ -12,7 +10,6 @@ uses
 	,SaGeUtils
 	,SaGeBase
 	,SaGeBased
-	,SaGeContext
 	,SaGeScreen
 	,SaGeRender
 	,SaGeImages
@@ -47,80 +44,8 @@ type
 			public
 		property ComboBox : TSGComboBox read FComboBox2;
 		end;
-	
-	TSGND=class(TSGDrawable)
-			public
-		constructor Create();override;
-		destructor Destroy();override;
-		class function ClassName():string;override;
-			public
-		FDimention:LongInt;
-			public
-		procedure Paint();override;
-		end;
-type
-	TSGMeshViever=class(TSGDrawable)
-			public
-		constructor Create;override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
-		procedure Paint;override;
-			protected
-		FMesh:TSGCustomModel;
-		FCamera:TSGCamera;
-		end;
 
 implementation
-
-procedure TSGMeshViever.Paint();
-begin
-FCamera.CallAction();
-if FMesh<>nil then
-	FMesh.Paint();
-end;
-
-constructor TSGMeshViever.Create;
-begin
-inherited;
-FCamera:=TSGCamera.Create();
-FCamera.SetContext(Context);
-FMesh:=nil;
-
-
-
-end;
-
-destructor TSGMeshViever.Destroy;
-begin
-if FCamera<>nil then
-	FCamera.Destroy();
-inherited;
-end;
-
-class function TSGMeshViever.ClassName:string;
-begin
-Result:='TSGMeshViever';
-end;
-
-class function TSGND.ClassName:string;
-begin
-Result:='SaGe N Dimentions';
-end;
-
-constructor TSGND.Create;
-begin
-inherited;
-end;
-
-destructor TSGND.Destroy;
-begin
-inherited;
-end;
-
-procedure TSGND.Paint();
-begin
-
-end;
 
 procedure TSGDrawClasses.DeleteDeviceResourses();
 begin

@@ -1,8 +1,9 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeUtils;
 
 interface
+
 uses
 	 SaGeBase
 	,Classes
@@ -14,12 +15,14 @@ uses
 	,SaGeMesh
 	,SaGeImagesBase
 	,SaGeResourseManager
+	,SaGeClasses
 	,SaGeCommonClasses
-	,PAPPE
 	;
+
 type
 	TSGFont = class;
 	TSGFPSViewer = class;
+
 type
 	TSGFPSViewer = class(TSGDrawable)
 			public
@@ -165,30 +168,6 @@ type
 		procedure AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 		end;
 
-		
-	{PSGViewportObject = ^ TSGViewportObject;
-	TSGViewportObject=class(TSGRenderObject)
-			private
-		FColor:TSGColor4f;
-		x,y,z:Real;
-		depth:Single;
-		viewport:TViewPortArray;
-		mv_matrix,proj_matrix:T16DArray;
-		Point:SGPoint;
-		function GetVertex:SGVertex;
-			public
-		procedure GetViewport;
-		procedure SetPoint (NewPoint:SGPoint;const WithSmezhenie:boolean = True);
-		procedure CanculateVertex;
-		procedure CanculateColor;
-		property Vertex : SGVertex read GetVertex;
-		property Color : SGColor4f read FColor;
-		end;
-	SGViewportObject = TSGViewportObject;
-	PTSGViewportObject = PSGViewportObject;
-	
-function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;}
-
 type
 	TSGStaticString=class(TSGDrawable)
 			public
@@ -207,7 +186,6 @@ type
 		property Font : TSGFont   read FFont write FFont;
 		end;
 
-// Эта процедура переводит шрифт в формат PNG
 procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
 
 implementation
@@ -847,71 +825,6 @@ FRotateY:=0;
 FTranslateX:=0;
 FTranslateY:=0;
 end;
-
-//======================================================================
-
-{procedure SGViewportObject.CanculateColor;
-begin
-glReadPixels(
-	Point.x,
-	Context.Height-Point.y-1,
-	1, 
-	1, 
-	GL_RGBA, 
-	GL_FLOAT, 
-	@FColor);
-end;
-
-procedure SGViewportObject.CanculateVertex; 
-begin
-glReadPixels(
-	Point.x,
-	Context.Height-Point.y-1,
-	1, 
-	1, 
-	GL_DEPTH_COMPONENT, 
-	GL_FLOAT, 
-	@depth);
-gluUnProject(
-	Point.x,
-	Context.Height-Point.y-1,
-	depth,
-	mv_matrix,
-	proj_matrix,
-	viewport,
-	@x,
-	@y,
-	@z);
-end;}
-{function SGViewportObject.GetVertex:SGVertex;
-begin
-Result.Import(x,y,z);
-end;}
-{procedure SGViewportObject.SetPoint(NewPoint:SGPoint;const WithSmezhenie:boolean = True);
-begin
-Point:=NewPoint;
-//if WithSmezhenie then
-	//Point+=Smezhenie;
-end;
-
-procedure SGViewportObject.GetViewport;
-begin
-glGetIntegerv(GL_VIEWPORT,viewport);
-glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
-glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
-end;
-
-function SGGetVertexFromPointOnScreen(const Point:SGPoint;const WithSmezhenie:boolean = True):SGVertex;
-var
-	ViewportObj:SGViewportObject;
-begin
-ViewportObj:=TSGViewportObject.Create;
-ViewportObj.GetViewport;
-ViewportObj.SetPoint(Point,WithSmezhenie);
-ViewportObj.CanculateVertex;
-Result:=ViewportObj.Vertex;
-ViewportObj.Destroy;
-end;}
 
 (*====================================================================*)
 (*=============================TSGFont================================*)

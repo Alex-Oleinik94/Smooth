@@ -1,6 +1,9 @@
 {$INCLUDE SaGe.inc}
+
 unit SaGeFractals;
+
 interface
+
 uses 
 	 crt
 	,SaGeCommon
@@ -15,7 +18,7 @@ uses
 	,SaGeImages
 	,SaGeImagesBase
 	,SaGeRender
-	,SaGeTotal
+	,SaGeCommonUtils
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	;

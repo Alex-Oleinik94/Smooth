@@ -1,6 +1,9 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
 unit SaGeCommon;
+
 interface 
+
 uses
 	 SaGeBase
 	,SaGeBased

@@ -7,7 +7,7 @@ interface
 uses
 	SaGeBase
 	,SaGeCommonClasses
-	,SaGeTotal
+	,SaGeCommonUtils
 	,SaGeRenderConstants
 	
 	,Ex1

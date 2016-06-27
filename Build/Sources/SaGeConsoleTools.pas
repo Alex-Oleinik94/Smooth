@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeConsoleTools;
 
@@ -49,7 +49,7 @@ uses
 	,SaGeBased
 	,SaGeMath
 	,SaGeExamples
-	,SaGeTotal
+	,SaGeCommonUtils
 	,SaGeFractals
 	,SaGeUtils
 	,SaGeModel
