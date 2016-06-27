@@ -159,6 +159,10 @@ type
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);virtual;abstract;
 		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);virtual;abstract;
+		
+		{$DEFINE INC_PLACE_RENDER_CLASS}
+		{$INCLUDE SaGeCommonStructs.inc}
+		{$UNDEF INC_PLACE_RENDER_CLASS}
 		end;
 	
 	TSGRenderClass  = class of TSGRender;
@@ -166,6 +170,12 @@ type
 procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+{$DEFINE RENDER_CLASS := TSGRender}
+{$DEFINE INC_PLACE_RENDER_IMPLEMENTATION}
+{$INCLUDE SaGeCommonStructs.inc}
+{$UNDEF INC_PLACE_RENDER_IMPLEMENTATION}
+{$UNDEF RENDER_CLASS}
 
 procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFDEF MSWINDOWS}

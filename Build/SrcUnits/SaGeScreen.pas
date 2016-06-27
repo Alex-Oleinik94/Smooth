@@ -33,7 +33,10 @@ const
 	SGS_BOTTOM = 2;
 	SGS_RIGHT  = 3;
 	SGS_TOP    = 4;
+
 type
+	TSGSTimer = TSGFloat;
+
 	TSGForm             = class;
 	TSGButton           = class;
 	TSGEdit             = class;
@@ -160,15 +163,15 @@ type
 			FParentWidth,FParentHeight:LongWord;
 			end;
 		FVisible : Boolean;
-		FVisibleTimer : real;
+		FVisibleTimer : TSGSTimer;
 		FActive : Boolean;
-		FActiveTimer : real;
+		FActiveTimer  : TSGSTimer;
 		
 		FCaption:SGCaption;
 		FFont:TSGFont;
 		
 		procedure UpgradeTimers();virtual;
-		procedure UpgradeTimer(const Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGSTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
 		procedure FromDraw();virtual;
 		procedure FromResize();virtual;
 		procedure FromUpDate(var FCanChange:Boolean);virtual;
@@ -180,8 +183,8 @@ type
 			public
 		function ReqursiveActive():Boolean;
 			public
-		property VisibleTimer : real read FVisibleTimer write FVisibleTimer;
-		property ActiveTimer : real read FActiveTimer write FActiveTimer;
+		property VisibleTimer : TSGSTimer read FVisibleTimer write FVisibleTimer;
+		property ActiveTimer : TSGSTimer read FActiveTimer write FActiveTimer;
 		property Caption : SGCaption read FCaption write FCaption;
 		property FText : SGCaption read FCaption write FCaption;
 		property Text : SGCaption read FCaption write FCaption;
@@ -294,11 +297,11 @@ type
 		constructor Create;override;
 		destructor Destroy;override;
 			public
-		FCursorOnButtonTimer : TSGReal;
+		FCursorOnButtonTimer : TSGSTimer;
 		FCursorOnButtonPrev  : TSGBoolean;
 		FCursorOnButton      : TSGBoolean;
 		FChangingButton      : TSGBoolean;
-		FChangingButtonTimer : TSGReal;
+		FChangingButtonTimer : TSGSTimer;
 		FViewImage1          : TSGImage;
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
@@ -400,16 +403,16 @@ type
 		destructor Destroy;override;
 			public
 		FCursorOnComponentPrev : TSGBoolean;
-		FCursorOnComponentTimer:Real;
+		FCursorOnComponentTimer:TSGSTimer;
 		FCursorPosition:LongInt;
 		FNowChanget:Boolean;
-		FNowChangetTimer:real;
+		FNowChangetTimer:TSGSTimer;
 		FTextType:TSGEditTextType;
 		FTextTypeFunction:TSGEditTextTypeFunction;
 		FTextComplite:Boolean;
-		FTextCompliteTimer:Real;
+		FTextCompliteTimer:TSGSTimer;
 		FDrawCursor:Boolean;
-		FDrawCursorTimer:Real;
+		FDrawCursorTimer:TSGSTimer;
 		FDrawCursorElapsedTime:LongWord;
 		FDrawCursorElapsedTimeChange:LongWord;
 		FDrawCursorElapsedTimeDontChange:LongWord;
@@ -499,8 +502,8 @@ type
 		destructor Destroy();override;
 			public
 		FBackLight:Boolean;
-		FBackLightTimer:real;
-		FOpenTimer:real;
+		FBackLightTimer : TSGSTimer;
+		FOpenTimer      : TSGSTimer;
 		FOpen:boolean;
 		FItems:packed array of
 			packed record
@@ -2403,7 +2406,7 @@ While Result=0 do
 	Result:=random(3)-1;
 end;
 
-procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : real; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : TSGSTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
 begin
 if Flag then
 	begin

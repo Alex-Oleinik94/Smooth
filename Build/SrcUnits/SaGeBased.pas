@@ -2,12 +2,6 @@
 
 unit SaGeBased;
 
-{
- *	@Author, REZ1DENT3
- * 	@Engine, SaGe
- * 	@copyright 2013
-}
-
 interface
 
 type
@@ -17,9 +11,13 @@ type
 	TSGLongInt	= LongInt;
 	PSGLongInt	= ^ TSGLongInt;
 	TSGExtended	= Extended;
-	TSGFloat	= Double;
-	TSGReal		= Real;
+	PSGExtended	= ^ TSGExtended;
+	TSGFloat	= Single;
+	PSGFloat	= ^ TSGFloat;
+	TSGDouble	= Real;
+	PSGDouble	= ^ TSGDouble;
 	TSGByte		= Byte;
+	PSGByte		= ^ TSGByte;
 	TSGInt64	= Int64;
 	TSGLongWord	= LongWord;
 	PSGLongWord	= ^ TSGLongWord;
@@ -28,7 +26,7 @@ type
 	PSGWord     = ^ TSGWord;
 	TSGQWord	= QWord;
 	TSGSingle	= Single;
-	TSGDouble   = TSGReal;
+	TSGReal     = TSGDouble;
 	TSGChar		= Char;
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;
@@ -50,23 +48,12 @@ type
  function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
  
  { Operator's ** }
- operator ** (const a, b: TSGFloat) 	: TSGFloat; 	inline; overload; 
+ operator ** (const a, b: TSGDouble) 	: TSGDouble; 	inline; overload; 
  operator ** (const a, b: TSGByte) 		: TSGByte; 		inline; overload;
  operator ** (const a, b: TSGLongWord) 	: TSGInt64;		inline; overload;
  operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	inline;	overload; 
  operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload;
-
- {
- *	Author: 	Sanches
- * 	Modifier:	REZ1DENT3 
- * 	Engine:		SaGe
- * 
- * 	Developer : 
- *  [
- * 		operator ** [TSGReal, 	TSGLongInt To TSGReal],
- * 		operator ** [TSGSingle, TSGLongInt To TSGSingle]
- *  ]
- }
+ 
  operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       inline; overload;
  operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload; 
  operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
@@ -753,7 +740,7 @@ function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger;
 	end;
 	{$ENDIF}
 
-operator ** (const a, b: TSGFloat) 		: TSGFloat; 	inline; overload; 
+operator ** (const a, b: TSGDouble) 		: TSGDouble; 	inline; overload; 
 begin
 	result := power(a, b);
 end;

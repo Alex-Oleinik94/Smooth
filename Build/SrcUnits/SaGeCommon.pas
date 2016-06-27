@@ -228,6 +228,10 @@ const
 	NilVertex : SGVertex = (x:0;y:0;z:0);
 	NilColor  : SGColor  = (r:0;g:0;b:0;a:0);
 
+{$DEFINE INC_PLACE_INTERFACE}
+{$INCLUDE SaGeCommonStructs.inc}
+{$UNDEF INC_PLACE_INTERFACE}
+
 type
 	ISGRender = interface(ISGRectangle)
 		['{6d0d4eb0-4de7-4000-bf5d-52a069a776d1}']
@@ -350,6 +354,10 @@ type
 		property Height : TSGLongWord read GetHeight write SetHeight;
 		property Context : ISGNearlyContext read GetContext write SetContext;
 		property RenderType : TSGRenderType read GetRenderType;
+		
+		{$DEFINE INC_PLACE_RENDER_INTERFACE}
+		{$INCLUDE SaGeCommonStructs.inc}
+		{$UNDEF INC_PLACE_RENDER_INTERFACE}
 		end;
 	
 	ISGRendered = interface
@@ -524,6 +532,10 @@ function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTI
 function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+{$DEFINE INC_PLACE_IMPLEMENTATION}
+{$INCLUDE SaGeCommonStructs.inc}
+{$UNDEF INC_PLACE_IMPLEMENTATION}
 
 function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
