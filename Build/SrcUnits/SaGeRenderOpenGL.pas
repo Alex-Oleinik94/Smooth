@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 {$IFDEF MOBILE}
 	{$DEFINE SGINTERPRITATEBEGINEND}
@@ -94,7 +94,7 @@ type
 			{$ENDIF}
 			public
 		{$DEFINE SG_RENDER_EIC}
-		{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
+		{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
 		{$UNDEF SG_RENDER_EIC}
 			public
 		function SetPixelFormat():Boolean;override;overload;
@@ -1189,7 +1189,7 @@ glClear(VParam);
 end;
 
 {$DEFINE SG_RENDER_EP}
-{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
+{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
 {$UNDEF SG_RENDER_EP}
 
 procedure TSGRenderOpenGL.Init();
@@ -1323,7 +1323,7 @@ SetRenderType({$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF});
 	{$ENDIF}
 
 {$DEFINE SG_RENDER_EICR}
-{$INCLUDE Includes\SaGeRenderOpenGLLoadExtendeds.inc}
+{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
 {$UNDEF SG_RENDER_EICR}
 
 FNowInBumpMapping:=False;

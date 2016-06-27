@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeRenderConstants;
 
@@ -19,7 +19,7 @@ type
 	
 	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX,SGRenderGLES);
 
-{$INCLUDE Includes\SaGeRenderConstants.inc}
+{$INCLUDE SaGeRenderConstants.inc}
 
 implementation
 

@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 unit SaGeFractals;
 interface
 uses 
@@ -131,12 +131,12 @@ type
 		end;
 
 {$DEFINE SGREADINTERFACE}
-{$i Includes\SaGeFractalMengerSpunch.inc}
-{$i Includes\SaGeFractalMandelbrod.inc}
-{$i Includes\SaGeFractalKohTriangle.inc}
-{$i Includes\SaGeFractalPodkova.inc}
-{$i Includes\SaGeFractalLomanaya.inc}
-{$i Includes\SageFractalTetraider.inc}
+{$INCLUDE SaGeFractalMengerSpunch.inc}
+{$INCLUDE SaGeFractalMandelbrod.inc}
+{$INCLUDE SaGeFractalKohTriangle.inc}
+{$INCLUDE SaGeFractalPodkova.inc}
+{$INCLUDE SaGeFractalLomanaya.inc}
+{$INCLUDE SageFractalTetraider.inc}
 {$UNDEF SGREADINTERFACE}
 
 type
@@ -190,12 +190,12 @@ if FDrawClasses<>nil then
 end;
 
 {$DEFINE SGREADIMPLEMENTATION}
-{$i Includes\SaGeFractalMengerSpunch.inc}
-{$i Includes\SaGeFractalMandelbrod.inc}
-{$i Includes\SaGeFractalKohTriangle.inc}
-{$i Includes\SaGeFractalPodkova.inc}
-{$i Includes\SaGeFractalLomanaya.inc}
-{$i Includes\SageFractalTetraider.inc}
+{$INCLUDE SaGeFractalMengerSpunch.inc}
+{$INCLUDE SaGeFractalMandelbrod.inc}
+{$INCLUDE SaGeFractalKohTriangle.inc}
+{$INCLUDE SaGeFractalPodkova.inc}
+{$INCLUDE SaGeFractalLomanaya.inc}
+{$INCLUDE SageFractalTetraider.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSG3DFractal.Calculate();

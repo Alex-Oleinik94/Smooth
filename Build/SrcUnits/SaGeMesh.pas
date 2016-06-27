@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeMesh;
 
@@ -522,12 +522,12 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-{$DEFINE SGREADINTERFACE}      {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+{$DEFINE SGREADINTERFACE}      {$INCLUDE SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
 
 implementation
 
-{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE Includes\SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
-{$INCLUDE Includes\SaGeMeshObj.inc}
+{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+{$INCLUDE SaGeMeshObj.inc}
 
 procedure TSG3DObject.CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
 var
