@@ -1,4 +1,4 @@
-{$MODE OBJFPC}
+{$INCLUDE SaGe.inc}
 library SaGe;
 uses
 	crt
@@ -8,7 +8,7 @@ uses
 	,SaGeConsoleTools
 	
 	,SaGeResourseManager
-	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
+	{$INCLUDE SaGeRMFiles.inc}
 	;
 
 function TSGImage_Create:TSGImage;cdecl;

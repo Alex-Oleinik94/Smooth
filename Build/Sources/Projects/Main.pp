@@ -1,4 +1,4 @@
-{$INCLUDE SrcUnits\Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 {$IF not defined(MOBILE)}
 	//{$DEFINE WITHSAGELIBRARY}
 	{$IF not defined(DARWIN)}
@@ -25,7 +25,7 @@ uses
 		{$ENDIF}
 	
 	,SaGeResourseManager
-	{$INCLUDE SrcUnits\Temp\SaGeRMFiles.inc}
+	{$INCLUDE SaGeRMFiles.inc}
 	
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary

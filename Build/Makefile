@@ -2,12 +2,15 @@ X32=-Pi386
 X64=-Px86_64
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
-DESKTOPFILE=Main
-BASEARGS= -FuSrcUnits/Temp -FuSrcUnits/Others/Synapse -FiSrcUnits/Includes -FiSrcUnits/Includes/Mesh -FiSrcUnits/Includes/Render -FiSrcUnits/Includes/Common -FiSrcUnits/Includes/Fractals -FuSrcUnits/Others/lNet -FuSrcUnits/Others/lNet/sys -FuSrcUnits -FuSrcUnits/Programs -FuSrcUnits/Others -FuSrcUnits/Others/PasJpeg -FiSrcUnits/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
-RENDERARGS= -FuSrcUnits/DirectX -FuSrcUnits/OpenGL 
+DESKTOPFILENAME=Main
+LIBRARYFILENAME=SaGe
+PROJECTSDIR=Sources/Projects
+DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
+BASEARGS= -FiSources/Temp -FuSources/Temp -FuSources/Others/Synapse -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
+RENDERARGS= -FuSources/DirectX -FuSources/OpenGL 
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
-ANDROIDARGS= -FuSrcUnits/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSrcUnits/OpenGL 
+ANDROIDARGS= -FuSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSources/OpenGL 
 OUTPUTDESKTOP= -FUCompiledUnits/i386-other -FE./../Binaries
 OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
@@ -16,10 +19,10 @@ DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
-SGRMFILE=./../Build/SrcUnits/Temp/SaGeRMFiles.inc
-SGTEMPUNITDIR=./../Build/SrcUnits/Temp
-SAGE="./../Binaries/$(DESKTOPFILE)"
-SAGELIB=SaGe
+SGTEMPUNITDIR=./../Build/Sources/Temp
+SGRMFILE=$(SGTEMPUNITDIR)/SaGeRMFiles.inc
+SAGE="./../Binaries/$(DESKTOPFILENAME)"
+SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
 
 release:
 	@$(PASCALCOMPILER) $(DORELEASE) $(DESKTOPARGS)
@@ -72,7 +75,7 @@ build_files:
 	@$(SAGE) -CDTPUARU "./../Data/Textures/KillKostia"                      $(SGTEMPUNITDIR)                      $(SGRMFILE)
 	@$(SAGE) -CDTPUARU "./../Data/Fonts"                                    $(SGTEMPUNITDIR)                      $(SGRMFILE)
 clear_files:
-	@rm -f SrcUnits/Temp/*
+	@rm -f Sources/Temp/*
 	@$(SAGE) -crf $(SGRMFILE)
 clear:
 	@rm -f CompiledUnits/arm-android/*
@@ -87,7 +90,7 @@ clear:
 	@rm -f ppas.bat
 	@rm -f *.a
 	@rm -f fpc-res.res
-	@rm -f SrcUnits/*.o
-	@rm -f SrcUnits/*.ppu
+	@rm -f Sources/*.o
+	@rm -f Sources/*.ppu
 	@rm -f Main.res
 	@$(MAKE) clear_files

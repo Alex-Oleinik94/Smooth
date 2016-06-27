@@ -6,11 +6,11 @@ FPC
 Temp
 Data/EngineLog.log
 Build/CompiledUnits
-Build/SrcUnits/Temp/*.pas
-Build/SrcUnits/*.o
-Build/SrcUnits/*.a
-Build/SrcUnits/*.ppu
-Build/SrcUnits/Others/Imaging/*
+Build/Sources/Temp/*.pas
+Build/Sources/*.o
+Build/Sources/*.a
+Build/Sources/*.ppu
+Build/Sources/Others/Imaging/*
 Build/*.ppu
 Build/*.o
 Build/Main.res

@@ -1,3 +1,3 @@
 @echo off
-copy .\SrcUnits\Others\SaGeRMFiles.inc .\SrcUnits\Temp\SaGeRMFiles.inc
+copy .\Sources\Includes\SaGeStandartResourseManagerFiles.inc .\Sources\Temp\SaGeRMFiles.inc
 if "%1"=="" ( pause )
