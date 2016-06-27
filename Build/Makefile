@@ -88,6 +88,7 @@ clear:
 	@rm -f *.ppu
 	@rm -f *.or
 	@rm -f ppas.bat
+	@rm -f *.bak
 	@rm -f *.a
 	@rm -f fpc-res.res
 	@rm -f Sources/*.o

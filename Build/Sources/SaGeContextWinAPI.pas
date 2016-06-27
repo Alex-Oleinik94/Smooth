@@ -65,6 +65,7 @@ type
 		hWindow  : HWnd;
 		dcWindow : hDc;
 		clWindow : LongWord;
+		FWindowClassName : TSGString;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  WindowRegister(): Boolean;
 		function  WindowCreate(): HWnd;
@@ -503,6 +504,7 @@ end;
 constructor TSGContextWinAPI.Create;
 begin
 inherited;
+FWindowClassName := '';
 hWindow  := 0;
 dcWindow := 0;
 clWindow := 0;
@@ -780,6 +782,7 @@ for i:=0 to SizeOf(Si)-1 do
 end;}
 
 begin
+FWindowClassName := 'SaGe Window Class ' + SGStr(Random(100000));
 WindowClass.cbSize        := SizeOf(WNDCLASSEX);
 WindowClass.Style         := cs_hRedraw or cs_vRedraw or CS_OWNDC;
 WindowClass.lpfnWndProc   := WndProc(@MyGLWndProc);
@@ -790,7 +793,7 @@ WindowClass.hIcon         := FIconHandle;
 WindowClass.hCursor       := FCursorHandle;
 WindowClass.hbrBackground := 0;
 WindowClass.lpszMenuName  := nil;
-WindowClass.lpszClassName := 'SaGe Window Class';
+WindowClass.lpszClassName := SGStringAsPChar(FWindowClassName);
 WindowClass.hIconSm       := WindowClass.hIcon;
 
 clWindow:=Windows.RegisterClassEx(WindowClass);
@@ -811,14 +814,14 @@ begin
 	{$ENDIF}
 if not FFullscreen then 
 	begin	
-	hWindow2 := Windows.CreateWindow('SaGe Window Class',
+	hWindow2 := Windows.CreateWindow(SGStringAsPChar(FWindowClassName),
 			  SGStringToPChar(FTitle),
-			  WS_CAPTION OR 
-			  WS_POPUPWINDOW OR
-			   WS_TILEDWINDOW OR 
-			   WS_VISIBLE OR 
-			   WS_CLIPSIBLINGS OR 
-			   WS_CLIPCHILDREN,
+				WS_CAPTION OR 
+				WS_POPUPWINDOW OR
+				WS_TILEDWINDOW OR 
+				WS_VISIBLE OR 
+				WS_CLIPSIBLINGS OR 
+				WS_CLIPCHILDREN,
 			  cw_UseDefault,
 			  cw_UseDefault,
 			  FWidth,
@@ -845,7 +848,7 @@ else
 			end;
 		end;
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
-		'SaGe Window Class',
+		SGStringAsPChar(FWindowClassName),
 		SGStringToPChar(FTitle),
 		WS_EX_TOPMOST OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
 		0, 0,
