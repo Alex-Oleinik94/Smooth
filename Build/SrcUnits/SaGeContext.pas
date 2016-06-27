@@ -193,6 +193,7 @@ type
 			protected
 		FNewContextType : TSGContextClass;
 		FRenderClass    : TSGRenderClass;
+		FRenderClassChanget : TSGBoolean;
 		FRender         : TSGRender;
 		FSelfLink       : PISGContext;
 		FPaintableClass : TSGDrawableClass;
@@ -246,9 +247,7 @@ SGScreen.DeleteDeviceResourses();
 if FRender <> nil then
 	begin
 	FRender.Context := nil;
-	FRender.Kill();
-	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
-	//FRender.Destroy();
+	FRender.Destroy();
 	FRender := nil;
 	end;
 {$IFDEF CONTEXT_DEBUGING}
@@ -258,6 +257,7 @@ FRender := FRenderClass.Create();
 FRender.Context := Self as ISGContext;
 if FRender.CreateContext() then
 	FRender.Init();
+FRenderClassChanget := False;
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
 SGScreen.LoadDeviceResourses();
@@ -280,7 +280,7 @@ WriteLn('TSGContext.SetRenderClass(...) : Begining');
 FRenderClass := TSGRenderClass(NewRender);
 if FInitialized and (not (Render is FRenderClass)) then
 	begin
-	ReinitializeRender();
+	FRenderClassChanget := True;
 	end;
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.SetRenderClass(...) : End');
@@ -423,6 +423,7 @@ StartComputeTimer();
 FInitialized := True;
 if FPaintableClass <> nil then
 	begin
+	SGScreen.Load(Self);
 	FPaintable := FPaintableClass.Create(Self);
 	FPaintable.LoadDeviceResourses();
 	end;
@@ -447,6 +448,8 @@ while Active and (FNewContextType = nil) do
 	{$IFDEF CONTEXT_DEBUGING}
 		WriteLn('TSGContext.Run(): Before continue looping');
 		{$ENDIF}
+	if FRenderClassChanget then
+		ReinitializeRender();
 	end;
 end;
 
@@ -609,6 +612,7 @@ var
 	i:LongWord;
 begin
 inherited;
+FRenderClassChanget := False;
 FIcon := nil;
 FCursor := nil;
 FInitialized := False;
@@ -660,9 +664,7 @@ if FPaintable <> nil then
 	end;
 if FRender <> nil then
 	begin
-	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
-	//FRender.Destroy();
-	FRender.Kill();
+	FRender.Destroy();
 	FRender:=nil;
 	end;
 end;

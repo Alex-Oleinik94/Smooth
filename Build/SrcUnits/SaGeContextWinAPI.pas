@@ -43,7 +43,6 @@ type
 		destructor Destroy();override;
 			public
 		procedure Initialize();override;
-		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
 		function  GetWindowArea():TSGPoint2f;override;
@@ -529,18 +528,7 @@ begin
 Active := CreateWindow();
 if Active then
 	begin
-	SGScreen.Load(Self);
 	inherited;
-	end;
-end;
-
-procedure TSGContextWinAPI.Run();
-begin
-Messages();
-StartComputeTimer();
-while Active and (FNewContextType = nil) do
-	begin
-	Paint();
 	end;
 end;
 

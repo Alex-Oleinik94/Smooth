@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 
-{$DEFINE RENDER_DEBUG}
+//{$DEFINE RENDER_DEBUG}
 
 unit SaGeRender;
 

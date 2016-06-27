@@ -1,6 +1,6 @@
 {$INCLUDE Includes\SaGe.inc}
 
-{$DEFINE RENDER_DX9_DEBUG}
+//{$DEFINE RENDER_DX9_DEBUG}
 
 unit SaGeRenderDirectX;
 
