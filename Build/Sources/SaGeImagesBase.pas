@@ -74,6 +74,7 @@ type
 		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ReAllocateForBounds(const NewWidth, NewHeight : TSGLongWord);
 		procedure PutImage(const VImage : TSGBitMap; const VX, VY : TSGLongWord);
+		procedure PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGUInt32);
 			public
 		property Width       : Cardinal read FWidth       write FWidth;
 		property Height      : Cardinal read FHeight      write FHeight;
@@ -91,8 +92,38 @@ operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 
 function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure MultByte(var a : TSGByte; const b : TSGByte);
+begin
+if a > b then
+	a := b;
+end;
+
+begin
+Result := Pixel1;
+MultByte(Result.x, Pixel2.x);
+MultByte(Result.y, Pixel2.y);
+MultByte(Result.z, Pixel2.z);
+MultByte(Result.w, Pixel2.w);
+end;
+
+procedure TSGBitMap.PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGUInt32);
+var
+	i, ii : TSGMaxEnum;
+	Pixel : PSGPixel4b = nil;
+begin
+for i := 0 to VWidth - 1 do
+	for ii := 0 to VHeight - 1 do
+		begin
+		Pixel := @PSGPixel4b(BitMap)[VX + i + (VY + ii) * Width];
+		Pixel^ := SGMultPixel4b(Pixel^, VColor);
+		end;
+end;
 
 procedure TSGBitMap.ReAllocateForBounds(const NewWidth, NewHeight : TSGLongWord);
 var

@@ -71,6 +71,18 @@ type
 
 {$IFNDEF INC_WITHOUT_FORWARD}
 
+{$IF    defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
+function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
+
+{$IF    defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
+function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
+
+{$IF    defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
+function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
+
 {$IF    defined(STRUCT_TYPE)}
 function Max(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function Min(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -139,6 +151,27 @@ operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF 
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+
+{$IF    defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
+function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(x, y);
+end;
+{$ENDIF defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
+
+{$IF    defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
+function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(x, y, z);
+end;
+{$ENDIF defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
+
+{$IF    defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
+function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(x, y, z, w);
+end;
+{$ENDIF defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_TYPE)}
 function Max(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
