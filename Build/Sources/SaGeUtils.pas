@@ -193,6 +193,10 @@ type
 		property Font : TSGFont   read FFont write FFont;
 		end;
 
+(*====================================================================*)
+(*===========================TSGMultiImage============================*)
+(*====================================================================*)
+
 type
 	TSGMultiImage = class(TSGImage)
 			public
@@ -201,7 +205,7 @@ type
 			public
 		procedure Add(const VImage : TSGBitMap);
 			protected
-		FArrayOfPoints : packed array of
+		FPoints : packed array of
 			TSGPoint2ui32;
 		end;
 
@@ -212,20 +216,36 @@ implementation
 (*====================================================================*)
 
 constructor TSGMultiImage.Create();
+var
+	NullPoint : TSGPoint2ui32 = (x:0;y:0);
 begin
 inherited;
-SetLength(FArrayOfPoints, 1);
-FArrayOfPoints[Low(FArrayOfPoints)].Import(0, 0);
+FPoints := NullPoint;
 end;
 
 destructor TSGMultiImage.Destroy();
 begin
-SetLength(FArrayOfPoints, 0);
+SetLength(FPoints, 0);
 inherited;
 end;
 
 procedure TSGMultiImage.Add(const VImage : TSGBitMap);
+var
+	Distance : TSGFloat = 100000;
+	NowDistance : TSGFloat;
+	TempPoint, Point : TSGPoint2ui32;
 begin
+for TempPoint in FPoints do
+	begin
+	NowDistance := Abs(TempPoint);
+	if NowDistance < Distance then
+		begin
+		Distance := NowDistance;
+		Point := TempPoint;
+		end;
+	end;
+if FImage = nil then
+	FImage := TSGBitMap.Create();
 
 end;
 

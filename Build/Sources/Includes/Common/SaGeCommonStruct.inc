@@ -56,6 +56,18 @@ type
 		end;
 	{$ENDIF defined(STRUCT_4) and defined(STRUCT_P_4)}
 	{$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
+	
+	{$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+	STRUCT_2_LIST = packed array of STRUCT_2;
+	{$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+	
+	{$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+	STRUCT_3_LIST = packed array of STRUCT_3;
+	{$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+	
+	{$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
+	STRUCT_4_LIST = packed array of STRUCT_4;
+	{$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
 {$IFNDEF INC_WITHOUT_FORWARD}
 
@@ -64,14 +76,339 @@ function Abs(const S : STRUCT_2):STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
 function Abs(const S : STRUCT_3):STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
+{$ELSE  STRUCT_IS_FLOAT}
+function Abs(const S : STRUCT_2):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function Abs(const S : STRUCT_2):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function Abs(const S : STRUCT_2):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
+function Abs(const S : STRUCT_3):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function Abs(const S : STRUCT_3):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function Abs(const S : STRUCT_3):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 {$ENDIF STRUCT_IS_FLOAT}
 
+operator + (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator = (const A, B : STRUCT_2) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator :=(const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+operator + (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator = (const A, B : STRUCT_3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator :=(const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+operator + (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator = (const A, B : STRUCT_4) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator :=(const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+{$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+
+{$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+operator :=(const A : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+
+{$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
+operator :=(const A : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
 {$ENDIF INC_WITHOUT_FORWARD}
 
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+
+{$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SetLength(Result, 1);
+Result[0] := A;
+end;
+
+operator + (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := A;
+if Result = nil then
+	SetLength(Result, 1)
+else
+	SetLength(Result, Length(Result) + 1);
+Result[High(Result)] := B;
+end;
+
+operator - (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i, ii : TSGMaxEnum;
+begin
+Result := A;
+if Result <> nil then 
+	begin
+	ii := Length(Result);
+	if ii > 0 then
+		begin
+		for i := 0 to ii - 1 do
+			begin
+			if Result[i] = B then
+				begin
+				ii := i;
+				break;
+				end;
+			end;
+		i := Length(Result);
+		if ii <> i then
+			begin
+			if ii <> i - 1 then
+				begin
+				for i := ii to High(Result) - 1 do
+					Result[i] := Result[i + 1];
+				end;
+			SetLength(Result, Length(Result) - 1);
+			end;
+		end;
+	end;
+end;
+
+{$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
+
+{$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+operator :=(const A : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SetLength(Result, 1);
+Result[0] := A;
+end;
+
+operator + (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := A;
+if Result = nil then
+	SetLength(Result, 1)
+else
+	SetLength(Result, Length(Result) + 1);
+Result[High(Result)] := B;
+end;
+
+operator - (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i, ii : TSGMaxEnum;
+begin
+Result := A;
+if Result <> nil then 
+	begin
+	ii := Length(Result);
+	if ii > 0 then
+		begin
+		for i := 0 to ii - 1 do
+			begin
+			if Result[i] = B then
+				begin
+				ii := i;
+				break;
+				end;
+			end;
+		i := Length(Result);
+		if ii <> i then
+			begin
+			if ii <> i - 1 then
+				begin
+				for i := ii to High(Result) - 1 do
+					Result[i] := Result[i + 1];
+				end;
+			SetLength(Result, Length(Result) - 1);
+			end;
+		end;
+	end;
+end;
+
+{$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
+
+{$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
+operator :=(const A : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SetLength(Result, 1);
+Result[0] := A;
+end;
+
+operator + (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := A;
+if Result = nil then
+	SetLength(Result, 1)
+else
+	SetLength(Result, Length(Result) + 1);
+Result[High(Result)] := B;
+end;
+
+operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i, ii : TSGMaxEnum;
+begin
+Result := A;
+if Result <> nil then 
+	begin
+	ii := Length(Result);
+	if ii > 0 then
+		begin
+		for i := 0 to ii - 1 do
+			begin
+			if Result[i] = B then
+				begin
+				ii := i;
+				break;
+				end;
+			end;
+		i := Length(Result);
+		if ii <> i then
+			begin
+			if ii <> i - 1 then
+				begin
+				for i := ii to High(Result) - 1 do
+					Result[i] := Result[i + 1];
+				end;
+			SetLength(Result, Length(Result) - 1);
+			end;
+		end;
+	end;
+end;
+
+{$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
+
+operator :=(const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A, A);
+end;
+
+operator :=(const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A, A, A, A);
+end;
+
+operator :=(const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A, A, A);
+end;
+
+operator + (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x + B.x, A.y + B.y);
+end;
+
+operator - (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x - B.x, A.y - B.y);
+end;
+
+operator = (const A, B : STRUCT_2) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := 
+{$IFDEF STRUCT_IS_FLOAT}
+	( Abs(A.x - B.x) + Abs(A.y - B.y) ) < SGZero
+{$ELSE  STRUCT_IS_FLOAT}
+	(A.x = B.x) and (A.y = B.y)
+{$ENDIF STRUCT_IS_FLOAT}
+	;
+end;
+
+operator - (const A : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import( - A.x, - A.y);
+end;
+
+operator + (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x + B.x, A.y + B.y, A.z + B.z);
+end;
+
+operator - (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x - B.x, A.y - B.y, A.z - B.z);
+end;
+
+operator = (const A, B : STRUCT_3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := 
+{$IFDEF STRUCT_IS_FLOAT}
+	( Abs(A.x - B.x) + Abs(A.y - B.y) + Abs(A.z - B.z) ) < SGZero
+{$ELSE  STRUCT_IS_FLOAT}
+	(A.x = B.x) and (A.y = B.y) and (A.z = B.z)
+{$ENDIF STRUCT_IS_FLOAT}
+	;
+end;
+
+operator - (const A : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import( - A.x, - A.y, - A.z);
+end;
+
+operator + (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x + B.x, A.y + B.y, A.z + B.z, A.w + B.w);
+end;
+
+operator - (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(A.x - B.x, A.y - B.y, A.z - B.z, A.w - B.w);
+end;
+
+operator = (const A, B : STRUCT_4) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := 
+{$IFDEF STRUCT_IS_FLOAT}
+	( Abs(A.x - B.x) + Abs(A.y - B.y) + Abs(A.z - B.z) + Abs(A.w - B.w) ) < SGZero
+{$ELSE  STRUCT_IS_FLOAT}
+	(A.x = B.x) and (A.y = B.y) and (A.z = B.z) and (A.w = B.w)
+{$ENDIF STRUCT_IS_FLOAT}
+	;
+end;
+
+operator - (const A : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import( - A.x, - A.y, - A.z, - A.w);
+end;
+
+
+{$IFNDEF STRUCT_IS_FLOAT}
+function Abs(const S : STRUCT_2):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y));
+end;
+
+function Abs(const S : STRUCT_2):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y));
+end;
+
+function Abs(const S : STRUCT_2):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y));
+end;
+{$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
+function Abs(const S : STRUCT_3):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y) + sqr(S.z));
+end;
+
+function Abs(const S : STRUCT_3):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y) + sqr(S.z));
+end;
+
+function Abs(const S : STRUCT_3):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := sqrt(sqr(S.x) + sqr(S.y) + sqr(S.z));
+end;
+{$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
+{$ENDIF STRUCT_IS_FLOAT}
+
 function STRUCT_2.FieldsArray() : STRUCT_PTYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := STRUCT_PTYPE(@x);
@@ -254,6 +591,7 @@ end;
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
 procedure RENDER_CLASS.Vertex(const S : STRUCT_4);overload;
 begin
+(* fiature *)Vertex3f(S.x,S.y,S.z);
 //Vertex4f(S.x,S.y,S.z,S.w);
 end;
 {$ENDIF defined(STRUCT_4) and defined(STRUCT_P_4)}
@@ -263,21 +601,27 @@ end;
 {$IFDEF STRUCT_IS_COLOR}
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
 procedure RENDER_CLASS.Color(const S :  STRUCT_3);overload;
+const
+	OneOf255 = 1/255;
 begin
-//{$IFDEF STRUCT_IS_FLOAT}
+{$IFDEF STRUCT_IS_FLOAT}
 Color3f(S.r,S.g,S.b);
-//{$ELSE  STRUCT_IS_FLOAT}
+{$ELSE  STRUCT_IS_FLOAT}
+(* fiature *)Color3f(S.r * OneOf255, S.g * OneOf255, S.b * OneOf255);
 //Color3b(S.r,S.g,S.b);
-//{$ENDIF STRUCT_IS_FLOAT}
+{$ENDIF STRUCT_IS_FLOAT}
 end;
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
 procedure RENDER_CLASS.Color(const S :  STRUCT_4);overload;
+const
+	OneOf255 = 1/255;
 begin
-//{$IFDEF STRUCT_IS_FLOAT}
+{$IFDEF STRUCT_IS_FLOAT}
 Color4f(S.r,S.g,S.b,S.a);
-//{$ELSE  STRUCT_IS_FLOAT}
+{$ELSE  STRUCT_IS_FLOAT}
+(* fiature *)Color4f(S.r * OneOf255, S.g * OneOf255, S.b * OneOf255, S.a * OneOf255);
 //Color4b(S.r,S.g,S.b,S.a);
-//{$ENDIF STRUCT_IS_FLOAT}
+{$ENDIF STRUCT_IS_FLOAT}
 end;
 {$ENDIF defined(STRUCT_4) and defined(STRUCT_P_4)}
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
@@ -291,11 +635,13 @@ end;
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
 procedure RENDER_CLASS.TexCoord(const S :  STRUCT_3);overload;
 begin
+(* fiature *)TexCoord2f(S.x,S.y);
 //TexCoord3f(S.x,S.y,S.z);
 end;
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
 procedure RENDER_CLASS.TexCoord(const S :  STRUCT_4);overload;
 begin
+(* fiature *)TexCoord2f(S.x,S.y);
 //TexCoord4f(S.x,S.y,S.z,S.w);
 end;
 {$ENDIF defined(STRUCT_4) and defined(STRUCT_P_4)}

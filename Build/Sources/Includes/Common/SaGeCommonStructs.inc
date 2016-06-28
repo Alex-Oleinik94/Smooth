@@ -8,6 +8,79 @@
 {$INCLUDE SaGeCommonStructUndef.inc}
 
 (*====================================================================*)
+(*============================64 bit, float===========================*)
+(*====================================================================*)
+
+{$DEFINE STRUCT_2     := TSGVertex2d}
+{$DEFINE STRUCT_3     := TSGVertex3d}
+{$DEFINE STRUCT_4     := TSGVertex4d}
+{$DEFINE STRUCT_P_2   := PSGVertex2d}
+{$DEFINE STRUCT_P_3   := PSGVertex3d}
+{$DEFINE STRUCT_P_4   := PSGVertex4d}
+{$DEFINE STRUCT_TYPE  := TSGDouble}
+{$DEFINE STRUCT_PTYPE := PSGDouble}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2dList}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3dList}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4dList}
+{$DEFINE STRUCT_IS_FLOAT}
+{$DEFINE STRUCT_IS_COLOR}
+{$DEFINE STRUCT_IS_VERTEX}
+{$DEFINE STRUCT_IS_TEX_VERTEX}
+{$INCLUDE SaGeCommonStruct.inc}
+{$INCLUDE SaGeCommonStructUndef.inc}
+{$IFDEF INC_PLACE_INTERFACE}
+type
+	TSGPoint2d  = TSGVertex2d;
+	TSGVector2d = TSGVertex2d;
+	TSGColor2d  = TSGVertex2d;
+	
+	TSGPoint3d  = TSGVertex3d;
+	TSGVector3d = TSGVertex3d;
+	TSGColor3d  = TSGVertex3d;
+	
+	TSGPoint4d  = TSGVertex4d;
+	TSGVector4d = TSGVertex4d;
+	TSGColor4d  = TSGVertex4d;
+{$ENDIF}
+
+
+(*====================================================================*)
+(*============================80 bit, float===========================*)
+(*====================================================================*)
+
+{$DEFINE STRUCT_2     := TSGVertex2e}
+{$DEFINE STRUCT_3     := TSGVertex3e}
+{$DEFINE STRUCT_4     := TSGVertex4e}
+{$DEFINE STRUCT_P_2   := PSGVertex2e}
+{$DEFINE STRUCT_P_3   := PSGVertex3e}
+{$DEFINE STRUCT_P_4   := PSGVertex4e}
+{$DEFINE STRUCT_TYPE  := TSGExtended}
+{$DEFINE STRUCT_PTYPE := PSGExtended}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2eList}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3eList}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4eList}
+{$DEFINE STRUCT_IS_FLOAT}
+{$DEFINE STRUCT_IS_COLOR}
+{$DEFINE STRUCT_IS_VERTEX}
+{$DEFINE STRUCT_IS_TEX_VERTEX}
+{$INCLUDE SaGeCommonStruct.inc}
+{$INCLUDE SaGeCommonStructUndef.inc}
+{$IFDEF INC_PLACE_INTERFACE}
+type
+	TSGPoint2e  = TSGVertex2e;
+	TSGVector2e = TSGVertex2e;
+	TSGColor2e  = TSGVertex2e;
+	
+	TSGPoint3e  = TSGVertex3e;
+	TSGVector3e = TSGVertex3e;
+	TSGColor3e  = TSGVertex3e;
+	
+	TSGPoint4e  = TSGVertex4e;
+	TSGVector4e = TSGVertex4e;
+	TSGColor4e  = TSGVertex4e;
+{$ENDIF}
+
+(*====================================================================*)
 (*=========================64 bit, unsigned===========================*)
 (*====================================================================*)
 
@@ -19,6 +92,9 @@
 {$DEFINE STRUCT_P_4   := PSGVertex4uint64}
 {$DEFINE STRUCT_TYPE  := TSGQuadWord}
 {$DEFINE STRUCT_PTYPE := PSGQuadWord}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2uint64List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3uint64List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4uint64List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -93,6 +169,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4int64}
 {$DEFINE STRUCT_TYPE  := TSGInt64}
 {$DEFINE STRUCT_PTYPE := PSGInt64}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2int64List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3int64List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4int64List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -167,6 +246,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4uint32}
 {$DEFINE STRUCT_TYPE  := TSGLongWord}
 {$DEFINE STRUCT_PTYPE := PSGLongWord}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2uint32List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3uint32List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4uint32List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -241,6 +323,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4int32}
 {$DEFINE STRUCT_TYPE  := TSGLongInt}
 {$DEFINE STRUCT_PTYPE := PSGLongInt}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2int32List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3int32List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4int32List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -315,6 +400,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4uint16}
 {$DEFINE STRUCT_TYPE  := TSGWord}
 {$DEFINE STRUCT_PTYPE := PSGWord}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2uint16List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3uint16List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4uint16List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -389,6 +477,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4int16}
 {$DEFINE STRUCT_TYPE  := TSGSmallInt}
 {$DEFINE STRUCT_PTYPE := PSGSmallInt}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2int16List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3int16List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4int16List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -463,6 +554,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4uint8}
 {$DEFINE STRUCT_TYPE  := TSGByte}
 {$DEFINE STRUCT_PTYPE := PSGByte}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2uint8List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3uint8List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4uint8List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -537,6 +631,9 @@ type
 {$DEFINE STRUCT_P_4   := PSGVertex4int8}
 {$DEFINE STRUCT_TYPE  := TSGShortInt}
 {$DEFINE STRUCT_PTYPE := PSGShortInt}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2int8List}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3int8List}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4int8List}
 {$DEFINE STRUCT_IS_COLOR}
 {$DEFINE STRUCT_IS_VERTEX}
 {$DEFINE STRUCT_IS_TEX_VERTEX}
@@ -597,71 +694,4 @@ type
 	PSGPoint4i8    = PSGVertex4int8;
 	PSGVector4i8   = PSGVertex4int8;
 	PSGColor4i8    = PSGVertex4int8;
-{$ENDIF}
-
-(*====================================================================*)
-(*============================64 bit, float===========================*)
-(*====================================================================*)
-
-{$DEFINE STRUCT_2     := TSGVertex2d}
-{$DEFINE STRUCT_3     := TSGVertex3d}
-{$DEFINE STRUCT_4     := TSGVertex4d}
-{$DEFINE STRUCT_P_2   := PSGVertex2d}
-{$DEFINE STRUCT_P_3   := PSGVertex3d}
-{$DEFINE STRUCT_P_4   := PSGVertex4d}
-{$DEFINE STRUCT_TYPE  := TSGDouble}
-{$DEFINE STRUCT_PTYPE := PSGDouble}
-{$DEFINE STRUCT_IS_FLOAT}
-{$DEFINE STRUCT_IS_COLOR}
-{$DEFINE STRUCT_IS_VERTEX}
-{$DEFINE STRUCT_IS_TEX_VERTEX}
-{$INCLUDE SaGeCommonStruct.inc}
-{$INCLUDE SaGeCommonStructUndef.inc}
-{$IFDEF INC_PLACE_INTERFACE}
-type
-	TSGPoint2d  = TSGVertex2d;
-	TSGVector2d = TSGVertex2d;
-	TSGColor2d  = TSGVertex2d;
-	
-	TSGPoint3d  = TSGVertex3d;
-	TSGVector3d = TSGVertex3d;
-	TSGColor3d  = TSGVertex3d;
-	
-	TSGPoint4d  = TSGVertex4d;
-	TSGVector4d = TSGVertex4d;
-	TSGColor4d  = TSGVertex4d;
-{$ENDIF}
-
-
-(*====================================================================*)
-(*============================80 bit, float===========================*)
-(*====================================================================*)
-
-{$DEFINE STRUCT_2     := TSGVertex2e}
-{$DEFINE STRUCT_3     := TSGVertex3e}
-{$DEFINE STRUCT_4     := TSGVertex4e}
-{$DEFINE STRUCT_P_2   := PSGVertex2e}
-{$DEFINE STRUCT_P_3   := PSGVertex3e}
-{$DEFINE STRUCT_P_4   := PSGVertex4e}
-{$DEFINE STRUCT_TYPE  := TSGExtended}
-{$DEFINE STRUCT_PTYPE := PSGExtended}
-{$DEFINE STRUCT_IS_FLOAT}
-{$DEFINE STRUCT_IS_COLOR}
-{$DEFINE STRUCT_IS_VERTEX}
-{$DEFINE STRUCT_IS_TEX_VERTEX}
-{$INCLUDE SaGeCommonStruct.inc}
-{$INCLUDE SaGeCommonStructUndef.inc}
-{$IFDEF INC_PLACE_INTERFACE}
-type
-	TSGPoint2e  = TSGVertex2e;
-	TSGVector2e = TSGVertex2e;
-	TSGColor2e  = TSGVertex2e;
-	
-	TSGPoint3e  = TSGVertex3e;
-	TSGVector3e = TSGVertex3e;
-	TSGColor3e  = TSGVertex3e;
-	
-	TSGPoint4e  = TSGVertex4e;
-	TSGVector4e = TSGVertex4e;
-	TSGColor4e  = TSGVertex4e;
 {$ENDIF}

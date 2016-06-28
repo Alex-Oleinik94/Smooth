@@ -15,11 +15,11 @@ var
 	SGConcoleCaller : procedure(const VParams : TSGConcoleCallerParams = nil);cdecl;
 	SGGetEngineVersion : function () : TSGString;
 
-procedure SGStandartLabraryCallConcoleCaller();
+procedure SGStandartLibraryCallConcoleCaller();
 
 implementation
 
-procedure SGStandartLabraryCallConcoleCaller();
+procedure SGStandartLibraryCallConcoleCaller();
 begin
 if SGConcoleCaller = nil then
 	begin
