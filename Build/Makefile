@@ -32,6 +32,8 @@ release_x64:
 	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(DESKTOPARGS)
 release_libpng:
 	@$(PASCALCOMPILER) $(X32) $(DORELEASE) -dENABLELIBPNG $(DESKTOPARGS)
+debug_libpng:
+	@$(PASCALCOMPILER) $(X32) $(DODEBUG) -dENABLELIBPNG $(DESKTOPARGS)
 debug:
 	@$(PASCALCOMPILER) $(DODEBUG) $(DESKTOPARGS)
 debug_x32:
@@ -72,7 +74,7 @@ build_files:
 	@$(SAGE) -CFTPUARU "./../Data/Textures/radiobox.sgia"                   $(SGTEMPUNITDIR) radio_box_image      $(SGRMFILE)
 	@$(SAGE) -CFTPUARU "./../Data/Textures/checkbox.sgia"                   $(SGTEMPUNITDIR) check_box_image      $(SGRMFILE)
 	@$(SAGE) -CDTPUARU "./../Data/Examples"                                 $(SGTEMPUNITDIR)                      $(SGRMFILE)
-	@$(SAGE) -CDTPUARU "./../Data/Textures/KillKostia"                      $(SGTEMPUNITDIR)                      $(SGRMFILE)
+	@$(SAGE) -CDTPUARU "./../Data/Textures/Killer"                          $(SGTEMPUNITDIR)                      $(SGRMFILE)
 	@$(SAGE) -CDTPUARU "./../Data/Fonts"                                    $(SGTEMPUNITDIR)                      $(SGRMFILE)
 clear_files:
 	@rm -f Sources/Temp/*
