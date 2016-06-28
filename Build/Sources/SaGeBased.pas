@@ -5,33 +5,67 @@ unit SaGeBased;
 interface
 
 type
-	TSGString 	= String;
+	// 8 bit, signed
 	TSGShortInt	= ShortInt;
+	PSGShortInt	= ^ TSGShortInt;
+	// 16 bit, signed
+	TSGSmallInt	= SmallInt;
+	PSGSmallInt	= ^ TSGSmallInt;
+	// 16 bit or 32 bit, signed
 	TSGInteger	= Integer;
+	PSGInteger	= ^ TSGInteger;
+	// 32 bit, signed
 	TSGLongInt	= LongInt;
 	PSGLongInt	= ^ TSGLongInt;
+	// 80 bit, float
 	TSGExtended	= Extended;
 	PSGExtended	= ^ TSGExtended;
+	// 32 bit, float
 	TSGFloat	= Single;
 	PSGFloat	= ^ TSGFloat;
-	TSGDouble	= Real;
+	// 64 bit, float
+	TSGDouble	= Double;
 	PSGDouble	= ^ TSGDouble;
+	// 8 bit, unsigned
 	TSGByte		= Byte;
 	PSGByte		= ^ TSGByte;
+	// 64 bit, signed
 	TSGInt64	= Int64;
+	PSGInt64	= ^ TSGInt64;
+	// 32 bit, unsigned
 	TSGLongWord	= LongWord;
 	PSGLongWord	= ^ TSGLongWord;
+	// 64 bit, unsigned
 	TSGQuadWord	= QWord;
+	PSGQuadWord	= ^ TSGQuadWord;
+	// 16 bit, unsigned
 	TSGWord	    = Word;
 	PSGWord     = ^ TSGWord;
-	TSGQWord	= QWord;
-	TSGSingle	= Single;
-	TSGReal     = TSGDouble;
+type
+	TSGUInt8   = TSGByte;
+	TSGInt8    = TSGShortInt;
+	TSGUInt16  = TSGWord;
+	TSGInt16   = TSGSmallInt;
+	TSGUInt32  = TSGLongWord;
+	TSGInt32   = TSGLongInt;
+	TSGUInt64  = TSGQuadWord;
+	// TSGInt64 allready defined
+	TSGFloat32 = TSGFloat;
+	TSGFloat64 = TSGDouble;
+	TSGFloat80 = TSGExtended;
+type
+	// Common
 	TSGChar		= Char;
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;
-	TSGCardinal = Cardinal;
+	TSGString 	= String;
+type
+	// Aditional
+	TSGQWord	= QWord;
+	TSGSingle	= TSGFloat;
+	TSGReal     = TSGDouble;
 	TSGGuid     = TGuid;
+	TSGCardinal = Cardinal;
 
  { encoding }
  procedure Windows1251ToUTF8(var Str: TSGString);

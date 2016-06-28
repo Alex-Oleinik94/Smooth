@@ -253,7 +253,7 @@ type
 		function GetContext() : ISGNearlyContext;
 		
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:TSGReal = 1);
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);
 		procedure EndScene();
 		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);

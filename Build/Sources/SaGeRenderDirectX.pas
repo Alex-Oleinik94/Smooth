@@ -46,7 +46,7 @@ type
 		function SupporedVBOBuffers:Boolean;override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);override;
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);override;
 		procedure LoadIdentity();override;
 		procedure Vertex3f(const x,y,z:single);override;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
@@ -1442,7 +1442,7 @@ else
 end;
 end;
 
-procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:Real = 1);
+procedure TSGRenderDirectX.InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);
 var
 	Matrix, Matrix1, Matrix2 : D3DMATRIX;
 var

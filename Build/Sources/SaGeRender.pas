@@ -60,7 +60,7 @@ type
 		property Context : ISGNearlyContext read GetContext write SetContext;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
-		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht:TSGReal = 1);virtual;abstract;
+		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);virtual;abstract;
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);virtual;abstract;
 		procedure EndScene();virtual;abstract;
 		procedure Perspective(const vAngle,vAspectRatio,vNear,vFar : TSGFloat);virtual;abstract;
