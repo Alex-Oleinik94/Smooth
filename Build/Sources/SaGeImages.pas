@@ -640,8 +640,9 @@ end;
 
 destructor TSGImage.Destroy();
 begin
-FreeAll;
-FImage.Destroy;
+FreeAll();
+if FImage <> nil then
+	FImage.Destroy();
 inherited;
 end;
 
@@ -655,7 +656,8 @@ procedure TSGImage.FreeAll;
 begin
 FreeSome;
 FreeTexture;
-FImage.Clear;
+if FImage <> nil then
+	FImage.Clear();
 end;
 
 procedure TSGImage.DisableTexture();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -791,11 +793,12 @@ end;
 
 procedure TSGImage.FreeBits();
 begin
-if FImage.FBitMap<>nil then
-	begin
-	FreeMem(FImage.FBitMap,FImage.FWidth*FImage.FHeight*FImage.FChannels);
-	FImage.FBitMap:=nil;
-	end;
+if FImage <> nil then
+	if FImage.FBitMap <> nil then
+		begin
+		FreeMem(FImage.FBitMap, FImage.FWidth*FImage.FHeight*FImage.FChannels);
+		FImage.FBitMap:=nil;
+		end;
 end;
 
 class function TSGImage.IsBMP(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
