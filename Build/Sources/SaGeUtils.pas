@@ -230,10 +230,12 @@ inherited;
 end;
 
 procedure TSGMultiImage.Add(const VImage : TSGBitMap);
+
+function FindPoint() : TSGPoint2ui32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Distance : TSGFloat = 100000;
 	NowDistance : TSGFloat;
-	TempPoint, Point : TSGPoint2ui32;
+	TempPoint : TSGPoint2ui32;
 begin
 for TempPoint in FPoints do
 	begin
@@ -241,12 +243,41 @@ for TempPoint in FPoints do
 	if NowDistance < Distance then
 		begin
 		Distance := NowDistance;
-		Point := TempPoint;
+		Result := TempPoint;
 		end;
 	end;
-if FImage = nil then
-	FImage := TSGBitMap.Create();
+end;
 
+procedure RecheckPoints();
+begin
+
+end;
+
+var
+	Point, Point2 : TSGPoint2ui32;
+begin
+if FImage = nil then
+	begin
+	FImage := TSGBitMap.Create();
+	FImage.CopyFrom(VImage);
+	SetLength(FPoints, 0);
+	Point.Import(VImage.Width, 0);
+	FPoints += Point;
+	Point.Import(0, VImage.Height);
+	FPoints += Point;
+	end
+else
+	begin
+	Point := FindPoint();
+	FPoints -= Point;
+	Image.ReAllocateForBounds(Max(Width, Point.x + VImage.Width),Max(Height, Point.y + VImage.Height));
+	Image.PutImage(VImage, Point.x, Point.y);
+	Point2.Import(Point.x + VImage.Width, Point.y);
+	FPoints += Point2;
+	Point2.Import(Point.x, Point.y + VImage.Height);
+	FPoints += Point2;
+	RecheckPoints();
+	end;
 end;
 
 (*====================================================================*)

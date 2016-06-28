@@ -71,6 +71,11 @@ type
 
 {$IFNDEF INC_WITHOUT_FORWARD}
 
+{$IF    defined(STRUCT_TYPE)}
+function Max(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function Min(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_TYPE)}
+
 {$IFDEF STRUCT_IS_FLOAT}
 function Abs(const S : STRUCT_2):STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
@@ -87,23 +92,29 @@ function Abs(const S : STRUCT_3):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 {$ENDIF STRUCT_IS_FLOAT}
 
+{$IF    defined(STRUCT_2)}
 operator + (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator = (const A, B : STRUCT_2) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_2)}
 
+{$IF    defined(STRUCT_3)}
 operator + (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator = (const A, B : STRUCT_3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_3)}
 
+{$IF    defined(STRUCT_4)}
 operator + (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator = (const A, B : STRUCT_4) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF defined(STRUCT_4)}
 
 {$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
 operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -129,6 +140,25 @@ operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF 
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
 
+{$IF    defined(STRUCT_TYPE)}
+function Max(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if A > B then
+	Result := A
+else
+	Result := B;
+end;
+
+function Min(const A, B : STRUCT_TYPE) : STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if A < B then
+	Result := A
+else
+	Result := B;
+end;
+
+{$ENDIF defined(STRUCT_TYPE)}
+
 {$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
 operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
@@ -156,23 +186,20 @@ if Result <> nil then
 	ii := Length(Result);
 	if ii > 0 then
 		begin
-		for i := 0 to ii - 1 do
+		i := 0;
+		while (i < Length(Result)) do
 			begin
 			if Result[i] = B then
 				begin
-				ii := i;
-				break;
-				end;
-			end;
-		i := Length(Result);
-		if ii <> i then
-			begin
-			if ii <> i - 1 then
-				begin
-				for i := ii to High(Result) - 1 do
-					Result[i] := Result[i + 1];
-				end;
-			SetLength(Result, Length(Result) - 1);
+				if High(Result) <> i then
+					begin
+					for ii := i to High(Result) - 1 do
+						Result[ii] := Result[ii + 1];
+					end;
+				SetLength(Result, Length(Result) - 1);
+				end
+			else
+				i += 1;
 			end;
 		end;
 	end;
@@ -207,23 +234,20 @@ if Result <> nil then
 	ii := Length(Result);
 	if ii > 0 then
 		begin
-		for i := 0 to ii - 1 do
+		i := 0;
+		while (i < Length(Result)) do
 			begin
 			if Result[i] = B then
 				begin
-				ii := i;
-				break;
-				end;
-			end;
-		i := Length(Result);
-		if ii <> i then
-			begin
-			if ii <> i - 1 then
-				begin
-				for i := ii to High(Result) - 1 do
-					Result[i] := Result[i + 1];
-				end;
-			SetLength(Result, Length(Result) - 1);
+				if High(Result) <> i then
+					begin
+					for ii := i to High(Result) - 1 do
+						Result[ii] := Result[ii + 1];
+					end;
+				SetLength(Result, Length(Result) - 1);
+				end
+			else
+				i += 1;
 			end;
 		end;
 	end;
@@ -258,45 +282,50 @@ if Result <> nil then
 	ii := Length(Result);
 	if ii > 0 then
 		begin
-		for i := 0 to ii - 1 do
+		i := 0;
+		while (i < Length(Result)) do
 			begin
 			if Result[i] = B then
 				begin
-				ii := i;
-				break;
-				end;
-			end;
-		i := Length(Result);
-		if ii <> i then
-			begin
-			if ii <> i - 1 then
-				begin
-				for i := ii to High(Result) - 1 do
-					Result[i] := Result[i + 1];
-				end;
-			SetLength(Result, Length(Result) - 1);
+				if High(Result) <> i then
+					begin
+					for ii := i to High(Result) - 1 do
+						Result[ii] := Result[ii + 1];
+					end;
+				SetLength(Result, Length(Result) - 1);
+				end
+			else
+				i += 1;
 			end;
 		end;
 	end;
 end;
 
+
 {$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
+{$IF    defined(STRUCT_2)}
 operator :=(const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A, A);
 end;
+{$ENDIF defined(STRUCT_2)}
 
+{$IF    defined(STRUCT_4)}
 operator :=(const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A, A, A, A);
 end;
+{$ENDIF defined(STRUCT_4)}
 
+{$IF    defined(STRUCT_3)}
 operator :=(const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A, A, A);
 end;
+{$ENDIF defined(STRUCT_3)}
 
+{$IF    defined(STRUCT_2)}
 operator + (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A.x + B.x, A.y + B.y);
@@ -322,7 +351,9 @@ operator - (const A : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import( - A.x, - A.y);
 end;
+{$ENDIF defined(STRUCT_2)}
 
+{$IF    defined(STRUCT_3)}
 operator + (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A.x + B.x, A.y + B.y, A.z + B.z);
@@ -348,7 +379,9 @@ operator - (const A : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import( - A.x, - A.y, - A.z);
 end;
+{$ENDIF defined(STRUCT_3)}
 
+{$IF    defined(STRUCT_4)}
 operator + (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A.x + B.x, A.y + B.y, A.z + B.z, A.w + B.w);
@@ -374,7 +407,7 @@ operator - (const A : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import( - A.x, - A.y, - A.z, - A.w);
 end;
-
+{$ENDIF defined(STRUCT_4)}
 
 {$IFNDEF STRUCT_IS_FLOAT}
 function Abs(const S : STRUCT_2):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;

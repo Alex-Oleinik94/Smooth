@@ -2421,7 +2421,7 @@ else
 	Result.g := trunc(color.g/total);
 	Result.b := trunc(color.b/total);
 	Result.a := 255;
-	Result.RGBToAlpha();
+	Result := SGConvertPixelRGBToAlpha(Result);
 	end;
 end; end;
 var
