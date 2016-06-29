@@ -110,6 +110,13 @@ operator - (const A, B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$END
 operator = (const A, B : STRUCT_2) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const A : STRUCT_TYPE; const B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF STRUCT_IS_FLOAT}
 {$ENDIF defined(STRUCT_2)}
 
 {$IF    defined(STRUCT_3)}
@@ -118,6 +125,16 @@ operator - (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$END
 operator = (const A, B : STRUCT_3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const A : STRUCT_TYPE; const B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF STRUCT_IS_FLOAT}
+{$IFDEF STRUCT_IS_VERTEX}
+operator * (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF STRUCT_IS_VERTEX}
 {$ENDIF defined(STRUCT_3)}
 
 {$IF    defined(STRUCT_4)}
@@ -126,6 +143,13 @@ operator - (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$END
 operator = (const A, B : STRUCT_4) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator :=(const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const A : STRUCT_TYPE; const B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF STRUCT_IS_FLOAT}
 {$ENDIF defined(STRUCT_4)}
 
 {$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
@@ -151,6 +175,81 @@ operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF 
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+
+{$IF    defined(STRUCT_4)}
+operator * (const A : STRUCT_TYPE; const B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A, B.z * A, B.w * A);
+end;
+operator * (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A, B.z * A, B.w * A);
+end;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x / A, B.y / A, B.z / A, B.w / A);
+end;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x div A, B.y div A, B.z div A, B.w div A);
+end;
+{$ENDIF STRUCT_IS_FLOAT}
+{$ENDIF defined(STRUCT_4)}
+
+{$IF    defined(STRUCT_3)}
+operator * (const A : STRUCT_TYPE; const B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A, B.z * A);
+end;
+operator * (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A, B.z * A);
+end;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x / A, B.y / A, B.z / A);
+end;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_3; const A : STRUCT_TYPE) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x div A, B.y div A, B.z div A);
+end;
+{$ENDIF STRUCT_IS_FLOAT}
+{$IFDEF STRUCT_IS_VERTEX}
+operator * (const A, B : STRUCT_3) : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(
+	A.y*B.z - A.z*B.y,
+	A.z*B.x - A.x*B.z,
+	A.x*B.y - A.y*B.x);
+end;
+{$ENDIF STRUCT_IS_VERTEX}
+{$ENDIF defined(STRUCT_3)}
+
+{$IF    defined(STRUCT_2)}
+operator * (const A : STRUCT_TYPE; const B : STRUCT_2) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A);
+end;
+operator * (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x * A, B.y * A);
+end;
+{$IFDEF STRUCT_IS_FLOAT}
+operator / (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x / A, B.y / A);
+end;
+{$ELSE  STRUCT_IS_FLOAT}
+operator div (const B : STRUCT_2; const A : STRUCT_TYPE) : STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Import(B.x div A, B.y div A);
+end;
+{$ENDIF STRUCT_IS_FLOAT}
+{$ENDIF defined(STRUCT_2)}
 
 {$IF    defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
 function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -604,11 +703,16 @@ end;
 
 {$IFDEF STRUCT_IS_VERTEX}
 procedure Vertex(const S : STRUCT_2);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
+procedure Translate(const S : STRUCT_2);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
+procedure LightPosition(const S : STRUCT_2;const Ligth : TSGUInt32 = SGR_LIGHT0);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
+procedure Translate(const S : STRUCT_3);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
 procedure Vertex(const S : STRUCT_3);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
 procedure Normal(const S : STRUCT_3);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
+procedure LightPosition(const S : STRUCT_3;const Ligth : TSGUInt32 = SGR_LIGHT0);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
 procedure Vertex(const S : STRUCT_4);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
+procedure LightPosition(const S : STRUCT_4;const Ligth : TSGUInt32 = SGR_LIGHT0);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;overload;{$ENDIF}
 {$ENDIF defined(STRUCT_4) and defined(STRUCT_P_4)}
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 {$ENDIF STRUCT_IS_VERTEX}
@@ -641,11 +745,53 @@ procedure TexCoord(const S :  STRUCT_4);{$IFDEF INC_PLACE_RENDER_CLASS}virtual;o
 {$IFDEF INC_PLACE_RENDER_IMPLEMENTATION}
 
 {$IFDEF STRUCT_IS_VERTEX}
+procedure RENDER_CLASS.LightPosition(const S : STRUCT_2;const Ligth : TSGUInt32 = SGR_LIGHT0);overload;
+var
+	LightPos      : array[0..3] of TSGFloat32;
+	AmbientLight  : array[0..3] of TSGFloat32 = (0.5,0.5,0.5,1.0);
+	DiffuseLight  : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+	SpecularLight : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+begin
+LightPos[0] := S.x;
+LightPos[1] := S.y;
+LightPos[2] := 0;
+LightPos[3] := 2;
+Enable(Ligth);
+Lightfv(Ligth, SGR_AMBIENT,  @AmbientLight);
+Lightfv(Ligth, SGR_DIFFUSE,  @DiffuseLight);
+Lightfv(Ligth, SGR_SPECULAR, @SpecularLight);
+Lightfv(Ligth, SGR_POSITION, @LightPos);
+end;
+procedure RENDER_CLASS.Translate(const S : STRUCT_2);overload;
+begin
+Translatef(S.x,S.y,0);
+end;
 procedure RENDER_CLASS.Vertex(const S : STRUCT_2);overload;
 begin
 Vertex2f(S.x,S.y);
 end;
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
+procedure RENDER_CLASS.LightPosition(const S : STRUCT_3;const Ligth : TSGUInt32 = SGR_LIGHT0);overload;
+var
+	LightPos      : array[0..3] of TSGFloat32;
+	AmbientLight  : array[0..3] of TSGFloat32 = (0.5,0.5,0.5,1.0);
+	DiffuseLight  : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+	SpecularLight : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+begin
+LightPos[0] := S.x;
+LightPos[1] := S.y;
+LightPos[2] := S.z;
+LightPos[3] := 2;
+Enable(Ligth);
+Lightfv(Ligth, SGR_AMBIENT,  @AmbientLight);
+Lightfv(Ligth, SGR_DIFFUSE,  @DiffuseLight);
+Lightfv(Ligth, SGR_SPECULAR, @SpecularLight);
+Lightfv(Ligth, SGR_POSITION, @LightPos);
+end;
+procedure RENDER_CLASS.Translate(const S : STRUCT_3);overload;
+begin
+Translatef(S.x,S.y,S.z);
+end;
 procedure RENDER_CLASS.Vertex(const S : STRUCT_3);overload;
 begin
 Vertex3f(S.x,S.y,S.z);
@@ -655,6 +801,24 @@ begin
 Normal3f(S.x,S.y,S.z);
 end;
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
+procedure RENDER_CLASS.LightPosition(const S : STRUCT_4;const Ligth : TSGUInt32 = SGR_LIGHT0);overload;
+var
+	LightPos      : array[0..3] of TSGFloat32;
+	AmbientLight  : array[0..3] of TSGFloat32 = (0.5,0.5,0.5,1.0);
+	DiffuseLight  : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+	SpecularLight : array[0..3] of TSGFloat32 = (1.0,1.0,1.0,1.0);
+begin
+LightPos[0] := S.x;
+LightPos[1] := S.y;
+LightPos[2] := S.z;
+LightPos[3] := S.w;
+Enable(Ligth);
+Lightfv(Ligth, SGR_AMBIENT,  @AmbientLight);
+Lightfv(Ligth, SGR_DIFFUSE,  @DiffuseLight);
+Lightfv(Ligth, SGR_SPECULAR, @SpecularLight);
+Lightfv(Ligth, SGR_POSITION, @LightPos);
+end;
+
 procedure RENDER_CLASS.Vertex(const S : STRUCT_4);overload;
 begin
 (* fiature *)Vertex3f(S.x,S.y,S.z);

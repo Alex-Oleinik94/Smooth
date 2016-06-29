@@ -1198,7 +1198,7 @@ var
 	DiffuseLight : array[0..3] of glFloat = (1.0,1.0,1.0,1.0);
 	SpecularLight : array[0..3] of glFloat = (1.0,1.0,1.0,1.0);
 	SpecularReflection : array[0..3] of glFloat = (0.4,0.4,0.4,1.0);
-	LightPosition : array[0..3] of glFloat = (0,1,0,2);
+	TempLightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
 FNowInBumpMapping:=False;
@@ -1241,7 +1241,7 @@ glLightfv(GL_LIGHT0,GL_AMBIENT, @AmbientLight);
 glLightfv(GL_LIGHT0,GL_DIFFUSE, @DiffuseLight);
 glLightfv(GL_LIGHT0,GL_SPECULAR, @SpecularLight);
 glEnable(GL_LIGHT0);
-glLightfv(GL_LIGHT0,GL_POSITION,@LightPosition);
+glLightfv(GL_LIGHT0,GL_POSITION,@TempLightPosition);
 glDisable(GL_LIGHT0);
 
 glEnable(GL_COLOR_MATERIAL);
