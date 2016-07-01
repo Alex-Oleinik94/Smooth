@@ -151,8 +151,21 @@ type
 		end;
 
 procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
+procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+try
+Image.Destroy();
+except
+end;
+try
+Image := nil;
+except
+end;
+end;
 
 procedure TSGImage.DeleteDeviceResourses();
 begin

@@ -37,6 +37,8 @@ type
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Paint;override;
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 			private
 		FStartDeep,FStartDeepHeight:LongWord;
 		FArray:TSGKillerArray;
@@ -97,6 +99,7 @@ type
 		procedure MayByVictory;
 		procedure CreateZombies(const o:LongWord = 0);
 		function IsBulletKillZombie(const Bullet:TSGVertex2f;const Zombie:LongWord):Boolean;
+		procedure InitImages(const VWidthHeight : TSGLongWord; const VRadBool : TSGBoolean);
 			private
 		FButtonReset:TSGButton;
 		FQuantityComboBox,FComboBoxDeep,FDifficultyComboBox:TSGComboBox;
@@ -104,11 +107,26 @@ type
 		FComboBoxRespamn,FGroundComboBox:TSGComboBox;
 			private
 		FImageZombi,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSGImage;
+		FImagesSize : TSGLongWord;
 		end;
 
 implementation
 
 {$OVERFLOWCHECKS OFF}
+
+procedure TSGKiller.DeleteDeviceResourses();
+begin
+SGKillImage(FImageSkull);
+SGKillImage(FImageBlock);
+SGKillImage(FImageBullet);
+SGKillImage(FImageZombi);
+SGKillImage(FImageYou);
+end;
+
+procedure TSGKiller.LoadDeviceResourses();
+begin
+InitImages(FImagesSize, True);
+end;
 
 function TSGKillerGetColor(const FWay:LongWord):TSGColor4f;
 var 
@@ -472,6 +490,87 @@ for i:=o to High(FZombies) do
 	end;
 end;
 
+procedure TSGKiller.InitImages(const VWidthHeight : TSGLongWord; const VRadBool : TSGBoolean);
+begin
+if (FImageBlock=nil) or VRadBool then
+	begin
+	if FImageBlock<>nil then
+		FImageBlock.Destroy;
+	FImageBlock:=TSGImage.Create;
+	FImageBlock.SetContext(Context);
+	with FImageBlock do
+		begin
+		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Block.sgia';
+		Loading();
+		Image.SetBounds(VWidthHeight,VWidthHeight);
+		ToTexture();
+		end;
+	end;
+
+if (FImageBullet=nil) or VRadBool then
+	begin
+	if FImageBullet<>nil then
+		FImageBullet.Destroy;
+	FImageBullet:=TSGImage.Create;
+	FImageBullet.SetContext(Context);
+	with FImageBullet do
+		begin
+		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Bullet.sgia';
+		Loading();
+		if VWidthHeight>64 then
+			Image.SetBounds(64,64)
+		else
+			Image.SetBounds(VWidthHeight,VWidthHeight);
+		ToTexture();
+		end;
+	end;
+
+if (FImageZombi=nil) or VRadBool then
+	begin
+	if FImageZombi<>nil then
+		FImageZombi.Destroy;
+	FImageZombi:=TSGImage.Create;
+	FImageZombi.SetContext(Context);
+	with FImageZombi do
+		begin
+		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Zombie.sgia';
+		Loading();
+		Image.SetBounds(VWidthHeight,VWidthHeight);
+		ToTexture();
+		end;
+	end;
+
+if (FImageYou=nil) or VRadBool then
+	begin
+	if FImageYou<>nil then
+		FImageYou.Destroy;
+	FImageYou:=TSGImage.Create;
+	FImageYou.SetContext(Context);
+	with FImageYou do
+		begin
+		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'You.sgia';
+		Loading();
+		Image.SetBounds(VWidthHeight,VWidthHeight);
+		ToTexture();
+		end;
+	end;
+	
+if (FImageSkull=nil) or VRadBool then
+	begin
+	if FImageSkull<>nil then
+		FImageSkull.Destroy;
+	FImageSkull:=TSGImage.Create;
+	FImageSkull.SetContext(Context);
+	with FImageSkull do
+		begin
+		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Skull.sgia';
+		Loading();
+		Image.SetBounds(VWidthHeight,VWidthHeight);
+		ToTexture();
+		end;
+	end;
+end;
+
 procedure TSGKiller.InitGame;
 var
 	i,ii,iii:LongWord;
@@ -535,83 +634,8 @@ else if i>15 then ii:=16
 else if i>7 then ii:=8
 else ii:=4;
 
-if (FImageBlock=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageBlock<>nil then
-		FImageBlock.Destroy;
-	FImageBlock:=TSGImage.Create;
-	FImageBlock.SetContext(Context);
-	with FImageBlock do
-		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Block.sgia';
-		Loading();
-		Image.SetBounds(ii,ii);
-		ToTexture();
-		end;
-	end;
-
-if (FImageBullet=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageBullet<>nil then
-		FImageBullet.Destroy;
-	FImageBullet:=TSGImage.Create;
-	FImageBullet.SetContext(Context);
-	with FImageBullet do
-		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Bullet.sgia';
-		Loading();
-		if ii>64 then
-			Image.SetBounds(64,64)
-		else
-			Image.SetBounds(ii,ii);
-		ToTexture();
-		end;
-	end;
-
-if (FImageZombi=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageZombi<>nil then
-		FImageZombi.Destroy;
-	FImageZombi:=TSGImage.Create;
-	FImageZombi.SetContext(Context);
-	with FImageZombi do
-		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Zombie.sgia';
-		Loading();
-		Image.SetBounds(ii,ii);
-		ToTexture();
-		end;
-	end;
-
-if (FImageYou=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageYou<>nil then
-		FImageYou.Destroy;
-	FImageYou:=TSGImage.Create;
-	FImageYou.SetContext(Context);
-	with FImageYou do
-		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'You.sgia';
-		Loading();
-		Image.SetBounds(ii,ii);
-		ToTexture();
-		end;
-	end;
-	
-if (FImageSkull=nil) or (Abs(Abs(OldFR)-Abs(FR))>SGZero) then
-	begin
-	if FImageSkull<>nil then
-		FImageSkull.Destroy;
-	FImageSkull:=TSGImage.Create;
-	FImageSkull.SetContext(Context);
-	with FImageSkull do
-		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Skull.sgia';
-		Loading();
-		Image.SetBounds(ii,ii);
-		ToTexture();
-		end;
-	end;
+FImagesSize := ii;
+InitImages(ii, Abs(Abs(OldFR)-Abs(FR))>SGZero);
 
 FDataTime.Get;
 Calculate;
@@ -640,11 +664,11 @@ FComboBoxRespamn.Destroy;
 FGroundComboBox.Destroy;
 FTimerLabel.Destroy;
 
-FImageSkull.Destroy;
-FImageBlock.Destroy;
-FImageBullet.Destroy;
-FImageZombi.Destroy;
-FImageYou.Destroy;
+SGKillImage(FImageSkull);
+SGKillImage(FImageBlock);
+SGKillImage(FImageBullet);
+SGKillImage(FImageZombi);
+SGKillImage(FImageYou);
 inherited;
 end;
 
