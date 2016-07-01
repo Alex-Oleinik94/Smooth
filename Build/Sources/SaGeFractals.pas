@@ -90,6 +90,8 @@ type
 		FEnableNormals  : TSGBoolean;
 		FHasIndexes     : TSGBoolean;
 			public
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 		procedure Paint();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
@@ -201,6 +203,16 @@ end;
 {$INCLUDE SageFractalTetraider.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
+procedure TSG3DFractal.DeleteDeviceResourses();
+begin
+ClearMesh();
+end;
+
+procedure TSG3DFractal.LoadDeviceResourses();
+begin
+Calculate();
+end;
+
 procedure TSG3DFractal.Calculate();
 begin
 FSizeLabelFlag:=False;
@@ -294,8 +306,10 @@ end;
 
 procedure TSG3DFractal.ClearMesh;inline;
 var
-	i:LongWord;
+	i : TSGLongWord;
 begin
+SetLength(FMeshesInfo, 0);
+FMeshesReady := False;
 if FMesh=nil then
 	begin
 	FMesh:=TSGCustomModel.Create();

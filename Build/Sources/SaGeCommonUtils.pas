@@ -51,12 +51,16 @@ procedure TSGDrawClasses.DeleteDeviceResourses();
 begin
 if FComboBox2.Font.Texture <> 0 then
 	FComboBox2.Font.DeleteDeviceResourses();
+if FNowDrawable and (FNowDraw <> nil) then
+	FNowDraw.DeleteDeviceResourses();
 end;
 
 procedure TSGDrawClasses.LoadDeviceResourses();
 begin
 if not (FComboBox2.Font.ReadyGoToTexture or (FComboBox2.Font.Texture <> 0)) then
 	FComboBox2.Font.Loading();
+if FNowDrawable and (FNowDraw <> nil) then
+	FNowDraw.LoadDeviceResourses();
 end;
 
 procedure TSGDrawClasses.SwitchTo(const Index : TSGLongWord);

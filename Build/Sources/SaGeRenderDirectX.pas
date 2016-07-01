@@ -227,6 +227,8 @@ type
 			private
 		procedure AfterVertexProc();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DropDeviceResourses();
+		procedure SetToNullTexture(var Texture : IDirect3DTexture9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetToNullResourse(var Resourse : IDirect3DResource9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 type
 	TSGRDXVertexDeclarationManipulator=class
@@ -659,8 +661,7 @@ for i:=0 to VQuantity-1 do
 	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1].FTexture<>nil) then
 		begin
 		SGDestroyInterface(FArTextures[VTextures[i]-1].FTexture);
-		if Self <> nil then
-			FArTextures[VTextures[i]-1].FTexture := nil;
+		SetToNullTexture(FArTextures[VTextures[i]-1].FTexture);
 		if FArTextures[VTextures[i]-1].FBufferChangeFullscreen<>nil then
 			FreeMem(FArTextures[VTextures[i]-1].FBufferChangeFullscreen);
 		FArTextures[VTextures[i]-1].FBufferChangeFullscreen:=nil;
@@ -930,7 +931,23 @@ for i:=0 to VQ-1 do
 	end;
 end;
 
-procedure TSGRenderDirectX.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
+procedure TSGRenderDirectX.SetToNullTexture(var Texture : IDirect3DTexture9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+try
+Texture := nil;
+except
+end;
+end;
+
+procedure TSGRenderDirectX.SetToNullResourse(var Resourse : IDirect3DResource9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+try
+Resourse := nil;
+except
+end;
+end;
+
+procedure TSGRenderDirectX.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);
 var
 	i:LongWord;
 begin 
@@ -938,8 +955,7 @@ for i:=0 to VQuantity-1 do
 	if FArBuffers[PLongWord(VPoint)[i]-1].FResourse<>nil then
 		begin
 		SGDestroyInterface(FArBuffers[PLongWord(VPoint)[i]-1].FResourse);
-		if Self <> nil then
-			FArBuffers[PLongWord(VPoint)[i]-1].FResourse := nil;
+		SetToNullResourse(FArBuffers[PLongWord(VPoint)[i]-1].FResourse);
 		FArBuffers[PLongWord(VPoint)[i]-1].FResourseSize:=0;
 		FArBuffers[PLongWord(VPoint)[i]-1].FType:=0;
 		if FArBuffers[PLongWord(VPoint)[i]-1].FVertexDeclaration<>nil then
@@ -1346,8 +1362,7 @@ if FArBuffers<>nil then if Length(FArBuffers)>0 then
 		if FArBuffers[i].FResourse<>nil then
 			begin
 			SGDestroyInterface(FArBuffers[i].FResourse);
-			if Self <> nil then
-				FArBuffers[i].FResourse := nil;
+			SetToNullResourse(FArBuffers[i].FResourse);
 			end;
 		if FArBuffers[i].FVertexDeclaration<>nil then
 			begin
@@ -1366,8 +1381,7 @@ if FArTextures <> nil then if Length(FArTextures) > 0 then
 		if FArTextures[i].FTexture<>nil then
 			begin
 			SGDestroyInterface(FArTextures[i].FTexture);
-			if Self <> nil then
-				FArTextures[i].FTexture := nil;
+			SetToNullTexture(FArTextures[i].FTexture);
 			end;
 		if FArTextures[i].FBufferChangeFullscreen <> nil then
 			begin
