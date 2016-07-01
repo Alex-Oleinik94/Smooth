@@ -1222,7 +1222,7 @@ if VRelief = nil then
 	Result.LastObject().ArVertex3f[27]^.Import(-1,-1,1);
 	
 	for i:=0 to Result.LastObject().Vertexes - 1 do
-		Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256);
+		Result.LastObject().SetColor(i,$0A/256,$C7/256,$F5/256,1);
 	end
 else
 	VRelief^.ExportToMesh(Result);

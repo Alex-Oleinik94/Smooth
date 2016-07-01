@@ -1009,16 +1009,16 @@ else if (FColorType=SGMeshColorType3b) then
 	ArColor3b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
 	end
 else if (FColorType=SGMeshColorType4b) then
-	begin
+	begin 
 	if Render.RenderType = SGRenderDirectX then
-		begin
-		ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
-		ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
-		end
-	else
 		begin
 		ArColor4b[Index]^.b:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
 		ArColor4b[Index]^.r:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+		end
+	else
+		begin
+		ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
+		ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
 		end;
 	ArColor4b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
 	ArColor4b[Index]^.a:=Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a);

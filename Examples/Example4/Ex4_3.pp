@@ -66,21 +66,21 @@ SetLength(FArray,8);
 SetLength(FIndexes,36);
 
 FArray[0].FVertex.Import(1,1,1);
-FArray[0].FColor .Import(255,255,255);
+FArray[0].FColor .Import(255,255,255,255);
 FArray[1].FVertex.Import(1,1,-1);
-FArray[1].FColor .Import(255,255,0);
+FArray[1].FColor .Import(255,255,0,255);
 FArray[2].FVertex.Import(1,-1,-1);
-FArray[2].FColor .Import(255,0,255);
+FArray[2].FColor .Import(255,0,255,255);
 FArray[3].FVertex.Import(1,-1,1);
-FArray[3].FColor .Import(0,255,255);
+FArray[3].FColor .Import(0,255,255,255);
 FArray[4].FVertex.Import(-1,-1,1);
-FArray[4].FColor .Import(255,0,0);
+FArray[4].FColor .Import(255,0,0,255);
 FArray[5].FVertex.Import(-1,1,1);
-FArray[5].FColor .Import(0,0,255);
+FArray[5].FColor .Import(0,0,255,255);
 FArray[6].FVertex.Import(-1,-1,-1);
-FArray[6].FColor .Import(0,0,0);
+FArray[6].FColor .Import(0,0,0,255);
 FArray[7].FVertex.Import(-1,1,-1);
-FArray[7].FColor .Import(0,255,0);
+FArray[7].FColor .Import(0,255,0,255);
 
 // Первый квадрат, состоящий из 2x треугольников
 i:=0;

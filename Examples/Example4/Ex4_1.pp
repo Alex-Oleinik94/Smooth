@@ -61,13 +61,13 @@ SetLength(FArray,36);
 // Первый квадрат, состоящий из 2x треугольников
 i:=0;
 FArray[i+0].FVertex.Import(1,1,1);
-FArray[i+0].FColor .Import(255,255,255);
+FArray[i+0].FColor .Import(255,255,255,255);
 FArray[i+1].FVertex.Import(1,1,-1);
-FArray[i+1].FColor .Import(255,255,0);
+FArray[i+1].FColor .Import(255,255,0,255);
 FArray[i+2].FVertex.Import(1,-1,-1);
-FArray[i+2].FColor .Import(255,0,255);
+FArray[i+2].FColor .Import(255,0,255,255);
 FArray[i+3].FVertex.Import(1,-1,1);
-FArray[i+3].FColor .Import(0,255,255);
+FArray[i+3].FColor .Import(0,255,255,255);
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
 
@@ -76,9 +76,9 @@ i+=6;
 FArray[i+0]:=FArray[0];
 FArray[i+1]:=FArray[3];
 FArray[i+2].FVertex.Import(-1,-1,1);
-FArray[i+2].FColor .Import(255,0,0);
+FArray[i+2].FColor .Import(255,0,0,255);
 FArray[i+3].FVertex.Import(-1,1,1);
-FArray[i+3].FColor .Import(0,0,255);
+FArray[i+3].FColor .Import(0,0,255,255);
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
 
@@ -97,7 +97,7 @@ i+=6;
 FArray[i+0]:=FArray[0];
 FArray[i+1]:=FArray[9];
 FArray[i+2].FVertex.Import(-1,1,-1);
-FArray[i+2].FColor .Import(0,255,0);
+FArray[i+2].FColor .Import(0,255,0,255);
 FArray[i+3]:=FArray[1];
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];

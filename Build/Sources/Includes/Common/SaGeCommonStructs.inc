@@ -33,27 +33,27 @@
 {$INCLUDE SaGeCommonStructUndef.inc}
 {$IFDEF INC_PLACE_INTERFACE}
 type
-	//TSGPoint2f  = TSGVertex2f;
+	TSGPoint2f  = TSGVertex2f;
 	TSGVector2f = TSGVertex2f;
 	TSGColor2f  = TSGVertex2f;
 	
-	//TSGPoint3f  = TSGVertex3f;
+	TSGPoint3f  = TSGVertex3f;
 	TSGVector3f = TSGVertex3f;
 	TSGColor3f  = TSGVertex3f;
 	
-	//TSGPoint4f  = TSGVertex4f;
+	TSGPoint4f  = TSGVertex4f;
 	TSGVector4f = TSGVertex4f;
 	TSGColor4f  = TSGVertex4f;
 	
-	//PSGPoint2f  = PSGVertex2f;
+	PSGPoint2f  = PSGVertex2f;
 	PSGVector2f = PSGVertex2f;
 	PSGColor2f  = PSGVertex2f;
 	
-	//PSGPoint3f  = PSGVertex3f;
+	PSGPoint3f  = PSGVertex3f;
 	PSGVector3f = PSGVertex3f;
 	PSGColor3f  = PSGVertex3f;
 	
-	//PSGPoint4f  = PSGVertex4f;
+	PSGPoint4f  = PSGVertex4f;
 	PSGVector4f = PSGVertex4f;
 	PSGColor4f  = PSGVertex4f;
 {$ENDIF}

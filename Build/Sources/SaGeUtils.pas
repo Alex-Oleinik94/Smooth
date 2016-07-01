@@ -166,7 +166,7 @@ type
 		property TextureParams:TStringParams read FTextureParams;
 		property SimbolParams:TSGSimbolParams read FSimbolParams;
 			public
-		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure DrawFontFromTwoVertex2f(const S:PChar;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
@@ -1092,7 +1092,7 @@ begin
 inherited;
 end;
 
-procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	i:LongInt = 0;
 	StringWidth : LongInt = 0;
@@ -1101,7 +1101,10 @@ var
 	ThisSimbolWidth:LongWord = 0;
 	DirectXShift : TSGVertex2f;
 	RealStringWidth, RealStringHeight : TSGSingle;
+	Vertex1, Vertex2 : TSGVertex2f;
 begin
+Vertex1 := V1;
+Vertex2 := V2;
 if Render.RenderType = SGRenderDirectX then
 	begin
 	if Context.Fullscreen then
@@ -1127,7 +1130,9 @@ if AutoYShift then
 	begin
 	Otstup.y:=(RealStringHeight - FFontHeight)/2;
 	end;
-Otstup.Round;
+Otstup := Otstup.Round();
+Vertex1 := Vertex1.Round();
+Vertex2 := Vertex2.Round();
 Render.BeginScene(SGR_QUADS);
 while (s[i]<>#0) and (not ToExit) do
 	begin
