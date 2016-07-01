@@ -235,9 +235,9 @@ if Render.SupporedShaders() then
 	FCamera:=TSGCamera.Create();
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
-	FCamera.Up:=SGVertexImport(0,0,1);
-	FCamera.Location:=SGVertexImport(0,-350,100);
-	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
+	FCamera.Up:=SGVertex3fImport(0,0,1);
+	FCamera.Location:=SGVertex3fImport(0,-350,100);
+	FCamera.View:=(SGVertex3fImport(0,0,0)-SGVertex3fImport(0,-350,100)).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);

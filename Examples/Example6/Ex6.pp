@@ -135,7 +135,7 @@ FSun.Import(cos(FSunAngle)*2,sin(FSunAngle)*2,2);
 
 Render.Color3f(1,1,1);
 Render.BeginScene(SGR_POINTS);
-FSun.Vertex(Render);
+Render.Vertex(FSun);
 Render.EndScene();
 
 Render.Disable(SGR_BLEND);

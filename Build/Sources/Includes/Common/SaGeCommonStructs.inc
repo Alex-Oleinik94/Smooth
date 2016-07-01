@@ -8,6 +8,57 @@
 {$INCLUDE SaGeCommonStructUndef.inc}
 
 (*====================================================================*)
+(*============================32 bit, float===========================*)
+(*====================================================================*)
+
+{$DEFINE STRUCT_2     := TSGVertex2f}
+{$DEFINE STRUCT_3     := TSGVertex3f}
+{$DEFINE STRUCT_4     := TSGVertex4f}
+{$DEFINE STRUCT_P_2   := PSGVertex2f}
+{$DEFINE STRUCT_P_3   := PSGVertex3f}
+{$DEFINE STRUCT_P_4   := PSGVertex4f}
+{$DEFINE STRUCT_TYPE  := TSGFloat}
+{$DEFINE STRUCT_PTYPE := PSGFloat}
+{$DEFINE STRUCT_2_LIST:= TSGVertex2fList}
+{$DEFINE STRUCT_3_LIST:= TSGVertex3fList}
+{$DEFINE STRUCT_4_LIST:= TSGVertex4fList}
+{$DEFINE STRUCT_2_IMPORT_FUNC := SGVertex2fImport}
+{$DEFINE STRUCT_3_IMPORT_FUNC := SGVertex3fImport}
+{$DEFINE STRUCT_4_IMPORT_FUNC := SGVertex4fImport}
+{$DEFINE STRUCT_IS_FLOAT}
+{$DEFINE STRUCT_IS_COLOR}
+{$DEFINE STRUCT_IS_VERTEX}
+{$DEFINE STRUCT_IS_TEX_VERTEX}
+{$INCLUDE SaGeCommonStruct.inc}
+{$INCLUDE SaGeCommonStructUndef.inc}
+{$IFDEF INC_PLACE_INTERFACE}
+type
+	//TSGPoint2f  = TSGVertex2f;
+	TSGVector2f = TSGVertex2f;
+	TSGColor2f  = TSGVertex2f;
+	
+	//TSGPoint3f  = TSGVertex3f;
+	TSGVector3f = TSGVertex3f;
+	TSGColor3f  = TSGVertex3f;
+	
+	//TSGPoint4f  = TSGVertex4f;
+	TSGVector4f = TSGVertex4f;
+	TSGColor4f  = TSGVertex4f;
+	
+	//PSGPoint2f  = PSGVertex2f;
+	PSGVector2f = PSGVertex2f;
+	PSGColor2f  = PSGVertex2f;
+	
+	//PSGPoint3f  = PSGVertex3f;
+	PSGVector3f = PSGVertex3f;
+	PSGColor3f  = PSGVertex3f;
+	
+	//PSGPoint4f  = PSGVertex4f;
+	PSGVector4f = PSGVertex4f;
+	PSGColor4f  = PSGVertex4f;
+{$ENDIF}
+
+(*====================================================================*)
 (*============================64 bit, float===========================*)
 (*====================================================================*)
 
@@ -44,8 +95,19 @@ type
 	TSGPoint4d  = TSGVertex4d;
 	TSGVector4d = TSGVertex4d;
 	TSGColor4d  = TSGVertex4d;
+	
+	PSGPoint2d  = PSGVertex2d;
+	PSGVector2d = PSGVertex2d;
+	PSGColor2d  = PSGVertex2d;
+	
+	PSGPoint3d  = PSGVertex3d;
+	PSGVector3d = PSGVertex3d;
+	PSGColor3d  = PSGVertex3d;
+	
+	PSGPoint4d  = PSGVertex4d;
+	PSGVector4d = PSGVertex4d;
+	PSGColor4d  = PSGVertex4d;
 {$ENDIF}
-
 
 (*====================================================================*)
 (*============================80 bit, float===========================*)
@@ -84,6 +146,18 @@ type
 	TSGPoint4e  = TSGVertex4e;
 	TSGVector4e = TSGVertex4e;
 	TSGColor4e  = TSGVertex4e;
+	
+	PSGPoint2e  = PSGVertex2e;
+	PSGVector2e = PSGVertex2e;
+	PSGColor2e  = PSGVertex2e;
+	
+	PSGPoint3e  = PSGVertex3e;
+	PSGVector3e = PSGVertex3e;
+	PSGColor3e  = PSGVertex3e;
+	
+	PSGPoint4e  = PSGVertex4e;
+	PSGVector4e = PSGVertex4e;
+	PSGColor4e  = PSGVertex4e;
 {$ENDIF}
 
 (*====================================================================*)
@@ -590,6 +664,38 @@ type
 {$INCLUDE SaGeCommonStruct.inc}
 {$INCLUDE SaGeCommonStructUndef.inc}
 {$IFDEF INC_PLACE_INTERFACE}
+type
+	TSGVertex2b   = TSGVertex2uint8;
+	TSGPoint2b    = TSGVertex2uint8;
+	TSGVector2b   = TSGVertex2uint8;
+	TSGColor2b    = TSGVertex2uint8;
+	
+	TSGVertex3b   = TSGVertex3uint8;
+	TSGPoint3b    = TSGVertex3uint8;
+	TSGVector3b   = TSGVertex3uint8;
+	TSGColor3b    = TSGVertex3uint8;
+	
+	TSGVertex4b   = TSGVertex4uint8;
+	TSGPoint4b    = TSGVertex4uint8;
+	TSGVector4b   = TSGVertex4uint8;
+	TSGColor4b    = TSGVertex4uint8;
+type
+	
+	PSGVertex2b   = PSGVertex2uint8;
+	PSGPoint2b    = PSGVertex2uint8;
+	PSGVector2b   = PSGVertex2uint8;
+	PSGColor2b    = PSGVertex2uint8;
+	
+	
+	PSGVertex3b   = PSGVertex3uint8;
+	PSGPoint3b    = PSGVertex3uint8;
+	PSGVector3b   = PSGVertex3uint8;
+	PSGColor3b    = PSGVertex3uint8;
+	
+	PSGVertex4b   = PSGVertex4uint8;
+	PSGPoint4b    = PSGVertex4uint8;
+	PSGVector4b   = PSGVertex4uint8;
+	PSGColor4b    = PSGVertex4uint8;
 type
 	TSGPoint2uint8  = TSGVertex2uint8;
 	TSGVector2uint8 = TSGVertex2uint8;

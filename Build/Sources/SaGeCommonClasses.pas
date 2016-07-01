@@ -43,7 +43,7 @@ type
 		constructor Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);virtual;
 		function LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;virtual;
 			private
-		FHotPixel : TSGPoint2f;
+		FHotPixel : TSGPoint2int32;
 		FStandartCursor : TSGCursorHandle;
 			public
 		property HotPixelX : TSGLongInt read FHotPixel.x write FHotPixel.x;
@@ -80,7 +80,7 @@ type
 		function CursorKeyPressedType():TSGCursorButtonType;
 		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;
 		function CursorWheel():TSGCursorWheel;
-		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;
+		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;
 		procedure ClearKeys();
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
@@ -118,13 +118,13 @@ type
 		procedure SetCursorCentered(const VCentered : TSGBoolean);
 		function GetCursorCentered() : TSGBoolean;
 		
-		function GetCursorPosition():TSGPoint2f;
-		procedure SetCursorPosition(const VPosition : TSGPoint2f);
-		function GetWindowArea():TSGPoint2f;
-		function GetScreenArea():TSGPoint2f;
-		function GetClientArea():TSGPoint2f;
-		function ShiftClientArea() : TSGPoint2f;
-		function GetClientAreaShift() : TSGPoint2f;
+		function GetCursorPosition():TSGPoint2int32;
+		procedure SetCursorPosition(const VPosition : TSGPoint2int32);
+		function GetWindowArea():TSGPoint2int32;
+		function GetScreenArea():TSGPoint2int32;
+		function GetClientArea():TSGPoint2int32;
+		function ShiftClientArea() : TSGPoint2int32;
+		function GetClientAreaShift() : TSGPoint2int32;
 		
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString;
 		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString;

@@ -115,15 +115,15 @@ type
 		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property Name               : TSGString   read FName               write FName;
 			public //Render Functions:
-		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
+		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2: TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure DrawImageFromTwoPoint2int32(Vertex1,Vertex2: TSGPoint2int32;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ImportFromDispley(const Point1,Point2: TSGPoint2int32;const NeedAlpha:Boolean = True);
 		procedure ImportFromDispley(const NeedAlpha:Boolean = True);
-		class function UnProjectShift:TSGPoint2f;
+		class function UnProjectShift:TSGPoint2int32;
 		procedure DrawImageFromTwoVertex2fAsRatio(Vertex1,Vertex2:TSGVertex2f;const RePlace:Boolean = True;const Ratio:real = 1);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint1,TexPoint2:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2: TSGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2: TSGVertex2f;const TexPoint1,TexPoint2:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure RePlacVertex(var Vertex1,Vertex2: TSGVertex2f;const RePlaceY:TSGExByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	SGImage     = TSGImage;
 	ArTSGImage  = type packed array of TSGImage;
@@ -271,17 +271,21 @@ FTexture := VTexturesBlock.GetNextUnusebleTexture();
 ToTexture();
 end;
 
-procedure TSGImage.DrawImageFromTwoPoint2f(Vertex1,Vertex2:SGPoint2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.DrawImageFromTwoPoint2int32(Vertex1,Vertex2: TSGPoint2int32;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function PointToVertex(const P : TSGPoint2int32):TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-DrawImageFromTwoVertex2f(SGPoint2fToVertex2f(Vertex1),SGPoint2fToVertex2f(Vertex2),RePlace,RePlaceY,Rotation);
+Result.Import(P.x, P.y);
+end;
+begin
+DrawImageFromTwoVertex2f(PointToVertex(Vertex1),PointToVertex(Vertex2),RePlace,RePlaceY,Rotation);
 end;
 
-procedure TSGImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2:SGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.DrawImageFromTwoVertex2f(Vertex1,Vertex2: TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2,SGVertex2fImport(0,0),SGVertex2fImport(1,1),RePlace,RePlaceY,Rotation);
 end;
 
-procedure TSGImage.DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint1,TexPoint2:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2: TSGVertex2f;const TexPoint1,TexPoint2:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure DoTexCoord(const NowRotation:Byte);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case (NowRotation mod 4) of
@@ -299,18 +303,18 @@ if RePlace then
 BindTexture();
 Render.BeginScene(SGR_QUADS);
 DoTexCoord(Rotation);
-Vertex1.Vertex(Render);
+Render.Vertex(Vertex1);
 DoTexCoord(Rotation+1);
 Render.Vertex2f(Vertex2.x,Vertex1.y);
 DoTexCoord(Rotation+2);
-Vertex2.Vertex(Render);
+Render.Vertex(Vertex2);
 DoTexCoord(Rotation+3);
 Render.Vertex2f(Vertex1.x,Vertex2.y);
 Render.EndScene();
 DisableTexture();
 end;
 
-procedure TSGImage.DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2:SGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.DrawImageFromTwoVertex2fWithTexPoint(Vertex1,Vertex2: TSGVertex2f;const TexPoint:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2,SGVertex2fImport(0,0),TexPoint,RePlace,RePlaceY,Rotation);
 end;
@@ -330,7 +334,7 @@ DrawImageFromTwoVertex2f(
 	RePlace,SG_2D);
 end;
 
-procedure TSGImage.RePlacVertex(var Vertex1,Vertex2:SGVertex2f;const RePlaceY:TSGExByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.RePlacVertex(var Vertex1,Vertex2: TSGVertex2f;const RePlaceY:TSGExByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Vertex1.x>Vertex2.x then
 	SGQuickRePlaceVertexType(Vertex1.x,Vertex2.x);
@@ -348,7 +352,7 @@ else
 end;
 end;
 
-class function TSGImage.UnProjectShift:TSGPoint2f;
+class function TSGImage.UnProjectShift:TSGPoint2int32;
 begin
 //Result:=TSGViewportObject.Smezhenie;
 	//onu:{$}
@@ -358,12 +362,12 @@ end;
 procedure TSGImage.ImportFromDispley(const NeedAlpha:Boolean = True);
 begin
 ImportFromDispley(
-	SGPointImport(1,1),
-	SGPointImport(Render.Width,Render.Height),
+	SGVertex2int32Import(1,1),
+	SGVertex2int32Import(Render.Width,Render.Height),
 	NeedAlpha);
 end;
 
-procedure TSGImage.ImportFromDispley(const Point1,Point2:SGPoint;const NeedAlpha:Boolean = True);
+procedure TSGImage.ImportFromDispley(const Point1,Point2: TSGPoint2int32;const NeedAlpha:Boolean = True);
 begin
 if Self<>nil then
 	FreeAll

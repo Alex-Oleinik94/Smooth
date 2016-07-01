@@ -324,12 +324,12 @@ begin
 end;
 
 procedure TSGLoad3DS.ComputeNormals(const AModel:TSGCustomModel);
-var vVector1, vVector2, vNormal,vSum:TSGVertex;
-	vPoly:array[0..2]of TSGVertex;
-	pNormals,pTempNormals:array of TSGVertex;
+var vVector1, vVector2, vNormal,vSum:TSGVertex3f;
+	vPoly:array[0..2]of TSGVertex3f;
+	pNormals,pTempNormals:array of TSGVertex3f;
 	iObject,i,ii,shared:longword;
 
-function Cross(const vVector1,vVector2:TSGVertex):TSGVertex;inline;
+function Cross(const vVector1,vVector2:TSGVertex3f):TSGVertex3f;inline;
 begin
 	result.x:=((vVector1.y * vVector2.z) - (vVector1.z * vVector2.y));
 	result.y:=((vVector1.z * vVector2.x) - (vVector1.x * vVector2.z));
@@ -360,7 +360,7 @@ if AModel.QuantityObjects>0 then
 				
 				vNormal:=Cross(vVector1,vVector2);
 				pTempNormals[i]:=vNormal;
-				vNormal.Normalize;
+				vNormal := vNormal.Normalized();
 				pNormals[i]:=vNormal;
 				end;
 			vSum.Import();
@@ -376,7 +376,7 @@ if AModel.QuantityObjects>0 then
 						end;
 					end;
 				ArNormal[i]^:=vSum/(-shared);
-				ArNormal[i]^.Normalize();
+				ArNormal[i]^ := ArNormal[i]^.Normalized();
 				vSum.Import();
 				shared:=0;
 				end;

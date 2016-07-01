@@ -45,9 +45,9 @@ type
 		procedure InitMesh (const Mesh : TSG3DObject);
 		procedure InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
 		procedure SetDrawableMesh(const Mesh : TSG3DObject);
-		procedure SetVertex( const x,y,z : TSGVertexType );inline;overload;
+		procedure SetVertex( const x,y,z : TSGFloat32 );inline;overload;
 		procedure SetVertex( const v : TSGVertex3f );inline;overload;
-		procedure RotateX(const rx : TSGVertexType );inline;overload;
+		procedure RotateX(const rx : TSGFloat32 );inline;overload;
 		procedure AddObjectEnd(const x : TSGSingle = 10; const y :TSGSingle = 0.5; const z : TSGSingle = 0.8);inline;
 		function GetMatrix():TSGPointer;inline;
 			public
@@ -377,12 +377,12 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	end;
 end;
 
-procedure TSGPhysicsObject.RotateX(const rx : TSGVertexType );inline;overload;
+procedure TSGPhysicsObject.RotateX(const rx : TSGFloat32 );inline;overload;
 begin
 PAPPE.PhysicsObjectSetMatrix(FObject,PAPPE.Matrix4x4TermMul(FObject.Transform,PAPPE.Matrix4x4RotateX(rx*PAPPE.DEG2RAD)));
 end;
 
-procedure TSGPhysicsObject.SetVertex( const x,y,z : TSGVertexType );inline;overload;
+procedure TSGPhysicsObject.SetVertex( const x,y,z : TSGFloat32 );inline;overload;
 begin
 PAPPE.PhysicsObjectSetVector(FObject,PAPPE.Vector3(x,y,z));
 end;

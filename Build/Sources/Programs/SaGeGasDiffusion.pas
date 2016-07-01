@@ -39,13 +39,13 @@ type
 	
 	TSGSourseType = object
 		FGazTypeIndex : TSGLongWord;
-		FCoord        : TSGPoint3f;
+		FCoord        : TSGPoint3int32;
 		FRadius       : TSGLongWord;
 		end;
 	
 	TSGSubsidenceVertex = object
 		FCount       : TSGLongWord;
-		FCoords      : TSGPoint3f;
+		FCoords      : TSGPoint3int32;
 		FVertexIndex : TSGLongWord;
 		FRelief      : TSGLongWord;
 		end;
@@ -765,7 +765,7 @@ if FRelief <> nil then
 						l += k;
 					
 					FRelief^.FData[j].FMesh.ArVertex3f[i * Edge + ii]^ := PostInvert(j, ProjectingPointToRelief(
-						SGVertexImport(
+						SGVertex3fImport(
 							(i1+a1*l)/(Edge-1)*2-1,
 							(i2+a2*l)/(Edge-1)*2-1,
 							(i3+a3*l)/(Edge-1)*2-1),
@@ -1781,8 +1781,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	Color.a := FVisibleTimer;
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
 		Color,
 		Color,
@@ -2385,7 +2385,7 @@ var
 	i, ii, iii, total, totalAlpha: LongInt;
 	px, py, pz : LongInt;
 	colorIndex : byte;
-	color : TSGColor4f = ( r : 0; g : 0; b : 0; a : 0);
+	color : TSGColor4f = ( x : 0; y : 0; z : 0; w : 0);
 begin with Klass do begin 
 total := 0;
 totalAlpha := 0;
@@ -2913,7 +2913,7 @@ if (FileWay <> '') and (SGFileExists(FileWay)) then
 	FRelefRedactor.SingleRelief^.FType := T;
 	FRelefRedactor.SingleRelief^.FEnabled := E;
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
-	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
+	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(0,1,0,1);
 	end;
 if IsInFullscreen then
 	Context.Fullscreen := True;
@@ -2957,7 +2957,7 @@ Button.Active := False;
 if FRelefOptionPanel <> nil then
 	begin
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:теоритически изменен';
-	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(0,1,0,1);
+	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(0,1,0,1);
 	end;
 if FRelefRedactor <> nil then
 	FRelefRedactor.StopRedactoring();
@@ -3067,7 +3067,7 @@ else
 	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	FRelefOptionPanel.VisibleTimer := 0.3;
 	end;
-(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGColorImport(1,0,0,1);
+(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(1,0,0,1);
 FNewScenePanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.Active := False;
@@ -3655,10 +3655,10 @@ var
 procedure DrawQuadSec(const Primitive : TSGLongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.BeginScene(Primitive);
-a.Vertex(Render);
-b.Vertex(Render);
-c.Vertex(Render);
-d.Vertex(Render);
+Render.Vertex(a);
+Render.Vertex(b);
+Render.Vertex(c);
+Render.Vertex(d);
 Render.EndScene();
 end;
 begin

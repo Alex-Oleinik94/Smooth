@@ -14,13 +14,13 @@ type
 		class function ClassName():string;override;
 			public
 		FDeep:TSGMengerType;
-		Ar6Normals:packed array [0..5] of  TSGVertex;
+		Ar6Normals:packed array [0..5] of  TSGVertex3f;
 		FThreadsArray:packed array [0..19] of 
 			record
 			AllQ:Real;
 			Q:Real;
 			Arr6:TSGMengerSpunchBoolAr6;
-			Point:TSGVertex;
+			Point:TSGVertex3f;
 			end;
 		procedure CalculateArray();
 		procedure Calculate();override;
@@ -29,7 +29,7 @@ type
 		function GetArTP(const OldArTP:TSGMengerSpunchBoolAr6;const i,ii,iii: byte;const ThisDepth:LongWord = 0):TSGMengerSpunchBoolAr6;inline;
 		class function DoOrNotDo(const i,ii,iii:Byte):boolean;inline;
 		class function DoOrNotDoPlus(const i,ii,iii:Byte):boolean;inline;
-		procedure PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
+		procedure PushIndexes(const i1,i2,i3,i4:TSGVertex3f;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
 		function DoAtThreads():boolean;inline;
 		end;
 		
@@ -327,17 +327,17 @@ EnableNormals:=True;
 if FEnableNormals then
 	begin
 	Ar6Normals[0].Import(0,1,0);
-	Ar6Normals[0].Normalize;
+	Ar6Normals[0] := Ar6Normals[0].Normalized();
 	Ar6Normals[1].Import(0,0,1);
-	Ar6Normals[1].Normalize;
+	Ar6Normals[1] := Ar6Normals[1].Normalized();
 	Ar6Normals[2].Import(-1,0,0);
-	Ar6Normals[2].Normalize;
+	Ar6Normals[2] := Ar6Normals[2].Normalized();
 	Ar6Normals[3].Import(0,0,-1);
-	Ar6Normals[3].Normalize;
+	Ar6Normals[3] := Ar6Normals[3].Normalized();
 	Ar6Normals[4].Import(1,0,0);
-	Ar6Normals[4].Normalize;
+	Ar6Normals[4] := Ar6Normals[4].Normalized();
 	Ar6Normals[5].Import(0,-1,0);
-	Ar6Normals[5].Normalize;
+	Ar6Normals[5] := Ar6Normals[5].Normalized();
 	end;
 CalculateArray();
 end;
@@ -345,10 +345,10 @@ end;
 procedure TSGFractalMengerSpunch.CalculateFromThread(var MeshID,ThreadArB,ThreadArE:LongWord);
 var
 	i:LongInt;
-	ArVerts:packed array [1..8]of TSGVertex;
+	ArVerts:packed array [1..8]of TSGVertex3f;
 	NOfV,NOfF:LongWord;// Индекс вершин и полигонов в меше
 
-procedure Rec(const ArTP:TSGMengerSpunchBoolAr6;const T1:TSGVertex;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
+procedure Rec(const ArTP:TSGMengerSpunchBoolAr6;const T1:TSGVertex3f;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
 var
 	i,ii,iii:Byte;
 	NewQ:Real;
@@ -400,7 +400,7 @@ else
 					begin
 					Rec( 
 						(GetArTP(ArTP,i,ii,iii,NowDepth-1)),
-						(T1+SGVertexImport(i*NewQ,ii*NewQ,iii*NewQ)),
+						(T1+SGVertex3fImport(i*NewQ,ii*NewQ,iii*NewQ)),
 						NewQ,AllQ,
 						NowDepth-1);
 					end;
@@ -429,7 +429,7 @@ if DoAtThreads then
 		begin
 		Rec(
 			TSGMengerSpunchBoolAr6True,
-			SGVertexImport(2.6,2.6,2.6),
+			SGVertex3fImport(2.6,2.6,2.6),
 			-5.2,-5.2,
 			FDepth);
 		end;
@@ -443,7 +443,7 @@ else
 	begin
 	Rec(
 		TSGMengerSpunchBoolAr6True,
-		SGVertexImport(2.6,2.6,2.6),
+		SGVertex3fImport(2.6,2.6,2.6),
 		-5.2,-5.2,
 		FDepth);
 	if FEnableVBO and (FMesh<>nil) then
@@ -496,7 +496,7 @@ for i:=0 to 2 do
 				((FDeep = FMengerPlus) and (DoOrNotDoPlus(i,ii,iii))) then
 				begin
 				FThreadsArray[i4].Arr6:=GetArTP(TSGMengerSpunchBoolAr6True,i,ii,iii);
-				FThreadsArray[i4].Point:=(SGVertexImport(2.6,2.6,2.6)+SGVertexImport(i*NewQ,ii*NewQ,iii*NewQ));
+				FThreadsArray[i4].Point:=(SGVertex3fImport(2.6,2.6,2.6)+SGVertex3fImport(i*NewQ,ii*NewQ,iii*NewQ));
 				FThreadsArray[i4].Q:=NewQ;
 				FThreadsArray[i4].AllQ:=-5.2;
 				i4+=1;
@@ -616,7 +616,7 @@ if FDeep = FMengerPlus then
 	end;
 end;
 
-procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
+procedure TSGFractalMengerSpunch.PushIndexes(const i1,i2,i3,i4:TSGVertex3f;const ai:longword;const AllQ:real;var MeshID:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
 //var
 //abnu:	B:boolean = False;
 begin

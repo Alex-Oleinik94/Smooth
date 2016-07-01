@@ -27,7 +27,7 @@ type
 	TSGGasDiffusionSingleRelief = object
 		FEnabled : TSGBoolean;
 		FType : TSGBoolean;
-		FPoints : packed array of TSGVertex;
+		FPoints : packed array of TSGVertex3f;
 		FPolygones : packed array of TSGGDRPrimetiveIndexes;
 		
 		FMesh : TSG3DObject;
@@ -543,14 +543,14 @@ case FCuttingIndex of
 		if IsPointCorrect(FCuttingVertex2) then
 			begin
 			Render.Color3f(0,1,0);
-			FCuttingVertex2.Vertex(Render);
+			Render.Vertex(FCuttingVertex2);
 			end
 		else
 			begin
 			Render.Color3f(1,0,0);
-			Vertex.Vertex(Render);
+			Render.Vertex(Vertex);
 			end;
-		FCuttingVertex1.Vertex(Render);
+		Render.Vertex(FCuttingVertex1);
 		Render.EndScene();
 		end
 	else
@@ -1215,7 +1215,7 @@ if FPolygones <> nil then
 		begin
 		VRender.BeginScene(SGR_LINE_LOOP);
 		for ii := 0 to High(FPolygones[i]) do
-			FPoints[FPolygones[i][ii]].Vertex(VRender);
+			VRender.Vertex(FPoints[FPolygones[i][ii]]);
 		VRender.EndScene();
 		end;
 	if FEnabled then
@@ -1240,7 +1240,7 @@ if FPolygones <> nil then
 		begin
 		VRender.BeginScene(SGR_LINE_LOOP);
 		for ii := 0 to High(FPolygones[i]) do
-			FPoints[FPolygones[i][ii]].Vertex(VRender);
+			VRender.Vertex(FPoints[FPolygones[i][ii]]);
 		VRender.EndScene();
 		end;
 	if FEnabled then
@@ -1262,7 +1262,7 @@ if (FPolygones <> nil) and FEnabled then
 		begin
 		VRender.BeginScene(SGR_POLYGON);
 		for ii := 0 to High(FPolygones[i]) do
-			FPoints[FPolygones[i][ii]].Vertex(VRender);
+			VRender.Vertex(FPoints[FPolygones[i][ii]]);
 		VRender.EndScene();
 		end;
 	end;
@@ -1375,15 +1375,15 @@ if FSingleRelief^.FPolygones <> nil then
 			begin
 			if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
 				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
-					((SGColorImport(1,0.3,0,1) + SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/3).Color(Render)
+					Render.Color((SGVertex4fImport(1,0.3,0,1) + SGVertex4fImport(1,1,1,1) + SGVertex4fImport(0,0.5,1,1))/3)
 				else
-					((SGColorImport(1,1,1,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
+					Render.Color((SGVertex4fImport(1,1,1,1) + SGVertex4fImport(0,0.5,1,1))/2)
 			else 
 				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
-					((SGColorImport(1,0.3,0,1) + SGColorImport(0,0.5,1,1))/2).Color(Render)
+					Render.Color((SGVertex4fImport(1,0.3,0,1) + SGVertex4fImport(0,0.5,1,1))/2)
 				else
 					Render.Color4f(0,0.5,1,1);
-			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]].Vertex(Render);
+			Render.Vertex(FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]]);
 			end;
 		Render.EndScene();
 		end;
@@ -1406,26 +1406,26 @@ if (FSingleRelief^.FPolygones <> nil) and FSingleRelief^.FEnabled then
 			if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FPixelPrimitives,FSingleRelief^.FPolygones[i][ii]) then
 				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					if FSingleRelief^.FType then
-						((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/3).Color(Render)
+						Render.Color((SGVertex4fImport(1,0,0,0.3) + SGVertex4fImport(1,1,1,0.5) + SGVertex4fImport(0,1,1,0.2))/3)
 					else
-						((SGColorImport(1,0,0,0.3) + SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/3).Color(Render)
+						Render.Color((SGVertex4fImport(1,0,0,0.3) + SGVertex4fImport(1,1,1,0.5) + SGVertex4fImport(0,0.5,1,0.2))/3)
 				else
 					if FSingleRelief^.FType then
-						((SGColorImport(1,1,1,0.5) + SGColorImport(0,1,1,0.2))/2).Color(Render)
+						Render.Color((SGVertex4fImport(1,1,1,0.5) + SGVertex4fImport(0,1,1,0.2))/2)
 					else
-						((SGColorImport(1,1,1,0.5) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+						Render.Color((SGVertex4fImport(1,1,1,0.5) + SGVertex4fImport(0,0.5,1,0.2))/2)
 			else
 				if FCutPolygoneButton.Active and ExistsIndexInPrimetiveIndexes(FSelectedPrimetives,FSingleRelief^.FPolygones[i][ii]) then
 					if FSingleRelief^.FType then
-						((SGColorImport(1,0,0,0.3) + SGColorImport(0,1,1,0.2))/2).Color(Render)
+						Render.Color((SGVertex4fImport(1,0,0,0.3) + SGVertex4fImport(0,1,1,0.2))/2)
 					else
-						((SGColorImport(1,0,0,0.3) + SGColorImport(0,0.5,1,0.2))/2).Color(Render)
+						Render.Color((SGVertex4fImport(1,0,0,0.3) + SGVertex4fImport(0,0.5,1,0.2))/2)
 				else
 					if FSingleRelief^.FType then
 						Render.Color4f(0,1,1,0.2)
 					else
 						Render.Color4f(0,0.5,1,0.2);
-			FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]].Vertex(Render);
+			Render.Vertex(FSingleRelief^.FPoints[FSingleRelief^.FPolygones[i][ii]]);
 			end;
 		Render.EndScene();
 		end;
@@ -1628,12 +1628,12 @@ end;
 initialization
 begin
 Matrixes[-1] := SGGetIdentityMatrix();
-Matrixes[0] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(1,0,0)),SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[1] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(-1,0,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,-1,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertexImport(0,0,-1)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
-Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(2*pi/2,SGVertexImport(1,0,0)) , SGGetTranslateMatrix(SGVertexImport(0,0,-1)));
+Matrixes[0] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(1,0,0)),SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[1] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(-1,0,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,1,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,-1,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,0,-1)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(2*pi/2,SGVertex3fImport(1,0,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
 end
 
 finalization

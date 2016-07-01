@@ -517,7 +517,7 @@ var
 	v : TSGVertex3f;
 begin
 v:=TSGVertex3f(Point^);
-v.Normalize();
+v := v.Normalized();
 Color4f(
 	v.x *0.5 + 0.5,
 	v.y *0.5 + 0.5,
@@ -887,7 +887,7 @@ begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
 glTranslatef(x,y,z);
 {$ELSE}
-Matrix := SGGetTranslateMatrix(SGVertexImport(x, y, z));
+Matrix := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
 MultMatrixf(@Matrix);
 {$ENDIF}
 end;
@@ -903,7 +903,7 @@ begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
 glRotatef(angle,x,y,z);
 {$ELSE}
-Matrix := SGGetRotateMatrix(Angle * DEG2RAD, SGVertexImport(x, y, z));
+Matrix := SGGetRotateMatrix(Angle * DEG2RAD, SGVertex3fImport(x, y, z));
 MultMatrixf(@Matrix);
 {$ENDIF}
 end;

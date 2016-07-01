@@ -311,7 +311,7 @@ begin
 if CountInsets() > 0 then
 	begin
 	Shift := 1;
-	Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+	Vertex := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 	for i := 0 to CountInsets() - 1 do
 		begin
 		if FInsets[i] = ActiveInset() then
@@ -325,10 +325,10 @@ if CountInsets() > 0 then
 			Color2 := SGGetColor4fFromLongWord($009999).WithAlpha(0.8);
 			end;
 		SGRoundQuad(Render,
-			SGVertexImport(
+			SGVertex3fImport(
 				Vertex.x + Shift,
 				Vertex.y + 1),
-			SGVertexImport(
+			SGVertex3fImport(
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
 				Vertex.y + FFont.FontHeight + 10 - 3),
 			5,10,

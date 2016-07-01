@@ -46,7 +46,7 @@ type
 		class function ClassName:string;override;
 		procedure Paint();override;
 			public
-		SelectPoint,SelectSecondPoint:SGPoint;
+		SelectPoint,SelectSecondPoint:TSGPoint2int32;
 		SelectPointEnabled:Boolean ;
 		Image:TSGImage;
 		
@@ -346,7 +346,7 @@ if MathGraphics<>0 then
 	for i:=0 to MathGraphics-1 do
 		if ArMathGraphics[i]<>nil then
 			begin
-			Colors[i].Color(Render);
+			Render.Color(Colors[i]);
 			ArMathGraphics[i].Paint();
 			end;
 
@@ -533,15 +533,15 @@ if SelectPointEnabled then
 	if Image.ReadyTexture then
 		begin
 		Render.Color4f(0,0.5,0.70,0.6);
-		Image.DrawImageFromTwoPoint2f(SelectPoint,SelectSecondPoint,True,SG_2D)
+		Image.DrawImageFromTwoPoint2int32(SelectPoint,SelectSecondPoint,True,SG_2D)
 		end
 	else
 		begin
 		Render.Color4f(0,0.5,0.70,0.6);
 		Render.BeginScene(SGR_QUADS);
-		SelectPoint.Vertex(Render);
+		Render.Vertex(SelectPoint);
 		Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-		SelectSecondPoint.Vertex(Render);
+		Render.Vertex(SelectSecondPoint);
 		Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 		Render.EndScene();
 		end;

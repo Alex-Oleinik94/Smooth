@@ -288,8 +288,7 @@ procedure TSGRenderDirectX.BeginBumpMapping(const Point : Pointer );
 var
 	v : TSGVertex3f;
 begin
-v := TSGVertex3f(Point^);
-v.Normalize();
+v := TSGVertex3f(Point^).Normalized();
 pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, SGRDXVertex3fToRGBA(v));
 end;
 

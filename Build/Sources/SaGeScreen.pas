@@ -206,7 +206,7 @@ type
 		function GetPriorityComponent() : TSGComponent;
 		function CursorInComponent():boolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
-		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function BottomShift():LongInt;
 		function RightShift():LongInt;
 			public
@@ -223,7 +223,7 @@ type
 		procedure CompleteChild(const VChild : TSGComponent);
 		function LastChild():TSGComponent;
 		procedure CreateAlign(const NewAllign:TSGExByte);
-		function CursorPosition():TSGPoint;
+		function CursorPosition(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
 		procedure KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -523,12 +523,12 @@ type
 		FBodyColor:TSGColor4f;
 			public
 		//This Oly For Optimizing Draw 
-		FRCAr1,FRCAr2:TSGArTSGVertex;
-		FRCV1,FRCV2:TSGVertex;
+		FRCAr1,FRCAr2:TSGVertex3fList;
+		FRCV1,FRCV2:TSGVertex3f;
 		
 		FClickOnOpenBox:Boolean;
 			public
-		procedure DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure DrawItem(const Vertex1,Vertex3: TSGPoint2int32;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Colums:LongInt;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -552,8 +552,8 @@ type
 		FItems:TArTArTSGComponent;
 		FSelectItems:
 			record
-				Point1:TSGPoint2f;
-				Point2:TSGPoint2f;
+				Point1: TSGPoint2int32;
+				Point2: TSGPoint2int32;
 				end;
 		FQuantityXs,FQuantityYs:LongInt;
 		FItemWidth,FItemHeight:LongInt;
@@ -789,8 +789,8 @@ procedure TSGRadioButton.DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$I
 begin
 Render.Color4f(1,1,1,FVisibleTimer);
 FImage.DrawImageFromTwoVertex2fWith2TexPoint(
-	SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-	SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+	SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+	SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 	SGVertex2fImport(0,x),
 	SGVertex2fImport(1,y),
 	True,SG_2D);
@@ -1116,8 +1116,8 @@ if  FOpen and (FCursorOnComponent) then
 						{$ENDIF}
 					FSelectItem:=FCursorOnThisItem;
 					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
-					FTextColor:=SGColorImport();
-					FBodyColor:=SGColorImport();
+					FTextColor:=SGVertex4fImport();
+					FBodyColor:=SGVertex4fImport();
 					if OnChange<>nil then
 						OnChange(Self);
 					FClickOnOpenBox:=False;
@@ -1134,37 +1134,37 @@ WriteLn('TSGComboBox.FromUpDate() : End');
 	{$ENDIF}
 end;
 
-procedure TSGComboBox.DrawItem(const Vertex1,Vertex3:TSGPoint2f;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGComboBox.DrawItem(const Vertex1,Vertex3: TSGPoint2int32;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if IDItem<>-1 then
 	begin
 	if FItems[IDItem].FImage<>nil then
 		begin
-		SGColorImport(1,1,1,Color.a).Color(Render);
+		Render.Color4f(1,1,1,Color.a);
 		FItems[IDItem].FImage.DrawImageFromTwoVertex2fAsRatio(
-			SGPoint2fToVertex3f(Vertex1),
-			SGPoint2fToVertex3f(SGPoint2fImport(Vertex1.x+Height,Vertex3.y)),tRUE,0.85);
-		Color.Color(Render);
+			SGPoint2int32ToVertex3f(Vertex1),
+			SGPoint2int32ToVertex3f(SGVertex2int32Import(Vertex1.x+Height,Vertex3.y)),tRUE,0.85);
+		Render.Color(Color);
 		Font.DrawFontFromTwoVertex2f(
 			FItems[IDItem].FCaption,
-			SGPoint2fToVertex2f(SGPoint2fImport(Vertex1.x+Height,Vertex1.y)),
-			SGPoint2fToVertex2f(Vertex3));
+			SGPoint2int32ToVertex3f(SGVertex2int32Import(Vertex1.x+Height,Vertex1.y)),
+			SGPoint2int32ToVertex3f(Vertex3));
 		end
 	else
 		begin
-		Color.Color(Render);
+		Render.Color(Color);
 		Font.DrawFontFromTwoVertex2f(
 			FItems[IDItem].FCaption,
-			SGPoint2fToVertex2f(Vertex1),
-			SGPoint2fToVertex2f(Vertex3));
+			SGPoint2int32ToVertex3f(Vertex1),
+			SGPoint2int32ToVertex3f(Vertex3));
 		end;
 	end;
 if (ComboBoxImage<>nil) and General and (not FOpen) then
 	begin
 	Render.Color4f(1,1,1,Color.A*FVisibleTimer);
 	ComboBoxImage.DrawImageFromTwoVertex2fAsRatio(
-		SGVertexImport(Vertex3.x-Height,Vertex1.y),
-		SGPoint2fToVertex2f(Vertex3),
+		SGVertex3fImport(Vertex3.x-Height,Vertex1.y),
+		SGPoint2int32ToVertex3f(Vertex3),
 		False,0.5);
 	end;
 end;
@@ -1173,15 +1173,15 @@ procedure TSGComboBox.FromDraw;
 const
 	QuikAnime = 15;
 const
-	FirsColor1:TSGColor4f = (r:0;g:0.5;b:1;a:1);
-	FirsColor11:TSGColor4f = (r:0.65;g:0.65;b:0.65;a:1);
-	SecondColor1:TSGColor4f = (r:0;g:0.9;b:1;a:1);
-	ThreeColor1:TSGColor4f = (r:0.8;g:0.8;b:0.8;a:1);
+	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
+	FirsColor11:TSGColor4f = (x:0.65;y:0.65;z:0.65;w:1);
+	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
+	ThreeColor1:TSGColor4f = (x:0.8;y:0.8;z:0.8;w:1);
 	
-	FirsColor2:TSGColor4f = (r:0;g:0.75;b:1;a:1);
-	FirsColor21:TSGColor4f = (r:0.9;g:0.9;b:0.9;a:1);
-	SecondColor2:TSGColor4f = (r:0;g:1;b:1;a:1);
-	ThreeColor2:TSGColor4f = (r:1;g:1;b:1;a:1);
+	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
+	FirsColor21:TSGColor4f = (x:0.9;y:0.9;z:0.9;w:1);
+	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
+	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
 var
 	i:LongInt;
 	FScroll:byte = 0;
@@ -1194,8 +1194,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if  (1-FBackLightTimer>SGZero) and 
 		(1-FOpenTimer>SGZero)  then
 	SGRoundQuad(Render, 
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
 		(FirsColor1*FActiveTimer+FirsColor11*(1-FActiveTimer)).WithAlpha(0.3*FVisibleTimer*(1-FBackLightTimer)*(1-FOpenTimer)),
 		(FirsColor2*FActiveTimer+FirsColor21*(1-FActiveTimer)).WithAlpha(0.3*FVisibleTimer*(1-FBackLightTimer)*(1-FOpenTimer))*1.3,
@@ -1203,16 +1203,16 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if  (FBackLightTimer>SGZero) and 
 		(1-FOpenTimer>SGZero)  then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
 		SecondColor1.WithAlpha(0.3*FVisibleTimer*FBackLightTimer*(1-FOpenTimer)),
 		SecondColor2.WithAlpha(0.3*FVisibleTimer*FBackLightTimer*(1-FOpenTimer))*1.3,
 		True);
 	if  (FOpenTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGVertexImport(
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGVertex3fImport(
 			GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x,
 			GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*Colums*FOpenTimer),
 		5,10,
@@ -1223,17 +1223,17 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		if FCursorOnComponent then
 			begin
 			FTextColor*=QuikAnime-1;
-			FTextColor+=SGColorImport(0,0,0,FVisibleTimer);
+			FTextColor+=SGVertex4fImport(0,0,0,FVisibleTimer);
 			FTextColor/=QuikAnime;
 			
 			FBodyColor*=QuikAnime-1;
-			FBodyColor+=SGColorImport(1,1,1,0.6*FVisibleTimer);
+			FBodyColor+=SGVertex4fImport(1,1,1,0.6*FVisibleTimer);
 			FBodyColor/=QuikAnime;
 			end
 		else
 			begin
 			FTextColor*=QuikAnime-1;
-			FTextColor+=SGColorImport(1,1,1,FVisibleTimer);
+			FTextColor+=SGVertex4fImport(1,1,1,FVisibleTimer);
 			FTextColor/=QuikAnime;
 			
 			FBodyColor*=QuikAnime-1;
@@ -1250,11 +1250,11 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		begin
 		if  (FOpenTimer>SGZero)  then
 		SGRoundQuad(Render,
-			SGVertexImport(
+			SGVertex3fImport(
 				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScrollWidth,
 				GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+FHeight*Colums*FOpenTimer*(FFirstScrollItem/High(FItems))
 				),
-			SGVertexImport(
+			SGVertex3fImport(
 				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x,
 				GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*Colums*FOpenTimer*((FFirstScrollItem+Colums-1)/High(FItems))),
 			5,10,
@@ -1270,10 +1270,10 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				begin
 				if  (FOpenTimer>SGZero)  then
 				SGRoundQuad(Render,
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
 					5,10,
@@ -1285,10 +1285,10 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				begin
 				if  (FOpenTimer>SGZero)  then	
 				SGRoundQuad(Render,
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
 					5,10,
@@ -1300,10 +1300,10 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				begin
 				if  (FOpenTimer>SGZero) then
 				SGRoundQuad(Render,
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertexImport(
+					SGVertex3fImport(
 						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
 						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
 					5,10,
@@ -1315,23 +1315,23 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				begin
 				if FItems[FFirstScrollItem+i].FActive then
 					DrawItem(
-						SGPoint2fImport(
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-						SGPoint2fImport(
-							GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
+						SGVertex2int32Import(
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x),
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y + Height*i*FOpenTimer)),
+						SGVertex2int32Import(
+							Trunc(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth),
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer)),
 						FTextColor.WithAlpha(FOpenTimer),
 						FFirstScrollItem+i)
 				else
 					DrawItem(
-						SGPoint2fImport(
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-						SGPoint2fImport(
-							GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-							GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
-						SGColorImport(1,0,0).WithAlpha(FOpenTimer * FVisibleTimer),
+						SGVertex2int32Import(
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x),
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer)),
+						SGVertex2int32Import(
+							Trunc(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth),
+							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer)),
+						SGVertex4fImport(1,0,0).WithAlpha(FOpenTimer * FVisibleTimer),
 						FFirstScrollItem+i);
 				end;
 			end;
@@ -1343,7 +1343,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	DrawItem(
 		GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT),
 		GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT),
-		SGColorImport(1,1,1,1-FOpenTimer).WithAlpha(FVisibleTimer),
+		SGVertex4fImport(1,1,1,1-FOpenTimer).WithAlpha(FVisibleTimer),
 		FSelectItem,True);
 	end;
 FBackLight:=False;
@@ -1730,17 +1730,17 @@ end;
 
 procedure TSGPanel.FromDraw;
 var 
-	Color2:TSGColor4f = (r:1;g:1;b:1;a:1);
-	Color1:TSGColor4f = (r:0;g:0.5;b:1;a:1);
+	Color2:TSGColor4f = (x:1;y:1;z:1;w:1);
+	Color1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
-		Color1.AddAlpha(0.3*FVisibleTimer),
-		Color2.AddAlpha(0.3*FVisibleTimer),
+		Color1.WithAlpha(0.3*FVisibleTimer),
+		Color2.WithAlpha(0.3*FVisibleTimer),
 		FViewLines,FViewQuad);
 	end;
 inherited;
@@ -1770,16 +1770,16 @@ begin
 if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
 	begin
 	Render.Color4f(1,1,1,FVisibleTimer);
-	a := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-	b := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
+	a := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+	b := SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
 	FImage.DrawImageFromTwoVertex2fWithTexPoint(a,b,FSecondPoint,True,SG_2D);
 	if FEnableLines then
 		begin
-		FLinesColor.Color(Render);
+		Render.Color(FLinesColor);
 		Render.BeginScene(SGR_LINE_LOOP);
-		a.Vertex(Render);
+		Render.Vertex(a);
 		Render.Vertex2f(a.x,b.y);
-		b.Vertex(Render);
+		Render.Vertex(b);
 		Render.Vertex2f(b.x,a.y);
 		Render.EndScene();
 		end;
@@ -1806,8 +1806,8 @@ end;
 	{$ENDIF}
 procedure TSGProgressBar.FromDraw;
 var 
-	Color3:TSGColor4f = (r:1;g:1;b:1;a:1);
-	Radius:real = 5;
+	Color3:TSGColor4f = (x:1;y:1;z:1;w:1);
+	Radius : TSGFloat = 5;
 begin
 if abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)<Radius then
 	Radius:=abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)/2;
@@ -1815,18 +1815,20 @@ FProgress:=(FProgress*7+FNeedProgress)/8;
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		Radius,10,
-		NilColor,
+		SGVertex4fImport(0,0,0,0),
 		Color3.WithAlpha(0.3*FVisibleTimer)*1.3,
 		True,False);
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(
-			SGPointImport(
-				GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x+
-				(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(
+			SGVertex2int32Import(
+					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x +
+					Trunc(
+						(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x -
+						 GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x) * FProgress),
 				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).y
 				)
 			),
@@ -1842,8 +1844,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			FFont.DrawFontFromTwoVertex2f(
 				//SGPCharTotal(SGPCharTotal(SGPCharIf(FViewCaption,Caption),' '),SGPCharTotal(SGStringToPChar(SGFloatToString(100*FProgress,2)),'%')),
 				SGStringIf(FViewCaption,Caption)+' '+SGFloatToString(100*FProgress,2)+'%',
-				SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-				SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
+				SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+				SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
 			end;
 		end;
 	end;
@@ -1857,8 +1859,8 @@ end;
 
 procedure TSGProgressBar.DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FColor1.SetVariables(0,0.5,1,1);
-FColor2.SetVariables(0,0.75,1,1);
+FColor1.Import(0,0.5,1,1);
+FColor2.Import(0,0.75,1,1);
 end;
 
 constructor TSGProgressBar.Create;
@@ -1977,30 +1979,30 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if FVisibleTimer>SGZero then
 		begin
 		SGRoundWindowQuad(Render,
-			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)),
-			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_CHILDREN)),
-			SGAbsTwoVertex(
-				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
-				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
-			SGAbsTwoVertex(
-				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)),
-				SGPoint2fToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_CHILDREN)),
+			Abs(
+				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)) -
+				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
+			Abs(
+				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)) -
+				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
 			10,
-			SGColorImport(
+			SGVertex4fImport(
 				0,1,1,0.5*FVisibleTimer),
-			SGColorImport(
+			SGVertex4fImport(
 				1,1,1,0.3*FVisibleTimer),
 			True,
-			SGColorImport(
+			SGVertex4fImport(
 				0,1,1,0.5*FVisibleTimer)*1.3,
-			SGColorImport(
+			SGVertex4fImport(
 				1,1,1,0.3*FVisibleTimer)*1.3);
 		Render.Color4f(1,1,1,FVisibleTimer);
 		Font.DrawFontFromTwoVertex2f(FCaption,
-			SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
 		end;
 	end;
 inherited FromDraw;
@@ -2479,7 +2481,7 @@ DestroyParent();
 inherited Destroy();
 end;
 
-function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte):SGPoint;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	begin
@@ -2858,7 +2860,7 @@ FNeedHeight:=FNoneHeight;
 FNeedWidth:=FNoneWidth;
 end;
 
-function TSGComponent.CursorPosition():TSGPoint;
+function TSGComponent.CursorPosition(): TSGPoint2int32;
 begin
 Result := Context.CursorPosition(SGNowCursorPosition);
 end;
@@ -3119,19 +3121,19 @@ end;
 
 procedure TSGEdit.FromDraw;
 var
-	FirsColor1:TSGColor4f = (r:0;g:0.5;b:1;a:1);
-	SecondColor1:TSGColor4f = (r:0;g:0.9;b:1;a:1);
-	ThreeColor1:TSGColor4f = (r:0.95;g:0.95;b:0.95;a:1);
+	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
+	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
+	ThreeColor1:TSGColor4f = (x:0.95;y:0.95;z:0.95;w:1);
 	
-	FirsColor2:TSGColor4f = (r:0;g:0.75;b:1;a:1);
-	SecondColor2:TSGColor4f = (r:0;g:1;b:1;a:1);
-	ThreeColor2:TSGColor4f = (r:1;g:1;b:1;a:1);
+	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
+	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
+	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
 	
-	FirsColor3:TSGColor4f = (r:0.8;g:0;b:0;a:0.8);
-	SecondColor3:TSGColor4f = (r:0.8;g:0;b:0;a:1);
+	FirsColor3:TSGColor4f = (x:0.8;y:0;z:0;w:0.8);
+	SecondColor3:TSGColor4f = (x:0.8;y:0;z:0;w:1);
 	
-	FirsColor4:TSGColor4f = (r:0;g:0.8;b:0;a:0.8);
-	SecondColor4:TSGColor4f = (r:0;g:0.8;b:0;a:1);
+	FirsColor4:TSGColor4f = (x:0;y:0.8;z:0;w:0.8);
+	SecondColor4:TSGColor4f = (x:0;y:0.8;z:0;w:1);
 	
 	ReqAct : Boolean = false;
 	TempTimer : Real = 0;
@@ -3141,12 +3143,12 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 	if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
 		begin
 		SGRoundQuad(Render,
-			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 			2,
 			10,
-			NilColor,
-			ThreeColor2.AddAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
+			SGVertex4fImport(0,0,0,0),
+			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
 			True);
 		end;
 	ReqAct := ReqursiveActive();
@@ -3156,38 +3158,38 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			if not ReqAct then
 				TempTimer := 1;
 			SGRoundQuad(Render,
-				SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-				SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+				SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+				SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 				2,10,
 				((FirsColor1*Byte(FTextType=SGEditTypeText)+
 					Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-						.AddAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
+						.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
 				((FirsColor2*Byte(FTextType=SGEditTypeText)+
 					Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
-						.AddAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
+						.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
 				True);
 			end;
 	if ReqAct and (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		2,10,
 		((SecondColor1/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer)))/(1+Byte(FTextType<>SGEditTypeText)))
-			.AddAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer),
+			.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer),
 		(((SecondColor2/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))/(1+Byte(FTextType<>SGEditTypeText)))
-			.AddAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
+			.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
 		True);
 	if (FVisibleTimer*FNowChangetTimer*FActiveTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		2,10,
 		((ThreeColor1*Byte(FTextType=SGEditTypeText)+
 			Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-			.AddAlpha(0.4*FVisibleTimer*FNowChangetTimer*FActiveTimer),
+			.WithAlpha(0.4*FVisibleTimer*FNowChangetTimer*FActiveTimer),
 		((ThreeColor2*Byte(FTextType=SGEditTypeText)+
 			Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))*2))
-			.AddAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
+			.WithAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
 		True);
 	end;
 if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
@@ -3195,8 +3197,8 @@ if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
 	Render.Color4f(1,1,1,FVisibleTimer);
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
-		SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
 		False);
 	end;
 if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)then
@@ -3204,8 +3206,8 @@ if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)
 	Render.Color4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
 	FFont.DrawCursorFromTwoVertex2f(
 		Caption,FCursorPosition,
-		SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
 		False);
 	end;
 inherited;
@@ -3442,11 +3444,11 @@ procedure TSGLabel.FromDraw;
 begin
 if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
 	begin
-	FTextColor.WithAlpha(FVisibleTimer).Color(Render);
+	Render.Color(FTextColor.WithAlpha(FVisibleTimer));
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
-		SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		Boolean(FTextPosition));
 	end;
 inherited;
@@ -3495,13 +3497,13 @@ end;
 
 procedure TSGButton.FromDraw;
 const 
-	FirsColor1:TSGColor4f = (r:0;g:0.5;b:1;a:1);
-	SecondColor1:TSGColor4f = (r:0;g:0.9;b:1;a:1);
-	ThreeColor1:TSGColor4f = (r:0.8;g:0.8;b:0.8;a:1);
+	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
+	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
+	ThreeColor1:TSGColor4f = (x:0.8;y:0.8;z:0.8;w:1);
 	
-	FirsColor2:TSGColor4f = (r:0;g:0.75;b:1;a:1);
-	SecondColor2:TSGColor4f = (r:0;g:1;b:1;a:1);
-	ThreeColor2:TSGColor4f = (r:1;g:1;b:1;a:1);
+	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
+	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
+	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
@@ -3509,14 +3511,14 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		begin
 		Render.Color4f(1,1,1,FVisibleTimer);
 		FViewImage1.DrawImageFromTwoVertex2f(
-			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
 		end;
 	if (not Active) or (FActiveTimer<1-SGZero) then
 		begin
 		SGRoundQuad(Render,
-			SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 			5,10,
 			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer))*0.54,
 			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer))*0.8,
@@ -3527,8 +3529,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		(1-FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
 		FirsColor1.WithAlpha(0.3*FVisibleTimer*(1-FCursorOnButtonTimer)*(1-FChangingButtonTimer)*FActiveTimer),
 		FirsColor2.WithAlpha(0.3*FVisibleTimer*(1-FCursorOnButtonTimer)*(1-FChangingButtonTimer)*FActiveTimer)*1.3,
@@ -3538,8 +3540,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		(1-FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,10,
 		SecondColor1.WithAlpha(0.3*FVisibleTimer*FCursorOnButtonTimer*(1-FChangingButtonTimer)*FActiveTimer),
 		SecondColor2.WithAlpha(0.3*FVisibleTimer*FCursorOnButtonTimer*(1-FChangingButtonTimer)*FActiveTimer)*1.3,
@@ -3548,8 +3550,8 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		(FChangingButtonTimer>SGZero) and
 		(FVisibleTimer>SGZero) then
 	SGRoundQuad(Render,
-		SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
 		5,
 		10,
 		ThreeColor1.WithAlpha(0.4*FVisibleTimer*FChangingButtonTimer*FActiveTimer),
@@ -3561,8 +3563,8 @@ if (Caption<>'') and (FFont<>nil) and (FFont.Ready) and (FVisibleTimer>SGZero) t
 	Render.Color4f(1,1,1,FVisibleTimer);
 	FFont.DrawFontFromTwoVertex2f(
 		Caption,
-		SGPoint2fToVertex2f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2fToVertex2f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
 	end;
 FCursorOnButton:=False;
 FChangingButton:=False;
@@ -3679,7 +3681,10 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
    (Context.KeyPressedType = SGDownKey) and 
    (Context.KeyPressedChar = 'O') and 
    TSGEngineConfigurationPanel.CanCreate(Self) then
+	begin
 	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();
+	Context.SetKey(SGNullKey,0);
+	end;
 
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Before "FromUpDateUnderCursor(CanRePleace);"');

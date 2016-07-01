@@ -85,7 +85,7 @@ FRadioButton.Checked := PointInTriangle2D(
 	SGVertex2fImport(200,200),
 	SGVertex2fImport(200,500),
 	SGVertex2fImport(500,200),
-	Context.CursorPosition());
+	SGPoint2int32ToVertex3f(Context.CursorPosition()));
 end;
 
 constructor TSGUserTesting.Create(const VContext : ISGContext);

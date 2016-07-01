@@ -79,7 +79,7 @@ type
 		FMeshesReady : TSGBoolean;
 		FShift       : TSGInt64;
 		
-		FSun              : TSGVertex;
+		FSun              : TSGVertex3f;
 		FSunAbs           : TSGSingle;
 		FSunTrigonometry  : packed array[0..2] of TSGSingle;
 		FLightingEnable   : TSGBoolean;
@@ -526,11 +526,11 @@ if FLightingEnable then
 	FSun*=FSunAbs;
 	Render.Color3f(1,1,1);
 	Render.BeginScene(SGR_POINTS);
-	FSun.Vertex(Render);
+	Render.Vertex(FSun);
 	Render.EndScene();
 	Render.Enable(SGR_LIGHTING);
 	Render.Enable(SGR_LIGHT0);
-	FSun.LightPosition(Render);
+	Render.LightPosition(FSun);
 	end
 else
 	if Render.IsEnabled(SGR_LIGHTING) then

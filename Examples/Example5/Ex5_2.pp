@@ -77,7 +77,7 @@ for i:=0 to QuantityObjects-1 do
 	FPhysics.LastObject().InitBox(8,8,8);
 	FPhysics.LastObject().SetVertex((-(8.5*kk*0.5))+((x+sx)*8.5),-65+(y*8.5),0);
 	FPhysics.LastObject().AddObjectEnd();
-	FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0,1,0);
+	FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0,1,0);
 	x:=x+1;
 	inc(j);
 	if j>k then
@@ -112,28 +112,28 @@ FPhysics:=TSGPhysics.Create(Context);
 FPhysics.AddObjectBegin(SGPBodyHeightMap,False);
 FPhysics.LastObject().InitHeightMapFromImage('Map.jpg',50,0,1024,1024);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(1,1,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(1,1,1);
 
 FPhysics.AddObjectBegin(SGPBodySphere,True);
 FPhysics.LastObject().InitSphere(8,16);
 FPhysics.LastObject().SetVertex(0,-56,18);
 FPhysics.LastObject().AddObjectEnd(50);
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.1,0.5,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.1,0.5,1);
 
 FPhysics.AddObjectBegin(SGPBodyCapsule,True);
 FPhysics.LastObject().InitCapsule(4,2.5,24);
 FPhysics.LastObject().SetVertex(0,-60,-18);
 FPhysics.LastObject().RotateX(90);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.5,0.1,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.5,0.1,1);
 
 InitCubes();
 
-FPhysics.SetGravitation(SGVertexImport(0,-9.81,0));
+FPhysics.SetGravitation(SGVertex3fImport(0,-9.81,0));
 FPhysics.Start();
 
 FGravitationAngle:=pi;
-FPhysics.AddLigth(SGR_LIGHT0,SGVertexImport(2,45,160));
+FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
 end;
 
 destructor TSGExample5_2.Destroy();
@@ -162,7 +162,7 @@ dt2.Get();
 FGravitationAngle += Context.ElapsedTime/100;
 if FGravitationAngle>2*pi then
 	FGravitationAngle -= 2*pi;
-FPhysics.SetGravitation(SGVertexImport(
+FPhysics.SetGravitation(SGVertex3fImport(
 	9.81*2.25*sin(FGravitationAngle),
 	9.81*2.25*cos(FGravitationAngle),
 	9.81*2.25*sin(FGravitationAngle*3)));

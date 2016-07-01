@@ -79,18 +79,18 @@ type
 		procedure UpdateTimer();virtual;
 		procedure Resize();virtual;
 		procedure Close();virtual;
-		function ShiftClientArea() : TSGPoint2f; virtual;
+		function ShiftClientArea() : TSGPoint2int32; virtual;
 		procedure SwapBuffers();virtual;
 		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
 		procedure Kill();virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
-		function GetCursorPosition():TSGPoint2f;virtual;abstract;
-		procedure SetCursorPosition(const VPosition : TSGPoint2f);virtual;abstract;
-		function GetWindowArea():TSGPoint2f;virtual;abstract;
-		function GetScreenArea():TSGPoint2f;virtual;abstract;
-		function GetClientArea():TSGPoint2f;virtual;abstract;
-		function GetClientAreaShift() : TSGPoint2f;virtual;abstract;
+		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
+		procedure SetCursorPosition(const VPosition : TSGPoint2int32);virtual;abstract;
+		function GetWindowArea():TSGPoint2int32;virtual;abstract;
+		function GetScreenArea():TSGPoint2int32;virtual;abstract;
+		function GetClientArea():TSGPoint2int32;virtual;abstract;
+		function GetClientAreaShift() : TSGPoint2int32;virtual;abstract;
 			protected
 		FActive          : TSGBoolean;
 		FInitialized     : TSGBoolean;
@@ -165,7 +165,7 @@ type
 		FKeyPressed       : TSGLongWord;
 		FKeyPressedType   : TSGCursorButtonType;
 		
-		FCursorPosition       : packed array [TSGCursorPosition] of TSGPoint2f;
+		FCursorPosition       : packed array [TSGCursorPosition] of TSGPoint2int32;
 		FCursorKeyPressed     : TSGCursorButtons;
 		FCursorKeyPressedType : TSGCursorButtonType;
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
@@ -183,7 +183,7 @@ type
 		function CursorKeyPressedType():TSGCursorButtonType;virtual;
 		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;virtual;
 		function CursorWheel():TSGCursorWheel;virtual;
-		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;virtual;
+		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;virtual;
 		
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
@@ -365,7 +365,7 @@ end;
 
 procedure TSGContext.SetCursorCentered(const VCentered : TSGBoolean);
 var
-	Point : TSGPoint2f;
+	Point : TSGPoint2int32;
 begin
 FCursorInCenter := VCentered;
 if (@SetCursorPosition <> nil) and VCentered then
@@ -544,7 +544,7 @@ begin
 FActive:=False;
 end;
 
-function TSGContext.ShiftClientArea() : TSGPoint2f; 
+function TSGContext.ShiftClientArea() : TSGPoint2int32; 
 begin
 Result.Import(0,0);
 end;
@@ -561,7 +561,7 @@ end;
 
 procedure TSGContext.Messages();
 var
-	Point:TSGPoint2f;
+	Point:TSGPoint2int32;
 begin
 Point := GetCursorPosition();
 Point -= ShiftClientArea();
@@ -584,7 +584,7 @@ if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyP
 	end;
 end;
 
-function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2f;
+function TSGContext.CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;
 begin
 Result:=FCursorPosition[Index];
 end;

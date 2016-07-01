@@ -68,7 +68,7 @@ with Render do
 	begin
 	Color3f(0,1,0);
 	BeginScene(SGR_POINTS);
-	Light.Vertex(Render);
+	Render.Vertex(Light);
 	EndScene();
 	
 	Color3f(1,1,1);

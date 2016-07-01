@@ -313,50 +313,55 @@ else
 	Result := (Space - VDistanse) / Space;
 end;
 
+function PointToVert3f(const P : TSGPoint2int32):TSGVertex3f;
+begin
+Result.Import(P.x, P.y);
+end;
+
 var
 	Vertex1, Vertex2 : TSGVertex3f;
 	Alpha, Distanse : TSGFloat;
-	Color : TSGColor4f = (r:0;g:0.2;b:0.7;a:0.6);
+	Color : TSGColor4f = (x:0;y:0.2;z:0.7;w:0.6);
 begin
-Vertex1 := SGPoint2fToVertex3f(GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_PARENT));
-Vertex2 := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_PARENT));
-Distanse := DistanseToQuad(Vertex1, Vertex2, SGPoint2fToVertex2f(Context.CursorPosition())) / 3;
+Vertex1 := PointToVert3f(GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_PARENT));
+Vertex2 := PointToVert3f(GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_PARENT));
+Distanse := DistanseToQuad(Vertex1, Vertex2, PointToVert3f(Context.CursorPosition())) / 3;
 Alpha := DistanseToAlpha(Distanse);
 Alpha *= FVisibleTimer;
 
 Render.BeginScene(SGR_QUADS);
 
-Color.WithAlpha(Alpha).Color(Render);
-Vertex1.Vertex(Render);
+Render.Color(Color.WithAlpha(Alpha));
+Render.Vertex(Vertex1);
 Render.Vertex2f(Vertex1.x, Vertex2.y);
-Vertex2.Vertex(Render);
+Render.Vertex(Vertex2);
 Render.Vertex2f(Vertex2.x, Vertex1.y);
 
-Color.WithAlpha(Alpha).Color(Render);
-Vertex1.Vertex(Render);
+Render.Color(Color.WithAlpha(Alpha));
+Render.Vertex(Vertex1);
 Render.Vertex2f(Vertex1.x, Vertex2.y);
-Color.WithAlpha(DistanseToAlpha(Space) * Alpha).Color(Render);
+Render.Color(Color.WithAlpha(DistanseToAlpha(Space) * Alpha));
 Render.Vertex2f(Vertex1.x - Space, Vertex2.y + Space);
 Render.Vertex2f(Vertex1.x - Space, Vertex1.y - Space);
 
-Color.WithAlpha(Alpha).Color(Render);
-Vertex1.Vertex(Render);
+Render.Color(Color.WithAlpha(Alpha));
+Render.Vertex(Vertex1);
 Render.Vertex2f(Vertex2.x, Vertex1.y);
-Color.WithAlpha(DistanseToAlpha(Space) * Alpha).Color(Render);
+Render.Color(Color.WithAlpha(DistanseToAlpha(Space) * Alpha));
 Render.Vertex2f(Vertex2.x + Space, Vertex1.y - Space);
 Render.Vertex2f(Vertex1.x - Space, Vertex1.y  - Space);
 
-Color.WithAlpha(Alpha).Color(Render);
-Vertex2.Vertex(Render);
+Render.Color(Color.WithAlpha(Alpha));
+Render.Vertex(Vertex2);
 Render.Vertex2f(Vertex1.x, Vertex2.y);
-Color.WithAlpha(DistanseToAlpha(Space) * Alpha).Color(Render);
+Render.Color(Color.WithAlpha(DistanseToAlpha(Space) * Alpha));
 Render.Vertex2f(Vertex1.x - Space, Vertex2.y + Space);
 Render.Vertex2f(Vertex2.x + Space, Vertex2.y  + Space);
 
-Color.WithAlpha(Alpha).Color(Render);
-Vertex2.Vertex(Render);
+Render.Color(Color.WithAlpha(Alpha));
+Render.Vertex(Vertex2);
 Render.Vertex2f(Vertex2.x, Vertex1.y);
-Color.WithAlpha(DistanseToAlpha(Space) * Alpha).Color(Render);
+Render.Color(Color.WithAlpha(DistanseToAlpha(Space) * Alpha));
 Render.Vertex2f(Vertex2.x + Space, Vertex1.y - Space);
 Render.Vertex2f(Vertex2.x + Space, Vertex2.y + Space);
 

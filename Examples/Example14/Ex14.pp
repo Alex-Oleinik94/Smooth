@@ -166,7 +166,7 @@ FPhysics.LastObject().AddObjectEnd(50);
 
 FLigthSphere := FPhysics.LastObject().Mesh;
 FPhysics.LastObject().Mesh := nil;
-FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.ObjectColor:=SGVertex4fImport(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -401,8 +401,8 @@ FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
 FLightMatrix := FCameraInverseModelViewMatrix *
 	FLightModelViewMatrix * 
 	FLightProjectionMatrix *
-	SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5)) *
-	SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5));
+	SGGetScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
+	SGGetTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
 
 if FShadowRenderType then
 	begin // Вариант #1

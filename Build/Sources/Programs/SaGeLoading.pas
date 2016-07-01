@@ -168,7 +168,7 @@ var
 	VVCosAngle, VVSinAngle, VVCosAngle2, VVSinAngle2 : TSGSingle;
 
 begin
-FColor.Color(Render);
+Render.Color(FColor);
 
 VVSinAngle:=sin(VProjectionAngle);
 VVSinAngle2:=sin(Pi*FProjectionAngle);
@@ -199,11 +199,11 @@ for i:=0 to FCountLines-1 do
 		VVSinAngle:=sin(FArrayOfLines[i].FWidth/180*pi);
 		
 		Render.BeginScene(SGR_LINE_LOOP);
-		FColor.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius).Color(Render);
+		Render.Color(FColor.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius));
 		Render.Vertex2f(iii+FArrayOfLines[i].FLengths[ii]-6,6);
 		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*VVCosAngle,
 			(iii+FArrayOfLines[i].FLengths[ii]-6)*VVSinAngle);
-		FColor.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius).Color(Render);
+		Render.Color(FColor.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius));
 		Render.Vertex2f(iii*VVCosAngle,iii*VVSinAngle);
 		Render.Vertex2f(iii,6);
 		Render.EndScene();
@@ -224,8 +224,8 @@ var
 
 begin
 CallAction();
-FCOlor:=(SGColorImport(1,0,0)*(1-FProgress)+SGColorImport(0,1,0)*FProgress);
-FCOlor.Normalize();
+FCOlor:=(SGVertex4fImport(1,0,0,1)*(1-FProgress)+SGVertex4fImport(0,1,0,1)*FProgress);
+TSGVertex3f(FCOlor) := FCOlor.Normalized();
 FColor.AddAlpha(FAlpha);
 Render.LineWidth(1);
 

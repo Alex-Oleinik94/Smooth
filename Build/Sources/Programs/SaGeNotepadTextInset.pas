@@ -26,7 +26,7 @@ uses
 type
 	TSGNTextInsetFileString = object
 		FString : TSGString;
-		FColors : TSGArColor4f;
+		FColors : TSGVertex4fList;
 		end;
 	
 	TSGNTextInsetFileStrings = type array of TSGNTextInsetFileString;
@@ -104,14 +104,14 @@ procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
 
 var
 	Line : TSGLongWord;
-	CursorPos : TSGPoint2f;
+	CursorPos : TSGPoint2int32;
 
 function IsCurOnText():TSGBoolean;
 begin
 Result := False;
 if not FCursorOnComponent then
 	Exit;
-CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGPoint2fImport(FRealLeft, FRealTop);
+CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealLeft, FRealTop);
 CursorPos.x -= Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
 Result := (Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
@@ -359,7 +359,7 @@ var
 begin
 MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
 ii := Trunc(FBegin);
-Vertex := SGPoint2fToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+Vertex := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 Shift := Abs(FBegin - ii);
 Vertex.y -= Shift * Font.FontHeight;
 for i := ii to Trunc(FEnd) + 1 do
@@ -424,18 +424,18 @@ var
 	VertexTopLeft, VertexBottomLeft : TSGVertex3f;
 	AreaAll : TSGFloat;
 begin
-VertexTop := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-VertexBottom := SGPoint2fToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
+VertexTop := SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+VertexBottom := SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
 VertexBottomLeft := VertexBottom; VertexBottomLeft.x -= ScrollBarWidth * FScrolTimer;
 VertexTopLeft := VertexTop; VertexTopLeft.x -= ScrollBarWidth * FScrolTimer;
 AreaAll := CountLines();
 Render.BeginScene(SGR_QUADS);
 
 Render.Color4f(0.3,0.3,0.3,FScrolTimer);
-VertexTop.Vertex(Render);
-VertexBottom.Vertex(Render);
-VertexBottomLeft.Vertex(Render);
-VertexTopLeft.Vertex(Render);
+Render.Vertex(VertexTop);
+Render.Vertex(VertexBottom);
+Render.Vertex(VertexBottomLeft);
+Render.Vertex(VertexTopLeft);
 
 Render.Color4f(0.1,0.9,0.1,FScrolTimer);
 Render.Vertex2f(

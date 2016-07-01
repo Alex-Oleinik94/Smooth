@@ -158,7 +158,7 @@ x := x0 * PlaneSize;
 y := y0 * PlaneSize;
 a := PI*2/50;
 Render.BeginScene(SGR_TRIANGLES);
-SGVertexImport(0,0,1).Normalized().Normal(Render);
+Render.Normal(SGVertex3fImport(0,0,1).Normalized());
 for i := 0 to 49 do
 	begin
 	Render.TexCoord2f(x / TextureSize, y / TextureSize);
@@ -191,7 +191,7 @@ FPhysics.LastObject().AddObjectEnd(50);
 
 FLigthSphere := FPhysics.LastObject().Mesh;
 FPhysics.LastObject().Mesh := nil;
-FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.ObjectColor:=SGVertex4fImport(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -265,9 +265,9 @@ if Render.SupporedShaders() then
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 	FCamera.ChangingLookAtObject := False;
-	FCamera.Up       := SGVertexImport(0,0,1);
-	FCamera.Location := SGVertexImport(0,-350,100);
-	FCamera.View     := (SGVertexImport(0,0,0)-FCamera.Location).Normalized();
+	FCamera.Up       := SGVertex3fImport(0,0,1);
+	FCamera.Location := SGVertex3fImport(0,-350,100);
+	FCamera.View     := (SGVertex3fImport(0,0,0)-FCamera.Location).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);
@@ -466,12 +466,12 @@ if Render.SupporedShaders() then
 	
 	for i := 0 to FLightsCount - 1 do
 		begin
-		FShadow.LightPos[i]   := SGVertexImport(
+		FShadow.LightPos[i]   := SGVertex3fImport(
 			cos(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
 			sin(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
 			FBigRad * 1.6);
-		FShadow.LightUp[i]    := SGVertexImport(0,0,1);
-		FShadow.LightEye[i]   := SGVertexImport(0,0,0) + SGVertexImport(FShadow.LightPos[i].x,FShadow.LightPos[i].y,0)*0.2;
+		FShadow.LightUp[i]    := SGVertex3fImport(0,0,1);
+		FShadow.LightEye[i]   := SGVertex3fImport(0,0,0) + SGVertex3fImport(FShadow.LightPos[i].x,FShadow.LightPos[i].y,0)*0.2;
 		FShadow.LightAngle[i] := FLigthCameraAngle;
 		end;
 	
@@ -527,8 +527,8 @@ if Render.SupporedShaders() then
 		Render.PopMatrix();
 		
 		Render.BeginScene(SGR_LINES);
-		FShadow.LightPos[i].Vertex(Render);
-		(FShadow.LightPos[i] + FShadow.LightDir[i] * 10).Vertex(Render);
+		Render.Vertex(FShadow.LightPos[i]);
+		Render.Vertex(FShadow.LightPos[i] + FShadow.LightDir[i] * 10);
 		Render.EndScene();
 		end;
 	
@@ -562,7 +562,7 @@ if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPresse
 	Context.ShowCursor(not Context.CursorCentered);
 	if FUseCameraAnimation then
 		begin
-		FCamera.Up   := SGVertexImport(0,0,1);
+		FCamera.Up   := SGVertex3fImport(0,0,1);
 		FCamera.View := (-FCamera.Location).Normalized();
 		end;
 	end;

@@ -258,18 +258,18 @@ type
 		function GetArFaces(const Index : LongWord = 0):TSGPointer;inline;
 		
 	private
-		function GetVertex3f(const Index : TSGMaxEnum):PTSGVertex3f;inline;
-		function GetVertex2f(const Index : TSGMaxEnum):PTSGVertex2f;inline;
-		function GetVertex4f(const Index : TSGMaxEnum):PTSGVertex4f;inline;
+		function GetVertex3f(const Index : TSGMaxEnum):PSGVertex3f;inline;
+		function GetVertex2f(const Index : TSGMaxEnum):PSGVertex2f;inline;
+		function GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f;inline;
 		
 	public
 		// Эти совйтсва возвращают указатель на Index-ый элемент массива вершин 
 		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType3f, иначе Result = nil
-		property ArVertex3f[Index : TSGMaxEnum]:PTSGVertex3f read GetVertex3f;
+		property ArVertex3f[Index : TSGMaxEnum]:PSGVertex3f read GetVertex3f;
 		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType2f, иначе Result = nil
-		property ArVertex2f[Index : TSGMaxEnum]:PTSGVertex2f read GetVertex2f;
+		property ArVertex2f[Index : TSGMaxEnum]:PSGVertex2f read GetVertex2f;
 		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType4f, иначе Result = nil
-		property ArVertex4f[Index : TSGMaxEnum]:PTSGVertex4f read GetVertex4f;
+		property ArVertex4f[Index : TSGMaxEnum]:PSGVertex4f read GetVertex4f;
 		
 		// Добавляет пустую(ые) вершины в массив вершин
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
@@ -277,10 +277,10 @@ type
 		procedure AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 	
 	private
-		function GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
-		function GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
-		function GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
-		function GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
+		function GetColor3f(const Index:TSGMaxEnum):PSGColor3f;inline;
+		function GetColor4f(const Index:TSGMaxEnum):PSGColor4f;inline;
+		function GetColor3b(const Index:TSGMaxEnum):PSGColor3b;inline;
+		function GetColor4b(const Index:TSGMaxEnum):PSGColor4b;inline;
 		
 	public
 		// Возвращает указатель на структуру данных,
@@ -288,10 +288,10 @@ type
 		// Каждую функцию можно использовать только когда установлен соответствующий тип формата цветов
 		// Иначе Result = nil.
 		(* Для установки цвета лучше использовать процедуру SetColor, описанную ниже *)
-		property ArColor3f[Index : TSGMaxEnum]:PTSGColor3f read GetColor3f;
-		property ArColor4f[Index : TSGMaxEnum]:PTSGColor4f read GetColor4f;
-		property ArColor3b[Index : TSGMaxEnum]:PTSGColor3b read GetColor3b;
-		property ArColor4b[Index : TSGMaxEnum]:PTSGColor4b read GetColor4b;
+		property ArColor3f[Index : TSGMaxEnum]:PSGColor3f read GetColor3f;
+		property ArColor4f[Index : TSGMaxEnum]:PSGColor4f read GetColor4f;
+		property ArColor3b[Index : TSGMaxEnum]:PSGColor3b read GetColor3b;
+		property ArColor4b[Index : TSGMaxEnum]:PSGColor4b read GetColor4b;
 		
 		// Эта процедура устанавливает цвет вершины. Работает для любого формата хранение цвета.
 		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1);inline;
@@ -300,22 +300,22 @@ type
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
 		procedure AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
 	private
-		function GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+		function GetNormal(const Index:TSGMaxEnum):PSGVertex3f;inline;
 	
 	public
 		// Свойство для редактирования нормалей
-		property ArNormal[Index : TSGMaxEnum]:PTSGVertex3f read GetNormal;
+		property ArNormal[Index : TSGMaxEnum]:PSGVertex3f read GetNormal;
 		
 	private
-		function GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
-		function GetTexVertex3f(const Index : TSGMaxEnum): PTSGVertex3f;inline;
-		function GetTexVertex4f(const Index : TSGMaxEnum): PTSGVertex4f;inline;
+		function GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f;inline;
+		function GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f;inline;
+		function GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f;inline;
 		
 	public
-		property ArTexVertex[Index : TSGMaxEnum] : PTSGVertex2f read GetTexVertex;
-		property ArTexVertex2f[Index : TSGMaxEnum] : PTSGVertex2f read GetTexVertex;
-		property ArTexVertex3f[Index : TSGMaxEnum] : PTSGVertex3f read GetTexVertex3f;
-		property ArTexVertex4f[Index : TSGMaxEnum] : PTSGVertex4f read GetTexVertex4f;
+		property ArTexVertex[Index : TSGMaxEnum] : PSGVertex2f read GetTexVertex;
+		property ArTexVertex2f[Index : TSGMaxEnum] : PSGVertex2f read GetTexVertex;
+		property ArTexVertex3f[Index : TSGMaxEnum] : PSGVertex3f read GetTexVertex3f;
+		property ArTexVertex4f[Index : TSGMaxEnum] : PSGVertex4f read GetTexVertex4f;
 		
 		// Устанавливает количество вершин
 		procedure SetVertexLength(const NewVertexLength:TSGQuadWord);inline;
@@ -849,7 +849,7 @@ var
 	i,ii,iiii,iii:TSGMaxEnum;
 	ArPoligonesNormals:packed array of TSGVertex3f = nil;
 	Plane:SGPlane;
-	Vertex:TSGVertex;
+	Vertex:TSGVertex3f;
 begin
 if (FObjectPoligonesType<>SGR_TRIANGLES) then
 	Exit;
@@ -911,8 +911,8 @@ for i:=0 to QuantityVertexes-1 do
 		if iii=1 then
 			Vertex+=ArPoligonesNormals[ii];
 		end;
-	Vertex.Normalize();
-	ArNormal[i]^:=Vertex;
+	Vertex := Vertex.Normalized();
+	ArNormal[i]^:= Vertex;
 	end;
 SetLength(ArPoligonesNormals,0);
 end;
@@ -1025,9 +1025,9 @@ else if (FColorType=SGMeshColorType4b) then
 	end;
 end;
 
-function TSG3DObject.GetTexVertex3f(const Index : TSGMaxEnum): PTSGVertex3f;inline;
+function TSG3DObject.GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f;inline;
 begin
-Result:=PTSGVertex3f(
+Result:=PSGVertex3f(
 	TSGMaxEnum(ArVertex)
 	+GetSizeOfOneVertex()*Index
 	+GetSizeOfOneVertexCoord()
@@ -1035,9 +1035,9 @@ Result:=PTSGVertex3f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetTexVertex4f(const Index : TSGMaxEnum): PTSGVertex4f;inline;
+function TSG3DObject.GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f;inline;
 begin
-Result:=PTSGVertex4f(
+Result:=PSGVertex4f(
 	TSGMaxEnum(ArVertex)
 	+GetSizeOfOneVertex()*Index
 	+GetSizeOfOneVertexCoord()
@@ -1045,9 +1045,9 @@ Result:=PTSGVertex4f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PTSGVertex2f;inline;
+function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f;inline;
 begin
-Result:=PTSGVertex2f(
+Result:=PSGVertex2f(
 	TSGMaxEnum(ArVertex)
 	+GetSizeOfOneVertex()*Index
 	+GetSizeOfOneVertexCoord()
@@ -1055,42 +1055,42 @@ Result:=PTSGVertex2f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PSGVertex3f;inline;
 begin
-Result:=PTSGVertex3f( 
+Result:=PSGVertex3f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index
 	+GetSizeOfOneVertexCoord()
 	+GetSizeOfOneColorCoord());
 end;
 
-function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PTSGColor4f;inline;
+function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PSGColor4f;inline;
 begin
-Result:=PTSGColor4f( 
+Result:=PSGColor4f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PTSGColor3b;inline;
+function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PSGColor3b;inline;
 begin
-Result:=PTSGColor3b( 
+Result:=PSGColor3b( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PTSGColor4b;inline;
+function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PSGColor4b;inline;
 begin
-Result:=PTSGColor4b(Pointer(
+Result:=PSGColor4b(Pointer(
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	GetSizeOfOneVertexCoord()));
 end;
 
-function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PTSGColor3f;inline;
+function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PSGColor3f;inline;
 begin
-Result:=PTSGColor3f( 
+Result:=PSGColor3f( 
 	TSGMaxEnum(ArVertex)+
 	GetSizeOfOneVertex()*Index+
 	GetSizeOfOneVertexCoord());
@@ -1182,19 +1182,19 @@ begin
 Result:=FNOfVerts*GetSizeOfOneVertex();
 end;
 
-function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PTSGVertex3f;inline;
+function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PSGVertex3f;inline;
 begin
-Result:=PTSGVertex3f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PSGVertex3f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-function TSG3DObject.GetVertex4f(const Index : TSGMaxEnum):PTSGVertex4f;inline;
+function TSG3DObject.GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f;inline;
 begin
-Result:=PTSGVertex4f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PSGVertex4f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PTSGVertex2f;inline;
+function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PSGVertex2f;inline;
 begin
-Result:=PTSGVertex2f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
+Result:=PSGVertex2f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
 procedure TSG3DObject.LoadFromFile(const FileWay:string);

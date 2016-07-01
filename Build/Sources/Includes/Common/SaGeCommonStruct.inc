@@ -36,7 +36,8 @@ type
 		{$ENDIF STRUCT_IS_FLOAT}
 		{$IFDEF STRUCT_IS_COLOR}
 			property b : STRUCT_TYPE read z write z;
-		{$ENDIF}
+			procedure ConvertType();         {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		{$ENDIF STRUCT_IS_COLOR}
 		end;
 	{$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
 	STRUCT_P_4 = ^ STRUCT_4;
@@ -51,6 +52,8 @@ type
 			function Round():STRUCT_4;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		{$ENDIF STRUCT_IS_FLOAT}
 		{$IFDEF STRUCT_IS_COLOR}
+			function WithAlpha(const Alpha : STRUCT_TYPE):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			procedure AddAlpha(const Alpha : STRUCT_TYPE);         {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			property a : STRUCT_TYPE read w write w;
 		{$ENDIF}
 		end;
@@ -72,15 +75,15 @@ type
 {$IFNDEF INC_WITHOUT_FORWARD}
 
 {$IF    defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
-function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
-function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
-function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_TYPE)}
@@ -175,6 +178,16 @@ operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF 
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+{$IF    defined(STRUCT_IS_COLOR) and defined(STRUCT_3)}
+procedure STRUCT_3.ConvertType();         {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Temp : STRUCT_TYPE;
+begin
+Temp := r;
+r := b;
+b := Temp;
+end;
+{$ENDIF defined(STRUCT_IS_COLOR) and defined(STRUCT_3)}
 
 {$IF    defined(STRUCT_4)}
 operator * (const A : STRUCT_TYPE; const B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -252,21 +265,21 @@ end;
 {$ENDIF defined(STRUCT_2)}
 
 {$IF    defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
-function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_2_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0):STRUCT_2;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(x, y);
 end;
 {$ENDIF defined(STRUCT_2_IMPORT_FUNC) and defined(STRUCT_2) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
-function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_3_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0):STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(x, y, z);
 end;
 {$ENDIF defined(STRUCT_3_IMPORT_FUNC) and defined(STRUCT_3) and defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_4_IMPORT_FUNC) and defined(STRUCT_4) and defined(STRUCT_TYPE)}
-function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function STRUCT_4_IMPORT_FUNC(const x : STRUCT_TYPE = 0; const y : STRUCT_TYPE = 0; const z : STRUCT_TYPE = 0; const w : STRUCT_TYPE = 0):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(x, y, z, w);
 end;
@@ -514,6 +527,25 @@ end;
 {$ENDIF defined(STRUCT_3)}
 
 {$IF    defined(STRUCT_4)}
+{$IFDEF STRUCT_IS_COLOR}
+	function STRUCT_4.WithAlpha(const Alpha : STRUCT_TYPE):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	begin
+	Result := Self;
+	{$IFDEF STRUCT_IS_FLOAT}
+		Result.a := Result.a * Alpha;
+	{$ELSE  STRUCT_IS_FLOAT}
+		Result.a := Trunc(Result.a * (Alpha / 255));
+	{$ENDIF STRUCT_IS_FLOAT}
+	end;
+	procedure STRUCT_4.AddAlpha(const Alpha : STRUCT_TYPE);         {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	begin
+	{$IFDEF STRUCT_IS_FLOAT}
+		a := a * Alpha;
+	{$ELSE  STRUCT_IS_FLOAT}
+		a := Trunc(a * (Alpha / 255));
+	{$ENDIF STRUCT_IS_FLOAT}
+	end;
+{$ENDIF}
 operator + (const A, B : STRUCT_4) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(A.x + B.x, A.y + B.y, A.z + B.z, A.w + B.w);

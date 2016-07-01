@@ -100,7 +100,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			private
-		FStartArray : TArTSGVertex3f;
+		FStartArray : TSGVertex3fList;
 		FMesh : TSG3DObject;
 		FDetalization : LongWord;
 		FType:TSGBezierCurveType;
@@ -108,7 +108,7 @@ type
 		FLowAttitude:Real;
 		procedure SetVertex(const Index:TSGMaxEnum;const VVertex:TSGVertex3f);
 		function GetVertex(const Index:TSGMaxEnum):TSGVertex3f;
-		function GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
+		function GetResultVertex(const Attitude:real;const FArray:PSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 		function GetLow(const R:Real):TSGVertex3f;inline;
 			public
 		property LowAttitude:Real read FLowAttitude;
@@ -152,7 +152,7 @@ type
 		function GetSimbolWidth(const Index:char):LongInt;inline;
 		function LoadSGF():TSGBoolean;
 			public
-		function GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
+		function GetSimbolInfo(const VSimbol:Char):TSGPoint2int32;inline;
 		function Loading():TSGBoolean;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:string ):LongWord;overload;
@@ -166,10 +166,10 @@ type
 		property TextureParams:TStringParams read FTextureParams;
 		property SimbolParams:TSGSimbolParams read FSimbolParams;
 			public
-		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
-		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
-		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
+		procedure DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
+		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 		procedure AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 		end;
 
@@ -506,9 +506,9 @@ else
 	Result:=GetLow(Attitude);
 end;
 
-function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:PTSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
+function TSGBezierCurve.GetResultVertex(const Attitude:real;const FArray:PSGVertex3f;const VLength:TSGMaxEnum):TSGVertex3f;inline;overload;
 var
-	VArray:TArTSGVertex3f;
+	VArray:TSGVertex3fList;
 	i:TSGMaxEnum;
 begin
 if VLength=1 then
@@ -719,7 +719,7 @@ SG_VIEW_WATCH_OBJECT:
 	end;
 SG_VIEW_LOOK_AT_OBJECT:
 	begin
-	FUp.Normalize();
+	FUp := FUp.Normalized();
 	Render.InitMatrixMode(SG_3D);
 	Matrix:=SGGetLookAtMatrix(FLocation,FView + FLocation,FUp);
 	Render.MultMatrixf(@Matrix);
@@ -896,7 +896,7 @@ FReadyToGoToTexture := True;
 FFontReady := True;
 end;
 
-function TSGFont.GetSimbolInfo(const VSimbol:Char):TSGPoint2f;inline;
+function TSGFont.GetSimbolInfo(const VSimbol:Char):TSGPoint2int32;inline;
 begin
 Result.Import(FSimbolParams[VSimbol].x,FSimbolParams[VSimbol].y);
 end;
@@ -906,7 +906,7 @@ begin
 Result:=FSimbolParams[Index].Width;
 end;
 
-procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	P:PChar;
 begin
@@ -918,7 +918,7 @@ if Length(S) > 0 then
 	end;
 end;
 
-procedure TSGFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 var
 	P:PChar;
 begin
@@ -1092,11 +1092,11 @@ begin
 inherited;
 end;
 
-procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
+procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 var
 	i:LongInt = 0;
 	StringWidth : LongInt = 0;
-	Otstup:SGVertex2f = (x:0;y:0);
+	Otstup:TSGVertex2f = (x:0;y:0);
 	ToExit:Boolean = False;
 	ThisSimbolWidth:LongWord = 0;
 	DirectXShift : TSGVertex2f;
@@ -1247,7 +1247,7 @@ var
 	i:LongWord;
 	PFontBits:PSGPixel4b;
 	iw,ih:LongWord;
-	SI:TSGPoint2f;
+	SI:TSGPoint2int32;
 
 procedure Invert(const a,b:TSGMaxEnum);inline;
 begin
@@ -1347,11 +1347,11 @@ for i:=1 to Length(VString) do
 end;
 
 
-procedure TSGFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:SGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
+procedure TSGFont.DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 var
 	i:LongInt = 0;
 	StringWidth:LongInt = 0;
-	Otstup:SGVertex2f = (x:0;y:0);
+	Otstup:TSGVertex2f = (x:0;y:0);
 begin
 if AutoXShift then
 	begin
@@ -1377,7 +1377,7 @@ if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
 	if CursorWidth = 1 then
 		begin
 		Render.BeginScene(SGR_LINES);
-		(Vertex1+Otstup).Vertex(Render);
+		Render.Vertex(Vertex1 + Otstup);
 		Render.Vertex2f(Otstup.x+Vertex1.x,Otstup.y+FFontHeight+Vertex1.y);
 		Render.EndScene();
 		end

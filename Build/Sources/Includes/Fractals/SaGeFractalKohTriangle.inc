@@ -54,7 +54,7 @@ procedure TSGFractalKohTriangle.CalculateFromThread();
 var
 	MeshID:LongWord;
 	FVertexIndex,FFaceIndex:LongWord;
-procedure Rec(const t1,t2,t3:TSGVertex;const NowDepth:LongWord);
+procedure Rec(const t1,t2,t3:TSGVertex3f;const NowDepth:LongWord);
 begin
 PushIndexes(
 	MeshID,
@@ -76,16 +76,16 @@ FFaceIndex:=0;
 FVertexIndex:=0;
 PushIndexes(
 	MeshID,
-	SGVertexImport(cos(pi/2),sin(pi/2))*4,
-	SGVertexImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
-	SGVertexImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4,
+	SGVertex3fImport(cos(pi/2),sin(pi/2))*4,
+	SGVertex3fImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
+	SGVertex3fImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4,
 	FVertexIndex,FFaceIndex);
 if FDepth>0 then
 	begin
 	Rec(
-		SGVertexImport(cos(pi/2),sin(pi/2))*4,
-		SGVertexImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
-		SGVertexImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4,
+		SGVertex3fImport(cos(pi/2),sin(pi/2))*4,
+		SGVertex3fImport(cos(pi/2+2*pi/3),sin(pi/2+2*pi/3))*4,
+		SGVertex3fImport(cos(pi/2+4*pi/3),sin(pi/2+4*pi/3))*4,
 		FDepth)
 	end;
 if FThreadsEnable then

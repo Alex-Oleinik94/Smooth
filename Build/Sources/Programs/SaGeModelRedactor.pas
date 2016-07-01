@@ -172,7 +172,7 @@ if FCustomModel<>nil then
 	
 	Render.Color3f(1,1,1);
 	Render.BeginScene(SGR_POINTS);
-	FSun.Vertex(Render);
+	Render.Vertex(FSun);
 	Render.EndScene();
 	
 	Render.Disable(SGR_BLEND);
@@ -212,7 +212,7 @@ if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and Context.KeysPre
 				end;
 			FSelectMesh := Context.KeyPressedByte-Byte('1');
 			FLastColorMesh:=FCustomModel.Objects[FSelectMesh].ObjectColor;
-			FCustomModel.Objects[FSelectMesh].ObjectColor:=SGColorImport(0,1,0);
+			FCustomModel.Objects[FSelectMesh].ObjectColor:=SGVertex4fImport(0,1,0);
 			end;
 		end;
 	Byte('D'): if FSelectMesh<>-1 then
@@ -222,23 +222,23 @@ if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and Context.KeysPre
 	Byte('X'): if FSelectMesh<>-1 then
 		begin
 		if Context.KeysPressed(SG_SHIFT_KEY) then
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(0.5,0,0))
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(0.5,0,0))
 		else
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(-0.5,0,0));
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(-0.5,0,0));
 		end;
 	Byte('Y'): if FSelectMesh<>-1 then
 		begin
 		if Context.KeysPressed(SG_SHIFT_KEY) then
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(0,0.5,0))
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(0,0.5,0))
 		else
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(0,-0.5,0));
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(0,-0.5,0));
 		end;
 	Byte('Z'): if FSelectMesh<>-1 then
 		begin
 		if Context.KeysPressed(SG_SHIFT_KEY) then
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(0,0,0.5))
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(0,0,0.5))
 		else
-			FCustomModel.Translate(FSelectMesh,SGVertexImport(0,0,-0.5));
+			FCustomModel.Translate(FSelectMesh,SGVertex3fImport(0,0,-0.5));
 		end;
 	Byte('I'): if FCustomModel<>nil then
 		FCustomModel.WriteInfo();

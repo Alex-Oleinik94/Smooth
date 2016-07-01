@@ -40,12 +40,12 @@ type
 			private
 		FStartDeep,FStartDeepHeight:LongWord;
 		FArray:TSGKillerArray;
-		FYou:TSGPoint2f;
+		FYou: TSGPoint2int32;
 		FZombies:packed array of
 			packed record
-			FPosition:TSGPoint2f;
+			FPosition: TSGPoint2int32;
 			FActive:Boolean;
-			FOldPosition:TSGPoint2f;
+			FOldPosition: TSGPoint2int32;
 			FDieInterval:single;
 			FNowPosition:TSGVertex2f;
 			end;
@@ -87,11 +87,11 @@ type
 			private
 		procedure DoQuad(const i,ii:LongWord;const artype : TSGKillerArrayType);inline;
 		procedure GoZombies;
-		function Proverka(const KPos:TSGPoint2f;const b:Byte):Boolean;inline;
+		function Proverka(const KPos: TSGPoint2int32;const b:Byte):Boolean;inline;
 		procedure Reset;inline;
 		procedure FreeGame;
 		procedure InitGame;
-		function TamNetZombie(const MayBeZombie:TSGPoint2f):Boolean;
+		function TamNetZombie(const MayBeZombie: TSGPoint2int32):Boolean;
 		procedure Calculate;
 		procedure CreateZombi(const ZombieID:LongWord);
 		procedure MayByVictory;
@@ -160,7 +160,7 @@ else
 		end;
 	end;
 repeat
-FZombies[ZombieID].FPosition:=Random(FForestWidth,FForestHeight);
+FZombies[ZombieID].FPosition.Import(Random(FForestWidth),Random(FForestHeight));
 ii:=0;
 for i:=0 to High(FZombies) do
 	if FZombies[i].FActive then
@@ -177,10 +177,10 @@ until (ii=0) and (FYou<>FZombies[ZombieID].FPosition) and
 FZombies[ZombieID].FOldPosition:=FZombies[ZombieID].FPosition;
 FZombies[ZombieID].FDieInterval:=0;
 FZombies[ZombieID].FActive:=True;
-FZombies[ZombieID].FNowPosition:=FZombies[ZombieID].FPosition*FR;
+FZombies[ZombieID].FNowPosition:=SGVertex2fImport(FZombies[ZombieID].FPosition.x*FR.x,FZombies[ZombieID].FPosition.y*FR.y);
 end;
 
-function TSGKiller.TamNetZombie(const MayBeZombie:TSGPoint2f):Boolean;
+function TSGKiller.TamNetZombie(const MayBeZombie: TSGPoint2int32):Boolean;
 var
 	i:LongInt;
 begin
@@ -468,7 +468,7 @@ for i:=o to High(FZombies) do
 	FZombies[i].FActive:=True;
 	FZombies[i].FOldPosition:=FZombies[i].FPosition;
 	FZombies[i].FDieInterval:=0;
-	FZombies[i].FNowPosition:=FZombies[i].FPosition*FR;
+	FZombies[i].FNowPosition:=SGVertex2fImport(FZombies[i].FPosition.x*FR.x,FZombies[i].FPosition.y*FR.y);
 	end;
 end;
 
@@ -791,7 +791,7 @@ if artype.FType=2 then
 	end
 else if artype.FWay=FForestHeight*FForestWidth then
 	begin
-	SGGetColor4fFromLongWord($FFFF00).Color(Render);
+	Render.Color(SGGetColor4fFromLongWord($FFFF00));
 	NeedsExtension := False;
 	end;
 if not NeedsExtension then
@@ -807,18 +807,18 @@ else
 		fillchar(Colors, SizeOf(Colors), 0)
 	else
 		Colors := GetColorArrayFrom(i, ii, artype.FWay);
-	Colors[0].Color(Render);
+	Render.Color(Colors[0]);
 	Render.Vertex2f(FR.x*i,FR.y*ii);
-	Colors[1].Color(Render);
+	Render.Color(Colors[1]);
 	Render.Vertex2f(FR.x*(i+1),FR.y*ii);
-	Colors[2].Color(Render);
+	Render.Color(Colors[2]);
 	Render.Vertex2f(FR.x*(i+1),FR.y*(ii+1));
-	Colors[3].Color(Render);
+	Render.Color(Colors[3]);
 	Render.Vertex2f(FR.x*i,FR.y*(ii+1));
 	end;
 end;
 
-function TSGKiller.Proverka(const KPos:TSGPoint2f;const b:Byte):Boolean;inline;
+function TSGKiller.Proverka(const KPos: TSGPoint2int32;const b:Byte):Boolean;inline;
 begin
 Result:=(KPos.x>=0)and
 		(KPos.y>=0) and
@@ -830,7 +830,7 @@ end;
 procedure TSGKiller.Calculate;
 var
 	i,ii,iii:LongWord;
-procedure Rec(var FArray:TSGKillerArray;NewMyPosition:TSGPoint2f;const Dlinna:LongWord );
+procedure Rec(var FArray:TSGKillerArray;NewMyPosition: TSGPoint2int32;const Dlinna:LongWord );
 begin
 if Proverka(NewMyPosition,0) and (FArray[NewMyPosition.x,NewMyPosition.y].FWay>Dlinna) then
 	begin
@@ -863,7 +863,7 @@ end;
 procedure TSGKiller.GoZombies;
 var
 	i,ii,iii,iiii,iiiii,iiiiii:LongWord;
-	Any:TSGPoint2f;
+	Any: TSGPoint2int32;
 begin
 for i:=0 to High(FZombies) do
 	if FZombies[i].FActive and (FZombies[i].FPosition=FYou) then
@@ -934,7 +934,7 @@ end;
 
 function TSGKiller.IsBulletKillZombie(const Bullet:TSGVertex2f;const Zombie:LongWord):Boolean;
 begin
-Result:=Abs((Bullet*FR)-FZombies[Zombie].FNowPosition)<Abs(FR)/3.9;
+Result:=Abs(SGVertex2fImport(Bullet.x*FR.x,Bullet.y*FR.y)-FZombies[Zombie].FNowPosition)<Abs(FR)/3.9;
 end;
 
 procedure TSGKiller.Paint();
@@ -942,7 +942,7 @@ var
 	i,ii,iii:LongWord;
 	FDT:TSGDataTime;
 	Vtx1,Vtx2:TSGVertex2f;
-	Any:TSGPoint2f;
+	Any: TSGPoint2int32;
 begin
 if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and (Context.KeyPressedByte=82) then	
 	Reset;
@@ -1160,7 +1160,10 @@ if FActive then
 		begin
 		if FZombies[i].FActive then
 			begin
-			FZombies[i].FNowPosition:=FR*( (FZombies[i].FPosition-FZombies[i].FOldPosition)*(FDTInterval/FInterval)+FZombies[i].FOldPosition);
+			FZombies[i].FNowPosition.Import(
+				FR.x * ((FZombies[i].FPosition.x-FZombies[i].FOldPosition.x)*(FDTInterval/FInterval)+FZombies[i].FOldPosition.x),
+				FR.y * ((FZombies[i].FPosition.y-FZombies[i].FOldPosition.y)*(FDTInterval/FInterval)+FZombies[i].FOldPosition.y)
+				);
 			FImageZombi.DrawImageFromTwoVertex2f(FZombies[i].FNowPosition,FZombies[i].FNowPosition+FR,True,SG_2D);
 			end;
 		end
@@ -1168,11 +1171,13 @@ else
 	for i:=0 to high(FZombies) do
 		if FZombies[i].FActive then
 			begin
-			FZombies[i].FNowPosition:=FR*FZombies[i].FPosition;//( (FZombies[i].FPosition-FZombies[i].FOldPosition)*(FDTInterval/FInterval)+FZombies[i].FOldPosition);
+			FZombies[i].FNowPosition.Import(
+				FR.x*FZombies[i].FPosition.x,
+				FR.y*FZombies[i].FPosition.y);
 			FImageZombi.DrawImageFromTwoVertex2f(FZombies[i].FNowPosition,FZombies[i].FNowPosition+FR,True,SG_2D);
 			end;
 
-Vtx1:=FYou*FR;
+Vtx1.Import(FYou.x*FR.x,FYou.y*FR.y);
 if (not FActive) and (not FVictory) then
 	begin
 	Render.Color3f(0.1,0.9,0.1);
@@ -1189,7 +1194,7 @@ Render.Color3f(1,1,1);
 if (FBullets<>nil) and (Length(FBullets)>0) then
 for i:=0 to High(FBullets) do
 	begin
-	Vtx1:=FBullets[i][0]*FR;
+	Vtx1.Import(FBullets[i][0].x*FR.x,FBullets[i][0].y*FR.y);
 	if FBullets[i][1].x>0 then
 		FImageBullet.DrawImageFromTwoVertex2f(Vtx1,Vtx1+FR,True,SG_2D)
 	else

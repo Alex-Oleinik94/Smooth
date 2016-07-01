@@ -68,7 +68,7 @@ type
 		procedure Paint();override;
 			protected
 		FNewPotokInit:Boolean;
-		SelectPoint,SelectSecondPoint,SelectSecondNormalPoint:SGPoint;
+		SelectPoint,SelectSecondPoint,SelectSecondNormalPoint:TSGPoint2int32;
 		
 		SelectPointEnabled:Boolean;
 		Manda:TSGFractalMandelbrod;
@@ -153,7 +153,7 @@ type
 		procedure OffComponents();inline;
 		procedure OnComponents();inline;
 		procedure InitManda();inline;
-		function GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;
+		function GetPointOnPosOnMand(const Point:TSGPoint2int32):TSGComplexNumber;inline;
 		procedure UpDateLabelCoordCaption();inline;
 		end;
 {$ENDIF}
@@ -235,7 +235,7 @@ end;
 
 procedure TSGFractalMandelbrodRelease.UpDateLabelCoordCaption();inline;
 var
-	Point:SGPoint;
+	Point: TSGPoint2int32;
 begin
 Point:=Context.CursorPosition(SGNowCursorPosition);
 LabelCoord.Caption:=SGStringToPChar('( '+SGFloatToString(Manda.FZNumber.x,3)+' ; '+SGFloatToString(Manda.FZNumber.y,3)+' ) , ( '+
@@ -538,8 +538,8 @@ LblProcent.FUserPointer1:=Self;
 LabelProcent:=TSGProgressBar.Create;
 SGScreen.CreateChild(LabelProcent);
 LabelProcent.SetBounds(10,ii,300,20);
-LabelProcent.Color2 := SGColorImport(1,0,0,0.8);
-LabelProcent.Color1 := SGColorImport(0.5,0,0,0.8);
+LabelProcent.Color2 := SGVertex4fImport(1,0,0,0.8);
+LabelProcent.Color1 := SGVertex4fImport(0.5,0,0,0.8);
 LabelProcent.Caption:='';
 LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
@@ -657,8 +657,8 @@ FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
 SGScreen.CreateChild(FBezierCurveKadrProgressBar);
 SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,-(-(130+140+10)-150-5),20);
 SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
-SGScreen.LastChild.AsProgressBar.Color1:=SGColorImport(1,1,0,0.7);
-SGScreen.LastChild.AsProgressBar.Color2:=SGColorImport(1,1/3,0,0.9);
+SGScreen.LastChild.AsProgressBar.Color1:=SGVertex4fImport(1,1,0,0.7);
+SGScreen.LastChild.AsProgressBar.Color2:=SGVertex4fImport(1,1/3,0,0.9);
 SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FButtonEnableCurve:=TSGButton.Create();
@@ -954,7 +954,7 @@ begin
 Result:='Фрактал Мандельброда и тп';
 end;
 
-function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point:SGPoint):TSGComplexNumber;inline;
+function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point: TSGPoint2int32):TSGComplexNumber;inline;
 begin
 Result.Import(
 	Manda.FView.x1+(Point.x/(Render.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
@@ -1103,10 +1103,10 @@ if MandaInitialized then
 						if (Manda.FThreadsData[ii].FFinished=False) then
 			begin
 						
-						FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SGColorImport(0.9,0.45,0,0.8))/2;
-						FArProgressBar[ii].Color1:=(FArProgressBar[ii].Color1+SGColorImport(1,0.5,0,1))/2;
-						FArProgressBar[i].Color2:=(FArProgressBar[i].Color2+SGColorImport(0.1,1,0.1,0.7))/2;
-						FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SGColorImport(0,1,0,1))/2;
+						FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SGVertex4fImport(0.9,0.45,0,0.8))/2;
+						FArProgressBar[ii].Color1:=(FArProgressBar[ii].Color1+SGVertex4fImport(1,0.5,0,1))/2;
+						FArProgressBar[i].Color2:=(FArProgressBar[i].Color2+SGVertex4fImport(0.1,1,0.1,0.7))/2;
+						FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SGVertex4fImport(0,1,0,1))/2;
 						
 						iiiC:=0;
 						if Manda.FThreadsData[i].FData<>nil then
@@ -1244,31 +1244,31 @@ if MandaInitialized then
 			
 			Render.Color4f(0,0.5,0.70,0.6);
 			Render.BeginScene(SGR_QUADS);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex(Render);
+			Render.Vertex(SelectSecondPoint);
 			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 			Render.EndScene();
 			Render.Color4f(0,0.7,0.70,0.8);
 			Render.BeginScene(SGR_LINE_LOOP);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex(Render);
+			Render.Vertex(SelectSecondPoint);
 			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 			Render.EndScene();
 			
 			Render.Color4f(0.6,0.5,0.30,0.6);
 			Render.BeginScene(SGR_QUADS);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			SelectSecondNormalPoint.Vertex(Render);
+			Render.Vertex(SelectSecondNormalPoint);
 			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
 			Render.EndScene();
 			Render.Color4f(1,0.9,0.20,0.8);
 			Render.BeginScene(SGR_LINE_LOOP);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			SelectSecondNormalPoint.Vertex(Render);
+			Render.Vertex(SelectSecondNormalPoint);
 			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
 			Render.EndScene();
 			end;
@@ -1298,24 +1298,24 @@ if MandaInitialized then
 			begin
 			Render.Color3f(1,1,1);
 			if SecondImage.Ready then
-				SecondImage.DrawImageFromTwoPoint2f(
-					SGPointImport(1,1),
-					SGPointImport(Render.Width,Render.Height),
+				SecondImage.DrawImageFromTwoPoint2int32(
+					SGVertex2int32Import(1,1),
+					SGVertex2int32Import(Render.Width,Render.Height),
 					True,SG_2D);
 			
 			Render.Color4f(0.1,0.7,0.20,0.6);
 			Render.BeginScene(SGR_QUADS);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex(Render);
+			Render.Vertex(SelectSecondPoint);
 			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 			Render.EndScene();
 			
 			Render.Color4f(0.05,0.9,0.10,0.8);
 			Render.BeginScene(SGR_LINE_LOOP);
-			SelectPoint.Vertex(Render);
+			Render.Vertex(SelectPoint);
 			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			SelectSecondPoint.Vertex(Render);
+			Render.Vertex(SelectSecondPoint);
 			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
 			Render.EndScene();
 			end;
@@ -1356,7 +1356,7 @@ if MandaInitialized then
 			SetLength(FCurveArPoints,Length(FCurveArPoints)+1);
 		FCurveArPoints[High(FCurveArPoints)]:=Manda.FColorScheme;
 		FBezierCurve.AddVertex(
-			SGVertexImport(
+			SGVertex3fImport(
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).x,
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).y));
 		FBezierCurve.Detalization:=FBezierCurve.VertexQuantity*10;
@@ -1379,7 +1379,7 @@ if MandaInitialized then
 				Render.Color3f(1,0,1);
 				Render.PointSize(5);
 				Render.BeginScene(SGR_POINTS);
-				Manda.FZNumber.Vertex(Render);
+				Render.Vertex(Manda.FZNumber);
 				Render.EndScene();
 				Render.PointSize(1);
 				end;
@@ -1554,9 +1554,9 @@ procedure TSGFractalMandelbrod.Paint();
 begin
 inherited;
 if FImage.Ready then
-	FImage.DrawImageFromTwoPoint2f(
-		SGPointImport(1,1),
-		SGPointImport(Render.Width,Render.Height),
+	FImage.DrawImageFromTwoPoint2int32(
+		SGVertex2int32Import(1,1),
+		SGVertex2int32Import(Render.Width,Render.Height),
 		False,SG_3D);
 end;
 

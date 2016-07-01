@@ -445,7 +445,7 @@ for i:=0 to FComplexity-1 do
 		if Quantity=0 then
 			Render.BeginScene(SGR_LINE_STRIP);
 		Quantity+=1;
-		FArVertexes[i].Vertex(Render);
+		Render.Vertex(FArVertexes[i]);
 		LastVertex:=i;
 		end
 	else
@@ -453,7 +453,7 @@ for i:=0 to FComplexity-1 do
 		if Quantity>0 then
 			begin
 			if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-				FArVertexes[LastVertex].Vertex(Render);
+				Render.Vertex(FArVertexes[LastVertex]);
 			Render.EndScene();
 			Quantity:=0;
 			end;
@@ -462,7 +462,7 @@ for i:=0 to FComplexity-1 do
 if Quantity>0 then
 	begin
 	if (Quantity=1) and (LastVertex>=0) and (LastVertex<FComplexity) then
-		FArVertexes[LastVertex].Vertex(Render);
+		Render.Vertex(FArVertexes[LastVertex]);
 	Render.EndScene();
 	Quantity:=0;
 	end;

@@ -36,10 +36,10 @@ var
 
 function GetColor(const v : TSGVertex3f):TSGColor3f;
 begin
-Result:=c0*(SGAbsTwoVertex(v,bb0)/h)+
-		c1*(SGAbsTwoVertex(v,bb1)/h)+
-		c2*(SGAbsTwoVertex(v,bb2)/h)+
-		c3*(SGAbsTwoVertex(v,bb3)/h);
+Result:=c0*(Abs(v-bb0)/h)+
+		c1*(Abs(v-bb1)/h)+
+		c2*(Abs(v-bb2)/h)+
+		c3*(Abs(v-bb3)/h);
 end;
 
 begin
@@ -49,15 +49,15 @@ FMesh.Objects[MeshID].ArVertex3f[FVertexIndex+2]^:=v2;
 if FEnableColors then
 	begin
 	c:=GetColor(v0);
-	C.Normalize();
+	C := C.Normalized();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex,
 		c.r,c.g,c.b);
 	C:=GetColor(v1);
-	C.Normalize();
+	C := C.Normalized();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex+1,
 		c.r,c.g,c.b);
 	C:=GetColor(v2);
-	C.Normalize();
+	C := C.Normalized();
 	FMesh.Objects[MeshID].SetColor(FVertexIndex+2,
 		c.r,c.g,c.b);
 	end;
@@ -115,10 +115,10 @@ end;
 var
 	b:TSGVertex3f;
 begin
-bb0:=SGVertexImport(cos(0)*Radius, sin(0)*Radius,-Radius*0.6);
-bb1:=SGVertexImport(cos(2*pi/3)*Radius, sin(2*pi/3)*Radius,-Radius*0.6);
-bb2:=SGVertexImport(cos(4*pi/3)*Radius, sin(4*pi/3)*Radius,-Radius*0.6);
-bb3:=SGVertexImport(0, 0, Radius*0.6);
+bb0:=SGVertex3fImport(cos(0)*Radius, sin(0)*Radius,-Radius*0.6);
+bb1:=SGVertex3fImport(cos(2*pi/3)*Radius, sin(2*pi/3)*Radius,-Radius*0.6);
+bb2:=SGVertex3fImport(cos(4*pi/3)*Radius, sin(4*pi/3)*Radius,-Radius*0.6);
+bb3:=SGVertex3fImport(0, 0, Radius*0.6);
 MeshID:=0;
 FVI:=0;
 FArNor[0]:=SGGetVertexWhichNormalFromThreeVertex(bb0,bb1,bb3);
