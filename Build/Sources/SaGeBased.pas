@@ -89,8 +89,10 @@ type
  operator ** (const a, b : TSGSingle) 	: TSGSingle; 	inline;	overload;
  
  operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       inline; overload;
- operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload; 
+ operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload;
+ {$IFNDEF ANDROID}
  operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
+ {$ENDIF ANDROID}
  
 implementation
 
@@ -794,11 +796,12 @@ begin
 	result := power(a, b);
 end;
 
+{$IFNDEF ANDROID}
 operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
 begin
 	result := power(a, b);
 end;
-
+{$ENDIF ANDROID}
 
 operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
 begin

@@ -670,7 +670,7 @@ begin
 			LongWord(Context.Window));
 	{$ELSE}
 		{$IFDEF ANDROID}
-			eglSwapBuffers(Context.Device,FWindow.Get('SURFACE'));
+			eglSwapBuffers(Context.Device,Context.GetOption('SURFACE'));
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSwapBuffers( FContext );
@@ -1470,7 +1470,7 @@ Result:=False;
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			FContext := eglCreateContext(Context.Device, FWindow.Get('VISUAL INFO'), nil, nil);
+			FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
 			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 			Result:=TSGMaxEnum(FContext)<>0;
 		{$ELSE}
@@ -1589,12 +1589,12 @@ begin
 			Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			if (FWindow<>nil) and (FContext<>nil) then 
+			if (Context <> nil) and (FContext <> nil) then 
 				begin
 				if eglMakeCurrent(
 					Context.Device, 
-					FWindow.Get('SURFACE'), 
-					FWindow.Get('SURFACE'), 
+					Context.GetOption('SURFACE'), 
+					Context.GetOption('SURFACE'), 
 					FContext)  = EGL_FALSE then
 						begin
 						Result:=False;
@@ -1714,11 +1714,11 @@ var
 {$ENDIF}
 begin
 {$IFDEF ANDROID}
-	FContext := eglCreateContext(Context.Device, FWindow.Get('VISUAL INFO'), nil, nil);
+	FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
 	if FContext = EGL_NO_CONTEXT then
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
 	SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
-	if eglMakeCurrent(Context.Device,FWindow.Get('SURFACE'),FWindow.Get('SURFACE'),FContext)  = EGL_FALSE then
+	if eglMakeCurrent(Context.Device,Context.GetOption('SURFACE'),Context.GetOption('SURFACE'),FContext)  = EGL_FALSE then
 		begin
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
 		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="FALSE"');

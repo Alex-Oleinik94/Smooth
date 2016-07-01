@@ -948,19 +948,6 @@ end;
 
 procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
 begin
-if (FRender<>nil) and (KillRC) then
-	begin
-	// After destroying TSGRender type compiler hjhjs ja hasd jdajskdjahsjd fuck
-	//FRender.Destroy();
-	FRender.Kill();
-	FRender:=nil;
-	end
-else
-	if (FRender<>nil) and (not KillRC) then
-		begin
-		FRender.ReleaseCurrent();
-		FRender.Context := nil;
-		end;
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
 if (dcWindow<>0) then

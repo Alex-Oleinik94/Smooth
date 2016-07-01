@@ -966,7 +966,7 @@ var
 	i,ii,iii:LongWord;
 	FDT:TSGDataTime;
 	Vtx1,Vtx2:TSGVertex2f;
-	Any: TSGPoint2int32;
+	Any,CP: TSGPoint2int32;
 begin
 if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and (Context.KeyPressedByte=82) then	
 	Reset;
@@ -974,7 +974,11 @@ if FActive then
 	begin
 	{$IFDEF MOBILE}
 	if Context.CursorKeysPressed(SGLeftCursorButton) then
-		FWayShift += Context.CursorPosition(SGDeferenseCursorPosition);
+		begin
+		CP += Context.CursorPosition(SGDeferenseCursorPosition);
+		FWayShift.x += CP.x;
+		FWayShift.y += CP.y;
+		end;
 	if FWayShift.x <= - FR.x then
 		begin
 		if FYou.x<>0 then

@@ -8,8 +8,9 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
-	,unix
+	,SaGeCommonClasses
 		//android units:
+	,unix
 	,cmem
 	,gles
 	,egl
@@ -31,14 +32,14 @@ type
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
-		function  GetCursorPosition():TSGPoint2f;override;
-		function  GetWindowRect():TSGPoint2f;override;
-		function  GetScreenResolution():TSGPoint2f;override;
+		function  GetCursorPosition(): TSGPoint2int32;override;
+		function  GetWindowArea(): TSGPoint2int32;override;
+		function  GetScreenArea(): TSGPoint2int32;override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
 		procedure ShowCursor(const b:Boolean);override;
-		procedure SetCursorPosition(const a:TSGPoint2f);override;
+		procedure SetCursorPosition(const a: TSGPoint2int32);override;
 			public
 		FDisplay:Pointer;
 		FSurface: EGLSurface;
@@ -46,12 +47,11 @@ type
 		FConfig: EGLConfig;
 		FAnimating:cint;
 			private
-		FLastTouch:TSGPoint2f;
-		FInitialized:Boolean;
+		FLastTouch: TSGPoint2int32;
 		function InitWindow():TSGBoolean;
 		procedure DestroyWondow();
 			public
-		function Get(const What:string):Pointer;override;
+		function GetOption(const What : TSGString) : TSGPointer;override;
 			public
 		procedure HandleComand(const Comand:cint32);
 		function HandleEvent(Event:PAInputEvent):cint32;
@@ -64,7 +64,7 @@ implementation
 uses
 	SaGeScreen;
 
-function TSGContextAndroid.Get(const What:string):Pointer;
+function TSGContextAndroid.GetOption(const What : TSGString) : TSGPointer;
 begin
 if What='WINDOW HANDLE' then
 	Result:=AndroidApp^.Window
@@ -75,10 +75,10 @@ else if What='VISUAL INFO' then
 else if What = 'SURFACE' then
 	Result:=FSurface
 else
-	Result:=inherited Get(What);
+	Result := nil;
 end;
 
-procedure TSGContextAndroid.SetCursorPosition(const a:TSGPoint2f);
+procedure TSGContextAndroid.SetCursorPosition(const a: TSGPoint2int32);
 begin
 SGLog.Sourse('"TSGContextAndroid.SetCursorPosition" isn''t possible!');
 end;
@@ -88,7 +88,7 @@ begin
 SGLog.Sourse('"TSGContextAndroid.ShowCursor" isn''t possible!');
 end;
 
-function TSGContextAndroid.GetScreenResolution():TSGPoint2f;
+function TSGContextAndroid.GetScreenArea(): TSGPoint2int32;
 var
 	w,h:EGLint;
 begin
@@ -102,12 +102,12 @@ else
 	Result.Import();
 end;
 
-function TSGContextAndroid.GetCursorPosition():TSGPoint2f;
+function TSGContextAndroid.GetCursorPosition(): TSGPoint2int32;
 begin
 Result:=FLastTouch;
 end;
 
-function TSGContextAndroid.GetWindowRect():TSGPoint2f;
+function TSGContextAndroid.GetWindowArea(): TSGPoint2int32;
 begin
 Result.Import();
 end;
@@ -120,7 +120,6 @@ FAndroidApp:=nil;
 FSurface:=nil;
 FDisplay:=nil;
 FLastTouch.Import();
-FInitialized:=False;
 FConfig:=nil;
 end;
 
@@ -220,7 +219,7 @@ SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglCreateWindowSurface". 
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
-	FRender.Window:=Self;
+	FRender.Context := Self as ISGContext;
 	if FRender.CreateContext() then 
 		begin
 		FRender.Init();
@@ -231,21 +230,23 @@ if FRender=nil then
 	end
 else
 	begin
-	FRender.Window:=Self;
+	FRender.Context := Self as ISGContext;
 	FRender.UnLockResourses();
 	Result:=True;
 	end;
-FWidth :=GetScreenResolution().x;
-FHeight:=GetScreenResolution().y;
+FWidth :=GetScreenArea().x;
+FHeight:=GetScreenArea().y;
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
 if not FInitialized then
 	begin
 	SGScreen.Load(Self);
 	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "SGScreen.Load(Self)".');
-	if FCallInitialize<>nil then
+	if FPaintableClass <> nil then
 		begin
-		FCallInitialize(Self);
-		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "FCallInitialize(Self)".');
+		SGScreen.Load(Self);
+		FPaintable := FPaintableClass.Create(Self);
+		FPaintable.LoadDeviceResourses();
+		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Paintable created');
 		end;
 	end;
 SGLog.Sourse('Leaving "TSGContextAndroid.InitWindow".');
@@ -316,8 +317,6 @@ APP_CMD_CONFIG_CHANGED://Поворот экрана и т п
 	end;
 APP_CMD_DESTROY://Завершение работы приложения
 	begin
-	if Render<>nil then
-		Render.Destroy();
 	Active:=False;
 	FAnimating:=0;
 	end;
@@ -428,9 +427,9 @@ procedure TSGContextAndroid.Run();
 
 procedure ChangingResolution();
 var
-	FPoint : TSGPoint2f;
+	FPoint : TSGPoint2int32;
 begin
-FPoint := GetScreenResolution();
+FPoint := GetScreenArea();
 if (FPoint.x<>FWidth) or (FPoint.y<>FHeight) then
 	begin
 	FWidth :=FPoint.x;
@@ -446,7 +445,7 @@ FAndroidApp^.OnAppCmd:=@TSGContextAndroid_HandleComand;
 FAndroidApp^.OnInputEvent:=@TSGContextAndroid_HandleInput;
 Messages();
 SGLog.Sourse('"TSGContextAndroid.Run" : before circle Active="'+SGStr(Active)+'", Animating="'+SGStr(FAnimating)+'".');
-FElapsedDateTime.Get();
+StartComputeTimer();
 
 while FActive and (FNewContextType=nil) do
 	begin
@@ -460,7 +459,7 @@ while FActive and (FNewContextType=nil) do
 		end
 	else
 		begin
-		UpdateElapsedTime();
+		UpdateTimer();
 		//SGLog.Sourse('"TSGContextAndroid.Run" : Wait!');
 		Messages();
 		end;

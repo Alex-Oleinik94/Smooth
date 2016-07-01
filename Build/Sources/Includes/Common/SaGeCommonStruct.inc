@@ -99,11 +99,15 @@ function Abs(const S : STRUCT_3):STRUCT_TYPE;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 {$ELSE  STRUCT_IS_FLOAT}
 function Abs(const S : STRUCT_2):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function Abs(const S : STRUCT_2):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFNDEF ANDROID}
 function Abs(const S : STRUCT_2):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF ANDROID}
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
 function Abs(const S : STRUCT_3):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function Abs(const S : STRUCT_3):TSGFloat64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFNDEF ANDROID}
 function Abs(const S : STRUCT_3):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF ANDROID}
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 {$ENDIF STRUCT_IS_FLOAT}
 
@@ -584,10 +588,13 @@ begin
 Result := sqrt(sqr(S.x) + sqr(S.y));
 end;
 
+{$IFNDEF ANDROID}
 function Abs(const S : STRUCT_2):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := sqrt(sqr(S.x) + sqr(S.y));
 end;
+{$ENDIF ANDROID}
+
 {$IF    defined(STRUCT_3) and defined(STRUCT_P_3)}
 function Abs(const S : STRUCT_3):TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
@@ -599,10 +606,12 @@ begin
 Result := sqrt(sqr(S.x) + sqr(S.y) + sqr(S.z));
 end;
 
+{$IFNDEF ANDROID}
 function Abs(const S : STRUCT_3):TSGFloat80;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := sqrt(sqr(S.x) + sqr(S.y) + sqr(S.z));
 end;
+{$ENDIF ANDROID}
 {$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 {$ENDIF STRUCT_IS_FLOAT}
 

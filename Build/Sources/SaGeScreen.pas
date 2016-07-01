@@ -1331,7 +1331,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 						SGVertex2int32Import(
 							Trunc(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth),
 							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer)),
-						SGVertex4fImport(1,0,0).WithAlpha(FOpenTimer * FVisibleTimer),
+						SGVertex4fImport(1,0,0,1).WithAlpha(FOpenTimer * FVisibleTimer),
 						FFirstScrollItem+i);
 				end;
 			end;
