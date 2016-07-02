@@ -34,18 +34,23 @@ type
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const a: TSGPoint2int32);override;
 		procedure SetTitle(const NewTitle:TSGString);override;
+		procedure SetCursor(const VCursor : TSGCursor);override;
 			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
-			public
+			private
 		dpy: PDisplay;
 		win: TWindow;
 		visinfo: PXVisualInfo;
 		cm: TColormap;
 			//Cursor Buffer
-		FCursorX,FCursorY:LongWord;
+		FCursorX, FCursorY:LongWord;
+		FCursorPtr : TSGLongWord;
 		function  CreateWindow():Boolean;
+		procedure SetLinuxCursor(const VCursorPtr : TSGLongWord; const VCursorVisibility : TSGBoolean);
+		class function GetPtrCursor(const VSGPtr : TSGCursorHandle) : TSGLongWord;
+		procedure SetBmpCursor(const VCursor : TSGCursor);
 			public
-		function GetOption(const What:string):Pointer;override;
+		function  GetOption(const What:string):Pointer;override;
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
 		function  GetClientWidth() : TSGLongWord;override;
@@ -57,6 +62,52 @@ implementation
 uses
 	SaGeScreen;
 
+procedure TSGContextLinux.SetBmpCursor(const VCursor : TSGCursor);
+begin
+FCursorPtr := 0;
+
+end;
+
+procedure TSGContextLinux.SetCursor(const VCursor : TSGCursor);
+begin
+if VCursor.StandartHandle <> SGC_NULL then
+	begin
+	SetLinuxCursor(GetPtrCursor(VCursor.StandartHandle), FShowCursor);
+	inherited;
+	end
+else
+	begin
+	SetBmpCursor(VCursor);
+	inherited;
+	end;
+end;
+
+class function TSGContextLinux.GetPtrCursor(const VSGPtr : TSGCursorHandle) : TSGLongWord;
+const
+	XC_left_ptr = 68;
+	XC_xterm    = 152;
+	XC_hand1    = 58; 
+begin
+case VSGPtr of
+SGC_NULL: Result := 0;
+SGC_APPSTARTING: Result := 0;
+SGC_NORMAL: Result := XC_left_ptr;
+SGC_CROSS: Result := 0;
+SGC_HAND: Result := XC_hand1;
+SGC_HELP: Result := 0;
+SGC_IBEAM: Result := XC_xterm;
+SGC_NO: Result := 0;
+SGC_SIZEALL: Result := 0;
+SGC_SIZENESW: Result := 0;
+SGC_SIZENS: Result := 0;
+SGC_SIZENWSE: Result := 0;
+SGC_SIZEWE: Result := 0;
+SGC_UP: Result := 0;
+SGC_WAIT: Result := 0;
+SGC_GLASSY: Result := 0;
+end;
+//WriteLn(VSGPtr,' ',Result);
+end;
 
 function  TSGContextLinux.GetClientWidth() : TSGLongWord;
 begin
@@ -273,38 +324,71 @@ XWarpPointer(dpy, win, win, 0, 0, 0, 0, a.x, a.y);
 XFlush(dpy);
 end;
 
-procedure TSGContextLinux.ShowCursor(const VVisibility : TSGBoolean);
-const
-	XC_left_ptr = 68;
+procedure TSGContextLinux.SetLinuxCursor(const VCursorPtr : TSGLongWord; const VCursorVisibility : TSGBoolean);
+
+procedure CreateNullCursor();
 var
 	XCursor          : TCursor;
 	bitmapNoData    : TPixmap;
 	black           : TXColor;
 	noData          : packed array[0..7] of byte = (0,0,0,0,0,0,0,0);
 begin
+black.red := 0;
+black.green := 0;
+black.blue :=0;
+bitmapNoData    := XCreateBitmapFromData(dpy, win, PChar(@noData), 8, 8);
+Xcursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
+	@black, @black, 0, 0);
+XDefineCursor(dpy,win, Xcursor);
+XFreeCursor(dpy, Xcursor);
+end;
+
+procedure CreatePtrCursor(const VCursorPtr : TSGLongWord);
+var
+	XCursor          : TCursor;
+begin
+Xcursor := XCreateFontCursor(dpy,VCursorPtr);
+XDefineCursor(dpy, win, Xcursor);
+XFreeCursor(dpy, Xcursor);
+end;
+
+begin
 if dpy = nil then
 	dpy := XOpenDisplay(nil);
 if (dpy = nil) or (win=0) then
 	Exit;
-inherited;
-if not FShowCursor then
+if VCursorVisibility and (VCursorPtr <> 0) then
 	begin
-	black.red := 0;
-	black.green := 0;
-	black.blue :=0;
-	bitmapNoData    := XCreateBitmapFromData(dpy, win, PChar(@noData), 8, 8);
-	Xcursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
-		@black, @black, 0, 0);
-	XDefineCursor(dpy,win, Xcursor);
-	XFreeCursor(dpy, Xcursor);
+	if (VCursorPtr <> FCursorPtr) or (VCursorVisibility <> FShowCursor) then
+		begin
+		CreatePtrCursor(VCursorPtr);
+		FCursorPtr := VCursorPtr;
+		end;
+	end
+else if VCursorVisibility and (VCursorPtr = 0) then
+	begin
+	if FCursor.StandartHandle <> SGC_NULL then
+		begin
+		SetLinuxCursor(GetPtrCursor(FCursor.StandartHandle), FShowCursor);
+		FCursorPtr := GetPtrCursor(FCursor.StandartHandle);
+		end
+	else
+		begin
+		SetBmpCursor(FCursor);
+		FCursorPtr := 0;
+		end;
 	end
 else
 	begin
-	Xcursor := XCreateFontCursor(dpy,XC_left_ptr);
-	XDefineCursor(dpy, win, Xcursor);
-	XFreeCursor(dpy, Xcursor);
+	CreateNullCursor();
+	FCursorPtr := 0;
 	end;
-	// XUndefineCursor(dpy, win); Это что то интересное из этой темы
+end;
+
+procedure TSGContextLinux.ShowCursor(const VVisibility : TSGBoolean);
+begin
+SetLinuxCursor(FCursorPtr, VVisibility);
+inherited;
 end;
 
 function TSGContextLinux.GetScreenArea(): TSGPoint2int32;
@@ -327,6 +411,8 @@ Result.Import(FCursorX,FCursorY)
 end;
 
 constructor TSGContextLinux.Create();
+const
+	XC_left_ptr = 68;
 begin
 inherited;
 dpy:=nil;
@@ -335,6 +421,7 @@ visinfo:=nil;
 cm:=0;
 FCursorY:=0;
 FCursorX:=0;
+FCursorPtr := XC_left_ptr;
 end;
 
 procedure TSGContextLinux.Kill();
