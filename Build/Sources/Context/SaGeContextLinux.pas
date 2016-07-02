@@ -1,5 +1,7 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
 unit SaGeContextLinux;
+
 interface
 
 uses 

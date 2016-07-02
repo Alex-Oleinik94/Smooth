@@ -47,7 +47,7 @@ uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
-		,SaGeRenderDirectx
+		,SaGeRenderDirectx9
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux
@@ -82,18 +82,18 @@ var
 			FClass : TSGRenderClass;
 			FName : TSGString;
 			end = (
-			(FClass :                    TSGRenderOpenGL                      ; FName : 'TSGRenderOpenGL' ),
-			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX {$ELSE} nil {$ENDIF}; FName : 'TSGRenderDirectX')
+			(FClass :                    TSGRenderOpenGL                      ; FName : 'OpenGL' ),
+			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9')
 			);
 	Contexts : packed array [0 .. 3] of
 		packed record
 			FClass : TSGContextClass;
 			FName : TSGString;
 			end = (
-			(FClass : {$IFDEF MSWINDOWS}TSGContextWinAPI  {$ELSE}nil{$ENDIF}; FName : 'TSGContextWinAPI' ),
-			(FClass : {$IFDEF ANDROID}  TSGContextAndroid {$ELSE}nil{$ENDIF}; FName : 'TSGContextAndroid'),
-			(FClass : {$IFDEF LINUX}    TSGContextLinux   {$ELSE}nil{$ENDIF}; FName : 'TSGContextLinux'  ),
-			(FClass : {$IFDEF DARWIN}   TSGContextMacOSX  {$ELSE}nil{$ENDIF}; FName : 'TSGContextMacOSX' )
+			(FClass : {$IFDEF MSWINDOWS}TSGContextWinAPI  {$ELSE}nil{$ENDIF}; FName : 'Windows (WinAPI)' ),
+			(FClass : {$IFDEF ANDROID}  TSGContextAndroid {$ELSE}nil{$ENDIF}; FName : 'Android (Natieve Activity)'),
+			(FClass : {$IFDEF LINUX}    TSGContextLinux   {$ELSE}nil{$ENDIF}; FName : 'Linux (X11)'  ),
+			(FClass : {$IFDEF DARWIN}   TSGContextMacOSX  {$ELSE}nil{$ENDIF}; FName : 'Mac OS X (Carbon)' )
 			);
 
 const

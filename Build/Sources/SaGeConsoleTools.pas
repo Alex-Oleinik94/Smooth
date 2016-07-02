@@ -27,7 +27,7 @@ uses
 	
 	(* ============ Engine Includes ============ *)
 	{$IFDEF MSWINDOWS}
-		,SaGeRenderDirectX
+		,SaGeRenderDirectX9
 		,SaGeContextWinAPI
 		{$ENDIF}
 	{$IFDEF LINUX}
@@ -779,18 +779,12 @@ with Context do
 		(Context as TSGContextAndroid).AndroidApp := State;
 		{$ENDIF}
 	
-	{$IFDEF MSWINDOWS}
-		if FRenderState = SGBR_DIRECTX then
-			Title := 'SaGe DirectX Window'
-		else
-		{$ENDIF}
-			Title := 'SaGe OpenGL Window';
-		
+	Title := 'SaGe Engine Window';
 	
 	SelfLink := @IContext;
 	{$IFDEF MSWINDOWS}
 		if FRenderState = SGBR_DIRECTX then
-			RenderClass := TSGRenderDirectX
+			RenderClass := TSGRenderDirectX9
 		else
 		{$ENDIF}
 			RenderClass := TSGRenderOpenGL;

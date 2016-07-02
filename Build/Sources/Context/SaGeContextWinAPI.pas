@@ -1,6 +1,6 @@
-{$include Includes\SaGe.inc}
+{$include SaGe.inc}
 
-{$R .\..\SaGe.res}
+{$R .\..\..\SaGe.res}
 
 //{$DEFINE SGWinAPIDebug}
 

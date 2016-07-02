@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 unit SaGeContextAndroid;
 interface
 
