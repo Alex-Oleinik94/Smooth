@@ -25,15 +25,14 @@ type
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
-		function  GetCursorPosition():TSGPoint2f;override;
-		//function  GetWindowRect():TSGPoint2f;override;
-		function  GetScreenArea():TSGPoint2f;override;
+		function  GetCursorPosition(): TSGPoint2int32;override;
+		function  GetScreenArea(): TSGPoint2int32;override;
 		procedure Kill();override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
-		procedure SetCursorPosition(const a:TSGPoint2f);override;
+		procedure SetCursorPosition(const a: TSGPoint2int32);override;
 		procedure SetTitle(const NewTitle:TSGString);override;
 			private
 		procedure SetUnixKey(const VKey:word; const VKeyType:TSGCursorButtonType);
@@ -263,7 +262,7 @@ else if @(inherited GetOption) <> nil then
 	;//Result := inherited GetOption(What);
 end;
 
-procedure TSGContextLinux.SetCursorPosition(const a:TSGPoint2f);
+procedure TSGContextLinux.SetCursorPosition(const a: TSGPoint2int32);
 begin
 if dpy = nil then
 	dpy := XOpenDisplay(nil);
@@ -278,7 +277,7 @@ procedure TSGContextLinux.ShowCursor(const VVisibility : TSGBoolean);
 const
 	XC_left_ptr = 68;
 var
-	Cursor          : TCursor;
+	XCursor          : TCursor;
 	bitmapNoData    : TPixmap;
 	black           : TXColor;
 	noData          : packed array[0..7] of byte = (0,0,0,0,0,0,0,0);
@@ -294,21 +293,21 @@ if not FShowCursor then
 	black.green := 0;
 	black.blue :=0;
 	bitmapNoData    := XCreateBitmapFromData(dpy, win, PChar(@noData), 8, 8);
-	cursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
+	Xcursor := XCreatePixmapCursor(dpy, bitmapNoData, bitmapNoData, 
 		@black, @black, 0, 0);
-	XDefineCursor(dpy,win, cursor);
-	XFreeCursor(dpy, cursor);
+	XDefineCursor(dpy,win, Xcursor);
+	XFreeCursor(dpy, Xcursor);
 	end
 else
 	begin
-	cursor := XCreateFontCursor(dpy,XC_left_ptr);
-	XDefineCursor(dpy, win, cursor);
-	XFreeCursor(dpy, cursor);
+	Xcursor := XCreateFontCursor(dpy,XC_left_ptr);
+	XDefineCursor(dpy, win, Xcursor);
+	XFreeCursor(dpy, Xcursor);
 	end;
 	// XUndefineCursor(dpy, win); Это что то интересное из этой темы
 end;
 
-function TSGContextLinux.GetScreenArea():TSGPoint2f;
+function TSGContextLinux.GetScreenArea(): TSGPoint2int32;
 begin
 if dpy = nil then
 	dpy:=XOpenDisplay(nil);
@@ -322,7 +321,7 @@ Result.Import(
 	XHeightOfScreen(XScreenOfDisplay(dpy,0)));
 end;
 
-function TSGContextLinux.GetCursorPosition():TSGPoint2f;
+function TSGContextLinux.GetCursorPosition(): TSGPoint2int32;
 begin
 Result.Import(FCursorX,FCursorY)
 end;
