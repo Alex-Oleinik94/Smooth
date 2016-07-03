@@ -34,9 +34,12 @@ type
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 			private
 		FFont : TSGFont;
 		FX, FY : TSGWord;
+		FAlpha : TSGFloat32;
 		
 		FFrameArray : packed array of TSGWord;
 		FFrameCount : TSGWord;
@@ -47,6 +50,7 @@ type
 			public
 		property X : TSGWord read FX write FX;
 		property Y : TSGWord read FY write FY;
+		property Alpha : TSGFloat32 read FAlpha write FAlpha;
 		end;
 (*====================================================================*)
 (*============================TSGCamera===============================*)
@@ -348,13 +352,12 @@ end;
 constructor TSGFPSViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-FFont := TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FFont.Context := Context;
-FFont.Loading();
+LoadDeviceResourses();
 FFrameCount := 30;
 SetLength(FFrameArray,FFrameCount);
 FFrameIndex := 0;
 FFrameReady := False;
+FAlpha := 1;
 end;
 
 destructor TSGFPSViewer.Destroy();
@@ -363,9 +366,31 @@ FFont.Destroy();
 inherited;
 end;
 
+procedure TSGFPSViewer.DeleteDeviceResourses();
+begin
+if FFont <> nil then
+	begin
+	FFont.Destroy();
+	FFont := nil;
+	end;
+end;
+
+procedure TSGFPSViewer.LoadDeviceResourses();
+begin
+if FFont <> nil then
+	begin
+	FFont.Destroy();
+	FFont := nil;
+	end;
+FFont := TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FFont.Context := Context;
+FFont.Loading();
+end;
+
 procedure TSGFPSViewer.Paint();
 var
 	FPSString : string = '';
+	FPSValue : TSGReal = 0;
 begin
 FFrameArray[FFrameIndex] := Context.ElapsedTime;
 FFrameIndex += 1;
@@ -374,11 +399,16 @@ if FFrameIndex = FFrameCount then
 	FFrameIndex := 0;
 	FFrameReady := True;
 	end;
+FPSValue := 100/(FrameSum()/(Real(FFrameCount)+0.01));
 if FFrameReady or (FFrameIndex > 2) then
-	FPSString := 'FPS ' + SGStrReal(100/(FrameSum()/(Real(FFrameCount)+0.01)),2)
+	FPSString := 'FPS ' + SGStrReal(FPSValue, 2)
 else
 	FPSString := 'FPS ?';
 Render.InitMatrixMode(SG_2D);
+if FPSValue >= 60 then
+	Render.Color4f(0,1,0,FAlpha)
+else
+	Render.Color((60 - FPSValue) / 60 * SGVertex4fImport(1,0,0,FAlpha) + (FPSValue) / 60 * SGVertex4fImport(0,1,0,FAlpha));
 FFont.DrawFontFromTwoVertex2f(FPSString,
 	SGVertex2fImport(FX, FY),
 	SGVertex2fImport(FX + FFont.StringLength(FPSString), FY + FFont.FFontHeight),

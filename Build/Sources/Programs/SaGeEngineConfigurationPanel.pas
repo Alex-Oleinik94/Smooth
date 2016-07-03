@@ -24,6 +24,8 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -39,6 +41,7 @@ type
 		FCaptionLabel,
 			FVersionLabel : TSGLabel;
 		FCloseButton : TSGButton;
+		FFPS : TSGFPSViewer;
 		end;
 
 implementation
@@ -133,6 +136,18 @@ if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitRender(Renders[VNewIndex].FClass);
 end;
 
+procedure TSGEngineConfigurationPanel.DeleteDeviceResourses();
+begin
+if FFPS <> nil then
+	FFPS.DeleteDeviceResourses();
+end;
+
+procedure TSGEngineConfigurationPanel.LoadDeviceResourses();
+begin
+if FFPS <> nil then
+	FFPS.LoadDeviceResourses();
+end;
+
 constructor TSGEngineConfigurationPanel.Create();
 var
 	i : TSGLongWord;
@@ -141,6 +156,8 @@ inherited;
 SetBounds(0, 0, 500, TotalHeight);
 BoundsToNeedBounds();
 Visible := True;
+
+FFPS := nil;
 
 FCaptionLabel := TSGLabel.Create();
 CreateChild(FCaptionLabel);
@@ -239,6 +256,8 @@ end;
 
 destructor TSGEngineConfigurationPanel.Destroy();
 begin
+if FFPS <> nil then
+	FFPS.Destroy();
 if FContextsComboBox <> nil then
 	FContextsComboBox.Destroy();
 if FRendersComboBox <> nil then
@@ -318,6 +337,18 @@ begin
 Result.Import(P.x, P.y);
 end;
 
+procedure DrawFPC(const V1, V2 : TSGVertex3f; const Alpha : TSGFloat32);
+begin
+if Context = nil then
+	Exit;
+if (FFPS = nil) then
+	FFPS := TSGFPSViewer.Create(Context);
+FFPS.x := Trunc(V1.x + (V2.x - V1.x) / 2 - 25);
+FFPS.y := Trunc(V1.y + (V2.y - V1.y) / 2 - 70);
+FFPS.Alpha := Alpha * 2;
+FFPS.Paint();
+end;
+
 var
 	Vertex1, Vertex2 : TSGVertex3f;
 	Alpha, Distanse : TSGFloat;
@@ -380,6 +411,8 @@ if Visible and (FVisibleTimer > Alpha) then
 	end;
 
 inherited;
+
+DrawFPC(Vertex1, Vertex2, Alpha);
 end;
 
 end.
