@@ -12,6 +12,8 @@
 	{$ENDIF}
 {$DEFINE INTERPRITATEROTATETRANSLATE}
 
+//{$DEFINE WGL_PIXEL_FORMAT}
+
 //{$DEFINE RENDER_OGL_DEBUG}
 
 unit SaGeRenderOpenGL;
@@ -1527,9 +1529,30 @@ end;
 
 function TSGRenderOpenGL.SetPixelFormat():Boolean;overload;
 {$IFDEF MSWINDOWS}
+	{$IFDEF WGL_PIXEL_FORMAT}
+	var
+		pixelFormats : array[0..99] of TSGLongInt;
+		numFormats : TSGUInt32 = 0;
+		attribList : array[0..18] of TSGLongInt =
+		 (
+			//WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+			WGL_RED_BITS_ARB, 8,
+			WGL_GREEN_BITS_ARB, 8,
+			WGL_BLUE_BITS_ARB, 8,
+			WGL_ALPHA_BITS_ARB, 8,
+			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+			WGL_COLOR_BITS_ARB, 32,
+			WGL_DEPTH_BITS_ARB, 24,
+			//WGL_STENCIL_BITS_ARB, 8,
+			0
+		 );
+	{$ELSE WGL_PIXEL_FORMAT}
 	var
 		pfd : PIXELFORMATDESCRIPTOR;
 		iFormat : integer;
+	{$ENDIF WGL_PIXEL_FORMAT}
 	{$ENDIF}
 {$IFDEF DARWIN}
 	var
@@ -1547,6 +1570,11 @@ Result:=False;
 	Result:=Assigned( ogl_Format );
 	{$ENDIF}
 {$IFDEF MSWINDOWS}
+	{$IFDEF WGL_PIXEL_FORMAT}
+	fillchar(pixelFormats, sizeof(pixelFormats), 0);
+	Result := wglChoosePixelFormatARB(TSGLongWord(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
+	WriteLn(pixelFormats[0],' ',numFormats);
+	{$ELSE WGL_PIXEL_FORMAT}
 	FillChar(pfd, sizeof(pfd), 0);
 	pfd.nSize         := sizeof(pfd);
 	pfd.nVersion      := 1;
@@ -1555,10 +1583,11 @@ Result:=False;
 	pfd.cColorBits    := 32;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( LongWord(Context.Device), @pfd );
+	iFormat := Windows.ChoosePixelFormat( TSGLongWord(Context.Device), @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
-	Result:=Windows.SetPixelFormat( LongWord(Context.Device), iFormat, @pfd );
+	Result:=Windows.SetPixelFormat( TSGLongWord(Context.Device), iFormat, @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
+	{$ENDIF WGL_PIXEL_FORMAT}
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;
