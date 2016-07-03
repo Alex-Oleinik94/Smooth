@@ -979,7 +979,13 @@ else
 			FRender.ReleaseCurrent();
 			end;
 		KillWindow(False);
+		Messages();
 		inherited InitFullscreen(VFullscreen);
+		if VFullscreen then
+			begin
+			FWidth := GetScreenArea().x;
+			FHeight:= GetScreenArea().y;
+			end;
 		Active := CreateWindow();
 		if (FRender <> nil) and Active then
 			FRender.UnLockResourses();
