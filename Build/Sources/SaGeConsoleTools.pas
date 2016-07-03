@@ -26,21 +26,7 @@ uses
 	,SNMPsend
 	
 	(* ============ Engine Includes ============ *)
-	{$IFDEF MSWINDOWS}
-		,SaGeRenderDirectX9
-		,SaGeContextWinAPI
-		{$ENDIF}
-	{$IFDEF LINUX}
-		,SaGeContextLinux
-		{$ENDIF}
-	{$IFDEF DARWIN}
-		,SaGeContextMacOSX
-		{$ENDIF}
-	{$IFDEF ANDROID}
-		,SaGeContextAndroid
-		{$ENDIF}
 	,SaGeRender
-	,SaGeRenderOpenGL
 	,SaGeCommon
 	,SaGeImagesBase
 	,SaGeContext
@@ -124,6 +110,13 @@ procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
+
+uses
+	{$IFDEF MSWINDOWS}
+		SaGeRenderDirectX9,
+		{$ENDIF}
+	SaGeRenderOpenGL
+	;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -751,20 +744,7 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ReadParams();
 {$ENDIF}
 
-Context :=
-{$IFDEF LAZARUS}
-	TSGContextLazarus
-{$ELSE}
-	{$IFDEF GLUT}
-		TSGContextGLUT
-	{$ELSE}
-		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}
-		{$IFDEF LINUX}    TSGContextLinux  {$ENDIF}
-		{$IFDEF ANDROID}  TSGContextAndroid{$ENDIF}
-		{$IFDEF DARWIN}   TSGContextMacOSX {$ENDIF}
-		{$ENDIF}
-	{$ENDIF}
-		.Create();
+Context := TSGCompatibleContext.Create();
 
 IContext := Context;
 
@@ -1226,21 +1206,13 @@ if
 	ViewerImage.Way:=FileWay;
 	if ViewerImage.Loading() then
 		begin
-		Context:=
-			   {$IFDEF MSWINDOWS} TSGContextWinAPI {$ENDIF}
-			   {$IFDEF LINUX}     TSGContextLinux  {$ENDIF}
-			   {$IFDEF DARWIN}    TSGContextMacOSX {$ENDIF}
-			   {$IFDEF ANDROID}   TSGContextAndroid{$ENDIF}
-				.Create();
+		Context:=TSGCompatibleContext.Create();
 		Context.Width:=ViewerImage.Width;
 		Context.Height:=ViewerImage.Height;
 		Context.Fullscreen:=False;
 		//Context.DrawProcedure:=TSGContextProcedure(@ViewerDraw);
 		Context.Title:='"'+FileWay+'" - SaGe Image Viewer';
-		Context.RenderClass:=
-				//{$IFDEF MSWINDOWS}TSGRenderDirectX{$ENDIF}
-				//{$IFDEF UNIX}     
-				TSGRenderOpenGL;// {$ENDIF};
+		Context.RenderClass:=TSGCompatibleRender;
 		Context.SelfLink:=@Context;
 		Context.Initialize();
 		ViewerImage.SetContext(Context);

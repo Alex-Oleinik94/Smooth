@@ -47,7 +47,7 @@ uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
-		,SaGeRenderDirectx9
+		,SaGeRenderDirectX9
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux

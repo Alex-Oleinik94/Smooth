@@ -168,8 +168,21 @@ type
 	TSGRenderClass  = class of TSGRender;
 
 procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	SaGeRenderOpenGL
+	{$IFDEF MSWINDOWS}
+		,SaGeRenderDirectX9
+		{$ENDIF}
+	;
+
+function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := TSGRenderOpenGL;
+end;
 
 {$DEFINE RENDER_CLASS := TSGRender}
 {$DEFINE INC_PLACE_RENDER_IMPLEMENTATION}

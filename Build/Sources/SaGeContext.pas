@@ -212,10 +212,42 @@ type
 	{$ENDIF}
 {$UNDEF SGREADINTERFACE}
 
+function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
-	SaGeScreen;
+	SaGeScreen
+	{$IFDEF MSWINDOWS}
+		,SaGeContextWinApi
+		{$ENDIF}
+	{$IFDEF LINUX}
+		,SaGeContextLinux
+		{$ENDIF}
+	{$IFDEF ANDROID}
+		,SaGeContextAndroid
+		{$ENDIF}
+	{$IFDEF DARWIN}
+		,SaGeContextMacOSX
+		{$ENDIF}
+	;
+
+function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 
+{$IFDEF LAZARUS}
+	TSGContextLazarus
+{$ELSE}
+	{$IFDEF GLUT}
+		TSGContextGLUT
+	{$ELSE}
+		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}
+		{$IFDEF LINUX}    TSGContextLinux  {$ENDIF}
+		{$IFDEF ANDROID}  TSGContextAndroid{$ENDIF}
+		{$IFDEF DARWIN}   TSGContextMacOSX {$ENDIF}
+		{$ENDIF}
+	{$ENDIF};
+end;
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$IFDEF GLUT}
