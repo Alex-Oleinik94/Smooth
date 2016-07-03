@@ -549,11 +549,12 @@ var
 	msg:Windows.TMSG;
 begin 
 Fillchar(msg,sizeof(msg),0);
-if Windows.PeekMessage(@msg,0,0,0,0) = true then
+while Windows.PeekMessage(@msg,0,0,0,0) do
 	begin
 	Windows.GetMessage(@msg,0,0,0);
 	Windows.TranslateMessage(msg);
 	Windows.DispatchMessage(msg);
+	Fillchar(msg,sizeof(msg),0);
 	end;
 inherited;
 end;
