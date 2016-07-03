@@ -11,6 +11,10 @@
 { The Original Code is DirectX.inc.                                            }
 {                                                                              }
 {******************************************************************************}
+
+{$DEFINE DYNAMIC_LINK_ALL}
+{$DEFINE DYNAMIC_LINK_EXPLICIT_ALL}
+
 {$IFNDEF __TMT__}
 {$IFNDEF FPC}
 

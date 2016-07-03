@@ -112,10 +112,11 @@ procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
 implementation
 
 uses
+	SaGeDoDynamicHeader
 	{$IFDEF MSWINDOWS}
-		SaGeRenderDirectX9,
+		,SaGeRenderDirectX9
 		{$ENDIF}
-	SaGeRenderOpenGL
+	,SaGeRenderOpenGL
 	;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
