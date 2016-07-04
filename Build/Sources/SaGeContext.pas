@@ -230,6 +230,9 @@ uses
 	{$IFDEF DARWIN}
 		,SaGeContextMacOSX
 		{$ENDIF}
+	{$IFDEF WITH_GLUT}
+		,SaGeContextGLUT
+		{$ENDIF}
 	;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -238,7 +241,7 @@ Result :=
 {$IFDEF LAZARUS}
 	TSGContextLazarus
 {$ELSE}
-	{$IFDEF GLUT}
+	{$IFDEF WITH_GLUT}
 		TSGContextGLUT
 	{$ELSE}
 		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}

@@ -1,6 +1,32 @@
-{$IFDEF SGREADINTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeContextGLUT;
+
+interface
+
+uses
+	Classes
+	,SaGeBase
+	,SaGeBased
+	,SaGeContext
+	,SaGeCommon
+	{$IFNDEF MOBILE}
+		,dglOpenGL
+		,gl
+		,glu
+		,glext
+	{$ELSE}
+		,gles
+		,gles11
+		,gles20
+		{$ENDIF}
+	{$IFDEF GLUT}
+		,glut
+		{$ENDIF}
+	;
+
 type
-	TSGContextGLUT=class(TSGContext)
+	TSGContextGLUT = class(TSGContext)
 			public
 		constructor Create;
 		destructor Destroy;override;
@@ -9,31 +35,24 @@ type
 		procedure Run;override;
 		procedure Messages;override;
 		procedure SwapBuffers;override;
-		function TopShift:LongWord;override;
-		function GetCursorPosition:TSGPoint2f;override;
-		function GetWindowRect:TSGPoint2f;override;
-		function GetScreenResolution:TSGPoint2f;override;
+		function GetCursorPosition: TSGPoint2int32;override;
+		function GetWindowArea: TSGPoint2int32;override;
+		function GetScreenArea: TSGPoint2int32;override;
 		procedure Resize;override;
-		function MouseShift:TSGPoint2f;override;
-		class function RectInCoords:Boolean;override;
 		procedure InitFullscreen(const b:boolean); override;
 			public
-		FCursorMoution:TSGPoint2f;
-			public
-		function GetRC:LongWord;override;
-		procedure SetRC(const NewRC:LongWord);override;
+		FCursorMoution: TSGPoint2int32;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
 
 procedure TSGContextGLUT.InitFullscreen(const b:boolean); 
 begin
 if FFullscreen<>b then
 	begin
 	if b then
-		glutFullScreen
+		//glutFullScreen
 	else
 		begin
 		glutReshapeWindow(Width,Height);
@@ -43,12 +62,12 @@ if FFullscreen<>b then
 inherited;
 end;
 
-function TSGContextGLUT.GetRC:LongWord;
+function TSGContextGLUT.GetRC: TSGLongWord;
 begin
 Result:=glutGetWindow();
 end;
 
-procedure TSGContextGLUT.SetRC(const NewRC:LongWord);
+procedure TSGContextGLUT.SetRC(const NewRC: TSGLongWord);
 begin
 glutSetWindow(NewRC);
 end;
@@ -158,7 +177,7 @@ TSGContextGLUT(Pointer(SGContext)).FCursorMoution.x:=x;
 TSGContextGLUT(Pointer(SGContext)).FCursorMoution.y:=y;
 end;
 
-function TSGContextGLUT.MouseShift:TSGPoint2f;
+function TSGContextGLUT.MouseShift: TSGPoint2int32;
 begin
 Result.Import(
 {$IFDEF MSWINDOWS}
@@ -207,7 +226,7 @@ if Fullscreen then
 else 
 	begin
 	glutInitWindowSize(Width, Height);
-	glutInitWindowPosition((GetScreenResolution.x - Width) div 2,(GetScreenResolution.y - Height) div 2);
+	glutInitWindowPosition((GetScreenArea.x - Width) div 2,(GetScreenArea.y - Height) div 2);
 	glutCreateWindow(SGStringToPChar(FTitle));
 	end;
 
@@ -243,28 +262,28 @@ begin
 glutSwapBuffers;
 end;
 
-function TSGContextGLUT.TopShift:LongWord;
+function TSGContextGLUT.TopShift: TSGLongWord;
 begin
 Result:=0;
 end;
 
-function TSGContextGLUT.GetCursorPosition:TSGPoint2f;
+function TSGContextGLUT.GetCursorPosition: TSGPoint2int32;
 begin
 Result:=FCursorMoution;
 end;
 
-function TSGContextGLUT.GetWindowRect:TSGPoint2f;
+function TSGContextGLUT.GetWindowArea: TSGPoint2int32;
 begin
 Result.Import(
 	glutGet(GLUT_WINDOW_X),
 	glutGet(GLUT_WINDOW_Y));
 end;
 
-function TSGContextGLUT.GetScreenResolution:TSGPoint2f;
+function TSGContextGLUT.GetScreenArea: TSGPoint2int32;
 begin
 Result.Import(
 	glutGet(GLUT_SCREEN_WIDTH),
 	glutGet(GLUT_SCREEN_HEIGHT));
 end;
 
-{$ENDIF}
+end.
