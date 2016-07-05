@@ -289,6 +289,7 @@ if FRendersComboBox.SelectItem = -1 then
 			FRendersComboBox.SelectItem := i;
 			break;
 			end;
+ToFront();
 inherited;
 end;
 

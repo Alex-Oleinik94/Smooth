@@ -210,6 +210,7 @@ type
 		function BottomShift():LongInt;
 		function RightShift():LongInt;
 			public
+		procedure ToFront();
 		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
 		function MustDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
@@ -2107,6 +2108,30 @@ end;
 {$IFDEF CLHINTS}
 	{$NOTE Component}
 	{$ENDIF}
+
+procedure TSGComponent.ToFront();
+var
+	Index : TSGLongInt;
+begin
+if FParent <> nil then
+	begin
+	if FParent.FChildren <> nil then
+		begin
+		if Length(FParent.FChildren) > 1 then
+			begin
+			Index := FParent.IndexOf(Self);
+			if Index <> -1 then
+				begin
+				if Index <> High(FParent.FChildren) then
+					begin
+					FParent.FChildren[Index] := FParent.FChildren[High(FParent.FChildren)];
+					FParent.FChildren[High(FParent.FChildren)] := Self;
+					end;
+				end;
+			end;
+		end;
+	end;
+end;
 
 procedure TSGComponent.DrawDrawClasses();
 var
