@@ -20,9 +20,7 @@ uses
 		,gles11
 		,gles20
 		{$ENDIF}
-	{$IFDEF GLUT}
-		,glut
-		{$ENDIF}
+	,glut
 	;
 
 type
@@ -46,13 +44,15 @@ type
 
 implementation
 
+var
+	ContextGLUT : TSGContextGLUT = nil;
 
 procedure TSGContextGLUT.InitFullscreen(const b:boolean); 
 begin
 if FFullscreen<>b then
 	begin
 	if b then
-		//glutFullScreen
+		glutFullScreen
 	else
 		begin
 		glutReshapeWindow(Width,Height);
@@ -60,16 +60,6 @@ if FFullscreen<>b then
 		end;
 	end;
 inherited;
-end;
-
-function TSGContextGLUT.GetRC: TSGLongWord;
-begin
-Result:=glutGetWindow();
-end;
-
-procedure TSGContextGLUT.SetRC(const NewRC: TSGLongWord);
-begin
-glutSetWindow(NewRC);
 end;
 
 procedure glutInitPascal(ParseCmdLine: Boolean);
@@ -89,17 +79,7 @@ end;
 
 procedure GLUTDrawGLScreen; cdecl;
 begin
-glClear(GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT);
-SGInitMatrixMode(SG_3D);
-if SGContext.FCallDraw<>nil then
-	SGContext.FCallDraw();
-SGIIdleFunction;
-SGScreen.Paint();
-SGContext.SwapBuffers;
-SGContext.ClearKeys;
-SGContext.Messages;
-{if SGContext.FNewContextType<>nil then
-	glutDestroyWindow(glutGetWindow());}
+ContextGLUT.Paint();
 end;
 
 procedure GLUTIdle; cdecl;
@@ -116,21 +96,18 @@ procedure GLUTReSizeScreen(Width, Height: Integer); cdecl;
 begin
 if Height = 0 then
 	Height := 1;
-SGContext.Width:=Width;
-SGContext.Height:=Height;
-SGContext.Resize;
+ContextGLUT.Width  := Width;
+ContextGLUT.Height := Height;
+ContextGLUT.Resize();
 end;
 
-procedure GLUTKeyboard(Key: 
-byte
-//glint
-; X, Y: Longint); cdecl;
+procedure GLUTKeyboard(Key: byte{glint}; X, Y: Longint); cdecl;
 begin
-WriteLn(Key,' ',GLUT_KEY_F11);
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.x:=x;
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.y:=y;
+//WriteLn(Key,' ',GLUT_KEY_F11);
+ContextGLUT.FCursorMoution.x:=x;
+ContextGLUT.FCursorMoution.y:=y;
 
-SGContext.SetKey(SGDownKey,Key);
+ContextGLUT.SetKey(SGDownKey,Key);
 end;
 
 procedure GLUTMouse(Button:integer; State:integer; x,y:integer);cdecl;
@@ -138,8 +115,8 @@ var
 	Bnt:TSGCursorButtons;
 	BntType:TSGCursorButtonType;
 begin
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.x:=x;
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.y:=y;
+ContextGLUT.FCursorMoution.x:=x;
+ContextGLUT.FCursorMoution.y:=y;
 case Button of
 GLUT_LEFT_BUTTON:
 	Bnt:=SGLeftCursorButton;
@@ -151,41 +128,30 @@ end;
 if State=0 then
 	begin
 	BntType:=SGDownKey;
-	SGContext.FCursorKeysPressed[Bnt]:=True;
+	ContextGLUT.FCursorKeysPressed[Bnt]:=True;
 	end
 else
 	begin
 	BntType:=SGUpKey;
-	SGContext.FCursorKeysPressed[Bnt]:=False;
+	ContextGLUT.FCursorKeysPressed[Bnt]:=False;
 	end;
-SGContext.FCursorKeyPressed:=Bnt;
-SGContext.FCursorKeyPressedType:=BntType;
+ContextGLUT.FCursorKeyPressed:=Bnt;
+ContextGLUT.FCursorKeyPressedType:=BntType;
 end;
 
 procedure GLUTMotionPassive(x,y:longint);cdecl;
 begin
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.x:=x;
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.y:=y;
-SGContext.FCursorKeysPressed[SGLeftCursorButton]:=False;
-SGContext.FCursorKeysPressed[SGMiddleCursorButton]:=False;
-SGContext.FCursorKeysPressed[SGRightCursorButton]:=False;
+ContextGLUT.FCursorMoution.x:=x;
+ContextGLUT.FCursorMoution.y:=y;
+ContextGLUT.FCursorKeysPressed[SGLeftCursorButton]:=False;
+ContextGLUT.FCursorKeysPressed[SGMiddleCursorButton]:=False;
+ContextGLUT.FCursorKeysPressed[SGRightCursorButton]:=False;
 end;
 
 procedure GLUTMotion(x,y:longint);cdecl;
 begin
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.x:=x;
-TSGContextGLUT(Pointer(SGContext)).FCursorMoution.y:=y;
-end;
-
-function TSGContextGLUT.MouseShift: TSGPoint2int32;
-begin
-Result.Import(
-{$IFDEF MSWINDOWS}
-	0,0
-{$ELSE}
-	0,0
-	{$ENDIF}
-	);
+ContextGLUT.FCursorMoution.x:=x;
+ContextGLUT.FCursorMoution.y:=y;
 end;
 
 procedure TSGContextGLUT.Resize;
@@ -193,27 +159,24 @@ begin
 inherited;
 end;
 
-class function TSGContextGLUT.RectInCoords:Boolean;
-begin
-Result:=False;
-end;
-
-constructor TSGContextGLUT.Create;
+constructor TSGContextGLUT.Create();
 begin
 inherited;
 FCursorMoution.Import();
 end;
 
-destructor TSGContextGLUT.Destroy;
+destructor TSGContextGLUT.Destroy();
 begin
-
+glutDestroyWindow(glutGetWindow());
+ContextGLUT := nil;
 inherited;
 end;
 
-procedure TSGContextGLUT.Initialize;
+procedure TSGContextGLUT.Initialize();
 type
 	TF=procedure (a:Byte;b,c:LongInt);cdecl;
 begin
+ContextGLUT := Self;
 glutInitPascal(True);
 glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
 
@@ -239,12 +202,8 @@ glutKeyboardFunc(TF(@GLUTKeyboard));
 glutMouseFunc(@GLUTMouse);
 glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
-glutSetIconTitle(PChar(FIconIdentifier));
+glutSetIconTitle(PChar(5));
 
-SGInitOpenGL;
-
-if SGContext.FCallInitialize<>nil then
-	SGContext.FCallInitialize();
 end;
 
 procedure TSGContextGLUT.Run;
@@ -260,11 +219,6 @@ end;
 procedure TSGContextGLUT.SwapBuffers;
 begin
 glutSwapBuffers;
-end;
-
-function TSGContextGLUT.TopShift: TSGLongWord;
-begin
-Result:=0;
 end;
 
 function TSGContextGLUT.GetCursorPosition: TSGPoint2int32;

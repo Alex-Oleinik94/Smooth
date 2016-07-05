@@ -117,6 +117,9 @@ uses
 		,SaGeRenderDirectX9
 		{$ENDIF}
 	,SaGeRenderOpenGL
+	{$IFDEF ANDROID}
+		,SaGeContextAndroid
+		{$ENDIF}
 	;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
