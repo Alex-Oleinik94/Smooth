@@ -108,11 +108,12 @@ procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcole
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
 uses
-	SaGeDoDynamicHeader
+	SaGeConvertHeaderToDynamic
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX9
 		{$ENDIF}
@@ -121,6 +122,17 @@ uses
 		,SaGeContextAndroid
 		{$ENDIF}
 	;
+
+procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
+begin
+if (Length(VParams) = 2) and (SGResourseFiles.FileExists(VParams[0])) then
+	SGConvertHeaderToDynamic(VParams[0], VParams[1])
+else
+	begin 
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'"@infilename @outfilename"');
+	end;
+end;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -141,6 +153,7 @@ ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU
 ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
 ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
 ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
+ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert header to dynamic utility');
 ConsoleCaller.AddComand(TSGConcoleCallerProcedure(@SGConsoleShowAllApplications), ['GUI',''], 'Shows all scenes in this application');
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();

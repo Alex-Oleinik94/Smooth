@@ -61,6 +61,7 @@ type
 	TSGString 	= String;
 type
 	// Aditional
+	TSGBool     = TSGBoolean;
 	TSGQWord	= QWord;
 	TSGSingle	= TSGFloat;
 	TSGReal     = TSGDouble;
