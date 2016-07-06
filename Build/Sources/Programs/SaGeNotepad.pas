@@ -456,7 +456,13 @@ end;
 
 procedure TSGNotepad.FromUpDate(var FCanChange:Boolean);
 begin
-
+if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.KeyPressedByte = 9 {Tab}) and (Context.KeysPressed(SG_CTRL_KEY))) then
+	begin
+	FActiveInset += 1;
+	if FActiveInset >= CountInsets() then
+		FActiveInset := 0;
+	Context.SetKey(SGNullKey,0);
+	end;
 inherited;
 end;
 

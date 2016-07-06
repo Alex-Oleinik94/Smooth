@@ -723,12 +723,26 @@ function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF 
 function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
-operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	C1 : TSGChar;
+begin
+Result := False;
+for C1 in S do
+	if C1 = C then
+		begin
+		Result := True;
+		Break;
+		end;
+end;
+
+operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := VList;
 if Result = nil then
@@ -738,7 +752,7 @@ else
 Result[High(Result)] := VString;
 end;
 
-operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	S : TSGString;
 begin

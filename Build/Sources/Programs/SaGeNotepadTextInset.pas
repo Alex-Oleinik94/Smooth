@@ -29,7 +29,7 @@ type
 		FColors : TSGVertex4fList;
 		end;
 	
-	TSGNTextInsetFileStrings = type array of TSGNTextInsetFileString;
+	TSGNTextInsetFileStrings = type packed array of TSGNTextInsetFileString;
 	
 	TSGNTextInset = class(TSGNInset)
 			public
@@ -49,7 +49,12 @@ type
 			FTimer : TSGFloat;
 			end;
 		
+		FSystemWords : TSGString;
+		FSystemSeparators : TSGString;
 			private
+		function GetTextColor(const VString : TSGString) : TSGVertex4fList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure UpdateLineColor(const Index : TSGLongWord);
+		procedure RealizeSystemSimbols();
 		procedure SetFile(const VFileName : TSGString);
 		procedure LoadFile();
 		function CountLines() : TSGLongWord;
@@ -66,6 +71,146 @@ type
 		end;
 
 implementation
+
+function TSGNTextInset.GetTextColor(const VString : TSGString) : TSGVertex4fList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	WordList : packed array of TSGString = nil;
+	WordCountSimbols : packed array of TSGByte = nil;
+	Index : TSGLongWord;
+
+//{$DEFINE TI_COLOR_DEBUG}
+
+procedure FunctionResult (const ResultIndex : TSGLongWord; const Color : TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result[ResultIndex] := Color;
+end;
+
+procedure SimbolProv(const LC, UC: TSGChar);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ProvS(const S : TSGString; var SL : TSGByte) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := True;
+Result := (Length(S) > SL);
+if Result then
+	Result := ((S[SL + 1] = LC) or (S[SL + 1] = UC));
+if Result then
+	SL += 1
+else
+	SL := 0;
+end;
+
+var
+	iiii : TSGLongWord;
+begin
+for iiii := 0 to High(WordCountSimbols) do
+	ProvS(WordList[iiii],WordCountSimbols[iiii]);
+end;
+
+procedure FinalProv();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ProvF(const S : TSGString; var SL : TSGByte) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	iii : TSGLongWord;
+begin
+Result := SL = Length(S);
+if Result then
+	for iii := 0 to SL - 1 do
+		FunctionResult(Index + iii - SL, SGVertex4fImport(0,0,1,1));
+end;
+
+var
+	ii : TSGLongWord;
+begin
+for ii := 0 to High(WordCountSimbols) do
+	if ProvF(WordList[ii],WordCountSimbols[ii]) then
+		break;
+fillchar(WordCountSimbols[0], Length(WordCountSimbols), 0);
+end;
+
+function GetFreeList() : TSGVertex4fList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGLongWord;
+	Res : TSGVertex4fList = nil;
+begin
+i := Length(VString);
+Res := nil;
+SetLength(Res, i);
+{$IFDEF TI_COLOR_DEBUG}WriteLn('Set Length  Result"',Index,'"');{$ENDIF}
+if Length(Res) > 0 then
+	begin
+	for i := 0 to High(Res) do
+		begin
+		Res[i].Import(1,1,1,1);
+		end;
+	end;
+Result := Res;
+end;
+
+begin
+(*========*)Result := nil; Exit;(*========*)
+Index := Length(VString);
+{$IFDEF TI_COLOR_DEBUG}WriteLn('Begin "',VString,'", Length = "',Index,'"');{$ENDIF}
+Result := GetFreeList();
+{$IFDEF TI_COLOR_DEBUG}WriteLn('Length(Result)="',Length(Result),'"');{$ENDIF}
+SetLength(WordList, StringWordCount(FSystemWords,' '));
+SetLength(WordCountSimbols, Length(WordList));
+fillchar(WordCountSimbols[0], Length(WordCountSimbols), 0);
+if Length(WordList) > 0 then
+	for Index := 0 to High(WordList) do
+		WordList [Index] := StringWordGet(FSystemWords,' ',Index + 1);
+{$IFDEF TI_COLOR_DEBUG}WriteLn('Length(WordList)="',Length(WordList),'"');{$ENDIF}
+Index := 1;
+while Index <= Length(VString) do
+	begin
+	{$IFDEF TI_COLOR_DEBUG}WriteLn(Index);{$ENDIF}
+	if VString[Index] in FSystemSeparators then
+		begin
+		FinalProv();
+		end
+	else
+		begin
+		SimbolProv(StringCase (VString[Index], @LowerCase)[1], StringCase (VString[Index], @UpperCase)[1]);
+		end;
+	Index += 1;
+	end;
+FinalProv();
+SetLength(WordList, 0);
+SetLength(WordCountSimbols, 0);
+{$IFDEF TI_COLOR_DEBUG}WriteLn('End "',VString,'"');{$ENDIF}
+end;
+
+procedure TSGNTextInset.UpdateLineColor(const Index : TSGLongWord);
+
+procedure STC(var Struct : TSGNTextInsetFileString);
+begin
+if Struct.FColors <> nil then
+	SetLength(Struct.FColors, 0);
+Struct.FColors := nil;
+{$IFDEF TI_COLOR_DEBUG}WriteLn('BTC');{$ENDIF}
+Struct.FColors := GetTextColor(Struct.FString);
+{$IFDEF TI_COLOR_DEBUG}WriteLn('ETC ',Length(Struct.FColors));{$ENDIF}
+end;
+
+begin
+STC(FFile[Index]);
+end;
+
+procedure TSGNTextInset.RealizeSystemSimbols();
+var
+	Expansion : TSGString;
+begin
+Expansion := SGGetFileExpansion(FFileName);
+if (Expansion = 'PAS') or (Expansion = 'PP') or (Expansion = 'INC') then
+	begin
+	FSystemWords := 'result exit absolute abstract add and true false array as asm assembler constref automated begin boolean break byte case cdecl char class const constructor contains default deprecated destructor dispid dispinterface div do downto dynamic else end except export exports external far file final finalization finally for forward function goto if implementation implements in index inherited initialization inline integer interface is label library message mod name near nil nodefault not object of on or out overload override package packed pascal platform private procedure program property protected public published raise read readonly real record register reintroduce remove repeat requires resourcestring safecall sealed set shl shr static stdcall stored strict string then threadvar to try type unit unsafe until uses var varargs virtual while with word write writeonly xor';
+	FSystemSeparators := ' ();:,.=<>+-[]	';
+	end
+else
+	begin
+	FSystemWords := '';
+	FSystemSeparators := '';
+	end;
+end;
 
 procedure TSGNTextInset.FromResize();
 begin
@@ -193,6 +338,8 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 			SGStringGetPart(FFile[FTextCursor.FLine].FString, FTextCursor.FColumn + 1, Length(FFile[FTextCursor.FLine].FString));
 		FFile[FTextCursor.FLine].FString := SGStringGetPart(FFile[FTextCursor.FLine].FString, 1, FTextCursor.FColumn);
 		GoToPosition(FTextCursor.FLine + 1, Length(WhiteSignature(FFile[FTextCursor.FLine].FString)));
+		UpdateLineColor(FTextCursor.FLine);
+		UpdateLineColor(FTextCursor.FLine - 1);
 		end;
 	#46: //Delete
 		begin
@@ -204,6 +351,7 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 				SGStringGetPart(FFile[FTextCursor.FLine].FString, 1, FTextCursor.FColumn) +
 				SGStringGetPart(FFile[FTextCursor.FLine].FString, FTextCursor.FColumn + 2, Length(FFile[FTextCursor.FLine].FString));
 			end;
+		UpdateLineColor(FTextCursor.FLine);
 		end;
 	#8: //BackSpase
 		begin
@@ -232,6 +380,7 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 			SetLength(FFile, Length(FFile) - 1);
 			GoToPosition(FTextCursor.FLine - 1, ii);
 			end;
+		UpdateLineColor(FTextCursor.FLine);
 		end;
 	#38: //UpKey(Arrow)
 		if FTextCursor.FLine > 0 then
@@ -284,6 +433,7 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 						Context.KeysPressed(16) , Context.KeysPressed(20))+
 					SGStringGetPart(FFile[FTextCursor.FLine].FString, FTextCursor.FColumn, Length(FFile[FTextCursor.FLine].FString));
 			end;
+		UpdateLineColor(FTextCursor.FLine);
 		end;
 	end;
 	end;
@@ -384,16 +534,33 @@ for i := ii to Trunc(FEnd) + 1 do
 			Vertex.x + MaxLinesShift,
 			Vertex.y + (i - ii + 1) * Font.FontHeight),
 		False);
-	Render.Color4f(1,1,1,Alpha);
-	Font.DrawFontFromTwoVertex2f(
-		FFile[i].FString,
-		SGVertex2fImport(
-			Vertex.x + MaxLinesShift,
-			Vertex.y + (i - ii) * Font.FontHeight),
-		SGVertex2fImport(
-			Vertex.x + Width,
-			Vertex.y + (i - ii + 1) * Font.FontHeight),
-		False);
+	if FFile[i].FColors <> nil then
+		begin
+		Font.DrawFontFromTwoVertex2fAndColorList(
+			FFile[i].FString,
+			FFile[i].FColors,
+			SGVertex2fImport(
+				Vertex.x + MaxLinesShift,
+				Vertex.y + (i - ii) * Font.FontHeight),
+			SGVertex2fImport(
+				Vertex.x + Width,
+				Vertex.y + (i - ii + 1) * Font.FontHeight),
+			False);
+		end
+	else
+		begin
+		Render.Color4f(1,1,1,Alpha);
+		Font.DrawFontFromTwoVertex2f(
+			FFile[i].FString,
+			SGVertex2fImport(
+				Vertex.x + MaxLinesShift,
+				Vertex.y + (i - ii) * Font.FontHeight),
+			SGVertex2fImport(
+				Vertex.x + Width,
+				Vertex.y + (i - ii + 1) * Font.FontHeight),
+			False);
+		UpdateLineColor(i);
+		end;
 	if i = FTextCursor.FLine then
 		begin
 		iii := Length(FFile[i].FString);
@@ -476,6 +643,8 @@ inherited;
 FFileName := '';
 FFile := nil;
 FScrolTimer := 1;
+FSystemSeparators := '';
+FSystemWords := '';
 end;
 
 destructor TSGNTextInset.Destroy();
@@ -487,6 +656,7 @@ end;
 procedure TSGNTextInset.SetFile(const VFileName : TSGString);
 begin
 FFileName := VFileName;
+RealizeSystemSimbols();
 LoadFile();
 end;
 

@@ -175,6 +175,7 @@ type
 		procedure DrawCursorFromTwoVertex2f(const S:PChar;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 		procedure DrawCursorFromTwoVertex2f(const S:String;const CursorPosition : LongInt;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True;const CursorWidth : TSGByte = 2);overload;
 		procedure AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
+		procedure DrawFontFromTwoVertex2fAndColorList(const S : TSGString; const VColorList : TSGVertex4fList;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);
 		end;
 
 procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
@@ -1120,6 +1121,96 @@ end;
 destructor TSGFont.Destroy;
 begin
 inherited;
+end;
+
+procedure TSGFont.DrawFontFromTwoVertex2fAndColorList(const S : TSGString; const VColorList : TSGVertex4fList;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);
+var
+	i:LongInt;
+	StringWidth : LongInt = 0;
+	Otstup:TSGVertex2f = (x:0;y:0);
+	ToExit:Boolean = False;
+	ThisSimbolWidth:LongWord = 0;
+	DirectXShift : TSGVertex2f;
+	RealStringWidth, RealStringHeight : TSGSingle;
+	Vertex1, Vertex2 : TSGVertex2f;
+begin
+Vertex1 := V1;
+Vertex2 := V2;
+if Render.RenderType = SGRenderDirectX then
+	begin
+	if Context.Fullscreen then
+		DirectXShift.Import(0.5, 0.5)
+	else
+		DirectXShift.Import(0.4, 0.3);
+	end
+else
+	begin
+	DirectXShift.Import(0, 0);
+	end;
+BindTexture();
+StringWidth := StringLength(S);
+RealStringWidth := Abs(Vertex2.x - Vertex1.x);
+RealStringHeight := Abs(Vertex2.y - Vertex1.y);
+if AutoXShift then
+	begin
+	Otstup.x:=(RealStringWidth - StringWidth)/2;
+	if Otstup.x < 0 then
+		Otstup.x := 0;
+	end;
+if AutoYShift then
+	begin
+	Otstup.y:=(RealStringHeight - FFontHeight)/2;
+	end;
+Otstup := Otstup.Round();
+Vertex1 := Vertex1.Round();
+Vertex2 := Vertex2.Round();
+Render.BeginScene(SGR_QUADS);
+i := 1;
+while (i <= Length(S)) and (not ToExit) do
+	begin
+	Render.Color(VColorList[i-1]);
+	if s[i] <> '	' then
+		begin
+		ThisSimbolWidth := FSimbolParams[s[i]].Width;
+		if Otstup.x + FSimbolParams[s[i]].Width > RealStringWidth then
+			begin
+			ToExit := True;
+			ThisSimbolWidth := Trunc(RealStringWidth - Otstup.x);
+			end;
+		
+		Render.TexCoord2f(
+				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+		Render.Vertex2f(
+			Otstup.x + Vertex1.x,
+			Otstup.y + Vertex1.y);
+		Render.TexCoord2f(
+				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
+			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+		Render.Vertex2f(
+			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.y + Vertex1.y);
+		Render.TexCoord2f(
+				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
+			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+		Render.Vertex2f(
+			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.y + Vertex1.y + FFontHeight);
+		Render.TexCoord2f(
+				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+		Render.Vertex2f(
+			Otstup.x + Vertex1.x,
+			Otstup.y + Vertex1.y + FFontHeight);
+		
+		Otstup.x += FSimbolParams[s[i]].Width;
+		end
+	else
+		Otstup.x += FSimbolParams[' '].Width * 4;
+	i+=1;
+	end;
+Render.EndScene();
+DisableTexture();
 end;
 
 procedure TSGFont.DrawFontFromTwoVertex2f(const S:PChar;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
