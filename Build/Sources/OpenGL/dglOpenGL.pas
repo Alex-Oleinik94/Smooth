@@ -20633,16 +20633,22 @@ end;
 
 
 initialization
-
+begin
 {$IFDEF CPU386}
   Set8087CW($133F);
 {$ENDIF}
 {$IFDEF DGL_64BIT}
   SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
 {$ENDIF}
-
+InitOpenGL();
+ReadExtensions();
+ReadImplementationProperties();
+end;
 
 finalization
+begin
+
+end;
 
 end.
 

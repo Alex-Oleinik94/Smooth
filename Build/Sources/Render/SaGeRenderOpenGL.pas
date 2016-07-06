@@ -32,9 +32,6 @@ uses
 		{$ENDIF}
 	{$IFNDEF MOBILE}
 		,dglOpenGL
-		,gl
-		,glu
-		,glext
 	{$ELSE}
 		,gles
 		,gles11
@@ -95,17 +92,12 @@ type
 			ogl_Format  : TAGLPixelFormat;
 			{$ENDIF}
 			public
-		{$DEFINE SG_RENDER_EIC}
-		{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
-		{$UNDEF SG_RENDER_EIC}
-			public
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure Kill();override;
-		procedure LoadExtendeds();
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
@@ -389,7 +381,7 @@ end;
 
 procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
 begin
-glUniformMatrix4fv(VLocationName,VCount,Byte(VTranspose),VData);
+glUniformMatrix4fv(VLocationName,VCount,ByteBool(VTranspose),VData);
 end;
 
 function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
@@ -399,7 +391,7 @@ end;
 
 function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
 begin
-Result := {$IFDEF MOBILE}False{$ELSE}SGIsSuppored_GL_ARB_shader_objects{$ENDIF};
+Result := {$IFDEF MOBILE}False{$ELSE}glCreateShaderObjectARB <> nil{$ENDIF};
 end;
 
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
@@ -431,7 +423,7 @@ procedure TSGRenderOpenGL.GetInfoLog(const VHandle : TSGLongWord; const VMaxLeng
 begin
 //glGetShaderInfoLog - GLES
 //glGetProgramInfoLog - GLES
-{$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,@VLength,VLog);{$ENDIF}
+{$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,VLength,VLog);{$ENDIF}
 end;
 
 
@@ -482,8 +474,8 @@ end;
 procedure TSGRenderOpenGL.GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);
 var
 	depth:Single;
-	viewportarray:TViewPortArray;
-	mv_matrix,proj_matrix:T16DArray;
+	viewportarray:array [0..3] of GLint;
+	mv_matrix,proj_matrix:TGLMatrixd4;
 begin
 glGetIntegerv(GL_VIEWPORT,viewportarray);
 glReadPixels(
@@ -494,8 +486,8 @@ glReadPixels(
 	GL_DEPTH_COMPONENT, 
 	GL_FLOAT, 
 	@depth);
-glGetDoublev(GL_MODELVIEW_MATRIX,mv_matrix);
-glGetDoublev(GL_PROJECTION_MATRIX,proj_matrix);
+glGetDoublev(GL_MODELVIEW_MATRIX,@mv_matrix);
+glGetDoublev(GL_PROJECTION_MATRIX,@proj_matrix);
 gluUnProject(
 	px,
 	LongInt(Context.Height)-LongInt(py)-1,
@@ -687,7 +679,7 @@ begin
 {$IFDEF MOBILE}
 	Result:=True;
 {$ELSE}
-	Result:=SGIsSuppored_GL_ARB_vertex_buffer_object;
+	Result:= glBindBufferARB <> nil;
 	{$ENDIF}
 end;
 
@@ -1190,10 +1182,6 @@ begin
 glClear(VParam);
 end;
 
-{$DEFINE SG_RENDER_EP}
-{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
-{$UNDEF SG_RENDER_EP}
-
 procedure TSGRenderOpenGL.Init();
 var
 	AmbientLight : array[0..3] of glFloat = (0.5,0.5,0.5,1.0);
@@ -1203,6 +1191,9 @@ var
 	TempLightPosition : array[0..3] of glFloat = (0,1,0,2);
 	fogColor:array[0..3] of glFloat = (0,0,0,1);
 begin
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Init() - Begin');
+	{$ENDIF}
 FNowInBumpMapping:=False;
 {$IFDEF MOBILE}
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
@@ -1219,6 +1210,7 @@ glFogf (GL_FOG_END, 400);
 glFogfv(GL_FOG_COLOR, @fogColor);
 glFogf(GL_FOG_DENSITY, 0.55);
 
+
 glDisable(GL_FOG);
 
 glClearColor(0,0,0,0);
@@ -1232,6 +1224,7 @@ glDepthFunc(GL_LESS);
 	glEnable(GL_LINE_SMOOTH);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	{$ENDIF}
+
 glLineWidth (1.0);
 
 glShadeModel(GL_SMOOTH);
@@ -1257,23 +1250,18 @@ glMaterialfv(GL_FRONT, GL_SPECULAR, @SpecularReflection);
 
 glDisable(GL_LIGHTING);
 
-LoadExtendeds();
-
-{$IFNDEF MOBILE}
-	dglOpenGL.InitOpenGL();
-	dglOpenGL.ReadExtensions();
-	dglOpenGL.ReadImplementationProperties();
-	{$ENDIF}
-
 {$IF defined(MSWINDOWS) and defined(CPU32)}
 	// Enable V-Sync
 	// ¬ключаем вертикальную синхронизацию кадров
-	if SGIsSuppored_WGL_EXT_swap_control then
+	if (dglOpenGL.wglSwapIntervalEXT <> nil) and (dglOpenGL.wglGetSwapIntervalEXT <> nil) then
 		begin
-		if wglGetSwapIntervalEXT()=0 then
-			wglSwapIntervalEXT(1);
-		SGLog.Sourse(['TSGRenderOpenGL.Init - V-Sync is "',TSGBoolean(wglGetSwapIntervalEXT()),'"']);
+		if dglOpenGL.wglGetSwapIntervalEXT() = 0 then
+			dglOpenGL.wglSwapIntervalEXT(1);
+		SGLog.Sourse(['TSGRenderOpenGL.Init - V-Sync is "',TSGBoolean(dglOpenGL.wglGetSwapIntervalEXT()),'"']);
 		end;
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Init() - End');
 	{$ENDIF}
 end;
 
@@ -1324,11 +1312,10 @@ SetRenderType({$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF});
 		{$ENDIF}
 	{$ENDIF}
 
-{$DEFINE SG_RENDER_EICR}
-{$INCLUDE SaGeRenderOpenGLLoadExtendeds.inc}
-{$UNDEF SG_RENDER_EICR}
-
 FNowInBumpMapping:=False;
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Create()');
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Kill();
@@ -1357,10 +1344,10 @@ begin
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if Context <> nil then
-			wglMakeCurrent( TSGLongWord(Context.Device), 0 );
+			dglOpenGL.wglMakeCurrent( TSGLongWord(Context.Device), 0 );
 		if FContext <> 0 then
 			begin
-			wglDeleteContext( FContext );
+			dglOpenGL.wglDeleteContext( FContext );
 			CloseHandle(FContext);
 			FContext := 0;
 			end;
@@ -1380,6 +1367,9 @@ begin
 			{$ENDIF}
 		{$ENDIF}
 	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Kill()');
+	{$ENDIF}
 end;
 
 destructor TSGRenderOpenGL.Destroy();
@@ -1387,7 +1377,7 @@ begin
 Kill();
 inherited;
 {$IFDEF RENDER_OGL_DEBUG}
-	WriteLn('TSGRenderOpenGL.Destroy(): End');
+	WriteLn('TSGRenderOpenGL.Destroy()');
 	{$ENDIF}
 end;
 
@@ -1468,7 +1458,7 @@ Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
-			FContext := wglCreateContext( TSGLongWord(Context.Device) );
+			FContext := dglOpenGL.wglCreateContext( TSGLongWord(Context.Device) );
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
@@ -1501,6 +1491,9 @@ Result:=False;
 if Result then
 	Result:=MakeCurrent();
 {$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.CreateContext():"',Result,'"');
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.ReleaseCurrent();
@@ -1514,7 +1507,7 @@ begin
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (Context <> nil)  then 
-			wglMakeCurrent( TSGLongWord(Context.Device), 0 );
+			dglOpenGL.wglMakeCurrent( TSGLongWord(Context.Device), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
 			
@@ -1524,6 +1517,9 @@ begin
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.ReleaseCurrent()');
 	{$ENDIF}
 end;
 
@@ -1572,7 +1568,7 @@ Result:=False;
 {$IFDEF MSWINDOWS}
 	{$IFDEF WGL_PIXEL_FORMAT}
 	fillchar(pixelFormats, sizeof(pixelFormats), 0);
-	Result := wglChoosePixelFormatARB(TSGLongWord(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
+	Result := dglOpenGL.wglChoosePixelFormatARB(TSGLongWord(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
 	WriteLn(pixelFormats[0],' ',numFormats);
 	{$ELSE WGL_PIXEL_FORMAT}
 	FillChar(pfd, sizeof(pfd), 0);
@@ -1591,6 +1587,9 @@ Result:=False;
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.SetPixelFormat():"',Result,'"');
 	{$ENDIF}
 end;
 
@@ -1611,7 +1610,7 @@ begin
 	{$IFDEF MSWINDOWS}
 		if (Context<>nil) and (FContext<>0) then 
 			begin
-			wglMakeCurrent( LongWord(Context.Device), FContext );
+			dglOpenGL.wglMakeCurrent( LongWord(Context.Device), FContext );
 			Result:=True;
 			end
 		else
@@ -1641,6 +1640,9 @@ begin
 				{$ENDIF}
 			{$ENDIF}
 		{$ENDIF}
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.MakeCurrent():"',Result,'"');
 	{$ENDIF}
 end;
 
