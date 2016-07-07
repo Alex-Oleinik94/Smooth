@@ -116,6 +116,7 @@ uses
 	SaGeConvertHeaderToDynamic
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX9
+		,SaGeRenderDirectX8
 		{$ENDIF}
 	,SaGeRenderOpenGL
 	{$IFDEF ANDROID}
@@ -664,7 +665,7 @@ procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = 
 var
 	Context:TSGContext = nil;
 	{$IFDEF MSWINDOWS}
-		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX,SGBR_UNKNOWN) = SGBR_OPENGL;
+		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX_9,SGBR_DIRECTX_8,SGBR_UNKNOWN) = SGBR_OPENGL;
 		{$ENDIF}
 	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
 
@@ -703,8 +704,9 @@ if (VParams<>nil) and (Length(VParams)>0) then
 				WriteLn('Whis is help for funning GUI.');
 				WriteLn('     -H; -HELP       : for run help');
 				{$IFDEF MSWINDOWS}
-					WriteLn('     -OPENGL         : for set prioritet render "OpenGL"');
-					WriteLn('     -DIRECTX        : for set prioritet render "DirectX"');
+					WriteLn('     -OGL            : for set prioritet render "OpenGL"');
+					WriteLn('     -D3DX9          : for set prioritet render "DirectX 9"');
+					WriteLn('     -D3DX8          : for set prioritet render "DirectX 8"');
 					{$ENDIF}
 				WriteLn('     -F; -FULLSCREEN : for change fullscreen');
 				GoToExit := True;
@@ -719,12 +721,19 @@ if (VParams<>nil) and (Length(VParams)>0) then
 						{$ENDIF}
 					FRenderState:=SGBR_OPENGL;
 					end
-				else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') then
+				else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') or (S='D3DX9') or (S='DIRECT3D9')or (S='DIRECTX9')or (S='DIRECT3DX9') then
 					begin
 					{$IFDEF SGMoreDebuging}
-						WriteLn('Set prioritet render : "DirectX"');
+						WriteLn('Set prioritet render : "DirectX 9"');
 						{$ENDIF}
-					FRenderState:=SGBR_DIRECTX;
+					FRenderState:=SGBR_DIRECTX_9;
+					end
+				else if (S='D3DX8') or (S='DIRECT3D8')or (S='DIRECTX8')or (S='DIRECT3DX8') then
+					begin
+					{$IFDEF SGMoreDebuging}
+						WriteLn('Set prioritet render : "DirectX 8"');
+						{$ENDIF}
+					FRenderState:=SGBR_DIRECTX_8;
 					end
 				{$ENDIF}
 			else if (S='F') or (S='FULLSCREEN') then
@@ -782,8 +791,10 @@ with Context do
 	
 	SelfLink := @IContext;
 	{$IFDEF MSWINDOWS}
-		if FRenderState = SGBR_DIRECTX then
+		if FRenderState = SGBR_DIRECTX_9 then
 			RenderClass := TSGRenderDirectX9
+		else if FRenderState = SGBR_DIRECTX_8 then
+			RenderClass := TSGRenderDirectX8
 		else
 		{$ENDIF}
 			RenderClass := TSGRenderOpenGL;

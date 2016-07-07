@@ -51,6 +51,7 @@ uses
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
 		,SaGeRenderDirectX9
+		,SaGeRenderDirectX8
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux
@@ -80,13 +81,14 @@ begin
 end;
 
 var
-	Renders : packed array [0 .. 1] of
+	Renders : packed array [0 .. 2] of
 		packed record
 			FClass : TSGRenderClass;
 			FName : TSGString;
 			end = (
 			(FClass :                    TSGRenderOpenGL                      ; FName : 'OpenGL' ),
-			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9')
+			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9'),
+			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX8{$ELSE} nil {$ENDIF}; FName : 'DirectX 8')
 			);
 	Contexts : packed array [0 .. 3] of
 		packed record
