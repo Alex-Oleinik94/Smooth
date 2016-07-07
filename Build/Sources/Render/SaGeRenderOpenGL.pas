@@ -15,6 +15,9 @@
 	//{$DEFINE WGL_PIXEL_FORMAT}
 	{$ENDIF}
 //{$DEFINE RENDER_OGL_DEBUG}
+{$IFNDEF MOBILE}
+	{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
+	{$ENDIF}
 
 unit SaGeRenderOpenGL;
 
@@ -270,6 +273,19 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK}
+procedure TSGRenderOpenGL_DynLinkError(const FunctionName : TSGString);
+var
+	ErStr : TSGString;
+begin
+ErStr := 'TSGRenderOpenGL_DynLinkError : Abstract function "'+FunctionName+'"';
+{.$IFDEF RENDER_OGL_DEBUG}
+	WriteLn(ErStr);
+	{.$ENDIF}
+SGLog.Sourse(ErStr);
+end;
+{$ENDIF}
+
 class function TSGRenderOpenGL.Suppored() : TSGBoolean;
 begin
 Result := True;
@@ -277,36 +293,43 @@ end;
 
 procedure TSGRenderOpenGL.Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform1iv = nil then TSGRenderOpenGL_DynLinkError('glUniform1iv');{$ENDIF}
 {$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongInt(VValue)^){$ELSE}glUniform1iv(VLocationName,VCount,VValue){$ENDIF};
 end;
 
 procedure TSGRenderOpenGL.Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer); 
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform1uiv = nil then TSGRenderOpenGL_DynLinkError('glUniform1uiv');{$ENDIF}
 {$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongWord(VValue)^){$ELSE}glUniform1uiv(VLocationName,VCount,VValue){$ENDIF};
 end;
 
 procedure TSGRenderOpenGL.Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform3fv = nil then TSGRenderOpenGL_DynLinkError('glUniform3fv');{$ENDIF}
 glUniform3fv(VLocationName,VCount,VValue);
 end;
 
 procedure TSGRenderOpenGL.Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform1f = nil then TSGRenderOpenGL_DynLinkError('glUniform1f');{$ENDIF}
 glUniform1f(VLocationName,V);
 end;
 
 procedure TSGRenderOpenGL.Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform3f = nil then TSGRenderOpenGL_DynLinkError('glUniform3f');{$ENDIF}
 glUniform3f(VLocationName,VX,VY,VZ);
 end;
 
 procedure TSGRenderOpenGL.PolygonOffset(const VFactor, VUnits : TSGFloat);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPolygonOffset = nil then TSGRenderOpenGL_DynLinkError('glPolygonOffset');{$ENDIF}
 glPolygonOffset(VFactor,VUnits);
 end;
 
 procedure TSGRenderOpenGL.GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetFloatv = nil then TSGRenderOpenGL_DynLinkError('glGetFloatv');{$ENDIF}
 glGetFloatv(VType, VPointer);
 end;
 
@@ -317,6 +340,7 @@ end;
 
 procedure TSGRenderOpenGL.ClearColor(const r,g,b,a : TSGFloat);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glClearColor = nil then TSGRenderOpenGL_DynLinkError('glClearColor');{$ENDIF}
 glClearColor(r,g,b,a);
 end;
 
@@ -327,71 +351,85 @@ end;
 
 procedure TSGRenderOpenGL.BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBindFramebufferEXT = nil then TSGRenderOpenGL_DynLinkError('glBindFramebufferEXT');{$ENDIF}
 {$IFNDEF MOBILE} glBindFramebufferEXT(VType,VHandle);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGenFrameBuffersEXT = nil then TSGRenderOpenGL_DynLinkError('glGenFrameBuffersEXT');{$ENDIF}
 {$IFNDEF MOBILE} glGenFrameBuffersEXT(VCount,VBuffers);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.DrawBuffer(const VType : TSGCardinal);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDrawBuffer = nil then TSGRenderOpenGL_DynLinkError('glDrawBuffer');{$ENDIF}
 {$IFNDEF MOBILE}glDrawBuffer(VType);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.ReadBuffer(const VType : TSGCardinal);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glReadBuffer = nil then TSGRenderOpenGL_DynLinkError('glReadBuffer');{$ENDIF}
 {$IFNDEF MOBILE}glReadBuffer(VType);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGenRenderBuffersEXT = nil then TSGRenderOpenGL_DynLinkError('glGenRenderBuffersEXT');{$ENDIF}
 {$IFNDEF MOBILE}glGenRenderBuffersEXT(VCount,VBuffers);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBindRenderBufferEXT = nil then TSGRenderOpenGL_DynLinkError('glBindRenderBufferEXT');{$ENDIF}
 {$IFNDEF MOBILE}glBindRenderBufferEXT(VType,VHandle);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer,VLevel: TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFrameBufferTexture2DEXT = nil then TSGRenderOpenGL_DynLinkError('glFrameBufferTexture2DEXT');{$ENDIF}
 {$IFNDEF MOBILE}glFrameBufferTexture2DEXT(VTarget,VAttachment,VRenderbuffertarget,VRenderbuffer,VLevel);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glFrameBufferRenderBufferEXT = nil then TSGRenderOpenGL_DynLinkError('glFrameBufferRenderBufferEXT');{$ENDIF}
 {$IFNDEF MOBILE}glFrameBufferRenderBufferEXT(VTarget,VAttachment,VRenderbuffertarget,VRenderbuffer);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glRenderBufferStorageEXT = nil then TSGRenderOpenGL_DynLinkError('glRenderBufferStorageEXT');{$ENDIF}
 {$IFNDEF MOBILE}glRenderBufferStorageEXT(VTarget,VAttachment,VWidth,VHeight);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.Scale(const x,y,z : TSGSingle);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glScalef = nil then TSGRenderOpenGL_DynLinkError('glScalef');{$ENDIF}
 glScalef(x,y,z);
 end;
 
 procedure TSGRenderOpenGL.Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform1iARB = nil then TSGRenderOpenGL_DynLinkError('glUniform1iARB');{$ENDIF}
 {$IFDEF MOBILE}glUniform1i{$ELSE}glUniform1iARB{$ENDIF}(VLocationName,VData);
 end;
 
 procedure TSGRenderOpenGL.UseProgram(const VProgram : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUseProgramObjectARB = nil then TSGRenderOpenGL_DynLinkError('glUseProgramObjectARB');{$ENDIF}
 {$IFDEF MOBILE}glUseProgram{$ELSE}glUseProgramObjectARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniformMatrix4fv = nil then TSGRenderOpenGL_DynLinkError('glUniformMatrix4fv');{$ENDIF}
 glUniformMatrix4fv(VLocationName,VCount,ByteBool(VTranspose),VData);
 end;
 
 function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetUniformLocationARB = nil then TSGRenderOpenGL_DynLinkError('glGetUniformLocationARB');{$ENDIF}
 {$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF},VLocationName);
 end;
 
@@ -402,6 +440,7 @@ end;
 
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateShaderObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateShaderObjectARB');{$ENDIF}
 Result := 
 {$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
 	{$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType)
@@ -410,11 +449,13 @@ end;
 
 procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glShaderSourceARB = nil then TSGRenderOpenGL_DynLinkError('glShaderSourceARB');{$ENDIF}
 {$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF},1,@VSourse,@VSourseLength);
 end;
 
 procedure TSGRenderOpenGL.CompileShader(const VShader : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCompileShaderARB = nil then TSGRenderOpenGL_DynLinkError('glCompileShaderARB');{$ENDIF}
 {$IFDEF MOBILE}glCompileShader{$ELSE}glCompileShaderARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF});
 end;
 
@@ -422,11 +463,13 @@ procedure TSGRenderOpenGL.GetObjectParameteriv(const VObject : TSGLongWord; cons
 begin
 //glGetProgramiv - GLES
 //glGetShaderiv - GLES
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetObjectParameterivARB = nil then TSGRenderOpenGL_DynLinkError('glGetObjectParameterivARB');{$ENDIF}
 {$IFNDEF MOBILE}glGetObjectParameterivARB({$IFDEF SHADERSISPOINTERS}Pointer(VObject){$ELSE}VObject{$ENDIF},VParamName,VResult);{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetInfoLogARB = nil then TSGRenderOpenGL_DynLinkError('glGetInfoLogARB');{$ENDIF}
 //glGetShaderInfoLog - GLES
 //glGetProgramInfoLog - GLES
 {$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,VLength,VLog);{$ENDIF}
@@ -435,6 +478,7 @@ end;
 
 function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateProgramObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateProgramObjectARB');{$ENDIF}
 Result := 
 {$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
 	{$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}()
@@ -443,21 +487,25 @@ end;
 
 procedure TSGRenderOpenGL.AttachShader(const VProgram, VShader : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glAttachObjectARB = nil then TSGRenderOpenGL_DynLinkError('glAttachObjectARB');{$ENDIF}
 {$IFDEF MOBILE}glAttachShader{$ELSE}glAttachObjectARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF},{$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.LinkShaderProgram(const VProgram : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLinkProgramARB = nil then TSGRenderOpenGL_DynLinkError('glLinkProgramARB');{$ENDIF}
 {$IFNDEF MOBILE}glLinkProgramARB{$ELSE}glLinkProgram{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF});
 end;
 
 procedure TSGRenderOpenGL.DeleteShader(const VProgram : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDeleteShader = nil then TSGRenderOpenGL_DynLinkError('glDeleteShader');{$ENDIF}
 glDeleteShader(VProgram);
 end;
 
 procedure TSGRenderOpenGL.DeleteShaderProgram(const VProgram : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDeleteProgram = nil then TSGRenderOpenGL_DynLinkError('glDeleteProgram');{$ENDIF}
 glDeleteProgram(VProgram);
 end;
 
@@ -483,6 +531,10 @@ var
 	viewportarray:array [0..3] of GLint;
 	mv_matrix,proj_matrix:TGLMatrixd4;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetIntegerv = nil then TSGRenderOpenGL_DynLinkError('glGetIntegerv');{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glReadPixels = nil then TSGRenderOpenGL_DynLinkError('glReadPixels');{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetDoublev = nil then TSGRenderOpenGL_DynLinkError('glGetDoublev');{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if gluUnProject = nil then TSGRenderOpenGL_DynLinkError('gluUnProject');{$ENDIF}
 glGetIntegerv(GL_VIEWPORT,viewportarray);
 glReadPixels(
 	px,
@@ -527,6 +579,7 @@ end;
 
 procedure TSGRenderOpenGL.ActiveTextureDiffuse();
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexEnvi = nil then TSGRenderOpenGL_DynLinkError('glTexEnvi');{$ENDIF}
 if FNowActiveNumberTexture = 0 then
 	begin
 	if FNowInBumpMapping then
@@ -564,6 +617,7 @@ end;
 
 procedure TSGRenderOpenGL.ActiveTextureBump();
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexEnvi = nil then TSGRenderOpenGL_DynLinkError('glTexEnvi');{$ENDIF}
 if FNowActiveNumberTexture = 0 then
 	begin
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
@@ -580,27 +634,32 @@ end;
 procedure TSGRenderOpenGL.ActiveTexture(const VTexture : TSGLongWord);
 begin
 FNowActiveNumberTexture := VTexture;
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glActiveTextureARB = nil then TSGRenderOpenGL_DynLinkError('glActiveTextureARB');{$ENDIF}
 {$IFDEF MOBILE}glActiveTexture{$ELSE}glActiveTextureARB{$ENDIF}(GL_TEXTURE0 + VTexture);
 end;
 
 procedure TSGRenderOpenGL.ClientActiveTexture(const VTexture : TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glClientActiveTextureARB = nil then TSGRenderOpenGL_DynLinkError('glClientActiveTextureARB');{$ENDIF}
 {$IFDEF MOBILE}glClientActiveTexture{$ELSE}glClientActiveTextureARB{$ENDIF}(GL_TEXTURE0 + VTexture);
 end;
 
 procedure TSGRenderOpenGL.ColorMaterial(const r,g,b,a : TSGSingle);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColor4f = nil then TSGRenderOpenGL_DynLinkError('glColor4f');{$ENDIF}
 glColor4f(r,g,b,a);
 end;
 
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
 SGRGLSetMatrix(SGGetOrthoMatrix(l,r,b,t,vNear,vFar));
 end;
 
 procedure TSGRenderOpenGL.Vertex3fv(const Variable : TSGPointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertex3fv = nil then TSGRenderOpenGL_DynLinkError('glVertex3fv');{$ENDIF}
 {$IFNDEF MOBILE}
 	glVertex3fv(Variable);
 {$ELSE}
@@ -610,6 +669,7 @@ end;
 
 procedure TSGRenderOpenGL.Normal3fv(const Variable : TSGPointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glNormal3fv = nil then TSGRenderOpenGL_DynLinkError('glNormal3fv');{$ENDIF}
 {$IFNDEF MOBILE}
 	glNormal3fv(Variable);
 {$ELSE}
@@ -619,43 +679,51 @@ end;
 
 procedure TSGRenderOpenGL.LoadMatrixf(const Variable : TSGPointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLoadMatrixf = nil then TSGRenderOpenGL_DynLinkError('glLoadMatrixf');{$ENDIF}
 glLoadMatrixf(Variable);
 end;
 
 procedure TSGRenderOpenGL.MultMatrixf(const Variable : TSGPointer);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMultMatrixf = nil then TSGRenderOpenGL_DynLinkError('glMultMatrixf');{$ENDIF}
 glMultMatrixf(Variable);
 end;
 
 procedure TSGRenderOpenGL.PushMatrix();
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPushMatrix = nil then TSGRenderOpenGL_DynLinkError('glPushMatrix');{$ENDIF}
 glPushMatrix();
 end;
 
 procedure TSGRenderOpenGL.PopMatrix();
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPopMatrix = nil then TSGRenderOpenGL_DynLinkError('glPopMatrix');{$ENDIF}
 glPopMatrix();
 end;
 
 procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
 SGRGLSetMatrix(SGGetLookAtMatrix(Eve,At,Up));
 end;
 
 procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type);inline;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
 SGRGLSetMatrix(SGGetPerspectiveMatrix(vAngle,vAspectRatio,vNear,vFar));
 end;
 
 procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLoadMatrixf = nil then TSGRenderOpenGL_DynLinkError('glLoadMatrixf');{$ENDIF}
 glLoadMatrixf(@vMatrix);
 end;
 
 procedure TSGRenderOpenGL.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDrawArrays = nil then TSGRenderOpenGL_DynLinkError('glDrawArrays');{$ENDIF}
 glDrawArrays(VParam,VFirst,VCount);
 end;
 
@@ -691,17 +759,20 @@ end;
 
 procedure TSGRenderOpenGL.PointSize(const PS:Single);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPointSize = nil then TSGRenderOpenGL_DynLinkError('glPointSize');{$ENDIF}
 glPointSize(PS);
 end;
 
 procedure TSGRenderOpenGL.LineWidth(const VLW:Single);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLineWidth = nil then TSGRenderOpenGL_DynLinkError('glLineWidth');{$ENDIF}
 glLineWidth(VLW);
 end;
 
 procedure TSGRenderOpenGL.Vertex3f(const x,y,z:single);
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertex3f = nil then TSGRenderOpenGL_DynLinkError('glVertex3f');{$ENDIF}
 	glVertex3f(x,y,z);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -753,9 +824,15 @@ begin
 {$IFNDEF SGINTERPRITATEBEGINEND}
 	{$IFNDEF MOBILE}
 		if IsEnabled(GL_BLEND) then
-			glColor4f(r,g,b,1)
+			begin
+			{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColor4f = nil then TSGRenderOpenGL_DynLinkError('glColor4f');{$ENDIF}
+			glColor4f(r,g,b,1);
+			end
 		else
+			begin
+			{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColor3f = nil then TSGRenderOpenGL_DynLinkError('glColor3f');{$ENDIF}
 			glColor3f(r,g,b);
+			end;
 	{$ELSE}
 		glColor4f(r,g,b,1)
 		{$ENDIF}
@@ -767,6 +844,7 @@ end;
 procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
 begin 
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexCoord2f = nil then TSGRenderOpenGL_DynLinkError('glTexCoord2f');{$ENDIF}
 	glTexCoord2f(x,y);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -777,6 +855,7 @@ end;
 procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertex2f = nil then TSGRenderOpenGL_DynLinkError('glVertex2f');{$ENDIF}
 	glVertex2f(x,y);
 {$ELSE}
 	Vertex3f(x,y,0);
@@ -786,6 +865,7 @@ end;
 procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single); 
 begin 
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColor4f = nil then TSGRenderOpenGL_DynLinkError('glColor4f');{$ENDIF}
 	glColor4f(r,g,b,a);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -800,6 +880,7 @@ end;
 procedure TSGRenderOpenGL.Normal3f(const x,y,z:single); 
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glNormal3f = nil then TSGRenderOpenGL_DynLinkError('glNormal3f');{$ENDIF}
 	glNormal3f(x,y,z);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -810,6 +891,7 @@ end;
 procedure TSGRenderOpenGL.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBegin = nil then TSGRenderOpenGL_DynLinkError('glBegin');{$ENDIF}
 	glBegin(VPrimitiveType);
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -826,6 +908,7 @@ procedure TSGRenderOpenGL.EndScene();
 	{$ENDIF}
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
+	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glEnd = nil then TSGRenderOpenGL_DynLinkError('glEnd');{$ENDIF}
 	glEnd();
 	{$ENDIF}
 {$IFDEF SGINTERPRITATEBEGINEND}
@@ -885,6 +968,7 @@ var
 {$ENDIF}
 begin 
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTranslatef = nil then TSGRenderOpenGL_DynLinkError('glTranslatef');{$ENDIF}
 glTranslatef(x,y,z);
 {$ELSE}
 Matrix := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
@@ -901,6 +985,7 @@ var
 {$ENDIF}
 begin 
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glRotatef = nil then TSGRenderOpenGL_DynLinkError('glRotatef');{$ENDIF}
 glRotatef(angle,x,y,z);
 {$ELSE}
 Matrix := SGGetRotateMatrix(Angle * DEG2RAD, SGVertex3fImport(x, y, z));
@@ -916,6 +1001,7 @@ begin
 	GL_TEXTURE_2D : FTextureEnabled := True;
 	end;
 	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glEnable = nil then TSGRenderOpenGL_DynLinkError('glEnable');{$ENDIF}
 glEnable(VParam);
 end;
 
@@ -927,6 +1013,7 @@ begin
 	GL_TEXTURE_2D : FTextureEnabled := False;
 	end;
 	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDisable = nil then TSGRenderOpenGL_DynLinkError('glDisable');{$ENDIF}
 glDisable(VParam);
 end;
 
@@ -949,6 +1036,7 @@ for i:=0 to VQuantity-1 do
 	FArTextures[VTextures[i]-1].FTexture:=0;
 	end;
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDeleteTextures = nil then TSGRenderOpenGL_DynLinkError('glDeleteTextures');{$ENDIF}
 glDeleteTextures(VQuantity,VTextures);
 {$ENDIF}
 end;
@@ -959,6 +1047,7 @@ type
 var
 	Ar:TSGPointer = nil;
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLightfv = nil then TSGRenderOpenGL_DynLinkError('glLightfv');{$ENDIF}
 if VParam=SGR_POSITION then
 	begin
 	System.GetMem(Ar,4*Sizeof(TSGSingle));
@@ -990,6 +1079,7 @@ for i:=0 to VQuantity-1 do
 	VTextures[i]:=Length(FArTextures);
 	end;
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGenTextures = nil then TSGRenderOpenGL_DynLinkError('glGenTextures');{$ENDIF}
 glGenTextures(VQuantity,VTextures);
 {$ENDIF}
 end;
@@ -1008,22 +1098,26 @@ else
 	glBindTexture(VParam,FArTextures[FBindedTexture].FTexture);
 	end;
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBindTexture = nil then TSGRenderOpenGL_DynLinkError('glBindTexture');{$ENDIF}
 glBindTexture(VParam,VTexture);
 {$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.TexParameteri(const VP1,VP2,VP3:Cardinal); 
-begin 
+begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexParameteri = nil then TSGRenderOpenGL_DynLinkError('glTexParameteri');{$ENDIF}
 glTexParameteri(VP1,VP2,VP3);
 end;
 
 procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPixelStorei = nil then TSGRenderOpenGL_DynLinkError('glPixelStorei');{$ENDIF}
 glPixelStorei(VParamName,VParam);
 end;
 
 procedure TSGRenderOpenGL.TexEnvi(const VP1,VP2,VP3:Cardinal); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexEnvi = nil then TSGRenderOpenGL_DynLinkError('glTexEnvi');{$ENDIF}
 glTexEnvi(VP1,VP2,VP3);
 end;
 
@@ -1048,26 +1142,31 @@ FS.Destroy();
 FArTextures[FBindedTexture].FSaved := True;
 SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : Saved : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
 {$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexImage2D = nil then TSGRenderOpenGL_DynLinkError('glTexImage2D');{$ENDIF}
 glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
 
 procedure TSGRenderOpenGL.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
-begin 
+begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glReadPixels = nil then TSGRenderOpenGL_DynLinkError('glReadPixels');{$ENDIF}
 glReadPixels(x,y,Vwidth,Vheight,format, atype,pixels);
 end;
 
 procedure TSGRenderOpenGL.CullFace(const VParam:Cardinal); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCullFace = nil then TSGRenderOpenGL_DynLinkError('glCullFace');{$ENDIF}
 glCullFace(VParam);
 end;
 
 procedure TSGRenderOpenGL.EnableClientState(const VParam:Cardinal); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glEnableClientState = nil then TSGRenderOpenGL_DynLinkError('glEnableClientState');{$ENDIF}
 glEnableClientState(VParam);
 end;
 
 procedure TSGRenderOpenGL.DisableClientState(const VParam:Cardinal); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDisableClientState = nil then TSGRenderOpenGL_DynLinkError('glDisableClientState');{$ENDIF}
 glDisableClientState(VParam);
 end;
 
@@ -1088,6 +1187,7 @@ for i:=0 to VQ-1 do
 	PT[i]:=Length(FArBuffers);
 	end;
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGenBuffersARB = nil then TSGRenderOpenGL_DynLinkError('glGenBuffersARB');{$ENDIF}
 {$IFNDEF MOBILE}glGenBuffersARB{$ELSE}glGenBuffers{$ENDIF}(VQ,PT);
 {$ENDIF}
 end;
@@ -1108,6 +1208,7 @@ for i:=0 to VQuantity-1 do
 	FArBuffers[PCardinal(VPoint)[i]-1].FSaved:=False;
 	end;
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDeleteBuffersARB = nil then TSGRenderOpenGL_DynLinkError('glDeleteBuffersARB');{$ENDIF}
 {$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(VQuantity,VPoint);
 {$ENDIF}
 end;
@@ -1124,6 +1225,7 @@ if VParam2 = 0 then
 else
 	{$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,FArBuffers[VParam2-1].FBuffer);
 {$ELSE}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBindBufferARB = nil then TSGRenderOpenGL_DynLinkError('glBindBufferARB');{$ENDIF}
 {$IFNDEF MOBILE}glBindBufferARB{$ELSE}glBindBuffer{$ENDIF}(VParam,VParam2);
 {$ENDIF}
 end;
@@ -1150,41 +1252,49 @@ FS.Destroy();
 FArBuffers[i].FSaved := True;
 SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(i)+'", Size='+SGStr(VSize)+'.');
 {$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBufferDataARB = nil then TSGRenderOpenGL_DynLinkError('glBufferDataARB');{$ENDIF}
 {$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
 end;
 
 procedure TSGRenderOpenGL.DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer); 
-begin 
+begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDrawElements = nil then TSGRenderOpenGL_DynLinkError('glDrawElements');{$ENDIF}
 glDrawElements(VParam,VSize,VParam2,VBuffer);
 end;
 
 procedure TSGRenderOpenGL.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColorPointer = nil then TSGRenderOpenGL_DynLinkError('glColorPointer');{$ENDIF}
 glColorPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
 procedure TSGRenderOpenGL.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexCoordPointer = nil then TSGRenderOpenGL_DynLinkError('glTexCoordPointer');{$ENDIF}
 glTexCoordPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
 procedure TSGRenderOpenGL.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glNormalPointer = nil then TSGRenderOpenGL_DynLinkError('glNormalPointer');{$ENDIF}
 glNormalPointer(VType,VSize,VBuffer);
 end;
 
 procedure TSGRenderOpenGL.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertexPointer = nil then TSGRenderOpenGL_DynLinkError('glVertexPointer');{$ENDIF}
 glVertexPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
 function TSGRenderOpenGL.IsEnabled(const VParam:Cardinal):Boolean; 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glIsEnabled = nil then TSGRenderOpenGL_DynLinkError('glIsEnabled');{$ENDIF}
 glIsEnabled(VParam);
 end;
 
 procedure TSGRenderOpenGL.Clear(const VParam:Cardinal); 
 begin 
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glClear = nil then TSGRenderOpenGL_DynLinkError('glClear');{$ENDIF}
 glClear(VParam);
 end;
 
@@ -1394,6 +1504,7 @@ end;
 
 procedure TSGRenderOpenGL.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
 LoadIdentity();
 SGRGLOrtho(x0,x1,y0,y1,0,0.1);
@@ -1439,11 +1550,13 @@ end;
 
 procedure TSGRenderOpenGL.Viewport(const a,b,c,d:LongWord);
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glViewport = nil then TSGRenderOpenGL_DynLinkError('glViewport');{$ENDIF}
 glViewport(a,b,c,d);
 end;
 
 procedure TSGRenderOpenGL.LoadIdentity();
 begin
+{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLoadIdentity = nil then TSGRenderOpenGL_DynLinkError('glLoadIdentity');{$ENDIF}
 glLoadIdentity();
 end;
 
@@ -1464,7 +1577,10 @@ Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if SetPixelFormat() then
-			FContext := dglOpenGL.wglCreateContext( TSGLongWord(Context.Device) );
+			begin
+			{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if dglOpenGL.wglCreateContext = nil then TSGRenderOpenGL_DynLinkError('dglOpenGL.wglCreateContext');{$ENDIF}
+			FContext := dglOpenGL.wglCreateContext( TSGMaxEnum(Context.Device) );
+			end;
 		Result:=FContext<>0;
 	{$ELSE}
 		{$IFDEF ANDROID}
