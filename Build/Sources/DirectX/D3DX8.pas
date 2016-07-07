@@ -6116,24 +6116,30 @@ D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
 Load_HINT('Initialization D3DX8 unit from '+SGPCharToString(UnitName)+'/'+'d3dx8dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
-function Load_D3DX8() : Boolean;
+procedure LoadD3DX8();
 var
-	i : LongWord;
-	R : array[0..0] of Boolean;
+	DefDll : String;
+
+function TryLoadD3DX8(const DllName : PChar):Boolean;
 begin
-R[0] := Load_D3DX8_0(d3dx8dll);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
+Result := False;
+if (SGPCharToString(DllName) <> DefDll) then
+	Result := Load_D3DX8_0(DllName);
 end;
+
+begin
+DefDll := SGPCharToString(d3dx8dll);
+if not TryLoadD3DX8('D3DX81ab.dll') then
+if not TryLoadD3DX8('d3dx8.dll') then
+if not TryLoadD3DX8('d3dx8d.dll') then
+	Load_HINT('Initialization D3DX8 unit FAILED!!!');
+end;
+
 initialization
 begin
 Free_D3DX8();
-if not Load_D3DX8() then
-if not Load_D3DX8_0('D3DX81ab.dll') then
-if not Load_D3DX8_0('d3dx8.dll') then
-if not Load_D3DX8_0('d3dx8d.dll') then
-	;
+if not Load_D3DX8_0(d3dx8dll) then
+	LoadD3DX8();
 end;
 finalization
 begin

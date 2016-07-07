@@ -1715,7 +1715,21 @@ end;
 initialization
 begin
 Free_png();
-Load_png();
+if not Load_png() then
+if not Load_png_0('libpng12') then
+if not Load_png_0('libpng11') then
+if not Load_png_0('libpng10') then
+if not Load_png_0('libpng9') then
+if not Load_png_0('libpng8') then
+if not Load_png_0('libpng7') then
+if not Load_png_0('libpng6') then
+if not Load_png_0('libpng5') then
+if not Load_png_0('libpng4') then
+if not Load_png_0('libpng3') then
+if not Load_png_0('libpng2') then
+if not Load_png_0('libpng1') then
+if not Load_png_0('libpng') then
+	Load_HINT('Initialization "PNG" unit FAILED!!!');
 end;
 finalization
 begin

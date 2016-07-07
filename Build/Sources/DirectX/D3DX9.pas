@@ -13283,14 +13283,24 @@ var
 	i : LongWord;
 	R : array[0..7] of Boolean;
 begin
-R[0] := Load_D3DX9_0(d3dx9mathDLL);
-R[1] := Load_D3DX9_1(d3dx9coreDLL);
-R[2] := Load_D3DX9_2(d3dx9shaderDLL);
-R[3] := Load_D3DX9_3(d3dx9effectDLL);
-R[4] := Load_D3DX9_4(d3dx9meshDLL);
-R[5] := Load_D3DX9_5(d3dx9shapesDLL);
-R[6] := Load_D3DX9_6(d3dx9texDLL);
-R[7] := Load_D3DX9_7(d3dx9animDLL);
+Result := False;
+FillChar(R, SizeOf(R), 0);
+if LoadLibrary(d3dx9mathDLL) <> 0 then
+	R[0] := Load_D3DX9_0(d3dx9mathDLL);
+if LoadLibrary(d3dx9coreDLL) <> 0 then
+	R[1] := Load_D3DX9_1(d3dx9coreDLL);
+if LoadLibrary(d3dx9shaderDLL) <> 0 then
+	R[2] := Load_D3DX9_2(d3dx9shaderDLL);
+if LoadLibrary(d3dx9effectDLL) <> 0 then
+	R[3] := Load_D3DX9_3(d3dx9effectDLL);
+if LoadLibrary(d3dx9meshDLL) <> 0 then
+	R[4] := Load_D3DX9_4(d3dx9meshDLL);
+if LoadLibrary(d3dx9shapesDLL) <> 0 then
+	R[5] := Load_D3DX9_5(d3dx9shapesDLL);
+if LoadLibrary(d3dx9texDLL) <> 0 then
+	R[6] := Load_D3DX9_6(d3dx9texDLL);
+if LoadLibrary(d3dx9animDLL) <> 0 then
+	R[7] := Load_D3DX9_7(d3dx9animDLL);
 Result := True;
 for i := 0 to 7 do
 	Result := Result and R[i];
@@ -13301,15 +13311,20 @@ var
 	R : array[0..7] of Boolean;
 	LNPC : PChar;
 begin
+Result := False;
+FillChar(R, SizeOf(R), 0);
 LNPC := SGStringToPChar(LN);
 R[0] := Load_D3DX9_0(LNPC);
-R[1] := Load_D3DX9_1(LNPC);
-R[2] := Load_D3DX9_2(LNPC);
-R[3] := Load_D3DX9_3(LNPC);
-R[4] := Load_D3DX9_4(LNPC);
-R[5] := Load_D3DX9_5(LNPC);
-R[6] := Load_D3DX9_6(LNPC);
-R[7] := Load_D3DX9_7(LNPC);
+if R[0] then
+	begin
+	R[1] := Load_D3DX9_1(LNPC);
+	R[2] := Load_D3DX9_2(LNPC);
+	R[3] := Load_D3DX9_3(LNPC);
+	R[4] := Load_D3DX9_4(LNPC);
+	R[5] := Load_D3DX9_5(LNPC);
+	R[6] := Load_D3DX9_6(LNPC);
+	R[7] := Load_D3DX9_7(LNPC);
+	end;
 FreeMem(LNPC);
 Result := True;
 for i := 0 to 7 do
@@ -13321,20 +13336,26 @@ var
 	R : Boolean = False;
 begin
 if not R then R := Load_D3DX9_FromLibrary('d3dx9.dll');
+if not R then R := Load_D3DX9_FromLibrary('d3dx9_33.dll');
 for i := 43 downto 24 do
-	begin
-	if not R then R := Load_D3DX9_FromLibrary('d3dx9_'+SGStr(i)+'.dll');
-	if not R then R := Load_D3DX9_FromLibrary('d3dx9d_'+SGStr(i)+'.dll');
-	if R then break;
-	end;
+	if i <> 33 then
+		begin
+		if R then break;
+		if not R then R := Load_D3DX9_FromLibrary('d3dx9_'+SGStr(i)+'.dll');
+		if R then break;
+		if not R then R := Load_D3DX9_FromLibrary('d3dx9d_'+SGStr(i)+'.dll');
+		if R then break;
+		end;
 if not R then R := Load_D3DX9_FromLibrary('d3dx9d.dll');
+if not R then R := Load_D3DX9_FromLibrary('d3dx9d_33.dll');
 Result := R;
 end;
 initialization
 begin
 Free_D3DX9();
 if not Load_D3DX9() then
-	LoadD3DX9();
+if not LoadD3DX9() then
+	Load_HINT('Initialization D3DX9 unit FAILED!!!');
 end;
 finalization
 begin
