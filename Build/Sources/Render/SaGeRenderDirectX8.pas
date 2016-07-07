@@ -1561,15 +1561,19 @@ end;
 
 function TSGRenderDirectX8.CreateContext():Boolean;
 var
-	d3dpp:D3DPRESENT_PARAMETERS;
-	MultiSampleType : D3DMULTISAMPLE_TYPE;
-	MultiSampleMaxQuality : TSGLongWord;
-
-{!!procedure FindMaxMultisample();
-var
-	Samples : array[0..16] of D3DMULTISAMPLE_TYPE = (
+	d3dpp                 : D3DPRESENT_PARAMETERS;
+	D3DFMT_List : array[0..7] of TSGMaxEnum = (
+		D3DFMT_UNKNOWN,
+		D3DFMT_D15S1,
+		D3DFMT_D16_LOCKABLE,
+		D3DFMT_D16,
+		D3DFMT_D24X8,
+		D3DFMT_D24S8,
+		D3DFMT_D24X4S4,
+		D3DFMT_D32
+		);
+	D3DMULTISAMPLE_List : array[0..15] of D3DMULTISAMPLE_TYPE = (
 		D3DMULTISAMPLE_NONE,
-		D3DMULTISAMPLE_NONMASKABLE,
 		D3DMULTISAMPLE_2_SAMPLES,
 		D3DMULTISAMPLE_3_SAMPLES,
 		D3DMULTISAMPLE_4_SAMPLES,
@@ -1585,37 +1589,49 @@ var
 		D3DMULTISAMPLE_14_SAMPLES,
 		D3DMULTISAMPLE_15_SAMPLES,
 		D3DMULTISAMPLE_16_SAMPLES );
-	Index : TSGLongWord;
-	Finded : TSGBoolean = False;
-begin
-for Index := High(Samples) downto Low(Samples) do
-	begin
-	if SUCCEEDED(pD3D.CheckDeviceMultiSampleType(
-          D3DADAPTER_DEFAULT, 
-          D3DDEVTYPE_HAL,
-          D3DFMT_X8R8G8B8, 
-          False, 
-          Samples[Index],
-          @MultiSampleMaxQuality
-       )) then 
-		begin
-		Finded := True;
-		MultiSampleType := Samples[Index];
-		SGLog.Sourse(['TSGRenderDirectX8__CreateContext_FindMaxMultisample : ',D3DMULTISAMPLE_16_SAMPLES,'-',MultiSampleMaxQuality,'']);
-		break;
-		end;
-	end;
-if not Finded then
-	begin
-	MultiSampleType := D3DMULTISAMPLE_NONE;
-	MultiSampleMaxQuality := 0;
-	end;
-end;}
 
+function D3DMULTISAMPLE_Str(const MS : D3DMULTISAMPLE_TYPE):TSGString;
+begin
+case MS of
+D3DMULTISAMPLE_NONE       : Result := 'D3DMULTISAMPLE_NONE';
+D3DMULTISAMPLE_2_SAMPLES  : Result := 'D3DMULTISAMPLE_2_SAMPLES';
+D3DMULTISAMPLE_3_SAMPLES  : Result := 'D3DMULTISAMPLE_3_SAMPLES';
+D3DMULTISAMPLE_4_SAMPLES  : Result := 'D3DMULTISAMPLE_4_SAMPLES';
+D3DMULTISAMPLE_5_SAMPLES  : Result := 'D3DMULTISAMPLE_5_SAMPLES';
+D3DMULTISAMPLE_6_SAMPLES  : Result := 'D3DMULTISAMPLE_6_SAMPLES';
+D3DMULTISAMPLE_7_SAMPLES  : Result := 'D3DMULTISAMPLE_7_SAMPLES';
+D3DMULTISAMPLE_8_SAMPLES  : Result := 'D3DMULTISAMPLE_8_SAMPLES';
+D3DMULTISAMPLE_9_SAMPLES  : Result := 'D3DMULTISAMPLE_9_SAMPLES';
+D3DMULTISAMPLE_10_SAMPLES : Result := 'D3DMULTISAMPLE_10_SAMPLES';
+D3DMULTISAMPLE_11_SAMPLES : Result := 'D3DMULTISAMPLE_11_SAMPLES';
+D3DMULTISAMPLE_12_SAMPLES : Result := 'D3DMULTISAMPLE_12_SAMPLES';
+D3DMULTISAMPLE_13_SAMPLES : Result := 'D3DMULTISAMPLE_13_SAMPLES';
+D3DMULTISAMPLE_14_SAMPLES : Result := 'D3DMULTISAMPLE_14_SAMPLES';
+D3DMULTISAMPLE_15_SAMPLES : Result := 'D3DMULTISAMPLE_15_SAMPLES';
+D3DMULTISAMPLE_16_SAMPLES : Result := 'D3DMULTISAMPLE_16_SAMPLES';
+end;
+end;
+
+function D3DFMT_Str(const FMT : TSGMaxEnum) : TSGString;
+begin
+case FMT of
+D3DFMT_UNKNOWN       : Result := 'D3DFMT_UNKNOWN';
+D3DFMT_D15S1         : Result := 'D3DFMT_D15S1';
+D3DFMT_D16_LOCKABLE  : Result := 'D3DFMT_D16_LOCKABLE';
+D3DFMT_D16           : Result := 'D3DFMT_D16';
+D3DFMT_D24X8         : Result := 'D3DFMT_D24X8';
+D3DFMT_D24S8         : Result := 'D3DFMT_D24S8';
+D3DFMT_D24X4S4       : Result := 'D3DFMT_D24X4S4';
+D3DFMT_D32           : Result := 'D3DFMT_D32';
+end;
+end;
+
+var
+	i, ii : TSGByte;
 begin
 if (pD3D = nil) then
 	begin
-	pD3D:=Direct3DCreate8( D3D_SDK_VERSION );
+	pD3D := Direct3DCreate8( D3D_SDK_VERSION );
 	SGLog.Sourse(['TSGRenderDirectX8__CreateContext : IDirect3D8="',TSGMaxEnum(Pointer(pD3D)),'"']);
 	if pD3d = nil then
 		begin
@@ -1625,30 +1641,47 @@ if (pD3D = nil) then
 	end;
 if pDevice = nil then
 	begin
-	//!!FindMaxMultisample();
-	
-	FillChar(d3dpp,SizeOf(d3dpp),0);
-	d3dpp.Windowed               := True;
-	d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
-	d3dpp.hDeviceWindow          := TSGLongWord(Context.Window);
-	d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
-	d3dpp.BackBufferWidth        := Context.Width;
-	d3dpp.BackBufferHeight       := Context.Height;
-	d3dpp.EnableAutoDepthStencil := True;
-	d3dpp.AutoDepthStencilFormat := D3DFMT_D24X8;
-	//!!d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
-	d3dpp.MultiSampleType        := MultiSampleType;
-	//d3dpp.MultiSampleQuality     := 0;
-
-	if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGLongWord(Context.Window),
-			D3DCREATE_SOFTWARE_VERTEXPROCESSING, d3dpp, pDevice))) then
+	Result := False;
+	for i := High(D3DFMT_List) downto Low(D3DFMT_List) do
 		begin
-		SGLog.Sourse(['TSGRenderDirectX8__CreateContext : IDirect3DDevice8="',TSGMaxEnum(Pointer(pDevice)),'"']);
-		Result:=False;
-		exit;
+		for ii := High(D3DMULTISAMPLE_List) downto Low(D3DMULTISAMPLE_List) do
+			begin
+			FillChar(d3dpp,SizeOf(d3dpp),0);
+			d3dpp.Windowed               := True;
+			d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
+			d3dpp.hDeviceWindow          := TSGMaxEnum(Context.Window);
+			d3dpp.BackBufferCount        := 1;
+			d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
+			d3dpp.BackBufferWidth        := Context.Width;
+			d3dpp.BackBufferHeight       := Context.Height;
+			d3dpp.EnableAutoDepthStencil := True;
+			d3dpp.AutoDepthStencilFormat := D3DFMT_List[i];
+			d3dpp.MultiSampleType        := D3DMULTISAMPLE_List[ii];
+
+			if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
+					D3DCREATE_SOFTWARE_VERTEXPROCESSING, d3dpp, pDevice))) then
+				begin
+				{$IFDEF RENDER_DX8_DEBUG}
+				SGLog.Sourse(['TSGRenderDirectX8__CreateContext : Failed create device with: DepthFormat = '+D3DFMT_Str(d3dpp.AutoDepthStencilFormat)+', MultiSampleType = ',D3DMULTISAMPLE_Str(d3dpp.MultiSampleType)]);
+				{$ENDIF}
+				end
+			else
+				break;
+			end;
+		if pDevice <> nil then
+			break;
 		end;
-	SGLog.Sourse(['TSGRenderDirectX8__CreateContext : IDirect3DDevice8="',TSGMaxEnum(Pointer(pDevice)),'"']);
-	Result:=True;
+	if pDevice <> nil then
+		begin
+		SGLog.Sourse(['TSGRenderDirectX8__CreateContext : IDirect3DDevice8 = "',TSGMaxEnum(Pointer(pDevice)),'", DepthFormat = '+D3DFMT_Str(d3dpp.AutoDepthStencilFormat)+', MultiSampleType = ',D3DMULTISAMPLE_Str(d3dpp.MultiSampleType)]);
+		Result := True;
+		end
+	else
+		begin
+		{$IFNDEF RENDER_DX8_DEBUG}
+		SGLog.Sourse(['TSGRenderDirectX8__CreateContext : Failed create device with anything params...']);
+		{$ENDIF}
+		end;
 	end
 else
 	begin
