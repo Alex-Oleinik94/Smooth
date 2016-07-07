@@ -416,14 +416,16 @@ function D3DXColorEqual(const c1, c2: TD3DXColor): Boolean;{$IFDEF ALLOW_INLINE}
 
 // non-inline
 
-// Converts an array 32-bit floats to 16-bit floats
+// Converts an array 32-bit floats to 16-bit floats
+
 (*
 function D3DXFloat32To16Array(pOut: PD3DXFloat16; pIn: PSingle; n: LongWord): PD3DXFloat16; stdcall; external d3dx9mathDLL;
 *)
 var D3DXFloat32To16Array : function( pOut : PD3DXFloat16 ; pIn : PSingle ; n : LongWord ) : PD3DXFloat16 ; stdcall ; 
 
 
-// Converts an array 16-bit floats to 32-bit floats
+// Converts an array 16-bit floats to 32-bit floats
+
 (*
 function D3DXFloat16To32Array(pOut: PSingle; pIn: PD3DXFloat16; n: LongWord): PSingle; stdcall; external d3dx9mathDLL;
 *)
@@ -461,7 +463,8 @@ function D3DXVec2Scale(out vOut: TD3DXVector2; const v: TD3DXVector2; s: Single)
 // Linear interpolation. V1 + s(V2-V1)
 function D3DXVec2Lerp(out vOut: TD3DXVector2; const v1, v2: TD3DXVector2; s: Single): PD3DXVector2;{$IFDEF ALLOW_INLINE} inline;{$ENDIF}
 
-// non-inline
+// non-inline
+
 (*
 function D3DXVec2Normalize(out vOut: TD3DXVector2; const v: TD3DXVector2): PD3DXVector2; stdcall; external d3dx9mathDLL;
 *)
@@ -469,7 +472,8 @@ var D3DXVec2Normalize : function( out vOut : TD3DXVector2 ; const v : TD3DXVecto
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 function D3DXVec2Hermite(out vOut: TD3DXVector2;
    const v1, t1, v2, t2: TD3DXVector2; s: Single): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -477,7 +481,8 @@ function D3DXVec2Hermite(out vOut: TD3DXVector2;
 var D3DXVec2Hermite : function( out vOut : TD3DXVector2 ; const v1 , t1 , v2 , t2 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ; 
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 function D3DXVec2CatmullRom(out vOut: TD3DXVector2;
    const v0, v1, v2, v3: TD3DXVector2; s: Single): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -485,7 +490,8 @@ function D3DXVec2CatmullRom(out vOut: TD3DXVector2;
 var D3DXVec2CatmullRom : function( out vOut : TD3DXVector2 ; const v0 , v1 , v2 , v3 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ; 
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 function D3DXVec2BaryCentric(out vOut: TD3DXVector2;
    const v1, v2, v3: TD3DXVector2; f, g: Single): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -493,7 +499,8 @@ function D3DXVec2BaryCentric(out vOut: TD3DXVector2;
 var D3DXVec2BaryCentric : function( out vOut : TD3DXVector2 ; const v1 , v2 , v3 : TD3DXVector2 ; f , g : Single ) : PD3DXVector2 ; stdcall ; 
 
 
-// Transform (x, y, 0, 1) by matrix.
+// Transform (x, y, 0, 1) by matrix.
+
 (*
 function D3DXVec2Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -501,7 +508,8 @@ function D3DXVec2Transform(out vOut: TD3DXVector4;
 var D3DXVec2Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform (x, y, 0, 1) by matrix, project result back into w=1.
+// Transform (x, y, 0, 1) by matrix, project result back into w=1.
+
 (*
 function D3DXVec2TransformCoord(out vOut: TD3DXVector2;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -509,7 +517,8 @@ function D3DXVec2TransformCoord(out vOut: TD3DXVector2;
 var D3DXVec2TransformCoord : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector2 ; stdcall ; 
 
 
-// Transform (x, y, 0, 0) by matrix.
+// Transform (x, y, 0, 0) by matrix.
+
 (*
 function D3DXVec2TransformNormal(out vOut: TD3DXVector2;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -518,7 +527,8 @@ var D3DXVec2TransformNormal : function( out vOut : TD3DXVector2 ; const v : TD3D
 
 
 
-// Transform Array (x, y, 0, 1) by matrix.
+// Transform Array (x, y, 0, 1) by matrix.
+
 (*
 function D3DXVec2TransformArray(pOut: PD3DXVector4; OutStride: LongWord;
   pV: PD3DXVector2; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -526,7 +536,8 @@ function D3DXVec2TransformArray(pOut: PD3DXVector4; OutStride: LongWord;
 var D3DXVec2TransformArray : function( pOut : PD3DXVector4 ; OutStride : LongWord ; pV : PD3DXVector2 ; VStride : LongWord ; const m : TD3DXMatrix ; n : LongWord ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform Array (x, y, 0, 1) by matrix, project result back into w=1.
+// Transform Array (x, y, 0, 1) by matrix, project result back into w=1.
+
 (*
 function D3DXVec2TransformCoordArray(pOut: PD3DXVector2; OutStride: LongWord;
   pV: PD3DXVector2; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -534,7 +545,8 @@ function D3DXVec2TransformCoordArray(pOut: PD3DXVector2; OutStride: LongWord;
 var D3DXVec2TransformCoordArray : function( pOut : PD3DXVector2 ; OutStride : LongWord ; pV : PD3DXVector2 ; VStride : LongWord ; const m : TD3DXMatrix ; n : LongWord ) : PD3DXVector2 ; stdcall ; 
 
 
-// Transform Array (x, y, 0, 0) by matrix.
+// Transform Array (x, y, 0, 0) by matrix.
+
 (*
 function D3DXVec2TransformNormalArray(pOut: PD3DXVector2; OutStride: LongWord;
   pV: PD3DXVector2; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector2; stdcall; external d3dx9mathDLL;
@@ -573,7 +585,8 @@ function D3DXVec3Scale(out vOut: TD3DXVector3; const v: TD3DXVector3; s: Single)
 function D3DXVec3Lerp(out vOut: TD3DXVector3;
   const v1, v2: TD3DXVector3; s: Single): PD3DXVector3;{$IFDEF ALLOW_INLINE} inline;{$ENDIF}
 
-// non-inline
+// non-inline
+
 (*
 
 function D3DXVec3Normalize(out vOut: TD3DXVector3;
@@ -583,7 +596,8 @@ var D3DXVec3Normalize : function( out vOut : TD3DXVector3 ; const v : TD3DXVecto
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 function D3DXVec3Hermite(out vOut: TD3DXVector3;
    const v1, t1, v2, t2: TD3DXVector3; s: Single): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -591,7 +605,8 @@ function D3DXVec3Hermite(out vOut: TD3DXVector3;
 var D3DXVec3Hermite : function( out vOut : TD3DXVector3 ; const v1 , t1 , v2 , t2 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ; 
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 function D3DXVec3CatmullRom(out vOut: TD3DXVector3;
    const v0, v1, v2, v3: TD3DXVector3; s: Single): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -599,7 +614,8 @@ function D3DXVec3CatmullRom(out vOut: TD3DXVector3;
 var D3DXVec3CatmullRom : function( out vOut : TD3DXVector3 ; const v0 , v1 , v2 , v3 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ; 
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 function D3DXVec3BaryCentric(out vOut: TD3DXVector3;
    const v1, v2, v3: TD3DXVector3; f, g: Single): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -607,7 +623,8 @@ function D3DXVec3BaryCentric(out vOut: TD3DXVector3;
 var D3DXVec3BaryCentric : function( out vOut : TD3DXVector3 ; const v1 , v2 , v3 : TD3DXVector3 ; f , g : Single ) : PD3DXVector3 ; stdcall ; 
 
 
-// Transform (x, y, z, 1) by matrix.
+// Transform (x, y, z, 1) by matrix.
+
 (*
 function D3DXVec3Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -615,7 +632,8 @@ function D3DXVec3Transform(out vOut: TD3DXVector4;
 var D3DXVec3Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform (x, y, z, 1) by matrix, project result back into w=1.
+// Transform (x, y, z, 1) by matrix, project result back into w=1.
+
 (*
 function D3DXVec3TransformCoord(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -625,7 +643,8 @@ var D3DXVec3TransformCoord : function( out vOut : TD3DXVector3 ; const v : TD3DX
 
 // Transform (x, y, z, 0) by matrix.  If you transforming a normal by a
 // non-affine matrix, the matrix you pass to this function should be the
-// transpose of the inverse of the matrix you would use to transform a coord.
+// transpose of the inverse of the matrix you would use to transform a coord.
+
 (*
 function D3DXVec3TransformNormal(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -634,7 +653,8 @@ var D3DXVec3TransformNormal : function( out vOut : TD3DXVector3 ; const v : TD3D
 
 
 
-// Transform Array (x, y, z, 1) by matrix.
+// Transform Array (x, y, z, 1) by matrix.
+
 (*
 function D3DXVec3TransformArray(pOut: PD3DXVector4; OutStride: LongWord;
   pV: PD3DXVector3; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -642,7 +662,8 @@ function D3DXVec3TransformArray(pOut: PD3DXVector4; OutStride: LongWord;
 var D3DXVec3TransformArray : function( pOut : PD3DXVector4 ; OutStride : LongWord ; pV : PD3DXVector3 ; VStride : LongWord ; const m : TD3DXMatrix ; n : LongWord ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform Array (x, y, z, 1) by matrix, project result back into w=1.
+// Transform Array (x, y, z, 1) by matrix, project result back into w=1.
+
 (*
 function D3DXVec3TransformCoordArray(pOut: PD3DXVector3; OutStride: LongWord;
   pV: PD3DXVector3; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -652,7 +673,8 @@ var D3DXVec3TransformCoordArray : function( pOut : PD3DXVector3 ; OutStride : Lo
 
 // Transform (x, y, z, 0) by matrix.  If you transforming a normal by a
 // non-affine matrix, the matrix you pass to this function should be the
-// transpose of the inverse of the matrix you would use to transform a coord.
+// transpose of the inverse of the matrix you would use to transform a coord.
+
 (*
 function D3DXVec3TransformNormalArray(pOut: PD3DXVector3; OutStride: LongWord;
   pV: PD3DXVector3; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -660,7 +682,8 @@ function D3DXVec3TransformNormalArray(pOut: PD3DXVector3; OutStride: LongWord;
 var D3DXVec3TransformNormalArray : function( pOut : PD3DXVector3 ; OutStride : LongWord ; pV : PD3DXVector3 ; VStride : LongWord ; const m : TD3DXMatrix ; n : LongWord ) : PD3DXVector3 ; stdcall ; 
 
 
-// Project vector from object space into screen space
+// Project vector from object space into screen space
+
 (*
 function D3DXVec3Project(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const pViewport: TD3DViewport9;
@@ -669,7 +692,8 @@ function D3DXVec3Project(out vOut: TD3DXVector3;
 var D3DXVec3Project : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport9 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
 
 
-// Project vector from screen space into object space
+// Project vector from screen space into object space
+
 (*
 function D3DXVec3Unproject(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const pViewport: TD3DViewport9;
@@ -678,7 +702,8 @@ function D3DXVec3Unproject(out vOut: TD3DXVector3;
 var D3DXVec3Unproject : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport9 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
 
 
-// Project vector Array from object space into screen space
+// Project vector Array from object space into screen space
+
 (*
 function D3DXVec3ProjectArray(pOut: PD3DXVector3; OutStride: LongWord;
   pV: PD3DXVector3; VStride: LongWord; const pViewport: TD3DViewport9;
@@ -687,7 +712,8 @@ function D3DXVec3ProjectArray(pOut: PD3DXVector3; OutStride: LongWord;
 var D3DXVec3ProjectArray : function( pOut : PD3DXVector3 ; OutStride : LongWord ; pV : PD3DXVector3 ; VStride : LongWord ; const pViewport : TD3DViewport9 ; const pProjection , pView , pWorld : TD3DXMatrix ; n : LongWord ) : PD3DXVector3 ; stdcall ; 
 
 
-// Project vector Array from screen space into object space
+// Project vector Array from screen space into object space
+
 (*
 function D3DXVec3UnprojectArray(pOut: PD3DXVector3; OutStride: LongWord;
   pV: PD3DXVector3; VStride: LongWord; const pViewport: TD3DViewport9;
@@ -727,7 +753,8 @@ function D3DXVec4Lerp(out vOut: TD3DXVector4;
 
 // non-inline
 
-// Cross-product in 4 dimensions.
+// Cross-product in 4 dimensions.
+
 (*
 function D3DXVec4Cross(out vOut: TD3DXVector4;
   const v1, v2, v3: TD3DXVector4): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -736,6 +763,7 @@ var D3DXVec4Cross : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3
 
 (*
 
+
 function D3DXVec4Normalize(out vOut: TD3DXVector4;
   const v: TD3DXVector4): PD3DXVector4; stdcall; external d3dx9mathDLL;
 *)
@@ -743,7 +771,8 @@ var D3DXVec4Normalize : function( out vOut : TD3DXVector4 ; const v : TD3DXVecto
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 function D3DXVec4Hermite(out vOut: TD3DXVector4;
    const v1, t1, v2, t2: TD3DXVector4; s: Single): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -751,7 +780,8 @@ function D3DXVec4Hermite(out vOut: TD3DXVector4;
 var D3DXVec4Hermite : function( out vOut : TD3DXVector4 ; const v1 , t1 , v2 , t2 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ; 
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 function D3DXVec4CatmullRom(out vOut: TD3DXVector4;
    const v0, v1, v2, v3: TD3DXVector4; s: Single): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -759,7 +789,8 @@ function D3DXVec4CatmullRom(out vOut: TD3DXVector4;
 var D3DXVec4CatmullRom : function( out vOut : TD3DXVector4 ; const v0 , v1 , v2 , v3 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ; 
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 function D3DXVec4BaryCentric(out vOut: TD3DXVector4;
    const v1, v2, v3: TD3DXVector4; f, g: Single): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -767,7 +798,8 @@ function D3DXVec4BaryCentric(out vOut: TD3DXVector4;
 var D3DXVec4BaryCentric : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3DXVector4 ; f , g : Single ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform vector by matrix.
+// Transform vector by matrix.
+
 (*
 function D3DXVec4Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector4; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -775,7 +807,8 @@ function D3DXVec4Transform(out vOut: TD3DXVector4;
 var D3DXVec4Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector4 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
 
 
-// Transform vector array by matrix.
+// Transform vector array by matrix.
+
 (*
 function D3DXVec4TransformArray(pOut: PD3DXVector4; OutStride: LongWord;
   pV: PD3DXVector4; VStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXVector4; stdcall; external d3dx9mathDLL;
@@ -794,7 +827,8 @@ function D3DXMatrixIdentity(out mOut: TD3DXMatrix): PD3DXMatrix;{$IFDEF ALLOW_IN
 
 function D3DXMatrixIsIdentity(const m: TD3DXMatrix): BOOL;{$IFDEF ALLOW_INLINE} inline;{$ENDIF}
 
-// non-inline
+// non-inline
+
 (*
 
 function D3DXMatrixDeterminant(const m: TD3DXMatrix): Single; stdcall; external d3dx9mathDLL;
@@ -803,6 +837,7 @@ var D3DXMatrixDeterminant : function( const m : TD3DXMatrix ) : Single ; stdcall
 
 (*
 
+
 function D3DXMatrixDecompose(pOutScale: PD3DXVector3; pOutRotation: PD3DXQuaternion;
    pOutTranslation: PD3DXVector3; const M: TD3DXMatrix): HRESULT; stdcall; external d3dx9mathDLL;
 *)
@@ -810,20 +845,23 @@ var D3DXMatrixDecompose : function( pOutScale : PD3DXVector3 ; pOutRotation : PD
 
 (*
 
+
 function D3DXMatrixTranspose(out pOut: TD3DXMatrix; const pM: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixTranspose : function( out pOut : TD3DXMatrix ; const pM : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
 
 
 // Matrix multiplication.  The result represents the transformation M2
-// followed by the transformation M1.  (Out = M1 * M2)
+// followed by the transformation M1.  (Out = M1 * M2)
+
 (*
 function D3DXMatrixMultiply(out mOut: TD3DXMatrix; const m1, m2: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixMultiply : function( out mOut : TD3DXMatrix ; const m1 , m2 : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
 
 
-// Matrix multiplication, followed by a transpose. (Out = T(M1 * M2))
+// Matrix multiplication, followed by a transpose. (Out = T(M1 * M2))
+
 (*
 function D3DXMatrixMultiplyTranspose(out pOut: TD3DXMatrix; const pM1, pM2: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
@@ -832,7 +870,8 @@ var D3DXMatrixMultiplyTranspose : function( out pOut : TD3DXMatrix ; const pM1 ,
 
 // Calculate inverse of matrix.  Inversion my fail, in which case NULL will
 // be returned.  The determinant of pM is also returned it pfDeterminant
-// is non-NULL.
+// is non-NULL.
+
 (*
 function D3DXMatrixInverse(out mOut: TD3DXMatrix; pfDeterminant: PSingle;
     const m: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -840,42 +879,48 @@ function D3DXMatrixInverse(out mOut: TD3DXMatrix; pfDeterminant: PSingle;
 var D3DXMatrixInverse : function( out mOut : TD3DXMatrix ; pfDeterminant : PSingle ; const m : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which scales by (sx, sy, sz)
+// Build a matrix which scales by (sx, sy, sz)
+
 (*
 function D3DXMatrixScaling(out mOut: TD3DXMatrix; sx, sy, sz: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixScaling : function( out mOut : TD3DXMatrix ; sx , sy , sz : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which translates by (x, y, z)
+// Build a matrix which translates by (x, y, z)
+
 (*
 function D3DXMatrixTranslation(out mOut: TD3DXMatrix; x, y, z: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixTranslation : function( out mOut : TD3DXMatrix ; x , y , z : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which rotates around the X axis
+// Build a matrix which rotates around the X axis
+
 (*
 function D3DXMatrixRotationX(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixRotationX : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which rotates around the Y axis
+// Build a matrix which rotates around the Y axis
+
 (*
 function D3DXMatrixRotationY(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixRotationY : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which rotates around the Z axis
+// Build a matrix which rotates around the Z axis
+
 (*
 function D3DXMatrixRotationZ(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixRotationZ : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which rotates around an arbitrary axis
+// Build a matrix which rotates around an arbitrary axis
+
 (*
 function D3DXMatrixRotationAxis(out mOut: TD3DXMatrix; const v: TD3DXVector3;
   angle: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -883,7 +928,8 @@ function D3DXMatrixRotationAxis(out mOut: TD3DXMatrix; const v: TD3DXVector3;
 var D3DXMatrixRotationAxis : function( out mOut : TD3DXMatrix ; const v : TD3DXVector3 ; angle : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix from a quaternion
+// Build a matrix from a quaternion
+
 (*
 function D3DXMatrixRotationQuaternion(out mOut: TD3DXMatrix; const Q: TD3DXQuaternion): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
@@ -891,7 +937,8 @@ var D3DXMatrixRotationQuaternion : function( out mOut : TD3DXMatrix ; const Q : 
 
 
 // Yaw around the Y axis, a pitch around the X axis,
-// and a roll around the Z axis.
+// and a roll around the Z axis.
+
 (*
 function D3DXMatrixRotationYawPitchRoll(out mOut: TD3DXMatrix; yaw, pitch, roll: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
@@ -899,7 +946,8 @@ var D3DXMatrixRotationYawPitchRoll : function( out mOut : TD3DXMatrix ; yaw , pi
 
 
 // Build transformation matrix.  NULL arguments are treated as identity.
-// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+
 (*
 function D3DXMatrixTransformation(out mOut: TD3DXMatrix;
    pScalingCenter: PD3DXVector3;
@@ -910,7 +958,8 @@ var D3DXMatrixTransformation : function( out mOut : TD3DXMatrix ; pScalingCenter
 
 
 // Build 2D transformation matrix in XY plane.  NULL arguments are treated as identity.
-// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+
 (*
 function D3DXMatrixTransformation2D(out pOut: TD3DXMatrix;
    pScalingCenter: PD3DXVector2;
@@ -921,7 +970,8 @@ var D3DXMatrixTransformation2D : function( out pOut : TD3DXMatrix ; pScalingCent
 
 
 // Build affine transformation matrix.  NULL arguments are treated as identity.
-// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+
 (*
 function D3DXMatrixAffineTransformation(out mOut: TD3DXMatrix;
    Scaling: Single; pRotationCenter: PD3DXVector3;
@@ -931,7 +981,8 @@ var D3DXMatrixAffineTransformation : function( out mOut : TD3DXMatrix ; Scaling 
 
 
 // Build 2D affine transformation matrix in XY plane.  NULL arguments are treated as identity.
-// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+
 (*
 function D3DXMatrixAffineTransformation2D(out mOut: TD3DXMatrix;
    Scaling: Single; pRotationCenter: PD3DXVector2;
@@ -940,49 +991,56 @@ function D3DXMatrixAffineTransformation2D(out mOut: TD3DXMatrix;
 var D3DXMatrixAffineTransformation2D : function( out mOut : TD3DXMatrix ; Scaling : Single ; pRotationCenter : PD3DXVector2 ; Rotation : Single ; pTranslation : PD3DXVector2 ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a lookat matrix. (right-handed)
+// Build a lookat matrix. (right-handed)
+
 (*
 function D3DXMatrixLookAtRH(out mOut: TD3DXMatrix; const Eye, At, Up: TD3DXVector3): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixLookAtRH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a lookat matrix. (left-handed)
+// Build a lookat matrix. (left-handed)
+
 (*
 function D3DXMatrixLookAtLH(out mOut: TD3DXMatrix; const Eye, At, Up: TD3DXVector3): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixLookAtLH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 function D3DXMatrixPerspectiveRH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixPerspectiveRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 function D3DXMatrixPerspectiveLH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixPerspectiveLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 function D3DXMatrixPerspectiveFovRH(out mOut: TD3DXMatrix; flovy, aspect, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixPerspectiveFovRH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 function D3DXMatrixPerspectiveFovLH(out mOut: TD3DXMatrix; flovy, aspect, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixPerspectiveFovLH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 function D3DXMatrixPerspectiveOffCenterRH(out mOut: TD3DXMatrix;
    l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -990,7 +1048,8 @@ function D3DXMatrixPerspectiveOffCenterRH(out mOut: TD3DXMatrix;
 var D3DXMatrixPerspectiveOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 function D3DXMatrixPerspectiveOffCenterLH(out mOut: TD3DXMatrix;
    l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -998,21 +1057,24 @@ function D3DXMatrixPerspectiveOffCenterLH(out mOut: TD3DXMatrix;
 var D3DXMatrixPerspectiveOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build an ortho projection matrix. (right-handed)
+// Build an ortho projection matrix. (right-handed)
+
 (*
 function D3DXMatrixOrthoRH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixOrthoRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build an ortho projection matrix. (left-handed)
+// Build an ortho projection matrix. (left-handed)
+
 (*
 function D3DXMatrixOrthoLH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
 *)
 var D3DXMatrixOrthoLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build an ortho projection matrix. (right-handed)
+// Build an ortho projection matrix. (right-handed)
+
 (*
 function D3DXMatrixOrthoOffCenterRH(out mOut: TD3DXMatrix;
   l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -1020,7 +1082,8 @@ function D3DXMatrixOrthoOffCenterRH(out mOut: TD3DXMatrix;
 var D3DXMatrixOrthoOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build an ortho projection matrix. (left-handed)
+// Build an ortho projection matrix. (left-handed)
+
 (*
 function D3DXMatrixOrthoOffCenterLH(out mOut: TD3DXMatrix;
   l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -1029,7 +1092,8 @@ var D3DXMatrixOrthoOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , 
 
 
 // Build a matrix which flattens geometry into a plane, as if casting
-// a shadow from a light.
+// a shadow from a light.
+
 (*
 function D3DXMatrixShadow(out mOut: TD3DXMatrix;
   const Light: TD3DXVector4; const Plane: TD3DXPlane): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -1037,7 +1101,8 @@ function D3DXMatrixShadow(out mOut: TD3DXMatrix;
 var D3DXMatrixShadow : function( out mOut : TD3DXMatrix ; const Light : TD3DXVector4 ; const Plane : TD3DXPlane ) : PD3DXMatrix ; stdcall ; 
 
 
-// Build a matrix which reflects the coordinate system about a plane
+// Build a matrix which reflects the coordinate system about a plane
+
 (*
 function D3DXMatrixReflect(out mOut: TD3DXMatrix;
    const Plane: TD3DXPlane): PD3DXMatrix; stdcall; external d3dx9mathDLL;
@@ -1071,7 +1136,8 @@ function D3DXQuaternionConjugate(out qOut: TD3DXQuaternion;
 
 // non-inline
 
-// Compute a quaternin's axis and angle of rotation. Expects unit quaternions.
+// Compute a quaternin's axis and angle of rotation. Expects unit quaternions.
+
 (*
 procedure D3DXQuaternionToAxisAngle(const q: TD3DXQuaternion;
   out Axis: TD3DXVector3; out Angle: Single); stdcall; external d3dx9mathDLL;
@@ -1079,7 +1145,8 @@ procedure D3DXQuaternionToAxisAngle(const q: TD3DXQuaternion;
 var D3DXQuaternionToAxisAngle : procedure( const q : TD3DXQuaternion ; out Axis : TD3DXVector3 ; out Angle : Single ) ; stdcall ; 
 
 
-// Build a quaternion from a rotation matrix.
+// Build a quaternion from a rotation matrix.
+
 (*
 function D3DXQuaternionRotationMatrix(out qOut: TD3DXQuaternion;
   const m: TD3DXMatrix): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1087,7 +1154,8 @@ function D3DXQuaternionRotationMatrix(out qOut: TD3DXQuaternion;
 var D3DXQuaternionRotationMatrix : function( out qOut : TD3DXQuaternion ; const m : TD3DXMatrix ) : PD3DXQuaternion ; stdcall ; 
 
 
-// Rotation about arbitrary axis.
+// Rotation about arbitrary axis.
+
 (*
 function D3DXQuaternionRotationAxis(out qOut: TD3DXQuaternion;
   const v: TD3DXVector3; Angle: Single): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1096,7 +1164,8 @@ var D3DXQuaternionRotationAxis : function( out qOut : TD3DXQuaternion ; const v 
 
 
 // Yaw around the Y axis, a pitch around the X axis,
-// and a roll around the Z axis.
+// and a roll around the Z axis.
+
 (*
 function D3DXQuaternionRotationYawPitchRoll(out qOut: TD3DXQuaternion;
   yaw, pitch, roll: Single): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1105,7 +1174,8 @@ var D3DXQuaternionRotationYawPitchRoll : function( out qOut : TD3DXQuaternion ; 
 
 
 // Quaternion multiplication.  The result represents the rotation Q2
-// followed by the rotation Q1.  (Out = Q2 * Q1)
+// followed by the rotation Q1.  (Out = Q2 * Q1)
+
 (*
 function D3DXQuaternionMultiply(out qOut: TD3DXQuaternion;
    const q1, q2: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1114,13 +1184,15 @@ var D3DXQuaternionMultiply : function( out qOut : TD3DXQuaternion ; const q1 , q
 
 (*
 
+
 function D3DXQuaternionNormalize(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
 *)
 var D3DXQuaternionNormalize : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
 
 
-// Conjugate and re-norm
+// Conjugate and re-norm
+
 (*
 function D3DXQuaternionInverse(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1129,7 +1201,8 @@ var D3DXQuaternionInverse : function( out qOut : TD3DXQuaternion ; const q : TD3
 
 
 // Expects unit quaternions.
-// if q = (cos(theta), sin(theta) * v); ln(q) = (0, theta * v)
+// if q = (cos(theta), sin(theta) * v); ln(q) = (0, theta * v)
+
 (*
 function D3DXQuaternionLn(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1138,7 +1211,8 @@ var D3DXQuaternionLn : function( out qOut : TD3DXQuaternion ; const q : TD3DXQua
 
 
 // Expects pure quaternions. (w == 0)  w is ignored in calculation.
-// if q = (0, theta * v); exp(q) = (cos(theta), sin(theta) * v)
+// if q = (0, theta * v); exp(q) = (cos(theta), sin(theta) * v)
+
 (*
 function D3DXQuaternionExp(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1147,7 +1221,8 @@ var D3DXQuaternionExp : function( out qOut : TD3DXQuaternion ; const q : TD3DXQu
 
 
 // Spherical linear interpolation between Q1 (s == 0) and Q2 (s == 1).
-// Expects unit quaternions.
+// Expects unit quaternions.
+
 (*
 function D3DXQuaternionSlerp(out qOut: TD3DXQuaternion;
    const q1, q2: TD3DXQuaternion; t: Single): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1156,7 +1231,8 @@ var D3DXQuaternionSlerp : function( out qOut : TD3DXQuaternion ; const q1 , q2 :
 
 
 // Spherical quadrangle interpolation.
-// Slerp(Slerp(Q1, C, t), Slerp(A, B, t), 2t(1-t))
+// Slerp(Slerp(Q1, C, t), Slerp(A, B, t), 2t(1-t))
+
 (*
 function D3DXQuaternionSquad(out qOut: TD3DXQuaternion;
    const pQ1, pA, pB, pC: TD3DXQuaternion; t: Single): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1166,7 +1242,8 @@ var D3DXQuaternionSquad : function( out qOut : TD3DXQuaternion ; const pQ1 , pA 
 
 // Setup control points for spherical quadrangle interpolation
 // from Q1 to Q2.  The control points are chosen in such a way
-// to ensure the continuity of tangents with adjacent segments.
+// to ensure the continuity of tangents with adjacent segments.
+
 (*
 procedure D3DXQuaternionSquadSetup(out pAOut, pBOut, pCOut: TD3DXQuaternion;
    const pQ0, pQ1, pQ2, pQ3: TD3DXQuaternion); stdcall; external d3dx9mathDLL;
@@ -1175,7 +1252,8 @@ var D3DXQuaternionSquadSetup : procedure( out pAOut , pBOut , pCOut : TD3DXQuate
 
 
 // Barycentric interpolation.
-// Slerp(Slerp(Q1, Q2, f+g), Slerp(Q1, Q3, f+g), g/(f+g))
+// Slerp(Slerp(Q1, Q2, f+g), Slerp(Q1, Q3, f+g), g/(f+g))
+
 (*
 function D3DXQuaternionBaryCentric(out qOut: TD3DXQuaternion;
    const q1, q2, q3: TD3DXQuaternion; f, g: Single): PD3DXQuaternion; stdcall; external d3dx9mathDLL;
@@ -1204,7 +1282,8 @@ function D3DXPlaneScale(out pOut: TD3DXPlane; const pP: TD3DXPlane; s: Single): 
 
 // non-inline
 
-// Normalize plane (so that |a,b,c| == 1)
+// Normalize plane (so that |a,b,c| == 1)
+
 (*
 function D3DXPlaneNormalize(out pOut: TD3DXPlane; const p: TD3DXPlane): PD3DXPlane; stdcall; external d3dx9mathDLL;
 *)
@@ -1212,7 +1291,8 @@ var D3DXPlaneNormalize : function( out pOut : TD3DXPlane ; const p : TD3DXPlane 
 
 
 // Find the intersection between a plane and a line.  If the line is
-// parallel to the plane, NULL is returned.
+// parallel to the plane, NULL is returned.
+
 (*
 function D3DXPlaneIntersectLine(out pOut: TD3DXVector3;
    const p: TD3DXPlane; const v1, v2: TD3DXVector3): PD3DXVector3; stdcall; external d3dx9mathDLL;
@@ -1220,7 +1300,8 @@ function D3DXPlaneIntersectLine(out pOut: TD3DXVector3;
 var D3DXPlaneIntersectLine : function( out pOut : TD3DXVector3 ; const p : TD3DXPlane ; const v1 , v2 : TD3DXVector3 ) : PD3DXVector3 ; stdcall ; 
 
 
-// Construct a plane from a point and a normal
+// Construct a plane from a point and a normal
+
 (*
 function D3DXPlaneFromPointNormal(out pOut: TD3DXPlane;
    const vPoint, vNormal: TD3DXVector3): PD3DXPlane; stdcall; external d3dx9mathDLL;
@@ -1228,7 +1309,8 @@ function D3DXPlaneFromPointNormal(out pOut: TD3DXPlane;
 var D3DXPlaneFromPointNormal : function( out pOut : TD3DXPlane ; const vPoint , vNormal : TD3DXVector3 ) : PD3DXPlane ; stdcall ; 
 
 
-// Construct a plane from 3 points
+// Construct a plane from 3 points
+
 (*
 function D3DXPlaneFromPoints(out pOut: TD3DXPlane;
    const v1, v2, v3: TD3DXVector3): PD3DXPlane; stdcall; external d3dx9mathDLL;
@@ -1237,7 +1319,8 @@ var D3DXPlaneFromPoints : function( out pOut : TD3DXPlane ; const v1 , v2 , v3 :
 
 
 // Transform a plane by a matrix.  The vector (a,b,c) must be normal.
-// M should be the inverse transpose of the transformation desired.
+// M should be the inverse transpose of the transformation desired.
+
 (*
 function D3DXPlaneTransform(out pOut: TD3DXPlane; const p: TD3DXPlane; const m: TD3DXMatrix): PD3DXPlane; stdcall; external d3dx9mathDLL;
 *)
@@ -1245,7 +1328,8 @@ var D3DXPlaneTransform : function( out pOut : TD3DXPlane ; const p : TD3DXPlane 
 
 
 // Transform an array of planes by a matrix.  The vectors (a,b,c) must be normal.
-// M should be the inverse transpose of the transformation desired.
+// M should be the inverse transpose of the transformation desired.
+
 (*
 function D3DXPlaneTransformArray(pOut: PD3DXPlane; OutStride: LongWord;
   pP: PD3DXPlane; PStride: LongWord; const m: TD3DXMatrix; n: LongWord): PD3DXPlane; stdcall; external d3dx9mathDLL;
@@ -1278,7 +1362,8 @@ function D3DXColorLerp(out cOut: TD3DXColor; const c1, c2: TD3DXColor; s: Single
 // non-inline
 
 // Interpolate r,g,b between desaturated color and color.
-// DesaturatedColor + s(Color - DesaturatedColor)
+// DesaturatedColor + s(Color - DesaturatedColor)
+
 (*
 function D3DXColorAdjustSaturation(out cOut: TD3DXColor;
    const pC: TD3DXColor; s: Single): PD3DXColor; stdcall; external d3dx9mathDLL;
@@ -1286,7 +1371,8 @@ function D3DXColorAdjustSaturation(out cOut: TD3DXColor;
 var D3DXColorAdjustSaturation : function( out cOut : TD3DXColor ; const pC : TD3DXColor ; s : Single ) : PD3DXColor ; stdcall ; 
 
 
-// Interpolate r,g,b between 50% grey and color.  Grey + s(Color - Grey)
+// Interpolate r,g,b between 50% grey and color.  Grey + s(Color - Grey)
+
 (*
 function D3DXColorAdjustContrast(out cOut: TD3DXColor;
    const pC: TD3DXColor; c: Single): PD3DXColor; stdcall; external d3dx9mathDLL;
@@ -1300,7 +1386,8 @@ var D3DXColorAdjustContrast : function( out cOut : TD3DXColor ; const pC : TD3DX
 //--------------------------
 
 // Calculate Fresnel term given the cosine of theta (likely obtained by
-// taking the dot of two normals), and the refraction index of the material.
+// taking the dot of two normals), and the refraction index of the material.
+
 (*
 function D3DXFresnelTerm(CosTheta, RefractionIndex: Single): Single; stdcall; external d3dx9mathDLL;
 *)
@@ -1393,6 +1480,7 @@ type
   IID_ID3DXMatrixStack = ID3DXMatrixStack;
 (*
 
+
 function D3DXCreateMatrixStack(Flags: DWord; out Stack: ID3DXMatrixStack): HResult; stdcall; external d3dx9mathDLL;
 *)
 var D3DXCreateMatrixStack : function( Flags : DWord ; out Stack : ID3DXMatrixStack ) : HResult ; stdcall ; 
@@ -1437,7 +1525,8 @@ const
 //   pDir
 //      Direction to evaluate in - assumed to be normalized
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHEvalDirection(pOut: PSingle; Order: LongWord;
@@ -1464,7 +1553,8 @@ var D3DXSHEvalDirection : function( pOut : PSingle ; Order : LongWord ; const pD
 //   pIn
 //      Input SH coeffs (rotated), incorect results if this is also output.
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHRotate(pOut: PSingle; Order: LongWord;
@@ -1490,7 +1580,8 @@ var D3DXSHRotate : function( pOut : PSingle ; Order : LongWord ; const pMatrix :
 //   pIn
 //      Input SH coeffs (rotated), incorect results if this is also output.
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHRotateZ(pOut: PSingle; Order: LongWord;
@@ -1516,7 +1607,8 @@ var D3DXSHRotateZ : function( pOut : PSingle ; Order : LongWord ; Angle : Single
 //   pB
 //      Input SH coeffs (second vector.)
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHAdd(pOut: PSingle; Order: LongWord;
@@ -1542,7 +1634,8 @@ var D3DXSHAdd : function( pOut : PSingle ; Order : LongWord ; pA , pB : PSingle 
 //   Scale
 //      Scale factor.
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHScale(pOut: PSingle; Order: LongWord;
@@ -1565,7 +1658,8 @@ var D3DXSHScale : function( pOut : PSingle ; Order : LongWord ; pIn : PSingle ; 
 //   pB
 //      Second set of input SH coeffs.
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHDot(Order: LongWord; pA, pB: PSingle): Single; stdcall; external d3dx9mathDLL;
@@ -1595,7 +1689,8 @@ var D3DXSHDot : function( Order : LongWord ; pA , pB : PSingle ) : Single ; stdc
 //   pG
 //      Second set of input SH coeffs.
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHMultiply2(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall; external d3dx9mathDLL;
@@ -1603,21 +1698,25 @@ function D3DXSHMultiply2(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall
 var D3DXSHMultiply2 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSingle ; stdcall ; 
 
 (*
+
 function D3DXSHMultiply3(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall; external d3dx9mathDLL;
 *)
 var D3DXSHMultiply3 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSingle ; stdcall ; 
 
 (*
+
 function D3DXSHMultiply4(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall; external d3dx9mathDLL;
 *)
 var D3DXSHMultiply4 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSingle ; stdcall ; 
 
 (*
+
 function D3DXSHMultiply5(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall; external d3dx9mathDLL;
 *)
 var D3DXSHMultiply5 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSingle ; stdcall ; 
 
 (*
+
 function D3DXSHMultiply6(pOut: PSingle; const pF, pG: PSingle): PSingle; stdcall; external d3dx9mathDLL;
 *)
 var D3DXSHMultiply6 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSingle ; stdcall ; 
@@ -1657,7 +1756,8 @@ var D3DXSHMultiply6 : function( pOut : PSingle ; const pF , pG : PSingle ) : PSi
 //   pBOut
 //      Output SH vector for Blue (optional.)
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHEvalDirectionalLight(Order: LongWord; const pDir: TD3DXVector3;
@@ -1697,7 +1797,8 @@ var D3DXSHEvalDirectionalLight : function( Order : LongWord ; const pDir : TD3DX
 //   pBOut
 //      Output SH vector for Blue (optional.)
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHEvalSphericalLight(Order: LongWord; const pPos: TD3DXVector3; Radius: Single;
@@ -1738,7 +1839,8 @@ var D3DXSHEvalSphericalLight : function( Order : LongWord ; const pPos : TD3DXVe
 //   pBOut
 //      Output SH vector for Blue (optional.)
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHEvalConeLight(Order: LongWord; const pDir: TD3DXVector3; Radius: Single;
@@ -1778,7 +1880,8 @@ var D3DXSHEvalConeLight : function( Order : LongWord ; const pDir : TD3DXVector3
 //   pBOut
 //      Output SH vector for Blue        
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHEvalHemisphereLight(Order: LongWord; const pDir: TD3DXVector3;
@@ -1812,7 +1915,8 @@ var D3DXSHEvalHemisphereLight : function( Order : LongWord ; const pDir : TD3DXV
 //   pBOut
 //      Output SH vector for Blue
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHProjectCubeMap(Order: LongWord; pCubeMap: IDirect3DCubeTexture9;
@@ -1852,6 +1956,7 @@ const
   D3DX_SDK_VERSION      = 33;
 (*
 
+
 function D3DXCheckVersion(D3DSdkVersion, D3DXSdkVersion: LongWord): BOOL; stdcall; external d3dx9coreDLL;
 *)
 var D3DXCheckVersion : function( D3DSdkVersion , D3DXSdkVersion : LongWord ) : BOOL ; stdcall ; 
@@ -1865,7 +1970,8 @@ var D3DXCheckVersion : function( D3DSdkVersion , D3DXSdkVersion : LongWord ) : B
 //
 //  returns previous mute value
 //
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
 (*
 
 function D3DXDebugMute(Mute: BOOL): BOOL; stdcall; external d3dx9coreDLL;
@@ -1882,7 +1988,8 @@ var D3DXDebugMute : function( Mute : BOOL ) : BOOL ; stdcall ;
 //    700 - DX7 level driver
 //    800 - DX8 level driver
 //    900 - DX9 level driver
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
 (*
 
 function D3DXGetDriverLevel(pDevice: IDirect3DDevice9): LongWord; stdcall; external d3dx9coreDLL;
@@ -2011,6 +2118,7 @@ type
   IID_ID3DXSprite = ID3DXSprite;
 (*
 
+
 function D3DXCreateSprite(pDevice: IDirect3DDevice9;
   out ppSprite: ID3DXSprite): HResult; stdcall; external d3dx9coreDLL;
 *)
@@ -2111,6 +2219,7 @@ type
 (*
 
 
+
 function D3DXCreateFontA(
   pDevice: IDirect3DDevice9;
   Height: Integer;
@@ -2129,6 +2238,7 @@ var D3DXCreateFontA : function( pDevice : IDirect3DDevice9 ; Height : Integer ; 
 
 (*
 
+
 function D3DXCreateFontW(
   pDevice: IDirect3DDevice9;
   Height: Integer;
@@ -2146,6 +2256,7 @@ function D3DXCreateFontW(
 var D3DXCreateFontW : function( pDevice : IDirect3DDevice9 ; Height : Integer ; Width : Longint ; Weight : LongWord ; MipLevels : LongWord ; Italic : BOOL ; CharSet : DWORD ; OutputPrecision : DWORD ; Quality : DWORD ; PitchAndFamily : DWORD ; pFaceName : PWideChar ; out ppFont : ID3DXFont ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateFont(
   pDevice: IDirect3DDevice9;
@@ -2166,6 +2277,7 @@ var D3DXCreateFont : function( pDevice : IDirect3DDevice9 ; Height : Integer ; W
 (*
 
 
+
 function D3DXCreateFontIndirectA(
   pDevice: IDirect3DDevice9;
   const pDesc: TD3DXFontDescA;
@@ -2175,6 +2287,7 @@ var D3DXCreateFontIndirectA : function( pDevice : IDirect3DDevice9 ; const pDesc
 
 (*
 
+
 function D3DXCreateFontIndirectW(
   pDevice: IDirect3DDevice9;
   const pDesc: TD3DXFontDescW;
@@ -2183,6 +2296,7 @@ function D3DXCreateFontIndirectW(
 var D3DXCreateFontIndirectW : function( pDevice : IDirect3DDevice9 ; const pDesc : TD3DXFontDescW ; out ppFont : ID3DXFont ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateFontIndirect(
   pDevice: IDirect3DDevice9;
@@ -2242,6 +2356,7 @@ type
 
   IID_ID3DXRenderToSurface = ID3DXRenderToSurface;
 (*
+
 
 
 function D3DXCreateRenderToSurface(ppDevice: IDirect3DDevice9;
@@ -2322,6 +2437,7 @@ type
 
   IID_ID3DXRenderToEnvMap = ID3DXRenderToEnvMap;
 (*
+
 
 
 function D3DXCreateRenderToEnvMap(ppDevice: IDirect3DDevice9;
@@ -2432,6 +2548,7 @@ type
 
   IID_ID3DXLine = ID3DXLine;
 (*
+
 
 
 function D3DXCreateLine(ppDevice: IDirect3DDevice9;
@@ -2895,7 +3012,8 @@ type
 //      Returns a buffer containing a listing of errors and warnings that were
 //      encountered during assembly.  If you are running in a debugger,
 //      these are the same messages you will see in your debug output.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXAssembleShaderFromFileA(
@@ -2910,6 +3028,7 @@ var D3DXAssembleShaderFromFileA : function( pSrcFile : PAnsiChar ; pDefines : PD
 
 (*
 
+
 function D3DXAssembleShaderFromFileW(
   pSrcFile: PWideChar;
   pDefines: PD3DXMacro;
@@ -2922,6 +3041,7 @@ var D3DXAssembleShaderFromFileW : function( pSrcFile : PWideChar ; pDefines : PD
 
 (*
 
+
 function D3DXAssembleShaderFromFile(
   pSrcFile: PChar;
   pDefines: PD3DXMacro;
@@ -2933,6 +3053,7 @@ function D3DXAssembleShaderFromFile(
 var D3DXAssembleShaderFromFile : function( pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; ppShader : PID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXAssembleShaderFromResourceA(
@@ -2948,6 +3069,7 @@ var D3DXAssembleShaderFromResourceA : function( hSrcModule : HModule ; pSrcResou
 
 (*
 
+
 function D3DXAssembleShaderFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -2961,6 +3083,7 @@ var D3DXAssembleShaderFromResourceW : function( hSrcModule : HModule ; pSrcResou
 
 (*
 
+
 function D3DXAssembleShaderFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -2973,6 +3096,7 @@ function D3DXAssembleShaderFromResource(
 var D3DXAssembleShaderFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWord ; ppShader : PID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXAssembleShader(
@@ -3032,7 +3156,8 @@ var D3DXAssembleShader : function( pSrcData : PAnsiChar ; SrcDataLen : LongWord 
 //      shader constants to the device.  Alternatively, an application can
 //      parse the D3DXSHADER_CONSTANTTABLE block embedded as a comment within
 //      the shader.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCompileShaderFromFileA(
@@ -3050,6 +3175,7 @@ var D3DXCompileShaderFromFileA : function( pSrcFile : PAnsiChar ; pDefines : PD3
 
 (*
 
+
 function D3DXCompileShaderFromFileW(
   pSrcFile: PWideChar;
   pDefines: PD3DXMacro;
@@ -3065,6 +3191,7 @@ var D3DXCompileShaderFromFileW : function( pSrcFile : PWideChar ; pDefines : PD3
 
 (*
 
+
 function D3DXCompileShaderFromFile(
   pSrcFile: PChar;
   pDefines: PD3DXMacro;
@@ -3079,6 +3206,7 @@ function D3DXCompileShaderFromFile(
 var D3DXCompileShaderFromFile : function( pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; pFunctionName : PAnsiChar ; pProfile : PAnsiChar ; Flags : DWORD ; ppShader : PID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ; ppConstantTable : PID3DXConstantTable ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCompileShaderFromResourceA(
@@ -3097,6 +3225,7 @@ var D3DXCompileShaderFromResourceA : function( hSrcModule : HModule ; pSrcResour
 
 (*
 
+
 function D3DXCompileShaderFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -3113,6 +3242,7 @@ var D3DXCompileShaderFromResourceW : function( hSrcModule : HModule ; pSrcResour
 
 (*
 
+
 function D3DXCompileShaderFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -3128,6 +3258,7 @@ function D3DXCompileShaderFromResource(
 var D3DXCompileShaderFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; pFunctionName : PAnsiChar ; pProfile : PAnsiChar ; Flags : DWORD ; ppShader : PID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ; ppConstantTable : PID3DXConstantTable ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCompileShader(
@@ -3162,7 +3293,8 @@ var D3DXCompileShader : function( pSrcData : PAnsiChar ; SrcDataLen : LongWord ;
 //      Pointer to a comment string to include at the top of the shader.
 //  ppDisassembly
 //      Returns a buffer containing the disassembled shader.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXDisassembleShader(
@@ -3183,7 +3315,8 @@ var D3DXDisassembleShader : function( const pShader : PDWORD ; EnableColorCode :
 // Parameters:
 //  pDevice
 //      Pointer to the device in question
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetPixelShaderProfile(pDevice: IDirect3DDevice9): PAnsiChar; stdcall; external d3dx9shaderDLL;
@@ -3191,6 +3324,7 @@ function D3DXGetPixelShaderProfile(pDevice: IDirect3DDevice9): PAnsiChar; stdcal
 var D3DXGetPixelShaderProfile : function( pDevice : IDirect3DDevice9 ) : PAnsiChar ; stdcall ; 
 
 (*
+
 
 function D3DXGetVertexShaderProfile(pDevice: IDirect3DDevice9): PAnsiChar; stdcall; external d3dx9shaderDLL;
 *)
@@ -3215,7 +3349,8 @@ var D3DXGetVertexShaderProfile : function( pDevice : IDirect3DDevice9 ) : PAnsiC
 //      and FourCC).  Can be NULL.
 //  pSizeInBytes
 //      Returns the size of the comment data in bytes.  Can be NULL.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXFindShaderComment(
@@ -3236,7 +3371,8 @@ var D3DXFindShaderComment : function( pFunction : PDWORD ; FourCC : DWORD ; ppDa
 // Parameters:
 //  pFunction
 //      Pointer to the function DWORD stream
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetShaderSize(const pFunction: PDWORD): LongWord; stdcall; external d3dx9shaderDLL;
@@ -3254,7 +3390,8 @@ var D3DXGetShaderSize : function( const pFunction : PDWORD ) : LongWord ; stdcal
 // Parameters:
 //  pFunction
 //      Pointer to the function DWORD stream
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetShaderVersion(pFunction: PDWORD): DWORD; stdcall; external d3dx9shaderDLL;
@@ -3278,7 +3415,8 @@ var D3DXGetShaderVersion : function( pFunction : PDWORD ) : DWORD ; stdcall ;
 //      MAXD3DDECLLENGTH elements.
 //  pCount
 //      Returns the number of elements referenced by the shader
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetShaderInputSemantics(
@@ -3289,6 +3427,7 @@ function D3DXGetShaderInputSemantics(
 var D3DXGetShaderInputSemantics : function( pFunction : PDWORD ; pSemantics : PD3DXSemantic ; pCount : PLongWord ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXGetShaderOutputSemantics(
   pFunction: PDWORD;
@@ -3313,7 +3452,8 @@ var D3DXGetShaderOutputSemantics : function( pFunction : PDWORD ; pSemantics : P
 //      contain at least 16 elements.
 // pCount
 //      Returns the number of samplers referenced by the shader
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetShaderSamplers(
@@ -3340,7 +3480,8 @@ var D3DXGetShaderSamplers : function( pFunction : PDWORD ; pSamplers : PPAnsiCha
 //      shader constants to the device.  Alternatively, an application can
 //      parse the D3DXSHADER_CONSTANTTABLE block embedded as a comment within
 //      the shader.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetShaderConstantTable(
@@ -3362,7 +3503,8 @@ var D3DXGetShaderConstantTable : function( pFunction : PDWORD ; out ppConstantTa
 //  ppTextureShader
 //      Returns a ID3DXTextureShader object which can be used to procedurally
 //      fill the contents of a texture using the D3DXFillTextureTX functions.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateTextureShader(
@@ -3405,7 +3547,8 @@ var D3DXCreateTextureShader : function( const pFunction : PDWORD ; out ppTexture
 //      Returns a buffer containing a listing of errors and warnings that were
 //      encountered during assembly.  If you are running in a debugger,
 //      these are the same messages you will see in your debug output.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3421,6 +3564,7 @@ var D3DXGatherFragmentsFromFileA : function( pSrcFile : PAnsiChar ; pDefines : P
 
 (*
 
+
 function D3DXGatherFragmentsFromFileW(
   pSrcFile: PWideChar;
   pDefines: PD3DXMacro;
@@ -3433,6 +3577,7 @@ var D3DXGatherFragmentsFromFileW : function( pSrcFile : PWideChar ; pDefines : P
 
 (*
 
+
 function D3DXGatherFragmentsFromFile(
   pSrcFile: PChar;
   pDefines: PD3DXMacro;
@@ -3444,6 +3589,7 @@ function D3DXGatherFragmentsFromFile(
 var D3DXGatherFragmentsFromFile : function( pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; out ppShader : ID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXGatherFragmentsFromResourceA(
@@ -3459,6 +3605,7 @@ var D3DXGatherFragmentsFromResourceA : function( hSrcModule : HModule ; pSrcReso
 
 (*
 
+
 function D3DXGatherFragmentsFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -3472,6 +3619,7 @@ var D3DXGatherFragmentsFromResourceW : function( hSrcModule : HModule ; pSrcReso
 
 (*
 
+
 function D3DXGatherFragmentsFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -3484,6 +3632,7 @@ function D3DXGatherFragmentsFromResource(
 var D3DXGatherFragmentsFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWord ; out ppShader : ID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXGatherFragments(
@@ -3513,7 +3662,8 @@ var D3DXGatherFragments : function( pSrcData : PAnsiChar ; SrcDataLen : LongWord
 //  ppFragmentLinker
 //      pointer to a memory location to put the created interface pointer
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateFragmentLinker(
@@ -3557,7 +3707,8 @@ var D3DXCreateFragmentLinker : function( pDevice : IDirect3DDevice9 ; ShaderCach
 //      Returns a buffer containing a listing of errors and warnings that were
 //      encountered during assembly.  If you are running in a debugger,
 //      these are the same messages you will see in your debug output.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXPreprocessShaderFromFileA(
@@ -3571,6 +3722,7 @@ var D3DXPreprocessShaderFromFileA : function( pSrcFile : PAnsiChar ; pDefines : 
 
 (*
 
+
 function D3DXPreprocessShaderFromFileW(
   pSrcFile: PWideChar;
   pDefines: PD3DXMacro;
@@ -3582,6 +3734,7 @@ var D3DXPreprocessShaderFromFileW : function( pSrcFile : PWideChar ; pDefines : 
 
 (*
 
+
 function D3DXPreprocessShaderFromFile(
   pSrcFile: PChar;
   pDefines: PD3DXMacro;
@@ -3592,6 +3745,7 @@ function D3DXPreprocessShaderFromFile(
 var D3DXPreprocessShaderFromFile : function( pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; out ppShaderText : ID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXPreprocessShaderFromResourceA(
@@ -3606,6 +3760,7 @@ var D3DXPreprocessShaderFromResourceA : function( hSrcModule : HModule ; pSrcRes
 
 (*
 
+
 function D3DXPreprocessShaderFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -3618,6 +3773,7 @@ var D3DXPreprocessShaderFromResourceW : function( hSrcModule : HModule ; pSrcRes
 
 (*
 
+
 function D3DXPreprocessShaderFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -3629,6 +3785,7 @@ function D3DXPreprocessShaderFromResource(
 var D3DXPreprocessShaderFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; out ppShaderText : ID3DXBuffer ; ppErrorMsgs : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXPreprocessShader(
@@ -4057,7 +4214,8 @@ type
 // Parameters:
 //  ppPool
 //      Returns the created pool.
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateEffectPool(
@@ -4108,7 +4266,8 @@ var D3DXCreateEffectPool : function( out ppPool : ID3DXEffectPool ) : HResult ; 
 //      Returns a buffer containing any error messages which occurred during
 //      compile.  Or NULL if you do not care about the error messages.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateEffectFromFileA(
@@ -4125,6 +4284,7 @@ var D3DXCreateEffectFromFileA : function( pDevice : IDirect3DDevice9 ; pSrcFile 
 
 (*
 
+
 function D3DXCreateEffectFromFileW(
   pDevice: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -4139,6 +4299,7 @@ var D3DXCreateEffectFromFileW : function( pDevice : IDirect3DDevice9 ; pSrcFile 
 
 (*
 
+
 function D3DXCreateEffectFromFile(
   pDevice: IDirect3DDevice9;
   pSrcFile: PChar;
@@ -4152,6 +4313,7 @@ function D3DXCreateEffectFromFile(
 var D3DXCreateEffectFromFile : function( pDevice : IDirect3DDevice9 ; pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; pPool : ID3DXEffectPool ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffectFromResourceA(
@@ -4169,6 +4331,7 @@ var D3DXCreateEffectFromResourceA : function( pDevice : IDirect3DDevice9 ; hSrcM
 
 (*
 
+
 function D3DXCreateEffectFromResourceW(
   pDevice: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -4184,6 +4347,7 @@ var D3DXCreateEffectFromResourceW : function( pDevice : IDirect3DDevice9 ; hSrcM
 
 (*
 
+
 function D3DXCreateEffectFromResource(
   pDevice: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -4198,6 +4362,7 @@ function D3DXCreateEffectFromResource(
 var D3DXCreateEffectFromResource : function( pDevice : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; pPool : ID3DXEffectPool ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffect(
@@ -4217,7 +4382,8 @@ var D3DXCreateEffect : function( pDevice : IDirect3DDevice9 ; pSrcData : Pointer
 
 //
 // Ex functions that accept pSkipConstants in addition to other parameters
-//
+//
+
 (*
 
 function D3DXCreateEffectFromFileExA(
@@ -4235,6 +4401,7 @@ var D3DXCreateEffectFromFileExA : function( pDevice : IDirect3DDevice9 ; pSrcFil
 
 (*
 
+
 function D3DXCreateEffectFromFileExW(
   pDevice: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -4250,6 +4417,7 @@ var D3DXCreateEffectFromFileExW : function( pDevice : IDirect3DDevice9 ; pSrcFil
 
 (*
 
+
 function D3DXCreateEffectFromFileEx(
   pDevice: IDirect3DDevice9;
   pSrcFile: PChar;
@@ -4264,6 +4432,7 @@ function D3DXCreateEffectFromFileEx(
 var D3DXCreateEffectFromFileEx : function( pDevice : IDirect3DDevice9 ; pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; pSkipConstants : PAnsiChar ; Flags : DWORD ; pPool : ID3DXEffectPool ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffectFromResourceExA(
@@ -4282,6 +4451,7 @@ var D3DXCreateEffectFromResourceExA : function( pDevice : IDirect3DDevice9 ; hSr
 
 (*
 
+
 function D3DXCreateEffectFromResourceExW(
   pDevice: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -4298,6 +4468,7 @@ var D3DXCreateEffectFromResourceExW : function( pDevice : IDirect3DDevice9 ; hSr
 
 (*
 
+
 function D3DXCreateEffectFromResourceEx(
   pDevice: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -4313,6 +4484,7 @@ function D3DXCreateEffectFromResourceEx(
 var D3DXCreateEffectFromResourceEx : function( pDevice : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; pSkipConstants : PAnsiChar ; Flags : DWORD ; pPool : ID3DXEffectPool ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffectEx(
@@ -4363,7 +4535,8 @@ var D3DXCreateEffectEx : function( pDevice : IDirect3DDevice9 ; pSrcData : Point
 //      Returns a buffer containing any error messages which occurred during
 //      parse.  Or NULL if you do not care about the error messages.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateEffectCompilerFromFileA(
@@ -4378,6 +4551,7 @@ var D3DXCreateEffectCompilerFromFileA : function( pSrcFile : PAnsiChar ; pDefine
 
 (*
 
+
 function D3DXCreateEffectCompilerFromFileW(
   pSrcFile: PWideChar;
   pDefines: PD3DXMacro;
@@ -4390,6 +4564,7 @@ var D3DXCreateEffectCompilerFromFileW : function( pSrcFile : PWideChar ; pDefine
 
 (*
 
+
 function D3DXCreateEffectCompilerFromFile(
   pSrcFile: PChar;
   pDefines: PD3DXMacro;
@@ -4401,6 +4576,7 @@ function D3DXCreateEffectCompilerFromFile(
 var D3DXCreateEffectCompilerFromFile : function( pSrcFile : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; out ppCompiler : ID3DXEffectCompiler ; ppParseErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffectCompilerFromResourceA(
@@ -4416,6 +4592,7 @@ var D3DXCreateEffectCompilerFromResourceA : function( hSrcModule : HModule ; pSr
 
 (*
 
+
 function D3DXCreateEffectCompilerFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -4429,6 +4606,7 @@ var D3DXCreateEffectCompilerFromResourceW : function( hSrcModule : HModule ; pSr
 
 (*
 
+
 function D3DXCreateEffectCompilerFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -4441,6 +4619,7 @@ function D3DXCreateEffectCompilerFromResource(
 var D3DXCreateEffectCompilerFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; pDefines : PD3DXMacro ; pInclude : ID3DXInclude_FPC ; Flags : DWORD ; out ppCompiler : ID3DXEffectCompiler ; ppParseErrors : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateEffectCompiler(
@@ -4461,7 +4640,8 @@ var D3DXCreateEffectCompiler : function( pSrcData : Pointer ; SrcDataLen : LongW
 // -----------------------
 //
 // Parameters:
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXDisassembleEffect(
@@ -4649,6 +4829,7 @@ type
     function GetChild(id: SIZE_T; out Obj: ID3DXFileData): HResult; stdcall;
   end;
 (*
+
 
 function D3DXFileCreate(out DirectXFile: ID3DXFile): HResult; stdcall; external d3dx9meshDLL;
 *)
@@ -5240,6 +5421,7 @@ type
 (*
 
 
+
 function D3DXCreateMesh(NumFaces, NumVertices: DWord; Options: DWord;
   pDeclaration: PD3DVertexElement9;
   pD3DDevice: IDirect3DDevice9; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx9meshDLL;
@@ -5248,12 +5430,14 @@ var D3DXCreateMesh : function( NumFaces , NumVertices : DWord ; Options : DWord 
 
 (*
 
+
 function D3DXCreateMeshFVF(NumFaces, NumVertices: DWord; Options: DWord;
   FVF: DWord; pD3DDevice: IDirect3DDevice9; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXCreateMeshFVF : function( NumFaces , NumVertices : DWord ; Options : DWord ; FVF : DWord ; pD3DDevice : IDirect3DDevice9 ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateSPMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
@@ -5262,7 +5446,8 @@ function D3DXCreateSPMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
 var D3DXCreateSPMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; out ppSMesh : ID3DXSPMesh ) : HResult ; stdcall ; 
 
 
-// clean a mesh up for simplification, try to make manifold
+// clean a mesh up for simplification, try to make manifold
+
 (*
 function D3DXCleanMesh(CleanType: TD3DXCleanType; pMeshIn: ID3DXMesh; pAdjacencyIn: PDWord;
   out ppMeshOut: ID3DXMesh; pAdjacencyOut: PDWord;
@@ -5272,12 +5457,14 @@ var D3DXCleanMesh : function( CleanType : TD3DXCleanType ; pMeshIn : ID3DXMesh ;
 
 (*
 
+
 function D3DXValidMesh(pMeshIn: ID3DXMesh; pAdjacency: PDWord;
   ppErrorsAndWarnings: PID3DXBuffer): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXValidMesh : function( pMeshIn : ID3DXMesh ; pAdjacency : PDWord ; ppErrorsAndWarnings : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXGeneratePMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
@@ -5287,6 +5474,7 @@ var D3DXGeneratePMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVer
 
 (*
 
+
 function D3DXSimplifyMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
   MinValue: DWord; Options: TD3DXMeshSimp; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx9meshDLL;
@@ -5294,6 +5482,7 @@ function D3DXSimplifyMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
 var D3DXSimplifyMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; MinValue : DWord ; Options : TD3DXMeshSimp ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXComputeBoundingSphere(
   pFirstPosition: PD3DXVector3;       // pointer to first position
@@ -5306,6 +5495,7 @@ var D3DXComputeBoundingSphere : function( pFirstPosition : PD3DXVector3 ; NumVer
 
 (*
 
+
 function D3DXComputeBoundingBox(
   pFirstPosition: PD3DXVector3;       // pointer to first position
   NumVertices: DWORD;
@@ -5316,17 +5506,20 @@ var D3DXComputeBoundingBox : function( pFirstPosition : PD3DXVector3 ; NumVertic
 
 (*
 
+
 function D3DXComputeNormals(pMesh: ID3DXBaseMesh; pAdjacency: PDWord): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXComputeNormals : function( pMesh : ID3DXBaseMesh ; pAdjacency : PDWord ) : HResult ; stdcall ; 
 
 (*
 
+
 function D3DXCreateBuffer(NumBytes: DWord; out ppBuffer: ID3DXBuffer): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXCreateBuffer : function( NumBytes : DWord ; out ppBuffer : ID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXLoadMeshFromXA(
   pFilename: PAnsiChar;
@@ -5340,6 +5533,7 @@ var D3DXLoadMeshFromXA : function( pFilename : PAnsiChar ; Options : DWord ; pD3
 
 (*
 
+
 function D3DXLoadMeshFromXW(
   pFilename: PWideChar;
   Options: DWord;
@@ -5352,6 +5546,7 @@ var D3DXLoadMeshFromXW : function( pFilename : PWideChar ; Options : DWord ; pD3
 
 (*
 
+
 function D3DXLoadMeshFromX(
   pFilename: PChar;
   Options: DWord;
@@ -5363,6 +5558,7 @@ function D3DXLoadMeshFromX(
 var D3DXLoadMeshFromX : function( pFilename : PChar ; Options : DWord ; pD3DDevice : IDirect3DDevice9 ; ppAdjacency , ppMaterials , ppEffectInstances : PID3DXBuffer ; pNumMaterials : PDWORD ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXLoadMeshFromXInMemory(
@@ -5378,6 +5574,7 @@ var D3DXLoadMeshFromXInMemory : function( Memory : Pointer ; SizeOfMemory : DWOR
 
 (*
 
+
 function D3DXLoadMeshFromXResource(
   Module: HModule;
   Name: PAnsiChar;
@@ -5392,6 +5589,7 @@ var D3DXLoadMeshFromXResource : function( Module : HModule ; Name : PAnsiChar ; 
 
 (*
 
+
 function D3DXSaveMeshToXA(
   pFilename: PAnsiChar;
   pMesh: ID3DXMesh;
@@ -5405,6 +5603,7 @@ var D3DXSaveMeshToXA : function( pFilename : PAnsiChar ; pMesh : ID3DXMesh ; pAd
 
 (*
 
+
 function D3DXSaveMeshToXW(
   pFilename: PWideChar;
   pMesh: ID3DXMesh;
@@ -5417,6 +5616,7 @@ function D3DXSaveMeshToXW(
 var D3DXSaveMeshToXW : function( pFilename : PWideChar ; pMesh : ID3DXMesh ; pAdjacency : PDWORD ; pMaterials : PD3DXMaterial ; pEffectInstances : PD3DXEffectInstance ; NumMaterials : DWORD ; Format : DWORD ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSaveMeshToX(
   pFilename: PChar;
@@ -5432,6 +5632,7 @@ var D3DXSaveMeshToX : function( pFilename : PChar ; pMesh : ID3DXMesh ; pAdjacen
 (*
 
 
+
 function D3DXCreatePMeshFromStream(
   pStream: IStream;
   Options: DWORD;
@@ -5445,7 +5646,8 @@ var D3DXCreatePMeshFromStream : function( pStream : IStream ; Options : DWORD ; 
 
 
 // Creates a skin info object based on the number of vertices, number of bones, and a declaration describing the vertex layout of the target vertices
-// The bone names and initial bone transforms are not filled in the skin info object by this method.
+// The bone names and initial bone transforms are not filled in the skin info object by this method.
+
 (*
 function D3DXCreateSkinInfo(
   NumVertices: DWORD;
@@ -5457,7 +5659,8 @@ var D3DXCreateSkinInfo : function( NumVertices : DWORD ; pDeclaration : PD3DVert
 
 
 // Creates a skin info object based on the number of vertices, number of bones, and a FVF describing the vertex layout of the target vertices
-// The bone names and initial bone transforms are not filled in the skin info object by this method.
+// The bone names and initial bone transforms are not filled in the skin info object by this method.
+
 (*
 function D3DXCreateSkinInfoFVF(
   NumVertices: DWORD;
@@ -5468,6 +5671,7 @@ function D3DXCreateSkinInfoFVF(
 var D3DXCreateSkinInfoFVF : function( NumVertices : DWORD ; FVF : DWORD ; NumBones : DWORD ; out ppSkinInfo : ID3DXSkinInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXLoadMeshFromXof(
   pxofMesh: ID3DXFileData;
@@ -5481,7 +5685,8 @@ var D3DXLoadMeshFromXof : function( pxofMesh : ID3DXFileData ; Options : DWord ;
 
 
 // This similar to D3DXLoadMeshFromXof, except also returns skinning info if present in the file
-// If skinning info is not present, ppSkinInfo will be NULL
+// If skinning info is not present, ppSkinInfo will be NULL
+
 (*
 function D3DXLoadSkinMeshFromXof(
   pxofMesh: ID3DXFileData;
@@ -5500,7 +5705,8 @@ var D3DXLoadSkinMeshFromXof : function( pxofMesh : ID3DXFileData ; Options : DWO
 // the mesh and the bone combination table and populates a skin info object with that data. The bone
 // names and initial bone transforms are not filled in the skin info object by this method. This works
 // with either a non-indexed or indexed blended mesh. It examines the FVF or declarator of the mesh to
-// determine what type it is.
+// determine what type it is.
+
 (*
 function D3DXCreateSkinInfoFromBlendedMesh(
   pMesh: ID3DXBaseMesh;
@@ -5511,6 +5717,7 @@ function D3DXCreateSkinInfoFromBlendedMesh(
 var D3DXCreateSkinInfoFromBlendedMesh : function( pMesh : ID3DXBaseMesh ; NumBones : DWORD ; pBoneCombinationTable : PD3DXBoneCombination ; out ppSkinInfo : ID3DXSkinInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXTessellateNPatches(pMeshIn: ID3DXMesh;
   pAdjacencyIn: PDWord; NumSegs: Single;
@@ -5523,7 +5730,8 @@ var D3DXTessellateNPatches : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWo
 
 //generates implied outputdecl from input decl
 //the decl generated from this should be used to generate the output decl for
-//the tessellator subroutines.
+//the tessellator subroutines.
+
 (*
 
 function D3DXGenerateOutputDecl(
@@ -5536,7 +5744,8 @@ var D3DXGenerateOutputDecl : function( pOutput : PD3DVertexElement9 ; pInput : P
 //loads patches from an XFileData
 //since an X file can have up to 6 different patch meshes in it,
 //returns them in an array - pNumPatches will contain the number of
-//meshes in the actual file.
+//meshes in the actual file.
+
 (*
 function D3DXLoadPatchMeshFromXof(
   pxofMesh: ID3DXFileData;
@@ -5550,7 +5759,8 @@ function D3DXLoadPatchMeshFromXof(
 var D3DXLoadPatchMeshFromXof : function( pxofMesh : ID3DXFileData ; Options : DWORD ; pD3DDevice : IDirect3DDevice9 ; ppMaterials : PID3DXBuffer ; ppEffectInstances : PID3DXBuffer ; pNumMaterials : PDWORD ; out ppMesh : ID3DXPatchMesh ) : HResult ; stdcall ; 
 
 
-//computes the size a single rect patch.
+//computes the size a single rect patch.
+
 (*
 function D3DXRectPatchSize(
   pfNumSegs: PSingle;           //segments for each edge (4)
@@ -5561,7 +5771,8 @@ function D3DXRectPatchSize(
 var D3DXRectPatchSize : function( pfNumSegs : PSingle ; pdwTriangles : PDWORD ; pdwVertices : PDWORD ) : HResult ; stdcall ; 
 
 
-//computes the size of a single triangle patch
+//computes the size of a single triangle patch
+
 (*
 function D3DXTriPatchSize(
   pfNumSegs: PSingle;           //segments for each edge (3)
@@ -5574,7 +5785,8 @@ var D3DXTriPatchSize : function( pfNumSegs : PSingle ; pdwTriangles : PDWORD ; p
 
 
 //tessellates a patch into a created mesh
-//similar to D3D RT patch
+//similar to D3D RT patch
+
 (*
 function D3DXTessellateRectPatch(
   pVB: IDirect3DVertexBuffer9;
@@ -5586,6 +5798,7 @@ function D3DXTessellateRectPatch(
 var D3DXTessellateRectPatch : function( pVB : IDirect3DVertexBuffer9 ; pNumSegs : PSingle ; pdwInDecl : PD3DVertexElement9 ; const pRectPatchInfo : TD3DRectPatchInfo ; pMesh : ID3DXMesh ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXTessellateTriPatch(
@@ -5600,7 +5813,8 @@ var D3DXTessellateTriPatch : function( pVB : IDirect3DVertexBuffer9 ; pNumSegs :
 
 
 
-//creates an NPatch PatchMesh from a D3DXMESH
+//creates an NPatch PatchMesh from a D3DXMESH
+
 (*
 function D3DXCreateNPatchMesh(
   pMeshSysMem: ID3DXMesh;
@@ -5610,7 +5824,8 @@ var D3DXCreateNPatchMesh : function( pMeshSysMem : ID3DXMesh ; out pPatchMesh : 
 
 
 
-//creates a patch mesh
+//creates a patch mesh
+
 (*
 function D3DXCreatePatchMesh(
   const pInfo: TD3DXPatchInfo; //patch type
@@ -5626,7 +5841,8 @@ var D3DXCreatePatchMesh : function( const pInfo : TD3DXPatchInfo ; dwNumPatches 
 
 
 //returns the number of degenerates in a patch mesh -
-//text output put in string.
+//text output put in string.
+
 (*
 function D3DXValidPatchMesh(
   pMesh: ID3DXPatchMesh;
@@ -5638,11 +5854,13 @@ var D3DXValidPatchMesh : function( pMesh : ID3DXPatchMesh ; dwcDegenerateVertice
 
 (*
 
+
 function D3DXGetFVFVertexSize(FVF: DWord): LongWord; stdcall; external d3dx9meshDLL;
 *)
 var D3DXGetFVFVertexSize : function( FVF : DWord ) : LongWord ; stdcall ; 
 
 (*
+
 
 function D3DXGetDeclVertexSize(pDecl: PD3DVertexElement9; Stream: DWORD): LongWord; stdcall; external d3dx9meshDLL;
 *)
@@ -5650,11 +5868,13 @@ var D3DXGetDeclVertexSize : function( pDecl : PD3DVertexElement9 ; Stream : DWOR
 
 (*
 
+
 function D3DXGetDeclLength(pDecl: PD3DVertexElement9): LongWord; stdcall; external d3dx9meshDLL;
 *)
 var D3DXGetDeclLength : function( pDecl : PD3DVertexElement9 ) : LongWord ; stdcall ; 
 
 (*
+
 
 function D3DXDeclaratorFromFVF(FVF: DWord; out Declaration: TFVFDeclaration): HResult; stdcall; external d3dx9meshDLL;
 *)
@@ -5662,11 +5882,13 @@ var D3DXDeclaratorFromFVF : function( FVF : DWord ; out Declaration : TFVFDeclar
 
 (*
 
+
 function D3DXFVFFromDeclarator(pDeclarator: PD3DVertexElement9; out pFVF: DWord): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXFVFFromDeclarator : function( pDeclarator : PD3DVertexElement9 ; out pFVF : DWord ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXWeldVertices(
   pMesh: ID3DXMesh;
@@ -5690,6 +5912,7 @@ type
   TD3DXIntersectInfo = _D3DXINTERSECTINFO;
 (*
 
+
 function D3DXIntersect(pMesh: ID3DXBaseMesh;
   const pRayPos, pRayDir: TD3DXVector3;
   out pHit: BOOL;                   // True if any faces were intersected
@@ -5704,6 +5927,7 @@ function D3DXIntersect(pMesh: ID3DXBaseMesh;
 var D3DXIntersect : function( pMesh : ID3DXBaseMesh ; const pRayPos , pRayDir : TD3DXVector3 ; out pHit : BOOL ; pFaceIndex : PDWord ; pU : PSingle ; pV : PSingle ; pDist : PSingle ; ppAllHits : PID3DXBuffer ; pCountOfHits : PDWord ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXIntersectSubset(pMesh: ID3DXBaseMesh; AttribId: DWord;
   const pRayPos, pRayDir: TD3DXVector3;
@@ -5721,6 +5945,7 @@ var D3DXIntersectSubset : function( pMesh : ID3DXBaseMesh ; AttribId : DWord ; c
 (*
 
 
+
 function D3DXSplitMesh(pMeshIn: ID3DXMesh; pAdjacencyIn: PDWord;
   MaxSize, Options: DWord;
   out pMeshesOut: DWord; out ppMeshArrayOut: ID3DXBuffer;
@@ -5730,6 +5955,7 @@ function D3DXSplitMesh(pMeshIn: ID3DXMesh; pAdjacencyIn: PDWord;
 var D3DXSplitMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; MaxSize , Options : DWord ; out pMeshesOut : DWord ; out ppMeshArrayOut : ID3DXBuffer ; ppAdjacencyArrayOut , ppFaceRemapArrayOut , ppVertRemapArrayOut : PID3DXBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXIntersectTri(
   const p0: TD3DXVector3;           // Triangle vertex 0 position
@@ -5746,12 +5972,14 @@ var D3DXIntersectTri : function( const p0 : TD3DXVector3 ; const p1 : TD3DXVecto
 
 (*
 
+
 function D3DXSphereBoundProbe(const pCenter: TD3DXVector3; Radius: Single;
   out pRayPosition, pRayDirection: TD3DXVector3): BOOL; stdcall; external d3dx9meshDLL;
 *)
 var D3DXSphereBoundProbe : function( const pCenter : TD3DXVector3 ; Radius : Single ; out pRayPosition , pRayDirection : TD3DXVector3 ) : BOOL ; stdcall ; 
 
 (*
+
 
 function D3DXBoxBoundProbe(const pMin, pMax: TD3DXVector3;
   out pRayPosition, pRayDirection: TD3DXVector3): BOOL; stdcall; external d3dx9meshDLL;
@@ -5761,11 +5989,13 @@ var D3DXBoxBoundProbe : function( const pMin , pMax : TD3DXVector3 ; out pRayPos
 (*
 
 
+
 function D3DXComputeTangentFrame(pMesh: ID3DXMesh; dwOptions: DWORD): HResult; stdcall; external d3dx9meshDLL;
 *)
 var D3DXComputeTangentFrame : function( pMesh : ID3DXMesh ; dwOptions : DWORD ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXComputeTangentFrameEx(pMesh: ID3DXMesh;
                                    dwTextureInSemantic: DWORD;
@@ -5802,7 +6032,8 @@ var D3DXComputeTangentFrameEx : function( pMesh : ID3DXMesh ; dwTextureInSemanti
 //in the TangentIndex or BinormIndex will cause it to ignore the specified 
 //semantic.
 //
-//Wrap should be specified if the texture coordinates wrap.
+//Wrap should be specified if the texture coordinates wrap.
+
 (*
 
 function D3DXComputeTangent(
@@ -5900,7 +6131,8 @@ type
 //                    atlasing algorithm.
 //  puNumChartsOut - A location to store the number of charts created, or if the
 //                   maximum number of charts was too low, this gives the minimum
-//                    number of charts needed to create an atlas.
+//                    number of charts needed to create an atlas.
+
 (*
 
 function D3DXUVAtlasCreate(
@@ -5951,7 +6183,8 @@ var D3DXUVAtlasCreate : function( pMesh : ID3DXMesh ; uMaxChartNumber : LongWord
 // |_____|
 //
 // The resulting partition adjacency parameter cannot be NULL, because it is
-// required for the packing step.
+// required for the packing step.
+
 (*
 
 
@@ -5983,7 +6216,8 @@ var D3DXUVAtlasPartition : function( pMesh : ID3DXMesh ; uMaxChartNumber : LongW
 // the adjacency returned from the partition step. This value cannot be NULL
 // because Pack needs to know where charts were cut in the partition step in
 // order to find the edges of each chart.
-// The options parameter is currently reserved.
+// The options parameter is currently reserved.
+
 (*
 function D3DXUVAtlasPack(
   pMesh: ID3DXMesh;
@@ -6041,7 +6275,8 @@ type
 // uSignalDimension - How many floats per vertex to use in calculating the IMT.
 // uSignalStride    - The number of bytes per vertex in the array. This must be
 //                    a multiple of sizeof(float)
-// ppIMTData        - Where to store the buffer holding the IMT data
+// ppIMTData        - Where to store the buffer holding the IMT data
+
 (*
 
 function D3DXComputeIMTFromPerVertexSignal(
@@ -6072,7 +6307,8 @@ var D3DXComputeIMTFromPerVertexSignal : function( pMesh : ID3DXMesh ; const pfVe
 // dwOptions        - reserved for future use
 // pSignalCallback  - The callback to use to get the signal.
 // pUserData        - A pointer that will be passed in to the callback.
-// ppIMTData        - Where to store the buffer holding the IMT data
+// ppIMTData        - Where to store the buffer holding the IMT data
+
 (*
 function D3DXComputeIMTFromSignal(
   pMesh: ID3DXMesh;
@@ -6100,7 +6336,8 @@ var D3DXComputeIMTFromSignal : function( pMesh : ID3DXMesh ; dwTextureIndex : DW
 // dwTextureIndex   - This describes which set of texture coordinates in the
 //                    mesh to use.
 // dwOptions        - Combination of one or more D3DXIMT flags.
-// ppIMTData        - Where to store the buffer holding the IMT data
+// ppIMTData        - Where to store the buffer holding the IMT data
+
 (*
 function D3DXComputeIMTFromTexture(
   pMesh: ID3DXMesh;
@@ -6128,7 +6365,8 @@ var D3DXComputeIMTFromTexture : function( pMesh : ID3DXMesh ; pTexture : IDirect
 // uSignalDimension - The number of floats per texel in the signal
 // uComponents      - The number of floats in each texel
 // dwOptions        - Combination of one or more D3DXIMT flags
-// ppIMTData        - Where to store the buffer holding the IMT data
+// ppIMTData        - Where to store the buffer holding the IMT data
+
 (*
 function D3DXComputeIMTFromPerTexelSignal(
   pMesh: ID3DXMesh;
@@ -6147,6 +6385,7 @@ var D3DXComputeIMTFromPerTexelSignal : function( pMesh : ID3DXMesh ; dwTextureIn
 
 (*
 
+
 function D3DXConvertMeshSubsetToSingleStrip(
   MeshIn: ID3DXBaseMesh;
   AttribId: DWord;
@@ -6157,6 +6396,7 @@ function D3DXConvertMeshSubsetToSingleStrip(
 var D3DXConvertMeshSubsetToSingleStrip : function( MeshIn : ID3DXBaseMesh ; AttribId : DWord ; IBOptions : DWord ; out ppIndexBuffer : IDirect3DIndexBuffer9 ; pNumIndices : PDWord ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXConvertMeshSubsetToStrips(
   MeshIn: ID3DXBaseMesh;
@@ -6193,7 +6433,8 @@ var D3DXConvertMeshSubsetToStrips : function( MeshIn : ID3DXBaseMesh ; AttribId 
 //      The number stored for a given element is where in the new ordering
 //        the face will have come from.  See ID3DXMesh::Optimize for more info.
 //
-//============================================================================
+//============================================================================
+
 (*
 function D3DXOptimizeFaces(
   pbIndices: Pointer;
@@ -6227,7 +6468,8 @@ var D3DXOptimizeFaces : function( pbIndices : Pointer ; cFaces : LongWord ; cVer
 //      The number stored for a given element is where in the new ordering
 //        the vertex will have come from.  See ID3DXMesh::Optimize for more info.
 //
-//============================================================================
+//============================================================================
+
 (*
 function D3DXOptimizeVertices(
   pbIndices: Pointer;
@@ -6947,7 +7189,8 @@ type
 //    ppBuffer
 //      Buffer that will be allocated
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXCreatePRTBuffer(
@@ -6979,7 +7222,8 @@ var D3DXCreatePRTBuffer : function( NumSamples : LongWord ; NumCoeffs : LongWord
 //    ppBuffer
 //      Buffer that will be allocated
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXCreatePRTBufferTex(
@@ -7004,7 +7248,8 @@ var D3DXCreatePRTBufferTex : function( Width : LongWord ; Height : LongWord ; Nu
 //    ppBuffer
 //      Buffer that will be allocated
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXLoadPRTBufferFromFileA(
@@ -7015,6 +7260,7 @@ var D3DXLoadPRTBufferFromFileA : function( pFilename : PAnsiChar ; ppBuffer : ID
 
 (*
 
+
 function D3DXLoadPRTBufferFromFileW(
   pFilename: PWideChar;
   ppBuffer: ID3DXPRTBuffer): HResult; stdcall; external d3dx9meshDLL name 'D3DXLoadPRTBufferFromFileW';
@@ -7022,6 +7268,7 @@ function D3DXLoadPRTBufferFromFileW(
 var D3DXLoadPRTBufferFromFileW : function( pFilename : PWideChar ; ppBuffer : ID3DXPRTBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXLoadPRTBufferFromFile(
   pFilename: PChar;
@@ -7043,7 +7290,8 @@ var D3DXLoadPRTBufferFromFile : function( pFilename : PChar ; ppBuffer : ID3DXPR
 //    pBuffer
 //      Buffer that will be saved
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSavePRTBufferToFileA(
@@ -7054,6 +7302,7 @@ var D3DXSavePRTBufferToFileA : function( pFilename : PAnsiChar ; ppBuffer : ID3D
 
 (*
 
+
 function D3DXSavePRTBufferToFileW(
   pFilename: PWideChar;
   ppBuffer: ID3DXPRTBuffer): HResult; stdcall; external d3dx9meshDLL name 'D3DXSavePRTBufferToFileW';
@@ -7061,6 +7310,7 @@ function D3DXSavePRTBufferToFileW(
 var D3DXSavePRTBufferToFileW : function( pFilename : PWideChar ; ppBuffer : ID3DXPRTBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSavePRTBufferToFile(
   pFilename: PChar;
@@ -7082,7 +7332,8 @@ var D3DXSavePRTBufferToFile : function( pFilename : PChar ; ppBuffer : ID3DXPRTB
 //    ppBuffer
 //      Buffer that will be allocated
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXLoadPRTCompBufferFromFileA(
@@ -7093,6 +7344,7 @@ var D3DXLoadPRTCompBufferFromFileA : function( pFilename : PAnsiChar ; ppBuffer 
 
 (*
 
+
 function D3DXLoadPRTCompBufferFromFileW(
   pFilename: PWideChar;
   ppBuffer: ID3DXPRTCompBuffer): HResult; stdcall; external d3dx9meshDLL name 'D3DXLoadPRTCompBufferFromFileW';
@@ -7100,6 +7352,7 @@ function D3DXLoadPRTCompBufferFromFileW(
 var D3DXLoadPRTCompBufferFromFileW : function( pFilename : PWideChar ; ppBuffer : ID3DXPRTCompBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXLoadPRTCompBufferFromFile(
   pFilename: PChar;
@@ -7121,7 +7374,8 @@ var D3DXLoadPRTCompBufferFromFile : function( pFilename : PChar ; ppBuffer : ID3
 //    pBuffer
 //      Buffer that will be saved
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSavePRTCompBufferToFileA(
@@ -7132,6 +7386,7 @@ var D3DXSavePRTCompBufferToFileA : function( pFilename : PAnsiChar ; ppBuffer : 
 
 (*
 
+
 function D3DXSavePRTCompBufferToFileW(
   pFilename: PWideChar;
   ppBuffer: ID3DXPRTCompBuffer): HResult; stdcall; external d3dx9meshDLL name 'D3DXSavePRTCompBufferToFileW';
@@ -7139,6 +7394,7 @@ function D3DXSavePRTCompBufferToFileW(
 var D3DXSavePRTCompBufferToFileW : function( pFilename : PWideChar ; ppBuffer : ID3DXPRTCompBuffer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSavePRTCompBufferToFile(
   pFilename: PChar;
@@ -7171,7 +7427,8 @@ var D3DXSavePRTCompBufferToFile : function( pFilename : PChar ; ppBuffer : ID3DX
 //    ppBufferOut
 //      Compressed buffer that will be created
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXCreatePRTCompBuffer(
@@ -7207,7 +7464,8 @@ var D3DXCreatePRTCompBuffer : function( Quality : TD3DXSHCompressQualityType ; N
 //    ppBuffer
 //      GutterHelper that will be created
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXCreateTextureGutterHelper(
@@ -7242,7 +7500,8 @@ var D3DXCreateTextureGutterHelper : function( Width : LongWord ; Height : LongWo
 //    ppEngine
 //      PRTEngine that will be created
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXCreatePRTEngine(
@@ -7287,7 +7546,8 @@ var D3DXCreatePRTEngine : function( pMesh : ID3DXMesh ; pAdjacency : PDWORD ; Ex
 //    ppMeshOut
 //      Mesh that will be created
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXConcatenateMeshes(
@@ -7327,7 +7587,8 @@ var D3DXConcatenateMeshes : function( ppMeshes : PID3DXMesh ; NumMeshes : LongWo
 //   pNumSuperClusters
 //      Returns the number of super clusters allocated
 //
-//============================================================================
+//============================================================================
+
 (*
 
 
@@ -7394,7 +7655,8 @@ var D3DXSHPRTCompSuperCluster : function( pClusterIDs : PLongWord ; pScene : ID3
 //      Structure per super cluster - contains indices into ppIBData,
 //      pSCClusterList and ppVertData
 //
-//============================================================================
+//============================================================================
+
 (*
 
 function D3DXSHPRTCompSplitMeshSC(
@@ -7657,7 +7919,8 @@ const
 //  Sides       Number of sides the polygon has.  (Must be >= 3)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreatePolygon(ppDevice: IDirect3DDevice9;
   Length: Single;
@@ -7683,7 +7946,8 @@ var D3DXCreatePolygon : function( ppDevice : IDirect3DDevice9 ; Length : Single 
 //  Depth       Depth of box (along Z-axis)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreateBox(ppDevice: IDirect3DDevice9;
   Width,
@@ -7712,7 +7976,8 @@ var D3DXCreateBox : function( ppDevice : IDirect3DDevice9 ; Width , Height , Dep
 //  Stacks      Number of stacks along the main axis
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreateCylinder(ppDevice: IDirect3DDevice9;
   Radius1,
@@ -7741,7 +8006,8 @@ var D3DXCreateCylinder : function( ppDevice : IDirect3DDevice9 ; Radius1 , Radiu
 //  Stacks      Number of stacks along the main axis
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreateSphere(ppDevice: IDirect3DDevice9;
   Radius: Single;
@@ -7769,7 +8035,8 @@ var D3DXCreateSphere : function( ppDevice : IDirect3DDevice9 ; Radius : Single ;
 //  Rings       Number of rings making up the torus (must be >= 3)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreateTorus(ppDevice: IDirect3DDevice9;
   InnerRadius,
@@ -7793,7 +8060,8 @@ var D3DXCreateTorus : function( ppDevice : IDirect3DDevice9 ; InnerRadius , Oute
 //  pDevice     The D3D device with which the mesh is going to be used.
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 function D3DXCreateTeapot(ppDevice: IDirect3DDevice9;
   out ppMesh: ID3DXMesh;
@@ -7818,7 +8086,8 @@ var D3DXCreateTeapot : function( ppDevice : IDirect3DDevice9 ; out ppMesh : ID3D
 //  Extrusion     Amount to extrude text in -Z direction
 //  ppMesh        The mesh object which will be created
 //  pGlyphMetrics Address of buffer to receive glyph metric data (or NULL)
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateTextA(ppDevice: IDirect3DDevice9;
@@ -7834,6 +8103,7 @@ var D3DXCreateTextA : function( ppDevice : IDirect3DDevice9 ; hDC : HDC ; pText 
 
 (*
 
+
 function D3DXCreateTextW(ppDevice: IDirect3DDevice9;
   hDC: HDC;
   pText: PWideChar;
@@ -7846,6 +8116,7 @@ function D3DXCreateTextW(ppDevice: IDirect3DDevice9;
 var D3DXCreateTextW : function( ppDevice : IDirect3DDevice9 ; hDC : HDC ; pText : PWideChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateText(ppDevice: IDirect3DDevice9;
   hDC: HDC;
@@ -8135,7 +8406,8 @@ type
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXGetImageInfoFromFileA(
@@ -8146,6 +8418,7 @@ var D3DXGetImageInfoFromFileA : function( pSrcFile : PAnsiChar ; out pSrcInfo : 
 
 (*
 
+
 function D3DXGetImageInfoFromFileW(
   pSrcFile: PWideChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx9texDLL name 'D3DXGetImageInfoFromFileW';
@@ -8154,6 +8427,7 @@ var D3DXGetImageInfoFromFileW : function( pSrcFile : PWideChar ; out pSrcInfo : 
 
 (*
 
+
 function D3DXGetImageInfoFromFile(
   pSrcFile: PChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx9texDLL name 'D3DXGetImageInfoFromFileA';
@@ -8161,6 +8435,7 @@ function D3DXGetImageInfoFromFile(
 var D3DXGetImageInfoFromFile : function( pSrcFile : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXGetImageInfoFromResourceA(
@@ -8172,6 +8447,7 @@ var D3DXGetImageInfoFromResourceA : function( hSrcModule : HModule ; pSrcResourc
 
 (*
 
+
 function D3DXGetImageInfoFromResourceW(
   hSrcModule: HModule;
   pSrcResource: PWideChar;
@@ -8181,6 +8457,7 @@ var D3DXGetImageInfoFromResourceW : function( hSrcModule : HModule ; pSrcResourc
 
 (*
 
+
 function D3DXGetImageInfoFromResource(
   hSrcModule: HModule;
   pSrcResource: PChar;
@@ -8189,6 +8466,7 @@ function D3DXGetImageInfoFromResource(
 var D3DXGetImageInfoFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXGetImageInfoFromFileInMemory(
@@ -8242,7 +8520,8 @@ var D3DXGetImageInfoFromFileInMemory : function( const pSrcData : Pointer ; SrcD
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file, or NULL.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXLoadSurfaceFromFileA(
   pDestSurface: IDirect3DSurface9;
@@ -8258,6 +8537,7 @@ var D3DXLoadSurfaceFromFileA : function( pDestSurface : IDirect3DSurface9 ; pDes
 
 (*
 
+
 function D3DXLoadSurfaceFromFileW(
   pDestSurface: IDirect3DSurface9;
   pDestPalette: PPaletteEntry;
@@ -8272,6 +8552,7 @@ var D3DXLoadSurfaceFromFileW : function( pDestSurface : IDirect3DSurface9 ; pDes
 
 (*
 
+
 function D3DXLoadSurfaceFromFile(
   pDestSurface: IDirect3DSurface9;
   pDestPalette: PPaletteEntry;
@@ -8285,6 +8566,7 @@ function D3DXLoadSurfaceFromFile(
 var D3DXLoadSurfaceFromFile : function( pDestSurface : IDirect3DSurface9 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 
@@ -8303,6 +8585,7 @@ var D3DXLoadSurfaceFromResourceA : function( pDestSurface : IDirect3DSurface9 ; 
 
 (*
 
+
 function D3DXLoadSurfaceFromResourceW(
   pDestSurface: IDirect3DSurface9;
   pDestPalette: PPaletteEntry;
@@ -8318,6 +8601,7 @@ var D3DXLoadSurfaceFromResourceW : function( pDestSurface : IDirect3DSurface9 ; 
 
 (*
 
+
 function D3DXLoadSurfaceFromResource(
   pDestSurface: IDirect3DSurface9;
   pDestPalette: PPaletteEntry;
@@ -8332,6 +8616,7 @@ function D3DXLoadSurfaceFromResource(
 var D3DXLoadSurfaceFromResource : function( pDestSurface : IDirect3DSurface9 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 
@@ -8378,7 +8663,8 @@ var D3DXLoadSurfaceFromFileInMemory : function( pDestSurface : IDirect3DSurface9
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadSurfaceFromSurface(
@@ -8428,7 +8714,8 @@ var D3DXLoadSurfaceFromSurface : function( pDestSurface : IDirect3DSurface9 ; pD
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadSurfaceFromMemory(
@@ -8465,7 +8752,8 @@ var D3DXLoadSurfaceFromMemory : function( pDestSurface : IDirect3DSurface9 ; pDe
 //  pSrcRect
 //      Source rectangle, or NULL for the entire image
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXSaveSurfaceToFileA(
@@ -8479,6 +8767,7 @@ var D3DXSaveSurfaceToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3D
 
 (*
 
+
 function D3DXSaveSurfaceToFileW(
   pDestFile: PWideChar;
   DestFormat: TD3DXImageFileFormat;
@@ -8489,6 +8778,7 @@ function D3DXSaveSurfaceToFileW(
 var D3DXSaveSurfaceToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface9 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSaveSurfaceToFile(
   pDestFile: PChar;
@@ -8518,7 +8808,8 @@ var D3DXSaveSurfaceToFile : function( pDestFile : PChar ; DestFormat : TD3DXImag
 //  pSrcRect
 //      Source rectangle, or NULL for the entire image
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXSaveSurfaceToFileInMemory(
@@ -8574,7 +8865,8 @@ var D3DXSaveSurfaceToFileInMemory : function( out ppDestBuf : ID3DXBuffer ; Dest
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file, or NULL.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadVolumeFromFileA(
@@ -8591,6 +8883,7 @@ var D3DXLoadVolumeFromFileA : function( pDestVolume : IDirect3DVolume9 ; pDestPa
 
 (*
 
+
 function D3DXLoadVolumeFromFileW(
   pDestVolume: IDirect3DVolume9;
   pDestPalette: PPaletteEntry;
@@ -8605,6 +8898,7 @@ var D3DXLoadVolumeFromFileW : function( pDestVolume : IDirect3DVolume9 ; pDestPa
 
 (*
 
+
 function D3DXLoadVolumeFromFile(
   pDestVolume: IDirect3DVolume9;
   pDestPalette: PPaletteEntry;
@@ -8618,6 +8912,7 @@ function D3DXLoadVolumeFromFile(
 var D3DXLoadVolumeFromFile : function( pDestVolume : IDirect3DVolume9 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXLoadVolumeFromResourceA(
@@ -8635,6 +8930,7 @@ var D3DXLoadVolumeFromResourceA : function( pDestVolume : IDirect3DVolume9 ; pDe
 
 (*
 
+
 function D3DXLoadVolumeFromResourceW(
   pDestVolume: IDirect3DVolume9;
   pDestPalette: PPaletteEntry;
@@ -8650,6 +8946,7 @@ var D3DXLoadVolumeFromResourceW : function( pDestVolume : IDirect3DVolume9 ; pDe
 
 (*
 
+
 function D3DXLoadVolumeFromResource(
   pDestVolume: IDirect3DVolume9;
   pDestPalette: PPaletteEntry;
@@ -8664,6 +8961,7 @@ function D3DXLoadVolumeFromResource(
 var D3DXLoadVolumeFromResource : function( pDestVolume : IDirect3DVolume9 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXLoadVolumeFromFileInMemory(
@@ -8709,7 +9007,8 @@ var D3DXLoadVolumeFromFileInMemory : function( pDestVolume : IDirect3DVolume9 ; 
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadVolumeFromVolume(
@@ -8762,7 +9061,8 @@ var D3DXLoadVolumeFromVolume : function( pDestVolume : IDirect3DVolume9 ; pDestP
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadVolumeFromMemory(
@@ -8800,7 +9100,8 @@ var D3DXLoadVolumeFromMemory : function( pDestVolume : IDirect3DVolume9 ; pDestP
 //  pSrcBox
 //      Source box, or NULL for the entire volume
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXSaveVolumeToFileA(
@@ -8814,6 +9115,7 @@ var D3DXSaveVolumeToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DX
 
 (*
 
+
 function D3DXSaveVolumeToFileW(
   pDestFile: PWideChar;
   DestFormat: TD3DXImageFileFormat;
@@ -8824,6 +9126,7 @@ function D3DXSaveVolumeToFileW(
 var D3DXSaveVolumeToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume9 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSaveVolumeToFile(
   pDestFile: PChar;
@@ -8854,7 +9157,8 @@ var D3DXSaveVolumeToFile : function( pDestFile : PChar ; DestFormat : TD3DXImage
 //  pSrcBox
 //      Source box, or NULL for the entire volume
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXSaveVolumeToFileInMemory(
@@ -8894,7 +9198,8 @@ var D3DXSaveVolumeToFileInMemory : function( out ppDestBuf : ID3DXBuffer ; DestF
 //  Pool
 //      Memory pool to be used to create texture
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXCheckTextureRequirements(
   pDevice: IDirect3DDevice9;
@@ -8909,6 +9214,7 @@ var D3DXCheckTextureRequirements : function( pDevice : IDirect3DDevice9 ; pWidth
 
 (*
 
+
 function D3DXCheckCubeTextureRequirements(
   pDevice: IDirect3DDevice9;
   pSize: PLongWord;
@@ -8920,6 +9226,7 @@ function D3DXCheckCubeTextureRequirements(
 var D3DXCheckCubeTextureRequirements : function( pDevice : IDirect3DDevice9 ; pSize : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCheckVolumeTextureRequirements(
   pDevice: IDirect3DDevice9;
@@ -8958,7 +9265,8 @@ var D3DXCheckVolumeTextureRequirements : function( pDevice : IDirect3DDevice9 ; 
 //  ppTexture, ppCubeTexture, ppVolumeTexture
 //      The texture object that will be created
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateTexture(
@@ -8975,6 +9283,7 @@ var D3DXCreateTexture : function( Device : IDirect3DDevice9 ; Width : LongWord ;
 
 (*
 
+
 function D3DXCreateCubeTexture(
   Device: IDirect3DDevice9;
   Size: LongWord;
@@ -8987,6 +9296,7 @@ function D3DXCreateCubeTexture(
 var D3DXCreateCubeTexture : function( Device : IDirect3DDevice9 ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTexture(
   Device: IDirect3DDevice9;
@@ -9066,7 +9376,8 @@ var D3DXCreateVolumeTexture : function( Device : IDirect3DDevice9 ; Width : Long
 //
 //----------------------------------------------------------------------------
 
-// FromFile
+// FromFile
+
 (*
 
 function D3DXCreateTextureFromFileA(
@@ -9078,6 +9389,7 @@ var D3DXCreateTextureFromFileA : function( Device : IDirect3DDevice9 ; pSrcFile 
 
 (*
 
+
 function D3DXCreateTextureFromFileW(
   Device: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -9086,6 +9398,7 @@ function D3DXCreateTextureFromFileW(
 var D3DXCreateTextureFromFileW : function( Device : IDirect3DDevice9 ; pSrcFile : PWideChar ; out ppTexture : IDirect3DTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateTextureFromFile(
   Device: IDirect3DDevice9;
@@ -9097,6 +9410,7 @@ var D3DXCreateTextureFromFile : function( Device : IDirect3DDevice9 ; pSrcFile :
 (*
 
 
+
 function D3DXCreateCubeTextureFromFileA(
   Device: IDirect3DDevice9;
   pSrcFile: PAnsiChar;
@@ -9106,6 +9420,7 @@ var D3DXCreateCubeTextureFromFileA : function( Device : IDirect3DDevice9 ; pSrcF
 
 (*
 
+
 function D3DXCreateCubeTextureFromFileW(
   Device: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -9114,6 +9429,7 @@ function D3DXCreateCubeTextureFromFileW(
 var D3DXCreateCubeTextureFromFileW : function( Device : IDirect3DDevice9 ; pSrcFile : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateCubeTextureFromFile(
   Device: IDirect3DDevice9;
@@ -9125,6 +9441,7 @@ var D3DXCreateCubeTextureFromFile : function( Device : IDirect3DDevice9 ; pSrcFi
 (*
 
 
+
 function D3DXCreateVolumeTextureFromFileA(
   Device: IDirect3DDevice9;
   pSrcFile: PAnsiChar;
@@ -9133,6 +9450,7 @@ function D3DXCreateVolumeTextureFromFileA(
 var D3DXCreateVolumeTextureFromFileA : function( Device : IDirect3DDevice9 ; pSrcFile : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromFileW(
   Device: IDirect3DDevice9;
@@ -9143,6 +9461,7 @@ var D3DXCreateVolumeTextureFromFileW : function( Device : IDirect3DDevice9 ; pSr
 
 (*
 
+
 function D3DXCreateVolumeTextureFromFile(
   Device: IDirect3DDevice9;
   pSrcFile: PChar;
@@ -9152,7 +9471,8 @@ var D3DXCreateVolumeTextureFromFile : function( Device : IDirect3DDevice9 ; pSrc
 
 
 
-// FromResource
+// FromResource
+
 (*
 
 function D3DXCreateTextureFromResourceA(
@@ -9165,6 +9485,7 @@ var D3DXCreateTextureFromResourceA : function( Device : IDirect3DDevice9 ; hSrcM
 
 (*
 
+
 function D3DXCreateTextureFromResourceW(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9174,6 +9495,7 @@ function D3DXCreateTextureFromResourceW(
 var D3DXCreateTextureFromResourceW : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppTexture : IDirect3DTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateTextureFromResource(
   Device: IDirect3DDevice9;
@@ -9186,6 +9508,7 @@ var D3DXCreateTextureFromResource : function( Device : IDirect3DDevice9 ; hSrcMo
 (*
 
 
+
 function D3DXCreateCubeTextureFromResourceA(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9196,6 +9519,7 @@ var D3DXCreateCubeTextureFromResourceA : function( Device : IDirect3DDevice9 ; h
 
 (*
 
+
 function D3DXCreateCubeTextureFromResourceW(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9205,6 +9529,7 @@ function D3DXCreateCubeTextureFromResourceW(
 var D3DXCreateCubeTextureFromResourceW : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateCubeTextureFromResource(
   Device: IDirect3DDevice9;
@@ -9217,6 +9542,7 @@ var D3DXCreateCubeTextureFromResource : function( Device : IDirect3DDevice9 ; hS
 (*
 
 
+
 function D3DXCreateVolumeTextureFromResourceA(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9226,6 +9552,7 @@ function D3DXCreateVolumeTextureFromResourceA(
 var D3DXCreateVolumeTextureFromResourceA : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromResourceW(
   Device: IDirect3DDevice9;
@@ -9237,6 +9564,7 @@ var D3DXCreateVolumeTextureFromResourceW : function( Device : IDirect3DDevice9 ;
 
 (*
 
+
 function D3DXCreateVolumeTextureFromResource(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9247,7 +9575,8 @@ var D3DXCreateVolumeTextureFromResource : function( Device : IDirect3DDevice9 ; 
 
 
 
-// FromFileEx
+// FromFileEx
+
 (*
 
 function D3DXCreateTextureFromFileExA(
@@ -9270,6 +9599,7 @@ var D3DXCreateTextureFromFileExA : function( Device : IDirect3DDevice9 ; pSrcFil
 
 (*
 
+
 function D3DXCreateTextureFromFileExW(
   Device: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -9289,6 +9619,7 @@ function D3DXCreateTextureFromFileExW(
 var D3DXCreateTextureFromFileExW : function( Device : IDirect3DDevice9 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateTextureFromFileEx(
   Device: IDirect3DDevice9;
@@ -9311,6 +9642,7 @@ var D3DXCreateTextureFromFileEx : function( Device : IDirect3DDevice9 ; pSrcFile
 (*
 
 
+
 function D3DXCreateCubeTextureFromFileExA(
   Device: IDirect3DDevice9;
   pSrcFile: PAnsiChar;
@@ -9329,6 +9661,7 @@ function D3DXCreateCubeTextureFromFileExA(
 var D3DXCreateCubeTextureFromFileExA : function( Device : IDirect3DDevice9 ; pSrcFile : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateCubeTextureFromFileExW(
   Device: IDirect3DDevice9;
@@ -9349,6 +9682,7 @@ var D3DXCreateCubeTextureFromFileExW : function( Device : IDirect3DDevice9 ; pSr
 
 (*
 
+
 function D3DXCreateCubeTextureFromFileEx(
   Device: IDirect3DDevice9;
   pSrcFile: PChar;
@@ -9367,6 +9701,7 @@ function D3DXCreateCubeTextureFromFileEx(
 var D3DXCreateCubeTextureFromFileEx : function( Device : IDirect3DDevice9 ; pSrcFile : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateVolumeTextureFromFileExA(
@@ -9390,6 +9725,7 @@ var D3DXCreateVolumeTextureFromFileExA : function( Device : IDirect3DDevice9 ; p
 
 (*
 
+
 function D3DXCreateVolumeTextureFromFileExW(
   Device: IDirect3DDevice9;
   pSrcFile: PWideChar;
@@ -9410,6 +9746,7 @@ function D3DXCreateVolumeTextureFromFileExW(
 var D3DXCreateVolumeTextureFromFileExW : function( Device : IDirect3DDevice9 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromFileEx(
   Device: IDirect3DDevice9;
@@ -9432,7 +9769,8 @@ var D3DXCreateVolumeTextureFromFileEx : function( Device : IDirect3DDevice9 ; pS
 
 
 
-// FromResourceEx
+// FromResourceEx
+
 (*
 
 function D3DXCreateTextureFromResourceExA(
@@ -9456,6 +9794,7 @@ var D3DXCreateTextureFromResourceExA : function( Device : IDirect3DDevice9 ; hSr
 
 (*
 
+
 function D3DXCreateTextureFromResourceExW(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9476,6 +9815,7 @@ function D3DXCreateTextureFromResourceExW(
 var D3DXCreateTextureFromResourceExW : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateTextureFromResourceEx(
   Device: IDirect3DDevice9;
@@ -9499,6 +9839,7 @@ var D3DXCreateTextureFromResourceEx : function( Device : IDirect3DDevice9 ; hSrc
 (*
 
 
+
 function D3DXCreateCubeTextureFromResourceExA(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9518,6 +9859,7 @@ function D3DXCreateCubeTextureFromResourceExA(
 var D3DXCreateCubeTextureFromResourceExA : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateCubeTextureFromResourceExW(
   Device: IDirect3DDevice9;
@@ -9539,6 +9881,7 @@ var D3DXCreateCubeTextureFromResourceExW : function( Device : IDirect3DDevice9 ;
 
 (*
 
+
 function D3DXCreateCubeTextureFromResourceEx(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9558,6 +9901,7 @@ function D3DXCreateCubeTextureFromResourceEx(
 var D3DXCreateCubeTextureFromResourceEx : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXCreateVolumeTextureFromResourceExA(
@@ -9582,6 +9926,7 @@ var D3DXCreateVolumeTextureFromResourceExA : function( Device : IDirect3DDevice9
 
 (*
 
+
 function D3DXCreateVolumeTextureFromResourceExW(
   Device: IDirect3DDevice9;
   hSrcModule: HModule;
@@ -9603,6 +9948,7 @@ function D3DXCreateVolumeTextureFromResourceExW(
 var D3DXCreateVolumeTextureFromResourceExW : function( Device : IDirect3DDevice9 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromResourceEx(
   Device: IDirect3DDevice9;
@@ -9626,7 +9972,8 @@ var D3DXCreateVolumeTextureFromResourceEx : function( Device : IDirect3DDevice9 
 
 
 
-// FromFileInMemory
+// FromFileInMemory
+
 (*
 
 function D3DXCreateTextureFromFileInMemory(
@@ -9639,6 +9986,7 @@ var D3DXCreateTextureFromFileInMemory : function( Device : IDirect3DDevice9 ; co
 
 (*
 
+
 function D3DXCreateCubeTextureFromFileInMemory(
   Device: IDirect3DDevice9;
   const pSrcData: Pointer;
@@ -9648,6 +9996,7 @@ function D3DXCreateCubeTextureFromFileInMemory(
 var D3DXCreateCubeTextureFromFileInMemory : function( Device : IDirect3DDevice9 ; const pSrcData : Pointer ; SrcDataSize : LongWord ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromFileInMemory(
   Device: IDirect3DDevice9;
@@ -9659,7 +10008,8 @@ var D3DXCreateVolumeTextureFromFileInMemory : function( Device : IDirect3DDevice
 
 
 
-// FromFileInMemoryEx
+// FromFileInMemoryEx
+
 (*
 
 function D3DXCreateTextureFromFileInMemoryEx(
@@ -9683,6 +10033,7 @@ var D3DXCreateTextureFromFileInMemoryEx : function( Device : IDirect3DDevice9 ; 
 
 (*
 
+
 function D3DXCreateCubeTextureFromFileInMemoryEx(
   Device: IDirect3DDevice9;
   const pSrcData: Pointer;
@@ -9702,6 +10053,7 @@ function D3DXCreateCubeTextureFromFileInMemoryEx(
 var D3DXCreateCubeTextureFromFileInMemoryEx : function( Device : IDirect3DDevice9 ; const pSrcData : Pointer ; SrcDataSize : LongWord ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture9 ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXCreateVolumeTextureFromFileInMemoryEx(
   Device: IDirect3DDevice9;
@@ -9741,7 +10093,8 @@ var D3DXCreateVolumeTextureFromFileInMemoryEx : function( Device : IDirect3DDevi
 //  pSrcPalette
 //      Source palette of 256 colors, or NULL
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -9755,6 +10108,7 @@ var D3DXSaveTextureToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3D
 
 (*
 
+
 function D3DXSaveTextureToFileW(
   pDestFile: PWideChar;
   DestFormat: TD3DXImageFileFormat;
@@ -9764,6 +10118,7 @@ function D3DXSaveTextureToFileW(
 var D3DXSaveTextureToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture9 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSaveTextureToFile(
   pDestFile: PChar;
@@ -9791,7 +10146,8 @@ var D3DXSaveTextureToFile : function( pDestFile : PChar ; DestFormat : TD3DXImag
 //  pSrcPalette
 //      Source palette of 256 colors, or NULL
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXSaveTextureToFileInMemory(
@@ -9826,7 +10182,8 @@ var D3DXSaveTextureToFileInMemory : function( out ppDestBuf : ID3DXBuffer ; Dest
 //      D3DX_FILTER flags controlling how each miplevel is filtered.
 //      Or D3DX_DEFAULT for D3DX_FILTER_BOX,
 //
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXFilterTexture(
@@ -9839,7 +10196,8 @@ var D3DXFilterTexture : function( pTexture : IDirect3DTexture9 ; pPalette : PPal
 
 
 // #define D3DXFilterCubeTexture D3DXFilterTexture
-// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+
 (*
 function D3DXFilterCubeTexture(
   pTexture: IDirect3DCubeTexture9;
@@ -9851,7 +10209,8 @@ var D3DXFilterCubeTexture : function( pTexture : IDirect3DCubeTexture9 ; pPalett
 
 
 // #define D3DXFilterVolumeTexture D3DXFilterTexture
-// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+
 (*
 function D3DXFilterVolumeTexture(
   pTexture: IDirect3DVolumeTexture9;
@@ -9879,7 +10238,8 @@ var D3DXFilterVolumeTexture : function( pTexture : IDirect3DVolumeTexture9 ; pPa
 //  pData
 //      Pointer to an arbitrary block of user defined data.  This pointer
 //      will be passed to the function provided in pFunction
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 (*
 
 function D3DXFillTexture(
@@ -9891,6 +10251,7 @@ var D3DXFillTexture : function( pTexture : IDirect3DTexture9 ; pFunction : TD3DX
 
 (*
 
+
 function D3DXFillCubeTexture(
   pCubeTexture: IDirect3DCubeTexture9;
   pFunction: TD3DXFill3D;
@@ -9899,6 +10260,7 @@ function D3DXFillCubeTexture(
 var D3DXFillCubeTexture : function( pCubeTexture : IDirect3DCubeTexture9 ; pFunction : TD3DXFill3D ; pData : Pointer ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXFillVolumeTexture(
   pVolumeTexture: IDirect3DVolumeTexture9;
@@ -9920,7 +10282,8 @@ var D3DXFillVolumeTexture : function( pVolumeTexture : IDirect3DVolumeTexture9 ;
 //      Pointer to the texture to be filled.
 //  pTextureShader
 //      Pointer to the texture shader to be used to fill in the texture
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXFillTextureTX(
@@ -9932,6 +10295,7 @@ var D3DXFillTextureTX : function( pTexture : IDirect3DTexture9 ; pTextureShader 
 (*
 
 
+
 function D3DXFillCubeTextureTX(
   pCubeTexture: IDirect3DCubeTexture9;
   pTextureShader: ID3DXTextureShader): HResult; stdcall; external d3dx9texDLL;
@@ -9939,6 +10303,7 @@ function D3DXFillCubeTextureTX(
 var D3DXFillCubeTextureTX : function( pCubeTexture : IDirect3DCubeTexture9 ; pTextureShader : ID3DXTextureShader ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXFillVolumeTextureTX(
@@ -9968,7 +10333,8 @@ var D3DXFillVolumeTextureTX : function( pVolumeTexture : IDirect3DVolumeTexture9
 //      D3DX_CHANNEL specifying source of height information
 //  Amplitude
 //      The constant value which the height information is multiplied by.
-//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
 (*
 
 function D3DXComputeNormalMap(
@@ -10717,7 +11083,8 @@ type
 //      Returns pointer to an animation controller corresponding to animation
 //      in the .X file. This is created with default max tracks and events
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXLoadMeshHierarchyFromXA(
   Filename: PAnsiChar;
@@ -10732,6 +11099,7 @@ var D3DXLoadMeshHierarchyFromXA : function( Filename : PAnsiChar ; MeshOptions :
 
 (*
 
+
 function D3DXLoadMeshHierarchyFromXW(
   Filename: PWideChar;
   MeshOptions: DWORD;
@@ -10745,6 +11113,7 @@ var D3DXLoadMeshHierarchyFromXW : function( Filename : PWideChar ; MeshOptions :
 
 (*
 
+
 function D3DXLoadMeshHierarchyFromX(
   Filename: PChar;
   MeshOptions: DWORD;
@@ -10757,6 +11126,7 @@ function D3DXLoadMeshHierarchyFromX(
 var D3DXLoadMeshHierarchyFromX : function( Filename : PChar ; MeshOptions : DWORD ; pD3DDevice : IDirect3DDevice9 ; pAlloc : ID3DXAllocateHierarchy_FPC ; pUserDataLoader : ID3DXLoadUserData_FPC ; out ppFrameHierarchy : PD3DXFrame ; out ppAnimController : ID3DXAnimationController ) : HResult ; stdcall ; 
 
 (*
+
 
 
 function D3DXLoadMeshHierarchyFromXInMemory(
@@ -10791,7 +11161,8 @@ var D3DXLoadMeshHierarchyFromXInMemory : function( Memory : Pointer ; SizeOfMemo
 //      Application provided interface to allow adding of user data to
 //        data objects saved to .X file
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXSaveMeshHierarchyToFileA(
   Filename: PAnsiChar;
@@ -10804,6 +11175,7 @@ var D3DXSaveMeshHierarchyToFileA : function( Filename : PAnsiChar ; XFormat : TD
 
 (*
 
+
 function D3DXSaveMeshHierarchyToFileW(
   Filename: PWideChar;
   XFormat: TD3DXFFileFormat;
@@ -10814,6 +11186,7 @@ function D3DXSaveMeshHierarchyToFileW(
 var D3DXSaveMeshHierarchyToFileW : function( Filename : PWideChar ; XFormat : TD3DXFFileFormat ; pFrameRoot : PD3DXFrame ; pAnimcontroller : ID3DXAnimationController ; pUserDataSaver : ID3DXSaveUserData_FPC ) : HResult ; stdcall ; 
 
 (*
+
 
 function D3DXSaveMeshHierarchyToFile(
   Filename: PChar;
@@ -10837,7 +11210,8 @@ var D3DXSaveMeshHierarchyToFile : function( Filename : PChar ; XFormat : TD3DXFF
 //  pAlloc
 //      Allocation interface used to de-allocate nodes of the frame hierarchy
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameDestroy(
   pFrameRoot: PD3DXFrame;
@@ -10857,7 +11231,8 @@ var D3DXFrameDestroy : function( pFrameRoot : PD3DXFrame ; pAlloc : ID3DXAllocat
 //  pFrameChild
 //      Pointer to the child node
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameAppendChild(
   pFrameParent: PD3DXFrame;
@@ -10877,7 +11252,8 @@ var D3DXFrameAppendChild : function( pFrameParent : PD3DXFrame ; pFrameChild : P
 //  Name
 //      Name of frame to find
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameFind(
   pFrameRoot: PD3DXFrame;
@@ -10898,7 +11274,8 @@ var D3DXFrameFind : function( pFrameRoot : PD3DXFrame ; Name : PAnsiChar ) : PD3
 //  pAnimController
 //      Pointer to the animation controller where the matrices are registered
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameRegisterNamedMatrices(
   pFrameRoot: PD3DXFrame;
@@ -10918,7 +11295,8 @@ var D3DXFrameRegisterNamedMatrices : function( pFrameRoot : PD3DXFrame ; pAnimCo
 // Return Value:
 //      Count of frames
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameNumNamedMatrices(
   pFrameRoot: PD3DXFrame): HResult; stdcall; external d3dx9animDLL;
@@ -10939,7 +11317,8 @@ var D3DXFrameNumNamedMatrices : function( pFrameRoot : PD3DXFrame ) : HResult ; 
 //  pObjectRadius
 //      Returns the radius of the bounding sphere
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 function D3DXFrameCalculateBoundingSphere(
   pFrameRoot: PD3DXFrame;
@@ -10971,7 +11350,8 @@ var D3DXFrameCalculateBoundingSphere : function( pFrameRoot : PD3DXFrame ; out p
 //  ppAnimationSet
 //      Returns the animation set interface
 //
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 (*
 function D3DXCreateKeyframedAnimationSet(
   pName: PAnsiChar;
@@ -11008,7 +11388,8 @@ var D3DXCreateKeyframedAnimationSet : function( pName : PAnsiChar ; TicksPerSeco
 //  ppAnimationSet
 //      Returns the animation set interface
 //
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 (*
 function D3DXCreateCompressedAnimationSet(
   pName: PAnsiChar;
@@ -11040,7 +11421,8 @@ var D3DXCreateCompressedAnimationSet : function( pName : PAnsiChar ; TicksPerSec
 //  ppAnimController
 //      Returns the animation controller interface
 //
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 (*
 function D3DXCreateAnimationController(
   MaxNumMatrices: LongWord;
@@ -11064,7 +11446,8 @@ implementation
 //***************************************************************************//
 //***************************************************************************//
 //***************************************************************************//
-
+uses
+	SaGeBase;
 
 
 
@@ -11922,7 +12305,12 @@ end;
 
 
 
-procedure FreeD3DX9();
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_D3DX9();
 begin
 D3DXFloat32To16Array := nil;
 D3DXFloat16To32Array := nil;
@@ -12307,537 +12695,649 @@ D3DXCreateKeyframedAnimationSet := nil;
 D3DXCreateCompressedAnimationSet := nil;
 D3DXCreateAnimationController := nil;
 end;
-
-function LoadD3DX9_0(const UnitName : PChar) : Boolean;
+function Load_D3DX9_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 104;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXFloat32To16Array := GetProcAddress(UnitLib, 'D3DXFloat32To16Array'); if @D3DXFloat32To16Array = nil then begin WriteLn('Error while loading "D3DXFloat32To16Array" from "',UnitName,'".'); Result := False; end;
-D3DXFloat16To32Array := GetProcAddress(UnitLib, 'D3DXFloat16To32Array'); if @D3DXFloat16To32Array = nil then begin WriteLn('Error while loading "D3DXFloat16To32Array" from "',UnitName,'".'); Result := False; end;
-D3DXVec2Normalize := GetProcAddress(UnitLib, 'D3DXVec2Normalize'); if @D3DXVec2Normalize = nil then begin WriteLn('Error while loading "D3DXVec2Normalize" from "',UnitName,'".'); Result := False; end;
-D3DXVec2Hermite := GetProcAddress(UnitLib, 'D3DXVec2Hermite'); if @D3DXVec2Hermite = nil then begin WriteLn('Error while loading "D3DXVec2Hermite" from "',UnitName,'".'); Result := False; end;
-D3DXVec2CatmullRom := GetProcAddress(UnitLib, 'D3DXVec2CatmullRom'); if @D3DXVec2CatmullRom = nil then begin WriteLn('Error while loading "D3DXVec2CatmullRom" from "',UnitName,'".'); Result := False; end;
-D3DXVec2BaryCentric := GetProcAddress(UnitLib, 'D3DXVec2BaryCentric'); if @D3DXVec2BaryCentric = nil then begin WriteLn('Error while loading "D3DXVec2BaryCentric" from "',UnitName,'".'); Result := False; end;
-D3DXVec2Transform := GetProcAddress(UnitLib, 'D3DXVec2Transform'); if @D3DXVec2Transform = nil then begin WriteLn('Error while loading "D3DXVec2Transform" from "',UnitName,'".'); Result := False; end;
-D3DXVec2TransformCoord := GetProcAddress(UnitLib, 'D3DXVec2TransformCoord'); if @D3DXVec2TransformCoord = nil then begin WriteLn('Error while loading "D3DXVec2TransformCoord" from "',UnitName,'".'); Result := False; end;
-D3DXVec2TransformNormal := GetProcAddress(UnitLib, 'D3DXVec2TransformNormal'); if @D3DXVec2TransformNormal = nil then begin WriteLn('Error while loading "D3DXVec2TransformNormal" from "',UnitName,'".'); Result := False; end;
-D3DXVec2TransformArray := GetProcAddress(UnitLib, 'D3DXVec2TransformArray'); if @D3DXVec2TransformArray = nil then begin WriteLn('Error while loading "D3DXVec2TransformArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec2TransformCoordArray := GetProcAddress(UnitLib, 'D3DXVec2TransformCoordArray'); if @D3DXVec2TransformCoordArray = nil then begin WriteLn('Error while loading "D3DXVec2TransformCoordArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec2TransformNormalArray := GetProcAddress(UnitLib, 'D3DXVec2TransformNormalArray'); if @D3DXVec2TransformNormalArray = nil then begin WriteLn('Error while loading "D3DXVec2TransformNormalArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec3Normalize := GetProcAddress(UnitLib, 'D3DXVec3Normalize'); if @D3DXVec3Normalize = nil then begin WriteLn('Error while loading "D3DXVec3Normalize" from "',UnitName,'".'); Result := False; end;
-D3DXVec3Hermite := GetProcAddress(UnitLib, 'D3DXVec3Hermite'); if @D3DXVec3Hermite = nil then begin WriteLn('Error while loading "D3DXVec3Hermite" from "',UnitName,'".'); Result := False; end;
-D3DXVec3CatmullRom := GetProcAddress(UnitLib, 'D3DXVec3CatmullRom'); if @D3DXVec3CatmullRom = nil then begin WriteLn('Error while loading "D3DXVec3CatmullRom" from "',UnitName,'".'); Result := False; end;
-D3DXVec3BaryCentric := GetProcAddress(UnitLib, 'D3DXVec3BaryCentric'); if @D3DXVec3BaryCentric = nil then begin WriteLn('Error while loading "D3DXVec3BaryCentric" from "',UnitName,'".'); Result := False; end;
-D3DXVec3Transform := GetProcAddress(UnitLib, 'D3DXVec3Transform'); if @D3DXVec3Transform = nil then begin WriteLn('Error while loading "D3DXVec3Transform" from "',UnitName,'".'); Result := False; end;
-D3DXVec3TransformCoord := GetProcAddress(UnitLib, 'D3DXVec3TransformCoord'); if @D3DXVec3TransformCoord = nil then begin WriteLn('Error while loading "D3DXVec3TransformCoord" from "',UnitName,'".'); Result := False; end;
-D3DXVec3TransformNormal := GetProcAddress(UnitLib, 'D3DXVec3TransformNormal'); if @D3DXVec3TransformNormal = nil then begin WriteLn('Error while loading "D3DXVec3TransformNormal" from "',UnitName,'".'); Result := False; end;
-D3DXVec3TransformArray := GetProcAddress(UnitLib, 'D3DXVec3TransformArray'); if @D3DXVec3TransformArray = nil then begin WriteLn('Error while loading "D3DXVec3TransformArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec3TransformCoordArray := GetProcAddress(UnitLib, 'D3DXVec3TransformCoordArray'); if @D3DXVec3TransformCoordArray = nil then begin WriteLn('Error while loading "D3DXVec3TransformCoordArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec3TransformNormalArray := GetProcAddress(UnitLib, 'D3DXVec3TransformNormalArray'); if @D3DXVec3TransformNormalArray = nil then begin WriteLn('Error while loading "D3DXVec3TransformNormalArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec3Project := GetProcAddress(UnitLib, 'D3DXVec3Project'); if @D3DXVec3Project = nil then begin WriteLn('Error while loading "D3DXVec3Project" from "',UnitName,'".'); Result := False; end;
-D3DXVec3Unproject := GetProcAddress(UnitLib, 'D3DXVec3Unproject'); if @D3DXVec3Unproject = nil then begin WriteLn('Error while loading "D3DXVec3Unproject" from "',UnitName,'".'); Result := False; end;
-D3DXVec3ProjectArray := GetProcAddress(UnitLib, 'D3DXVec3ProjectArray'); if @D3DXVec3ProjectArray = nil then begin WriteLn('Error while loading "D3DXVec3ProjectArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec3UnprojectArray := GetProcAddress(UnitLib, 'D3DXVec3UnprojectArray'); if @D3DXVec3UnprojectArray = nil then begin WriteLn('Error while loading "D3DXVec3UnprojectArray" from "',UnitName,'".'); Result := False; end;
-D3DXVec4Cross := GetProcAddress(UnitLib, 'D3DXVec4Cross'); if @D3DXVec4Cross = nil then begin WriteLn('Error while loading "D3DXVec4Cross" from "',UnitName,'".'); Result := False; end;
-D3DXVec4Normalize := GetProcAddress(UnitLib, 'D3DXVec4Normalize'); if @D3DXVec4Normalize = nil then begin WriteLn('Error while loading "D3DXVec4Normalize" from "',UnitName,'".'); Result := False; end;
-D3DXVec4Hermite := GetProcAddress(UnitLib, 'D3DXVec4Hermite'); if @D3DXVec4Hermite = nil then begin WriteLn('Error while loading "D3DXVec4Hermite" from "',UnitName,'".'); Result := False; end;
-D3DXVec4CatmullRom := GetProcAddress(UnitLib, 'D3DXVec4CatmullRom'); if @D3DXVec4CatmullRom = nil then begin WriteLn('Error while loading "D3DXVec4CatmullRom" from "',UnitName,'".'); Result := False; end;
-D3DXVec4BaryCentric := GetProcAddress(UnitLib, 'D3DXVec4BaryCentric'); if @D3DXVec4BaryCentric = nil then begin WriteLn('Error while loading "D3DXVec4BaryCentric" from "',UnitName,'".'); Result := False; end;
-D3DXVec4Transform := GetProcAddress(UnitLib, 'D3DXVec4Transform'); if @D3DXVec4Transform = nil then begin WriteLn('Error while loading "D3DXVec4Transform" from "',UnitName,'".'); Result := False; end;
-D3DXVec4TransformArray := GetProcAddress(UnitLib, 'D3DXVec4TransformArray'); if @D3DXVec4TransformArray = nil then begin WriteLn('Error while loading "D3DXVec4TransformArray" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixDeterminant := GetProcAddress(UnitLib, 'D3DXMatrixDeterminant'); if @D3DXMatrixDeterminant = nil then begin WriteLn('Error while loading "D3DXMatrixDeterminant" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixDecompose := GetProcAddress(UnitLib, 'D3DXMatrixDecompose'); if @D3DXMatrixDecompose = nil then begin WriteLn('Error while loading "D3DXMatrixDecompose" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixTranspose := GetProcAddress(UnitLib, 'D3DXMatrixTranspose'); if @D3DXMatrixTranspose = nil then begin WriteLn('Error while loading "D3DXMatrixTranspose" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixMultiply := GetProcAddress(UnitLib, 'D3DXMatrixMultiply'); if @D3DXMatrixMultiply = nil then begin WriteLn('Error while loading "D3DXMatrixMultiply" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixMultiplyTranspose := GetProcAddress(UnitLib, 'D3DXMatrixMultiplyTranspose'); if @D3DXMatrixMultiplyTranspose = nil then begin WriteLn('Error while loading "D3DXMatrixMultiplyTranspose" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixInverse := GetProcAddress(UnitLib, 'D3DXMatrixInverse'); if @D3DXMatrixInverse = nil then begin WriteLn('Error while loading "D3DXMatrixInverse" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixScaling := GetProcAddress(UnitLib, 'D3DXMatrixScaling'); if @D3DXMatrixScaling = nil then begin WriteLn('Error while loading "D3DXMatrixScaling" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixTranslation := GetProcAddress(UnitLib, 'D3DXMatrixTranslation'); if @D3DXMatrixTranslation = nil then begin WriteLn('Error while loading "D3DXMatrixTranslation" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationX := GetProcAddress(UnitLib, 'D3DXMatrixRotationX'); if @D3DXMatrixRotationX = nil then begin WriteLn('Error while loading "D3DXMatrixRotationX" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationY := GetProcAddress(UnitLib, 'D3DXMatrixRotationY'); if @D3DXMatrixRotationY = nil then begin WriteLn('Error while loading "D3DXMatrixRotationY" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationZ := GetProcAddress(UnitLib, 'D3DXMatrixRotationZ'); if @D3DXMatrixRotationZ = nil then begin WriteLn('Error while loading "D3DXMatrixRotationZ" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationAxis := GetProcAddress(UnitLib, 'D3DXMatrixRotationAxis'); if @D3DXMatrixRotationAxis = nil then begin WriteLn('Error while loading "D3DXMatrixRotationAxis" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationQuaternion := GetProcAddress(UnitLib, 'D3DXMatrixRotationQuaternion'); if @D3DXMatrixRotationQuaternion = nil then begin WriteLn('Error while loading "D3DXMatrixRotationQuaternion" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixRotationYawPitchRoll := GetProcAddress(UnitLib, 'D3DXMatrixRotationYawPitchRoll'); if @D3DXMatrixRotationYawPitchRoll = nil then begin WriteLn('Error while loading "D3DXMatrixRotationYawPitchRoll" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixTransformation := GetProcAddress(UnitLib, 'D3DXMatrixTransformation'); if @D3DXMatrixTransformation = nil then begin WriteLn('Error while loading "D3DXMatrixTransformation" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixTransformation2D := GetProcAddress(UnitLib, 'D3DXMatrixTransformation2D'); if @D3DXMatrixTransformation2D = nil then begin WriteLn('Error while loading "D3DXMatrixTransformation2D" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixAffineTransformation := GetProcAddress(UnitLib, 'D3DXMatrixAffineTransformation'); if @D3DXMatrixAffineTransformation = nil then begin WriteLn('Error while loading "D3DXMatrixAffineTransformation" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixAffineTransformation2D := GetProcAddress(UnitLib, 'D3DXMatrixAffineTransformation2D'); if @D3DXMatrixAffineTransformation2D = nil then begin WriteLn('Error while loading "D3DXMatrixAffineTransformation2D" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixLookAtRH := GetProcAddress(UnitLib, 'D3DXMatrixLookAtRH'); if @D3DXMatrixLookAtRH = nil then begin WriteLn('Error while loading "D3DXMatrixLookAtRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixLookAtLH := GetProcAddress(UnitLib, 'D3DXMatrixLookAtLH'); if @D3DXMatrixLookAtLH = nil then begin WriteLn('Error while loading "D3DXMatrixLookAtLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveRH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveRH'); if @D3DXMatrixPerspectiveRH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveLH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveLH'); if @D3DXMatrixPerspectiveLH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveFovRH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveFovRH'); if @D3DXMatrixPerspectiveFovRH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveFovRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveFovLH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveFovLH'); if @D3DXMatrixPerspectiveFovLH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveFovLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveOffCenterRH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveOffCenterRH'); if @D3DXMatrixPerspectiveOffCenterRH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveOffCenterRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixPerspectiveOffCenterLH := GetProcAddress(UnitLib, 'D3DXMatrixPerspectiveOffCenterLH'); if @D3DXMatrixPerspectiveOffCenterLH = nil then begin WriteLn('Error while loading "D3DXMatrixPerspectiveOffCenterLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixOrthoRH := GetProcAddress(UnitLib, 'D3DXMatrixOrthoRH'); if @D3DXMatrixOrthoRH = nil then begin WriteLn('Error while loading "D3DXMatrixOrthoRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixOrthoLH := GetProcAddress(UnitLib, 'D3DXMatrixOrthoLH'); if @D3DXMatrixOrthoLH = nil then begin WriteLn('Error while loading "D3DXMatrixOrthoLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixOrthoOffCenterRH := GetProcAddress(UnitLib, 'D3DXMatrixOrthoOffCenterRH'); if @D3DXMatrixOrthoOffCenterRH = nil then begin WriteLn('Error while loading "D3DXMatrixOrthoOffCenterRH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixOrthoOffCenterLH := GetProcAddress(UnitLib, 'D3DXMatrixOrthoOffCenterLH'); if @D3DXMatrixOrthoOffCenterLH = nil then begin WriteLn('Error while loading "D3DXMatrixOrthoOffCenterLH" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixShadow := GetProcAddress(UnitLib, 'D3DXMatrixShadow'); if @D3DXMatrixShadow = nil then begin WriteLn('Error while loading "D3DXMatrixShadow" from "',UnitName,'".'); Result := False; end;
-D3DXMatrixReflect := GetProcAddress(UnitLib, 'D3DXMatrixReflect'); if @D3DXMatrixReflect = nil then begin WriteLn('Error while loading "D3DXMatrixReflect" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionToAxisAngle := GetProcAddress(UnitLib, 'D3DXQuaternionToAxisAngle'); if @D3DXQuaternionToAxisAngle = nil then begin WriteLn('Error while loading "D3DXQuaternionToAxisAngle" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionRotationMatrix := GetProcAddress(UnitLib, 'D3DXQuaternionRotationMatrix'); if @D3DXQuaternionRotationMatrix = nil then begin WriteLn('Error while loading "D3DXQuaternionRotationMatrix" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionRotationAxis := GetProcAddress(UnitLib, 'D3DXQuaternionRotationAxis'); if @D3DXQuaternionRotationAxis = nil then begin WriteLn('Error while loading "D3DXQuaternionRotationAxis" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionRotationYawPitchRoll := GetProcAddress(UnitLib, 'D3DXQuaternionRotationYawPitchRoll'); if @D3DXQuaternionRotationYawPitchRoll = nil then begin WriteLn('Error while loading "D3DXQuaternionRotationYawPitchRoll" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionMultiply := GetProcAddress(UnitLib, 'D3DXQuaternionMultiply'); if @D3DXQuaternionMultiply = nil then begin WriteLn('Error while loading "D3DXQuaternionMultiply" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionNormalize := GetProcAddress(UnitLib, 'D3DXQuaternionNormalize'); if @D3DXQuaternionNormalize = nil then begin WriteLn('Error while loading "D3DXQuaternionNormalize" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionInverse := GetProcAddress(UnitLib, 'D3DXQuaternionInverse'); if @D3DXQuaternionInverse = nil then begin WriteLn('Error while loading "D3DXQuaternionInverse" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionLn := GetProcAddress(UnitLib, 'D3DXQuaternionLn'); if @D3DXQuaternionLn = nil then begin WriteLn('Error while loading "D3DXQuaternionLn" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionExp := GetProcAddress(UnitLib, 'D3DXQuaternionExp'); if @D3DXQuaternionExp = nil then begin WriteLn('Error while loading "D3DXQuaternionExp" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionSlerp := GetProcAddress(UnitLib, 'D3DXQuaternionSlerp'); if @D3DXQuaternionSlerp = nil then begin WriteLn('Error while loading "D3DXQuaternionSlerp" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionSquad := GetProcAddress(UnitLib, 'D3DXQuaternionSquad'); if @D3DXQuaternionSquad = nil then begin WriteLn('Error while loading "D3DXQuaternionSquad" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionSquadSetup := GetProcAddress(UnitLib, 'D3DXQuaternionSquadSetup'); if @D3DXQuaternionSquadSetup = nil then begin WriteLn('Error while loading "D3DXQuaternionSquadSetup" from "',UnitName,'".'); Result := False; end;
-D3DXQuaternionBaryCentric := GetProcAddress(UnitLib, 'D3DXQuaternionBaryCentric'); if @D3DXQuaternionBaryCentric = nil then begin WriteLn('Error while loading "D3DXQuaternionBaryCentric" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneNormalize := GetProcAddress(UnitLib, 'D3DXPlaneNormalize'); if @D3DXPlaneNormalize = nil then begin WriteLn('Error while loading "D3DXPlaneNormalize" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneIntersectLine := GetProcAddress(UnitLib, 'D3DXPlaneIntersectLine'); if @D3DXPlaneIntersectLine = nil then begin WriteLn('Error while loading "D3DXPlaneIntersectLine" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneFromPointNormal := GetProcAddress(UnitLib, 'D3DXPlaneFromPointNormal'); if @D3DXPlaneFromPointNormal = nil then begin WriteLn('Error while loading "D3DXPlaneFromPointNormal" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneFromPoints := GetProcAddress(UnitLib, 'D3DXPlaneFromPoints'); if @D3DXPlaneFromPoints = nil then begin WriteLn('Error while loading "D3DXPlaneFromPoints" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneTransform := GetProcAddress(UnitLib, 'D3DXPlaneTransform'); if @D3DXPlaneTransform = nil then begin WriteLn('Error while loading "D3DXPlaneTransform" from "',UnitName,'".'); Result := False; end;
-D3DXPlaneTransformArray := GetProcAddress(UnitLib, 'D3DXPlaneTransformArray'); if @D3DXPlaneTransformArray = nil then begin WriteLn('Error while loading "D3DXPlaneTransformArray" from "',UnitName,'".'); Result := False; end;
-D3DXColorAdjustSaturation := GetProcAddress(UnitLib, 'D3DXColorAdjustSaturation'); if @D3DXColorAdjustSaturation = nil then begin WriteLn('Error while loading "D3DXColorAdjustSaturation" from "',UnitName,'".'); Result := False; end;
-D3DXColorAdjustContrast := GetProcAddress(UnitLib, 'D3DXColorAdjustContrast'); if @D3DXColorAdjustContrast = nil then begin WriteLn('Error while loading "D3DXColorAdjustContrast" from "',UnitName,'".'); Result := False; end;
-D3DXFresnelTerm := GetProcAddress(UnitLib, 'D3DXFresnelTerm'); if @D3DXFresnelTerm = nil then begin WriteLn('Error while loading "D3DXFresnelTerm" from "',UnitName,'".'); Result := False; end;
-D3DXCreateMatrixStack := GetProcAddress(UnitLib, 'D3DXCreateMatrixStack'); if @D3DXCreateMatrixStack = nil then begin WriteLn('Error while loading "D3DXCreateMatrixStack" from "',UnitName,'".'); Result := False; end;
-D3DXSHEvalDirection := GetProcAddress(UnitLib, 'D3DXSHEvalDirection'); if @D3DXSHEvalDirection = nil then begin WriteLn('Error while loading "D3DXSHEvalDirection" from "',UnitName,'".'); Result := False; end;
-D3DXSHRotate := GetProcAddress(UnitLib, 'D3DXSHRotate'); if @D3DXSHRotate = nil then begin WriteLn('Error while loading "D3DXSHRotate" from "',UnitName,'".'); Result := False; end;
-D3DXSHRotateZ := GetProcAddress(UnitLib, 'D3DXSHRotateZ'); if @D3DXSHRotateZ = nil then begin WriteLn('Error while loading "D3DXSHRotateZ" from "',UnitName,'".'); Result := False; end;
-D3DXSHAdd := GetProcAddress(UnitLib, 'D3DXSHAdd'); if @D3DXSHAdd = nil then begin WriteLn('Error while loading "D3DXSHAdd" from "',UnitName,'".'); Result := False; end;
-D3DXSHScale := GetProcAddress(UnitLib, 'D3DXSHScale'); if @D3DXSHScale = nil then begin WriteLn('Error while loading "D3DXSHScale" from "',UnitName,'".'); Result := False; end;
-D3DXSHDot := GetProcAddress(UnitLib, 'D3DXSHDot'); if @D3DXSHDot = nil then begin WriteLn('Error while loading "D3DXSHDot" from "',UnitName,'".'); Result := False; end;
-D3DXSHMultiply2 := GetProcAddress(UnitLib, 'D3DXSHMultiply2'); if @D3DXSHMultiply2 = nil then begin WriteLn('Error while loading "D3DXSHMultiply2" from "',UnitName,'".'); Result := False; end;
-D3DXSHMultiply3 := GetProcAddress(UnitLib, 'D3DXSHMultiply3'); if @D3DXSHMultiply3 = nil then begin WriteLn('Error while loading "D3DXSHMultiply3" from "',UnitName,'".'); Result := False; end;
-D3DXSHMultiply4 := GetProcAddress(UnitLib, 'D3DXSHMultiply4'); if @D3DXSHMultiply4 = nil then begin WriteLn('Error while loading "D3DXSHMultiply4" from "',UnitName,'".'); Result := False; end;
-D3DXSHMultiply5 := GetProcAddress(UnitLib, 'D3DXSHMultiply5'); if @D3DXSHMultiply5 = nil then begin WriteLn('Error while loading "D3DXSHMultiply5" from "',UnitName,'".'); Result := False; end;
-D3DXSHMultiply6 := GetProcAddress(UnitLib, 'D3DXSHMultiply6'); if @D3DXSHMultiply6 = nil then begin WriteLn('Error while loading "D3DXSHMultiply6" from "',UnitName,'".'); Result := False; end;
-D3DXSHEvalDirectionalLight := GetProcAddress(UnitLib, 'D3DXSHEvalDirectionalLight'); if @D3DXSHEvalDirectionalLight = nil then begin WriteLn('Error while loading "D3DXSHEvalDirectionalLight" from "',UnitName,'".'); Result := False; end;
-D3DXSHEvalSphericalLight := GetProcAddress(UnitLib, 'D3DXSHEvalSphericalLight'); if @D3DXSHEvalSphericalLight = nil then begin WriteLn('Error while loading "D3DXSHEvalSphericalLight" from "',UnitName,'".'); Result := False; end;
-D3DXSHEvalConeLight := GetProcAddress(UnitLib, 'D3DXSHEvalConeLight'); if @D3DXSHEvalConeLight = nil then begin WriteLn('Error while loading "D3DXSHEvalConeLight" from "',UnitName,'".'); Result := False; end;
-D3DXSHEvalHemisphereLight := GetProcAddress(UnitLib, 'D3DXSHEvalHemisphereLight'); if @D3DXSHEvalHemisphereLight = nil then begin WriteLn('Error while loading "D3DXSHEvalHemisphereLight" from "',UnitName,'".'); Result := False; end;
-D3DXSHProjectCubeMap := GetProcAddress(UnitLib, 'D3DXSHProjectCubeMap'); if @D3DXSHProjectCubeMap = nil then begin WriteLn('Error while loading "D3DXSHProjectCubeMap" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXFloat32To16Array := LoadProcedure('D3DXFloat32To16Array');
+D3DXFloat16To32Array := LoadProcedure('D3DXFloat16To32Array');
+D3DXVec2Normalize := LoadProcedure('D3DXVec2Normalize');
+D3DXVec2Hermite := LoadProcedure('D3DXVec2Hermite');
+D3DXVec2CatmullRom := LoadProcedure('D3DXVec2CatmullRom');
+D3DXVec2BaryCentric := LoadProcedure('D3DXVec2BaryCentric');
+D3DXVec2Transform := LoadProcedure('D3DXVec2Transform');
+D3DXVec2TransformCoord := LoadProcedure('D3DXVec2TransformCoord');
+D3DXVec2TransformNormal := LoadProcedure('D3DXVec2TransformNormal');
+D3DXVec2TransformArray := LoadProcedure('D3DXVec2TransformArray');
+D3DXVec2TransformCoordArray := LoadProcedure('D3DXVec2TransformCoordArray');
+D3DXVec2TransformNormalArray := LoadProcedure('D3DXVec2TransformNormalArray');
+D3DXVec3Normalize := LoadProcedure('D3DXVec3Normalize');
+D3DXVec3Hermite := LoadProcedure('D3DXVec3Hermite');
+D3DXVec3CatmullRom := LoadProcedure('D3DXVec3CatmullRom');
+D3DXVec3BaryCentric := LoadProcedure('D3DXVec3BaryCentric');
+D3DXVec3Transform := LoadProcedure('D3DXVec3Transform');
+D3DXVec3TransformCoord := LoadProcedure('D3DXVec3TransformCoord');
+D3DXVec3TransformNormal := LoadProcedure('D3DXVec3TransformNormal');
+D3DXVec3TransformArray := LoadProcedure('D3DXVec3TransformArray');
+D3DXVec3TransformCoordArray := LoadProcedure('D3DXVec3TransformCoordArray');
+D3DXVec3TransformNormalArray := LoadProcedure('D3DXVec3TransformNormalArray');
+D3DXVec3Project := LoadProcedure('D3DXVec3Project');
+D3DXVec3Unproject := LoadProcedure('D3DXVec3Unproject');
+D3DXVec3ProjectArray := LoadProcedure('D3DXVec3ProjectArray');
+D3DXVec3UnprojectArray := LoadProcedure('D3DXVec3UnprojectArray');
+D3DXVec4Cross := LoadProcedure('D3DXVec4Cross');
+D3DXVec4Normalize := LoadProcedure('D3DXVec4Normalize');
+D3DXVec4Hermite := LoadProcedure('D3DXVec4Hermite');
+D3DXVec4CatmullRom := LoadProcedure('D3DXVec4CatmullRom');
+D3DXVec4BaryCentric := LoadProcedure('D3DXVec4BaryCentric');
+D3DXVec4Transform := LoadProcedure('D3DXVec4Transform');
+D3DXVec4TransformArray := LoadProcedure('D3DXVec4TransformArray');
+D3DXMatrixDeterminant := LoadProcedure('D3DXMatrixDeterminant');
+D3DXMatrixDecompose := LoadProcedure('D3DXMatrixDecompose');
+D3DXMatrixTranspose := LoadProcedure('D3DXMatrixTranspose');
+D3DXMatrixMultiply := LoadProcedure('D3DXMatrixMultiply');
+D3DXMatrixMultiplyTranspose := LoadProcedure('D3DXMatrixMultiplyTranspose');
+D3DXMatrixInverse := LoadProcedure('D3DXMatrixInverse');
+D3DXMatrixScaling := LoadProcedure('D3DXMatrixScaling');
+D3DXMatrixTranslation := LoadProcedure('D3DXMatrixTranslation');
+D3DXMatrixRotationX := LoadProcedure('D3DXMatrixRotationX');
+D3DXMatrixRotationY := LoadProcedure('D3DXMatrixRotationY');
+D3DXMatrixRotationZ := LoadProcedure('D3DXMatrixRotationZ');
+D3DXMatrixRotationAxis := LoadProcedure('D3DXMatrixRotationAxis');
+D3DXMatrixRotationQuaternion := LoadProcedure('D3DXMatrixRotationQuaternion');
+D3DXMatrixRotationYawPitchRoll := LoadProcedure('D3DXMatrixRotationYawPitchRoll');
+D3DXMatrixTransformation := LoadProcedure('D3DXMatrixTransformation');
+D3DXMatrixTransformation2D := LoadProcedure('D3DXMatrixTransformation2D');
+D3DXMatrixAffineTransformation := LoadProcedure('D3DXMatrixAffineTransformation');
+D3DXMatrixAffineTransformation2D := LoadProcedure('D3DXMatrixAffineTransformation2D');
+D3DXMatrixLookAtRH := LoadProcedure('D3DXMatrixLookAtRH');
+D3DXMatrixLookAtLH := LoadProcedure('D3DXMatrixLookAtLH');
+D3DXMatrixPerspectiveRH := LoadProcedure('D3DXMatrixPerspectiveRH');
+D3DXMatrixPerspectiveLH := LoadProcedure('D3DXMatrixPerspectiveLH');
+D3DXMatrixPerspectiveFovRH := LoadProcedure('D3DXMatrixPerspectiveFovRH');
+D3DXMatrixPerspectiveFovLH := LoadProcedure('D3DXMatrixPerspectiveFovLH');
+D3DXMatrixPerspectiveOffCenterRH := LoadProcedure('D3DXMatrixPerspectiveOffCenterRH');
+D3DXMatrixPerspectiveOffCenterLH := LoadProcedure('D3DXMatrixPerspectiveOffCenterLH');
+D3DXMatrixOrthoRH := LoadProcedure('D3DXMatrixOrthoRH');
+D3DXMatrixOrthoLH := LoadProcedure('D3DXMatrixOrthoLH');
+D3DXMatrixOrthoOffCenterRH := LoadProcedure('D3DXMatrixOrthoOffCenterRH');
+D3DXMatrixOrthoOffCenterLH := LoadProcedure('D3DXMatrixOrthoOffCenterLH');
+D3DXMatrixShadow := LoadProcedure('D3DXMatrixShadow');
+D3DXMatrixReflect := LoadProcedure('D3DXMatrixReflect');
+D3DXQuaternionToAxisAngle := LoadProcedure('D3DXQuaternionToAxisAngle');
+D3DXQuaternionRotationMatrix := LoadProcedure('D3DXQuaternionRotationMatrix');
+D3DXQuaternionRotationAxis := LoadProcedure('D3DXQuaternionRotationAxis');
+D3DXQuaternionRotationYawPitchRoll := LoadProcedure('D3DXQuaternionRotationYawPitchRoll');
+D3DXQuaternionMultiply := LoadProcedure('D3DXQuaternionMultiply');
+D3DXQuaternionNormalize := LoadProcedure('D3DXQuaternionNormalize');
+D3DXQuaternionInverse := LoadProcedure('D3DXQuaternionInverse');
+D3DXQuaternionLn := LoadProcedure('D3DXQuaternionLn');
+D3DXQuaternionExp := LoadProcedure('D3DXQuaternionExp');
+D3DXQuaternionSlerp := LoadProcedure('D3DXQuaternionSlerp');
+D3DXQuaternionSquad := LoadProcedure('D3DXQuaternionSquad');
+D3DXQuaternionSquadSetup := LoadProcedure('D3DXQuaternionSquadSetup');
+D3DXQuaternionBaryCentric := LoadProcedure('D3DXQuaternionBaryCentric');
+D3DXPlaneNormalize := LoadProcedure('D3DXPlaneNormalize');
+D3DXPlaneIntersectLine := LoadProcedure('D3DXPlaneIntersectLine');
+D3DXPlaneFromPointNormal := LoadProcedure('D3DXPlaneFromPointNormal');
+D3DXPlaneFromPoints := LoadProcedure('D3DXPlaneFromPoints');
+D3DXPlaneTransform := LoadProcedure('D3DXPlaneTransform');
+D3DXPlaneTransformArray := LoadProcedure('D3DXPlaneTransformArray');
+D3DXColorAdjustSaturation := LoadProcedure('D3DXColorAdjustSaturation');
+D3DXColorAdjustContrast := LoadProcedure('D3DXColorAdjustContrast');
+D3DXFresnelTerm := LoadProcedure('D3DXFresnelTerm');
+D3DXCreateMatrixStack := LoadProcedure('D3DXCreateMatrixStack');
+D3DXSHEvalDirection := LoadProcedure('D3DXSHEvalDirection');
+D3DXSHRotate := LoadProcedure('D3DXSHRotate');
+D3DXSHRotateZ := LoadProcedure('D3DXSHRotateZ');
+D3DXSHAdd := LoadProcedure('D3DXSHAdd');
+D3DXSHScale := LoadProcedure('D3DXSHScale');
+D3DXSHDot := LoadProcedure('D3DXSHDot');
+D3DXSHMultiply2 := LoadProcedure('D3DXSHMultiply2');
+D3DXSHMultiply3 := LoadProcedure('D3DXSHMultiply3');
+D3DXSHMultiply4 := LoadProcedure('D3DXSHMultiply4');
+D3DXSHMultiply5 := LoadProcedure('D3DXSHMultiply5');
+D3DXSHMultiply6 := LoadProcedure('D3DXSHMultiply6');
+D3DXSHEvalDirectionalLight := LoadProcedure('D3DXSHEvalDirectionalLight');
+D3DXSHEvalSphericalLight := LoadProcedure('D3DXSHEvalSphericalLight');
+D3DXSHEvalConeLight := LoadProcedure('D3DXSHEvalConeLight');
+D3DXSHEvalHemisphereLight := LoadProcedure('D3DXSHEvalHemisphereLight');
+D3DXSHProjectCubeMap := LoadProcedure('D3DXSHProjectCubeMap');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9mathDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_1(const UnitName : PChar) : Boolean;
+function Load_D3DX9_1(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 13;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXCheckVersion := GetProcAddress(UnitLib, 'D3DXCheckVersion'); if @D3DXCheckVersion = nil then begin WriteLn('Error while loading "D3DXCheckVersion" from "',UnitName,'".'); Result := False; end;
-D3DXDebugMute := GetProcAddress(UnitLib, 'D3DXDebugMute'); if @D3DXDebugMute = nil then begin WriteLn('Error while loading "D3DXDebugMute" from "',UnitName,'".'); Result := False; end;
-D3DXGetDriverLevel := GetProcAddress(UnitLib, 'D3DXGetDriverLevel'); if @D3DXGetDriverLevel = nil then begin WriteLn('Error while loading "D3DXGetDriverLevel" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSprite := GetProcAddress(UnitLib, 'D3DXCreateSprite'); if @D3DXCreateSprite = nil then begin WriteLn('Error while loading "D3DXCreateSprite" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFontA := GetProcAddress(UnitLib, 'D3DXCreateFontA'); if @D3DXCreateFontA = nil then begin WriteLn('Error while loading "D3DXCreateFontA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFontW := GetProcAddress(UnitLib, 'D3DXCreateFontW'); if @D3DXCreateFontW = nil then begin WriteLn('Error while loading "D3DXCreateFontW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFont := GetProcAddress(UnitLib, 'D3DXCreateFontA'); if @D3DXCreateFont = nil then begin WriteLn('Error while loading "D3DXCreateFont" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFontIndirectA := GetProcAddress(UnitLib, 'D3DXCreateFontIndirectA'); if @D3DXCreateFontIndirectA = nil then begin WriteLn('Error while loading "D3DXCreateFontIndirectA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFontIndirectW := GetProcAddress(UnitLib, 'D3DXCreateFontIndirectW'); if @D3DXCreateFontIndirectW = nil then begin WriteLn('Error while loading "D3DXCreateFontIndirectW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFontIndirect := GetProcAddress(UnitLib, 'D3DXCreateFontIndirectA'); if @D3DXCreateFontIndirect = nil then begin WriteLn('Error while loading "D3DXCreateFontIndirect" from "',UnitName,'".'); Result := False; end;
-D3DXCreateRenderToSurface := GetProcAddress(UnitLib, 'D3DXCreateRenderToSurface'); if @D3DXCreateRenderToSurface = nil then begin WriteLn('Error while loading "D3DXCreateRenderToSurface" from "',UnitName,'".'); Result := False; end;
-D3DXCreateRenderToEnvMap := GetProcAddress(UnitLib, 'D3DXCreateRenderToEnvMap'); if @D3DXCreateRenderToEnvMap = nil then begin WriteLn('Error while loading "D3DXCreateRenderToEnvMap" from "',UnitName,'".'); Result := False; end;
-D3DXCreateLine := GetProcAddress(UnitLib, 'D3DXCreateLine'); if @D3DXCreateLine = nil then begin WriteLn('Error while loading "D3DXCreateLine" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXCheckVersion := LoadProcedure('D3DXCheckVersion');
+D3DXDebugMute := LoadProcedure('D3DXDebugMute');
+D3DXGetDriverLevel := LoadProcedure('D3DXGetDriverLevel');
+D3DXCreateSprite := LoadProcedure('D3DXCreateSprite');
+D3DXCreateFontA := LoadProcedure('D3DXCreateFontA');
+D3DXCreateFontW := LoadProcedure('D3DXCreateFontW');
+D3DXCreateFont := LoadProcedure('D3DXCreateFontA');
+D3DXCreateFontIndirectA := LoadProcedure('D3DXCreateFontIndirectA');
+D3DXCreateFontIndirectW := LoadProcedure('D3DXCreateFontIndirectW');
+D3DXCreateFontIndirect := LoadProcedure('D3DXCreateFontIndirectA');
+D3DXCreateRenderToSurface := LoadProcedure('D3DXCreateRenderToSurface');
+D3DXCreateRenderToEnvMap := LoadProcedure('D3DXCreateRenderToEnvMap');
+D3DXCreateLine := LoadProcedure('D3DXCreateLine');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9coreDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_2(const UnitName : PChar) : Boolean;
+function Load_D3DX9_2(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 40;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXAssembleShaderFromFileA := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromFileA'); if @D3DXAssembleShaderFromFileA = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShaderFromFileW := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromFileW'); if @D3DXAssembleShaderFromFileW = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShaderFromFile := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromFileA'); if @D3DXAssembleShaderFromFile = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShaderFromResourceA := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromResourceA'); if @D3DXAssembleShaderFromResourceA = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShaderFromResourceW := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromResourceW'); if @D3DXAssembleShaderFromResourceW = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShaderFromResource := GetProcAddress(UnitLib, 'D3DXAssembleShaderFromResourceA'); if @D3DXAssembleShaderFromResource = nil then begin WriteLn('Error while loading "D3DXAssembleShaderFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXAssembleShader := GetProcAddress(UnitLib, 'D3DXAssembleShader'); if @D3DXAssembleShader = nil then begin WriteLn('Error while loading "D3DXAssembleShader" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromFileA := GetProcAddress(UnitLib, 'D3DXCompileShaderFromFileA'); if @D3DXCompileShaderFromFileA = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromFileW := GetProcAddress(UnitLib, 'D3DXCompileShaderFromFileW'); if @D3DXCompileShaderFromFileW = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromFile := GetProcAddress(UnitLib, 'D3DXCompileShaderFromFileA'); if @D3DXCompileShaderFromFile = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromResourceA := GetProcAddress(UnitLib, 'D3DXCompileShaderFromResourceA'); if @D3DXCompileShaderFromResourceA = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromResourceW := GetProcAddress(UnitLib, 'D3DXCompileShaderFromResourceW'); if @D3DXCompileShaderFromResourceW = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShaderFromResource := GetProcAddress(UnitLib, 'D3DXCompileShaderFromResourceA'); if @D3DXCompileShaderFromResource = nil then begin WriteLn('Error while loading "D3DXCompileShaderFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCompileShader := GetProcAddress(UnitLib, 'D3DXCompileShader'); if @D3DXCompileShader = nil then begin WriteLn('Error while loading "D3DXCompileShader" from "',UnitName,'".'); Result := False; end;
-D3DXDisassembleShader := GetProcAddress(UnitLib, 'D3DXDisassembleShader'); if @D3DXDisassembleShader = nil then begin WriteLn('Error while loading "D3DXDisassembleShader" from "',UnitName,'".'); Result := False; end;
-D3DXGetPixelShaderProfile := GetProcAddress(UnitLib, 'D3DXGetPixelShaderProfile'); if @D3DXGetPixelShaderProfile = nil then begin WriteLn('Error while loading "D3DXGetPixelShaderProfile" from "',UnitName,'".'); Result := False; end;
-D3DXGetVertexShaderProfile := GetProcAddress(UnitLib, 'D3DXGetVertexShaderProfile'); if @D3DXGetVertexShaderProfile = nil then begin WriteLn('Error while loading "D3DXGetVertexShaderProfile" from "',UnitName,'".'); Result := False; end;
-D3DXFindShaderComment := GetProcAddress(UnitLib, 'D3DXFindShaderComment'); if @D3DXFindShaderComment = nil then begin WriteLn('Error while loading "D3DXFindShaderComment" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderSize := GetProcAddress(UnitLib, 'D3DXGetShaderSize'); if @D3DXGetShaderSize = nil then begin WriteLn('Error while loading "D3DXGetShaderSize" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderVersion := GetProcAddress(UnitLib, 'D3DXGetShaderVersion'); if @D3DXGetShaderVersion = nil then begin WriteLn('Error while loading "D3DXGetShaderVersion" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderInputSemantics := GetProcAddress(UnitLib, 'D3DXGetShaderInputSemantics'); if @D3DXGetShaderInputSemantics = nil then begin WriteLn('Error while loading "D3DXGetShaderInputSemantics" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderOutputSemantics := GetProcAddress(UnitLib, 'D3DXGetShaderOutputSemantics'); if @D3DXGetShaderOutputSemantics = nil then begin WriteLn('Error while loading "D3DXGetShaderOutputSemantics" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderSamplers := GetProcAddress(UnitLib, 'D3DXGetShaderSamplers'); if @D3DXGetShaderSamplers = nil then begin WriteLn('Error while loading "D3DXGetShaderSamplers" from "',UnitName,'".'); Result := False; end;
-D3DXGetShaderConstantTable := GetProcAddress(UnitLib, 'D3DXGetShaderConstantTable'); if @D3DXGetShaderConstantTable = nil then begin WriteLn('Error while loading "D3DXGetShaderConstantTable" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureShader := GetProcAddress(UnitLib, 'D3DXCreateTextureShader'); if @D3DXCreateTextureShader = nil then begin WriteLn('Error while loading "D3DXCreateTextureShader" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromFileA := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromFileA'); if @D3DXGatherFragmentsFromFileA = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromFileW := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromFileW'); if @D3DXGatherFragmentsFromFileW = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromFile := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromFileA'); if @D3DXGatherFragmentsFromFile = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromResourceA := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromResourceA'); if @D3DXGatherFragmentsFromResourceA = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromResourceW := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromResourceW'); if @D3DXGatherFragmentsFromResourceW = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragmentsFromResource := GetProcAddress(UnitLib, 'D3DXGatherFragmentsFromResourceA'); if @D3DXGatherFragmentsFromResource = nil then begin WriteLn('Error while loading "D3DXGatherFragmentsFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXGatherFragments := GetProcAddress(UnitLib, 'D3DXGatherFragments'); if @D3DXGatherFragments = nil then begin WriteLn('Error while loading "D3DXGatherFragments" from "',UnitName,'".'); Result := False; end;
-D3DXCreateFragmentLinker := GetProcAddress(UnitLib, 'D3DXCreateFragmentLinker'); if @D3DXCreateFragmentLinker = nil then begin WriteLn('Error while loading "D3DXCreateFragmentLinker" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromFileA := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromFileA'); if @D3DXPreprocessShaderFromFileA = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromFileW := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromFileW'); if @D3DXPreprocessShaderFromFileW = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromFile := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromFileA'); if @D3DXPreprocessShaderFromFile = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromResourceA := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromResourceA'); if @D3DXPreprocessShaderFromResourceA = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromResourceW := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromResourceW'); if @D3DXPreprocessShaderFromResourceW = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShaderFromResource := GetProcAddress(UnitLib, 'D3DXPreprocessShaderFromResourceA'); if @D3DXPreprocessShaderFromResource = nil then begin WriteLn('Error while loading "D3DXPreprocessShaderFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXPreprocessShader := GetProcAddress(UnitLib, 'D3DXPreprocessShader'); if @D3DXPreprocessShader = nil then begin WriteLn('Error while loading "D3DXPreprocessShader" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXAssembleShaderFromFileA := LoadProcedure('D3DXAssembleShaderFromFileA');
+D3DXAssembleShaderFromFileW := LoadProcedure('D3DXAssembleShaderFromFileW');
+D3DXAssembleShaderFromFile := LoadProcedure('D3DXAssembleShaderFromFileA');
+D3DXAssembleShaderFromResourceA := LoadProcedure('D3DXAssembleShaderFromResourceA');
+D3DXAssembleShaderFromResourceW := LoadProcedure('D3DXAssembleShaderFromResourceW');
+D3DXAssembleShaderFromResource := LoadProcedure('D3DXAssembleShaderFromResourceA');
+D3DXAssembleShader := LoadProcedure('D3DXAssembleShader');
+D3DXCompileShaderFromFileA := LoadProcedure('D3DXCompileShaderFromFileA');
+D3DXCompileShaderFromFileW := LoadProcedure('D3DXCompileShaderFromFileW');
+D3DXCompileShaderFromFile := LoadProcedure('D3DXCompileShaderFromFileA');
+D3DXCompileShaderFromResourceA := LoadProcedure('D3DXCompileShaderFromResourceA');
+D3DXCompileShaderFromResourceW := LoadProcedure('D3DXCompileShaderFromResourceW');
+D3DXCompileShaderFromResource := LoadProcedure('D3DXCompileShaderFromResourceA');
+D3DXCompileShader := LoadProcedure('D3DXCompileShader');
+D3DXDisassembleShader := LoadProcedure('D3DXDisassembleShader');
+D3DXGetPixelShaderProfile := LoadProcedure('D3DXGetPixelShaderProfile');
+D3DXGetVertexShaderProfile := LoadProcedure('D3DXGetVertexShaderProfile');
+D3DXFindShaderComment := LoadProcedure('D3DXFindShaderComment');
+D3DXGetShaderSize := LoadProcedure('D3DXGetShaderSize');
+D3DXGetShaderVersion := LoadProcedure('D3DXGetShaderVersion');
+D3DXGetShaderInputSemantics := LoadProcedure('D3DXGetShaderInputSemantics');
+D3DXGetShaderOutputSemantics := LoadProcedure('D3DXGetShaderOutputSemantics');
+D3DXGetShaderSamplers := LoadProcedure('D3DXGetShaderSamplers');
+D3DXGetShaderConstantTable := LoadProcedure('D3DXGetShaderConstantTable');
+D3DXCreateTextureShader := LoadProcedure('D3DXCreateTextureShader');
+D3DXGatherFragmentsFromFileA := LoadProcedure('D3DXGatherFragmentsFromFileA');
+D3DXGatherFragmentsFromFileW := LoadProcedure('D3DXGatherFragmentsFromFileW');
+D3DXGatherFragmentsFromFile := LoadProcedure('D3DXGatherFragmentsFromFileA');
+D3DXGatherFragmentsFromResourceA := LoadProcedure('D3DXGatherFragmentsFromResourceA');
+D3DXGatherFragmentsFromResourceW := LoadProcedure('D3DXGatherFragmentsFromResourceW');
+D3DXGatherFragmentsFromResource := LoadProcedure('D3DXGatherFragmentsFromResourceA');
+D3DXGatherFragments := LoadProcedure('D3DXGatherFragments');
+D3DXCreateFragmentLinker := LoadProcedure('D3DXCreateFragmentLinker');
+D3DXPreprocessShaderFromFileA := LoadProcedure('D3DXPreprocessShaderFromFileA');
+D3DXPreprocessShaderFromFileW := LoadProcedure('D3DXPreprocessShaderFromFileW');
+D3DXPreprocessShaderFromFile := LoadProcedure('D3DXPreprocessShaderFromFileA');
+D3DXPreprocessShaderFromResourceA := LoadProcedure('D3DXPreprocessShaderFromResourceA');
+D3DXPreprocessShaderFromResourceW := LoadProcedure('D3DXPreprocessShaderFromResourceW');
+D3DXPreprocessShaderFromResource := LoadProcedure('D3DXPreprocessShaderFromResourceA');
+D3DXPreprocessShader := LoadProcedure('D3DXPreprocessShader');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9shaderDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_3(const UnitName : PChar) : Boolean;
+function Load_D3DX9_3(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 23;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXCreateEffectPool := GetProcAddress(UnitLib, 'D3DXCreateEffectPool'); if @D3DXCreateEffectPool = nil then begin WriteLn('Error while loading "D3DXCreateEffectPool" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFileA := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileA'); if @D3DXCreateEffectFromFileA = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFileW := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileW'); if @D3DXCreateEffectFromFileW = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFile := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileA'); if @D3DXCreateEffectFromFile = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResourceA := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceA'); if @D3DXCreateEffectFromResourceA = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResourceW := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceW'); if @D3DXCreateEffectFromResourceW = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResource := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceA'); if @D3DXCreateEffectFromResource = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffect := GetProcAddress(UnitLib, 'D3DXCreateEffect'); if @D3DXCreateEffect = nil then begin WriteLn('Error while loading "D3DXCreateEffect" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFileExA := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileExA'); if @D3DXCreateEffectFromFileExA = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFileExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFileExW := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileExW'); if @D3DXCreateEffectFromFileExW = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFileExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromFileEx := GetProcAddress(UnitLib, 'D3DXCreateEffectFromFileExA'); if @D3DXCreateEffectFromFileEx = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromFileEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResourceExA := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceExA'); if @D3DXCreateEffectFromResourceExA = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResourceExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResourceExW := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceExW'); if @D3DXCreateEffectFromResourceExW = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResourceExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectFromResourceEx := GetProcAddress(UnitLib, 'D3DXCreateEffectFromResourceExA'); if @D3DXCreateEffectFromResourceEx = nil then begin WriteLn('Error while loading "D3DXCreateEffectFromResourceEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectEx := GetProcAddress(UnitLib, 'D3DXCreateEffectEx'); if @D3DXCreateEffectEx = nil then begin WriteLn('Error while loading "D3DXCreateEffectEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromFileA := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromFileA'); if @D3DXCreateEffectCompilerFromFileA = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromFileW := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromFileW'); if @D3DXCreateEffectCompilerFromFileW = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromFile := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromFileA'); if @D3DXCreateEffectCompilerFromFile = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromResourceA := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromResourceA'); if @D3DXCreateEffectCompilerFromResourceA = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromResourceW := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromResourceW'); if @D3DXCreateEffectCompilerFromResourceW = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompilerFromResource := GetProcAddress(UnitLib, 'D3DXCreateEffectCompilerFromResourceA'); if @D3DXCreateEffectCompilerFromResource = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompilerFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCreateEffectCompiler := GetProcAddress(UnitLib, 'D3DXCreateEffectCompiler'); if @D3DXCreateEffectCompiler = nil then begin WriteLn('Error while loading "D3DXCreateEffectCompiler" from "',UnitName,'".'); Result := False; end;
-D3DXDisassembleEffect := GetProcAddress(UnitLib, 'D3DXDisassembleEffect'); if @D3DXDisassembleEffect = nil then begin WriteLn('Error while loading "D3DXDisassembleEffect" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXCreateEffectPool := LoadProcedure('D3DXCreateEffectPool');
+D3DXCreateEffectFromFileA := LoadProcedure('D3DXCreateEffectFromFileA');
+D3DXCreateEffectFromFileW := LoadProcedure('D3DXCreateEffectFromFileW');
+D3DXCreateEffectFromFile := LoadProcedure('D3DXCreateEffectFromFileA');
+D3DXCreateEffectFromResourceA := LoadProcedure('D3DXCreateEffectFromResourceA');
+D3DXCreateEffectFromResourceW := LoadProcedure('D3DXCreateEffectFromResourceW');
+D3DXCreateEffectFromResource := LoadProcedure('D3DXCreateEffectFromResourceA');
+D3DXCreateEffect := LoadProcedure('D3DXCreateEffect');
+D3DXCreateEffectFromFileExA := LoadProcedure('D3DXCreateEffectFromFileExA');
+D3DXCreateEffectFromFileExW := LoadProcedure('D3DXCreateEffectFromFileExW');
+D3DXCreateEffectFromFileEx := LoadProcedure('D3DXCreateEffectFromFileExA');
+D3DXCreateEffectFromResourceExA := LoadProcedure('D3DXCreateEffectFromResourceExA');
+D3DXCreateEffectFromResourceExW := LoadProcedure('D3DXCreateEffectFromResourceExW');
+D3DXCreateEffectFromResourceEx := LoadProcedure('D3DXCreateEffectFromResourceExA');
+D3DXCreateEffectEx := LoadProcedure('D3DXCreateEffectEx');
+D3DXCreateEffectCompilerFromFileA := LoadProcedure('D3DXCreateEffectCompilerFromFileA');
+D3DXCreateEffectCompilerFromFileW := LoadProcedure('D3DXCreateEffectCompilerFromFileW');
+D3DXCreateEffectCompilerFromFile := LoadProcedure('D3DXCreateEffectCompilerFromFileA');
+D3DXCreateEffectCompilerFromResourceA := LoadProcedure('D3DXCreateEffectCompilerFromResourceA');
+D3DXCreateEffectCompilerFromResourceW := LoadProcedure('D3DXCreateEffectCompilerFromResourceW');
+D3DXCreateEffectCompilerFromResource := LoadProcedure('D3DXCreateEffectCompilerFromResourceA');
+D3DXCreateEffectCompiler := LoadProcedure('D3DXCreateEffectCompiler');
+D3DXDisassembleEffect := LoadProcedure('D3DXDisassembleEffect');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9effectDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_4(const UnitName : PChar) : Boolean;
+function Load_D3DX9_4(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 82;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXFileCreate := GetProcAddress(UnitLib, 'D3DXFileCreate'); if @D3DXFileCreate = nil then begin WriteLn('Error while loading "D3DXFileCreate" from "',UnitName,'".'); Result := False; end;
-D3DXCreateMesh := GetProcAddress(UnitLib, 'D3DXCreateMesh'); if @D3DXCreateMesh = nil then begin WriteLn('Error while loading "D3DXCreateMesh" from "',UnitName,'".'); Result := False; end;
-D3DXCreateMeshFVF := GetProcAddress(UnitLib, 'D3DXCreateMeshFVF'); if @D3DXCreateMeshFVF = nil then begin WriteLn('Error while loading "D3DXCreateMeshFVF" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSPMesh := GetProcAddress(UnitLib, 'D3DXCreateSPMesh'); if @D3DXCreateSPMesh = nil then begin WriteLn('Error while loading "D3DXCreateSPMesh" from "',UnitName,'".'); Result := False; end;
-D3DXCleanMesh := GetProcAddress(UnitLib, 'D3DXCleanMesh'); if @D3DXCleanMesh = nil then begin WriteLn('Error while loading "D3DXCleanMesh" from "',UnitName,'".'); Result := False; end;
-D3DXValidMesh := GetProcAddress(UnitLib, 'D3DXValidMesh'); if @D3DXValidMesh = nil then begin WriteLn('Error while loading "D3DXValidMesh" from "',UnitName,'".'); Result := False; end;
-D3DXGeneratePMesh := GetProcAddress(UnitLib, 'D3DXGeneratePMesh'); if @D3DXGeneratePMesh = nil then begin WriteLn('Error while loading "D3DXGeneratePMesh" from "',UnitName,'".'); Result := False; end;
-D3DXSimplifyMesh := GetProcAddress(UnitLib, 'D3DXSimplifyMesh'); if @D3DXSimplifyMesh = nil then begin WriteLn('Error while loading "D3DXSimplifyMesh" from "',UnitName,'".'); Result := False; end;
-D3DXComputeBoundingSphere := GetProcAddress(UnitLib, 'D3DXComputeBoundingSphere'); if @D3DXComputeBoundingSphere = nil then begin WriteLn('Error while loading "D3DXComputeBoundingSphere" from "',UnitName,'".'); Result := False; end;
-D3DXComputeBoundingBox := GetProcAddress(UnitLib, 'D3DXComputeBoundingBox'); if @D3DXComputeBoundingBox = nil then begin WriteLn('Error while loading "D3DXComputeBoundingBox" from "',UnitName,'".'); Result := False; end;
-D3DXComputeNormals := GetProcAddress(UnitLib, 'D3DXComputeNormals'); if @D3DXComputeNormals = nil then begin WriteLn('Error while loading "D3DXComputeNormals" from "',UnitName,'".'); Result := False; end;
-D3DXCreateBuffer := GetProcAddress(UnitLib, 'D3DXCreateBuffer'); if @D3DXCreateBuffer = nil then begin WriteLn('Error while loading "D3DXCreateBuffer" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromXA := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXA'); if @D3DXLoadMeshFromXA = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromXA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromXW := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXW'); if @D3DXLoadMeshFromXW = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromXW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromX := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXA'); if @D3DXLoadMeshFromX = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromX" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromXInMemory := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXInMemory'); if @D3DXLoadMeshFromXInMemory = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromXInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromXResource := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXResource'); if @D3DXLoadMeshFromXResource = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromXResource" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshToXA := GetProcAddress(UnitLib, 'D3DXSaveMeshToXA'); if @D3DXSaveMeshToXA = nil then begin WriteLn('Error while loading "D3DXSaveMeshToXA" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshToXW := GetProcAddress(UnitLib, 'D3DXSaveMeshToXW'); if @D3DXSaveMeshToXW = nil then begin WriteLn('Error while loading "D3DXSaveMeshToXW" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshToX := GetProcAddress(UnitLib, 'D3DXSaveMeshToXA'); if @D3DXSaveMeshToX = nil then begin WriteLn('Error while loading "D3DXSaveMeshToX" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePMeshFromStream := GetProcAddress(UnitLib, 'D3DXCreatePMeshFromStream'); if @D3DXCreatePMeshFromStream = nil then begin WriteLn('Error while loading "D3DXCreatePMeshFromStream" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSkinInfo := GetProcAddress(UnitLib, 'D3DXCreateSkinInfo'); if @D3DXCreateSkinInfo = nil then begin WriteLn('Error while loading "D3DXCreateSkinInfo" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSkinInfoFVF := GetProcAddress(UnitLib, 'D3DXCreateSkinInfoFVF'); if @D3DXCreateSkinInfoFVF = nil then begin WriteLn('Error while loading "D3DXCreateSkinInfoFVF" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshFromXof := GetProcAddress(UnitLib, 'D3DXLoadMeshFromXof'); if @D3DXLoadMeshFromXof = nil then begin WriteLn('Error while loading "D3DXLoadMeshFromXof" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSkinMeshFromXof := GetProcAddress(UnitLib, 'D3DXLoadSkinMeshFromXof'); if @D3DXLoadSkinMeshFromXof = nil then begin WriteLn('Error while loading "D3DXLoadSkinMeshFromXof" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSkinInfoFromBlendedMesh := GetProcAddress(UnitLib, 'D3DXCreateSkinInfoFromBlendedMesh'); if @D3DXCreateSkinInfoFromBlendedMesh = nil then begin WriteLn('Error while loading "D3DXCreateSkinInfoFromBlendedMesh" from "',UnitName,'".'); Result := False; end;
-D3DXTessellateNPatches := GetProcAddress(UnitLib, 'D3DXTessellateNPatches'); if @D3DXTessellateNPatches = nil then begin WriteLn('Error while loading "D3DXTessellateNPatches" from "',UnitName,'".'); Result := False; end;
-D3DXGenerateOutputDecl := GetProcAddress(UnitLib, 'D3DXGenerateOutputDecl'); if @D3DXGenerateOutputDecl = nil then begin WriteLn('Error while loading "D3DXGenerateOutputDecl" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPatchMeshFromXof := GetProcAddress(UnitLib, 'D3DXLoadPatchMeshFromXof'); if @D3DXLoadPatchMeshFromXof = nil then begin WriteLn('Error while loading "D3DXLoadPatchMeshFromXof" from "',UnitName,'".'); Result := False; end;
-D3DXRectPatchSize := GetProcAddress(UnitLib, 'D3DXRectPatchSize'); if @D3DXRectPatchSize = nil then begin WriteLn('Error while loading "D3DXRectPatchSize" from "',UnitName,'".'); Result := False; end;
-D3DXTriPatchSize := GetProcAddress(UnitLib, 'D3DXTriPatchSize'); if @D3DXTriPatchSize = nil then begin WriteLn('Error while loading "D3DXTriPatchSize" from "',UnitName,'".'); Result := False; end;
-D3DXTessellateRectPatch := GetProcAddress(UnitLib, 'D3DXTessellateRectPatch'); if @D3DXTessellateRectPatch = nil then begin WriteLn('Error while loading "D3DXTessellateRectPatch" from "',UnitName,'".'); Result := False; end;
-D3DXTessellateTriPatch := GetProcAddress(UnitLib, 'D3DXTessellateTriPatch'); if @D3DXTessellateTriPatch = nil then begin WriteLn('Error while loading "D3DXTessellateTriPatch" from "',UnitName,'".'); Result := False; end;
-D3DXCreateNPatchMesh := GetProcAddress(UnitLib, 'D3DXCreateNPatchMesh'); if @D3DXCreateNPatchMesh = nil then begin WriteLn('Error while loading "D3DXCreateNPatchMesh" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePatchMesh := GetProcAddress(UnitLib, 'D3DXCreatePatchMesh'); if @D3DXCreatePatchMesh = nil then begin WriteLn('Error while loading "D3DXCreatePatchMesh" from "',UnitName,'".'); Result := False; end;
-D3DXValidPatchMesh := GetProcAddress(UnitLib, 'D3DXValidPatchMesh'); if @D3DXValidPatchMesh = nil then begin WriteLn('Error while loading "D3DXValidPatchMesh" from "',UnitName,'".'); Result := False; end;
-D3DXGetFVFVertexSize := GetProcAddress(UnitLib, 'D3DXGetFVFVertexSize'); if @D3DXGetFVFVertexSize = nil then begin WriteLn('Error while loading "D3DXGetFVFVertexSize" from "',UnitName,'".'); Result := False; end;
-D3DXGetDeclVertexSize := GetProcAddress(UnitLib, 'D3DXGetDeclVertexSize'); if @D3DXGetDeclVertexSize = nil then begin WriteLn('Error while loading "D3DXGetDeclVertexSize" from "',UnitName,'".'); Result := False; end;
-D3DXGetDeclLength := GetProcAddress(UnitLib, 'D3DXGetDeclLength'); if @D3DXGetDeclLength = nil then begin WriteLn('Error while loading "D3DXGetDeclLength" from "',UnitName,'".'); Result := False; end;
-D3DXDeclaratorFromFVF := GetProcAddress(UnitLib, 'D3DXDeclaratorFromFVF'); if @D3DXDeclaratorFromFVF = nil then begin WriteLn('Error while loading "D3DXDeclaratorFromFVF" from "',UnitName,'".'); Result := False; end;
-D3DXFVFFromDeclarator := GetProcAddress(UnitLib, 'D3DXFVFFromDeclarator'); if @D3DXFVFFromDeclarator = nil then begin WriteLn('Error while loading "D3DXFVFFromDeclarator" from "',UnitName,'".'); Result := False; end;
-D3DXWeldVertices := GetProcAddress(UnitLib, 'D3DXWeldVertices'); if @D3DXWeldVertices = nil then begin WriteLn('Error while loading "D3DXWeldVertices" from "',UnitName,'".'); Result := False; end;
-D3DXIntersect := GetProcAddress(UnitLib, 'D3DXIntersect'); if @D3DXIntersect = nil then begin WriteLn('Error while loading "D3DXIntersect" from "',UnitName,'".'); Result := False; end;
-D3DXIntersectSubset := GetProcAddress(UnitLib, 'D3DXIntersectSubset'); if @D3DXIntersectSubset = nil then begin WriteLn('Error while loading "D3DXIntersectSubset" from "',UnitName,'".'); Result := False; end;
-D3DXSplitMesh := GetProcAddress(UnitLib, 'D3DXSplitMesh'); if @D3DXSplitMesh = nil then begin WriteLn('Error while loading "D3DXSplitMesh" from "',UnitName,'".'); Result := False; end;
-D3DXIntersectTri := GetProcAddress(UnitLib, 'D3DXIntersectTri'); if @D3DXIntersectTri = nil then begin WriteLn('Error while loading "D3DXIntersectTri" from "',UnitName,'".'); Result := False; end;
-D3DXSphereBoundProbe := GetProcAddress(UnitLib, 'D3DXSphereBoundProbe'); if @D3DXSphereBoundProbe = nil then begin WriteLn('Error while loading "D3DXSphereBoundProbe" from "',UnitName,'".'); Result := False; end;
-D3DXBoxBoundProbe := GetProcAddress(UnitLib, 'D3DXBoxBoundProbe'); if @D3DXBoxBoundProbe = nil then begin WriteLn('Error while loading "D3DXBoxBoundProbe" from "',UnitName,'".'); Result := False; end;
-D3DXComputeTangentFrame := GetProcAddress(UnitLib, 'D3DXComputeTangentFrame'); if @D3DXComputeTangentFrame = nil then begin WriteLn('Error while loading "D3DXComputeTangentFrame" from "',UnitName,'".'); Result := False; end;
-D3DXComputeTangentFrameEx := GetProcAddress(UnitLib, 'D3DXComputeTangentFrameEx'); if @D3DXComputeTangentFrameEx = nil then begin WriteLn('Error while loading "D3DXComputeTangentFrameEx" from "',UnitName,'".'); Result := False; end;
-D3DXComputeTangent := GetProcAddress(UnitLib, 'D3DXComputeTangent'); if @D3DXComputeTangent = nil then begin WriteLn('Error while loading "D3DXComputeTangent" from "',UnitName,'".'); Result := False; end;
-D3DXUVAtlasCreate := GetProcAddress(UnitLib, 'D3DXUVAtlasCreate'); if @D3DXUVAtlasCreate = nil then begin WriteLn('Error while loading "D3DXUVAtlasCreate" from "',UnitName,'".'); Result := False; end;
-D3DXUVAtlasPartition := GetProcAddress(UnitLib, 'D3DXUVAtlasPartition'); if @D3DXUVAtlasPartition = nil then begin WriteLn('Error while loading "D3DXUVAtlasPartition" from "',UnitName,'".'); Result := False; end;
-D3DXUVAtlasPack := GetProcAddress(UnitLib, 'D3DXUVAtlasPack'); if @D3DXUVAtlasPack = nil then begin WriteLn('Error while loading "D3DXUVAtlasPack" from "',UnitName,'".'); Result := False; end;
-D3DXComputeIMTFromPerVertexSignal := GetProcAddress(UnitLib, 'D3DXComputeIMTFromPerVertexSignal'); if @D3DXComputeIMTFromPerVertexSignal = nil then begin WriteLn('Error while loading "D3DXComputeIMTFromPerVertexSignal" from "',UnitName,'".'); Result := False; end;
-D3DXComputeIMTFromSignal := GetProcAddress(UnitLib, 'D3DXComputeIMTFromSignal'); if @D3DXComputeIMTFromSignal = nil then begin WriteLn('Error while loading "D3DXComputeIMTFromSignal" from "',UnitName,'".'); Result := False; end;
-D3DXComputeIMTFromTexture := GetProcAddress(UnitLib, 'D3DXComputeIMTFromTexture'); if @D3DXComputeIMTFromTexture = nil then begin WriteLn('Error while loading "D3DXComputeIMTFromTexture" from "',UnitName,'".'); Result := False; end;
-D3DXComputeIMTFromPerTexelSignal := GetProcAddress(UnitLib, 'D3DXComputeIMTFromPerTexelSignal'); if @D3DXComputeIMTFromPerTexelSignal = nil then begin WriteLn('Error while loading "D3DXComputeIMTFromPerTexelSignal" from "',UnitName,'".'); Result := False; end;
-D3DXConvertMeshSubsetToSingleStrip := GetProcAddress(UnitLib, 'D3DXConvertMeshSubsetToSingleStrip'); if @D3DXConvertMeshSubsetToSingleStrip = nil then begin WriteLn('Error while loading "D3DXConvertMeshSubsetToSingleStrip" from "',UnitName,'".'); Result := False; end;
-D3DXConvertMeshSubsetToStrips := GetProcAddress(UnitLib, 'D3DXConvertMeshSubsetToStrips'); if @D3DXConvertMeshSubsetToStrips = nil then begin WriteLn('Error while loading "D3DXConvertMeshSubsetToStrips" from "',UnitName,'".'); Result := False; end;
-D3DXOptimizeFaces := GetProcAddress(UnitLib, 'D3DXOptimizeFaces'); if @D3DXOptimizeFaces = nil then begin WriteLn('Error while loading "D3DXOptimizeFaces" from "',UnitName,'".'); Result := False; end;
-D3DXOptimizeVertices := GetProcAddress(UnitLib, 'D3DXOptimizeVertices'); if @D3DXOptimizeVertices = nil then begin WriteLn('Error while loading "D3DXOptimizeVertices" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePRTBuffer := GetProcAddress(UnitLib, 'D3DXCreatePRTBuffer'); if @D3DXCreatePRTBuffer = nil then begin WriteLn('Error while loading "D3DXCreatePRTBuffer" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePRTBufferTex := GetProcAddress(UnitLib, 'D3DXCreatePRTBufferTex'); if @D3DXCreatePRTBufferTex = nil then begin WriteLn('Error while loading "D3DXCreatePRTBufferTex" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTBufferFromFileA := GetProcAddress(UnitLib, 'D3DXLoadPRTBufferFromFileA'); if @D3DXLoadPRTBufferFromFileA = nil then begin WriteLn('Error while loading "D3DXLoadPRTBufferFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTBufferFromFileW := GetProcAddress(UnitLib, 'D3DXLoadPRTBufferFromFileW'); if @D3DXLoadPRTBufferFromFileW = nil then begin WriteLn('Error while loading "D3DXLoadPRTBufferFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTBufferFromFile := GetProcAddress(UnitLib, 'D3DXLoadPRTBufferFromFileA'); if @D3DXLoadPRTBufferFromFile = nil then begin WriteLn('Error while loading "D3DXLoadPRTBufferFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTBufferToFileA := GetProcAddress(UnitLib, 'D3DXSavePRTBufferToFileA'); if @D3DXSavePRTBufferToFileA = nil then begin WriteLn('Error while loading "D3DXSavePRTBufferToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTBufferToFileW := GetProcAddress(UnitLib, 'D3DXSavePRTBufferToFileW'); if @D3DXSavePRTBufferToFileW = nil then begin WriteLn('Error while loading "D3DXSavePRTBufferToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTBufferToFile := GetProcAddress(UnitLib, 'D3DXSavePRTBufferToFileA'); if @D3DXSavePRTBufferToFile = nil then begin WriteLn('Error while loading "D3DXSavePRTBufferToFile" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTCompBufferFromFileA := GetProcAddress(UnitLib, 'D3DXLoadPRTCompBufferFromFileA'); if @D3DXLoadPRTCompBufferFromFileA = nil then begin WriteLn('Error while loading "D3DXLoadPRTCompBufferFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTCompBufferFromFileW := GetProcAddress(UnitLib, 'D3DXLoadPRTCompBufferFromFileW'); if @D3DXLoadPRTCompBufferFromFileW = nil then begin WriteLn('Error while loading "D3DXLoadPRTCompBufferFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadPRTCompBufferFromFile := GetProcAddress(UnitLib, 'D3DXLoadPRTCompBufferFromFileA'); if @D3DXLoadPRTCompBufferFromFile = nil then begin WriteLn('Error while loading "D3DXLoadPRTCompBufferFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTCompBufferToFileA := GetProcAddress(UnitLib, 'D3DXSavePRTCompBufferToFileA'); if @D3DXSavePRTCompBufferToFileA = nil then begin WriteLn('Error while loading "D3DXSavePRTCompBufferToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTCompBufferToFileW := GetProcAddress(UnitLib, 'D3DXSavePRTCompBufferToFileW'); if @D3DXSavePRTCompBufferToFileW = nil then begin WriteLn('Error while loading "D3DXSavePRTCompBufferToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSavePRTCompBufferToFile := GetProcAddress(UnitLib, 'D3DXSavePRTCompBufferToFileA'); if @D3DXSavePRTCompBufferToFile = nil then begin WriteLn('Error while loading "D3DXSavePRTCompBufferToFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePRTCompBuffer := GetProcAddress(UnitLib, 'D3DXCreatePRTCompBuffer'); if @D3DXCreatePRTCompBuffer = nil then begin WriteLn('Error while loading "D3DXCreatePRTCompBuffer" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureGutterHelper := GetProcAddress(UnitLib, 'D3DXCreateTextureGutterHelper'); if @D3DXCreateTextureGutterHelper = nil then begin WriteLn('Error while loading "D3DXCreateTextureGutterHelper" from "',UnitName,'".'); Result := False; end;
-D3DXCreatePRTEngine := GetProcAddress(UnitLib, 'D3DXCreatePRTEngine'); if @D3DXCreatePRTEngine = nil then begin WriteLn('Error while loading "D3DXCreatePRTEngine" from "',UnitName,'".'); Result := False; end;
-D3DXConcatenateMeshes := GetProcAddress(UnitLib, 'D3DXConcatenateMeshes'); if @D3DXConcatenateMeshes = nil then begin WriteLn('Error while loading "D3DXConcatenateMeshes" from "',UnitName,'".'); Result := False; end;
-D3DXSHPRTCompSuperCluster := GetProcAddress(UnitLib, 'D3DXSHPRTCompSuperCluster'); if @D3DXSHPRTCompSuperCluster = nil then begin WriteLn('Error while loading "D3DXSHPRTCompSuperCluster" from "',UnitName,'".'); Result := False; end;
-D3DXSHPRTCompSplitMeshSC := GetProcAddress(UnitLib, 'D3DXSHPRTCompSplitMeshSC'); if @D3DXSHPRTCompSplitMeshSC = nil then begin WriteLn('Error while loading "D3DXSHPRTCompSplitMeshSC" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXFileCreate := LoadProcedure('D3DXFileCreate');
+D3DXCreateMesh := LoadProcedure('D3DXCreateMesh');
+D3DXCreateMeshFVF := LoadProcedure('D3DXCreateMeshFVF');
+D3DXCreateSPMesh := LoadProcedure('D3DXCreateSPMesh');
+D3DXCleanMesh := LoadProcedure('D3DXCleanMesh');
+D3DXValidMesh := LoadProcedure('D3DXValidMesh');
+D3DXGeneratePMesh := LoadProcedure('D3DXGeneratePMesh');
+D3DXSimplifyMesh := LoadProcedure('D3DXSimplifyMesh');
+D3DXComputeBoundingSphere := LoadProcedure('D3DXComputeBoundingSphere');
+D3DXComputeBoundingBox := LoadProcedure('D3DXComputeBoundingBox');
+D3DXComputeNormals := LoadProcedure('D3DXComputeNormals');
+D3DXCreateBuffer := LoadProcedure('D3DXCreateBuffer');
+D3DXLoadMeshFromXA := LoadProcedure('D3DXLoadMeshFromXA');
+D3DXLoadMeshFromXW := LoadProcedure('D3DXLoadMeshFromXW');
+D3DXLoadMeshFromX := LoadProcedure('D3DXLoadMeshFromXA');
+D3DXLoadMeshFromXInMemory := LoadProcedure('D3DXLoadMeshFromXInMemory');
+D3DXLoadMeshFromXResource := LoadProcedure('D3DXLoadMeshFromXResource');
+D3DXSaveMeshToXA := LoadProcedure('D3DXSaveMeshToXA');
+D3DXSaveMeshToXW := LoadProcedure('D3DXSaveMeshToXW');
+D3DXSaveMeshToX := LoadProcedure('D3DXSaveMeshToXA');
+D3DXCreatePMeshFromStream := LoadProcedure('D3DXCreatePMeshFromStream');
+D3DXCreateSkinInfo := LoadProcedure('D3DXCreateSkinInfo');
+D3DXCreateSkinInfoFVF := LoadProcedure('D3DXCreateSkinInfoFVF');
+D3DXLoadMeshFromXof := LoadProcedure('D3DXLoadMeshFromXof');
+D3DXLoadSkinMeshFromXof := LoadProcedure('D3DXLoadSkinMeshFromXof');
+D3DXCreateSkinInfoFromBlendedMesh := LoadProcedure('D3DXCreateSkinInfoFromBlendedMesh');
+D3DXTessellateNPatches := LoadProcedure('D3DXTessellateNPatches');
+D3DXGenerateOutputDecl := LoadProcedure('D3DXGenerateOutputDecl');
+D3DXLoadPatchMeshFromXof := LoadProcedure('D3DXLoadPatchMeshFromXof');
+D3DXRectPatchSize := LoadProcedure('D3DXRectPatchSize');
+D3DXTriPatchSize := LoadProcedure('D3DXTriPatchSize');
+D3DXTessellateRectPatch := LoadProcedure('D3DXTessellateRectPatch');
+D3DXTessellateTriPatch := LoadProcedure('D3DXTessellateTriPatch');
+D3DXCreateNPatchMesh := LoadProcedure('D3DXCreateNPatchMesh');
+D3DXCreatePatchMesh := LoadProcedure('D3DXCreatePatchMesh');
+D3DXValidPatchMesh := LoadProcedure('D3DXValidPatchMesh');
+D3DXGetFVFVertexSize := LoadProcedure('D3DXGetFVFVertexSize');
+D3DXGetDeclVertexSize := LoadProcedure('D3DXGetDeclVertexSize');
+D3DXGetDeclLength := LoadProcedure('D3DXGetDeclLength');
+D3DXDeclaratorFromFVF := LoadProcedure('D3DXDeclaratorFromFVF');
+D3DXFVFFromDeclarator := LoadProcedure('D3DXFVFFromDeclarator');
+D3DXWeldVertices := LoadProcedure('D3DXWeldVertices');
+D3DXIntersect := LoadProcedure('D3DXIntersect');
+D3DXIntersectSubset := LoadProcedure('D3DXIntersectSubset');
+D3DXSplitMesh := LoadProcedure('D3DXSplitMesh');
+D3DXIntersectTri := LoadProcedure('D3DXIntersectTri');
+D3DXSphereBoundProbe := LoadProcedure('D3DXSphereBoundProbe');
+D3DXBoxBoundProbe := LoadProcedure('D3DXBoxBoundProbe');
+D3DXComputeTangentFrame := LoadProcedure('D3DXComputeTangentFrame');
+D3DXComputeTangentFrameEx := LoadProcedure('D3DXComputeTangentFrameEx');
+D3DXComputeTangent := LoadProcedure('D3DXComputeTangent');
+D3DXUVAtlasCreate := LoadProcedure('D3DXUVAtlasCreate');
+D3DXUVAtlasPartition := LoadProcedure('D3DXUVAtlasPartition');
+D3DXUVAtlasPack := LoadProcedure('D3DXUVAtlasPack');
+D3DXComputeIMTFromPerVertexSignal := LoadProcedure('D3DXComputeIMTFromPerVertexSignal');
+D3DXComputeIMTFromSignal := LoadProcedure('D3DXComputeIMTFromSignal');
+D3DXComputeIMTFromTexture := LoadProcedure('D3DXComputeIMTFromTexture');
+D3DXComputeIMTFromPerTexelSignal := LoadProcedure('D3DXComputeIMTFromPerTexelSignal');
+D3DXConvertMeshSubsetToSingleStrip := LoadProcedure('D3DXConvertMeshSubsetToSingleStrip');
+D3DXConvertMeshSubsetToStrips := LoadProcedure('D3DXConvertMeshSubsetToStrips');
+D3DXOptimizeFaces := LoadProcedure('D3DXOptimizeFaces');
+D3DXOptimizeVertices := LoadProcedure('D3DXOptimizeVertices');
+D3DXCreatePRTBuffer := LoadProcedure('D3DXCreatePRTBuffer');
+D3DXCreatePRTBufferTex := LoadProcedure('D3DXCreatePRTBufferTex');
+D3DXLoadPRTBufferFromFileA := LoadProcedure('D3DXLoadPRTBufferFromFileA');
+D3DXLoadPRTBufferFromFileW := LoadProcedure('D3DXLoadPRTBufferFromFileW');
+D3DXLoadPRTBufferFromFile := LoadProcedure('D3DXLoadPRTBufferFromFileA');
+D3DXSavePRTBufferToFileA := LoadProcedure('D3DXSavePRTBufferToFileA');
+D3DXSavePRTBufferToFileW := LoadProcedure('D3DXSavePRTBufferToFileW');
+D3DXSavePRTBufferToFile := LoadProcedure('D3DXSavePRTBufferToFileA');
+D3DXLoadPRTCompBufferFromFileA := LoadProcedure('D3DXLoadPRTCompBufferFromFileA');
+D3DXLoadPRTCompBufferFromFileW := LoadProcedure('D3DXLoadPRTCompBufferFromFileW');
+D3DXLoadPRTCompBufferFromFile := LoadProcedure('D3DXLoadPRTCompBufferFromFileA');
+D3DXSavePRTCompBufferToFileA := LoadProcedure('D3DXSavePRTCompBufferToFileA');
+D3DXSavePRTCompBufferToFileW := LoadProcedure('D3DXSavePRTCompBufferToFileW');
+D3DXSavePRTCompBufferToFile := LoadProcedure('D3DXSavePRTCompBufferToFileA');
+D3DXCreatePRTCompBuffer := LoadProcedure('D3DXCreatePRTCompBuffer');
+D3DXCreateTextureGutterHelper := LoadProcedure('D3DXCreateTextureGutterHelper');
+D3DXCreatePRTEngine := LoadProcedure('D3DXCreatePRTEngine');
+D3DXConcatenateMeshes := LoadProcedure('D3DXConcatenateMeshes');
+D3DXSHPRTCompSuperCluster := LoadProcedure('D3DXSHPRTCompSuperCluster');
+D3DXSHPRTCompSplitMeshSC := LoadProcedure('D3DXSHPRTCompSplitMeshSC');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9meshDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_5(const UnitName : PChar) : Boolean;
+function Load_D3DX9_5(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 9;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXCreatePolygon := GetProcAddress(UnitLib, 'D3DXCreatePolygon'); if @D3DXCreatePolygon = nil then begin WriteLn('Error while loading "D3DXCreatePolygon" from "',UnitName,'".'); Result := False; end;
-D3DXCreateBox := GetProcAddress(UnitLib, 'D3DXCreateBox'); if @D3DXCreateBox = nil then begin WriteLn('Error while loading "D3DXCreateBox" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCylinder := GetProcAddress(UnitLib, 'D3DXCreateCylinder'); if @D3DXCreateCylinder = nil then begin WriteLn('Error while loading "D3DXCreateCylinder" from "',UnitName,'".'); Result := False; end;
-D3DXCreateSphere := GetProcAddress(UnitLib, 'D3DXCreateSphere'); if @D3DXCreateSphere = nil then begin WriteLn('Error while loading "D3DXCreateSphere" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTorus := GetProcAddress(UnitLib, 'D3DXCreateTorus'); if @D3DXCreateTorus = nil then begin WriteLn('Error while loading "D3DXCreateTorus" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTeapot := GetProcAddress(UnitLib, 'D3DXCreateTeapot'); if @D3DXCreateTeapot = nil then begin WriteLn('Error while loading "D3DXCreateTeapot" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextA := GetProcAddress(UnitLib, 'D3DXCreateTextA'); if @D3DXCreateTextA = nil then begin WriteLn('Error while loading "D3DXCreateTextA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextW := GetProcAddress(UnitLib, 'D3DXCreateTextW'); if @D3DXCreateTextW = nil then begin WriteLn('Error while loading "D3DXCreateTextW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateText := GetProcAddress(UnitLib, 'D3DXCreateTextA'); if @D3DXCreateText = nil then begin WriteLn('Error while loading "D3DXCreateText" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXCreatePolygon := LoadProcedure('D3DXCreatePolygon');
+D3DXCreateBox := LoadProcedure('D3DXCreateBox');
+D3DXCreateCylinder := LoadProcedure('D3DXCreateCylinder');
+D3DXCreateSphere := LoadProcedure('D3DXCreateSphere');
+D3DXCreateTorus := LoadProcedure('D3DXCreateTorus');
+D3DXCreateTeapot := LoadProcedure('D3DXCreateTeapot');
+D3DXCreateTextA := LoadProcedure('D3DXCreateTextA');
+D3DXCreateTextW := LoadProcedure('D3DXCreateTextW');
+D3DXCreateText := LoadProcedure('D3DXCreateTextA');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9shapesDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_6(const UnitName : PChar) : Boolean;
+function Load_D3DX9_6(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 95;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXGetImageInfoFromFileA := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromFileA'); if @D3DXGetImageInfoFromFileA = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromFileW := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromFileW'); if @D3DXGetImageInfoFromFileW = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromFile := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromFileA'); if @D3DXGetImageInfoFromFile = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromResourceA := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromResourceA'); if @D3DXGetImageInfoFromResourceA = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromResourceW := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromResourceW'); if @D3DXGetImageInfoFromResourceW = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromResource := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromResourceA'); if @D3DXGetImageInfoFromResource = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXGetImageInfoFromFileInMemory := GetProcAddress(UnitLib, 'D3DXGetImageInfoFromFileInMemory'); if @D3DXGetImageInfoFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXGetImageInfoFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromFileA := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromFileA'); if @D3DXLoadSurfaceFromFileA = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromFileW := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromFileW'); if @D3DXLoadSurfaceFromFileW = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromFile := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromFileA'); if @D3DXLoadSurfaceFromFile = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromResourceA := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromResourceA'); if @D3DXLoadSurfaceFromResourceA = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromResourceW := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromResourceW'); if @D3DXLoadSurfaceFromResourceW = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromResource := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromResourceA'); if @D3DXLoadSurfaceFromResource = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromFileInMemory := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromFileInMemory'); if @D3DXLoadSurfaceFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromSurface := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromSurface'); if @D3DXLoadSurfaceFromSurface = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromSurface" from "',UnitName,'".'); Result := False; end;
-D3DXLoadSurfaceFromMemory := GetProcAddress(UnitLib, 'D3DXLoadSurfaceFromMemory'); if @D3DXLoadSurfaceFromMemory = nil then begin WriteLn('Error while loading "D3DXLoadSurfaceFromMemory" from "',UnitName,'".'); Result := False; end;
-D3DXSaveSurfaceToFileA := GetProcAddress(UnitLib, 'D3DXSaveSurfaceToFileA'); if @D3DXSaveSurfaceToFileA = nil then begin WriteLn('Error while loading "D3DXSaveSurfaceToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSaveSurfaceToFileW := GetProcAddress(UnitLib, 'D3DXSaveSurfaceToFileW'); if @D3DXSaveSurfaceToFileW = nil then begin WriteLn('Error while loading "D3DXSaveSurfaceToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSaveSurfaceToFile := GetProcAddress(UnitLib, 'D3DXSaveSurfaceToFileA'); if @D3DXSaveSurfaceToFile = nil then begin WriteLn('Error while loading "D3DXSaveSurfaceToFile" from "',UnitName,'".'); Result := False; end;
-D3DXSaveSurfaceToFileInMemory := GetProcAddress(UnitLib, 'D3DXSaveSurfaceToFileInMemory'); if @D3DXSaveSurfaceToFileInMemory = nil then begin WriteLn('Error while loading "D3DXSaveSurfaceToFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromFileA := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromFileA'); if @D3DXLoadVolumeFromFileA = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromFileW := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromFileW'); if @D3DXLoadVolumeFromFileW = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromFile := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromFileA'); if @D3DXLoadVolumeFromFile = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromResourceA := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromResourceA'); if @D3DXLoadVolumeFromResourceA = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromResourceW := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromResourceW'); if @D3DXLoadVolumeFromResourceW = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromResource := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromResourceA'); if @D3DXLoadVolumeFromResource = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromFileInMemory := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromFileInMemory'); if @D3DXLoadVolumeFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromVolume := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromVolume'); if @D3DXLoadVolumeFromVolume = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromVolume" from "',UnitName,'".'); Result := False; end;
-D3DXLoadVolumeFromMemory := GetProcAddress(UnitLib, 'D3DXLoadVolumeFromMemory'); if @D3DXLoadVolumeFromMemory = nil then begin WriteLn('Error while loading "D3DXLoadVolumeFromMemory" from "',UnitName,'".'); Result := False; end;
-D3DXSaveVolumeToFileA := GetProcAddress(UnitLib, 'D3DXSaveVolumeToFileA'); if @D3DXSaveVolumeToFileA = nil then begin WriteLn('Error while loading "D3DXSaveVolumeToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSaveVolumeToFileW := GetProcAddress(UnitLib, 'D3DXSaveVolumeToFileW'); if @D3DXSaveVolumeToFileW = nil then begin WriteLn('Error while loading "D3DXSaveVolumeToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSaveVolumeToFile := GetProcAddress(UnitLib, 'D3DXSaveVolumeToFileA'); if @D3DXSaveVolumeToFile = nil then begin WriteLn('Error while loading "D3DXSaveVolumeToFile" from "',UnitName,'".'); Result := False; end;
-D3DXSaveVolumeToFileInMemory := GetProcAddress(UnitLib, 'D3DXSaveVolumeToFileInMemory'); if @D3DXSaveVolumeToFileInMemory = nil then begin WriteLn('Error while loading "D3DXSaveVolumeToFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXCheckTextureRequirements := GetProcAddress(UnitLib, 'D3DXCheckTextureRequirements'); if @D3DXCheckTextureRequirements = nil then begin WriteLn('Error while loading "D3DXCheckTextureRequirements" from "',UnitName,'".'); Result := False; end;
-D3DXCheckCubeTextureRequirements := GetProcAddress(UnitLib, 'D3DXCheckCubeTextureRequirements'); if @D3DXCheckCubeTextureRequirements = nil then begin WriteLn('Error while loading "D3DXCheckCubeTextureRequirements" from "',UnitName,'".'); Result := False; end;
-D3DXCheckVolumeTextureRequirements := GetProcAddress(UnitLib, 'D3DXCheckVolumeTextureRequirements'); if @D3DXCheckVolumeTextureRequirements = nil then begin WriteLn('Error while loading "D3DXCheckVolumeTextureRequirements" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTexture := GetProcAddress(UnitLib, 'D3DXCreateTexture'); if @D3DXCreateTexture = nil then begin WriteLn('Error while loading "D3DXCreateTexture" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTexture := GetProcAddress(UnitLib, 'D3DXCreateCubeTexture'); if @D3DXCreateCubeTexture = nil then begin WriteLn('Error while loading "D3DXCreateCubeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTexture := GetProcAddress(UnitLib, 'D3DXCreateVolumeTexture'); if @D3DXCreateVolumeTexture = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileA := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileA'); if @D3DXCreateTextureFromFileA = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileW := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileW'); if @D3DXCreateTextureFromFileW = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFile := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileA'); if @D3DXCreateTextureFromFile = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileA := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileA'); if @D3DXCreateCubeTextureFromFileA = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileW := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileW'); if @D3DXCreateCubeTextureFromFileW = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFile := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileA'); if @D3DXCreateCubeTextureFromFile = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileA := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileA'); if @D3DXCreateVolumeTextureFromFileA = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileW := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileW'); if @D3DXCreateVolumeTextureFromFileW = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFile := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileA'); if @D3DXCreateVolumeTextureFromFile = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFile" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResourceA := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceA'); if @D3DXCreateTextureFromResourceA = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResourceW := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceW'); if @D3DXCreateTextureFromResourceW = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResource := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceA'); if @D3DXCreateTextureFromResource = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResourceA := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceA'); if @D3DXCreateCubeTextureFromResourceA = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResourceW := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceW'); if @D3DXCreateCubeTextureFromResourceW = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResource := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceA'); if @D3DXCreateCubeTextureFromResource = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResourceA := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceA'); if @D3DXCreateVolumeTextureFromResourceA = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResourceA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResourceW := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceW'); if @D3DXCreateVolumeTextureFromResourceW = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResourceW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResource := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceA'); if @D3DXCreateVolumeTextureFromResource = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResource" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileExA := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileExA'); if @D3DXCreateTextureFromFileExA = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileExW := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileExW'); if @D3DXCreateTextureFromFileExW = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileEx := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileExA'); if @D3DXCreateTextureFromFileEx = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileExA := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileExA'); if @D3DXCreateCubeTextureFromFileExA = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileExW := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileExW'); if @D3DXCreateCubeTextureFromFileExW = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileEx := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileExA'); if @D3DXCreateCubeTextureFromFileEx = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileExA := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileExA'); if @D3DXCreateVolumeTextureFromFileExA = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileExW := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileExW'); if @D3DXCreateVolumeTextureFromFileExW = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileEx := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileExA'); if @D3DXCreateVolumeTextureFromFileEx = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResourceExA := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceExA'); if @D3DXCreateTextureFromResourceExA = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResourceExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResourceExW := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceExW'); if @D3DXCreateTextureFromResourceExW = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResourceExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromResourceEx := GetProcAddress(UnitLib, 'D3DXCreateTextureFromResourceExA'); if @D3DXCreateTextureFromResourceEx = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromResourceEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResourceExA := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceExA'); if @D3DXCreateCubeTextureFromResourceExA = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResourceExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResourceExW := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceExW'); if @D3DXCreateCubeTextureFromResourceExW = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResourceExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromResourceEx := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromResourceExA'); if @D3DXCreateCubeTextureFromResourceEx = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromResourceEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResourceExA := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceExA'); if @D3DXCreateVolumeTextureFromResourceExA = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResourceExA" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResourceExW := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceExW'); if @D3DXCreateVolumeTextureFromResourceExW = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResourceExW" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromResourceEx := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromResourceExA'); if @D3DXCreateVolumeTextureFromResourceEx = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromResourceEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileInMemory := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileInMemory'); if @D3DXCreateTextureFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileInMemory := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileInMemory'); if @D3DXCreateCubeTextureFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileInMemory := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileInMemory'); if @D3DXCreateVolumeTextureFromFileInMemory = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXCreateTextureFromFileInMemoryEx := GetProcAddress(UnitLib, 'D3DXCreateTextureFromFileInMemoryEx'); if @D3DXCreateTextureFromFileInMemoryEx = nil then begin WriteLn('Error while loading "D3DXCreateTextureFromFileInMemoryEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCubeTextureFromFileInMemoryEx := GetProcAddress(UnitLib, 'D3DXCreateCubeTextureFromFileInMemoryEx'); if @D3DXCreateCubeTextureFromFileInMemoryEx = nil then begin WriteLn('Error while loading "D3DXCreateCubeTextureFromFileInMemoryEx" from "',UnitName,'".'); Result := False; end;
-D3DXCreateVolumeTextureFromFileInMemoryEx := GetProcAddress(UnitLib, 'D3DXCreateVolumeTextureFromFileInMemoryEx'); if @D3DXCreateVolumeTextureFromFileInMemoryEx = nil then begin WriteLn('Error while loading "D3DXCreateVolumeTextureFromFileInMemoryEx" from "',UnitName,'".'); Result := False; end;
-D3DXSaveTextureToFileA := GetProcAddress(UnitLib, 'D3DXSaveTextureToFileA'); if @D3DXSaveTextureToFileA = nil then begin WriteLn('Error while loading "D3DXSaveTextureToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSaveTextureToFileW := GetProcAddress(UnitLib, 'D3DXSaveTextureToFileW'); if @D3DXSaveTextureToFileW = nil then begin WriteLn('Error while loading "D3DXSaveTextureToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSaveTextureToFile := GetProcAddress(UnitLib, 'D3DXSaveTextureToFileA'); if @D3DXSaveTextureToFile = nil then begin WriteLn('Error while loading "D3DXSaveTextureToFile" from "',UnitName,'".'); Result := False; end;
-D3DXSaveTextureToFileInMemory := GetProcAddress(UnitLib, 'D3DXSaveTextureToFileInMemory'); if @D3DXSaveTextureToFileInMemory = nil then begin WriteLn('Error while loading "D3DXSaveTextureToFileInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXFilterTexture := GetProcAddress(UnitLib, 'D3DXFilterTexture'); if @D3DXFilterTexture = nil then begin WriteLn('Error while loading "D3DXFilterTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFilterCubeTexture := GetProcAddress(UnitLib, 'D3DXFilterTexture'); if @D3DXFilterCubeTexture = nil then begin WriteLn('Error while loading "D3DXFilterCubeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFilterVolumeTexture := GetProcAddress(UnitLib, 'D3DXFilterTexture'); if @D3DXFilterVolumeTexture = nil then begin WriteLn('Error while loading "D3DXFilterVolumeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFillTexture := GetProcAddress(UnitLib, 'D3DXFillTexture'); if @D3DXFillTexture = nil then begin WriteLn('Error while loading "D3DXFillTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFillCubeTexture := GetProcAddress(UnitLib, 'D3DXFillCubeTexture'); if @D3DXFillCubeTexture = nil then begin WriteLn('Error while loading "D3DXFillCubeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFillVolumeTexture := GetProcAddress(UnitLib, 'D3DXFillVolumeTexture'); if @D3DXFillVolumeTexture = nil then begin WriteLn('Error while loading "D3DXFillVolumeTexture" from "',UnitName,'".'); Result := False; end;
-D3DXFillTextureTX := GetProcAddress(UnitLib, 'D3DXFillTextureTX'); if @D3DXFillTextureTX = nil then begin WriteLn('Error while loading "D3DXFillTextureTX" from "',UnitName,'".'); Result := False; end;
-D3DXFillCubeTextureTX := GetProcAddress(UnitLib, 'D3DXFillCubeTextureTX'); if @D3DXFillCubeTextureTX = nil then begin WriteLn('Error while loading "D3DXFillCubeTextureTX" from "',UnitName,'".'); Result := False; end;
-D3DXFillVolumeTextureTX := GetProcAddress(UnitLib, 'D3DXFillVolumeTextureTX'); if @D3DXFillVolumeTextureTX = nil then begin WriteLn('Error while loading "D3DXFillVolumeTextureTX" from "',UnitName,'".'); Result := False; end;
-D3DXComputeNormalMap := GetProcAddress(UnitLib, 'D3DXComputeNormalMap'); if @D3DXComputeNormalMap = nil then begin WriteLn('Error while loading "D3DXComputeNormalMap" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXGetImageInfoFromFileA := LoadProcedure('D3DXGetImageInfoFromFileA');
+D3DXGetImageInfoFromFileW := LoadProcedure('D3DXGetImageInfoFromFileW');
+D3DXGetImageInfoFromFile := LoadProcedure('D3DXGetImageInfoFromFileA');
+D3DXGetImageInfoFromResourceA := LoadProcedure('D3DXGetImageInfoFromResourceA');
+D3DXGetImageInfoFromResourceW := LoadProcedure('D3DXGetImageInfoFromResourceW');
+D3DXGetImageInfoFromResource := LoadProcedure('D3DXGetImageInfoFromResourceA');
+D3DXGetImageInfoFromFileInMemory := LoadProcedure('D3DXGetImageInfoFromFileInMemory');
+D3DXLoadSurfaceFromFileA := LoadProcedure('D3DXLoadSurfaceFromFileA');
+D3DXLoadSurfaceFromFileW := LoadProcedure('D3DXLoadSurfaceFromFileW');
+D3DXLoadSurfaceFromFile := LoadProcedure('D3DXLoadSurfaceFromFileA');
+D3DXLoadSurfaceFromResourceA := LoadProcedure('D3DXLoadSurfaceFromResourceA');
+D3DXLoadSurfaceFromResourceW := LoadProcedure('D3DXLoadSurfaceFromResourceW');
+D3DXLoadSurfaceFromResource := LoadProcedure('D3DXLoadSurfaceFromResourceA');
+D3DXLoadSurfaceFromFileInMemory := LoadProcedure('D3DXLoadSurfaceFromFileInMemory');
+D3DXLoadSurfaceFromSurface := LoadProcedure('D3DXLoadSurfaceFromSurface');
+D3DXLoadSurfaceFromMemory := LoadProcedure('D3DXLoadSurfaceFromMemory');
+D3DXSaveSurfaceToFileA := LoadProcedure('D3DXSaveSurfaceToFileA');
+D3DXSaveSurfaceToFileW := LoadProcedure('D3DXSaveSurfaceToFileW');
+D3DXSaveSurfaceToFile := LoadProcedure('D3DXSaveSurfaceToFileA');
+D3DXSaveSurfaceToFileInMemory := LoadProcedure('D3DXSaveSurfaceToFileInMemory');
+D3DXLoadVolumeFromFileA := LoadProcedure('D3DXLoadVolumeFromFileA');
+D3DXLoadVolumeFromFileW := LoadProcedure('D3DXLoadVolumeFromFileW');
+D3DXLoadVolumeFromFile := LoadProcedure('D3DXLoadVolumeFromFileA');
+D3DXLoadVolumeFromResourceA := LoadProcedure('D3DXLoadVolumeFromResourceA');
+D3DXLoadVolumeFromResourceW := LoadProcedure('D3DXLoadVolumeFromResourceW');
+D3DXLoadVolumeFromResource := LoadProcedure('D3DXLoadVolumeFromResourceA');
+D3DXLoadVolumeFromFileInMemory := LoadProcedure('D3DXLoadVolumeFromFileInMemory');
+D3DXLoadVolumeFromVolume := LoadProcedure('D3DXLoadVolumeFromVolume');
+D3DXLoadVolumeFromMemory := LoadProcedure('D3DXLoadVolumeFromMemory');
+D3DXSaveVolumeToFileA := LoadProcedure('D3DXSaveVolumeToFileA');
+D3DXSaveVolumeToFileW := LoadProcedure('D3DXSaveVolumeToFileW');
+D3DXSaveVolumeToFile := LoadProcedure('D3DXSaveVolumeToFileA');
+D3DXSaveVolumeToFileInMemory := LoadProcedure('D3DXSaveVolumeToFileInMemory');
+D3DXCheckTextureRequirements := LoadProcedure('D3DXCheckTextureRequirements');
+D3DXCheckCubeTextureRequirements := LoadProcedure('D3DXCheckCubeTextureRequirements');
+D3DXCheckVolumeTextureRequirements := LoadProcedure('D3DXCheckVolumeTextureRequirements');
+D3DXCreateTexture := LoadProcedure('D3DXCreateTexture');
+D3DXCreateCubeTexture := LoadProcedure('D3DXCreateCubeTexture');
+D3DXCreateVolumeTexture := LoadProcedure('D3DXCreateVolumeTexture');
+D3DXCreateTextureFromFileA := LoadProcedure('D3DXCreateTextureFromFileA');
+D3DXCreateTextureFromFileW := LoadProcedure('D3DXCreateTextureFromFileW');
+D3DXCreateTextureFromFile := LoadProcedure('D3DXCreateTextureFromFileA');
+D3DXCreateCubeTextureFromFileA := LoadProcedure('D3DXCreateCubeTextureFromFileA');
+D3DXCreateCubeTextureFromFileW := LoadProcedure('D3DXCreateCubeTextureFromFileW');
+D3DXCreateCubeTextureFromFile := LoadProcedure('D3DXCreateCubeTextureFromFileA');
+D3DXCreateVolumeTextureFromFileA := LoadProcedure('D3DXCreateVolumeTextureFromFileA');
+D3DXCreateVolumeTextureFromFileW := LoadProcedure('D3DXCreateVolumeTextureFromFileW');
+D3DXCreateVolumeTextureFromFile := LoadProcedure('D3DXCreateVolumeTextureFromFileA');
+D3DXCreateTextureFromResourceA := LoadProcedure('D3DXCreateTextureFromResourceA');
+D3DXCreateTextureFromResourceW := LoadProcedure('D3DXCreateTextureFromResourceW');
+D3DXCreateTextureFromResource := LoadProcedure('D3DXCreateTextureFromResourceA');
+D3DXCreateCubeTextureFromResourceA := LoadProcedure('D3DXCreateCubeTextureFromResourceA');
+D3DXCreateCubeTextureFromResourceW := LoadProcedure('D3DXCreateCubeTextureFromResourceW');
+D3DXCreateCubeTextureFromResource := LoadProcedure('D3DXCreateCubeTextureFromResourceA');
+D3DXCreateVolumeTextureFromResourceA := LoadProcedure('D3DXCreateVolumeTextureFromResourceA');
+D3DXCreateVolumeTextureFromResourceW := LoadProcedure('D3DXCreateVolumeTextureFromResourceW');
+D3DXCreateVolumeTextureFromResource := LoadProcedure('D3DXCreateVolumeTextureFromResourceA');
+D3DXCreateTextureFromFileExA := LoadProcedure('D3DXCreateTextureFromFileExA');
+D3DXCreateTextureFromFileExW := LoadProcedure('D3DXCreateTextureFromFileExW');
+D3DXCreateTextureFromFileEx := LoadProcedure('D3DXCreateTextureFromFileExA');
+D3DXCreateCubeTextureFromFileExA := LoadProcedure('D3DXCreateCubeTextureFromFileExA');
+D3DXCreateCubeTextureFromFileExW := LoadProcedure('D3DXCreateCubeTextureFromFileExW');
+D3DXCreateCubeTextureFromFileEx := LoadProcedure('D3DXCreateCubeTextureFromFileExA');
+D3DXCreateVolumeTextureFromFileExA := LoadProcedure('D3DXCreateVolumeTextureFromFileExA');
+D3DXCreateVolumeTextureFromFileExW := LoadProcedure('D3DXCreateVolumeTextureFromFileExW');
+D3DXCreateVolumeTextureFromFileEx := LoadProcedure('D3DXCreateVolumeTextureFromFileExA');
+D3DXCreateTextureFromResourceExA := LoadProcedure('D3DXCreateTextureFromResourceExA');
+D3DXCreateTextureFromResourceExW := LoadProcedure('D3DXCreateTextureFromResourceExW');
+D3DXCreateTextureFromResourceEx := LoadProcedure('D3DXCreateTextureFromResourceExA');
+D3DXCreateCubeTextureFromResourceExA := LoadProcedure('D3DXCreateCubeTextureFromResourceExA');
+D3DXCreateCubeTextureFromResourceExW := LoadProcedure('D3DXCreateCubeTextureFromResourceExW');
+D3DXCreateCubeTextureFromResourceEx := LoadProcedure('D3DXCreateCubeTextureFromResourceExA');
+D3DXCreateVolumeTextureFromResourceExA := LoadProcedure('D3DXCreateVolumeTextureFromResourceExA');
+D3DXCreateVolumeTextureFromResourceExW := LoadProcedure('D3DXCreateVolumeTextureFromResourceExW');
+D3DXCreateVolumeTextureFromResourceEx := LoadProcedure('D3DXCreateVolumeTextureFromResourceExA');
+D3DXCreateTextureFromFileInMemory := LoadProcedure('D3DXCreateTextureFromFileInMemory');
+D3DXCreateCubeTextureFromFileInMemory := LoadProcedure('D3DXCreateCubeTextureFromFileInMemory');
+D3DXCreateVolumeTextureFromFileInMemory := LoadProcedure('D3DXCreateVolumeTextureFromFileInMemory');
+D3DXCreateTextureFromFileInMemoryEx := LoadProcedure('D3DXCreateTextureFromFileInMemoryEx');
+D3DXCreateCubeTextureFromFileInMemoryEx := LoadProcedure('D3DXCreateCubeTextureFromFileInMemoryEx');
+D3DXCreateVolumeTextureFromFileInMemoryEx := LoadProcedure('D3DXCreateVolumeTextureFromFileInMemoryEx');
+D3DXSaveTextureToFileA := LoadProcedure('D3DXSaveTextureToFileA');
+D3DXSaveTextureToFileW := LoadProcedure('D3DXSaveTextureToFileW');
+D3DXSaveTextureToFile := LoadProcedure('D3DXSaveTextureToFileA');
+D3DXSaveTextureToFileInMemory := LoadProcedure('D3DXSaveTextureToFileInMemory');
+D3DXFilterTexture := LoadProcedure('D3DXFilterTexture');
+D3DXFilterCubeTexture := LoadProcedure('D3DXFilterTexture');
+D3DXFilterVolumeTexture := LoadProcedure('D3DXFilterTexture');
+D3DXFillTexture := LoadProcedure('D3DXFillTexture');
+D3DXFillCubeTexture := LoadProcedure('D3DXFillCubeTexture');
+D3DXFillVolumeTexture := LoadProcedure('D3DXFillVolumeTexture');
+D3DXFillTextureTX := LoadProcedure('D3DXFillTextureTX');
+D3DXFillCubeTextureTX := LoadProcedure('D3DXFillCubeTextureTX');
+D3DXFillVolumeTextureTX := LoadProcedure('D3DXFillVolumeTextureTX');
+D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9texDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
-
-function LoadD3DX9_7(const UnitName : PChar) : Boolean;
+function Load_D3DX9_7(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 16;
 var
 	UnitLib : LongWord;
-procedure LoadProcedure(var Proc : Pointer; const Name : PChar);
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Proc := GetProcAddress(UnitLib, Name);
-if Proc = nil then
-	begin
-	WriteLn('Error while loading "',Name,'".');
-	end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
 Result := UnitLib <> 0;
-D3DXLoadMeshHierarchyFromXA := GetProcAddress(UnitLib, 'D3DXLoadMeshHierarchyFromXA'); if @D3DXLoadMeshHierarchyFromXA = nil then begin WriteLn('Error while loading "D3DXLoadMeshHierarchyFromXA" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshHierarchyFromXW := GetProcAddress(UnitLib, 'D3DXLoadMeshHierarchyFromXW'); if @D3DXLoadMeshHierarchyFromXW = nil then begin WriteLn('Error while loading "D3DXLoadMeshHierarchyFromXW" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshHierarchyFromX := GetProcAddress(UnitLib, 'D3DXLoadMeshHierarchyFromXA'); if @D3DXLoadMeshHierarchyFromX = nil then begin WriteLn('Error while loading "D3DXLoadMeshHierarchyFromX" from "',UnitName,'".'); Result := False; end;
-D3DXLoadMeshHierarchyFromXInMemory := GetProcAddress(UnitLib, 'D3DXLoadMeshHierarchyFromXInMemory'); if @D3DXLoadMeshHierarchyFromXInMemory = nil then begin WriteLn('Error while loading "D3DXLoadMeshHierarchyFromXInMemory" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshHierarchyToFileA := GetProcAddress(UnitLib, 'D3DXSaveMeshHierarchyToFileA'); if @D3DXSaveMeshHierarchyToFileA = nil then begin WriteLn('Error while loading "D3DXSaveMeshHierarchyToFileA" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshHierarchyToFileW := GetProcAddress(UnitLib, 'D3DXSaveMeshHierarchyToFileW'); if @D3DXSaveMeshHierarchyToFileW = nil then begin WriteLn('Error while loading "D3DXSaveMeshHierarchyToFileW" from "',UnitName,'".'); Result := False; end;
-D3DXSaveMeshHierarchyToFile := GetProcAddress(UnitLib, 'D3DXSaveMeshHierarchyToFileA'); if @D3DXSaveMeshHierarchyToFile = nil then begin WriteLn('Error while loading "D3DXSaveMeshHierarchyToFile" from "',UnitName,'".'); Result := False; end;
-D3DXFrameDestroy := GetProcAddress(UnitLib, 'D3DXFrameDestroy'); if @D3DXFrameDestroy = nil then begin WriteLn('Error while loading "D3DXFrameDestroy" from "',UnitName,'".'); Result := False; end;
-D3DXFrameAppendChild := GetProcAddress(UnitLib, 'D3DXFrameAppendChild'); if @D3DXFrameAppendChild = nil then begin WriteLn('Error while loading "D3DXFrameAppendChild" from "',UnitName,'".'); Result := False; end;
-D3DXFrameFind := GetProcAddress(UnitLib, 'D3DXFrameFind'); if @D3DXFrameFind = nil then begin WriteLn('Error while loading "D3DXFrameFind" from "',UnitName,'".'); Result := False; end;
-D3DXFrameRegisterNamedMatrices := GetProcAddress(UnitLib, 'D3DXFrameRegisterNamedMatrices'); if @D3DXFrameRegisterNamedMatrices = nil then begin WriteLn('Error while loading "D3DXFrameRegisterNamedMatrices" from "',UnitName,'".'); Result := False; end;
-D3DXFrameNumNamedMatrices := GetProcAddress(UnitLib, 'D3DXFrameNumNamedMatrices'); if @D3DXFrameNumNamedMatrices = nil then begin WriteLn('Error while loading "D3DXFrameNumNamedMatrices" from "',UnitName,'".'); Result := False; end;
-D3DXFrameCalculateBoundingSphere := GetProcAddress(UnitLib, 'D3DXFrameCalculateBoundingSphere'); if @D3DXFrameCalculateBoundingSphere = nil then begin WriteLn('Error while loading "D3DXFrameCalculateBoundingSphere" from "',UnitName,'".'); Result := False; end;
-D3DXCreateKeyframedAnimationSet := GetProcAddress(UnitLib, 'D3DXCreateKeyframedAnimationSet'); if @D3DXCreateKeyframedAnimationSet = nil then begin WriteLn('Error while loading "D3DXCreateKeyframedAnimationSet" from "',UnitName,'".'); Result := False; end;
-D3DXCreateCompressedAnimationSet := GetProcAddress(UnitLib, 'D3DXCreateCompressedAnimationSet'); if @D3DXCreateCompressedAnimationSet = nil then begin WriteLn('Error while loading "D3DXCreateCompressedAnimationSet" from "',UnitName,'".'); Result := False; end;
-D3DXCreateAnimationController := GetProcAddress(UnitLib, 'D3DXCreateAnimationController'); if @D3DXCreateAnimationController = nil then begin WriteLn('Error while loading "D3DXCreateAnimationController" from "',UnitName,'".'); Result := False; end;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DXLoadMeshHierarchyFromXA := LoadProcedure('D3DXLoadMeshHierarchyFromXA');
+D3DXLoadMeshHierarchyFromXW := LoadProcedure('D3DXLoadMeshHierarchyFromXW');
+D3DXLoadMeshHierarchyFromX := LoadProcedure('D3DXLoadMeshHierarchyFromXA');
+D3DXLoadMeshHierarchyFromXInMemory := LoadProcedure('D3DXLoadMeshHierarchyFromXInMemory');
+D3DXSaveMeshHierarchyToFileA := LoadProcedure('D3DXSaveMeshHierarchyToFileA');
+D3DXSaveMeshHierarchyToFileW := LoadProcedure('D3DXSaveMeshHierarchyToFileW');
+D3DXSaveMeshHierarchyToFile := LoadProcedure('D3DXSaveMeshHierarchyToFileA');
+D3DXFrameDestroy := LoadProcedure('D3DXFrameDestroy');
+D3DXFrameAppendChild := LoadProcedure('D3DXFrameAppendChild');
+D3DXFrameFind := LoadProcedure('D3DXFrameFind');
+D3DXFrameRegisterNamedMatrices := LoadProcedure('D3DXFrameRegisterNamedMatrices');
+D3DXFrameNumNamedMatrices := LoadProcedure('D3DXFrameNumNamedMatrices');
+D3DXFrameCalculateBoundingSphere := LoadProcedure('D3DXFrameCalculateBoundingSphere');
+D3DXCreateKeyframedAnimationSet := LoadProcedure('D3DXCreateKeyframedAnimationSet');
+D3DXCreateCompressedAnimationSet := LoadProcedure('D3DXCreateCompressedAnimationSet');
+D3DXCreateAnimationController := LoadProcedure('D3DXCreateAnimationController');
+Load_HINT('Initialization D3DX9 unit from '+SGPCharToString(UnitName)+'/'+'d3dx9animDLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
+function Load_D3DX9() : Boolean;
+var
+	i : LongWord;
+	R : array[0..7] of Boolean;
+begin
+R[0] := Load_D3DX9_0(d3dx9mathDLL);
+R[1] := Load_D3DX9_1(d3dx9coreDLL);
+R[2] := Load_D3DX9_2(d3dx9shaderDLL);
+R[3] := Load_D3DX9_3(d3dx9effectDLL);
+R[4] := Load_D3DX9_4(d3dx9meshDLL);
+R[5] := Load_D3DX9_5(d3dx9shapesDLL);
+R[6] := Load_D3DX9_6(d3dx9texDLL);
+R[7] := Load_D3DX9_7(d3dx9animDLL);
+Result := True;
+for i := 0 to 7 do
+	Result := Result and R[i];
+end;
+function Load_D3DX9_FromLibrary(const LN : String) : Boolean;
+var
+	i : LongWord;
+	R : array[0..7] of Boolean;
+	LNPC : PChar;
+begin
+LNPC := SGStringToPChar(LN);
+R[0] := Load_D3DX9_0(LNPC);
+R[1] := Load_D3DX9_1(LNPC);
+R[2] := Load_D3DX9_2(LNPC);
+R[3] := Load_D3DX9_3(LNPC);
+R[4] := Load_D3DX9_4(LNPC);
+R[5] := Load_D3DX9_5(LNPC);
+R[6] := Load_D3DX9_6(LNPC);
+R[7] := Load_D3DX9_7(LNPC);
+FreeMem(LNPC);
+Result := True;
+for i := 0 to 7 do
+	Result := Result and R[i];
+end;
 function LoadD3DX9() : Boolean;
+var
+	i : LongWord;
+	R : Boolean = False;
 begin
-Result := 
-	    LoadD3DX9_0(d3dx9mathDLL)
-	and LoadD3DX9_1(d3dx9coreDLL)
-	and LoadD3DX9_2(d3dx9shaderDLL)
-	and LoadD3DX9_3(d3dx9effectDLL)
-	and LoadD3DX9_4(d3dx9meshDLL)
-	and LoadD3DX9_5(d3dx9shapesDLL)
-	and LoadD3DX9_6(d3dx9texDLL)
-	and LoadD3DX9_7(d3dx9animDLL)
-	;
+if not R then R := Load_D3DX9_FromLibrary('d3dx9.dll');
+for i := 43 downto 24 do
+	begin
+	if not R then R := Load_D3DX9_FromLibrary('d3dx9_'+SGStr(i)+'.dll');
+	if not R then R := Load_D3DX9_FromLibrary('d3dx9d_'+SGStr(i)+'.dll');
+	if R then break;
+	end;
+if not R then R := Load_D3DX9_FromLibrary('d3dx9d.dll');
+Result := R;
 end;
 initialization
 begin
-FreeD3DX9();
-LoadD3DX9();
+Free_D3DX9();
+if not Load_D3DX9() then
+	LoadD3DX9();
 end;
 finalization
 begin
-FreeD3DX9();
+Free_D3DX9();
 end;
 end.

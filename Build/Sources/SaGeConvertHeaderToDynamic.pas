@@ -530,7 +530,7 @@ for ii := 0 to High(Typization) do
 	SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('Result := GetProcAddress(UnitLib, Name);' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('if Result = nil then' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Error while loading "''+SGPCharToString(Name)+''"!'')' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	Load_HINT(''Initialization '+SGUpCaseString(UnitName)+' unit from ''+SGPCharToString(UnitName)+'': Error while loading "''+SGPCharToString(Name)+''"!'')' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('else' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	CountLoadSuccs := CountLoadSuccs + 1;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
@@ -540,7 +540,7 @@ for ii := 0 to High(Typization) do
 	SGWriteStringToStream('CountLoadSuccs := 0;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('if not Result then' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	begin' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Error while loading dynamic library!'');' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	Load_HINT(''Initialization '+SGUpCaseString(UnitName)+' unit from ''+SGPCharToString(UnitName)+'': Error while loading dynamic library!'');' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	exit;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	end;' + SGWinEoln, FOutStream, False);
 	for i := 0 to High(Typization[ii]) do
@@ -557,7 +557,7 @@ for ii := 0 to High(Typization) do
 			SGWriteStringToStream('Pointer(' + Typization[ii][i].FPascalName + ') := LoadProcedure('+StringInQuotes(Typization[ii][i].FExternalName)+');' + SGWinEoln, FOutStream, False);
 			end;
 		end;
-	SGWriteStringToStream('Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Loaded ''+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+''% (''+SGStr(CountLoadSuccs)+''/''+SGStr(TotalProcCount)+'').'');' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('Load_HINT(''Initialization '+SGUpCaseString(UnitName)+' unit from ''+SGPCharToString(UnitName)+''/''+'+StringInQuotes(Typization[ii][0].FExternalLibrary)+'+'': Loaded ''+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+''% (''+SGStr(CountLoadSuccs)+''/''+SGStr(TotalProcCount)+'').'');' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 	end;
 
@@ -617,7 +617,7 @@ while FInStream.Size <> FInStream.Position do
 		Identifier := '';
 		while (FInStream.Position <> i) and (FInStream.Position < FInStream.Size) do
 			Identifier += ReadChar();
-		SGWriteStringToStream(SGWinEoln + '(*' + Identifier + SGWinEoln + '*)' + SGWinEoln, FOutStream, False);
+		SGWriteStringToStream(SGWinEoln + '(*' + SGWinEoln + Identifier + SGWinEoln + '*)' + SGWinEoln, FOutStream, False);
 		//WriteLn(Identifier);
 		FInStream.Position := ProcInPos;
 		Identifier := '';
