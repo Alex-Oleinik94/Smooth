@@ -28,7 +28,7 @@ end;
 
 procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 begin
-if Render.RenderType=SGRenderDirectX then
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then
 	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
 else
 	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex]^:=v;
@@ -87,7 +87,7 @@ begin
 inherited;
 ClearMesh();
 Quantity:=(8**FDepth)+1;
-if Render.RenderType = SGRenderDirectX then 
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then 
 	CalculateMeshes(Quantity,SGR_LINE_STRIP,SGMeshVertexType3f)
 else
 	CalculateMeshes(Quantity,SGR_LINE_STRIP,SGMeshVertexType2f);

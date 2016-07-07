@@ -459,7 +459,7 @@ if FMesh <> nil then
 FText := NewText;
 if FText = '' then
 	Exit;
-if Render.RenderType = SGRenderDirectX then
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then
 	DXShift := 0.5;
 FMesh := TSG3DObject.Create();
 FMesh.SetContext(Context);
@@ -1136,7 +1136,7 @@ var
 begin
 Vertex1 := V1;
 Vertex2 := V2;
-if Render.RenderType = SGRenderDirectX then
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then
 	begin
 	if Context.Fullscreen then
 		DirectXShift.Import(0.5, 0.5)
@@ -1226,7 +1226,7 @@ var
 begin
 Vertex1 := V1;
 Vertex2 := V2;
-if Render.RenderType = SGRenderDirectX then
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then
 	begin
 	if Context.Fullscreen then
 		DirectXShift.Import(0.5, 0.5)

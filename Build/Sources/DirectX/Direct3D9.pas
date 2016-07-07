@@ -47,17 +47,9 @@ unit Direct3D9;
 
 interface
 
-// Global level dynamic loading support
-{$IFDEF DYNAMIC_LINK_ALL}
-  {$DEFINE DIRECT3D9_DYNAMIC_LINK}
-{$ENDIF}
-{$IFDEF DYNAMIC_LINK_EXPLICIT_ALL}
-  {$DEFINE DIRECT3D9_DYNAMIC_LINK_EXPLICIT}
-{$ENDIF}
-
 // Remove "dots" below to force some kind of dynamic linking
-{.$DEFINE DIRECT3D9_DYNAMIC_LINK}
-{.$DEFINE DIRECT3D9_DYNAMIC_LINK_EXPLICIT}
+{$DEFINE DIRECT3D9_DYNAMIC_LINK}
+{$DEFINE DIRECT3D9_DYNAMIC_LINK_EXPLICIT}
 
 
 uses Windows, DXTypes;
@@ -3567,8 +3559,6 @@ const
 
 
 function Direct3D9Loaded: Boolean;
-function LoadDirect3D9: Boolean;
-function UnLoadDirect3D9: Boolean;
 
 const
   Direct3D9dll = 'd3d9.dll';
@@ -3576,43 +3566,67 @@ const
 // Due to the way Object Pascal handles functions resulting in 'native' interface
 // pointer we should declare result not as interface but as usial pointer
 
-{$IFDEF DIRECT3D9_DYNAMIC_LINK}
-type
-  TDirect3DCreate9 = function (SDKVersion: LongWord): Pointer; stdcall;
-  {$IFDEF DIRECT3D_VERSION_9_VISTA}
-  TDirect3DCreate9Ex = function (SDKVersion: LongWord; out d3d9ex: IDirect3D9Ex): HRESULT; stdcall;
-  {$ENDIF}
-
-var
-  _Direct3DCreate9: TDirect3DCreate9 = nil;
-  {$IFDEF DIRECT3D_VERSION_9_VISTA}
-  Direct3DCreate9Ex: TDirect3DCreate9Ex = nil;
-  {$ENDIF}
-
-{$ELSE}
-function _Direct3DCreate9(SDKVersion: LongWord): Pointer; stdcall;
-{$ENDIF}
-
-function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9; stdcall;
-{$IFNDEF DIRECT3D9_DYNAMIC_LINK}
-{$IFDEF DIRECT3D_VERSION_9_VISTA}
-function Direct3DCreate9Ex(SDKVersion: LongWord; out d3d9ex: IDirect3D9Ex): HRESULT; stdcall;
-{$ENDIF}
-{$ENDIF}
-
 (*
  * Stubs for graphics profiling.
  *)
+(*
+
 
 function D3DPERF_BeginEvent(col: TD3DColor; wszName: PWideChar): Integer; stdcall; external Direct3D9dll;
-function D3DPERF_EndEvent: Integer; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_BeginEvent : function( col : TD3DColor ; wszName : PWideChar ) : Integer ; stdcall ; 
+
+(*
+
+function D3DPERF_EndEvent(): Integer; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_EndEvent : function( ) : Integer ; stdcall ; 
+
+(*
+
 procedure D3DPERF_SetMarker(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
+*)
+var D3DPERF_SetMarker : procedure( col : TD3DColor ; wszName : PWideChar ) ; stdcall ; 
+
+(*
+
 procedure D3DPERF_SetRegion(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
-function D3DPERF_QueryRepeatFrame: BOOL; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_SetRegion : procedure( col : TD3DColor ; wszName : PWideChar ) ; stdcall ; 
+
+(*
+
+function D3DPERF_QueryRepeatFrame(): BOOL; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_QueryRepeatFrame : function( ) : BOOL ; stdcall ; 
+
+(*
+
 
 procedure D3DPERF_SetOptions(dwOptions: DWORD); stdcall; external Direct3D9dll;
-function D3DPERF_GetStatus: DWORD; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_SetOptions : procedure( dwOptions : DWORD ) ; stdcall ; 
 
+(*
+
+function D3DPERF_GetStatus(): DWORD; stdcall; external Direct3D9dll;
+*)
+var D3DPERF_GetStatus : function( ) : DWORD ; stdcall ; 
+
+(*
+
+function _Direct3DCreate9(SDKVersion: LongWord): Pointer; stdcall; external Direct3D9dll name 'Direct3DCreate9';
+*)
+var _Direct3DCreate9 : function( SDKVersion : LongWord ) : Pointer ; stdcall ; 
+
+function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9;stdcall;
+{$IFDEF DIRECT3D_VERSION_9_VISTA}
+(*
+
+function _Direct3DCreate9Ex(SDKVersion: LongWord; out d3d9ex: IDirect3D9Ex): HRESULT; stdcall; external Direct3D9dll name 'Direct3DCreate9Ex';
+*)
+var Direct3DCreate9Ex : function( SDKVersion : LongWord ; out d3d9ex : IDirect3D9Ex ) : HRESULT ; stdcall ; 
+{$ENDIF}
 
 //********************************************************************
 // Introduced types for compatibility with non-Borland compliant translation
@@ -3664,6 +3678,9 @@ type
 
 
 implementation
+
+uses
+	SaGeBase;
 
 (*==========================================================================;
  *  File:       d3d9types.h
@@ -3797,87 +3814,98 @@ begin
   Result:= DWord((0 shl 31) or (_FACD3D shl 16)) or Code;
 end;
 
-{$IFDEF DIRECT3D9_DYNAMIC_LINK}
 var
-  Direct3D9Lib: THandle = 0;
+	UnitLib : TSGMaxEnum;
 
 function Direct3D9Loaded: Boolean;
 begin
-  Result:= Direct3D9Lib <> 0;
+Result := (UnitLib <> 0) and Assigned(_Direct3DCreate9);
 end;
 
-function UnLoadDirect3D9: Boolean;
+function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9;stdcall;
 begin
-  Result:= True;
-  if Direct3D9Loaded then
-  begin
-    Result:= FreeLibrary(Direct3D9Lib);
-    _Direct3DCreate9:= nil;
-    Direct3D9Lib:= 0;
-  end;
+Result:= IDirect3D9(_Direct3DCreate9(SDKVersion));
+if Assigned(Result) then Result._Release; // Delphi autoincrement reference count
 end;
 
-function LoadDirect3D9: Boolean;
-const
-  ProcName = 'Direct3DCreate9';
-  ProcNameEx = 'Direct3DCreate9Ex';
+procedure Load_HINT(const Er : String);
 begin
-  Result:= Direct3D9Loaded;
-  if (not Result) then
-  begin
-    Direct3D9Lib:= LoadLibrary(Direct3D9dll);
-    if Direct3D9Loaded then
-    begin
-      _Direct3DCreate9:= GetProcAddress(Direct3D9Lib, ProcName);
-      Result:= Assigned(_Direct3DCreate9);
-      if not Result then UnLoadDirect3D9;
-      {$IFDEF DIRECT3D_VERSION_9_VISTA}
-      
-      Direct3DCreate9Ex:= GetProcAddress(Direct3D9Lib, ProcNameEx);
-      {$ENDIF}
-    end;
-  end;
+//WriteLn(Er);
+SGLog.Sourse(Er);
 end;
-{$ELSE}
-function Direct3D9Loaded: Boolean;
-begin // Stub function for static linking
-  Result:= True;
-end;
-
-function UnLoadDirect3D9: Boolean;
-begin // Stub function for static linking
-  Result:= True; // should emulate "normal" behaviour
-end;
-
-function LoadDirect3D9: Boolean;
-begin // Stub function for static linking
-  Result:= True;
-end;
-
-function _Direct3DCreate9(SDKVersion: LongWord): Pointer; external Direct3D9dll name 'Direct3DCreate9';
+procedure Free_Direct3D9();
+begin
+D3DPERF_BeginEvent := nil;
+D3DPERF_EndEvent := nil;
+D3DPERF_SetMarker := nil;
+D3DPERF_SetRegion := nil;
+D3DPERF_QueryRepeatFrame := nil;
+D3DPERF_SetOptions := nil;
+D3DPERF_GetStatus := nil;
+_Direct3DCreate9 := nil;
 {$IFDEF DIRECT3D_VERSION_9_VISTA}
-function Direct3DCreate9Ex(SDKVersion: LongWord; out d3d9ex: IDirect3D9Ex): HRESULT; stdcall; external Direct3D9dll;
+Direct3DCreate9Ex := nil;
 {$ENDIF}
-{$ENDIF}
-
-function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9; stdcall;
+end;
+function Load_Direct3D9_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 
+	{$IFDEF DIRECT3D_VERSION_9_VISTA}
+	9
+	{$ELSE}
+	8
+	{$ENDIF}
+	;
+var
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-{$IFDEF DIRECT3D9_DYNAMIC_LINK}
-{$IFDEF DIRECT3D9_DYNAMIC_LINK_EXPLICIT}
-  LoadDirect3D9;
-
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization DIRECT3D9 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+begin
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization DIRECT3D9 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3DPERF_BeginEvent := LoadProcedure('D3DPERF_BeginEvent');
+D3DPERF_EndEvent := LoadProcedure('D3DPERF_EndEvent');
+D3DPERF_SetMarker := LoadProcedure('D3DPERF_SetMarker');
+D3DPERF_SetRegion := LoadProcedure('D3DPERF_SetRegion');
+D3DPERF_QueryRepeatFrame := LoadProcedure('D3DPERF_QueryRepeatFrame');
+D3DPERF_SetOptions := LoadProcedure('D3DPERF_SetOptions');
+D3DPERF_GetStatus := LoadProcedure('D3DPERF_GetStatus');
+_Direct3DCreate9 := LoadProcedure('Direct3DCreate9');
+{$IFDEF DIRECT3D_VERSION_9_VISTA}
+Direct3DCreate9Ex := LoadProcedure('Direct3DCreate9Ex');
 {$ENDIF}
-{$ENDIF}
-  Result:= IDirect3D9(_Direct3DCreate9(SDKVersion));
-  if Assigned(Result) then Result._Release; // Delphi autoincrement reference count
+Load_HINT('Initialization DIRECT3D9 unit from '+SGPCharToString(UnitName)+'/'+'Direct3D9dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
-{$IFDEF DIRECT3D9_DYNAMIC_LINK}
+function Load_Direct3D9() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_Direct3D9_0(Direct3D9dll);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
 initialization
-{$IFNDEF DIRECT3D9_DYNAMIC_LINK_EXPLICIT}
-  LoadDirect3D9;
-{$ENDIF}
+begin
+Free_Direct3D9();
+Load_Direct3D9();
+end;
 finalization
-  UnLoadDirect3D9;
-{$ENDIF}
+begin
+Free_Direct3D9();
+end;
 end.

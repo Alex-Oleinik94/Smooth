@@ -92,6 +92,7 @@ type
 			ogl_Format  : TAGLPixelFormat;
 			{$ENDIF}
 			public
+		class function Suppored() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -268,6 +269,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+class function TSGRenderOpenGL.Suppored() : TSGBoolean;
+begin
+Result := True;
+end;
 
 procedure TSGRenderOpenGL.Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin

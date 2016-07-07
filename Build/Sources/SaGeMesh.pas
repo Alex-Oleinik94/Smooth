@@ -672,7 +672,7 @@ procedure TSG3DObject.AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxV
 begin
 if (MaxVertexLength<=255) and (Render.RenderType=SGRenderOpenGL) then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat1b
-else if (MaxVertexLength<=255*255) or (Render.RenderType=SGRenderDirectX) then
+else if (MaxVertexLength<=255*255) or (Render.RenderType=SGRenderDirectX9) or (Render.RenderType=SGRenderDirectX8) then
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat2b
 else 
 	ArFaces[ArIndex].FIndexFormat:=SGMeshIndexFormat4b;
@@ -976,7 +976,7 @@ else if (FColorType=SGMeshColorType3b) then
 	end
 else if (FColorType=SGMeshColorType4b) then
 	begin
-	if Render.RenderType = SGRenderDirectX then
+	if (Render.RenderType = SGRenderDirectX9) or (Render.RenderType = SGRenderDirectX8) then
 		begin
 		Result.Import(ArColor4b[Index]^.r / 255, ArColor4b[Index]^.g / 255, ArColor4b[Index]^.b / 255, ArColor4b[Index]^.a / 255);
 		end
@@ -1010,7 +1010,7 @@ else if (FColorType=SGMeshColorType3b) then
 	end
 else if (FColorType=SGMeshColorType4b) then
 	begin 
-	if Render.RenderType = SGRenderDirectX then
+	if (Render.RenderType = SGRenderDirectX9) or (Render.RenderType = SGRenderDirectX8) then
 		begin
 		ArColor4b[Index]^.b:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
 		ArColor4b[Index]^.r:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);

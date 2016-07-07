@@ -1509,7 +1509,7 @@ function Load_png_0(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 171;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin

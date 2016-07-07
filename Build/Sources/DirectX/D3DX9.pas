@@ -12699,7 +12699,7 @@ function Load_D3DX9_0(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 104;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -12828,7 +12828,7 @@ function Load_D3DX9_1(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 13;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -12866,7 +12866,7 @@ function Load_D3DX9_2(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 40;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -12931,7 +12931,7 @@ function Load_D3DX9_3(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 23;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -12979,7 +12979,7 @@ function Load_D3DX9_4(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 82;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -13086,7 +13086,7 @@ function Load_D3DX9_5(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 9;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -13120,7 +13120,7 @@ function Load_D3DX9_6(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 95;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -13240,7 +13240,7 @@ function Load_D3DX9_7(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 16;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
@@ -13335,8 +13335,8 @@ var
 	i : LongWord;
 	R : Boolean = False;
 begin
-if not R then R := Load_D3DX9_FromLibrary('d3dx9.dll');
 if not R then R := Load_D3DX9_FromLibrary('d3dx9_33.dll');
+if not R then R := Load_D3DX9_FromLibrary('d3dx9.dll');
 for i := 43 downto 24 do
 	if i <> 33 then
 		begin
@@ -13346,8 +13346,8 @@ for i := 43 downto 24 do
 		if not R then R := Load_D3DX9_FromLibrary('d3dx9d_'+SGStr(i)+'.dll');
 		if R then break;
 		end;
-if not R then R := Load_D3DX9_FromLibrary('d3dx9d.dll');
 if not R then R := Load_D3DX9_FromLibrary('d3dx9d_33.dll');
+if not R then R := Load_D3DX9_FromLibrary('d3dx9d.dll');
 Result := R;
 end;
 initialization

@@ -133,7 +133,7 @@ else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and (
 else
 	begin 
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]. Param @mode is in set of "ObjFpc", "fpc" and "Delphi".');
+	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]. Param @mode is in set of "ObjFpc", "fpc" or "Delphi".');
 	end;
 end;
 
@@ -699,16 +699,24 @@ if (VParams<>nil) and (Length(VParams)>0) then
 		if StringTrimLeft(VParams[i], '-') <> VParams[i] then
 			begin
 			S := SGUpCaseString(StringTrimLeft(VParams[i], '-'));
-			if (S='HELP') or (S='H') then
+			if (S='HELP') or (S='H')or (S='?') then
 				begin
-				WriteLn('Whis is help for funning GUI.');
-				WriteLn('     -H; -HELP       : for run help');
+				WriteLn('This is additional params for running GUI.');
+				WriteLn('     -h; -help; -?   : for show this');
 				{$IFDEF MSWINDOWS}
-					WriteLn('     -OGL            : for set prioritet render "OpenGL"');
-					WriteLn('     -D3DX9          : for set prioritet render "DirectX 9"');
-					WriteLn('     -D3DX8          : for set prioritet render "DirectX 8"');
+					Write('     -ogl            : for use OpenGL');WriteLn();
+					Write('     -d3dx9          : for use DirectX 9');
+					if TSGRenderDirectX9.Suppored() then
+						WriteLn()
+					else
+						WriteLn(', but it is impossible for your system!');
+					Write('     -d3dx8          : for use DirectX 8');
+					if TSGRenderDirectX8.Suppored() then
+						WriteLn()
+					else
+						WriteLn(', but it is impossible for your system!');
 					{$ENDIF}
-				WriteLn('     -F; -FULLSCREEN : for change fullscreen');
+				WriteLn('     -f; -fullscreen : for change fullscreen mode');
 				GoToExit := True;
 				HelpUsed := True;
 				Break;
@@ -717,21 +725,21 @@ if (VParams<>nil) and (Length(VParams)>0) then
 				else if (S='OGL') or (S='OPENGL') then
 					begin
 					{$IFDEF SGMoreDebuging}
-						WriteLn('Set prioritet render : "OpenGL"');
+						WriteLn('Engine uses OpenGL.');
 						{$ENDIF}
 					FRenderState:=SGBR_OPENGL;
 					end
 				else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') or (S='D3DX9') or (S='DIRECT3D9')or (S='DIRECTX9')or (S='DIRECT3DX9') then
 					begin
 					{$IFDEF SGMoreDebuging}
-						WriteLn('Set prioritet render : "DirectX 9"');
+						WriteLn('Engine uses DirectX 9.');
 						{$ENDIF}
 					FRenderState:=SGBR_DIRECTX_9;
 					end
 				else if (S='D3DX8') or (S='DIRECT3D8')or (S='DIRECTX8')or (S='DIRECT3DX8') then
 					begin
 					{$IFDEF SGMoreDebuging}
-						WriteLn('Set prioritet render : "DirectX 8"');
+						WriteLn('Engine uses DirectX 8.');
 						{$ENDIF}
 					FRenderState:=SGBR_DIRECTX_8;
 					end

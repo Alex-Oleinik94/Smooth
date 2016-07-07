@@ -17,7 +17,7 @@ type
 	TSGMatrixMode   = TSGLongWord;
 	TSGPrimtiveType = TSGLongWord;
 	
-	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX,SGRenderGLES);
+	TSGRenderType   = (SGRenderNone,SGRenderOpenGL,SGRenderDirectX9,SGRenderDirectX8,SGRenderGLES);
 
 {$INCLUDE SaGeRenderConstants.inc}
 

@@ -524,7 +524,7 @@ for ii := 0 to High(Typization) do
 	SGWriteStringToStream('const' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	TotalProcCount = '+SGStr(Length(Typization[ii]))+';' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('var' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	UnitLib : LongWord;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	UnitLib : TSGMaxEnum;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	CountLoadSuccs : LongWord;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('function LoadProcedure(const Name : PChar) : Pointer;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);

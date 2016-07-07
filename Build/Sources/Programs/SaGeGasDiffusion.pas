@@ -3739,7 +3739,7 @@ if FMesh <> nil then
 		begin
 		if FEnableSaving then 
 			begin
-			if (Render.RenderType = SGRenderDirectX) then
+			if (Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8]) then
 				if FMesh.QuantityObjects<>0 then
 					for i := 0 to FMesh.QuantityObjects-1 do 
 						FMesh.Objects[i].ChangeMeshColorType4b();
@@ -3769,7 +3769,7 @@ if FMesh <> nil then
 			FNowCadr:=0;
 		FFileStream.Position:=FArCadrs[FNowCadr];
 		FMesh.LoadFromSG3DM(FFileStream);
-		if (Render.RenderType=SGRenderDirectX) then
+		if (Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8]) then
 			if FMesh.QuantityObjects<>0 then
 				for i := 0 to FMesh.QuantityObjects-1 do 
 					FMesh.Objects[i].ChangeMeshColorType4b();

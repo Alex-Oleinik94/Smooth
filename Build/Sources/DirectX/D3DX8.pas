@@ -5866,7 +5866,7 @@ function Load_D3DX8_0(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 228;
 var
-	UnitLib : LongWord;
+	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin

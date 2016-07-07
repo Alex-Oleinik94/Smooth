@@ -29,7 +29,7 @@ end;
 procedure TSGFractalKohTriangle.PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 begin
 FVertexIndex+=3;
-if Render.RenderType<>SGRenderDirectX then
+if not (Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8]) then
 	begin
 	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex-3]^:=v1;
 	FMesh.Objects[MeshID].ArVertex2f[FVertexIndex-2]^:=v2;
@@ -109,7 +109,7 @@ begin
 inherited;
 ClearMesh;
 Quantity:=RecQuantity(FDepth);
-if Render.RenderType = SGRenderDirectX then 
+if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then 
 	CalculateMeshes(Quantity,SGR_LINES,SGMeshVertexType3f,1)
 else
 	CalculateMeshes(Quantity,SGR_LINES,SGMeshVertexType2f,1);

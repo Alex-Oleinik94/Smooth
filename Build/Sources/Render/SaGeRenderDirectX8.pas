@@ -35,6 +35,7 @@ type
 		pD3D:IDirect3D8;
 		pDevice:IDirect3DDevice8;
 			public
+		class function Suppored() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -246,6 +247,11 @@ function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;i
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
+
+class function TSGRenderDirectX8.Suppored() : TSGBoolean;
+begin
+Result := Direct3D8Loaded();
+end;
 
 function TSGRenderDirectX8.SupporedShaders() : TSGBoolean;
 begin
@@ -1348,7 +1354,7 @@ begin
 inherited Create();
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
-SetRenderType(SGRenderDirectX);
+SetRenderType(SGRenderDirectX8);
 FArTextures:=nil;
 pDevice:=nil;
 pD3D:=nil;

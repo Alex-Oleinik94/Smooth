@@ -2689,22 +2689,9 @@ const
  *)
 
 function Direct3D8Loaded: Boolean;
-function LoadDirect3D8: Boolean;
-function UnLoadDirect3D8: Boolean;
 
 // Due to the way Object Pascal handles functions resulting in 'native' interface
 // pointer we should declare result not as interface but as usial pointer
-
-{$IFDEF DIRECT3D8_DYNAMIC_LINK}
-type
-  TDirect3DCreate8 = function (SDKVersion: LongWord): Pointer; stdcall;
-
-var
-  _Direct3DCreate8: TDirect3DCreate8 = nil;
-
-{$ELSE}
-function _Direct3DCreate8(SDKVersion: LongWord): Pointer; stdcall;
-{$ENDIF}
 
 function Direct3DCreate8(SDKVersion: LongWord): IDirect3D8; stdcall;
 
@@ -2755,9 +2742,21 @@ type
   PD3DDevInfo_ResourceManager           = PD3DDevInfoResourceManager;
   PD3DDevInfo_D3DVertexStats            = PD3DDevInfoD3DVertexStats;
 
+const
+  Direct3D8dll = 'd3d8.dll';
+(*
+
+
+function _Direct3DCreate8(SDKVersion: LongWord): Pointer; stdcall;external Direct3D8dll name 'Direct3DCreate8';
+*)
+var _Direct3DCreate8 : function( SDKVersion : LongWord ) : Pointer ; stdcall ; 
+
 
 implementation
 
+uses
+	SaGeBase
+	;
 
 (*==========================================================================;
  *  File:       d3d8types.h
@@ -2932,82 +2931,72 @@ begin
   Result:= DWord((1 shl 31) or (_FACD3D shl 16)) or Code;
 end;
 
-const
-  Direct3D8dll = 'd3d8.dll';
-
-{$IFDEF DIRECT3D8_DYNAMIC_LINK}
 var
-  Direct3D8Lib: THandle = 0;
+	UnitLib : TSGMaxEnum = 0;
 
 function Direct3D8Loaded: Boolean;
 begin
-  Result:= Direct3D8Lib <> 0;
+Result := (UnitLib <> 0) and Assigned(_Direct3DCreate8);
 end;
 
-function UnLoadDirect3D8: Boolean;
+function Direct3DCreate8(SDKVersion: LongWord): IDirect3D8; stdcall;
 begin
-  Result:= True;
-  if Direct3D8Loaded then
-  begin
-    Result:= FreeLibrary(Direct3D8Lib);
-    _Direct3DCreate8:= nil;
-    Direct3D8Lib:= 0;
-  end;
+Result:= IDirect3D8(_Direct3DCreate8(SDKVersion));
+if Assigned(Result) then Result._Release; // Delphi autoincrement reference count
 end;
 
-function LoadDirect3D8: Boolean;
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_Direct3D8();
+begin
+_Direct3DCreate8 := nil;
+end;
+function Load_Direct3D8_0(const UnitName : PChar) : Boolean;
 const
-  ProcName = 'Direct3DCreate8';
+	TotalProcCount = 1;
+var
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
 begin
-  Result:= Direct3D8Loaded;
-  if (not Result) then
-  begin
-    Direct3D8Lib:= LoadLibrary(Direct3D8dll);
-    if Direct3D8Loaded then
-    begin
-      _Direct3DCreate8:= GetProcAddress(Direct3D8Lib, ProcName);
-      Result:= Assigned(_Direct3DCreate8);
-      if not Result then UnLoadDirect3D8;
-    end;
-  end;
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
 end;
-{$ELSE}
-function Direct3D8Loaded: Boolean;
-begin // Stub function for static linking
-  Result:= True;
-end;
-
-function UnLoadDirect3D8: Boolean;
-begin // Stub function for static linking
-  Result:= True; // should emulate "normal" behaviour
-end;
-
-function LoadDirect3D8: Boolean;
-begin // Stub function for static linking
-  Result:= True;
-end;
-
-function _Direct3DCreate8(SDKVersion: LongWord): Pointer; external Direct3D8dll name 'Direct3DCreate8';
-{$ENDIF}
-
-function Direct3DCreate8(SDKVersion: LongWord): IDirect3D8;
 begin
-{$IFDEF DIRECT3D8_DYNAMIC_LINK}
-{$IFDEF DIRECT3D8_DYNAMIC_LINK_EXPLICIT}
-  LoadDirect3D8;
-
-{$ENDIF}
-{$ENDIF}
-  Result:= IDirect3D8(_Direct3DCreate8(SDKVersion));
-  if Assigned(Result) then Result._Release; // Delphi autoincrement reference count
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+_Direct3DCreate8 := LoadProcedure('Direct3DCreate8');
+Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+'/'+'Direct3D8dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
-{$IFDEF DIRECT3D8_DYNAMIC_LINK}
+function Load_Direct3D8() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_Direct3D8_0(Direct3D8dll);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
 initialization
-{$IFNDEF DIRECT3D8_DYNAMIC_LINK_EXPLICIT}
-  LoadDirect3D8;
-{$ENDIF}
+begin
+Free_Direct3D8();
+Load_Direct3D8();
+end;
 finalization
-  UnLoadDirect3D8;
-{$ENDIF}
+begin
+Free_Direct3D8();
+end;
 end.

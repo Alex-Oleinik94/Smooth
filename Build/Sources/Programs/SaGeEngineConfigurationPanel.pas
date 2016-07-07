@@ -153,6 +153,7 @@ end;
 constructor TSGEngineConfigurationPanel.Create();
 var
 	i : TSGLongWord;
+	FCanUseRender : TSGBool;
 begin
 inherited;
 SetBounds(0, 0, 500, TotalHeight);
@@ -184,7 +185,12 @@ CreateChild(FRendersComboBox);
 FRendersComboBox.UserPointer:=Self;
 FRendersComboBox.Visible := True;
 for i := Low(Renders) to High(Renders) do
-	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, Renders[i].FClass <> nil);
+	begin
+	FCanUseRender := Renders[i].FClass <> nil;
+	if FCanUseRender then
+		FCanUseRender := Renders[i].FClass.Suppored();
+	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUseRender);
+	end;
 FRendersComboBox.FProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 
 FCloseButton := TSGButton.Create();

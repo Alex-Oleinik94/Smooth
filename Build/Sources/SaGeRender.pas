@@ -23,8 +23,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 		function GetRenderType():TSGRenderType;virtual;
-		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};override;
-		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};override;
+		class function Suppored() : TSGBoolean;virtual;
 			protected
 		function GetWidth() : TSGLongWord;virtual;
 		function GetHeight() : TSGLongWord;virtual;
@@ -176,6 +175,7 @@ uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX9
+		,SaGeRenderDirectX8
 		{$ENDIF}
 	;
 
@@ -210,14 +210,9 @@ while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
 {$ENDIF}
 end;
 
-function TSGRender._AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+class function TSGRender.Suppored() : TSGBoolean;
 begin
-Result := inherited;
-end;
-
-function TSGRender._Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
-begin
-Result := inherited;
+Result := False;
 end;
 
 procedure TSGRender.SetRenderType(const VType : TSGRenderType);
