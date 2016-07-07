@@ -12,19 +12,20 @@ uses
 type
 	TSGDoDynamicHeader = class
 			public
-		constructor Create(const VFileName, VOutFileName : TSGString);virtual;
+		constructor Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = 'OBJFPC');virtual;
 		destructor Destroy();override;
 		procedure PrintErrors();virtual;
 		procedure Execute();virtual;
 			private
 		FInFileName, FOutFileName : TSGString;
 		FInStream, FOutStream : TMemoryStream;
+		FMode : TSGString;
 			protected
 		function GetNextIdentivier(const NeedsToWrite : TSGBool = True) : TSGString;
 		function SeeNextIdentifier() : TSGString;
 		end;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString);
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = 'OBJFPC');
 
 implementation
 
@@ -35,19 +36,20 @@ uses
 	,StrMan
 	;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString);
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = 'OBJFPC');
 var
 	V : TSGDoDynamicHeader = nil;
 begin
-V := TSGDoDynamicHeader.Create(VInFile, VOutFile);
+V := TSGDoDynamicHeader.Create(VInFile, VOutFile, VMode);
 V.Execute();
 V.PrintErrors();
 V.Destroy();
 V := nil;
 end;
 
-constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString);
+constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = 'OBJFPC');
 begin
+FMode := SGUpCaseString(VMode);
 FInFileName := VFileName;
 FOutFileName := VOutFileName;
 FOutStream := TMemoryStream.Create();
@@ -96,7 +98,7 @@ end;
 
 function BadChar(const C : TSGChar):TSGBoolean;
 begin
-Result := C in '()[]:;@^,*<>/=+''{}$-';
+Result := C in '()[]:;@^,*<>/=+''{}$-#';
 end;
 
 function EoChar(const C : TSGChar):TSGBool;
@@ -360,7 +362,8 @@ else if SGUpCaseString(StringWordGet(Str, ' ', WordCount - 8)) = 'EXTERNAL' then
 else
 	begin
 	WriteLn('Can''t find external lib!');
-	WriteLn(Str);
+	//WriteLn(Str);
+	//FOutStream.SaveToFile(FOutFileName);
 	Halt();
 	end;
 end;
@@ -391,7 +394,7 @@ while (SGUpCaseString(NextWord(i)) <> 'EXTERNAL') do
 	begin
 	if not ((i <= Length(Str))) then
 		begin
-		WriteLn(Str);ReadLn();
+		//WriteLn(Str);ReadLn();
 		end;
 	Result += Str[i];
 	i += 1;
@@ -499,7 +502,15 @@ end;
 var
 	ii : TSGLongWord;
 begin
-SGWriteStringToStream(SGWinEoln + 'procedure Free'+UnitName+'();' + SGWinEoln, FOutStream, False);
+//SGWriteStringToStream(SGWinEoln + '{$mode '+FMode+'}' + SGWinEoln, FOutStream, False);
+
+SGWriteStringToStream(SGWinEoln + 'procedure Load_HINT(const Er : String);' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('//WriteLn(Er);' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('SGLog.Sourse(Er);' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
+
+SGWriteStringToStream('procedure Free_'+UnitName+'();' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
 for i := 0 to High(ExternalProcedures) do
 	SGWriteStringToStream(''+ExternalProcedures[i].FPascalName+' := nil;' + SGWinEoln, FOutStream, False);
@@ -509,45 +520,68 @@ ProcessTypization();
 
 for ii := 0 to High(Typization) do
 	begin
-	SGWriteStringToStream(SGWinEoln + 'function Load'+UnitName+'_'+SGStr(ii)+'(const UnitName : PChar) : Boolean;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('function Load_'+UnitName+'_'+SGStr(ii)+'(const UnitName : PChar) : Boolean;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('const' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	TotalProcCount = '+SGStr(Length(Typization[ii]))+';' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('var' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('	UnitLib : LongWord;' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('procedure LoadProcedure(var Proc : Pointer; const Name : PChar);' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	CountLoadSuccs : LongWord;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('function LoadProcedure(const Name : PChar) : Pointer;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('Proc := GetProcAddress(UnitLib, Name);' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('if Proc = nil then' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	begin' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	WriteLn(''Error while loading "'',Name,''".'');' + SGWinEoln, FOutStream, False);
-	SGWriteStringToStream('	end;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('Result := GetProcAddress(UnitLib, Name);' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('if Result = nil then' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Error while loading "''+SGPCharToString(Name)+''"!'')' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('else' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	CountLoadSuccs := CountLoadSuccs + 1;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('UnitLib := LoadLibrary(UnitName);' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('Result := UnitLib <> 0;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('CountLoadSuccs := 0;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('if not Result then' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	begin' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Error while loading dynamic library!'');' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	exit;' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('	end;' + SGWinEoln, FOutStream, False);
 	for i := 0 to High(Typization[ii]) do
-		SGWriteStringToStream(''+Typization[ii][i].FPascalName+' := GetProcAddress(UnitLib, '+StringInQuotes(Typization[ii][i].FExternalName)+'); if @' + Typization[ii][i].FPascalName + ' = nil then begin WriteLn(''Error while loading "'+Typization[ii][i].FPascalName+'" from "'',UnitName,''".''); Result := False; end;' + SGWinEoln, FOutStream, False);
+		begin
+		if FMode <> 'OBJFPC' then
+			begin
+			SGWriteStringToStream(Typization[ii][i].FPascalName+' := LoadProcedure('+StringInQuotes(Typization[ii][i].FExternalName)+');' + SGWinEoln, FOutStream, False);
+			{SGWriteStringToStream(
+				' if @' + Typization[ii][i].FPascalName + ' = nil then begin WriteLn(''Error while loading "'+
+				Typization[ii][i].FPascalName+'" from "'',UnitName,''".''); Result := False; end;' + SGWinEoln, FOutStream, False);}
+			end
+		else
+			begin
+			SGWriteStringToStream('Pointer(' + Typization[ii][i].FPascalName + ') := LoadProcedure('+StringInQuotes(Typization[ii][i].FExternalName)+');' + SGWinEoln, FOutStream, False);
+			end;
+		end;
+	SGWriteStringToStream('Load_HINT(''Initialization "'+SGUpCaseString(UnitName)+'" unit from "''+SGPCharToString(UnitName)+''": Loaded ''+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+''% (''+SGStr(CountLoadSuccs)+''/''+SGStr(TotalProcCount)+'').'');' + SGWinEoln, FOutStream, False);
 	SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 	end;
 
-SGWriteStringToStream(SGWinEoln + 'function Load'+UnitName+'() : Boolean;' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream(SGWinEoln + 'function Load_'+UnitName+'() : Boolean;' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('var' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('	i : LongWord;' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('	R : array[0..'+SGStr(High(Typization))+'] of Boolean;' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
-SGWriteStringToStream('Result := ' + SGWinEoln, FOutStream, False);
 for i := 0 to High(Typization) do
 	begin
-	if i <> 0 then
-		SGWriteStringToStream('	and ', FOutStream, False)
-	else
-		SGWriteStringToStream('	    ', FOutStream, False);
-	SGWriteStringToStream('Load'+UnitName+'_'+SGStr(i)+'('+Typization[i][0].FExternalLibrary+')' + SGWinEoln, FOutStream, False);
+	SGWriteStringToStream('R['+SGStr(i)+'] := Load_'+UnitName+'_'+SGStr(i)+'('+Typization[i][0].FExternalLibrary+');' + SGWinEoln, FOutStream, False);
 	end;
-SGWriteStringToStream('	;' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('Result := True;' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('for i := 0 to '+SGStr(High(Typization))+' do' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('	Result := Result and R[i];' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('initialization' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
-SGWriteStringToStream('Load'+UnitName+'();' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('Free_'+UnitName+'();' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('Load_'+UnitName+'();' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('finalization' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('begin' + SGWinEoln, FOutStream, False);
-SGWriteStringToStream('Free'+UnitName+'();' + SGWinEoln, FOutStream, False);
+SGWriteStringToStream('Free_'+UnitName+'();' + SGWinEoln, FOutStream, False);
 SGWriteStringToStream('end;' + SGWinEoln, FOutStream, False);
 
 for i := 0 to High(Typization) do
@@ -581,13 +615,13 @@ while FInStream.Size <> FInStream.Position do
 		
 		FInStream.Position := ProcInPos;
 		Identifier := '';
-		while FInStream.Position <> i do
+		while (FInStream.Position <> i) and (FInStream.Position < FInStream.Size) do
 			Identifier += ReadChar();
 		SGWriteStringToStream(SGWinEoln + '(*' + Identifier + SGWinEoln + '*)' + SGWinEoln, FOutStream, False);
-		
+		//WriteLn(Identifier);
 		FInStream.Position := ProcInPos;
 		Identifier := '';
-		while FInStream.Position <> i do
+		while (FInStream.Position <> i) and (FInStream.Position < FInStream.Size) do
 			begin
 			if Identifier <> '' then
 				Identifier += ' ';

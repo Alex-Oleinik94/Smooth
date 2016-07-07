@@ -127,10 +127,12 @@ procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams
 begin
 if (Length(VParams) = 2) and (SGResourseFiles.FileExists(VParams[0])) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1])
+else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and ((SGUpCaseString(VParams[2]) = 'OBJFPC') or (SGUpCaseString(VParams[2]) = 'DELPHI') or (SGUpCaseString(VParams[2]) = 'FPC')) then
+	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2])
 else
 	begin 
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@infilename @outfilename"');
+	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]. Param @mode is in set of "ObjFpc", "fpc" and "Delphi".');
 	end;
 end;
 
