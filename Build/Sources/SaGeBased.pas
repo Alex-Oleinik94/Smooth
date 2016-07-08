@@ -91,9 +91,9 @@ type
  
  operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       inline; overload;
  operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload;
- {$IFNDEF ANDROID}
+ {$IFNDEF ANDROID} {$IFNDEF WIN64}
  operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
- {$ENDIF ANDROID}
+ {$ENDIF ANDROID} {$ENDIF WIN64}
  
 implementation
 
@@ -797,12 +797,12 @@ begin
 	result := power(a, b);
 end;
 
-{$IFNDEF ANDROID}
+{$IFNDEF ANDROID} {$IFNDEF WIN64}
 operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
 begin
 	result := power(a, b);
 end;
-{$ENDIF ANDROID}
+{$ENDIF ANDROID} {$ENDIF WIN64}
 
 operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
 begin

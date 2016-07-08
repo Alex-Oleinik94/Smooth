@@ -14943,8 +14943,10 @@ var
 
 procedure SGPrintStat();
 begin
-SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% (',SGLoadedFUnction,'/',SGAllFunction,')']);
-SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% (',SGGLULoadedFunc,'/',SGGLUAllFunc,')']);
+if SGAllFunction > 0 then
+	SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% (',SGLoadedFUnction,'/',SGAllFunction,')']);
+if (SGGLUAllFunc > 0) then
+	SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% (',SGGLULoadedFunc,'/',SGGLUAllFunc,')']);
 end;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;
@@ -14954,7 +14956,7 @@ begin
 
 
   {$IFDEF DGL_WIN}
-    Result := GetProcAddress(HMODULE(LibHandle), ProcName);
+    Result := GetProcAddress(TSGMaxEnum(LibHandle), ProcName);
 
     if result = nil then
       if Assigned(@wglGetProcAddress) then
@@ -14978,8 +14980,6 @@ begin
     Result := GetProcAddress(HMODULE(LibHandle), ProcName);
   {$ENDIF}
   
-  if Result = nil then
-    SGLog.Sourse(['dglOpenGL : Error while loading "'+SGPCharToString(ProcName)+'".']);
   if LibHandle = GL_LibHandle then
     begin 
     SGAllFunction += 1;
@@ -19060,6 +19060,11 @@ end;
 
 procedure ReadExtensions;
 begin
+SGAllFunction := 0;
+SGLoadedFUnction := 0;
+SGGLULoadedFunc := 0;
+SGGLUAllFunc := 0;
+
   ReadOpenGLCore;
 
   Read_GL_3DFX_tbuffer;
@@ -19294,6 +19299,9 @@ begin
 {$ENDIF}
 
   ExtensionsRead := True;
+  
+  SGPrintStat();
+  SGLog.Sourse(Int_GetExtensionString, 'dglOpenGL : Suppored extensions :',' ');
 end;
 
 // =============================================================================
@@ -20346,13 +20354,9 @@ begin
 end;
 {$ENDIF}
 
-
 initialization
 begin
 InitOpenGL(OPENGL_LIBNAME,GLU_LIBNAME);
-ReadCoreVersion();
-ReadImplementationProperties();
-ReadExtensions();
 SGPrintStat();
 {$IFDEF CPU386}
   Set8087CW($133F);

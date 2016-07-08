@@ -17,6 +17,8 @@
 {$IFNDEF MOBILE}
 	{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
 	//{$DEFINE USE_GLEXT}
+{$ELSE}
+	{$DEFINE USE_GLEXT}
 	{$ENDIF}
 //{$DEFINE RENDER_OGL_DEBUG}
 
@@ -1324,6 +1326,17 @@ begin
 	WriteLn('TSGRenderOpenGL.Init() - Begin');
 	{$ENDIF}
 FNowInBumpMapping:=False;
+
+{$IFNDEF MOBILE}
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Init() - Begin ReadExtensions');
+	{$ENDIF}
+ReadExtensions();
+{$IFDEF RENDER_OGL_DEBUG}
+	WriteLn('TSGRenderOpenGL.Init() - End ReadExtensions');
+	{$ENDIF}
+{$ENDIF}
+
 {$IFDEF MOBILE}
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 	{$ENDIF}

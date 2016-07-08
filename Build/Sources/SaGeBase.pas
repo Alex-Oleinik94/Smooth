@@ -447,6 +447,7 @@ type
 		destructor Destroy;override;
 		procedure Sourse(const s:string;const WithTime:Boolean = True);
 		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);
+		procedure Sourse(const S : TSGString; const Title : TSGString; const Razd : TSGString);
 			private
 		FFileStream:TFileStream;
 		end;
@@ -726,8 +727,47 @@ operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUP
 operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function HexStr(const b : TSGByte):TSGChar;
+begin
+Result := ' ';
+case b of
+0:Result := '0';
+1:Result := '1';
+2:Result := '2';
+3:Result := '3';
+4:Result := '4';
+5:Result := '5';
+6:Result := '6';
+7:Result := '7';
+8:Result := '8';
+9:Result := '9';
+10:Result := 'A';
+11:Result := 'B';
+12:Result := 'C';
+13:Result := 'D';
+14:Result := 'E';
+15:Result := 'F';
+end;
+end;
+
+function ByteStr(const B : TSGByte):TSGString;
+begin
+Result := HexStr(b shr 4) + HexStr(b and 15);
+end;
+
+var
+	i : TSGByte;
+begin
+Result := '$';
+for i := {$IFDEF CPU64} 7 {$ELSE} {$IFDEF CPU32} 3 {$ELSE} 1 {$ENDIF} {$ENDIF} downto 0 do
+	Result += ByteStr(PSGByte(@Sourse)[i]);
+end;
 
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -1659,6 +1699,14 @@ begin
 	Sourse(OutString,WithTime);
 	SetLength(OutString,0);
 	end;
+end;
+
+procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Razd : TSGString);
+//var
+	//ArS : TSGStringList;
+begin
+Sourse(Title,True);
+
 end;
 
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;

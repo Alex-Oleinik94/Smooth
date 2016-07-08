@@ -40,15 +40,13 @@
 	{$MACRO ON}
 	{$ENDIF}
 
-//{$DEFINE LAZARUS}
-{$DEFINE WITH_GLUT}
+{$IFNDEF MOBILE}
+	{$DEFINE WITH_GLUT}
+	{$ENDIF}
 
 {$WARNINGS OFF}
 {$NOTES OFF}
 {$HINTS OFF}
-
-{$DEFINE SGDebuging}
-//{$DEFINE SGMoreDebuging}
 
 {$IF defined(CPU386) and defined(CPU32) and (not defined(DARWIN))}
 	{$DEFINE WITHASMINC}
