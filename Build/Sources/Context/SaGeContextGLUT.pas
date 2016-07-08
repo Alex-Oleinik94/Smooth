@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE GLUT_DEBUG}
+
 unit SaGeContextGLUT;
 
 interface
@@ -39,26 +41,46 @@ type
 		procedure Resize;override;
 		procedure InitFullscreen(const b:boolean); override;
 			public
+		function  GetClientWidth() : TSGLongWord;override;
+		function  GetClientHeight() : TSGLongWord;override;
+			protected
+		function InitRender() : TSGBoolean;
+			public
 		FCursorMoution: TSGPoint2int32;
 		end;
 
 implementation
 
+uses
+	SaGeRenderOpenGL,
+	SaGeCommonClasses,
+	SaGeRender;
 var
 	ContextGLUT : TSGContextGLUT = nil;
 
+function  TSGContextGLUT.GetClientWidth() : TSGLongWord;
+begin
+Result := FWidth;
+end;
+
+function  TSGContextGLUT.GetClientHeight() : TSGLongWord;
+begin
+Result := FHeight;
+end;
+
 procedure TSGContextGLUT.InitFullscreen(const b:boolean); 
 begin
-if FFullscreen<>b then
-	begin
-	if b then
-		glutFullScreen
-	else
+if FInitialized then
+	if FFullscreen <> b then
 		begin
-		glutReshapeWindow(Width,Height);
-		//glutPositionWindow
+		if b then
+			glutFullScreen
+		else
+			begin
+			glutReshapeWindow(Width,Height);
+			//glutPositionWindow
+			end;
 		end;
-	end;
 inherited;
 end;
 
@@ -174,12 +196,19 @@ end;
 
 procedure TSGContextGLUT.Initialize();
 type
-	TF=procedure (a:Byte;b,c:LongInt);cdecl;
+	TF = procedure (a:Byte;b,c:LongInt);cdecl;
 begin
+if ContextGLUT <> nil then
+	begin
+	SGLog.Sourse('TSGContextGLUT__InitRender() : Finded other GLUT context, destroyed!');
+	ContextGLUT.Destroy();
+	ContextGLUT := nil;
+	end;
+
 ContextGLUT := Self;
+
 glutInitPascal(True);
 glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
-
 
 if Fullscreen then 
 	begin
@@ -204,10 +233,65 @@ glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
 glutSetIconTitle(PChar(5));
 
+if InitRender() then
+	inherited;
+end;
+
+function TSGContextGLUT.InitRender() : TSGBoolean;
+const
+	TempRender : TSGRender = nil;
+begin
+if (FRenderClass = nil) then
+	begin
+	FRenderClass := TSGRenderOpenGL;
+	end
+else
+	begin
+	SGLog.Sourse('TSGContextGLUT__InitRender() : Testing render class!');
+	TempRender := FRenderClass.Create();
+	if not (TempRender is TSGRenderOpenGL) then
+		begin
+		SGLog.Sourse('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render replaced!');
+		FRenderClass := TSGRenderOpenGL;
+		end;
+	TempRender.Destroy();
+	TempRender := nil;
+	end;
+
+if FRender = nil then
+	begin
+	{$IFDEF GLUT_DEBUG}
+		SGLog.Sourse('TSGContextGLUT__InitRender() : Createing render');
+		{$ENDIF}
+	FRender := FRenderClass.Create();
+	FRender.Context := Self as ISGContext;
+	FRender.Init();
+	Result := FRender <> nil;
+	{$IFDEF GLUT_DEBUG}
+		SGLog.Sourse('TSGContextGLUT__InitRender() : Created render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		{$ENDIF}
+	end
+else
+	begin
+	if not (FRender is TSGRenderOpenGL) then
+		begin
+		SGLog.Sourse('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render recreated!');
+		FRender.Destroy();
+		FRender := nil;
+		Result := InitRender();
+		end;
+	
+	{$IFDEF GLUT_DEBUG}
+		SGLog.Sourse('TSGContextGLUT__InitRender() : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		{$ENDIF}
+	FRender.Context := Self as ISGContext;
+	Result := FRender.MakeCurrent();
+	end;
 end;
 
 procedure TSGContextGLUT.Run;
 begin
+StartComputeTimer();
 glutMainLoop;
 end;
 

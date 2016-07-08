@@ -62,6 +62,9 @@ uses
 	{$IFDEF DARWIN}
 		,SaGeContextMacOSX
 		{$ENDIF}
+	{$IFDEF WITH_GLUT}
+		,SaGeContextGLUT
+		{$ENDIF}
 	;
 
 procedure TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass);
@@ -77,7 +80,13 @@ end;
 
 procedure TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass);
 begin
-
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass = ',TSGMaxEnum(VContextClass),') : Begining');
+	{$ENDIF}
+//Context.NewContextType := VContextClass;
+{$IFDEF CONFIGURATION_DEBUG}
+	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass) : End');
+	{$ENDIF}
 end;
 
 var
@@ -90,7 +99,7 @@ var
 			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9'),
 			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX8{$ELSE} nil {$ENDIF}; FName : 'DirectX 8')
 			);
-	Contexts : packed array [0 .. 3] of
+	Contexts : packed array [0 .. 4] of
 		packed record
 			FClass : TSGContextClass;
 			FName : TSGString;
@@ -98,7 +107,8 @@ var
 			(FClass : {$IFDEF MSWINDOWS}TSGContextWinAPI  {$ELSE}nil{$ENDIF}; FName : 'Windows (WinAPI)' ),
 			(FClass : {$IFDEF ANDROID}  TSGContextAndroid {$ELSE}nil{$ENDIF}; FName : 'Android (Natieve Activity)'),
 			(FClass : {$IFDEF LINUX}    TSGContextLinux   {$ELSE}nil{$ENDIF}; FName : 'Linux (X11)'  ),
-			(FClass : {$IFDEF DARWIN}   TSGContextMacOSX  {$ELSE}nil{$ENDIF}; FName : 'Mac OS X (Carbon)' )
+			(FClass : {$IFDEF DARWIN}   TSGContextMacOSX  {$ELSE}nil{$ENDIF}; FName : 'Mac OS X (Carbon)' ),
+			(FClass : {$IFDEF WITH_GLUT}TSGContextGLUT    {$ELSE}nil{$ENDIF}; FName : 'OpenGL Utility Toolkit (GLUT)' )
 			);
 
 const

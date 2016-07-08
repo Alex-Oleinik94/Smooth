@@ -199,18 +199,10 @@ type
 		FPaintableClass : TSGDrawableClass;
 		FPaintable       : TSGDrawable;
 			public
+		property NewContextClass : TSGContextClass read FNewContextType write FNewContextType;
 		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
 		end;
-
-{$DEFINE SGREADINTERFACE}
-{$IFDEF GLUT}
-	{$I Includes\SaGeContextGLUT.inc}
-	{$ENDIF}
-{$IFDEF LAZARUS}
-	{$I Includes\SaGeContextLazarus.inc}
-	{$ENDIF}
-{$UNDEF SGREADINTERFACE}
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -238,28 +230,18 @@ uses
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := 
-{$IFDEF LAZARUS}
-	TSGContextLazarus
-{$ELSE}
-	{$IFDEF WITH_GLUT}
-		TSGContextGLUT
-	{$ELSE}
-		{$IFDEF MSWINDOWS}TSGContextWinAPI {$ENDIF}
-		{$IFDEF LINUX}    TSGContextLinux  {$ENDIF}
-		{$IFDEF ANDROID}  TSGContextAndroid{$ENDIF}
-		{$IFDEF DARWIN}   TSGContextMacOSX {$ENDIF}
-		{$ENDIF}
-	{$ENDIF};
+	{$IFDEF MSWINDOWS}TSGContextWinAPI {$ELSE}
+	{$IFDEF LINUX}    TSGContextLinux  {$ELSE}
+	{$IFDEF ANDROID}  TSGContextAndroid{$ELSE}
+	{$IFDEF DARWIN}   TSGContextMacOSX {$ELSE}
+	                  nil
+	{$ENDIF}   {$ENDIF}   {$ENDIF}    {$ENDIF}
+	;
+{$IFDEF WITH_GLUT}
+if Result = nil then
+	Result := TSGContextGLUT;
+	{$ENDIF}
 end;
-
-{$DEFINE SGREADIMPLEMENTATION}
-{$IFDEF GLUT}
-	{$I Includes\SaGeContextGLUT.inc}
-	{$ENDIF}
-{$IFDEF LAZARUS}
-	{$I Includes\SaGeContextLazarus.inc}
-	{$ENDIF}
-{$UNDEF SGREADIMPLEMENTATION}
 
 procedure TSGContext.ShowCursor(const VVisibility : TSGBoolean);
 begin

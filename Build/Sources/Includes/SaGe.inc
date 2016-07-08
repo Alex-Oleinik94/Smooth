@@ -16,9 +16,7 @@
 	{$ENDIF}
 
 {$IF (not defined(MOBILE)) and (not defined(WIN64)) and (not (defined(DARWIN) and defined(CPU32)))}
-	{$IF (not defined(RELEASE)) or defined(ENABLELIBPNG)}
-		{$DEFINE WITHLIBPNG}
-		{$ENDIF}
+	{$DEFINE WITHLIBPNG}
 	{$ENDIF}
 
 {$IFDEF RELEASE}
@@ -43,7 +41,7 @@
 	{$ENDIF}
 
 //{$DEFINE LAZARUS}
-//{$DEFINE WITH_GLUT}
+{$DEFINE WITH_GLUT}
 
 {$WARNINGS OFF}
 {$NOTES OFF}
