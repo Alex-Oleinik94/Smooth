@@ -9,10 +9,12 @@ uses
 	,Classes
 	;
 
+const
+	SGDDHDefMode = 'OBJFPC';
 type
 	TSGDoDynamicHeader = class
 			public
-		constructor Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = 'OBJFPC');virtual;
+		constructor Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHDefMode);virtual;
 		destructor Destroy();override;
 		procedure PrintErrors();virtual;
 		procedure Execute();virtual;
@@ -25,7 +27,7 @@ type
 		function SeeNextIdentifier() : TSGString;
 		end;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = 'OBJFPC');
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHDefMode);
 
 implementation
 
@@ -36,7 +38,7 @@ uses
 	,StrMan
 	;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = 'OBJFPC');
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHDefMode);
 var
 	V : TSGDoDynamicHeader = nil;
 begin
@@ -47,7 +49,7 @@ V.Destroy();
 V := nil;
 end;
 
-constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = 'OBJFPC');
+constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHDefMode);
 begin
 FMode := SGUpCaseString(VMode);
 FInFileName := VFileName;

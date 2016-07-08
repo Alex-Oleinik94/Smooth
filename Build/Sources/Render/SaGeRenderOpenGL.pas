@@ -14,34 +14,34 @@
 {$IFDEF MSWINDOWS}
 	//{$DEFINE WGL_PIXEL_FORMAT}
 	{$ENDIF}
-//{$DEFINE RENDER_OGL_DEBUG}
 {$IFNDEF MOBILE}
 	{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
+	//{$DEFINE USE_GLEXT}
 	{$ENDIF}
+//{$DEFINE RENDER_OGL_DEBUG}
 
 unit SaGeRenderOpenGL;
 
 interface
 
 uses
+	//* ===================== SaGe Units =====================
 	 SaGeBase
 	,SaGeBased
 	,SaGeRender
 	,SaGeCommon
+	,SaGeRenderConstants
+	
+	//* ==================== System Units ====================
+	,DynLibs
+	,SysUtils
 	,Math
-	{$IFDEF ANDROID}
-		,egl
-		,android_native_app_glue
-		{$ENDIF}
-	{$IFNDEF MOBILE}
-		,dglOpenGL
-	{$ELSE}
-		,gles
-		,gles11
-		,gles20
-		{$ENDIF}
-	{$IFDEF MSWINDOWS}
-		,windows
+	,Classes
+	
+	//* ====================== OS Units ======================
+	{$IFDEF DARWIN}
+		,AGL
+		,MacOSAll
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,Dl
@@ -53,14 +53,27 @@ uses
 		,xlib
 		,xutil
 		{$ENDIF}
-	{$IFDEF DARWIN}
-		,AGL
-		,MacOSAll
+	{$IFDEF MSWINDOWS}
+		,windows
 		{$ENDIF}
-	,DynLibs
-	,SysUtils
-	,Classes
-	,SaGeRenderConstants
+	{$IFDEF ANDROID}
+		,egl
+		,android_native_app_glue
+		{$ENDIF}
+	
+	//* ==================== OpenGL Units ====================
+	{$IFNDEF MOBILE}
+		{$IFDEF USE_GLEXT}
+			,glext
+			,gl
+		{$ELSE}
+			,dglOpenGL
+		{$ENDIF}
+	{$ELSE}
+		,gles
+		,gles11
+		,gles20
+		{$ENDIF}
 	;
 
 {$IFDEF NEEDRESOURSES}
@@ -424,7 +437,7 @@ end;
 procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniformMatrix4fv = nil then TSGRenderOpenGL_DynLinkError('glUniformMatrix4fv');{$ENDIF}
-glUniformMatrix4fv(VLocationName,VCount,ByteBool(VTranspose),VData);
+glUniformMatrix4fv(VLocationName,VCount,{$IFNDEF USE_GLEXT}ByteBool{$ELSE}Byte{$ENDIF}(VTranspose),VData);
 end;
 
 function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
@@ -472,7 +485,7 @@ begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGetInfoLogARB = nil then TSGRenderOpenGL_DynLinkError('glGetInfoLogARB');{$ENDIF}
 //glGetShaderInfoLog - GLES
 //glGetProgramInfoLog - GLES
-{$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,VLength,VLog);{$ENDIF}
+{$IFNDEF MOBILE}glGetInfoLogARB({$IFDEF SHADERSISPOINTERS}Pointer(VHandle){$ELSE}VHandle{$ENDIF},VMaxLength,{$IFDEF USE_GLEXT}@{$ENDIF}VLength,VLog);{$ENDIF}
 end;
 
 

@@ -14869,6 +14869,9 @@ procedure Read_WIN_swap_hint;
 
 implementation
 
+uses
+	SaGeBase
+	;
 
 {$IFDEF DGL_LINUX}
 const
@@ -14932,6 +14935,17 @@ begin
 	{$ENDIF}
 end;
 
+var
+	SGAllFunction    : TSGMaxEnum = 0;
+	SGLoadedFUnction : TSGMaxEnum = 0;
+	SGGLUAllFunc     : TSGMaxEnum = 0;
+	SGGLULoadedFunc  : TSGMaxEnum = 0;
+
+procedure SGPrintStat();
+begin
+SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% (',SGLoadedFUnction,'/',SGAllFunction,')']);
+SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% (',SGGLULoadedFunc,'/',SGGLUAllFunc,')']);
+end;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;
 begin
@@ -14942,11 +14956,9 @@ begin
   {$IFDEF DGL_WIN}
     Result := GetProcAddress(HMODULE(LibHandle), ProcName);
 
-    if result <> nil then
-      exit;
-
-    if Addr(wglGetProcAddress) <> nil then
-      Result := wglGetProcAddress(ProcName);
+    if result = nil then
+      if Assigned(@wglGetProcAddress) then
+        Result := wglGetProcAddress(ProcName);
   {$ENDIF}
 
   {$IFDEF DGL_LINUX}
@@ -14954,22 +14966,32 @@ begin
       if Addr(glXGetProcAddress) <> nil then
         Result := glXGetProcAddress(ProcName);
 
-      if result <> nil then
-        exit;
-
-      if Addr(glXGetProcAddressARB) <> nil then
-        Result := glXGetProcAddressARB(ProcName);
-
-      if result <> nil then
-        exit;
+      if result = nil then
+        if Addr(glXGetProcAddressARB) <> nil then
+          Result := glXGetProcAddressARB(ProcName);
     end;
-
-    Result := dlsym(LibHandle, ProcName);
+    if result = nil then
+      Result := dlsym(LibHandle, ProcName);
   {$ENDIF}
 
   {$IFDEF DGL_MAC}
     Result := GetProcAddress(HMODULE(LibHandle), ProcName);
   {$ENDIF}
+  
+  if Result = nil then
+    SGLog.Sourse(['dglOpenGL : Error while loading "'+SGPCharToString(ProcName)+'".']);
+  if LibHandle = GL_LibHandle then
+    begin 
+    SGAllFunction += 1;
+    if Result <> nil then
+      SGLoadedFUnction += 1;
+    end
+  else
+    begin
+    SGGLUAllFunc += 1;
+    if Result <> nil then
+      SGGLULoadedFunc += 1;
+    end;
 end;
 
 
@@ -15060,6 +15082,7 @@ begin
   // load GL functions
   if (GL_LibHandle <> nil) then begin
     {$IFDEF DGL_WIN}
+      wglGetProcAddress := dglGetProcAddress('wglGetProcAddress');
       wglCopyContext := dglGetProcAddress('wglCopyContext');
       wglCreateLayerContext := dglGetProcAddress('wglCreateLayerContext');
       wglCreateContext := dglGetProcAddress('wglCreateContext');
@@ -15068,7 +15091,6 @@ begin
       wglGetCurrentContext := dglGetProcAddress('wglGetCurrentContext');
       wglGetCurrentDC := dglGetProcAddress('wglGetCurrentDC');
       wglGetLayerPaletteEntries := dglGetProcAddress('wglGetLayerPaletteEntries');
-      wglGetProcAddress := dglGetProcAddress('wglGetProcAddress');
       wglMakeCurrent := dglGetProcAddress('wglMakeCurrent');
       wglRealizeLayerPalette := dglGetProcAddress('wglRealizeLayerPalette');
       wglSetLayerPaletteEntries := dglGetProcAddress('wglSetLayerPaletteEntries');
@@ -19332,7 +19354,7 @@ begin
 
   AnsiBuffer := glGetString(GL_VERSION);
   Buffer := String(AnsiBuffer);
-
+  
   TrimAndSplitVersionString(Buffer, MajorVersion, MinorVersion);
 
   GL_VERSION_1_0 := True;
@@ -20327,16 +20349,17 @@ end;
 
 initialization
 begin
+InitOpenGL(OPENGL_LIBNAME,GLU_LIBNAME);
+ReadCoreVersion();
+ReadImplementationProperties();
+ReadExtensions();
+SGPrintStat();
 {$IFDEF CPU386}
   Set8087CW($133F);
 {$ENDIF}
 {$IFDEF DGL_64BIT}
   SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
 {$ENDIF}
-InitOpenGL();
-ReadCoreVersion();
-ReadImplementationProperties();
-ReadExtensions();
 end;
 
 finalization
