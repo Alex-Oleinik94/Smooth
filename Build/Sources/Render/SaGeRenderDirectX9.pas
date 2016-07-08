@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-//{$DEFINE RENDER_DX9_DEBUG}
+{$DEFINE RENDER_DX9_DEBUG}
 
 unit SaGeRenderDirectX9;
 
@@ -8,17 +8,20 @@ interface
 
 uses
 	 SaGeBase
-	,crt
 	,SaGeBased
 	,SaGeRender
-	,windows
-	,DynLibs
-	,DXTypes
-	,D3DX9
-	,Direct3D9
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeClasses
+	
+	,crt
+	,windows
+	,DynLibs
+	
+	,DXTypes
+	,DXErr9
+	,D3DX9
+	,Direct3D9
 	;
 
 type
@@ -1649,11 +1652,13 @@ D3DFMT_D32           : Result := 'D3DFMT_D32';
 end;
 end;
 
+var
+	DXErr : TSGMaxEnum;
 begin
 if (pD3D = nil) then
 	begin
 	pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
-	SGLog.Sourse(['TSGRenderDirectX9__CreateContext : IDirect3D9="',TSGMaxEnum(Pointer(pD3D)),'"']);
+	SGLog.Sourse(['TSGRenderDirectX9__CreateContext : IDirect3D9="',SGAddrStr(pD3D),'"']);
 	if pD3d = nil then
 		begin
 		Result:=False;
@@ -1664,6 +1669,9 @@ if pDevice = nil then
 	begin
 	FindMaxMultisample();
 	Result := False;
+	{$IFDEF RENDER_DX9_DEBUG}
+	SGLog.Sourse('TSGRenderDirectX9__CreateContext : SizeOf(D3DPRESENT_PARAMETERS) = ' + SGStr(SizeOf(D3DPRESENT_PARAMETERS)));
+	{$ENDIF}
 	for ii := High(D3DFMT_List) downto Low(D3DFMT_List) do
 		begin
 		FillChar(d3dpp,SizeOf(d3dpp),0);
@@ -1678,12 +1686,15 @@ if pDevice = nil then
 		d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 		d3dpp.MultiSampleType        := MultiSampleType;
 		d3dpp.MultiSampleQuality     := 0;
-
-		if( 0 <> ( pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGLongWord(Context.Window),
-				D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice))) then
+		
+		DXErr :=  pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
+				D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice);
+		
+		if( DXErr <> D3D_OK) then
 			begin
 			{$IFDEF RENDER_DX9_DEBUG}
 			SGLog.Sourse(['TSGRenderDirectX9__CreateContext : Failed create device with: DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+			SGLog.Sourse(['DirectX Error :"',SGPCharToString(DXGetErrorString9(DXErr)),'"']);
 			{$ENDIF}
 			end
 		else
@@ -1691,14 +1702,12 @@ if pDevice = nil then
 		end;
 	if pDevice <> nil then
 		begin
-		SGLog.Sourse(['TSGRenderDirectX9__CreateContext : IDirect3DDevice9="',TSGMaxEnum(Pointer(pDevice)),'", DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+		SGLog.Sourse(['TSGRenderDirectX9__CreateContext : IDirect3DDevice9="',SGAddrStr(pDevice),'", DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
 		Result := True;
 		end
 	else
 		begin
-		{$IFNDEF RENDER_DX9_DEBUG}
 		SGLog.Sourse(['TSGRenderDirectX9__CreateContext : Failed create device with anything params...']);
-		{$ENDIF}
 		end;
 	end
 else

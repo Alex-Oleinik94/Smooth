@@ -14944,9 +14944,9 @@ var
 procedure SGPrintStat();
 begin
 if SGAllFunction > 0 then
-	SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% (',SGLoadedFUnction,'/',SGAllFunction,')']);
+	SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% ('+SGStr(SGLoadedFUnction)+'/'+SGStr(SGAllFunction)+')']);
 if (SGGLUAllFunc > 0) then
-	SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% (',SGGLULoadedFunc,'/',SGGLUAllFunc,')']);
+	SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% ('+SGStr(SGGLULoadedFunc)+'/'+SGStr(SGGLUAllFunc)+')']);
 end;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;

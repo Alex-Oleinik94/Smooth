@@ -67,6 +67,17 @@ type
 	TSGReal     = TSGDouble;
 	TSGGuid     = TGuid;
 	TSGCardinal = Cardinal;
+type
+	TSGEnumPointer = 
+		{$IFDEF CPU64}
+			TSGUInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGUInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGUInt16
+		{$ENDIF}{$ENDIF}{$ENDIF}
+		;
+	TSGMaxEnum = TSGEnumPointer;
 
  { encoding }
  procedure Windows1251ToUTF8(var Str: TSGString);
@@ -91,15 +102,23 @@ type
  
  operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       inline; overload;
  operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     inline;	overload;
- {$IFNDEF ANDROID} {$IFNDEF WIN64}
+ {$IFNDEF WITHOUT_EXTENDED}
  operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
- {$ENDIF ANDROID} {$ENDIF WIN64}
- 
+ {$ENDIF WITHOUT_EXTENDED}
+
+{$DEFINE  INC_PLACE_INTERFACE}
+{$INCLUDE SaGeCommonLists.inc}
+{$UNDEF   INC_PLACE_INTERFACE}
+
 implementation
 
 uses 
 	Math
 	;
+
+{$DEFINE  INC_PLACE_IMPLEMENTATION}
+{$INCLUDE SaGeCommonLists.inc}
+{$UNDEF   INC_PLACE_IMPLEMENTATION}
 
 procedure Windows1251ToUTF8(var Str: TSGString);
 const
@@ -797,12 +816,12 @@ begin
 	result := power(a, b);
 end;
 
-{$IFNDEF ANDROID} {$IFNDEF WIN64}
+{$IFNDEF WITHOUT_EXTENDED}
 operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	inline; overload;
 begin
 	result := power(a, b);
 end;
-{$ENDIF ANDROID} {$ENDIF WIN64}
+{$ENDIF WITHOUT_EXTENDED}
 
 operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	inline;	overload; 
 begin

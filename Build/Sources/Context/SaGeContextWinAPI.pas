@@ -64,7 +64,7 @@ type
 			protected
 		hWindow  : HWnd;
 		dcWindow : hDc;
-		clWindow : LongWord;
+		clWindow : TSGMaxEnum;
 		FWindowClassName : TSGString;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  WindowRegister(): Boolean;
@@ -875,7 +875,7 @@ end;
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
 begin
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent=',hParent,') : Enter']);
+	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Enter']);
 	{$ENDIF}
 dcWindow := GetDC( hParent );
 if FRender = nil then
@@ -886,16 +886,19 @@ if FRender = nil then
 	FRender := FRenderClass.Create();
 	FRender.Context := Self as ISGContext;
 	Result := FRender.CreateContext();
+	{$IFDEF SGWinAPIDebug}
+		SGLog.Sourse(['TSGContextWinAPI__WindowInit(HWnd) : Create render context (Result=',Result,')']);
+		{$ENDIF}
 	if Result then 
 		FRender.Init();
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	end
 else
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.SetPixelFormat();

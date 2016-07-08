@@ -45,7 +45,7 @@ uses
   dynlibs,
   {$ENDIF}
   {$ENDIF}
-  GL;
+  dglOpenGL;
 
 type
   TGlutVoidCallback = procedure; cdecl;
@@ -466,9 +466,10 @@ implementation
 { MorphOS GL works differently due to different dynamic-library handling on Amiga-like }
 { systems, so its functions are included here. }
 {$INCLUDE tinygl.inc}
+uses SaGeBase,SaGeBased;
 
 {$ELSE MORPHOS}
-uses FreeGlut;
+uses FreeGlut,SaGeBase,SaGeBased;
 
 var
   hDLL: TLibHandle;
@@ -610,11 +611,16 @@ end;
 {$ELSE MORPHOS}
 var
   MethodName: string = '';
+  AllGlutFuncions : TSGLongWord = 0;
+  LoadedGlutFuncions : TSGLongWord = 0;
 
   function GetGLutProcAddress(Lib: PtrInt; ProcName: PChar): Pointer;
   begin
     MethodName:=ProcName;
     Result:=GetProcAddress(Lib, ProcName);
+    AllGlutFuncions += 1;
+    if Result <> nil then
+      LoadedGlutFuncions += 1;
   end;
 
 begin
@@ -622,7 +628,7 @@ begin
   UnloadGlut;
 
   hDLL := LoadLibrary(PChar(dll));
-  if hDLL = 0 then raise Exception.Create('Could not load Glut from ' + dll);
+  if hDLL = 0 then begin SGLog.Sourse('glut : Could not load Glut from ' + dll); exit; end;
   try
     @glutInit := GetGLutProcAddress(hDLL, 'glutInit');
     @glutInitDisplayMode := GetGLutProcAddress(hDLL, 'glutInitDisplayMode');
@@ -750,15 +756,17 @@ begin
     GLUT_BITMAP_HELVETICA_18 := GetGLutProcAddress(hDll, 'glutBitmapHelvetica18');
 {$endif Windows}
   except
-    raise Exception.Create('Could not load ' + MethodName + ' from ' + dll);
+    SGLog.Sourse('glut : Exception while loading!!!');
   end;
+  SGLog.Sourse(['glut : Initialization from ' + dll + ': Loaded ',SGStrReal(LoadedGlutFuncions/AllGlutFuncions*100,3),'% ('+SGStr(LoadedGlutFuncions)+'/'+SGStr(AllGlutFuncions)+')']);
   LoadFreeGlut(hDLL);
 end;
 {$ENDIF MORPHOS}
 
 
 initialization
-
+begin
+  UnloadGlut();
   {$IFDEF Windows}
   LoadGlut('glut32.dll');
   {$ELSE}
@@ -774,9 +782,10 @@ initialization
   {$ENDIF}
   {$endif}
   {$ENDIF}
+end;
 
 finalization
-
+begin
   UnloadGlut;
-
+end;
 end.

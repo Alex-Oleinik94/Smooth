@@ -217,22 +217,7 @@ var
 const
 	SGLogDirectory = {$IFDEF ANDROID}'/sdcard/.SaGe'{$ELSE}SGDataDirectory{$ENDIF};
 type
-	//Это для приведения приведения типов к общему виду относительно х32 и х64
-	//Так как Pointer на х32 занимает 4 байта, а на х64 - 8 байтов
-	TSGEnumPointer = 
-		{$IFDEF CPU64}
-			QWord;
-		{$ELSE}
-			{$IFDEF CPU32}
-				LongWord;
-			{$ELSE}
-				{$IFDEF CPU16}
-					Word;
-					{$ENDIF}
-				{$ENDIF}
-			{$ENDIF}
-	TSGMaxEnum = TSGEnumPointer;
-	
+	TSGMaxEnum = SaGeBased.TSGMaxEnum;
 	//Типы C++
 	Float  = type Single;
 	Double = type Real;
@@ -244,7 +229,7 @@ type
 	PSGUInt      = ^ SGUint;
 	SGInt        = Int64;
 	TSGHandle    = type LongInt;
-	TSGLibHandle = type TSGHandle;
+	TSGLibHandle = type TSGMaxEnum;
 	FileOfByte   = type File Of Byte;
 	PFileOfByte  = ^ FileOfByte;
 	
@@ -730,6 +715,9 @@ operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF 
 function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	StrMan;
 
 function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -1702,11 +1690,51 @@ begin
 end;
 
 procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Razd : TSGString);
-//var
-	//ArS : TSGStringList;
+var
+	ArS : TSGStringList = nil;
+	i, WordCount, MaxLength, n, ii: TSGLongWord;
+	TempS : TSGString;
 begin
-Sourse(Title,True);
-
+WordCount := StringWordCount(S, Razd);
+if WordCount > 0 then
+	begin
+	Sourse(Title + ' (' + SGStr(WordCount) + ')',True);
+	for i := 1 to WordCount do
+		begin
+		TempS := StringWordGet(S, Razd, i);
+		if TempS <> '' then
+			ArS += TempS;
+		end;
+	MaxLength := Length(ArS[0]);
+	if Length(ArS) > 1 then
+		begin
+		for i := 1 to High(ArS) do
+			if Length(ArS[i]) > MaxLength then
+				MaxLength := Length(ArS[i]);
+		end;
+	MaxLength += 2;
+	n := 150 div MaxLength;
+	MaxLength += (150 mod MaxLength) div n;
+	ii := 0;
+	TempS := '  ';
+	for i := 0 to High(ArS) do
+		begin
+		if ii = n - 1 then
+			TempS += ArS[i]
+		else
+			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
+		ii +=1;
+		if ii = n then
+			begin
+			ii := 0;
+			Sourse(TempS, False);
+			TempS := '  ';
+			end;
+		end;
+	if TempS <> '  ' then
+		Sourse(TempS, False);
+	SetLength(ArS, 0);
+	end;
 end;
 
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;

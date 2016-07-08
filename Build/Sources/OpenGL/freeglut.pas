@@ -21,7 +21,7 @@ unit FreeGlut;
 
 interface
 
-uses DynLibs, GL, Glut;
+uses DynLibs, dglOpenGL, Glut;
 
 type
   TGLdouble3 = array [0..2] of GLdouble;
@@ -145,34 +145,50 @@ procedure UnloadFreeGlut;
 
 implementation
 
+uses
+	SaGeBase,SaGeBased;
+
 procedure LoadFreeGlut(hDLL: TLibHandle);
+var
+	AllGlutFuncions : TSGLongWord = 0;
+	LoadedGlutFuncions : TSGLongWord = 0;
+
+function fglutGetProcAddress(const S : PChar):Pointer;
 begin
-  @glutMainLoopEvent := GetProcAddress(hDLL, 'glutMainLoopEvent');
-  @glutLeaveMainLoop := GetProcAddress(hDLL, 'glutLeaveMainLoop');
-  @glutExit := GetProcAddress(hDLL, 'glutExit');
-  @glutFullScreenToggle := GetProcAddress(hDLL, 'glutFullScreenToggle');
-  @glutMouseWheelFunc := GetProcAddress(hDLL, 'glutMouseWheelFunc');
-  @glutCloseFunc := GetProcAddress(hDLL, 'glutCloseFunc');
-  @glutMenuDestroyFunc := GetProcAddress(hDLL, 'glutMenuDestroyFunc');
-  @glutSetOption := GetProcAddress(hDLL, 'glutSetOption');
-  @glutGetModeValues := GetProcAddress(hDLL, 'glutGetModeValues');
-  @glutGetWindowData := GetProcAddress(hDLL, 'glutGetWindowData');
-  @glutSetWindowData := GetProcAddress(hDLL, 'glutSetWindowData');
-  @glutGetMenuData := GetProcAddress(hDLL, 'glutGetMenuData');
-  @glutSetMenuData := GetProcAddress(hDLL, 'glutSetMenuData');
-  @glutBitmapHeight := GetProcAddress(hDLL, 'glutBitmapHeight');
-  @glutStrokeHeight := GetProcAddress(hDLL, 'glutStrokeHeight');
-  @glutBitmapString := GetProcAddress(hDLL, 'glutBitmapString');
-  @glutStrokeString := GetProcAddress(hDLL, 'glutStrokeString');
-  @glutWireRhombicDodecahedron := GetProcAddress(hDLL, 'glutWireRhombicDodecahedron');
-  @glutSolidRhombicDodecahedron := GetProcAddress(hDLL, 'glutSolidRhombicDodecahedron');
-  @glutWireSierpinskiSponge := GetProcAddress(hDLL, 'glutWireSierpinskiSponge');
-  @glutSolidSierpinskiSponge := GetProcAddress(hDLL, 'glutSolidSierpinskiSponge');
-  @glutWireCylinder := GetProcAddress(hDLL, 'glutWireCylinder');
-  @glutSolidCylinder := GetProcAddress(hDLL, 'glutSolidCylinder');
-  @glutInitContextVersion := GetProcAddress(hDLL, 'glutInitContextVersion');
-  @glutInitContextFlags := GetProcAddress(hDLL, 'glutInitContextFlags');
-  @glutInitContextProfile := GetProcAddress(hDLL, 'glutInitContextProfile');
+Result := GetProcAddress(hDLL, S);
+AllGlutFuncions += 1;
+if Result <> nil then
+	LoadedGlutFuncions += 1;
+end;
+
+begin
+  @glutMainLoopEvent := fglutGetProcAddress('glutMainLoopEvent');
+  @glutLeaveMainLoop := fglutGetProcAddress('glutLeaveMainLoop');
+  @glutExit := fglutGetProcAddress('glutExit');
+  @glutFullScreenToggle := fglutGetProcAddress('glutFullScreenToggle');
+  @glutMouseWheelFunc := fglutGetProcAddress('glutMouseWheelFunc');
+  @glutCloseFunc := fglutGetProcAddress('glutCloseFunc');
+  @glutMenuDestroyFunc := fglutGetProcAddress('glutMenuDestroyFunc');
+  @glutSetOption := fglutGetProcAddress('glutSetOption');
+  @glutGetModeValues := fglutGetProcAddress('glutGetModeValues');
+  @glutGetWindowData := fglutGetProcAddress('glutGetWindowData');
+  @glutSetWindowData := fglutGetProcAddress('glutSetWindowData');
+  @glutGetMenuData := fglutGetProcAddress('glutGetMenuData');
+  @glutSetMenuData := fglutGetProcAddress('glutSetMenuData');
+  @glutBitmapHeight := fglutGetProcAddress('glutBitmapHeight');
+  @glutStrokeHeight := fglutGetProcAddress('glutStrokeHeight');
+  @glutBitmapString := fglutGetProcAddress('glutBitmapString');
+  @glutStrokeString := fglutGetProcAddress('glutStrokeString');
+  @glutWireRhombicDodecahedron := fglutGetProcAddress('glutWireRhombicDodecahedron');
+  @glutSolidRhombicDodecahedron := fglutGetProcAddress('glutSolidRhombicDodecahedron');
+  @glutWireSierpinskiSponge := fglutGetProcAddress('glutWireSierpinskiSponge');
+  @glutSolidSierpinskiSponge := fglutGetProcAddress('glutSolidSierpinskiSponge');
+  @glutWireCylinder := fglutGetProcAddress('glutWireCylinder');
+  @glutSolidCylinder := fglutGetProcAddress('glutSolidCylinder');
+  @glutInitContextVersion := fglutGetProcAddress('glutInitContextVersion');
+  @glutInitContextFlags := fglutGetProcAddress('glutInitContextFlags');
+  @glutInitContextProfile := fglutGetProcAddress('glutInitContextProfile');
+  SGLog.Sourse(['freeglut : Initialization : Loaded ',SGStrReal(LoadedGlutFuncions/AllGlutFuncions*100,3),'% ('+SGStr(LoadedGlutFuncions)+'/'+SGStr(AllGlutFuncions)+')']);
 end;
 
 procedure UnloadFreeGlut;

@@ -457,7 +457,7 @@ function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWo
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateShaderObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateShaderObjectARB');{$ENDIF}
 Result := 
-{$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
+{$IFDEF SHADERSISPOINTERS} TSGMaxEnum( {$ENDIF}
 	{$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType)
 {$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
 end;
@@ -495,7 +495,7 @@ function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateProgramObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateProgramObjectARB');{$ENDIF}
 Result := 
-{$IFDEF SHADERSISPOINTERS} TSGLongWord( {$ENDIF}
+{$IFDEF SHADERSISPOINTERS} TSGMaxEnum( {$ENDIF}
 	{$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}()
 {$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
 end;
@@ -745,12 +745,12 @@ end;
 procedure TSGRenderOpenGL.SwapBuffers();
 begin
 {$IFDEF MSWINDOWS}
-	Windows.SwapBuffers( LongWord(Context.Device) );
+	Windows.SwapBuffers( TSGMaxEnum(Context.Device) );
 {$ELSE}
 	{$IFDEF LINUX}
 		glXSwapBuffers(
 			PDisplay(Context.Device),
-			LongWord(Context.Window));
+			TSGMaxEnum(Context.Window));
 	{$ELSE}
 		{$IFDEF ANDROID}
 			eglSwapBuffers(Context.Device,Context.GetOption('SURFACE'));
@@ -1486,7 +1486,7 @@ begin
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if Context <> nil then
-			dglOpenGL.wglMakeCurrent( TSGLongWord(Context.Device), 0 );
+			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), 0 );
 		if FContext <> 0 then
 			begin
 			dglOpenGL.wglDeleteContext( FContext );
@@ -1650,12 +1650,12 @@ begin
 	if (Context <> nil) and (FContext <> nil) then 
 		glXMakeCurrent(
 			PDisplay(Context.Device),
-			LongWord(Context.Window),
+			TSGMaxEnum(Context.Window),
 			nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (Context <> nil)  then 
-			dglOpenGL.wglMakeCurrent( TSGLongWord(Context.Device), 0 );
+			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
 			
@@ -1716,7 +1716,7 @@ Result:=False;
 {$IFDEF MSWINDOWS}
 	{$IFDEF WGL_PIXEL_FORMAT}
 	fillchar(pixelFormats, sizeof(pixelFormats), 0);
-	Result := dglOpenGL.wglChoosePixelFormatARB(TSGLongWord(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
+	Result := dglOpenGL.wglChoosePixelFormatARB(TSGMaxEnum(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
 	WriteLn(pixelFormats[0],' ',numFormats);
 	{$ELSE WGL_PIXEL_FORMAT}
 	FillChar(pfd, sizeof(pfd), 0);
@@ -1727,9 +1727,9 @@ Result:=False;
 	pfd.cColorBits    := 32;
 	pfd.cDepthBits    := 24;
 	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( TSGLongWord(Context.Device), @pfd );
+	iFormat := Windows.ChoosePixelFormat( TSGMaxEnum(Context.Device), @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
-	Result:=Windows.SetPixelFormat( TSGLongWord(Context.Device), iFormat, @pfd );
+	Result:=Windows.SetPixelFormat( TSGMaxEnum(Context.Device), iFormat, @pfd );
 	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
 	{$ENDIF WGL_PIXEL_FORMAT}
 	{$ENDIF}
@@ -1748,7 +1748,7 @@ begin
 		begin
 		glXMakeCurrent(
 			PDisplay(Context.Device),
-			LongWord(Context.Window),
+			TSGMaxEnum(Context.Window),
 			FContext);
 		Result:=True;
 		end
@@ -1758,7 +1758,7 @@ begin
 	{$IFDEF MSWINDOWS}
 		if (Context<>nil) and (FContext<>0) then 
 			begin
-			dglOpenGL.wglMakeCurrent( LongWord(Context.Device), FContext );
+			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), FContext );
 			Result:=True;
 			end
 		else

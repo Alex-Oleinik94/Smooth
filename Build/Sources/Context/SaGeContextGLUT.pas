@@ -14,15 +14,13 @@ uses
 	,SaGeCommon
 	{$IFNDEF MOBILE}
 		,dglOpenGL
-		,gl
-		,glu
-		,glext
 	{$ELSE}
 		,gles
 		,gles11
 		,gles20
 		{$ENDIF}
 	,glut
+	,FreeGlut
 	;
 
 type
@@ -268,7 +266,7 @@ if FRender = nil then
 	FRender.Init();
 	Result := FRender <> nil;
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Sourse('TSGContextGLUT__InitRender() : Created render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		SGLog.Sourse('TSGContextGLUT__InitRender() : Created render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	end
 else
@@ -282,7 +280,7 @@ else
 		end;
 	
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Sourse('TSGContextGLUT__InitRender() : Formating render (Render='+SGStr(LongWord(Pointer(FRender)))+')');
+		SGLog.Sourse('TSGContextGLUT__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.MakeCurrent();
