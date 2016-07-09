@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-{$DEFINE RENDER_DX9_DEBUG}
+//{$DEFINE RENDER_DX9_DEBUG}
 
 unit SaGeRenderDirectX9;
 
@@ -1708,6 +1708,7 @@ if pDevice = nil then
 	else
 		begin
 		SGLog.Sourse(['TSGRenderDirectX9__CreateContext : Failed create device with anything params...']);
+		SGLog.Sourse(['DirectX Last Error :"',SGPCharToString(DXGetErrorString9(DXErr)),'"']);
 		end;
 	end
 else

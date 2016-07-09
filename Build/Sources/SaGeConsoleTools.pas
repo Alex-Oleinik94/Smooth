@@ -472,13 +472,13 @@ if OpenFileCheck() then
 else
 	begin
 	Comand := ComandCheck();
-	if (Comand = 'HELP') or (Comand = 'H') then
+	if (Comand = 'HELP') or (Comand = 'H') or (Comand = '?') then
 		begin
 		if (FComands <> nil) and (Length(FComands)>0) then
 			begin
 			SGPrintEngineVersion();
 			WriteLn('Help:');
-			WriteLn(' "--help", "--h" - Shows this');
+			WriteLn(' "--help", "--h", "--?" - Shows this');
 			for i := 0 to High(FComands) do
 				begin
 				if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then

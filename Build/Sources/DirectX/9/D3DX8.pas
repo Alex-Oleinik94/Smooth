@@ -4890,6 +4890,9 @@ type
   TD3DXImage_FileFormat = TD3DXImageFileFormat;
 
 
+var
+	D3DX8Loaded : Boolean = False;
+
 //***************************************************************************//
 //***************************************************************************//
 //***************************************************************************//
@@ -6114,6 +6117,7 @@ D3DXFillCubeTexture := LoadProcedure('D3DXFillCubeTexture');
 D3DXFillVolumeTexture := LoadProcedure('D3DXFillVolumeTexture');
 D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
 Load_HINT('Initialization D3DX8 unit from '+SGPCharToString(UnitName)+'/'+'d3dx8dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+D3DX8Loaded := Result and (CountLoadSuccs <> 0);
 end;
 
 procedure LoadD3DX8();

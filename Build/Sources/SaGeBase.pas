@@ -252,10 +252,10 @@ type
 	TArReal        = type packed array of real;
 	TArExtended    = type packed array of extended;
 	TArTArLongWord = type packed array of TArLongWord;
-	TSGArString    = type packed array of TSGString;
 	TArConst       = type packed array of TVarRec;
 	TSGArConst     = type TArConst;
-	TSGConcoleCallerParams = TSGArString;
+	TSGArString    = TSGStringList;
+	TSGConcoleCallerParams = TSGStringList;
 	
 	TSGArStringEnumerator = class
 			private
