@@ -117,6 +117,7 @@ uses
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
+		,SaGeRenderDirectX12
 		{$ENDIF}
 	,SaGeRenderOpenGL
 	{$IFDEF ANDROID}

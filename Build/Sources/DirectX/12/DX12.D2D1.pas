@@ -2834,35 +2834,95 @@ type
 
 
 { D2D1.h }
+(*
+
 function D2D1CreateFactory(factoryType: TD2D1_FACTORY_TYPE; const riid: TGUID; pFactoryOptions: PD2D1_FACTORY_OPTIONS;
     out ppIFactory): HResult; stdcall;
     external D2D1_DLL;
+*)
+var D2D1CreateFactory : function( factoryType : TD2D1_FACTORY_TYPE ; const riid : TGUID ; pFactoryOptions : PD2D1_FACTORY_OPTIONS ; out ppIFactory ) : HResult ; stdcall ; 
+
+(*
+
 
 procedure D2D1MakeRotateMatrix(angle: single; center: TD2D1_POINT_2F; out matrix: TD2D1_MATRIX_3X2_F); stdcall; external D2D1_DLL;
+*)
+var D2D1MakeRotateMatrix : procedure( angle : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ; 
+
+(*
+
 
 procedure D2D1MakeSkewMatrix(angleX: single; angleY: single; center: TD2D1_POINT_2F; out matrix: TD2D1_MATRIX_3X2_F); stdcall; external D2D1_DLL;
+*)
+var D2D1MakeSkewMatrix : procedure( angleX : single ; angleY : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ; 
+
+(*
+
 
 function D2D1IsMatrixInvertible(matrix: PD2D1_MATRIX_3X2_F): longbool; stdcall; external D2D1_DLL;
+*)
+var D2D1IsMatrixInvertible : function( matrix : PD2D1_MATRIX_3X2_F ) : longbool ; stdcall ; 
+
+(*
+
 
 function D2D1InvertMatrix(var matrix: TD2D1_MATRIX_3X2_F): longbool; stdcall; external D2D1_DLL;
+*)
+var D2D1InvertMatrix : function( var matrix : TD2D1_MATRIX_3X2_F ) : longbool ; stdcall ; 
+
 
 { D2D1_1.h }
+(*
+
 function D2D1CreateDevice(dxgiDevice: IDXGIDevice; creationProperties: PD2D1_CREATION_PROPERTIES; out d2dDevice: ID2D1Device): HResult;
     stdcall; external D2D1_DLL;
+*)
+var D2D1CreateDevice : function( dxgiDevice : IDXGIDevice ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDevice : ID2D1Device ) : HResult ; stdcall ; 
+
+(*
+
 
 function D2D1CreateDeviceContext(dxgiSurface: IDXGISurface; creationProperties: PD2D1_CREATION_PROPERTIES;
     out d2dDeviceContext: ID2D1DeviceContext): HResult; stdcall; external D2D1_DLL;
+*)
+var D2D1CreateDeviceContext : function( dxgiSurface : IDXGISurface ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDeviceContext : ID2D1DeviceContext ) : HResult ; stdcall ; 
+
+(*
+
 
 function D2D1ConvertColorSpace(sourceColorSpace: TD2D1_COLOR_SPACE; destinationColorSpace: TD2D1_COLOR_SPACE; color: PD2D1_COLOR_F): TD2D1_COLOR_F;
     stdcall; external D2D1_DLL;
+*)
+var D2D1ConvertColorSpace : function( sourceColorSpace : TD2D1_COLOR_SPACE ; destinationColorSpace : TD2D1_COLOR_SPACE ; color : PD2D1_COLOR_F ) : TD2D1_COLOR_F ; stdcall ; 
+
+(*
+
 
 procedure D2D1SinCos(angle: single; out s: single; out c: single); stdcall; external D2D1_DLL;
+*)
+var D2D1SinCos : procedure( angle : single ; out s : single ; out c : single ) ; stdcall ; 
+
+(*
+
 function D2D1Tan(angle: single): single; stdcall; external D2D1_DLL;
+*)
+var D2D1Tan : function( angle : single ) : single ; stdcall ; 
+
+(*
+
 function D2D1Vec3Length(x: single; y: single; z: single): single; stdcall; external D2D1_DLL;
+*)
+var D2D1Vec3Length : function( x : single ; y : single ; z : single ) : single ; stdcall ; 
+
 
 
 { D2D1_2.h }
+(*
+
 function D2D1ComputeMaximumScaleFactor(const matrix: TD2D1_MATRIX_3X2_F): single; stdcall; external D2D1_DLL;
+*)
+var D2D1ComputeMaximumScaleFactor : function( const matrix : TD2D1_MATRIX_3X2_F ) : single ; stdcall ; 
+
 
 
 { D2D1 Helper functions }
@@ -3015,7 +3075,10 @@ function ComputeFlatteningTolerance(matrix: TD2D1_MATRIX_3X2_F; dpiX: single = 9
 
 implementation
 
-
+uses
+	SaGeBase,
+	SaGeBased
+	;
 
 function FloatMax: single;
 begin
@@ -4409,5 +4472,82 @@ begin
     Result.y := point.x * _12 + point.y * _22 + _32;
 end;
 
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_D2D1();
+begin
+D2D1CreateFactory := nil;
+D2D1MakeRotateMatrix := nil;
+D2D1MakeSkewMatrix := nil;
+D2D1IsMatrixInvertible := nil;
+D2D1InvertMatrix := nil;
+D2D1CreateDevice := nil;
+D2D1CreateDeviceContext := nil;
+D2D1ConvertColorSpace := nil;
+D2D1SinCos := nil;
+D2D1Tan := nil;
+D2D1Vec3Length := nil;
+D2D1ComputeMaximumScaleFactor := nil;
+end;
+function Load_D2D1_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 12;
+var
+	UnitLib : TSGMaxEnum;
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+begin
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D2D1CreateFactory := LoadProcedure('D2D1CreateFactory');
+D2D1MakeRotateMatrix := LoadProcedure('D2D1MakeRotateMatrix');
+D2D1MakeSkewMatrix := LoadProcedure('D2D1MakeSkewMatrix');
+D2D1IsMatrixInvertible := LoadProcedure('D2D1IsMatrixInvertible');
+D2D1InvertMatrix := LoadProcedure('D2D1InvertMatrix');
+D2D1CreateDevice := LoadProcedure('D2D1CreateDevice');
+D2D1CreateDeviceContext := LoadProcedure('D2D1CreateDeviceContext');
+D2D1ConvertColorSpace := LoadProcedure('D2D1ConvertColorSpace');
+D2D1SinCos := LoadProcedure('D2D1SinCos');
+D2D1Tan := LoadProcedure('D2D1Tan');
+D2D1Vec3Length := LoadProcedure('D2D1Vec3Length');
+D2D1ComputeMaximumScaleFactor := LoadProcedure('D2D1ComputeMaximumScaleFactor');
+Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+'/'+'D2D1_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+end;
 
+function Load_D2D1() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_D2D1_0(D2D1_DLL);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
+initialization
+begin
+Free_D2D1();
+if not Load_D2D1() then
+	Load_HINT('DX12.D2D1: Initialization FAILED!!!');
+end;
+finalization
+begin
+Free_D2D1();
+end;
 end.

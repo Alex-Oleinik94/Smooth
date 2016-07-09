@@ -1762,15 +1762,23 @@ type
             antialiasMode: TDWRITE_TEXT_ANTIALIAS_MODE; baselineOriginX: single; baselineOriginY: single;
             out glyphRunAnalysis: IDWriteGlyphRunAnalysis): HResult; stdcall;
     end;
+(*
+
 
 
 function DWriteCreateFactory(factoryType: TDWRITE_FACTORY_TYPE; const iid: TGUID; out factory): HResult;
     stdcall; external DWRITE_DLL;
+*)
+var DWriteCreateFactory : function( factoryType : TDWRITE_FACTORY_TYPE ; const iid : TGUID ; out factory ) : HResult ; stdcall ; 
+
 
 function DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d: uint8): UINT32;
 
 implementation
 
+uses
+	SaGeBase,
+	SaGeBased;
 
 // Creates an OpenType tag as a 32bit integer such that
 // the first character in the tag is the lowest byte,
@@ -1787,4 +1795,61 @@ begin
 end;
 
 
+
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_DWrite();
+begin
+DWriteCreateFactory := nil;
+end;
+function Load_DWrite_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 1;
+var
+	UnitLib : TSGMaxEnum;
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+begin
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+DWriteCreateFactory := LoadProcedure('DWriteCreateFactory');
+Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+'/'+'DWRITE_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+end;
+
+function Load_DWrite() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_DWrite_0(DWRITE_DLL);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
+initialization
+begin
+Free_DWrite();
+if not Load_DWrite() then
+	Load_HINT('DX12.DWrite: Initialization FAILED!!!');
+end;
+finalization
+begin
+Free_DWrite();
+end;
 end.

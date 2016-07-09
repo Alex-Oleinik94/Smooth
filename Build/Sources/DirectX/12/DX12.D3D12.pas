@@ -2290,14 +2290,24 @@ TD3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT = record
         RowPitch: SIZE_T;
         SlicePitch: SIZE_T;
     end;
+(*
+
 
 
 function D3D12SerializeRootSignature(const pRootSignature: TD3D12_ROOT_SIGNATURE_DESC; Version: TD3D_ROOT_SIGNATURE_VERSION;
     out ppBlob: ID3DBlob; out ppErrorBlob: ID3DBlob): HResult; stdcall; external D3D12_DLL;
+*)
+var D3D12SerializeRootSignature : function( const pRootSignature : TD3D12_ROOT_SIGNATURE_DESC ; Version : TD3D_ROOT_SIGNATURE_VERSION ; out ppBlob : ID3DBlob ; out ppErrorBlob : ID3DBlob ) : HResult ; stdcall ; 
+
+(*
+
 
 
 function D3D12CreateRootSignatureDeserializer(pSrcData: pointer; SrcDataSizeInBytes: SIZE_T;
     const pRootSignatureDeserializerInterface: TGUID; out ppRootSignatureDeserializer): HResult; stdcall; external D3D12_DLL;
+*)
+var D3D12CreateRootSignatureDeserializer : function( pSrcData : pointer ; SrcDataSizeInBytes : SIZE_T ; const pRootSignatureDeserializerInterface : TGUID ; out ppRootSignatureDeserializer ) : HResult ; stdcall ; 
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2322,24 +2332,90 @@ function D3D12CreateRootSignatureDeserializer(pSrcData: pointer; SrcDataSizeInBy
 
 ///////////////////////////////////////////////////////////////////////////
 
+(*
+
 
 function D3D12CreateDevice(pAdapter: IUnknown; MinimumFeatureLevel: TD3D_FEATURE_LEVEL; const riid: TGUID; // Expected: ID3D12Device
     out ppDevice): HResult; stdcall; external D3D12_DLL;
+*)
+var D3D12CreateDevice : function( pAdapter : IUnknown ; MinimumFeatureLevel : TD3D_FEATURE_LEVEL ; const riid : TGUID ; out ppDevice ) : HResult ; stdcall ; 
+
+(*
+
 
 
 function D3D12GetDebugInterface(const riid: TGUID; out ppvDebug): HResult; stdcall; external D3D12_DLL;
+*)
+var D3D12GetDebugInterface : function( const riid : TGUID ; out ppvDebug ) : HResult ; stdcall ; 
+
 
 implementation
 
+uses
+	SaGeBase
+	,SaGeBased
+	;
+
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_D3D12();
+begin
+D3D12SerializeRootSignature := nil;
+D3D12CreateRootSignatureDeserializer := nil;
+D3D12CreateDevice := nil;
+D3D12GetDebugInterface := nil;
+end;
+function Load_D3D12_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 4;
+var
+	UnitLib : TSGMaxEnum;
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+begin
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+D3D12SerializeRootSignature := LoadProcedure('D3D12SerializeRootSignature');
+D3D12CreateRootSignatureDeserializer := LoadProcedure('D3D12CreateRootSignatureDeserializer');
+D3D12CreateDevice := LoadProcedure('D3D12CreateDevice');
+D3D12GetDebugInterface := LoadProcedure('D3D12GetDebugInterface');
+Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+'/'+'D3D12_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+end;
+
+function Load_D3D12() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_D3D12_0(D3D12_DLL);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
+initialization
+begin
+Free_D3D12();
+if not Load_D3D12() then
+	Load_HINT('DX12.D3D12: Initialization FAILED!!!');
+end;
+finalization
+begin
+Free_D3D12();
+end;
 end.
-
-
-
-
-
-
-
-
-
-
-

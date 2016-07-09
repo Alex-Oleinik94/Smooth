@@ -641,11 +641,26 @@ type
         function SetMaximumFrameLatency(MaxLatency: UINT): HResult; stdcall;
         function GetMaximumFrameLatency(out pMaxLatency: UINT): HResult; stdcall;
     end;
+(*
+
 
 function CreateDXGIFactory(const riid: TGUID; out ppFactory): HResult; stdcall; external DLL_DXGI;
+*)
+var CreateDXGIFactory : function( const riid : TGUID ; out ppFactory ) : HResult ; stdcall ; 
+
+(*
+
 function CreateDXGIFactory1(const riid: TGUID; out ppFactory): HResult; stdcall; external DLL_DXGI;
+*)
+var CreateDXGIFactory1 : function( const riid : TGUID ; out ppFactory ) : HResult ; stdcall ; 
+
 
 implementation
+
+uses
+	SaGeBase
+	,SaGeBased
+	;
 
 { TD3DCOLORVALUE }
 
@@ -667,142 +682,63 @@ begin
     a := la;
 end;
 
+
+procedure Load_HINT(const Er : String);
+begin
+//WriteLn(Er);
+SGLog.Sourse(Er);
+end;
+procedure Free_DXGI();
+begin
+CreateDXGIFactory := nil;
+CreateDXGIFactory1 := nil;
+end;
+function Load_DXGI_0(const UnitName : PChar) : Boolean;
+const
+	TotalProcCount = 2;
+var
+	UnitLib : TSGMaxEnum;
+	CountLoadSuccs : LongWord;
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(UnitLib, Name);
+if Result = nil then
+	Load_HINT('DX12.DXGI: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+else
+	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+begin
+UnitLib := LoadLibrary(UnitName);
+Result := UnitLib <> 0;
+CountLoadSuccs := 0;
+if not Result then
+	begin
+	Load_HINT('DX12.DXGI: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	exit;
+	end;
+CreateDXGIFactory := LoadProcedure('CreateDXGIFactory');
+CreateDXGIFactory1 := LoadProcedure('CreateDXGIFactory1');
+Load_HINT('DX12.DXGI: Initialization from '+SGPCharToString(UnitName)+'/'+'DLL_DXGI'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+end;
+
+function Load_DXGI() : Boolean;
+var
+	i : LongWord;
+	R : array[0..0] of Boolean;
+begin
+R[0] := Load_DXGI_0(DLL_DXGI);
+Result := True;
+for i := 0 to 0 do
+	Result := Result and R[i];
+end;
+initialization
+begin
+Free_DXGI();
+if not Load_DXGI() then
+	Load_HINT('DX12.DXGI: Initialization FAILED!!!');
+end;
+finalization
+begin
+Free_DXGI();
+end;
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
