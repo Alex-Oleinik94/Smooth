@@ -14953,7 +14953,7 @@ function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF
 begin
   if LibHandle = nil then
     LibHandle := GL_LibHandle;
-
+  Result := nil;
 
   {$IFDEF DGL_WIN}
     Result := GetProcAddress(TSGMaxEnum(LibHandle), ProcName);
@@ -20358,14 +20358,14 @@ end;
 
 initialization
 begin
-InitOpenGL(OPENGL_LIBNAME,GLU_LIBNAME);
-SGPrintStat();
 {$IFDEF CPU386}
   Set8087CW($133F);
 {$ENDIF}
 {$IFDEF DGL_64BIT}
   SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
 {$ENDIF}
+InitOpenGL(OPENGL_LIBNAME,GLU_LIBNAME);
+SGPrintStat();
 end;
 
 finalization

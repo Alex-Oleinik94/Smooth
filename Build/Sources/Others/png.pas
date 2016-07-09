@@ -1712,23 +1712,26 @@ Result := True;
 for i := 0 to 0 do
 	Result := Result and R[i];
 end;
+const
+	BS = {$IFDEF MSWINDOWS}'lib'{$ELSE}''{$ENDIF};
 initialization
 begin
 Free_png();
 if not Load_png() then
-if not Load_png_0('libpng12') then
-if not Load_png_0('libpng11') then
-if not Load_png_0('libpng10') then
-if not Load_png_0('libpng9') then
-if not Load_png_0('libpng8') then
-if not Load_png_0('libpng7') then
-if not Load_png_0('libpng6') then
-if not Load_png_0('libpng5') then
-if not Load_png_0('libpng4') then
-if not Load_png_0('libpng3') then
-if not Load_png_0('libpng2') then
-if not Load_png_0('libpng1') then
-if not Load_png_0('libpng') then
+{$IFNDEF MSWINDOWS}if not Load_png_0(BS+'png13') then{$ENDIF}
+if not Load_png_0(BS+'png12') then
+if not Load_png_0(BS+'png11') then
+if not Load_png_0(BS+'png10') then
+if not Load_png_0(BS+'png9') then
+if not Load_png_0(BS+'png8') then
+if not Load_png_0(BS+'png7') then
+if not Load_png_0(BS+'png6') then
+if not Load_png_0(BS+'png5') then
+if not Load_png_0(BS+'png4') then
+if not Load_png_0(BS+'png3') then
+if not Load_png_0(BS+'png2') then
+if not Load_png_0(BS+'png1') then
+{$IFDEF MSWINDOWS}if not Load_png_0(BS+'png') then{$ENDIF}
 	Load_HINT('Initialization "PNG" unit FAILED!!!');
 end;
 finalization
