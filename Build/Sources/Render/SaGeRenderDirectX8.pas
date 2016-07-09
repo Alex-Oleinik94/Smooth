@@ -1219,7 +1219,7 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 	if FEnabledClientStateNormal then
 		VertexType:=VertexType or D3DFVF_NORMAL;
 	pDevice.BeginScene();
-	//!!pDevice.SetFVF( VertexType );
+	pDevice.SetVertexShader( VertexType );
 	pDevice.DrawPrimitiveUP(SGRDXConvertPrimetiveType(VParam),SGRDXGetNumPrimetives(VParam,VCount), 
 		TSGPointer(BeginArray+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex*VFirst)^,
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex);
@@ -1319,7 +1319,7 @@ FPrimetiveType:=VPrimitiveType;
 FPrimetivePrt:=0;
 FNumberOfPoints:=0;
 pDevice.BeginScene();
-//!!pDevice.SetFVF( MyVertexType );
+pDevice.SetVertexShader( MyVertexType );
 end;
 
 procedure TSGRenderDirectX8.EndScene();
