@@ -1694,17 +1694,38 @@ var
 	ArS : TSGStringList = nil;
 	i, WordCount, MaxLength, n, ii: TSGLongWord;
 	TempS : TSGString;
+
+procedure CalcWords();
+procedure LoopIteration();
 begin
-WordCount := StringWordCount(S, Razd);
+if TempS <> '' then
+	begin
+	WordCount += 1;
+	ArS += TempS;
+	TempS := '';
+	end;
+end;
+var
+	i : TSGLongWord;
+begin
+WordCount := 0;
+i := 1;
+TempS := '';
+for i := 1 to Length(S) do
+	begin
+	if S[i] in Razd then
+		LoopIteration()
+	else
+		TempS += S[i];
+	end;
+LoopIteration();
+end;
+
+begin
+CalcWords();
 if WordCount > 0 then
 	begin
 	Sourse(Title + ' (' + SGStr(WordCount) + ')',True);
-	for i := 1 to WordCount do
-		begin
-		TempS := StringWordGet(S, Razd, i);
-		if TempS <> '' then
-			ArS += TempS;
-		end;
 	MaxLength := Length(ArS[0]);
 	if Length(ArS) > 1 then
 		begin

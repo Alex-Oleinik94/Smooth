@@ -15,7 +15,7 @@
 	//{$DEFINE WGL_PIXEL_FORMAT}
 	{$ENDIF}
 {$IFNDEF MOBILE}
-	{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
+	//{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
 	//{$DEFINE USE_GLEXT}
 {$ELSE}
 	{$DEFINE USE_GLEXT}
@@ -362,6 +362,9 @@ end;
 function TSGRenderOpenGL.SupporedDepthTextures():TSGBoolean;
 begin
 Result := {$IFDEF MOBILE} False {$ELSE} dglOpenGL.GL_ARB_texture_rg {$ENDIF};
+{$IFDEF RENDER_OGL_DEBUG}
+	SGLog.Sourse(['TSGRenderOpenGL.SupporedDepthTextures : Result = ',Result]);
+	{$ENDIF}
 end;
 
 procedure TSGRenderOpenGL.BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
@@ -450,7 +453,10 @@ end;
 
 function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
 begin
-Result := {$IFDEF MOBILE}False{$ELSE}glCreateShaderObjectARB <> nil{$ENDIF};
+Result := {$IFDEF MOBILE}False{$ELSE}dglOpenGL.GL_ARB_shader_objects{$ENDIF};
+{$IFDEF RENDER_OGL_DEBUG}
+	SGLog.Sourse(['TSGRenderOpenGL.SupporedShaders : Result = ',Result]);
+	{$ENDIF}
 end;
 
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
@@ -768,7 +774,10 @@ begin
 {$IFDEF MOBILE}
 	Result:=True;
 {$ELSE}
-	Result:= glBindBufferARB <> nil;
+	Result:= dglOpenGL.GL_ARB_vertex_buffer_object;
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	SGLog.Sourse(['TSGRenderOpenGL.SupporedVBOBuffers : Result = ',Result]);
 	{$ENDIF}
 end;
 

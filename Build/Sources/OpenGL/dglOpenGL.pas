@@ -19302,6 +19302,8 @@ SGGLUAllFunc := 0;
   
   SGPrintStat();
   SGLog.Sourse(Int_GetExtensionString, 'dglOpenGL : Suppored extensions :',' ');
+  
+  ReadImplementationProperties();
 end;
 
 // =============================================================================
