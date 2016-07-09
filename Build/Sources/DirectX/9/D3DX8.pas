@@ -4901,7 +4901,9 @@ implementation
 //***************************************************************************//
 //***************************************************************************//
 uses
-	SaGeBase;
+	SaGeBase,
+	SaGeBased
+	;
 
 
 
@@ -5865,19 +5867,39 @@ D3DXFillCubeTexture := nil;
 D3DXFillVolumeTexture := nil;
 D3DXComputeNormalMap := nil;
 end;
+var
+	DllNamesWithError : TSGString = '';
+
+procedure PrintDllNamesWithError();
+begin
+SGLog.Sourse(DllNamesWithError,'Initialization D3DX8 : Can''t load from this libraries :',' ');
+end;
+
 function Load_D3DX8_0(const UnitName : PChar) : Boolean;
 const
 	TotalProcCount = 228;
 var
 	UnitLib : TSGMaxEnum;
 	CountLoadSuccs : LongWord;
+	FunctionWithError : TSGString = '';
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(UnitLib, Name);
 if Result = nil then
-	Load_HINT('Initialization D3DX8 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+	FunctionWithError += SGPCharToString(Name) + ' '
 else
 	CountLoadSuccs := CountLoadSuccs + 1;
+end;
+procedure CantLoad();
+begin
+DllNamesWithError += SGPCharToString(UnitName) + ' ';
+end;
+function SepName():TSGString;
+begin
+Result := '';
+if SGPCharToString(UnitName) = d3dx8dll then
+	Result += '/'+'d3dx8dll';
 end;
 begin
 UnitLib := LoadLibrary(UnitName);
@@ -5885,7 +5907,7 @@ Result := UnitLib <> 0;
 CountLoadSuccs := 0;
 if not Result then
 	begin
-	Load_HINT('Initialization D3DX8 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
+	CantLoad();
 	exit;
 	end;
 D3DXVec2Normalize := LoadProcedure('D3DXVec2Normalize');
@@ -6116,19 +6138,61 @@ D3DXFillTexture := LoadProcedure('D3DXFillTexture');
 D3DXFillCubeTexture := LoadProcedure('D3DXFillCubeTexture');
 D3DXFillVolumeTexture := LoadProcedure('D3DXFillVolumeTexture');
 D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
-Load_HINT('Initialization D3DX8 unit from '+SGPCharToString(UnitName)+'/'+'d3dx8dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
-D3DX8Loaded := Result and (CountLoadSuccs <> 0);
+Result := Result and (CountLoadSuccs <> 0);
+if Result then
+	begin
+	Load_HINT('D3DX8: Initialization from '+SGPCharToString(UnitName)+SepName()+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+	SGLog.Sourse(FunctionWithError,'D3DX8: Initialization from '+SGPCharToString(UnitName)+SepName()+': Can''t loading this functions :',' ');
+	end
+else
+	CantLoad();
+D3DX8Loaded := Result;
+FunctionWithError := '';
 end;
 
 procedure LoadD3DX8();
 var
 	DefDll : String;
 
-function TryLoadD3DX8(const DllName : PChar):Boolean;
+function TryLoadD3DX8(const DllName : PChar):Boolean;overload;
 begin
 Result := False;
 if (SGPCharToString(DllName) <> DefDll) then
 	Result := Load_D3DX8_0(DllName);
+end;
+
+function TryLoadD3DX8(const DllName : TSGString):Boolean;overload;
+var
+	DLLPC : PChar;
+begin
+Result := False;
+if (DllName <> DefDll) then
+	begin
+	DLLPC := SGStringToPChar(DllName);
+	Result := Load_D3DX8_0(DLLPC);
+	FreeMem(DLLPC);
+	end;
+end;
+
+function LoadFromD3DX9() : Boolean;
+var
+	i : LongWord;
+	R : Boolean = False;
+begin
+if not R then R := TryLoadD3DX8('d3dx9_33.dll');
+if not R then R := TryLoadD3DX8('d3dx9.dll');
+for i := 43 downto 24 do
+	if i <> 33 then
+		begin
+		if R then break;
+		if not R then R := TryLoadD3DX8('d3dx9_'+SGStr(i)+'.dll');
+		if R then break;
+		if not R then R := TryLoadD3DX8('d3dx9d_'+SGStr(i)+'.dll');
+		if R then break;
+		end;
+if not R then R := TryLoadD3DX8('d3dx9d_33.dll');
+if not R then R := TryLoadD3DX8('d3dx9d.dll');
+Result := R;
 end;
 
 begin
@@ -6136,7 +6200,9 @@ DefDll := SGPCharToString(d3dx8dll);
 if not TryLoadD3DX8('D3DX81ab.dll') then
 if not TryLoadD3DX8('d3dx8.dll') then
 if not TryLoadD3DX8('d3dx8d.dll') then
-	Load_HINT('Initialization D3DX8 unit FAILED!!!');
+if not LoadFromD3DX9() then
+	Load_HINT('D3DX8: Initialization FAILED!!!');
+PrintDllNamesWithError();
 end;
 
 initialization
