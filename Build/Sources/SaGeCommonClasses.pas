@@ -158,7 +158,9 @@ type
 		procedure SetSelfLink(const VLink : PISGContext);
 		function GetSelfLink() : PISGContext;
 		procedure SetRenderClass(const NewRender : TSGPointer);
+		procedure SetNewContext(const NewContext : TSGPointer);
 		
+		property NewContext : TSGPointer write SetNewContext;
 		property RenderClass : TSGPointer write SetRenderClass;
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;

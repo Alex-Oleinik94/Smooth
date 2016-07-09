@@ -50,6 +50,7 @@ uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
+		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
 		{$ENDIF}
@@ -83,19 +84,20 @@ begin
 {$IFDEF CONFIGURATION_DEBUG}
 	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass = ',TSGMaxEnum(VContextClass),') : Begining');
 	{$ENDIF}
-//Context.NewContextType := VContextClass;
+Context.NewContext := VContextClass;
 {$IFDEF CONFIGURATION_DEBUG}
 	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass) : End');
 	{$ENDIF}
 end;
 
 var
-	Renders : packed array [0 .. 2] of
+	Renders : packed array [0 .. 3] of
 		packed record
 			FClass : TSGRenderClass;
 			FName : TSGString;
 			end = (
 			(FClass :                    TSGRenderOpenGL                      ; FName : 'OpenGL' ),
+			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX12{$ELSE} nil {$ENDIF}; FName : 'DirectX 12'),
 			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX9{$ELSE} nil {$ENDIF}; FName : 'DirectX 9'),
 			(FClass : {$IFDEF MSWINDOWS} TSGRenderDirectX8{$ELSE} nil {$ENDIF}; FName : 'DirectX 8')
 			);

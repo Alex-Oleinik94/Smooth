@@ -17,21 +17,8 @@ uses
 	,SaGeCommonClasses
 	,SaGeClasses
 	,SaGeImagesBase
-	{$IFDEF LAZARUS}
-		,Interfaces,
-		LMessages,
-		Messages,
-		Variants,
-		Graphics,
-		Buttons,
-		Menus,
-		ComCtrls,
-		LCLIntf,
-		LCLType,
-		Extctrls,
-		Controls
-		,Forms
-		,_mmtime
+	{$IF defined(ANDROID)}
+		,android_native_app_glue
 		{$ENDIF}
 	;
 const
@@ -189,7 +176,8 @@ type
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
-		procedure CopyInfo(const C : ISGContext);virtual;
+		procedure MoveInfo(var FormerContext : TSGContext);virtual;
+		procedure SetNewContext(const NewContext : TSGPointer);virtual;
 			protected
 		FNewContextType : TSGContextClass;
 		FRenderClass    : TSGRenderClass;
@@ -199,12 +187,17 @@ type
 		FPaintableClass : TSGDrawableClass;
 		FPaintable       : TSGDrawable;
 			public
-		property NewContextClass : TSGContextClass read FNewContextType write FNewContextType;
+		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
 		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
+			public
+		procedure DeleteDeviceResourses();
+		procedure LoadDeviceResourses();
 		end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF}; const VFullscreen : TSGBoolean = True);
+function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
 
 implementation
 
@@ -226,6 +219,99 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+procedure TSGContext.SetNewContext(const NewContext : TSGPointer);
+begin
+FNewContextType := TSGContextClass(NewContext);
+end;
+
+procedure TSGContext.DeleteDeviceResourses();
+begin
+if FPaintable <> nil then
+	FPaintable.DeleteDeviceResourses();
+if SGScreen <> nil then
+	SGScreen.DeleteDeviceResourses();
+end;
+
+procedure TSGContext.LoadDeviceResourses();
+begin
+if FPaintable <> nil then
+	FPaintable.LoadDeviceResourses();
+if SGScreen <> nil then
+	SGScreen.LoadDeviceResourses();
+end;
+
+procedure TSGContext.MoveInfo(var FormerContext : TSGContext);
+begin
+if FormerContext = nil then
+	Exit;
+FSelfLink      := FormerContext.FSelfLink;
+FRenderClass   := FormerContext.FRenderClass;
+FWidth         := FormerContext.FWidth;
+FHeight        := FormerContext.FHeight;
+FFullscreen    := FormerContext.FFullscreen;
+FTitle         := FormerContext.FTitle;
+FPaintable     := FormerContext.FPaintable;
+FPaintableClass:= FormerContext.FPaintableClass;
+FShowCursor    := FormerContext.FShowCursor;
+FIcon          := FormerContext.FIcon;
+FCursor        := FormerContext.FCursor;
+FActive        := FormerContext.FActive;
+FormerContext.FPaintable := nil;
+end;
+
+function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
+// Result = True : Continue loop
+// Result = False : Exit loop
+var
+	NewContext : TSGContext = nil;
+begin
+Result := False;
+if Context.Active and (Context.NewContext <> nil) and (not (Context is Context.NewContext)) then
+	begin
+	NewContext := Context.NewContext.Create();
+	Context.DeleteDeviceResourses();
+	NewContext.MoveInfo(Context);
+	Context.Destroy();
+	Context := NewContext;
+	IContext := Context;
+	Context.Initialize();
+	Context.LoadDeviceResourses();
+	Result := Context.Active;
+	end;
+end;
+
+procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF}; const VFullscreen : TSGBoolean = True);
+var
+	Context : TSGContext = nil;
+	IContext : ISGContext = nil;
+begin
+Context := VContextClass.Create();
+IContext := Context;
+with Context do
+	begin
+	Width  := GetScreenArea().x;
+	Height := GetScreenArea().y;
+	Fullscreen := VFullscreen;
+	Cursor := TSGCursor.Create(SGC_NORMAL);
+	{$IFDEF ANDROID}
+	if Context is TSGContextAndroid then
+		(Context as TSGContextAndroid).AndroidApp := State;
+		{$ENDIF}
+	Title := 'SaGe Engine Window';
+	SelfLink := @IContext;
+	RenderClass := VRenderClass;
+	Paintable := VPaintableClass;
+	end;
+Context.Initialize();
+if Context.Active then
+	repeat
+	Context.Run();
+	until not SGTryChangeContextType(Context, IContext);
+IContext := nil;
+Context.Destroy();
+Context := nil;
+end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -512,22 +598,6 @@ end;
 procedure TSGContext.SetTitle(const VTitle : TSGString);
 begin
 FTitle := VTitle;
-end;
-
-procedure TSGContext.CopyInfo(const C : ISGContext);
-begin
-{if C=nil then
-	Exit;
-FSelfPoint:=C.SelfPoint;
-FRenderClass:=C.RenderClass;
-FWidth:=C.Width;
-FHeight:=C.Height;
-FFullscreen:=C.Fullscreen;
-FTitle:=C.Title;
-FCursorIdenifier:=C.CursorIdenifier;
-FIconIdentifier:=C.IconIdentifier;
-FCallDraw:=C.CallDraw;
-FCallInitialize:=C.CallInitialize;}
 end;
 
 procedure TSGContext.InitFullscreen(const VFullscreen : TSGBoolean);

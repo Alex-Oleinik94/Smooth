@@ -26,6 +26,7 @@ uses
 	,Ex13
 	,Ex14
 	,Ex15
+	,Ex16
 	;
 
 type
@@ -62,6 +63,7 @@ FDrawClasses.Add(TSGApprFunction{Ex7});
 FDrawClasses.Add(TSGExample13);
 FDrawClasses.Add(TSGExample14);
 FDrawClasses.Add(TSGExample15);
+FDrawClasses.Add(TSGExample16);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.BoundsToNeedBounds();
 FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);

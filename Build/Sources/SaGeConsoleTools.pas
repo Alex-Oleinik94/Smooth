@@ -20,7 +20,6 @@ uses
 		,unix
 		{$ENDIF}
 	{$IF defined(ANDROID)}
-		,jni
 		,android_native_app_glue
 		{$ENDIF}
 	,SNMPsend
@@ -92,6 +91,7 @@ function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleC
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
@@ -607,85 +607,12 @@ SGConcoleCaller(Params);
 SetLength(Params,0);
 end;
 
-type
-	TSGAllApplicationsDrawable = class(TSGDrawable)
-			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		procedure Paint();override;
-		procedure LoadDeviceResourses();override;
-		procedure DeleteDeviceResourses();override;
-		end;
-
-constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
-begin
-inherited Create(VContext);
-
-with TSGDrawClasses.Create(Context) do
-	begin
-	Add(TSGNotepadApplication);
-	Add(TSGGasDiffusion);
-	Add(TSGAllFractals,False);
-	Add(TSGAllExamples,False);
-	Add(TSGLoading);
-	Add(TSGGraphViewer);
-	Add(TSGKiller);
-	Add(TSGGenAlg);
-	
-	//Add(TSGUserTesting);
-	//Add(TSGGraphic);
-	//Add(TSGGraphViewer3D);
-	//Add(TSGMeshViever);
-	//Add(TSGExampleShader);
-	//Add(TSGModelRedactor);
-	//Add(TSGGameTron);
-	//Add(TSGClientWeb);
-	
-	Initialize();
-	end;
-end;
-
-procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
-begin
-end;
-
-procedure TSGAllApplicationsDrawable.DeleteDeviceResourses();
-begin
-end;
-
-destructor TSGAllApplicationsDrawable.Destroy();
-begin
-inherited;
-end;
-
-procedure TSGAllApplicationsDrawable.Paint();
-begin
-end;
-
-procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
 var
-	Context:TSGContext = nil;
 	{$IFDEF MSWINDOWS}
 		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX_9,SGBR_DIRECTX_8,SGBR_UNKNOWN) = SGBR_OPENGL;
 		{$ENDIF}
 	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
-
-procedure ContextTypeWatcherCallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	NewContext:TSGContext = nil;
-begin
-if Context.Active then//and (Context.FNewContextType<>nil) then
-	begin
-	//NewContext:=Context.FNewContextType.Create();
-	//NewContext.CopyInfo(Context);
-	//NewContext.FCallInitialize:=nil;
-	//Pointer(Context.FRender):=nil;
-	//Context.Destroy();
-	//Context:=NewContext;
-	//NewContext:=nil;
-	//Context.Initialize();
-	end;
-end;
 
 procedure ReadParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -773,7 +700,8 @@ if GoToExit then
 end;
 
 var
-	IContext : ISGContext;
+	RenderClass : TSGRenderClass;
+
 begin
 {$IFNDEF ANDROID}
 SGPrintEngineVersion();
@@ -781,47 +709,81 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ReadParams();
 {$ENDIF}
 
-Context := TSGCompatibleContext.Create();
+{$IFDEF MSWINDOWS}
+if FRenderState = SGBR_DIRECTX_9 then
+	RenderClass := TSGRenderDirectX9
+else if FRenderState = SGBR_DIRECTX_8 then
+	RenderClass := TSGRenderDirectX8
+else
+{$ENDIF}
+	RenderClass := TSGRenderOpenGL;
 
-IContext := Context;
+SGRunPaintable(
+	VPaintabeClass
+	,TSGCompatibleContext
+	,RenderClass
+	{$IFDEF ANDROID},State{$ENDIF}
+	,VFullscreen);
+end;
 
-with Context do
+type
+	TSGAllApplicationsDrawable = class(TSGDrawable)
+			public
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
+		procedure Paint();override;
+		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResourses();override;
+		end;
+
+constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
+begin
+inherited Create(VContext);
+
+with TSGDrawClasses.Create(Context) do
 	begin
-	Width  := GetScreenArea().x;
-	Height := GetScreenArea().y;
-	Fullscreen := VFullscreen;
-	Cursor := TSGCursor.Create(SGC_NORMAL);
+	Add(TSGNotepadApplication);
+	Add(TSGGasDiffusion);
+	Add(TSGAllFractals,False);
+	Add(TSGAllExamples,False);
+	Add(TSGLoading);
+	Add(TSGGraphViewer);
+	Add(TSGKiller);
+	Add(TSGGenAlg);
 	
-	{$IFDEF ANDROID}
-		(Context as TSGContextAndroid).AndroidApp := State;
-		{$ENDIF}
+	//Add(TSGUserTesting);
+	//Add(TSGGraphic);
+	//Add(TSGGraphViewer3D);
+	//Add(TSGMeshViever);
+	//Add(TSGExampleShader);
+	//Add(TSGModelRedactor);
+	//Add(TSGGameTron);
+	//Add(TSGClientWeb);
 	
-	Title := 'SaGe Engine Window';
-	
-	SelfLink := @IContext;
-	{$IFDEF MSWINDOWS}
-		if FRenderState = SGBR_DIRECTX_9 then
-			RenderClass := TSGRenderDirectX9
-		else if FRenderState = SGBR_DIRECTX_8 then
-			RenderClass := TSGRenderDirectX8
-		else
-		{$ENDIF}
-			RenderClass := TSGRenderOpenGL;
-	
-	Paintable := TSGAllApplicationsDrawable;
+	Initialize();
 	end;
+end;
 
-Context.Initialize();
+procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
+begin
+end;
 
-repeat
-Context.Run();
+procedure TSGAllApplicationsDrawable.DeleteDeviceResourses();
+begin
+end;
 
-ContextTypeWatcherCallAction();
+destructor TSGAllApplicationsDrawable.Destroy();
+begin
+inherited;
+end;
 
-until (IContext <> nil) and (Context.Active = False);
+procedure TSGAllApplicationsDrawable.Paint();
+begin
+end;
 
-IContext := nil;
-Context.Destroy();
+procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
+begin
+SGConsoleRunPaintable(TSGAllApplicationsDrawable,VParams{$IFDEF ANDROID},State{$ENDIF});
 end;
 
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
