@@ -53,7 +53,7 @@ type
 		end;
 	
 	TSGMRTarget = object
-		FName : TSGString;
+		FNames : TSGStringList;
 		FComands : TSGMRIdentifierList;
 		end;
 	
@@ -103,7 +103,7 @@ implementation
 
 function TSGMakefileReader.GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result.FName := '';
+Result.FNames := nil;
 Result.FComands := nil;
 if (VIndex < TargetCount()) and (VIndex >= 0) then
 	Result := FTargets[VIndex];
@@ -114,11 +114,11 @@ var
 	Target : TSGMRTarget;
 	UpCasedName : TSGString;
 begin
-Result.FName := '';
+Result.FNames := nil;
 Result.FComands := nil;
 UpCasedName := SGUpCaseString(VName);
 for Target in FTargets do
-	if Target.FName = UpCasedName then
+	if UpCasedName in Target.FNames then
 		begin
 		Result := Target;
 		break;
@@ -134,7 +134,7 @@ UpCasedName := SGUpCaseString(VName);
 Result := TargetCount();
 if FTargets <> nil then
 	for i := 0 to TargetCount() - 1 do
-		if FTargets[i].FName = UpCasedName then
+		if UpCasedName in FTargets[i].FNames then
 			begin
 			Result := i;
 			break;
@@ -218,7 +218,7 @@ if VTarget = '' then
 	i := 0
 else if TargetCount() > 0 then
 	for ii := 0 to TargetCount() - 1 do
-		if Target = FTargets[ii].FName then
+		if Target in FTargets[ii].FNames then
 			begin
 			i := ii;
 			break;
@@ -272,7 +272,7 @@ if TargetCount() > 0 then
 	System.WriteLn('Targets:');
 	for i := 0 to TargetCount() - 1 do
 		begin
-		System.WriteLn(' Target ', i + 1, ' : "', FTargets[i].FName,'"');
+		System.WriteLn(' Target ', i + 1, ' : "', SGStringFromStringList(FTargets[i].FNames,', '),'"');
 		
 		TextColor(4);
 		if (FTargets[i].FComands <> nil) and (Length(FTargets[i].FComands) > 0) then
@@ -391,7 +391,7 @@ while Stream.Position <> Stream.Size do
 				end;
 			end;
 		end
-	else if (StringWordCount(S,'=') = 2) and (Length(StringTrimLeft(S,' 	')) = Length(S)) then
+	else if ((StringWordCount(S,'=') = 2) or (((StringWordCount(S,'=') = 1) and (StringTrimRight(S,'=') + '=' = S)))) and (Length(StringTrimLeft(S,' 	')) = Length(S)) then
 		begin
 		if (FConstants = nil) then
 			SetLength(FConstants, 1)
@@ -413,7 +413,7 @@ while Stream.Position <> Stream.Size do
 		with FTargets[High(FTargets)] do
 			begin
 			FComands := nil;
-			FName := SGUpCaseString(StringWordGet(S,':',1));
+			FNames := SGStringListFromString(SGUpCaseString(StringWordGet(S,':',1)),', ');
 			end;
 		end
 	else if StringTrimAll(S,' 	') = '' then
@@ -422,7 +422,6 @@ while Stream.Position <> Stream.Size do
 	else
 		begin
 		WriteLn('Unknown string "',S,'"');
-		ReadLn();
 		end;
 	end;
 Stream.Destroy();

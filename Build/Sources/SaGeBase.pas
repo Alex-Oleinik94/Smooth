@@ -432,7 +432,7 @@ type
 		destructor Destroy;override;
 		procedure Sourse(const s:string;const WithTime:Boolean = True);
 		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);
-		procedure Sourse(const S : TSGString; const Title : TSGString; const Razd : TSGString);
+		procedure Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString);
 			private
 		FFileStream:TFileStream;
 		end;
@@ -713,11 +713,30 @@ operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;o
 operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 implementation
 
 uses
 	StrMan;
+
+function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := '';
+if S <> nil then
+	if Length(S) > 0 then
+		begin
+		for i := 0 to High(S) do
+			begin
+			Result += S[i];
+			if i <> High(S) then
+				Result += Separator;
+			end;
+		end;
+end;
 
 function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -1689,31 +1708,28 @@ begin
 	end;
 end;
 
-procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Razd : TSGString);
+function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	ArS : TSGStringList = nil;
-	i, WordCount, MaxLength, n, ii: TSGLongWord;
 	TempS : TSGString;
 
-procedure CalcWords();
 procedure LoopIteration();
 begin
 if TempS <> '' then
 	begin
-	WordCount += 1;
-	ArS += TempS;
+	Result += TempS;
 	TempS := '';
 	end;
 end;
+
 var
 	i : TSGLongWord;
 begin
-WordCount := 0;
+Result := nil;
 i := 1;
 TempS := '';
 for i := 1 to Length(S) do
 	begin
-	if S[i] in Razd then
+	if S[i] in Separators then
 		LoopIteration()
 	else
 		TempS += S[i];
@@ -1721,8 +1737,17 @@ for i := 1 to Length(S) do
 LoopIteration();
 end;
 
+procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString);
+var
+	ArS : TSGStringList = nil;
+	i, WordCount, MaxLength, n, ii: TSGLongWord;
+	TempS : TSGString;
+
 begin
-CalcWords();
+ArS := SGStringListFromString(S, Separators);
+WordCount := 0;
+if ArS <> nil then
+	WordCount := Length(ArS);
 if WordCount > 0 then
 	begin
 	Sourse(Title + ' (' + SGStr(WordCount) + ')',True);
