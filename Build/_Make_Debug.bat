@@ -2,8 +2,8 @@
 echo "======================================="
 echo "|Compiling  Debug  Version for Windows|"
 echo "======================================="
-MKDIR CompiledUnits
-MKDIR CompiledUnits\i386-other
+MKDIR Output
+MKDIR Output\i386-debug-desktop
 make clear_files
 @echo off
 make inc_version_debug

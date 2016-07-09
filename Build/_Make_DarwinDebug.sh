@@ -2,8 +2,8 @@
 echo "=========================================="
 echo "| Compiling  Debug  Version for Mac OSX  |"
 echo "=========================================="
-mkdir CompiledUnits
-mkdir CompiledUnits/i386-other
+mkdir Output
+mkdir Output/i386-debug-desktop
 make inc_version_debug
 make darwin_debug
 make clear_files

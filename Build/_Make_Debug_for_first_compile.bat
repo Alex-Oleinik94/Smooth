@@ -2,8 +2,9 @@
 echo "======================================="
 echo "|Compiling  Debug  Version for Windows|"
 echo "======================================="
-MKDIR CompiledUnits
-MKDIR CompiledUnits\i386-other
+MKDIR Sources\Temp
+MKDIR Output
+MKDIR Output\i386-debug-desktop
 CALL _Restore_RMFile.bat false
 make debug
 pause

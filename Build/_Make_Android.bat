@@ -2,8 +2,8 @@
 echo "======================================="
 echo "|Compiling  Debug  Version for Android|"
 echo "======================================="
-MKDIR CompiledUnits
-MKDIR CompiledUnits\arm-android
+MKDIR Output
+MKDIR Output\arm-android
 MKDIR AndroidTools
 MKDIR AndroidTools\SaGe
 MKDIR AndroidTools\SaGe\libs

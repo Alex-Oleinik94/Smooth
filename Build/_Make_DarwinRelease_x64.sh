@@ -2,8 +2,8 @@
 echo "=========================================="
 echo "| Compiling Release Version for Mac OSX  |"
 echo "=========================================="
-MKDIR CompiledUnits
-MKDIR CompiledUnits/i386-other
+MKDIR Output
+MKDIR Output/x86_64-release-desktop
 make inc_version_release
 make darwin_release_x64
 strip ../Binaries/Main

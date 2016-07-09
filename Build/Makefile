@@ -1,5 +1,9 @@
-X32=-Pi386 
-X64=-Px86_64
+DX32=-Pi386 -FUOutput/i386-debug-desktop
+DX64=-Px86_64 -FUOutput/x86_64-debug-desktop
+RX32=-Pi386 -FUOutput/i386-release-desktop
+RX64=-Px86_64 -FUOutput/x86_64-release-desktop
+LX32=-Pi386 -FUOutput/i386-library
+LX64=-Px86_64 -FUOutput/x86_64-library
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
 DESKTOPFILENAME=Main
@@ -11,9 +15,8 @@ RENDERARGS= -FuSources/DirectX -FuSources/DirectX/9 -FuSources/DirectX/12 -FuSou
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
 ANDROIDARGS= -FuSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSources/OpenGL 
-OUTPUTDESKTOP= -FUCompiledUnits/i386-other -FE./../Binaries
-OUTPUTANDROID= -FUCompiledUnits/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
-OUTPUTLIBRARY= -FUCompiledUnits/i386-other -FE./../Binaries
+OUTPUTDESKTOP= -FE./../Binaries
+OUTPUTANDROID= -FUOutput/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 DESKTOPARGS= $(ARGS) $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
@@ -23,37 +26,29 @@ SGTEMPUNITDIR=./../Build/Sources/Temp
 SGRMFILE=$(SGTEMPUNITDIR)/SaGeRMFiles.inc
 SAGE="./../Binaries/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
+SG_TARGET_LIST=release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64
+SG_TARGET=
 
-release:
-	@$(PASCALCOMPILER) $(DORELEASE) $(DESKTOPARGS)
-release_x32:
-	@$(PASCALCOMPILER) $(X32) $(DORELEASE) $(DESKTOPARGS)
+release_x32, release:
+	@$(PASCALCOMPILER) $(RX32) $(DORELEASE) $(DESKTOPARGS)
 release_x64:
-	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(DESKTOPARGS)
-debug:
-	@$(PASCALCOMPILER) $(DODEBUG) $(DESKTOPARGS)
-debug_x32:
-	@$(PASCALCOMPILER) $(X32) $(DODEBUG) $(DESKTOPARGS)
+	@$(PASCALCOMPILER) $(RX64) $(DORELEASE) $(DESKTOPARGS)
+debug_x32, debug:
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(DESKTOPARGS)
 debug_x64:
-	@$(PASCALCOMPILER) $(X64) $(DODEBUG) $(DESKTOPARGS)
-darwin_debug:
-	@$(PASCALCOMPILER) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
-darwin_debug_x32:
-	@$(PASCALCOMPILER) $(X32) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
-darwin_release:
-	@$(PASCALCOMPILER) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
-darwin_release_x32:
-	@$(PASCALCOMPILER) $(X32) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
+	@$(PASCALCOMPILER) $(DX64) $(DODEBUG) $(DESKTOPARGS)
+darwin_debug_x32, darwin_debug:
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
+darwin_release_x32, darwin_release:
+	@$(PASCALCOMPILER) $(RX32) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
 darwin_debug_x64:
-	@$(PASCALCOMPILER) $(X64) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
+	@$(PASCALCOMPILER) $(DX64) $(DODEBUG) $(DARWINARGS) $(DESKTOPARGS)
 darwin_release_x64:
-	@$(PASCALCOMPILER) $(X64) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
-lib:
-	@$(PASCALCOMPILER) -dLIBRARY $(DORELEASE) $(ARGS) $(OUTPUTLIBRARY) $(SAGELIB)
-lib_x32:
-	@$(PASCALCOMPILER) -dLIBRARY $(X32) $(DORELEASE) $(ARGS) $(OUTPUTLIBRARY) $(SAGELIB)
+	@$(PASCALCOMPILER) $(RX64) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
+lib_x32, lib:
+	@$(PASCALCOMPILER) -dLIBRARY $(LX32) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
 lib_x64:
-	@$(PASCALCOMPILER) -dLIBRARY $(X64) $(DORELEASE) $(ARGS) $(OUTPUTLIBRARY) $(SAGELIB)
+	@$(PASCALCOMPILER) -dLIBRARY $(LX64) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
 android:
 	@$(CROSSPASCALCOMPILER) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(DESKTOPFILE)
 ios:
@@ -76,12 +71,15 @@ clear_files:
 	@rm -f Sources/Temp/*
 	@$(SAGE) -crf $(SGRMFILE)
 clear:
-	@rm -f CompiledUnits/arm-android/*
-	@rm -f CompiledUnits/i386-other/*
-	@rm -f CompiledUnits/*.o
-	@rm -f CompiledUnits/*.ppu
-	@rm -f CompiledUnits/*.res
-	@rm -f CompiledUnits/*.or
+	@rm -f Output/arm-android/*
+	@rm -f Output/i386-debug-desktop/*
+	@rm -f Output/i386-release-desktop/*
+	@rm -f Output/x86_64-debug-desktop/*
+	@rm -f Output/x86_64-release-desktop/*
+	@rm -f Output/*.o
+	@rm -f Output/*.ppu
+	@rm -f Output/*.res
+	@rm -f Output/*.or
 	@rm -f *.o
 	@rm -f *.ppu
 	@rm -f *.or
@@ -93,3 +91,8 @@ clear:
 	@rm -f Sources/*.ppu
 	@rm -f Main.res
 	@$(MAKE) clear_files
+sg_compile:
+	$(MAKE) clear_files
+	$(SAGE) --sco $(SG_TARGET)
+	$(MAKE) $(SG_TARGET)
+	$(MAKE) clear_files
