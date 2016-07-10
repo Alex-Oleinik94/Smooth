@@ -165,7 +165,7 @@ end;
 constructor TSGEngineConfigurationPanel.Create();
 var
 	i : TSGLongWord;
-	FCanUseRender : TSGBool;
+	FCanUse: TSGBool;
 begin
 inherited;
 SetBounds(0, 0, 500, TotalHeight);
@@ -189,7 +189,12 @@ CreateChild(FContextsComboBox);
 FContextsComboBox.Visible := True;
 FContextsComboBox.UserPointer:=Self;
 for i := Low(Contexts) to High(Contexts) do
-	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, Contexts[i].FClass <> nil);
+	begin
+	FCanUse := Contexts[i].FClass <> nil;
+	if FCanUse then
+		FCanUse := Contexts[i].FClass.Suppored();
+	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
+	end;
 FContextsComboBox.FProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
 
 FRendersComboBox := TSGComboBox.Create();
@@ -198,10 +203,10 @@ FRendersComboBox.UserPointer:=Self;
 FRendersComboBox.Visible := True;
 for i := Low(Renders) to High(Renders) do
 	begin
-	FCanUseRender := Renders[i].FClass <> nil;
-	if FCanUseRender then
-		FCanUseRender := Renders[i].FClass.Suppored();
-	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUseRender);
+	FCanUse := Renders[i].FClass <> nil;
+	if FCanUse then
+		FCanUse := Renders[i].FClass.Suppored();
+	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
 FRendersComboBox.FProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 

@@ -456,6 +456,9 @@ var
   glutGameModeGet : function (mode : GLenum) : integer; extdecl;
 {$ENDIF MORPHOS}
 
+var
+	GLUTLoaded : Boolean = False;
+
 procedure LoadGlut(const dll: String);
 procedure UnloadGlut;
 
@@ -477,6 +480,8 @@ var
 
 procedure UnloadGlut;
 begin
+GLUTLoaded := False;
+
 {$IFDEF MORPHOS}
   // MorphOS's GL will closed down by TinyGL unit, nothing is needed here.
 {$ELSE MORPHOS}
@@ -760,6 +765,7 @@ begin
   end;
   SGLog.Sourse(['glut : Initialization from ' + dll + ': Loaded ',SGStrReal(LoadedGlutFuncions/AllGlutFuncions*100,3),'% ('+SGStr(LoadedGlutFuncions)+'/'+SGStr(AllGlutFuncions)+')']);
   LoadFreeGlut(hDLL);
+  GLUTLoaded := (hDLL <> 0) and (LoadedGlutFuncions <> 0);
 end;
 {$ENDIF MORPHOS}
 

@@ -38,6 +38,7 @@ type
 		function GetScreenArea: TSGPoint2int32;override;
 		procedure Resize;override;
 		procedure InitFullscreen(const b:boolean); override;
+		class function Suppored() : TSGBoolean; override;
 			public
 		function  GetClientWidth() : TSGLongWord;override;
 		function  GetClientHeight() : TSGLongWord;override;
@@ -55,6 +56,11 @@ uses
 	SaGeRender;
 var
 	ContextGLUT : TSGContextGLUT = nil;
+
+class function TSGContextGLUT.Suppored() : TSGBoolean;
+begin
+Result := GLUT.GLUTLoaded;
+end;
 
 function  TSGContextGLUT.GetClientWidth() : TSGLongWord;
 begin
@@ -232,7 +238,8 @@ glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
 glutSetIconTitle(PChar(5));
 
-if InitRender() then
+Active := InitRender();
+if Active then
 	inherited;
 end;
 
@@ -291,7 +298,8 @@ end;
 procedure TSGContextGLUT.Run;
 begin
 StartComputeTimer();
-glutMainLoop;
+while Active and (FNewContextType = nil) do
+	glutMainLoop;
 end;
 
 procedure TSGContextGLUT.Messages;

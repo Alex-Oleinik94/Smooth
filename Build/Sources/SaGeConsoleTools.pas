@@ -123,6 +123,9 @@ uses
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
 		{$ENDIF}
+	{$IFDEF WITH_GLUT}
+		,SaGeContextGLUT
+		{$ENDIF}
 	;
 
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
@@ -609,10 +612,9 @@ end;
 
 procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
 var
-	{$IFDEF MSWINDOWS}
-		FRenderState:(SGBR_OPENGL,SGBR_DIRECTX_9,SGBR_DIRECTX_8,SGBR_UNKNOWN) = SGBR_OPENGL;
-		{$ENDIF}
+	RenderClass : TSGRenderClass = nil;
 	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
+	ContextClass : TSGContextClass = nil;
 
 procedure ReadParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -631,8 +633,8 @@ if (VParams<>nil) and (Length(VParams)>0) then
 				begin
 				WriteLn('This is additional params for running GUI.');
 				WriteLn('     -h; -help; -?   : for show this');
+				WriteLn('     -ogl            : for use OpenGL');
 				{$IFDEF MSWINDOWS}
-					Write('     -ogl            : for use OpenGL');WriteLn();
 					Write('     -d3dx9          : for use DirectX 9');
 					if TSGRenderDirectX9.Suppored() then
 						WriteLn()
@@ -645,33 +647,49 @@ if (VParams<>nil) and (Length(VParams)>0) then
 						WriteLn(', but it is impossible for your system!');
 					{$ENDIF}
 				WriteLn('     -f; -fullscreen : for change fullscreen mode');
+				{$IFDEF WITH_GLUT}
+					Write('     -glut           : for use GLUT');
+					if TSGContextGLUT.Suppored() then
+						WriteLn()
+					else
+						WriteLn(', but it is impossible for your system!');
+					{$ENDIF}
 				GoToExit := True;
 				HelpUsed := True;
 				Break;
 				end
-			{$IFDEF MSWINDOWS}
-				else if (S='OGL') or (S='OPENGL') then
-					begin
-					{$IFDEF SGMoreDebuging}
-						WriteLn('Engine uses OpenGL.');
-						{$ENDIF}
-					FRenderState:=SGBR_OPENGL;
-					end
-				else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') or (S='D3DX9') or (S='DIRECT3D9')or (S='DIRECTX9')or (S='DIRECT3DX9') then
-					begin
-					{$IFDEF SGMoreDebuging}
-						WriteLn('Engine uses DirectX 9.');
-						{$ENDIF}
-					FRenderState:=SGBR_DIRECTX_9;
-					end
-				else if (S='D3DX8') or (S='DIRECT3D8')or (S='DIRECTX8')or (S='DIRECT3DX8') then
-					begin
-					{$IFDEF SGMoreDebuging}
-						WriteLn('Engine uses DirectX 8.');
-						{$ENDIF}
-					FRenderState:=SGBR_DIRECTX_8;
-					end
-				{$ENDIF}
+			else if (S='OGL') or (S='OPENGL') then
+				begin
+				{$IFDEF SGMoreDebuging}
+					WriteLn('Engine uses OpenGL.');
+					{$ENDIF}
+				RenderClass := TSGRenderOpenGL;
+				end
+{$IFDEF WITH_GLUT}
+			else if (S='GLUT') then
+				begin
+				{$IFDEF SGMoreDebuging}
+					WriteLn('Engine uses GLUT.');
+					{$ENDIF}
+				ContextClass := TSGContextGLUT;
+				end
+{$ENDIF}
+{$IFDEF MSWINDOWS}
+			else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') or (S='D3DX9') or (S='DIRECT3D9')or (S='DIRECTX9')or (S='DIRECT3DX9') then
+				begin
+				{$IFDEF SGMoreDebuging}
+					WriteLn('Engine uses DirectX 9.');
+					{$ENDIF}
+				RenderClass := TSGRenderDirectX9;
+				end
+			else if (S='D3DX8') or (S='DIRECT3D8')or (S='DIRECTX8')or (S='DIRECT3DX8') then
+				begin
+				{$IFDEF SGMoreDebuging}
+					WriteLn('Engine uses DirectX 8.');
+					{$ENDIF}
+				RenderClass := TSGRenderDirectX8;
+				end
+{$ENDIF}
 			else if (S='F') or (S='FULLSCREEN') then
 				begin
 				VFullscreen:=not VFullscreen;
@@ -699,28 +717,18 @@ if GoToExit then
 	end;
 end;
 
-var
-	RenderClass : TSGRenderClass;
-
 begin
+ContextClass := TSGCompatibleContext;
+RenderClass  := TSGCompatibleRender;
 {$IFNDEF ANDROID}
 SGPrintEngineVersion();
 if (VParams<>nil) and (Length(VParams)>0) then
 	ReadParams();
 {$ENDIF}
 
-{$IFDEF MSWINDOWS}
-if FRenderState = SGBR_DIRECTX_9 then
-	RenderClass := TSGRenderDirectX9
-else if FRenderState = SGBR_DIRECTX_8 then
-	RenderClass := TSGRenderDirectX8
-else
-{$ENDIF}
-	RenderClass := TSGRenderOpenGL;
-
 SGRunPaintable(
 	VPaintabeClass
-	,TSGCompatibleContext
+	,ContextClass
 	,RenderClass
 	{$IFDEF ANDROID},State{$ENDIF}
 	,VFullscreen);

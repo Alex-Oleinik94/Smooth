@@ -1494,8 +1494,8 @@ begin
 	
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		if Context <> nil then
-			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), 0 );
+		if (Context <> nil) and (dglOpenGL.wglMakeCurrent <> nil) then
+			dglOpenGL.wglMakeCurrent(0, 0);
 		if FContext <> 0 then
 			begin
 			dglOpenGL.wglDeleteContext( FContext );

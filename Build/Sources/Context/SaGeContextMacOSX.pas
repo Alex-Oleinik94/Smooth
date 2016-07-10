@@ -27,6 +27,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
+		class function Suppored() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -44,6 +45,11 @@ implementation
 
 uses
 	SaGeScreen;
+
+class function TSGContextMacOSX.Suppored() : TSGBoolean;
+begin
+Result := True;
+end;
 
 procedure TSGContextMacOSX.SetTittle(const NewTittle:TSGString);
 begin

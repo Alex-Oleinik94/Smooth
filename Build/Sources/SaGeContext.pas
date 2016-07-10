@@ -70,6 +70,7 @@ type
 		procedure SwapBuffers();virtual;
 		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
 		procedure Kill();virtual;
+		class function Suppored() : TSGBoolean; virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
@@ -220,6 +221,11 @@ uses
 		{$ENDIF}
 	;
 
+class function TSGContext.Suppored() : TSGBoolean; 
+begin
+Result := False;
+end;
+
 procedure TSGContext.SetNewContext(const NewContext : TSGPointer);
 begin
 FNewContextType := TSGContextClass(NewContext);
@@ -256,7 +262,6 @@ FPaintableClass:= FormerContext.FPaintableClass;
 FShowCursor    := FormerContext.FShowCursor;
 FIcon          := FormerContext.FIcon;
 FCursor        := TSGCursor.Copy(FormerContext.FCursor);
-FActive        := FormerContext.FActive;
 FormerContext.FPaintable := nil;
 end;
 
@@ -528,7 +533,7 @@ if FPaintableClass <> nil then
 	begin
 	if not SGScreen.ContextAssigned() then
 		SGScreen.Load(Self);
-	if FPaintable = nil then
+	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		FPaintable.LoadDeviceResourses();

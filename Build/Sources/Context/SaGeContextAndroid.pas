@@ -35,6 +35,7 @@ type
 		function  GetCursorPosition(): TSGPoint2int32;override;
 		function  GetWindowArea(): TSGPoint2int32;override;
 		function  GetScreenArea(): TSGPoint2int32;override;
+		class function Suppored() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -63,6 +64,11 @@ implementation
 
 uses
 	SaGeScreen;
+
+class function TSGContextAndroid.Suppored() : TSGBoolean; 
+begin
+Result := True;
+end;
 
 function TSGContextAndroid.GetOption(const What : TSGString) : TSGPointer;
 begin

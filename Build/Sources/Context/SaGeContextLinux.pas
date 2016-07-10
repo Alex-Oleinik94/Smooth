@@ -30,6 +30,7 @@ type
 		function  GetCursorPosition(): TSGPoint2int32;override;
 		function  GetScreenArea(): TSGPoint2int32;override;
 		procedure Kill();override;
+		class function Suppored() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -63,6 +64,11 @@ implementation
 
 uses
 	SaGeScreen;
+
+class function TSGContextLinux.Suppored() : TSGBoolean; 
+begin
+Result := True;
+end;
 
 procedure TSGContextLinux.SetBmpCursor(const VCursor : TSGCursor);
 begin
