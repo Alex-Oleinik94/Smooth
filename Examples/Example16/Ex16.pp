@@ -44,6 +44,8 @@ type
 		FCamera : TSGCamera;
 		FFont : TSGFont;
 		FMesh : TSG3DObject;
+		FSize : TSGLongWord;
+		FLightAngle : TSGSingle;
 			protected
 		procedure Generate();
 		procedure DrawDebugCube();
@@ -78,6 +80,8 @@ begin
 FFont := nil;
 FCamera := nil;
 FMesh := nil;
+FSize := 7;
+FLightAngle := 0;
 
 inherited Create(VContext);
 
@@ -125,6 +129,7 @@ if FMesh <> nil then
 	FMesh := nil;
 	end;
 TerrainGenerator := TSGFractalTerrainGenerator.Create();
+TerrainGenerator.Size := FSize;
 FMesh := TerrainGenerator.GenerateMesh(Context, @TSGExample16VertexFunction, @TSGExample16ColorFunction);
 TerrainGenerator.Destroy();
 if FMesh <> nil then
@@ -147,14 +152,42 @@ inherited;
 end;
 
 procedure TSGExample16.Paint();
+var
+	Light : TSGVertex3f;
 begin
 FCamera.CallAction();
+
+Light.Import(cos(FLightAngle),0.5,sin(FLightAngle));
+Light *= 40;
+FLightAngle += Context.ElapsedTime * 0.01;
+
+Render.Color3f(1,1,1);
+Render.BeginScene(SGR_POINTS);
+Render.Vertex(Light);
+Render.EndScene();
+
+Render.Enable(SGR_LIGHTING);
+Render.Enable(SGR_LIGHT0);
+Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@Light);
+
 if FMesh <> nil then
 	FMesh.Paint();
-DrawDebugCube();
+//DrawDebugCube();
+
+Render.Disable(SGR_LIGHTING);
+
 if (Context.KeyPressedType = SGDownKey) and 
    (Context.KeyPressedChar = 'R') then
 	Generate();
+if (Context.KeyPressedType = SGDownKey) and 
+   (Context.KeyPressedChar in ['0'..'9']) then
+	begin
+	if Context.KeyPressedChar = '0' then
+		FSize := 10
+	else
+		FSize := SGVal(Context.KeyPressedChar);
+	Generate();
+	end;
 end;
 
 procedure TSGExample16.DrawDebugCube();
