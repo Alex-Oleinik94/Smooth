@@ -57,6 +57,14 @@ uses
 var
 	ContextGLUT : TSGContextGLUT = nil;
 
+{$IFDEF GLUT_DEBUG}
+procedure GLUTHint(const S : TSGString);
+begin
+SGLog.Sourse(S);
+WriteLn(S);
+end;
+{$ENDIF}
+
 class function TSGContextGLUT.Suppored() : TSGBoolean;
 begin
 Result := GLUT.GLUTLoaded;
@@ -78,11 +86,12 @@ if FInitialized then
 	if FFullscreen <> b then
 		begin
 		if b then
-			glutFullScreen
+			glutFullScreen()
 		else
 			begin
 			glutReshapeWindow(Width,Height);
-			//glutPositionWindow
+			if glutPositionWindow <> nil then
+				glutPositionWindow(0, 0);
 			end;
 		end;
 inherited;
@@ -105,21 +114,25 @@ end;
 
 procedure GLUTDrawGLScreen; cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTDrawGLScreen');{$ENDIF}
 ContextGLUT.Paint();
 end;
 
 procedure GLUTIdle; cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTIdle');{$ENDIF}
 glutPostWindowRedisplay(glutGetWindow());
 end;
 
 procedure GLUTVisible(vis:integer); cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTVisible(Visible='+SGStr(vis)+')');{$ENDIF}
 glutIdleFunc(@GLUTIdle);
 end;
 
 procedure GLUTReSizeScreen(Width, Height: Integer); cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTReSizeScreen(Width='+SGStr(Width)+',Height='+SGStr(Height)+')');{$ENDIF}
 if Height = 0 then
 	Height := 1;
 ContextGLUT.Width  := Width;
@@ -129,11 +142,11 @@ end;
 
 procedure GLUTKeyboard(Key: byte{glint}; X, Y: Longint); cdecl;
 begin
-//WriteLn(Key,' ',GLUT_KEY_F11);
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTReSizeScreen(Key='+SGStr(Key)+',X='+SGStr(X)+',Y='+SGStr(Y)+'), Char(Key)="'+Char(Key)+'"');{$ENDIF}
 ContextGLUT.FCursorMoution.x:=x;
 ContextGLUT.FCursorMoution.y:=y;
 
-ContextGLUT.SetKey(SGDownKey,Key);
+ContextGLUT.SetKey(SGUpKey, Key);
 end;
 
 procedure GLUTMouse(Button:integer; State:integer; x,y:integer);cdecl;
@@ -141,6 +154,7 @@ var
 	Bnt:TSGCursorButtons;
 	BntType:TSGCursorButtonType;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMouse');{$ENDIF}
 ContextGLUT.FCursorMoution.x:=x;
 ContextGLUT.FCursorMoution.y:=y;
 case Button of
@@ -152,51 +166,29 @@ GLUT_MIDDLE_BUTTON:
 	Bnt:=SGMiddleCursorButton;
 end;
 if State=0 then
-	begin
-	BntType:=SGDownKey;
-	ContextGLUT.FCursorKeysPressed[Bnt]:=True;
-	end
+	BntType:=SGDownKey
 else
-	begin
 	BntType:=SGUpKey;
-	ContextGLUT.FCursorKeysPressed[Bnt]:=False;
-	end;
-ContextGLUT.FCursorKeyPressed:=Bnt;
-ContextGLUT.FCursorKeyPressedType:=BntType;
+ContextGLUT.SetCursorKey(BntType, Bnt);
 end;
 
 procedure GLUTMotionPassive(x,y:longint);cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMotionPassive');{$ENDIF}
 ContextGLUT.FCursorMoution.x:=x;
 ContextGLUT.FCursorMoution.y:=y;
-ContextGLUT.FCursorKeysPressed[SGLeftCursorButton]:=False;
-ContextGLUT.FCursorKeysPressed[SGMiddleCursorButton]:=False;
-ContextGLUT.FCursorKeysPressed[SGRightCursorButton]:=False;
 end;
 
 procedure GLUTMotion(x,y:longint);cdecl;
 begin
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMotion');{$ENDIF}
 ContextGLUT.FCursorMoution.x:=x;
 ContextGLUT.FCursorMoution.y:=y;
 end;
 
-procedure TSGContextGLUT.Resize;
+procedure GLUTWindowStatus(Status:integer); cdecl;
 begin
-inherited;
-end;
-
-constructor TSGContextGLUT.Create();
-begin
-inherited;
-FCursorMoution.Import();
-end;
-
-destructor TSGContextGLUT.Destroy();
-begin
-if glutGetWindow() <> 0 then
-	glutDestroyWindow(glutGetWindow());
-ContextGLUT := nil;
-inherited;
+{$IFDEF GLUT_DEBUG}GLUTHint('GLUTWindowStatus(Status='+SGStr(Status)+')');{$ENDIF}
 end;
 
 procedure TSGContextGLUT.Initialize();
@@ -236,11 +228,31 @@ glutKeyboardFunc(TF(@GLUTKeyboard));
 glutMouseFunc(@GLUTMouse);
 glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
-glutSetIconTitle(PChar(5));
+//glutSetIconTitle(PChar(5));
+//glutWindowStatusFunc(@GLUTWindowStatus);
 
 Active := InitRender();
 if Active then
 	inherited;
+end;
+
+procedure TSGContextGLUT.Resize;
+begin
+inherited;
+end;
+
+constructor TSGContextGLUT.Create();
+begin
+inherited;
+FCursorMoution.Import();
+end;
+
+destructor TSGContextGLUT.Destroy();
+begin
+if glutGetWindow() <> 0 then
+	glutDestroyWindow(glutGetWindow());
+ContextGLUT := nil;
+inherited;
 end;
 
 function TSGContextGLUT.InitRender() : TSGBoolean;
