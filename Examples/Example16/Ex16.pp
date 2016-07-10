@@ -80,7 +80,7 @@ begin
 FFont := nil;
 FCamera := nil;
 FMesh := nil;
-FSize := 7;
+FSize := 9;
 FLightAngle := 0;
 
 inherited Create(VContext);
@@ -106,17 +106,33 @@ function TSGExample16VertexFunction(const VX, VY, VSize : TSGLongWord; const VAl
 begin
 Result.Import(
 	TSGExample16CorrectFloat(VX, VSize),
-	VAltitude * 40, 
+	((VAltitude + 0.41) / 0.82) * ((VAltitude + 0.41) / 0.82) * 40, 
 	TSGExample16CorrectFloat(VY, VSize));
+end;
+
+function TSGExample16ColorShiftFunction(const P, P1, P2 : TSGFloat;const C1, C2 : TSGColor4f):TSGColor4f;
+begin
+Result.Import(0,0,0,0);
+if (P >= P1 - SGZero) and (P <= P2 + SGZero) then
+	begin
+	Result := 
+		C1 * ((P2 - P) / Abs(P2 - P1)) +
+		C2 * ((P - P1) / Abs(P2 - P1));
+	end;
 end;
 
 function TSGExample16ColorFunction(const VAltitude : TSGFloat) : TSGColor4f;
 var
 	A : TSGFloat;
 begin
-A := (VAltitude + 0.4) / 0.8;
-
-Result := SGVertex4fImport(0,1,0,1) * A + SGVertex4fImport(0,0,1,1) * (1 - A);
+A := (VAltitude + 0.41) / 0.82;
+Result := TSGExample16ColorShiftFunction(A, 0,    0.33, SGVertex4fImport(0,0,1,1), SGVertex4fImport(0.3,0.3,0.3,1))
+	    + TSGExample16ColorShiftFunction(A, 0.33, 0.66, SGVertex4fImport(0.3,0.3,0.3,1), SGVertex4fImport(0.545,0.411,0.007,1))
+        + TSGExample16ColorShiftFunction(A, 0.66,    1, SGVertex4fImport(0.545,0.411,0.007,1), SGVertex4fImport(0,1,0,1));
+if A > 1 then
+	Result.Import(1,1,1,1)
+else if A < 0 then
+	Result.Import(0, 0, 1/4, 1);
 end;
 
 procedure TSGExample16.Generate();

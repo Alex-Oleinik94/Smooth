@@ -27,24 +27,24 @@ type
 		class function ClassName() : TSGString; override;
 			protected
 		FCornersAltitudes : TSGFTGCornersAltitudes;
-		FSize : TSGLongWord;
+		FSize : TSGLongInt;
 		FAltitude : TSGFloat;
 			protected
-		procedure SetSize(const VSize : TSGLongWord);
+		procedure SetSize(const VSize : TSGLongInt);
 			public
 		function GenerateMesh(const VContext : ISGContext; const VVertexFunction : TSGFTGVertexFunction; const VColorFunction : TSGFTGColorFunction = nil) : TSG3DObject;
 		function GenerateTerrain() : TSGFTGTerrain;
 			public
 		property Altitude : TSGFloat write FAltitude;
-		property Size : TSGLongWord write SetSize;
+		property Size : TSGLongInt write SetSize;
 		property CornersAltitudes : TSGFTGCornersAltitudes write FCornersAltitudes;
 		end;
 
 implementation
 
-procedure TSGFractalTerrainGenerator.SetSize(const VSize : TSGLongWord);
+procedure TSGFractalTerrainGenerator.SetSize(const VSize : TSGLongInt);
 
-function SizeRec(const VRecSize : TSGLongWord) : TSGLongWord;
+function SizeRec(const VRecSize : TSGLongInt) : TSGLongInt;
 begin
 if VRecSize = 0 then
 	Result := 0
@@ -62,12 +62,12 @@ function TSGFractalTerrainGenerator.GenerateMesh(const VContext : ISGContext; co
 var
 	Terrain : TSGFTGTerrain = nil;
 
-function CalcNormal(const VVector : TSGVector3f; const VX, VY, VSize : TSGLongWord):TSGVector3f;
+function CalcNormal(const VVector : TSGVector3f; const VX, VY, VSize : TSGLongInt):TSGVector3f;
 var
 	Points : array [0..3] of TSGVertex3f;
 	PointsExists : array [0..3] of TSGBoolean = (False, False, False, False);
 	TotalExists : TSGByte = 0;
-	i, ii : TSGLongWord;
+	i, ii : TSGLongInt;
 begin
 PointsExists[0] := (VX > 0) and (VY > 0);
 if PointsExists[0] then
@@ -102,7 +102,7 @@ else
 end;
 
 var
-	i, ii : TSGLongWord;
+	i, ii : TSGLongInt;
 	VertexColor : TSGColor4f;
 	Vector : TSGVector3f;
 begin
@@ -152,13 +152,13 @@ end;
 
 function TSGFractalTerrainGenerator.GenerateTerrain() : TSGFTGTerrain;
 var
-	i : TSGLongWord;
+	i : TSGLongInt;
 
-procedure Rec(const VX, VY, VSize : TSGLongWord; const VAltitude : TSGFloat);
+procedure Rec(const VX, VY, VSize : TSGLongInt; const VAltitude : TSGFloat; const RecCount : TSGLongInt);
 var
-	MX, MY : TSGLongWord;
-	VLSize : TSGLongWord;
-	VLSize2 : TSGLongWord;
+	MX, MY : TSGLongInt;
+	VLSize : TSGLongInt;
+	VLSize2 : TSGLongInt;
 
 function RandomAltitudeShift() : TSGFloat;
 begin
@@ -177,32 +177,74 @@ VAverageAltitude :=
 Result[MX, MY] := VAverageAltitude + RandomAltitudeShift();
 end;
 
-procedure InitBorderPointAltitude(const VX, VY, VX1, VY1, VX2, VY2 : TSGLongWord);
+procedure InitBorderPointAltitude(const VX, VY, VX1, VY1, VX2, VY2, VX3, VY3, VX4, VY4 : TSGLongInt);overload;
+begin
+Result[VX, VY] := (Result[VX1, VY1] + Result[VX2, VY2] + Result[VX3, VY3] + Result[VX4, VY4] ) / 4 + RandomAltitudeShift();
+end;
+
+procedure InitBorderPointAltitude(const VX, VY, VX1, VY1, VX2, VY2, VX3, VY3 : TSGLongInt);overload;
+begin
+Result[VX, VY] := (Result[VX1, VY1] + Result[VX2, VY2] + Result[VX3, VY3]) / 3 + RandomAltitudeShift();
+end;
+
+procedure InitBorderPointAltitude(const VX, VY, VX1, VY1, VX2, VY2 : TSGLongInt);overload;
 begin
 Result[VX, VY] := (Result[VX1, VY1] + Result[VX2, VY2] ) / 2 + RandomAltitudeShift();
 end;
 
+function TestCoords(const X, Y : TSGLongInt) : TSGBool;
+begin
+Result := (X > 0) and (Y > 0) and (Y < FSize) and (X < FSize);
+end;
+
+procedure InitBorderPointAltitudeWithTest(const VX, VY, VX1, VY1, VX2, VY2, VX3, VY3, VX4, VY4 : TSGLongInt);
+begin
+if TestCoords(VX4, VY4) then
+	InitBorderPointAltitude(
+		VX, VY, 
+		VX1, VY1,
+		VX2, VY2,
+		VX3, VY3,
+		VX4, VY4)
+else
+	InitBorderPointAltitude(
+		VX, VY, 
+		VX1, VY1,
+		VX2, VY2,
+		VX3, VY3);
+end;
+
 procedure InitBorderPointsAltitudes();
 begin
-InitBorderPointAltitude(
+InitBorderPointAltitudeWithTest(
 	VX, VY + VLSize, 
 	VX, VY,
-	VX, VY + VSize);
-InitBorderPointAltitude(
+	MX, MY,
+	VX, VY + VSize,
+	VX - VLSize2, VY + VLSize);
+InitBorderPointAltitudeWithTest(
 	VX + VSize, VY + VLSize, 
 	VX + VSize, VY,
-	VX + VSize, VY + VSize);
-InitBorderPointAltitude(
+	MX, MY,
+	VX + VSize, VY + VSize,
+	VX + VSize + VLSize, VY + VLSize);
+InitBorderPointAltitudeWithTest(
 	VX + VLSize, VY, 
 	VX,          VY,
-	VX + VSize,  VY);
-InitBorderPointAltitude(
+	MX, MY,
+	VX + VSize,  VY,
+	VX + VLSize, VY - VLSize2);
+InitBorderPointAltitudeWithTest(
 	VX + VLSize, VY + VSize, 
 	VX,          VY + VSize,
-	VX + VSize,  VY + VSize);
+	MX, MY,
+	VX + VSize,  VY + VSize,
+	VX + VLSize, VY + VSize + VLSize);
 end;
 
 begin
+if RecCount = 0 then
+	Exit;
 if VSize <= 1 then
 	Exit;
 VLSize := Trunc((VSize + 1) / 2);
@@ -211,12 +253,32 @@ if VLSize + VLSize2 = 0 then
 	Exit;
 MX := VX + VLSize;
 MY := VY + VLSize;
-InitMiddlePointAltitude();
-InitBorderPointsAltitudes();
-Rec(VX,          VY,          VLSize,  VAltitude / 2);
-Rec(VX + VLSize, VY,          VLSize2, VAltitude / 2);
-Rec(VX,          VY + VLSize, VLSize2, VAltitude / 2);
-Rec(MX,          MY,          VLSize2, VAltitude / 2);
+if RecCount = 1 then
+	begin
+	InitMiddlePointAltitude();
+	InitBorderPointsAltitudes();
+	end;
+Rec(VX,          VY,          VLSize,  VAltitude / 2, RecCount - 1);
+Rec(VX + VLSize, VY,          VLSize2, VAltitude / 2, RecCount - 1);
+Rec(VX,          VY + VLSize, VLSize2, VAltitude / 2, RecCount - 1);
+Rec(MX,          MY,          VLSize2, VAltitude / 2, RecCount - 1);
+end;
+
+function GetQuantityCounts(const VSize : TSGLongInt) : TSGLongInt;
+
+function QuantRec(const VSize : TSGLongInt) : TSGLongInt;
+var
+	Chunk : TSGLongInt;
+begin
+Result := 0;
+if VSize <= 1 then
+	Exit;
+Chunk := Trunc((VSize + 1) / 2);
+Result := Max(QuantRec(Chunk), QuantRec(VSize - Chunk)) + 1;
+end;
+
+begin
+Result := QuantRec(VSize);
 end;
 
 begin
@@ -233,12 +295,13 @@ Result[FSize - 1, 0        ] := FCornersAltitudes[1];
 Result[FSize - 1, FSize - 1] := FCornersAltitudes[2];
 Result[0,         FSize - 1] := FCornersAltitudes[3];
 
-Rec(0, 0, FSize - 1, FAltitude);
+for i := 1 to GetQuantityCounts(FSize) do
+	Rec(0, 0, FSize - 1, FAltitude, i);
 end;
 
 constructor TSGFractalTerrainGenerator.Create();
 var
-	i : TSGLongWord;
+	i : TSGLongInt;
 begin
 inherited;
 Size := 7;
