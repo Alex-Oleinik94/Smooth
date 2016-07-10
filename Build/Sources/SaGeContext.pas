@@ -290,7 +290,15 @@ procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContex
 var
 	Context : TSGContext = nil;
 	IContext : ISGContext = nil;
+
+procedure Hint(const S : TSGString);
 begin
+SGLog.Sourse(S);
+WriteLn(S);
+end;
+
+begin
+Hint('Run (Class="'+VPaintableClass.ClassName() +'", Context="'+VContextClass.ClassName()+'", Render="'+VRenderClass.ClassName()+'", Fullscreen="'+SGStr(VFullscreen)+'")');
 Context := VContextClass.Create();
 IContext := Context;
 with Context do

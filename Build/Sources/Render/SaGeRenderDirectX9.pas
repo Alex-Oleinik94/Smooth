@@ -48,6 +48,7 @@ type
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);override;
@@ -250,6 +251,11 @@ function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;i
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
+
+class function TSGRenderDirectX9.ClassName() : TSGString; 
+begin
+Result := 'TSGRenderDirectX9';
+end;
 
 class function TSGRenderDirectX9.Suppored() : TSGBoolean;
 begin

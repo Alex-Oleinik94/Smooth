@@ -271,6 +271,8 @@ type
 		procedure Paint();override;
 		procedure DeleteDeviceResourses();override;
 		procedure LoadDeviceResourses();override;
+		procedure CustomPaint(VCanReplace : TSGBool);
+		function UpDateScreen() : TSGBoolean;
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -3692,10 +3694,56 @@ if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	end;
 end;
 
+procedure TSGScreen.CustomPaint(VCanReplace : TSGBool);
+var
+	i : TSGLongWord;
+begin
+InProcessing := True;
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before "DrawDrawClasses();"');
+	{$ENDIF}
+DrawDrawClasses();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before over updating');
+	{$ENDIF}
+
+Render.LineWidth(1);
+Render.InitMatrixMode(SG_2D);
+
+VCanReplace:=False;
+for i:=0 to High(SGScreens) do
+	if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
+		SGScreens[i].FScreen.FromUpDate(VCanReplace);
+
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Before drawing');
+	{$ENDIF}
+
+FromDraw();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.Paint() : Beining');
+	{$ENDIF}
+InProcessing := False;
+end;
+
+function TSGScreen.UpDateScreen() : TSGBoolean;
+begin
+InProcessing := True;
+Result := True;
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor(CanRePleace);"');
+	{$ENDIF}
+FromUpDateUnderCursor(Result);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate(CanRePleace);"');
+	{$ENDIF}
+FromUpDate(Result);
+InProcessing := False;
+end;
+
 procedure TSGScreen.Paint();
 var
-	CanRePleace : TSGBoolean = True;
-	i : TSGLongWord;
+	CanRePleace : TSGBoolean;
 begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
@@ -3711,43 +3759,8 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 	Context.SetKey(SGNullKey,0);
 	end;
 
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before "FromUpDateUnderCursor(CanRePleace);"');
-	{$ENDIF}
-
-InProcessing := True;
-
-FromUpDateUnderCursor(CanRePleace);
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before "FromUpDate(CanRePleace);"');
-	{$ENDIF}
-FromUpDate(CanRePleace);
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before "DrawDrawClasses();"');
-	{$ENDIF}
-DrawDrawClasses();
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before over updating');
-	{$ENDIF}
-
-Render.LineWidth(1);
-Render.InitMatrixMode(SG_2D);
-
-CanRePleace:=False;
-for i:=0 to High(SGScreens) do
-	if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
-		SGScreens[i].FScreen.FromUpDate(CanRePleace);
-
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before drawing');
-	{$ENDIF}
-
-FromDraw();
-
-InProcessing := False;
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Beining');
-	{$ENDIF}
+CanRePleace := UpDateScreen();
+CustomPaint(CanRePleace);
 end;
 
 initialization

@@ -742,7 +742,13 @@ type
 		procedure Paint();override;
 		procedure LoadDeviceResourses();override;
 		procedure DeleteDeviceResourses();override;
+		class function ClassName() : TSGString;override;
 		end;
+
+class function TSGAllApplicationsDrawable.ClassName() : TSGString;
+begin
+Result := 'TSGAllApplicationsDrawable';
+end;
 
 constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
 begin

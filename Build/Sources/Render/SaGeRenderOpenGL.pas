@@ -120,6 +120,7 @@ type
 		procedure Viewport(const a,b,c,d:LongWord);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);override;
@@ -287,6 +288,11 @@ procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
 procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
+
+class function TSGRenderOpenGL.ClassName() : TSGString; 
+begin
+Result := 'TSGRenderOpenGL';
+end;
 
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK}
 procedure TSGRenderOpenGL_DynLinkError(const FunctionName : TSGString);

@@ -50,6 +50,7 @@ type
 		function  ShiftClientArea() : TSGPoint2int32; override;
 		procedure Kill();override;
 		class function Suppored() : TSGBoolean; override;
+		class function ClassName() : TSGString;override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
@@ -107,6 +108,11 @@ uses
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+class function TSGContextWinAPI.ClassName() : TSGString;
+begin
+Result := 'TSGContextWinAPI';
+end;
 
 class function TSGContextWinAPI.Suppored() : TSGBoolean; 
 begin
