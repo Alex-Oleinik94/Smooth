@@ -14,19 +14,21 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	crt
+	,Math
+	
+	,SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
-	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
 	,SaGePhysics
 	,SaGeImages
-	,Math
+	,SaGeFractalTerrain
 	;
 
 type
@@ -36,9 +38,12 @@ type
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
-			private
+			protected
 		FCamera : TSGCamera;
 		FFont : TSGFont;
+		FMesh : TSG3DObject;
+			protected
+		procedure Generate();
 		end;
 
 {$IFDEF ENGINE}
@@ -54,6 +59,7 @@ constructor TSGExample16.Create(const VContext : ISGContext);
 begin
 FFont := nil;
 FCamera := nil;
+FMesh := nil;
 
 inherited Create(VContext);
 
@@ -70,6 +76,27 @@ FCamera.Up       := SGVertex3fImport(0,0,1);
 FCamera.Location := SGVertex3fImport(0,-350,100);
 FCamera.View     := (SGVertex3fImport(0,0,0)-FCamera.Location).Normalized();
 FCamera.Location := FCamera.Location;
+
+Generate();
+end;
+
+procedure TSGExample16.Generate();
+var
+	TerrainGenerator : TSGFractalTerrainGenerator;
+begin
+if FMesh <> nil then
+	begin
+	FMesh.Destroy();
+	FMesh := nil;
+	end;
+TerrainGenerator := TSGFractalTerrainGenerator.Create();
+FMesh := TerrainGenerator.Generate();
+TerrainGenerator.Destroy();
+if FMesh <> nil then
+	begin
+	FMesh.Context := Context;
+	FMesh.LoadToVBO();
+	end;
 end;
 
 destructor TSGExample16.Destroy();
@@ -89,7 +116,9 @@ end;
 
 procedure TSGExample16.Paint();
 begin
-
+FCamera.CallAction();
+if FMesh <> nil then
+	FMesh.Paint();
 end;
 
 {$IFNDEF ENGINE}
