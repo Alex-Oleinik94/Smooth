@@ -198,7 +198,10 @@ end;
 procedure TSGInterfacedObject.DestroyFromInterface();
 begin
 if Self <> nil then
+	begin
+	WriteLn('Destroying from interface ' + ClassName());
 	Self.Destroy();
+	end;
 end;
 
 function TSGExtendedPaintable.Suppored() : TSGBoolean;
@@ -251,8 +254,7 @@ begin
 Result := InterlockedDecrement(FReferenceCount); 
 if Result = 0 then
 	begin
-	WriteLn('?????._Release = null');
-	Destroy();
+	DestroyFromInterface();
 	end;
 end;
 

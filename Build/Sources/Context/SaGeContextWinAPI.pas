@@ -963,6 +963,8 @@ Result := true;
 end;
 
 procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
+var
+	CM : PChar;
 begin
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
@@ -978,7 +980,9 @@ if hWindow<>0 then
 	CloseHandle( hWindow);
 	hWindow:=0;
 	end;
-UnregisterClass('SaGe Window Class', System.MainInstance);
+CM := SGStringToPChar(FWindowClassName);
+UnregisterClass(CM, System.MainInstance);
+FreeMem(CM);
 end;
 
 procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean); 
