@@ -187,7 +187,8 @@ end;
 
 destructor TSGContextGLUT.Destroy();
 begin
-glutDestroyWindow(glutGetWindow());
+if glutGetWindow() <> 0 then
+	glutDestroyWindow(glutGetWindow());
 ContextGLUT := nil;
 inherited;
 end;

@@ -3684,7 +3684,7 @@ end;
 
 procedure TSGScreen.Resize();
 begin
-if (SGScreen <> nil) then if SGScreen.ContextAssigned()then if Render.Width <> 0 then if Render.Height <> 0 then
+if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	begin
 	SetBounds(0, 0, Render.Width, Render.Height);
 	BoundsToNeedBounds();

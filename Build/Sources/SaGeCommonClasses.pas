@@ -42,6 +42,8 @@ type
 			public
 		constructor Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);virtual;
 		function LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;virtual;
+		class function Copy(const VCursor : TSGCursor):TSGCursor;
+		procedure CopyFrom(const VCursor : TSGCursor);
 			private
 		FHotPixel : TSGPoint2int32;
 		FStandartCursor : TSGCursorHandle;
@@ -234,6 +236,19 @@ implementation
 uses
 	SaGeImages;
 
+procedure TSGCursor.CopyFrom(const VCursor : TSGCursor);
+begin
+(Self as TSGBitMap).CopyFrom(VCursor as TSGBitMap);
+FHotPixel       := VCursor.FHotPixel;
+FStandartCursor := VCursor.FStandartCursor;
+end;
+
+class function TSGCursor.Copy(const VCursor : TSGCursor):TSGCursor;
+begin
+Result := TSGCursor.Create();
+Result.CopyFrom(VCursor);
+end;
+
 function TSGCursor.LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;
 var
 	Image : TSGImage;
@@ -241,7 +256,7 @@ begin
 Image := TSGImage.Create(VFileName);
 Image.Loading();
 
-CopyFrom(Image.Image);
+(Self as TSGBitMap).CopyFrom(Image.Image);
 HotPixelX := Trunc(HotX * Width );
 HotPixelY := Trunc(HotY * Height);
 

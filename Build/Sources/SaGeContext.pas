@@ -255,7 +255,7 @@ FPaintable     := FormerContext.FPaintable;
 FPaintableClass:= FormerContext.FPaintableClass;
 FShowCursor    := FormerContext.FShowCursor;
 FIcon          := FormerContext.FIcon;
-FCursor        := FormerContext.FCursor;
+FCursor        := TSGCursor.Copy(FormerContext.FCursor);
 FActive        := FormerContext.FActive;
 FormerContext.FPaintable := nil;
 end;
@@ -267,14 +267,14 @@ var
 	NewContext : TSGContext = nil;
 begin
 Result := False;
-if Context.Active and (Context.NewContext <> nil) and (not (Context is Context.NewContext)) then
+if Context.Active and (Context.NewContext <> nil) then
 	begin
 	NewContext := Context.NewContext.Create();
 	Context.DeleteDeviceResourses();
 	NewContext.MoveInfo(Context);
+	IContext := NewContext;
 	Context.Destroy();
 	Context := NewContext;
-	IContext := Context;
 	Context.Initialize();
 	Context.LoadDeviceResourses();
 	Result := Context.Active;
@@ -526,9 +526,13 @@ StartComputeTimer();
 FInitialized := True;
 if FPaintableClass <> nil then
 	begin
-	SGScreen.Load(Self);
-	FPaintable := FPaintableClass.Create(Self);
-	FPaintable.LoadDeviceResourses();
+	if not SGScreen.ContextAssigned() then
+		SGScreen.Load(Self);
+	if FPaintable = nil then
+		begin
+		FPaintable := FPaintableClass.Create(Self);
+		FPaintable.LoadDeviceResourses();
+		end;
 	end;
 end;
 

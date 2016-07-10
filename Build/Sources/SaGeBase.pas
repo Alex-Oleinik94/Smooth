@@ -1765,7 +1765,7 @@ if WordCount > 0 then
 	TempS := '  ';
 	for i := 0 to High(ArS) do
 		begin
-		if ii = n - 1 then
+		if (ii = n - 1) or (i = High(ArS)) then
 			TempS += ArS[i]
 		else
 			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
