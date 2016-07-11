@@ -217,6 +217,7 @@ type
 		constructor Create();override;deprecated;
 		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);virtual;
+		class function ClassName() : TSGString; override;
 			private
 		FContext : PISGContext;
 			public
@@ -235,6 +236,11 @@ implementation
 
 uses
 	SaGeImages;
+
+class function TSGDrawable.ClassName() : TSGString;
+begin
+Result := 'TSGDrawable';
+end;
 
 procedure TSGCursor.CopyFrom(const VCursor : TSGCursor);
 begin

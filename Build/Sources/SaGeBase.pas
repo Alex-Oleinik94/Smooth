@@ -715,11 +715,26 @@ operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF 
 function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 implementation
 
 uses
 	StrMan;
+
+function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	i : TSGLongWord;
+begin
+Result := nil;
+if SL = nil then
+	exit;
+if Length(SL) = 0 then
+	exit;
+SetLength(Result, Length(SL));
+for i := 0 to High(SL) do
+	Result[i] := SGUpCaseString(SL[i]);
+end;
 
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
@@ -1032,6 +1047,7 @@ function SGDownCaseString(const str:TSGString):TSGString;
 var
 	i:TSGMaxEnum;
 begin
+Result := '';
 for i:=1 to Length(str) do
 	Result+=DownCase(str[i]);
 end;

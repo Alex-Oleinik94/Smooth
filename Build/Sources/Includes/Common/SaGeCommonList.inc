@@ -7,9 +7,25 @@ operator + (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF 
 operator - (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator * (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator in(const B : DATATYPE; const A : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	C : DATATYPE;
+begin
+Result := True;
+for C in A do
+	begin
+	if not (C in B) then
+		begin
+		Result := False;
+		break;
+		end;
+	end;
+end;
+
 operator in(const B : DATATYPE; const A : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	C : DATATYPE;
@@ -29,7 +45,7 @@ var
 	Exists : TSGBoolean = False;
 begin
 Result := A;
-if Result = nil then
+if (Result = nil) or (Length(Result) = 0) then
 	begin
 	SetLength(Result, 1);
 	Result[High(Result)] := B;

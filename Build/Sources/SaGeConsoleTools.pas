@@ -45,6 +45,7 @@ uses
 	,SaGeVersion
 	,SaGeMakefileReader
 	,SaGeCommonClasses
+	,SaGeFileOpener
 	
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
@@ -85,7 +86,6 @@ procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure FPCTCTransliater();
 procedure GoogleReNameCache();
-procedure GoViewer(const FileWay : String);
 
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -109,6 +109,7 @@ procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleWriteOpenableExpansions(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -141,6 +142,17 @@ else
 	end;
 end;
 
+procedure SGConsoleWriteOpenableExpansions(const VParams : TSGConcoleCallerParams = nil);
+begin
+if (VParams <> nil) and (Length(VParams) > 0) then
+	begin
+	SGPrintEngineVersion();
+	WriteLn('Params is not allowed here!');
+	end
+else
+	SGWriteOpenableExpansions();
+end;
+
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
@@ -160,6 +172,7 @@ ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU
 ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
 ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
 ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
+ConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
 ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert header to dynamic utility');
 ConsoleCaller.AddComand(TSGConcoleCallerProcedure(@SGConsoleShowAllApplications), ['GUI',''], 'Shows all scenes in this application');
 ConsoleCaller.Execute();
@@ -467,10 +480,7 @@ begin
 if OpenFileCheck() then
 	begin
 	SGPrintEngineVersion();
-	WriteLn('Try to open file(-s):');
-	for i := 0 to High(FParams) do
-		WriteLn('   ',FParams[i]);
-	ReadLn();
+	SGTryOpenFiles(FParams);
 	end
 else
 	begin
@@ -491,7 +501,7 @@ else
 							begin
 							if ii <> 0 then
 								Write(',');
-							Write(' "--',StringCase(FComands[i].FSyntax[ii],@LowerCase),'"');
+							Write(' "--',SGDownCaseString(FComands[i].FSyntax[ii]),'"');
 							end;
 					WriteLn(' - ',FComands[i].FHelpString);
 					end;
@@ -521,7 +531,7 @@ else
 						begin
 						SGPrintEngineVersion();
 						TextColor(12);
-						Write('Console caller : error : abstrac comand "');
+						Write('Console caller : error : abstract comand "');
 						TextColor(15);
 						Write(SGDownCaseString(Comand));
 						TextColor(12);
@@ -1198,55 +1208,6 @@ While (dos.DosError<>18) do
 	DOS.findnext(sr);
 	end;
 DOS.findclose(sr);
-end;
-
-var
-	ViewerImage:TSGImage = nil;
-procedure ViewerDraw(const Context:PSGContext);
-begin
-Context^.Render.InitMatrixMode(SG_2D);
-ViewerImage.DrawImageFromTwoVertex2f(
-	SGVertex2fImport(0,0),
-	SGVertex2fImport(Context^.Width,Context^.Height));
-end;
-
-procedure GoViewer(const FileWay:String);
-var
-	Context:TSGContext = nil;
-begin
-if 
-(SGGetFileExpansion(FileWay)='PNG') or
-(SGGetFileExpansion(FileWay)='JPG') or 
-(SGGetFileExpansion(FileWay)='JPEG') or 
-(SGGetFileExpansion(FileWay)='BMP') or 
-(SGGetFileExpansion(FileWay)='TGA') then
-	begin
-	ViewerImage:=TSGImage.Create();
-	ViewerImage.Way:=FileWay;
-	if ViewerImage.Loading() then
-		begin
-		Context:=TSGCompatibleContext.Create();
-		Context.Width:=ViewerImage.Width;
-		Context.Height:=ViewerImage.Height;
-		Context.Fullscreen:=False;
-		//Context.DrawProcedure:=TSGContextProcedure(@ViewerDraw);
-		Context.Title:='"'+FileWay+'" - SaGe Image Viewer';
-		Context.RenderClass:=TSGCompatibleRender;
-		Context.SelfLink:=@Context;
-		Context.Initialize();
-		ViewerImage.SetContext(Context);
-		ViewerImage.ToTexture();
-		Context.Run();
-		Context.Destroy();
-		end
-	else
-		begin
-		WriteLn('Error while loading bit map!');
-		end;
-	ViewerImage.Destroy();
-	end
-else
-	WriteLn('Unknown expansion "',(SGGetFileExpansion(FileWay)),'"!');
 end;
 
 end.
