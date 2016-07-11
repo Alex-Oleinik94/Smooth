@@ -80,7 +80,7 @@ var
 	S : TSGString;
 begin
 Result := '';
-if SGResourseFiles.FileExists(VersionFileName) then
+if (SGResourseFiles <> nil) and SGResourseFiles.FileExists(VersionFileName) then
 	begin
 	Stream := TMemoryStream.Create();
 	SGResourseFiles.LoadMemoryStreamFromFile(Stream, VersionFileName);
@@ -111,7 +111,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	WriteLn(SGGetEngineFullVersion());
+	SGHint(SGGetEngineFullVersion());
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	end;
 VersionPrinted := True;
@@ -153,7 +153,7 @@ exports
 
 initialization
 begin
-SGLog.Sourse(SGGetEngineFullVersion());
+
 end;
 
 end.

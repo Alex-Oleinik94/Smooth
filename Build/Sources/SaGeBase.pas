@@ -716,11 +716,17 @@ function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}in
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGHint(const S : TSGString);
 
 implementation
 
 uses
 	StrMan;
+procedure SGHint(const S : TSGString);
+begin
+SGLog.Sourse(S);
+WriteLn(S);
+end;
 
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var

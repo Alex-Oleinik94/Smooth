@@ -75,6 +75,7 @@ type
 		function WaysEqual(w1,w2:TSGString):TSGBoolean;
 		function FileExists(const FileName : TSGString):TSGBoolean;inline;
 		procedure ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
+		procedure WriteFiles();
 			private
 		FArFiles:packed array of
 			packed record
@@ -94,6 +95,9 @@ procedure SGRegisterUnit(const UnitName, RFFile : TSGString);{$IFDEF SUPPORTINLI
 procedure SGClearRFFile(const RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	SaGeVersion;
 
 procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -288,6 +292,30 @@ OutStream.Destroy();
 end;
 
 (*===========TSGResourseFiles===========*)
+
+procedure TSGResourseFiles.WriteFiles();
+var
+	TotalSize : TSGQuadWord = 0;
+	Size : TSGQuadWord = 0;
+	TotalFilesCount : TSGLongWord = 0;
+	i : TSGLongWord;
+	Stream : TMemoryStream;
+begin
+SGPrintEngineVersion();
+SGHint('Files:');
+if FArFiles <> nil then if Length(FArFiles) > 0 then
+	for i:= 0 to High(FArFiles) do
+		begin
+		Stream := TMemoryStream.Create();
+		FArFiles[i].FSelf(Stream);
+		Size := Stream.Size;
+		Stream.Destroy();
+		SGHint('    ' + FArFiles[i].FWay + ' (' + SGGetSizeString(Size,'EN') + ')');
+		TotalFilesCount += 1;
+		TotalSize += Size;
+		end;
+SGHint('Total files: ' + SGStr(TotalFilesCount) + ', total size: ' + SGGetSizeString(TotalSize,'EN'));
+end;
 
 procedure TSGResourseFiles.ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
 

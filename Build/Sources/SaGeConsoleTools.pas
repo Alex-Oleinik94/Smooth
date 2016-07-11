@@ -153,6 +153,17 @@ else
 	SGWriteOpenableExpansions();
 end;
 
+procedure SGConsoleWriteFiles(const VParams : TSGConcoleCallerParams = nil);
+begin
+if (VParams <> nil) and (Length(VParams) > 0) then
+	begin
+	SGPrintEngineVersion();
+	WriteLn('Params is not allowed here!');
+	end
+else
+	SGResourseFiles.WriteFiles();
+end;
+
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
@@ -167,7 +178,8 @@ ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTP
 ConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
 ConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Inc engine Version');
 ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit');
-ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all Files in this application');
+ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
+ConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
 ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units');
 ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
 ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
