@@ -680,18 +680,23 @@ class function TSGImageFractal.GetColorOne(const a,b,color:LongInt):byte;inline;
 var
 	OutPut : TSGMaxEnum;
 begin
-if Color>b then
+if Color>=b then
 	Result:=255
 else
-	if Color<a then
+	if Color<=a then
 		Result:=0
 	else
 		begin
-		OutPut := Trunc(((b-a)/(color-a))*255);
-		if OutPut > 255 then
-			Result := OutPut mod 256
+		if color-a = 0 then
+			Result := 0
 		else
-			Result := OutPut;
+			begin
+			OutPut := Trunc(((b-a)/(color-a))*255);
+			if OutPut > 255 then
+				Result := OutPut mod 256
+			else
+				Result := OutPut;
+			end;
 		end;
 end;
 

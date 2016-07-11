@@ -11,9 +11,6 @@
 	{$DEFINE SHADERSISPOINTERS}
 	{$ENDIF}
 {$DEFINE INTERPRITATEROTATETRANSLATE}
-{$IFDEF MSWINDOWS}
-	//{$DEFINE WGL_PIXEL_FORMAT}
-	{$ENDIF}
 {$IFNDEF MOBILE}
 	//{$DEFINE RENDER_OGL_DEBUG_DYNLINK}
 	//{$DEFINE USE_GLEXT}
@@ -273,6 +270,10 @@ type
 			// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
 			// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
 			{$ENDIF}
+			protected
+		{$IFDEF MSWINDOWS}
+		function wglSetPixelFormat() : TSGBoolean;
+		{$ENDIF}
 		end;
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
@@ -1352,6 +1353,10 @@ ReadExtensions();
 	{$ENDIF}
 {$ENDIF}
 
+{$IFDEF MSWINDOWS}
+SGLog.Sourse('TSGRenderOpenGL.Init() - wglSetPixelFormat() = ' + SGStr(wglSetPixelFormat()));
+{$ENDIF}
+
 {$IFDEF MOBILE}
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 	{$ENDIF}
@@ -1686,37 +1691,118 @@ begin
 	{$ENDIF}
 end;
 
+{$IFDEF MSWINDOWS}
+function TSGRenderOpenGL.wglSetPixelFormat() : TSGBoolean;
+var
+	pixelFormat : TSGLongInt = 0;
+	numFormats : TSGUInt32 = 0;
+	iAttributes : array[0..99] of TSGLongInt;
+	fAttributes : array[0..1] of TSGFloat = (0, 0);
+	Index : LongWord = 0;
+
+procedure AddAtrib(const A : TSGLongInt);overload;
+begin
+iAttributes[Index] := A;
+Index += 1;
+end;
+
+procedure AddAtrib(const A, B : TSGLongInt);overload;
+begin
+AddAtrib(A);
+AddAtrib(B);
+end;
+procedure AddAtrib(const A : TSGLongInt; const B : ByteBool);overload;
+begin
+AddAtrib(A);
+AddAtrib(TSGLongInt(B));
+end;
+
+procedure FinalizeAttrib();
+begin
+AddAtrib(0,0);
+end;
+
+begin
+Result := False;
+if (dglOpenGL.wglChoosePixelFormatARB = nil) or (Context.Device = nil) then
+	exit;
+
+Index := 0;
+fillchar(pixelFormat, sizeof(pixelFormat), 0);
+fillchar(iAttributes, sizeof(iAttributes), 0);
+
+AddAtrib(WGL_DRAW_TO_WINDOW_ARB, GL_TRUE);
+AddAtrib(WGL_SUPPORT_OPENGL_ARB, GL_TRUE);
+AddAtrib(WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB);
+AddAtrib(WGL_COLOR_BITS_ARB, 24);
+AddAtrib(WGL_ALPHA_BITS_ARB, 8);
+AddAtrib(WGL_DEPTH_BITS_ARB, 24);
+AddAtrib(WGL_STENCIL_BITS_ARB, 8);
+AddAtrib(WGL_DOUBLE_BUFFER_ARB, GL_TRUE);
+//AddAtrib(WGL_SAMPLE_BUFFERS_ARB,GL_TRUE);
+//AddAtrib(WGL_SAMPLES_ARB, 0);
+FinalizeAttrib();
+
+(*AddAtrib(WGL_SUPPORT_OPENGL_ARB, GL_TRUE);
+AddAtrib(WGL_DRAW_TO_WINDOW_ARB, GL_TRUE);
+AddAtrib(WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB);
+AddAtrib(WGL_RED_BITS_ARB, 8);
+AddAtrib(WGL_GREEN_BITS_ARB, 8);
+AddAtrib(WGL_BLUE_BITS_ARB, 8);
+AddAtrib(WGL_ALPHA_BITS_ARB, 8);
+AddAtrib(WGL_DOUBLE_BUFFER_ARB, GL_TRUE);
+AddAtrib(WGL_COLOR_BITS_ARB, 32);
+AddAtrib(WGL_DEPTH_BITS_ARB, 24);
+AddAtrib(WGL_STENCIL_BITS_ARB, 8);
+FinalizeAttrib();*)
+
+Result := dglOpenGL.wglChoosePixelFormatARB(
+	TSGMaxEnum(Context.Device), 
+	@iAttributes[0], 
+	@fAttributes[0], 
+	1, 
+	@pixelFormat, 
+	@numFormats);
+
+if (Result and (numFormats >= 1)) then
+	begin
+	
+	end
+else
+	begin
+	if not Result then
+		SGLog.Sourse(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats returned fail!'])
+	else
+		SGLog.Sourse(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats finded ',numFormats,' formats']);
+	end;
+end;
+{$ENDIF}
+
 function TSGRenderOpenGL.SetPixelFormat():Boolean;overload;
 {$IFDEF MSWINDOWS}
-	{$IFDEF WGL_PIXEL_FORMAT}
-	var
-		pixelFormats : array[0..99] of TSGLongInt;
-		numFormats : TSGUInt32 = 0;
-		attribList : array[0..18] of TSGLongInt =
-		 (
-			//WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-			WGL_RED_BITS_ARB, 8,
-			WGL_GREEN_BITS_ARB, 8,
-			WGL_BLUE_BITS_ARB, 8,
-			WGL_ALPHA_BITS_ARB, 8,
-			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-			WGL_COLOR_BITS_ARB, 32,
-			WGL_DEPTH_BITS_ARB, 24,
-			//WGL_STENCIL_BITS_ARB, 8,
-			0
-		 );
-	{$ELSE WGL_PIXEL_FORMAT}
-	var
-		pfd : PIXELFORMATDESCRIPTOR;
-		iFormat : integer;
-	{$ENDIF WGL_PIXEL_FORMAT}
-	{$ENDIF}
+function WinAPISetPixelFormat() : TSGBoolean;
+var
+	pfd : PIXELFORMATDESCRIPTOR;
+	iFormat : integer;
+begin
+FillChar(pfd, sizeof(pfd), 0);
+pfd.nSize         := sizeof(pfd);
+pfd.nVersion      := 1;
+pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
+pfd.iPixelType    := PFD_TYPE_RGBA;
+pfd.cColorBits    := 32;
+pfd.cDepthBits    := 24;
+pfd.iLayerType    := PFD_MAIN_PLANE;
+iFormat := Windows.ChoosePixelFormat( TSGMaxEnum(Context.Device), @pfd );
+SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
+Result:=Windows.SetPixelFormat( TSGMaxEnum(Context.Device), iFormat, @pfd );
+SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
+end;
+{$ENDIF}
 {$IFDEF DARWIN}
-	var
-		ogl_Attr    : array[ 0..31 ] of DWORD;
-	{$ENDIF}
+var
+	ogl_Attr    : array[ 0..31 ] of DWORD;
+{$ENDIF}
 begin
 Result:=False;
 {$IFDEF DARWIN}
@@ -1729,24 +1815,7 @@ Result:=False;
 	Result:=Assigned( ogl_Format );
 	{$ENDIF}
 {$IFDEF MSWINDOWS}
-	{$IFDEF WGL_PIXEL_FORMAT}
-	fillchar(pixelFormats, sizeof(pixelFormats), 0);
-	Result := dglOpenGL.wglChoosePixelFormatARB(TSGMaxEnum(Context.Device), @attribList, nil, Length(pixelFormats), @pixelFormats[0], @numFormats) <> False;
-	WriteLn(pixelFormats[0],' ',numFormats);
-	{$ELSE WGL_PIXEL_FORMAT}
-	FillChar(pfd, sizeof(pfd), 0);
-	pfd.nSize         := sizeof(pfd);
-	pfd.nVersion      := 1;
-	pfd.dwFlags       := PFD_SUPPORT_OPENGL OR PFD_DRAW_TO_WINDOW OR PFD_DOUBLEBUFFER;
-	pfd.iPixelType    := PFD_TYPE_RGBA;
-	pfd.cColorBits    := 32;
-	pfd.cDepthBits    := 24;
-	pfd.iLayerType    := PFD_MAIN_PLANE;
-	iFormat := Windows.ChoosePixelFormat( TSGMaxEnum(Context.Device), @pfd );
-	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
-	Result:=Windows.SetPixelFormat( TSGMaxEnum(Context.Device), iFormat, @pfd );
-	SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
-	{$ENDIF WGL_PIXEL_FORMAT}
+	Result := WinAPISetPixelFormat();
 	{$ENDIF}
 {$IF defined(LINUX) or defined(ANDROID)}
 	Result:=True;

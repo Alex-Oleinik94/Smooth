@@ -14,6 +14,7 @@ varying vec4 coll;
 vec3 processTexAndBump(int texNumber, int bumpNumber) {
 	vec3 d = processTexture(texNumber);
 	vec3 b = (processTexture(bumpNumber)- 0.5) * 2;
+	b = normalize(b + normalizedNormal);
 	float bs = 
 		#for i 0 /*#1*/-2 max( dot(b, -lightVec/*#i*/), 
 		dot(b, -lightVec/*#99*/)

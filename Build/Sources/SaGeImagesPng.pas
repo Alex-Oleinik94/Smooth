@@ -4,6 +4,8 @@ unit SaGeImagesPng;
 
 interface
 
+function SupporedPNG() : Boolean;
+
 implementation
 
 uses 
@@ -16,6 +18,11 @@ uses
 	,SaGeRenderConstants
 	,SaGeResourseManager
 	;
+
+function SupporedPNG() : Boolean;
+begin
+Result := png.LibPNGLoaded;
+end;
 
 procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;
 procedure SavePNG(const BitMap: TSGBitMap;const Stream: TStream;const  Interlaced: boolean = false);forward;

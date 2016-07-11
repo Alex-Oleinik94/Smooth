@@ -324,8 +324,7 @@ if (ii >= 2) and SGResourseFiles.FileExists(VParams[0]) then
 	if Length(Params)>0 then
 		for i := 2 to High(VParams) do
 			Params[i-2] := VParams[i];
-	SGSaveShaderSourseToFile(VParams[1],
-		SGReadShaderSourseFromFile(VParams[0],Params));
+	SGReadAndSaveShaderSourceFile(VParams[0], VParams[1], Params);
 	SetLength(Params,0);
 	end
 else
@@ -668,6 +667,11 @@ if (VParams<>nil) and (Length(VParams)>0) then
 {$IFDEF WITH_GLUT}
 			else if (S='GLUT') then
 				begin
+				if not TSGContextGLUT.Suppored() then
+					begin
+					WriteLn('GLUT can''t be used! It is not loaded! You can install GLUT for using.');
+					Halt(); 
+					end;
 				{$IFDEF SGMoreDebuging}
 					WriteLn('Engine uses GLUT.');
 					{$ENDIF}

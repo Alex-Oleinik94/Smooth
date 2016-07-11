@@ -870,7 +870,7 @@ case SGGetCoreCount() of
 10:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=6;
 12:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=7;
 16:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=8;
-else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=0;
+else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
 end;
 
 FTNRF:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
@@ -1582,34 +1582,23 @@ function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGExByte;const Re
 var
 	Color : TSGLongWord;
 
-// $RANGECHECKS
-{$IFOPT R+}
-	{$DEFINE RANGECHECKS_OFFED}
-	{$R-}
-	{$ENDIF}
-
 function YellowPil():TSGMandaPixel;
 begin
-	Result.r := trunc(abs(cos(Color) * Color));
-	Result.g := GetColor(Color Div 2,Color ** 2,trunc(abs((cos(Color) ** 2) * Result.r)));
+	Result.r := trunc(abs(cos(Color) * Color)) mod 255;
+	Result.g := GetColor(Color Div 2,Color * Color,trunc(abs((cos(Color) * cos(Color)) * Result.r))mod 500);
 	if Color <> 0 then
 		Result.b := GetColor(
 			Result.g, 
 			Result.r, 
 			(sqr(Result.r)
-		) DIV Color) DIV 128
+		) mod Color)
 	else
 		Result.b := GetColor(
 			Result.g, 
 			Result.r, 
 			(sqr(Result.r)
-		) DIV 255) DIV 158;
+		) mod 255);
 end;
-
-{$IFDEF RANGECHECKS_OFFED}
-	{$R+}
-	{$UNDEFINE RANGECHECKS_OFFED}
-	{$ENDIF}
 
 procedure SwapByte(var a,b:byte);inline;
 var 
@@ -1633,9 +1622,9 @@ case VColorSceme of
 		end
 	else
 		begin
-		Result.r:=GetColor(0,383,Color) div 2;
-		Result.g:=GetColor(128,896,Color);
-		Result.b:=GetColor(0,383,Color);
+		Result.r:=GetColor(0,383,Color mod 383) div 2;
+		Result.g:=GetColor(128,896,Color  mod 896);
+		Result.b:=GetColor(0,383,Color  mod 383);
 		end;
 	end;
 2:
@@ -1670,7 +1659,7 @@ case VColorSceme of
 		Result.g := GetColor(
 			128, 
 			383, 
-			trunc(abs(cos(Color) * Result.r))
+			(trunc(abs(cos(Color) * Result.r)) mod 383)
 		);
 		if (Result.g < Result.r) then
 			Result.b := 
@@ -1681,33 +1670,33 @@ case VColorSceme of
 	end;
 7:
 	begin
-	Result.b:=GetColor(0,383,Color) div 2;
-	Result.r:=GetColor(128,896,Color);
-	Result.g:=GetColor(0,383,Color);
+	Result.b:=GetColor(0,383,Color mod 383) div 2;
+	Result.r:=GetColor(128,896,Color mod 896);
+	Result.g:=GetColor(0,383,Color mod 383);
 	end;
 8:
 	begin
-	Result.g:=GetColor(0,383,Color) div 2;
-	Result.r:=GetColor(128,896,Color);
-	Result.b:=GetColor(0,383,Color);
+	Result.g:=GetColor(0,383,Color mod 383) div 2;
+	Result.r:=GetColor(128,896,Color mod 896);
+	Result.b:=GetColor(0,383,Color mod 383);
 	end;
 9:
 	begin
-	Result.g:=GetColor(0,383,Color) div 2;
-	Result.b:=GetColor(128,896,Color);
-	Result.r:=GetColor(0,383,Color);
+	Result.g:=GetColor(0,383,Color mod 383) div 2;
+	Result.b:=GetColor(128,896,Color mod 896);
+	Result.r:=GetColor(0,383,Color mod 383);
 	end;
 10:
 	begin
-	Result.r:=GetColor(0,383,Color) div 2;
-	Result.b:=GetColor(128,896,Color);
-	Result.g:=GetColor(0,383,Color);
+	Result.r:=GetColor(0,383,Color mod 383) div 2;
+	Result.b:=GetColor(128,896,Color mod 896);
+	Result.g:=GetColor(0,383,Color mod 383);
 	end;
 11:
 	begin
-	Result.b:=GetColor(0,383,Color) div 2;
-	Result.g:=GetColor(128,896,Color);
-	Result.r:=GetColor(0,383,Color);
+	Result.b:=GetColor(0,383,Color mod 383) div 2;
+	Result.g:=GetColor(128,896,Color mod 896);
+	Result.r:=GetColor(0,383,Color mod 383);
 	end;
 12:
 	begin
@@ -1746,9 +1735,9 @@ else
 		end
 	else
 		begin
-		Result.r:=GetColor(200,400,Color);
-		Result.g:=GetColor(0,200,Color);
-		Result.b:=GetColor(100,300,Color);
+		Result.r:=GetColor(200,400,Color mod 400);
+		Result.g:=GetColor(0,200,Color mod 200);
+		Result.b:=GetColor(100,300,Color mod 300);
 		end;
 	end;
 end;

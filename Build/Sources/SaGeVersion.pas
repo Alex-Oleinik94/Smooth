@@ -15,6 +15,7 @@ const
 	VersionFileName = SGEngineDirectory + Slash + 'version.txt';
 
 function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -68,6 +69,11 @@ const
 
 implementation
 
+function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 'SaGe Engine version '+SGGetEngineVersion()+' ('+SGVerOS+' '+SGVerCPU+' bit)';
+end;
+
 function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var 
 	Stream: TMemoryStream;
@@ -105,7 +111,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	WriteLn('SaGe Engine version ',SGGetEngineVersion(),' (',SGVerOS,' ',SGVerCPU,' bit)');
+	WriteLn(SGGetEngineFullVersion());
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	end;
 VersionPrinted := True;
@@ -144,5 +150,10 @@ exports
 	SGGetEngineVersion
 	;
 {$ENDIF}
+
+initialization
+begin
+SGLog.Sourse(SGGetEngineFullVersion());
+end;
 
 end.

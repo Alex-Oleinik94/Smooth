@@ -323,6 +323,9 @@ FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
 	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
 	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['shadow', FLightsCount]));
 
+//SGReadAndSaveShaderSourceFile(Example15Dir + 'main.vert','main_shadow.vert',[FLightsCount, BonesCount]);
+//SGReadAndSaveShaderSourceFile(Example15Dir + 'main.frag','main_shadow.frag',['shadow', FLightsCount]);
+
 for i := 0 to FLightsCount - 1 do
 	begin
 	FLights[i].FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap'+SGStr(i));

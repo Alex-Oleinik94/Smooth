@@ -447,6 +447,7 @@ procedure TSGImage.Saveing(const Format:TSGExByte = SGI_DEFAULT);
 var
 	SaveFormat : TSGExByte;
 	Stream:TMemoryStream = nil;
+
 procedure SaveJpg();
 var
 	BmpStream:TMemoryStream = nil;
@@ -457,18 +458,55 @@ BmpStream.Position:=0;
 SaveJPEG(BmpStream,Stream);
 BmpStream.Destroy();
 end;
+
+function GetDefSaveFormat() : TSGExByte;
+begin
+if Channels=3 then
+	begin
+	{$IFDEF WITHLIBPNG}
+	if SupporedPNG() then
+		Result := SGI_PNG
+	else
+	{$ELSE}
+		Result:=SGI_JPEG;
+	{$ENDIF}
+	end
+else if Channels=4 then
+	begin
+	{$IFDEF WITHLIBPNG}
+	if SupporedPNG() then
+		Result := SGI_PNG
+	else
+	{$ELSE}
+		Result:=SGI_SGIA;
+	{$ENDIF}
+	end
+else 
+	Result:=SGI_JPEG
+end;
+
 begin
 if (FImage=nil) or (FImage.BitMap=nil) then
 	Exit;
 if Format=SGI_DEFAULT then
-	if Channels=3 then
-		SaveFormat:={$IFNDEF WITHLIBPNG}SGI_JPEG{$ELSE}SGI_PNG{$ENDIF}
-	else if Channels=4 then
-		SaveFormat:={$IFNDEF WITHLIBPNG}SGI_SGIA{$ELSE}SGI_PNG{$ENDIF}
-	else 
-		SaveFormat:=SGI_JPEG
+	SaveFormat := GetDefSaveFormat()
 else
 	SaveFormat:=Format;
+{$IFDEF WITHLIBPNG}
+if (SaveFormat = SGI_PNG) and (not SupporedPNG()) then
+	begin
+	if Channels = 4 then
+		begin
+		SaveFormat := SGI_SGIA;
+		SGLog.Sourse('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_SGIA.');
+		end
+	else
+		begin
+		SaveFormat := SGI_JPEG;
+		SGLog.Sourse('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_JPEG.');
+		end;
+	end;
+{$ENDIF}
 Stream:=TMemoryStream.Create();
 case SaveFormat of
 SGI_SGIA:

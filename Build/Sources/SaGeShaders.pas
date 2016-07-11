@@ -94,9 +94,21 @@ function SGCreateShaderProgramFromSourses(const Context : ISGContext;const VVert
 procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const ):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : array of const );{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SGSaveShaderSourseToFile(VOutFileName,SGReadShaderSourseFromFile(VInFileName,VFileParams));
+end;
+
+procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : array of const );{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SGSaveShaderSourseToFile(VOutFileName,SGReadShaderSourseFromFile(VInFileName,VFileParams));
+end;
 
 function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var

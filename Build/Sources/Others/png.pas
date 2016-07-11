@@ -1320,6 +1320,7 @@ function png_get_libpng_ver(png_ptr:png_structp):png_charp;cdecl; external LibPn
 *)
 var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ; 
 
+var LibPNGLoaded : Boolean = False;
 
 implementation
 
@@ -1700,6 +1701,7 @@ Pointer(png_get_header_ver) := LoadProcedure('png_get_header_ver');
 Pointer(png_get_header_version) := LoadProcedure('png_get_header_version');
 Pointer(png_get_libpng_ver) := LoadProcedure('png_get_libpng_ver');
 Load_HINT('Initialization "PNG" unit from "'+SGPCharToString(UnitName)+'": Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+LibPNGLoaded := (UnitLib <> 0) and (CountLoadSuccs <> 0);
 end;
 
 function Load_png() : Boolean;

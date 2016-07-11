@@ -126,8 +126,8 @@ type
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
 		procedure SetClientWidth(const VClientWidth : TSGLongWord);virtual;abstract;
 		procedure SetClientHeight(const VClientHeight : TSGLongWord);virtual;abstract;
-		function  GetWindow() : TSGPointer;virtual;abstract;
-		function  GetDevice() : TSGPointer;virtual;abstract;
+		function  GetWindow() : TSGPointer;virtual;
+		function  GetDevice() : TSGPointer;virtual;
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
 		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual;abstract;
 			public
@@ -220,6 +220,16 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+function  TSGContext.GetWindow() : TSGPointer;
+begin
+Result := nil;
+end;
+
+function  TSGContext.GetDevice() : TSGPointer;
+begin
+Result := nil;
+end;
 
 class function TSGContext.Suppored() : TSGBoolean; 
 begin
