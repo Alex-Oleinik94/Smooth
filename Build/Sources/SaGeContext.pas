@@ -841,6 +841,8 @@ end;
 procedure TSGContext.Resize();
 begin
 SGScreen.Resize();
+if FPaintable <> nil then
+	FPaintable.Resize();
 end;
 
 function TSGContext.CursorWheel():TSGCursorWheel;

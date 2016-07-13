@@ -141,6 +141,7 @@ type
 		function Suppored() : TSGBoolean;
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
+		procedure Resize();
 		end;
 	
 	TSGExtendedPaintable = class(TSGPaintable, ISGDeviceDependent)
@@ -149,6 +150,7 @@ type
 		procedure DeleteDeviceResourses();virtual;
 		procedure LoadDeviceResourses();virtual;
 		function Suppored() : TSGBoolean;virtual;
+		procedure Resize();virtual;
 		end;
 
 procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -207,6 +209,10 @@ end;
 function TSGExtendedPaintable.Suppored() : TSGBoolean;
 begin
 Result := True;
+end;
+
+procedure TSGExtendedPaintable.Resize();
+begin
 end;
 
 procedure TSGExtendedPaintable.DeleteDeviceResourses();

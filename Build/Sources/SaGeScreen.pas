@@ -95,6 +95,7 @@ type
 			public
 		procedure Paint();virtual;
 		procedure DeleteDeviceResourses();virtual;
+		procedure Resize();virtual;
 		procedure LoadDeviceResourses();virtual;
 		function Suppored() : TSGBoolean;virtual;
 			private
@@ -2133,6 +2134,11 @@ if FParent <> nil then
 			end;
 		end;
 	end;
+end;
+
+procedure TSGComponent.Resize();
+begin
+FromResize();
 end;
 
 procedure TSGComponent.DrawDrawClasses();

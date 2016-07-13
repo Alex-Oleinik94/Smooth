@@ -405,7 +405,9 @@ end;
 function TSGResourseFiles.LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
 var
 	i : TSGMaxEnum;
+	CD : TSGString;
 begin
+CD := SGGetCurrentDirectory();
 Result:=False;
 if Stream=nil then
 	Exit;
@@ -419,12 +421,16 @@ if ExistsInFile(FileName) then
 			end;
 	Result:=True;
 	end
-else
-	if SGFileExists(FileName) then
-		begin
-		Stream.LoadFromFile(FileName);
-		Result:=True;
-		end;
+else if SGFileExists(FileName) then
+	begin
+	Stream.LoadFromFile(FileName);
+	Result:=True;
+	end
+else if SGFileExists(CD + FileName) then
+	begin
+	Stream.LoadFromFile(CD + FileName);
+	Result:=True;
+	end;
 if Result then
 	Stream.Position := 0;
 end;

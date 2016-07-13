@@ -722,6 +722,7 @@ implementation
 
 uses
 	StrMan;
+
 procedure SGHint(const S : TSGString);
 begin
 SGLog.Sourse(S);
