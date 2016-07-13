@@ -38,6 +38,7 @@
 	{$SMARTLINK ON}
 	{$R-}
 	{$MACRO ON}
+	{$modeswitch nestedprocvars}
 	{$ENDIF}
 
 {$IFNDEF MOBILE}

@@ -12,6 +12,9 @@ uses
 	;
 
 type
+	TSGFileOpenerDrawable = class;
+	TSGFileOpenerDrawableClass = class of TSGFileOpenerDrawable;
+	
 	TSGFileOpener = class;
 	TSGFileOpenerClass = class of TSGFileOpener;
 	TSGFileOpener = class(TSGNamed)
@@ -19,9 +22,9 @@ type
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; virtual;
 		class procedure Execute(const VFiles : TSGStringList);virtual;
+		class function GetDrawableClass() : TSGFileOpenerDrawableClass;virtual;
 		end;
 
-type
 	TSGFileOpenerDrawable = class (TSGDrawable)
 			protected
 		FFiles : TSGStringList;
@@ -40,10 +43,16 @@ implementation
 
 uses
 	SaGeImageFileOpener,
-	SaGeVersion;
+	SaGeVersion,
+	SaGeContext;
 
 var
 	SGFileOpeners : packed array of TSGFileOpenerClass = nil;
+
+class function TSGFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
+begin
+Result := nil;
+end;
 
 procedure SGWriteOpenableExpansions();
 var
@@ -74,7 +83,7 @@ end;
 
 procedure TSGFileOpenerDrawable.SetOption(const VName : TSGString; const VValue : TSGPointer);
 begin
-if VName = 'FILES' then
+if VName = 'FILES TO OPEN' then
 	FFiles := TSGStringList(VValue)
 else
 	inherited;
@@ -174,6 +183,7 @@ end;
 
 class procedure TSGFileOpener.Execute(const VFiles : TSGStringList);
 begin
+SGCompatibleRunPaintable(GetDrawableClass(), SGContextOptionImport('FILES TO OPEN', TSGPointer(VFiles)));
 end;
 
 class function TSGFileOpener.GetExpansions() : TSGStringList; 

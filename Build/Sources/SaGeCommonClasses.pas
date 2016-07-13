@@ -158,9 +158,12 @@ type
 	ISGContext = interface(ISGCustomContext)
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
 		procedure SetSelfLink(const VLink : PISGContext);
-		function GetSelfLink() : PISGContext;
+		function  GetSelfLink() : PISGContext;
 		procedure SetRenderClass(const NewRender : TSGPointer);
 		procedure SetNewContext(const NewContext : TSGPointer);
+		function  GetDefaultWindowColor():TSGColor3f;
+		procedure BeginIncessantlyPainting();
+		procedure EndIncessantlyPainting();
 		
 		property NewContext : TSGPointer write SetNewContext;
 		property RenderClass : TSGPointer write SetRenderClass;

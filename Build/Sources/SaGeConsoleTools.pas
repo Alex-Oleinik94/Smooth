@@ -19,9 +19,6 @@ uses
 	{$ELSEIF defined(UNIX)}
 		,unix
 		{$ENDIF}
-	{$IF defined(ANDROID)}
-		,android_native_app_glue
-		{$ENDIF}
 	,SNMPsend
 	
 	(* ============ Engine Includes ============ *)
@@ -66,50 +63,57 @@ const
 
 type
 	TSGConcoleCallerProcedure = procedure (const VParams : TSGConcoleCallerParams = nil);
+	TSGConcoleCallerNestedProcedure = function (const VParam : TSGString) : TSGBool is nested;
 	TSGConsoleCaller = class
 			public
 		constructor Create(const VParams : TSGConcoleCallerParams);
 		destructor Destroy();override;
-		procedure AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Execute();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure AddComand(const VComand       : TSGConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
 		FParams : TSGConcoleCallerParams;
 		FComands : packed array of
 			packed record
-				FComand : TSGConcoleCallerProcedure;
-				FSyntax : TSGConcoleCallerParams;
-				FHelpString : TSGString;
+				FComand       : TSGConcoleCallerProcedure;
+				FNestedComand : TSGConcoleCallerNestedProcedure;
+				FSyntax       : TSGConcoleCallerParams;
+				FHelpString   : TSGString;
 				end;
+			private
+		function AllNested() : TSGBool;
+		function AllNormal() : TSGBool;
 		end;
-
-procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure FPCTCTransliater();
 procedure GoogleReNameCache();
+
+procedure SGConcoleCaller                                (const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleShowAllApplications                   (const VParams : TSGConcoleCallerParams = nil);overload;
+procedure SGConsoleConvertImageToSaGeImageAlphaFormat    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleBuild                                 (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleShaderReadWrite                       (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleClearRFFile                           (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleAddToLog                              (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleIncEngineVersion                      (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConvertFileToPascalUnit               (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleExtractFiles                          (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConvertDirectoryFilesToPascalUnits    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleFindInPas                             (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleImageResizer                          (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleMake                                  (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConvertHeaderToDynamic                (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleWriteOpenableExpansions               (const VParams : TSGConcoleCallerParams = nil);
 
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
 
-procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
-procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleBuild(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleShaderReadWrite(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleClearRFFile(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleAddToLog(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleIncEngineVersion(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleConvertFileToPascalUnit(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleExtractFiles(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleWriteOpenableExpansions(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
+procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil;  ContextSettings : TSGContextSettings = nil);overload;
+procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -121,9 +125,6 @@ uses
 		,SaGeRenderDirectX12
 		{$ENDIF}
 	,SaGeRenderOpenGL
-	{$IFDEF ANDROID}
-		,SaGeContextAndroid
-		{$ENDIF}
 	{$IFDEF WITH_GLUT}
 		,SaGeContextGLUT
 		{$ENDIF}
@@ -186,7 +187,7 @@ ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
 ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
 ConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
 ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert header to dynamic utility');
-ConsoleCaller.AddComand(TSGConcoleCallerProcedure(@SGConsoleShowAllApplications), ['GUI',''], 'Shows all scenes in this application');
+ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all scenes in this application');
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();
 end;
@@ -405,6 +406,42 @@ FParams := VParams;
 FComands := nil;
 end;
 
+function TSGConsoleCaller.AllNested() : TSGBool;
+var
+	i : TSGLongWord;
+begin
+Result := False;
+if FComands <> nil then
+	if Length(FComands) > 0 then
+		begin
+		Result := True;
+		for i := 0 to High(FComands) do
+			if (FComands[i].FNestedComand = nil) or (FComands[i].FComand <> nil) then
+				begin
+				Result := False;
+				break;
+				end;
+		end;
+end;
+
+function TSGConsoleCaller.AllNormal() : TSGBool;
+var
+	i : TSGLongWord;
+begin
+Result := False;
+if FComands <> nil then
+	if Length(FComands) > 0 then
+		begin
+		Result := True;
+		for i := 0 to High(FComands) do
+			if (FComands[i].FNestedComand <> nil) or (FComands[i].FComand = nil) then
+				begin
+				Result := False;
+				break;
+				end;
+		end;
+end;
+
 destructor TSGConsoleCaller.Destroy();
 var
 	i : TSGLongWord;
@@ -419,7 +456,7 @@ if (FComands <> nil) and (Length(FComands)>0) then
 inherited;
 end;
 
-procedure TSGConsoleCaller.AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGConsoleCaller.AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	i : TSGLongWord;
 begin
@@ -428,6 +465,7 @@ if FComands = nil then
 else
 	SetLength(FComands, Length(FComands) + 1);
 FComands[High(FComands)].FComand := VComand;
+FComands[High(FComands)].FNestedComand := nil;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
 if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
@@ -435,7 +473,52 @@ if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)
 		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
 end;
 
-procedure TSGConsoleCaller.Execute();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i : TSGLongWord;
+begin
+if FComands = nil then
+	SetLength(FComands, 1)
+else
+	SetLength(FComands, Length(FComands) + 1);
+FComands[High(FComands)].FComand := nil;
+FComands[High(FComands)].FNestedComand := VNestedComand;
+FComands[High(FComands)].FHelpString := VHelp;
+FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
+if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
+	for i := 0 to High(FComands[High(FComands)].FSyntax) do
+		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
+end;
+
+function TSGConsoleCaller.Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure ErrorUnknownComand(const Comand : TSGString);
+begin
+SGPrintEngineVersion();
+TextColor(12);
+Write('Console caller : error : abstract comand "');
+TextColor(15);
+Write(SGDownCaseString(Comand));
+TextColor(12);
+WriteLn('"!');
+TextColor(7);
+end;
+
+procedure ErrorUnknownSimbol(const Comand : TSGString);
+begin
+SGPrintEngineVersion();
+TextColor(12);
+Write('Console caller : error : unknown simbol "');
+TextColor(15);
+Write(Comand);
+TextColor(12);
+Write('", use "');
+TextColor(15);
+Write('--help');
+TextColor(12);
+WriteLn('"');
+TextColor(7);
+end;
 
 function OpenFileCheck() : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -453,6 +536,39 @@ if Result then
 	end;
 end;
 
+function IsComandHelp(const Comand : TSGString) : TSGBool;
+begin
+Result := (Comand = 'HELP') or (Comand = 'H') or (Comand = '?');
+end;
+
+procedure ExecuteHelp();
+var
+	i, ii : TSGLongWord;
+begin
+if (FComands <> nil) and (Length(FComands)>0) then
+	begin
+	SGPrintEngineVersion();
+	WriteLn('Help:');
+	WriteLn(' --help, --h, --? - Shows this');
+	for i := 0 to High(FComands) do
+		begin
+		if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
+			begin
+			for ii := 0 to High(FComands[i].FSyntax) do
+				if FComands[i].FSyntax[ii] <> '' then
+					begin
+					if ii <> 0 then
+						Write(',');
+					Write(' --',SGDownCaseString(FComands[i].FSyntax[ii]));
+					end;
+			WriteLn(' - ',FComands[i].FHelpString);
+			end;
+		end;
+	end;
+end;
+
+procedure ExecuteNormal();
+
 function ComandCheck():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	TempString : TSGString;
@@ -467,18 +583,7 @@ if (FParams <> nil) and (Length(FParams)>0) then
 		end
 	else
 		begin
-		SGPrintEngineVersion();
-		TextColor(12);
-		Write('Console caller : error : unknown simbol "');
-		TextColor(15);
-		Write(FParams[0]);
-		TextColor(12);
-		Write('", use "');
-		TextColor(15);
-		Write('--help');
-		TextColor(12);
-		WriteLn('"');
-		TextColor(7);
+		ErrorUnknownSimbol(FParams[0]);
 		end;
 	end;
 end;
@@ -487,122 +592,216 @@ var
 	i, ii, iii : TSGLongWord;
 	Comand : TSGString;
 	Params : TSGConcoleCallerParams;
+begin
+Comand := ComandCheck();
+if IsComandHelp(Comand) then
+	begin
+	ExecuteHelp();
+	end
+else if Comand <> '' then
+	begin
+	iii := 0;
+	if (FComands <> nil) and (Length(FComands)>0) then
+		begin
+		for i := 0 to High(FComands) do
+			begin
+			iii := 0;
+			if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
+				begin
+				for ii := 0 to High(FComands[i].FSyntax) do
+					if FComands[i].FSyntax[ii] = Comand then
+						begin
+						iii := 1;
+						break;
+						end;
+				end;
+			if iii = 1 then
+				begin
+				if FComands[i].FComand = nil then
+					begin
+					ErrorUnknownComand(Comand);
+					iii := 0;
+					end
+				else
+					begin
+					Params := SGDecConsoleParams(FParams);
+					FComands[i].FComand(Params);
+					SetLength(Params,0);
+					break;
+					end;
+				end;
+			end;
+		end;
+	if iii = 0 then
+		begin
+		ErrorUnknownComand(Comand);
+		end;
+	end
+else if (Comand = '') and (SGCountConsoleParams(FParams) = 0) then
+	begin
+	iii := 0;
+	if (FComands <> nil) and (Length(FComands)>0) then
+		begin
+		for i := 0 to High(FComands) do
+			begin
+			iii := 0;
+			if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
+				begin
+				for ii := 0 to High(FComands[i].FSyntax) do
+					if FComands[i].FSyntax[ii] = '' then
+						begin
+						iii := 1;
+						break;
+						end;
+				if (iii = 1) then
+					begin
+					FComands[i].FComand();
+					break;
+					end;
+				end;
+			end;
+		end;
+	end;
+end;
+
+function ExecuteNested() : TSGBool;
+
+function TestComand(const Comand : TSGString):TSGBool;
+var
+	ii, iii : TSGLongWord;
+begin
+Result := False;
+for ii := 0 to High(FComands) do
+	begin
+	for iii := 0 to High(FComands[ii].FSyntax) do
+		begin
+		if StringMatching(Comand, FComands[ii].FSyntax[iii]) then
+			begin
+			Result := True;
+			break;
+			end;
+		end;
+	if Result then
+		break;
+	end;
+end;
+
+var
+	Comand : TSGString;
+	i, hi, e, ii, iii : TSGLongWord;
+begin
+Result := False;
+if (FParams <> nil) and (Length(FParams) > 0) then
+	begin
+	hi := Length(FParams);
+	e := 0;
+	for i := 0 to High(FParams) do
+		begin
+		Comand := StringTrimLeft(FParams[i],'-');
+		if Length(Comand) <> Length(FParams[i]) then
+			begin
+			Comand := SGUpCaseString(Comand);
+			if IsComandHelp(Comand) then
+				hi := i
+			else if not TestComand(Comand) then
+				begin
+				ErrorUnknownComand(Comand);
+				e += 1;
+				end
+			end
+		else
+			begin
+			e += 1;
+			ErrorUnknownSimbol(Comand);
+			end;
+		end;
+	if e <> 0 then
+		begin
+		SGPrintEngineVersion();
+		TextColor(12);
+		WriteLn('Console caller : fatal : total ',e,' errors!');
+		TextColor(7);
+		end;
+	if hi <> Length(FParams) then
+		begin
+		ExecuteHelp();
+		end
+	else if e = 0 then
+		begin
+		for i := 0 to High(FParams) do
+			begin
+			Comand := StringTrimLeft(FParams[i],'-');
+			Comand := SGUpCaseString(Comand);
+			hi := Length(FComands);
+			for ii := 0 to High(FComands) do
+				begin
+				for iii := 0 to High(FComands[ii].FSyntax) do
+					begin
+					if StringMatching(Comand, FComands[ii].FSyntax[iii]) then
+						begin
+						hi := ii;
+						break;
+						end;
+					end;
+				if hi <> Length(FComands) then
+					break;
+				end;
+			if hi = Length(FComands) then
+				begin
+				ErrorUnknownComand(Comand);
+				e += 1;
+				end
+			else
+				begin
+				if not FComands[hi].FNestedComand(StringTrimLeft(FParams[i],'-')) then
+					begin
+					SGPrintEngineVersion();
+					TextColor(12);
+					Write('Console caller : error : error while executing comand "');
+					TextColor(15);
+					Write(Comand);
+					TextColor(12);
+					Write('", use "');
+					TextColor(15);
+					Write('--help');
+					TextColor(12);
+					WriteLn('"');
+					TextColor(7);
+					e += 1;
+					end;
+				end;     
+			end;
+		Result := e = 0;
+		if not Result then
+			begin
+			SGPrintEngineVersion();
+			TextColor(12);
+			WriteLn('Console caller : fatal : total ',e,' errors!');
+			TextColor(7);
+			end;
+		end;
+	end;
+end;
 
 begin
+Result := True;
 if OpenFileCheck() then
 	begin
 	SGPrintEngineVersion();
 	SGTryOpenFiles(FParams);
 	end
+else if AllNormal() then
+	begin
+	ExecuteNormal();
+	end
+else if AllNested() then
+	Result := ExecuteNested()
 else
 	begin
-	Comand := ComandCheck();
-	if (Comand = 'HELP') or (Comand = 'H') or (Comand = '?') then
-		begin
-		if (FComands <> nil) and (Length(FComands)>0) then
-			begin
-			SGPrintEngineVersion();
-			WriteLn('Help:');
-			WriteLn(' "--help", "--h", "--?" - Shows this');
-			for i := 0 to High(FComands) do
-				begin
-				if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
-					begin
-					for ii := 0 to High(FComands[i].FSyntax) do
-						if FComands[i].FSyntax[ii] <> '' then
-							begin
-							if ii <> 0 then
-								Write(',');
-							Write(' "--',SGDownCaseString(FComands[i].FSyntax[ii]),'"');
-							end;
-					WriteLn(' - ',FComands[i].FHelpString);
-					end;
-				end;
-			end;
-		end
-	else if Comand <> '' then
-		begin
-		iii := 0;
-		if (FComands <> nil) and (Length(FComands)>0) then
-			begin
-			for i := 0 to High(FComands) do
-				begin
-				iii := 0;
-				if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
-					begin
-					for ii := 0 to High(FComands[i].FSyntax) do
-						if FComands[i].FSyntax[ii] = Comand then
-							begin
-							iii := 1;
-							break;
-							end;
-					end;
-				if iii = 1 then
-					begin
-					if FComands[i].FComand = nil then
-						begin
-						SGPrintEngineVersion();
-						TextColor(12);
-						Write('Console caller : error : abstract comand "');
-						TextColor(15);
-						Write(SGDownCaseString(Comand));
-						TextColor(12);
-						WriteLn('"!');
-						TextColor(7);
-						iii := 0;
-						end
-					else
-						begin
-						Params := SGDecConsoleParams(FParams);
-						FComands[i].FComand(Params);
-						SetLength(Params,0);
-						break;
-						end;
-					end;
-				end;
-			end;
-		if iii = 0 then
-			begin
-			SGPrintEngineVersion();
-			SGPrintEngineVersion();
-			TextColor(12);
-			Write('Console caller : error : unknown comand "');
-			TextColor(15);
-			Write(SGDownCaseString(Comand));
-			TextColor(12);
-			Write('", use "');
-			TextColor(15);
-			Write('--help');
-			TextColor(12);
-			WriteLn('"');
-			TextColor(7);
-			end;
-		end
-	else if (Comand = '') and (SGCountConsoleParams(FParams) = 0) then
-		begin
-		iii := 0;
-		if (FComands <> nil) and (Length(FComands)>0) then
-			begin
-			for i := 0 to High(FComands) do
-				begin
-				iii := 0;
-				if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
-					begin
-					for ii := 0 to High(FComands[i].FSyntax) do
-						if FComands[i].FSyntax[ii] = '' then
-							begin
-							iii := 1;
-							break;
-							end;
-					if (iii = 1) then
-						begin
-						FComands[i].FComand();
-						break;
-						end;
-					end;
-				end;
-			end;
-		end;
+	TextColor(12);
+	Write('Console caller : error : unknown configuration!');
+	TextColor(7);
+	Result := False;
 	end;
 end;
 
@@ -631,133 +830,307 @@ SGConcoleCaller(Params);
 SetLength(Params,0);
 end;
 
-procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
 var
-	RenderClass : TSGRenderClass = nil;
-	VFullscreen:TSGBoolean = {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
-	ContextClass : TSGContextClass = nil;
+	RenderClass   : TSGRenderClass = nil;
+	ContextClass  : TSGContextClass = nil;
 
-procedure ReadParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	GoToExit : TSGBoolean = False;
-	i, ii : TSGLongWord;
-	S : TSGString;
-	HelpUsed : TSGBoolean = False;
+function ProccessFullscreen(const Comand : TSGString):TSGBool;
 begin
-if (VParams<>nil) and (Length(VParams)>0) then
+Result := True;
+if ('FULLSCREEN' in ContextSettings) then
 	begin
-	for i:= 0 to High(VParams) do
-		if StringTrimLeft(VParams[i], '-') <> VParams[i] then
+	if SGContextOptionFullscreen(False) in ContextSettings then
+		begin
+		ContextSettings -= SGContextOptionFullscreen(False);
+		ContextSettings += SGContextOptionFullscreen(True);
+		end
+	else
+		begin
+		if SGContextOptionFullscreen(True) in ContextSettings then
 			begin
-			S := SGUpCaseString(StringTrimLeft(VParams[i], '-'));
-			if (S='HELP') or (S='H')or (S='?') then
-				begin
-				WriteLn('This is additional params for running GUI.');
-				WriteLn('     -h; -help; -?   : for show this');
-				WriteLn('     -ogl            : for use OpenGL');
-				{$IFDEF MSWINDOWS}
-					Write('     -d3dx9          : for use DirectX 9');
-					if TSGRenderDirectX9.Suppored() then
-						WriteLn()
-					else
-						WriteLn(', but it is impossible for your system!');
-					Write('     -d3dx8          : for use DirectX 8');
-					if TSGRenderDirectX8.Suppored() then
-						WriteLn()
-					else
-						WriteLn(', but it is impossible for your system!');
-					{$ENDIF}
-				WriteLn('     -f; -fullscreen : for change fullscreen mode');
-				{$IFDEF WITH_GLUT}
-					Write('     -glut           : for use GLUT');
-					if TSGContextGLUT.Suppored() then
-						WriteLn()
-					else
-						WriteLn(', but it is impossible for your system!');
-					{$ENDIF}
-				GoToExit := True;
-				HelpUsed := True;
-				Break;
-				end
-			else if (S='OGL') or (S='OPENGL') then
-				begin
-				{$IFDEF SGMoreDebuging}
-					WriteLn('Engine uses OpenGL.');
-					{$ENDIF}
-				RenderClass := TSGRenderOpenGL;
-				end
-{$IFDEF WITH_GLUT}
-			else if (S='GLUT') then
-				begin
-				if not TSGContextGLUT.Suppored() then
-					begin
-					WriteLn('GLUT can''t be used! It is not loaded! You can install GLUT for using.');
-					Halt(); 
-					end;
-				{$IFDEF SGMoreDebuging}
-					WriteLn('Engine uses GLUT.');
-					{$ENDIF}
-				ContextClass := TSGContextGLUT;
-				end
-{$ENDIF}
-{$IFDEF MSWINDOWS}
-			else if (S='D3DX') or (S='DIRECT3D')or (S='DIRECTX')or (S='DIRECT3DX') or (S='D3DX9') or (S='DIRECT3D9')or (S='DIRECTX9')or (S='DIRECT3DX9') then
-				begin
-				{$IFDEF SGMoreDebuging}
-					WriteLn('Engine uses DirectX 9.');
-					{$ENDIF}
-				RenderClass := TSGRenderDirectX9;
-				end
-			else if (S='D3DX8') or (S='DIRECT3D8')or (S='DIRECTX8')or (S='DIRECT3DX8') then
-				begin
-				{$IFDEF SGMoreDebuging}
-					WriteLn('Engine uses DirectX 8.');
-					{$ENDIF}
-				RenderClass := TSGRenderDirectX8;
-				end
-{$ENDIF}
-			else if (S='F') or (S='FULLSCREEN') then
-				begin
-				VFullscreen:=not VFullscreen;
-				{$IFDEF SGMoreDebuging}
-					WriteLn('Set fullscreen : "',VFullscreen,'"');
-					{$ENDIF}
-				end
-			else
-				begin
-				WriteLn('Unknown comand "',S,'"!');
-				GoToExit := True;
-				end;
+			ContextSettings -= SGContextOptionFullscreen(True);
+			ContextSettings += SGContextOptionFullscreen(False);
 			end
 		else
-			begin
-			WriteLn('Unknown comand string "',VParams[i],'"!');
-			GoToExit := True;
-			end;
-	end;
-if GoToExit then
+			Result := False;
+		end;
+	end
+else
+	ContextSettings += SGContextOptionFullscreen(True);
+end;
+
+function IsGLUTSuppored() : TSGBool;
+begin
+{$IFDEF WITH_GLUT}
+Result := TSGContextGLUT.Suppored();
+{$ELSE}
+Result := False;
+{$ENDIF}
+end;
+
+function IsD3DX8Suppored() : TSGBool;
+begin
+{$IFDEF MSWINDOWS}
+Result := TSGRenderDirectX8.Suppored();
+{$ELSE}
+Result := False;
+{$ENDIF}
+end;
+
+function IsD3DX9Suppored() : TSGBool;
+begin
+{$IFDEF MSWINDOWS}
+Result := TSGRenderDirectX9.Suppored();
+{$ELSE}
+Result := False;
+{$ENDIF}
+end;
+
+function IsD3DX12Suppored() : TSGBool;
+begin
+{$IFDEF MSWINDOWS}
+Result := TSGRenderDirectX12.Suppored();
+{$ELSE}
+Result := False;
+{$ENDIF}
+end;
+
+function ProccessGLUT(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not IsGLUTSuppored() then
 	begin
-	if not HelpUsed then
-		WriteLn('Use "-help" for help!');
-	Halt();
+	WriteLn('GLUT can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF WITH_GLUT}
+if Result then
+	ContextClass := TSGContextGLUT;
+{$ENDIF}
+end;
+
+function ProccessDirectX12(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not IsD3DX12Suppored() then
+	begin
+	WriteLn('Direct3D X 12 can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF MSWINDOWS}
+if Result then
+	RenderClass := TSGRenderDirectX12;
+{$ENDIF}
+end;
+
+function ProccessDirectX9(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not IsD3DX9Suppored() then
+	begin
+	WriteLn('Direct3D X 9 can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF MSWINDOWS}
+if Result then
+	RenderClass := TSGRenderDirectX9;
+{$ENDIF}
+end;
+
+function ProccessDirectX8(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not IsD3DX8Suppored() then
+	begin
+	WriteLn('Direct3D X 8 can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF MSWINDOWS}
+if Result then
+	RenderClass := TSGRenderDirectX8;
+{$ENDIF}
+end;
+
+function StringIsNumber(const S : TSGString) : TSGBool;
+var
+	i : TSGLongWord;
+begin
+Result := Length(S) > 0;
+for i := 1 to Length(S) do
+	begin
+	if not (S[i] in '0123456789') then
+		begin
+		Result := false;
+		break;
+		end;
 	end;
 end;
 
+function ProccessWidth(const Comand : TSGString):TSGBool;
+var
+	MustBeNumber : TSGString;
 begin
-ContextClass := TSGCompatibleContext;
-RenderClass  := TSGCompatibleRender;
-{$IFNDEF ANDROID}
-SGPrintEngineVersion();
-if (VParams<>nil) and (Length(VParams)>0) then
-	ReadParams();
-{$ENDIF}
+MustBeNumber := StringTrimLeft(Comand,'WIDTHwidth');
+Result := StringIsNumber(MustBeNumber);
+if Result then
+	begin
+	if ('WIDTH' in ContextSettings) then
+		begin
+		ContextSettings -= 'WIDTH';
+		end;
+	ContextSettings += SGContextOptionWidth(SGVal(MustBeNumber));
+	end;
+end;
 
+function ProccessHeight(const Comand : TSGString):TSGBool;
+var
+	MustBeNumber : TSGString;
+begin
+MustBeNumber := StringTrimLeft(Comand,'HEIGHTheight');
+Result := StringIsNumber(MustBeNumber);
+if Result then
+	begin
+	if ('HEIGHT' in ContextSettings) then
+		begin
+		ContextSettings -= 'HEIGHT';
+		end;
+	ContextSettings += SGContextOptionHeight(SGVal(MustBeNumber));
+	end;
+end;
+
+function ProccessLeft(const Comand : TSGString):TSGBool;
+var
+	MustBeNumber : TSGString;
+begin
+MustBeNumber := StringTrimLeft(Comand,'XLEFTxleft');
+Result := StringIsNumber(MustBeNumber);
+if Result then
+	begin
+	if ('LEFT' in ContextSettings) then
+		begin
+		ContextSettings -= 'LEFT';
+		end;
+	ContextSettings += SGContextOptionLeft(SGVal(MustBeNumber));
+	end;
+end;
+
+function ProccessTop(const Comand : TSGString):TSGBool;
+var
+	MustBeNumber : TSGString;
+begin
+MustBeNumber := StringTrimLeft(Comand,'YTOPytop');
+Result := StringIsNumber(MustBeNumber);
+if Result then
+	begin
+	if ('TOP' in ContextSettings) then
+		begin
+		ContextSettings -= 'TOP';
+		end;
+	ContextSettings += SGContextOptionTop(SGVal(MustBeNumber));
+	end;
+end;
+
+function ProccessWH(const Comand : TSGString):TSGBool;
+var
+	C, X : TSGChar;
+	CountXX : TSGLongWord = 0;
+begin
+Result := Length(Comand) > 2;
+for C in Comand do
+	begin
+	if not (C in '0123456789Xx') then
+		begin
+		Result := False;
+		break;
+		end;
+	end;
+if Result then
+	begin
+	CountXX := 0;
+	for C in Comand do
+		if C in 'xX' then
+			begin
+			X := C;
+			CountXX += 1;
+			end;
+	Result := CountXX = 1;
+	end;
+if Result then
+	begin
+	Result := (Length(StringWordGet(Comand,X,1)) > 0) and (Length(StringWordGet(Comand,X,2))>0);
+	end;
+if Result then
+	begin
+	if ('WIDTH' in ContextSettings) then
+		begin
+		ContextSettings -= 'WIDTH';
+		end;
+	if ('HEIGHT' in ContextSettings) then
+		begin
+		ContextSettings -= 'HEIGHT';
+		end;
+	ContextSettings += SGContextOptionWidth (SGVal(StringWordGet(Comand,X,1)));
+	ContextSettings += SGContextOptionHeight(SGVal(StringWordGet(Comand,X,2)));
+	end;
+end;
+
+const TitleQuote : TSGChar = '''';
+
+function ProccessTitle(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if ('TITLE' in ContextSettings) then
+	begin
+	ContextSettings -= 'TITLE';
+	end;
+ContextSettings += SGContextOptionTitle(StringWordGet(Comand,TitleQuote,2));
+end;
+
+procedure Run();
+begin
 SGRunPaintable(
 	VPaintabeClass
 	,ContextClass
 	,RenderClass
-	{$IFDEF ANDROID},State{$ENDIF}
-	,VFullscreen);
+	,ContextSettings);
+end;
+
+function ImposibleParam(const B : TSGBool):TSGString;
+begin
+Result := Iff(not B,', but it is impossible!','')
+end;
+
+var
+	ConsoleCaller : TSGConsoleCaller = nil;
+begin
+SGPrintEngineVersion();
+ContextClass := TSGCompatibleContext;
+RenderClass  := TSGCompatibleRender;
+if (VParams<>nil) and (Length(VParams)>0) then
+	begin
+	ConsoleCaller := TSGConsoleCaller.Create(VParams);
+	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               'For use GLUT' +          ImposibleParam(IsGLUTSuppored()));
+	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored()));
+	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored()));
+	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored()));
+	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
+	ConsoleCaller.AddComand(@ProccessWH,        ['?*X*?'],              'For set window width and height');
+	ConsoleCaller.AddComand(@ProccessTitle,     ['t' + TitleQuote + '*' + TitleQuote],   'For set window title');
+	ConsoleCaller.AddComand(@ProccessWidth,     ['W*?','WIDTH*?'],      'For set window width');
+	ConsoleCaller.AddComand(@ProccessHeight,    ['H*?','HEIGHT*?'],     'For set window height');
+	ConsoleCaller.AddComand(@ProccessLeft,      ['L*?','LEFT*?','X*?'], 'For set window x');
+	ConsoleCaller.AddComand(@ProccessTop,       ['T*?','TOP*?', 'Y*?'], 'For set window y');
+	if ConsoleCaller.Execute() then
+		begin
+		ConsoleCaller.Destroy();
+		Run();
+		end
+	else
+		ConsoleCaller.Destroy();
+	end
+else
+	Run();
 end;
 
 type
@@ -821,9 +1194,14 @@ procedure TSGAllApplicationsDrawable.Paint();
 begin
 end;
 
-procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF});
+procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil;  ContextSettings : TSGContextSettings = nil);overload;
 begin
-SGConsoleRunPaintable(TSGAllApplicationsDrawable,VParams{$IFDEF ANDROID},State{$ENDIF});
+SGConsoleRunPaintable(TSGAllApplicationsDrawable, VParams, ContextSettings);
+end;
+
+procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil);overload;
+begin
+SGConsoleRunPaintable(TSGAllApplicationsDrawable, VParams);
 end;
 
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);

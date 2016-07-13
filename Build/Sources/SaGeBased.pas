@@ -106,15 +106,84 @@ type
  operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   inline; overload;
  {$ENDIF WITHOUT_EXTENDED}
 
+type
+	TSGOptionPointer = TSGPointer;
+	
+	TSGOption = object
+		FName : TSGString;
+		FOption : TSGOptionPointer;
+		procedure Import(const VName : TSGString; const VPointer : TSGPointer);
+		end;
+
+operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 {$DEFINE  INC_PLACE_INTERFACE}
 {$INCLUDE SaGeCommonLists.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
+
+operator in(const S : TSGString; const A : TSGSettings):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
 uses 
 	Math
 	;
+
+operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i, ii : TSGMaxEnum;
+begin
+Result := A;
+if Result <> nil then 
+	begin
+	ii := Length(Result);
+	if ii > 0 then
+		begin
+		i := 0;
+		while (i < Length(Result)) do
+			begin
+			if Result[i].FName = S then
+				begin
+				if High(Result) <> i then
+					begin
+					for ii := i to High(Result) - 1 do
+						Result[ii] := Result[ii + 1];
+					end;
+				SetLength(Result, Length(Result) - 1);
+				end
+			else
+				i += 1;
+			end;
+		end;
+	end;
+end;
+
+operator in(const S : TSGString; const A : TSGSettings):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	O : TSGOption;
+begin
+Result := False;
+for O in A do
+	begin
+	if O.FName = S then
+		begin
+		Result := True;
+		break;
+		end;
+	end;
+end;
+
+procedure TSGOption.Import(const VName : TSGString; const VPointer : TSGPointer);
+begin
+FName := VName;
+FOption := VPointer;
+end;
+
+operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (A.FName = B.FName) and (A.FOption = B.FOption);
+end;
 
 {$DEFINE  INC_PLACE_IMPLEMENTATION}
 {$INCLUDE SaGeCommonLists.inc}

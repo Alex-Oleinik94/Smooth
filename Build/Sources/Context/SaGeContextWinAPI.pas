@@ -51,6 +51,7 @@ type
 		procedure Kill();override;
 		class function Suppored() : TSGBoolean; override;
 		class function ClassName() : TSGString;override;
+		function GetDefaultWindowColor():TSGColor3f;override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
@@ -80,8 +81,6 @@ type
 		class function CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
 		class function CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
 		class function CreateGlassyCursor() : HCURSOR;
-		function  GetClientWidth() : TSGLongWord;override;
-		function  GetClientHeight() : TSGLongWord;override;
 			protected
 		FCursorHandle : Windows.HCURSOR;
 		FIconHandle   : Windows.HICON;
@@ -108,6 +107,17 @@ uses
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+function TSGContextWinAPI.GetDefaultWindowColor():TSGColor3f;
+var
+	Colour : TSGLongWord;
+begin
+Colour := GetSysColor(COLOR_WINDOW);
+Result.Import(
+	PByte(@Colour)[0]/255,
+	PByte(@Colour)[1]/255,
+	PByte(@Colour)[2]/255);
+end;
 
 class function TSGContextWinAPI.ClassName() : TSGString;
 begin
@@ -313,16 +323,6 @@ end;
 class function TSGContextWinAPI.GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Windows.GetWindowRect(VWindow, Result);
-end;
-
-function  TSGContextWinAPI.GetClientWidth() : TSGLongWord;
-begin
-Result := GetClientWindowRect(hWindow).right;
-end;
-
-function  TSGContextWinAPI.GetClientHeight() : TSGLongWord;
-begin
-Result := GetClientWindowRect(hWindow).bottom;
 end;
 
 class function TSGContextWinAPI.GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -538,10 +538,27 @@ inherited;
 end;
 
 procedure TSGContextWinAPI.Initialize();
+
+procedure HandlingSizingFromRect();
+var
+	WRect, WCRect : Windows.TRect;
+begin
+Windows.GetWindowRect(hWindow, WRect);
+FWidth  :=  WRect.Right  - WRect.Left;
+FHeight :=  WRect.Bottom - WRect.Top;
+FLeft := WRect.Left;
+FTop  := WRect.Top;
+WCRect  := GetClientWindowRect(dcWindow);
+FClientHeight := GetClientWindowRect(hWindow).bottom;
+FClientWidth  := GetClientWindowRect(hWindow).right;
+Resize();
+end;
+
 begin
 Active := CreateWindow();
 if Active then
 	begin
+	HandlingSizingFromRect();
 	inherited;
 	end;
 end;
@@ -579,13 +596,29 @@ end;
 
 function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 
-procedure HandlingSizingFromRect();
+procedure HandlingSizingFromRect(const PR : PRect = nil);
 var
-	mRect:Windows.TRect;
+	WRect, WCRect : Windows.TRect;
+	Shift : TSGPoint2int32;
 begin
-Windows.GetWindowRect(hWindow, mRect);
-Width:=  mRect.Right  - mRect.Left;
-Height:= mRect.Bottom - mRect.Top;
+Shift := ShiftClientArea();
+if PR = nil then
+	begin
+	Windows.GetWindowRect(hWindow, WRect);
+	FWidth  :=  WRect.Right  - WRect.Left;
+	FHeight :=  WRect.Bottom - WRect.Top;
+	FLeft := WRect.Left;
+	FTop  := WRect.Top;
+	end
+else
+	begin
+	FWidth  :=  PR^.Right  - PR^.Left;
+	FHeight :=  PR^.Bottom - PR^.Top;
+	FLeft := PR^.Left;
+	FTop  := PR^.Top;
+	end;
+FClientWidth  := FWidth - 2 * Shift.x;
+FClientHeight := FHeight - Shift.x - Shift.y;
 Resize();
 end;
 
@@ -596,15 +629,11 @@ var
 begin
 if FFullscreen then
 	begin
-	Width := PSGWord(@LParam)[0];
-	Height := PSGWord(@LParam)[1];
-	end
-else
-	begin
-	Shift  := GetClientAreaShift();
-	Width  := Shift.x * 2;
-	Height := Shift.y + GetSystemMetrics(SM_CYSIZEFRAME);
+	FWidth := PSGWord(@LParam)[0];
+	FHeight := PSGWord(@LParam)[1];
 	end;
+FClientWidth := PSGWord(@LParam)[0];
+FClientHeight := PSGWord(@LParam)[1];
 Resize();
 end;
 
@@ -707,10 +736,12 @@ wm_syscommand:
 wm_size:
 	begin
 	Result := 0;
+	HandlingSizingFromParam();
+	HandlingPaint();
 	end;
 wm_sizing:
 	begin
-	HandlingSizingFromRect();
+	HandlingSizingFromRect(PRect(lParam));
 	HandlingPaint();
 	Result := 1;
 	end;
@@ -835,8 +866,8 @@ if not FFullscreen then
 				WS_VISIBLE OR 
 				WS_CLIPSIBLINGS OR 
 				WS_CLIPCHILDREN,
-			  cw_UseDefault,
-			  cw_UseDefault,
+			  FLeft,
+			  FTop,
 			  FWidth,
 			  FHeight,
 			  0, 0,
@@ -860,11 +891,14 @@ else
 			Exit;
 			end;
 		end;
+	FTop := 0; 
+	FLeft := 0;
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
 		SGStringAsPChar(FWindowClassName),
 		SGStringToPChar(FTitle),
 		WS_EX_TOPMOST OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
-		0, 0,
+		0,
+		0,
 		FWidth,
 		FHeight,
 		0, 0,

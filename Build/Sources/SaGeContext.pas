@@ -49,6 +49,11 @@ const
 	 SGUpCursorWheel =            SaGeCommonClasses.SGUpCursorWheel;
 	 SGDownCursorWheel =          SaGeCommonClasses.SGDownCursorWheel;
 type
+	TSGContextOption = TSGOption;
+	TSGContextSettings = TSGSettings;
+	TSGPaintableSettings = TSGSettings;
+	TSGPaintableOption = TSGOption;
+type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
@@ -71,6 +76,7 @@ type
 		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
 		procedure Kill();virtual;
 		class function Suppored() : TSGBoolean; virtual;
+		function GetDefaultWindowColor():TSGColor3f; virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
@@ -83,6 +89,8 @@ type
 		FActive          : TSGBoolean;
 		FInitialized     : TSGBoolean;
 		FWidth, FHeight  : TSGLongWord;
+		FClientWidth, FClientHeight  : TSGLongWord;
+		FLeft, FTop      : TSGLongWord;
 		FFullscreen      : TSGBoolean;
 		FTitle           : TSGString;
 		FElapsedTime     : TSGLongWord;
@@ -90,6 +98,7 @@ type
 		FShowCursor      : TSGBoolean;
 		FIcon            : TSGBitMap;
 		FCursor          : TSGCursor;
+		FIncessantlyPainting : TSGLongInt;
 			protected
 		FPaintWithHandlingMessages : TSGBoolean;
 			protected
@@ -119,13 +128,15 @@ type
 		procedure SetCursor(const VCursor : TSGCursor);virtual;
 		function  GetIcon():TSGBitMap;virtual;
 		procedure SetIcon(const VIcon : TSGBitMap);virtual;
+		procedure BeginIncessantlyPainting();virtual;
+		procedure EndIncessantlyPainting();virtual;
 		
-		function  GetClientWidth() : TSGLongWord;virtual;abstract;
-		function  GetClientHeight() : TSGLongWord;virtual;abstract;
+		function  GetClientWidth() : TSGLongWord;virtual;
+		function  GetClientHeight() : TSGLongWord;virtual;
 		function  GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
-		procedure SetClientWidth(const VClientWidth : TSGLongWord);virtual;abstract;
-		procedure SetClientHeight(const VClientHeight : TSGLongWord);virtual;abstract;
+		procedure SetClientWidth(const VClientWidth : TSGLongWord);virtual;
+		procedure SetClientHeight(const VClientHeight : TSGLongWord);virtual;
 		function  GetWindow() : TSGPointer;virtual;
 		function  GetDevice() : TSGPointer;virtual;
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
@@ -187,18 +198,37 @@ type
 		FSelfLink       : PISGContext;
 		FPaintableClass : TSGDrawableClass;
 		FPaintable       : TSGDrawable;
+		FPaintableSettings : TSGPaintableSettings;
+			protected
+		procedure SetPaintableSettings(); virtual;
 			public
 		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
 		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
+		property PaintableSettings : TSGPaintableSettings write FPaintableSettings;
 			public
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
 		end;
 
+function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
+function SGContextOptionHeight(const VVariable : TSGLongWord) : TSGContextOption;
+function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
+function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
+function SGContextOptionFullscreen(const VVariable : TSGBoolean) : TSGContextOption;
+function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
+function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
+{$IFDEF ANDROID}
+function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
+{$ENDIF}
+
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF}; const VFullscreen : TSGBoolean = True);
+
+procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
+procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
 function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings);
+function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
 
 implementation
 
@@ -220,6 +250,103 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
+begin
+SGRunPaintable(VPaintableClass, TSGCompatibleContext, TSGCompatibleRender, VSettings);
+end;
+
+function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
+begin
+Result.Import(VName, VOption);
+end;
+
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings);
+
+function WordName(const S : TSGString):TSGString;
+begin
+Result := SGDownCaseString(S);
+Result[1] := UpCase(Result[1]);
+end;
+
+var
+	O : TSGContextOption;
+	First : TSGBoolean = True;
+	S : TSGString = '';
+	StandartOptions : TSGStringList = nil;
+begin
+if VSettings = nil then
+	exit;
+if Length(VSettings) = 0 then
+	exit;
+S += 'Options (';
+StandartOptions += 'WIDTH';
+StandartOptions += 'HEIGHT';
+StandartOptions += 'LEFT';
+StandartOptions += 'TOP';
+StandartOptions += 'FULLSCREEN';
+for O in VSettings do
+	begin
+	if First then
+		First := False
+	else
+		S += ', ';
+	S += WordName(O.FName) + '=';
+	if O.FName in StandartOptions then
+		begin
+		S += SGStr(TSGMaxEnum(O.FOption));
+		end
+	else if O.FName = 'TITLE' then
+		begin
+		S += '''' + SGPCharToString(PChar(O.FOption)) + '''';
+		end
+	else
+		begin
+		S += SGAddrStr(O.FOption);
+		end;
+	end;
+SetLength(StandartOptions, 0);
+S += ')';
+SGHint(S);
+S := '';
+end;
+
+function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
+begin
+Result.Import('WIDTH', TSGPointer(VVariable));
+end;
+
+function SGContextOptionHeight(const VVariable : TSGLongWord) : TSGContextOption;
+begin
+Result.Import('HEIGHT', TSGPointer(VVariable));
+end;
+
+function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
+begin
+Result.Import('LEFT', TSGPointer(VVariable));
+end;
+
+function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
+begin
+Result.Import('TOP', TSGPointer(VVariable));
+end;
+
+function SGContextOptionFullscreen(const VVariable : TSGBoolean) : TSGContextOption;
+begin
+Result.Import('FULLSCREEN', TSGPointer(TSGByte(VVariable)));
+end;
+
+{$IFDEF ANDROID}
+function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
+begin
+Result.Import('ANDROIDAPP', State);
+end;
+{$ENDIF}
+
+function TSGContext.GetDefaultWindowColor():TSGColor3f;
+begin
+Result.Import(1,1,1);
+end;
 
 function  TSGContext.GetWindow() : TSGPointer;
 begin
@@ -296,36 +423,75 @@ if Context.Active and (Context.NewContext <> nil) then
 	end;
 end;
 
-procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass{$IFDEF ANDROID};const State : PAndroid_App = nil{$ENDIF}; const VFullscreen : TSGBoolean = True);
+function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
+begin
+Result.Import('TITLE', SGStringToPChar(VVariable));
+end;
+
+function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
+var
+	O : TSGContextOption;
+begin
+Result := nil;
+for O in Settings do
+	begin
+	if O.FName  = 'WIDTH' then
+		Context.Width := TSGMaxEnum(O.FOption)
+	else if O.FName  = 'HEIGHT' then
+		Context.Height := TSGMaxEnum(O.FOption)
+	else if O.FName  = 'LEFT' then
+		Context.Left := TSGMaxEnum(O.FOption)
+	else if O.FName  = 'TOP' then
+		Context.Top := TSGMaxEnum(O.FOption)
+	else if O.FName  = 'FULLSCREEN' then
+		Context.Fullscreen := TSGBool(TSGMaxEnum(O.FOption))
+	else if O.FName  = 'CURSOR' then
+		Context.Cursor := TSGCursor(O.FOption)
+	else if O.FName  = 'TITLE' then
+		begin
+		Context.Title := SGPCharToString(PChar(O.FOption));
+		FreeMem(O.FOption);
+		end
+	{$IFDEF ANDROID}
+	else if (Context is TSGContextAndroid) and (O.FName = 'ANDROIDAPP') then
+		(Context as TSGContextAndroid).AndroidApp := PAndroid_App(O.FOption)
+		{$ENDIF}
+	else
+		begin
+		Result += O;
+		end;
+	end;
+if not ('WIDTH' in Settings) then
+	Context.Width  := Context.GetScreenArea().x;
+if not ('HEIGHT' in Settings) then
+	Context.Height  := Context.GetScreenArea().y;
+if not ('FULLSCREEN' in Settings) then
+	Context.Fullscreen := {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
+if not ('CURSOR' in Settings) then
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+if not ('TITLE' in Settings) then
+	Context.Title := 'SaGe Engine Window';
+end;
+
+procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
 var
 	Context : TSGContext = nil;
 	IContext : ISGContext = nil;
-
-procedure Hint(const S : TSGString);
+	Settings : TSGContextSettings = nil;
+	PaintableSettings : TSGPaintableSettings = nil;
 begin
-SGLog.Sourse(S);
-WriteLn(S);
-end;
+SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)');
+SGPrintContextSettings(VSettings);
 
-begin
-Hint('Run (Class="'+VPaintableClass.ClassName() +'", Context="'+VContextClass.ClassName()+'", Render="'+VRenderClass.ClassName()+'", Fullscreen="'+SGStr(VFullscreen)+'")');
+Settings := VSettings;
 Context := VContextClass.Create();
 IContext := Context;
-with Context do
-	begin
-	Width  := GetScreenArea().x;
-	Height := GetScreenArea().y;
-	Fullscreen := VFullscreen;
-	Cursor := TSGCursor.Create(SGC_NORMAL);
-	{$IFDEF ANDROID}
-	if Context is TSGContextAndroid then
-		(Context as TSGContextAndroid).AndroidApp := State;
-		{$ENDIF}
-	Title := 'SaGe Engine Window';
-	SelfLink := @IContext;
-	RenderClass := VRenderClass;
-	Paintable := VPaintableClass;
-	end;
+
+Context.PaintableSettings := SGSetContextSettings(Context, Settings);
+Context.SelfLink := @IContext;
+Context.RenderClass := VRenderClass;
+Context.Paintable := VPaintableClass;
+
 Context.Initialize();
 if Context.Active then
 	repeat
@@ -334,6 +500,7 @@ if Context.Active then
 IContext := nil;
 Context.Destroy();
 Context := nil;
+SetLength(Settings, 0);
 end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -456,22 +623,22 @@ end;
 
 function TSGContext.GetLeft() : TSGLongWord;
 begin
-
+Result := FLeft;
 end;
 
 function TSGContext.GetTop() : TSGLongWord;
 begin
-
+Result := FTop;
 end;
 
 procedure TSGContext.SetLeft(const VLeft : TSGLongWord);
 begin
-
+FLeft := VLeft;
 end;
 
 procedure TSGContext.SetTop(const VTop : TSGLongWord);
 begin
-
+FTop := VTop;
 end;
 
 function  TSGContext.GetFullscreen() : TSGBoolean;
@@ -554,9 +721,11 @@ if FPaintableClass <> nil then
 	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
+		SetPaintableSettings();
 		FPaintable.LoadDeviceResourses();
 		end;
 	end;
+Paint();
 end;
 
 procedure TSGContext.UpdateTimer();
@@ -574,7 +743,13 @@ Messages();
 StartComputeTimer();
 while Active and (FNewContextType = nil) do
 	begin
-	Paint();
+	if FIncessantlyPainting > 0 then
+		Paint()
+	else
+		begin
+		Sleep(200);
+		Paint();
+		end;
 	{$IFDEF CONTEXT_DEBUGING}
 		WriteLn('TSGContext.Run(): Before continue looping');
 		{$ENDIF}
@@ -721,11 +896,66 @@ else
 	Result:=FCursorKeysPressed[Index];
 end;
 
+procedure TSGContext.BeginIncessantlyPainting();
+begin
+FIncessantlyPainting += 1;
+end;
+
+procedure TSGContext.EndIncessantlyPainting();
+begin
+if FIncessantlyPainting > 0 then
+	FIncessantlyPainting -= 1;
+end;
+
+function  TSGContext.GetClientWidth() : TSGLongWord;
+begin
+Result := FClientWidth;
+end;
+
+function  TSGContext.GetClientHeight() : TSGLongWord;
+begin
+Result := FClientHeight;
+end;
+
+procedure TSGContext.SetClientWidth(const VClientWidth : TSGLongWord);
+begin
+FClientWidth := VClientWidth;
+end;
+
+procedure TSGContext.SetClientHeight(const VClientHeight : TSGLongWord);
+begin
+FClientHeight := VClientHeight;
+end;
+
+procedure TSGContext.SetPaintableSettings();
+var
+	O : TSGPaintableOption;
+begin
+if FPaintableSettings <> nil then
+	begin
+	if Length(FPaintableSettings) > 0 then
+		begin
+		for O in FPaintableSettings do
+			begin
+			if FPaintable <> nil then
+				FPaintable.SetOption(O.FName, O.FOption);
+			end;
+		SetLength(FPaintableSettings, 0);
+		end;
+	FPaintableSettings := nil;
+	end;
+end;
+
 constructor TSGContext.Create();
 var
 	i:LongWord;
 begin
 inherited;
+FLeft := 0;
+FTop := 0;
+FClientHeight := 0;
+FClientWidth := 0;
+FIncessantlyPainting := 1;
 FRenderClassChanget := False;
 FIcon := nil;
 FCursor := nil;
@@ -750,6 +980,9 @@ FCursorKeysPressed[SGLeftCursorButton]:=False;
 FCursorKeysPressed[SGRightCursorButton]:=False;
 FRender:=nil;
 FPaintWithHandlingMessages := True;
+FPaintableSettings := nil;
+FPaintableClass := nil;
+FPaintable := nil;
 end;
 
 procedure TSGContext.ClearKeys();

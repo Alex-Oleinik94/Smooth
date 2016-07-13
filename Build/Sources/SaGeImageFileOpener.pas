@@ -16,7 +16,7 @@ type
 			public
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
-		class procedure Execute(const VFiles : TSGStringList);override;
+		class function GetDrawableClass() : TSGFileOpenerDrawableClass;override;
 		end;
 
 implementation
@@ -29,16 +29,14 @@ uses
 	SaGeCommonClasses,
 	SaGeRender,
 	SaGeImages,
-	SaGeCommon
+	SaGeCommon,
+	SaGeRenderConstants
 	;
 
 class function TSGImageFileOpener.ClassName() : TSGString;
 begin
 Result := 'TSGImageFileOpener';
 end;
-
-var
-	AFFiles : TSGStringList = nil;
 
 type
 	TSGImageViewer = class(TSGFileOpenerDrawable)
@@ -50,7 +48,9 @@ type
 		procedure LoadDeviceResourses();override;
 		procedure Paint();override;
 			private
+		FBackgroundColor : TSGColor3f;
 		FImage : TSGImage;
+		FBackgroundImage : TSGImage;
 		end;
 
 destructor TSGImageViewer.Destroy();
@@ -67,6 +67,9 @@ constructor TSGImageViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FImage := nil;
+FBackgroundColor := Context.GetDefaultWindowColor();
+Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
+Context.EndIncessantlyPainting();
 end;
 
 class function TSGImageViewer.ClassName() : TSGString; 
@@ -86,7 +89,17 @@ end;
 procedure TSGImageViewer.Paint();
 begin
 Render.InitMatrixMode(SG_2D);
-Render.Color3f(1,1,1);
+Render.Color(FBackgroundColor);
+with Render do
+	begin
+	BeginScene(SGR_QUADS);
+	Vertex2f(0,0);
+	Vertex2f(Width,0);
+	Vertex2f(Width,Height);
+	Vertex2f(0,Height);
+	EndScene();
+	Color3f(1,1,1);
+	end;
 FImage.DrawImageFromTwoVertex2f(
 	SGVertex2fImport(0,0),
 	SGVertex2fImport(Render.Width,Render.Height),
@@ -98,16 +111,14 @@ begin
 DeleteDeviceResourses();
 FImage := TSGImage.Create();
 FImage.Context := Context;
-FImage.Way := AFFiles[0];
+FImage.Way := FFiles[0];
 FImage.Loading();
 FImage.ToTexture();
 end;
 
-class procedure TSGImageFileOpener.Execute(const VFiles : TSGStringList);
+class function TSGImageFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
 begin
-AFFiles := VFiles;
-SGRunPaintable(TSGImageViewer, TSGCompatibleContext, TSGCompatibleRender, {$IFDEF ANDROID}nil,{$ENDIF}False);
-AFFiles := nil;
+Result := TSGImageViewer;
 end;
 
 class function TSGImageFileOpener.GetExpansions() : TSGStringList; 
