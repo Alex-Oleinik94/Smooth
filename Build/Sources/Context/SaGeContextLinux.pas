@@ -569,7 +569,7 @@ winAttr.colormap := cm;
 winAttr.border_pixel := 0;
 winAttr.background_pixel := 0;
 winAttr.event_mask := ExposureMask or PointerMotionMask or ButtonPressMask or ButtonReleaseMask or StructureNotifyMask or KeyPressMask or KeyReleaseMask;
-win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),0,0,Width,Height,0,visinfo^.depth,
+win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),FLeft,FTop,FWidth,FHeight,0,visinfo^.depth,
 	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
 if win = 0 then
 	begin

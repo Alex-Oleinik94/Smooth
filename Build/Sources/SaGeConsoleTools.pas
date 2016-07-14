@@ -1075,7 +1075,7 @@ if Result then
 	end;
 end;
 
-const TitleQuote : TSGChar = '''';
+const TitleQuote : TSGChar = {$IFDEF MSWINDOWS}''''{$ELSE}'-'{$ENDIF};
 
 function ProccessTitle(const Comand : TSGString):TSGBool;
 begin
