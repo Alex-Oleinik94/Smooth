@@ -72,19 +72,25 @@ type
 		FLocation : TSGVertex3f;
 		FView   :TSGVertex3f;
 		FUp : TSGVertex3f;
-		procedure Change();inline;
+		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		procedure InitMatrix();inline;
-		procedure Clear();inline;
-		procedure CallAction();inline;
-		function GetProjectionMatrix() : TSGMatrix4;inline;
-		function GetModelViewMatrix() : TSGMatrix4;inline;
+		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetProjectionMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetModelViewMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure InitViewModeComboBox();virtual;abstract;
 		procedure Move(const Param : TSGSingle);
 		procedure MoveSidewards(const Param : TSGSingle);
 		procedure MoveUp(const Param : TSGSingle);
 		procedure Rotate(const x, y, z : TSGSingle);
+			public
+		property RotateX : TSGFloat read FRotateX write FRotateX;
+		property RotateY : TSGFloat read FRotateY write FRotateY;
+		property TranslateX : TSGFloat read FTranslateX write FTranslateX;
+		property TranslateY : TSGFloat read FTranslateY write FTranslateY;
+		property Zum : TSGFloat read FZum write FZum;
 			public
 		property Up        : TSGVertex3f read FUp         write FUp;
 		property Location  : TSGVertex3f read FLocation   write FLocation;
@@ -646,12 +652,12 @@ end;
 (*============================TSGCamera===============================*)
 (*====================================================================*)
 
-function TSGCamera.GetProjectionMatrix() : TSGMatrix4;inline;
+function TSGCamera.GetProjectionMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SGR_PROJECTION_MATRIX, @Result);
 end;
 
-function TSGCamera.GetModelViewMatrix() : TSGMatrix4;inline;
+function TSGCamera.GetModelViewMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SGR_MODELVIEW_MATRIX, @Result);
 end;
@@ -668,7 +674,7 @@ Clear();
 FChangingLookAtObject := False;
 end;
 
-procedure TSGCamera.Change();inline;
+procedure TSGCamera.Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 const
 	RotateConst = 0.002;
 var
@@ -732,11 +738,19 @@ SG_VIEW_WATCH_OBJECT:
 		begin
 		FZum*=0.89;
 		end;
+	if (Context.KeyPressed) and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SGDownKey) and (Context.KeysPressed('V')) then
+		begin
+		WriteLn('Zum=',FZum:0:4);
+		WriteLn('TranslateY=',FTranslateY:0:4);
+		WriteLn('TranslateY=',FTranslateY:0:4);
+		WriteLn('RotateY=',FRotateY:0:4);
+		WriteLn('RotateX=',FRotateX:0:4);
+		end;
 	end;
 end;
 end;
 
-procedure TSGCamera.InitMatrix();inline;
+procedure TSGCamera.InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Matrix:TSGMatrix4;
 begin
@@ -789,13 +803,13 @@ begin
 Position := Position + (View * Up).Normalized() * Param;
 end;
 
-procedure TSGCamera.CallAction();inline;
+procedure TSGCamera.CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Change();
 InitMatrix();
 end;
 
-procedure TSGCamera.Clear();inline;
+procedure TSGCamera.Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FZum:=1;
 FRotateX:=0;

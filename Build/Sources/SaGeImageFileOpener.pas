@@ -51,6 +51,8 @@ type
 		procedure RescaleImagePosition();
 		procedure PaintImageInfo();
 		procedure ProccessMouseWheel(const VWheel : TSGBool);
+		procedure OpenFileDialog();
+		procedure SaveFileDialog();
 			public
 		procedure LoadingFromThread();
 		end;
@@ -205,10 +207,29 @@ if  (CursorPosF.x > FPosition.x) and
 	end;
 end;
 
+procedure TSGImageViewer.OpenFileDialog();
+begin
+
+end;
+
+procedure TSGImageViewer.SaveFileDialog();
+begin
+{FileWay := Context.FileSaveDialog(
+	'Куда сохранить то?!',
+	'Файлы рельефа(*.sggdrf)'+#0+'*.sggdrf'+#0+
+	'All files(*.*)'+#0+'*.*'+#0+
+	#0,
+	'sggdrf');}
+end;
+
 procedure TSGImageViewer.Paint();
 begin
 if Context.CursorWheel() <> SGNullCursorWheel then
 	ProccessMouseWheel(SGUpCursorWheel = Context.CursorWheel());
+if Context.KeyPressed and (Context.KeyPressedChar = 'S') and Context.KeysPressed(SG_CTRL_KEY) then
+	begin
+	SaveFileDialog();
+	end;
 Render.InitMatrixMode(SG_2D);
 Render.Color(FBackgroundColor);
 with Render do
@@ -273,9 +294,7 @@ if (FRenderSize.x < FImage.Width) or (FRenderSize.y < FImage.Height) then
 else
 	begin
 	FSize.Import(FImage.Width, FImage.Height);
-	FPosition.Import(
-		(FRenderSize.x  - FSize.x) / 2,
-		(FRenderSize.y - FSize.y) / 2);
+	FPosition := (FRenderSize - FSize) / 2;
 	end;
 end;
 
@@ -287,26 +306,33 @@ RS.Import(Render.Width, Render.Height);
 FPosition += (RS / 2) - (FRenderSize / 2);
 FRenderSize := RS;
 if (FRenderSize.x > FSize.x) and (FRenderSize.y > FSize.y) then
-	begin
-	if FRenderSize.x / FRenderSize.y > FImage.Width / FImage.Height then
+	if ((FRenderSize.x < FImage.Width) or (FRenderSize.y < FImage.Height)) then
 		begin
-		FSize.Import(
-			FRenderSize.x,
-			FRenderSize.x * FImage.Height / FImage.Width);
-		FPosition.Import(
-			0,
-			(FRenderSize.y - FSize.y) / 2);
+		if FRenderSize.x / FRenderSize.y > FImage.Width / FImage.Height then
+			begin
+			FSize.Import(
+				FRenderSize.x,
+				FRenderSize.x * FImage.Height / FImage.Width);
+			FPosition.Import(
+				0,
+				(FRenderSize.y - FSize.y) / 2);
+			end
+		else
+			begin
+			FSize.Import(
+				FRenderSize.y * FImage.Width / FImage.Height,
+				FRenderSize.y);
+			FPosition.Import(
+				(FRenderSize.x - FSize.x) / 0,
+				0);
+			end;
 		end
 	else
 		begin
-		FSize.Import(
-			FRenderSize.y * FImage.Width / FImage.Height,
-			FRenderSize.y);
-		FPosition.Import(
-			(FRenderSize.x - FSize.x) / 0,
-			0);
+		if (FSize.x < FImage.Width) or (FSize.y < FImage.Height) then
+			FSize.Import(FImage.Width, FImage.Height);
+		FPosition := (FRenderSize - FSize) / 2;
 		end;
-	end;
 end;
 
 procedure TSGImageViewer.LoadDeviceResourses();

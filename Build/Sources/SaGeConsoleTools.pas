@@ -1087,6 +1087,22 @@ if ('TITLE' in ContextSettings) then
 ContextSettings += SGContextOptionTitle(StringWordGet(Comand,TitleQuote,2));
 end;
 
+function ProccessMax(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+ContextSettings -= 'MAX';
+ContextSettings -= 'MIN';
+ContextSettings += SGContextOptionMax();
+end;
+
+function ProccessMin(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+ContextSettings -= 'MAX';
+ContextSettings -= 'MIN';
+ContextSettings += SGContextOptionMin();
+end;
+
 procedure Run();
 begin
 SGRunPaintable(
@@ -1115,6 +1131,8 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored()));
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
+	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
+	ConsoleCaller.AddComand(@ProccessMin,       ['MIN'],                'For minimize window arter initialization');
 	ConsoleCaller.AddComand(@ProccessWH,        ['?*X*?'],              'For set window width and height');
 	ConsoleCaller.AddComand(@ProccessTitle,     ['t' + TitleQuote + '*' + TitleQuote],   'For set window title');
 	ConsoleCaller.AddComand(@ProccessWidth,     ['W*?','WIDTH*?'],      'For set window width');

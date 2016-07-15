@@ -183,7 +183,7 @@ end;
 
 class procedure TSGFileOpener.Execute(const VFiles : TSGStringList);
 begin
-SGCompatibleRunPaintable(GetDrawableClass(), SGContextOptionImport('FILES TO OPEN', TSGPointer(VFiles)));
+SGCompatibleRunPaintable(GetDrawableClass(), SGContextOptionImport('FILES TO OPEN', TSGPointer(VFiles)) + SGContextOptionMax());
 end;
 
 class function TSGFileOpener.GetExpansions() : TSGStringList; 

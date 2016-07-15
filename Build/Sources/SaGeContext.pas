@@ -77,6 +77,8 @@ type
 		procedure Kill();virtual;
 		class function Suppored() : TSGBoolean; virtual;
 		function GetDefaultWindowColor():TSGColor3f; virtual;
+		procedure Minimize();virtual;
+		procedure Maximize();virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
@@ -216,6 +218,8 @@ function SGContextOptionHeight(const VVariable : TSGLongWord) : TSGContextOption
 function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
 function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
 function SGContextOptionFullscreen(const VVariable : TSGBoolean) : TSGContextOption;
+function SGContextOptionMax() : TSGContextOption;
+function SGContextOptionMin() : TSGContextOption;
 function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
 function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
 {$IFDEF ANDROID}
@@ -251,9 +255,27 @@ uses
 		{$ENDIF}
 	;
 
+procedure TSGContext.Minimize();
+begin
+end;
+
+procedure TSGContext.Maximize();
+begin
+end;
+
 procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
 begin
 SGRunPaintable(VPaintableClass, TSGCompatibleContext, TSGCompatibleRender, VSettings);
+end;
+
+function SGContextOptionMax() : TSGContextOption;
+begin
+Result.Import('MAX', nil);
+end;
+
+function SGContextOptionMin() : TSGContextOption;
+begin
+Result.Import('MIN', nil);
 end;
 
 function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
@@ -291,18 +313,21 @@ for O in VSettings do
 		First := False
 	else
 		S += ', ';
-	S += WordName(O.FName) + '=';
+	S += WordName(O.FName);
 	if O.FName in StandartOptions then
 		begin
-		S += SGStr(TSGMaxEnum(O.FOption));
+		S += '=' + SGStr(TSGMaxEnum(O.FOption));
 		end
 	else if O.FName = 'TITLE' then
 		begin
-		S += '''' + SGPCharToString(PChar(O.FOption)) + '''';
+		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
+		end
+	else if (O.FName = 'MIN') or (O.FName = 'MAX') then
+		begin
 		end
 	else
 		begin
-		S += SGAddrStr(O.FOption);
+		S += '=' + SGAddrStr(O.FOption);
 		end;
 	end;
 SetLength(StandartOptions, 0);
@@ -478,7 +503,40 @@ var
 	Context : TSGContext = nil;
 	IContext : ISGContext = nil;
 	Settings : TSGContextSettings = nil;
+var
 	PaintableSettings : TSGPaintableSettings = nil;
+	Placement : TSGByte = 0;
+
+procedure CheckPlacement();
+var
+	MinExists, MaxExists : TSGBool;
+begin
+MinExists := ('MIN' in PaintableSettings);
+MaxExists := ('MAX' in PaintableSettings);
+if MaxExists or MinExists then
+	begin
+	if MinExists xor MaxExists then
+		begin
+		PaintableSettings -= (Iff(MinExists, 'MIN','') + Iff(MaxExists, 'MAX',''));
+		Placement := 2 * Byte(MaxExists) + 1 * Byte(MinExists);
+		end
+	else
+		begin
+		PaintableSettings -= 'MAX';
+		PaintableSettings -= 'MIN';
+		SGHint('Run : warning : maximization and minimization are not available at the same time');
+		end;
+	end;
+end;
+
+procedure InitPlacement();
+begin
+case Placement of
+2 : Context.Maximize();
+1 : Context.Minimize();
+end;
+end;
+
 begin
 SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)');
 SGPrintContextSettings(VSettings);
@@ -487,16 +545,21 @@ Settings := VSettings;
 Context := VContextClass.Create();
 IContext := Context;
 
-Context.PaintableSettings := SGSetContextSettings(Context, Settings);
+PaintableSettings := SGSetContextSettings(Context, Settings);
+CheckPlacement();
+Context.PaintableSettings := PaintableSettings;
 Context.SelfLink := @IContext;
 Context.RenderClass := VRenderClass;
 Context.Paintable := VPaintableClass;
 
 Context.Initialize();
 if Context.Active then
+	begin
+	InitPlacement();
 	repeat
 	Context.Run();
 	until not SGTryChangeContextType(Context, IContext);
+	end;
 IContext := nil;
 Context.Destroy();
 Context := nil;

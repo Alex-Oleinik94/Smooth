@@ -52,6 +52,8 @@ type
 		class function Suppored() : TSGBoolean; override;
 		class function ClassName() : TSGString;override;
 		function GetDefaultWindowColor():TSGColor3f;override;
+		procedure Minimize();override;
+		procedure Maximize();override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
@@ -107,6 +109,24 @@ uses
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts:packed array of TSGContextWinAPI = nil;
+
+procedure TSGContextWinAPI.Minimize();
+var
+	wp : WINDOWPLACEMENT;
+begin
+GetWindowPlacement(hWindow, @wp);
+wp.showCmd := SW_SHOWMINIMIZED;
+SetWindowPlacement(hWindow, @wp);
+end;
+
+procedure TSGContextWinAPI.Maximize();
+var
+	wp : WINDOWPLACEMENT;
+begin
+GetWindowPlacement(hWindow, @wp);
+wp.showCmd := SW_SHOWMAXIMIZED;
+SetWindowPlacement(hWindow, @wp);
+end;
 
 function TSGContextWinAPI.GetDefaultWindowColor():TSGColor3f;
 var

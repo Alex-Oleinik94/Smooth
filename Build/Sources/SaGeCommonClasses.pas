@@ -164,6 +164,8 @@ type
 		function  GetDefaultWindowColor():TSGColor3f;
 		procedure BeginIncessantlyPainting();
 		procedure EndIncessantlyPainting();
+		procedure Minimize();
+		procedure Maximize();
 		
 		property NewContext : TSGPointer write SetNewContext;
 		property RenderClass : TSGPointer write SetRenderClass;

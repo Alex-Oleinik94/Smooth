@@ -92,7 +92,9 @@ FFont.ToTexture();
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
-
+FCamera.Zum := 15.47;
+FCamera.RotateY := -42.66;
+FCamera.RotateX := 37.66;
 Generate();
 end;
 
