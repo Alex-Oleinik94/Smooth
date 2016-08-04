@@ -306,13 +306,14 @@ StandartOptions += 'WIDTH';
 StandartOptions += 'HEIGHT';
 StandartOptions += 'LEFT';
 StandartOptions += 'TOP';
-StandartOptions += 'FULLSCREEN';
 for O in VSettings do
 	begin
 	if First then
 		First := False
 	else
 		S += ', ';
+	if (O.FName = 'FULLSCREEN') and (TSGMaxEnum(O.FOption) = 0) then
+		S += '!';
 	S += WordName(O.FName);
 	if O.FName in StandartOptions then
 		begin
@@ -322,7 +323,7 @@ for O in VSettings do
 		begin
 		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
 		end
-	else if (O.FName = 'MIN') or (O.FName = 'MAX') then
+	else if (O.FName = 'MIN') or (O.FName = 'MAX') or (O.FName = 'FULLSCREEN') then
 		begin
 		end
 	else

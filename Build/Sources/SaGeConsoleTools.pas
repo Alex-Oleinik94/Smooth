@@ -1002,7 +1002,6 @@ if ('FULLSCREEN' in ContextSettings) then
 		if SGContextOptionFullscreen(True) in ContextSettings then
 			begin
 			ContextSettings -= SGContextOptionFullscreen(True);
-			ContextSettings += SGContextOptionFullscreen(False);
 			end
 		else
 			Result := False;
