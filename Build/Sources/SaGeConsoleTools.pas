@@ -60,6 +60,8 @@ uses
 
 const
 	SGErrorString = 'Error of parameters, use ';
+	SGConcoleCallerHelpParams = ' --help, --h, --?';
+	SGConcoleCallerUnknownCategory = '--unknown--';
 
 type
 	TSGConcoleCallerProcedure = procedure (const VParams : TSGConcoleCallerParams = nil);
@@ -71,7 +73,9 @@ type
 		procedure AddComand(const VComand       : TSGConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		function Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Category(const VC : TSGString);
 			private
+		FCurrentCategory : TSGString;
 		FParams : TSGConcoleCallerParams;
 		FComands : packed array of
 			packed record
@@ -79,6 +83,7 @@ type
 				FNestedComand : TSGConcoleCallerNestedProcedure;
 				FSyntax       : TSGConcoleCallerParams;
 				FHelpString   : TSGString;
+				FCategory     : TSGString;
 				end;
 			private
 		function AllNested() : TSGBool;
@@ -400,10 +405,16 @@ else
 	end;
 end;
 
+procedure TSGConsoleCaller.Category(const VC : TSGString);
+begin
+FCurrentCategory := VC;
+end;
+
 constructor TSGConsoleCaller.Create(const VParams : TSGConcoleCallerParams);
 begin
 FParams := VParams;
 FComands := nil;
+FCurrentCategory := SGConcoleCallerUnknownCategory;
 end;
 
 function TSGConsoleCaller.AllNested() : TSGBool;
@@ -467,6 +478,7 @@ else
 FComands[High(FComands)].FComand := VComand;
 FComands[High(FComands)].FNestedComand := nil;
 FComands[High(FComands)].FHelpString := VHelp;
+FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
 if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
 	for i := 0 to High(FComands[High(FComands)].FSyntax) do
@@ -484,6 +496,7 @@ else
 FComands[High(FComands)].FComand := nil;
 FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FHelpString := VHelp;
+FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
 if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
 	for i := 0 to High(FComands[High(FComands)].FSyntax) do
@@ -543,27 +556,124 @@ end;
 
 procedure ExecuteHelp();
 var
+	FCategoryesSpaces : packed array of
+		packed record
+			FCategory : TSGString;
+			FSpaces   : TSGUInt32;
+			end = nil;
+
+function CategorySpace(const C : TSGString):TSGUInt32;
+var
+	i : TSGUInt32;
+begin
+Result := 0;
+if FCategoryesSpaces <> nil then if Length(FCategoryesSpaces) > 0 then
+	for i := 0 to High(FCategoryesSpaces) do
+		if FCategoryesSpaces[i].FCategory = C then
+			begin
+			Result := FCategoryesSpaces[i].FSpaces;
+			break;
+			end;
+end;
+
+procedure CalcCategorySpaces();
+
+function LastCatecory() : TSGString;
+begin
+if FCategoryesSpaces = nil then
+	Result := SGConcoleCallerUnknownCategory
+else if Length(FCategoryesSpaces) = 0 then
+	Result := SGConcoleCallerUnknownCategory
+else
+	Result := FCategoryesSpaces[High(FCategoryesSpaces)].FCategory;
+end;
+
+function ComandSpace(const i : TSGLongWord) : TSGLongWord;
+var
+	ii : TSGUInt32;
+begin
+Result := 0;
+for ii := 0 to High(FComands[i].FSyntax) do
+	if FComands[i].FSyntax[ii] <> '' then
+		begin
+		if ii <> 0 then
+			Result += 1;
+		Result += 3 + Length(FComands[i].FSyntax[ii]);
+		end;
+if FComands[ii].FCategory = SGConcoleCallerUnknownCategory then
+	if Result < Length(SGConcoleCallerHelpParams) then
+		Result := Length(SGConcoleCallerHelpParams);
+end;
+
+procedure AddNewCatSpase(const C : TSGString; const S : TSGUInt32);
+begin
+if FCategoryesSpaces = nil then
+	SetLength(FCategoryesSpaces, 1)
+else
+	SetLength(FCategoryesSpaces, Length(FCategoryesSpaces) + 1);
+FCategoryesSpaces[High(FCategoryesSpaces)].FCategory := C;
+FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces   := S;
+end;
+
+var
 	i, ii : TSGLongWord;
+begin
+if FComands <> nil then if Length(FComands) > 0 then
+	for i := 0 to High(FComands) do
+		begin
+		if (LastCatecory() <> FComands[i].FCategory) or (FCategoryesSpaces = nil) or (Length(FCategoryesSpaces) = 0) then
+			AddNewCatSpase(FComands[i].FCategory, ComandSpace(i))
+		else
+			begin
+			ii := ComandSpace(i);
+			if ii > FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces then
+				FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces := ii;
+			end;
+		end;
+end;
+
+var
+	i, ii, iii : TSGLongWord;
+	LCat : TSGString;
 begin
 if (FComands <> nil) and (Length(FComands)>0) then
 	begin
 	SGPrintEngineVersion();
 	WriteLn('Help:');
-	WriteLn(' --help, --h, --? - Shows this');
+	WriteLn(SGConcoleCallerHelpParams, ' - Shows this');
+	CalcCategorySpaces();
+	LCat := SGConcoleCallerUnknownCategory;
 	for i := 0 to High(FComands) do
 		begin
 		if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
 			begin
+			if LCat <> FComands[i].FCategory then
+				begin
+				LCat := FComands[i].FCategory;
+				WriteLn(LCat);
+				end;
+			iii := 0;
 			for ii := 0 to High(FComands[i].FSyntax) do
 				if FComands[i].FSyntax[ii] <> '' then
 					begin
 					if ii <> 0 then
+						begin
 						Write(',');
+						iii += 1;
+						end;
 					Write(' --',SGDownCaseString(FComands[i].FSyntax[ii]));
+					iii += 3 + Length(FComands[i].FSyntax[ii]);
 					end;
+			ii := CategorySpace(FComands[i].FCategory);
+			while iii < ii do
+				begin
+				Write(' ');
+				iii += 1;
+				end;
 			WriteLn(' - ',FComands[i].FHelpString);
 			end;
 		end;
+	SetLength(FCategoryesSpaces, 0);
 	end;
 end;
 
@@ -1126,10 +1236,12 @@ RenderClass  := TSGCompatibleRender;
 if (VParams<>nil) and (Length(VParams)>0) then
 	begin
 	ConsoleCaller := TSGConsoleCaller.Create(VParams);
+	ConsoleCaller.Category('Context settings:');
 	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               'For use GLUT' +          ImposibleParam(IsGLUTSuppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored()));
+	ConsoleCaller.Category('Window settings:');
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
 	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
 	ConsoleCaller.AddComand(@ProccessMin,       ['MIN'],                'For minimize window arter initialization');
