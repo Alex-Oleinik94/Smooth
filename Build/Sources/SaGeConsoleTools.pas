@@ -176,23 +176,28 @@ var
 begin
 ConsoleCaller := TSGConsoleCaller.Create(VParams);
 ConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console caller');
+ConsoleCaller.Category('Applications');
+ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
+ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
+ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all 3D/2D scenes');
+ConsoleCaller.Category('System applications');
+ConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
+ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
+ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert pascal Header to Dynamic utility');
+ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
+ConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
+ConsoleCaller.Category('Images tools');
+ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
 ConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA'], 'Convert image To SaGeImagesAlpha format');
+ConsoleCaller.Category('Build tools');
 ConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
-ConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it');
 ConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear RF File');
 ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in rffile');
-ConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
 ConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Inc engine Version');
-ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit');
+ConsoleCaller.Category('System tools');
 ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
-ConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
-ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units');
-ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
-ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
-ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
 ConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
-ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert header to dynamic utility');
-ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all scenes in this application');
+ConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();
 end;
@@ -600,7 +605,7 @@ for ii := 0 to High(FComands[i].FSyntax) do
 			Result += 1;
 		Result += 3 + Length(FComands[i].FSyntax[ii]);
 		end;
-if FComands[ii].FCategory = SGConcoleCallerUnknownCategory then
+if FComands[i].FCategory = SGConcoleCallerUnknownCategory then
 	if Result < Length(SGConcoleCallerHelpParams) then
 		Result := Length(SGConcoleCallerHelpParams);
 end;
@@ -632,14 +637,38 @@ if FComands <> nil then if Length(FComands) > 0 then
 		end;
 end;
 
+function IsDefParam(const i : TSGLongWord):TSGBoolean;
+var
+	ii : TSGUInt32;
+begin
+Result := False;
+if FComands[i].FSyntax <> nil then
+	if Length(FComands[i].FSyntax) <> 0 then
+		for ii := 0 to High(FComands[i].FSyntax) do
+			if FComands[i].FSyntax[ii] = '' then
+				begin
+				Result := True;
+				break;
+				end;
+end;
+
+const
+	CategoryColor = 15;
+	StandartColor = 7;
+	DefParamColor = 11;
+	CommaColor = 14;
 var
 	i, ii, iii : TSGLongWord;
 	LCat : TSGString;
+	dp : TSGBool;
 begin
 if (FComands <> nil) and (Length(FComands)>0) then
 	begin
 	SGPrintEngineVersion();
-	WriteLn('Help:');
+	TextColor(CategoryColor);
+	Write('Help');
+	TextColor(StandartColor);
+	WriteLn(':');
 	WriteLn(SGConcoleCallerHelpParams, ' - Shows this');
 	CalcCategorySpaces();
 	LCat := SGConcoleCallerUnknownCategory;
@@ -650,16 +679,28 @@ if (FComands <> nil) and (Length(FComands)>0) then
 			if LCat <> FComands[i].FCategory then
 				begin
 				LCat := FComands[i].FCategory;
-				WriteLn(LCat);
+				TextColor(CategoryColor);
+				Write(LCat);
+				TextColor(CommaColor);
+				WriteLn(':');
+				TextColor(StandartColor);
 				end;
+			dp := IsDefParam(i);
+			if DP then
+				TextColor(DefParamColor);
 			iii := 0;
 			for ii := 0 to High(FComands[i].FSyntax) do
 				if FComands[i].FSyntax[ii] <> '' then
 					begin
 					if ii <> 0 then
 						begin
+						TextColor(CommaColor);
 						Write(',');
 						iii += 1;
+						if DP then
+							TextColor(DefParamColor)
+						else
+							TextColor(StandartColor);
 						end;
 					Write(' --',SGDownCaseString(FComands[i].FSyntax[ii]));
 					iii += 3 + Length(FComands[i].FSyntax[ii]);
@@ -671,6 +712,7 @@ if (FComands <> nil) and (Length(FComands)>0) then
 				iii += 1;
 				end;
 			WriteLn(' - ',FComands[i].FHelpString);
+			TextColor(StandartColor);
 			end;
 		end;
 	SetLength(FCategoryesSpaces, 0);
@@ -1236,12 +1278,12 @@ RenderClass  := TSGCompatibleRender;
 if (VParams<>nil) and (Length(VParams)>0) then
 	begin
 	ConsoleCaller := TSGConsoleCaller.Create(VParams);
-	ConsoleCaller.Category('Context settings:');
+	ConsoleCaller.Category('Context settings');
 	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               'For use GLUT' +          ImposibleParam(IsGLUTSuppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored()));
 	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored()));
-	ConsoleCaller.Category('Window settings:');
+	ConsoleCaller.Category('Window settings');
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
 	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
 	ConsoleCaller.AddComand(@ProccessMin,       ['MIN'],                'For minimize window arter initialization');
