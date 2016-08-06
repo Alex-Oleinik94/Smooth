@@ -27,6 +27,8 @@ type
 		FPosition : TSGComponentLocationVectorType;
 		FSize     : TSGComponentLocationVectorType;
 		procedure Import(const VPosition, VSize : TSGComponentLocationVectorType ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		property Size : TSGComponentLocationVectorType read FSize;
+		property Position : TSGComponentLocationVectorType read FPosition;
 		end;
 	
 	TSGAnchors = type TSGExByte;
@@ -103,6 +105,16 @@ type
 		
 		function GetVisibleTimer() : TSGScreenTimer;
 		function GetActiveTimer() : TSGScreenTimer;
+		function GetActive() : TSGBoolean;
+		function GetVisible() : TSGBoolean;
+		function GetFont() : TSGFont;
+		
+		property Font : TSGFont read GetFont;
+		property Caption : TSGCaption read GetTitle;
+		property Active : TSGBoolean read GetActive;
+		property Visible : TSGBoolean read GetVisible;
+		property VisibleTimer : TSGScreenTimer read GetVisibleTimer;
+		property ActiveTimer : TSGScreenTimer read GetActiveTimer;
 		end;
 	
 	ISGScreen = interface(ISGComponent)
@@ -116,12 +128,18 @@ type
 		['{ac52a3a2-e62d-4473-a2b9-1d36f56389a9}']
 		function GetOverTimer() : TSGScreenTimer;
 		function GetOver() : TSGBool;
+		
+		property Over : TSGBoolean read GetOver;
+		property OverTimer : TSGScreenTimer read GetOverTimer;
 		end;
 	
 	ISGClickComponent = interface(ISGOverComponent)
 		['{9b21d96d-b820-41cd-b18f-14ed09d5c218}']
 		function GetClickTimer() : TSGScreenTimer;
 		function GetClick() : TSGBool;
+		
+		property Click : TSGBoolean read GetOver;
+		property ClickTimer : TSGScreenTimer read GetOverTimer;
 		end;
 	
 	ISGButton = interface(ISGClickComponent)

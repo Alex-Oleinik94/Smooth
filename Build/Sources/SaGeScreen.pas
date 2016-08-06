@@ -189,12 +189,15 @@ type
 		function NotVisible : TSGBoolean;virtual;
 		function GetVisibleTimer() : TSGScreenTimer;virtual;
 		function GetActiveTimer() : TSGScreenTimer;virtual;
+		function GetFont() : TSGFont;virtual;
+		function GetActive() : TSGBoolean;
+		function GetVisible() : TSGBoolean;
 			public
 		property VisibleTimer : TSGScreenTimer     read FVisibleTimer write FVisibleTimer;
 		property ActiveTimer  : TSGScreenTimer     read FActiveTimer  write FActiveTimer;
 		property Caption      : TSGCaption    read FCaption      write FCaption;
 		property Text         : TSGCaption    read FCaption      write FCaption;
-		property Font         : TSGFont       read FFont         write FFont;
+		property Font         : TSGFont       read GetFont       write FFont;
 		property Skin         : TSGScreenSkin read FSkin         write FSkin;
 		property Visible      : Boolean       read FVisible      write SetVisible;
 		property Active       : Boolean       read FActive       write FActive         default False;
@@ -272,7 +275,8 @@ type
 			public
 		constructor Create();override;
 			protected
-		FOver : TSGBoolean;
+		FOverPrev  : TSGBoolean;
+		FOver      : TSGBoolean;
 		FOverTimer : TSGScreenTimer;
 		procedure UpgradeTimers();override;
 			public 
@@ -284,7 +288,7 @@ type
 			public
 		constructor Create();override;
 			protected
-		FClick : TSGBoolean;
+		FClick      : TSGBoolean;
 		FClickTimer : TSGScreenTimer;
 		procedure UpgradeTimers();override;
 			public
@@ -338,7 +342,6 @@ type
 		FCursorOnButton      : TSGBoolean;
 		FChangingButton      : TSGBoolean;
 		FChangingButtonTimer : TSGScreenTimer;
-		FViewImage1          : TSGImage;
 			public
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
@@ -2161,13 +2164,15 @@ end;
 procedure TSGOverComponent.UpgradeTimers();
 begin
 inherited;
+FOverPrev := FOver;
 FOver := CursorInComponent();
-UpgradeTimer(FOver, FOverTimer);
+UpgradeTimer(FOver, FOverTimer, 3, 2);
 end;
 
 constructor TSGOverComponent.Create();
 begin
 inherited;
+FOverPrev := False;
 FOver := False;
 FOverTimer := 0;
 end;
@@ -2180,7 +2185,7 @@ end;
 procedure TSGClickComponent.UpgradeTimers();
 begin
 inherited;
-UpgradeTimer(FClick, FClickTimer);
+UpgradeTimer(FClick, FClickTimer, 5, 2);
 end;
 
 constructor TSGClickComponent.Create();
@@ -2196,6 +2201,21 @@ Result := FClickTimer;
 end;
 
 //===========================
+
+function TSGComponent.GetActive() : TSGBoolean;
+begin
+Result := FActive;
+end;
+
+function TSGComponent.GetVisible() : TSGBoolean;
+begin
+Result := FVisible;
+end;
+
+function TSGComponent.GetFont() : TSGFont;
+begin
+Result := FFont;
+end;
 
 function TSGComponent.HasChildren() : TSGBoolean;
 begin
@@ -3679,6 +3699,8 @@ if FCursorOnButtonPrev and (not FCursorOnButton) then
 FCursorOnButtonPrev := FCursorOnComponent;
 UpgradeTimer(FCursorOnButton,FCursorOnButtonTimer,3,2);
 UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
+if FOver then if Context.CursorKeysPressed(SGLeftCursorButton) then
+	FClick:=True;
 inherited FromUpDate(FCanChange);
 end;
 
@@ -3687,8 +3709,6 @@ begin
 FCursorOnButton     := CursorInComponentNow;
 if CursorInComponentNow then
 	begin
-	if (Context.CursorKeysPressed(SGLeftCursorButton)) then
-		FChangingButton:=True;
 	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 		begin
 		if (OnChange<>nil) then
@@ -3700,79 +3720,14 @@ inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
 
 procedure TSGButton.FromDraw;
-const 
-	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
-	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
-	ThreeColor1:TSGColor4f = (x:0.8;y:0.8;z:0.8;w:1);
-	
-	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
-	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
-	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
 	begin
 	FSkin.PaintButton(Self);
-	if FViewImage1<>nil then
-		begin
-		Render.Color4f(1,1,1,FVisibleTimer);
-		FViewImage1.DrawImageFromTwoVertex2f(
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
-		end;
-	if (not Active) or (FActiveTimer<1-SGZero) then
-		begin
-		SGRoundQuad(Render,
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-			5,10,
-			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer))*0.54,
-			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer))*0.8,
-			True);
-		end;
-	if  (FActiveTimer>SGZero) and 
-		(1-FCursorOnButtonTimer>SGZero) and 
-		(1-FChangingButtonTimer>SGZero) and
-		(FVisibleTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,10,
-		FirsColor1.WithAlpha(0.3*FVisibleTimer*(1-FCursorOnButtonTimer)*(1-FChangingButtonTimer)*FActiveTimer),
-		FirsColor2.WithAlpha(0.3*FVisibleTimer*(1-FCursorOnButtonTimer)*(1-FChangingButtonTimer)*FActiveTimer)*1.3,
-		True);
-	if  (FActiveTimer>SGZero) and 
-		(FCursorOnButtonTimer>SGZero) and 
-		(1-FChangingButtonTimer>SGZero) and
-		(FVisibleTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,10,
-		SecondColor1.WithAlpha(0.3*FVisibleTimer*FCursorOnButtonTimer*(1-FChangingButtonTimer)*FActiveTimer),
-		SecondColor2.WithAlpha(0.3*FVisibleTimer*FCursorOnButtonTimer*(1-FChangingButtonTimer)*FActiveTimer)*1.3,
-		True);
-	if  (FActiveTimer>SGZero) and 
-		(FChangingButtonTimer>SGZero) and
-		(FVisibleTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,
-		10,
-		ThreeColor1.WithAlpha(0.4*FVisibleTimer*FChangingButtonTimer*FActiveTimer),
-		ThreeColor2.WithAlpha(0.3*FVisibleTimer*FChangingButtonTimer*FActiveTimer)*1.3,
-		True);
-	end;
-if (Caption<>'') and (FFont<>nil) and (FFont.Ready) and (FVisibleTimer>SGZero) then
-	begin
-	Render.Color4f(1,1,1,FVisibleTimer);
-	FFont.DrawFontFromTwoVertex2f(
-		Caption,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
 	end;
 FCursorOnButton:=False;
 FChangingButton:=False;
+FClick := False;
 inherited FromDraw;
 end;
 
@@ -3793,7 +3748,6 @@ FTopShiftForChilds    := 0;
 FRightShiftForChilds  := 0;
 FBottomShiftForChilds := 0;
 FCanHaveChildren      := False;
-FViewImage1           := nil;
 FCursorOnButtonPrev   := False;
 FCursorOnButton       := False;
 end;

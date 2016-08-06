@@ -262,7 +262,8 @@ function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane): TSGVertex3f;{$
 function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3: TSGVertex3f): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPlaneFromThreeVertex(const a1,a2,a3: TSGVertex3f):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2: TSGVertex3f): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
+procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGRoundQuad(const VRender:ISGRender;const Vertex12,Vertex32: TSGVertex2f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGGetArrayOfRoundQuad(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
 procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f; 
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
@@ -1067,13 +1068,33 @@ end;
 
 procedure SGRoundQuad(
 	const VRender:ISGRender;
+	const Vertex12,Vertex32: TSGVertex2f; 
+	const Radius:real; 
+	const Interval:LongInt;
+	const QuadColor: TSGColor4f; 
+	const LinesColor: TSGColor4f; 
+	const WithLines:boolean = False;
+	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	ArVertex : TSGVertex3fList = nil;
+	Vertex1, Vertex3 : TSGVertex3f;
+begin
+Vertex1.Import(Vertex12.x, Vertex12.y);
+Vertex3.Import(Vertex32.x, Vertex32.y);
+ArVertex := SGGetArrayOfRoundQuad(Vertex1,Vertex3,Radius,Interval);
+SGConstructRoundQuad(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
+SetLength(ArVertex,0);
+end;
+
+procedure SGRoundQuad(
+	const VRender:ISGRender;
 	const Vertex1,Vertex3: TSGVertex3f; 
 	const Radius:real; 
 	const Interval:LongInt;
 	const QuadColor: TSGColor4f; 
 	const LinesColor: TSGColor4f; 
 	const WithLines:boolean = False;
-	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	ArVertex : TSGVertex3fList = nil;
 begin

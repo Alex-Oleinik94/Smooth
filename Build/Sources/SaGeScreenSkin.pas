@@ -32,7 +32,6 @@ type
 		FDisabled : TSGScreenSkinFrameColor;
 		FOver     : TSGScreenSkinFrameColor;
 		FText     : TSGScreenSkinFrameColor;
-		procedure Import(const VNormal, VDisabled, VOver, VClick : TSGScreenSkinFrameColor);  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
 	TSGScreenSkin = class(TSGContextabled)
@@ -43,20 +42,67 @@ type
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
 		procedure IddleFunction(); virtual;
-			private
+			protected
 		FColors : TSGScreenSkinColors;
+		FColorsFrom, FColorsTo : TSGScreenSkinColors;
+		FColorsTimer : TSGScreenTimer;
 			public
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			public
-		procedure PaintButton(const VButton : ISGButton); virtual;
+		procedure PaintButton(const Button : ISGButton); virtual;
 		end;
 
-function SGScreenSkinColorsImport(const VNormal, VDisabled, VOver, VClick : TSGScreenSkinFrameColor) : TSGScreenSkinColors; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStandartSkinColors() : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGenerateRandomSkinColors(const Colors : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGenerateUnequalRandomSkinColors(const Colors : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (A : TSGScreenSkinColors; const B : TSGFloat) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (A, B : TSGScreenSkinColors) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.FNormal.FFirst  := A.FNormal.FFirst  + B.FNormal.FFirst;
+Result.FNormal.FSecond := A.FNormal.FSecond + B.FNormal.FSecond;
+
+Result.FDisabled.FFirst  := A.FDisabled.FFirst  + B.FDisabled.FFirst;
+Result.FDisabled.FSecond := A.FDisabled.FSecond + B.FDisabled.FSecond;
+
+Result.FOver.FFirst  := A.FOver.FFirst  + B.FOver.FFirst;
+Result.FOver.FSecond := A.FOver.FSecond + B.FOver.FSecond;
+
+Result.FClick.FFirst  := A.FClick.FFirst  + B.FClick.FFirst;
+Result.FClick.FSecond := A.FClick.FSecond + B.FClick.FSecond;
+
+Result.FText.FFirst  := A.FText.FFirst  + B.FText.FFirst;
+Result.FText.FSecond := A.FText.FSecond + B.FText.FSecond;
+end;
+
+operator * (A : TSGScreenSkinColors; const B : TSGFloat) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGUInt32;
+begin
+for i := 0 to (SizeOf(TSGScreenSkinColors) div SizeOf(TSGColor4f)) - 1 do
+	begin
+	PSGColor4f(@Result)[i] := PSGColor4f(@A)[i] * B;
+	end;
+end;
+
+operator = (A, B : TSGScreenSkinColors) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGUInt32;
+begin
+Result := True;
+for i := 0 to (SizeOf(TSGScreenSkinColors) div SizeOf(TSGColor4f)) - 1 do
+	if PSGColor4f(@A)[i] <> PSGColor4f(@B)[i] then
+		begin
+		Result := False;
+		break;
+		end;
+end;
 
 function SGGenerateRandomSkinColors(const Colors : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -117,6 +163,16 @@ end;
 
 procedure TSGScreenSkin.IddleFunction();
 begin
+FColorsTimer += SGObjectTimerConst * Context.ElapsedTime / 3;
+if FColorsTimer > 1 then
+	begin
+	FColorsTimer := 0;
+	FColorsFrom := FColorsTo;
+	FColors := FColorsTo;
+	FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
+	end
+else
+	FColors := FColorsFrom * (1 - FColorsTimer) + FColorsTo * FColorsTimer;
 end;
 
 constructor TSGScreenSkin.CreateRandom(const VContext : ISGContext);
@@ -142,19 +198,6 @@ Result.FText.FFirst.Import(1,1,1,1);
 Result.FText.FSecond.Import(0,0,0,1);
 end;
 
-function SGScreenSkinColorsImport(const VNormal, VDisabled, VOver, VClick : TSGScreenSkinFrameColor) : TSGScreenSkinColors; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result.Import(VNormal, VDisabled, VOver, VClick);
-end;
-
-procedure TSGScreenSkinColors.Import(const VNormal, VDisabled, VOver, VClick : TSGScreenSkinFrameColor);  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-FNormal   := VNormal;
-FDisabled := VDisabled;
-FOver     := VOver;
-FClick    := VClick;
-end;
-
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ):TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(VFirst, VSecond);
@@ -171,10 +214,20 @@ begin
 Create(VContext, SGStandartSkinColors());
 end;
 
+function SGGenerateUnequalRandomSkinColors(const Colors : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+repeat
+Result := SGGenerateRandomSkinColors(Colors);
+until Result <> Colors;
+end;
+
 constructor TSGScreenSkin.Create(const VContext : ISGContext; const VColors : TSGScreenSkinColors);
 begin
 inherited Create(VContext);
 FColors := VColors;
+FColorsTimer := 0;
+FColorsFrom := FColors;
+FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 end;
 
 destructor TSGScreenSkin.Destroy();
@@ -187,9 +240,60 @@ begin
 Result := 'TSGScreenSkin';
 end;
 
-procedure TSGScreenSkin.PaintButton(const VButton : ISGButton);
+procedure TSGScreenSkin.PaintButton(const Button : ISGButton);
+var
+	Location : TSGComponentLocation;
+	Active, Visible : TSGBool;
+	ActiveTimer, VisibleTimer, OverTimer, ClickTimer : TSGScreenTimer;
 begin
+Location := Button.GetLocation();
 
+Active := Button.Active;
+Visible := Button.Visible;
+
+ClickTimer := Button.ClickTimer;
+OverTimer := Button.OverTimer;
+VisibleTimer := Button.VisibleTimer;
+ActiveTimer := Button.ActiveTimer;
+
+if (not Active) or (ActiveTimer < 1 - SGZero) then
+	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+		5,10,
+		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
+		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
+		True);
+if  (ActiveTimer > SGZero) and 
+	(1-OverTimer>SGZero) and 
+	(1-ClickTimer>SGZero) and
+	(VisibleTimer>SGZero) then
+	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+		5,10,
+		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer),
+		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer)*1.3,
+		True);
+if  (ActiveTimer>SGZero) and 
+	(OverTimer>SGZero) and 
+	(1-ClickTimer>SGZero) and
+	(VisibleTimer>SGZero) then
+	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+		5,10,
+		FColors.FOver.FFirst.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
+		True);
+if  (ActiveTimer>SGZero) and 
+	(ClickTimer>SGZero) and
+	(VisibleTimer>SGZero) then
+	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+		5,
+		10,
+		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
+		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3,
+		True);
+if (Button.Caption<>'') and (Button.Font<>nil) and (Button.Font.Ready) and (VisibleTimer>SGZero) then
+	begin
+	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
+	Button.Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
+	end;
 end;
 
 end.
