@@ -139,11 +139,17 @@ type
 		function GetClick() : TSGBool;
 		
 		property Click : TSGBoolean read GetOver;
-		property ClickTimer : TSGScreenTimer read GetOverTimer;
+		property ClickTimer : TSGScreenTimer read GetClickTimer;
 		end;
 	
 	ISGButton = interface(ISGClickComponent)
 		['{ec439dc0-edd6-42e2-af41-42e9805c2e77}']
+		end;
+	
+	ISGPanel = interface(ISGComponent)
+		['{41f51334-780b-444c-aa61-4c000759516b}']
+		function ViewingLines() : TSGBoolean;
+		function ViewingQuad() : TSGBoolean;
 		end;
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

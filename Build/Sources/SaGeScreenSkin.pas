@@ -50,6 +50,7 @@ type
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			public
 		procedure PaintButton(const Button : ISGButton); virtual;
+		procedure PaintPanel(const Panel : ISGPanel); virtual;
 		end;
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -238,6 +239,40 @@ end;
 class function TSGScreenSkin.ClassName() : TSGString;
 begin
 Result := 'TSGScreenSkin';
+end;
+
+procedure TSGScreenSkin.PaintPanel(const Panel : ISGPanel);
+var
+	Location : TSGComponentLocation;
+	ActiveTimer, VisibleTimer : TSGScreenTimer;
+	ViewingLines, ViewingQuad : TSGBool;
+begin
+ViewingLines := Panel.ViewingLines;
+ViewingQuad := Panel.ViewingQuad;
+
+if ViewingQuad or ViewingLines then
+	begin
+	Location := Panel.GetLocation();
+
+	VisibleTimer := Panel.VisibleTimer;
+	ActiveTimer := Panel.ActiveTimer;
+
+	if (ActiveTimer < 1 - SGZero) then
+		SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+			5,10,
+			FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
+			FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
+			ViewingLines, ViewingQuad);
+
+	if  (ActiveTimer > SGZero) and 
+		(VisibleTimer > SGZero) then
+		SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
+			5,10,
+			FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*ActiveTimer),
+			FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*ActiveTimer)*1.3,
+			ViewingLines, ViewingQuad);
+	end;
+
 end;
 
 procedure TSGScreenSkin.PaintButton(const Button : ISGButton);

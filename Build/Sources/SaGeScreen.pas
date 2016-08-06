@@ -393,18 +393,20 @@ type
 		function GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
-	TSGPanel=class(TSGComponent)
+	TSGPanel=class(TSGComponent, ISGPanel)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
-			public
-		FViewLines:Boolean;
-		FViewQuad:Boolean;
+			protected
+		FViewLines : TSGBoolean;
+		FViewQuad  : TSGBoolean;
+		function ViewingLines() : TSGBoolean; virtual;
+		function ViewingQuad() : TSGBoolean;  virtual;
 			public
 		procedure FromDraw;override;
 			public
-		property ViewQuad : Boolean read FViewQuad write FViewQuad;
-		property ViewLines : Boolean read FViewLines write FViewLines;
+		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;
+		property ViewLines : TSGBoolean read ViewingLines write FViewLines;
 		end;
 	
 	TSGPicture=class(TSGComponent)
@@ -1771,20 +1773,21 @@ end;
 	{$NOTE Panel}
 	{$ENDIF}
 
-procedure TSGPanel.FromDraw;
-var 
-	Color2:TSGColor4f = (x:1;y:1;z:1;w:1);
-	Color1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
+function TSGPanel.ViewingLines() : TSGBoolean;
 begin
-if (FVisible) or (FVisibleTimer>SGZero) then
+Result := ViewingLines;
+end;
+
+function TSGPanel.ViewingQuad() : TSGBoolean;
+begin
+Result := ViewingQuad;
+end;
+
+procedure TSGPanel.FromDraw;
+begin
+if (FVisible) or (FVisibleTimer > SGZero) then
 	begin
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,10,
-		Color1.WithAlpha(0.3*FVisibleTimer),
-		Color2.WithAlpha(0.3*FVisibleTimer),
-		FViewLines,FViewQuad);
+	FSkin.PaintPanel(Self);
 	end;
 inherited;
 end;
@@ -1792,8 +1795,8 @@ end;
 constructor TSGPanel.Create;
 begin
 inherited;
-FViewLines:=True;
-FViewQuad:=True;
+FViewLines := True;
+FViewQuad  := True;
 end;
 
 destructor TSGPanel.Destroy;
