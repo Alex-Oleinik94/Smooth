@@ -2168,7 +2168,7 @@ procedure TSGOverComponent.UpgradeTimers();
 begin
 inherited;
 FOverPrev := FOver;
-FOver := CursorInComponent();
+FOver := CursorInComponent() and ReqursiveActive;
 UpgradeTimer(FOver, FOverTimer, 3, 2);
 end;
 
@@ -2188,6 +2188,7 @@ end;
 procedure TSGClickComponent.UpgradeTimers();
 begin
 inherited;
+FClick := FClick and ReqursiveActive;
 UpgradeTimer(FClick, FClickTimer, 5, 2);
 end;
 
@@ -2660,7 +2661,7 @@ end;
 procedure TSGComponent.UpgradeTimers;
 begin
 UpgradeTimer(FVisible,FVisibleTimer);
-UpgradeTimer(FActive,FActiveTimer);
+UpgradeTimer(FActive and ReqursiveActive, FActiveTimer);
 end;
 
 // Deleted self in parent
@@ -3607,7 +3608,7 @@ if CaptionCharget or CursorChanget then
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
 	end;
-if FCursorOnComponent and Active and Visible then
+if FCursorOnComponent and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
 if FCursorOnComponentPrev and (not FCursorOnComponent) then
@@ -3693,7 +3694,7 @@ if not Active then
 	FCursorOnButton    := False;
 	FChangingButton    := False;
 	end;
-if FCursorOnButton and Active and Visible then
+if FCursorOnButton and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
 		Context.Cursor := TSGCursor.Create(SGC_HAND);
 if FCursorOnButtonPrev and (not FCursorOnButton) then
