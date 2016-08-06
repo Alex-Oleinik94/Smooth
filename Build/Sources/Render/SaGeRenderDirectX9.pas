@@ -45,7 +45,7 @@ type
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure Kill();override;
-		procedure Viewport(const a,b,c,d:LongWord);override;
+		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
 		class function ClassName() : TSGString; override;
@@ -1507,7 +1507,7 @@ else
 		end;
 end;
 
-procedure TSGRenderDirectX9.Viewport(const a,b,c,d:LongWord);
+procedure TSGRenderDirectX9.Viewport(const a,b,c,d:TSGAreaInt);
 begin
 
 end;

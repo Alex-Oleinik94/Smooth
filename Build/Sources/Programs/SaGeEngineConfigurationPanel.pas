@@ -17,6 +17,7 @@ uses
 	,SaGeRender
 	,SaGeVersion
 	,SaGeRenderConstants
+	,SaGeScreenBase
 	;
 
 type
@@ -120,17 +121,16 @@ const
 
 class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreen): TSGBoolean;
 var
-	i : TSGLongWord;
+	Component : TSGComponent;
 begin
 Result := True;
-if VScreen.FChildren <> nil then
-	if Length(VScreen.FChildren) > 0 then
-		for i := 0 to High(VScreen.FChildren) do
-			if VScreen.FChildren[i] is TSGEngineConfigurationPanel then
-				begin
-				Result := False;
-				break;
-				end;
+if VScreen.HasChildren then
+	for Component in VScreen do
+		if Component is TSGEngineConfigurationPanel then
+			begin
+			Result := False;
+			break;
+			end;
 end;
 
 procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGButton);
@@ -384,7 +384,7 @@ Vertex1 := PointToVert3f(GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_PARENT));
 Vertex2 := PointToVert3f(GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_PARENT));
 Distanse := DistanseToQuad(Vertex1, Vertex2, PointToVert3f(Context.CursorPosition())) / 3;
 Alpha := DistanseToAlpha(Distanse);
-Alpha *= FVisibleTimer;
+Alpha *= VisibleTimer;
 
 Render.BeginScene(SGR_QUADS);
 
@@ -426,14 +426,14 @@ Render.EndScene();
 
 Alpha := DistanseToAlpha(Distanse);
 
-if Visible and (FVisibleTimer > Alpha) then
+if Visible and (VisibleTimer > Alpha) then
 	begin
-	FVisibleTimer := Alpha;
-	FCaptionLabel.FVisibleTimer := Alpha;
-	FVersionLabel.FVisibleTimer := Alpha;
-	FContextsComboBox.FVisibleTimer := Alpha;
-	FRendersComboBox.FVisibleTimer := Alpha;
-	FCloseButton.FVisibleTimer := Alpha;
+	VisibleTimer := Alpha;
+	FCaptionLabel.VisibleTimer := Alpha;
+	FVersionLabel.VisibleTimer := Alpha;
+	FContextsComboBox.VisibleTimer := Alpha;
+	FRendersComboBox.VisibleTimer := Alpha;
+	FCloseButton.VisibleTimer := Alpha;
 	end;
 
 inherited;

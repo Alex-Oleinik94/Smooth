@@ -21,6 +21,7 @@ uses
 	,SaGeCommonUtils
 	,SaGeRenderConstants
 	,SaGeCommonClasses
+	,SaGeScreenBase
 	;
 type
 	TSGFractal = class;
@@ -269,7 +270,7 @@ SGScreen.LastChild.SetBounds(a,b,c,d);
 SGScreen.LastChild.Anchors:=Anch;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
-FSizeLabel.FTextPosition:=0;
+FSizeLabel.TextPosition:=False;
 end;
 
 procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);

@@ -16,6 +16,7 @@ uses
 	,SaGeImages
 	,SaGeCommonClasses
 	,SaGeRenderConstants
+	,SaGeScreenBase
 	;
 
 type
@@ -433,7 +434,7 @@ SGScreen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.AsLabel.FTextPosition:=0;
+SGScreen.LastChild.AsLabel.TextPosition:=False;
 SGScreen.LastChild.FUserPointer1:=Self;
 FTimerLabel.TextColor.Import(0,0,0,1);
 
@@ -641,7 +642,7 @@ FDataTime.Get;
 Calculate;
 FTimer.Get;
 FLabebYouLose.Visible:=False;
-FLabebYouLose.FVisibleTimer:=0;
+FLabebYouLose.VisibleTimer:=0;
 FBulletDataTime2.Get;
 FVictory:=False;
 
@@ -1239,9 +1240,9 @@ if not FActive then
 	begin
 	Render.BeginScene(SGR_QUADS);
 	if FVictory then
-		Render.Color4f(0,1,0,FLabebYouLose.FVisibleTimer)
+		Render.Color4f(0,1,0,FLabebYouLose.VisibleTimer)
 	else
-		Render.Color4f(1,0,0,FLabebYouLose.FVisibleTimer);
+		Render.Color4f(1,0,0,FLabebYouLose.VisibleTimer);
 	
 	Render.Vertex2f(Context.Width/2 - 300,Context.Height/2-100);
 	Render.Vertex2f(Context.Width/2 + 300,Context.Height/2-100);

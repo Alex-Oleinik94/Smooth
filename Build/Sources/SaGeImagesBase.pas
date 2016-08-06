@@ -1,4 +1,6 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
+//{$DEFINE SG_IMAGES_DEBUG}
 
 unit SaGeImagesBase;
 
@@ -296,10 +298,14 @@ var
 	Info:TSGPixelInfo = (FArray:nil);
 	a:single;
 begin
+{$IFDEF SG_IMAGES_DEBUG}
 SGLog.Sourse('TSGBitMap : Beginning to set new Height "'+SGStr(FHeight)+'" -> "'+SGStr(NewHeight)+'" (Width = '+SGStr(FWidth)+').');
+{$ENDIF}
 if NewHeight=FHeight then
 	begin
+	{$IFDEF SG_IMAGES_DEBUG}
 	SGLog.Sourse('TSGBitMap : Setting new Height not need.');
+	{$ENDIF}
 	Exit;
 	end;
 
@@ -344,10 +350,14 @@ var
 	Info:TSGPixelInfo = (FArray:nil);
 	a:single;
 begin
+{$IFDEF SG_IMAGES_DEBUG}
 SGLog.Sourse('TSGBitMap : Beginning to set new Width "'+SGStr(FWidth)+'" -> "'+SGStr(NewWidth)+'" (Height = '+SGStr(FHeight)+').');
+{$ENDIF}
 if NewWidth=FWidth then
 	begin
+	{$IFDEF SG_IMAGES_DEBUG}
 	SGLog.Sourse('TSGBitMap : Setting new Width not need.');
+	{$ENDIF}
 	Exit;
 	end;
 

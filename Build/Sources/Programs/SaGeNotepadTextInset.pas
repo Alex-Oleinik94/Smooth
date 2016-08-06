@@ -21,6 +21,7 @@ uses
 	,SaGeResourseManager
 	,StrMan
 	,SaGeNotepad
+	,SaGeScreenBase
 	;
 
 type

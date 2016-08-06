@@ -44,7 +44,7 @@ type
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure Kill();override;
-		procedure Viewport(const a,b,c,d:LongWord);override;
+		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
 		class function ClassName() : TSGString; override;
@@ -1645,7 +1645,7 @@ else if Mode=SG_2D then
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.InitMatrixMode - End'); {$ENDIF}
 end;
 
-procedure TSGRenderDirectX8.Viewport(const a,b,c,d:LongWord);
+procedure TSGRenderDirectX8.Viewport(const a,b,c,d:TSGAreaInt);
 begin
 
 end;

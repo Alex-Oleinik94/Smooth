@@ -49,15 +49,17 @@ type
 		procedure Paint();
 		end;
 	
+	TSGAreaInt = TSGInt32;
+	
 	ISGRectangle = interface(ISGPaintable)
 		['{e8662e5e-d8bd-4515-8828-40853a68da8f}']
-		function GetWidth() : TSGLongWord;
-		function GetHeight() : TSGLongWord;
-		procedure SetWidth(const VWidth : TSGLongWord);
-		procedure SetHeight(const VHeight : TSGLongWord);
+		function GetWidth() : TSGAreaInt;
+		function GetHeight() : TSGAreaInt;
+		procedure SetWidth(const VWidth : TSGAreaInt);
+		procedure SetHeight(const VHeight : TSGAreaInt);
 		
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Width  : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		end;
 	
 	ISGTitledResiseableRectangle = interface(ISGRectangle)
@@ -67,61 +69,63 @@ type
 		
 		procedure Resize();
 		
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		end;
 	
+	
 	ISGArea = interface(ISGTitledResiseableRectangle)
 		['{f1f34026-791d-4476-a5dc-32ecaeec36c8}']
-		function GetLeft() : TSGLongWord;
-		function GetTop() : TSGLongWord;
-		procedure SetLeft(const VLeft : TSGLongWord);
-		procedure SetTop(const VTop : TSGLongWord);
+		function GetLeft() : TSGAreaInt;
+		function GetTop() : TSGAreaInt;
+		procedure SetLeft(const VLeft : TSGAreaInt);
+		procedure SetTop(const VTop : TSGAreaInt);
 		
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
-		property Title : TSGString read GetTitle write SetTitle;
+		property Left   : TSGAreaInt read GetLeft write SetLeft;
+		property Top    : TSGAreaInt read GetTop write SetTop;
+		property Width  : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
+		property Title  : TSGString  read GetTitle write SetTitle;
 		end;
 	
 	ISGDeviceArea = interface(ISGArea)
 		['{f1abd9e3-5eb3-40ae-9d70-0b28a8d4d68b}']
-		function GetClientWidth() : TSGLongWord;
-		function GetClientHeight() : TSGLongWord;
-		procedure SetClientWidth(const VClientWidth : TSGLongWord);
-		procedure SetClientHeight(const VClientHeight : TSGLongWord);
+		function GetClientWidth()  : TSGAreaInt;
+		function GetClientHeight() : TSGAreaInt;
+		procedure SetClientWidth (const VClientWidth  : TSGAreaInt);
+		procedure SetClientHeight(const VClientHeight : TSGAreaInt);
 		function GetWindow() : TSGPointer;
 		function GetDevice() : TSGPointer;
 		
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
 		end;
 	
+	TSGTimerInt = TSGUInt32;
 	ISGTimerArea = interface(ISGDeviceArea)
 		['{2746e985-11ee-4a85-a840-fe89d1d81f0d}']
 		procedure StartComputeTimer();
 		procedure UpdateTimer();
-		function GetElapsedTime() : TSGLongWord;
+		function GetElapsedTime() : TSGTimerInt;
 		
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
-		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
 	
 	ISGNearlyContext = interface(ISGTimerArea)

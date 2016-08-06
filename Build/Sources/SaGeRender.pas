@@ -25,13 +25,13 @@ type
 		function GetRenderType():TSGRenderType;virtual;
 		class function Suppored() : TSGBoolean;virtual;
 			protected
-		function GetWidth() : TSGLongWord;virtual;
-		function GetHeight() : TSGLongWord;virtual;
+		function GetWidth() : TSGAreaInt;virtual;
+		function GetHeight() : TSGAreaInt;virtual;
 			private
 		procedure SetContext(const VContext : ISGNearlyContext);
 		function  GetContext() : ISGNearlyContext;
-		procedure SetWidth(const VWidth : TSGLongWord);virtual;abstract;
-		procedure SetHeight(const VHeight : TSGLongWord);virtual;abstract;
+		procedure SetWidth(const VWidth : TSGAreaInt);virtual;abstract;
+		procedure SetHeight(const VHeight : TSGAreaInt);virtual;abstract;
 		function  GetOption(const VOption : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VOption : TSGString; const VValue : TSGPointer);virtual;abstract;
 		procedure Paint();virtual;abstract;
@@ -45,7 +45,7 @@ type
 		function MakeCurrent():TSGBoolean;virtual;
 		procedure ReleaseCurrent();virtual;abstract;
 		function CreateContext():TSGBoolean;virtual;abstract;
-		procedure Viewport(const a,b,c,d:TSGLongWord);virtual;abstract;
+		procedure Viewport(const a,b,c,d : TSGAreaInt);virtual;abstract;
 		procedure Init();virtual;abstract;
 		procedure Kill();virtual;abstract;
 		function SupporedVBOBuffers():TSGBoolean;virtual;
@@ -53,8 +53,8 @@ type
 		procedure LockResourses();virtual;
 		procedure UnLockResourses();virtual;
 			public
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property RenderType : TSGRenderType read FType;
 		property Context : ISGNearlyContext read GetContext write SetContext;
 			public
@@ -288,7 +288,7 @@ inherited Destroy();
 	{$ENDIF}
 end;
 
-function TSGRender.GetWidth() : TSGLongWord;
+function TSGRender.GetWidth() : TSGAreaInt;
 begin
 if FContext = nil then
 	Result := 0
@@ -300,7 +300,7 @@ else
 	end;
 end;
 
-function TSGRender.GetHeight() : TSGLongWord;
+function TSGRender.GetHeight() : TSGAreaInt;
 begin
 if FContext = nil then
 	Result := 0

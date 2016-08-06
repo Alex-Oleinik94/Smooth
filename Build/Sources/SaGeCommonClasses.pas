@@ -37,6 +37,7 @@ type
 	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey);
 	TSGCursorWheel = (SGNullCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
+	TSGHotPixelType = TSGLongInt;
 	
 	TSGCursor = class(TSGBitMap)
 			public
@@ -48,8 +49,8 @@ type
 		FHotPixel : TSGPoint2int32;
 		FStandartCursor : TSGCursorHandle;
 			public
-		property HotPixelX : TSGLongInt read FHotPixel.x write FHotPixel.x;
-		property HotPixelY : TSGLongInt read FHotPixel.y write FHotPixel.y;
+		property HotPixelX : TSGHotPixelType read FHotPixel.x write FHotPixel.x;
+		property HotPixelY : TSGHotPixelType read FHotPixel.y write FHotPixel.y;
 		property StandartHandle : TSGCursorHandle read FStandartCursor;
 		end;
 	
@@ -57,17 +58,17 @@ type
 		['{ed55d22e-7069-46b1-ad39-fb9fcbe63bcb}']
 		function GetRender() : ISGRender;
 		
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Render : ISGRender read GetRender;
-		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
 	
 	ISGContextHandler = interface(ISGRenderedTimerArea)
@@ -88,17 +89,17 @@ type
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);
 		
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		property Render : ISGRender read GetRender;
-		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		end;
 	
 	ISGCustomContext = interface(ISGContextHandler)
@@ -140,17 +141,17 @@ type
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
 		property Icon : TSGBitMap read GetIcon write SetIcon;
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		property Render : ISGRender read GetRender;
-		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
 		end;
 	
@@ -174,17 +175,18 @@ type
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
 		property Icon : TSGBitMap read GetIcon write SetIcon;
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Render : ISGRender read GetRender;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
 	
 	ISGContextabled = interface(ISGRendered)

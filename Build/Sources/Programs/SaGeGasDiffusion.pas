@@ -20,7 +20,10 @@ uses
 	,SaGeScreen
 	,SaGeImages
 	,SaGeImagesBase
-	,SaGeGasDiffusionReliefRedactor;
+	,SaGeGasDiffusionReliefRedactor
+	,SaGeScreenBase
+	;
+
 const
 	PredStr = 
 		{$IFDEF ANDROID}
@@ -3420,7 +3423,7 @@ FNewScenePanel.LastChild.SetBounds(5,19,280,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FNewScenePanel.LastChild.AsLabel.FTextPosition:=0;
+FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
 
 FNumberLabel:=TSGLabel.Create();
 FNewScenePanel.CreateChild(FNumberLabel);
@@ -3429,7 +3432,7 @@ FNewScenePanel.LastChild.SetBounds(170,19,180,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Font := FTahomaFont;
-FNewScenePanel.LastChild.AsLabel.FTextPosition:=0;
+FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
 
 FStartSceneButton:=TSGButton.Create();
 FNewScenePanel.CreateChild(FStartSceneButton);

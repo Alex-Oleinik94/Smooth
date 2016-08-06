@@ -1,4 +1,11 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
+//{$DEFINE SG_DEBUG_SHADERS}
+{$IFDEF SG_DEBUG_SHADERS}
+	{$DEFINE SG_BASE_DEBUG_SHADERS}
+{$ELSE}
+	//{$DEFINE SG_BASE_DEBUG_SHADERS}
+{$ENDIF}
 
 unit SaGeShaders;
 
@@ -33,6 +40,8 @@ type
 			public
 		property Shader : TSGLongWord read FShader;
 		property Handle : TSGLongWord read FShader;
+			public
+		function StringType() : TSGString;
 		end;
 	
 	TSGShaderProgram=class(TSGContextabled)
@@ -763,7 +772,9 @@ begin
 Render.LinkShaderProgram(FProgram);
 Render.GetObjectParameteriv(FProgram, SGR_OBJECT_LINK_STATUS_ARB, @linked);
 Result := linked = SGR_TRUE;
-SGLog.Sourse('TSGShaderProgram.Link : Program="'+SGStr(FProgram)+'", Result="'+SGStr(Result)+'".');
+{$IFDEF SG_BASE_DEBUG_SHADERS}
+	SGLog.Sourse('TSGShaderProgram.Link : Program="'+SGStr(FProgram)+'", Result="'+SGStr(Result)+'".');
+	{$ENDIF}
 end;
 
 destructor TSGShaderProgram.Destroy;
@@ -803,10 +814,14 @@ var
 	pc:PChar = nil;
 	pcl:integer = 0;
 begin
+{$IFDEF SG_DEBUG_SHADERS}
 SGLog.Sourse('TSGShader.Sourse : Begin to sourse shader "'+SGStr(FShader)+'"');// : "'+s+'"');
+{$ENDIF}
 pc:=SGStringToPChar(s);
 Render.ShaderSource(FShader,pc,SGPCharLength(pc));
+{$IFDEF SG_DEBUG_SHADERS}
 SGLog.Sourse('TSGShader.Sourse : Shader soursed "'+SGStr(FShader)+'"');
+{$ENDIF}
 FreeMem(pc);
 end;
 
@@ -818,19 +833,22 @@ Result := False;
 Render.CompileShader(FShader);
 Render.GetObjectParameteriv(FShader, SGR_OBJECT_COMPILE_STATUS_ARB, @compiled);
 Result := compiled = SGR_TRUE;
-SGLog.Sourse('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'"');
+{$IFDEF SG_BASE_DEBUG_SHADERS}
+	SGLog.Sourse('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'", Type="'+StringType()+'"');
+	{$ENDIF}
 end;
 
-constructor TSGShader.Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
-function WTS:string;
+function TSGShader.StringType() : TSGString;
 begin
-if ShaderType=SGR_VERTEX_SHADER then
+if FType=SGR_VERTEX_SHADER then
 	Result:='SGR_VERTEX_SHADER'
-else if ShaderType=SGR_FRAGMENT_SHADER then
+else if FType=SGR_FRAGMENT_SHADER then
 	Result:='SGR_FRAGMENT_SHADER'
 else
 	Result:='UNKNOWN';
 end;
+
+constructor TSGShader.Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 begin
 inherited Create(VContext);
 if Render.SupporedShaders() then
@@ -839,10 +857,12 @@ if Render.SupporedShaders() then
 	end
 else
 	begin
-	SGLog.Sourse('Fatal error: TSGShader.Create : Shaders not suppored!');
+	SGLog.Sourse('TSGShader.Create : Fatal error : Shaders not suppored!');
 	end;
 FType:=ShaderType;
-SGLog.Sourse('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+WTS+'"');
+{$IFDEF SG_DEBUG_SHADERS}
+	SGLog.Sourse('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+StringType()+'"');
+	{$ENDIF}
 end;
 
 destructor TSGShader.Destroy;

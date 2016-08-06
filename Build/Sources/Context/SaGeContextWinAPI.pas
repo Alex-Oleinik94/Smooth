@@ -737,7 +737,7 @@ wm_mbuttonup:
 	SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
 	begin 
-	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed from API.');
+	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed from OS.');
 	Active:=False;
 	PostQuitMessage(0);
 	Exit;

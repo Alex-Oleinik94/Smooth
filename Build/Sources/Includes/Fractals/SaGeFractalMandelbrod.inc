@@ -550,7 +550,7 @@ SGScreen.LastChild.SetBounds(10,Render.Height-25,Render.Width div 2,20);
 SGScreen.LastChild.Anchors:=[SGAnchBottom];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.AsLabel.FTextPosition:=0;
+SGScreen.LastChild.AsLabel.TextPosition:=False;
 SGScreen.LastChild.FUserPointer1:=Self;
 
 ScreenshotPanel:=TSGPanel.Create;
@@ -572,7 +572,7 @@ SGScreen.LastChild.CreateChild(TSGEdit.Create);
 SGScreen.LastChild.LastChild.SetBounds(5,5,120,20);
 SGScreen.LastChild.LastChild.BoundsToNeedBounds;
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.LastChild.FUserPointer2:=SGScreen.LastChild.FChildren[High(SGScreen.LastChild.FChildren)-1];
+SGScreen.LastChild.LastChild.FUserPointer2:=SGScreen.LastChild.Children[SGScreen.LastChild.ChildCount()-1];
 (SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
 (SGScreen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
 SGScreen.LastChild.LastChild.Caption:='4096';
@@ -712,7 +712,7 @@ FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
 FBezierCurvePanel.CreateChild(TSGLabel.Create());
 FBezierCurvePanel.LastChild.Caption:='Количество кадров:';
-FBezierCurvePanel.LastChild.AsLabel.FTextPosition:=0;
+FBezierCurvePanel.LastChild.AsLabel.TextPosition:=False;
 FBezierCurvePanel.LastChild.SetBounds(3,47,137,20);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
@@ -754,8 +754,8 @@ begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	Button.Parent.Visible:=(False);
-	QuantityThreads:=SGVal((Button.Parent.FChildren[4].AsComboBox.FItems[Button.Parent.FChildren[4].AsComboBox.FSelectItem].FCaption));
-	StartDepth:=SGVal(Button.Parent.FChildren[3].AsComboBox.FItems[Button.Parent.FChildren[3].AsComboBox.FSelectItem].FCaption);
+	QuantityThreads:=SGVal((Button.Parent.Children[5].AsComboBox.FItems[Button.Parent.Children[5].AsComboBox.FSelectItem].FCaption));
+	StartDepth:=SGVal(Button.Parent.Children[4].AsComboBox.FItems[Button.Parent.Children[4].AsComboBox.FSelectItem].FCaption);
 	InitManda;
 	MandaInitialized:=True;
 	end;
@@ -1460,14 +1460,14 @@ if MandaInitialized then
 				Progress:=0;
 				RealProgress:=0;
 				Visible:=true;
-				FNeedTop:=ii;
+				Top := ii;
 				ii+=25;
 				DefaultColor;
 				Manda.BeginThread(i,GetProgressPointer());
 				end;
 			end;
-		LabelProcent.FNeedTop:=ii;
-		LblProcent.FNeedTop:=ii;
+		LabelProcent.Top:=ii;
+		LblProcent.Top:=ii;
 		end;
 	Changet:=False;
 	end;

@@ -23,6 +23,7 @@ uses
 	,SaGeExamples
 	,SaGeCommon
 	,SaGeRenderConstants
+	,SaGeScreenBase
 	;
 type
 	TSGApprFunction = class(TSGDrawable)

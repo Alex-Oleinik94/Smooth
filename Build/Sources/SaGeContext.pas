@@ -90,12 +90,12 @@ type
 			protected
 		FActive          : TSGBoolean;
 		FInitialized     : TSGBoolean;
-		FWidth, FHeight  : TSGLongWord;
-		FClientWidth, FClientHeight  : TSGLongWord;
-		FLeft, FTop      : TSGLongWord;
+		FWidth, FHeight  : TSGAreaInt;
+		FClientWidth, FClientHeight  : TSGAreaInt;
+		FLeft, FTop      : TSGAreaInt;
 		FFullscreen      : TSGBoolean;
 		FTitle           : TSGString;
-		FElapsedTime     : TSGLongWord;
+		FElapsedTime     : TSGTimerInt;
 		FElapsedDateTime : TSGDateTime;
 		FShowCursor      : TSGBoolean;
 		FIcon            : TSGBitMap;
@@ -107,17 +107,17 @@ type
 		procedure ReinitializeRender();virtual;
 		function  GetRender() : ISGRender;virtual;
 		procedure StartComputeTimer();virtual;
-		function  GetElapsedTime() : TSGLongWord;virtual;
+		function  GetElapsedTime() : TSGTimerInt;virtual;
 		function  GetTitle() : TSGString;virtual;
 		procedure SetTitle(const VTitle : TSGString);virtual;
-		function  GetWidth() : TSGLongWord;virtual;
-		function  GetHeight() : TSGLongWord;virtual;
-		procedure SetWidth(const VWidth : TSGLongWord);virtual;
-		procedure SetHeight(const VHeight : TSGLongWord);virtual;
-		function  GetLeft() : TSGLongWord;virtual;
-		function  GetTop() : TSGLongWord;virtual;
-		procedure SetLeft(const VLeft : TSGLongWord);virtual;
-		procedure SetTop(const VTop : TSGLongWord);virtual;
+		function  GetWidth() : TSGAreaInt;virtual;
+		function  GetHeight() : TSGAreaInt;virtual;
+		procedure SetWidth(const VWidth : TSGAreaInt);virtual;
+		procedure SetHeight(const VHeight : TSGAreaInt);virtual;
+		function  GetLeft() : TSGAreaInt;virtual;
+		function  GetTop() : TSGAreaInt;virtual;
+		procedure SetLeft(const VLeft : TSGAreaInt);virtual;
+		procedure SetTop(const VTop : TSGAreaInt);virtual;
 		function  GetFullscreen() : TSGBoolean;virtual;
 		procedure InitFullscreen(const VFullscreen : TSGBoolean);virtual;
 		procedure SetActive(const VActive : TSGBoolean);virtual;
@@ -133,12 +133,12 @@ type
 		procedure BeginIncessantlyPainting();virtual;
 		procedure EndIncessantlyPainting();virtual;
 		
-		function  GetClientWidth() : TSGLongWord;virtual;
-		function  GetClientHeight() : TSGLongWord;virtual;
+		function  GetClientWidth() : TSGAreaInt;virtual;
+		function  GetClientHeight() : TSGAreaInt;virtual;
 		function  GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
-		procedure SetClientWidth(const VClientWidth : TSGLongWord);virtual;
-		procedure SetClientHeight(const VClientHeight : TSGLongWord);virtual;
+		procedure SetClientWidth(const VClientWidth : TSGAreaInt);virtual;
+		procedure SetClientHeight(const VClientHeight : TSGAreaInt);virtual;
 		function  GetWindow() : TSGPointer;virtual;
 		function  GetDevice() : TSGPointer;virtual;
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
@@ -149,18 +149,18 @@ type
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
 		property Icon : TSGBitMap read GetIcon write SetIcon;
-		property Left : TSGLongWord read GetLeft write SetLeft;
-		property Top : TSGLongWord read GetTop write SetTop;
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Left : TSGAreaInt read GetLeft write SetLeft;
+		property Top : TSGAreaInt read GetTop write SetTop;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Title : TSGString read GetTitle write SetTitle;
 		property Render : ISGRender read GetRender;
-		property ElapsedTime : TSGLongWord read GetElapsedTime;
+		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
 		property Device : TSGPointer read GetDevice;
 		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGLongWord read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGLongWord read GetClientHeight write SetClientHeight;
+		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
+		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 			protected
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
@@ -655,7 +655,7 @@ FElapsedDateTime.Get();
 FElapsedTime := 0;
 end;
 
-function TSGContext.GetElapsedTime() : TSGLongWord;
+function TSGContext.GetElapsedTime() : TSGTimerInt;
 begin
 Result := FElapsedTime;
 end;
@@ -665,42 +665,42 @@ begin
 Result := FTitle;
 end;
 
-function TSGContext.GetWidth() : TSGLongWord;
+function TSGContext.GetWidth() : TSGAreaInt;
 begin
 Result := FWidth;
 end;
 
-function TSGContext.GetHeight() : TSGLongWord;
+function TSGContext.GetHeight() : TSGAreaInt;
 begin
 Result := FHeight;
 end;
 
-procedure TSGContext.SetWidth(const VWidth : TSGLongWord);
+procedure TSGContext.SetWidth(const VWidth : TSGAreaInt);
 begin
 FWidth := VWidth;
 end;
 
-procedure TSGContext.SetHeight(const VHeight : TSGLongWord);
+procedure TSGContext.SetHeight(const VHeight : TSGAreaInt);
 begin
 FHeight := VHeight;
 end;
 
-function TSGContext.GetLeft() : TSGLongWord;
+function TSGContext.GetLeft() : TSGAreaInt;
 begin
 Result := FLeft;
 end;
 
-function TSGContext.GetTop() : TSGLongWord;
+function TSGContext.GetTop() : TSGAreaInt;
 begin
 Result := FTop;
 end;
 
-procedure TSGContext.SetLeft(const VLeft : TSGLongWord);
+procedure TSGContext.SetLeft(const VLeft : TSGAreaInt);
 begin
 FLeft := VLeft;
 end;
 
-procedure TSGContext.SetTop(const VTop : TSGLongWord);
+procedure TSGContext.SetTop(const VTop : TSGAreaInt);
 begin
 FTop := VTop;
 end;
@@ -973,22 +973,22 @@ if FIncessantlyPainting > 0 then
 	FIncessantlyPainting -= 1;
 end;
 
-function  TSGContext.GetClientWidth() : TSGLongWord;
+function  TSGContext.GetClientWidth() : TSGAreaInt;
 begin
 Result := FClientWidth;
 end;
 
-function  TSGContext.GetClientHeight() : TSGLongWord;
+function  TSGContext.GetClientHeight() : TSGAreaInt;
 begin
 Result := FClientHeight;
 end;
 
-procedure TSGContext.SetClientWidth(const VClientWidth : TSGLongWord);
+procedure TSGContext.SetClientWidth(const VClientWidth : TSGAreaInt);
 begin
 FClientWidth := VClientWidth;
 end;
 
-procedure TSGContext.SetClientHeight(const VClientHeight : TSGLongWord);
+procedure TSGContext.SetClientHeight(const VClientHeight : TSGAreaInt);
 begin
 FClientHeight := VClientHeight;
 end;

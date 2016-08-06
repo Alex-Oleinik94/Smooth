@@ -286,9 +286,7 @@ type
 	Text      = TextFile;
 	PTextFile = ^ TextFile;
 	
-	//Это для SaGeScreen
-	TSGCaption =  string;
-	SGCaption = TSGCaption;
+	TSGCaption =  TSGString;
 	
 	SGProcedure  = type TProcedure;
 	TSGProcedure = type SGProcedure;

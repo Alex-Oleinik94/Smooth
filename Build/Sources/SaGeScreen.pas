@@ -19,24 +19,11 @@ uses
 	,SaGeRenderConstants
 	,SaGeResourseManager
 	,SaGeCommonClasses
+	,SaGeScreenBase
+	,SaGeScreenSkin
 	;
 
 type
-	TSGAnchors = type TSGExByte;
-const
-	SGAnchRight  : TSGAnchors =  $11;
-	SGAnchLeft   : TSGAnchors =   $12;
-	SGAnchTop    : TSGAnchors =    $13;
-	SGAnchBottom :TSGAnchors = $14;
-	
-	SGS_LEFT   = 1;
-	SGS_BOTTOM = 2;
-	SGS_RIGHT  = 3;
-	SGS_TOP    = 4;
-
-type
-	TSGSTimer = TSGFloat;
-
 	TSGForm             = class;
 	TSGButton           = class;
 	TSGEdit             = class;
@@ -81,98 +68,114 @@ type
 	TArTSGComponent       = TSGArTSGComponent;
 	TArTArTSGComponent    = type packed array of TArTSGComponent;
 	TSGComponentProcedure = procedure ( Component : TSGComponent );
-	TSGComponent = class(TSGContextabled, ISGDeviceDependent)
+	TSGComponent = class(TSGContextabled, ISGDeviceDependent, ISGComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		// for-in loop
+			// for-in loop
 		function GetEnumerator(): TSGComponentEnumerator;
 		function GetReverseEnumerator: TSGComponentEnumerator;
 			private
 		function GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
 			public
-		procedure Paint();virtual;
+			// ISGDeviceDependent declaration
+		procedure Paint(); virtual;
 		procedure DeleteDeviceResourses();virtual;
-		procedure Resize();virtual;
+		procedure Resize(); virtual;
 		procedure LoadDeviceResourses();virtual;
 		function Suppored() : TSGBoolean;virtual;
-			private
-		FWidth:LongInt;
-		FHeight:LongInt;
+			protected
+			// Location
+		FWidth  : TSGScreenInt;
+		FHeight : TSGScreenInt;
+		FLeft   : TSGScreenInt;
+		FTop    : TSGScreenInt;
+		
+		FNoneTop    : TSGScreenInt;
+		FNoneLeft   : TSGScreenInt;
+		FNoneHeight : TSGScreenInt;
+		FNoneWidth  : TSGScreenInt;
+		
+		FNeedLeft   : TSGScreenInt;
+		FNeedTop    : TSGScreenInt;
+		FNeedWidth  : TSGScreenInt;
+		FNeedHeight : TSGScreenInt;
+		
+		FTopShiftForChilds    : TSGScreenInt;
+		FLeftShiftForChilds   : TSGScreenInt;
+		FRightShiftForChilds  : TSGScreenInt;
+		FBottomShiftForChilds : TSGScreenInt;
+		
+		FRealLeft : TSGScreenInt;
+		FRealTop  : TSGScreenInt;
+		
+		FUnLimited : TSGBoolean;
+		FParent    : TSGComponent;
+		
+		procedure SetRight (NewRight  : TSGScreenInt);virtual;
+		procedure SetBottom(NewBottom : TSGScreenInt);virtual;
+		function GetRight()  : TSGScreenInt;virtual;
+		function GetBottom() : TSGScreenInt;virtual;
+		
+		function  GetTitle() : TSGString;virtual;
+		procedure SetTitle(const VTitle : TSGString);virtual;
+		function  GetWidth() : TSGAreaInt;virtual;
+		function  GetHeight() : TSGAreaInt;virtual;
+		procedure SetWidth(const VWidth : TSGAreaInt);virtual;
+		procedure SetHeight(const VHeight : TSGAreaInt);virtual;
+		function  GetLeft() : TSGAreaInt;virtual;
+		function  GetTop() : TSGAreaInt;virtual;
+		procedure SetLeft(const VLeft : TSGAreaInt);virtual;
+		procedure SetTop(const VTop : TSGAreaInt);virtual;
+		
+		function GetScreenWidth()  : TSGScreenInt;virtual;
+		function GetScreenHeight() : TSGScreenInt;virtual;
+		function GetLocation() : TSGComponentLocation;virtual;
+		
+		function UpDateObj(var Obj, NObj : TSGScreenInt) : TSGScreenInt;
+		procedure UpDateObjects();virtual;
+		procedure TestCoords();virtual;
 			public
-		FParent:TSGComponent;
-		FLeft:LongInt;
-		FTop:LongInt;
-			//Сохраненные координаты
-		FNoneTop:LongInt;
-		FNoneLeft:LongInt;
-		FNoneHeight:LongInt;
-		FNoneWidth:LongInt;
-			//К чему стремиться[?]
-		FNeedLeft:LongInt;
-		FNeedTop:LongInt;
-		FNeedWidth:LongInt;
-		FNeedHeight:LongInt;
-		
-		FTopShiftForChilds:LongInt;
-		FLeftShiftForChilds:LongInt;
-		FRightShiftForChilds:LongInt;
-		FBottomShiftForChilds:LongInt;
-		
-		FRealLeft:LongInt;
-		FRealTop:LongInt;
-		
-		FUnLimited:Boolean;
-		
-		procedure SetRight(NewRight:LongInt);
-		procedure SetBottom(NewBottom:LongInt);
-		function GetRight:LongInt;
-		function GetBottom : LongInt;
-		function GetScreenWidth : longint;
-		function GetScreenHeight : longint;
-		function UpDateObj(var Obj,NObj:LongInt):Longint;
-		procedure UpDateObjects;virtual;
-		procedure TestCoords;virtual;
-			public
-		property Width : LongInt read FNeedWidth write FNeedWidth;
-		property Height : LongInt read FNeedHeight write FNeedHeight;
-		property Left : LongInt read FLeft write FLeft;
-		property Top : LongInt read FTop write FNeedTop;
-		property Parent : TSGComponent read FParent write FParent;
-		property Bottom : longint read GetBottom write SetBottom;
-		property Right : longint read GetRight write SetRight;
-		property ScreenWidth : longint read GetScreenWidth;
-		property ScreenHeight : longint read GetScreenHeight;
-		property UnLimited : boolean read FUnLimited write fUnLimited;
+		property Width        : TSGAreaInt   read GetWidth write SetWidth;
+		property Height       : TSGAreaInt   read GetHeight write SetHeight;
+		property Left         : TSGAreaInt   read GetLeft write SetLeft;
+		property Top          : TSGAreaInt   read GetTop write SetTop;
+		property Parent       : TSGComponent read FParent write FParent;
+		property Bottom       : TSGScreenInt read GetBottom write SetBottom;
+		property Right        : TSGScreenInt read GetRight write SetRight;
+		property ScreenWidth  : TSGScreenInt read GetScreenWidth;
+		property ScreenHeight : TSGScreenInt read GetScreenHeight;
+		property UnLimited    : TSGBoolean   read FUnLimited write FUnLimited;
 			public
 		procedure BoundsToNeedBounds();virtual;
-		procedure SetShifts(const NL,NT,NR,NB:LongInt);virtual;
-		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);virtual;
-		procedure SetMiddleBounds(const NewWidth,NewHeight:LongInt);virtual;
+		procedure SetShifts(const NL,NT,NR,NB:TSGScreenInt);virtual;
+		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);virtual;
+		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);virtual;
 		procedure WriteBounds();
-		class function RandomOne():LongInt;
-		procedure AddToLeft(const Value:LongInt);
-		procedure AddToWidth(const Value:LongInt);
-		procedure AddToHeight(const Value:LongInt);
-		procedure AddToTop(const Value:LongInt);
-			public
+		class function RandomOne():TSGScreenInt;
+		procedure AddToLeft(const Value:TSGScreenInt);
+		procedure AddToWidth(const Value:TSGScreenInt);
+		procedure AddToHeight(const Value:TSGScreenInt);
+		procedure AddToTop(const Value:TSGScreenInt);
+			protected
 		FAlign:TSGExByte;
 		FAnchors:TSGSetOfByte;
 		FAnchorsData:packed record
-			FParentWidth,FParentHeight:LongWord;
+			FParentWidth,FParentHeight:TSGScreenInt;
 			end;
-		FVisible : Boolean;
-		FVisibleTimer : TSGSTimer;
-		FActive : Boolean;
-		FActiveTimer  : TSGSTimer;
+		FVisible : TSGBoolean;
+		FVisibleTimer : TSGScreenTimer;
+		FActive : TSGBoolean;
+		FActiveTimer  : TSGScreenTimer;
 		
-		FCaption:SGCaption;
-		FFont:TSGFont;
+		FCaption : TSGCaption;
+		FFont    : TSGFont;
+		FSkin    : TSGScreenSkin;
 		
 		procedure UpgradeTimers();virtual;
-		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGSTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
 		procedure FromDraw();virtual;
 		procedure FromResize();virtual;
 		procedure FromUpDate(var FCanChange:Boolean);virtual;
@@ -180,47 +183,46 @@ type
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);virtual;
 			protected
 		procedure SetVisible(const b:Boolean);virtual;
-		procedure SetCaption(const NewCaption:SGCaption);virtual;
+		procedure SetCaption(const NewCaption : TSGCaption);virtual;
 			public
 		function ReqursiveActive():Boolean;
+		function NotVisible : TSGBoolean;virtual;
+		function GetVisibleTimer() : TSGScreenTimer;virtual;
+		function GetActiveTimer() : TSGScreenTimer;virtual;
 			public
-		property VisibleTimer : TSGSTimer read FVisibleTimer write FVisibleTimer;
-		property ActiveTimer : TSGSTimer read FActiveTimer write FActiveTimer;
-		property Caption : SGCaption read FCaption write FCaption;
-		property FText : SGCaption read FCaption write FCaption;
-		property Text : SGCaption read FCaption write FCaption;
-		property Font: TSGFont read FFont write FFont;
-		property Visible : Boolean read FVisible write SetVisible;
-		property Active : Boolean read FActive write FActive default False;
-		property Anchors : TSGSetOfByte read FAnchors write FAnchors;
-		function NotVisible:boolean;virtual;
-			public
+		property VisibleTimer : TSGScreenTimer     read FVisibleTimer write FVisibleTimer;
+		property ActiveTimer  : TSGScreenTimer     read FActiveTimer  write FActiveTimer;
+		property Caption      : TSGCaption    read FCaption      write FCaption;
+		property Text         : TSGCaption    read FCaption      write FCaption;
+		property Font         : TSGFont       read FFont         write FFont;
+		property Skin         : TSGScreenSkin read FSkin         write FSkin;
+		property Visible      : Boolean       read FVisible      write SetVisible;
+		property Active       : Boolean       read FActive       write FActive         default False;
+		property Anchors      : TSGSetOfByte  read FAnchors      write FAnchors;
+			protected
 		FChildren:TSGArTSGComponent;
 		FCursorOnComponent:Boolean;
 		FCursorOnComponentCaption:Boolean;
 		FCanHaveChildren:Boolean;
 		FComponentProcedure:TSGComponentProcedure;
-		FChildrenPriority:TSGMaxEnum;
+		FChildrenPriority : TSGMaxEnum;
 		FMarkedForDestroy : TSGBoolean;
+			public
+		function HasChildren() : TSGBoolean;virtual;
+		function ChildCount() : TSGUInt32;virtual;
 		procedure ClearPriority();
 		procedure MakePriority();
 		function GetPriorityComponent() : TSGComponent;
-		function CursorInComponent():boolean;virtual;
+		function CursorInComponent():TSGBoolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
-		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function BottomShift():LongInt;
-		function RightShift():LongInt;
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;
+		function BottomShift():TSGScreenInt;
+		function RightShift():TSGScreenInt;
 			public
 		procedure ToFront();
-		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
 		function MustDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
-		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
-		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
-		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
-		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
 		function GetChild(a:Int):TSGComponent;
-		property Children[Index : Int (* Indexing [1..Size] *)]:TSGComponent read GetChild;
 		function CreateChild(const Child : TSGComponent) : TSGComponent;
 		procedure CompleteChild(const VChild : TSGComponent);
 		function LastChild():TSGComponent;
@@ -228,11 +230,17 @@ type
 		function CursorPosition(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
-		procedure KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure KillChildren();
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
+		property Children[Index : Int (* Indexing [1..Size] *)]:TSGComponent read GetChild;
+		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
 		property Align : TSGExByte read FAlign write CreateAlign;
+		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
+		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
+		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
+		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
 			public
 		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -248,7 +256,7 @@ type
 		function AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public 
 		OnChange : TSGComponentProcedure ;
-		FUserPointer1,FUserPointer2,FUserPointer3:Pointer;
+		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
 		FDrawClass:TSGDrawable;
 			public
 		property DrawClass : TSGDrawable read FDrawClass write FDrawClass;
@@ -260,15 +268,39 @@ type
 	SGComponent = TSGComponent;
 	PSGComponent = PTSGComponent;
 	
-	TSGScreen = class(TSGComponent)
+	TSGOverComponent = class(TSGComponent, ISGOverComponent)
 			public
-		constructor Create();
+		constructor Create();override;
+			protected
+		FOver : TSGBoolean;
+		FOverTimer : TSGScreenTimer;
+		procedure UpgradeTimers();override;
+			public 
+		function GetOverTimer() : TSGScreenTimer;virtual;
+		function GetOver() : TSGBool;
+		end;
+	
+	TSGClickComponent = class(TSGOverComponent, ISGClickComponent)
+			public
+		constructor Create();override;
+			protected
+		FClick : TSGBoolean;
+		FClickTimer : TSGScreenTimer;
+		procedure UpgradeTimers();override;
+			public
+		function GetClickTimer() : TSGScreenTimer;virtual;
+		function GetClick() : TSGBool;virtual;
+		end;
+	
+	TSGScreen = class(TSGComponent, ISGScreen)
+			public
+		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FInProcessing : TSGBoolean;
 			public
 		procedure Load(const VContext : ISGContext);
-		procedure Resize();
+		procedure Resize();override;
 		procedure Paint();override;
 		procedure DeleteDeviceResourses();override;
 		procedure LoadDeviceResourses();override;
@@ -281,7 +313,7 @@ type
 	PSGForm = ^ TSGForm;
 	TSGForm = class(TSGComponent)
 			public
-		constructor Create;
+		constructor Create;override;
 		destructor Destroy;override;
 			public
 		FButtonsType : SGFrameButtonsType;
@@ -293,30 +325,34 @@ type
 		function CursorInComponentCaption():boolean;override;
 			public
 		procedure FromDraw;override;
-		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
+		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 		end;
 	
-	TSGButton=class(TSGComponent)
+	TSGButton=class(TSGClickComponent, ISGButton)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
-			public
-		FCursorOnButtonTimer : TSGSTimer;
+			protected
+		FCursorOnButtonTimer : TSGScreenTimer;
 		FCursorOnButtonPrev  : TSGBoolean;
 		FCursorOnButton      : TSGBoolean;
 		FChangingButton      : TSGBoolean;
-		FChangingButtonTimer : TSGSTimer;
+		FChangingButtonTimer : TSGScreenTimer;
 		FViewImage1          : TSGImage;
+			public
 		function CursorInComponentCaption():boolean;override;
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw;override;
+		
 		end;
 	
 	TSGLabel=class(TSGComponent)
+			private
 		FTextColor:TSGColor4f;
 		FTextPosition:Int;
+			public
 		procedure FromDraw;override;
 		constructor Create;override;
 			private
@@ -407,16 +443,16 @@ type
 		destructor Destroy;override;
 			public
 		FCursorOnComponentPrev : TSGBoolean;
-		FCursorOnComponentTimer:TSGSTimer;
+		FCursorOnComponentTimer:TSGScreenTimer;
 		FCursorPosition:LongInt;
 		FNowChanget:Boolean;
-		FNowChangetTimer:TSGSTimer;
+		FNowChangetTimer:TSGScreenTimer;
 		FTextType:TSGEditTextType;
 		FTextTypeFunction:TSGEditTextTypeFunction;
 		FTextComplite:Boolean;
-		FTextCompliteTimer:TSGSTimer;
+		FTextCompliteTimer:TSGScreenTimer;
 		FDrawCursor:Boolean;
-		FDrawCursorTimer:TSGSTimer;
+		FDrawCursorTimer:TSGScreenTimer;
 		FDrawCursorElapsedTime:LongWord;
 		FDrawCursorElapsedTimeChange:LongWord;
 		FDrawCursorElapsedTimeDontChange:LongWord;
@@ -426,7 +462,7 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
-		procedure SetCaption(const NewCaption:SGCaption);override;
+		procedure SetCaption(const NewCaption : TSGCaption);override;
 		procedure SetTextType(const NewTextType:TSGEditTextType);virtual;
 			public
 		property TextType:TSGEditTextType read FTextType write SetTextType;
@@ -449,13 +485,13 @@ type
 		constructor Create;override;
 			public
 		FActiveButton:longint;
-		FButtonTop:longint;
-		FActiveButtonTop:longint;
+		FButtonTop:TSGScreenInt;
+		FActiveButtonTop:TSGScreenInt;
 		FLastActiveButton:LongInt;
 		FProcedure:TSGButtonMenuProcedure;
 		
 		FMiddle:boolean;
-		FMiddleTop:LongInt;
+		FMiddleTop:TSGScreenInt;
 		
 		FSelectNotClick:Boolean;
 			public
@@ -465,8 +501,8 @@ type
 		procedure AddButton(const s:string;const FFActive:boolean = False);
 		procedure SetButton(const l:LongInt);
 		procedure GetMiddleTop;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		property ButtonTop:LongInt read FButtonTop write FButtonTop;
-		property ActiveButtonTop:LongInt read FActiveButtonTop write FActiveButtonTop;
+		property ButtonTop:TSGScreenInt read FButtonTop write FButtonTop;
+		property ActiveButtonTop:TSGScreenInt read FActiveButtonTop write FActiveButtonTop;
 		procedure DetectActiveButton;virtual;
 		end;
 const
@@ -484,7 +520,7 @@ type
 		end;
 	TSGScrollBar=class(TSGComponent)
 			public
-		constructor Create(const NewType:TSGExByte  = SGScrollBarVertical);
+		constructor Create(const NewType:TSGExByte  = SGScrollBarVertical);virtual;
 		destructor Destroy;override;
 			public
 		FScrollMax:Int64;
@@ -492,7 +528,7 @@ type
 		FScrollLow:Int64;
 		FScroolType:TSGExByte;
 		FBeginingPosition:Int64;
-		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
+		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 		procedure UpDateScrollBounds;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
@@ -506,8 +542,8 @@ type
 		destructor Destroy();override;
 			public
 		FBackLight:Boolean;
-		FBackLightTimer : TSGSTimer;
-		FOpenTimer      : TSGSTimer;
+		FBackLightTimer : TSGScreenTimer;
+		FOpenTimer      : TSGScreenTimer;
 		FOpen:boolean;
 		FItems:packed array of
 			packed record
@@ -566,7 +602,7 @@ type
 		procedure FromDraw;override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure BoundsToNeedBounds;override;
-		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);override;
+		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 			public
 		procedure CreateItem(const ItemX,ItemY:LongInt;const ItemComponent:TSGComponent);
 		function Items(const ItemX,ItemY:LongInt):TSGComponent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -853,7 +889,7 @@ QuantityXs:=VQuantityXs;
 QuantityYs:=VQuantityYs;
 end;
 
-procedure TSGGrid.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);
+procedure TSGGrid.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 begin
 inherited;
 QuantityXs:=QuantityXs;
@@ -1533,7 +1569,7 @@ else
 		end;
 end;
 
-procedure TSGScrollBar.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);
+procedure TSGScrollBar.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 begin
 inherited SetBounds(NewLeft,NewTop,NewWidth,NewHeight);
 if FScroolType = SGScrollBarVertical then
@@ -2112,6 +2148,139 @@ end;
 	{$NOTE Component}
 	{$ENDIF}
 
+function TSGOverComponent.GetOver() : TSGBool;
+begin
+Result := FOver;
+end;
+
+function TSGClickComponent.GetClick() : TSGBool;
+begin
+Result := FClick;
+end;
+
+procedure TSGOverComponent.UpgradeTimers();
+begin
+inherited;
+FOver := CursorInComponent();
+UpgradeTimer(FOver, FOverTimer);
+end;
+
+constructor TSGOverComponent.Create();
+begin
+inherited;
+FOver := False;
+FOverTimer := 0;
+end;
+
+function TSGOverComponent.GetOverTimer() : TSGScreenTimer;
+begin
+Result := FOverTimer;
+end;
+
+procedure TSGClickComponent.UpgradeTimers();
+begin
+inherited;
+UpgradeTimer(FClick, FClickTimer);
+end;
+
+constructor TSGClickComponent.Create();
+begin
+inherited;
+FClick := False;
+FClickTimer := 0;
+end;
+
+function TSGClickComponent.GetClickTimer() : TSGScreenTimer;
+begin
+Result := FClickTimer;
+end;
+
+//===========================
+
+function TSGComponent.HasChildren() : TSGBoolean;
+begin
+Result := False;
+if FChildren <> nil then
+	if Length(FChildren) > 0 then
+		Result := True;
+end;
+
+function TSGComponent.ChildCount() : TSGUInt32;
+begin
+if not HasChildren() then
+	Result := 0
+else
+	Result := Length(FChildren);
+end;
+
+function TSGComponent.GetVisibleTimer() : TSGScreenTimer;
+begin
+Result := FVisibleTimer;
+end;
+
+function TSGComponent.GetActiveTimer() : TSGScreenTimer;
+begin
+Result := FActiveTimer;
+end;
+
+function  TSGComponent.GetTitle() : TSGString;
+begin
+Result := FCaption;
+end;
+
+procedure TSGComponent.SetTitle(const VTitle : TSGString);
+begin
+FCaption := VTitle;
+end;
+
+function  TSGComponent.GetWidth() : TSGAreaInt;
+begin
+Result := FNeedWidth;
+end;
+
+function  TSGComponent.GetHeight() : TSGAreaInt;
+begin
+Result := FNeedHeight;
+end;
+
+procedure TSGComponent.SetWidth(const VWidth : TSGAreaInt);
+begin
+FNeedWidth := VWidth;
+end;
+
+procedure TSGComponent.SetHeight(const VHeight : TSGAreaInt);
+begin
+FNeedHeight := VHeight;
+end;
+
+function  TSGComponent.GetLeft() : TSGAreaInt;
+begin
+Result := FNeedLeft;
+end;
+
+function  TSGComponent.GetTop() : TSGAreaInt;
+begin
+Result := FNeedTop;
+end;
+
+procedure TSGComponent.SetLeft(const VLeft : TSGAreaInt);
+begin
+FNeedLeft := VLeft;
+end;
+
+procedure TSGComponent.SetTop(const VTop : TSGAreaInt);
+begin
+FNeedTop := VTop;
+end;
+
+function TSGComponent.GetLocation() : TSGComponentLocation;
+var
+	Pos : TSGVector3f;
+begin
+Pos := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
+Result.Import(Pos, SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)) - Pos);
+end;
+
 procedure TSGComponent.ToFront();
 var
 	Index : TSGLongInt;
@@ -2351,32 +2520,32 @@ else
 	Result:=Render.Height;
 end;
 
-procedure TSGComponent.SetRight(NewRight:LongInt);
+procedure TSGComponent.SetRight(NewRight:TSGScreenInt);
 begin
 Left:=ScreenWidth-Width-NewRight;
 end;
 
-procedure TSGComponent.SetBottom(NewBottom:LongInt);
+procedure TSGComponent.SetBottom(NewBottom:TSGScreenInt);
 begin
 Top:=ScreenHeight-Height-NewBottom;
 end;
 
-function TSGComponent.GetRight:LongInt;
+function TSGComponent.GetRight:TSGScreenInt;
 begin
 Result:=ScreenWidth-Width-Left;
 end;
 
-function TSGComponent.GetBottom : LongInt;
+function TSGComponent.GetBottom : TSGScreenInt;
 begin
 Result:=ScreenHeight-Height-Top;
 end;
 
-function TSGComponent.BottomShift:LongInt;
+function TSGComponent.BottomShift:TSGScreenInt;
 begin
 Result:=FTopShiftForChilds+FBottomShiftForChilds;
 end;
 
-function TSGComponent.RightShift:LongInt;
+function TSGComponent.RightShift:TSGScreenInt;
 begin
 Result:=FLeftShiftForChilds+FRightShiftForChilds;
 end;
@@ -2388,7 +2557,7 @@ if FChildren <> nil then
 	Result := FChildren[High(FChildren)];
 end;
 
-function TSGComponent.UpDateObj(var Obj,NObj:LongInt):LongInt;
+function TSGComponent.UpDateObj(var Obj,NObj:TSGScreenInt):TSGScreenInt;
 const 
 	Speed = 2;
 var
@@ -2441,7 +2610,7 @@ While Result=0 do
 	Result:=random(3)-1;
 end;
 
-procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : TSGSTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
 begin
 if Flag then
 	begin
@@ -2573,6 +2742,8 @@ if VChild.Parent = nil then
 	VChild.Parent := Self;
 if VChild.Font = nil then
 	VChild.Font := Font;
+if VChild.Skin = nil then
+	VChild.Skin := Skin;
 for Component in VChild do
 	VChild.CompleteChild(Component);
 end;
@@ -2930,7 +3101,7 @@ if (FParent<>nil) and (FParent.FParent<>nil) and (not FUnLimited) then
 	end;
 end;
 
-procedure TSGComponent.SetCaption(const NewCaption:SGCaption);
+procedure TSGComponent.SetCaption(const NewCaption : TSGCaption);
 begin
 FCaption := NewCaption;
 end;
@@ -3129,7 +3300,7 @@ SGEditTypeInteger:
 end;
 end;
 
-procedure TSGEdit.SetCaption(const NewCaption:SGCaption);
+procedure TSGEdit.SetCaption(const NewCaption : TSGCaption);
 var
 	CC:Boolean = False;
 begin
@@ -3538,8 +3709,9 @@ const
 	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
 	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
 begin
-if (FVisible) or (FVisibleTimer>SGZero) then
+if (FVisible) or (FVisibleTimer > SGZero) then
 	begin
+	FSkin.PaintButton(Self);
 	if FViewImage1<>nil then
 		begin
 		Render.Color4f(1,1,1,FVisibleTimer);
@@ -3675,6 +3847,7 @@ begin
 {$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
 
 SetContext(VContext);
+FSkin := TSGScreenSkin.CreateRandom(Context);
 SetShifts(0, 0, 0, 0);
 Visible := True;
 Resize();
@@ -3766,6 +3939,7 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 	end;
 
 CanRePleace := UpDateScreen();
+Skin.IddleFunction();
 CustomPaint(CanRePleace);
 end;
 

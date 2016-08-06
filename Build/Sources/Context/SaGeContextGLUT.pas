@@ -15,6 +15,7 @@ uses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeScreen
+	,SaGeClasses
 	
 	{$IFNDEF MOBILE}
 		,dglOpenGL
@@ -46,8 +47,8 @@ type
 		procedure Paint();override;
 		class function ClassName() : TSGString;override;
 			public
-		function  GetClientWidth() : TSGLongWord;override;
-		function  GetClientHeight() : TSGLongWord;override;
+		function  GetClientWidth() : TSGAreaInt;override;
+		function  GetClientHeight() : TSGAreaInt;override;
 			protected
 		function InitRender() : TSGBoolean;
 			protected
@@ -88,12 +89,12 @@ begin
 Result := GLUT.GLUTLoaded;
 end;
 
-function  TSGContextGLUT.GetClientWidth() : TSGLongWord;
+function  TSGContextGLUT.GetClientWidth() : TSGAreaInt;
 begin
 Result := FWidth;
 end;
 
-function  TSGContextGLUT.GetClientHeight() : TSGLongWord;
+function  TSGContextGLUT.GetClientHeight() : TSGAreaInt;
 begin
 Result := FHeight;
 end;

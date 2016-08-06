@@ -30,6 +30,7 @@ uses
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderConstants
+	,SaGeClasses
 	
 	//* ==================== System Units ====================
 	,DynLibs
@@ -114,7 +115,7 @@ type
 		procedure ReleaseCurrent();override;
 		procedure Init();override;
 		procedure Kill();override;
-		procedure Viewport(const a,b,c,d:LongWord);override;
+		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
 		function SupporedVBOBuffers:Boolean;override;
 		class function ClassName() : TSGString; override;
@@ -1594,7 +1595,7 @@ glMatrixMode(GL_MODELVIEW);
 LoadIdentity();
 end;
 
-procedure TSGRenderOpenGL.Viewport(const a,b,c,d:LongWord);
+procedure TSGRenderOpenGL.Viewport(const a,b,c,d:TSGAreaInt);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glViewport = nil then TSGRenderOpenGL_DynLinkError('glViewport');{$ENDIF}
 glViewport(a,b,c,d);

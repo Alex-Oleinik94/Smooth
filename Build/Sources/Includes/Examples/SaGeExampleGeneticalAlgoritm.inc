@@ -59,10 +59,10 @@ if Self.SelectItem=1 then
 	begin
 	FL3.Caption:='Предпологаемая точка, вид селекции:';
 	//Self.SetBounds(260+103,129,167,21);
-	Self.FNeedLeft:=260+103;
-	Self.FNeedWidth:=167;
+	Self.Left:=260+103;
+	Self.Width:=167;
 	//FS1.SetBounds(260,129,99,21);
-	FS1.FNeedWidth:=99;
+	FS1.Width:=99;
 	FS1.Visible:=true;
 	end
 else
@@ -70,9 +70,9 @@ else
 	FL3.Caption:='Вид селекции:';
 	//FS1.SetBounds(260,129,0,21);
 	//Self.SetBounds(260,129,270,21);
-	FS1.FNeedWidth:=0;
-	Self.FNeedLeft:=260;
-	Self.FNeedWidth:=270;
+	FS1.Width:=0;
+	Self.Left:=260;
+	Self.Width:=270;
 	FS1.Visible:=False;
 	end;
 GA1MyNumberFucntion(Self);
@@ -102,7 +102,7 @@ if not Result then
 	Result:=(Ex.ErrorsQuantity=0) and (Length(Ex.Variables)<=1);
 	Ex.Destroy;
 	TSGGenAlg(S.FUserPointer1).FXl.Width:=TSGGenAlg(S.FUserPointer1).FXl.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
-	TSGGenAlg(S.FUserPointer1).FXl.FNeedLeft:=258-TSGGenAlg(S.FUserPointer1).FXl.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
+	TSGGenAlg(S.FUserPointer1).FXl.Left:=258-TSGGenAlg(S.FUserPointer1).FXl.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
 	end
 else
 	begin

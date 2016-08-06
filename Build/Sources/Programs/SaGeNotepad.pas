@@ -20,6 +20,7 @@ uses
 	,SaGeMakefileReader
 	,SaGeResourseManager
 	,StrMan
+	,SaGeScreenBase
 	;
 
 type

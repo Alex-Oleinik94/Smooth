@@ -98,7 +98,7 @@ type
 		function MakeCurrent():TSGBoolean;
 		procedure ReleaseCurrent();
 		function CreateContext():TSGBoolean;
-		procedure Viewport(const a,b,c,d:TSGLongWord);
+		procedure Viewport(const a,b,c,d:TSGAreaInt);
 		procedure Init();
 		function SupporedVBOBuffers():TSGBoolean;
 		procedure SwapBuffers();
@@ -208,8 +208,8 @@ type
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);
 		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);
 		
-		property Width : TSGLongWord read GetWidth write SetWidth;
-		property Height : TSGLongWord read GetHeight write SetHeight;
+		property Width : TSGAreaInt read GetWidth write SetWidth;
+		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Context : ISGNearlyContext read GetContext write SetContext;
 		property RenderType : TSGRenderType read GetRenderType;
 		

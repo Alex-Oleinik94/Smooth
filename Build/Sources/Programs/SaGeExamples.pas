@@ -20,6 +20,7 @@ uses
 	,SaGeImages
 	,SaGeRenderConstants
 	,SaGeCommonClasses
+	,SaGeScreenBase
 	;
 
 {$DEFINE SGREADINTERFACE}
