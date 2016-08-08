@@ -2006,8 +2006,8 @@ if FAddNewGazPanel = nil then
 		for i:=0 to High(FCube.FGazes) do
 			(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
-	(FAddNewGazPanel.LastChild as TSGComboBox).FMaxColumns := 5;
+	(FAddNewGazPanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
+	(FAddNewGazPanel.LastChild as TSGComboBox).MaxLines := 5;
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//2
 	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
@@ -2035,7 +2035,7 @@ if FAddNewGazPanel = nil then
 	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Образуется при контакте');
 	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Небудет получаться');
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewGazPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmGas123Proc);
+	(FAddNewGazPanel.LastChild as TSGComboBox).CallBackProcedure := TSGComboBoxProcedure(@mmmGas123Proc);
 	
 	FAddNewGazPanel.CreateChild(TSGEdit.Create());//7
 	FAddNewGazPanel.LastChild.SetBounds(3,69,(pw div 2) - 10,18);
@@ -2224,7 +2224,7 @@ if FAddNewSoursePanel = nil then
 		for i:=0 to High(FCube.FSourses) do
 			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageSourseProc);
+	(FAddNewSoursePanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmSourseChageSourseProc);
 	(FAddNewSoursePanel.LastChild as TSGComboBox).MaxLines := 6;
 	
 	FAddNewSoursePanel.CreateChild(TSGButton.Create());//2
@@ -2244,7 +2244,7 @@ if FAddNewSoursePanel = nil then
 		for i:=0 to High(FCube.FGazes) do
 			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmSourseChageGasProc);
+	(FAddNewSoursePanel.LastChild as TSGComboBox).CallBackProcedure :=TSGComboBoxProcedure(@mmmSourseChageGasProc);
 	
 	FAddNewSoursePanel.CreateChild(TSGEdit.Create());//4
 	FAddNewSoursePanel.LastChild.SetBounds(3+(pw div 2)+3,69-21,(pw div 2) - 10,18);
@@ -2808,7 +2808,7 @@ const
 	W = 200;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FLoadScenePanel.Visible := False;
-	FFileName := FLoadComboBox.Items(FLoadComboBox.SelectItem);
+	FFileName := FLoadComboBox.Items[FLoadComboBox.SelectItem].Caption;
 	FFileName := PredStr+Catalog+Slash+FFileName;
 	FFileStream := TFileStream.Create(FFileName,fmOpenRead);
 	FEnableSaving := False;
@@ -3117,7 +3117,7 @@ FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa не пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Газ липнет к стенкe');
-(FBoundsOptionsPanel.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmChangeBoundTypeComboBoxProcedure);
+(FBoundsOptionsPanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmChangeBoundTypeComboBoxProcedure);
 (FBoundsOptionsPanel.LastChild as TSGComboBox).SelectItem:=0;
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 end;end;

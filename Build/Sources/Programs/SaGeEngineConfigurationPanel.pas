@@ -195,7 +195,7 @@ for i := Low(Contexts) to High(Contexts) do
 		FCanUse := Contexts[i].FClass.Suppored();
 	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
 	end;
-FContextsComboBox.FProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
+FContextsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
 
 FRendersComboBox := TSGComboBox.Create();
 CreateChild(FRendersComboBox);
@@ -208,7 +208,7 @@ for i := Low(Renders) to High(Renders) do
 		FCanUse := Renders[i].FClass.Suppored();
 	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
-FRendersComboBox.FProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
+FRendersComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 
 FCloseButton := TSGButton.Create();
 CreateChild(FCloseButton);
@@ -378,8 +378,10 @@ end;
 var
 	Vertex1, Vertex2 : TSGVertex3f;
 	Alpha, Distanse : TSGFloat;
-	Color : TSGColor4f = (x:0;y:0.2;z:0.7;w:0.6);
+	Color : TSGColor4f;
+
 begin
+Color := FSkin.Colors.FNormal.FFirst.WithAlpha(0.8);
 Vertex1 := PointToVert3f(GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_PARENT));
 Vertex2 := PointToVert3f(GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_PARENT));
 Distanse := DistanseToQuad(Vertex1, Vertex2, PointToVert3f(Context.CursorPosition())) / 3;

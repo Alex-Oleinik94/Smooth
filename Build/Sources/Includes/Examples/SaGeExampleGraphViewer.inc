@@ -458,7 +458,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	(Form.LastChild as TSGComboBox).CreateItem('Функция');
 	(Form.LastChild as TSGComboBox).CreateItem('Производная функции');
 	(Form.LastChild as TSGComboBox).SelectItem := 0;
-	(Form.LastChild as TSGComboBox).FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
+	(Form.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
 	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
 	
 	Form.CreateChild(TSGEdit.Create());

@@ -48,9 +48,12 @@ type
 		FColorsTimer : TSGScreenTimer;
 			public
 		property Colors : TSGScreenSkinColors read FColors write FColors;
+			protected
+		procedure PaintComboBoxItem(const Item : PSGComboBoxItem; const General : TSGBool); virtual;
 			public
 		procedure PaintButton(const Button : ISGButton); virtual;
 		procedure PaintPanel(const Panel : ISGPanel); virtual;
+		procedure PaintComboBox(const ComboBox : ISGComboBox); virtual;
 		end;
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -329,6 +332,16 @@ if (Button.Caption<>'') and (Button.Font<>nil) and (Button.Font.Ready) and (Visi
 	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
 	Button.Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
 	end;
+end;
+
+procedure TSGScreenSkin.PaintComboBoxItem(const Item : PSGComboBoxItem; const General : TSGBool); 
+begin
+
+end;
+
+procedure TSGScreenSkin.PaintComboBox(const ComboBox : ISGComboBox);
+begin
+
 end;
 
 end.

@@ -155,8 +155,8 @@ SGScreen.LastChild.AsComboBox.CreateItem('Нормали и Цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Только Нормали');
 SGScreen.LastChild.AsComboBox.CreateItem('Только Цвета');
 SGScreen.LastChild.AsComboBox.CreateItem('Ваще Ничего');
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure2);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure2);
+SGScreen.LastChild.AsComboBox.SelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 
@@ -168,8 +168,8 @@ SGScreen.LastChild.AsComboBox.CreateItem('Звездочка');
 SGScreen.LastChild.AsComboBox.CreateItem('Губка Менгера');
 SGScreen.LastChild.AsComboBox.CreateItem('Снежинка (bug)');
 //SGScreen.LastChild.AsComboBox.CreateItem('New Губка Менгера');
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure);
+SGScreen.LastChild.AsComboBox.SelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 

@@ -54,7 +54,7 @@ if NowDepth>0 then
 		0.5*(b*t1.y-b*t2.y+t1.x+t2.x),
 		0.5*(b*t2.x-b*t1.x+t1.y+t2.y));
 	Rec(t1,v,NowDepth-1,1);
-	if not Boolean(FTCB.FSelectItem) then
+	if not Boolean(FTCB.SelectItem) then
 		Rec(v,t2,NowDepth-1,1)
 	else
 		Rec(v,t2,NowDepth-1,-1);
@@ -141,13 +141,13 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 	end;
 end;
 
-procedure fgsdfghjsafhjsdgjfgshdj(a,b:LongInt;Button:TSGComponent);
+procedure TSGFractalPodkova_CamboBox_CallBackProcedure(a,b:LongInt;Button:TSGComponent);
 begin
 with TSGFractalPodkova(Button.FUserPointer1) do
 	begin
 	if a<>b then
 		begin
-		FTCB.FSelectItem:=b;
+		FTCB.SelectItem:=b;
 		Calculate;
 		end;
 	end;
@@ -209,8 +209,8 @@ SGScreen.LastChild.SetBounds(Render.Width-160-90-125-130-50,5,125+50,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Кривая Леви');
 SGScreen.LastChild.AsComboBox.CreateItem('Дракон Хартера — Хейтуэя');
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@fgsdfghjsafhjsdgjfgshdj);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGFractalPodkova_CamboBox_CallBackProcedure);
+SGScreen.LastChild.AsComboBox.SelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.Visible:=True;
 

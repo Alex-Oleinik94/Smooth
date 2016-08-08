@@ -98,7 +98,7 @@ SGScreen.CreateChild(FComboBox2);
 FComboBox2.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
 FComboBox2.SelectItem:=0;
 FComboBox2.FUserPointer1:=Self;
-FComboBox2.FProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
+FComboBox2.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
 FComboBox2.Visible:=True;
 FComboBox2.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
 FComboBox2.Font.SetContext(Context);

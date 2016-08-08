@@ -296,6 +296,21 @@ type
 		function GetClick() : TSGBool;virtual;
 		end;
 	
+	TSGOpenComponent = class(TSGClickComponent, ISGOpenComponent)
+			public
+		constructor Create();override;
+			protected
+		FOpen      : TSGBoolean;
+		FOpenTimer : TSGScreenTimer;
+		procedure UpgradeTimers();override;
+			public
+		function GetOpen() : TSGBoolean;
+		function GetOpenTimer() : TSGScreenTimer;
+			public
+		property Open : TSGBoolean read GetOpen write FOpen;
+		property OpenTimer : TSGScreenTimer read GetOpenTimer write FOpenTimer;
+		end;
+	
 	TSGScreen = class(TSGComponent, ISGScreen)
 			public
 		constructor Create();override;
@@ -541,22 +556,14 @@ type
 		end;
 	
 	TSGComboBoxProcedure = TSGButtonMenuProcedure;
-	TSGComboBox=class(TSGComponent)
+	TSGComboBox=class(TSGOpenComponent, ISGComboBox)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-			public
+			protected
 		FBackLight:Boolean;
 		FBackLightTimer : TSGScreenTimer;
-		FOpenTimer      : TSGScreenTimer;
-		FOpen:boolean;
-		FItems:packed array of
-			packed record
-				FImage:TSGImage;
-				FCaption:TSGCaption;
-				FID:Int;
-				FActive : TSGBoolean;
-				end;
+		FItems:TSGComboBoxItemList;
 		FProcedure:TSGComboBoxProcedure;
 		FMaxColumns:longWord;
 		FSelectItem:LongInt;
@@ -583,10 +590,15 @@ type
 			public
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
 		procedure ClearItems();
-		function Items(const Index : TSGLongWord):TSGString;
+		function GetItems() : PSGComboBoxItem;
+		function GetItemsCount() : TSGUInt32;
 			public
 		property SelectItem : LongInt read FSelectItem write FSelectItem;
 		property MaxLines   : LongWord read FMaxColumns write FMaxColumns;
+		property CallBackProcedure : TSGComboBoxProcedure read FProcedure write FProcedure;
+		
+		property ItemsCount : TSGUInt32 read GetItemsCount;
+		property Items : PSGComboBoxItem read GetItems;
 		end;
 	
 	TSGGrid=class(TSGComponent)
@@ -1029,13 +1041,21 @@ end;
 var
 	ComboBoxImage:TSGImage = nil;
 
-function TSGComboBox.Items(const Index : TSGLongWord):TSGString;
+
+function TSGComboBox.GetItems() : PSGComboBoxItem;
 begin
-if FItems<>nil then
-	Result:=FItems[Index].FCaption
-else
-	Result:='';
+Result := nil;
+if FItems <> nil then
+	Result := @FItems[0];
 end;
+
+function TSGComboBox.GetItemsCount() : TSGUInt32;
+begin
+Result := 0;
+if FItems <> nil then
+	Result := Length(FItems);
+end;
+
 
 procedure TSGComboBox.ClearItems();
 begin
@@ -1143,7 +1163,7 @@ if  FOpen and (FCursorOnComponent) then
 			(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer) and
 			(((FMaxColumns<Length(FItems)) and 
 			(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxColumns>=Length(FItems))) and
-			FItems[i].FActive then
+			FItems[i].Active then
 				begin
 				FCursorOnThisItem := FFirstScrollItem + i;
 				if FClickOnOpenBox then
@@ -1183,15 +1203,15 @@ procedure TSGComboBox.DrawItem(const Vertex1,Vertex3: TSGPoint2int32;const Color
 begin
 if IDItem<>-1 then
 	begin
-	if FItems[IDItem].FImage<>nil then
+	if FItems[IDItem].Image<>nil then
 		begin
 		Render.Color4f(1,1,1,Color.a);
-		FItems[IDItem].FImage.DrawImageFromTwoVertex2fAsRatio(
+		FItems[IDItem].Image.DrawImageFromTwoVertex2fAsRatio(
 			SGPoint2int32ToVertex3f(Vertex1),
 			SGPoint2int32ToVertex3f(SGVertex2int32Import(Vertex1.x+Height,Vertex3.y)),tRUE,0.85);
 		Render.Color(Color);
 		Font.DrawFontFromTwoVertex2f(
-			FItems[IDItem].FCaption,
+			FItems[IDItem].Caption,
 			SGPoint2int32ToVertex3f(SGVertex2int32Import(Vertex1.x+Height,Vertex1.y)),
 			SGPoint2int32ToVertex3f(Vertex3));
 		end
@@ -1199,7 +1219,7 @@ if IDItem<>-1 then
 		begin
 		Render.Color(Color);
 		Font.DrawFontFromTwoVertex2f(
-			FItems[IDItem].FCaption,
+			FItems[IDItem].Caption,
 			SGPoint2int32ToVertex3f(Vertex1),
 			SGPoint2int32ToVertex3f(Vertex3));
 		end;
@@ -1236,6 +1256,7 @@ if not CursorInComponent then
 	FCursorOnThisItem:=-1;
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
+	FSkin.PaintComboBox(Self);
 	if  (1-FBackLightTimer>SGZero) and 
 		(1-FOpenTimer>SGZero)  then
 	SGRoundQuad(Render, 
@@ -1311,7 +1332,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 		begin
 		for i:=0 to Colums-1 do
 			begin
-			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then if FItems[FFirstScrollItem+i].FActive then
+			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then if FItems[FFirstScrollItem+i].Active then
 				begin
 				if  (FOpenTimer>SGZero)  then
 				SGRoundQuad(Render,
@@ -1326,7 +1347,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 					SGGetColor4fFromLongWord($9740F7).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
 					True);
 				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].FActive then
+			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].Active then
 				begin
 				if  (FOpenTimer>SGZero)  then	
 				SGRoundQuad(Render,
@@ -1341,7 +1362,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 					SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
 					True);
 				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].FActive then
+			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].Active then
 				begin
 				if  (FOpenTimer>SGZero) then
 				SGRoundQuad(Render,
@@ -1358,7 +1379,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 				end;
 			if FOpenTimer>SGZero then
 				begin
-				if FItems[FFirstScrollItem+i].FActive then
+				if FItems[FFirstScrollItem+i].Active then
 					DrawItem(
 						SGVertex2int32Import(
 							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x),
@@ -1400,10 +1421,10 @@ begin
 if Self <> nil then
 	begin
 	SetLEngth(FItems, Length(FItems) + 1);
-	FItems[High(FItems)].FCaption:= ItemCaption;
-	FItems[High(FItems)].FImage  := ItemImage;
-	FItems[High(FItems)].FID     := FIdent;
-	FItems[High(FItems)].FActive := VActive;
+	FItems[High(FItems)].Caption    := ItemCaption;
+	FItems[High(FItems)].Image      := ItemImage;
+	FItems[High(FItems)].Identifier := FIdent;
+	FItems[High(FItems)].Active     := VActive;
 	end;
 end;
 
@@ -2154,14 +2175,11 @@ end;
 	{$NOTE Component}
 	{$ENDIF}
 
+// TSGOverComponent
+
 function TSGOverComponent.GetOver() : TSGBool;
 begin
 Result := FOver;
-end;
-
-function TSGClickComponent.GetClick() : TSGBool;
-begin
-Result := FClick;
 end;
 
 procedure TSGOverComponent.UpgradeTimers();
@@ -2183,6 +2201,39 @@ end;
 function TSGOverComponent.GetOverTimer() : TSGScreenTimer;
 begin
 Result := FOverTimer;
+end;
+
+// TSGOpenComponent
+
+function TSGOpenComponent.GetOpen() : TSGBool;
+begin
+Result := FOpen;
+end;
+
+procedure TSGOpenComponent.UpgradeTimers();
+begin
+inherited;
+FOpen := FOpen and ReqursiveActive;
+UpgradeTimer(FOpen, FOpenTimer, 3, 2);
+end;
+
+constructor TSGOpenComponent.Create();
+begin
+inherited;
+FOpen := False;
+FOpenTimer := 0;
+end;
+
+function TSGOpenComponent.GetOpenTimer() : TSGScreenTimer;
+begin
+Result := FOpenTimer;
+end;
+
+// TSGClickComponent
+
+function TSGClickComponent.GetClick() : TSGBool;
+begin
+Result := FClick;
 end;
 
 procedure TSGClickComponent.UpgradeTimers();

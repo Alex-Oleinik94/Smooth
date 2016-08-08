@@ -151,10 +151,57 @@ type
 		function ViewingLines() : TSGBoolean;
 		function ViewingQuad() : TSGBoolean;
 		end;
+	
+	ISGOpenComponent = interface(ISGClickComponent)
+		['{84a57b91-b224-45f1-a25d-938dbec2ad0f}']
+		function GetOpen() : TSGBoolean;
+		function GetOpenTimer() : TSGScreenTimer;
+		
+		property Open : TSGBoolean read GetOpen;
+		property OpenTimer : TSGScreenTimer read GetOpenTimer;
+		end;
+	
+	TSGComboBoxItemIdentifier = TSGInt64;
+	PSGComboBoxItem = ^ TSGComboBoxItem;
+	TSGComboBoxItem = object
+			protected
+		FImage      : TSGImage;
+		FCaption    : TSGCaption;
+		FIdentifier : TSGComboBoxItemIdentifier;
+		FActive     : TSGBoolean;
+			public
+		procedure Clear();
+			public
+		property Active     : TSGBoolean                read FActive     write FActive;
+		property Caption    : TSGCaption                read FCaption    write FCaption;
+		property Text       : TSGCaption                read FCaption    write FCaption;
+		property Identifier : TSGComboBoxItemIdentifier read FIdentifier write FIdentifier;
+		property Image      : TSGImage                  read FImage      write FImage;
+		end;
+	
+	TSGComboBoxItemList = packed array of TSGComboBoxItem;
+	
+	ISGComboBox = interface(ISGClickComponent)
+		['{5859810e-163e-4f5d-9622-7b574ebe07d5}']
+		function GetItems() : PSGComboBoxItem;
+		function GetItemsCount() : TSGUInt32;
+		
+		property ItemsCount : TSGUInt32 read GetItemsCount;
+		property Items : PSGComboBoxItem read GetItems;
+		end;
+	
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure TSGComboBoxItem.Clear();
+begin
+FImage := nil;
+FCaption := '';
+FIdentifier := 0;
+FActive := False;
+end;
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

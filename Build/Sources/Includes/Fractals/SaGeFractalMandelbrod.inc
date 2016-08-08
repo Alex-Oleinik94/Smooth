@@ -173,7 +173,7 @@ else
 	FCurvePointPanel.Active:=True;
 	if (FCurvePCB<>nil) and (FCurveSelectPoint<>-1) then
 		begin
-		FCurvePCB.FSelectItem:=FCurveArPoints[FCurveSelectPoint];
+		FCurvePCB.SelectItem:=FCurveArPoints[FCurveSelectPoint];
 		end;
 	end;
 end;
@@ -370,7 +370,7 @@ procedure QuantityRecComboBoxProcedure(a,b:LongInt;aaa:TSGComponent);
 BEGIN
 with TSGFractalMandelbrodRelease(aaa.FUserPointer1) do
 	begin
-	Manda.FZQuantityRec:=QuantityRecComboBox.FItems[b].FId;
+	Manda.FZQuantityRec:=QuantityRecComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -381,7 +381,7 @@ procedure StepenComboBoxProcedure(a,b:LongInt;aaa:TSGComponent);
 begin
 with TSGFractalMandelbrodRelease(aaa.FUserPointer1) do
 	begin
-	Manda.FZDegree:=StepenComboBox.FItems[b].FId;
+	Manda.FZDegree:=StepenComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -582,8 +582,8 @@ SGScreen.LastChild.SetBounds(Render.Width-50-125+45,5{+Context.TopShift},120,20)
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to High(VNameThemes) do
 	SGScreen.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
+SGScreen.LastChild.AsComboBox.SelectItem:=0;
 ColorComboBox:=SGScreen.LastChild.AsComboBox;
 SGScreen.LastChild.FUserPointer1:=Self;
 
@@ -593,8 +593,8 @@ SGScreen.LastChild.SetBounds(Render.Width-50-125+45-185,5,180,20);
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.AsComboBox.CreateItem('Множество Жюлиа');
 SGScreen.LastChild.AsComboBox.CreateItem('Модель Мандельброта');
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@TypeComboBoxProcedure);
-SGScreen.LastChild.AsComboBox.FSelectItem:=0;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TypeComboBoxProcedure);
+SGScreen.LastChild.AsComboBox.SelectItem:=0;
 SGScreen.LastChild.FUserPointer1:=Self;
 
 SGScreen.CreateChild(TSGButton.Create);
@@ -619,8 +619,8 @@ SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125+45-105,5{+Context.T
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.AsComboBox.FSelectItem:=1;
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@StepenComboBoxProcedure);
+SGScreen.LastChild.AsComboBox.SelectItem:=1;
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@StepenComboBoxProcedure);
 SGScreen.LastChild.FUserPointer1:=Self;
 i:=1;
 while i<=100 do
@@ -635,7 +635,7 @@ SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125-105+45-105,5{+Conte
 SGScreen.LastChild.Anchors:=[SGAnchRight];
 SGScreen.LastChild.Caption:='';
 SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@QuantityRecComboBoxProcedure);
+SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@QuantityRecComboBoxProcedure);
 SGScreen.LastChild.FUserPointer1:=Self;
 i:=6;
 while i<=13 do
@@ -643,7 +643,7 @@ while i<=13 do
 	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)),nil,2**i);
 	if i=8 then
 		begin
-		SGScreen.LastChild.AsComboBox.FSelectItem:=High(QuantityRecComboBox.FItems);
+		SGScreen.LastChild.AsComboBox.SelectItem := QuantityRecComboBox.ItemsCount - 1;
 		end;
 	i+=1;
 	end;
@@ -681,7 +681,7 @@ FCurvePointPanel.CreateChild(TSGComboBox.Create);
 FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
 for i:=0 to High(VNameThemes) do
 	FCurvePointPanel.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
-FCurvePointPanel.LastChild.AsComboBox.FProcedure:=TSGComboBoxProcedure(@CurveColorComboBoxProcedure);
+FCurvePointPanel.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@CurveColorComboBoxProcedure);
 FCurvePointPanel.LastChild.AsComboBox.SelectItem:=0;
 FCurvePointPanel.LastChild.AsComboBox.MaxLines:=5;
 FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
@@ -754,8 +754,8 @@ begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
 	Button.Parent.Visible:=(False);
-	QuantityThreads:=SGVal((Button.Parent.Children[5].AsComboBox.FItems[Button.Parent.Children[5].AsComboBox.FSelectItem].FCaption));
-	StartDepth:=SGVal(Button.Parent.Children[4].AsComboBox.FItems[Button.Parent.Children[4].AsComboBox.FSelectItem].FCaption);
+	QuantityThreads:=SGVal((Button.Parent.Children[5].AsComboBox.Items[Button.Parent.Children[5].AsComboBox.SelectItem].Caption));
+	StartDepth:=SGVal(Button.Parent.Children[4].AsComboBox.Items[Button.Parent.Children[4].AsComboBox.SelectItem].Caption);
 	InitManda;
 	MandaInitialized:=True;
 	end;
@@ -837,7 +837,7 @@ SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 SGScreen.LastChild.CreateChild(TSGComboBox.Create);
 SGScreen.LastChild.LastChild.Visible:=True;
 SGScreen.LastChild.LastChild.SetBounds(5,80,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=4;
+SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=4;
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('64');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('128');
 SGScreen.LastChild.LastChild.AsComboBox.CreateItem('256');
@@ -862,15 +862,15 @@ SGScreen.LastChild.LastChild.AsComboBox.CreateItem('16');
 SGScreen.LastChild.LastChild.BoundsToNeedBounds();
 SGScreen.LastChild.LastChild.FUserPointer1:=Self;
 case SGGetCoreCount() of 
-2:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=1;
-3:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=2;
-4:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
-6:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=4;
-8:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=5;
-10:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=6;
-12:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=7;
-16:SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=8;
-else SGScreen.LastChild.LastChild.AsComboBox.FSelectItem:=3;
+2:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=1;
+3:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=2;
+4:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=3;
+6:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=4;
+8:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=5;
+10:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=6;
+12:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=7;
+16:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=8;
+else SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=3;
 end;
 
 FTNRF:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
