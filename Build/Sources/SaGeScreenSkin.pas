@@ -21,8 +21,10 @@ uses
 
 type
 	TSGScreenSkinFrameColor = object
+			public
 		FFirst  : TSGColor4f;
 		FSecond : TSGColor4f;
+			public
 		procedure Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
@@ -53,7 +55,6 @@ type
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
 		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True); virtual;
-		procedure PaintComboBoxItem(const ComboBox : ISGComboBox; const Location : TSGComponentLocation; var Item : TSGComboBoxItem); virtual;
 			public
 		procedure PaintButton(const Button : ISGButton); virtual;
 		procedure PaintPanel(const Panel : ISGPanel); virtual;
@@ -340,17 +341,52 @@ if (Button.Caption<>'') and (Button.Font<>nil) and (Button.Font.Ready) and (Visi
 	end;
 end;
 
-procedure TSGScreenSkin.PaintComboBoxItem(const ComboBox : ISGComboBox;const Location : TSGComponentLocation; var Item : TSGComboBoxItem); 
-begin
-ComboBox.Font.DrawFontFromTwoVertex2f(Item.Caption, Location.Position, Location.Position + Location.Size);
-end;
-
 procedure TSGScreenSkin.PaintComboBox(const ComboBox : ISGComboBox);
 var
 	Location, TextLocation : TSGComponentLocation;
 	ActiveTimer, VisibleTimer, OverTimer, ClickTimer, OpenTimer : TSGScreenTimer;
 
 procedure PaintOpened(const OpenLocation : TSGComponentLocation); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function GetTextColor(const VOverTimer : TSGScreenTimer) : TSGVertex4f; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := FColors.FText.FSecond * (VOverTimer) + FColors.FText.FFirst * (1 - VOverTimer);
+Result.a := 0.9 * OpenTimer;
+end;
+
+var
+	TextColor, DisabledTextColor : TSGVertex4f;
+
+procedure PaintItem(const ItemLocation : TSGComponentLocation; var Item : TSGComboBoxItem); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure SetSelectedTextColor(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	SelectedTextColor : TSGVertex4f;
+begin
+SelectedTextColor := FColors.FNormal.FFirst;
+TSGVertex3f(SelectedTextColor) := SelectedTextColor.Normalized();
+SelectedTextColor.a := OpenTimer;
+Render.Color(SelectedTextColor);
+end;
+
+begin
+if Item.Over then
+	begin
+	PaintQuad(ItemLocation,
+		FColors.FOver.FFirst.WithAlpha(0.3*OpenTimer),
+		FColors.FOver.FSecond.WithAlpha(0.3*OpenTimer)*1.3);
+	end;
+
+if Item.Selected and (not Item.Over) and Item.Active then
+	SetSelectedTextColor()
+else if Item.Selected and Item.Over and Item.Active then
+	Render.Color(GetTextColor(1 - OverTimer))
+else if Item.Active then
+	Render.Color(TextColor)
+else
+	Render.Color(DisabledTextColor);
+ComboBox.Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.Position, ItemLocation.Position + ItemLocation.Size);
+end;
 
 function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -361,15 +397,26 @@ Result.PositionY := OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.Fir
 end;
 
 var
-	TextColor, BodyColor : TSGVertex4f;
 	NeedPaintScroll : TSGBool;
+
+function GetItemLocation(const Index : TSGUInt32):TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := OpenLocation;
+Result.SizeY := Result.SizeY / ComboBox.Lines;
+Result.PositionY := Result.PositionY + Index * Result.SizeY;
+if NeedPaintScroll then
+	Result.SizeX := Result.SizeX - Location.SizeY;
+end;
+
+var
+	BodyColor : TSGVertex4f;
 	i : TSGUInt32;
-	ItemLocation : TSGComponentLocation;
 begin
 BodyColor := (FColors.FText.FSecond * (1 - OverTimer) + FColors.FText.FFirst * (OverTimer)) * 0.5 + 0.5 * FColors.FText.FFirst;
-TextColor := FColors.FText.FSecond * (OverTimer) + FColors.FText.FFirst * (1 - OverTimer);
-TextColor.a := 0.9 * OpenTimer;
 BodyColor *= 0.8;
+TextColor := GetTextColor(OverTimer);
+DisabledTextColor := FColors.FDisabled.FSecond * 0.1 + SGVertex4fImport(1,0,0,1) * 0.9;
+DisabledTextColor.a := OpenTimer;
 
 PaintQuad(OpenLocation,
 	BodyColor.WithAlpha(OpenTimer),
@@ -385,16 +432,7 @@ if ComboBox.Lines > 0 then
 			BodyColor.WithAlpha(OpenTimer)*1.3);
 	
 	for i := 0 to ComboBox.Lines - 1 do
-		begin
-		ItemLocation := OpenLocation;
-		ItemLocation.SizeY := ItemLocation.SizeY / ComboBox.Lines;
-		ItemLocation.PositionY := ItemLocation.PositionY + i * ItemLocation.SizeY;
-		if NeedPaintScroll then
-			ItemLocation.SizeX := ItemLocation.SizeX - Location.SizeY;
-		
-		Render.Color(TextColor);
-		PaintComboBoxItem(ComboBox, ItemLocation, ComboBox.Items[i + ComboBox.FirstItemIndex]);
-		end;
+		PaintItem(GetItemLocation(i), ComboBox.Items[i + ComboBox.FirstItemIndex]);
 	end;
 end;
 
@@ -451,7 +489,7 @@ if 1 - OpenTimer > SGZero then
 		end;
 	if ComboBox.GetSelectedItem() <> nil then
 		begin
-		PaintComboBoxItem(ComboBox, TextLocation, ComboBox.GetSelectedItem()^);
+		ComboBox.Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.Position, TextLocation.Position + TextLocation.Size);
 		end;
 	end;
 

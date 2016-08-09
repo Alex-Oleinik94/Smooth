@@ -72,6 +72,8 @@ clear_files:
 	@$(SAGE) -crf $(SGRMFILE)
 clear:
 	@rm -f Output/arm-android/*
+	@rm -f Output/i386-library/*
+	@rm -f Output/x86_64-library/*
 	@rm -f Output/i386-debug-desktop/*
 	@rm -f Output/i386-release-desktop/*
 	@rm -f Output/x86_64-debug-desktop/*
