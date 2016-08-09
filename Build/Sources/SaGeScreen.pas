@@ -581,7 +581,6 @@ type
 		FClickOnOpenBox:Boolean;
 			public
 		procedure DrawItem(const Vertex1,Vertex3: TSGPoint2int32;const Color:TSGColor4f;const IDItem:LongInt = -1;const General:Boolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function Colums:LongInt;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromDraw;override;
@@ -592,9 +591,14 @@ type
 		procedure ClearItems();
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
+		function GetLines() : TSGUInt32;
+		function GetSelectedItem() : PSGComboBoxItem;
+		function GetFirstItemIndex() : TSGUInt32;
 			public
 		property SelectItem : LongInt read FSelectItem write FSelectItem;
 		property MaxLines   : LongWord read FMaxColumns write FMaxColumns;
+		
+		property Lines      : TSGUInt32 read GetLines;
 		property CallBackProcedure : TSGComboBoxProcedure read FProcedure write FProcedure;
 		
 		property ItemsCount : TSGUInt32 read GetItemsCount;
@@ -1073,7 +1077,7 @@ Result:=
 	(
 	(FOpen and 
 		(
-		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Colums*FOpenTimer)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Lines*FOpenTimer)
 		or
 		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight)
 		)
@@ -1084,7 +1088,7 @@ Result:=
 FCursorOnComponent:=Result;
 end;
 
-function TSGComboBox.Colums():LongInt;
+function TSGComboBox.GetLines() : TSGUInt32;
 begin
 if FItems<>nil then
 	if FMaxColumns>Length(FItems) then
@@ -1128,7 +1132,7 @@ if CursorInComponentNow then
 			end
 		else
 			begin
-			if FFirstScrollItem+Colums-1<>High(FItems) then
+			if FFirstScrollItem+Lines-1<>High(FItems) then
 				begin
 				FFirstScrollItem+=1;
 				end;
@@ -1157,7 +1161,7 @@ if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed
 	end;
 if  FOpen and (FCursorOnComponent) then
 	begin
-	for i:=0 to Colums-1 do
+	for i:=0 to Lines-1 do
 		begin
 		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer) and
 			(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer) and
@@ -1235,185 +1239,29 @@ if (ComboBoxImage<>nil) and General and (not FOpen) then
 end;
 
 procedure TSGComboBox.FromDraw;
-const
-	QuikAnime = 15;
-const
-	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
-	FirsColor11:TSGColor4f = (x:0.65;y:0.65;z:0.65;w:1);
-	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
-	ThreeColor1:TSGColor4f = (x:0.8;y:0.8;z:0.8;w:1);
-	
-	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
-	FirsColor21:TSGColor4f = (x:0.9;y:0.9;z:0.9;w:1);
-	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
-	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
-var
-	i:LongInt;
-	FScroll:byte = 0;
 begin
-FScroll:=Byte(FMaxColumns<Length(FItems));
 if not CursorInComponent then
 	FCursorOnThisItem:=-1;
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
 	FSkin.PaintComboBox(Self);
-	if  (1-FBackLightTimer>SGZero) and 
-		(1-FOpenTimer>SGZero)  then
-	SGRoundQuad(Render, 
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,10,
-		(FirsColor1*FActiveTimer+FirsColor11*(1-FActiveTimer)).WithAlpha(0.3*FVisibleTimer*(1-FBackLightTimer)*(1-FOpenTimer)),
-		(FirsColor2*FActiveTimer+FirsColor21*(1-FActiveTimer)).WithAlpha(0.3*FVisibleTimer*(1-FBackLightTimer)*(1-FOpenTimer))*1.3,
-		True);
-	if  (FBackLightTimer>SGZero) and 
-		(1-FOpenTimer>SGZero)  then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		5,10,
-		SecondColor1.WithAlpha(0.3*FVisibleTimer*FBackLightTimer*(1-FOpenTimer)),
-		SecondColor2.WithAlpha(0.3*FVisibleTimer*FBackLightTimer*(1-FOpenTimer))*1.3,
-		True);
-	if  (FOpenTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGVertex3fImport(
-			GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x,
-			GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*Colums*FOpenTimer),
-		5,10,
-		FBodyColor.WithAlpha(FOpenTimer),
-		FBodyColor.WithAlpha(FOpenTimer)*1.3,
-		True);
-	if FOpen then
-		if FCursorOnComponent then
-			begin
-			FTextColor*=QuikAnime-1;
-			FTextColor+=SGVertex4fImport(0,0,0,FVisibleTimer);
-			FTextColor/=QuikAnime;
-			
-			FBodyColor*=QuikAnime-1;
-			FBodyColor+=SGVertex4fImport(1,1,1,0.6*FVisibleTimer);
-			FBodyColor/=QuikAnime;
-			end
-		else
-			begin
-			FTextColor*=QuikAnime-1;
-			FTextColor+=SGVertex4fImport(1,1,1,FVisibleTimer);
-			FTextColor/=QuikAnime;
-			
-			FBodyColor*=QuikAnime-1;
-			FBodyColor+=ThreeColor1.WithAlpha(0.4*FVisibleTimer);
-			FBodyColor/=QuikAnime;
-			end
-	else
-		begin
-		FBodyColor*=QuikAnime-1;
-		FBodyColor+=ThreeColor1.WithAlpha(0.4*FVisibleTimer);
-		FBodyColor/=QuikAnime;
-		end;
-	if Boolean(FScroll) then
-		begin
-		if  (FOpenTimer>SGZero)  then
-		SGRoundQuad(Render,
-			SGVertex3fImport(
-				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScrollWidth,
-				GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+FHeight*Colums*FOpenTimer*(FFirstScrollItem/High(FItems))
-				),
-			SGVertex3fImport(
-				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x,
-				GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*Colums*FOpenTimer*((FFirstScrollItem+Colums-1)/High(FItems))),
-			5,10,
-			ThreeColor1.WithAlpha(0.4*FVisibleTimer*FOpenTimer),
-			ThreeColor2.WithAlpha(0.3*FVisibleTimer*FOpenTimer)*1.3,
-			True);
-		end;
-	if FOpen or (FOpenTimer>SGZero) then
-		begin
-		for i:=0 to Colums-1 do
-			begin
-			if (FSelectItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then if FItems[FFirstScrollItem+i].Active then
-				begin
-				if  (FOpenTimer>SGZero)  then
-				SGRoundQuad(Render,
-					SGVertex3fImport(
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertex3fImport(
-						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
-					5,10,
-					SGGetColor4fFromLongWord($9740F7).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2),
-					SGGetColor4fFromLongWord($9740F7).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
-					True);
-				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem<>FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].Active then
-				begin
-				if  (FOpenTimer>SGZero)  then	
-				SGRoundQuad(Render,
-					SGVertex3fImport(
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertex3fImport(
-						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
-					5,10,
-					SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2),
-					SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
-					True);
-				end;
-			if (FCursorOnThisItem<>-1) and (FCursorOnThisItem=FFirstScrollItem+i) and (FSelectItem=FCursorOnThisItem) then  if FItems[FFirstScrollItem+i].Active then
-				begin
-				if  (FOpenTimer>SGZero) then
-				SGRoundQuad(Render,
-					SGVertex3fImport(
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer),
-					SGVertex3fImport(
-						GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth,
-						GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer),
-					5,10,
-					SGGetColor4fFromLongWord($FF8000).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2),
-					SGGetColor4fFromLongWord($FF8000).WithAlpha(0.6*FVisibleTimer*FOpenTimer/2)*1.3,
-					True);
-				end;
-			if FOpenTimer>SGZero then
-				begin
-				if FItems[FFirstScrollItem+i].Active then
-					DrawItem(
-						SGVertex2int32Import(
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x),
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y + Height*i*FOpenTimer)),
-						SGVertex2int32Import(
-							Trunc(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth),
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer)),
-						FTextColor.WithAlpha(FOpenTimer),
-						FFirstScrollItem+i)
-				else
-					DrawItem(
-						SGVertex2int32Import(
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x),
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*i*FOpenTimer)),
-						SGVertex2int32Import(
-							Trunc(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-FScroll*FScrollWidth),
-							Trunc(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).y+Height*(i+1)*FOpenTimer)),
-						SGVertex4fImport(1,0,0,1).WithAlpha(FOpenTimer * FVisibleTimer),
-						FFirstScrollItem+i);
-				end;
-			end;
-		end;
-	if  (1-FOpenTimer>SGZero) and
-		(FVisibleTimer>SGZero) and 
-		(FSelectItem>=0) and 
-		(FSelectItem<=High(FItems)) then
-	DrawItem(
-		GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT),
-		GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT),
-		SGVertex4fImport(1,1,1,1-FOpenTimer).WithAlpha(FVisibleTimer),
-		FSelectItem,True);
 	end;
 FBackLight:=False;
 inherited;
+end;
+
+function TSGComboBox.GetFirstItemIndex() : TSGUInt32;
+begin
+Result := FFirstScrollItem;
+end;
+
+function TSGComboBox.GetSelectedItem() : PSGComboBoxItem;
+begin
+Result := nil;
+if FSelectItem <> -1 then
+	begin
+	Result := @FItems[FSelectItem];
+	end;
 end;
 
 procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
@@ -2239,7 +2087,7 @@ end;
 procedure TSGClickComponent.UpgradeTimers();
 begin
 inherited;
-FClick := FClick and ReqursiveActive;
+FClick := FOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
 UpgradeTimer(FClick, FClickTimer, 5, 2);
 end;
 
@@ -3754,8 +3602,6 @@ if FCursorOnButtonPrev and (not FCursorOnButton) then
 FCursorOnButtonPrev := FCursorOnComponent;
 UpgradeTimer(FCursorOnButton,FCursorOnButtonTimer,3,2);
 UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
-if FOver then if Context.CursorKeysPressed(SGLeftCursorButton) then
-	FClick:=True;
 inherited FromUpDate(FCanChange);
 end;
 

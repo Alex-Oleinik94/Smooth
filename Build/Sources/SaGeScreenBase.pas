@@ -24,11 +24,19 @@ type
 	TSGComponentLocationVectorType = TSGVector2f;
 	
 	TSGComponentLocation = object
+			protected
 		FPosition : TSGComponentLocationVectorType;
 		FSize     : TSGComponentLocationVectorType;
+			public
 		procedure Import(const VPosition, VSize : TSGComponentLocationVectorType ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		property Size : TSGComponentLocationVectorType read FSize;
-		property Position : TSGComponentLocationVectorType read FPosition;
+		procedure Write(const VName : TSGString = ''); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		property Size      : TSGComponentLocationVectorType read FSize     write FSize;
+		property Position  : TSGComponentLocationVectorType read FPosition write FPosition;
+		property SizeX     : TSGFloat read FSize.x     write FSize.x;
+		property SizeY     : TSGFloat read FSize.y     write FSize.y;
+		property PositionX : TSGFloat read FPosition.x write FPosition.x;
+		property PositionY : TSGFloat read FPosition.y write FPosition.y;
 		end;
 	
 	TSGAnchors = type TSGExByte;
@@ -169,9 +177,13 @@ type
 		FCaption    : TSGCaption;
 		FIdentifier : TSGComboBoxItemIdentifier;
 		FActive     : TSGBoolean;
+		FSelected   : TSGBoolean;
+		FOver       : TSGBoolean;
 			public
 		procedure Clear();
 			public
+		property Selected   : TSGBoolean                read FSelected   write FSelected;
+		property Over       : TSGBoolean                read FOver       write FOver;
 		property Active     : TSGBoolean                read FActive     write FActive;
 		property Caption    : TSGCaption                read FCaption    write FCaption;
 		property Text       : TSGCaption                read FCaption    write FCaption;
@@ -181,13 +193,18 @@ type
 	
 	TSGComboBoxItemList = packed array of TSGComboBoxItem;
 	
-	ISGComboBox = interface(ISGClickComponent)
+	ISGComboBox = interface(ISGOpenComponent)
 		['{5859810e-163e-4f5d-9622-7b574ebe07d5}']
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
+		function GetLines() : TSGUInt32;
+		function GetSelectedItem() : PSGComboBoxItem;
+		function GetFirstItemIndex() : TSGUInt32;
 		
-		property ItemsCount : TSGUInt32 read GetItemsCount;
-		property Items : PSGComboBoxItem read GetItems;
+		property FirstItemIndex : TSGUInt32 read GetFirstItemIndex;
+		property Lines          : TSGUInt32 read GetLines;
+		property ItemsCount     : TSGUInt32 read GetItemsCount;
+		property Items          : PSGComboBoxItem read GetItems;
 		end;
 	
 
@@ -195,12 +212,21 @@ function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocation
 
 implementation
 
+procedure TSGComponentLocation.Write(const VName : TSGString = ''); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+WriteLn(VName,':');
+FPosition.WriteLn();
+FSize.WriteLn();
+end;
+
 procedure TSGComboBoxItem.Clear();
 begin
-FImage := nil;
-FCaption := '';
+FImage      := nil;
+FCaption    := '';
 FIdentifier := 0;
-FActive := False;
+FActive     := False;
+FSelected   := False;
+FOver       := False;
 end;
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

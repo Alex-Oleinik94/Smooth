@@ -43,13 +43,17 @@ type
 		class function ClassName() : TSGString;override;
 		procedure IddleFunction(); virtual;
 			protected
-		FColors : TSGScreenSkinColors;
-		FColorsFrom, FColorsTo : TSGScreenSkinColors;
+		FColors      : TSGScreenSkinColors;
+		FColorsTo    : TSGScreenSkinColors;
+		FColorsFrom  : TSGScreenSkinColors;
 		FColorsTimer : TSGScreenTimer;
+			protected
+		FComboBoxImage : TSGImage;
 			public
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
-		procedure PaintComboBoxItem(const Item : PSGComboBoxItem; const General : TSGBool); virtual;
+		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True); virtual;
+		procedure PaintComboBoxItem(const ComboBox : ISGComboBox; const Location : TSGComponentLocation; var Item : TSGComboBoxItem); virtual;
 			public
 		procedure PaintButton(const Button : ISGButton); virtual;
 		procedure PaintPanel(const Panel : ISGPanel); virtual;
@@ -232,6 +236,10 @@ FColors := VColors;
 FColorsTimer := 0;
 FColorsFrom := FColors;
 FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
+
+FComboBoxImage := TSGImage.Create(SGTextureDirectory + Slash + 'ComboBoxImage.sgia');
+FComboBoxImage.SetContext(VContext);
+FComboBoxImage.Loading();
 end;
 
 destructor TSGScreenSkin.Destroy();
@@ -242,6 +250,11 @@ end;
 class function TSGScreenSkin.ClassName() : TSGString;
 begin
 Result := 'TSGScreenSkin';
+end;
+
+procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True);
+begin
+SGRoundQuad(Render, Location.Position, Location.Position + Location.Size, 5, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
 end;
 
 procedure TSGScreenSkin.PaintPanel(const Panel : ISGPanel);
@@ -261,16 +274,14 @@ if ViewingQuad or ViewingLines then
 	ActiveTimer := Panel.ActiveTimer;
 
 	if (ActiveTimer < 1 - SGZero) then
-		SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-			5,10,
+		PaintQuad(Location,
 			FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
 			FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
 			ViewingLines, ViewingQuad);
 
 	if  (ActiveTimer > SGZero) and 
 		(VisibleTimer > SGZero) then
-		SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-			5,10,
+		PaintQuad(Location,
 			FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*ActiveTimer),
 			FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*ActiveTimer)*1.3,
 			ViewingLines, ViewingQuad);
@@ -295,8 +306,7 @@ VisibleTimer := Button.VisibleTimer;
 ActiveTimer := Button.ActiveTimer;
 
 if (not Active) or (ActiveTimer < 1 - SGZero) then
-	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-		5,10,
+	PaintQuad(Location,
 		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
 		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
 		True);
@@ -304,8 +314,7 @@ if  (ActiveTimer > SGZero) and
 	(1-OverTimer>SGZero) and 
 	(1-ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
-	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-		5,10,
+	PaintQuad(Location,
 		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer),
 		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer)*1.3,
 		True);
@@ -313,17 +322,14 @@ if  (ActiveTimer>SGZero) and
 	(OverTimer>SGZero) and 
 	(1-ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
-	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-		5,10,
+	PaintQuad(Location,
 		FColors.FOver.FFirst.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer),
 		FColors.FOver.FSecond.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
 		True);
 if  (ActiveTimer>SGZero) and 
 	(ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
-	SGRoundQuad(Render, Location.Position, Location.Position + Location.Size,
-		5,
-		10,
+	PaintQuad(Location,
 		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
 		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3,
 		True);
@@ -334,13 +340,120 @@ if (Button.Caption<>'') and (Button.Font<>nil) and (Button.Font.Ready) and (Visi
 	end;
 end;
 
-procedure TSGScreenSkin.PaintComboBoxItem(const Item : PSGComboBoxItem; const General : TSGBool); 
+procedure TSGScreenSkin.PaintComboBoxItem(const ComboBox : ISGComboBox;const Location : TSGComponentLocation; var Item : TSGComboBoxItem); 
 begin
-
+ComboBox.Font.DrawFontFromTwoVertex2f(Item.Caption, Location.Position, Location.Position + Location.Size);
 end;
 
 procedure TSGScreenSkin.PaintComboBox(const ComboBox : ISGComboBox);
+var
+	Location, TextLocation : TSGComponentLocation;
+	ActiveTimer, VisibleTimer, OverTimer, ClickTimer, OpenTimer : TSGScreenTimer;
+
+procedure PaintOpened(const OpenLocation : TSGComponentLocation); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
+Result.SizeX := Location.SizeY;
+Result.SizeY := OpenLocation.Size.Y * (ComboBox.Lines / ComboBox.ItemsCount);
+Result.PositionX := OpenLocation.PositionX + OpenLocation.SizeX - Location.SizeY;
+Result.PositionY := OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.FirstItemIndex / ComboBox.ItemsCount);
+end;
+
+var
+	TextColor, BodyColor : TSGVertex4f;
+	NeedPaintScroll : TSGBool;
+	i : TSGUInt32;
+	ItemLocation : TSGComponentLocation;
+begin
+BodyColor := (FColors.FText.FSecond * (1 - OverTimer) + FColors.FText.FFirst * (OverTimer)) * 0.5 + 0.5 * FColors.FText.FFirst;
+TextColor := FColors.FText.FSecond * (OverTimer) + FColors.FText.FFirst * (1 - OverTimer);
+TextColor.a := 0.9 * OpenTimer;
+BodyColor *= 0.8;
+
+PaintQuad(OpenLocation,
+	BodyColor.WithAlpha(OpenTimer),
+	BodyColor.WithAlpha(OpenTimer)*1.3);
+
+if ComboBox.Lines > 0 then
+	begin
+	NeedPaintScroll := ComboBox.ItemsCount > ComboBox.Lines;
+	
+	if NeedPaintScroll then
+		PaintQuad(GetScrollLocation(),
+			BodyColor.WithAlpha(OpenTimer),
+			BodyColor.WithAlpha(OpenTimer)*1.3);
+	
+	for i := 0 to ComboBox.Lines - 1 do
+		begin
+		ItemLocation := OpenLocation;
+		ItemLocation.SizeY := ItemLocation.SizeY / ComboBox.Lines;
+		ItemLocation.PositionY := ItemLocation.PositionY + i * ItemLocation.SizeY;
+		if NeedPaintScroll then
+			ItemLocation.SizeX := ItemLocation.SizeX - Location.SizeY;
+		
+		Render.Color(TextColor);
+		PaintComboBoxItem(ComboBox, ItemLocation, ComboBox.Items[i + ComboBox.FirstItemIndex]);
+		end;
+	end;
+end;
+
+begin
+Location := ComboBox.GetLocation();
+
+ClickTimer   := ComboBox.ClickTimer;
+OverTimer    := ComboBox.OverTimer;
+VisibleTimer := ComboBox.VisibleTimer;
+ActiveTimer  := ComboBox.ActiveTimer;
+OpenTimer    := ComboBox.OpenTimer;
+
+if  (1 - OverTimer>SGZero) and 
+	(1 - OpenTimer>SGZero)  then
+	PaintQuad(Location,
+		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer*(1 - OpenTimer)),
+		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer*(1 - OpenTimer))*1.3);
+if  (OverTimer>SGZero) and 
+	(1-OpenTimer>SGZero)  then
+	PaintQuad(Location,
+		FColors.FOver.FFirst.WithAlpha(0.3*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.3*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer)*1.3);
+if (ActiveTimer < 1 - SGZero) then
+	PaintQuad(Location,
+		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
+		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8);
+if  (ActiveTimer>SGZero) and 
+	(ClickTimer>SGZero) and
+	(VisibleTimer>SGZero) then
+	PaintQuad(Location,
+		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
+		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3);
+
+if OpenTimer > SGZero then
+	begin
+	TextLocation := Location;
+	TextLocation.SizeY := TextLocation.SizeY * ( 1 + (ComboBox.Lines - 1) * OpenTimer);
+	
+	PaintOpened(TextLocation);
+	end
+else
+	TextLocation := Location;
+
+if 1 - OpenTimer > SGZero then
+	begin
+	if (FComboBoxImage<>nil) then
+		begin
+		Render.Color(FColors.FText.FFirst.WithAlpha(Sqr((1 - OpenTimer) * VisibleTimer)));
+		
+		FComboBoxImage.DrawImageFromTwoVertex2fAsRatio(
+			TextLocation.Position + TextLocation.Size - SGVertex2fImport(Location.SizeY, TextLocation.SizeY),
+			TextLocation.Position + TextLocation.Size,
+			False,0.5);
+		end;
+	if ComboBox.GetSelectedItem() <> nil then
+		begin
+		PaintComboBoxItem(ComboBox, TextLocation, ComboBox.GetSelectedItem()^);
+		end;
+	end;
 
 end;
 
