@@ -59,6 +59,7 @@ type
 		procedure PaintButton(const Button : ISGButton); virtual;
 		procedure PaintPanel(const Panel : ISGPanel); virtual;
 		procedure PaintComboBox(const ComboBox : ISGComboBox); virtual;
+		procedure PaintLabel(const VLabel : ISGLabel); virtual;
 		end;
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -262,7 +263,8 @@ procedure TSGScreenSkin.PaintPanel(const Panel : ISGPanel);
 var
 	Location : TSGComponentLocation;
 	ActiveTimer, VisibleTimer : TSGScreenTimer;
-	ViewingLines, ViewingQuad : TSGBool;
+	ViewingQuad  : TSGBool;
+	ViewingLines : TSGBool;
 begin
 ViewingLines := Panel.ViewingLines;
 ViewingQuad := Panel.ViewingQuad;
@@ -287,7 +289,6 @@ if ViewingQuad or ViewingLines then
 			FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*ActiveTimer)*1.3,
 			ViewingLines, ViewingQuad);
 	end;
-
 end;
 
 procedure TSGScreenSkin.PaintButton(const Button : ISGButton);
@@ -324,8 +325,8 @@ if  (ActiveTimer>SGZero) and
 	(1-ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
 	PaintQuad(Location,
-		FColors.FOver.FFirst.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer),
-		FColors.FOver.FSecond.WithAlpha(0.3*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
+		FColors.FOver.FFirst.WithAlpha(0.5*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.5*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
 		True);
 if  (ActiveTimer>SGZero) and 
 	(ClickTimer>SGZero) and
@@ -396,10 +397,7 @@ Result.PositionX := OpenLocation.PositionX + OpenLocation.SizeX - Location.SizeY
 Result.PositionY := OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.FirstItemIndex / ComboBox.ItemsCount);
 end;
 
-var
-	NeedPaintScroll : TSGBool;
-
-function GetItemLocation(const Index : TSGUInt32):TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function GetItemLocation(const Index : TSGUInt32; const NeedPaintScroll : TSGBool = False):TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := OpenLocation;
 Result.SizeY := Result.SizeY / ComboBox.Lines;
@@ -409,6 +407,7 @@ if NeedPaintScroll then
 end;
 
 var
+	NeedPaintScroll : TSGBool;
 	BodyColor : TSGVertex4f;
 	i : TSGUInt32;
 begin
@@ -432,7 +431,7 @@ if ComboBox.Lines > 0 then
 			BodyColor.WithAlpha(OpenTimer)*1.3);
 	
 	for i := 0 to ComboBox.Lines - 1 do
-		PaintItem(GetItemLocation(i), ComboBox.Items[i + ComboBox.FirstItemIndex]);
+		PaintItem(GetItemLocation(i, NeedPaintScroll), ComboBox.Items[i + ComboBox.FirstItemIndex]);
 	end;
 end;
 
@@ -453,8 +452,8 @@ if  (1 - OverTimer>SGZero) and
 if  (OverTimer>SGZero) and 
 	(1-OpenTimer>SGZero)  then
 	PaintQuad(Location,
-		FColors.FOver.FFirst.WithAlpha(0.3*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer),
-		FColors.FOver.FSecond.WithAlpha(0.3*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer)*1.3);
+		FColors.FOver.FFirst.WithAlpha(0.5*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.5*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer)*1.3);
 if (ActiveTimer < 1 - SGZero) then
 	PaintQuad(Location,
 		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
@@ -492,7 +491,23 @@ if 1 - OpenTimer > SGZero then
 		ComboBox.Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.Position, TextLocation.Position + TextLocation.Size);
 		end;
 	end;
+end;
 
+procedure TSGScreenSkin.PaintLabel(const VLabel : ISGLabel); 
+var
+	Location : TSGComponentLocation;
+begin
+if (VLabel.Caption<>'') and (VLabel.Font<>nil) and (VLabel.Font.Ready) then
+	begin
+	Location := VLabel.GetLocation();
+	if VLabel.TextColorSeted then
+		Render.Color(VLabel.TextColor.WithAlpha(VLabel.VisibleTimer))
+	else
+		Render.Color(FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer));
+	VLabel.Font.DrawFontFromTwoVertex2f(VLabel.Caption,
+		Location.Position, Location.Position + Location.Size,
+		VLabel.TextPosition);
+	end;
 end;
 
 end.

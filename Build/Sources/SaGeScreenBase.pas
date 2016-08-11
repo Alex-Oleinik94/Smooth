@@ -150,6 +150,20 @@ type
 		property ClickTimer : TSGScreenTimer read GetClickTimer;
 		end;
 	
+	ISGLabel = interface(ISGComponent)
+		['{7f02dd71-b699-453f-aa8d-f41dd7d44bc6}']
+		function  GetTextPosition() : TSGBoolean;
+		procedure SetTextPosition(const Pos : TSGBoolean);
+		function  GetTextColor() : TSGColor4f;
+		procedure SetTextColor(const VTextColor : TSGColor4f);
+		function  GetTextColorSeted() : TSGBoolean;
+		procedure SetTextColorSeted(const VTextColorSeted : TSGBoolean);
+		
+		property TextPosition   : TSGBoolean read GetTextPosition   write SetTextPosition;
+		property TextColor      : TSGColor4f read GetTextColor      write SetTextColor;
+		property TextColorSeted : TSGBoolean read GetTextColorSeted write SetTextColorSeted;
+		end;
+	
 	ISGButton = interface(ISGClickComponent)
 		['{ec439dc0-edd6-42e2-af41-42e9805c2e77}']
 		end;
@@ -157,7 +171,7 @@ type
 	ISGPanel = interface(ISGComponent)
 		['{41f51334-780b-444c-aa61-4c000759516b}']
 		function ViewingLines() : TSGBoolean;
-		function ViewingQuad() : TSGBoolean;
+		function ViewingQuad()  : TSGBoolean;
 		end;
 	
 	ISGOpenComponent = interface(ISGClickComponent)
