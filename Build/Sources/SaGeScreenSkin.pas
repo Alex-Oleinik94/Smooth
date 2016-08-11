@@ -380,7 +380,7 @@ var
 	SelectedTextColor : TSGVertex4f;
 begin
 SelectedTextColor := FColors.FNormal.FFirst;
-TSGVertex3f(SelectedTextColor) := SelectedTextColor.Normalized();
+TSGColor3f(SelectedTextColor) := SelectedTextColor.Normalized();
 SelectedTextColor.a := OpenTimer;
 Render.Color(SelectedTextColor);
 end;
@@ -389,8 +389,8 @@ begin
 if Item.Over then
 	begin
 	PaintQuad(ItemLocation,
-		FColors.FOver.FFirst.WithAlpha(0.3*OpenTimer),
-		FColors.FOver.FSecond.WithAlpha(0.3*OpenTimer)*1.3);
+		FColors.FOver.FFirst .WithAlpha(0.3*OpenTimer)     * (1 - ClickTimer) + FColors.FClick.FFirst .WithAlpha(0.3*OpenTimer)     * ClickTimer,
+		FColors.FOver.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * (1 - ClickTimer) + FColors.FClick.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * ClickTimer);
 	end;
 
 if Item.Selected and (not Item.Over) and Item.Active then
@@ -475,10 +475,11 @@ if (ActiveTimer < 1 - SGZero) then
 		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8);
 if  (ActiveTimer>SGZero) and 
 	(ClickTimer>SGZero) and
+	(OpenTimer < 1 - SGZero) and
 	(VisibleTimer>SGZero) then
 	PaintQuad(Location,
-		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
-		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3);
+		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*(1-OpenTimer)*ActiveTimer),
+		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*(1-OpenTimer)*ActiveTimer)*1.3);
 
 if OpenTimer > SGZero then
 	begin
