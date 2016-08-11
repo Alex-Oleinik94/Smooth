@@ -193,19 +193,21 @@ end;
 
 function SGStandartSkinColors() : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result.FNormal.FFirst.Import(0,1/2,1,1);
+Result.FNormal.FFirst .Import(0,1/2,1,1);
 Result.FNormal.FSecond.Import(0,3/4,1,1);
 
-Result.FClick.FFirst.Import(5/10,5/10,5/10,1);
-Result.FClick.FSecond.Import(7/10,7/10,7/10,1);
+Result.FClick.FFirst .Import(1,1/2,0,1);
+Result.FClick.FSecond.Import(1,1/4,0,1);
+Result.FClick.FFirst  := Result.FClick.FFirst  * 1/2 + SGVertex4fImport(0.5,0.5,0.5,1) * 1/2;
+Result.FClick.FSecond := Result.FClick.FSecond * 1/2 + SGVertex4fImport(0.7,0.7,0.7,1) * 1/2;
 
-Result.FDisabled.FFirst.Import(8/10,8/10,8/10,1);
+Result.FDisabled.FFirst .Import(8/10,8/10,8/10,1);
 Result.FDisabled.FSecond.Import(1,1,1,1);
 
-Result.FOver.FFirst.Import(0,9/10,1,1);
+Result.FOver.FFirst .Import(0,9/10,1,1);
 Result.FOver.FSecond.Import(0,1,1,1);
 
-Result.FText.FFirst.Import(1,1,1,1);
+Result.FText.FFirst .Import(1,1,1,1);
 Result.FText.FSecond.Import(0,0,0,1);
 end;
 
