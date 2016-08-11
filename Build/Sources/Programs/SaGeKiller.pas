@@ -32,7 +32,7 @@ const
 	TSGKillerStringWin = 'Ты выиграл!!!';
 	TSGKillerStringLose = 'Ты проиграл...';
 type
-	TSGKiller=class(TSGDrawable)
+	TSGKiller=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext:ISGContext);override;
 		destructor Destroy;override;
@@ -352,99 +352,99 @@ FImageBullet.Loading;}
 
 SetLength(FZombies,1);
 FButtonReset:=TSGButton.Create;
-SGScreen.CreateChild(FButtonReset);
-SGScreen.LastChild.SetBounds(Context.Width-50,5,40,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Reset';
+Screen.CreateChild(FButtonReset);
+Screen.LastChild.SetBounds(Context.Width-50,5,40,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='Reset';
 FButtonReset.OnChange:=TSGComponentProcedure(@TSGButton_Reset_OnChange);
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FDifficultyComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(FDifficultyComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-145,5,118+145,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
-SGScreen.LastChild.AsComboBox.CreateItem('Очень сильно легко');
-SGScreen.LastChild.AsComboBox.CreateItem('Очень легко');
-SGScreen.LastChild.AsComboBox.CreateItem('Легко');
-SGScreen.LastChild.AsComboBox.CreateItem('Нормально');
-SGScreen.LastChild.AsComboBox.CreateItem('Ну так, ничё');
-SGScreen.LastChild.AsComboBox.CreateItem('Сложно');
-SGScreen.LastChild.AsComboBox.CreateItem('Очень сложно');
-SGScreen.LastChild.AsComboBox.CreateItem('Тяжко!');
-SGScreen.LastChild.AsComboBox.CreateItem('Очень тяжко!!');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_Difficulty_OnChange);
-SGScreen.LastChild.AsComboBox.SelectItem:=4;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FDifficultyComboBox);
+Screen.LastChild.SetBounds(Context.Width-50-125-145,5,118+145,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
+Screen.LastChild.AsComboBox.CreateItem('Очень сильно легко');
+Screen.LastChild.AsComboBox.CreateItem('Очень легко');
+Screen.LastChild.AsComboBox.CreateItem('Легко');
+Screen.LastChild.AsComboBox.CreateItem('Нормально');
+Screen.LastChild.AsComboBox.CreateItem('Ну так, ничё');
+Screen.LastChild.AsComboBox.CreateItem('Сложно');
+Screen.LastChild.AsComboBox.CreateItem('Очень сложно');
+Screen.LastChild.AsComboBox.CreateItem('Тяжко!');
+Screen.LastChild.AsComboBox.CreateItem('Очень тяжко!!');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_Difficulty_OnChange);
+Screen.LastChild.AsComboBox.SelectItem:=4;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FQuantityComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(FQuantityComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60,5,55,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
+Screen.CreateChild(FQuantityComboBox);
+Screen.LastChild.SetBounds(Context.Width-50-125-145-60,5,55,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to 8 do
-	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_DeepZombies_OnChange);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_DeepZombies_OnChange);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 
 FComboBoxDeep:=TSGComboBox.Create;
-SGScreen.CreateChild(FComboBoxDeep);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60,5,55,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
+Screen.CreateChild(FComboBoxDeep);
+Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60,5,55,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=3 to 8 do
-	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_CountZombies_OnChange);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_CountZombies_OnChange);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FComboBoxRespamn:=TSGComboBox.Create;
-SGScreen.CreateChild(FComboBoxRespamn);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130,5,125,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
-SGScreen.LastChild.AsComboBox.CreateItem('Респамн Включeн');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_RespamnZombies_OnChange);
-SGScreen.LastChild.AsComboBox.SelectItem:=1;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FComboBoxRespamn);
+Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130,5,125,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
+Screen.LastChild.AsComboBox.CreateItem('Респамн Включeн');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_RespamnZombies_OnChange);
+Screen.LastChild.AsComboBox.SelectItem:=1;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FGroundComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(FGroundComboBox);
-SGScreen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130-140,5,135,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Стенок нету');
-SGScreen.LastChild.AsComboBox.CreateItem('Стенок мало');
-SGScreen.LastChild.AsComboBox.CreateItem('Стенок немного');
-SGScreen.LastChild.AsComboBox.CreateItem('Стенок немало');
-SGScreen.LastChild.AsComboBox.CreateItem('Стенок много');
-SGScreen.LastChild.AsComboBox.CreateItem('Стенки везде');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_GroundZombies_OnChange);
-SGScreen.LastChild.AsComboBox.SelectItem:=2;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FGroundComboBox);
+Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130-140,5,135,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.AsComboBox.CreateItem('Стенок нету');
+Screen.LastChild.AsComboBox.CreateItem('Стенок мало');
+Screen.LastChild.AsComboBox.CreateItem('Стенок немного');
+Screen.LastChild.AsComboBox.CreateItem('Стенок немало');
+Screen.LastChild.AsComboBox.CreateItem('Стенок много');
+Screen.LastChild.AsComboBox.CreateItem('Стенки везде');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_GroundZombies_OnChange);
+Screen.LastChild.AsComboBox.SelectItem:=2;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FTimerLabel:=TSGLabel.Create;
-SGScreen.CreateChild(FTimerLabel);
-SGScreen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
-SGScreen.LastChild.Anchors:=[SGAnchBottom];
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.AsLabel.TextPosition:=False;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FTimerLabel);
+Screen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
+Screen.LastChild.Anchors:=[SGAnchBottom];
+Screen.LastChild.Caption:='';
+Screen.LastChild.Visible:=True;
+Screen.LastChild.AsLabel.TextPosition:=False;
+Screen.LastChild.FUserPointer1:=Self;
 FTimerLabel.TextColor.Import(0,0,0,1);
 
 FLabebYouLose:=TSGLabel.Create;
-SGScreen.CreateChild(FLabebYouLose);
-SGScreen.LastChild.SetBounds(5,Context.Height div 2 - 15,Context.Width-10,30);
-SGScreen.LastChild.Anchors:=[SGAnchBottom];
-SGScreen.LastChild.Caption:=TSGKillerStringLose;
-SGScreen.LastChild.Visible:=False;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FLabebYouLose);
+Screen.LastChild.SetBounds(5,Context.Height div 2 - 15,Context.Width-10,30);
+Screen.LastChild.Anchors:=[SGAnchBottom];
+Screen.LastChild.Caption:=TSGKillerStringLose;
+Screen.LastChild.Visible:=False;
+Screen.LastChild.FUserPointer1:=Self;
 FLabebYouLose.TextColor.Import(0,0,0,1);
 
 InitGame;

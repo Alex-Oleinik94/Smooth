@@ -1,7 +1,7 @@
 
 {$IFDEF SGREADINTERFACE}
 type
-	TSGGenAlg=class(TSGDrawable)
+	TSGGenAlg=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
@@ -247,19 +247,19 @@ a:=0;
 b:=0;
 
 FNB:=TSGButton.Create;
-SGScreen.CreateChild(FNB);
-SGScreen.LastChild.SetBounds(Render.Width-90,1 ,80,15);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Заного';
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FNB);
+Screen.LastChild.SetBounds(Render.Width-90,1 ,80,15);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='Заного';
+Screen.LastChild.FUserPointer1:=Self;
 FNB.OnChange:=TSGComponentProcedure(@New1234543454354);
 
 FP1:=TSGPanel.Create;
-SGScreen.CreateChild(FP1);
-SGScreen.LastChild.SetMiddleBounds(550,378);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FP1);
+Screen.LastChild.SetMiddleBounds(550,378);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FP1.CreateChild(TSGLabel.Create);
 FP1.LastChild.SetBounds(265,38,8,25);
@@ -558,13 +558,13 @@ FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGLabel).TextPosition:=False;
 
 FLPoint:=TSGLabel.Create;
-SGScreen.CreateChild(FLPoint);
-SGScreen.LastChild.SetBounds(0,0,0,0);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=False;
-(SGScreen.LastChild as TSGLabel).TextPosition:=False;
+Screen.CreateChild(FLPoint);
+Screen.LastChild.SetBounds(0,0,0,0);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='';
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=False;
+(Screen.LastChild as TSGLabel).TextPosition:=False;
 
 end;
 

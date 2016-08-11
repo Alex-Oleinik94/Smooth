@@ -203,39 +203,39 @@ InitEffectsComboBox(Render.Width-160,40,150,30,[SGAnchRight]);
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 
 FLDC:=TSGLabel.Create;
-SGScreen.CreateChild(FLDC);
-SGScreen.LastChild.SetBounds(Render.Width-160-90-125,5,115,30);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Итерация:';
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FLDC);
+Screen.LastChild.SetBounds(Render.Width-160-90-125,5,115,30);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='Итерация:';
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 
 FBPD:=TSGButton.Create;
-SGScreen.CreateChild(FBPD);
-SGScreen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='+';
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FBPD);
+Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='+';
+Screen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKTTet);
-SGScreen.LastChild.Visible:=True;
+Screen.LastChild.Visible:=True;
 
 FLD:=TSGLabel.Create;
-SGScreen.CreateChild(FLD);
-SGScreen.LastChild.SetBounds(Render.Width-160-60,5,20,30);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='0';
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FLD);
+Screen.LastChild.SetBounds(Render.Width-160-60,5,20,30);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='0';
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FBMD:=TSGButton.Create;
-SGScreen.CreateChild(FBMD);
-SGScreen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='-';
+Screen.CreateChild(FBMD);
+Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKTTet);
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 

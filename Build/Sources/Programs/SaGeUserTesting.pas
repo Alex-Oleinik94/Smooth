@@ -22,7 +22,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommon;
 type
-	TSGUserTesting=class(TSGDrawable)
+	TSGUserTesting=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -92,7 +92,7 @@ constructor TSGUserTesting.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FRadioButton := TSGRadioButton.Create();
-SGScreen.CreateChild(FRadioButton);
+Screen.CreateChild(FRadioButton);
 FRadioButton.SetBounds(200,200,40,40);
 FRadioButton.BoundsToNeedBounds();
 FRadioButton.Visible := True;

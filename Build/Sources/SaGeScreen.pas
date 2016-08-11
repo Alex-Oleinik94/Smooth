@@ -14,7 +14,6 @@ uses
 	,SaGeClasses
 	,SaGeBased
 	,SaGeImages
-	,SaGeContext
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeResourseManager
@@ -42,6 +41,7 @@ type
 {$INCLUDE SaGeScreenComponents.inc}
 {$UNDEF  SCREEN_INTERFACE}
 
+type
 	TSGScreen = class(TSGComponent, ISGScreen)
 			public
 		constructor Create();override;
@@ -59,28 +59,94 @@ type
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
-
-var
-	SGScreen:TSGScreen = nil;
+type
+	ISGScreened = interface(ISGContextabled)
+		['{01b2e610-7d81-4db4-bece-19222fbffde9}']
+		function GetScreen() : TSGScreen;
+		function ScreenAssigned() : TSGBoolean;
+		
+		property Screen : TSGScreen read GetScreen;
+		end;
+type
+	TSGScreened = class(TSGContextabled, ISGScreened)
+			public
+		function GetScreen() : TSGScreen; virtual;
+		function ScreenAssigned() : TSGBoolean; virtual;
+			public
+		property Screen : TSGScreen read GetScreen;
+		end;
+type
+	TSGScreenedDrawable = class(TSGDrawable, ISGScreened)
+			public
+		function GetScreen() : TSGScreen; virtual;
+		function ScreenAssigned() : TSGBoolean; virtual;
+			public
+		property Screen : TSGScreen read GetScreen;
+		end;
 
 implementation
 
 uses
-	SaGeEngineConfigurationPanel;
-
-var
-	SGScreens:packed array of 
-			packed record 
-			FScreen:TSGScreen;
-			FImage:TSGImage;
-			end = nil;
-	FOldPosition,FNewPosition:LongWord;
-	FMoveProgress:Real = 0;
-	FMoveVector:TSGVertex2f = (x:0;y:0);
+	 SaGeEngineConfigurationPanel
+	,SaGeContext
+	;
 
 {$DEFINE SCREEN_IMPLEMENTATION}
 {$INCLUDE SaGeScreenComponents.inc}
 {$UNDEF  SCREEN_IMPLEMENTATION}
+
+function TSGScreenedDrawable.ScreenAssigned() : TSGBoolean;
+begin
+Result := ContextAssigned();
+if Result then
+	Result := FContext^.Screen <> nil;
+end;
+
+function TSGScreenedDrawable.GetScreen() : TSGScreen;
+begin
+if ContextAssigned() then
+	Result := TSGScreen(FContext^.Screen);
+end;
+
+function TSGScreened.ScreenAssigned() : TSGBoolean;
+begin
+Result := ContextAssigned();
+if Result then
+	Result := FContext^.Screen <> nil;
+end;
+
+function TSGScreened.GetScreen() : TSGScreen;
+begin
+if ContextAssigned() then
+	Result := TSGScreen(FContext^.Screen);
+end;
+
+// ====================================== TSGScreen
+
+procedure TSGScreen.DeleteDeviceResourses();
+begin 
+FSkin.DeleteDeviceResourses();
+Font.DeleteDeviceResourses();
+inherited;
+end;
+
+procedure TSGScreen.LoadDeviceResourses();
+begin
+FSkin.LoadDeviceResourses();
+Font.LoadDeviceResourses();
+inherited;
+end;
+
+constructor TSGScreen.Create();
+begin
+inherited Create();
+FInProcessing := False;
+end;
+
+destructor TSGScreen.Destroy();
+begin
+inherited;
+end;
 
 procedure TSGScreen.Load(const VContext : ISGContext);
 begin
@@ -126,9 +192,6 @@ Render.LineWidth(1);
 Render.InitMatrixMode(SG_2D);
 
 VCanReplace:=False;
-for i:=0 to High(SGScreens) do
-	if (SGScreens[i].FScreen<>nil) and (SGScreens[i].FScreen<>Self) then
-		SGScreens[i].FScreen.FromUpDate(VCanReplace);
 
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Before drawing');
@@ -177,25 +240,6 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 CanRePleace := UpDateScreen();
 Skin.IddleFunction();
 CustomPaint(CanRePleace);
-end;
-
-initialization
-begin
-FNewPosition:=0;
-FOldPosition:=0;
-
-SGScreen := TSGScreen.Create();
-
-SetLength(SGScreens,1);
-SGScreens[Low(SGScreens)].FScreen := SGScreen;
-SGScreens[Low(SGScreens)].FImage  := nil;
-end;
-
-finalization
-begin
-if SGScreen <> nil then
-	SGScreen.Destroy();
-SGScreen := nil;
 end;
 
 end.

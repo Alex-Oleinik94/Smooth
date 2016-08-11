@@ -108,7 +108,7 @@ constructor TSGNotepadApplication.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FNotepad := TSGNotepad.Create();
-SGScreen.CreateChild(FNotepad);
+TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
 FNotepad.BoundsToNeedBounds();
 FNotepad.Visible := True;

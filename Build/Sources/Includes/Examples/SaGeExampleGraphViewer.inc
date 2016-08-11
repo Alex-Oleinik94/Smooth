@@ -1,7 +1,7 @@
 
 {$IFDEF SGREADINTERFACE}
 type
-	TSGGraphic=class(TSGDrawable)
+	TSGGraphic=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
@@ -364,21 +364,21 @@ Render.Vertex2f(		(q2+c-View.x1)/absx*Render.Width,
 				Render.Height-(q1-View.y1)/AbsY*Render.Height);
 Render.EndScene();
 
-SGScreen.Font.DrawFontFromTwoVertex2f(SGStTen(msd),
+Screen.Font.DrawFontFromTwoVertex2f(SGStTen(msd),
 	SGVertex2fImport(1+(q2-View.x1)/absx*Render.Width,
 				Render.Height-(q1-View.y1)/absy*Render.Height),
 	SGVertex2fImport((q2+c*3-View.x1)/AbsX*Render.Width,
-				SGScreen.Font.FontHeight+Render.Height-(q1-View.y1)/AbsY*Render.Height),
+				Screen.Font.FontHeight+Render.Height-(q1-View.y1)/AbsY*Render.Height),
 				False,False);
 
 q:=GetFP(View.x1,View.x2,msd);
 while q < View.x2 do
 	begin
-	SGScreen.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
+	Screen.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+2
 			,View.y2/absy*Render.Height),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+500
-			,View.y2/absy*Render.Height+SGScreen.Font.FontHeight),
+			,View.y2/absy*Render.Height+Screen.Font.FontHeight),
 		False,False);
 	q+=c;
 	end;
@@ -386,11 +386,11 @@ while q < View.x2 do
 q:=GetFP(View.y1,View.y2,msd);
 while q < View.y2 do
 	begin
-	SGScreen.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
+	Screen.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
 		SGVertex2fImport(Render.Width-View.x2/AbsX*Render.Width+2
 			,Render.Height-(q-View.y1)/Absy*Render.Height),
 		SGVertex2fImport(Render.Width-View.x2/absx*Render.Width+500
-			,Render.Height-(q-View.y1)/absy*Render.Height+SGScreen.Font.FontHeight),
+			,Render.Height-(q-View.y1)/absy*Render.Height+Screen.Font.FontHeight),
 		False,False);
 	q+=c;
 	end;
@@ -437,7 +437,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	Button.Active := False;
 	
 	Form := TSGForm.Create();
-	SGScreen.CreateChild(Form);
+	Screen.CreateChild(Form);
 	Form.SetMiddleBounds(400,133);
 	Form.BoundsToNeedBounds();
 	Form.Visible := True;
@@ -495,12 +495,12 @@ Image.SetContext(Context);
 Image.Loading;
 
 FNewFunctionButton:=TSGButton.Create;
-SGScreen.CreateChild(FNewFunctionButton);
-SGScreen.LastChild.SetBounds(Render.Width-140,Render.Height-28,130,23);
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption:='Добавить функцию';
-SGScreen.LastChild.OnChange:=TSGComponentProcedure(@GoNewFunction);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FNewFunctionButton);
+Screen.LastChild.SetBounds(Render.Width-140,Render.Height-28,130,23);
+Screen.LastChild.Visible:=True;
+Screen.LastChild.Caption:='Добавить функцию';
+Screen.LastChild.OnChange:=TSGComponentProcedure(@GoNewFunction);
+Screen.LastChild.FUserPointer1:=Self;
 end;
 
 destructor TSGGraphViewer.Destroy;

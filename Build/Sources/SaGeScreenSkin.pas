@@ -11,7 +11,6 @@ uses
 	,SaGeClasses
 	,SaGeBased
 	,SaGeImages
-	,SaGeContext
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeResourseManager
@@ -36,13 +35,15 @@ type
 		FText     : TSGScreenSkinFrameColor;
 		end;
 	
-	TSGScreenSkin = class(TSGContextabled)
+	TSGScreenSkin = class(TSGDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override; 
 		constructor Create(const VContext : ISGContext; const VColors : TSGScreenSkinColors);virtual;
 		constructor CreateRandom(const VContext : ISGContext);virtual;
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
+		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 		procedure IddleFunction(); virtual;
 			protected
 		FColors      : TSGScreenSkinColors;
@@ -229,6 +230,18 @@ begin
 repeat
 Result := SGGenerateRandomSkinColors(Colors);
 until Result <> Colors;
+end;
+
+procedure TSGScreenSkin.DeleteDeviceResourses();
+begin
+FComboBoxImage.DeleteDeviceResourses();
+inherited;
+end;
+
+procedure TSGScreenSkin.LoadDeviceResourses();
+begin
+FComboBoxImage.LoadDeviceResourses();
+inherited;
 end;
 
 constructor TSGScreenSkin.Create(const VContext : ISGContext; const VColors : TSGScreenSkinColors);

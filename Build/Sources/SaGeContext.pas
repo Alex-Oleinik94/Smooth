@@ -10,7 +10,6 @@ uses
 	,SaGeBased
 	,SaGeCommon
 	,Classes
-	,SysUtils
 	,crt
 	,SaGeRender
 	,SaGeRenderConstants
@@ -20,6 +19,7 @@ uses
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
+	,SaGeScreen
 	;
 const
 	SG_ALT_KEY = 18;
@@ -194,20 +194,28 @@ type
 		procedure SetNewContext(const NewContext : TSGPointer);virtual;
 			protected
 		FNewContextType : TSGContextClass;
-		FRenderClass    : TSGRenderClass;
-		FRenderClassChanget : TSGBoolean;
-		FRender         : TSGRender;
 		FSelfLink       : PISGContext;
-		FPaintableClass : TSGDrawableClass;
-		FPaintable       : TSGDrawable;
+			protected
+		FPaintableClass    : TSGDrawableClass;
+		FPaintable         : TSGDrawable;
 		FPaintableSettings : TSGPaintableSettings;
 			protected
+		FRenderClass        : TSGRenderClass;
+		FRenderClassChanget : TSGBoolean;
+		FRender             : TSGRender;
+			protected
+		FScreen : TSGScreen;
+			protected
 		procedure SetPaintableSettings(); virtual;
+			private
+		function GetScreen() : TSGPointer; virtual;
+		procedure DestroyScreen(); virtual;
 			public
 		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
 		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
 		property PaintableSettings : TSGPaintableSettings write FPaintableSettings;
+		property Screen : TSGScreen read FScreen;
 			public
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
@@ -237,7 +245,7 @@ function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContex
 implementation
 
 uses
-	SaGeScreen
+	SysUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
 		{$ENDIF}
@@ -254,6 +262,20 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+procedure TSGContext.DestroyScreen();
+begin
+if FScreen <> nil then
+	begin
+	FScreen.Destroy();
+	FScreen := nil;
+	end;
+end;
+
+function TSGContext.GetScreen() : TSGPointer; 
+begin
+Result := FScreen;
+end;
 
 procedure TSGContext.Minimize();
 begin
@@ -398,22 +420,23 @@ procedure TSGContext.DeleteDeviceResourses();
 begin
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
-if SGScreen <> nil then
-	SGScreen.DeleteDeviceResourses();
+if Screen <> nil then
+	Screen.DeleteDeviceResourses();
 end;
 
 procedure TSGContext.LoadDeviceResourses();
 begin
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
-if SGScreen <> nil then
-	SGScreen.LoadDeviceResourses();
+if Screen <> nil then
+	Screen.LoadDeviceResourses();
 end;
 
 procedure TSGContext.MoveInfo(var FormerContext : TSGContext);
 begin
 if FormerContext = nil then
 	Exit;
+DestroyScreen();
 FSelfLink      := FormerContext.FSelfLink;
 FRenderClass   := FormerContext.FRenderClass;
 FWidth         := FormerContext.FWidth;
@@ -425,6 +448,8 @@ FPaintableClass:= FormerContext.FPaintableClass;
 FShowCursor    := FormerContext.FShowCursor;
 FIcon          := FormerContext.FIcon;
 FCursor        := TSGCursor.Copy(FormerContext.FCursor);
+FScreen        := FormerContext.FScreen;
+FormerContext.FScreen    := nil;
 FormerContext.FPaintable := nil;
 end;
 
@@ -600,7 +625,7 @@ WriteLn('TSGContext.ReinitializeRender() : Begining');
 	{$ENDIF}
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResourses();
-SGScreen.DeleteDeviceResourses();
+Screen.DeleteDeviceResourses();
 if FRender <> nil then
 	begin
 	FRender.Context := nil;
@@ -617,7 +642,7 @@ if FRender.CreateContext() then
 FRenderClassChanget := False;
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResourses();
-SGScreen.LoadDeviceResourses();
+Screen.LoadDeviceResourses();
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : End');
 	{$ENDIF}
@@ -780,8 +805,8 @@ StartComputeTimer();
 FInitialized := True;
 if FPaintableClass <> nil then
 	begin
-	if not SGScreen.ContextAssigned() then
-		SGScreen.Load(Self);
+	if not Screen.ContextAssigned() then
+		Screen.Load(Self);
 	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
@@ -849,9 +874,9 @@ if FPaintWithHandlingMessages then
 	Messages();
 	end;
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Before "SGScreen.Paint();"');
+	WriteLn('TSGContext.Paint() : Before "Screen.Paint();"');
 	{$ENDIF}
-SGScreen.Paint();
+Screen.Paint();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
@@ -904,7 +929,7 @@ end;
 
 procedure TSGContext.Resize();
 begin
-SGScreen.Resize();
+Screen.Resize();
 if FPaintable <> nil then
 	FPaintable.Resize();
 end;
@@ -1049,6 +1074,7 @@ FPaintWithHandlingMessages := True;
 FPaintableSettings := nil;
 FPaintableClass := nil;
 FPaintable := nil;
+FScreen := TSGScreen.Create();
 end;
 
 procedure TSGContext.ClearKeys();
@@ -1085,6 +1111,7 @@ end;
 destructor TSGContext.Destroy();
 begin
 Kill();
+DestroyScreen();
 inherited;
 end;
 

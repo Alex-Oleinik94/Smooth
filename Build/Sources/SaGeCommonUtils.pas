@@ -20,7 +20,7 @@ uses
 const
 	SGDrawClassesComboBoxWidth = 300;
 type
-	TSGDrawClasses = class(TSGDrawable)
+	TSGDrawClasses = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -94,7 +94,7 @@ begin
 	SGLog.Sourse('Begin of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
 FComboBox2:=TSGComboBox.Create();
-SGScreen.CreateChild(FComboBox2);
+Screen.CreateChild(FComboBox2);
 FComboBox2.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
 FComboBox2.SelectItem:=0;
 FComboBox2.FUserPointer1:=Self;
@@ -108,7 +108,7 @@ FComboBox2.FDrawClass:=Self;
 FComboBox2.BoundsToNeedBounds();
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	for i:=0 to High(FArClasses) do
-		SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
+		Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	begin
 	FComboBox2.SelectItem := Random(Length(FArClasses));

@@ -26,7 +26,7 @@ uses
 	,SaGeScreenBase
 	;
 type
-	TSGApprFunction = class(TSGDrawable)
+	TSGApprFunction = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -202,7 +202,7 @@ FFont.Loading();
 FFont.ToTexture();
 
 FBackButton := TSGButton.Create();
-SGScreen.CreateChild(FBackButton);
+Screen.CreateChild(FBackButton);
 FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
 FBackButton.BoundsToNeedBounds();
 FBackButton.Caption := 'Назад';
@@ -213,7 +213,7 @@ FBackButton.FUserPointer1:=Self;
 FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
 
 FPanelStart := TSGPanel.Create();
-SGScreen.CreateChild(FPanelStart);
+Screen.CreateChild(FPanelStart);
 FPanelStart.SetMiddleBounds(400,(FFont.FontHeight+4)*8+5);
 FPanelStart.BoundsToNeedBounds();
 FPanelStart.Visible := True;

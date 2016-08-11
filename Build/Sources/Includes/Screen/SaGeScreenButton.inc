@@ -93,41 +93,4 @@ destructor TSGButton.Destroy();
 begin
 inherited Destroy();
 end;
-
-procedure TSGScreen.DeleteDeviceResourses();
-
-procedure PProcessImage(const VImage : TSGImage);
-begin
-if VImage.Texture <> 0 then
-	VImage.DeleteDeviceResourses();
-end;
-
-begin 
-PProcessImage(Font);
-inherited;
-end;
-
-procedure TSGScreen.LoadDeviceResourses();
-
-procedure PProcessImage(const VImage : TSGImage);
-begin
-if not (VImage.ReadyGoToTexture or (VImage.Texture <> 0)) then
-	VImage.Loading();
-end;
-
-begin
-PProcessImage(Font);
-inherited;
-end;
-
-constructor TSGScreen.Create();
-begin
-inherited Create();
-FInProcessing := False;
-end;
-
-destructor TSGScreen.Destroy();
-begin
-inherited;
-end;
 {$ENDIF}

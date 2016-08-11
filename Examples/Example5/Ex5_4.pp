@@ -29,7 +29,7 @@ const
 	QuantityObjects = 15;
 	GravitationConst = 9.81*2.25;
 type
-	TSGExample5_4 = class(TSGDrawable)
+	TSGExample5_4 = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -236,15 +236,15 @@ if FPhysics<>nil then
 	Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 	Render.EndScene();
 	Render.Color3f(1,1,0);
-	SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
+	Screen.Font.DrawFontFromTwoVertex2f('2ms',
 		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
-	SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+Screen.Font.FontHeight));
+	Screen.Font.DrawFontFromTwoVertex2f('0ms',
 		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
-	SGScreen.Font.DrawFontFromTwoVertex2f('Physics Time',
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+Screen.Font.FontHeight));
+	Screen.Font.DrawFontFromTwoVertex2f('Physics Time',
 		SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+Screen.Font.FontHeight-10));
 	end;
 
 KeyControl();

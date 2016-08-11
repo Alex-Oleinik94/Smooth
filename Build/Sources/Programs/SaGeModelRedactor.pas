@@ -19,7 +19,7 @@ uses
 	,SaGeResourseManager
 	;
 type
-	TSGModelRedactor=class(TSGDrawable)
+	TSGModelRedactor=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -91,7 +91,7 @@ var
 begin
 
 Form := TSGForm.Create();
-SGScreen.CreateChild(Form);
+Screen.CreateChild(Form);
 Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,100);
 Form.Caption := 'Загрузка обьекта';
 Form.FUserPointer1:=Self;

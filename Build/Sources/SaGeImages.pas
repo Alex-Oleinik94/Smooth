@@ -42,6 +42,7 @@ type
 		constructor Create(const NewWay:string = '');
 		destructor Destroy();override;
 		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResourses();override;
 			public
 		// А это само изображение ( в оперативной памяти, в виде последовательности байнов, и свойств изобрадения )
 		// В общем это BitMap (битовая карта)
@@ -167,10 +168,19 @@ except
 end;
 end;
 
-procedure TSGImage.DeleteDeviceResourses();
+procedure TSGImage.LoadDeviceResourses();
 begin
+if not (ReadyGoToTexture or (Texture <> 0)) then
+	Loading();
+end;
+
+procedure TSGImage.DeleteDeviceResourses();
+var
+	IsHasTexture : TSGBoolean;
+begin
+IsHasTexture := FTexture <> 0;
 FreeTexture();
-FReadyToGoToTexture := FImage.FBitMap <> nil;
+FReadyToGoToTexture := IsHasTexture and (FImage.FBitMap <> nil);
 end;
 
 constructor TSGTextureBlock.Create(const VContext : ISGContext);

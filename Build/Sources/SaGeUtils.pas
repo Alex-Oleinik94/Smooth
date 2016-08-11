@@ -9,7 +9,6 @@ uses
 	,Classes
 	,SaGeBased
 	,SaGeCommon
-	,SaGeContext
 	,SaGeRenderConstants
 	,SaGeImages
 	,SaGeMesh
@@ -229,6 +228,10 @@ type
 		end;
 
 implementation
+
+uses
+	SaGeContext
+	;
 
 (*====================================================================*)
 (*===========================TSGMultiImage============================*)

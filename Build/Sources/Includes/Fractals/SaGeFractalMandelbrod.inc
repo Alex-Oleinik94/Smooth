@@ -60,7 +60,7 @@ procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadDat
 
 
 type
-	TSGFractalMandelbrodRelease=class(TSGDrawable)
+	TSGFractalMandelbrodRelease=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -519,24 +519,24 @@ ii+={Context.TopShift+}40;
 for i:=0 to QuantityThreads-1 do
 	begin
 	FArProgressBar[i]:=TSGProgressBar.Create;
-	SGScreen.CreateChild(FArProgressBar[i]);
-	SGScreen.LastChild.SetBounds(10,ii,300,20);
-	SGScreen.LastChild.BoundsToNeedBounds();
+	Screen.CreateChild(FArProgressBar[i]);
+	Screen.LastChild.SetBounds(10,ii,300,20);
+	Screen.LastChild.BoundsToNeedBounds();
 	ii+=23;
-	SGScreen.LastChild.Visible:=True;
-	SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
+	Screen.LastChild.Visible:=True;
+	Screen.LastChild.AsProgressBar.ViewProgress:=True;
 	Manda.BeginThread(i,FArProgressBar[i]);
 	end;
 
 LblProcent:=TSGLabel.Create;
-SGScreen.CreateChild(LblProcent);
+Screen.CreateChild(LblProcent);
 LblProcent.SetBounds(10,ii,300,20);
 LblProcent.Caption:='';
 LblProcent.Visible:=True;
 LblProcent.FUserPointer1:=Self;
 
 LabelProcent:=TSGProgressBar.Create;
-SGScreen.CreateChild(LabelProcent);
+Screen.CreateChild(LabelProcent);
 LabelProcent.SetBounds(10,ii,300,20);
 LabelProcent.Color2 := SGVertex4fImport(1,0,0,0.8);
 LabelProcent.Color1 := SGVertex4fImport(0.5,0,0,0.8);
@@ -545,137 +545,137 @@ LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
 
 LabelCoord:=TSGLabel.Create;
-SGScreen.CreateChild(LabelCoord);
-SGScreen.LastChild.SetBounds(10,Render.Height-25,Render.Width div 2,20);
-SGScreen.LastChild.Anchors:=[SGAnchBottom];
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.AsLabel.TextPosition:=False;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(LabelCoord);
+Screen.LastChild.SetBounds(10,Render.Height-25,Render.Width div 2,20);
+Screen.LastChild.Anchors:=[SGAnchBottom];
+Screen.LastChild.Caption:='';
+Screen.LastChild.Visible:=True;
+Screen.LastChild.AsLabel.TextPosition:=False;
+Screen.LastChild.FUserPointer1:=Self;
 
 ScreenshotPanel:=TSGPanel.Create;
-SGScreen.CreateChild(ScreenshotPanel);
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-30,130+140+10,25);
-SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(ScreenshotPanel);
+Screen.LastChild.Caption:='';
+Screen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-30,130+140+10,25);
+Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGButton.Create);
-SGScreen.LastChild.LastChild.SetBounds(130,5,140,20);
-SGScreen.LastChild.LastChild.Caption:='Сохранить';
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.AsButton.OnChange:=TSGComponentProcedure(@SaveImage);
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGButton.Create);
+Screen.LastChild.LastChild.SetBounds(130,5,140,20);
+Screen.LastChild.LastChild.Caption:='Сохранить';
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.AsButton.OnChange:=TSGComponentProcedure(@SaveImage);
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGEdit.Create);
-SGScreen.LastChild.LastChild.SetBounds(5,5,120,20);
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.LastChild.FUserPointer2:=SGScreen.LastChild.Children[SGScreen.LastChild.ChildCount()-1];
-(SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
-(SGScreen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
-SGScreen.LastChild.LastChild.Caption:='4096';
+Screen.LastChild.CreateChild(TSGEdit.Create);
+Screen.LastChild.LastChild.SetBounds(5,5,120,20);
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.LastChild.FUserPointer2:=Screen.LastChild.Children[Screen.LastChild.ChildCount()-1];
+(Screen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
+(Screen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
+Screen.LastChild.LastChild.Caption:='4096';
 
-SGScreen.CreateChild(TSGComboBox.Create);
-SGScreen.LastChild.SetBounds(Render.Width-50-125+45,5{+Context.TopShift},120,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
+Screen.CreateChild(TSGComboBox.Create);
+Screen.LastChild.SetBounds(Render.Width-50-125+45,5{+Context.TopShift},120,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to High(VNameThemes) do
-	SGScreen.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-ColorComboBox:=SGScreen.LastChild.AsComboBox;
-SGScreen.LastChild.FUserPointer1:=Self;
+	Screen.LastChild.AsComboBox.CreateItem(VNameThemes[i]);
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@ColorComboBoxProcedure);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+ColorComboBox:=Screen.LastChild.AsComboBox;
+Screen.LastChild.FUserPointer1:=Self;
 
 TypeComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(TypeComboBox);
-SGScreen.LastChild.SetBounds(Render.Width-50-125+45-185,5,180,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.AsComboBox.CreateItem('Множество Жюлиа');
-SGScreen.LastChild.AsComboBox.CreateItem('Модель Мандельброта');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TypeComboBoxProcedure);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(TypeComboBox);
+Screen.LastChild.SetBounds(Render.Width-50-125+45-185,5,180,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.AsComboBox.CreateItem('Множество Жюлиа');
+Screen.LastChild.AsComboBox.CreateItem('Модель Мандельброта');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TypeComboBoxProcedure);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+Screen.LastChild.FUserPointer1:=Self;
 
-SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(Render.Width-50-125-185+45-105,5,100,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Сброс зума';
-ZumButton:=SGScreen.LastChild.AsButton;
+Screen.CreateChild(TSGButton.Create);
+Screen.LastChild.SetBounds(Render.Width-50-125-185+45-105,5,100,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='Сброс зума';
+ZumButton:=Screen.LastChild.AsButton;
 ZumButton.OnChange:=TSGComponentProcedure(@ZumButtonOnChange);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.FUserPointer1:=Self;
 
-SGScreen.CreateChild(TSGButton.Create);
-SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='Установ. тчк.';
-ButtonSelectZNumber:=SGScreen.LastChild.AsButton;
+Screen.CreateChild(TSGButton.Create);
+Screen.LastChild.SetBounds(Render.Width-50-125-185-105+45-125,5{+Context.TopShift},120,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='Установ. тчк.';
+ButtonSelectZNumber:=Screen.LastChild.AsButton;
 ButtonSelectZNumber.OnChange:=TSGComponentProcedure(@ButtonSelectZNumberOnChange);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.FUserPointer1:=Self;
 
 StepenComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(StepenComboBox);
-SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.AsComboBox.SelectItem:=1;
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@StepenComboBoxProcedure);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(StepenComboBox);
+Screen.LastChild.SetBounds(Render.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='';
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.AsComboBox.SelectItem:=1;
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@StepenComboBoxProcedure);
+Screen.LastChild.FUserPointer1:=Self;
 i:=1;
 while i<=100 do
 	begin
-	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(i)),nil,i);
+	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(i)),nil,i);
 	i+=1;
 	end;
 
 QuantityRecComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(QuantityRecComboBox);
-SGScreen.LastChild.SetBounds(Render.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@QuantityRecComboBoxProcedure);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(QuantityRecComboBox);
+Screen.LastChild.SetBounds(Render.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Caption:='';
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@QuantityRecComboBoxProcedure);
+Screen.LastChild.FUserPointer1:=Self;
 i:=6;
 while i<=13 do
 	begin
-	SGScreen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)),nil,2**i);
+	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)),nil,2**i);
 	if i=8 then
 		begin
-		SGScreen.LastChild.AsComboBox.SelectItem := QuantityRecComboBox.ItemsCount - 1;
+		Screen.LastChild.AsComboBox.SelectItem := QuantityRecComboBox.ItemsCount - 1;
 		end;
 	i+=1;
 	end;
 
 FCurveInfoLbl:=TSGLabel.Create();
-SGScreen.CreateChild(FCurveInfoLbl);
-SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30-25,-(-(130+140+10)-150-5),20);
-SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
+Screen.CreateChild(FCurveInfoLbl);
+Screen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30-25,-(-(130+140+10)-150-5),20);
+Screen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
-SGScreen.CreateChild(FBezierCurveKadrProgressBar);
-SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,-(-(130+140+10)-150-5),20);
-SGScreen.LastChild.AsProgressBar.ViewProgress:=True;
-SGScreen.LastChild.AsProgressBar.Color1:=SGVertex4fImport(1,1,0,0.7);
-SGScreen.LastChild.AsProgressBar.Color2:=SGVertex4fImport(1,1/3,0,0.9);
-SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
+Screen.CreateChild(FBezierCurveKadrProgressBar);
+Screen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,-(-(130+140+10)-150-5),20);
+Screen.LastChild.AsProgressBar.ViewProgress:=True;
+Screen.LastChild.AsProgressBar.Color1:=SGVertex4fImport(1,1,0,0.7);
+Screen.LastChild.AsProgressBar.Color2:=SGVertex4fImport(1,1/3,0,0.9);
+Screen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
 
 FButtonEnableCurve:=TSGButton.Create();
-SGScreen.CreateChild(FButtonEnableCurve);
-SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,150,20);
-SGScreen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
-SGScreen.LastChild.Caption:='On видео панель';
+Screen.CreateChild(FButtonEnableCurve);
+Screen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30,150,20);
+Screen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
+Screen.LastChild.Caption:='On видео панель';
 FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.FUserPointer1:=Self;
 
 FCurvePointPanel:=TSGPanel.Create();
-SGScreen.CreateChild(FCurvePointPanel);
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Render.Width-10-(140+10),Render.Height-130-130,140+10,125);
-SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FCurvePointPanel);
+Screen.LastChild.Caption:='';
+Screen.LastChild.SetBounds(Render.Width-10-(140+10),Render.Height-130-130,140+10,125);
+Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.FUserPointer1:=Self;
 
 FCurvePointPanel.CreateChild(TSGComboBox.Create);
 FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
@@ -688,12 +688,12 @@ FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
 FCurvePointPanel.LastChild.FUserPointer1:=Self;
 
 FBezierCurvePanel:=TSGPanel.Create();
-SGScreen.CreateChild(FBezierCurvePanel);
-SGScreen.LastChild.Caption:='';
-SGScreen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125);
-SGScreen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.FUserPointer1:=Self;
+Screen.CreateChild(FBezierCurvePanel);
+Screen.LastChild.Caption:='';
+Screen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125);
+Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.FUserPointer1:=Self;
 
 FBezierCurvePanel.CreateChild(TSGButton.Create());
 FBezierCurvePanel.LastChild.AsButton.Caption:='On режим добавления точек';
@@ -718,13 +718,13 @@ FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
 FBezierCurveEditKadr:=TSGEdit.Create();
-SGScreen.LastChild.CreateChild(FBezierCurveEditKadr);
-SGScreen.LastChild.LastChild.SetBounds(123,47,137,20);
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
-(SGScreen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntionVideo);
-(SGScreen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
-SGScreen.LastChild.LastChild.Caption:='200';
+Screen.LastChild.CreateChild(FBezierCurveEditKadr);
+Screen.LastChild.LastChild.SetBounds(123,47,137,20);
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
+(Screen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntionVideo);
+(Screen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
+Screen.LastChild.LastChild.Caption:='200';
 
 FBezierCurvePanel.CreateChild(TSGLabel.Create());
 FBezierCurvePanel.LastChild.Caption:='Примерно займет времени: дохрена!';
@@ -803,74 +803,74 @@ VideoPanel:=nil;
 fmStartPanel:=nil;
 FCurveInfoLbl:=nil;
 
-SGScreen.CreateChild(TSGPanel.Create);
-SGScreen.LastChild.SetMiddleBounds(300,Render.Height-200);
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.AsPanel.ViewLines:=False;
-SGScreen.LastChild.AsPanel.ViewQuad:=False;
-SGScreen.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.FUserPointer1:=Self;
-fmStartPanel:=SGScreen.LastChild;
+Screen.CreateChild(TSGPanel.Create);
+Screen.LastChild.SetMiddleBounds(300,Render.Height-200);
+Screen.LastChild.Visible:=True;
+Screen.LastChild.AsPanel.ViewLines:=False;
+Screen.LastChild.AsPanel.ViewQuad:=False;
+Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.FUserPointer1:=Self;
+fmStartPanel:=Screen.LastChild;
 
-SGScreen.LastChild.CreateChild(TSGLabel.Create);
-SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.Caption:='Количество потоков:';
-SGScreen.LastChild.LastChild.SetBounds(5,5,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGLabel.Create);
+Screen.LastChild.LastChild.Visible:=True;
+Screen.LastChild.LastChild.Caption:='Количество потоков:';
+Screen.LastChild.LastChild.SetBounds(5,5,Screen.LastChild.Width-10,20);
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGLabel.Create);
-SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.Caption:='Разрешение текстуры:';
-SGScreen.LastChild.LastChild.SetBounds(5,55,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGLabel.Create);
+Screen.LastChild.LastChild.Visible:=True;
+Screen.LastChild.LastChild.Caption:='Разрешение текстуры:';
+Screen.LastChild.LastChild.SetBounds(5,55,Screen.LastChild.Width-10,20);
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGButton.Create);
-SGScreen.LastChild.LastChild.SetBounds(75,115,140,20);
-SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.Caption:='Запуск';
-SGScreen.LastChild.LastChild.OnChange:=TSGComponentProcedure(@BeginInitMand);
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGButton.Create);
+Screen.LastChild.LastChild.SetBounds(75,115,140,20);
+Screen.LastChild.LastChild.Visible:=True;
+Screen.LastChild.LastChild.Caption:='Запуск';
+Screen.LastChild.LastChild.OnChange:=TSGComponentProcedure(@BeginInitMand);
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGComboBox.Create);
-SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.SetBounds(5,80,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=4;
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('64');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('128');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('256');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('512');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('1024');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('2048');
-SGScreen.LastChild.LastChild.BoundsToNeedBounds;
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGComboBox.Create);
+Screen.LastChild.LastChild.Visible:=True;
+Screen.LastChild.LastChild.SetBounds(5,80,Screen.LastChild.Width-10,20);
+Screen.LastChild.LastChild.AsComboBox.SelectItem:=4;
+Screen.LastChild.LastChild.AsComboBox.CreateItem('64');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('128');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('256');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('512');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('1024');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('2048');
+Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-SGScreen.LastChild.CreateChild(TSGComboBox.Create);
-SGScreen.LastChild.LastChild.Visible:=True;
-SGScreen.LastChild.LastChild.SetBounds(5,30,SGScreen.LastChild.Width-10,20);
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('1');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('2');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('3');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('4');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('6');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('8');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('10');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('12');
-SGScreen.LastChild.LastChild.AsComboBox.CreateItem('16');
-SGScreen.LastChild.LastChild.BoundsToNeedBounds();
-SGScreen.LastChild.LastChild.FUserPointer1:=Self;
+Screen.LastChild.CreateChild(TSGComboBox.Create);
+Screen.LastChild.LastChild.Visible:=True;
+Screen.LastChild.LastChild.SetBounds(5,30,Screen.LastChild.Width-10,20);
+Screen.LastChild.LastChild.AsComboBox.CreateItem('1');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('2');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('3');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('4');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('6');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('8');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('10');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('12');
+Screen.LastChild.LastChild.AsComboBox.CreateItem('16');
+Screen.LastChild.LastChild.BoundsToNeedBounds();
+Screen.LastChild.LastChild.FUserPointer1:=Self;
 case SGGetCoreCount() of 
-2:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=1;
-3:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=2;
-4:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=3;
-6:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=4;
-8:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=5;
-10:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=6;
-12:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=7;
-16:SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=8;
-else SGScreen.LastChild.LastChild.AsComboBox.SelectItem:=3;
+2:Screen.LastChild.LastChild.AsComboBox.SelectItem:=1;
+3:Screen.LastChild.LastChild.AsComboBox.SelectItem:=2;
+4:Screen.LastChild.LastChild.AsComboBox.SelectItem:=3;
+6:Screen.LastChild.LastChild.AsComboBox.SelectItem:=4;
+8:Screen.LastChild.LastChild.AsComboBox.SelectItem:=5;
+10:Screen.LastChild.LastChild.AsComboBox.SelectItem:=6;
+12:Screen.LastChild.LastChild.AsComboBox.SelectItem:=7;
+16:Screen.LastChild.LastChild.AsComboBox.SelectItem:=8;
+else Screen.LastChild.LastChild.AsComboBox.SelectItem:=3;
 end;
 
 FTNRF:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
@@ -998,7 +998,7 @@ if MandaInitialized then
 		for i:=0 to QuantityThreads-1 do
 			begin
 			FArProgressBar[i].Visible:=False;
-			//SGScreen.Children[CID-QuantityThreads+i+2].AsProgressBar.Visible:=False;
+			//Screen.Children[CID-QuantityThreads+i+2].AsProgressBar.Visible:=False;
 			end;
 		
 		FDateTime.Get();

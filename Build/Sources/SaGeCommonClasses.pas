@@ -158,6 +158,7 @@ type
 	PISGContext = ^ ISGContext;
 	ISGContext = interface(ISGCustomContext)
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
+		function  GetScreen() : TSGPointer;
 		procedure SetSelfLink(const VLink : PISGContext);
 		function  GetSelfLink() : PISGContext;
 		procedure SetRenderClass(const NewRender : TSGPointer);
@@ -168,6 +169,7 @@ type
 		procedure Minimize();
 		procedure Maximize();
 		
+		property Screen : TSGPointer read GetScreen;
 		property NewContext : TSGPointer write SetNewContext;
 		property RenderClass : TSGPointer write SetRenderClass;
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
@@ -204,7 +206,7 @@ type
 		constructor Create();override;deprecated;
 		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);virtual;
-			private
+			protected
 		FContext : PISGContext;
 			public
 		procedure SetContext(const VContext : ISGContext);virtual;
@@ -225,7 +227,7 @@ type
 		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);virtual;
 		class function ClassName() : TSGString; override;
-			private
+			protected
 		FContext : PISGContext;
 			public
 		procedure SetContext(const VContext : ISGContext);virtual;

@@ -63,7 +63,7 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGasDiffusionReliefRedactor = class(TSGDrawable)
+	TSGGasDiffusionReliefRedactor = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;
@@ -966,7 +966,7 @@ if FFont = nil then
 if FPrimetiveTypeButtonPoints = nil then
 	begin
 	FPrimetiveTypeButtonPoints := TSGButton.Create();
-	SGScreen.CreateChild(FPrimetiveTypeButtonPoints);
+	Screen.CreateChild(FPrimetiveTypeButtonPoints);
 	FPrimetiveTypeButtonPoints.Caption := 'Управление точками';
 	FPrimetiveTypeButtonPoints.SetBounds(Context.Width - a - 10, Context.Height div 2 + 0, a, 27);
 	FPrimetiveTypeButtonPoints.BoundsToNeedBounds();
@@ -979,7 +979,7 @@ FPrimetiveTypeButtonPoints.Active := False;
 if FPrimetiveTypeButtonLines = nil then
 	begin
 	FPrimetiveTypeButtonLines := TSGButton.Create();
-	SGScreen.CreateChild(FPrimetiveTypeButtonLines);
+	Screen.CreateChild(FPrimetiveTypeButtonLines);
 	FPrimetiveTypeButtonLines.Caption := 'Управление линиями';
 	FPrimetiveTypeButtonLines.SetBounds(Context.Width - a - 10, Context.Height div 2 + 30, a, 27);
 	FPrimetiveTypeButtonLines.BoundsToNeedBounds();
@@ -992,7 +992,7 @@ FPrimetiveTypeButtonLines.Active := True;
 if FPrimetiveTypeButtonPolygones = nil then
 	begin
 	FPrimetiveTypeButtonPolygones := TSGButton.Create();
-	SGScreen.CreateChild(FPrimetiveTypeButtonPolygones);
+	Screen.CreateChild(FPrimetiveTypeButtonPolygones);
 	FPrimetiveTypeButtonPolygones.Caption := 'Управление полигонами';
 	FPrimetiveTypeButtonPolygones.SetBounds(Context.Width - a - 10, Context.Height div 2 + 60, a, 27);
 	FPrimetiveTypeButtonPolygones.BoundsToNeedBounds();
@@ -1005,7 +1005,7 @@ FPrimetiveTypeButtonPolygones.Active := True;
 if FCutPolygoneButton = nil then
 	begin
 	FCutPolygoneButton := TSGButton.Create();
-	SGScreen.CreateChild(FCutPolygoneButton);
+	Screen.CreateChild(FCutPolygoneButton);
 	FCutPolygoneButton.Caption := 'Разрезать полигон';
 	FCutPolygoneButton.SetBounds(Context.Width - a - 10, Context.Height div 2 + 90, a, 27);
 	FCutPolygoneButton.BoundsToNeedBounds();

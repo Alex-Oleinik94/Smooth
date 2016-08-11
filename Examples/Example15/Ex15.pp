@@ -39,7 +39,7 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample15=class(TSGDrawable)
+	TSGExample15=class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -201,15 +201,15 @@ end;
 procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
 begin
 VButton := TSGButton.Create();
-SGScreen.CreateChild(VButton);
-SGScreen.LastChild.Font := FFont;
-SGScreen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
-SGScreen.LastChild.BoundsToNeedBounds();
-SGScreen.LastChild.UserPointer:=Self;
-SGScreen.LastChild.Anchors:=[SGAnchRight];
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption := VCaption;
-(SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+Screen.CreateChild(VButton);
+Screen.LastChild.Font := FFont;
+Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
+Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.UserPointer:=Self;
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Visible:=True;
+Screen.LastChild.Caption := VCaption;
+(Screen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
 end;
 
 var
@@ -314,13 +314,13 @@ if Render.SupporedShaders() then
 	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
 	FCountLabel := TSGLabel.Create();
-	SGScreen.CreateChild(FCountLabel);
-	SGScreen.LastChild.Font := FFont;
-	SGScreen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
-	SGScreen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Anchors:=[SGAnchRight];
-	SGScreen.LastChild.Visible := True;
+	Screen.CreateChild(FCountLabel);
+	Screen.LastChild.Font := FFont;
+	Screen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+	Screen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	Screen.LastChild.BoundsToNeedBounds();
+	Screen.LastChild.Anchors:=[SGAnchRight];
+	Screen.LastChild.Visible := True;
 	
 	FStoneImageD := TSGImage.Create('Ex6_D.jpg');
 	FStoneImageD.Context := Context;
@@ -542,12 +542,12 @@ else
 	Render.InitMatrixMode(SG_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := SGScreen.Font.StringLength(WarningString1);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
+	VStringLength := Screen.Font.StringLength(WarningString1);
+	Screen.Font.DrawFontFromTwoVertex2f(WarningString1,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
-	VStringLength := SGScreen.Font.StringLength(WarningString2);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
+	VStringLength := Screen.Font.StringLength(WarningString2);
+	Screen.Font.DrawFontFromTwoVertex2f(WarningString2,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;

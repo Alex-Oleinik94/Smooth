@@ -328,7 +328,7 @@ begin
 {$IFDEF GLUT_DEBUG}
 	WriteLn('TSGContextGLUT.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
-SCR := SGScreen.UpDateScreen();
+SCR := Screen.UpDateScreen();
 UpdateTimer(); 
 {$IFDEF GLUT_DEBUG}
 	WriteLn('TSGContextGLUT.Paint() : Before "Render.Clear(...);"');
@@ -348,7 +348,7 @@ if FPaintable <> nil then
 {$IFDEF GLUT_DEBUG}
 	WriteLn('TSGContextGLUT.Paint() : Before "SGScreen.Paint();"');
 	{$ENDIF}
-SGScreen.CustomPaint(SCR);
+Screen.CustomPaint(SCR);
 {$IFDEF GLUT_DEBUG}
 	WriteLn('TSGContextGLUT.Paint() : Before "SwapBuffers();"');
 	{$ENDIF}

@@ -34,7 +34,7 @@ type
 		FFractal:TSGFractal;
 		end;
 	
-	TSGFractal = class(TSGDrawable)
+	TSGFractal = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
@@ -265,28 +265,28 @@ end;
 procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
 FSizeLabel:=TSGLabel.Create;
-SGScreen.CreateChild(FSizeLabel);
-SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.Anchors:=Anch;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FSizeLabel);
+Screen.LastChild.SetBounds(a,b,c,d);
+Screen.LastChild.Anchors:=Anch;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 FSizeLabel.TextPosition:=False;
 end;
 
 procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
 FEffectsComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(FEffectsComboBox);
-SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.Anchors:=Anch;
-SGScreen.LastChild.AsComboBox.CreateItem('Нормали и цвета');
-SGScreen.LastChild.AsComboBox.CreateItem('Только нормали');
-SGScreen.LastChild.AsComboBox.CreateItem('Только цвета');
-SGScreen.LastChild.AsComboBox.CreateItem('Ничего нету');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxEffProc);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FEffectsComboBox);
+Screen.LastChild.SetBounds(a,b,c,d);
+Screen.LastChild.Anchors:=Anch;
+Screen.LastChild.AsComboBox.CreateItem('Нормали и цвета');
+Screen.LastChild.AsComboBox.CreateItem('Только нормали');
+Screen.LastChild.AsComboBox.CreateItem('Только цвета');
+Screen.LastChild.AsComboBox.CreateItem('Ничего нету');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxEffProc);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 end;
 
 procedure TSG3DFractal.InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
@@ -294,15 +294,15 @@ begin
 if FProjectionComboBox<>nil then
 	Exit;
 FProjectionComboBox:=TSGComboBox.Create;
-SGScreen.CreateChild(FProjectionComboBox);
-SGScreen.LastChild.SetBounds(a,b,c,d);
-SGScreen.LastChild.Anchors:=Anch;
-SGScreen.LastChild.AsComboBox.CreateItem('Перспектива');
-SGScreen.LastChild.AsComboBox.CreateItem('Ортогонал');
-SGScreen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProjProc);
-SGScreen.LastChild.AsComboBox.SelectItem:=0;
-SGScreen.LastChild.FUserPointer1:=Self;
-SGScreen.LastChild.Visible:=True;
+Screen.CreateChild(FProjectionComboBox);
+Screen.LastChild.SetBounds(a,b,c,d);
+Screen.LastChild.Anchors:=Anch;
+Screen.LastChild.AsComboBox.CreateItem('Перспектива');
+Screen.LastChild.AsComboBox.CreateItem('Ортогонал');
+Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProjProc);
+Screen.LastChild.AsComboBox.SelectItem:=0;
+Screen.LastChild.FUserPointer1:=Self;
+Screen.LastChild.Visible:=True;
 end;
 
 procedure TSG3DFractal.ClearMesh;inline;
