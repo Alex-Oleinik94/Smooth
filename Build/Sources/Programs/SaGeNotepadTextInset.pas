@@ -258,15 +258,15 @@ Result := False;
 if not FCursorOnComponent then
 	Exit;
 CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealLeft, FRealTop);
-CursorPos.x -= Font.StringLength(SGStr(CountLines()));
+CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
-Result := (Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
+Result := (Skin.Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
 		  (5 <= CursorPos.x);
 end;
 
 procedure PutCursor();
 begin
-GoToPosition(Line, Font.CursorPlace(FFile[Line].FString, CursorPos.x - 5));
+GoToPosition(Line, Skin.Font.CursorPlace(FFile[Line].FString, CursorPos.x - 5));
 end;
 
 procedure ProcessCursor();
@@ -458,7 +458,7 @@ var
 	Difference, DifferenceOld, Middle : TSGFloat;
 begin
 DifferenceOld := Abs(FEnd - FBegin);
-Difference := Height / Font.FontHeight;
+Difference := Height / Skin.Font.FontHeight;
 if Abs(Difference - DifferenceOld) > SGZero then
 	begin
 	Middle := (FEnd + FBegin) / 2;
@@ -508,11 +508,11 @@ var
 	MaxLinesShift : TSGLongWord;
 	Alpha, Shift : TSGFloat;
 begin
-MaxLinesShift := Font.StringLength(SGStr(CountLines())) + 5;
+MaxLinesShift := Skin.Font.StringLength(SGStr(CountLines())) + 5;
 ii := Trunc(FBegin);
 Vertex := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
 Shift := Abs(FBegin - ii);
-Vertex.y -= Shift * Font.FontHeight;
+Vertex.y -= Shift * Skin.Font.FontHeight;
 for i := ii to Trunc(FEnd) + 1 do
 	begin
 	if i >= CountLines() then
@@ -526,39 +526,39 @@ for i := ii to Trunc(FEnd) + 1 do
 		Alpha := 1;
 	
 	Render.Color4f(0.9,0.9,0.9,Alpha);
-	Font.DrawFontFromTwoVertex2f(
+	Skin.Font.DrawFontFromTwoVertex2f(
 		SGStr(i+1),
 		SGVertex2fImport(
 			Vertex.x,
-			Vertex.y + (i - ii) * Font.FontHeight),
+			Vertex.y + (i - ii) * Skin.Font.FontHeight),
 		SGVertex2fImport(
 			Vertex.x + MaxLinesShift,
-			Vertex.y + (i - ii + 1) * Font.FontHeight),
+			Vertex.y + (i - ii + 1) * Skin.Font.FontHeight),
 		False);
 	if FFile[i].FColors <> nil then
 		begin
-		Font.DrawFontFromTwoVertex2fAndColorList(
+		Skin.Font.DrawFontFromTwoVertex2fAndColorList(
 			FFile[i].FString,
 			FFile[i].FColors,
 			SGVertex2fImport(
 				Vertex.x + MaxLinesShift,
-				Vertex.y + (i - ii) * Font.FontHeight),
+				Vertex.y + (i - ii) * Skin.Font.FontHeight),
 			SGVertex2fImport(
 				Vertex.x + Width,
-				Vertex.y + (i - ii + 1) * Font.FontHeight),
+				Vertex.y + (i - ii + 1) * Skin.Font.FontHeight),
 			False);
 		end
 	else
 		begin
 		Render.Color4f(1,1,1,Alpha);
-		Font.DrawFontFromTwoVertex2f(
+		Skin.Font.DrawFontFromTwoVertex2f(
 			FFile[i].FString,
 			SGVertex2fImport(
 				Vertex.x + MaxLinesShift,
-				Vertex.y + (i - ii) * Font.FontHeight),
+				Vertex.y + (i - ii) * Skin.Font.FontHeight),
 			SGVertex2fImport(
 				Vertex.x + Width,
-				Vertex.y + (i - ii + 1) * Font.FontHeight),
+				Vertex.y + (i - ii + 1) * Skin.Font.FontHeight),
 			False);
 		UpdateLineColor(i);
 		end;
@@ -568,15 +568,15 @@ for i := ii to Trunc(FEnd) + 1 do
 		if FTextCursor.FColumn < iii then
 			iii := FTextCursor.FColumn;
 		Render.Color4f(0,1,0,1);
-		Font.DrawCursorFromTwoVertex2f(
+		Skin.Font.DrawCursorFromTwoVertex2f(
 			FFile[i].FString,
 			iii,
 			SGVertex2fImport(
 				Vertex.x + MaxLinesShift,
-				Vertex.y + (i - ii) * Font.FontHeight),
+				Vertex.y + (i - ii) * Skin.Font.FontHeight),
 			SGVertex2fImport(
 				Vertex.x + Width,
-				Vertex.y + (i - ii + 1) * Font.FontHeight),
+				Vertex.y + (i - ii + 1) * Skin.Font.FontHeight),
 			False,
 			True,
 			2);

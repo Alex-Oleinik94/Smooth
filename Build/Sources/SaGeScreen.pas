@@ -126,14 +126,12 @@ end;
 procedure TSGScreen.DeleteDeviceResourses();
 begin 
 FSkin.DeleteDeviceResourses();
-Font.DeleteDeviceResourses();
 inherited;
 end;
 
 procedure TSGScreen.LoadDeviceResourses();
 begin
 FSkin.LoadDeviceResourses();
-Font.LoadDeviceResourses();
 inherited;
 end;
 
@@ -151,17 +149,11 @@ end;
 procedure TSGScreen.Load(const VContext : ISGContext);
 begin
 {$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
-
-SetContext(VContext);
+Context := VContext;
 FSkin := TSGScreenSkin.CreateRandom(Context);
 SetShifts(0, 0, 0, 0);
 Visible := True;
 Resize();
-
-Font := TSGFont.Create(SGFontDirectory + Slash + 'Tahoma.sgf');
-Font.SetContext(VContext);
-Font.Loading();
-
 {$IFDEF ANDROID}SGLog.Sourse('Leaving "SGScreenLoad".');{$ENDIF}
 end;
 

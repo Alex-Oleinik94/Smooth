@@ -139,7 +139,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			SGVertex4fImport(
 				1,1,1,0.3*FVisibleTimer)*1.3);
 		Render.Color4f(1,1,1,FVisibleTimer);
-		Font.DrawFontFromTwoVertex2f(FCaption,
+		Skin.Font.DrawFontFromTwoVertex2f(FCaption,
 			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
 			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
 		end;

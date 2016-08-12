@@ -101,8 +101,8 @@ if not Result then
 		TSGGenAlg(S.FUserPointer1).FXl.Caption:=SGStringToPChar('f('+SGPCharToString(Ex.Variable)+')=');
 	Result:=(Ex.ErrorsQuantity=0) and (Length(Ex.Variables)<=1);
 	Ex.Destroy;
-	TSGGenAlg(S.FUserPointer1).FXl.Width:=TSGGenAlg(S.FUserPointer1).FXl.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
-	TSGGenAlg(S.FUserPointer1).FXl.Left:=258-TSGGenAlg(S.FUserPointer1).FXl.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
+	TSGGenAlg(S.FUserPointer1).FXl.Width:=TSGGenAlg(S.FUserPointer1).FXl.Skin.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
+	TSGGenAlg(S.FUserPointer1).FXl.Left:=258-TSGGenAlg(S.FUserPointer1).FXl.Skin.Font.StringLength(TSGGenAlg(S.FUserPointer1).FXl.Caption);
 	end
 else
 	begin
@@ -185,9 +185,9 @@ with TSGGenAlg(Button.FUserPointer1) do
 	FLPoint.Caption:=SGStringToPChar('('+SGStrReal(FFindPoint,5)+','+SGStrReal(FResultFP,5)+')');
 	FNB.Visible:=True;
 	FLPoint.SetBounds(
-		Render.Width-5-FLPoint.Font.StringLength(FLPoint.Caption),
+		Render.Width-5-FLPoint.Skin.Font.StringLength(FLPoint.Caption),
 		Render.Height-25,
-		FLPoint.Font.StringLength(FLPoint.Caption),
+		FLPoint.Skin.Font.StringLength(FLPoint.Caption),
 		21);
 	FLPoint.Visible:=True;
 	FLPoint.BoundsToNeedBounds;

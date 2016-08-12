@@ -235,7 +235,7 @@ var
 begin
 Result := 0;
 for i := Low(Renders) to High(Renders) do
-	ProcessValue(Font.StringLength(Renders[i].FName) + ShiftWidth, Result);
+	ProcessValue(Skin.Font.StringLength(Renders[i].FName) + ShiftWidth, Result);
 end;
 
 function CalculateContextsComboBoxWidth() : TSGLongWord;
@@ -244,15 +244,15 @@ var
 begin
 Result := 0;
 for i := Low(Contexts) to High(Contexts) do
-	ProcessValue(Font.StringLength(Contexts[i].FName) + ShiftWidth, Result);
+	ProcessValue(Skin.Font.StringLength(Contexts[i].FName) + ShiftWidth, Result);
 end;
 
 function CalculateWidth() : TSGLongWord;
 begin
 Result := 0;
-ProcessValue(Font.StringLength(FCloseButton.Caption) + ShiftWidth, Result);
-ProcessValue(Font.StringLength(FVersionLabel.Caption) + ShiftWidth, Result);
-ProcessValue(Font.StringLength(FCaptionLabel.Caption) + ShiftWidth, Result);
+ProcessValue(Skin.Font.StringLength(FCloseButton.Caption) + ShiftWidth, Result);
+ProcessValue(Skin.Font.StringLength(FVersionLabel.Caption) + ShiftWidth, Result);
+ProcessValue(Skin.Font.StringLength(FCaptionLabel.Caption) + ShiftWidth, Result);
 ProcessValue(CalculateContextsComboBoxWidth(), Result);
 ProcessValue(CalculateRendersComboBoxWidth(), Result);
 end;
@@ -273,7 +273,7 @@ FContextsComboBox.BoundsToNeedBounds();
 FRendersComboBox.SetMiddleBounds(CalculateRendersComboBoxWidth(), FontHeight);
 FRendersComboBox.Top := (FontHeight * 2 + HeightShift) * 3 + (FontHeight div 4);
 FRendersComboBox.BoundsToNeedBounds();
-FCloseButton.SetMiddleBounds(Font.StringLength(FCloseButton.Caption) + ShiftWidth, FontHeight);
+FCloseButton.SetMiddleBounds(Skin.Font.StringLength(FCloseButton.Caption) + ShiftWidth, FontHeight);
 FCloseButton.Top := (FontHeight * 2 + HeightShift) * 4 + (FontHeight div 4);
 FCloseButton.BoundsToNeedBounds();
 inherited;

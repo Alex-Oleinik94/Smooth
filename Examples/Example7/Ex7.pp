@@ -218,7 +218,7 @@ FPanelStart.SetMiddleBounds(400,(FFont.FontHeight+4)*8+5);
 FPanelStart.BoundsToNeedBounds();
 FPanelStart.Visible := True;
 FPanelStart.Active := True;
-FPanelStart.Font := FFont;
+FPanelStart.Skin := FPanelStart.Skin.CreateDependentSkinWithAnotherFont(FFont);
 
 FPanelStart.CreateChild(TSGLabel.Create());
 FPanelStart.LastChild.SetBounds(5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2);

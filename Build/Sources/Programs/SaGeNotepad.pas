@@ -267,7 +267,7 @@ begin
 if CountInsets() >0 then
 	for i := 0 to CountInsets() - 1 do
 		begin
-		FInsets[i].SetBounds(0, FFont.FontHeight + 10, Width, Height - (FFont.FontHeight + 10));
+		FInsets[i].SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
 		FInsets[i].BoundsToNeedBounds();
 		FInsets[i].FromResize();
 		end;
@@ -331,20 +331,20 @@ if CountInsets() > 0 then
 				Vertex.y + 1),
 			SGVertex3fImport(
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
-				Vertex.y + FFont.FontHeight + 10 - 3),
+				Vertex.y + Skin.Font.FontHeight + 10 - 3),
 			5,10,
 			Color1,
 			Color2,
 			True);
 		Render.Color4f(1,1,1,1);
-		Font.DrawFontFromTwoVertex2f(
+		Skin.Font.DrawFontFromTwoVertex2f(
 			FInsets[i].Title,
 			SGVertex2fImport(
 				Vertex.x + Shift,
 				Vertex.y + 1),
 			SGVertex2fImport(
 				Vertex.x + Shift + FInsets[i].TitleWidth + 10,
-				Vertex.y + FFont.FontHeight + 10  - 3));
+				Vertex.y + Skin.Font.FontHeight + 10  - 3));
 		Shift += FInsets[i].TitleWidth + 10 + 2;
 		end;
 	end;
@@ -358,7 +358,7 @@ end;
 function TSGNInset.GetTitleWidth() : TSGLongWord;
 begin
 if FTitleWidth = 0 then
-	FTitleWidth := Font.StringLength(FTitle);
+	FTitleWidth := Skin.Font.StringLength(FTitle);
 Result := FTitleWidth;
 end;
 
@@ -421,7 +421,7 @@ SetLength(FInsets, CountInsets() + 1);
 FInsets[High(FInsets)] := VInset;
 CreateChild(VInset);
 VInset.Owner := Self;
-VInset.SetBounds(0, FFont.FontHeight + 10, Width, Height - (FFont.FontHeight + 10));
+VInset.SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
 VInset.BoundsToNeedBounds();
 end;
 

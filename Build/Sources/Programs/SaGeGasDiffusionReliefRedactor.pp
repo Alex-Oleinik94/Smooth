@@ -970,7 +970,7 @@ if FPrimetiveTypeButtonPoints = nil then
 	FPrimetiveTypeButtonPoints.Caption := 'Управление точками';
 	FPrimetiveTypeButtonPoints.SetBounds(Context.Width - a - 10, Context.Height div 2 + 0, a, 27);
 	FPrimetiveTypeButtonPoints.BoundsToNeedBounds();
-	FPrimetiveTypeButtonPoints.Font := FFont;
+	//FPrimetiveTypeButtonPoints.Font := FFont;
 	FPrimetiveTypeButtonPoints.OnChange := TSGComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonPoints.UserPointer := Self;
 	end;
@@ -983,7 +983,7 @@ if FPrimetiveTypeButtonLines = nil then
 	FPrimetiveTypeButtonLines.Caption := 'Управление линиями';
 	FPrimetiveTypeButtonLines.SetBounds(Context.Width - a - 10, Context.Height div 2 + 30, a, 27);
 	FPrimetiveTypeButtonLines.BoundsToNeedBounds();
-	FPrimetiveTypeButtonLines.Font := FFont;
+	//FPrimetiveTypeButtonLines.Font := FFont;
 	FPrimetiveTypeButtonLines.OnChange := TSGComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonLines.UserPointer := Self;
 	end;
@@ -996,7 +996,7 @@ if FPrimetiveTypeButtonPolygones = nil then
 	FPrimetiveTypeButtonPolygones.Caption := 'Управление полигонами';
 	FPrimetiveTypeButtonPolygones.SetBounds(Context.Width - a - 10, Context.Height div 2 + 60, a, 27);
 	FPrimetiveTypeButtonPolygones.BoundsToNeedBounds();
-	FPrimetiveTypeButtonPolygones.Font := FFont;
+	//FPrimetiveTypeButtonPolygones.Font := FFont;
 	FPrimetiveTypeButtonPolygones.OnChange := TSGComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonPolygones.UserPointer := Self;
 	end;
@@ -1009,7 +1009,7 @@ if FCutPolygoneButton = nil then
 	FCutPolygoneButton.Caption := 'Разрезать полигон';
 	FCutPolygoneButton.SetBounds(Context.Width - a - 10, Context.Height div 2 + 90, a, 27);
 	FCutPolygoneButton.BoundsToNeedBounds();
-	FCutPolygoneButton.Font := FFont;
+	//FCutPolygoneButton.Font := FFont;
 	FCutPolygoneButton.UserPointer := Self;
 	FCutPolygoneButton.OnChange := TSGComponentProcedure(@mmmFPrimetiveTypeButton);
 	end;

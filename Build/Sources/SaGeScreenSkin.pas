@@ -19,13 +19,7 @@ uses
 	;
 
 type
-	TSGScreenSkinFrameColor = object
-			public
-		FFirst  : TSGColor4f;
-		FSecond : TSGColor4f;
-			public
-		procedure Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		end;
+	TSGScreenSkin = class;
 	
 	TSGScreenSkinColors = object
 		FNormal   : TSGScreenSkinFrameColor;
@@ -44,12 +38,30 @@ type
 		class function ClassName() : TSGString;override;
 		procedure DeleteDeviceResourses();override;
 		procedure LoadDeviceResourses();override;
+			public
 		procedure IddleFunction(); virtual;
+		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupored : TSGBool = False) : TSGScreenSkin; overload;
+		function CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;
+			protected
+		FOwner : TSGScreenSkin;
+		procedure CopyColors(var VColors : TSGScreenSkinColors); virtual;
+		property Owner : TSGScreenSkin read FOwner write FOwner;
 			protected
 		FColors      : TSGScreenSkinColors;
 		FColorsTo    : TSGScreenSkinColors;
 		FColorsFrom  : TSGScreenSkinColors;
 		FColorsTimer : TSGScreenTimer;
+			protected
+		FFont : TSGFont;
+		FDestroyFontSuppored : TSGBool;
+		procedure CreateFont(); virtual;
+		procedure DestroyFont(); virtual;
+		function FontAssigned() : TSGBool; virtual;
+		function GetFont() : TSGFont;virtual;
+		procedure SetFont(const VFont : TSGFont); virtual;
+			public
+		property DestroyFontSuppored : TSGBool read FDestroyFontSuppored write FDestroyFontSuppored;
+		property Font : TSGFont read GetFont write SetFont;
 			protected
 		FComboBoxImage : TSGImage;
 			public
@@ -61,7 +73,11 @@ type
 		procedure PaintPanel(const Panel : ISGPanel); virtual;
 		procedure PaintComboBox(const ComboBox : ISGComboBox); virtual;
 		procedure PaintLabel(const VLabel : ISGLabel); virtual;
+		procedure PaintEdit(const Edit : ISGEdit); virtual;
+		procedure PaintProgressBar(const ProgressBar : ISGProgressBar); virtual;
 		end;
+const
+	SGScreenSkinDefaultFontFileName = SGFontDirectory + Slash + 'Tahoma.sgf';
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStandartSkinColors() : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -174,16 +190,21 @@ end;
 
 procedure TSGScreenSkin.IddleFunction();
 begin
-FColorsTimer += SGObjectTimerConst * Context.ElapsedTime / 3;
-if FColorsTimer > 1 then
+if FOwner = nil then
 	begin
-	FColorsTimer := 0;
-	FColorsFrom := FColorsTo;
-	FColors := FColorsTo;
-	FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
+	FColorsTimer += SGObjectTimerConst * Context.ElapsedTime / 3;
+	if FColorsTimer > 1 then
+		begin
+		FColorsTimer := 0;
+		FColorsFrom := FColorsTo;
+		FColors := FColorsTo;
+		FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
+		end
+	else
+		FColors := FColorsFrom * (1 - FColorsTimer) + FColorsTo * FColorsTimer;
 	end
 else
-	FColors := FColorsFrom * (1 - FColorsTimer) + FColorsTo * FColorsTimer;
+	FOwner.CopyColors(FColors);
 end;
 
 constructor TSGScreenSkin.CreateRandom(const VContext : ISGContext);
@@ -216,10 +237,26 @@ begin
 Result.Import(VFirst, VSecond);
 end;
 
-procedure TSGScreenSkinFrameColor.Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGScreenSkin.CopyColors(var VColors : TSGScreenSkinColors); 
 begin
-FFirst  := VFirst;
-FSecond := FSecond;
+VColors := FColors;
+end;
+
+function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupored : TSGBool = False) : TSGScreenSkin; overload;
+begin
+Result := TSGScreenSkin.Create(Context);
+Result.Font  := VFont;
+Result.Owner := Self;
+end;
+
+function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;
+var
+	VFont : TSGFont;
+begin
+VFont := TSGFont.Create(VFontFileName);
+VFont.Context := Context;
+VFont.Loading();
+Result := CreateDependentSkinWithAnotherFont(VFont, True);
 end;
 
 constructor TSGScreenSkin.Create(const VContext : ISGContext);
@@ -236,12 +273,14 @@ end;
 
 procedure TSGScreenSkin.DeleteDeviceResourses();
 begin
+FFont.DeleteDeviceResourses();
 FComboBoxImage.DeleteDeviceResourses();
 inherited;
 end;
 
 procedure TSGScreenSkin.LoadDeviceResourses();
 begin
+FFont.LoadDeviceResourses();
 FComboBoxImage.LoadDeviceResourses();
 inherited;
 end;
@@ -257,10 +296,56 @@ FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 FComboBoxImage := TSGImage.Create(SGTextureDirectory + Slash + 'ComboBoxImage.sgia');
 FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
+
+FDestroyFontSuppored := True;
+FFont := nil;
+
+FOwner := nil;
+end;
+
+procedure TSGScreenSkin.CreateFont();
+begin
+DestroyFont();
+
+FFont := TSGFont.Create(SGScreenSkinDefaultFontFileName);
+FFont.Context := Context;
+FFont.Loading();
+end;
+
+procedure TSGScreenSkin.DestroyFont();
+begin
+if FDestroyFontSuppored and (FFont <> nil) then
+	begin
+	FFont.Destroy();
+	FFont := nil;
+	end;
+end;
+
+function TSGScreenSkin.FontAssigned() : TSGBool;
+begin
+Result := FFont <> nil;
+{if Result then
+	Result := FFont.Ready;}
+end;
+
+procedure TSGScreenSkin.SetFont(const VFont : TSGFont); 
+begin
+if (FFont <> VFont) then
+	DestroyFont();
+FFont := VFont;
+end;
+
+function TSGScreenSkin.GetFont() : TSGFont;
+begin
+if not FontAssigned() then
+	CreateFont();
+Result := FFont;
 end;
 
 destructor TSGScreenSkin.Destroy();
 begin
+SGKillImage(FComboBoxImage);
+DestroyFont();
 inherited;
 end;
 
@@ -350,10 +435,10 @@ if  (ActiveTimer>SGZero) and
 		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
 		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3,
 		True);
-if (Button.Caption<>'') and (Button.Font<>nil) and (Button.Font.Ready) and (VisibleTimer>SGZero) then
+if (Button.Caption<>'') and (Font<>nil) and (Font.Ready) and (VisibleTimer>SGZero) then
 	begin
 	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
-	Button.Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
+	Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
 	end;
 end;
 
@@ -401,7 +486,7 @@ else if Item.Active then
 	Render.Color(TextColor)
 else
 	Render.Color(DisabledTextColor);
-ComboBox.Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.Position, ItemLocation.Position + ItemLocation.Size);
+Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.Position, ItemLocation.Position + ItemLocation.Size);
 end;
 
 function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -504,7 +589,7 @@ if 1 - OpenTimer > SGZero then
 		end;
 	if ComboBox.GetSelectedItem() <> nil then
 		begin
-		ComboBox.Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.Position, TextLocation.Position + TextLocation.Size);
+		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.Position, TextLocation.Position + TextLocation.Size);
 		end;
 	end;
 end;
@@ -513,17 +598,137 @@ procedure TSGScreenSkin.PaintLabel(const VLabel : ISGLabel);
 var
 	Location : TSGComponentLocation;
 begin
-if (VLabel.Caption<>'') and (VLabel.Font<>nil) and (VLabel.Font.Ready) then
+if (VLabel.Caption<>'') and (Font<>nil) and (Font.Ready) then
 	begin
 	Location := VLabel.GetLocation();
 	if VLabel.TextColorSeted then
 		Render.Color(VLabel.TextColor.WithAlpha(VLabel.VisibleTimer))
 	else
 		Render.Color(FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer));
-	VLabel.Font.DrawFontFromTwoVertex2f(VLabel.Caption,
+	Font.DrawFontFromTwoVertex2f(VLabel.Caption,
 		Location.Position, Location.Position + Location.Size,
 		VLabel.TextPosition);
 	end;
+end;
+
+procedure TSGScreenSkin.PaintEdit(const Edit : ISGEdit); 
+begin
+{if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
+	begin
+	SGRoundQuad(Render,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		2,
+		10,
+		SGVertex4fImport(0,0,0,0),
+		ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
+		True);
+	end;
+ReqAct := ReqursiveActive();
+if (1-FNowChangetTimer>SGZero) then
+		begin
+		TempTimer := (1-FCursorOnComponentTimer)*(1-FNowChangetTimer);
+		if not ReqAct then
+			TempTimer := 1;
+		SGRoundQuad(Render,
+			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+			2,10,
+			((FirsColor1*Byte(FTextType=SGEditTypeText)+
+				Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
+					.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
+			((FirsColor2*Byte(FTextType=SGEditTypeText)+
+				Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
+					.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
+			True);
+		end;
+if ReqAct and (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
+SGRoundQuad(Render,
+	SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+	SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+	2,10,
+	((SecondColor1/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer)))/(1+Byte(FTextType<>SGEditTypeText)))
+		.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer),
+	(((SecondColor2/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))/(1+Byte(FTextType<>SGEditTypeText)))
+		.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
+	True);
+if (FVisibleTimer*FNowChangetTimer*FActiveTimer>SGZero) then
+SGRoundQuad(Render,
+	SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+	SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+	2,10,
+	((ThreeColor1*Byte(FTextType=SGEditTypeText)+
+		Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
+		.WithAlpha(0.4*FVisibleTimer*FNowChangetTimer*FActiveTimer),
+	((ThreeColor2*Byte(FTextType=SGEditTypeText)+
+		Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))*2))
+		.WithAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
+	True);
+if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
+	begin
+	Render.Color4f(1,1,1,FVisibleTimer);
+	FFont.DrawFontFromTwoVertex2f(
+		Caption,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
+		False);
+	end;
+if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)then
+	begin
+	Render.Color4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
+	FFont.DrawCursorFromTwoVertex2f(
+		Caption,FCursorPosition,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
+		False);
+	end;}
+end;
+
+procedure TSGScreenSkin.PaintProgressBar(const ProgressBar : ISGProgressBar); 
+var 
+	Color3:TSGColor4f = (x:1;y:1;z:1;w:1);
+	Radius : TSGFloat = 5;
+begin
+{if abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)<Radius then
+	Radius:=abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)/2;
+FProgress:=(FProgress*7+FNeedProgress)/8;
+if (FVisible) or (FVisibleTimer>SGZero) then
+	begin
+	SGRoundQuad(Render,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
+		Radius,10,
+		SGVertex4fImport(0,0,0,0),
+		Color3.WithAlpha(0.3*FVisibleTimer)*1.3,
+		True,False);
+	SGRoundQuad(Render,
+		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+		SGPoint2int32ToVertex3f(
+			SGVertex2int32Import(
+					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x +
+					Trunc(
+						(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x -
+						 GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x) * FProgress),
+				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).y
+				)
+			),
+		Radius,10,
+		FColor1.WithAlpha(0.3*FVisibleTimer),
+		FColor2.WithAlpha(0.3*FVisibleTimer),
+		True,True);
+	if FViewProgress then
+		begin
+		if (FFont<>nil) and (FFont.Ready) then
+			begin
+			Render.Color4f(1,1,1,FVisibleTimer);
+			FFont.DrawFontFromTwoVertex2f(
+				//SGPCharTotal(SGPCharTotal(SGPCharIf(FViewCaption,Caption),' '),SGPCharTotal(SGStringToPChar(SGFloatToString(100*FProgress,2)),'%')),
+				SGStringIf(FViewCaption,Caption)+' '+SGFloatToString(100*FProgress,2)+'%',
+				SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
+				SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
+			end;
+		end;
+	end;}
 end;
 
 end.

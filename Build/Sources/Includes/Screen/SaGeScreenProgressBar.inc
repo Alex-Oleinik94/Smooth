@@ -1,27 +1,35 @@
 {$IFDEF SCREEN_INTERFACE}
 type
-	TSGProgressBarFloat = real;
-	PSGProgressBarFloat = ^ TSGProgressBarFloat;
-	TSGProgressBar=class(TSGComponent)
+	
+	TSGProgressBar=class(TSGComponent, ISGProgressBar)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-			private
-		FProgress:TSGProgressBarFloat;
-		FNeedProgress:TSGProgressBarFloat;
-		FViewProgress:Boolean;
-		FColor1:TSGColor4f;
-		FColor2:TSGColor4f;
-		FViewCaption:Boolean;
+			protected
+		FProgress      : TSGProgressBarFloat;
+		FProgressTimer : TSGProgressBarFloat;
+		FViewProgress  : TSGBool;
+		FColor         : TSGScreenSkinFrameColor;
+		FViewCaption   : TSGBool;
+		FIsColorStatic : TSGBool;
 			public
 		procedure FromDraw();override;
 			public
-		property RealProgress:TSGProgressBarFloat read FProgress write FProgress;
-		property Progress:TSGProgressBarFloat read FNeedProgress write FNeedProgress;
-		property ViewProgress:Boolean read FViewProgress write FViewProgress;
-		property ViewCaption:Boolean read FViewCaption write FViewCaption;
-		property Color1:TSGColor4f read FColor1 write FColor1;
-		property Color2:TSGColor4f read FColor2 write FColor2;
+		function GetProgress() : TSGProgressBarFloat;
+		function GetColor() : TSGScreenSkinFrameColor;
+		function GetIsColorStatic() : TSGBool;
+		function GetProgressTimer() : TSGProgressBarFloat;
+		function GetViewCaption() : TSGBool;
+		function GetViewProgress() : TSGBool;
+			public
+		property ProgressTimer : TSGProgressBarFloat      read GetProgressTimer write FProgressTimer;
+		property Progress      : TSGProgressBarFloat      read GetProgress      write FProgress;
+		property Color         : TSGScreenSkinFrameColor  read GetColor         write FColor;
+		property IsColorStatic : TSGBool                  read GetIsColorStatic;
+		property ViewProgress  : TSGBool                  read GetViewProgress  write FViewProgress;
+		property ViewCaption   : TSGBool                  read GetViewCaption   write FViewCaption;
+		property Color1        : TSGColor4f               read FColor.FFirst    write FColor.FFirst;
+		property Color2        : TSGColor4f               read FColor.FSecond   write FColor.FSecond;
 			public
 		procedure DefaultColor();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -29,73 +37,64 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
-procedure TSGProgressBar.FromDraw;
-var 
-	Color3:TSGColor4f = (x:1;y:1;z:1;w:1);
-	Radius : TSGFloat = 5;
+function  TSGProgressBar.GetProgress() : TSGProgressBarFloat;
 begin
-if abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)<Radius then
-	Radius:=abs((GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x-GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x)*FProgress)/2;
-FProgress:=(FProgress*7+FNeedProgress)/8;
-if (FVisible) or (FVisibleTimer>SGZero) then
-	begin
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		Radius,10,
-		SGVertex4fImport(0,0,0,0),
-		Color3.WithAlpha(0.3*FVisibleTimer)*1.3,
-		True,False);
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(
-			SGVertex2int32Import(
-					GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x +
-					Trunc(
-						(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).x -
-						 GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT).x) * FProgress),
-				GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT).y
-				)
-			),
-		Radius,10,
-		FColor1.WithAlpha(0.3*FVisibleTimer),
-		FColor2.WithAlpha(0.3*FVisibleTimer),
-		True,True);
-	if FViewProgress then
-		begin
-		if (FFont<>nil) and (FFont.Ready) then
-			begin
-			Render.Color4f(1,1,1,FVisibleTimer);
-			FFont.DrawFontFromTwoVertex2f(
-				//SGPCharTotal(SGPCharTotal(SGPCharIf(FViewCaption,Caption),' '),SGPCharTotal(SGStringToPChar(SGFloatToString(100*FProgress,2)),'%')),
-				SGStringIf(FViewCaption,Caption)+' '+SGFloatToString(100*FProgress,2)+'%',
-				SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-				SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)));
-			end;
-		end;
-	end;
+Result := FProgress;
+end;
+
+function  TSGProgressBar.GetColor() : TSGScreenSkinFrameColor;
+begin
+Result := FColor;
+end;
+
+function  TSGProgressBar.GetIsColorStatic() : TSGBool;
+begin
+Result := FIsColorStatic;
+end;
+
+function  TSGProgressBar.GetProgressTimer() : TSGProgressBarFloat;
+begin
+Result := FProgressTimer;
+end;
+
+function  TSGProgressBar.GetViewCaption() : TSGBool;
+begin
+Result := FViewCaption;
+end;
+
+function  TSGProgressBar.GetViewProgress() : TSGBool;
+begin
+Result := FViewProgress;
+end;
+
+procedure TSGProgressBar.FromDraw;
+begin
+if FVisibleTimer > SGZero then
+	FSkin.PaintProgressBar(Self);
 inherited;
 end;
 
 function TSGProgressBar.GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := @FNeedProgress;
+Result := @FProgress;
 end;
 
 procedure TSGProgressBar.DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FColor1.Import(0,0.5,1,1);
-FColor2.Import(0,0.75,1,1);
+FColor.FFirst .Import(0.9,0.9,0.9,1);
+FColor.FSecond.Import(1,1,1,1);
+FIsColorStatic := True;
 end;
 
 constructor TSGProgressBar.Create;
 begin
 inherited;
-FProgress:=0;
-FNeedProgress:=0;
-FViewProgress:=False;
-FViewCaption:=False;
-DefaultColor;
+FProgress      := 0;
+FProgressTimer := 0;
+FViewProgress  := False;
+FViewCaption   := False;
+DefaultColor();
+FIsColorStatic := False;
 end;
 
 destructor TSGProgressBar.Destroy;

@@ -40,7 +40,16 @@ type
 	
 	TSGAnchors = type TSGExByte;
 	TSGScreenInt    = TSGAreaInt;
-
+	
+	
+	TSGScreenSkinFrameColor = object
+			public
+		FFirst  : TSGColor4f;
+		FSecond : TSGColor4f;
+			public
+		procedure Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		end;
+	
 const
 	SGAnchRight  : TSGAnchors = $11;
 	SGAnchLeft   : TSGAnchors = $12;
@@ -114,9 +123,7 @@ type
 		function GetActiveTimer() : TSGScreenTimer;
 		function GetActive() : TSGBoolean;
 		function GetVisible() : TSGBoolean;
-		function GetFont() : TSGFont;
 		
-		property Font : TSGFont read GetFont;
 		property Caption : TSGCaption read GetTitle;
 		property Active : TSGBoolean read GetActive;
 		property Visible : TSGBoolean read GetVisible;
@@ -220,10 +227,52 @@ type
 		property Items          : PSGComboBoxItem read GetItems;
 		end;
 	
+	TSGEditTextType         = TSGExByte;
+	ISGEdit = interface(ISGOverComponent)
+		['{468c7f6f-795a-48a1-b5be-615448c2dcbe}']
+		function GetTextType() : TSGEditTextType;
+		function GetTextComplite() : TSGBoolean;
+		function GetCursorPosition() : TSGInt32;
+		function GetTextTypeAssigned() : TSGBoolean;
+		function GetCursorTimer() : TSGScreenTimer;
+		function GetTextCompliteTimer() : TSGScreenTimer;
+		
+		property TextCompliteTimer : TSGScreenTimer  read GetTextCompliteTimer;
+		property CursorTimer       : TSGScreenTimer  read GetCursorTimer;
+		property TextTypeAssigned  : TSGBoolean      read GetTextTypeAssigned;
+		property TextType          : TSGEditTextType read GetTextType;
+		property TextComplite      : TSGBoolean      read GetTextComplite;
+		property CursorPosition    : TSGInt32        read GetCursorPosition;
+		end;
+	
+	TSGProgressBarFloat = TSGFloat64;
+	PSGProgressBarFloat = ^ TSGProgressBarFloat;
+	ISGProgressBar = interface(ISGComponent)
+		['{d3781f76-15e1-4537-9886-c6f98787cade}']
+		function GetProgress() : TSGProgressBarFloat;
+		function GetColor() : TSGScreenSkinFrameColor;
+		function GetIsColorStatic() : TSGBool;
+		function GetProgressTimer() : TSGProgressBarFloat;
+		function GetViewCaption() : TSGBool;
+		function GetViewProgress() : TSGBool;
+		
+		property ViewProgress  : TSGBool                 read GetViewProgress;
+		property ViewCaption   : TSGBool                 read GetViewCaption;
+		property ProgressTimer : TSGProgressBarFloat     read GetProgressTimer;
+		property Progress      : TSGProgressBarFloat     read GetProgress;
+		property Color         : TSGScreenSkinFrameColor read GetColor;
+		property IsColorStatic : TSGBool                 read GetIsColorStatic;
+		end;
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure TSGScreenSkinFrameColor.Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+FFirst  := VFirst;
+FSecond := FSecond;
+end;
 
 procedure TSGComponentLocation.Write(const VName : TSGString = ''); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

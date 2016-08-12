@@ -1,6 +1,5 @@
 {$IFDEF SCREEN_INTERFACE}
 type
-	TSGEditTextType         = TSGExByte;
 	TSGEditTextTypeFunction = function (const s:TSGEdit):boolean;
 const
 	SGEditTypeText    = 0;
@@ -14,11 +13,11 @@ function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
 type
-	TSGEdit=class(TSGComponent)
+	TSGEdit=class(TSGOverComponent, ISGEdit)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
-			public
+			protected
 		FCursorOnComponentPrev : TSGBoolean;
 		FCursorOnComponentTimer:TSGScreenTimer;
 		FCursorPosition:LongInt;
@@ -39,12 +38,19 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
+		function GetCursorTimer() : TSGScreenTimer;
+		function GetTextCompliteTimer() : TSGScreenTimer;
+		function GetTextType() : TSGEditTextType;
+		function GetTextComplite() : TSGBoolean;
+		function GetCursorPosition() : TSGInt32;
 		procedure SetCaption(const NewCaption : TSGCaption);override;
 		procedure SetTextType(const NewTextType:TSGEditTextType);virtual;
+		function GetTextTypeAssigned() : TSGBoolean;
 			public
-		property TextType:TSGEditTextType read FTextType write SetTextType;
-		property TextComplite:Boolean read FTextComplite write FTextComplite;
-		property TextTypeFunction:TSGEditTextTypeFunction read FTextTypeFunction write FTextTypeFunction;
+		property TextType         : TSGEditTextType         read GetTextType         write SetTextType;
+		property TextComplite     : TSGBoolean              read GetTextComplite     write FTextComplite;
+		property TextTypeFunction : TSGEditTextTypeFunction read FTextTypeFunction   write FTextTypeFunction;
+		property CursorPosition   : TSGInt32                read GetCursorPosition;
 		end;
 {$ENDIF}
 
@@ -112,6 +118,36 @@ begin
 Result:=SGResourseFiles.FileExists(s.Caption);
 end;
 
+function TSGEdit.GetTextType() : TSGEditTextType;
+begin
+Result := FTextType;
+end;
+
+function TSGEdit.GetTextComplite() : TSGBoolean;
+begin
+Result := FTextComplite;
+end;
+
+function TSGEdit.GetCursorPosition() : TSGInt32;
+begin
+Result := FCursorPosition;
+end;
+
+function TSGEdit.GetTextTypeAssigned() : TSGBoolean;
+begin
+Result := FTextType <> 0;
+end;
+
+function TSGEdit.GetCursorTimer() : TSGScreenTimer;
+begin
+Result := FDrawCursorTimer;
+end;
+
+function TSGEdit.GetTextCompliteTimer() : TSGScreenTimer;
+begin
+Result := FTextCompliteTimer;
+end;
+
 procedure TSGEdit.SetTextType(const NewTextType:TSGEditTextType);
 begin
 FTextType:=NewTextType;
@@ -177,77 +213,9 @@ var
 	ReqAct : Boolean = false;
 	TempTimer : Real = 0;
 begin
-if (FVisible) or (FVisibleTimer>SGZero) then
+if (FVisibleTimer>SGZero) then
 	begin
-	if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
-		begin
-		SGRoundQuad(Render,
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-			2,
-			10,
-			SGVertex4fImport(0,0,0,0),
-			ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
-			True);
-		end;
-	ReqAct := ReqursiveActive();
-	if (1-FNowChangetTimer>SGZero) then
-			begin
-			TempTimer := (1-FCursorOnComponentTimer)*(1-FNowChangetTimer);
-			if not ReqAct then
-				TempTimer := 1;
-			SGRoundQuad(Render,
-				SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-				SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-				2,10,
-				((FirsColor1*Byte(FTextType=SGEditTypeText)+
-					Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-						.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
-				((FirsColor2*Byte(FTextType=SGEditTypeText)+
-					Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
-						.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
-				True);
-			end;
-	if ReqAct and (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		2,10,
-		((SecondColor1/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer)))/(1+Byte(FTextType<>SGEditTypeText)))
-			.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer),
-		(((SecondColor2/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))/(1+Byte(FTextType<>SGEditTypeText)))
-			.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
-		True);
-	if (FVisibleTimer*FNowChangetTimer*FActiveTimer>SGZero) then
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		2,10,
-		((ThreeColor1*Byte(FTextType=SGEditTypeText)+
-			Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-			.WithAlpha(0.4*FVisibleTimer*FNowChangetTimer*FActiveTimer),
-		((ThreeColor2*Byte(FTextType=SGEditTypeText)+
-			Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))*2))
-			.WithAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
-		True);
-	end;
-if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
-	begin
-	Render.Color4f(1,1,1,FVisibleTimer);
-	FFont.DrawFontFromTwoVertex2f(
-		Caption,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
-		False);
-	end;
-if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)then
-	begin
-	Render.Color4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
-	FFont.DrawCursorFromTwoVertex2f(
-		Caption,FCursorPosition,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
-		False);
+	FSkin.PaintEdit(Self);
 	end;
 inherited;
 end;

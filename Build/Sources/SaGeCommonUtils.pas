@@ -49,16 +49,12 @@ implementation
 
 procedure TSGDrawClasses.DeleteDeviceResourses();
 begin
-if FComboBox2.Font.Texture <> 0 then
-	FComboBox2.Font.DeleteDeviceResourses();
 if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.DeleteDeviceResourses();
 end;
 
 procedure TSGDrawClasses.LoadDeviceResourses();
 begin
-if not (FComboBox2.Font.ReadyGoToTexture or (FComboBox2.Font.Texture <> 0)) then
-	FComboBox2.Font.Loading();
 if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.LoadDeviceResourses();
 end;
@@ -100,9 +96,7 @@ FComboBox2.SelectItem:=0;
 FComboBox2.FUserPointer1:=Self;
 FComboBox2.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
 FComboBox2.Visible:=True;
-FComboBox2.Font:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
-FComboBox2.Font.SetContext(Context);
-FComboBox2.Font.Loading();
+FComboBox2.Skin := FComboBox2.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory+Slash+'Tahoma.sgf');
 FComboBox2.Active:=Length(FArClasses)>1;
 FComboBox2.FDrawClass:=Self;
 FComboBox2.BoundsToNeedBounds();
@@ -168,11 +162,6 @@ if FComboBox2 <> nil then
 	begin
 	if FComboBox2.FDrawClass <> nil then
 		FComboBox2.FDrawClass := nil;
-	if FComboBox2.Font <> nil then
-		begin
-		FComboBox2.Font.Destroy();
-		FComboBox2.Font := nil;
-		end;
 	FComboBox2.Destroy();
 	FComboBox2 := nil;
 	end;

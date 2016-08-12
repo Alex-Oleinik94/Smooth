@@ -105,7 +105,7 @@ DrawCube(2,0,0,0.5,0.2);
 DrawCube(2,-6,0,2,0.5);
 
 Render.Color3f(1,1,1);
-Screen.Font.BindTexture();
+Screen.Skin.Font.BindTexture();
 Render.BeginScene(SGR_QUADS);
 Render.TexCoord2f(0,1);
 Render.Vertex3f(6,6,-3);
@@ -116,7 +116,7 @@ Render.Vertex3f(-6,-6,-3);
 Render.TexCoord2f(1,1);
 Render.Vertex3f(-6,6,-3);
 Render.EndScene();
-Screen.Font.DisableTexture();
+Screen.Skin.Font.DisableTexture();
 end;
 
 {$IFNDEF ENGINE}

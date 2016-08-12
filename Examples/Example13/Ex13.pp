@@ -189,7 +189,7 @@ procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const 
 begin
 VButton := TSGButton.Create();
 Screen.CreateChild(VButton);
-Screen.LastChild.Font := FFont;
+Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
 Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
 Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.UserPointer:=Self;
@@ -304,7 +304,7 @@ if Render.SupporedShaders() then
 	
 	FCountLabel := TSGLabel.Create();
 	Screen.CreateChild(FCountLabel);
-	Screen.LastChild.Font := FFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
 	Screen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
 	Screen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -423,12 +423,12 @@ else
 	Render.InitMatrixMode(SG_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := Screen.Font.StringLength(WarningString1);
-	Screen.Font.DrawFontFromTwoVertex2f(WarningString1,
+	VStringLength := Screen.Skin.Font.StringLength(WarningString1);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
-	VStringLength := Screen.Font.StringLength(WarningString2);
-	Screen.Font.DrawFontFromTwoVertex2f(WarningString2,
+	VStringLength := Screen.Skin.Font.StringLength(WarningString2);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;

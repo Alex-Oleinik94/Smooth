@@ -132,9 +132,9 @@ type
 		FActiveTimer  : TSGScreenTimer;
 		
 		FCaption : TSGCaption;
-		FFont    : TSGFont;
 		FSkin    : TSGScreenSkin;
 		
+		procedure UpDateSkin();virtual;
 		procedure UpgradeTimers();virtual;
 		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
 		procedure FromDraw();virtual;
@@ -150,7 +150,6 @@ type
 		function NotVisible : TSGBoolean;virtual;
 		function GetVisibleTimer() : TSGScreenTimer;virtual;
 		function GetActiveTimer() : TSGScreenTimer;virtual;
-		function GetFont() : TSGFont;virtual;
 		function GetActive() : TSGBoolean;
 		function GetVisible() : TSGBoolean;
 			public
@@ -158,7 +157,6 @@ type
 		property ActiveTimer  : TSGScreenTimer     read FActiveTimer  write FActiveTimer;
 		property Caption      : TSGCaption    read FCaption      write FCaption;
 		property Text         : TSGCaption    read FCaption      write FCaption;
-		property Font         : TSGFont       read GetFont       write FFont;
 		property Skin         : TSGScreenSkin read FSkin         write FSkin;
 		property Visible      : Boolean       read FVisible      write SetVisible;
 		property Active       : Boolean       read FActive       write FActive         default False;
@@ -232,6 +230,14 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+procedure TSGComponent.UpDateSkin();
+begin
+if FSkin <> nil then
+	begin
+	if (FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin)) then
+		Skin.IddleFunction();
+	end;
+end;
 
 function TSGComponent.GetActive() : TSGBoolean;
 begin
@@ -241,11 +247,6 @@ end;
 function TSGComponent.GetVisible() : TSGBoolean;
 begin
 Result := FVisible;
-end;
-
-function TSGComponent.GetFont() : TSGFont;
-begin
-Result := FFont;
 end;
 
 function TSGComponent.HasChildren() : TSGBoolean;
@@ -791,8 +792,6 @@ if ContextAssigned() then
 	VChild.SetContext(Context);
 if VChild.Parent = nil then
 	VChild.Parent := Self;
-if VChild.Font = nil then
-	VChild.Font := Font;
 if VChild.Skin = nil then
 	VChild.Skin := Skin;
 for Component in VChild do
@@ -852,6 +851,7 @@ begin
 
 UpDateObjects();
 UpgradeTimers();
+UpDateSkin();
 
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
@@ -1007,7 +1007,6 @@ FBottomShiftForChilds:=5;
 FRealTop:=0;
 FRealLeft:=0;
 FCanHaveChildren:=True;
-FFont:=nil;
 ComponentProcedure:=nil;
 FUserPointer1:=nil;
 FUserPointer2:=nil;

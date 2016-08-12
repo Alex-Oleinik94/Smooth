@@ -2371,10 +2371,10 @@ if FUsrSechPanel = nil then
 		FCube.Edge/FImageSechenieBounds);
 	
 	FUsrSechPanel.CreateChild(TSGProgressBar.Create());
-	FUsrSechPanel.LastChild.Font := FTahomaFont;
+	//FUsrSechPanel.LastChild.Font := FTahomaFont;
 	FUsrSechPanel.LastChild.SetBounds(
-		10,FUsrSechPanel.Height div 2 - FUsrSechPanel.LastChild.Font.FontHeight div 2,
-		FUsrSechPanel.Width - 30,FUsrSechPanel.LastChild.Font.FontHeight);
+		10,FUsrSechPanel.Height div 2 - FUsrSechPanel.LastChild.Skin.Font.FontHeight div 2,
+		FUsrSechPanel.Width - 30,FUsrSechPanel.LastChild.Skin.Font.FontHeight);
 	FUsrSechPanel.LastChild.BoundsToNeedBounds();
 	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
 	end;
@@ -2479,7 +2479,7 @@ if (FUsrSechThread = nil) and (not FUpdateUsrAfterThread) then
 	FCubeForUsr := FCube.Copy();
 	FUsrSechThread := TSGThread.Create(TSGThreadProcedure(@FUsrImageThreadProcedure),Self);
 	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
-	(FUsrSechPanel.Children[2] as TSGProgressBar).RealProgress := 0;
+	(FUsrSechPanel.Children[2] as TSGProgressBar).ProgressTimer := 0;
 	(FUsrSechPanel.Children[2] as TSGProgressBar).Progress := 0;
 	
 	FAddSechSecondPanelButton.Active := False;
@@ -2533,7 +2533,7 @@ if FBackToMenuButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible := True;
 	Screen.LastChild.Active  := True;
-	Screen.LastChild.Font    := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption :='В главное меню';
 	Screen.LastChild.UserPointer:=Klass;
 	FBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFBackToMenuButtonProcedure);
@@ -2553,7 +2553,7 @@ if FAddNewGazButton=nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	FAddNewGazButton.Active  := True;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Править типы газа';
 	Screen.LastChild.UserPointer:=Klass;
 	FAddNewGazButton.OnChange:=TSGComponentProcedure(@mmmFAddNewGazButtonProcedure);
@@ -2573,7 +2573,7 @@ if FAddNewSourseButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	FAddNewSourseButton.Active  := True;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Править източники газа';
 	Screen.LastChild.UserPointer:=Klass;
 	FAddNewSourseButton.OnChange:=TSGComponentProcedure(@FAddNewSourseButtonProcedure);
@@ -2593,7 +2593,7 @@ if FStartEmulatingButton=nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	FStartEmulatingButton.Active  := True;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Эмурировать';
 	Screen.LastChild.UserPointer:=Klass;
 	FStartEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFRunDiffusionButtonProcedure);
@@ -2613,7 +2613,7 @@ if FPauseEmulatingButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=False;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Приостановить эмуляцию';
 	Screen.LastChild.UserPointer:=Klass;
 	FPauseEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFPauseDiffusionButtonProcedure);
@@ -2633,7 +2633,7 @@ if FStopEmulatingButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=False;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Ocтановить эмуляцию';
 	Screen.LastChild.UserPointer:=Klass;
 	FStopEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFStopDiffusionButtonProcedure);
@@ -2653,7 +2653,7 @@ if FAddSechenieButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=True;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Рассмотреть сечение';
 	Screen.LastChild.UserPointer:=Klass;
 	FAddSechenieButton.OnChange:=TSGComponentProcedure(@mmmFAddSechenieButtonProcedure);
@@ -2673,7 +2673,7 @@ if FDeleteSechenieButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=False;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Не рассмотривать сечение';
 	Screen.LastChild.UserPointer:=Klass;
 	FDeleteSechenieButton.OnChange:=TSGComponentProcedure(@mmmFDeleteSechenieButtonProcedure);
@@ -2693,7 +2693,7 @@ if FAddSechSecondPanelButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=False;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Вычисление концентрации';
 	Screen.LastChild.UserPointer:=Klass;
 	FAddSechSecondPanelButton.OnChange:=TSGComponentProcedure(@mmmFAddSechSecondPanelButtonProcedure);
@@ -2713,7 +2713,7 @@ if FSaveImageButton = nil then
 	Screen.LastChild.Anchors:=[SGAnchRight];
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.Active :=False;
-	Screen.LastChild.Font := FTahomaFont;
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Сoхранить картинку';
 	Screen.LastChild.UserPointer:=Klass;
 	FSaveImageButton.OnChange:=TSGComponentProcedure(@mmmFSaveImageButtonProcedure);
@@ -2730,7 +2730,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FStartingFlag := 1;
 	FStartingThread := TSGThread.Create(TSGThreadProcedure(@mmmFStartingThreadProcedure),Button.UserPointer,True);
 	FStartingProgressBar.Visible := True;
-	FStartingProgressBar.RealProgress := 0;
+	FStartingProgressBar.ProgressTimer := 0;
 	FStartingProgressBar.Progress := 0;
 	FStartSceneButton.Active := False;
 	FLoadButton.Active := False;
@@ -2830,7 +2830,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Anchors:=[SGAnchRight];
 		Screen.LastChild.Visible := True;
 		Screen.LastChild.Active  := True;
-		Screen.LastChild.Font    := FTahomaFont;
+		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='В меню загрузок';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
 		FMovieBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFMovieBackToMenuButtonProcedure);
@@ -2850,7 +2850,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Anchors:=[SGAnchRight];
 		Screen.LastChild.Visible := True;
 		Screen.LastChild.Active  := False;
-		Screen.LastChild.Font    := FTahomaFont;
+		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='Воспроизведение';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
 		FMoviePlayButton.OnChange:=TSGComponentProcedure(@mmmFMoviePlayButtonProcedure);
@@ -2869,7 +2869,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Anchors:=[SGAnchRight];
 		Screen.LastChild.Visible := True;
 		Screen.LastChild.Active  := True;
-		Screen.LastChild.Font    := FTahomaFont;
+		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='Пауза';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
 		FMoviePauseButton.OnChange:=TSGComponentProcedure(@mmmFMoviePauseButtonProcedure);
@@ -3027,14 +3027,14 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.Caption := 'Статус рельефа:Неопределен';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Загрузить рельеф из файла';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*1,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefOpenFileButton);
 	
@@ -3042,7 +3042,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.Caption := 'Сохранить рельеф в файл';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*2,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefSaveFileButton);
 	
@@ -3050,7 +3050,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.Caption := 'Редактировать рельеф';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*3,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefRedactrReliefButton);
 	FRelefOptionPanel.LastChild.Active := {$IFDEF MOBILE}False{$ELSE}True{$ENDIF};
@@ -3059,7 +3059,7 @@ if (FRelefOptionPanel = nil) then
 	FRelefOptionPanel.LastChild.Caption := 'Назад';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*4,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Font := FTahomaFont;
+	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
 	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefBackButton);
 	end
@@ -3113,7 +3113,7 @@ FBoundsOptionsPanel.CreateChild(TSGComboBox.Create());
 FBoundsOptionsPanel.LastChild.SetBounds(10 + FConstLabelsWidth + 10,5+(19+5)*vIndex,FConstWidth-50-FConstLoadMeshButtonWidth - FConstLabelsWidth,19);
 FBoundsOptionsPanel.LastChild.Visible:=True;
 FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
-FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa не пропускают газ');
 (FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Газ липнет к стенкe');
@@ -3127,7 +3127,7 @@ FBoundsOptionsPanel.CreateChild(TSGLabel.Create());
 FBoundsOptionsPanel.LastChild.SetBounds(10 ,5+(19+5)*vIndex,FConstLabelsWidth,19);
 FBoundsOptionsPanel.LastChild.Visible:=True;
 FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
-FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 case vIndex of
 0 : FBoundsOptionsPanel.LastChild.Caption := 'Верхняя';
@@ -3145,7 +3145,7 @@ FBoundsOptionsPanel.LastChild.SetBounds(FConstWidth - 20 - FConstLoadMeshButtonW
 FBoundsOptionsPanel.LastChild.Visible:=True;
 FBoundsOptionsPanel.LastChild.Active := False;
 FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
-FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 FBoundsOptionsPanel.LastChild.Caption := 'Настроить рельеф';
 (FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrRelief);
@@ -3184,7 +3184,7 @@ if FBoundsOptionsPanel = nil then
 	FBoundsOptionsPanel.LastChild.Visible:=True;
 	FBoundsOptionsPanel.LastChild.Active := True;
 	FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
-	FBoundsOptionsPanel.LastChild.Font := FTahomaFont;
+	FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 	FBoundsOptionsPanel.LastChild.Caption := 'Назад';
 	(FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFBoundsBackButtonProcedure);
@@ -3305,7 +3305,7 @@ if lghl < lghg + 1 then
 		FConchLabels[i].Visible:=True;
 		FConchLabels[i].Active:=True;
 		FConchLabels[i].TextPosition := False;
-		FConchLabels[i].Font := FTahomaFont;
+		FConchLabels[i].Skin := FConchLabels[i].Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		end;
 	end
 else while lghl > lghg + 1 do
@@ -3398,7 +3398,7 @@ Screen.CreateChild(FRedactorBackButton);
 Screen.LastChild.SetBounds(Render.Width div 2 - 75,5,130,20);
 Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.Visible:=False;
-Screen.LastChild.Font := FTahomaFont;
+Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 Screen.LastChild.Caption:='Назад';
 Screen.LastChild.UserPointer:=Self;
 FRedactorBackButton.OnChange:=TSGComponentProcedure(@mmmFRedactorBackButton);
@@ -3415,14 +3415,14 @@ FNewScenePanel.LastChild.Caption := 'Создание новой сцены';
 FNewScenePanel.LastChild.SetBounds(5,0,275+100,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 
 FNewScenePanel.CreateChild(TSGLabel.Create());
 FNewScenePanel.LastChild.Caption := 'Количество точек:';
 FNewScenePanel.LastChild.SetBounds(5,19,280,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
 
 FNumberLabel:=TSGLabel.Create();
@@ -3431,7 +3431,7 @@ FNewScenePanel.LastChild.Caption:='';
 FNewScenePanel.LastChild.SetBounds(170,19,180,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
 
 FStartSceneButton:=TSGButton.Create();
@@ -3439,7 +3439,7 @@ FNewScenePanel.CreateChild(FStartSceneButton);
 FNewScenePanel.LastChild.SetBounds(10,44,80,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption:='Старт';
 FNewScenePanel.LastChild.UserPointer:=Self;
 FStartSceneButton.OnChange:=TSGComponentProcedure(@mmmFStartSceneButtonProcedure);
@@ -3449,7 +3449,7 @@ FNewScenePanel.CreateChild(FEdgeEdit);
 FNewScenePanel.LastChild.SetBounds(118,19,50,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption:='75';
 FNewScenePanel.LastChild.UserPointer:=Self;
 FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction);
@@ -3461,7 +3461,7 @@ FNewScenePanel.CreateChild(FEnableLoadButton);
 FNewScenePanel.LastChild.SetBounds(100,44,278,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption:='Загрузка сохраненной сцены/повтора';
 FNewScenePanel.LastChild.UserPointer:=Self;
 FEnableLoadButton.OnChange:=TSGComponentProcedure(@mmmFEnableLoadButtonProcedure);
@@ -3471,7 +3471,7 @@ FNewScenePanel.CreateChild(FEnableOutputComboBox);
 FEnableOutputComboBox.SetBounds(10,44+26,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FEnableOutputComboBox.CreateItem('Включить непрерывное сохранение эмуляции');
 FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
 //FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
@@ -3483,7 +3483,7 @@ FNewScenePanel.CreateChild(FBoundsTypeButton);
 FBoundsTypeButton.SetBounds(10,44+26+25,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Font := FTahomaFont;
+FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption := 'Настроить поведение газа на границах';
 FBoundsTypeButton.OnChange:=TSGComponentProcedure(@mmmFBoundsTypeButtonProcedure);
 FBoundsTypeButton.UserPointer:=Self;
@@ -3500,14 +3500,14 @@ FLoadScenePanel.LastChild.Caption := 'Загрузка сохраненной сцены/повтора';
 FLoadScenePanel.LastChild.SetBounds(5,0,275+140,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 
 FLoadComboBox := TSGComboBox.Create();
 FLoadScenePanel.CreateChild(FLoadComboBox);
 FLoadComboBox.SetBounds(5,21,480-60,19);
 FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 //FLoadComboBox.FProcedure:=TSGComboBoxProcedure(@FLoadComboBoxProcedure);
 FLoadComboBox.SelectItem:=-1;
 FLoadComboBox.UserPointer:=Self;
@@ -3517,7 +3517,7 @@ FLoadScenePanel.CreateChild(FBackButton);
 FLoadScenePanel.LastChild.SetBounds(10,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Назад';
 FLoadScenePanel.LastChild.UserPointer:=Self;
 FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
@@ -3527,7 +3527,7 @@ FLoadScenePanel.CreateChild(FUpdateButton);
 FLoadScenePanel.LastChild.SetBounds(145,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Обновить';
 FLoadScenePanel.LastChild.UserPointer:=Self;
 FUpdateButton.OnChange:=TSGComponentProcedure(@mmmFUpdateButtonProcedure);
@@ -3537,7 +3537,7 @@ FLoadScenePanel.CreateChild(FLoadButton);
 FLoadScenePanel.LastChild.SetBounds(145+135,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Загрузить';
 FLoadScenePanel.LastChild.UserPointer:=Self;
 FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
@@ -3546,7 +3546,7 @@ FLoadScenePanel.CreateChild(TSGButton.Create());
 FLoadScenePanel.LastChild.SetBounds(5,44+24,420,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Font := FTahomaFont;
+FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Открыть папку с сохранениями';
 FLoadScenePanel.LastChild.UserPointer:=Self;
 (FLoadScenePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFOpenSaveDir);
@@ -3558,7 +3558,7 @@ Screen.LastChild.SetBounds(5,Render.Height-25,Render.Width-10,20);
 Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.Visible:=True;
 Screen.LastChild.Anchors:=[SGAnchBottom];
-Screen.LastChild.Font := FTahomaFont;
+Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 end;
 
 procedure TSGGasDiffusion.UpDateChangeSourses();

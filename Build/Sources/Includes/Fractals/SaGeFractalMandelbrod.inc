@@ -1144,7 +1144,7 @@ if MandaInitialized then
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FBeginData.Get;
 						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr:=iiiC;
 						FArProgressBar[i].Progress:=0;
-						FArProgressBar[i].RealProgress:=0;
+						FArProgressBar[i].ProgressTimer:=0;
 						
 						Manda.FThreadsData[i].FThread:=
 							TSGThread.Create(
@@ -1458,7 +1458,7 @@ if MandaInitialized then
 			with FArProgressBar[i] do
 				begin
 				Progress:=0;
-				RealProgress:=0;
+				ProgressTimer:=0;
 				Visible:=true;
 				Top := ii;
 				ii+=25;
