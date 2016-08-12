@@ -192,6 +192,7 @@ type
 		function CursorPosition(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
+		procedure DestroySkin();
 		procedure KillChildren();
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -232,11 +233,8 @@ type
 {$IFDEF SCREEN_IMPLEMENTATION}
 procedure TSGComponent.UpDateSkin();
 begin
-if FSkin <> nil then
-	begin
-	if (FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin)) then
-		Skin.IddleFunction();
-	end;
+if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin))) then
+	Skin.IddleFunction();
 end;
 
 function TSGComponent.GetActive() : TSGBoolean;
@@ -727,11 +725,22 @@ if FParent<>nil then
 	{$ENDIF}
 end;
 
+procedure TSGComponent.DestroySkin();
+begin
+if FSkin <> nil then
+	begin
+	if (FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin)) then
+		FSkin.Destroy();
+	FSkin := nil;
+	end;
+end;
+
 destructor TSGComponent.Destroy();
 begin
 if FDrawClass<>nil then
 	FDrawClass.Destroy();
 DestroyParent();
+DestroySkin();
 inherited Destroy();
 end;
 

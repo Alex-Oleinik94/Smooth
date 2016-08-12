@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeClasses;
 
@@ -7,7 +7,11 @@ interface
 uses
 	Classes
 	,SaGeBase
-	,SaGeBased;
+	,SaGeBased
+	{$IFDEF WITHLEAKSDETECTOR}
+	,SaGeLeaksDetector
+	{$ENDIF}
+	;
 	
 type
 	ISGInterface = interface(IInterface)
@@ -27,15 +31,18 @@ type
 		function _AddRef : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
 		function _Release : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};virtual;
 			public
-		constructor Create();override;
+		constructor Create(); override;
 		destructor Destroy(); override;
 		procedure DestroyFromInterface();virtual;
 		end;
 	
 	TSGNamed = class(TSGInterfacedObject)
 			public
+		{$IFDEF WITHLEAKSDETECTOR}
+		constructor Create(); override;
+		destructor Destroy(); override;
+		{$ENDIF}
 		class function ClassName() : TSGString; virtual;
-		constructor Create();virtual;
 		end;
 	
 	ISGOptionGetSeter = interface
@@ -164,17 +171,32 @@ implementation
 uses
 	SysUtils;
 
+{$IFDEF WITHLEAKSDETECTOR}
+constructor TSGNamed.Create(); 
+begin
+inherited;
+if LeaksDetector <> nil then
+	LeaksDetector.AddReference(ClassName())
+else
+	SGLog.Sourse(['TSGLeaksDetector : Error : AddReferense(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+end;
+
+destructor TSGNamed.Destroy();
+begin
+if LeaksDetector <> nil then
+	LeaksDetector.ReleaseReference(ClassName())
+else
+	SGLog.Sourse(['TSGLeaksDetector : Error : ReleaseReference(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+inherited;
+end;
+{$ENDIF}
+
 procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 try
 while i._Release() > 0 do ;
 except
 end;
-end;
-
-constructor TSGNamed.Create();
-begin
-inherited;
 end;
 
 function TSGPaintable.GetOption(const VName : TSGString) : TSGPointer;

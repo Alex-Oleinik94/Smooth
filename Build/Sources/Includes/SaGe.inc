@@ -61,3 +61,10 @@
 	{$OVERFLOWCHECKS OFF} 
 	{$ENDIF}
 
+{$IF not defined(RELEASE)}
+	{$DEFINE WITHLEAKSDETECTOR}
+	{$ENDIF}
+
+{$IF not defined(FPC_HAS_CONSTREF)}
+	{$DEFINE constref := const}
+	{$ENDIF}

@@ -356,7 +356,7 @@ end;
 
 function TSGDrawable.GetRender():ISGRender;
 begin
-Result:=FContext^.Render;
+Result := FContext^.Render;
 end;
 
 procedure TSGDrawable.SetContext(const VContext : ISGContext);
