@@ -4,6 +4,7 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			protected
 		FViewLines : TSGBoolean;
 		FViewQuad  : TSGBoolean;
@@ -18,6 +19,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGPanel.ClassName() : TSGString; 
+begin
+Result := 'TSGPanel';
+end;
+
 function TSGPanel.ViewingLines() : TSGBoolean;
 begin
 Result := ViewingLines;

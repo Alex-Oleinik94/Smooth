@@ -7,6 +7,7 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -16,6 +17,7 @@ type
 			public
 		constructor Create(const NewType:TSGExByte  = SGScrollBarVertical);virtual;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			public
 		FScrollMax:Int64;
 		FScrollHigh:Int64;
@@ -31,6 +33,16 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGScrollBar.ClassName() : TSGString; 
+begin
+Result := 'TSGScrollBar';
+end;
+
+class function TSGScrollBarButton.ClassName() : TSGString; 
+begin
+Result := 'TSGScrollBarButton';
+end;
 
 procedure TSGScrollBarButton.FromDraw;
 var

@@ -2,10 +2,11 @@
 type
 	TSGRCButtonType = (SGNoneRadioCheckButton,SGRadioButton,SGCheckButton);
 	TSGRadioButton = class;
-	TSGRadioGroup = class
+	TSGRadioGroup = class(TSGNamed)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			private
 		FGroup : packed array of TSGRadioButton;
 			public
@@ -18,6 +19,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromDraw;override;
@@ -42,6 +44,16 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGRadioButton.ClassName() : TSGString; 
+begin
+Result := 'TSGRadioButton';
+end;
+
+class function TSGRadioGroup.ClassName() : TSGString; 
+begin
+Result := 'TSGRadioGroup';
+end;
 
 procedure TSGRadioGroup.KillChecked();
 var
@@ -154,6 +166,7 @@ end;
 
 constructor TSGRadioGroup.Create();
 begin
+inherited;
 FGroup := nil;
 end;
 

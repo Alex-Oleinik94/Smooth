@@ -33,6 +33,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			public
 			// for-in loop
 		function GetEnumerator(): TSGComponentEnumerator;
@@ -231,6 +232,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGComponent.ClassName() : TSGString; 
+begin
+Result := 'TSGComponent';
+end;
+
 procedure TSGComponent.UpDateSkin();
 begin
 if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin))) then
@@ -421,11 +427,20 @@ for Component in Self do
 	Component.VisibleAll();
 end;
 
-procedure TSGComponent.KillChildren;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGComponent.KillChildren();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ChildExists() : TSGBool;
 begin
-while Length(FChildren)>0 do
+Result := False;
+if FChildren <> nil then
+	if Length(FChildren) > 0 then
+		Result := True;
+end;
+
+begin
+while ChildExists() do
 	begin
-	FChildren[High(FChildren)].Destroy;
+	FChildren[0].Destroy();
 	end;
 end;
 
@@ -738,7 +753,11 @@ end;
 destructor TSGComponent.Destroy();
 begin
 if FDrawClass<>nil then
+	begin
 	FDrawClass.Destroy();
+	FDrawClass := nil;
+	end;
+KillChildren();
 DestroyParent();
 DestroySkin();
 inherited Destroy();

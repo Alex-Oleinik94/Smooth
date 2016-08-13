@@ -8,6 +8,7 @@ type
 			public
 		procedure FromDraw;override;
 		constructor Create;override;
+		class function ClassName() : TSGString; override;
 			protected
 		function  GetTextPosition() : TSGBoolean; virtual;
 		procedure SetTextPosition(const VTextPosition : TSGBoolean); virtual;
@@ -23,6 +24,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGLabel.ClassName() : TSGString; 
+begin
+Result := 'TSGLabel';
+end;
 
 function  TSGLabel.GetTextColor() : TSGColor4f;
 begin

@@ -46,6 +46,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			private
 		FInProcessing : TSGBoolean;
 			public
@@ -70,6 +71,8 @@ type
 type
 	TSGScreened = class(TSGContextabled, ISGScreened)
 			public
+		class function ClassName() : TSGString; override;
+			public
 		function GetScreen() : TSGScreen; virtual;
 		function ScreenAssigned() : TSGBoolean; virtual;
 			public
@@ -77,6 +80,8 @@ type
 		end;
 type
 	TSGScreenedDrawable = class(TSGDrawable, ISGScreened)
+			public
+		class function ClassName() : TSGString; override;
 			public
 		function GetScreen() : TSGScreen; virtual;
 		function ScreenAssigned() : TSGBoolean; virtual;
@@ -94,6 +99,21 @@ uses
 {$DEFINE SCREEN_IMPLEMENTATION}
 {$INCLUDE SaGeScreenComponents.inc}
 {$UNDEF  SCREEN_IMPLEMENTATION}
+
+class function TSGScreened.ClassName() : TSGString; 
+begin
+Result := 'TSGScreened';
+end;
+
+class function TSGScreen.ClassName() : TSGString; 
+begin
+Result := 'TSGScreen';
+end;
+
+class function TSGScreenedDrawable.ClassName() : TSGString; 
+begin
+Result := 'TSGScreenedDrawable';
+end;
 
 function TSGScreenedDrawable.ScreenAssigned() : TSGBoolean;
 begin
@@ -143,6 +163,7 @@ end;
 
 destructor TSGScreen.Destroy();
 begin
+FInProcessing := False;
 inherited;
 end;
 

@@ -21,6 +21,7 @@ uses
 	SaGeBase
 	,SaGeBased
 	,SaGeContext
+	,SysUtils
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
@@ -39,7 +40,15 @@ uses
 	procedure android_main(State: PAndroid_App); cdecl; export;
 	begin
 	SGLog.Sourse('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
+	{$IFDEF WITHEXCEPTIONTRACEING}
+	try
+	{$ENDIF}
 	SGConsoleShowAllApplications(nil, SGContextOptionAndroidApp(State));
+	{$IFDEF WITHEXCEPTIONTRACEING}
+	except on e : Exception do
+		SGPrintExceptionStackTrace(e);
+	end;
+	{$ENDIF}
 	end;
 	
 	exports 
@@ -49,10 +58,21 @@ uses
 	end.
 {$ELSE}
 	begin
+	{$IFDEF WITHEXCEPTIONTRACEING}
+	try
+	{$ENDIF}
 	{$IF defined(WITHSAGELIBRARY)}
 		SGStandartLabraryCallConcoleCaller();
 	{$ELSE}
 		SGStandartCallConcoleCaller();
+	{$ENDIF}
+	{$IFDEF WITHEXCEPTIONTRACEING}
+	except on e : Exception do
+		begin
+		SGPrintExceptionStackTrace(e);
+		Write('Press ENTER! ');ReadLn();
+		end;
+	end;
 	{$ENDIF}
 	end.
 	{$ENDIF}

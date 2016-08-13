@@ -4,6 +4,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			private
 		FImage       : TSGImage;
 		FEnableLines : TSGBoolean;
@@ -21,6 +22,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGPicture.ClassName() : TSGString; 
+begin
+Result := 'TSGPicture';
+end;
 
 procedure TSGPicture.FromDraw;
 var

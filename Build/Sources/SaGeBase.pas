@@ -715,11 +715,48 @@ function SGStringListFromString(const S : TSGString; const Separators : TSGStrin
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGHint(const S : TSGString);
+procedure SGPrintStackTrace();
+procedure SGPrintExceptionStackTrace(const e : Exception);
 
 implementation
 
 uses
 	StrMan;
+
+procedure SGPrintExceptionStackTrace(const e : Exception);
+var
+	I: Integer;
+	Frames: PPointer;
+	Report : TSGString;
+begin
+Report := 'An unhandled exception occurred at ' + SGAddrStr(ExceptAddr) + ':' + SGWinEoln;
+if E <> nil then
+	Report += E.ClassName + ': ' + E.Message + SGWinEoln;
+Report += BackTraceStrFunc(ExceptAddr) + SGWinEoln;
+Frames := ExceptFrames;
+for I := 0 to ExceptFrameCount - 1 do
+	Report += BackTraceStrFunc(Frames[I]) + SGWinEoln;
+SGHint(Report);
+Report := '';
+end;
+
+procedure SGPrintStackTrace();
+var
+	bp: Pointer;
+	addr: Pointer;
+	oldbp: Pointer;
+begin
+bp := get_caller_frame(get_frame);
+while bp<>nil do
+	begin
+	addr := get_caller_addr(bp);
+	SGHint(BackTraceStrFunc(addr));
+	oldbp := bp;
+	bp := get_caller_frame(bp);
+	if (bp <= oldbp) or (bp > (StackBottom + StackLength)) then
+		bp := nil;
+	end;
+end;
 
 procedure SGHint(const S : TSGString);
 begin

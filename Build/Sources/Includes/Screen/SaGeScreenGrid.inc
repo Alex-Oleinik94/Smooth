@@ -4,6 +4,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			public
 		FItems:TSGComponentListList;
 		FSelectItems:
@@ -31,6 +32,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGGrid.ClassName() : TSGString; 
+begin
+Result := 'TSGGrid';
+end;
 
 procedure TSGGrid.SetViewPortSize(const VQuantityXs,VQuantityYs:LongInt);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

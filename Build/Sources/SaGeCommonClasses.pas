@@ -334,18 +334,16 @@ end;
 function TSGContextabled.RenderAssigned() : TSGBoolean;
 begin
 Result := False;
-if (FContext <> nil) then
-	if (FContext^ <> nil) then
-		if FContext^.Render <> nil then
-			Result := True;
+if ContextAssigned() then
+	if FContext^.Render <> nil then
+		Result := True;
 end;
 
 function TSGDrawable.RenderAssigned() : TSGBoolean;
 begin
-if (FContext <> nil) then
-	if (FContext^ <> nil) then
-		if FContext^.Render <> nil then
-			Result := True;
+if ContextAssigned() then
+	if FContext^.Render <> nil then
+		Result := True;
 end;
 
 constructor TSGDrawable.Create(const VContext:ISGContext);

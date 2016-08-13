@@ -5,6 +5,7 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			public
 		FButtonsType : SGFrameButtonsType;
 		FIcon        : TSGImage;
@@ -20,6 +21,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+
+class function TSGForm.ClassName() : TSGString; 
+begin
+Result := 'TSGForm';
+end;
 
 procedure TSGForm.FromUpDate(var FCanChange:Boolean);
 var

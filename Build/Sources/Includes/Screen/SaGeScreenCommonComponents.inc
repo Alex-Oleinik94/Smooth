@@ -3,6 +3,7 @@ type
 	TSGOverComponent = class(TSGComponent, ISGOverComponent)
 			public
 		constructor Create();override;
+		class function ClassName() : TSGString; override;
 			protected
 		FOverPrev  : TSGBoolean;
 		FOver      : TSGBoolean;
@@ -16,6 +17,7 @@ type
 	TSGClickComponent = class(TSGOverComponent, ISGClickComponent)
 			public
 		constructor Create();override;
+		class function ClassName() : TSGString; override;
 			protected
 		FClick      : TSGBoolean;
 		FClickTimer : TSGScreenTimer;
@@ -28,6 +30,7 @@ type
 	TSGOpenComponent = class(TSGClickComponent, ISGOpenComponent)
 			public
 		constructor Create();override;
+		class function ClassName() : TSGString; override;
 			protected
 		FOpen      : TSGBoolean;
 		FOpenTimer : TSGScreenTimer;
@@ -44,6 +47,11 @@ type
 {$IFDEF SCREEN_IMPLEMENTATION}
 
 // TSGOverComponent
+
+class function TSGOverComponent.ClassName() : TSGString; 
+begin
+Result := 'TSGOverComponent';
+end;
 
 function TSGOverComponent.GetOver() : TSGBool;
 begin
@@ -73,6 +81,11 @@ end;
 
 // TSGOpenComponent
 
+class function TSGOpenComponent.ClassName() : TSGString; 
+begin
+Result := 'TSGOpenComponent';
+end;
+
 function TSGOpenComponent.GetOpen() : TSGBool;
 begin
 Result := FOpen;
@@ -98,6 +111,11 @@ Result := FOpenTimer;
 end;
 
 // TSGClickComponent
+
+class function TSGClickComponent.ClassName() : TSGString; 
+begin
+Result := 'TSGClickComponent';
+end;
 
 function TSGClickComponent.GetClick() : TSGBool;
 begin

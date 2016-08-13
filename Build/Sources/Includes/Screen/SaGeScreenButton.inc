@@ -4,6 +4,7 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			protected
 		FCursorOnButtonTimer : TSGScreenTimer;
 		FCursorOnButtonPrev  : TSGBoolean;
@@ -20,6 +21,10 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGButton.ClassName() : TSGString; 
+begin
+Result := 'TSGButton';
+end;
 
 procedure TSGButton.FromUpDate(var FCanChange:Boolean);
 begin

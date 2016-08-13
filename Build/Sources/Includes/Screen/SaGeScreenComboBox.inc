@@ -5,6 +5,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			protected
 		FBackLight:Boolean;
 		FBackLightTimer : TSGScreenTimer;
@@ -50,6 +51,10 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGComboBox.ClassName() : TSGString; 
+begin
+Result := 'TSGComboBox';
+end;
 
 procedure TSGComboBox.SelectItemFromIndex(const Index : TSGInt32);
 var

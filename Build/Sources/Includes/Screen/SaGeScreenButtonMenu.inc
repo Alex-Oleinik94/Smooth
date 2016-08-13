@@ -4,6 +4,7 @@ type
 	TSGButtonMenuButton=class(TSGButton)
 			public
 		constructor Create;override;
+		class function ClassName() : TSGString; override;
 			public
 		FIdentifity:Int64;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -13,6 +14,7 @@ type
 	TSGButtonMenu=class(TSGComponent)
 			public
 		constructor Create;override;
+		class function ClassName() : TSGString; override;
 			public
 		FActiveButton:longint;
 		FButtonTop:TSGScreenInt;
@@ -38,6 +40,16 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGButtonMenuButton.ClassName() : TSGString; 
+begin
+Result := 'TSGButtonMenuButton';
+end;
+
+class function TSGButtonMenu.ClassName() : TSGString; 
+begin
+Result := 'TSGButtonMenu';
+end;
+
 procedure TSGButtonMenu.DetectActiveButton;
 var
 	i,iii:Longint;

@@ -17,6 +17,7 @@ type
 			public
 		constructor Create;override;
 		destructor Destroy;override;
+		class function ClassName() : TSGString; override;
 			protected
 		FCursorOnComponentPrev : TSGBoolean;
 		FCursorOnComponentTimer:TSGScreenTimer;
@@ -55,6 +56,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGEdit.ClassName() : TSGString; 
+begin
+Result := 'TSGEdit';
+end;
+
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
 var
 	i,ii:LongWord;

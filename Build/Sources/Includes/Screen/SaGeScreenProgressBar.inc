@@ -5,6 +5,7 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			protected
 		FProgress      : TSGProgressBarFloat;
 		FProgressTimer : TSGProgressBarFloat;
@@ -37,6 +38,11 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
+class function TSGProgressBar.ClassName() : TSGString; 
+begin
+Result := 'TSGProgressBar';
+end;
+
 function  TSGProgressBar.GetProgress() : TSGProgressBarFloat;
 begin
 Result := FProgress;
