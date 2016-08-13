@@ -17,11 +17,12 @@ uses
 	,SaGeBased
 	,SaGeRenderConstants
 	,SaGeResourseManager
+	,SaGeDllManager
 	;
 
 function SupporedPNG() : Boolean;
 begin
-Result := png.LibPNGLoaded;
+Result := DllManager.DllSuppored('png');
 end;
 
 procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;

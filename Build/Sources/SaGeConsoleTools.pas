@@ -110,6 +110,8 @@ procedure SGConsoleImageResizer                          (const VParams : TSGCon
 procedure SGConsoleMake                                  (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertHeaderToDynamic                (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleWriteOpenableExpansions               (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleWriteFiles                            (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleDllPrintStat                          (const VParams : TSGConcoleCallerParams = nil);
 
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -133,6 +135,7 @@ uses
 	{$IFDEF WITH_GLUT}
 		,SaGeContextGLUT
 		{$ENDIF}
+	,SaGeDllManager
 	;
 
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
@@ -144,7 +147,7 @@ else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and (
 else
 	begin 
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]. Param @mode is in set of "ObjFpc", "fpc" or "Delphi".');
+	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]". Param @mode is in set of "ObjFpc", "fpc" or "Delphi".');
 	end;
 end;
 
@@ -168,6 +171,32 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 	end
 else
 	SGResourseFiles.WriteFiles();
+end;
+
+procedure SGConsoleDllPrintStat(const VParams : TSGConcoleCallerParams = nil);
+var
+	Dll : TSGDll;
+begin
+if (VParams <> nil) and (Length(VParams) > 0) then
+	begin
+	Dll := nil;
+	if Length(VParams) = 1 then
+		begin
+		Dll := DllManager.Dll(VParams[0]);
+		if Dll <> nil then
+			begin
+			SGPrintEngineVersion();
+			Dll.PrintStat(True);
+			end;
+		end;
+	if Dll = nil then
+		begin
+		SGPrintEngineVersion();
+		WriteLn(SGErrorString,'"[@library]". Param @library is Engine''s name of this Library.');
+		end;
+	end
+else
+	DllManager.PrintStat();
 end;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -198,6 +227,7 @@ ConsoleCaller.Category('System tools');
 ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
 ConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
 ConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
+ConsoleCaller.AddComand(@SGConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
 ConsoleCaller.Execute();
 ConsoleCaller.Destroy();
 end;
@@ -561,7 +591,7 @@ end;
 
 procedure ExecuteHelp();
 var
-	FCategoryesSpaces : packed array of
+	FCategoriesSpaces : packed array of
 		packed record
 			FCategory : TSGString;
 			FSpaces   : TSGUInt32;
@@ -572,11 +602,11 @@ var
 	i : TSGUInt32;
 begin
 Result := 0;
-if FCategoryesSpaces <> nil then if Length(FCategoryesSpaces) > 0 then
-	for i := 0 to High(FCategoryesSpaces) do
-		if FCategoryesSpaces[i].FCategory = C then
+if FCategoriesSpaces <> nil then if Length(FCategoriesSpaces) > 0 then
+	for i := 0 to High(FCategoriesSpaces) do
+		if FCategoriesSpaces[i].FCategory = C then
 			begin
-			Result := FCategoryesSpaces[i].FSpaces;
+			Result := FCategoriesSpaces[i].FSpaces;
 			break;
 			end;
 end;
@@ -585,12 +615,12 @@ procedure CalcCategorySpaces();
 
 function LastCatecory() : TSGString;
 begin
-if FCategoryesSpaces = nil then
+if FCategoriesSpaces = nil then
 	Result := SGConcoleCallerUnknownCategory
-else if Length(FCategoryesSpaces) = 0 then
+else if Length(FCategoriesSpaces) = 0 then
 	Result := SGConcoleCallerUnknownCategory
 else
-	Result := FCategoryesSpaces[High(FCategoryesSpaces)].FCategory;
+	Result := FCategoriesSpaces[High(FCategoriesSpaces)].FCategory;
 end;
 
 function ComandSpace(const i : TSGLongWord) : TSGLongWord;
@@ -612,12 +642,12 @@ end;
 
 procedure AddNewCatSpase(const C : TSGString; const S : TSGUInt32);
 begin
-if FCategoryesSpaces = nil then
-	SetLength(FCategoryesSpaces, 1)
+if FCategoriesSpaces = nil then
+	SetLength(FCategoriesSpaces, 1)
 else
-	SetLength(FCategoryesSpaces, Length(FCategoryesSpaces) + 1);
-FCategoryesSpaces[High(FCategoryesSpaces)].FCategory := C;
-FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces   := S;
+	SetLength(FCategoriesSpaces, Length(FCategoriesSpaces) + 1);
+FCategoriesSpaces[High(FCategoriesSpaces)].FCategory := C;
+FCategoriesSpaces[High(FCategoriesSpaces)].FSpaces   := S;
 end;
 
 var
@@ -626,13 +656,13 @@ begin
 if FComands <> nil then if Length(FComands) > 0 then
 	for i := 0 to High(FComands) do
 		begin
-		if (LastCatecory() <> FComands[i].FCategory) or (FCategoryesSpaces = nil) or (Length(FCategoryesSpaces) = 0) then
+		if (LastCatecory() <> FComands[i].FCategory) or (FCategoriesSpaces = nil) or (Length(FCategoriesSpaces) = 0) then
 			AddNewCatSpase(FComands[i].FCategory, ComandSpace(i))
 		else
 			begin
 			ii := ComandSpace(i);
-			if ii > FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces then
-				FCategoryesSpaces[High(FCategoryesSpaces)].FSpaces := ii;
+			if ii > FCategoriesSpaces[High(FCategoriesSpaces)].FSpaces then
+				FCategoriesSpaces[High(FCategoriesSpaces)].FSpaces := ii;
 			end;
 		end;
 end;
@@ -715,7 +745,7 @@ if (FComands <> nil) and (Length(FComands)>0) then
 			TextColor(StandartColor);
 			end;
 		end;
-	SetLength(FCategoryesSpaces, 0);
+	SetLength(FCategoriesSpaces, 0);
 	end;
 end;
 
@@ -1476,7 +1506,7 @@ write(' files in ');
 TextColor(14);
 Write(ChisFi);
 TextColor(15);
-wRITElN(' derictoryes...');
+wRITElN(' derictories...');
 end;
 
 procedure DoFiles(const VDir:string);

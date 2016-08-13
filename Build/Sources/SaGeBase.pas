@@ -71,7 +71,7 @@ const
 	{$ELSE}
 		{$IFDEF UNIX}
 			SGLibraryNameBegin = 'lib';
-			SGLibraryNameEnd = '.so';	
+			SGLibraryNameEnd = '.so';
 		{$ELSE}
 			SGLibraryNameBegin = '';
 			SGLibraryNameEnd = '';
@@ -428,9 +428,10 @@ type
 			public
 		constructor Create;
 		destructor Destroy;override;
-		procedure Sourse(const s:string;const WithTime:Boolean = True);
-		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);
-		procedure Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString);
+		procedure Sourse(const s:string;const WithTime:Boolean = True);overload;
+		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);overload;
+		procedure Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+		procedure Sourse(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 			private
 		FFileStream:TFileStream;
 		end;
@@ -463,7 +464,8 @@ operator + (a,b:TArReal):TArReal;inline;
 //И получить разницу во времени этих дат в (мили)секундах
 operator - (const a,b:TSGDateTime):TSGDateTime;inline;
 
-function LoadLibrary(const AName : PChar): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function LoadLibrary(const AName : PChar): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function LoadLibrary(const AName : TSGString): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function UnloadLibrary(const VLib : TSGLibHandle) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function GetProcAddress(const Lib : TSGLibHandle; const VPChar:PChar):Pointer;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -717,6 +719,8 @@ function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPP
 procedure SGHint(const S : TSGString);
 procedure SGPrintStackTrace();
 procedure SGPrintExceptionStackTrace(const e : Exception);
+procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
+procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
 
 implementation
 
@@ -1800,14 +1804,62 @@ for i := 1 to Length(S) do
 LoopIteration();
 end;
 
-procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString);
+procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
 var
-	ArS : TSGStringList = nil;
 	i, WordCount, MaxLength, n, ii: TSGLongWord;
 	TempS : TSGString;
+begin
+WordCount := 0;
+if ArS <> nil then
+	WordCount := Length(ArS);
+if WordCount > 0 then
+	begin
+	WriteLn(Title + ' (' + SGStr(WordCount) + ')');
+	MaxLength := Length(ArS[0]);
+	if Length(ArS) > 1 then
+		begin
+		for i := 1 to High(ArS) do
+			if Length(ArS[i]) > MaxLength then
+				MaxLength := Length(ArS[i]);
+		end;
+	MaxLength += 2;
+	n := SimbolsLength div MaxLength;
+	MaxLength += (SimbolsLength mod MaxLength) div n;
+	ii := 0;
+	TempS := '  ';
+	for i := 0 to High(ArS) do
+		begin
+		if (ii = n - 1) or (i = High(ArS)) then
+			TempS += ArS[i]
+		else
+			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
+		ii +=1;
+		if ii = n then
+			begin
+			ii := 0;
+			WriteLn(TempS);
+			TempS := '  ';
+			end;
+		end;
+	if TempS <> '  ' then
+		WriteLn(TempS);
+	end;
+end;
 
+procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);
+var
+	ArS : TSGStringList = nil;
 begin
 ArS := SGStringListFromString(S, Separators);
+SGPrintParams(ArS, Title, SimbolsLength);
+SetLength(ArS, 0);
+end;
+
+procedure TSGLog.Sourse(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+var
+	i, WordCount, MaxLength, n, ii: TSGLongWord;
+	TempS : TSGString;
+begin
 WordCount := 0;
 if ArS <> nil then
 	WordCount := Length(ArS);
@@ -1842,8 +1894,17 @@ if WordCount > 0 then
 		end;
 	if TempS <> '  ' then
 		Sourse(TempS, False);
-	SetLength(ArS, 0);
 	end;
+end;
+
+
+procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+var
+	ArS : TSGStringList = nil;
+begin
+ArS := SGStringListFromString(S, Separators);
+Sourse(ArS, Title, SimbolsLength);
+SetLength(ArS, 0);
 end;
 
 function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
@@ -2986,7 +3047,16 @@ begin
 	{$ENDIF}
 end;
 
-function LoadLibrary(const AName: PChar) : TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function LoadLibrary(const AName : TSGString): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	PC : PSGChar;
+begin
+PC := SGStringToPChar(AName);
+Result := LoadLibrary(PC);
+FreeMem(PC, SGPCharLength(PC) + 1);
+end;
+
+function LoadLibrary(const AName: PChar) : TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=
 	{$ifdef UNIX} 

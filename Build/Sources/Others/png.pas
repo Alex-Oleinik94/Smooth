@@ -1320,19 +1320,41 @@ function png_get_libpng_ver(png_ptr:png_structp):png_charp;cdecl; external LibPn
 *)
 var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ; 
 
-var LibPNGLoaded : Boolean = False;
-
 implementation
 
 uses
-	SaGeBase;
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager;
 
-procedure Load_HINT(const Er : String);
+type
+	TSGDllPNG = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllPNG.SystemNames() : TSGStringList; 
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := 'LibPng';
+Result += 'Png';
 end;
-procedure Free_png();
+
+class function TSGDllPNG.DllNames() : TSGStringList;
+const
+	WinDllPrefix = {$IFDEF MSWINDOWS}'lib'{$ELSE}''{$ENDIF};
+var
+	i : TSGUInt32;
+begin
+Result := nil;
+for i := {$IFDEF MSWINDOWS}12{$ELSE}13{$ENDIF} downto 1 do
+	Result += WinDllPrefix + 'png' + SGStr(i);
+{$IFDEF MSWINDOWS}Result += WinDllPrefix + 'png'; {$ENDIF}
+end;
+
+class procedure TSGDllPNG.Free(); 
 begin
 png_access_version_number := nil;
 png_set_sig_bytes := nil;
@@ -1506,29 +1528,24 @@ png_get_header_ver := nil;
 png_get_header_version := nil;
 png_get_libpng_ver := nil;
 end;
-function Load_png_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 171;
+
+class function TSGDllPNG.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	UnitLib : TSGMaxEnum;
-	CountLoadSuccs : LongWord;
+	LoadResult : PSGDllLoadObject = nil;
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	Load_HINT('Initialization "PNG" unit from "'+SGPCharToString(UnitName)+'": Error while loading "'+SGPCharToString(Name)+'"!')
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
+
 begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	Load_HINT('Initialization "PNG" unit from "'+SGPCharToString(UnitName)+'": Error while loading dynamic library!');
-	exit;
-	end;
+Result.Clear();
+Result.FFunctionCount := 171;
+LoadResult := @Result;
 Pointer(png_access_version_number) := LoadProcedure('png_access_version_number');
 Pointer(png_set_sig_bytes) := LoadProcedure('png_set_sig_bytes');
 Pointer(png_sig_cmp) := LoadProcedure('png_sig_cmp');
@@ -1700,44 +1717,10 @@ Pointer(png_write_png) := LoadProcedure('png_write_png');
 Pointer(png_get_header_ver) := LoadProcedure('png_get_header_ver');
 Pointer(png_get_header_version) := LoadProcedure('png_get_header_version');
 Pointer(png_get_libpng_ver) := LoadProcedure('png_get_libpng_ver');
-Load_HINT('Initialization "PNG" unit from "'+SGPCharToString(UnitName)+'": Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
-LibPNGLoaded := (UnitLib <> 0) and (CountLoadSuccs <> 0);
 end;
 
-function Load_png() : Boolean;
-var
-	i : LongWord;
-	R : array[0..0] of Boolean;
-begin
-R[0] := Load_png_0(LibPng);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
-end;
-const
-	BS = {$IFDEF MSWINDOWS}'lib'{$ELSE}''{$ENDIF};
 initialization
 begin
-Free_png();
-if not Load_png() then
-{$IFNDEF MSWINDOWS}if not Load_png_0(BS+'png13') then{$ENDIF}
-if not Load_png_0(BS+'png12') then
-if not Load_png_0(BS+'png11') then
-if not Load_png_0(BS+'png10') then
-if not Load_png_0(BS+'png9') then
-if not Load_png_0(BS+'png8') then
-if not Load_png_0(BS+'png7') then
-if not Load_png_0(BS+'png6') then
-if not Load_png_0(BS+'png5') then
-if not Load_png_0(BS+'png4') then
-if not Load_png_0(BS+'png3') then
-if not Load_png_0(BS+'png2') then
-if not Load_png_0(BS+'png1') then
-{$IFDEF MSWINDOWS}if not Load_png_0(BS+'png') then{$ENDIF}
-	Load_HINT('Initialization "PNG" unit FAILED!!!');
-end;
-finalization
-begin
-Free_png();
+TSGDllPNG.Create();
 end;
 end.

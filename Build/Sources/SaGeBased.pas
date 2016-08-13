@@ -56,6 +56,7 @@ type
 type
 	// Common
 	TSGChar		= Char;
+	PSGChar		= ^ TSGChar;
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;
 	TSGString 	= String;
