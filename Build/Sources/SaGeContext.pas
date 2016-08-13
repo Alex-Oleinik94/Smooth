@@ -1101,6 +1101,11 @@ if FPaintable <> nil then
 	FPaintable.Destroy();
 	FPaintable := nil;
 	end;
+if FScreen <> nil then
+	begin
+	FScreen.Destroy();
+	FScreen := nil;
+	end;
 if FRender <> nil then
 	begin
 	FRender.Destroy();
@@ -1111,7 +1116,6 @@ end;
 destructor TSGContext.Destroy();
 begin
 Kill();
-DestroyScreen();
 inherited;
 end;
 

@@ -158,13 +158,7 @@ if FNowDraw <> nil then
 	FNowDraw.Destroy();
 	FNowDraw := nil;
 	end;
-if FComboBox2 <> nil then
-	begin
-	if FComboBox2.FDrawClass <> nil then
-		FComboBox2.FDrawClass := nil;
-	FComboBox2.Destroy();
-	FComboBox2 := nil;
-	end;
+FComboBox2 := nil;
 if FArClasses <> nil then
 	begin
 	SetLength(FArClasses, 0);

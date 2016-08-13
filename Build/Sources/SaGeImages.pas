@@ -696,7 +696,7 @@ end;
 
 procedure TSGImage.FreeTexture();
 begin
-if (FTexture <> 0) and RenderAssigned() then
+if RenderAssigned() and (FTexture <> 0) then
 	begin
 	Render.DeleteTextures(1,@FTexture);
 	FTexture := 0;

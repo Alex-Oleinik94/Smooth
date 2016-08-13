@@ -247,6 +247,8 @@ begin
 Result := TSGScreenSkin.Create(Context);
 Result.Font  := VFont;
 Result.Owner := Self;
+Result.DestroyFontSuppored := VDestroyFontSupored;
+Result.IddleFunction();
 end;
 
 function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;

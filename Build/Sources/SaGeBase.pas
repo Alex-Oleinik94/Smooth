@@ -725,8 +725,8 @@ uses
 
 procedure SGPrintExceptionStackTrace(const e : Exception);
 var
-	I: Integer;
-	Frames: PPointer;
+	I, H   : Integer;
+	Frames : PPointer;
 	Report : TSGString;
 begin
 Report := 'An unhandled exception occurred at ' + SGAddrStr(ExceptAddr) + ':' + SGWinEoln;
@@ -734,8 +734,13 @@ if E <> nil then
 	Report += E.ClassName + ': ' + E.Message + SGWinEoln;
 Report += BackTraceStrFunc(ExceptAddr) + SGWinEoln;
 Frames := ExceptFrames;
-for I := 0 to ExceptFrameCount - 1 do
-	Report += BackTraceStrFunc(Frames[I]) + SGWinEoln;
+H := ExceptFrameCount - 1;
+for I := 0 to H do
+	begin
+	Report += BackTraceStrFunc(Frames[I]);
+	if I <> H then
+		Report += SGWinEoln;
+	end;
 SGHint(Report);
 Report := '';
 end;
