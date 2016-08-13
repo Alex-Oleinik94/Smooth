@@ -2688,8 +2688,6 @@ const
  * against the right headers.
  *)
 
-function Direct3D8Loaded: Boolean;
-
 // Due to the way Object Pascal handles functions resulting in 'native' interface
 // pointer we should declare result not as interface but as usial pointer
 
@@ -2756,6 +2754,8 @@ implementation
 
 uses
 	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
 	;
 
 (*==========================================================================;
@@ -2931,72 +2931,63 @@ begin
   Result:= DWord((1 shl 31) or (_FACD3D shl 16)) or Code;
 end;
 
-var
-	UnitLib : TSGMaxEnum = 0;
-
-function Direct3D8Loaded: Boolean;
-begin
-Result := (UnitLib <> 0) and Assigned(_Direct3DCreate8);
-end;
-
 function Direct3DCreate8(SDKVersion: LongWord): IDirect3D8; stdcall;
 begin
 Result:= IDirect3D8(_Direct3DCreate8(SDKVersion));
 if Assigned(Result) then Result._Release; // Delphi autoincrement reference count
 end;
 
-procedure Load_HINT(const Er : String);
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllD3D8 = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllD3D8.SystemNames() : TSGStringList; 
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := 'Direct3D8';
+Result += 'D3D8';
 end;
-procedure Free_Direct3D8();
+
+class function TSGDllD3D8.DllNames() : TSGStringList;
+begin
+Result := Direct3D8dll;
+end;
+
+class procedure TSGDllD3D8.Free(); 
 begin
 _Direct3DCreate8 := nil;
 end;
-function Load_Direct3D8_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 1;
+
+class function TSGDllD3D8.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	CountLoadSuccs : LongWord;
+	LoadResult : PSGDllLoadObject = nil;
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
-end;
-begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
-	exit;
-	end;
-_Direct3DCreate8 := LoadProcedure('Direct3DCreate8');
-Load_HINT('Initialization DIRECT3D8 unit from '+SGPCharToString(UnitName)+'/'+'Direct3D8dll'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+	LoadResult^.FFunctionLoaded += 1;
 end;
 
-function Load_Direct3D8() : Boolean;
-var
-	i : LongWord;
-	R : array[0..0] of Boolean;
 begin
-R[0] := Load_Direct3D8_0(Direct3D8dll);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
+Result.Clear();
+Result.FFunctionCount := 1;
+LoadResult := @Result;
+_Direct3DCreate8 := LoadProcedure('Direct3DCreate8');
 end;
+
 initialization
 begin
-Free_Direct3D8();
-Load_Direct3D8();
-end;
-finalization
-begin
-Free_Direct3D8();
+TSGDllD3D8.Create();
 end;
 end.

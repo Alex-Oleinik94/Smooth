@@ -251,6 +251,10 @@ function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
 
+uses
+	SaGeDllManager
+	;
+
 class function TSGRenderDirectX8.ClassName() : TSGString; 
 begin
 Result := 'TSGRenderDirectX8';
@@ -267,7 +271,8 @@ end;
 class function TSGRenderDirectX8.Suppored() : TSGBoolean;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Suppored'); {$ENDIF}
-Result := Direct3D8Loaded();
+Result := DllManager.DllSuppored('Direct3D8');
+DllManager.DllSuppored('Direct3DX8');
 end;
 
 function TSGRenderDirectX8.SupporedShaders() : TSGBoolean;

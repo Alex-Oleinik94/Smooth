@@ -223,9 +223,11 @@ else
 		end;
 	
 	WriteLn('Total     loaded functions : ', TSGDll_Procent(FuncLoaded, AllFunc));
-	WriteLn('Total not loaded functions : ', TSGDll_Procent(FuncNotLoaded, AllFunc));
+	if FuncNotLoaded <> 0 then
+		WriteLn('Total not loaded functions : ', TSGDll_Procent(FuncNotLoaded, AllFunc));
 	WriteLn('Total     loaded libraries : ', TSGDll_Procent(LibLoaded, DllCount));
-	WriteLn('Total not loaded libraries : ', TSGDll_Procent(LibNotLoaded, DllCount));
+	if LibNotLoaded <> 0 then
+		WriteLn('Total not loaded libraries : ', TSGDll_Procent(LibNotLoaded, DllCount));
 	end;
 end;
 

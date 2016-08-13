@@ -252,6 +252,10 @@ function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
 implementation
 
+uses
+	SaGeDllManager
+	;
+
 class function TSGRenderDirectX9.ClassName() : TSGString; 
 begin
 Result := 'TSGRenderDirectX9';
@@ -259,7 +263,8 @@ end;
 
 class function TSGRenderDirectX9.Suppored() : TSGBoolean;
 begin
-Result := Direct3D9Loaded();
+Result := DllManager.DllSuppored('Direct3D9');
+DllManager.DllSuppored('Direct3DX9');
 end;
 
 function TSGRenderDirectX9.SupporedShaders() : TSGBoolean;

@@ -4900,14 +4900,11 @@ implementation
 //***************************************************************************//
 //***************************************************************************//
 //***************************************************************************//
+
 uses
-	SaGeBase,
-	SaGeBased
-	;
-
-
-
-
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -5630,13 +5627,49 @@ begin
 end;
 {$ENDIF}
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
-procedure Load_HINT(const Er : String);
+type
+	TSGDllD3DX8 = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllD3DX8.SystemNames() : TSGStringList; 
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := 'Direct3DX8';
+Result += 'D3DX8';
 end;
-procedure Free_D3DX8();
+
+class function TSGDllD3DX8.DllNames() : TSGStringList;
+var
+	i : TSGUInt16;
+begin
+Result := d3dx8dll;
+if d3dx8dll <> 'D3DX81ab.dll' then
+	Result += 'D3DX81ab.dll';
+if d3dx8dll <> 'd3dx8.dll' then
+	Result += 'd3dx8.dll';
+if d3dx8dll <> 'd3dx8d.dll' then
+	Result += 'd3dx8d.dll';
+Result += 'd3dx9_33.dll';
+Result += 'd3dx9.dll';
+for i := 43 downto 24 do
+	if i <> 33 then
+		Result += 'd3dx9_'+SGStr(i)+'.dll';
+for i := 43 downto 24 do
+	if i <> 33 then
+		Result += 'd3dx9d_'+SGStr(i)+'.dll';
+Result += 'd3dx9d_33.dll';
+Result += 'd3dx9d.dll';
+end;
+
+class procedure TSGDllD3DX8.Free(); 
 begin
 D3DXVec2Normalize := nil;
 D3DXVec2Hermite := nil;
@@ -5867,49 +5900,24 @@ D3DXFillCubeTexture := nil;
 D3DXFillVolumeTexture := nil;
 D3DXComputeNormalMap := nil;
 end;
-var
-	DllNamesWithError : TSGString = '';
 
-procedure PrintDllNamesWithError();
-begin
-SGLog.Sourse(DllNamesWithError,'Initialization D3DX8 : Can''t load from this libraries :',' ');
-end;
-
-function Load_D3DX8_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 228;
+class function TSGDllD3DX8.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	UnitLib : TSGMaxEnum;
-	CountLoadSuccs : LongWord;
-	FunctionWithError : TSGString = '';
+	LoadResult : PSGDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	FunctionWithError += SGPCharToString(Name) + ' '
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
-procedure CantLoad();
+
 begin
-DllNamesWithError += SGPCharToString(UnitName) + ' ';
-end;
-function SepName():TSGString;
-begin
-Result := '';
-if SGPCharToString(UnitName) = d3dx8dll then
-	Result += '/'+'d3dx8dll';
-end;
-begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	CantLoad();
-	exit;
-	end;
+Result.Clear();
+Result.FFunctionCount := 228;
+LoadResult := @Result;
 D3DXVec2Normalize := LoadProcedure('D3DXVec2Normalize');
 D3DXVec2Hermite := LoadProcedure('D3DXVec2Hermite');
 D3DXVec2CatmullRom := LoadProcedure('D3DXVec2CatmullRom');
@@ -6138,81 +6146,10 @@ D3DXFillTexture := LoadProcedure('D3DXFillTexture');
 D3DXFillCubeTexture := LoadProcedure('D3DXFillCubeTexture');
 D3DXFillVolumeTexture := LoadProcedure('D3DXFillVolumeTexture');
 D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
-Result := Result and (CountLoadSuccs <> 0);
-if Result then
-	begin
-	Load_HINT('D3DX8: Initialization from '+SGPCharToString(UnitName)+SepName()+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
-	SGLog.Sourse(FunctionWithError,'D3DX8: Initialization from '+SGPCharToString(UnitName)+SepName()+': Can''t loading this functions :',' ');
-	end
-else
-	CantLoad();
-D3DX8Loaded := Result;
-FunctionWithError := '';
-end;
-
-procedure LoadD3DX8();
-var
-	DefDll : String;
-
-function TryLoadD3DX8(const DllName : PChar):Boolean;overload;
-begin
-Result := False;
-if (SGPCharToString(DllName) <> DefDll) then
-	Result := Load_D3DX8_0(DllName);
-end;
-
-function TryLoadD3DX8(const DllName : TSGString):Boolean;overload;
-var
-	DLLPC : PChar;
-begin
-Result := False;
-if (DllName <> DefDll) then
-	begin
-	DLLPC := SGStringToPChar(DllName);
-	Result := Load_D3DX8_0(DLLPC);
-	FreeMem(DLLPC);
-	end;
-end;
-
-function LoadFromD3DX9() : Boolean;
-var
-	i : LongWord;
-	R : Boolean = False;
-begin
-if not R then R := TryLoadD3DX8('d3dx9_33.dll');
-if not R then R := TryLoadD3DX8('d3dx9.dll');
-for i := 43 downto 24 do
-	if i <> 33 then
-		begin
-		if R then break;
-		if not R then R := TryLoadD3DX8('d3dx9_'+SGStr(i)+'.dll');
-		if R then break;
-		if not R then R := TryLoadD3DX8('d3dx9d_'+SGStr(i)+'.dll');
-		if R then break;
-		end;
-if not R then R := TryLoadD3DX8('d3dx9d_33.dll');
-if not R then R := TryLoadD3DX8('d3dx9d.dll');
-Result := R;
-end;
-
-begin
-DefDll := SGPCharToString(d3dx8dll);
-if not TryLoadD3DX8('D3DX81ab.dll') then
-if not TryLoadD3DX8('d3dx8.dll') then
-if not TryLoadD3DX8('d3dx8d.dll') then
-if not LoadFromD3DX9() then
-	Load_HINT('D3DX8: Initialization FAILED!!!');
-PrintDllNamesWithError();
 end;
 
 initialization
 begin
-Free_D3DX8();
-if not Load_D3DX8_0(d3dx8dll) then
-	LoadD3DX8();
-end;
-finalization
-begin
-Free_D3DX8();
+TSGDllD3DX8.Create();
 end;
 end.
