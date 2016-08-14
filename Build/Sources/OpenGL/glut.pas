@@ -456,12 +456,6 @@ var
   glutGameModeGet : function (mode : GLenum) : integer; extdecl;
 {$ENDIF MORPHOS}
 
-var
-	GLUTLoaded : Boolean = False;
-
-procedure LoadGlut(const dll: String);
-procedure UnloadGlut;
-
 implementation
 
 {$IFDEF MORPHOS}
@@ -469,26 +463,41 @@ implementation
 { MorphOS GL works differently due to different dynamic-library handling on Amiga-like }
 { systems, so its functions are included here. }
 {$INCLUDE tinygl.inc}
-uses SaGeBase,SaGeBased;
+
+uses SaGeBase
+	,SaGeBased,
+	SaGeDllManager
+	;
 
 {$ELSE MORPHOS}
-uses FreeGlut,SaGeBase,SaGeBased;
 
-var
-  hDLL: TLibHandle;
+uses FreeGlut
+	,SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
 {$ENDIF MORPHOS}
 
-procedure UnloadGlut;
-begin
-GLUTLoaded := False;
+type
+	TSGDllGLUT = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function ChildNames() : TSGStringList; override;
+		class procedure Free(); override;
+		end;
 
+class function TSGDllGLUT.ChildNames() : TSGStringList;
+begin
+Result := 'freeglut';
+end;
+
+class procedure TSGDllGLUT.Free(); 
+begin
 {$IFDEF MORPHOS}
   // MorphOS's GL will closed down by TinyGL unit, nothing is needed here.
 {$ELSE MORPHOS}
-
-  if (hDLL <> 0) then
-    FreeLibrary(hDLL);
-
   @glutInit := nil;
   @glutInitDisplayMode := nil;
   @glutInitDisplayString := nil;
@@ -603,195 +612,191 @@ GLUTLoaded := False;
   @glutEnterGameMode := nil;
   @glutLeaveGameMode := nil;
   @glutGameModeGet := nil;
-  
-  UnloadFreeGlut;
 {$ENDIF MORPHOS}
 end;
 
-procedure LoadGlut(const dll: String);
+class function TSGDllGLUT.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 {$IFDEF MORPHOS}
 begin
+Result.Clear();
   // MorphOS's GL has own initialization in TinyGL unit, nothing is needed here.
 end;
 {$ELSE MORPHOS}
 var
-  MethodName: string = '';
-  AllGlutFuncions : TSGLongWord = 0;
-  LoadedGlutFuncions : TSGLongWord = 0;
+	LoadResult : PSGDllLoadObject = nil;
 
-  function GetGLutProcAddress(Lib: PtrInt; ProcName: PChar): Pointer;
-  begin
-    MethodName:=ProcName;
-    Result:=GetProcAddress(Lib, ProcName);
-    AllGlutFuncions += 1;
-    if Result <> nil then
-      LoadedGlutFuncions += 1;
-  end;
+function GetGLutProcAddress(const ProcName: PChar): Pointer;
+begin
+Result := GetProcAddress(VDll, ProcName);
+LoadResult^.FFunctionCount += 1;
+if Result <> nil then
+	LoadResult^.FFunctionLoaded += 1;
+end;
 
 begin
-
-  UnloadGlut;
-
-  hDLL := LoadLibrary(PChar(dll));
-  if hDLL = 0 then begin SGLog.Sourse('glut : Could not load Glut from ' + dll); exit; end;
+Result.Clear();
+LoadResult := @Result;
   try
-    @glutInit := GetGLutProcAddress(hDLL, 'glutInit');
-    @glutInitDisplayMode := GetGLutProcAddress(hDLL, 'glutInitDisplayMode');
-    @glutInitDisplayString := GetGLutProcAddress(hDLL, 'glutInitDisplayString');
-    @glutInitWindowPosition := GetGLutProcAddress(hDLL, 'glutInitWindowPosition');
-    @glutInitWindowSize := GetGLutProcAddress(hDLL, 'glutInitWindowSize');
-    @glutMainLoop := GetGLutProcAddress(hDLL, 'glutMainLoop');
-    @glutCreateWindow := GetGLutProcAddress(hDLL, 'glutCreateWindow');
-    @glutCreateSubWindow := GetGLutProcAddress(hDLL, 'glutCreateSubWindow');
-    @glutDestroyWindow := GetGLutProcAddress(hDLL, 'glutDestroyWindow');
-    @glutPostRedisplay := GetGLutProcAddress(hDLL, 'glutPostRedisplay');
-    @glutPostWindowRedisplay := GetGLutProcAddress(hDLL, 'glutPostWindowRedisplay');
-    @glutSwapBuffers := GetGLutProcAddress(hDLL, 'glutSwapBuffers');
-    @glutGetWindow := GetGLutProcAddress(hDLL, 'glutGetWindow');
-    @glutSetWindow := GetGLutProcAddress(hDLL, 'glutSetWindow');
-    @glutSetWindowTitle := GetGLutProcAddress(hDLL, 'glutSetWindowTitle');
-    @glutSetIconTitle := GetGLutProcAddress(hDLL, 'glutSetIconTitle');
-    @glutPositionWindow := GetGLutProcAddress(hDLL, 'glutPositionWindow');
-    @glutReshapeWindow := GetGLutProcAddress(hDLL, 'glutReshapeWindow');
-    @glutPopWindow := GetGLutProcAddress(hDLL, 'glutPopWindow');
-    @glutPushWindow := GetGLutProcAddress(hDLL, 'glutPushWindow');
-    @glutIconifyWindow := GetGLutProcAddress(hDLL, 'glutIconifyWindow');
-    @glutShowWindow := GetGLutProcAddress(hDLL, 'glutShowWindow');
-    @glutHideWindow := GetGLutProcAddress(hDLL, 'glutHideWindow');
-    @glutFullScreen := GetGLutProcAddress(hDLL, 'glutFullScreen');
-    @glutSetCursor := GetGLutProcAddress(hDLL, 'glutSetCursor');
-    @glutWarpPointer := GetGLutProcAddress(hDLL, 'glutWarpPointer');
-    @glutEstablishOverlay := GetGLutProcAddress(hDLL, 'glutEstablishOverlay');
-    @glutRemoveOverlay := GetGLutProcAddress(hDLL, 'glutRemoveOverlay');
-    @glutUseLayer := GetGLutProcAddress(hDLL, 'glutUseLayer');
-    @glutPostOverlayRedisplay := GetGLutProcAddress(hDLL, 'glutPostOverlayRedisplay');
-    @glutPostWindowOverlayRedisplay := GetGLutProcAddress(hDLL, 'glutPostWindowOverlayRedisplay');
-    @glutShowOverlay := GetGLutProcAddress(hDLL, 'glutShowOverlay');
-    @glutHideOverlay := GetGLutProcAddress(hDLL, 'glutHideOverlay');
-    @glutCreateMenu := GetGLutProcAddress(hDLL, 'glutCreateMenu');
-    @glutDestroyMenu := GetGLutProcAddress(hDLL, 'glutDestroyMenu');
-    @glutGetMenu := GetGLutProcAddress(hDLL, 'glutGetMenu');
-    @glutSetMenu := GetGLutProcAddress(hDLL, 'glutSetMenu');
-    @glutAddMenuEntry := GetGLutProcAddress(hDLL, 'glutAddMenuEntry');
-    @glutAddSubMenu := GetGLutProcAddress(hDLL, 'glutAddSubMenu');
-    @glutChangeToMenuEntry := GetGLutProcAddress(hDLL, 'glutChangeToMenuEntry');
-    @glutChangeToSubMenu := GetGLutProcAddress(hDLL, 'glutChangeToSubMenu');
-    @glutRemoveMenuItem := GetGLutProcAddress(hDLL, 'glutRemoveMenuItem');
-    @glutAttachMenu := GetGLutProcAddress(hDLL, 'glutAttachMenu');
-    @glutDetachMenu := GetGLutProcAddress(hDLL, 'glutDetachMenu');
-    @glutDisplayFunc := GetGLutProcAddress(hDLL, 'glutDisplayFunc');
-    @glutReshapeFunc := GetGLutProcAddress(hDLL, 'glutReshapeFunc');
-    @glutKeyboardFunc := GetGLutProcAddress(hDLL, 'glutKeyboardFunc');
-    @glutMouseFunc := GetGLutProcAddress(hDLL, 'glutMouseFunc');
-    @glutMotionFunc := GetGLutProcAddress(hDLL, 'glutMotionFunc');
-    @glutPassiveMotionFunc := GetGLutProcAddress(hDLL, 'glutPassiveMotionFunc');
-    @glutEntryFunc := GetGLutProcAddress(hDLL, 'glutEntryFunc');
-    @glutVisibilityFunc := GetGLutProcAddress(hDLL, 'glutVisibilityFunc');
-    @glutIdleFunc := GetGLutProcAddress(hDLL, 'glutIdleFunc');
-    @glutTimerFunc := GetGLutProcAddress(hDLL, 'glutTimerFunc');
-    @glutMenuStateFunc := GetGLutProcAddress(hDLL, 'glutMenuStateFunc');
-    @glutSpecialFunc := GetGLutProcAddress(hDLL, 'glutSpecialFunc');
-    @glutSpaceballMotionFunc := GetGLutProcAddress(hDLL, 'glutSpaceballMotionFunc');
-    @glutSpaceballRotateFunc := GetGLutProcAddress(hDLL, 'glutSpaceballRotateFunc');
-    @glutSpaceballButtonFunc := GetGLutProcAddress(hDLL, 'glutSpaceballButtonFunc');
-    @glutButtonBoxFunc := GetGLutProcAddress(hDLL, 'glutButtonBoxFunc');
-    @glutDialsFunc := GetGLutProcAddress(hDLL, 'glutDialsFunc');
-    @glutTabletMotionFunc := GetGLutProcAddress(hDLL, 'glutTabletMotionFunc');
-    @glutTabletButtonFunc := GetGLutProcAddress(hDLL, 'glutTabletButtonFunc');
-    @glutMenuStatusFunc := GetGLutProcAddress(hDLL, 'glutMenuStatusFunc');
-    @glutOverlayDisplayFunc := GetGLutProcAddress(hDLL, 'glutOverlayDisplayFunc');
-    @glutWindowStatusFunc := GetGLutProcAddress(hDLL, 'glutWindowStatusFunc');
-    @glutKeyboardUpFunc := GetGLutProcAddress(hDLL, 'glutKeyboardUpFunc');
-    @glutSpecialUpFunc := GetGLutProcAddress(hDLL, 'glutSpecialUpFunc');
-    @glutJoystickFunc := GetGLutProcAddress(hDLL, 'glutJoystickFunc');
-    @glutSetColor := GetGLutProcAddress(hDLL, 'glutSetColor');
-    @glutGetColor := GetGLutProcAddress(hDLL, 'glutGetColor');
-    @glutCopyColormap := GetGLutProcAddress(hDLL, 'glutCopyColormap');
-    @glutGet := GetGLutProcAddress(hDLL, 'glutGet');
-    @glutDeviceGet := GetGLutProcAddress(hDLL, 'glutDeviceGet');
-    @glutExtensionSupported := GetGLutProcAddress(hDLL, 'glutExtensionSupported');
-    @glutGetModifiers := GetGLutProcAddress(hDLL, 'glutGetModifiers');
-    @glutLayerGet := GetGLutProcAddress(hDLL, 'glutLayerGet');
-    @glutBitmapCharacter := GetGLutProcAddress(hDLL, 'glutBitmapCharacter');
-    @glutBitmapWidth := GetGLutProcAddress(hDLL, 'glutBitmapWidth');
-    @glutStrokeCharacter := GetGLutProcAddress(hDLL, 'glutStrokeCharacter');
-    @glutStrokeWidth := GetGLutProcAddress(hDLL, 'glutStrokeWidth');
-    @glutBitmapLength := GetGLutProcAddress(hDLL, 'glutBitmapLength');
-    @glutStrokeLength := GetGLutProcAddress(hDLL, 'glutStrokeLength');
-    @glutWireSphere := GetGLutProcAddress(hDLL, 'glutWireSphere');
-    @glutSolidSphere := GetGLutProcAddress(hDLL, 'glutSolidSphere');
-    @glutWireCone := GetGLutProcAddress(hDLL, 'glutWireCone');
-    @glutSolidCone := GetGLutProcAddress(hDLL, 'glutSolidCone');
-    @glutWireCube := GetGLutProcAddress(hDLL, 'glutWireCube');
-    @glutSolidCube := GetGLutProcAddress(hDLL, 'glutSolidCube');
-    @glutWireTorus := GetGLutProcAddress(hDLL, 'glutWireTorus');
-    @glutSolidTorus := GetGLutProcAddress(hDLL, 'glutSolidTorus');
-    @glutWireDodecahedron := GetGLutProcAddress(hDLL, 'glutWireDodecahedron');
-    @glutSolidDodecahedron := GetGLutProcAddress(hDLL, 'glutSolidDodecahedron');
-    @glutWireTeapot := GetGLutProcAddress(hDLL, 'glutWireTeapot');
-    @glutSolidTeapot := GetGLutProcAddress(hDLL, 'glutSolidTeapot');
-    @glutWireOctahedron := GetGLutProcAddress(hDLL, 'glutWireOctahedron');
-    @glutSolidOctahedron := GetGLutProcAddress(hDLL, 'glutSolidOctahedron');
-    @glutWireTetrahedron := GetGLutProcAddress(hDLL, 'glutWireTetrahedron');
-    @glutSolidTetrahedron := GetGLutProcAddress(hDLL, 'glutSolidTetrahedron');
-    @glutWireIcosahedron := GetGLutProcAddress(hDLL, 'glutWireIcosahedron');
-    @glutSolidIcosahedron := GetGLutProcAddress(hDLL, 'glutSolidIcosahedron');
-    @glutVideoResizeGet := GetGLutProcAddress(hDLL, 'glutVideoResizeGet');
-    @glutSetupVideoResizing := GetGLutProcAddress(hDLL, 'glutSetupVideoResizing');
-    @glutStopVideoResizing := GetGLutProcAddress(hDLL, 'glutStopVideoResizing');
-    @glutVideoResize := GetGLutProcAddress(hDLL, 'glutVideoResize');
-    @glutVideoPan := GetGLutProcAddress(hDLL, 'glutVideoPan');
-    @glutReportErrors := GetGLutProcAddress(hDLL, 'glutReportErrors');
-    @glutIgnoreKeyRepeat := GetGLutProcAddress(hDLL, 'glutIgnoreKeyRepeat');
-    @glutSetKeyRepeat := GetGLutProcAddress(hDLL, 'glutSetKeyRepeat');
-    @glutForceJoystickFunc := GetGLutProcAddress(hDLL, 'glutForceJoystickFunc');
-    @glutGameModeString := GetGLutProcAddress(hDLL, 'glutGameModeString');
-    @glutEnterGameMode := GetGLutProcAddress(hDLL, 'glutEnterGameMode');
-    @glutLeaveGameMode := GetGLutProcAddress(hDLL, 'glutLeaveGameMode');
-    @glutGameModeGet := GetGLutProcAddress(hDLL, 'glutGameModeGet');
+    @glutInit := GetGLutProcAddress('glutInit');
+    @glutInitDisplayMode := GetGLutProcAddress('glutInitDisplayMode');
+    @glutInitDisplayString := GetGLutProcAddress('glutInitDisplayString');
+    @glutInitWindowPosition := GetGLutProcAddress('glutInitWindowPosition');
+    @glutInitWindowSize := GetGLutProcAddress('glutInitWindowSize');
+    @glutMainLoop := GetGLutProcAddress('glutMainLoop');
+    @glutCreateWindow := GetGLutProcAddress('glutCreateWindow');
+    @glutCreateSubWindow := GetGLutProcAddress('glutCreateSubWindow');
+    @glutDestroyWindow := GetGLutProcAddress('glutDestroyWindow');
+    @glutPostRedisplay := GetGLutProcAddress('glutPostRedisplay');
+    @glutPostWindowRedisplay := GetGLutProcAddress('glutPostWindowRedisplay');
+    @glutSwapBuffers := GetGLutProcAddress('glutSwapBuffers');
+    @glutGetWindow := GetGLutProcAddress('glutGetWindow');
+    @glutSetWindow := GetGLutProcAddress('glutSetWindow');
+    @glutSetWindowTitle := GetGLutProcAddress('glutSetWindowTitle');
+    @glutSetIconTitle := GetGLutProcAddress('glutSetIconTitle');
+    @glutPositionWindow := GetGLutProcAddress('glutPositionWindow');
+    @glutReshapeWindow := GetGLutProcAddress('glutReshapeWindow');
+    @glutPopWindow := GetGLutProcAddress('glutPopWindow');
+    @glutPushWindow := GetGLutProcAddress('glutPushWindow');
+    @glutIconifyWindow := GetGLutProcAddress('glutIconifyWindow');
+    @glutShowWindow := GetGLutProcAddress('glutShowWindow');
+    @glutHideWindow := GetGLutProcAddress('glutHideWindow');
+    @glutFullScreen := GetGLutProcAddress('glutFullScreen');
+    @glutSetCursor := GetGLutProcAddress('glutSetCursor');
+    @glutWarpPointer := GetGLutProcAddress('glutWarpPointer');
+    @glutEstablishOverlay := GetGLutProcAddress('glutEstablishOverlay');
+    @glutRemoveOverlay := GetGLutProcAddress('glutRemoveOverlay');
+    @glutUseLayer := GetGLutProcAddress('glutUseLayer');
+    @glutPostOverlayRedisplay := GetGLutProcAddress('glutPostOverlayRedisplay');
+    @glutPostWindowOverlayRedisplay := GetGLutProcAddress('glutPostWindowOverlayRedisplay');
+    @glutShowOverlay := GetGLutProcAddress('glutShowOverlay');
+    @glutHideOverlay := GetGLutProcAddress('glutHideOverlay');
+    @glutCreateMenu := GetGLutProcAddress('glutCreateMenu');
+    @glutDestroyMenu := GetGLutProcAddress('glutDestroyMenu');
+    @glutGetMenu := GetGLutProcAddress('glutGetMenu');
+    @glutSetMenu := GetGLutProcAddress('glutSetMenu');
+    @glutAddMenuEntry := GetGLutProcAddress('glutAddMenuEntry');
+    @glutAddSubMenu := GetGLutProcAddress('glutAddSubMenu');
+    @glutChangeToMenuEntry := GetGLutProcAddress('glutChangeToMenuEntry');
+    @glutChangeToSubMenu := GetGLutProcAddress('glutChangeToSubMenu');
+    @glutRemoveMenuItem := GetGLutProcAddress('glutRemoveMenuItem');
+    @glutAttachMenu := GetGLutProcAddress('glutAttachMenu');
+    @glutDetachMenu := GetGLutProcAddress('glutDetachMenu');
+    @glutDisplayFunc := GetGLutProcAddress('glutDisplayFunc');
+    @glutReshapeFunc := GetGLutProcAddress('glutReshapeFunc');
+    @glutKeyboardFunc := GetGLutProcAddress('glutKeyboardFunc');
+    @glutMouseFunc := GetGLutProcAddress('glutMouseFunc');
+    @glutMotionFunc := GetGLutProcAddress('glutMotionFunc');
+    @glutPassiveMotionFunc := GetGLutProcAddress('glutPassiveMotionFunc');
+    @glutEntryFunc := GetGLutProcAddress('glutEntryFunc');
+    @glutVisibilityFunc := GetGLutProcAddress('glutVisibilityFunc');
+    @glutIdleFunc := GetGLutProcAddress('glutIdleFunc');
+    @glutTimerFunc := GetGLutProcAddress('glutTimerFunc');
+    @glutMenuStateFunc := GetGLutProcAddress('glutMenuStateFunc');
+    @glutSpecialFunc := GetGLutProcAddress('glutSpecialFunc');
+    @glutSpaceballMotionFunc := GetGLutProcAddress('glutSpaceballMotionFunc');
+    @glutSpaceballRotateFunc := GetGLutProcAddress('glutSpaceballRotateFunc');
+    @glutSpaceballButtonFunc := GetGLutProcAddress('glutSpaceballButtonFunc');
+    @glutButtonBoxFunc := GetGLutProcAddress('glutButtonBoxFunc');
+    @glutDialsFunc := GetGLutProcAddress('glutDialsFunc');
+    @glutTabletMotionFunc := GetGLutProcAddress('glutTabletMotionFunc');
+    @glutTabletButtonFunc := GetGLutProcAddress('glutTabletButtonFunc');
+    @glutMenuStatusFunc := GetGLutProcAddress('glutMenuStatusFunc');
+    @glutOverlayDisplayFunc := GetGLutProcAddress('glutOverlayDisplayFunc');
+    @glutWindowStatusFunc := GetGLutProcAddress('glutWindowStatusFunc');
+    @glutKeyboardUpFunc := GetGLutProcAddress('glutKeyboardUpFunc');
+    @glutSpecialUpFunc := GetGLutProcAddress('glutSpecialUpFunc');
+    @glutJoystickFunc := GetGLutProcAddress('glutJoystickFunc');
+    @glutSetColor := GetGLutProcAddress('glutSetColor');
+    @glutGetColor := GetGLutProcAddress('glutGetColor');
+    @glutCopyColormap := GetGLutProcAddress('glutCopyColormap');
+    @glutGet := GetGLutProcAddress('glutGet');
+    @glutDeviceGet := GetGLutProcAddress('glutDeviceGet');
+    @glutExtensionSupported := GetGLutProcAddress('glutExtensionSupported');
+    @glutGetModifiers := GetGLutProcAddress('glutGetModifiers');
+    @glutLayerGet := GetGLutProcAddress('glutLayerGet');
+    @glutBitmapCharacter := GetGLutProcAddress('glutBitmapCharacter');
+    @glutBitmapWidth := GetGLutProcAddress('glutBitmapWidth');
+    @glutStrokeCharacter := GetGLutProcAddress('glutStrokeCharacter');
+    @glutStrokeWidth := GetGLutProcAddress('glutStrokeWidth');
+    @glutBitmapLength := GetGLutProcAddress('glutBitmapLength');
+    @glutStrokeLength := GetGLutProcAddress('glutStrokeLength');
+    @glutWireSphere := GetGLutProcAddress('glutWireSphere');
+    @glutSolidSphere := GetGLutProcAddress('glutSolidSphere');
+    @glutWireCone := GetGLutProcAddress('glutWireCone');
+    @glutSolidCone := GetGLutProcAddress('glutSolidCone');
+    @glutWireCube := GetGLutProcAddress('glutWireCube');
+    @glutSolidCube := GetGLutProcAddress('glutSolidCube');
+    @glutWireTorus := GetGLutProcAddress('glutWireTorus');
+    @glutSolidTorus := GetGLutProcAddress('glutSolidTorus');
+    @glutWireDodecahedron := GetGLutProcAddress('glutWireDodecahedron');
+    @glutSolidDodecahedron := GetGLutProcAddress('glutSolidDodecahedron');
+    @glutWireTeapot := GetGLutProcAddress('glutWireTeapot');
+    @glutSolidTeapot := GetGLutProcAddress('glutSolidTeapot');
+    @glutWireOctahedron := GetGLutProcAddress('glutWireOctahedron');
+    @glutSolidOctahedron := GetGLutProcAddress('glutSolidOctahedron');
+    @glutWireTetrahedron := GetGLutProcAddress('glutWireTetrahedron');
+    @glutSolidTetrahedron := GetGLutProcAddress('glutSolidTetrahedron');
+    @glutWireIcosahedron := GetGLutProcAddress('glutWireIcosahedron');
+    @glutSolidIcosahedron := GetGLutProcAddress('glutSolidIcosahedron');
+    @glutVideoResizeGet := GetGLutProcAddress('glutVideoResizeGet');
+    @glutSetupVideoResizing := GetGLutProcAddress('glutSetupVideoResizing');
+    @glutStopVideoResizing := GetGLutProcAddress('glutStopVideoResizing');
+    @glutVideoResize := GetGLutProcAddress('glutVideoResize');
+    @glutVideoPan := GetGLutProcAddress('glutVideoPan');
+    @glutReportErrors := GetGLutProcAddress('glutReportErrors');
+    @glutIgnoreKeyRepeat := GetGLutProcAddress('glutIgnoreKeyRepeat');
+    @glutSetKeyRepeat := GetGLutProcAddress('glutSetKeyRepeat');
+    @glutForceJoystickFunc := GetGLutProcAddress('glutForceJoystickFunc');
+    @glutGameModeString := GetGLutProcAddress('glutGameModeString');
+    @glutEnterGameMode := GetGLutProcAddress('glutEnterGameMode');
+    @glutLeaveGameMode := GetGLutProcAddress('glutLeaveGameMode');
+    @glutGameModeGet := GetGLutProcAddress('glutGameModeGet');
 {$ifndef Windows}
-    GLUT_STROKE_ROMAN := GetGLutProcAddress(hDll, 'glutStrokeRoman');
+    GLUT_STROKE_ROMAN := GetGLutProcAddress('glutStrokeRoman');
     GLUT_STROKE_MONO_ROMAN := GetGLutProcAddress(hDll,'glutStrokeMonoRoman');
-    GLUT_BITMAP_9_BY_15 := GetGLutProcAddress(hDll, 'glutBitmap9By15');
-    GLUT_BITMAP_8_BY_13 := GetGLutProcAddress(hDll, 'glutBitmap8By13');
-    GLUT_BITMAP_TIMES_ROMAN_10 := GetGLutProcAddress(hDll, 'glutBitmapTimesRoman10');
-    GLUT_BITMAP_TIMES_ROMAN_24 := GetGLutProcAddress(hDll, 'glutBitmapTimesRoman24');
-    GLUT_BITMAP_HELVETICA_10 := GetGLutProcAddress(hDll, 'glutBitmapHelvetica10');
-    GLUT_BITMAP_HELVETICA_12 := GetGLutProcAddress(hDll, 'glutBitmapHelvetica12');
+    GLUT_BITMAP_9_BY_15 := GetGLutProcAddress('glutBitmap9By15');
+    GLUT_BITMAP_8_BY_13 := GetGLutProcAddress('glutBitmap8By13');
+    GLUT_BITMAP_TIMES_ROMAN_10 := GetGLutProcAddress('glutBitmapTimesRoman10');
+    GLUT_BITMAP_TIMES_ROMAN_24 := GetGLutProcAddress('glutBitmapTimesRoman24');
+    GLUT_BITMAP_HELVETICA_10 := GetGLutProcAddress('glutBitmapHelvetica10');
+    GLUT_BITMAP_HELVETICA_12 := GetGLutProcAddress('glutBitmapHelvetica12');
     GLUT_BITMAP_HELVETICA_18 := GetGLutProcAddress(hDll, 'glutBitmapHelvetica18');
 {$endif Windows}
   except
-    SGLog.Sourse('glut : Exception while loading!!!');
+    
   end;
-  SGLog.Sourse(['glut : Initialization from ' + dll + ': Loaded ',SGStrReal(LoadedGlutFuncions/AllGlutFuncions*100,3),'% ('+SGStr(LoadedGlutFuncions)+'/'+SGStr(AllGlutFuncions)+')']);
-  LoadFreeGlut(hDLL);
-  GLUTLoaded := (hDLL <> 0) and (LoadedGlutFuncions <> 0);
 end;
 {$ENDIF MORPHOS}
 
+class function TSGDllGLUT.SystemNames() : TSGStringList; 
+begin
+Result := 'GLUT';
+Result += 'LibGlut';
+Result += 'Glut32';
+end;
+
+class function TSGDllGLUT.DllNames() : TSGStringList;
+begin
+{$IFDEF Windows}
+Result := 'glut32.dll';
+{$ELSE}
+{$ifdef darwin}
+Result := '/System/Library/Frameworks/GLUT.framework/GLUT';
+{$else}
+{$IFDEF haiku}
+Result := 'libglut.so';
+{$ELSE}
+{$IFNDEF MORPHOS}
+Result := 'libglut.so.3';
+{$ENDIF}
+{$ENDIF}
+{$endif}
+{$ENDIF}
+end;
 
 initialization
 begin
-  UnloadGlut();
-  {$IFDEF Windows}
-  LoadGlut('glut32.dll');
-  {$ELSE}
-  {$ifdef darwin}
-  LoadGlut('/System/Library/Frameworks/GLUT.framework/GLUT');
-  {$else}
-  {$IFDEF haiku}
-  LoadGlut('libglut.so');
-  {$ELSE}
-  {$IFNDEF MORPHOS}
-  LoadGlut('libglut.so.3');
-  {$ENDIF}
-  {$ENDIF}
-  {$endif}
-  {$ENDIF}
+TSGDllGLUT.Create();
 end;
 
-finalization
-begin
-  UnloadGlut;
-end;
 end.

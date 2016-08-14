@@ -1325,7 +1325,8 @@ implementation
 uses
 	SaGeBase
 	,SaGeBased
-	,SaGeDllManager;
+	,SaGeDllManager
+	;
 
 type
 	TSGDllPNG = class(TSGDll)

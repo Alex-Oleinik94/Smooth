@@ -135,33 +135,64 @@ var
   glutInitContextFlags: procedure(flags: Integer); extdecl;
   glutInitContextProfile: procedure(profile: Integer); extdecl;
 
-{ Load all freeglut functions from given library.
-  Called automatically from Glut unit when standard Glut stuff is loaded. }
-procedure LoadFreeGlut(hDLL: TLibHandle);
-
-{ Set to nil all freeglut functions.
-  Called automatically from Glut unit when standard Glut stuff is unloaded. }
-procedure UnloadFreeGlut;
-
 implementation
 
 uses
-	SaGeBase,SaGeBased;
+	 SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
 
-procedure LoadFreeGlut(hDLL: TLibHandle);
+type
+	TSGDllFreeGLUT = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllFreeGLUT.SystemNames() : TSGStringList; 
+begin
+Result := 'FreeGLUT';
+Result += 'LibFreeGlut';
+Result += 'FreeGlut32';
+end;
+
+class function TSGDllFreeGLUT.DllNames() : TSGStringList;
+begin
+{$IFDEF Windows}
+Result := 'glut32.dll';
+{$ELSE}
+{$ifdef darwin}
+Result := '/System/Library/Frameworks/GLUT.framework/GLUT';
+{$else}
+{$IFDEF haiku}
+Result := 'libglut.so';
+{$ELSE}
+{$IFNDEF MORPHOS}
+Result := 'libglut.so.3';
+{$ENDIF}
+{$ENDIF}
+{$endif}
+{$ENDIF}
+end;
+
+class function TSGDllFreeGLUT.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	AllGlutFuncions : TSGLongWord = 0;
-	LoadedGlutFuncions : TSGLongWord = 0;
+	LoadResult : PSGDllLoadObject = nil;
 
 function fglutGetProcAddress(const S : PChar):Pointer;
 begin
-Result := GetProcAddress(hDLL, S);
-AllGlutFuncions += 1;
+Result := GetProcAddress(VDll, S);
+LoadResult^.FFunctionCount += 1;
 if Result <> nil then
-	LoadedGlutFuncions += 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
 
 begin
+Result.Clear();
+LoadResult := @Result;
   @glutMainLoopEvent := fglutGetProcAddress('glutMainLoopEvent');
   @glutLeaveMainLoop := fglutGetProcAddress('glutLeaveMainLoop');
   @glutExit := fglutGetProcAddress('glutExit');
@@ -188,10 +219,9 @@ begin
   @glutInitContextVersion := fglutGetProcAddress('glutInitContextVersion');
   @glutInitContextFlags := fglutGetProcAddress('glutInitContextFlags');
   @glutInitContextProfile := fglutGetProcAddress('glutInitContextProfile');
-  SGLog.Sourse(['freeglut : Initialization : Loaded ',SGStrReal(LoadedGlutFuncions/AllGlutFuncions*100,3),'% ('+SGStr(LoadedGlutFuncions)+'/'+SGStr(AllGlutFuncions)+')']);
 end;
 
-procedure UnloadFreeGlut;
+class procedure TSGDllFreeGLUT.Free(); 
 begin
   @glutMainLoopEvent := nil;
   @glutLeaveMainLoop := nil;
@@ -219,6 +249,11 @@ begin
   @glutInitContextVersion := nil;
   @glutInitContextFlags := nil;
   @glutInitContextProfile := nil;
+end;
+
+initialization
+begin
+TSGDllFreeGLUT.Create();
 end;
 
 end.

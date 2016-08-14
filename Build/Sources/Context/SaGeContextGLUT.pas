@@ -60,9 +60,12 @@ type
 implementation
 
 uses
-	SaGeRenderOpenGL,
-	SaGeCommonClasses,
-	SaGeRender;
+	SaGeRenderOpenGL
+	,SaGeCommonClasses
+	,SaGeRender
+	,SaGeDllManager
+	;
+
 var
 	ContextGLUT : TSGContextGLUT = nil;
 
@@ -86,7 +89,7 @@ end;
 
 class function TSGContextGLUT.Suppored() : TSGBoolean;
 begin
-Result := GLUT.GLUTLoaded;
+Result := DllManager.DllSuppored('glut');
 end;
 
 function  TSGContextGLUT.GetClientWidth() : TSGAreaInt;

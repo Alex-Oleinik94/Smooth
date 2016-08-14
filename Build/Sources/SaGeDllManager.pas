@@ -52,6 +52,7 @@ type
 		function Loading() : TSGBool;
 		function CustomLoading() : TSGBool;
 		function ReLoading() : TSGBool;
+		procedure LoadingChilds();
 			public
 		class function ChildNames() : TSGStringList; virtual;
 		
@@ -480,6 +481,29 @@ if not FLoaded then
 FLoadExecuted := True;
 Result := FLoaded;
 LogStat();
+if FLoaded then
+	LoadingChilds();
+end;
+
+procedure TSGDll.LoadingChilds();
+var
+	Childs : TSGStringList;
+	i : TSGUInt32;
+begin
+if FOwner <> nil then
+	begin
+	Childs := ChildNames();
+	if Childs <> nil then
+		begin
+		if Length(Childs) > 0 then
+			begin
+			for i := 0 to High(Childs) do
+				FOwner.DllSuppored(Childs[i]);
+			SetLength(Childs, 0);
+			end;
+		Childs := nil;
+		end;
+	end;
 end;
 
 function TSGDll.ReLoading() : TSGBool;
