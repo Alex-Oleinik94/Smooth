@@ -65,26 +65,34 @@ const
 
 type
 	TSGConcoleCallerProcedure = procedure (const VParams : TSGConcoleCallerParams = nil);
+	TSGConcoleCallerNestedHelpFunction = function () : TSGString is nested;
 	TSGConcoleCallerNestedProcedure = function (const VParam : TSGString) : TSGBool is nested;
+	TSGConsoleCallerComand = object
+			public
+		FComand             : TSGConcoleCallerProcedure;
+		FNestedComand       : TSGConcoleCallerNestedProcedure;
+		FNestedHelpFunction : TSGConcoleCallerNestedHelpFunction;
+		FSyntax             : TSGConcoleCallerParams;
+		FHelpString         : TSGString;
+		FCategory           : TSGString;
+			public
+		procedure Free();
+		end;
+	TSGConsoleCallerComands = packed array of TSGConsoleCallerComand;
+	
 	TSGConsoleCaller = class
 			public
 		constructor Create(const VParams : TSGConcoleCallerParams);
 		destructor Destroy();override;
 		procedure AddComand(const VComand       : TSGConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		function Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Category(const VC : TSGString);
 			private
 		FCurrentCategory : TSGString;
 		FParams : TSGConcoleCallerParams;
-		FComands : packed array of
-			packed record
-				FComand       : TSGConcoleCallerProcedure;
-				FNestedComand : TSGConcoleCallerNestedProcedure;
-				FSyntax       : TSGConcoleCallerParams;
-				FHelpString   : TSGString;
-				FCategory     : TSGString;
-				end;
+		FComands : TSGConsoleCallerComands;
 			private
 		function AllNested() : TSGBool;
 		function AllNormal() : TSGBool;
@@ -502,6 +510,16 @@ if (FComands <> nil) and (Length(FComands)>0) then
 inherited;
 end;
 
+procedure TSGConsoleCallerComand.Free();
+begin
+FComand             := nil;
+FNestedComand       := nil;
+FNestedHelpFunction := nil;
+FSyntax             := nil;
+FHelpString         := '';
+FCategory           := '';
+end;
+
 procedure TSGConsoleCaller.AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	i : TSGLongWord;
@@ -510,8 +528,8 @@ if FComands = nil then
 	SetLength(FComands, 1)
 else
 	SetLength(FComands, Length(FComands) + 1);
+FComands[High(FComands)].Free();
 FComands[High(FComands)].FComand := VComand;
-FComands[High(FComands)].FNestedComand := nil;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
@@ -528,9 +546,27 @@ if FComands = nil then
 	SetLength(FComands, 1)
 else
 	SetLength(FComands, Length(FComands) + 1);
-FComands[High(FComands)].FComand := nil;
+FComands[High(FComands)].Free();
 FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FHelpString := VHelp;
+FComands[High(FComands)].FCategory := FCurrentCategory;
+FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
+if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
+	for i := 0 to High(FComands[High(FComands)].FSyntax) do
+		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
+end;
+
+procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i : TSGLongWord;
+begin
+if FComands = nil then
+	SetLength(FComands, 1)
+else
+	SetLength(FComands, Length(FComands) + 1);
+FComands[High(FComands)].Free();
+FComands[High(FComands)].FNestedComand := VNestedComand;
+FComands[High(FComands)].FNestedHelpFunction := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
 if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
@@ -741,6 +777,8 @@ if (FComands <> nil) and (Length(FComands)>0) then
 				Write(' ');
 				iii += 1;
 				end;
+			if FComands[i].FNestedHelpFunction <> nil then
+				FComands[i].FHelpString := FComands[i].FNestedHelpFunction();
 			WriteLn(' - ',FComands[i].FHelpString);
 			TextColor(StandartColor);
 			end;
@@ -1298,6 +1336,26 @@ begin
 Result := Iff(not B,', but it is impossible!','')
 end;
 
+function HelpFuncGLUT() : TSGString;
+begin
+Result := 'For use GLUT' + ImposibleParam(IsGLUTSuppored());
+end;
+
+function HelpFuncDX8() : TSGString;
+begin
+Result := 'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored());
+end;
+
+function HelpFuncDX9() : TSGString;
+begin
+Result := 'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored());
+end;
+
+function HelpFuncDX12() : TSGString;
+begin
+Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored());
+end;
+
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
 begin
@@ -1308,10 +1366,10 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	begin
 	ConsoleCaller := TSGConsoleCaller.Create(VParams);
 	ConsoleCaller.Category('Context settings');
-	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               'For use GLUT' +          ImposibleParam(IsGLUTSuppored()));
-	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored()));
-	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored()));
-	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored()));
+	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
+	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
+	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
+	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
 	ConsoleCaller.Category('Window settings');
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
 	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');

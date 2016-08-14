@@ -265,8 +265,7 @@ end;
 
 function TSGDllManager.Loading(const VDll : TSGDll) : TSGBool;
 begin
-VDll.Loading();
-Result := VDll.Loaded;
+Result := VDll.Loading();
 end;
 
 // ======================================== TSGDll
