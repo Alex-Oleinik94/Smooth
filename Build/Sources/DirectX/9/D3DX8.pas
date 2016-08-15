@@ -309,67 +309,74 @@ function D3DXVec2Scale(out vOut: TD3DXVector2; const v: TD3DXVector2; s: Single)
 // Linear interpolation. V1 + s(V2-V1)
 function D3DXVec2Lerp(out vOut: TD3DXVector2; const v1, v2: TD3DXVector2; s: Single): PD3DXVector2;
 
-// non-inline
+// non-inline
+
 (*
 
 function D3DXVec2Normalize(out vOut: TD3DXVector2; const v: TD3DXVector2): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2Normalize : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2Normalize : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ) : PD3DXVector2 ; stdcall ;
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 
 function D3DXVec2Hermite(out vOut: TD3DXVector2;
    const v1, t1, v2, t2: TD3DXVector2; s: Single): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2Hermite : function( out vOut : TD3DXVector2 ; const v1 , t1 , v2 , t2 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2Hermite : function( out vOut : TD3DXVector2 ; const v1 , t1 , v2 , t2 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ;
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 
 function D3DXVec2CatmullRom(out vOut: TD3DXVector2;
    const v0, v1, v2, v3: TD3DXVector2; s: Single): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2CatmullRom : function( out vOut : TD3DXVector2 ; const v0 , v1 , v2 , v3 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2CatmullRom : function( out vOut : TD3DXVector2 ; const v0 , v1 , v2 , v3 : TD3DXVector2 ; s : Single ) : PD3DXVector2 ; stdcall ;
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 
 function D3DXVec2BaryCentric(out vOut: TD3DXVector2;
    const v1, v2, v3: TD3DXVector2; f, g: Single): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2BaryCentric : function( out vOut : TD3DXVector2 ; const v1 , v2 , v3 : TD3DXVector2 ; f , g : Single ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2BaryCentric : function( out vOut : TD3DXVector2 ; const v1 , v2 , v3 : TD3DXVector2 ; f , g : Single ) : PD3DXVector2 ; stdcall ;
 
 
-// Transform (x, y, 0, 1) by matrix.
+// Transform (x, y, 0, 1) by matrix.
+
 (*
 
 function D3DXVec2Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec2Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec2Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ;
 
 
-// Transform (x, y, 0, 1) by matrix, project result back into w=1.
+// Transform (x, y, 0, 1) by matrix, project result back into w=1.
+
 (*
 
 function D3DXVec2TransformCoord(out vOut: TD3DXVector2;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2TransformCoord : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2TransformCoord : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector2 ; stdcall ;
 
 
-// Transform (x, y, 0, 0) by matrix.
+// Transform (x, y, 0, 0) by matrix.
+
 (*
 
 function D3DXVec2TransformNormal(out vOut: TD3DXVector2;
   const v: TD3DXVector2; const m: TD3DXMatrix): PD3DXVector2; stdcall; external d3dx8dll;
 *)
-var D3DXVec2TransformNormal : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector2 ; stdcall ; 
+var D3DXVec2TransformNormal : function( out vOut : TD3DXVector2 ; const v : TD3DXVector2 ; const m : TD3DXMatrix ) : PD3DXVector2 ; stdcall ;
 
 
 
@@ -403,91 +410,100 @@ function D3DXVec3Scale(out vOut: TD3DXVector3; const v: TD3DXVector3; s: Single)
 function D3DXVec3Lerp(out vOut: TD3DXVector3;
   const v1, v2: TD3DXVector3; s: Single): PD3DXVector3;
 
-// non-inline
+// non-inline
+
 (*
 
 
 function D3DXVec3Normalize(out vOut: TD3DXVector3;
    const v: TD3DXVector3): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3Normalize : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3Normalize : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ) : PD3DXVector3 ; stdcall ;
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 
 function D3DXVec3Hermite(out vOut: TD3DXVector3;
    const v1, t1, v2, t2: TD3DXVector3; s: Single): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3Hermite : function( out vOut : TD3DXVector3 ; const v1 , t1 , v2 , t2 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3Hermite : function( out vOut : TD3DXVector3 ; const v1 , t1 , v2 , t2 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ;
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 
 function D3DXVec3CatmullRom(out vOut: TD3DXVector3;
    const v0, v1, v2, v3: TD3DXVector3; s: Single): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3CatmullRom : function( out vOut : TD3DXVector3 ; const v0 , v1 , v2 , v3 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3CatmullRom : function( out vOut : TD3DXVector3 ; const v0 , v1 , v2 , v3 : TD3DXVector3 ; s : Single ) : PD3DXVector3 ; stdcall ;
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 
 function D3DXVec3BaryCentric(out vOut: TD3DXVector3;
    const v1, v2, v3: TD3DXVector3; f, g: Single): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3BaryCentric : function( out vOut : TD3DXVector3 ; const v1 , v2 , v3 : TD3DXVector3 ; f , g : Single ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3BaryCentric : function( out vOut : TD3DXVector3 ; const v1 , v2 , v3 : TD3DXVector3 ; f , g : Single ) : PD3DXVector3 ; stdcall ;
 
 
-// Transform (x, y, z, 1) by matrix.
+// Transform (x, y, z, 1) by matrix.
+
 (*
 
 function D3DXVec3Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec3Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec3Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ;
 
 
-// Transform (x, y, z, 1) by matrix, project result back into w=1.
+// Transform (x, y, z, 1) by matrix, project result back into w=1.
+
 (*
 
 function D3DXVec3TransformCoord(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3TransformCoord : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3TransformCoord : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector3 ; stdcall ;
 
 
 // Transform (x, y, z, 0) by matrix.  If you transforming a normal by a
 // non-affine matrix, the matrix you pass to this function should be the
-// transpose of the inverse of the matrix you would use to transform a coord.
+// transpose of the inverse of the matrix you would use to transform a coord.
+
 (*
 
 function D3DXVec3TransformNormal(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const m: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3TransformNormal : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3TransformNormal : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const m : TD3DXMatrix ) : PD3DXVector3 ; stdcall ;
 
 
-// Project vector from object space into screen space
+// Project vector from object space into screen space
+
 (*
 
 function D3DXVec3Project(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const pViewport: TD3DViewport8;
   const pProjection, pView, pWorld: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3Project : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport8 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3Project : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport8 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ;
 
 
-// Project vector from screen space into object space
+// Project vector from screen space into object space
+
 (*
 
 function D3DXVec3Unproject(out vOut: TD3DXVector3;
   const v: TD3DXVector3; const pViewport: TD3DViewport8;
   const pProjection, pView, pWorld: TD3DXMatrix): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXVec3Unproject : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport8 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ; 
+var D3DXVec3Unproject : function( out vOut : TD3DXVector3 ; const v : TD3DXVector3 ; const pViewport : TD3DViewport8 ; const pProjection , pView , pWorld : TD3DXMatrix ) : PD3DXVector3 ; stdcall ;
 
 
 
@@ -521,13 +537,14 @@ function D3DXVec4Lerp(out vOut: TD3DXVector4;
 
 // non-inline
 
-// Cross-product in 4 dimensions.
+// Cross-product in 4 dimensions.
+
 (*
 
 function D3DXVec4Cross(out vOut: TD3DXVector4;
   const v1, v2, v3: TD3DXVector4): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4Cross : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3DXVector4 ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4Cross : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3DXVector4 ) : PD3DXVector4 ; stdcall ;
 
 (*
 
@@ -535,44 +552,48 @@ var D3DXVec4Cross : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3
 function D3DXVec4Normalize(out vOut: TD3DXVector4;
   const v: TD3DXVector4): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4Normalize : function( out vOut : TD3DXVector4 ; const v : TD3DXVector4 ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4Normalize : function( out vOut : TD3DXVector4 ; const v : TD3DXVector4 ) : PD3DXVector4 ; stdcall ;
 
 
 // Hermite interpolation between position V1, tangent T1 (when s == 0)
-// and position V2, tangent T2 (when s == 1).
+// and position V2, tangent T2 (when s == 1).
+
 (*
 
 function D3DXVec4Hermite(out vOut: TD3DXVector4;
    const v1, t1, v2, t2: TD3DXVector4; s: Single): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4Hermite : function( out vOut : TD3DXVector4 ; const v1 , t1 , v2 , t2 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4Hermite : function( out vOut : TD3DXVector4 ; const v1 , t1 , v2 , t2 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ;
 
 
-// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+// CatmullRom interpolation between V1 (when s == 0) and V2 (when s == 1)
+
 (*
 
 function D3DXVec4CatmullRom(out vOut: TD3DXVector4;
    const v0, v1, v2, v3: TD3DXVector4; s: Single): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4CatmullRom : function( out vOut : TD3DXVector4 ; const v0 , v1 , v2 , v3 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4CatmullRom : function( out vOut : TD3DXVector4 ; const v0 , v1 , v2 , v3 : TD3DXVector4 ; s : Single ) : PD3DXVector4 ; stdcall ;
 
 
-// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+// Barycentric coordinates.  V1 + f(V2-V1) + g(V3-V1)
+
 (*
 
 function D3DXVec4BaryCentric(out vOut: TD3DXVector4;
    const v1, v2, v3: TD3DXVector4; f, g: Single): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4BaryCentric : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3DXVector4 ; f , g : Single ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4BaryCentric : function( out vOut : TD3DXVector4 ; const v1 , v2 , v3 : TD3DXVector4 ; f , g : Single ) : PD3DXVector4 ; stdcall ;
 
 
-// Transform vector by matrix.
+// Transform vector by matrix.
+
 (*
 
 function D3DXVec4Transform(out vOut: TD3DXVector4;
   const v: TD3DXVector4; const m: TD3DXMatrix): PD3DXVector4; stdcall; external d3dx8dll;
 *)
-var D3DXVec4Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector4 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ; 
+var D3DXVec4Transform : function( out vOut : TD3DXVector4 ; const v : TD3DXVector4 ; const m : TD3DXMatrix ) : PD3DXVector4 ; stdcall ;
 
 
 
@@ -586,119 +607,132 @@ function D3DXMatrixIdentity(out mOut: TD3DXMatrix): PD3DXMatrix;
 
 function D3DXMatrixIsIdentity(const m: TD3DXMatrix): BOOL;
 
-// non-inline
+// non-inline
+
 (*
 
 
 function D3DXMatrixfDeterminant(const m: TD3DXMatrix): Single; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixfDeterminant : function( const m : TD3DXMatrix ) : Single ; stdcall ; 
+var D3DXMatrixfDeterminant : function( const m : TD3DXMatrix ) : Single ; stdcall ;
 
 (*
 
 
 function D3DXMatrixTranspose(out pOut: TD3DXMatrix; const pM: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixTranspose : function( out pOut : TD3DXMatrix ; const pM : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixTranspose : function( out pOut : TD3DXMatrix ; const pM : TD3DXMatrix ) : PD3DXMatrix ; stdcall ;
 
 
 // Matrix multiplication.  The result represents the transformation M2
-// followed by the transformation M1.  (Out = M1 * M2)
+// followed by the transformation M1.  (Out = M1 * M2)
+
 (*
 
 function D3DXMatrixMultiply(out mOut: TD3DXMatrix; const m1, m2: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixMultiply : function( out mOut : TD3DXMatrix ; const m1 , m2 : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixMultiply : function( out mOut : TD3DXMatrix ; const m1 , m2 : TD3DXMatrix ) : PD3DXMatrix ; stdcall ;
 
 
-// Matrix multiplication, followed by a transpose. (Out = T(M1 * M2))
+// Matrix multiplication, followed by a transpose. (Out = T(M1 * M2))
+
 (*
 
 function D3DXMatrixMultiplyTranspose(out pOut: TD3DXMatrix; const pM1, pM2: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixMultiplyTranspose : function( out pOut : TD3DXMatrix ; const pM1 , pM2 : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixMultiplyTranspose : function( out pOut : TD3DXMatrix ; const pM1 , pM2 : TD3DXMatrix ) : PD3DXMatrix ; stdcall ;
 
 
 // Calculate inverse of matrix.  Inversion my fail, in which case NULL will
 // be returned.  The determinant of pM is also returned it pfDeterminant
-// is non-NULL.
+// is non-NULL.
+
 (*
 
 function D3DXMatrixInverse(out mOut: TD3DXMatrix; pfDeterminant: PSingle;
     const m: TD3DXMatrix): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixInverse : function( out mOut : TD3DXMatrix ; pfDeterminant : PSingle ; const m : TD3DXMatrix ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixInverse : function( out mOut : TD3DXMatrix ; pfDeterminant : PSingle ; const m : TD3DXMatrix ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which scales by (sx, sy, sz)
+// Build a matrix which scales by (sx, sy, sz)
+
 (*
 
 function D3DXMatrixScaling(out mOut: TD3DXMatrix; sx, sy, sz: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixScaling : function( out mOut : TD3DXMatrix ; sx , sy , sz : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixScaling : function( out mOut : TD3DXMatrix ; sx , sy , sz : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which translates by (x, y, z)
+// Build a matrix which translates by (x, y, z)
+
 (*
 
 function D3DXMatrixTranslation(out mOut: TD3DXMatrix; x, y, z: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixTranslation : function( out mOut : TD3DXMatrix ; x , y , z : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixTranslation : function( out mOut : TD3DXMatrix ; x , y , z : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which rotates around the X axis
+// Build a matrix which rotates around the X axis
+
 (*
 
 function D3DXMatrixRotationX(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationX : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationX : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which rotates around the Y axis
+// Build a matrix which rotates around the Y axis
+
 (*
 
 function D3DXMatrixRotationY(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationY : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationY : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which rotates around the Z axis
+// Build a matrix which rotates around the Z axis
+
 (*
 
 function D3DXMatrixRotationZ(out mOut: TD3DXMatrix; angle: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationZ : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationZ : function( out mOut : TD3DXMatrix ; angle : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which rotates around an arbitrary axis
+// Build a matrix which rotates around an arbitrary axis
+
 (*
 
 function D3DXMatrixRotationAxis(out mOut: TD3DXMatrix; const v: TD3DXVector3;
   angle: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationAxis : function( out mOut : TD3DXMatrix ; const v : TD3DXVector3 ; angle : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationAxis : function( out mOut : TD3DXMatrix ; const v : TD3DXVector3 ; angle : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix from a quaternion
+// Build a matrix from a quaternion
+
 (*
 
 function D3DXMatrixRotationQuaternion(out mOut: TD3DXMatrix; const Q: TD3DXQuaternion): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationQuaternion : function( out mOut : TD3DXMatrix ; const Q : TD3DXQuaternion ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationQuaternion : function( out mOut : TD3DXMatrix ; const Q : TD3DXQuaternion ) : PD3DXMatrix ; stdcall ;
 
 
 // Yaw around the Y axis, a pitch around the X axis,
-// and a roll around the Z axis.
+// and a roll around the Z axis.
+
 (*
 
 function D3DXMatrixRotationYawPitchRoll(out mOut: TD3DXMatrix; yaw, pitch, roll: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixRotationYawPitchRoll : function( out mOut : TD3DXMatrix ; yaw , pitch , roll : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixRotationYawPitchRoll : function( out mOut : TD3DXMatrix ; yaw , pitch , roll : Single ) : PD3DXMatrix ; stdcall ;
 
 
 
 // Build transformation matrix.  NULL arguments are treated as identity.
-// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+// Mout = Msc-1 * Msr-1 * Ms * Msr * Msc * Mrc-1 * Mr * Mrc * Mt
+
 (*
 
 function D3DXMatrixTransformation(out mOut: TD3DXMatrix;
@@ -706,137 +740,152 @@ function D3DXMatrixTransformation(out mOut: TD3DXMatrix;
    pScalingRotation: PD3DXQuaternion; pScaling, pRotationCenter: PD3DXVector3;
    pRotation: PD3DXQuaternion; pTranslation: PD3DXVector3): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixTransformation : function( out mOut : TD3DXMatrix ; pScalingCenter : PD3DXVector3 ; pScalingRotation : PD3DXQuaternion ; pScaling , pRotationCenter : PD3DXVector3 ; pRotation : PD3DXQuaternion ; pTranslation : PD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixTransformation : function( out mOut : TD3DXMatrix ; pScalingCenter : PD3DXVector3 ; pScalingRotation : PD3DXQuaternion ; pScaling , pRotationCenter : PD3DXVector3 ; pRotation : PD3DXQuaternion ; pTranslation : PD3DXVector3 ) : PD3DXMatrix ; stdcall ;
 
 
 // Build affine transformation matrix.  NULL arguments are treated as identity.
-// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+// Mout = Ms * Mrc-1 * Mr * Mrc * Mt
+
 (*
 
 function D3DXMatrixAffineTransformation(out mOut: TD3DXMatrix;
    Scaling: Single; pRotationCenter: PD3DXVector3;
    pRotation: PD3DXQuaternion; pTranslation: PD3DXVector3): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixAffineTransformation : function( out mOut : TD3DXMatrix ; Scaling : Single ; pRotationCenter : PD3DXVector3 ; pRotation : PD3DXQuaternion ; pTranslation : PD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixAffineTransformation : function( out mOut : TD3DXMatrix ; Scaling : Single ; pRotationCenter : PD3DXVector3 ; pRotation : PD3DXQuaternion ; pTranslation : PD3DXVector3 ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a lookat matrix. (right-handed)
+// Build a lookat matrix. (right-handed)
+
 (*
 
 function D3DXMatrixLookAtRH(out mOut: TD3DXMatrix; const Eye, At, Up: TD3DXVector3): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixLookAtRH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixLookAtRH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a lookat matrix. (left-handed)
+// Build a lookat matrix. (left-handed)
+
 (*
 
 function D3DXMatrixLookAtLH(out mOut: TD3DXMatrix; const Eye, At, Up: TD3DXVector3): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixLookAtLH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixLookAtLH : function( out mOut : TD3DXMatrix ; const Eye , At , Up : TD3DXVector3 ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 
 function D3DXMatrixPerspectiveRH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 
 function D3DXMatrixPerspectiveLH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 
 function D3DXMatrixPerspectiveFovRH(out mOut: TD3DXMatrix; flovy, aspect, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveFovRH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveFovRH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 
 function D3DXMatrixPerspectiveFovLH(out mOut: TD3DXMatrix; flovy, aspect, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveFovLH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveFovLH : function( out mOut : TD3DXMatrix ; flovy , aspect , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (right-handed)
+// Build a perspective projection matrix. (right-handed)
+
 (*
 
 function D3DXMatrixPerspectiveOffCenterRH(out mOut: TD3DXMatrix;
    l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a perspective projection matrix. (left-handed)
+// Build a perspective projection matrix. (left-handed)
+
 (*
 
 function D3DXMatrixPerspectiveOffCenterLH(out mOut: TD3DXMatrix;
    l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixPerspectiveOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixPerspectiveOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build an ortho projection matrix. (right-handed)
+// Build an ortho projection matrix. (right-handed)
+
 (*
 
 function D3DXMatrixOrthoRH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixOrthoRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixOrthoRH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build an ortho projection matrix. (left-handed)
+// Build an ortho projection matrix. (left-handed)
+
 (*
 
 function D3DXMatrixOrthoLH(out mOut: TD3DXMatrix; w, h, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixOrthoLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixOrthoLH : function( out mOut : TD3DXMatrix ; w , h , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build an ortho projection matrix. (right-handed)
+// Build an ortho projection matrix. (right-handed)
+
 (*
 
 function D3DXMatrixOrthoOffCenterRH(out mOut: TD3DXMatrix;
   l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixOrthoOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixOrthoOffCenterRH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
-// Build an ortho projection matrix. (left-handed)
+// Build an ortho projection matrix. (left-handed)
+
 (*
 
 function D3DXMatrixOrthoOffCenterLH(out mOut: TD3DXMatrix;
   l, r, b, t, zn, zf: Single): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixOrthoOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixOrthoOffCenterLH : function( out mOut : TD3DXMatrix ; l , r , b , t , zn , zf : Single ) : PD3DXMatrix ; stdcall ;
 
 
 // Build a matrix which flattens geometry into a plane, as if casting
-// a shadow from a light.
+// a shadow from a light.
+
 (*
 
 function D3DXMatrixShadow(out mOut: TD3DXMatrix;
   const Light: TD3DXVector4; const Plane: TD3DXPlane): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixShadow : function( out mOut : TD3DXMatrix ; const Light : TD3DXVector4 ; const Plane : TD3DXPlane ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixShadow : function( out mOut : TD3DXMatrix ; const Light : TD3DXVector4 ; const Plane : TD3DXPlane ) : PD3DXMatrix ; stdcall ;
 
 
-// Build a matrix which reflects the coordinate system about a plane
+// Build a matrix which reflects the coordinate system about a plane
+
 (*
 
 function D3DXMatrixReflect(out mOut: TD3DXMatrix;
    const Plane: TD3DXPlane): PD3DXMatrix; stdcall; external d3dx8dll;
 *)
-var D3DXMatrixReflect : function( out mOut : TD3DXMatrix ; const Plane : TD3DXPlane ) : PD3DXMatrix ; stdcall ; 
+var D3DXMatrixReflect : function( out mOut : TD3DXMatrix ; const Plane : TD3DXPlane ) : PD3DXMatrix ; stdcall ;
 
 
 
@@ -865,51 +914,56 @@ function D3DXQuaternionConjugate(out qOut: TD3DXQuaternion;
 
 // non-inline
 
-// Compute a quaternin's axis and angle of rotation. Expects unit quaternions.
+// Compute a quaternin's axis and angle of rotation. Expects unit quaternions.
+
 (*
 
 procedure D3DXQuaternionToAxisAngle(const q: TD3DXQuaternion;
   out Axis: TD3DXVector3; out Angle: Single); stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionToAxisAngle : procedure( const q : TD3DXQuaternion ; out Axis : TD3DXVector3 ; out Angle : Single ) ; stdcall ; 
+var D3DXQuaternionToAxisAngle : procedure( const q : TD3DXQuaternion ; out Axis : TD3DXVector3 ; out Angle : Single ) ; stdcall ;
 
 
-// Build a quaternion from a rotation matrix.
+// Build a quaternion from a rotation matrix.
+
 (*
 
 function D3DXQuaternionRotationMatrix(out qOut: TD3DXQuaternion;
   const m: TD3DXMatrix): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionRotationMatrix : function( out qOut : TD3DXQuaternion ; const m : TD3DXMatrix ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionRotationMatrix : function( out qOut : TD3DXQuaternion ; const m : TD3DXMatrix ) : PD3DXQuaternion ; stdcall ;
 
 
-// Rotation about arbitrary axis.
+// Rotation about arbitrary axis.
+
 (*
 
 function D3DXQuaternionRotationAxis(out qOut: TD3DXQuaternion;
   const v: TD3DXVector3; Angle: Single): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionRotationAxis : function( out qOut : TD3DXQuaternion ; const v : TD3DXVector3 ; Angle : Single ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionRotationAxis : function( out qOut : TD3DXQuaternion ; const v : TD3DXVector3 ; Angle : Single ) : PD3DXQuaternion ; stdcall ;
 
 
 // Yaw around the Y axis, a pitch around the X axis,
-// and a roll around the Z axis.
+// and a roll around the Z axis.
+
 (*
 
 function D3DXQuaternionRotationYawPitchRoll(out qOut: TD3DXQuaternion;
   yaw, pitch, roll: Single): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionRotationYawPitchRoll : function( out qOut : TD3DXQuaternion ; yaw , pitch , roll : Single ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionRotationYawPitchRoll : function( out qOut : TD3DXQuaternion ; yaw , pitch , roll : Single ) : PD3DXQuaternion ; stdcall ;
 
 
 // Quaternion multiplication.  The result represents the rotation Q2
-// followed by the rotation Q1.  (Out = Q2 * Q1)
+// followed by the rotation Q1.  (Out = Q2 * Q1)
+
 (*
 
 function D3DXQuaternionMultiply(out qOut: TD3DXQuaternion;
    const q1, q2: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionMultiply : function( out qOut : TD3DXQuaternion ; const q1 , q2 : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionMultiply : function( out qOut : TD3DXQuaternion ; const q1 , q2 : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ;
 
 (*
 
@@ -917,77 +971,84 @@ var D3DXQuaternionMultiply : function( out qOut : TD3DXQuaternion ; const q1 , q
 function D3DXQuaternionNormalize(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionNormalize : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionNormalize : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ;
 
 
-// Conjugate and re-norm
+// Conjugate and re-norm
+
 (*
 
 function D3DXQuaternionInverse(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionInverse : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionInverse : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ;
 
 
 // Expects unit quaternions.
-// if q = (cos(theta), sin(theta) * v); ln(q) = (0, theta * v)
+// if q = (cos(theta), sin(theta) * v); ln(q) = (0, theta * v)
+
 (*
 
 function D3DXQuaternionLn(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionLn : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionLn : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ;
 
 
 // Expects pure quaternions. (w == 0)  w is ignored in calculation.
-// if q = (0, theta * v); exp(q) = (cos(theta), sin(theta) * v)
+// if q = (0, theta * v); exp(q) = (cos(theta), sin(theta) * v)
+
 (*
 
 function D3DXQuaternionExp(out qOut: TD3DXQuaternion;
    const q: TD3DXQuaternion): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionExp : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionExp : function( out qOut : TD3DXQuaternion ; const q : TD3DXQuaternion ) : PD3DXQuaternion ; stdcall ;
 
 
 // Spherical linear interpolation between Q1 (s == 0) and Q2 (s == 1).
-// Expects unit quaternions.
+// Expects unit quaternions.
+
 (*
 
 function D3DXQuaternionSlerp(out qOut: TD3DXQuaternion;
    const q1, q2: TD3DXQuaternion; t: Single): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionSlerp : function( out qOut : TD3DXQuaternion ; const q1 , q2 : TD3DXQuaternion ; t : Single ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionSlerp : function( out qOut : TD3DXQuaternion ; const q1 , q2 : TD3DXQuaternion ; t : Single ) : PD3DXQuaternion ; stdcall ;
 
 
 // Spherical quadrangle interpolation.
-// Slerp(Slerp(Q1, C, t), Slerp(A, B, t), 2t(1-t))
+// Slerp(Slerp(Q1, C, t), Slerp(A, B, t), 2t(1-t))
+
 (*
 
 function D3DXQuaternionSquad(out qOut: TD3DXQuaternion;
    const pQ1, pA, pB, pC: TD3DXQuaternion; t: Single): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionSquad : function( out qOut : TD3DXQuaternion ; const pQ1 , pA , pB , pC : TD3DXQuaternion ; t : Single ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionSquad : function( out qOut : TD3DXQuaternion ; const pQ1 , pA , pB , pC : TD3DXQuaternion ; t : Single ) : PD3DXQuaternion ; stdcall ;
 
 
 // Setup control points for spherical quadrangle interpolation
 // from Q1 to Q2.  The control points are chosen in such a way
-// to ensure the continuity of tangents with adjacent segments.
+// to ensure the continuity of tangents with adjacent segments.
+
 (*
 
 procedure D3DXQuaternionSquadSetup(out pAOut, pBOut, pCOut: TD3DXQuaternion;
    const pQ0, pQ1, pQ2, pQ3: TD3DXQuaternion); stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionSquadSetup : procedure( out pAOut , pBOut , pCOut : TD3DXQuaternion ; const pQ0 , pQ1 , pQ2 , pQ3 : TD3DXQuaternion ) ; stdcall ; 
+var D3DXQuaternionSquadSetup : procedure( out pAOut , pBOut , pCOut : TD3DXQuaternion ; const pQ0 , pQ1 , pQ2 , pQ3 : TD3DXQuaternion ) ; stdcall ;
 
 
 // Barycentric interpolation.
-// Slerp(Slerp(Q1, Q2, f+g), Slerp(Q1, Q3, f+g), g/(f+g))
+// Slerp(Slerp(Q1, Q2, f+g), Slerp(Q1, Q3, f+g), g/(f+g))
+
 (*
 
 function D3DXQuaternionBaryCentric(out qOut: TD3DXQuaternion;
    const q1, q2, q3: TD3DXQuaternion; f, g: Single): PD3DXQuaternion; stdcall; external d3dx8dll;
 *)
-var D3DXQuaternionBaryCentric : function( out qOut : TD3DXQuaternion ; const q1 , q2 , q3 : TD3DXQuaternion ; f , g : Single ) : PD3DXQuaternion ; stdcall ; 
+var D3DXQuaternionBaryCentric : function( out qOut : TD3DXQuaternion ; const q1 , q2 , q3 : TD3DXQuaternion ; f , g : Single ) : PD3DXQuaternion ; stdcall ;
 
 
 
@@ -1009,49 +1070,54 @@ function D3DXPlaneDotNormal(const p: TD3DXPlane; const v: TD3DXVector3): Single;
 
 // non-inline
 
-// Normalize plane (so that |a,b,c| == 1)
+// Normalize plane (so that |a,b,c| == 1)
+
 (*
 
 function D3DXPlaneNormalize(out pOut: TD3DXPlane; const p: TD3DXPlane): PD3DXPlane; stdcall; external d3dx8dll;
 *)
-var D3DXPlaneNormalize : function( out pOut : TD3DXPlane ; const p : TD3DXPlane ) : PD3DXPlane ; stdcall ; 
+var D3DXPlaneNormalize : function( out pOut : TD3DXPlane ; const p : TD3DXPlane ) : PD3DXPlane ; stdcall ;
 
 
 // Find the intersection between a plane and a line.  If the line is
-// parallel to the plane, NULL is returned.
+// parallel to the plane, NULL is returned.
+
 (*
 
 function D3DXPlaneIntersectLine(out vOut: TD3DXVector3;
    const p: TD3DXPlane; const v1, v2: TD3DXVector3): PD3DXVector3; stdcall; external d3dx8dll;
 *)
-var D3DXPlaneIntersectLine : function( out vOut : TD3DXVector3 ; const p : TD3DXPlane ; const v1 , v2 : TD3DXVector3 ) : PD3DXVector3 ; stdcall ; 
+var D3DXPlaneIntersectLine : function( out vOut : TD3DXVector3 ; const p : TD3DXPlane ; const v1 , v2 : TD3DXVector3 ) : PD3DXVector3 ; stdcall ;
 
 
-// Construct a plane from a point and a normal
+// Construct a plane from a point and a normal
+
 (*
 
 function D3DXPlaneFromPointNormal(out pOut: TD3DXPlane;
    const vPoint, vNormal: TD3DXVector3): PD3DXPlane; stdcall; external d3dx8dll;
 *)
-var D3DXPlaneFromPointNormal : function( out pOut : TD3DXPlane ; const vPoint , vNormal : TD3DXVector3 ) : PD3DXPlane ; stdcall ; 
+var D3DXPlaneFromPointNormal : function( out pOut : TD3DXPlane ; const vPoint , vNormal : TD3DXVector3 ) : PD3DXPlane ; stdcall ;
 
 
-// Construct a plane from 3 points
+// Construct a plane from 3 points
+
 (*
 
 function D3DXPlaneFromPoints(out pOut: TD3DXPlane;
    const v1, v2, v3: TD3DXVector3): PD3DXPlane; stdcall; external d3dx8dll;
 *)
-var D3DXPlaneFromPoints : function( out pOut : TD3DXPlane ; const v1 , v2 , v3 : TD3DXVector3 ) : PD3DXPlane ; stdcall ; 
+var D3DXPlaneFromPoints : function( out pOut : TD3DXPlane ; const v1 , v2 , v3 : TD3DXVector3 ) : PD3DXPlane ; stdcall ;
 
 
 // Transform a plane by a matrix.  The vector (a,b,c) must be normal.
-// M should be the inverse transpose of the transformation desired.
+// M should be the inverse transpose of the transformation desired.
+
 (*
 
 function D3DXPlaneTransform(out pOut: TD3DXPlane; const p: TD3DXPlane; const m: TD3DXMatrix): PD3DXPlane; stdcall; external d3dx8dll;
 *)
-var D3DXPlaneTransform : function( out pOut : TD3DXPlane ; const p : TD3DXPlane ; const m : TD3DXMatrix ) : PD3DXPlane ; stdcall ; 
+var D3DXPlaneTransform : function( out pOut : TD3DXPlane ; const p : TD3DXPlane ; const m : TD3DXMatrix ) : PD3DXPlane ; stdcall ;
 
 
 
@@ -1079,22 +1145,24 @@ function D3DXColorLerp(out cOut: TD3DXColor; const c1, c2: TD3DXColor; s: Single
 // non-inline
 
 // Interpolate r,g,b between desaturated color and color.
-// DesaturatedColor + s(Color - DesaturatedColor)
+// DesaturatedColor + s(Color - DesaturatedColor)
+
 (*
 
 function D3DXColorAdjustSaturation(out cOut: TD3DXColor;
    const pC: TD3DXColor; s: Single): PD3DXColor; stdcall; external d3dx8dll;
 *)
-var D3DXColorAdjustSaturation : function( out cOut : TD3DXColor ; const pC : TD3DXColor ; s : Single ) : PD3DXColor ; stdcall ; 
+var D3DXColorAdjustSaturation : function( out cOut : TD3DXColor ; const pC : TD3DXColor ; s : Single ) : PD3DXColor ; stdcall ;
 
 
-// Interpolate r,g,b between 50% grey and color.  Grey + s(Color - Grey)
+// Interpolate r,g,b between 50% grey and color.  Grey + s(Color - Grey)
+
 (*
 
 function D3DXColorAdjustContrast(out cOut: TD3DXColor;
    const pC: TD3DXColor; c: Single): PD3DXColor; stdcall; external d3dx8dll;
 *)
-var D3DXColorAdjustContrast : function( out cOut : TD3DXColor ; const pC : TD3DXColor ; c : Single ) : PD3DXColor ; stdcall ; 
+var D3DXColorAdjustContrast : function( out cOut : TD3DXColor ; const pC : TD3DXColor ; c : Single ) : PD3DXColor ; stdcall ;
 
 
 
@@ -1103,12 +1171,13 @@ var D3DXColorAdjustContrast : function( out cOut : TD3DXColor ; const pC : TD3DX
 //--------------------------
 
 // Calculate Fresnel term given the cosine of theta (likely obtained by
-// taking the dot of two normals), and the refraction index of the material.
+// taking the dot of two normals), and the refraction index of the material.
+
 (*
 
 function D3DXFresnelTerm(CosTheta, RefractionIndex: Single): Single; stdcall; external d3dx8dll;
 *)
-var D3DXFresnelTerm : function( CosTheta , RefractionIndex : Single ) : Single ; stdcall ; 
+var D3DXFresnelTerm : function( CosTheta , RefractionIndex : Single ) : Single ; stdcall ;
 
 
 
@@ -1200,7 +1269,7 @@ type
 
 function D3DXCreateMatrixStack(Flags: DWord; out Stack: ID3DXMatrixStack): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateMatrixStack : function( Flags : DWord ; out Stack : ID3DXMatrixStack ) : HResult ; stdcall ; 
+var D3DXCreateMatrixStack : function( Flags : DWord ; out Stack : ID3DXMatrixStack ) : HResult ; stdcall ;
 
 
 
@@ -1287,7 +1356,7 @@ type
 function D3DXCreateFont(pDevice: IDirect3DDevice8; hFont: HFONT;
   out ppFont: ID3DXFont): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateFont : function( pDevice : IDirect3DDevice8 ; hFont : HFONT ; out ppFont : ID3DXFont ) : HResult ; stdcall ; 
+var D3DXCreateFont : function( pDevice : IDirect3DDevice8 ; hFont : HFONT ; out ppFont : ID3DXFont ) : HResult ; stdcall ;
 
 (*
 
@@ -1295,7 +1364,7 @@ var D3DXCreateFont : function( pDevice : IDirect3DDevice8 ; hFont : HFONT ; out 
 function D3DXCreateFontIndirect(pDevice: IDirect3DDevice8;
   const pLogFont: TLogFont; out ppFont: ID3DXFont): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateFontIndirect : function( pDevice : IDirect3DDevice8 ; const pLogFont : TLogFont ; out ppFont : ID3DXFont ) : HResult ; stdcall ; 
+var D3DXCreateFontIndirect : function( pDevice : IDirect3DDevice8 ; const pLogFont : TLogFont ; out ppFont : ID3DXFont ) : HResult ; stdcall ;
 
 
 
@@ -1349,7 +1418,7 @@ type
 function D3DXCreateSprite(ppDevice: IDirect3DDevice8;
   out ppSprite: ID3DXSprite): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSprite : function( ppDevice : IDirect3DDevice8 ; out ppSprite : ID3DXSprite ) : HResult ; stdcall ; 
+var D3DXCreateSprite : function( ppDevice : IDirect3DDevice8 ; out ppSprite : ID3DXSprite ) : HResult ; stdcall ;
 
 
 
@@ -1409,7 +1478,7 @@ function D3DXCreateRenderToSurface(ppDevice: IDirect3DDevice8;
   DepthStencilFormat: TD3DFormat;
   out ppRenderToSurface: ID3DXRenderToSurface): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateRenderToSurface : function( ppDevice : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; Format : TD3DFormat ; DepthStencil : BOOL ; DepthStencilFormat : TD3DFormat ; out ppRenderToSurface : ID3DXRenderToSurface ) : HResult ; stdcall ; 
+var D3DXCreateRenderToSurface : function( ppDevice : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; Format : TD3DFormat ; DepthStencil : BOOL ; DepthStencilFormat : TD3DFormat ; out ppRenderToSurface : ID3DXRenderToSurface ) : HResult ; stdcall ;
 
 
 
@@ -1485,7 +1554,7 @@ function D3DXCreateRenderToEnvMap(ppDevice: IDirect3DDevice8;
   DepthStencilFormat: TD3DFormat;
   out ppRenderToEnvMap: ID3DXRenderToEnvMap): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateRenderToEnvMap : function( ppDevice : IDirect3DDevice8 ; Size : LongWord ; Format : TD3DFormat ; DepthStencil : BOOL ; DepthStencilFormat : TD3DFormat ; out ppRenderToEnvMap : ID3DXRenderToEnvMap ) : HResult ; stdcall ; 
+var D3DXCreateRenderToEnvMap : function( ppDevice : IDirect3DDevice8 ; Size : LongWord ; Format : TD3DFormat ; DepthStencil : BOOL ; DepthStencilFormat : TD3DFormat ; out ppRenderToEnvMap : ID3DXRenderToEnvMap ) : HResult ; stdcall ;
 
 
 
@@ -1536,7 +1605,8 @@ const
 //      Returns an ID3DXBuffer object containing the object code.
 //  ppCompilationErrors
 //      Returns an ID3DXBuffer object containing ascii error messages
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 
@@ -1547,7 +1617,7 @@ function D3DXAssembleShaderFromFileA(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromFileA';
 *)
-var D3DXAssembleShaderFromFileA : function( pSrcFile : PAnsiChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromFileA : function( pSrcFile : PAnsiChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1559,7 +1629,7 @@ function D3DXAssembleShaderFromFileW(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromFileW';
 *)
-var D3DXAssembleShaderFromFileW : function( pSrcFile : PWideChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromFileW : function( pSrcFile : PWideChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1571,7 +1641,7 @@ function D3DXAssembleShaderFromFile(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromFileA';
 *)
-var D3DXAssembleShaderFromFile : function( pSrcFile : PChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromFile : function( pSrcFile : PChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1585,7 +1655,7 @@ function D3DXAssembleShaderFromResourceA(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromResourceA';
 *)
-var D3DXAssembleShaderFromResourceA : function( hSrcModule : HModule ; pSrcResource : PAnsiChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromResourceA : function( hSrcModule : HModule ; pSrcResource : PAnsiChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1598,7 +1668,7 @@ function D3DXAssembleShaderFromResourceW(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromResourceW';
 *)
-var D3DXAssembleShaderFromResourceW : function( hSrcModule : HModule ; pSrcResource : PWideChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromResourceW : function( hSrcModule : HModule ; pSrcResource : PWideChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1611,7 +1681,7 @@ function D3DXAssembleShaderFromResource(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXAssembleShaderFromResourceA';
 *)
-var D3DXAssembleShaderFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShaderFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1625,7 +1695,7 @@ function D3DXAssembleShader(
   ppCompiledShader: PID3DXBuffer;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXAssembleShader : function( const pSrcData ; SrcDataLen : LongWord ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXAssembleShader : function( const pSrcData ; SrcDataLen : LongWord ; Flags : DWord ; ppConstants : PID3DXBuffer ; ppCompiledShader : PID3DXBuffer ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -1648,22 +1718,23 @@ var D3DXAssembleShader : function( const pSrcData ; SrcDataLen : LongWord ; Flag
 //  BufferLen
 //      Count of characters in buffer.  Any error message longer than this
 //      length will be truncated to fit.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXGetErrorStringA(hr: HResult; pBuffer: PAnsiChar; BufferLen: LongWord): HResult; stdcall; external d3dx8dll name 'D3DXGetErrorStringA'; overload;
 *)
-var _D3DXGetErrorStringA : function( hr : HResult ; pBuffer : PAnsiChar ; BufferLen : LongWord ) : HResult ; stdcall ; 
+var _D3DXGetErrorStringA : function( hr : HResult ; pBuffer : PAnsiChar ; BufferLen : LongWord ) : HResult ; stdcall ;
 (*
- 
+
 function D3DXGetErrorStringW(hr: HResult; pBuffer: PWideChar; BufferLen: LongWord): HResult; stdcall; external d3dx8dll name 'D3DXGetErrorStringW'; overload;
 *)
-var _D3DXGetErrorStringW : function( hr : HResult ; pBuffer : PWideChar ; BufferLen : LongWord ) : HResult ; stdcall ; 
+var _D3DXGetErrorStringW : function( hr : HResult ; pBuffer : PWideChar ; BufferLen : LongWord ) : HResult ; stdcall ;
 (*
- 
-function D3DXGetErrorString(hr: HResult; pBuffer: PChar; BufferLen: LongWord): HResult; stdcall; external d3dx8dll name 'D3DXGetErrorStringA'; overload; 
+
+function D3DXGetErrorString(hr: HResult; pBuffer: PChar; BufferLen: LongWord): HResult; stdcall; external d3dx8dll name 'D3DXGetErrorStringA'; overload;
 *)
-var _D3DXGetErrorString : function( hr : HResult ; pBuffer : PChar ; BufferLen : LongWord ) : HResult ; stdcall ; 
+var _D3DXGetErrorString : function( hr : HResult ; pBuffer : PChar ; BufferLen : LongWord ) : HResult ; stdcall ;
 
 // Object Pascal support functions for D3DXGetErrorString
 function D3DXGetErrorStringA(hr: HResult): String; overload;
@@ -1821,7 +1892,8 @@ type
 //      Returns a buffer containing any error messages which occurred during
 //      compile.  Or NULL if you do not care about the error messages.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -1832,7 +1904,7 @@ function D3DXCreateEffectFromFileA(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromFileA';
 *)
-var D3DXCreateEffectFromFileA : function( pDevice : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromFileA : function( pDevice : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1843,7 +1915,7 @@ function D3DXCreateEffectFromFileW(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromFileW';
 *)
-var D3DXCreateEffectFromFileW : function( pDevice : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromFileW : function( pDevice : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1854,7 +1926,7 @@ function D3DXCreateEffectFromFile(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromFileA';
 *)
-var D3DXCreateEffectFromFile : function( pDevice : IDirect3DDevice8 ; pSrcFile : PChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromFile : function( pDevice : IDirect3DDevice8 ; pSrcFile : PChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1866,7 +1938,7 @@ function D3DXCreateEffectFromResourceA(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromResourceA';
 *)
-var D3DXCreateEffectFromResourceA : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromResourceA : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1878,7 +1950,7 @@ function D3DXCreateEffectFromResourceW(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromResourceW';
 *)
-var D3DXCreateEffectFromResourceW : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromResourceW : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1890,7 +1962,7 @@ function D3DXCreateEffectFromResource(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll name 'D3DXCreateEffectFromResourceA';
 *)
-var D3DXCreateEffectFromResource : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffectFromResource : function( pDevice : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -1903,7 +1975,7 @@ function D3DXCreateEffect(
   out ppEffect: ID3DXEffect;
   ppCompilationErrors: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateEffect : function( pDevice : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateEffect : function( pDevice : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppEffect : ID3DXEffect ; ppCompilationErrors : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2221,7 +2293,7 @@ type
 function D3DXCreateMesh(NumFaces, NumVertices: DWord; Options: DWord;
   pDeclaration: PDWord; pD3D: IDirect3DDevice8; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateMesh : function( NumFaces , NumVertices : DWord ; Options : DWord ; pDeclaration : PDWord ; pD3D : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXCreateMesh : function( NumFaces , NumVertices : DWord ; Options : DWord ; pDeclaration : PDWord ; pD3D : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2229,7 +2301,7 @@ var D3DXCreateMesh : function( NumFaces , NumVertices : DWord ; Options : DWord 
 function D3DXCreateMeshFVF(NumFaces, NumVertices: DWord; Options: DWord;
   FVF: DWord; pD3D: IDirect3DDevice8; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateMeshFVF : function( NumFaces , NumVertices : DWord ; Options : DWord ; FVF : DWord ; pD3D : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXCreateMeshFVF : function( NumFaces , NumVertices : DWord ; Options : DWord ; FVF : DWord ; pD3D : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2238,17 +2310,18 @@ function D3DXCreateSPMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
   out ppSMesh: ID3DXSPMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSPMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; out ppSMesh : ID3DXSPMesh ) : HResult ; stdcall ; 
+var D3DXCreateSPMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; out ppSMesh : ID3DXSPMesh ) : HResult ; stdcall ;
 
 
-// clean a mesh up for simplification, try to make manifold
+// clean a mesh up for simplification, try to make manifold
+
 (*
 
 function D3DXCleanMesh(pMeshIn: ID3DXMesh; pAdjacencyIn: PDWord;
   out ppMeshOut: ID3DXMesh; pAdjacencyOut: PDWord;
   ppErrorsAndWarnings: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCleanMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; out ppMeshOut : ID3DXMesh ; pAdjacencyOut : PDWord ; ppErrorsAndWarnings : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCleanMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; out ppMeshOut : ID3DXMesh ; pAdjacencyOut : PDWord ; ppErrorsAndWarnings : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -2256,7 +2329,7 @@ var D3DXCleanMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; out 
 function D3DXValidMesh(pMeshIn: ID3DXMesh; pAdjacency: PDWord;
   ppErrorsAndWarnings: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXValidMesh : function( pMeshIn : ID3DXMesh ; pAdjacency : PDWord ; ppErrorsAndWarnings : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXValidMesh : function( pMeshIn : ID3DXMesh ; pAdjacency : PDWord ; ppErrorsAndWarnings : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -2265,7 +2338,7 @@ function D3DXGeneratePMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
   MinValue: DWord; Options: TD3DMeshSimp; out ppPMesh: ID3DXPMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXGeneratePMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; MinValue : DWord ; Options : TD3DMeshSimp ; out ppPMesh : ID3DXPMesh ) : HResult ; stdcall ; 
+var D3DXGeneratePMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; MinValue : DWord ; Options : TD3DMeshSimp ; out ppPMesh : ID3DXPMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2274,7 +2347,7 @@ function D3DXSimplifyMesh(pMesh: ID3DXMesh; pAdjacency: PDWord;
   pVertexAttributeWeights: PD3DXAttributeWeights; pVertexWeights: PSingle;
   MinValue: DWord; Options: TD3DMeshSimp; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXSimplifyMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; MinValue : DWord ; Options : TD3DMeshSimp ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXSimplifyMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVertexAttributeWeights : PD3DXAttributeWeights ; pVertexWeights : PSingle ; MinValue : DWord ; Options : TD3DMeshSimp ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2282,7 +2355,7 @@ var D3DXSimplifyMesh : function( pMesh : ID3DXMesh ; pAdjacency : PDWord ; pVert
 function D3DXComputeBoundingSphere(const pPointsFVF; NumVertices: DWord;
   FVF: DWord; out pCenter: TD3DXVector3; out pRadius: Single): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXComputeBoundingSphere : function( const pPointsFVF ; NumVertices : DWord ; FVF : DWord ; out pCenter : TD3DXVector3 ; out pRadius : Single ) : HResult ; stdcall ; 
+var D3DXComputeBoundingSphere : function( const pPointsFVF ; NumVertices : DWord ; FVF : DWord ; out pCenter : TD3DXVector3 ; out pRadius : Single ) : HResult ; stdcall ;
 
 (*
 
@@ -2290,21 +2363,21 @@ var D3DXComputeBoundingSphere : function( const pPointsFVF ; NumVertices : DWord
 function D3DXComputeBoundingBox(const pPointsFVF; NumVertices: DWord;
   FVF: DWord; out pMin, pMax: TD3DXVector3): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXComputeBoundingBox : function( const pPointsFVF ; NumVertices : DWord ; FVF : DWord ; out pMin , pMax : TD3DXVector3 ) : HResult ; stdcall ; 
+var D3DXComputeBoundingBox : function( const pPointsFVF ; NumVertices : DWord ; FVF : DWord ; out pMin , pMax : TD3DXVector3 ) : HResult ; stdcall ;
 
 (*
 
 
 function D3DXComputeNormals(pMesh: ID3DXBaseMesh; pAdjacency: PDWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXComputeNormals : function( pMesh : ID3DXBaseMesh ; pAdjacency : PDWord ) : HResult ; stdcall ; 
+var D3DXComputeNormals : function( pMesh : ID3DXBaseMesh ; pAdjacency : PDWord ) : HResult ; stdcall ;
 
 (*
 
 
 function D3DXCreateBuffer(NumBytes: DWord; out ppBuffer: ID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateBuffer : function( NumBytes : DWord ; out ppBuffer : ID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateBuffer : function( NumBytes : DWord ; out ppBuffer : ID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -2313,7 +2386,7 @@ function D3DXLoadMeshFromX(pFilename: PAnsiChar; Options: DWord;
   pD3D: IDirect3DDevice8; ppAdjacency, ppMaterials: PID3DXBuffer;
   pNumMaterials: PDWord; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadMeshFromX : function( pFilename : PAnsiChar ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXLoadMeshFromX : function( pFilename : PAnsiChar ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2323,7 +2396,7 @@ function D3DXLoadMeshFromXInMemory(Memory: PByte; SizeOfMemory: DWord;
   ppAdjacency, ppMaterials: PID3DXBuffer;
   pNumMaterials: PDWord; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadMeshFromXInMemory : function( Memory : PByte ; SizeOfMemory : DWord ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXLoadMeshFromXInMemory : function( Memory : PByte ; SizeOfMemory : DWord ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2333,7 +2406,7 @@ function D3DXLoadMeshFromXResource(Module: HModule; Name: PAnsiChar; _Type: PAns
   ppAdjacency, ppMaterials: PID3DXBuffer;
   pNumMaterials: PDWord; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadMeshFromXResource : function( Module : HModule ; Name : PAnsiChar ; _Type : PAnsiChar ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXLoadMeshFromXResource : function( Module : HModule ; Name : PAnsiChar ; _Type : PAnsiChar ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2342,7 +2415,7 @@ function D3DXSaveMeshToX(pFilename: PAnsiChar; ppMesh: ID3DXMesh;
   pAdjacency: PDWord; pMaterials: PD3DXMaterial; NumMaterials: DWord;
   Format: DWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXSaveMeshToX : function( pFilename : PAnsiChar ; ppMesh : ID3DXMesh ; pAdjacency : PDWord ; pMaterials : PD3DXMaterial ; NumMaterials : DWord ; Format : DWord ) : HResult ; stdcall ; 
+var D3DXSaveMeshToX : function( pFilename : PAnsiChar ; ppMesh : ID3DXMesh ; pAdjacency : PDWord ; pMaterials : PD3DXMaterial ; NumMaterials : DWord ; Format : DWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2351,7 +2424,7 @@ function D3DXCreatePMeshFromStream(pStream: IStream; Options: DWord;
   pD3D: IDirect3DDevice8; ppMaterials: PID3DXBuffer;
   pNumMaterials: PDWord; out ppPMesh: ID3DXPMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreatePMeshFromStream : function( pStream : IStream ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppPMesh : ID3DXPMesh ) : HResult ; stdcall ; 
+var D3DXCreatePMeshFromStream : function( pStream : IStream ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppPMesh : ID3DXPMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2360,7 +2433,7 @@ function D3DXCreateSkinMesh(NumFaces, NumVertices, NumBones, Options: DWord;
   pDeclaration: PDWord; pD3D: IDirect3DDevice8;
   out ppSkinMesh: ID3DXSkinMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSkinMesh : function( NumFaces , NumVertices , NumBones , Options : DWord ; pDeclaration : PDWord ; pD3D : IDirect3DDevice8 ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ; 
+var D3DXCreateSkinMesh : function( NumFaces , NumVertices , NumBones , Options : DWord ; pDeclaration : PDWord ; pD3D : IDirect3DDevice8 ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2369,7 +2442,7 @@ function D3DXCreateSkinMeshFVF(NumFaces, NumVertices, NumBones, Options: DWord;
   FVF: DWord; pD3D: IDirect3DDevice8;
   out ppSkinMesh: ID3DXSkinMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSkinMeshFVF : function( NumFaces , NumVertices , NumBones , Options : DWord ; FVF : DWord ; pD3D : IDirect3DDevice8 ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ; 
+var D3DXCreateSkinMeshFVF : function( NumFaces , NumVertices , NumBones , Options : DWord ; FVF : DWord ; pD3D : IDirect3DDevice8 ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2377,7 +2450,7 @@ var D3DXCreateSkinMeshFVF : function( NumFaces , NumVertices , NumBones , Option
 function D3DXCreateSkinMeshFromMesh(pMesh: ID3DXMesh; numBones: DWord;
   out ppSkinMesh: ID3DXSkinMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSkinMeshFromMesh : function( pMesh : ID3DXMesh ; numBones : DWord ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ; 
+var D3DXCreateSkinMeshFromMesh : function( pMesh : ID3DXMesh ; numBones : DWord ; out ppSkinMesh : ID3DXSkinMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2387,7 +2460,7 @@ function D3DXLoadMeshFromXof(pXofObjMesh: IDirectXFileData;
   ppAdjacency, ppMaterials: PID3DXBuffer;
   pNumMaterials: PDWord; out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadMeshFromXof : function( pXofObjMesh : IDirectXFileData ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXLoadMeshFromXof : function( pXofObjMesh : IDirectXFileData ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pNumMaterials : PDWord ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2398,7 +2471,7 @@ function D3DXLoadSkinMeshFromXof(pXofObjMesh: IDirectXFileData;
   pmMatOut: PDWord; ppBoneNames, ppBoneTransforms: PID3DXBuffer;
   out ppMesh: ID3DXMesh): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadSkinMeshFromXof : function( pXofObjMesh : IDirectXFileData ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pmMatOut : PDWord ; ppBoneNames , ppBoneTransforms : PID3DXBuffer ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ; 
+var D3DXLoadSkinMeshFromXof : function( pXofObjMesh : IDirectXFileData ; Options : DWord ; pD3D : IDirect3DDevice8 ; ppAdjacency , ppMaterials : PID3DXBuffer ; pmMatOut : PDWord ; ppBoneNames , ppBoneTransforms : PID3DXBuffer ; out ppMesh : ID3DXMesh ) : HResult ; stdcall ;
 
 (*
 
@@ -2408,28 +2481,28 @@ function D3DXTessellateNPatches(pMeshIn: ID3DXMesh;
   QuadraticInterpNormals: BOOL; // if false use linear intrep for normals, if true use quadratic
   out ppMeshOut: ID3DXMesh; ppAdjacencyOut: PDWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXTessellateNPatches : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; NumSegs : Single ; QuadraticInterpNormals : BOOL ; out ppMeshOut : ID3DXMesh ; ppAdjacencyOut : PDWord ) : HResult ; stdcall ; 
+var D3DXTessellateNPatches : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; NumSegs : Single ; QuadraticInterpNormals : BOOL ; out ppMeshOut : ID3DXMesh ; ppAdjacencyOut : PDWord ) : HResult ; stdcall ;
 
 (*
 
 
 function D3DXGetFVFVertexSize(FVF: DWord): LongWord; stdcall; external d3dx8dll;
 *)
-var D3DXGetFVFVertexSize : function( FVF : DWord ) : LongWord ; stdcall ; 
+var D3DXGetFVFVertexSize : function( FVF : DWord ) : LongWord ; stdcall ;
 
 (*
 
 
 function D3DXDeclaratorFromFVF(FVF: DWord; out Declaration: TFVFDeclaration): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXDeclaratorFromFVF : function( FVF : DWord ; out Declaration : TFVFDeclaration ) : HResult ; stdcall ; 
+var D3DXDeclaratorFromFVF : function( FVF : DWord ; out Declaration : TFVFDeclaration ) : HResult ; stdcall ;
 
 (*
 
 
 function D3DXFVFFromDeclarator(pDeclarator: PDWord; out pFVF: DWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXFVFFromDeclarator : function( pDeclarator : PDWord ; out pFVF : DWord ) : HResult ; stdcall ; 
+var D3DXFVFFromDeclarator : function( pDeclarator : PDWord ; out pFVF : DWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2438,7 +2511,7 @@ function D3DXWeldVertices(pMesh: ID3DXMesh; pEpsilons: PD3DXWeldEpsilons;
   rgdwAdjacencyIn, rgdwAdjacencyOut, pFaceRemap: PDWord;
   ppVertexRemap: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXWeldVertices : function( pMesh : ID3DXMesh ; pEpsilons : PD3DXWeldEpsilons ; rgdwAdjacencyIn , rgdwAdjacencyOut , pFaceRemap : PDWord ; ppVertexRemap : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXWeldVertices : function( pMesh : ID3DXMesh ; pEpsilons : PD3DXWeldEpsilons ; rgdwAdjacencyIn , rgdwAdjacencyOut , pFaceRemap : PDWord ; ppVertexRemap : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 type
@@ -2465,7 +2538,7 @@ function D3DXIntersect(pMesh: ID3DXBaseMesh;
   pCountOfHits: PDWord              // Number of entries in AllHits array
  ): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXIntersect : function( pMesh : ID3DXBaseMesh ; const pRayPos , pRayDir : TD3DXVector3 ; out pHit : BOOL ; pFaceIndex : PDWord ; pU : PSingle ; pV : PSingle ; pDist : PSingle ; ppAllHits : PID3DXBuffer ; pCountOfHits : PDWord ) : HResult ; stdcall ; 
+var D3DXIntersect : function( pMesh : ID3DXBaseMesh ; const pRayPos , pRayDir : TD3DXVector3 ; out pHit : BOOL ; pFaceIndex : PDWord ; pU : PSingle ; pV : PSingle ; pDist : PSingle ; ppAllHits : PID3DXBuffer ; pCountOfHits : PDWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2481,7 +2554,7 @@ function D3DXIntersectSubset(pMesh: ID3DXBaseMesh; AttribId: DWord;
   pCountOfHits: PDWord              // Number of entries in AllHits array
  ): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXIntersectSubset : function( pMesh : ID3DXBaseMesh ; AttribId : DWord ; const pRayPos , pRayDir : TD3DXVector3 ; out pHit : BOOL ; pFaceIndex : PDWord ; pU : PSingle ; pV : PSingle ; pDist : PSingle ; ppAllHits : PID3DXBuffer ; pCountOfHits : PDWord ) : HResult ; stdcall ; 
+var D3DXIntersectSubset : function( pMesh : ID3DXBaseMesh ; AttribId : DWord ; const pRayPos , pRayDir : TD3DXVector3 ; out pHit : BOOL ; pFaceIndex : PDWord ; pU : PSingle ; pV : PSingle ; pDist : PSingle ; ppAllHits : PID3DXBuffer ; pCountOfHits : PDWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2493,7 +2566,7 @@ function D3DXSplitMesh(pMeshIn: ID3DXMesh; pAdjacencyIn: PDWord;
   ppAdjacencyArrayOut, ppFaceRemapArrayOut, ppVertRemapArrayOut: PID3DXBuffer
  ): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXSplitMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; MaxSize , Options : DWord ; out pMeshesOut : DWord ; out ppMeshArrayOut : ID3DXBuffer ; ppAdjacencyArrayOut , ppFaceRemapArrayOut , ppVertRemapArrayOut : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXSplitMesh : function( pMeshIn : ID3DXMesh ; pAdjacencyIn : PDWord ; MaxSize , Options : DWord ; out pMeshesOut : DWord ; out ppMeshArrayOut : ID3DXBuffer ; ppAdjacencyArrayOut , ppFaceRemapArrayOut , ppVertRemapArrayOut : PID3DXBuffer ) : HResult ; stdcall ;
 
 (*
 
@@ -2509,7 +2582,7 @@ function D3DXIntersectTri(
     out pDist: Single                 // Ray-Intersection Parameter Distance
  ): BOOL; stdcall; external d3dx8dll;
 *)
-var D3DXIntersectTri : function( const p0 : TD3DXVector3 ; const p1 : TD3DXVector3 ; const p2 : TD3DXVector3 ; const pRayPos : TD3DXVector3 ; const pRayDir : TD3DXVector3 ; out pU : Single ; out pV : Single ; out pDist : Single ) : BOOL ; stdcall ; 
+var D3DXIntersectTri : function( const p0 : TD3DXVector3 ; const p1 : TD3DXVector3 ; const p2 : TD3DXVector3 ; const pRayPos : TD3DXVector3 ; const pRayDir : TD3DXVector3 ; out pU : Single ; out pV : Single ; out pDist : Single ) : BOOL ; stdcall ;
 
 (*
 
@@ -2517,7 +2590,7 @@ var D3DXIntersectTri : function( const p0 : TD3DXVector3 ; const p1 : TD3DXVecto
 function D3DXSphereBoundProbe(const pCenter: TD3DXVector3; Radius: Single;
   out pRayPosition, pRayDirection: TD3DXVector3): BOOL; stdcall; external d3dx8dll;
 *)
-var D3DXSphereBoundProbe : function( const pCenter : TD3DXVector3 ; Radius : Single ; out pRayPosition , pRayDirection : TD3DXVector3 ) : BOOL ; stdcall ; 
+var D3DXSphereBoundProbe : function( const pCenter : TD3DXVector3 ; Radius : Single ; out pRayPosition , pRayDirection : TD3DXVector3 ) : BOOL ; stdcall ;
 
 (*
 
@@ -2525,7 +2598,7 @@ var D3DXSphereBoundProbe : function( const pCenter : TD3DXVector3 ; Radius : Sin
 function D3DXBoxBoundProbe(const pMin, pMax: TD3DXVector3;
   out pRayPosition, pRayDirection: TD3DXVector3): BOOL; stdcall; external d3dx8dll;
 *)
-var D3DXBoxBoundProbe : function( const pMin , pMax : TD3DXVector3 ; out pRayPosition , pRayDirection : TD3DXVector3 ) : BOOL ; stdcall ; 
+var D3DXBoxBoundProbe : function( const pMin , pMax : TD3DXVector3 ; out pRayPosition , pRayDirection : TD3DXVector3 ) : BOOL ; stdcall ;
 
 
 type
@@ -2549,7 +2622,7 @@ function D3DXComputeTangent(InMesh: ID3DXMesh; TexStage: DWord;
   OutMesh: ID3DXMesh; TexStageUVec, TexStageVVec: DWord;
   Wrap: DWord; Adjacency: PDWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXComputeTangent : function( InMesh : ID3DXMesh ; TexStage : DWord ; OutMesh : ID3DXMesh ; TexStageUVec , TexStageVVec : DWord ; Wrap : DWord ; Adjacency : PDWord ) : HResult ; stdcall ; 
+var D3DXComputeTangent : function( InMesh : ID3DXMesh ; TexStage : DWord ; OutMesh : ID3DXMesh ; TexStageUVec , TexStageVVec : DWord ; Wrap : DWord ; Adjacency : PDWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2559,7 +2632,7 @@ function D3DXConvertMeshSubsetToSingleStrip(MeshIn: ID3DXBaseMesh;
   out ppIndexBuffer: IDirect3DIndexBuffer8; pNumIndices: PDWord
  ): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXConvertMeshSubsetToSingleStrip : function( MeshIn : ID3DXBaseMesh ; AttribId : DWord ; IBOptions : DWord ; out ppIndexBuffer : IDirect3DIndexBuffer8 ; pNumIndices : PDWord ) : HResult ; stdcall ; 
+var D3DXConvertMeshSubsetToSingleStrip : function( MeshIn : ID3DXBaseMesh ; AttribId : DWord ; IBOptions : DWord ; out ppIndexBuffer : IDirect3DIndexBuffer8 ; pNumIndices : PDWord ) : HResult ; stdcall ;
 
 (*
 
@@ -2569,7 +2642,7 @@ function D3DXConvertMeshSubsetToStrips(MeshIn: ID3DXBaseMesh;
   out ppIndexBuffer: IDirect3DIndexBuffer8; pNumIndices: PDWord;
   ppStripLengths: PID3DXBuffer; pNumStrips: PDWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXConvertMeshSubsetToStrips : function( MeshIn : ID3DXBaseMesh ; AttribId : DWord ; IBOptions : DWord ; out ppIndexBuffer : IDirect3DIndexBuffer8 ; pNumIndices : PDWord ; ppStripLengths : PID3DXBuffer ; pNumStrips : PDWord ) : HResult ; stdcall ; 
+var D3DXConvertMeshSubsetToStrips : function( MeshIn : ID3DXBaseMesh ; AttribId : DWord ; IBOptions : DWord ; out ppIndexBuffer : IDirect3DIndexBuffer8 ; pNumIndices : PDWord ; ppStripLengths : PID3DXBuffer ; pNumStrips : PDWord ) : HResult ; stdcall ;
 
 
 
@@ -2606,7 +2679,8 @@ var D3DXConvertMeshSubsetToStrips : function( MeshIn : ID3DXBaseMesh ; AttribId 
 //  Sides       Number of sides the polygon has.  (Must be >= 3)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreatePolygon(ppDevice: IDirect3DDevice8;
@@ -2615,7 +2689,7 @@ function D3DXCreatePolygon(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreatePolygon : function( ppDevice : IDirect3DDevice8 ; Length : Single ; Sides : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreatePolygon : function( ppDevice : IDirect3DDevice8 ; Length : Single ; Sides : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2633,7 +2707,8 @@ var D3DXCreatePolygon : function( ppDevice : IDirect3DDevice8 ; Length : Single 
 //  Depth       Depth of box (along Z-axis)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateBox(ppDevice: IDirect3DDevice8;
@@ -2643,7 +2718,7 @@ function D3DXCreateBox(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateBox : function( ppDevice : IDirect3DDevice8 ; Width , Height , Depth : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateBox : function( ppDevice : IDirect3DDevice8 ; Width , Height , Depth : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2663,7 +2738,8 @@ var D3DXCreateBox : function( ppDevice : IDirect3DDevice8 ; Width , Height , Dep
 //  Stacks      Number of stacks along the main axis
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateCylinder(ppDevice: IDirect3DDevice8;
@@ -2675,7 +2751,7 @@ function D3DXCreateCylinder(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateCylinder : function( ppDevice : IDirect3DDevice8 ; Radius1 , Radius2 , Length : Single ; Slices , Stacks : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateCylinder : function( ppDevice : IDirect3DDevice8 ; Radius1 , Radius2 , Length : Single ; Slices , Stacks : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2693,7 +2769,8 @@ var D3DXCreateCylinder : function( ppDevice : IDirect3DDevice8 ; Radius1 , Radiu
 //  Stacks      Number of stacks along the main axis
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateSphere(ppDevice: IDirect3DDevice8;
@@ -2703,7 +2780,7 @@ function D3DXCreateSphere(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateSphere : function( ppDevice : IDirect3DDevice8 ; Radius : Single ; Slices , Stacks : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateSphere : function( ppDevice : IDirect3DDevice8 ; Radius : Single ; Slices , Stacks : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2722,7 +2799,8 @@ var D3DXCreateSphere : function( ppDevice : IDirect3DDevice8 ; Radius : Single ;
 //  Rings       Number of rings making up the torus (must be >= 3)
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateTorus(ppDevice: IDirect3DDevice8;
@@ -2733,7 +2811,7 @@ function D3DXCreateTorus(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateTorus : function( ppDevice : IDirect3DDevice8 ; InnerRadius , OuterRadius : Single ; Sides , Rings : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateTorus : function( ppDevice : IDirect3DDevice8 ; InnerRadius , OuterRadius : Single ; Sides , Rings : LongWord ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2747,14 +2825,15 @@ var D3DXCreateTorus : function( ppDevice : IDirect3DDevice8 ; InnerRadius , Oute
 //  pDevice     The D3D device with which the mesh is going to be used.
 //  ppMesh      The mesh object which will be created
 //  ppAdjacency Returns a buffer containing adjacency info.  Can be NULL.
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 function D3DXCreateTeapot(ppDevice: IDirect3DDevice8;
   out ppMesh: ID3DXMesh;
   ppAdjacency: PID3DXBuffer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateTeapot : function( ppDevice : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ; 
+var D3DXCreateTeapot : function( ppDevice : IDirect3DDevice8 ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ) : HResult ; stdcall ;
 
 
 
@@ -2773,7 +2852,8 @@ var D3DXCreateTeapot : function( ppDevice : IDirect3DDevice8 ; out ppMesh : ID3D
 //  Extrusion     Amount to extrude text in -Z direction
 //  ppMesh        The mesh object which will be created
 //  pGlyphMetrics Address of buffer to receive glyph metric data (or NULL)
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 
@@ -2786,7 +2866,7 @@ function D3DXCreateTextA(ppDevice: IDirect3DDevice8;
   ppAdjacency: PID3DXBuffer;
   pGlyphMetrics: PGlyphMetricsFloat): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextA';
 *)
-var D3DXCreateTextA : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PAnsiChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ; 
+var D3DXCreateTextA : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PAnsiChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ;
 
 (*
 
@@ -2800,7 +2880,7 @@ function D3DXCreateTextW(ppDevice: IDirect3DDevice8;
   ppAdjacency: PID3DXBuffer;
   pGlyphMetrics: PGlyphMetricsFloat): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextW';
 *)
-var D3DXCreateTextW : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PWideChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ; 
+var D3DXCreateTextW : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PWideChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ;
 
 (*
 
@@ -2814,7 +2894,7 @@ function D3DXCreateText(ppDevice: IDirect3DDevice8;
   ppAdjacency: PID3DXBuffer;
   pGlyphMetrics: PGlyphMetricsFloat): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextA';
 *)
-var D3DXCreateText : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ; 
+var D3DXCreateText : function( ppDevice : IDirect3DDevice8 ; hDC : HDC ; pText : PChar ; Deviation : Single ; Extrusion : Single ; out ppMesh : ID3DXMesh ; ppAdjacency : PID3DXBuffer ; pGlyphMetrics : PGlyphMetricsFloat ) : HResult ; stdcall ;
 
 
 
@@ -3065,7 +3145,8 @@ type
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3073,7 +3154,7 @@ function D3DXGetImageInfoFromFileA(
   pSrcFile: PAnsiChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromFileA';
 *)
-var D3DXGetImageInfoFromFileA : function( pSrcFile : PAnsiChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromFileA : function( pSrcFile : PAnsiChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3082,7 +3163,7 @@ function D3DXGetImageInfoFromFileW(
   pSrcFile: PWideChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromFileW';
 *)
-var D3DXGetImageInfoFromFileW : function( pSrcFile : PWideChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromFileW : function( pSrcFile : PWideChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3091,7 +3172,7 @@ function D3DXGetImageInfoFromFile(
   pSrcFile: PChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromFileA';
 *)
-var D3DXGetImageInfoFromFile : function( pSrcFile : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromFile : function( pSrcFile : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3102,7 +3183,7 @@ function D3DXGetImageInfoFromResourceA(
   pSrcResource: PAnsiChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromResourceA';
 *)
-var D3DXGetImageInfoFromResourceA : function( hSrcModule : HModule ; pSrcResource : PAnsiChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromResourceA : function( hSrcModule : HModule ; pSrcResource : PAnsiChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3112,7 +3193,7 @@ function D3DXGetImageInfoFromResourceW(
   pSrcResource: PWideChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromResourceW';
 *)
-var D3DXGetImageInfoFromResourceW : function( hSrcModule : HModule ; pSrcResource : PWideChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromResourceW : function( hSrcModule : HModule ; pSrcResource : PWideChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3122,7 +3203,7 @@ function D3DXGetImageInfoFromResource(
   pSrcResource: PChar;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXGetImageInfoFromResourceA';
 *)
-var D3DXGetImageInfoFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromResource : function( hSrcModule : HModule ; pSrcResource : PChar ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3133,7 +3214,7 @@ function D3DXGetImageInfoFromFileInMemory(
   SrcDataSize: LongWord;
   out pSrcInfo: TD3DXImageInfo): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXGetImageInfoFromFileInMemory : function( const pSrcData ; SrcDataSize : LongWord ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXGetImageInfoFromFileInMemory : function( const pSrcData ; SrcDataSize : LongWord ; out pSrcInfo : TD3DXImageInfo ) : HResult ; stdcall ;
 
 
 
@@ -3179,7 +3260,8 @@ var D3DXGetImageInfoFromFileInMemory : function( const pSrcData ; SrcDataSize : 
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file, or NULL.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXLoadSurfaceFromFileA(
@@ -3192,7 +3274,7 @@ function D3DXLoadSurfaceFromFileA(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromFileA';
 *)
-var D3DXLoadSurfaceFromFileA : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PAnsiChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromFileA : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PAnsiChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3207,7 +3289,7 @@ function D3DXLoadSurfaceFromFileW(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromFileW';
 *)
-var D3DXLoadSurfaceFromFileW : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PWideChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromFileW : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PWideChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3222,7 +3304,7 @@ function D3DXLoadSurfaceFromFile(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromFileA';
 *)
-var D3DXLoadSurfaceFromFile : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromFile : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcFile : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3240,7 +3322,7 @@ function D3DXLoadSurfaceFromResourceA(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromResourceA';
 *)
-var D3DXLoadSurfaceFromResourceA : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromResourceA : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3256,7 +3338,7 @@ function D3DXLoadSurfaceFromResourceW(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromResourceW';
 *)
-var D3DXLoadSurfaceFromResourceW : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PWideChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromResourceW : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PWideChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3272,7 +3354,7 @@ function D3DXLoadSurfaceFromResource(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadSurfaceFromResourceA';
 *)
-var D3DXLoadSurfaceFromResource : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromResource : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3290,7 +3372,7 @@ function D3DXLoadSurfaceFromFileInMemory(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadSurfaceFromFileInMemory : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; const pSrcData ; SrcDataSize : LongWord ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromFileInMemory : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; const pSrcData ; SrcDataSize : LongWord ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 
 
@@ -3322,7 +3404,8 @@ var D3DXLoadSurfaceFromFileInMemory : function( pDestSurface : IDirect3DSurface8
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3336,7 +3419,7 @@ function D3DXLoadSurfaceFromSurface(
   Filter: DWord;
   ColorKey: TD3DColor): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadSurfaceFromSurface : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromSurface : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ;
 
 
 
@@ -3373,7 +3456,8 @@ var D3DXLoadSurfaceFromSurface : function( pDestSurface : IDirect3DSurface8 ; pD
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3389,7 +3473,7 @@ function D3DXLoadSurfaceFromMemory(
   Filter: DWord;
   ColorKey: TD3DColor): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadSurfaceFromMemory : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; const pSrcMemory ; SrcFormat : TD3DFormat ; SrcPitch : LongWord ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ; 
+var D3DXLoadSurfaceFromMemory : function( pDestSurface : IDirect3DSurface8 ; pDestPalette : PPaletteEntry ; pDestRect : PRect ; const pSrcMemory ; SrcFormat : TD3DFormat ; SrcPitch : LongWord ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ;
 
 
 
@@ -3411,7 +3495,8 @@ var D3DXLoadSurfaceFromMemory : function( pDestSurface : IDirect3DSurface8 ; pDe
 //  pSrcRect
 //      Source rectangle, or NULL for the entire image
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3422,7 +3507,7 @@ function D3DXSaveSurfaceToFileA(
   pSrcPalette: PPaletteEntry;
   pSrcRect: PRect): HResult; stdcall; external d3dx8dll name 'D3DXSaveSurfaceToFileA';
 *)
-var D3DXSaveSurfaceToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ; 
+var D3DXSaveSurfaceToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ;
 
 (*
 
@@ -3434,7 +3519,7 @@ function D3DXSaveSurfaceToFileW(
   pSrcPalette: PPaletteEntry;
   pSrcRect: PRect): HResult; stdcall; external d3dx8dll name 'D3DXSaveSurfaceToFileW';
 *)
-var D3DXSaveSurfaceToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ; 
+var D3DXSaveSurfaceToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ;
 
 (*
 
@@ -3446,7 +3531,7 @@ function D3DXSaveSurfaceToFile(
   pSrcPalette: PPaletteEntry;
   pSrcRect: PRect): HResult; stdcall; external d3dx8dll name 'D3DXSaveSurfaceToFileA';
 *)
-var D3DXSaveSurfaceToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ; 
+var D3DXSaveSurfaceToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcSurface : IDirect3DSurface8 ; pSrcPalette : PPaletteEntry ; pSrcRect : PRect ) : HResult ; stdcall ;
 
 
 
@@ -3493,7 +3578,8 @@ var D3DXSaveSurfaceToFile : function( pDestFile : PChar ; DestFormat : TD3DXImag
 //      Pointer to a D3DXIMAGE_INFO structure to be filled in with the
 //      description of the data in the source image file, or NULL.
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3507,7 +3593,7 @@ function D3DXLoadVolumeFromFileA(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromFileA';
 *)
-var D3DXLoadVolumeFromFileA : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PAnsiChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromFileA : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PAnsiChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3522,7 +3608,7 @@ function D3DXLoadVolumeFromFileW(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromFileW';
 *)
-var D3DXLoadVolumeFromFileW : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PWideChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromFileW : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PWideChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3537,7 +3623,7 @@ function D3DXLoadVolumeFromFile(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromFileA';
 *)
-var D3DXLoadVolumeFromFile : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromFile : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcFile : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3554,7 +3640,7 @@ function D3DXLoadVolumeFromResourceA(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromResourceA';
 *)
-var D3DXLoadVolumeFromResourceA : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromResourceA : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3570,7 +3656,7 @@ function D3DXLoadVolumeFromResourceW(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromResourceW';
 *)
-var D3DXLoadVolumeFromResourceW : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PWideChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromResourceW : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PWideChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3586,7 +3672,7 @@ function D3DXLoadVolumeFromResource(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll name 'D3DXLoadVolumeFromResourceA';
 *)
-var D3DXLoadVolumeFromResource : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromResource : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; hSrcModule : HModule ; pSrcResource : PChar ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 (*
 
@@ -3603,7 +3689,7 @@ function D3DXLoadVolumeFromFileInMemory(
   ColorKey: TD3DColor;
   pSrcInfo: PD3DXImageInfo): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadVolumeFromFileInMemory : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; const pSrcData ; SrcDataSize : LongWord ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromFileInMemory : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; const pSrcData ; SrcDataSize : LongWord ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ) : HResult ; stdcall ;
 
 
 
@@ -3635,7 +3721,8 @@ var D3DXLoadVolumeFromFileInMemory : function( pDestVolume : IDirect3DVolume8 ; 
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3649,7 +3736,7 @@ function D3DXLoadVolumeFromVolume(
   Filter: DWord;
   ColorKey: TD3DColor): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadVolumeFromVolume : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromVolume : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ;
 
 
 
@@ -3689,7 +3776,8 @@ var D3DXLoadVolumeFromVolume : function( pDestVolume : IDirect3DVolume8 ; pDestP
 //      format.  Alpha is significant, and should usually be set to FF for
 //      opaque colorkeys.  (ex. Opaque black == 0xff000000)
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3706,7 +3794,7 @@ function D3DXLoadVolumeFromMemory(
   Filter: DWord;
   ColorKey: TD3DColor): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXLoadVolumeFromMemory : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; const pSrcMemory ; SrcFormat : TD3DFormat ; SrcRowPitch : LongWord ; SrcSlicePitch : LongWord ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ; 
+var D3DXLoadVolumeFromMemory : function( pDestVolume : IDirect3DVolume8 ; pDestPalette : PPaletteEntry ; pDestBox : TD3DBox ; const pSrcMemory ; SrcFormat : TD3DFormat ; SrcRowPitch : LongWord ; SrcSlicePitch : LongWord ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ; Filter : DWord ; ColorKey : TD3DColor ) : HResult ; stdcall ;
 
 
 
@@ -3728,7 +3816,8 @@ var D3DXLoadVolumeFromMemory : function( pDestVolume : IDirect3DVolume8 ; pDestP
 //  pSrcBox
 //      Source box, or NULL for the entire volume
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3739,7 +3828,7 @@ function D3DXSaveVolumeToFileA(
   pSrcPalette: PPaletteEntry;
   pSrcBox: TD3DBox): HResult; stdcall; external d3dx8dll name 'D3DXSaveVolumeToFileA';
 *)
-var D3DXSaveVolumeToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ; 
+var D3DXSaveVolumeToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ;
 
 (*
 
@@ -3751,7 +3840,7 @@ function D3DXSaveVolumeToFileW(
   pSrcPalette: PPaletteEntry;
   pSrcBox: TD3DBox): HResult; stdcall; external d3dx8dll name 'D3DXSaveVolumeToFileW';
 *)
-var D3DXSaveVolumeToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ; 
+var D3DXSaveVolumeToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ;
 
 (*
 
@@ -3763,7 +3852,7 @@ function D3DXSaveVolumeToFile(
   pSrcPalette: PPaletteEntry;
   pSrcBox: TD3DBox): HResult; stdcall; external d3dx8dll name 'D3DXSaveVolumeToFileA';
 *)
-var D3DXSaveVolumeToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ; 
+var D3DXSaveVolumeToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcVolume : IDirect3DVolume8 ; pSrcPalette : PPaletteEntry ; pSrcBox : TD3DBox ) : HResult ; stdcall ;
 
 
 
@@ -3794,7 +3883,8 @@ var D3DXSaveVolumeToFile : function( pDestFile : PChar ; DestFormat : TD3DXImage
 //  Pool
 //      Memory pool to be used to create texture
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 function D3DXCheckTextureRequirements(
@@ -3806,7 +3896,7 @@ function D3DXCheckTextureRequirements(
   pFormat: PD3DFormat;
   Pool: TD3DPool): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCheckTextureRequirements : function( pDevice : IDirect3DDevice8 ; pWidth : PLongWord ; pHeight : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ; 
+var D3DXCheckTextureRequirements : function( pDevice : IDirect3DDevice8 ; pWidth : PLongWord ; pHeight : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ;
 
 (*
 
@@ -3819,7 +3909,7 @@ function D3DXCheckCubeTextureRequirements(
   pFormat: PD3DFormat;
   Pool: TD3DPool): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCheckCubeTextureRequirements : function( pDevice : IDirect3DDevice8 ; pSize : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ; 
+var D3DXCheckCubeTextureRequirements : function( pDevice : IDirect3DDevice8 ; pSize : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ;
 
 (*
 
@@ -3834,7 +3924,7 @@ function D3DXCheckVolumeTextureRequirements(
   pFormat: PD3DFormat;
   Pool: TD3DPool): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCheckVolumeTextureRequirements : function( pDevice : IDirect3DDevice8 ; pWidth : PLongWord ; pHeight : PLongWord ; pDepth : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ; 
+var D3DXCheckVolumeTextureRequirements : function( pDevice : IDirect3DDevice8 ; pWidth : PLongWord ; pHeight : PLongWord ; pDepth : PLongWord ; pNumMipLevels : PLongWord ; Usage : DWord ; pFormat : PD3DFormat ; Pool : TD3DPool ) : HResult ; stdcall ;
 
 
 
@@ -3861,7 +3951,8 @@ var D3DXCheckVolumeTextureRequirements : function( pDevice : IDirect3DDevice8 ; 
 //  ppTexture, ppCubeTexture, ppVolumeTexture
 //      The texture object that will be created
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -3875,7 +3966,7 @@ function D3DXCreateTexture(
   Pool: TD3DPool;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateTexture : function( Device : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTexture : function( Device : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -3889,7 +3980,7 @@ function D3DXCreateCubeTexture(
   Pool: TD3DPool;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateCubeTexture : function( Device : IDirect3DDevice8 ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTexture : function( Device : IDirect3DDevice8 ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -3905,7 +3996,7 @@ function D3DXCreateVolumeTexture(
   Pool: TD3DPool;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateVolumeTexture : function( Device : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTexture : function( Device : IDirect3DDevice8 ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
@@ -3964,7 +4055,8 @@ var D3DXCreateVolumeTexture : function( Device : IDirect3DDevice8 ; Width : Long
 //----------------------------------------------------------------------------
 
 
-// FromFile
+// FromFile
+
 (*
 
 
@@ -3973,7 +4065,7 @@ function D3DXCreateTextureFromFileA(
   pSrcFile: PAnsiChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileA';
 *)
-var D3DXCreateTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -3983,7 +4075,7 @@ function D3DXCreateTextureFromFileW(
   pSrcFile: PWideChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileW';
 *)
-var D3DXCreateTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -3993,7 +4085,7 @@ function D3DXCreateTextureFromFile(
   pSrcFile: PChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileA';
 *)
-var D3DXCreateTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4004,7 +4096,7 @@ function D3DXCreateCubeTextureFromFileA(
   pSrcFile: PAnsiChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileA';
 *)
-var D3DXCreateCubeTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4014,7 +4106,7 @@ function D3DXCreateCubeTextureFromFileW(
   pSrcFile: PWideChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileW';
 *)
-var D3DXCreateCubeTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4024,7 +4116,7 @@ function D3DXCreateCubeTextureFromFile(
   pSrcFile: PChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileA';
 *)
-var D3DXCreateCubeTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4035,7 +4127,7 @@ function D3DXCreateVolumeTextureFromFileA(
   pSrcFile: PAnsiChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileA';
 *)
-var D3DXCreateVolumeTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4045,7 +4137,7 @@ function D3DXCreateVolumeTextureFromFileW(
   pSrcFile: PWideChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileW';
 *)
-var D3DXCreateVolumeTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4055,11 +4147,12 @@ function D3DXCreateVolumeTextureFromFile(
   pSrcFile: PChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileA';
 *)
-var D3DXCreateVolumeTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFile : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
-// FromResource
+// FromResource
+
 (*
 
 
@@ -4069,7 +4162,7 @@ function D3DXCreateTextureFromResourceA(
   pSrcResource: PAnsiChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceA';
 *)
-var D3DXCreateTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4080,7 +4173,7 @@ function D3DXCreateTextureFromResourceW(
   pSrcResource: PWideChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceW';
 *)
-var D3DXCreateTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4091,7 +4184,7 @@ function D3DXCreateTextureFromResource(
   pSrcResource: PChar;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceA';
 *)
-var D3DXCreateTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4103,7 +4196,7 @@ function D3DXCreateCubeTextureFromResourceA(
   pSrcResource: PAnsiChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceA';
 *)
-var D3DXCreateCubeTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4114,7 +4207,7 @@ function D3DXCreateCubeTextureFromResourceW(
   pSrcResource: PWideChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceW';
 *)
-var D3DXCreateCubeTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4125,7 +4218,7 @@ function D3DXCreateCubeTextureFromResource(
   pSrcResource: PChar;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceA';
 *)
-var D3DXCreateCubeTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4137,7 +4230,7 @@ function D3DXCreateVolumeTextureFromResourceA(
   pSrcResource: PAnsiChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceA';
 *)
-var D3DXCreateVolumeTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResourceA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4148,7 +4241,7 @@ function D3DXCreateVolumeTextureFromResourceW(
   pSrcResource: PWideChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceW';
 *)
-var D3DXCreateVolumeTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResourceW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4159,11 +4252,12 @@ function D3DXCreateVolumeTextureFromResource(
   pSrcResource: PChar;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceA';
 *)
-var D3DXCreateVolumeTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResource : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
-// FromFileEx
+// FromFileEx
+
 (*
 
 
@@ -4183,7 +4277,7 @@ function D3DXCreateTextureFromFileExA(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileExA';
 *)
-var D3DXCreateTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4204,7 +4298,7 @@ function D3DXCreateTextureFromFileExW(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileExW';
 *)
-var D3DXCreateTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4225,7 +4319,7 @@ function D3DXCreateTextureFromFileEx(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromFileExA';
 *)
-var D3DXCreateTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4246,7 +4340,7 @@ function D3DXCreateCubeTextureFromFileExA(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileExA';
 *)
-var D3DXCreateCubeTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4266,7 +4360,7 @@ function D3DXCreateCubeTextureFromFileExW(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileExW';
 *)
-var D3DXCreateCubeTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4286,7 +4380,7 @@ function D3DXCreateCubeTextureFromFileEx(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromFileExA';
 *)
-var D3DXCreateCubeTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4309,7 +4403,7 @@ function D3DXCreateVolumeTextureFromFileExA(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileExA';
 *)
-var D3DXCreateVolumeTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileExA : function( Device : IDirect3DDevice8 ; pSrcFile : PAnsiChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4331,7 +4425,7 @@ function D3DXCreateVolumeTextureFromFileExW(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileExW';
 *)
-var D3DXCreateVolumeTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileExW : function( Device : IDirect3DDevice8 ; pSrcFile : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4353,11 +4447,12 @@ function D3DXCreateVolumeTextureFromFileEx(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromFileExA';
 *)
-var D3DXCreateVolumeTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileEx : function( Device : IDirect3DDevice8 ; pSrcFile : PChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
-// FromResourceEx
+// FromResourceEx
+
 (*
 
 
@@ -4378,7 +4473,7 @@ function D3DXCreateTextureFromResourceExA(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceExA';
 *)
-var D3DXCreateTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4400,7 +4495,7 @@ function D3DXCreateTextureFromResourceExW(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceExW';
 *)
-var D3DXCreateTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4422,7 +4517,7 @@ function D3DXCreateTextureFromResourceEx(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateTextureFromResourceExA';
 *)
-var D3DXCreateTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4444,7 +4539,7 @@ function D3DXCreateCubeTextureFromResourceExA(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceExA';
 *)
-var D3DXCreateCubeTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4465,7 +4560,7 @@ function D3DXCreateCubeTextureFromResourceExW(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceExW';
 *)
-var D3DXCreateCubeTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4486,7 +4581,7 @@ function D3DXCreateCubeTextureFromResourceEx(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateCubeTextureFromResourceExA';
 *)
-var D3DXCreateCubeTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4510,7 +4605,7 @@ function D3DXCreateVolumeTextureFromResourceExA(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceExA';
 *)
-var D3DXCreateVolumeTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResourceExA : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PAnsiChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4533,7 +4628,7 @@ function D3DXCreateVolumeTextureFromResourceExW(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceExW';
 *)
-var D3DXCreateVolumeTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResourceExW : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PWideChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4556,11 +4651,12 @@ function D3DXCreateVolumeTextureFromResourceEx(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll name 'D3DXCreateVolumeTextureFromResourceExA';
 *)
-var D3DXCreateVolumeTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromResourceEx : function( Device : IDirect3DDevice8 ; hSrcModule : HModule ; pSrcResource : PChar ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
-// FromFileInMemory
+// FromFileInMemory
+
 (*
 
 
@@ -4570,7 +4666,7 @@ function D3DXCreateTextureFromFileInMemory(
   SrcDataSize: LongWord;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4581,7 +4677,7 @@ function D3DXCreateCubeTextureFromFileInMemory(
   SrcDataSize: LongWord;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateCubeTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4592,11 +4688,12 @@ function D3DXCreateVolumeTextureFromFileInMemory(
   SrcDataSize: LongWord;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateVolumeTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileInMemory : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
-// FromFileInMemoryEx
+// FromFileInMemoryEx
+
 (*
 
 
@@ -4617,7 +4714,7 @@ function D3DXCreateTextureFromFileInMemoryEx(
   pPalette: PPaletteEntry;
   out ppTexture: IDirect3DTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Width : LongWord ; Height : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppTexture : IDirect3DTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4638,7 +4735,7 @@ function D3DXCreateCubeTextureFromFileInMemoryEx(
   pPalette: PPaletteEntry;
   out ppCubeTexture: IDirect3DCubeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateCubeTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateCubeTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Size : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppCubeTexture : IDirect3DCubeTexture8 ) : HResult ; stdcall ;
 
 (*
 
@@ -4661,7 +4758,7 @@ function D3DXCreateVolumeTextureFromFileInMemoryEx(
   pPalette: PPaletteEntry;
   out ppVolumeTexture: IDirect3DVolumeTexture8): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXCreateVolumeTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ; 
+var D3DXCreateVolumeTextureFromFileInMemoryEx : function( Device : IDirect3DDevice8 ; const pSrcData ; SrcDataSize : LongWord ; Width : LongWord ; Height : LongWord ; Depth : LongWord ; MipLevels : LongWord ; Usage : DWord ; Format : TD3DFormat ; Pool : TD3DPool ; Filter : DWord ; MipFilter : DWord ; ColorKey : TD3DColor ; pSrcInfo : PD3DXImageInfo ; pPalette : PPaletteEntry ; out ppVolumeTexture : IDirect3DVolumeTexture8 ) : HResult ; stdcall ;
 
 
 
@@ -4681,7 +4778,8 @@ var D3DXCreateVolumeTextureFromFileInMemoryEx : function( Device : IDirect3DDevi
 //  pSrcPalette
 //      Source palette of 256 colors, or NULL
 //
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
 (*
 
 
@@ -4692,7 +4790,7 @@ function D3DXSaveTextureToFileA(
   pSrcTexture: IDirect3DBaseTexture8;
   pSrcPalette: PPaletteEntry): HResult; stdcall; external d3dx8dll name 'D3DXSaveTextureToFileA';
 *)
-var D3DXSaveTextureToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ; 
+var D3DXSaveTextureToFileA : function( pDestFile : PAnsiChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ;
 
 (*
 
@@ -4703,7 +4801,7 @@ function D3DXSaveTextureToFileW(
   pSrcTexture: IDirect3DBaseTexture8;
   pSrcPalette: PPaletteEntry): HResult; stdcall; external d3dx8dll name 'D3DXSaveTextureToFileW';
 *)
-var D3DXSaveTextureToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ; 
+var D3DXSaveTextureToFileW : function( pDestFile : PWideChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ;
 
 (*
 
@@ -4714,7 +4812,7 @@ function D3DXSaveTextureToFile(
   pSrcTexture: IDirect3DBaseTexture8;
   pSrcPalette: PPaletteEntry): HResult; stdcall; external d3dx8dll name 'D3DXSaveTextureToFileA';
 *)
-var D3DXSaveTextureToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ; 
+var D3DXSaveTextureToFile : function( pDestFile : PChar ; DestFormat : TD3DXImageFileFormat ; pSrcTexture : IDirect3DBaseTexture8 ; pSrcPalette : PPaletteEntry ) : HResult ; stdcall ;
 
 
 
@@ -4740,7 +4838,8 @@ var D3DXSaveTextureToFile : function( pDestFile : PChar ; DestFormat : TD3DXImag
 //      D3DX_FILTER flags controlling how each miplevel is filtered.
 //      Or D3DX_DEFAULT for D3DX_FILTER_BOX,
 //
-//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+
 (*
 
 
@@ -4750,11 +4849,12 @@ function D3DXFilterTexture(
   SrcLevel: LongWord;
   Filter: DWord): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXFilterTexture : function( pTexture : IDirect3DTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ; 
+var D3DXFilterTexture : function( pTexture : IDirect3DTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ;
 
 
 // #define D3DXFilterCubeTexture D3DXFilterTexture
-// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+
 (*
 
 function D3DXFilterCubeTexture(
@@ -4763,11 +4863,12 @@ function D3DXFilterCubeTexture(
   SrcLevel: LongWord;
   Filter: DWord): HResult; stdcall; external d3dx8dll name 'D3DXFilterTexture';
 *)
-var D3DXFilterCubeTexture : function( pTexture : IDirect3DCubeTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ; 
+var D3DXFilterCubeTexture : function( pTexture : IDirect3DCubeTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ;
 
 
 // #define D3DXFilterVolumeTexture D3DXFilterTexture
-// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+// In Pascal this mapped to DLL-exported "D3DXFilterTexture" function
+
 (*
 
 function D3DXFilterVolumeTexture(
@@ -4776,7 +4877,7 @@ function D3DXFilterVolumeTexture(
   SrcLevel: LongWord;
   Filter: DWord): HResult; stdcall; external d3dx8dll name 'D3DXFilterTexture';
 *)
-var D3DXFilterVolumeTexture : function( pTexture : IDirect3DVolumeTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ; 
+var D3DXFilterVolumeTexture : function( pTexture : IDirect3DVolumeTexture8 ; pPalette : PPaletteEntry ; SrcLevel : LongWord ; Filter : DWord ) : HResult ; stdcall ;
 
 
 
@@ -4796,7 +4897,8 @@ var D3DXFilterVolumeTexture : function( pTexture : IDirect3DVolumeTexture8 ; pPa
 //  pData
 //      Pointer to an arbitrary block of user defined data.  This pointer
 //      will be passed to the function provided in pFunction
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 (*
 
 
@@ -4805,7 +4907,7 @@ function D3DXFillTexture(
   pFunction: TD3DXFill2D;
   pData: Pointer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXFillTexture : function( pTexture : IDirect3DTexture8 ; pFunction : TD3DXFill2D ; pData : Pointer ) : HResult ; stdcall ; 
+var D3DXFillTexture : function( pTexture : IDirect3DTexture8 ; pFunction : TD3DXFill2D ; pData : Pointer ) : HResult ; stdcall ;
 
 (*
 
@@ -4815,7 +4917,7 @@ function D3DXFillCubeTexture(
   pFunction: TD3DXFill2D;
   pData: Pointer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXFillCubeTexture : function( pCubeTexture : IDirect3DCubeTexture8 ; pFunction : TD3DXFill2D ; pData : Pointer ) : HResult ; stdcall ; 
+var D3DXFillCubeTexture : function( pCubeTexture : IDirect3DCubeTexture8 ; pFunction : TD3DXFill2D ; pData : Pointer ) : HResult ; stdcall ;
 
 (*
 
@@ -4825,7 +4927,7 @@ function D3DXFillVolumeTexture(
   pFunction: TD3DXFill3D;
   pData: Pointer): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXFillVolumeTexture : function( pVolumeTexture : IDirect3DVolumeTexture8 ; pFunction : TD3DXFill3D ; pData : Pointer ) : HResult ; stdcall ; 
+var D3DXFillVolumeTexture : function( pVolumeTexture : IDirect3DVolumeTexture8 ; pFunction : TD3DXFill3D ; pData : Pointer ) : HResult ; stdcall ;
 
 
 
@@ -4849,7 +4951,8 @@ var D3DXFillVolumeTexture : function( pVolumeTexture : IDirect3DVolumeTexture8 ;
 //      D3DX_CHANNEL specifying source of height information
 //  Amplitude
 //      The constant value which the height information is multiplied by.
-//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
 (*
 
 
@@ -4861,7 +4964,7 @@ function D3DXComputeNormalMap(
   Channel: DWord;
   Amplitude: Single): HResult; stdcall; external d3dx8dll;
 *)
-var D3DXComputeNormalMap : function( pTexture : IDirect3DTexture8 ; pSrcTexture : IDirect3DTexture8 ; pSrcPalette : PPaletteEntry ; Flags : DWord ; Channel : DWord ; Amplitude : Single ) : HResult ; stdcall ; 
+var D3DXComputeNormalMap : function( pTexture : IDirect3DTexture8 ; pSrcTexture : IDirect3DTexture8 ; pSrcPalette : PPaletteEntry ; Flags : DWord ; Channel : DWord ; Amplitude : Single ) : HResult ; stdcall ;
 
 
 
@@ -4888,10 +4991,6 @@ type
 
   PD3DXImage_FileFormat = PD3DXImageFileFormat;
   TD3DXImage_FileFormat = TD3DXImageFileFormat;
-
-
-var
-	D3DX8Loaded : Boolean = False;
 
 //***************************************************************************//
 //***************************************************************************//
@@ -5640,7 +5739,7 @@ type
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD3DX8.SystemNames() : TSGStringList; 
+class function TSGDllD3DX8.SystemNames() : TSGStringList;
 begin
 Result := 'Direct3DX8';
 Result += 'D3DX8';
@@ -5669,7 +5768,7 @@ Result += 'd3dx9d_33.dll';
 Result += 'd3dx9d.dll';
 end;
 
-class procedure TSGDllD3DX8.Free(); 
+class procedure TSGDllD3DX8.Free();
 begin
 D3DXVec2Normalize := nil;
 D3DXVec2Hermite := nil;

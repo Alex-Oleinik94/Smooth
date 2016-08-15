@@ -36,6 +36,7 @@ type
 			//FOR USE
 		pD3D:IDirect3D8;
 		pDevice:IDirect3DDevice8;
+		D3DX8Loaded : TSGBoolean;
 			public
 		class function Suppored() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
@@ -1446,6 +1447,7 @@ end;
 constructor TSGRenderDirectX8.Create();
 begin
 inherited Create();
+D3DX8Loaded := DllManager.DllSuppored('Direct3DX8');
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
 SetRenderType(SGRenderDirectX8);
