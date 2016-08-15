@@ -4,7 +4,7 @@ unit SaGeDllManager;
 
 interface
 
-uses 
+uses
 	SaGeCommon
 	, SaGeBase
 	, SaGeBased
@@ -18,7 +18,7 @@ const
 
 type
 	TSGDllManager = class;
-	
+
 	PSGDllLoadObject = ^ TSGDllLoadObject;
 	TSGDllLoadObject = object
 			public
@@ -29,7 +29,7 @@ type
 		procedure Clear();
 		end;
 	TSGDllLoadObjectList = packed array of TSGDllLoadObject;
-	
+
 	TSGDllClass = class of TSGDll;
 	TSGDll = class(TSGNamed)
 			public
@@ -44,7 +44,7 @@ type
 		FLoadExecuted  : TSGBool;
 		FLoaded        : TSGBool;
 		FLoadObjects   : TSGDllLoadObjectList;
-		FErrorDllNames : TSGStringList; 
+		FErrorDllNames : TSGStringList;
 		FLibHandle     : TSGLibHandle;
 		FDllFileNames  : TSGStringList;
 			public
@@ -55,11 +55,11 @@ type
 		procedure LoadingChilds();
 			public
 		class function ChildNames() : TSGStringList; virtual;
-		
+
 		class function ChunkNames() : TSGStringList; virtual;
 		class function DllChunkNames() : TSGStringList; virtual;
 		class function LoadChunk(const VChunk : TSGString;const VDll : TSGLibHandle) : TSGDllLoadObject; virtual;
-		
+
 		class function SystemNames() : TSGStringList; virtual; abstract;
 		class function DllNames() : TSGStringList; virtual; abstract;
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; virtual; abstract;
@@ -77,9 +77,9 @@ type
 		property LoadExecuted : TSGBool read FLoadExecuted write FLoadExecuted;
 		property Owner    : TSGDllManager read FOwner write SetOwner;
 		end;
-	
+
 	TSGDllList = packed array of TSGDll;
-	
+
 	TSGDllManager = class(TSGNamed)
 			public
 		constructor Create(); override;
@@ -97,14 +97,49 @@ type
 		function MayUnloadDll(const VFileName : TSGString): TSGBool;
 		function CountUsesLibrary(const VFileName : TSGString) : TSGUInt32;
 		end;
-	
+
 var
 	DllManager : TSGDllManager = nil;
+
+operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;
 
 implementation
 
 uses
-	SaGeVersion;
+	SaGeVersion
+	;
+
+operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;
+var
+	i, ii, lA, lB : TSGUInt32;
+begin
+Result.Clear();
+Result.FFunctionCount := A.FFunctionCount + B.FFunctionCount;
+Result.FFunctionLoaded := A.FFunctionLoaded + B.FFunctionLoaded;
+lA := 0;
+lB := 0;
+if A.FFunctionErrors <> nil then
+	lA := Length(A.FFunctionErrors);
+if B.FFunctionErrors <> nil then
+	lB := Length(B.FFunctionErrors);
+ii := lA + lB;
+if ii > 0 then
+	begin
+	SetLength(Result.FFunctionErrors, ii);
+	if lA > 0 then
+		begin
+		for i := 0 to lA - 1 do
+			Result.FFunctionErrors[i] := A.FFunctionErrors[i];
+		SetLength(A.FFunctionErrors, 0);
+		end;
+	if lB > 0 then
+		begin
+		for i := lA to ii - 1 do
+			Result.FFunctionErrors[i] := B.FFunctionErrors[ii - lA];
+		SetLength(B.FFunctionErrors, 0);
+		end;
+	end;
+end;
 
 function TSGDll_Procent(const count, all : TSGUInt32) : TSGString;
 begin
@@ -138,13 +173,13 @@ begin
 Result := 0;
 end;
 
-constructor TSGDllManager.Create(); 
+constructor TSGDllManager.Create();
 begin
 inherited;
 FDlls := nil;
 end;
 
-destructor TSGDllManager.Destroy(); 
+destructor TSGDllManager.Destroy();
 begin
 if FDlls <> nil then
 	begin
@@ -211,18 +246,18 @@ else
 	FuncLoaded := 0;
 	FuncNotLoaded := 0;
 	AllFunc := 0;
-	
+
 	for i := 0 to DllCount - 1 do
 		begin
 		FDlls[i].PrintStat();
-		
+
 		LibLoaded    += TSGByte(FDlls[i].Suppored);
 		LibNotLoaded += TSGByte(not FDlls[i].Suppored);
 		FuncLoaded += FDlls[i].LoadedFunctions();
 		AllFunc += FDlls[i].TotalFunctions();
 		FuncNotLoaded += FDlls[i].TotalFunctions() - FDlls[i].LoadedFunctions();
 		end;
-	
+
 	WriteLn('Total     loaded functions : ', TSGDll_Procent(FuncLoaded, AllFunc));
 	if FuncNotLoaded <> 0 then
 		WriteLn('Total not loaded functions : ', TSGDll_Procent(FuncNotLoaded, AllFunc));
@@ -330,7 +365,7 @@ var
 begin
 Result := '';
 StringList := SystemNames();
-if StringList <> nil then 
+if StringList <> nil then
 	begin
 	if Length(StringList) > 0 then
 		begin
@@ -373,7 +408,7 @@ var
 	i, ii : TSGUInt32;
 begin
 Result := nil;
-if FLoadObjects <> nil then 
+if FLoadObjects <> nil then
 	if Length(FLoadObjects) > 0 then
 		for i := 0 to High(FLoadObjects) do
 			if FLoadObjects[i].FFunctionErrors <> nil then
@@ -452,7 +487,7 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 				SetLength(FDllFileNames, 1);
 				FDllFileNames[0] := DllFileNames[i];
 				FLibHandle := TestLibHandle;
-				
+
 				TestLibHandle := 0;
 				fillchar(TestLoadObject, SizeOf(TestLoadObject), 0);
 				Result := True;

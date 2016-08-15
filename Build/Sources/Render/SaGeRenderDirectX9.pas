@@ -13,11 +13,11 @@ uses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeClasses
-	
+
 	,crt
 	,windows
 	,DynLibs
-	
+
 	,DXTypes
 	,DXErr9
 	,D3DX9
@@ -27,7 +27,7 @@ uses
 type
 	D3DXVector3 = TD3DXVector3;
 	D3DVector = D3DXVector3;
-	
+
 	TSGRDTypeDataBuffer = (SGRDTypeDataBufferVertex, SGRDTypeDataBufferColor, SGRDTypeDataBufferNormal, SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX9 = class(TSGRender)
 			public
@@ -60,7 +60,7 @@ type
 		procedure LockResourses();override;
 		// Инициализация рендера и загрузка сохраненных ресурсов
 		procedure UnLockResourses();override;
-		
+
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
 		procedure Vertex2f(const x,y:single);override;
@@ -113,7 +113,7 @@ type
 		{$IFNDEF MOBILE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
-		
+
 		function SupporedShaders() : TSGBoolean;override;
 		// Остальное потом
 		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
@@ -122,12 +122,12 @@ type
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;
 		procedure DeleteShader(const VProgram : TSGLongWord);override;
-		
+
 		function CreateShaderProgram() : TSGLongWord;override;
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
-		
+
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;override;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 		procedure UseProgram(const VProgram : TSGLongWord);override;
@@ -135,7 +135,7 @@ type
 			private
 		//цвет, в который окрашивается буфер при очистке
 		FClearColor:LongWord;
-		
+
 			(*glBegin ... glEnd*)
 			//приведение цветов и полигонов к Vertex-ам опенжл-я
 		// Текуший тип приметивов (задается в BeginScene)
@@ -149,7 +149,7 @@ type
 			x,y,z:TSGSingle;
 			end;
 		// Массив, который в последущем раендерится с помощью pDevice.DrawPrimitiveUP(..)
-		FArPoints:array[0..2]of 
+		FArPoints:array[0..2]of
 			packed record
 				x,y,z : TSGSingle;
 				Normalx,Normaly,Normalz: TSGSingle;
@@ -158,12 +158,12 @@ type
 				end;
 		// Количество вершин, которые в данный момент уже записаны массив FArPoints
 		FNumberOfPoints : LongWord;
-		
+
 			(* Textures *)
 		// Индекс массива FArTextures[] активной в данный момент текстуры
 		FNowTexture:LongWord;
 		// Массив текстур
-		FArTextures:packed array of 
+		FArTextures:packed array of
 			packed record
 			// texture
 			FTexture:IDirect3DTexture9;
@@ -172,11 +172,11 @@ type
 			// image info
 			FWidth,FHeight,FChannels,FFormat:TSGLongWord;
 			end;
-		
+
 			(* ===VBO=== or arrays *)
 		// FArBuffers[i-1] содержит информацию о i-ом буфере.
-		FArBuffers:packed array of 
-			packed record 
+		FArBuffers:packed array of
+			packed record
 			// Тип ресурса SGR_ARRAY_BUFFER_ARB or SGR_ELEMENT_ARRAY_BUFFER_ARB
 			FType:TSGLongWord;
 			// Ресурс. (Он IDirect3DVertexBuffer9 или IDirect3DIndexBuffer9)
@@ -195,7 +195,7 @@ type
 		FVBOData:packed array [0..1] of TSGLongWord;
 		// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
 		// FVBOData[1] - SGR_ELEMENT_ARRAY_BUFFER_ARB
-		FArDataBuffers:packed array[TSGRDTypeDataBuffer] of 
+		FArDataBuffers:packed array[TSGRDTypeDataBuffer] of
 			packed record
 			// Состояние на момент регестрирования буфера FVBOData[0]
 			FVBOBuffer      : TSGLongWord;
@@ -211,21 +211,21 @@ type
 			// FShift --- Если VBO - смещение в байтах относительно начала этого компонента массива.
 			// А если не VBO - указатель на первый элемент массива. (Это не получится запрогать походу)
 			end;
-		
+
 			(* Light *)
 		FLigth               : D3DLIGHT9;
-		
+
 			(* PushMatrix/PopMatrix *)
 		FQuantitySavedMatrix : LongWord;
 		FLengthArSavedMatrix : LongWord;
 		FArSavedMatrix       : packed array of D3DMATRIX;
-		
+
 			(* Material *)
 		FMaterial            : D3DMATERIAL9;
-		
+
 			(* Matrix Mode *)
 		FNowMatrixMode : TSGLongWord;
-		
+
 			(* MultiTexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
 		FNowActiveClientNumberTexture : TSGLongWord;
@@ -256,7 +256,7 @@ uses
 	SaGeDllManager
 	;
 
-class function TSGRenderDirectX9.ClassName() : TSGString; 
+class function TSGRenderDirectX9.ClassName() : TSGString;
 begin
 Result := 'TSGRenderDirectX9';
 end;
@@ -264,7 +264,8 @@ end;
 class function TSGRenderDirectX9.Suppored() : TSGBoolean;
 begin
 Result := DllManager.DllSuppored('Direct3D9');
-DllManager.DllSuppored('Direct3DX9');
+if Result then
+	DllManager.DllSuppored('Direct3DX9');
 end;
 
 function TSGRenderDirectX9.SupporedShaders() : TSGBoolean;
@@ -299,7 +300,7 @@ end;
 
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 begin
-Result := 
+Result :=
 	(Round(255.0 * 1.0) shl 24) +
 	(Round(127.0 * v.x + 128.0) shl 16) +
 	(Round(127.0 * v.y + 128.0) shl 8) +
@@ -407,20 +408,20 @@ SGR_TRIANGLES:Result:=D3DPT_TRIANGLELIST;
 SGR_POINTS:Result:=D3DPT_POINTLIST;
 SGR_LINE_STRIP:Result:=D3DPT_LINESTRIP;
 SGR_TRIANGLE_STRIP:Result:=D3DPT_TRIANGLESTRIP;
-else 
+else
 	Result:=D3DPT_INVALID_0;
 end;
 end;
 (*for look at*)
-{//задаем соответствующие вектора 
-D3DXVECTOR3 position(5.0f, 3.0f, –10.0f); 
-D3DXVECTOR3 target(0.0f, 0.0f, 0.0f); 
-D3DXVECTOR3 up(0.0f, 1.0f, 0.0f); 
-//создаем матрицу 
-D3DXMATRIX V; 
-//инициализируем её 
-D3DXMatrixLookAtLH(&V, &position, &target, &up); 
-//и задаем как матрицу вида 
+{//задаем соответствующие вектора
+D3DXVECTOR3 position(5.0f, 3.0f, –10.0f);
+D3DXVECTOR3 target(0.0f, 0.0f, 0.0f);
+D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
+//создаем матрицу
+D3DXMATRIX V;
+//инициализируем её
+D3DXMatrixLookAtLH(&V, &position, &target, &up);
+//и задаем как матрицу вида
 pDevice->SetTransform(D3DTS_VIEW, &V);}
 
 function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
@@ -493,7 +494,7 @@ case FPrimetiveType of
 SGR_POINTS:
 	if (FNumberOfPoints=1) then
 		FNumberOfPoints:=0;
-SGR_TRIANGLES: 
+SGR_TRIANGLES:
 	if FNumberOfPoints=3 then
 		FNumberOfPoints:=0;
 SGR_QUADS:
@@ -556,13 +557,13 @@ begin
 Color4f(r,g,b,1);
 end;
 
-procedure TSGRenderDirectX9.TexCoord2f(const x,y:single); 
-begin 
+procedure TSGRenderDirectX9.TexCoord2f(const x,y:single);
+begin
 FArPoints[FNumberOfPoints].tx:=x;
 FArPoints[FNumberOfPoints].ty:=y;
 end;
 
-procedure TSGRenderDirectX9.Vertex2f(const x,y:single); 
+procedure TSGRenderDirectX9.Vertex2f(const x,y:single);
 begin
 FArPoints[FNumberOfPoints].Color:=FNowColor;
 FArPoints[FNumberOfPoints].x:=x;
@@ -572,7 +573,7 @@ FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
-procedure TSGRenderDirectX9.Color4f(const r,g,b,a:single); 
+procedure TSGRenderDirectX9.Color4f(const r,g,b,a:single);
 begin
 FNowColor:=D3DCOLOR_ARGB(
 	Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a),
@@ -589,27 +590,27 @@ end;
 procedure TSGRenderDirectX9.MultMatrixf(const Variable : TSGPointer);
 var
 	Matrix1,MatrixOut:D3DMATRIX;
-begin 
+begin
 pDevice.GetTransform(FNowMatrixMode,Matrix1);
 D3DXMatrixMultiply(MatrixOut,PD3DMATRIX(Variable)^,Matrix1);
 pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
-procedure TSGRenderDirectX9.Translatef(const x,y,z:single); 
+procedure TSGRenderDirectX9.Translatef(const x,y,z:single);
 var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
-begin 
+begin
 pDevice.GetTransform(FNowMatrixMode,Matrix1);
 D3DXMatrixTranslation(Matrix2,x,y,z);
 D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
 pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
-procedure TSGRenderDirectX9.Rotatef(const angle:single;const x,y,z:single); 
+procedure TSGRenderDirectX9.Rotatef(const angle:single;const x,y,z:single);
 var
 	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
 	v:TD3DXVector3;
-begin 
+begin
 v.x:=x;
 v.y:=y;
 v.z:=z;
@@ -619,7 +620,7 @@ D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
 pDevice.SetTransform(FNowMatrixMode,MatrixOut);
 end;
 
-procedure TSGRenderDirectX9.Enable(VParam:Cardinal); 
+procedure TSGRenderDirectX9.Enable(VParam:Cardinal);
 begin
 case VParam of
 SGR_DEPTH_TEST:
@@ -641,8 +642,8 @@ SGR_BLEND:
 end;
 end;
 
-procedure TSGRenderDirectX9.Disable(const VParam:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.Disable(const VParam:Cardinal);
+begin
 case VParam of
 SGR_DEPTH_TEST:
 	begin
@@ -672,10 +673,10 @@ SGR_BLEND:
 end;
 end;
 
-procedure TSGRenderDirectX9.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+procedure TSGRenderDirectX9.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
 var
 	i:LongWord;
-begin 
+begin
 for i:=0 to VQuantity-1 do
 	begin
 	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1].FTexture<>nil) then
@@ -689,10 +690,10 @@ for i:=0 to VQuantity-1 do
 	end;
 end;
 
-procedure TSGRenderDirectX9.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer); 
+procedure TSGRenderDirectX9.Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);
 type
 	PArS = ^ Single;
-begin 
+begin
 case VLight of
 SGR_LIGHT0:
 	begin
@@ -730,8 +731,8 @@ SGR_LIGHT0:
 		pDevice.SetRenderState(D3DRS_LIGHTING,1);
 		pDevice.SetRenderState(D3DRS_AMBIENT, 1);
 		end;
-	else 
-		begin 
+	else
+		begin
 		end;
 	end;
 	end;
@@ -741,10 +742,10 @@ else
 end;
 end;
 
-procedure TSGRenderDirectX9.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+procedure TSGRenderDirectX9.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
 var
 	I:LongWord;
-begin 
+begin
 for i:=0 to VQuantity-1 do
 	begin
 	if FArTextures=nil then
@@ -757,8 +758,8 @@ for i:=0 to VQuantity-1 do
 	end;
 end;
 
-procedure TSGRenderDirectX9.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.BindTexture(const VParam:Cardinal;const VTexture:Cardinal);
+begin
 FNowTexture:=VTexture;
 if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1].FTexture<>nil) then
 	pDevice.SetTexture(FNowActiveNumberTexture, FArTextures[FNowTexture-1].FTexture);
@@ -767,7 +768,7 @@ end;
 procedure TSGRenderDirectX9.TexParameteri(const VP1,VP2,VP3:Cardinal);
 var
 	Caps : D3DCAPS9;
-begin 
+begin
 if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 	begin
 	case VP2 of
@@ -782,7 +783,7 @@ if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 			pDevice.GetDeviceCaps(Caps);
 			if Caps.MaxAnisotropy > 0 then
 				begin
-				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC); 
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
 				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAXANISOTROPY, Caps.MaxAnisotropy);
 				end
 			else
@@ -800,7 +801,7 @@ if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 			pDevice.GetDeviceCaps(Caps);
 			if Caps.MaxAnisotropy > 0 then
 				begin
-				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC); 
+				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
 				pDevice.SetSamplerState( FNowActiveNumberTexture, D3DSAMP_MAXANISOTROPY, Caps.MaxAnisotropy);
 				end
 			else
@@ -811,20 +812,20 @@ if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 	end;
 end;
 
-procedure TSGRenderDirectX9.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
-begin 
+procedure TSGRenderDirectX9.PixelStorei(const VParamName:Cardinal;const VParam:SGInt);
+begin
 
 end;
 
-procedure TSGRenderDirectX9.TexEnvi(const VP1,VP2,VP3:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.TexEnvi(const VP1,VP2,VP3:Cardinal);
+begin
 
 end;
 
-procedure TSGRenderDirectX9.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer); 
+procedure TSGRenderDirectX9.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);
 var
 	VTFormat:LongWord;
-	rcLockedRect:D3DLOCKED_RECT; 
+	rcLockedRect:D3DLOCKED_RECT;
 
 procedure RGBAToD3D_ARGB();inline;
 type
@@ -859,7 +860,7 @@ i+=1;
 until i=ii;
 end;
 
-begin 
+begin
 VTFormat:=0;
 case VFormatType of
 SGR_RGBA:VTFormat:=D3DFMT_A8R8G8B8;
@@ -899,21 +900,21 @@ else
 	end;
 end;
 
-procedure TSGRenderDirectX9.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
-begin 
+procedure TSGRenderDirectX9.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);
+begin
 
 end;
 
-procedure TSGRenderDirectX9.CullFace(const VParam:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.CullFace(const VParam:Cardinal);
+begin
 case VParam of
 SGR_BACK :pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CW );
 SGR_FRONT:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
 end;
 end;
 
-procedure TSGRenderDirectX9.EnableClientState(const VParam:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.EnableClientState(const VParam:Cardinal);
+begin
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=True;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=True;
@@ -922,8 +923,8 @@ SGR_COLOR_ARRAY:FEnabledClientStateColor:=True;
 end;
 end;
 
-procedure TSGRenderDirectX9.DisableClientState(const VParam:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.DisableClientState(const VParam:Cardinal);
+begin
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=False;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=False;
@@ -932,10 +933,10 @@ SGR_COLOR_ARRAY:FEnabledClientStateColor:=False;
 end;
 end;
 
-procedure TSGRenderDirectX9.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
+procedure TSGRenderDirectX9.GenBuffersARB(const VQ:Integer;const PT:PCardinal);
 var
 	i:LongWord;
-begin 
+begin
 for i:=0 to VQ-1 do
 	begin
 	if FArBuffers=nil then
@@ -970,7 +971,7 @@ end;
 procedure TSGRenderDirectX9.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);
 var
 	i:LongWord;
-begin 
+begin
 for i:=0 to VQuantity-1 do
 	if FArBuffers[PLongWord(VPoint)[i]-1].FResourse<>nil then
 		begin
@@ -989,7 +990,7 @@ for i:=0 to VQuantity-1 do
 end;
 
 procedure TSGRenderDirectX9.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
-begin 
+begin
 case VParam of
 SGR_ARRAY_BUFFER_ARB        :FVBOData[0]:=VParam2;
 SGR_ELEMENT_ARRAY_BUFFER_ARB:FVBOData[1]:=VParam2;
@@ -1004,7 +1005,7 @@ procedure TSGRenderDirectX9.BufferDataARB(
 	const VIndexPrimetiveType : TSGLongWord = 0);
 var
 	VVBuffer:PByte = nil;
-begin 
+begin
 if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	begin
 	if pDevice.CreateVertexBuffer(VSize,0,0,D3DPOOL_DEFAULT,
@@ -1077,10 +1078,10 @@ procedure TSGRenderDirectX9.DrawElements(
 	VBuffer:Pointer);
 var
 	VertexManipulator:TSGRDXVertexDeclarationManipulator = nil;
-begin 
+begin
 if (VBuffer<>nil) or (not FEnabledClientStateVertex) then
 	Exit;
-if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then 
+if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then
 	begin
 	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration = nil then
 		begin
@@ -1109,7 +1110,7 @@ if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) th
 		SGLog.Sourse('TSGRenderDirectX9__DrawElements : SetIndices : Failed!!');
 	//Draw
 	if pDevice.DrawIndexedPrimitive(SGRDXConvertPrimetiveType(VParam),0,0,
-		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div 
+		FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FResourseSize div
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex
 		,0,SGRDXGetNumPrimetives(VParam,VSize))<>D3D_OK then
 			SGLog.Sourse('TSGRenderDirectX9__DrawElements : DrawIndexedPrimitive : Draw Failed!!');
@@ -1139,7 +1140,7 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferNormal].FShift;
 	if FEnabledClientStateTexVertex and (BeginArray>FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift) then
 		BeginArray:=FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift;
-	
+
 	if FEnabledClientStateColor then
 		VertexType:=VertexType or D3DFVF_DIFFUSE;
 	if FEnabledClientStateTexVertex then
@@ -1148,7 +1149,7 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 		VertexType:=VertexType or D3DFVF_NORMAL;
 	pDevice.BeginScene();
 	pDevice.SetFVF( VertexType );
-	pDevice.DrawPrimitiveUP(SGRDXConvertPrimetiveType(VParam),SGRDXGetNumPrimetives(VParam,VCount), 
+	pDevice.DrawPrimitiveUP(SGRDXConvertPrimetiveType(VParam),SGRDXGetNumPrimetives(VParam,VCount),
 		TSGPointer(BeginArray+FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex*VFirst)^,
 		FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex);
 	pDevice.EndScene();
@@ -1185,8 +1186,8 @@ else
 	end;
 end;
 
-procedure TSGRenderDirectX9.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderDirectX9.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferColor].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferColor].FDataType:=VType;
@@ -1194,8 +1195,8 @@ FArDataBuffers[SGRDTypeDataBufferColor].FSizeOfOneVertex:=VSize;
 FArDataBuffers[SGRDTypeDataBufferColor].FShift:=TSGMaxEnum(VBuffer);
 end;
 
-procedure TSGRenderDirectX9.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderDirectX9.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FDataType:=VType;
@@ -1203,8 +1204,8 @@ FArDataBuffers[SGRDTypeDataBufferTexVertex].FSizeOfOneVertex:=VSize;
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FShift:=TSGMaxEnum(VBuffer);
 end;
 
-procedure TSGRenderDirectX9.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderDirectX9.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 FArDataBuffers[SGRDTypeDataBufferNormal].FQuantityParams:=3;
 FArDataBuffers[SGRDTypeDataBufferNormal].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferNormal].FDataType:=VType;
@@ -1212,8 +1213,8 @@ FArDataBuffers[SGRDTypeDataBufferNormal].FSizeOfOneVertex:=VSize;
 FArDataBuffers[SGRDTypeDataBufferNormal].FShift:=TSGMaxEnum(VBuffer);
 end;
 
-procedure TSGRenderDirectX9.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderDirectX9.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 FArDataBuffers[SGRDTypeDataBufferVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferVertex].FDataType:=VType;
@@ -1221,13 +1222,13 @@ FArDataBuffers[SGRDTypeDataBufferVertex].FSizeOfOneVertex:=VSize;
 FArDataBuffers[SGRDTypeDataBufferVertex].FShift:=TSGMaxEnum(VBuffer);
 end;
 
-function TSGRenderDirectX9.IsEnabled(const VParam:Cardinal):Boolean; 
-begin 
+function TSGRenderDirectX9.IsEnabled(const VParam:Cardinal):Boolean;
+begin
 Result:=False;
 end;
 
-procedure TSGRenderDirectX9.Clear(const VParam:Cardinal); 
-begin 
+procedure TSGRenderDirectX9.Clear(const VParam:Cardinal);
+begin
 pDevice.Clear( 0, nil, D3DCLEAR_TARGET or D3DCLEAR_ZBUFFER, FClearColor, 1.0, 0 );
 end;
 
@@ -1266,10 +1267,10 @@ pDevice.SetRenderState(D3DRS_ZENABLE, 1);
 
 //==========Устанавливаем материал
 (*Справка!*)
-{Diffuse - рассеиваемый свет. 
- Ambient - фоновый свет. 
- Specular - отражаемый свет. 
- Emissive - собственное свечение объекта. 
+{Diffuse - рассеиваемый свет.
+ Ambient - фоновый свет.
+ Specular - отражаемый свет.
+ Emissive - собственное свечение объекта.
  Power - резкость отражений.}
 FillChar(FMaterial,SizeOf(FMaterial),0);
 FMaterial.Diffuse:=SGRDXGetD3DCOLORVALUE(1,1,1,1);
@@ -1317,18 +1318,18 @@ pDevice.SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
 //===================Сглаживание
-//pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1); 
+//pDevice.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS,1);
 //Чето это сильно мутит, линии колбасу напоминают от этого параметра
-//pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1); 
+//pDevice.SetRenderState(D3DRS_ANTIALIASEDLINEENABLE,1);
 
 //========Линейная фильтрация текстур
-pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR); 
+pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 //От MIP фильтора у текстур возникают аномалии
-//pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR); 
+//pDevice.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
 //========Tочечьная фильтрация текстур
-(*pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT); 
+(*pDevice.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
 pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);*)
 
 //=========Анизатропная фильтрация текстур
@@ -1336,7 +1337,7 @@ pDevice.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);*)
 pDevice.SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_ANISOTROPIC);
 pDevice.SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 4);*)
 
-//========Фильтр детализации текстур 
+//========Фильтр детализации текстур
 //(Чтобы при загрузке текстур генерировались несколько текстур, разного разрешения)
 pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_NONE);
 //pDevice.SetSamplerState(0,D3DSAMP_MIPFILTER,D3DTEXF_POINT);
@@ -1470,7 +1471,7 @@ SGR_PROJECTION:
 	FNowMatrixMode:=D3DTS_PROJECTION;
 SGR_MODELVIEW:
 	FNowMatrixMode:=D3DTS_VIEW;
-else 
+else
 	FNowMatrixMode:=D3DTS_WORLD;
 end;
 end;
@@ -1535,8 +1536,8 @@ FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
-procedure TSGRenderDirectX9.Normal3f(const x,y,z:single); 
-begin 
+procedure TSGRenderDirectX9.Normal3f(const x,y,z:single);
+begin
 FNowNormal.x:=x;
 FNowNormal.y:=y;
 FNowNormal.z:=z;
@@ -1615,13 +1616,13 @@ begin
 for Index := High(Samples) downto Low(Samples) do
 	begin
 	if SUCCEEDED(pD3D.CheckDeviceMultiSampleType(
-          D3DADAPTER_DEFAULT, 
+          D3DADAPTER_DEFAULT,
           D3DDEVTYPE_HAL,
-          D3DFMT_X8R8G8B8, 
-          False, 
+          D3DFMT_X8R8G8B8,
+          False,
           Samples[Index],
           @MultiSampleMaxQuality
-       )) then 
+       )) then
 		begin
 		Finded := True;
 		MultiSampleType := Samples[Index];
@@ -1697,10 +1698,10 @@ if pDevice = nil then
 		d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
 		d3dpp.MultiSampleType        := MultiSampleType;
 		d3dpp.MultiSampleQuality     := 0;
-		
+
 		DXErr :=  pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice);
-		
+
 		if( DXErr <> D3D_OK) then
 			begin
 			{$IFDEF RENDER_DX9_DEBUG}
@@ -1820,7 +1821,7 @@ if FArBuffers<>nil then
 					FArBuffers[i].FVertexDeclaration:=nil;
 				end;
 			//SGLog.Sourse('TSGRenderDirectX9__LockResourses : Begin to lock buffer "'+SGStr(i)+'"!');
-			if FArBuffers[i].FType=SGR_ELEMENT_ARRAY_BUFFER_ARB then 
+			if FArBuffers[i].FType=SGR_ELEMENT_ARRAY_BUFFER_ARB then
 				begin
 				if (FArBuffers[i].FResourse as IDirect3DIndexBuffer9).Lock(0,FArBuffers[i].FResourseSize,VVBuffer,0)<>D3D_OK then
 					begin
