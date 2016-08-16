@@ -3,7 +3,7 @@
 unit SaGeLeaksDetector;
 
 interface
-uses 
+uses
 	SaGeBase
 	,SaGeBased
 	;
@@ -13,9 +13,9 @@ type
 		FName : TSGString;
 		FCount : TSGLongWord;
 		end;
-	
+
 	TSGLeaksDetectorReferences = packed array of TSGLeaksDetectorReference;
-	
+
 	TSGLeaksDetector = class
 			public
 		constructor Create();
@@ -61,7 +61,7 @@ var
 	i : TSGInt32;
 begin
 f := False;
-if FReferences <> nil then 
+if FReferences <> nil then
 	if Length(FReferences) > 0 then
 		for i := 0 to High(FReferences) do
 			if FReferences[i].FName = VName then
@@ -85,8 +85,10 @@ var
 	f : TSGBool = False;
 	i : TSGInt32;
 begin
+if VName = 'TSGDrawable' then
+	SGPrintStackTrace();
 f := False;
-if FReferences <> nil then 
+if FReferences <> nil then
 	if Length(FReferences) > 0 then
 		for i := 0 to High(FReferences) do
 			if FReferences[i].FName = VName then

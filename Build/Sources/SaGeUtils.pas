@@ -39,12 +39,12 @@ type
 		FFont : TSGFont;
 		FX, FY : TSGWord;
 		FAlpha : TSGFloat32;
-		
+
 		FFrameArray : packed array of TSGWord;
 		FFrameCount : TSGWord;
 		FFrameIndex : TSGWord;
 		FFrameReady : TSGBoolean;
-		
+
 		function FrameSum():TSGWord;inline;
 			public
 		property X : TSGWord read FX write FX;
@@ -125,7 +125,7 @@ type
 		function GetResultVertex(const Attitude:real):TSGVertex3f;inline;overload;
 		procedure Calculate();
 		procedure AddVertex(const VVertex:TSGVertex3f);
-		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex; 
+		property Vertexes[Index : TSGMaxEnum]:TSGVertex3f read GetVertex write SetVertex;
 		property Detalization:LongWord read FDetalization write FDetalization;
 		procedure Paint();override;
 		function VertexQuantity:TSGMaxEnum;inline;
@@ -137,18 +137,19 @@ type
 type
 	TSGFontInt = TSGLongWord;
 	TSGSimbolParamType = TSGWord;
-	
+
 	TStringParams=packed array of packed array [0..1] of string;
-	
+
 	TSGSimbolParam=object
 		X,Y,Width:TSGSimbolParamType;
 		end;
-	
+
 	TSGSimbolParams = packed array[#0..#255] of TSGSimbolParam;
-	
+
 	TSGFont=class(TSGImage)
 			public
 		constructor Create(const FileName:string = '');
+		class function ClassName() : TSGString; override;
 		destructor Destroy;override;
 			protected
 		FSimbolParams:TSGSimbolParams;
@@ -489,7 +490,7 @@ for i:=1 to Length(FText) do
 	FMesh.ArVertex3f[(i-1)*6+3]^:=FMesh.ArVertex3f[(i-1)*6+0]^;
 	FMesh.ArVertex3f[(i-1)*6+4]^:=FMesh.ArVertex3f[(i-1)*6+2]^;
 	FMesh.ArVertex3f[(i-1)*6+5]^.Import(ii,FFont.FontHeight);
-	
+
 	FMesh.ArTexVertex[(i-1)*6+0]^.Import(
 		(FFont.SimbolParams[FText[i]].x+DXShift)/FFont.Width,
 		1-(FFont.SimbolParams[FText[i]].y/FFont.Height));
@@ -504,7 +505,7 @@ for i:=1 to Length(FText) do
 	FMesh.ArTexVertex[(i-1)*6+5]^.Import(
 		(FFont.SimbolParams[FText[i]].x+DXShift)/FFont.Width,
 		1-((FFont.SimbolParams[FText[i]].y+FFont.FontHeight)/FFont.Height));
-	
+
 	ii+=FFont.SimbolParams[FText[i]].Width;
 	end;
 FMesh.LoadToVBO();
@@ -698,7 +699,7 @@ SG_VIEW_LOOK_AT_OBJECT: if FChangingLookAtObject then
 		else
 			RotateZ := -Context.ElapsedTime*o*4;
 		end;
-	
+
 	if (Context.KeysPressed('W')) then
 		Move(Context.ElapsedTime*o);
 	if (Context.KeysPressed('S')) then
@@ -1110,7 +1111,7 @@ if SGGetFileExpansion(FWay)='SGF' then
 	Exit;
 	end;
 Result:=inherited Loading();
-if not Result then 
+if not Result then
 	Exit;
 i:=Length(FWay);
 while (FWay[i]<>'.')and(FWay[i]<>'/')and(i>0)do
@@ -1125,6 +1126,11 @@ if (i>0)and (FWay[i]='.') then
 		LoadFont(FontWay);
 		end;
 	end;
+end;
+
+class function TSGFont.ClassName() : TSGString;
+begin
+Result := 'TSGFont';
 end;
 
 constructor TSGFont.Create(const FileName:string = '');
@@ -1194,7 +1200,7 @@ while (i <= Length(S)) and (not ToExit) do
 			ToExit := True;
 			ThisSimbolWidth := Trunc(RealStringWidth - Otstup.x);
 			end;
-		
+
 		Render.TexCoord2f(
 				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
 			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
@@ -1219,7 +1225,7 @@ while (i <= Length(S)) and (not ToExit) do
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y + FFontHeight);
-		
+
 		Otstup.x += FSimbolParams[s[i]].Width;
 		end
 	else
@@ -1282,7 +1288,7 @@ while (s[i]<>#0) and (not ToExit) do
 			ToExit := True;
 			ThisSimbolWidth := Trunc(RealStringWidth - Otstup.x);
 			end;
-		
+
 		Render.TexCoord2f(
 				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
 			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
@@ -1307,7 +1313,7 @@ while (s[i]<>#0) and (not ToExit) do
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y + FFontHeight);
-		
+
 		Otstup.x += FSimbolParams[s[i]].Width;
 		end
 	else
@@ -1664,7 +1670,7 @@ for i:=0 to Font.Width*Font.Height*Font.Channels-1 do
 if RunInConsole then
 	begin
 	SGLog.Sourse(['SGTranslateFont : Font : Total [1..254] variables quantyti : "',q,'" of "'+SGStr(Font.Width*Font.Height*Font.Channels)+'" ('+SGStrReal(q/(Font.Width*Font.Height*Font.Channels)*100,2)+' per cent)!']);
-	for i:=0 to 255 do 
+	for i:=0 to 255 do
 		if Colors[i]<>0 then
 			begin
 			SGLog.Sourse(['SGTranslateFont : Colors[',i,']="',Colors[i],'".']);
@@ -1690,7 +1696,7 @@ for i:=0 to Font.Width*Font.Height-1 do
 	Colors[BitMap[i*Font.Channels+3]]+=1;
 	end;
 SetLength(TudaColors,0);
-for i:=0 to 255 do 
+for i:=0 to 255 do
 	if Colors[i]<>0 then
 		begin
 		ObrColors[i]:=QuantityColors;
@@ -1701,7 +1707,7 @@ for i:=0 to 255 do
 if RunInConsole then
 	begin
 	SGLog.Sourse(['SGTranslateFont : Font : Quantity colors = "',QuantityColors,'"!']);
-	for i:=0 to 255 do 
+	for i:=0 to 255 do
 		if Colors[i]<>0 then
 			begin
 			SGLog.Sourse(['SGTranslateFont : Colors[',i,']="',Colors[i],'" ('+SGStrReal(Colors[i]/(Font.Width*Font.Height)*100,2)+' per cent).']);

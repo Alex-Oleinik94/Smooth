@@ -4,7 +4,7 @@ unit SaGeImages;
 
 interface
 
-uses 
+uses
 	crt
 	,dos
 	{$IFDEF MSWINDOWS}
@@ -30,43 +30,44 @@ uses
 type
 	TSGImage = class;
 	TSGTextureBlock = class;
-	
+
 	TSGIByte = type TSGExByte;
 	TSGITextureType = (SGITextureTypeTexture,SGITextureTypeBump);
-	
+
 	PSGImage  = ^ TSGImage;
 	PTSGImage = PSGImage;
 	// Класс изображения и текстуры
 	TSGImage = class(TSGDrawable)
 			public
-		constructor Create(const NewWay:string = '');
+		constructor Create(const NewWay : string = '');
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 		procedure DeleteDeviceResourses();override;
 		procedure LoadDeviceResourses();override;
 			public
 		// А это само изображение ( в оперативной памяти, в виде последовательности байнов, и свойств изобрадения )
 		// В общем это BitMap (битовая карта)
 		FImage   : TSGBitMap;
-		
-		// Поток, в которы подгружается изобрадения, при его загрузке. 
+
+		// Поток, в которы подгружается изобрадения, при его загрузке.
 		// Сделано MemoryStream чтобы очень быстро грузилось.
 		FStream  : TMemoryStream;
-		
+
 		// Идентификатор текстуры
 		FTexture : SGUInt;
 		// for ActiveTexture
 		FTextureNumber : TSGInteger;
 		// what it the texture
 		FTextureType   : TSGITextureType;
-		
+
 		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
 		FReadyToGoToTexture : TSGBoolean;
 		//Путь в файлу
 		FWay                : TSGString;
 		//ФОрмат, в который сохранится изображзение прии его сохранении
 		FSaveFormat:TSGIByte;
-		
-		//Имя изображения/материала и тп 
+
+		//Имя изображения/материала и тп
 		FName : TSGString;
 			public
 		property TextureNumber : TSGInteger      read FTextureNumber write FTextureNumber;
@@ -99,7 +100,7 @@ type
 		procedure FreeTexture();
 		procedure FreeAll();
 		function Ready():TSGBoolean;virtual;
-			public 
+			public
 		property FormatType         : TSGCardinal read FImage.FFormatType  write FImage.FFormatType;
 		property DataType           : TSGCardinal read FImage.FDataType    write FImage.FDataType;
 		property Channels           : TSGCardinal read FImage.FChannels    write FImage.FChannels;
@@ -402,10 +403,10 @@ if NeedAlpha then
 	Render.ReadPixels(
 		Point1.x-1,//+ReadPixelsShift.x,
 		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1, 
-		Point2.y-Point1.y+1, 
-		SGR_RGBA, 
-		SGR_UNSIGNED_BYTE, 
+		Point2.x-Point1.x+1,
+		Point2.y-Point1.y+1,
+		SGR_RGBA,
+		SGR_UNSIGNED_BYTE,
 		FImage.FBitMap);
 	Bits:=32;
 	end
@@ -415,10 +416,10 @@ else
 	Render.ReadPixels(
 		Point1.x-1,//+ReadPixelsShift.x,
 		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1, 
-		Point2.y-Point1.y+1, 
-		SGR_RGB, 
-		SGR_UNSIGNED_BYTE, 
+		Point2.x-Point1.x+1,
+		Point2.y-Point1.y+1,
+		SGR_RGB,
+		SGR_UNSIGNED_BYTE,
 		FImage.FBitMap);
 	Bits:=24;
 	end;
@@ -491,7 +492,7 @@ else if Channels=4 then
 		Result:=SGI_SGIA;
 	{$ENDIF}
 	end
-else 
+else
 	Result:=SGI_JPEG
 end;
 
@@ -629,7 +630,7 @@ try
 		begin
 		if Compression then
 			begin
-			
+
 			end
 		else
 			begin
@@ -643,11 +644,11 @@ try
 		end;
 	16:
 		begin
-		
+
 		end;
 	8:
 		begin
-		
+
 		end;
 	end;
 except
@@ -924,8 +925,14 @@ begin
 Result:=FTexture<>0;
 end;
 
+class function TSGImage.ClassName() : TSGString;
+begin
+Result := 'TSGImage';
+end;
+
 constructor TSGImage.Create(const NewWay:string = '');
 begin
+inherited Create();
 FTextureNumber := -1;
 FTextureType := SGITextureTypeTexture;
 FTexture:=0;
@@ -937,7 +944,7 @@ FName:='';
 end;
 
 
-initialization 
+initialization
 begin
 
 end;
