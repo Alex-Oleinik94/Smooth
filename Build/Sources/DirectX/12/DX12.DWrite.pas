@@ -1769,7 +1769,7 @@ type
 function DWriteCreateFactory(factoryType: TDWRITE_FACTORY_TYPE; const iid: TGUID; out factory): HResult;
     stdcall; external DWRITE_DLL;
 *)
-var DWriteCreateFactory : function( factoryType : TDWRITE_FACTORY_TYPE ; const iid : TGUID ; out factory ) : HResult ; stdcall ; 
+var DWriteCreateFactory : function( factoryType : TDWRITE_FACTORY_TYPE ; const iid : TGUID ; out factory ) : HResult ; stdcall ;
 
 
 function DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d: uint8): UINT32;
@@ -1777,8 +1777,10 @@ function DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d: uint8): UINT32;
 implementation
 
 uses
-	SaGeBase,
-	SaGeBased;
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
 
 // Creates an OpenType tag as a 32bit integer such that
 // the first character in the tag is the lowest byte,
@@ -1794,62 +1796,57 @@ begin
     Result := (d shl 24) or (c shl 16) or (b shl 8) or a;
 end;
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
+type
+	TSGDllDWrite = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
 
-procedure Load_HINT(const Er : String);
+class function TSGDllDWrite.SystemNames() : TSGStringList;
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := 'DX12.DWrite';
+Result += 'DWrite';
 end;
-procedure Free_DWrite();
+
+class function TSGDllDWrite.DllNames() : TSGStringList;
+begin
+Result := DWRITE_DLL;
+end;
+
+class procedure TSGDllDWrite.Free();
 begin
 DWriteCreateFactory := nil;
 end;
-function Load_DWrite_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 1;
+
+class function TSGDllDWrite.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	UnitLib : TSGMaxEnum;
-	CountLoadSuccs : LongWord;
+	LoadResult : PSGDllLoadObject = nil;
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
-end;
-begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
-	exit;
-	end;
-DWriteCreateFactory := LoadProcedure('DWriteCreateFactory');
-Load_HINT('DX12.DWrite: Initialization from '+SGPCharToString(UnitName)+'/'+'DWRITE_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
+	LoadResult^.FFunctionLoaded += 1;
 end;
 
-function Load_DWrite() : Boolean;
-var
-	i : LongWord;
-	R : array[0..0] of Boolean;
 begin
-R[0] := Load_DWrite_0(DWRITE_DLL);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
+Result.Clear();
+Result.FFunctionCount := 1;
+LoadResult := @Result;
+DWriteCreateFactory := LoadProcedure('DWriteCreateFactory');
 end;
+
 initialization
 begin
-Free_DWrite();
-if not Load_DWrite() then
-	Load_HINT('DX12.DWrite: Initialization FAILED!!!');
-end;
-finalization
-begin
-Free_DWrite();
+TSGDllDWrite.Create();
 end;
 end.

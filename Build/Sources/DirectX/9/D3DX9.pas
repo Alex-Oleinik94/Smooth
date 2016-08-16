@@ -12297,6 +12297,10 @@ begin
   Result := (Ord('T') shl 24) or (Ord('X') shl 16) or (_Major shl 8) or (_Minor);
 end;
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
 type
 	TSGDllD3DX9 = class(TSGDll)
 			public

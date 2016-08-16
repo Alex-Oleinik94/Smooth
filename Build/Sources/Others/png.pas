@@ -457,868 +457,868 @@ png_free_ptr = Procedure (Arg1 : png_structp; Arg2 : png_voidp) ; cdecl;
 
 function png_access_version_number():png_uint_32;cdecl; external LibPng;
 *)
-var png_access_version_number : function( ) : png_uint_32 ; cdecl ; 
+var png_access_version_number : function( ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_sig_bytes(png_ptr:png_structp; num_bytes:longint);cdecl; external LibPng;
 *)
-var png_set_sig_bytes : procedure( png_ptr : png_structp ; num_bytes : longint ) ; cdecl ; 
+var png_set_sig_bytes : procedure( png_ptr : png_structp ; num_bytes : longint ) ; cdecl ;
 
 (*
 function png_sig_cmp(sig:png_bytep; start:png_size_t; num_to_check:png_size_t):longint;cdecl; external LibPng;
 *)
-var png_sig_cmp : function( sig : png_bytep ; start : png_size_t ; num_to_check : png_size_t ) : longint ; cdecl ; 
+var png_sig_cmp : function( sig : png_bytep ; start : png_size_t ; num_to_check : png_size_t ) : longint ; cdecl ;
 
 (*
 function png_check_sig(sig:png_bytep; num:longint):longint;cdecl; external LibPng;
 *)
-var png_check_sig : function( sig : png_bytep ; num : longint ) : longint ; cdecl ; 
+var png_check_sig : function( sig : png_bytep ; num : longint ) : longint ; cdecl ;
 
 (*
 function png_create_read_struct(user_png_ver:png_const_charp; error_ptr:png_voidp; error_fn:png_error_ptr; warn_fn:png_error_ptr):png_structp;cdecl; external LibPng;
 *)
-var png_create_read_struct : function( user_png_ver : png_const_charp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warn_fn : png_error_ptr ) : png_structp ; cdecl ; 
+var png_create_read_struct : function( user_png_ver : png_const_charp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warn_fn : png_error_ptr ) : png_structp ; cdecl ;
 
 (*
 function png_create_write_struct(user_png_ver:png_const_charp; error_ptr:png_voidp; error_fn:png_error_ptr; warn_fn:png_error_ptr):png_structp;cdecl; external LibPng;
 *)
-var png_create_write_struct : function( user_png_ver : png_const_charp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warn_fn : png_error_ptr ) : png_structp ; cdecl ; 
+var png_create_write_struct : function( user_png_ver : png_const_charp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warn_fn : png_error_ptr ) : png_structp ; cdecl ;
 
 (*
 function png_get_compression_buffer_size(png_ptr:png_structp):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_compression_buffer_size : function( png_ptr : png_structp ) : png_uint_32 ; cdecl ; 
+var png_get_compression_buffer_size : function( png_ptr : png_structp ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_compression_buffer_size(png_ptr:png_structp; size:png_uint_32);cdecl; external LibPng;
 *)
-var png_set_compression_buffer_size : procedure( png_ptr : png_structp ; size : png_uint_32 ) ; cdecl ; 
+var png_set_compression_buffer_size : procedure( png_ptr : png_structp ; size : png_uint_32 ) ; cdecl ;
 
 (*
 function png_reset_zstream(png_ptr:png_structp):longint;cdecl; external LibPng;
 *)
-var png_reset_zstream : function( png_ptr : png_structp ) : longint ; cdecl ; 
+var png_reset_zstream : function( png_ptr : png_structp ) : longint ; cdecl ;
 
 (*
 procedure png_write_chunk(png_ptr:png_structp; chunk_name:png_bytep; data:png_bytep; length:png_size_t);cdecl; external LibPng;
 *)
-var png_write_chunk : procedure( png_ptr : png_structp ; chunk_name : png_bytep ; data : png_bytep ; length : png_size_t ) ; cdecl ; 
+var png_write_chunk : procedure( png_ptr : png_structp ; chunk_name : png_bytep ; data : png_bytep ; length : png_size_t ) ; cdecl ;
 
 (*
 procedure png_write_chunk_start(png_ptr:png_structp; chunk_name:png_bytep; length:png_uint_32);cdecl; external LibPng;
 *)
-var png_write_chunk_start : procedure( png_ptr : png_structp ; chunk_name : png_bytep ; length : png_uint_32 ) ; cdecl ; 
+var png_write_chunk_start : procedure( png_ptr : png_structp ; chunk_name : png_bytep ; length : png_uint_32 ) ; cdecl ;
 
 (*
 procedure png_write_chunk_data(png_ptr:png_structp; data:png_bytep; length:png_size_t);cdecl; external LibPng;
 *)
-var png_write_chunk_data : procedure( png_ptr : png_structp ; data : png_bytep ; length : png_size_t ) ; cdecl ; 
+var png_write_chunk_data : procedure( png_ptr : png_structp ; data : png_bytep ; length : png_size_t ) ; cdecl ;
 
 (*
 procedure png_write_chunk_end(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_write_chunk_end : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_write_chunk_end : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 function png_create_info_struct(png_ptr:png_structp):png_infop;cdecl; external LibPng;
 *)
-var png_create_info_struct : function( png_ptr : png_structp ) : png_infop ; cdecl ; 
+var png_create_info_struct : function( png_ptr : png_structp ) : png_infop ; cdecl ;
 
 (*
 procedure png_info_init(info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_info_init : procedure( info_ptr : png_infop ) ; cdecl ; 
+var png_info_init : procedure( info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_write_info_before_PLTE(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_write_info_before_PLTE : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_write_info_before_PLTE : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_write_info(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_write_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_write_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_read_info(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_read_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_read_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 function png_convert_to_rfc1123(png_ptr:png_structp; ptime:png_timep):png_charp;cdecl; external LibPng;
 *)
-var png_convert_to_rfc1123 : function( png_ptr : png_structp ; ptime : png_timep ) : png_charp ; cdecl ; 
+var png_convert_to_rfc1123 : function( png_ptr : png_structp ; ptime : png_timep ) : png_charp ; cdecl ;
 
 (*
 procedure png_convert_from_struct_tm(ptime:png_timep; ttime:Pointer);cdecl; external LibPng;
 *)
-var png_convert_from_struct_tm : procedure( ptime : png_timep ; ttime : Pointer ) ; cdecl ; 
+var png_convert_from_struct_tm : procedure( ptime : png_timep ; ttime : Pointer ) ; cdecl ;
 
 (*
 procedure png_convert_from_time_t(ptime:png_timep; ttime:time_t);cdecl; external LibPng;
 *)
-var png_convert_from_time_t : procedure( ptime : png_timep ; ttime : time_t ) ; cdecl ; 
+var png_convert_from_time_t : procedure( ptime : png_timep ; ttime : time_t ) ; cdecl ;
 
 (*
 procedure png_set_expand(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_expand : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_expand : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_gray_1_2_4_to_8(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_gray_1_2_4_to_8 : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_gray_1_2_4_to_8 : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_palette_to_rgb(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_palette_to_rgb : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_palette_to_rgb : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_tRNS_to_alpha(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_tRNS_to_alpha : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_tRNS_to_alpha : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_bgr(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_bgr : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_bgr : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_gray_to_rgb(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_gray_to_rgb : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_gray_to_rgb : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_rgb_to_gray(png_ptr:png_structp; error_action:longint; red:double; green:double);cdecl; external LibPng;
 *)
-var png_set_rgb_to_gray : procedure( png_ptr : png_structp ; error_action : longint ; red : double ; green : double ) ; cdecl ; 
+var png_set_rgb_to_gray : procedure( png_ptr : png_structp ; error_action : longint ; red : double ; green : double ) ; cdecl ;
 
 (*
 procedure png_set_rgb_to_gray_fixed(png_ptr:png_structp; error_action:longint; red:png_fixed_point; green:png_fixed_point);cdecl; external LibPng;
 *)
-var png_set_rgb_to_gray_fixed : procedure( png_ptr : png_structp ; error_action : longint ; red : png_fixed_point ; green : png_fixed_point ) ; cdecl ; 
+var png_set_rgb_to_gray_fixed : procedure( png_ptr : png_structp ; error_action : longint ; red : png_fixed_point ; green : png_fixed_point ) ; cdecl ;
 
 (*
 function png_get_rgb_to_gray_status(png_ptr:png_structp):png_byte;cdecl; external LibPng;
 *)
-var png_get_rgb_to_gray_status : function( png_ptr : png_structp ) : png_byte ; cdecl ; 
+var png_get_rgb_to_gray_status : function( png_ptr : png_structp ) : png_byte ; cdecl ;
 
 (*
 procedure png_build_grayscale_palette(bit_depth:longint; palette:png_colorp);cdecl; external LibPng;
 *)
-var png_build_grayscale_palette : procedure( bit_depth : longint ; palette : png_colorp ) ; cdecl ; 
+var png_build_grayscale_palette : procedure( bit_depth : longint ; palette : png_colorp ) ; cdecl ;
 
 (*
 procedure png_set_strip_alpha(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_strip_alpha : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_strip_alpha : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_swap_alpha(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_swap_alpha : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_swap_alpha : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_invert_alpha(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_invert_alpha : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_invert_alpha : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_filler(png_ptr:png_structp; filler:png_uint_32; flags:longint);cdecl; external LibPng;
 *)
-var png_set_filler : procedure( png_ptr : png_structp ; filler : png_uint_32 ; flags : longint ) ; cdecl ; 
+var png_set_filler : procedure( png_ptr : png_structp ; filler : png_uint_32 ; flags : longint ) ; cdecl ;
 
 (*
 procedure png_set_swap(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_swap : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_swap : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_packing(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_packing : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_packing : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_packswap(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_packswap : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_packswap : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_shift(png_ptr:png_structp; true_bits:png_color_8p);cdecl; external LibPng;
 *)
-var png_set_shift : procedure( png_ptr : png_structp ; true_bits : png_color_8p ) ; cdecl ; 
+var png_set_shift : procedure( png_ptr : png_structp ; true_bits : png_color_8p ) ; cdecl ;
 
 (*
 function png_set_interlace_handling(png_ptr:png_structp):longint;cdecl; external LibPng;
 *)
-var png_set_interlace_handling : function( png_ptr : png_structp ) : longint ; cdecl ; 
+var png_set_interlace_handling : function( png_ptr : png_structp ) : longint ; cdecl ;
 
 (*
 procedure png_set_invert_mono(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_invert_mono : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_invert_mono : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_background(png_ptr:png_structp; background_color:png_color_16p; background_gamma_code:longint; need_expand:longint; background_gamma:double);cdecl; external LibPng;
 *)
-var png_set_background : procedure( png_ptr : png_structp ; background_color : png_color_16p ; background_gamma_code : longint ; need_expand : longint ; background_gamma : double ) ; cdecl ; 
+var png_set_background : procedure( png_ptr : png_structp ; background_color : png_color_16p ; background_gamma_code : longint ; need_expand : longint ; background_gamma : double ) ; cdecl ;
 
 (*
 procedure png_set_strip_16(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_set_strip_16 : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_set_strip_16 : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_dither(png_ptr:png_structp; palette:png_colorp; num_palette:longint; maximum_colors:longint; histogram:png_uint_16p;
             full_dither:longint);cdecl; external LibPng;
 *)
-var png_set_dither : procedure( png_ptr : png_structp ; palette : png_colorp ; num_palette : longint ; maximum_colors : longint ; histogram : png_uint_16p ; full_dither : longint ) ; cdecl ; 
+var png_set_dither : procedure( png_ptr : png_structp ; palette : png_colorp ; num_palette : longint ; maximum_colors : longint ; histogram : png_uint_16p ; full_dither : longint ) ; cdecl ;
 
 (*
 procedure png_set_gamma(png_ptr:png_structp; screen_gamma:double; default_file_gamma:double);cdecl; external LibPng;
 *)
-var png_set_gamma : procedure( png_ptr : png_structp ; screen_gamma : double ; default_file_gamma : double ) ; cdecl ; 
+var png_set_gamma : procedure( png_ptr : png_structp ; screen_gamma : double ; default_file_gamma : double ) ; cdecl ;
 
 (*
 procedure png_permit_empty_plte(png_ptr:png_structp; empty_plte_permitted:longint);cdecl; external LibPng;
 *)
-var png_permit_empty_plte : procedure( png_ptr : png_structp ; empty_plte_permitted : longint ) ; cdecl ; 
+var png_permit_empty_plte : procedure( png_ptr : png_structp ; empty_plte_permitted : longint ) ; cdecl ;
 
 (*
 procedure png_set_flush(png_ptr:png_structp; nrows:longint);cdecl; external LibPng;
 *)
-var png_set_flush : procedure( png_ptr : png_structp ; nrows : longint ) ; cdecl ; 
+var png_set_flush : procedure( png_ptr : png_structp ; nrows : longint ) ; cdecl ;
 
 (*
 procedure png_write_flush(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_write_flush : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_write_flush : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_start_read_image(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_start_read_image : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_start_read_image : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_read_update_info(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_read_update_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_read_update_info : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_read_rows(png_ptr:png_structp; row:png_bytepp; display_row:png_bytepp; num_rows:png_uint_32);cdecl; external LibPng;
 *)
-var png_read_rows : procedure( png_ptr : png_structp ; row : png_bytepp ; display_row : png_bytepp ; num_rows : png_uint_32 ) ; cdecl ; 
+var png_read_rows : procedure( png_ptr : png_structp ; row : png_bytepp ; display_row : png_bytepp ; num_rows : png_uint_32 ) ; cdecl ;
 
 (*
 procedure png_read_row(png_ptr:png_structp; row:png_bytep; display_row:png_bytep);cdecl; external LibPng;
 *)
-var png_read_row : procedure( png_ptr : png_structp ; row : png_bytep ; display_row : png_bytep ) ; cdecl ; 
+var png_read_row : procedure( png_ptr : png_structp ; row : png_bytep ; display_row : png_bytep ) ; cdecl ;
 
 (*
 procedure png_read_image(png_ptr:png_structp; image:png_bytepp);cdecl; external LibPng;
 *)
-var png_read_image : procedure( png_ptr : png_structp ; image : png_bytepp ) ; cdecl ; 
+var png_read_image : procedure( png_ptr : png_structp ; image : png_bytepp ) ; cdecl ;
 
 (*
 procedure png_write_row(png_ptr:png_structp; row:png_bytep);cdecl; external LibPng;
 *)
-var png_write_row : procedure( png_ptr : png_structp ; row : png_bytep ) ; cdecl ; 
+var png_write_row : procedure( png_ptr : png_structp ; row : png_bytep ) ; cdecl ;
 
 (*
 procedure png_write_rows(png_ptr:png_structp; row:png_bytepp; num_rows:png_uint_32);cdecl; external LibPng;
 *)
-var png_write_rows : procedure( png_ptr : png_structp ; row : png_bytepp ; num_rows : png_uint_32 ) ; cdecl ; 
+var png_write_rows : procedure( png_ptr : png_structp ; row : png_bytepp ; num_rows : png_uint_32 ) ; cdecl ;
 
 (*
 procedure png_write_image(png_ptr:png_structp; image:png_bytepp);cdecl; external LibPng;
 *)
-var png_write_image : procedure( png_ptr : png_structp ; image : png_bytepp ) ; cdecl ; 
+var png_write_image : procedure( png_ptr : png_structp ; image : png_bytepp ) ; cdecl ;
 
 (*
 procedure png_write_end(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_write_end : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_write_end : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_read_end(png_ptr:png_structp; info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_read_end : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ; 
+var png_read_end : procedure( png_ptr : png_structp ; info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_destroy_info_struct(png_ptr:png_structp; info_ptr_ptr:png_infopp);cdecl; external LibPng;
 *)
-var png_destroy_info_struct : procedure( png_ptr : png_structp ; info_ptr_ptr : png_infopp ) ; cdecl ; 
+var png_destroy_info_struct : procedure( png_ptr : png_structp ; info_ptr_ptr : png_infopp ) ; cdecl ;
 
 (*
 procedure png_destroy_read_struct(png_ptr_ptr:png_structpp; info_ptr_ptr:png_infopp; end_info_ptr_ptr:png_infopp);cdecl; external LibPng;
 *)
-var png_destroy_read_struct : procedure( png_ptr_ptr : png_structpp ; info_ptr_ptr : png_infopp ; end_info_ptr_ptr : png_infopp ) ; cdecl ; 
+var png_destroy_read_struct : procedure( png_ptr_ptr : png_structpp ; info_ptr_ptr : png_infopp ; end_info_ptr_ptr : png_infopp ) ; cdecl ;
 
 (*
 procedure png_read_destroy(png_ptr:png_structp; info_ptr:png_infop; end_info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_read_destroy : procedure( png_ptr : png_structp ; info_ptr : png_infop ; end_info_ptr : png_infop ) ; cdecl ; 
+var png_read_destroy : procedure( png_ptr : png_structp ; info_ptr : png_infop ; end_info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_destroy_write_struct(png_ptr_ptr:png_structpp; info_ptr_ptr:png_infopp);cdecl; external LibPng;
 *)
-var png_destroy_write_struct : procedure( png_ptr_ptr : png_structpp ; info_ptr_ptr : png_infopp ) ; cdecl ; 
+var png_destroy_write_struct : procedure( png_ptr_ptr : png_structpp ; info_ptr_ptr : png_infopp ) ; cdecl ;
 
 (*
 procedure png_write_destroy_info(info_ptr:png_infop);cdecl; external LibPng;
 *)
-var png_write_destroy_info : procedure( info_ptr : png_infop ) ; cdecl ; 
+var png_write_destroy_info : procedure( info_ptr : png_infop ) ; cdecl ;
 
 (*
 procedure png_write_destroy(png_ptr:png_structp);cdecl; external LibPng;
 *)
-var png_write_destroy : procedure( png_ptr : png_structp ) ; cdecl ; 
+var png_write_destroy : procedure( png_ptr : png_structp ) ; cdecl ;
 
 (*
 procedure png_set_crc_action(png_ptr:png_structp; crit_action:longint; ancil_action:longint);cdecl; external LibPng;
 *)
-var png_set_crc_action : procedure( png_ptr : png_structp ; crit_action : longint ; ancil_action : longint ) ; cdecl ; 
+var png_set_crc_action : procedure( png_ptr : png_structp ; crit_action : longint ; ancil_action : longint ) ; cdecl ;
 
 (*
 procedure png_set_filter(png_ptr:png_structp; method:longint; filters:longint);cdecl; external LibPng;
 *)
-var png_set_filter : procedure( png_ptr : png_structp ; method : longint ; filters : longint ) ; cdecl ; 
+var png_set_filter : procedure( png_ptr : png_structp ; method : longint ; filters : longint ) ; cdecl ;
 
 (*
 procedure png_set_filter_heuristics(png_ptr:png_structp; heuristic_method:longint; num_weights:longint; filter_weights:png_doublep; filter_costs:png_doublep);cdecl; external LibPng;
 *)
-var png_set_filter_heuristics : procedure( png_ptr : png_structp ; heuristic_method : longint ; num_weights : longint ; filter_weights : png_doublep ; filter_costs : png_doublep ) ; cdecl ; 
+var png_set_filter_heuristics : procedure( png_ptr : png_structp ; heuristic_method : longint ; num_weights : longint ; filter_weights : png_doublep ; filter_costs : png_doublep ) ; cdecl ;
 
 (*
 procedure png_set_compression_level(png_ptr:png_structp; level:longint);cdecl; external LibPng;
 *)
-var png_set_compression_level : procedure( png_ptr : png_structp ; level : longint ) ; cdecl ; 
+var png_set_compression_level : procedure( png_ptr : png_structp ; level : longint ) ; cdecl ;
 
 (*
 procedure png_set_compression_mem_level(png_ptr:png_structp; mem_level:longint);cdecl; external LibPng;
 *)
-var png_set_compression_mem_level : procedure( png_ptr : png_structp ; mem_level : longint ) ; cdecl ; 
+var png_set_compression_mem_level : procedure( png_ptr : png_structp ; mem_level : longint ) ; cdecl ;
 
 (*
 procedure png_set_compression_strategy(png_ptr:png_structp; strategy:longint);cdecl; external LibPng;
 *)
-var png_set_compression_strategy : procedure( png_ptr : png_structp ; strategy : longint ) ; cdecl ; 
+var png_set_compression_strategy : procedure( png_ptr : png_structp ; strategy : longint ) ; cdecl ;
 
 (*
 procedure png_set_compression_window_bits(png_ptr:png_structp; window_bits:longint);cdecl; external LibPng;
 *)
-var png_set_compression_window_bits : procedure( png_ptr : png_structp ; window_bits : longint ) ; cdecl ; 
+var png_set_compression_window_bits : procedure( png_ptr : png_structp ; window_bits : longint ) ; cdecl ;
 
 (*
 procedure png_set_compression_method(png_ptr:png_structp; method:longint);cdecl; external LibPng;
 *)
-var png_set_compression_method : procedure( png_ptr : png_structp ; method : longint ) ; cdecl ; 
+var png_set_compression_method : procedure( png_ptr : png_structp ; method : longint ) ; cdecl ;
 
 (*
 procedure png_init_io(png_ptr:png_structp; fp:png_FILE_p);cdecl; external LibPng;
 *)
-var png_init_io : procedure( png_ptr : png_structp ; fp : png_FILE_p ) ; cdecl ; 
+var png_init_io : procedure( png_ptr : png_structp ; fp : png_FILE_p ) ; cdecl ;
 
 (*
 procedure png_set_error_fn(png_ptr:png_structp; error_ptr:png_voidp; error_fn:png_error_ptr; warning_fn:png_error_ptr);cdecl; external LibPng;
 *)
-var png_set_error_fn : procedure( png_ptr : png_structp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warning_fn : png_error_ptr ) ; cdecl ; 
+var png_set_error_fn : procedure( png_ptr : png_structp ; error_ptr : png_voidp ; error_fn : png_error_ptr ; warning_fn : png_error_ptr ) ; cdecl ;
 
 (*
 function png_get_error_ptr(png_ptr:png_structp):png_voidp;cdecl; external LibPng;
 *)
-var png_get_error_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ; 
+var png_get_error_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ;
 
 (*
 procedure png_set_write_fn(png_ptr:png_structp; io_ptr:png_voidp; write_data_fn:png_rw_ptr; output_flush_fn:png_flush_ptr);cdecl; external LibPng;
 *)
-var png_set_write_fn : procedure( png_ptr : png_structp ; io_ptr : png_voidp ; write_data_fn : png_rw_ptr ; output_flush_fn : png_flush_ptr ) ; cdecl ; 
+var png_set_write_fn : procedure( png_ptr : png_structp ; io_ptr : png_voidp ; write_data_fn : png_rw_ptr ; output_flush_fn : png_flush_ptr ) ; cdecl ;
 
 (*
 procedure png_set_read_fn(png_ptr:png_structp; io_ptr:png_voidp; read_data_fn:png_rw_ptr);cdecl; external LibPng;
 *)
-var png_set_read_fn : procedure( png_ptr : png_structp ; io_ptr : png_voidp ; read_data_fn : png_rw_ptr ) ; cdecl ; 
+var png_set_read_fn : procedure( png_ptr : png_structp ; io_ptr : png_voidp ; read_data_fn : png_rw_ptr ) ; cdecl ;
 
 (*
 function png_get_io_ptr(png_ptr:png_structp):png_voidp;cdecl; external LibPng;
 *)
-var png_get_io_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ; 
+var png_get_io_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ;
 
 (*
 procedure png_set_read_status_fn(png_ptr:png_structp; read_row_fn:png_read_status_ptr);cdecl; external LibPng;
 *)
-var png_set_read_status_fn : procedure( png_ptr : png_structp ; read_row_fn : png_read_status_ptr ) ; cdecl ; 
+var png_set_read_status_fn : procedure( png_ptr : png_structp ; read_row_fn : png_read_status_ptr ) ; cdecl ;
 
 (*
 procedure png_set_write_status_fn(png_ptr:png_structp; write_row_fn:png_write_status_ptr);cdecl; external LibPng;
 *)
-var png_set_write_status_fn : procedure( png_ptr : png_structp ; write_row_fn : png_write_status_ptr ) ; cdecl ; 
+var png_set_write_status_fn : procedure( png_ptr : png_structp ; write_row_fn : png_write_status_ptr ) ; cdecl ;
 
 (*
 procedure png_set_read_user_transform_fn(png_ptr:png_structp; read_user_transform_fn:png_user_transform_ptr);cdecl; external LibPng;
 *)
-var png_set_read_user_transform_fn : procedure( png_ptr : png_structp ; read_user_transform_fn : png_user_transform_ptr ) ; cdecl ; 
+var png_set_read_user_transform_fn : procedure( png_ptr : png_structp ; read_user_transform_fn : png_user_transform_ptr ) ; cdecl ;
 
 (*
 procedure png_set_write_user_transform_fn(png_ptr:png_structp; write_user_transform_fn:png_user_transform_ptr);cdecl; external LibPng;
 *)
-var png_set_write_user_transform_fn : procedure( png_ptr : png_structp ; write_user_transform_fn : png_user_transform_ptr ) ; cdecl ; 
+var png_set_write_user_transform_fn : procedure( png_ptr : png_structp ; write_user_transform_fn : png_user_transform_ptr ) ; cdecl ;
 
 (*
 procedure png_set_user_transform_info(png_ptr:png_structp; user_transform_ptr:png_voidp; user_transform_depth:longint; user_transform_channels:longint);cdecl; external LibPng;
 *)
-var png_set_user_transform_info : procedure( png_ptr : png_structp ; user_transform_ptr : png_voidp ; user_transform_depth : longint ; user_transform_channels : longint ) ; cdecl ; 
+var png_set_user_transform_info : procedure( png_ptr : png_structp ; user_transform_ptr : png_voidp ; user_transform_depth : longint ; user_transform_channels : longint ) ; cdecl ;
 
 (*
 function png_get_user_transform_ptr(png_ptr:png_structp):png_voidp;cdecl; external LibPng;
 *)
-var png_get_user_transform_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ; 
+var png_get_user_transform_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ;
 
 (*
 procedure png_set_read_user_chunk_fn(png_ptr:png_structp; user_chunk_ptr:png_voidp; read_user_chunk_fn:png_user_chunk_ptr);cdecl; external LibPng;
 *)
-var png_set_read_user_chunk_fn : procedure( png_ptr : png_structp ; user_chunk_ptr : png_voidp ; read_user_chunk_fn : png_user_chunk_ptr ) ; cdecl ; 
+var png_set_read_user_chunk_fn : procedure( png_ptr : png_structp ; user_chunk_ptr : png_voidp ; read_user_chunk_fn : png_user_chunk_ptr ) ; cdecl ;
 
 (*
 function png_get_user_chunk_ptr(png_ptr:png_structp):png_voidp;cdecl; external LibPng;
 *)
-var png_get_user_chunk_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ; 
+var png_get_user_chunk_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ;
 
 (*
 procedure png_set_progressive_read_fn(png_ptr:png_structp; progressive_ptr:png_voidp; info_fn:png_progressive_info_ptr; row_fn:png_progressive_row_ptr; end_fn:png_progressive_end_ptr);cdecl; external LibPng;
 *)
-var png_set_progressive_read_fn : procedure( png_ptr : png_structp ; progressive_ptr : png_voidp ; info_fn : png_progressive_info_ptr ; row_fn : png_progressive_row_ptr ; end_fn : png_progressive_end_ptr ) ; cdecl ; 
+var png_set_progressive_read_fn : procedure( png_ptr : png_structp ; progressive_ptr : png_voidp ; info_fn : png_progressive_info_ptr ; row_fn : png_progressive_row_ptr ; end_fn : png_progressive_end_ptr ) ; cdecl ;
 
 (*
 function png_get_progressive_ptr(png_ptr:png_structp):png_voidp;cdecl; external LibPng;
 *)
-var png_get_progressive_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ; 
+var png_get_progressive_ptr : function( png_ptr : png_structp ) : png_voidp ; cdecl ;
 
 (*
 procedure png_process_data(png_ptr:png_structp; info_ptr:png_infop; buffer:png_bytep; buffer_size:png_size_t);cdecl; external LibPng;
 *)
-var png_process_data : procedure( png_ptr : png_structp ; info_ptr : png_infop ; buffer : png_bytep ; buffer_size : png_size_t ) ; cdecl ; 
+var png_process_data : procedure( png_ptr : png_structp ; info_ptr : png_infop ; buffer : png_bytep ; buffer_size : png_size_t ) ; cdecl ;
 
 (*
 procedure png_progressive_combine_row(png_ptr:png_structp; old_row:png_bytep; new_row:png_bytep);cdecl; external LibPng;
 *)
-var png_progressive_combine_row : procedure( png_ptr : png_structp ; old_row : png_bytep ; new_row : png_bytep ) ; cdecl ; 
+var png_progressive_combine_row : procedure( png_ptr : png_structp ; old_row : png_bytep ; new_row : png_bytep ) ; cdecl ;
 
 (*
 function png_malloc(png_ptr:png_structp; size:png_uint_32):png_voidp;cdecl; external LibPng;
 *)
-var png_malloc : function( png_ptr : png_structp ; size : png_uint_32 ) : png_voidp ; cdecl ; 
+var png_malloc : function( png_ptr : png_structp ; size : png_uint_32 ) : png_voidp ; cdecl ;
 
 (*
 procedure png_free(png_ptr:png_structp; ptr:png_voidp);cdecl; external LibPng;
 *)
-var png_free : procedure( png_ptr : png_structp ; ptr : png_voidp ) ; cdecl ; 
+var png_free : procedure( png_ptr : png_structp ; ptr : png_voidp ) ; cdecl ;
 
 (*
 procedure png_free_data(png_ptr:png_structp; info_ptr:png_infop; free_me:png_uint_32; num:longint);cdecl; external LibPng;
 *)
-var png_free_data : procedure( png_ptr : png_structp ; info_ptr : png_infop ; free_me : png_uint_32 ; num : longint ) ; cdecl ; 
+var png_free_data : procedure( png_ptr : png_structp ; info_ptr : png_infop ; free_me : png_uint_32 ; num : longint ) ; cdecl ;
 
 (*
 procedure png_data_freer(png_ptr:png_structp; info_ptr:png_infop; freer:longint; mask:png_uint_32);cdecl; external LibPng;
 *)
-var png_data_freer : procedure( png_ptr : png_structp ; info_ptr : png_infop ; freer : longint ; mask : png_uint_32 ) ; cdecl ; 
+var png_data_freer : procedure( png_ptr : png_structp ; info_ptr : png_infop ; freer : longint ; mask : png_uint_32 ) ; cdecl ;
 
 (*
 function png_memcpy_check(png_ptr:png_structp; s1:png_voidp; s2:png_voidp; size:png_uint_32):png_voidp;cdecl; external LibPng;
 *)
-var png_memcpy_check : function( png_ptr : png_structp ; s1 : png_voidp ; s2 : png_voidp ; size : png_uint_32 ) : png_voidp ; cdecl ; 
+var png_memcpy_check : function( png_ptr : png_structp ; s1 : png_voidp ; s2 : png_voidp ; size : png_uint_32 ) : png_voidp ; cdecl ;
 
 (*
 function png_memset_check(png_ptr:png_structp; s1:png_voidp; value:longint; size:png_uint_32):png_voidp;cdecl; external LibPng;
 *)
-var png_memset_check : function( png_ptr : png_structp ; s1 : png_voidp ; value : longint ; size : png_uint_32 ) : png_voidp ; cdecl ; 
+var png_memset_check : function( png_ptr : png_structp ; s1 : png_voidp ; value : longint ; size : png_uint_32 ) : png_voidp ; cdecl ;
 
 (*
 procedure png_error(png_ptr:png_structp; error:png_const_charp);cdecl; external LibPng;
 *)
-var png_error : procedure( png_ptr : png_structp ; error : png_const_charp ) ; cdecl ; 
+var png_error : procedure( png_ptr : png_structp ; error : png_const_charp ) ; cdecl ;
 
 (*
 procedure png_chunk_error(png_ptr:png_structp; error:png_const_charp);cdecl; external LibPng;
 *)
-var png_chunk_error : procedure( png_ptr : png_structp ; error : png_const_charp ) ; cdecl ; 
+var png_chunk_error : procedure( png_ptr : png_structp ; error : png_const_charp ) ; cdecl ;
 
 (*
 procedure png_warning(png_ptr:png_structp; message:png_const_charp);cdecl; external LibPng;
 *)
-var png_warning : procedure( png_ptr : png_structp ; message : png_const_charp ) ; cdecl ; 
+var png_warning : procedure( png_ptr : png_structp ; message : png_const_charp ) ; cdecl ;
 
 (*
 procedure png_chunk_warning(png_ptr:png_structp; message:png_const_charp);cdecl; external LibPng;
 *)
-var png_chunk_warning : procedure( png_ptr : png_structp ; message : png_const_charp ) ; cdecl ; 
+var png_chunk_warning : procedure( png_ptr : png_structp ; message : png_const_charp ) ; cdecl ;
 
 (*
 function png_get_valid(png_ptr:png_structp; info_ptr:png_infop; flag:png_uint_32):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_valid : function( png_ptr : png_structp ; info_ptr : png_infop ; flag : png_uint_32 ) : png_uint_32 ; cdecl ; 
+var png_get_valid : function( png_ptr : png_structp ; info_ptr : png_infop ; flag : png_uint_32 ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_rowbytes(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_rowbytes : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_rowbytes : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_rows(png_ptr:png_structp; info_ptr:png_infop):png_bytepp;cdecl; external LibPng;
 *)
-var png_get_rows : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_bytepp ; cdecl ; 
+var png_get_rows : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_bytepp ; cdecl ;
 
 (*
 procedure png_set_rows(png_ptr:png_structp; info_ptr:png_infop; row_pointers:png_bytepp);cdecl; external LibPng;
 *)
-var png_set_rows : procedure( png_ptr : png_structp ; info_ptr : png_infop ; row_pointers : png_bytepp ) ; cdecl ; 
+var png_set_rows : procedure( png_ptr : png_structp ; info_ptr : png_infop ; row_pointers : png_bytepp ) ; cdecl ;
 
 (*
 function png_get_channels(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_channels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_channels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_image_width(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_image_width : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_image_width : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_image_height(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_image_height : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_image_height : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_bit_depth(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_bit_depth : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_bit_depth : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_color_type(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_color_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_color_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_filter_type(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_filter_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_filter_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_interlace_type(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_interlace_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_interlace_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_compression_type(png_ptr:png_structp; info_ptr:png_infop):png_byte;cdecl; external LibPng;
 *)
-var png_get_compression_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ; 
+var png_get_compression_type : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_byte ; cdecl ;
 
 (*
 function png_get_pixels_per_meter(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_x_pixels_per_meter(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_x_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_x_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_y_pixels_per_meter(png_ptr:png_structp; info_ptr:png_infop):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_y_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ; 
+var png_get_y_pixels_per_meter : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_pixel_aspect_ratio(png_ptr:png_structp; info_ptr:png_infop):double;cdecl; external LibPng;
 *)
-var png_get_pixel_aspect_ratio : function( png_ptr : png_structp ; info_ptr : png_infop ) : double ; cdecl ; 
+var png_get_pixel_aspect_ratio : function( png_ptr : png_structp ; info_ptr : png_infop ) : double ; cdecl ;
 
 (*
 function png_get_x_offset_pixels(png_ptr:png_structp; info_ptr:png_infop):png_int_32;cdecl; external LibPng;
 *)
-var png_get_x_offset_pixels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ; 
+var png_get_x_offset_pixels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ;
 
 (*
 function png_get_y_offset_pixels(png_ptr:png_structp; info_ptr:png_infop):png_int_32;cdecl; external LibPng;
 *)
-var png_get_y_offset_pixels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ; 
+var png_get_y_offset_pixels : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ;
 
 (*
 function png_get_x_offset_microns(png_ptr:png_structp; info_ptr:png_infop):png_int_32;cdecl; external LibPng;
 *)
-var png_get_x_offset_microns : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ; 
+var png_get_x_offset_microns : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ;
 
 (*
 function png_get_y_offset_microns(png_ptr:png_structp; info_ptr:png_infop):png_int_32;cdecl; external LibPng;
 *)
-var png_get_y_offset_microns : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ; 
+var png_get_y_offset_microns : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_int_32 ; cdecl ;
 
 (*
 function png_get_signature(png_ptr:png_structp; info_ptr:png_infop):png_bytep;cdecl; external LibPng;
 *)
-var png_get_signature : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_bytep ; cdecl ; 
+var png_get_signature : function( png_ptr : png_structp ; info_ptr : png_infop ) : png_bytep ; cdecl ;
 
 (*
 function png_get_bKGD(png_ptr:png_structp; info_ptr:png_infop; background:Ppng_color_16p):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_bKGD : function( png_ptr : png_structp ; info_ptr : png_infop ; background : Ppng_color_16p ) : png_uint_32 ; cdecl ; 
+var png_get_bKGD : function( png_ptr : png_structp ; info_ptr : png_infop ; background : Ppng_color_16p ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_bKGD(png_ptr:png_structp; info_ptr:png_infop; background:png_color_16p);cdecl; external LibPng;
 *)
-var png_set_bKGD : procedure( png_ptr : png_structp ; info_ptr : png_infop ; background : png_color_16p ) ; cdecl ; 
+var png_set_bKGD : procedure( png_ptr : png_structp ; info_ptr : png_infop ; background : png_color_16p ) ; cdecl ;
 
 (*
 function png_get_cHRM(png_ptr:png_structp; info_ptr:png_infop; white_x:Pdouble; white_y:Pdouble; red_x:Pdouble;
            red_y:Pdouble; green_x:Pdouble; green_y:Pdouble; blue_x:Pdouble; blue_y:Pdouble):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_cHRM : function( png_ptr : png_structp ; info_ptr : png_infop ; white_x : Pdouble ; white_y : Pdouble ; red_x : Pdouble ; red_y : Pdouble ; green_x : Pdouble ; green_y : Pdouble ; blue_x : Pdouble ; blue_y : Pdouble ) : png_uint_32 ; cdecl ; 
+var png_get_cHRM : function( png_ptr : png_structp ; info_ptr : png_infop ; white_x : Pdouble ; white_y : Pdouble ; red_x : Pdouble ; red_y : Pdouble ; green_x : Pdouble ; green_y : Pdouble ; blue_x : Pdouble ; blue_y : Pdouble ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_cHRM_fixed(png_ptr:png_structp; info_ptr:png_infop; int_white_x:Ppng_fixed_point; int_white_y:Ppng_fixed_point; int_red_x:Ppng_fixed_point;
            int_red_y:Ppng_fixed_point; int_green_x:Ppng_fixed_point; int_green_y:Ppng_fixed_point; int_blue_x:Ppng_fixed_point; int_blue_y:Ppng_fixed_point):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_cHRM_fixed : function( png_ptr : png_structp ; info_ptr : png_infop ; int_white_x : Ppng_fixed_point ; int_white_y : Ppng_fixed_point ; int_red_x : Ppng_fixed_point ; int_red_y : Ppng_fixed_point ; int_green_x : Ppng_fixed_point ; int_green_y : Ppng_fixed_point ; int_blue_x : Ppng_fixed_point ; int_blue_y : Ppng_fixed_point ) : png_uint_32 ; cdecl ; 
+var png_get_cHRM_fixed : function( png_ptr : png_structp ; info_ptr : png_infop ; int_white_x : Ppng_fixed_point ; int_white_y : Ppng_fixed_point ; int_red_x : Ppng_fixed_point ; int_red_y : Ppng_fixed_point ; int_green_x : Ppng_fixed_point ; int_green_y : Ppng_fixed_point ; int_blue_x : Ppng_fixed_point ; int_blue_y : Ppng_fixed_point ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_cHRM(png_ptr:png_structp; info_ptr:png_infop; white_x:double; white_y:double; red_x:double;
             red_y:double; green_x:double; green_y:double; blue_x:double; blue_y:double);cdecl; external LibPng;
 *)
-var png_set_cHRM : procedure( png_ptr : png_structp ; info_ptr : png_infop ; white_x : double ; white_y : double ; red_x : double ; red_y : double ; green_x : double ; green_y : double ; blue_x : double ; blue_y : double ) ; cdecl ; 
+var png_set_cHRM : procedure( png_ptr : png_structp ; info_ptr : png_infop ; white_x : double ; white_y : double ; red_x : double ; red_y : double ; green_x : double ; green_y : double ; blue_x : double ; blue_y : double ) ; cdecl ;
 
 (*
 procedure png_set_cHRM_fixed(png_ptr:png_structp; info_ptr:png_infop; int_white_x:png_fixed_point; int_white_y:png_fixed_point; int_red_x:png_fixed_point;
             int_red_y:png_fixed_point; int_green_x:png_fixed_point; int_green_y:png_fixed_point; int_blue_x:png_fixed_point; int_blue_y:png_fixed_point);cdecl; external LibPng;
 *)
-var png_set_cHRM_fixed : procedure( png_ptr : png_structp ; info_ptr : png_infop ; int_white_x : png_fixed_point ; int_white_y : png_fixed_point ; int_red_x : png_fixed_point ; int_red_y : png_fixed_point ; int_green_x : png_fixed_point ; int_green_y : png_fixed_point ; int_blue_x : png_fixed_point ; int_blue_y : png_fixed_point ) ; cdecl ; 
+var png_set_cHRM_fixed : procedure( png_ptr : png_structp ; info_ptr : png_infop ; int_white_x : png_fixed_point ; int_white_y : png_fixed_point ; int_red_x : png_fixed_point ; int_red_y : png_fixed_point ; int_green_x : png_fixed_point ; int_green_y : png_fixed_point ; int_blue_x : png_fixed_point ; int_blue_y : png_fixed_point ) ; cdecl ;
 
 (*
 function png_get_gAMA(png_ptr:png_structp; info_ptr:png_infop; file_gamma:Pdouble):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_gAMA : function( png_ptr : png_structp ; info_ptr : png_infop ; file_gamma : Pdouble ) : png_uint_32 ; cdecl ; 
+var png_get_gAMA : function( png_ptr : png_structp ; info_ptr : png_infop ; file_gamma : Pdouble ) : png_uint_32 ; cdecl ;
 
 (*
 function png_get_gAMA_fixed(png_ptr:png_structp; info_ptr:png_infop; int_file_gamma:Ppng_fixed_point):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_gAMA_fixed : function( png_ptr : png_structp ; info_ptr : png_infop ; int_file_gamma : Ppng_fixed_point ) : png_uint_32 ; cdecl ; 
+var png_get_gAMA_fixed : function( png_ptr : png_structp ; info_ptr : png_infop ; int_file_gamma : Ppng_fixed_point ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_gAMA(png_ptr:png_structp; info_ptr:png_infop; file_gamma:double);cdecl; external LibPng;
 *)
-var png_set_gAMA : procedure( png_ptr : png_structp ; info_ptr : png_infop ; file_gamma : double ) ; cdecl ; 
+var png_set_gAMA : procedure( png_ptr : png_structp ; info_ptr : png_infop ; file_gamma : double ) ; cdecl ;
 
 (*
 procedure png_set_gAMA_fixed(png_ptr:png_structp; info_ptr:png_infop; int_file_gamma:png_fixed_point);cdecl; external LibPng;
 *)
-var png_set_gAMA_fixed : procedure( png_ptr : png_structp ; info_ptr : png_infop ; int_file_gamma : png_fixed_point ) ; cdecl ; 
+var png_set_gAMA_fixed : procedure( png_ptr : png_structp ; info_ptr : png_infop ; int_file_gamma : png_fixed_point ) ; cdecl ;
 
 (*
 function png_get_hIST(png_ptr:png_structp; info_ptr:png_infop; hist:Ppng_uint_16p):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_hIST : function( png_ptr : png_structp ; info_ptr : png_infop ; hist : Ppng_uint_16p ) : png_uint_32 ; cdecl ; 
+var png_get_hIST : function( png_ptr : png_structp ; info_ptr : png_infop ; hist : Ppng_uint_16p ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_hIST(png_ptr:png_structp; info_ptr:png_infop; hist:png_uint_16p);cdecl; external LibPng;
 *)
-var png_set_hIST : procedure( png_ptr : png_structp ; info_ptr : png_infop ; hist : png_uint_16p ) ; cdecl ; 
+var png_set_hIST : procedure( png_ptr : png_structp ; info_ptr : png_infop ; hist : png_uint_16p ) ; cdecl ;
 
 (*
 function png_get_IHDR(png_ptr:png_structp; info_ptr:png_infop; width:Ppng_uint_32; height:Ppng_uint_32; bit_depth:Plongint;
            color_type:Plongint; interlace_type:Plongint; compression_type:Plongint; filter_type:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_IHDR : function( png_ptr : png_structp ; info_ptr : png_infop ; width : Ppng_uint_32 ; height : Ppng_uint_32 ; bit_depth : Plongint ; color_type : Plongint ; interlace_type : Plongint ; compression_type : Plongint ; filter_type : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_IHDR : function( png_ptr : png_structp ; info_ptr : png_infop ; width : Ppng_uint_32 ; height : Ppng_uint_32 ; bit_depth : Plongint ; color_type : Plongint ; interlace_type : Plongint ; compression_type : Plongint ; filter_type : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_IHDR(png_ptr:png_structp; info_ptr:png_infop; width:png_uint_32; height:png_uint_32; bit_depth:longint;
             color_type:longint; interlace_type:longint; compression_type:longint; filter_type:longint);cdecl; external LibPng;
 *)
-var png_set_IHDR : procedure( png_ptr : png_structp ; info_ptr : png_infop ; width : png_uint_32 ; height : png_uint_32 ; bit_depth : longint ; color_type : longint ; interlace_type : longint ; compression_type : longint ; filter_type : longint ) ; cdecl ; 
+var png_set_IHDR : procedure( png_ptr : png_structp ; info_ptr : png_infop ; width : png_uint_32 ; height : png_uint_32 ; bit_depth : longint ; color_type : longint ; interlace_type : longint ; compression_type : longint ; filter_type : longint ) ; cdecl ;
 
 (*
 function png_get_oFFs(png_ptr:png_structp; info_ptr:png_infop; offset_x:Ppng_int_32; offset_y:Ppng_int_32; unit_type:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_oFFs : function( png_ptr : png_structp ; info_ptr : png_infop ; offset_x : Ppng_int_32 ; offset_y : Ppng_int_32 ; unit_type : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_oFFs : function( png_ptr : png_structp ; info_ptr : png_infop ; offset_x : Ppng_int_32 ; offset_y : Ppng_int_32 ; unit_type : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_oFFs(png_ptr:png_structp; info_ptr:png_infop; offset_x:png_int_32; offset_y:png_int_32; unit_type:longint);cdecl; external LibPng;
 *)
-var png_set_oFFs : procedure( png_ptr : png_structp ; info_ptr : png_infop ; offset_x : png_int_32 ; offset_y : png_int_32 ; unit_type : longint ) ; cdecl ; 
+var png_set_oFFs : procedure( png_ptr : png_structp ; info_ptr : png_infop ; offset_x : png_int_32 ; offset_y : png_int_32 ; unit_type : longint ) ; cdecl ;
 
 (*
 function png_get_pCAL(png_ptr:png_structp; info_ptr:png_infop; purpose:Ppng_charp; X0:Ppng_int_32; X1:Ppng_int_32;
            atype:Plongint; nparams:Plongint; units:Ppng_charp; params:Ppng_charpp):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_pCAL : function( png_ptr : png_structp ; info_ptr : png_infop ; purpose : Ppng_charp ; X0 : Ppng_int_32 ; X1 : Ppng_int_32 ; atype : Plongint ; nparams : Plongint ; units : Ppng_charp ; params : Ppng_charpp ) : png_uint_32 ; cdecl ; 
+var png_get_pCAL : function( png_ptr : png_structp ; info_ptr : png_infop ; purpose : Ppng_charp ; X0 : Ppng_int_32 ; X1 : Ppng_int_32 ; atype : Plongint ; nparams : Plongint ; units : Ppng_charp ; params : Ppng_charpp ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_pCAL(png_ptr:png_structp; info_ptr:png_infop; purpose:png_charp; X0:png_int_32; X1:png_int_32;
             atype:longint; nparams:longint; units:png_charp; params:png_charpp);cdecl; external LibPng;
 *)
-var png_set_pCAL : procedure( png_ptr : png_structp ; info_ptr : png_infop ; purpose : png_charp ; X0 : png_int_32 ; X1 : png_int_32 ; atype : longint ; nparams : longint ; units : png_charp ; params : png_charpp ) ; cdecl ; 
+var png_set_pCAL : procedure( png_ptr : png_structp ; info_ptr : png_infop ; purpose : png_charp ; X0 : png_int_32 ; X1 : png_int_32 ; atype : longint ; nparams : longint ; units : png_charp ; params : png_charpp ) ; cdecl ;
 
 (*
 function png_get_pHYs(png_ptr:png_structp; info_ptr:png_infop; res_x:Ppng_uint_32; res_y:Ppng_uint_32; unit_type:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_pHYs : function( png_ptr : png_structp ; info_ptr : png_infop ; res_x : Ppng_uint_32 ; res_y : Ppng_uint_32 ; unit_type : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_pHYs : function( png_ptr : png_structp ; info_ptr : png_infop ; res_x : Ppng_uint_32 ; res_y : Ppng_uint_32 ; unit_type : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_pHYs(png_ptr:png_structp; info_ptr:png_infop; res_x:png_uint_32; res_y:png_uint_32; unit_type:longint);cdecl; external LibPng;
 *)
-var png_set_pHYs : procedure( png_ptr : png_structp ; info_ptr : png_infop ; res_x : png_uint_32 ; res_y : png_uint_32 ; unit_type : longint ) ; cdecl ; 
+var png_set_pHYs : procedure( png_ptr : png_structp ; info_ptr : png_infop ; res_x : png_uint_32 ; res_y : png_uint_32 ; unit_type : longint ) ; cdecl ;
 
 (*
 function png_get_PLTE(png_ptr:png_structp; info_ptr:png_infop; palette:Ppng_colorp; num_palette:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_PLTE : function( png_ptr : png_structp ; info_ptr : png_infop ; palette : Ppng_colorp ; num_palette : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_PLTE : function( png_ptr : png_structp ; info_ptr : png_infop ; palette : Ppng_colorp ; num_palette : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_PLTE(png_ptr:png_structp; info_ptr:png_infop; palette:png_colorp; num_palette:longint);cdecl; external LibPng;
 *)
-var png_set_PLTE : procedure( png_ptr : png_structp ; info_ptr : png_infop ; palette : png_colorp ; num_palette : longint ) ; cdecl ; 
+var png_set_PLTE : procedure( png_ptr : png_structp ; info_ptr : png_infop ; palette : png_colorp ; num_palette : longint ) ; cdecl ;
 
 (*
 function png_get_sBIT(png_ptr:png_structp; info_ptr:png_infop; sig_bit:Ppng_color_8p):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_sBIT : function( png_ptr : png_structp ; info_ptr : png_infop ; sig_bit : Ppng_color_8p ) : png_uint_32 ; cdecl ; 
+var png_get_sBIT : function( png_ptr : png_structp ; info_ptr : png_infop ; sig_bit : Ppng_color_8p ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_sBIT(png_ptr:png_structp; info_ptr:png_infop; sig_bit:png_color_8p);cdecl; external LibPng;
 *)
-var png_set_sBIT : procedure( png_ptr : png_structp ; info_ptr : png_infop ; sig_bit : png_color_8p ) ; cdecl ; 
+var png_set_sBIT : procedure( png_ptr : png_structp ; info_ptr : png_infop ; sig_bit : png_color_8p ) ; cdecl ;
 
 (*
 function png_get_sRGB(png_ptr:png_structp; info_ptr:png_infop; intent:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_sRGB : function( png_ptr : png_structp ; info_ptr : png_infop ; intent : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_sRGB : function( png_ptr : png_structp ; info_ptr : png_infop ; intent : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_sRGB(png_ptr:png_structp; info_ptr:png_infop; intent:longint);cdecl; external LibPng;
 *)
-var png_set_sRGB : procedure( png_ptr : png_structp ; info_ptr : png_infop ; intent : longint ) ; cdecl ; 
+var png_set_sRGB : procedure( png_ptr : png_structp ; info_ptr : png_infop ; intent : longint ) ; cdecl ;
 
 (*
 procedure png_set_sRGB_gAMA_and_cHRM(png_ptr:png_structp; info_ptr:png_infop; intent:longint);cdecl; external LibPng;
 *)
-var png_set_sRGB_gAMA_and_cHRM : procedure( png_ptr : png_structp ; info_ptr : png_infop ; intent : longint ) ; cdecl ; 
+var png_set_sRGB_gAMA_and_cHRM : procedure( png_ptr : png_structp ; info_ptr : png_infop ; intent : longint ) ; cdecl ;
 
 (*
 function png_get_iCCP(png_ptr:png_structp; info_ptr:png_infop; name:png_charpp; compression_type:Plongint; profile:png_charpp;
            proflen:Ppng_uint_32):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_iCCP : function( png_ptr : png_structp ; info_ptr : png_infop ; name : png_charpp ; compression_type : Plongint ; profile : png_charpp ; proflen : Ppng_uint_32 ) : png_uint_32 ; cdecl ; 
+var png_get_iCCP : function( png_ptr : png_structp ; info_ptr : png_infop ; name : png_charpp ; compression_type : Plongint ; profile : png_charpp ; proflen : Ppng_uint_32 ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_iCCP(png_ptr:png_structp; info_ptr:png_infop; name:png_charp; compression_type:longint; profile:png_charp;
             proflen:png_uint_32);cdecl; external LibPng;
 *)
-var png_set_iCCP : procedure( png_ptr : png_structp ; info_ptr : png_infop ; name : png_charp ; compression_type : longint ; profile : png_charp ; proflen : png_uint_32 ) ; cdecl ; 
+var png_set_iCCP : procedure( png_ptr : png_structp ; info_ptr : png_infop ; name : png_charp ; compression_type : longint ; profile : png_charp ; proflen : png_uint_32 ) ; cdecl ;
 
 (*
 function png_get_sPLT(png_ptr:png_structp; info_ptr:png_infop; entries:png_sPLT_tpp):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_sPLT : function( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_sPLT_tpp ) : png_uint_32 ; cdecl ; 
+var png_get_sPLT : function( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_sPLT_tpp ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_sPLT(png_ptr:png_structp; info_ptr:png_infop; entries:png_sPLT_tp; nentries:longint);cdecl; external LibPng;
 *)
-var png_set_sPLT : procedure( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_sPLT_tp ; nentries : longint ) ; cdecl ; 
+var png_set_sPLT : procedure( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_sPLT_tp ; nentries : longint ) ; cdecl ;
 
 (*
 function png_get_text(png_ptr:png_structp; info_ptr:png_infop; text_ptr:Ppng_textp; num_text:Plongint):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_text : function( png_ptr : png_structp ; info_ptr : png_infop ; text_ptr : Ppng_textp ; num_text : Plongint ) : png_uint_32 ; cdecl ; 
+var png_get_text : function( png_ptr : png_structp ; info_ptr : png_infop ; text_ptr : Ppng_textp ; num_text : Plongint ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_text(png_ptr:png_structp; info_ptr:png_infop; text_ptr:png_textp; num_text:longint);cdecl; external LibPng;
 *)
-var png_set_text : procedure( png_ptr : png_structp ; info_ptr : png_infop ; text_ptr : png_textp ; num_text : longint ) ; cdecl ; 
+var png_set_text : procedure( png_ptr : png_structp ; info_ptr : png_infop ; text_ptr : png_textp ; num_text : longint ) ; cdecl ;
 
 (*
 function png_get_tIME(png_ptr:png_structp; info_ptr:png_infop; mod_time:Ppng_timep):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_tIME : function( png_ptr : png_structp ; info_ptr : png_infop ; mod_time : Ppng_timep ) : png_uint_32 ; cdecl ; 
+var png_get_tIME : function( png_ptr : png_structp ; info_ptr : png_infop ; mod_time : Ppng_timep ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_tIME(png_ptr:png_structp; info_ptr:png_infop; mod_time:png_timep);cdecl; external LibPng;
 *)
-var png_set_tIME : procedure( png_ptr : png_structp ; info_ptr : png_infop ; mod_time : png_timep ) ; cdecl ; 
+var png_set_tIME : procedure( png_ptr : png_structp ; info_ptr : png_infop ; mod_time : png_timep ) ; cdecl ;
 
 (*
 function png_get_tRNS(png_ptr:png_structp; info_ptr:png_infop; trans:Ppng_bytep; num_trans:Plongint; trans_values:Ppng_color_16p):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_tRNS : function( png_ptr : png_structp ; info_ptr : png_infop ; trans : Ppng_bytep ; num_trans : Plongint ; trans_values : Ppng_color_16p ) : png_uint_32 ; cdecl ; 
+var png_get_tRNS : function( png_ptr : png_structp ; info_ptr : png_infop ; trans : Ppng_bytep ; num_trans : Plongint ; trans_values : Ppng_color_16p ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_tRNS(png_ptr:png_structp; info_ptr:png_infop; trans:png_bytep; num_trans:longint; trans_values:png_color_16p);cdecl; external LibPng;
 *)
-var png_set_tRNS : procedure( png_ptr : png_structp ; info_ptr : png_infop ; trans : png_bytep ; num_trans : longint ; trans_values : png_color_16p ) ; cdecl ; 
+var png_set_tRNS : procedure( png_ptr : png_structp ; info_ptr : png_infop ; trans : png_bytep ; num_trans : longint ; trans_values : png_color_16p ) ; cdecl ;
 
 (*
 function png_get_sCAL(png_ptr:png_structp; info_ptr:png_infop; aunit:Plongint; width:Pdouble; height:Pdouble):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_sCAL : function( png_ptr : png_structp ; info_ptr : png_infop ; aunit : Plongint ; width : Pdouble ; height : Pdouble ) : png_uint_32 ; cdecl ; 
+var png_get_sCAL : function( png_ptr : png_structp ; info_ptr : png_infop ; aunit : Plongint ; width : Pdouble ; height : Pdouble ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_sCAL(png_ptr:png_structp; info_ptr:png_infop; aunit:longint; width:double; height:double);cdecl; external LibPng;
 *)
-var png_set_sCAL : procedure( png_ptr : png_structp ; info_ptr : png_infop ; aunit : longint ; width : double ; height : double ) ; cdecl ; 
+var png_set_sCAL : procedure( png_ptr : png_structp ; info_ptr : png_infop ; aunit : longint ; width : double ; height : double ) ; cdecl ;
 
 (*
 procedure png_set_sCAL_s(png_ptr:png_structp; info_ptr:png_infop; aunit:longint; swidth:png_charp; sheight:png_charp);cdecl; external LibPng;
 *)
-var png_set_sCAL_s : procedure( png_ptr : png_structp ; info_ptr : png_infop ; aunit : longint ; swidth : png_charp ; sheight : png_charp ) ; cdecl ; 
+var png_set_sCAL_s : procedure( png_ptr : png_structp ; info_ptr : png_infop ; aunit : longint ; swidth : png_charp ; sheight : png_charp ) ; cdecl ;
 
 (*
 procedure png_set_keep_unknown_chunks(png_ptr:png_structp; keep:longint; chunk_list:png_bytep; num_chunks:longint);cdecl; external LibPng;
 *)
-var png_set_keep_unknown_chunks : procedure( png_ptr : png_structp ; keep : longint ; chunk_list : png_bytep ; num_chunks : longint ) ; cdecl ; 
+var png_set_keep_unknown_chunks : procedure( png_ptr : png_structp ; keep : longint ; chunk_list : png_bytep ; num_chunks : longint ) ; cdecl ;
 
 (*
 procedure png_set_unknown_chunks(png_ptr:png_structp; info_ptr:png_infop; unknowns:png_unknown_chunkp; num_unknowns:longint);cdecl; external LibPng;
 *)
-var png_set_unknown_chunks : procedure( png_ptr : png_structp ; info_ptr : png_infop ; unknowns : png_unknown_chunkp ; num_unknowns : longint ) ; cdecl ; 
+var png_set_unknown_chunks : procedure( png_ptr : png_structp ; info_ptr : png_infop ; unknowns : png_unknown_chunkp ; num_unknowns : longint ) ; cdecl ;
 
 (*
 procedure png_set_unknown_chunk_location(png_ptr:png_structp; info_ptr:png_infop; chunk:longint; location:longint);cdecl; external LibPng;
 *)
-var png_set_unknown_chunk_location : procedure( png_ptr : png_structp ; info_ptr : png_infop ; chunk : longint ; location : longint ) ; cdecl ; 
+var png_set_unknown_chunk_location : procedure( png_ptr : png_structp ; info_ptr : png_infop ; chunk : longint ; location : longint ) ; cdecl ;
 
 (*
 function png_get_unknown_chunks(png_ptr:png_structp; info_ptr:png_infop; entries:png_unknown_chunkpp):png_uint_32;cdecl; external LibPng;
 *)
-var png_get_unknown_chunks : function( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_unknown_chunkpp ) : png_uint_32 ; cdecl ; 
+var png_get_unknown_chunks : function( png_ptr : png_structp ; info_ptr : png_infop ; entries : png_unknown_chunkpp ) : png_uint_32 ; cdecl ;
 
 (*
 procedure png_set_invalid(png_ptr:png_structp; info_ptr:png_infop; mask:longint);cdecl; external LibPng;
 *)
-var png_set_invalid : procedure( png_ptr : png_structp ; info_ptr : png_infop ; mask : longint ) ; cdecl ; 
+var png_set_invalid : procedure( png_ptr : png_structp ; info_ptr : png_infop ; mask : longint ) ; cdecl ;
 
 (*
 procedure png_read_png(png_ptr:png_structp; info_ptr:png_infop; transforms:longint; params:voidp);cdecl; external LibPng;
 *)
-var png_read_png : procedure( png_ptr : png_structp ; info_ptr : png_infop ; transforms : longint ; params : voidp ) ; cdecl ; 
+var png_read_png : procedure( png_ptr : png_structp ; info_ptr : png_infop ; transforms : longint ; params : voidp ) ; cdecl ;
 
 (*
 procedure png_write_png(png_ptr:png_structp; info_ptr:png_infop; transforms:longint; params:voidp);cdecl; external LibPng;
 *)
-var png_write_png : procedure( png_ptr : png_structp ; info_ptr : png_infop ; transforms : longint ; params : voidp ) ; cdecl ; 
+var png_write_png : procedure( png_ptr : png_structp ; info_ptr : png_infop ; transforms : longint ; params : voidp ) ; cdecl ;
 
 (*
 function png_get_header_ver(png_ptr:png_structp):png_charp;cdecl; external LibPng;
 *)
-var png_get_header_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ; 
+var png_get_header_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ;
 
 (*
 function png_get_header_version(png_ptr:png_structp):png_charp;cdecl; external LibPng;
 *)
-var png_get_header_version : function( png_ptr : png_structp ) : png_charp ; cdecl ; 
+var png_get_header_version : function( png_ptr : png_structp ) : png_charp ; cdecl ;
 
 (*
 function png_get_libpng_ver(png_ptr:png_structp):png_charp;cdecl; external LibPng;
 *)
-var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ; 
+var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ;
 
 implementation
 
@@ -1327,6 +1327,10 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	;
+
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
 	TSGDllPNG = class(TSGDll)
@@ -1337,7 +1341,7 @@ type
 		class procedure Free(); override;
 		end;
 
-class function TSGDllPNG.SystemNames() : TSGStringList; 
+class function TSGDllPNG.SystemNames() : TSGStringList;
 begin
 Result := 'LibPng';
 Result += 'Png';
@@ -1355,7 +1359,7 @@ for i := {$IFDEF MSWINDOWS}12{$ELSE}13{$ENDIF} downto 1 do
 {$IFDEF MSWINDOWS}Result += WinDllPrefix + 'png'; {$ENDIF}
 end;
 
-class procedure TSGDllPNG.Free(); 
+class procedure TSGDllPNG.Free();
 begin
 png_access_version_number := nil;
 png_set_sig_bytes := nil;

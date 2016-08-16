@@ -1,4 +1,3 @@
-
 {$REGION 'Copyright (C) CMC Development Team'}
 { **************************************************************************
   Copyright (C) 2015 CMC Development Team
@@ -49,7 +48,7 @@ interface
 
 uses
     Windows, Classes, SysUtils, DX12.DXGI, DX12.D3DCommon;
-	
+
 const
 		D3D12_DLL ='D3D12.dll';
 
@@ -832,7 +831,7 @@ type
         D3D12_FEATURE_FORMAT_SUPPORT = (D3D12_FEATURE_FEATURE_LEVELS + 1),
         D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS = (D3D12_FEATURE_FORMAT_SUPPORT + 1),
         D3D12_FEATURE_FORMAT_INFO = (D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS + 1),
-		D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT	= ( D3D12_FEATURE_FORMAT_INFO + 1 ) 
+		D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT	= ( D3D12_FEATURE_FORMAT_INFO + 1 )
         );
 
     TD3D12_SHADER_MIN_PRECISION_SUPPORT = (
@@ -979,8 +978,8 @@ type
         Format: TDXGI_FORMAT;
         PlaneCount: UINT8;
     end;
-	
-	
+
+
 TD3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT = record
      MaxGPUVirtualAddressBitsPerResource:UINT;
      MaxGPUVirtualAddressBitsPerProcess:UINT;
@@ -2297,7 +2296,7 @@ TD3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT = record
 function D3D12SerializeRootSignature(const pRootSignature: TD3D12_ROOT_SIGNATURE_DESC; Version: TD3D_ROOT_SIGNATURE_VERSION;
     out ppBlob: ID3DBlob; out ppErrorBlob: ID3DBlob): HResult; stdcall; external D3D12_DLL;
 *)
-var D3D12SerializeRootSignature : function( const pRootSignature : TD3D12_ROOT_SIGNATURE_DESC ; Version : TD3D_ROOT_SIGNATURE_VERSION ; out ppBlob : ID3DBlob ; out ppErrorBlob : ID3DBlob ) : HResult ; stdcall ; 
+var D3D12SerializeRootSignature : function( const pRootSignature : TD3D12_ROOT_SIGNATURE_DESC ; Version : TD3D_ROOT_SIGNATURE_VERSION ; out ppBlob : ID3DBlob ; out ppErrorBlob : ID3DBlob ) : HResult ; stdcall ;
 
 (*
 
@@ -2306,7 +2305,7 @@ var D3D12SerializeRootSignature : function( const pRootSignature : TD3D12_ROOT_S
 function D3D12CreateRootSignatureDeserializer(pSrcData: pointer; SrcDataSizeInBytes: SIZE_T;
     const pRootSignatureDeserializerInterface: TGUID; out ppRootSignatureDeserializer): HResult; stdcall; external D3D12_DLL;
 *)
-var D3D12CreateRootSignatureDeserializer : function( pSrcData : pointer ; SrcDataSizeInBytes : SIZE_T ; const pRootSignatureDeserializerInterface : TGUID ; out ppRootSignatureDeserializer ) : HResult ; stdcall ; 
+var D3D12CreateRootSignatureDeserializer : function( pSrcData : pointer ; SrcDataSizeInBytes : SIZE_T ; const pRootSignatureDeserializerInterface : TGUID ; out ppRootSignatureDeserializer ) : HResult ; stdcall ;
 
 
 
@@ -2338,7 +2337,7 @@ var D3D12CreateRootSignatureDeserializer : function( pSrcData : pointer ; SrcDat
 function D3D12CreateDevice(pAdapter: IUnknown; MinimumFeatureLevel: TD3D_FEATURE_LEVEL; const riid: TGUID; // Expected: ID3D12Device
     out ppDevice): HResult; stdcall; external D3D12_DLL;
 *)
-var D3D12CreateDevice : function( pAdapter : IUnknown ; MinimumFeatureLevel : TD3D_FEATURE_LEVEL ; const riid : TGUID ; out ppDevice ) : HResult ; stdcall ; 
+var D3D12CreateDevice : function( pAdapter : IUnknown ; MinimumFeatureLevel : TD3D_FEATURE_LEVEL ; const riid : TGUID ; out ppDevice ) : HResult ; stdcall ;
 
 (*
 
@@ -2346,7 +2345,7 @@ var D3D12CreateDevice : function( pAdapter : IUnknown ; MinimumFeatureLevel : TD
 
 function D3D12GetDebugInterface(const riid: TGUID; out ppvDebug): HResult; stdcall; external D3D12_DLL;
 *)
-var D3D12GetDebugInterface : function( const riid : TGUID ; out ppvDebug ) : HResult ; stdcall ; 
+var D3D12GetDebugInterface : function( const riid : TGUID ; out ppvDebug ) : HResult ; stdcall ;
 
 
 implementation
@@ -2354,68 +2353,69 @@ implementation
 uses
 	SaGeBase
 	,SaGeBased
+	,SaGeDllManager
 	;
 
-procedure Load_HINT(const Er : String);
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllD3D12 = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllD3D12.SystemNames() : TSGStringList;
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := nil;
+Result += 'DX12.D3D12';
+Result += 'DX12.Direct3D12';
+Result += 'Direct3D12';
+Result += 'D3D12';
 end;
-procedure Free_D3D12();
+
+class function TSGDllD3D12.DllNames() : TSGStringList;
+begin
+Result := D3D12_DLL;
+end;
+
+class procedure TSGDllD3D12.Free();
 begin
 D3D12SerializeRootSignature := nil;
 D3D12CreateRootSignatureDeserializer := nil;
 D3D12CreateDevice := nil;
 D3D12GetDebugInterface := nil;
 end;
-function Load_D3D12_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 4;
+
+class function TSGDllD3D12.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	UnitLib : TSGMaxEnum;
-	CountLoadSuccs : LongWord;
+	LoadResult : PSGDllLoadObject = nil;
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
+
 begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
-	exit;
-	end;
+Result.Clear();
+Result.FFunctionCount := 4;
+LoadResult := @Result;
 D3D12SerializeRootSignature := LoadProcedure('D3D12SerializeRootSignature');
 D3D12CreateRootSignatureDeserializer := LoadProcedure('D3D12CreateRootSignatureDeserializer');
 D3D12CreateDevice := LoadProcedure('D3D12CreateDevice');
 D3D12GetDebugInterface := LoadProcedure('D3D12GetDebugInterface');
-Load_HINT('DX12.D3D12: Initialization from '+SGPCharToString(UnitName)+'/'+'D3D12_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
-function Load_D3D12() : Boolean;
-var
-	i : LongWord;
-	R : array[0..0] of Boolean;
-begin
-R[0] := Load_D3D12_0(D3D12_DLL);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
-end;
 initialization
 begin
-Free_D3D12();
-if not Load_D3D12() then
-	Load_HINT('DX12.D3D12: Initialization FAILED!!!');
-end;
-finalization
-begin
-Free_D3D12();
+TSGDllD3D12.Create();
 end;
 end.

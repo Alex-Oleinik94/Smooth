@@ -65,7 +65,7 @@ type
 		['{01b2e610-7d81-4db4-bece-19222fbffde9}']
 		function GetScreen() : TSGScreen;
 		function ScreenAssigned() : TSGBoolean;
-		
+
 		property Screen : TSGScreen read GetScreen;
 		end;
 type
@@ -100,17 +100,17 @@ uses
 {$INCLUDE SaGeScreenComponents.inc}
 {$UNDEF  SCREEN_IMPLEMENTATION}
 
-class function TSGScreened.ClassName() : TSGString; 
+class function TSGScreened.ClassName() : TSGString;
 begin
 Result := 'TSGScreened';
 end;
 
-class function TSGScreen.ClassName() : TSGString; 
+class function TSGScreen.ClassName() : TSGString;
 begin
 Result := 'TSGScreen';
 end;
 
-class function TSGScreenedDrawable.ClassName() : TSGString; 
+class function TSGScreenedDrawable.ClassName() : TSGString;
 begin
 Result := 'TSGScreenedDrawable';
 end;
@@ -125,7 +125,9 @@ end;
 function TSGScreenedDrawable.GetScreen() : TSGScreen;
 begin
 if ContextAssigned() then
-	Result := TSGScreen(FContext^.Screen);
+	Result := TSGScreen(FContext^.Screen)
+else
+	Result := nil;
 end;
 
 function TSGScreened.ScreenAssigned() : TSGBoolean;
@@ -138,13 +140,15 @@ end;
 function TSGScreened.GetScreen() : TSGScreen;
 begin
 if ContextAssigned() then
-	Result := TSGScreen(FContext^.Screen);
+	Result := TSGScreen(FContext^.Screen)
+else
+	Result := nil;
 end;
 
 // ====================================== TSGScreen
 
 procedure TSGScreen.DeleteDeviceResourses();
-begin 
+begin
 FSkin.DeleteDeviceResourses();
 inherited;
 end;
@@ -240,10 +244,10 @@ begin
 	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
 	{$ENDIF}
 
-if (Context.KeysPressed(SG_CTRL_KEY)) and 
-   (Context.KeysPressed(SG_ALT_KEY)) and 
-   (Context.KeyPressedType = SGDownKey) and 
-   (Context.KeyPressedChar = 'O') and 
+if (Context.KeysPressed(SG_CTRL_KEY)) and
+   (Context.KeysPressed(SG_ALT_KEY)) and
+   (Context.KeyPressedType = SGDownKey) and
+   (Context.KeyPressedChar = 'O') and
    TSGEngineConfigurationPanel.CanCreate(Self) then
 	begin
 	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();

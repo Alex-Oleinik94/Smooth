@@ -2840,35 +2840,35 @@ function D2D1CreateFactory(factoryType: TD2D1_FACTORY_TYPE; const riid: TGUID; p
     out ppIFactory): HResult; stdcall;
     external D2D1_DLL;
 *)
-var D2D1CreateFactory : function( factoryType : TD2D1_FACTORY_TYPE ; const riid : TGUID ; pFactoryOptions : PD2D1_FACTORY_OPTIONS ; out ppIFactory ) : HResult ; stdcall ; 
+var D2D1CreateFactory : function( factoryType : TD2D1_FACTORY_TYPE ; const riid : TGUID ; pFactoryOptions : PD2D1_FACTORY_OPTIONS ; out ppIFactory ) : HResult ; stdcall ;
 
 (*
 
 
 procedure D2D1MakeRotateMatrix(angle: single; center: TD2D1_POINT_2F; out matrix: TD2D1_MATRIX_3X2_F); stdcall; external D2D1_DLL;
 *)
-var D2D1MakeRotateMatrix : procedure( angle : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ; 
+var D2D1MakeRotateMatrix : procedure( angle : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ;
 
 (*
 
 
 procedure D2D1MakeSkewMatrix(angleX: single; angleY: single; center: TD2D1_POINT_2F; out matrix: TD2D1_MATRIX_3X2_F); stdcall; external D2D1_DLL;
 *)
-var D2D1MakeSkewMatrix : procedure( angleX : single ; angleY : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ; 
+var D2D1MakeSkewMatrix : procedure( angleX : single ; angleY : single ; center : TD2D1_POINT_2F ; out matrix : TD2D1_MATRIX_3X2_F ) ; stdcall ;
 
 (*
 
 
 function D2D1IsMatrixInvertible(matrix: PD2D1_MATRIX_3X2_F): longbool; stdcall; external D2D1_DLL;
 *)
-var D2D1IsMatrixInvertible : function( matrix : PD2D1_MATRIX_3X2_F ) : longbool ; stdcall ; 
+var D2D1IsMatrixInvertible : function( matrix : PD2D1_MATRIX_3X2_F ) : longbool ; stdcall ;
 
 (*
 
 
 function D2D1InvertMatrix(var matrix: TD2D1_MATRIX_3X2_F): longbool; stdcall; external D2D1_DLL;
 *)
-var D2D1InvertMatrix : function( var matrix : TD2D1_MATRIX_3X2_F ) : longbool ; stdcall ; 
+var D2D1InvertMatrix : function( var matrix : TD2D1_MATRIX_3X2_F ) : longbool ; stdcall ;
 
 
 { D2D1_1.h }
@@ -2877,7 +2877,7 @@ var D2D1InvertMatrix : function( var matrix : TD2D1_MATRIX_3X2_F ) : longbool ; 
 function D2D1CreateDevice(dxgiDevice: IDXGIDevice; creationProperties: PD2D1_CREATION_PROPERTIES; out d2dDevice: ID2D1Device): HResult;
     stdcall; external D2D1_DLL;
 *)
-var D2D1CreateDevice : function( dxgiDevice : IDXGIDevice ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDevice : ID2D1Device ) : HResult ; stdcall ; 
+var D2D1CreateDevice : function( dxgiDevice : IDXGIDevice ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDevice : ID2D1Device ) : HResult ; stdcall ;
 
 (*
 
@@ -2885,7 +2885,7 @@ var D2D1CreateDevice : function( dxgiDevice : IDXGIDevice ; creationProperties :
 function D2D1CreateDeviceContext(dxgiSurface: IDXGISurface; creationProperties: PD2D1_CREATION_PROPERTIES;
     out d2dDeviceContext: ID2D1DeviceContext): HResult; stdcall; external D2D1_DLL;
 *)
-var D2D1CreateDeviceContext : function( dxgiSurface : IDXGISurface ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDeviceContext : ID2D1DeviceContext ) : HResult ; stdcall ; 
+var D2D1CreateDeviceContext : function( dxgiSurface : IDXGISurface ; creationProperties : PD2D1_CREATION_PROPERTIES ; out d2dDeviceContext : ID2D1DeviceContext ) : HResult ; stdcall ;
 
 (*
 
@@ -2893,26 +2893,26 @@ var D2D1CreateDeviceContext : function( dxgiSurface : IDXGISurface ; creationPro
 function D2D1ConvertColorSpace(sourceColorSpace: TD2D1_COLOR_SPACE; destinationColorSpace: TD2D1_COLOR_SPACE; color: PD2D1_COLOR_F): TD2D1_COLOR_F;
     stdcall; external D2D1_DLL;
 *)
-var D2D1ConvertColorSpace : function( sourceColorSpace : TD2D1_COLOR_SPACE ; destinationColorSpace : TD2D1_COLOR_SPACE ; color : PD2D1_COLOR_F ) : TD2D1_COLOR_F ; stdcall ; 
+var D2D1ConvertColorSpace : function( sourceColorSpace : TD2D1_COLOR_SPACE ; destinationColorSpace : TD2D1_COLOR_SPACE ; color : PD2D1_COLOR_F ) : TD2D1_COLOR_F ; stdcall ;
 
 (*
 
 
 procedure D2D1SinCos(angle: single; out s: single; out c: single); stdcall; external D2D1_DLL;
 *)
-var D2D1SinCos : procedure( angle : single ; out s : single ; out c : single ) ; stdcall ; 
+var D2D1SinCos : procedure( angle : single ; out s : single ; out c : single ) ; stdcall ;
 
 (*
 
 function D2D1Tan(angle: single): single; stdcall; external D2D1_DLL;
 *)
-var D2D1Tan : function( angle : single ) : single ; stdcall ; 
+var D2D1Tan : function( angle : single ) : single ; stdcall ;
 
 (*
 
 function D2D1Vec3Length(x: single; y: single; z: single): single; stdcall; external D2D1_DLL;
 *)
-var D2D1Vec3Length : function( x : single ; y : single ; z : single ) : single ; stdcall ; 
+var D2D1Vec3Length : function( x : single ; y : single ; z : single ) : single ; stdcall ;
 
 
 
@@ -2921,7 +2921,7 @@ var D2D1Vec3Length : function( x : single ; y : single ; z : single ) : single ;
 
 function D2D1ComputeMaximumScaleFactor(const matrix: TD2D1_MATRIX_3X2_F): single; stdcall; external D2D1_DLL;
 *)
-var D2D1ComputeMaximumScaleFactor : function( const matrix : TD2D1_MATRIX_3X2_F ) : single ; stdcall ; 
+var D2D1ComputeMaximumScaleFactor : function( const matrix : TD2D1_MATRIX_3X2_F ) : single ; stdcall ;
 
 
 
@@ -3076,8 +3076,9 @@ function ComputeFlatteningTolerance(matrix: TD2D1_MATRIX_3X2_F; dpiX: single = 9
 implementation
 
 uses
-	SaGeBase,
-	SaGeBased
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
 	;
 
 function FloatMax: single;
@@ -4464,20 +4465,37 @@ begin
     _32 := a._31 * b._12 + a._32 * b._22 + b._32;
 end;
 
-
-
 function TD2D_MATRIX_3X2_F.TransformPoint(point: TD2D_POINT_2F): TD2D_POINT_2F;
 begin
     Result.x := point.x * _11 + point.y * _21 + _31;
     Result.y := point.x * _12 + point.y * _22 + _32;
 end;
 
-procedure Load_HINT(const Er : String);
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllD1D2 = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllD1D2.SystemNames() : TSGStringList;
 begin
-//WriteLn(Er);
-SGLog.Sourse(Er);
+Result := 'DX12.D1D2';
+Result += 'D1D2';
 end;
-procedure Free_D2D1();
+
+class function TSGDllD1D2.DllNames() : TSGStringList;
+begin
+Result := D2D1_DLL;
+end;
+
+class procedure TSGDllD1D2.Free();
 begin
 D2D1CreateFactory := nil;
 D2D1MakeRotateMatrix := nil;
@@ -4492,29 +4510,24 @@ D2D1Tan := nil;
 D2D1Vec3Length := nil;
 D2D1ComputeMaximumScaleFactor := nil;
 end;
-function Load_D2D1_0(const UnitName : PChar) : Boolean;
-const
-	TotalProcCount = 12;
+
+class function TSGDllD1D2.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var
-	UnitLib : TSGMaxEnum;
-	CountLoadSuccs : LongWord;
+	LoadResult : PSGDllLoadObject = nil;
+
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
-Result := GetProcAddress(UnitLib, Name);
+Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+': Error while loading "'+SGPCharToString(Name)+'"!')
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-	CountLoadSuccs := CountLoadSuccs + 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
+
 begin
-UnitLib := LoadLibrary(UnitName);
-Result := UnitLib <> 0;
-CountLoadSuccs := 0;
-if not Result then
-	begin
-	Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+': Error while loading dynamic library!');
-	exit;
-	end;
+Result.Clear();
+Result.FFunctionCount := 12;
+LoadResult := @Result;
 D2D1CreateFactory := LoadProcedure('D2D1CreateFactory');
 D2D1MakeRotateMatrix := LoadProcedure('D2D1MakeRotateMatrix');
 D2D1MakeSkewMatrix := LoadProcedure('D2D1MakeSkewMatrix');
@@ -4527,27 +4540,10 @@ D2D1SinCos := LoadProcedure('D2D1SinCos');
 D2D1Tan := LoadProcedure('D2D1Tan');
 D2D1Vec3Length := LoadProcedure('D2D1Vec3Length');
 D2D1ComputeMaximumScaleFactor := LoadProcedure('D2D1ComputeMaximumScaleFactor');
-Load_HINT('DX12.D2D1: Initialization from '+SGPCharToString(UnitName)+'/'+'D2D1_DLL'+': Loaded '+SGStrReal(CountLoadSuccs/TotalProcCount*100,3)+'% ('+SGStr(CountLoadSuccs)+'/'+SGStr(TotalProcCount)+').');
 end;
 
-function Load_D2D1() : Boolean;
-var
-	i : LongWord;
-	R : array[0..0] of Boolean;
-begin
-R[0] := Load_D2D1_0(D2D1_DLL);
-Result := True;
-for i := 0 to 0 do
-	Result := Result and R[i];
-end;
 initialization
 begin
-Free_D2D1();
-if not Load_D2D1() then
-	Load_HINT('DX12.D2D1: Initialization FAILED!!!');
-end;
-finalization
-begin
-Free_D2D1();
+TSGDllD1D2.Create();
 end;
 end.
