@@ -4,7 +4,7 @@ unit SaGeConsoleTools;
 
 interface
 
-uses 
+uses
 	(* ============ System Includes ============ *)
 	 Dos
 	,Crt
@@ -20,7 +20,7 @@ uses
 		,unix
 		{$ENDIF}
 	,SNMPsend
-	
+
 	(* ============ Engine Includes ============ *)
 	,SaGeRender
 	,SaGeCommon
@@ -43,7 +43,7 @@ uses
 	,SaGeMakefileReader
 	,SaGeCommonClasses
 	,SaGeFileOpener
-	
+
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
 	,SaGeModelRedactor
@@ -79,7 +79,7 @@ type
 		procedure Free();
 		end;
 	TSGConsoleCallerComands = packed array of TSGConsoleCallerComand;
-	
+
 	TSGConsoleCaller = class
 			public
 		constructor Create(const VParams : TSGConcoleCallerParams);
@@ -153,7 +153,7 @@ if (Length(VParams) = 2) and (SGResourseFiles.FileExists(VParams[0])) then
 else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and ((SGUpCaseString(VParams[2]) = 'OBJFPC') or (SGUpCaseString(VParams[2]) = 'DELPHI') or (SGUpCaseString(VParams[2]) = 'FPC')) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2])
 else
-	begin 
+	begin
 	SGPrintEngineVersion();
 	WriteLn(SGErrorString,'"@infilename @outfilename [@mode]". Param @mode is in set of "ObjFpc", "fpc" or "Delphi".');
 	end;
@@ -303,9 +303,9 @@ end;
 
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result :=   (SGUpCaseString(Param) = 'TRUE') or 
-			(SGUpCaseString(Param) = 'FALSE') or 
-			(Param = '0') or 
+Result :=   (SGUpCaseString(Param) = 'TRUE') or
+			(SGUpCaseString(Param) = 'FALSE') or
+			(Param = '0') or
 			(Param = '1');
 end;
 
@@ -313,7 +313,7 @@ procedure SGConsoleIncEngineVersion(const VParams : TSGConcoleCallerParams = nil
 var
 	Param : TSGString;
 begin
-if  (SGCountConsoleParams(VParams) = 0) or 
+if  (SGCountConsoleParams(VParams) = 0) or
 	((SGCountConsoleParams(VParams) = 1) and (SGIsBoolConsoleParam(VParams[0]))) then
 	begin
 	if SGCountConsoleParams(VParams) = 1 then
@@ -425,7 +425,7 @@ end;
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (
-	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = 'H') or 
+	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = 'H') or
 	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = 'HELP')) then
 	begin
 	SGPrintEngineVersion();
@@ -989,7 +989,7 @@ if (FParams <> nil) and (Length(FParams) > 0) then
 					TextColor(7);
 					e += 1;
 					end;
-				end;     
+				end;
 			end;
 		Result := e = 0;
 		if not Result then
@@ -1168,6 +1168,20 @@ if not IsD3DX8Suppored() then
 {$IFDEF MSWINDOWS}
 if Result then
 	RenderClass := TSGRenderDirectX8;
+{$ENDIF}
+end;
+
+function ProccessOpenGL(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not TSGRenderOpenGL.Suppored() then
+	begin
+	WriteLn('OpenGL can''t be used in your system!');
+	Result := False;
+	end;
+{$IFDEF MSWINDOWS}
+if Result then
+	RenderClass := TSGRenderOpenGL;
 {$ENDIF}
 end;
 
@@ -1356,6 +1370,11 @@ begin
 Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored());
 end;
 
+function HelpFuncOGL() : TSGString;
+begin
+Result := 'For use OpenGL' + ImposibleParam(TSGRenderOpenGL.Suppored());
+end;
+
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
 begin
@@ -1370,6 +1389,7 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
 	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
 	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
+	ConsoleCaller.AddComand(@ProccessOpenGL  ,  ['ogl', 'OpenGL'],      @HelpFuncOGL);
 	ConsoleCaller.Category('Window settings');
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
 	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
@@ -1422,7 +1442,7 @@ with TSGDrawClasses.Create(Context) do
 	Add(TSGGraphViewer);
 	Add(TSGKiller);
 	Add(TSGGenAlg);
-	
+
 	//Add(TSGUserTesting);
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);
@@ -1431,7 +1451,7 @@ with TSGDrawClasses.Create(Context) do
 	//Add(TSGModelRedactor);
 	//Add(TSGGameTron);
 	//Add(TSGClientWeb);
-	
+
 	Initialize();
 	end;
 end;
@@ -1712,7 +1732,7 @@ if SGCountConsoleParams(VParams) <> 0 then
 						SetLength(ArWords,1)
 					else
 						SetLength(ArWords,Length(ArWords)+1);
-					
+
 					if (TempS[5] = '"') then
 						begin
 						TempS2 := '';
@@ -1784,7 +1804,7 @@ SGT.Destroy;
 end;
 
 procedure GoogleReNameCache();
-var 
+var
 	Cache:string = 'Cache';
 var
 	sr:DOS.SearchRec;
