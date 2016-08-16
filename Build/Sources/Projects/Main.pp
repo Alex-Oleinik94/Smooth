@@ -25,10 +25,10 @@ uses
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
-	
+
 	,SaGeResourseManager
 	{$INCLUDE SaGeRMFiles.inc}
-	
+
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary
 	{$ELSE}
@@ -50,10 +50,10 @@ uses
 	end;
 	{$ENDIF}
 	end;
-	
-	exports 
+
+	exports
 			ANativeActivity_onCreate name 'ANativeActivity_onCreate';
-	
+
 	begin
 	end.
 {$ELSE}
@@ -70,7 +70,7 @@ uses
 	except on e : Exception do
 		begin
 		SGPrintExceptionStackTrace(e);
-		Write('Press ENTER! ');ReadLn();
+		//Write('Press ENTER! ');ReadLn();
 		end;
 	end;
 	{$ENDIF}

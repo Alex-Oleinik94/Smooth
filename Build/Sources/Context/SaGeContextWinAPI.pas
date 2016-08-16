@@ -24,7 +24,7 @@ uses
 const
 	SGCWAPI_ICON = 5;
 type
-	WinAPIParam = 
+	WinAPIParam =
 		{$IFDEF CPU32}
 			LongInt
 		{$ELSE}
@@ -36,7 +36,7 @@ type
 		{$ELSE}
 			QWord
 			{$ENDIF};
-	
+
 	TSGContextWinAPI = class(TSGContext)
 			public
 		constructor Create();override;
@@ -92,7 +92,7 @@ type
 		function  FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
 		function  FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
-	
+
 function SGFullscreenQueschionWinAPIMethod():boolean;
 function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 //procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
@@ -103,7 +103,7 @@ uses
 	SaGeScreen
 	,SysUtils;
 
-// А вод это жесткий костыль. 
+// А вод это жесткий костыль.
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
 // например указатель на контекст, и поэтому процедура отловления сообщений системы
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
@@ -144,7 +144,7 @@ begin
 Result := 'TSGContextWinAPI';
 end;
 
-class function TSGContextWinAPI.Suppored() : TSGBoolean; 
+class function TSGContextWinAPI.Suppored() : TSGBoolean;
 begin
 Result := True;
 end;
@@ -179,9 +179,9 @@ var
 	MainBitPixel : COLORREF;
 begin
 hNullDC				:= GetDC(0);
-hMainDC				:= CreateCompatibleDC(hNullDC); 
-hAndMaskDC			:= CreateCompatibleDC(hNullDC); 
-hXorMaskDC			:= CreateCompatibleDC(hNullDC); 
+hMainDC				:= CreateCompatibleDC(hNullDC);
+hAndMaskDC			:= CreateCompatibleDC(hNullDC);
+hXorMaskDC			:= CreateCompatibleDC(hNullDC);
 
 GetObject(hSourceBitmap, sizeof(BITMAP), @bm);
 
@@ -192,7 +192,7 @@ hXorMaskBitmap	:= CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
 hOldMainBitmap      := HBITMAP(SelectObject(hMainDC,   hSourceBitmap ));
 hOldAndMaskBitmap	:= HBITMAP(SelectObject(hAndMaskDC,hAndMaskBitmap));
 hOldXorMaskBitmap	:= HBITMAP(SelectObject(hXorMaskDC,hXorMaskBitmap));
- 
+
 for x := 0 to bm.bmWidth - 1 do
 	begin
 	for y := 0 to bm.bmHeight - 1 do
@@ -335,7 +335,7 @@ else
 	end;
 end;
 
-procedure TSGContextWinAPI.SetIcon  (const VIcon   : TSGBitMap); 
+procedure TSGContextWinAPI.SetIcon  (const VIcon   : TSGBitMap);
 begin
 
 end;
@@ -355,7 +355,7 @@ begin
 Result := TSGPointer(hWindow);
 end;
 
-function  TSGContextWinAPI.GetDevice() : TSGPointer; 
+function  TSGContextWinAPI.GetDevice() : TSGPointer;
 begin
 Result := TSGPointer(dcWindow);
 end;
@@ -547,9 +547,9 @@ end;
 
 procedure TSGContextWinAPI.Kill();
 begin
-KillWindow();
-SetLength(SGContexts,0);
 inherited;
+KillWindow();
+SetLength(SGContexts, 0);
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -589,14 +589,14 @@ Result:=MessageBox(0,'Fullscreen Mode?', 'Question!',MB_YESNO OR MB_ICONQUESTION
 end;
 
 procedure TSGContextWinAPI.SwapBuffers();
-begin 
-Render.SwapBuffers(); 
+begin
+Render.SwapBuffers();
 end;
 
 procedure TSGContextWinAPI.Messages;
 var
 	msg:Windows.TMSG;
-begin 
+begin
 Fillchar(msg,sizeof(msg),0);
 while Windows.PeekMessage(@msg,0,0,0,0) do
 	begin
@@ -736,7 +736,7 @@ wm_rbuttonup:
 wm_mbuttonup:
 	SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
-	begin 
+	begin
 	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed from OS.');
 	Active:=False;
 	PostQuitMessage(0);
@@ -785,7 +785,7 @@ function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; co
 var
 	SGContext:TSGContextWinAPI;
 	i:TSGLongWord;
-begin 
+begin
 SGContext:=nil;
 Result:=0;
 DoExit:=False;
@@ -807,7 +807,7 @@ end;
 function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinAPIParam):WinAPIParam;  stdcall; export;
 var
 	DoExit:Boolean;
-begin 
+begin
 DoExit:=False;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('MyWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
@@ -826,7 +826,7 @@ function TSGContextWinAPI.WindowRegister: Boolean;
 var
   WindowClass: Windows.WndClassEx;
 
-(*Porzhat*) //return GetFileAttributes("c:\ProgramFiles (x86)")==-1?32:64;  
+(*Porzhat*) //return GetFileAttributes("c:\ProgramFiles (x86)")==-1?32:64;
 {function GetProcessorArchitecture:Byte;
 var
 	Si,SI1:Windows.SYSTEM_INFO;
@@ -876,15 +876,15 @@ begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
-if not FFullscreen then 
-	begin	
+if not FFullscreen then
+	begin
 	hWindow2 := Windows.CreateWindow(SGStringAsPChar(FWindowClassName),
 			  SGStringToPChar(FTitle),
-				WS_CAPTION OR 
+				WS_CAPTION OR
 				WS_POPUPWINDOW OR
-				WS_TILEDWINDOW OR 
-				WS_VISIBLE OR 
-				WS_CLIPSIBLINGS OR 
+				WS_TILEDWINDOW OR
+				WS_VISIBLE OR
+				WS_CLIPSIBLINGS OR
 				WS_CLIPCHILDREN,
 			  FLeft,
 			  FTop,
@@ -893,7 +893,7 @@ if not FFullscreen then
 			  0, 0,
 			  system.MainInstance,
 			  nil);
-	end 
+	end
 else
 	begin
 	if (FWidth<>GetScreenArea().x) or (FHeight<>GetScreenArea().y) then
@@ -903,7 +903,7 @@ else
 		dmScreenSettings.dmPelsHeight := FHeight;
 		dmScreenSettings.dmBitsPerPel := 32;
 		dmScreenSettings.dmFields := DM_BITSPERPEL OR DM_PELSWIDTH OR DM_PELSHEIGHT;
-		if ChangeDisplaySettings(@dmScreenSettings,CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then 
+		if ChangeDisplaySettings(@dmScreenSettings,CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then
 			begin
 			ThrowError('Screen resolution is not supported by your gfx card!');
 			SGLog.Sourse('Screen resolution is not supported by your gfx card!');
@@ -911,7 +911,7 @@ else
 			Exit;
 			end;
 		end;
-	FTop := 0; 
+	FTop := 0;
 	FLeft := 0;
 	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
 		SGStringAsPChar(FWindowClassName),
@@ -926,7 +926,7 @@ else
 		nil );
 	ShowCursor(FShowCursor);
 	end;
-if hWindow2 <> 0 then 
+if hWindow2 <> 0 then
 	begin
 	ShowWindow(hWindow2, CmdShow);
 	UpdateWindow(hWindow2);
@@ -955,7 +955,7 @@ if FRender = nil then
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse(['TSGContextWinAPI__WindowInit(HWnd) : Create render context (Result=',Result,')']);
 		{$ENDIF}
-	if Result then 
+	if Result then
 		FRender.Init();
 	{$IFDEF SGWinAPIDebug}
 		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGAddrStr(FRender)+')');
@@ -977,7 +977,7 @@ else
 end;
 
 function TSGContextWinAPI.CreateWindow():Boolean;
-begin 
+begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Sourse('TSGContextWinAPI__CreateWindow : Enter');
 	{$ENDIF}
@@ -996,14 +996,14 @@ else
 	SetLength(SGContexts,Length(SGContexts)+1);
 SGContexts[High(SGContexts)]:=Self;
 
-if longint(hWindow) = 0 then 
+if longint(hWindow) = 0 then
 	begin
 	ThrowError('Could not create Application Window!');
 	SGLog.Sourse('Could not create Application Window!');
 	Result := false;
 	Exit;
 	end;
-if not WindowInit(hWindow) then 
+if not WindowInit(hWindow) then
 	begin
 	ThrowError('Could not initialise Application Window!');
 	SGLog.Sourse('Could not initialise Application Window!');
@@ -1017,8 +1017,20 @@ Result := true;
 end;
 
 procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
+
+procedure UnregisterWindowClass();
 var
-	CM : PChar;
+	WindowClassName : PChar;
+begin
+if FWindowClassName <> '' then
+	begin
+	WindowClassName := SGStringToPChar(FWindowClassName);
+	UnregisterClass(WindowClassName, System.MainInstance);
+	FreeMem(WindowClassName);
+	FWindowClassName := '';
+	end;
+end;
+
 begin
 if (hWindow<>0) and (dcWindow<>0) then
 	ReleaseDC( hWindow, dcWindow );
@@ -1028,22 +1040,23 @@ if (dcWindow<>0) then
 	dcWindow:=0;
 	end;
 if hWindow<>0 then
+	begin
 	DestroyWindow( hWindow );
+	hWindow:=0;
+	end;
 if hWindow<>0 then
 	begin
 	CloseHandle( hWindow);
 	hWindow:=0;
 	end;
-CM := SGStringToPChar(FWindowClassName);
-UnregisterClass(CM, System.MainInstance);
-FreeMem(CM);
+UnregisterWindowClass();
 end;
 
-procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean); 
+procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean);
 begin
 if hWindow = 0 then
 	inherited InitFullscreen(VFullscreen)
-else 
+else
 	if Fullscreen <> VFullscreen then
 		begin
 		if (FRender<>nil) then

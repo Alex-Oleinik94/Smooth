@@ -37,14 +37,14 @@ const
 	 SGNowCursorPosition =        SaGeCommonClasses.SGNowCursorPosition;       // -  оординаты мыши в насто€щий момент
 	 SGLastCursorPosition =       SaGeCommonClasses.SGLastCursorPosition;      // -  оординаты мыши, полученые при преведущем этапе цикла
 	 SGNullCursorButton =         SaGeCommonClasses.SGNullCursorButton;
-	 
+
 	 SGMiddleCursorButton =       SaGeCommonClasses.SGMiddleCursorButton;
 	 SGLeftCursorButton =         SaGeCommonClasses.SGLeftCursorButton;
 	 SGRightCursorButton =        SaGeCommonClasses.SGRightCursorButton;
-	 
+
 	 SGDownKey =                  SaGeCommonClasses.SGDownKey;
 	 SGUpKey =                    SaGeCommonClasses.SGUpKey;
-	 
+
 	 SGNullCursorWheel =          SaGeCommonClasses.SGNullCursorWheel;
 	 SGUpCursorWheel =            SaGeCommonClasses.SGUpCursorWheel;
 	 SGDownCursorWheel =          SaGeCommonClasses.SGDownCursorWheel;
@@ -58,7 +58,7 @@ type
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
 	TSGContextProcedure = procedure(const a:TSGContext);
-	
+
 	TSGContext = class(TSGNamed, ISGContext)
 			public
 		constructor Create(); override;
@@ -132,7 +132,7 @@ type
 		procedure SetIcon(const VIcon : TSGBitMap);virtual;
 		procedure BeginIncessantlyPainting();virtual;
 		procedure EndIncessantlyPainting();virtual;
-		
+
 		function  GetClientWidth() : TSGAreaInt;virtual;
 		function  GetClientHeight() : TSGAreaInt;virtual;
 		function  GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
@@ -165,7 +165,7 @@ type
 		FKeysPressed      : packed array [0..255] of TSGBoolean;
 		FKeyPressed       : TSGLongWord;
 		FKeyPressedType   : TSGCursorButtonType;
-		
+
 		FCursorPosition       : packed array [TSGCursorPosition] of TSGPoint2int32;
 		FCursorKeyPressed     : TSGCursorButtons;
 		FCursorKeyPressedType : TSGCursorButtonType;
@@ -185,7 +185,7 @@ type
 		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;virtual;
 		function CursorWheel():TSGCursorWheel;virtual;
 		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;virtual;
-		
+
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
@@ -272,7 +272,7 @@ if FScreen <> nil then
 	end;
 end;
 
-function TSGContext.GetScreen() : TSGPointer; 
+function TSGContext.GetScreen() : TSGPointer;
 begin
 Result := FScreen;
 end;
@@ -406,7 +406,7 @@ begin
 Result := nil;
 end;
 
-class function TSGContext.Suppored() : TSGBoolean; 
+class function TSGContext.Suppored() : TSGBoolean;
 begin
 Result := False;
 end;
@@ -586,6 +586,7 @@ if Context.Active then
 	Context.Run();
 	until not SGTryChangeContextType(Context, IContext);
 	end;
+Context.Kill();
 IContext := nil;
 Context.Destroy();
 Context := nil;
@@ -594,7 +595,7 @@ end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := 
+Result :=
 	{$IFDEF MSWINDOWS}TSGContextWinAPI {$ELSE}
 	{$IFDEF LINUX}    TSGContextLinux  {$ELSE}
 	{$IFDEF ANDROID}  TSGContextAndroid{$ELSE}
@@ -852,7 +853,7 @@ begin
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
-UpdateTimer(); 
+UpdateTimer();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
@@ -922,7 +923,7 @@ begin
 FActive:=False;
 end;
 
-function TSGContext.ShiftClientArea() : TSGPoint2int32; 
+function TSGContext.ShiftClientArea() : TSGPoint2int32;
 begin
 Result.Import(0,0);
 end;
@@ -1081,7 +1082,7 @@ procedure TSGContext.ClearKeys();
 begin
 FCursorKeyPressed:=SGNullCursorButton;
 FKeyPressed:=0;
-FCursorWheel:=SGNullCursorWheel; 
+FCursorWheel:=SGNullCursorWheel;
 end;
 
 procedure TSGContext.Kill();
