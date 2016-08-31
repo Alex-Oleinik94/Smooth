@@ -31,13 +31,13 @@ uses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeClasses
-	
+
 	//* ==================== System Units ====================
 	,DynLibs
 	,SysUtils
 	,Math
 	,Classes
-	
+
 	//* ====================== OS Units ======================
 	{$IFDEF DARWIN}
 		,AGL
@@ -60,7 +60,7 @@ uses
 		,egl
 		,android_native_app_glue
 		{$ENDIF}
-	
+
 	//* ==================== OpenGL Units ====================
 	{$IFNDEF MOBILE}
 		{$IFDEF USE_GLEXT}
@@ -77,33 +77,24 @@ uses
 	;
 
 {$IFDEF NEEDRESOURSES}
-	const 
+	const
 		TempDir = {$IFDEF ANDROID}'/sdcard/.SaGe/Temp'{$ELSE}'Temp'{$ENDIF};
 	{$ENDIF}
 type
-	TSGRenderOpenGL=class(TSGRender)
+	TSGRenderOpenGLContext =
+	{$IFDEF LINUX}     GLXContext  {$ELSE}
+	{$IFDEF MSWINDOWS} HGLRC       {$ELSE}
+	{$IFDEF ANDROID}   EGLContext  {$ELSE}
+	{$IFDEF DARWIN}    TAGLContext {$ELSE}
+	                   Pointer
+	{$ENDIF}  {$ENDIF}  {$ENDIF} {$ENDIF};
+
+	TSGRenderOpenGL = class(TSGRender)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create ();override;
+		destructor  Destroy();override;
 			protected
-		FContext:
-		{$IFDEF LINUX}
-			GLXContext
-		{$ELSE}
-			{$IFDEF MSWINDOWS}
-				HGLRC
-			{$ELSE}
-				{$IFDEF ANDROID}
-					EGLContext
-				{$ELSE}
-					{$IFDEF DARWIN}
-						TAGLContext
-					{$ELSE}
-						Pointer
-						{$ENDIF}
-					{$ENDIF}
-				{$ENDIF}
-			 {$ENDIF};
+		FContext : TSGRenderOpenGLContext;
 		{$IFDEF DARWIN}
 			ogl_Format  : TAGLPixelFormat;
 			{$ENDIF}
@@ -131,7 +122,7 @@ type
 		procedure LockResourses();override;
 		// Инициализация рендера и загрузка сохраненных ресурсов
 		procedure UnLockResourses();override;
-		
+
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
 		procedure Vertex2f(const x,y:single);override;
@@ -189,7 +180,7 @@ type
 		{$ELSE}
 			procedure GetVertexUnderPixel(const px, py : LongWord; out x, y, z : Real);override;
 			{$ENDIF}
-		
+
 			(* Shaders *)
 		function SupporedShaders() : TSGBoolean;override;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
@@ -198,7 +189,7 @@ type
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;
 		procedure DeleteShader(const VProgram : TSGLongWord);override;
-		
+
 		function CreateShaderProgram() : TSGLongWord;override;
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);override;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);override;
@@ -212,7 +203,7 @@ type
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
-		
+
 		function SupporedDepthTextures():TSGBoolean;override;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
 		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); override;
@@ -227,33 +218,33 @@ type
 			private
 			(* Multitexturing *)
 		FNowActiveNumberTexture : TSGLongWord;
-		
+
 			(* Bump Mapping *)
 		FNowInBumpMapping       : TSGBoolean;
-		
+
 		{$IFDEF SGINTERPRITATEBEGINEND}
 			(* GLES BeginScene\EndScene*)
 		FNowPrimetiveType  : TSGLongWord;
 		FNowNormal         : TSGVertex3f;
 		FNowColor          : TSGColor4b;
 		FNowTexCoord       : TSGVertex2f;
-		
+
 		FFragmentInfo      : TSGByte;
-		
+
 		FMaxLengthArPoints : TSGLongWord;
 		FNowPosArPoints    : TSGInteger;
-		FArPoints : packed array of 
+		FArPoints : packed array of
 			packed record
 				FVertex   : TSGVertex3f;
 				FNormal   : TSGVertex3f;
 				FTexCoord : TSGVertex2f;
 				FColor    : TSGColor4b;
 				end;
-		
+
 		FLightingEnabled : TSGBoolean;
 		FTextureEnabled  : TSGBoolean;
 		{$ENDIF}
-		
+
 		{$IFDEF NEEDRESOURSES}
 			FArTextures : packed array of
 				packed record
@@ -261,7 +252,7 @@ type
 					FTexture : SGUInt;
 					end;
 			FBindedTexture : TSGLongWord;
-			
+
 			FArBuffers : packed array of
 				packed record
 					FSaved : Boolean;
@@ -277,7 +268,7 @@ type
 		{$ENDIF}
 		end;
 
-//Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу 
+//Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу
 //в соответствии с типом TSGMatrix4.
 procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
 
@@ -291,7 +282,7 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
 
-class function TSGRenderOpenGL.ClassName() : TSGString; 
+class function TSGRenderOpenGL.ClassName() : TSGString;
 begin
 Result := 'TSGRenderOpenGL';
 end;
@@ -320,7 +311,7 @@ begin
 {$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongInt(VValue)^){$ELSE}glUniform1iv(VLocationName,VCount,VValue){$ENDIF};
 end;
 
-procedure TSGRenderOpenGL.Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer); 
+procedure TSGRenderOpenGL.Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniform1uiv = nil then TSGRenderOpenGL_DynLinkError('glUniform1uiv');{$ENDIF}
 {$IF defined(MOBILE)}glUniform1i(VLocationName,PSGLongWord(VValue)^){$ELSE}glUniform1uiv(VLocationName,VCount,VValue){$ENDIF};
@@ -399,7 +390,7 @@ begin
 {$IFNDEF MOBILE}glReadBuffer(VType);{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+procedure TSGRenderOpenGL.GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glGenRenderBuffersEXT = nil then TSGRenderOpenGL_DynLinkError('glGenRenderBuffersEXT');{$ENDIF}
 {$IFNDEF MOBILE}glGenRenderBuffersEXT(VCount,VBuffers);{$ENDIF}
@@ -470,7 +461,7 @@ end;
 function TSGRenderOpenGL.CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateShaderObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateShaderObjectARB');{$ENDIF}
-Result := 
+Result :=
 {$IFDEF SHADERSISPOINTERS} TSGMaxEnum( {$ENDIF}
 	{$IFNDEF MOBILE}glCreateShaderObjectARB{$ELSE}glCreateShader{$ENDIF}(VShaderType)
 {$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
@@ -508,7 +499,7 @@ end;
 function TSGRenderOpenGL.CreateShaderProgram() : TSGLongWord;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCreateProgramObjectARB = nil then TSGRenderOpenGL_DynLinkError('glCreateProgramObjectARB');{$ENDIF}
-Result := 
+Result :=
 {$IFDEF SHADERSISPOINTERS} TSGMaxEnum( {$ENDIF}
 	{$IFDEF MOBILE}glCreateProgram{$ELSE}glCreateProgramObjectARB{$ENDIF}()
 {$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
@@ -568,10 +559,10 @@ glGetIntegerv(GL_VIEWPORT,viewportarray);
 glReadPixels(
 	px,
 	LongInt(Context.Width)-LongInt(py)-1,
-	1, 
-	1, 
-	GL_DEPTH_COMPONENT, 
-	GL_FLOAT, 
+	1,
+	1,
+	GL_DEPTH_COMPONENT,
+	GL_FLOAT,
 	@depth);
 glGetDoublev(GL_MODELVIEW_MATRIX,@mv_matrix);
 glGetDoublev(GL_PROJECTION_MATRIX,@proj_matrix);
@@ -623,13 +614,13 @@ if FNowActiveNumberTexture = 0 then
 		begin
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-		
+
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
-		
+
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
-		end; 	
+		end;
 	end
 else if FNowActiveNumberTexture = 1 then
 	begin
@@ -817,15 +808,15 @@ begin
 			FMaxLengthArPoints := FNowPosArPoints + 1;
 			SetLength(FArPoints,FMaxLengthArPoints);
 			end;
-		
+
 		FArPoints[FNowPosArPoints].FVertex.Import(x,y,z);
 		FArPoints[FNowPosArPoints].FColor    := FNowColor;
 		FArPoints[FNowPosArPoints].FNormal   := FNowNormal;
 		FArPoints[FNowPosArPoints].FTexCoord := FNowTexCoord;
-		
+
 		FArPoints[FNowPosArPoints-1] := FArPoints[FNowPosArPoints-3];
 		FArPoints[FNowPosArPoints-2] := FArPoints[FNowPosArPoints-5];
-		
+
 		FFragmentInfo := 0;
 		end
 	else
@@ -873,8 +864,8 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.TexCoord2f(const x,y:single); 
-begin 
+procedure TSGRenderOpenGL.TexCoord2f(const x,y:single);
+begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexCoord2f = nil then TSGRenderOpenGL_DynLinkError('glTexCoord2f');{$ENDIF}
 	glTexCoord2f(x,y);
@@ -884,7 +875,7 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Vertex2f(const x,y:single); 
+procedure TSGRenderOpenGL.Vertex2f(const x,y:single);
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertex2f = nil then TSGRenderOpenGL_DynLinkError('glVertex2f');{$ENDIF}
@@ -894,8 +885,8 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single); 
-begin 
+procedure TSGRenderOpenGL.Color4f(const r,g,b,a:single);
+begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColor4f = nil then TSGRenderOpenGL_DynLinkError('glColor4f');{$ENDIF}
 	glColor4f(r,g,b,a);
@@ -909,7 +900,7 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Normal3f(const x,y,z:single); 
+procedure TSGRenderOpenGL.Normal3f(const x,y,z:single);
 begin
 {$IF (not defined(MOBILE)) and (not defined(SGINTERPRITATEBEGINEND))}
 	{$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glNormal3f = nil then TSGRenderOpenGL_DynLinkError('glNormal3f');{$ENDIF}
@@ -956,7 +947,7 @@ begin
 	glEnableClientState(GL_NORMAL_ARRAY);
 	if FTextureEnabled then
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glVertexPointer  (3, GL_FLOAT,          SizeOf(FArPoints[0]), 
+	glVertexPointer  (3, GL_FLOAT,          SizeOf(FArPoints[0]),
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}nil{$ELSE}@FArPoints[0].FVertex{$ENDIF});
 	glColorPointer   (4, GL_UNSIGNED_BYTE,  SizeOf(FArPoints[0]),
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
@@ -968,18 +959,18 @@ begin
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FTexCoord)-TSGMaxEnum(@FArPoints[0].FVertex))
 				{$ELSE}@FArPoints[0].FTexCoord{$ENDIF});
 	if FLightingEnabled then
-	glNormalPointer  (   GL_FLOAT,          SizeOf(FArPoints[0]), 
+	glNormalPointer  (   GL_FLOAT,          SizeOf(FArPoints[0]),
 		{$IFDEF SGINTERPRITATEBEGINENDWITHVBO}
 			TSGPointer(TSGMaxEnum(@FArPoints[0].FNormal) -TSGMaxEnum(@FArPoints[0].FVertex))
 				{$ELSE}@FArPoints[0].FNormal{$ENDIF});
-	
+
 	{$IFDEF MOBILE}
 		if FNowPrimetiveType = SGR_QUADS then
 			glDrawArrays(GL_TRIANGLES, 0, FNowPosArPoints+1)
 		else
 		{$ENDIF}
 			glDrawArrays(FNowPrimetiveType, 0, FNowPosArPoints+1);
-	
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	if FLightingEnabled then
@@ -998,7 +989,7 @@ procedure TSGRenderOpenGL.Translatef(const x, y, z : TSGSingle);
 var
 	Matrix : TSGMatrix4;
 {$ENDIF}
-begin 
+begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTranslatef = nil then TSGRenderOpenGL_DynLinkError('glTranslatef');{$ENDIF}
 glTranslatef(x,y,z);
@@ -1008,14 +999,14 @@ MultMatrixf(@Matrix);
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Rotatef(const Angle : TSGSingle; const x, y, z : TSGSingle); 
+procedure TSGRenderOpenGL.Rotatef(const Angle : TSGSingle; const x, y, z : TSGSingle);
 {$IF defined(INTERPRITATEROTATETRANSLATE)}
 const
 	DEG2RAD = PI/180;
 var
 	Matrix : TSGMatrix4;
 {$ENDIF}
-begin 
+begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glRotatef = nil then TSGRenderOpenGL_DynLinkError('glRotatef');{$ENDIF}
 glRotatef(angle,x,y,z);
@@ -1025,7 +1016,7 @@ MultMatrixf(@Matrix);
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.Enable(VParam:Cardinal); 
+procedure TSGRenderOpenGL.Enable(VParam:Cardinal);
 begin
 {$IFDEF SGINTERPRITATEBEGINEND}
 	case VParam of
@@ -1037,7 +1028,7 @@ begin
 glEnable(VParam);
 end;
 
-procedure TSGRenderOpenGL.Disable(const VParam:Cardinal); 
+procedure TSGRenderOpenGL.Disable(const VParam:Cardinal);
 begin
 {$IFDEF SGINTERPRITATEBEGINEND}
 	case VParam of
@@ -1049,12 +1040,12 @@ begin
 glDisable(VParam);
 end;
 
-procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
 {$IFDEF NEEDRESOURSES}
 var
 	i : LongWord;
 {$ENDIF}
-begin 
+begin
 {$IFDEF NEEDRESOURSES}
 for i:=0 to VQuantity-1 do
 	begin
@@ -1078,7 +1069,7 @@ type
 	PSingle = ^ Single;
 var
 	Ar:TSGPointer = nil;
-begin 
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLightfv = nil then TSGRenderOpenGL_DynLinkError('glLightfv');{$ENDIF}
 if VParam=SGR_POSITION then
 	begin
@@ -1092,12 +1083,12 @@ else
 	glLightfv(VLight,VParam,VParam2);
 end;
 
-procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
 {$IFDEF NEEDRESOURSES}
 var
 	i : TSGMaxEnum;
 	{$ENDIF}
-begin 
+begin
 {$IFDEF NEEDRESOURSES}
 for i:=0 to VQuantity-1 do
 	begin
@@ -1116,8 +1107,8 @@ glGenTextures(VQuantity,VTextures);
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal);
+begin
 {$IFDEF NEEDRESOURSES}
 if VTexture = 0 then
 	begin
@@ -1135,25 +1126,25 @@ glBindTexture(VParam,VTexture);
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.TexParameteri(const VP1,VP2,VP3:Cardinal); 
+procedure TSGRenderOpenGL.TexParameteri(const VP1,VP2,VP3:Cardinal);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexParameteri = nil then TSGRenderOpenGL_DynLinkError('glTexParameteri');{$ENDIF}
 glTexParameteri(VP1,VP2,VP3);
 end;
 
-procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
-begin 
+procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:SGInt);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPixelStorei = nil then TSGRenderOpenGL_DynLinkError('glPixelStorei');{$ENDIF}
 glPixelStorei(VParamName,VParam);
 end;
 
-procedure TSGRenderOpenGL.TexEnvi(const VP1,VP2,VP3:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.TexEnvi(const VP1,VP2,VP3:Cardinal);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexEnvi = nil then TSGRenderOpenGL_DynLinkError('glTexEnvi');{$ENDIF}
 glTexEnvi(VP1,VP2,VP3);
 end;
 
-procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer); 
+procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);
 {$IFDEF NEEDRESOURSES}
 var
 	FS : TFileStream = nil;
@@ -1178,31 +1169,31 @@ SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : Saved : "'+TempDir+'/t'+SGStr(FBind
 glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
 end;
 
-procedure TSGRenderOpenGL.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer); 
+procedure TSGRenderOpenGL.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glReadPixels = nil then TSGRenderOpenGL_DynLinkError('glReadPixels');{$ENDIF}
 glReadPixels(x,y,Vwidth,Vheight,format, atype,pixels);
 end;
 
-procedure TSGRenderOpenGL.CullFace(const VParam:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.CullFace(const VParam:Cardinal);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glCullFace = nil then TSGRenderOpenGL_DynLinkError('glCullFace');{$ENDIF}
 glCullFace(VParam);
 end;
 
-procedure TSGRenderOpenGL.EnableClientState(const VParam:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.EnableClientState(const VParam:Cardinal);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glEnableClientState = nil then TSGRenderOpenGL_DynLinkError('glEnableClientState');{$ENDIF}
 glEnableClientState(VParam);
 end;
 
-procedure TSGRenderOpenGL.DisableClientState(const VParam:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.DisableClientState(const VParam:Cardinal);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDisableClientState = nil then TSGRenderOpenGL_DynLinkError('glDisableClientState');{$ENDIF}
 glDisableClientState(VParam);
 end;
 
-procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal); 
+procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal);
 {$IFDEF NEEDRESOURSES}
 var
 	i : LongWord;
@@ -1224,12 +1215,12 @@ for i:=0 to VQ-1 do
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer); 
+procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);
 {$IFDEF NEEDRESOURSES}
 var
 	i : LongWord;
 {$ENDIF}
-begin 
+begin
 {$IFDEF NEEDRESOURSES}
 for i:=0 to VQuantity-1 do
 	begin
@@ -1245,7 +1236,7 @@ for i:=0 to VQuantity-1 do
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal); 
+procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
 begin
 {$IFDEF NEEDRESOURSES}
 case VParam of
@@ -1262,7 +1253,7 @@ else
 {$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal;const VIndexPrimetiveType : TSGLongWord = 0); 
+procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal;const VIndexPrimetiveType : TSGLongWord = 0);
 {$IFDEF NEEDRESOURSES}
 var
 	FS : TFileStream = nil;
@@ -1288,44 +1279,44 @@ SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(i)
 {$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
 end;
 
-procedure TSGRenderOpenGL.DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer); 
+procedure TSGRenderOpenGL.DrawElements(const VParam:TSGCardinal;const VSize:TSGInt64;const VParam2:Cardinal;VBuffer:Pointer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glDrawElements = nil then TSGRenderOpenGL_DynLinkError('glDrawElements');{$ENDIF}
 glDrawElements(VParam,VSize,VParam2,VBuffer);
 end;
 
-procedure TSGRenderOpenGL.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderOpenGL.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glColorPointer = nil then TSGRenderOpenGL_DynLinkError('glColorPointer');{$ENDIF}
 glColorPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
-procedure TSGRenderOpenGL.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
+procedure TSGRenderOpenGL.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexCoordPointer = nil then TSGRenderOpenGL_DynLinkError('glTexCoordPointer');{$ENDIF}
 glTexCoordPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
-procedure TSGRenderOpenGL.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderOpenGL.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glNormalPointer = nil then TSGRenderOpenGL_DynLinkError('glNormalPointer');{$ENDIF}
 glNormalPointer(VType,VSize,VBuffer);
 end;
 
-procedure TSGRenderOpenGL.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer); 
-begin 
+procedure TSGRenderOpenGL.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glVertexPointer = nil then TSGRenderOpenGL_DynLinkError('glVertexPointer');{$ENDIF}
 glVertexPointer(VQChannels,VType,VSize,VBuffer);
 end;
 
-function TSGRenderOpenGL.IsEnabled(const VParam:Cardinal):Boolean; 
-begin 
+function TSGRenderOpenGL.IsEnabled(const VParam:Cardinal):Boolean;
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glIsEnabled = nil then TSGRenderOpenGL_DynLinkError('glIsEnabled');{$ENDIF}
 glIsEnabled(VParam);
 end;
 
-procedure TSGRenderOpenGL.Clear(const VParam:Cardinal); 
-begin 
+procedure TSGRenderOpenGL.Clear(const VParam:Cardinal);
+begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glClear = nil then TSGRenderOpenGL_DynLinkError('glClear');{$ENDIF}
 glClear(VParam);
 end;
@@ -1363,7 +1354,7 @@ SGLog.Sourse('TSGRenderOpenGL.Init() - wglSetPixelFormat() = ' + SGStr(wglSetPix
 	{$ENDIF}
 
 glEnable(GL_FOG);
-{$IFNDEF MOBILE} 
+{$IFNDEF MOBILE}
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 	{$ENDIF}
 glHint (GL_FOG_HINT, GL_NICEST);
@@ -1503,7 +1494,7 @@ begin
 	FreeMemTemp();
 	{$ENDIF}
 {$IFDEF LINUX}
-	
+
 {$ELSE}
 	{$IFDEF MSWINDOWS}
 		if (Context <> nil) and (dglOpenGL.wglMakeCurrent <> nil) then
@@ -1585,7 +1576,7 @@ else
 		end
 	else
 		begin
-		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я 
+		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я
 		//Думаю все таки надуюсь, что gluPerspective будет работать чуть чуть быстрее чем моя процедурка.
 		{$IFNDEF MOBILE}gluPerspective{$ELSE}SGRGLPerspective{$ENDIF}
 			(45, CWidth / CHeight, TSGRenderNear, TSGRenderFar);
@@ -1668,18 +1659,18 @@ end;
 procedure TSGRenderOpenGL.ReleaseCurrent();
 begin
 {$IFDEF LINUX}
-	if (Context <> nil) and (FContext <> nil) then 
+	if (Context <> nil) and (FContext <> nil) then
 		glXMakeCurrent(
 			PDisplay(Context.Device),
 			TSGMaxEnum(Context.Window),
 			nil);
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		if (Context <> nil)  then 
+		if (Context <> nil)  then
 			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), 0 );
 	{$ELSE}
 		{$IFDEF ANDROID}
-			
+
 		{$ELSE}
 			{$IFDEF DARWIN}
 				aglSetDrawable( nil, Context.Device);
@@ -1758,16 +1749,16 @@ AddAtrib(WGL_STENCIL_BITS_ARB, 8);
 FinalizeAttrib();*)
 
 Result := dglOpenGL.wglChoosePixelFormatARB(
-	TSGMaxEnum(Context.Device), 
-	@iAttributes[0], 
-	@fAttributes[0], 
-	1, 
-	@pixelFormat, 
+	TSGMaxEnum(Context.Device),
+	@iAttributes[0],
+	@fAttributes[0],
+	1,
+	@pixelFormat,
 	@numFormats);
 
 if (Result and (numFormats >= 1)) then
 	begin
-	
+
 	end
 else
 	begin
@@ -1829,7 +1820,7 @@ end;
 function TSGRenderOpenGL.MakeCurrent():Boolean;
 begin
 {$IFDEF LINUX}
-	if (Context <> nil) and (FContext <> nil) then 
+	if (Context <> nil) and (FContext <> nil) then
 		begin
 		glXMakeCurrent(
 			PDisplay(Context.Device),
@@ -1841,7 +1832,7 @@ begin
 		Result:=False;
 {$ELSE}
 	{$IFDEF MSWINDOWS}
-		if (Context<>nil) and (FContext<>0) then 
+		if (Context<>nil) and (FContext<>0) then
 			begin
 			dglOpenGL.wglMakeCurrent( TSGMaxEnum(Context.Device), FContext );
 			Result:=True;
@@ -1850,12 +1841,12 @@ begin
 			Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
-			if (Context <> nil) and (FContext <> nil) then 
+			if (Context <> nil) and (FContext <> nil) then
 				begin
 				if eglMakeCurrent(
-					Context.Device, 
-					Context.GetOption('SURFACE'), 
-					Context.GetOption('SURFACE'), 
+					Context.Device,
+					Context.GetOption('SURFACE'),
+					Context.GetOption('SURFACE'),
 					FContext)  = EGL_FALSE then
 						begin
 						Result:=False;

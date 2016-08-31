@@ -1,20 +1,21 @@
-DX32=-Pi386 -FUOutput/i386-debug-desktop
-DX64=-Px86_64 -FUOutput/x86_64-debug-desktop
-RX32=-Pi386 -FUOutput/i386-release-desktop
-RX64=-Px86_64 -FUOutput/x86_64-release-desktop
-LX32=-Pi386 -FUOutput/i386-library
-LX64=-Px86_64 -FUOutput/x86_64-library
+OutputDirectory=Output
+DX32=-Pi386 -FU$(OutputDirectory)/i386-debug-desktop
+DX64=-Px86_64 -FU$(OutputDirectory)/x86_64-debug-desktop
+RX32=-Pi386 -FU$(OutputDirectory)/i386-release-desktop
+RX64=-Px86_64 -FU$(OutputDirectory)/x86_64-release-desktop
+LX32=-Pi386 -FU$(OutputDirectory)/i386-library
+LX64=-Px86_64 -FU$(OutputDirectory)/x86_64-library
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
 DESKTOPFILENAME=Main
 LIBRARYFILENAME=SaGe
 PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
-BASEARGS= -FiSources/Temp -FuSources/Images -FuSources/ConsolePrograms -FuSources/Context -FuSources/Render -FuSources/Temp -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
-RENDERARGS= -FuSources/DirectX -FuSources/DirectX/9 -FuSources/DirectX/12 -FuSources/OpenGL 
+BASEARGS= -FiSources/Temp -FuSources/Images -FuSources/Programs/Console -FuSources/Context -FuSources/Render -FuSources/Temp -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
+RENDERARGS= -FuSources/DirectX -FuSources/Others/DirectX/9 -FuSources/Others/DirectX/12 -FuSources/Others/OpenGL
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
-ANDROIDARGS= -FuSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSources/OpenGL 
+ANDROIDARGS= -FuSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSources/Others/OpenGL
 OUTPUTDESKTOP= -FE./../Binaries
 OUTPUTANDROID= -FUOutput/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 DESKTOPARGS= $(ARGS) $(OUTPUTDESKTOP) $(DESKTOPFILE)
@@ -52,7 +53,7 @@ lib_x64:
 android:
 	@$(CROSSPASCALCOMPILER) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(DESKTOPFILE)
 ios:
-	
+
 inc_version_debug:
 	@$(SAGE) -iv 0
 	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
@@ -71,17 +72,17 @@ clear_files:
 	@rm -f Sources/Temp/*
 	@$(SAGE) -crf $(SGRMFILE)
 clear:
-	@rm -f Output/arm-android/*
-	@rm -f Output/i386-library/*
-	@rm -f Output/x86_64-library/*
-	@rm -f Output/i386-debug-desktop/*
-	@rm -f Output/i386-release-desktop/*
-	@rm -f Output/x86_64-debug-desktop/*
-	@rm -f Output/x86_64-release-desktop/*
-	@rm -f Output/*.o
-	@rm -f Output/*.ppu
-	@rm -f Output/*.res
-	@rm -f Output/*.or
+	@rm -f $(OutputDirectory)/arm-android/*
+	@rm -f $(OutputDirectory)/i386-library/*
+	@rm -f $(OutputDirectory)/x86_64-library/*
+	@rm -f $(OutputDirectory)/i386-debug-desktop/*
+	@rm -f $(OutputDirectory)/i386-release-desktop/*
+	@rm -f $(OutputDirectory)/x86_64-debug-desktop/*
+	@rm -f $(OutputDirectory)/x86_64-release-desktop/*
+	@rm -f $(OutputDirectory)/*.o
+	@rm -f $(OutputDirectory)/*.ppu
+	@rm -f $(OutputDirectory)/*.res
+	@rm -f $(OutputDirectory)/*.or
 	@rm -f *.o
 	@rm -f *.ppu
 	@rm -f *.or

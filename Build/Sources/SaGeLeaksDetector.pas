@@ -116,12 +116,14 @@ for i := Length(IName) to iii do
 end;
 
 var
-	i, ii : TSGInt32;
+	i, ii, ln, lc : TSGInt32;
 	S : TSGString;
+	SL : TSGStringList;
 begin
 S := '';
 iii := 0;
 ii := 0;
+lc := 0;
 if FReferences <> nil then
 	if Length(FReferences) > 0 then
 		for i := 0 to High(FReferences) do
@@ -130,17 +132,25 @@ if FReferences <> nil then
 			if Length(FReferences[i].FName) > iii then
 				iii := Length(FReferences[i].FName);
 			if FReferences[i].FCount <= 0 then
-				S += FReferences[i].FName + ';';
+				S += FReferences[i].FName + ';'
+			else if Length(SGStr(FReferences[i].FCount)) > lc then
+				lc := Length(SGStr(FReferences[i].FCount));
 			end;
 if ii = 0 then
 	SGLog.Sourse(['TSGLeaksDetector : Leaks not detected.'])
 else
+	begin
 	SGLog.Sourse(['TSGLeaksDetector : Total ',ii,' leaks.']);
-if FReferences <> nil then
-	if Length(FReferences) > 0 then
-		for i := 0 to High(FReferences) do
-			if FReferences[i].FCount > 0 then
-				SGLog.Sourse(['   ',ItemTitle(FReferences[i].FName),' - ',FReferences[i].FCount,' references.']);
+	SL := nil;
+	if FReferences <> nil then
+		if Length(FReferences) > 0 then
+			for i := 0 to High(FReferences) do
+				if FReferences[i].FCount > 0 then
+					SL += (ItemTitle(FReferences[i].FName) + '- ' + SGStr(FReferences[i].FCount) + ';');
+					//SGLog.Sourse(['   ',,' - ',FReferences[i].FCount,' references.']);
+	SGLog.Sourse(SL, 'TSGLeaksDetector : Leaks :');
+	SetLength(SL, 0);
+	end;
 SGLog.Sourse(S,'TSGLeaksDetector : Lines without references',';');
 S := '';
 end;

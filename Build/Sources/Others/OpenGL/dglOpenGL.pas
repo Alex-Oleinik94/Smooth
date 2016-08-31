@@ -14871,6 +14871,8 @@ implementation
 
 uses
 	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
 	;
 
 {$IFDEF DGL_LINUX}
@@ -14979,9 +14981,9 @@ begin
   {$IFDEF DGL_MAC}
     Result := GetProcAddress(HMODULE(LibHandle), ProcName);
   {$ENDIF}
-  
+
   if LibHandle = GL_LibHandle then
-    begin 
+    begin
     SGAllFunction += 1;
     if Result <> nil then
       SGLoadedFUnction += 1;
@@ -19299,10 +19301,10 @@ SGGLUAllFunc := 0;
 {$ENDIF}
 
   ExtensionsRead := True;
-  
+
   SGPrintStat();
   SGLog.Sourse(Int_GetExtensionString, 'dglOpenGL : Suppored extensions :',' ');
-  
+
   ReadImplementationProperties();
 end;
 
@@ -19364,7 +19366,7 @@ begin
 
   AnsiBuffer := glGetString(GL_VERSION);
   Buffer := String(AnsiBuffer);
-  
+
   TrimAndSplitVersionString(Buffer, MajorVersion, MinorVersion);
 
   GL_VERSION_1_0 := True;
@@ -20356,6 +20358,44 @@ begin
 end;
 {$ENDIF}
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllOpenGL = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllOpenGL.SystemNames() : TSGStringList;
+begin
+Result := 'OpenGL';
+Result += 'OGL';
+Result += 'GL';
+Result += 'GLES';
+end;
+
+class function TSGDllOpenGL.DllNames() : TSGStringList;
+begin
+Result := ;
+end;
+
+class procedure TSGDllOpenGL.Free();
+begin
+
+end;
+
+class function TSGDllOpenGL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+begin
+Result.Clear();
+InitOpenGL(OPENGL_LIBNAME, GLU_LIBNAME);
+SGPrintStat();
+end;
+
 initialization
 begin
 {$IFDEF CPU386}
@@ -20364,8 +20404,7 @@ begin
 {$IFDEF DGL_64BIT}
   SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
 {$ENDIF}
-InitOpenGL(OPENGL_LIBNAME,GLU_LIBNAME);
-SGPrintStat();
+TSGDllOpenGL.Create();
 end;
 
 finalization

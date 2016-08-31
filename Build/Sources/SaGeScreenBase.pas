@@ -4,7 +4,7 @@ unit SaGeScreenBase;
 
 interface
 
-uses 
+uses
 	 Crt
 	,SaGeCommon
 	,SaGeBase
@@ -21,7 +21,7 @@ type
 	TSGCaption =  TSGString;
 	TSGScreenTimer = TSGFloat;
 	TSGComponentLocationVectorType = TSGVector2f;
-	
+
 	TSGComponentLocation = object
 			protected
 		FPosition : TSGComponentLocationVectorType;
@@ -37,11 +37,11 @@ type
 		property PositionX : TSGFloat read FPosition.x write FPosition.x;
 		property PositionY : TSGFloat read FPosition.y write FPosition.y;
 		end;
-	
+
 	TSGAnchors = type TSGExByte;
 	TSGScreenInt    = TSGAreaInt;
-	
-	
+
+
 	TSGScreenSkinFrameColor = object
 			public
 		FFirst  : TSGColor4f;
@@ -49,13 +49,13 @@ type
 			public
 		procedure Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
-	
+
 const
 	SGAnchRight  : TSGAnchors = $11;
 	SGAnchLeft   : TSGAnchors = $12;
 	SGAnchTop    : TSGAnchors = $13;
 	SGAnchBottom : TSGAnchors = $14;
-	
+
 	SGS_LEFT   = 1;
 	SGS_BOTTOM = 2;
 	SGS_RIGHT  = 3;
@@ -64,44 +64,44 @@ const
 type
 	ISGComponent = interface(ISGArea)
 		['{6ee600fd-f8b3-40bc-bf8a-ec7693b21e96}']
-		
+
 		procedure SetRight (NewRight  : TSGScreenInt);
 		procedure SetBottom(NewBottom : TSGScreenInt);
 		function GetRight()  : TSGScreenInt;
 		function GetBottom() : TSGScreenInt;
-		
+
 		function GetScreenWidth()  : TSGScreenInt;
 		function GetScreenHeight() : TSGScreenInt;
 		function GetLocation() : TSGComponentLocation;
-		
+
 		procedure SetShifts(const NL,NT,NR,NB:TSGScreenInt);
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);
 		procedure BoundsToNeedBounds();
-		
+
 		function UpDateObj(var Obj, NObj : TSGScreenInt) : TSGScreenInt;
 		procedure WriteBounds();
-		
+
 		procedure UpDateObjects();
 		procedure TestCoords();
 		procedure UpgradeTimers();
-		
+
 		procedure AddToLeft(const Value:TSGScreenInt);
 		procedure AddToWidth(const Value:TSGScreenInt);
 		procedure AddToHeight(const Value:TSGScreenInt);
 		procedure AddToTop(const Value:TSGScreenInt);
-		
+
 		procedure FromDraw();
 		procedure FromResize();
 		procedure FromUpDate(var FCanChange:Boolean);
 		procedure FromUpDateUnderCursor(var CanRePleace:TSGBoolean;const CursorInComponentNow:TSGBoolean = True);
 		procedure FromUpDateCaptionUnderCursor(var CanRePleace:TSGBoolean);
-		
+
 		procedure SetVisible(const b:TSGBoolean);
 		procedure SetCaption(const NewCaption : TSGCaption);
 		function ReqursiveActive():TSGBoolean;
 		function NotVisible : TSGBoolean;
-		
+
 		procedure ClearPriority();
 		procedure MakePriority();
 		function CursorInComponent():TSGBoolean;
@@ -118,44 +118,44 @@ type
 		procedure DestroyParent();
 		procedure KillChildren();
 		procedure VisibleAll();
-		
+
 		function GetVisibleTimer() : TSGScreenTimer;
 		function GetActiveTimer() : TSGScreenTimer;
 		function GetActive() : TSGBoolean;
 		function GetVisible() : TSGBoolean;
-		
+
 		property Caption : TSGCaption read GetTitle;
 		property Active : TSGBoolean read GetActive;
 		property Visible : TSGBoolean read GetVisible;
 		property VisibleTimer : TSGScreenTimer read GetVisibleTimer;
 		property ActiveTimer : TSGScreenTimer read GetActiveTimer;
 		end;
-	
+
 	ISGScreen = interface(ISGComponent)
 		['{c3c6ea12-c4ff-41de-a250-1e4d856b3e59}']
 		procedure Load(const VContext : ISGContext);
 		procedure CustomPaint(VCanReplace : TSGBool);
 		function UpDateScreen() : TSGBoolean;
 		end;
-	
+
 	ISGOverComponent = interface(ISGComponent)
 		['{ac52a3a2-e62d-4473-a2b9-1d36f56389a9}']
 		function GetOverTimer() : TSGScreenTimer;
 		function GetOver() : TSGBool;
-		
+
 		property Over : TSGBoolean read GetOver;
 		property OverTimer : TSGScreenTimer read GetOverTimer;
 		end;
-	
+
 	ISGClickComponent = interface(ISGOverComponent)
 		['{9b21d96d-b820-41cd-b18f-14ed09d5c218}']
 		function GetClickTimer() : TSGScreenTimer;
 		function GetClick() : TSGBool;
-		
+
 		property Click : TSGBoolean read GetOver;
 		property ClickTimer : TSGScreenTimer read GetClickTimer;
 		end;
-	
+
 	ISGLabel = interface(ISGComponent)
 		['{7f02dd71-b699-453f-aa8d-f41dd7d44bc6}']
 		function  GetTextPosition() : TSGBoolean;
@@ -164,31 +164,31 @@ type
 		procedure SetTextColor(const VTextColor : TSGColor4f);
 		function  GetTextColorSeted() : TSGBoolean;
 		procedure SetTextColorSeted(const VTextColorSeted : TSGBoolean);
-		
+
 		property TextPosition   : TSGBoolean read GetTextPosition   write SetTextPosition;
 		property TextColor      : TSGColor4f read GetTextColor      write SetTextColor;
 		property TextColorSeted : TSGBoolean read GetTextColorSeted write SetTextColorSeted;
 		end;
-	
+
 	ISGButton = interface(ISGClickComponent)
 		['{ec439dc0-edd6-42e2-af41-42e9805c2e77}']
 		end;
-	
+
 	ISGPanel = interface(ISGComponent)
 		['{41f51334-780b-444c-aa61-4c000759516b}']
 		function ViewingLines() : TSGBoolean;
 		function ViewingQuad()  : TSGBoolean;
 		end;
-	
+
 	ISGOpenComponent = interface(ISGClickComponent)
 		['{84a57b91-b224-45f1-a25d-938dbec2ad0f}']
 		function GetOpen() : TSGBoolean;
 		function GetOpenTimer() : TSGScreenTimer;
-		
+
 		property Open : TSGBoolean read GetOpen;
 		property OpenTimer : TSGScreenTimer read GetOpenTimer;
 		end;
-	
+
 	TSGComboBoxItemIdentifier = TSGInt64;
 	PSGComboBoxItem = ^ TSGComboBoxItem;
 	TSGComboBoxItem = object
@@ -210,9 +210,9 @@ type
 		property Identifier : TSGComboBoxItemIdentifier read FIdentifier write FIdentifier;
 		property Image      : TSGImage                  read FImage      write FImage;
 		end;
-	
+
 	TSGComboBoxItemList = packed array of TSGComboBoxItem;
-	
+
 	ISGComboBox = interface(ISGOpenComponent)
 		['{5859810e-163e-4f5d-9622-7b574ebe07d5}']
 		function GetItems() : PSGComboBoxItem;
@@ -220,13 +220,13 @@ type
 		function GetLines() : TSGUInt32;
 		function GetSelectedItem() : PSGComboBoxItem;
 		function GetFirstItemIndex() : TSGUInt32;
-		
+
 		property FirstItemIndex : TSGUInt32 read GetFirstItemIndex;
 		property Lines          : TSGUInt32 read GetLines;
 		property ItemsCount     : TSGUInt32 read GetItemsCount;
 		property Items          : PSGComboBoxItem read GetItems;
 		end;
-	
+
 	TSGEditTextType         = TSGExByte;
 	ISGEdit = interface(ISGOverComponent)
 		['{468c7f6f-795a-48a1-b5be-615448c2dcbe}']
@@ -236,7 +236,7 @@ type
 		function GetTextTypeAssigned() : TSGBoolean;
 		function GetCursorTimer() : TSGScreenTimer;
 		function GetTextCompliteTimer() : TSGScreenTimer;
-		
+
 		property TextCompliteTimer : TSGScreenTimer  read GetTextCompliteTimer;
 		property CursorTimer       : TSGScreenTimer  read GetCursorTimer;
 		property TextTypeAssigned  : TSGBoolean      read GetTextTypeAssigned;
@@ -244,7 +244,7 @@ type
 		property TextComplite      : TSGBoolean      read GetTextComplite;
 		property CursorPosition    : TSGInt32        read GetCursorPosition;
 		end;
-	
+
 	TSGProgressBarFloat = TSGFloat64;
 	PSGProgressBarFloat = ^ TSGProgressBarFloat;
 	ISGProgressBar = interface(ISGComponent)
@@ -255,7 +255,7 @@ type
 		function GetProgressTimer() : TSGProgressBarFloat;
 		function GetViewCaption() : TSGBool;
 		function GetViewProgress() : TSGBool;
-		
+
 		property ViewProgress  : TSGBool                 read GetViewProgress;
 		property ViewCaption   : TSGBool                 read GetViewCaption;
 		property ProgressTimer : TSGProgressBarFloat     read GetProgressTimer;
@@ -283,6 +283,8 @@ end;
 
 procedure TSGComboBoxItem.Clear();
 begin
+if (FImage as TSGImage) <> nil then
+	FImage.Destroy();
 FImage      := nil;
 FCaption    := '';
 FIdentifier := 0;

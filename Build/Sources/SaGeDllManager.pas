@@ -64,6 +64,8 @@ type
 		class function DllNames() : TSGStringList; virtual; abstract;
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; virtual; abstract;
 		class procedure Free(); virtual; abstract;
+
+		class function LoadExtensions() : TSGDllLoadObject; virtual; abstract;
 			protected
 		function GetSuppored() : TSGBool;
 		procedure SetOwner(const VOwner : TSGDllManager);

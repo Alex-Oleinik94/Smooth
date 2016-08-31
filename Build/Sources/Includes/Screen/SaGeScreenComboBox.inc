@@ -16,10 +16,10 @@ type
 		FFirstScrollItem:LongInt;
 		FCursorOnThisItem:LongInt;
 		FScrollWidth:LongInt;
-		
+
 		FTextColor:TSGColor4f;
 		FBodyColor:TSGColor4f;
-		
+
 		FClickOnOpenBox:Boolean;
 			protected
 		procedure OverItem(const Index : TSGUInt32); virtual;
@@ -41,17 +41,17 @@ type
 		property SelectedItemIndex : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
 		property SelectItem        : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
 		property MaxLines          : LongWord read FMaxLines          write FMaxLines;
-		
+
 		property Lines      : TSGUInt32 read GetLines;
 		property CallBackProcedure : TSGComboBoxProcedure read FProcedure write FProcedure;
-		
+
 		property ItemsCount : TSGUInt32 read GetItemsCount;
 		property Items : PSGComboBoxItem read GetItems;
 		end;
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
-class function TSGComboBox.ClassName() : TSGString; 
+class function TSGComboBox.ClassName() : TSGString;
 begin
 Result := 'TSGComboBox';
 end;
@@ -103,7 +103,7 @@ Result:=
 	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
 	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
 	(
-	(FOpen and 
+	(FOpen and
 		(
 		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Lines*FOpenTimer)
 		or
@@ -193,7 +193,7 @@ if  FOpen and (FCursorOnComponent) then
 		begin
 		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer) and
 			(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer) and
-			(((FMaxLines<Length(FItems)) and 
+			(((FMaxLines<Length(FItems)) and
 			(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
 			FItems[i].Active then
 				begin
@@ -265,7 +265,7 @@ procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TS
 begin
 if Self <> nil then
 	begin
-	SetLEngth(FItems, Length(FItems) + 1);
+	SetLength(FItems, Length(FItems) + 1);
 	FItems[High(FItems)].Clear();
 	FItems[High(FItems)].Caption    := ItemCaption;
 	FItems[High(FItems)].Image      := ItemImage;
@@ -290,7 +290,19 @@ FScrollWidth:=20;
 end;
 
 destructor TSGComboBox.Destroy;
+var
+	i : TSGUInt32;
 begin
+if FItems <> nil then
+	begin
+	if Length(FItems) > 0 then
+		begin
+		for i := 0 to High(FItems) do
+			FItems[i].Clear();
+		SetLength(FItems, 0);
+		end;
+	FItems := nil;
+	end;
 inherited;
 end;
 
