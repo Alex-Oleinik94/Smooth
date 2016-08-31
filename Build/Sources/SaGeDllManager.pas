@@ -470,44 +470,46 @@ end;
 
 function TSGDll.StatString(const LoadObjectId : TSGUInt32 = 0) : TSGString;
 var
-	MNL, MCNL : TSGUInt32;
+	MNL, MCNL, TF, LF : TSGUInt32;
+	LN : TSGString = '';
 begin
 MNL  := FOwner.GenerateMaxNameLength();
-MCNL := FOwner.GenerateMaxChunkNameLength();
 Result := StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': ';
+if LoadObjectId <> 0 then
+	begin
+	MCNL := FOwner.GenerateMaxChunkNameLength();
+	Result += StringJustifyLeft(ChunkName(LoadObjectId - 1), MCNL + 1, ' ') + ': ';
+	end;
+LN := '';
+TF := 0;
+LF := 0;
 if LoadObjectId = 0 then
-	if LoadedFunctions() = 0 then
-		begin
-		Result +=
-			'Failed to load' +
-			Iff(TotalFunctions() > 0,' all of ' + SGStr(TotalFunctions()) + ' functions','') +
-			Iff((FDllFileNames <> nil) and (Length(FDllFileNames) = 1),' from ''' + FDllFileNames[0] + '''','') +
-			'!';
-		end
-	else
-		Result +=
-			'Loaded ' +
-			TSGDll_Procent(LoadedFunctions(), TotalFunctions()) +
-			Iff((FDllFileNames <> nil) and (Length(FDllFileNames) = 1),' from ''' + FDllFileNames[0] + '''','') +
-			'.'
+	begin
+	LF := LoadedFunctions();
+	TF := TotalFunctions();
+	if (FDllFileNames <> nil) then if (Length(FDllFileNames) = 1) then
+		LN := FDllFileNames[0];
+	end
 else
 	begin
-	Result += StringJustifyLeft(ChunkName(LoadObjectId - 1), MCNL + 1, ' ') + ': ';
-	if FLoadObjects[LoadObjectId - 1].FFunctionLoaded  = 0 then
-		begin
-		Result +=
-			'Failed to load' +
-			Iff(FLoadObjects[LoadObjectId - 1].FFunctionCount > 0,' all of ' + SGStr(FLoadObjects[LoadObjectId - 1].FFunctionCount) + ' functions','') +
-			Iff(FDllFileNames <> nil,' from ''' + FDllFileNames[LoadObjectId - 1] + '''','') +
-			'!';
-		end
-	else
-		Result +=
-			'Loaded ' +
-			TSGDll_Procent(FLoadObjects[LoadObjectId - 1].FFunctionLoaded, FLoadObjects[LoadObjectId - 1].FFunctionCount) +
-			Iff(FDllFileNames <> nil,' from ''' + FDllFileNames[LoadObjectId - 1] + '''','') +
-			'.'
+	TF := FLoadObjects[LoadObjectId - 1].FFunctionCount;
+	LF := FLoadObjects[LoadObjectId - 1].FFunctionLoaded;
+	if (FDllFileNames <> nil) then if (Length(FDllFileNames) <= LoadObjectId) then if LoadObjectId >= 1 then
+		LN := FDllFileNames[LoadObjectId - 1];
 	end;
+if LF = 0 then
+	Result +=
+		'Failed to load' +
+		Iff(TF > 0,' all of ' + SGStr(TF) + ' functions','')
+else
+	Result +=
+		'Loaded ' +
+		TSGDll_Procent(LF, TF);
+Result += Iff(LN <> '', ' from ''' + LN + '''','');
+if LF = 0 then
+	Result += '!'
+else
+	Result += '.';
 end;
 
 procedure TSGDll.LogExtStat();
