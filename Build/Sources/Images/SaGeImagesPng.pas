@@ -8,7 +8,7 @@ function SupporedPNG() : Boolean;
 
 implementation
 
-uses 
+uses
 	crt
 	,png
 	,Classes
@@ -22,7 +22,7 @@ uses
 
 function SupporedPNG() : Boolean;
 begin
-Result := DllManager.DllSuppored('png');
+Result := DllManager.Suppored('png');
 end;
 
 procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;
@@ -49,7 +49,7 @@ LoadPNG(VStream,Result as TSGBitMap);
 end;
 
 function TSGResourseManipulatorImagesPNG.SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
-begin 
+begin
 if (VExpansion<>'PNG') or (not(VResourse is TSGBitMap)) then
 	Result:=False
 else
@@ -61,7 +61,7 @@ end;
 
 type
 	TDynStringArray = packed array of string;
-const 
+const
 	PNG_COLOR_MASK_PALETTE = 1;
 	PNG_COLOR_MASK_COLOR = 2;
 	PNG_COLOR_MASK_ALPHA = 4;
@@ -71,27 +71,27 @@ const
 	PNG_COLOR_TYPE_RGB = (PNG_COLOR_MASK_COLOR);
 	PNG_COLOR_TYPE_RGB_ALPHA = (PNG_COLOR_MASK_COLOR or PNG_COLOR_MASK_ALPHA);
 	PNG_COLOR_TYPE_GRAY_ALPHA = (PNG_COLOR_MASK_ALPHA);
-	
+
 	PNG_COLOR_TYPE_RGBA = PNG_COLOR_TYPE_RGB_ALPHA;
 	PNG_COLOR_TYPE_GA = PNG_COLOR_TYPE_GRAY_ALPHA;
 
 	PNG_COMPRESSION_TYPE_BASE = 0;
-	PNG_COMPRESSION_TYPE_DEFAULT = PNG_COMPRESSION_TYPE_BASE; 
-	
+	PNG_COMPRESSION_TYPE_DEFAULT = PNG_COMPRESSION_TYPE_BASE;
+
 	PNG_FILTER_TYPE_BASE = 0;
 	PNG_INTRAPIXEL_DIFFERENCING = 64;
-	PNG_FILTER_TYPE_DEFAULT = PNG_FILTER_TYPE_BASE; 
+	PNG_FILTER_TYPE_DEFAULT = PNG_FILTER_TYPE_BASE;
 
 	PNG_INTERLACE_NONE = 0;
 	PNG_INTERLACE_ADAM7 = 1;
-	PNG_INTERLACE_LAST = 2;     
+	PNG_INTERLACE_LAST = 2;
 
 {$DEFINE LIBPNG_CDECL}
 
 procedure our_png_error_fn(png_ptr : png_structp; s : png_const_charp); {$ifndef LIBPNG_CDECL} stdcall {$else} cdecl {$endif};
-var 
+var
 	warnings: TDynStringArray;
-begin 
+begin
 Warnings := TDynStringArray(png_get_error_ptr(png_ptr));
 SetLength(warnings,Length(warnings)+1);
 Warnings[High(warnings)]:='     Png error - libpng returned error :';
@@ -100,7 +100,7 @@ Warnings[High(warnings)]:=s;
 end;
 
 procedure our_png_warning_fn(png_ptr : png_structp; s : png_const_charp); {$ifndef LIBPNG_CDECL} stdcall {$else} cdecl {$endif};
-var 
+var
 	warnings: TDynStringArray = nil;
 begin
 warnings := TDynStringArray(png_get_error_ptr(png_ptr));
@@ -148,36 +148,36 @@ SetLength(warningslist,0);
 png_ptr := nil;
 try
 	png_ptr := png_create_read_struct(PNG_LIBPNG_VER_STRING, Pointer(WarningsList),@our_png_error_fn,@our_png_warning_fn);
-		
+
 	info_ptr := png_create_info_struct(png_ptr);
-	
+
 	png_set_read_fn(png_ptr, Stream,@our_png_read_fn);
 
 	png_read_info(png_ptr, info_ptr);
-	
+
 	BitMap.FWidth := png_get_image_width(png_ptr, info_ptr);
 	BitMap.FHeight := png_get_image_height(png_ptr, info_ptr);
 	BitMap.FChannels:=png_get_channels(png_ptr, info_ptr);
 	BitMap.FSizeChannel:=png_get_bit_depth(png_ptr, info_ptr);
 	BitMap.CreateTypes();
-	
+
 	png_read_update_info(png_ptr, info_ptr);
-	
+
 	SetLEngth(row_pointers,BitMap.FHeight);
 	GetMem(BitMap.FBitMap,BitMap.FWidth*BitMap.FHeight*BitMap.FChannels);
-	
+
 	for i := 0 to BitMap.FHeight-1 do
 		row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
-	
+
 	png_read_image(png_ptr, @row_pointers[0]);
-	
+
 	SetLength(row_pointers,0);
-	
+
 	png_read_end(png_ptr, nil);
 	if (png_ptr <> nil) then
 		begin
 		if info_ptr = nil then
-			png_destroy_read_struct(@png_ptr, nil, nil) 
+			png_destroy_read_struct(@png_ptr, nil, nil)
 		else
 			png_destroy_read_struct(@png_ptr, @info_ptr, nil);
 		end;
@@ -206,7 +206,7 @@ begin
 png_ptr := nil;
 if interlaced then
 interlaceType := PNG_INTERLACE_ADAM7 else
-interlaceType := PNG_INTERLACE_NONE;  
+interlaceType := PNG_INTERLACE_NONE;
 try
 	png_ptr := png_create_write_struct(PNG_LIBPNG_VER_STRING,Pointer(WarningsList),@our_png_error_fn,@our_png_warning_fn);
 	info_ptr := png_create_info_struct(png_ptr);

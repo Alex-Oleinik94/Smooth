@@ -8,7 +8,7 @@ interface
 
 uses
 	Classes
-	
+
 	,SaGeBase
 	,SaGeBased
 	,SaGeContext
@@ -16,7 +16,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeScreen
 	,SaGeClasses
-	
+
 	{$IFNDEF MOBILE}
 		,dglOpenGL
 	{$ELSE}
@@ -89,7 +89,7 @@ end;
 
 class function TSGContextGLUT.Suppored() : TSGBoolean;
 begin
-Result := DllManager.DllSuppored('glut');
+Result := DllManager.Suppored('glut');
 end;
 
 function  TSGContextGLUT.GetClientWidth() : TSGAreaInt;
@@ -102,7 +102,7 @@ begin
 Result := FHeight;
 end;
 
-procedure TSGContextGLUT.InitFullscreen(const b:boolean); 
+procedure TSGContextGLUT.InitFullscreen(const b:boolean);
 begin
 if FInitialized then
 	if FFullscreen <> b then
@@ -224,12 +224,12 @@ ContextGLUT := Self;
 glutInitPascal(True);
 glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
 
-if Fullscreen then 
+if Fullscreen then
 	begin
 	glutGameModeString(SGStringToPChar(SGStr(Width)+'x'+SGStr(Height)+':32@60'));
 	glutEnterGameMode();
 	end
-else 
+else
 	begin
 	glutInitWindowSize(Width, Height);
 	glutInitWindowPosition((GetScreenArea.x - Width) div 2,(GetScreenArea.y - Height) div 2);
@@ -315,7 +315,7 @@ else
 		FRender := nil;
 		Result := InitRender();
 		end;
-	
+
 	{$IFDEF GLUT_DEBUG}
 		SGLog.Sourse('TSGContextGLUT__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
@@ -332,7 +332,7 @@ begin
 	WriteLn('TSGContextGLUT.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
 SCR := Screen.UpDateScreen();
-UpdateTimer(); 
+UpdateTimer();
 {$IFDEF GLUT_DEBUG}
 	WriteLn('TSGContextGLUT.Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}

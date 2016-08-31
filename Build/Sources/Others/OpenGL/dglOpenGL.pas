@@ -14571,29 +14571,11 @@ type
   TRCOptions = set of (opDoubleBuffered, opGDI, opStereo);
 
 var
-  GL_LibHandle: Pointer = nil;
-  GLU_LibHandle: Pointer = nil;
-
   LastPixelFormat: Integer;
   ExtensionsRead: Boolean;
   ImplementationRead: Boolean;
 
-
-const
-{$IFDEF DGL_WIN}
-  OPENGL_LIBNAME = 'OpenGL32.dll';
-  GLU_LIBNAME = 'GLU32.dll';
-{$ELSE}
-  {$IFDEF darwin}
-    OPENGL_LIBNAME = 'libGL.dylib';
-    GLU_LIBNAME = 'libGLU.dylib';
-  {$ELSE}
-    OPENGL_LIBNAME = 'libGL.so.1';
-    GLU_LIBNAME = 'libGLU.so.1';
-  {$ENDIF}
-{$ENDIF}
-
-function InitOpenGL(LibName: String = OPENGL_LIBNAME; GLULibName: String = GLU_LIBNAME): Boolean;
+function InitOpenGL(): Boolean;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;
 function dglCheckExtension(Extension: AnsiString): Boolean;
@@ -14875,6 +14857,24 @@ uses
 	,SaGeDllManager
 	;
 
+var
+  GL_LibHandle: Pointer = nil;
+  GLU_LibHandle: Pointer = nil;
+
+const
+{$IFDEF DGL_WIN}
+  OPENGL_LIBNAME = 'OpenGL32.dll';
+  GLU_LIBNAME = 'GLU32.dll';
+{$ELSE}
+  {$IFDEF darwin}
+    OPENGL_LIBNAME = 'libGL.dylib';
+    GLU_LIBNAME = 'libGLU.dylib';
+  {$ELSE}
+    OPENGL_LIBNAME = 'libGL.so.1';
+    GLU_LIBNAME = 'libGLU.so.1';
+  {$ENDIF}
+{$ENDIF}
+
 {$IFDEF DGL_LINUX}
 const
   RTLD_LAZY = $001;
@@ -14938,18 +14938,8 @@ begin
 end;
 
 var
-	SGAllFunction    : TSGMaxEnum = 0;
-	SGLoadedFUnction : TSGMaxEnum = 0;
-	SGGLUAllFunc     : TSGMaxEnum = 0;
-	SGGLULoadedFunc  : TSGMaxEnum = 0;
-
-procedure SGPrintStat();
-begin
-if SGAllFunction > 0 then
-	SGLog.Sourse(['dglOpenGL : Initialization from ' + OPENGL_LIBNAME + ': Loaded ',SGStrReal(SGLoadedFUnction/SGAllFunction*100,3),'% ('+SGStr(SGLoadedFUnction)+'/'+SGStr(SGAllFunction)+')']);
-if (SGGLUAllFunc > 0) then
-	SGLog.Sourse(['dglOpenGL : Initialization from ' + GLU_LIBNAME + ': Loaded ',SGStrReal(SGGLULoadedFunc/SGGLUAllFunc*100,3),'% ('+SGStr(SGGLULoadedFunc)+'/'+SGStr(SGGLUAllFunc)+')']);
-end;
+	LoadObjectGL  : PSGDllLoadObject = nil;
+	LoadObjectGLU : PSGDllLoadObject = nil;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;
 begin
@@ -14984,15 +14974,23 @@ begin
 
   if LibHandle = GL_LibHandle then
     begin
-    SGAllFunction += 1;
-    if Result <> nil then
-      SGLoadedFUnction += 1;
+      if LoadObjectGL <> nil then
+        begin
+        LoadObjectGL^.FFunctionCount  += 1;
+        LoadObjectGL^.FFunctionLoaded += Byte(Result <> nil);
+        if Result = nil then
+          LoadObjectGL^.FFunctionErrors += String(ProcName);
+        end;
     end
-  else
+  else if LibHandle = GLU_LibHandle then
     begin
-    SGGLUAllFunc += 1;
-    if Result <> nil then
-      SGGLULoadedFunc += 1;
+      if LoadObjectGLU <> nil then
+        begin
+        LoadObjectGLU^.FFunctionCount  += 1;
+        LoadObjectGLU^.FFunctionLoaded += Byte(Result <> nil);
+        if Result = nil then
+          LoadObjectGLU^.FFunctionErrors += String(ProcName);
+        end;
     end;
 end;
 
@@ -15064,22 +15062,9 @@ begin
   Result := Int_CheckExtension(Extensions, Extension);
 end;
 
-
-
-function InitOpenGL(LibName: String; GLULibName: String): Boolean;
+function InitOpenGL(): Boolean;
 begin
   Result := False;
-
-  // free opened libraries
-  if GL_LibHandle <> nil then
-    dglFreeLibrary(GL_LibHandle);
-
-  if GLU_LibHandle <> nil then
-    dglFreeLibrary(GLU_LibHandle);
-
-  // load library
-  GL_LibHandle := dglLoadLibrary(PChar(LibName));
-  GLU_LibHandle := dglLoadLibrary(PChar(GLULibName));
 
   // load GL functions
   if (GL_LibHandle <> nil) then begin
@@ -19062,11 +19047,6 @@ end;
 
 procedure ReadExtensions;
 begin
-SGAllFunction := 0;
-SGLoadedFUnction := 0;
-SGGLULoadedFunc := 0;
-SGGLUAllFunc := 0;
-
   ReadOpenGLCore;
 
   Read_GL_3DFX_tbuffer;
@@ -19301,9 +19281,6 @@ SGGLUAllFunc := 0;
 {$ENDIF}
 
   ExtensionsRead := True;
-
-  SGPrintStat();
-  SGLog.Sourse(Int_GetExtensionString, 'dglOpenGL : Suppored extensions :',' ');
 
   ReadImplementationProperties();
 end;
@@ -20369,7 +20346,19 @@ type
 		class function DllNames() : TSGStringList; override;
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
 		class procedure Free(); override;
+
+		class function ChunkNames() : TSGStringList; override;
+		class function DllChunkNames() : TSGStringList; override;
+		class function LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList; override;
+		class function ChunksLoadJointly() : TSGBool; override;
+
+		class function LoadExtensions() : TSGDllLoadExtensionsObject; override;
 		end;
+
+class function TSGDllOpenGL.ChunksLoadJointly() : TSGBool;
+begin
+Result := True;
+end;
 
 class function TSGDllOpenGL.SystemNames() : TSGStringList;
 begin
@@ -20379,21 +20368,59 @@ Result += 'GL';
 Result += 'GLES';
 end;
 
+class function TSGDllOpenGL.ChunkNames() : TSGStringList;
+begin
+Result := nil;
+Result += 'GL';
+Result += 'GLU';
+end;
+
+class function TSGDllOpenGL.DllChunkNames() : TSGStringList;
+begin
+Result := nil;
+Result += OPENGL_LIBNAME;
+Result += GLU_LIBNAME;
+end;
+
 class function TSGDllOpenGL.DllNames() : TSGStringList;
 begin
-Result := ;
+Result := nil;
 end;
 
 class procedure TSGDllOpenGL.Free();
 begin
+GL_LibHandle  := 0;
+GLU_LibHandle := 0;
+LoadObjectGL  := nil;
+LoadObjectGLU := nil;
+end;
 
+class function TSGDllOpenGL.LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList;
+begin
+SetLength(Result, 2);
+Result[0].Clear();
+Result[1].Clear();
+LoadObjectGL  := @Result[0];
+LoadObjectGLU := @Result[1];
+GL_LibHandle  := Pointer(VDll[0]);
+GLU_LibHandle := Pointer(VDll[1]);
+InitOpenGL();
+LoadObjectGL  := nil;
+LoadObjectGLU := nil;
 end;
 
 class function TSGDllOpenGL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 begin
 Result.Clear();
-InitOpenGL(OPENGL_LIBNAME, GLU_LIBNAME);
-SGPrintStat();
+end;
+
+class function TSGDllOpenGL.LoadExtensions() : TSGDllLoadExtensionsObject;
+begin
+Result.Clear();
+LoadObjectGL  := @Result;
+dglOpenGL.ReadExtensions();
+LoadObjectGL  := nil;
+Result.FExtensions := SGStringListFromString(Int_GetExtensionString, ' ');;
 end;
 
 initialization

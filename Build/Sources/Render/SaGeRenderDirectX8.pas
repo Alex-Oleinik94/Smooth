@@ -272,9 +272,9 @@ end;
 class function TSGRenderDirectX8.Suppored() : TSGBoolean;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Suppored'); {$ENDIF}
-Result := DllManager.DllSuppored('Direct3D8');
+Result := DllManager.Suppored('Direct3D8');
 if Result then
-	DllManager.DllSuppored('Direct3DX8');
+	DllManager.Suppored('Direct3DX8');
 end;
 
 function TSGRenderDirectX8.SupporedShaders() : TSGBoolean;
@@ -1447,7 +1447,7 @@ end;
 constructor TSGRenderDirectX8.Create();
 begin
 inherited Create();
-D3DX8Loaded := DllManager.DllSuppored('Direct3DX8');
+D3DX8Loaded := DllManager.Suppored('Direct3DX8');
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
 SetRenderType(SGRenderDirectX8);

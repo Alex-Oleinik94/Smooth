@@ -1380,7 +1380,7 @@ var
 begin
 SGPrintEngineVersion();
 ContextClass := TSGCompatibleContext;
-RenderClass  := TSGCompatibleRender;
+RenderClass  := TSGRenderOpenGL;
 if (VParams<>nil) and (Length(VParams)>0) then
 	begin
 	ConsoleCaller := TSGConsoleCaller.Create(VParams);

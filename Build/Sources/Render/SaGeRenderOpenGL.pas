@@ -31,6 +31,7 @@ uses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeClasses
+	,SaGeDllManager
 
 	//* ==================== System Units ====================
 	,DynLibs
@@ -302,7 +303,13 @@ end;
 
 class function TSGRenderOpenGL.Suppored() : TSGBoolean;
 begin
-Result := True;
+Result :=
+	{$IFDEF MOBILE}
+		True
+	{$ELSE}
+		DllManager.Suppored('OpenGL')
+	{$ENDIF}
+	;
 end;
 
 procedure TSGRenderOpenGL.Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
@@ -1339,7 +1346,8 @@ FNowInBumpMapping:=False;
 {$IFDEF RENDER_OGL_DEBUG}
 	WriteLn('TSGRenderOpenGL.Init() - Begin ReadExtensions');
 	{$ENDIF}
-ReadExtensions();
+if DllManager.Dll('OpenGL') <> nil then
+	DllManager.Dll('OpenGL').ReadExtensions();
 {$IFDEF RENDER_OGL_DEBUG}
 	WriteLn('TSGRenderOpenGL.Init() - End ReadExtensions');
 	{$ENDIF}

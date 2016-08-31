@@ -152,11 +152,13 @@ type
 		class procedure Free(); override;
 		end;
 
-class function TSGDllFreeGLUT.SystemNames() : TSGStringList; 
+class function TSGDllFreeGLUT.SystemNames() : TSGStringList;
 begin
 Result := 'FreeGLUT';
 Result += 'LibFreeGlut';
 Result += 'FreeGlut32';
+Result += 'FGlut';
+Result += 'FGlut32';
 end;
 
 class function TSGDllFreeGLUT.DllNames() : TSGStringList;
@@ -221,7 +223,7 @@ LoadResult := @Result;
   @glutInitContextProfile := fglutGetProcAddress('glutInitContextProfile');
 end;
 
-class procedure TSGDllFreeGLUT.Free(); 
+class procedure TSGDllFreeGLUT.Free();
 begin
   @glutMainLoopEvent := nil;
   @glutLeaveMainLoop := nil;

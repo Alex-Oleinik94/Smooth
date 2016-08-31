@@ -263,9 +263,9 @@ end;
 
 class function TSGRenderDirectX9.Suppored() : TSGBoolean;
 begin
-Result := DllManager.DllSuppored('Direct3D9');
+Result := DllManager.Suppored('Direct3D9');
 if Result then
-	DllManager.DllSuppored('Direct3DX9');
+	DllManager.Suppored('Direct3DX9');
 end;
 
 function TSGRenderDirectX9.SupporedShaders() : TSGBoolean;

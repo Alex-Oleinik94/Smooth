@@ -30,6 +30,13 @@ type
 		end;
 	TSGDllLoadObjectList = packed array of TSGDllLoadObject;
 
+	TSGDllLoadExtensionsObject = object(TSGDllLoadObject)
+			public
+		FExtensions : TSGStringList;
+			public
+		procedure Clear();
+		end;
+
 	TSGDllClass = class of TSGDll;
 	TSGDll = class(TSGNamed)
 			public
@@ -38,15 +45,24 @@ type
 			public
 		procedure PrintStat(const Extended : TSGBool = False);
 		procedure LogStat();
-		function StatString() : TSGString;
+		procedure LogExtStat();
+		function StatString(const LoadObjectId : TSGUInt32 = 0) : TSGString;
+		function ChunkName(const i : TSGUInt32) : TSGString;
 			private
 		FOwner         : TSGDllManager;
+
 		FLoadExecuted  : TSGBool;
 		FLoaded        : TSGBool;
+
 		FLoadObjects   : TSGDllLoadObjectList;
 		FErrorDllNames : TSGStringList;
-		FLibHandle     : TSGLibHandle;
+		FLibHandles    : TSGLibHandleList;
 		FDllFileNames  : TSGStringList;
+
+			// Extensions
+		FLoadExtensionsExecuted : TSGBool;
+		FLoadedExtensions       : TSGBool;
+		FExtensionsLoadObject   : TSGDllLoadExtensionsObject;
 			public
 		procedure UnLoad();
 		function Loading() : TSGBool;
@@ -59,13 +75,15 @@ type
 		class function ChunkNames() : TSGStringList; virtual;
 		class function DllChunkNames() : TSGStringList; virtual;
 		class function LoadChunk(const VChunk : TSGString;const VDll : TSGLibHandle) : TSGDllLoadObject; virtual;
+		class function LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList; virtual;
+		class function ChunksLoadJointly() : TSGBool; virtual;
 
 		class function SystemNames() : TSGStringList; virtual; abstract;
 		class function DllNames() : TSGStringList; virtual; abstract;
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; virtual; abstract;
 		class procedure Free(); virtual; abstract;
 
-		class function LoadExtensions() : TSGDllLoadObject; virtual; abstract;
+		class function LoadExtensions() : TSGDllLoadExtensionsObject; virtual;
 			protected
 		function GetSuppored() : TSGBool;
 		procedure SetOwner(const VOwner : TSGDllManager);
@@ -74,10 +92,12 @@ type
 		class function FirstName() : TSGString;
 		function GenerateAllNotLoadedFunc() : TSGStringList;
 			public
-		property Suppored : TSGBool read GetSuppored;
-		property Loaded   : TSGBool read FLoaded write FLoaded;
+		procedure ReadExtensions(); virtual;
+			public
+		property Suppored     : TSGBool read GetSuppored;
+		property Loaded       : TSGBool read FLoaded write FLoaded;
 		property LoadExecuted : TSGBool read FLoadExecuted write FLoadExecuted;
-		property Owner    : TSGDllManager read FOwner write SetOwner;
+		property Owner        : TSGDllManager read FOwner write SetOwner;
 		end;
 
 	TSGDllList = packed array of TSGDll;
@@ -95,9 +115,12 @@ type
 		procedure Del(const VDll : TSGDll);
 			public
 		function Dll(const VSystemName : TSGString) : TSGDll;
-		function DllSuppored(const VSystemName : TSGString) : TSGBool;
+		function Suppored(const VSystemName : TSGString) : TSGBool;
 		function MayUnloadDll(const VFileName : TSGString): TSGBool;
 		function CountUsesLibrary(const VFileName : TSGString) : TSGUInt32;
+
+		function GenerateMaxNameLength() : TSGUInt32;
+		function GenerateMaxChunkNameLength() : TSGUInt32;
 		end;
 
 var
@@ -109,6 +132,8 @@ implementation
 
 uses
 	SaGeVersion
+	,StrMan
+	,crt
 	;
 
 operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;
@@ -155,6 +180,12 @@ if all > 0 then
 	begin
 	Result += ', ' + SGStrReal(count/all * 100, DllManagerProcentPrecision) + '%';
 	end;
+end;
+
+procedure TSGDllLoadExtensionsObject.Clear();
+begin
+SetLength(FExtensions, 0);
+inherited;
 end;
 
 procedure TSGDllLoadObject.Clear();
@@ -228,6 +259,43 @@ FDlls[High(FDlls)] := VDll;
 VDll.Owner := Self;
 end;
 
+function TSGDllManager.GenerateMaxNameLength() : TSGUInt32;
+var
+	i : TSGUInt32;
+begin
+Result := 0;
+if FDlls <> nil then
+	if Length(FDlls) > 0 then
+		for i := 0 to High(FDlls) do
+			if Result < Length(FDlls[i].FirstName) then
+				Result := Length(FDlls[i].FirstName);
+end;
+
+function TSGDllManager.GenerateMaxChunkNameLength() : TSGUInt32;
+var
+	i, ii : TSGUInt32;
+	SL : TSGStringList;
+begin
+Result := 0;
+if FDlls <> nil then
+	if Length(FDlls) > 0 then
+		for i := 0 to High(FDlls) do
+			begin
+			SL := FDlls[i].ChunkNames();
+			if SL <> nil then
+				begin
+				if Length(SL) > 0 then
+					begin
+					for ii := 0 to High(SL) do
+						if Length(SL[i]) > Result then
+							Result := Length(SL[i]);
+					SetLength(SL, 0);
+					end;
+				SL := nil;
+				end;
+			end;
+end;
+
 procedure TSGDllManager.PrintStat();
 var
 	i : TSGUInt32;
@@ -269,7 +337,7 @@ else
 	end;
 end;
 
-function TSGDllManager.DllSuppored(const VSystemName : TSGString) : TSGBool;
+function TSGDllManager.Suppored(const VSystemName : TSGString) : TSGBool;
 var
 	DynLibrary : TSGDll;
 begin
@@ -312,11 +380,14 @@ constructor TSGDll.Create();
 begin
 inherited;
 Free();
+FExtensionsLoadObject.Clear();
+FLoadedExtensions := False;
+FLoadExtensionsExecuted := False;
 FLoadObjects   := nil;
 FLoadExecuted  := False;
 FLoaded        := False;
 FErrorDllNames := nil;
-FLibHandle     := 0;
+FLibHandles    := nil;
 FOwner         := nil;
 FDllFileNames  := nil;
 if DllManager <> nil then
@@ -346,13 +417,15 @@ if FDllFileNames <> nil then
 		for i := 0 to High(FDllFileNames) do
 			if Owner.MayUnloadDll(FDllFileNames[i]) then
 				begin
-				UnLoadLibrary(FLibHandle);
+				UnLoadLibrary(FLibHandles[i]);
 				FDllFileNames[i] := '';
-				FLibHandle := 0;
+				FLibHandles[i] := 0;
 				end;
 		SetLength(FDllFileNames, 0);
+		SetLength(FLibHandles, 0);
 		end;
 	FDllFileNames := nil;
+	FLibHandles := nil;
 	end;
 end;
 
@@ -378,30 +451,104 @@ if StringList <> nil then
 	end;
 end;
 
-function TSGDll.StatString() : TSGString;
+function TSGDll.ChunkName(const i : TSGUInt32) : TSGString;
+var
+	SL : TSGStringList;
 begin
-Result := FirstName() + ': ';
-if LoadedFunctions() = 0 then
+Result := '';
+SL := ChunkNames();
+if SL <> nil then
 	begin
-	Result += 'Failed to load' + Iff(TotalFunctions() > 0,' all of ' + SGStr(TotalFunctions()) + ' functions','') + '!';
-	end
+	if Length(SL) > 0 then
+		begin
+		Result := SL[i];
+		SetLength(SL, 0);
+		end;
+	SL := nil;
+	end;
+end;
+
+function TSGDll.StatString(const LoadObjectId : TSGUInt32 = 0) : TSGString;
+var
+	MNL, MCNL : TSGUInt32;
+begin
+MNL  := FOwner.GenerateMaxNameLength();
+MCNL := FOwner.GenerateMaxChunkNameLength();
+Result := StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': ';
+if LoadObjectId = 0 then
+	if LoadedFunctions() = 0 then
+		begin
+		Result +=
+			'Failed to load' +
+			Iff(TotalFunctions() > 0,' all of ' + SGStr(TotalFunctions()) + ' functions','') +
+			Iff((FDllFileNames <> nil) and (Length(FDllFileNames) = 1),' from ''' + FDllFileNames[0] + '''','') +
+			'!';
+		end
+	else
+		Result +=
+			'Loaded ' +
+			TSGDll_Procent(LoadedFunctions(), TotalFunctions()) +
+			Iff((FDllFileNames <> nil) and (Length(FDllFileNames) = 1),' from ''' + FDllFileNames[0] + '''','') +
+			'.'
 else
-	Result +=
-		'Loaded ' +
-		TSGDll_Procent(LoadedFunctions(), TotalFunctions()) +
-		Iff(FDllFileNames <> nil,' from ''' + FDllFileNames[0] + '''','') +
-		'.';
+	begin
+	Result += StringJustifyLeft(ChunkName(LoadObjectId - 1), MCNL + 1, ' ') + ': ';
+	if FLoadObjects[LoadObjectId - 1].FFunctionLoaded  = 0 then
+		begin
+		Result +=
+			'Failed to load' +
+			Iff(FLoadObjects[LoadObjectId - 1].FFunctionCount > 0,' all of ' + SGStr(FLoadObjects[LoadObjectId - 1].FFunctionCount) + ' functions','') +
+			Iff(FDllFileNames <> nil,' from ''' + FDllFileNames[LoadObjectId - 1] + '''','') +
+			'!';
+		end
+	else
+		Result +=
+			'Loaded ' +
+			TSGDll_Procent(FLoadObjects[LoadObjectId - 1].FFunctionLoaded, FLoadObjects[LoadObjectId - 1].FFunctionCount) +
+			Iff(FDllFileNames <> nil,' from ''' + FDllFileNames[LoadObjectId - 1] + '''','') +
+			'.'
+	end;
+end;
+
+procedure TSGDll.LogExtStat();
+var
+	MNL : TSGUInt32;
+begin
+MNL  := FOwner.GenerateMaxNameLength();
+SGLog.Sourse(StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions : Loaded ' + TSGDll_Procent(FExtensionsLoadObject.FFunctionLoaded, FExtensionsLoadObject.FFunctionCount) + '.');
+SGLog.Sourse(FExtensionsLoadObject.FExtensions, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions :');
 end;
 
 procedure TSGDll.LogStat();
+
+function IsSeparate() : TSGBool;
+begin
+Result := False;
+if FLoadObjects <> nil then
+	Result := Length(FLoadObjects) > 1;
+end;
+
+procedure SourceSeparate();
+var
+	i : TSGUInt32;
+begin
+for i := 0 to High(FLoadObjects) do
+	SGLog.Sourse(StatString(i + 1));
+end;
+
 var
 	NotLoadedFunc : TSGStringList;
+	MNL : TSGUInt32;
 begin
+MNL  := FOwner.GenerateMaxNameLength();
 Loading();
-SGLog.Sourse([StatString()]);
-SGLog.Sourse(FErrorDllNames, FirstName() + ': Can''t load from this libraries :');
+if IsSeparate then
+	SourceSeparate()
+else
+	SGLog.Sourse(StatString());
+SGLog.Sourse(FErrorDllNames, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load from this libraries :');
 NotLoadedFunc := GenerateAllNotLoadedFunc();
-SGLog.Sourse(NotLoadedFunc, FirstName() + ': Can''t load this functions :');
+SGLog.Sourse(NotLoadedFunc, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load this functions :');
 SetLength(NotLoadedFunc, 0);
 end;
 
@@ -420,18 +567,48 @@ if FLoadObjects <> nil then
 end;
 
 procedure TSGDll.PrintStat(const Extended : TSGBool = False);
+
+function IsSeparate() : TSGBool;
+begin
+Result := False;
+if FLoadObjects <> nil then
+	Result := Length(FLoadObjects) > 1;
+end;
+
+procedure WriteSeparate();
 var
+	i : TSGUInt32;
+begin
+for i := 0 to High(FLoadObjects) do
+	WriteLn(StatString(i + 1));
+end;
+
+var
+	MNL : TSGUInt32;
 	NotLoadedFunc : TSGStringList;
 begin
+MNL  := FOwner.GenerateMaxNameLength();
 Loading();
-WriteLn(StatString());
+if FLoaded then
+	if TotalFunctions() = LoadedFunctions() then
+		TextColor(10)
+	else
+		TextColor(14)
+else
+	TextColor(12);
+if IsSeparate then
+	WriteSeparate()
+else
+	WriteLn(StatString());
 if Extended then
 	begin
-	SGPrintParams(FErrorDllNames, FirstName() + ': Can''t load from this libraries :');
+	TextColor(7);
+	SGPrintParams(FErrorDllNames, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load from this libraries :');
 	NotLoadedFunc := GenerateAllNotLoadedFunc();
-	SGPrintParams(NotLoadedFunc, FirstName() + ': Can''t load this functions :');
+	SGPrintParams(NotLoadedFunc, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load this functions :');
 	SetLength(NotLoadedFunc, 0);
 	end;
+TextColor(7);
 end;
 
 function TSGDll.TotalFunctions() : TSGUInt32;
@@ -456,14 +633,53 @@ end;
 
 function TSGDll.CustomLoading() : TSGBool;
 
+function LoadJointly() : TSGBool;
+var
+	i : TSGUInt32;
+begin
+Result := False;
+FDllFileNames := DllChunkNames();
+SetLength(FLibHandles, Length(FDllFileNames));
+for i := 0 to High(FLibHandles) do
+	FLibHandles[i] := LoadLibrary(FDllFileNames[i]);
+FLoadObjects := LoadChunks(FLibHandles);
+Result := True;
+if FLoadObjects <> nil then
+	if Length(FLoadObjects) > 0 then
+		for i := 0 to High(FLoadObjects) do
+			if FLoadObjects[i].FFunctionLoaded = 0 then
+				begin
+				Result := False;
+				break;
+				end;
+end;
+
 function LoadSeparate() : TSGBool;
 begin
 Result := False;
+if ChunksLoadJointly() then
+	Result := LoadJointly()
+else
+	begin
+
+	end;
 end;
 
 function IsSeparate() : TSGBool;
+var
+	SL : TSGStringList;
 begin
 Result := False;
+SL := ChunkNames();
+if SL <> nil then
+	begin
+	if Length(SL) > 0 then
+		begin
+		Result := Length(SL) > 1;
+		SetLength(SL, 0);
+		end;
+	SL := nil;
+	end;
 end;
 
 function LoadNormal() : TSGBool;
@@ -472,6 +688,21 @@ var
 	i : TSGUInt32;
 	TestLibHandle : TSGLibHandle;
 	TestLoadObject : TSGDllLoadObject;
+
+procedure FinalizeLoad(const Sucs : TSGBool);
+begin
+SetLength(FLoadObjects, 1);
+FLoadObjects[0] := TestLoadObject;
+SetLength(FDllFileNames, 1);
+FDllFileNames[0] := DllFileNames[i];
+SetLength(FLibHandles, 1);
+FLibHandles[0] := TestLibHandle;
+
+TestLibHandle := 0;
+TestLoadObject.Clear();
+Result := Sucs;
+end;
+
 begin
 Result := False;
 DllFileNames := DllNames();
@@ -482,18 +713,10 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 		if TestLibHandle <> 0 then
 			begin
 			TestLoadObject := Load(TestLibHandle);
-			if TestLoadObject.FFunctionCount > 0 then
-				begin
-				SetLength(FLoadObjects, 1);
-				FLoadObjects[0] := TestLoadObject;
-				SetLength(FDllFileNames, 1);
-				FDllFileNames[0] := DllFileNames[i];
-				FLibHandle := TestLibHandle;
-
-				TestLibHandle := 0;
-				fillchar(TestLoadObject, SizeOf(TestLoadObject), 0);
-				Result := True;
-				end
+			if TestLoadObject.FFunctionLoaded > 0 then
+				FinalizeLoad(True)
+			else if TestLoadObject.FFunctionCount > 0 then
+				FinalizeLoad(False)
 			else
 				TestLoadObject.Clear();
 			end;
@@ -511,8 +734,9 @@ SetLength(DllFileNames, 0);
 end;
 
 begin
-if IsSeparate() then
-	FLoaded := LoadSeparate();
+if not FLoaded then
+	if IsSeparate() then
+		FLoaded := LoadSeparate();
 if not FLoaded then
 	FLoaded := LoadNormal();
 FLoadExecuted := True;
@@ -535,11 +759,29 @@ if FOwner <> nil then
 		if Length(Childs) > 0 then
 			begin
 			for i := 0 to High(Childs) do
-				FOwner.DllSuppored(Childs[i]);
+				FOwner.Suppored(Childs[i]);
 			SetLength(Childs, 0);
 			end;
 		Childs := nil;
 		end;
+	end;
+end;
+
+procedure TSGDll.ReadExtensions();
+
+function ReadExt () : TSGBool;
+begin
+Result := False;
+FExtensionsLoadObject := LoadExtensions();
+Result := FExtensionsLoadObject.FFunctionLoaded > 0;
+end;
+
+begin
+if not FLoadExtensionsExecuted then
+	begin
+	FLoadedExtensions := ReadExt();
+	FLoadExtensionsExecuted := True;
+	LogExtStat();
 	end;
 end;
 
@@ -578,6 +820,21 @@ end;
 class function TSGDll.LoadChunk(const VChunk : TSGString; const VDll : TSGLibHandle) : TSGDllLoadObject;
 begin
 Result.Clear();
+end;
+
+class function TSGDll.LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList;
+begin
+Result := nil;
+end;
+
+class function TSGDll.LoadExtensions() : TSGDllLoadExtensionsObject;
+begin
+Result.Clear();
+end;
+
+class function TSGDll.ChunksLoadJointly() : TSGBool;
+begin
+Result := False;
 end;
 
 initialization

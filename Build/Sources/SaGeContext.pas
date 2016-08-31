@@ -566,6 +566,13 @@ end;
 begin
 SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)');
 SGPrintContextSettings(VSettings);
+if not VRenderClass.Suppored then
+	begin
+	SGHint(VRenderClass.ClassName() + ' not suppored!');
+	Settings := VSettings;
+	SetLength(Settings, 0);
+	exit;
+	end;
 
 Settings := VSettings;
 Context := VContextClass.Create();

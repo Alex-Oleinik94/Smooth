@@ -6,7 +6,7 @@ unit SaGeRender;
 
 interface
 
-uses 
+uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeClasses
@@ -122,7 +122,7 @@ type
 		{$ELSE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);virtual;abstract;
 			{$ENDIF}
-		
+
 			(* Shaders *)
 		function SupporedShaders() : TSGBoolean;virtual;abstract;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;virtual;abstract;
@@ -131,12 +131,12 @@ type
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);virtual;abstract;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);virtual;abstract;
 		procedure DeleteShader(const VProgram : TSGLongWord);virtual;abstract;
-		
+
 		function CreateShaderProgram() : TSGLongWord;virtual;abstract;
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);virtual;abstract;
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);virtual;abstract;
-		
+
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;virtual;abstract;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);virtual;abstract;
 		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
@@ -146,7 +146,7 @@ type
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
-		
+
 		function SupporedDepthTextures():TSGBoolean;virtual;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
 		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); virtual;abstract;
@@ -158,12 +158,12 @@ type
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);virtual;abstract;
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);virtual;abstract;
 		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);virtual;abstract;
-		
+
 		{$DEFINE INC_PLACE_RENDER_CLASS}
 		{$INCLUDE SaGeCommonStructs.inc}
 		{$UNDEF INC_PLACE_RENDER_CLASS}
 		end;
-	
+
 	TSGRenderClass  = class of TSGRender;
 
 procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -174,6 +174,7 @@ implementation
 uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
+		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
 		{$ENDIF}
@@ -181,7 +182,16 @@ uses
 
 function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := TSGRenderOpenGL;
+if TSGRenderOpenGL.Suppored then
+	Result := TSGRenderOpenGL;
+{$IFDEF MSWINDOWS}
+if (Result = nil) and (TSGRenderDirectX12.Suppored) then
+	Result := TSGRenderDirectX12;
+if (Result = nil) and (TSGRenderDirectX9.Suppored) then
+	Result := TSGRenderDirectX9;
+if (Result = nil) and (TSGRenderDirectX8.Suppored) then
+	Result := TSGRenderDirectX8;
+{$ENDIF}
 end;
 
 {$DEFINE RENDER_CLASS := TSGRender}
@@ -260,7 +270,7 @@ SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited method!!');
 end;
 
 procedure TSGRender.Enable(VParam:Cardinal);
-begin 
+begin
 SGLog.Sourse('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
 end;
 

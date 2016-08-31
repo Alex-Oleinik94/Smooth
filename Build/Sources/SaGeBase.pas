@@ -5,7 +5,7 @@ unit SaGeBase;
 
 interface
 
-uses 
+uses
 	crt
 	,dos
 	{$IFDEF MSWINDOWS}
@@ -117,11 +117,11 @@ const
 	SGFrameButtonsTypeCleared = SGFrameButtonsType0f;
 	SGFrameButtonsType1f =               $000004;
 	SGFrameButtonsType3f =               $000005;
-	
+
 	SGObjectTimerConst : real = 0.02;
-	
+
 	SGFrameAnimationConst = 200;
-	
+
 	//Это для SaGeScreen.TSGComponent
 	SGAlignNone =                        $000006;
 	SGAlignLeft =                        $000007;
@@ -129,21 +129,21 @@ const
 	SGAlignTop =                         $000009;
 	SGAlignBottom =                      $00000A;
 	SGAlignClient =                      $00000B;
-	
+
 	//Это для SaGeScreen.TSGComponent
 	SGAnchorRight =                      $00000D;
 	SGAnchorLeft =                       $00000E;
 	SGAnchorTop =                        $00000F;
 	SGAnchorBottom =                     $000010;
-	
+
 	//Типы проэкции для SaGeRender
 	SG_3D =                              $000011;
 	SG_3D_ORTHO =                        $000012;
-	
+
 	//Это для SaGeScreen
 	SG_VERTEX_FOR_CHILDREN =             $000013;
 	SG_VERTEX_FOR_PARENT =               $000014;
-	
+
 	//Это для SaGeScreen
 	SG_LEFT =                            $000015;
 	SG_TOP =                             $000016;
@@ -151,7 +151,7 @@ const
 	SG_WIDTH =                           $000018;
 	SG_RIGHT =                           $000019;
 	SG_BOTTOM =                          $00001A;
-	
+
 	//Это для SaGeMath
 	SG_VARIABLE =                        $00001B;
 	SG_CONST =                           $00001C;
@@ -164,22 +164,22 @@ const
 	SG_NOTHINC = SG_NONE;
 	SG_NOTHINK = SG_NONE;
 	SG_FUNCTION =                        $000023;
-	
+
 	//Это для SaGeMath
 	SG_ERROR =                           $000024;
 	SG_WARNING =                         $000025;
 	SG_NOTE =                            $000026;
-	
+
 	//Тип проэкции для SaGeRender
 	SG_2D =                              $000027;
-	
+
 	//Это для SaGeShaders
 	SG_GLSL_3_0 =                        $000028;
 	SG_GLSL_ARB =                        $000029;
 const
 	WinSlash = '\';
 	UnixSlash = '/';
-	Slash = 
+	Slash =
 		{$IFDEF MSWINDOWS}
 			WinSlash
 		{$ELSE}
@@ -201,7 +201,7 @@ const
 	SGModelsDirectory = SGDataDirectory + Slash +'Models';
 	SGExamplesDirectory = SGDataDirectory + Slash +'Examples';
 	SGEngineDirectory = SGDataDirectory + Slash +'Engine';
-	SGImagesDirectory = 
+	SGImagesDirectory =
 		{$IFDEF ANDROID}
 			'/sdcard/Images'
 		{$ELSE}
@@ -211,7 +211,7 @@ const
 		SGTempDirectory = '.'+Slash+'..'+Slash+'Temp';
 		{$ENDIF}
 var
-	//Если эту переменную задать как False, то SGLog.Sourse нечего делать не будет, 
+	//Если эту переменную задать как False, то SGLog.Sourse нечего делать не будет,
 	//и самого файлика лога SGLog.Create не создаст
 	SGLogEnable:Boolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
 const
@@ -222,7 +222,7 @@ type
 	Float  = type Single;
 	Double = type Real;
 	Int    = type LongInt;
-	
+
 	//SaGe Unsigned Integer
 	SGUint       = type LongWord;
 	//Pointer for SaGe Unsigned Integer
@@ -230,15 +230,16 @@ type
 	SGInt        = Int64;
 	TSGHandle    = type LongInt;
 	TSGLibHandle = type TSGMaxEnum;
+	TSGLibHandleList = type packed array of TSGMaxEnum;
 	FileOfByte   = type File Of Byte;
 	PFileOfByte  = ^ FileOfByte;
-	
+
 	TSGIdentifier = type LongWord;
-	
+
 	PReal     = ^ real;
 	TSGExByte = type Int64;
 	PSingle = ^ single;
-	
+
 	TSGSetOfByte   = type packed set   of byte;
 	TArBoolean     = type packed array of boolean;
 	TSGArBoolean   = type packed array of TSGBoolean;
@@ -256,7 +257,7 @@ type
 	TSGArConst     = type TArConst;
 	TSGArString    = TSGStringList;
 	TSGConcoleCallerParams = TSGStringList;
-	
+
 	TSGArStringEnumerator = class
 			private
 		FList : TSGArString;
@@ -267,30 +268,30 @@ type
 		function MoveNext(): TSGBoolean;
 		property Current : TSGString read GetCurrent;
 		end;
-	
+
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
 	PTArByte     = ^ TArByte;
 	PTArInteger  = ^ TArInteger;
 	PTArWord     = ^ TArWord;
 	PTArInt64    = ^ TArInt64;
-	
+
 	//Строки C++
 	PChar    = ^ Char;
 	SGPChar  = PChar;
 	TArPChar = type packed array of PChar;
 	TArChar  = type packed array of Char;
-	
+
 	//Файлики
 	PText     = ^ TextFile;
 	Text      = TextFile;
 	PTextFile = ^ TextFile;
-	
+
 	TSGCaption =  TSGString;
-	
+
 	SGProcedure  = type TProcedure;
 	TSGProcedure = type SGProcedure;
-	
+
 	SGFrameButtonsType = type TSGExByte;
 type
 	//Тип плоскости. Так как он не может Draw(), то он описан сдесь, а не в SaGeCommon
@@ -307,10 +308,10 @@ type
 	ArLong01          = packed array [0..1] of LongWord;
 	PArLong01         = ^ ArLong01;
 	SGObjectProcedure = ArLong01;
-	
+
 	//Расширение TSGBoolean. Тут есть SG_TRUE, SG_FALSE и SG_UNKNOWN
 	TSGExBoolean = type TSGByte;
-	
+
 	//Класс, который позволяет загружать динамические библиотеки
 	TSGLibrary = class
 			public
@@ -323,7 +324,7 @@ type
 			public
 		property LibHandle : TSGLibHandle read FLibrary;
 		end;
-	
+
 	//Начальный класс SaGe
 	TSGClass=class;
 	TSGClassClass = class of TSGClass;
@@ -356,10 +357,10 @@ type
 		function GetPastMiliSecondsFrom(const a:TSGDateTime):int64;
 		end;
 	TSGDataTime=TSGDateTime;
-	
+
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
-	TSGThreadFunctionResult = 
+	TSGThreadFunctionResult =
 	{$IFDEF ANDROID}
 		Pointer
 	{$ELSE}
@@ -390,7 +391,7 @@ type
 		FProcedure:TSGThreadProcedure;
 		FParametr:Pointer;
 		FThreadID:LongWord;
-		{$IFDEF ANDROID} 
+		{$IFDEF ANDROID}
 			attr : pthread_attr_t;
 			mutex : pthread_mutex_t;
 			cond : pthread_cond_t;
@@ -403,7 +404,7 @@ type
 		end;
 	SGThread = TSGThread;
 	ArTSGThread = type packed array of TSGThread;
-	TArTSGThread = ArTSGThread; 
+	TArTSGThread = ArTSGThread;
 const
 	SGSetExists               : TSGExByte = 100;
 	SGSetNote                 : TSGExByte = 101;
@@ -440,13 +441,13 @@ type
 			FProcedure : TSGProcedure;
 			end;
 	TSGConsoleMenuArray = packed array of TSGConsoleRecord;
-const 
+const
 	//Значения, которые может принимать type TSGExBoolean
 	SG_TRUE = TSGExBoolean(1);
 	SG_FALSE = TSGExBoolean(0);
 	SG_UNKNOWN = TSGExBoolean(2);
 const
-	//Используется для вычисления с Эпсилон 
+	//Используется для вычисления с Эпсилон
 	SGZero = 0.0001;
 var
 	//Экземпляр класса лога программы
@@ -605,7 +606,7 @@ procedure SGReleazeFileWay(WAy:string);
 //Возвращает путь к файлу из полного имени файла
 function SGGetFileWay(const Way:String):String;
 
-//Создает папку. 
+//Создает папку.
 function SGMakeDirectory(const DirWay:String):Boolean;inline;
 
 //Вычисление матриц
@@ -664,7 +665,7 @@ function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PC
 //Возвразает количество цифр в числе
 function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
 
-//Возвращает свободное имя файла. 
+//Возвращает свободное имя файла.
 //Catalog - это полный путь папки, где он будет его искать.
 //Sl - это то, что он будлет каждый раз прибавлять в конец имени файла в скобойкой и с нумерацией
 function SGGetFreeFileName(const Name:string;const sl:string = 'Copy'):string;inline;
@@ -950,7 +951,7 @@ var
 begin
 Result := 0;
 if Length(Text) = 0 then Exit;
-for i := 1 to Length(Text) do 
+for i := 1 to Length(Text) do
 	if (Text[i] = ',') or (Text[i] = '.') then
 		break;
 iii := i;
@@ -1081,7 +1082,7 @@ if (poUsePipes in AProcess.Options) and ViewOutput then
 	WriteFromBytes();
 	end;
 
-AProcess.Free(); 
+AProcess.Free();
 end;
 
 function DownCase(const c:TSGChar):TSGChar;
@@ -1185,7 +1186,7 @@ LongInt2:=LongInt3;
 end;
 
 function SGReadLnByte:Byte;
-begin 
+begin
 Readln(Result);
 end;
 
@@ -1273,7 +1274,7 @@ else
 end;
 
 function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):string;inline;
-var 
+var
 	Number:LongInt = 1;
 begin
 if SGExistsDirectory(Name) then
@@ -1469,15 +1470,15 @@ if not ((PChar1=nil) and (PChar2=nil)) then
 			((PChar2=nil) and (PChar1<>nil) and (PChar1[i]<>#0))then
 				Result:=False
 		else
-			if (PChar1<>nil) and (PChar2<>nil) and 
-				(((PChar1[i]=#0) and (PChar2[i]<>#0)) or 
+			if (PChar1<>nil) and (PChar2<>nil) and
+				(((PChar1[i]=#0) and (PChar2[i]<>#0)) or
 				 ((PChar2[i]=#0) and (PChar1[i]<>#0))) then
 					Result:=False
 			else
-				if (PChar1<>nil) and (PChar2<>nil) and 
-					(PChar1[i]<>#0) and (PChar2[i]<>#0) and 
+				if (PChar1<>nil) and (PChar2<>nil) and
+					(PChar1[i]<>#0) and (PChar2[i]<>#0) and
 					(PChar1[i]<>PChar2[i]) then
-						Result:=False;					
+						Result:=False;
 		I+=1;
 		end;
 end;
@@ -1611,21 +1612,21 @@ var
 	i : TSGLongWord;
 begin
 SetLength(Result, Length(Ar));
-if High(Ar)>=0 then 
+if High(Ar)>=0 then
 	begin
 	for i := 0 to High(Ar) do
 		case Ar[i].vtype of
-		vtInteger: 
+		vtInteger:
 			Result[i] := SGStr(Ar[i].vinteger);
-		vtString: 
+		vtString:
 			Result[i] := (Ar[i].vstring^);
-		vtAnsiString: 
+		vtAnsiString:
 			Result[i] := (AnsiString(Ar[i].vpointer));
-		vtBoolean: 
+		vtBoolean:
 			Result[i] := SGStr(Ar[i].vboolean);
-		vtChar: 
+		vtChar:
 			Result[i] := Ar[i].vchar;
-		vtExtended: 
+		vtExtended:
 			Result[i] := SGStrReal(Extended(Ar[i].vpointer^),5);
 		end;
 	end;
@@ -1636,21 +1637,21 @@ var
 	i:LongWord;
 begin
 Result:='';
-if High(Ar)>=0 then 
+if High(Ar)>=0 then
 	begin
 	for i := 0 to High(ar) do
 		case ar[i].vtype of
-		vtInteger: 
+		vtInteger:
 			Result+=SGStr(ar[i].vinteger);
-		vtString: 
+		vtString:
 			Result+=(ar[i].vstring^);
-		vtAnsiString: 
+		vtAnsiString:
 			Result+=(AnsiString(ar[i].vpointer));
-		vtBoolean: 
+		vtBoolean:
 			Result+=SGStr(ar[i].vboolean);
-		vtChar: 
+		vtChar:
 			Result+=ar[i].vchar;
-		vtExtended: 
+		vtExtended:
 			Result+=SGStrReal(Extended(ar[i].vpointer^),5);
 		end;
 	end;
@@ -1665,7 +1666,7 @@ var
 	i,j:Int64;
 	Key,Temp:PByte;
 begin
-i:=L; 
+i:=L;
 j:=R;
 GetMem(Key,SizeOfElement);
 GetMem(Temp,SizeOfElement);
@@ -1955,7 +1956,7 @@ for ii:=0 to High(Ar) do
 	Crt.TextColor(VActiveText*Byte(NowActive=ii)+VText*Byte((NowActive<>ii)));
 	Crt.TextBackGround(VActiveBackGround*Byte(NowActive=ii)+VBackGround*Byte((NowActive<>ii)));
 	if DAll or ((not DAll) and ((ii=NowActive) or (ii=OldActive))) then
-		if Koima then 
+		if Koima then
 			begin
 			if ii=NowActive then
 				begin
@@ -2008,7 +2009,7 @@ while not GoExit do
 		NowActive+=1;
 		DS;
 		end;
-	#72:if NowActive>0 then 
+	#72:if NowActive>0 then
 		begin
 		OldActive:=NowActive;
 		NowActive-=1;
@@ -2113,9 +2114,9 @@ function SGStrReal(r:real;const l:longint):string;inline;
 var
 	i     : TSGLongInt;
 begin
-if r<0 then 
-	Result:='-' 
-else 
+if r<0 then
+	Result:='-'
+else
 	Result:='';
 r:=abs(r);
 Result+=SGStr(Trunc(r));
@@ -2126,14 +2127,14 @@ if R>1/(10**l) then
 	Result+='.';
 	for i:=1 to l do
 		begin
-		if r=0 then 
+		if r=0 then
 			Break;
 		r*=10;
 		Result+=SGStr(trunc(r));
 		r-=trunc(r);
 		end;
 	end;
-if (Result='') or (Result='-') then 
+if (Result='') or (Result='-') then
 	Result+='0';
 end;
 
@@ -2141,9 +2142,9 @@ function SGStrExtended(r:Extended;const l:longint):string;inline;
 var
 	i     : TSGLongInt;
 begin
-if r<0 then 
-	Result:='-' 
-else 
+if r<0 then
+	Result:='-'
+else
 	Result:='';
 if ((SGStr(Trunc(abs(r)))='9223372036854775808') and
 	((SGStr(Trunc(abs(r/100)))='9223372036854775808'))) or
@@ -2162,14 +2163,14 @@ if R>1/(10**l) then
 	Result+='.';
 	for i:=1 to l do
 		begin
-		if r=0 then 
+		if r=0 then
 			Break;
 		r*=10;
 		Result+=SGStr(trunc(r));
 		r-=trunc(r);
 		end;
 	end;
-if (Result='') or (Result='-') then 
+if (Result='') or (Result='-') then
 	Result+='0';
 end;
 
@@ -2529,7 +2530,7 @@ ThreadClass.Execute();
 {$IFDEF ANDROID}
 	while true do
 		begin
-		Sleep(10000); 
+		Sleep(10000);
 		end;
 	{$ENDIF}
 end;
@@ -2739,7 +2740,7 @@ var
 	Days:Int64 = 0;
 	Monthes:Int64 = 0;
 	Years:Int64 = 0;
-	
+
 	QWr:Word = 0;
 begin
 Result:='';
@@ -3059,12 +3060,12 @@ end;
 function LoadLibrary(const AName: PChar) : TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result:=
-	{$ifdef UNIX} 
+	{$ifdef UNIX}
 		TSGLibHandle( dlopen(AName, RTLD_LAZY or RTLD_GLOBAL) );
-	{$else} 
+	{$else}
 		Windows.LoadLibrary(AName);
 		{$endif}
-end; 
+end;
 
 initialization
 begin
