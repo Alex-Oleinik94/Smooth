@@ -16,6 +16,7 @@ Build/*.ppu
 Build/*.o
 Build/Main.res
 Binaries/Main.exe
+Binaries/*.dll
 Binaries/SaGeLib.dll
 Binaries/SaGeLib.so
 Binaries/SaGe.dll

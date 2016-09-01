@@ -2039,6 +2039,7 @@ end;
 
 begin
 Result.Clear();
+LoadResult := @Result;
 ext_alutInit:= LoadProcedure('alutInit');
 ext_alutExit:= LoadProcedure('alutExit');
 ext_alutLoadWAVFile:= LoadProcedure('alutLoadWAVFile');
