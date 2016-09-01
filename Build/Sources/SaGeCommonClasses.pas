@@ -38,7 +38,7 @@ type
 	TSGCursorWheel = (SGNullCursorWheel,SGUpCursorWheel,SGDownCursorWheel);
 	TSGCursorPosition = (SGDeferenseCursorPosition,SGNowCursorPosition,SGLastCursorPosition);
 	TSGHotPixelType = TSGLongInt;
-	
+
 	TSGCursor = class(TSGBitMap)
 			public
 		constructor Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);virtual;
@@ -53,11 +53,11 @@ type
 		property HotPixelY : TSGHotPixelType read FHotPixel.y write FHotPixel.y;
 		property StandartHandle : TSGCursorHandle read FStandartCursor;
 		end;
-	
+
 	ISGRenderedTimerArea = interface(ISGNearlyContext)
 		['{ed55d22e-7069-46b1-ad39-fb9fcbe63bcb}']
 		function GetRender() : ISGRender;
-		
+
 		property Left : TSGAreaInt read GetLeft write SetLeft;
 		property Top : TSGAreaInt read GetTop write SetTop;
 		property Width : TSGAreaInt read GetWidth write SetWidth;
@@ -70,7 +70,7 @@ type
 		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
 		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
-	
+
 	ISGContextHandler = interface(ISGRenderedTimerArea)
 		['{a886fa59-2fe5-4ac7-a2ae-829df4b8a911}']
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;overload;
@@ -88,7 +88,7 @@ type
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);
 		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);
-		
+
 		property Left : TSGAreaInt read GetLeft write SetLeft;
 		property Top : TSGAreaInt read GetTop write SetTop;
 		property Width : TSGAreaInt read GetWidth write SetWidth;
@@ -101,7 +101,7 @@ type
 		property Render : ISGRender read GetRender;
 		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		end;
-	
+
 	ISGCustomContext = interface(ISGContextHandler)
 		['{b55c5aea-0250-4e89-8889-8f5eae820eb0}']
 		procedure Initialize();
@@ -111,16 +111,16 @@ type
 		procedure Close();
 		procedure ShowCursor(const VShowing : TSGBoolean);
 		procedure ReinitializeRender();
-		
+
 		function  GetFullscreen() : TSGBoolean;
 		procedure InitFullscreen(const VFullscreen : TSGBoolean);
-		
+
 		procedure SetActive(const VActive : TSGBoolean);
 		function  GetActive():TSGBoolean;
-		
+
 		procedure SetCursorCentered(const VCentered : TSGBoolean);
 		function GetCursorCentered() : TSGBoolean;
-		
+
 		function GetCursorPosition():TSGPoint2int32;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);
 		function GetWindowArea():TSGPoint2int32;
@@ -128,15 +128,15 @@ type
 		function GetClientArea():TSGPoint2int32;
 		function ShiftClientArea() : TSGPoint2int32;
 		function GetClientAreaShift() : TSGPoint2int32;
-		
+
 		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString;
 		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString;
-		
+
 		function GetCursor():TSGCursor;
 		procedure SetCursor(const VCursor : TSGCursor);
 		function GetIcon():TSGBitMap;
 		procedure SetIcon(const VIcon : TSGBitMap);
-		
+
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
@@ -154,7 +154,7 @@ type
 		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		property CursorCentered : TSGBoolean read GetCursorCentered write SetCursorCentered;
 		end;
-	
+
 	PISGContext = ^ ISGContext;
 	ISGContext = interface(ISGCustomContext)
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
@@ -168,7 +168,9 @@ type
 		procedure EndIncessantlyPainting();
 		procedure Minimize();
 		procedure Maximize();
-		
+		function GetAudioRender() : ISGAudioRender;
+
+		property AudioRender : ISGAudioRender read GetAudioRender;
 		property Screen : TSGPointer read GetScreen;
 		property NewContext : TSGPointer write SetNewContext;
 		property RenderClass : TSGPointer write SetRenderClass;
@@ -190,17 +192,17 @@ type
 		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
 		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
-	
+
 	ISGContextabled = interface(ISGRendered)
 		['{ee8df1e3-abe8-4378-8d11-7b5903fea502}']
 		procedure SetContext(const VContext : ISGContext);
 		function GetContext() : ISGContext;
 		function ContextAssigned() : TSGBoolean;
-		
+
 		property Context : ISGContext read GetContext write SetContext;
 		property Render  : ISGRender  read GetRender;
 		end;
-	
+
 	TSGContextabled = class(TSGNamed, ISGContextabled)
 			public
 		constructor Create();override;deprecated;
@@ -212,14 +214,17 @@ type
 		procedure SetContext(const VContext : ISGContext);virtual;
 		function GetContext() : ISGContext;virtual;
 		function GetRender() : ISGRender;virtual;
-		
+		function GetAudioRender() : ISGAudioRender;virtual;
+
 		function ContextAssigned() : TSGBoolean;virtual;
 		function RenderAssigned() : TSGBoolean;virtual;
-		
+		function AudioRenderAssigned() : TSGBool; virtual;
+
 		property Context : ISGContext read GetContext write SetContext;
 		property Render  : ISGRender  read GetRender;
+		property AudioRender : ISGAudioRender read GetAudioRender;
 		end;
-	
+
 	TSGDrawableClass = class of TSGDrawable;
 	TSGDrawable = class(TSGExtendedPaintable, ISGContextabled)
 			public
@@ -233,18 +238,45 @@ type
 		procedure SetContext(const VContext : ISGContext);virtual;
 		function GetContext() : ISGContext;virtual;
 		function GetRender() : ISGRender;virtual;
-		
+		function GetAudioRender() : ISGAudioRender;virtual;
+
 		function ContextAssigned() : TSGBoolean;virtual;
 		function RenderAssigned() : TSGBoolean;virtual;
-		
+		function AudioRenderAssigned() : TSGBool; virtual;
+
 		property Context : ISGContext read GetContext write SetContext;
 		property Render  : ISGRender  read GetRender;
+		property AudioRender : ISGAudioRender read GetAudioRender;
 		end;
 
 implementation
 
 uses
 	SaGeImages;
+
+function TSGDrawable.AudioRenderAssigned() : TSGBool;
+begin
+Result := False;
+if ContextAssigned() then
+	Result := Context.AudioRender <> nil;
+end;
+
+function TSGDrawable.GetAudioRender() : ISGAudioRender;
+begin
+Result := Context.AudioRender;
+end;
+
+function TSGContextabled.AudioRenderAssigned() : TSGBool;
+begin
+Result := False;
+if ContextAssigned() then
+	Result := Context.AudioRender <> nil;
+end;
+
+function TSGContextabled.GetAudioRender() : ISGAudioRender;
+begin
+Result := Context.AudioRender;
+end;
 
 class function TSGDrawable.ClassName() : TSGString;
 begin
@@ -365,7 +397,7 @@ else
 	FContext := nil;
 end;
 
-function TSGDrawable.ContextAssigned() : TSGBoolean; 
+function TSGDrawable.ContextAssigned() : TSGBoolean;
 begin
 Result := False;
 if (FContext <> nil) then

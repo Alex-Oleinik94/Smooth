@@ -16,10 +16,10 @@ uses
 	,SaGeImagesBase
 	,SaGeScreen
 	,SaGeAudioRender
-	
+
 	,Classes
 	,crt
-	
+
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
@@ -222,6 +222,11 @@ type
 			public
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
+			protected
+		FAudioRender : TSGAudioRender;
+		function GetAudioRender() : ISGAudioRender;
+			public
+		property AudioRender : ISGAudioRender read GetAudioRender;
 		end;
 
 function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
@@ -1048,11 +1053,19 @@ if FPaintableSettings <> nil then
 	end;
 end;
 
+function TSGContext.GetAudioRender() : ISGAudioRender;
+begin
+Result := nil;
+if FAudioRender <> nil then
+	Result := FAudioRender as ISGAudioRender;
+end;
+
 constructor TSGContext.Create();
 var
 	i:LongWord;
 begin
 inherited;
+FAudioRender := nil;
 FLeft := 0;
 FTop := 0;
 FClientHeight := 0;
