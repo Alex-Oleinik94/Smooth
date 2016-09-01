@@ -5,17 +5,19 @@ unit SaGeContextLinux;
 interface
 
 uses 
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
+	,SaGeClasses
+	,SaGeCommonClasses
+	
 	,unix
 	,x
 	,xlib
 	,xutil
 	,glx
-	,SaGeCommonClasses
 	;
 type
 	TSGContextLinux = class(TSGContext)
@@ -56,8 +58,9 @@ type
 		function  GetOption(const What:string):Pointer;override;
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
-		function  GetClientWidth() : TSGLongWord;override;
-		function  GetClientHeight() : TSGLongWord;override;
+			protected
+		function  GetClientWidth() : TSGAreaInt;override;
+		function  GetClientHeight() : TSGAreaInt;override;
 		end;
 
 implementation
@@ -117,12 +120,12 @@ end;
 //WriteLn(VSGPtr,' ',Result);
 end;
 
-function  TSGContextLinux.GetClientWidth() : TSGLongWord;
+function  TSGContextLinux.GetClientWidth() : TSGAreaInt;
 begin
 Result := Width;
 end;
 
-function  TSGContextLinux.GetClientHeight() : TSGLongWord;
+function  TSGContextLinux.GetClientHeight() : TSGAreaInt;
 begin
 Result := Height;
 end;
@@ -455,12 +458,7 @@ procedure TSGContextLinux.Initialize();
 begin
 Active:=CreateWindow();
 if Active then
-	begin
-	SGScreen.Load(Self);
-	if FPaintable <> nil then
-		FPaintable.LoadDeviceResourses();
 	inherited;
-	end;
 end;
 
 procedure TSGContextLinux.Run();

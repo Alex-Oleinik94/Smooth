@@ -753,14 +753,14 @@ LoadResult := @Result;
     @glutGameModeGet := GetGLutProcAddress('glutGameModeGet');
 {$ifndef Windows}
     GLUT_STROKE_ROMAN := GetGLutProcAddress('glutStrokeRoman');
-    GLUT_STROKE_MONO_ROMAN := GetGLutProcAddress(hDll,'glutStrokeMonoRoman');
+    GLUT_STROKE_MONO_ROMAN := GetGLutProcAddress('glutStrokeMonoRoman');
     GLUT_BITMAP_9_BY_15 := GetGLutProcAddress('glutBitmap9By15');
     GLUT_BITMAP_8_BY_13 := GetGLutProcAddress('glutBitmap8By13');
     GLUT_BITMAP_TIMES_ROMAN_10 := GetGLutProcAddress('glutBitmapTimesRoman10');
     GLUT_BITMAP_TIMES_ROMAN_24 := GetGLutProcAddress('glutBitmapTimesRoman24');
     GLUT_BITMAP_HELVETICA_10 := GetGLutProcAddress('glutBitmapHelvetica10');
     GLUT_BITMAP_HELVETICA_12 := GetGLutProcAddress('glutBitmapHelvetica12');
-    GLUT_BITMAP_HELVETICA_18 := GetGLutProcAddress(hDll, 'glutBitmapHelvetica18');
+    GLUT_BITMAP_HELVETICA_18 := GetGLutProcAddress('glutBitmapHelvetica18');
 {$endif Windows}
   except
     
