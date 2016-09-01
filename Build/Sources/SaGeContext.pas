@@ -223,8 +223,12 @@ type
 		procedure DeleteDeviceResourses();
 		procedure LoadDeviceResourses();
 			protected
-		FAudioRender : TSGAudioRender;
+		FAudioRender      : TSGAudioRender;
+		FAudioRenderClass : TSGAudioRenderClass;
+			protected
 		function GetAudioRender() : ISGAudioRender;
+		procedure CreateAudio();
+		procedure KillAudio();
 			public
 		property AudioRender : ISGAudioRender read GetAudioRender;
 		end;
@@ -239,10 +243,12 @@ function SGContextOptionMin() : TSGContextOption;
 function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
 function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
 {$IFDEF ANDROID}
-function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
+function SGContextOptionAndroidApp(const State : TSGPointer) : TSGOptionPointer;
 {$ENDIF}
 function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
+
 function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
+function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -272,6 +278,49 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
+var
+	O, OSets : TSGOption;
+	Sets : TSGBool = False;
+begin
+Result := nil;
+for O in VSettings do
+	if O.FName = VName then
+		begin
+		OSets := O;
+		Sets := True;
+		break;
+		end;
+if Sets then
+	begin
+	Result := OSets.FOption;
+	VSettings -= OSets;
+	end;
+end;
+
+procedure TSGContext.CreateAudio();
+begin
+if FAudioRenderClass = nil then
+	if 'AUDIORENDER' in FPaintableSettings then
+		FAudioRenderClass := TSGAudioRenderClass(SGProcessContextOption('AUDIORENDER', FPaintableSettings));
+if FAudioRenderClass <> nil then
+	begin
+	if FAudioRender <> nil then
+		KillAudio();
+	FAudioRender := FAudioRenderClass.Create();
+	FAudioRender.Initialize();
+	end;
+end;
+
+procedure TSGContext.KillAudio();
+begin
+if FAudioRender <> nil then
+	begin
+	FAudioRender.Destroy();
+	FAudioRender := nil;
+	end;
+end;
 
 procedure TSGContext.DestroyScreen();
 begin
@@ -488,8 +537,10 @@ FShowCursor    := FormerContext.FShowCursor;
 FIcon          := FormerContext.FIcon;
 FCursor        := TSGCursor.Copy(FormerContext.FCursor);
 FScreen        := FormerContext.FScreen;
-FormerContext.FScreen    := nil;
-FormerContext.FPaintable := nil;
+FAudioRender   := FormerContext.FAudioRender;
+FormerContext.FScreen      := nil;
+FormerContext.FPaintable   := nil;
+FormerContext.FAudioRender := nil;
 end;
 
 function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
@@ -666,7 +717,12 @@ FCursorWheel := VCursorWheel;
 end;
 
 procedure TSGContext.ReinitializeRender();
+var
+	DT1, DT2 : TSGDateTime;
+	OldRenderClassName : TSGString = '';
 begin
+OldRenderClassName := FRender.ClassName();
+DT1.Get();
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : Begining');
 	{$ENDIF}
@@ -693,6 +749,8 @@ Screen.LoadDeviceResourses();
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : End');
 	{$ENDIF}
+DT2.Get();
+SGLog.Sourse('TSGContext.ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SGSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SGStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -854,6 +912,7 @@ if FPaintableClass <> nil then
 	begin
 	if not Screen.ContextAssigned() then
 		Screen.Load(Self);
+	CreateAudio();
 	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
@@ -1161,6 +1220,7 @@ if FScreen <> nil then
 	FScreen.Destroy();
 	FScreen := nil;
 	end;
+KillAudio();
 if FRender <> nil then
 	begin
 	FRender.Destroy();

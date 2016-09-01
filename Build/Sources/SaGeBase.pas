@@ -2763,32 +2763,56 @@ VSeconds:=VSeconds div 12;
 Years:=VSeconds;
 if (Years<>0) and (QWr<=2) then
 	begin
-	Result+=SGStr(Years)+' г ';
+	Result+=SGStr(Years);
+	if Encoding = 'RUS1251' then
+		Result += ' г '
+	else
+		Result += ' y ';
 	QWr+=1;
 	end;
 if (Monthes<>0)  and (QWr<=2)then
 	begin
-	Result+=SGStr(Monthes)+' мес ';
+	Result+=SGStr(Monthes);
+	if Encoding = 'RUS1251' then
+		Result += ' мес '
+	else
+		Result += ' mon ';
 	QWr+=1;
 	end;
 if (Days<>0)  and (QWr<=2)then
 	begin
-	Result+=SGStr(Days)+' дн ';
+	Result+=SGStr(Days);
+	if Encoding = 'RUS1251' then
+		Result += ' дн '
+	else
+		Result += ' d ';
 	QWr+=1;
 	end;
 if (Hours<>0)  and (QWr<=2)then
 	begin
-	Result+=SGStr(Hours)+' ч ';
+	Result+=SGStr(Hours);
+	if Encoding = 'RUS1251' then
+		Result += ' ч '
+	else
+		Result += ' h ';
 	QWr+=1;
 	end;
 if (Minutes<>0)  and (QWr<=2)then
 	begin
-	Result+=SGStr(Minutes)+' мин ';
+	Result+=SGStr(Minutes);
+	if Encoding = 'RUS1251' then
+		Result += ' мин '
+	else
+		Result += ' min ';
 	QWr+=1;
 	end;
 if ((Result='') or (Seconds<>0)) and (QWr<=2) then
 	begin
-	Result+=SGStr(Seconds)+' сек ';
+	Result+=SGStr(Seconds);
+	if Encoding = 'RUS1251' then
+		Result += ' сек '
+	else
+		Result += ' s ';
 	QWr+=1;
 	end;
 end;

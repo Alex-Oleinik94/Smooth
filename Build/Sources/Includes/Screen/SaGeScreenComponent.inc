@@ -1,7 +1,7 @@
 {$IFDEF SCREEN_INTERFACE}
 type
 	TSGComponent = class;
-	
+
 	// for-in loop enumerator class
 	TSGComponentEnumerator = class
 			protected
@@ -24,7 +24,7 @@ type
 		constructor Create(const VComponent : TSGComponent); override;
 		function MoveNext(): TSGBoolean; override;
 		end;
-	
+
 	PSGComponent          = ^ TSGComponent;
 	TSGComponentList      = packed array of TSGComponent;
 	TSGComponentListList  = packed array of TSGComponentList;
@@ -54,33 +54,33 @@ type
 		FHeight : TSGScreenInt;
 		FLeft   : TSGScreenInt;
 		FTop    : TSGScreenInt;
-		
+
 		FNoneTop    : TSGScreenInt;
 		FNoneLeft   : TSGScreenInt;
 		FNoneHeight : TSGScreenInt;
 		FNoneWidth  : TSGScreenInt;
-		
+
 		FNeedLeft   : TSGScreenInt;
 		FNeedTop    : TSGScreenInt;
 		FNeedWidth  : TSGScreenInt;
 		FNeedHeight : TSGScreenInt;
-		
+
 		FTopShiftForChilds    : TSGScreenInt;
 		FLeftShiftForChilds   : TSGScreenInt;
 		FRightShiftForChilds  : TSGScreenInt;
 		FBottomShiftForChilds : TSGScreenInt;
-		
+
 		FRealLeft : TSGScreenInt;
 		FRealTop  : TSGScreenInt;
-		
+
 		FUnLimited : TSGBoolean;
 		FParent    : TSGComponent;
-		
+
 		procedure SetRight (NewRight  : TSGScreenInt);virtual;
 		procedure SetBottom(NewBottom : TSGScreenInt);virtual;
 		function GetRight()  : TSGScreenInt;virtual;
 		function GetBottom() : TSGScreenInt;virtual;
-		
+
 		function  GetTitle() : TSGString;virtual;
 		procedure SetTitle(const VTitle : TSGString);virtual;
 		function  GetWidth() : TSGAreaInt;virtual;
@@ -91,11 +91,11 @@ type
 		function  GetTop() : TSGAreaInt;virtual;
 		procedure SetLeft(const VLeft : TSGAreaInt);virtual;
 		procedure SetTop(const VTop : TSGAreaInt);virtual;
-		
+
 		function GetScreenWidth()  : TSGScreenInt;virtual;
 		function GetScreenHeight() : TSGScreenInt;virtual;
 		function GetLocation() : TSGComponentLocation;virtual;
-		
+
 		function UpDateObj(var Obj, NObj : TSGScreenInt) : TSGScreenInt;
 		procedure UpDateObjects();virtual;
 		procedure TestCoords();virtual;
@@ -131,10 +131,10 @@ type
 		FVisibleTimer : TSGScreenTimer;
 		FActive : TSGBoolean;
 		FActiveTimer  : TSGScreenTimer;
-		
+
 		FCaption : TSGCaption;
 		FSkin    : TSGScreenSkin;
-		
+
 		procedure UpDateSkin();virtual;
 		procedure UpgradeTimers();virtual;
 		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
@@ -218,7 +218,7 @@ type
 		function AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			public 
+			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
 		FDrawClass:TSGDrawable;
@@ -232,7 +232,7 @@ type
 {$ENDIF}
 
 {$IFDEF SCREEN_IMPLEMENTATION}
-class function TSGComponent.ClassName() : TSGString; 
+class function TSGComponent.ClassName() : TSGString;
 begin
 Result := 'TSGComponent';
 end;
@@ -406,7 +406,7 @@ else
 end;
 
 function TSGComponent.IndexOf(const VComponent : TSGComponent ): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var 
+var
 	i : LongInt;
 begin
 Result := -1;
@@ -623,7 +623,7 @@ if FChildren <> nil then
 end;
 
 function TSGComponent.UpDateObj(var Obj,NObj:TSGScreenInt):TSGScreenInt;
-const 
+const
 	Speed = 2;
 var
 	Value:LongInt = 0;
@@ -752,7 +752,7 @@ end;
 
 destructor TSGComponent.Destroy();
 begin
-if FDrawClass<>nil then
+if FDrawClass <> nil then
 	begin
 	FDrawClass.Destroy();
 	FDrawClass := nil;
@@ -884,7 +884,7 @@ UpDateSkin();
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
 	PriorityComponent.FromUpDate(FCanChange);
-	
+
 Index := 0;
 while Index < Length(FChildren) do
 	begin

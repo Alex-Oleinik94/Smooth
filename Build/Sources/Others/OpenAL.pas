@@ -2098,19 +2098,23 @@ if alIsExtensionPresent('EAX2.0') then
 	Result.FExtensions += 'EAX2.0';
 	EAXSet := alProcedure('EAXSet');
 	EAXGet := alProcedure('EAXGet');
-	end;
+	end
+else
+	Result.FFunctionCount += 2;
 //EAX-RAM Extension
 if alIsExtensionPresent('EAX-RAM') then
 	begin
 	Result.FExtensions += 'EAX-RAM';
 	EAXSetBufferMode := alProcedure('EAXSetBufferMode');
-		EAXGetBufferMode := alProcedure('EAXGetBufferMode');
+	EAXGetBufferMode := alProcedure('EAXGetBufferMode');
 	AL_EAX_RAM_SIZE := alGetEnumValue('AL_EAX_RAM_SIZE');
 	AL_EAX_RAM_FREE := alGetEnumValue('AL_EAX_RAM_FREE');
 	AL_STORAGE_AUTOMATIC := alGetEnumValue('AL_STORAGE_AUTOMATIC');
 	AL_STORAGE_HARDWARE := alGetEnumValue('AL_STORAGE_HARDWARE');
 	AL_STORAGE_ACCESSIBLE := alGetEnumValue('AL_STORAGE_ACCESSIBLE');
-	end;
+	end
+else
+	Result.FFunctionCount += 7;
 if alcIsExtensionPresent(alcGetContextsDevice(alcGetCurrentContext()), ALC_EXT_EFX_NAME) then
 	begin
 	Result.FExtensions += ALC_EXT_EFX_NAME;
@@ -2147,7 +2151,9 @@ if alcIsExtensionPresent(alcGetContextsDevice(alcGetCurrentContext()), ALC_EXT_E
 	alGetAuxiliaryEffectSlotiv := alProcedure('alGetAuxiliaryEffectSlotiv');
 	alGetAuxiliaryEffectSlotf := alProcedure('alGetAuxiliaryEffectSlotf');
 	alGetAuxiliaryEffectSlotfv := alProcedure('alGetAuxiliaryEffectSlotfv');
-	end;
+	end
+else
+	Result.FFunctionCount += 33;
 end;
 
 class function TSGDllOpenAL.SystemNames() : TSGStringList;
@@ -2168,30 +2174,6 @@ Result += 'libopenal.so.2';
 Result += 'libopenal.so.1';
 Result += 'libopenal.so';
 {$ENDIF}
-end;
-
-procedure InitOpenAL();
-var
-	ListenerPos: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
-	ListenerVel: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
-	ListenerOri: array [0..5] of TALfloat= ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
-begin
-if not DllManager.Suppored('Alut') then
-	int_alutInit()
-else
-	ext_alutInit(nil, nil);
-
-alListenerfv(AL_POSITION,@ListenerPos);
-alListenerfv(AL_VELOCITY,@ListenerVel);
-alListenerfv(AL_ORIENTATION,@ListenerOri);
-end;
-
-procedure ExitOpenAL();
-begin
-if not DllManager.Suppored('Alut') then
-	int_alutExit()
-else
-	ext_alutExit();
 end;
 
 class procedure TSGDllOpenAL.Free();
