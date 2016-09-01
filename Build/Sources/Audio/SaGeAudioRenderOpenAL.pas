@@ -32,6 +32,8 @@ type
 		FBuffer : TALuint;
 			public
 		procedure Clear();
+			public
+		procedure DeleteBuffer();
 		end;
 
 	TSGOpenALSource = object(TSGOpenALBuffer)
@@ -43,6 +45,9 @@ type
 		procedure Play();
 		procedure Pause();
 		procedure Stop();
+		procedure DeleteSource();
+		procedure Looping(const VLoop : TSGBool);
+		function State() : TALint;
 		end;
 
 	TSGOpenALTrack = object(TSGOpenALBufferInfo)
@@ -82,6 +87,31 @@ implementation
 uses
 	SaGeDllManager
 	;
+
+procedure TSGOpenALBuffer.DeleteBuffer();
+begin
+AlDeleteBuffers(1, @FBuffer);
+FBuffer := 0;
+end;
+
+function TSGOpenALSource.State() : TALint;
+begin
+alGetSourcei( FSource, AL_SOURCE_STATE, @Result);
+end;
+
+procedure TSGOpenALSource.Looping(const VLoop : TSGBool);
+begin
+if VLoop then
+	AlSourcei ( FSource, AL_LOOPING, AL_TRUE )
+else
+	AlSourcei ( FSource, AL_LOOPING, FLoop );
+end;
+
+procedure TSGOpenALSource.DeleteSource();
+begin
+AlDeleteSources(1, @FSource);
+FSource := 0;
+end;
 
 procedure TSGOpenALSource.Play();
 begin
@@ -215,7 +245,7 @@ alListenerfv(AL_VELOCITY,    @ListenerVel);
 alListenerfv(AL_ORIENTATION, @ListenerOri);
 
 //Test :
-//CreateSource(CreateBuffer(LoadWAVFromFile('SystemBass.wav'))).Play();
+//CreateSource(CreateBuffer(LoadWAVFromFile('./../../Sounds/SystemBass.wav'))).Play();
 end;
 
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;
