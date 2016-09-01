@@ -5,13 +5,6 @@ unit OpenAL;
 {$IFDEF FPC}
 	// Added by bero
 	{$MODE Delphi}
-	{$IFDEF CPUI386}
-		{$DEFINE CPU386}
-		{$ASMMODE INTEL}
-		{$ENDIF}
-	{$IFNDEF WIN32}
-		{$LINKLIB C}
-		{$ENDIF}
 	{$ENDIF}
 
 interface
@@ -19,23 +12,10 @@ interface
 uses
 	Classes
 	,SysUtils
-	{$IFDEF Win32}
+	{$IFDEF MSWINDOWS}
 		,Windows
 		{$ENDIF}
 	;
-
-{ $ DEFINE ALUT} //define ALUT to use alut.dll
-
-const
-{$IFDEF Win32}
-  callibname='OpenAL32.dll';
-  calutlibname='Alut.dll';
-{$ENDIF}
-{$IFDEF Linux}
-  callibname='libopenal.so';
-  calutlibname='libalut.so';
-{$ENDIF}
-
 
 type
   // OpenAL boolean type.
@@ -47,6 +27,7 @@ type
   // OpenAL 8bit signed byte.
   TALbyte = ShortInt;
   PALbyte = ^TALbyte;
+  PPALbyte = ^PALbyte;
   // OpenAL 8bit unsigned byte.
   TALuByte = Char;
   PALuByte = PChar;
@@ -1837,50 +1818,34 @@ var
   ALGETAUXILIARYEFFECTSLOTFV: procedure( asid: TALuint; param: TALenum; values: PALfloat ); cdecl;
 
 
-{$IFDEF ALUT}
+
   //External Alut functions (from dll or so)
-  alutInit: procedure(argc: PALint; argv: array of PALbyte); cdecl;overload;
-  alutExit: procedure; cdecl;
+  ext_alutInit: procedure(argc: PALint; argv: PPALbyte); cdecl;
+  ext_alutExit: procedure; cdecl;
 
-  alutLoadWAVFile: procedure(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint); cdecl;
-  alutLoadWAVMemory: procedure(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint); cdecl;
-  alutUnloadWAV: procedure(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei); cdecl;
-{$ELSE}
+  ext_alutLoadWAVFile: procedure(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint); cdecl;
+  ext_alutLoadWAVMemory: procedure(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint); cdecl;
+  ext_alutUnloadWAV: procedure(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei); cdecl;
+
   //Internal Alut functions
-  procedure alutInit();overload;
-  procedure alutExit;
+  procedure int_alutInit();
+  procedure int_alutExit;
 
-  procedure alutLoadWAVFile(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
-  procedure alutLoadWAVMemory(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
-  procedure alutUnloadWAV(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei);
-  function LoadWavStream(Stream: Tstream; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint): Boolean; //Unofficial
-{$ENDIF}
+  procedure int_alutLoadWAVFile(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
+  procedure int_alutLoadWAVMemory(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
+  procedure int_alutUnloadWAV(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei);
+  function int_LoadWavStream(Stream: Tstream; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint): Boolean; //Unofficial
 
-
-var
-  LibHandle          : THandle = 0;
-{$IFDEF ALUT}
-  AlutLibHandle      : THandle = 0;
-{$ENDIF}
-  EFXUtilLibHandle       : THandle = 0;
 type
   HMODULE = THandle;
 
-var
-	ListenerPos: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);  
-	ListenerVel: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);  
-	ListenerOri: array [0..5] of TALfloat= ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0); 
-{$IFDEF ALUT}
-function InitOpenAL(LibName: String = callibname;AlutLibName: String = calutlibname): Boolean;
-{$ELSE}
-function InitOpenAL(LibName: String = callibname): Boolean;
-{$ENDIF}
-procedure ReadOpenALExtensions;
-
-
 implementation
 
-//uses classes;
+uses
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
 
 type
   //WAV file header
@@ -1903,253 +1868,9 @@ const
   WAV_IMA_ADPCM = $0011;
   WAV_MP3       = $0055;
 
-{$IFDEF FPC}
-{$IFNDEF Win32}
-// Added by bero
-const
-  RTLD_LAZY         = $001;
-  RTLD_NOW          = $002;
-  RTLD_BINDING_MASK = $003;
-  LibraryLib        = {$IFDEF Linux}'dl'{$ELSE}'c'{$ENDIF};
-
-function LoadLibraryEx(Name : PChar; Flags : LongInt) : Pointer; cdecl; external LibraryLib name 'dlopen';
-function GetProcAddressEx(Lib : Pointer; Name : PChar) : Pointer; cdecl; external LibraryLib name 'dlsym';
-function FreeLibraryEx(Lib : Pointer) : LongInt; cdecl; external LibraryLib name 'dlclose';
-
-function LoadLibrary(Name : PChar) : THandle;
-begin
- Result := THandle(LoadLibraryEx(Name, RTLD_LAZY));
-end;
-
-function GetProcAddress(LibHandle : THandle; ProcName : PChar) : Pointer;
-begin
- Result := GetProcAddressEx(Pointer(LibHandle), ProcName);
-end;
-
-function FreeLibrary(LibHandle : THandle) : Boolean;
-begin
- if LibHandle = 0 then
-   Result := False
-  else
-   Result := FreeLibraryEx(Pointer(LibHandle)) = 0;
-end;
-{$ENDIF}
-{$ENDIF}
-
-//ProcName can be case sensitive !!!
-function alProcedure(ProcName : PAnsiChar) : Pointer;
-begin
-Result := NIL;
-if Addr(alGetProcAddress) <> NIL then
- Result := alGetProcAddress(ProcName);
-if result <> NIL then
- exit;
-Result := GetProcAddress(LibHandle, ProcName);
-end;
-
-{$IFDEF ALUT}
-function InitOpenAL(LibName, AlutLibName: String): Boolean;
-{$ELSE}
-function InitOpenAL(LibName: String): Boolean;
-{$ENDIF}
-begin
-  Result       := False;
-  if LibHandle<>0 then FreeLibrary(LibHandle);
-  LibName[Length(LibName)+1]:=#0;
-  LibHandle    := LoadLibrary(PChar(@LibName[1]));
-{$IFDEF ALUT}
-  if AlutLibHandle<>0 then FreeLibrary(AlutLibHandle);
-  AlutLibName[Length(AlutLibName)+1]:=#0;
-  AlutLibHandle    := LoadLibrary(PChar(@AlutLibName[1]));
-
-  if (AlutLibHandle <> 0) then
-  begin
-    alutInit:= GetProcAddress(AlutLibHandle, alutInit);
-    alutExit:= GetProcAddress(AlutLibHandle, 'alutExit');
-    alutLoadWAVFile:= GetProcAddress(AlutLibHandle, 'alutLoadWAVFile');
-    alutLoadWAVMemory:= GetProcAddress(AlutLibHandle, 'alutLoadWAVMemory');
-    alutUnloadWAV:= GetProcAddress(AlutLibHandle, 'alutUnloadWAV');
-  end;
-{$ENDIF}
-
-  alGetProcAddress := GetProcAddress(LibHandle, 'alGetProcAddress'  );
-
-  if (LibHandle <> 0) then
-  begin
-
-    alEnable:= alProcedure('alEnable');
-    alDisable:= alProcedure('alDisable');
-    alIsEnabled:= alProcedure('alIsEnabled');
-    alHint:= alProcedure('alHint');
-    alGetBooleanv:= alProcedure('alGetBooleanv');
-    alGetIntegerv:= alProcedure('alGetIntegerv');
-    alGetFloatv:= alProcedure('alGetFloatv');
-    alGetDoublev:= alProcedure('alGetDoublev');
-    alGetString:= alProcedure('alGetString');
-    alGetBoolean:= alProcedure('alGetBoolean');
-    alGetInteger:= alProcedure('alGetInteger');
-    alGetFloat:= alProcedure('alGetFloat');
-    alGetDouble:= alProcedure('alGetDouble');
-    alGetError:= alProcedure('alGetError');
-    alIsExtensionPresent:= alProcedure('alIsExtensionPresent');
-    alGetEnumValue:= alProcedure('alGetEnumValue');
-
-    alListenerf:= alProcedure('alListenerf');
-    alListener3f:= alProcedure('alListener3f');
-    alListenerfv:= alProcedure('alListenerfv');
-
-    alListeneri:= alProcedure('alListeneri');
-    alListener3i:= alProcedure('alListener3i');
-    alListeneriv:= alProcedure('alListeneriv');
-
-    alGetListeneriv:= alProcedure('alGetListeneriv');
-    alGetListenerfv:= alProcedure('alGetListenerfv');
-
-    alGenSources:= alProcedure('alGenSources');
-    alDeleteSources:= alProcedure('alDeleteSources');
-    alIsSource:= alProcedure('alIsSource');
-
-    alSourcei:= alProcedure('alSourcei');
-    alSource3i:= alProcedure('alSource3i');
-    alSourceiv:= alProcedure('alSourceiv');
-
-    alSourcef:= alProcedure('alSourcef');
-    alSource3f:= alProcedure('alSource3f');
-    alSourcefv:= alProcedure('alSourcefv');
-
-    alGetSourcei:= alProcedure('alGetSourcei');
-    alGetSource3i:= alProcedure('alGetSource3i');
-    alGetSourceiv:= alProcedure('alGetSourceiv');
-
-    alGetSourcef:= alProcedure('alGetSourcef');
-    alGetSource3f:= alProcedure('alGetSource3f');
-    alGetSourcefv:= alProcedure('alGetSourcefv');
-
-    alSourcePlay:= alProcedure('alSourcePlay');
-    alSourcePause:=alProcedure('alSourcePause');
-    alSourceStop:= alProcedure('alSourceStop');
-    alSourceRewind:= alProcedure('alSourceRewind');
-    alSourcePlayv:= alProcedure('alSourcePlayv');
-    alSourceStopv:= alProcedure('alSourceStopv');
-    alSourceRewindv:= alProcedure('alSourceRewindv');
-    alSourcePausev:= alProcedure('alSourcePausev');
-    alGenBuffers:= alProcedure('alGenBuffers');
-    alDeleteBuffers:= alProcedure('alDeleteBuffers');
-    alIsBuffer:= alProcedure('alIsBuffer');
-    alBufferData:= alProcedure('alBufferData');
-
-    alBufferi:= alProcedure('alBufferi');
-    alBuffer3i:= alProcedure('alBuffer3i');
-    alBufferiv:= alProcedure('alBufferiv');
-
-    alBufferf:= alProcedure('alBufferf');
-    alBuffer3f:= alProcedure('alBuffer3f');
-    alBufferfv:= alProcedure('alBufferfv');
-
-    alGetBufferi:= alProcedure('alGetBufferi');
-    alGetBuffer3i:= alProcedure('alGetBuffer3i');
-    alGetBufferiv:= alProcedure('alGetBufferiv');
-
-    alGetBufferf:= alProcedure('alGetBufferf');
-    alGetBuffer3f:= alProcedure('alGetBuffer3f');
-    alGetBufferfv:= alProcedure('alGetBufferfv');
-
-    alSourceQueueBuffers:= alProcedure('alSourceQueueBuffers');
-    alSourceUnqueueBuffers:= alProcedure('alSourceUnqueueBuffers');
-    alDistanceModel:= alProcedure('alDistanceModel');
-    alDopplerFactor:= alProcedure('alDopplerFactor');
-    alDopplerVelocity:= alProcedure('alDopplerVelocity');
-    alSpeedOfSound := alProcedure('alSpeedOfSound');
-
-    alcCreateContext:= alProcedure('alcCreateContext');
-    alcMakeContextCurrent:= alProcedure('alcMakeContextCurrent');
-    alcProcessContext:= alProcedure('alcProcessContext');
-    alcSuspendContext:= alProcedure('alcSuspendContext');
-    alcDestroyContext:= alProcedure('alcDestroyContext');
-    alcGetError:= alProcedure('alcGetError');
-    alcGetCurrentContext:= alProcedure('alcGetCurrentContext');
-    alcOpenDevice:= alProcedure('alcOpenDevice');
-    alcCloseDevice:= alProcedure('alcCloseDevice');
-    alcIsExtensionPresent:= alProcedure('alcIsExtensionPresent');
-    alcGetProcAddress:= alProcedure('alcGetProcAddress');
-    alcGetEnumValue:= alProcedure('alcGetEnumValue');
-    alcGetContextsDevice:= alProcedure('alcGetContextsDevice');
-    alcGetString:= alProcedure('alcGetString');
-    alcGetIntegerv:= alProcedure('alcGetIntegerv');
-
-    alcCaptureOpenDevice:= alProcedure('alcCaptureOpenDevice');
-    alcCaptureCloseDevice:= alProcedure('alcCaptureCloseDevice');
-    alcCaptureStart:= alProcedure('alcCaptureStart');
-    alcCaptureStop:= alProcedure('alcCaptureStop');
-    alcCaptureSamples:= alProcedure('alcCaptureSamples');
-
-    Result:=True;
-  end;
-end;
-
-procedure ReadOpenALExtensions;
-begin
-  if (LibHandle <> 0) then
-    begin
-      //EAX Extensions
-      if alIsExtensionPresent('EAX2.0') then
-      begin
-        EAXSet := alProcedure('EAXSet');
-        EAXGet := alProcedure('EAXGet');
-      end;
-      //EAX-RAM Extension
-      if alIsExtensionPresent('EAX-RAM') then
-      begin
-        EAXSetBufferMode := alGetProcAddress('EAXSetBufferMode');
-    		EAXGetBufferMode := alGetProcAddress('EAXGetBufferMode');
-        AL_EAX_RAM_SIZE := alGetEnumValue('AL_EAX_RAM_SIZE');
-        AL_EAX_RAM_FREE := alGetEnumValue('AL_EAX_RAM_FREE');
-        AL_STORAGE_AUTOMATIC := alGetEnumValue('AL_STORAGE_AUTOMATIC');
-        AL_STORAGE_HARDWARE := alGetEnumValue('AL_STORAGE_HARDWARE');
-        AL_STORAGE_ACCESSIBLE := alGetEnumValue('AL_STORAGE_ACCESSIBLE');
-      end;
-      if alcIsExtensionPresent(alcGetContextsDevice(alcGetCurrentContext()), ALC_EXT_EFX_NAME) then
-      begin
-        alGenEffects := alGetProcAddress('alGenEffects');
-		    alDeleteEffects := alGetProcAddress('alDeleteEffects');
-		    alIsEffect := alGetProcAddress('alIsEffect');
-		    alEffecti := alGetProcAddress('alEffecti');
-		    alEffectiv := alGetProcAddress('alEffectiv');
-		    alEffectf := alGetProcAddress('alEffectf');
-		    alEffectfv := alGetProcAddress('alEffectfv');
-		    alGetEffecti := alGetProcAddress('alGetEffecti');
-		    alGetEffectiv := alGetProcAddress('alGetEffectiv');
-		    alGetEffectf := alGetProcAddress('alGetEffectf');
-        alGetEffectfv := alGetProcAddress('alGetEffectfv');
-        alGenFilters := alGetProcAddress('alGenFilters');
-		    alDeleteFilters := alGetProcAddress('alDeleteFilters');
-		    alIsFilter := alGetProcAddress('alIsFilter');
-		    alFilteri := alGetProcAddress('alFilteri');
-		    alFilteriv := alGetProcAddress('alFilteriv');
-		    alFilterf := alGetProcAddress('alFilterf');
-		    alFilterfv := alGetProcAddress('alFilterfv');
-		    alGetFilteri := alGetProcAddress('alGetFilteri');
-		    alGetFilteriv := alGetProcAddress('alGetFilteriv');
-		    alGetFilterf := alGetProcAddress('alGetFilterf');
-		    alGetFilterfv := alGetProcAddress('alGetFilterfv');
-		    alGenAuxiliaryEffectSlots := alGetProcAddress('alGenAuxiliaryEffectSlots');
-		    alDeleteAuxiliaryEffectSlots := alGetProcAddress('alDeleteAuxiliaryEffectSlots');
-		    alIsAuxiliaryEffectSlot := alGetProcAddress('alIsAuxiliaryEffectSlot');
-		    alAuxiliaryEffectSloti := alGetProcAddress('alAuxiliaryEffectSloti');
-		    alAuxiliaryEffectSlotiv := alGetProcAddress('alAuxiliaryEffectSlotiv');
-        alAuxiliaryEffectSlotf := alGetProcAddress('alAuxiliaryEffectSlotf');
-		    alAuxiliaryEffectSlotfv := alGetProcAddress('alAuxiliaryEffectSlotfv');
-		    alGetAuxiliaryEffectSloti := alGetProcAddress('alGetAuxiliaryEffectSloti');
-		    alGetAuxiliaryEffectSlotiv := alGetProcAddress('alGetAuxiliaryEffectSlotiv');
-		    alGetAuxiliaryEffectSlotf := alGetProcAddress('alGetAuxiliaryEffectSlotf');
-		    alGetAuxiliaryEffectSlotfv := alGetProcAddress('alGetAuxiliaryEffectSlotfv');
-      end;
-    end;
-end;
-
 //Internal Alut replacement procedures
 
-procedure alutInit();
+procedure int_alutInit();
 var
   Context: PALCcontext;
   Device: PALCdevice;
@@ -2162,7 +1883,7 @@ begin
   alcMakeContextCurrent(Context);
 end;
 
-procedure alutExit;
+procedure int_alutExit;
 var
   Context: PALCcontext;
   Device: PALCdevice;
@@ -2177,7 +1898,7 @@ begin
   alcCloseDevice(Device);
 end;
 
-function LoadWavStream(Stream: Tstream; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint): Boolean;
+function int_LoadWavStream(Stream: Tstream; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint): Boolean;
 var
   WavHeader: TWavHeader;
   readname: pansichar;
@@ -2245,55 +1966,370 @@ begin
 
 end;
 
-procedure alutLoadWAVFile(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
+procedure int_alutLoadWAVFile(fname: string; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
 var
   Stream : TFileStream;
 begin
   Stream:=TFileStream.Create(fname,$0000);
-  LoadWavStream(Stream, format, data, size, freq, loop);
+  int_LoadWavStream(Stream, format, data, size, freq, loop);
   Stream.Free;
 end;
 
-procedure alutLoadWAVMemory(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
+procedure int_alutLoadWAVMemory(memory: PALbyte; var format: TALenum; var data: TALvoid; var size: TALsizei; var freq: TALsizei; var loop: TALint);
 var Stream: TMemoryStream;
 begin
   Stream:=TMemoryStream.Create;
   Stream.Write(memory,sizeof(memory^));
-  LoadWavStream(Stream, format, data, size, freq, loop);
+  int_LoadWavStream(Stream, format, data, size, freq, loop);
   Stream.Free;
 end;
 
-procedure alutUnloadWAV(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei);
+procedure int_alutUnloadWAV(format: TALenum; data: TALvoid; size: TALsizei; freq: TALsizei);
 begin
   //Clean up
   if data<>nil then freemem(data);
 end;
 
-initialization
-begin
-{$IFDEF MSWINDOWS}
-	InitOpenAL('OpenAL32.dll');
-{$ELSE}
-	InitOpenAL('libopenal.so.3');
-	if LibHandle=0 then
-		InitOpenAL('libopenal.so.2');
-	if LibHandle=0 then
-		InitOpenAL('libopenal.so.1');
-	if LibHandle=0 then
-		InitOpenAL('libopenal.so');
-	{$ENDIF}
-ReadOpenALExtensions;
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
-alutInit();
+type
+	TSGDllAlut = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllAlut.SystemNames() : TSGStringList;
+begin
+Result := 'ALUT';
+Result += 'LibAlut';
+end;
+
+class function TSGDllAlut.DllNames() : TSGStringList;
+begin
+Result := nil;
+{$IFDEF MSWINDOWS}
+Result += 'Alut.dll';
+{$ELSE}
+Result += 'libalut.so.3';
+Result += 'libalut.so.2';
+Result += 'libalut.so.1';
+Result += 'libalut.so';
+{$ENDIF}
+end;
+
+class function TSGDllAlut.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(VDll, Name);
+if Result = nil then
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+	LoadResult^.FFunctionLoaded += 1;
+LoadResult^.FFunctionCount += 1;
+end;
+
+begin
+Result.Clear();
+ext_alutInit:= LoadProcedure('alutInit');
+ext_alutExit:= LoadProcedure('alutExit');
+ext_alutLoadWAVFile:= LoadProcedure('alutLoadWAVFile');
+ext_alutLoadWAVMemory:= LoadProcedure('alutLoadWAVMemory');
+ext_alutUnloadWAV:= LoadProcedure('alutUnloadWAV');
+end;
+
+class procedure TSGDllAlut.Free();
+begin
+ext_alutInit := nil;
+ext_alutExit := nil;
+ext_alutLoadWAVFile := nil;
+ext_alutLoadWAVMemory := nil;
+ext_alutUnloadWAV := nil;
+end;
+
+type
+	TSGDllOpenAL = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		function LoadExtensions() : TSGDllLoadExtensionsObject; override;
+		class function ChildNames() : TSGStringList; override;
+		end;
+
+class function TSGDllOpenAL.ChildNames() : TSGStringList;
+begin
+Result := 'alut';
+end;
+
+function TSGDllOpenAL.LoadExtensions() : TSGDllLoadExtensionsObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function alProcedure(const Name : PChar) : Pointer;
+begin
+if (FLibHandles <> nil) then if Length(FLibHandles) = 1 then
+	Result := GetProcAddress(FLibHandles[0], Name);
+if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
+	Result := alGetProcAddress(Name);
+if Result = nil then
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+	LoadResult^.FFunctionLoaded += 1;
+LoadResult^.FFunctionCount += 1;
+end;
+
+begin
+Result.Clear();
+LoadResult := @Result;
+
+//EAX Extensions
+if alIsExtensionPresent('EAX2.0') then
+	begin
+	Result.FExtensions += 'EAX2.0';
+	EAXSet := alProcedure('EAXSet');
+	EAXGet := alProcedure('EAXGet');
+	end;
+//EAX-RAM Extension
+if alIsExtensionPresent('EAX-RAM') then
+	begin
+	Result.FExtensions += 'EAX-RAM';
+	EAXSetBufferMode := alProcedure('EAXSetBufferMode');
+		EAXGetBufferMode := alProcedure('EAXGetBufferMode');
+	AL_EAX_RAM_SIZE := alGetEnumValue('AL_EAX_RAM_SIZE');
+	AL_EAX_RAM_FREE := alGetEnumValue('AL_EAX_RAM_FREE');
+	AL_STORAGE_AUTOMATIC := alGetEnumValue('AL_STORAGE_AUTOMATIC');
+	AL_STORAGE_HARDWARE := alGetEnumValue('AL_STORAGE_HARDWARE');
+	AL_STORAGE_ACCESSIBLE := alGetEnumValue('AL_STORAGE_ACCESSIBLE');
+	end;
+if alcIsExtensionPresent(alcGetContextsDevice(alcGetCurrentContext()), ALC_EXT_EFX_NAME) then
+	begin
+	Result.FExtensions += ALC_EXT_EFX_NAME;
+	alGenEffects := alProcedure('alGenEffects');
+	alDeleteEffects := alProcedure('alDeleteEffects');
+	alIsEffect := alProcedure('alIsEffect');
+	alEffecti := alProcedure('alEffecti');
+	alEffectiv := alProcedure('alEffectiv');
+	alEffectf := alProcedure('alEffectf');
+	alEffectfv := alProcedure('alEffectfv');
+	alGetEffecti := alProcedure('alGetEffecti');
+	alGetEffectiv := alProcedure('alGetEffectiv');
+	alGetEffectf := alProcedure('alGetEffectf');
+	alGetEffectfv := alProcedure('alGetEffectfv');
+	alGenFilters := alProcedure('alGenFilters');
+	alDeleteFilters := alProcedure('alDeleteFilters');
+	alIsFilter := alProcedure('alIsFilter');
+	alFilteri := alProcedure('alFilteri');
+	alFilteriv := alProcedure('alFilteriv');
+	alFilterf := alProcedure('alFilterf');
+	alFilterfv := alProcedure('alFilterfv');
+	alGetFilteri := alProcedure('alGetFilteri');
+	alGetFilteriv := alProcedure('alGetFilteriv');
+	alGetFilterf := alProcedure('alGetFilterf');
+	alGetFilterfv := alProcedure('alGetFilterfv');
+	alGenAuxiliaryEffectSlots := alProcedure('alGenAuxiliaryEffectSlots');
+	alDeleteAuxiliaryEffectSlots := alProcedure('alDeleteAuxiliaryEffectSlots');
+	alIsAuxiliaryEffectSlot := alProcedure('alIsAuxiliaryEffectSlot');
+	alAuxiliaryEffectSloti := alProcedure('alAuxiliaryEffectSloti');
+	alAuxiliaryEffectSlotiv := alProcedure('alAuxiliaryEffectSlotiv');
+	alAuxiliaryEffectSlotf := alProcedure('alAuxiliaryEffectSlotf');
+	alAuxiliaryEffectSlotfv := alProcedure('alAuxiliaryEffectSlotfv');
+	alGetAuxiliaryEffectSloti := alProcedure('alGetAuxiliaryEffectSloti');
+	alGetAuxiliaryEffectSlotiv := alProcedure('alGetAuxiliaryEffectSlotiv');
+	alGetAuxiliaryEffectSlotf := alProcedure('alGetAuxiliaryEffectSlotf');
+	alGetAuxiliaryEffectSlotfv := alProcedure('alGetAuxiliaryEffectSlotfv');
+	end;
+end;
+
+class function TSGDllOpenAL.SystemNames() : TSGStringList;
+begin
+Result := 'OpenAL';
+Result += 'OAL';
+Result += 'AL';
+end;
+
+class function TSGDllOpenAL.DllNames() : TSGStringList;
+begin
+Result := nil;
+{$IFDEF MSWINDOWS}
+Result += 'OpenAL32.dll';
+{$ELSE}
+Result += 'libopenal.so.3';
+Result += 'libopenal.so.2';
+Result += 'libopenal.so.1';
+Result += 'libopenal.so';
+{$ENDIF}
+end;
+
+procedure InitOpenAL();
+var
+	ListenerPos: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
+	ListenerVel: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
+	ListenerOri: array [0..5] of TALfloat= ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
+begin
+if not DllManager.Suppored('Alut') then
+	int_alutInit()
+else
+	ext_alutInit(nil, nil);
 
 alListenerfv(AL_POSITION,@ListenerPos);
 alListenerfv(AL_VELOCITY,@ListenerVel);
-alListenerfv(AL_ORIENTATION,@ListenerOri); 
+alListenerfv(AL_ORIENTATION,@ListenerOri);
 end;
 
-finalization
+procedure ExitOpenAL();
 begin
-alutExit;
+if not DllManager.Suppored('Alut') then
+	int_alutExit()
+else
+	ext_alutExit();
+end;
+
+class procedure TSGDllOpenAL.Free();
+begin
+end;
+
+class function TSGDllOpenAL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function alProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(VDll, Name);
+if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
+	Result := alGetProcAddress(Name);
+if Result = nil then
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+	LoadResult^.FFunctionLoaded += 1;
+LoadResult^.FFunctionCount += 1;
+end;
+
+begin
+Result.Clear();
+LoadResult := @Result;
+
+alGetProcAddress := alProcedure('alGetProcAddress');
+
+alEnable:= alProcedure('alEnable');
+alDisable:= alProcedure('alDisable');
+alIsEnabled:= alProcedure('alIsEnabled');
+alHint:= alProcedure('alHint');
+alGetBooleanv:= alProcedure('alGetBooleanv');
+alGetIntegerv:= alProcedure('alGetIntegerv');
+alGetFloatv:= alProcedure('alGetFloatv');
+alGetDoublev:= alProcedure('alGetDoublev');
+alGetString:= alProcedure('alGetString');
+alGetBoolean:= alProcedure('alGetBoolean');
+alGetInteger:= alProcedure('alGetInteger');
+alGetFloat:= alProcedure('alGetFloat');
+alGetDouble:= alProcedure('alGetDouble');
+alGetError:= alProcedure('alGetError');
+alIsExtensionPresent:= alProcedure('alIsExtensionPresent');
+alGetEnumValue:= alProcedure('alGetEnumValue');
+
+alListenerf:= alProcedure('alListenerf');
+alListener3f:= alProcedure('alListener3f');
+alListenerfv:= alProcedure('alListenerfv');
+
+alListeneri:= alProcedure('alListeneri');
+alListener3i:= alProcedure('alListener3i');
+alListeneriv:= alProcedure('alListeneriv');
+
+alGetListeneriv:= alProcedure('alGetListeneriv');
+alGetListenerfv:= alProcedure('alGetListenerfv');
+
+alGenSources:= alProcedure('alGenSources');
+alDeleteSources:= alProcedure('alDeleteSources');
+alIsSource:= alProcedure('alIsSource');
+
+alSourcei:= alProcedure('alSourcei');
+alSource3i:= alProcedure('alSource3i');
+alSourceiv:= alProcedure('alSourceiv');
+
+alSourcef:= alProcedure('alSourcef');
+alSource3f:= alProcedure('alSource3f');
+alSourcefv:= alProcedure('alSourcefv');
+
+alGetSourcei:= alProcedure('alGetSourcei');
+alGetSource3i:= alProcedure('alGetSource3i');
+alGetSourceiv:= alProcedure('alGetSourceiv');
+
+alGetSourcef:= alProcedure('alGetSourcef');
+alGetSource3f:= alProcedure('alGetSource3f');
+alGetSourcefv:= alProcedure('alGetSourcefv');
+
+alSourcePlay:= alProcedure('alSourcePlay');
+alSourcePause:=alProcedure('alSourcePause');
+alSourceStop:= alProcedure('alSourceStop');
+alSourceRewind:= alProcedure('alSourceRewind');
+alSourcePlayv:= alProcedure('alSourcePlayv');
+alSourceStopv:= alProcedure('alSourceStopv');
+alSourceRewindv:= alProcedure('alSourceRewindv');
+alSourcePausev:= alProcedure('alSourcePausev');
+alGenBuffers:= alProcedure('alGenBuffers');
+alDeleteBuffers:= alProcedure('alDeleteBuffers');
+alIsBuffer:= alProcedure('alIsBuffer');
+alBufferData:= alProcedure('alBufferData');
+
+alBufferi:= alProcedure('alBufferi');
+alBuffer3i:= alProcedure('alBuffer3i');
+alBufferiv:= alProcedure('alBufferiv');
+
+alBufferf:= alProcedure('alBufferf');
+alBuffer3f:= alProcedure('alBuffer3f');
+alBufferfv:= alProcedure('alBufferfv');
+
+alGetBufferi:= alProcedure('alGetBufferi');
+alGetBuffer3i:= alProcedure('alGetBuffer3i');
+alGetBufferiv:= alProcedure('alGetBufferiv');
+
+alGetBufferf:= alProcedure('alGetBufferf');
+alGetBuffer3f:= alProcedure('alGetBuffer3f');
+alGetBufferfv:= alProcedure('alGetBufferfv');
+
+alSourceQueueBuffers:= alProcedure('alSourceQueueBuffers');
+alSourceUnqueueBuffers:= alProcedure('alSourceUnqueueBuffers');
+alDistanceModel:= alProcedure('alDistanceModel');
+alDopplerFactor:= alProcedure('alDopplerFactor');
+alDopplerVelocity:= alProcedure('alDopplerVelocity');
+alSpeedOfSound := alProcedure('alSpeedOfSound');
+
+alcCreateContext:= alProcedure('alcCreateContext');
+alcMakeContextCurrent:= alProcedure('alcMakeContextCurrent');
+alcProcessContext:= alProcedure('alcProcessContext');
+alcSuspendContext:= alProcedure('alcSuspendContext');
+alcDestroyContext:= alProcedure('alcDestroyContext');
+alcGetError:= alProcedure('alcGetError');
+alcGetCurrentContext:= alProcedure('alcGetCurrentContext');
+alcOpenDevice:= alProcedure('alcOpenDevice');
+alcCloseDevice:= alProcedure('alcCloseDevice');
+alcIsExtensionPresent:= alProcedure('alcIsExtensionPresent');
+alcGetProcAddress:= alProcedure('alcGetProcAddress');
+alcGetEnumValue:= alProcedure('alcGetEnumValue');
+alcGetContextsDevice:= alProcedure('alcGetContextsDevice');
+alcGetString:= alProcedure('alcGetString');
+alcGetIntegerv:= alProcedure('alcGetIntegerv');
+
+alcCaptureOpenDevice:= alProcedure('alcCaptureOpenDevice');
+alcCaptureCloseDevice:= alProcedure('alcCaptureCloseDevice');
+alcCaptureStart:= alProcedure('alcCaptureStart');
+alcCaptureStop:= alProcedure('alcCaptureStop');
+alcCaptureSamples:= alProcedure('alcCaptureSamples');
+end;
+
+initialization
+begin
+TSGDllOpenAL.Create();
+TSGDllAlut.Create();
 end;
 
 end.

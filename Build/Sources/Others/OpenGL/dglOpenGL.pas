@@ -20352,7 +20352,7 @@ type
 		class function LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList; override;
 		class function ChunksLoadJointly() : TSGBool; override;
 
-		class function LoadExtensions() : TSGDllLoadExtensionsObject; override;
+		function LoadExtensions() : TSGDllLoadExtensionsObject; override;
 		end;
 
 class function TSGDllOpenGL.ChunksLoadJointly() : TSGBool;
@@ -20414,7 +20414,7 @@ begin
 Result.Clear();
 end;
 
-class function TSGDllOpenGL.LoadExtensions() : TSGDllLoadExtensionsObject;
+function TSGDllOpenGL.LoadExtensions() : TSGDllLoadExtensionsObject;
 begin
 Result.Clear();
 LoadObjectGL  := @Result;

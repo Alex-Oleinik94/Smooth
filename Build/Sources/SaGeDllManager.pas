@@ -56,13 +56,14 @@ type
 
 		FLoadObjects   : TSGDllLoadObjectList;
 		FErrorDllNames : TSGStringList;
-		FLibHandles    : TSGLibHandleList;
-		FDllFileNames  : TSGStringList;
 
 			// Extensions
 		FLoadExtensionsExecuted : TSGBool;
 		FLoadedExtensions       : TSGBool;
 		FExtensionsLoadObject   : TSGDllLoadExtensionsObject;
+			protected
+		FLibHandles    : TSGLibHandleList;
+		FDllFileNames  : TSGStringList;
 			public
 		procedure UnLoad();
 		function Loading() : TSGBool;
@@ -83,7 +84,7 @@ type
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; virtual; abstract;
 		class procedure Free(); virtual; abstract;
 
-		class function LoadExtensions() : TSGDllLoadExtensionsObject; virtual;
+		function LoadExtensions() : TSGDllLoadExtensionsObject; virtual;
 			protected
 		function GetSuppored() : TSGBool;
 		procedure SetOwner(const VOwner : TSGDllManager);
@@ -494,7 +495,7 @@ else
 	begin
 	TF := FLoadObjects[LoadObjectId - 1].FFunctionCount;
 	LF := FLoadObjects[LoadObjectId - 1].FFunctionLoaded;
-	if (FDllFileNames <> nil) then if (Length(FDllFileNames) <= LoadObjectId) then if LoadObjectId >= 1 then
+	if (FDllFileNames <> nil) then if (Length(FDllFileNames) >= LoadObjectId) then if LoadObjectId >= 1 then
 		LN := FDllFileNames[LoadObjectId - 1];
 	end;
 if LF = 0 then
@@ -829,7 +830,7 @@ begin
 Result := nil;
 end;
 
-class function TSGDll.LoadExtensions() : TSGDllLoadExtensionsObject;
+function TSGDll.LoadExtensions() : TSGDllLoadExtensionsObject;
 begin
 Result.Clear();
 end;
