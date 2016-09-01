@@ -182,7 +182,7 @@ try
 			png_destroy_read_struct(@png_ptr, @info_ptr, nil);
 		end;
 except
-	SGLog.Sourse('SaGeImagesPNG : Exeption in loading pnd!');
+	SGLog.Sourse('SaGeImagesPNG : Exeption while loading png!');
 	BitMap.Clear();
 	end;
 

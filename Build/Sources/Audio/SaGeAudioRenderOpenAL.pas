@@ -47,9 +47,9 @@ begin
 if DllManager.Dll('OpenAL') <> nil then
 	DllManager.Dll('OpenAL').ReadExtensions();
 
-alListenerfv(AL_POSITION,@ListenerPos);
-alListenerfv(AL_VELOCITY,@ListenerVel);
-alListenerfv(AL_ORIENTATION,@ListenerOri);
+alListenerfv(AL_POSITION,    @ListenerPos);
+alListenerfv(AL_VELOCITY,    @ListenerVel);
+alListenerfv(AL_ORIENTATION, @ListenerOri);
 end;
 
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;
