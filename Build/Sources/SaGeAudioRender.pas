@@ -19,6 +19,7 @@ type
 	TSGAudioRender = class(TSGNamed, ISGAudioRender)
 			public
 		class function Suppored() : TSGBool; virtual;
+		class function ClassName() : TSGString; override;
 		end;
 
 function TSGCompatibleAudioRender():TSGAudioRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -40,6 +41,11 @@ Result := nil;
 if (Result = nil) and (TSGAudioRenderOpenAL.Suppored()) then
 	Result := TSGAudioRenderOpenAL;
 {$ENDIF}
+end;
+
+class function TSGAudioRender.ClassName() : TSGString;
+begin
+Result := 'TSGAudioRender';
 end;
 
 class function TSGAudioRender.Suppored() : TSGBool;

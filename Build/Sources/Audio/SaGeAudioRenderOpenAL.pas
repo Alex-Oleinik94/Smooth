@@ -20,6 +20,7 @@ type
 	TSGAudioRenderOpenAL = class(TSGAudioRender)
 			public
 		class function Suppored() : TSGBool; override;
+		class function ClassName() : TSGString; override;
 		end;
 
 implementation
@@ -27,6 +28,11 @@ implementation
 uses
 	SaGeDllManager
 	;
+
+class function TSGAudioRenderOpenAL.ClassName() : TSGString;
+begin
+Result := 'TSGAudioRenderOpenAL';
+end;
 
 class function TSGAudioRenderOpenAL.Suppored() : TSGBool;
 begin

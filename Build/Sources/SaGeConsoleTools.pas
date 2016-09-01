@@ -22,6 +22,7 @@ uses
 	,SNMPsend
 
 	(* ============ Engine Includes ============ *)
+	,SaGeAudioRender
 	,SaGeRender
 	,SaGeCommon
 	,SaGeImagesBase
@@ -144,6 +145,9 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	,SaGeDllManager
+	{$IFNDEF MOBILE}
+		,SaGeAudioRenderOpenAL
+		{$ENDIF}
 	;
 
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
@@ -1054,6 +1058,8 @@ procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const V
 var
 	RenderClass   : TSGRenderClass = nil;
 	ContextClass  : TSGContextClass = nil;
+	AudioRenderClass : TSGAudioRenderClass = nil;
+	AudioDisabled : TSGBool = False;
 
 function ProccessFullscreen(const Comand : TSGString):TSGBool;
 begin
@@ -1336,15 +1342,6 @@ ContextSettings -= 'MIN';
 ContextSettings += SGContextOptionMin();
 end;
 
-procedure Run();
-begin
-SGRunPaintable(
-	VPaintabeClass
-	,ContextClass
-	,RenderClass
-	,ContextSettings);
-end;
-
 function ImposibleParam(const B : TSGBool):TSGString;
 begin
 Result := Iff(not B,', but it is impossible!','')
@@ -1375,6 +1372,61 @@ begin
 Result := 'For use OpenGL' + ImposibleParam(TSGRenderOpenGL.Suppored());
 end;
 
+function IsOpenALSuppored() : TSGBoolean;
+begin
+Result :=
+	{$IFDEF MOBILE}
+	False
+	{$ELSE}
+	TSGAudioRenderOpenAL.Suppored()
+	{$ENDIF}
+	;
+end;
+
+function HelpFuncOAL() : TSGString;
+begin
+Result := 'For use OpenAL' + ImposibleParam(IsOpenALSuppored());
+end;
+
+function ProccessWA(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+AudioRenderClass := nil;
+AudioDisabled := True;
+end;
+
+function ProccessOpenAL(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+if not IsOpenALSuppored() then
+	begin
+	WriteLn('OpenAL can''t be used in your system!');
+	Result := False;
+	end;
+if AudioDisabled then
+	begin
+	WriteLn('Audio suppport allready disabled!');
+	Result := False;
+	end;
+{$IFNDEF MOBILE}
+if Result then
+	AudioRenderClass := TSGAudioRenderOpenAL;
+{$ENDIF}
+end;
+
+procedure Run();
+begin
+if (AudioRenderClass = nil) and (not AudioDisabled) then
+	AudioRenderClass := TSGCompatibleAudioRender;
+if (AudioRenderClass <> nil) then
+	ContextSettings += SGContextOptionAudioRender(AudioRenderClass);
+SGRunPaintable(
+	VPaintabeClass
+	,ContextClass
+	,RenderClass
+	,ContextSettings);
+end;
+
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
 begin
@@ -1386,10 +1438,14 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ConsoleCaller := TSGConsoleCaller.Create(VParams);
 	ConsoleCaller.Category('Context settings');
 	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
+	ConsoleCaller.Category('Render settings');
 	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
 	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
 	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
 	ConsoleCaller.AddComand(@ProccessOpenGL  ,  ['ogl', 'OpenGL'],      @HelpFuncOGL);
+	ConsoleCaller.Category('Audio settings');
+	ConsoleCaller.AddComand(@ProccessOpenAL  ,  ['oal', 'OpenAL'],      @HelpFuncOAL);
+	ConsoleCaller.AddComand(@ProccessWA      ,  ['wa', 'WithoutAudio'], 'Disable audio support');
 	ConsoleCaller.Category('Window settings');
 	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
 	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');

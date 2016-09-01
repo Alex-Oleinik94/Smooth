@@ -241,6 +241,8 @@ function SGContextOptionImport(const VName : TSGString; const VOption : TSGPoint
 {$IFDEF ANDROID}
 function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
 {$ENDIF}
+function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
+function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -293,9 +295,28 @@ procedure TSGContext.Maximize();
 begin
 end;
 
-procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
+function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
+var
+	i : TSGUInt32;
 begin
-SGRunPaintable(VPaintableClass, TSGCompatibleContext, TSGCompatibleRender, VSettings);
+Result := nil;
+if VSettings <> nil then if Length(VSettings) > 0 then
+	begin
+	SetLength(Result, Length(VSettings));
+	for i := 0 to High(Result) do
+		Result[i] := VSettings[i];
+	end;
+end;
+
+procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
+var
+	Settings : TSGContextSettings = nil;
+begin
+Settings := SGCopyContextSettings(VSettings);
+if not ('AUDIORENDER' in Settings) then if TSGCompatibleAudioRender <> nil then
+	Settings += SGContextOptionAudioRender(TSGCompatibleAudioRender);
+SGRunPaintable(VPaintableClass, TSGCompatibleContext, TSGCompatibleRender, Settings);
+SetLength(Settings, 0);
 end;
 
 function SGContextOptionMax() : TSGContextOption;
@@ -344,11 +365,16 @@ for O in VSettings do
 		S += ', ';
 	if (O.FName = 'FULLSCREEN') and (TSGMaxEnum(O.FOption) = 0) then
 		S += '!';
-	S += WordName(O.FName);
+	if O.FName = 'AUDIORENDER' then
+		S += 'Audio'
+	else
+		S += WordName(O.FName);
 	if O.FName in StandartOptions then
 		begin
 		S += '=' + SGStr(TSGMaxEnum(O.FOption));
 		end
+	else if O.FName = 'AUDIORENDER' then
+		S += ' is ' + TSGAudioRenderClass(O.FOption).ClassName()
 	else if O.FName = 'TITLE' then
 		begin
 		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
@@ -380,6 +406,11 @@ end;
 function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
 begin
 Result.Import('LEFT', TSGPointer(VVariable));
+end;
+
+function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
+begin
+Result.Import('AUDIORENDER', TSGPointer(VAudioRender));
 end;
 
 function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
