@@ -2,7 +2,7 @@
 unit SaGeContextAndroid;
 interface
 
-uses 
+uses
 	SaGeBase
 	,SaGeBased
 	,SaGeCommon
@@ -65,7 +65,7 @@ implementation
 uses
 	SaGeScreen;
 
-class function TSGContextAndroid.Suppored() : TSGBoolean; 
+class function TSGContextAndroid.Suppored() : TSGBoolean;
 begin
 Result := True;
 end;
@@ -179,7 +179,7 @@ var
 
 procedure InitPixelFormat();inline;
 begin
-FunctiosResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs); 
+FunctiosResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs);
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SGStr(FunctiosResult)+'".');
 FunctiosResult := eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
 if Attribs[8] <> EGL_NONE then
@@ -217,7 +217,7 @@ if FDisplay = EGL_NO_DISPLAY then
 		Active := False;
 		Exit;
 		end;
-	FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format); 
+	FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format);
 	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
 	end;
 FSurface       := eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.Window, nil);
@@ -226,7 +226,7 @@ if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
 	FRender.Context := Self as ISGContext;
-	if FRender.CreateContext() then 
+	if FRender.CreateContext() then
 		begin
 		FRender.Init();
 		Result:=True;
@@ -245,12 +245,13 @@ FHeight:=GetScreenArea().y;
 SGLog.Sourse('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
 if not FInitialized then
 	begin
-	SGScreen.Load(Self);
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "SGScreen.Load(Self)".');
-	if FPaintableClass <> nil then
+	if not Screen.ContextAssigned() then
+		Screen.Load(Self);
+	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "Screen.Load(Self)".');
+	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
-		SGScreen.Load(Self);
 		FPaintable := FPaintableClass.Create(Self);
+		SetPaintableSettings();
 		FPaintable.LoadDeviceResourses();
 		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Paintable created');
 		end;
@@ -295,7 +296,7 @@ APP_CMD_SAVE_STATE://Cохранить память приложения...
 // The system has asked us to save our current state.  Do so.
 engine^.app^.savedState := malloc(sizeof(Tsaved_state));
 Psaved_state(engine^.app^.savedState)^ := engine^.state;
-engine^.app^.savedStateSize := sizeof(Tsaved_state); 
+engine^.app^.savedStateSize := sizeof(Tsaved_state);
 *)
 APP_CMD_INIT_WINDOW://Иницианализируем окно
 	begin
@@ -330,7 +331,7 @@ end;
 end;
 
 function TSGContextAndroid.HandleEvent(Event:PAInputEvent):cint32;
-var 
+var
 	EventType, EventActionAndMask,EventAction,EventPointerIndex, EventCode, EventScanCode, PointersCount : TSGLongInt;
 
 function WITE():TSGString;inline;
@@ -408,7 +409,7 @@ AINPUT_EVENT_TYPE_MOTION:
 	begin
 	EventCode     := AKeyEvent_getKeyCode(event);
 	EventScanCode := AKeyEvent_getScanCode(event);
-	
+
 	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Key = (Code:'+SGStr(EventCode)+';ScanCode:'+SGStr(EventScanCode)+'), Action = "'+WITA()+'"');
 	end;}
 else
@@ -460,7 +461,7 @@ while FActive and (FNewContextType=nil) do
 		//SGLog.Sourse('"TSGContextAndroid.Run" : Begin paint!');
 		Paint();
 		//SGLog.Sourse('"TSGContextAndroid.Run" : End paint...');
-		
+
 		ChangingResolution();
 		end
 	else
@@ -516,13 +517,13 @@ while (Ident >= 0) do
 	else
 		Val := -1;
 	Ident := ALooper_pollAll(Val, nil, @Events,@Source);
-	end; 
+	end;
 if FAnimating <> 0 then
 	inherited;
 //SGLog.Sourse('Leaving "TSGContextAndroid.Messages".');
 end;
 
-procedure TSGContextAndroid.InitFullscreen(const b:boolean); 
+procedure TSGContextAndroid.InitFullscreen(const b:boolean);
 begin
 FFullscreen := True;
 end;

@@ -20,6 +20,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 	,SaGeScreen
+	,SaGeAudioRender
 	;
 const
 	SG_ALT_KEY = 18;

@@ -2,7 +2,7 @@
 
 unit SaGeCommon;
 
-interface 
+interface
 
 uses
 	 SaGeBase
@@ -20,21 +20,22 @@ uses
 
 type
 	ISGRender = interface;
-	
+	ISGAudioRender = interface;
+
 	TSGVertexFormat = (SGVertexFormat2f,SGVertexFormat3f,SGVertexFormat4f);
-	
+
 	TSGThreadProcedure = SaGeBase.TSGThreadProcedure;
 	TSGThread = SaGeBase.TSGThread;
 	SGThread = SaGeBase.TSGThread;
-	
+
 	TSGComplexNumber = object(TSGVertex2f)
 		end;
-	
+
 	TSGQuaternion = object(TSGVertex4f)
 		procedure Inverse();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Intersed():TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
-	
+
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes=object
 		Vertexes:array[0..1] of TSGVertex2f;
@@ -52,7 +53,7 @@ type
 		function AbsX:TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AbsY:TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
-	
+
 	TSGVisibleVertex=object(TSGVertex3f)
 		Visible:Boolean;
 		end;
@@ -63,13 +64,13 @@ type
 	TSGVisibleVertexFunction = function (a:TSGVisibleVertex;CONST b:Pointer):TSGVisibleVertex;
 	TSGPointerProcedure = procedure (a:Pointer);
 	TSGProcedure = procedure;
-	
+
 	TSGCustomPosition = record
 		case byte of
 		0: (FLocation : TSGVertex3f; FTurn   : TSGVertex3f);
 		1: (X, Y, Z   : TSGSingle;   A, B, G : TSGSingle);
 		end;
-	
+
 	PSGPosition = ^ TSGPosition;
 	TSGPosition = object
 			protected
@@ -85,12 +86,17 @@ type
 		property Turn      : TSGVertex3f       read FPosition.FTurn     write FPosition.FTurn;
 		property CustomPos : TSGCustomPosition read FPosition           write FPosition;
 		end;
-	
+
 	TSGMatrix4Type = TSGFloat;
-	
+
 	TSGMatrix4 = array [0..3,0..3] of TSGMatrix4Type;
 
 type
+	ISGAudioRender = interface
+		['{cb4d7649-16ee-44f6-b9f1-bf393f6bb18c}']
+
+		end;
+
 	ISGRender = interface(ISGRectangle)
 		['{6d0d4eb0-4de7-4000-bf5d-52a069a776d1}']
 		function GetRenderType() : TSGRenderType;
@@ -106,7 +112,7 @@ type
 		procedure UnLockResourses();
 		procedure SetContext(const VContext : ISGNearlyContext);
 		function GetContext() : ISGNearlyContext;
-		
+
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);
@@ -171,7 +177,7 @@ type
 		{$ELSE}
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);
 			{$ENDIF}
-		
+
 			(* Shaders *)
 		function SupporedShaders() : TSGBoolean;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
@@ -180,12 +186,12 @@ type
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);
 		procedure DeleteShader(const VProgram : TSGLongWord);
-		
+
 		function CreateShaderProgram() : TSGLongWord;
 		procedure AttachShader(const VProgram, VShader : TSGLongWord);
 		procedure LinkShaderProgram(const VProgram : TSGLongWord);
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);
-		
+
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
 		procedure UseProgram(const VProgram : TSGLongWord);
@@ -195,34 +201,34 @@ type
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
-		
+
 		function SupporedDepthTextures():TSGBoolean;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
-		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
 		procedure DrawBuffer(const VType : TSGCardinal);
 		procedure ReadBuffer(const VType : TSGCardinal);
-		procedure GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); 
+		procedure GenRenderBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
 		procedure BindRenderBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
 		procedure FrameBufferTexture2D(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer, VLevel: TSGLongWord);
 		procedure FrameBufferRenderBuffer(const VTarget: TSGCardinal; const VAttachment: TSGCardinal; const VRenderbuffertarget: TSGCardinal; const VRenderbuffer: TSGLongWord);
 		procedure RenderBufferStorage(const VTarget, VAttachment: TSGCardinal; const VWidth, VHeight: TSGLongWord);
 		procedure GetFloatv(const VType : TSGCardinal; const VPointer : Pointer);
-		
+
 		property Width : TSGAreaInt read GetWidth write SetWidth;
 		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property Context : ISGNearlyContext read GetContext write SetContext;
 		property RenderType : TSGRenderType read GetRenderType;
-		
+
 		{$DEFINE INC_PLACE_RENDER_INTERFACE}
 		{$INCLUDE SaGeCommonStructs.inc}
 		{$UNDEF INC_PLACE_RENDER_INTERFACE}
 		end;
-	
+
 	ISGRendered = interface
 		['{535e900f-03d6-47d1-b2e1-9eadadf877f3}']
 		function GetRender() : ISGRender;
 		function RenderAssigned() : TSGBoolean;
-		
+
 		property Render : ISGRender read GetRender;
 		end;
 
@@ -265,7 +271,7 @@ function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2: TS
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex12,Vertex32: TSGVertex2f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGGetArrayOfRoundQuad(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
-procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f; 
+procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f;
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
 	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConstructRoundQuad(const VRender:ISGRender;const ArVertex:TSGVertex3fList;const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
@@ -345,7 +351,7 @@ else if Coodrs.y = -1 then
 else if Coodrs.y = 1 then
 	Result := PI/2
 else if Coodrs.y > SGZero then
-	Result := ArcCos(Coodrs.x) 
+	Result := ArcCos(Coodrs.x)
 else
 	Result := ArcCos(-Coodrs.x) + PI;
 end;
@@ -357,9 +363,9 @@ begin
 sv1 := Sqr(v1);
 sv2 := Sqr(v2);
 sv3 := Sqr(v3);
-Result := 
-	(sv1 < sv2 + sv3) and 
-	(sv2 < sv1 + sv3) and 
+Result :=
+	(sv1 < sv2 + sv3) and
+	(sv2 < sv1 + sv3) and
 	(sv3 < sv2 + sv1);
 end;
 
@@ -497,7 +503,7 @@ var
 begin
  Result:=SGGetIdentityMatrix();
  CosinusAngle:=cos(Angle);
- SinusAngle:=sin(Angle);    
+ SinusAngle:=sin(Angle);
  Result[0,0]:=CosinusAngle+((1-CosinusAngle)*Axis.x*Axis.x);
  Result[1,0]:=((1-CosinusAngle)*Axis.x*Axis.y)-(Axis.z*SinusAngle);
  Result[2,0]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.y*SinusAngle);
@@ -713,26 +719,26 @@ var i           : integer;
 begin
 a:=0;
 b:=0;
-for i:=0 to 3 do 
+for i:=0 to 3 do
 	begin
 	a:=a+( q1.Data[i]-q2.Data[i] )*( q1.Data[i]-q2.Data[i] );
 	b:=b+( q1.Data[i]+q2.Data[i] )*( q1.Data[i]+q2.Data[i] );
 	end;
-if ( a > b ) then 
+if ( a > b ) then
 	q2.Inverse();
 
 cosom:=q1.Data[0]*q2.Data[0]+q1.Data[1]*q2.Data[1]
 	+q1.Data[2]*q2.Data[2]+q1.Data[3]*q2.Data[3];
 
-if (( 1.0+cosom ) > 0.00000001 ) then 
+if (( 1.0+cosom ) > 0.00000001 ) then
 	begin
-	if (( 1.0-cosom ) > 0.00000001 ) then 
+	if (( 1.0-cosom ) > 0.00000001 ) then
 		begin
 		omega:= arccos( cosom );
 		sinom:= sin( omega );
 		sclq1:= sin(( 1.0-interp )*omega )/sinom;
 		sclq2:= sin( interp*omega )/sinom;
-		end 
+		end
 	else
 		begin
 		sclq1:= 1.0-interp;
@@ -797,10 +803,10 @@ end;
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 Procedure RotatePoint(Var Xp, Yp, Zp: TSGSingle;const Xv, Yv, Zv, Angle: TSGSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var 
+var
 	Temp, TempV, Nx, Ny, Nz: TSGSingle;
 	C, S : TSGSingle;
-Begin 
+Begin
 C := Cos(Angle);
 S := Sin(Angle);
 Temp := 1.0 - C;
@@ -820,9 +826,9 @@ Nz:=Xp * (Xv * TempV - S * Yv) +
 	Yp * (Yv * TempV + S * Xv) +
 	Zp * (Zv * TempV + C);
 
-Xp:=Nx; 
-Yp:=Ny; 
-Zp:=Nz; 
+Xp:=Nx;
+Yp:=Ny;
+Zp:=Nz;
 End;
 begin
 Result := Point;
@@ -1058,7 +1064,7 @@ VRender.Vertex(d);
 VRender.EndScene();
 end;
 
-procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f; 
+procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f;
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
 	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -1068,11 +1074,11 @@ end;
 
 procedure SGRoundQuad(
 	const VRender:ISGRender;
-	const Vertex12,Vertex32: TSGVertex2f; 
-	const Radius:real; 
+	const Vertex12,Vertex32: TSGVertex2f;
+	const Radius:real;
 	const Interval:LongInt;
-	const QuadColor: TSGColor4f; 
-	const LinesColor: TSGColor4f; 
+	const QuadColor: TSGColor4f;
+	const LinesColor: TSGColor4f;
 	const WithLines:boolean = False;
 	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
@@ -1088,11 +1094,11 @@ end;
 
 procedure SGRoundQuad(
 	const VRender:ISGRender;
-	const Vertex1,Vertex3: TSGVertex3f; 
-	const Radius:real; 
+	const Vertex1,Vertex3: TSGVertex3f;
+	const Radius:real;
 	const Interval:LongInt;
-	const QuadColor: TSGColor4f; 
-	const LinesColor: TSGColor4f; 
+	const QuadColor: TSGColor4f;
+	const LinesColor: TSGColor4f;
 	const WithLines:boolean = False;
 	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
@@ -1120,22 +1126,22 @@ SetLength(Result,Interval*4+4);
 ii:=0;
 For i:=0 to Interval do
 	begin
-	Result[ii].Import(VertexR2.x+cos((Pi/2)/(Interval)*i)*Radius,VertexR2.y+sin((Pi/2)/(Interval)*i+Pi)*Radius+2*Radius,VertexR2.z); 
+	Result[ii].Import(VertexR2.x+cos((Pi/2)/(Interval)*i)*Radius,VertexR2.y+sin((Pi/2)/(Interval)*i+Pi)*Radius+2*Radius,VertexR2.z);
 	ii+=1;
 	end;
 For i:=0 to Interval do
 	begin
-	Result[ii].Import(VertexR1.x+cos((Pi/2)*i/(Interval)+Pi/2)*Radius,VertexR1.y+sin((Pi/2)*i/(Interval)+3*Pi/2)*Radius+2*Radius,VertexR1.z); 
+	Result[ii].Import(VertexR1.x+cos((Pi/2)*i/(Interval)+Pi/2)*Radius,VertexR1.y+sin((Pi/2)*i/(Interval)+3*Pi/2)*Radius+2*Radius,VertexR1.z);
 	ii+=1;
 	end;
 For i:=0 to Interval do
-	begin 
-	Result[ii].Import(VertexR4.x+cos((Pi/2)*i/Interval+Pi)*Radius,VertexR4.y+sin((Pi/2)*i/(Interval))*Radius-2*Radius,VertexR4.z); 
+	begin
+	Result[ii].Import(VertexR4.x+cos((Pi/2)*i/Interval+Pi)*Radius,VertexR4.y+sin((Pi/2)*i/(Interval))*Radius-2*Radius,VertexR4.z);
 	ii+=1;
 	end;
 For i:=0 to Interval do
-	begin 
-	Result[ii].Import(VertexR3.x+cos((Pi/2)*i/(Interval)+3*Pi/2)*Radius,VertexR3.y+sin((Pi/2)*i/(Interval)+Pi/2)*Radius-2*Radius,VertexR3.z); 
+	begin
+	Result[ii].Import(VertexR3.x+cos((Pi/2)*i/(Interval)+3*Pi/2)*Radius,VertexR3.y+sin((Pi/2)*i/(Interval)+Pi/2)*Radius-2*Radius,VertexR3.z);
 	ii+=1;
 	end;
 end;
@@ -1144,8 +1150,8 @@ procedure SGConstructRoundQuad(
 	const VRender:ISGRender;
 	const ArVertex:TSGVertex3fList;
 	const Interval:LongInt;
-	const QuadColor: TSGColor4f; 
-	const LinesColor: TSGColor4f; 
+	const QuadColor: TSGColor4f;
+	const LinesColor: TSGColor4f;
 	const WithLines:boolean = False;
 	const WithQuad:boolean = True);
 var
@@ -1248,9 +1254,9 @@ end;
 
 function TSGScreenVertexes.VertexInView(const Vertex:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=(Vertex.x<SGMax(X1,X2)) and 
-	(Vertex.y<SGMax(Y1,Y2)) and 
-	(Vertex.x>SGMin(X1,X2)) and 
+Result:=(Vertex.x<SGMax(X1,X2)) and
+	(Vertex.y<SGMax(Y1,Y2)) and
+	(Vertex.x>SGMin(X1,X2)) and
 	(Vertex.y>SGMin(Y1,Y2));
 end;
 
@@ -1265,7 +1271,7 @@ if WithAlpha then
 		LongWordByteArray(LongWordColor)[2]/255,
 		LongWordByteArray(LongWordColor)[1]/255,
 		LongWordByteArray(LongWordColor)[0]/255);
-	
+
 	end
 else
 	begin

@@ -2014,6 +2014,7 @@ begin
 Result := nil;
 {$IFDEF MSWINDOWS}
 Result += 'Alut.dll';
+Result += 'Alut32.dll';
 {$ELSE}
 Result += 'libalut.so.3';
 Result += 'libalut.so.2';
