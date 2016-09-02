@@ -47,6 +47,9 @@ uses
 	;
 
 type
+	TSGALSource = TALuint;
+	TSGALBuffer = TALuint;
+
 	TSGOpenALBufferInfo = object
 			public
 		FFrequency   : TALsizei;
@@ -57,7 +60,7 @@ type
 
 	TSGOpenALBuffer = object(TSGOpenALBufferInfo)
 			public
-		FBuffer : TALuint;
+		FBuffer : TSGALBuffer;
 			public
 		procedure Clear();
 			public
@@ -66,7 +69,7 @@ type
 
 	TSGOpenALSource = object(TSGOpenALBuffer)
 			public
-		FSource : TALuint;
+		FSource : TSGALSource;
 			public
 		procedure Clear();
 			public
@@ -88,6 +91,33 @@ type
 		function Assigned() : TSGBool;
 		end;
 
+	{$IFDEF USE_MPG123}
+	TSGOpenALMP3 = class(TSGThread)
+			public
+		constructor Create(const FilePath: TSGString);
+		destructor Destroy(); override;
+			protected
+		FMaxBufferSize : TSGMaxEnum;
+		FSource   : TSGALSource;
+		FBuffers  : array[0..1] of TSGALBuffer;
+		FFormat   : TALenum;
+		FFileName : TSGString;
+		FMPGHandle   : PMPG123_Handle;
+		FRate     : Integer;
+		FChannels : Integer;
+		FEncoding : Integer;
+		FPlaying  : TSGBool;
+			protected
+		procedure UpdateBuffer();
+		procedure PreBuffer();
+		procedure Stream(const VBuffer : TSGALBuffer);
+			public
+		procedure Execute(); override;
+		procedure Play();
+		procedure Stop();
+		end;
+	{$ENDIF}
+
 type
 	TSGAudioRenderOpenAL = class(TSGAudioRender)
 			public
@@ -95,7 +125,12 @@ type
 		class function Suppored() : TSGBool; override;
 		class function ClassName() : TSGString; override;
 			private
+		{$IFDEF USE_MPG123}
+			FMPG123Suppored : TSGBool;
+			FMPG123Initialized : TSGBool;
+			{$ENDIF}
 		FALUTSuppored : TSGBool;
+			private
 		FContext      : PALCcontext;
 		FDevice       : PALCdevice;
 			public
@@ -114,7 +149,112 @@ implementation
 
 uses
 	SaGeDllManager
+	{$IFDEF USE_MPG123}
+	,Windows
+	{$ENDIF}
 	;
+
+{$IFDEF USE_MPG123}
+destructor TSGOpenALMP3.Destroy();
+begin
+alSourceStop(FSource);
+alDeleteSources(1, @FSource);
+alDeleteBuffers(1, @FBuffers);
+mpg123_close(FMPGHandle);
+inherited;
+end;
+
+procedure TSGOpenALMP3.Execute();
+var
+	Critical : TRTLCriticalSection;
+begin
+InitializeCriticalSection(Critical);
+while FPlaying do
+	begin
+	EnterCriticalSection(Critical);
+	UpdateBuffer();
+	LeaveCriticalSection(Critical);
+	Sleep(50);
+	end;
+DeleteCriticalSection(Critical);
+end;
+
+constructor TSGOpenALMP3.Create(const FilePath: TSGString);
+begin
+inherited Create(nil, nil, False);
+FFileName := FilePath;
+FMaxBufferSize := 4096*8;
+
+FMPGHandle := mpg123_new('MMX', nil); //TODO: make this a property. MMX is common
+if FMPGHandle = nil then
+	begin
+	SGLog.Sourse('TSGOpenALMP3 : Error while creating MP3 handle!');
+	Exit;
+	end;
+
+mpg123_open(FMPGHandle, PChar(FFileName));
+mpg123_getformat(FMPGHandle, @FRate, @FChannels, @FEncoding);
+mpg123_format_none(FMPGHandle);
+mpg123_format(FMPGHandle, FRate, FChannels, FEncoding);
+
+FFormat := AL_FORMAT_STEREO16; //TODO: this should be determined from mp3 file
+alGenBuffers(2, @FBuffers);
+alGenSources(1, @FSource);
+alSource3f(FSource, AL_POSITION, 0, 0, 0);
+alSource3f(FSource, AL_VELOCITY, 0, 0, 0);
+alSource3f(FSource, AL_DIRECTION, 0, 0, 0);
+alSourcef (FSource, AL_ROLLOFF_FACTOR, 0);
+alSourcei (FSource, AL_SOURCE_RELATIVE, AL_TRUE);
+end;
+
+procedure TSGOpenALMP3.UpdateBuffer();
+var
+ Processed : TALint;
+ Buffer    : TALUInt;
+begin
+//TODO: detect end of mp3
+alGetSourcei(FSource, AL_BUFFERS_PROCESSED, @Processed);
+if Processed > 0 then
+	repeat
+	alSourceUnqueueBuffers(FSource, 1, @Buffer);
+	Stream(Buffer);
+	alSourceQueueBuffers(FSource, 1, @Buffer);
+	dec(Processed);
+	until Processed <= 0;
+end;
+
+procedure TSGOpenALMP3.PreBuffer();
+begin
+Stream(FBuffers[0]);
+Stream(FBuffers[1]);
+alSourceQueueBuffers(FSource, 2, @FBuffers);
+end;
+
+procedure TSGOpenALMP3.Stream(const VBuffer : TSGALBuffer);
+var
+  Data : PByte;
+  D    : Cardinal;
+begin
+  GetMem(data, FMaxBufferSize);
+  mpg123_read(FMPGHandle, Data, FMaxBufferSize, @D);
+  alBufferData(VBuffer, FFormat, Data, FMaxBufferSize, FRate);
+  FreeMem(Data);
+end;
+
+procedure TSGOpenALMP3.Play();
+begin
+PreBuffer();
+FPlaying := True;
+Start();
+alSourcePlay(FSource);
+end;
+
+procedure TSGOpenALMP3.Stop();
+begin
+FPlaying := False;
+alSourceStop(FSource);
+end;
+{$ENDIF}
 
 procedure TSGOpenALBuffer.DeleteBuffer();
 begin
@@ -268,12 +408,21 @@ begin
 if DllManager.Dll('OpenAL') <> nil then
 	DllManager.Dll('OpenAL').ReadExtensions();
 
+{$IFDEF USE_MPG123}
+if not FMPG123Initialized then
+	begin
+	FMPG123Initialized := mpg123_init() = 0;
+	SGLog.Sourse('TSGAudioRenderOpenAL : MPG123 : ' + Iff(FMPG123Initialized, 'Initialized.', 'Initialization fail.'));
+	end;
+{$ENDIF}
+
 alListenerfv(AL_POSITION,    @ListenerPos);
 alListenerfv(AL_VELOCITY,    @ListenerVel);
 alListenerfv(AL_ORIENTATION, @ListenerOri);
 
 //Test :
 //CreateSource(CreateBuffer(LoadWAVFromFile('./../../Sounds/SystemBass.wav'))).Play();
+//{$IFDEF USE_MPG123} TSGOpenALMP3.Create('./../../Sounds/Test.mp3').Play(); {$ENDIF}
 end;
 
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;
@@ -295,6 +444,13 @@ end;
 
 procedure TSGAudioRenderOpenAL.Kill();
 begin
+{$IFDEF USE_MPG123}
+if FMPG123Initialized then
+	begin
+	mpg123_exit();
+	FMPG123Initialized := False;
+	end;
+{$ENDIF}
 if not FALUTSuppored then
 	int_alutExit()
 else
@@ -310,6 +466,10 @@ inherited;
 FALUTSuppored := DllManager.Suppored('alut');
 FContext := nil;
 FDevice := nil;
+{$IFDEF USE_MPG123}
+FMPG123Suppored := DllManager.Suppored('mpg123');
+FMPG123Initialized := False;
+{$ENDIF}
 end;
 
 class function TSGAudioRenderOpenAL.ClassName() : TSGString;

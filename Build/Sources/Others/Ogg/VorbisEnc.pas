@@ -44,6 +44,7 @@ interface
 
 uses OSTypes, Codec;
 
+(*
 const
 {$IFDEF MSWINDOWS}
   VorbisEncLib = 'vorbisenc.dll';
@@ -52,6 +53,7 @@ const
 {$IFDEF UNIX}
   VorbisEncLib = 'libvorbisenc.so';
 {$ENDIF UNIX}
+*)
 
 { vorbis/vorbisenc.h }
 (*
@@ -108,7 +110,10 @@ end;
 class function TSGDllVorbisEnc.DllNames() : TSGStringList;
 begin
 Result := nil;
-Result += VorbisEncLib;
+Result += DllPrefix + 'vorbisenc' + DllPostfix;
+{$IFDEF MSWINDOWS}
+Result += DllPrefix + 'libvorbisenc' + DllPostfix;
+{$ENDIF}
 end;
 class function TSGDllVorbisEnc.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
 var

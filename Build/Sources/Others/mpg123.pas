@@ -428,7 +428,12 @@ end;
 class function TSGDllMPG123.DllNames() : TSGStringList;
 begin
 Result := nil;
+Result += 'libmpg123-0';
+Result += 'libmpg123';
+{$IFDEF MSWINDOWS}
 Result += 'libmpg123-0.dll';
+Result += 'libmpg123.dll';
+{$ENDIF}
 end;
 
 class procedure TSGDllMPG123.Free();

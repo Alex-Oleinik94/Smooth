@@ -47,6 +47,7 @@ interface
 
 uses OSTypes;
 
+(*
 const
 {$IFDEF MSWINDOWS}
   OggLib = 'ogg.dll';
@@ -55,6 +56,7 @@ const
 {$IFDEF UNIX}
   OggLib = 'libogg.so';
 {$ENDIF UNIX}
+*)
 
 { ogg/ogg.h }
 
@@ -453,7 +455,10 @@ end;
 
 class function TSGDllOGG.DllNames() : TSGStringList;
 begin
-Result := OggLib;
+Result := DllPrefix + 'ogg' + DllPostfix;
+{$IFDEF MSWINDOWS}
+Result += DllPrefix + 'libogg' + DllPostfix;
+{$ENDIF}
 end;
 
 class procedure TSGDllOGG.Free();

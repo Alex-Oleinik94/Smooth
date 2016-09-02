@@ -360,28 +360,26 @@ type
 
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
+
 	TSGThreadFunctionResult =
-	{$IFDEF ANDROID}
+	{$IFDEF         ANDROID}
 		Pointer
-	{$ELSE}
-		{$IFDEF MSWINDOWS}
-			LongWord
-		{$ELSE}
-			{$IFDEF UNIX}
-				{$IFDEF CPU32}
-					LongInt
-					{$ENDIF}
-				{$IFDEF CPU64}
-					Int64
-					{$ENDIF}
-				{$ENDIF}
-			{$ENDIF}
-		{$ENDIF};
+	{$ELSE} {$IFDEF MSWINDOWS}
+		LongWord
+	{$ELSE} {$IFDEF UNIX}
+		{$IFDEF CPU32}
+			LongInt
+		{$ENDIF}
+		{$IFDEF CPU64}
+			Int64
+		{$ENDIF}
+	{$ENDIF}{$ENDIF}{$ENDIF};
+
 	TSGThreadID = {$IFDEF ANDROID} pthread_t {$ELSE}{$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF}{$ENDIF};
 	TSGThreadFunction = function ( p : TSGPointer ): TSGThreadFunctionResult;
 		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	//Это класс, при помощью которого можно создать поток
-	TSGThread=class
+	TSGThread = class
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 		destructor Destroy();override;
@@ -396,11 +394,14 @@ type
 			mutex : pthread_mutex_t;
 			cond : pthread_cond_t;
 			{$ENDIF}
-		procedure Execute;virtual;
-		procedure Start;virtual;
-		property Finished: boolean read FFinished write FFinished;
+		procedure Execute();virtual;
+		procedure Start();virtual;
 		procedure SetProcedure(const Proc:TSGThreadProcedure);
 		procedure SetParametr(const Pointer:Pointer);
+		procedure PreExecuting();
+		procedure PostExecuting();
+			public
+		property Finished: boolean read FFinished write FFinished;
 		end;
 	SGThread = TSGThread;
 	ArTSGThread = type packed array of TSGThread;
@@ -2501,7 +2502,7 @@ begin
 FParametr:=Pointer;
 end;
 
-procedure TSGThread.Execute();
+procedure TSGThread.PreExecuting();
 begin
 {$IFDEF ANDROID}
 	pthread_mutex_lock(@mutex);
@@ -2511,8 +2512,10 @@ FFinished:=False;
 	pthread_cond_broadcast(@cond);
 	pthread_mutex_unlock(@mutex);
 	{$ENDIF}
-if Pointer(FProcedure)<>nil then
-	FProcedure(FParametr);
+end;
+
+procedure TSGThread.PostExecuting();
+begin
 {$IFDEF ANDROID}
 	pthread_mutex_lock(@mutex);
 	{$ENDIF}
@@ -2522,11 +2525,19 @@ FFinished:=True;
 	{$ENDIF}
 end;
 
+procedure TSGThread.Execute();
+begin
+if Pointer(FProcedure)<>nil then
+	FProcedure(FParametr);
+end;
+
 function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
+ThreadClass.PreExecuting();
 ThreadClass.Execute();
+ThreadClass.PostExecuting();
 {$IFDEF ANDROID}
 	while true do
 		begin
