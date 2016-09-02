@@ -2,20 +2,48 @@
 
 //{$DEFINE OPENAL_RENDER_DEBUG}
 
+{$IF defined(DESKTOP)}
+	{$DEFINE USE_OGG}
+	{$ENDIF}
+
+{$IF defined(MSWINDOWS) and defined(DESKTOP)}
+		{$DEFINE USE_MPG123}
+		{$ENDIF}
+
 unit SaGeAudioRenderOpenAL;
 
 interface
 
 uses
+	// Engine
 	 SaGeBase
 	,SaGeBased
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeAudioRender
 
+	// System
 	,Classes
 
+	// Audio Library
 	,OpenAL
+
+	// Codecs :
+		(* ogg *)
+	{$IFDEF USE_OGG}
+	,Ogg
+	,Codec
+	,CommentUtils
+	,OSTypes
+	,VCEdit
+	,VorbisEnc
+	,VorbisFile
+	{$ENDIF}
+
+		(* mp3 and etc *)
+	{$IFDEF USE_MPG123}
+	,mpg123
+	{$ENDIF}
 	;
 
 type
