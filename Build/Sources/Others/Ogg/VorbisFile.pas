@@ -126,48 +126,175 @@ type
 
       callbacks: ov_callbacks;
          end;
+(*
+
 
 function ov_clear(var vf: OggVorbis_File): int; cdecl; external VorbisfileLib;
+*)
+var ov_clear : function( var vf : OggVorbis_File ) : int ; cdecl ;
+
 { Do not use "ov_open" in Object Pascal }
-// function ov_open(var f: FILE; var vf: OggVorbis_File; initial: PChar; ibytes: long): int; cdecl; external VorbisfileLib;
+(*
+
+function ov_open(var f: FILE; var vf: OggVorbis_File; initial: PChar; ibytes: long): int; cdecl; external VorbisfileLib;
+*)
+var ov_open : function( var f : FILE ; var vf : OggVorbis_File ; initial : PChar ; ibytes : long ) : int ; cdecl ;
+
+(*
+
 function ov_open_callbacks(const datasource; var vf: OggVorbis_File; initial: PChar; ibytes: long; callbacks: ov_callbacks): int; cdecl; external VorbisfileLib;
+*)
+var ov_open_callbacks : function( const datasource ; var vf : OggVorbis_File ; initial : PChar ; ibytes : long ; callbacks : ov_callbacks ) : int ; cdecl ;
+
 
 { Do not use "ov_test" in Object Pascal }
-// function ov_test(var f: FILE; var vf: OggVorbis_File; initial: PChar; ibytes: long): int; cdecl; external VorbisfileLib;
+(*
+
+function ov_test(var f: FILE; var vf: OggVorbis_File; initial: PChar; ibytes: long): int; cdecl; external VorbisfileLib;
+*)
+var ov_test : function( var f : FILE ; var vf : OggVorbis_File ; initial : PChar ; ibytes : long ) : int ; cdecl ;
+
+(*
+
 function ov_test_callbacks(const datasource; var vf: OggVorbis_File; initial: PChar; ibytes: long; callbacks: ov_callbacks): int; cdecl; external VorbisfileLib;
+*)
+var ov_test_callbacks : function( const datasource ; var vf : OggVorbis_File ; initial : PChar ; ibytes : long ; callbacks : ov_callbacks ) : int ; cdecl ;
+
+(*
+
 function ov_test_open(var vf: OggVorbis_File): int; cdecl; external VorbisfileLib;
+*)
+var ov_test_open : function( var vf : OggVorbis_File ) : int ; cdecl ;
+
+(*
+
 
 function ov_bitrate(var vf: OggVorbis_File; i: int): long; cdecl; external VorbisfileLib;
+*)
+var ov_bitrate : function( var vf : OggVorbis_File ; i : int ) : long ; cdecl ;
+
+(*
+
 function ov_bitrate_instant(var vf: OggVorbis_File): long; cdecl; external VorbisfileLib;
+*)
+var ov_bitrate_instant : function( var vf : OggVorbis_File ) : long ; cdecl ;
+
+(*
+
 function ov_streams(var vf: OggVorbis_File): long; cdecl; external VorbisfileLib;
+*)
+var ov_streams : function( var vf : OggVorbis_File ) : long ; cdecl ;
+
+(*
+
 function ov_seekable(var vf: OggVorbis_File): long; cdecl; external VorbisfileLib;
+*)
+var ov_seekable : function( var vf : OggVorbis_File ) : long ; cdecl ;
+
+(*
+
 function ov_serialnumber(var vf: OggVorbis_File; i: int): long; cdecl; external VorbisfileLib;
+*)
+var ov_serialnumber : function( var vf : OggVorbis_File ; i : int ) : long ; cdecl ;
+
+(*
+
 
 function ov_raw_total(var vf: OggVorbis_File; i: int): ogg_int64_t; cdecl; external VorbisfileLib;
+*)
+var ov_raw_total : function( var vf : OggVorbis_File ; i : int ) : ogg_int64_t ; cdecl ;
+
+(*
+
 function ov_pcm_total(var vf: OggVorbis_File; i: int): ogg_int64_t; cdecl; external VorbisfileLib;
+*)
+var ov_pcm_total : function( var vf : OggVorbis_File ; i : int ) : ogg_int64_t ; cdecl ;
+
+(*
+
 function ov_time_total(var vf: OggVorbis_File; i: int): double; cdecl; external VorbisfileLib;
+*)
+var ov_time_total : function( var vf : OggVorbis_File ; i : int ) : double ; cdecl ;
+
+(*
+
 
 function ov_raw_seek(var vf: OggVorbis_File; pos: long): int; cdecl; external VorbisfileLib;
+*)
+var ov_raw_seek : function( var vf : OggVorbis_File ; pos : long ) : int ; cdecl ;
+
+(*
+
 function ov_pcm_seek(var vf: OggVorbis_File; pos: ogg_int64_t): int; cdecl; external VorbisfileLib;
+*)
+var ov_pcm_seek : function( var vf : OggVorbis_File ; pos : ogg_int64_t ) : int ; cdecl ;
+
+(*
+
 function ov_pcm_seek_page(var vf: OggVorbis_File; pos: ogg_int64_t): int; cdecl; external VorbisfileLib;
+*)
+var ov_pcm_seek_page : function( var vf : OggVorbis_File ; pos : ogg_int64_t ) : int ; cdecl ;
+
+(*
+
 function ov_time_seek(var vf: OggVorbis_File; pos: double): int; cdecl; external VorbisfileLib;
+*)
+var ov_time_seek : function( var vf : OggVorbis_File ; pos : double ) : int ; cdecl ;
+
+(*
+
 function ov_time_seek_page(var vf: OggVorbis_File; pos: double): int; cdecl; external VorbisfileLib;
+*)
+var ov_time_seek_page : function( var vf : OggVorbis_File ; pos : double ) : int ; cdecl ;
+
+(*
+
 
 function ov_raw_tell(var vf: OggVorbis_File): ogg_int64_t; cdecl; external VorbisfileLib;
+*)
+var ov_raw_tell : function( var vf : OggVorbis_File ) : ogg_int64_t ; cdecl ;
+
+(*
+
 function ov_pcm_tell(var vf: OggVorbis_File): ogg_int64_t; cdecl; external VorbisfileLib;
+*)
+var ov_pcm_tell : function( var vf : OggVorbis_File ) : ogg_int64_t ; cdecl ;
+
+(*
+
 function ov_time_tell(var vf: OggVorbis_File): double; cdecl; external VorbisfileLib;
+*)
+var ov_time_tell : function( var vf : OggVorbis_File ) : double ; cdecl ;
+
+(*
+
 
 function ov_info(var vf: OggVorbis_File; link: int): p_vorbis_info; cdecl; external VorbisfileLib;
+*)
+var ov_info : function( var vf : OggVorbis_File ; link : int ) : p_vorbis_info ; cdecl ;
+
+(*
+
 function ov_comment(var vf: OggVorbis_File; link: int): p_vorbis_comment; cdecl; external VorbisfileLib;
+*)
+var ov_comment : function( var vf : OggVorbis_File ; link : int ) : p_vorbis_comment ; cdecl ;
+
+(*
+
 
 function ov_read(var vf: OggVorbis_File; const buffer; length: int; bigendianp: int; word: int; sgned: int; bitstream: p_int): int; cdecl; external VorbisfileLib;
+*)
+var ov_read : function( var vf : OggVorbis_File ; const buffer ; length : int ; bigendianp : int ; word : int ; sgned : int ; bitstream : p_int ) : int ; cdecl ;
+
 
 { The following is added and not found in the original .h file }
+type
+	int_t = int;
 
 { The vorbisfile callbacks for Object Pascal TStreams }
 function ops_read_func(var ptr; size, nmemb: size_t; const datasource): size_t; cdecl;
-function ops_seek_func(const datasource; offset: ogg_int64_t; whence: int): int; cdecl;
-function ops_close_func(const datasource): int; cdecl;
+function ops_seek_func(const datasource; offset: ogg_int64_t; whence: int_t): int_t; cdecl;
+function ops_close_func(const datasource): int_t; cdecl;
 function ops_tell_func(const datasource): long; cdecl;
 
 var
@@ -175,7 +302,12 @@ var
 
 implementation
 
-uses Classes;
+uses
+	 SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	,Classes
+	;
 
 const
   { Constants taken from the MSVC++6 ANSI C library. These values may be
@@ -205,7 +337,7 @@ begin
   end;
 end;
 
-function ops_seek_func (const datasource; offset: ogg_int64_t; whence: int): int;
+function ops_seek_func (const datasource; offset: ogg_int64_t; whence: int_t): int_t;
 { Returns zero on success, returns a non-zero value on error, result is undefined
   when device is unseekable. }
 begin
@@ -221,7 +353,7 @@ begin
   end;
 end;
 
-function ops_close_func(const datasource): int;
+function ops_close_func(const datasource): int_t;
 { Returns zero when device was successfully closed, EOF on error. }
 begin
   try
@@ -244,9 +376,105 @@ begin
   end;
 end;
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllVorbisFile = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+class procedure TSGDllVorbisFile.Free();
+begin
+ov_clear := nil;
+ov_open := nil;
+ov_open_callbacks := nil;
+ov_test := nil;
+ov_test_callbacks := nil;
+ov_test_open := nil;
+ov_bitrate := nil;
+ov_bitrate_instant := nil;
+ov_streams := nil;
+ov_seekable := nil;
+ov_serialnumber := nil;
+ov_raw_total := nil;
+ov_pcm_total := nil;
+ov_time_total := nil;
+ov_raw_seek := nil;
+ov_pcm_seek := nil;
+ov_pcm_seek_page := nil;
+ov_time_seek := nil;
+ov_time_seek_page := nil;
+ov_raw_tell := nil;
+ov_pcm_tell := nil;
+ov_time_tell := nil;
+ov_info := nil;
+ov_comment := nil;
+ov_read := nil;
+end;
+class function TSGDllVorbisFile.SystemNames() : TSGStringList;
+begin
+Result := nil;
+Result += 'VorbisFile';
+Result += 'LibVorbisFile';
+end;
+class function TSGDllVorbisFile.DllNames() : TSGStringList;
+begin
+Result := nil;
+Result += VorbisfileLib;
+end;
+class function TSGDllVorbisFile.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(VDll, Name);
+if Result = nil then
+LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+LoadResult^.FFunctionLoaded += 1;
+end;
+
+begin
+Result.Clear();
+Result.FFunctionCount := 25;
+LoadResult := @Result;
+ov_clear := LoadProcedure('ov_clear');
+ov_open := LoadProcedure('ov_open');
+ov_open_callbacks := LoadProcedure('ov_open_callbacks');
+ov_test := LoadProcedure('ov_test');
+ov_test_callbacks := LoadProcedure('ov_test_callbacks');
+ov_test_open := LoadProcedure('ov_test_open');
+ov_bitrate := LoadProcedure('ov_bitrate');
+ov_bitrate_instant := LoadProcedure('ov_bitrate_instant');
+ov_streams := LoadProcedure('ov_streams');
+ov_seekable := LoadProcedure('ov_seekable');
+ov_serialnumber := LoadProcedure('ov_serialnumber');
+ov_raw_total := LoadProcedure('ov_raw_total');
+ov_pcm_total := LoadProcedure('ov_pcm_total');
+ov_time_total := LoadProcedure('ov_time_total');
+ov_raw_seek := LoadProcedure('ov_raw_seek');
+ov_pcm_seek := LoadProcedure('ov_pcm_seek');
+ov_pcm_seek_page := LoadProcedure('ov_pcm_seek_page');
+ov_time_seek := LoadProcedure('ov_time_seek');
+ov_time_seek_page := LoadProcedure('ov_time_seek_page');
+ov_raw_tell := LoadProcedure('ov_raw_tell');
+ov_pcm_tell := LoadProcedure('ov_pcm_tell');
+ov_time_tell := LoadProcedure('ov_time_tell');
+ov_info := LoadProcedure('ov_info');
+ov_comment := LoadProcedure('ov_comment');
+ov_read := LoadProcedure('ov_read');
+end;
+
 initialization
-  ops_callbacks.read_func := ops_read_func;
-  ops_callbacks.seek_func := ops_seek_func;
-  ops_callbacks.close_func := ops_close_func;
-  ops_callbacks.tell_func := ops_tell_func;
+	ops_callbacks.read_func := ops_read_func;
+	ops_callbacks.seek_func := ops_seek_func;
+	ops_callbacks.close_func := ops_close_func;
+	ops_callbacks.tell_func := ops_tell_func;
+	TSGDllVorbisFile.Create();
 end.

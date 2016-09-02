@@ -425,6 +425,7 @@ class function TSGDllCodec.SystemNames() : TSGStringList;
 begin
 Result := nil;
 Result += 'Vorbis';
+Result += 'LibVorbis';
 end;
 class function TSGDllCodec.DllNames() : TSGStringList;
 begin
