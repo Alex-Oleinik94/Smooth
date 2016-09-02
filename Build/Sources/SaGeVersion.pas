@@ -67,15 +67,22 @@ const
 		{$ENDIF}
 		;
 
+function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGVerOS + C + SGVerCPU;
+end;
 
 function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := 'SaGe Engine version '+SGGetEngineVersion()+' ('+SGVerOS+' '+SGVerCPU+' bit)';
+Result := 'SaGe Engine version '+SGGetEngineVersion()+' (' + SGEngineTarget(' ') + ' bit)';
 end;
 
 function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var 
+var
 	Stream: TMemoryStream;
 	S : TSGString;
 begin

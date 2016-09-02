@@ -387,93 +387,207 @@ var
 
   mpg123_outblock: function(mh: Pmpg123_handle): size_t; cdecl;
 
-  //mpg123_replace_reader : function(mh:Pmpg123_handle; r_read:function (_para1:longint; _para2:pointer; _para3:size_t):Tssize_t; r_lseek:function (_para1:longint; _para2:off_t; _para3:longint):off_t):longint;
+type
+  T_r_read  = function (_para1:longint; _para2:pointer; _para3:size_t):size_t;
+  T_r_lseek = function (_para1:longint; _para2:off_t; _para3:longint):off_t;
+
+var
+  mpg123_replace_reader : function(
+	mh      : Pmpg123_handle;
+	r_read  : T_r_read;
+	r_lseek : T_r_lseek
+		):longint;
 
 implementation
 
-var
-  hlib: THandle;
+uses
+	SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
 
-procedure Freempg123;
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllMPG123 = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+
+class function TSGDllMPG123.SystemNames() : TSGStringList;
 begin
-  FreeLibrary(hlib);
+Result := 'mpg123';
+Result += 'libmpg123';
 end;
 
-procedure Loadmpg123(lib: PChar);
+class function TSGDllMPG123.DllNames() : TSGStringList;
 begin
-  hlib := LoadLibrary(lib);
-  mpg123_init := GetProcAddress(hlib, 'mpg123_init');
-  mpg123_exit := GetProcAddress(hlib, 'mpg123_exit');
-  mpg123_new := GetProcAddress(hlib, 'mpg123_new');
-  mpg123_delete := GetProcAddress(hlib, 'mpg123_delete');
-  mpg123_param := GetProcAddress(hlib, 'mpg123_param');
-  mpg123_getparam := GetProcAddress(hlib, 'mpg123_getparam');
-  mpg123_plain_strerror := GetProcAddress(hlib, 'mpg123_plain_strerror');
-  mpg123_strerror := GetProcAddress(hlib, 'mpg123_strerror');
-  mpg123_errcode := GetProcAddress(hlib, 'mpg123_errcode');
-  mpg123_decoders := GetProcAddress(hlib, 'mpg123_decoders');
-  mpg123_supported_decoders := GetProcAddress(hlib, 'mpg123_supported_decoders');
-  mpg123_decoder := GetProcAddress(hlib, 'mpg123_decoder');
-  mpg123_rates := GetProcAddress(hlib, 'mpg123_rates');
-  mpg123_encodings := GetProcAddress(hlib, 'mpg123_encodings');
-  mpg123_format_none := GetProcAddress(hlib, 'mpg123_format_none');
-  mpg123_format_all := GetProcAddress(hlib, 'mpg123_format_all');
-  mpg123_format := GetProcAddress(hlib, 'mpg123_format');
-  mpg123_format_support := GetProcAddress(hlib, 'mpg123_format_support');
-  mpg123_getformat := GetProcAddress(hlib, 'mpg123_getformat');
-  mpg123_open := GetProcAddress(hlib, 'mpg123_open');
-  mpg123_open_fd := GetProcAddress(hlib, 'mpg123_open_fd');
-  mpg123_open_feed := GetProcAddress(hlib, 'mpg123_open_feed');
-  mpg123_close := GetProcAddress(hlib, 'mpg123_close');
-  mpg123_read := GetProcAddress(hlib, 'mpg123_read');
-  mpg123_decode := GetProcAddress(hlib, 'mpg123_decode');
-  mpg123_decode_frame := GetProcAddress(hlib, 'mpg123_decode_frame');
-  mpg123_tell := GetProcAddress(hlib, 'mpg123_tell');
-  mpg123_tellframe := GetProcAddress(hlib, 'mpg123_tellframe');
-  mpg123_seek := GetProcAddress(hlib, 'mpg123_seek');
-  mpg123_feedseek := GetProcAddress(hlib, 'mpg123_feedseek');
-  mpg123_seek_frame := GetProcAddress(hlib, 'mpg123_seek_frame');
-  mpg123_timeframe := GetProcAddress(hlib, 'mpg123_timeframe');
-  mpg123_index := GetProcAddress(hlib, 'mpg123_index');
-  mpg123_position := GetProcAddress(hlib, 'mpg123_position');
-  mpg123_eq := GetProcAddress(hlib, 'mpg123_eq');
-  mpg123_reset_eq := GetProcAddress(hlib, 'mpg123_reset_eq');
-  mpg123_volume := GetProcAddress(hlib, 'mpg123_volume');
-  mpg123_volume_change := GetProcAddress(hlib, 'mpg123_volume_change');
-  mpg123_getvolume := GetProcAddress(hlib, 'mpg123_getvolume');
-  mpg123_info := GetProcAddress(hlib, 'mpg123_info');
-  mpg123_safe_buffer := GetProcAddress(hlib, 'mpg123_safe_buffer');
-  mpg123_scan := GetProcAddress(hlib, 'mpg123_scan');
-  mpg123_length := GetProcAddress(hlib, 'mpg123_length');
-  mpg123_tpf := GetProcAddress(hlib, 'mpg123_tpf');
-  mpg123_clip := GetProcAddress(hlib, 'mpg123_clip');
-  mpg123_init_string := GetProcAddress(hlib, 'mpg123_init_string');
-  mpg123_free_string := GetProcAddress(hlib, 'mpg123_free_string');
-  mpg123_resize_string := GetProcAddress(hlib, 'mpg123_resize_string');
-  mpg123_copy_string := GetProcAddress(hlib, 'mpg123_copy_string');
-  mpg123_add_string := GetProcAddress(hlib, 'mpg123_add_string');
-  mpg123_set_string := GetProcAddress(hlib, 'mpg123_set_string');
-  mpg123_meta_check := GetProcAddress(hlib, 'mpg123_meta_check');
-  mpg123_id3_ := GetProcAddress(hlib, 'mpg123_id3');
-  mpg123_icy_ := GetProcAddress(hlib, 'mpg123_icy');
-  mpg123_parnew := GetProcAddress(hlib, 'mpg123_parnew');
-  mpg123_new_pars := GetProcAddress(hlib, 'mpg123_new_pars');
-  mpg123_delete_pars := GetProcAddress(hlib, 'mpg123_delete_pars');
-  mpg123_fmt_none := GetProcAddress(hlib, 'mpg123_fmt_none');
-  mpg123_fmt_all := GetProcAddress(hlib, 'mpg123_fmt_all');
-  mpg123_fmt := GetProcAddress(hlib, 'mpg123_fmt');
-  mpg123_fmt_support := GetProcAddress(hlib, 'mpg123_fmt_support');
-  mpg123_par := GetProcAddress(hlib, 'mpg123_par');
-  mpg123_getpar := GetProcAddress(hlib, 'mpg123_getpar');
-  mpg123_replace_buffer := GetProcAddress(hlib, 'mpg123_replace_buffer');
-  mpg123_outblock := GetProcAddress(hlib, 'mpg123_outblock');
-  //mpg123_replace_reader := GetProcAddress(hlib,'mpg123_replace_reader');
+Result := nil;
+Result += 'libmpg123-0.dll';
+end;
+
+class procedure TSGDllMPG123.Free();
+begin
+mpg123_init := nil;
+mpg123_exit := nil;
+mpg123_new := nil;
+mpg123_delete := nil;
+mpg123_param := nil;
+mpg123_getparam := nil;
+mpg123_plain_strerror := nil;
+mpg123_strerror := nil;
+mpg123_errcode := nil;
+mpg123_decoders := nil;
+mpg123_supported_decoders := nil;
+mpg123_decoder := nil;
+mpg123_rates := nil;
+mpg123_encodings := nil;
+mpg123_format_none := nil;
+mpg123_format_all := nil;
+mpg123_format := nil;
+mpg123_format_support := nil;
+mpg123_getformat := nil;
+mpg123_open := nil;
+mpg123_open_fd := nil;
+mpg123_open_feed := nil;
+mpg123_close := nil;
+mpg123_read := nil;
+mpg123_decode := nil;
+mpg123_decode_frame := nil;
+mpg123_tell := nil;
+mpg123_tellframe := nil;
+mpg123_seek := nil;
+mpg123_feedseek := nil;
+mpg123_seek_frame := nil;
+mpg123_timeframe := nil;
+mpg123_index := nil;
+mpg123_position := nil;
+mpg123_eq := nil;
+mpg123_reset_eq := nil;
+mpg123_volume := nil;
+mpg123_volume_change := nil;
+mpg123_getvolume := nil;
+mpg123_info := nil;
+mpg123_safe_buffer := nil;
+mpg123_scan := nil;
+mpg123_length := nil;
+mpg123_tpf := nil;
+mpg123_clip := nil;
+mpg123_init_string := nil;
+mpg123_free_string := nil;
+mpg123_resize_string := nil;
+mpg123_copy_string := nil;
+mpg123_add_string := nil;
+mpg123_set_string := nil;
+mpg123_meta_check := nil;
+mpg123_id3_ := nil;
+mpg123_icy_ := nil;
+mpg123_parnew := nil;
+mpg123_new_pars := nil;
+mpg123_delete_pars := nil;
+mpg123_fmt_none := nil;
+mpg123_fmt_all := nil;
+mpg123_fmt := nil;
+mpg123_fmt_support := nil;
+mpg123_par := nil;
+mpg123_getpar := nil;
+mpg123_replace_buffer := nil;
+mpg123_outblock := nil;
+mpg123_replace_reader := nil;
+end;
+
+class function TSGDllMPG123.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(VDll, Name);
+if Result = nil then
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+	LoadResult^.FFunctionLoaded += 1;
+LoadResult^.FFunctionCount += 1;
+end;
+
+begin
+Result.Clear();
+LoadResult := @Result;
+mpg123_init := LoadProcedure('mpg123_init');
+mpg123_exit := LoadProcedure('mpg123_exit');
+mpg123_new := LoadProcedure('mpg123_new');
+mpg123_delete := LoadProcedure('mpg123_delete');
+mpg123_param := LoadProcedure('mpg123_param');
+mpg123_getparam := LoadProcedure('mpg123_getparam');
+mpg123_plain_strerror := LoadProcedure('mpg123_plain_strerror');
+mpg123_strerror := LoadProcedure('mpg123_strerror');
+mpg123_errcode := LoadProcedure('mpg123_errcode');
+mpg123_decoders := LoadProcedure('mpg123_decoders');
+mpg123_supported_decoders := LoadProcedure('mpg123_supported_decoders');
+mpg123_decoder := LoadProcedure('mpg123_decoder');
+mpg123_rates := LoadProcedure('mpg123_rates');
+mpg123_encodings := LoadProcedure('mpg123_encodings');
+mpg123_format_none := LoadProcedure('mpg123_format_none');
+mpg123_format_all := LoadProcedure('mpg123_format_all');
+mpg123_format := LoadProcedure('mpg123_format');
+mpg123_format_support := LoadProcedure('mpg123_format_support');
+mpg123_getformat := LoadProcedure('mpg123_getformat');
+mpg123_open := LoadProcedure('mpg123_open');
+mpg123_open_fd := LoadProcedure('mpg123_open_fd');
+mpg123_open_feed := LoadProcedure('mpg123_open_feed');
+mpg123_close := LoadProcedure('mpg123_close');
+mpg123_read := LoadProcedure('mpg123_read');
+mpg123_decode := LoadProcedure('mpg123_decode');
+mpg123_decode_frame := LoadProcedure('mpg123_decode_frame');
+mpg123_tell := LoadProcedure('mpg123_tell');
+mpg123_tellframe := LoadProcedure('mpg123_tellframe');
+mpg123_seek := LoadProcedure('mpg123_seek');
+mpg123_feedseek := LoadProcedure('mpg123_feedseek');
+mpg123_seek_frame := LoadProcedure('mpg123_seek_frame');
+mpg123_timeframe := LoadProcedure('mpg123_timeframe');
+mpg123_index := LoadProcedure('mpg123_index');
+mpg123_position := LoadProcedure('mpg123_position');
+mpg123_eq := LoadProcedure('mpg123_eq');
+mpg123_reset_eq := LoadProcedure('mpg123_reset_eq');
+mpg123_volume := LoadProcedure('mpg123_volume');
+mpg123_volume_change := LoadProcedure('mpg123_volume_change');
+mpg123_getvolume := LoadProcedure('mpg123_getvolume');
+mpg123_info := LoadProcedure('mpg123_info');
+mpg123_safe_buffer := LoadProcedure('mpg123_safe_buffer');
+mpg123_scan := LoadProcedure('mpg123_scan');
+mpg123_length := LoadProcedure('mpg123_length');
+mpg123_tpf := LoadProcedure('mpg123_tpf');
+mpg123_clip := LoadProcedure('mpg123_clip');
+mpg123_init_string := LoadProcedure('mpg123_init_string');
+mpg123_free_string := LoadProcedure('mpg123_free_string');
+mpg123_resize_string := LoadProcedure('mpg123_resize_string');
+mpg123_copy_string := LoadProcedure('mpg123_copy_string');
+mpg123_add_string := LoadProcedure('mpg123_add_string');
+mpg123_set_string := LoadProcedure('mpg123_set_string');
+mpg123_meta_check := LoadProcedure('mpg123_meta_check');
+mpg123_id3_ := LoadProcedure('mpg123_id3');
+mpg123_icy_ := LoadProcedure('mpg123_icy');
+mpg123_parnew := LoadProcedure('mpg123_parnew');
+mpg123_new_pars := LoadProcedure('mpg123_new_pars');
+mpg123_delete_pars := LoadProcedure('mpg123_delete_pars');
+mpg123_fmt_none := LoadProcedure('mpg123_fmt_none');
+mpg123_fmt_all := LoadProcedure('mpg123_fmt_all');
+mpg123_fmt := LoadProcedure('mpg123_fmt');
+mpg123_fmt_support := LoadProcedure('mpg123_fmt_support');
+mpg123_par := LoadProcedure('mpg123_par');
+mpg123_getpar := LoadProcedure('mpg123_getpar');
+mpg123_replace_buffer := LoadProcedure('mpg123_replace_buffer');
+mpg123_outblock := LoadProcedure('mpg123_outblock');
+mpg123_replace_reader := LoadProcedure('mpg123_replace_reader');
 end;
 
 initialization
-  Loadmpg123('libmpg123-0.dll');
-finalization
-  Freempg123;
+	TSGDllMPG123.Create();
 
 end.
 

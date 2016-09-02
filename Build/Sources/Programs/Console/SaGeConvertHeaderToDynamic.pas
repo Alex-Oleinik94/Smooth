@@ -10,11 +10,14 @@ uses
 	;
 
 const
-	SGDDHDefMode = 'OBJFPC';
+	SGDDHModeObjFpc = 'OBJFPC';
+	SGDDHModeFpc = 'FPC';
+	SGDDHModeDelphi = 'DELPHI';
+	SGDDHModeDef = SGDDHModeObjFpc;
 type
 	TSGDoDynamicHeader = class
 			public
-		constructor Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHDefMode);virtual;
+		constructor Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHModeDef);virtual;
 		destructor Destroy();override;
 		procedure PrintErrors();virtual;
 		procedure Execute();virtual;
@@ -25,9 +28,11 @@ type
 			protected
 		function GetNextIdentivier(const NeedsToWrite : TSGBool = True) : TSGString;
 		function SeeNextIdentifier() : TSGString;
+			public
+		class procedure NullUtil(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef);
 		end;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHDefMode);
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef);
 
 implementation
 
@@ -38,7 +43,43 @@ uses
 	,StrMan
 	;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHDefMode);
+class procedure TSGDoDynamicHeader.NullUtil(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef);
+var
+	InFileStream, OutFileStream : TMemoryStream;
+	S, W : TSGString;
+	L : TSGUInt32 = 0;
+begin
+SGPrintEngineVersion();
+SGHint('Input  file "' + VInFile + '"');
+SGHint('Output file "' + VOutFile + '"');
+SGHint('Mode = "' + SGUpCaseString(VMode) + '"');
+InFileStream := TMemoryStream.Create();
+OutFileStream := TMemoryStream.Create();
+InFileStream.LoadFromFile(VInFile);
+InFileStream.Position := 0;
+while InFileStream.Position <> InFileStream.Size do
+	begin
+	S := SGReadLnStringFromStream(InFileStream);
+	if StringWordCount(S, ' ') > 0 then
+		begin
+		l += 1;
+		W := StringWordGet(S, ' ', 1);
+		//if VMode = SGDDHModeDelphi then
+		//	SGWriteStringToStream('Pointer(', OutFileStream, False);
+		SGWriteStringToStream(W, OutFileStream, False);
+		//if VMode = SGDDHModeDelphi then
+		//	SGWriteStringToStream(') ', OutFileStream, False);
+		SGWriteStringToStream(' := nil;' + SGWinEoln, OutFileStream, False);
+		end;
+	end;
+SGHint('Total lines : ' + SGStr(l));
+OutFileStream.Position := 0;
+OutFileStream.SaveToFile(VOutFile);
+OutFileStream.Destroy();
+InFileStream.Destroy();
+end;
+
+procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef);
 var
 	V : TSGDoDynamicHeader = nil;
 begin
@@ -49,7 +90,7 @@ V.Destroy();
 V := nil;
 end;
 
-constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHDefMode);
+constructor TSGDoDynamicHeader.Create(const VFileName, VOutFileName : TSGString; const VMode : TSGString = SGDDHModeDef);
 begin
 FMode := SGUpCaseString(VMode);
 FInFileName := VFileName;
@@ -251,7 +292,7 @@ while (not Succ) and (FInStream.Position <> FInStream.Size) do
 		end
 	else
 		begin
-		
+
 		end;
 	end;
 end;
@@ -610,11 +651,11 @@ while FInStream.Size <> FInStream.Position do
 	else if SGUpCaseString(Identifier) = 'EXTERNAL' then
 		begin
 		ExternalCount += 1;
-		while GetNextIdentivier() <> ';' do 
+		while GetNextIdentivier() <> ';' do
 			;
 		SetSizePos(ProcOutSize, FInStream.Position);
 		i := FInStream.Position;
-		
+
 		FInStream.Position := ProcInPos;
 		Identifier := '';
 		while (FInStream.Position <> i) and (FInStream.Position < FInStream.Size) do
@@ -629,7 +670,7 @@ while FInStream.Size <> FInStream.Position do
 				Identifier += ' ';
 			Identifier += GetNextIdentivier(False);
 			end;
-		
+
 		Identifier := ReWriteExternal(Identifier);
 		end
 	else if (SGUpCaseString(Identifier) = 'END.') then

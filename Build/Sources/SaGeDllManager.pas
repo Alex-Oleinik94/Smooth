@@ -124,6 +124,9 @@ type
 
 		function GenerateMaxNameLength() : TSGUInt32;
 		function GenerateMaxChunkNameLength() : TSGUInt32;
+			public
+		class function LibrariesDirectory() : TSGString;
+		class function OpenLibrary(const VLibName : TSGString) : TSGLibHandle;
 		end;
 
 var
@@ -197,6 +200,18 @@ SetLength(FFunctionErrors, 0);
 FFunctionCount  := 0;
 FFunctionLoaded := 0;
 FFunctionErrors := nil;
+end;
+
+class function TSGDllManager.LibrariesDirectory() : TSGString;
+begin
+Result := '.'+Slash+'..'+Slash+'Libraries' + Slash + SGEngineTarget();
+end;
+
+class function TSGDllManager.OpenLibrary(const VLibName : TSGString) : TSGLibHandle;
+begin
+Result := LoadLibrary(LibrariesDirectory + Slash + VLibName);
+if Result = 0 then
+	Result := LoadLibrary(VLibName);
 end;
 
 function TSGDllManager.MayUnloadDll(const VFileName : TSGString): TSGBool;
@@ -420,9 +435,12 @@ if FDllFileNames <> nil then
 		for i := 0 to High(FDllFileNames) do
 			if Owner.MayUnloadDll(FDllFileNames[i]) then
 				begin
-				UnLoadLibrary(FLibHandles[i]);
 				FDllFileNames[i] := '';
-				FLibHandles[i] := 0;
+				if FLibHandles[i] <> 0 then
+					begin
+					UnLoadLibrary(FLibHandles[i]);
+					FLibHandles[i] := 0;
+					end;
 				end;
 		SetLength(FDllFileNames, 0);
 		SetLength(FLibHandles, 0);
@@ -652,7 +670,7 @@ Result := False;
 FDllFileNames := DllChunkNames();
 SetLength(FLibHandles, Length(FDllFileNames));
 for i := 0 to High(FLibHandles) do
-	FLibHandles[i] := LoadLibrary(FDllFileNames[i]);
+	FLibHandles[i] := DllManager.OpenLibrary(FDllFileNames[i]);
 FLoadObjects := LoadChunks(FLibHandles);
 Result := True;
 if FLoadObjects <> nil then
@@ -735,7 +753,7 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 		{$IFDEF DLL_MANAGER_DEBUG}
 		SGLog.Sourse('TSGDll.LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
 		{$ENDIF}
-		TestLibHandle := LoadLibrary(DllFileNames[i]);
+		TestLibHandle := DllManager.OpenLibrary(DllFileNames[i]);
 		{$IFDEF DLL_MANAGER_DEBUG}
 		SGLog.Sourse('TSGDll.LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
 		{$ENDIF}
