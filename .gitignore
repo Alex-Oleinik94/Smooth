@@ -1,6 +1,9 @@
 Libraries/*/*.dll
 Libraries/*/*.so
 Libraries/*/*.so.*
+Libraries/*/*/*.dll
+Libraries/*/*/*.so
+Libraries/*/*/*.so.*
 Build/AndroidTools/CodeResourses
 Build/AndroidTools/SaGe
 Build/AndroidTools/Libs/platforms

@@ -126,7 +126,7 @@ type
 		function GenerateMaxChunkNameLength() : TSGUInt32;
 			public
 		class function LibrariesDirectory() : TSGString;
-		class function OpenLibrary(const VLibName : TSGString) : TSGLibHandle;
+		class function OpenLibrary(const VLibName : TSGString; var VFileName : TSGString) : TSGLibHandle;
 		end;
 
 var
@@ -140,6 +140,7 @@ uses
 	SaGeVersion
 	,StrMan
 	,crt
+	,dos
 	;
 
 operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;
@@ -207,11 +208,55 @@ begin
 Result := '.'+Slash+'..'+Slash+'Libraries' + Slash + SGEngineTarget();
 end;
 
-class function TSGDllManager.OpenLibrary(const VLibName : TSGString) : TSGLibHandle;
+class function TSGDllManager.OpenLibrary(const VLibName : TSGString; var VFileName : TSGString) : TSGLibHandle;
+
+function GetDirectoryList() : TSGStringList;
+var
+	sr:dos.searchrec;
 begin
-Result := LoadLibrary(LibrariesDirectory + Slash + VLibName);
+Result := nil;
+dos.findfirst(LibrariesDirectory + Slash + '*',$10,sr);
+while DosError<>18 do
+	begin
+	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(LibrariesDirectory + Slash + sr.name))) then
+		Result += TSGString(LibrariesDirectory + Slash + sr.name);
+	dos.findnext(sr);
+	end;
+dos.findclose(sr);
+end;
+
+function LL(const VIN : TSGString; var VON : TSGString):TSGLibHandle;
+begin
+Result := LoadLibrary(VIN);
+if Result <> 0 then
+	VON := VIN;
+end;
+
+var
+	DL : TSGStringList = nil;
+	i : TSGUInt32;
+begin
+Result := LL(LibrariesDirectory + Slash + VLibName, VFileName);
 if Result = 0 then
-	Result := LoadLibrary(VLibName);
+	begin
+	DL := GetDirectoryList();
+	if DL <> nil then
+		begin
+		if Length(DL) > 0 then
+			begin
+			for i := 0 to High(DL) do
+				begin
+				Result := LL(DL[i] + Slash + VLibName, VFileName);
+				if Result <> 0 then
+					break;
+				end;
+			SetLength(DL, 0);
+			end;
+		DL := nil;
+		end;
+	end;
+if Result = 0 then
+	Result := LL(VLibName, VFileName);
 end;
 
 function TSGDllManager.MayUnloadDll(const VFileName : TSGString): TSGBool;
@@ -670,7 +715,7 @@ Result := False;
 FDllFileNames := DllChunkNames();
 SetLength(FLibHandles, Length(FDllFileNames));
 for i := 0 to High(FLibHandles) do
-	FLibHandles[i] := DllManager.OpenLibrary(FDllFileNames[i]);
+	FLibHandles[i] := DllManager.OpenLibrary(FDllFileNames[i], FDllFileNames[i]);
 FLoadObjects := LoadChunks(FLibHandles);
 Result := True;
 if FLoadObjects <> nil then
@@ -720,6 +765,7 @@ var
 	i : TSGUInt32;
 	TestLibHandle : TSGLibHandle;
 	TestLoadObject : TSGDllLoadObject;
+	TestFileName : TSGString;
 
 procedure FinalizeLoad(const Sucs : TSGBool);
 begin
@@ -729,7 +775,7 @@ SGLog.Sourse('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - Beging');
 SetLength(FLoadObjects, 1);
 FLoadObjects[0] := TestLoadObject;
 SetLength(FDllFileNames, 1);
-FDllFileNames[0] := DllFileNames[i];
+FDllFileNames[0] := TestFileName;
 SetLength(FLibHandles, 1);
 FLibHandles[0] := TestLibHandle;
 
@@ -753,7 +799,7 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 		{$IFDEF DLL_MANAGER_DEBUG}
 		SGLog.Sourse('TSGDll.LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
 		{$ENDIF}
-		TestLibHandle := DllManager.OpenLibrary(DllFileNames[i]);
+		TestLibHandle := DllManager.OpenLibrary(DllFileNames[i], TestFileName);
 		{$IFDEF DLL_MANAGER_DEBUG}
 		SGLog.Sourse('TSGDll.LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
 		{$ENDIF}
