@@ -168,40 +168,165 @@ that logical bitstream. *************************************************)
     end;
 
 (* Vorbis PRIMITIVES: general ***************************************)
+(*
+
 
 procedure vorbis_info_init(var vi: vorbis_info); cdecl; external VorbisLib;
+*)
+var vorbis_info_init : procedure( var vi : vorbis_info ) ; cdecl ;
+
+(*
+
 procedure vorbis_info_clear(var vi: vorbis_info); cdecl; external VorbisLib;
+*)
+var vorbis_info_clear : procedure( var vi : vorbis_info ) ; cdecl ;
+
+(*
+
 procedure vorbis_comment_init(var vc: vorbis_comment); cdecl; external VorbisLib;
+*)
+var vorbis_comment_init : procedure( var vc : vorbis_comment ) ; cdecl ;
+
+(*
+
 procedure vorbis_comment_add(var vc: vorbis_comment; comment: PChar);  cdecl; external VorbisLib;
+*)
+var vorbis_comment_add : procedure( var vc : vorbis_comment ; comment : PChar ) ; cdecl ;
+
+(*
+
 procedure vorbis_comment_add_tag(var vc: vorbis_comment; tag: PChar; contents: PChar); cdecl; external VorbisLib;
+*)
+var vorbis_comment_add_tag : procedure( var vc : vorbis_comment ; tag : PChar ; contents : PChar ) ; cdecl ;
+
+(*
+
 
 function vorbis_comment_query(var vc: vorbis_comment; tag: PChar; count: int): PChar; cdecl; external VorbisLib;
+*)
+var vorbis_comment_query : function( var vc : vorbis_comment ; tag : PChar ; count : int ) : PChar ; cdecl ;
+
+(*
+
 function vorbis_comment_query_count(var vc: vorbis_comment; tag: PChar): int; cdecl; external VorbisLib;
+*)
+var vorbis_comment_query_count : function( var vc : vorbis_comment ; tag : PChar ) : int ; cdecl ;
+
+(*
+
 procedure vorbis_comment_clear(var vc: vorbis_comment); cdecl; external VorbisLib;
+*)
+var vorbis_comment_clear : procedure( var vc : vorbis_comment ) ; cdecl ;
+
+(*
+
 
 function vorbis_block_init(var v: vorbis_dsp_state; var vb: vorbis_block): int; cdecl; external VorbisLib;
+*)
+var vorbis_block_init : function( var v : vorbis_dsp_state ; var vb : vorbis_block ) : int ; cdecl ;
+
+(*
+
 function vorbis_block_clear(var vb: vorbis_block): int; cdecl; external VorbisLib;
+*)
+var vorbis_block_clear : function( var vb : vorbis_block ) : int ; cdecl ;
+
+(*
+
 procedure vorbis_dsp_clear(var v: vorbis_dsp_state); cdecl; external VorbisLib;
+*)
+var vorbis_dsp_clear : procedure( var v : vorbis_dsp_state ) ; cdecl ;
+
 
 (* Vorbis PRIMITIVES: analysis/DSP layer ****************************)
+(*
+
 
 function vorbis_analysis_init(var v: vorbis_dsp_state; var vi: vorbis_info): int; cdecl; external VorbisLib;
+*)
+var vorbis_analysis_init : function( var v : vorbis_dsp_state ; var vi : vorbis_info ) : int ; cdecl ;
+
+(*
+
 function vorbis_commentheader_out(var vc: vorbis_comment; var op: ogg_packet): int; cdecl; external VorbisLib;
+*)
+var vorbis_commentheader_out : function( var vc : vorbis_comment ; var op : ogg_packet ) : int ; cdecl ;
+
+(*
+
 function vorbis_analysis_headerout(var v: vorbis_dsp_state; var vc: vorbis_comment; var op: ogg_packet; var op_comm: ogg_packet; var op_code: ogg_packet): int; cdecl; external VorbisLib;
+*)
+var vorbis_analysis_headerout : function( var v : vorbis_dsp_state ; var vc : vorbis_comment ; var op : ogg_packet ; var op_comm : ogg_packet ; var op_code : ogg_packet ) : int ; cdecl ;
+
+(*
+
 function vorbis_analysis_buffer(var v: vorbis_dsp_state; vals: int): p_float_p_float_array; cdecl; external VorbisLib;
+*)
+var vorbis_analysis_buffer : function( var v : vorbis_dsp_state ; vals : int ) : p_float_p_float_array ; cdecl ;
+
+(*
+
 function vorbis_analysis_wrote(var v: vorbis_dsp_state; vals: int): int; cdecl; external VorbisLib;
+*)
+var vorbis_analysis_wrote : function( var v : vorbis_dsp_state ; vals : int ) : int ; cdecl ;
+
+(*
+
 function vorbis_analysis_blockout(var v: vorbis_dsp_state; var vb: vorbis_block): int; cdecl; external VorbisLib;
+*)
+var vorbis_analysis_blockout : function( var v : vorbis_dsp_state ; var vb : vorbis_block ) : int ; cdecl ;
+
+(*
+
 function vorbis_analysis(var vb: vorbis_block; var op: ogg_packet): int; cdecl; external VorbisLib;
+*)
+var vorbis_analysis : function( var vb : vorbis_block ; var op : ogg_packet ) : int ; cdecl ;
+
 
 (* Vorbis PRIMITIVES: synthesis layer *******************************)
+(*
+
 
 function vorbis_synthesis_headerin(var vi: vorbis_info; var vc: vorbis_comment; var op: ogg_packet): int; cdecl; external VorbisLib;
+*)
+var vorbis_synthesis_headerin : function( var vi : vorbis_info ; var vc : vorbis_comment ; var op : ogg_packet ) : int ; cdecl ;
+
+(*
+
 function vorbis_synthesis_init(var v: vorbis_dsp_state; var vi: vorbis_info): int; cdecl; external VorbisLib;
+*)
+var vorbis_synthesis_init : function( var v : vorbis_dsp_state ; var vi : vorbis_info ) : int ; cdecl ;
+
+(*
+
 function vorbis_synthesis(var vb: vorbis_block; var op: ogg_packet): int; cdecl; external VorbisLib;
+*)
+var vorbis_synthesis : function( var vb : vorbis_block ; var op : ogg_packet ) : int ; cdecl ;
+
+(*
+
 function vorbis_synthesis_blockin(var v: vorbis_dsp_state; var vb: vorbis_block): int; cdecl; external VorbisLib;
+*)
+var vorbis_synthesis_blockin : function( var v : vorbis_dsp_state ; var vb : vorbis_block ) : int ; cdecl ;
+
+(*
+
 function vorbis_synthesis_pcmout(var v: vorbis_dsp_state; pcm: p_p_float_p_float_array): int; cdecl; external VorbisLib;
+*)
+var vorbis_synthesis_pcmout : function( var v : vorbis_dsp_state ; pcm : p_p_float_p_float_array ) : int ; cdecl ;
+
+(*
+
 function vorbis_synthesis_read(var v: vorbis_dsp_state; samples: int): int; cdecl; external VorbisLib;
-function vorbis_packet_blocksize(var vi: vorbis_info; var op: ogg_packet): long; cdecl; external VorbisLib; { New since RC1 }
+*)
+var vorbis_synthesis_read : function( var v : vorbis_dsp_state ; samples : int ) : int ; cdecl ;
+
+(*
+
+function vorbis_packet_blocksize(var vi: vorbis_info; var op: ogg_packet): long; cdecl; external VorbisLib;
+*)
+var vorbis_packet_blocksize : function( var vi : vorbis_info ; var op : ogg_packet ) : long ; cdecl ;
+ { New since RC1 }
 
 (* Vorbis ERRORS and return codes ***********************************)
 
@@ -227,6 +352,13 @@ function GetVorbisErrorName(ErrorCode: Integer): string;
 
 implementation
 
+uses
+	 SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	;
+
+
 function GetVorbisErrorName(ErrorCode: Integer): string;
 begin
   case ErrorCode of
@@ -249,4 +381,100 @@ begin
   end;
 end;
 
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllCodec = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		end;
+class procedure TSGDllCodec.Free();
+begin
+vorbis_info_init := nil;
+vorbis_info_clear := nil;
+vorbis_comment_init := nil;
+vorbis_comment_add := nil;
+vorbis_comment_add_tag := nil;
+vorbis_comment_query := nil;
+vorbis_comment_query_count := nil;
+vorbis_comment_clear := nil;
+vorbis_block_init := nil;
+vorbis_block_clear := nil;
+vorbis_dsp_clear := nil;
+vorbis_analysis_init := nil;
+vorbis_commentheader_out := nil;
+vorbis_analysis_headerout := nil;
+vorbis_analysis_buffer := nil;
+vorbis_analysis_wrote := nil;
+vorbis_analysis_blockout := nil;
+vorbis_analysis := nil;
+vorbis_synthesis_headerin := nil;
+vorbis_synthesis_init := nil;
+vorbis_synthesis := nil;
+vorbis_synthesis_blockin := nil;
+vorbis_synthesis_pcmout := nil;
+vorbis_synthesis_read := nil;
+vorbis_packet_blocksize := nil;
+end;
+class function TSGDllCodec.SystemNames() : TSGStringList;
+begin
+Result := nil;
+Result += 'Vorbis';
+end;
+class function TSGDllCodec.DllNames() : TSGStringList;
+begin
+Result := nil;
+Result += VorbisLib;
+end;
+class function TSGDllCodec.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+var
+	LoadResult : PSGDllLoadObject = nil;
+
+function LoadProcedure(const Name : PChar) : Pointer;
+begin
+Result := GetProcAddress(VDll, Name);
+if Result = nil then
+LoadResult^.FFunctionErrors += SGPCharToString(Name)
+else
+LoadResult^.FFunctionLoaded += 1;
+end;
+
+begin
+Result.Clear();
+Result.FFunctionCount := 25;
+LoadResult := @Result;
+Pointer(vorbis_info_init) := LoadProcedure('vorbis_info_init');
+Pointer(vorbis_info_clear) := LoadProcedure('vorbis_info_clear');
+Pointer(vorbis_comment_init) := LoadProcedure('vorbis_comment_init');
+Pointer(vorbis_comment_add) := LoadProcedure('vorbis_comment_add');
+Pointer(vorbis_comment_add_tag) := LoadProcedure('vorbis_comment_add_tag');
+Pointer(vorbis_comment_query) := LoadProcedure('vorbis_comment_query');
+Pointer(vorbis_comment_query_count) := LoadProcedure('vorbis_comment_query_count');
+Pointer(vorbis_comment_clear) := LoadProcedure('vorbis_comment_clear');
+Pointer(vorbis_block_init) := LoadProcedure('vorbis_block_init');
+Pointer(vorbis_block_clear) := LoadProcedure('vorbis_block_clear');
+Pointer(vorbis_dsp_clear) := LoadProcedure('vorbis_dsp_clear');
+Pointer(vorbis_analysis_init) := LoadProcedure('vorbis_analysis_init');
+Pointer(vorbis_commentheader_out) := LoadProcedure('vorbis_commentheader_out');
+Pointer(vorbis_analysis_headerout) := LoadProcedure('vorbis_analysis_headerout');
+Pointer(vorbis_analysis_buffer) := LoadProcedure('vorbis_analysis_buffer');
+Pointer(vorbis_analysis_wrote) := LoadProcedure('vorbis_analysis_wrote');
+Pointer(vorbis_analysis_blockout) := LoadProcedure('vorbis_analysis_blockout');
+Pointer(vorbis_analysis) := LoadProcedure('vorbis_analysis');
+Pointer(vorbis_synthesis_headerin) := LoadProcedure('vorbis_synthesis_headerin');
+Pointer(vorbis_synthesis_init) := LoadProcedure('vorbis_synthesis_init');
+Pointer(vorbis_synthesis) := LoadProcedure('vorbis_synthesis');
+Pointer(vorbis_synthesis_blockin) := LoadProcedure('vorbis_synthesis_blockin');
+Pointer(vorbis_synthesis_pcmout) := LoadProcedure('vorbis_synthesis_pcmout');
+Pointer(vorbis_synthesis_read) := LoadProcedure('vorbis_synthesis_read');
+Pointer(vorbis_packet_blocksize) := LoadProcedure('vorbis_packet_blocksize');
+end;
+
+initialization
+	TSGDllCodec.Create();
 end.
