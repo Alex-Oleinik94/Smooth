@@ -3,7 +3,9 @@ unit mpg123;
 interface
 
 uses
+{$IFDEF MSWINDOWS}
   Windows,
+  {$ENDIF}
   SysUtils;
 
   // INITIAL CONVERSION BY ARTHUR 17/02/2008
@@ -426,13 +428,31 @@ Result += 'libmpg123';
 end;
 
 class function TSGDllMPG123.DllNames() : TSGStringList;
+
+{$IFDEF UNIX}
+procedure UnixLib(const VLib : TSGString);
+begin
+Result += VLib + '.so.3';
+Result += VLib + '.so.2';
+Result += VLib + '.so.1';
+Result += VLib + '.so.0';
+Result += VLib + '.so';
+end;
+{$ENDIF}
+
 begin
 Result := nil;
-Result += 'libmpg123-0';
-Result += 'libmpg123';
 {$IFDEF MSWINDOWS}
 Result += 'libmpg123-0.dll';
 Result += 'libmpg123.dll';
+Result += 'mpg123.dll';
+Result += 'mpg123-0.dll';
+{$ENDIF}
+{$IFDEF UNIX}
+UnixLib('libmpg123-0');
+UnixLib('libmpg123');
+UnixLib('mpg123-0');
+UnixLib('mpg123');
 {$ENDIF}
 end;
 

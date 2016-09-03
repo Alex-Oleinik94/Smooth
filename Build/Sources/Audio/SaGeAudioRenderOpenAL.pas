@@ -2,11 +2,11 @@
 
 //{$DEFINE OPENAL_RENDER_DEBUG}
 
-{$IF defined(DESKTOP)}
+{$IF defined(WIN32)}
 	{$DEFINE USE_OGG}
 	{$ENDIF}
 
-{$IF defined(MSWINDOWS) and defined(DESKTOP)}
+{$IF defined(DESKTOP)}
 		{$DEFINE USE_MPG123}
 		{$ENDIF}
 
@@ -24,6 +24,8 @@ uses
 
 	// System
 	,Classes
+	,SysUtils
+	,SyncObjs
 
 	// Audio Library
 	,OpenAL
@@ -111,7 +113,7 @@ type
 		FPlaying  : TSGBool;
 			protected
 		function UpdateBuffer() : TSGBool;
-		procedure PreBuffer();
+		function PreBuffer() : TSGUInt64;
 		function Stream(const VBuffer : TSGALBuffer) : TSGUInt64;
 			public
 		procedure Execute(); override;
@@ -181,9 +183,6 @@ implementation
 
 uses
 	SaGeDllManager
-	{$IFDEF USE_MPG123}
-	,Windows
-	{$ENDIF}
 	;
 
 constructor TSGAudioRenderOpenALFileSource.Create(const VAudioRender : TSGAudioRender);
@@ -280,6 +279,81 @@ function TSGAudioRenderOpenAL.SupporedMPG123() : TSGBool;
 begin
 Result := FMPG123Suppored and FMPG123Initialized;
 end;
+
+function GetMPG123AudioDecoder() : PChar;
+var
+	Decoders : PPChar;
+	i : TSGUInt32;
+	DFirst, DLast : TSGString;
+	DecoderList : TSGStringList = nil;
+
+procedure SetDecoder(const VDecoder : TSGString);
+var
+	i : TSGUInt32;
+begin
+if Decoders <> nil then
+	begin
+	i :=0;
+	while Decoders[i] <> nil do
+		begin
+		if SGPCharToString(Decoders[i]) = VDecoder then
+			begin
+			Result := Decoders[i];
+			break;
+			end;
+		i += 1;
+		end;
+	end;
+end;
+
+const
+	GeneralDecoder = 
+{$IFDEF LINUX}
+		'default'
+{$ELSE} {$IFDEF MSWINDOWS}
+		'MMX'
+{$ELSE} 
+		''
+{$ENDIF} {$ENDIF} 
+		;
+begin
+Decoders := mpg123_supported_decoders();
+Result := nil;
+DFirst := '';
+DLast  := '';
+if Decoders <> nil then
+	begin
+	i := 0;
+	while Decoders[i] <> nil do
+		begin
+		if i = 0 then 
+			DLast := SGPCharToString(Decoders[i]);
+		DecoderList += SGPCharToString(Decoders[i]);
+		i += 1;
+		if Decoders[i] = nil then 
+			DLast := SGPCharToString(Decoders[i]);
+		end;
+	end;
+if GeneralDecoder in DecoderList then
+	SetDecoder(GeneralDecoder)
+else if 'x86-64' in DecoderList then
+	SetDecoder('x86-64')
+else if 'i586' in DecoderList then
+	SetDecoder('i586')
+else if 'i386' in DecoderList then
+	SetDecoder('i386')
+else if 'MMX' in DecoderList then
+	SetDecoder('MMX')
+else if 'generic' in DecoderList then
+	SetDecoder('generic')
+else if 'AVX' in DecoderList then
+	SetDecoder('AVX')
+else if DLast <> '' then
+	SetDecoder(DLast)
+else if DFirst <> '' then
+	SetDecoder(DFirst);
+SetLength(DecoderList, 0);
+end;
 {$ENDIF}
 
 class function TSGAudioRenderOpenAL.SupporedAudioFormats() : TSGStringList;
@@ -309,19 +383,27 @@ end;
 
 procedure TSGOpenALMP123FilePlayer.Execute();
 var
-	Critical : TRTLCriticalSection;
+	CriticalSection : TCriticalSection = nil;
+	TrySusc : TSGBool;
 begin
-InitializeCriticalSection(Critical);
+CriticalSection := TCriticalSection.Create();
 while FPlaying do
 	begin
-	EnterCriticalSection(Critical);
+	TrySusc := False;
+	CriticalSection.Acquire();
+	try
 	if not UpdateBuffer() then
 		FPlaying := False;
-	LeaveCriticalSection(Critical);
+	TrySusc := True;
+	finally
+	if not TrySusc then
+		FPlaying := False;
+	CriticalSection.Release();
+	end;
 	if FPlaying then
 		Sleep(50);
 	end;
-DeleteCriticalSection(Critical);
+CriticalSection.Destroy();
 end;
 
 constructor TSGOpenALMP123FilePlayer.Create(const FilePath: TSGString);
@@ -366,24 +448,6 @@ else
 end;
 end;
 
-function GetMPG123AudioDecoder() : PChar;
-var
-	Decoders : PPChar;
-	i : TSGUInt32;
-begin
-Decoders := mpg123_supported_decoders();
-Result := nil;
-if Decoders <> nil then
-	begin
-	i := 0;
-	while Decoders[i] <> nil do
-		begin
-		Result := Decoders[i];
-		i += 1;
-		end;
-	end;
-end;
-
 begin
 inherited Create(nil, nil, False);
 FFileName := FilePath;
@@ -394,9 +458,11 @@ if GetMPG123AudioDecoder() = nil then
 	begin
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while determine decoder!');
 	Exit;
-	end;
+	end
+else
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Decoder is ''' + SGPCharToString(GetMPG123AudioDecoder()) + '''.');
 
-FMPGHandle := mpg123_new(GetMPG123AudioDecoder(), nil);
+FMPGHandle := mpg123_new(nil, nil);
 if FMPGHandle = nil then
 	begin
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while creating MP3 handle!');
@@ -435,7 +501,7 @@ alSource3f(FSource, AL_DIRECTION, 0, 0, 0);
 alSourcef (FSource, AL_ROLLOFF_FACTOR, 0);
 alSourcei (FSource, AL_SOURCE_RELATIVE, AL_TRUE);
 
-//SGLog.Sourse('TSGOpenALMP123FilePlayer : Created.');
+SGLog.Sourse('TSGOpenALMP123FilePlayer : Created.');
 end;
 
 function TSGOpenALMP123FilePlayer.UpdateBuffer() : TSGBool;
@@ -463,11 +529,19 @@ else
 	Result := True;
 end;
 
-procedure TSGOpenALMP123FilePlayer.PreBuffer();
+function TSGOpenALMP123FilePlayer.PreBuffer() : TSGUInt64;
 begin
-Stream(FBuffers[0]);
-Stream(FBuffers[1]);
-alSourceQueueBuffers(FSource, 2, @FBuffers[0]);
+Result := 0;
+try
+Result += Stream(FBuffers[0]);
+Result += Stream(FBuffers[1]);
+finally
+Result := 0;
+FPlaying := False;
+SGLog.Sourse('TSGOpenALMP123FilePlayer : Exception while prebuffering!');
+end;
+if Result > 0 then
+	alSourceQueueBuffers(FSource, 2, @FBuffers[0]);
 end;
 
 function TSGOpenALMP123FilePlayer.Stream(const VBuffer : TSGALBuffer) : TSGUInt64;
@@ -476,7 +550,12 @@ var
 	DataLength : Cardinal;
 begin
 GetMem(data, FMaxBufferSize);
-mpg123_read(FMPGHandle, Data, FMaxBufferSize, @DataLength);
+try
+	mpg123_read(FMPGHandle, Data, FMaxBufferSize, @DataLength);
+except
+	DataLength := 0;
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while decoding!')
+end;
 if DataLength <> 0 then
 	alBufferData(VBuffer, FFormat, Data, DataLength, FRate);
 FreeMem(Data);
@@ -484,11 +563,15 @@ Result := DataLength;
 end;
 
 procedure TSGOpenALMP123FilePlayer.Play();
+var
+	DoneBufferingSize : TSGUInt64;
 begin
-PreBuffer();
 FPlaying := True;
-Start();
-alSourcePlay(FSource);
+DoneBufferingSize := PreBuffer();
+if FPlaying then
+	Start();
+if DoneBufferingSize > 0 then
+	alSourcePlay(FSource);
 end;
 
 procedure TSGOpenALMP123FilePlayer.Stop();
