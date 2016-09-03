@@ -49,11 +49,12 @@ uses
 type
 	TSGALSource = TALuint;
 	TSGALBuffer = TALuint;
+	TSGALFormat = TALenum;
 
 	TSGOpenALBufferInfo = object
 			public
 		FFrequency   : TALsizei;
-		FLoop   : TALint;
+		FLoop        : TALint;
 			public
 		procedure Clear();
 		end;
@@ -92,7 +93,7 @@ type
 		end;
 
 	{$IFDEF USE_MPG123}
-	TSGOpenALMP3 = class(TSGThread)
+	TSGOpenALMP123FilePlayer = class(TSGThread)
 			public
 		constructor Create(const FilePath: TSGString);
 		destructor Destroy(); override;
@@ -102,28 +103,55 @@ type
 		FBuffers  : array[0..1] of TSGALBuffer;
 		FFormat   : TALenum;
 		FFileName : TSGString;
-		FMPGHandle   : PMPG123_Handle;
+		FMPGHandle: PMPG123_Handle;
+		FMPGInfo  : Tmpg123_frameinfo;
 		FRate     : Integer;
 		FChannels : Integer;
 		FEncoding : Integer;
 		FPlaying  : TSGBool;
 			protected
-		procedure UpdateBuffer();
+		function UpdateBuffer() : TSGBool;
 		procedure PreBuffer();
-		procedure Stream(const VBuffer : TSGALBuffer);
+		function Stream(const VBuffer : TSGALBuffer) : TSGUInt64;
 			public
 		procedure Execute(); override;
 		procedure Play();
 		procedure Stop();
+			public
+		property Playing : TSGBool read FPlaying;
 		end;
 	{$ENDIF}
 
 type
+	TSGAudioRenderOpenALFileSource = class(TSGAudioRenderFileSource)
+			public
+		constructor Create(const VAudioRender : TSGAudioRender); override;
+		class function ClassName() : TSGString; override;
+			private
+		{$IFDEF USE_MPG123}
+		FMPG123Player : TSGOpenALMP123FilePlayer;
+		{$ENDIF}
+		{$IFDEF USE_OGG}
+		{$ENDIF}
+		FWav : packed record
+			FTrack  : TSGOpenALTrack;
+			FBuffer : TSGOpenALBuffer;
+			FSource : TSGOpenALSource;
+			end;
+		FExpansion : TSGString;
+			protected
+		function GetEnded() : TSGBool; override;
+		procedure SetFile(const VFileName : TSGString); override;
+			public
+		procedure Play(); override;
+		end;
+
 	TSGAudioRenderOpenAL = class(TSGAudioRender)
 			public
 		constructor Create(); override;
 		class function Suppored() : TSGBool; override;
 		class function ClassName() : TSGString; override;
+		class function SupporedAudioFormats() : TSGStringList; override;
 			private
 		{$IFDEF USE_MPG123}
 			FMPG123Suppored : TSGBool;
@@ -137,7 +165,11 @@ type
 		procedure Init(); override;
 		function CreateDevice() : TSGBool; override;
 		procedure Kill(); override;
-			protected
+		function CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource; override;
+			public
+		{$IFDEF USE_MPG123}
+		function SupporedMPG123() : TSGBool;
+		{$ENDIF}
 		function LoadWAVFromFile(const VFileName : TSGString) : TSGOpenALTrack;
 		function LoadWAVFromStream(const VStream : TStream) : TSGOpenALTrack;
 		procedure UnloadTrack(var VTrack : TSGOpenALTrack);
@@ -154,17 +186,127 @@ uses
 	{$ENDIF}
 	;
 
+constructor TSGAudioRenderOpenALFileSource.Create(const VAudioRender : TSGAudioRender);
+begin
+inherited Create(VAudioRender);
 {$IFDEF USE_MPG123}
-destructor TSGOpenALMP3.Destroy();
+FMPG123Player := nil;
+{$ENDIF}
+FExpansion := '';
+FWav.FTrack.Clear();
+FWav.FBuffer.Clear();
+FWav.FSource.Clear();
+end;
+
+class function TSGAudioRenderOpenALFileSource.ClassName() : TSGString;
+begin
+Result := 'TSGAudioRenderOpenALFileSource';
+end;
+
+function TSGAudioRenderOpenALFileSource.GetEnded() : TSGBool;
+begin
+Result := True;
+if (FExpansion = 'WAV') then
+	begin
+	Result := not (FWav.FSource.State() = AL_PLAYING)
+	end
+{$IFDEF USE_MPG123}
+else if FExpansion = 'MP3' then
+	begin
+	Result := not FMPG123Player.Playing;
+	end
+{$ENDIF}
+else
+	begin
+	SGLog.Sourse('TSGAudioRenderOpenALFileSource - GetEnded():TSGBool - Unknown expansion(''' + FExpansion + ''')!');
+	end;
+end;
+
+procedure TSGAudioRenderOpenALFileSource.SetFile(const VFileName : TSGString);
+begin
+inherited SetFile(VFileName);
+FExpansion := SGGetFileExpansion(FFileName);
+if (FExpansion = 'WAV') and ((AudioRender as TSGAudioRenderOpenAL) <> nil) then
+	begin
+	FWav.FTrack := (AudioRender as TSGAudioRenderOpenAL).LoadWAVFromFile(FFileName);
+	FWav.FBuffer := (AudioRender as TSGAudioRenderOpenAL).CreateBuffer(FWav.FTrack);
+	FWav.FSource := (AudioRender as TSGAudioRenderOpenAL).CreateSource(FWav.FBuffer);
+	end
+{$IFDEF USE_MPG123}
+else if (FExpansion = 'MP3') and AudioRenderAssigned() and ((AudioRender as TSGAudioRenderOpenAL) <> nil) and (AudioRender as TSGAudioRenderOpenAL).SupporedMPG123 then
+	begin
+	FMPG123Player := TSGOpenALMP123FilePlayer.Create(FFileName);
+	end
+{$ENDIF}
+else
+	begin
+	SGLog.Sourse('TSGAudioRenderOpenALFileSource - SetFile(''' + VFileName + ''') - Unknown expansion(''' + FExpansion + ''')!');
+	FExpansion := '';
+	end;
+end;
+
+procedure TSGAudioRenderOpenALFileSource.Play();
+begin
+if FExpansion = 'WAV' then
+	begin
+	if FWav.FSource.FSource <> 0 then
+		FWav.FSource.Play()
+	else
+		SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Expansion=''' + FExpansion + ''', but FWav.FSourceis not assigned!');
+	end
+{$IFDEF USE_MPG123}
+else if FExpansion = 'MP3' then
+	begin
+	if FMPG123Player <> nil then
+		FMPG123Player.Play()
+	else
+		SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Expansion=''' + FExpansion + ''', but FMPG123Player = nil!');
+	end
+{$ENDIF}
+else
+	begin
+	SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Unknown expansion(''' + FExpansion + ''')!');
+	end;
+end;
+
+function TSGAudioRenderOpenAL.CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource;
+begin
+Result := TSGAudioRenderOpenALFileSource.Create(Self);
+Result.FileName := VFileName;
+end;
+
+{$IFDEF USE_MPG123}
+function TSGAudioRenderOpenAL.SupporedMPG123() : TSGBool;
+begin
+Result := FMPG123Suppored and FMPG123Initialized;
+end;
+{$ENDIF}
+
+class function TSGAudioRenderOpenAL.SupporedAudioFormats() : TSGStringList;
+begin
+Result := nil;
+Result += 'wav';
+{$IFDEF USE_MPG123}
+if DllManager.Suppored('mpg123') then
+	Result += 'mp3';
+{$ENDIF}
+{$IFDEF USE_OGG}
+if DllManager.Suppored('ogg') then
+	Result += 'ogg';
+{$ENDIF}
+end;
+
+{$IFDEF USE_MPG123}
+destructor TSGOpenALMP123FilePlayer.Destroy();
 begin
 alSourceStop(FSource);
 alDeleteSources(1, @FSource);
-alDeleteBuffers(1, @FBuffers);
+alDeleteBuffers(2, @FBuffers[0]);
 mpg123_close(FMPGHandle);
 inherited;
 end;
 
-procedure TSGOpenALMP3.Execute();
+procedure TSGOpenALMP123FilePlayer.Execute();
 var
 	Critical : TRTLCriticalSection;
 begin
@@ -172,23 +314,84 @@ InitializeCriticalSection(Critical);
 while FPlaying do
 	begin
 	EnterCriticalSection(Critical);
-	UpdateBuffer();
+	if not UpdateBuffer() then
+		FPlaying := False;
 	LeaveCriticalSection(Critical);
-	Sleep(50);
+	if FPlaying then
+		Sleep(50);
 	end;
 DeleteCriticalSection(Critical);
 end;
 
-constructor TSGOpenALMP3.Create(const FilePath: TSGString);
+constructor TSGOpenALMP123FilePlayer.Create(const FilePath: TSGString);
+
+function StrOpenALFormat(const VFormat : TSGALFormat) : TSGString;
+begin
+case VFormat of
+AL_FORMAT_MONO16 :
+	Result := 'AL_FORMAT_MONO16';
+AL_FORMAT_MONO8 :
+	Result := 'AL_FORMAT_MONO8';
+AL_FORMAT_STEREO16 :
+	Result := 'AL_FORMAT_STEREO16';
+AL_FORMAT_STEREO8 :
+	Result := 'AL_FORMAT_STEREO8';
+else
+	Result := '?';
+end;
+end;
+
+function StrMPG123Encoding(const VEncoding : integer) : TSGString;
+begin
+case VEncoding of
+MPG123_ENC_16 :
+	Result := 'MPG123_ENC_16';
+MPG123_ENC_SIGNED_16 :
+	Result := 'MPG123_ENC_SIGNED_16';
+MPG123_ENC_UNSIGNED_16 :
+	Result := 'MPG123_ENC_UNSIGNED_16';
+MPG123_ENC_8 :
+	Result := 'MPG123_ENC_8';
+MPG123_ENC_SIGNED_8 :
+	Result := 'MPG123_ENC_SIGNED_8';
+MPG123_ENC_UNSIGNED_8 :
+	Result := 'MPG123_ENC_UNSIGNED_8';
+MPG123_ENC_ULAW_8 :
+	Result := 'MPG123_ENC_ULAW_8';
+MPG123_ENC_ALAW_8 :
+	Result := 'MPG123_ENC_ALAW_8';
+else
+	Result := '?';
+end;
+end;
+
+function GetMPG123AudioDecoder() : PChar;
+var
+	Decoders : PPChar;
+begin
+Decoders := mpg123_supported_decoders();
+Result := nil;
+if Decoders <> nil then
+	if Decoders[0] <> nil then
+		Result := Decoders[0];
+end;
+
 begin
 inherited Create(nil, nil, False);
 FFileName := FilePath;
 FMaxBufferSize := 4096*8;
+FillChar(FMPGInfo,SizeOf(FMPGInfo),0);
 
-FMPGHandle := mpg123_new('MMX', nil); //TODO: make this a property. MMX is common
+if GetMPG123AudioDecoder() = nil then
+	begin
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while determine decoder!');
+	Exit;
+	end;
+
+FMPGHandle := mpg123_new(GetMPG123AudioDecoder(), nil);
 if FMPGHandle = nil then
 	begin
-	SGLog.Sourse('TSGOpenALMP3 : Error while creating MP3 handle!');
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while creating MP3 handle!');
 	Exit;
 	end;
 
@@ -196,9 +399,27 @@ mpg123_open(FMPGHandle, PChar(FFileName));
 mpg123_getformat(FMPGHandle, @FRate, @FChannels, @FEncoding);
 mpg123_format_none(FMPGHandle);
 mpg123_format(FMPGHandle, FRate, FChannels, FEncoding);
+SGLog.Sourse('TSGOpenALMP123FilePlayer : File=''' + FilePath + ''', Encoding=''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + ''', Rate=''' + SGStr(FRate) + ''', Channels=''' + SGStr(FChannels) + '''.');
 
-FFormat := AL_FORMAT_STEREO16; //TODO: this should be determined from mp3 file
-alGenBuffers(2, @FBuffers);
+FFormat := 0;
+case FEncoding of
+MPG123_ENC_16, MPG123_ENC_SIGNED_16, MPG123_ENC_UNSIGNED_16 :
+	if FChannels = MPG123_MONO then
+		FFormat := AL_FORMAT_MONO16
+	else if FChannels = MPG123_STEREO then
+		FFormat := AL_FORMAT_STEREO16;
+MPG123_ENC_8, MPG123_ENC_SIGNED_8, MPG123_ENC_UNSIGNED_8, MPG123_ENC_ULAW_8, MPG123_ENC_ALAW_8 :
+	if FChannels = MPG123_MONO then
+		FFormat := AL_FORMAT_MONO8
+	else if FChannels = MPG123_STEREO then
+		FFormat := AL_FORMAT_STEREO8;
+end;
+if FFormat = 0 then
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : - Unknown encoding(''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + ''')!')
+else
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : - Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + StrOpenALFormat(FFormat) + '''.');
+
+alGenBuffers(2, @FBuffers[0]);
 alGenSources(1, @FSource);
 alSource3f(FSource, AL_POSITION, 0, 0, 0);
 alSource3f(FSource, AL_VELOCITY, 0, 0, 0);
@@ -207,41 +428,52 @@ alSourcef (FSource, AL_ROLLOFF_FACTOR, 0);
 alSourcei (FSource, AL_SOURCE_RELATIVE, AL_TRUE);
 end;
 
-procedure TSGOpenALMP3.UpdateBuffer();
+function TSGOpenALMP123FilePlayer.UpdateBuffer() : TSGBool;
 var
- Processed : TALint;
- Buffer    : TALUInt;
+	Processed : TALint;
+	Buffer    : TSGALBuffer;
+	BufferLength : TSGUInt64;
 begin
-//TODO: detect end of mp3
+Result := False;
 alGetSourcei(FSource, AL_BUFFERS_PROCESSED, @Processed);
 if Processed > 0 then
 	repeat
 	alSourceUnqueueBuffers(FSource, 1, @Buffer);
-	Stream(Buffer);
-	alSourceQueueBuffers(FSource, 1, @Buffer);
+	BufferLength := Stream(Buffer);
+	if BufferLength <> 0 then
+		begin
+		alSourceQueueBuffers(FSource, 1, @Buffer);
+		Result := True;
+		end
+	else
+		break;
 	dec(Processed);
-	until Processed <= 0;
+	until Processed <= 0
+else
+	Result := True;
 end;
 
-procedure TSGOpenALMP3.PreBuffer();
+procedure TSGOpenALMP123FilePlayer.PreBuffer();
 begin
 Stream(FBuffers[0]);
 Stream(FBuffers[1]);
-alSourceQueueBuffers(FSource, 2, @FBuffers);
+alSourceQueueBuffers(FSource, 2, @FBuffers[0]);
 end;
 
-procedure TSGOpenALMP3.Stream(const VBuffer : TSGALBuffer);
+function TSGOpenALMP123FilePlayer.Stream(const VBuffer : TSGALBuffer) : TSGUInt64;
 var
-  Data : PByte;
-  D    : Cardinal;
+	Data : PByte;
+	DataLength : Cardinal;
 begin
-  GetMem(data, FMaxBufferSize);
-  mpg123_read(FMPGHandle, Data, FMaxBufferSize, @D);
-  alBufferData(VBuffer, FFormat, Data, FMaxBufferSize, FRate);
-  FreeMem(Data);
+GetMem(data, FMaxBufferSize);
+mpg123_read(FMPGHandle, Data, FMaxBufferSize, @DataLength);
+if DataLength <> 0 then
+	alBufferData(VBuffer, FFormat, Data, DataLength, FRate);
+FreeMem(Data);
+Result := DataLength;
 end;
 
-procedure TSGOpenALMP3.Play();
+procedure TSGOpenALMP123FilePlayer.Play();
 begin
 PreBuffer();
 FPlaying := True;
@@ -249,7 +481,7 @@ Start();
 alSourcePlay(FSource);
 end;
 
-procedure TSGOpenALMP3.Stop();
+procedure TSGOpenALMP123FilePlayer.Stop();
 begin
 FPlaying := False;
 alSourceStop(FSource);
@@ -404,25 +636,46 @@ var
 	ListenerPos: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
 	ListenerVel: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0);
 	ListenerOri: array [0..5] of TALfloat= ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
+
+{$IFDEF USE_MPG123}
+procedure _MPG123Initialize();
+var
+	SD : PPChar;
+	i : TSGUInt32;
+	Decoders : TSGString = '';
+begin
+if not FMPG123Initialized then
+	begin
+	FMPG123Initialized := mpg123_init() = 0;
+	SGLog.Sourse('TSGAudioRenderOpenAL : MPG123 : ' + Iff(FMPG123Initialized, 'Initialized.', 'Initialization fail.'));
+	if FMPG123Initialized then
+		begin
+		SD := mpg123_supported_decoders();
+		i := 0;
+		while SD[i] <> nil do
+			begin
+			if i <> 0 then
+				Decoders += ', ';
+			Decoders += SGPCharToString(SD[i]);
+			i += 1;
+			end;
+		SGLog.Sourse('TSGAudioRenderOpenAL : MPG123 : Supored decoders - ' + Decoders + '.');
+		end;
+	end;
+end;
+{$ENDIF}
+
 begin
 if DllManager.Dll('OpenAL') <> nil then
 	DllManager.Dll('OpenAL').ReadExtensions();
 
 {$IFDEF USE_MPG123}
-if not FMPG123Initialized then
-	begin
-	FMPG123Initialized := mpg123_init() = 0;
-	SGLog.Sourse('TSGAudioRenderOpenAL : MPG123 : ' + Iff(FMPG123Initialized, 'Initialized.', 'Initialization fail.'));
-	end;
+_MPG123Initialize();
 {$ENDIF}
 
 alListenerfv(AL_POSITION,    @ListenerPos);
 alListenerfv(AL_VELOCITY,    @ListenerVel);
 alListenerfv(AL_ORIENTATION, @ListenerOri);
-
-//Test :
-//CreateSource(CreateBuffer(LoadWAVFromFile('./../../Sounds/SystemBass.wav'))).Play();
-//{$IFDEF USE_MPG123} TSGOpenALMP3.Create('./../../Sounds/Test.mp3').Play(); {$ENDIF}
 end;
 
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;

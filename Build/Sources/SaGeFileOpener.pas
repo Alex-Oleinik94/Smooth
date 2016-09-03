@@ -3,7 +3,7 @@
 unit SaGeFileOpener;
 
 interface
-uses 
+uses
 	  Classes
 	, SaGeBase
 	, SaGeBased
@@ -14,7 +14,7 @@ uses
 type
 	TSGFileOpenerDrawable = class;
 	TSGFileOpenerDrawableClass = class of TSGFileOpenerDrawable;
-	
+
 	TSGFileOpener = class;
 	TSGFileOpenerClass = class of TSGFileOpener;
 	TSGFileOpener = class(TSGNamed)
@@ -42,9 +42,13 @@ procedure SGWriteOpenableExpansions();
 implementation
 
 uses
-	SaGeImageFileOpener,
-	SaGeVersion,
-	SaGeContext;
+	SaGeVersion
+	,SaGeContext
+
+	// Openers :
+	,SaGeImageFileOpener
+	,SaGeAudioFileOpener
+	;
 
 var
 	SGFileOpeners : packed array of TSGFileOpenerClass = nil;
@@ -101,7 +105,7 @@ inherited Create(VContext);
 FFiles := nil;
 end;
 
-class function TSGFileOpenerDrawable.ClassName() : TSGString; 
+class function TSGFileOpenerDrawable.ClassName() : TSGString;
 begin
 Result := 'TSGFileOpenerDrawable';
 end;
@@ -186,7 +190,7 @@ begin
 SGCompatibleRunPaintable(GetDrawableClass(), SGContextOptionImport('FILES TO OPEN', TSGPointer(VFiles)) + SGContextOptionMax());
 end;
 
-class function TSGFileOpener.GetExpansions() : TSGStringList; 
+class function TSGFileOpener.GetExpansions() : TSGStringList;
 begin
 Result := nil;
 end;
