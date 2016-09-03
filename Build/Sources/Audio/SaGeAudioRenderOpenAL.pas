@@ -368,12 +368,19 @@ end;
 function GetMPG123AudioDecoder() : PChar;
 var
 	Decoders : PPChar;
+	i : TSGUInt32;
 begin
 Decoders := mpg123_supported_decoders();
 Result := nil;
 if Decoders <> nil then
-	if Decoders[0] <> nil then
-		Result := Decoders[0];
+	begin
+	i := 0;
+	while Decoders[i] <> nil do
+		begin
+		Result := Decoders[i];
+		i += 1;
+		end;
+	end;
 end;
 
 begin
@@ -415,9 +422,9 @@ MPG123_ENC_8, MPG123_ENC_SIGNED_8, MPG123_ENC_UNSIGNED_8, MPG123_ENC_ULAW_8, MPG
 		FFormat := AL_FORMAT_STEREO8;
 end;
 if FFormat = 0 then
-	SGLog.Sourse('TSGOpenALMP123FilePlayer : - Unknown encoding(''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + ''')!')
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Unknown encoding(''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + ''')!')
 else
-	SGLog.Sourse('TSGOpenALMP123FilePlayer : - Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + StrOpenALFormat(FFormat) + '''.');
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + StrOpenALFormat(FFormat) + '''.');
 
 alGenBuffers(2, @FBuffers[0]);
 alGenSources(1, @FSource);
@@ -426,6 +433,8 @@ alSource3f(FSource, AL_VELOCITY, 0, 0, 0);
 alSource3f(FSource, AL_DIRECTION, 0, 0, 0);
 alSourcef (FSource, AL_ROLLOFF_FACTOR, 0);
 alSourcei (FSource, AL_SOURCE_RELATIVE, AL_TRUE);
+
+//SGLog.Sourse('TSGOpenALMP123FilePlayer : Created.');
 end;
 
 function TSGOpenALMP123FilePlayer.UpdateBuffer() : TSGBool;
