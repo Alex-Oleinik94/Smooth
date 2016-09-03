@@ -303,6 +303,7 @@ alSourceStop(FSource);
 alDeleteSources(1, @FSource);
 alDeleteBuffers(2, @FBuffers[0]);
 mpg123_close(FMPGHandle);
+mpg123_delete(FMPGHandle);
 inherited;
 end;
 
@@ -422,7 +423,7 @@ MPG123_ENC_8, MPG123_ENC_SIGNED_8, MPG123_ENC_UNSIGNED_8, MPG123_ENC_ULAW_8, MPG
 		FFormat := AL_FORMAT_STEREO8;
 end;
 if FFormat = 0 then
-	SGLog.Sourse('TSGOpenALMP123FilePlayer : Unknown encoding(''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + ''')!')
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Unknown encoding - ''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + '''!')
 else
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + StrOpenALFormat(FFormat) + '''.');
 
