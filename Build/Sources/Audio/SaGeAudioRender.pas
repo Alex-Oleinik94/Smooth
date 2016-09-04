@@ -35,6 +35,35 @@ type
 		property AudioRender : TSGAudioRender read GetAudioRender;
 		end;
 
+	ISGAudioRenderSource = interface(ISGInterface)
+		['{78510d07-ffc2-4223-b178-abf674dd856c}']
+		procedure SetPosition(const VPosition : TSGVector3f);
+		function  GetPosition() : TSGVector3f;
+		procedure SetDirection(const VDirection : TSGVector3f);
+		function  GetDirection() : TSGVector3f;
+		procedure SetVelocity(const VVelocity : TSGVector3f);
+		function  GetVelocity() : TSGVector3f;
+		procedure SetLooping(const VLooping : TSGBool);
+		function  GetLooping() : TSGBool;
+		procedure SetRelative(const VRelative : TSGBool);
+		function GetRelative() : TSGBool;
+
+		procedure Update();
+
+		procedure Play();
+		function Played() : TSGBool;
+		procedure Pause();
+		function Paused() : TSGBool;
+		procedure Stop();
+		function Stoped : TSGBool;
+
+		property Relative  : TSGBool     read GetRelative  write SetRelative;
+		property Looping   : TSGBool     read GetLooping   write SetLooping;
+		property Velocity  : TSGVector3f read GetVelocity  write SetVelocity;
+		property Direction : TSGVector3f read GetDirection write SetDirection;
+		property Position  : TSGVector3f read GetPosition  write SetPosition;
+		end;
+
 	TSGAudioRenderSourceCoords = object
 			public
 		FPosition  : TSGVector3f;
@@ -44,14 +73,42 @@ type
 		procedure Clear();
 		end;
 
-	TSGAudioRenderSource = class(TSGAudioRenderObject)
+	TSGAudioRenderSource = class(TSGAudioRenderObject, ISGAudioRenderSource)
 			public
 		constructor Create(const VAudioRender : TSGAudioRender); override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCoords : TSGAudioRenderSourceCoords;
+		FCoords  : TSGAudioRenderSourceCoords;
+		FLooping : TSGBool;
+		FRelative: TSGBool;
+			protected
+		function GetSource() : ISGAudioRenderSource; virtual;
+			protected
+		property Source : ISGAudioRenderSource read GetSource;
 			public
-		procedure UpdateSource(); virtual; abstract;
+		procedure SetPosition(const VPosition : TSGVector3f); virtual;
+		function  GetPosition() : TSGVector3f; virtual;
+		procedure SetDirection(const VDirection : TSGVector3f); virtual;
+		function  GetDirection() : TSGVector3f; virtual;
+		procedure SetVelocity(const VVelocity : TSGVector3f); virtual;
+		function  GetVelocity() : TSGVector3f; virtual;
+		procedure SetLooping(const VLooping : TSGBool); virtual;
+		function  GetLooping() : TSGBool; virtual;
+		procedure SetRelative(const VRelative : TSGBool); virtual;
+		function GetRelative() : TSGBool; virtual;
+		procedure Update(); virtual;
+		procedure Play(); virtual;
+		function Played() : TSGBool; virtual;
+		procedure Pause(); virtual;
+		function Paused() : TSGBool; virtual;
+		procedure Stop(); virtual;
+		function Stoped : TSGBool; virtual;
+			public
+		property Relative  : TSGBool     read GetRelative  write SetRelative;
+		property Looping   : TSGBool     read GetLooping   write SetLooping;
+		property Velocity  : TSGVector3f read GetVelocity  write SetVelocity;
+		property Direction : TSGVector3f read GetDirection write SetDirection;
+		property Position  : TSGVector3f read GetPosition  write SetPosition;
 		end;
 
 	TSGAudioRenderFileSource = class(TSGAudioRenderSource)
@@ -99,6 +156,124 @@ uses
 	,SaGeAudioRenderOpenAL
 	{$ENDIF}
 	;
+procedure TSGAudioRenderSource.Play();
+begin
+if Source <> nil then
+	Source.Play();
+end;
+
+function TSGAudioRenderSource.Played() : TSGBool;
+begin
+Result := False;
+if Source <> nil then
+	Result := Source.Played();
+end;
+
+procedure TSGAudioRenderSource.Pause();
+begin
+if Source <> nil then
+	Source.Pause();
+end;
+
+function TSGAudioRenderSource.Paused() : TSGBool;
+begin
+Result := False;
+if Source <> nil then
+	Result := Source.Paused();
+end;
+
+procedure TSGAudioRenderSource.Stop();
+begin
+if Source <> nil then
+	Source.Stop();
+end;
+
+function TSGAudioRenderSource.Stoped : TSGBool;
+begin
+Result := False;
+if Source <> nil then
+	Result := Source.Stoped();
+end;
+
+function TSGAudioRenderSource.GetSource() : ISGAudioRenderSource;
+begin
+Result := nil;
+end;
+
+procedure TSGAudioRenderSource.SetPosition(const VPosition : TSGVector3f);
+begin
+FCoords.FPosition := VPosition;
+if Source <> nil then
+	Source.Position := VPosition;
+end;
+
+function  TSGAudioRenderSource.GetPosition() : TSGVector3f;
+begin
+Result := FCoords.FPosition;
+end;
+
+procedure TSGAudioRenderSource.SetDirection(const VDirection : TSGVector3f);
+begin
+FCoords.FDirection := VDirection;
+if Source <> nil then
+	Source.Direction := VDirection;
+end;
+
+function  TSGAudioRenderSource.GetDirection() : TSGVector3f;
+begin
+Result := FCoords.FDirection;
+end;
+
+procedure TSGAudioRenderSource.SetVelocity(const VVelocity : TSGVector3f);
+begin
+FCoords.FVelocity := VVelocity;
+if Source <> nil then
+	Source.Velocity := VVelocity;
+end;
+
+function  TSGAudioRenderSource.GetVelocity() : TSGVector3f;
+begin
+Result := FCoords.FVelocity;
+end;
+
+procedure TSGAudioRenderSource.SetLooping(const VLooping : TSGBool);
+begin
+FLooping := VLooping;
+if Source <> nil then
+	Source.Looping := VLooping;
+end;
+
+function  TSGAudioRenderSource.GetLooping() : TSGBool;
+begin
+Result := FLooping;
+end;
+
+procedure TSGAudioRenderSource.SetRelative(const VRelative : TSGBool);
+begin
+FRelative := VRelative;
+if Source <> nil then
+	Source.Relative := FRelative;
+end;
+
+function TSGAudioRenderSource.GetRelative() : TSGBool;
+begin
+if Source <> nil then
+	Result := Source.Relative
+else
+	Result := False;
+end;
+
+procedure TSGAudioRenderSource.Update();
+begin
+if Source <> nil then
+	begin
+	Source.Position := FCoords.FPosition;
+	Source.Direction := FCoords.FDirection;
+	Source.Velocity := FCoords.FVelocity;
+	Source.Looping := FLooping;
+	Source.Relative := FRelative;
+	end;
+end;
 
 constructor TSGAudioRenderObject.Create(const VAudioRender : TSGAudioRender);
 begin
