@@ -29,6 +29,7 @@ uses
 
 	// Audio Library
 	,OpenAL
+	,Alut
 
 	// Codecs :
 		(* ogg *)
@@ -106,7 +107,6 @@ type
 		FFormat   : TALenum;
 		FFileName : TSGString;
 		FMPGHandle: PMPG123_Handle;
-		FMPGInfo  : Tmpg123_frameinfo;
 		FRate     : Integer;
 		FChannels : Integer;
 		FEncoding : Integer;
@@ -307,14 +307,12 @@ if Decoders <> nil then
 end;
 
 const
-	GeneralDecoder = 
+	GeneralDecoder =
 {$IFDEF LINUX}
 		'default'
-{$ELSE} {$IFDEF MSWINDOWS}
-		'MMX'
-{$ELSE} 
+{$ELSE}
 		''
-{$ENDIF} {$ENDIF} 
+{$ENDIF}
 		;
 begin
 Decoders := mpg123_supported_decoders();
@@ -326,15 +324,15 @@ if Decoders <> nil then
 	i := 0;
 	while Decoders[i] <> nil do
 		begin
-		if i = 0 then 
+		if i = 0 then
 			DLast := SGPCharToString(Decoders[i]);
 		DecoderList += SGPCharToString(Decoders[i]);
 		i += 1;
-		if Decoders[i] = nil then 
+		if Decoders[i] = nil then
 			DLast := SGPCharToString(Decoders[i]);
 		end;
 	end;
-if GeneralDecoder in DecoderList then
+if (GeneralDecoder <> '') and (GeneralDecoder in DecoderList) then
 	SetDecoder(GeneralDecoder)
 else if 'x86-64' in DecoderList then
 	SetDecoder('x86-64')
@@ -452,7 +450,6 @@ begin
 inherited Create(nil, nil, False);
 FFileName := FilePath;
 FMaxBufferSize := 4096*8;
-FillChar(FMPGInfo,SizeOf(FMPGInfo),0);
 
 if GetMPG123AudioDecoder() = nil then
 	begin
@@ -462,7 +459,7 @@ if GetMPG123AudioDecoder() = nil then
 else
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Decoder is ''' + SGPCharToString(GetMPG123AudioDecoder()) + '''.');
 
-FMPGHandle := mpg123_new(nil, nil);
+FMPGHandle := mpg123_new(GetMPG123AudioDecoder(), nil);
 if FMPGHandle = nil then
 	begin
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while creating MP3 handle!');
@@ -535,7 +532,7 @@ Result := 0;
 try
 Result += Stream(FBuffers[0]);
 Result += Stream(FBuffers[1]);
-finally
+except
 Result := 0;
 FPlaying := False;
 SGLog.Sourse('TSGOpenALMP123FilePlayer : Exception while prebuffering!');
@@ -548,14 +545,19 @@ function TSGOpenALMP123FilePlayer.Stream(const VBuffer : TSGALBuffer) : TSGUInt6
 var
 	Data : PByte;
 	DataLength : Cardinal;
+	ExceptionBe : TSGBool = False;
 begin
 GetMem(data, FMaxBufferSize);
+DataLength := FMaxBufferSize;
 try
 	mpg123_read(FMPGHandle, Data, FMaxBufferSize, @DataLength);
 except
+	ExceptionBe := True;
 	DataLength := 0;
-	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while decoding!')
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Error while decoding! DataLength=''' + SGStr(DataLength) + '''.')
 end;
+if not ExceptionBe then
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Decoded data, Length=''' + SGStr(DataLength) + '''.');
 if DataLength <> 0 then
 	alBufferData(VBuffer, FFormat, Data, DataLength, FRate);
 FreeMem(Data);

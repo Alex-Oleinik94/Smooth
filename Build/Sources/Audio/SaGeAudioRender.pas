@@ -11,6 +11,9 @@ uses
 	,SaGeBased
 	,SaGeClasses
 	,SaGeCommon
+	,SaGeAudioDecoder
+
+	,Classes
 	;
 
 type
@@ -32,14 +35,21 @@ type
 		property AudioRender : TSGAudioRender read GetAudioRender;
 		end;
 
+	TSGAudioRenderSourceCoords = object
+			public
+		FPosition  : TSGVector3f;
+		FDirection : TSGVector3f;
+		FVelocity  : TSGVector3f;
+			public
+		procedure Clear();
+		end;
+
 	TSGAudioRenderSource = class(TSGAudioRenderObject)
 			public
 		constructor Create(const VAudioRender : TSGAudioRender); override;
 		class function ClassName() : TSGString; override;
 			protected
-		FPosition  : TSGVector3f;
-		FDirection : TSGVector3f;
-		FVelocity  : TSGVector3f;
+		FCoords : TSGAudioRenderSourceCoords;
 			public
 		procedure UpdateSource(); virtual; abstract;
 		end;
@@ -117,12 +127,17 @@ begin
 Result := FAudioRender <> nil;
 end;
 
-constructor TSGAudioRenderSource.Create(const VAudioRender : TSGAudioRender);
+procedure TSGAudioRenderSourceCoords.Clear();
 begin
-inherited Create(VAudioRender);
 FPosition .Import(0, 0, 0);
 FDirection.Import(0, 0, 0);
 FVelocity .Import(0, 0, 0);
+end;
+
+constructor TSGAudioRenderSource.Create(const VAudioRender : TSGAudioRender);
+begin
+inherited Create(VAudioRender);
+FCoords.Clear();
 end;
 
 class function TSGAudioRenderSource.ClassName() : TSGString;
