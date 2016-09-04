@@ -44,8 +44,8 @@ type
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			public
-		procedure SetInput(const VStream : TStream); override; overload;
-		procedure SetInput(const VFileName : TSGString); override; overload;
+		function SetInput(const VStream : TStream): TSGAudioDecoder; override; overload;
+		function SetInput(const VFileName : TSGString) : TSGAudioDecoder; override; overload;
 		procedure ReadInfo(); override;
 		function Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64; override;
 			protected
@@ -90,18 +90,20 @@ begin
 FillChar(Self, SizeOf(Self), 0);
 end;
 
-procedure TSGAudioDecoderWAV.SetInput(const VStream : TStream); overload;
+function TSGAudioDecoderWAV.SetInput(const VStream : TStream): TSGAudioDecoder; overload;
 begin
 KillInput();
 FInput := VStream;
 FInput.Position := 0;
+Result := Self;
 end;
 
-procedure TSGAudioDecoderWAV.SetInput(const VFileName : TSGString); overload;
+function TSGAudioDecoderWAV.SetInput(const VFileName : TSGString) : TSGAudioDecoder; overload;
 begin
 KillInput();
 FInput := TFileStream.Create(VFileName, fmOpenRead);
 FInput.Position := 0;
+Result := Self;
 end;
 
 procedure TSGAudioDecoderWAV.DetermineInfo();
@@ -123,7 +125,6 @@ DetermineInfo();
 if WAV_STANDARD <> FWavHeader.FormatCode then
 	SGLog.Sourse('TSGAudioDecoderWAV.ReadInfo : Needs decode data! FormatCode = ''' + StrFormatCode(FWavHeader.FormatCode) + '''.');
 FInput.Seek((8-44)+12+4+FWAVHeader.FormatHeaderSize+4, soFromCurrent);
-WriteLn(FWavHeader.FormatCode);
 
 repeat
 FInput.Read(ChuckName, SizeOf(ChuckName));
@@ -141,6 +142,7 @@ else
 	FInput.Position := FInput.Position + ChuckSize;
 	end;
 until FInput.Position >= FInput.Size;
+FInput.Position := FPosition;
 end;
 
 function TSGAudioDecoderWAV.Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64;
@@ -154,8 +156,12 @@ else
 	Result := VBufferSize;
 if Result <> 0 then
 	begin
-	FInput.Position := FPosition;
-	Result := FInput.Read(VData, Result);
+	if FInput.Position <> FPosition then
+		begin
+		FInput.Position := FPosition;
+		WriteLn(1);
+		end;
+	FInput.ReadBuffer(VData, Result);
 	end;
 end;
 

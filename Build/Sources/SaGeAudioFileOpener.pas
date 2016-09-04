@@ -29,30 +29,45 @@ implementation
 uses
 	SysUtils
 	,SaGeAudioRender
+	,SaGeAudioDecoder
 	,SaGeDllManager
 	;
 
 procedure PlayFiles(const Files : TSGStringList);
 var
 	AudioRender : TSGAudioRender = nil;
-	AudioRenderFileSource : TSGAudioRenderFileSource = nil;
-
-procedure UpdateScreen();
+	BufferedSource : TSGAudioBufferedSource = nil;
+	FileExpansion : TSGString = '';
 begin
-
-end;
-
-begin
+FileExpansion := SGGetFileExpansion(Files[0]);
+if TSGCompatibleAudioRender = nil then
+	begin
+	SGHint('Error! No audio renders suppored!');
+	exit;
+	end;
 AudioRender := TSGCompatibleAudioRender.Create();
 AudioRender.Initialize();
-AudioRenderFileSource := AudioRender.CreateFileSource(Files[0]);
-AudioRenderFileSource.Play();
-while not AudioRenderFileSource.Ended do
+BufferedSource := AudioRender.CreateBufferedSource();
+if BufferedSource = nil then
 	begin
-	UpdateScreen();
-	Sleep(10);
+	SGHint('Error! Could not create buffered source!');
+	AudioRender.Destroy();
+	exit;
 	end;
-AudioRenderFileSource.Destroy();
+if TSGCompatibleAudioDecoder(FileExpansion) = nil then
+	begin
+	SGHint('Error! No audio decoders suppored for ''' + FileExpansion + '''!');
+	BufferedSource.Destroy();
+	AudioRender.Destroy();
+	exit;
+	end;
+BufferedSource.Attach(TSGCompatibleAudioDecoder(FileExpansion).Create().SetInput(Files[0]));
+BufferedSource.Play();
+while BufferedSource.Playing do
+	begin
+	Sleep(100);
+	end;
+BufferedSource.Destroy();
 AudioRender.Destroy();
 end;
 

@@ -35,7 +35,7 @@ type
 		property AudioRender : TSGAudioRender read GetAudioRender;
 		end;
 
-	ISGAudioRenderSource = interface(ISGInterface)
+	ISGAudioSource = interface(ISGInterface)
 		['{78510d07-ffc2-4223-b178-abf674dd856c}']
 		procedure SetPosition(const VPosition : TSGVector3f);
 		function  GetPosition() : TSGVector3f;
@@ -48,10 +48,8 @@ type
 		procedure SetRelative(const VRelative : TSGBool);
 		function GetRelative() : TSGBool;
 
-		procedure Update();
-
 		procedure Play();
-		function Played() : TSGBool;
+		function Playing() : TSGBool;
 		procedure Pause();
 		function Paused() : TSGBool;
 		procedure Stop();
@@ -64,7 +62,7 @@ type
 		property Position  : TSGVector3f read GetPosition  write SetPosition;
 		end;
 
-	TSGAudioRenderSourceCoords = object
+	TSGAudioSourceCoords = object
 			public
 		FPosition  : TSGVector3f;
 		FDirection : TSGVector3f;
@@ -73,18 +71,18 @@ type
 		procedure Clear();
 		end;
 
-	TSGAudioRenderSource = class(TSGAudioRenderObject, ISGAudioRenderSource)
+	TSGAudioSource = class(TSGAudioRenderObject, ISGAudioSource)
 			public
 		constructor Create(const VAudioRender : TSGAudioRender); override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCoords  : TSGAudioRenderSourceCoords;
+		FCoords  : TSGAudioSourceCoords;
 		FLooping : TSGBool;
 		FRelative: TSGBool;
 			protected
-		function GetSource() : ISGAudioRenderSource; virtual;
+		function GetSource() : ISGAudioSource; virtual;
 			protected
-		property Source : ISGAudioRenderSource read GetSource;
+		property Source : ISGAudioSource read GetSource;
 			public
 		procedure SetPosition(const VPosition : TSGVector3f); virtual;
 		function  GetPosition() : TSGVector3f; virtual;
@@ -98,7 +96,7 @@ type
 		function GetRelative() : TSGBool; virtual;
 		procedure Update(); virtual;
 		procedure Play(); virtual;
-		function Played() : TSGBool; virtual;
+		function Playing() : TSGBool; virtual;
 		procedure Pause(); virtual;
 		function Paused() : TSGBool; virtual;
 		procedure Stop(); virtual;
@@ -111,20 +109,30 @@ type
 		property Position  : TSGVector3f read GetPosition  write SetPosition;
 		end;
 
-	TSGAudioRenderFileSource = class(TSGAudioRenderSource)
+	TSGAudioBufferedSource = class(TSGAudioSource)
 			public
 		constructor Create(const VAudioRender : TSGAudioRender); override;
-		class function ClassName() : TSGString; override;
+		destructor Destroy(); override;
+			private
+		procedure StartThread();
+		procedure StopThread();
+		function UpDateBuffers() : TSGUInt64;
+		procedure KillDecoder();
 			protected
-		FFileName : TSGString;
+		FThread  : TSGThread;
+		FDecoder : TSGAudioDecoder;
+		FPreBuffered : TSGBool;
 			protected
-		function GetEnded() : TSGBool; virtual; abstract;
-		procedure SetFile(const VFileName : TSGString); virtual;
+		function CountProcessedBuffers() : TSGUInt32; virtual; abstract;
+		procedure DataProcessedBuffer(var Data; const VDataLength : TSGUInt64); virtual; abstract;
+		procedure PreBuffer(); virtual; abstract;
 			public
-		procedure Play(); virtual; abstract;
+		procedure Attach(const VDecoder : TSGAudioDecoder); virtual;
+		procedure UpdateLoop(); virtual;
+		procedure Play(); override;
+		procedure Stop(); override;
 			public
-		property Ended : TSGBool read GetEnded;
-		property FileName : TSGString read FFileName write SetFile;
+		property Decoder : TSGAudioDecoder read FDecoder;
 		end;
 
 	TSGAudioRender = class(TSGNamed, ISGAudioRender)
@@ -141,7 +149,7 @@ type
 		procedure Init(); virtual; abstract;
 		function CreateDevice() : TSGBool; virtual; abstract;
 		procedure Kill(); virtual;
-		function CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource; virtual;
+		function CreateBufferedSource() : TSGAudioBufferedSource; virtual;
 			public
 		property Initialized : TSGBool read FInitialized;
 		end;
@@ -151,111 +159,226 @@ function TSGCompatibleAudioRender():TSGAudioRenderClass;{$IFDEF SUPPORTINLINE}in
 implementation
 
 uses
-	Crt
+	SysUtils
 	{$IFNDEF MOBILE}
 	,SaGeAudioRenderOpenAL
 	{$ENDIF}
 	;
-procedure TSGAudioRenderSource.Play();
+
+function TSGAudioRender.CreateBufferedSource() : TSGAudioBufferedSource;
+begin
+Result := nil;
+end;
+
+procedure TSGAudioBufferedSource.KillDecoder();
+begin
+if FDecoder <> nil then
+	begin
+	FDecoder.Destroy();
+	FDecoder := nil;
+	end;
+end;
+
+procedure TSGAudioBufferedSource.Attach(const VDecoder : TSGAudioDecoder);
+begin
+KillDecoder();
+FDecoder := VDecoder;
+Decoder.ReadInfo();
+//WriteLn('Decoder size = ' + SGStr(Decoder.Size));
+//WriteLn('Decoder position = ' + SGStr(Decoder.Position));
+end;
+
+procedure TSGAudioBufferedSource_Execute(const VSource : TSGAudioBufferedSource);
+begin
+VSource.UpdateLoop();
+end;
+
+procedure TSGAudioBufferedSource.StartThread();
+begin
+if FThread <> nil then
+	exit;
+FThread := TSGThread.Create(TSGThreadProcedure(@TSGAudioBufferedSource_Execute), Self, True);
+end;
+
+procedure TSGAudioBufferedSource.StopThread();
+begin
+if FThread = nil then
+	exit;
+while not FThread.Finished do
+	Sleep(3);
+FThread.Destroy();
+FThread := nil;
+end;
+
+procedure TSGAudioBufferedSource.UpdateLoop();
+begin
+while Source.Playing do
+	begin
+	UpDateBuffers();
+	Sleep(20);
+	end;
+end;
+
+procedure TSGAudioBufferedSource.Play();
+begin
+if not FPreBuffered then
+	begin
+	PreBuffer();
+	FPreBuffered := True;
+	end;
+inherited;
+if FThread = nil then
+	StartThread();
+end;
+
+procedure TSGAudioBufferedSource.Stop();
+begin
+FPreBuffered := False;
+inherited;
+if FThread <> nil then
+	StopThread();
+end;
+
+function TSGAudioBufferedSource.UpDateBuffers() : TSGUInt64;
+
+function DecodeDataAndSendToBuffer() : TSGUInt64;
+var
+	Data : TSGPointer = nil;
+begin
+GetMem(Data, SGAudioDecoderBufferSize);
+Result := FDecoder.Read(Data^, SGAudioDecoderBufferSize);
+DataProcessedBuffer(Data^, Result);
+FreeMem(Data);
+end;
+
+var
+	i : TSGUInt32;
+begin
+Result := 0;
+i := CountProcessedBuffers();
+while i > 0 do
+	begin
+	Result += DecodeDataAndSendToBuffer();
+	i -= 1;
+	end;
+end;
+
+constructor TSGAudioBufferedSource.Create(const VAudioRender : TSGAudioRender);
+begin
+inherited Create(VAudioRender);
+FThread := nil;
+FDecoder := nil;
+FPreBuffered := False;
+end;
+
+destructor TSGAudioBufferedSource.Destroy();
+begin
+if FThread <> nil then
+	StopThread();
+KillDecoder();
+inherited;
+end;
+
+procedure TSGAudioSource.Play();
 begin
 if Source <> nil then
 	Source.Play();
 end;
 
-function TSGAudioRenderSource.Played() : TSGBool;
+function TSGAudioSource.Playing() : TSGBool;
 begin
 Result := False;
 if Source <> nil then
-	Result := Source.Played();
+	Result := Source.Playing();
 end;
 
-procedure TSGAudioRenderSource.Pause();
+procedure TSGAudioSource.Pause();
 begin
 if Source <> nil then
 	Source.Pause();
 end;
 
-function TSGAudioRenderSource.Paused() : TSGBool;
+function TSGAudioSource.Paused() : TSGBool;
 begin
 Result := False;
 if Source <> nil then
 	Result := Source.Paused();
 end;
 
-procedure TSGAudioRenderSource.Stop();
+procedure TSGAudioSource.Stop();
 begin
 if Source <> nil then
 	Source.Stop();
 end;
 
-function TSGAudioRenderSource.Stoped : TSGBool;
+function TSGAudioSource.Stoped : TSGBool;
 begin
 Result := False;
 if Source <> nil then
 	Result := Source.Stoped();
 end;
 
-function TSGAudioRenderSource.GetSource() : ISGAudioRenderSource;
+function TSGAudioSource.GetSource() : ISGAudioSource;
 begin
 Result := nil;
 end;
 
-procedure TSGAudioRenderSource.SetPosition(const VPosition : TSGVector3f);
+procedure TSGAudioSource.SetPosition(const VPosition : TSGVector3f);
 begin
 FCoords.FPosition := VPosition;
 if Source <> nil then
 	Source.Position := VPosition;
 end;
 
-function  TSGAudioRenderSource.GetPosition() : TSGVector3f;
+function  TSGAudioSource.GetPosition() : TSGVector3f;
 begin
 Result := FCoords.FPosition;
 end;
 
-procedure TSGAudioRenderSource.SetDirection(const VDirection : TSGVector3f);
+procedure TSGAudioSource.SetDirection(const VDirection : TSGVector3f);
 begin
 FCoords.FDirection := VDirection;
 if Source <> nil then
 	Source.Direction := VDirection;
 end;
 
-function  TSGAudioRenderSource.GetDirection() : TSGVector3f;
+function  TSGAudioSource.GetDirection() : TSGVector3f;
 begin
 Result := FCoords.FDirection;
 end;
 
-procedure TSGAudioRenderSource.SetVelocity(const VVelocity : TSGVector3f);
+procedure TSGAudioSource.SetVelocity(const VVelocity : TSGVector3f);
 begin
 FCoords.FVelocity := VVelocity;
 if Source <> nil then
 	Source.Velocity := VVelocity;
 end;
 
-function  TSGAudioRenderSource.GetVelocity() : TSGVector3f;
+function  TSGAudioSource.GetVelocity() : TSGVector3f;
 begin
 Result := FCoords.FVelocity;
 end;
 
-procedure TSGAudioRenderSource.SetLooping(const VLooping : TSGBool);
+procedure TSGAudioSource.SetLooping(const VLooping : TSGBool);
 begin
 FLooping := VLooping;
 if Source <> nil then
 	Source.Looping := VLooping;
 end;
 
-function  TSGAudioRenderSource.GetLooping() : TSGBool;
+function  TSGAudioSource.GetLooping() : TSGBool;
 begin
 Result := FLooping;
 end;
 
-procedure TSGAudioRenderSource.SetRelative(const VRelative : TSGBool);
+procedure TSGAudioSource.SetRelative(const VRelative : TSGBool);
 begin
 FRelative := VRelative;
 if Source <> nil then
 	Source.Relative := FRelative;
 end;
 
-function TSGAudioRenderSource.GetRelative() : TSGBool;
+function TSGAudioSource.GetRelative() : TSGBool;
 begin
 if Source <> nil then
 	Result := Source.Relative
@@ -263,7 +386,7 @@ else
 	Result := False;
 end;
 
-procedure TSGAudioRenderSource.Update();
+procedure TSGAudioSource.Update();
 begin
 if Source <> nil then
 	begin
@@ -302,43 +425,22 @@ begin
 Result := FAudioRender <> nil;
 end;
 
-procedure TSGAudioRenderSourceCoords.Clear();
+procedure TSGAudioSourceCoords.Clear();
 begin
 FPosition .Import(0, 0, 0);
 FDirection.Import(0, 0, 0);
 FVelocity .Import(0, 0, 0);
 end;
 
-constructor TSGAudioRenderSource.Create(const VAudioRender : TSGAudioRender);
+constructor TSGAudioSource.Create(const VAudioRender : TSGAudioRender);
 begin
 inherited Create(VAudioRender);
 FCoords.Clear();
 end;
 
-class function TSGAudioRenderSource.ClassName() : TSGString;
+class function TSGAudioSource.ClassName() : TSGString;
 begin
-Result := 'TSGAudioRenderSource';
-end;
-
-constructor TSGAudioRenderFileSource.Create(const VAudioRender : TSGAudioRender);
-begin
-inherited Create(VAudioRender);
-FFileName := '';
-end;
-
-procedure TSGAudioRenderFileSource.SetFile(const VFileName : TSGString);
-begin
-FFileName := VFileName;
-end;
-
-class function TSGAudioRenderFileSource.ClassName() : TSGString;
-begin
-Result := 'TSGAudioRenderFileSource';
-end;
-
-function TSGAudioRender.CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource;
-begin
-Result := nil;
+Result := 'TSGAudioSource';
 end;
 
 class function TSGAudioRender.SupporedAudioFormats() : TSGStringList;

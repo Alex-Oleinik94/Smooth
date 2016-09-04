@@ -9,14 +9,18 @@ uses
 	,SaGeBased
 	,SaGeClasses
 	,SaGeCommon
+	,SaGeDllManager
 
 	,Classes
 	;
 
+type
+	TSGAudioDecoder = class;
+	TSGAudioDecoderClass = class of TSGAudioDecoder;
 const
 	SGAudioDecoderBufferSize = 4096 * 8;
 type
-	TSGAudioDecoderInfo = object
+	TSGAudioInfo = object
 			public
 		FBitsPerSample : TSGByte; // 8, 16 or 32
 		FChannels      : TSGByte; // 1, 2 and etc
@@ -31,12 +35,12 @@ type
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			public
-		procedure SetInput(const VStream : TStream); virtual; abstract; overload;
-		procedure SetInput(const VFileName : TSGString); virtual; abstract; overload;
+		function SetInput(const VStream : TStream): TSGAudioDecoder; virtual; abstract; overload;
+		function SetInput(const VFileName : TSGString): TSGAudioDecoder; virtual; abstract; overload;
 		procedure ReadInfo(); virtual; abstract;
 		function Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64; virtual; abstract;
 			protected
-		FInfo : TSGAudioDecoderInfo;
+		FInfo : TSGAudioInfo;
 		FInfoReaded : TSGBool;
 			protected
 		procedure DetermineInfo(); virtual; abstract;
@@ -45,9 +49,11 @@ type
 		procedure SetPosition(const VPosition : TSGUInt64); virtual; abstract;
 			public
 		property Size : TSGUInt64 read GetSize;
-		property Position : TSGUInt64 read GetPosition;
-		property Info : TSGAudioDecoderInfo read FInfo;
+		property Position : TSGUInt64 read GetPosition write SetPosition;
+		property Info : TSGAudioInfo read FInfo;
 		end;
+
+function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
 
 implementation
 
@@ -55,6 +61,13 @@ uses
 	Crt
 	,SaGeAudioDecoderWAV
 	;
+
+function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
+begin
+Result := nil;
+if (VExpansion = 'WAV') or (VExpansion = 'WAVE') then
+	Result := TSGAudioDecoderWAV;
+end;
 
 constructor TSGAudioDecoder.Create();
 begin
@@ -75,7 +88,7 @@ begin
 Result := 'TSGAudioDecoder';
 end;
 
-procedure TSGAudioDecoderInfo.Clear();
+procedure TSGAudioInfo.Clear();
 begin
 FBitsPerSample := 0;
 FChannels      := 0;

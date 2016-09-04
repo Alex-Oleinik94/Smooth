@@ -21,6 +21,7 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeAudioRender
+	,SaGeAudioDecoder
 
 	// System
 	,Classes
@@ -54,47 +55,6 @@ type
 	TSGALBuffer = TALuint;
 	TSGALFormat = TALenum;
 
-	TSGOpenALBufferInfo = object
-			public
-		FFrequency   : TALsizei;
-		FLoop        : TALint;
-			public
-		procedure Clear();
-		end;
-
-	TSGOpenALBuffer = object(TSGOpenALBufferInfo)
-			public
-		FBuffer : TSGALBuffer;
-			public
-		procedure Clear();
-			public
-		procedure DeleteBuffer();
-		end;
-
-	TSGOpenALSource = object(TSGOpenALBuffer)
-			public
-		FSource : TSGALSource;
-			public
-		procedure Clear();
-			public
-		procedure Play();
-		procedure Pause();
-		procedure Stop();
-		procedure DeleteSource();
-		procedure Looping(const VLoop : TSGBool);
-		function State() : TALint;
-		end;
-
-	TSGOpenALTrack = object(TSGOpenALBufferInfo)
-			public
-		FFormat : TALenum;
-		FData   : TALvoid;
-		FSize   : TALsizei;
-			public
-		procedure Clear();
-		function Assigned() : TSGBool;
-		end;
-
 	{$IFDEF USE_MPG123}
 	TSGOpenALMP123FilePlayer = class(TSGThread)
 			public
@@ -124,28 +84,52 @@ type
 		end;
 	{$ENDIF}
 
-type
-	TSGAudioRenderOpenALFileSource = class(TSGAudioRenderFileSource)
+	TSGOpenALCustomSource = class(TSGAudioRenderObject, ISGAudioSource)
 			public
 		constructor Create(const VAudioRender : TSGAudioRender); override;
+		destructor Destroy(); override;
+			protected
+		FSource : TSGALSource;
+			public
+		property Source : TSGALSource read FSource;
+			public
+		class function ClassName() : TSGString; override;
+			public
+		procedure SetPosition(const VPosition : TSGVector3f); virtual;
+		function  GetPosition() : TSGVector3f; virtual;
+		procedure SetDirection(const VDirection : TSGVector3f); virtual;
+		function  GetDirection() : TSGVector3f; virtual;
+		procedure SetVelocity(const VVelocity : TSGVector3f); virtual;
+		function  GetVelocity() : TSGVector3f; virtual;
+		procedure SetLooping(const VLooping : TSGBool); virtual;
+		function  GetLooping() : TSGBool; virtual;
+		procedure SetRelative(const VRelative : TSGBool); virtual;
+		function GetRelative() : TSGBool; virtual;
+		procedure Play(); virtual;
+		function Playing() : TSGBool; virtual;
+		procedure Pause(); virtual;
+		function Paused() : TSGBool; virtual;
+		procedure Stop(); virtual;
+		function Stoped : TSGBool; virtual;
+		end;
+
+	TSGOpenALBufferedSource = class(TSGAudioBufferedSource)
+			public
+		constructor Create(const VAudioRender : TSGAudioRender); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			private
-		{$IFDEF USE_MPG123}
-		FMPG123Player : TSGOpenALMP123FilePlayer;
-		{$ENDIF}
-		{$IFDEF USE_OGG}
-		{$ENDIF}
-		FWav : packed record
-			FTrack  : TSGOpenALTrack;
-			FBuffer : TSGOpenALBuffer;
-			FSource : TSGOpenALSource;
-			end;
-		FExpansion : TSGString;
+		FOpenALSource : TSGOpenALCustomSource;
+		FBuffers  : array[0..1] of TSGALBuffer;
+		FFormat   : TALenum;
+		FAudioInfo: TSGAudioInfo;
 			protected
-		function GetEnded() : TSGBool; override;
-		procedure SetFile(const VFileName : TSGString); override;
-			public
-		procedure Play(); override;
+		function GetSource() : ISGAudioSource; override;
+		function CountProcessedBuffers() : TSGUInt32; override;
+		procedure DataProcessedBuffer(var Data; const VDataLength : TSGUInt64); override;
+		procedure PreBuffer(); override;
+			protected
+		procedure BufferSource(const VBuffer : TSGALBuffer; var Data; const VDataLength : TSGUInt64);
 		end;
 
 	TSGAudioRenderOpenAL = class(TSGAudioRender)
@@ -167,17 +151,15 @@ type
 		procedure Init(); override;
 		function CreateDevice() : TSGBool; override;
 		procedure Kill(); override;
-		function CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource; override;
+		function CreateBufferedSource() : TSGAudioBufferedSource; override;
 			public
 		{$IFDEF USE_MPG123}
 		function SupporedMPG123() : TSGBool;
 		{$ENDIF}
-		function LoadWAVFromFile(const VFileName : TSGString) : TSGOpenALTrack;
-		function LoadWAVFromStream(const VStream : TStream) : TSGOpenALTrack;
-		procedure UnloadTrack(var VTrack : TSGOpenALTrack);
-		function CreateBuffer(VTrack : TSGOpenALTrack; const VUnloadTrack : TSGBool = True) : TSGOpenALBuffer;
-		function CreateSource(const VBuffer : TSGOpenALBuffer) : TSGOpenALSource;
 		end;
+
+function SGOpenALFormatFromAudioInfo(const VInfo : TSGAudioInfo) : TSGALFormat;
+function SGOpenALStrFormat(const VFormat : TSGALFormat) : TSGString;
 
 implementation
 
@@ -185,93 +167,253 @@ uses
 	SaGeDllManager
 	;
 
-constructor TSGAudioRenderOpenALFileSource.Create(const VAudioRender : TSGAudioRender);
+function SGOpenALFormatFromAudioInfo(const VInfo : TSGAudioInfo) : TSGALFormat;
+begin
+Result := 0;
+case VInfo.FBitsPerSample of
+16:
+	if VInfo.FChannels = 1 then
+		Result := AL_FORMAT_MONO16
+	else if VInfo.FChannels = 2 then
+		Result := AL_FORMAT_STEREO16;
+8:
+	if VInfo.FChannels = 1 then
+		Result := AL_FORMAT_MONO8
+	else if VInfo.FChannels = 2 then
+		Result := AL_FORMAT_STEREO8;
+end;
+end;
+
+function SGOpenALStrFormat(const VFormat : TSGALFormat) : TSGString;
+begin
+case VFormat of
+AL_FORMAT_MONO16 :
+	Result := 'AL_FORMAT_MONO16';
+AL_FORMAT_MONO8 :
+	Result := 'AL_FORMAT_MONO8';
+AL_FORMAT_STEREO16 :
+	Result := 'AL_FORMAT_STEREO16';
+AL_FORMAT_STEREO8 :
+	Result := 'AL_FORMAT_STEREO8';
+else
+	Result := '?';
+end;
+end;
+
+procedure TSGOpenALBufferedSource.BufferSource(const VBuffer : TSGALBuffer; var Data; const VDataLength : TSGUInt64);
+begin
+alBufferData(VBuffer, FFormat, @Data, VDataLength, FAudioInfo.FFrequency);
+end;
+
+constructor TSGOpenALBufferedSource.Create(const VAudioRender : TSGAudioRender);
 begin
 inherited Create(VAudioRender);
-{$IFDEF USE_MPG123}
-FMPG123Player := nil;
-{$ENDIF}
-FExpansion := '';
-FWav.FTrack.Clear();
-FWav.FBuffer.Clear();
-FWav.FSource.Clear();
+FOpenALSource := TSGOpenALCustomSource.Create(VAudioRender);
+FillChar(FFormat, SizeOf(FFormat), 0);
+FillChar(FAudioInfo, SizeOf(FAudioInfo), 0);
+FillChar(FBuffers, SizeOf(FBuffers), 0);
 end;
 
-class function TSGAudioRenderOpenALFileSource.ClassName() : TSGString;
+destructor TSGOpenALBufferedSource.Destroy();
 begin
-Result := 'TSGAudioRenderOpenALFileSource';
+if FBuffers[0] + FBuffers[1] <> 0 then
+	alDeleteBuffers(2, @FBuffers[0]);
+FOpenALSource.Destroy();
+inherited;
 end;
 
-function TSGAudioRenderOpenALFileSource.GetEnded() : TSGBool;
+class function TSGOpenALBufferedSource.ClassName() : TSGString;
 begin
-Result := True;
-if (FExpansion = 'WAV') then
+Result := 'TSGOpenALBufferedSource';
+end;
+
+function TSGOpenALBufferedSource.GetSource() : ISGAudioSource;
+begin
+Result := FOpenALSource;
+end;
+
+function TSGOpenALBufferedSource.CountProcessedBuffers() : TSGUInt32;
+var
+	Processed : TALint;
+begin
+alGetSourcei(FOpenALSource.Source, AL_BUFFERS_PROCESSED, @Processed);
+Result := Processed;
+end;
+
+procedure TSGOpenALBufferedSource.DataProcessedBuffer(var Data; const VDataLength : TSGUInt64);
+var
+	Buffer : TSGALBuffer;
+begin
+if VDataLength > 0 then
 	begin
-	Result := not (FWav.FSource.State() = AL_PLAYING)
-	end
-{$IFDEF USE_MPG123}
-else if FExpansion = 'MP3' then
-	begin
-	Result := not FMPG123Player.Playing;
-	end
-{$ENDIF}
-else
-	begin
-	SGLog.Sourse('TSGAudioRenderOpenALFileSource - GetEnded():TSGBool - Unknown expansion(''' + FExpansion + ''')!');
+	alSourceUnqueueBuffers(FOpenALSource.Source, 1, @Buffer);
+	BufferSource(Buffer, Data, VDataLength);
+	alSourceQueueBuffers(FOpenALSource.Source, 1, @Buffer);
 	end;
 end;
 
-procedure TSGAudioRenderOpenALFileSource.SetFile(const VFileName : TSGString);
+procedure TSGOpenALBufferedSource.PreBuffer();
+
+function DecodeAndSendDataToBufferBuffer(const VBuffer : TSGALBuffer) : TSGUInt64;
+var
+	Data : Pointer;
 begin
-inherited SetFile(VFileName);
-FExpansion := SGGetFileExpansion(FFileName);
-if (FExpansion = 'WAV') and ((AudioRender as TSGAudioRenderOpenAL) <> nil) then
-	begin
-	FWav.FTrack := (AudioRender as TSGAudioRenderOpenAL).LoadWAVFromFile(FFileName);
-	FWav.FBuffer := (AudioRender as TSGAudioRenderOpenAL).CreateBuffer(FWav.FTrack);
-	FWav.FSource := (AudioRender as TSGAudioRenderOpenAL).CreateSource(FWav.FBuffer);
-	end
-{$IFDEF USE_MPG123}
-else if (FExpansion = 'MP3') and AudioRenderAssigned() and ((AudioRender as TSGAudioRenderOpenAL) <> nil) and (AudioRender as TSGAudioRenderOpenAL).SupporedMPG123 then
-	begin
-	FMPG123Player := TSGOpenALMP123FilePlayer.Create(FFileName);
-	end
-{$ENDIF}
-else
-	begin
-	SGLog.Sourse('TSGAudioRenderOpenALFileSource - SetFile(''' + VFileName + ''') - Unknown expansion(''' + FExpansion + ''')!');
-	FExpansion := '';
-	end;
+GetMem(Data, SGAudioDecoderBufferSize);
+Result := FDecoder.Read(Data, SGAudioDecoderBufferSize);
+if Result > 0 then
+	BufferSource(VBuffer, Data^, Result);
+FreeMem(Data);
 end;
 
-procedure TSGAudioRenderOpenALFileSource.Play();
 begin
-if FExpansion = 'WAV' then
-	begin
-	if FWav.FSource.FSource <> 0 then
-		FWav.FSource.Play()
-	else
-		SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Expansion=''' + FExpansion + ''', but FWav.FSourceis not assigned!');
-	end
-{$IFDEF USE_MPG123}
-else if FExpansion = 'MP3' then
-	begin
-	if FMPG123Player <> nil then
-		FMPG123Player.Play()
-	else
-		SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Expansion=''' + FExpansion + ''', but FMPG123Player = nil!');
-	end
-{$ENDIF}
-else
-	begin
-	SGLog.Sourse('TSGAudioRenderOpenALFileSource - Play() - Unknown expansion(''' + FExpansion + ''')!');
-	end;
+FAudioInfo := FDecoder.Info;
+FFormat := SGOpenALFormatFromAudioInfo(FAudioInfo);
+SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Determine format ''' + SGOpenALStrFormat(FFormat) + '''.');
+alGenBuffers(2, @FBuffers[0]);
+SGLog.Sourse(
+	'TSGOpenALBufferedSource.PreBuffer : Decoded data size ''' +
+	SGStr((DecodeAndSendDataToBufferBuffer(FBuffers[0]) + DecodeAndSendDataToBufferBuffer(FBuffers[1]))) +
+	'''.');
+alSourceQueueBuffers(FOpenALSource.Source, 2, @FBuffers[0]);
 end;
 
-function TSGAudioRenderOpenAL.CreateFileSource(const VFileName : TSGString) : TSGAudioRenderFileSource;
+constructor TSGOpenALCustomSource.Create(const VAudioRender : TSGAudioRender);
 begin
-Result := TSGAudioRenderOpenALFileSource.Create(Self);
-Result.FileName := VFileName;
+inherited Create(VAudioRender);
+alGenSources(1, @FSource);
+alSourcef  (FSource, AL_PITCH,     1.0 );
+alSourcef  (FSource, AL_GAIN,      1.0 );
+alSource3f (FSource, AL_POSITION,  0, 0, 0);
+alSource3f (FSource, AL_VELOCITY,  0, 0, 0);
+alSource3f (FSource, AL_DIRECTION, 0, 0, 0);
+alSourcei  (FSource, AL_LOOPING,   AL_FALSE);
+alSourcei  (FSource, AL_SOURCE_RELATIVE, AL_FALSE);
+end;
+
+destructor TSGOpenALCustomSource.Destroy();
+begin
+alDeleteSources(1, @FSource);
+inherited;
+end;
+
+class function TSGOpenALCustomSource.ClassName() : TSGString;
+begin
+Result := 'TSGOpenALCustomSource';
+end;
+
+procedure TSGOpenALCustomSource.SetPosition(const VPosition : TSGVector3f);
+var
+	Position : TSGVector3f;
+begin
+Position := VPosition;
+alSourcefv(FSource, AL_POSITION, @Position);
+end;
+
+function  TSGOpenALCustomSource.GetPosition() : TSGVector3f;
+begin
+alGetSourcefv(FSource, AL_POSITION, @Result);
+end;
+
+procedure TSGOpenALCustomSource.SetDirection(const VDirection : TSGVector3f);
+var
+	Direction : TSGVector3f;
+begin
+Direction := VDirection;
+alSourcefv(FSource, AL_DIRECTION, @Direction);
+end;
+
+function  TSGOpenALCustomSource.GetDirection() : TSGVector3f;
+begin
+alGetSourcefv(FSource, AL_DIRECTION, @Result);
+end;
+
+procedure TSGOpenALCustomSource.SetVelocity(const VVelocity : TSGVector3f);
+var
+	Velocity : TSGVector3f;
+begin
+Velocity := VVelocity;
+alSourcefv(FSource, AL_VELOCITY, @Velocity);
+end;
+
+function  TSGOpenALCustomSource.GetVelocity() : TSGVector3f;
+begin
+alGetSourcefv(FSource, AL_VELOCITY, @Result);
+end;
+
+procedure TSGOpenALCustomSource.SetLooping(const VLooping : TSGBool);
+var
+	Looping : TALint;
+begin
+Looping := AL_TRUE * Byte(VLooping) + AL_FALSE * Byte(not VLooping);
+alSourcei(FSource, AL_LOOPING, Looping);
+end;
+
+function  TSGOpenALCustomSource.GetLooping() : TSGBool;
+var
+	Looping : TALint;
+begin
+alGetSourcei(FSource, AL_LOOPING, @Looping);
+Result := Looping = AL_TRUE;
+end;
+
+procedure TSGOpenALCustomSource.SetRelative(const VRelative : TSGBool);
+var
+	Relative : TALint;
+begin
+Relative := AL_TRUE * Byte(VRelative) + AL_FALSE * Byte(not VRelative);
+alSourcei(FSource, AL_SOURCE_RELATIVE, Relative);
+end;
+
+function TSGOpenALCustomSource.GetRelative() : TSGBool;
+var
+	Relative : TALint;
+begin
+alGetSourcei(FSource, AL_SOURCE_RELATIVE, @Relative);
+Result := Relative = AL_TRUE;
+end;
+
+procedure TSGOpenALCustomSource.Play();
+begin
+alSourcePlay(FSource);
+end;
+
+function TSGOpenALCustomSource.Playing() : TSGBool;
+var
+	State : TALint;
+begin
+alGetSourcei(FSource, AL_SOURCE_STATE, @State);
+Result := AL_PLAYING = State;
+end;
+
+procedure TSGOpenALCustomSource.Pause();
+begin
+alSourcePause(FSource);
+end;
+
+function TSGOpenALCustomSource.Paused() : TSGBool;
+var
+	State : TALint;
+begin
+alGetSourcei(FSource, AL_SOURCE_STATE, @State);
+Result := AL_PAUSED = State;
+end;
+
+procedure TSGOpenALCustomSource.Stop();
+begin
+alSourceStop(FSource);
+end;
+
+function TSGOpenALCustomSource.Stoped : TSGBool;
+var
+	State : TALint;
+begin
+alGetSourcei(FSource, AL_SOURCE_STATE, @State);
+Result := AL_STOPPED = State;
+end;
+
+function TSGAudioRenderOpenAL.CreateBufferedSource() : TSGAudioBufferedSource;
+begin
+Result := TSGOpenALBufferedSource.Create(Self);
 end;
 
 {$IFDEF USE_MPG123}
@@ -406,22 +548,6 @@ end;
 
 constructor TSGOpenALMP123FilePlayer.Create(const FilePath: TSGString);
 
-function StrOpenALFormat(const VFormat : TSGALFormat) : TSGString;
-begin
-case VFormat of
-AL_FORMAT_MONO16 :
-	Result := 'AL_FORMAT_MONO16';
-AL_FORMAT_MONO8 :
-	Result := 'AL_FORMAT_MONO8';
-AL_FORMAT_STEREO16 :
-	Result := 'AL_FORMAT_STEREO16';
-AL_FORMAT_STEREO8 :
-	Result := 'AL_FORMAT_STEREO8';
-else
-	Result := '?';
-end;
-end;
-
 function StrMPG123Encoding(const VEncoding : integer) : TSGString;
 begin
 case VEncoding of
@@ -488,7 +614,7 @@ end;
 if FFormat = 0 then
 	SGLog.Sourse('TSGOpenALMP123FilePlayer : Unknown encoding - ''' + SGStr(FEncoding) + ''' is ''' + StrMPG123Encoding(FEncoding) + '''!')
 else
-	SGLog.Sourse('TSGOpenALMP123FilePlayer : Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + StrOpenALFormat(FFormat) + '''.');
+	SGLog.Sourse('TSGOpenALMP123FilePlayer : Format : ''' + StrMPG123Encoding(FEncoding) + ''' --> ''' + SGOpenALStrFormat(FFormat) + '''.');
 
 alGenBuffers(2, @FBuffers[0]);
 alGenSources(1, @FSource);
@@ -582,149 +708,6 @@ FPlaying := False;
 alSourceStop(FSource);
 end;
 {$ENDIF}
-
-procedure TSGOpenALBuffer.DeleteBuffer();
-begin
-AlDeleteBuffers(1, @FBuffer);
-FBuffer := 0;
-end;
-
-function TSGOpenALSource.State() : TALint;
-begin
-alGetSourcei( FSource, AL_SOURCE_STATE, @Result);
-end;
-
-procedure TSGOpenALSource.Looping(const VLoop : TSGBool);
-begin
-if VLoop then
-	AlSourcei ( FSource, AL_LOOPING, AL_TRUE )
-else
-	AlSourcei ( FSource, AL_LOOPING, FLoop );
-end;
-
-procedure TSGOpenALSource.DeleteSource();
-begin
-AlDeleteSources(1, @FSource);
-FSource := 0;
-end;
-
-procedure TSGOpenALSource.Play();
-begin
-AlSourcePlay(FSource);
-end;
-
-procedure TSGOpenALSource.Pause();
-begin
-AlSourcePause(FSource);
-end;
-
-procedure TSGOpenALSource.Stop();
-begin
-AlSourceStop(FSource);
-end;
-
-function TSGAudioRenderOpenAL.CreateSource(const VBuffer : TSGOpenALBuffer) : TSGOpenALSource;
-var
-	sourcepos: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0 );
-	sourcevel: array [0..2] of TALfloat= ( 0.0, 0.0, 0.0 );
-begin
-Result.Clear();
-TSGOpenALBuffer(Result) := VBuffer;
-alGenSources(1, @Result.FSource);
-alSourcei  ( Result.FSource, AL_BUFFER,   VBuffer.FBuffer);
-alSourcef  ( Result.FSource, AL_PITCH,    1.0 );
-alSourcef  ( Result.FSource, AL_GAIN,     1.0 );
-alSourcefv ( Result.FSource, AL_POSITION, @sourcepos);
-alSourcefv ( Result.FSource, AL_VELOCITY, @sourcevel);
-alSourcei  ( Result.FSource, AL_LOOPING,  Result.FLoop);
-end;
-
-function TSGAudioRenderOpenAL.CreateBuffer(VTrack : TSGOpenALTrack; const VUnloadTrack : TSGBool = True) : TSGOpenALBuffer;
-begin
-Result.Clear();
-TSGOpenALBufferInfo(Result) := TSGOpenALBufferInfo(VTrack);
-alGenBuffers(1, @Result.FBuffer);
-alBufferData(Result.FBuffer, VTrack.FFormat, VTrack.FData, VTrack.FSize, VTrack.FFrequency);
-if VUnloadTrack then
-	UnloadTrack(VTrack);
-end;
-
-function TSGAudioRenderOpenAL.LoadWAVFromFile(const VFileName : TSGString) : TSGOpenALTrack;
-begin
-Result.Clear();
-if FALUTSuppored and (ext_alutLoadWAVFile <> nil) then
-	ext_alutLoadWAVFile(VFileName, Result.FFormat, Result.FData, Result.FSize, Result.FFrequency, Result.FLoop);
-if not Result.Assigned() then
-	Result.Clear();
-if not Result.Assigned() then
-	int_alutLoadWAVFile(VFileName, Result.FFormat, Result.FData, Result.FSize, Result.FFrequency, Result.FLoop);
-if not Result.Assigned() then
-	Result.Clear();
-end;
-
-function TSGAudioRenderOpenAL.LoadWAVFromStream(const VStream : TStream) : TSGOpenALTrack;
-var
-	Memory : PALbyte = nil;
-begin
-Result.Clear();
-if FALUTSuppored and (ext_alutLoadWAVMemory <> nil) then
-	begin
-	Memory := GetMem(VStream.Size);
-	VStream.Position := 0;
-	VStream.WriteBuffer(Memory^, VStream.Size);
-	ext_alutLoadWAVMemory(Memory, Result.FFormat, Result.FData, Result.FSize, Result.FFrequency, Result.FLoop);
-	FreeMem(Memory);
-	Memory := nil;
-	VStream.Position := 0;
-	end;
-if not Result.Assigned() then
-	Result.Clear();
-if not Result.Assigned() then
-	if not int_LoadWavStream(VStream, Result.FFormat, Result.FData, Result.FSize, Result.FFrequency, Result.FLoop) then
-		UnloadTrack(Result);
-if not Result.Assigned() then
-	Result.Clear();
-end;
-
-procedure TSGAudioRenderOpenAL.UnloadTrack(var VTrack : TSGOpenALTrack);
-begin
-if FALUTSuppored and (ext_alutUnloadWAV <> nil) then
-	ext_alutUnloadWAV(VTrack.FFormat, VTrack.FData, VTrack.FSize, VTrack.FFrequency)
-else
-	int_alutUnloadWAV(VTrack.FFormat, VTrack.FData, VTrack.FSize, VTrack.FFrequency);
-VTrack.FData := nil;
-end;
-
-function TSGOpenALTrack.Assigned() : TSGBool;
-begin
-Result := FData <> nil;
-end;
-
-procedure TSGOpenALSource.Clear();
-begin
-FSource := 0;
-inherited;
-end;
-
-procedure TSGOpenALBuffer.Clear();
-begin
-FBuffer := 0;
-inherited;
-end;
-
-procedure TSGOpenALBufferInfo.Clear();
-begin
-FFrequency   := 0;
-FLoop        := 0;
-end;
-
-procedure TSGOpenALTrack.Clear();
-begin
-FFormat := 0;
-FData   := nil;
-FSize   := 0;
-inherited;
-end;
 
 procedure TSGAudioRenderOpenAL.Init();
 var
