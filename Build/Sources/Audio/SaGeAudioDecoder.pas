@@ -1,5 +1,13 @@
 {$INCLUDE SaGe.inc}
 
+{$IF defined(WIN32)}
+	{$DEFINE USE_OGG}
+	{$ENDIF}
+
+{$IF defined(DESKTOP)}
+		{$DEFINE USE_MPG123}
+		{$ENDIF}
+
 unit SaGeAudioDecoder;
 
 interface
@@ -34,6 +42,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
+		class function SupporedFormats() : TSGStringList; virtual;
+		class function Suppored() : TSGBool; virtual;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; virtual; abstract; overload;
 		function SetInput(const VFileName : TSGString): TSGAudioDecoder; virtual; abstract; overload;
@@ -43,7 +53,6 @@ type
 		FInfo : TSGAudioInfo;
 		FInfoReaded : TSGBool;
 			protected
-		procedure DetermineInfo(); virtual; abstract;
 		function GetSize() : TSGUInt64; virtual; abstract;
 		function GetPosition() : TSGUInt64; virtual; abstract;
 		procedure SetPosition(const VPosition : TSGUInt64); virtual; abstract;
@@ -54,19 +63,61 @@ type
 		end;
 
 function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
+function TSGCompatibleAudioDecoders_Formats() : TSGStringList;
 
 implementation
 
 uses
 	Crt
+
+	//Decoders
 	,SaGeAudioDecoderWAV
+	{$IFDEF USE_MPG123}
+	,SaGeAudioDecoderMPG123
+	{$ENDIF}
+	{$IFDEF USE_OGG}
+	,SaGeAudioDecoderOGG
+	{$ENDIF}
 	;
+
+function TSGCompatibleAudioDecoders_Formats() : TSGStringList;
+begin
+Result := nil;
+Result += 'WAV';
+Result += 'WAVE';
+{$IFDEF USE_MPG123}
+if TSGAudioDecoderMPG123.Suppored then
+	Result += 'MP3';
+{$ENDIF}
+{$IFDEF USE_OGG}
+if TSGAudioDecoderMPG123.Suppored then
+	Result += 'OGG';
+{$ENDIF}
+end;
 
 function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
 begin
 Result := nil;
-if (VExpansion = 'WAV') or (VExpansion = 'WAVE') then
+if (Result = nil) and ((VExpansion = 'WAV') or (VExpansion = 'WAVE')) then
 	Result := TSGAudioDecoderWAV;
+{$IFDEF USE_MPG123}
+if (Result = nil) and (VExpansion = 'MP3') and TSGAudioDecoderMPG123.Suppored() then
+	Result := TSGAudioDecoderMPG123;
+{$ENDIF}
+{$IFDEF USE_OGG}
+if (Result = nil) and (VExpansion = 'OGG') and TSGAudioDecoderOGG.Suppored() then
+	Result := TSGAudioDecoderOGG;
+{$ENDIF}
+end;
+
+class function TSGAudioDecoder.Suppored() : TSGBool;
+begin
+Result := False;
+end;
+
+class function TSGAudioDecoder.SupporedFormats() : TSGStringList;
+begin
+Result := nil;
 end;
 
 constructor TSGAudioDecoder.Create();

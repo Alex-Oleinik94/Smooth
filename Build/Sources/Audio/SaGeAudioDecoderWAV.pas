@@ -43,6 +43,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
+		class function SupporedFormats() : TSGStringList; override;
+		class function Suppored() : TSGBool; override;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; override; overload;
 		function SetInput(const VFileName : TSGString) : TSGAudioDecoder; override; overload;
@@ -52,7 +54,6 @@ type
 		procedure SetPosition(const VPosition : TSGUInt64); override;
 		function GetSize() : TSGUInt64; override;
 		function GetPosition() : TSGUInt64; override;
-		procedure DetermineInfo(); override;
 			private
 		FInput        : TStream;
 		FDataPosition : TSGUInt64;
@@ -61,6 +62,7 @@ type
 		FWAVHeader    : TWAVHeader;
 			private
 		procedure KillInput();
+		procedure DetermineInfo();
 			public
 		class function StrFormatCode(const VFormatCode : Word):TSGString;
 		end;
@@ -68,8 +70,20 @@ type
 implementation
 
 uses
-	Crt
+	SysUtils
 	;
+
+class function TSGAudioDecoderWAV.SupporedFormats() : TSGStringList;
+begin
+Result := nil;
+Result += 'WAV';
+Result += 'WAVE';
+end;
+
+class function TSGAudioDecoderWAV.Suppored() : TSGBool;
+begin
+Result := True;
+end;
 
 class function TSGAudioDecoderWAV.StrFormatCode(const VFormatCode : Word):TSGString;
 begin
@@ -99,9 +113,22 @@ Result := Self;
 end;
 
 function TSGAudioDecoderWAV.SetInput(const VFileName : TSGString) : TSGAudioDecoder; overload;
+
+function CreateMemoryStream() : TStream;
+begin
+Result := TMemoryStream.Create();
+(Result as TMemoryStream).LoadFromFile(VFileName);
+end;
+
+function CreateFileStream() : TStream;
+begin
+Result := TFileStream.Create(VFileName, fmOpenRead);
+end;
+
 begin
 KillInput();
-FInput := TFileStream.Create(VFileName, fmOpenRead);
+FInput := CreateFileStream();
+//FInput := CreateMemoryStream();
 FInput.Position := 0;
 Result := Self;
 end;
@@ -133,7 +160,8 @@ if ChuckName = 'data' then
 	begin
 	FDataSize := ChuckSize;
 	FDataPosition := FInput.Position;
-	FPosition := FDataPosition;
+	FPosition := FInput.Position;
+	SGLog.Sourse('TSGAudioDecoderWAV : Data chunk determinded, Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''!');
 	FInput.Position := FInput.Position + ChuckSize;
 	end
 else
@@ -141,11 +169,20 @@ else
 	SGLog.Sourse('TSGAudioDecoderWAV.ReadInfo : Unknown chunk ''' + ChuckName + ''', Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''.');
 	FInput.Position := FInput.Position + ChuckSize;
 	end;
-until FInput.Position >= FInput.Size;
-FInput.Position := FPosition;
+until (FInput.Position >= FInput.Size);
+
+FInfoReaded := True;
 end;
 
+//{$DEFINE USE_READBUFFER}
+{$DEFINE USE_READ}
+{$IFDEF USE_READ}
+	{$DEFINE USE_RESULT}
+	{$ENDIF}
+
 function TSGAudioDecoderWAV.Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64;
+var
+	BytesRead : TSGInt32 = 0;
 begin
 Result := 0;
 if FPosition >= FDataPosition + FDataSize then
@@ -157,11 +194,24 @@ else
 if Result <> 0 then
 	begin
 	if FInput.Position <> FPosition then
-		begin
 		FInput.Position := FPosition;
-		WriteLn(1);
+	try
+	{$IFDEF USE_READ}
+		BytesRead := FInput.Read(VData, Result);
+		{$IFDEF USE_RESULT}Result := BytesRead;{$ENDIF}
+	{$ELSE} {$IFDEF USE_READBUFFER}
+		FInput.ReadBuffer(VData, Result);
+		{$ENDIF} {$ENDIF}
+	except on e : Exception do
+		begin
+		SGLog.Sourse('TSGAudioDecoderWAV.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Exception while reading from Stream!');
+		SGPrintExceptionStackTrace(e);
 		end;
-	FInput.ReadBuffer(VData, Result);
+	end;
+	{$IF defined(USE_READ) and (not defined(USE_RESULT))}
+	//SGLog.Sourse('TSGAudioDecoderWAV.Read : Read ' + SGStr(BytesRead) + ' of ' + SGStr(Result) + ' bytes' + Iff(BytesRead = 0, '!', '.'));
+	{$ENDIF}
+	FPosition += Result;
 	end;
 end;
 
@@ -200,10 +250,14 @@ if FInput <> nil then
 FInfo.Clear();
 FWAVHeader.Clear();
 FInfoReaded := False;
+FDataPosition := 0;
+FDataSize := 0;
+FPosition := 0;
 end;
 
 destructor TSGAudioDecoderWAV.Destroy();
 begin
+KillInput();
 inherited;
 end;
 

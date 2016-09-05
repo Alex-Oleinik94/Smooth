@@ -141,7 +141,6 @@ type
 		destructor  Destroy(); override;
 		class function Suppored() : TSGBool; virtual;
 		class function ClassName() : TSGString; override;
-		class function SupporedAudioFormats() : TSGStringList; virtual;
 			protected
 		FInitialized : TSGBool;
 			public
@@ -160,6 +159,7 @@ implementation
 
 uses
 	SysUtils
+	,SyncObjs
 	{$IFNDEF MOBILE}
 	,SaGeAudioRenderOpenAL
 	{$ENDIF}
@@ -211,12 +211,22 @@ FThread := nil;
 end;
 
 procedure TSGAudioBufferedSource.UpdateLoop();
+var
+	CriticalSection : TCriticalSection = nil;
+	InPlaying : TSGBool = True;
 begin
-while Source.Playing do
+CriticalSection := TCriticalSection.Create();
+while InPlaying do
 	begin
-	UpDateBuffers();
-	Sleep(20);
+	CriticalSection.Acquire();
+	InPlaying := Source.Playing;
+	if InPlaying then
+		UpDateBuffers();
+	CriticalSection.Release();
+	if InPlaying then
+		Sleep(20);
 	end;
+CriticalSection.Destroy();
 end;
 
 procedure TSGAudioBufferedSource.Play();
@@ -441,11 +451,6 @@ end;
 class function TSGAudioSource.ClassName() : TSGString;
 begin
 Result := 'TSGAudioSource';
-end;
-
-class function TSGAudioRender.SupporedAudioFormats() : TSGStringList;
-begin
-Result := nil;
 end;
 
 procedure TSGAudioRender.Kill();

@@ -38,6 +38,36 @@ var
 	AudioRender : TSGAudioRender = nil;
 	BufferedSource : TSGAudioBufferedSource = nil;
 	FileExpansion : TSGString = '';
+
+var
+	ConsAll, ConsWr : TSGUInt32;
+	ConsSize : TSGUInt64;
+
+procedure BeginConsole();
+var
+	i : TSGUInt32;
+begin
+ConsAll := 50;
+ConsWr := 0;
+ConsSize := BufferedSource.Decoder.Size;
+for i := 1 to ConsAll do
+	Write('#');
+WriteLn();
+end;
+
+procedure UpdateConsole();
+var
+	ConsPos : TSGUInt64;
+begin
+ConsPos := BufferedSource.Decoder.Position;
+while Trunc(ConsPos / ConsSize * ConsAll) > ConsWr do
+	begin
+	Write('*');
+	ConsWr += 1;
+	ConsPos := BufferedSource.Decoder.Position;
+	end;
+end;
+
 begin
 FileExpansion := SGGetFileExpansion(Files[0]);
 if TSGCompatibleAudioRender = nil then
@@ -63,10 +93,15 @@ if TSGCompatibleAudioDecoder(FileExpansion) = nil then
 	end;
 BufferedSource.Attach(TSGCompatibleAudioDecoder(FileExpansion).Create().SetInput(Files[0]));
 BufferedSource.Play();
+BufferedSource.Relative := True;
+
+BeginConsole();
 while BufferedSource.Playing do
 	begin
-	Sleep(100);
+	UpdateConsole();
+	Sleep(20);
 	end;
+
 BufferedSource.Destroy();
 AudioRender.Destroy();
 end;
@@ -83,9 +118,7 @@ end;
 
 class function TSGAudioFileOpener.GetExpansions() : TSGStringList;
 begin
-Result := nil;
-if TSGCompatibleAudioRender <> nil then
-	Result := TSGCompatibleAudioRender.SupporedAudioFormats();
+Result := TSGCompatibleAudioDecoders_Formats();
 end;
 
 initialization

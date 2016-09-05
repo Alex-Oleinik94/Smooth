@@ -93,6 +93,7 @@ type
 		function TotalFunctions() : TSGUInt32;
 		function LoadedFunctions() : TSGUInt32;
 		class function FirstName() : TSGString;
+		class function JustifedFirstName() : TSGString;
 		function GenerateAllNotLoadedFunc() : TSGStringList;
 			public
 		procedure ReadExtensions(); virtual;
@@ -532,6 +533,13 @@ if SL <> nil then
 		end;
 	SL := nil;
 	end;
+end;
+
+class function TSGDll.JustifedFirstName() : TSGString;
+begin
+Result := FirstName();
+if DllManager <> nil then
+	Result := StringJustifyLeft(Result, DllManager.GenerateMaxNameLength() + 1, ' ');
 end;
 
 function TSGDll.StatString(const LoadObjectId : TSGUInt32 = 0) : TSGString;

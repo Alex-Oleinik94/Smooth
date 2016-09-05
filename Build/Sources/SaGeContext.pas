@@ -243,7 +243,7 @@ function SGContextOptionMin() : TSGContextOption;
 function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
 function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
 {$IFDEF ANDROID}
-function SGContextOptionAndroidApp(const State : TSGPointer) : TSGOptionPointer;
+function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
 {$ENDIF}
 function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
 

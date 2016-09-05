@@ -400,6 +400,8 @@ var
 	r_lseek : T_r_lseek
 		):longint;
 
+function mpg123_inited() : Boolean;
+
 implementation
 
 uses
@@ -411,6 +413,8 @@ uses
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 // =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+var
+	FInited : TSGBool = False;
 
 type
 	TSGDllMPG123 = class(TSGDll)
@@ -420,6 +424,11 @@ type
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
 		class procedure Free(); override;
 		end;
+
+function mpg123_inited() : Boolean;
+begin
+Result := FInited;
+end;
 
 class function TSGDllMPG123.SystemNames() : TSGStringList;
 begin
@@ -458,6 +467,12 @@ end;
 
 class procedure TSGDllMPG123.Free();
 begin
+if FInited then
+	begin
+	mpg123_exit();
+	SGLog.Sourse('TSGDllMPG123.Free : Exited.');
+	FInited := False;
+	end;
 mpg123_init := nil;
 mpg123_exit := nil;
 mpg123_new := nil;
@@ -540,6 +555,34 @@ else
 LoadResult^.FFunctionCount += 1;
 end;
 
+procedure mpg123_inialize();
+type
+	TArrayOfPChar = array [0..100000] of PChar;
+var
+	SD : PPChar;
+	i : TSGUInt32;
+	Decoders : TSGString = '';
+begin
+if FInited then
+	exit;
+if Result.FFunctionLoaded > 0 then
+	FInited := mpg123_init() = 0;
+SGLog.Sourse(JustifedFirstName() + ': ' + Iff(FInited, 'Initialized.', 'Initialization fail.'));
+if FInited then
+	begin
+	SD := mpg123_supported_decoders();
+	i := 0;
+	while TArrayOfPChar(SD)[i] <> nil do
+		begin
+		if i <> 0 then
+			Decoders += ', ';
+		Decoders += SGPCharToString(TArrayOfPChar(SD)[i]);
+		i += 1;
+		end;
+	SGLog.Sourse(JustifedFirstName() + ': Supored decoders - ' + Decoders + '.');
+	end;
+end;
+
 begin
 Result.Clear();
 LoadResult := @Result;
@@ -609,6 +652,7 @@ mpg123_getpar := LoadProcedure('mpg123_getpar');
 mpg123_replace_buffer := LoadProcedure('mpg123_replace_buffer');
 mpg123_outblock := LoadProcedure('mpg123_outblock');
 mpg123_replace_reader := LoadProcedure('mpg123_replace_reader');
+mpg123_inialize();
 end;
 
 initialization
