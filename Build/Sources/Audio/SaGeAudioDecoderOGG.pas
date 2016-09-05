@@ -222,6 +222,7 @@ end;
 
 procedure TSGAudioDecoderOGG.KillInput();
 begin
+//ov_clear(FFile);
 if FInputStream <> nil then
 	begin
 	FInputStream.Destroy();
@@ -245,5 +246,8 @@ class function TSGAudioDecoderOGG.ClassName() : TSGString;
 begin
 Result := 'TSGAudioDecoderOGG';
 end;
+
+initialization
+	SGAddDecoder(TSGAudioDecoderOGG);
 
 end.

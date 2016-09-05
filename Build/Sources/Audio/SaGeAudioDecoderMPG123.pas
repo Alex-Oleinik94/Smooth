@@ -291,4 +291,7 @@ begin
 Result := 'TSGAudioDecoderMPG123';
 end;
 
+initialization
+	SGAddDecoder(TSGAudioDecoderMPG123);
+
 end.

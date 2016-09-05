@@ -8,9 +8,57 @@ operator - (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF 
 operator * (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator in(const B : DATATYPE; const A : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+function ListSize(const List : DATATYPE_LIST) : TSGUInt32;
+begin
+Result := 0;
+if List <> nil then
+	Result := Length(List);
+end;
+
+var
+	C : DATATYPE;
+begin
+Result := nil;
+for C in A do
+	Result += C;
+for C in B do
+	Result += C;
+if ListSize(A) > 0 then
+	SetLength(A, 0);
+if ListSize(B) > 0 then
+	SetLength(B, 0);
+end;
+
+operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+function ListSize(const List : DATATYPE_LIST) : TSGUInt32;
+begin
+Result := 0;
+if List <> nil then
+	Result := Length(List);
+end;
+
+var
+	C : DATATYPE;
+begin
+Result := nil;
+for C in A do
+	Result *= C;
+for C in B do
+	Result *= C;
+if ListSize(A) > 0 then
+	SetLength(A, 0);
+if ListSize(B) > 0 then
+	SetLength(B, 0);
+end;
+
 operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	C : DATATYPE;
@@ -87,7 +135,7 @@ var
 	i, ii : TSGMaxEnum;
 begin
 Result := A;
-if Result <> nil then 
+if Result <> nil then
 	begin
 	ii := Length(Result);
 	if ii > 0 then

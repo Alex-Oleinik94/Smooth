@@ -23,6 +23,7 @@ type
 		class function GetExpansions() : TSGStringList; virtual;
 		class procedure Execute(const VFiles : TSGStringList);virtual;
 		class function GetDrawableClass() : TSGFileOpenerDrawableClass;virtual;
+		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; virtual;
 		end;
 
 	TSGFileOpenerDrawable = class (TSGDrawable)
@@ -52,6 +53,11 @@ uses
 
 var
 	SGFileOpeners : packed array of TSGFileOpenerClass = nil;
+
+class function TSGFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+begin
+Result := False;
+end;
 
 class function TSGFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
 begin
@@ -113,7 +119,7 @@ end;
 procedure SGTryOpenFiles(const VFiles : TSGStringList);
 var
 	C, EC : TSGFileOpenerClass;
-	SL1, SL2, Exp : TSGStringList;
+	SL1 : TSGStringList;
 	i : TSGLongWord;
 	S : TSGString;
 
@@ -135,25 +141,17 @@ if VFiles = nil then
 if Length(VFiles) = 0 then
 	Exit;
 EC := nil;
+SL1 := nil;
 for i := 0 to High(VFiles) do
-	begin
 	SL1 *= SGUpCaseString(SGGetFileExpansion(VFiles[i]));
-	end;
 for C in SGFileOpeners do
-	begin
-	Exp := C.GetExpansions();
-	SL2 := SGUpCaseStringList(Exp);
-	if SL1 in SL2 then
+	if C.ExpansionsSuppored(SL1) then
+		begin
 		EC := C;
-	SetLength(Exp, 0);
-	SetLength(SL2, 0);
-	if EC <> nil then
 		break;
-	end;
+		end;
 if EC <> nil then
-	begin
-	EC.Execute(VFiles);
-	end
+	EC.Execute(VFiles)
 else
 	begin
 	S := '';

@@ -25,6 +25,15 @@ uses
 type
 	TSGAudioDecoder = class;
 	TSGAudioDecoderClass = class of TSGAudioDecoder;
+
+{$DEFINE INC_PLACE_INTERFACE}
+{$DEFINE DATATYPE_LIST := TSGAudioDecoderClassList}
+{$DEFINE DATATYPE      := TSGAudioDecoderClass}
+{$INCLUDE SaGeCommonList.inc}
+{$UNDEF DATATYPE_LIST}
+{$UNDEF DATATYPE}
+{$UNDEF INC_PLACE_INTERFACE}
+
 const
 	SGAudioDecoderBufferSize = 4096 * 8;
 type
@@ -57,13 +66,14 @@ type
 		function GetPosition() : TSGUInt64; virtual; abstract;
 		procedure SetPosition(const VPosition : TSGUInt64); virtual; abstract;
 			public
-		property Size : TSGUInt64 read GetSize;
+		property Size     : TSGUInt64 read GetSize;
 		property Position : TSGUInt64 read GetPosition write SetPosition;
-		property Info : TSGAudioInfo read FInfo;
+		property Info     : TSGAudioInfo read FInfo;
 		end;
 
 function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
-function TSGCompatibleAudioDecoders_Formats() : TSGStringList;
+function TSGCompatibleAudioFormats() : TSGStringList;
+procedure SGAddDecoder(const VDecoder : TSGAudioDecoderClass);
 
 implementation
 
@@ -80,34 +90,49 @@ uses
 	{$ENDIF}
 	;
 
-function TSGCompatibleAudioDecoders_Formats() : TSGStringList;
+{$DEFINE INC_PLACE_IMPLEMENTATION}
+{$DEFINE DATATYPE_LIST := TSGAudioDecoderClassList}
+{$DEFINE DATATYPE      := TSGAudioDecoderClass}
+{$INCLUDE SaGeCommonList.inc}
+{$UNDEF DATATYPE_LIST}
+{$UNDEF DATATYPE}
+{$UNDEF INC_PLACE_IMPLEMENTATION}
+
+var
+	AudioDecoders : TSGAudioDecoderClassList = nil;
+
+procedure SGAddDecoder(const VDecoder : TSGAudioDecoderClass);
+begin
+AudioDecoders *= VDecoder;
+end;
+
+function TSGCompatibleAudioFormats() : TSGStringList;
+var
+	C : TSGAudioDecoderClass;
 begin
 Result := nil;
-Result += 'WAV';
-Result += 'WAVE';
-{$IFDEF USE_MPG123}
-if TSGAudioDecoderMPG123.Suppored then
-	Result += 'MP3';
-{$ENDIF}
-{$IFDEF USE_OGG}
-if TSGAudioDecoderMPG123.Suppored then
-	Result += 'OGG';
-{$ENDIF}
+for C in AudioDecoders do
+	if C.Suppored then
+		Result *= C.SupporedFormats();
 end;
 
 function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
+var
+	C  : TSGAudioDecoderClass;
+	SF : TSGStringList;
 begin
 Result := nil;
-if (Result = nil) and ((VExpansion = 'WAV') or (VExpansion = 'WAVE')) then
-	Result := TSGAudioDecoderWAV;
-{$IFDEF USE_MPG123}
-if (Result = nil) and (VExpansion = 'MP3') and TSGAudioDecoderMPG123.Suppored() then
-	Result := TSGAudioDecoderMPG123;
-{$ENDIF}
-{$IFDEF USE_OGG}
-if (Result = nil) and (VExpansion = 'OGG') and TSGAudioDecoderOGG.Suppored() then
-	Result := TSGAudioDecoderOGG;
-{$ENDIF}
+for C in AudioDecoders do
+	begin
+	SF := C.SupporedFormats();
+	if VExpansion in SF then
+		Result := C;
+	SetLength(SF, 0);
+	if (Result <> nil) and (not C.Suppored) then
+		Result := nil;
+	if Result <> nil then
+		break;
+	end;
 end;
 
 class function TSGAudioDecoder.Suppored() : TSGBool;
@@ -145,5 +170,8 @@ FBitsPerSample := 0;
 FChannels      := 0;
 FFrequency     := 0;
 end;
+
+finalization
+	SetLength(AudioDecoders, 0);
 
 end.

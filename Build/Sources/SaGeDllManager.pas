@@ -44,6 +44,7 @@ type
 			public
 		constructor Create(); override;
 		destructor  Destroy(); override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure PrintStat(const Extended : TSGBool = False);
 		procedure LogStat();
@@ -110,6 +111,7 @@ type
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
 			protected
 		FDlls : TSGDllList;
 			public
@@ -202,6 +204,11 @@ SetLength(FFunctionErrors, 0);
 FFunctionCount  := 0;
 FFunctionLoaded := 0;
 FFunctionErrors := nil;
+end;
+
+class function TSGDllManager.ClassName() : TSGString;
+begin
+Result := 'TSGDllManager';
 end;
 
 class function TSGDllManager.LibrariesDirectory() : TSGString;
@@ -439,6 +446,11 @@ Result := VDll.Loading();
 end;
 
 // ======================================== TSGDll
+
+class function TSGDll.ClassName() : TSGString;
+begin
+Result := 'TSGDll';
+end;
 
 constructor TSGDll.Create();
 begin

@@ -22,6 +22,7 @@ type
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
 		class procedure Execute(const VFiles : TSGStringList);override;
+		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
 
 implementation
@@ -106,6 +107,19 @@ BufferedSource.Destroy();
 AudioRender.Destroy();
 end;
 
+class function TSGAudioFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+var
+	S : TSGString;
+begin
+Result := True;
+for S in VExpansions do
+	if TSGCompatibleAudioDecoder(S) = nil then
+		begin
+		Result := False;
+		break;
+		end
+end;
+
 class procedure TSGAudioFileOpener.Execute(const VFiles : TSGStringList);
 begin
 PlayFiles(VFiles);
@@ -118,7 +132,7 @@ end;
 
 class function TSGAudioFileOpener.GetExpansions() : TSGStringList;
 begin
-Result := TSGCompatibleAudioDecoders_Formats();
+Result := TSGCompatibleAudioFormats();
 end;
 
 initialization

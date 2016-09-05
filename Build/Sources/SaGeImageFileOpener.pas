@@ -3,7 +3,7 @@
 unit SaGeImageFileOpener;
 
 interface
-uses 
+uses
 	  Classes
 	, SaGeBase
 	, SaGeBased
@@ -22,7 +22,8 @@ type
 			public
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
-		class function GetDrawableClass() : TSGFileOpenerDrawableClass;override;
+		class function GetDrawableClass() : TSGFileOpenerDrawableClass; override;
+		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
 
 type
@@ -38,7 +39,7 @@ type
 			private
 		FBackgroundColor : TSGColor3f;
 		FWaitAnimation : TSGWaiting;
-		
+
 		FBackgroundImage : TSGImage;
 		FImage : TSGImage;
 		FLoadingThread : TSGThread;
@@ -106,7 +107,7 @@ FFont.SetContext(Context);
 FLoadingThread := TSGThread.Create(TSGThreadProcedure(@TSGImageViewer_LoadThreadProc), Self, True);
 end;
 
-class function TSGImageViewer.ClassName() : TSGString; 
+class function TSGImageViewer.ClassName() : TSGString;
 begin
 Result := 'TSGImageViewer';
 end;
@@ -188,8 +189,8 @@ var
 begin
 CursorPos := Context.CursorPosition();
 CursorPosF.Import(CursorPos.x, CursorPos.y);
-if  (CursorPosF.x > FPosition.x) and 
-	(CursorPosF.y > FPosition.y) and 
+if  (CursorPosF.x > FPosition.x) and
+	(CursorPosF.y > FPosition.y) and
 	(CursorPosF.x < FPosition.x + FSize.x) and
 	(CursorPosF.y < FPosition.y + FSize.y) then
 	begin
@@ -347,7 +348,7 @@ begin
 Result := TSGImageViewer;
 end;
 
-class function TSGImageFileOpener.GetExpansions() : TSGStringList; 
+function TSGImageFileOpener_GetAlwaysSuporedExpansions() : TSGStringList;
 begin
 Result := nil;
 Result *= 'JPG';
@@ -355,9 +356,40 @@ Result *= 'JPEG';
 Result *= 'BMP';
 Result *= 'TGA';
 Result *= 'SGIA';
+end;
+
+class function TSGImageFileOpener.GetExpansions() : TSGStringList;
+begin
+Result := TSGImageFileOpener_GetAlwaysSuporedExpansions();
 {$IFDEF WITHLIBPNG}
 if SupporedPNG() then
 	Result *= 'PNG';
+{$ENDIF}
+end;
+
+class function TSGImageFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+var
+	ASE : TSGStringList = nil;
+	PNGInExpansions : TSGBool = False;
+	S : TSGString = '';
+begin
+ASE := TSGImageFileOpener_GetAlwaysSuporedExpansions();
+Result := True;
+for S in VExpansions do
+	if not (S in ASE) then
+		begin
+		if S = 'PNG' then
+			PNGInExpansions := True
+		else
+			begin
+			Result := False;
+			break;
+			end;
+		end;
+{$IFDEF WITHLIBPNG}
+if Result = True then
+	if PNGInExpansions then
+		Result := SupporedPNG();
 {$ENDIF}
 end;
 

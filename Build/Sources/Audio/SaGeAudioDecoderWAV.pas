@@ -266,4 +266,6 @@ begin
 Result := 'TSGAudioDecoderWAV';
 end;
 
+initialization
+	SGAddDecoder(TSGAudioDecoderWAV);
 end.

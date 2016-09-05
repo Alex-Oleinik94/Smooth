@@ -470,7 +470,7 @@ begin
 if FInited then
 	begin
 	mpg123_exit();
-	SGLog.Sourse('TSGDllMPG123.Free : Exited.');
+	SGLog.Sourse(JustifedFirstName() + ': Exited.');
 	FInited := False;
 	end;
 mpg123_init := nil;
