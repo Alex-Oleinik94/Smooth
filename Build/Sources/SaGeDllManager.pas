@@ -223,6 +223,8 @@ var
 	sr:dos.searchrec;
 begin
 Result := nil;
+if not SGExistsDirectory(LibrariesDirectory) then
+	exit;
 dos.findfirst(LibrariesDirectory + Slash + '*',$10,sr);
 while DosError<>18 do
 	begin

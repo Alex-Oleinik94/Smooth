@@ -113,23 +113,9 @@ Result := Self;
 end;
 
 function TSGAudioDecoderWAV.SetInput(const VFileName : TSGString) : TSGAudioDecoder; overload;
-
-function CreateMemoryStream() : TStream;
-begin
-Result := TMemoryStream.Create();
-(Result as TMemoryStream).LoadFromFile(VFileName);
-end;
-
-function CreateFileStream() : TStream;
-begin
-Result := TFileStream.Create(VFileName, fmOpenRead);
-end;
-
 begin
 KillInput();
-FInput := CreateFileStream();
-//FInput := CreateMemoryStream();
-FInput.Position := 0;
+FInput := CreateInputStream(VFileName);
 Result := Self;
 end;
 

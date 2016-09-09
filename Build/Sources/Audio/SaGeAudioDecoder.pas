@@ -62,6 +62,7 @@ type
 		FInfo : TSGAudioInfo;
 		FInfoReaded : TSGBool;
 			protected
+		class function CreateInputStream(const VFileName : TSGString) : TStream; virtual;
 		function GetSize() : TSGUInt64; virtual; abstract;
 		function GetPosition() : TSGUInt64; virtual; abstract;
 		procedure SetPosition(const VPosition : TSGUInt64); virtual; abstract;
@@ -133,6 +134,24 @@ for C in AudioDecoders do
 	if Result <> nil then
 		break;
 	end;
+end;
+
+class function TSGAudioDecoder.CreateInputStream(const VFileName : TSGString) : TStream;
+
+function CreateMemoryStream() : TStream;
+begin
+Result := TMemoryStream.Create();
+(Result as TMemoryStream).LoadFromFile(VFileName);
+end;
+
+function CreateFileStream() : TStream;
+begin
+Result := TFileStream.Create(VFileName, fmOpenRead);
+end;
+
+begin
+Result := CreateFileStream();
+Result.Position := 0;
 end;
 
 class function TSGAudioDecoder.Suppored() : TSGBool;

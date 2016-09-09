@@ -403,11 +403,21 @@ function GetProcName(): TSGString;
 var
 	i : TSGLongInt;
 begin
-i := StringPos('(', Str, 0);
 Result := '';
-while (Str[i] <> ' ') or (Result = '') do
+i := StringPos('(', Str, 0);
+if i = 0 then
+	i := StringPos(':', Str, 0);
+if i = 0 then
+	i := StringPos(';', Str, 0);
+if i = 0 then
 	begin
-	if not (Str[i] in '( 	') then
+	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcName() = ''''.');
+	SGLog.Sourse('Where S = ''' + S + '''.');
+	exit;
+	end;
+while (not (Str[i] in ' 	')) or (Result = '') do
+	begin
+	if not (Str[i] in ':;( 	') then
 		Result += Str[i];
 	i -= 1;
 	end;
@@ -435,6 +445,7 @@ function GetProcLib(): TSGString;
 var
 	WordCount : TSGUInt32 = 0;
 begin
+Result := '';
 WordCount := StringWordCount(Str, ' ');
 if SGUpCaseString(StringWordGet(Str, ' ', WordCount - 2)) = 'EXTERNAL' then
 	begin
@@ -461,17 +472,16 @@ else if SGUpCaseString(StringWordGet(Str, ' ', WordCount - 8)) = 'EXTERNAL' then
 	end
 else
 	begin
-	WriteLn('Can''t find external lib!');
-	//WriteLn(Str);
-	//FOutStream.SaveToFile(FOutFileName);
-	Halt();
+	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcLib() = ''''.');
+	SGLog.Sourse('Where S = ''' + S + '''.');
+	exit;
 	end;
 end;
 
 function NextWord(StringIndex : TSGLongWord):TSGString;
 begin
 Result := '';
-while (StringIndex <= Length(Str)) and (Str[StringIndex] <> ' ') do
+while (StringIndex <= Length(Str)) and (not(Str[StringIndex] in '	 ')) do
 	begin
 	Result += Str[StringIndex];
 	StringIndex += 1;
@@ -484,17 +494,27 @@ var
 begin
 i := 1;
 Result := '';
-while Str[i] <> ' ' do
+while not (Str[i] in '	 ') do
 	begin
 	Result += Str[i];
 	i += 1;
 	end;
 i := StringPos('(', Str, 0);
+if i = 0 then
+	i := StringPos(':', Str, 0);
+if i = 0 then
+	i := StringPos(';', Str, 0);
+if i = 0 then
+	begin
+	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcType() = ''''.');
+	SGLog.Sourse('Where S = ''' + S + '''.');
+	exit;
+	end;
 while (SGUpCaseString(NextWord(i)) <> 'EXTERNAL') do
 	begin
 	if not ((i <= Length(Str))) then
 		begin
-		//WriteLn(Str);ReadLn();
+		WriteLn(Str);ReadLn();
 		end;
 	Result += Str[i];
 	i += 1;
