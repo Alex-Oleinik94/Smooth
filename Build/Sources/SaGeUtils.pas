@@ -355,8 +355,8 @@ if FFrameCount <> 0 then
 	else
 		for i := 0 to FFrameIndex do
 			Result += FFrameArray[i];
-	end
-else
+	end;
+if Result = 0 then
 	Result := 1;
 end;
 

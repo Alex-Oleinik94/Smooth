@@ -32,6 +32,9 @@ Binaries/Main.dbg
 Binaries/Main_Lazarus.dbg
 Binaries/SaGe.apk
 Binaries/*.exe
+Binaries/*.ogg
+Binaries/*.wav
+Binaries/*.mp3
 Binaries/Main_Release.exe
 Binaries/Main_Lazarus.exe
 Binaries/Main_Compressed.exe
