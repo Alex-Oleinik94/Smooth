@@ -44,6 +44,7 @@ uses
 	,SaGeMakefileReader
 	,SaGeCommonClasses
 	,SaGeFileOpener
+	,SaGeHash
 
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
@@ -88,6 +89,7 @@ type
 		procedure AddComand(const VComand       : TSGConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure CheckForLastComand();
 		function Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Category(const VC : TSGString);
 			private
@@ -97,6 +99,8 @@ type
 			private
 		function AllNested() : TSGBool;
 		function AllNormal() : TSGBool;
+			public
+		property Params : TSGConcoleCallerParams write FParams;
 		end;
 
 procedure FPCTCTransliater();
@@ -130,6 +134,9 @@ procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil;  ContextSettings : TSGContextSettings = nil);overload;
 procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+var
+	GeneralConsoleCaller : TSGConsoleCaller = nil;
 
 implementation
 
@@ -200,6 +207,11 @@ else
 	end;
 end;
 
+procedure SGConsoleBuildFiles(const VParams : TSGConcoleCallerParams = nil);
+begin
+SGBuildFiles(VParams[0],VParams[1],VParams[2],VParams[3]);
+end;
+
 procedure SGConsoleWriteOpenableExpansions(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) > 0) then
@@ -249,36 +261,9 @@ else
 end;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	ConsoleCaller : TSGConsoleCaller = nil;
 begin
-ConsoleCaller := TSGConsoleCaller.Create(VParams);
-ConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console caller');
-ConsoleCaller.Category('Applications');
-ConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
-ConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
-ConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all 3D/2D scenes');
-ConsoleCaller.Category('System applications');
-ConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
-ConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
-ConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert pascal Header to Dynamic utility');
-ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
-ConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
-ConsoleCaller.Category('Images tools');
-ConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
-ConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA'], 'Convert image To SaGeImagesAlpha format');
-ConsoleCaller.Category('Build tools');
-ConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
-ConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear RF File');
-ConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in rffile');
-ConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Inc engine Version');
-ConsoleCaller.Category('System tools');
-ConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
-ConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
-ConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
-ConsoleCaller.AddComand(@SGConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
-ConsoleCaller.Execute();
-ConsoleCaller.Destroy();
+GeneralConsoleCaller.Params := VParams;
+GeneralConsoleCaller.Execute();
 end;
 
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);
@@ -298,12 +283,17 @@ end;
 procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (SGCountConsoleParams(VParams) = 3) and SGResourseFiles.FileExists(VParams[2]) and SGExistsDirectory(VParams[0])and SGExistsDirectory(VParams[1]) then
-	SGConvertDirectoryFilesToPascalUnits(VParams[0],VParams[1],VParams[2])
+	SGConvertDirectoryFilesToPascalUnits(VParams[0],VParams[1],'',VParams[2])
 else
 	begin
 	SGPrintEngineVersion();
 	WriteLn(SGErrorString,'"@dirname @outdirname @rffile"');
 	end;
+end;
+
+procedure SGConsoleHash(const VParams : TSGConcoleCallerParams = nil);
+begin
+SGConsoleHashFile(VParams[0]);
 end;
 
 procedure SGConsoleExtractFiles(const VParams : TSGConcoleCallerParams = nil);
@@ -403,7 +393,7 @@ end;
 procedure SGConsoleClearRFFile(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
-	SGClearRFFile(VParams[0])
+	SGClearRegistrationFile(VParams[0])
 else
 	begin
 	SGPrintEngineVersion();
@@ -561,9 +551,75 @@ FHelpString         := '';
 FCategory           := '';
 end;
 
-procedure TSGConsoleCaller.AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TSGConsoleCaller.CheckForLastComand();
 var
-	i : TSGLongWord;
+	i, iiii : TSGLongWord;
+	ii : TSGInt32;
+	iii : TSGBool;
+begin
+with FComands[High(FComands)] do
+	if (FSyntax <> nil) and (Length(FSyntax)>0) then
+		begin
+		// Upcaseing
+		for i := 0 to High(FSyntax) do
+			FSyntax[i] := SGUpCaseString(FSyntax[i]);
+		// Deleting dublicates of syntax for this comand
+		ii := 0;
+		i := 0;
+		while i < Length(FSyntax) do
+			begin
+			ii := i - 1;
+			iii := False;
+			while ii > -1 do
+				begin
+				if FSyntax[i] = FSyntax[ii] then
+					begin
+					iii := True;
+					break;
+					end;
+				ii -= 1;
+				end;
+			if iii then
+				begin
+				if ii < High(FSyntax) then
+					for iiii := ii to High(FSyntax) - 1 do
+						FSyntax[ii] := FSyntax[ii + 1];
+				SetLength(FSyntax,Length(FSyntax) - 1);
+				end
+			else
+				i += 1;
+			end;
+		// Deleting dublicates of all comands if this comand is general
+		// General comand started if no comands is in params
+		ii := 0;
+		for i := 0 to High(FSyntax) do
+			if FSyntax[i] = '' then
+				begin
+				ii := 1;
+				break;
+				end;
+		if ii = 1 then
+			begin
+			if Length(FComands) > 1 then
+				for i := 0 to High(FComands) - 1 do
+					begin
+					ii := 0;
+					while ii < Length(FComands[i].FSyntax) do
+						if FComands[i].FSyntax[ii] = '' then
+							begin
+							if ii <> High(FComands[i].FSyntax) then
+								for iiii := ii to High(FComands[i].FSyntax) - 1 do
+									FComands[i].FSyntax[ii] := FComands[i].FSyntax[ii + 1];
+							SetLength(FComands[i].FSyntax,Length(FComands[i].FSyntax) - 1);
+							end
+						else
+							ii += 1;
+					end;
+			end;
+		end;
+end;
+
+procedure TSGConsoleCaller.AddComand(const VComand : TSGConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -574,9 +630,7 @@ FComands[High(FComands)].FComand := VComand;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
-if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
-	for i := 0 to High(FComands[High(FComands)].FSyntax) do
-		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
+CheckForLastComand();
 end;
 
 procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -592,9 +646,7 @@ FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
-if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
-	for i := 0 to High(FComands[High(FComands)].FSyntax) do
-		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
+CheckForLastComand();
 end;
 
 procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -610,9 +662,7 @@ FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FNestedHelpFunction := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
 FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
-if (FComands[High(FComands)].FSyntax <> nil) and (Length(FComands[High(FComands)].FSyntax)>0) then
-	for i := 0 to High(FComands[High(FComands)].FSyntax) do
-		FComands[High(FComands)].FSyntax[i] := SGUpCaseString(FComands[High(FComands)].FSyntax[i]);
+CheckForLastComand();
 end;
 
 function TSGConsoleCaller.Execute() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1970,6 +2020,53 @@ While (dos.DosError<>18) do
 	DOS.findnext(sr);
 	end;
 DOS.findclose(sr);
+end;
+
+procedure InitGeneralConsoleCaller();
+begin
+GeneralConsoleCaller := TSGConsoleCaller.Create(nil);
+GeneralConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console caller');
+GeneralConsoleCaller.Category('Applications');
+GeneralConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
+GeneralConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
+GeneralConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all 3D/2D scenes');
+GeneralConsoleCaller.Category('System applications');
+GeneralConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert pascal Header to Dynamic utility');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
+GeneralConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
+GeneralConsoleCaller.Category('Images tools');
+GeneralConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA'], 'Convert image To SaGeImagesAlpha format');
+GeneralConsoleCaller.Category('Build tools');
+GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
+GeneralConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear Registration File');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in rffile');
+GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
+GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
+GeneralConsoleCaller.Category('System tools');
+GeneralConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Print checksum for file');
+GeneralConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
+GeneralConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
+GeneralConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
+GeneralConsoleCaller.AddComand(@SGConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
+end;
+
+procedure DestroyGeneralConsoleCaller();
+begin
+GeneralConsoleCaller.Destroy();
+GeneralConsoleCaller := nil;
+end;
+
+initialization
+begin
+InitGeneralConsoleCaller();
+end;
+
+finalization
+begin
+DestroyGeneralConsoleCaller();
 end;
 
 end.

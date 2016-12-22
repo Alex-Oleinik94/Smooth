@@ -3,7 +3,7 @@ unit SaGeResourseManager;
 
 interface
 
-uses 
+uses
 	 SaGeBase
 	 ,SaGeBased
 	 ,Classes
@@ -11,6 +11,7 @@ uses
 	 ,SysUtils
 	 ,Dos
 	 ,StrMan
+	 ,SaGeHash
 	 ;
 
 type
@@ -89,17 +90,269 @@ var
 const
 	SGConvertFileToPascalUnitDefaultInc = True;
 
-procedure SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRegisterUnit(const UnitName, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGClearRFFile(const RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+type
+	TSGConvertedFileInfo = object
+			public
+		FName : TSGString;
+		FPath : TSGString;
+		FSize : TSGUInt64;
+		FOutSize : TSGUInt64;
+		FPastMiliseconds : TSGUInt64;
+		FConvertationNotNeed : TSGBoolean;
+			public
+		procedure Clear();
+		end;
+	
+	TSGConvertedFilesInfo = object
+			public
+		FCount : TSGUInt32;
+		FSize : TSGUInt64;
+		FOutSize : TSGUInt64;
+		FPastMiliseconds : TSGUInt64;
+		FCountCopyedFromCache : TSGUInt32;
+			public
+		procedure Clear();
+		procedure Print(const Prefix : TSGString = '');
+		end;
+type
+	PSGBuildResourse = ^ TSGBuildResourse;
+	TSGBuildResourse = object
+			public
+		FType : TSGChar;
+		FPath : TSGString;
+		FName : TSGString;
+			public
+		procedure Free();
+		end;
+	
+	TSGBuildResourses = object
+			public
+		FResourses : packed array of TSGBuildResourse;
+		FCacheDirectory : TSGString;
+		FTempDirectory : TSGString;
+			public
+		procedure Free();
+		procedure Clear();
+		function Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
+		procedure AddResourse(const VType : TSGChar);
+		function LastResourse():PSGBuildResourse;
+		end;
+
+function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGConvertFileToPascalUnit(const FileName, TempUnitPath, CacheUnitPath, UnitName : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterUnit(const UnitName, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGClearRegistrationFile(const RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 uses
 	SaGeVersion;
 
-procedure SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, RFFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := A;
+Result.FCount += B.FCount;
+Result.FSize += B.FSize;
+Result.FOutSize += B.FOutSize;
+Result.FPastMiliseconds += B.FPastMiliseconds;
+Result.FCountCopyedFromCache += B.FCountCopyedFromCache;
+end;
+
+operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := A;
+Result.FCount += 1;
+Result.FSize += B.FSize;
+Result.FOutSize += B.FOutSize;
+Result.FPastMiliseconds += B.FPastMiliseconds;
+Result.FCountCopyedFromCache += Byte(B.FConvertationNotNeed);
+end;
+
+procedure TSGConvertedFileInfo.Clear();
+begin
+FSize := 0;
+FOutSize := 0;
+FPastMiliseconds := 0;
+FName := '';
+FPath := '';
+FConvertationNotNeed := False;
+end;
+
+
+procedure TSGConvertedFilesInfo.Clear();
+begin
+FCount := 0;
+FSize := 0;
+FOutSize := 0;
+FPastMiliseconds := 0;
+FCountCopyedFromCache := 0;
+end;
+
+function SGConvertFileToPascalUnit(const FileName, TempUnitPath, CacheUnitPath, UnitName : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+
+procedure FileCopy(const Source, Destination : TSGString);
+var
+	Stream : TMemoryStream = nil;
+begin
+Stream := TMemoryStream.Create();
+Stream.LoadFromFile(Source);
+Stream.Position := 0;
+Stream.SaveToFile(Destination);
+Stream.Destroy();
+Stream := nil;
+end;
+
+var
+	Postfix : TSGString;
+begin
+Result := SGConvertFileToPascalUnit(FileName, CacheUnitPath, UnitName, IsInc);
+Postfix := Slash + UnitName + '.pas';
+FileCopy(CacheUnitPath + Postfix, TempUnitPath + Postfix);
+end;
+
+function SGGetBuildResoursesFromFile(const FileName : TSGString) : TSGBuildResourses;
+
+function GetHeader(const S : TSGString):TSGString;
+var
+	i : TSGUInt32;
+begin
+Result := '';
+if Length(S) > 2 then
+	begin
+	if (S[1] = '[') and (S[Length(S)] = ']') then
+		for i := 2 to Length(S) - 1 do
+			Result += S[i];
+	end;
+end;
+
+var
+	Stream : TMemoryStream = nil;
+	S, H, ParamName, Param : TSGString;
+
+begin
+Result.Free();
+Stream := TMemoryStream.Create();
+Stream.LoadFromFile(FileName);
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	begin
+	S := SGReadLnStringFromStream(Stream);
+	if S <> '' then
+		begin
+		H := GetHeader(S);
+		if H <> '' then
+			begin
+			if H = 'file' then
+				Result.AddResourse('F')
+			else if H = 'directory' then
+				Result.AddResourse('D')
+			else
+				Result.AddResourse(' ');
+			end
+		else
+			begin
+			ParamName := StringWordGet(S, '=', 1);
+			Param := StringWordGet(S, '=', 2);
+			if ParamName = 'Path' then
+				Result.LastResourse()^.FPath := Param
+			else if ParamName = 'Name' then
+				Result.LastResourse()^.FName := Param;
+			end;
+		end;
+	end;
+Stream.Destroy();
+end;
+
+procedure TSGBuildResourse.Free();
+begin
+FType := ' ';
+FPath := '';
+FName := '';
+end;
+
+procedure TSGBuildResourses.Free();
+begin
+FResourses := nil;
+FCacheDirectory := '';
+FTempDirectory := '';
+end;
+
+procedure TSGBuildResourses.Clear();
+begin
+SetLength(FResourses, 0);
+Free();
+end;
+
+procedure TSGBuildResourses.AddResourse(const VType : TSGChar);
+begin
+if FResourses = nil then
+	SetLength(FResourses, 1)
+else
+	SetLength(FResourses, Length(FResourses) + 1);
+FResourses[High(FResourses)].Free();
+FResourses[High(FResourses)].FType := VType;
+end;
+
+function TSGBuildResourses.LastResourse():PSGBuildResourse;
+begin
+Result := nil;
+if FResourses <> nil then
+	if Length(FResourses) > 0 then
+		Result := @FResourses[High(FResourses)];
+end;
+
+procedure TSGConvertedFilesInfo.Print(const Prefix : TSGString = '');
+begin
+SGHint(Prefix + 'Converted ' + SGStr(FCount) + ' files, ' + SGStr(FCountCopyedFromCache) + ' copyed from cache.');
+SGHint(Prefix + 'Files size ' + SGGetSizeString(FSize,'EN') + ', output size ' + SGGetSizeString(FOutSize,'EN') + '.');
+SGHint(Prefix + 'Past miliseconds ' + SGStr(FPastMiliseconds) + '.');
+end;
+
+function TSGBuildResourses.Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
+
+procedure ProcessResourse(const Resourse : TSGBuildResourse);
+begin
+if Resourse.FType = 'F' then
+	begin
+	Result += SGConvertFileToPascalUnit(Resourse.FPath, FTempDirectory, FCacheDirectory, Resourse.FName);
+	SGRegisterUnit(Resourse.FName, FileForRegistration);
+	end
+else if Resourse.FType = 'D' then
+	Result += SGConvertDirectoryFilesToPascalUnits(Resourse.FPath, FTempDirectory, FCacheDirectory, FileForRegistration);
+end;
+
+var
+	i : TSGUInt32;
+begin
+Result.Clear();
+SGMakeDirectory(FTempDirectory);
+SGMakeDirectory(FCacheDirectory);
+for i := 0 to High(FResourses) do
+	ProcessResourse(FResourses[i]);
+end;
+
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Resourses : TSGBuildResourses;
+	Info : TSGConvertedFilesInfo;
+begin
+Resourses := SGGetBuildResoursesFromFile(DataFile);
+if Resourses.FTempDirectory = '' then
+	Resourses.FTempDirectory := TempUnitDir;
+if Resourses.FCacheDirectory = '' then
+	Resourses.FCacheDirectory := CacheUnitDir;
+Info := Resourses.Process(RegistrationFile);
+Resourses.Clear();
+SGHint('Builded files:');
+Info.Print('  ');
+end;
+
+function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function IsBagSinbol(const Simbol : TSGChar):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -112,7 +365,7 @@ var
 begin
 Result := 'AutomaticUnit_';
 for i := Length(DirName)+2 to Length(FileName) do
-	if IsBagSinbol(FileName[i]) then 
+	if IsBagSinbol(FileName[i]) then
 		Result += '_'
 	else
 		Result += FileName[i];
@@ -123,8 +376,11 @@ var
 	UnitName : TSGString;
 begin
 UnitName := CalcUnitName(FileName);
-SGConvertFileToPascalUnit(FileName, UnitsWay, UnitName);
-SGRegisterUnit(UnitName, RFFile);
+if CacheUnitPath = '' then
+	Result += SGConvertFileToPascalUnit(FileName, UnitsWay, UnitName)
+else
+	Result += SGConvertFileToPascalUnit(FileName, UnitsWay, CacheUnitPath, UnitName);
+SGRegisterUnit(UnitName, RegistrationFile);
 end;
 
 procedure ProcessDirectoryFiles(const VDir : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -161,39 +417,49 @@ dos.findclose(sr);
 end;
 
 begin
+Result.Clear();
 ProcessDirectory(DirName);
 end;
 
-procedure SGClearRFFile(const RFFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGClearRegistrationFile(const RegistrationFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 begin
-Stream:=TFileStream.Create(RFFile,fmCreate);
+Stream := TFileStream.Create(RegistrationFile,fmCreate);
 SGWriteStringToStream('(*This is part of SaGe Engine*)'+SGWinEoln,Stream,False);
-SGWriteStringToStream('//RF file. Files:'+SGWinEoln,Stream,False);
+SGWriteStringToStream('//Registration file. Files:'+SGWinEoln,Stream,False);
 Stream.Destroy();
 end;
 
-procedure SGRegisterUnit(const UnitName, RFFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterUnit(const UnitName, RegistrationFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 	MemStream:TMemoryStream = nil;
 	Exists : TSGBoolean = False;
 begin
 MemStream:=TMemoryStream.Create();
-MemStream.LoadFromFile(RFFile);
+MemStream.LoadFromFile(RegistrationFile);
 MemStream.Position := 0;
 while (MemStream.Position <> MemStream.Size) and (not Exists) do
 	Exists := StringTrimAll(SGReadLnStringFromStream(MemStream),' 	,') = UnitName;
 if not Exists then
 	begin
 	SGWriteStringToStream('	,' + UnitName + SGWinEoln, MemStream, False);
-	MemStream.SaveToFile(RFFile);
+	MemStream.SaveToFile(RegistrationFile);
 	end;
 MemStream.Destroy();
 end;
 
-procedure SGConvertFileToPascalUnit(const FileName,UnitWay,NameUnit:TSGString;const IsInc:TSGBoolean = SGConvertFileToPascalUnitDefaultInc);
+function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+const
+	Hash_MD5_Prefix = ' MD5 : ';
+	Hash_SHA256_Prefix = ' SHA256 : ';
+var
+	Hash_MD5    : TSGString;
+	Hash_SHA256 : TSGString;
+	OutputFileName : TSGString;
+
+procedure ReadWriteFile();
 var
 	Step : TSGLongWord = 1000000;
 var
@@ -233,13 +499,18 @@ end;
 begin
 I:=0;
 SetLength(A, Step);
-OutStream := TFileStream.Create(UnitWay+Slash+NameUnit+'.pas',fmCreate);
-InStream  := TFileStream.Create(FileName,fmOpenRead);
+OutStream := TFileStream.Create(OutputFileName, fmCreate);
+InStream  := TMemoryStream.Create();
+(InStream as TMemoryStream).LoadFromFile(FileName);
+InStream.Position := 0;
 if IsInc then
 	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+SGWinEoln,OutStream,False)
 else
 	SGWriteStringToStream('{$MODE OBJFPC}'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('//"'+FileName+'"'+SGWinEoln,OutStream,False);
+SGWriteStringToStream('// Engine''s path : "' + FileName + '"'+SGWinEoln,OutStream,False);
+SGWriteStringToStream('// Path : "' + OutputFileName + '"'+SGWinEoln,OutStream,False);
+SGWriteStringToStream('//' + Hash_MD5_Prefix + Hash_MD5 + SGWinEoln, OutStream, False);
+SGWriteStringToStream('//' + Hash_SHA256_Prefix+ Hash_SHA256 + SGWinEoln, OutStream, False);
 SGWriteStringToStream('unit '+NameUnit+';'+SGWinEoln,OutStream,False);
 SGWriteStringToStream('interface'+SGWinEoln,OutStream,False);
 if IsInc then
@@ -289,6 +560,65 @@ TextColor(7);
 WriteLn('.');
 InStream.Destroy();
 OutStream.Destroy();
+end;
+
+procedure CalculateHash(const FileName : TSGString);
+var
+	Stream : TMemoryStream = nil;
+begin
+Stream := TMemoryStream.Create();
+Stream.LoadFromFile(FileName);
+Stream.Position := 0;
+Hash_MD5 := SGHash(Stream, SGHashTypeMD5);
+Stream.Position := 0;
+Hash_SHA256 := SGHash(Stream, SGHashTypeSHA256);
+Stream.Destroy();
+end;
+
+function CheckForEqualFileHashes(const Hash_MD5, Hash_SHA256, OutputFileName : TSGString) : TSGBoolean;
+var
+	Stream : TStream;
+	MD5, SHA256 : TSGString;
+	i : TSGUInt16;
+begin
+Result := False;
+Stream := TFileStream.Create(OutputFileName, fmOpenRead);
+for i := 1 to 3 do
+	SGReadLnStringFromStream(Stream);
+Result := 
+	(SGReadLnStringFromStream(Stream) = '//' + Hash_MD5_Prefix + Hash_MD5) and 
+	(SGReadLnStringFromStream(Stream) = '//' + Hash_SHA256_Prefix + Hash_SHA256);
+Stream.Destroy();
+end;
+
+procedure GetFilesSize();
+var
+	Stream : TStream;
+begin
+Stream := TFileStream.Create(FileName, fmOpenRead);
+Result.FSize := Stream.Size;
+Stream.Destroy;
+Stream := TFileStream.Create(OutputFileName, fmOpenRead);
+Result.FOutSize := Stream.Size;
+Stream.Destroy;
+end;
+
+var
+	DateTime1, DateTime2 : TSGDateTime;
+begin
+Result.Clear();
+DateTime1.Get();
+OutputFileName := UnitWay + Slash + NameUnit + '.pas';
+CalculateHash(FileName);
+if not (SGFileExists(OutputFileName) and CheckForEqualFileHashes(Hash_MD5, Hash_SHA256, OutputFileName)) then
+	ReadWriteFile()
+else
+	Result.FConvertationNotNeed := True;
+DateTime2.Get();
+Result.FPastMiliseconds := (DateTime2 - DateTime1).GetPastMiliSeconds();
+Result.FName := SGGetFileName(FileName);
+Result.FPath := OutputFileName;
+GetFilesSize();
 end;
 
 (*===========TSGResourseFiles===========*)

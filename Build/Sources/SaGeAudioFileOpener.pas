@@ -32,6 +32,7 @@ uses
 	,SaGeAudioRender
 	,SaGeAudioDecoder
 	,SaGeDllManager
+	,crt
 	;
 
 procedure PlayFiles(const Files : TSGStringList);
@@ -43,6 +44,7 @@ var
 var
 	ConsAll, ConsWr : TSGUInt32;
 	ConsSize : TSGUInt64;
+	i : TSGUInt32;
 
 procedure BeginConsole();
 var
@@ -70,6 +72,14 @@ while Trunc(ConsPos / ConsSize * ConsAll) > ConsWr do
 end;
 
 begin
+if Length(Files)>1 then
+	begin
+	SGHint('Hint: Opening ' + SGStr(Length(Files)) + ' files:');
+	for i := 0 to High(Files) do
+		SGHint('  ' + Files[i]);
+	SGHint('Warrning: Suppored playing only one of files.');
+	end;
+SGHint('Playing "' + Files[0] + '".');
 FileExpansion := SGGetFileExpansion(Files[0]);
 if TSGCompatibleAudioRender = nil then
 	begin
@@ -100,9 +110,12 @@ BeginConsole();
 while BufferedSource.Playing do
 	begin
 	UpdateConsole();
+	if KeyPressed and (ReadKey = #27) then
+		break;
 	Sleep(20);
 	end;
 
+BufferedSource.Stop();
 BufferedSource.Destroy();
 AudioRender.Destroy();
 end;

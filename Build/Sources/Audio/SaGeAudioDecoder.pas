@@ -5,8 +5,8 @@
 	{$ENDIF}
 
 {$IF defined(DESKTOP)}
-		{$DEFINE USE_MPG123}
-		{$ENDIF}
+	{$DEFINE USE_MPG123}
+	{$ENDIF}
 
 unit SaGeAudioDecoder;
 

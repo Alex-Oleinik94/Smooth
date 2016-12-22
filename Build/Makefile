@@ -11,7 +11,7 @@ DESKTOPFILENAME=Main
 LIBRARYFILENAME=SaGe
 PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
-BASEARGS= -FiSources/Temp -FuSources/Images -FuSources/Audio -FuSources/Programs/Console -FuSources/Others/OpenAL -FuSources/Context -FuSources/Render -FuSources/Temp -FuSources/Others/Ogg -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
+BASEARGS= -FiSources/Temp -FuSources/Images -FuSources/Audio -FuSources/Programs/Console -FuSources/Others/OpenAL -FuSources/Others/DCP/Ciphers -FuSources/Others/DCP/Hashes -FuSources/Others/DCP -FuSources/Context -FuSources/Render -FuSources/Temp -FuSources/Others/Ogg -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
 RENDERARGS= -FuSources/DirectX -FuSources/Others/DirectX/9 -FuSources/Others/DirectX/12 -FuSources/Others/OpenGL
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
@@ -24,7 +24,8 @@ DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 SGTEMPUNITDIR=./../Build/Sources/Temp
-SGRMFILE=$(SGTEMPUNITDIR)/SaGeRMFiles.inc
+SGCACHEUNITDIR=./../Build/Sources/Temp/Cache
+SGREGISTRATIONFILE=$(SGTEMPUNITDIR)/SaGeRMFiles.inc
 SAGE="./../Binaries/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
 SG_TARGET_LIST=release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64
@@ -56,21 +57,17 @@ ios:
 
 inc_version_debug:
 	@$(SAGE) -iv 0
-	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
+	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
 inc_version_release:
 	@$(SAGE) -iv 1
-	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGRMFILE)
+	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
 build_files:
 	@$(MAKE) clear_files
-	@$(SAGE) -CFTPUARU "./../Data/Textures/ComboBoxImage.sgia"              $(SGTEMPUNITDIR) combo_box_image      $(SGRMFILE)
-	@$(SAGE) -CFTPUARU "./../Data/Textures/radiobox.sgia"                   $(SGTEMPUNITDIR) radio_box_image      $(SGRMFILE)
-	@$(SAGE) -CFTPUARU "./../Data/Textures/checkbox.sgia"                   $(SGTEMPUNITDIR) check_box_image      $(SGRMFILE)
-	@$(SAGE) -CDTPUARU "./../Data/Examples"                                 $(SGTEMPUNITDIR)                      $(SGRMFILE)
-	@$(SAGE) -CDTPUARU "./../Data/Textures/Killer"                          $(SGTEMPUNITDIR)                      $(SGRMFILE)
-	@$(SAGE) -CDTPUARU "./../Data/Fonts"                                    $(SGTEMPUNITDIR)                      $(SGRMFILE)
+	@$(SAGE) -bf "./../Build/BuildFiles.ini" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) $(SGREGISTRATIONFILE)
 clear_files:
-	@rm -f Sources/Temp/*
-	@$(SAGE) -crf $(SGRMFILE)
+	@rm -f Sources/Temp/*.pas
+	@rm -f Sources/Temp/*.inc
+	@$(SAGE) -crf $(SGREGISTRATIONFILE)
 clear:
 	@rm -f $(OutputDirectory)/arm-android/*
 	@rm -f $(OutputDirectory)/i386-library/*
