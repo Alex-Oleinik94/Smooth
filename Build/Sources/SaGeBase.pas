@@ -559,6 +559,7 @@ function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):Strin
 function SGStrReal(r:real;const l:longint):string;
 function SGStrExtended(r:Extended;const l:longint):string;inline;
 function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
+function SGCheckFloatString(const S : TSGString; const Point : TSGChar = '.') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //перевод строки в строку С++. При этом выбеляется память (Length(s)+1) под указатель на строк С++.
 function SGStringToPChar(const s:string):PCHAR;
@@ -2111,9 +2112,112 @@ else
 	Result:=b;
 end;
 
+function SGCheckFloatString(const S : TSGString; const Point : TSGChar = '.') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ExistPoint(const S : TSGString) : TSGBool;
+var
+	i : TSGUInt32;
+begin
+Result := False;
+for i := 1 to Length(S) do
+	if S[i] = Point then
+		begin
+		Result := True;
+		break;
+		end;
+end;
+
+function NeedDeletionZeros(const S : TSGString) : TSGBool;
+begin
+Result := ExistPoint(S) and (S[Length(S)] = '0');
+end;
+
+function DeleteZeros(const S : TSGString) : TSGString;
+begin
+Result := S;
+while Result[Length(Result)] = '0' do
+	SetLength(Result, Length(Result) - 1);
+if Result[Length(Result)] = '.' then
+	SetLength(Result, Length(Result) - 1);
+if Result = '' then
+	Result := '0';
+end;
+
+function TruncNines(var S : TSGString; const CountNines : TSGUInt16 = 4) : TSGBool;
+
+function AddOne(S2 : TSGString) : TSGString;
+var
+	S3 : TSGString;
+	P : TSGBool;
+
+function IfPoint() : TSGString;
+begin
+Result := '';
+if P then
+	Result := Point;
+end;
+
+begin
+P := False;
+if (S2 = '0') or (S2 = '') then
+	S2 := '1' 
+else
+	begin
+	if (Length(S2) > 0) then
+		begin
+		if S2[Length(S2)] = Point then
+			begin
+			SetLength(S2, Length(S2) - 1);
+			P := True;
+			end;
+		S3 := S2;
+		SetLength(S2, Length(S2) - 1);
+		if SGStr(SGVal(S3[Length(S3)]) + 1) = '10' then
+			begin
+			S2 := AddOne(S2) + IfPoint() + '0';
+			end
+		else
+			S2 += IfPoint() + SGStr(SGVal(S3[Length(S3)]) + 1);
+		end;
+	end;
+Result := S2;
+end;
+
+var
+	Nines : TSGUInt16;
+	S2 : TSGString;
+begin
+S2 := S;
+Nines := 0;
+Result := False;
+if ExistPoint(S) then
+	while (Length(S2) > 0) and (S2[Length(S2)] = '9') do
+		begin
+		SetLength(S2, Length(S2) - 1);
+		Nines += 1;
+		end;
+if Nines >= CountNines then
+	begin
+	if (Length(S2) > 0) and (S2[Length(S2)] = '.') then
+		SetLength(S2, Length(S2) - 1);
+	S2 := AddOne(S2);
+	Result := S <> S2;
+	S := S2;
+	end;
+end;
+
+begin
+Result := S;
+if NeedDeletionZeros(Result) then
+	Result := DeleteZeros(Result);
+if TruncNines(Result) then
+	if NeedDeletionZeros(Result) then
+		Result := DeleteZeros(Result);
+end;
+
 function SGStrReal(r:real;const l:longint):string;inline;
 var
-	i     : TSGLongInt;
+	i : TSGLongInt;
 begin
 if r<0 then
 	Result:='-'
@@ -2137,6 +2241,7 @@ if R>1/(10**l) then
 	end;
 if (Result='') or (Result='-') then
 	Result+='0';
+Result := SGCheckFloatString(Result);
 end;
 
 function SGStrExtended(r:Extended;const l:longint):string;inline;
@@ -2173,6 +2278,7 @@ if R>1/(10**l) then
 	end;
 if (Result='') or (Result='-') then
 	Result+='0';
+Result := SGCheckFloatString(Result);
 end;
 
 function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):String;inline;

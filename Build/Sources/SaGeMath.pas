@@ -1096,8 +1096,8 @@ SG_BOOLEAN:
 SG_NUMERIC:
 	write(trunc(FConst));
 SG_REAL:
-	write(FConst:0:10);
-SG_OPERATOR,SG_OBJECT,SG_FUNCTION,SG_VARIABLE:
+	write(SGStrExtended(FConst, 16));
+SG_OPERATOR, SG_OBJECT, SG_FUNCTION, SG_VARIABLE:
 	write(FVariable);
 end;
 textcolor(White);
