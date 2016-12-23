@@ -507,13 +507,14 @@ function SGPCharNil:PChar;inline;
 function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
 
 //Переводит секунды в строку, где они будут уже распределены на года, месяца и т д
-function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;inline;
+function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGMiliSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Это функции для отладки WinAPI функций, связанных с символами, получиными в SaGeContextWinAPI как коды клавиш
-function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;inline;
-function SGGetLanguage:String;inline;
-function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
-function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
+function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetLanguage:String;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Вычисление максимального или минимального значения из заданых
 function SGMax(const a,b:single):single;inline;overload;
@@ -2706,7 +2707,7 @@ begin
 	{$ENDIF}
 end;
 
-function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
+function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SGWhatIsTheSimbolEN:='';
 case l of
@@ -2761,7 +2762,7 @@ case l of
 end;
 end;
 
-function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;inline;
+function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SGWhatIsTheSimbolRU:='';
 case l of
@@ -2816,7 +2817,7 @@ case l of
 end;
 end;
 
-function SGGetLanguage:String;inline;
+function SGGetLanguage:String;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFDEF MSWINDOWS}
 	var
 		Layout:array [0..kl_namelength]of char;
@@ -2833,7 +2834,7 @@ begin
 	{$ENDIF}
 end;
 
-function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;inline;
+function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Language:string = '';
 begin
@@ -2849,7 +2850,22 @@ else
 		Result:=char(l);
 end;
 
-function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;inline;
+function SGMiliSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := '';
+if VSeconds div 100 <> 0 then
+	Result += SGSecondsToStringTime(VSeconds div 100, Encoding);
+if (VSeconds mod 100 <> 0) or (Result = '') then
+	begin
+	Result += SGStr(VSeconds mod 100);
+	if Encoding = 'RUS1251' then
+		Result += ' мсек '
+	else
+		Result += ' msec ';
+	end;
+end;
+
+function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Seconds:Int64 = 0;
 	Minutes:Int64 = 0;

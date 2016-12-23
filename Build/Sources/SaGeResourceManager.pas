@@ -113,7 +113,7 @@ type
 		FCountCopyedFromCache : TSGUInt32;
 			public
 		procedure Clear();
-		procedure Print(const Prefix : TSGString = '');
+		procedure Print();
 		end;
 type
 	PSGBuildResource = ^ TSGBuildResource;
@@ -187,9 +187,9 @@ Write(';out ');
 TextColor(12);
 Write(SGGetSizeString(FOutSize,'EN'));
 TextColor(7);
-Write(';msec ');
+Write(';time ');
 TextColor(11);
-Write(FPastMiliseconds);
+Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
 TextColor(7);
 Write(';cache ');
 TextColor(13);
@@ -351,11 +351,30 @@ if FResources <> nil then
 		Result := @FResources[High(FResources)];
 end;
 
-procedure TSGConvertedFilesInfo.Print(const Prefix : TSGString = '');
+procedure TSGConvertedFilesInfo.Print();
 begin
-SGHint(Prefix + 'Converted ' + SGStr(FCount) + ' files, ' + SGStr(FCountCopyedFromCache) + ' copyed from cache.');
-SGHint(Prefix + 'Files size ' + SGGetSizeString(FSize,'EN') + ', output size ' + SGGetSizeString(FOutSize,'EN') + '.');
-SGHint(Prefix + 'Past miliseconds ' + SGStr(FPastMiliseconds) + '.');
+TextColor(7);
+Write('Converted files:count ');
+TextColor(14);
+Write(FCount);
+TextColor(7);
+Write(';cached ');
+TextColor(13);
+Write(FCountCopyedFromCache);
+TextColor(7);
+Write(';in size ');
+TextColor(10);
+Write(SGGetSizeString(FSize,'EN'));
+TextColor(7);
+Write(';out size ');
+TextColor(12);
+Write(SGGetSizeString(FOutSize,'EN'));
+TextColor(7);
+Write(';time ');
+TextColor(11);
+Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
+TextColor(7);
+WriteLn('.');
 end;
 
 function TSGBuildResources.Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
@@ -393,8 +412,10 @@ if Resources.FCacheDirectory = '' then
 	Resources.FCacheDirectory := CacheUnitDir;
 Info := Resources.Process(RegistrationFile);
 Resources.Clear();
-SGHint('Builded files:');
-Info.Print('  ');
+TextColor(15);
+Write('Build:');
+TextColor(7);
+Info.Print();
 end;
 
 function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
