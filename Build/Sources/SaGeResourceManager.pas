@@ -1,5 +1,5 @@
 {$INCLUDE Includes\SaGe.inc}
-unit SaGeResourseManager;
+unit SaGeResourceManager;
 
 interface
 
@@ -15,57 +15,57 @@ uses
 	 ;
 
 type
-	TSGResourse=class(TSGClass)
+	TSGResource=class(TSGClass)
 		end;
 type
-	TSGResourseManipulatorExpansions = packed array of
+	TSGResourceManipulatorExpansions = packed array of
 		packed record
 			RExpansion : TSGString;
 			RLoadIsSupported : TSGBoolean;
 			RSaveIsSupported : TSGBoolean;
 			end;
 type
-	TSGResourseManipulator = class;
-	TSGResourseManipulatorClass = class of TSGResourseManipulator;
-	TSGResourseManipulator = class(TSGClass)
+	TSGResourceManipulator = class;
+	TSGResourceManipulatorClass = class of TSGResourceManipulator;
+	TSGResourceManipulator = class(TSGClass)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FQuantityExpansions : TSGLongWord;
-		FArExpansions : TSGResourseManipulatorExpansions;
+		FArExpansions : TSGResourceManipulatorExpansions;
 			protected
 		procedure AddExpansion(const VExpansion:TSGString;const VLoadIsSupported, VSaveIsSupported : TSGBoolean);
 			public
 		function LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 		function SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
-		function LoadResourse(const VFileName,VExpansion : TSGString):TSGResourse;
-		function SaveResourse(const VFileName,VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
-		function LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;virtual;
-		function SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;virtual;
+		function LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
+		function SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
+		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;virtual;
+		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;virtual;
 		end;
 type
-	TSGResourseManager = class(TSGClass)
+	TSGResourceManager = class(TSGClass)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 			private
 		FQuantityManipulators : TSGLongWord;
-		FArManipulators : packed array of TSGResourseManipulator;
+		FArManipulators : packed array of TSGResourceManipulator;
 			public
-		procedure AddManipulator(const VManipulatorClass : TSGResourseManipulatorClass);
+		procedure AddManipulator(const VManipulatorClass : TSGResourceManipulatorClass);
 		function LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 		function SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
-		function LoadResourse(const VFileName,VExpansion : TSGString):TSGResourse;
-		function SaveResourse(const VFileName,VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
-		function LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;
-		function SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+		function LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
+		function SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
+		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
+		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 		end;
 var
-	SGResourseManager : TSGResourseManager = nil;
+	SGResourceManager : TSGResourceManager = nil;
 type
-	TSGResourseFilesProcedure = procedure (const Stream:TStream);
-	TSGResourseFiles = class(TSGClass)
+	TSGResourceFilesProcedure = procedure (const Stream:TStream);
+	TSGResourceFiles = class(TSGClass)
 			public
 		constructor Create();
 		destructor Destroy();override;
@@ -81,11 +81,11 @@ type
 		FArFiles:packed array of
 			packed record
 				FWay:TSGString;
-				FSelf:TSGResourseFilesProcedure;
+				FSelf:TSGResourceFilesProcedure;
 				end;
 		end;
 var
-	SGResourseFiles:TSGResourseFiles = nil;
+	SGResourceFiles:TSGResourceFiles = nil;
 
 const
 	SGConvertFileToPascalUnitDefaultInc = True;
@@ -101,6 +101,7 @@ type
 		FConvertationNotNeed : TSGBoolean;
 			public
 		procedure Clear();
+		procedure Print();
 		end;
 	
 	TSGConvertedFilesInfo = object
@@ -115,8 +116,8 @@ type
 		procedure Print(const Prefix : TSGString = '');
 		end;
 type
-	PSGBuildResourse = ^ TSGBuildResourse;
-	TSGBuildResourse = object
+	PSGBuildResource = ^ TSGBuildResource;
+	TSGBuildResource = object
 			public
 		FType : TSGChar;
 		FPath : TSGString;
@@ -125,25 +126,35 @@ type
 		procedure Free();
 		end;
 	
-	TSGBuildResourses = object
+	TSGBuildResources = object
 			public
-		FResourses : packed array of TSGBuildResourse;
+		FResources : packed array of TSGBuildResource;
 		FCacheDirectory : TSGString;
 		FTempDirectory : TSGString;
 			public
 		procedure Free();
 		procedure Clear();
 		function Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
-		procedure AddResourse(const VType : TSGChar);
-		function LastResourse():PSGBuildResourse;
+		procedure AddResource(const VType : TSGChar);
+		function LastResource():PSGBuildResource;
 		end;
 
-function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+type
+	TSGRMArrayType = (
+		SGRMArrayTypeUInt8,
+		//SGRMArrayTypeUInt16,
+		//SGRMArrayTypeUInt32,
+		SGRMArrayTypeUInt64);
+const
+	SGRMArrayDefaultType = SGRMArrayTypeUInt64;
+
+function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc; const ArrayType : TSGRMArrayType = SGRMArrayDefaultType) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGConvertFileToPascalUnit(const FileName, TempUnitPath, CacheUnitPath, UnitName : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRegisterUnit(const UnitName, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGClearRegistrationFile(const RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGWriteHexStringToStream(const S : TSGString; const Stream : TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -152,6 +163,40 @@ implementation
 
 uses
 	SaGeVersion;
+
+procedure TSGConvertedFileInfo.Print();
+
+function StrBool(const B : TSGBoolean) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if B then
+	Result := 'True'
+else
+	Result := 'False';
+end;
+
+begin
+Write('Converted');
+TextColor(14);
+Write('"',SGGetFileName(FName)+'.'+SGDownCaseString(SGGetFileExpansion(FName)),'"');
+TextColor(7);
+Write(':in ');
+TextColor(10);
+Write(SGGetSizeString(FSize,'EN'));
+TextColor(7);
+Write(';out ');
+TextColor(12);
+Write(SGGetSizeString(FOutSize,'EN'));
+TextColor(7);
+Write(';msec ');
+TextColor(11);
+Write(FPastMiliseconds);
+TextColor(7);
+Write(';cache ');
+TextColor(13);
+Write(StrBool(FConvertationNotNeed));
+TextColor(7);
+WriteLn('.');
+end;
 
 operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -215,7 +260,7 @@ Postfix := Slash + UnitName + '.pas';
 FileCopy(CacheUnitPath + Postfix, TempUnitPath + Postfix);
 end;
 
-function SGGetBuildResoursesFromFile(const FileName : TSGString) : TSGBuildResourses;
+function SGGetBuildResourcesFromFile(const FileName : TSGString) : TSGBuildResources;
 
 function GetHeader(const S : TSGString):TSGString;
 var
@@ -248,62 +293,62 @@ while Stream.Position <> Stream.Size do
 		if H <> '' then
 			begin
 			if H = 'file' then
-				Result.AddResourse('F')
+				Result.AddResource('F')
 			else if H = 'directory' then
-				Result.AddResourse('D')
+				Result.AddResource('D')
 			else
-				Result.AddResourse(' ');
+				Result.AddResource(' ');
 			end
 		else
 			begin
 			ParamName := StringWordGet(S, '=', 1);
 			Param := StringWordGet(S, '=', 2);
 			if ParamName = 'Path' then
-				Result.LastResourse()^.FPath := Param
+				Result.LastResource()^.FPath := Param
 			else if ParamName = 'Name' then
-				Result.LastResourse()^.FName := Param;
+				Result.LastResource()^.FName := Param;
 			end;
 		end;
 	end;
 Stream.Destroy();
 end;
 
-procedure TSGBuildResourse.Free();
+procedure TSGBuildResource.Free();
 begin
 FType := ' ';
 FPath := '';
 FName := '';
 end;
 
-procedure TSGBuildResourses.Free();
+procedure TSGBuildResources.Free();
 begin
-FResourses := nil;
+FResources := nil;
 FCacheDirectory := '';
 FTempDirectory := '';
 end;
 
-procedure TSGBuildResourses.Clear();
+procedure TSGBuildResources.Clear();
 begin
-SetLength(FResourses, 0);
+SetLength(FResources, 0);
 Free();
 end;
 
-procedure TSGBuildResourses.AddResourse(const VType : TSGChar);
+procedure TSGBuildResources.AddResource(const VType : TSGChar);
 begin
-if FResourses = nil then
-	SetLength(FResourses, 1)
+if FResources = nil then
+	SetLength(FResources, 1)
 else
-	SetLength(FResourses, Length(FResourses) + 1);
-FResourses[High(FResourses)].Free();
-FResourses[High(FResourses)].FType := VType;
+	SetLength(FResources, Length(FResources) + 1);
+FResources[High(FResources)].Free();
+FResources[High(FResources)].FType := VType;
 end;
 
-function TSGBuildResourses.LastResourse():PSGBuildResourse;
+function TSGBuildResources.LastResource():PSGBuildResource;
 begin
 Result := nil;
-if FResourses <> nil then
-	if Length(FResourses) > 0 then
-		Result := @FResourses[High(FResourses)];
+if FResources <> nil then
+	if Length(FResources) > 0 then
+		Result := @FResources[High(FResources)];
 end;
 
 procedure TSGConvertedFilesInfo.Print(const Prefix : TSGString = '');
@@ -313,17 +358,17 @@ SGHint(Prefix + 'Files size ' + SGGetSizeString(FSize,'EN') + ', output size ' +
 SGHint(Prefix + 'Past miliseconds ' + SGStr(FPastMiliseconds) + '.');
 end;
 
-function TSGBuildResourses.Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
+function TSGBuildResources.Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;
 
-procedure ProcessResourse(const Resourse : TSGBuildResourse);
+procedure ProcessResource(const Resource : TSGBuildResource);
 begin
-if Resourse.FType = 'F' then
+if Resource.FType = 'F' then
 	begin
-	Result += SGConvertFileToPascalUnit(Resourse.FPath, FTempDirectory, FCacheDirectory, Resourse.FName);
-	SGRegisterUnit(Resourse.FName, FileForRegistration);
+	Result += SGConvertFileToPascalUnit(Resource.FPath, FTempDirectory, FCacheDirectory, Resource.FName);
+	SGRegisterUnit(Resource.FName, FileForRegistration);
 	end
-else if Resourse.FType = 'D' then
-	Result += SGConvertDirectoryFilesToPascalUnits(Resourse.FPath, FTempDirectory, FCacheDirectory, FileForRegistration);
+else if Resource.FType = 'D' then
+	Result += SGConvertDirectoryFilesToPascalUnits(Resource.FPath, FTempDirectory, FCacheDirectory, FileForRegistration);
 end;
 
 var
@@ -332,22 +377,22 @@ begin
 Result.Clear();
 SGMakeDirectory(FTempDirectory);
 SGMakeDirectory(FCacheDirectory);
-for i := 0 to High(FResourses) do
-	ProcessResourse(FResourses[i]);
+for i := 0 to High(FResources) do
+	ProcessResource(FResources[i]);
 end;
 
 procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	Resourses : TSGBuildResourses;
+	Resources : TSGBuildResources;
 	Info : TSGConvertedFilesInfo;
 begin
-Resourses := SGGetBuildResoursesFromFile(DataFile);
-if Resourses.FTempDirectory = '' then
-	Resourses.FTempDirectory := TempUnitDir;
-if Resourses.FCacheDirectory = '' then
-	Resourses.FCacheDirectory := CacheUnitDir;
-Info := Resourses.Process(RegistrationFile);
-Resourses.Clear();
+Resources := SGGetBuildResourcesFromFile(DataFile);
+if Resources.FTempDirectory = '' then
+	Resources.FTempDirectory := TempUnitDir;
+if Resources.FCacheDirectory = '' then
+	Resources.FCacheDirectory := CacheUnitDir;
+Info := Resources.Process(RegistrationFile);
+Resources.Clear();
 SGHint('Builded files:');
 Info.Print('  ');
 end;
@@ -450,7 +495,41 @@ if not Exists then
 MemStream.Destroy();
 end;
 
-function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGWriteHexStringToStream(const S : TSGString; const Stream : TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function ValHex(const S : TSGString) : TSGByte;
+
+function ValHexChar(const C : TSGChar) : TSGByte;
+begin
+case C of
+'0'..'9' : Result := SGVal(C);
+'A' : Result := 10;
+'B' : Result := 11;
+'C' : Result := 12;
+'D' : Result := 13;
+'E' : Result := 14;
+'F' : Result := 15;
+end;
+end;
+
+begin
+Result := 
+	(ValHexChar(S[1]) shl 4) +
+	(ValHexChar(S[2])) ; 
+end;
+
+var
+	B : TSGByte;
+	i : TSGUInt16;
+begin
+for i := 1 to Length(S) div 2 do
+	begin
+	B := ValHex(S[(i - 1) * 2 + 1] + S[(i - 1) * 2 + 2]);
+	Stream.WriteBuffer(B, 1);
+	end;
+end;
+
+function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc; const ArrayType : TSGRMArrayType = SGRMArrayDefaultType) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 const
 	Hash_MD5_Prefix = ' MD5 : ';
 	Hash_SHA256_Prefix = ' SHA256 : ';
@@ -461,39 +540,142 @@ var
 
 procedure ReadWriteFile();
 var
-	Step : TSGLongWord = 1000000;
+	Step : TSGLongWord = 1048576;
 var
 	OutStream : TStream = nil;
 	InStream  : TStream = nil;
-	A: packed array of Byte;
+	A: packed array of TSGByte = nil;
 	I, iiii, i5 : TSGLongWord;
 
-procedure WriteProc(const ThisStep:LongWord);
-var
-	III,II:LongWord;
+procedure OutString(const S : TSGString);
 begin
-InStream.ReadBuffer(A[0],ThisStep);
-SGWriteStringToStream('procedure '+'LoadToStream_'+NameUnit+'_'+SGStr(I)+'(const Stream:TStream);'+SGWinEoln,OutStream,False);
-I+=1;
-SGWriteStringToStream('var'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('	A:array ['+'1..'+SGStr(ThisStep)+'] of byte = ('+SGWinEoln+'	',OutStream,False);
+SGWriteStringToStream(S, OutStream, False);
+end;
+
+procedure WriteProc(const ThisStep:LongWord);
+
+function Str8Bit(const Raw : TSGByte):TSGString;
+
+function CharFourBites(const Raw : TSGByte) : TSGString;
+begin
+case Raw of
+0..9 : Result := SGStr(Raw);
+10: Result := 'A';
+11: Result := 'B';
+12: Result := 'C';
+13: Result := 'D';
+14: Result := 'E';
+15: Result := 'F';
+end;
+end;
+
+begin
+Result := '';
+Result += CharFourBites(Raw and $F0 shr 4);
+Result += CharFourBites(Raw and $0F);
+end;
+
+procedure Write8Bit();
+var
+	III, II:LongWord;
+begin
+OutString('	A:array [1..'+SGStr(ThisStep)+'] of TSGUInt8 = ('+SGWinEoln+'	');
 II:=0;
 for iii:=0 to ThisStep-1 do
 	begin
 	if II=10 then
 		begin
-		SGWriteStringToStream(''+SGWinEoln+'	',OutStream,False);
+		OutString(SGWinEoln+'	');
 		II:=0;
 		end;
-	SGWriteStringToStream(SGStr(A[iIi]),OutStream,False);
+	OutString(SGStr(A[iIi]));
 	if III<>ThisStep-1 then
-		SGWriteStringToStream(', ',OutStream,False);
+		OutString(', ');
 	II+=1;
 	end;
-SGWriteStringToStream(');'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('begin'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('end;'+SGWinEoln,OutStream,False);
+OutString(');'+SGWinEoln);
+OutString('begin'+SGWinEoln);
+OutString('Stream.WriteBuffer(A,'+SGStr(ThisStep)+');'+SGWinEoln);
+OutString('end;'+SGWinEoln);
+end;
+
+procedure Write64Bit();
+const
+	LineSize = 5;
+var
+	ArraySize : TSGUInt64;
+	ArrayLength : TSGUInt64;
+	OtherLength : TSGUInt64;
+	i, ii, iii : TSGUInt32;
+	j, jj, jjj : TSGUInt32;
+	S : TSGString;
+begin
+ArrayLength := ThisStep div 8;
+ArraySize := ArrayLength * 8;
+OtherLength := ThisStep - ArraySize;
+OutString('	A : array [1..'+SGStr(ArrayLength)+'] of TSGUInt64 = ('+SGWinEoln+'	');
+i := 0;
+ii := 0;
+iii := 0;
+while ii <> ArraySize do
+	begin
+	if (iii = LineSize) then
+		begin
+		OutString(SGWinEoln+'	');
+		iii := 0;
+		end;
+	S := '$';
+	for j := 0 to 7 do
+		S += Str8Bit(A[ii + 7 - j]);
+	OutString(S);
+	iii += 1;
+	i += 1;
+	ii += 8;
+	if i <> ArrayLength then
+		OutString(', ');
+	if (i = ArrayLength) then
+		begin
+		OutString(SGWinEoln+'	');
+		iii := 0;
+		end;
+	end;
+OutString('	);'+SGWinEoln);
+if OtherLength <> 0 then
+	begin
+	OutString('	B : TSGString = ''');
+	while ii <> ThisStep do
+		begin
+		OutString(Str8Bit(A[ii]));
+		ii += 1;
+		end;
+	OutString(''';'+SGWinEoln);
+	end;
+OutString('begin'+SGWinEoln);
+OutString('Stream.WriteBuffer(A, '+SGStr(ArraySize)+');'+SGWinEoln);
+if OtherLength <> 0 then
+	OutString('SGWriteHexStringToStream(B, Stream);'+SGWinEoln);
+OutString('end;'+SGWinEoln);
+end;
+
+begin
+InStream.ReadBuffer(A[0], ThisStep);
+OutString('procedure '+'LoadToStream_'+NameUnit+'_'+SGStr(I)+'(const Stream:TStream);'+SGWinEoln);
+I+=1;
+OutString('var'+SGWinEoln);
+case ArrayType of
+SGRMArrayTypeUInt8 :
+	Write8Bit();
+{SGRMArrayTypeUInt16:
+	begin
+	
+	end;
+SGRMArrayTypeUInt32:
+	begin
+	
+	end;}
+SGRMArrayTypeUInt64:
+	Write64Bit();
+end;
 end;
 
 begin
@@ -504,25 +686,26 @@ InStream  := TMemoryStream.Create();
 (InStream as TMemoryStream).LoadFromFile(FileName);
 InStream.Position := 0;
 if IsInc then
-	SGWriteStringToStream('{$INCLUDE SaGe.inc}'+SGWinEoln,OutStream,False)
+	OutString('{$INCLUDE SaGe.inc}'+SGWinEoln)
 else
-	SGWriteStringToStream('{$MODE OBJFPC}'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('// Engine''s path : "' + FileName + '"'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('// Path : "' + OutputFileName + '"'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('//' + Hash_MD5_Prefix + Hash_MD5 + SGWinEoln, OutStream, False);
-SGWriteStringToStream('//' + Hash_SHA256_Prefix+ Hash_SHA256 + SGWinEoln, OutStream, False);
-SGWriteStringToStream('unit '+NameUnit+';'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('interface'+SGWinEoln,OutStream,False);
+	OutString('{$MODE OBJFPC}'+SGWinEoln);
+OutString('// Engine''s path : "' + FileName + '"'+SGWinEoln);
+OutString('// Path : "' + OutputFileName + '"'+SGWinEoln);
+OutString('//' + Hash_MD5_Prefix + Hash_MD5 + SGWinEoln);
+OutString('//' + Hash_SHA256_Prefix+ Hash_SHA256 + SGWinEoln);
+OutString('unit '+NameUnit+';'+SGWinEoln);
+OutString('interface'+SGWinEoln);
 if IsInc then
-	SGWriteStringToStream('implementation'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('uses'+SGWinEoln,OutStream,False);
+	OutString('implementation'+SGWinEoln);
+OutString('uses'+SGWinEoln);
 if IsInc then
-	SGWriteStringToStream('	SaGeResourseManager,'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('	Classes;'+SGWinEoln,OutStream,False);
+	OutString('	SaGeResourceManager,'+SGWinEoln);
+OutString('	SaGeBased,'+SGWinEoln);
+OutString('	Classes;'+SGWinEoln);
 if not IsInc then
 	begin
-	SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGWinEoln,OutStream,False);
-	SGWriteStringToStream('implementation'+SGWinEoln,OutStream,False);
+	OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGWinEoln);
+	OutString('implementation'+SGWinEoln);
 	end;
 while InStream.Position<=InStream.Size-Step do
 	WriteProc(Step);
@@ -531,33 +714,20 @@ if InStream.Position<>InStream.Size then
 	IIii:=InStream.Size-InStream.Position;
 	WriteProc(IIii);
 	end;
-SGWriteStringToStream('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('begin'+SGWinEoln,OutStream,False);
+OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGWinEoln);
+OutString('begin'+SGWinEoln);
 for i5:=0 to i-1 do
-	SGWriteStringToStream('LoadToStream_'+NameUnit+'_'+SGStr(i5)+'(Stream);'+SGWinEoln,OutStream,False);
-SGWriteStringToStream('end;'+SGWinEoln,OutStream,False);
+	OutString('LoadToStream_'+NameUnit+'_'+SGStr(i5)+'(Stream);'+SGWinEoln);
+OutString('end;'+SGWinEoln);
 if IsInc then
 	begin
-	SGWriteStringToStream('initialization'+SGWinEoln,OutStream,False);
-	SGWriteStringToStream('begin'+SGWinEoln,OutStream,False);
-	SGWriteStringToStream('SGResourseFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SGWinEoln,OutStream,False);
-	SGWriteStringToStream('end;'+SGWinEoln,OutStream,False);
+	OutString('initialization'+SGWinEoln);
+	OutString('begin'+SGWinEoln);
+	OutString('SGResourceFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SGWinEoln);
+	OutString('end;'+SGWinEoln);
 	end;
-SGWriteStringToStream('end.'+SGWinEoln,OutStream,False);
+OutString('end.'+SGWinEoln);
 SetLength(A,0);
-Write('Converted');
-TextColor(14);
-Write('"',SGGetFileName(FileName)+'.'+SGDownCaseString(SGGetFileExpansion(FileName)),'"');
-TextColor(7);
-Write(':in:');
-TextColor(10);
-Write(SGGetSizeString(InStream.Size,'EN'));
-TextColor(7);
-Write(',out:');
-TextColor(12);
-Write(SGGetSizeString(OutStream.Size,'EN'));
-TextColor(7);
-WriteLn('.');
 InStream.Destroy();
 OutStream.Destroy();
 end;
@@ -616,14 +786,14 @@ else
 	Result.FConvertationNotNeed := True;
 DateTime2.Get();
 Result.FPastMiliseconds := (DateTime2 - DateTime1).GetPastMiliSeconds();
-Result.FName := SGGetFileName(FileName);
+Result.FName := FileName;
 Result.FPath := OutputFileName;
 GetFilesSize();
 end;
 
-(*===========TSGResourseFiles===========*)
+(*===========TSGResourceFiles===========*)
 
-procedure TSGResourseFiles.WriteFiles();
+procedure TSGResourceFiles.WriteFiles();
 var
 	TotalSize : TSGQuadWord = 0;
 	Size : TSGQuadWord = 0;
@@ -647,7 +817,7 @@ if FArFiles <> nil then if Length(FArFiles) > 0 then
 SGHint('Total files: ' + SGStr(TotalFilesCount) + ', total size: ' + SGGetSizeString(TotalSize,'EN'));
 end;
 
-procedure TSGResourseFiles.ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
+procedure TSGResourceFiles.ExtractFiles(const Dir : TSGString; const WithDirs : TSGBoolean);
 
 function ConvertFileName( const FileName : TSGString):TSGString;
 var
@@ -683,7 +853,7 @@ else
 	end;
 end;
 
-function TSGResourseFiles.WaysEqual(w1,w2:TSGString):TSGBoolean;
+function TSGResourceFiles.WaysEqual(w1,w2:TSGString):TSGBoolean;
 var
 	i:TSGMaxEnum;
 function SimbolsEqual(const s1,s2:TSGChar):TSGBoolean;
@@ -710,12 +880,12 @@ else
 	Result:=False;
 end;
 
-function TSGResourseFiles.FileExists(const FileName : TSGString):TSGBoolean;inline;
+function TSGResourceFiles.FileExists(const FileName : TSGString):TSGBoolean;inline;
 begin
 Result:=ExistsInFile(FileName) or SGFileExists(FileName);
 end;
 
-function TSGResourseFiles.ExistsInFile(const Name:TSGString):TSGBoolean;
+function TSGResourceFiles.ExistsInFile(const Name:TSGString):TSGBoolean;
 var
 	i:TSGMaxEnum;
 begin
@@ -732,7 +902,7 @@ for i:=0 to High(FArFiles) do
 	end;
 end;
 
-function TSGResourseFiles.LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
+function TSGResourceFiles.LoadMemoryStreamFromFile(const Stream:TMemoryStream;const FileName:TSGString):TSGBoolean;
 var
 	i : TSGMaxEnum;
 	CD : TSGString;
@@ -765,47 +935,47 @@ if Result then
 	Stream.Position := 0;
 end;
 
-constructor TSGResourseFiles.Create();
+constructor TSGResourceFiles.Create();
 begin
 inherited;
 FArFiles:=nil;
 end;
 
-destructor TSGResourseFiles.Destroy();
+destructor TSGResourceFiles.Destroy();
 begin
 SetLength(FArFiles,0);
 inherited;
 end;
 
-procedure TSGResourseFiles.AddFile(const FileWay:TSGString;const Proc : TSGPointer);
+procedure TSGResourceFiles.AddFile(const FileWay:TSGString;const Proc : TSGPointer);
 begin
 if FArFiles=nil then
 	SetLength(FArFiles,1)
 else
 	SetLength(FArFiles,Length(FArFiles)+1);
 FArFiles[High(FArFiles)].FWay:=FileWay;
-FArFiles[High(FArFiles)].FSelf:=TSGResourseFilesProcedure(Proc);
+FArFiles[High(FArFiles)].FSelf:=TSGResourceFilesProcedure(Proc);
 end;
 
-(*===========TSGResourseManipulator===========*)
+(*===========TSGResourceManipulator===========*)
 
-destructor TSGResourseManipulator.Destroy();
+destructor TSGResourceManipulator.Destroy();
 begin
 SetLength(FArExpansions,0);
 inherited;
 end;
 
-function TSGResourseManipulator.LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;
+function TSGResourceManipulator.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
 begin
 Result:=nil;
 end;
 
-function TSGResourseManipulator.SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+function TSGResourceManipulator.SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 begin
 Result:=False;
 end;
 
-function TSGResourseManipulator.SaveResourse(const VFileName,VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+function TSGResourceManipulator.SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 var
 	Stream : TStream = nil;
 begin
@@ -813,7 +983,7 @@ Result:=False;
 Stream := TFileStream.Create(VFileName,fmCreate);
 if Stream<>nil then
 	begin
-	Result:=SaveResourseToStream(Stream,VExpansion,VResourse);
+	Result:=SaveResourceToStream(Stream,VExpansion,VResource);
 	Stream.Destroy();
 	if not Result then
 		if SGFileExists(VFileName) then
@@ -821,7 +991,7 @@ if Stream<>nil then
 	end;
 end;
 
-function TSGResourseManipulator.LoadResourse(const VFileName,VExpansion : TSGString):TSGResourse;
+function TSGResourceManipulator.LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
 var
 	Stream : TStream = nil;
 begin
@@ -831,20 +1001,20 @@ if SGFileExists(VFileName) then
 	Stream := TFileStream.Create(VFileName,fmOpenRead);
 	if Stream<>nil then
 		begin
-		Result:=LoadResourseFromStream(Stream,VExpansion);
+		Result:=LoadResourceFromStream(Stream,VExpansion);
 		Stream.Destroy();
 		end;
 	end;
 end;
 
-constructor TSGResourseManipulator.Create();
+constructor TSGResourceManipulator.Create();
 begin
 inherited;
 FQuantityExpansions:=0;
 FArExpansions :=  nil;
 end;
 
-procedure TSGResourseManipulator.AddExpansion(const VExpansion:TSGString;const VLoadIsSupported, VSaveIsSupported : TSGBoolean);
+procedure TSGResourceManipulator.AddExpansion(const VExpansion:TSGString;const VLoadIsSupported, VSaveIsSupported : TSGBoolean);
 begin
 FQuantityExpansions+=1;
 SetLength(FArExpansions,FQuantityExpansions);
@@ -853,7 +1023,7 @@ FArExpansions[FQuantityExpansions-1].RLoadIsSupported:=VLoadIsSupported;
 FArExpansions[FQuantityExpansions-1].RSaveIsSupported:=VSaveIsSupported;
 end;
 
-function TSGResourseManipulator.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManipulator.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -867,7 +1037,7 @@ if FQuantityExpansions<>0 then
 			end;
 end;
 
-function TSGResourseManipulator.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManipulator.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -881,15 +1051,15 @@ if FQuantityExpansions<>0 then
 			end;
 end;
 
-(*===========TSGResourseManager===========*)
+(*===========TSGResourceManager===========*)
 
-destructor TSGResourseManager.Destroy();
+destructor TSGResourceManager.Destroy();
 begin
 SetLength(FArManipulators,0);
 inherited;
 end;
 
-function TSGResourseManager.LoadResourse(const VFileName,VExpansion : TSGString):TSGResourse;
+function TSGResourceManager.LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
 var
 	Index : TSGLongWord;
 begin
@@ -898,13 +1068,13 @@ if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
 		if FArManipulators[Index].LoadingIsSuppored(VExpansion) then
 			begin
-			Result:=FArManipulators[Index].LoadResourse(VFileName,SGUpCaseString(VExpansion));
+			Result:=FArManipulators[Index].LoadResource(VFileName,SGUpCaseString(VExpansion));
 			if Result <> nil then
 				Break;
 			end;
 end;
 
-function TSGResourseManager.SaveResourse(const VFileName,VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+function TSGResourceManager.SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -913,13 +1083,13 @@ if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
 		if FArManipulators[Index].SaveingIsSuppored(VExpansion) then
 			begin
-			Result:=FArManipulators[Index].SaveResourse(VFileName,SGUpCaseString(VExpansion),VResourse);
+			Result:=FArManipulators[Index].SaveResource(VFileName,SGUpCaseString(VExpansion),VResource);
 			if Result then
 				Break;
 			end;
 end;
 
-function TSGResourseManager.LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;
+function TSGResourceManager.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
 var
 	Index : TSGLongWord;
 	StreamPosition : TSGQuadWord;
@@ -930,7 +1100,7 @@ if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
 		if FArManipulators[Index].LoadingIsSuppored(VExpansion) then
 			begin
-			Result:=FArManipulators[Index].LoadResourseFromStream(VStream,SGUpCaseString(VExpansion));
+			Result:=FArManipulators[Index].LoadResourceFromStream(VStream,SGUpCaseString(VExpansion));
 			if Result <> nil then
 				Break
 			else
@@ -938,7 +1108,7 @@ if FQuantityManipulators <>0 then
 			end;
 end;
 
-function TSGResourseManager.SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+function TSGResourceManager.SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 var
 	Index : TSGLongWord;
 	StreamPosition : TSGQuadWord;
@@ -949,7 +1119,7 @@ if FQuantityManipulators<>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
 		if FArManipulators[Index].SaveingIsSuppored(SGUpCaseString(VExpansion)) then
 			begin
-			Result:=FArManipulators[Index].SaveResourseToStream(VStream,SGUpCaseString(VExpansion),VResourse);
+			Result:=FArManipulators[Index].SaveResourceToStream(VStream,SGUpCaseString(VExpansion),VResource);
 			if Result  then
 				begin
 				Break;
@@ -962,14 +1132,14 @@ if FQuantityManipulators<>0 then
 			end;
 end;
 
-procedure TSGResourseManager.AddManipulator(const VManipulatorClass : TSGResourseManipulatorClass);
+procedure TSGResourceManager.AddManipulator(const VManipulatorClass : TSGResourceManipulatorClass);
 begin
 FQuantityManipulators+=1;
 SetLength(FArManipulators,FQuantityManipulators);
 FArManipulators[FQuantityManipulators-1]:=VManipulatorClass.Create();
 end;
 
-function TSGResourseManager.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManager.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -982,7 +1152,7 @@ for Index := 0 to FQuantityManipulators - 1 do
 		end;
 end;
 
-function TSGResourseManager.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManager.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -997,7 +1167,7 @@ if FQuantityManipulators <> 0 then
 end;
 
 
-constructor TSGResourseManager.Create();
+constructor TSGResourceManager.Create();
 begin
 inherited;
 FArManipulators :=nil;
@@ -1008,14 +1178,14 @@ end;
 
 initialization
 begin
-SGResourseManager := TSGResourseManager.Create();
-SGResourseFiles:=TSGResourseFiles.Create();
+SGResourceManager := TSGResourceManager.Create();
+SGResourceFiles:=TSGResourceFiles.Create();
 end;
 
 finalization
 begin
-SGResourseManager.Destroy();
-SGResourseFiles.Destroy();
+SGResourceManager.Destroy();
+SGResourceFiles.Destroy();
 end;
 
 end.

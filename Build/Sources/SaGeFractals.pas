@@ -91,8 +91,8 @@ type
 		FEnableNormals  : TSGBoolean;
 		FHasIndexes     : TSGBoolean;
 			public
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 		procedure Paint();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
@@ -204,12 +204,12 @@ end;
 {$INCLUDE SageFractalTetraider.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
-procedure TSG3DFractal.DeleteDeviceResourses();
+procedure TSG3DFractal.DeleteDeviceResources();
 begin
 ClearMesh();
 end;
 
-procedure TSG3DFractal.LoadDeviceResourses();
+procedure TSG3DFractal.LoadDeviceResources();
 begin
 Calculate();
 end;

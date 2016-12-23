@@ -32,8 +32,8 @@ type
 		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 		procedure Paint();override;
 		procedure Resize();override;
 			private
@@ -127,7 +127,7 @@ begin
 RescaleImagePosition();
 end;
 
-procedure TSGImageViewer.DeleteDeviceResourses();
+procedure TSGImageViewer.DeleteDeviceResources();
 begin
 if FImage <> nil then
 	begin
@@ -336,9 +336,9 @@ if (FRenderSize.x > FSize.x) and (FRenderSize.y > FSize.y) then
 		end;
 end;
 
-procedure TSGImageViewer.LoadDeviceResourses();
+procedure TSGImageViewer.LoadDeviceResources();
 begin
-DeleteDeviceResourses();
+DeleteDeviceResources();
 FImage := TSGImage.Create(FFiles[0]);
 FImage.Context := Context;
 end;

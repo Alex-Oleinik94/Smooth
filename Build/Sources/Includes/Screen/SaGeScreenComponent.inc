@@ -44,9 +44,9 @@ type
 			public
 			// ISGDeviceDependent declaration
 		procedure Paint(); virtual;
-		procedure DeleteDeviceResourses();virtual;
+		procedure DeleteDeviceResources();virtual;
 		procedure Resize(); virtual;
-		procedure LoadDeviceResourses();virtual;
+		procedure LoadDeviceResources();virtual;
 		function Suppored() : TSGBoolean;virtual;
 			protected
 			// Location
@@ -903,24 +903,24 @@ if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
 end;
 
-procedure TSGComponent.DeleteDeviceResourses();
+procedure TSGComponent.DeleteDeviceResources();
 var
 	Component : TSGComponent;
 begin
 if FDrawClass <> nil then
-	FDrawClass.DeleteDeviceResourses();
+	FDrawClass.DeleteDeviceResources();
 for Component in Self do
-	Component.DeleteDeviceResourses();
+	Component.DeleteDeviceResources();
 end;
 
-procedure TSGComponent.LoadDeviceResourses();
+procedure TSGComponent.LoadDeviceResources();
 var
 	Component : TSGComponent;
 begin
 if FDrawClass <> nil then
-	FDrawClass.LoadDeviceResourses();
+	FDrawClass.LoadDeviceResources();
 for Component in Self do
-	Component.LoadDeviceResourses();
+	Component.LoadDeviceResources();
 end;
 
 function TSGComponent.Suppored() : TSGBoolean;

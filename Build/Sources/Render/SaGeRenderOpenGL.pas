@@ -5,7 +5,7 @@
 	//{$DEFINE SGINTERPRITATEBEGINENDWITHVBO}
 	{$ENDIF}
 {$IFDEF ANDROID}
-	{$DEFINE NEEDRESOURSES}
+	{$DEFINE NEEDResourceS}
 	{$ENDIF}
 {$IFDEF DARWIN}
 	{$DEFINE SHADERSISPOINTERS}
@@ -77,7 +77,7 @@ uses
 		{$ENDIF}
 	;
 
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 	const
 		TempDir = {$IFDEF ANDROID}'/sdcard/.SaGe/Temp'{$ELSE}'Temp'{$ENDIF};
 	{$ENDIF}
@@ -120,9 +120,9 @@ type
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
 		// Сохранения ресурсов рендера и убивание самого рендера
-		procedure LockResourses();override;
+		procedure LockResources();override;
 		// Инициализация рендера и загрузка сохраненных ресурсов
-		procedure UnLockResourses();override;
+		procedure UnLockResources();override;
 
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
@@ -246,7 +246,7 @@ type
 		FTextureEnabled  : TSGBoolean;
 		{$ENDIF}
 
-		{$IFDEF NEEDRESOURSES}
+		{$IFDEF NEEDResourceS}
 			FArTextures : packed array of
 				packed record
 					FSaved : Boolean;
@@ -1048,12 +1048,12 @@ glDisable(VParam);
 end;
 
 procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	i : LongWord;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 for i:=0 to VQuantity-1 do
 	begin
 	if FArTextures[VTextures[i]-1].FSaved then
@@ -1091,12 +1091,12 @@ else
 end;
 
 procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	i : TSGMaxEnum;
 	{$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 for i:=0 to VQuantity-1 do
 	begin
 	if FArTextures=nil then
@@ -1116,7 +1116,7 @@ end;
 
 procedure TSGRenderOpenGL.BindTexture(const VParam:Cardinal;const VTexture:Cardinal);
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 if VTexture = 0 then
 	begin
 	glBindTexture(VParam,0);
@@ -1152,12 +1152,12 @@ glTexEnvi(VP1,VP2,VP3);
 end;
 
 procedure TSGRenderOpenGL.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	FS : TFileStream = nil;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 FS := TFileStream.Create(TempDir+'/t'+SGStr(FBindedTexture),fmCreate);
 FS.WriteBuffer(VTextureType,SizeOf(VTextureType));
 FS.WriteBuffer(VP1,SizeOf(VP1));
@@ -1201,12 +1201,12 @@ glDisableClientState(VParam);
 end;
 
 procedure TSGRenderOpenGL.GenBuffersARB(const VQ:Integer;const PT:PCardinal);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	i : LongWord;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 for i:=0 to VQ-1 do
 	begin
 	if FArBuffers = nil then
@@ -1223,12 +1223,12 @@ for i:=0 to VQ-1 do
 end;
 
 procedure TSGRenderOpenGL.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Pointer);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	i : LongWord;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 for i:=0 to VQuantity-1 do
 	begin
 	{$IFNDEF MOBILE}glDeleteBuffersARB{$ELSE}glDeleteBuffers{$ENDIF}(1,@FArBuffers[PCardinal(VPoint)[i]-1].FBuffer);
@@ -1245,7 +1245,7 @@ end;
 
 procedure TSGRenderOpenGL.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 case VParam of
 SGR_ARRAY_BUFFER_ARB : FVBOData[0] := VParam2-1;
 SGR_ELEMENT_ARRAY_BUFFER_ARB : FVBOData[1] := VParam2-1;
@@ -1261,14 +1261,14 @@ else
 end;
 
 procedure TSGRenderOpenGL.BufferDataARB(const VParam:Cardinal;const VSize:int64;VBuffer:Pointer;const VParam2:Cardinal;const VIndexPrimetiveType : TSGLongWord = 0);
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 var
 	FS : TFileStream = nil;
 	i : Cardinal;
 	ii : TSGQuadWord;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 i := Byte(VParam = SGR_ARRAY_BUFFER_ARB)*FVBOData[0]+Byte(VParam = SGR_ELEMENT_ARRAY_BUFFER_ARB)*FVBOData[1];
 FS := TFileStream.Create(TempDir+'/b'+SGStr(i),fmCreate);
 ii:= VParam;
@@ -1428,7 +1428,7 @@ glDisable(GL_LIGHTING);
 end;
 
 constructor TSGRenderOpenGL.Create();
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 procedure FreeMemTemp();
 var
 	ar : TArString = nil;
@@ -1452,7 +1452,7 @@ SetRenderType({$IFDEF MOBILE}SGRenderGLES{$ELSE}SGRenderOpenGL{$ENDIF});
 	FLightingEnabled := False;
 	FTextureEnabled  := False;
 	{$ENDIF}
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 	FArTextures := nil;
 	FBindedTexture := 0;
 	FArBuffers :=nil;
@@ -1481,7 +1481,7 @@ FNowInBumpMapping:=False;
 end;
 
 procedure TSGRenderOpenGL.Kill();
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 procedure FreeMemTemp();
 var
 	ar : TArString = nil;
@@ -1496,7 +1496,7 @@ SetLength(ar,0);
 end;
 {$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 	SetLength(FArTextures,0);
 	SetLength(FArBuffers,0);
 	FreeMemTemp();
@@ -1879,13 +1879,13 @@ begin
 end;
 
 // Сохранения ресурсов рендера и убивание самого рендера
-procedure TSGRenderOpenGL.LockResourses();
-{$IFDEF NEEDRESOURSES}
+procedure TSGRenderOpenGL.LockResources();
+{$IFDEF NEEDResourceS}
 var
 	i : LongWord;
 	{$ENDIF}
 begin
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 	if FArTextures <> nil then
 		for i:= 0 to High(FArTextures) do
 			if (FArTextures[i].FTexture <> 0) and (FArTextures[i].FSaved) then
@@ -1905,15 +1905,15 @@ begin
 	if (FContext <> EGL_NO_CONTEXT) then
 		begin
 		if eglDestroyContext(Context.Device, FContext) = EGL_FALSE then
-			SGLog.Sourse('"TSGRenderOpenGL.LockResourses" : EGL Error : "'+SGGetEGLError()+'"');
+			SGLog.Sourse('"TSGRenderOpenGL.LockResources" : EGL Error : "'+SGGetEGLError()+'"');
 		FContext := EGL_NO_CONTEXT;
 		end;
 	{$ENDIF}
 end;
 
 // Инициализация рендера и загрузка сохраненных ресурсов
-procedure TSGRenderOpenGL.UnLockResourses();
-{$IFDEF NEEDRESOURSES}
+procedure TSGRenderOpenGL.UnLockResources();
+{$IFDEF NEEDResourceS}
 procedure LoadTexture(const i : LongWord);
 var
 	VTextureType,VP1,VChannels,VWidth,VHeight,VFormatType,VDataType,VP2:Cardinal;
@@ -1948,7 +1948,7 @@ glBindTexture(VTextureType,0);
 glDisable(VTextureType);
 
 FreeMem(VBitMap,VChannels*VWidth*VHeight);
-SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
+SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
 end;
 procedure LoadBuffer(const i : LongWord);
 var
@@ -1979,20 +1979,20 @@ begin
 {$IFDEF ANDROID}
 	FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
 	if FContext = EGL_NO_CONTEXT then
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
-	SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
+	SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 	if eglMakeCurrent(Context.Device,Context.GetOption('SURFACE'),Context.GetOption('SURFACE'),FContext)  = EGL_FALSE then
 		begin
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : EGL Error : "'+SGGetEGLError()+'"');
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="FALSE"');
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="FALSE"');
 		end
 	else
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResourses" : Called "eglMakeCurrent". Result="TRUE"');
+		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="TRUE"');
 	{$ENDIF}
 Init();
 Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 SwapBuffers();
-{$IFDEF NEEDRESOURSES}
+{$IFDEF NEEDResourceS}
 	if FArTextures<>nil then
 		for i:=0 to High(FArTextures) do
 			if FArTextures[i].FSaved then

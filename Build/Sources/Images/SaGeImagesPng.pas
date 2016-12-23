@@ -16,7 +16,7 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeDllManager
 	;
 
@@ -29,32 +29,32 @@ procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;
 procedure SavePNG(const BitMap: TSGBitMap;const Stream: TStream;const  Interlaced: boolean = false);forward;
 
 type
-	TSGResourseManipulatorImagesPNG=class(TSGResourseManipulator)
+	TSGResourceManipulatorImagesPNG=class(TSGResourceManipulator)
 			public
 		constructor Create();override;
-		function LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;override;
-		function SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;override;
+		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;override;
+		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;override;
 		end;
 
-constructor TSGResourseManipulatorImagesPNG.Create();
+constructor TSGResourceManipulatorImagesPNG.Create();
 begin
 inherited;
 AddExpansion('PNG',True,True);
 end;
 
-function TSGResourseManipulatorImagesPNG.LoadResourseFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResourse;
+function TSGResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
 begin
 Result := TSGBitMap.Create();
 LoadPNG(VStream,Result as TSGBitMap);
 end;
 
-function TSGResourseManipulatorImagesPNG.SaveResourseToStream(const VStream : TStream;const VExpansion : TSGString;const VResourse : TSGResourse):TSGBoolean;
+function TSGResourceManipulatorImagesPNG.SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 begin
-if (VExpansion<>'PNG') or (not(VResourse is TSGBitMap)) then
+if (VExpansion<>'PNG') or (not(VResource is TSGBitMap)) then
 	Result:=False
 else
 	begin
-	SavePNG(VResourse as TSGBitMap,VStream);
+	SavePNG(VResource as TSGBitMap,VStream);
 	Result:=True;
 	end;
 end;
@@ -257,7 +257,7 @@ end;
 
 initialization
 begin
-SGResourseManager.AddManipulator(TSGResourseManipulatorImagesPNG);
+SGResourceManager.AddManipulator(TSGResourceManipulatorImagesPNG);
 end;
 
 end.

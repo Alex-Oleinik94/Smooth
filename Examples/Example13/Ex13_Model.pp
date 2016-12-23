@@ -17,7 +17,7 @@ uses
 	,Classes
 	,SysUtils
 	,StrMan
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 
 type
@@ -264,7 +264,7 @@ var
 	i,j,k : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
 while SGReadLnStringFromStream(Stream) <> 'nodes' do ;
@@ -353,7 +353,7 @@ var Stream       : TMemoryStream;
     ActionIndex  : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
 SetLength(FAnimation.FActions,Length(FAnimation.FActions)+1);

@@ -1061,7 +1061,7 @@ else
 		begin
 		if (FRender<>nil) then
 			begin
-			FRender.LockResourses();
+			FRender.LockResources();
 			FRender.ReleaseCurrent();
 			end;
 		KillWindow(False);
@@ -1074,7 +1074,7 @@ else
 			end;
 		Active := CreateWindow();
 		if (FRender <> nil) and Active then
-			FRender.UnLockResourses();
+			FRender.UnLockResources();
 		Resize();
 		end;
 end;

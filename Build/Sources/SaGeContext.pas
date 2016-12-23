@@ -220,8 +220,8 @@ type
 		property PaintableSettings : TSGPaintableSettings write FPaintableSettings;
 		property Screen : TSGScreen read FScreen;
 			public
-		procedure DeleteDeviceResourses();
-		procedure LoadDeviceResourses();
+		procedure DeleteDeviceResources();
+		procedure LoadDeviceResources();
 			protected
 		FAudioRender      : TSGAudioRender;
 		FAudioRenderClass : TSGAudioRenderClass;
@@ -504,20 +504,20 @@ begin
 FNewContextType := TSGContextClass(NewContext);
 end;
 
-procedure TSGContext.DeleteDeviceResourses();
+procedure TSGContext.DeleteDeviceResources();
 begin
 if FPaintable <> nil then
-	FPaintable.DeleteDeviceResourses();
+	FPaintable.DeleteDeviceResources();
 if Screen <> nil then
-	Screen.DeleteDeviceResourses();
+	Screen.DeleteDeviceResources();
 end;
 
-procedure TSGContext.LoadDeviceResourses();
+procedure TSGContext.LoadDeviceResources();
 begin
 if FPaintable <> nil then
-	FPaintable.LoadDeviceResourses();
+	FPaintable.LoadDeviceResources();
 if Screen <> nil then
-	Screen.LoadDeviceResourses();
+	Screen.LoadDeviceResources();
 end;
 
 procedure TSGContext.MoveInfo(var FormerContext : TSGContext);
@@ -553,13 +553,13 @@ Result := False;
 if Context.Active and (Context.NewContext <> nil) then
 	begin
 	NewContext := Context.NewContext.Create();
-	Context.DeleteDeviceResourses();
+	Context.DeleteDeviceResources();
 	NewContext.MoveInfo(Context);
 	IContext := NewContext;
 	Context.Destroy();
 	Context := NewContext;
 	Context.Initialize();
-	Context.LoadDeviceResourses();
+	Context.LoadDeviceResources();
 	Result := Context.Active;
 	end;
 end;
@@ -727,8 +727,8 @@ DT1.Get();
 WriteLn('TSGContext.ReinitializeRender() : Begining');
 	{$ENDIF}
 if FPaintable <> nil then
-	FPaintable.DeleteDeviceResourses();
-Screen.DeleteDeviceResourses();
+	FPaintable.DeleteDeviceResources();
+Screen.DeleteDeviceResources();
 if FRender <> nil then
 	begin
 	FRender.Context := nil;
@@ -744,8 +744,8 @@ if FRender.CreateContext() then
 	FRender.Init();
 FRenderClassChanget := False;
 if FPaintable <> nil then
-	FPaintable.LoadDeviceResourses();
-Screen.LoadDeviceResourses();
+	FPaintable.LoadDeviceResources();
+Screen.LoadDeviceResources();
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.ReinitializeRender() : End');
 	{$ENDIF}
@@ -917,7 +917,7 @@ if FPaintableClass <> nil then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		SetPaintableSettings();
-		FPaintable.LoadDeviceResourses();
+		FPaintable.LoadDeviceResources();
 		end;
 	end;
 Paint();

@@ -150,7 +150,7 @@ end;
 procedure TSGContextAndroid.DestroyWondow();
 begin
 if Render<>nil then
-	Render.LockResourses();
+	Render.LockResources();
 if (FSurface <> EGL_NO_SURFACE) then
 	begin
 	eglDestroySurface(FDisplay, FSurface);
@@ -237,7 +237,7 @@ if FRender=nil then
 else
 	begin
 	FRender.Context := Self as ISGContext;
-	FRender.UnLockResourses();
+	FRender.UnLockResources();
 	Result:=True;
 	end;
 FWidth :=GetScreenArea().x;
@@ -252,7 +252,7 @@ if not FInitialized then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		SetPaintableSettings();
-		FPaintable.LoadDeviceResourses();
+		FPaintable.LoadDeviceResources();
 		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Paintable created');
 		end;
 	end;

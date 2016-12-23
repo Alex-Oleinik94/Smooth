@@ -59,7 +59,7 @@ procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VM
 implementation
 
 uses
-	SaGeResourseManager
+	SaGeResourceManager
 	,SaGeBase
 	,SaGeVersion
 	,StrMan
@@ -120,7 +120,7 @@ FInFileName := VFileName;
 FOutFileName := VOutFileName;
 FOutStream := TMemoryStream.Create();
 FInStream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(FInStream, FInFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(FInStream, FInFileName);
 FInStream.Position := 0;
 end;
 

@@ -18,7 +18,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeMakefileReader
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,StrMan
 	,SaGeNotepad
 	,SaGeScreenBase
@@ -666,7 +666,7 @@ var
 	Stream : TMemoryStream = nil;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream, FFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream, FFileName);
 Stream.Position := 0;
 while Stream.Position <> Stream.Size do
 	begin

@@ -12,7 +12,7 @@ uses
 	,StrMan
 	,crt
 	,SaGeVersion
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 
 type
@@ -370,7 +370,7 @@ var
 	S : TSGString;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream, FFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream, FFileName);
 Stream.Position := 0;
 while Stream.Position <> Stream.Size do
 	begin

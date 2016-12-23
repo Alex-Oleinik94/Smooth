@@ -13,7 +13,7 @@ uses
 	,SaGeImages
 	,SaGeMesh
 	,SaGeImagesBase
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeClasses
 	,SaGeCommonClasses
 	;
@@ -33,8 +33,8 @@ type
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			private
 		FFont : TSGFont;
 		FX, FY : TSGWord;
@@ -363,7 +363,7 @@ end;
 constructor TSGFPSViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-LoadDeviceResourses();
+LoadDeviceResources();
 FFrameCount := 30;
 SetLength(FFrameArray,FFrameCount);
 FFrameIndex := 0;
@@ -377,7 +377,7 @@ FFont.Destroy();
 inherited;
 end;
 
-procedure TSGFPSViewer.DeleteDeviceResourses();
+procedure TSGFPSViewer.DeleteDeviceResources();
 begin
 if FFont <> nil then
 	begin
@@ -386,7 +386,7 @@ if FFont <> nil then
 	end;
 end;
 
-procedure TSGFPSViewer.LoadDeviceResourses();
+procedure TSGFPSViewer.LoadDeviceResources();
 begin
 if FFont <> nil then
 	begin
@@ -883,7 +883,7 @@ var
 begin
 Result:=False;
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,FWay);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,FWay);
 Stream.Position:=0;
 if Stream.Size=0 then
 	begin

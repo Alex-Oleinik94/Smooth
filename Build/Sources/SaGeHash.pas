@@ -180,19 +180,10 @@ end;
 
 function SGHashStrRawByte(const Raw : TSGByte):TSGString;
 
-function CharFourBites(const Raw : TSGByte) : TSGChar;
+function CharFourBites(const Raw : TSGByte) : TSGString;
 begin
 case Raw of
-0 : Result := '0';
-1 : Result := '1';
-2 : Result := '2';
-3 : Result := '3';
-4 : Result := '4';
-5 : Result := '5';
-6 : Result := '6';
-7 : Result := '7';
-8 : Result := '8';
-9 : Result := '9';
+0..9 : Result := SGStr(Raw);
 10: Result := 'A';
 11: Result := 'B';
 12: Result := 'C';

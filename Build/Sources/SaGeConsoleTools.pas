@@ -39,7 +39,7 @@ uses
 	,SaGeMesh
 	,SaGeShaders
 	,SaGeNet
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeVersion
 	,SaGeMakefileReader
 	,SaGeCommonClasses
@@ -181,21 +181,21 @@ end;
 
 function IsNullUtil() : TSGBool;
 begin
-Result := (Length(VParams) = 4) and (SGResourseFiles.FileExists(VParams[1])) and ParamIsMode(VParams[3]);
+Result := (Length(VParams) = 4) and (SGResourceFiles.FileExists(VParams[1])) and ParamIsMode(VParams[3]);
 if not Result then
-	Result := (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[1]));
+	Result := (Length(VParams) = 3) and (SGResourceFiles.FileExists(VParams[1]));
 if Result then
 	Result := SGUpCaseString(StringTrimLeft(VParams[0], '-')) = 'NU';
 end;
 
 begin
-if (Length(VParams) = 2) and (SGResourseFiles.FileExists(VParams[0])) then
+if (Length(VParams) = 2) and (SGResourceFiles.FileExists(VParams[0])) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1])
-else if (Length(VParams) = 4) and (SGResourseFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) and ParamIsWriteMode(VParams[3]) then
+else if (Length(VParams) = 4) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) and ParamIsWriteMode(VParams[3]) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2], VParams[3])
-else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and ParamIsWriteMode(VParams[2]) then
+else if (Length(VParams) = 3) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsWriteMode(VParams[2]) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1], SGDDHModeDef, VParams[2])
-else if (Length(VParams) = 3) and (SGResourseFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) then
+else if (Length(VParams) = 3) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) then
 	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2])
 else if IsNullUtil() then
 	if (Length(VParams) = 3) then
@@ -235,7 +235,7 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 	WriteLn('Params is not allowed here!');
 	end
 else
-	SGResourseFiles.WriteFiles();
+	SGResourceFiles.WriteFiles();
 end;
 
 procedure SGConsoleDllPrintStat(const VParams : TSGConcoleCallerParams = nil);
@@ -286,7 +286,7 @@ end;
 
 procedure SGConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSGConcoleCallerParams = nil);
 begin
-if (SGCountConsoleParams(VParams) = 3) and SGResourseFiles.FileExists(VParams[2]) and SGExistsDirectory(VParams[0])and SGExistsDirectory(VParams[1]) then
+if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[2]) and SGExistsDirectory(VParams[0])and SGExistsDirectory(VParams[1]) then
 	SGConvertDirectoryFilesToPascalUnits(VParams[0],VParams[1],'',VParams[2])
 else
 	begin
@@ -309,7 +309,7 @@ if ((SGCountConsoleParams(VParams) = 1) or ((SGCountConsoleParams(VParams) = 2) 
 	Param := 'false';
 	if SGCountConsoleParams(VParams) = 2 then
 		Param := VParams[1];
-	SGResourseFiles.ExtractFiles(VParams[0],(SGUpCaseString(Param) = 'TRUE') or (Param = '1'));
+	SGResourceFiles.ExtractFiles(VParams[0],(SGUpCaseString(Param) = 'TRUE') or (Param = '1'));
 	end
 else
 	begin
@@ -322,7 +322,7 @@ procedure SGConsoleConvertFileToPascalUnit(const VParams : TSGConcoleCallerParam
 var
 	Param : TSGString;
 begin
-if ((SGCountConsoleParams(VParams) = 3) or ((SGCountConsoleParams(VParams) = 4) and (SGIsBoolConsoleParam(VParams[3])))) and SGResourseFiles.FileExists(VParams[0]) and SGExistsDirectory(VParams[1]) then
+if ((SGCountConsoleParams(VParams) = 3) or ((SGCountConsoleParams(VParams) = 4) and (SGIsBoolConsoleParam(VParams[3])))) and SGResourceFiles.FileExists(VParams[0]) and SGExistsDirectory(VParams[1]) then
 	begin
 	Param := 'false';
 	if SGCountConsoleParams(VParams) = 4 then
@@ -366,12 +366,31 @@ end;
 
 procedure SGConsoleAddToLog(const VParams : TSGConcoleCallerParams = nil);
 begin
-if (SGCountConsoleParams(VParams) = 2) and SGResourseFiles.FileExists(VParams[0]) then
+if (SGCountConsoleParams(VParams) = 2) and SGResourceFiles.FileExists(VParams[0]) then
 	SGAddToLog(VParams[0],VParams[1])
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@logfilename @line"');
+	WriteLn(SGErrorString,'"@log_file_name @line"');
+	end;
+end;
+
+procedure SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
+var
+	i, ii : TSGLongWord;
+begin
+ii := 0;
+if (VParams <> nil) then
+	ii := Length(VParams);
+if (ii = 5) and SGResourceFiles.FileExists(VParams[0]) and SGResourceFiles.FileExists(VParams[4]) and SGExistsDirectory(VParams[1]) then
+	begin
+	SGConvertFileToPascalUnit(VParams[0],VParams[1],VParams[2],VParams[3],True).Print();
+	SGRegisterUnit(VParams[3],VParams[4]);
+	end
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'"@file_path @unit_dir @cache_dir @unit_name @registration_file_path"');
 	end;
 end;
 
@@ -382,15 +401,15 @@ begin
 ii := 0;
 if (VParams <> nil) then
 	ii := Length(VParams);
-if (ii = 4) and SGResourseFiles.FileExists(VParams[0]) and SGResourseFiles.FileExists(VParams[3]) and SGExistsDirectory(VParams[1]) then
+if (ii = 4) and SGResourceFiles.FileExists(VParams[0]) and SGResourceFiles.FileExists(VParams[3]) and SGExistsDirectory(VParams[1]) then
 	begin
-	SGConvertFileToPascalUnit(VParams[0],VParams[1],VParams[2],True);
+	SGConvertFileToPascalUnit(VParams[0],VParams[1],VParams[2],True).Print();
 	SGRegisterUnit(VParams[2],VParams[3]);
 	end
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@filename @unitdir @unitname @rffilename"');
+	WriteLn(SGErrorString,'"@file_path @unit_dir @unit_name @registration_file_path"');
 	end;
 end;
 
@@ -427,7 +446,7 @@ begin
 ii := 0;
 if (VParams <> nil) then
 	ii := Length(VParams);
-if (ii >= 2) and SGResourseFiles.FileExists(VParams[0]) then
+if (ii >= 2) and SGResourceFiles.FileExists(VParams[0]) then
 	begin
 	SetLength(Params,Length(VParams)-2);
 	if Length(Params)>0 then
@@ -597,7 +616,7 @@ else if (VParams = nil) or (Length(VParams)<2) then
 	SGPrintEngineVersion();
 	WriteLn('Error count of parameters!');
 	end
-else if (VParams <> nil) and (Length(VParams) = 2) and SGResourseFiles.FileExists(VParams[0]) then
+else if (VParams <> nil) and (Length(VParams) = 2) and SGResourceFiles.FileExists(VParams[0]) then
 	SGConvertToSGIA(VParams[0],VParams[1])
 else
 	begin
@@ -830,7 +849,7 @@ Result := (FParams <> nil) and (Length(FParams)>0);
 if Result then
 	begin
 	for i := 0 to High(FParams) do
-		if not SGResourseFiles.FileExists(FParams[i]) then
+		if not SGResourceFiles.FileExists(FParams[i]) then
 			begin
 			Result := False;
 			break;
@@ -1688,8 +1707,8 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		procedure LoadDeviceResourses();override;
-		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResources();override;
+		procedure DeleteDeviceResources();override;
 		class function ClassName() : TSGString;override;
 		end;
 
@@ -1726,11 +1745,11 @@ with TSGDrawClasses.Create(Context) do
 	end;
 end;
 
-procedure TSGAllApplicationsDrawable.LoadDeviceResourses();
+procedure TSGAllApplicationsDrawable.LoadDeviceResources();
 begin
 end;
 
-procedure TSGAllApplicationsDrawable.DeleteDeviceResourses();
+procedure TSGAllApplicationsDrawable.DeleteDeviceResources();
 begin
 end;
 
@@ -1757,7 +1776,7 @@ procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
 var
 	Image:TSGImage;
 begin
-if (SGCountConsoleParams(VParams) = 3) and SGResourseFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
+if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
 	begin
 	Image:=TSGImage.Create();
 	Image.Way := VParams[0];
@@ -2184,7 +2203,8 @@ GeneralConsoleCaller.AddComand(@RunOtherEnginesConsoleProgramsConsoleCaller, ['o
 GeneralConsoleCaller.Category('Build tools');
 GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
 GeneralConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear Registration File');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in rffile');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
+GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
 GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
 GeneralConsoleCaller.Category('System tools');

@@ -17,7 +17,7 @@ uses
 	,SaGeBased
 	,SaGeImagesBase
 	,SaGeCommon
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeRenderConstants
 		// formats
 	,SaGeImagesBmp
@@ -42,8 +42,8 @@ type
 		constructor Create(const NewWay : string = '');
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			public
 		// А это само изображение ( в оперативной памяти, в виде последовательности байнов, и свойств изобрадения )
 		// В общем это BitMap (битовая карта)
@@ -169,13 +169,13 @@ except
 end;
 end;
 
-procedure TSGImage.LoadDeviceResourses();
+procedure TSGImage.LoadDeviceResources();
 begin
 if not (ReadyGoToTexture or (Texture <> 0)) then
 	Loading();
 end;
 
-procedure TSGImage.DeleteDeviceResourses();
+procedure TSGImage.DeleteDeviceResources();
 var
 	IsHasTexture : TSGBoolean;
 begin
@@ -438,11 +438,11 @@ var
 begin
 if (FImage<>nil) and (FImage.FBitMap<>nil) then
 	begin
-	if SGResourseManager.SaveingIsSuppored('PNG') then
-		SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage)
+	if SGResourceManager.SaveingIsSuppored('PNG') then
+		SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage)
 	else
-		if SGResourseManager.SaveingIsSuppored('BMP') then
-			SGResourseManager.SaveResourseToStream(Stream,'BMP',FImage);
+		if SGResourceManager.SaveingIsSuppored('BMP') then
+			SGResourceManager.SaveResourceToStream(Stream,'BMP',FImage);
 	end
 else
 	if (FWay<>'') and FileExists(FWay) then
@@ -530,8 +530,8 @@ SGI_SGIA:
 		{$IFDEF SGDebuging}
 			SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
 			{$ENDIF}
-		if SGResourseManager.SaveingIsSuppored('PNG') then
-			SGResourseManager.SaveResourseToStream(Stream,'PNG',FImage);
+		if SGResourceManager.SaveingIsSuppored('PNG') then
+			SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage);
 		end;
 	{$ENDIF}
 SGI_JPEG:
@@ -825,8 +825,8 @@ if (not Result) and IsJPEG(FStream.Memory,FStream.Size) then
 	end;
 if (not Result) and IsPNG(FStream.Memory,FStream.Size) then
 	begin
-	if SGResourseManager.LoadingIsSuppored('PNG') then
-		FImage:=SGResourseManager.LoadResourseFromStream(FStream,'PNG') as TSGBitMap;
+	if SGResourceManager.LoadingIsSuppored('PNG') then
+		FImage:=SGResourceManager.LoadResourceFromStream(FStream,'PNG') as TSGBitMap;
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
 		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as PNG is "'+SGStr(Result)+'"');
@@ -881,7 +881,7 @@ else
 	FStream.Free();
 	FStream:=TMemoryStream.Create();
 	end;
-SGResourseFiles.LoadMemoryStreamFromFile(FStream,FWay);
+SGResourceFiles.LoadMemoryStreamFromFile(FStream,FWay);
 FStream.Position:=0;
 {$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__LoadToMemory". Way="'+FWay+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
 end;

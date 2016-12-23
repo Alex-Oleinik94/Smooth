@@ -150,16 +150,16 @@ type
 	ISGDeviceDependent = interface(ISGPaintable)
 		['{0841a6ed-c09e-4273-965a-c82db11d26ff}']
 		function Suppored() : TSGBoolean;
-		procedure DeleteDeviceResourses();
-		procedure LoadDeviceResourses();
+		procedure DeleteDeviceResources();
+		procedure LoadDeviceResources();
 		procedure Resize();
 		end;
 
 	TSGExtendedPaintable = class(TSGPaintable, ISGDeviceDependent)
 			public
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResourses();virtual;
-		procedure LoadDeviceResourses();virtual;
+		procedure DeleteDeviceResources();virtual;
+		procedure LoadDeviceResources();virtual;
 		function Suppored() : TSGBoolean;virtual;
 		procedure Resize();virtual;
 		end;
@@ -241,11 +241,11 @@ procedure TSGExtendedPaintable.Resize();
 begin
 end;
 
-procedure TSGExtendedPaintable.DeleteDeviceResourses();
+procedure TSGExtendedPaintable.DeleteDeviceResources();
 begin
 end;
 
-procedure TSGExtendedPaintable.LoadDeviceResourses();
+procedure TSGExtendedPaintable.LoadDeviceResources();
 begin
 end;
 

@@ -13,7 +13,7 @@ uses
 	,SaGeImages
 	,SaGeUtils
 	,SaGeRenderConstants
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	;
@@ -36,8 +36,8 @@ type
 		constructor CreateRandom(const VContext : ISGContext);virtual;
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			public
 		procedure IddleFunction(); virtual;
 		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupored : TSGBool = False) : TSGScreenSkin; overload;
@@ -273,17 +273,17 @@ Result := SGGenerateRandomSkinColors(Colors);
 until Result <> Colors;
 end;
 
-procedure TSGScreenSkin.DeleteDeviceResourses();
+procedure TSGScreenSkin.DeleteDeviceResources();
 begin
-FFont.DeleteDeviceResourses();
-FComboBoxImage.DeleteDeviceResourses();
+FFont.DeleteDeviceResources();
+FComboBoxImage.DeleteDeviceResources();
 inherited;
 end;
 
-procedure TSGScreenSkin.LoadDeviceResourses();
+procedure TSGScreenSkin.LoadDeviceResources();
 begin
-FFont.LoadDeviceResourses();
-FComboBoxImage.LoadDeviceResourses();
+FFont.LoadDeviceResources();
+FComboBoxImage.LoadDeviceResources();
 inherited;
 end;
 

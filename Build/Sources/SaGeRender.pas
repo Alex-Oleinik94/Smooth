@@ -50,8 +50,8 @@ type
 		procedure Kill();virtual;abstract;
 		function SupporedVBOBuffers():TSGBoolean;virtual;
 		procedure SwapBuffers();virtual;abstract;
-		procedure LockResourses();virtual;
-		procedure UnLockResourses();virtual;
+		procedure LockResources();virtual;
+		procedure UnLockResources();virtual;
 			public
 		property Width : TSGAreaInt read GetWidth write SetWidth;
 		property Height : TSGAreaInt read GetHeight write SetHeight;
@@ -256,11 +256,11 @@ begin
 end;
 {$ENDIF}
 
-procedure TSGRender.UnLockResourses();
+procedure TSGRender.UnLockResources();
 begin
 end;
 
-procedure TSGRender.LockResourses();
+procedure TSGRender.LockResources();
 begin
 end;
 

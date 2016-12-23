@@ -25,8 +25,8 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			public
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
@@ -150,16 +150,16 @@ if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitRender(Renders[VNewIndex].FClass);
 end;
 
-procedure TSGEngineConfigurationPanel.DeleteDeviceResourses();
+procedure TSGEngineConfigurationPanel.DeleteDeviceResources();
 begin
 if FFPS <> nil then
-	FFPS.DeleteDeviceResourses();
+	FFPS.DeleteDeviceResources();
 end;
 
-procedure TSGEngineConfigurationPanel.LoadDeviceResourses();
+procedure TSGEngineConfigurationPanel.LoadDeviceResources();
 begin
 if FFPS <> nil then
-	FFPS.LoadDeviceResourses();
+	FFPS.LoadDeviceResources();
 end;
 
 constructor TSGEngineConfigurationPanel.Create();

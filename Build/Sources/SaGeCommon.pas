@@ -111,8 +111,8 @@ type
 		procedure Init();
 		function SupporedVBOBuffers():TSGBoolean;
 		procedure SwapBuffers();
-		procedure LockResourses();
-		procedure UnLockResourses();
+		procedure LockResources();
+		procedure UnLockResources();
 		procedure SetContext(const VContext : ISGNearlyContext);
 		function GetContext() : ISGNearlyContext;
 

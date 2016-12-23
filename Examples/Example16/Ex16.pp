@@ -38,8 +38,8 @@ type
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
-		procedure LoadDeviceResourses();override;
-		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResources();override;
+		procedure DeleteDeviceResources();override;
 			protected
 		FCamera : TSGCamera;
 		FFont : TSGFont;
@@ -56,12 +56,12 @@ type
 	{$ENDIF}
 
 
-procedure TSGExample16.LoadDeviceResourses();
+procedure TSGExample16.LoadDeviceResources();
 begin
 Generate();
 end;
 
-procedure TSGExample16.DeleteDeviceResourses();
+procedure TSGExample16.DeleteDeviceResources();
 begin
 if FMesh <> nil then
 	begin

@@ -7,7 +7,7 @@ interface
 uses
 	SaGeBase
 	,SaGeBased
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,Classes
 	;
 
@@ -87,10 +87,10 @@ var
 	S : TSGString;
 begin
 Result := '';
-if (SGResourseFiles <> nil) and SGResourseFiles.FileExists(VersionFileName) then
+if (SGResourceFiles <> nil) and SGResourceFiles.FileExists(VersionFileName) then
 	begin
 	Stream := TMemoryStream.Create();
-	SGResourseFiles.LoadMemoryStreamFromFile(Stream, VersionFileName);
+	SGResourceFiles.LoadMemoryStreamFromFile(Stream, VersionFileName);
 	Stream.Position := 0;
 	Result += SGReadLnStringFromStream(Stream);
 	Result += '.';

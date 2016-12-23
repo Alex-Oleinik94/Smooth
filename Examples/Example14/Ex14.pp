@@ -26,7 +26,7 @@ uses
 	,SysUtils
 	,SaGeShaders
 	,SaGePhysics
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 
 const
@@ -122,7 +122,7 @@ FModel.QuantityFaceArrays := 1;
 FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
 
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,FileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,FileName);
 Stream.ReadBuffer(FModelBBoxMin,SizeOf(FModelBBoxMin));
 Stream.ReadBuffer(FModelBBoxMax,SizeOf(FModelBBoxMax));
 FModelCenter := (FModelBBoxMax + FModelBBoxMin)/2;

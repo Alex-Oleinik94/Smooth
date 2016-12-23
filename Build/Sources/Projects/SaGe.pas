@@ -7,7 +7,7 @@ uses
 	,SaGeImages
 	,SaGeConsoleTools
 	
-	,SaGeResourseManager
+	,SaGeResourceManager
 	{$INCLUDE SaGeRMFiles.inc}
 	;
 

@@ -121,7 +121,7 @@ end;
 
 function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
 begin
-Result:=SGResourseFiles.FileExists(s.Caption);
+Result:=SGResourceFiles.FileExists(s.Caption);
 end;
 
 function TSGEdit.GetTextType() : TSGEditTextType;

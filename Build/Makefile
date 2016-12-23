@@ -57,10 +57,10 @@ ios:
 
 inc_version_debug:
 	@$(SAGE) -iv 0
-	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
+	@$(SAGE) -CCFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
 inc_version_release:
 	@$(SAGE) -iv 1
-	@$(SAGE) -CFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
+	@$(SAGE) -CCFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
 build_files:
 	@$(MAKE) clear_files
 	@$(SAGE) -bf "./../Build/BuildFiles.ini" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) $(SGREGISTRATIONFILE)

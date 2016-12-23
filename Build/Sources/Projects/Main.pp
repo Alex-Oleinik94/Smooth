@@ -26,7 +26,7 @@ uses
 		,android_native_app_glue
 		{$ENDIF}
 
-	,SaGeResourseManager
+	,SaGeResourceManager
 	{$INCLUDE SaGeRMFiles.inc}
 
 	{$IF defined(WITHSAGELIBRARY)}

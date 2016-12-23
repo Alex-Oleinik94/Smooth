@@ -38,8 +38,8 @@ type
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Paint;override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			private
 		FStartDeep,FStartDeepHeight:LongWord;
 		FArray:TSGKillerArray;
@@ -115,7 +115,7 @@ implementation
 
 {$OVERFLOWCHECKS OFF}
 
-procedure TSGKiller.DeleteDeviceResourses();
+procedure TSGKiller.DeleteDeviceResources();
 begin
 SGKillImage(FImageSkull);
 SGKillImage(FImageBlock);
@@ -124,7 +124,7 @@ SGKillImage(FImageZombi);
 SGKillImage(FImageYou);
 end;
 
-procedure TSGKiller.LoadDeviceResourses();
+procedure TSGKiller.LoadDeviceResources();
 begin
 InitImages(FImagesSize, True);
 end;

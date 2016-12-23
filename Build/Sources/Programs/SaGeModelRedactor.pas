@@ -16,7 +16,7 @@ uses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 type
 	TSGModelRedactor=class(TSGScreenedDrawable)
@@ -58,7 +58,7 @@ if not TSGEdit(Button.FUserPointer2).TextComplite then
 with TSGModelRedactor(Button.FUserPointer1) do
 	begin
 	Stream := TMemoryStream.Create();
-	SGResourseFiles.LoadMemoryStreamFromFile(Stream,TSGEdit(Button.FUserPointer2).Caption);
+	SGResourceFiles.LoadMemoryStreamFromFile(Stream,TSGEdit(Button.FUserPointer2).Caption);
 	Stream.Position:=0;
 	if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='3DS' then
 		Suc:=FCustomModel.Load3DSFromStream(Stream,TSGEdit(Button.FUserPointer2).Caption)

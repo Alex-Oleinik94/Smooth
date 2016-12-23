@@ -19,7 +19,7 @@ uses
 	,SaGeRender
 	,SaGeCommonClasses
 	,Classes
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,StrMan
 	,SaGeMath
 	,SaGeRenderConstants
@@ -568,9 +568,9 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 	S := '';
 	if (VParams<> nil) and (Length(VParams)>0) then
 		begin
-		if (SGResourseFiles.FileExists(SGGetFileWay(FFileName) + VParams[0])) then
+		if (SGResourceFiles.FileExists(SGGetFileWay(FFileName) + VParams[0])) then
 			S := SGGetFileWay(FFileName) + VParams[0]
-		else if SGResourseFiles.FileExists(VParams[0]) then
+		else if SGResourceFiles.FileExists(VParams[0]) then
 			S := VParams[0]
 		else
 			begin
@@ -591,7 +591,7 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 		SGLog.Sourse(S);
 		S := '';
 		end;
-	if SGResourseFiles.FileExists(S) then
+	if SGResourceFiles.FileExists(S) then
 		begin
 		if (VParams <> nil) and (Length(VParams)>1) then
 			for i := 1 to High(VParams) do
@@ -711,7 +711,7 @@ function TSGShaderReader.Process():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 begin
 Result := '';
 FStream := TMemoryStream.Create();
-if SGResourseFiles.LoadMemoryStreamFromFile(FStream,FFileName) then
+if SGResourceFiles.LoadMemoryStreamFromFile(FStream,FFileName) then
 	begin
 	FStream.Position := 0;
 	while FStream.Position <> FStream.Size do

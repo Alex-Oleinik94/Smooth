@@ -25,8 +25,8 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
-		procedure DeleteDeviceResourses();override;
-		procedure LoadDeviceResourses();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			public
 		FNowDraw     : TSGDrawable;
 		FNowDrawable : TSGBoolean;
@@ -47,23 +47,23 @@ type
 
 implementation
 
-procedure TSGDrawClasses.DeleteDeviceResourses();
+procedure TSGDrawClasses.DeleteDeviceResources();
 begin
 if FNowDrawable and (FNowDraw <> nil) then
-	FNowDraw.DeleteDeviceResourses();
+	FNowDraw.DeleteDeviceResources();
 end;
 
-procedure TSGDrawClasses.LoadDeviceResourses();
+procedure TSGDrawClasses.LoadDeviceResources();
 begin
 if FNowDrawable and (FNowDraw <> nil) then
-	FNowDraw.LoadDeviceResourses();
+	FNowDraw.LoadDeviceResources();
 end;
 
 procedure TSGDrawClasses.SwitchTo(const Index : TSGLongWord);
 begin
 if FNowDraw <> nil then
 	begin
-	FNowDraw.DeleteDeviceResourses();
+	FNowDraw.DeleteDeviceResources();
 	FNowDraw.Destroy();
 	FNowDraw := nil;
 	end;

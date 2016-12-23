@@ -11,7 +11,7 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,SaGeCommon
 	;
 
@@ -49,7 +49,7 @@ type
 		procedure Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
-	TSGBitMap = class(TSGResourse)
+	TSGBitMap = class(TSGResource)
 			public
 		FBitMap:PByte;
 		

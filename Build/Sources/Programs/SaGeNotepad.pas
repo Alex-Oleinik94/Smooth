@@ -18,7 +18,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeMakefileReader
-	,SaGeResourseManager
+	,SaGeResourceManager
 	,StrMan
 	,SaGeScreenBase
 	;
@@ -87,8 +87,8 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		procedure LoadDeviceResourses();override;
-		procedure DeleteDeviceResourses();override;
+		procedure LoadDeviceResources();override;
+		procedure DeleteDeviceResources();override;
 		class function ClassName() : TSGString;override;
 			private
 		FNotepad : TSGNotepad;
@@ -116,11 +116,11 @@ FNotepad.AddMakeFile('.\..\Build');
 FNotepad.OpenMakefileProjects();
 end;
 
-procedure TSGNotepadApplication.LoadDeviceResourses();
+procedure TSGNotepadApplication.LoadDeviceResources();
 begin
 end;
 
-procedure TSGNotepadApplication.DeleteDeviceResourses();
+procedure TSGNotepadApplication.DeleteDeviceResources();
 begin
 end;
 
@@ -167,7 +167,7 @@ var
 begin
 TotalString := SGGetFileWay(FMakefile.FileName) + VDirName;
 if (not (TotalString in FMakefileDirectories)) then
-	if SGResourseFiles.FileExists(TotalString) then
+	if SGResourceFiles.FileExists(TotalString) then
 		FMakefileDirectories += TotalString;
 end;
 
@@ -177,7 +177,7 @@ function ValidProject(const VProjectName : TSGString) : TSGBoolean;
 begin
 Result := False;
 if (not (VProjectName in FMakefileProjects)) then
-	if SGResourseFiles.FileExists(VProjectName) then
+	if SGResourceFiles.FileExists(VProjectName) then
 		Result := True;
 end;
 
@@ -237,11 +237,11 @@ if FMakefile <> nil then
 	FMakefile.Destroy();
 	FMakefile := nil;
 	end;
-if SGResourseFiles.FileExists(VFileName) then
+if SGResourceFiles.FileExists(VFileName) then
 	FMakefile := TSGMakefileReader.Create(VFileName)
-else if SGResourseFiles.FileExists(VFileName + 'Makefile') then
+else if SGResourceFiles.FileExists(VFileName + 'Makefile') then
 	FMakefile := TSGMakefileReader.Create(VFileName + 'Makefile')
-else if SGResourseFiles.FileExists(VFileName + Slash + 'Makefile') then
+else if SGResourceFiles.FileExists(VFileName + Slash + 'Makefile') then
 	FMakefile := TSGMakefileReader.Create(VFileName + Slash + 'Makefile');
 if FMakefile <> nil then
 	begin

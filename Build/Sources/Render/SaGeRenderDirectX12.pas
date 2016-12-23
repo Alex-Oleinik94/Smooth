@@ -52,9 +52,9 @@ type
 		procedure BeginScene(const VPrimitiveType:TSGPrimtiveType);override;
 		procedure EndScene();override;
 		// Сохранения ресурсов рендера и убивание самого рендера
-		procedure LockResourses();override;
+		procedure LockResources();override;
 		// Инициализация рендера и загрузка сохраненных ресурсов
-		procedure UnLockResourses();override;
+		procedure UnLockResources();override;
 		
 		procedure Color3f(const r,g,b:single);override;
 		procedure TexCoord2f(const x,y:single);override;
@@ -499,12 +499,12 @@ begin
 
 end;
 
-procedure TSGRenderDirectX12.LockResourses();
+procedure TSGRenderDirectX12.LockResources();
 begin
 
 end;
 
-procedure TSGRenderDirectX12.UnLockResourses();
+procedure TSGRenderDirectX12.UnLockResources();
 begin
 
 end;
