@@ -11,7 +11,7 @@ DESKTOPFILENAME=Main
 LIBRARYFILENAME=SaGe
 PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
-BASEARGS= -FiSources/Temp -FuSources/Images -FuSources/Audio -FuSources/Programs/Console -FuSources/Others/OpenAL -FuSources/Others/DCP/Ciphers -FuSources/Others/DCP/Hashes -FuSources/Others/DCP -FuSources/Context -FuSources/Render -FuSources/Temp -FuSources/Others/Ogg -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
+BASEARGS= -FiOutput/Resources -FuSources/Images -FuSources/Audio -FuSources/Programs/Console -FuSources/Others/OpenAL -FuSources/Others/DCP/Ciphers -FuSources/Others/DCP/Hashes -FuSources/Others/DCP -FuSources/Context -FuSources/Render -FuOutput/Resources -FuSources/Others/Ogg -FuSources/Others/Synapse -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Examples -FiSources/Includes/Common -FiSources/Includes/Fractals -FuSources/Others/lNet -FuSources/Others/lNet/sys -FuSources -FuSources/Programs -FuSources/Others -FuSources/Others/PasJpeg -FiSources/Includes -Sm -dENGINE -Fu../Examples/* -Fu../Examples
 RENDERARGS= -FuSources/DirectX -FuSources/Others/DirectX/9 -FuSources/Others/DirectX/12 -FuSources/Others/OpenGL
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
@@ -23,8 +23,8 @@ DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
-SGTEMPUNITDIR=./../Build/Sources/Temp
-SGCACHEUNITDIR=./../Build/Sources/Temp/Cache
+SGTEMPUNITDIR=./../Build/Output/Resources
+SGCACHEUNITDIR=./../Build/Output/ResourcesCache
 SGREGISTRATIONFILE=$(SGTEMPUNITDIR)/SaGeFileRegistrationResources.inc
 SAGE="./../Binaries/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
@@ -65,8 +65,8 @@ build_files:
 	@$(MAKE) clear_files
 	@$(SAGE) -bf "./../Build/BuildFiles.ini" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) $(SGREGISTRATIONFILE)
 clear_files:
-	@rm -f Sources/Temp/*.pas
-	@rm -f Sources/Temp/*.inc
+	@rm -f Output/Resources/*.pas
+	@rm -f Output/Resources/*.inc
 	@$(SAGE) -cfrr $(SGREGISTRATIONFILE)
 clear:
 	@rm -f $(OutputDirectory)/arm-android/*

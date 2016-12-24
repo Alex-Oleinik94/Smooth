@@ -1,6 +1,6 @@
 @echo off
+CALL _Create_Output_Directoryes
 cd ..
-if not exist Sources\Temp MKDIR Sources\Temp
-copy .\Sources\Includes\SaGeStandartFileRegistrationResources.inc .\Sources\Temp\SaGeFileRegistrationResources.inc
+copy .\Sources\Includes\SaGeStandartFileRegistrationResources.inc .\Output\Resources\SaGeFileRegistrationResources.inc
 cd Scripts
 if "%1"=="" ( pause )
