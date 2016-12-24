@@ -8,7 +8,7 @@ uses
 	,SaGeConsoleTools
 	
 	,SaGeResourceManager
-	{$INCLUDE SaGeRMFiles.inc}
+	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
 
 function TSGImage_Create:TSGImage;cdecl;

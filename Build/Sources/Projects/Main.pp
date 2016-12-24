@@ -27,7 +27,7 @@ uses
 		{$ENDIF}
 
 	,SaGeResourceManager
-	{$INCLUDE SaGeRMFiles.inc}
+	{$INCLUDE SaGeFileRegistrationResources.inc}
 
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary

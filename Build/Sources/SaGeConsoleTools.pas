@@ -111,7 +111,7 @@ procedure SGConsoleShowAllApplications                   (const VParams : TSGCon
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat    (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleBuild                                 (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleShaderReadWrite                       (const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleClearRFFile                           (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleClearFileRegistrationResources        (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleAddToLog                              (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleIncEngineVersion                      (const VParams : TSGConcoleCallerParams = nil);
@@ -291,7 +291,7 @@ if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[2]
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGErrorString,'"@dirname @outdirname @rffile"');
+	WriteLn(SGErrorString,'"@dir_name @out_dir_name @file_registration_resources_path"');
 	end;
 end;
 
@@ -413,10 +413,10 @@ else
 	end;
 end;
 
-procedure SGConsoleClearRFFile(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleClearFileRegistrationResources(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
-	SGClearRegistrationFile(VParams[0])
+	SGClearFileRegistrationResources(VParams[0])
 else
 	begin
 	SGPrintEngineVersion();
@@ -1964,7 +1964,7 @@ end;
 begin
 SGPrintEngineVersion();
 
-SetLength(ArF,10);
+SetLength(ArF,13);
 ArF[0]:='pas';
 ArF[1]:='pp';
 ArF[2]:='inc';
@@ -1975,6 +1975,9 @@ ArF[6]:='hpp';
 ArF[7]:='hxx';
 ArF[8]:='c';
 ArF[9]:='html';
+ArF[10]:='bat';
+ArF[11]:='cmd';
+ArF[12]:='sh';
 textcolor(15);
 
 if SGCountConsoleParams(VParams) <> 0 then
@@ -2202,7 +2205,7 @@ GeneralConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader 
 GeneralConsoleCaller.AddComand(@RunOtherEnginesConsoleProgramsConsoleCaller, ['oecp'], 'Other Engine''s Console Programs');
 GeneralConsoleCaller.Category('Build tools');
 GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
-GeneralConsoleCaller.AddComand(@SGConsoleClearRFFile, ['CRF'], 'Clear Registration File');
+GeneralConsoleCaller.AddComand(@SGConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
 GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');

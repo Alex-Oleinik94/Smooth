@@ -25,7 +25,7 @@ DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 SGTEMPUNITDIR=./../Build/Sources/Temp
 SGCACHEUNITDIR=./../Build/Sources/Temp/Cache
-SGREGISTRATIONFILE=$(SGTEMPUNITDIR)/SaGeRMFiles.inc
+SGREGISTRATIONFILE=$(SGTEMPUNITDIR)/SaGeFileRegistrationResources.inc
 SAGE="./../Binaries/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
 SG_TARGET_LIST=release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64
@@ -67,7 +67,7 @@ build_files:
 clear_files:
 	@rm -f Sources/Temp/*.pas
 	@rm -f Sources/Temp/*.inc
-	@$(SAGE) -crf $(SGREGISTRATIONFILE)
+	@$(SAGE) -cfrr $(SGREGISTRATIONFILE)
 clear:
 	@rm -f $(OutputDirectory)/arm-android/*
 	@rm -f $(OutputDirectory)/i386-library/*

@@ -150,10 +150,10 @@ const
 
 function SGConvertFileToPascalUnit(const FileName, UnitWay, NameUnit : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc; const ArrayType : TSGRMArrayType = SGRMArrayDefaultType) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGConvertFileToPascalUnit(const FileName, TempUnitPath, CacheUnitPath, UnitName : TSGString; const IsInc : TSGBoolean = SGConvertFileToPascalUnitDefaultInc) : TSGConvertedFileInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRegisterUnit(const UnitName, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGClearRegistrationFile(const RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, FileRegistrationResources : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterUnit(const UnitName, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGClearFileRegistrationResources(const FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteHexStringToStream(const S : TSGString; const Stream : TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -400,7 +400,7 @@ for i := 0 to High(FResources) do
 	ProcessResource(FResources[i]);
 end;
 
-procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, RegistrationFile : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Resources : TSGBuildResources;
 	Info : TSGConvertedFilesInfo;
@@ -410,7 +410,7 @@ if Resources.FTempDirectory = '' then
 	Resources.FTempDirectory := TempUnitDir;
 if Resources.FCacheDirectory = '' then
 	Resources.FCacheDirectory := CacheUnitDir;
-Info := Resources.Process(RegistrationFile);
+Info := Resources.Process(FileRegistrationResources);
 Resources.Clear();
 TextColor(15);
 Write('Build:');
@@ -418,7 +418,7 @@ TextColor(7);
 Info.Print();
 end;
 
-function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, RegistrationFile : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, FileRegistrationResources : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function IsBagSinbol(const Simbol : TSGChar):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -446,7 +446,7 @@ if CacheUnitPath = '' then
 	Result += SGConvertFileToPascalUnit(FileName, UnitsWay, UnitName)
 else
 	Result += SGConvertFileToPascalUnit(FileName, UnitsWay, CacheUnitPath, UnitName);
-SGRegisterUnit(UnitName, RegistrationFile);
+SGRegisterUnit(UnitName, FileRegistrationResources);
 end;
 
 procedure ProcessDirectoryFiles(const VDir : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -487,31 +487,31 @@ Result.Clear();
 ProcessDirectory(DirName);
 end;
 
-procedure SGClearRegistrationFile(const RegistrationFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGClearFileRegistrationResources(const FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 begin
-Stream := TFileStream.Create(RegistrationFile,fmCreate);
+Stream := TFileStream.Create(FileRegistrationResources, fmCreate);
 SGWriteStringToStream('(*This is part of SaGe Engine*)'+SGWinEoln,Stream,False);
-SGWriteStringToStream('//Registration file. Files:'+SGWinEoln,Stream,False);
+SGWriteStringToStream('//File registration resources. Files:'+SGWinEoln,Stream,False);
 Stream.Destroy();
 end;
 
-procedure SGRegisterUnit(const UnitName, RegistrationFile:TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterUnit(const UnitName, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream:TFileStream = nil;
 	MemStream:TMemoryStream = nil;
 	Exists : TSGBoolean = False;
 begin
 MemStream:=TMemoryStream.Create();
-MemStream.LoadFromFile(RegistrationFile);
+MemStream.LoadFromFile(FileRegistrationResources);
 MemStream.Position := 0;
 while (MemStream.Position <> MemStream.Size) and (not Exists) do
 	Exists := StringTrimAll(SGReadLnStringFromStream(MemStream),' 	,') = UnitName;
 if not Exists then
 	begin
 	SGWriteStringToStream('	,' + UnitName + SGWinEoln, MemStream, False);
-	MemStream.SaveToFile(RegistrationFile);
+	MemStream.SaveToFile(FileRegistrationResources);
 	end;
 MemStream.Destroy();
 end;
