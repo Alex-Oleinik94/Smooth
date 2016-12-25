@@ -21,6 +21,7 @@ function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORT
 procedure SGPackagesToMakefile(var Make : TSGMakefileReader);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIsPackageOpen(var Make : TSGMakefileReader;const PackageName : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -28,7 +29,6 @@ uses
 	crt
 	{$INCLUDE SaGeFileRegistrationPackages.inc}
 	;
-
 var
 	PackagesDrawClasses : TSGDrawClassesObjectList = nil;
 
@@ -43,6 +43,15 @@ const
 begin
 PathPrefix := Make.GetConstant('SGPACKAGESPATH') + '/';
 
+end;
+
+function SGIsPackageOpen(var Make : TSGMakefileReader;const PackageName : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	PackagesList : TSGStringList = nil;
+begin
+PackagesList := SGGetPackagesList(Make);
+Result := PackageName in PackagesList;
+SetLength(PackagesList, 0);
 end;
 
 procedure SGPackagesToMakefile(var Make : TSGMakefileReader);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

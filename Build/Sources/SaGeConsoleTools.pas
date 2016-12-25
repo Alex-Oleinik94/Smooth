@@ -564,6 +564,19 @@ SGRegisterUnit(
 	Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
 end;
 
+procedure ProcessPackages(var Make : TSGMakefileReader);
+var
+	i : TSGUInt32;
+begin
+if OpenPackages then
+	SGPackagesToMakefile(Make);
+if Packages <> nil then
+	if Length(Packages) > 0 then
+		for i := 0 to High(Packages) do
+			if not SGIsPackageOpen(Make, Packages[i]) then
+				SGPackageToMakefile(Make, Packages[i]);
+end;
+
 var
 	Make : TSGMakefileReader = nil;
 begin
@@ -586,7 +599,7 @@ if IsRelease then
 	end
 else
 	ProcessVersionFile(Make,'False');
-SGPackagesToMakefile(Make);
+ProcessPackages(Make);
 Make.Execute(Target);
 Make.Execute('clear_files');
 Make.Destroy();

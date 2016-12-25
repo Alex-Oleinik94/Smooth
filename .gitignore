@@ -16,7 +16,7 @@ Build/Output
 Build/Sources/*.o
 Build/Sources/*.a
 Build/Sources/*.ppu
-Build/Sources/Others/Imaging/*
+Build/ExternalSources/Imaging/*
 Build/*.ppu
 Build/*.o
 Build/Main.res
@@ -38,10 +38,6 @@ Binaries/Main_Release.exe
 Binaries/Main_Lazarus.exe
 Binaries/Main_Compressed.exe
 Binaries/d3dx9d_33.dll
-Others/DirectX/*.o
-Others/DirectX/*.ppu
-Others/DirectX/*.a
-Others/DirectX/*.exe
 Data/Images/*/*.png
 Data/Images/*.png
 Data/Images/*/*.jpg
