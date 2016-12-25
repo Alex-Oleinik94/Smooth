@@ -451,10 +451,156 @@ const
 		{$ELSE}
 			''
 			{$ENDIF};
+
+function ConsoleParam() : TSGString;
+begin
+Result := StringTrimAll(SGStringFromStringList(VParams,' '),' ');
+end;
+
+var
+	Target : TSGString = '';
+	Packages : TSGStringList = nil;
+	OpenPackages : TSGBool = False;
+
+function IsRelease() : TSGBool;
+begin
+Result := 
+	(SGUpCaseString(Target) = 'RELEASE') or
+	(SGUpCaseString(Target) = 'RELEASE_X64');
+end;
+
+function ReadParams(const Make : TSGMakefileReader) : TSGBool;
+
+procedure ReadError(const S : TSGString);
+begin
+WriteLn('Error simbol "', S, '"');
+Result := False;
+end;
+
+function GetPackageNameFromComandName(const C : TSGString) : TSGString;
+var
+	i : TSGUInt32;
+begin
+Result := '';
+if Length(C) > 1 then
+	begin
+	for i := 2 to Length(C) do
+		Result += C[i];
+	end;
+end;
+
+var
+	i : TSGUInt32;
+	AllTargets : TSGStringList;
+	S, SUP, P : TSGString;
+begin
+Result := True;
+AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
+if AllTargets <> nil then if Length(AllTargets) > 0 then
+	for i := 0 to High(AllTargets) do
+		AllTargets[i] := SGUpCaseString(StringTrimAll(AllTargets[i],' '));
+if ConsoleParam() = '' then
+	exit
+else 
+	if VParams <> nil then
+		if Length(VParams) > 0 then
+		begin
+		for i := 0 to High(VParams) do
+			begin
+			if (StringTrimLeft(VParams[i],'-') <> VParams[i]) then
+				begin
+				S := StringTrimLeft(VParams[i],'-');
+				SUP := SGUpCaseString(S);
+				if (SUP = 'PS') or
+				   (SUP = 'PACKAGES') or
+				   (SUP = 'PALL') then
+					OpenPackages := True
+				else
+					begin
+					if Length(SUP) > 0 then
+						begin
+						if SUP[1] = 'P' then
+							begin
+							P := GetPackageNameFromComandName(S);
+							if P = '' then
+								ReadError(VParams[i])
+							else
+								Packages += P;
+							end
+						else
+							ReadError(VParams[i]);
+						end
+					else
+						ReadError(VParams[i]);
+					end;
+				end
+			else
+				begin
+				if (SGUpCaseString(VParams[i]) in AllTargets) and (i = High(VParams)) then
+					begin
+					Target := VParams[i];
+					end
+				else
+					ReadError(VParams[i]);
+				end;
+			end;
+		end;
+SetLength(AllTargets, 0);
+end;
+
+procedure ExecuteBuild();
+
+procedure ProcessVersionFile(var Make : TSGMakefileReader; const ReleaseVersion : TSGString = 'False');
+begin
+SGConsoleIncEngineVersion(ReleaseVersion);
+SGConvertFileToPascalUnit(
+	Make.GetConstant('SGDATAPATH') + '/Engine/version.txt',
+	Make.GetConstant('SGRESOURCESPATH'),
+	Make.GetConstant('SGRESOURCESCACHEPATH'),
+	'SaGeVersionFile',
+	True).Print();
+SGRegisterUnit(
+	'SaGeVersionFile',
+	Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
+end;
+
+var
+	Make : TSGMakefileReader = nil;
+begin
+Make := TSGMakefileReader.Create('./Makefile');
+if not ReadParams(Make) then
+	begin
+	Make.Destroy();
+	WriteLn('Error while reading console params!');
+	Halt(1);
+	end;
+Make.Execute('clear_files');
+if IsRelease then
+	begin
+	SGBuildFiles(
+		Make.GetConstant('SGBUILDPATH') + '/BuildFiles.ini',
+		Make.GetConstant('SGRESOURCESPATH'),
+		Make.GetConstant('SGRESOURCESCACHEPATH'),
+		Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
+	ProcessVersionFile(Make,'True');
+	end
+else
+	ProcessVersionFile(Make,'False');
+SGPackagesToMakefile(Make);
+Make.Execute(Target);
+Make.Execute('clear_files');
+Make.Destroy();
+end;
+
 begin
 SGPrintEngineVersion();
-SGHint('Building SaGe...');
-ExecuteProcess(BuildComand,[]);
+TextColor(15);
+SGHint('===============================');
+SGHint('|Building SaGe from executable|');
+SGHint('===============================');
+TextColor(7);
+ExecuteBuild();
+SetLength(Packages, 0);
 end;
 
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

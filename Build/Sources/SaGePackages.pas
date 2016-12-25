@@ -10,6 +10,7 @@ uses
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeCommonUtils
+	,SaGeMakefileReader
 	
 	,Classes
 	;
@@ -17,6 +18,9 @@ uses
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPackagesToMakefile(var Make : TSGMakefileReader);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -27,6 +31,32 @@ uses
 
 var
 	PackagesDrawClasses : TSGDrawClassesObjectList = nil;
+
+procedure SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+
+end;
+
+function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+const
+	PathPrefix : TSGString = '';
+begin
+PathPrefix := Make.GetConstant('SGPACKAGESPATH') + '/';
+
+end;
+
+procedure SGPackagesToMakefile(var Make : TSGMakefileReader);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	PackagesList : TSGStringList = nil;
+	i : TSGUInt32;
+begin
+PackagesList := SGGetPackagesList(Make);
+if PackagesList <> nil then
+	if Length(PackagesList) > 0 then
+		for i := 0 to High(PackagesList) do
+			SGPackageToMakefile(Make, PackagesList[i]);
+SetLength(PackagesList, 0);
+end;
 
 function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

@@ -6,11 +6,13 @@ interface
 
 uses
 	 Classes
+	,crt
+	,SysUtils
+	
 	,SaGeMath
 	,SaGeBase
 	,SaGeBased
 	,StrMan
-	,crt
 	,SaGeVersion
 	,SaGeResourceManager
 	;
@@ -231,6 +233,7 @@ if i = TargetCount() then
 else if (FTargets[i].FComands <> nil) and (Length(FTargets[i].FComands) > 0) then
 	begin
 	for ii := 0 to High(FTargets[i].FComands) do
+		//ExecuteProcess(FTargets[i].FComands[ii].FAbsoluteIdentifier,[]);
 		SGRunComand(FTargets[i].FComands[ii].FAbsoluteIdentifier);
 	end;
 end;
