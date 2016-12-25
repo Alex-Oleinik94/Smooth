@@ -45,6 +45,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeFileOpener
 	,SaGeHash
+	,SaGePackages
 
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
@@ -295,6 +296,11 @@ else
 	end;
 end;
 
+procedure SGConsoleIsConsole(const VParams : TSGConcoleCallerParams = nil);
+begin
+Halt(TSGByte(SGIsConsole()));
+end;
+
 procedure SGConsoleHash(const VParams : TSGConcoleCallerParams = nil);
 begin
 SGConsoleHashFile(VParams[0]);
@@ -413,6 +419,17 @@ else
 	end;
 end;
 
+procedure SGConsoleClearFileRegistrationPackages(const VParams : TSGConcoleCallerParams = nil);
+begin
+if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
+	SGClearFileRegistrationPackages(VParams[0])
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'"@filename"');
+	end;
+end;
+
 procedure SGConsoleClearFileRegistrationResources(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
@@ -425,10 +442,19 @@ else
 end;
 
 procedure SGConsoleBuild(const VParams : TSGConcoleCallerParams = nil);
+const
+	BuildComand = 
+		{$IF defined(MSWINDOWS)}
+			'cmd.exe /C "cd ./../Build/Scripts & _Make_Debug.bat false false"'
+		{$ELSEIF defined(LINUX)}
+			''
+		{$ELSE}
+			''
+			{$ENDIF};
 begin
 SGPrintEngineVersion();
-WriteLn('Building SaGe...');
-SGRunComand('cmd /c "cd ./../Build & ./FPC_Make_Debug.cmd"');
+SGHint('Building SaGe...');
+ExecuteProcess(BuildComand,[]);
 end;
 
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1725,13 +1751,13 @@ with TSGDrawClasses.Create(Context) do
 	begin
 	Add(TSGNotepadApplication);
 	Add(TSGGasDiffusion);
-	Add(TSGAllFractals,False);
-	Add(TSGAllExamples,False);
+	Add(TSGAllExamples, False);
 	Add(TSGLoading);
 	Add(TSGGraphViewer);
 	Add(TSGKiller);
 	Add(TSGGenAlg);
-
+	
+	Add(SGGetRegisteredDrawClasses());
 	//Add(TSGUserTesting);
 	//Add(TSGGraphic);
 	//Add(TSGGraphViewer3D);
@@ -2206,12 +2232,14 @@ GeneralConsoleCaller.AddComand(@RunOtherEnginesConsoleProgramsConsoleCaller, ['o
 GeneralConsoleCaller.Category('Build tools');
 GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
 GeneralConsoleCaller.AddComand(@SGConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
+GeneralConsoleCaller.AddComand(@SGConsoleClearFileRegistrationPackages, ['Cfrp'], 'Clear File Registration Packages');
 GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
 GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
 GeneralConsoleCaller.Category('System tools');
 GeneralConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Print checksum for file');
+GeneralConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
 GeneralConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
 GeneralConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
 GeneralConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');

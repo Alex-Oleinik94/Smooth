@@ -10,4 +10,6 @@ make inc_version_debug
 make debug_x64
 @echo off
 make clear_files
-pause
+cd Scripts
+if "%2"=="" ( CALL _Check_Console )
+if "%1"=="" ( pause )

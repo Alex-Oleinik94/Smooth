@@ -20,6 +20,13 @@ uses
 const
 	SGDrawClassesComboBoxWidth = 300;
 type
+	TSGDrawClassesObject = object
+		public
+		FClass : TSGDrawableClass;
+		FDrawable : TSGBool;
+		end;
+	TSGDrawClassesObjectList = packed array of TSGDrawClassesObject;
+	
 	TSGDrawClasses = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
@@ -38,7 +45,8 @@ type
 		FComboBox2:TSGComboBox;
 			public
 		procedure Paint();override;
-		procedure Add(const NewClass:TSGDrawableClass; const Dravable : TSGBoolean = True);
+		procedure Add(const NewClasses:TSGDrawClassesObjectList);overload;
+		procedure Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
 		procedure Initialize();
 		procedure SwitchTo(const Index : TSGLongWord);
 			public
@@ -134,11 +142,21 @@ if FNowDrawable then
 	{$ENDIF}
 end;
 
-procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Dravable : TSGBoolean = True);
+procedure TSGDrawClasses.Add(const NewClasses:TSGDrawClassesObjectList);overload;
+var
+	i : TSGUInt32;
+begin
+if NewClasses <> nil then 
+	if Length(NewClasses) > 0 then
+		for i := 0 to High(NewClasses) do
+			Add(NewClasses[i].FClass, NewClasses[i].FDrawable);
+end;
+
+procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
 begin
 SetLength(FArClasses,Length(FArClasses)+1);
 FArClasses[High(FArClasses)].FClass:=NewClass;
-FArClasses[High(FArClasses)].FDrawable:=Dravable;
+FArClasses[High(FArClasses)].FDrawable:=Drawable;
 if FComboBox2 <> nil then
 	FComboBox2.Active:=Length(FArClasses) > 1;
 end;

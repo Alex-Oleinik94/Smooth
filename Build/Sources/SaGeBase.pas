@@ -35,15 +35,15 @@ uses
 {$IFDEF ANDROID}
 				{*========POSIX Thread=========*}
 	const
-	 PTHREAD_CREATE_JOINABLE = 0;
-	 PTHREAD_CREATE_DETACHED = 1;
+		PTHREAD_CREATE_JOINABLE = 0;
+		PTHREAD_CREATE_DETACHED = 1;
 	type
-	 ppthread_t = ^pthread_t;
-	 ppthread_attr_t = ^pthread_attr_t;
-	 ppthread_mutex_t = ^pthread_mutex_t;
-	 ppthread_cond_t = ^pthread_cond_t;
-	 ppthread_mutexattr_t = ^pthread_mutexattr_t;
-	 ppthread_condattr_t = ^pthread_condattr_t;
+		ppthread_t = ^pthread_t;
+		ppthread_attr_t = ^pthread_attr_t;
+		ppthread_mutex_t = ^pthread_mutex_t;
+		ppthread_cond_t = ^pthread_cond_t;
+		ppthread_mutexattr_t = ^pthread_mutexattr_t;
+		ppthread_condattr_t = ^pthread_condattr_t;
 
 	 __start_routine_t = pointer;
 	function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
@@ -465,6 +465,8 @@ operator + (a,b:TArReal):TArReal;inline;
 //Вызвать функцию, возвращающую прошедшые (мили)секунды
 //И получить разницу во времени этих дат в (мили)секундах
 operator - (const a,b:TSGDateTime):TSGDateTime;inline;
+
+function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function LoadLibrary(const AName : PChar): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function LoadLibrary(const AName : TSGString): TSGLibHandle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -3164,6 +3166,19 @@ end;
 function SGTruncUp(const t:real):LongInt;inline;
 begin
 Result:=Trunc(t)+1;
+end;
+
+function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+{$IF defined(MSWINDOWS)}
+	Result := IsConsole;
+{$ELSEIF defined(LINUX)}
+	Result := True;
+{$ELSEIF defined(ANDROID)}
+	Result := False;
+{$ELSE}
+	Result := False;
+{$ENDIF}
 end;
 
 destructor TSGLibrary.Destroy;

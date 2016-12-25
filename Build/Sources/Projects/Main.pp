@@ -13,12 +13,10 @@
 	library Main;
 	{$ENDIF}
 uses
-	{$IF defined(UNIX)}
-		{$IF defined(UseCThreads)}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and defined(UseCThreads)}
+		cthreads,
 		{$ENDIF}
-	SaGeBase
+	SaGeBase,crt,dos
 	,SaGeBased
 	,SaGeContext
 	,SysUtils

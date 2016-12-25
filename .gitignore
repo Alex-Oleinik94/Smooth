@@ -13,7 +13,6 @@ Temp
 Data/EngineLog.log
 Build/CompiledUnits
 Build/Output
-Build/Sources/Temp/*.pas
 Build/Sources/*.o
 Build/Sources/*.a
 Build/Sources/*.ppu

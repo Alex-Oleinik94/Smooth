@@ -13,4 +13,6 @@ make clear_files
 @echo off
 "./Utility/enigmavbconsole.exe" "./Utility/Main.evb"
 REM "./Utility/upx.exe" -9 -o ./../Binaries/Main_Release_2.exe ./../Binaries/Main_Release.exe
-pause
+cd Scripts
+if "%2"=="" ( CALL _Check_Console )
+if "%1"=="" ( pause )

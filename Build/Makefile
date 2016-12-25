@@ -5,6 +5,15 @@ RX32=-Pi386 -FU$(OutputDirectory)/i386-release-desktop
 RX64=-Px86_64 -FU$(OutputDirectory)/x86_64-release-desktop
 LX32=-Pi386 -FU$(OutputDirectory)/i386-library
 LX64=-Px86_64 -FU$(OutputDirectory)/x86_64-library
+SGBUILDPATH=./../Build
+SGBINARYPATH=./../Binaries
+SGDATAPATH=./../Data
+SGRESOURCESDIR=$(OutputDirectory)/Resources
+SGRESOURCESPATH=$(SGBUILDPATH)/$(SGRESOURCESDIR)
+SGRESOURCESCACHEDIR=$(OutputDirectory)/ResourcesCache
+SGRESOURCESCACHEPATH=$(SGBUILDPATH)/$(SGRESOURCESCACHEDIR)
+SGFILEREGISTRATIONRESOURCES=$(SGRESOURCESPATH)/SaGeFileRegistrationResources.inc
+SGFILEREGISTRATIONPACKAGES=$(SGRESOURCESPATH)/SaGeFileRegistrationPackages.inc
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
 DESKTOPFILENAME=Main
@@ -16,17 +25,14 @@ RENDERARGS= -FuSources/DirectX -FuSources/Others/DirectX/9 -FuSources/Others/Dir
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
 ANDROIDARGS= -FuSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuSources/Others/OpenGL
-OUTPUTDESKTOP= -FE./../Binaries
+OUTPUTDESKTOP= -FE$(SGBINARYPATH)
 OUTPUTANDROID= -FUOutput/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
 DESKTOPARGS= $(ARGS) $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
-SGTEMPUNITDIR=./../Build/Output/Resources
-SGCACHEUNITDIR=./../Build/Output/ResourcesCache
-SGREGISTRATIONFILE=$(SGTEMPUNITDIR)/SaGeFileRegistrationResources.inc
-SAGE="./../Binaries/$(DESKTOPFILENAME)"
+SAGE="$(SGBINARYPATH)/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
 SG_TARGET_LIST=release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64
 SG_TARGET=
@@ -57,17 +63,18 @@ ios:
 
 inc_version_debug:
 	@$(SAGE) -iv 0
-	@$(SAGE) -CCFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
+	@$(SAGE) -CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
 inc_version_release:
 	@$(SAGE) -iv 1
-	@$(SAGE) -CCFTPUARU "./../Data/Engine/version.txt" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) SaGeVersionFile $(SGREGISTRATIONFILE)
+	@$(SAGE) -CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
 build_files:
 	@$(MAKE) clear_files
-	@$(SAGE) -bf "./../Build/BuildFiles.ini" $(SGTEMPUNITDIR) $(SGCACHEUNITDIR) $(SGREGISTRATIONFILE)
+	@$(SAGE) -bf "$(SGBUILDPATH)/BuildFiles.ini" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) $(SGFILEREGISTRATIONRESOURCES)
 clear_files:
-	@rm -f Output/Resources/*.pas
-	@rm -f Output/Resources/*.inc
-	@$(SAGE) -cfrr $(SGREGISTRATIONFILE)
+	@rm -f $(SGRESOURCESDIR)/*.pas
+	@rm -f $(SGRESOURCESDIR)/*.inc
+	@$(SAGE) -cfrr $(SGFILEREGISTRATIONRESOURCES)
+	@$(SAGE) -cfrp $(SGFILEREGISTRATIONPACKAGES)
 clear:
 	@rm -f $(OutputDirectory)/arm-android/*
 	@rm -f $(OutputDirectory)/i386-library/*
