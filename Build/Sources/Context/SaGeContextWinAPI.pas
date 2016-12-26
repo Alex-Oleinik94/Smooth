@@ -156,7 +156,6 @@ const
 var
 	hBM : HBITMAP;
 	bm : PByte = nil;
-	i : TSGLongWord;
 begin
 Result := 0;
 hBM := CreateCompatibleBitmap(GetDC(0), SGCWAPI_Glassy_Cursor_Width, SGCWAPI_Glassy_Cursor_Height);
@@ -561,14 +560,13 @@ procedure TSGContextWinAPI.Initialize();
 
 procedure HandlingSizingFromRect();
 var
-	WRect, WCRect : Windows.TRect;
+	WRect : Windows.TRect;
 begin
 Windows.GetWindowRect(hWindow, WRect);
 FWidth  :=  WRect.Right  - WRect.Left;
 FHeight :=  WRect.Bottom - WRect.Top;
 FLeft := WRect.Left;
 FTop  := WRect.Top;
-WCRect  := GetClientWindowRect(dcWindow);
 FClientHeight := GetClientWindowRect(hWindow).bottom;
 FClientWidth  := GetClientWindowRect(hWindow).right;
 Resize();
@@ -618,7 +616,7 @@ function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMe
 
 procedure HandlingSizingFromRect(const PR : PRect = nil);
 var
-	WRect, WCRect : Windows.TRect;
+	WRect : Windows.TRect;
 	Shift : TSGPoint2int32;
 begin
 Shift := ShiftClientArea();
@@ -643,9 +641,6 @@ Resize();
 end;
 
 procedure HandlingSizingFromParam();
-var
-	mRect : Windows.TRect;
-	Shift : TSGPoint2int32;
 begin
 if FFullscreen then
 	begin

@@ -266,6 +266,7 @@ end;
 
 function TSGRender.MakeCurrent():Boolean;
 begin
+Result := False;
 SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited method!!');
 end;
 

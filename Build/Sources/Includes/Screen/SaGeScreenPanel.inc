@@ -2,14 +2,14 @@
 type
 	TSGPanel = class(TSGComponent, ISGPanel)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			protected
 		FViewLines : TSGBoolean;
 		FViewQuad  : TSGBoolean;
 		function ViewingLines() : TSGBoolean; virtual;
-		function ViewingQuad()  : TSGBoolean;  virtual;
+		function ViewingQuad()  : TSGBoolean; virtual;
 			public
 		procedure FromDraw;override;
 			public
@@ -26,11 +26,13 @@ end;
 
 function TSGPanel.ViewingLines() : TSGBoolean;
 begin
+Result := False;
 Result := ViewingLines;
 end;
 
 function TSGPanel.ViewingQuad() : TSGBoolean;
 begin
+Result := False;
 Result := ViewingQuad;
 end;
 

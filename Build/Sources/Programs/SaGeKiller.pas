@@ -77,11 +77,11 @@ type
 		FQuantitySkulls:LongWord;  //+
 		FSkullsNowPosition:LongWord; //+
 		
-		FGun:
+		{FGun:
 			packed record
 			//FType:Byte;
 			FTimeFire,FTimeRe,FPatrones,FPatronesAll,FPatronesNow:LongWord;
-			end; //-
+			end; //-}
 		
 		FBulletsGos:LongWord;
 		{$IFDEF MOBILE}
@@ -574,7 +574,7 @@ end;
 
 procedure TSGKiller.InitGame;
 var
-	i,ii,iii:LongWord;
+	i,ii:LongWord;
 	OldFR:TSGVertex2f = (x:0;y:0);
 begin
 FChanget:=True;
@@ -967,7 +967,7 @@ var
 	i,ii,iii:LongWord;
 	FDT:TSGDataTime;
 	Vtx1,Vtx2:TSGVertex2f;
-	Any,CP: TSGPoint2int32;
+	Any : TSGPoint2int32;
 begin
 if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) and (Context.KeyPressedByte=82) then	
 	Reset;

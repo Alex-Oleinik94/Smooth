@@ -382,7 +382,7 @@ var
 	FUniformShadow_lightMatrix : TSGLongWord = 0;
 	FUniformShadow_lightPos    : TSGLongWord = 0;
 	FUniformShadow_shadowMap   : TSGLongWord = 0;
-	FMVLightPos, FLightDir     : TSGVertex3f;
+	{FMVLightPos,} FLightDir     : TSGVertex3f;
 	FLightInverseModelViewMatrix : TSGMatrix4;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
@@ -432,7 +432,7 @@ else
 FShaderShadow.Use();
 Render.Uniform1i(FUniformShadow_shadowMap, 0);
 Render.UniformMatrix4fv(FUniformShadow_lightMatrix, 1, False, @FLightMatrix );
-FMVLightPos := FLightPos * FCameraModelViewMatrix;
+//FMVLightPos := FLightPos * FCameraModelViewMatrix;
 Render.Uniform3f(FUniformShadow_lightPos, FLightPos.x, FLightPos.y, FLightPos.z);
 FLightDir := (FLightEye - FLightPos).Normalized();
 Render.Uniform3f(FUniformShadow_lightDir, FLightDir.x, FLightDir.y, FLightDir.z);

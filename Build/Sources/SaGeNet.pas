@@ -92,7 +92,7 @@ implementation
 function SGGetSelfIP():String;
 var 
 	Response : String = '';
-	i,ii,iii : LongInt;
+	i,iii : LongInt;
 begin
 Response := SGMemoryStreamToString(SGGetFromHTTP('http://checkip.dyndns.org/'),True);
 Result := '';
@@ -141,7 +141,6 @@ function SGSetDynamicIPToStaticServerWithCurl(const DynamicIP:String;const Stati
 var
 	a : TProcess;
 	s : TStringList;
-	i : LongWord;
 begin
 a := TProcess.Create(nil);
 a.Executable := 'curl';

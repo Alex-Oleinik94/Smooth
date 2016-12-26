@@ -1122,13 +1122,11 @@ end;
 
 function SGConvertAnsiToASCII(const s:TSGString):TSGString;
 var
-	i,ii,iii:TSGLongWord;
+	i : TSGUInt32;
 begin
-Result:='';
-for i:=1 to Length(s) do
-	begin
-	Result+=SGAnsiToASCII[s[i]];
-	end;
+Result := '';
+for i:= 1 to Length(S) do
+	Result += SGAnsiToASCII[S[i]];
 end;
 
 function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
@@ -1686,16 +1684,16 @@ i:=L;
 j:=R;
 GetMem(Key,SizeOfElement);
 GetMem(Temp,SizeOfElement);
-Move(PByte(LongWord(@Arr)+((L+R)div 2)*SizeOfElement)^,Key^,SizeOfElement);
+Move(PByte(TSGMaxEnum(@Arr)+((L+R)div 2)*SizeOfElement)^,Key^,SizeOfElement);
 repeat
-while SGQSF(SortFunction)(PByte(LongWord(@Arr)+i*SizeOfElement)^,Key^) do i+=1;
-while SGQSF(SortFunction)(Key^,PByte(LongWord(@Arr)+j*SizeOfElement)^) do j-=1;
+while SGQSF(SortFunction)(PByte(TSGMaxEnum(@Arr)+i*SizeOfElement)^,Key^) do i+=1;
+while SGQSF(SortFunction)(Key^,PByte(TSGMaxEnum(@Arr)+j*SizeOfElement)^) do j-=1;
 if i<=j then
 	begin
-	Move(PByte(LongWord(@Arr)+i*SizeOfElement)^,Temp^,SizeOfElement);
-	Move(PByte(LongWord(@Arr)+j*SizeOfElement)^,
-		 PByte(LongWord(@Arr)+i*SizeOfElement)^,SizeOfElement);
-	Move(Temp^,PByte(LongWord(@Arr)+j*SizeOfElement)^,SizeOfElement);
+	Move(PByte(TSGMaxEnum(@Arr)+i*SizeOfElement)^,Temp^,SizeOfElement);
+	Move(PByte(TSGMaxEnum(@Arr)+j*SizeOfElement)^,
+		 PByte(TSGMaxEnum(@Arr)+i*SizeOfElement)^,SizeOfElement);
+	Move(Temp^,PByte(TSGMaxEnum(@Arr)+j*SizeOfElement)^,SizeOfElement);
 	i+=1;
 	j-=1;
 	end;

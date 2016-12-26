@@ -383,7 +383,7 @@ end;
 
 procedure SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
 var
-	i, ii : TSGLongWord;
+	ii : TSGLongWord;
 begin
 ii := 0;
 if (VParams <> nil) then
@@ -402,7 +402,7 @@ end;
 
 procedure SGConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSGConcoleCallerParams = nil);
 var
-	i, ii : TSGLongWord;
+	ii : TSGLongWord;
 begin
 ii := 0;
 if (VParams <> nil) then
@@ -965,8 +965,6 @@ CheckForLastComand();
 end;
 
 procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	i : TSGLongWord;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -981,8 +979,6 @@ CheckForLastComand();
 end;
 
 procedure TSGConsoleCaller.AddComand(const VNestedComand : TSGConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSGConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	i : TSGLongWord;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -1986,7 +1982,7 @@ var
 	Oy:LongWord;
 	PF,PS:LongWord;
 	FArF:packed array of TFileStream = nil;
-	i,ii,iii:LongWord;
+	i,ii:LongWord;
 	ArF:packed array of string = nil;
 	FDir:string = '.';
 var

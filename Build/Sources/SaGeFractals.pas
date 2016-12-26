@@ -241,8 +241,6 @@ Screen.LastChild.Visible:=True;
 end;
 
 procedure TSG3DFractal.ClearMesh;inline;
-var
-	i : TSGLongWord;
 begin
 SetLength(FMeshesInfo, 0);
 FMeshesReady := False;

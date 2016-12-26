@@ -2193,8 +2193,6 @@ FArObjects := nil;
 end;
 
 destructor TSGCustomModel.Destroy();
-var
-    i: TSGLongWord;
 begin
 Clear();
 inherited;

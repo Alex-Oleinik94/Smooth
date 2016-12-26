@@ -126,7 +126,7 @@ var
 	ObjArAllVertexes : packed array of array[0..2] of TSGLongWord = nil;
 	ObjQuantityAllVertexes : TSGLongWord;
 	ObjArNormalFaces : packed array of array[0..2] of TSGLongWord = nil;
-	ObjQuantityNormalFaces : TSGLongWord;
+	//ObjQuantityNormalFaces : TSGLongWord;
 
 function ExistsVertex(const f1,f2,f3:TSGLongWord):TSGInt64;register;
 var
@@ -150,7 +150,7 @@ var
 	i, ii, iii : TSGLongWord;
 begin
 ObjQuantityAllVertexes:=0;
-ObjQuantityNormalFaces:=0;
+//ObjQuantityNormalFaces:=0;
 SetLength(ObjArNormalFaces,ObjQuantityFaces);
 for i := 0 to ObjQuantityFaces-1 do
 	for ib := 0 to 2 do 

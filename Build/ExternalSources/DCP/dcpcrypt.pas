@@ -2,6 +2,9 @@
   This source is only used to compile and install the package.
  }
 
+{$WARNINGS OFF}
+{$NOTES OFF}
+{$HINTS OFF}
 unit dcpcrypt; 
 
 interface

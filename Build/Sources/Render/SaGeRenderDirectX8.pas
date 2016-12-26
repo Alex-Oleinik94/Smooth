@@ -829,8 +829,7 @@ if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTextur
 end;
 
 procedure TSGRenderDirectX8.TexParameteri(const VP1,VP2,VP3:Cardinal);
-var
-	Caps : D3DCAPS8;
+//var Caps : D3DCAPS8;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexParameteri'); {$ENDIF}
 {!!
@@ -1151,8 +1150,7 @@ procedure TSGRenderDirectX8.DrawElements(
 	const VSize:int64;// не в байтах а в 4*байт
 	const VParam2:Cardinal;
 	VBuffer:Pointer);
-var
-	VertexManipulator:TSGRDXVertexDeclarationManipulator = nil;
+//var VertexManipulator:TSGRDXVertexDeclarationManipulator = nil;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DrawElements'); {$ENDIF}
 if (VBuffer<>nil) or (not FEnabledClientStateVertex) then
@@ -1207,7 +1205,7 @@ end;
 
 procedure TSGRenderDirectX8.DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
 var
-	VertexManipulator : TSGRDXVertexDeclarationManipulator = nil;
+	//VertexManipulator : TSGRDXVertexDeclarationManipulator = nil;
 	BeginArray:TSGMaxEnum;
 	VertexType:LongWord = D3DFVF_XYZ;
 begin
@@ -1346,8 +1344,7 @@ pDevice.EndScene();
 end;
 
 procedure TSGRenderDirectX8.Init();
-var
-	VectorDir:D3DXVECTOR3;
+//var VectorDir:D3DXVECTOR3;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Init'); {$ENDIF}
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);

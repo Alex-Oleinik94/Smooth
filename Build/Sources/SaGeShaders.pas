@@ -121,7 +121,6 @@ end;
 
 function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	i : TSGLongWord;
 	FileParams : TSGShaderParams;
 begin
 Result:='';
@@ -379,7 +378,7 @@ end;
 
 function TSGShaderReader.ProcessString(const VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i, ii, iii : TSGLongWord;
+	i, ii : TSGLongWord;
 	S : TSGString;
 begin
 Result := '';
@@ -680,8 +679,6 @@ function TSGShaderReader.ProcessCustomString(const S : TSGString; const Stream :
 var
 	C, S1, CS : TSGString;
 	Params : TSGShaderParams;
-	CH : TSGChar;
-	ii : TSGLongWord;
 begin
 Result := '';
 C := FindComand(S,Params,CS);
@@ -797,8 +794,6 @@ var
 	InfoLogLength:LongInt = 0;
 	InfoLog:PChar = nil;
 	CharsWritten:LongInt  = 0;
-var
-	Success:Boolean = False;
 begin
 Render.GetObjectParameteriv(FShader, SGR_INFO_LOG_LENGTH,@InfoLogLength);
 if InfoLogLength>0 then
@@ -812,7 +807,6 @@ end;
 procedure TSGShader.Sourse(const s:string);
 var
 	pc:PChar = nil;
-	pcl:integer = 0;
 begin
 {$IFDEF SG_DEBUG_SHADERS}
 SGLog.Sourse('TSGShader.Sourse : Begin to sourse shader "'+SGStr(FShader)+'"');// : "'+s+'"');

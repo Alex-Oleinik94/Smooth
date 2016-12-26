@@ -198,8 +198,8 @@ end;
 
 procedure TSGLoading.CallAction();
 var
-	i,ii,iii :    TSGWord;
-	iiii :        TSGSingle;
+	i, iii : TSGWord;
+	iiii   : TSGSingle;
 begin
 for i:=0 to FCountLines-1 do
 	begin
@@ -280,7 +280,7 @@ end;
 
 destructor TSGLoading.Destroy();
 var
-	i,ii : TSGWord;
+	i : TSGWord;
 begin
 if FArrayOfLines<>nil then
 	begin

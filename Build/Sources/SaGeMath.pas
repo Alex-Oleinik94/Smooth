@@ -1410,9 +1410,8 @@ var
 		Length:LongWord;
 		ToExit:Boolean;
 		end;
-function ProvSk:Boolean;
+function ProvSk() : TSGBoolean;
 var
-	ii,iii:LongWord;
 	Ar:packed array of char;
 begin
 Result:=True;

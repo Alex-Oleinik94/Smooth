@@ -108,7 +108,7 @@ const
 	tttt = 18;
 var
 	Gauss : TSGLineSystem = nil;
-	i, ii, iii : LongWord;
+	i, ii : LongWord;
 begin with TSGApprFunction(Self.FUserPointer1) do begin
 Gauss := TSGLineSystem.Create(n);
 for i:=0 to n-1 do
@@ -130,12 +130,10 @@ end;end;
 
 procedure InitGraphicView();
 var
-	SrX,SrY,r : TSGSingle;
+	SrY,r : TSGSingle;
 	i : TSGLongWord;
 begin with TSGApprFunction(Self.FUserPointer1) do begin
 r := abs(MaxAB-MinAB);
-SrX:=(MaxAB+MinAB)/2;
-SrY:=0;
 for i := 0 to High(FArPoints) do
 	SrY += FArPoints[i].y;
 SrY /= Length(FArPoints);

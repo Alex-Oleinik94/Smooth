@@ -1253,8 +1253,7 @@ pDevice.EndScene();
 end;
 
 procedure TSGRenderDirectX9.Init();
-var
-	VectorDir:D3DXVECTOR3;
+//var VectorDir:D3DXVECTOR3;
 begin
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
@@ -1443,7 +1442,7 @@ end;
 
 procedure TSGRenderDirectX9.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 var
-	Matrix,Matrix1,Matrix2:D3DMATRIX;
+	Matrix{,Matrix1,Matrix2}:D3DMATRIX;
 begin
 if x0<x1 then
 	if y0<y1 then

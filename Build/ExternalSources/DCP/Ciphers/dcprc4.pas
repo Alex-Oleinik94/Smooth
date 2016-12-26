@@ -22,6 +22,9 @@
 {* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER        *}
 {* DEALINGS IN THE SOFTWARE.                                                  *}
 {******************************************************************************}
+{$WARNINGS OFF}
+{$NOTES OFF}
+{$HINTS OFF}
 unit DCPrc4;
 
 {$MODE Delphi}

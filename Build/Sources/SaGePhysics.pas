@@ -277,8 +277,6 @@ FType:=0;
 end;
 
 destructor TSGPhysicsObject.Destroy();
-var
-	i : TSGLongWord;
 begin
 if FMesh<>nil then
 	FMesh.Destroy();

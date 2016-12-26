@@ -116,7 +116,7 @@ for i := Length(IName) to iii do
 end;
 
 var
-	i, ii, ln, lc : TSGInt32;
+	i, ii, {ln,} lc : TSGInt32;
 	S : TSGString;
 	SL : TSGStringList;
 begin

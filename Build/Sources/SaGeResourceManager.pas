@@ -67,7 +67,7 @@ type
 	TSGResourceFilesProcedure = procedure (const Stream:TStream);
 	TSGResourceFiles = class(TSGClass)
 			public
-		constructor Create();
+		constructor Create();override;
 		destructor Destroy();override;
 			public
 		procedure AddFile(const FileWay:TSGString;const Proc : TSGPointer);
@@ -627,7 +627,7 @@ var
 	ArrayLength : TSGUInt64;
 	OtherLength : TSGUInt64;
 	i, ii, iii : TSGUInt32;
-	j, jj, jjj : TSGUInt32;
+	j : TSGUInt32;
 	S : TSGString;
 begin
 ArrayLength := ThisStep div 8;
@@ -768,7 +768,6 @@ end;
 function CheckForEqualFileHashes(const Hash_MD5, Hash_SHA256, OutputFileName : TSGString) : TSGBoolean;
 var
 	Stream : TStream;
-	MD5, SHA256 : TSGString;
 	i : TSGUInt16;
 begin
 Result := False;

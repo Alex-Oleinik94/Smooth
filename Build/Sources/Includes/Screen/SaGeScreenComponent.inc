@@ -39,8 +39,8 @@ type
 		function GetEnumerator(): TSGComponentEnumerator;
 		function GetReverseEnumerator: TSGComponentEnumerator;
 			private
-		function GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
-		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
+		function GetOption(const VName : TSGString) : TSGPointer;virtual;
+		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;
 			public
 			// ISGDeviceDependent declaration
 		procedure Paint(); virtual;
@@ -923,6 +923,15 @@ for Component in Self do
 	Component.LoadDeviceResources();
 end;
 
+function TSGComponent.GetOption(const VName : TSGString) : TSGPointer;
+begin
+Result := nil;
+end;
+
+procedure TSGComponent.SetOption(const VName : TSGString; const VValue : TSGPointer);
+begin
+end;
+
 function TSGComponent.Suppored() : TSGBoolean;
 begin
 Result := True;
@@ -962,7 +971,7 @@ end;
 
 procedure TSGComponent.ClearPriority();
 var
-	i,ii:TSGMaxEnum;
+	ii : TSGMaxEnum;
 begin
 FChildrenPriority:=0;
 if FParent<>nil then
@@ -985,7 +994,7 @@ end;
 
 procedure TSGComponent.MakePriority();
 var
-	i, ii : TSGMaxEnum;
+	ii : TSGMaxEnum;
 begin
 if FParent<>nil then
 	begin

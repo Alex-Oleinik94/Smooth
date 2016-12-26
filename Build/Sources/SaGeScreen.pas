@@ -193,8 +193,6 @@ if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 end;
 
 procedure TSGScreen.CustomPaint(VCanReplace : TSGBool);
-var
-	i : TSGLongWord;
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}

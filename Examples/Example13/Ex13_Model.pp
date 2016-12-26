@@ -460,7 +460,7 @@ end;
 procedure TSkelAnimState.Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSGBoolean);
 var
 	Delta : TSGFloat;
-	i, j, k : TIndex;
+	i : TIndex;
 begin
 if Length(FCurrentPos.FBones) = 0 then
 	Exit;

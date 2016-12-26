@@ -101,8 +101,8 @@ end;
 
 procedure TSGGA.ToValue(var Hromosoma:TSGGAHromosoma);
 var
-	i,ii,iii:LongWord;
-	A,B,C:TSGGAValueType;
+	i{,ii,iii}:LongWord;
+	{A,B,}C:TSGGAValueType;
 begin
 (*Jorjies*)
 C:=Abs(Interval.A+Interval.B);
@@ -138,7 +138,7 @@ end;
 
 procedure TSGGA.ToBits(var Hromosoma:TSGGAHromosoma);
 var
-	i,ii,iii:LongWord;
+	i{,ii,iii}:LongWord;
 	A,B,C:TSGGAValueType;
 begin
 //writeln(Hromosoma.FValue:0:10);
@@ -426,7 +426,7 @@ end;
 
 function SGGA.Mutation(const a:TSGGAHromosoma):TSGGAHromosoma;
 var
-	i,ii,iii,iiii,iiiii:LongWord;
+	i{,ii},iii,iiii,iiiii:LongWord;
 
 function R(const a,b:Byte):Byte;
 begin
