@@ -499,7 +499,6 @@ end;
 
 procedure SGRegisterUnit(const UnitName, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	Stream:TFileStream = nil;
 	MemStream:TMemoryStream = nil;
 	Exists : TSGBoolean = False;
 begin

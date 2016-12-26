@@ -72,6 +72,10 @@ type
 		property Current : TSGMRTarget read GetCurrent;
 		end;
 	
+	TSGMRIdentifierType = (
+		SGMRIdentifierTypeAbsolute,
+		SGMRIdentifierTypeDependent);
+	
 	TSGMakefileReader = class(TSGClass)
 			public
 		constructor Create(const VFileName : TSGString);
@@ -86,8 +90,10 @@ type
 		procedure Read();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ProcessString(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function IndexOfTarget(const VName : TSGString):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure RecombineIdentifiers();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		function GetConstant(S : TSGString): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetConstant(S : TSGString;const IdentifierType : TSGMRIdentifierType = SGMRIdentifierTypeAbsolute): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetConstant(const Name, Value : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetTarget(const VName : TSGString):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function TargetCount() : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -214,6 +220,7 @@ var
 	Target : TSGString;
 	i, ii : TSGLongWord;
 begin
+RecombineIdentifiers();
 Target := SGUpCaseString(VTarget);
 i := TargetCount();
 if VTarget = '' then
@@ -294,7 +301,25 @@ if TargetCount() > 0 then
 	end;
 end;
 
-function TSGMakefileReader.GetConstant(S : TSGString): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGMakefileReader.SetConstant(const Name, Value : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	UpCasedName : TSGString;
+	i : TSGUInt32;
+begin
+UpCasedName := SGUpCaseString(Name);
+if (FConstants <> nil) and (Length(FConstants)>0) then
+	begin
+	for i := 0 to High(FConstants) do
+		if FConstants[i].FName = UpCasedName then
+			begin
+			FConstants[i].FIdentifier.FDependentIdentifier := 
+				Value;
+			break;
+			end;
+	end;
+end;
+
+function TSGMakefileReader.GetConstant(S : TSGString;const IdentifierType : TSGMRIdentifierType = SGMRIdentifierTypeAbsolute): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGLongWord;
 begin
@@ -309,7 +334,10 @@ else if (FConstants <> nil) and (Length(FConstants)>0) then
 	for i := 0 to High(FConstants) do
 		if FConstants[i].FName = S then
 			begin
-			Result := FConstants[i].FIdentifier.FAbsoluteIdentifier;
+			if IdentifierType = SGMRIdentifierTypeAbsolute then
+				Result := FConstants[i].FIdentifier.FAbsoluteIdentifier
+			else
+				Result := FConstants[i].FIdentifier.FDependentIdentifier;
 			break;
 			end;
 	end;
@@ -367,6 +395,25 @@ while i <= Length(S) do
 	end;
 end;
 
+procedure TSGMakefileReader.RecombineIdentifiers();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, ii : TSGUInt32;
+begin
+if FConstants <> nil then
+	if Length(FConstants) > 0 then
+		for i := 0 to High(FConstants) do
+			FConstants[i].FIdentifier.FAbsoluteIdentifier := 
+				ProcessString(FConstants[i].FIdentifier.FDependentIdentifier);
+if FTargets <> nil then
+	if Length(FTargets) > 0 then
+		for i := 0 to High(FTargets) do
+			if FTargets[i].FComands <> nil then
+				if Length(FTargets[i].FComands) > 0 then
+					for ii := 0 to High(FTargets[i].FComands) do
+						FTargets[i].FComands[ii].FAbsoluteIdentifier :=
+							SGDeleteExcessSpaces(ProcessString(FTargets[i].FComands[ii].FDependentIdentifier))
+end;
+
 procedure TSGMakefileReader.Read();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream : TMemoryStream;
@@ -390,7 +437,7 @@ while Stream.Position <> Stream.Size do
 			with FComands[High(FComands)] do
 				begin
 				FDependentIdentifier := StringTrimLeft(SGDeleteExcessSpaces(S),'@');
-				FAbsoluteIdentifier := SGDeleteExcessSpaces(ProcessString(FDependentIdentifier));
+				FAbsoluteIdentifier := '';
 				end;
 			end;
 		end
@@ -404,7 +451,7 @@ while Stream.Position <> Stream.Size do
 			begin
 			FName := SGUpCaseString(StringWordGet(S,'=',1));
 			FIdentifier.FDependentIdentifier := StringWordGet(S,'=',2);
-			FIdentifier.FAbsoluteIdentifier := ProcessString(FIdentifier.FDependentIdentifier);
+			FIdentifier.FAbsoluteIdentifier := '';
 			end;
 		end
 	else if (Length(StringTrimLeft(S,' 	')) = Length(S)) and (S = StringWordGet(S,':',1) + ':') then

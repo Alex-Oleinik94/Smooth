@@ -16,7 +16,7 @@ uses
 	{$IF defined(UNIX) and defined(UseCThreads)}
 		cthreads,
 		{$ENDIF}
-	SaGeBase,crt,dos
+	SaGeBase
 	,SaGeBased
 	,SaGeContext
 	,SysUtils

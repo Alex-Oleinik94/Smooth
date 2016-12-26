@@ -12,7 +12,17 @@ uses
 	,SaGePackages
 	,SaGeCommonClasses
 	,SaGeCommonUtils
+	,SaGeScreen
+	,SaGeCommon
+	,SaGeUtils
+	,SaGeImages
+	,SaGeScreenBase
+	,SaGeRender
+	,SaGeRenderConstants
+	,SaGeImagesBase
+	,SaGeMesh
 	
+	,Crt
 	,Classes
 	;
 

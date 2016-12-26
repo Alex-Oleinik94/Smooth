@@ -727,11 +727,22 @@ procedure SGPrintStackTrace();
 procedure SGPrintExceptionStackTrace(const e : Exception);
 procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
 procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
+procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');
 
 implementation
 
 uses
 	StrMan;
+
+procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');
+var
+	i : TSGUInt32;
+begin
+if SL <> nil then
+	if Length(SL) > 0 then
+		for i := 0 to High(SL) do
+			SL[i] := StringTrimAll(SL[i], Garbage);
+end;
 
 procedure SGPrintExceptionStackTrace(const e : Exception);
 var
