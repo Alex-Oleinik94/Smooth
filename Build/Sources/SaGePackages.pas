@@ -103,7 +103,7 @@ var
 begin
 Result := False;
 PackageInfo := SGGetPackageInfo(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName);
-if PackageInfo.FName = PackageName then
+if SGUpCaseString(PackageInfo.FName) = SGUpCaseString(PackageName) then
 	begin
 	if SGPackagesToMakefile(Make, PackageInfo.FDependingPackages) then
 		begin
@@ -111,20 +111,20 @@ if PackageInfo.FName = PackageName then
 		for Str in PackageInfo.FSourcesPaths do
 			Make.SetConstant(
 				'BASEARGS', 
-				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fu' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/' + Str + ' ');
+				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fu' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/' + Str + ' ');
 		for Str in PackageInfo.FIncludesPaths do
 			Make.SetConstant(
 				'BASEARGS', 
-				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/' + Str + ' ');
+				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/' + Str + ' ');
 		Make.RecombineIdentifiers();
 		SGRegisterPackage(PackageInfo, Make.GetConstant('SGFILEREGISTRATIONPACKAGES'));
-		if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/BuildFiles.ini') then
+		if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini') then
 			SGBuildFiles(
-				Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/BuildFiles.ini',
+				Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini',
 				Make.GetConstant('SGRESOURCESPATH'),
 				Make.GetConstant('SGRESOURCESCACHEPATH'),
 				Make.GetConstant('SGFILEREGISTRATIONRESOURCES'),
-				PackageName);
+				PackageInfo.FName);
 		end;
 	end;
 PackageInfo.Clear();
