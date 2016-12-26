@@ -17,6 +17,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeRenderConstants
 	,SaGeScreenBase
+	,SaGePackages
 	;
 
 type
@@ -1255,6 +1256,11 @@ if not FActive then
 	Render.Vertex2f(0,Context.Height);
 	Render.EndScene();
 	end;
+end;
+
+initialization
+begin
+SGRegisterDrawClass(TSGKiller);
 end;
 
 end.

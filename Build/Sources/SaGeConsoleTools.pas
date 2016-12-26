@@ -31,7 +31,6 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommonUtils
 	,SaGeFractals
 	,SaGeUtils
@@ -50,15 +49,10 @@ uses
 	(* ============ Additional Engine Includes ============ *)
 	,SaGeFPCToC
 	,SaGeModelRedactor
-	,SaGeGasDiffusion
 	,SaGeClientWeb
-	,SaGeGeneticalAlgoritm
-	,SaGeAllExamples
 	,SaGeUserTesting
 	,SaGeTron
 	,SaGeLoading
-	,SaGeNotepad
-	,SaGeKiller
 	;
 
 const
@@ -491,14 +485,18 @@ end;
 
 var
 	i : TSGUInt32;
-	AllTargets : TSGStringList;
+	AllTargets : TSGStringList = nil;
 	S, SUP, P : TSGString;
 begin
 Result := True;
+WriteLn(Make.GetConstant('SG_TARGET_LIST'));
 AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
 if AllTargets <> nil then if Length(AllTargets) > 0 then
 	for i := 0 to High(AllTargets) do
+		begin
 		AllTargets[i] := SGUpCaseString(StringTrimAll(AllTargets[i],' '));
+		WriteLn(AllTargets[i]);
+		end;
 if ConsoleParam() = '' then
 	exit
 else 
@@ -574,7 +572,7 @@ if Packages <> nil then
 	if Length(Packages) > 0 then
 		for i := 0 to High(Packages) do
 			if not SGIsPackageOpen(Make, Packages[i]) then
-				SGPackageToMakefile(Make, Packages[i]);
+				SGPackageToMakefile(Make, Packages[i], IsRelease);
 end;
 
 var
@@ -1904,18 +1902,10 @@ inherited Create(VContext);
 
 with TSGDrawClasses.Create(Context) do
 	begin
-	Add(TSGNotepadApplication);
-	Add(TSGGasDiffusion);
-	Add(TSGAllExamples, False);
 	Add(TSGLoading);
-	Add(TSGGraphViewer);
-	Add(TSGKiller);
-	Add(TSGGenAlg);
 	
 	Add(SGGetRegisteredDrawClasses());
 	//Add(TSGUserTesting);
-	//Add(TSGGraphic);
-	//Add(TSGGraphViewer3D);
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
 	//Add(TSGModelRedactor);

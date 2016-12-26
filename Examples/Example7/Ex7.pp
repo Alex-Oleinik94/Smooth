@@ -20,7 +20,7 @@ uses
 	,SaGeScreen
 	,SaGeUtils
 	,SaGeMath
-	,SaGeExamples
+	,SaGeGraphicViewer
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeScreenBase

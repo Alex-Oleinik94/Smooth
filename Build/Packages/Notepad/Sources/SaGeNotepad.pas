@@ -7,20 +7,22 @@ interface
 uses 
 	 crt
 	,SysUtils
+	,Classes
+	,StrMan
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeContext
 	,SaGeScreen
-	,SaGeUtils
-	,Classes
 	,SaGeCommon
 	,SaGeRender
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager
-	,StrMan
 	,SaGeScreenBase
+	,SaGeUtils
+	,SaGePackages
 	;
 
 type
@@ -470,6 +472,11 @@ end;
 procedure TSGNotepad.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
 begin
 inherited;
+end;
+
+initialization
+begin
+SGRegisterDrawClass(TSGNotepadApplication);
 end;
 
 end.

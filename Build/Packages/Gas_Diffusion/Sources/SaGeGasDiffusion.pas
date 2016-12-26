@@ -8,8 +8,9 @@ interface
 uses
 	 dos
 	,SysUtils
-	,SaGeBase
 	,Classes
+	
+	,SaGeBase
 	,SaGeBased
 	,SaGeMesh
 	,SaGeContext
@@ -22,6 +23,7 @@ uses
 	,SaGeImagesBase
 	,SaGeGasDiffusionReliefRedactor
 	,SaGeScreenBase
+	,SaGePackages
 	;
 
 const
@@ -3807,6 +3809,11 @@ else if FDiffusionRuned then
 	if (FMesh<>nil) and (FMesh.LastObject()<>nil) then
 		FInfoLabel.Caption:=FInfoLabel.Caption+'Итерация: "'+SGStr(FNowCadr)+'", Количество точек: "'+SGStr(FCube.FDinamicQuantityMoleculs)+'"'
 	end;
+end;
+
+initialization
+begin
+SGRegisterDrawClass(TSGGasDiffusion);
 end;
 
 end.

@@ -1,31 +1,24 @@
 {$INCLUDE SaGe.inc}
-
-unit SaGeExamples;
-
+Unit SaGeGraphicViewer;
 interface
-uses
-	 SaGeCommon
-	,Classes
-	,SaGeMesh
-	,SaGeFractals
-	,SaGeUtils
-	,SaGeContext
-	,SaGeScreen
-	,SaGeNet
-	,SaGeMath
-	,SaGeGeneticalAlgoritm
+uses 
+	crt
 	,SaGeBase
 	,SaGeBased
-	,SaGeRender
+	,SaGeGeneticalAlgoritm
+	,SaGeScreen
+	,SaGeCommonClasses
+	,SaGeFractals
+	,SaGeCommon
+	,SaGeMath
 	,SaGeImages
 	,SaGeRenderConstants
-	,SaGeCommonClasses
-	,SaGeScreenBase
+	,SaGeMesh
+	,SaGePackages
 	;
 
 {$DEFINE SGREADINTERFACE}
 {$INCLUDE SaGeExampleGraphViewer.inc}
-{$INCLUDE SaGeExampleGeneticalAlgoritm.inc}
 {$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADINTERFACE}
 
@@ -33,8 +26,17 @@ implementation
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$INCLUDE SaGeExampleGraphViewer.inc}
-{$INCLUDE SaGeExampleGeneticalAlgoritm.inc}
 {$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADIMPLEMENTATION}
 
-end.
+initialization
+begin
+(*
+	Add(TSGGraphViewer);
+	//Add(TSGGraphic);
+	//Add(TSGGraphViewer3D);
+*)
+SGRegisterDrawClass(TSGGraphViewer);
+end;
+
+END.

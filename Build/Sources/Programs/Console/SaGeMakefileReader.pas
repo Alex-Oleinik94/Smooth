@@ -90,8 +90,8 @@ type
 		procedure Read();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ProcessString(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function IndexOfTarget(const VName : TSGString):TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure RecombineIdentifiers();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
+		procedure RecombineIdentifiers();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetConstant(S : TSGString;const IdentifierType : TSGMRIdentifierType = SGMRIdentifierTypeAbsolute): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetConstant(const Name, Value : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -475,6 +475,7 @@ while Stream.Position <> Stream.Size do
 		end;
 	end;
 Stream.Destroy();
+RecombineIdentifiers();
 end;
 
 constructor TSGMakefileReader.Create(const VFileName : TSGString);

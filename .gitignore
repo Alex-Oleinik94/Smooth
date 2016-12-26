@@ -1,20 +1,20 @@
 *.bak
 *.ppu
 *.o
+*.exe
+*.so.*
+*.dll
+*.so
+*.apk
+*.dbg
+*.ogg
+*.wav
+*.mp3
 Libraries
 FPC
 Temp
 pp4
 Apache_Ant
-Binaries/*.dll
-Binaries/*.so
-Binaries/*.so.*
-Binaries/*.dbg
-Binaries/*.apk
-Binaries/*.exe
-Binaries/*.ogg
-Binaries/*.wav
-Binaries/*.mp3
 Binaries/Main
 Binaries/Gas Diffusion Saves
 Build/Main.res
@@ -27,7 +27,3 @@ Build/AndroidTools/Libs
 Build/ExternalSources/Imaging
 Data/EngineLog.log
 Data/Images
-Examples/*.exe
-Examples/*.dll
-Examples/*.so
-Examples/*.so.*

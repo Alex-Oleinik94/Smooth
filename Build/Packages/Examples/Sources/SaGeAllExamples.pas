@@ -9,6 +9,8 @@ uses
 	,SaGeCommonClasses
 	,SaGeCommonUtils
 	,SaGeRenderConstants
+	,SaGeGraphicViewer
+	,SaGePackages
 	
 	,Ex1
 	,Ex2_2
@@ -87,6 +89,11 @@ procedure TSGAllExamples.Paint();
 begin
 if FDrawClasses<>nil then
 	FDrawClasses.Paint();
+end;
+
+initialization
+begin
+SGRegisterDrawClass(TSGAllExamples, False);
 end;
 
 end.
