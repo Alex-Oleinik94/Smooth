@@ -489,14 +489,10 @@ var
 	S, SUP, P : TSGString;
 begin
 Result := True;
-WriteLn(Make.GetConstant('SG_TARGET_LIST'));
 AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
 if AllTargets <> nil then if Length(AllTargets) > 0 then
 	for i := 0 to High(AllTargets) do
-		begin
 		AllTargets[i] := SGUpCaseString(StringTrimAll(AllTargets[i],' '));
-		WriteLn(AllTargets[i]);
-		end;
 if ConsoleParam() = '' then
 	exit
 else 
@@ -567,12 +563,11 @@ var
 	i : TSGUInt32;
 begin
 if OpenPackages then
-	SGPackagesToMakefile(Make);
+	SGPackagesToMakefile(Make, IsRelease);
 if Packages <> nil then
 	if Length(Packages) > 0 then
 		for i := 0 to High(Packages) do
-			if not SGIsPackageOpen(Make, Packages[i]) then
-				SGPackageToMakefile(Make, Packages[i], IsRelease);
+			SGPackageToMakefile(Make, Packages[i], IsRelease);
 end;
 
 var

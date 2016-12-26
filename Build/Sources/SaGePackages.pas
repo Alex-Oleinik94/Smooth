@@ -38,7 +38,7 @@ function SGGetPackageInfo(const PackagePath : TSGString) : TSGPackageInfo;{$IFDE
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGPackagesToMakefile(var Make : TSGMakefileReader):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -118,12 +118,13 @@ if PackageInfo.FName = PackageName then
 				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/' + Str + ' ');
 		Make.RecombineIdentifiers();
 		SGRegisterPackage(PackageInfo, Make.GetConstant('SGFILEREGISTRATIONPACKAGES'));
-		if SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/BuildFiles.ini') then
+		if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/BuildFiles.ini') then
 			SGBuildFiles(
 				Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName + '/BuildFiles.ini',
 				Make.GetConstant('SGRESOURCESPATH'),
 				Make.GetConstant('SGRESOURCESCACHEPATH'),
-				Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
+				Make.GetConstant('SGFILEREGISTRATIONRESOURCES'),
+				PackageName);
 		end;
 	end;
 PackageInfo.Clear();
@@ -261,7 +262,7 @@ for S in PackagesNames do
 	end;
 end;
 
-function SGPackagesToMakefile(var Make : TSGMakefileReader) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	PackagesList : TSGStringList = nil;
 	i : TSGUInt32;
@@ -271,7 +272,7 @@ PackagesList := SGGetPackagesList(Make);
 if PackagesList <> nil then
 	if Length(PackagesList) > 0 then
 		for i := 0 to High(PackagesList) do
-			if not SGPackageToMakefile(Make, PackagesList[i]) then
+			if not SGPackageToMakefile(Make, PackagesList[i], BuildFiles) then
 				Result := False;
 SetLength(PackagesList, 0);
 end;

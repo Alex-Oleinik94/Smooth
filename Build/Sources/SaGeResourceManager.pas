@@ -153,7 +153,7 @@ function SGConvertFileToPascalUnit(const FileName, TempUnitPath, CacheUnitPath, 
 function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, FileRegistrationResources : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRegisterUnit(const UnitName, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGClearFileRegistrationResources(const FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString; const Name : TSGString = '');{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteHexStringToStream(const S : TSGString; const Stream : TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -400,7 +400,7 @@ for i := 0 to High(FResources) do
 	ProcessResource(FResources[i]);
 end;
 
-procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString; const Name : TSGString = '');{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Resources : TSGBuildResources;
 	Info : TSGConvertedFilesInfo;
@@ -413,7 +413,16 @@ if Resources.FCacheDirectory = '' then
 Info := Resources.Process(FileRegistrationResources);
 Resources.Clear();
 TextColor(15);
-Write('Build:');
+Write('Build');
+if (Name <> '') then
+	begin
+	Write('(');
+	TextColor(14);
+	Write(Name);
+	TextColor(15);
+	Write(')');
+	end;
+Write(':');
 TextColor(7);
 Info.Print();
 end;
