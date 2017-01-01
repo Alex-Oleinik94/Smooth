@@ -213,20 +213,20 @@ end;
 
 function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	sr:dos.searchrec;
+	SR : Dos.SearchRec;
 const
 	PathPrefix : TSGString = '';
 begin
 Result := nil;
 PathPrefix := Make.GetConstant('SGPACKAGESPATH') + '/';
-dos.findfirst(PathPrefix + '*', $3F, sr);
-while DosError<>18 do
+Dos.FindFirst(PathPrefix + '*', $3F, SR);
+while DosError <> 18 do
 	begin
-	if (sr.name <> '.') and (sr.name <> '..') and SGExistsDirectory(PathPrefix + sr.name) and SGIsPackageOpen(PathPrefix + sr.name) then
-		Result += sr.name;
-	dos.findnext(sr);
+	if (SR.Name <> '.') and (SR.Name <> '..') and SGExistsDirectory(PathPrefix + SR.Name) and SGIsPackageOpen(PathPrefix + SR.Name) then
+		Result += SR.Name;
+	Dos.FindNext(SR);
 	end;
-dos.findclose(sr);
+Dos.FindClose(SR);
 end;
 
 function SGIsPackageOpen(const PackagePath : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;

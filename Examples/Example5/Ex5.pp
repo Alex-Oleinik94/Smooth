@@ -175,7 +175,7 @@ procedure TSGExample5.Paint();
 var
 	i,ii      : TSGLongWord;
 	Licht0Pos : TSGVertex3f;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
 
 // $RANGECHECKS
 {$IFOPT R+}

@@ -56,12 +56,12 @@ type
 		FHowManyZombiesYouKill:LongWord;
 		FMaxWay:LongWord;
 		FR:TSGVertex2f;
-		FDataTime:TSGDataTime;
+		FDataTime:TSGDateTime;
 		FInterval:LongWord;
 		FForestWidth,FForestHeight:LongWord;
 		FChanget:Boolean;
-		FTimer:TSGDataTime;
-		FTimer2,FBulletDataTime1,FBulletDataTime2:TSGDataTime;
+		FTimer:TSGDateTime;
+		FTimer2,FBulletDataTime1,FBulletDataTime2:TSGDateTime;
 		FActive:Boolean; //+
 		FVictory:Boolean;//+
 		FBullets:packed array of
@@ -966,7 +966,7 @@ end;
 procedure TSGKiller.Paint();
 var
 	i,ii,iii:LongWord;
-	FDT:TSGDataTime;
+	FDT:TSGDateTime;
 	Vtx1,Vtx2:TSGVertex2f;
 	Any : TSGPoint2int32;
 begin

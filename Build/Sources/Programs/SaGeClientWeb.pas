@@ -56,7 +56,7 @@ var
 	S : String = '';
 	MS : TMemoryStream = nil;
 	i : LongWord;
-	DT : TSGDataTime;
+	DT : TSGDateTime;
 begin
 inherited Create(VContext);
 SGLog.Sourse('Begin get HTTP');

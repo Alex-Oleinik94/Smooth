@@ -180,7 +180,7 @@ end;
 procedure TSGExample5_4.Paint();
 var
 	i,ii      : TSGLongWord;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
 begin
 FCamera.CallAction();
 Render.Color3f(1,1,1);

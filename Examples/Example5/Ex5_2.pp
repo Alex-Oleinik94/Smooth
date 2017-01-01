@@ -146,7 +146,7 @@ end;
 procedure TSGExample5_2.Paint();
 var
 	i,ii      : TSGLongWord;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
 
 begin
 FCamera.CallAction();

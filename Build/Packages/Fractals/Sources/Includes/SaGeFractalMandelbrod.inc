@@ -51,7 +51,7 @@ type
 		FNumber:LongInt;
 		VBuffer:array[False..True]of PBoolean;
 		
-		FBeginData:TSGDataTime;//время начала потока
+		FBeginData:TSGDateTime;//время начала потока
 		
 		FHePr:LongWord;//Уже сделаный прогресс потока по Height
 		end;
@@ -142,7 +142,7 @@ type
 		FCurvePointPanel:TSGPanel;
 		FCurvePCB:TSGCOmboBox;
 		FCurveInfoLbl:TSGLabel;
-		FCurveBeginDataTime:TSGDataTime;
+		FCurveBeginDataTime:TSGDateTime;
 		
 		FTNRF:TSGFont;
 		

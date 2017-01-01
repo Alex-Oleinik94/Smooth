@@ -356,7 +356,6 @@ type
 		function GetPastMiliSeconds:int64;
 		function GetPastMiliSecondsFrom(const a:TSGDateTime):int64;
 		end;
-	TSGDataTime=TSGDateTime;
 
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
