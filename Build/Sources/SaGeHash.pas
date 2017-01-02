@@ -89,7 +89,8 @@ implementation
 uses
 	SaGeResourceManager,
 	SaGeVersion,
-	Dos
+	Dos,
+	Crt
 	;
 
 var
@@ -260,6 +261,7 @@ function GetData(const Path : TSGString) : TEDHashFileDataList;
 procedure AddData(const Stream : TStream);
 var
 	SS : TSGUInt16;
+	i : TSGMaxEnum;
 begin
 if Result = nil then
 	SetLength(Result, 1)
@@ -267,26 +269,17 @@ else
 	SetLength(Result, Length(Result) + 1);
 with Result[High(Result)] do
 	begin
-	FName := SGReadLnStringFromStream(Stream);
-	//WriteLn(FName);
+	FName := SGReadStringFromStream(Stream, [#0]);
 	Stream.ReadBuffer(FSize, SizeOf(FSize));
-	//WriteLn(FSize);ReadLn();
-	FHashData := nil;
 	Stream.ReadBuffer(SS, SizeOf(SS));
-	while SS <> 0 do
-		begin
-		if FHashData = nil then
-			SetLength(FHashData, 1)
-		else
-			SetLength(FHashData, Length(FHashData) + 1);
-		with FHashData[High(FHashData)] do
-			begin
-			FName := SGReadLnStringFromStream(Stream);
-			FHash := SGReadLnStringFromStream(Stream);
-			//WriteLn(FName);WriteLn(FHash);ReadLn();
-			end;
-		Stream.ReadBuffer(SS, SizeOf(SS));
-		end;
+	SetLength(FHashData, SS);
+	if SS > 0 then
+		for i := 0 to High(FHashData) do
+			with FHashData[High(FHashData)] do
+				begin
+				FName := SGReadStringFromStream(Stream, [#0]);
+				FHash := SGReadStringFromStream(Stream, [#0]);
+				end;
 	end;
 end;
 
@@ -317,14 +310,134 @@ procedure CheckData(var Data1, Data2 : TEDHashFileDataList);
 var
 	Files : packed array of
 		packed record
-			FName : TSGString;
+			FName   : TSGString;
 			FIndex1, FIndex2 : TSGInt32;
 			FResult : TSGBool;
+			FSize   : TSGUInt64;
 			end = nil;
 
 procedure CalcResultData();
-begin
 
+function CountEq() : TSGUInt32;
+var
+	i, ii : TSGUInt32;
+begin
+Result := 0;
+for i := 0 to High(Data1) do
+	for ii := 0 to High(Data2) do
+		if Data1[i].FName = Data2[ii].FName then
+			begin
+			Result += 1;
+			break;
+			end;
+end;
+
+function CountEx1() : TSGUInt32;
+var
+	i, ii, iii : TSGUInt32;
+begin
+Result := 0;
+for i := 0 to High(Data1) do
+	begin
+	iii := 0;
+	for ii := 0 to High(Data2) do
+		if Data1[i].FName = Data2[ii].FName then
+			begin
+			iii := 1;
+			break;
+			end;
+	if iii = 0 then
+		Result += 1;
+	end;
+end;
+
+function CountEx2() : TSGUInt32;
+var
+	i, ii, iii : TSGUInt32;
+begin
+Result := 0;
+for i := 0 to High(Data2) do
+	begin
+	iii := 0;
+	for ii := 0 to High(Data1) do
+		if Data2[i].FName = Data1[ii].FName then
+			begin
+			iii := 1;
+			break;
+			end;
+	if iii = 0 then
+		Result += 1;
+	end;
+end;
+
+function EqHashList(const D1, D2 : TEDHashDataList) : TSGBool;
+var
+	i, ii : TSGUInt32;
+begin
+Result := True;
+for i := 0 to High(D1) do
+	for ii := 0 to High(D2) do
+		if (D1[i].FName = D2[ii].FName) and (D1[i].FHash <> D2[ii].FHash) then
+			begin
+			Result := False;
+			break;
+			end;
+end;
+
+var
+	k, i, ii, iii : TSGUInt32;
+begin
+SetLength(Files, CountEq() + CountEx1() + CountEx2());
+k := 0;
+for i := 0 to High(Data1) do
+	for ii := 0 to High(Data2) do
+		if Data1[i].FName = Data2[ii].FName then
+			begin
+			Files[k].FName   := Data1[i].FName;
+			Files[k].FSize   := 0;
+			Files[k].FIndex1 := i;
+			Files[k].FIndex2 := ii;
+			Files[k].FResult := EqHashList(Data1[i].FHashData, Data2[ii].FHashData);
+			k += 1;
+			end;
+for i := 0 to High(Data1) do
+	begin
+	iii := 0;
+	for ii := 0 to High(Data2) do
+		if Data1[i].FName = Data2[ii].FName then
+			begin
+			iii := 1;
+			break;
+			end;
+	if iii = 0 then
+		begin
+		Files[k].FName   := Data1[i].FName;
+		Files[k].FSize   := 0;
+		Files[k].FIndex1 := i;
+		Files[k].FIndex2 := -1;
+		Files[k].FResult := False;
+		k += 1;
+		end;
+	end;
+for i := 0 to High(Data2) do
+	begin
+	iii := 0;
+	for ii := 0 to High(Data1) do
+		if Data2[i].FName = Data1[ii].FName then
+			begin
+			iii := 1;
+			break;
+			end;
+	if iii = 0 then
+		begin
+		Files[k].FName   := Data1[i].FName;
+		Files[k].FSize   := 0;
+		Files[k].FIndex1 := -1;
+		Files[k].FIndex2 := i;
+		Files[k].FResult := False;
+		k += 1;
+		end;
+	end;
 end;
 
 procedure PrintResultData();
@@ -339,17 +452,19 @@ CountEqual := 0;
 CountNonEqual := 0;
 CountExist1 := 0;
 CountExist2 := 0;
-for i := 0 to High(Files) do
-	begin
-	if Files[i].FResult then
-		CountEqual += 1
-	else if (Files[i].FIndex1 = -1) then
-		CountExist2 += 1
-	else if (Files[i].FIndex2 = -1) then
-		CountExist1 += 1
-	else
-		CountNonEqual += 1;
-	end;
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			begin
+			if Files[i].FResult then
+				CountEqual += 1
+			else if (Files[i].FIndex1 = -1) then
+				CountExist2 += 1
+			else if (Files[i].FIndex2 = -1) then
+				CountExist1 += 1
+			else
+				CountNonEqual += 1;
+			end;
 SGHint('Count equal : ' + SGStr(CountEqual));
 SGHint('Count non-equal : ' + SGStr(CountNonEqual));
 SGHint('Count exist in first : ' + SGStr(CountExist1));
@@ -438,24 +553,24 @@ end;
 procedure PutFile(const Stream : TStream; const FileName : TSGString; const FileSize : TSGUInt64);
 var
 	FS : TSGUInt64;
-	SS, i : TSGUInt16;
-	HashStr : TSGString;
+	SS : TSGUInt16;
+	i : TSGMaxEnum;
 begin
 SGWriteStringToStream(FileName, Stream);
 FS := FileSize;
 Stream.WriteBuffer(FS, SizeOf(FS));
+SS := 0;
+for i := Low(HashTable) to High(HashTable) do
+	SS += TSGByte(HashTable[i].FType in HashTypes);
+Stream.WriteBuffer(SS, SizeOf(SS));
 for i := Low(HashTable) to High(HashTable) do
 	begin
 	if HashTable[i].FType in HashTypes then
 		begin
-		SS := 1;
-		Stream.WriteBuffer(SS, SizeOf(SS));
 		SGWriteStringToStream(HashTable[i].FName, Stream);
 		SGWriteStringToStream(SGHash(FileName, HashTable[i].FType), Stream);
 		end;
 	end;
-SS := 0;
-Stream.WriteBuffer(SS, SizeOf(SS));
 end;
 
 var

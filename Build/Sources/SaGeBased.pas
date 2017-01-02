@@ -60,6 +60,8 @@ type
 	TSGBoolean	= Boolean;
 	TSGPointer  = Pointer;
 	TSGString 	= String;
+	
+	TSGCharSet = set of TSGChar;
 type
 	// Aditional
 	TSGBool     = TSGBoolean;

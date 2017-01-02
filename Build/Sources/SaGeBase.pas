@@ -476,7 +476,7 @@ function GetProcAddress(const Lib : TSGLibHandle; const VPChar:PChar):Pointer;{$
 function SGTruncUp(const T : Real):LongInt;inline;
 
 //»з потока считываетс€ сткока, пока не будет найден нулевой байт
-function SGReadStringFromStream(const Stream:TStream):String;inline;
+function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadLnStringFromStream(const Stream:TStream):String;inline;
 
 //«аписывает строку в поток. ≈сли (Stavit00 = True), то в конце записываетс€ нулевой байт.
@@ -3083,16 +3083,18 @@ if Stream.Position <> Stream.Size then
 	Stream.Position := Stream.Position - 1;
 end;
 
-function SGReadStringFromStream(const Stream:TStream):String;inline;
+function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	c:char = #1;
+	C : TSGChar;
+	First : TSGBool = True;
 begin
 Result:='';
-while c<>#0 do
+while (not (C in Eolns)) or First do
 	begin
-	Stream.ReadBuffer(c,1);
-	if c<>#0 then
-		Result+=c;
+	Stream.ReadBuffer(C, 1);
+	if not (C in Eolns) then
+		Result += C;
+	First := False;
 	end;
 end;
 
