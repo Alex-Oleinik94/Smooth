@@ -67,14 +67,14 @@ type
 			public
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
-		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True); virtual;
+		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGUInt8 = 5); virtual;
 			public
-		procedure PaintButton(const Button : ISGButton); virtual;
-		procedure PaintPanel(const Panel : ISGPanel); virtual;
-		procedure PaintComboBox(const ComboBox : ISGComboBox); virtual;
-		procedure PaintLabel(const VLabel : ISGLabel); virtual;
-		procedure PaintEdit(const Edit : ISGEdit); virtual;
-		procedure PaintProgressBar(const ProgressBar : ISGProgressBar); virtual;
+		procedure PaintButton(constref Button : ISGButton); virtual;
+		procedure PaintPanel(constref Panel : ISGPanel); virtual;
+		procedure PaintComboBox(constref ComboBox : ISGComboBox); virtual;
+		procedure PaintLabel(constref VLabel : ISGLabel); virtual;
+		procedure PaintEdit(constref Edit : ISGEdit); virtual;
+		procedure PaintProgressBar(constref ProgressBar : ISGProgressBar); virtual;
 		end;
 const
 	SGScreenSkinDefaultFontFileName = SGFontDirectory + Slash + 'Tahoma.sgf';
@@ -356,12 +356,12 @@ begin
 Result := 'TSGScreenSkin';
 end;
 
-procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True);
+procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGUInt8 = 5);
 begin
-SGRoundQuad(Render, Location.Position, Location.Position + Location.Size, 5, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
+SGRoundQuad(Render, Location.Position, Location.Position + Location.Size, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
 end;
 
-procedure TSGScreenSkin.PaintPanel(const Panel : ISGPanel);
+procedure TSGScreenSkin.PaintPanel(constref Panel : ISGPanel);
 var
 	Location : TSGComponentLocation;
 	ActiveTimer, VisibleTimer : TSGScreenTimer;
@@ -393,7 +393,7 @@ if ViewingQuad or ViewingLines then
 	end;
 end;
 
-procedure TSGScreenSkin.PaintButton(const Button : ISGButton);
+procedure TSGScreenSkin.PaintButton(constref Button : ISGButton);
 var
 	Location : TSGComponentLocation;
 	Active, Visible : TSGBool;
@@ -444,7 +444,7 @@ if (Button.Caption<>'') and (Font<>nil) and (Font.Ready) and (VisibleTimer>SGZer
 	end;
 end;
 
-procedure TSGScreenSkin.PaintComboBox(const ComboBox : ISGComboBox);
+procedure TSGScreenSkin.PaintComboBox(constref ComboBox : ISGComboBox);
 var
 	Location, TextLocation : TSGComponentLocation;
 	ActiveTimer, VisibleTimer, OverTimer, ClickTimer, OpenTimer : TSGScreenTimer;
@@ -596,7 +596,7 @@ if 1 - OpenTimer > SGZero then
 	end;
 end;
 
-procedure TSGScreenSkin.PaintLabel(const VLabel : ISGLabel); 
+procedure TSGScreenSkin.PaintLabel(constref VLabel : ISGLabel); 
 var
 	Location : TSGComponentLocation;
 begin
@@ -613,8 +613,55 @@ if (VLabel.Caption<>'') and (Font<>nil) and (Font.Ready) then
 	end;
 end;
 
-procedure TSGScreenSkin.PaintEdit(const Edit : ISGEdit); 
+procedure TSGScreenSkin.PaintEdit(constref Edit : ISGEdit); 
+var
+	Location : TSGComponentLocation;
+	Active, Visible : TSGBool;
+	ActiveTimer, VisibleTimer, OverTimer, TextCompliteTimer : TSGScreenTimer;
+	
+	NormalFirst, NormalSecond : TSGColor4f;
+	RedColor  : TSGColor4f;
+	GreenColor : TSGColor4f;
 begin
+Location := Edit.GetLocation();
+
+Active := Edit.Active;
+Visible := Edit.Visible;
+
+OverTimer := Edit.OverTimer;
+VisibleTimer := Edit.VisibleTimer;
+ActiveTimer := Edit.ActiveTimer;
+
+NormalFirst  := FColors.FNormal.FFirst;
+NormalSecond := FColors.FNormal.FSecond;
+
+if Edit.TextTypeAssigned then
+	begin
+	TextCompliteTimer := Edit.TextCompliteTimer;
+	RedColor.Import(1, 0, 0, 1);
+	GreenColor.Import(0, 1, 0, 1);
+	
+	NormalFirst := (TextCompliteTimer  * GreenColor + (1 - TextCompliteTimer) * RedColor) * 0.85;
+	NormalSecond := TextCompliteTimer  * GreenColor + (1 - TextCompliteTimer) * RedColor;
+	end;
+
+if  (ActiveTimer>SGZero) and 
+	(VisibleTimer>SGZero) then
+	PaintQuad(Location,
+		NormalFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),
+		NormalSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3,
+		True, True, 2);
+
+if (Font <> nil) and (Font.Ready) and (Edit.Caption <> '') then
+	begin
+	Render.Color4f(1, 1, 1, VisibleTimer);
+	Font.DrawFontFromTwoVertex2f(Edit.Caption, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
+	if (Edit.CursorTimer > 0) and Edit.NowEditing then
+		begin
+		Render.Color4f(1, 0.5, 0, VisibleTimer * Edit.CursorTimer);
+		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
+		end;
+	end;
 {if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
 	begin
 	SGRoundQuad(Render,
@@ -686,7 +733,7 @@ if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)
 	end;}
 end;
 
-procedure TSGScreenSkin.PaintProgressBar(const ProgressBar : ISGProgressBar); 
+procedure TSGScreenSkin.PaintProgressBar(constref ProgressBar : ISGProgressBar); 
 var 
 	Color3:TSGColor4f = (x:1;y:1;z:1;w:1);
 	Radius : TSGFloat = 5;

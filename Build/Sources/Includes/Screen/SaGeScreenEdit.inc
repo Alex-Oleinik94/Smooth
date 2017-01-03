@@ -13,40 +13,41 @@ function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
 type
-	TSGEdit=class(TSGOverComponent, ISGEdit)
+	TSGEdit = class(TSGOverComponent, ISGEdit)
 			public
 		constructor Create;override;
 		destructor Destroy;override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCursorOnComponentPrev : TSGBoolean;
-		FCursorOnComponentTimer:TSGScreenTimer;
-		FCursorPosition:LongInt;
-		FNowChanget:Boolean;
-		FNowChangetTimer:TSGScreenTimer;
-		FTextType:TSGEditTextType;
-		FTextTypeFunction:TSGEditTextTypeFunction;
-		FTextComplite:Boolean;
-		FTextCompliteTimer:TSGScreenTimer;
-		FDrawCursor:Boolean;
-		FDrawCursorTimer:TSGScreenTimer;
-		FDrawCursorElapsedTime:LongWord;
-		FDrawCursorElapsedTimeChange:LongWord;
-		FDrawCursorElapsedTimeDontChange:LongWord;
+		FCursorOnComponentPrev  : TSGBoolean;
+		FCursorOnComponentTimer : TSGScreenTimer;
+		FCursorPosition         : TSGInt32;
+		FNowChanget             : TSGBool;
+		FNowChangetTimer        : TSGScreenTimer;
+		FTextType               : TSGEditTextType;
+		FTextTypeFunction       : TSGEditTextTypeFunction;
+		FTextComplite           : TSGBool;
+		FTextCompliteTimer      : TSGScreenTimer;
+		FDrawCursor             : TSGBool;
+		FDrawCursorTimer        : TSGScreenTimer;
+		FDrawCursorElapsedTime  : TSGUInt32;
+		FDrawCursorElapsedTimeChange : TSGUInt32;
+		FDrawCursorElapsedTimeDontChange : TSGUInt32;
 			public
 		procedure FromDraw;override;
 		procedure FromUpDate(var FCanChange:Boolean);override;
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
-		function GetCursorTimer() : TSGScreenTimer;
+		function GetCursorTimer() : TSGScreenTimer; virtual;
 		function GetTextCompliteTimer() : TSGScreenTimer;
 		function GetTextType() : TSGEditTextType;
 		function GetTextComplite() : TSGBoolean;
-		function GetCursorPosition() : TSGInt32;
+		function GetCursorPosition() : TSGInt32; virtual;
 		procedure SetCaption(const NewCaption : TSGCaption);override;
 		procedure SetTextType(const NewTextType:TSGEditTextType);virtual;
 		function GetTextTypeAssigned() : TSGBoolean;
+		function GetNowEditing() : TSGBool;virtual;
 			public
 		property TextType         : TSGEditTextType         read GetTextType         write SetTextType;
 		property TextComplite     : TSGBoolean              read GetTextComplite     write FTextComplite;
@@ -137,6 +138,11 @@ end;
 function TSGEdit.GetCursorPosition() : TSGInt32;
 begin
 Result := FCursorPosition;
+end;
+
+function TSGEdit.GetNowEditing() : TSGBool;
+begin
+Result := FNowChanget;
 end;
 
 function TSGEdit.GetTextTypeAssigned() : TSGBoolean;

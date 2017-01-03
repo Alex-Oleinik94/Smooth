@@ -178,6 +178,9 @@ type
 		['{41f51334-780b-444c-aa61-4c000759516b}']
 		function ViewingLines() : TSGBoolean;
 		function ViewingQuad()  : TSGBoolean;
+		
+		property ViewLines : TSGBool read ViewingLines;
+		property ViewQuad : TSGBool read ViewingQuad;
 		end;
 
 	ISGOpenComponent = interface(ISGClickComponent)
@@ -236,7 +239,9 @@ type
 		function GetTextTypeAssigned() : TSGBoolean;
 		function GetCursorTimer() : TSGScreenTimer;
 		function GetTextCompliteTimer() : TSGScreenTimer;
-
+		function GetNowEditing() : TSGBool;
+		
+		property NowEditing        : TSGBool         read GetNowEditing;
 		property TextCompliteTimer : TSGScreenTimer  read GetTextCompliteTimer;
 		property CursorTimer       : TSGScreenTimer  read GetCursorTimer;
 		property TextTypeAssigned  : TSGBoolean      read GetTextTypeAssigned;

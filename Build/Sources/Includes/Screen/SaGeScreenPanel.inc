@@ -13,8 +13,8 @@ type
 			public
 		procedure FromDraw;override;
 			public
-		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;
 		property ViewLines : TSGBoolean read ViewingLines write FViewLines;
+		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;
 		end;
 {$ENDIF}
 
@@ -26,33 +26,29 @@ end;
 
 function TSGPanel.ViewingLines() : TSGBoolean;
 begin
-Result := False;
-Result := ViewingLines;
+Result := FViewLines;
 end;
 
 function TSGPanel.ViewingQuad() : TSGBoolean;
 begin
-Result := False;
-Result := ViewingQuad;
+Result := FViewQuad;
 end;
 
-procedure TSGPanel.FromDraw;
+procedure TSGPanel.FromDraw();
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
-	begin
 	FSkin.PaintPanel(Self);
-	end;
 inherited;
 end;
 
-constructor TSGPanel.Create;
+constructor TSGPanel.Create();
 begin
 inherited;
 FViewLines := True;
 FViewQuad  := True;
 end;
 
-destructor TSGPanel.Destroy;
+destructor TSGPanel.Destroy();
 begin
 inherited;
 end;
