@@ -57,6 +57,7 @@ type
 		procedure CreateFont(); virtual;
 		procedure DestroyFont(); virtual;
 		function FontAssigned() : TSGBool; virtual;
+		function FontReady() : TSGBool; virtual;
 		function GetFont() : TSGFont;virtual;
 		procedure SetFont(const VFont : TSGFont); virtual;
 			public
@@ -323,11 +324,16 @@ if FDestroyFontSuppored and (FFont <> nil) then
 	end;
 end;
 
+function TSGScreenSkin.FontReady() : TSGBool;
+begin
+Result := FontAssigned;
+if Result then
+	Result := Font.Ready;
+end;
+
 function TSGScreenSkin.FontAssigned() : TSGBool;
 begin
 Result := FFont <> nil;
-{if Result then
-	Result := FFont.Ready;}
 end;
 
 procedure TSGScreenSkin.SetFont(const VFont : TSGFont); 
@@ -437,7 +443,7 @@ if  (ActiveTimer>SGZero) and
 		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*ActiveTimer),
 		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3,
 		True);
-if (Button.Caption<>'') and (Font<>nil) and (Font.Ready) and (VisibleTimer>SGZero) then
+if (Button.Caption<>'') and FontReady and (VisibleTimer>SGZero) then
 	begin
 	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
 	Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
@@ -546,27 +552,27 @@ VisibleTimer := ComboBox.VisibleTimer;
 ActiveTimer  := ComboBox.ActiveTimer;
 OpenTimer    := ComboBox.OpenTimer;
 
-if  (1 - OverTimer>SGZero) and 
-	(1 - OpenTimer>SGZero)  then
+if  (1 - OverTimer > SGZero) and 
+	(1 - OpenTimer > SGZero)  then
 	PaintQuad(Location,
-		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer*(1 - OpenTimer)),
-		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer*(1 - OpenTimer))*1.3);
-if  (OverTimer>SGZero) and 
-	(1-OpenTimer>SGZero)  then
+		FColors.FNormal.FFirst.WithAlpha(0.3 * VisibleTimer * (1-OverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)),
+		FColors.FNormal.FSecond.WithAlpha(0.3 * VisibleTimer * (1-OverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)) * 1.3);
+if  (OverTimer > SGZero) and 
+	(1-OpenTimer > SGZero)  then
 	PaintQuad(Location,
-		FColors.FOver.FFirst.WithAlpha(0.5*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer),
-		FColors.FOver.FSecond.WithAlpha(0.5*VisibleTimer*OverTimer*(1-OpenTimer)*(1-ClickTimer)*ActiveTimer)*1.3);
+		FColors.FOver.FFirst.WithAlpha(0.5 * VisibleTimer * OverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.5 * VisibleTimer * OverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer) * 1.3);
 if (ActiveTimer < 1 - SGZero) then
 	PaintQuad(Location,
-		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
-		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8);
-if  (ActiveTimer>SGZero) and 
-	(ClickTimer>SGZero) and
+		FColors.FDisabled.FFirst.WithAlpha(0.7 * VisibleTimer * (1-ActiveTimer)) * 0.54,
+		FColors.FDisabled.FSecond.WithAlpha(0.7 * VisibleTimer * (1-ActiveTimer)) * 0.8);
+if  (ActiveTimer > SGZero) and 
+	(ClickTimer > SGZero) and
 	(OpenTimer < 1 - SGZero) and
-	(VisibleTimer>SGZero) then
+	(VisibleTimer > SGZero) then
 	PaintQuad(Location,
-		FColors.FClick.FFirst.WithAlpha(0.4*VisibleTimer*ClickTimer*(1-OpenTimer)*ActiveTimer),
-		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*(1-OpenTimer)*ActiveTimer)*1.3);
+		FColors.FClick.FFirst.WithAlpha(0.4 * VisibleTimer * ClickTimer * (1-OpenTimer) * ActiveTimer),
+		FColors.FClick.FSecond.WithAlpha(0.3 * VisibleTimer * ClickTimer * (1-OpenTimer) * ActiveTimer) * 1.3);
 
 if OpenTimer > SGZero then
 	begin
@@ -600,7 +606,7 @@ procedure TSGScreenSkin.PaintLabel(constref VLabel : ISGLabel);
 var
 	Location : TSGComponentLocation;
 begin
-if (VLabel.Caption<>'') and (Font<>nil) and (Font.Ready) then
+if (VLabel.Caption <> '') and FontReady then
 	begin
 	Location := VLabel.GetLocation();
 	if VLabel.TextColorSeted then
@@ -652,7 +658,7 @@ if  (ActiveTimer>SGZero) and
 		NormalSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3,
 		True, True, 2);
 
-if (Font <> nil) and (Font.Ready) and (Edit.Caption <> '') then
+if FontReady and (Edit.Caption <> '') then
 	begin
 	Render.Color4f(1, 1, 1, VisibleTimer);
 	Font.DrawFontFromTwoVertex2f(Edit.Caption, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
@@ -712,25 +718,7 @@ SGRoundQuad(Render,
 	((ThreeColor2*Byte(FTextType=SGEditTypeText)+
 		Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))*2))
 		.WithAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
-	True);
-if (Caption<>'') and (FFont<>nil) and (FFont.Ready) then
-	begin
-	Render.Color4f(1,1,1,FVisibleTimer);
-	FFont.DrawFontFromTwoVertex2f(
-		Caption,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
-		False);
-	end;
-if FNowChanget and (FDrawCursorTimer>SGZero)  and (FFont<>nil) and (FFont.Ready)then
-	begin
-	Render.Color4f(1,0.5,0,FVisibleTimer*FDrawCursorTimer);
-	FFont.DrawCursorFromTwoVertex2f(
-		Caption,FCursorPosition,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT))+SGX(3),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT))-SGX(6),
-		False);
-	end;}
+	True);}
 end;
 
 procedure TSGScreenSkin.PaintProgressBar(constref ProgressBar : ISGProgressBar); 
