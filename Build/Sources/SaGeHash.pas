@@ -312,8 +312,9 @@ var
 		packed record
 			FName   : TSGString;
 			FIndex1, FIndex2 : TSGInt32;
-			FResult : TSGBool;
+			FResult : TSGByte;
 			FSize   : TSGUInt64;
+			FSize2  : TSGUInt64;
 			end = nil;
 
 procedure CalcResultData();
@@ -370,18 +371,24 @@ for i := 0 to High(Data2) do
 	end;
 end;
 
-function EqHashList(const D1, D2 : TEDHashDataList) : TSGBool;
+function EqHashList(const D1, D2 : TEDHashDataList) : TSGByte;
 var
 	i, ii : TSGUInt32;
 begin
-Result := True;
+Result := 3;
 for i := 0 to High(D1) do
 	for ii := 0 to High(D2) do
 		if (D1[i].FName = D2[ii].FName) and (D1[i].FHash <> D2[ii].FHash) then
 			begin
-			Result := False;
+			Result := 0;
 			break;
+			end
+		else if (D1[i].FName = D2[ii].FName) and (D1[i].FHash = D2[ii].FHash) and (Result <> 0) then
+			begin
+			Result := 1;
 			end;
+if Result = 3 then
+	Result := 2;
 end;
 
 var
@@ -394,7 +401,8 @@ for i := 0 to High(Data1) do
 		if Data1[i].FName = Data2[ii].FName then
 			begin
 			Files[k].FName   := Data1[i].FName;
-			Files[k].FSize   := 0;
+			Files[k].FSize   := Data1[i].FSize;
+			Files[k].FSize2  := Data2[i].FSize;
 			Files[k].FIndex1 := i;
 			Files[k].FIndex2 := ii;
 			Files[k].FResult := EqHashList(Data1[i].FHashData, Data2[ii].FHashData);
@@ -412,10 +420,11 @@ for i := 0 to High(Data1) do
 	if iii = 0 then
 		begin
 		Files[k].FName   := Data1[i].FName;
-		Files[k].FSize   := 0;
+		Files[k].FSize   := Data1[i].FSize;
+		Files[k].FSize2  := 0;
 		Files[k].FIndex1 := i;
 		Files[k].FIndex2 := -1;
-		Files[k].FResult := False;
+		Files[k].FResult := 0;
 		k += 1;
 		end;
 	end;
@@ -430,11 +439,12 @@ for i := 0 to High(Data2) do
 			end;
 	if iii = 0 then
 		begin
-		Files[k].FName   := Data1[i].FName;
-		Files[k].FSize   := 0;
+		Files[k].FName   := Data2[i].FName;
+		Files[k].FSize   := Data2[i].FSize;
+		Files[k].FSize2  := 0;
 		Files[k].FIndex1 := -1;
 		Files[k].FIndex2 := i;
-		Files[k].FResult := False;
+		Files[k].FResult := 0;
 		k += 1;
 		end;
 	end;
@@ -444,11 +454,21 @@ procedure PrintResultData();
 var
 	i : TSGUInt32;
 	CountEqual : TSGUInt32;
+	CountUnknown : TSGUInt32;
 	CountNonEqual : TSGUInt32;
 	CountExist1 : TSGUInt32;
 	CountExist2 : TSGUInt32;
+	OutFIleName : TSGString;
+	OutStream : TStream;
+
+procedure WriteLnString(const S : TSGString);
+begin
+SGWriteStringToStream(S + SGWinEoln, OutStream, False);
+end;
+
 begin
 CountEqual := 0;
+CountUnknown := 0;
 CountNonEqual := 0;
 CountExist1 := 0;
 CountExist2 := 0;
@@ -456,7 +476,9 @@ if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			begin
-			if Files[i].FResult then
+			if Files[i].FResult = 2 then
+				CountUnknown += 1
+			else if Files[i].FResult = 1 then
 				CountEqual += 1
 			else if (Files[i].FIndex1 = -1) then
 				CountExist2 += 1
@@ -466,9 +488,45 @@ if Files <> nil then
 				CountNonEqual += 1;
 			end;
 SGHint('Count equal : ' + SGStr(CountEqual));
+SGHint('Count unknown : ' + SGStr(CountUnknown));
 SGHint('Count non-equal : ' + SGStr(CountNonEqual));
 SGHint('Count exist in first : ' + SGStr(CountExist1));
 SGHint('Count exist in second : ' + SGStr(CountExist2));
+OutFIleName := SGGetFreeFileName('Hash check results.txt');
+OutStream := TFileStream.Create(OutFIleName, fmCreate);
+WriteLnString('Results:');
+WriteLnString('	Equal('+SGStr(CountEqual)+'):');
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			if Files[i].FResult = 1 then
+				WriteLnString('		"' + Files[i].FName + '", ' + SGGetSizeString(Files[i].FSize, 'EN'));
+WriteLnString('	Not equal('+SGStr(CountNonEqual)+'):');
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			if (Files[i].FResult = 0) then
+				WriteLnString('		"' + Files[i].FName + '", ' + SGGetSizeString(Files[i].FSize, 'EN') + ', ' + SGGetSizeString(Files[i].FSize2, 'EN'));
+WriteLnString('	Unknown('+SGStr(CountUnknown)+'):');
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			if (Files[i].FResult = 2) then
+				WriteLnString('		"' + Files[i].FName + '", ' + SGGetSizeString(Files[i].FSize, 'EN'));
+WriteLnString('	Exist in first('+SGStr(CountExist1)+'):');
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			if (Files[i].FIndex2 = -1) then
+				WriteLnString('		"' + Files[i].FName + '", ' + SGGetSizeString(Files[i].FSize, 'EN'));
+WriteLnString('	Exist in second('+SGStr(CountExist2)+'):');
+if Files <> nil then
+	if Length(FIles) > 0 then
+		for i := 0 to High(Files) do
+			if (Files[i].FIndex1 = -1) then
+				WriteLnString('		"' + Files[i].FName + '", ' + SGGetSizeString(Files[i].FSize, 'EN'));
+OutStream.Destroy();
+SGHint('Results saved "' + OutFIleName + '"');
 end;
 
 begin
