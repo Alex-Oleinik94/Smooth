@@ -161,8 +161,11 @@ uses
 	SysUtils
 	,SyncObjs
 	{$IFNDEF MOBILE}
-	,SaGeAudioRenderOpenAL
-	{$ENDIF}
+		,SaGeAudioRenderOpenAL
+		{$ENDIF}
+	{$IFDEF MSWINDOWS}
+		,SaGeAudioRenderBASS
+		{$ENDIF}
 	;
 
 function TSGAudioRender.CreateBufferedSource() : TSGAudioBufferedSource;
