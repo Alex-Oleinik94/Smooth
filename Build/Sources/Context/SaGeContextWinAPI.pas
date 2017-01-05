@@ -770,7 +770,7 @@ wm_move
 else
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('StandartWndProc : Unknown Message : Window="'+SGSTr(TSGMaxEnum(Window))+'" Message="'+SGStr(AMessage)+'" wParam="'+SGStr(wParam)+'" lParam="'+SGStr(lParam)+'"');
+		SGLog.Sourse('StandartWndProc : Unknown Message : Window="'+SGSTr(TSGMaxEnum(Window))+'", Message="'+SGStr(AMessage)+'", wParam="'+SGStr(wParam)+'", lParam="'+SGStr(lParam)+'"');
 		{$ENDIF}
 	end;
 end;
@@ -805,7 +805,7 @@ var
 begin
 DoExit:=False;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('MyWndProc(Window='+SGStr(Window)+',AMessage='+SGStr(AMessage)+',WParam='+SGSTr(WParam)+',LParam='+SGStr(LParam)+') : Enter');
+	SGLog.Sourse('Enter export proc(Window='+SGStr(Window)+', Message='+SGStr(AMessage)+', wParam='+SGSTr(WParam)+', lParam='+SGStr(LParam)+')');
 	{$ENDIF}
 Result:=StandartWndProc(Window,AMessage,WParam,LParam,DoExit);
 if DoExit then
@@ -813,7 +813,7 @@ if DoExit then
 else
 	Result := DefWindowProc(Window, AMessage, WParam, LParam);
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('MyWndProc : Exit (Result='+SGStr(Result)+')');
+	SGLog.Sourse('Exit export proc(Result='+SGStr(Result)+')');
 	{$ENDIF}
 end;
 

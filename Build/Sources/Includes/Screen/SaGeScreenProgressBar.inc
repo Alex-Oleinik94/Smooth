@@ -87,8 +87,8 @@ end;
 
 procedure TSGProgressBar.DefaultColor;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-FColor.FFirst .Import(0.9,0.9,0.9,1);
-FColor.FSecond.Import(1,1,1,1);
+FColor.FFirst .Import(0.9, 0.9, 0.9, 1);
+FColor.FSecond.Import(1,   1,   1,   1);
 FIsColorStatic := True;
 end;
 
@@ -97,10 +97,11 @@ begin
 inherited;
 FProgress      := 0;
 FProgressTimer := 0;
-FViewProgress  := False;
-FViewCaption   := False;
+FViewProgress  := True;
+FViewCaption   := True;
 DefaultColor();
 FIsColorStatic := False;
+Caption := '';
 end;
 
 destructor TSGProgressBar.Destroy;
