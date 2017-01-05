@@ -155,8 +155,8 @@ end;
 procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
 begin
 SetLength(FArClasses,Length(FArClasses)+1);
-FArClasses[High(FArClasses)].FClass:=NewClass;
-FArClasses[High(FArClasses)].FDrawable:=Drawable;
+FArClasses[High(FArClasses)].FClass    := NewClass;
+FArClasses[High(FArClasses)].FDrawable := Drawable;
 if FComboBox2 <> nil then
 	FComboBox2.Active:=Length(FArClasses) > 1;
 end;

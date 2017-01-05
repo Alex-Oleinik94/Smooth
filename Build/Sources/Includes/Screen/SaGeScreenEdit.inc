@@ -7,7 +7,7 @@ const
 	SGEditTypeNumber  = 2;
 	SGEditTypeUser    = 3;
 	SGEditTypeInteger = 4;
-	SGEditTypeWay     = 5;
+	SGEditTypePath    = 5;
 
 function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
 function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
@@ -164,7 +164,7 @@ procedure TSGEdit.SetTextType(const NewTextType:TSGEditTextType);
 begin
 FTextType:=NewTextType;
 case FTextType of
-SGEditTypeWay:
+SGEditTypePath:
 	FTextTypeFunction:=TSGEditTextTypeFunction(@TSGEditTextTypeFunctionWay);
 SGEditTypeSingle:
 	begin

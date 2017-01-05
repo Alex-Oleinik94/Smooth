@@ -102,7 +102,7 @@ Form.LastChild.SetBounds(5,5,575,20);
 Form.LastChild.BoundsToNeedBounds();
 Form.LastChild.FUserPointer1:=Self;
 Form.LastChild.FUserPointer2:=Edit;
-(Form.LastChild as TSGEdit).TextType:=SGEditTypeWay;
+(Form.LastChild as TSGEdit).TextType:=SGEditTypePath;
 Form.LastChild.Caption:='./../Temp/motoBike.3dss';//SGModelsDirectory+Slash;
 (Form.LastChild as TSGEdit).TextComplite:=TSGEditTextTypeFunctionWay((Form.LastChild as TSGEdit));
 
