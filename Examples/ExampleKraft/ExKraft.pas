@@ -140,7 +140,7 @@ end;
 
 {$IF not defined(ENGINE)}
 	begin
-	ExampleClass := TSGExample15;
+	ExampleClass := TSGKraftExamples;
 	RunApplication();
 	end.
 {$ELSE}

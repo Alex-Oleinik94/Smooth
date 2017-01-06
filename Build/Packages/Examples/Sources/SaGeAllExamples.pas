@@ -28,7 +28,7 @@ uses
 	,Ex13
 	,Ex14
 	,Ex15
-	,ExKraft
+	//,ExKraft
 	,Ex16
 	;
 
@@ -57,7 +57,7 @@ FDrawClasses.Add(TSGExample3);
 FDrawClasses.Add(TSGExample4_1);
 FDrawClasses.Add(TSGExample4_2);
 FDrawClasses.Add(TSGExample4_3);
-FDrawClasses.Add(TSGKraftExamples);
+//FDrawClasses.Add(TSGKraftExamples);
 FDrawClasses.Add(TSGExample5);
 FDrawClasses.Add(TSGExample5_2);
 FDrawClasses.Add(TSGExample5_4);
