@@ -68,7 +68,7 @@ type
 		procedure Paint();override;
 			protected
 		FNewPotokInit:Boolean;
-		SelectPoint,SelectSecondPoint,SelectSecondNormalPoint:TSGPoint2int32;
+		SelectPoint,SelectSecondPoint:TSGPoint2int32;
 		
 		SelectPointEnabled:Boolean;
 		Manda:TSGFractalMandelbrod;
@@ -520,6 +520,7 @@ for i:=0 to QuantityThreads-1 do
 	begin
 	FArProgressBar[i]:=TSGProgressBar.Create;
 	Screen.CreateChild(FArProgressBar[i]);
+	FArProgressBar[i].ViewCaption := False;
 	Screen.LastChild.SetBounds(10,ii,300,20);
 	Screen.LastChild.BoundsToNeedBounds();
 	ii+=23;
@@ -541,6 +542,7 @@ LabelProcent.SetBounds(10,ii,300,20);
 LabelProcent.Color2 := SGVertex4fImport(1,0,0,0.8);
 LabelProcent.Color1 := SGVertex4fImport(0.5,0,0,0.8);
 LabelProcent.Caption:='';
+LabelProcent.ViewCaption := False;
 LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
 
@@ -962,26 +964,113 @@ Result.Import(
 	);
 end;
 
-{function QuantityNumbers(a:TSGMaxEnum):byte;inline;
+
+procedure TSGFractalMandelbrodRelease.Paint();
+
+procedure UpdateFirstPoint();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=0;
-while a>0 do
+if (Context.CursorKeysPressed(SGRightCursorButton))  then
 	begin
-	a:=a div 10;
-	Inc(Result);
+	SelectPointEnabled:=True;
+	SelectPoint:=Context.CursorPosition(SGNowCursorPosition);
 	end;
 end;
 
-function GetZeros(const QZ:byte):string;
 var
-	i:byte;
-begin
-Result:='';
-for i:=1 to QZ do
-	Result+='0';
-end;}
+	SelectSecondNormalPoint : TSGPoint2int32;
 
-procedure TSGFractalMandelbrodRelease.Paint();
+procedure UpdateSecondPoint();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure QuadVertexes(const Point1, Point2 : TSGPoint2int32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Render.Vertex(Point1);
+Render.Vertex2f(Point1.x, Point2.y);
+Render.Vertex(Point2);
+Render.Vertex2f(Point2.x, Point1.y);
+end;
+
+procedure QuadVertexes(const VType : TSGMaxEnum; const Point1, Point2 : TSGPoint2int32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Render.BeginScene(VType);
+QuadVertexes(Point1, Point2);
+Render.EndScene();
+end;
+
+var
+	Abss, RenderBounds : TSGPoint2int32;
+
+procedure DrawQuads();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Abss.x / Abss.y > RenderBounds.x / RenderBounds.y then
+	begin
+	SelectSecondNormalPoint.y := SelectSecondPoint.y;
+	if (SelectPoint.x < SelectSecondPoint.x) then
+		SelectSecondNormalPoint.x := SelectPoint.x + Round(Abss.y / RenderBounds.y * RenderBounds.x)
+	else
+		SelectSecondNormalPoint.x := SelectPoint.x - Round(Abss.y / RenderBounds.y * RenderBounds.x);
+	end
+else
+	begin
+	SelectSecondNormalPoint.x := SelectSecondPoint.x;
+	if SelectPoint.y < SelectSecondPoint.y then
+		SelectSecondNormalPoint.y := SelectPoint.y + Round(Abss.x / RenderBounds.x * RenderBounds.y)
+	else
+		SelectSecondNormalPoint.y := SelectPoint.y - Round(Abss.x / RenderBounds.x * RenderBounds.y);
+	end;
+
+Render.Color4f(0,0.5,0.70,0.6);
+QuadVertexes(SGR_QUADS, SelectPoint, SelectSecondPoint);
+Render.Color4f(0,0.7,0.70,0.8);
+QuadVertexes(SGR_LINE_LOOP, SelectPoint, SelectSecondPoint);
+
+Render.Color4f(0.6,0.5,0.30,0.6);
+QuadVertexes(SGR_QUADS, SelectPoint, SelectSecondNormalPoint);
+Render.Color4f(1,0.9,0.20,0.8);
+QuadVertexes(SGR_LINE_LOOP, SelectPoint, SelectSecondNormalPoint);
+end;
+
+begin
+if SelectPointEnabled then
+	begin
+	if Context.KeyPressedChar = #27 then
+		SelectPointEnabled := False;
+	
+	SelectSecondPoint := Context.CursorPosition(SGNowCursorPosition);
+	Abss.Import(
+		Abs(SelectPoint.x - SelectSecondPoint.x),
+		Abs(SelectPoint.y - SelectSecondPoint.y));
+	RenderBounds.Import(
+		Render.Width,
+		Render.Height);
+	try
+	DrawQuads();
+	except
+	end;
+	end;
+end;
+
+procedure UpdateFinalPoint();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
+	begin
+	SelectSecondPoint:=SelectSecondNormalPoint;
+	
+	SelectPointEnabled:=False;
+	if SelectPoint.x>SelectSecondPoint.x then
+		SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
+	if SelectPoint.y>SelectSecondPoint.y then
+		SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
+	FOldView:=Manda.FView;
+	Manda.FView.Import(
+		GetPointOnPosOnMand(SelectPoint).x,
+		GetPointOnPosOnMand(SelectSecondPoint).y,
+		GetPointOnPosOnMand(SelectSecondPoint).x,
+		GetPointOnPosOnMand(SelectPoint).y
+		);
+	Changet:=True;
+	end;
+end;
+
 var
 	i,ii:LongInt;
 	TDT:TSGDateTime;
@@ -1214,83 +1303,9 @@ if MandaInitialized then
 				SelectSecondPoint.Import;
 				end;
 			end;
-		if (Context.CursorKeysPressed(SGRightCursorButton))  then
-			begin
-			SelectPointEnabled:=True;
-			SelectPoint:=Context.CursorPosition(SGNowCursorPosition);
-			end;
-		if SelectPointEnabled then
-			begin
-			if Context.KeyPressedChar=#27 then
-				SelectPointEnabled:=False;
-			
-			SelectSecondPoint:=Context.CursorPosition(SGNowCursorPosition);
-			if abs(SelectPoint.x-SelectSecondPoint.x)/abs(SelectPoint.y-SelectSecondPoint.y)>Render.Width/Render.Height then
-				begin
-				SelectSecondNormalPoint.y:=SelectSecondPoint.y;
-				if (SelectPoint.x<SelectSecondPoint.x)then
-					SelectSecondNormalPoint.x:=SelectPoint.x+Round(abs(SelectSecondPoint.y-SelectPoint.y)/Render.Height*Render.Width)
-				else
-					SelectSecondNormalPoint.x:=SelectPoint.x-Round(abs(SelectSecondPoint.y-SelectPoint.y)/Render.Height*Render.Width);
-				end
-			else
-				begin
-				SelectSecondNormalPoint.x:=SelectSecondPoint.x;
-				if SelectPoint.y<SelectSecondPoint.y then
-					SelectSecondNormalPoint.y:=SelectPoint.y+Round(abs(SelectSecondPoint.x-SelectPoint.x)/Render.Width*Render.Height)
-				else
-					SelectSecondNormalPoint.y:=SelectPoint.y-Round(abs(SelectSecondPoint.x-SelectPoint.x)/Render.Width*Render.Height);
-				end;
-			
-			Render.Color4f(0,0.5,0.70,0.6);
-			Render.BeginScene(SGR_QUADS);
-			Render.Vertex(SelectPoint);
-			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			Render.Vertex(SelectSecondPoint);
-			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
-			Render.EndScene();
-			Render.Color4f(0,0.7,0.70,0.8);
-			Render.BeginScene(SGR_LINE_LOOP);
-			Render.Vertex(SelectPoint);
-			Render.Vertex2f(SelectPoint.x,SelectSecondPoint.y);
-			Render.Vertex(SelectSecondPoint);
-			Render.Vertex2f(SelectSecondPoint.x,SelectPoint.y);
-			Render.EndScene();
-			
-			Render.Color4f(0.6,0.5,0.30,0.6);
-			Render.BeginScene(SGR_QUADS);
-			Render.Vertex(SelectPoint);
-			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			Render.Vertex(SelectSecondNormalPoint);
-			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
-			Render.EndScene();
-			Render.Color4f(1,0.9,0.20,0.8);
-			Render.BeginScene(SGR_LINE_LOOP);
-			Render.Vertex(SelectPoint);
-			Render.Vertex2f(SelectPoint.x,SelectSecondNormalPoint.y);
-			Render.Vertex(SelectSecondNormalPoint);
-			Render.Vertex2f(SelectSecondNormalPoint.x,SelectPoint.y);
-			Render.EndScene();
-			end;
-		if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
-			begin
-			//Тут херачится новый зум
-			SelectSecondPoint:=SelectSecondNormalPoint;
-			
-			SelectPointEnabled:=False;
-			if SelectPoint.x>SelectSecondPoint.x then
-				SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
-			if SelectPoint.y>SelectSecondPoint.y then
-				SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
-			FOldView:=Manda.FView;
-			Manda.FView.Import(
-				GetPointOnPosOnMand(SelectPoint).x,
-				GetPointOnPosOnMand(SelectSecondPoint).y,
-				GetPointOnPosOnMand(SelectSecondPoint).x,
-				GetPointOnPosOnMand(SelectPoint).y
-				);
-			Changet:=True;
-			end;
+		UpdateFirstPoint();
+		UpdateSecondPoint();
+		UpdateFinalPoint();
 		end
 	else
 		begin

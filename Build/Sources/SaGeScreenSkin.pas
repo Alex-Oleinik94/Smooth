@@ -68,7 +68,7 @@ type
 			public
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
-		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGUInt8 = 5); virtual;
+		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5); virtual;
 			public
 		procedure PaintButton(constref Button : ISGButton); virtual;
 		procedure PaintPanel(constref Panel : ISGPanel); virtual;
@@ -362,7 +362,7 @@ begin
 Result := 'TSGScreenSkin';
 end;
 
-procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGUInt8 = 5);
+procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5);
 begin
 SGRoundQuad(Render, Location.Position, Location.Position + Location.Size, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
 end;
@@ -727,27 +727,28 @@ var
 	Active, Visible : TSGBool;
 	ActiveTimer, VisibleTimer : TSGScreenTimer;
 	FrameColor : TSGScreenSkinFrameColor;
-	Radius : TSGFloat = 2;
+	Radius : TSGFloat;
 begin
+Radius := 5;
 Location := ProgressBar.GetLocation();
+Location2 := Location;
+Location2.SizeX := Location2.Size.X * ProgressBar.Progress;
 
 Active := ProgressBar.Active;
 Visible := ProgressBar.Visible;
 
 VisibleTimer := ProgressBar.VisibleTimer;
 ActiveTimer := ProgressBar.ActiveTimer;
+if Location2.Size.X < Radius then
+	Radius := Location2.Size.X / 2.001;
 
 PaintQuad(Location,
 	FColors.FOver.FFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),
 	FColors.FOver.FSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3,
-	True, False, 5);
+	True, False, Radius);
 
 if ProgressBar.ViewProgress then
 	begin
-	Location2 := Location;
-	Location2.SizeX := Location2.Size.X * ProgressBar.Progress;
-	if Location2.Size.X < Radius then
-		Radius := Location2.Size.X / 2.001;
 	if ProgressBar.IsColorStatic then
 		FrameColor := ProgressBar.Color
 	else
@@ -755,7 +756,7 @@ if ProgressBar.ViewProgress then
 	PaintQuad(Location2,
 		FrameColor.FFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),
 		FrameColor.FSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3,
-		True, True, 5);
+		True, True, Radius);
 	end;
 
 if FontReady and ProgressBar.ViewCaption then 

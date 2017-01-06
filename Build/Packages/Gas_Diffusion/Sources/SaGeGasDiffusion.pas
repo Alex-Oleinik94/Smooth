@@ -1380,10 +1380,11 @@ if FSechenieImage<>nil then
 	FSechenieImage.Destroy();
 if FBoundsOptionsPanel <> nil then
 	FBoundsOptionsPanel.Destroy();
-
-// allready in FBoundsOptionsPanel.Destroy();
-//if FRelefRedactor <> nil then
-//	FRelefRedactor.Destroy();
+if FRelefRedactor <> nil then
+	begin
+	FRelefRedactor.Destroy();
+	FRelefRedactor := nil;
+	end;
 
 if FRedactorBackButton <> nil then
 	FRedactorBackButton.Destroy();

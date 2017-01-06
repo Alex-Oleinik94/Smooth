@@ -37,7 +37,7 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
-			public
+			private
 		FDrawClasses : TSGDrawClasses;
 			public
 		procedure Paint();override;
@@ -73,7 +73,7 @@ end;
 destructor TSGAllExamples.Destroy();
 begin
 FDrawClasses.Destroy();
-FDrawClasses:=nil;
+FDrawClasses := nil;
 inherited;
 end;
 
@@ -84,7 +84,7 @@ end;
 
 procedure TSGAllExamples.Paint();
 begin
-if FDrawClasses<>nil then
+if FDrawClasses <> nil then
 	FDrawClasses.Paint();
 end;
 

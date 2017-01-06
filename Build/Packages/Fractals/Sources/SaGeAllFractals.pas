@@ -41,7 +41,7 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
-			public
+			private
 		FDrawClasses : TSGDrawClasses;
 			public
 		procedure Paint();override;
