@@ -1,3 +1,4 @@
+{$mode objfpc}
 unit crt;
 
 interface
@@ -15,6 +16,7 @@ procedure clrscr();inline;
 procedure textbackground(const a:byte);inline;
 function readkey():char;inline;
 procedure Delay(const t : LongWord);inline;
+function KeyPressed:boolean;
 
 implementation
 
@@ -23,10 +25,11 @@ begin
 Sleep(t);
 end;
 
+function KeyPressed:boolean; begin Result := false; end;
 procedure clrscr();inline;begin end;
 procedure Gotoxy(const a,b:byte);inline;begin end;
-function wherey():byte;inline;begin end;
+function wherey():byte;inline;begin Result := 0; end;
 procedure textcolor(const a:byte);inline;begin end;
 procedure textbackground(const a:byte);inline;begin end;
-function readkey():char;inline;begin end;
+function readkey():char;inline;begin Result := #0; end;
 end.

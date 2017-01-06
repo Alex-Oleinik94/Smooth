@@ -65,7 +65,7 @@ type
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			private
-		FOpenALSource : TSGOpenALCustomSource;
+		FCustomSource : TSGOpenALCustomSource;
 		FBuffers  : array[0..1] of TSGALBuffer;
 		FFormat   : TALenum;
 		FAudioInfo: TSGAudioInfo;
@@ -145,7 +145,7 @@ end;
 constructor TSGOpenALBufferedSource.Create(const VAudioRender : TSGAudioRender);
 begin
 inherited Create(VAudioRender);
-FOpenALSource := TSGOpenALCustomSource.Create(VAudioRender);
+FCustomSource := TSGOpenALCustomSource.Create(VAudioRender);
 FillChar(FFormat, SizeOf(FFormat), 0);
 FillChar(FAudioInfo, SizeOf(FAudioInfo), 0);
 FillChar(FBuffers, SizeOf(FBuffers), 0);
@@ -155,7 +155,7 @@ destructor TSGOpenALBufferedSource.Destroy();
 begin
 if FBuffers[0] + FBuffers[1] <> 0 then
 	alDeleteBuffers(2, @FBuffers[0]);
-FOpenALSource.Destroy();
+FCustomSource.Destroy();
 inherited;
 end;
 
@@ -166,14 +166,14 @@ end;
 
 function TSGOpenALBufferedSource.GetSource() : ISGAudioSource;
 begin
-Result := FOpenALSource;
+Result := FCustomSource;
 end;
 
 function TSGOpenALBufferedSource.CountProcessedBuffers() : TSGUInt32;
 var
 	Processed : TALint;
 begin
-alGetSourcei(FOpenALSource.Source, AL_BUFFERS_PROCESSED, @Processed);
+alGetSourcei(FCustomSource.Source, AL_BUFFERS_PROCESSED, @Processed);
 Result := Processed;
 end;
 
@@ -183,9 +183,9 @@ var
 begin
 if VDataLength > 0 then
 	begin
-	alSourceUnqueueBuffers(FOpenALSource.Source, 1, @Buffer);
+	alSourceUnqueueBuffers(FCustomSource.Source, 1, @Buffer);
 	BufferSource(Buffer, Data, VDataLength);
-	alSourceQueueBuffers(FOpenALSource.Source, 1, @Buffer);
+	alSourceQueueBuffers(FCustomSource.Source, 1, @Buffer);
 	end;
 end;
 
@@ -213,7 +213,7 @@ alGenBuffers(2, @FBuffers[0]);
 DecodedDataLength += DecodeAndSendDataToBufferBuffer(FBuffers[0], Data^, SGAudioDecoderBufferSize);
 DecodedDataLength += DecodeAndSendDataToBufferBuffer(FBuffers[1], Data^, SGAudioDecoderBufferSize);
 SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Decoded data size ''' + SGStr(DecodedDataLength) + '''.');
-alSourceQueueBuffers(FOpenALSource.Source, 2, @FBuffers[0]);
+alSourceQueueBuffers(FCustomSource.Source, 2, @FBuffers[0]);
 
 FreeMem(Data);
 SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Done.');

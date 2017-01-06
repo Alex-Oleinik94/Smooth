@@ -113,8 +113,9 @@ type
 			public
 		procedure BoundsToNeedBounds();virtual;
 		procedure SetShifts(const NL,NT,NR,NB:TSGScreenInt);virtual;
-		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);virtual;
-		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);virtual;
+		procedure SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);virtual;
+		procedure SetBoundsFloat(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenFloat);
+		procedure SetMiddleBounds(const NewWidth, NewHeight : TSGScreenInt);virtual;
 		procedure WriteBounds();
 		class function RandomOne():TSGScreenInt;
 		procedure AddToLeft(const Value:TSGScreenInt);
@@ -643,7 +644,12 @@ if Obj <> NObj then
 	end;
 end;
 
-procedure TSGComponent.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);
+procedure TSGComponent.SetBoundsFloat(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenFloat);
+begin
+SetBounds(Round(NewLeft), Round(NewTop), Round(NewWidth), Round(NewHeight));
+end;
+
+procedure TSGComponent.SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);
 begin
 Height:=NewHeight;
 Left:=NewLeft;

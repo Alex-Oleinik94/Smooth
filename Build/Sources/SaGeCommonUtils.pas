@@ -15,10 +15,13 @@ uses
 	,SaGeImages
 	,SaGeCommonClasses
 	,SaGeRenderConstants
+	,SaGeScreenBase
 	;
 
-const
-	SGDrawClassesComboBoxWidth = 300;
+(*=================================*)
+(*=========TSGDrawClasses==========*)
+(*=================================*)
+
 type
 	TSGDrawClassesObject = object
 		public
@@ -37,23 +40,29 @@ type
 			public
 		FNowDraw     : TSGDrawable;
 		FNowDrawable : TSGBoolean;
-		FArClasses:packed array of
+		FArClasses   : packed array of
 			packed record 
 				FClass    : TSGDrawableClass;
 				FDrawable : TSGBoolean;
 				end;
-		FComboBox2:TSGComboBox;
+		FComboBox : TSGComboBox;
 			public
 		procedure Paint();override;
 		procedure Add(const NewClasses:TSGDrawClassesObjectList);overload;
 		procedure Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
-		procedure Initialize();
+		procedure Initialize();overload;
+		procedure Initialize(const Location : TSGComponentLocation);overload;
+		procedure Initialize(const L, T, W, H : TSGScreenFloat);overload;
 		procedure SwitchTo(const Index : TSGLongWord);
 			public
-		property ComboBox : TSGComboBox read FComboBox2;
+		property ComboBox : TSGComboBox read FComboBox;
 		end;
 
 implementation
+
+(*=================================*)
+(*=========TSGDrawClasses==========*)
+(*=================================*)
 
 procedure TSGDrawClasses.DeleteDeviceResources();
 begin
@@ -80,7 +89,7 @@ if FArClasses <> nil then
 		begin
 		FNowDraw     := FArClasses[Index].FClass.Create(Context);
 		FNowDrawable := FArClasses[Index].FDrawable;
-		FComboBox2.Caption := FArClasses[Index].FClass.ClassName();
+		FComboBox.Caption := FArClasses[Index].FClass.ClassName();
 		end;
 end;
 
@@ -90,31 +99,40 @@ if a <> b then
 	TSGDrawClasses(VComboBox.FUserPointer1).SwitchTo(b);
 end;
 
-procedure TSGDrawClasses.Initialize();
+procedure TSGDrawClasses.Initialize();overload;
+begin
+Initialize(SGComponentLocationImport(5, 5, 300, 18));
+end;
+procedure TSGDrawClasses.Initialize(const L, T, W, H : TSGScreenFloat);overload;
+begin
+Initialize(SGComponentLocationImport(L, T, W, H));
+end;
+
+procedure TSGDrawClasses.Initialize(const Location : TSGComponentLocation);overload;
 var
 	i:LongWord;
 begin
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('Begin of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
-FComboBox2:=TSGComboBox.Create();
-Screen.CreateChild(FComboBox2);
-FComboBox2.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
-FComboBox2.SelectItem:=0;
-FComboBox2.FUserPointer1:=Self;
-FComboBox2.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
-FComboBox2.Visible:=True;
-FComboBox2.Skin := FComboBox2.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory+Slash+'Tahoma.sgf');
-FComboBox2.Active:=Length(FArClasses)>1;
-FComboBox2.FDrawClass:=Self;
-FComboBox2.BoundsToNeedBounds();
+FComboBox:=TSGComboBox.Create();
+Screen.CreateChild(FComboBox);
+FComboBox.SetBoundsFloat(Location.Position.X, Location.Position.Y, Location.Size.X, Round(Location.Size.Y));
+FComboBox.SelectItem:=0;
+FComboBox.FUserPointer1:=Self;
+FComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
+FComboBox.Visible:=True;
+FComboBox.Skin := FComboBox.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory+Slash+'Tahoma.sgf');
+FComboBox.Active:=Length(FArClasses)>1;
+FComboBox.FDrawClass:=Self;
+FComboBox.BoundsToNeedBounds();
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	for i:=0 to High(FArClasses) do
 		Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	begin
-	FComboBox2.SelectItem := Random(Length(FArClasses));
-	SwitchTo(FComboBox2.SelectItem);
+	FComboBox.SelectItem := Random(Length(FArClasses));
+	SwitchTo(FComboBox.SelectItem);
 	end;
 {$IFDEF SGMoreDebuging}
 	SGLog.Sourse('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
@@ -123,7 +141,7 @@ end;
 
 class function TSGDrawClasses.ClassName():string;
 begin
-Result:='SaGe Draw Classes';
+Result := 'SaGe Draw Classes';
 end;
 
 procedure TSGDrawClasses.Paint();
@@ -154,11 +172,11 @@ end;
 
 procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
 begin
-SetLength(FArClasses,Length(FArClasses)+1);
+SetLength(FArClasses, Length(FArClasses) + 1);
 FArClasses[High(FArClasses)].FClass    := NewClass;
 FArClasses[High(FArClasses)].FDrawable := Drawable;
-if FComboBox2 <> nil then
-	FComboBox2.Active:=Length(FArClasses) > 1;
+if FComboBox <> nil then
+	FComboBox.Active:=Length(FArClasses) > 1;
 end;
 
 constructor TSGDrawClasses.Create(const VContext : ISGContext);
@@ -166,7 +184,7 @@ begin
 inherited Create(VContext);
 FNowDraw   := nil;
 FArClasses := nil;
-FComboBox2 := nil;
+FComboBox := nil;
 end;
 
 destructor TSGDrawClasses.Destroy;
@@ -176,7 +194,12 @@ if FNowDraw <> nil then
 	FNowDraw.Destroy();
 	FNowDraw := nil;
 	end;
-FComboBox2 := nil;
+if FComboBox <> nil then
+	begin
+	FComboBox.FDrawClass := nil;
+	FComboBox.MarkForDestroy();
+	FComboBox := nil;
+	end;
 if FArClasses <> nil then
 	begin
 	SetLength(FArClasses, 0);

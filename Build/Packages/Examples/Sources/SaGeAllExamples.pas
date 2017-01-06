@@ -61,16 +61,13 @@ FDrawClasses.Add(TSGExample5_2);
 FDrawClasses.Add(TSGExample5_4);
 FDrawClasses.Add(TSGExample6);
 FDrawClasses.Add(TSGExample6_2);
-FDrawClasses.Add(TSGApprFunction{Ex7});
+FDrawClasses.Add(TSGApprFunction); // Ex 7
 FDrawClasses.Add(TSGExample13);
 FDrawClasses.Add(TSGExample14);
 FDrawClasses.Add(TSGExample15);
 FDrawClasses.Add(TSGExample16);
 FDrawClasses.Initialize();
-FDrawClasses.ComboBox.BoundsToNeedBounds();
-FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
-FDrawClasses.ComboBox.BoundsToNeedBounds();
-FDrawClasses.ComboBox.SetBounds(5,28,SGDrawClassesComboBoxWidth,18);
+FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 end;
 
 destructor TSGAllExamples.Destroy();

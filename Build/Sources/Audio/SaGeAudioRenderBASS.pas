@@ -62,7 +62,7 @@ type
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			private
-		FBASSSource : TSGBASSCustomSource;
+		FCustomSource : TSGBASSCustomSource;
 			protected
 		function GetSource() : ISGAudioSource; override;
 		function CountProcessedBuffers() : TSGUInt32; override;
@@ -93,12 +93,13 @@ uses
 constructor TSGBASSBufferedSource.Create(const VAudioRender : TSGAudioRender);
 begin
 inherited Create(VAudioRender);
+FCustomSource := TSGBASSCustomSource.Create(VAudioRender);
 
 end;
 
 destructor TSGBASSBufferedSource.Destroy();
 begin
-
+FCustomSource.Destroy();
 inherited;
 end;
 
@@ -109,7 +110,7 @@ end;
 
 function TSGBASSBufferedSource.GetSource() : ISGAudioSource;
 begin
-Result := FBASSSource;
+Result := FCustomSource;
 end;
 
 function TSGBASSBufferedSource.CountProcessedBuffers() : TSGUInt32;

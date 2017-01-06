@@ -19,7 +19,9 @@ uses
 
 type
 	TSGCaption =  TSGString;
-	TSGScreenTimer = TSGFloat;
+	TSGScreenFloat = TSGFloat;
+	TSGScreenTimer = TSGScreenFloat;
+	TSGComponentLocationType = TSGScreenFloat;
 	TSGComponentLocationVectorType = TSGVector2f;
 
 	TSGComponentLocation = object
@@ -32,10 +34,10 @@ type
 			public
 		property Size      : TSGComponentLocationVectorType read FSize     write FSize;
 		property Position  : TSGComponentLocationVectorType read FPosition write FPosition;
-		property SizeX     : TSGFloat read FSize.x     write FSize.x;
-		property SizeY     : TSGFloat read FSize.y     write FSize.y;
-		property PositionX : TSGFloat read FPosition.x write FPosition.x;
-		property PositionY : TSGFloat read FPosition.y write FPosition.y;
+		property SizeX     : TSGComponentLocationType read FSize.x     write FSize.x;
+		property SizeY     : TSGComponentLocationType read FSize.y     write FSize.y;
+		property PositionX : TSGComponentLocationType read FPosition.x write FPosition.x;
+		property PositionY : TSGComponentLocationType read FPosition.y write FPosition.y;
 		end;
 
 	TSGAnchors = type TSGExByte;
@@ -269,9 +271,15 @@ type
 		property IsColorStatic : TSGBool                 read GetIsColorStatic;
 		end;
 
-function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGComponentLocationImport(SGVertex2fImport(VLeft, VTop), SGVertex2fImport(VWidth, VHeight));
+end;
 
 procedure TSGScreenSkinFrameColor.Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -298,7 +306,7 @@ FSelected   := False;
 FOver       := False;
 end;
 
-function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(VPosition, VSize);
 end;

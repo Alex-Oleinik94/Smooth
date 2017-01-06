@@ -60,10 +60,7 @@ FDrawClasses.Add(TSGFractalTetraider);
 FDrawClasses.Add(TSGFractalLomanaya);
 FDrawClasses.Add(TSGFractalPodkova);
 FDrawClasses.Initialize();
-FDrawClasses.ComboBox.BoundsToNeedBounds();
-FDrawClasses.ComboBox.SetBounds(5,5,SGDrawClassesComboBoxWidth,18);
-FDrawClasses.ComboBox.BoundsToNeedBounds();
-FDrawClasses.ComboBox.SetBounds(5,28,SGDrawClassesComboBoxWidth,18);
+FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 end;
 
 destructor TSGAllFractals.Destroy();

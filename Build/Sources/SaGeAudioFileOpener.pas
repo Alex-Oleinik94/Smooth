@@ -33,9 +33,10 @@ uses
 	,SaGeAudioDecoder
 	,SaGeDllManager
 	,crt
+	,dos
 	;
 
-procedure PlayFiles(const Files : TSGStringList);
+procedure ConsolePlayFile(const FileName : TSGString);
 var
 	AudioRender : TSGAudioRender = nil;
 	BufferedSource : TSGAudioBufferedSource = nil;
@@ -72,15 +73,8 @@ while Trunc(ConsPos / ConsSize * ConsAll) > ConsWr do
 end;
 
 begin
-if Length(Files)>1 then
-	begin
-	SGHint('Hint: Opening ' + SGStr(Length(Files)) + ' files:');
-	for i := 0 to High(Files) do
-		SGHint('  ' + Files[i]);
-	SGHint('Warrning: Suppored playing only one of files.');
-	end;
-SGHint('Playing "' + Files[0] + '".');
-FileExpansion := SGGetFileExpansion(Files[0]);
+SGHint('Playing "' + FileName + '".');
+FileExpansion := SGGetFileExpansion(FileName);
 if TSGCompatibleAudioRender = nil then
 	begin
 	SGHint('Error! No audio renders suppored!');
@@ -102,7 +96,7 @@ if TSGCompatibleAudioDecoder(FileExpansion) = nil then
 	AudioRender.Destroy();
 	exit;
 	end;
-BufferedSource.Attach(TSGCompatibleAudioDecoder(FileExpansion).Create().SetInput(Files[0]));
+BufferedSource.Attach(TSGCompatibleAudioDecoder(FileExpansion).Create().SetInput(FileName));
 BufferedSource.Play();
 BufferedSource.Relative := True;
 
@@ -134,8 +128,17 @@ for S in VExpansions do
 end;
 
 class procedure TSGAudioFileOpener.Execute(const VFiles : TSGStringList);
+var
+	i : TSGUInt32;
 begin
-PlayFiles(VFiles);
+if Length(VFiles)>1 then
+	begin
+	SGHint('Hint: Opening ' + SGStr(Length(VFiles)) + ' files:');
+	for i := 0 to High(VFiles) do
+		SGHint('  ' + VFiles[i]);
+	SGHint('Warrning: Suppored playing only one of files.');
+	end;
+ConsolePlayFile(VFiles[0]);
 end;
 
 class function TSGAudioFileOpener.ClassName() : TSGString;
