@@ -5,11 +5,11 @@ interface
 
 uses
 	crt
-	,SaGeContext
+	,SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
@@ -17,7 +17,7 @@ uses
 	,Classes
 	,SysUtils
 	,StrMan
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 
 type
@@ -116,11 +116,11 @@ type
 	// - полигонов
 	// - вершин
 	// - инверсно преобразованной модели скелетной анимации
-	TModel = class(TSGDrawClass)
+	TModel = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			public
 		FFileName  : string;            // имя файла
@@ -254,10 +254,7 @@ begin
 S := String(S1);
 S := Trim(S);
 S := StringWordGet(S,' ',Index);
-{$IFDEF FPC}
-	S := StringReplace(S, '.', ',', [rfReplaceAll]);
-	{$ENDIF}
-Result := StrToFloatDef(S,0);
+Result := SGValFloat(S);
 end;
 
 procedure TModel.Load(const VFileName : TSGString);
@@ -267,7 +264,7 @@ var
 	i,j,k : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
 while SGReadLnStringFromStream(Stream) <> 'nodes' do ;
@@ -356,7 +353,7 @@ var Stream       : TMemoryStream;
     ActionIndex  : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
 SetLength(FAnimation.FActions,Length(FAnimation.FActions)+1);
@@ -463,7 +460,7 @@ end;
 procedure TSkelAnimState.Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSGBoolean);
 var
 	Delta : TSGFloat;
-	i, j, k : TIndex;
+	i : TIndex;
 begin
 if Length(FCurrentPos.FBones) = 0 then
 	Exit;
@@ -659,7 +656,7 @@ begin
 Result := @FAnimation;
 end;
 
-constructor TModel.Create(const VContext : TSGContext);
+constructor TModel.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh := nil;
@@ -667,10 +664,10 @@ FTextures := nil;
 FTexturesBlock := nil;
 end;
 
-procedure TModel.Draw();
+procedure TModel.Paint();
 begin
 if FMesh <> nil then
-	FMesh.Draw();
+	FMesh.Paint();
 end;
 
 class function TModel.ClassName():TSGString;

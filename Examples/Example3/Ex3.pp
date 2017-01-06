@@ -14,19 +14,19 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	;
 type
-	TSGExample3=class(TSGDrawClass)
+	TSGExample3=class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -41,7 +41,7 @@ begin
 Result := 'Кубики и текстура шрифта вместе с камерой';
 end;
 
-constructor TSGExample3.Create(const VContext : TSGContext);
+constructor TSGExample3.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
@@ -53,7 +53,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample3.Draw();
+procedure TSGExample3.Paint();
 
 procedure DrawCube(const x,y,z,r,a: Single);
 begin
@@ -105,7 +105,7 @@ DrawCube(2,0,0,0.5,0.2);
 DrawCube(2,-6,0,2,0.5);
 
 Render.Color3f(1,1,1);
-SGScreen.Font.BindTexture();
+Screen.Skin.Font.BindTexture();
 Render.BeginScene(SGR_QUADS);
 Render.TexCoord2f(0,1);
 Render.Vertex3f(6,6,-3);
@@ -116,7 +116,7 @@ Render.Vertex3f(-6,-6,-3);
 Render.TexCoord2f(1,1);
 Render.Vertex3f(-6,6,-3);
 Render.EndScene();
-SGScreen.Font.DisableTexture();
+Screen.Skin.Font.DisableTexture();
 end;
 
 {$IFNDEF ENGINE}

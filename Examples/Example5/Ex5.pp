@@ -14,11 +14,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,PAPPE
 	,SaGeCommon
 	,crt
@@ -27,11 +27,11 @@ uses
 const
 	QuantityObjects = 15;
 type
-	TSGExample5=class(TSGDrawClass)
+	TSGExample5=class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera           : TSGCamera;
@@ -63,7 +63,7 @@ begin
 Result := 'Пример физического движка №1';
 end;
 
-constructor TSGExample5.Create(const VContext : TSGContext);
+constructor TSGExample5.Create(const VContext : ISGContext);
 procedure InitCubes();
 var
 	i,j,r,x,k,y,kk:TSGLongWord;
@@ -91,7 +91,8 @@ for i:=0 to length(Objects)-1 do
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k <> 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;
@@ -170,11 +171,17 @@ PAPPE.PhysicsDone       (Physics);
 inherited;
 end;
 
-procedure TSGExample5.Draw();
+procedure TSGExample5.Paint();
 var
 	i,ii      : TSGLongWord;
 	Licht0Pos : TSGVertex3f;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
+
+// $RANGECHECKS
+{$IFOPT R+}
+	{$DEFINE RANGECHECKS_OFFED}
+	{$R-}
+	{$ENDIF}
 
 procedure DrawObjectMesh(var AObjectMesh: TPhysicsObjectMesh); register;
 var
@@ -200,6 +207,11 @@ for I:=0 to AObjectMesh.NumTriangles-1 do
 	end;
 Render.EndScene();
 end;
+
+{$IFDEF RANGECHECKS_OFFED}
+	{$R+}
+	{$UNDEFINE RANGECHECKS_OFFED}
+	{$ENDIF}
 
 procedure DrawObject(var AObject: TPhysicsObject); register;
 var
@@ -275,7 +287,7 @@ Render.Color3f(1,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
 while i<>FPhysicsTimeIndex do
 	begin
-	Render.Vertex2f(ii/1.5,Context.Height-20*FPhysicsTime[i]-10/1.5);
+	Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
 	if i = 0 then
 		i:= FPhysicsTimeCount -1
 	else
@@ -285,21 +297,21 @@ while i<>FPhysicsTimeIndex do
 Render.EndScene();
 Render.Color3f(0,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
-Render.Vertex2f(5/1.5,Context.Height-30-5/1.5);
-Render.Vertex2f(5/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
-SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Context.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
-SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
-SGScreen.Font.DrawFontFromTwoVertex2f('Physics Time',
-	SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('2ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+Screen.Skin.Font.FontHeight));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('0ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+Screen.Skin.Font.FontHeight));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
+	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+Screen.Skin.Font.FontHeight-10));
 	
 end;
 

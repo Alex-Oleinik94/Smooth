@@ -14,34 +14,36 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
 	,SaGePhysics
+	,SaGeImages
+	,Math
+	,SaGeScreenBase
+	
 	,Ex13_Model
 	,Ex15_Shadow
 	,Ex6_D
 	,Ex6_N
-	,Math
-	,SaGeImages
 	;
 
 const
 	ScaleForDepth = 12;
 
 type
-	TSGExample15=class(TSGDrawClass)
+	TSGExample15=class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure KeyControl();
 		procedure AddModels(const VCount : TIndex);
@@ -157,7 +159,7 @@ x := x0 * PlaneSize;
 y := y0 * PlaneSize;
 a := PI*2/50;
 Render.BeginScene(SGR_TRIANGLES);
-SGVertexImport(0,0,1).Normalized().Normal(Render);
+Render.Normal(SGVertex3fImport(0,0,1).Normalized());
 for i := 0 to 49 do
 	begin
 	Render.TexCoord2f(x / TextureSize, y / TextureSize);
@@ -175,7 +177,7 @@ for i := 0 to 49 do
 Render.EndScene();
 end;
 
-constructor TSGExample15.Create(const VContext : TSGContext);
+constructor TSGExample15.Create(const VContext : ISGContext);
 
 procedure LoadLigthModel();
 var
@@ -190,7 +192,7 @@ FPhysics.LastObject().AddObjectEnd(50);
 
 FLigthSphere := FPhysics.LastObject().Mesh;
 FPhysics.LastObject().Mesh := nil;
-FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.ObjectColor:=SGVertex4fImport(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -199,14 +201,15 @@ end;
 procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
 begin
 VButton := TSGButton.Create();
-SGScreen.CreateChild(VButton);
-SGScreen.LastChild.Font := FFont;
-SGScreen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
-SGScreen.LastChild.BoundsToNeedBounds();
-SGScreen.LastChild.UserPointer:=Self;
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption := VCaption;
-(SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+Screen.CreateChild(VButton);
+Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
+Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
+Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.UserPointer:=Self;
+Screen.LastChild.Anchors:=[SGAnchRight];
+Screen.LastChild.Visible:=True;
+Screen.LastChild.Caption := VCaption;
+(Screen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
 end;
 
 var
@@ -256,16 +259,16 @@ if Render.SupporedShaders() then
 	FFont.ToTexture();
 	
 	FFPS := TSGFPSViewer.Create(Context);
-	FFPS.X := Context.Width div 2;
+	FFPS.X := Render.Width div 2;
 	FFPS.Y := 5;
 	
 	FCamera:=TSGCamera.Create();
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 	FCamera.ChangingLookAtObject := False;
-	FCamera.Up       := SGVertexImport(0,0,1);
-	FCamera.Location := SGVertexImport(0,-350,100);
-	FCamera.View     := (SGVertexImport(0,0,0)-FCamera.Location).Normalized();
+	FCamera.Up       := SGVertex3fImport(0,0,1);
+	FCamera.Location := SGVertex3fImport(0,-350,100);
+	FCamera.View     := (SGVertex3fImport(0,0,0)-FCamera.Location).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);
@@ -301,22 +304,23 @@ if Render.SupporedShaders() then
 	
 	FShadow := TSGExample15_Shadow.Create(Context, FLightsCount, FModel.Animation^.FNodesNum, FModel.TexturesBlock);
 	
-	CreateButton(FP1Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
-	CreateButton(FM1Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
-	CreateButton(FP5Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
-	CreateButton(FM5Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
-	CreateButton(FP15Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
-	CreateButton(FM15Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
-	CreateButton(FP100Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
-	CreateButton(FM100Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	CreateButton(FP1Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
+	CreateButton(FM1Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
+	CreateButton(FP5Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
+	CreateButton(FM5Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
+	CreateButton(FP15Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
+	CreateButton(FM15Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
+	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
+	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
 	FCountLabel := TSGLabel.Create();
-	SGScreen.CreateChild(FCountLabel);
-	SGScreen.LastChild.Font := FFont;
-	SGScreen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
-	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Visible := True;
+	Screen.CreateChild(FCountLabel);
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
+	Screen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+	Screen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	Screen.LastChild.BoundsToNeedBounds();
+	Screen.LastChild.Anchors:=[SGAnchRight];
+	Screen.LastChild.Visible := True;
 	
 	FStoneImageD := TSGImage.Create('Ex6_D.jpg');
 	FStoneImageD.Context := Context;
@@ -349,7 +353,7 @@ for i := 0 to High(FAnimationStates) do
 	FAnimationStates[i].ResetState(0);
 SetLength(FAnimationStates,0);
 
-Context.CursorInCenter := False;
+Context.CursorCentered := False;
 
 if (FP1Button <> nil) then
 	FP1Button.Destroy();
@@ -429,7 +433,7 @@ for i := 0 to FQuantityModels - 1 do
 	FAnimationStates[i].FSpeed := (30+5*i) * 0.01;
 	Render.Translatef(x,y,0);
 	Render.Rotatef(-angle / PI * 180 + 90,0,0,1);
-	FModel.Draw();
+	FModel.Paint();
 	Render.PopMatrix();
 	end;
 
@@ -444,7 +448,7 @@ Render.PopMatrix();
 Render.Enable(SGR_BLEND);
 end;
 
-procedure TSGExample15.Draw();
+procedure TSGExample15.Paint();
 const
 	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
@@ -463,12 +467,12 @@ if Render.SupporedShaders() then
 	
 	for i := 0 to FLightsCount - 1 do
 		begin
-		FShadow.LightPos[i]   := SGVertexImport(
+		FShadow.LightPos[i]   := SGVertex3fImport(
 			cos(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
 			sin(FLightsSettings[i].FMn*FRotateAngleLight/10)*FBigRad,
 			FBigRad * 1.6);
-		FShadow.LightUp[i]    := SGVertexImport(0,0,1);
-		FShadow.LightEye[i]   := SGVertexImport(0,0,0) + SGVertexImport(FShadow.LightPos[i].x,FShadow.LightPos[i].y,0)*0.2;
+		FShadow.LightUp[i]    := SGVertex3fImport(0,0,1);
+		FShadow.LightEye[i]   := SGVertex3fImport(0,0,0) + SGVertex3fImport(FShadow.LightPos[i].x,FShadow.LightPos[i].y,0)*0.2;
 		FShadow.LightAngle[i] := FLigthCameraAngle;
 		end;
 	
@@ -520,32 +524,32 @@ if Render.SupporedShaders() then
 		Render.PushMatrix();
 		FLightInverseModelViewMatrix := SGInverseMatrix(FShadow.LightModelViewMatrix[i]);
 		Render.MultMatrixf(@FLightInverseModelViewMatrix);
-		FLigthSphere.Draw();
+		FLigthSphere.Paint();
 		Render.PopMatrix();
 		
 		Render.BeginScene(SGR_LINES);
-		FShadow.LightPos[i].Vertex(Render);
-		(FShadow.LightPos[i] + FShadow.LightDir[i] * 10).Vertex(Render);
+		Render.Vertex(FShadow.LightPos[i]);
+		Render.Vertex(FShadow.LightPos[i] + FShadow.LightDir[i] * 10);
 		Render.EndScene();
 		end;
 	
 	FShadow.KeyboardCallback();
 	KeyControl();
-	FFPS.Draw();
+	FFPS.Paint();
 	end
 else
 	begin
 	Render.InitMatrixMode(SG_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := SGScreen.Font.StringLength(WarningString1);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height - 20) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 00) div 2));
-	VStringLength := SGScreen.Font.StringLength(WarningString2);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
+	VStringLength := Screen.Skin.Font.StringLength(WarningString1);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
+	VStringLength := Screen.Skin.Font.StringLength(WarningString2);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;
 end;
 
@@ -555,11 +559,11 @@ if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPresse
 	begin
 	FUseCameraAnimation := not FUseCameraAnimation;
 	FCamera.ChangingLookAtObject := not FUseCameraAnimation;
-	Context.CursorInCenter := not FUseCameraAnimation;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not FUseCameraAnimation;
+	Context.ShowCursor(not Context.CursorCentered);
 	if FUseCameraAnimation then
 		begin
-		FCamera.Up   := SGVertexImport(0,0,1);
+		FCamera.Up   := SGVertex3fImport(0,0,1);
 		FCamera.View := (-FCamera.Location).Normalized();
 		end;
 	end;

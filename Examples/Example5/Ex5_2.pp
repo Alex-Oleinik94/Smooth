@@ -14,11 +14,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGePhysics
 	,crt
@@ -27,11 +27,11 @@ uses
 const
 	QuantityObjects = 60;
 type
-	TSGExample5_2=class(TSGDrawClass)
+	TSGExample5_2=class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera           : TSGCamera;
@@ -52,7 +52,7 @@ begin
 Result := 'Пример физического движка №2';
 end;
 
-constructor TSGExample5_2.Create(const VContext : TSGContext);
+constructor TSGExample5_2.Create(const VContext : ISGContext);
 procedure InitCubes();
 var
 	i,j,r,x,k,y,kk:TSGLongWord;
@@ -77,14 +77,15 @@ for i:=0 to QuantityObjects-1 do
 	FPhysics.LastObject().InitBox(8,8,8);
 	FPhysics.LastObject().SetVertex((-(8.5*kk*0.5))+((x+sx)*8.5),-65+(y*8.5),0);
 	FPhysics.LastObject().AddObjectEnd();
-	FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0,1,0);
+	FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0,1,0,1);
 	x:=x+1;
 	inc(j);
 	if j>k then
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k > 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;
@@ -111,28 +112,28 @@ FPhysics:=TSGPhysics.Create(Context);
 FPhysics.AddObjectBegin(SGPBodyHeightMap,False);
 FPhysics.LastObject().InitHeightMapFromImage('Map.jpg',50,0,1024,1024);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(1,1,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(1,1,1,1);
 
 FPhysics.AddObjectBegin(SGPBodySphere,True);
 FPhysics.LastObject().InitSphere(8,16);
 FPhysics.LastObject().SetVertex(0,-56,18);
 FPhysics.LastObject().AddObjectEnd(50);
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.1,0.5,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.1,0.5,1,1);
 
 FPhysics.AddObjectBegin(SGPBodyCapsule,True);
 FPhysics.LastObject().InitCapsule(4,2.5,24);
 FPhysics.LastObject().SetVertex(0,-60,-18);
 FPhysics.LastObject().RotateX(90);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.5,0.1,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.5,0.1,1,1);
 
 InitCubes();
 
-FPhysics.SetGravitation(SGVertexImport(0,-9.81,0));
+FPhysics.SetGravitation(SGVertex3fImport(0,-9.81,0));
 FPhysics.Start();
 
 FGravitationAngle:=pi;
-FPhysics.AddLigth(SGR_LIGHT0,SGVertexImport(2,45,160));
+FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
 end;
 
 destructor TSGExample5_2.Destroy();
@@ -142,10 +143,10 @@ if FPhysics<>nil then
 inherited;
 end;
 
-procedure TSGExample5_2.Draw();
+procedure TSGExample5_2.Paint();
 var
 	i,ii      : TSGLongWord;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
 
 begin
 FCamera.CallAction();
@@ -154,14 +155,14 @@ dt1.Get();
 if FPhysics<>nil then
 	begin
 	FPhysics.UpDate();
-	FPhysics.Draw();
+	FPhysics.Paint();
 	end;
 dt2.Get();
 
 FGravitationAngle += Context.ElapsedTime/100;
 if FGravitationAngle>2*pi then
 	FGravitationAngle -= 2*pi;
-FPhysics.SetGravitation(SGVertexImport(
+FPhysics.SetGravitation(SGVertex3fImport(
 	9.81*2.25*sin(FGravitationAngle),
 	9.81*2.25*cos(FGravitationAngle),
 	9.81*2.25*sin(FGravitationAngle*3)));
@@ -180,7 +181,7 @@ Render.Color3f(1,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
 while i<>FPhysicsTimeIndex do
 	begin
-	Render.Vertex2f(ii/1.5,Context.Height-20*FPhysicsTime[i]-10/1.5);
+	Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
 	if i = 0 then
 		i:= FPhysicsTimeCount -1
 	else
@@ -190,21 +191,21 @@ while i<>FPhysicsTimeIndex do
 Render.EndScene();
 Render.Color3f(0,0,0);
 Render.BeginScene(SGR_LINE_STRIP);
-Render.Vertex2f(5/1.5,Context.Height-30-5/1.5);
-Render.Vertex2f(5/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-5/1.5);
-Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
+Render.Vertex2f(5/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
+Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
-SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Context.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
-SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
-SGScreen.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
-	SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('2ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+Screen.Skin.Font.FontHeight));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('0ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+Screen.Skin.Font.FontHeight));
+Screen.Skin.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
+	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+Screen.Skin.Font.FontHeight-10));
 end;
 
 {$IFNDEF ENGINE}

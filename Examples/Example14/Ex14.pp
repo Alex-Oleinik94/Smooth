@@ -14,10 +14,10 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeMesh
@@ -26,17 +26,17 @@ uses
 	,SysUtils
 	,SaGeShaders
 	,SaGePhysics
-	,SaGeResourseManager
+	,SaGeResourceManager
 	;
 
 const
 	TextureSize = 1024;
 type
-	TSGExample14 = class(TSGDrawClass)
+	TSGExample14 = class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -122,7 +122,7 @@ FModel.QuantityFaceArrays := 1;
 FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
 
 Stream := TMemoryStream.Create();
-SGResourseFiles.LoadMemoryStreamFromFile(Stream,FileName);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream,FileName);
 Stream.ReadBuffer(FModelBBoxMin,SizeOf(FModelBBoxMin));
 Stream.ReadBuffer(FModelBBoxMax,SizeOf(FModelBBoxMax));
 FModelCenter := (FModelBBoxMax + FModelBBoxMin)/2;
@@ -151,7 +151,7 @@ begin
 Result := 'Shadow Mapping';
 end;
 
-constructor TSGExample14.Create(const VContext : TSGContext);
+constructor TSGExample14.Create(const VContext : ISGContext);
 
 procedure LoadLigthModel();
 var
@@ -166,7 +166,7 @@ FPhysics.LastObject().AddObjectEnd(50);
 
 FLigthSphere := FPhysics.LastObject().Mesh;
 FPhysics.LastObject().Mesh := nil;
-FLigthSphere.ObjectColor:=SGColorImport(1,1,1);
+FLigthSphere.ObjectColor:=SGVertex4fImport(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -371,7 +371,7 @@ Render.Color3f(0.9,0.9,0.9);
 Render.PushMatrix();
 Render.Scale(0.005,0.005,0.005);
 Render.Translatef(-FModelCenter.x,-FModelCenter.y,-FModelCenter.z);
-FModel.Draw();
+FModel.Paint();
 Render.PopMatrix();
 end;
 
@@ -382,7 +382,7 @@ var
 	FUniformShadow_lightMatrix : TSGLongWord = 0;
 	FUniformShadow_lightPos    : TSGLongWord = 0;
 	FUniformShadow_shadowMap   : TSGLongWord = 0;
-	FMVLightPos, FLightDir     : TSGVertex3f;
+	{FMVLightPos,} FLightDir     : TSGVertex3f;
 	FLightInverseModelViewMatrix : TSGMatrix4;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
@@ -401,8 +401,8 @@ FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
 FLightMatrix := FCameraInverseModelViewMatrix *
 	FLightModelViewMatrix * 
 	FLightProjectionMatrix *
-	SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5)) *
-	SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5));
+	SGGetScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
+	SGGetTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
 
 if FShadowRenderType then
 	begin // Вариант #1
@@ -432,7 +432,7 @@ else
 FShaderShadow.Use();
 Render.Uniform1i(FUniformShadow_shadowMap, 0);
 Render.UniformMatrix4fv(FUniformShadow_lightMatrix, 1, False, @FLightMatrix );
-FMVLightPos := FLightPos * FCameraModelViewMatrix;
+//FMVLightPos := FLightPos * FCameraModelViewMatrix;
 Render.Uniform3f(FUniformShadow_lightPos, FLightPos.x, FLightPos.y, FLightPos.z);
 FLightDir := (FLightEye - FLightPos).Normalized();
 Render.Uniform3f(FUniformShadow_lightDir, FLightDir.x, FLightDir.y, FLightDir.z);
@@ -454,7 +454,7 @@ Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.PushMatrix();
 FLightInverseModelViewMatrix := SGInverseMatrix(FLightModelViewMatrix);
 Render.MultMatrixf(@FLightInverseModelViewMatrix);
-FLigthSphere.Draw();
+FLigthSphere.Paint();
 Render.PopMatrix();
 
 {
@@ -465,7 +465,7 @@ Render.EndScene();
 }
 end;
 
-procedure TSGExample14.Draw();
+procedure TSGExample14.Paint();
 begin
 FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
 

@@ -14,11 +14,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGePhysics
 	,crt
@@ -29,11 +29,11 @@ const
 	QuantityObjects = 15;
 	GravitationConst = 9.81*2.25;
 type
-	TSGExample5_4=class(TSGDrawClass)
+	TSGExample5_4 = class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera           : TSGCamera;
@@ -60,7 +60,7 @@ begin
 Result := 'Пример физического движка №4';
 end;
 
-constructor TSGExample5_4.Create(const VContext : TSGContext);
+constructor TSGExample5_4.Create(const VContext : ISGContext);
 const 
 	EnableCullFaceInExample = True;
 procedure InitCubes();
@@ -81,7 +81,7 @@ for i:=0 to QuantityObjects-1 do
 	FPhysics.LastObject().InitBox(8,8,8);
 	FPhysics.LastObject().SetVertex((-(8.5*kk*0.5))+((x+sx)*8.5),-65+(y*8.5),0);
 	FPhysics.LastObject().AddObjectEnd();
-	FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0,1,0);
+	FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0,1,0,1);
 	FPhysics.LastObject().Mesh.EnableCullFace := EnableCullFaceInExample;
 	x:=x+1;
 	inc(j);
@@ -89,7 +89,8 @@ for i:=0 to QuantityObjects-1 do
 		begin
 		inc(r);
 		j:=0;
-		dec(k);
+		if k > 0 then
+			dec(k);
 		x:=0;
 		y:=y+1;
 		sx:=sx+0.5;
@@ -103,15 +104,15 @@ inherited Create(VContext);
 FBike := nil;
 FGravitationFlag := False;
 
-Context.CursorInCenter:=True;
+Context.CursorCentered := True;
 Context.ShowCursor(False);
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
-FCamera.Up:=SGVertexImport(0,1,0);
-FCamera.Location:=SGVertexImport(0,-50,-60);
-FCamera.View:=SGVertexImport(0,0,1);
+FCamera.Up:=SGVertex3fImport(0,1,0);
+FCamera.Location:=SGVertex3fImport(0,-50,-60);
+FCamera.View:=SGVertex3fImport(0,0,1);
 
 FPhysicsTimeCount:=Context.Width;
 SetLength(FPhysicsTime,FPhysicsTimeCount);
@@ -124,7 +125,7 @@ FPhysics.AddObjectBegin(SGPBodySphere,True);
 FPhysics.LastObject().InitSphere(8,16);
 FPhysics.LastObject().SetVertex(0,-56,18);
 FPhysics.LastObject().AddObjectEnd(50);
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.1,0.5,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.1,0.5,1,1);
 FPhysics.LastObject().Mesh.EnableCullFace := EnableCullFaceInExample;
 
 FPhysics.AddObjectBegin(SGPBodyCapsule,True);
@@ -132,7 +133,7 @@ FPhysics.LastObject().InitCapsule(4,2.5,24);
 FPhysics.LastObject().SetVertex(0,-60,-18);
 FPhysics.LastObject().RotateX(90);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(0.5,0.1,1);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.5,0.1,1,1);
 FPhysics.LastObject().Mesh.EnableCullFace := EnableCullFaceInExample;
 
 InitCubes();
@@ -140,7 +141,7 @@ InitCubes();
 FPhysics.AddObjectBegin(SGPBodyBox,False);
 FPhysics.LastObject().InitBox(-140,-140,-140);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGColorImport(1,1,1,0.7);
+FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(1,1,1,0.7);
 FPhysics.LastObject().Mesh.EnableCullFace := EnableCullFaceInExample;
 
 (*
@@ -158,11 +159,11 @@ FPhysics.LastObject().SetVertex(0,0,0);
 FPhysics.LastObject().AddObjectEnd(10);
 *)
 
-FPhysics.SetGravitation(SGVertexImport(0,-GravitationConst,0));
+FPhysics.SetGravitation(SGVertex3fImport(0,-GravitationConst,0));
 FPhysics.Start();
 
 FGravitationAngle:=pi;
-FPhysics.AddLigth(SGR_LIGHT0,SGVertexImport(2,45,160));
+FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
 end;
 
 destructor TSGExample5_4.Destroy();
@@ -176,10 +177,10 @@ if FPhysics<>nil then
 inherited;
 end;
 
-procedure TSGExample5_4.Draw();
+procedure TSGExample5_4.Paint();
 var
 	i,ii      : TSGLongWord;
-	dt1,dt2   : TSGDataTime;
+	dt1,dt2   : TSGDateTime;
 begin
 FCamera.CallAction();
 Render.Color3f(1,1,1);
@@ -189,7 +190,7 @@ if FPhysics<>nil then
 	dt1.Get();
 	FPhysics.UpDate();
 	dt2.Get();
-	FPhysics.Draw();
+	FPhysics.Paint();
 	end;
 
 if (not FGravitationFlag) then
@@ -197,7 +198,7 @@ if (not FGravitationFlag) then
 	FGravitationAngle += Context.ElapsedTime/100;
 	if FGravitationAngle>2*pi then
 		FGravitationAngle -= 2*pi;
-	FPhysics.SetGravitation(SGVertexImport(
+	FPhysics.SetGravitation(SGVertex3fImport(
 		GravitationConst*sin(FGravitationAngle),
 		GravitationConst*cos(FGravitationAngle),
 		GravitationConst*sin(FGravitationAngle*3)));
@@ -219,7 +220,7 @@ if FPhysics<>nil then
 	Render.BeginScene(SGR_LINE_STRIP);
 	while i<>FPhysicsTimeIndex do
 		begin
-		Render.Vertex2f(ii/1.5,Context.Height-20*FPhysicsTime[i]-10/1.5);
+		Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
 		if i = 0 then
 			i:= FPhysicsTimeCount -1
 		else
@@ -229,21 +230,21 @@ if FPhysics<>nil then
 	Render.EndScene();
 	Render.Color3f(1,0,1);
 	Render.BeginScene(SGR_LINE_STRIP);
-	Render.Vertex2f(5/1.5,Context.Height-30-5/1.5);
-	Render.Vertex2f(5/1.5,Context.Height-5/1.5);
-	Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-5/1.5);
-	Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5);
+	Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
+	Render.Vertex2f(5/1.5,Render.Height-5/1.5);
+	Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
+	Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 	Render.EndScene();
 	Render.Color3f(1,1,0);
-	SGScreen.Font.DrawFontFromTwoVertex2f('2ms',
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-50-5/1.5-3),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('2ms'),Context.Height-50-5/1.5-3+SGScreen.Font.FontHeight));
-	SGScreen.Font.DrawFontFromTwoVertex2f('0ms',
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Context.Height-10-5/1.5-3),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+SGScreen.Font.StringLength('0ms'),Context.Height-10-5/1.5-3+SGScreen.Font.FontHeight));
-	SGScreen.Font.DrawFontFromTwoVertex2f('Physics Time',
-		SGVertex2fImport(5/1.5,Context.Height-30-5/1.5-10),
-		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Context.Height-30-5/1.5+SGScreen.Font.FontHeight-10));
+	Screen.Skin.Font.DrawFontFromTwoVertex2f('2ms',
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+Screen.Skin.Font.FontHeight));
+	Screen.Skin.Font.DrawFontFromTwoVertex2f('0ms',
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+Screen.Skin.Font.FontHeight));
+	Screen.Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
+		SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+		SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+Screen.Skin.Font.FontHeight-10));
 	end;
 
 KeyControl();
@@ -258,8 +259,8 @@ var
 begin
 if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
 	begin
-	Context.CursorInCenter := not Context.CursorInCenter;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not Context.CursorCentered;
+	Context.ShowCursor(not Context.CursorCentered);
 	end;
 
 Q := Context.KeysPressed('Q');
@@ -275,7 +276,7 @@ if (Q xor E) then
 if (Context.KeysPressed('Z')) then
 	begin
 	FGravitationFlag := True;
-	FPhysics.SetGravitation(SGVertexImport(0,-GravitationConst,0));
+	FPhysics.SetGravitation(SGVertex3fImport(0,-GravitationConst,0));
 	end
 else
 	FGravitationFlag := False;
@@ -291,7 +292,10 @@ if (Context.KeysPressed(' ')) then
 	FCamera.MoveUp(Context.ElapsedTime*0.7);
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+if Context.CursorCentered then
+	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst)
+else
+	FCamera.Rotate(0, 0, RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}

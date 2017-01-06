@@ -14,20 +14,20 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeCommon
 	;
 type
-	TSGExample4_1=class(TSGDrawClass)
+	TSGExample4_1=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FCamera : TSGCamera;
@@ -43,7 +43,7 @@ begin
 Result := 'Вывод неиндексированым массивом с VBO';
 end;
 
-constructor TSGExample4_1.Create(const VContext : TSGContext);
+constructor TSGExample4_1.Create(const VContext : ISGContext);
 var
 	i:TSGByte;
 	FArray  : packed array of 
@@ -61,13 +61,13 @@ SetLength(FArray,36);
 // Первый квадрат, состоящий из 2x треугольников
 i:=0;
 FArray[i+0].FVertex.Import(1,1,1);
-FArray[i+0].FColor .Import(255,255,255);
+FArray[i+0].FColor .Import(255,255,255,255);
 FArray[i+1].FVertex.Import(1,1,-1);
-FArray[i+1].FColor .Import(255,255,0);
+FArray[i+1].FColor .Import(255,255,0,255);
 FArray[i+2].FVertex.Import(1,-1,-1);
-FArray[i+2].FColor .Import(255,0,255);
+FArray[i+2].FColor .Import(255,0,255,255);
 FArray[i+3].FVertex.Import(1,-1,1);
-FArray[i+3].FColor .Import(0,255,255);
+FArray[i+3].FColor .Import(0,255,255,255);
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
 
@@ -76,9 +76,9 @@ i+=6;
 FArray[i+0]:=FArray[0];
 FArray[i+1]:=FArray[3];
 FArray[i+2].FVertex.Import(-1,-1,1);
-FArray[i+2].FColor .Import(255,0,0);
+FArray[i+2].FColor .Import(255,0,0,255);
 FArray[i+3].FVertex.Import(-1,1,1);
-FArray[i+3].FColor .Import(0,0,255);
+FArray[i+3].FColor .Import(0,0,255,255);
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
 
@@ -97,7 +97,7 @@ i+=6;
 FArray[i+0]:=FArray[0];
 FArray[i+1]:=FArray[9];
 FArray[i+2].FVertex.Import(-1,1,-1);
-FArray[i+2].FColor .Import(0,255,0);
+FArray[i+2].FColor .Import(0,255,0,255);
 FArray[i+3]:=FArray[1];
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
@@ -120,8 +120,7 @@ FArray[i+3]:=FArray[3*6+2];
 FArray[i+4]:=FArray[i+0];
 FArray[i+5]:=FArray[i+2];
 
-// А вод тут у нас проблемка. 
-// Дело в том, что в DirectX можно использовать цвета в формате UNSIGNED_BYTE как (b;g;r;a).
+// В DirectX можно использовать цвета в формате UNSIGNED_BYTE как (b;g;r;a).
 // А в OpenGL можно использовать как FLOAT (r;g;b) и (r;g;b;a), так и UNSIGNED_BYTE (r;g;b) и (r;g;b;a).
 // И получается, что синий и красный цвета меняются местами. Поэтому мы их меняем обратно.
 // Для решения этой проблемы реализован класс TSGMesh, которы сам делает все эти операции, 
@@ -144,7 +143,7 @@ Render.DeleteBuffersARB(1,@FBuffer);
 inherited;
 end;
 
-procedure TSGExample4_1.Draw();
+procedure TSGExample4_1.Paint();
 begin
 FCamera.CallAction();
 

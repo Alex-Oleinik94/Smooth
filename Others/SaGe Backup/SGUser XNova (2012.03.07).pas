@@ -35,7 +35,7 @@ procedure UpDateBuildPanel(//Это инфо о здании..
 	const Quantity:Int;
 	const BuildingWaiting:TSGXNovaBuildingsWaiting);
 procedure UpDateWorldWayComboBox;
-procedure ResoursesPanelUpDate(
+procedure ResourcesPanelUpDate(
 	const Panel:TSGPanel; 
 	const Documentation:TSGXNovaUnitsDocumentation;
 	const World:TSGXNovaWorld;
@@ -61,7 +61,7 @@ var
 	
 	PlanetPanel:TSGPanel = nil;
 	
-	ResoursePanel:TSGPanel = nil;
+	ResourcePanel:TSGPanel = nil;
 var
 	UnitsDocumentation:TSGXNovaUnitsDocumentation = nil;
 	PlanetsPictures:packed array of TSGGLImage = nil;
@@ -71,14 +71,14 @@ var
 var
 	OnChangeDeleteBuildingFromWaitingButton:TSGIdentifierButton = nil;
 
-{$NOTE Resourses}
+{$NOTE Resources}
 
-procedure ChangeResourseMenu(a,b:LongInt);
+procedure ChangeResourceMenu(a,b:LongInt);
 begin
 
 end;
 
-procedure ResoursesPanelUpDate(
+procedure ResourcesPanelUpDate(
 	const Panel:TSGPanel; 
 	const Documentation:TSGXNovaUnitsDocumentation;
 	const World:TSGXNovaWorld;
@@ -92,7 +92,7 @@ Panel.KillChildren;
 
 Panel.CreateChild(TSGButtonMenu.Create);
 Panel.LastChild.SetBounds(3,3,Panel.Width div 4,Panel.Height-10);
-Panel.LastChild.AsButtonMenu.FProcedure:=TSGButtonMenuProcedure(@ChangeResourseMenu);
+Panel.LastChild.AsButtonMenu.FProcedure:=TSGButtonMenuProcedure(@ChangeResourceMenu);
 Panel.LastChild.AsButtonMenu.ButtonTop:=20;
 Panel.LastChild.AsButtonMenu.ActiveButtonTop:=40;
 Panel.LastChild.AsButtonMenu.FMiddle:=True;
@@ -105,7 +105,7 @@ Panel.LastChild.AsButtonMenu.SetButton(0);
 
 for i:=0 to High(Planet.FUnits.FUnits) do
 	begin
-	if Documentation.FDocumentation[Planet.FUnits.FUnits[i].FIdentifity].FType = XNovaResourse then
+	if Documentation.FDocumentation[Planet.FUnits.FUnits[i].FIdentifity].FType = XNovaResource then
 		begin
 		Panel.LastChild.AsButtonMenu.AddButton(
 			Documentation.FDocumentation[Planet.FUnits.FUnits[i].FIdentifity].FName+
@@ -705,16 +705,16 @@ case a of
 2:
 	BildingsPanel.Visible:=False;
 1:
-	ResoursePanel.Visible:=False;
+	ResourcePanel.Visible:=False;
 end;
 
 case b of
 1:
 	begin
-	ResoursePanel.Visible:=True;
+	ResourcePanel.Visible:=True;
 	World:=TSGXNovaWorld.Create;
 	World.Load('Worlds'+Slash+SGPCharToString(WorldWayEdit.Caption)+'.xui');
-	ResoursesPanelUpDate(ResoursePanel,UnitsDocumentation,World,SGPCharToString(UserEdit.Caption),PlanetNumber);
+	ResourcesPanelUpDate(ResourcePanel,UnitsDocumentation,World,SGPCharToString(UserEdit.Caption),PlanetNumber);
 	World.Destroy;
 	end;
 2:
@@ -1015,8 +1015,8 @@ SGScreen.LastChild.SetBounds(
 SGScreen.LastChild.BoundsToNeedBounds;
 
 (*Money Panel*)
-ResoursePanel:=TSGPanel.Create;
-SGScreen.CreateChild(ResoursePanel);
+ResourcePanel:=TSGPanel.Create;
+SGScreen.CreateChild(ResourcePanel);
 SGScreen.LastChild.SetBounds(
 	205,
 	3

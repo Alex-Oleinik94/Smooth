@@ -10,11 +10,11 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
@@ -26,9 +26,9 @@ uses
 	;
 
 type
-	TSGExample15_Shadow = class(TSGContextObject)
+	TSGExample15_Shadow = class(TSGContextabled)
 			public
-		constructor Create(const VContext : TSGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32;const TextureBlock : TSGTextureBlock = nil);
+		constructor Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32;const TextureBlock : TSGTextureBlock = nil);
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			public
@@ -261,7 +261,7 @@ else
 Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
 end;
 
-constructor TSGExample15_Shadow.Create(const VContext : TSGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
+constructor TSGExample15_Shadow.Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
 const
 	TexSize = 4096;
 	Example15Dir = SGExamplesDirectory + Slash + '15' +Slash;
@@ -322,6 +322,9 @@ FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
 FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
 	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
 	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['shadow', FLightsCount]));
+
+//SGReadAndSaveShaderSourceFile(Example15Dir + 'main.vert','main_shadow.vert',[FLightsCount, BonesCount]);
+//SGReadAndSaveShaderSourceFile(Example15Dir + 'main.frag','main_shadow.frag',['shadow', FLightsCount]);
 
 for i := 0 to FLightsCount - 1 do
 	begin
@@ -435,8 +438,8 @@ for i := 0 to FLightsCount - 1 do
 	FLights[i].FLightMatrix := FCameraInverseModelViewMatrix *
 		FLights[i].FLightModelViewMatrix * 
 		FLights[i].FLightProjectionMatrix *
-		SGGetScaleMatrix(SGVertexImport(0.5,0.5,0.5)) *
-		SGGetTranslateMatrix(SGVertexImport(0.5,0.5,0.5));
+		SGGetScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
+		SGGetTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
 
 	Render.Uniform1i(FLights[i].FUniformShadow_shadowMap, i + 7);
 	Render.UniformMatrix4fv(FLights[i].FUniformShadow_lightMatrix, 1, False, @FLights[i].FLightMatrix );

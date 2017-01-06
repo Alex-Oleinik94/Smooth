@@ -14,22 +14,23 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	 SaGeContext
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeScreen
 	,SaGeUtils
 	,SaGeMath
-	,SaGeExamples
+	,SaGeGraphicViewer
 	,SaGeCommon
-	,SaGeRender
+	,SaGeRenderConstants
+	,SaGeScreenBase
 	;
 type
-	TSGApprFunction=class(TSGDrawClass)
+	TSGApprFunction = class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			public
 		FFont : TSGFont;
@@ -107,7 +108,7 @@ const
 	tttt = 18;
 var
 	Gauss : TSGLineSystem = nil;
-	i, ii, iii : LongWord;
+	i, ii : LongWord;
 begin with TSGApprFunction(Self.FUserPointer1) do begin
 Gauss := TSGLineSystem.Create(n);
 for i:=0 to n-1 do
@@ -129,12 +130,10 @@ end;end;
 
 procedure InitGraphicView();
 var
-	SrX,SrY,r : TSGSingle;
+	SrY,r : TSGSingle;
 	i : TSGLongWord;
 begin with TSGApprFunction(Self.FUserPointer1) do begin
 r := abs(MaxAB-MinAB);
-SrX:=(MaxAB+MinAB)/2;
-SrY:=0;
 for i := 0 to High(FArPoints) do
 	SrY += FArPoints[i].y;
 SrY /= Length(FArPoints);
@@ -190,7 +189,7 @@ FPanelStart.Visible:=True;
 FBackButton.Visible:=False;
 end; end;
 
-constructor TSGApprFunction.Create(const VContext : TSGContext);
+constructor TSGApprFunction.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FGraphic:=nil;
@@ -201,22 +200,23 @@ FFont.Loading();
 FFont.ToTexture();
 
 FBackButton := TSGButton.Create();
-SGScreen.CreateChild(FBackButton);
-FBackButton.SetBounds(Context.Width - 230,5 ,220,FFont.FontHeight+4);
+Screen.CreateChild(FBackButton);
+FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
 FBackButton.BoundsToNeedBounds();
 FBackButton.Caption := 'Назад';
 FBackButton.Visible:=False;
+FBackButton.Anchors:=[SGAnchRight];
 FBackButton.Active:=True;
 FBackButton.FUserPointer1:=Self;
 FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
 
 FPanelStart := TSGPanel.Create();
-SGScreen.CreateChild(FPanelStart);
+Screen.CreateChild(FPanelStart);
 FPanelStart.SetMiddleBounds(400,(FFont.FontHeight+4)*8+5);
 FPanelStart.BoundsToNeedBounds();
 FPanelStart.Visible := True;
 FPanelStart.Active := True;
-FPanelStart.Font := FFont;
+FPanelStart.Skin := FPanelStart.Skin.CreateDependentSkinWithAnotherFont(FFont);
 
 FPanelStart.CreateChild(TSGLabel.Create());
 FPanelStart.LastChild.SetBounds(5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2);
@@ -304,13 +304,13 @@ if FGraphic<>nil then
 inherited;
 end;
 
-procedure TSGApprFunction.Draw();
+procedure TSGApprFunction.Paint();
 var
 	i : TSGLongWord;
 begin
 if FGraphic<>nil then
 	begin
-	FGraphic.Draw();
+	FGraphic.Paint();
 	
 	Render.PointSize(5);
 	Render.Color3f(1,0,1);

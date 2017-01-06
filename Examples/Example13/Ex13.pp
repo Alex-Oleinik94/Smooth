@@ -14,16 +14,18 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
-	,SaGeRender
+	,SaGeRenderConstants
 	,SaGeCommon
 	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
+	,SaGeScreenBase
+	
 	,Ex13_Model
 	;
 
@@ -31,11 +33,11 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample13=class(TSGDrawClass)
+	TSGExample13=class(TSGScreenedDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure KeyControl();
 		function GetVertexShaderSourse():TSGString;
@@ -181,19 +183,20 @@ procedure mmmFM15ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.Us
 procedure mmmFP100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(100); end;
 procedure mmmFM100ButtonProcedure(Button:TSGButton); begin TSGExample13(Button.UserPointer).AddModels(-100); end;
 
-constructor TSGExample13.Create(const VContext : TSGContext);
+constructor TSGExample13.Create(const VContext : ISGContext);
 
 procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
 begin
 VButton := TSGButton.Create();
-SGScreen.CreateChild(VButton);
-SGScreen.LastChild.Font := FFont;
-SGScreen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
-SGScreen.LastChild.BoundsToNeedBounds();
-SGScreen.LastChild.UserPointer:=Self;
-SGScreen.LastChild.Visible:=True;
-SGScreen.LastChild.Caption := VCaption;
-(SGScreen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+Screen.CreateChild(VButton);
+Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
+Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
+Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.UserPointer:=Self;
+Screen.LastChild.Visible:=True;
+Screen.LastChild.Caption := VCaption;
+Screen.LastChild.Anchors:=[SGAnchRight];
+(Screen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
 end;
 
 var
@@ -227,15 +230,15 @@ if Render.SupporedShaders() then
 	FFont.ToTexture();
 	
 	FFPS := TSGFPSViewer.Create(Context);
-	FFPS.X := Context.Width div 2;
+	FFPS.X := Render.Width div 2;
 	FFPS.Y := 5;
 	
 	FCamera:=TSGCamera.Create();
 	FCamera.SetContext(Context);
 	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
-	FCamera.Up:=SGVertexImport(0,0,1);
-	FCamera.Location:=SGVertexImport(0,-350,100);
-	FCamera.View:=(SGVertexImport(0,0,0)-SGVertexImport(0,-350,100)).Normalized();
+	FCamera.Up:=SGVertex3fImport(0,0,1);
+	FCamera.Location:=SGVertex3fImport(0,-350,100);
+	FCamera.View:=(SGVertex3fImport(0,0,0)-SGVertex3fImport(0,-350,100)).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);
@@ -290,22 +293,23 @@ if Render.SupporedShaders() then
 		FreeMem(TempPChar)
 		end;
 	
-	CreateButton(FP1Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
-	CreateButton(FM1Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
-	CreateButton(FP5Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
-	CreateButton(FM5Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
-	CreateButton(FP15Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
-	CreateButton(FM15Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
-	CreateButton(FP100Button,Context.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
-	CreateButton(FM100Button,Context.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	CreateButton(FP1Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
+	CreateButton(FM1Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
+	CreateButton(FP5Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
+	CreateButton(FM5Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
+	CreateButton(FP15Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
+	CreateButton(FM15Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
+	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
+	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
 	FCountLabel := TSGLabel.Create();
-	SGScreen.CreateChild(FCountLabel);
-	SGScreen.LastChild.Font := FFont;
-	SGScreen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
-	SGScreen.LastChild.SetBounds(Context.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
-	SGScreen.LastChild.BoundsToNeedBounds();
-	SGScreen.LastChild.Visible := True;
+	Screen.CreateChild(FCountLabel);
+	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
+	Screen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+	Screen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
+	Screen.LastChild.BoundsToNeedBounds();
+	Screen.LastChild.Visible := True;
+	Screen.LastChild.Anchors:=[SGAnchRight];
 	end;
 end;
 
@@ -327,7 +331,7 @@ for i := 0 to High(FAnimationStates) do
 	FAnimationStates[i].ResetState(0);
 SetLength(FAnimationStates,0);
 
-Context.CursorInCenter := False;
+Context.CursorCentered := False;
 
 if (FP1Button <> nil) then
 	FP1Button.Destroy();
@@ -358,7 +362,7 @@ if FFPS <> nil then
 inherited;
 end;
 
-procedure TSGExample13.Draw();
+procedure TSGExample13.Paint();
 const
 	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
@@ -370,7 +374,7 @@ if Render.SupporedShaders() then
 	begin
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/10;
-	if (not Context.CursorInCenter) then
+	if (not Context.CursorCentered) then
 		Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	Render.Color3f(1,1,1);
 	Render.Disable(SGR_BLEND);
@@ -395,7 +399,7 @@ if Render.SupporedShaders() then
 		Render.PushMatrix();
 		Render.Translatef((30+5*i)*sin((FQuantityModels+6.28)*i/FQuantityModels),
 						  (30+5*i)*cos((FQuantityModels+6.28)*i/FQuantityModels),0);
-		FModel.Draw();
+		FModel.Paint();
 		Render.PopMatrix();
 		end;
 	
@@ -412,21 +416,21 @@ if Render.SupporedShaders() then
 	
 	//KeyControl();
 	
-	FFPS.Draw();
+	FFPS.Paint();
 	end
 else
 	begin
 	Render.InitMatrixMode(SG_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := SGScreen.Font.StringLength(WarningString1);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString1,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height - 20) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 00) div 2));
-	VStringLength := SGScreen.Font.StringLength(WarningString2);
-	SGScreen.Font.DrawFontFromTwoVertex2f(WarningString2,
-		SGVertex2fImport((Context.Width - VStringLength) div 2, (Context.Height + 00) div 2),
-		SGVertex2fImport((Context.Width + VStringLength) div 2, (Context.Height + 20) div 2));
+	VStringLength := Screen.Skin.Font.StringLength(WarningString1);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
+	VStringLength := Screen.Skin.Font.StringLength(WarningString2);
+	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
+		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
+		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;
 end;
 
@@ -439,8 +443,8 @@ var
 begin
 if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
 	begin
-	Context.CursorInCenter := not Context.CursorInCenter;
-	Context.ShowCursor(not Context.CursorInCenter);
+	Context.CursorCentered := not Context.CursorCentered;
+	Context.ShowCursor(not Context.CursorCentered);
 	end;
 
 Q := Context.KeysPressed('Q');
@@ -465,8 +469,8 @@ if (Context.KeysPressed(' ')) then
 	FCamera.MoveUp(Context.ElapsedTime*0.7);
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
-if (Context.CursorInCenter) then
-	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Context.Width*Context.Height*RotateConst,RotateZ*RotateConst);
+if (Context.CursorCentered) then
+	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}

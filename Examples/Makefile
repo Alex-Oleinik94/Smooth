@@ -1,5 +1,5 @@
 PP=fpc
-BASEARGS= -Fu. -Fu./../Build/SrcUnits/Includes -Fu./../Build/SrcUnits/lNet -Fu./../Build/SrcUnits/lNet/sys -Fu./../Build/SrcUnits -Fu./../Build/SrcUnits/Programs -Fu./../Build/SrcUnits/Others -Fi./../Build/SrcUnits/Includes -Sm
+BASEARGS= -Fu. -Fu./../Build/SrcUnits/Includes -Fu./../Build/SrcUnits/Others/lNet -Fu./../Build/SrcUnits/Others/Synapse -Fu./../Build/SrcUnits/Others/lNet/sys -Fu./../Build/SrcUnits -Fu./../Build/SrcUnits/Programs -Fu./../Build/SrcUnits/Others -Fi./../Build/SrcUnits/Includes -Sm
 RENDERARGS= -Fu./../Build/SrcUnits/DirectX -Fu./../Build/SrcUnits/OpenGL 
 OUTPUTUNIXORWIN= -FU./../Build/CompiledUnits/i386-other -FE.
 OPT= -XX -O3 -CX -dRELEASE

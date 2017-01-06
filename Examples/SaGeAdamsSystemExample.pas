@@ -24,7 +24,7 @@ uses
 	,SaGeFractals
 	,SaGeUtils
 	,SaGeScreen
-	,SaGeTotal
+	,SaGeCommonUtils
 	,SaGeMesh
 	,SaGeMath
 	,SaGeExamples

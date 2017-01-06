@@ -1063,15 +1063,15 @@ function GlSanStandardExit(q:longint):boolean;
 function GlSanMouseReadKey:longint;
 procedure GlSanColor(c:GlSanKoor; r:real);
 {$IFDEF MSWINDOWS}
-	procedure Texture_Init(NameResourse:longint);
+	procedure Texture_Init(NameResource:longint);
 	{$ENDIF}
 function GlSanObject_Quadros(sss:GlSancolor4f):GlSanObject;
 function GlSanObject_Quadros(ss:longint):GlSanObject;
 {$IFDEF MSWINDOWS}
-	function GlSanLoadTexture(NameResourse:longint; var x,y:longint):GlUint;
+	function GlSanLoadTexture(NameResource:longint; var x,y:longint):GlUint;
 	{$ENDIF}
-function GlSanTextureLoad(NameResourse:longint):GlUint;
-function GlSanLoadTexture(NameResourse:longint):GlUint;
+function GlSanTextureLoad(NameResource:longint):GlUint;
+function GlSanLoadTexture(NameResource:longint):GlUint;
 procedure InitRot(ob:GlSanObject;yg1,yg2,yg3:real;t:GlSanKoor;r:real);
 procedure InitRot(ob:GlSanObject;os:longint;yg:real;t:GlSanKoor;r:real);
 function GlSanAfterUntil(q:longint;L,o:boolean):boolean;
@@ -1225,7 +1225,7 @@ function GlSanPrinQuad(t1,t2,t3,t4:GlSanKoor;curkoor:glSanKoor):boolean;
 function GlSanPrinTreug(t1,t2,t3:GlSanKoor;curkoor:glSanKoor):boolean;
 function GlSanWndActive(const w:PPGlSanWnd):boolean;
 {$IFDEF MSWINDOWS}
-	function GlSanLoadStringFromResourse(const l:longint):string;
+	function GlSanLoadStringFromResource(const l:longint):string;
 	{$ENDIF}
 function GlSanWndRunLoadFile(const tittle:String;const pr,w:pointer; const pa:pointer):pointer;
 function GlSanWndGetCaptionFromEdit(const P:pointer;const l:longint):string;
@@ -6357,7 +6357,7 @@ else
 end;
 
 
-function GlSanLoadStringFromResourse(const l:longint):string;
+function GlSanLoadStringFromResource(const l:longint):string;
 var
 	s:string;
 begin
@@ -6366,7 +6366,7 @@ begin
 {$ELSE}
 	s:='';
 	{$ENDIF}
-GlSanLoadStringFromResourse:=s;
+GlSanLoadStringFromResource:=s;
 end;
 
 function GlSanWhatIsTheSimbolEN(const l:longint):string;
@@ -14489,19 +14489,19 @@ for i:=1 to KolF do
 	end;
 end;
 
-function GlSanLoadTexture(NameResourse:longint):GlUint;
+function GlSanLoadTexture(NameResource:longint):GlUint;
 begin
-GlSanLoadTexture:=GlSanTextureLoad(NameResourse);
+GlSanLoadTexture:=GlSanTextureLoad(NameResource);
 end;
 
-function GlSanTextureLoad(NameResourse:longint):GlUint;
+function GlSanTextureLoad(NameResource:longint):GlUint;
 {$IFDEF MSWINDOWS}
 	var x,y:longint;
 		g:gluint;
 	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
-	g:=GlSanLoadTexture(NameResourse, x , y);
+	g:=GlSanLoadTexture(NameResource, x , y);
 	GlSanTextureLoad:=g;
 {$ELSE}
 	GlSanTextureLoad:=0;
@@ -14852,13 +14852,13 @@ for i:=1 to KolF do
 	end;
 end;
 {$IFDEF MSWINDOWS}
-	procedure Texture_Init(NameResourse:longint);
+	procedure Texture_Init(NameResource:longint);
 	var
 	  gBitmap : hBitmap;
 	  sBitmap : Bitmap;
 		TextureID:GLuint;
 	begin
-	 gbitmap := Windows.LoadImage(GetModuleHandle(NIL), MAKEINTRESOURCE(NameResourse), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+	 gbitmap := Windows.LoadImage(GetModuleHandle(NIL), MAKEINTRESOURCE(NameResource), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 	 GetObject(gbitmap, sizeof(sbitmap), @sbitmap);
 
 
@@ -14880,13 +14880,13 @@ end;
 
 	end;
 
-	function GlSanLoadTexture(NameResourse:longint; var x,y:longint):GlUint;
+	function GlSanLoadTexture(NameResource:longint; var x,y:longint):GlUint;
 	var
 	  gBitmap : hBitmap;
 	  sBitmap : Bitmap;
 		TextureID:GLuint;
 	begin
-	 gbitmap := Windows.LoadImage(GetModuleHandle(NIL), MAKEINTRESOURCE(NameResourse), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+	 gbitmap := Windows.LoadImage(GetModuleHandle(NIL), MAKEINTRESOURCE(NameResource), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 	 GetObject(gbitmap, sizeof(sbitmap), @sbitmap);
 
 

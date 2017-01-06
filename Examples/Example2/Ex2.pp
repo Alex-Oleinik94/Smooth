@@ -14,17 +14,17 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeContext
+	SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
-	,SaGeRender
+	,SaGeRenderConstants
 	;
 type
-	TSGExample2=class(TSGDrawClass)
+	TSGExample2=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FAngle : TSGSingle;
@@ -39,7 +39,7 @@ begin
 Result := 'Крутящиеся треугольники';
 end;
 
-constructor TSGExample2.Create(const VContext : TSGContext);
+constructor TSGExample2.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FAngle:=0;
@@ -50,7 +50,7 @@ begin
 inherited;
 end;
 
-procedure TSGExample2.Draw();
+procedure TSGExample2.Paint();
 begin
 Render.InitMatrixMode(SG_3D);
 Render.Translatef(2,0,-6);
