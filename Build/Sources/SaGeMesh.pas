@@ -1672,13 +1672,13 @@ S2:='SaGe3DObj';
 Stream.ReadBuffer(S[0],SizeOf(S[0])*9);
 if S<>S2 then
 	begin
-	SGLog.Sourse(['TSG3DObject.LoadFromSG3DO : Fatal : It is not "SaGe3DObj" file!']);
+	SGLog.Source(['TSG3DObject.LoadFromSG3DO : Fatal : It is not "SaGe3DObj" file!']);
 	Exit;
 	end;
 Stream.ReadBuffer(Version,SizeOf(Version));
 if Version <> SGMeshVersion then
 	begin
-	SGLog.Sourse(['TSG3DObject.LoadFromSG3DO : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
+	SGLog.Source(['TSG3DObject.LoadFromSG3DO : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
 	Exit;
 	end;
 Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
@@ -1920,7 +1920,7 @@ var
 begin
 if FEnableVBO then
 	begin
-	SGLog.Sourse('TSG3dObject__LoadToVBO : It is not possible to do this several counts!');
+	SGLog.Source('TSG3dObject__LoadToVBO : It is not possible to do this several counts!');
 	Exit;
 	end;
 Render.GenBuffersARB(1, @FVertexesBuffer);

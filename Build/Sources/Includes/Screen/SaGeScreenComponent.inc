@@ -913,6 +913,8 @@ procedure TSGComponent.DeleteDeviceResources();
 var
 	Component : TSGComponent;
 begin
+if FSkin <> nil then
+	FSkin.DeleteDeviceResources();
 if FDrawClass <> nil then
 	FDrawClass.DeleteDeviceResources();
 for Component in Self do
@@ -923,6 +925,8 @@ procedure TSGComponent.LoadDeviceResources();
 var
 	Component : TSGComponent;
 begin
+if FSkin <> nil then
+	FSkin.LoadDeviceResources();
 if FDrawClass <> nil then
 	FDrawClass.LoadDeviceResources();
 for Component in Self do

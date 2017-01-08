@@ -605,8 +605,8 @@ var
 	MNL : TSGUInt32;
 begin
 MNL  := FOwner.GenerateMaxNameLength();
-SGLog.Sourse(StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions : Loaded ' + TSGDll_Procent(FExtensionsLoadObject.FFunctionLoaded, FExtensionsLoadObject.FFunctionCount) + '.');
-SGLog.Sourse(FExtensionsLoadObject.FExtensions, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions :');
+SGLog.Source(StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions : Loaded ' + TSGDll_Procent(FExtensionsLoadObject.FFunctionLoaded, FExtensionsLoadObject.FFunctionCount) + '.');
+SGLog.Source(FExtensionsLoadObject.FExtensions, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Extensions :');
 end;
 
 procedure TSGDll.LogStat();
@@ -623,7 +623,7 @@ var
 	i : TSGUInt32;
 begin
 for i := 0 to High(FLoadObjects) do
-	SGLog.Sourse(StatString(i + 1));
+	SGLog.Source(StatString(i + 1));
 end;
 
 var
@@ -635,10 +635,10 @@ Loading();
 if IsSeparate then
 	SourceSeparate()
 else
-	SGLog.Sourse(StatString());
-SGLog.Sourse(FErrorDllNames, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load from this libraries :');
+	SGLog.Source(StatString());
+SGLog.Source(FErrorDllNames, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load from this libraries :');
 NotLoadedFunc := GenerateAllNotLoadedFunc();
-SGLog.Sourse(NotLoadedFunc, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load this functions :');
+SGLog.Source(NotLoadedFunc, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load this functions :');
 SetLength(NotLoadedFunc, 0);
 end;
 
@@ -678,7 +678,7 @@ var
 	NotLoadedFunc : TSGStringList;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.PrintStat(' + SGStr(Extended) + ')');
+SGLog.Source('TSGDll.PrintStat(' + SGStr(Extended) + ')');
 {$ENDIF}
 MNL  := FOwner.GenerateMaxNameLength();
 Loading();
@@ -731,7 +731,7 @@ var
 	i : TSGUInt32;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.LoadJointly()');
+SGLog.Source('TSGDll.LoadJointly()');
 {$ENDIF}
 Result := False;
 FDllFileNames := DllChunkNames();
@@ -753,7 +753,7 @@ end;
 function LoadSeparate() : TSGBool;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.LoadSeparate()');
+SGLog.Source('TSGDll.LoadSeparate()');
 {$ENDIF}
 Result := False;
 if ChunksLoadJointly() then
@@ -792,7 +792,7 @@ var
 procedure FinalizeLoad(const Sucs : TSGBool);
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - Beging');
+SGLog.Source('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - Beging');
 {$ENDIF}
 SetLength(FLoadObjects, 1);
 FLoadObjects[0] := TestLoadObject;
@@ -805,13 +805,13 @@ TestLibHandle := 0;
 TestLoadObject.Clear();
 Result := Sucs;
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - End');
+SGLog.Source('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - End');
 {$ENDIF}
 end;
 
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.LoadNormal() - Begin');
+SGLog.Source('TSGDll.LoadNormal() - Begin');
 {$ENDIF}
 Result := False;
 DllFileNames := DllNames();
@@ -819,11 +819,11 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 	for i := 0 to High(DllFileNames) do
 		begin
 		{$IFDEF DLL_MANAGER_DEBUG}
-		SGLog.Sourse('TSGDll.LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
+		SGLog.Source('TSGDll.LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
 		{$ENDIF}
 		TestLibHandle := DllManager.OpenLibrary(DllFileNames[i], TestFileName);
 		{$IFDEF DLL_MANAGER_DEBUG}
-		SGLog.Sourse('TSGDll.LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
+		SGLog.Source('TSGDll.LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
 		{$ENDIF}
 		if TestLibHandle <> 0 then
 			begin
@@ -852,7 +852,7 @@ end;
 
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Sourse('TSGDll.CustomLoading()');
+SGLog.Source('TSGDll.CustomLoading()');
 {$ENDIF}
 if not FLoaded then
 	if IsSeparate() then

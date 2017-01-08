@@ -66,12 +66,12 @@ end;
 
 procedure TSGContextMacOSX.SetCursorPosition(const a:TSGPoint2f);
 begin
-SGLog.Sourse('"TSGContextMacOSX.SetCursorPosition" isn''t possible!');
+SGLog.Source('"TSGContextMacOSX.SetCursorPosition" isn''t possible!');
 end;
 
 procedure TSGContextMacOSX.ShowCursor(const b:Boolean);
 begin
-SGLog.Sourse('"TSGContextMacOSX.ShowCursor" isn''t possible!');
+SGLog.Source('"TSGContextMacOSX.ShowCursor" isn''t possible!');
 end;
 
 function TSGContextMacOSX.GetScreenResolution:TSGPoint2f;

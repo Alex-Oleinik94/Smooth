@@ -53,8 +53,6 @@ type
 		procedure Load(const VContext : ISGContext);
 		procedure Resize();override;
 		procedure Paint();override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
 		procedure CustomPaint(VCanReplace : TSGBool);
 		function UpDateScreen() : TSGBoolean;
 			public
@@ -147,18 +145,6 @@ end;
 
 // ====================================== TSGScreen
 
-procedure TSGScreen.DeleteDeviceResources();
-begin
-FSkin.DeleteDeviceResources();
-inherited;
-end;
-
-procedure TSGScreen.LoadDeviceResources();
-begin
-FSkin.LoadDeviceResources();
-inherited;
-end;
-
 constructor TSGScreen.Create();
 begin
 inherited Create();
@@ -173,13 +159,13 @@ end;
 
 procedure TSGScreen.Load(const VContext : ISGContext);
 begin
-{$IFDEF ANDROID}SGLog.Sourse('Enterind "SGScreenLoad". Context="'+SGStr(TSGMaxEnum(Pointer(Context)))+'"');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
 Context := VContext;
 FSkin := TSGScreenSkin.CreateRandom(Context);
 SetShifts(0, 0, 0, 0);
 Visible := True;
 Resize();
-{$IFDEF ANDROID}SGLog.Sourse('Leaving "SGScreenLoad".');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
 end;
 
 procedure TSGScreen.Resize();

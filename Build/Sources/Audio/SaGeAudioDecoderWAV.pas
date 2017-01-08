@@ -136,7 +136,7 @@ if FInfoReaded then
 FInput.Read(FWAVHeader, SizeOf(FWAVHeader));
 DetermineInfo();
 if WAV_STANDARD <> FWavHeader.FormatCode then
-	SGLog.Sourse('TSGAudioDecoderWAV.ReadInfo : Needs decode data! FormatCode = ''' + StrFormatCode(FWavHeader.FormatCode) + '''.');
+	SGLog.Source('TSGAudioDecoderWAV.ReadInfo : Needs decode data! FormatCode = ''' + StrFormatCode(FWavHeader.FormatCode) + '''.');
 FInput.Seek((8-44)+12+4+FWAVHeader.FormatHeaderSize+4, soFromCurrent);
 
 repeat
@@ -147,12 +147,12 @@ if ChuckName = 'data' then
 	FDataSize := ChuckSize;
 	FDataPosition := FInput.Position;
 	FPosition := FInput.Position;
-	SGLog.Sourse('TSGAudioDecoderWAV : Data chunk determinded, Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''!');
+	SGLog.Source('TSGAudioDecoderWAV : Data chunk determinded, Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''!');
 	FInput.Position := FInput.Position + ChuckSize;
 	end
 else
 	begin
-	SGLog.Sourse('TSGAudioDecoderWAV.ReadInfo : Unknown chunk ''' + ChuckName + ''', Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''.');
+	SGLog.Source('TSGAudioDecoderWAV.ReadInfo : Unknown chunk ''' + ChuckName + ''', Position=''' + SGStr(FInput.Position) + ''', Size=''' + SGStr(ChuckSize) + '''.');
 	FInput.Position := FInput.Position + ChuckSize;
 	end;
 until (FInput.Position >= FInput.Size);
@@ -190,12 +190,12 @@ if Result <> 0 then
 		{$ENDIF} {$ENDIF}
 	except on e : Exception do
 		begin
-		SGLog.Sourse('TSGAudioDecoderWAV.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Exception while reading from Stream!');
+		SGLog.Source('TSGAudioDecoderWAV.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Exception while reading from Stream!');
 		SGPrintExceptionStackTrace(e);
 		end;
 	end;
 	{$IF defined(USE_READ) and (not defined(USE_RESULT))}
-	//SGLog.Sourse('TSGAudioDecoderWAV.Read : Read ' + SGStr(BytesRead) + ' of ' + SGStr(Result) + ' bytes' + Iff(BytesRead = 0, '!', '.'));
+	//SGLog.Source('TSGAudioDecoderWAV.Read : Read ' + SGStr(BytesRead) + ' of ' + SGStr(Result) + ' bytes' + Iff(BytesRead = 0, '!', '.'));
 	{$ENDIF}
 	FPosition += Result;
 	end;

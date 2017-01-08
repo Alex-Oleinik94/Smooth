@@ -250,15 +250,15 @@ Render.ReadBuffer(SGR_NONE);
 Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_DEPTH_ATTACHMENT_EXT, SGR_TEXTURE_2D, FTexDepth2, 0);
 Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
 
-FShaderDepth := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.vert'),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.frag'));
-FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_tex2D.frag'));
-FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
-	SGReadShaderSourseFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_shad2D.frag'));
+FShaderDepth := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.frag'));
+FShaderShadowTex2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_tex2D.frag'));
+FShaderShadowShad2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_shad2D.frag'));
 
 
 FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap');

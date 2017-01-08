@@ -310,18 +310,18 @@ for i := 0 to FLightsCount - 1 do
 	CreateTextureAndFrame(FLights[i].FTexDepth,FLights[i].FFrameBufferDepth,TextureBlock,@FLights[i].FRenderBufferDepth);
 	end;
 
-FShaderDepthTex2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
-	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.frag',['texture']));
-FShaderDepthShad2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
-	SGReadShaderSourseFromFile(Example15Dir + 'main_depth.frag',['shadow']));
-FShaderShadowTex2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
-	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['texture', FLightsCount]));
-FShaderShadowShad2D := SGCreateShaderProgramFromSourses(Context,
-	SGReadShaderSourseFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
-	SGReadShaderSourseFromFile(Example15Dir + 'main.frag',['shadow', FLightsCount]));
+FShaderDepthTex2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
+	SGReadShaderSourceFromFile(Example15Dir + 'main_depth.frag',['texture']));
+FShaderDepthShad2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(Example15Dir + 'main_depth.vert',[BonesCount]),
+	SGReadShaderSourceFromFile(Example15Dir + 'main_depth.frag',['shadow']));
+FShaderShadowTex2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
+	SGReadShaderSourceFromFile(Example15Dir + 'main.frag',['texture', FLightsCount]));
+FShaderShadowShad2D := SGCreateShaderProgramFromSources(Context,
+	SGReadShaderSourceFromFile(Example15Dir + 'main.vert',[FLightsCount, BonesCount]),
+	SGReadShaderSourceFromFile(Example15Dir + 'main.frag',['shadow', FLightsCount]));
 
 //SGReadAndSaveShaderSourceFile(Example15Dir + 'main.vert','main_shadow.vert',[FLightsCount, BonesCount]);
 //SGReadAndSaveShaderSourceFile(Example15Dir + 'main.frag','main_shadow.frag',['shadow', FLightsCount]);

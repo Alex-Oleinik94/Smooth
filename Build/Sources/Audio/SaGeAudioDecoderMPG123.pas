@@ -181,11 +181,11 @@ KillInput();
 FMPGHandle := mpg123_new(mpg123_AudioDecoder(), nil);
 if FMPGHandle = nil then
 	begin
-	SGLog.Sourse('TSGAudioDecoderMPG123.SetInput : Error while creating MPG123 handle!');
+	SGLog.Source('TSGAudioDecoderMPG123.SetInput : Error while creating MPG123 handle!');
 	Exit;
 	end
 else
-	SGLog.Sourse('TSGAudioDecoderMPG123.SetInput : MPG123 handle created as ''' + SGPCharToString(mpg123_AudioDecoder()) + '''.');
+	SGLog.Source('TSGAudioDecoderMPG123.SetInput : MPG123 handle created as ''' + SGPCharToString(mpg123_AudioDecoder()) + '''.');
 
 mpg123_open(FMPGHandle, PChar(VFileName));
 Result := Self;
@@ -211,7 +211,7 @@ end;
 FInfo.FChannels := FChannels;
 FInfo.FFrequency := FRate;
 
-SGLog.Sourse('TSGAudioDecoderMPG123.ReadInfo : Encoding=''' + SGStr(FEncoding) + ''' is ''' + mpg123_StrEncoding(FEncoding) + ''', Rate=''' + SGStr(FRate) + ''', Channels=''' + SGStr(FChannels) + '''!');
+SGLog.Source('TSGAudioDecoderMPG123.ReadInfo : Encoding=''' + SGStr(FEncoding) + ''' is ''' + mpg123_StrEncoding(FEncoding) + ''', Rate=''' + SGStr(FRate) + ''', Channels=''' + SGStr(FChannels) + '''!');
 FInfoReaded := True;
 end;
 
@@ -225,11 +225,11 @@ try
 mpg123_read(FMPGHandle, @VData, Result, @DataLength);
 except on e : Exception do
 	begin
-	SGLog.Sourse('TSGAudioDecoderMPG123.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Exception while decoding!');
+	SGLog.Source('TSGAudioDecoderMPG123.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Exception while decoding!');
 	SGPrintExceptionStackTrace(e);
 	end;
 end;
-//SGLog.Sourse('TSGAudioDecoderMPG123.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Reads ' + SGStr(DataLength) + ' of ' + SGStr(Result) + ' bytes' + Iff(DataLength = 0, '!', '.'));
+//SGLog.Source('TSGAudioDecoderMPG123.Read(''' + SGAddrStr(@VData) + ''', ''' + SGStr(VBufferSize) + ''') : Reads ' + SGStr(DataLength) + ' of ' + SGStr(Result) + ' bytes' + Iff(DataLength = 0, '!', '.'));
 Result := DataLength;
 end;
 

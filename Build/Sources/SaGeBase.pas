@@ -211,7 +211,7 @@ const
 		SGTempDirectory = '.'+Slash+'..'+Slash+'Temp';
 		{$ENDIF}
 var
-	//≈сли эту переменную задать как False, то SGLog.Sourse нечего делать не будет,
+	//≈сли эту переменную задать как False, то SGLog.Source нечего делать не будет,
 	//и самого файлика лога SGLog.Create не создаст
 	SGLogEnable:Boolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
 const
@@ -429,10 +429,10 @@ type
 			public
 		constructor Create;
 		destructor Destroy;override;
-		procedure Sourse(const s:string;const WithTime:Boolean = True);overload;
-		procedure Sourse(const Ar : array of const;const WithTime:Boolean = True);overload;
-		procedure Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-		procedure Sourse(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+		procedure Source(const s:string;const WithTime:Boolean = True);overload;
+		procedure Source(const Ar : array of const;const WithTime:Boolean = True);overload;
+		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+		procedure Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 			private
 		FFileStream:TFileStream;
 		end;
@@ -717,7 +717,7 @@ operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUP
 operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -785,7 +785,7 @@ end;
 
 procedure SGHint(const S : TSGString);
 begin
-SGLog.Sourse(S);
+SGLog.Source(S);
 WriteLn(S);
 end;
 
@@ -820,7 +820,7 @@ if S <> nil then
 		end;
 end;
 
-function SGAddrStr(const Sourse : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function HexStr(const b : TSGByte):TSGChar;
 begin
@@ -855,7 +855,7 @@ var
 begin
 Result := '$';
 for i := {$IFDEF CPU64} 7 {$ELSE} {$IFDEF CPU32} 3 {$ELSE} 1 {$ENDIF} {$ENDIF} downto 0 do
-	Result += ByteStr(PSGByte(@Sourse)[i]);
+	Result += ByteStr(PSGByte(@Source)[i]);
 end;
 
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1777,14 +1777,14 @@ except
 	end;
 end;
 
-procedure TSGLog.Sourse(const Ar : array of const; const WithTime:Boolean = True);
+procedure TSGLog.Source(const Ar : array of const; const WithTime:Boolean = True);
 var
 	OutString:String = '';
 begin
  if SGLogEnable then
 	begin
 	OutString:=SGGetStringFromConstArray(Ar);
-	Sourse(OutString,WithTime);
+	Source(OutString,WithTime);
 	SetLength(OutString,0);
 	end;
 end;
@@ -1869,7 +1869,7 @@ SGPrintParams(ArS, Title, SimbolsLength);
 SetLength(ArS, 0);
 end;
 
-procedure TSGLog.Sourse(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 var
 	i, WordCount, MaxLength, n, ii: TSGLongWord;
 	TempS : TSGString;
@@ -1879,7 +1879,7 @@ if ArS <> nil then
 	WordCount := Length(ArS);
 if WordCount > 0 then
 	begin
-	Sourse(Title + ' (' + SGStr(WordCount) + ')',True);
+	Source(Title + ' (' + SGStr(WordCount) + ')',True);
 	MaxLength := Length(ArS[0]);
 	if Length(ArS) > 1 then
 		begin
@@ -1902,22 +1902,22 @@ if WordCount > 0 then
 		if ii = n then
 			begin
 			ii := 0;
-			Sourse(TempS, False);
+			Source(TempS, False);
 			TempS := '  ';
 			end;
 		end;
 	if TempS <> '  ' then
-		Sourse(TempS, False);
+		Source(TempS, False);
 	end;
 end;
 
 
-procedure TSGLog.Sourse(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+procedure TSGLog.Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 var
 	ArS : TSGStringList = nil;
 begin
 ArS := SGStringListFromString(S, Separators);
-Sourse(ArS, Title, SimbolsLength);
+Source(ArS, Title, SimbolsLength);
 SetLength(ArS, 0);
 end;
 
@@ -2040,7 +2040,7 @@ while not GoExit do
 	end;
 end;
 
-procedure TSGLog.Sourse(const s:string;const WithTime:Boolean = True);
+procedure TSGLog.Source(const s:string;const WithTime:Boolean = True);
 var
 	ss:string;
 	a:TSGDateTime;
@@ -2673,7 +2673,7 @@ begin
 	if not FFinished then
 		begin
 		i:=TerminateThread(FHandle,0);
-		SGLog.Sourse(['TSGThread__Destroy : FHandle=',FHandle,',FThreadID=',FThreadID,',Terminate Result=',i,'.']);
+		SGLog.Source(['TSGThread__Destroy : FHandle=',FHandle,',FThreadID=',FThreadID,',Terminate Result=',i,'.']);
 		end;
 	if FHandle <> 0 then
 		CloseHandle(FHandle);
@@ -2700,7 +2700,7 @@ begin
 	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
 {$ELSE}
 	{$IFDEF ANDROID}
-			SGLog.Sourse('Start thread');
+			SGLog.Source('Start thread');
 			pthread_mutex_init(@mutex, nil);
 			pthread_cond_init(@cond, nil);
 			pthread_attr_init(@attr);
@@ -2710,7 +2710,7 @@ begin
 			while FFinished do
 				pthread_cond_wait(@cond, @mutex);
 			pthread_mutex_unlock(@mutex);
-			SGLog.Sourse('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
+			SGLog.Source('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 		{$ELSE}
 			FHandle := BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
 		{$ENDIF}
@@ -3254,8 +3254,8 @@ begin
 {$IFDEF ANDROID}SGMakeDirectory('/sdcard/.SaGe');{$ENDIF}
 try
 SGLog:=TSGLog.Create();
-SGLog.Sourse('(***) SaGe Engine Log (***)',False);
-SGLog.Sourse('  << Create Log >>');
+SGLog.Source('(***) SaGe Engine Log (***)', False);
+SGLog.Source('  << Create Log >>');
 except
 SGLogEnable:=False;
 SGLog:=TSGLog.Create();
@@ -3268,8 +3268,9 @@ end;
 
 finalization
 begin
-SGLog.Sourse('  << Destroy Log >>');
+SGLog.Source('  << Destroy Log >>');
 SGLog.Destroy();
+SGLog := nil;
 end;
 
 end.

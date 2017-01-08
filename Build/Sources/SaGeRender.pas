@@ -126,7 +126,7 @@ type
 			(* Shaders *)
 		function SupporedShaders() : TSGBoolean;virtual;abstract;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;virtual;abstract;
-		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);virtual;abstract;
+		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);virtual;abstract;
 		procedure CompileShader(const VShader : TSGLongWord);virtual;abstract;
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);virtual;abstract;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);virtual;abstract;
@@ -267,12 +267,12 @@ end;
 function TSGRender.MakeCurrent():Boolean;
 begin
 Result := False;
-SGLog.Sourse('TSGRender__MakeCurrent() : Error : Call inherited method!!');
+SGLog.Source('TSGRender__MakeCurrent() : Error : Call inherited method!!');
 end;
 
 procedure TSGRender.Enable(VParam:Cardinal);
 begin
-SGLog.Sourse('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
+SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
 end;
 
 function TSGRender.SupporedVBOBuffers():Boolean;
@@ -289,7 +289,7 @@ end;
 
 destructor TSGRender.Destroy();
 begin
-SGLog.Sourse(['TSGRender__Destroy()']);
+SGLog.Source(['TSGRender__Destroy()']);
 {$IFDEF RENDER_DEBUG}
 	WriteLn('TSGRender.Destroy(): Before "inherited"');
 	{$ENDIF}

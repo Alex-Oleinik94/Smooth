@@ -86,12 +86,12 @@ end;
 
 procedure TSGContextAndroid.SetCursorPosition(const a: TSGPoint2int32);
 begin
-SGLog.Sourse('"TSGContextAndroid.SetCursorPosition" isn''t possible!');
+SGLog.Source('"TSGContextAndroid.SetCursorPosition" isn''t possible!');
 end;
 
 procedure TSGContextAndroid.ShowCursor(const b:Boolean);
 begin
-SGLog.Sourse('"TSGContextAndroid.ShowCursor" isn''t possible!');
+SGLog.Source('"TSGContextAndroid.ShowCursor" isn''t possible!');
 end;
 
 function TSGContextAndroid.GetScreenArea(): TSGPoint2int32;
@@ -131,7 +131,7 @@ end;
 
 destructor TSGContextAndroid.Destroy();
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.Destroy".');
+SGLog.Source('Entering "TSGContextAndroid.Destroy".');
 if (FDisplay <> EGL_NO_DISPLAY) then
 	begin
 	DestroyWondow();
@@ -139,7 +139,7 @@ if (FDisplay <> EGL_NO_DISPLAY) then
 	FRender:=nil;
 	end;
 inherited;
-SGLog.Sourse('Leaving "TSGContextAndroid.Destroy".');
+SGLog.Source('Leaving "TSGContextAndroid.Destroy".');
 end;
 
 procedure TSGContextAndroid.Initialize();
@@ -180,23 +180,23 @@ var
 procedure InitPixelFormat();inline;
 begin
 FunctiosResult := eglChooseConfig(FDisplay, Attribs, @FConfig, 1, @NumConfigs);
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SGStr(FunctiosResult)+'".');
+SGLog.Source('"TSGContextAndroid.InitWindow" : Called "eglChooseConfig". Result="'+SGStr(FunctiosResult)+'".');
 FunctiosResult := eglGetConfigAttrib(FDisplay, FConfig, EGL_NATIVE_VISUAL_ID, @Format);
 if Attribs[8] <> EGL_NONE then
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SGStr(FunctiosResult)+'", Depth Size = "'+SGStr(Attribs[9])+'".')
+	SGLog.Source('"TSGContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SGStr(FunctiosResult)+'", Depth Size = "'+SGStr(Attribs[9])+'".')
 else
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SGStr(FunctiosResult)+'", Without Depth.');
+	SGLog.Source('"TSGContextAndroid.InitWindow" : Called "eglGetConfigAttrib". Result="'+SGStr(FunctiosResult)+'", Without Depth.');
 end;
 
 begin
 Result:=False;
-SGLog.Sourse('Entering "TSGContextAndroid.InitWindow".');
+SGLog.Source('Entering "TSGContextAndroid.InitWindow".');
 if FDisplay = EGL_NO_DISPLAY then
 	begin
 	FDisplay       := eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
+	SGLog.Source('"TSGContextAndroid.InitWindow" : "eglGetDisplay" calling sucssesful! Result="'+SGStr(TSGMaxEnum(FDisplay))+'"');
 	FunctiosResult := eglInitialize(FDisplay, nil,nil);
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SGStr(FunctiosResult)+'".');
+	SGLog.Source('"TSGContextAndroid.InitWindow" : Called "eglInitialize". Result="'+SGStr(FunctiosResult)+'".');
 	InitPixelFormat();
 	{$IFDEF SGDEPTHANDROID}
 		while (FunctiosResult = 0) and (Attribs[9]<>8) do
@@ -212,16 +212,16 @@ if FDisplay = EGL_NO_DISPLAY then
 		{$ENDIF}
 	if FunctiosResult = 0 then
 		begin
-		SGLog.Sourse('"TSGContextAndroid.InitWindow" : FATAL : Can''t initialize pixel formats.');
+		SGLog.Source('"TSGContextAndroid.InitWindow" : FATAL : Can''t initialize pixel formats.');
 		Result := False;
 		Active := False;
 		Exit;
 		end;
 	FunctiosResult := ANativeWindow_SetBuffersGeometry(FAndroidApp^.Window, 0, 0, Format);
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
+	SGLog.Source('"TSGContextAndroid.InitWindow" : Called "ANativeWindow_SetBuffersGeometry". Result="'+SGStr(FunctiosResult)+'"');
 	end;
 FSurface       := eglCreateWindowSurface(FDisplay, FConfig, AndroidApp^.Window, nil);
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "eglCreateWindowSurface". Result="'+SGStr(FunctiosResult)+'"');
+SGLog.Source('"TSGContextAndroid.InitWindow" : Called "eglCreateWindowSurface". Result="'+SGStr(FunctiosResult)+'"');
 if FRender=nil then
 	begin
 	FRender:=FRenderClass.Create();
@@ -242,21 +242,21 @@ else
 	end;
 FWidth :=GetScreenArea().x;
 FHeight:=GetScreenArea().y;
-SGLog.Sourse('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
+SGLog.Source('"TSGContextAndroid.InitWindow" : Screen resolution = ('+SGStr(Width)+','+SGStr(Height)+').');
 if not FInitialized then
 	begin
 	if not Screen.ContextAssigned() then
 		Screen.Load(Self);
-	SGLog.Sourse('"TSGContextAndroid.InitWindow" : Called "Screen.Load(Self)".');
+	SGLog.Source('"TSGContextAndroid.InitWindow" : Called "Screen.Load(Self)".');
 	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		SetPaintableSettings();
 		FPaintable.LoadDeviceResources();
-		SGLog.Sourse('"TSGContextAndroid.InitWindow" : Paintable created');
+		SGLog.Source('"TSGContextAndroid.InitWindow" : Paintable created');
 		end;
 	end;
-SGLog.Sourse('Leaving "TSGContextAndroid.InitWindow".');
+SGLog.Source('Leaving "TSGContextAndroid.InitWindow".');
 FInitialized:=Result;
 end;
 
@@ -286,7 +286,7 @@ end;
 end;
 
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.HandleCommand" : New comand = "'+WITC()+'"');
+SGLog.Source('Entering "TSGContextAndroid.HandleCommand" : New comand = "'+WITC()+'"');
 case Comand of
 APP_CMD_SAVE_STATE://Cохранить память приложения...
 	begin
@@ -377,7 +377,7 @@ var
 	S : STRING = '';
 begin
 EventType := AInputEvent_getType(event);
-//SGLog.Sourse('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
+//SGLog.Source('Entering "TSGContextAndroid.HandleEvent". Event type ="'+WITE()+'"');
 case EventType of
 AINPUT_EVENT_TYPE_MOTION:
 	begin
@@ -402,7 +402,7 @@ AINPUT_EVENT_TYPE_MOTION:
 	{S+= '"TSGContextAndroid.HandleEvent" : Action = "'+WITAM()+'", PointerIndex = "'+SGStr(EventPointerIndex)+'", PointersCount = "'+SGStr(PointersCount)+'"';
 	for i := 0 to PointersCount-1 do
 		S+=', Pointer'+SGStr(i+1)+':('+SGStr(Round(AMotionEvent_getX(event, i)))+','+SGStr(Round(AMotionEvent_getY(event, i)))+')';
-	SGLog.Sourse(s);}
+	SGLog.Source(s);}
 	FAnimating:=1;
 	end;
 {AINPUT_EVENT_TYPE_KEY:
@@ -410,7 +410,7 @@ AINPUT_EVENT_TYPE_MOTION:
 	EventCode     := AKeyEvent_getKeyCode(event);
 	EventScanCode := AKeyEvent_getScanCode(event);
 
-	SGLog.Sourse('"TSGContextAndroid.HandleEvent" : Key = (Code:'+SGStr(EventCode)+';ScanCode:'+SGStr(EventScanCode)+'), Action = "'+WITA()+'"');
+	SGLog.Source('"TSGContextAndroid.HandleEvent" : Key = (Code:'+SGStr(EventCode)+';ScanCode:'+SGStr(EventScanCode)+'), Action = "'+WITA()+'"');
 	end;}
 else
 	begin
@@ -446,32 +446,32 @@ if (FPoint.x<>FWidth) or (FPoint.y<>FHeight) then
 end;
 
 begin
-SGLog.Sourse('Entering "TSGContextAndroid.Run".');
+SGLog.Source('Entering "TSGContextAndroid.Run".');
 FAndroidApp^.UserData := Self;
 FAndroidApp^.OnAppCmd:=@TSGContextAndroid_HandleComand;
 FAndroidApp^.OnInputEvent:=@TSGContextAndroid_HandleInput;
 Messages();
-SGLog.Sourse('"TSGContextAndroid.Run" : before circle Active="'+SGStr(Active)+'", Animating="'+SGStr(FAnimating)+'".');
+SGLog.Source('"TSGContextAndroid.Run" : before circle Active="'+SGStr(Active)+'", Animating="'+SGStr(FAnimating)+'".');
 StartComputeTimer();
 
 while FActive and (FNewContextType=nil) do
 	begin
 	if (FDisplay<>nil) and (FAnimating<>0) then
 		begin
-		//SGLog.Sourse('"TSGContextAndroid.Run" : Begin paint!');
+		//SGLog.Source('"TSGContextAndroid.Run" : Begin paint!');
 		Paint();
-		//SGLog.Sourse('"TSGContextAndroid.Run" : End paint...');
+		//SGLog.Source('"TSGContextAndroid.Run" : End paint...');
 
 		ChangingResolution();
 		end
 	else
 		begin
 		UpdateTimer();
-		//SGLog.Sourse('"TSGContextAndroid.Run" : Wait!');
+		//SGLog.Source('"TSGContextAndroid.Run" : Wait!');
 		Messages();
 		end;
 	end;
-SGLog.Sourse('Leaving "TSGContextAndroid.Run".');
+SGLog.Source('Leaving "TSGContextAndroid.Run".');
 end;
 
 procedure TSGContextAndroid.SwapBuffers();
@@ -484,7 +484,7 @@ var
 	Ident, Events, Val: cint;
 	source: PAndroid_Poll_Source;
 begin
-//SGLog.Sourse('Entering "TSGContextAndroid.Messages".');
+//SGLog.Source('Entering "TSGContextAndroid.Messages".');
 if FAnimating<>0 then
 	Val:=0
 else
@@ -520,7 +520,7 @@ while (Ident >= 0) do
 	end;
 if FAnimating <> 0 then
 	inherited;
-//SGLog.Sourse('Leaving "TSGContextAndroid.Messages".');
+//SGLog.Source('Leaving "TSGContextAndroid.Messages".');
 end;
 
 procedure TSGContextAndroid.InitFullscreen(const b:boolean);

@@ -82,7 +82,7 @@ end;
 {$IFDEF GLUT_DEBUG}
 procedure GLUTHint(const S : TSGString);
 begin
-SGLog.Sourse(S);
+SGLog.Source(S);
 WriteLn(S);
 end;
 {$ENDIF}
@@ -214,7 +214,7 @@ type
 begin
 if ContextGLUT <> nil then
 	begin
-	SGLog.Sourse('TSGContextGLUT__InitRender() : Finded other GLUT context, destroyed!');
+	SGLog.Source('TSGContextGLUT__InitRender() : Finded other GLUT context, destroyed!');
 	ContextGLUT.Destroy();
 	ContextGLUT := nil;
 	end;
@@ -282,11 +282,11 @@ if (FRenderClass = nil) then
 	end
 else
 	begin
-	SGLog.Sourse('TSGContextGLUT__InitRender() : Testing render class!');
+	SGLog.Source('TSGContextGLUT__InitRender() : Testing render class!');
 	TempRender := FRenderClass.Create();
 	if not (TempRender is TSGRenderOpenGL) then
 		begin
-		SGLog.Sourse('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render replaced!');
+		SGLog.Source('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render replaced!');
 		FRenderClass := TSGRenderOpenGL;
 		end;
 	TempRender.Destroy();
@@ -296,28 +296,28 @@ else
 if FRender = nil then
 	begin
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Sourse('TSGContextGLUT__InitRender() : Createing render');
+		SGLog.Source('TSGContextGLUT__InitRender() : Createing render');
 		{$ENDIF}
 	FRender := FRenderClass.Create();
 	FRender.Context := Self as ISGContext;
 	FRender.Init();
 	Result := FRender <> nil;
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Sourse('TSGContextGLUT__InitRender() : Created render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextGLUT__InitRender() : Created render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	end
 else
 	begin
 	if not (FRender is TSGRenderOpenGL) then
 		begin
-		SGLog.Sourse('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render recreated!');
+		SGLog.Source('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render recreated!');
 		FRender.Destroy();
 		FRender := nil;
 		Result := InitRender();
 		end;
 
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Sourse('TSGContextGLUT__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextGLUT__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.MakeCurrent();

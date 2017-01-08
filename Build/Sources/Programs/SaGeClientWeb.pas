@@ -59,9 +59,9 @@ var
 	DT : TSGDateTime;
 begin
 inherited Create(VContext);
-SGLog.Sourse('Begin get HTTP');
+SGLog.Source('Begin get HTTP');
 MS := SGGetFromHTTP('http://fpm.babichev.net/schedule/32/k/mathmod?api=json');
-SGLog.Sourse(['End get HTTP "',TSGMaxEnum(MS),'"']);
+SGLog.Source(['End get HTTP "',TSGMaxEnum(MS),'"']);
 if MS = nil then 
 	Exit;
 i := 0;

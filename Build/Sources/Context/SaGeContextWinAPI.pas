@@ -396,7 +396,7 @@ ofn^.lpstrDefExt := SGStringToPChar(extension);
 if not GetSaveFileName (ofn) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGContextWinAPI.FileSaveDlg - GetSaveFileName(...) results with FALSE');
+		SGLog.Source('TSGContextWinAPI.FileSaveDlg - GetSaveFileName(...) results with FALSE');
 		{$ENDIF}
 	end;
 Result := SGPCharToString(ofn^.lpstrFile);
@@ -436,7 +436,7 @@ fillchar(ofn^.lpstrFile^,1000,0);
 if not GetOpenFileName (ofn) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGContextWinAPI.FileOpenDlg - GetOpenFileName(...) results with FALSE');
+		SGLog.Source('TSGContextWinAPI.FileOpenDlg - GetOpenFileName(...) results with FALSE');
 		{$ENDIF}
 	end;
 Result := SGPCharToString(ofn^.lpstrFile);
@@ -732,7 +732,7 @@ wm_mbuttonup:
 	SetCursorKey(SGUpKey,SGMiddleCursorButton);
 wm_destroy:
 	begin
-	SGLog.Sourse('TSGContextWinAPI__Messages : Note : Window is closed from OS.');
+	SGLog.Source('TSGContextWinAPI__Messages : Note : Window is closed from OS.');
 	Active:=False;
 	PostQuitMessage(0);
 	Exit;
@@ -770,7 +770,7 @@ wm_move
 else
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('StandartWndProc : Unknown Message : Window="'+SGSTr(TSGMaxEnum(Window))+'", Message="'+SGStr(AMessage)+'", wParam="'+SGStr(wParam)+'", lParam="'+SGStr(lParam)+'"');
+		SGLog.Source('StandartWndProc : Unknown Message : Window="'+SGSTr(TSGMaxEnum(Window))+'", Message="'+SGStr(AMessage)+'", wParam="'+SGStr(wParam)+'", lParam="'+SGStr(lParam)+'"');
 		{$ENDIF}
 	end;
 end;
@@ -805,7 +805,7 @@ var
 begin
 DoExit:=False;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('Enter export proc(Window='+SGStr(Window)+', Message='+SGStr(AMessage)+', wParam='+SGSTr(WParam)+', lParam='+SGStr(LParam)+')');
+	SGLog.Source('Enter export proc(Window='+SGStr(Window)+', Message='+SGStr(AMessage)+', wParam='+SGSTr(WParam)+', lParam='+SGStr(LParam)+')');
 	{$ENDIF}
 Result:=StandartWndProc(Window,AMessage,WParam,LParam,DoExit);
 if DoExit then
@@ -813,7 +813,7 @@ if DoExit then
 else
 	Result := DefWindowProc(Window, AMessage, WParam, LParam);
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('Exit export proc(Result='+SGStr(Result)+')');
+	SGLog.Source('Exit export proc(Result='+SGStr(Result)+')');
 	{$ENDIF}
 end;
 
@@ -859,7 +859,7 @@ clWindow:=Windows.RegisterClassEx(WindowClass);
 
 Result := clWindow <> 0;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__WindowRegister : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowRegister : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
@@ -869,7 +869,7 @@ var
   dmScreenSettings : DEVMODE;
 begin
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('TSGContextWinAPI__WindowCreate : Enter');
+	SGLog.Source('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
 if not FFullscreen then
 	begin
@@ -901,7 +901,7 @@ else
 		if ChangeDisplaySettings(@dmScreenSettings,CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then
 			begin
 			ThrowError('Screen resolution is not supported by your gfx card!');
-			SGLog.Sourse('Screen resolution is not supported by your gfx card!');
+			SGLog.Source('Screen resolution is not supported by your gfx card!');
 			WindowCreate := 0;
 			Exit;
 			end;
@@ -929,37 +929,37 @@ if hWindow2 <> 0 then
 	end;
 Result := hWindow2;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__WindowCreate : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowCreate : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
 begin
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Enter']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Enter']);
 	{$ENDIF}
 dcWindow := GetDC( hParent );
 if FRender = nil then
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
+		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
 		{$ENDIF}
 	FRender := FRenderClass.Create();
 	FRender.Context := Self as ISGContext;
 	Result := FRender.CreateContext();
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse(['TSGContextWinAPI__WindowInit(HWnd) : Create render context (Result=',Result,')']);
+		SGLog.Source(['TSGContextWinAPI__WindowInit(HWnd) : Create render context (Result=',Result,')']);
 		{$ENDIF}
 	if Result then
 		FRender.Init();
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	end
 else
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Sourse('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.SetPixelFormat();
@@ -967,19 +967,19 @@ else
 		Render.MakeCurrent();
 	end;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
 function TSGContextWinAPI.CreateWindow():Boolean;
 begin
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse('TSGContextWinAPI__CreateWindow : Enter');
+	SGLog.Source('TSGContextWinAPI__CreateWindow : Enter');
 	{$ENDIF}
 if not WindowRegister then
 		begin
 		ThrowError('Could not register the Application Window!');
-		SGLog.Sourse('Could not register the Application Window!');
+		SGLog.Source('Could not register the Application Window!');
 		Result := false;
 		Exit;
 		end;
@@ -994,20 +994,20 @@ SGContexts[High(SGContexts)]:=Self;
 if longint(hWindow) = 0 then
 	begin
 	ThrowError('Could not create Application Window!');
-	SGLog.Sourse('Could not create Application Window!');
+	SGLog.Source('Could not create Application Window!');
 	Result := false;
 	Exit;
 	end;
 if not WindowInit(hWindow) then
 	begin
 	ThrowError('Could not initialise Application Window!');
-	SGLog.Sourse('Could not initialise Application Window!');
+	SGLog.Source('Could not initialise Application Window!');
 	Result := false;
 	Exit;
 	end;
 Result := true;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Sourse(['TSGContextWinAPI__CreateWindow : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__CreateWindow : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 

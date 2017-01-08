@@ -185,7 +185,7 @@ type
 			(* Shaders *)
 		function SupporedShaders() : TSGBoolean;override;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
-		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);override;
+		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
 		procedure CompileShader(const VShader : TSGLongWord);override;
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;
@@ -297,7 +297,7 @@ ErStr := 'TSGRenderOpenGL_DynLinkError : Abstract function "'+FunctionName+'"';
 {.$IFDEF RENDER_OGL_DEBUG}
 	WriteLn(ErStr);
 	{.$ENDIF}
-SGLog.Sourse(ErStr);
+SGLog.Source(ErStr);
 end;
 {$ENDIF}
 
@@ -369,7 +369,7 @@ function TSGRenderOpenGL.SupporedDepthTextures():TSGBoolean;
 begin
 Result := {$IFDEF MOBILE} False {$ELSE} dglOpenGL.GL_ARB_texture_rg {$ENDIF};
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Sourse(['TSGRenderOpenGL.SupporedDepthTextures : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupporedDepthTextures : Result = ',Result]);
 	{$ENDIF}
 end;
 
@@ -461,7 +461,7 @@ function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
 begin
 Result := {$IFDEF MOBILE}False{$ELSE}dglOpenGL.GL_ARB_shader_objects{$ENDIF};
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Sourse(['TSGRenderOpenGL.SupporedShaders : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupporedShaders : Result = ',Result]);
 	{$ENDIF}
 end;
 
@@ -474,10 +474,10 @@ Result :=
 {$IFDEF SHADERSISPOINTERS} ) {$ENDIF} ;
 end;
 
-procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
+procedure TSGRenderOpenGL.ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glShaderSourceARB = nil then TSGRenderOpenGL_DynLinkError('glShaderSourceARB');{$ENDIF}
-{$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF},1,@VSourse,@VSourseLength);
+{$IFDEF MOBILE}glShaderSource{$ELSE}glShaderSourceARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VShader){$ELSE}VShader{$ENDIF},1,@VSource,@VSourceLength);
 end;
 
 procedure TSGRenderOpenGL.CompileShader(const VShader : TSGLongWord);
@@ -783,7 +783,7 @@ begin
 	Result:= dglOpenGL.GL_ARB_vertex_buffer_object;
 	{$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Sourse(['TSGRenderOpenGL.SupporedVBOBuffers : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupporedVBOBuffers : Result = ',Result]);
 	{$ENDIF}
 end;
 
@@ -1170,7 +1170,7 @@ FS.WriteBuffer(VDataType,SizeOf(VDataType));
 FS.WriteBuffer(VBitMap^,VChannels*VWidth*VHeight);
 FS.Destroy();
 FArTextures[FBindedTexture].FSaved := True;
-SGLog.Sourse('"TSGRenderOpenGL.TexImage2D" : Saved : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
+SGLog.Source('"TSGRenderOpenGL.TexImage2D" : Saved : "'+TempDir+'/t'+SGStr(FBindedTexture)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+'.');
 {$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTexImage2D = nil then TSGRenderOpenGL_DynLinkError('glTexImage2D');{$ENDIF}
 glTexImage2D(VTextureType,VP1,{$IFDEF MOBILE}VFormatType{$ELSE}VChannels{$ENDIF},VWidth,VHeight,VP2,VFormatType,VDataType,VBitMap);
@@ -1280,7 +1280,7 @@ FS.WriteBuffer(ii,SizeOf(ii));
 FS.WriteBuffer(VBuffer^,VSize);
 FS.Destroy();
 FArBuffers[i].FSaved := True;
-SGLog.Sourse('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(i)+'", Size='+SGStr(VSize)+'.');
+SGLog.Source('"TSGRenderOpenGL.BufferDataARB" : Saved : "'+TempDir+'/b'+SGStr(i)+'", Size='+SGStr(VSize)+'.');
 {$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glBufferDataARB = nil then TSGRenderOpenGL_DynLinkError('glBufferDataARB');{$ENDIF}
 {$IFNDEF MOBILE}glBufferDataARB{$ELSE}glBufferData{$ENDIF}(VParam,VSize,VBuffer,VParam2);
@@ -1354,7 +1354,7 @@ if DllManager.Dll('OpenGL') <> nil then
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
-SGLog.Sourse('TSGRenderOpenGL.Init() - wglSetPixelFormat() = ' + SGStr(wglSetPixelFormat()));
+SGLog.Source('TSGRenderOpenGL.Init() - wglSetPixelFormat() = ' + SGStr(wglSetPixelFormat()));
 {$ENDIF}
 
 {$IFDEF MOBILE}
@@ -1419,7 +1419,7 @@ glDisable(GL_LIGHTING);
 		begin
 		if dglOpenGL.wglGetSwapIntervalEXT() = 0 then
 			dglOpenGL.wglSwapIntervalEXT(1);
-		SGLog.Sourse(['TSGRenderOpenGL.Init - V-Sync is "',TSGBoolean(dglOpenGL.wglGetSwapIntervalEXT()),'"']);
+		SGLog.Source(['TSGRenderOpenGL.Init - V-Sync is "',TSGBoolean(dglOpenGL.wglGetSwapIntervalEXT()),'"']);
 		end;
 	{$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG}
@@ -1616,7 +1616,7 @@ Result:=False;
 		PXVisualInfo(Context.GetOption('VISUAL INFO')),nil,true);
 	if FContext = nil then
 		begin
-		SGLog.Sourse('TSGContextUnix__CreateWindow : Error : Could not create an OpenGL rendering context!');
+		SGLog.Source('TSGContextUnix__CreateWindow : Error : Could not create an OpenGL rendering context!');
 		Exit;
 		end;
 	Result:=FContext<>nil;
@@ -1631,7 +1631,7 @@ Result:=False;
 	{$ELSE}
 		{$IFDEF ANDROID}
 			FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
-			SGLog.Sourse('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+			SGLog.Source('"TSGRenderOpenGL.CreateContext" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 			Result:=TSGMaxEnum(FContext)<>0;
 		{$ELSE}
 			{$IFDEF DARWIN}
@@ -1771,9 +1771,9 @@ if (Result and (numFormats >= 1)) then
 else
 	begin
 	if not Result then
-		SGLog.Sourse(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats returned fail!'])
+		SGLog.Source(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats returned fail!'])
 	else
-		SGLog.Sourse(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats finded ',numFormats,' formats']);
+		SGLog.Source(['TSGRenderOpenGL.wglSetPixelFormat - Choosing formats finded ',numFormats,' formats']);
 	end;
 end;
 {$ENDIF}
@@ -1794,9 +1794,9 @@ pfd.cColorBits    := 32;
 pfd.cDepthBits    := 24;
 pfd.iLayerType    := PFD_MAIN_PLANE;
 iFormat := Windows.ChoosePixelFormat( TSGMaxEnum(Context.Device), @pfd );
-SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
+SGLog.Source(['TSGRenderOpenGL.SetPixelFormat - "iFormat" = "',iFormat,'"']);
 Result:=Windows.SetPixelFormat( TSGMaxEnum(Context.Device), iFormat, @pfd );
-SGLog.Sourse(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
+SGLog.Source(['TSGRenderOpenGL.SetPixelFormat - "Result" = "',Result,'"']);
 end;
 {$ENDIF}
 {$IFDEF DARWIN}
@@ -1858,11 +1858,11 @@ begin
 					FContext)  = EGL_FALSE then
 						begin
 						Result:=False;
-						SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : EGL Error : "'+SGGetEGLError()+'"');
+						SGLog.Source('"TSGRenderOpenGL.MakeCurrent" : EGL Error : "'+SGGetEGLError()+'"');
 						end
 				else
 					Result:=True;
-				SGLog.Sourse('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
+				SGLog.Source('"TSGRenderOpenGL.MakeCurrent" : Called "eglMakeCurrent". Result="'+SGStr(Result)+'"');
 				end
 			else
 				Result:=False;
@@ -1905,7 +1905,7 @@ begin
 	if (FContext <> EGL_NO_CONTEXT) then
 		begin
 		if eglDestroyContext(Context.Device, FContext) = EGL_FALSE then
-			SGLog.Sourse('"TSGRenderOpenGL.LockResources" : EGL Error : "'+SGGetEGLError()+'"');
+			SGLog.Source('"TSGRenderOpenGL.LockResources" : EGL Error : "'+SGGetEGLError()+'"');
 		FContext := EGL_NO_CONTEXT;
 		end;
 	{$ENDIF}
@@ -1948,7 +1948,7 @@ glBindTexture(VTextureType,0);
 glDisable(VTextureType);
 
 FreeMem(VBitMap,VChannels*VWidth*VHeight);
-SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
+SGLog.Source('"TSGRenderOpenGL.UnLockResources" : LoadTexture : "'+TempDir+'/t'+SGStr(i)+'": W='+SGStr(VWidth)+', H='+SGStr(VHeight)+', C='+SGStr(VChannels)+', T='+SGStr(FArTextures[i].FTexture)+'.');
 end;
 procedure LoadBuffer(const i : LongWord);
 var
@@ -1979,15 +1979,15 @@ begin
 {$IFDEF ANDROID}
 	FContext := eglCreateContext(Context.Device, Context.GetOption('VISUAL INFO'), nil, nil);
 	if FContext = EGL_NO_CONTEXT then
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
-	SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
+		SGLog.Source('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
+	SGLog.Source('"TSGRenderOpenGL.UnLockResources" : Called "eglCreateContext". Result="'+SGStr(TSGMaxEnum(FContext))+'"');
 	if eglMakeCurrent(Context.Device,Context.GetOption('SURFACE'),Context.GetOption('SURFACE'),FContext)  = EGL_FALSE then
 		begin
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="FALSE"');
+		SGLog.Source('"TSGRenderOpenGL.UnLockResources" : EGL Error : "'+SGGetEGLError()+'"');
+		SGLog.Source('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="FALSE"');
 		end
 	else
-		SGLog.Sourse('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="TRUE"');
+		SGLog.Source('"TSGRenderOpenGL.UnLockResources" : Called "eglMakeCurrent". Result="TRUE"');
 	{$ENDIF}
 Init();
 Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);

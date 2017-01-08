@@ -96,14 +96,14 @@ procedure TSGAudioDecoderOGG.LogFileInfo();
 begin
 with FVorbisInfo do
 	begin
-	SGLog.Sourse('TSGAudioDecoderOGG.File Version         = '+SGStr(Version));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Channels        = '+SGStr(Channels));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Rate (hz)       = '+SGStr(Rate));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Bitrate upper   = '+SGStr(bitrate_upper));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Bitrate nominal = '+SGStr(bitrate_nominal));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Bitrate lower   = '+SGStr(bitrate_lower));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Bitrate window  = '+SGStr(bitrate_window));
-	SGLog.Sourse('TSGAudioDecoderOGG.File Vendor          = '+SGPCharToString(FVorbisComment.Vendor));
+	SGLog.Source('TSGAudioDecoderOGG.File Version         = '+SGStr(Version));
+	SGLog.Source('TSGAudioDecoderOGG.File Channels        = '+SGStr(Channels));
+	SGLog.Source('TSGAudioDecoderOGG.File Rate (hz)       = '+SGStr(Rate));
+	SGLog.Source('TSGAudioDecoderOGG.File Bitrate upper   = '+SGStr(bitrate_upper));
+	SGLog.Source('TSGAudioDecoderOGG.File Bitrate nominal = '+SGStr(bitrate_nominal));
+	SGLog.Source('TSGAudioDecoderOGG.File Bitrate lower   = '+SGStr(bitrate_lower));
+	SGLog.Source('TSGAudioDecoderOGG.File Bitrate window  = '+SGStr(bitrate_window));
+	SGLog.Source('TSGAudioDecoderOGG.File Vendor          = '+SGPCharToString(FVorbisComment.Vendor));
 	end;
 end;
 
@@ -135,7 +135,7 @@ if FInfoReaded then
 Res := ov_open_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
 if Res <> 0 then
 	begin
-	SGLog.Sourse('TSGAudioDecoderOGG.AttachInput : Could not open Ogg stream. ['+ErrorString(Res)+']');
+	SGLog.Source('TSGAudioDecoderOGG.AttachInput : Could not open Ogg stream. ['+ErrorString(Res)+']');
 	exit;
 	end;
 FVorbisInfo    := ov_info(FFile, -1)^;
@@ -166,7 +166,7 @@ if Res > 0 then
 	Result += Res
 else if Res < 0 then
 	begin
-	SGLog.Sourse('TSGAudioDecoderOGG.Read : Error! [' + ErrorString(Res) + ']');
+	SGLog.Source('TSGAudioDecoderOGG.Read : Error! [' + ErrorString(Res) + ']');
 	Result := 0;
 	end
 else
@@ -174,7 +174,7 @@ else
 until (Result >= VBufferSize) or ToExit;
 
 if (Result > VBufferSize) then
-	SGLog.Sourse('TSGAudioDecoderOGG.Read : Hint Readed data > Buffer size!');
+	SGLog.Source('TSGAudioDecoderOGG.Read : Hint Readed data > Buffer size!');
 end;
 
 function TSGAudioDecoderOGG.GetSize() : TSGUInt64;

@@ -40,8 +40,8 @@ type
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
 		procedure KeyControl();
-		function GetVertexShaderSourse():TSGString;
-		function GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
+		function GetVertexShaderSource():TSGString;
+		function GetFragmentShaderSource(const VTexturesCount : TSGLongWord):TSGString;
 		procedure AddModels(const VCount : TIndex);
 			private
 		FCamera : TSGCamera;
@@ -107,7 +107,7 @@ else if Length(FAnimationStates) >= NewLength then
 FCountLabel.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
 end;
 
-function TSGExample13.GetVertexShaderSourse():TSGString;
+function TSGExample13.GetVertexShaderSource():TSGString;
 begin
 Result := '// Vertex Shader '+#13+#10+
 	'uniform mat4 boneMat[32]; '+#13+#10+
@@ -145,7 +145,7 @@ Result := '// Vertex Shader '+#13+#10+
 	'}';
 end;
 
-function TSGExample13.GetFragmentShaderSourse(const VTexturesCount : TSGLongWord):TSGString;
+function TSGExample13.GetFragmentShaderSource(const VTexturesCount : TSGLongWord):TSGString;
 var
 	i : TIndex;
 begin
@@ -270,12 +270,12 @@ if Render.SupporedShaders() then
 	FModel.MakeMesh();
 	
 	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
-	FVertexShader.Sourse(GetVertexShaderSourse());
+	FVertexShader.Source(GetVertexShaderSource());
 	if not FVertexShader.Compile() then
 		FVertexShader.PrintInfoLog();
 
 	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
-	FFragmentShader.Sourse(GetFragmentShaderSourse(FModel.GetTexturesCount()));
+	FFragmentShader.Source(GetFragmentShaderSource(FModel.GetTexturesCount()));
 	if not FFragmentShader.Compile() then
 		FFragmentShader.PrintInfoLog();
 

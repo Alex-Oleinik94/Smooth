@@ -178,7 +178,7 @@ inherited;
 if LeaksDetector <> nil then
 	LeaksDetector.AddReference(ClassName())
 else
-	SGLog.Sourse(['TSGLeaksDetector : Error : AddReferense(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+	SGLog.Source(['TSGLeaksDetector : Error : AddReferense(''',ClassName(),''') without specimen of TSGLeaksDetector']);
 end;
 
 destructor TSGNamed.Destroy();
@@ -186,7 +186,7 @@ begin
 if LeaksDetector <> nil then
 	LeaksDetector.ReleaseReference(ClassName())
 else
-	SGLog.Sourse(['TSGLeaksDetector : Error : ReleaseReference(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+	SGLog.Source(['TSGLeaksDetector : Error : ReleaseReference(''',ClassName(),''') without specimen of TSGLeaksDetector']);
 inherited;
 end;
 {$ENDIF}

@@ -525,7 +525,7 @@ While XPending(dpy)<>0 do
 		end;
 	DestroyNotify:
 		begin
-		SGLog.Sourse('TSGContextLinux__Messages : Note : Window is closed for API.');
+		SGLog.Source('TSGContextLinux__Messages : Note : Window is closed for API.');
 		Active:=False;
 		end;
 	end;
@@ -547,18 +547,18 @@ if dpy = nil then
 	dpy := XOpenDisplay(nil);
 if dpy = nil then
 	begin
-	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not connect to X server!');
+	SGLog.Source('TSGContextLinux__CreateWindow : Error : Could not connect to X server!');
 	Exit;
 	end;
 if not (glXQueryExtension(dpy,errorBase,eventBase)) then
 	begin
-	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : GLX extension not supported!');
+	SGLog.Source('TSGContextLinux__CreateWindow : Error : GLX extension not supported!');
 	Exit;
 	end;
 visinfo := glXChooseVisual(dpy,DefaultScreen(dpy), Attr);
 if(visinfo = nil) then
 	begin
-	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not find visual!');
+	SGLog.Source('TSGContextLinux__CreateWindow : Error : Could not find visual!');
 	Exit;
 	end;
 cm := XCreateColormap(dpy,RootWindow(dpy,visinfo^.screen),visinfo^.visual,AllocNone);
@@ -571,7 +571,7 @@ win := XCreateWindow(dpy,RootWindow(dpy,visinfo^.screen),FLeft,FTop,FWidth,FHeig
 	InputOutput,visinfo^.visual,CWBorderPixel or CWColormap or CWEventMask,@winAttr);
 if win = 0 then
 	begin
-	SGLog.Sourse('TSGContextLinux__CreateWindow : Error : Could not create window!');
+	SGLog.Source('TSGContextLinux__CreateWindow : Error : Could not create window!');
 	Exit;
 	end;
 Name := SGStringAsPChar(FTitle);

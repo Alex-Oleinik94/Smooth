@@ -204,7 +204,7 @@ var
 begin
 FAudioInfo := FDecoder.Info;
 FFormat := SGOpenALFormatFromAudioInfo(FAudioInfo);
-SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Determine format ''' + SGOpenALStrFormat(FFormat) + '''.');
+SGLog.Source('TSGOpenALBufferedSource.PreBuffer : Determine format ''' + SGOpenALStrFormat(FFormat) + '''.');
 
 GetMem(Data, SGAudioDecoderBufferSize);
 FillChar(Data^, SizeOf(SGAudioDecoderBufferSize), 0);
@@ -212,11 +212,11 @@ FillChar(Data^, SizeOf(SGAudioDecoderBufferSize), 0);
 alGenBuffers(2, @FBuffers[0]);
 DecodedDataLength += DecodeAndSendDataToBufferBuffer(FBuffers[0], Data^, SGAudioDecoderBufferSize);
 DecodedDataLength += DecodeAndSendDataToBufferBuffer(FBuffers[1], Data^, SGAudioDecoderBufferSize);
-SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Decoded data size ''' + SGStr(DecodedDataLength) + '''.');
+SGLog.Source('TSGOpenALBufferedSource.PreBuffer : Decoded data size ''' + SGStr(DecodedDataLength) + '''.');
 alSourceQueueBuffers(FCustomSource.Source, 2, @FBuffers[0]);
 
 FreeMem(Data);
-SGLog.Sourse('TSGOpenALBufferedSource.PreBuffer : Done.');
+SGLog.Source('TSGOpenALBufferedSource.PreBuffer : Done.');
 end;
 
 constructor TSGOpenALCustomSource.Create(const VAudioRender : TSGAudioRender);
@@ -387,7 +387,7 @@ if FContext <> nil then
 
 Result := (FContext <> nil) and (FDevice <> nil);
 
-SGLog.Sourse('TSGAudioRenderOpenAL : Context = ' + SGAddrStr(FContext) + ', Device = ' + SGAddrStr(FDevice) + '.');
+SGLog.Source('TSGAudioRenderOpenAL : Context = ' + SGAddrStr(FContext) + ', Device = ' + SGAddrStr(FDevice) + '.');
 end;
 
 procedure TSGAudioRenderOpenAL.Kill();

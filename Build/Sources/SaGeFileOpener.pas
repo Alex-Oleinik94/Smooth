@@ -73,7 +73,7 @@ var
 procedure Wrt(const S : TSGString);
 begin
 WriteLn('You may open files wich expansion(-s) is ',S,'.');
-SGLog.Sourse(['Suppored to open files which expansion(-s) is ',S,'.']);
+SGLog.Source(['Suppored to open files which expansion(-s) is ',S,'.']);
 end;
 begin
 SGPrintEngineVersion();
@@ -130,7 +130,7 @@ var
 begin
 SL := SGArConstToArString(A);
 S := SGStringFromStringList(SL,'');
-SGLog.Sourse(['SGTryOpenFiles returned hint:',SGWinEoln,S]);
+SGLog.Source(['SGTryOpenFiles returned hint:',SGWinEoln,S]);
 WriteLn(S);
 SetLength(SL, 0);
 end;

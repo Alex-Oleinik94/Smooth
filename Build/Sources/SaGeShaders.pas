@@ -32,7 +32,7 @@ type
 		constructor Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 		destructor Destroy();override;
 		function Compile():Boolean;inline;
-		procedure Sourse(const s:string);overload;
+		procedure Source(const s:string);overload;
 		procedure PrintInfoLog();
 			private
 		FShader : TSGLongWord;
@@ -99,11 +99,11 @@ type
 	property FileParams : TSGShaderParams write FFileParams;
 	end;
 
-function SGCreateShaderProgramFromSourses(const Context : ISGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const ):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVertexSource, VFragmentSource : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSaveShaderSourceToFile(const VFileName, VSource : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGReadShaderSourceFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourceFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourceFromFile(const VFileName : TSGString; const VFileParams : array of const ):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : array of const );{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
@@ -111,21 +111,21 @@ implementation
 
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-SGSaveShaderSourseToFile(VOutFileName,SGReadShaderSourseFromFile(VInFileName,VFileParams));
+SGSaveShaderSourceToFile(VOutFileName,SGReadShaderSourceFromFile(VInFileName,VFileParams));
 end;
 
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : array of const );{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-SGSaveShaderSourseToFile(VOutFileName,SGReadShaderSourseFromFile(VInFileName,VFileParams));
+SGSaveShaderSourceToFile(VOutFileName,SGReadShaderSourceFromFile(VInFileName,VFileParams));
 end;
 
-function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourceFromFile(const VFileName : TSGString; const VFileParams : array of const):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	FileParams : TSGShaderParams;
 begin
 Result:='';
 FileParams := SGArConstToArString(VFileParams);
-Result := SGReadShaderSourseFromFile(VFileName,FileParams);
+Result := SGReadShaderSourceFromFile(VFileName,FileParams);
 SetLength(FileParams,0);
 end;
 
@@ -213,13 +213,13 @@ SetLength(FFileParams,0);
 inherited;
 end;
 
-procedure SGSaveShaderSourseToFile(const VFileName, VSourse : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSaveShaderSourceToFile(const VFileName, VSource : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	f : TextFile;
 begin
 Assign(f, VFileName);
 Rewrite(f);
-Write(f,VSourse);
+Write(f,VSource);
 Close(f);
 end;
 
@@ -237,17 +237,17 @@ begin
 Result := Render.GetUniformLocation(FProgram,VLocationName);
 end;
 
-function SGCreateShaderProgramFromSourses(const Context : ISGContext;const VVertexSourse, VFragmentSourse : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVertexSource, VFragmentSource : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	FFragmentShader, FVertexShader : TSGShader;
 begin
 FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
-FVertexShader.Sourse(VVertexSourse);
+FVertexShader.Source(VVertexSource);
 if not FVertexShader.Compile() then
 	FVertexShader.PrintInfoLog();
 
 FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
-FFragmentShader.Sourse(VFragmentSourse);
+FFragmentShader.Source(VFragmentSource);
 if not FFragmentShader.Compile() then
 	FFragmentShader.PrintInfoLog();
 
@@ -258,14 +258,14 @@ if not Result.Link() then
 	Result.PrintInfoLog();
 end;
 
-function SGReadShaderSourseFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourceFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	VFileParams : TSGShaderParams;
 begin
-Result := SGReadShaderSourseFromFile(VFileName,VFileParams);
+Result := SGReadShaderSourceFromFile(VFileName,VFileParams);
 end;
 
-function SGReadShaderSourseFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGReadShaderSourceFromFile(const VFileName : TSGString; const VFileParams : TSGShaderParams):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	Reader : TSGShaderReader = nil;
 begin
@@ -501,7 +501,7 @@ else if VComand='FOR' then
 		{$IFNDEF RELEASE}
 			WriteLn(S);
 			{$ENDIF}
-		SGLog.Sourse(S);
+		SGLog.Source(S);
 		S := '';
 		end
 	else
@@ -577,7 +577,7 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 			{$IFNDEF RELEASE}
 				WriteLn(S);
 				{$ENDIF}
-			SGLog.Sourse(S);
+			SGLog.Source(S);
 			S := '';
 			end;
 		end
@@ -587,7 +587,7 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 		{$IFNDEF RELEASE}
 			WriteLn(S);
 			{$ENDIF}
-		SGLog.Sourse(S);
+		SGLog.Source(S);
 		S := '';
 		end;
 	if SGResourceFiles.FileExists(S) then
@@ -597,7 +597,7 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 				VParams[i-1] := ProcessString(VParams[i],VAditionalParams);
 		if (VParams <> nil) and (Length(VParams)>0) then
 			SetLength(VParams,Length(VParams)-1);
-		Result += SGReadShaderSourseFromFile(S,VParams);
+		Result += SGReadShaderSourceFromFile(S,VParams);
 		end
 	else
 		begin
@@ -605,7 +605,7 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 		{$IFNDEF RELEASE}
 			WriteLn(S);
 			{$ENDIF}
-		SGLog.Sourse(S);
+		SGLog.Source(S);
 		S := '';
 		end;
 	end
@@ -757,7 +757,7 @@ if MaxLength > 1 then
 			Log += '/n'
 		else if (InfoLog[i] <> #10) then
 			Log += InfoLog[i];
-	SGLog.Sourse('TSGShaderProgram.PrintInfoLog : Program="'+SGStr(FProgram)+'", Log="'+Log+'".');
+	SGLog.Source('TSGShaderProgram.PrintInfoLog : Program="'+SGStr(FProgram)+'", Log="'+Log+'".');
 	SetLength(InfoLog, 0);
 	end;
 end;
@@ -770,7 +770,7 @@ Render.LinkShaderProgram(FProgram);
 Render.GetObjectParameteriv(FProgram, SGR_OBJECT_LINK_STATUS_ARB, @linked);
 Result := linked = SGR_TRUE;
 {$IFDEF SG_BASE_DEBUG_SHADERS}
-	SGLog.Sourse('TSGShaderProgram.Link : Program="'+SGStr(FProgram)+'", Result="'+SGStr(Result)+'".');
+	SGLog.Source('TSGShaderProgram.Link : Program="'+SGStr(FProgram)+'", Result="'+SGStr(Result)+'".');
 	{$ENDIF}
 end;
 
@@ -800,21 +800,21 @@ if InfoLogLength>0 then
 	begin
 	GetMem(InfoLog,InfoLogLength);
 	Render.GetInfoLog(FShader, InfoLogLength, CharsWritten, InfoLog);
-	SGLog.Sourse('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');
+	SGLog.Source('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');
 	FreeMem(InfoLog,InfoLogLength);
 	end;
 end;
-procedure TSGShader.Sourse(const s:string);
+procedure TSGShader.Source(const s:string);
 var
 	pc:PChar = nil;
 begin
 {$IFDEF SG_DEBUG_SHADERS}
-SGLog.Sourse('TSGShader.Sourse : Begin to sourse shader "'+SGStr(FShader)+'"');// : "'+s+'"');
+SGLog.Source('TSGShader.Source : Begin to Source shader "'+SGStr(FShader)+'"');// : "'+s+'"');
 {$ENDIF}
 pc:=SGStringToPChar(s);
 Render.ShaderSource(FShader,pc,SGPCharLength(pc));
 {$IFDEF SG_DEBUG_SHADERS}
-SGLog.Sourse('TSGShader.Sourse : Shader soursed "'+SGStr(FShader)+'"');
+SGLog.Source('TSGShader.Source : Shader Sourced "'+SGStr(FShader)+'"');
 {$ENDIF}
 FreeMem(pc);
 end;
@@ -828,7 +828,7 @@ Render.CompileShader(FShader);
 Render.GetObjectParameteriv(FShader, SGR_OBJECT_COMPILE_STATUS_ARB, @compiled);
 Result := compiled = SGR_TRUE;
 {$IFDEF SG_BASE_DEBUG_SHADERS}
-	SGLog.Sourse('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'", Type="'+StringType()+'"');
+	SGLog.Source('TSGShader.Compile : Shader="'+SGStr(FShader)+'", Result="'+SGStr(Result)+'", Type="'+StringType()+'"');
 	{$ENDIF}
 end;
 
@@ -851,11 +851,11 @@ if Render.SupporedShaders() then
 	end
 else
 	begin
-	SGLog.Sourse('TSGShader.Create : Fatal error : Shaders not suppored!');
+	SGLog.Source('TSGShader.Create : Fatal error : Shaders not suppored!');
 	end;
 FType:=ShaderType;
 {$IFDEF SG_DEBUG_SHADERS}
-	SGLog.Sourse('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+StringType()+'"');
+	SGLog.Source('TSGShader.Create : Create Shader "'+SGStr(FShader)+'" as "'+StringType()+'"');
 	{$ENDIF}
 end;
 

@@ -37,7 +37,7 @@ uses
 {$IF defined(ANDROID)}
 	procedure android_main(State: PAndroid_App); cdecl; export;
 	begin
-	SGLog.Sourse('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
+	SGLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	try
 	{$ENDIF}

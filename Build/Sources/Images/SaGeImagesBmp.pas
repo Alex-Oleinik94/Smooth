@@ -196,7 +196,7 @@ begin
     16: begin rowLength := biWidth * 2 end;
     24: begin rowLength := biWidth * 3 end;
     32: begin rowLength := biWidth * 4 end;
-    else SGLog.Sourse('LoadBMP : Wrong bitmap : biBitCount doesn''t match any allowed value');
+    else SGLog.Source('LoadBMP : Wrong bitmap : biBitCount doesn''t match any allowed value');
    end;
 
    if (paletteSize <> 0 {paletted format}) and (biClrUsed <> 0) then
@@ -204,7 +204,7 @@ begin
 
    if biCompression <> BI_RGB then
 	begin
-    SGLog.Sourse('LoadBMP : TODO : RLE compressed and bitfields bitmaps not implemented yet');
+    SGLog.Source('LoadBMP : TODO : RLE compressed and bitfields bitmaps not implemented yet');
     Exit;
     end;
 

@@ -78,7 +78,7 @@ procedure TSGLeaksDetector.ReleaseReference(const VName : TSGString);
 
 procedure Error(const ErrorString : TSGString);
 begin
-SGLog.Sourse(['TSGLeaksDetector : Error when releasing reference ''',VName,''' ',ErrorString]);
+SGLog.Source(['TSGLeaksDetector : Error when releasing reference ''',VName,''' ',ErrorString]);
 end;
 
 var
@@ -137,21 +137,21 @@ if FReferences <> nil then
 				lc := Length(SGStr(FReferences[i].FCount));
 			end;
 if ii = 0 then
-	SGLog.Sourse(['TSGLeaksDetector : Leaks not detected.'])
+	SGLog.Source(['TSGLeaksDetector : Leaks not detected.'])
 else
 	begin
-	SGLog.Sourse(['TSGLeaksDetector : Total ',ii,' leaks.']);
+	SGLog.Source(['TSGLeaksDetector : Total ',ii,' leaks.']);
 	SL := nil;
 	if FReferences <> nil then
 		if Length(FReferences) > 0 then
 			for i := 0 to High(FReferences) do
 				if FReferences[i].FCount > 0 then
 					SL += (ItemTitle(FReferences[i].FName) + '- ' + SGStr(FReferences[i].FCount) + ';');
-					//SGLog.Sourse(['   ',,' - ',FReferences[i].FCount,' references.']);
-	SGLog.Sourse(SL, 'TSGLeaksDetector : Leaks :');
+					//SGLog.Source(['   ',,' - ',FReferences[i].FCount,' references.']);
+	SGLog.Source(SL, 'TSGLeaksDetector : Leaks :');
 	SetLength(SL, 0);
 	end;
-SGLog.Sourse(S,'TSGLeaksDetector : Lines without references',';');
+SGLog.Source(S,'TSGLeaksDetector : Lines without references',';');
 S := '';
 end;
 

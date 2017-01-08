@@ -36,6 +36,9 @@ type
 		constructor CreateRandom(const VContext : ISGContext);virtual;
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
+			protected
+		FDeviceResourcesDeleted : TSGBool;
+			public
 		procedure DeleteDeviceResources();override;
 		procedure LoadDeviceResources();override;
 			public
@@ -276,15 +279,21 @@ end;
 
 procedure TSGScreenSkin.DeleteDeviceResources();
 begin
+if FDeviceResourcesDeleted then
+	Exit;
 FFont.DeleteDeviceResources();
 FComboBoxImage.DeleteDeviceResources();
+FDeviceResourcesDeleted := True;
 inherited;
 end;
 
 procedure TSGScreenSkin.LoadDeviceResources();
 begin
+if not FDeviceResourcesDeleted then
+	Exit;
 FFont.LoadDeviceResources();
 FComboBoxImage.LoadDeviceResources();
+FDeviceResourcesDeleted := False;
 inherited;
 end;
 
@@ -300,6 +309,7 @@ FComboBoxImage := TSGImage.Create(SGTextureDirectory + Slash + 'ComboBoxImage.sg
 FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
 
+FDeviceResourcesDeleted := False;
 FDestroyFontSuppored := True;
 FFont := nil;
 

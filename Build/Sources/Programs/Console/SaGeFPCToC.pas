@@ -122,7 +122,7 @@ type
 		destructor Destroy;override;
 		function NextIdentifierIsZS:Boolean;
 		function NextIdentifierMRM:string;
-		procedure SourseToLog(const Ar:packed array of const);
+		procedure SourceToLog(const Ar:packed array of const);
 			public
 		FReadClass:SGTReadClass;
 		end;
@@ -290,14 +290,14 @@ FReadClass.ReMember;
 end;
 
 begin
-SourseToLog(['SGTExpression.GoRead : Beginning']);
+SourceToLog(['SGTExpression.GoRead : Beginning']);
 repeat
 NI:=FReadClass.NextIdentifier;
 Add(SGTComment.Create);
-SourseToLog(['SGTExpression.GoRead : Adding "',NI,'"']);
+SourceToLog(['SGTExpression.GoRead : Adding "',NI,'"']);
 LastChunk.FName:=NI;
 until hare;
-SourseToLog(['SGTExpression.GoRead : End']);
+SourceToLog(['SGTExpression.GoRead : End']);
 end;
 
 procedure SGTExpression.GoWrite(const FWriteClass:SGTWriteClass = nil);
@@ -442,16 +442,16 @@ procedure SGTProcedure.GoRead;
 var
 	NI:String = '';
 begin
-SourseToLog(['SGTProcedure.GoRead : Begin read header procedure']);
+SourceToLog(['SGTProcedure.GoRead : Begin read header procedure']);
 FName:=FReadClass.NextIdentifier;
-SourseToLog(['SGTProcedure.GoRead : Name procedure is "',FName,'"']);
+SourceToLog(['SGTProcedure.GoRead : Name procedure is "',FName,'"']);
 NI:=FReadClass.NextIdentifier;
 if NI='(' then
 	begin
 	NI:=FReadClass.NextIdentifier;
 	while NI<>')' do
 		begin
-		SourseToLog(['SGTProcedure.GoRead : Begin to read parametr procedure "',FName,'"']);
+		SourceToLog(['SGTProcedure.GoRead : Begin to read parametr procedure "',FName,'"']);
 		if FParametrs=nil then
 			SetLength(FParametrs,1)
 		else
@@ -462,13 +462,13 @@ if NI='(' then
 		FParametrs[High(FParametrs)].FExpression:=nil;
 		if (NI='CONST') or (NI='VAR') or (NI='OUT') then
 			begin
-			SourseToLog(['SGTProcedure.GoRead : type of type "',Length(FParametrs),'" is "',NI,'"']);
+			SourceToLog(['SGTProcedure.GoRead : type of type "',Length(FParametrs),'" is "',NI,'"']);
 			FParametrs[High(FParametrs)].FTypeType:=NI;
 			NI:=FReadClass.NextIdentifier;
 			end;
 		while NI<>':' do
 			begin
-			SourseToLog(['SGTProcedure.GoRead : Begin to read variable parametr procedure "',FName,'"']);
+			SourceToLog(['SGTProcedure.GoRead : Begin to read variable parametr procedure "',FName,'"']);
 			if FParametrs[High(FParametrs)].FNames=nil then
 				SetLength(FParametrs[High(FParametrs)].FNames,1)
 			else
@@ -494,10 +494,10 @@ if NI='(' then
 		end;
 	FReadClass.NextIdentifier;
 	end;
-SourseToLog(['SGTProcedure.GoRead : End read header procedure']);
+SourceToLog(['SGTProcedure.GoRead : End read header procedure']);
 if FPlace<>SGTUHeader then
 	begin
-	SourseToLog(['SGTProcedure.GoRead : Begin to read chuncks procedure "',FName,'"']);
+	SourceToLog(['SGTProcedure.GoRead : Begin to read chuncks procedure "',FName,'"']);
 	repeat
 	NI:=FReadClass.NextIdentifier;
 	if NI='PROCEDURE' then
@@ -640,7 +640,7 @@ if FReadClass.NextIdentifier='=' then
 	FReadClass.NextIdentifier;
 	end;
 
-SourseToLog(['SGTVariable.GoRead : Succsesful Of Type "',FType,'"']);
+SourceToLog(['SGTVariable.GoRead : Succsesful Of Type "',FType,'"']);
 end;
 
 {===========}(*SGTComment*){===========}
@@ -681,7 +681,7 @@ case c of
 end;
 if i<>0 then
 	FComment+=c;
-//SourseToLog(['SGTComment.GoRead : I = "',i,'", FComment = "',FComment,'"']);
+//SourceToLog(['SGTComment.GoRead : I = "',i,'", FComment = "',FComment,'"']);
 until i=0;
 end;
 
@@ -872,14 +872,14 @@ var
 begin
 repeat
 NI:=FReadClass.NextIdentifier;
-SourseToLog(['SGTProgram.GoRead : NextId = "',NI,'"']);
+SourceToLog(['SGTProgram.GoRead : NextId = "',NI,'"']);
 if NI='PROGRAM' then
 	begin
 	FName:=FReadClass.NextIdentifier;
-	SourseToLog(['TSGTProgram.GoRead : Read Name Program "',FName,'"']);
+	SourceToLog(['TSGTProgram.GoRead : Read Name Program "',FName,'"']);
 	if FReadClass.NextIdentifier <> ';' then
 		begin
-		SourseToLog(['TSGTProgram.GoRead : After Name Must Be ";"']);
+		SourceToLog(['TSGTProgram.GoRead : After Name Must Be ";"']);
 		end;
 	end
 else if (NI='PROCEDURE') then
@@ -930,7 +930,7 @@ var
 	FStream:SGTWriteClass = nil;
 	i:LongWord;
 begin
-SourseToLog(['SGTProgram.GoWrite : Beginning']);
+SourceToLog(['SGTProgram.GoWrite : Beginning']);
 FStream:=SGTWriteClass.Create(OutWay+FWay+FName+'.cpp');
 FStream.WriteLn('//'+FName+'.pas');
 FStream.Writeln('#include "SaGeHeader.h"');
@@ -1059,14 +1059,14 @@ end;
 
 {=============}(*SGTReadClassComponent*){===========}
 
-procedure SGTReadClassComponent.SourseToLog(const Ar:packed array of const);
+procedure SGTReadClassComponent.SourceToLog(const Ar:packed array of const);
 var
 	OutString:String;
 	I:LongWord;
 begin
 OutString:='';
 OutString:=SGGetStringFromConstArray(Ar);
-SGLog.Sourse(['[ ',FReadClass.StringInfo,' ] ',OutString]);
+SGLog.Source(['[ ',FReadClass.StringInfo,' ] ',OutString]);
 SetLength(OutString,0);
 end;
 
@@ -1273,13 +1273,13 @@ end;
 begin
 Result:=False;
 if ExistsUnit then Exit;
-SGLog.Sourse(['TSGTranslater.GoFindAndReadUnit : Create Unit Chunck "',Way,'"']);
+SGLog.Source(['TSGTranslater.GoFindAndReadUnit : Create Unit Chunck "',Way,'"']);
 SetLength(FChunks,Length(FChunks)+1);
 FChunks[High(FChunks)]:=SGTUnit.Create;
 FChunks[High(FChunks)].FName:=Way;
 (FChunks[High(FChunks)] as SGTReadClassComponent).FReadClass:=SGTReadClass.Create(SGTRead.Create(Way+'.pas'));
 FChunks[High(FChunks)].FParent:=Self;
-SGLog.Sourse(['TSGTranslater.GoRead : Go Read "',Length(FChunks),'" Chunck "',Way,'"']);
+SGLog.Source(['TSGTranslater.GoRead : Go Read "',Length(FChunks),'" Chunck "',Way,'"']);
 FChunks[High(FChunks)].GoRead;
 Result:=True;
 end;
@@ -1312,19 +1312,19 @@ var
 begin
 if SGUpCaseString(FObject)='CMD' then
 	begin
-	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Cmd Type)']);
+	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Cmd Type)']);
 	for ii:=2 to argc-1 do
 		begin
 		FT:=SGUpCaseString(SGPCharToString(argv[ii]));
 		if (FT[1]<>'-') then
 			begin
 			Writeln('Befor command "',FT,'" must be "-".');
-			SGLog.Sourse(['TSGTranslater.GoRead : ','Befor command "',FT,'" must be "-".']);
+			SGLog.Source(['TSGTranslater.GoRead : ','Befor command "',FT,'" must be "-".']);
 			end
 		else if Length(FT)<3 then
 			begin
 			Writeln('Error sintaxis command "',FT,'". (Length>3)');
-			SGLog.Sourse(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'" (Length>3).']);
+			SGLog.Source(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'" (Length>3).']);
 			end
 		else
 			begin
@@ -1351,7 +1351,7 @@ if SGUpCaseString(FObject)='CMD' then
 			else 
 				begin
 				Writeln('Error sintaxis command "',FT,'".');
-				SGLog.Sourse(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'".']);
+				SGLog.Source(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'".']);
 				end;
 			end;
 		end;
@@ -1359,13 +1359,13 @@ if SGUpCaseString(FObject)='CMD' then
 	end;
 if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SGUpCaseString(FObject))='PP') then
 	begin
-	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
+	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
 	if FT='' then
-		SGLog.Sourse(['TSGTranslater.GoRead : Error Getting File Type "',FObject,'"'])
+		SGLog.Source(['TSGTranslater.GoRead : Error Getting File Type "',FObject,'"'])
 	else
 		begin
-		SGLog.Sourse(['TSGTranslater.GoRead : Create Chunck "',FT,'"']);
+		SGLog.Source(['TSGTranslater.GoRead : Create Chunck "',FT,'"']);
 		SetLength(FChunks,1);
 		if FT='PROGRAM' then
 			FChunks[0]:=SGTProgram.Create;
@@ -1375,13 +1375,13 @@ if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SG
 			;//FChunks[0]:=SGTUnit.Create;
 		(FChunks[0] as SGTReadClassComponent).FReadClass:=SGTReadClass.Create(SGTRead.Create(FObject));
 		FChunks[0].FParent:=Self;
-		SGLog.Sourse(['TSGTranslater.GoRead : Go Read First Chunck "',FT,'"']);
+		SGLog.Source(['TSGTranslater.GoRead : Go Read First Chunck "',FT,'"']);
 		FChunks[0].GoRead;
 		end;
 	end
 else  if (not WasInCmd) or (WasInCmd and (MW='')) then
 	begin
-	SGLog.Sourse(['TSGTranslater.GoRead : Don''t know what a you doing pider!']);
+	SGLog.Source(['TSGTranslater.GoRead : Don''t know what a you doing pider!']);
 	if WasInCmd then
 		WriteLn('TSGTranslater.GoRead : Don''t know what a you doing pider!');
 	end
@@ -1389,18 +1389,18 @@ else {= Makefile}
 	begin
 	if WasInCmd then
 		FObject:=MW;
-	SGLog.Sourse(['TSGTranslater.GoRead : Start Reading (Makefile Type)']);
+	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Makefile Type)']);
 	if (SGGetFileName(FObject)='') and (SGGetFileExpansion(FObject)='') then
 		begin
 		FObject+='Makefile';
 		end;
 	if SGFileExists(FObject) then
 		begin
-		SGLog.Sourse(['TSGTranslater.GoRead : Finded makefile.']);
+		SGLog.Source(['TSGTranslater.GoRead : Finded makefile.']);
 		end
 	else
 		begin
-		SGLog.Sourse(['TSGTranslater.GoRead : Don''t find makefile.']);
+		SGLog.Source(['TSGTranslater.GoRead : Don''t find makefile.']);
 		if WasInCmd then
 			WriteLn('Don''t find makefile..');
 		end;
@@ -1482,7 +1482,7 @@ if FStream.Position<FStream.Size then
 			FColumn+=1;
 	end
 else
-	SGLog.Sourse('SGTRead.ReadChar : Stream.Position = Stream.Size');
+	SGLog.Source('SGTRead.ReadChar : Stream.Position = Stream.Size');
 end;
 
 class function SGTRead.Create(const Way:String):SGTRead;overload;
@@ -1524,7 +1524,7 @@ if FStream.Position=FStream.Size then
 	Exit;
 	end;
 Result:=SGUpCaseString(ReadCircle());
-//SourseToLog(['Translator : Low  Identity of "',FWay,'" is "',Result,'"']);
+//SourceToLog(['Translator : Low  Identity of "',FWay,'" is "',Result,'"']);
 end;
 
 procedure SGTRead.MovePos(const I:Int64);
@@ -1698,7 +1698,7 @@ var
 	Quantity:LongWord = 1;
 	C:Char = #0;
 begin
-SGLog.Sourse(['TSGTReadClass.UnReadComments']);
+SGLog.Source(['TSGTReadClass.UnReadComments']);
 while Quantity>0 do
 	begin
 	C:=FFiles[High(FFiles)].ReadChar;
@@ -1724,7 +1724,7 @@ var
 	ii:LongWord;
 	Identity3:String;
 begin
-SGLog.Sourse('TSGTReadClass.NextIdentifier.Obhod');
+SGLog.Source('TSGTReadClass.NextIdentifier.Obhod');
 ii:=1;
 repeat
 Identity3:=FFiles[High(FFiles)].NextIdentifier;
@@ -1775,7 +1775,7 @@ end;
 begin
 Result:='';
 if (FFiles=nil) or (Length(FFiles)=0) then
-	SGLog.Sourse('TSGTReadClass.NextIdentifier : Quantity Files = 0')
+	SGLog.Source('TSGTReadClass.NextIdentifier : Quantity Files = 0')
 else
 	begin
 	Result:=FFiles[High(FFiles)].NextIdentifier;
@@ -1847,7 +1847,7 @@ else
 			Result:=Self.NextIdentifier();
 			end;
 	end;
-//SourseToLog(['Translator : High Identity of "',FFiles[High(FFiles)].FWay,'" is "',Result,'"']);
+//SourceToLog(['Translator : High Identity of "',FFiles[High(FFiles)].FWay,'" is "',Result,'"']);
 end;
 
 class function TSGTReadClass.Create(const TRead:SGTRead):SGTReadClass;overload;

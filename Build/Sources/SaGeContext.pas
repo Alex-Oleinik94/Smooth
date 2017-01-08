@@ -203,6 +203,7 @@ type
 		FPaintable         : TSGDrawable;
 		FPaintableSettings : TSGPaintableSettings;
 			protected
+		FRenderClassOld     : TSGRenderClass;
 		FRenderClass        : TSGRenderClass;
 		FRenderClassChanget : TSGBoolean;
 		FRender             : TSGRender;
@@ -717,40 +718,73 @@ FCursorWheel := VCursorWheel;
 end;
 
 procedure TSGContext.ReinitializeRender();
+
+procedure DestroyRender();
+begin
+FRender.Context := nil;
+FRender.Destroy();
+FRender := nil;
+end;
+
+function InitNewRenderClass(const NewRenderClass : TSGRenderClass) : TSGBool;
+begin
+if NewRenderClass = nil then
+	begin
+	Result := False;
+	Exit;
+	end;
+Result := True;
+try
+	FRender := NewRenderClass.Create();
+	FRender.Context := Self as ISGContext;
+	if FRender.CreateContext() then
+		FRender.Init();
+	FRenderClass    := NewRenderClass;
+	FRenderClassOld := nil;
+except
+	Result := False;
+	if FRender <> nil then
+		DestroyRender();
+end;
+end;
+
 var
 	DT1, DT2 : TSGDateTime;
 	OldRenderClassName : TSGString = '';
+	ResultSuccess : TSGBool = False;
 begin
 OldRenderClassName := FRender.ClassName();
 DT1.Get();
 {$IFDEF CONTEXT_DEBUGING}
-WriteLn('TSGContext.ReinitializeRender() : Begining');
+	WriteLn('TSGContext.ReinitializeRender() : Begining');
 	{$ENDIF}
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResources();
 Screen.DeleteDeviceResources();
 if FRender <> nil then
-	begin
-	FRender.Context := nil;
-	FRender.Destroy();
-	FRender := nil;
-	end;
+	DestroyRender();
 {$IFDEF CONTEXT_DEBUGING}
-WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
+	WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
 	{$ENDIF}
-FRender := FRenderClass.Create();
-FRender.Context := Self as ISGContext;
-if FRender.CreateContext() then
-	FRender.Init();
+ResultSuccess := InitNewRenderClass(FRenderClass);
+if not ResultSuccess then
+	ResultSuccess := InitNewRenderClass(FRenderClassOld);
+if (not ResultSuccess) and (TSGCompatibleRender <> nil) then
+	ResultSuccess := InitNewRenderClass(TSGCompatibleRender);
+if not ResultSuccess then
+	begin
+	SGHint('TSGContext.ReinitializeRender() : Can''t initialize render.');
+	Halt(1);
+	end;
 FRenderClassChanget := False;
 if FPaintable <> nil then
 	FPaintable.LoadDeviceResources();
 Screen.LoadDeviceResources();
 {$IFDEF CONTEXT_DEBUGING}
-WriteLn('TSGContext.ReinitializeRender() : End');
+	WriteLn('TSGContext.ReinitializeRender() : End');
 	{$ENDIF}
 DT2.Get();
-SGLog.Sourse('TSGContext.ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SGSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SGStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
+SGLog.Source('TSGContext.ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SGSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SGStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -764,6 +798,7 @@ begin
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext.SetRenderClass(...) : Begining');
 	{$ENDIF}
+FRenderClassOld := FRenderClass;
 FRenderClass := TSGRenderClass(NewRender);
 if FInitialized and (not (Render is FRenderClass)) then
 	begin
@@ -1162,6 +1197,8 @@ FClientHeight := 0;
 FClientWidth := 0;
 FIncessantlyPainting := 1;
 FRenderClassChanget := False;
+FRenderClass := nil;
+FRenderClassOld := nil;
 FIcon := nil;
 FCursor := nil;
 FInitialized := False;

@@ -411,8 +411,8 @@ if i = 0 then
 	i := StringPos(';', Str, 0);
 if i = 0 then
 	begin
-	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcName() = ''''.');
-	SGLog.Sourse('Where S = ''' + S + '''.');
+	SGLog.Source('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcName() = ''''.');
+	SGLog.Source('Where S = ''' + S + '''.');
 	exit;
 	end;
 while (not (Str[i] in ' 	')) or (Result = '') do
@@ -472,8 +472,8 @@ else if SGUpCaseString(StringWordGet(Str, ' ', WordCount - 8)) = 'EXTERNAL' then
 	end
 else
 	begin
-	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcLib() = ''''.');
-	SGLog.Sourse('Where S = ''' + S + '''.');
+	SGLog.Source('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcLib() = ''''.');
+	SGLog.Source('Where S = ''' + S + '''.');
 	exit;
 	end;
 end;
@@ -506,8 +506,8 @@ if i = 0 then
 	i := StringPos(';', Str, 0);
 if i = 0 then
 	begin
-	SGLog.Sourse('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcType() = ''''.');
-	SGLog.Sourse('Where S = ''' + S + '''.');
+	SGLog.Source('TSGDoDynamicHeader.Execute().ReWriteExternal(S).GetProcType() = ''''.');
+	SGLog.Source('Where S = ''' + S + '''.');
 	exit;
 	end;
 while (SGUpCaseString(NextWord(i)) <> 'EXTERNAL') do
@@ -635,7 +635,7 @@ if FWriteMode <> SGDDHWriteModeObjectSaGe then
 		WriteString('//');
 	WriteString('WriteLn(Er);' + SGWinEoln);
 	if not (FWriteMode = SGDDHWriteModeFpc) then
-		WriteString('SGLog.Sourse(Er);' + SGWinEoln)
+		WriteString('SGLog.Source(Er);' + SGWinEoln)
 	else
 		WriteString('//Can source Er to log' + SGWinEoln);
 	WriteString('end;' + SGWinEoln);

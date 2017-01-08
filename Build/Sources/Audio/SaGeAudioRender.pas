@@ -487,6 +487,8 @@ Result := nil;
 {$IFNDEF MOBILE}
 if (Result = nil) and (TSGAudioRenderOpenAL.Suppored()) then
 	Result := TSGAudioRenderOpenAL;
+if (Result = nil) and (TSGAudioRenderBASS.Suppored()) then
+	Result := TSGAudioRenderBASS;
 {$ENDIF}
 end;
 

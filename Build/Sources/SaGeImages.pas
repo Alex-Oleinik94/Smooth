@@ -509,12 +509,12 @@ if (SaveFormat = SGI_PNG) and (not SupporedPNG()) then
 	if Channels = 4 then
 		begin
 		SaveFormat := SGI_SGIA;
-		SGLog.Sourse('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_SGIA.');
+		SGLog.Source('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_SGIA.');
 		end
 	else
 		begin
 		SaveFormat := SGI_JPEG;
-		SGLog.Sourse('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_JPEG.');
+		SGLog.Source('TSGImage.Saveing - Saving to PNG is impossible, save format replaced to SGI_JPEG.');
 		end;
 	end;
 {$ENDIF}
@@ -528,7 +528,7 @@ SGI_SGIA:
 	SGI_PNG:
 		begin
 		{$IFDEF SGDebuging}
-			SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as PNG');
+			SGLog.Source('TSGImage  : Saveing "'+FWay+'" as PNG');
 			{$ENDIF}
 		if SGResourceManager.SaveingIsSuppored('PNG') then
 			SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage);
@@ -537,14 +537,14 @@ SGI_SGIA:
 SGI_JPEG:
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as JPEG');
+		SGLog.Source('TSGImage  : Saveing "'+FWay+'" as JPEG');
 		{$ENDIF}
 	SaveJpg();
 	end;
 SGI_BMP:
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Saveing "'+FWay+'" as BMP');
+		SGLog.Source('TSGImage  : Saveing "'+FWay+'" as BMP');
 		{$ENDIF}
 	SaveBMP(FImage,Stream);
 	end;
@@ -564,7 +564,7 @@ end;
 
 function TSGImage.Loading():TSGBoolean;
 begin
-{$IFDEF ANDROID}SGLog.Sourse('Enterind "TSGImage__Loading".');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Enterind "TSGImage__Loading".');{$ENDIF}
 
 Result:=False;
 LoadToMemory();
@@ -572,7 +572,7 @@ if (FStream<>nil) and (FStream.Size<>0) then
 	LoadToBitMap();
 Result:=ReadyToGoToTexture;
 
-{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__Loading". Result = "'+SGStr(Result)+'"');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__Loading". Result = "'+SGStr(Result)+'"');{$ENDIF}
 end;
 
 procedure TSGImage.SetBitMapBits(const Value:Cardinal);
@@ -780,7 +780,7 @@ end;
 
 function TSGImage.LoadToBitMap():TSGBoolean;
 begin
-{$IFDEF ANDROID}SGLog.Sourse('Enterind "TSGImage__LoadToBitMap".');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Enterind "TSGImage__LoadToBitMap".');{$ENDIF}
 Result:=False;
 FStream.Position:=0;
 if (FStream.Size<2) then
@@ -790,18 +790,18 @@ if (not Result) and IsBMP(FStream.Memory,FStream.Size) then
 	LoadBMP(FStream,FImage);
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as BMP is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as BMP is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 if (not Result) and IsSGIA(FStream.Memory,FStream.Size) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Begin loading "'+FWay+'" as SGIA.');
+		SGLog.Source('TSGImage  : Begin loading "'+FWay+'" as SGIA.');
 		{$ENDIF}
 	LoadSGIAToBitMap(FStream,FImage);
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as SGIA is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as SGIA is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
@@ -809,18 +809,18 @@ if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
 	LoadMBMToBitMap;
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as MBM is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as MBM is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 if (not Result) and IsJPEG(FStream.Memory,FStream.Size) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Begin loading "'+FWay+'" as JPEG.');
+		SGLog.Source('TSGImage  : Begin loading "'+FWay+'" as JPEG.');
 		{$ENDIF}
 	LoadJPEGToBitMap(FStream,FImage);
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as JPEG is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as JPEG is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 if (not Result) and IsPNG(FStream.Memory,FStream.Size) then
@@ -829,7 +829,7 @@ if (not Result) and IsPNG(FStream.Memory,FStream.Size) then
 		FImage:=SGResourceManager.LoadResourceFromStream(FStream,'PNG') as TSGBitMap;
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as PNG is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as PNG is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 if (not Result) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
@@ -841,11 +841,11 @@ if (not Result) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
 		FImage:=TSGBitMap.Create;
 	Result:=FImage.BitMap<>nil;
 	{$IFDEF SGDebuging}
-		SGLog.Sourse('TSGImage  : Loaded "'+FWay+'" as TGA is "'+SGStr(Result)+'"');
+		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as TGA is "'+SGStr(Result)+'"');
 		{$ENDIF}
 	end;
 FReadyToGoToTexture:=Result;
-{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
 end;
 
 procedure TSGImage.FreeSream();
@@ -883,7 +883,7 @@ else
 	end;
 SGResourceFiles.LoadMemoryStreamFromFile(FStream,FWay);
 FStream.Position:=0;
-{$IFDEF ANDROID}SGLog.Sourse('Leaving "TSGImage__LoadToMemory". Way="'+FWay+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToMemory". Way="'+FWay+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
 end;
 
 procedure TSGImage.ToTexture();
@@ -915,7 +915,7 @@ Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.Disable(SGR_TEXTURE_2D);
 FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
-	SGLog.Sourse('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
+	SGLog.Source('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
 end;
 

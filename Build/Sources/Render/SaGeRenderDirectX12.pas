@@ -112,7 +112,7 @@ type
 		function SupporedShaders() : TSGBoolean;override;
 		// Остальное потом
 		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
-		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);override;
+		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
 		procedure CompileShader(const VShader : TSGLongWord);override;
 		procedure GetObjectParameteriv(const VObject : TSGLongWord; const VParamName : TSGCardinal; const VResult : TSGRPInteger);override;
 		procedure GetInfoLog(const VHandle : TSGLongWord; const VMaxLength : TSGInteger; var VLength : TSGInteger; VLog : PChar);override;

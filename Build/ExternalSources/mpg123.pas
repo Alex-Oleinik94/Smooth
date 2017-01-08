@@ -470,7 +470,7 @@ begin
 if FInited then
 	begin
 	mpg123_exit();
-	SGLog.Sourse(JustifedFirstName() + ': Exited.');
+	SGLog.Source(JustifedFirstName() + ': Exited.');
 	FInited := False;
 	end;
 mpg123_init := nil;
@@ -567,7 +567,7 @@ if FInited then
 	exit;
 if Result.FFunctionLoaded > 0 then
 	FInited := mpg123_init() = 0;
-SGLog.Sourse(JustifedFirstName() + ': ' + Iff(FInited, 'Initialized.', 'Initialization fail.'));
+SGLog.Source(JustifedFirstName() + ': ' + Iff(FInited, 'Initialized.', 'Initialization fail.'));
 if FInited then
 	begin
 	SD := mpg123_supported_decoders();
@@ -579,7 +579,7 @@ if FInited then
 		Decoders += SGPCharToString(TArrayOfPChar(SD)[i]);
 		i += 1;
 		end;
-	SGLog.Sourse(JustifedFirstName() + ': Supored decoders - ' + Decoders + '.');
+	SGLog.Source(JustifedFirstName() + ': Supored decoders - ' + Decoders + '.');
 	end;
 end;
 

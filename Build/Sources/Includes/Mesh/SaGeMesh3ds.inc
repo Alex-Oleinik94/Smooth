@@ -102,12 +102,12 @@ begin
 Result:=Self;
 FQO := AModel.QuantityObjects;
 Sucsses:=False;
-SGLog.Sourse(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
+SGLog.Source(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
 if TFile= nil then
 	Tfile:=TFileStream.Create(FFileName,fmOpenRead);
 if Tfile=nil then
 	begin
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Не удалось открыть файл "',FFileName,'"']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Не удалось открыть файл "',FFileName,'"']);
 	exit;
 	end;
 //Читаем заголовок
@@ -116,7 +116,7 @@ Tfile.Read(Ch.Length,4);
 Tfile.Position:=Tfile.Position-6;
 if Ch.ID<>MAIN3DS then
 	begin
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Это не 3d файл! "',FFileName,'"']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Это не 3d файл! "',FFileName,'"']);
 	exit;
 	end;
 //находим блок редактора
@@ -150,7 +150,7 @@ while Ch.ID=cMATERIAL do
 			AModel.LastMaterial().AddDiffuseMap(SGGetFileWay(FFileName) + SGReadStringFromStream(TFile));
 			end;
 		end;
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'.']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'.']);
 	//Ищем новый материал
 	Tfile.Position:=ObjectsPos;
 	Tfile.Read(Ch.ID,2);
@@ -181,7 +181,7 @@ while Ch.ID=EDIT_OBJECT do
 	AModel.LastObject().VertexType:=SGMeshVertexType3f;
 	Tfile.Position:=Tfile.Position+6;
 	AModel.LastObject().Name := SGReadStringFromStream(TFile);
-	SGLog.Sourse(['TSGLoad3DS.Import3DS : Object: "',AModel.LastObject().Name,'"']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Object: "',AModel.LastObject().Name,'"']);
 	Tfile.Position:=ObjectsPos;
 	//Находим блок сетки
 	ChPos:=Self.FindChunk(OBJ_TRIMESH,true);
@@ -219,7 +219,7 @@ while Ch.ID=EDIT_OBJECT do
 		TFile.Read(iii,2);
 		if iii<>QuantityVertexes then
 			begin
-			SGLog.Sourse('TSGLoad3DS.Import3DS : Fatal : Quantity Vrtexes <> Quantity Texture Vertexes!');
+			SGLog.Source('TSGLoad3DS.Import3DS : Fatal : Quantity Vrtexes <> Quantity Texture Vertexes!');
 			AModel.Clear();
 			Exit;
 			end;
@@ -339,7 +339,7 @@ var
 	DT,DT2:TSGDateTime;
 begin
 DT.Get();
-SGLog.Sourse('TSGLoad3DS.ComputeNormals : Started');
+SGLog.Source('TSGLoad3DS.ComputeNormals : Started');
 if AModel.QuantityObjects>0 then
 	begin
 	for iObject:=FQO to AModel.QuantityObjects-1 do
@@ -386,7 +386,7 @@ if AModel.QuantityObjects>0 then
 		end;
 	end;
 DT2.Get();
-SGLog.Sourse('TSGLoad3DS.ComputeNormals : Endng ( '+
+SGLog.Source('TSGLoad3DS.ComputeNormals : Endng ( '+
 	SGSecondsToStringTime((DT2-DT).GetPastSeconds)+' '+SGStr((DT2-DT).GetPastMiliSeconds div 100)+' милисек'+' )');
 end;
 
