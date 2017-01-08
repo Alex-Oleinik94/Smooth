@@ -18,6 +18,8 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 		procedure Paint();override;
+		procedure DeleteDeviceResources();override;
+		procedure LoadDeviceResources();override;
 			private
 		FProjectionAngle      : TSGSingle;     //Угол поворота центра
 		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
@@ -431,6 +433,18 @@ end;
 class function TSGLoading.ClassName():string;
 begin
 Result:='Модель загрузки';
+end;
+
+procedure TSGLoading.DeleteDeviceResources();
+begin
+FFont.DeleteDeviceResources();
+inherited;
+end;
+
+procedure TSGLoading.LoadDeviceResources();
+begin
+FFont.LoadDeviceResources();
+inherited;
 end;
 
 end.

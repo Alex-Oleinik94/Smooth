@@ -75,7 +75,7 @@ type
 		function  WindowRegister(): Boolean;
 		function  WindowCreate(): HWnd;
 		function  WindowInit(hParent : HWnd): Boolean;
-		procedure KillWindow(const KillRC:Boolean = True);
+		procedure KillWindow();
 		function  CreateWindow():Boolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -83,6 +83,7 @@ type
 		class function CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
 		class function CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
 		class function CreateGlassyCursor() : HCURSOR;
+		procedure HandlingSizingFromRect(const PR : PRect = nil);
 			protected
 		FCursorHandle : Windows.HCURSOR;
 		FIconHandle   : Windows.HICON;
@@ -546,9 +547,9 @@ end;
 
 procedure TSGContextWinAPI.Kill();
 begin
-inherited;
 KillWindow();
 SetLength(SGContexts, 0);
+inherited;
 end;
 
 destructor TSGContextWinAPI.Destroy;
@@ -558,7 +559,7 @@ end;
 
 procedure TSGContextWinAPI.Initialize();
 
-procedure HandlingSizingFromRect();
+procedure HandlingReSizingFromRect();
 var
 	WRect : Windows.TRect;
 begin
@@ -576,7 +577,7 @@ begin
 Active := CreateWindow();
 if Active then
 	begin
-	HandlingSizingFromRect();
+	HandlingReSizingFromRect();
 	inherited;
 	end;
 end;
@@ -612,9 +613,7 @@ MessageBox(0, pcErrorMessage, 'Error', MB_OK);
 Halt(0);
 end;
 
-function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
-
-procedure HandlingSizingFromRect(const PR : PRect = nil);
+procedure TSGContextWinAPI.HandlingSizingFromRect(const PR : PRect = nil);
 var
 	WRect : Windows.TRect;
 	Shift : TSGPoint2int32;
@@ -639,6 +638,8 @@ FClientWidth  := FWidth - 2 * Shift.x;
 FClientHeight := FHeight - Shift.x - Shift.y;
 Resize();
 end;
+
+function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
 
 procedure HandlingSizingFromParam();
 begin
@@ -1011,7 +1012,7 @@ Result := true;
 	{$ENDIF}
 end;
 
-procedure TSGContextWinAPI.KillWindow(const KillRC:Boolean = True);
+procedure TSGContextWinAPI.KillWindow();
 
 procedure UnregisterWindowClass();
 var
@@ -1027,22 +1028,15 @@ if FWindowClassName <> '' then
 end;
 
 begin
-if (hWindow<>0) and (dcWindow<>0) then
-	ReleaseDC( hWindow, dcWindow );
-if (dcWindow<>0) then
+if (hWindow <> 0) and (dcWindow <> 0) then
 	begin
-	CloseHandle(dcWindow);
-	dcWindow:=0;
+	ReleaseDC(hWindow, dcWindow);
+	dcWindow := 0;
 	end;
-if hWindow<>0 then
+if hWindow <> 0 then
 	begin
-	DestroyWindow( hWindow );
-	hWindow:=0;
-	end;
-if hWindow<>0 then
-	begin
-	CloseHandle( hWindow);
-	hWindow:=0;
+	DestroyWindow(hWindow);
+	hWindow := 0;
 	end;
 UnregisterWindowClass();
 end;
@@ -1059,7 +1053,7 @@ else
 			FRender.LockResources();
 			FRender.ReleaseCurrent();
 			end;
-		KillWindow(False);
+		KillWindow();
 		Messages();
 		inherited InitFullscreen(VFullscreen);
 		if VFullscreen then
@@ -1068,9 +1062,12 @@ else
 			FHeight:= GetScreenArea().y;
 			end;
 		Active := CreateWindow();
+		if not Fullscreen then
+			Maximize();
+		Messages();
 		if (FRender <> nil) and Active then
 			FRender.UnLockResources();
-		Resize();
+		HandlingSizingFromRect();
 		end;
 end;
 

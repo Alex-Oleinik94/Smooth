@@ -82,6 +82,7 @@ type
 		function GetDefaultWindowColor():TSGColor3f; virtual;
 		procedure Minimize();virtual;
 		procedure Maximize();virtual;
+		procedure PrintBounds();
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
@@ -479,6 +480,13 @@ begin
 Result.Import('ANDROIDAPP', State);
 end;
 {$ENDIF}
+
+procedure TSGContext.PrintBounds();
+begin
+WriteLn('L:', FLeft, ';T:', FTop);
+WriteLn('W:', FWidth, ';H:', FHeight);
+WriteLn('CW:', FClientWidth, ';CH:', FClientHeight);
+end;
 
 function TSGContext.GetDefaultWindowColor():TSGColor3f;
 begin
