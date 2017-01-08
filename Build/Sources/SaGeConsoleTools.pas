@@ -511,6 +511,7 @@ var
 	Target : TSGString = '';
 	Packages : TSGStringList = nil;
 	OpenPackages : TSGBool = False;
+	Bitrate : TSGByte = 0;
 
 function IsRelease() : TSGBool;
 begin
@@ -565,6 +566,28 @@ else
 				   (SUP = 'PACKAGES') or
 				   (SUP = 'PALL') then
 					OpenPackages := True
+				else if (SUP = '32') or
+				   (SUP = '64') or
+				   (SUP = 'X32') or
+				   (SUP = 'X86') or
+				   (SUP = '86') or
+				   (SUP = 'X64') or
+				   (SUP = 'I386') or
+				   (SUP = '86_64') or
+				   (SUP = 'X86_64') then
+					begin
+					if  (SUP = '32') or
+						(SUP = 'X32') or
+						(SUP = 'I386')  then
+							Bitrate := 32
+					else if (SUP = 'X86') or
+						(SUP = '86') or
+						(SUP = 'X64') or
+						(SUP = '64') or
+						(SUP = '86_64') or
+						(SUP = 'X86_64') then
+							Bitrate := 64;
+					end
 				else
 					begin
 					if Length(SUP) > 0 then
@@ -626,6 +649,15 @@ if Packages <> nil then
 			SGPackageToMakefile(Make, Packages[i], IsRelease);
 end;
 
+procedure PrintTarget(const Target : TSGString);
+begin
+Write('Making target: "');
+TextColor(15);
+Write(Target);
+TextColor(7);
+WriteLn('".');
+end;
+
 var
 	Make : TSGMakefileReader = nil;
 begin
@@ -649,6 +681,21 @@ if IsRelease then
 else
 	ProcessVersionFile(Make,'False');
 ProcessPackages(Make);
+if IsRelease() then
+	begin
+	if Bitrate = 32 then
+		Target := 'release_x32'
+	else if Bitrate = 64 then
+		Target := 'release_x64';
+	end
+else
+	begin
+	if Bitrate = 32 then
+		Target := 'debug_x32'
+	else if Bitrate = 64 then
+		Target := 'debug_x64';
+	end;
+PrintTarget(Target);
 Make.Execute(Target);
 Make.Execute('clear_files');
 Make.Destroy();

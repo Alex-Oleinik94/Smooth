@@ -8,8 +8,6 @@ interface
 
 uses
 	 SaGeCommon
-	,Classes
-	,SaGeUtils
 	,SaGeContext
 	,SaGeScreen
 	,SaGeBase
@@ -18,6 +16,9 @@ uses
 	,SaGeVersion
 	,SaGeRenderConstants
 	,SaGeScreenBase
+	
+	,Classes
+	,SaGeUtils
 	;
 
 type
@@ -50,7 +51,7 @@ implementation
 uses
 	SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
-		,SaGeContextWinApi
+		,SaGeContextWinAPI
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
@@ -72,7 +73,7 @@ uses
 procedure TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass);
 begin
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass = ',TSGMaxEnum(VRenderClass),') : Begining');
+	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass = ',SGAddrStr(VRenderClass),') : Begining');
 	{$ENDIF}
 Context.SetRenderClass(VRenderClass);
 {$IFDEF CONFIGURATION_DEBUG}
@@ -83,7 +84,7 @@ end;
 procedure TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass);
 begin
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass = ',TSGMaxEnum(VContextClass),') : Begining');
+	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass = ',SGAddrStr(VContextClass),') : Begining');
 	{$ENDIF}
 Context.NewContext := VContextClass;
 {$IFDEF CONFIGURATION_DEBUG}
@@ -296,7 +297,7 @@ if FVersionLabel <> nil then
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDate(var FCanChange:Boolean);
+procedure TSGEngineConfigurationPanel.FromUpDate(var FCanChange : TSGBoolean);
 var
 	i : TSGLongWord;
 begin
@@ -307,7 +308,7 @@ if FContextsComboBox.SelectItem = -1 then
 			FContextsComboBox.SelectItem := i;
 			break;
 			end;
-if FRendersComboBox.SelectItem = -1 then
+if (FRendersComboBox.SelectItem = -1) or ((FRendersComboBox.SelectItem <> -1) and (not(Render is Renders[FRendersComboBox.SelectItem].FClass))) then
 	for i := Low(Renders) to High(Renders) do
 		if Render is Renders[i].FClass then
 			begin

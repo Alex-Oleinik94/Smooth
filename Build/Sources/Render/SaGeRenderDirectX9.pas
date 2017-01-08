@@ -1666,15 +1666,13 @@ end;
 var
 	DXErr : TSGMaxEnum;
 begin
+Result := False;
 if (pD3D = nil) then
 	begin
-	pD3D:=Direct3DCreate9( D3D_SDK_VERSION );
+	pD3D := Direct3DCreate9( D3D_SDK_VERSION );
 	SGLog.Source(['TSGRenderDirectX9__CreateContext : IDirect3D9="',SGAddrStr(pD3D),'"']);
 	if pD3d = nil then
-		begin
-		Result:=False;
 		exit;
-		end;
 	end;
 if pDevice = nil then
 	begin

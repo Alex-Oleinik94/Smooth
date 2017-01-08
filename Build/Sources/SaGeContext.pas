@@ -727,6 +727,14 @@ FRender := nil;
 end;
 
 function InitNewRenderClass(const NewRenderClass : TSGRenderClass) : TSGBool;
+
+procedure Fatal();
+begin
+Result := False;
+if FRender <> nil then
+	DestroyRender();
+end;
+
 begin
 if NewRenderClass = nil then
 	begin
@@ -738,13 +746,15 @@ try
 	FRender := NewRenderClass.Create();
 	FRender.Context := Self as ISGContext;
 	if FRender.CreateContext() then
+		begin
 		FRender.Init();
-	FRenderClass    := NewRenderClass;
-	FRenderClassOld := nil;
+		FRenderClass    := NewRenderClass;
+		FRenderClassOld := nil;
+		end
+	else
+		Fatal();
 except
-	Result := False;
-	if FRender <> nil then
-		DestroyRender();
+	Fatal();
 end;
 end;
 
