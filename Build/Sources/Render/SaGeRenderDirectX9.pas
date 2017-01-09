@@ -7,17 +7,20 @@ unit SaGeRenderDirectX9;
 interface
 
 uses
+	// Engine
 	 SaGeBase
 	,SaGeBased
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeClasses
-
+	
+	// System
 	,crt
 	,windows
 	,DynLibs
-
+	
+	// Direct X 9
 	,DXTypes
 	,DXErr9
 	,D3DX9
@@ -34,9 +37,10 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			protected
-			//FOR USE
-		pD3D:IDirect3D9;
-		pDevice:IDirect3DDevice9;
+		pD3D      : IDirect3D9;
+		pD3DEx    : IDirect3D9Ex;
+		pDevice   : IDirect3DDevice9;
+		pDeviceEx : IDirect3DDevice9Ex;
 			public
 		class function Suppored() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
@@ -1352,12 +1356,14 @@ end;
 constructor TSGRenderDirectX9.Create();
 begin
 inherited Create();
+pDevice   := nil;
+pDeviceEx := nil;
+pD3DEx    := nil;
+pD3D      := nil;
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
 SetRenderType(SGRenderDirectX9);
 FArTextures:=nil;
-pDevice:=nil;
-pD3D:=nil;
 FArBuffers:=nil;
 FEnabledClientStateVertex:=False;
 FEnabledClientStateColor:=False;
@@ -1419,15 +1425,17 @@ begin
 DropDeviceResources();
 if (pDevice<>nil)  then
 	begin
+	pDeviceEx := nil;
 	SGDestroyInterface(pDevice);
 	if Self <> nil then
 		TSGPointer(pDevice) := nil;
 	end;
-if (pD3d <> nil) then
+if (pD3D <> nil) then
 	begin
-	SGDestroyInterface(pD3d);
+	pD3DEx := nil;
+	SGDestroyInterface(pD3D);
 	if Self <> nil then
-		TSGPointer(pD3d) := nil;
+		TSGPointer(pD3D) := nil;
 	end;
 end;
 
@@ -1561,8 +1569,8 @@ end;
 
 function TSGRenderDirectX9.CreateContext():Boolean;
 var
-	d3dpp:D3DPRESENT_PARAMETERS;
-	MultiSampleType : D3DMULTISAMPLE_TYPE;
+	d3dpp                 : D3DPRESENT_PARAMETERS;
+	MultiSampleType       : D3DMULTISAMPLE_TYPE;
 	MultiSampleMaxQuality : TSGLongWord;
 
 procedure FindMaxMultisample();
@@ -1647,7 +1655,6 @@ var
 		D3DFMT_D24X4S4,
 		D3DFMT_D32
 		);
-	ii : TSGByte;
 
 function D3DFMT_Str(const FMT : TSGMaxEnum) : TSGString;
 begin
@@ -1663,61 +1670,157 @@ D3DFMT_D32           : Result := 'D3DFMT_D32';
 end;
 end;
 
+procedure LogDirectXLastError(const Error : TSGMaxEnum);
+begin
+SGLog.Source(['TSGRenderDirectX9__CreateContext: DirectX Error: "',Error,'"/"',SGAddrStr(TSGPointer(Error)),'"']);
+SGLog.Source(['TSGRenderDirectX9__CreateContext: DirectX Error Discription: "',SGPCharToString(DXGetErrorString9(Error)),'"']);
+end;
+
+procedure TryCreateD3DEx(const Version : TSGMaxEnum);
+
+function StrSDKVersion(const Version : TSGMaxEnum) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+case Version of
+D3D9b_SDK_VERSION : Result := 'D3D9b_SDK_VERSION';
+D3D_SDK_VERSION   : Result := 'D3D_SDK_VERSION';
+else
+	Result := '';
+end;
+end;
+
 var
-	DXErr : TSGMaxEnum;
+	DirectXErrorCode : TSGMaxEnum = 0;
+begin
+if pD3DEx <> nil then
+	Exit;
+DirectXErrorCode := Direct3DCreate9Ex(Version, pD3DEx);
+if (DirectXErrorCode = D3D_OK) and (pD3DEx <> nil) then
+	begin
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension context with sdk version "',StrSDKVersion(Version),'".']);
+	pD3D := pD3DEx;
+	end
+else
+	begin
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create extension context with sdk version "',StrSDKVersion(Version),'".']);
+	LogDirectXLastError(DirectXErrorCode);
+	end;
+end;
+
+procedure FillPresendParameters(var d3dpp : D3DPRESENT_PARAMETERS);
+begin
+FillChar(d3dpp, SizeOf(d3dpp), 0);
+d3dpp.Windowed               := True;
+d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
+d3dpp.hDeviceWindow          := TSGMaxEnum(Context.Window);
+d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
+d3dpp.BackBufferWidth        := Context.Width;
+d3dpp.BackBufferHeight       := Context.Height;
+d3dpp.EnableAutoDepthStencil := True;
+d3dpp.AutoDepthStencilFormat := D3DFMT_D24S8;
+d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
+d3dpp.MultiSampleType        := MultiSampleType;
+d3dpp.MultiSampleQuality     := 0;
+end;
+
+var
+	DirectXErrorCode   : TSGMaxEnum = 0;
+
+procedure TryCreateDevice();
+var
+	Index : TSGByte;
+begin
+for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
+	begin
+	FillPresendParameters(d3dpp);
+	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
+	
+	DirectXErrorCode :=  pD3D.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice);
+	
+	if( DirectXErrorCode <> D3D_OK) then
+		begin
+		{$IFDEF RENDER_DX9_DEBUG}
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with: DepthFormat = ', D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+		LogDirectXLastError(DirectXErrorCode);
+		{$ENDIF}
+		end
+	else
+		break;
+	end;
+end;
+
+procedure TryCreateDeviceEx();
+var
+	Index : TSGByte;
+begin
+if pD3DEx = nil then
+	exit;
+for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
+	begin
+	FillPresendParameters(d3dpp);
+	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
+	
+	DirectXErrorCode :=  pD3DEx.CreateDeviceEx( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
+			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, nil, pDeviceEx);
+	
+	if(DirectXErrorCode <> D3D_OK) then
+		begin
+		pDeviceEx := nil;
+		pDevice := nil;
+		{$IFDEF RENDER_DX9_DEBUG}
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with: DepthFormat = ', D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+		LogDirectXLastError(DirectXErrorCode);
+		{$ENDIF}
+		end
+	else
+		begin
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension device.']);
+		pDevice := pDeviceEx;
+		break;
+		end;
+	end;
+end;
+
 begin
 Result := False;
 if (pD3D = nil) then
 	begin
-	pD3D := Direct3DCreate9( D3D_SDK_VERSION );
-	SGLog.Source(['TSGRenderDirectX9__CreateContext : IDirect3D9="',SGAddrStr(pD3D),'"']);
-	if pD3d = nil then
+	pD3DEx := nil;
+	TryCreateD3DEx(D3D9b_SDK_VERSION);
+	if pD3DEx = nil then
+		TryCreateD3DEx(D3D_SDK_VERSION);
+	if pD3D = nil then
+		pD3D := Direct3DCreate9(D3D_SDK_VERSION);
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3D9',SGStringIf(pD3DEx <> nil,'Ex'),'="',SGAddrStr(pD3D),'"']);
+	if pD3D = nil then
 		exit;
 	end;
 if pDevice = nil then
 	begin
 	FindMaxMultisample();
-	Result := False;
 	{$IFDEF RENDER_DX9_DEBUG}
-	SGLog.Source('TSGRenderDirectX9__CreateContext : SizeOf(D3DPRESENT_PARAMETERS) = ' + SGStr(SizeOf(D3DPRESENT_PARAMETERS)));
+	SGLog.Source('TSGRenderDirectX9__CreateContext: SizeOf(D3DPRESENT_PARAMETERS) = ' + SGStr(SizeOf(D3DPRESENT_PARAMETERS)));
 	{$ENDIF}
-	for ii := High(D3DFMT_List) downto Low(D3DFMT_List) do
-		begin
-		FillChar(d3dpp,SizeOf(d3dpp),0);
-		d3dpp.Windowed               := True;
-		d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
-		d3dpp.hDeviceWindow          := TSGMaxEnum(Context.Window);
-		d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
-		d3dpp.BackBufferWidth        := Context.Width;
-		d3dpp.BackBufferHeight       := Context.Height;
-		d3dpp.EnableAutoDepthStencil := True;
-		d3dpp.AutoDepthStencilFormat := D3DFMT_List[ii];
-		d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
-		d3dpp.MultiSampleType        := MultiSampleType;
-		d3dpp.MultiSampleQuality     := 0;
-
-		DXErr :=  pD3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
-				D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice);
-
-		if( DXErr <> D3D_OK) then
-			begin
-			{$IFDEF RENDER_DX9_DEBUG}
-			SGLog.Source(['TSGRenderDirectX9__CreateContext : Failed create device with: DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
-			SGLog.Source(['DirectX Error :"',SGPCharToString(DXGetErrorString9(DXErr)),'"']);
-			{$ENDIF}
-			end
-		else
-			break;
-		end;
+	FillPresendParameters(d3dpp);
+	end;
+if pDevice = nil then
+	begin
+	pDeviceEx := nil;
+	if pD3DEx <> nil then
+		TryCreateDeviceEx();
+	if pDevice = nil then
+		TryCreateDevice();
 	if pDevice <> nil then
 		begin
-		SGLog.Source(['TSGRenderDirectX9__CreateContext : IDirect3DDevice9="',SGAddrStr(pDevice),'", DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3DDevice9',SGStringIf(pDeviceEx <> nil, 'Ex'),'="',SGAddrStr(pDevice),'", DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
 		Result := True;
 		end
 	else
 		begin
-		SGLog.Source(['TSGRenderDirectX9__CreateContext : Failed create device with anything params...']);
-		SGLog.Source(['DirectX Last Error :"',SGPCharToString(DXGetErrorString9(DXErr)),'"']);
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with anything params, hWindow="',SGAddrStr(Context.Window),'".']);
+		{$IFNDEF RENDER_DX9_DEBUG}
+		LogDirectXLastError(DirectXErrorCode);
+		{$ENDIF}
 		end;
 	end
 else
