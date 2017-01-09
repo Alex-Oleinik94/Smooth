@@ -114,7 +114,7 @@ TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
 FNotepad.BoundsToNeedBounds();
 FNotepad.Visible := True;
-FNotepad.AddMakeFile('.\..\Build');
+FNotepad.AddMakeFile('.' + Slash + '..' + Slash + 'Build' + Slash + 'Makefile');
 FNotepad.OpenMakefileProjects();
 end;
 

@@ -16,6 +16,8 @@ Temp
 pp4
 Apache_Ant
 Binaries/Main
+Binaries/Main_Packages
+Binaries/Main_Console
 Binaries/Gas Diffusion Saves
 Build/Main.res
 Build/CompiledUnits

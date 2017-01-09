@@ -162,8 +162,6 @@ uses
 	,SyncObjs
 	{$IFNDEF MOBILE}
 		,SaGeAudioRenderOpenAL
-		{$ENDIF}
-	{$IFDEF MSWINDOWS}
 		,SaGeAudioRenderBASS
 		{$ENDIF}
 	;

@@ -5,7 +5,7 @@ cd ./..
 echo "======================================="
 echo "| Compiling  Debug  Version for Unix  |"
 echo "======================================="
-make debug
+make debug_x64
 cd ./Scripts
 ./_Check_Console.sh
 read -p "Press enter to continue..." nothing
