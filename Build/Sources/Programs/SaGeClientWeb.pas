@@ -60,7 +60,7 @@ var
 begin
 inherited Create(VContext);
 SGLog.Source('Begin get HTTP');
-MS := SGGetFromHTTP('http://fpm.babichev.net/schedule/32/k/mathmod?api=json');
+MS := SGHTTPGetMemoryStream('http://fpm.babichev.net/schedule/32/k/mathmod?api=json');
 SGLog.Source(['End get HTTP "',TSGMaxEnum(MS),'"']);
 if MS = nil then 
 	Exit;

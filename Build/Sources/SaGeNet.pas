@@ -1,4 +1,4 @@
-{$I Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeNet;
 
@@ -14,6 +14,7 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeCommon
+	,SaGeVersion
 	
 	,lCommon
 	,lhttp
@@ -23,15 +24,17 @@ uses
 	,lHTTPUtil
 	;
 const 
-	SGGetDynamicIPAdres = 'http://for-alexander-oleynikov.net46.net/';
-	SGSetDynamicIPAdres = SGGetDynamicIPAdres + '?data=';
+	SGDefaultTimeOut = 200;
+	SGDefaultHTTPTimeOut = SGDefaultTimeOut;
+
 type
 	TSGSocket = TLSocket;
 	TSGUDPConnectionClass=class(TLUDP)
 		function SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
 		end;
 	
-	TSGReceiveProcedure=procedure(Parant:Pointer;AStream:TMemoryStream; aSocket: TSGSocket);
+	TSGReceiveProcedure       = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
+	TSGNestedReceiveProcedure = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket) is nested;
 	
 	TSGConnectionMode = (SGServerMode,SGClientMode);
 	
@@ -40,8 +43,10 @@ type
 		constructor Create;
 		destructor Destroy;override;
 			public
+		FViewErrorCase : TSGViewErrorType;
 		FConnection: TSGUDPConnectionClass;
 		FReceiveProcedure:TSGReceiveProcedure;
+		FNestedReceiveProcedure:TSGNestedReceiveProcedure;
 		FParent:Pointer;
 		FAddress:string;
 		FPort:Word;
@@ -57,6 +62,7 @@ type
 		function SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
 			public
 		property ReceiveProcedure:TSGReceiveProcedure read FReceiveProcedure write FReceiveProcedure;
+		property NestedReceiveProcedure:TSGNestedReceiveProcedure read FNestedReceiveProcedure write FNestedReceiveProcedure;
 		property Parent:Pointer read FParent write FParent;
 		property ConnectionMode:TSGConnectionMode read FConnectionMode write FConnectionMode;
 		property Port:Word read FPort write FPort;
@@ -78,45 +84,70 @@ type
 		end;
 
 
-procedure IPSERVER();
 
-function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
-function SGGetDynamicIPFromStaticServerWithCurl(const StaticServerIP : String = SGGetDynamicIPAdres):String;
-function SGSetDynamicIPToStaticServerWithCurl(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
-procedure SGAttachToMyRemoteDesktop();
+function SGHTTPGetString      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetStream      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGet            (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGMemoryStreamToString(MS : TMemoryStream;const DestroyStream : Boolean = False):String;
-function SGGetSelfIP():String;
+
+function SGCheckURL(const URL : TSGString; const Protocol : TSGString = ''; const Port : TSGUInt16 = 0) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetURLProtocol(const URL : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGSetURLProtocol(const URL, Protocol : TSGString) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGDecomposeURL(const URL : TSGString; out Host, URI : TSGString; out Port : TSGUInt16) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
-function SGGetSelfIP():String;
-var 
-	Response : String = '';
-	i,iii : LongInt;
+uses
+	StrMan
+	,SaGeConsoleTools
+	;
+
+function SGSetURLProtocol(const URL, Protocol : TSGString) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Response := SGMemoryStreamToString(SGGetFromHTTP('http://checkip.dyndns.org/'),True);
-Result := '';
-if (Response <> '') and (Response <> 'error')then
+Result := URL;
+if StringWordCount(URL, ':') = 2 then
+	Result := Protocol + ':' + StringWordGet(URL, ':', 2)
+else if StringWordCount(URL, ':') = 1 then
+	Result := Protocol + '://' + URL
+else
+	Result := URL;
+end;
+
+function SGGetURLProtocol(const URL : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i, Pos2 : TSGUInt32;
+begin
+if StringWordCount(URL, ':') = 2 then
+	Result := StringWordGet(URL, ':', 1)
+else
+	Result := '';
+end;
+
+function SGCheckURL(const URL : TSGString; const Protocol : TSGString = ''; const Port : TSGUInt16 = 0) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	VPort : TSGUInt16;
+	Host, URI : TSGString;
+	URLProtocol : TSGString;
+begin
+Result := URL;
+URLProtocol := SGGetURLProtocol(Result);
+if (URLProtocol = '') and (Protocol <> '') then
 	begin
-	iii := 0;
-	for i := 1 to Length(Response) do
-		begin
-		if Response[i] = ':' then
-			begin
-			iii := i;
-			break;
-			end;
-		end;
-	if iii <> 0 then
-		begin
-		Inc(iii,2);
-		while Response[iii] <> '<' do
-			begin
-			Result += Response[iii];
-			Inc(iii);
-			end;
-		end;
+	URLProtocol := Protocol;
+	Result := SGSetURLProtocol(Result, URLProtocol);
 	end;
+DecomposeURL(Result, Host, URI, VPort);
+if Port <> 0 then
+	VPort := Port;
+if URI = '' then
+	URI := '/';
+Result := URLProtocol + '://' + Host + URI;
+if Port <> 0 then
+	Result += ':' + SGStr(Port);
+SGLog.Source(Result);
 end;
 
 function SGMemoryStreamToString(MS : TMemoryStream;const DestroyStream : Boolean = False):String;
@@ -137,73 +168,17 @@ if MS <> nil then
 	end;
 end;
 
-function SGSetDynamicIPToStaticServerWithCurl(const DynamicIP:String;const StaticServerIP : String = SGSetDynamicIPAdres):Boolean;
-var
-	a : TProcess;
-	s : TStringList;
-begin
-a := TProcess.Create(nil);
-a.Executable := 'curl';
-a.Parameters.Add('-s');
-a.Parameters.Add(StaticServerIP+DynamicIP);
-a.Options := a.Options + [poUsePipes];
-a.Execute;
-a.WaitOnExit();
-Result:= False;
-if (a.ExitStatus = 0) then
-	begin
-	s := TStringList.Create;
-	s.LoadFromStream(a.Output);
-	if (S.Count = 1) then
-		if (S[0] = 'success') then
-			Result := True;
-	s.Free;
-	end;
-a.Free; 
-end;
-
-function SGGetDynamicIPFromStaticServerWithCurl(const StaticServerIP : String = SGGetDynamicIPAdres):String;
-var
-	a : TProcess;
-	s : TStringList;
-	i : LongWord;
-begin
-a := TProcess.Create(nil);
-a.Executable := 'curl';
-a.Parameters.Add('-s');
-a.Parameters.Add(StaticServerIP);
-a.Options := a.Options + [poUsePipes];
-a.Execute;
-a.WaitOnExit();
-if (a.ExitStatus = 0) then
-	begin
-	s := TStringList.Create;
-	Result:= '';
-	s.LoadFromStream(a.Output);
-	for i := 0 to s.Count-1 do
-		begin
-		if Result <> '' then
-			Result += SGWinEoln;
-		Result += s[i];
-		end;
-	s.Free;
-	end
-else
-	Result := 'error';
-a.Free; 
-end;
-
 procedure TSGHTTPHandler.ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 begin
 {$IFDEF SGDebuging}
-	SGLog.Sourse(['TSGHTTPHandler.ClientProcessHeaders - "'+'ResponseStatus="', HTTPStatusCodes[ASocket.ResponseStatus],'", ResponseReason="',ASocket.ResponseReason, '"']);
+	SGLog.Source(['TSGHTTPHandler.ClientProcessHeaders - "'+'ResponseStatus="', HTTPStatusCodes[ASocket.ResponseStatus],'", ResponseReason="',ASocket.ResponseReason, '"']);
 	{$ENDIF}
 end;
 
 procedure TSGHTTPHandler.ClientError(const Msg: string; aSocket: TLSocket);
 begin
 {$IFDEF SGDebuging}
-	SGLog.Sourse('TSGHTTPHandler.ClientError - Error="'+Msg+'"');
+	SGLog.Source('TSGHTTPHandler.ClientError - Error="'+Msg+'"');
 	{$ENDIF}
 Error := True;
 end;
@@ -212,7 +187,7 @@ procedure TSGHTTPHandler.ClientDisconnect(ASocket: TLSocket);
 begin
 Done := true;
 {$IFDEF SGDebuging}
-	SGLog.Sourse('TSGHTTPHandler.ClientDisconnect');
+	SGLog.Source('TSGHTTPHandler.ClientDisconnect');
 	{$ENDIF}
 end;
   
@@ -221,7 +196,7 @@ begin
 Stream.Position := 0;
 ASocket.Disconnect;
 {$IFDEF SGDebuging}
-	SGLog.Sourse('TSGHTTPHandler.ClientDoneInput');
+	SGLog.Source('TSGHTTPHandler.ClientDoneInput');
 	{$ENDIF}
 end;
 
@@ -231,27 +206,50 @@ begin
 Stream.WriteBuffer(ABuffer^,ASize);
 Result := ASize;
 {$IFDEF SGDebuging}
-	SGLog.Sourse('TSGHTTPHandler.ClientInput');
+	SGLog.Source('TSGHTTPHandler.ClientInput');
 	{$ENDIF}
 end;
 
-function SGGetFromHTTP(const Way : String; const Timeout : LongWord = 200):TMemoryStream;
+function SGHTTPGetString(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGMemoryStreamToString(SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase), True);
+end;
+
+function SGHTTPGetStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase);
+end;
+
+function SGHTTPGet(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase);
+end;
+
+function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	Client : TSGHTTPHandler = nil;
 	HttpClient : TLHTTPClient = nil;
-	UseSSL : Boolean;
-	Port : Word;
-	Host, URI : STring;
+	UseSSL : TSGBool;
+	Port : TSGUInt16;
+	Host, URI : TSGString;
+	Protocol : TSGString;
+	FinalURL : TSGString;
 begin
 Result:=nil;
-
-UseSSL := DecomposeURL(Way, Host, URI, Port);
+Protocol := SGGetURLProtocol(URL);
+SGHint(['lNet HTTP Get: Protocol="', Protocol, '"'], ErrorViewCase);
+if Protocol = '' then
+	Protocol := 'http';
+FinalURL := SGCheckURL(URL, Protocol);
+UseSSL := DecomposeURL(FinalURL, Host, URI, Port);
+SGHint(['lNet HTTP Get: URL="', FinalURL, '"'], ErrorViewCase);
 if UseSSL then
+	begin
+	SGHint(['lNet HTTP Get: SSL does not supporting! Exit.'], ErrorViewCase);
 	Exit;
+	end;
 
-{$IFDEF SGDebuging}
-	SGLog.Sourse(['SGGetFromHTTP - Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"']);
-	{$ENDIF}
+SGHint(['lNet HTTP Get: Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"'], ErrorViewCase);
 
 Client := TSGHTTPHandler.Create();
 Client.Done := False;
@@ -273,14 +271,12 @@ HttpClient.SendRequest;
 Client.Done := false;
 Client.Error := false;
 
-{$IFDEF SGDebuging}
-	SGLog.Sourse('SGGetFromHTTP - Begin looping...');
-	{$ENDIF}
+SGHint('lNet HTTP Get: Begin looping...', ErrorViewCase);
 
 while (not Client.Done) and (not Client.Error) do
 	begin
-	HttpClient.CallAction;
-	SysUtils.Sleep(5);
+	HttpClient.CallAction();
+	SysUtils.Sleep(3);
 	end;
 
 HttpClient.Free;
@@ -292,9 +288,9 @@ else
 
 Client.Destroy();
 
-{$IFDEF SGDebuging}
-	SGLog.Sourse(['SGGetFromHTTP - Done with  Result="',TSGMaxEnum(Result),'"']);
-	{$ENDIF}
+SGHint(['lNet HTTP Get: Done with  Result=',SGAddrStr(Result),'.'], ErrorViewCase);
+if Result <> nil then
+	Result.Position := 0;
 end;
 
 function TSGUDPConnection.SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
@@ -333,6 +329,9 @@ end;
 constructor TSGUDPConnection.Create;
 begin
 inherited;
+FNestedReceiveProcedure := nil;
+FReceiveProcedure := nil;
+FViewErrorCase := [SGPrintError, SGLogError];
 FConnection := TSGUDPConnectionClass.Create(nil);
 FConnection.OnError := TLSocketErrorEvent(@OnError);
 FConnection.OnReceive := @OnReceive;
@@ -346,102 +345,159 @@ end;
 
 destructor TSGUDPConnection.Destroy;
 begin
-FConnection.Destroy;
-FConnection:=nil;
+if FConnection <> nil then
+	begin
+	FConnection.Destroy;
+	FConnection:=nil;
+	end;
 inherited;
 end;
 
 procedure TSGUDPConnection.OnError(const msg: string; aSocket: TLSocket);
 begin
-Writeln(msg);
+SGHint('TSGUDPConnection: Error: "' + Msg + '; Socket: '+SGAddrStr(aSocket) +'.', FViewErrorCase);
 end;
 
 procedure TSGUDPConnection.OnReceive(aSocket: TLSocket);
 var
-	Stream:TMemoryStream;
-	AMemory:Pointer;
-	ASize:LongInt;
+	Stream : TMemoryStream;
+	AMemory : TSGPointer;
+	ASize : TSGInt32;
 begin
-Stream:=TMemoryStream.Create;
-ASize:=BUFFER_SIZE;
-GetMem(AMemory,ASize);
-ASize:=aSocket.Get(AMemory^,ASize);
-Stream.WriteBuffer(AMemory^,ASize);
-FreeMem(AMemory,BUFFER_SIZE);
-Stream.Position:=0;
+ASize := BUFFER_SIZE;
+GetMem(AMemory, ASize);
+ASize := aSocket.Get(AMemory^, ASize);
+Stream := TMemoryStream.Create();
+Stream.WriteBuffer(AMemory^, ASize);
+FreeMem(AMemory, BUFFER_SIZE);
+Stream.Position := 0;
 if FReceiveProcedure<>nil then
-	FReceiveProcedure(FParent,Stream,aSocket);
-Stream.Free;
+	FReceiveProcedure(FParent, Stream, aSocket);
+if FNestedReceiveProcedure<>nil then
+	FNestedReceiveProcedure(FParent, Stream, aSocket);
+Stream.Free();
 end;
 
-// IP SERVER
+function SGDecomposeURL(const URL : TSGString; out Host, URI : TSGString; out Port : TSGUInt16) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure IPSERVER();
-const
-	ErrorSleepInterval = 100;
-	SuccessSleepInterval = 100000;
+function StringIsNumber(const Str : TSGString) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	SelfIP, ServerIP, s: String;
-	DatTime : TSGDateTime;
+	i : TSGUInt32;
 begin
-ClrScr();
-WriteLn('SaGe IP Server is running....');
-while True do
-	begin
-	SelfIP := SGGetSelfIP();
-	if SelfIP = '' then
-		SysUtils.Sleep(ErrorSleepInterval)
-	else
-		begin
-		ServerIP := SGMemoryStreamToString(SGGetFromHTTP(SGGetDynamicIPAdres),True);
-		if ServerIP = '' then
-			SysUtils.Sleep(ErrorSleepInterval)
-		else
+Result := Str <> '';
+if Result then
+	for i := 1 to Length(Str) do
+		if not (Str[i] in '0123456789') then
 			begin
-			if ServerIP <> SelfIP then
-				begin
-				s := SGMemoryStreamToString(SGGetFromHTTP(SGSetDynamicIPAdres+SelfIP),True);
-				if (s = 'success') then
-					begin
-					DatTime.Get();
-					WriteLn('[',DatTime.Years,'.',DatTime.Month,'.',DatTime.Day,' ',DatTime.Hours,':',DatTime.Minutes,':',DatTime.Seconds,'] Your ip is "',SelfIP,'".');
-					SysUtils.Sleep(SuccessSleepInterval);
-					end
-				else
-					SysUtils.Sleep(ErrorSleepInterval)
-				end
-			else
-				SysUtils.Sleep(SuccessSleepInterval);
+			Result := False;
+			break;
 			end;
-		end
-	end;
 end;
 
-procedure SGAttachToMyRemoteDesktop();
-var
-	ServerIP : String;
-	SelfIP : String;
-	Port : String = '4000';
 begin
-ServerIP := SGMemoryStreamToString(SGGetFromHTTP(SGGetDynamicIPAdres),True);
-if (ServerIP <> '') then
-	SelfIP := SGGetSelfIP();
-if (SelfIP <> '') and (ServerIP <> '') then
+Result := False;
+if StringMatching(SGUpCaseString(URL), 'LOCALHOST*') then
 	begin
-	if (SelfIP = ServerIP) then
-		begin
-		Port := '3389';
-		ServerIP := '192.168.0.92';
-		end;
-	SGRunComand('mstsc /v:'+ServerIP+':'+Port);
+	Host := 'localhost';
+	Port := 0;
+	URI := '';
+	if (StringWordCount(URL, ':') = 2) then
+		if StringIsNumber(StringWordGet(URL, ':', 2)) then
+			Port := SGVal(StringWordGet(URL, ':', 2))
+		else
+			SGHint('SGDecomposeURL: Error while pasring port!');
 	end
 else
 	begin
-	WriteLn('Error!');
-	WriteLn('Check your internet connection.');
-	WriteLn('Press any key to continue...');
-	ReadLn();
+	Result := DecomposeURL(URL, Host, URI, Port);
 	end;
+end;
+
+procedure SGConsoleServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Connection : TSGUDPConnection = nil;
+
+procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
+begin
+SGWriteStream(AStream);
+end;
+
+var
+	RK : TSGChar = #0;
+begin
+SGPrintEngineVersion();
+Connection := TSGUDPConnection.Create();
+Connection.ConnectionMode := SGServerMode;
+Connection.Port := Port;
+Connection.NestedReceiveProcedure := @OnReceive;
+Connection.Start();
+SGHint(['SGConsoleServer(',Port,'): Ready=', Connection.Ready]);
+while Connection.Ready do
+	begin
+	if KeyPressed then
+		begin
+		RK := ReadKey;
+		Write(RK);
+		Connection.SendMemoryStream(SGStringToStream(RK));
+		end;
+	Connection.CallAction();
+	Sleep(5);
+	end;
+Connection.Destroy();
+end;
+
+procedure SGConsoleClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Connection : TSGUDPConnection = nil;
+
+procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
+begin
+SGWriteStream(AStream);
+end;
+
+procedure SetURL();
+var
+	Port : TSGUInt16;
+	Host, URI : TSGString;
+begin
+SGDecomposeURL(URL, Host, URI, Port);
+SGHint(['SGConsoleClient("',URL,'"): Host="',Host,'", URI="',URI,'", Port="',Port,'"']);
+Connection.Address := Host + URI;
+Connection.Port := Port;
+end;
+
+var
+	RK : TSGChar = #0;
+begin
+SGPrintEngineVersion();
+Connection := TSGUDPConnection.Create();
+Connection.ConnectionMode := SGClientMode;
+SetURL();
+Connection.NestedReceiveProcedure := @OnReceive;
+Connection.Start();
+SGHint(['SGConsoleClient("',URL,'"): Ready=', Connection.Ready]);
+while Connection.Ready do
+	begin
+	if KeyPressed then
+		begin
+		RK := ReadKey;
+		Write(RK);
+		Connection.SendMemoryStream(SGStringToStream(RK));
+		end;
+	Connection.CallAction();
+	Sleep(5);
+	end;
+Connection.Destroy();
+end;
+
+initialization
+begin
+
+end;
+
+finalization
+begin
+
 end;
 
 end.

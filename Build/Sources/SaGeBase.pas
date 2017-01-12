@@ -217,6 +217,16 @@ var
 const
 	SGLogDirectory = {$IFDEF ANDROID}'/sdcard/.SaGe'{$ELSE}SGDataDirectory{$ENDIF};
 type
+	TSGViewErrorCase = (
+		SGPrintError,
+		SGLogError);
+	TSGViewErrorType = set of TSGViewErrorCase;
+const
+	SGViewErrorFull  : TSGViewErrorType = [SGPrintError, SGLogError];
+	SGViewErrorPrint : TSGViewErrorType = [SGPrintError];
+	SGViewErrorLog   : TSGViewErrorType = [SGLogError];
+	SGViewErrorNULL  : TSGViewErrorType = [];
+type
 	TSGMaxEnum = SaGeBased.TSGMaxEnum;
 	//Типы C++
 	Float  = type Single;
@@ -721,17 +731,41 @@ function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}in
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-procedure SGHint(const S : TSGString);
+procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGPrintStackTrace();
 procedure SGPrintExceptionStackTrace(const e : Exception);
 procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
 procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');
+procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 implementation
 
 uses
 	StrMan;
+
+function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := TMemoryStream.Create();
+SGWriteStringToStream(Str, Result, False);
+end;
+
+procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	Write(SGReadLnStringFromStream(Stream));
+end;
+
+procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	WriteLn(SGReadLnStringFromStream(Stream));
+end;
 
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');
 var
@@ -783,10 +817,17 @@ while bp<>nil do
 	end;
 end;
 
-procedure SGHint(const S : TSGString);
+procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 begin
-SGLog.Source(S);
-WriteLn(S);
+SGHint(SGGetStringFromConstArray(MessagePtrs), ViewCase);
+end;
+
+procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+begin
+if SGLogError in ViewCase then
+	SGLog.Source(MessageStr);
+if SGPrintError in ViewCase then
+	WriteLn(MessageStr);
 end;
 
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}

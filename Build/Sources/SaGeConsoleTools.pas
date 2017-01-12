@@ -128,14 +128,18 @@ function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleC
 function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGParseStringToConsoleCallerParams(const VParams : TSGString) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
+procedure SGConsoleRunConsole(const VParams : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil;  ContextSettings : TSGContextSettings = nil);overload;
 procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 var
 	GeneralConsoleCaller : TSGConsoleCaller = nil;
 	OtherEnginesConsoleProgramsConsoleCaller : TSGConsoleCaller = nil;
+	HttpConsoleCaller : TSGConsoleCaller = nil;
+	NetConsoleCaller :  TSGConsoleCaller = nil;
 
 implementation
 
@@ -155,6 +159,66 @@ uses
 		,SaGeAudioRenderOpenAL
 		{$ENDIF}
 	;
+
+procedure SGConsoleRunConsole(const VParams : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Params : TSGConcoleCallerParams = nil;
+begin
+Params := SGParseStringToConsoleCallerParams(VParams);
+SGConcoleCaller(Params);
+SetLength(Params, 0);
+end;
+
+function SGParseStringToConsoleCallerParams(const VParams : TSGString) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	FunctionResult : TSGConcoleCallerParams absolute Result;
+
+function LastParamIsEmpty() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := False;
+if FunctionResult <> nil then
+	Result := FunctionResult[High(FunctionResult)] = '';
+end;
+
+procedure AddParam();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if LastParamIsEmpty() then
+	Exit;
+SetLength(Result, SGCountConsoleParams(Result) + 1);
+Result[High(Result)] := '';
+end;
+
+procedure AddSimbol(const Simbol : TSGChar);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Result = nil then
+	AddParam();
+Result[High(Result)] += Simbol;
+end;
+
+var
+	i : TSGUInt32;
+	Quotes : TSGInt32 = 0;
+begin
+Result := nil;
+Quotes := 0;
+i := 1;
+while i <= Length(VParams) do
+	begin
+	if VParams[i] = '"' then
+		if Quotes > 0 then
+			Quotes -= 1
+		else
+			Quotes += 1
+	else if VParams[i] = ' ' then
+		if Quotes > 0 then
+			AddSimbol(VParams[i])
+		else
+			AddParam()
+	else
+		AddSimbol(VParams[i]);
+	i += 1;
+	end;
+end;
 
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
 
@@ -353,6 +417,130 @@ else
 				end;
 			end;
 	SaGeHash.SGConsoleHash(VParams[High(VParams)], HashTypes);
+	end;
+end;
+
+procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
+var
+	URL : TSGString = '';
+begin
+URL := SGStringFromStringList(VParams, '');
+if URL <> '' then
+	SGConsoleClient(URL)
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'" @URL ".');
+	end;
+end;
+
+procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
+begin
+if (SGCountConsoleParams(VParams) = 1) and (SGVal(VParams[0]) <> 0) then
+	begin
+	SGConsoleServer(SGVal(VParams[0]));
+	end
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'" @port ".');
+	end;
+end;
+
+procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
+var
+	URL : TSGString = '';
+	FileName : TSGString = '';
+	UseLibrary : TSGString = 'lNet';
+	TimeOut : TSGLongWord = SGDefaultHTTPTimeOut;
+	Errors : TSGBool = False;
+
+function Parse() : TSGBoolean;
+var
+	i : TSGLongWord;
+	ParamsCount : TSGLongWord;
+	Param : TSGString;
+	Comand : TSGString;
+begin
+i := 0;
+ParamsCount := SGCountConsoleParams(VParams);
+Result := True;
+while i < ParamsCount do
+	begin
+	Param := VParams[i];
+	Comand := '';
+	if StringTrimLeft(Param, '-') <> Param then
+		Comand := SGUpCaseString(StringTrimLeft(Param, '-'));
+	if (Comand = '') and (i = ParamsCount - 1) then
+		URL := Param
+	else if (Comand <> '') and (i < ParamsCount - 2) then
+		begin
+		if (Comand = 'O') or (Comand = 'OUT') or (Comand = 'OUTPUT') then
+			FileName := VParams[i + 1]
+		else if (Comand = 'T') or (Comand = 'TIME') or (Comand = 'TIMEOUT') then
+			TimeOut := SGVal(VParams[i + 1])
+		else if (Comand = 'L') or (Comand = 'LIB') or (Comand = 'LIBRARY') then
+			UseLibrary := VParams[i + 1]
+		else
+			begin
+			Result := False;
+			break;
+			end;
+		i += 1;
+		end
+	else if (Comand <> '') and (i < ParamsCount - 1) then
+		begin
+		if (Comand = 'E') or (Comand = 'ERRORS') then
+				Errors := True
+		else
+			begin
+			Result := False;
+			break;
+			end;
+		end
+	else
+		begin
+		Result := False;
+		break;
+		end;
+	i += 1;
+	end;
+end;
+
+function HTTPGet() : TSGBool;
+var
+	Stream : TMemoryStream = nil;
+	ViewCase : TSGViewErrorType = [];
+begin
+if Errors then
+	ViewCase := SGViewErrorFull;
+if SGPrintError in ViewCase then
+	SGPrintEngineVersion();
+Stream := SGHTTPGetMemoryStream(URL, TimeOut, ViewCase);
+Result := Stream <> nil;
+if Result then
+	begin
+	if FileName <> '' then
+		Stream.SaveToFile(FileName)
+	else
+		SGPrintStream(Stream);
+	Stream.Destroy();
+	end;
+end;
+
+begin
+if Parse() and (URL <> '') then
+	begin
+	if not HTTPGet() then
+		begin
+		SGPrintEngineVersion();
+		SGHint('HTTP:GET - Error!', SGViewErrorFull);
+		end;
+	end
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGErrorString,'"[ --e] [ --o @filename] [ --l @library] [ --t @timeout] @URL".');
 	end;
 end;
 
@@ -1394,7 +1582,21 @@ else if (Comand = '') and (SGCountConsoleParams(FParams) = 0) then
 					end;
 				end;
 			end;
+		if iii <> 1 then
+			begin
+			SGPrintEngineVersion();
+			TextColor(12);
+			Write('Console caller : error : You must enter the comand!');
+			TextColor(7);
+			end;
 		end;
+	end
+else
+	begin
+	SGPrintEngineVersion();
+	TextColor(12);
+	Write('Console caller : Unknown error!');
+	TextColor(7);
 	end;
 end;
 
@@ -1532,6 +1734,7 @@ else if AllNested() then
 	Result := ExecuteNested()
 else
 	begin
+	SGPrintEngineVersion();
 	TextColor(12);
 	Write('Console caller : error : unknown configuration!');
 	TextColor(7);
@@ -2440,10 +2643,79 @@ While (dos.DosError<>18) do
 DOS.findclose(sr);
 end;
 
+//============================
+(*============Http===========*)
+//============================
+
+procedure DestroyHttpConsoleCaller();
+begin
+if HttpConsoleCaller <> nil then
+	begin
+	HttpConsoleCaller.Destroy();
+	HttpConsoleCaller := nil;
+	end;
+end;
+
+procedure RunHttpConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+HttpConsoleCaller.Params := VParams;
+HttpConsoleCaller.Execute();
+end;
+
+procedure InitHttpConsoleCaller();
+begin
+DestroyHttpConsoleCaller();
+HttpConsoleCaller := TSGConsoleCaller.Create(nil);
+HttpConsoleCaller.Category('HTTP tools');
+HttpConsoleCaller.AddComand(@SGConsoleHTTPGet,  ['get'], 'GET Method');
+end;
+
+//============================
+(*=============Net===========*)
+//============================
+
+procedure DestroyNetConsoleCaller();
+begin
+if NetConsoleCaller <> nil then
+	begin
+	NetConsoleCaller.Destroy();
+	NetConsoleCaller := nil;
+	end;
+end;
+
+procedure RunNetConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+NetConsoleCaller.Params := VParams;
+NetConsoleCaller.Execute();
+end;
+
+procedure InitNetConsoleCaller();
+begin
+DestroyNetConsoleCaller();
+NetConsoleCaller := TSGConsoleCaller.Create(nil);
+NetConsoleCaller.Category('Internet tools');
+NetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'Http tools');
+NetConsoleCaller.AddComand(@SGConsoleNetServer, ['Server'], 'Run server');
+NetConsoleCaller.AddComand(@SGConsoleNetClient, ['Connect'], 'Connect to server');
+end;
+
+//============================
+(*OtherEnginesConsolePrograms*)
+//============================
+
 procedure RunOtherEnginesConsoleProgramsConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 OtherEnginesConsoleProgramsConsoleCaller.Params := VParams;
 OtherEnginesConsoleProgramsConsoleCaller.Execute();
+end;
+
+procedure DestroyOtherEnginesConsoleProgramsConsoleCaller();
+begin
+if OtherEnginesConsoleProgramsConsoleCaller <> nil then
+	begin
+	OtherEnginesConsoleProgramsConsoleCaller.Destroy();
+	OtherEnginesConsoleProgramsConsoleCaller := nil;
+	end;
 end;
 
 procedure InitOtherEnginesConsoleProgramsConsoleCaller();
@@ -2457,8 +2729,22 @@ OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleCalculateExpression
 OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleCalculateBoolTable, ['cbt'], 'Calculate Boolean Table');
 end;
 
+//============================
+(*===========General=========*)
+//============================
+
+procedure DestroyGeneralConsoleCaller();
+begin
+if GeneralConsoleCaller <> nil then
+	begin
+	GeneralConsoleCaller.Destroy();
+	GeneralConsoleCaller := nil;
+	end;
+end;
+
 procedure InitGeneralConsoleCaller();
 begin
+DestroyGeneralConsoleCaller();
 GeneralConsoleCaller := TSGConsoleCaller.Create(nil);
 GeneralConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console caller');
 GeneralConsoleCaller.Category('Applications');
@@ -2471,6 +2757,7 @@ GeneralConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['C
 GeneralConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert pascal Header to Dynamic utility');
 GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
 GeneralConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
+GeneralConsoleCaller.AddComand(@RunNetConsoleCaller, ['net'], 'Internet tools');
 GeneralConsoleCaller.AddComand(@RunOtherEnginesConsoleProgramsConsoleCaller, ['oecp'], 'Other Engine''s Console Programs');
 GeneralConsoleCaller.Category('Build tools');
 GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
@@ -2489,28 +2776,32 @@ GeneralConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in
 GeneralConsoleCaller.AddComand(@SGConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
 end;
 
-procedure DestroyOtherEnginesConsoleProgramsConsoleCaller();
-begin
-OtherEnginesConsoleProgramsConsoleCaller.Destroy();
-OtherEnginesConsoleProgramsConsoleCaller := nil;
-end;
+//============================
 
-procedure DestroyGeneralConsoleCaller();
+procedure InitConsoleCallers();
 begin
-GeneralConsoleCaller.Destroy();
-GeneralConsoleCaller := nil;
-end;
-
-initialization
-begin
+InitHttpConsoleCaller();
+InitNetConsoleCaller();
 InitGeneralConsoleCaller();
 InitOtherEnginesConsoleProgramsConsoleCaller();
 end;
 
-finalization
+procedure DestroyConsoleCallers();
 begin
+DestroyHttpConsoleCaller();
+DestroyNetConsoleCaller();
 DestroyOtherEnginesConsoleProgramsConsoleCaller();
 DestroyGeneralConsoleCaller();
+end;
+
+initialization
+begin
+InitConsoleCallers();
+end;
+
+finalization
+begin
+DestroyConsoleCallers();
 end;
 
 end.
