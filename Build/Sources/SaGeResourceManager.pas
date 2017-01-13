@@ -162,7 +162,9 @@ operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF 
 implementation
 
 uses
-	SaGeVersion;
+	SaGeVersion
+	{$INCLUDE SaGeFileRegistrationResources.inc}
+	;
 
 procedure TSGConvertedFileInfo.Print();
 

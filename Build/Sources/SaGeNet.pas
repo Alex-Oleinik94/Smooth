@@ -15,6 +15,7 @@ uses
 	,SaGeBased
 	,SaGeCommon
 	,SaGeVersion
+	,SaGeClasses
 	
 	,lCommon
 	,lhttp
@@ -28,21 +29,21 @@ const
 	SGDefaultHTTPTimeOut = SGDefaultTimeOut;
 
 type
-	TSGSocket = TLSocket;
-	TSGUDPConnectionClass=class(TLUDP)
-		function SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
+	TSGUDPConnectionClass = class(TLUDP)
+		function SendMemoryStream(const AStream:TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		end;
 	
-	TSGReceiveProcedure       = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
-	TSGNestedReceiveProcedure = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket) is nested;
+	TSGReceiveProcedure       = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TLSocket);
+	TSGNestedReceiveProcedure = procedure(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TLSocket) is nested;
 	
 	TSGConnectionMode = (SGServerMode,SGClientMode);
 	
-	TSGUDPConnection=class
+	TSGUDPConnection = class(TSGNamed)
 			public
-		constructor Create;
-		destructor Destroy;override;
-			public
+		constructor Create();override;
+		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
+			protected
 		FViewErrorCase : TSGViewErrorType;
 		FConnection: TSGUDPConnectionClass;
 		FReceiveProcedure:TSGReceiveProcedure;
@@ -54,12 +55,13 @@ type
 		FConnectionResult:Boolean;
 		procedure OnError(const msg: string; aSocket: TLSocket);
 		procedure OnReceive(aSocket: TLSocket);
+			protected
+		function Listen() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function Connect() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 			public
-		procedure Listen;inline;
-		procedure Connect;inline;
-		procedure Start;inline;
-		procedure CallAction;inline;
-		function SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
+		function Start() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure CallAction();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function SendMemoryStream(const AStream:TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 			public
 		property ReceiveProcedure:TSGReceiveProcedure read FReceiveProcedure write FReceiveProcedure;
 		property NestedReceiveProcedure:TSGNestedReceiveProcedure read FNestedReceiveProcedure write FNestedReceiveProcedure;
@@ -95,8 +97,10 @@ function SGCheckURL(const URL : TSGString; const Protocol : TSGString = ''; cons
 function SGGetURLProtocol(const URL : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGSetURLProtocol(const URL, Protocol : TSGString) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDecomposeURL(const URL : TSGString; out Host, URI : TSGString; out Port : TSGUInt16) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConsoleServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConsoleClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure SGConsoleUDPConnection(const IsServer : TSGBool; const URL : TSGString; const ServerPort : TSGUInt16 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleUDPServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGConsoleUDPClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -293,40 +297,48 @@ if Result <> nil then
 	Result.Position := 0;
 end;
 
-function TSGUDPConnection.SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
+class function TSGUDPConnection.ClassName() : TSGString;
 begin
-Result:=FConnection.SendMemoryStream(AStream);
+Result := 'TSGUDPConnection';
 end;
 
-procedure TSGUDPConnection.Listen;inline;
+function TSGUDPConnection.SendMemoryStream(const AStream:TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-FConnectionResult:=FConnection.Listen(FPort);
+Result := FConnection.SendMemoryStream(AStream);
 end;
 
-procedure TSGUDPConnection.CallAction;inline;
+function TSGUDPConnection.Listen() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-FConnection.CallAction;
+Result := FConnection.Listen(FPort);
+FConnectionResult := Result;
 end;
 
-procedure TSGUDPConnection.Start;inline;
+procedure TSGUDPConnection.CallAction();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+FConnection.CallAction();
+end;
+
+function TSGUDPConnection.Start() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 case FConnectionMode of
-SGClientMode:Connect;
-SGServerMode:Listen;
+SGClientMode : Result := Connect();
+SGServerMode : Result := Listen();
 end;
+FConnectionResult := Result;
 end;
 
-procedure TSGUDPConnection.Connect;inline;
+function TSGUDPConnection.Connect() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-FConnectionResult:=FConnection.Connect(FAddress,FPort);
+Result := FConnection.Connect(FAddress,FPort);
+FConnectionResult := Result;
 end;
 
-function TSGUDPConnectionClass.SendMemoryStream(const AStream:TMemoryStream):Integer;inline;
+function TSGUDPConnectionClass.SendMemoryStream(const AStream:TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=Send(AStream.Memory^,AStream.Size);
+Result := Send(AStream.Memory^, AStream.Size);
 end;
 
-constructor TSGUDPConnection.Create;
+constructor TSGUDPConnection.Create();
 begin
 inherited;
 FNestedReceiveProcedure := nil;
@@ -343,11 +355,14 @@ FConnectionMode:=SGClientMode;
 FConnectionResult:=False;
 end;
 
-destructor TSGUDPConnection.Destroy;
+destructor TSGUDPConnection.Destroy();
 begin
 if FConnection <> nil then
 	begin
-	FConnection.Destroy;
+	try
+	FConnection.Free();
+	except on e:Exception do
+	end;
 	FConnection:=nil;
 	end;
 inherited;
@@ -355,7 +370,8 @@ end;
 
 procedure TSGUDPConnection.OnError(const msg: string; aSocket: TLSocket);
 begin
-SGHint('TSGUDPConnection: Error: "' + Msg + '; Socket: '+SGAddrStr(aSocket) +'.', FViewErrorCase);
+SGHint('TSGUDPConnection: Error: "' + Msg + '"; Socket: '+SGAddrStr(aSocket) +'.', FViewErrorCase);
+FConnectionResult := False;
 end;
 
 procedure TSGUDPConnection.OnReceive(aSocket: TLSocket);
@@ -413,69 +429,69 @@ else
 	end;
 end;
 
-procedure SGConsoleServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Connection : TSGUDPConnection = nil;
-
-procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
+procedure SGConsoleUDPClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SGWriteStream(AStream);
+SGConsoleUDPConnection(False, URL);
 end;
 
-var
-	RK : TSGChar = #0;
+procedure SGConsoleUDPServer(const Port : TSGUInt16);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SGPrintEngineVersion();
-Connection := TSGUDPConnection.Create();
-Connection.ConnectionMode := SGServerMode;
-Connection.Port := Port;
-Connection.NestedReceiveProcedure := @OnReceive;
-Connection.Start();
-SGHint(['SGConsoleServer(',Port,'): Ready=', Connection.Ready]);
-while Connection.Ready do
-	begin
-	if KeyPressed then
-		begin
-		RK := ReadKey;
-		Write(RK);
-		Connection.SendMemoryStream(SGStringToStream(RK));
-		end;
-	Connection.CallAction();
-	Sleep(5);
-	end;
-Connection.Destroy();
+SGConsoleUDPConnection(True, '', Port);
 end;
 
-procedure SGConsoleClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Connection : TSGUDPConnection = nil;
+procedure SGConsoleUDPConnection(const IsServer : TSGBool; const URL : TSGString; const ServerPort : TSGUInt16 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TSGSocket);
+function ConnectionType() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SGWriteStream(AStream);
+if IsServer then
+	Result := 'Server'
+else
+	Result := 'Client';
 end;
 
-procedure SetURL();
+function ConnectionParam() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if IsServer then
+	Result := SGStr(ServerPort)
+else
+	Result := URL;
+end;
+
+procedure SetConnectionURL(const Connection : TSGUDPConnection; const URL : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Port : TSGUInt16;
 	Host, URI : TSGString;
 begin
 SGDecomposeURL(URL, Host, URI, Port);
-SGHint(['SGConsoleClient("',URL,'"): Host="',Host,'", URI="',URI,'", Port="',Port,'"']);
+SGHint(['UDP Connection<', ConnectionType, '>(', ConnectionParam, '): Host="',Host,'", URI="',URI,'", Port="',Port,'"']);
 Connection.Address := Host + URI;
 Connection.Port := Port;
 end;
 
+procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TLSocket);
+begin
+SGWriteStream(AStream);
+end;
+
 var
+	Connection : TSGUDPConnection = nil;
 	RK : TSGChar = #0;
 begin
 SGPrintEngineVersion();
 Connection := TSGUDPConnection.Create();
-Connection.ConnectionMode := SGClientMode;
-SetURL();
+if IsServer then
+	begin
+	Connection.ConnectionMode := SGServerMode;
+	Connection.Port := ServerPort;
+	end
+else
+	begin
+	Connection.ConnectionMode := SGClientMode;
+	SetConnectionURL(Connection, URL);
+	end;
 Connection.NestedReceiveProcedure := @OnReceive;
 Connection.Start();
-SGHint(['SGConsoleClient("',URL,'"): Ready=', Connection.Ready]);
+SGHint(['UDP Connection<', ConnectionType, '>(', ConnectionParam, '): Ready=', Connection.Ready]);
 while Connection.Ready do
 	begin
 	if KeyPressed then

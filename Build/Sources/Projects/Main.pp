@@ -20,12 +20,11 @@ uses
 	,SaGeBased
 	,SaGeContext
 	,SysUtils
+	,SaGeResourceManager
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
 
-	,SaGeResourceManager
-	{$INCLUDE SaGeFileRegistrationResources.inc}
 
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary

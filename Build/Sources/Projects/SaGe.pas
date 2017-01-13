@@ -6,9 +6,7 @@ uses
 	,SaGeFractals
 	,SaGeImages
 	,SaGeConsoleTools
-	
 	,SaGeResourceManager
-	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
 
 function TSGImage_Create:TSGImage;cdecl;

@@ -139,6 +139,7 @@ var
 	GeneralConsoleCaller : TSGConsoleCaller = nil;
 	OtherEnginesConsoleProgramsConsoleCaller : TSGConsoleCaller = nil;
 	HttpConsoleCaller : TSGConsoleCaller = nil;
+	UdpConsoleCaller : TSGConsoleCaller = nil;
 	NetConsoleCaller :  TSGConsoleCaller = nil;
 
 implementation
@@ -426,7 +427,7 @@ var
 begin
 URL := SGStringFromStringList(VParams, '');
 if URL <> '' then
-	SGConsoleClient(URL)
+	SGConsoleUDPClient(URL)
 else
 	begin
 	SGPrintEngineVersion();
@@ -438,7 +439,7 @@ procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (SGCountConsoleParams(VParams) = 1) and (SGVal(VParams[0]) <> 0) then
 	begin
-	SGConsoleServer(SGVal(VParams[0]));
+	SGConsoleUDPServer(SGVal(VParams[0]));
 	end
 else
 	begin
@@ -2644,6 +2645,34 @@ DOS.findclose(sr);
 end;
 
 //============================
+(*============Udp===========*)
+//============================
+
+procedure DestroyUdpConsoleCaller();
+begin
+if UdpConsoleCaller <> nil then
+	begin
+	UdpConsoleCaller.Destroy();
+	UdpConsoleCaller := nil;
+	end;
+end;
+
+procedure RunUdpConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+UdpConsoleCaller.Params := VParams;
+UdpConsoleCaller.Execute();
+end;
+
+procedure InitUdpConsoleCaller();
+begin
+DestroyUdpConsoleCaller();
+UdpConsoleCaller := TSGConsoleCaller.Create(nil);
+UdpConsoleCaller.Category('UDP tools');
+UdpConsoleCaller.AddComand(@SGConsoleNetServer, ['Server'], 'Run server');
+UdpConsoleCaller.AddComand(@SGConsoleNetClient, ['Connect'], 'Connect to server');
+end;
+
+//============================
 (*============Http===========*)
 //============================
 
@@ -2694,9 +2723,8 @@ begin
 DestroyNetConsoleCaller();
 NetConsoleCaller := TSGConsoleCaller.Create(nil);
 NetConsoleCaller.Category('Internet tools');
-NetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'Http tools');
-NetConsoleCaller.AddComand(@SGConsoleNetServer, ['Server'], 'Run server');
-NetConsoleCaller.AddComand(@SGConsoleNetClient, ['Connect'], 'Connect to server');
+NetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
+NetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
 end;
 
 //============================
@@ -2780,6 +2808,7 @@ end;
 
 procedure InitConsoleCallers();
 begin
+InitUdpConsoleCaller();
 InitHttpConsoleCaller();
 InitNetConsoleCaller();
 InitGeneralConsoleCaller();
@@ -2788,6 +2817,7 @@ end;
 
 procedure DestroyConsoleCallers();
 begin
+DestroyUdpConsoleCaller();
 DestroyHttpConsoleCaller();
 DestroyNetConsoleCaller();
 DestroyOtherEnginesConsoleProgramsConsoleCaller();

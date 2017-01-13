@@ -5,22 +5,24 @@ unit SaGeMesh;
 interface
 
 uses
-      Classes
+      SaGeBase
     , SaGeCommon
-    , SaGeBase
     , SaGeBased
     , SaGeImages
     , SaGeRender
     , SaGeRenderConstants
+    , SaGeCommonClasses
+    
+    , Classes
     , Crt
-    , SaGeCommonClasses;
+    ;
 const
 	SGMeshVersion : TSGQuadWord = 169;
 type
-	// Это тип типа хранения цветов в нашей модели
+	// Это тип типа хранения цветов в модели
 	TSGMeshColorType = (SGMeshColorType3f,SGMeshColorType4f,SGMeshColorType3b,SGMeshColorType4b);
 	TSGMeshIndexFormat = (SGMeshIndexFormat1b,SGMeshIndexFormat2b,SGMeshIndexFormat4b);
-	// Это тип типа хранения вершин в нашей модели
+	// Это тип типа хранения вершин в модели
 	TSGMeshVertexType = TSGVertexFormat;
 	TSGMeshBumpType = (SGMeshBumpTypeNone,SGMeshBumpTypeCopyTexture2f,SGMeshBumpTypeCubeMap3f,SGMeshBumpType2f);
 const
@@ -168,7 +170,7 @@ type
 		end;
 	
     { TSG3dObject }
-    // Наша моделька..
+    // Моделька..
 type
     TSG3DObject = class(TSGDrawable)
     public
@@ -231,26 +233,26 @@ type
 		property VertexType                        : TSGMeshVertexType read FVertexType          write SetVertexType;
 		property ObjectPoligonesType               : LongWord          read FObjectPoligonesType write FObjectPoligonesType;
     protected
-        // А это у нас массив индексов
+        // Это массив индексов
 		ArFaces : packed array of 
 			packed record 
 				FIndexFormat      : TSGMeshIndexFormat;
 				FPoligonesType    : TSGLongWord;
 				FNOfFaces         : TSGQuadWord;
-				// Указательл на первый элемент области памяти, где находятся наши индексы
+				// Указательл на первый элемент области памяти, где находятся индексы
 				FArray            : TSGPointer;
 				// Идентификатор материала
 				FMaterialID       : TSGInt64;
 				end;
 		
-		// А это у нас массив самих вершин. Его пришлось сделать таким. 
-		// Не смотри что он такой ебанутый (TSGPointer). 
+		// Это массив самих вершин. Его пришлось сделать таким. 
+		// Не смотрите что он такой ебанутый (TSGPointer). 
 		// Он в себе содерщит пиздец сколько всего, но обрабатывается по другому...
 		//! B каком порядке записывается в памяти информация о вершине
 		(* Vertex = [Vertexes, Colors, Normals, TexVertexes] *)
 		//! Что предстваляет из себя этот массив
 		(* Array of Vertex *)
-		ArVertex:TSGPointer;
+		ArVertex : TSGPointer;
 	public
 		// Возвращает указатель на первый элемент массива вершин
 		function GetArVertexes():TSGPointer;inline;
@@ -373,7 +375,7 @@ type
     protected
 		// Вклбючено ли VBO
 		// VBO - Vertex Buffer Object
-		// Vertex Buffer Object - это такая технология, при которой можно рисовать, 
+		// Vertex Buffer Object - это технология, при которой можно отображать обьекты на экране, 
 		//    держа все массивы в памяти видеокарте, а не в оперативной памяти
 		// Если на вашем устройстве нету видеокарты (типо нетбук), то массивы будут копироваться в оперативку
 		FEnableVBO      : TSGBoolean;
@@ -396,7 +398,7 @@ type
 		property EnableCullFaceBack  : TSGBoolean read FEnableCullFaceBack  write FEnableCullFaceBack;
     public
         procedure Paint(); override;
-        // Дело в том, что если включен Cull Face, то Draw нужно делать 2 раза.
+        // Когда включен Cull Face, то Draw нужно делать 2 раза.
         // Так что вод тут делается Draw, а в Draw просто проверяется, включен или не  Cull Face, 
         //   и в зависимости от этого он вызывает эту процедуду 1 или 2 раза
         procedure BasicDraw(); inline;
@@ -522,11 +524,16 @@ type
     end;
     PSGCustomModel = ^TSGCustomModel;
     
-{$DEFINE SGREADINTERFACE}      {$INCLUDE SaGeMesh3ds.inc} {$UNDEF SGREADINTERFACE}
+{$DEFINE SGREADINTERFACE}
+{$INCLUDE SaGeMesh3ds.inc}
+{$UNDEF SGREADINTERFACE}
 
 implementation
 
-{$DEFINE SGREADIMPLEMENTATION} {$INCLUDE SaGeMesh3ds.inc} {$UNDEF SGREADIMPLEMENTATION}
+{$DEFINE SGREADIMPLEMENTATION}
+{$INCLUDE SaGeMesh3ds.inc}
+{$UNDEF SGREADIMPLEMENTATION}
+
 {$INCLUDE SaGeMeshObj.inc}
 
 procedure TSG3DObject.CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
