@@ -41,6 +41,7 @@
 	{$R-}
 	{$MACRO ON}
 	{$modeswitch nestedprocvars}
+	{$modeswitch typehelpers}
 	{$ENDIF}
 
 {$IFNDEF MOBILE}

@@ -83,6 +83,7 @@ type
 		procedure Minimize();virtual;
 		procedure Maximize();virtual;
 		procedure PrintBounds();
+		class function UserProfilePath() : TSGString; virtual;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);virtual;
 		function GetCursorPosition():TSGPoint2int32;virtual;abstract;
@@ -301,6 +302,11 @@ if Sets then
 	end;
 end;
 
+class function TSGContext.UserProfilePath() : TSGString;
+begin
+Result := '.';
+end;
+
 procedure TSGContext.CreateAudio();
 begin
 if FAudioRenderClass = nil then
@@ -390,7 +396,8 @@ procedure SGPrintContextSettings(const VSettings : TSGContextSettings);
 function WordName(const S : TSGString):TSGString;
 begin
 Result := SGDownCaseString(S);
-Result[1] := UpCase(Result[1]);
+if Length(Result) > 0 then
+	Result[1] := UpCase(Result[1]);
 end;
 
 var
@@ -398,6 +405,7 @@ var
 	First : TSGBoolean = True;
 	S : TSGString = '';
 	StandartOptions : TSGStringList = nil;
+	i : TSGUInt32;
 begin
 if VSettings = nil then
 	exit;
@@ -429,6 +437,18 @@ for O in VSettings do
 	else if O.FName = 'TITLE' then
 		begin
 		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
+		end
+	else if (O.FName = 'FILES TO OPEN') then
+		begin
+		S += '=[';
+		if Length(TSGStringList(O.FOption)) > 0 then
+			for i := 0 to High(TSGStringList(O.FOption)) do
+				begin
+				if i <> 0 then
+					S += ', ';
+				S += '`' + TSGStringList(O.FOption)[i] + '`';
+				end;
+		S += ']';
 		end
 	else if (O.FName = 'MIN') or (O.FName = 'MAX') or (O.FName = 'FULLSCREEN') then
 		begin
@@ -649,7 +669,7 @@ if MaxExists or MinExists then
 		begin
 		PaintableSettings -= 'MAX';
 		PaintableSettings -= 'MIN';
-		SGHint('Run : warning : maximization and minimization are not available at the same time');
+		SGHint('Run : warning : maximization and minimization are not available at the same time!');
 		end;
 	end;
 end;
@@ -665,15 +685,14 @@ end;
 begin
 SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)');
 SGPrintContextSettings(VSettings);
+Settings := VSettings;
 if not VRenderClass.Suppored then
 	begin
 	SGHint(VRenderClass.ClassName() + ' not suppored!');
-	Settings := VSettings;
 	SetLength(Settings, 0);
 	exit;
 	end;
 
-Settings := VSettings;
 Context := VContextClass.Create();
 IContext := Context;
 

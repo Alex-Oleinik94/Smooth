@@ -85,7 +85,7 @@ type
 				end;
 		end;
 var
-	SGResourceFiles:TSGResourceFiles = nil;
+	SGResourceFiles : TSGResourceFiles = nil;
 
 const
 	SGConvertFileToPascalUnitDefaultInc = True;
@@ -156,6 +156,10 @@ procedure SGClearFileRegistrationResources(const FileRegistrationResources : TSG
 procedure SGBuildFiles(const DataFile, TempUnitDir, CacheUnitDir, FileRegistrationResources : TSGString; const Name : TSGString = '');{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteHexStringToStream(const S : TSGString; const Stream : TStream);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+procedure SGDestroyResources();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGInitResources();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGAddResourceFile(const FileWay:TSGString;const Proc : TSGPointer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 operator + (const A : TSGConvertedFilesInfo; const B : TSGConvertedFileInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -165,6 +169,12 @@ uses
 	SaGeVersion
 	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
+
+procedure SGAddResourceFile(const FileWay:TSGString;const Proc : TSGPointer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SGInitResources();
+SGResourceFiles.AddFile(FileWay, Proc);
+end;
 
 procedure TSGConvertedFileInfo.Print();
 
@@ -729,10 +739,11 @@ OutString('interface'+SGWinEoln);
 if IsInc then
 	OutString('implementation'+SGWinEoln);
 OutString('uses'+SGWinEoln);
+OutString('	 Classes'+SGWinEoln);
+OutString('	,SaGeBased'+SGWinEoln);
 if IsInc then
-	OutString('	SaGeResourceManager,'+SGWinEoln);
-OutString('	SaGeBased,'+SGWinEoln);
-OutString('	Classes;'+SGWinEoln);
+	OutString('	,SaGeResourceManager'+SGWinEoln);
+OutString('	;'+SGWinEoln);
 if not IsInc then
 	begin
 	OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SGWinEoln);
@@ -754,7 +765,7 @@ if IsInc then
 	begin
 	OutString('initialization'+SGWinEoln);
 	OutString('begin'+SGWinEoln);
-	OutString('SGResourceFiles.AddFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SGWinEoln);
+	OutString('SGAddResourceFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SGWinEoln);
 	OutString('end;'+SGWinEoln);
 	end;
 OutString('end.'+SGWinEoln);
@@ -979,7 +990,7 @@ end;
 
 procedure TSGResourceFiles.AddFile(const FileWay:TSGString;const Proc : TSGPointer);
 begin
-if FArFiles=nil then
+if FArFiles = nil then
 	SetLength(FArFiles,1)
 else
 	SetLength(FArFiles,Length(FArFiles)+1);
@@ -1204,18 +1215,36 @@ FArManipulators :=nil;
 FQuantityManipulators:=0;
 end;
 
-(*=======variable realization=====*)
+procedure SGInitResources(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if SGResourceManager = nil then
+	SGResourceManager := TSGResourceManager.Create();
+if SGResourceFiles = nil then
+	SGResourceFiles := TSGResourceFiles.Create();
+end;
+
+procedure SGDestroyResources(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if SGResourceManager <> nil then
+	begin
+	SGResourceManager.Destroy();
+	SGResourceManager := nil;
+	end;
+if SGResourceFiles <> nil then
+	begin
+	SGResourceFiles.Destroy();
+	SGResourceFiles := nil;
+	end;
+end;
 
 initialization
 begin
-SGResourceManager := TSGResourceManager.Create();
-SGResourceFiles:=TSGResourceFiles.Create();
+SGInitResources();
 end;
 
 finalization
 begin
-SGResourceManager.Destroy();
-SGResourceFiles.Destroy();
+SGDestroyResources();
 end;
 
 end.

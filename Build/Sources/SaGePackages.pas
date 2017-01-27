@@ -57,7 +57,7 @@ var
 
 procedure SGRegisterPackage(const PackageInfo : TSGPackageInfo;const FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	MemStream:TMemoryStream = nil;
+	MemStream : TMemoryStream = nil;
 	StartSize : TSGUInt64;
 
 procedure WriteName(const PackageName : TSGString);

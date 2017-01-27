@@ -5,26 +5,18 @@ unit SaGeImages;
 interface
 
 uses
-	crt
-	,dos
-	{$IFDEF MSWINDOWS}
-		,windows
-		,MMSystem
-		{$ENDIF}
+		// System
+	 Crt
+	,Dos
 	,SysUtils
 	,Classes
+		// Engine
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
 	,SaGeCommon
 	,SaGeResourceManager
 	,SaGeRenderConstants
-		// formats
-	,SaGeImagesBmp
-	,SaGeImagesJpeg
-	{$IFDEF WITHLIBPNG},SaGeImagesPng{$ENDIF}
-	,SaGeImagesTga
-	,SaGeImagesSgia
 	,SaGeCommonClasses
 	;
 type
@@ -32,10 +24,9 @@ type
 	TSGTextureBlock = class;
 
 	TSGIByte = type TSGExByte;
-	TSGITextureType = (SGITextureTypeTexture,SGITextureTypeBump);
+	TSGITextureType = (SGITextureTypeTexture, SGITextureTypeBump);
 
 	PSGImage  = ^ TSGImage;
-	PTSGImage = PSGImage;
 	// Класс изображения и текстуры
 	TSGImage = class(TSGDrawable)
 			public
@@ -127,9 +118,8 @@ type
 		procedure DrawImageFromTwoVertex2fWith2TexPoint(Vertex1,Vertex2: TSGVertex2f;const TexPoint1,TexPoint2:TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGExByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure RePlacVertex(var Vertex1,Vertex2: TSGVertex2f;const RePlaceY:TSGExByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
-	SGImage     = TSGImage;
-	ArTSGImage  = type packed array of TSGImage;
-	TArTSGImage = ArTSGImage;
+	
+	TSGImageList = packed array of TSGImage;
 
 type
 	TSGTextureBlock = class(TSGDrawable)
@@ -152,10 +142,21 @@ type
 		property Size : TSGLongWord read GetSize write SetSize;
 		end;
 
-procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
+procedure SGConvertToSGIA(const InFile, OutFile : TSGString);
 procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+		// Image formats
+	SaGeImagesBmp
+	,SaGeImagesJpeg
+	{$IFDEF WITHLIBPNG}
+		,SaGeImagesPng
+		{$ENDIF}
+	,SaGeImagesTga
+	,SaGeImagesSgia
+	;
 
 procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

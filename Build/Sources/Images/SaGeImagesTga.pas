@@ -5,11 +5,27 @@ unit SaGeImagesTga;
 interface
 
 uses
+		// System
 	 SysUtils
 	,Classes
+		// Engine
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase;
+
+type
+	TSGTGAHeader = packed record
+		FileType     : Byte;
+		ColorMapType : Byte;
+		ImageType    : Byte;
+		ColorMapSpec : Array[0..4] of Byte;
+		OrigX  : Array [0..1] of Byte;
+		OrigY  : Array [0..1] of Byte;
+		Width  : Array [0..1] of Byte;
+		Height : Array [0..1] of Byte;
+		BPP    : Byte;
+		ImageInfo : Byte;
+		end;
 
 // Загрузка формата TGA
 function LoadTGA(const Stream:TStream):TSGBitmap;
@@ -55,21 +71,10 @@ procedure TGACopySwapPixel(const Source, Destination: Pointer);
 	{$ENDIF}
 
 var
-	TGAHeader : packed record
-		FileType     : Byte;
-		ColorMapType : Byte;
-		ImageType    : Byte;
-		ColorMapSpec : Array[0..4] of Byte;
-		OrigX  : Array [0..1] of Byte;
-		OrigY  : Array [0..1] of Byte;
-		Width  : Array [0..1] of Byte;
-		Height : Array [0..1] of Byte;
-		BPP    : Byte;
-		ImageInfo : Byte;
-		end;
+	TGAHeader : TSGTGAHeader;
 	CompImage : TSGPointer;
 	ColorDepth    : Integer;
-	ImageSize     : Integer;
+	ImageSize     : TSGMaxEnum;
 	BufferIndex : Integer;
 	CurrentByte : Integer;
 	CurrentPixel : Integer;
@@ -80,7 +85,7 @@ var
 
 begin
 try
-	Result:=TSGBitmap.Create;
+	Result := TSGBitmap.Create();
 	Stream.ReadBuffer(TGAHeader, SizeOf(TGAHeader));
 	if ((TGAHeader.ImageType <> 2) and (TGAHeader.ImageType <> 10)) or (TGAHeader.ColorMapType<>0) then  
 		begin
@@ -99,7 +104,8 @@ try
 		Result:=nil;
 		Exit;
 		end;
-	GetMem(Result.FBitMap,ImageSize);
+	Result.FBitMap := GetMem(ImageSize);
+	FillChar(Result.FBitMap^, ImageSize, 0);
 	if TGAHeader.ImageType = 2 then
 		begin
 		if Stream.Size-Stream.Position < ImageSize then
@@ -182,7 +188,7 @@ except
 		Result.Destroy;
 		Result:=nil;
 		end;
-	end;
+end;
 end;
 
 end.

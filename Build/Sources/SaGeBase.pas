@@ -253,7 +253,6 @@ type
 	TSGSetOfByte   = type packed set   of byte;
 	TArBoolean     = type packed array of boolean;
 	TSGArBoolean   = type packed array of TSGBoolean;
-	TArString      = type packed array of string;
 	TArLongint     = type packed array of longint;
 	TArLongword    = type packed array of longword;
 	TArByte        = type packed array of byte;
@@ -509,7 +508,7 @@ function SGPCharIf(const Bool:Boolean;const VPChar:PChar):PChar;
 function SGStringIf(const B:Boolean;const s:string):string;inline;
 
 //Возвращает имена всех файлов в этом каталоге
-function SGGetFileNames(const Catalog:String;const What:String = ''):TArString;
+function SGGetFileNames(const Catalog:String;const What:String = ''):TSGStringList;
 
 //Возвращает указатель на нулевой байт
 function SGPCharNil:PChar;inline;
@@ -741,11 +740,28 @@ procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = 
 procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 implementation
 
 uses
 	StrMan;
+
+function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	Str2 : TSGString = '';
+	C : TSGChar;
+begin
+Result := False;
+while (Stream.Size <> Stream.Position) and (Length(Str2) < Length(Str)) do
+	begin
+	Stream.Read(C, 1);
+	Str2 += C;
+	end;
+Result := Str2 = Str;
+if DestroyingStream then
+	Stream.Destroy();
+end;
 
 function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
@@ -3012,7 +3028,7 @@ GetMem(Result,1);
 Result[0]:=#0;
 end;
 
-function SGGetFileNames(const Catalog:String;const What:String = ''):TArString;
+function SGGetFileNames(const Catalog:String;const What:String = ''):TSGStringList;
 var
 	Found:Integer;
 	SearchRec:TSearchRec;

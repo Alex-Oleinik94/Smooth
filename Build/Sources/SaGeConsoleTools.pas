@@ -99,7 +99,6 @@ type
 		end;
 
 procedure FPCTCTransliater();
-procedure GoogleReNameCache();
 
 procedure SGConcoleCaller                                (const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConsoleShowAllApplications                   (const VParams : TSGConcoleCallerParams = nil);overload;
@@ -122,6 +121,7 @@ procedure SGConsoleWriteFiles                            (const VParams : TSGCon
 procedure SGConsoleDllPrintStat                          (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleCalculateExpression                   (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleCalculateBoolTable                    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleGoogleReNameCache                     (const VParams : TSGConcoleCallerParams = nil);
 
 function SGConsoleCallerParamsToPChar(const VParams : TSGConcoleCallerParams = nil; const BeginPosition : TSGUInt32 = 0) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDecConsoleParams(const Params : TSGConcoleCallerParams) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1696,7 +1696,7 @@ if (FParams <> nil) and (Length(FParams) > 0) then
 					TextColor(12);
 					Write('Console caller : error : error while executing comand "');
 					TextColor(15);
-					Write(Comand);
+					Write(StringTrimLeft(FParams[i],'-'));
 					TextColor(12);
 					Write('", use "');
 					TextColor(15);
@@ -2143,6 +2143,7 @@ end;
 
 var
 	ConsoleCaller : TSGConsoleCaller = nil;
+	Success : TSGBool = True;
 begin
 SGPrintEngineVersion();
 ContextClass := TSGCompatibleContext;
@@ -2170,15 +2171,11 @@ if (VParams<>nil) and (Length(VParams)>0) then
 	ConsoleCaller.AddComand(@ProccessHeight,    ['H*?','HEIGHT*?'],     'For set window height');
 	ConsoleCaller.AddComand(@ProccessLeft,      ['L*?','LEFT*?','X*?'], 'For set window x');
 	ConsoleCaller.AddComand(@ProccessTop,       ['T*?','TOP*?', 'Y*?'], 'For set window y');
-	if ConsoleCaller.Execute() then
-		begin
-		ConsoleCaller.Destroy();
-		Run();
-		end
-	else
-		ConsoleCaller.Destroy();
-	end
-else
+	Success := ConsoleCaller.Execute();
+	ConsoleCaller.Destroy();
+	ConsoleCaller := nil;
+	end;
+if Success then
 	Run();
 end;
 
@@ -2558,7 +2555,6 @@ SetLength(ArF,0);
 SetLength(ArWords,0);
 end;
 
-
 procedure FPCTCTransliater();
 var
 	SGT:SGTranslater = nil;
@@ -2568,80 +2564,240 @@ SGT.GoTranslate;
 SGT.Destroy;
 end;
 
-procedure GoogleReNameCache();
+procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);
+type
+	TSGGRCResult = (SGBad, SGSuccess, SGUnknown);
 var
-	Cache:string = 'Cache';
-var
-	sr:DOS.SearchRec;
-	f:TFileStream;
-	b:word;
-	razr:string;
+	CacheDirectory : TSGString = '';
+	TempDirectory : TSGString = '';
+	ComplitedDirectory : TSGString = '';
+	TempDirectoryEnabled : TSGBool = False;
+	WriteUnknows : TSGBool = False;
 
-function IsRazr(const a:string):Boolean;
-var
-	i:LongWord;
+procedure MoveCachedFile(const Source, Destination : TSGString);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=False;
-for i:=1 to Length(a) do
-	if a[i]='.' then
-		begin
-		Result:=True;
-		Break;
-		end;
+{$IFDEF MSWINDOWS}MoveFile{$ELSE}RenameFile{$ENDIF}(
+	SGStringToPChar(Source),
+	SGStringToPChar(Destination)
+	);
+end;
+
+function BeginingOfStream(const Stream : TStream) : TStream;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := Stream;
+Result.Position := 0;
+end;
+
+function FindFileExpansion(const Stream : TStream) : TSGString;
+
+function MatchingByte(const B : TSGByte) : TSGBool;
+var
+	SB : TSGByte;
+begin
+with BeginingOfStream(Stream) do
+	ReadBuffer(SB, 1);
+Result := B = SB;
+end;
+
+function MatchingByte2(const B1, B2 : TSGByte) : TSGBool;
+var
+	SB1, SB2 : TSGByte;
+begin
+with BeginingOfStream(Stream) do
+	begin
+	ReadBuffer(SB1, 1);
+	ReadBuffer(SB2, 1);
+	end;
+Result := (B1 = SB1) and (B2 = SB2);
 end;
 
 begin
-if argc>2 then
-	Cache:=SGGetComand(argv[2]);
-if not SGExistsDirectory('.'+Slash+Cache) then
+Result := '';
+if MatchingByte(8508) or
+   MatchingByte(29230) or
+   MatchingByte(35615) or
+   MatchingByte(10799) or
+   MatchingByte(12079) or
+   MatchingByte(28777) or
+   MatchingByte(10250) then
+	Result := ' ';
+if MatchingByte(22339) then ; //хз
+if MatchingByte(20617) then Result := 'png';
+if MatchingByte(55551) then Result := 'jpg';
+if MatchingByte(17481) then Result := 'mp3';
+if MatchingByte(18759) then Result := 'gif';
+if MatchingByte2(0, 8192) then Result := 'wmv';
+if  SGMatchingStreamString(BeginingOfStream(Stream), '<!doctype html><html', False) or
+	SGMatchingStreamString(BeginingOfStream(Stream), '<html',                False) then
+		Result := 'html';
+end;
+
+procedure WriteUnknownFile(const FileName : TSGString; const Stream : TStream);
+var
+	Len : TSGUInt32 = 20;
+	Str : packed array of TSGChar;
+	C : TSGChar;
+	Str2 : TSGString;
+begin
+Stream.Position := 0;
+if Stream.Size < Len then
+	Len := Stream.Size;
+SetLength(Str, Len);
+Stream.ReadBuffer(Str[0], Len);
+for C in Str do
+	Str2 += C;
+SGHint(['GRC: Unknown "',FileName,'", ', SGGetSizeString(Stream.Size, 'EN'),' : ', Str2, SGStringIf(Len <> Stream.Size, '..')]);
+SetLength(Str, 0);
+end;
+
+function Proccess(const FileName : TSGString) : TSGGRCResult;
+var
+	Expansion : TSGString;
+	Stream : TMemoryStream = nil;
+begin
+Result := SGBad;
+Expansion := '';
+Stream := TMemoryStream.Create();
+Stream.LoadFromFile(CacheDirectory + Slash + FileName);
+Expansion := FindFileExpansion(Stream);
+if (Expansion = '') and WriteUnknows then
+	WriteUnknownFile(FileName, Stream);
+Stream.Destroy();
+Stream := nil;
+if Expansion=' ' then
 	begin
-	WriteLn('Cashe Directory is not exists: "','.\'+Slash+Cache,'".');
+	if TempDirectoryEnabled then
+		MoveCachedFile(CacheDirectory + Slash + FileName, TempDirectory + Slash + FileName);
+	end
+else if Expansion<>'' then
+	MoveCachedFile(CacheDirectory + Slash + FileName, ComplitedDirectory + Slash + FileName + '.' + Expansion);
+if Expansion = '' then
+	Result := SGUnknown
+else if Expansion = ' ' then
+	Result := SGBad
+else
+	Result := SGSuccess;
+end;
+
+procedure MainLoop();
+var
+	Files : TSGStringList = nil;
+	FileName : TSGString;
+var
+	CountBad : TSGUInt32 = 0;
+	CountUnknown : TSGUInt32 = 0;
+	CountComplited : TSGUInt32 = 0;
+	FileResult : TSGGRCResult;
+begin
+Files := SGGetFileNames(CacheDirectory + Slash, 'f_*');
+for FileName in Files do
+	if not ('.' in FileName) then
+		case Proccess(FileName) of
+		SGUnknown : CountUnknown += 1;
+		SGBad     : CountBad += 1;
+		SGSuccess : CountComplited += 1;
+		end;
+SGHint(['Some statistic info:']);
+SGHint(['  ', CountComplited, ' complited files.']);
+SGHint(['  ', CountUnknown, ' unknown files.']);
+SGHint(['  ', CountBad, ' bad files.']);
+SetLength(Files, 0);
+end;
+
+function ReadParams() : TSGBool;
+
+function SelectCacheDir(const Param : TSGString) : TSGBool;
+begin
+Result := False;
+
+if Result then
+	SGHint('GRC: Set cache directory to "' + CacheDirectory + '".');
+end;
+
+function SelectTempDir(const Param : TSGString) : TSGBool;
+begin
+Result := False;
+
+if Result then
+	begin
+	TempDirectoryEnabled := True;
+	SGHint('GRC: Temp directory enabled and set to "' + TempDirectory + '".');
+	end;
+end;
+
+function SelectResultDir(const Param : TSGString) : TSGBool;
+begin
+Result := False;
+
+if Result then
+	SGHint('GRC: Set result directory to "' + ComplitedDirectory + '".');
+end;
+
+function SelectCacheDirSimject(const Param : TSGString) : TSGBool;
+begin
+Result := False;
+{$IFDEF MSWINDOWS}
+	CacheDirectory := TSGCompatibleContext.UserProfilePath() + Slash + 'AppData' + Slash + 'Local' + Slash + 'Slimjet' + Slash + 'User Data' + Slash + 'Default' + Slash + 'Cache';
+	Result := True;
+{$ELSE MSWINDOWS}
+	
+{$ENDIF MSWINDOWS}
+if Result then
+	SGHint('GRC: Set cache directory to "' + CacheDirectory + '".');
+end;
+
+function EnableTempDirectory(const Param : TSGString) : TSGBool;
+begin
+Result := True;
+TempDirectoryEnabled := True;
+SGHint('GRC: Enabled temp directory.');
+end;
+
+function EnableWriteUnknows(const Param : TSGString) : TSGBool;
+begin
+Result := True;
+WriteUnknows := True;
+SGHint('GRC: Enabled writing unknows.');
+end;
+
+begin
+Result := True;
+if (VParams <> nil) and (Length(VParams) > 0) then
+	with TSGConsoleCaller.Create(VParams) do
+		begin
+		Category('Flags');
+		AddComand(@EnableTempDirectory, ['temp'], 'Enable temp directory');
+		AddComand(@EnableWriteUnknows, ['wu'], 'Enable write unknows');
+		Category('Default paths');
+		AddComand(@SelectCacheDirSimject, ['cd:Slimjet','cache:Slimjet'], 'Set cache directory for browser Slimjet for curent user');
+		Category('Paths');
+		AddComand(@SelectCacheDir, ['cd:*?','cache:*?'], 'Set cache directory');
+		AddComand(@SelectTempDir, ['td:*?','temp:*?'], 'Set temp directory');
+		AddComand(@SelectResultDir, ['rd:*?','result:*?'], 'Set directory for results');
+		Result := Execute();
+		Destroy();
+		end;
+if CacheDirectory = '' then
+	CacheDirectory := '.' + Slash + 'Cache';
+if (TempDirectory = '') and TempDirectoryEnabled then
+	TempDirectory := CacheDirectory + Slash + 'Temp';
+if ComplitedDirectory = '' then
+	ComplitedDirectory := CacheDirectory + Slash + 'Complited';
+end;
+
+begin
+SGPrintEngineVersion();
+if not ReadParams() then
+	Exit;
+if not SGExistsDirectory(CacheDirectory) then
+	begin
+	SGHint(['GRC: Cashe Directory does not exists: "',CacheDirectory,'"!']);
 	Exit;
 	end;
-SGMakeDirectory('.'+Slash+Cache+Slash+'Temp');
-SGMakeDirectory('.'+Slash+Cache+Slash+'Complited');
-DOS.findfirst('.'+Slash+Cache+Slash+'f_*',$3F,sr);
-While (dos.DosError<>18) do
-	begin
-	if not IsRazr(sr.name) then
-		begin
-		razr:='';
-		F:=TFileStream.Create('.'+Slash+Cache+Slash+sr.Name,fmOpenRead);
-		if F.Size >=2 then
-		F.ReadBuffer(b,2);
-		F.Destroy;
-		case b of
-		22339:;//хз
-		0:
-			begin
-			F:=TFileStream.Create('.'+Slash+Cache+Slash+sr.Name,fmOpenRead);
-			if F.Size >=4 then
-			F.ReadBuffer(b,2);
-			F.ReadBuffer(b,2);
-			F.Destroy;
-			if b = 8192 then
-				razr:='wmv'
-			else
-				begin writeln('Unknown ',sr.Name,' 0, ',b,'.');  end;
-			end;
-		8508,29230,35615,10799,12079,28777,10250:razr:=' ';
-		20617:razr:='png';
-		55551:razr:='jpg';
-		17481:razr:='mp3';
-		18759:razr:='gif';
-		else begin writeln('Unknown ',sr.Name,' ',b,'.');  end;
-		end;
-		if razr=' ' then
-			begin
-			{$IFDEF MSWINDOWS}MoveFile{$ELSE}RenameFile{$ENDIF}(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Temp'+Slash+sr.Name));
-			end
-		else
-			if razr<>'' then
-				{$IFDEF MSWINDOWS}MoveFile{$ELSE}RenameFile{$ENDIF}(SGStringToPChar('.'+Slash+Cache+Slash+sr.Name),SGStringToPChar('.'+Slash+Cache+Slash+'Complited'+Slash+sr.Name+'.'+razr));
-		end;
-	DOS.findnext(sr);
-	end;
-DOS.findclose(sr);
+if TempDirectoryEnabled then
+	SGMakeDirectory(TempDirectory);
+SGMakeDirectory(ComplitedDirectory);
+MainLoop();
 end;
 
 //============================
@@ -2750,11 +2906,13 @@ procedure InitOtherEnginesConsoleProgramsConsoleCaller();
 begin
 OtherEnginesConsoleProgramsConsoleCaller := TSGConsoleCaller.Create(nil);
 OtherEnginesConsoleProgramsConsoleCaller.Category('Images tools');
-OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR',''], 'Image Resizer');
+OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleImageResizer, ['IR'], 'Image Resizer');
 OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleConvertImageToSaGeImageAlphaFormat, ['CTSGIA'], 'Convert image To SaGeImagesAlpha format');
 OtherEnginesConsoleProgramsConsoleCaller.Category('Math tools');
 OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleCalculateExpression, ['ce'], 'Calculate Expression');
 OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleCalculateBoolTable, ['cbt'], 'Calculate Boolean Table');
+OtherEnginesConsoleProgramsConsoleCaller.Category('Other tools');
+OtherEnginesConsoleProgramsConsoleCaller.AddComand(@SGConsoleGoogleReNameCache, ['grc'], 'Tool for renameing browser cache files');
 end;
 
 //============================

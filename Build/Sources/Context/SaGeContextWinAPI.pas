@@ -9,34 +9,47 @@ unit SaGeContextWinAPI;
 interface
 
 uses
+	// Engine
 	 SaGeBase
 	,SaGeBased
-	,Windows
 	,SaGeContext
 	,SaGeCommon
 	,SaGeRender
-	,commdlg
 	,SaGeClasses
 	,SaGeCommonClasses
 	,SaGeImagesBase
+	
+	// Windows units
+	,Windows
+	,CommDlg
+	,CommCtrl
+	,ActiveX
+	,jwauserenv
 	;
 
 const
 	SGCWAPI_ICON = 5;
 type
 	WinAPIParam =
-		{$IFDEF CPU32}
-			LongInt
-		{$ELSE}
-			Int64
-			{$ENDIF};
+		{$IFDEF CPU64}
+			TSGInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGInt16
+		{$ENDIF} {$ENDIF} {$ENDIF}
+		;
+type
 	WinAPIHandle =
-		{$IFDEF CPU32}
-			LongWord
-		{$ELSE}
-			QWord
-			{$ENDIF};
-
+		{$IFDEF CPU64}
+			TSGUInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGUInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGUInt16
+		{$ENDIF} {$ENDIF} {$ENDIF}
+		;
+type
 	TSGContextWinAPI = class(TSGContext)
 			public
 		constructor Create();override;
@@ -54,6 +67,7 @@ type
 		function GetDefaultWindowColor():TSGColor3f;override;
 		procedure Minimize();override;
 		procedure Maximize();override;
+		class function UserProfilePath() : TSGString; override;
 			public
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
@@ -67,14 +81,14 @@ type
 		procedure SetCursor(const VCursor : TSGCursor); override;
 		procedure SetIcon  (const VIcon   : TSGBitMap); override;
 			protected
-		hWindow  : HWnd;
-		dcWindow : hDc;
+		hWindow  : Windows.HWnd;
+		dcWindow : Windows.HDC;
 		clWindow : TSGMaxEnum;
 		FWindowClassName : TSGString;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  WindowRegister(): Boolean;
-		function  WindowCreate(): HWnd;
-		function  WindowInit(hParent : HWnd): Boolean;
+		function  WindowCreate(): Windows.HWnd;
+		function  WindowInit(hParent : Windows.HWnd): Boolean;
 		procedure KillWindow();
 		function  CreateWindow():Boolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -101,15 +115,46 @@ function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; co
 implementation
 
 uses
-	SaGeScreen
-	,SysUtils;
+	 SaGeScreen
+	,SysUtils
+	;
 
 // А вод это жесткий костыль.
 // Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
 // например указатель на контекст, и поэтому процедура отловления сообщений системы
 // Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
-	SGContexts:packed array of TSGContextWinAPI = nil;
+	SGContexts : packed array of TSGContextWinAPI = nil;
+
+class function TSGContextWinAPI.UserProfilePath() : TSGString;
+const 
+	MaxMem : TSGUInt32 = 100;
+var
+	ProfilePath : LPTSTR = nil;
+	Size : TSGUInt32;
+	hCurrentProcess : Windows.HANDLE;
+	hToken : Windows.HANDLE;
+begin
+Result := inherited UserProfilePath();
+GetMem(ProfilePath, MaxMem);
+Size := MaxMem;
+hCurrentProcess := GetCurrentProcess();
+if hCurrentProcess = 0 then
+	SGLog.Source(['TSGContextWinAPI__UserProfilePath : GetCurrentProcess() returned falture handle!'])
+else
+	if not OpenProcessToken(hCurrentProcess, TOKEN_ALL_ACCESS, hToken) then
+		SGLog.Source(['TSGContextWinAPI__UserProfilePath : OpenProcessToken(..) returned FALSE!']);
+	if hToken = 0 then
+		SGLog.Source(['TSGContextWinAPI__UserProfilePath : OpenProcessToken(..) returned falture token!'])
+	else
+		if not GetUserProfileDirectory(hToken, ProfilePath, Size) then
+			SGLog.Source(['TSGContextWinAPI__UserProfilePath : GetUserProfileDirectory(..) returned FALSE!'])
+		else
+			Result := SGPCharToString(ProfilePath);
+if hToken <> 0 then
+	CloseHandle(hToken);
+FreeMem(ProfilePath);
+end;
 
 procedure TSGContextWinAPI.Minimize();
 var

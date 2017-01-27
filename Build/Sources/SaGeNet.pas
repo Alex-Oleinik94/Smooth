@@ -45,17 +45,17 @@ type
 		class function ClassName() : TSGString; override;
 			protected
 		FViewErrorCase : TSGViewErrorType;
-		FConnection: TSGUDPConnectionClass;
-		FReceiveProcedure:TSGReceiveProcedure;
-		FNestedReceiveProcedure:TSGNestedReceiveProcedure;
-		FParent:Pointer;
-		FAddress:string;
-		FPort:Word;
-		FConnectionMode:TSGConnectionMode;
-		FConnectionResult:Boolean;
-		procedure OnError(const msg: string; aSocket: TLSocket);
-		procedure OnReceive(aSocket: TLSocket);
+		FConnection : TSGUDPConnectionClass;
+		FReceiveProcedure : TSGReceiveProcedure;
+		FNestedReceiveProcedure : TSGNestedReceiveProcedure;
+		FParent : TSGPointer;
+		FAddress : TSGString;
+		FPort : TSGUInt16;
+		FConnectionMode : TSGConnectionMode;
+		FConnectionResult : TSGBool;
 			protected
+		procedure OnError(const Msg: TSGString; aSocket: TLSocket);
+		procedure OnReceive(aSocket: TLSocket);
 		function Listen() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		function Connect() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 			public
@@ -67,15 +67,92 @@ type
 		property NestedReceiveProcedure:TSGNestedReceiveProcedure read FNestedReceiveProcedure write FNestedReceiveProcedure;
 		property Parent:Pointer read FParent write FParent;
 		property ConnectionMode:TSGConnectionMode read FConnectionMode write FConnectionMode;
-		property Port:Word read FPort write FPort;
-		property Host:String read FAddress write FAddress;
-		property Address:String read FAddress write FAddress;
-		property Ready:boolean read FConnectionResult;
+		property Port : TSGUInt16 read FPort write FPort;
+		property Host : TSGString read FAddress write FAddress;
+		property Address : TSGString read FAddress write FAddress;
+		property Ready : TSGBoolean read FConnectionResult;
 		end;
-
+	
+	TSGHost = object
+			public
+		FAddress : TSGString;
+		FPort : TSGUInt16;
+		FURL : TSGString;
+		FLastSend : TSGDateTime;
+		FLastRecieved : TSGDateTime;
+		FLastSendIterator : TSGUInt64;
+		FLastRecievedIterator : TSGUInt64;
+		end;
+	PSGHost = ^ TSGHost;
+	TSGHostList = packed array of TSGHost;
+	
+	TSGCustomConnectionHandler = class(TSGNamed)
+			public
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+			protected
+		FHosts : TSGHostList;
+		FIterator : TSGUInt64;
+			protected
+		function GetHost(const Index : TSGMaxEnum) : PSGHost; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		function HostsCount() : TSGMaxEnum; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		property Hosts[Index : TSGMaxEnum]:PSGHost read GetHost;
+		end;
+	
+	TSGCustomUDPConnectionHandler = class(TSGCustomConnectionHandler)
+			public
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+			public
+		procedure Recieved(const Stream : TMemoryStream; const Socket : TLSocket);
+			protected
+		FConnection : TSGUDPConnection;
+			public
+		property Connection : TSGUDPConnection read FConnection;
+		end;
+	
+	TSGPacketType = TSGString;
+	TSGDataType = TSGString;
+	(*
+	Packet = ['SAGEPACKET', $PacketIterator<UInt64>, $PacketType, #0, $PacketData];
+	PacketData<TryConnect> = [];
+	PacketData<ConnectionSuccess> = [];
+	PacketData<Check> = [];
+	PacketData<CheckSuccess> = [];
+	PacketData<Disconnect> = [];
+	PacketData<Data> = [$DataType, #0, $Data];
+	*)
+const
+	SGPacketTryConnect        : TSGPacketType = 'TRYCONNECT';
+	SGPacketConnectionSuccess : TSGPacketType = 'CONNECTIONSUCS';
+	SGPacketCheck             : TSGPacketType = 'CHECK';
+	SGPacketCheckSuccess      : TSGPacketType = 'CHECKSUCS';
+	SGPacketDisconnect        : TSGPacketType = 'DISCONNECT';
+	SGPacketData              : TSGPacketType = 'DATA';
+type
+	TSGUDPServer = class(TSGCustomUDPConnectionHandler)
+			public
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+			protected
+		FCkeckInterval : TSGUInt16;
+		end;
+	
+	TSGUDPClient = class(TSGCustomUDPConnectionHandler)
+			public
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+		end;
+	
 	TSGHTTPHandler=class
 			public
-		Done, Error : Boolean;
+		Done, Error : TSGBoolean;
 		Stream : TMemoryStream;
 			public
 		procedure ClientDisconnect(ASocket: TLSocket);
@@ -84,8 +161,6 @@ type
 		function ClientInput(ASocket: TLHTTPClientSocket; ABuffer: pchar; ASize: Integer): Integer;
 		procedure ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 		end;
-
-
 
 function SGHTTPGetString      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -108,6 +183,116 @@ uses
 	StrMan
 	,SaGeConsoleTools
 	;
+
+// TSGUDPClient
+
+constructor TSGUDPClient.Create();
+begin
+inherited;
+FConnection.ConnectionMode := SGClientMode;
+end;
+
+destructor TSGUDPClient.Destroy();
+begin
+inherited;
+end;
+
+class function TSGUDPClient.ClassName() : TSGString;
+begin
+Result := 'TSGUDPClient';
+end;
+
+// TSGUDPServer
+
+constructor TSGUDPServer.Create();
+begin
+inherited;
+FCkeckInterval := 50;
+FConnection.ConnectionMode := SGServerMode;
+end;
+
+destructor TSGUDPServer.Destroy();
+begin
+inherited;
+end;
+
+class function TSGUDPServer.ClassName() : TSGString;
+begin
+Result := 'TSGUDPServer';
+end;
+
+// TSGCustomUDPConnectionHandler
+
+procedure TSGCustomUDPConnectionHandler.Recieved(const Stream : TMemoryStream; const Socket : TLSocket);
+begin
+
+end;
+
+procedure TSGCustomUDPConnectionHandler_Received(Parent : TSGCustomUDPConnectionHandler; AStream : TMemoryStream; aSocket : TLSocket);
+begin
+Parent.Recieved(AStream, aSocket);
+end;
+
+constructor TSGCustomUDPConnectionHandler.Create();
+begin
+inherited;
+FConnection := TSGUDPConnection.Create();
+FConnection.ReceiveProcedure := TSGReceiveProcedure(@TSGCustomUDPConnectionHandler_Received);
+FConnection.Parent := Self;
+end;
+
+destructor TSGCustomUDPConnectionHandler.Destroy();
+begin
+if FConnection <> nil then
+	begin
+	FConnection.Destroy();
+	FConnection := nil;
+	end;
+inherited;
+end;
+
+class function TSGCustomUDPConnectionHandler.ClassName() : TSGString;
+begin
+Result := 'TSGCustomUDPConnectionHandler';
+end;
+
+// TSGCustomConnectionHandler
+
+function TSGCustomConnectionHandler.HostsCount() : TSGMaxEnum; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 0;
+if FHosts <> nil then
+	Result := Length(FHosts);
+end;
+
+function TSGCustomConnectionHandler.GetHost(const Index : TSGMaxEnum) : PSGHost; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := nil;
+if (Index >= 0) and (Index < HostsCount()) then
+	Result := @FHosts[Index];
+end;
+
+constructor TSGCustomConnectionHandler.Create();
+begin
+inherited;
+FIterator := 1;
+FHosts := nil;
+end;
+
+destructor TSGCustomConnectionHandler.Destroy();
+begin
+if FHosts <> nil then
+	begin
+	SetLength(FHosts, 0);
+	FHosts := nil;
+	end;
+inherited;
+end;
+
+class function TSGCustomConnectionHandler.ClassName() : TSGString;
+begin
+Result := 'TSGCustomConnectionHandler';
+end;
 
 function SGSetURLProtocol(const URL, Protocol : TSGString) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -164,7 +349,7 @@ if MS <> nil then
 	MS.Position := 0;
 	while MS.Position <> MS.Size do
 		begin
-		MS.ReadBuffer(c,1);
+		MS.ReadBuffer(c, 1);
 		Result += c;
 		end;
 	if DestroyStream then
@@ -189,7 +374,7 @@ end;
 
 procedure TSGHTTPHandler.ClientDisconnect(ASocket: TLSocket);
 begin
-Done := true;
+Done := True;
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGHTTPHandler.ClientDisconnect');
 	{$ENDIF}
@@ -198,14 +383,14 @@ end;
 procedure TSGHTTPHandler.ClientDoneInput(ASocket: TLHTTPClientSocket);
 begin
 Stream.Position := 0;
-ASocket.Disconnect;
+ASocket.Disconnect();
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGHTTPHandler.ClientDoneInput');
 	{$ENDIF}
 end;
 
 function TSGHTTPHandler.ClientInput(ASocket: TLHTTPClientSocket;
-  ABuffer: pchar; ASize: Integer): Integer;
+  ABuffer: PChar; ASize: Integer): Integer;
 begin
 Stream.WriteBuffer(ABuffer^,ASize);
 Result := ASize;
@@ -241,19 +426,19 @@ var
 begin
 Result:=nil;
 Protocol := SGGetURLProtocol(URL);
-SGHint(['lNet HTTP Get: Protocol="', Protocol, '"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Protocol="', Protocol, '"'], ErrorViewCase);
 if Protocol = '' then
 	Protocol := 'http';
 FinalURL := SGCheckURL(URL, Protocol);
 UseSSL := DecomposeURL(FinalURL, Host, URI, Port);
-SGHint(['lNet HTTP Get: URL="', FinalURL, '"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: URL="', FinalURL, '"'], ErrorViewCase);
 if UseSSL then
 	begin
-	SGHint(['lNet HTTP Get: SSL does not supporting! Exit.'], ErrorViewCase);
+	SGHint(['HTTP:Get<lNet>: SSL does not supporting! Exit.'], ErrorViewCase + [SGLogError]);
 	Exit;
 	end;
 
-SGHint(['lNet HTTP Get: Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"'], ErrorViewCase);
 
 Client := TSGHTTPHandler.Create();
 Client.Done := False;
@@ -271,11 +456,11 @@ HttpClient.OnDoneInput := @Client.ClientDoneInput;
 HttpClient.OnError := @Client.ClientError;
 HttpClient.OnInput := @Client.ClientInput;
 HttpClient.OnProcessHeaders := @Client.ClientProcessHeaders;
-HttpClient.SendRequest;
-Client.Done := false;
-Client.Error := false;
+HttpClient.SendRequest();
+Client.Done := False;
+Client.Error := False;
 
-SGHint('lNet HTTP Get: Begin looping...', ErrorViewCase);
+SGHint('HTTP:Get<lNet>: Begin looping...', ErrorViewCase);
 
 while (not Client.Done) and (not Client.Error) do
 	begin
@@ -292,7 +477,7 @@ else
 
 Client.Destroy();
 
-SGHint(['lNet HTTP Get: Done with  Result=',SGAddrStr(Result),'.'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Done with  Result=',SGAddrStr(Result),'.'], ErrorViewCase);
 if Result <> nil then
 	Result.Position := 0;
 end;
@@ -329,11 +514,11 @@ end;
 
 function TSGUDPConnection.Connect() : TSGBool;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result := FConnection.Connect(FAddress,FPort);
+Result := FConnection.Connect(FAddress, FPort);
 FConnectionResult := Result;
 end;
 
-function TSGUDPConnectionClass.SendMemoryStream(const AStream:TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function TSGUDPConnectionClass.SendMemoryStream(const AStream : TMemoryStream):Integer;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := Send(AStream.Memory^, AStream.Size);
 end;
@@ -348,11 +533,11 @@ FConnection := TSGUDPConnectionClass.Create(nil);
 FConnection.OnError := TLSocketErrorEvent(@OnError);
 FConnection.OnReceive := @OnReceive;
 FConnection.Timeout := 100; 
-FParent:=nil;
-FAddress:='localhost';
-FPort:=5233;
-FConnectionMode:=SGClientMode;
-FConnectionResult:=False;
+FParent := nil;
+FAddress := 'localhost';
+FPort := 5233;
+FConnectionMode := SGClientMode;
+FConnectionResult := False;
 end;
 
 destructor TSGUDPConnection.Destroy();
@@ -423,6 +608,22 @@ if StringMatching(SGUpCaseString(URL), 'LOCALHOST*') then
 		else
 			SGHint('SGDecomposeURL: Error while pasring port!');
 	end
+else if StringMatching(URL, '*?.*?.*?.*?:*?') then
+	begin
+	Port := 0;
+	URI := '';
+	Host := StringWordGet(URL, ':', 1);
+	if StringIsNumber(StringWordGet(URL, ':', 2)) then
+		Port := SGVal(StringWordGet(URL, ':', 2))
+	else
+		SGHint('SGDecomposeURL: Error while pasring port!');
+	end
+else if StringMatching(URL, '*?.*?.*?.*?') then
+	begin
+	Port := 0;
+	Host := URL;
+	URI := '';
+	end
 else
 	begin
 	Result := DecomposeURL(URL, Host, URI, Port);
@@ -470,7 +671,9 @@ end;
 
 procedure OnReceive(Parent : TSGPointer; AStream : TMemoryStream; aSocket : TLSocket);
 begin
+Write('Received:"');
 SGWriteStream(AStream);
+WriteLn('" PeerAddress: "', aSocket.PeerAddress, '", PeerPort: "', aSocket.PeerPort, '".');
 end;
 
 var
@@ -497,11 +700,11 @@ while Connection.Ready do
 	if KeyPressed then
 		begin
 		RK := ReadKey;
-		Write(RK);
+		WriteLn('Send:"',RK,'".');
 		Connection.SendMemoryStream(SGStringToStream(RK));
 		end;
 	Connection.CallAction();
-	Sleep(5);
+	Sleep(2);
 	end;
 Connection.Destroy();
 end;
