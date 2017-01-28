@@ -1431,7 +1431,7 @@ constructor TSGRenderOpenGL.Create();
 {$IFDEF NEEDResourceS}
 procedure FreeMemTemp();
 var
-	ar : TArString = nil;
+	ar : TSGStringList = nil;
 	i : TSGMaxEnum;
 begin
 ar := SGGetFileNames(TempDir+'/','*');
@@ -1484,7 +1484,7 @@ procedure TSGRenderOpenGL.Kill();
 {$IFDEF NEEDResourceS}
 procedure FreeMemTemp();
 var
-	ar : TArString = nil;
+	ar : TSGStringList = nil;
 	i : TSGMaxEnum;
 begin
 ar := SGGetFileNames(TempDir+'/','*');

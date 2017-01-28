@@ -3245,7 +3245,7 @@ end;
 
 procedure TSGGasDiffusion.UpDateSavesComboBox();
 var
-	ar : TArString = nil;
+	ar : TSGStringList = nil;
 	i : TSGLongWord;
 	ExC : Boolean = False;
 begin

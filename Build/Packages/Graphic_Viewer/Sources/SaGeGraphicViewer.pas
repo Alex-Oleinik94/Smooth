@@ -1,6 +1,9 @@
 {$INCLUDE SaGe.inc}
-Unit SaGeGraphicViewer;
+
+unit SaGeGraphicViewer;
+
 interface
+
 uses 
 	crt
 	,SaGeBase
@@ -15,6 +18,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeMesh
 	,SaGePackages
+	,SaGeConsoleToolsBase
 	;
 
 {$DEFINE SGREADINTERFACE}
@@ -22,12 +26,24 @@ uses
 {$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADINTERFACE}
 
+procedure SGConsoleViewGraphic(const VParams : TSGConcoleCallerParams = nil);
+
 implementation
+
+uses
+	 SaGeConsoleTools
+	,SaGeConsolePaintableTools
+	;
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$INCLUDE SaGeExampleGraphViewer.inc}
 {$INCLUDE SaGeExampleGraphViewer3D.inc}
 {$UNDEF SGREADIMPLEMENTATION}
+
+procedure SGConsoleViewGraphic(const VParams : TSGConcoleCallerParams = nil);
+begin
+SGHint('Todo...');
+end;
 
 initialization
 begin
@@ -37,6 +53,7 @@ begin
 	//Add(TSGGraphViewer3D);
 *)
 SGRegisterDrawClass(TSGGraphViewer);
+SGOtherConsoleCaller.AddComand('Math tools', @SGConsoleViewGraphic, ['vg'], 'View graphic');
 end;
 
 END.

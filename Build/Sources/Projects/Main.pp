@@ -1,4 +1,5 @@
 {$INCLUDE SaGe.inc}
+
 {$IF not defined(MOBILE)}
 	//{$DEFINE WITHSAGELIBRARY}
 	{$IF not defined(DARWIN)}
@@ -8,29 +9,32 @@
 			{$APPTYPE CONSOLE}
 			{$ENDIF}
 		{$ENDIF}
+	
 	program Main;
 {$ELSE}
 	library Main;
 	{$ENDIF}
+
 uses
 	{$IF defined(UNIX) and defined(UseCThreads)}
 		cthreads,
 		{$ENDIF}
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeContext
 	,SysUtils
 	,SaGeResourceManager
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
+		,SaGeConsolePaintableTools
 		{$ENDIF}
-
 
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary
-	{$ELSE}
+		{$ENDIF}
+	{$IF (not defined(WITHSAGELIBRARY)) and (not defined(ANDROID))}
 		,SaGeConsoleTools
-	{$ENDIF}
+		{$ENDIF}
 	;
 
 {$IF defined(ANDROID)}

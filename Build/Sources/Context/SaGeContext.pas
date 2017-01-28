@@ -1204,11 +1204,9 @@ if FPaintableSettings <> nil then
 	begin
 	if Length(FPaintableSettings) > 0 then
 		begin
-		for O in FPaintableSettings do
-			begin
-			if FPaintable <> nil then
-				FPaintable.SetOption(O.FName, O.FOption);
-			end;
+		if FPaintable <> nil then
+			for O in FPaintableSettings do
+					FPaintable.SetOption(O.FName, O.FOption);
 		SetLength(FPaintableSettings, 0);
 		end;
 	FPaintableSettings := nil;
