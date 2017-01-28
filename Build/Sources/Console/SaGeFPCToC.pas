@@ -2,8 +2,10 @@
 unit SaGeFPCToC;
 interface
 uses
-	Classes,
-	SaGeBase, SaGeBased;
+	 Classes
+	,SaGeBase
+	,SaGeBased
+	;
 type
 	SGTranslater=class;
 	
@@ -236,6 +238,7 @@ type
 		FObject:string;
 		FWays:packed array of String;
 		FOutWay:string;
+		FParams : TSGConcoleCallerParams;
 			private
 		function GetOutWay:string;override;
 			public
@@ -244,6 +247,8 @@ type
 		procedure GoWrite(const FWriteClass:SGTWriteClass = nil);override;
 		function FileType(const VWay:string):string;
 		function GoFindAndReadUnit(const VWay:string):Boolean;
+			public
+		property Params : TSGConcoleCallerParams read FParams write FParams;
 		end;
 	TSGTranslater=SGTranslater;
 
@@ -1309,22 +1314,27 @@ var
 var
 	MW:String = '';
 	WasInCmd:Boolean = False;
+var
+	AnyError : TSGBool = False;
 begin
 if SGUpCaseString(FObject)='CMD' then
 	begin
 	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Cmd Type)']);
-	for ii:=2 to argc-1 do
+	if (FParams <> nil) and (Length(FParams) > 0) then
+	for ii:=0 to High(FParams) do
 		begin
-		FT:=SGUpCaseString(SGPCharToString(argv[ii]));
+		FT:=SGUpCaseString(FParams[ii]);
 		if (FT[1]<>'-') then
 			begin
+			AnyError := True;
 			Writeln('Befor command "',FT,'" must be "-".');
 			SGLog.Source(['TSGTranslater.GoRead : ','Befor command "',FT,'" must be "-".']);
 			end
 		else if Length(FT)<3 then
 			begin
-			Writeln('Error sintaxis command "',FT,'". (Length>3)');
-			SGLog.Source(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'" (Length>3).']);
+			AnyError := True;
+			Writeln('Error syntax command "',FT,'". (Length>3)');
+			SGLog.Source(['TSGTranslater.GoRead : ','Error syntax command "',FT,'" (Length>3).']);
 			end
 		else
 			begin
@@ -1350,19 +1360,33 @@ if SGUpCaseString(FObject)='CMD' then
 				end
 			else 
 				begin
-				Writeln('Error sintaxis command "',FT,'".');
-				SGLog.Source(['TSGTranslater.GoRead : ','Error sintaxis command "',FT,'".']);
+				AnyError := True;
+				Writeln('Error syntax command "',FT,'".');
+				SGLog.Source(['TSGTranslater.GoRead : ','Error syntax command "',FT,'".']);
 				end;
 			end;
 		end;
 	WasInCmd:=True;
+	end;
+if AnyError then
+	begin
+	SGHint(['Help:']);
+	SGHint(['  Use -pm(%path_makefile) for set makefile path.']);
+	SGHint(['  Use -ow(%out_path) for set out path.']);
+	SGHint(['  Use -pp(%object_path) for set object path to translate.']);
+	SGHint(['  Use -pu(%object_path) for set object path to translate.']);
+	SGHint(['  Use -pl(%object_path) for set object path to translate.']);
+	Halt(0);
 	end;
 if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SGUpCaseString(FObject))='PP') then
 	begin
 	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
 	if FT='' then
-		SGLog.Source(['TSGTranslater.GoRead : Error Getting File Type "',FObject,'"'])
+		begin
+		AnyError := True;
+		SGLog.Source(['TSGTranslater.GoRead : Error Getting File Type "',FObject,'"']);
+		end
 	else
 		begin
 		SGLog.Source(['TSGTranslater.GoRead : Create Chunck "',FT,'"']);
@@ -1381,9 +1405,10 @@ if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SG
 	end
 else  if (not WasInCmd) or (WasInCmd and (MW='')) then
 	begin
-	SGLog.Source(['TSGTranslater.GoRead : Don''t know what a you doing pider!']);
+	AnyError := True;
+	SGLog.Source(['TSGTranslater.GoRead : Don''t know what a you doing!']);
 	if WasInCmd then
-		WriteLn('TSGTranslater.GoRead : Don''t know what a you doing pider!');
+		WriteLn('TSGTranslater.GoRead : Don''t know what a you doing!');
 	end
 else {= Makefile}
 	begin

@@ -179,15 +179,16 @@ WOW /e Тeкст
 unit san;
 interface
 	uses
+		dos,crt,OpenAL,SysUtils,gl,glu,classes
+		,SaGeBase, SaGeBased, SaGeCommon
 		{$IFDEF MSWINDOWS}
-			dos,crt,graph,windows,gl,glu,classes,SysUtils,OpenAL,MMSystem{,SaGeImages,SaGe};
+			,graph,windows,MMSystem
+		{$ELSE} {$IFDEF LINUX}
+			,glx,xlib,unix,x,xutil
 		{$ELSE}
-			{$IFDEF LINUX}
-				dos,crt,gl,glu,glx,xlib,unix,x,xutil,OpenAL;
-			{$ELSE}
-				{$WARNING <<<<)(NE POPRET!)(>>>>}
-				{$ENDIF}
-			{$ENDIF}
+			{$WARNING <<<<)(NE POPRET!)(>>>>}
+		{$ENDIF}{$ENDIF}
+			;
 	const (*$NOTE >>|<           Begining    Const           >|<<*)
 			SanStringXO='XO by MPSNP (Krestiki - Noliki) (Sanches Corporation OpenGl Application) ';
 			GL_SAN_STRING=			1;

@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeConsoleToolsBase
-	
-	//,SaGeFPCToC
 	;
+
+procedure SGConsoleFPCTCTransliater(const VParams : TSGConcoleCallerParams = nil);
 
 procedure SGConsoleRunConsole(const VParams : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -39,6 +39,10 @@ uses
 	,SaGeConsoleNetTools
 	,SaGeConsoleShaderTools
 	,SaGeConsoleHashTools
+	
+	// Engine includes
+	,SaGeVersion
+	,SaGeFPCToC
 	;
 
 var
@@ -60,7 +64,7 @@ var
 begin
 Params := SGSystemParamsToConcoleCallerParams();
 SGConcoleCaller(Params);
-SetLength(Params,0);
+SetLength(Params, 0);
 end;
 
 procedure SGConsoleRunConsole(const VParams : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -72,14 +76,16 @@ SGConcoleCaller(Params);
 SetLength(Params, 0);
 end;
 
-{procedure FPCTCTransliater();
+procedure SGConsoleFPCTCTransliater(const VParams : TSGConcoleCallerParams = nil);
 var
-	SGT:SGTranslater = nil;
+	SGT : SGTranslater = nil;
 begin
-SGT:=SGTranslater.Create('cmd');
-SGT.GoTranslate;
-SGT.Destroy;
-end;}
+SGPrintEngineVersion();
+SGT := SGTranslater.Create('cmd');
+SGT.Params := VParams;
+SGT.GoTranslate();
+SGT.Destroy();
+end;
 
 //============================
 (*============Udp===========*)
@@ -199,6 +205,7 @@ OtherConsoleCaller.AddComand(@SGConsoleCalculateExpression, ['ce'], 'Calculate E
 OtherConsoleCaller.AddComand(@SGConsoleCalculateBoolTable, ['cbt'], 'Calculate Boolean Table');
 OtherConsoleCaller.Category('Other tools');
 OtherConsoleCaller.AddComand(@SGConsoleGoogleReNameCache, ['grc'], 'Tool for renameing browser cache files');
+OtherConsoleCaller.AddComand(@SGConsoleFPCTCTransliater, ['fpctc'], 'Tool for transliating FPC to C');
 end;
 
 //============================
