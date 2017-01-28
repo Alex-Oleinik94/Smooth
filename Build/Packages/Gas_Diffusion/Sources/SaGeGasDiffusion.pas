@@ -6,7 +6,7 @@ unit SaGeGasDiffusion;
 
 interface
 uses
-	 dos
+	 Dos
 	,SysUtils
 	,Classes
 	

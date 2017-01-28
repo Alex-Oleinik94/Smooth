@@ -7,21 +7,25 @@ interface
 uses
 	 SaGeBase
 	,SaGeBased
-	,SaGeContext
 	,SaGeConsoleToolsBase
-	,SaGeVersion
-	
-	{$IFDEF MSWINDOWS}
-	,Windows
-	{$ELSE}
-	,Unix
-	{$ENDIF}
-	,Classes
 	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
+
+uses
+	 Dos
+	,Classes
+	{$IFDEF MSWINDOWS}
+		,Windows
+	{$ELSE}
+		,Unix
+	{$ENDIF}
+	
+	,SaGeContext
+	,SaGeVersion
+	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);
 type
@@ -32,6 +36,15 @@ var
 	ComplitedDirectory : TSGString = '';
 	TempDirectoryEnabled : TSGBool = False;
 	WriteUnknows : TSGBool = False;
+	OpenResultDir : TSGBool = True;
+	Mask : TSGString = 'f_*';
+
+procedure OpenResultDirectoy();
+begin
+{$IFDEF MSWINDOWS}
+	Exec('explorer.exe', '"' + ComplitedDirectory + '"');
+	{$ENDIF}
+end;
 
 procedure MoveCachedFile(const Source, Destination : TSGString);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
@@ -88,7 +101,7 @@ if MatchingByte(22339) then ; //хз
 if MatchingByte(20617) then Result := 'png';
 if MatchingByte(55551) then Result := 'jpg';
 if MatchingByte(17481) then Result := 'mp3';
-if MatchingByte(18759) then Result := 'gif';
+//if MatchingByte(18759) then Result := 'gif';
 if MatchingByte2(0, 8192) then Result := 'wmv';
 if  SGMatchingStreamString(BeginingOfStream(Stream), '<!doctype html><html', False) or
 	SGMatchingStreamString(BeginingOfStream(Stream), '<html',                False) then
@@ -152,7 +165,7 @@ var
 	CountComplited : TSGUInt32 = 0;
 	FileResult : TSGGRCResult;
 begin
-Files := SGGetFileNames(CacheDirectory + Slash, 'f_*');
+Files := SGGetFileNames(CacheDirectory + Slash, Mask);
 for FileName in Files do
 	if not ('.' in FileName) then
 		case Proccess(FileName) of
@@ -164,6 +177,8 @@ SGHint(['Some statistic info:']);
 SGHint(['  ', CountComplited, ' complited files.']);
 SGHint(['  ', CountUnknown, ' unknown files.']);
 SGHint(['  ', CountBad, ' bad files.']);
+if OpenResultDir and (CountComplited <> 0) then
+	OpenResultDirectoy();
 SetLength(Files, 0);
 end;
 
@@ -172,7 +187,7 @@ function ReadParams() : TSGBool;
 function SelectCacheDir(const Param : TSGString) : TSGBool;
 begin
 Result := False;
-
+(** TODO **)
 if Result then
 	SGHint('GRC: Set cache directory to "' + CacheDirectory + '".');
 end;
@@ -180,7 +195,7 @@ end;
 function SelectTempDir(const Param : TSGString) : TSGBool;
 begin
 Result := False;
-
+(** TODO **)
 if Result then
 	begin
 	TempDirectoryEnabled := True;
@@ -191,7 +206,7 @@ end;
 function SelectResultDir(const Param : TSGString) : TSGBool;
 begin
 Result := False;
-
+(** TODO **)
 if Result then
 	SGHint('GRC: Set result directory to "' + ComplitedDirectory + '".');
 end;
@@ -203,7 +218,7 @@ Result := False;
 	CacheDirectory := TSGCompatibleContext.UserProfilePath() + Slash + 'AppData' + Slash + 'Local' + Slash + 'Slimjet' + Slash + 'User Data' + Slash + 'Default' + Slash + 'Cache';
 	Result := True;
 {$ELSE MSWINDOWS}
-	
+	(** TODO **)
 {$ENDIF MSWINDOWS}
 if Result then
 	SGHint('GRC: Set cache directory to "' + CacheDirectory + '".');
@@ -223,14 +238,23 @@ WriteUnknows := True;
 SGHint('GRC: Enabled writing unknows.');
 end;
 
+function SetMask(const Param : TSGString) : TSGBool;
+begin
+Result := False;
+(** TODO **)
+if Result then
+	SGHint('GRC: Set mask cached files to "' + Mask + '".');
+end;
+
 begin
 Result := True;
 if (VParams <> nil) and (Length(VParams) > 0) then
 	with TSGConsoleCaller.Create(VParams) do
 		begin
-		Category('Flags');
+		Category('Settings');
 		AddComand(@EnableTempDirectory, ['temp'], 'Enable temp directory');
 		AddComand(@EnableWriteUnknows, ['wu'], 'Enable write unknows');
+		AddComand(@SetMask, ['mask:*?'], 'Set file mask for cache files');
 		Category('Default paths');
 		AddComand(@SelectCacheDirSimject, ['cd:Slimjet','cache:Slimjet'], 'Set cache directory for browser Slimjet for curent user');
 		Category('Paths');
