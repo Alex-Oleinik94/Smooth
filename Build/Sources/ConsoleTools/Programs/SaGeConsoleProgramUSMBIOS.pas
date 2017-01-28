@@ -1,14 +1,31 @@
-{$IFDEF FPC}{$mode objfpc}{$H+}
-{$ELSE}
-{$APPTYPE CONSOLE}
-{$ENDIF}
- 
+{$INCLUDE SaGe.inc}
+
+unit SaGeConsoleProgramUSMBIOS;
+
+interface
+
 uses
-  Classes,
-  TypInfo,
-  SysUtils,
-  uSMBIOS;
- 
+	 SaGeBase
+	,SaGeBased
+	,SaGeConsoleToolsBase
+	;
+
+procedure SGConsoleUSMBIOS(const VParams : TSGConcoleCallerParams = nil);
+
+implementation
+
+uses
+	Classes,
+	TypInfo,
+	SysUtils,
+	uSMBIOS,
+	Crt
+	
+	,SaGeVersion
+	,SaGeConsoleTools
+	;
+
+
 function SetToString(Info: PTypeInfo; const Value): String;
 var
   LTypeInfo  : PTypeInfo;
@@ -43,7 +60,9 @@ Var
 begin
   SMBios:=TSMBios.Create;
   try
+      TextColor(10);
       WriteLn('Processor Information');
+      TextColor(7);
       if SMBios.HasProcessorInfo then
       for LProcessorInfo in SMBios.ProcessorInfo do
       begin
@@ -73,12 +92,15 @@ begin
             WriteLn(Format('Processor Characteristics %.4x',[LProcessorInfo.RAWProcessorInformation^.ProcessorCharacteristics]));
           end;
         end;
-        Writeln;
+        TextColor(1);Write('Press ENTER.');TextColor(7);ReadLn();
  
         if (LProcessorInfo.RAWProcessorInformation^.L1CacheHandle>0) and (LProcessorInfo.L2Chache<>nil)  then
         begin
+          TextColor(10);
           WriteLn('L1 Cache Handle Info');
+          TextColor(14);
           WriteLn('--------------------');
+          TextColor(7);
           WriteLn('  Socket Designation    '+LProcessorInfo.L1Chache.SocketDesignationStr);
           WriteLn(Format('  Cache Configuration   %.4x',[LProcessorInfo.L1Chache.RAWCacheInformation^.CacheConfiguration]));
           WriteLn(Format('  Maximum Cache Size    %d Kb',[LProcessorInfo.L1Chache.GetMaximumCacheSize]));
@@ -95,8 +117,11 @@ begin
  
         if (LProcessorInfo.RAWProcessorInformation^.L2CacheHandle>0)  and (LProcessorInfo.L2Chache<>nil)  then
         begin
+          TextColor(10);
           WriteLn('L2 Cache Handle Info');
+          TextColor(14);
           WriteLn('--------------------');
+          TextColor(7);
           WriteLn('  Socket Designation    '+LProcessorInfo.L2Chache.SocketDesignationStr);
           WriteLn(Format('  Cache Configuration   %.4x',[LProcessorInfo.L2Chache.RAWCacheInformation^.CacheConfiguration]));
           WriteLn(Format('  Maximum Cache Size    %d Kb',[LProcessorInfo.L2Chache.GetMaximumCacheSize]));
@@ -113,8 +138,11 @@ begin
  
         if (LProcessorInfo.RAWProcessorInformation^.L3CacheHandle>0) and (LProcessorInfo.L3Chache<>nil) then
         begin
+          TextColor(10);
           WriteLn('L3 Cache Handle Info');
+          TextColor(14);
           WriteLn('--------------------');
+          TextColor(7);
           WriteLn('  Socket Designation    '+LProcessorInfo.L3Chache.SocketDesignationStr);
           WriteLn(Format('  Cache Configuration   %.4x',[LProcessorInfo.L3Chache.RAWCacheInformation^.CacheConfiguration]));
           WriteLn(Format('  Maximum Cache Size    %d Kb',[LProcessorInfo.L3Chache.GetMaximumCacheSize]));
@@ -128,8 +156,6 @@ begin
           WriteLn(Format('  System Cache Type     %s',[SystemCacheTypeStr[LProcessorInfo.L3Chache.GetSystemCacheType]]));
           WriteLn(Format('  Associativity         %s',[LProcessorInfo.L3Chache.AssociativityStr]));
         end;
- 
-        Readln;
       end
       else
       Writeln('No Processor Info was found');
@@ -138,7 +164,20 @@ begin
   end;
 end;   
 
+procedure SGConsoleUSMBIOS(const VParams : TSGConcoleCallerParams = nil);
 begin
+if (VParams = nil) or (Length(VParams) = 0) then
+	GetProcessorInfo
+else
+	begin
+	SGPrintEngineVersion();
+	SGHint('Params is not allowed here!');
+	end;
+end;
 
-GetProcessorInfo
+initialization
+begin
+SGOtherConsoleCaller.AddComand('Other tools', @SGConsoleUSMBIOS, ['usmbios'], 'Launch uSMBIOS tool for get processor info');
+end;
+
 end.

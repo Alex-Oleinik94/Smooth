@@ -25,10 +25,9 @@ function SGNetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inli
 implementation
 
 uses
-	// Aditional console program includes
-	 SaGeConsoleProgramFindInPas
-	,SaGeConsoleProgramGoogleReNameCache
-	,SaGeConsoleProgramConvertHeaderToDynamic
+	// Engine includes
+	 SaGeVersion
+	,SaGeFPCToC
 	
 	// Aditional console tool includes
 	,SaGeConsoleEngineTools
@@ -40,9 +39,11 @@ uses
 	,SaGeConsoleShaderTools
 	,SaGeConsoleHashTools
 	
-	// Engine includes
-	,SaGeVersion
-	,SaGeFPCToC
+	// Aditional console program includes
+	,SaGeConsoleProgramFindInPas
+	,SaGeConsoleProgramGoogleReNameCache
+	,SaGeConsoleProgramConvertHeaderToDynamic
+	,SaGeConsoleProgramUSMBIOS
 	;
 
 var

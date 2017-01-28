@@ -5169,11 +5169,9 @@ var
   FSWbemLocator: OLEVariant;
   FWMIService: OLEVariant;
   FWbemObjectSet: OLEVariant;
-  FWbemObject: {$IFDEF FPC}Variant {$ELSE} OLEVariant{$ENDIF};
+  FWbemObject: OLEVariant;
   oEnum: IEnumvariant;
-  {$IFNDEF FPC}
   iValue: LongWord;
-  {$ENDIF}
   vArray: variant;
   Value: integer;
   i: integer;
@@ -5187,7 +5185,7 @@ begin;
 
   FWbemObjectSet := FWMIService.ExecQuery('SELECT * FROM MSSmBios_RawSMBiosTables', 'WQL', wbemFlagForwardOnly);
   oEnum := IUnknown(FWbemObjectSet._NewEnum) as IEnumvariant;
-  if {$IFDEF FPC} oEnum.Next(1, FWbemObject, nil){$ELSE}oEnum.Next(1, FWbemObject, iValue){$ENDIF} = 0 then
+  if oEnum.Next(1, FWbemObject, iValue) = 0 then
   begin
     //FSize := FWbemObject.Size;
     if Assigned(FRawSMBIOSData.SMBIOSTableData) then
@@ -5201,7 +5199,7 @@ begin;
 
     vArray := FWbemObject.SMBiosData;
 
-      {$IFDEF FPC} if VarIsArray(vArray) then {$ENDIF} //if (VarType(vArray) and VarArray) <> 0 then
+      
       for i := VarArrayLowBound(vArray, 1) to VarArrayHighBound(vArray, 1) do
       begin
         Value := vArray[i];
