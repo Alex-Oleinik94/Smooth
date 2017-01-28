@@ -1659,7 +1659,7 @@ case VColorSceme of
 4:
 	begin
 		Result.r := Color mod 256;
-		Result.g := (SizeOf(FImage.FImage.FBitMap) * Color) div 255;
+		Result.g := (SizeOf(FImage.FImage.BitMap) * Color) div 255;
 		Result.b := 0;	// nil
 	end;
 
@@ -1774,9 +1774,9 @@ else
 	begin
 	MandaPixel1:=GetPixelColor(FColorScheme,RecNumber);
 	end;
-FImage.FImage.FBitMap[(Y*Width+X)*3+0]:=MandaPixel1.r;
-FImage.FImage.FBitMap[(Y*Width+X)*3+1]:=MandaPixel1.g;
-FImage.FImage.FBitMap[(Y*Width+X)*3+2]:=MandaPixel1.b;
+FImage.FImage.BitMap[(Y*Width+X)*3+0]:=MandaPixel1.r;
+FImage.FImage.BitMap[(Y*Width+X)*3+1]:=MandaPixel1.g;
+FImage.FImage.BitMap[(Y*Width+X)*3+2]:=MandaPixel1.b;
 end;
 
 function TSGFractalMandelbrod.MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;

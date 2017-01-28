@@ -5,7 +5,7 @@ unit SaGeNet;
 interface
 
 uses
-	Crt
+	 Crt
 	,SysUtils
 	,Classes
 	,StrUtils

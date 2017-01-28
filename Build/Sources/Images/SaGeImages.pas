@@ -5,25 +5,19 @@ unit SaGeImages;
 interface
 
 uses
-		// System
-	 Crt
-	,Dos
-	,SysUtils
-	,Classes
 		// Engine
-	,SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
-	,SaGeCommon
-	,SaGeResourceManager
-	,SaGeRenderConstants
 	,SaGeCommonClasses
+	,SaGeCommon
+		// System
+	,Classes
 	;
 type
 	TSGImage = class;
 	TSGTextureBlock = class;
 
-	TSGIByte = type TSGExByte;
 	TSGITextureType = (SGITextureTypeTexture, SGITextureTypeBump);
 
 	PSGImage  = ^ TSGImage;
@@ -64,18 +58,13 @@ type
 		property TextureNumber : TSGInteger      read FTextureNumber write FTextureNumber;
 		property TextureType   : TSGITextureType read FTextureType   write FTextureType;
 			protected
-		procedure LoadMBMToBitMap(const Position:LongWord = 20);
+		procedure LoadMBMToBitMap(const Position:TSGUInt32 = 20);
 		procedure LoadToMemory();virtual;
 		function LoadToBitMap():TSGBoolean;virtual;
-		function GetBitMapBits():TSGCardinal;
-		procedure SetBitMapBits(const Value:TSGCardinal);
-		class function IsBMP(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-		class function IsMBM(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-		class function IsPNG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-		class function IsJPEG(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-		class function IsSGIA(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-		class function GetLongWord(const FileBits:PByte;const Position:TSGLongInt):LongWord;
-		class function GetLongWordBack(const FileBits:PByte;const Position:TSGLongInt):LongWord;
+		function GetBitMapBits():TSGBitMapUInt;
+		procedure SetBitMapBits(const Value:TSGBitMapUInt);
+		class function GetLongWord(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
+		class function GetLongWordBack(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
 			public
 		procedure Saveing(const Format:TSGExByte = SGI_DEFAULT);
 		function Loading():TSGBoolean;virtual;
@@ -92,15 +81,15 @@ type
 		procedure FreeAll();
 		function Ready():TSGBoolean;virtual;
 			public
-		property FormatType         : TSGCardinal read FImage.FFormatType  write FImage.FFormatType;
-		property DataType           : TSGCardinal read FImage.FDataType    write FImage.FDataType;
-		property Channels           : TSGCardinal read FImage.FChannels    write FImage.FChannels;
-		property BitDepth           : TSGCardinal read FImage.FSizeChannel write FImage.FSizeChannel;
+		property FormatType         : TSGBitMapUInt read FImage.FFormatType  write FImage.FFormatType;
+		property DataType           : TSGBitMapUInt read FImage.FDataType    write FImage.FDataType;
+		property Channels           : TSGBitMapUInt read FImage.FChannels    write FImage.FChannels;
+		property BitDepth           : TSGBitMapUInt read FImage.FSizeChannel write FImage.FSizeChannel;
 		property Texture            : SGUInt      read FTexture            write FTexture;
-		property Height             : TSGCardinal read FImage.FHeight      write FImage.FHeight;
-		property Width              : TSGCardinal read FImage.FWidth       write FImage.FWidth;
-		property Bits               : TSGCardinal read GetBitMapBits       write SetBitMapBits;
-		property BitMap             : PByte       read FImage.FBitMap      write FImage.FBitMap;
+		property Height             : TSGBitMapUInt read FImage.FHeight      write FImage.FHeight;
+		property Width              : TSGBitMapUInt read FImage.FWidth       write FImage.FWidth;
+		property Bits               : TSGBitMapUInt read GetBitMapBits       write SetBitMapBits;
+		property BitMap             : PSGByte       read FImage.FBitMap      write FImage.FBitMap;
 		property Image              : TSGBitMap   read FImage;
 		property Way                : TSGString   read FWay                write FWay;
 		property ReadyToGoToTexture : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
@@ -149,13 +138,23 @@ implementation
 
 uses
 		// Image formats
-	SaGeImagesBmp
+	 SaGeImagesBmp
 	,SaGeImagesJpeg
 	{$IFDEF WITHLIBPNG}
 		,SaGeImagesPng
 		{$ENDIF}
 	,SaGeImagesTga
 	,SaGeImagesSgia
+	,SaGeImageFormatDeterminer
+	
+		// System
+	,Crt
+	,Dos
+	,SysUtils
+	
+		// Engine
+	,SaGeResourceManager
+	,SaGeRenderConstants
 	;
 
 procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -182,7 +181,7 @@ var
 begin
 IsHasTexture := FTexture <> 0;
 FreeTexture();
-FReadyToGoToTexture := IsHasTexture and (FImage.FBitMap <> nil);
+FReadyToGoToTexture := IsHasTexture and (FImage.BitMap <> nil);
 end;
 
 constructor TSGTextureBlock.Create(const VContext : ISGContext);
@@ -394,39 +393,22 @@ end;
 
 procedure TSGImage.ImportFromDispley(const Point1,Point2: TSGPoint2int32;const NeedAlpha:Boolean = True);
 begin
-if Self<>nil then
-	FreeAll
+if Self <> nil then
+	FreeAll()
 else
-	Self:=TSGImage.Create;
-if NeedAlpha then
-	begin
-	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*4);
-	Render.ReadPixels(
-		Point1.x-1,//+ReadPixelsShift.x,
-		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1,
-		Point2.y-Point1.y+1,
-		SGR_RGBA,
-		SGR_UNSIGNED_BYTE,
-		FImage.FBitMap);
-	Bits:=32;
-	end
-else
-	begin
-	GetMem(FImage.FBitMap,(Point2.x-Point1.x+1)*(Point2.y-Point1.y+1)*3);
-	Render.ReadPixels(
-		Point1.x-1,//+ReadPixelsShift.x,
-		Point1.y-1,//+ReadPixelsShift.y,
-		Point2.x-Point1.x+1,
-		Point2.y-Point1.y+1,
-		SGR_RGB,
-		SGR_UNSIGNED_BYTE,
-		FImage.FBitMap);
-	Bits:=24;
-	end;
-Height:=Point2.y-Point1.y+1;
-Width:=Point2.x-Point1.x+1;
-FReadyToGoToTexture:=True;
+	Self := TSGImage.Create();
+Width := Point2.x - Point1.x + 1;
+Height := Point2.y - Point1.y + 1;
+Bits := 24 + 8 * TSGByte(NeedAlpha);
+Render.ReadPixels(
+	Point1.x-1,
+	Point1.y-1,
+	Point2.x-Point1.x+1,
+	Point2.y-Point1.y+1,
+	SGR_RGBA * TSGByte(NeedAlpha) + SGR_RGB * TSGByte(not NeedAlpha),
+	SGR_UNSIGNED_BYTE,
+	FImage.BitMap);
+FReadyToGoToTexture := True;
 end;
 
 (****************************)
@@ -434,10 +416,8 @@ end;
 (****************************)
 
 procedure TSGImage.SaveToStream(const Stream:TStream);
-var
-	Stream2:TMemoryStream = nil;
 begin
-if (FImage<>nil) and (FImage.FBitMap<>nil) then
+if (FImage<>nil) and (FImage.BitMap<>nil) then
 	begin
 	if SGResourceManager.SaveingIsSuppored('PNG') then
 		SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage)
@@ -447,12 +427,12 @@ if (FImage<>nil) and (FImage.FBitMap<>nil) then
 	end
 else
 	if (FWay<>'') and FileExists(FWay) then
-		begin
-		Stream2:=TMemoryStream.Create;
-		Stream2.LoadFromFile(FWay);
-		Stream2.SaveToStream(Stream);
-		Stream2.Destroy;
-		end;
+		with TMemoryStream.Create() do
+			begin
+			LoadFromFile(FWay);
+			SaveToStream(Stream);
+			Destroy();
+			end;
 end;
 
 procedure TSGImage.Saveing(const Format:TSGExByte = SGI_DEFAULT);
@@ -558,7 +538,7 @@ end;
 if Stream<>nil then
 	begin
 	Stream.Position:=0;
-	Stream.SaveToFile(SGSetExpansionToFileName(Way,SGGetExpansionFromImageFormat(SaveFormat)));
+	Stream.SaveToFile(SGSetExpansionToFileName(Way,TSGImageFormatDeterminer.DetermineExpansionFromFormat(SaveFormat)));
 	Stream.Destroy();
 	end;
 end;
@@ -576,36 +556,36 @@ Result:=ReadyToGoToTexture;
 {$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__Loading". Result = "'+SGStr(Result)+'"');{$ENDIF}
 end;
 
-procedure TSGImage.SetBitMapBits(const Value:Cardinal);
+procedure TSGImage.SetBitMapBits(const Value : TSGBitMapUInt);
 begin
 case Value of
 16:
 	begin
-	FImage.FSizeChannel:=4;
-	FImage.FChannels:=4;
+	FImage.SizeChannel:=4;
+	FImage.Channels:=4;
 	end;
 24:
 	begin
-	FImage.FChannels:=3;
-	FImage.FSizeChannel:=8;
+	FImage.Channels:=3;
+	FImage.SizeChannel:=8;
 	end;
 32:
 	begin
-	FImage.FChannels:=4;
-	FImage.FSizeChannel:=8;
+	FImage.Channels:=4;
+	FImage.SizeChannel:=8;
 	end;
 else
 	begin
-	FImage.FChannels:=0;
-	FImage.FSizeChannel:=0;
+	FImage.Channels:=0;
+	FImage.SizeChannel:=0;
 	end;
 end;
-FImage.CreateTypes;
+FImage.CreateTypes();
 end;
 
-function TSGImage.GetBitMapBits:Cardinal;
+function TSGImage.GetBitMapBits() : TSGBitMapUInt;
 begin
-Result:=FImage.FSizeChannel*FImage.FChannels;
+Result := FImage.SizeChannel * FImage.Channels;
 end;
 
 function TSGImage.Ready:Boolean;
@@ -613,19 +593,18 @@ begin
 Result:=ReadyTexture;
 end;
 
-
-
-procedure TSGImage.LoadMBMToBitMap(const Position:LongWord = 20);
+procedure TSGImage.LoadMBMToBitMap(const Position:TSGUInt32 = 20);
 var
 	I:LongWord;
 	Compression:Boolean = False;
 begin
 try
-	FImage.FWidth:=GetLongWord(PByte(FStream.Memory),Position+8);
-	FImage.FHeight:=GetLongWord(PByte(FStream.Memory),Position+12);
+	FImage.Width:=GetLongWord(PByte(FStream.Memory),Position+8);
+	FImage.Height:=GetLongWord(PByte(FStream.Memory),Position+12);
 	Bits:=GetLongWord(PByte(FStream.Memory),Position+24);
 	Compression:=(GetLongWord(PByte(FStream.Memory),Position+36)<>0);
-	GetMem(FImage.FBitMap,FImage.FWidth*FImage.FHeight*FImage.FChannels);
+	FImage.ReAllocateMemory();
+	FImage.CreateTypes();
 	case Bits of
 	24:
 		begin
@@ -637,9 +616,9 @@ try
 			begin
 			for i:=0 to Width*Height-1 do
 				begin
-				FImage.FBitMap[i*3+0]:=PByte(FStream.Memory)[Position+40+i*3+2];
-				FImage.FBitMap[i*3+1]:=PByte(FStream.Memory)[Position+40+i*3+1];
-				FImage.FBitMap[i*3+2]:=PByte(FStream.Memory)[Position+40+i*3+0];
+				FImage.BitMap[i*3+0]:=PByte(FStream.Memory)[Position+40+i*3+2];
+				FImage.BitMap[i*3+1]:=PByte(FStream.Memory)[Position+40+i*3+1];
+				FImage.BitMap[i*3+2]:=PByte(FStream.Memory)[Position+40+i*3+0];
 				end;
 			end;
 		end;
@@ -653,47 +632,12 @@ try
 		end;
 	end;
 except
-	FreeBits;
+	FreeBits();
 	end;
 
 	{writeln(Width);
 	writeln(Height);
 	writeln(BitMapBits);}
-end;
-
-class function TSGImage.IsPNG(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-begin
-Result:=
-	(FileBits[0]=$89) and
-	(FileBits[1]=$50) and
-	(FileBits[2]=$4E) and
-	(FileBits[3]=$47) and
-	(FileBits[4]=$0D) and
-	(FileBits[5]=$0A) and
-	(FileBits[6]=$1A) and
-	(FileBits[7]=$0A);
-end;
-
-class function TSGImage.IsSGIA(const FileBits:Pbyte;const FileBitsLength:TSGLongInt):boolean;
-begin
-Result:=(
-	(FileBits[0]=$53) and
-	(FileBits[1]=$47) and
-	(FileBits[2]=$49) and
-	(FileBits[3]=$41));
-end;
-
-class function TSGImage.IsJPEG(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-begin
-Result:=
-    ((FileBits[0]=$FF)and
-	(FileBits[1]=$D8) and
-	(FileBits[2]=$FF) );
-end;
-
-class function TSGImage.IsMBM(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-begin
-Result:=(FileBits[0]=$37) and (FileBits[1]=$0) and (FileBits[2]=$0) and (FileBits[3]=$10);
 end;
 
 procedure TSGImage.FreeTexture();
@@ -709,7 +653,10 @@ destructor TSGImage.Destroy();
 begin
 FreeAll();
 if FImage <> nil then
+	begin
 	FImage.Destroy();
+	FImage := nil;
+	end;
 inherited;
 end;
 
@@ -769,82 +716,62 @@ else
 	end;
 end;
 
-class function TSGImage.GetLongWordBack(const FileBits:PByte;const Position:LongInt):LongWord;
+class function TSGImage.GetLongWordBack(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
 begin
 Result:=FileBits[Position+3]+FileBits[Position+2]*256+FileBits[Position+1]*256*256+FileBits[Position]*256*256*256;
 end;
 
-class function TSGImage.GetLongWord(const FileBits:PByte;const Position:LongInt):LongWord;
+class function TSGImage.GetLongWord(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
 begin
 Result:=FileBits[Position]+FileBits[Position+1]*256+FileBits[Position+2]*256*256+FileBits[Position+3]*256*256*256;
 end;
 
 function TSGImage.LoadToBitMap():TSGBoolean;
+var
+	ImageFormat : TSGImageFormat = 0;
 begin
 {$IFDEF ANDROID}SGLog.Source('Enterind "TSGImage__LoadToBitMap".');{$ENDIF}
 Result:=False;
 FStream.Position:=0;
-if (FStream.Size<2) then
-	exit;
-if (not Result) and IsBMP(FStream.Memory,FStream.Size) then
-	begin
-	LoadBMP(FStream,FImage);
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as BMP is "'+SGStr(Result)+'"');
-		{$ENDIF}
+ImageFormat := TSGImageFormatDeterminer.DetermineFormat(FStream);
+if (ImageFormat = 0) and (SGUpCaseString(SGGetFileExpansion(Way)) = 'TGA') then
+	ImageFormat := SGI_TGA;
+if ImageFormat = 0 then
+	SGLog.Source(['TSGImage.LoadToBitMap() : Determining image format for "' + Way + '" failed!'])
+else
+	case ImageFormat of
+	SGI_TGA :
+		begin
+		if FImage<>nil then
+			FImage.Destroy();
+		FImage := LoadTGA(FStream);
+		end;
+	SGI_JPEG :
+		LoadJPEGToBitMap(FStream, FImage);
+	SGI_BMP :
+		LoadBMP(FStream, FImage);
+	SGI_SGIA :
+		LoadSGIAToBitMap(FStream, FImage);
+	SGI_MBM :
+		LoadMBMToBitMap();
+	{$IFDEF WITHLIBPNG}
+	SGI_PNG :
+		if SGResourceManager.LoadingIsSuppored('PNG') then
+			begin
+			if FImage <> nil then
+				FImage.Destroy();
+			FImage := SGResourceManager.LoadResourceFromStream(FStream, 'PNG') as TSGBitMap;
+			end;
+	{$ENDIF}
+	else
+		SGLog.Source(['TSGImage.LoadToBitMap() : Unknown image format "' + Way + '"!'])
 	end;
-if (not Result) and IsSGIA(FStream.Memory,FStream.Size) then
-	begin
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Begin loading "'+FWay+'" as SGIA.');
-		{$ENDIF}
-	LoadSGIAToBitMap(FStream,FImage);
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as SGIA is "'+SGStr(Result)+'"');
-		{$ENDIF}
-	end;
-if (not Result) and IsMBM(FStream.Memory,FStream.Size) then
-	begin
-	LoadMBMToBitMap;
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as MBM is "'+SGStr(Result)+'"');
-		{$ENDIF}
-	end;
-if (not Result) and IsJPEG(FStream.Memory,FStream.Size) then
-	begin
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Begin loading "'+FWay+'" as JPEG.');
-		{$ENDIF}
-	LoadJPEGToBitMap(FStream,FImage);
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as JPEG is "'+SGStr(Result)+'"');
-		{$ENDIF}
-	end;
-if (not Result) and IsPNG(FStream.Memory,FStream.Size) then
-	begin
-	if SGResourceManager.LoadingIsSuppored('PNG') then
-		FImage:=SGResourceManager.LoadResourceFromStream(FStream,'PNG') as TSGBitMap;
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as PNG is "'+SGStr(Result)+'"');
-		{$ENDIF}
-	end;
-if (not Result) and (SGUpCaseString(SGGetFileExpansion(Way))='TGA') then
-	begin
-	if FImage<>nil then
-		FImage.Destroy;
-	FImage:=LoadTGA(FStream);
-	if FImage=nil then
-		FImage:=TSGBitMap.Create;
-	Result:=FImage.BitMap<>nil;
-	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Loaded "'+FWay+'" as TGA is "'+SGStr(Result)+'"');
-		{$ENDIF}
-	end;
+if FImage = nil then
+	FImage := TSGBitMap.Create();
+Result:=FImage.BitMap<>nil;
+{$IFDEF SGDebuging}
+	SGLog.Source('TSGImage  : Loaded "' + FWay + '" as ' + SGUpCaseString(TSGImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat)) + ' is "'+SGStr(Result)+'"');
+	{$ENDIF}
 FReadyToGoToTexture:=Result;
 {$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
 end;
@@ -861,16 +788,7 @@ end;
 procedure TSGImage.FreeBits();
 begin
 if FImage <> nil then
-	if FImage.FBitMap <> nil then
-		begin
-		FreeMem(FImage.FBitMap, FImage.FWidth*FImage.FHeight*FImage.FChannels);
-		FImage.FBitMap:=nil;
-		end;
-end;
-
-class function TSGImage.IsBMP(const FileBits:Pbyte;const FileBitsLength:LongInt):boolean;
-begin
-Result:=(FileBits[0]=66) and (FileBits[1]=77);
+	FImage.ClearBitMapBits();
 end;
 
 procedure TSGImage.LoadToMemory();
@@ -908,7 +826,7 @@ Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
-Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.FBitMap);
+Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.BitMap);
 Render.BindTexture(SGR_TEXTURE_2D, 0);
 {$IFDEF MOBILE}
 	Render.GenerateMipmap(SGR_TEXTURE_2D);

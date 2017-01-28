@@ -25,6 +25,7 @@ uses
 	
 	,SaGeContext
 	,SaGeVersion
+	,SaGeImageFormatDeterminer
 	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);
@@ -97,6 +98,7 @@ if MatchingByte(8508) or
    MatchingByte(28777) or
    MatchingByte(10250) then
 	Result := ' ';
+Result := TSGImageFormatDeterminer.DetermineExpansion(Stream);
 if MatchingByte(22339) then ; //хз
 if MatchingByte(20617) then Result := 'png';
 if MatchingByte(55551) then Result := 'jpg';

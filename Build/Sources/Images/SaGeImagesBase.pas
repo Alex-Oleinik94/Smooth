@@ -14,7 +14,10 @@ uses
 	,SaGeResourceManager
 	,SaGeCommon
 	;
-
+type
+	TSGImageByte = type TSGExByte;
+	TSGIByte = TSGImageByte;
+	TSGImageFormat = TSGUInt32;
 const 
 	SGI_NONE =              $00000000;
 	SGI_LOADING =           $00000001;
@@ -30,8 +33,10 @@ const
 	SGI_JPG =               $00000006;
 	SGI_JPEG = SGI_JPG;
 	SGI_TGA =               $00000007;
+	SGI_TARGA =             SGI_TGA;
 	SGI_SGIA =              $00000008;
 	SGI_DEFAULT =           $00000009;
+	SGI_MBM  =              $00000010;
 type
 	PSGPixel3b = PSGVertex3ui8;
 	TSGPixel3b = TSGVertex3ui8;
@@ -39,8 +44,11 @@ type
 	PSGPixel4b = PSGVertex4ui8;
 	TSGPixel4b = TSGVertex4ui8;
 	
+	TSGBitMapInt = TSGInt32;
+	TSGBitMapUInt = TSGUInt32;
+	
 	TSGPixelInfo = object
-		FArray:packed array of 
+		FArray : packed array of 
 			packed record 
 				FProcent:real;
 				FIdentifity:LongWord;
@@ -51,40 +59,45 @@ type
 	
 	TSGBitMap = class(TSGResource)
 			public
-		FBitMap:PByte;
-		
-		FWidth:Cardinal;
-		FHeight:Cardinal;
-		
-		FChannels:Cardinal;
-		FSizeChannel:Cardinal;
-		
-		FFormatType:Cardinal;
-		FDataType:Cardinal;
-			public
 		constructor Create();override;
 		destructor Destroy();override;
+			protected
+		FBitMap : PSGByte;
+		
+		FWidth  : TSGBitMapUInt;
+		FHeight : TSGBitMapUInt;
+		
+		FChannels    : TSGBitMapUInt;
+		FSizeChannel : TSGBitMapUInt;
+		
+		FFormatType : TSGBitMapUInt;
+		FDataType   : TSGBitMapUInt;
 			public
-		procedure Clear;
-		procedure CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
-		procedure WriteInfo(const PredStr : TSGString = '');
-		procedure SetWidth(const NewWidth:LongInt);
-		procedure SetHeight(const NewHeight:LongInt);
-		procedure SetBounds(const NewWidth,NewHeight:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ReAllocateForBounds(const NewWidth, NewHeight : TSGLongWord);
-		procedure PutImage(const VImage : TSGBitMap; const VX, VY : TSGLongWord);
-		procedure PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGUInt32);
+		procedure WriteInfo(const PredStr : TSGString = '');
+		procedure ReAllocateMemory();
 			public
-		property Width       : Cardinal read FWidth       write FWidth;
-		property Height      : Cardinal read FHeight      write FHeight;
-		property Channels    : Cardinal read FChannels    write FChannels;
-		property BitDepth    : Cardinal read FSizeChannel write FSizeChannel;
-		property PixelFormat : Cardinal read FFormatType  write FFormatType;
-		property PixelType   : Cardinal read FDataType    write FDataType;
-		property BitMap      : PByte    read FBitMap      write FBitMap;
+		procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
+		function PixelsRGBA(const x,y:TSGBitMapUInt):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure PutImage(const VImage : TSGBitMap; const VX, VY : TSGBitMapUInt);
+		procedure PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGBitMapUInt);
+			public
+		procedure ReAllocateForBounds(const NewWidth, NewHeight : TSGBitMapUInt);
+		procedure SetWidth(const NewWidth:TSGBitMapUInt);
+		procedure SetHeight(const NewHeight:TSGBitMapUInt);
+		procedure SetBounds(const NewWidth,NewHeight:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetBounds(const NewBound:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		property Width       : TSGBitMapUInt read FWidth       write FWidth;
+		property Height      : TSGBitMapUInt read FHeight      write FHeight;
+		property Channels    : TSGBitMapUInt read FChannels    write FChannels;
+		property BitDepth    : TSGBitMapUInt read FSizeChannel write FSizeChannel;
+		property SizeChannel : TSGBitMapUInt read FSizeChannel write FSizeChannel;
+		property PixelFormat : TSGBitMapUInt read FFormatType  write FFormatType;
+		property PixelType   : TSGBitMapUInt read FDataType    write FDataType;
+		property BitMap      : PSGByte       read FBitMap      write FBitMap;
 		end;
 
 operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -92,7 +105,6 @@ operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;{$IFDEF SUPPORTINLINE}i
 operator + (const a,b:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -114,7 +126,7 @@ MultByte(Result.z, Pixel2.z);
 MultByte(Result.w, Pixel2.w);
 end;
 
-procedure TSGBitMap.PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGUInt32);
+procedure TSGBitMap.PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGBitMapUInt);
 var
 	i, ii : TSGMaxEnum;
 	Pixel : PSGPixel4b = nil;
@@ -127,7 +139,7 @@ for i := 0 to VWidth - 1 do
 		end;
 end;
 
-procedure TSGBitMap.ReAllocateForBounds(const NewWidth, NewHeight : TSGLongWord);
+procedure TSGBitMap.ReAllocateForBounds(const NewWidth, NewHeight : TSGBitMapUInt);
 var
 	NewBitMap : PByte;
 	Size, i : TSGMaxEnum;
@@ -145,7 +157,7 @@ FWidth := NewWidth;
 FHeight := NewHeight;
 end;
 
-procedure TSGBitMap.PutImage(const VImage : TSGBitMap; const VX, VY : TSGLongWord);
+procedure TSGBitMap.PutImage(const VImage : TSGBitMap; const VX, VY : TSGBitMapUInt);
 var
 	i : TSGMaxEnum;
 begin
@@ -182,21 +194,6 @@ end;
 function TSGBitMap.PixelsRGBA(const x,y:LongWord):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := @PSGPixel4b(FBitMap)[y* FWidth + x];
-end;
-
-function SGGetExpansionFromImageFormat(const Fromat:TSGExByte):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-case Fromat of
-SGI_TGA:Result:='tga';
-SGI_BMP:Result:='bmp';
-SGI_JPG:Result:='jpg';
-SGI_SGIA:Result:='sgia';
-{$IFDEF WITHLIBPNG}
-	SGI_PNG:Result:='png';
-	{$ENDIF}
-else
-	Result:='';
-end;
 end;
 
 operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -280,18 +277,18 @@ while i<=High(FArray) do
 	end;
 end;
 
-procedure TSGBitMap.SetBounds(const NewBound:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGBitMap.SetBounds(const NewBound:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetBounds(NewBound,NewBound);
 end;
 
-procedure TSGBitMap.SetBounds(const NewWidth,NewHeight:LongWord);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGBitMap.SetBounds(const NewWidth,NewHeight:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetHeight(NewHeight);
 SetWidth(NewWidth);
 end;
 
-procedure TSGBitMap.SetHeight(const NewHeight:LongInt);
+procedure TSGBitMap.SetHeight(const NewHeight:TSGBitMapUInt);
 var
 	NewBitMap:PByte = nil;
 	I,II,III,IIII:LongWord;
@@ -343,7 +340,7 @@ case FChannels*FSizeChannel of
 end;
 end;
 
-procedure TSGBitMap.SetWidth(const NewWidth:LongInt);
+procedure TSGBitMap.SetWidth(const NewWidth:TSGBitMapUInt);
 var
 	NewBitMap:PByte = nil;
 	I,II,III,IIII:LongWord;
@@ -399,7 +396,7 @@ WriteLn(PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeCha
 TextColor(7);
 end;
 
-procedure TSGBitMap.CreateTypes(const Alpha:Cardinal = SG_UNKNOWN;const Grayscale:Cardinal = SG_UNKNOWN);
+procedure TSGBitMap.CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
 begin
 FFormatType:=0;
 FDataType:=0;
@@ -442,13 +439,25 @@ else
 end;
 end;
 
-procedure TSGBitMap.Clear;
+procedure TSGBitMap.ReAllocateMemory();
 begin
-if FBitMap<>nil then
+ClearBitMapBits();
+GetMem(FBitMap, Width * Height * Channels);
+fillchar(FBitMap^, Width * Height * Channels, 0);
+end;
+
+procedure TSGBitMap.ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if FBitMap <> nil then
 	begin
 	FreeMem(FBitMap);
 	FBitMap := nil;
 	end;
+end;
+
+procedure TSGBitMap.Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+ClearBitMapBits();
 FWidth      := 0;
 FHeight     := 0;
 FSizeChannel:= 0;
@@ -480,12 +489,12 @@ constructor TSGBitMap.Create();
 begin
 inherited;
 FBitMap:=nil;
-Clear;
+Clear();
 end;
 
 destructor TSGBitMap.Destroy();
 begin
-Clear;
+Clear();
 inherited;
 end;
 

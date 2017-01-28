@@ -259,8 +259,8 @@ begin
        24:BitMap.Channels:=3;
        8:BitMap.Channels:=1;
        end;
-       BitMap.BitDepth:=biBitCount div BitMap.Channels;
-       GetMem(BitMap.FBitMap,biWidth*biHeight*BitMap.Channels);
+       BitMap.BitDepth := biBitCount div BitMap.Channels;
+       BitMap.ReAllocateMemory();
        BitMap.CreateTypes();
        
      for i := 0 to biHeight - 1 do
@@ -269,14 +269,14 @@ begin
       { skip row 32bit padding }
       with Stream do Position := Position + Round(rowLength/ 4)*4 - rowLength;
       if rowsGoingUp then rownum := i else rownum := biHeight-i-1;
-      WriteRow(@BitMap.FBitMap[rownum*(BitMap.FWidth)*BitMap.FChannels], rowData);
+      WriteRow(@BitMap.BitMap[rownum*(BitMap.Width)*BitMap.Channels], rowData);
      end;
      
     finally
      FreeMem(pointer(rowdata));
      FreeMem(pointer(palette));
     end;
-   except BitMap.Clear; raise end;
+   except BitMap.Clear(); raise end;
   end;
 
  except
@@ -284,7 +284,7 @@ begin
    // specified number of bytes 
   on E: EReadError do raise EInvalidBMP.Create('Read error: ' + E.Message);
   on E: ECheckFailed do raise EInvalidBMP.Create('Wrong bitmap: ' + E.Message);}
-  BitMap.Clear;
+  BitMap.Clear();
  end;
 end;
 

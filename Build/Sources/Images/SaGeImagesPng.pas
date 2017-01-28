@@ -54,7 +54,7 @@ if (VExpansion<>'PNG') or (not(VResource is TSGBitMap)) then
 	Result:=False
 else
 	begin
-	SavePNG(VResource as TSGBitMap,VStream);
+	SavePNG(VResource as TSGBitMap, VStream);
 	Result:=True;
 	end;
 end;
@@ -155,19 +155,19 @@ try
 
 	png_read_info(png_ptr, info_ptr);
 
-	BitMap.FWidth := png_get_image_width(png_ptr, info_ptr);
-	BitMap.FHeight := png_get_image_height(png_ptr, info_ptr);
-	BitMap.FChannels:=png_get_channels(png_ptr, info_ptr);
-	BitMap.FSizeChannel:=png_get_bit_depth(png_ptr, info_ptr);
+	BitMap.Width := png_get_image_width(png_ptr, info_ptr);
+	BitMap.Height := png_get_image_height(png_ptr, info_ptr);
+	BitMap.Channels:=png_get_channels(png_ptr, info_ptr);
+	BitMap.SizeChannel:=png_get_bit_depth(png_ptr, info_ptr);
+	BitMap.ReAllocateMemory();
 	BitMap.CreateTypes();
 
 	png_read_update_info(png_ptr, info_ptr);
 
-	SetLEngth(row_pointers,BitMap.FHeight);
-	GetMem(BitMap.FBitMap,BitMap.FWidth*BitMap.FHeight*BitMap.FChannels);
+	SetLEngth(row_pointers,BitMap.Height);
 
-	for i := 0 to BitMap.FHeight-1 do
-		row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
+	for i := 0 to BitMap.Height-1 do
+		row_pointers[i] := @BitMap.BitMap[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
 
 	png_read_image(png_ptr, @row_pointers[0]);
 
@@ -211,7 +211,7 @@ try
 	png_ptr := png_create_write_struct(PNG_LIBPNG_VER_STRING,Pointer(WarningsList),@our_png_error_fn,@our_png_warning_fn);
 	info_ptr := png_create_info_struct(png_ptr);
 	png_set_write_fn(png_ptr, Stream,@our_png_write_fn,@our_png_flush_fn);
-	BitMap.CreateTypes;
+	BitMap.CreateTypes();
 	if BitMap.PixelFormat=SGR_RGB then
 		ColorType:=PNG_COLOR_MASK_COLOR
 	else
@@ -233,8 +233,8 @@ try
 	png_write_info(png_ptr, info_ptr);
 	SetLength(row_pointers,BitMap.Height);
 	try
-		for i := 0 to BitMap.FHeight-1 do
-			row_pointers[i] := @BitMap.FBitMap[(BitMap.FHeight-1 -i )*(BitMap.FWidth)*BitMap.FChannels];
+		for i := 0 to BitMap.Height-1 do
+			row_pointers[i] := @BitMap.BitMap[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
 		png_write_image(png_ptr, @row_pointers[0]);
 	finally
 		SetLength(row_pointers,0);
