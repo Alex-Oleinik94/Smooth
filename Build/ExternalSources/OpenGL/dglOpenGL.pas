@@ -14852,9 +14852,11 @@ procedure Read_WIN_swap_hint;
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 var

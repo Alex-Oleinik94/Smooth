@@ -43,6 +43,10 @@ type
 
 implementation
 
+uses
+	 SaGeLog
+	;
+
 class function TSGGameTron.ClassName():string;
 begin
 Result := 'Трон';

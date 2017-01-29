@@ -4,7 +4,12 @@ unit Ex13_Model;
 interface
 
 uses
-	crt
+	Crt
+	,Classes
+	,SysUtils
+	
+	,StrMan
+	
 	,SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
@@ -14,9 +19,6 @@ uses
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeImages
-	,Classes
-	,SysUtils
-	,StrMan
 	,SaGeResourceManager
 	;
 
@@ -149,6 +151,10 @@ type
 function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function TModel.GetTexturesCount():TSGLongWord;inline;
 begin

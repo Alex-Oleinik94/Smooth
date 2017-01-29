@@ -24,6 +24,7 @@ uses
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeScreenBase
+	,SaGeStringUtils
 	;
 type
 	TSGApprFunction = class(TSGScreenedDrawable)

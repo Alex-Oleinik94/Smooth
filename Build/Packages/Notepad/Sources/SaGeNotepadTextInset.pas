@@ -5,21 +5,21 @@ unit SaGeNotepadTextInset;
 interface
 
 uses 
-	 crt
+	 Crt
 	,SysUtils
+	,Classes
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeContext
 	,SaGeScreen
 	,SaGeUtils
-	,Classes
 	,SaGeCommon
 	,SaGeRender
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager
-	,StrMan
 	,SaGeNotepad
 	,SaGeScreenBase
 	;
@@ -72,6 +72,13 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	,SaGeEncodingUtils
+	
+	,StrMan
+	;
 
 function TSGNTextInset.GetTextColor(const VString : TSGString) : TSGVertex4fList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

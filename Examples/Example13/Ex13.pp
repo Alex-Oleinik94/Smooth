@@ -25,6 +25,7 @@ uses
 	,SaGeMesh
 	,SaGeShaders
 	,SaGeScreenBase
+	,SaGeStringUtils
 	
 	,Ex13_Model
 	;

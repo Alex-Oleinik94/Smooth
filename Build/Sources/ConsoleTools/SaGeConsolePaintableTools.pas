@@ -39,6 +39,7 @@ uses
 	,SaGeAudioRender
 	,SaGeCommonUtils
 	,SaGeVersion
+	,SaGeStringUtils
 	
 	// System-dependent includes
 	{$IFDEF MSWINDOWS}

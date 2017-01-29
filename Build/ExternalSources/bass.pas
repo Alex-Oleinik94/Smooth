@@ -1326,8 +1326,8 @@ uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
-
 
 function BASS_SPEAKER_N(n: DWORD): DWORD;
 begin

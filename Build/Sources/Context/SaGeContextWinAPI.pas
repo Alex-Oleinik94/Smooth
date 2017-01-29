@@ -18,6 +18,7 @@ uses
 	,SaGeClasses
 	,SaGeCommonClasses
 	,SaGeImagesBase
+	,SaGeStringUtils
 	
 	// Windows units
 	,Windows
@@ -116,6 +117,8 @@ implementation
 
 uses
 	 SaGeScreen
+	,SaGeLog
+	
 	,SysUtils
 	;
 

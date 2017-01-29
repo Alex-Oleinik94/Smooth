@@ -3,19 +3,21 @@
 unit SaGeImageFileOpener;
 
 interface
+
 uses
-	  Classes
-	, SaGeBase
-	, SaGeBased
-	, SaGeClasses
-	, SaGeFileOpener
-	, SaGeContext
-	, SaGeLoading
-	, SaGeUtils
-	, SaGeCommonClasses
-	, SaGeCommon
-	, SaGeImages
-	, SaGeThreads
+	 Classes
+	
+	,SaGeBase
+	,SaGeBased
+	,SaGeClasses
+	,SaGeFileOpener
+	,SaGeContext
+	,SaGeLoading
+	,SaGeUtils
+	,SaGeCommonClasses
+	,SaGeCommon
+	,SaGeImages
+	,SaGeThreads
 	;
 
 type
@@ -26,8 +28,7 @@ type
 		class function GetDrawableClass() : TSGFileOpenerDrawableClass; override;
 		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
-
-type
+	
 	TSGImageViewer = class(TSGFileOpenerDrawable)
 			public
 		destructor Destroy();override;
@@ -40,7 +41,7 @@ type
 			private
 		FBackgroundColor : TSGColor3f;
 		FWaitAnimation : TSGWaiting;
-
+		
 		FBackgroundImage : TSGImage;
 		FImage : TSGImage;
 		FLoadingThread : TSGThread;
@@ -62,12 +63,14 @@ type
 implementation
 
 uses
-{$IFDEF WITHLIBPNG}
-	SaGeImagesPng,
-{$ENDIF}
-	SaGeRender,
-	SaGeRenderConstants,
-	SysUtils
+	 SaGeStringUtils
+	{$IFDEF WITHLIBPNG}
+		,SaGeImagesPng
+	{$ENDIF}
+	,SaGeRender
+	,SaGeRenderConstants
+	
+	,SysUtils
 	;
 
 class function TSGImageFileOpener.ClassName() : TSGString;

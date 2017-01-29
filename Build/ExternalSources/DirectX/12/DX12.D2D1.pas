@@ -3076,9 +3076,10 @@ function ComputeFlatteningTolerance(matrix: TD2D1_MATRIX_3X2_F; dpiX: single = 9
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 function FloatMax: single;

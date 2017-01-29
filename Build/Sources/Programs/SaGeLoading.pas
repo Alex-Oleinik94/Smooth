@@ -1,14 +1,18 @@
 {$INCLUDE SaGe.inc}
+
 unit SaGeLoading;
+
 interface
+
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeCommon
 	,SaGeUtils
 	;
+
 type
 	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
 	//Класс загрузки.
@@ -66,6 +70,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function TSGWaiting.PaintAt(const VX, VY, VW, VH : TSGLongWord; const VActive : TSGBool = True) : TSGBool;
 begin

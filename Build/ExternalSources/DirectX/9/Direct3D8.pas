@@ -2753,9 +2753,10 @@ var _Direct3DCreate8 : function( SDKVersion : LongWord ) : Pointer ; stdcall ;
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 (*==========================================================================;

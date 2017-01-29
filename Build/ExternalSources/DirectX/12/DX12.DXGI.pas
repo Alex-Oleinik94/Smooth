@@ -658,9 +658,10 @@ var CreateDXGIFactory1 : function( const riid : TGUID ; out ppFactory ) : HResul
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 { TD3DCOLORVALUE }

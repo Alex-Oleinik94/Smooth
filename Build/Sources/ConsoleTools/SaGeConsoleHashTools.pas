@@ -20,6 +20,7 @@ uses
 	,SaGeHash
 	,SaGeVersion
 	,SaGeResourceManager
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleHash(const VParams : TSGConcoleCallerParams = nil);

@@ -1,8 +1,12 @@
 {$INCLUDE SaGe.inc}
-Unit SaGeGeneticalAlgoritmRelease;
+
+unit SaGeGeneticalAlgoritmRelease;
+
 interface
+
 uses 
-	crt
+	 Crt
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeGeneticalAlgoritm
@@ -21,6 +25,10 @@ uses
 {$UNDEF SGREADINTERFACE}
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$INCLUDE SaGeExampleGeneticalAlgoritm.inc}

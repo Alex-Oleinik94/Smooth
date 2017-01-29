@@ -20,6 +20,7 @@ uses
 	,StrMan
 	
 	,SaGeMath
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleCalculateBoolTable(const VParams : TSGConcoleCallerParams = nil);

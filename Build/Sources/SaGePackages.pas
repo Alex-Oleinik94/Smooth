@@ -49,7 +49,10 @@ procedure SGRegisterPackage(const PackageInfo : TSGPackageInfo;const FileRegistr
 implementation
 
 uses
-	crt
+	 Crt
+	
+	,SaGeStringUtils
+	
 	{$INCLUDE SaGeFileRegistrationPackages.inc}
 	;
 var

@@ -14,12 +14,12 @@ uses
 	,SaGeCommon
 	,SaGeAudioRender
 	,SaGeAudioDecoder
-
+	
 	// System
 	,Classes
 	,SysUtils
 	,SyncObjs
-
+	
 	// Audio Library
 	,OpenAL
 	,Alut
@@ -101,7 +101,9 @@ function SGOpenALStrFormat(const VFormat : TSGALFormat) : TSGString;
 implementation
 
 uses
-	SaGeDllManager
+	 SaGeDllManager
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 function SGOpenALFormatFromAudioInfo(const VInfo : TSGAudioInfo) : TSGALFormat;

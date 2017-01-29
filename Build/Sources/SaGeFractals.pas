@@ -141,6 +141,10 @@ type
 
 implementation
 
+uses
+	 SaGeStringUtils
+	;
+
 procedure TSG3DFractal.DeleteDeviceResources();
 begin
 ClearMesh();

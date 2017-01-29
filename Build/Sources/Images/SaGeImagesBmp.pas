@@ -5,13 +5,14 @@ unit SaGeImagesBmp;
 interface
 
 uses
-	crt
+	 Crt
+	,Classes
+	,SysUtils
+	,Dos
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesBase
-	,Classes
-	,SysUtils
-	,dos
 	;
 
 procedure LoadBMP(Stream: TStream; BitMap: TSGBitMap);
@@ -19,6 +20,9 @@ procedure SaveBMP(BitMap: TSGBitMap; Stream: TStream);
 
 implementation
 
+uses
+	 SaGeLog
+	;
 
 type
   TBitmapFileHeader = packed record

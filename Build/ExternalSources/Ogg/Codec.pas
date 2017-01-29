@@ -356,6 +356,7 @@ uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 

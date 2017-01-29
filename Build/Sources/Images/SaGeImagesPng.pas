@@ -9,10 +9,13 @@ function SupporedPNG() : Boolean;
 implementation
 
 uses
-	crt
-	,png
+	Crt
 	,Classes
+	
+	,png
+	
 	,SaGeImagesBase
+	,SaGeLog
 	,SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants

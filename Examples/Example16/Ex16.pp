@@ -28,6 +28,7 @@ uses
 	,SaGeShaders
 	,SaGeImages
 	,SaGeFractalTerrain
+	,SaGeStringUtils
 	
 	,Ex5_Physics
 	;

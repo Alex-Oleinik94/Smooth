@@ -11,11 +11,14 @@ interface
 uses
 	 SysUtils
 	,Classes
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeImagesJpeg
 	,SaGeImagesBmp
-	,SaGeImagesBase;
+	,SaGeImagesBase
+	,SaGeStringUtils
+	;
 
 procedure SaveSGIA(const Stream:TStream;var FImage:TSGBitMap);
 procedure LoadSGIAToBitMap(const FStream:TStream;var FImage:TSGBitMap);

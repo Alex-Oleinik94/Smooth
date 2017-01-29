@@ -5,17 +5,20 @@ unit SaGeMath;
 interface
 
 uses 
-	crt
+	 Crt
+	,Math
 	,Classes
+	
 	,SaGeCommon
 	,SaGeBase
 	,SaGeBased
-	,Math
 	,SaGeRender
 	,SaGeContext
 	,SaGeClasses
 	,SaGeCommonClasses
-	,SaGeRenderConstants;
+	,SaGeRenderConstants
+	;
+
 type
 	TSGMathFloatType = {$IFNDEF ANDROID}Extended{$ELSE}Real{$ENDIF};
 	
@@ -228,6 +231,10 @@ type
 function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

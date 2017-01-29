@@ -1,11 +1,18 @@
 {$INCLUDE SaGe.inc}
+
 unit SaGeFPCToC;
+
 interface
+
 uses
 	 Classes
+	
+	,SaGeStringUtils
 	,SaGeBase
 	,SaGeBased
+	,SaGeConsoleToolsBase
 	;
+
 type
 	SGTranslater=class;
 	
@@ -254,6 +261,9 @@ type
 
 implementation
 
+uses
+	 SaGeLog
+	;
 {==============}(*SGTExpression*){==============}
 
 class function SGTExpression.ClassName:string;

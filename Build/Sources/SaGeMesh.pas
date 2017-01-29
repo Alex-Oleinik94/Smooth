@@ -5,17 +5,19 @@ unit SaGeMesh;
 interface
 
 uses
-      SaGeBase
-    , SaGeCommon
-    , SaGeBased
-    , SaGeImages
-    , SaGeRender
-    , SaGeRenderConstants
-    , SaGeCommonClasses
-    
-    , Classes
-    , Crt
-    ;
+	 SaGeBase
+	,SaGeDateTime
+	,SaGeCommon
+	,SaGeBased
+	,SaGeImages
+	,SaGeRender
+	,SaGeRenderConstants
+	,SaGeCommonClasses
+	,SaGeStringUtils
+	
+	,Classes
+	,Crt
+	;
 const
 	SGMeshVersion : TSGQuadWord = 169;
 type
@@ -529,6 +531,10 @@ type
 {$UNDEF SGREADINTERFACE}
 
 implementation
+
+uses
+	SaGeLog
+	;
 
 {$DEFINE SGREADIMPLEMENTATION}
 {$INCLUDE SaGeMesh3ds.inc}

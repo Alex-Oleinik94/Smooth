@@ -4,16 +4,17 @@ unit SaGeAudioFileOpener;
 
 interface
 uses
-	  Classes
-	, SaGeBase
-	, SaGeBased
-	, SaGeClasses
-	, SaGeFileOpener
-	, SaGeContext
-	, SaGeLoading
-	, SaGeUtils
-	, SaGeCommonClasses
-	, SaGeCommon
+	 Classes
+	
+	,SaGeBase
+	,SaGeBased
+	,SaGeClasses
+	,SaGeFileOpener
+	,SaGeContext
+	,SaGeLoading
+	,SaGeUtils
+	,SaGeCommonClasses
+	,SaGeCommon
 	;
 
 type
@@ -28,12 +29,14 @@ type
 implementation
 
 uses
-	SysUtils
+	 SysUtils
+	,Crt
+	,Dos
+	
 	,SaGeAudioRender
 	,SaGeAudioDecoder
 	,SaGeDllManager
-	,crt
-	,dos
+	,SaGeStringUtils
 	;
 
 procedure ConsolePlayFile(const FileName : TSGString);

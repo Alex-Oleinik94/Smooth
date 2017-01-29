@@ -283,6 +283,11 @@ procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
 
 implementation
 
+uses
+	 SaGeStringUtils
+	,SaGeLog
+	;
+
 class function TSGRenderOpenGL.ClassName() : TSGString;
 begin
 Result := 'TSGRenderOpenGL';

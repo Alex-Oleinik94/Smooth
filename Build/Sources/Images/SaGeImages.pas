@@ -11,6 +11,7 @@ uses
 	,SaGeImagesBase
 	,SaGeCommonClasses
 	,SaGeCommon
+	,SaGeStringUtils
 		// System
 	,Classes
 	;
@@ -146,6 +147,7 @@ uses
 	,SaGeImagesTga
 	,SaGeImagesSgia
 	,SaGeImageFormatDeterminer
+	,SaGeLog
 	
 		// System
 	,Crt

@@ -6,6 +6,7 @@ interface
 
 uses
 	 SaGeBased
+	
 	,Classes
 	;
 
@@ -59,9 +60,12 @@ procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VM
 implementation
 
 uses
-	SaGeResourceManager
+	 SaGeResourceManager
 	,SaGeBase
 	,SaGeVersion
+	,SaGeStringUtils
+	,SaGeLog
+	
 	,StrMan
 	;
 

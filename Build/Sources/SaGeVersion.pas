@@ -5,9 +5,12 @@ unit SaGeVersion;
 interface
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeResourceManager
+	,SaGeDateTime
+	,SaGeStringUtils
+	
 	,Classes
 	;
 

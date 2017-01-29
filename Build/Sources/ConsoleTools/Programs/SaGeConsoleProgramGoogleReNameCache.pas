@@ -26,6 +26,7 @@ uses
 	,SaGeContext
 	,SaGeVersion
 	,SaGeImageFormatDeterminer
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);

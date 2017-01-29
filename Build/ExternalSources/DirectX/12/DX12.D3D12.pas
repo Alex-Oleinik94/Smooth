@@ -2351,9 +2351,10 @@ var D3D12GetDebugInterface : function( const riid : TGUID ; out ppvDebug ) : HRe
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

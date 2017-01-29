@@ -22,6 +22,8 @@ uses
 	,SaGeRenderConstants
 	,SaGeImagesBase
 	,SaGeMesh
+	,SaGeDateTime
+	,SaGeSysUtils
 	
 	,Crt
 	,Classes
@@ -49,6 +51,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 constructor TSGAllFractals.Create(const VContext:ISGContext);
 begin

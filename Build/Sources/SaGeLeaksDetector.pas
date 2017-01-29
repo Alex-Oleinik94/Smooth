@@ -3,10 +3,12 @@
 unit SaGeLeaksDetector;
 
 interface
+
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	;
+
 type
 	TSGLeaksDetectorReference = object
 			public
@@ -32,6 +34,11 @@ var
 	LeaksDetector : TSGLeaksDetector = nil;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	,SaGeLog
+	;
 
 constructor TSGLeaksDetector.Create();
 begin
@@ -157,7 +164,8 @@ end;
 
 initialization
 begin
-LeaksDetector := TSGLeaksDetector.Create();
+if LeaksDetector = nil then
+	LeaksDetector := TSGLeaksDetector.Create();
 end;
 
 finalization

@@ -7,10 +7,11 @@ unit SaGeDllManager;
 interface
 
 uses
-	SaGeCommon
-	, SaGeBase
-	, SaGeBased
-	, SaGeClasses
+	 SaGeCommon
+	,SaGeBase
+	,SaGeBased
+	,SaGeClasses
+	,SaGeStringUtils
 	;
 
 const
@@ -140,10 +141,12 @@ operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;
 implementation
 
 uses
-	SaGeVersion
+	 SaGeVersion
+	,SaGeLog
+	
 	,StrMan
-	,crt
-	,dos
+	,Crt
+	,Dos
 	;
 
 operator + (A, B : TSGDllLoadObject):TSGDllLoadObject; overload;

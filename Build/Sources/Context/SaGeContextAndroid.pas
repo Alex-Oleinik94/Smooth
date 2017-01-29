@@ -3,7 +3,7 @@ unit SaGeContextAndroid;
 interface
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
@@ -63,7 +63,10 @@ type
 implementation
 
 uses
-	SaGeScreen;
+	 SaGeScreen
+	,SaGeLog
+	,SaGeStringUtils
+	;
 
 class function TSGContextAndroid.Suppored() : TSGBoolean;
 begin

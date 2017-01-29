@@ -10,9 +10,9 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeAudioDecoder
-
+	
 	,Classes
-
+	
 	,mpg123
 	;
 
@@ -52,8 +52,11 @@ function mpg123_StrEncoding(const VEncoding : integer) : TSGString;
 implementation
 
 uses
-	SysUtils
+	 SysUtils
+	
+	,SaGeStringUtils
 	,SaGeDllManager
+	,SaGeLog
 	;
 
 class function TSGAudioDecoderMPG123.SupporedFormats() : TSGStringList;

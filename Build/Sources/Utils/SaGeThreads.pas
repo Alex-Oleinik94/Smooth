@@ -114,6 +114,10 @@ type
 
 implementation
 
+uses
+	 SaGeLog
+	,SaGeStringUtils
+	;
 
 constructor TSGThread.Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 begin

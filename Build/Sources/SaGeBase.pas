@@ -1,5 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
-//{$DEFINE USE_uSMBIOS}
+{$INCLUDE SaGe.inc}
 
 unit SaGeBase;
 
@@ -21,9 +20,6 @@ uses
 	,SysUtils
 	,Classes
 	,Process
-	{$IFDEF USE_uSMBIOS}
-		,uSMBIOS
-		{$ENDIF}
 	{$IFDEF ANDROID}
 		,ctypes
 		,cmem
@@ -45,41 +41,7 @@ const
 			SGLibraryNameEnd = '';
 			{$ENDIF}
 		{$ENDIF}
-const
-	//Табкица перевода символов изт кодировки WINDOWS1251 в CP866
-	SGAnsiToASCII: packed array[char] of char = {Ansi - WINDOWS1251(CP1251); ASCII - CP866 }
-    (#$00, #$01, #$02, #$03, #$04, #$05, #$06, #$07,   { $00 - $07 }
-     #$08, #$09, #$0a, #$0b, #$0c, #$0d, #$0e, #$0f,   { $08 - $0f }
-     #$10, #$11, #$12, #$13, #$14, #$15, #$16, #$17,   { $10 - $17 }
-     #$18, #$19, #$1a, #$1b, #$1c, #$1d, #$1e, #$1f,   { $18 - $1f }
-     #$20, #$21, #$22, #$23, #$24, #$25, #$26, #$27,   { $20 - $27 }
-     #$28, #$29, #$2a, #$2b, #$2c, #$2d, #$2e, #$2f,   { $28 - $2f }
-     #$30, #$31, #$32, #$33, #$34, #$35, #$36, #$37,   { $30 - $37 }
-     #$38, #$39, #$3a, #$3b, #$3c, #$3d, #$3e, #$3f,   { $38 - $3f }
-     #$40, #$41, #$42, #$43, #$44, #$45, #$46, #$47,   { $40 - $47 }
-     #$48, #$49, #$4a, #$4b, #$4c, #$4d, #$4e, #$4f,   { $48 - $4f }
-     #$50, #$51, #$52, #$53, #$54, #$55, #$56, #$57,   { $50 - $57 }
-     #$58, #$59, #$5a, #$5b, #$5c, #$5d, #$5e, #$5f,   { $58 - $5f }
-     #$60, #$61, #$62, #$63, #$64, #$65, #$66, #$67,   { $60 - $67 }
-     #$68, #$69, #$6a, #$6b, #$6c, #$6d, #$6e, #$6f,   { $68 - $6f }
-     #$70, #$71, #$72, #$73, #$74, #$75, #$76, #$77,   { $70 - $77 }
-     #$78, #$79, #$7a, #$7b, #$7c, #$7d, #$7e, #$7f,   { $78 - $7f }
-     '?' , '?' , '?' , '?' , '?' , '?' , '?' , '?' ,   { $80 - $87 }
-     '?' , '?' , '?' , '?' , '?' , '?' , '?' , '?' ,   { $88 - $8f }
-     '?' , '?' , '?' , '?' , '?' , '?' , '?' , '?' ,   { $90 - $97 }
-     '?' , '?' , '?' , '?' , '?' , '?' , '?' , '?' ,   { $98 - $9f }
-     #$ff, #$ad, #$9b, #$9c, '?' , #$9d, '?' , '?' ,   { $a0 - $a7 }
-     '?' , '?' , #$a6, #$ae, #$aa, '?' , '?' , '?' ,   { $a8 - $af }
-     #$f8, #$f1, #$fd, '?' , '?' , #$e6, '?' , #$fa,   { $b0 - $b7 }
-     '?' , '?' , #$a7, #$af, #$ac, #$ab, '?' , #$a8,   { $b8 - $bf }
-     '?' , '?' , '?' , '?' , #$8e, #$8f, #$92, #$80,   { $c0 - $c7 }
-     '?' , #$90, '?' , '?' , '?' , '?' , '?' , '?' ,   { $c8 - $cf }
-     '?' , #$a5, '?' , '?' , '?' , '?' , #$99, '?' ,   { $d0 - $d7 }
-     '?' , '?' , '?' , '?' , #$9a, '?' , '?' , #$e1,   { $d8 - $df }
-     #$85, #$a0, #$83, '?' , #$84, #$86, #$91, #$87,   { $e0 - $e7 }
-     #$8a, #$82, #$88, #$89, #$8d, #$a1, #$8c, #$8b,   { $e8 - $ef }
-     '?' , #$a4, #$95, #$a2, #$93, '?' , #$94, #$f6,   { $f0 - $f7 }
-     '?' , #$97, #$a3, #$96, #$81, '?' , '?' , #$98);  { $f8 - $ff }
+
 const
 	SGFrameButtonsType0f =               $000003;
 	SGFrameButtonsTypeCleared = SGFrameButtonsType0f;
@@ -178,12 +140,6 @@ const
 	{$IF (not defined(RELEASE)) and (not defined(MOBILE))}
 		SGTempDirectory = '.'+Slash+'..'+Slash+'Temp';
 		{$ENDIF}
-var
-	//Если эту переменную задать как False, то SGLog.Source нечего делать не будет,
-	//и самого файлика лога SGLog.Create не создаст
-	SGLogEnable:Boolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
-const
-	SGLogDirectory = {$IFDEF ANDROID}'/sdcard/.SaGe'{$ELSE}SGDataDirectory{$ENDIF};
 type
 	TSGViewErrorCase = (
 		SGPrintError,
@@ -232,19 +188,6 @@ type
 	TArTArLongWord = type packed array of TArLongWord;
 	TArConst       = type packed array of TVarRec;
 	TSGArConst     = type TArConst;
-	TSGArString    = TSGStringList;
-	TSGConcoleCallerParams = TSGStringList;
-
-	TSGArStringEnumerator = class
-			private
-		FList : TSGArString;
-		FIndex : TSGLongInt;
-			public
-		constructor Create(const List : TSGArString);
-		function GetCurrent(): TSGString;
-		function MoveNext(): TSGBoolean;
-		property Current : TSGString read GetCurrent;
-		end;
 
 	PTArLongint  = ^ TArLongint;
 	PTArLongword = ^ TArLongword;
@@ -316,23 +259,6 @@ type
 const
 	fmCreate = Classes.fmCreate;
 	fmOpenRead = Classes.fmOpenRead;
-type
-	//Класс даты и времени
-	TArFrom1To8OfLongInt = array[1..8] of LongInt;
-	PArFrom1To8OfLongInt = ^ TArFrom1To8OfLongInt;
-	TSGDateTime=object
-		Years,Month,Day,Week:LongInt;
-		Hours,Minutes,Seconds,Sec100:LongInt;
-		procedure Get;
-		function GetPastSecondsFrom(const a:TSGDateTime):int64;
-		function GetPastSeconds:int64;
-		procedure Write;
-		procedure Import(a1,a2,a3,a4,a5,a6,a7,a8:LongInt);
-		procedure ImportFromSeconds( Sec:int64);
-		procedure Clear;
-		function GetPastMiliSeconds:int64;
-		function GetPastMiliSecondsFrom(const a:TSGDateTime):int64;
-		end;
 const
 	SGSetExists               : TSGExByte = 100;
 	SGSetNote                 : TSGExByte = 101;
@@ -352,23 +278,6 @@ type
 		function  ExistsItem(const FItem:String):TSGExByte;overload;
 		procedure KillItem(const FItem:string);
 		end;
-	//Лог программы
-	TSGLog = class(TObject)
-			public
-		constructor Create;
-		destructor Destroy;override;
-		procedure Source(const s:string;const WithTime:Boolean = True);overload;
-		procedure Source(const Ar : array of const;const WithTime:Boolean = True);overload;
-		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-		procedure Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-			private
-		FFileStream:TFileStream;
-		end;
-	TSGConsoleRecord = packed record
-			FTitle : string;
-			FProcedure : TSGProcedure;
-			end;
-	TSGConsoleMenuArray = packed array of TSGConsoleRecord;
 const
 	//Значения, которые может принимать type TSGExBoolean
 	SG_TRUE = TSGExBoolean(1);
@@ -378,8 +287,6 @@ const
 	//Используется для вычисления с Эпсилон
 	SGZero = 0.0001;
 var
-	//Экземпляр класса лога программы
-	SGLog:TSGLog = nil;
 	//Несуществующее значение
 	Nan:real;
 	//Бесконечное значение
@@ -387,11 +294,6 @@ var
 
 //Сливает массивы Real-ов
 operator + (a,b:TArReal):TArReal;inline;
-
-//Вычитает одну дату их другой. Из результата можно
-//Вызвать функцию, возвращающую прошедшые (мили)секунды
-//И получить разницу во времени этих дат в (мили)секундах
-operator - (const a,b:TSGDateTime):TSGDateTime;inline;
 
 function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -403,47 +305,8 @@ function GetProcAddress(const Lib : TSGLibHandle; const VPChar:PChar):Pointer;{$
 //Result := Trunc(T)+1
 function SGTruncUp(const T : Real):LongInt;inline;
 
-//Из потока считывается сткока, пока не будет найден нулевой байт
-function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGReadLnStringFromStream(const Stream:TStream):String;inline;
-
-//Записывает строку в поток. Если (Stavit00 = True), то в конце записывается нулевой байт.
-procedure SGWriteStringToStream(const String1:String;const Stream:TStream;const Stavit00:Boolean = True);inline;
-
-//Читает изтекстовова файла строку, находящиюся в двойных кавычках
-function SGReadStringInQuotesFromTextFile(const TextFile:PText):String;
-
-//Читает слово из файла. (В слове нету пробелов)
-function SGReadWordFromTextFile(const TextFile:PTextFile):String;
-
-//Обращает строку в верхний регистр
-function SGUpCaseString(const S:String):String;
-
-//Добавляет в конце строки нулевой байт, и возвращает указатель на строку
-function SGStringAsPChar(var Str:String):PChar;
-
-//Если ( Bool = True ), то Result := Строка, нежели Result := ''.
-function SGPCharIf(const Bool:Boolean;const VPChar:PChar):PChar;
-function SGStringIf(const B:Boolean;const s:string):string;inline;
-
 //Возвращает имена всех файлов в этом каталоге
 function SGGetFileNames(const Catalog:String;const What:String = ''):TSGStringList;
-
-//Возвращает указатель на нулевой байт
-function SGPCharNil:PChar;inline;
-
-//Переводит LongInt в String
-function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
-
-//Переводит секунды в строку, где они будут уже распределены на года, месяца и т д
-function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGMiliSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-//Это функции для отладки WinAPI функций, связанных с символами, получиными в SaGeContextWinAPI как коды клавиш
-function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetLanguage:String;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Вычисление максимального или минимального значения из заданых
 function SGMax(const a,b:single):single;inline;overload;
@@ -461,12 +324,6 @@ function SGMin(const a,b:QWord):QWord;overload;inline;
 //Возвращает расширение файла в верхнем регистре
 function SGGetFileExpansion(const FileName:string):string;inline;
 
-//Проверяет, не образована ли строка AString как Part + [хз]
-function SGExistsFirstPartString(const AString:String;const Part:String):Boolean;
-
-//Читает строку из потока, находящиюся между символами Quote
-function SGReadStringInQuotesFromStream(Const Stream:TStream;const Quote:char = #39):string;inline;
-
 //Загружает часть потока в другой поток
 procedure SGLoadLoadPartStreamToStream(const StreamIn,StreamOut:TStream; const Size:Int64);overload;inline;
 
@@ -476,58 +333,11 @@ procedure SGLoadLoadPartStreamToStream(const StreamIn:TStream;StreamOut:TMemoryS
 //Вычисления логорифма
 function Log(const a,b:real):real;inline;
 
-//Возвращает длинну строки
-function SGPCharLength(const pc:PChar):int64;inline;
-
-//Перевод Boolean в String
-function SGStr(const b:boolean):String;overload;inline;
-
-//Возвращает строку, гду красивенько написан размер файла, занимающего Size байт
-function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):String;inline;
-
-//Переводит действительное число в строку, оставив после запятой l цифр
-function SGStrReal(r:real;const l:longint):string;
-function SGStrExtended(r:Extended;const l:longint):string;inline;
-function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
-function SGCheckFloatString(const S : TSGString; const Point : TSGChar = '.') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-//перевод строки в строку С++. При этом выбеляется память (Length(s)+1) под указатель на строк С++.
-function SGStringToPChar(const s:string):PCHAR;
-
 //Проверяет наличие файла на диске
 function SGFileExists(const FileName:string = ''):boolean;
 
-//Это для SGConsoleMenu
-operator + (const a,b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
-operator + (const a:TSGConsoleMenuArray;b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
-function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
-
-//Псевдографическое меню в консоли.
-procedure SGConsoleMenu(const Ar:TSGConsoleMenuArray;
-	const VBackGround:LongWord = 0;
-	const VText:LongWord = 15;
-	const VActiveBackGround:LongWord = 0;
-	const VActiveText:LongWord = 10;
-	const Koima:Boolean = True);
-
-//Перевод строки C++ в строку
-function SGPCharToString(const VChar:PChar):string;inline;
-
-//Переводит строку в число
-function SGVal(const Text:string = '0'):Int64;inline;overload;
-function SGValFloat(const Text : TSGString = '0'):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-
-//Возвращаето часть строки, находящуюся между [a..b] включительно
-function SGStringGetPart(const S:string;const a,b:LongWord):String;
-
 //Самая быстрая сортировка
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
-
-//Переводит тип (array of const) в строку
-//(array of const) можно задавать как ['dsdas',123,'a',#34,123.5].
-function SGGetStringFromConstArray(const Ar : array of const):String;
-
-function SGArConstToArString(const Ar : array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 //Возвращает краткое имя файла, из полного имени файла
 function SGGetFileName(const WayName:string):string;
@@ -545,36 +355,6 @@ function SGMakeDirectory(const DirWay:String):Boolean;inline;
 function SGGetMatrix2x2(a1,a2,a3,a4:real):real;inline;
 function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
 
-//Добавляет к строке С++ символ в конец строки
-function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
-
-//Проверяет эквивалентность строк С++
-function SGPCharsEqual(const PChar1,PChar2:PChar):Boolean;inline;
-
-//Возвращает индекс последнего элемента строки
-function SGPCharHigh(const VPChar:PChar):LongInt;inline;
-
-//Возвращает длинну строки
-function SGPCharLength(const VPChar:PChar):LongWord;inline;
-
-//Урезает строку С++ на Number символов с конца
-function SGPCharDecFromEnd(var VPChar:PChar; const Number:LongWord = 1):PChar;
-
-//Возвращает строку С++ в верхнем регистре
-function SGPCharUpCase(const VPChar:PChar):PChar;inline;
-
-//Чистает строку С++ с клавиатуры
-function SGPCharRead():PChar;inline;
-
-//Читает один символ с клавиатуры
-function SGCharRead:Char;inline;
-
-//Удаляет все пробелы в строке С++
-function SGPCharDeleteSpaces(const VPChar:PCHAR):PChar;inline;
-
-//Возвращает конкютинацию строк С++
-function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
-
 //Проверяет, не находятся ли значения параметров функции в одной Эпсилон окресности какой-то точки
 function SGRealsEqual(const r1,r2:real):Boolean;inline;
 
@@ -591,9 +371,6 @@ function SGRandomMinus():Int;inline;
 //Возвращает обьект плоскости, полученый вт результате приобразования трех точек
 function SGGetPlaneFromNineReals(const x1,y1,z1,x2,y2,z2,x0,y0,z0:real):SGPlane;
 
-//Возвращает часть строки С++, находящуюся между позициями включительно
-function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
-
 //Возвразает количество цифр в числе
 function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
 
@@ -604,12 +381,6 @@ function SGGetFreeFileName(const Name:string;const sl:string = 'Copy'):string;in
 
 //Возвращает имя файла без его расширения
 function SGGetFileNameWithoutExpansion(const FileName:string):string;inline;
-
-//Читает строку из консольки
-function SGReadLnString():String;
-
-//Читает один байт из консольки
-function SGReadLnByte():Byte;
 
 //Аналог SGGetFreeFileName, только для каталогов (папок)
 function SGGetFreeDirectoryName(const Name:string;const sl:string = 'Copy'):string;inline;
@@ -623,32 +394,14 @@ function SGExistsDirectory(const DirWay:String):Boolean;inline;
 //Возвращает директорию, в которой запужена программа
 function SGGetCurrentDirectory():string;inline;
 
-//Возвращает количество логических ядер процессора
-function SGGetCoreCount():Byte;inline;
-
 function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
-
-function SGConvertAnsiToASCII(const s:TSGString):TSGString;
-
-function SGDownCaseString(const str:TSGString):TSGString;
-function DownCase(const c:TSGChar):TSGChar;
 
 procedure SGRunComand(const Comand : String; const ViewOutput : Boolean = True);
 function Iff(const b : TSGBoolean; const s1, s2 : TSGString) : TSGString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function Iff(const b : TSGBoolean; const s1, s2 : TSGFloat): TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
 procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGPrintStackTrace();
@@ -666,7 +419,15 @@ implementation
 uses
 	 StrMan
 	
+	,SaGeStringUtils
 	,SaGeThreads
+	,SaGeDateTime
+	,SaGeEncodingUtils
+	,SaGeFileUtils
+	,SaGeConsoleUtils
+	,SaGeMathUtils
+	,SaGeSysUtils
+	,SaGeLog
 	;
 
 function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -768,222 +529,9 @@ if SGPrintError in ViewCase then
 	WriteLn(MessageStr);
 end;
 
-function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	i : TSGLongWord;
-begin
-Result := nil;
-if SL = nil then
-	exit;
-if Length(SL) = 0 then
-	exit;
-SetLength(Result, Length(SL));
-for i := 0 to High(SL) do
-	Result[i] := SGUpCaseString(SL[i]);
-end;
-
-function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	i : TSGLongWord;
-begin
-Result := '';
-if S <> nil then
-	if Length(S) > 0 then
-		begin
-		for i := 0 to High(S) do
-			begin
-			Result += S[i];
-			if i <> High(S) then
-				Result += Separator;
-			end;
-		end;
-end;
-
-function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function HexStr(const b : TSGByte):TSGChar;
-begin
-Result := ' ';
-case b of
-0:Result := '0';
-1:Result := '1';
-2:Result := '2';
-3:Result := '3';
-4:Result := '4';
-5:Result := '5';
-6:Result := '6';
-7:Result := '7';
-8:Result := '8';
-9:Result := '9';
-10:Result := 'A';
-11:Result := 'B';
-12:Result := 'C';
-13:Result := 'D';
-14:Result := 'E';
-15:Result := 'F';
-end;
-end;
-
-function ByteStr(const B : TSGByte):TSGString;
-begin
-Result := HexStr(b shr 4) + HexStr(b and 15);
-end;
-
-var
-	i : TSGByte;
-begin
-Result := '$';
-for i := {$IFDEF CPU64} 7 {$ELSE} {$IFDEF CPU32} 3 {$ELSE} 1 {$ENDIF} {$ENDIF} downto 0 do
-	Result += ByteStr(PSGByte(@Source)[i]);
-end;
-
-operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C1 : TSGChar;
-begin
-Result := False;
-for C1 in S do
-	if C1 = C then
-		begin
-		Result := True;
-		Break;
-		end;
-end;
-
-operator +(const VList : TSGArString; const VString : TSGString) : TSGArString;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := VList;
-if Result = nil then
-	SetLength(Result, 1)
-else
-	SetLength(Result, Length(Result) + 1);
-Result[High(Result)] := VString;
-end;
-
-operator in(const VString : TSGString; const VList : TSGArString) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	S : TSGString;
-begin
-Result := False;
-for S in VList do
-	if S = VString then
-		begin
-		Result := True;
-		break;
-		end;
-end;
-
-operator Enumerator(const List : TSGArString): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := TSGArStringEnumerator.Create(List);
-end;
-
-constructor TSGArStringEnumerator.Create(const List : TSGArString);
-begin
-FList := List;
-FIndex := -1;
-end;
-
-function TSGArStringEnumerator.GetCurrent(): TSGString;
-begin
-Result := FList[FIndex];
-end;
-
-function TSGArStringEnumerator.MoveNext(): TSGBoolean;
-begin
-FIndex += 1;
-Result := (FList <> nil) and (Length(FList) > FIndex);
-end;
-
 function SGGetApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := argv[0];
-end;
-
-function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function LastCharacter(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := '';
-if (S <> '') and (S[Length(S)] = ' ') then
-	Result := ' ';
-end;
-
-var
-	i : TSGLongWord;
-begin
-Result := '';
-if Length(S) > 0 then
-	for i := 1 to Length(S) do
-		begin
-		if S[i] = ' ' then
-			begin
-			if LastCharacter(Result) <> ' ' then
-				Result += S[i];
-			end
-		else
-			begin
-			Result += S[i];
-			end;
-		end;
-end;
-
-function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-SetLength(Result, argc - 1);
-if Length(Result) > 0 then
-	for i := 0 to High(Result) do
-		Result[i] := SGPCharToString(argv[i+1]);
-end;
-
-function SGValFloat(const Text : TSGString = '0'):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-var
-	i, iii : TSGLongInt;
-	ii : TSGLongWord;
-begin
-Result := 0;
-if Length(Text) = 0 then Exit;
-for i := 1 to Length(Text) do
-	if (Text[i] = ',') or (Text[i] = '.') then
-		break;
-iii := i;
-if (Text[i] = ',') or (Text[i] = '.') then
-	i -= 1;
-ii := 1;
-while i >= 1 do
-	begin
-	Result += ii * SGVal(Text[i]);
-	ii *= 10;
-	i -= 1;
-	end;
-i := iii;
-i += 1;
-ii := 10;
-while i <= Length(Text) do
-	begin
-	Result += SGVal(Text[i]) / ii;
-	i += 1;
-	ii *= 10;
-	end;
-for i := 1 to Length(Text) do
-	if Text[i] = '-' then
-		begin
-		Result *= -1;
-		break;
-		end;
-end;
-
-
-function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-Result := VString;
-for i := 1 to Length(Result) do
-	if Result[i] = C1 then
-		Result[i] := C2;
 end;
 
 procedure SGAddToLog(const FileName, Line : String);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1079,58 +627,9 @@ if (poUsePipes in AProcess.Options) and ViewOutput then
 AProcess.Free();
 end;
 
-function DownCase(const c:TSGChar):TSGChar;
-begin
-if c in ['A'..'Z'] then
-	begin
-	Result:=TSGChar(TSGByte(c)-(TSGByte('A')-TSGByte('a')))
-	end
-else
-	Result:=c;
-end;
-
-function SGDownCaseString(const str:TSGString):TSGString;
-var
-	i:TSGMaxEnum;
-begin
-Result := '';
-for i:=1 to Length(str) do
-	Result+=DownCase(str[i]);
-end;
-
-function SGConvertAnsiToASCII(const s:TSGString):TSGString;
-var
-	i : TSGUInt32;
-begin
-Result := '';
-for i:= 1 to Length(S) do
-	Result += SGAnsiToASCII[S[i]];
-end;
-
 function SGSetExpansionToFileName(const FileName,Expansion:TSGString):TSGString;inline;
 begin
 Result:= SGGetFileWay(FileName)+SGGetFileNameWithoutExpansion(SGGetFileName(FileName))+'.'+Expansion;
-end;
-
-function SGGetCoreCount():Byte;inline;
-{$IFDEF USE_uSMBIOS}
-Var
-  SMBios             : TSMBios;
-  LProcessorInfo     : TProcessorInformation;
-{$ENDIF}
-begin
-Result:=0;
-{$IFDEF USE_uSMBIOS}
-try
-	SMBios:=TSMBios.Create();
-	if SMBios.HasProcessorInfo then
-		for LProcessorInfo in SMBios.ProcessorInfo do
-			if SMBios.SmbiosVersion>='2.5' then
-				Result:=LProcessorInfo.RAWProcessorInformation^.CoreCount;
-finally
-	SMBios.Free;
-	end;
-{$ENDIF}
 end;
 
 function SGGetCurrentDirectory():string;inline;
@@ -1177,29 +676,6 @@ LongInt1:=LongInt2;
 LongInt2:=LongInt3;
 end;
 
-function SGReadLnByte:Byte;
-begin
-Readln(Result);
-end;
-
-function SGReadLnString:String;
-begin
-Readln(Result);
-end;
-
-function SGPCharGetPart(const VPChar:PChar;const Position1,Position2:LongInt):PChar;
-var
-	i:LongInt;
-begin
-Result:='';
-i:=Position1;
-while (VPChar[i]<>#0) and (i<>Position2+1) do
-	begin
-	SGPCharAddSimbol(Result,VPChar[i]);
-	i+=1;
-	end;
-end;
-
 function SGGetQuantitySimbolsInNumber(l:LongInt):LongInt;inline;
 begin
 Result:=0;
@@ -1207,39 +683,6 @@ while l<>0 do
 	begin
 	Result+=1;
 	l:=l div 10;
-	end;
-end;
-
-function SGFloatToString(const R:Extended;const Zeros:LongInt = 0):string;inline;
-var
-	i:LongInt;
-begin
-Result:='';
-if Trunc(R)=0 then
-	begin
-	if R<0 then
-		Result+='-';
-	Result+='0';
-	end
-else
-	Result+=SGStr(Trunc(R));
-if Zeros<>0 then
-	begin
-	if Abs(R-Trunc(R))*10**Zeros<>0 then
-		begin
-		i:=Zeros-SGGetQuantitySimbolsInNumber(Trunc(Abs(R-Trunc(R))*(10**Zeros)));
-		Result+='.';
-		while i>0 do
-			begin
-			i-=1;
-			Result+='0';
-			end;
-		Result+=SGStr(Trunc(Abs(R-Trunc(R))*(10**Zeros)));
-		while Result[Length(Result)]='0' do
-			SetLength(Result,Length(Result)-1);//Byte(Result[0])-=1;
-		if Result[Length(Result)]='.' then
-			SetLength(Result,Length(Result)-1);//Byte(Result[0])-=1;
-		end;
 	end;
 end;
 
@@ -1349,152 +792,6 @@ begin
 Result:=abs(r1-r2)<=SGZero;
 end;
 
-function SGPCharTotal(const VPChar1,VPChar2:PChar):PChar;inline;
-var
-	Length1:LongInt = 0;
-	Length2:LongInt = 0;
-	I:LongInt = 0;
-begin
-Length1:=SGPCharLength(VPChar1);
-Length2:=SGPCharLength(VPChar2);
-Result:=nil;
-GetMem(Result,Length1+Length2+1);
-Result[Length1+Length2]:=#0;
-for I:=0 to Length1-1 do
-	Result[I]:=VPChar1[i];
-for i:=Length1 to Length1+Length2-1 do
-	Result[I]:=VPChar2[I-Length1];
-end;
-
-function SGPCharDeleteSpaces(const VPChar:PCHAR):PChar;inline;
-var
-	I:Longint = 0;
-begin
-GetMem(Result,1);
-Result^:=#0;
-while VPChar[i]<>#0 do
-	begin
-	if VPChar[i]<>' ' then
-		SGPCharAddSimbol(Result,VPChar[i]);
-	I+=1;
-	end;
-end;
-
-function SGCharRead:Char;inline;
-begin
-Read(Result);
-end;
-
-function SGPCharRead:PChar;inline;
-begin
-GetMem(Result,1);
-Result[0]:=#0;
-while not eoln do
-	begin
-	SGPCharAddSimbol(Result,SGCharRead);
-	end;
-end;
-
-function SGPCharUpCase(const VPChar:PChar):PChar;inline;
-var
-	i:LongWord = 0;
-begin
-Result:=nil;
-if (VPChar<>nil) then
-	begin
-	I:=SGPCharLength(VPChar);
-	GetMem(Result,I+1);
-	Result[I]:=#0;
-	I:=0;
-	while VPChar[i]<>#0 do
-		begin
-		Result[i]:=UpCase(VPChar[i]);
-		I+=1;
-		end;
-	end;
-end;
-
-function SGPCharDecFromEnd(var VPChar:PChar; const Number:LongWord = 1):PChar;
-var
-	NewVPChar:PChar = nil;
-	LengthOld:LongWord = 0;
-	I:LongInt = 0;
-begin
-LengthOld:=SGPCharLength(VPChar);
-GetMem(NewVPChar,LengthOld-Number+1);
-for I:=0 to LengthOld-Number-1 do
-	NewVPChar[i]:=VPChar[i];
-NewVPChar[LengthOld-Number]:=#0;
-VPChar:=NewVPChar;
-Result:=NewVPChar;
-end;
-
-function SGPCharLength(const VPChar:PChar):LongWord;inline;
-begin
-Result:=SGPCharHigh(VPChar)+1;
-end;
-
-function SGPCharHigh(const VPChar:PChar):LongInt;inline;
-begin
-if (VPChar = nil) or (VPChar[0] = #0) then
-	Result:=-1
-else
-	begin
-	Result:=0;
-	while VPChar[Result]<>#0 do
-		Result+=1;
-	Result-=1;
-	end;
-end;
-
-function SGPCharsEqual(const PChar1,PChar2:PChar):Boolean;inline;
-var
-	I:LongInt = 0;
-	VExit:Boolean = False;
-begin
-Result:=True;
-if not ((PChar1=nil) and (PChar2=nil)) then
-	while Result and (not VExit) do
-		begin
-		if (PChar1=nil) or (PChar2=nil) or (PChar1[i]=#0) or (PChar2[i]=#0) then
-			VExit:=True;
-		if  ((PChar1=nil) and (PChar2<>nil) and (PChar2[i]<>#0)) or
-			((PChar2=nil) and (PChar1<>nil) and (PChar1[i]<>#0))then
-				Result:=False
-		else
-			if (PChar1<>nil) and (PChar2<>nil) and
-				(((PChar1[i]=#0) and (PChar2[i]<>#0)) or
-				 ((PChar2[i]=#0) and (PChar1[i]<>#0))) then
-					Result:=False
-			else
-				if (PChar1<>nil) and (PChar2<>nil) and
-					(PChar1[i]<>#0) and (PChar2[i]<>#0) and
-					(PChar1[i]<>PChar2[i]) then
-						Result:=False;
-		I+=1;
-		end;
-end;
-
-function SGPCharAddSimbol(var VPChar:PChar; const VChar:Char):PChar;
-var
-	NewVPChar:PChar = nil;
-	LengthOld:LongInt = 0;
-	I:LongInt = 0;
-begin
-if VPChar<>nil then
-	begin
-	while (VPChar[LengthOld]<>#0) do
-		LengthOld+=1;
-	end;
-GetMem(NewVPChar,LengthOld+2);
-for I:=0 to LengthOld-1 do
-	NewVPChar[i]:=VPChar[i];
-NewVPChar[LengthOld]:=VChar;
-NewVPChar[LengthOld+1]:=#0;
-VPChar:=NewVPChar;
-Result:=NewVPChar;
-end;
-
 function SGGetMatrix3x3(a1,a2,a3,a4,a5,a6,a7,a8,a9:real):real;inline;
 begin
 Result:=a1*SGGetMatrix2x2(a5,a6,a8,a9)-a2*SGGetMatrix2x2(a4,a6,a7,a9)+a3*SGGetMatrix2x2(a4,a5,a7,a8);
@@ -1599,56 +896,6 @@ for i:=Length(S) downto 1 do
 SetLength(S,0);
 end;
 
-function SGArConstToArString(const Ar : array of const):TSGArString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	i : TSGLongWord;
-begin
-SetLength(Result, Length(Ar));
-if High(Ar)>=0 then
-	begin
-	for i := 0 to High(Ar) do
-		case Ar[i].vtype of
-		vtInteger:
-			Result[i] := SGStr(Ar[i].vinteger);
-		vtString:
-			Result[i] := (Ar[i].vstring^);
-		vtAnsiString:
-			Result[i] := (AnsiString(Ar[i].vpointer));
-		vtBoolean:
-			Result[i] := SGStr(Ar[i].vboolean);
-		vtChar:
-			Result[i] := Ar[i].vchar;
-		vtExtended:
-			Result[i] := SGStrReal(Extended(Ar[i].vpointer^),5);
-		end;
-	end;
-end;
-
-function SGGetStringFromConstArray(const Ar: array of const):String;
-var
-	i:LongWord;
-begin
-Result:='';
-if High(Ar)>=0 then
-	begin
-	for i := 0 to High(ar) do
-		case ar[i].vtype of
-		vtInteger:
-			Result+=SGStr(ar[i].vinteger);
-		vtString:
-			Result+=(ar[i].vstring^);
-		vtAnsiString:
-			Result+=(AnsiString(ar[i].vpointer));
-		vtBoolean:
-			Result+=SGStr(ar[i].vboolean);
-		vtChar:
-			Result+=ar[i].vchar;
-		vtExtended:
-			Result+=SGStrReal(Extended(ar[i].vpointer^),5);
-		end;
-	end;
-end;
-
 procedure SGQuickSort(var Arr; const ArrLength,SizeOfElement:Int64;const SortFunction:Pointer);
 type
 	SGQSF = function (var a,b):Boolean;
@@ -1686,28 +933,6 @@ begin
 Sort(0,ArrLength-1);
 end;
 
-function SGStringGetPart(const S:string;const a,b:LongWord):String;
-var
-	i:LongWord;
-begin
-Result:='';
-for i:=a to b do
-	Result+=S[i];
-end;
-
-function SGStringIf(const B:Boolean;const s:string):string;inline;
-begin
-if B then
-	Result:=S
-else
-	Result:='';
-end;
-
-function SGVal(const Text:string = '0'):Int64;inline;overload;
-begin
-Val(Text,Result);
-end;
-
 function SGMin(const a,b:LongInt):LongInt;overload;inline;
 begin
 if a<b then
@@ -1738,63 +963,6 @@ if a<b then
 	Result:=a
 else
 	Result:=b;
-end;
-
-function SGPCharToString(const VChar:PChar):string;inline;
-var
-	i:Longint = 0;
-begin
-try
-	Result:='';
-	while byte(VChar[i])<>0 do
-		begin
-		Result+=VChar[i];
-		i+=1;
-		end;
-except
-	Result:='';
-	end;
-end;
-
-procedure TSGLog.Source(const Ar : array of const; const WithTime:Boolean = True);
-var
-	OutString:String = '';
-begin
- if SGLogEnable then
-	begin
-	OutString:=SGGetStringFromConstArray(Ar);
-	Source(OutString,WithTime);
-	SetLength(OutString,0);
-	end;
-end;
-
-function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	TempS : TSGString;
-
-procedure LoopIteration();
-begin
-if TempS <> '' then
-	begin
-	Result += TempS;
-	TempS := '';
-	end;
-end;
-
-var
-	i : TSGLongWord;
-begin
-Result := nil;
-i := 1;
-TempS := '';
-for i := 1 to Length(S) do
-	begin
-	if S[i] in Separators then
-		LoopIteration()
-	else
-		TempS += S[i];
-	end;
-LoopIteration();
 end;
 
 procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
@@ -1848,216 +1016,6 @@ SGPrintParams(ArS, Title, SimbolsLength);
 SetLength(ArS, 0);
 end;
 
-procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-var
-	i, WordCount, MaxLength, n, ii: TSGLongWord;
-	TempS : TSGString;
-begin
-WordCount := 0;
-if ArS <> nil then
-	WordCount := Length(ArS);
-if WordCount > 0 then
-	begin
-	Source(Title + ' (' + SGStr(WordCount) + ')',True);
-	MaxLength := Length(ArS[0]);
-	if Length(ArS) > 1 then
-		begin
-		for i := 1 to High(ArS) do
-			if Length(ArS[i]) > MaxLength then
-				MaxLength := Length(ArS[i]);
-		end;
-	MaxLength += 2;
-	n := 150 div MaxLength;
-	MaxLength += (150 mod MaxLength) div n;
-	ii := 0;
-	TempS := '  ';
-	for i := 0 to High(ArS) do
-		begin
-		if (ii = n - 1) or (i = High(ArS)) then
-			TempS += ArS[i]
-		else
-			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
-		ii +=1;
-		if ii = n then
-			begin
-			ii := 0;
-			Source(TempS, False);
-			TempS := '  ';
-			end;
-		end;
-	if TempS <> '  ' then
-		Source(TempS, False);
-	end;
-end;
-
-
-procedure TSGLog.Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-var
-	ArS : TSGStringList = nil;
-begin
-ArS := SGStringListFromString(S, Separators);
-Source(ArS, Title, SimbolsLength);
-SetLength(ArS, 0);
-end;
-
-function SGConsoleRecord(const s:string;const p:pointer):TSGConsoleRecord;inline;
-begin
-Result.FTitle:=s;
-Result.FProcedure:=TSGProcedure(p);
-end;
-
-operator + (const a,b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
-begin
-SetLength(Result,2);
-Result[0]:=a;
-Result[1]:=b;
-end;
-
-operator + (const a:TSGConsoleMenuArray;b:TSGConsoleRecord):TSGConsoleMenuArray;overload;inline;
-begin
-Result:=a;
-SetLength(Result,Length(Result)+1);
-Result[High(Result)]:=b;
-end;
-
-procedure SGConsoleMenu(const Ar:TSGConsoleMenuArray;
-	const VBackGround:LongWord = 0;
-	const VText:LongWord = 15;
-	const VActiveBackGround:LongWord = 0;
-	const VActiveText:LongWord = 10;
-	const Koima:Boolean = True);
-var
-	NowActive:LongWord;
-	OldActive:LongWord = 0;
-	c:char = #0;
-	GoExit:Boolean = False;
-	DAll:Boolean = True;
-	MaxLength:LongWord = 0;
-procedure DS;
-var
-	iiii,iii,ii,i:LongWord;
-begin
-Crt.TextBackGround(VBackGround);
-if DAll then
-	Crt.ClrScr;
-i:=2;
-for ii:=0 to High(Ar) do
-	begin
-	iiii:=3+((MaxLength - Length(Ar[ii].FTitle))div 2);
-	Crt.GoToXY(iiii,i);
-	Crt.TextColor(VActiveText*Byte(NowActive=ii)+VText*Byte((NowActive<>ii)));
-	Crt.TextBackGround(VActiveBackGround*Byte(NowActive=ii)+VBackGround*Byte((NowActive<>ii)));
-	if DAll or ((not DAll) and ((ii=NowActive) or (ii=OldActive))) then
-		if Koima then
-			begin
-			if ii=NowActive then
-				begin
-				Write(#218);for iii:=1 to Length(Ar[ii].FTitle) do Write(#196);Write(#191);
-				i+=1;Crt.GoToXY(iiii,i);
-				Write(#179);Write(Ar[ii].FTitle);Write(#179);
-				i+=1;Crt.GoToXY(iiii,i);
-				Write(#192);for iii:=1 to Length(Ar[ii].FTitle) do Write(#196);Write(#217);
-				end
-			else
-				begin
-				Write(#201);for iii:=1 to Length(Ar[ii].FTitle) do Write(#205);Write(#187);
-				i+=1;Crt.GoToXY(iiii,i);
-				Write(#186);Write(Ar[ii].FTitle);Write(#186);
-				i+=1;Crt.GoToXY(iiii,i);
-				Write(#200);for iii:=1 to Length(Ar[ii].FTitle) do Write(#205);Write(#188);
-				end;
-			i+=1;
-			end
-		else
-			begin
-			Write(Ar[ii].FTitle);
-			i+=1;
-			end
-	else
-		if Koima then
-			i+=3
-		else
-			i+=1;
-	end;
-Crt.GoToXY(80,25);
-DAll:=False;
-end;
-
-begin
-for OldActive:=0  to High(Ar) do
-	if MaxLength<Length(Ar[OldActive].FTitle) then
-		MaxLength:=Length(Ar[OldActive].FTitle);
-OldActive:=0;
-NowActive:=Random(Length(Ar));
-DS;
-while not GoExit do
-	begin
-	c:=Crt.ReadKey;
-	case c of
-	#27:GoExit:=True;
-	#80:if NowActive<High(Ar) then
-		begin
-		OldActive:=NowActive;
-		NowActive+=1;
-		DS;
-		end;
-	#72:if NowActive>0 then
-		begin
-		OldActive:=NowActive;
-		NowActive-=1;
-		DS;
-		end;
-	#13:if Ar[NowActive].FProcedure=nil then
-		GoExit:=True
-	else
-		begin
-		Ar[NowActive].FProcedure();
-		DAll:=true;
-		DS;
-		end;
-	end;
-	end;
-end;
-
-procedure TSGLog.Source(const s:string;const WithTime:Boolean = True);
-var
-	ss:string;
-	a:TSGDateTime;
-	pc:PChar;
-begin
-if SGLogEnable then
-	if not WithTime then
-		begin
-		pc:=SGStringToPChar(s+SGWinEoln);
-		FFileStream.WriteBuffer(pc^,Length(s)+2);
-		FreeMem(pc,Length(s)+3);
-		end
-	else
-		begin
-		a.Get;
-		with a do
-			ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
-				'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
-		pc:=SGStringToPChar(ss+SGWinEoln);
-		FFileStream.WriteBuffer(pc^,Length(ss)+2);
-		FreeMem(pc,Length(ss)+3);
-		end;
-end;
-
-constructor TSGLog.Create();
-begin
-inherited;
-if SGLogEnable then
-	FFileStream:=TFileStream.Create(SGLogDirectory+Slash+'EngineLog.log',fmCreate);
-end;
-
-destructor TSGLog.Destroy;
-begin
-if SGLogEnable then
-	FFileStream.Destroy;
-inherited;
-end;
-
 function SGFileExists(const FileName:string = ''):boolean;
 begin
 Result:=FileExists(FileName);
@@ -2084,250 +1042,12 @@ begin
 inherited;
 end;
 
-function SGStringToPChar(const s:string):PCHAR;
-var
-	i:longint;
-begin
-GetMem(Result,Length(s)+1);
-for i:=1 to Length(s) do
-	Result[i-1]:=s[i];
-Result[i]:=#0;
-end;
-
 function SGMax(const a,b:Int64):Int64;inline;overload;
 begin
 if a>b then
 	Result:=a
 else
 	Result:=b;
-end;
-
-function SGCheckFloatString(const S : TSGString; const Point : TSGChar = '.') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function ExistPoint(const S : TSGString) : TSGBool;
-var
-	i : TSGUInt32;
-begin
-Result := False;
-for i := 1 to Length(S) do
-	if S[i] = Point then
-		begin
-		Result := True;
-		break;
-		end;
-end;
-
-function NeedDeletionZeros(const S : TSGString) : TSGBool;
-begin
-Result := ExistPoint(S) and (S[Length(S)] = '0');
-end;
-
-function DeleteZeros(const S : TSGString) : TSGString;
-begin
-Result := S;
-while Result[Length(Result)] = '0' do
-	SetLength(Result, Length(Result) - 1);
-if Result[Length(Result)] = '.' then
-	SetLength(Result, Length(Result) - 1);
-if Result = '' then
-	Result := '0';
-end;
-
-function TruncNines(var S : TSGString; const CountNines : TSGUInt16 = 4) : TSGBool;
-
-function AddOne(S2 : TSGString) : TSGString;
-var
-	S3 : TSGString;
-	P : TSGBool;
-
-function IfPoint() : TSGString;
-begin
-Result := '';
-if P then
-	Result := Point;
-end;
-
-begin
-P := False;
-if (S2 = '0') or (S2 = '') then
-	S2 := '1' 
-else
-	begin
-	if (Length(S2) > 0) then
-		begin
-		if S2[Length(S2)] = Point then
-			begin
-			SetLength(S2, Length(S2) - 1);
-			P := True;
-			end;
-		S3 := S2;
-		SetLength(S2, Length(S2) - 1);
-		if SGStr(SGVal(S3[Length(S3)]) + 1) = '10' then
-			begin
-			S2 := AddOne(S2) + IfPoint() + '0';
-			end
-		else
-			S2 += IfPoint() + SGStr(SGVal(S3[Length(S3)]) + 1);
-		end;
-	end;
-Result := S2;
-end;
-
-var
-	Nines : TSGUInt16;
-	S2 : TSGString;
-begin
-S2 := S;
-Nines := 0;
-Result := False;
-if ExistPoint(S) then
-	while (Length(S2) > 0) and (S2[Length(S2)] = '9') do
-		begin
-		SetLength(S2, Length(S2) - 1);
-		Nines += 1;
-		end;
-if Nines >= CountNines then
-	begin
-	if (Length(S2) > 0) and (S2[Length(S2)] = '.') then
-		SetLength(S2, Length(S2) - 1);
-	S2 := AddOne(S2);
-	Result := S <> S2;
-	S := S2;
-	end;
-end;
-
-begin
-Result := S;
-if NeedDeletionZeros(Result) then
-	Result := DeleteZeros(Result);
-if TruncNines(Result) then
-	if NeedDeletionZeros(Result) then
-		Result := DeleteZeros(Result);
-end;
-
-function SGStrReal(r:real;const l:longint):string;inline;
-var
-	i : TSGLongInt;
-begin
-if r<0 then
-	Result:='-'
-else
-	Result:='';
-r:=abs(r);
-Result+=SGStr(Trunc(r));
-r-=trunc(r);
-r:=abs(r);
-if R>1/(10**l) then
-	begin
-	Result+='.';
-	for i:=1 to l do
-		begin
-		if r=0 then
-			Break;
-		r*=10;
-		Result+=SGStr(trunc(r));
-		r-=trunc(r);
-		end;
-	end;
-if (Result='') or (Result='-') then
-	Result+='0';
-Result := SGCheckFloatString(Result);
-end;
-
-function SGStrExtended(r:Extended;const l:longint):string;inline;
-var
-	i     : TSGLongInt;
-begin
-if r<0 then
-	Result:='-'
-else
-	Result:='';
-if ((SGStr(Trunc(abs(r)))='9223372036854775808') and
-	((SGStr(Trunc(abs(r/100)))='9223372036854775808'))) or
-	((SGStr(Trunc(abs(r)))='-9223372036854775808') and
-	((SGStr(Trunc(abs(r/100)))='-9223372036854775808'))) then
-		begin
-		Result+='Inf';
-		Exit();
-		end;
-r:=abs(r);
-Result+=SGStr(Trunc(r));
-r-=trunc(r);
-r:=abs(r);
-if R>1/(10**l) then
-	begin
-	Result+='.';
-	for i:=1 to l do
-		begin
-		if r=0 then
-			Break;
-		r*=10;
-		Result+=SGStr(trunc(r));
-		r-=trunc(r);
-		end;
-	end;
-if (Result='') or (Result='-') then
-	Result+='0';
-Result := SGCheckFloatString(Result);
-end;
-
-function SGGetSizeString(const Size:Int64;const Language:TSGString = 'RU'):String;inline;
-var
-	e:extended;
-	d:LongWord = 0;
-begin
-if Size<1024 then
-	begin
-	Result:=SGStr(Size);
-	if Language='RU' then
-		Result+=' байт'
-	else
-		Result+=' byte';
-	end
-else
-	begin
-	e:=Size;
-	repeat
-	e:=e/1024;
-	d+=1;
-	until e<1024;
-	Result:=SGStrReal(e,2);
-	case d of
-	1:
-		if Language='RU' then
-			Result+=' КБайт'
-		else
-			Result+=' KByte';
-	2:
-		if Language='RU' then
-			Result+=' MБайт'
-		else
-			Result+=' MByte';
-	3:
-		if Language='RU' then
-			Result+=' ГБайт'
-		else
-			Result+=' GByte';
-	4:
-		if Language='RU' then
-			Result+=' ТБайт'
-		else
-			Result+=' TByte';
-	end;
-	end;
-end;
-
-function SGStr(const b:boolean):String;overload;inline;
-begin
-if b then
-	Result:='TRUE'
-else
-	Result:='FALSE';
-end;
-
-function SGPCharLength(const pc:PChar):int64;inline;
-begin
-Result:=StrLen(pc);
 end;
 
 function Log(const a,b:real):real;inline;
@@ -2374,41 +1094,6 @@ for i:=0 to High(FArray) do
 		end;
 end;
 
-function SGReadStringInQuotesFromStream(Const Stream:TStream;const Quote:char = #39):string;inline;
-var
-	c:char;
-begin
-Result:='';
-Stream.ReadBuffer(c,SizeOf(c));
-repeat
-Stream.ReadBuffer(c,SizeOf(c));
-if c <> Quote then
-	Result+=c;
-until c = Quote;
-end;
-
-function SGExistsFirstPartString(const AString:String;const Part:String):Boolean;
-var
-	i:LongInt;
-begin
-if Length(Part)>Length(AString) then
-	Result:=False
-else
-	if Part=AString then
-		Result:=False
-	else
-		begin
-		Result:=True;
-		for i:=1 to Length(Part) do
-			begin
-			if Part[i]<>AString[i] then
-				Result:=False;
-			if Result=False then
-				Break;
-			end;
-		end;
-end;
-
 constructor TSGSetOfString.Create;
 begin
 FArray:=nil;
@@ -2452,28 +1137,6 @@ for i:=0 to High(FArray) do
 	if Result=SGSetExistsAndExistsNext then
 		Break;
 	end;
-end;
-
-procedure TSGDateTime.Clear;
-begin
-Years:=0;
-Month:=0;
-Hours:=0;
-Day:=0;
-Week:=0;
-Minutes:=0;
-Seconds:=0;
-Sec100:=0;
-end;
-
-function TSGDateTime.GetPastMiliSeconds:int64;
-begin
-Result:=GetPastSeconds*100+Sec100;
-end;
-
-function TSGDateTime.GetPastMiliSecondsFrom(const a:TSGDateTime):int64;
-begin
-Result:=(Self-a).GetPastMiliSeconds;
 end;
 
 operator + (a,b:TArReal):TArReal;inline;
@@ -2571,260 +1234,6 @@ else
 	Result:=b;
 end;
 
-function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-SGWhatIsTheSimbolEN:='';
-case l of
-32:Result:=' ';
-48:if Shift then Result:=')' else Result:='0';
-49:if Shift then Result:='!' else Result:='1';
-50:if Shift then Result:='@' else Result:='2';
-51:if Shift then Result:='#' else Result:='3';
-52:if Shift then Result:='$' else Result:='4';
-53:if Shift then Result:='%' else Result:='5';
-54:if Shift then Result:='^' else Result:='6';
-55:if Shift then Result:='&' else Result:='7';
-56:if Shift then Result:='*' else Result:='8';
-57:if Shift then Result:='(' else Result:='9';
-65:if Shift xor Caps then Result:='A' else Result:='a';
-66:if Shift xor Caps then Result:='B' else Result:='b';
-67:if Shift xor Caps then Result:='C' else Result:='c';
-68:if Shift xor Caps then Result:='D' else Result:='d';
-69:if Shift xor Caps then Result:='E' else Result:='e';
-70:if Shift xor Caps then Result:='F' else Result:='f';
-71:if Shift xor Caps then Result:='G' else Result:='g';
-72:if Shift xor Caps then Result:='H' else Result:='h';
-73:if Shift xor Caps then Result:='I' else Result:='i';
-74:if Shift xor Caps then Result:='J' else Result:='j';
-75:if Shift xor Caps then Result:='K' else Result:='k';
-76:if Shift xor Caps then Result:='L' else Result:='l';
-77:if Shift xor Caps then Result:='M' else Result:='m';
-78:if Shift xor Caps then Result:='N' else Result:='n';
-79:if Shift xor Caps then Result:='O' else Result:='o';
-80:if Shift xor Caps then Result:='P' else Result:='p';
-81:if Shift xor Caps then Result:='Q' else Result:='q';
-82:if Shift xor Caps then Result:='R' else Result:='r';
-83:if Shift xor Caps then Result:='S' else Result:='s';
-84:if Shift xor Caps then Result:='T' else Result:='t';
-85:if Shift xor Caps then Result:='U' else Result:='u';
-86:if Shift xor Caps then Result:='V' else Result:='v';
-87:if Shift xor Caps then Result:='W' else Result:='w';
-88:if Shift xor Caps then Result:='X' else Result:='x';
-89:if Shift xor Caps then Result:='Y' else Result:='y';
-90:if Shift xor Caps then Result:='Z' else Result:='z';
-186:if Shift then Result:=':' else Result:=';';
-187:if Shift then Result:='+' else Result:='=';
-188:if Shift then Result:='<' else Result:=',';
-189:if Shift then Result:='_' else Result:='-';
-190:if Shift then Result:='>' else Result:='.';
-191:if Shift then Result:='?' else Result:='/';
-192:if Shift then Result:='~' else Result:='`';
-219:if Shift then Result:='{' else Result:='[';
-220:if Shift then Result:='|' else Result:='\';
-221:if Shift then Result:='}' else Result:=']';
-222:if Shift then Result:='"' else Result:='"';
-end;
-end;
-
-function SGWhatIsTheSimbolRU(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-SGWhatIsTheSimbolRU:='';
-case l of
-32:Result:=' ';
-48:if Shift then Result:=')' else Result:='0';
-49:if Shift then Result:='!' else Result:='1';
-50:if Shift then Result:='"' else Result:='2';
-51:if Shift then Result:='№' else Result:='3';
-52:if Shift then Result:=';' else Result:='4';
-53:if Shift then Result:='%' else Result:='5';
-54:if Shift then Result:='^' else Result:='6';
-55:if Shift then Result:='?' else Result:='7';
-56:if Shift then Result:='*' else Result:='8';
-57:if Shift then Result:='(' else Result:='9';
-65:if Shift xor Caps then Result:='Ф' else Result:='ф';
-66:if Shift xor Caps then Result:='И' else Result:='и';
-67:if Shift xor Caps then Result:='С' else Result:='с';
-68:if Shift xor Caps then Result:='В' else Result:='в';
-69:if Shift xor Caps then Result:='У' else Result:='у';
-70:if Shift xor Caps then Result:='А' else Result:='а';
-71:if Shift xor Caps then Result:='П' else Result:='п';
-72:if Shift xor Caps then Result:='Р' else Result:='р';
-73:if Shift xor Caps then Result:='Ш' else Result:='ш';
-74:if Shift xor Caps then Result:='О' else Result:='о';
-75:if Shift xor Caps then Result:='Л' else Result:='л';
-76:if Shift xor Caps then Result:='Д' else Result:='д';
-77:if Shift xor Caps then Result:='Ь' else Result:='ь';
-78:if Shift xor Caps then Result:='Т' else Result:='т';
-79:if Shift xor Caps then Result:='Щ' else Result:='щ';
-80:if Shift xor Caps then Result:='З' else Result:='з';
-81:if Shift xor Caps then Result:='Й' else Result:='й';
-82:if Shift xor Caps then Result:='К' else Result:='к';
-83:if Shift xor Caps then Result:='Ы' else Result:='ы';
-84:if Shift xor Caps then Result:='Е' else Result:='е';
-85:if Shift xor Caps then Result:='Г' else Result:='г';
-86:if Shift xor Caps then Result:='М' else Result:='м';
-87:if Shift xor Caps then Result:='Ц' else Result:='ц';
-88:if Shift xor Caps then Result:='Ч' else Result:='ч';
-89:if Shift xor Caps then Result:='Н' else Result:='н';
-90:if Shift xor Caps then Result:='Я' else Result:='я';
-186:if Shift xor Caps then Result:='Ж' else Result:='ж';
-187:if Shift xor Caps then Result:='+' else Result:='=';
-188:if Shift xor Caps then Result:='Б' else Result:='б';
-189:if Shift then Result:='_' else Result:='-';
-190:if Shift xor Caps then Result:='Ю' else Result:='ю';
-191:if Shift then Result:=',' else Result:='.';
-192:if Shift xor Caps then Result:='Ё' else Result:='ё';
-219:if Shift xor Caps then Result:='Х' else Result:='х';
-220:if Shift then Result:='/' else Result:='\';
-221:if Shift xor Caps then Result:='Ъ' else Result:='ъ';
-222:if Shift xor Caps then Result:='Э' else Result:='э';
-end;
-end;
-
-function SGGetLanguage:String;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-{$IFDEF MSWINDOWS}
-	var
-		Layout:array [0..kl_namelength]of char;
-	{$ENDIF}
-begin
-{$IFDEF MSWINDOWS}
-	GetKeyboardLayoutname(Layout);
-	if layout='00000409' then
-		Result:='EN'
-	else
-		Result:='RU';
-{$ELSE}
-	Result:='EN';
-	{$ENDIF}
-end;
-
-function SGWhatIsTheSimbol(const l:longint;const Shift:Boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Language:string = '';
-begin
-Language:=SGGetLanguage;
-if Language='EN' then
-	begin
-	Result:=SGWhatIsTheSimbolEN(l,Shift,Caps);
-	end
-else
-	if Language='RU' then
-		Result:=SGWhatIsTheSimbolRU(l,Shift,Caps)
-	else
-		Result:=char(l);
-end;
-
-function SGMiliSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := '';
-if VSeconds div 100 <> 0 then
-	Result += SGSecondsToStringTime(VSeconds div 100, Encoding);
-if (VSeconds mod 100 <> 0) or (Result = '') then
-	begin
-	Result += SGStr(VSeconds mod 100);
-	if Encoding = 'RUS1251' then
-		Result += ' мсек '
-	else
-		Result += ' msec ';
-	end;
-end;
-
-function SGSecondsToStringTime(VSeconds:Int64;const Encoding : string = 'RUS1251'):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Seconds:Int64 = 0;
-	Minutes:Int64 = 0;
-	Hours:Int64 = 0;
-	Days:Int64 = 0;
-	Monthes:Int64 = 0;
-	Years:Int64 = 0;
-
-	QWr:Word = 0;
-begin
-Result:='';
-
-Seconds:=VSeconds mod 60;
-VSeconds:=VSeconds div 60;
-
-Minutes:=VSeconds mod 60;
-VSeconds:=VSeconds div 60;
-
-Hours:=VSeconds mod 24;
-VSeconds:=VSeconds div 24;
-
-Days:=VSeconds mod 30;
-VSeconds:=VSeconds div 30;
-
-Monthes:=VSeconds mod 12;
-VSeconds:=VSeconds div 12;
-
-Years:=VSeconds;
-if (Years<>0) and (QWr<=2) then
-	begin
-	Result+=SGStr(Years);
-	if Encoding = 'RUS1251' then
-		Result += ' г '
-	else
-		Result += ' y ';
-	QWr+=1;
-	end;
-if (Monthes<>0)  and (QWr<=2)then
-	begin
-	Result+=SGStr(Monthes);
-	if Encoding = 'RUS1251' then
-		Result += ' мес '
-	else
-		Result += ' mon ';
-	QWr+=1;
-	end;
-if (Days<>0)  and (QWr<=2)then
-	begin
-	Result+=SGStr(Days);
-	if Encoding = 'RUS1251' then
-		Result += ' дн '
-	else
-		Result += ' d ';
-	QWr+=1;
-	end;
-if (Hours<>0)  and (QWr<=2)then
-	begin
-	Result+=SGStr(Hours);
-	if Encoding = 'RUS1251' then
-		Result += ' ч '
-	else
-		Result += ' h ';
-	QWr+=1;
-	end;
-if (Minutes<>0)  and (QWr<=2)then
-	begin
-	Result+=SGStr(Minutes);
-	if Encoding = 'RUS1251' then
-		Result += ' мин '
-	else
-		Result += ' min ';
-	QWr+=1;
-	end;
-if ((Result='') or (Seconds<>0)) and (QWr<=2) then
-	begin
-	Result+=SGStr(Seconds);
-	if Encoding = 'RUS1251' then
-		Result += ' сек '
-	else
-		Result += ' s ';
-	QWr+=1;
-	end;
-end;
-
-function SGStr(const Number : TSGInt64 = 0):String;inline;overload;
-begin
-Str(Number,Result);
-end;
-
-function SGPCharNil:PChar;inline;
-begin
-GetMem(Result,1);
-Result[0]:=#0;
-end;
-
 function SGGetFileNames(const Catalog:String;const What:String = ''):TSGStringList;
 var
 	Found:Integer;
@@ -2844,188 +1253,6 @@ while Found = 0 do
 SysUtils.FindClose(SearchRec);
 end;
 
-function SGPCharIf(const Bool:Boolean;const VPChar:PChar):PChar;
-begin
-if Bool then
-	Result:=VPChar
-else
-	Result:=nil;
-end;
-
-function SGStringAsPChar(var Str:String):PChar;
-begin
-if (Length(Str) = 0) or ((Length(Str) > 0) and (Str[Length(Str)] <> #0)) then
-	Str += #0;
-Result:=@Str[1];
-end;
-
-function SGUpCaseString(const S:String):String;
-var
-	i:LongWord;
-begin
-SetLength(Result,Length(S));
-for i:=1 to Length(S) do
-	Result[i]:=UpCase(S[i]);
-end;
-
-function SGReadWordFromTextFile(const TextFile:PTextFile):String;
-var
-	c:char = #0;
-begin
-Result:='';
-Read(TextFile^,C);
-while c=' ' do
-	Read(TextFile^,C);
-while (c<>' ') and (Not Eoln(TextFile^)) do
-	begin
-	Result+=C;
-	Read(TextFile^,C);
-	end;
-end;
-
-function SGReadStringInQuotesFromTextFile(const TextFile:PText):String;
-var
-	C:char;
-begin
-Result:='';
-Read(TextFile^,C);
-while (c in [' ','	']) do
-	Read(TextFile^,C);
-if c='"' then
-	begin
-	Read(TextFile^,C);
-	while (c<>'"') do
-		begin
-		Result+=C;
-		Read(TextFile^,C);
-		end;
-	end
-else
-	Result:='';
-end;
-
-procedure SGWriteStringToStream(const String1:String;const Stream:TStream;const Stavit00:Boolean = True);inline;
-var
-	c:char = #0;
-begin
-Stream.WriteBuffer(String1[1],Length(String1));
-if Stavit00 then
-	Stream.WriteBuffer(c,SizeOf(Char));
-end;
-
-function SGReadLnStringFromStream(const Stream:TStream):String;inline;
-
-function EolnChars(const c : char):TSGBoolean; inline;
-begin
-Result := (c = #13) or (c = #0) or (c = #10) or (c = #27);
-end;
-
-var
-	c:char = #1;
-	ToOut : TSGBoolean = False;
-begin
-Result:='';
-while (Stream.Position < Stream.Size) and ((not ToOut) or EolnChars(c))  do
-	begin
-	Stream.ReadBuffer(c,1);
-	if EolnChars(c) then
-		ToOut := True
-	else if (not ToOut) then
-		Result += c;
-	end;
-if Stream.Position <> Stream.Size then
-	Stream.Position := Stream.Position - 1;
-end;
-
-function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar;
-	First : TSGBool = True;
-begin
-Result:='';
-while (not (C in Eolns)) or First do
-	begin
-	Stream.ReadBuffer(C, 1);
-	if not (C in Eolns) then
-		Result += C;
-	First := False;
-	end;
-end;
-
-procedure TSGDateTime.ImportFromSeconds(Sec:int64);
-begin
-Sec100:=0;
-Seconds:=Sec mod 60;
-Sec:=Sec div 60;
-Minutes:= Sec mod 60;
-Sec:=Sec div 60;
-Hours:=Sec mod 24;
-Sec:=Sec div 24;
-Day:=Sec mod 30;
-Month:=(Sec div 30) mod 12;
-Years:=Sec mod 365;
-{
-Result+=b.Month*60*60*24*30;
-Result+=b.Years*60*60*24*365;}
-end;
-
-procedure TSGDateTime.Import(a1,a2,a3,a4,a5,a6,a7,a8:LongInt);
-begin
-PArFrom1To8OfLongInt(@Self)^[1]:=a1;
-PArFrom1To8OfLongInt(@Self)^[2]:=a2;
-PArFrom1To8OfLongInt(@Self)^[3]:=a3;
-PArFrom1To8OfLongInt(@Self)^[4]:=a4;
-PArFrom1To8OfLongInt(@Self)^[5]:=a5;
-PArFrom1To8OfLongInt(@Self)^[6]:=a6;
-PArFrom1To8OfLongInt(@Self)^[7]:=a7;
-PArFrom1To8OfLongInt(@Self)^[8]:=a8;
-end;
-
-procedure TSGDateTime.Write;
-begin
-writeln(Years,' ',Month,' ',Day,' ',Week,' ',Hours,' ',Minutes,' ',Seconds,' ',Sec100);
-end;
-
-operator - (const a,b:TSGDateTime):TSGDateTime;inline;
-var
-	i:TSGByte;
-begin
-for i:=1 to 8 do
-	PArFrom1To8OfLongInt(@Result)^[i]:=PArFrom1To8OfLongInt(@a)^[i]-PArFrom1To8OfLongInt(@b)^[i];
-end;
-
-function TSGDateTime.GetPastSeconds:int64;
-begin
-Result:=Seconds;
-Result+=Minutes*60;
-Result+=Hours  *60*60;
-Result+=Day    *60*60*24;
-Result+=Month  *60*60*24*30;
-Result+=Years  *60*60*24*365;
-end;
-
-function TSGDateTime.GetPastSecondsFrom(const a:TSGDateTime):int64;
-begin
-Result:=0;
-Result:=(Self-a).GetPastSeconds;
-end;
-
-procedure TSGDateTime.Get;
-var
-	NYears,NMonth,NDay,NWeek:Word;
-	NHours,NMinutes,NSeconds,NSec100:Word;
-begin
-GetDate(NYears,NMonth,NDay,NWeek);
-GetTime(NHours,NMinutes,NSeconds,NSec100);
-Years:=NYears;
-Month:=NMonth;
-Day:=NDay;
-Week:=NWeek;
-Hours:=NHours;
-Minutes:=NMinutes;
-Seconds:=NSeconds;
-Sec100:=NSec100;
-end;
 
 function SGTruncUp(const t:real):LongInt;inline;
 begin
@@ -3105,26 +1332,9 @@ end;
 
 initialization
 begin
-{$IFDEF ANDROID}SGMakeDirectory('/sdcard/.SaGe');{$ENDIF}
-try
-SGLog:=TSGLog.Create();
-SGLog.Source('(***) SaGe Engine Log (***)', False);
-SGLog.Source('  << Create Log >>');
-except
-SGLogEnable:=False;
-SGLog:=TSGLog.Create();
-end;
-
 Nan:=sqrt(-1);
 Inf:=1/0;
 RandomIze();
-end;
-
-finalization
-begin
-SGLog.Source('  << Destroy Log >>');
-SGLog.Destroy();
-SGLog := nil;
 end;
 
 end.

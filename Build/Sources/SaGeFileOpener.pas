@@ -4,11 +4,13 @@ unit SaGeFileOpener;
 
 interface
 uses
-	  Classes
-	, SaGeBase
-	, SaGeBased
-	, SaGeClasses
-	, SaGeCommonClasses
+	 Classes
+	
+	,SaGeBase
+	,SaGeBased
+	,SaGeClasses
+	,SaGeCommonClasses
+	,SaGeStringUtils
 	;
 
 type
@@ -43,8 +45,9 @@ procedure SGWriteOpenableExpansions();
 implementation
 
 uses
-	SaGeVersion
+	 SaGeVersion
 	,SaGeContext
+	,SaGeLog
 
 	// Openers :
 	,SaGeImageFileOpener

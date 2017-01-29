@@ -172,7 +172,8 @@ function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$END
 implementation
 
 uses
-	SaGeRenderOpenGL
+	 SaGeRenderOpenGL
+	,SaGeLog
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9

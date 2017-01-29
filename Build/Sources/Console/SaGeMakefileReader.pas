@@ -6,7 +6,7 @@ interface
 
 uses
 	 Classes
-	,crt
+	,Crt
 	,SysUtils
 	
 	,SaGeMath
@@ -108,6 +108,10 @@ operator Enumerator(const List : TSGMRConstantList): TSGMRConstantListEnumerator
 operator Enumerator(const List : TSGMRTargetList): TSGMRTargetListEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function TSGMakefileReader.GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

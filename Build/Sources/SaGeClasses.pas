@@ -5,12 +5,13 @@ unit SaGeClasses;
 interface
 
 uses
-	Classes
+	 Classes
+	
 	,SaGeBase
 	,SaGeBased
 	{$IFDEF WITHLEAKSDETECTOR}
-	,SaGeLeaksDetector
-	{$ENDIF}
+		,SaGeLeaksDetector
+		{$ENDIF}
 	;
 
 type
@@ -169,7 +170,10 @@ procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDI
 implementation
 
 uses
-	SysUtils;
+	 SysUtils
+	
+	,SaGeLog
+	;
 
 {$IFDEF WITHLEAKSDETECTOR}
 constructor TSGNamed.Create();

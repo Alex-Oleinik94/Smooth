@@ -5,14 +5,17 @@ interface
 
 uses
 	 SaGeBase
-	 ,SaGeBased
-	 ,Classes
-	 ,Crt
-	 ,SysUtils
-	 ,Dos
-	 ,StrMan
-	 ,SaGeHash
-	 ;
+	,SaGeBased
+	,SaGeHash
+	,SaGeDateTime
+	,SaGeStringUtils
+	
+	,Dos
+	,Crt
+	,StrMan
+	,Classes
+	,SysUtils
+	;
 
 type
 	TSGResource=class(TSGClass)

@@ -1777,9 +1777,10 @@ function DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d: uint8): UINT32;
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 // Creates an OpenType tag as a 32bit integer such that

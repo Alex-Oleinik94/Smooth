@@ -15,11 +15,12 @@ procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams
 implementation
 
 uses
-	StrMan
+	 StrMan
 	
 	,SaGeVersion
 	,SaGeResourceManager
 	,SaGeConvertHeaderToDynamic
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);

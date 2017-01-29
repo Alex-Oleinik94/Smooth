@@ -211,6 +211,10 @@ type
 
 implementation
 
+uses
+	 SaGeStringUtils
+	;
+
 //Algorithm
 
 procedure TSGGazType.Create(const r,g,b: Single;const a: Single = 1;const p1 : LongInt = -1; const p2: LongInt = -1);

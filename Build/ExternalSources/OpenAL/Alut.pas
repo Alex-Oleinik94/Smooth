@@ -37,9 +37,10 @@ var
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 //Internal Alut replacement procedures

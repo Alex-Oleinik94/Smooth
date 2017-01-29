@@ -9,6 +9,7 @@ interface
 
 uses
 	 Crt
+	
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
@@ -92,6 +93,9 @@ implementation
 uses
 	 SaGeEngineConfigurationPanel
 	,SaGeContext
+	,SaGeEncodingUtils
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 {$DEFINE SCREEN_IMPLEMENTATION}

@@ -11,21 +11,23 @@ unit SaGeShaders;
 
 interface
 uses
-	crt
+	 Crt
+	,SysUtils
+	,Classes
+	
+	,StrMan
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeCommon
-	,SysUtils
 	,SaGeRender
 	,SaGeCommonClasses
-	,Classes
 	,SaGeResourceManager
-	,StrMan
 	,SaGeMath
 	,SaGeRenderConstants
 	;
 type
-	TSGShaderParams = TSGArString;
+	TSGShaderParams = TSGStringList;
 	TSGShaderProgram = class;
 	TSGShader = class(TSGContextabled)
 			public
@@ -64,40 +66,40 @@ type
 		end;
 	
 	TSGShaderReader = class
-		public
-	constructor Create();
-	destructor Destroy();override;
-		private
-	FStandartParams : packed array of
-		packed record
-			FNumber : TSGLongWord;
-			FParam  : TSGString;
-			end;
-	FStream : TMemoryStream;
-	FFileParams : TSGShaderParams;
-	FFileName : TSGString;
-		public
-	function IdentifierValue(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ProcessString(const VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ProcessFor(const VVariable : TSGString; const VBegin, VEnd : TSGLongInt; const VString : TSGString;const NeedEolns : TSGBoolean = False;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ProcessComand(const VComand : TSGString; VParams : TSGShaderParams;const Stream : TMemoryStream;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function FindComand(VString : TSGString; out VParams : TSGShaderParams; out ComandShift : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ProcessCustomString(const S : TSGString; const Stream : TMemoryStream; const VAditionalParams : TSGString = '';const UseEoln : TSGBoolean = True):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function Process():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ProcessStrings(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	
-	function WithParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-	function WithParam(const VAditionalParams : TSGString; const VParam, VValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-	function DelParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function GetParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function ConqutinateParam(const VAditionalParams : TSGString; const VParam, VConqutinateValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	
-	function WithComandShift(const VAditionalParams : TSGString; const VShift:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	function GetComandShift(const VAditionalParams : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		public
-	property FileName : TSGString write FFileName;
-	property FileParams : TSGShaderParams write FFileParams;
-	end;
+			public
+		constructor Create();
+		destructor Destroy();override;
+			private
+		FStandartParams : packed array of
+			packed record
+				FNumber : TSGLongWord;
+				FParam  : TSGString;
+				end;
+		FStream : TMemoryStream;
+		FFileParams : TSGShaderParams;
+		FFileName : TSGString;
+			public
+		function IdentifierValue(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProcessString(const VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProcessFor(const VVariable : TSGString; const VBegin, VEnd : TSGLongInt; const VString : TSGString;const NeedEolns : TSGBoolean = False;const VAditionalParams : TSGString = ''):TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProcessComand(const VComand : TSGString; VParams : TSGShaderParams;const Stream : TMemoryStream;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function FindComand(VString : TSGString; out VParams : TSGShaderParams; out ComandShift : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProcessCustomString(const S : TSGString; const Stream : TMemoryStream; const VAditionalParams : TSGString = '';const UseEoln : TSGBoolean = True):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Process():TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ProcessStrings(VString : TSGString;const VAditionalParams : TSGString = ''):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		
+		function WithParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function WithParam(const VAditionalParams : TSGString; const VParam, VValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function DelParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetParam(const VAditionalParams : TSGString; const VParam:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function ConqutinateParam(const VAditionalParams : TSGString; const VParam, VConqutinateValue:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		
+		function WithComandShift(const VAditionalParams : TSGString; const VShift:TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetComandShift(const VAditionalParams : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
+		property FileName : TSGString write FFileName;
+		property FileParams : TSGShaderParams write FFileParams;
+		end;
 
 function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVertexSource, VFragmentSource : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGSaveShaderSourceToFile(const VFileName, VSource : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -108,6 +110,11 @@ procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGStr
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : array of const );{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	,SaGeLog
+	;
 
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin

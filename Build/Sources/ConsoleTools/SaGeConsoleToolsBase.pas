@@ -15,6 +15,7 @@ const
 	SGConcoleCallerUnknownCategory = '--unknown--';
 
 type
+	TSGConcoleCallerParams = TSGStringList;
 	TSGConcoleCallerProcedure = procedure (const VParams : TSGConcoleCallerParams = nil);
 	TSGConcoleCallerNestedHelpFunction = function () : TSGString is nested;
 	TSGConcoleCallerNestedProcedure = function (const VParam : TSGString) : TSGBool is nested;
@@ -62,6 +63,7 @@ function SGCountConsoleParams(const Params : TSGConcoleCallerParams) : TSGLongWo
 function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGParseStringToConsoleCallerParams(const VParams : TSGString) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -74,7 +76,18 @@ uses
 	,SaGeResourceManager
 	,SaGeVersion
 	,SaGeFileOpener
+	,SaGeStringUtils
 	;
+
+function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGUInt32;
+begin
+SetLength(Result, argc - 1);
+if Length(Result) > 0 then
+	for i := 0 to High(Result) do
+		Result[i] := SGPCharToString(argv[i + 1]);
+end;
 
 function TSGConsoleCaller.Execute(const VParams : TSGConcoleCallerParams; const ClearParams : TSGBool = False) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

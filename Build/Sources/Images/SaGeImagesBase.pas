@@ -7,7 +7,8 @@ unit SaGeImagesBase;
 interface
 
 uses 
-	crt
+	 Crt
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeRenderConstants
@@ -109,6 +110,10 @@ function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUP
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 

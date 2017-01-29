@@ -33,6 +33,7 @@ uses
 	,SaGeResourceManager
 	,SaGeMakefileReader
 	,SaGePackages
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);

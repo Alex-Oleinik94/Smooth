@@ -5001,9 +5001,11 @@ implementation
 //***************************************************************************//
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
-	,SaGeDllManager;
+	,SaGeDllManager
+	,SaGeStringUtils
+	;
 
 //////////////////////////////////////////////////////////////////////////////
 //

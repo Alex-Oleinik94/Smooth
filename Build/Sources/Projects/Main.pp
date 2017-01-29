@@ -27,6 +27,7 @@ uses
 		,SaGeConsolePaintableTools
 		,SaGeBased
 		,SaGeContext
+		,SaGeLog
 		{$ENDIF}
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary

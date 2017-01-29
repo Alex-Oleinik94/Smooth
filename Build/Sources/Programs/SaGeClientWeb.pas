@@ -5,12 +5,14 @@ unit SaGeClientWeb;
 interface
 
 uses
-	Classes
+	 Classes
+	
 	,SaGeBased
 	,SaGeBase
 	,SaGeRender
 	,SaGeCommonClasses
 	,SaGeNet
+	,SaGeDateTime
 	
 	,fpjson
 	,jsonparser
@@ -29,6 +31,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeLog
+	;
 
 {Constructor Create; virtual;
 Procedure Clear;  virtual; Abstract;

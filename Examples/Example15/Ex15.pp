@@ -25,6 +25,7 @@ uses
 	,SaGeShaders
 	,SaGeImages
 	,SaGeScreenBase
+	,SaGeStringUtils
 	
 	,Math
 	,crt

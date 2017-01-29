@@ -5,7 +5,8 @@ unit SaGeGraphicViewer;
 interface
 
 uses 
-	crt
+	Crt
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeGeneticalAlgoritm
@@ -33,6 +34,7 @@ implementation
 uses
 	 SaGeConsoleTools
 	,SaGeConsolePaintableTools
+	,SaGeStringUtils
 	;
 
 {$DEFINE SGREADIMPLEMENTATION}

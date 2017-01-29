@@ -5,7 +5,7 @@ unit SaGeCommonUtils;
 interface
 
 uses
-	SaGeCommon
+	 SaGeCommon
 	,SaGeMesh
 	,SaGeUtils
 	,SaGeBase
@@ -59,6 +59,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 (*=================================*)
 (*=========TSGDrawClasses==========*)

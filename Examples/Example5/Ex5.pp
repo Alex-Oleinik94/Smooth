@@ -14,15 +14,18 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants
-	,PAPPE
 	,SaGeCommon
-	,crt
+	,SaGeDateTime
 	,SaGeScreen
+	
+	,Crt
+	
+	,PAPPE
 	;
 const
 	QuantityObjects = 15;

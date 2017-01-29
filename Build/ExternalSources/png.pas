@@ -1323,9 +1323,10 @@ var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ;
 implementation
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeStringUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

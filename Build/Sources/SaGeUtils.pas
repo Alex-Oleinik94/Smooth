@@ -15,6 +15,7 @@ uses
 	,SaGeResourceManager
 	,SaGeClasses
 	,SaGeCommonClasses
+	,SaGeStringUtils
 	
 	,Classes
 	;
@@ -232,7 +233,8 @@ type
 implementation
 
 uses
-	SaGeContext
+	 SaGeContext
+	,SaGeLog
 	;
 
 (*====================================================================*)

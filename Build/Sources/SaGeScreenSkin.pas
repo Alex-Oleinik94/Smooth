@@ -6,6 +6,7 @@ interface
 
 uses
 	 Crt
+	
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
@@ -93,6 +94,10 @@ operator * (A : TSGScreenSkinColors; const B : TSGFloat) : TSGScreenSkinColors;{
 operator = (A, B : TSGScreenSkinColors) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

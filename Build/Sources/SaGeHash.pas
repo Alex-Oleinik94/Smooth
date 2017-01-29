@@ -5,8 +5,11 @@ unit SaGeHash;
 interface
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
+	,SaGeDateTime
+	,SaGeStringUtils
+	
 	,Classes
 	,SysUtils
 	

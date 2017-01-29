@@ -5,8 +5,10 @@
 unit SaGeContext;
 
 interface
+
 uses
 	 SaGeBase
+	,SaGeDateTime
 	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
@@ -16,14 +18,15 @@ uses
 	,SaGeImagesBase
 	,SaGeScreen
 	,SaGeAudioRender
-
+	
 	,Classes
-	,crt
-
+	,Crt
+	
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		{$ENDIF}
 	;
+
 const
 	SG_ALT_KEY = 18;
 	SG_CTRL_KEY = 17;
@@ -264,7 +267,10 @@ function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContex
 implementation
 
 uses
-	SysUtils
+	 SysUtils
+	
+	,SaGeStringUtils
+	,SaGeLog
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
 		{$ENDIF}

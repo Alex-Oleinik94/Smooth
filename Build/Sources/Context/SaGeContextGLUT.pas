@@ -7,8 +7,8 @@ unit SaGeContextGLUT;
 interface
 
 uses
-	Classes
-
+	 Classes
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeContext
@@ -16,7 +16,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeScreen
 	,SaGeClasses
-
+	
 	{$IFNDEF MOBILE}
 		,dglOpenGL
 	{$ELSE}
@@ -60,10 +60,12 @@ type
 implementation
 
 uses
-	SaGeRenderOpenGL
+	 SaGeRenderOpenGL
 	,SaGeCommonClasses
 	,SaGeRender
 	,SaGeDllManager
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 var

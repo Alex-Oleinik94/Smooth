@@ -70,7 +70,10 @@ type
 implementation
 
 uses
-	SysUtils
+	 SysUtils
+	
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 class function TSGAudioDecoderWAV.SupporedFormats() : TSGStringList;

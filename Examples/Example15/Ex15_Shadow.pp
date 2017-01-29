@@ -1,15 +1,10 @@
 {$INCLUDE SaGe.inc}
+
 unit Ex15_Shadow;
+
 interface
+
 uses
-	{$IFNDEF ENGINE}
-		{$IFDEF UNIX}
-			{$IFNDEF ANDROID}
-				cthreads,
-				{$ENDIF}
-			{$ENDIF}
-		SaGeBaseExample,
-		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
@@ -21,7 +16,7 @@ uses
 	,SaGeShaders
 	,SaGeImages
 	
-	,crt
+	,Crt
 	
 	,Ex5_Physics
 	,Ex13_Model
@@ -119,6 +114,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 function TSGExample15_Shadow.GetLightAngle(const index : TSGLongWord):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

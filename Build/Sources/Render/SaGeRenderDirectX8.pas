@@ -253,7 +253,9 @@ function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 implementation
 
 uses
-	SaGeDllManager
+	 SaGeDllManager
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 class function TSGRenderDirectX8.ClassName() : TSGString;

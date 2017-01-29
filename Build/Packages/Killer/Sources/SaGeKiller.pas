@@ -5,7 +5,7 @@ unit SaGeKiller;
 interface
 
 uses
-	SaGeCommon
+	 SaGeCommon
 	,SaGeMesh
 	,SaGeUtils
 	,SaGeBase
@@ -18,6 +18,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeScreenBase
 	,SaGePackages
+	,SaGeDateTime
 	;
 
 type
@@ -113,6 +114,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
 
 {$OVERFLOWCHECKS OFF}
 

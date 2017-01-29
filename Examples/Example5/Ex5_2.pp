@@ -21,8 +21,9 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
+	,SaGeDateTime
 	
-	,crt
+	,Crt
 	
 	,Ex5_Physics
 	;

@@ -20,6 +20,10 @@ procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
+uses
+	 SaGeStringUtils
+	;
+
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 var
 	ArWords:array of string = nil;

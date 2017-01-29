@@ -16,6 +16,7 @@ uses
 	,SaGeCommon
 	,SaGeVersion
 	,SaGeClasses
+	,SaGeDateTime
 	
 	,lCommon
 	,lhttp
@@ -180,8 +181,11 @@ procedure SGConsoleUDPClient(const URL : TSGString);{$IFDEF SUPPORTINLINE}inline
 implementation
 
 uses
-	StrMan
+	 StrMan
+	
 	,SaGeConsoleTools
+	,SaGeStringUtils
+	,SaGeLog
 	;
 
 // TSGUDPClient

@@ -5,10 +5,9 @@ unit SaGeNotepad;
 interface
 
 uses 
-	 crt
+	 Crt
 	,SysUtils
 	,Classes
-	,StrMan
 	
 	,SaGeBase
 	,SaGeBased
@@ -74,8 +73,8 @@ type
 		FInsets : TSGNInsetList;
 		FActiveInset : TSGLongWord;
 		FMakefile : TSGMakefileReader;
-		FMakefileDirectories : TSGArString;
-		FMakefileProjects    : TSGArString;
+		FMakefileDirectories : TSGStringList;
+		FMakefileProjects    : TSGStringList;
 			private
 		procedure AddInset(const VInset : TSGNInset);
 		function CountInsets() : TSGLongWord;
@@ -99,7 +98,11 @@ type
 implementation
 
 uses
-	SaGeNotepadTextInset;
+	 SaGeNotepadTextInset
+	,SaGeStringUtils
+	
+	,StrMan
+	;
 
 class function TSGNotepadApplication.ClassName() : TSGString;
 begin

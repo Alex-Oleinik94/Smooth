@@ -21,6 +21,7 @@ uses
 	,SaGeVersion
 	,SaGeResourceManager
 	,SaGeImages
+	,SaGeStringUtils
 	;
 
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);

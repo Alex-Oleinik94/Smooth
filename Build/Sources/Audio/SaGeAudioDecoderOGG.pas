@@ -10,9 +10,9 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeAudioDecoder
-
+	
 	,Classes
-
+	
 	,Ogg
 	,Codec
 	,CommentUtils
@@ -59,8 +59,11 @@ type
 implementation
 
 uses
-	SysUtils
+	 SysUtils
+	
+	,SaGeStringUtils
 	,SaGeDllManager
+	,SaGeLog
 	;
 
 class function TSGAudioDecoderOGG.ErrorString(Code : Integer) : String;
