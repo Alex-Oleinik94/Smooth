@@ -14,20 +14,22 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
-	,SaGePhysics
-	,crt
 	,SaGeScreen
+	
+	,crt
+	
+	,Ex5_Physics
 	;
 const
 	QuantityObjects = 60;
 type
-	TSGExample5_2=class(TSGScreenedDrawable)
+	TSGExample5_2 = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

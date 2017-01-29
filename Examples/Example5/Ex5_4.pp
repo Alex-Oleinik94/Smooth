@@ -14,16 +14,18 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
-	,SaGePhysics
-	,crt
 	,SaGeScreen
 	,SaGeMesh
+	
+	,Crt
+	
+	,Ex5_Physics
 	;
 const
 	QuantityObjects = 15;

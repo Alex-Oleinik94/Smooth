@@ -14,7 +14,7 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeRenderConstants
@@ -22,11 +22,13 @@ uses
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeCommon
+	,SaGeShaders
+	,SaGeResourceManager
+	
 	,Classes
 	,SysUtils
-	,SaGeShaders
-	,SaGePhysics
-	,SaGeResourceManager
+	
+	,Ex5_Physics
 	;
 
 const

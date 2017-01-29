@@ -14,7 +14,7 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	crt
+	 Crt
 	,Math
 	
 	,SaGeCommonClasses
@@ -26,9 +26,10 @@ uses
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
-	,SaGePhysics
 	,SaGeImages
 	,SaGeFractalTerrain
+	
+	,Ex5_Physics
 	;
 
 type

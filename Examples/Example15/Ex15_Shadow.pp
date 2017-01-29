@@ -10,19 +10,21 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
-	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
-	,SaGePhysics
-	,Ex13_Model
 	,SaGeImages
+	
+	,crt
+	
+	,Ex5_Physics
+	,Ex13_Model
 	;
 
 type

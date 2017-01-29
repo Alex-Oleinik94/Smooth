@@ -235,7 +235,7 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
    TSGEngineConfigurationPanel.CanCreate(Self) then
 	begin
 	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();
-	Context.SetKey(SGNullKey,0);
+	Context.SetKey(SGNullKey, 0);
 	end;
 
 CanRePleace := UpDateScreen();

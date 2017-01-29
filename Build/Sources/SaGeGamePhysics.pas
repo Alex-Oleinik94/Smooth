@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeGamePhysics;
 
@@ -12,8 +12,9 @@ uses
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeScene
-	,SaGePhysics
 	,SaGeCommonClasses
+	
+	,SaGePhysics
 	;
 
 type

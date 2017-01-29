@@ -19,16 +19,15 @@ uses
 	{$IF defined(UNIX) and defined(UseCThreads)}
 		cthreads,
 		{$ENDIF}
-	 SaGeBase
-	,SaGeBased
-	,SaGeContext
-	,SysUtils
+	 SysUtils
+	,SaGeBase
 	,SaGeResourceManager
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		,SaGeConsolePaintableTools
+		,SaGeBased
+		,SaGeContext
 		{$ENDIF}
-
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary
 		{$ENDIF}
