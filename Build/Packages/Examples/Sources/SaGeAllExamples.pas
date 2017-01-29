@@ -28,8 +28,8 @@ uses
 	,Ex13
 	,Ex14
 	,Ex15
-	//,ExKraft
 	,Ex16
+	//,ExKraft
 	;
 
 type
