@@ -5,13 +5,14 @@ unit SaGeFractals;
 interface
 
 uses 
-	 crt
-	,SaGeCommon
-	,SaGeContext
-	,SaGeBase
-	,SaGeBased
+	 Crt
 	,Classes
 	,SysUtils
+	
+	,SaGeBase
+	,SaGeBased
+	,SaGeCommon
+	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeUtils
@@ -22,6 +23,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeScreenBase
+	,SaGeThreads
 	;
 type
 	TSGFractal = class;

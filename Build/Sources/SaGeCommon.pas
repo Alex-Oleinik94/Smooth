@@ -5,14 +5,16 @@ unit SaGeCommon;
 interface
 
 uses
-	 SaGeBase
-	,SaGeBased
+	 Crt
+	,Math
 	,Classes
 	,SysUtils
-	,Math
-	,Crt
+	
+	,SaGeBase
+	,SaGeBased
 	,SaGeRenderConstants
-	,SaGeClasses;
+	,SaGeClasses
+	;
 
 {$DEFINE INC_PLACE_INTERFACE}
 {$INCLUDE SaGeCommonStructs.inc}
@@ -23,10 +25,6 @@ type
 	ISGAudioRender = interface;
 
 	TSGVertexFormat = (SGVertexFormat2f,SGVertexFormat3f,SGVertexFormat4f);
-
-	TSGThreadProcedure = SaGeBase.TSGThreadProcedure;
-	TSGThread = SaGeBase.TSGThread;
-	SGThread = SaGeBase.TSGThread;
 
 	TSGComplexNumber = object(TSGVertex2f)
 		end;

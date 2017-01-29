@@ -15,6 +15,7 @@ uses
 	, SaGeCommonClasses
 	, SaGeCommon
 	, SaGeImages
+	, SaGeThreads
 	;
 
 type

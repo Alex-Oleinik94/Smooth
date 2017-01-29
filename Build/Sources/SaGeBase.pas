@@ -32,38 +32,6 @@ uses
 		{$ENDIF}
 	;
 
-{$IFDEF ANDROID}
-				{*========POSIX Thread=========*}
-	const
-		PTHREAD_CREATE_JOINABLE = 0;
-		PTHREAD_CREATE_DETACHED = 1;
-	type
-		ppthread_t = ^pthread_t;
-		ppthread_attr_t = ^pthread_attr_t;
-		ppthread_mutex_t = ^pthread_mutex_t;
-		ppthread_cond_t = ^pthread_cond_t;
-		ppthread_mutexattr_t = ^pthread_mutexattr_t;
-		ppthread_condattr_t = ^pthread_condattr_t;
-
-	 __start_routine_t = pointer;
-	function pthread_create(__thread:ppthread_t; __attr:ppthread_attr_t;__start_routine: __start_routine_t;__arg:pointer):longint;cdecl;external 'libc.so';
-	function pthread_attr_init(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
-	function pthread_attr_setdetachstate(__attr:ppthread_attr_t; __detachstate:longint):longint;cdecl;external 'libc.so';
-	function pthread_mutex_init(__mutex:ppthread_mutex_t; __mutex_attr:ppthread_mutexattr_t):longint;cdecl;external 'libc.so';
-	function pthread_mutex_destroy(__mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
-	function pthread_mutex_lock(__mutex: ppthread_mutex_t):longint;cdecl;external 'libc.so';
-	function pthread_mutex_unlock(__mutex: ppthread_mutex_t):longint;cdecl;external 'libc.so';
-	function pthread_cond_init(__cond:ppthread_cond_t; __cond_attr:ppthread_condattr_t):longint;cdecl;external 'libc.so';
-	function pthread_cond_destroy(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
-	function pthread_cond_signal(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
-	function pthread_cond_broadcast(__cond:ppthread_cond_t):longint;cdecl;external 'libc.so';
-	function pthread_cond_wait(__cond:ppthread_cond_t; __mutex:ppthread_mutex_t):longint;cdecl;external 'libc.so';
-	//procedure pthread_exit(value : Pointer);cdecl;external 'libc.so';
-	function  pthread_attr_destroy(__attr:ppthread_attr_t):longint;cdecl;external 'libc.so';
-	//function pthread_cancel(__thread:pthread_t):LongInt;cdecl;external 'libc.so';
-	function pthread_join(thread:pthread_t; a:pointer):LongInt;cdecl;external 'libc.so';
-	{$ENDIF}
-
 const
 	{$IFDEF MSWINDOWS}
 		SGLibraryNameBegin = '';
@@ -365,55 +333,6 @@ type
 		function GetPastMiliSeconds:int64;
 		function GetPastMiliSecondsFrom(const a:TSGDateTime):int64;
 		end;
-
-	//Это для потоков
-	TSGThreadProcedure     = procedure ( p : Pointer );
-
-	TSGThreadFunctionResult =
-	{$IFDEF         ANDROID}
-		Pointer
-	{$ELSE} {$IFDEF MSWINDOWS}
-		LongWord
-	{$ELSE} {$IFDEF UNIX}
-		{$IFDEF CPU32}
-			LongInt
-		{$ENDIF}
-		{$IFDEF CPU64}
-			Int64
-		{$ENDIF}
-	{$ENDIF}{$ENDIF}{$ENDIF};
-
-	TSGThreadID = {$IFDEF ANDROID} pthread_t {$ELSE}{$IFDEF DARWIN}TThreadID{$ELSE}LongWord{$ENDIF}{$ENDIF};
-	TSGThreadFunction = function ( p : TSGPointer ): TSGThreadFunctionResult;
-		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
-	//Это класс, при помощью которого можно создать поток
-	TSGThread = class
-			public
-		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
-		destructor Destroy();override;
-			public
-		FHandle:TSGThreadID;
-		FFinished:Boolean;
-		FProcedure:TSGThreadProcedure;
-		FParametr:Pointer;
-		FThreadID:LongWord;
-		{$IFDEF ANDROID}
-			attr : pthread_attr_t;
-			mutex : pthread_mutex_t;
-			cond : pthread_cond_t;
-			{$ENDIF}
-		procedure Execute();virtual;
-		procedure Start();virtual;
-		procedure SetProcedure(const Proc:TSGThreadProcedure);
-		procedure SetParametr(const Pointer:Pointer);
-		procedure PreExecuting();
-		procedure PostExecuting();
-			public
-		property Finished: boolean read FFinished write FFinished;
-		end;
-	SGThread = TSGThread;
-	ArTSGThread = type packed array of TSGThread;
-	TArTSGThread = ArTSGThread;
 const
 	SGSetExists               : TSGExByte = 100;
 	SGSetNote                 : TSGExByte = 101;
@@ -745,7 +664,10 @@ function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; c
 implementation
 
 uses
-	StrMan;
+	 StrMan
+	
+	,SaGeThreads
+	;
 
 function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
@@ -2647,131 +2569,6 @@ if a>b then
 	Result:=a
 else
 	Result:=b;
-end;
-
-constructor TSGThread.Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
-begin
-inherited Create;
-FFinished:=True;
-FParametr:=Para;
-FProcedure:=Proc;
-FillChar(FHandle,SizeOf(FHandle),0);
-FThreadID:=0;
-{$IFDEF ANDROID}
-	fillchar(attr,sizeof(attr),0);
-	fillchar(cond,sizeof(cond),0);
-	fillchar(mutex,sizeof(mutex),0);
-	{$ENDIF}
-if QuickStart then
-	Start();
-end;
-
-procedure TSGThread.SetProcedure(const Proc:TSGThreadProcedure);
-begin
-FProcedure:=Proc;
-end;
-
-procedure TSGThread.SetParametr(const Pointer:Pointer);
-begin
-FParametr:=Pointer;
-end;
-
-procedure TSGThread.PreExecuting();
-begin
-{$IFDEF ANDROID}
-	pthread_mutex_lock(@mutex);
-	{$ENDIF}
-FFinished:=False;
-{$IFDEF ANDROID}
-	pthread_cond_broadcast(@cond);
-	pthread_mutex_unlock(@mutex);
-	{$ENDIF}
-end;
-
-procedure TSGThread.PostExecuting();
-begin
-{$IFDEF ANDROID}
-	pthread_mutex_lock(@mutex);
-	{$ENDIF}
-FFinished:=True;
-{$IFDEF ANDROID}
-	pthread_mutex_unlock(@mutex);
-	{$ENDIF}
-end;
-
-procedure TSGThread.Execute();
-begin
-if Pointer(FProcedure)<>nil then
-	FProcedure(FParametr);
-end;
-
-function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
-{$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
-begin
-Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
-ThreadClass.PreExecuting();
-ThreadClass.Execute();
-ThreadClass.PostExecuting();
-{$IFDEF ANDROID}
-	while true do
-		begin
-		Sleep(10000);
-		end;
-	{$ENDIF}
-end;
-
-destructor TSGThread.Destroy();
-{$IFDEF MSWINDOWS}
-	var
-		i : TSGBoolean;
-	{$ENDIF}
-begin
-{$IFDEF MSWINDOWS}
-	if not FFinished then
-		begin
-		i:=TerminateThread(FHandle,0);
-		SGLog.Source(['TSGThread__Destroy : FHandle=',FHandle,',FThreadID=',FThreadID,',Terminate Result=',i,'.']);
-		end;
-	if FHandle <> 0 then
-		CloseHandle(FHandle);
-{$ELSE}
-	{$IFDEF ANDROID}
-		{if not FFinished then
-			pthread_cancel(FHandle);}
-		pthread_cond_destroy(@cond);
-		pthread_mutex_destroy(@mutex);
-		pthread_attr_destroy(@attr);
-	{$ELSE}
-	if not FFinished then
-		KillThread(FHandle);
-		{$ENDIF}
-	{$ENDIF}
-FillChar(FHandle,SizeOf(FHandle),0);
-FThreadID:=0;
-inherited;
-end;
-
-procedure TSGThread.Start();
-begin
-{$IFDEF MSWINDOWS}
-	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
-{$ELSE}
-	{$IFDEF ANDROID}
-			SGLog.Source('Start thread');
-			pthread_mutex_init(@mutex, nil);
-			pthread_cond_init(@cond, nil);
-			pthread_attr_init(@attr);
-			pthread_attr_setdetachstate(@attr,PTHREAD_CREATE_DETACHED);
-			FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
-			pthread_mutex_lock(@mutex);
-			while FFinished do
-				pthread_cond_wait(@cond, @mutex);
-			pthread_mutex_unlock(@mutex);
-			SGLog.Source('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
-		{$ELSE}
-			FHandle := BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
-		{$ENDIF}
-	{$ENDIF}
 end;
 
 function SGWhatIsTheSimbolEN(const l:longint;const Shift:boolean = False;const Caps:Boolean = False):string;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

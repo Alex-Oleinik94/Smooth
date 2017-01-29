@@ -5,8 +5,9 @@ unit SaGeAllFractals;
 interface
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeBased
+	,SaGeThreads
 	,SaGeResourceManager
 	,SaGeFractals
 	,SaGePackages

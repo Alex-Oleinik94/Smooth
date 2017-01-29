@@ -17,7 +17,9 @@ uses
 	,SaGeNet
 	,SaGeLoading
 	,SaGeUtils
-	,SaGeMesh;
+	,SaGeMesh
+	,SaGeThreads
+	;
 
 const
 	SGTStateLoading  = $006001;

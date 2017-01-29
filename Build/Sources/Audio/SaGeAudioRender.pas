@@ -12,7 +12,8 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeAudioDecoder
-
+	,SaGeThreads
+	
 	,Classes
 	;
 
