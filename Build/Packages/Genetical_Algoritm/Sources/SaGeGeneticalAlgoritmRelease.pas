@@ -28,6 +28,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeMathUtils
 	;
 
 {$DEFINE SGREADIMPLEMENTATION}

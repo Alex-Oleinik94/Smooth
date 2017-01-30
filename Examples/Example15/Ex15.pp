@@ -26,6 +26,7 @@ uses
 	,SaGeImages
 	,SaGeScreenBase
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	,Math
 	,crt
@@ -255,7 +256,7 @@ if FLightsCount > 0 then
 
 if Render.SupporedShaders() then
 	begin
-	FFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+	FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 	FFont.SetContext(Context);
 	FFont.Loading();
 	FFont.ToTexture();
@@ -274,9 +275,9 @@ if Render.SupporedShaders() then
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);
-	FModel.Load(SGExamplesDirectory + Slash + '13' + Slash + 'c_marine.smd');
-	FModel.LoadAnimation(SGExamplesDirectory + Slash + '13' + Slash + 'run.smd');
-	FModel.LoadTextures(SGExamplesDirectory + Slash + '13' + Slash, 2 * FLightsCount + 2);
+	FModel.Load(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'c_marine.smd');
+	FModel.LoadAnimation(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'run.smd');
+	FModel.LoadTextures(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator, 2 * FLightsCount + 2);
 	FModel.PrepareSkeletalAnimation();
 	
 	FTexturesHandles[0] := FModel.GetTextureHandle('SM_4B.jpg');

@@ -15,12 +15,14 @@ procedure SGConsoleHash(const VParams : TSGConcoleCallerParams = nil);
 implementation
 
 uses
-	StrMan
+	 StrMan
 	
 	,SaGeHash
 	,SaGeVersion
 	,SaGeResourceManager
 	,SaGeStringUtils
+	,SaGeLog
+	,SaGeFileUtils
 	;
 
 procedure SGConsoleHash(const VParams : TSGConcoleCallerParams = nil);

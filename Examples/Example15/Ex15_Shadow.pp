@@ -117,6 +117,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
 	;
 
 function TSGExample15_Shadow.GetLightAngle(const index : TSGLongWord):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -265,7 +266,7 @@ end;
 constructor TSGExample15_Shadow.Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32; const TextureBlock : TSGTextureBlock = nil);
 const
 	TexSize = 4096;
-	Example15Dir = SGExamplesDirectory + Slash + '15' +Slash;
+	Example15Dir = SGExamplesDirectory + DirectorySeparator + '15' +DirectorySeparator;
 var
 	i : TSGLongWord;
 begin

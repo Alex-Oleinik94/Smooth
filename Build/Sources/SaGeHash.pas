@@ -90,10 +90,13 @@ function SGHashStrType(const VType : TSGHashType):TSGString;{$IFDEF SUPPORTINLIN
 implementation
 
 uses
-	SaGeResourceManager,
-	SaGeVersion,
-	Dos,
-	Crt
+	 SaGeResourceManager
+	,SaGeVersion
+	,SaGeFileUtils
+	,SaGeLog
+	
+	,Dos
+	,Crt
 	;
 
 var
@@ -495,7 +498,7 @@ SGHint('Count unknown : ' + SGStr(CountUnknown));
 SGHint('Count non-equal : ' + SGStr(CountNonEqual));
 SGHint('Count exist in first : ' + SGStr(CountExist1));
 SGHint('Count exist in second : ' + SGStr(CountExist2));
-OutFIleName := SGGetFreeFileName('Hash check results.txt');
+OutFileName := SGFreeFileName('Hash check results.txt');
 OutStream := TFileStream.Create(OutFIleName, fmCreate);
 WriteLnString('Results:');
 WriteLnString('	Equal('+SGStr(CountEqual)+'):');
@@ -581,27 +584,27 @@ var
 	FS : TSGInt64;
 begin
 Result := nil;
-Dos.FindFirst(Directory + Slash + '*', $3F, SR);
+Dos.FindFirst(Directory + DirectorySeparator + '*', $3F, SR);
 while DosError <> 18 do
 	begin
 	if (SR.Name <> '.') and (SR.Name <> '..') then
 		begin
-		if SGExistsDirectory(Directory + Slash + SR.Name) then
+		if SGExistsDirectory(Directory + DirectorySeparator + SR.Name) then
 			begin
-			DirFileList := GetFileListFromDir(Directory + Slash + SR.Name);
+			DirFileList := GetFileListFromDir(Directory + DirectorySeparator + SR.Name);
 			
 			SetLength(DirFileList, 0);
 			end
-		else if SGFileExists(Directory + Slash + SR.Name) then
+		else if SGFileExists(Directory + DirectorySeparator + SR.Name) then
 			begin
-			FS := FileSize(Directory + Slash + SR.Name);
+			FS := FileSize(Directory + DirectorySeparator + SR.Name);
 			if FS <> -1 then
 				begin
 				if Result = nil then
 					SetLength(Result, 1)
 				else
 					SetLength(Result, Length(Result) + 1);
-				Result[High(Result)].FPath := Directory + Slash + SR.Name;
+				Result[High(Result)].FPath := Directory + DirectorySeparator + SR.Name;
 				Result[High(Result)].FSize := FS;
 				end;
 			end;
@@ -647,8 +650,8 @@ if HashParam = [] then
 	HashTypes := SGFullHashParam
 else
 	HashTypes := HashParam;
-ResultFile := DirectoryName + Slash + 'SaGeHashData.dat';
-ResultFile := SGGetFreeFileName(ResultFile, '#');
+ResultFile := DirectoryName + DirectorySeparator + 'SaGeHashData.dat';
+ResultFile := SGFreeFileName(ResultFile, '#');
 SGHint('Finding files...');
 DT1.Get();
 FileList := GetFileListFromDir(DirectoryName);

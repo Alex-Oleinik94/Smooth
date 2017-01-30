@@ -11,7 +11,6 @@ uses
 	,SaGeImagesBase
 	,SaGeCommonClasses
 	,SaGeCommon
-	,SaGeStringUtils
 		// System
 	,Classes
 	;
@@ -157,6 +156,8 @@ uses
 		// Engine
 	,SaGeResourceManager
 	,SaGeRenderConstants
+	,SaGeFileUtils
+	,SaGeStringUtils
 	;
 
 procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -540,7 +541,7 @@ end;
 if Stream<>nil then
 	begin
 	Stream.Position:=0;
-	Stream.SaveToFile(SGSetExpansionToFileName(Way,TSGImageFormatDeterminer.DetermineExpansionFromFormat(SaveFormat)));
+	Stream.SaveToFile(SGSetExpansionToFileName(Way, TSGImageFormatDeterminer.DetermineExpansionFromFormat(SaveFormat)));
 	Stream.Destroy();
 	end;
 end;
@@ -736,7 +737,7 @@ begin
 Result:=False;
 FStream.Position:=0;
 ImageFormat := TSGImageFormatDeterminer.DetermineFormat(FStream);
-if (ImageFormat = 0) and (SGUpCaseString(SGGetFileExpansion(Way)) = 'TGA') then
+if (ImageFormat = 0) and (SGUpCaseString(SGFileExpansion(Way)) = 'TGA') then
 	ImageFormat := SGI_TGA;
 if ImageFormat = 0 then
 	SGLog.Source(['TSGImage.LoadToBitMap() : Determining image format for "' + Way + '" failed!'])

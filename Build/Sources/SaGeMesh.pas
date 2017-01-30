@@ -13,7 +13,6 @@ uses
 	,SaGeRender
 	,SaGeRenderConstants
 	,SaGeCommonClasses
-	,SaGeStringUtils
 	
 	,Classes
 	,Crt
@@ -533,7 +532,10 @@ type
 implementation
 
 uses
-	SaGeLog
+	 SaGeLog
+	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeMathUtils
 	;
 
 {$DEFINE SGREADIMPLEMENTATION}
@@ -861,7 +863,7 @@ var
 	SecondArVertex:Pointer = nil;
 	i,ii,iiii,iii:TSGMaxEnum;
 	ArPoligonesNormals:packed array of TSGVertex3f = nil;
-	Plane:SGPlane;
+	Plane:TSGPlane3D;
 	Vertex:TSGVertex3f;
 begin
 if (FObjectPoligonesType<>SGR_TRIANGLES) then
@@ -2099,27 +2101,27 @@ for i:=0 to FQuantityObjects-1 do
 	end;
 end;
 
-procedure TSGCustomModel.LoadFromFile(const FileWay:string);
+procedure TSGCustomModel.LoadFromFile(const FileWay : TSGString);
 begin
 if SGFileExists(FileWay) then
 	begin
-		if SGUpCaseString(SGGetFileExpansion(FileWay))='3DS' then
+	if SGUpCaseString(SGFileExpansion(FileWay))='3DS' then
+		begin
+		Load3DSFromFile(FileWay);
+		end
+	else
+		if SGUpCaseString(SGFileExpansion(FileWay))='OBJ' then
 			begin
-			Load3DSFromFile(FileWay);
+			AddObject().LoadFromOBJ(FileWay);
 			end
 		else
-			if SGUpCaseString(SGGetFileExpansion(FileWay))='OBJ' then
-				begin
-				AddObject().LoadFromOBJ(FileWay);
-				end
-			else
-				begin
-				LoadFromSG3DMFile(FileWay);
-				end;
+			begin
+			LoadFromSG3DMFile(FileWay);
+			end;
 	end;
 end;
 
-class function TSGCustomModel.ClassName():String;
+class function TSGCustomModel.ClassName() : TSGString;
 begin
 Result:='TSGCustomModel';
 end;

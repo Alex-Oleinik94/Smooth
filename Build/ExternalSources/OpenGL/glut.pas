@@ -464,17 +464,21 @@ implementation
 { systems, so its functions are included here. }
 {$INCLUDE tinygl.inc}
 
-uses SaGeBase
-	,SaGeBased,
-	SaGeDllManager
+uses
+	 SaGeBase
+	,SaGeBased
+	,SaGeDllManager
+	,SaGeSysUtils
 	;
 
 {$ELSE MORPHOS}
 
-uses FreeGlut
+uses 
+	 FreeGlut
 	,SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeSysUtils
 	;
 {$ENDIF MORPHOS}
 

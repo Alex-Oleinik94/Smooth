@@ -114,6 +114,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeLog
+	,SaGeFileUtils
 	;
 
 procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGString; const VFileParams : TSGShaderParams);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -574,8 +575,8 @@ else if (VComand='I') or (VComand='INC') or (VComand='INCLUDE') then
 	S := '';
 	if (VParams<> nil) and (Length(VParams)>0) then
 		begin
-		if (SGResourceFiles.FileExists(SGGetFileWay(FFileName) + VParams[0])) then
-			S := SGGetFileWay(FFileName) + VParams[0]
+		if (SGResourceFiles.FileExists(SGFilePath(FFileName) + VParams[0])) then
+			S := SGFilePath(FFileName) + VParams[0]
 		else if SGResourceFiles.FileExists(VParams[0]) then
 			S := VParams[0]
 		else

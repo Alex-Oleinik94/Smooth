@@ -286,6 +286,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeLog
+	,SaGeFileUtils
 	;
 
 class function TSGRenderOpenGL.ClassName() : TSGString;
@@ -1439,7 +1440,7 @@ var
 	ar : TSGStringList = nil;
 	i : TSGMaxEnum;
 begin
-ar := SGGetFileNames(TempDir+'/','*');
+ar := SGDirectoryFiles(TempDir+'/','*');
 if ar <> nil then
 	for i:= 0 to High(ar) do
 		if (ar[i]<>'.') and (ar[i]<>'..') then
@@ -1492,7 +1493,7 @@ var
 	ar : TSGStringList = nil;
 	i : TSGMaxEnum;
 begin
-ar := SGGetFileNames(TempDir+'/','*');
+ar := SGDirectoryFiles(TempDir+'/','*');
 if ar <> nil then
 	for i:= 0 to High(ar) do
 		if (ar[i]<>'.') and (ar[i]<>'..') then

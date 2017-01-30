@@ -184,6 +184,7 @@ uses
 	 StrMan
 	
 	,SaGeConsoleTools
+	,SaGeConsoleUtils
 	,SaGeStringUtils
 	,SaGeLog
 	;

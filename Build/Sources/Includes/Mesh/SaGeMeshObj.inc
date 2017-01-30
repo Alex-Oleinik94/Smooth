@@ -65,7 +65,7 @@ else if Comand = 'map_Kd' then
 	begin
 	Comand := ObjReadLnString(f);
 	if Comand <> '' then
-		FParent.LastMaterial().AddDiffuseMap(SGGetFileWay(MaterialFileName)+Comand)
+		FParent.LastMaterial().AddDiffuseMap(SGFilePath(MaterialFileName)+Comand)
 	end
 else if Comand = 'map_bump' then
 	begin
@@ -75,7 +75,7 @@ else if Comand = 'bump' then
 	begin
 	Comand := ObjReadLnString(f);
 	if Comand <> '' then
-		FParent.LastMaterial().AddBumpMap(SGGetFileWay(MaterialFileName)+Comand)
+		FParent.LastMaterial().AddBumpMap(SGFilePath(MaterialFileName)+Comand)
 	end
 else if Comand = 'map_opacity' then
 	begin
@@ -274,7 +274,7 @@ Reset(f);
 repeat
 Comand := ObjReadComand(f);
 if Comand = 'mtllib' then
-	LoadMaterialLibrary(SGGetFileWay(FFileName)+ObjReadLnString(f))
+	LoadMaterialLibrary(SGFilePath(FFileName)+ObjReadLnString(f))
 else if Comand = 'v' then
 	ObjAddVertex()
 else if Comand = 'vn' then

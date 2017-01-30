@@ -65,6 +65,7 @@ uses
 	,SaGeVersion
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeFileUtils
 	
 	,StrMan
 	;
@@ -771,7 +772,7 @@ var
 	i : TSGUInt32;
 begin
 Result := 0;
-UnitName := SGGetFileName(FInFileName);
+UnitName := SGFileName(FInFileName);
 while FInStream.Size <> FInStream.Position do
 	begin
 	GetSizePos(LastOutSize, LastInPos);

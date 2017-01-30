@@ -113,6 +113,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeMathUtils
 	;
 
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

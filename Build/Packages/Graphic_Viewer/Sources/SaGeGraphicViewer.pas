@@ -35,6 +35,10 @@ uses
 	 SaGeConsoleTools
 	,SaGeConsolePaintableTools
 	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeLog
+	,SaGeMathUtils
+	,SaGeBaseUtils
 	;
 
 {$DEFINE SGREADIMPLEMENTATION}

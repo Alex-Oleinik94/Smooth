@@ -2355,6 +2355,7 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

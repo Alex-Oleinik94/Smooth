@@ -22,16 +22,17 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
 	;
 
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 var
-	ArWords:array of string = nil;
+	ArWords:TSGStringList = nil;
 	Oy:LongWord;
 	PF,PS:LongWord;
 	FArF:packed array of TFileStream = nil;
 	i,ii:LongWord;
-	ArF:packed array of string = nil;
+	ArF:TSGStringList = nil;
 	FDir:string = '.';
 var
 	TempS,TempS2:String;
@@ -82,7 +83,7 @@ while not eof(f) do
 				FArF[i]:=nil;
 			end;
 		if FArF[iii-1]=nil then
-			FArF[iii-1]:=TFileStream.Create(NameFolder+Slash+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
+			FArF[iii-1]:=TFileStream.Create(NameFolder+DirectorySeparator+'Results of '+SGStr(iii)+' matches.txt',fmCreate);
 		SGWriteStringToStream('"'+VFile+'" : "'+SGStr(KolStr)+'"'+SGWinEoln,FArF[iii-1],False);
 		end;
 	end;
@@ -112,7 +113,7 @@ var
 begin
 for i:=0 to High(ArF) do
 	begin
-	dos.findfirst(VDir+Slash+'*.'+ArF[i],$3F,sr);
+	dos.findfirst(VDir+DirectorySeparator+'*.'+ArF[i],$3F,sr);
 	while DosError<>18 do
 		begin
 		FindInFile(VDir+sr.name);
@@ -172,18 +173,18 @@ while i<=High(ArWords) do
 	end;
 end;
 
-procedure DoDirectories(const VDir:string);
+procedure DoDirectories(const VDir : TSGString);
 var
 	sr:dos.searchrec;
 begin
-DoFiles(VDir+Slash);
-dos.findfirst(VDir+Slash+'*',$10,sr);
+DoFiles(VDir + DirectorySeparator);
+dos.findfirst(VDir+DirectorySeparator+'*',$10,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir+Slash+sr.name))) then
+	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(VDir + DirectorySeparator + Sr.Name))) then
 		BEGIN
 		ChisFi+=1;
-		DoDirectories(VDir+Slash+sr.name);
+		DoDirectories(VDir + DirectorySeparator + Sr.Name);
 		END;
 	dos.findnext(sr);
 	end;
@@ -283,7 +284,7 @@ if SGCountConsoleParams(VParams) <> 0 then
 		end;
 
 PF:=0;PS:=0;OY:=0;
-NameFolder:=SGGetFreeDirectoryName('Find In Pas Results','Part');
+NameFolder:=SGFreeDirectoryName('Find In Pas Results', 'Part');
 SGMakeDirectory(NameFolder);
 Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
 if (not StartingNow) then

@@ -17,6 +17,7 @@ uses
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeScreenBase
+	,SaGeFileUtils
 	;
 
 type
@@ -82,7 +83,7 @@ type
 		procedure PaintProgressBar(constref ProgressBar : ISGProgressBar); virtual;
 		end;
 const
-	SGScreenSkinDefaultFontFileName = SGFontDirectory + Slash + 'Tahoma.sgf';
+	SGScreenSkinDefaultFontFileName = SGFontDirectory + DirectorySeparator + 'Tahoma.sgf';
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStandartSkinColors() : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -97,6 +98,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeMathUtils
 	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -310,7 +312,7 @@ FColorsTimer := 0;
 FColorsFrom := FColors;
 FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 
-FComboBoxImage := TSGImage.Create(SGTextureDirectory + Slash + 'ComboBoxImage.sgia');
+FComboBoxImage := TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'ComboBoxImage.sgia');
 FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
 

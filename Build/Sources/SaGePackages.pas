@@ -52,6 +52,7 @@ uses
 	 Crt
 	
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	{$INCLUDE SaGeFileRegistrationPackages.inc}
 	;
@@ -200,7 +201,7 @@ var
 begin
 Result.ZeroMemory();
 Stream := TMemoryStream.Create();
-Stream.LoadFromFile(PackagePath + Slash + 'MakeInfo.ini');
+Stream.LoadFromFile(PackagePath + DirectorySeparator + 'MakeInfo.ini');
 Stream.Position := 0;
 repeat
 S := SGReadLnStringFromStream(Stream);

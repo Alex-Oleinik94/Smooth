@@ -3,6 +3,7 @@
 unit SaGeFileOpener;
 
 interface
+
 uses
 	 Classes
 	
@@ -48,7 +49,8 @@ uses
 	 SaGeVersion
 	,SaGeContext
 	,SaGeLog
-
+	,SaGeFileUtils
+	
 	// Openers :
 	,SaGeImageFileOpener
 	,SaGeAudioFileOpener
@@ -146,7 +148,7 @@ if Length(VFiles) = 0 then
 EC := nil;
 SL1 := nil;
 for i := 0 to High(VFiles) do
-	SL1 *= SGUpCaseString(SGGetFileExpansion(VFiles[i]));
+	SL1 *= SGUpCaseString(SGFileExpansion(VFiles[i]));
 for C in SGFileOpeners do
 	if C.ExpansionsSuppored(SL1) then
 		begin

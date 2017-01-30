@@ -34,6 +34,9 @@ uses
 	,SaGeMakefileReader
 	,SaGePackages
 	,SaGeStringUtils
+	,SaGeConsoleUtils
+	,SaGeLog
+	,SaGeFileUtils
 	;
 
 procedure SGConsoleMake(const VParams : TSGConcoleCallerParams = nil);

@@ -11,7 +11,7 @@ uses
 	,SaGeBase
 	,SaGeBased
 	,SaGeClasses
-	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 const
@@ -143,6 +143,10 @@ implementation
 uses
 	 SaGeVersion
 	,SaGeLog
+	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeConsoleUtils
+	,SaGeBaseUtils
 	
 	,StrMan
 	,Crt
@@ -216,7 +220,7 @@ end;
 
 class function TSGDllManager.LibrariesDirectory() : TSGString;
 begin
-Result := '.'+Slash+'..'+Slash+'Libraries' + Slash + SGEngineTarget();
+Result := '.'+DirectorySeparator+'..'+DirectorySeparator+'Libraries' + DirectorySeparator + SGEngineTarget();
 end;
 
 class function TSGDllManager.OpenLibrary(const VLibName : TSGString; var VFileName : TSGString) : TSGLibHandle;
@@ -228,11 +232,11 @@ begin
 Result := nil;
 if not SGExistsDirectory(LibrariesDirectory) then
 	exit;
-dos.findfirst(LibrariesDirectory + Slash + '*',$10,sr);
+dos.findfirst(LibrariesDirectory + DirectorySeparator + '*',$10,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(LibrariesDirectory + Slash + sr.name))) then
-		Result += TSGString(LibrariesDirectory + Slash + sr.name);
+	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(LibrariesDirectory + DirectorySeparator + sr.name))) then
+		Result += TSGString(LibrariesDirectory + DirectorySeparator + sr.name);
 	dos.findnext(sr);
 	end;
 dos.findclose(sr);
@@ -249,7 +253,7 @@ var
 	DL : TSGStringList = nil;
 	i : TSGUInt32;
 begin
-Result := LL(LibrariesDirectory + Slash + VLibName, VFileName);
+Result := LL(LibrariesDirectory + DirectorySeparator + VLibName, VFileName);
 if Result = 0 then
 	begin
 	DL := GetDirectoryList();
@@ -259,7 +263,7 @@ if Result = 0 then
 			begin
 			for i := 0 to High(DL) do
 				begin
-				Result := LL(DL[i] + Slash + VLibName, VFileName);
+				Result := LL(DL[i] + DirectorySeparator + VLibName, VFileName);
 				if Result <> 0 then
 					break;
 				end;

@@ -26,6 +26,8 @@ uses
 	,SaGeDllManager
 	,SaGeFileOpener
 	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeLog
 	;
 
 procedure SGConsoleAddToLog(const VParams : TSGConcoleCallerParams = nil);

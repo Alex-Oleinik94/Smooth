@@ -307,6 +307,7 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	
 	,Classes
 	;

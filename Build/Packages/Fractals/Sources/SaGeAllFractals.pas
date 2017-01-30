@@ -54,6 +54,9 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeMathUtils
+	,SaGeBaseUtils
 	;
 
 constructor TSGAllFractals.Create(const VContext:ISGContext);

@@ -22,6 +22,7 @@ uses
 	,SaGeResourceManager
 	,SaGeImages
 	,SaGeStringUtils
+	,SaGeFileUtils
 	;
 
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);
@@ -56,13 +57,13 @@ var
 begin
 if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
 	begin
-	Image:=TSGImage.Create();
+	Image := TSGImage.Create();
 	Image.Way := VParams[0];
 	Image.Loading();
 	Image.Image.SetBounds(
 		SGVal(VParams[1]),
 		SGVal(VParams[2]));
-	Image.Way := SGGetFreeFileName(Image.Way);
+	Image.Way := SGFreeFileName(Image.Way);
 	Image.Saveing();
 	Image.Destroy();
 	end

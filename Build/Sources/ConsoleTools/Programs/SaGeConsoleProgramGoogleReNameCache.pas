@@ -27,6 +27,8 @@ uses
 	,SaGeVersion
 	,SaGeImageFormatDeterminer
 	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeLog
 	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);
@@ -137,7 +139,7 @@ begin
 Result := SGBad;
 Expansion := '';
 Stream := TMemoryStream.Create();
-Stream.LoadFromFile(CacheDirectory + Slash + FileName);
+Stream.LoadFromFile(CacheDirectory + DirectorySeparator + FileName);
 Expansion := FindFileExpansion(Stream);
 if (Expansion = '') and WriteUnknows then
 	WriteUnknownFile(FileName, Stream);
@@ -146,10 +148,10 @@ Stream := nil;
 if Expansion=' ' then
 	begin
 	if TempDirectoryEnabled then
-		MoveCachedFile(CacheDirectory + Slash + FileName, TempDirectory + Slash + FileName);
+		MoveCachedFile(CacheDirectory + DirectorySeparator + FileName, TempDirectory + DirectorySeparator + FileName);
 	end
 else if Expansion<>'' then
-	MoveCachedFile(CacheDirectory + Slash + FileName, ComplitedDirectory + Slash + FileName + '.' + Expansion);
+	MoveCachedFile(CacheDirectory + DirectorySeparator + FileName, ComplitedDirectory + DirectorySeparator + FileName + '.' + Expansion);
 if Expansion = '' then
 	Result := SGUnknown
 else if Expansion = ' ' then
@@ -168,7 +170,7 @@ var
 	CountComplited : TSGUInt32 = 0;
 	FileResult : TSGGRCResult;
 begin
-Files := SGGetFileNames(CacheDirectory + Slash, Mask);
+Files := SGDirectoryFiles(CacheDirectory + DirectorySeparator, Mask);
 for FileName in Files do
 	if not ('.' in FileName) then
 		case Proccess(FileName) of
@@ -218,7 +220,7 @@ function SelectCacheDirSimject(const Param : TSGString) : TSGBool;
 begin
 Result := False;
 {$IFDEF MSWINDOWS}
-	CacheDirectory := TSGCompatibleContext.UserProfilePath() + Slash + 'AppData' + Slash + 'Local' + Slash + 'Slimjet' + Slash + 'User Data' + Slash + 'Default' + Slash + 'Cache';
+	CacheDirectory := TSGCompatibleContext.UserProfilePath() + DirectorySeparator + 'AppData' + DirectorySeparator + 'Local' + DirectorySeparator + 'Slimjet' + DirectorySeparator + 'User Data' + DirectorySeparator + 'Default' + DirectorySeparator + 'Cache';
 	Result := True;
 {$ELSE MSWINDOWS}
 	(** TODO **)
@@ -268,11 +270,11 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 		Destroy();
 		end;
 if CacheDirectory = '' then
-	CacheDirectory := '.' + Slash + 'Cache';
+	CacheDirectory := '.' + DirectorySeparator + 'Cache';
 if (TempDirectory = '') and TempDirectoryEnabled then
-	TempDirectory := CacheDirectory + Slash + 'Temp';
+	TempDirectory := CacheDirectory + DirectorySeparator + 'Temp';
 if ComplitedDirectory = '' then
-	ComplitedDirectory := CacheDirectory + Slash + 'Complited';
+	ComplitedDirectory := CacheDirectory + DirectorySeparator + 'Complited';
 end;
 
 begin

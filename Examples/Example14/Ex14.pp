@@ -24,6 +24,7 @@ uses
 	,SaGeCommon
 	,SaGeShaders
 	,SaGeResourceManager
+	,SaGeFileUtils
 	
 	,Classes
 	,SysUtils
@@ -253,14 +254,14 @@ Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_DEPTH_ATTACHMENT_EXT, SGR_T
 Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
 
 FShaderDepth := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'depth.frag'));
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.frag'));
 FShaderShadowTex2D := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_tex2D.frag'));
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_tex2D.frag'));
 FShaderShadowShad2D := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + Slash + '14' + Slash + 'shadow_shad2D.frag'));
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
+	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_shad2D.frag'));
 
 
 FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap');
@@ -273,7 +274,7 @@ FUniformShadowShad2D_lightMatrix := FShaderShadowShad2D.GetUniformLocation('ligh
 FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('lightPos');
 FUniformShadowShad2D_lightDir    := FShaderShadowShad2D.GetUniformLocation('lightDir');
 
-LoadModel(SGExamplesDirectory + Slash + '14' + Slash + 'model.bin');
+LoadModel(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'model.bin');
 LoadLigthModel();
 end;
 

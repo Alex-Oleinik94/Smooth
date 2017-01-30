@@ -23,6 +23,8 @@ uses
 	,SaGeVersion
 	,SaGeNet
 	,SaGeStringUtils
+	,SaGeLog
+	,SaGeConsoleUtils
 	;
 
 

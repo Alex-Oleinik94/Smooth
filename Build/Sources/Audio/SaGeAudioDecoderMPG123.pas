@@ -57,6 +57,7 @@ uses
 	,SaGeStringUtils
 	,SaGeDllManager
 	,SaGeLog
+	,SaGeSysUtils
 	;
 
 class function TSGAudioDecoderMPG123.SupporedFormats() : TSGStringList;

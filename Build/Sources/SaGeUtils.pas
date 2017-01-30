@@ -235,6 +235,8 @@ implementation
 uses
 	 SaGeContext
 	,SaGeLog
+	,SaGeFileUtils
+	,SaGeMathUtils
 	;
 
 (*====================================================================*)
@@ -396,7 +398,7 @@ if FFont <> nil then
 	FFont.Destroy();
 	FFont := nil;
 	end;
-FFont := TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 FFont.Context := Context;
 FFont.Loading();
 end;
@@ -1108,7 +1110,7 @@ var
 	i:LongInt = 0;
 	ii:LongInt = 0;
 begin
-if SGGetFileExpansion(FWay)='SGF' then
+if SGFileExpansion(FWay)='SGF' then
 	begin
 	Result:=LoadSGF();
 	Exit;

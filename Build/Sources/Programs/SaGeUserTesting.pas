@@ -5,8 +5,9 @@ unit SaGeUserTesting;
 interface
 
 uses 
-	 crt
+	 Crt
 	,SysUtils
+	
 	,SaGeBase
 	,SaGeBased
 	,SaGeCommonClasses
@@ -20,7 +21,10 @@ uses
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeRenderConstants
-	,SaGeCommon;
+	,SaGeCommon
+	,SaGeMathUtils
+	;
+
 type
 	TSGUserTesting=class(TSGScreenedDrawable)
 			public

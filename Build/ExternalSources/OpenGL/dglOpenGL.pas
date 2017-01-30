@@ -14857,6 +14857,7 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeSysUtils
 	;
 
 var

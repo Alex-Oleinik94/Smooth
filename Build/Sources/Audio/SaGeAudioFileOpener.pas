@@ -37,6 +37,8 @@ uses
 	,SaGeAudioDecoder
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeLog
 	;
 
 procedure ConsolePlayFile(const FileName : TSGString);
@@ -77,7 +79,7 @@ end;
 
 begin
 SGHint('Playing "' + FileName + '".');
-FileExpansion := SGGetFileExpansion(FileName);
+FileExpansion := SGFileExpansion(FileName);
 if TSGCompatibleAudioRender = nil then
 	begin
 	SGHint('Error! No audio renders suppored!');

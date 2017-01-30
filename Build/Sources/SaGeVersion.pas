@@ -10,12 +10,13 @@ uses
 	,SaGeResourceManager
 	,SaGeDateTime
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	,Classes
 	;
 
 const
-	VersionFileName = SGEngineDirectory + Slash + 'version.txt';
+	VersionFileName = SGEngineDirectory + DirectorySeparator + 'version.txt';
 
 function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -73,6 +74,11 @@ const
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeLog
+	,SaGeBaseUtils
+	;
 
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

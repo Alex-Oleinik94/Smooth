@@ -1,4 +1,3 @@
-
 {$IFDEF SGREADINTERFACE}
 type
 	TSGGenAlg=class(TSGScreenedDrawable)
@@ -117,7 +116,7 @@ Ex2.BeginCalculate;
 Ex2.ClearErrors;
 Ex2.ChangeVariables(Ex2.Variable,TSGExpressionChunkCreateReal(x));
 Ex2.Calculate;
-if (Ex2.Resultat.Quantity>0) and (SGRealExists(Ex2.Resultat.FConst)) and (Ex2.ErrorsQuantity=0) then
+if (Ex2.Resultat.Quantity>0) and (SGFloatExists(Ex2.Resultat.FConst)) and (Ex2.ErrorsQuantity=0) then
 	Result:=Ex2.Resultat.FConst
 else
 	Result:=Nan;

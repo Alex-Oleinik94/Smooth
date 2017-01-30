@@ -19,7 +19,7 @@ uses
 	{$IF defined(UNIX) and defined(UseCThreads)}
 		cthreads,
 		{$ENDIF}
-	 SysUtils
+	 SaGeSysUtils
 	,SaGeBase
 	,SaGeResourceManager
 	{$IF defined(ANDROID)}
@@ -46,7 +46,7 @@ uses
 	{$ENDIF}
 	SGConsoleShowAllApplications(nil, SGContextOptionAndroidApp(State));
 	{$IFDEF WITHEXCEPTIONTRACEING}
-	except on e : Exception do
+	except on e : TSGException do
 		SGPrintExceptionStackTrace(e);
 	end;
 	{$ENDIF}
@@ -68,7 +68,7 @@ uses
 		SGStandartCallConcoleCaller();
 	{$ENDIF}
 	{$IFDEF WITHEXCEPTIONTRACEING}
-	except on e : Exception do
+	except on e : TSGException do
 		begin
 		SGPrintExceptionStackTrace(e);
 		//Write('Press ENTER! ');ReadLn();

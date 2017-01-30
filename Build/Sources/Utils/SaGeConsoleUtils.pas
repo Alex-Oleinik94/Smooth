@@ -19,13 +19,13 @@ type
 			FTitle : TSGString;
 			FProcedure : TSGProcedure;
 			end;
-	TSGConsoleMenuArray = packed array of TSGConsoleRecord;
+	TSGConsoleMenuList = packed array of TSGConsoleRecord;
 
-operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuArray;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator + (const a : TSGConsoleMenuArray; b : TSGConsoleRecord) : TSGConsoleMenuArray;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a : TSGConsoleMenuList; b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGConsoleRecord(const S : TSGString; const P : TSGPointer) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure SGConsoleMenu(const Ar : TSGConsoleMenuArray;
+procedure SGConsoleMenu(const Ar : TSGConsoleMenuList;
 	const VBackGround : TSGByte = 0;
 	const VText : TSGByte = 15;
 	const VActiveBackGround : TSGByte = 0;
@@ -35,8 +35,120 @@ procedure SGConsoleMenu(const Ar : TSGConsoleMenuArray;
 function SGReadLnByte() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCharRead() : TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadLnString() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPCharRead() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGExtractComand(const Comand : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
+
+procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 implementation
+
+uses
+	 StrMan
+	,SaGeStringUtils
+	;
+
+function SGExtractComand(const Comand : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	TrimedComand : TSGString;
+begin
+TrimedComand := StringTrimLeft(Comand, '-');
+if TrimedComand <> Comand then
+	Result := TrimedComand
+else
+	Result := '';
+end;
+
+function SGPCharRead() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+GetMem(Result, 1);
+Result[0] := #0;
+while not eoln do
+	SGPCharAddSimbol(Result, SGCharRead());
+end;
+
+procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	Write(SGReadLnStringFromStream(Stream));
+end;
+
+procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	WriteLn(SGReadLnStringFromStream(Stream));
+end;
+
+procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 78);overload;
+var
+	i, WordCount, MaxLength, n, ii: TSGLongWord;
+	TempS : TSGString;
+begin
+WordCount := 0;
+if ArS <> nil then
+	WordCount := Length(ArS);
+if WordCount > 0 then
+	begin
+	WriteLn(Title + ' (' + SGStr(WordCount) + ')');
+	MaxLength := Length(ArS[0]);
+	if Length(ArS) > 1 then
+		begin
+		for i := 1 to High(ArS) do
+			if Length(ArS[i]) > MaxLength then
+				MaxLength := Length(ArS[i]);
+		end;
+	MaxLength += 2;
+	n := SimbolsLength div MaxLength;
+	MaxLength += (SimbolsLength mod MaxLength) div n;
+	ii := 0;
+	TempS := '  ';
+	for i := 0 to High(ArS) do
+		begin
+		if (ii = n - 1) or (i = High(ArS)) then
+			TempS += ArS[i]
+		else
+			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
+		ii +=1;
+		if ii = n then
+			begin
+			ii := 0;
+			WriteLn(TempS);
+			TempS := '  ';
+			end;
+		end;
+	if TempS <> '  ' then
+		WriteLn(TempS);
+	end;
+end;
+
+procedure SGPrintParams(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 78);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	ArS : TSGStringList = nil;
+begin
+ArS := SGStringListFromString(S, Separators);
+SGPrintParams(ArS, Title, SimbolsLength);
+SetLength(ArS, 0);
+end;
+
+function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+{$IF defined(MSWINDOWS)}
+	Result := IsConsole;
+{$ELSEIF defined(LINUX)}
+	Result := True;
+{$ELSEIF defined(ANDROID)}
+	Result := False;
+{$ELSE}
+	Result := False;
+{$ENDIF}
+end;
 
 function SGReadLnString() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -49,21 +161,21 @@ Result.FTitle := S;
 Result.FProcedure := TSGProcedure(P);
 end;
 
-operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuArray;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetLength(Result, 2);
 Result[0] := a;
 Result[1] := b;
 end;
 
-operator + (const a : TSGConsoleMenuArray; b : TSGConsoleRecord) : TSGConsoleMenuArray;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a : TSGConsoleMenuList; b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := a;
 SetLength(Result, Length(Result) + 1);
 Result[High(Result)] := b;
 end;
 
-procedure SGConsoleMenu(const Ar : TSGConsoleMenuArray;
+procedure SGConsoleMenu(const Ar : TSGConsoleMenuList;
 	const VBackGround : TSGByte = 0;
 	const VText : TSGByte = 15;
 	const VActiveBackGround : TSGByte = 0;

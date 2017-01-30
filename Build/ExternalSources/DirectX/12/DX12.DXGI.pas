@@ -662,6 +662,7 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 { TD3DCOLORVALUE }

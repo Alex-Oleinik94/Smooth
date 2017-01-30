@@ -100,6 +100,7 @@ implementation
 uses
 	 SaGeNotepadTextInset
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	,StrMan
 	;
@@ -117,7 +118,7 @@ TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
 FNotepad.BoundsToNeedBounds();
 FNotepad.Visible := True;
-FNotepad.AddMakeFile('.' + Slash + '..' + Slash + 'Build' + Slash + 'Makefile');
+FNotepad.AddMakeFile('.' + DirectorySeparator + '..' + DirectorySeparator + 'Build' + DirectorySeparator + 'Makefile');
 FNotepad.OpenMakefileProjects();
 end;
 
@@ -170,7 +171,7 @@ end;
 var
 	TotalString : TSGString;
 begin
-TotalString := SGGetFileWay(FMakefile.FileName) + VDirName;
+TotalString := SGFilePath(FMakefile.FileName) + VDirName;
 if (not (TotalString in FMakefileDirectories)) then
 	if SGResourceFiles.FileExists(TotalString) then
 		FMakefileDirectories += TotalString;
@@ -190,7 +191,7 @@ var
 	ProjectName : TSGString;
 
 begin
-ProjectName := SGGetFileWay(FMakefile.FileName) + VProjName;
+ProjectName := SGFilePath(FMakefile.FileName) + VProjName;
 if ValidProject(ProjectName) then
 	FMakefileProjects += ProjectName
 else if ValidProject(ProjectName + '.pp') then
@@ -246,8 +247,8 @@ if SGResourceFiles.FileExists(VFileName) then
 	FMakefile := TSGMakefileReader.Create(VFileName)
 else if SGResourceFiles.FileExists(VFileName + 'Makefile') then
 	FMakefile := TSGMakefileReader.Create(VFileName + 'Makefile')
-else if SGResourceFiles.FileExists(VFileName + Slash + 'Makefile') then
-	FMakefile := TSGMakefileReader.Create(VFileName + Slash + 'Makefile');
+else if SGResourceFiles.FileExists(VFileName + DirectorySeparator + 'Makefile') then
+	FMakefile := TSGMakefileReader.Create(VFileName + DirectorySeparator + 'Makefile');
 if FMakefile <> nil then
 	begin
 	if FMakefile.TargetCount() <> 0 then
@@ -437,7 +438,7 @@ begin
 Inset := TSGNTextInset.Create();
 AddInset(Inset);
 FActiveInset := InsetIndex(Inset);
-Inset.Title := SGGetFileName(VFileName);
+Inset.Title := SGFileName(VFileName);
 Inset.FileName := VFileName;
 Inset.GoToPosition(VLine, VColumn);
 end;

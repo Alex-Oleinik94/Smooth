@@ -52,7 +52,9 @@ type
 	// TSGInt64 allready defined
 	TSGFloat32 = TSGFloat;
 	TSGFloat64 = TSGDouble;
-	TSGFloat80 = TSGExtended;
+	{$IFNDEF WITHOUT_EXTENDED}
+		TSGFloat80 = TSGExtended;
+	{$ENDIF}
 type
 	// Common
 	TSGChar		= Char;
@@ -82,24 +84,8 @@ type
 		;
 	TSGMaxEnum = TSGEnumPointer;
  
- { Swap }
- procedure Swap(var x, y : TSGInteger); {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
- 
  { TYPE To TYPE }
- function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
- 
- { Operator's ** }
- operator ** (const a, b: TSGDouble) 	: TSGDouble; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload; 
- operator ** (const a, b: TSGByte) 		: TSGByte; 		{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
- operator ** (const a, b: TSGLongWord) 	: TSGInt64;		{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
- operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	{$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload; 
- operator ** (const a, b : TSGSingle) 	: TSGSingle; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload;
- 
- operator ** (const a : TSGReal;     const b : TSGLongInt) : TSGReal;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
- operator ** (const a : TSGSingle;   const b : TSGLongInt) : TSGSingle;     {$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload;
- {$IFNDEF WITHOUT_EXTENDED}
- operator ** (const a : TSGExtended; const b : TSGLongInt) : TSGExtended;   {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
- {$ENDIF WITHOUT_EXTENDED}
+ function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
 
 type
 	TSGOptionPointer = TSGPointer;
@@ -109,7 +95,7 @@ type
 		FName : TSGString;
 		FOption : TSGOptionPointer;
 			public
-		procedure Import(const VName : TSGString; const VPointer : TSGPointer);
+		procedure Import(const VName : TSGString; const VPointer : TSGOptionPointer);
 		end;
 
 operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -183,7 +169,7 @@ for O in A do
 	end;
 end;
 
-procedure TSGOption.Import(const VName : TSGString; const VPointer : TSGPointer);
+procedure TSGOption.Import(const VName : TSGString; const VPointer : TSGOptionPointer);
 begin
 FName := VName;
 FOption := VPointer;
@@ -198,25 +184,8 @@ end;
 {$INCLUDE SaGeCommonLists.inc}
 {$UNDEF   INC_PLACE_IMPLEMENTATION}
 
-procedure Swap(var x, y : TSGInteger); 
-{$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
-{$IFDEF WITHASMINC}
-	asm
-	xchg [edx], ecx
-	xchg [eax], ecx
-	xchg [edx], ecx
-	end;
-{$ELSE}
-	var
-		z:TSGInteger;
-	begin
-	z:=x;
-	x:=y;
-	y:=z;
-	end;
-	{$ENDIF}
 
-function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger; 
+function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; 
 {$IFDEF WITHASMINC} assembler; register; {$ENDIF}  overload;
 {$IFDEF WITHASMINC}
 	asm
@@ -225,50 +194,8 @@ function TSGShortIntToInt(Value : TSGShortInt) : TSGInteger;
 	end;
 {$ELSE}
 	begin
-	Result:=Value;
+	Result := Value;
 	end;
 	{$ENDIF}
-
-operator ** (const a, b: TSGDouble) 		: TSGDouble; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload; 
-begin
-	result := power(a, b);
-end;
-
-operator ** (const a, b: TSGByte) 		: TSGByte; 		{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-begin
-	result := round(power(a, b));
-end;
-
-operator ** (const a, b: TSGLongWord) 	: TSGInt64;		{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-begin
-	result := round(power(a, b));
-end;
- 
-operator ** (const a : TSGReal; 	const b : TSGLongInt) : TSGReal; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-begin
-	result := power(a, b);
-end;
-
-{$IFNDEF WITHOUT_EXTENDED}
-operator ** (const a : TSGExtended; 	const b : TSGLongInt) : TSGExtended; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-begin
-	result := power(a, b);
-end;
-{$ENDIF WITHOUT_EXTENDED}
-
-operator ** (const a : TSGSingle; 	const b : TSGLongInt) : TSGSingle; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload; 
-begin
-	result := power(a, b);
-end;
-
-operator ** (const a, b : TSGLongInt) 	: TSGLongInt;	{$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload; 
-begin
-	result := round(power(a, b));
-end;
-
-operator ** (const a, b : TSGSingle) 	: TSGSingle; 	{$IFDEF SUPPORTINLINE}inline;{$ENDIF}	overload; 
-begin
-	result := power(a, b);
-end;
 
 end.

@@ -8,7 +8,6 @@ uses
 	,SaGeBased
 	,SaGeHash
 	,SaGeDateTime
-	,SaGeStringUtils
 	
 	,Dos
 	,Crt
@@ -169,7 +168,10 @@ operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF 
 implementation
 
 uses
-	SaGeVersion
+	 SaGeVersion
+	,SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeLog
 	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
 
@@ -192,19 +194,19 @@ end;
 begin
 Write('Converted');
 TextColor(14);
-Write('"',SGGetFileName(FName)+'.'+SGDownCaseString(SGGetFileExpansion(FName)),'"');
+Write('"',SGFileName(FName) + '.' + SGDownCaseString(SGFileExpansion(FName)), '"');
 TextColor(7);
 Write(':in ');
 TextColor(10);
-Write(SGGetSizeString(FSize,'EN'));
+Write(SGGetSizeString(FSize, 'EN'));
 TextColor(7);
 Write(';out ');
 TextColor(12);
-Write(SGGetSizeString(FOutSize,'EN'));
+Write(SGGetSizeString(FOutSize, 'EN'));
 TextColor(7);
 Write(';time ');
 TextColor(11);
-Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
+Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' '));
 TextColor(7);
 Write(';cache ');
 TextColor(13);
@@ -271,7 +273,7 @@ var
 	Postfix : TSGString;
 begin
 Result := SGConvertFileToPascalUnit(FileName, CacheUnitPath, UnitName, IsInc);
-Postfix := Slash + UnitName + '.pas';
+Postfix := DirectorySeparator + UnitName + '.pas';
 FileCopy(CacheUnitPath + Postfix, TempUnitPath + Postfix);
 end;
 
@@ -446,7 +448,7 @@ function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnit
 
 function IsBagSinbol(const Simbol : TSGChar):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := (Simbol = WinSlash) or (Simbol = UnixSlash) or (Simbol = '.') or (Simbol = ' ') or (Simbol = '	');
+Result := (Simbol = WinDirectorySeparator) or (Simbol = UnixDirectorySeparator) or (Simbol = '.') or (Simbol = ' ') or (Simbol = '	');
 end;
 
 function CalcUnitName(const FileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -493,13 +495,13 @@ procedure ProcessDirectory(const VDir : TSGString);{$IFDEF SUPPORTINLINE}inline;
 var
 	sr:dos.searchrec;
 begin
-ProcessDirectoryFiles(VDir+Slash);
-dos.findfirst(VDir+Slash+'*',$10,sr);
+ProcessDirectoryFiles(VDir+DirectorySeparator);
+dos.findfirst(VDir+DirectorySeparator+'*',$10,sr);
 while DosError<>18 do
 	begin
-	if (sr.name<>'.') and (sr.name<>'..') and (SGExistsDirectory(VDir+Slash+sr.name)) then
+	if (sr.name<>'.') and (sr.name<>'..') and (SGExistsDirectory(VDir+DirectorySeparator+sr.name)) then
 		begin
-		ProcessDirectory(VDir+Slash+sr.name);
+		ProcessDirectory(VDir+DirectorySeparator+sr.name);
 		end;
 	dos.findnext(sr);
 	end;
@@ -822,7 +824,7 @@ var
 begin
 Result.Clear();
 DateTime1.Get();
-OutputFileName := UnitWay + Slash + NameUnit + '.pas';
+OutputFileName := UnitWay + DirectorySeparator + NameUnit + '.pas';
 CalculateHash(FileName);
 if not (SGFileExists(OutputFileName) and CheckForEqualFileHashes(Hash_MD5, Hash_SHA256, OutputFileName)) then
 	ReadWriteFile()
@@ -869,7 +871,7 @@ var
 begin
 Result := '';
 for i := 1 to Length(FileName) do
-	if (FileName[i] = WinSlash) or (FileName[i] = UnixSlash) then
+	if (FileName[i] = WinDirectorySeparator) or (FileName[i] = UnixDirectorySeparator) then
 		Result += '{DS}'
 	else
 		Result += FileName[i];
@@ -890,7 +892,7 @@ else
 		Stream := TMemoryStream.Create();
 		FArFiles[i].FSelf(Stream);
 		Stream.Position := 0;
-		Stream.SaveToFile(Dir + Slash + ConvertFileName(FArFiles[i].FWay));
+		Stream.SaveToFile(Dir + DirectorySeparator + ConvertFileName(FArFiles[i].FWay));
 		Stream.Destroy();
 		end;
 	WriteLn('Total files : ',Length(FArFiles));
@@ -902,7 +904,7 @@ var
 	i:TSGMaxEnum;
 function SimbolsEqual(const s1,s2:TSGChar):TSGBoolean;
 begin
-if ((s1=UnixSlash) or (s1=WinSlash)) and ((s2=UnixSlash) or (s2=WinSlash)) then
+if ((s1=UnixDirectorySeparator) or (s1=WinDirectorySeparator)) and ((s2=UnixDirectorySeparator) or (s2=WinDirectorySeparator)) then
 	Result:=True
 else
 	Result:=s1=s2;
@@ -951,7 +953,7 @@ var
 	i : TSGMaxEnum;
 	CD : TSGString;
 begin
-CD := SGGetCurrentDirectory();
+CD := SGCurrentDirectory();
 Result:=False;
 if Stream=nil then
 	Exit;

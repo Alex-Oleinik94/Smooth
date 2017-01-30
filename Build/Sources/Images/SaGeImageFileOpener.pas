@@ -69,6 +69,7 @@ uses
 	{$ENDIF}
 	,SaGeRender
 	,SaGeRenderConstants
+	,SaGeFileUtils
 	
 	,SysUtils
 	;
@@ -106,7 +107,7 @@ FLoadingDone := False;
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
 FWaitAnimation := TSGWaiting.Create(Context);
-FFont := TSGFont.Create(SGFontDirectory + Slash + 'Tahoma.sgf');
+FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 FFont.SetContext(Context);
 FLoadingThread := TSGThread.Create(TSGThreadProcedure(@TSGImageViewer_LoadThreadProc), Self, True);
 end;

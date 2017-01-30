@@ -7,10 +7,11 @@ unit SaGeGasDiffusionReliefRedactor;
 interface
 
 uses
-	 dos
-	,crt
-	,SaGeBase
+	 Dos
+	,Crt
 	,Classes
+	
+	,SaGeBase
 	,SaGeBased
 	,SaGeMesh
 	,SaGeCommonClasses
@@ -20,7 +21,8 @@ uses
 	,SaGeUtils
 	,SaGeScreen
 	,SaGeImages
-	,SaGeImagesBase;
+	,SaGeImagesBase
+	;
 type
 	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
 type
@@ -119,6 +121,11 @@ type
 function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 SaGeFileUtils
+	,SaGeMathUtils
+	;
 
 var
 	Matrixes : array[-1..5] of TSGMatrix4;
@@ -958,7 +965,7 @@ begin
 FInRedactoring := True;
 if FFont = nil then
 	begin
-	FFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+	FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 	FFont.SetContext(Context);
 	FFont.Loading();
 	FFont.ToTexture();

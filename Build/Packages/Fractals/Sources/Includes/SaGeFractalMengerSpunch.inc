@@ -140,7 +140,7 @@ constructor TSGFractalMengerSpunchRelease.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 
-FFont1:=TSGFont.Create(SGFontDirectory+Slash+'Tahoma.sgf');
+FFont1:=TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 FFont1.SetContext(Context);
 FFont1.Loading();
 

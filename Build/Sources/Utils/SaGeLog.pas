@@ -10,13 +10,25 @@ uses
 	
 	,SaGeBase
 	,SaGeBased
+	,SaGeFileUtils
 	;
 var
-	//Если эту переменную задать как False, то SGLog.Source нечего делать не будет,
-	//и самого файлика лога SGLog.Create не создаст
-	SGLogEnable : TSGBoolean = {$IFDEF RELEASE}False{$ELSE}True{$ENDIF};
+	SGLogEnable : TSGBoolean = 
+		{$IFDEF RELEASE}
+			False
+		{$ELSE}
+			True
+		{$ENDIF}
+	;
 const
-	SGLogDirectory = {$IFDEF ANDROID}'/sdcard/.SaGe'{$ELSE}SGDataDirectory{$ENDIF};
+	SGLogDirectory =
+		{$IFDEF ANDROID}
+			DirectorySeparator +'sdcard' + DirectorySeparator +'.SaGe'
+		{$ELSE}
+			SGDataDirectory
+		{$ENDIF}
+	;
+	SGLogFileName = SGLogDirectory + DirectorySeparator + 'EngineLog.log';
 type
 	TSGLog = class(TObject)
 			public
@@ -33,6 +45,11 @@ var
 	//Экземпляр класса лога программы
 	SGLog : TSGLog = nil;
 
+procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGLogDateTimePredString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
@@ -41,6 +58,61 @@ uses
 	
 	,StrMan
 	;
+
+function SGLogDateTimePredString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	DateTime  : TSGDateTime;
+begin
+DateTime.Get();
+Result := 
+	'[' +
+		StringJustifyRight(SGStr(DateTime.Day),   2, '0') + '.' + 
+		StringJustifyRight(SGStr(DateTime.Month), 2, '0') + '.' +
+		StringJustifyRight(SGStr(DateTime.Years), 4, '0') + '/' + 
+		SGStr(DateTime.Week) + 
+	']' +
+	'[' +
+		StringJustifyRight(SGStr(DateTime.Hours),   2, '0') + ':' + 
+		StringJustifyRight(SGStr(DateTime.Minutes), 2, '0') + ':' + 
+		StringJustifyRight(SGStr(DateTime.Seconds), 2, '0') + '/' + 
+		StringJustifyRight(SGStr(DateTime.Sec100),  2, '0') + 
+	']' + ' -->'
+	;
+end;
+
+procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	ss : TSGString;
+	pc :PSGChar;
+	FFileStream : TMemoryStream;
+begin
+FFileStream := TMemoryStream.Create();
+if SGFileExists(FileName) then
+	begin
+	FFileStream.LoadFromFile(FileName);
+	FFileStream.Position := FFileStream.Size;
+	end;
+ss := SGLogDateTimePredString() + Line;
+pc := SGStringToPChar(ss + SGWinEoln);
+FFileStream.WriteBuffer(pc^, Length(ss) + 2);
+FreeMem(pc, Length(ss) + 3);
+FFileStream.Position := 0;
+FFileStream.SaveToFile(FileName);
+FFileStream.Destroy();
+end;
+
+procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+begin
+SGHint(SGGetStringFromConstArray(MessagePtrs), ViewCase);
+end;
+
+procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+begin
+if SGLogError in ViewCase then
+	SGLog.Source(MessageStr);
+if SGPrintError in ViewCase then
+	WriteLn(MessageStr);
+end;
 
 procedure TSGLog.Source(const Ar : array of const; const WithTime:Boolean = True);
 var
@@ -107,9 +179,8 @@ end;
 
 procedure TSGLog.Source(const s:string;const WithTime:Boolean = True);
 var
-	ss:string;
-	a:TSGDateTime;
-	pc:PChar;
+	ss : TSGString;
+	pc : PSGChar;
 begin
 if SGLogEnable then
 	if not WithTime then
@@ -120,10 +191,7 @@ if SGLogEnable then
 		end
 	else
 		begin
-		a.Get;
-		with a do
-			ss:='['+SGStr(Day)+'.'+SGStr(Month)+'.'+SGStr(Years)+'/'+SGStr(Week)+']'+
-				'['+SGStr(Hours)+':'+SGStr(Minutes)+':'+SGStr(Seconds)+'/'+SGStr(Sec100)+'] -->'+s;
+		SS := SGLogDateTimePredString() + s;
 		pc:=SGStringToPChar(ss+SGWinEoln);
 		FFileStream.WriteBuffer(pc^,Length(ss)+2);
 		FreeMem(pc,Length(ss)+3);
@@ -134,7 +202,7 @@ constructor TSGLog.Create();
 begin
 inherited;
 if SGLogEnable then
-	FFileStream:=TFileStream.Create(SGLogDirectory+Slash+'EngineLog.log',fmCreate);
+	FFileStream := TFileStream.Create(SGLogFileName, fmCreate);
 end;
 
 destructor TSGLog.Destroy;

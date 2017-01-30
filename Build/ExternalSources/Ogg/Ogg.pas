@@ -427,12 +427,12 @@ var ogg_packet_clear : procedure( var op : ogg_packet ) ; cdecl ;
 
 implementation
 
-
 uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

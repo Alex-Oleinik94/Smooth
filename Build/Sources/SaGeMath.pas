@@ -234,6 +234,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeMathUtils
 	;
 
 function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -492,7 +493,7 @@ for i:=VPosBegin to VPosEnd do
 	if not SGPCharsEqual(FVariable,'') then
 		FExpression.ChangeVariables(FVariable,TSGExpressionChunkCreateReal(Position));
 	FExpression.Calculate;
-	if (FExpression.Resultat.Quantity<>0) and (SGRealExists(FExpression.Resultat.FConst))  then
+	if (FExpression.Resultat.Quantity<>0) and (SGFloatExists(FExpression.Resultat.FConst))  then
 		begin
 		FArVertexes[i].Visible:=True;
 		FArVertexes[i].Import(Position,FExpression.Resultat.FConst+FYShift);

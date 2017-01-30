@@ -1781,6 +1781,7 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 // Creates an OpenType tag as a 32bit integer such that

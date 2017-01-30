@@ -3080,6 +3080,7 @@ uses
 	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
+	,SaGeSysUtils
 	;
 
 function FloatMax: single;

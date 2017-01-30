@@ -448,7 +448,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	SelectPoint.Import();
 	SelectSecondPoint.Import();
 	Manda.FZMand:=False;
-	FVideoBuffer:=SGGetFreeDirectoryName(SGImagesDirectory+Slash+'Manda Buffer','Part');
+	FVideoBuffer:=SGFreeDirectoryName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod Buffer', 'Part');
 	SGMakeDirectory(FVideoBuffer);
 	Manda.Width:=1920;//*5;
 	Manda.Height:=1080;//*5;
@@ -511,7 +511,7 @@ Manda.FZDegree:=2;
 Manda.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Manda.CreateThreads(QuantityThreads);
 Manda.BeginCalculate;
-Manda.FImage.Way:=SGImagesDirectory+Slash+'Mand New.jpg';
+Manda.FImage.Way:=SGImagesDirectory+DirectorySeparator+'Mand New.jpg';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -875,7 +875,7 @@ case SGGetCoreCount() of
 else Screen.LastChild.LastChild.AsComboBox.SelectItem:=3;
 end;
 
-FTNRF:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
+FTNRF:=TSGFont.Create(SGFontDirectory+DirectorySeparator+'Times New Roman.sgf');
 FTNRF.SetContext(Context);
 FTNRF.Loading();
 end;
@@ -1057,9 +1057,9 @@ if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
 	
 	SelectPointEnabled:=False;
 	if SelectPoint.x>SelectSecondPoint.x then
-		SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
+		Swap(SelectPoint.x,SelectSecondPoint.x);
 	if SelectPoint.y>SelectSecondPoint.y then
-		SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
+		Swap(SelectPoint.y,SelectSecondPoint.y);
 	FOldView:=Manda.FView;
 	Manda.FView.Import(
 		GetPointOnPosOnMand(SelectPoint).x,
@@ -1120,7 +1120,7 @@ if MandaInitialized then
 				if FNowRenderitsiaVideo then
 					begin
 					//Manda.FImage.Image.SetBounds(1920,1080);
-					Manda.FImage.Way:=FVideoBuffer+Slash+
+					Manda.FImage.Way:=FVideoBuffer+DirectorySeparator+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SGStr(FNowKadr)+'.jpg';
 					end;
@@ -1275,8 +1275,8 @@ if MandaInitialized then
 		//if Manda.FView.VertexInView(Manda.FZNumber) then
 			//begin
 			VtxForZN.Import(
-				abs(Manda.FZNumber.x-SGMin(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Render.Width,
-				abs(Manda.FZNumber.Y-SGMax(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Render.Height
+				abs(Manda.FZNumber.x-Min(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Render.Width,
+				abs(Manda.FZNumber.Y-Max(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Render.Height
 				);
 			Render.Color3f(1,1,1);
 			Render.BeginScene(SGR_TRIANGLES);
@@ -1462,7 +1462,7 @@ if MandaInitialized then
 			Manda.Height:=StartDepth;
 			end;
 		Manda.BeginCalculate();
-		Manda.FImage.Way:=SGGetFreeFileName(SGImagesDirectory+Slash+'Mand New.jpg');
+		Manda.FImage.Way := SGFreeFileName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod.jpg');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;

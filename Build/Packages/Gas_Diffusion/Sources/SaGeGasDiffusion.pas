@@ -25,6 +25,7 @@ uses
 	,SaGeGasDiffusionReliefRedactor
 	,SaGeScreenBase
 	,SaGePackages
+	,SaGeFileUtils
 	;
 
 const
@@ -213,6 +214,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeMathUtils
 	;
 
 //Algorithm
@@ -1773,8 +1775,8 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FPauseEmulatingButton.Active := True;
 	if FEnableSaving and (FFileStream=nil) then
 		begin
-		FFileName   := SGGetFreeFileName(PredStr+Catalog+Slash+'Save.GDS','number');
-		FFileStream := TFileStream.Create(FFileName,fmCreate);
+		FFileName   := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Save.GDS', 'number');
+		FFileStream := TFileStream.Create(FFileName, fmCreate);
 		end;
 end; end;
 
@@ -2328,10 +2330,10 @@ if d = 2 then
 
 SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
-	Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.png','number');
+	Image.Way := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.png', 'number');
 	Image.Saveing(SGI_PNG);
 {$ELSE}
-	Image.Way := SGGetFreeFileName(PredStr+Catalog+Slash+'Image.jpg','number');
+	Image.Way := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.jpg', 'number');
 	Image.Saveing(SGI_JPEG);
 	{$ENDIF}
 
@@ -2817,7 +2819,7 @@ const
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FLoadScenePanel.Visible := False;
 	FFileName := FLoadComboBox.Items[FLoadComboBox.SelectItem].Caption;
-	FFileName := PredStr+Catalog+Slash+FFileName;
+	FFileName := PredStr+Catalog+DirectorySeparator+FFileName;
 	FFileStream := TFileStream.Create(FFileName,fmOpenRead);
 	FEnableSaving := False;
 	ReadCadrs();
@@ -2923,7 +2925,7 @@ if (FileWay <> '') and (SGFileExists(FileWay)) then
 	FRelefRedactor.SingleRelief^.Load(FileWay);
 	FRelefRedactor.SingleRelief^.FType := T;
 	FRelefRedactor.SingleRelief^.FEnabled := E;
-	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGGetFileName(FileWay)+'.'+SGDownCaseString(SGGetFileExpansion(FileWay))+')';
+	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGFileName(FileWay)+'.'+SGDownCaseString(SGFileExpansion(FileWay))+')';
 	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(0,1,0,1);
 	end;
 if IsInFullscreen then
@@ -3255,7 +3257,7 @@ var
 	ExC : Boolean = False;
 begin
 FLoadComboBox.ClearItems();
-ar := SGGetFileNames(PredStr+Catalog+'/','*.GDS');
+ar := SGDirectoryFiles(PredStr + Catalog + '/', '*.GDS');
 if ar <> nil then
 	begin
 	for i:=0 to High(ar) do
@@ -3389,7 +3391,7 @@ FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.FZum := Render.Height/Render.Width;
 
-FTahomaFont:=TSGFont.Create(SGFontDirectory+Slash+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FTahomaFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 FTahomaFont.SetContext(Context);
 FTahomaFont.Loading();
 FTahomaFont.ToTexture();

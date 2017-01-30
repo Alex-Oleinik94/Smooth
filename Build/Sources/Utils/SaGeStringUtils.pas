@@ -59,16 +59,18 @@ operator in(const VString : TSGString; const VList : TSGStringList) : TSGBoolean
 operator +(const VList : TSGStringList; const VString : TSGString) : TSGStringList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TStream
 function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadLnStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteStringToStream(const String1 : TSGString; const Stream : TStream; const Stavit0 : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TextFile
 function SGReadStringInQuotesFromTextFile(const TextFile : PText) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -82,6 +84,7 @@ function SGStringAsPChar(var Str : TSGString) : PSGChar;{$IFDEF SUPPORTINLINE}in
 function SGStringToPChar(const S : TSGString) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharNil() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharIf(const Bool : TSGBoolean; const VPChar : PSGChar) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGPCharFree(const PC : PSGChar; const KillWithLenght : TSGBool = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharLength(const PC : PSGChar) : TSGUInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharLength(const PC : PSGChar) : TSGUInt32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharToString(const VChar : PSGChar) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -90,7 +93,6 @@ function SGPCharsEqual(const PChar1, PChar2 : PSGChar) : TSGBoolean;{$IFDEF SUPP
 function SGPCharHigh(const VPChar : PSGChar) : TSGInt32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharDecFromEnd(var VPChar : PSGChar; const Number : TSGUInt32 = 1) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharUpCase(const VPChar : PSGChar) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGPCharRead() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharDeleteSpaces(const VPChar : PSGChar) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharTotal(const VPChar1, VPChar2 : PSGChar) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращает часть строки С++, находящуюся между позициями включительно
@@ -99,12 +101,23 @@ function SGPCharGetPart(const VPChar : PSGChar; const Position1, Position2 : TSG
 implementation
 
 uses
-	 SaGeConsoleUtils
+	 StrMan
+	,SaGeMathUtils
 	;
 
 (************)
 (** STRING **)
 (************)
+
+procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	i : TSGUInt32;
+begin
+if SL <> nil then
+	if Length(SL) > 0 then
+		for i := 0 to High(SL) do
+			SL[i] := StringTrimAll(SL[i], Garbage);
+end;
 
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
@@ -376,7 +389,7 @@ if Zeros <> 0 then
 	begin
 	if Abs(R - Trunc(R)) * 10 ** Zeros <> 0 then
 		begin
-		i := Zeros - SGGetQuantitySimbolsInNumber(Trunc(Abs(R - Trunc(R)) * (10 ** Zeros)));
+		i := Zeros - SGCountSimbolsInNumber(Trunc(Abs(R - Trunc(R)) * (10 ** Zeros)));
 		Result += '.';
 		while i > 0 do
 			begin
@@ -712,6 +725,28 @@ end;
 
 // TStream
 
+function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	Str2 : TSGString = '';
+	C : TSGChar;
+begin
+Result := False;
+while (Stream.Size <> Stream.Position) and (Length(Str2) < Length(Str)) do
+	begin
+	Stream.Read(C, 1);
+	Str2 += C;
+	end;
+Result := Str2 = Str;
+if DestroyingStream then
+	Stream.Destroy();
+end;
+
+function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := TMemoryStream.Create();
+SGWriteStringToStream(Str, Result, False);
+end;
+
 function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	C : TSGChar;
@@ -910,14 +945,6 @@ while VPChar[i] <> #0 do
 	end;
 end;
 
-function SGPCharRead() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-GetMem(Result, 1);
-Result[0] := #0;
-while not eoln do
-	SGPCharAddSimbol(Result, SGCharRead());
-end;
-
 function SGPCharUpCase(const VPChar : PSGChar) : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGInt32 = 0;
@@ -1011,6 +1038,14 @@ NewVPChar[LengthOld] := VChar;
 NewVPChar[LengthOld + 1] := #0;
 VPChar := NewVPChar;
 Result := NewVPChar;
+end;
+
+procedure SGPCharFree(const PC : PSGChar; const KillWithLenght : TSGBool = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if not KillWithLenght then
+	FreeMem(PC)
+else
+	FreeMem(PC, SGPCharLength(PC) + 1);
 end;
 
 (**********)

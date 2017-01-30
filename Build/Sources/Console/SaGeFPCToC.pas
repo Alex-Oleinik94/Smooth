@@ -263,6 +263,7 @@ implementation
 
 uses
 	 SaGeLog
+	,SaGeFileUtils
 	;
 {==============}(*SGTExpression*){==============}
 
@@ -1235,9 +1236,9 @@ var
 	i:LongWord;
 	FSGH:SGTWriteClass = nil;
 begin
-SGReleazeFileWay(FOutWay);
+SGMakeDirectories(FOutWay);
 
-FSGH:=SGTWriteClass.Create(FOutWay+'SaGeHeader.h');
+FSGH:=SGTWriteClass.Create(FOutWay + 'SaGeHeader.h');
 FSGH.WriteLn('#ifndef sageheader_included');
 FSGH.WriteLn('#define sageheader_included');
 FSGH.WriteLn('#include <iostream>');
@@ -1359,8 +1360,8 @@ if SGUpCaseString(FObject)='CMD' then
 				FOutWay:='';
 				for i:=4 to Length(FT) do
 					FOutWay+=FT[i];
-				if not (FOutWay[Length(FOutWay)] in [UnixSlash,WinSlash]) then
-					FOutWay+=Slash;
+				if not (FOutWay[Length(FOutWay)] in [UnixDirectorySeparator, WinDirectorySeparator]) then
+					FOutWay += DirectorySeparator;
 				end
 			else if (FT[2]='P') and ((FT[3]='P') or (FT[3]='U') or (FT[3]='L')) then
 				begin
@@ -1388,7 +1389,7 @@ if AnyError then
 	SGHint(['  Use -pl(%object_path) for set object path to translate.']);
 	Halt(0);
 	end;
-if (SGGetFileExpansion(SGUpCaseString(FObject))='PAS') or (SGGetFileExpansion(SGUpCaseString(FObject))='PP') then
+if (SGFileExpansion(SGUpCaseString(FObject))='PAS') or (SGFileExpansion(SGUpCaseString(FObject))='PP') then
 	begin
 	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
@@ -1425,7 +1426,7 @@ else {= Makefile}
 	if WasInCmd then
 		FObject:=MW;
 	SGLog.Source(['TSGTranslater.GoRead : Start Reading (Makefile Type)']);
-	if (SGGetFileName(FObject)='') and (SGGetFileExpansion(FObject)='') then
+	if (SGFileName(FObject)='') and (SGFileExpansion(FObject)='') then
 		begin
 		FObject+='Makefile';
 		end;

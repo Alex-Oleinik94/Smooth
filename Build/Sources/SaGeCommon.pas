@@ -14,6 +14,7 @@ uses
 	,SaGeBased
 	,SaGeRenderConstants
 	,SaGeClasses
+	,SaGeMathUtils
 	;
 
 {$DEFINE INC_PLACE_INTERFACE}
@@ -265,9 +266,9 @@ function SGTSGVertex3fImport(const x:real = 0;const y:real = 0;const z:real = 0)
 function SGVertexOnQuad(const Vertex: TSGVertex3f; const QuadVertex1: TSGVertex3f;const QuadVertex2: TSGVertex3f;const QuadVertex3: TSGVertex3f;const QuadVertex4: TSGVertex3f):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTreugPlosh(const a1,a2,a3: TSGVertex3f):real;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGVertexOnQuad(const Vertex: TSGVertex3f; const QuadVertex1: TSGVertex3f;const QuadVertex3: TSGVertex3f):boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:TSGPlane3D): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3: TSGVertex3f): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetPlaneFromThreeVertex(const a1,a2,a3: TSGVertex3f):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPlaneFromThreeVertex(const a1,a2,a3: TSGVertex3f):TSGPlane3D;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetVertexOnIntersectionOfTwoLinesFromFourVertex(const q1,q2,w1,w2: TSGVertex3f): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex12,Vertex32: TSGVertex2f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -1255,10 +1256,11 @@ end;
 
 function TSGScreenVertexes.VertexInView(const Vertex:TSGVertex2f):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=(Vertex.x<SGMax(X1,X2)) and
-	(Vertex.y<SGMax(Y1,Y2)) and
-	(Vertex.x>SGMin(X1,X2)) and
-	(Vertex.y>SGMin(Y1,Y2));
+Result:=
+	(Vertex.x<Max(X1,X2)) and
+	(Vertex.y<Max(Y1,Y2)) and
+	(Vertex.x>Min(X1,X2)) and
+	(Vertex.y>Min(Y1,Y2));
 end;
 
 function SGGetColor4fFromLongWord(const LongWordColor:LongWord;const WithAlpha:Boolean = False): TSGColor4f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1374,9 +1376,9 @@ Result:=SGGetVertexOnIntersectionOfThreePlane(
 	SGGetPlaneFromThreeVertex(SGGetVertexInAttitude(q1,q3),w1,w2));
 end;
 
-function SGGetPlaneFromThreeVertex(const a1,a2,a3: TSGVertex3f):SGPlane;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPlaneFromThreeVertex(const a1, a2, a3: TSGVertex3f) : TSGPlane3D;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=SGGetPlaneFromNineReals(a1.x,a1.y,a1.z,a2.x,a2.y,a2.z,a3.x,a3.y,a3.z);
+Result := SGPlane3DFrom3Points(a1.x, a1.y, a1.z, a2.x, a2.y, a2.z, a3.x, a3.y, a3.z);
 end;
 
 function SGGetVertexWhichNormalFromThreeVertex(const p1,p2,p3: TSGVertex3f): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1428,16 +1430,16 @@ else
 	Result:=True;
 end;
 
-function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:SGPlane): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var de,de1,de2,de3:real;
+function SGGetVertexOnIntersectionOfThreePlane(p1,p2,p3:TSGPlane3D): TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var de, de1, de2, de3 : TSGMathFloat;
 begin
 p1.d:=-1*(p1.d);
 p2.d:=-1*(p2.d);
 p3.d:=-1*(p3.d);
-de:=SGGetMatrix3x3(p1.a,p1.b,p1.c,p2.a,p2.b,p2.c,p3.a,p3.b,p3.c);
-de1:=SGGetMatrix3x3(p1.d,p1.b,p1.c,p2.d,p2.b,p2.c,p3.d,p3.b,p3.c);
-de2:=SGGetMatrix3x3(p1.a,p1.d,p1.c,p2.a,p2.d,p2.c,p3.a,p3.d,p3.c);
-de3:=SGGetMatrix3x3(p1.a,p1.b,p1.d,p2.a,p2.b,p2.d,p3.a,p3.b,p3.d);
+de  := SGComputeDeterminantMatrix3x3(p1.a,p1.b,p1.c,p2.a,p2.b,p2.c,p3.a,p3.b,p3.c);
+de1 := SGComputeDeterminantMatrix3x3(p1.d,p1.b,p1.c,p2.d,p2.b,p2.c,p3.d,p3.b,p3.c);
+de2 := SGComputeDeterminantMatrix3x3(p1.a,p1.d,p1.c,p2.a,p2.d,p2.c,p3.a,p3.d,p3.c);
+de3 := SGComputeDeterminantMatrix3x3(p1.a,p1.b,p1.d,p2.a,p2.b,p2.d,p3.a,p3.b,p3.d);
 Result.Import(de1/de,de2/de,de3/de);
 end;
 

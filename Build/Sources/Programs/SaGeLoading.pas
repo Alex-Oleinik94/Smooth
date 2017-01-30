@@ -73,6 +73,8 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeMathUtils
 	;
 
 function TSGWaiting.PaintAt(const VX, VY, VW, VH : TSGLongWord; const VActive : TSGBool = True) : TSGBool;
@@ -269,8 +271,8 @@ if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
 FProjectionAngle:=600;
-FProjectionAngleShift:=SGRandomMinus()*0.01; //Тут в радианах, поэтому так мало
-FAngleShift:=SGRandomMinus()*0.7;            //А тут в градусах
+FProjectionAngleShift:=SGRandomOne()*0.01; //Тут в радианах, поэтому так мало
+FAngleShift:=SGRandomOne()*0.7;            //А тут в градусах
 FMaxRadius:=280;
 SetLength(FArrayOfLines,FCountLines);
 for i:=0 to FCountLines-1 do
@@ -279,7 +281,7 @@ for i:=0 to FCountLines-1 do
 	FArrayOfLines[i].FSpeed:=(Random(400)+100)/200;
 	FArrayOfLines[i].FWidth:=360/FCountLines;
 	end;
-FFont:=TSGFont.Create(SGFontDirectory+Slash+'Times New Roman.sgf');
+FFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
 FFont.SetContext(Context);
 FFont.Loading();
 FProgressIsSet:=False;
@@ -431,8 +433,8 @@ if not FProgressIsSet then
 		begin
 		FProgress:=0;
 		FType:=SGBeforeLoading;
-		FProjectionAngleShift:=SGRandomMinus()*0.01;
-		FAngleShift:=SGRandomMinus()*0.7;
+		FProjectionAngleShift:=SGRandomOne()*0.01;
+		FAngleShift:=SGRandomOne()*0.7;
 		FProjectionAngle:=600;
 		end;
 	end;

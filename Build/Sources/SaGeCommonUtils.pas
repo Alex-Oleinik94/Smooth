@@ -62,6 +62,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
 	;
 
 (*=================================*)
@@ -126,7 +127,7 @@ FComboBox.SelectItem:=0;
 FComboBox.FUserPointer1:=Self;
 FComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
 FComboBox.Visible:=True;
-FComboBox.Skin := FComboBox.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory+Slash+'Tahoma.sgf');
+FComboBox.Skin := FComboBox.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 FComboBox.Active:=Length(FArClasses)>1;
 FComboBox.FDrawClass:=Self;
 FComboBox.BoundsToNeedBounds();

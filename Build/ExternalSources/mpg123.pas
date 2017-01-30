@@ -410,6 +410,8 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeBaseUtils
+	,SaGeSysUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

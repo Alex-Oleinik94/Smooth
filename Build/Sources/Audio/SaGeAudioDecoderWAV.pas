@@ -74,6 +74,7 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeSysUtils
 	;
 
 class function TSGAudioDecoderWAV.SupporedFormats() : TSGStringList;

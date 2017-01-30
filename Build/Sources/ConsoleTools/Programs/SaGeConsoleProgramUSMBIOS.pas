@@ -22,6 +22,7 @@ uses
 	
 	,SaGeVersion
 	,SaGeConsoleTools
+	,SaGeLog
 	;
 
 

@@ -96,6 +96,8 @@ uses
 	,SaGeEncodingUtils
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeBaseUtils
+	,SaGeMathUtils
 	;
 
 {$DEFINE SCREEN_IMPLEMENTATION}

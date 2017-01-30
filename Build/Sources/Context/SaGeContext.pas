@@ -271,6 +271,7 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
 		{$ENDIF}

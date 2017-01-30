@@ -141,6 +141,7 @@ uses
 	 SaGeBase
 	,SaGeBased
 	,SaGeDllManager
+	,SaGeSysUtils
 	;
 
 type

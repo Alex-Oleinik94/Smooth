@@ -111,6 +111,8 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeSysUtils
 	;
 
 function TSGMakefileReader.GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -331,7 +333,7 @@ Result := '';
 S := SGUpCaseString(S);
 if S = 'MAKE' then
 	begin
-	Result := '"' + SGGetApplicationFileName() + '"' + ' --make';
+	Result := '"' + SGApplicationFileName() + '"' + ' --make';
 	end
 else if (FConstants <> nil) and (Length(FConstants)>0) then
 	begin

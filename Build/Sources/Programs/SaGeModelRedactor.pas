@@ -39,6 +39,10 @@ type
 
 implementation
 
+uses
+	 SaGeFileUtils
+	;
+
 procedure mmmButtonFormEsc(Button:TSGButton);
 begin
 with TSGModelRedactor(Button.FUserPointer1) do
@@ -60,10 +64,10 @@ with TSGModelRedactor(Button.FUserPointer1) do
 	Stream := TMemoryStream.Create();
 	SGResourceFiles.LoadMemoryStreamFromFile(Stream,TSGEdit(Button.FUserPointer2).Caption);
 	Stream.Position:=0;
-	if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='3DS' then
+	if SGFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='3DS' then
 		Suc:=FCustomModel.Load3DSFromStream(Stream,TSGEdit(Button.FUserPointer2).Caption)
 	else
-		if SGGetFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='OBJ' then
+		if SGFileExpansion(TSGEdit(Button.FUserPointer2).Caption)='OBJ' then
 			begin
 			FCustomModel.AddObject().LoadFromOBJ(TSGEdit(Button.FUserPointer2).Caption);
 			end

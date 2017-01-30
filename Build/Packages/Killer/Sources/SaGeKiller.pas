@@ -117,6 +117,8 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeMathUtils
 	;
 
 {$OVERFLOWCHECKS OFF}
@@ -337,23 +339,23 @@ FImageYou:=nil;
 FImageBullet:=nil;
 
 {FImageBlock:=TSGImage.Create;
-FImageBlock.Way:=SGTextureDirectory+Slash+'Killer'+Slash+'KKK1.png';
+FImageBlock.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK1.png';
 FImageBlock.Loading;
 
 FImageSkull:=TSGImage.Create;
-FImageSkull.Way:=SGTextureDirectory+Slash+'Killer'+Slash+'KKK4.png';
+FImageSkull.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK4.png';
 FImageSkull.Loading;
 
 FImageZombi:=TSGImage.Create;
-FImageZombi.Way:=SGTextureDirectory+Slash+'Killer'+Slash+'KKK0.png';
+FImageZombi.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK0.png';
 FImageZombi.Loading;
 
 FImageYou:=TSGImage.Create;
-FImageYou.Way:=SGTextureDirectory+Slash+'Killer'+Slash+'KKK2.png';
+FImageYou.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK2.png';
 FImageYou.Loading;
 
 FImageBullet:=TSGImage.Create;
-FImageBullet.Way:=SGTextureDirectory+Slash+'Killer'+Slash+'KKK3.png';
+FImageBullet.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK3.png';
 FImageBullet.Loading;}
 
 SetLength(FZombies,1);
@@ -507,7 +509,7 @@ if (FImageBlock=nil) or VRadBool then
 	FImageBlock.SetContext(Context);
 	with FImageBlock do
 		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Block.sgia';
+		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Block.sgia';
 		Loading();
 		Image.SetBounds(VWidthHeight,VWidthHeight);
 		ToTexture();
@@ -522,7 +524,7 @@ if (FImageBullet=nil) or VRadBool then
 	FImageBullet.SetContext(Context);
 	with FImageBullet do
 		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Bullet.sgia';
+		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Bullet.sgia';
 		Loading();
 		if VWidthHeight>64 then
 			Image.SetBounds(64,64)
@@ -540,7 +542,7 @@ if (FImageZombi=nil) or VRadBool then
 	FImageZombi.SetContext(Context);
 	with FImageZombi do
 		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Zombie.sgia';
+		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Zombie.sgia';
 		Loading();
 		Image.SetBounds(VWidthHeight,VWidthHeight);
 		ToTexture();
@@ -555,7 +557,7 @@ if (FImageYou=nil) or VRadBool then
 	FImageYou.SetContext(Context);
 	with FImageYou do
 		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'You.sgia';
+		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'You.sgia';
 		Loading();
 		Image.SetBounds(VWidthHeight,VWidthHeight);
 		ToTexture();
@@ -570,7 +572,7 @@ if (FImageSkull=nil) or VRadBool then
 	FImageSkull.SetContext(Context);
 	with FImageSkull do
 		begin
-		Way:=SGTextureDirectory+Slash+'Killer'+Slash+'Skull.sgia';
+		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Skull.sgia';
 		Loading();
 		Image.SetBounds(VWidthHeight,VWidthHeight);
 		ToTexture();

@@ -40,6 +40,7 @@ uses
 	,SaGeCommonUtils
 	,SaGeVersion
 	,SaGeStringUtils
+	,SaGeBaseUtils
 	
 	// System-dependent includes
 	{$IFDEF MSWINDOWS}

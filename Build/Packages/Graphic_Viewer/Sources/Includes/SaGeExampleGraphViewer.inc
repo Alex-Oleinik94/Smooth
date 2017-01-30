@@ -1,4 +1,3 @@
-
 {$IFDEF SGREADINTERFACE}
 type
 	TSGGraphic=class(TSGScreenedDrawable)
@@ -261,7 +260,7 @@ Render.BeginScene(SGR_LINES);
 AbsX:=abs(View.x1-View.x2);
 AbsY:=abs(View.y1-View.y2);
 
-msd:=SGMin(GetMSD(AbsX),GetMSD(AbsY));
+msd:=Min(GetMSD(AbsX),GetMSD(AbsY));
 k1:=Abs((View.x2/AbsX-1));
 k2:=Abs(((View.x2-View.x1)/AbsX-1+View.x2/AbsX));
 for i:=0 to 1 do
@@ -374,7 +373,7 @@ Screen.Skin.Font.DrawFontFromTwoVertex2f(SGStTen(msd),
 q:=GetFP(View.x1,View.x2,msd);
 while q < View.x2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
+	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(Min(0,msd)))),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+2
 			,View.y2/absy*Render.Height),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+500
@@ -386,7 +385,7 @@ while q < View.x2 do
 q:=GetFP(View.y1,View.y2,msd);
 while q < View.y2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(SGMin(0,msd)))),
+	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(Min(0,msd)))),
 		SGVertex2fImport(Render.Width-View.x2/AbsX*Render.Width+2
 			,Render.Height-(q-View.y1)/Absy*Render.Height),
 		SGVertex2fImport(Render.Width-View.x2/absx*Render.Width+500
@@ -490,7 +489,7 @@ inherited Create(VContext);
 SelectPointEnabled:=False;
 Image:=nil;
 
-Image:=TSGImage.Create(SGTextureDirectory+Slash+'IconArea-hover.png');
+Image:=TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'IconArea-hover.png');
 Image.SetContext(Context);
 Image.Loading;
 
@@ -550,9 +549,9 @@ if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
 	begin
 	SelectPointEnabled:=False;
 	if SelectPoint.x>SelectSecondPoint.x then
-		SGQuickRePlaceLongInt(SelectPoint.x,SelectSecondPoint.x);
+		Swap(SelectPoint.x,SelectSecondPoint.x);
 	if SelectPoint.y>SelectSecondPoint.y then
-		SGQuickRePlaceLongInt(SelectPoint.y,SelectSecondPoint.y);
+		Swap(SelectPoint.y,SelectSecondPoint.y);
 	View.Import(
 		View.x1+abs(View.x1-View.x2)*SelectPoint.x/Render.Width,
 		View.y1+abs(View.y1-View.y2)*(Render.Height-SelectSecondPoint.y)/Render.Height,
