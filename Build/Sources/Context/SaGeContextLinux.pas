@@ -65,7 +65,11 @@ type
 implementation
 
 uses
-	SaGeScreen;
+	 SaGeScreen
+	,SaGeEncodingUtils
+	,SaGeLog
+	,SaGeStringUtils
+	;
 
 class function TSGContextLinux.Suppored() : TSGBoolean; 
 begin

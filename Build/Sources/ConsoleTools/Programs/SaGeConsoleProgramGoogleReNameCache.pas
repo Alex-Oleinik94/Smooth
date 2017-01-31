@@ -16,6 +16,7 @@ implementation
 uses
 	 Dos
 	,Classes
+	,SysUtils
 	{$IFDEF MSWINDOWS}
 		,Windows
 	{$ELSE}
