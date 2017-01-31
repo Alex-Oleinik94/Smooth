@@ -14,10 +14,10 @@ type
 		FZDegree      : LongInt;
 		FZMand        : Boolean;
 		FZQuantityRec : LongInt;
-		FColorScheme  : TSGExByte;
+		FColorScheme  : TSGByte;
 		
 		FAttitudeForThemeEnable : Boolean;
-		FTheme1,FTheme2         : TSGExByte;
+		FTheme1,FTheme2         : TSGByte;
 		FFAttitudeForTheme      : Real;
 		
 		FSmosh : Byte;
@@ -25,7 +25,7 @@ type
 		function Rec(Number:TSGComplexNumber):Word;inline;
 		function MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
 			public
-		function GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
+		function GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandaPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 		procedure Calculate;override;
 		procedure Paint();override;
@@ -136,7 +136,7 @@ type
 		FNowKadr:QWord;
 		FAllKadrs:QWOrd;
 		
-		FCurveArPoints:packed array of TSGExByte;
+		FCurveArPoints:packed array of TSGByte;
 		FCurveSelectPoint:Int64;
 		
 		FCurvePointPanel:TSGPanel;
@@ -863,7 +863,7 @@ Screen.LastChild.LastChild.AsComboBox.CreateItem('12');
 Screen.LastChild.LastChild.AsComboBox.CreateItem('16');
 Screen.LastChild.LastChild.BoundsToNeedBounds();
 Screen.LastChild.LastChild.FUserPointer1:=Self;
-case SGGetCoreCount() of 
+case SGCoreCount() of 
 2:Screen.LastChild.LastChild.AsComboBox.SelectItem:=1;
 3:Screen.LastChild.LastChild.AsComboBox.SelectItem:=2;
 4:Screen.LastChild.LastChild.AsComboBox.SelectItem:=3;
@@ -1593,7 +1593,7 @@ FColorScheme:=0;
 FSmosh:=1;
 end;
 
-function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGExByte;const RecNumber:Word):TSGMandaPixel;inline;
+function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandaPixel;inline;
 var
 	Color : TSGLongWord;
 
@@ -1840,11 +1840,11 @@ for i:=Data.h1 to Data.h2 do
 	if not VReady then
 		VReady:=True;
 	
-	if PReal(Data.FPoint)<>nil then
+	if PSGDouble(Data.FPoint)<>nil then
 		if IsComponent then
 			TSGProgressBar(Data.FPoint).Progress:=(i-Data.h1)/(Data.h2-Data.h1)
 		else
-			PReal(Data.FPoint)^:=(i-Data.h1)/(Data.h2-Data.h1);
+			PSGDouble(Data.FPoint)^:=(i-Data.h1)/(Data.h2-Data.h1);
 	
 	while Data.FWait do
 		begin

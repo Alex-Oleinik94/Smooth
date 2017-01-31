@@ -123,7 +123,7 @@ type
 		procedure AddToHeight(const Value:TSGScreenInt);
 		procedure AddToTop(const Value:TSGScreenInt);
 			protected
-		FAlign:TSGExByte;
+		FAlign:TSGByte;
 		FAnchors:TSGSetOfByte;
 		FAnchorsData:packed record
 			FParentWidth,FParentHeight:TSGScreenInt;
@@ -179,18 +179,18 @@ type
 		function GetPriorityComponent() : TSGComponent;
 		function CursorInComponent():TSGBoolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
-		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
 		function RightShift():TSGScreenInt;
 			public
 		procedure ToFront();
 		function MustDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
-		function GetChild(a:Int):TSGComponent;
+		function GetChild(a:TSGInt32):TSGComponent;
 		function CreateChild(const Child : TSGComponent) : TSGComponent;
 		procedure CompleteChild(const VChild : TSGComponent);
 		function LastChild():TSGComponent;
-		procedure CreateAlign(const NewAllign:TSGExByte);
+		procedure CreateAlign(const NewAllign:TSGByte);
 		function CursorPosition(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
@@ -199,9 +199,9 @@ type
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		property Children[Index : Int (* Indexing [1..Size] *)]:TSGComponent read GetChild;
+		property Children[Index : TSGInt32 (* Indexing [1..Size] *)]:TSGComponent read GetChild;
 		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
-		property Align : TSGExByte read FAlign write CreateAlign;
+		property Align : TSGByte read FAlign write CreateAlign;
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
@@ -530,7 +530,7 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.GetChild(a:Int):TSGComponent;
+function TSGComponent.GetChild(a:TSGInt32):TSGComponent;
 begin
 if (a-1 >= 0) and (a-1<=High(FChildren)) then
 	Result:=FChildren[a-1]
@@ -769,7 +769,7 @@ DestroySkin();
 inherited Destroy();
 end;
 
-function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGComponent.GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	begin
@@ -1166,7 +1166,7 @@ begin
 Result := Context.CursorPosition(SGNowCursorPosition);
 end;
 
-procedure TSGComponent.CreateAlign(const NewAllign:TSGExByte);
+procedure TSGComponent.CreateAlign(const NewAllign:TSGByte);
 begin
 FAlign:=NewAllign;
 end;

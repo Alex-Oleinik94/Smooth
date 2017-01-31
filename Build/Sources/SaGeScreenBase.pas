@@ -10,14 +10,42 @@ uses
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
-	,SaGeBased
 	,SaGeImages
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	;
-
+const
+	SGFrameAnimationConst = 200;
+	SGObjectTimerConst : TSGFloat64 = 0.02;
+	
+	SGFrameButtonsType0f =               $000003;
+	SGFrameButtonsTypeCleared = SGFrameButtonsType0f;
+	SGFrameButtonsType1f =               $000004;
+	SGFrameButtonsType3f =               $000005;
+const
+	SGAlignNone =                        $000006;
+	SGAlignLeft =                        $000007;
+	SGAlignRight =                       $000008;
+	SGAlignTop =                         $000009;
+	SGAlignBottom =                      $00000A;
+	SGAlignClient =                      $00000B;
+	
+	SGAnchorRight =                      $00000D;
+	SGAnchorLeft =                       $00000E;
+	SGAnchorTop =                        $00000F;
+	SGAnchorBottom =                     $000010;
+	
+	SG_VERTEX_FOR_CHILDREN =             $000013;
+	SG_VERTEX_FOR_PARENT =               $000014;
+	
+	SG_LEFT =                            $000015;
+	SG_TOP =                             $000016;
+	SG_HEIGHT =                          $000017;
+	SG_WIDTH =                           $000018;
+	SG_RIGHT =                           $000019;
+	SG_BOTTOM =                          $00001A;
 type
 	TSGCaption =  TSGString;
 	TSGScreenFloat = TSGFloat;
@@ -41,7 +69,7 @@ type
 		property PositionY : TSGComponentLocationType read FPosition.y write FPosition.y;
 		end;
 
-	TSGAnchors = type TSGExByte;
+	TSGAnchors = type TSGByte;
 	TSGScreenInt    = TSGAreaInt;
 
 
@@ -109,13 +137,13 @@ type
 		procedure MakePriority();
 		function CursorInComponent():TSGBoolean;
 		function CursorInComponentCaption():TSGBoolean;
-		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGExByte): TSGPoint2int32;
+		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
 		function RightShift():TSGScreenInt;
 		procedure ToFront();
 		function MustDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
-		procedure CreateAlign(const NewAllign:TSGExByte);
+		procedure CreateAlign(const NewAllign:TSGByte);
 		function CursorPosition(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
@@ -233,7 +261,7 @@ type
 		property Items          : PSGComboBoxItem read GetItems;
 		end;
 
-	TSGEditTextType         = TSGExByte;
+	TSGEditTextType         = TSGByte;
 	ISGEdit = interface(ISGOverComponent)
 		['{468c7f6f-795a-48a1-b5be-615448c2dcbe}']
 		function GetTextType() : TSGEditTextType;

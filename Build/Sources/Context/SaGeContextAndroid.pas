@@ -4,7 +4,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext

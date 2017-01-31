@@ -30,7 +30,7 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
-		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
+		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:TSGInt32 = -1; const VActive : TSGBoolean = True);
 		procedure ClearItems();
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
@@ -261,7 +261,7 @@ if FSelectedItemIndex <> -1 then
 	end;
 end;
 
-procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:Int = -1; const VActive : TSGBoolean = True);
+procedure TSGComboBox.CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:TSGInt32 = -1; const VActive : TSGBoolean = True);
 begin
 if Self <> nil then
 	begin

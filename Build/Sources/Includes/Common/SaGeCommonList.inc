@@ -1,7 +1,12 @@
 {$IFDEF INC_PLACE_INTERFACE}
 type
 	DATATYPE_LIST = packed array of DATATYPE;
-
+{$IF    defined(DATATYPE_LIST_HELPER)}
+	DATATYPE_LIST_HELPER = type helper for DATATYPE_LIST
+		function Copy() : DATATYPE_LIST; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		end;
+{$ENDIF defined(DATATYPE_LIST_HELPER)}
+{$IFNDEF INC_WITHOUT_FORWARD}
 operator :=(const A : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator + (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -10,9 +15,19 @@ operator in(const B : DATATYPE; const A : DATATYPE_LIST) : TSGBoolean;{$IFDEF SU
 operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF INC_WITHOUT_FORWARD}
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+{$IF    defined(DATATYPE_LIST_HELPER)}
+function DATATYPE_LIST_HELPER.Copy() : DATATYPE_LIST; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SetLength(Result, Length(Self));
+if Length(Self) > 0 then
+	Move(Self[0], Result[0], Length(Self) * SizeOf(DATATYPE));
+end;
+{$ENDIF defined(DATATYPE_LIST_HELPER)}
+
 operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 function ListSize(const List : DATATYPE_LIST) : TSGUInt32;

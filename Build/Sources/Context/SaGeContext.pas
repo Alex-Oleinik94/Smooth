@@ -9,7 +9,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeDateTime
-	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
 	,SaGeRenderConstants

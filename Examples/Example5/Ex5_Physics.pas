@@ -10,7 +10,6 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeMesh
 	,SaGeCommonClasses
 	,SaGeCommon

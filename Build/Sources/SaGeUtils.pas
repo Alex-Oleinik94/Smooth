@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeRenderConstants
 	,SaGeImages
@@ -64,8 +63,8 @@ type
 			public
 		constructor Create();override;
 			public
-		FMatrixMode: TSGExByte; // SG_3D, SG_2D, SG_ORTHO_3D
-		FViewMode  : TSGExByte; // SG_VIEW_...
+		FMatrixMode: TSGByte; // SG_3D, SG_2D, SG_ORTHO_3D
+		FViewMode  : TSGByte; // SG_VIEW_...
 		FChangingLookAtObject : TSGBoolean;
 			// for SG_VIEW_WATCH_OBJECT
 		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSGSingle;
@@ -97,8 +96,8 @@ type
 		property Location  : TSGVertex3f read FLocation   write FLocation;
 		property Position  : TSGVertex3f read FLocation   write FLocation;
 		property View      : TSGVertex3f read FView       write FView;
-		property MatrixMode: TSGExByte   read FMatrixMode write FMatrixMode;
-		property ViewMode  : TSGExByte   read FViewMode   write FViewMode;
+		property MatrixMode: TSGByte   read FMatrixMode write FMatrixMode;
+		property ViewMode  : TSGByte   read FViewMode   write FViewMode;
 		property ChangingLookAtObject : TSGBoolean write FChangingLookAtObject;
 		end;
 

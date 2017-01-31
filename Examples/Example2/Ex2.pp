@@ -15,7 +15,6 @@ uses
 		SaGeBaseExample,
 		{$ENDIF}
 	SaGeCommonClasses
-	,SaGeBased
 	,SaGeBase
 	,SaGeRenderConstants
 	;

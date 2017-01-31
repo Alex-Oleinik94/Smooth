@@ -9,7 +9,6 @@ interface
 uses
 	 SaGeCommon
 	,SaGeBase
-	,SaGeBased
 	,SaGeClasses
 	,SaGeSysUtils
 	;

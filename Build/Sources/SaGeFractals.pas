@@ -10,7 +10,6 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeContext
 	,SaGeMesh
@@ -78,7 +77,7 @@ type
 		class function ClassName():string;override;
 			protected
 		FMesh        : TSGCustomModel;
-		FMeshesInfo  : packed array of TSGExBoolean;
+		FMeshesInfo  : packed array of TSGByte;
 		FMeshesReady : TSGBoolean;
 		FShift       : TSGInt64;
 		

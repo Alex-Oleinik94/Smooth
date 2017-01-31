@@ -11,7 +11,6 @@ uses
 	,StrMan
 	
 	,SaGeCommonClasses
-	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants

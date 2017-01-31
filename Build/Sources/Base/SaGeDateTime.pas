@@ -7,7 +7,7 @@ interface
 uses
 	 Dos
 	
-	,SaGeBased
+	,SaGeBase
 	;
 type
 	// Used Int64 (not UInt64) becouse "Ariphmetic overflow"

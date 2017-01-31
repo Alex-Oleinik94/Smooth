@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeCommonClasses
-	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants

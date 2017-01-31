@@ -61,15 +61,33 @@ type
 	{$ENDIF defined(STRUCT_3) and defined(STRUCT_P_3)}
 	
 	{$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
-	STRUCT_2_LIST = packed array of STRUCT_2;
+		{$IF    defined(STRUCT_2_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST_HELPER := STRUCT_2_LIST_HELPER}
+		{$ENDIF defined(STRUCT_2_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST        := STRUCT_2_LIST}
+		{$DEFINE DATATYPE             := STRUCT_2}
+		{$INCLUDE SaGeCommonList.inc}
+		{$INCLUDE SaGeCommonListUndef.inc}
 	{$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
 	
 	{$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
-	STRUCT_3_LIST = packed array of STRUCT_3;
+		{$IF    defined(STRUCT_3_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST_HELPER := STRUCT_3_LIST_HELPER}
+		{$ENDIF defined(STRUCT_3_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST        := STRUCT_3_LIST}
+		{$DEFINE DATATYPE             := STRUCT_3}
+		{$INCLUDE SaGeCommonList.inc}
+		{$INCLUDE SaGeCommonListUndef.inc}
 	{$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
 	
 	{$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
-	STRUCT_4_LIST = packed array of STRUCT_4;
+		{$IF    defined(STRUCT_4_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST_HELPER := STRUCT_4_LIST_HELPER}
+		{$ENDIF defined(STRUCT_4_LIST_HELPER)}
+		{$DEFINE DATATYPE_LIST        := STRUCT_4_LIST}
+		{$DEFINE DATATYPE             := STRUCT_4}
+		{$INCLUDE SaGeCommonList.inc}
+		{$INCLUDE SaGeCommonListUndef.inc}
 	{$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
 {$IFNDEF INC_WITHOUT_FORWARD}
@@ -158,24 +176,6 @@ operator / (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPOR
 operator div (const B : STRUCT_4; const A : STRUCT_TYPE) : STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$ENDIF STRUCT_IS_FLOAT}
 {$ENDIF defined(STRUCT_4)}
-
-{$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
-operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator + (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator - (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-{$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
-
-{$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
-operator :=(const A : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator + (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator - (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-{$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
-
-{$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
-operator :=(const A : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator + (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-{$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
 {$ENDIF INC_WITHOUT_FORWARD}
 
@@ -309,148 +309,33 @@ end;
 {$ENDIF defined(STRUCT_TYPE)}
 
 {$IF    defined(STRUCT_2_LIST) and defined(STRUCT_2)}
-operator :=(const A : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-SetLength(Result, 1);
-Result[0] := A;
-end;
-
-operator + (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-Result := A;
-if Result = nil then
-	SetLength(Result, 1)
-else
-	SetLength(Result, Length(Result) + 1);
-Result[High(Result)] := B;
-end;
-
-operator - (const A : STRUCT_2_LIST;const B : STRUCT_2) : STRUCT_2_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	i, ii : TSGMaxEnum;
-begin
-Result := A;
-if Result <> nil then 
-	begin
-	ii := Length(Result);
-	if ii > 0 then
-		begin
-		i := 0;
-		while (i < Length(Result)) do
-			begin
-			if Result[i] = B then
-				begin
-				if High(Result) <> i then
-					begin
-					for ii := i to High(Result) - 1 do
-						Result[ii] := Result[ii + 1];
-					end;
-				SetLength(Result, Length(Result) - 1);
-				end
-			else
-				i += 1;
-			end;
-		end;
-	end;
-end;
-
+	{$IF    defined(STRUCT_2_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST_HELPER := STRUCT_2_LIST_HELPER}
+	{$ENDIF defined(STRUCT_2_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST        := STRUCT_2_LIST}
+	{$DEFINE DATATYPE             := STRUCT_2}
+	{$INCLUDE SaGeCommonList.inc}
+	{$INCLUDE SaGeCommonListUndef.inc}
 {$ENDIF defined(STRUCT_2_LIST) and defined(STRUCT_2)}
 
 {$IF    defined(STRUCT_3_LIST) and defined(STRUCT_3)}
-operator :=(const A : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-SetLength(Result, 1);
-Result[0] := A;
-end;
-
-operator + (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-Result := A;
-if Result = nil then
-	SetLength(Result, 1)
-else
-	SetLength(Result, Length(Result) + 1);
-Result[High(Result)] := B;
-end;
-
-operator - (const A : STRUCT_3_LIST;const B : STRUCT_3) : STRUCT_3_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	i, ii : TSGMaxEnum;
-begin
-Result := A;
-if Result <> nil then 
-	begin
-	ii := Length(Result);
-	if ii > 0 then
-		begin
-		i := 0;
-		while (i < Length(Result)) do
-			begin
-			if Result[i] = B then
-				begin
-				if High(Result) <> i then
-					begin
-					for ii := i to High(Result) - 1 do
-						Result[ii] := Result[ii + 1];
-					end;
-				SetLength(Result, Length(Result) - 1);
-				end
-			else
-				i += 1;
-			end;
-		end;
-	end;
-end;
-
+	{$IF    defined(STRUCT_3_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST_HELPER := STRUCT_3_LIST_HELPER}
+	{$ENDIF defined(STRUCT_3_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST        := STRUCT_3_LIST}
+	{$DEFINE DATATYPE             := STRUCT_3}
+	{$INCLUDE SaGeCommonList.inc}
+	{$INCLUDE SaGeCommonListUndef.inc}
 {$ENDIF defined(STRUCT_3_LIST) and defined(STRUCT_3)}
 
 {$IF    defined(STRUCT_4_LIST) and defined(STRUCT_4)}
-operator :=(const A : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-SetLength(Result, 1);
-Result[0] := A;
-end;
-
-operator + (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-begin
-Result := A;
-if Result = nil then
-	SetLength(Result, 1)
-else
-	SetLength(Result, Length(Result) + 1);
-Result[High(Result)] := B;
-end;
-
-operator - (const A : STRUCT_4_LIST;const B : STRUCT_4) : STRUCT_4_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	i, ii : TSGMaxEnum;
-begin
-Result := A;
-if Result <> nil then 
-	begin
-	ii := Length(Result);
-	if ii > 0 then
-		begin
-		i := 0;
-		while (i < Length(Result)) do
-			begin
-			if Result[i] = B then
-				begin
-				if High(Result) <> i then
-					begin
-					for ii := i to High(Result) - 1 do
-						Result[ii] := Result[ii + 1];
-					end;
-				SetLength(Result, Length(Result) - 1);
-				end
-			else
-				i += 1;
-			end;
-		end;
-	end;
-end;
-
-
+	{$IF    defined(STRUCT_4_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST_HELPER := STRUCT_4_LIST_HELPER}
+	{$ENDIF defined(STRUCT_4_LIST_HELPER)}
+	{$DEFINE DATATYPE_LIST        := STRUCT_4_LIST}
+	{$DEFINE DATATYPE             := STRUCT_4}
+	{$INCLUDE SaGeCommonList.inc}
+	{$INCLUDE SaGeCommonListUndef.inc}
 {$ENDIF defined(STRUCT_4_LIST) and defined(STRUCT_4)}
 
 {$IF    defined(STRUCT_2)}

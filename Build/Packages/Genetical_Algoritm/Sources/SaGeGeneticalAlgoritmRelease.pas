@@ -8,7 +8,6 @@ uses
 	 Crt
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeGeneticalAlgoritm
 	,SaGeScreen
 	,SaGeScreenBase

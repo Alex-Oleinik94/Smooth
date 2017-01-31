@@ -5,7 +5,7 @@ unit SaGeAllExamples;
 interface
 
 uses
-	SaGeBase
+	 SaGeBase
 	,SaGeCommonClasses
 	,SaGeCommonUtils
 	,SaGeRenderConstants

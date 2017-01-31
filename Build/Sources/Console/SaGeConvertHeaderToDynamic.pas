@@ -5,7 +5,7 @@ unit SaGeConvertHeaderToDynamic;
 interface
 
 uses
-	 SaGeBased
+	 SaGeBase
 	
 	,Classes
 	;
@@ -61,7 +61,6 @@ implementation
 
 uses
 	 SaGeResourceManager
-	,SaGeBase
 	,SaGeVersion
 	,SaGeStringUtils
 	,SaGeLog
@@ -789,7 +788,6 @@ while FInStream.Size <> FInStream.Position do
 		WriteString(SGWinEoln);
 		WriteString('uses ' + SGWinEoln);
 		WriteString('	 SaGeBase' + SGWinEoln);
-		WriteString('	,SaGeBased' + SGWinEoln);
 		if FWriteMode = SGDDHWriteModeObjectSaGe then
 			WriteString('	,SaGeDllManager' + SGWinEoln);
 		WriteString('	;' + SGWinEoln);

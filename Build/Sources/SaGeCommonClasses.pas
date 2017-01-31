@@ -4,7 +4,7 @@ unit SaGeCommonClasses;
 
 interface
 uses
-	SaGeBased
+	 SaGeBase
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeRender

@@ -5,10 +5,10 @@ unit SaGeLibrary;
 interface
 
 uses
-	SaGeBase
-	,SaGeBased
-	,Classes
+	 SaGeBase
 	,SaGeVersion
+	
+	,Classes
 	;
 
 var

@@ -10,7 +10,6 @@ uses
 	,Classes
 		// Engine
 	,SaGeBase
-	,SaGeBased
 	,SaGeImagesBase;
 
 type

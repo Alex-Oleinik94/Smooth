@@ -9,7 +9,6 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeBase
-	,SaGeBased
 	,SaGeConsoleToolsBase
 	;
 

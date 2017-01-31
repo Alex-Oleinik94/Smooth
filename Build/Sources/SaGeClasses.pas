@@ -8,7 +8,6 @@ uses
 	 Classes
 	
 	,SaGeBase
-	,SaGeBased
 	{$IFDEF WITHLEAKSDETECTOR}
 		,SaGeLeaksDetector
 		{$ENDIF}

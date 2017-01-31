@@ -11,7 +11,6 @@ uses
 	
 	,SaGeMath
 	,SaGeBase
-	,SaGeBased
 	,StrMan
 	,SaGeVersion
 	,SaGeResourceManager

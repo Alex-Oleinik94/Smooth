@@ -9,7 +9,6 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeCommonClasses
 	,SaGeModel
 	,SaGeScene

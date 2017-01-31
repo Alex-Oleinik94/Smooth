@@ -5,8 +5,7 @@ unit SaGeGameNet;
 interface
 
 uses
-	SaGeBase
-	,SaGeBased
+	 SaGeBase
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeNet

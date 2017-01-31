@@ -13,7 +13,6 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeImagesJpeg
 	,SaGeImagesBmp
 	,SaGeImagesBase
@@ -47,7 +46,7 @@ FStream.Position:=FStream.Position+4;
 FStream.ReadBuffer(q,SizeOf(q));
 
 Stream:=TMemoryStream.Create();
-SGLoadLoadPartStreamToStream(FStream,Stream,q);
+SGCopyPartStreamToStream(FStream, Stream, q);
 Stream.Position:=0;
 LoadJPEGToBitMap(Stream,BitMapRGB);
 Stream.Destroy();
@@ -55,7 +54,7 @@ Stream.Destroy();
 FStream.ReadBuffer(q,SizeOf(q));
 
 Stream:=TMemoryStream.Create();
-SGLoadLoadPartStreamToStream(FStream,Stream,q);
+SGCopyPartStreamToStream(FStream, Stream, q);
 Stream.Position:=0;
 LoadJPEGToBitMap(Stream,BitMapAlpha);
 Stream.Destroy();

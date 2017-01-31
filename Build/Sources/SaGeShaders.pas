@@ -18,7 +18,6 @@ uses
 	,StrMan
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeRender
 	,SaGeCommonClasses

@@ -11,7 +11,6 @@ uses
 	,Dos
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeImagesBase
 	;
 

@@ -4,12 +4,12 @@ unit SaGeModelRedactor;
 
 interface
 uses
-	crt
+	 Crt
 	,Classes
-	,SaGeBase
-	,SaGeBased
-	,SaGeCommon
 	,SysUtils
+	
+	,SaGeBase
+	,SaGeCommon
 	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommonClasses

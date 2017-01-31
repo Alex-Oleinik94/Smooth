@@ -406,7 +406,6 @@ implementation
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeLog

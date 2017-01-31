@@ -16,7 +16,6 @@ uses
 		,SaGeContextLinux
 		{$ENDIF}
 	,dos
-	,SaGeBased
 	,Classes
 	,SysUtils
 	,SaGeContext

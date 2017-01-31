@@ -5,14 +5,15 @@ unit SaGeContextMacOSX;
 interface
 
 uses 
-	SaGeBase
-	,SaGeBased
+	 SaGeBase
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
+	
 	,MacOSAll
 	,unix
-	,agl;
+	,agl
+	;
 	
 type
 	TSGContextMacOSX=class(TSGContext)

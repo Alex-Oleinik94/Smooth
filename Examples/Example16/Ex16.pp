@@ -18,7 +18,6 @@ uses
 	,Math
 	
 	,SaGeCommonClasses
-	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRenderConstants

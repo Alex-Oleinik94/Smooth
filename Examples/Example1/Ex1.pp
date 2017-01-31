@@ -15,7 +15,7 @@ uses
 		SaGeBaseExample,
 		{$ENDIF}
 	SaGeCommonClasses
-	,SaGeBased
+	,SaGeBase
 	;
 type
 	TSGExample1=class(TSGDrawable)

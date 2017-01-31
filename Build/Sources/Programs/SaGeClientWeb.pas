@@ -7,7 +7,6 @@ interface
 uses
 	 Classes
 	
-	,SaGeBased
 	,SaGeBase
 	,SaGeRender
 	,SaGeCommonClasses

@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeNet

@@ -11,7 +11,6 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeRenderConstants
 	,SaGeClasses
 	,SaGeMathUtils
@@ -98,7 +97,9 @@ type
 		function CreateDevice() : TSGBool;
 		procedure Kill();
 		end;
-
+	
+	TSGRenderTexture = type TSGUInt32;
+	PSGRenderTexture = ^ TSGRenderTexture;
 	ISGRender = interface(ISGRectangle)
 		['{6d0d4eb0-4de7-4000-bf5d-52a069a776d1}']
 		function GetRenderType() : TSGRenderType;
@@ -133,12 +134,12 @@ type
 		procedure Rotatef(const angle:TSGSingle;const x,y,z:TSGSingle);
 		procedure Enable(VParam:TSGCardinal);
 		procedure Disable(const VParam:TSGCardinal);
-		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);
+		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGRenderTexture);
 		procedure Lightfv(const VLight,VParam:TSGCardinal;const VParam2:TSGPointer);
-		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);
+		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGRenderTexture);
 		procedure BindTexture(const VParam:TSGCardinal;const VTexture:TSGCardinal);
 		procedure TexParameteri(const VP1,VP2,VP3:TSGCardinal);
-		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:SGInt);
+		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:TSGInt32);
 		procedure TexEnvi(const VP1,VP2,VP3:TSGCardinal);
 		procedure TexImage2D(const VTextureType:TSGCardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:TSGCardinal;VBitMap:TSGPointer);
 		procedure ReadPixels(const x,y:TSGInteger;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: TSGPointer);

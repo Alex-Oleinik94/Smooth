@@ -139,7 +139,6 @@ implementation
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeDllManager
 	,SaGeSysUtils
 	;

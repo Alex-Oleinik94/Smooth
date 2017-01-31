@@ -192,11 +192,13 @@ unit SaGeImagesJpeg;
 interface
 
 uses
-  Classes, SysUtils
+	 Classes
+	,SysUtils
+	
 	,SaGeBase
-	,SaGeBased
 	,SaGeImagesBmp
-	,SaGeImagesBase;
+	,SaGeImagesBase
+	;
 
 type
   { }

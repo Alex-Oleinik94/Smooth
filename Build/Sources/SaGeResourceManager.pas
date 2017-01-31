@@ -5,7 +5,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeHash
 	,SaGeDateTime
 	
@@ -745,7 +744,7 @@ if IsInc then
 	OutString('implementation'+SGWinEoln);
 OutString('uses'+SGWinEoln);
 OutString('	 Classes'+SGWinEoln);
-OutString('	,SaGeBased'+SGWinEoln);
+OutString('	,SaGeBase'+SGWinEoln);
 if IsInc then
 	OutString('	,SaGeResourceManager'+SGWinEoln);
 OutString('	;'+SGWinEoln);

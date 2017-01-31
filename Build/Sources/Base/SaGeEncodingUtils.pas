@@ -5,7 +5,7 @@ unit SaGeEncodingUtils;
 interface
 
 uses
-	 SaGeBased
+	 SaGeBase
 	;
 
 procedure Windows1251ToUTF8(var Str: TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

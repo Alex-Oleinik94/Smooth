@@ -12,7 +12,6 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeMesh
 	,SaGeCommonClasses
 	,SaGeRenderConstants

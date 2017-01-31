@@ -8,10 +8,11 @@ uses
 	 Classes
 	,SysUtils
 	
-	,SaGeBased
+	,SaGeBase
 	;
 
 const
+	// Separators
 	WinDirectorySeparator = '\';
 	UnixDirectorySeparator = '/';
 	DirectorySeparator =
@@ -22,9 +23,52 @@ const
 			{$ENDIF}
 		;
 	DirectorySeparators = [WinDirectorySeparator, UnixDirectorySeparator];
+const
+	// SaGe Directories
+	SGSaGeDirectory     = '.' + DirectorySeparator + '..';
+	SGDataDirectory     = SGSaGeDirectory + DirectorySeparator + 'Data';
+	SGTempDirectory     = SGSaGeDirectory + DirectorySeparator + 'Temp';
+	SGFontDirectory     = SGDataDirectory + DirectorySeparator + 'Fonts';
+	SGTextureDirectory  = SGDataDirectory + DirectorySeparator + 'Textures';
+	SGModelsDirectory   = SGDataDirectory + DirectorySeparator + 'Models';
+	SGExamplesDirectory = SGDataDirectory + DirectorySeparator + 'Examples';
+	SGEngineDirectory   = SGDataDirectory + DirectorySeparator + 'Engine';
+	SGImagesDirectory   = SGDataDirectory + DirectorySeparator + 'Images';
+	SGFontsDirectory    = SGFontDirectory;
+	SGTexturesDirectory = SGTextureDirectory;
+	// SaGe Absolute Directories
+	SGAbsoluteSaGeDirectory = 
+		{$IFDEF MOBILE}
+			{$IFDEF ANDROID}
+				DirectorySeparator + 'sdcard' + DirectorySeparator + '.SaGe'
+			{$ELSE}
+				''
+			{$ENDIF}
+		{$ELSE}
+			SGSaGeDirectory
+		{$ENDIF}
+		;
+	SGAbsoluteDataDirectory     = SGAbsoluteSaGeDirectory + DirectorySeparator + 'Data';
+	SGAbsoluteTempDirectory     = SGAbsoluteSaGeDirectory + DirectorySeparator + 'Temp';
+	SGAbsoluteFontDirectory     = SGAbsoluteDataDirectory + DirectorySeparator + 'Fonts';
+	SGAbsoluteTextureDirectory  = SGAbsoluteDataDirectory + DirectorySeparator + 'Textures';
+	SGAbsoluteModelsDirectory   = SGAbsoluteDataDirectory + DirectorySeparator + 'Models';
+	SGAbsoluteExamplesDirectory = SGAbsoluteDataDirectory + DirectorySeparator + 'Examples';
+	SGAbsoluteEngineDirectory   = SGAbsoluteDataDirectory + DirectorySeparator + 'Engine';
+	SGAbsoluteImagesDirectory   = SGAbsoluteDataDirectory + DirectorySeparator + 'Images';
+	SGAbsoluteTexturesDirectory = SGAbsoluteTextureDirectory;
+	SGAbsoluteFontsDirectory    = SGAbsoluteFontDirectory;
+const
+	// End Of File
 	SGUnixEoln = #10;
 	SGWinEoln  = #13#10;
 	SGMacEoln  = #13;
+
+(************)
+(** COMMON **)
+(************)
+
+function SGCheckDirectorySeparators(const Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (**********)
 (** FILE **)
@@ -35,7 +79,7 @@ function SGFileNameWithoutExpansion(const FileName : TSGString) : TSGString;{$IF
 function SGFreeFileName(const Name : TSGString; const Sl : TSGString = 'Copy') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGSetExpansionToFileName(const FileName, Expansion : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFileName(const PathName : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGFilePath(const Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGFilePath(Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFileExists(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -49,27 +93,47 @@ function SGMakeDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPO
 procedure SGMakeDirectories(const FinalDirectory : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGExistsDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+(************************)
+(** DIRECTORY AND FILES**)
+(************************)
+
 function SGDirectoryFiles(Catalog : TSGString; const What : TSGString = '') : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 uses
 	 SaGeStringUtils
-	,SaGeBase
 	;
+
+(************)
+(** COMMON **)
+(************)
+
+function SGCheckDirectorySeparators(const Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	C : TSGChar;
+begin
+Result := '';
+for C in Path do
+	if C in DirectorySeparators then
+		Result += DirectorySeparator
+	else
+		Result += C;
+end;
+
+(************************)
+(** DIRECTORY AND FILES**)
+(************************)
 
 function SGDirectoryFiles(Catalog : TSGString; const What : TSGString = '') : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Found : Integer;
 	SearchRec : TSearchRec;
-	i : TSGUInt32;
 begin
 Result := nil;
 if Catalog = '' then
 	Catalog := '.';
-for i := 0 to Length(Catalog) do
-	if Catalog[i] in DirectorySeparators then
-		Catalog[i] := DirectorySeparator;
+Catalog := SGCheckDirectorySeparators(Catalog);
 if Catalog[Length(Catalog)] <> DirectorySeparator then
 	Catalog += DirectorySeparator;
 if What <> '' then
@@ -90,21 +154,22 @@ end;
 
 function SGFileExists(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FileExists(FileName);
+Result := FileExists(SGCheckDirectorySeparators(FileName));
 end;
 
 function SGApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if argc > 0 then
-	Result := argv[0]
+	Result := SGCheckDirectorySeparators(argv[0])
 else
 	Result := '';
 end;
 
-function SGFilePath(const Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGFilePath(Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i, ii : TSGUInt32;
 begin
+Path := SGCheckDirectorySeparators(Path);
 if SGFileName(Path) = '' then
 	Result := Path
 else
@@ -149,6 +214,7 @@ Result:='';
 for i:=Length(S) downto 1 do
 	Result+=S[i];
 SetLength(S,0);
+Result := SGCheckDirectorySeparators(Result);
 end;
 
 function SGSetExpansionToFileName(const FileName, Expansion : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -157,6 +223,7 @@ if Expansion <> '' then
 	Result := SGFilePath(FileName) + SGFileNameWithoutExpansion(SGFileName(FileName)) + '.' + Expansion
 else
 	Result := SGFilePath(FileName) + SGFileNameWithoutExpansion(SGFileName(FileName));
+Result := SGCheckDirectorySeparators(Result);
 end;
 
 function SGFreeFileName(const Name : TSGString; const Sl : TSGString = 'Copy') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -181,16 +248,17 @@ end;
 var
 	Number        : TSGInt32 = 1;
 begin
-if FileExists(Name) then
+if SGFileExists(Name) then
 	begin
 	FileExpansion := SGFileExpansion(Name);
 	FileName := SGFileNameWithoutExpansion(Name);
-	while FileExists(FileNameFromNumber(Number)) do
+	while SGFileExists(FileNameFromNumber(Number)) do
 		Number+=1;
 	Result := FileNameFromNumber(Number);
 	end
 else
 	Result := Name;
+Result := SGCheckDirectorySeparators(Result);
 end;
 
 function SGFileNameWithoutExpansion(const FileName : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -213,6 +281,7 @@ else
 	for i:=1 to PointPosition-1 do
 		Result+=FileName[i];
 	end;
+Result := SGCheckDirectorySeparators(Result);
 end;
 
 function SGFileExpansion(const FileName : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -240,7 +309,7 @@ else
 		i-=1;
 		end;
 	end;
-Result:=SGUpCaseString(Result);
+Result := SGUpCaseString(Result);
 end;
 
 (***************)
@@ -280,13 +349,14 @@ if SGExistsDirectory(Name) then
 	end
 else
 	Result := Name;
+Result := SGCheckDirectorySeparators(Result);
 end;
 
 function SGMakeDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := True;
 try
-	MKDir(Directory);
+	MKDir(SGCheckDirectorySeparators(Directory));
 except
 	Result := False;
 end;
@@ -327,7 +397,7 @@ end;
 
 function SGExistsDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := DirectoryExists(Directory);
+Result := DirectoryExists(SGCheckDirectorySeparators(Directory));
 end;
 
 end.

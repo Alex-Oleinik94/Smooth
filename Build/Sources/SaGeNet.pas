@@ -12,11 +12,11 @@ uses
 	,Process
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeVersion
 	,SaGeClasses
 	,SaGeDateTime
+	,SaGeLog
 	
 	,lCommon
 	,lhttp
@@ -186,7 +186,6 @@ uses
 	,SaGeConsoleTools
 	,SaGeConsoleUtils
 	,SaGeStringUtils
-	,SaGeLog
 	;
 
 // TSGUDPClient

@@ -26,7 +26,6 @@ interface
 uses
 	//* ===================== SaGe Units =====================
 	 SaGeBase
-	,SaGeBased
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderConstants
@@ -134,12 +133,12 @@ type
 		procedure Rotatef(const angle:single;const x,y,z:single);override;
 		procedure Enable(VParam:Cardinal);override;
 		procedure Disable(const VParam:Cardinal);override;
-		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);override;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);override;
-		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);override;
 		procedure BindTexture(const VParam:Cardinal;const VTexture:Cardinal);override;
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
-		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
+		procedure PixelStorei(const VParamName:Cardinal;const VParam:TSGInt32);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
 		procedure TexImage2D(const VTextureType:Cardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);override;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: Pointer);override;
@@ -250,14 +249,14 @@ type
 			FArTextures : packed array of
 				packed record
 					FSaved : Boolean;
-					FTexture : SGUInt;
+					FTexture : TSGUInt32;
 					end;
 			FBindedTexture : TSGLongWord;
 
 			FArBuffers : packed array of
 				packed record
 					FSaved : Boolean;
-					FBuffer : SGUInt;
+					FBuffer : TSGUInt32;
 					end;
 			FVBOData:packed array [0..1] of TSGLongWord;
 			// FVBOData[0] - SGR_ARRAY_BUFFER_ARB
@@ -1053,7 +1052,7 @@ begin
 glDisable(VParam);
 end;
 
-procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
+procedure TSGRenderOpenGL.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);
 {$IFDEF NEEDResourceS}
 var
 	i : LongWord;
@@ -1096,7 +1095,7 @@ else
 	glLightfv(VLight,VParam,VParam2);
 end;
 
-procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
+procedure TSGRenderOpenGL.GenTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);
 {$IFDEF NEEDResourceS}
 var
 	i : TSGMaxEnum;
@@ -1145,7 +1144,7 @@ begin
 glTexParameteri(VP1,VP2,VP3);
 end;
 
-procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:SGInt);
+procedure TSGRenderOpenGL.PixelStorei(const VParamName:Cardinal;const VParam:TSGInt32);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glPixelStorei = nil then TSGRenderOpenGL_DynLinkError('glPixelStorei');{$ENDIF}
 glPixelStorei(VParamName,VParam);

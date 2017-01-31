@@ -8,7 +8,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeClasses
 	,SaGeRenderConstants
 	,SaGeCommon
@@ -76,12 +75,12 @@ type
 		procedure Rotatef(const angle:TSGSingle;const x,y,z:TSGSingle);virtual;abstract;
 		procedure Enable(VParam:TSGCardinal);virtual;
 		procedure Disable(const VParam:TSGCardinal);virtual;abstract;
-		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure DeleteTextures(const VQuantity:TSGCardinal;const VTextures:PSGRenderTexture);virtual;abstract;
 		procedure Lightfv(const VLight,VParam:TSGCardinal;const VParam2:TSGPointer);virtual;abstract;
-		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGUInt);virtual;abstract;
+		procedure GenTextures(const VQuantity:TSGCardinal;const VTextures:PSGRenderTexture);virtual;abstract;
 		procedure BindTexture(const VParam:TSGCardinal;const VTexture:TSGCardinal);virtual;abstract;
 		procedure TexParameteri(const VP1,VP2,VP3:TSGCardinal);virtual;abstract;
-		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:SGInt);virtual;abstract;
+		procedure PixelStorei(const VParamName:TSGCardinal;const VParam:TSGInt32);virtual;abstract;
 		procedure TexEnvi(const VP1,VP2,VP3:TSGCardinal);virtual;abstract;
 		procedure TexImage2D(const VTextureType:TSGCardinal;const VP1:TSGCardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:TSGCardinal;VBitMap:TSGPointer);virtual;abstract;
 		procedure ReadPixels(const x,y:TSGInteger;const Vwidth,Vheight:TSGInteger;const format, atype: TSGCardinal;const pixels: TSGPointer);virtual;abstract;

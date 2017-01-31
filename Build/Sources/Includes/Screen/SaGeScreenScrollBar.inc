@@ -15,14 +15,14 @@ type
 		end;
 	TSGScrollBar=class(TSGComponent)
 			public
-		constructor Create(const NewType:TSGExByte  = SGScrollBarVertical);virtual;
+		constructor Create(const NewType:TSGByte  = SGScrollBarVertical);virtual;
 		destructor Destroy;override;
 		class function ClassName() : TSGString; override;
 			public
 		FScrollMax:Int64;
 		FScrollHigh:Int64;
 		FScrollLow:Int64;
-		FScroolType:TSGExByte;
+		FScroolType:TSGByte;
 		FBeginingPosition:Int64;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 		procedure UpDateScrollBounds;
@@ -209,7 +209,7 @@ begin
 Inherited;
 end;
 
-constructor TSGScrollBar.Create(const NewType:TSGExByte  = SGScrollBarVertical);
+constructor TSGScrollBar.Create(const NewType:TSGByte  = SGScrollBarVertical);
 begin
 inherited Create;
 FBeginingPosition:=0;

@@ -4,8 +4,7 @@ unit SaGeScene;
 interface
 
 uses
-	SaGeBase
-	,SaGeBased
+	 SaGeBase
 	,SaGeCommon
 	,SaGeCommonClasses
 	,SaGeMesh

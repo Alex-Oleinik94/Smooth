@@ -9,7 +9,6 @@ uses
 	,SaGeCommon
 	,SaGeClasses
 	,SaGeBase
-	,SaGeBased
 	,SaGeImages
 	,SaGeCommonClasses
 	,SaGeMesh

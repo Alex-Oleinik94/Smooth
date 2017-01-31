@@ -7,7 +7,6 @@ uses
 	  Classes
 	, SaGeCommon
 	, SaGeBase
-	, SaGeBased
 	, SaGeImages
 	, SaGeRender
 	, SaGeCommonClasses

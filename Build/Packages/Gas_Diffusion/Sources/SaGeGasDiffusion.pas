@@ -11,7 +11,6 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeThreads
 	,SaGeMesh
 	,SaGeContext

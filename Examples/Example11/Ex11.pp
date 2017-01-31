@@ -8,7 +8,6 @@ uses
 			{$ENDIF}
 		{$ENDIF}
 	 SaGeContext
-	,SaGeBased
 	,SaGeBase
 	,SaGeBaseExample
 	,SaGeUtils

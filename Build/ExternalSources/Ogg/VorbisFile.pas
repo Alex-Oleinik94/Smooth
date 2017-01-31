@@ -304,7 +304,6 @@ implementation
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeSysUtils

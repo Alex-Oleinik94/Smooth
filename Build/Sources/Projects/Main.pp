@@ -25,7 +25,6 @@ uses
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		,SaGeConsolePaintableTools
-		,SaGeBased
 		,SaGeContext
 		,SaGeLog
 		{$ENDIF}

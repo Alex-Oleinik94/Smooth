@@ -7,11 +7,10 @@ interface
 uses
 	 Crt
 	,Dos
-	,Classes
 	,SysUtils
+	,Classes
 	
 	,SaGeBase
-	,SaGeBased
 	;
 
 type

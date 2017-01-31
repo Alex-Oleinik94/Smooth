@@ -11,7 +11,6 @@ interface
 uses
 	// Engine
 	 SaGeBase
-	,SaGeBased
 	,SaGeContext
 	,SaGeCommon
 	,SaGeRender

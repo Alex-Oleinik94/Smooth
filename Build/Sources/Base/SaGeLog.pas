@@ -9,9 +9,18 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeFileUtils
 	;
+type
+	TSGViewErrorCase = (
+		SGPrintError,
+		SGLogError);
+	TSGViewErrorType = set of TSGViewErrorCase;
+const
+	SGViewErrorFull  : TSGViewErrorType = [SGPrintError, SGLogError];
+	SGViewErrorPrint : TSGViewErrorType = [SGPrintError];
+	SGViewErrorLog   : TSGViewErrorType = [SGLogError];
+	SGViewErrorNULL  : TSGViewErrorType = [];
 var
 	SGLogEnable : TSGBoolean = 
 		{$IFDEF RELEASE}

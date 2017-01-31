@@ -1,7 +1,8 @@
 {$INCLUDE SaGe.inc}
 library SaGe;
 uses
-	crt
+	 Crt
+	
 	,SaGeBase
 	,SaGeFractals
 	,SaGeImages

@@ -5,7 +5,7 @@ unit SaGeBaseUtils;
 interface
 
 uses
-	 SaGeBased
+	 SaGeBase
 	;
 
 // Sort

@@ -15,7 +15,6 @@ uses
 		SaGeBaseExample,
 		{$ENDIF}
 	 SaGeContext
-	,SaGeBased
 	,SaGeBase
 	,SaGeUtils
 	,SaGeRender

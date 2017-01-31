@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeConsoleToolsBase
 	;
 
@@ -35,8 +34,8 @@ end;
 
 var
 	Exp:TSGExpression = nil;
-	Variables:TArPChar = nil;
-	Consts:TArBoolean = nil;
+	Variables:TSGPCharList = nil;
+	Consts:packed array of TSGBoolean = nil;
 	I:LongInt;
 	NeedExit:Boolean = False;
 

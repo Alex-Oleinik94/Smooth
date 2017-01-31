@@ -5,8 +5,7 @@ unit SaGePackages;
 interface
 
 uses
-	SaGeBase
-	,SaGeBased
+	 SaGeBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeCommonUtils

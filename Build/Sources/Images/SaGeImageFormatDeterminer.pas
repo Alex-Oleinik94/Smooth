@@ -7,7 +7,6 @@ interface
 uses
 	 Classes
 	,SaGeBase
-	,SaGeBased
 	,SaGeImagesBase
 	;
 type

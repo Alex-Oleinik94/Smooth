@@ -6,17 +6,33 @@ unit SaGeSysUtils;
 interface
 
 uses
-	 Classes
-	,SysUtils
+	 SysUtils
 	
 	,SaGeBase
-	,SaGeBased
 	;
 
 // Core
-function SGGetCoreCount() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCoreCount() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // Libraries
+const
+	SGLibraryNameBegin = 
+		{$IFDEF UNIX}
+			'lib'
+		{$ELSE}
+			''
+		{$ENDIF}
+		;
+	SGLibraryNameEnd =
+		{$IFDEF UNIX}
+			'.so'
+		{$ELSE} {$IFDEF MSWINDOWS}
+			'.dll'
+		{$ELSE}
+			''
+		{$ENDIF} {$ENDIF}
+		;
+
 type
 	TSGLibHandle = type TSGMaxEnum;
 	TSGLibHandleList = type packed array of TSGLibHandle;
@@ -48,6 +64,7 @@ procedure SGPrintStackTrace();
 procedure SGPrintExceptionStackTrace(const e : TSGException);
 
 // Other
+function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
 procedure SGRunComand(const Comand : TSGString; const ViewOutput : TSGBoolean = True);
 
 implementation
@@ -66,6 +83,7 @@ uses
 		{$ENDIF}
 	,DynLibs
 	,Process
+	,Classes
 	
 	,SaGeStringUtils
 	,SaGeLog
@@ -228,7 +246,7 @@ Result:=
 		{$endif}
 end;
 
-function SGGetCoreCount() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCoreCount() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFDEF USE_uSMBIOS}
 Var
   SMBios             : TSMBios;
@@ -248,5 +266,18 @@ finally
 	end;
 {$ENDIF}
 end;
+
+function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; 
+{$IFDEF WITHASMINC} assembler; register; {$ENDIF}  overload;
+{$IFDEF WITHASMINC}
+	asm
+		cbw
+		cwde
+	end;
+{$ELSE}
+	begin
+	Result := Value;
+	end;
+	{$ENDIF}
 
 end.

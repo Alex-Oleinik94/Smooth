@@ -5,10 +5,10 @@ unit SaGeTron;
 interface
 
 uses 
-	 crt
+	 Crt
 	,SysUtils
+	
 	,SaGeBase
-	,SaGeBased
 	,SaGeCommonClasses
 	,SaGeModel
 	,SaGeScene

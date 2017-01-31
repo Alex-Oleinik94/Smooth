@@ -8,7 +8,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderConstants
@@ -65,12 +64,12 @@ type
 		procedure Rotatef(const angle:single;const x,y,z:single);override;
 		procedure Enable(VParam:Cardinal);override;
 		procedure Disable(const VParam:Cardinal);override;
-		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);override;
 		procedure Lightfv(const VLight,VParam:Cardinal;const VParam2:Pointer);override;
-		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);override;
+		procedure GenTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);override;
 		procedure BindTexture(const VParam:Cardinal;const VTexture:Cardinal);override;
 		procedure TexParameteri(const VP1,VP2,VP3:Cardinal);override;
-		procedure PixelStorei(const VParamName:Cardinal;const VParam:SGInt);override;
+		procedure PixelStorei(const VParamName:Cardinal;const VParam:TSGInt32);override;
 		procedure TexEnvi(const VP1,VP2,VP3:Cardinal);override;
 		procedure TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);override;
 		procedure ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);override;
@@ -270,7 +269,7 @@ begin
 
 end;
 
-procedure TSGRenderDirectX12.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGUInt); 
+procedure TSGRenderDirectX12.DeleteTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture); 
 begin 
 
 end;
@@ -280,7 +279,7 @@ begin
 
 end;
 
-procedure TSGRenderDirectX12.GenTextures(const VQuantity:Cardinal;const VTextures:PSGUInt);
+procedure TSGRenderDirectX12.GenTextures(const VQuantity:Cardinal;const VTextures:PSGRenderTexture);
 begin 
 
 end;
@@ -295,7 +294,7 @@ begin
 
 end;
 
-procedure TSGRenderDirectX12.PixelStorei(const VParamName:Cardinal;const VParam:SGInt); 
+procedure TSGRenderDirectX12.PixelStorei(const VParamName:Cardinal;const VParam:TSGInt32); 
 begin 
 
 end;

@@ -11,7 +11,6 @@ uses
 	,SaGeContext
 	,SaGeScreen
 	,SaGeBase
-	,SaGeBased
 	,SaGeRender
 	,SaGeVersion
 	,SaGeRenderConstants

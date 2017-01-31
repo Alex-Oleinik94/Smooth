@@ -5,7 +5,7 @@ unit SaGeMathUtils;
 interface
 
 uses
-	 SaGeBased
+	 SaGeBase
 	;
 
 const

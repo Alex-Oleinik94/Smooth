@@ -8,7 +8,6 @@ uses
 	 Classes
 	
 	,SaGeBase
-	,SaGeBased
 	;
 
 (**********)
@@ -32,7 +31,13 @@ type
 		function MoveNext(): TSGBoolean;
 		property Current : TSGString read GetCurrent;
 		end;
+	
+	TSGStringHelper = type helper for TSGString
+		function Len() : TSGMaxEnum; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Length() : TSGMaxEnum; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		end;
 
+function SGStringLength(const S : TSGString) : TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGUpCaseString(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDownCaseString(const Str : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringIf(const B : TSGBoolean; const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -108,6 +113,21 @@ uses
 (************)
 (** STRING **)
 (************)
+
+function SGStringLength(const S : TSGString) : TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Length(S);
+end;
+
+function TSGStringHelper.Len() : TSGMaxEnum; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGStringLength(Self);
+end;
+
+function TSGStringHelper.Length() : TSGMaxEnum; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGStringLength(Self);
+end;
 
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var

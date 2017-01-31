@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeBased
 	,SaGeCommon
 	,SaGeMesh
 	,SaGeModel

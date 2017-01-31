@@ -1,4 +1,4 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 unit SaGeMath;
 
@@ -11,7 +11,6 @@ uses
 	
 	,SaGeCommon
 	,SaGeBase
-	,SaGeBased
 	,SaGeRender
 	,SaGeContext
 	,SaGeClasses
@@ -19,15 +18,31 @@ uses
 	,SaGeRenderConstants
 	;
 
+const
+	SG_VARIABLE =                        $00001B;
+	SG_CONST =                           $00001C;
+	SG_OPERATOR =                        $00001D;
+	SG_BOOLEAN =                         $00001E;
+	SG_REAL =                            $00001F;
+	SG_NUMERIC =                         $000020;
+	SG_OBJECT =                          $000021;
+	SG_NONE =                            $000022;
+	SG_NOTHINK = SG_NONE;
+	SG_FUNCTION =                        $000023;
+	
+	SG_ERROR =                           $000024;
+	SG_WARNING =                         $000025;
+	SG_NOTE =                            $000026;
+
 type
 	TSGMathFloatType = {$IFNDEF ANDROID}Extended{$ELSE}Real{$ENDIF};
 	
 	TSGExpressionError=class
 			public
-		constructor Create(const VPChar:PChar;const VType:TSGExByte = SG_ERROR);
+		constructor Create(const VPChar:PChar;const VType:TSGByte = SG_ERROR);
 		destructor Destroy;override;
 			public
-		FType:TSGExByte;
+		FType:TSGByte;
 		FPChar:PChar;
 		end;
 	TArTSGExpressionError = type packed array of TSGExpressionError;
@@ -38,7 +53,7 @@ type
 			public
 		destructor Destroy;
 			public
-		FType:TSGExByte;
+		FType:TSGByte;
 		FConst:TSGMathFloatType;
 		FVariable:PChar;
 		FQuantity:Longint;
@@ -68,7 +83,7 @@ type
 	TSGExpressionObject = class(TSGObject)
 			public
 		constructor Create(
-			const That:TSGExByte = SG_OPERATOR;
+			const That:TSGByte = SG_OPERATOR;
 			const NewName:PChar = '';
 			const NewParametrs:LongWord = 0;  
 			const NewFunction:Pointer = nil;
@@ -76,7 +91,7 @@ type
 			const NewMove:Boolean = True);
 		destructor Destroy;override;
 			public
-		FType:TSGExByte;
+		FType:TSGByte;
 		FName:PChar;
 		FParametrs:LongWord;
 		FFunction:Pointer;
@@ -116,20 +131,20 @@ type
 		FCalculateForGraph:Boolean;
 		FCalculateAlgoritm:TSGCalculateAlgoritm;
 		function GetResultFunction(const ArEC:TArTSGExpressionChunk;const VFunction:LongWord;const VParams:packed array of LongWord):TSGExpressionChunk;
-		function IsOperator(var MayBeOperator:PChar):TSGExByte;
-		function IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGExByte;const VWasObject:Boolean):Boolean;
+		function IsOperator(var MayBeOperator:PChar):TSGByte;
+		function IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGByte;const VWasObject:Boolean):Boolean;
 		procedure CanculateSteak(var OperatorsSteak:TArTSGExpressionChunk;const Chunk:TSGExpressionChunk );
 		procedure AddExpressionChunk(const Chunk:TSGExpressionChunk);
 		procedure DebugSteak(const Steak:TArTSGExpressionChunk;const Color:byte = 10;VChar:Char = '-');
-		function GetVariables:TArPChar;
-		procedure AddError(const VPChar:PChar = 'Error';const VType:TSGExByte = SG_ERROR);
-		function GetType(const VType:TSGExByte ):PChar;
-		function FindObject(const Chunk:TSGExpressionChunk; const VType:TSGExByte):Boolean;
+		function GetVariables:TSGPCharList;
+		procedure AddError(const VPChar:PChar = 'Error';const VType:TSGByte = SG_ERROR);
+		function GetType(const VType:TSGByte ):PChar;
+		function FindObject(const Chunk:TSGExpressionChunk; const VType:TSGByte):Boolean;
 		function GetVariable:PChar;
 			public
 		function GetObjectPrioritete(const Chunk:TSGExpressionChunk):LongInt;
-		function GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGExByte = SG_OBJECT):Boolean;
-		function GetObjectParatemetrs(const VPChar:PChar;const VType:TSGExByte = SG_OBJECT):LongInt;
+		function GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGByte = SG_OBJECT):Boolean;
+		function GetObjectParatemetrs(const VPChar:PChar;const VType:TSGByte = SG_OBJECT):LongInt;
 		procedure NewObject(const VOperator:TSGExpressionObject);
 		procedure CanculateExpression;
 		procedure BeginCalculate;
@@ -147,7 +162,7 @@ type
 		function Resultat(const Number:LongInt = 1):TSGExpressionChunk;
 		property Expression:PChar read FExpression write FExpression;
 		property DeBug:Boolean read FDeBug write FDeBug;
-		property Variables:TArPChar read GetVariables;
+		property Variables:TSGPCharList read GetVariables;
 		property Variable:PChar read GetVariable;
 		function ErrorsQuantity:LongInt;
 		function Errors(Index : LongInt):PChar;
@@ -706,7 +721,7 @@ end;
 
 function TSGExpression.GetVariable:PChar;
 var
-	ArPChar:TArPChar = nil;
+	ArPChar:TSGPCharList = nil;
 begin
 ArPChar:=Variables;
 if Length(ArPChar)>0 then
@@ -877,7 +892,7 @@ while (Length(FResultat[Number])>1) or ((Length(FResultat[Number])=1) and (FResu
 	end;
 end;
 
-function TSGExpression.GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGExByte = SG_OBJECT):Boolean;
+function TSGExpression.GetObjectMoveEqual(const Chunk:TSGExpressionChunk;const VType:TSGByte = SG_OBJECT):Boolean;
 var
 	I:LongInt;
 begin
@@ -914,7 +929,7 @@ with Result do
 	end;
 end;
 
-function TSGExpression.FindObject(const Chunk:TSGExpressionChunk; const VType:TSGExByte):Boolean;
+function TSGExpression.FindObject(const Chunk:TSGExpressionChunk; const VType:TSGByte):Boolean;
 var
 	I:LongInt;
 begin
@@ -927,7 +942,7 @@ for i:=0 to High(FOperators) do
 		end;
 end;
 
-constructor TSGExpressionError.Create(const VPChar:PChar;const VType:TSGExByte = SG_ERROR);
+constructor TSGExpressionError.Create(const VPChar:PChar;const VType:TSGByte = SG_ERROR);
 begin
 inherited Create;
 FPChar:=VPChar;
@@ -971,7 +986,7 @@ for i:=0 to High(FErrors) do
 textcolor(white);
 end;
 
-function TSGExpression.GetType(const VType:TSGExByte ):PChar;
+function TSGExpression.GetType(const VType:TSGByte ):PChar;
 begin
 case VType of
 0:
@@ -995,7 +1010,7 @@ else
 END;
 end;
 
-procedure TSGExpression.AddError(const VPChar:PChar = 'Error';const VType:TSGExByte = SG_ERROR);
+procedure TSGExpression.AddError(const VPChar:PChar = 'Error';const VType:TSGByte = SG_ERROR);
 begin
 SetLength(FErrors,Length(FErrors)+1);
 FErrors[High(FErrors)]:=TSGExpressionError.Create(VPChar,VType);;
@@ -1033,7 +1048,7 @@ with Result do
 	end;
 end;
 
-function TSGExpression.GetVariables:TArPChar;
+function TSGExpression.GetVariables:TSGPCharList;
 var
 	I:LongInt = 0;
 	II:LongInt = 0;
@@ -1154,7 +1169,7 @@ textcolor(white);
 writeln;
 end;
 
-function TSGExpression.GetObjectParatemetrs(const VPChar:PChar;const VType:TSGExByte = SG_OBJECT):LongInt;
+function TSGExpression.GetObjectParatemetrs(const VPChar:PChar;const VType:TSGByte = SG_OBJECT):LongInt;
 var
 	I:LongInt = 0;
 begin
@@ -1208,7 +1223,7 @@ else
 		end;
 end;
 
-function TSGExpression.IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGExByte;const VWasObject:Boolean):Boolean;
+function TSGExpression.IdentityChunk( var VPChar:PChar; var Chunk:TSGExpressionChunk;const State:TSGByte;const VWasObject:Boolean):Boolean;
 var
 	Points:LongWord = 0;
 	PointPosition:LongInt = -1;
@@ -1314,7 +1329,7 @@ else
 end;
 
 constructor TSGExpressionObject.Create(
-	const That:TSGExByte = SG_OPERATOR;
+	const That:TSGByte = SG_OPERATOR;
 	const NewName:PChar = '';
 	const NewParametrs:LongWord = 0;  
 	const NewFunction:Pointer = nil;
@@ -1341,7 +1356,7 @@ begin
 inherited;
 end;
 
-function TSGExpression.IsOperator(var MayBeOperator:PChar):TSGExByte;
+function TSGExpression.IsOperator(var MayBeOperator:PChar):TSGByte;
 (*
 0 - Not operator
 1 - Is operator
@@ -1411,7 +1426,7 @@ var
 	NewChunk:TSGExpressionChunk;
 	OldChunk:TSGExpressionChunk;
 	NewChunkString:PChar = '';
-	ChunkState:TSGExByte = 0;
+	ChunkState:TSGByte = 0;
 	I:LongInt = 0;
 	IfStringWasObj:packed record
 		Was:Boolean;

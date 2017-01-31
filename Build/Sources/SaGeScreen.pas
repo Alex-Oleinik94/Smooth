@@ -13,7 +13,6 @@ uses
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
-	,SaGeBased
 	,SaGeImages
 	,SaGeUtils
 	,SaGeRenderConstants

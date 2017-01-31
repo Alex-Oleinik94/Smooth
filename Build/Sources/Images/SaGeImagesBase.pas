@@ -10,13 +10,12 @@ uses
 	 Crt
 	
 	,SaGeBase
-	,SaGeBased
 	,SaGeRenderConstants
 	,SaGeResourceManager
 	,SaGeCommon
 	;
 type
-	TSGImageByte = type TSGExByte;
+	TSGImageByte = type TSGByte;
 	TSGIByte = TSGImageByte;
 	TSGImageFormat = TSGUInt32;
 const 
