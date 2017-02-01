@@ -983,9 +983,9 @@ if FActive then
 	{$IFDEF MOBILE}
 	if Context.CursorKeysPressed(SGLeftCursorButton) then
 		begin
-		CP += Context.CursorPosition(SGDeferenseCursorPosition);
-		FWayShift.x += CP.x;
-		FWayShift.y += CP.y;
+		Any := Context.CursorPosition(SGDeferenseCursorPosition);
+		FWayShift.x += Any.x;
+		FWayShift.y += Any.y;
 		end;
 	if FWayShift.x <= - FR.x then
 		begin

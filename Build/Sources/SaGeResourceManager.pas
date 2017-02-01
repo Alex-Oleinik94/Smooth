@@ -115,6 +115,7 @@ type
 			public
 		procedure Clear();
 		procedure Print();
+		function GetString() : TSGString;
 		end;
 type
 	PSGBuildResource = ^ TSGBuildResource;
@@ -171,6 +172,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog
+	,SaGeBaseUtils
 	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
 
@@ -367,6 +369,22 @@ if FResources <> nil then
 		Result := @FResources[High(FResources)];
 end;
 
+function TSGConvertedFilesInfo.GetString() : TSGString;
+begin
+Result := 
+	'Converted files:count ' +
+	SGStr(FCount) +
+	';cached ' +
+	SGStr(FCountCopyedFromCache) +
+	';in size ' +
+	SGGetSizeString(FSize,'EN') +
+	';out size ' +
+	SGGetSizeString(FOutSize,'EN') +
+	';time ' +
+	StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'), ' ') +
+	'.';
+end;
+
 procedure TSGConvertedFilesInfo.Print();
 begin
 TextColor(7);
@@ -441,6 +459,7 @@ if (Name <> '') then
 Write(':');
 TextColor(7);
 Info.Print();
+SGLog.Source(['Build', Iff(Name <> '','(' + Name + ')'), ':', Info.GetString()]);
 end;
 
 function SGConvertDirectoryFilesToPascalUnits(const DirName, UnitsWay, CacheUnitPath, FileRegistrationResources : TSGString) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

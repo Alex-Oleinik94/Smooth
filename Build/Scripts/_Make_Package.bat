@@ -10,16 +10,20 @@ if "%2"=="" (
 ) else (
 	set p2=%2
 )
-if exist "../Binaries/Main_Console.exe" (
-	echo %S1%
-	echo %S2%
-	echo %S3%
-	"../Binaries/Main_Console.exe" --build -p%1 %p2%
-	if %errorlevel% equ 0 (
-		copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe
-		)
+if "%1"=="" (
+	echo Enter package name as param of this file!
 ) else (
-	echo Compile debug executable first!
+	if exist "../Binaries/Main_Console.exe" (
+		echo %S1%
+		echo %S2%
+		echo %S3%
+		"../Binaries/Main_Console.exe" --build --p%1 --%p2%
+		if %errorlevel% equ 0 (
+			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe
+			)
+	) else (
+		echo Compile debug executable first!
+	)
 )
 cd Scripts
 if "%2"=="" ( pause )

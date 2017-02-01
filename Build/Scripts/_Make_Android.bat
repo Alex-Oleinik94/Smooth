@@ -10,5 +10,6 @@ MKDIR AndroidTools\SaGe\libs
 MKDIR AndroidTools\SaGe\libs\armeabi
 make inc_version_debug
 make android
+cd Scripts
 @echo off
 if "%1"=="" ( pause )

@@ -44,8 +44,10 @@ function SGStringIf(const B : TSGBoolean; const S : TSGString) : TSGString;{$IFD
 function SGStr(const Number : TSGInt64  ) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGStr(const B      : TSGBoolean) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGStrReal(R : TSGReal; const l : TSGInt32) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$IFNDEF WITHOUT_EXTENDED}
 function SGStrExtended(R : TSGExtended; const l : TSGInt32):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGFloatToString(const R : TSGExtended; const Zeros : TSGInt32 = 0):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$ENDIF WITHOUT_EXTENDED}
+function SGFloatToString(const R : TSGFloat64; const Zeros : TSGInt32 = 0):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCheckFloatString(const S : TSGString; const Point : TSGChar = '.') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGVal(const Text : TSGString) : TSGInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGValFloat(const Text : TSGString) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -66,7 +68,7 @@ operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF 
 function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGUpCaseStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TStream
@@ -168,18 +170,19 @@ for i := 1 to Length(S) do
 LoopIteration();
 end;
 
-function SGUpCaseStringList(const SL : TSGStringList):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGUpCaseStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	i : TSGLongWord;
+	i : TSGUInt32;
 begin
 Result := nil;
-if SL = nil then
-	exit;
-if Length(SL) = 0 then
-	exit;
-SetLength(Result, Length(SL));
-for i := 0 to High(SL) do
-	Result[i] := SGUpCaseString(SL[i]);
+if (SL <> nil) and (Length(SL) > 0) then
+	begin
+	SetLength(Result, Length(SL));
+	for i := 0 to High(SL) do
+		Result[i] := SGUpCaseString(SL[i]);
+	end;
+if FreeList then
+	SetLength(SL, 0);
 end;
 
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -343,6 +346,8 @@ for i := 1 to Length(str) do
 end;
 
 function SGArConstToArString(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+type
+	TSGExtended = Extended;
 var
 	i : TSGUInt32;
 begin
@@ -368,6 +373,8 @@ if High(Ar)>=0 then
 end;
 
 function SGGetStringFromConstArray(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+type
+	TSGExtended = Extended;
 var
 	i : TSGUInt32;
 begin
@@ -392,7 +399,7 @@ if High(Ar) >= 0 then
 	end;
 end;
 
-function SGFloatToString(const R : TSGExtended; const Zeros : TSGInt32 = 0):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGFloatToString(const R : TSGDouble; const Zeros : TSGInt32 = 0):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGInt32;
 begin
@@ -557,6 +564,7 @@ if (Result = '') or (Result = '-') then
 Result := SGCheckFloatString(Result);
 end;
 
+{$IFNDEF WITHOUT_EXTENDED}
 function SGStrExtended(R : TSGExtended; const l : TSGInt32):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGInt32;
@@ -593,6 +601,7 @@ if (Result = '') or (Result = '-') then
 	Result += '0';
 Result := SGCheckFloatString(Result);
 end;
+{$ENDIF WITHOUT_EXTENDED}
 
 function SGVal(const Text : TSGString) : TSGInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin

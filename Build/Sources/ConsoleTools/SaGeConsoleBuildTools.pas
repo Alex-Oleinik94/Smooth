@@ -176,123 +176,93 @@ const
 		{$ELSE}
 			''
 			{$ENDIF};
-
-function ConsoleParam() : TSGString;
-begin
-Result := StringTrimAll(SGStringFromStringList(VParams,' '),' ');
-end;
-
 var
 	Target : TSGString = '';
 	Packages : TSGStringList = nil;
 	OpenPackages : TSGBool = False;
 	Bitrate : TSGByte = 0;
 
+procedure PrintLogo();
+begin
+TextColor(15);
+SGHint('===============================');
+SGHint('|Building SaGe from executable|');
+SGHint('===============================');
+TextColor(7);
+end;
+
 function IsRelease() : TSGBool;
 begin
 Result := 
 	(SGUpCaseString(Target) = 'RELEASE') or
+	(SGUpCaseString(Target) = 'ANDROID') or
 	(SGUpCaseString(Target) = 'RELEASE_X64');
 end;
 
 function ReadParams(const Make : TSGMakefileReader) : TSGBool;
-
-procedure ReadError(const S : TSGString);
-begin
-WriteLn('Error simbol "', S, '"');
-Result := False;
-end;
-
-function GetPackageNameFromComandName(const C : TSGString) : TSGString;
-var
-	i : TSGUInt32;
-begin
-Result := '';
-if Length(C) > 1 then
-	begin
-	for i := 2 to Length(C) do
-		Result += C[i];
-	end;
-end;
-
 var
 	i : TSGUInt32;
 	AllTargets : TSGStringList = nil;
 	S, SUP, P : TSGString;
+
+function Proccess32(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+Bitrate := 32;
+end;
+
+function Proccess64(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+Bitrate := 64;
+end;
+
+function ProccessPS(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+OpenPackages := True;
+end;
+
+function ProccessPackage(const Comand : TSGString):TSGBool;
+var
+	i : TSGUInt32;
+	PackageName : TSGString = '';
+begin
+if Length(Comand) > 1 then
+	begin
+	for i := 2 to Length(Comand) do
+		PackageName += Comand[i];
+	end;
+Result := PackageName <> '';
+if Result then
+	Packages += P;
+end;
+
+function ProccessTarget(const Comand : TSGString):TSGBool;
+begin
+Result := (Target = '') and (SGUpCaseString(Comand) in AllTargets);
+if Result then
+	Target := Comand;
+end;
+
 begin
 Result := True;
 AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
-if AllTargets <> nil then if Length(AllTargets) > 0 then
-	for i := 0 to High(AllTargets) do
-		AllTargets[i] := SGUpCaseString(StringTrimAll(AllTargets[i],' '));
-if ConsoleParam() = '' then
-	exit
-else 
-	if VParams <> nil then
-		if Length(VParams) > 0 then
-		begin
-		for i := 0 to High(VParams) do
-			begin
-			if (StringTrimLeft(VParams[i],'-') <> VParams[i]) then
-				begin
-				S := StringTrimLeft(VParams[i],'-');
-				SUP := SGUpCaseString(S);
-				if (SUP = 'PS') or
-				   (SUP = 'PACKAGES') or
-				   (SUP = 'PALL') then
-					OpenPackages := True
-				else if (SUP = '32') or
-				   (SUP = '64') or
-				   (SUP = 'X32') or
-				   (SUP = 'X86') or
-				   (SUP = '86') or
-				   (SUP = 'X64') or
-				   (SUP = 'I386') or
-				   (SUP = '86_64') or
-				   (SUP = 'X86_64') then
-					begin
-					if  (SUP = '32') or
-						(SUP = 'X32') or
-						(SUP = 'I386')  then
-							Bitrate := 32
-					else if (SUP = 'X86') or
-						(SUP = '86') or
-						(SUP = 'X64') or
-						(SUP = '64') or
-						(SUP = '86_64') or
-						(SUP = 'X86_64') then
-							Bitrate := 64;
-					end
-				else
-					begin
-					if Length(SUP) > 0 then
-						begin
-						if SUP[1] = 'P' then
-							begin
-							P := GetPackageNameFromComandName(S);
-							if P = '' then
-								ReadError(VParams[i])
-							else
-								Packages += P;
-							end
-						else
-							ReadError(VParams[i]);
-						end
-					else
-						ReadError(VParams[i]);
-					end;
-				end
-			else
-				begin
-				if (SGUpCaseString(VParams[i]) in AllTargets) and (i = High(VParams)) then
-					begin
-					Target := VParams[i];
-					end
-				else
-					ReadError(VParams[i]);
-				end;
-			end;
-		end;
+SGStringListTrimAll(AllTargets, ' ');
+AllTargets := SGUpCaseStringList(AllTargets, True);
+with TSGConsoleCaller.Create(VParams) do
+	begin
+	Category('Bitrate');
+	AddComand(@Proccess32, ['32', 'x32', 'i386'], 'Building 32 bit target');
+	AddComand(@Proccess64, ['64', 'x64', '86_64', 'x86_64'], 'Building 64 bit target');
+	Category('Packages');
+	AddComand(@ProccessPS, ['ps', 'packages', 'pall'], 'Building all open packages');
+	AddComand(@ProccessPackage, ['p*?'], 'Building an package');
+	Category('Target');
+	AddComand(@ProccessTarget, ['*?'], 'Building an target');
+	Result := Execute();
+	Destroy();
+	end;
 SetLength(AllTargets, 0);
 end;
 
@@ -317,11 +287,11 @@ var
 	i : TSGUInt32;
 begin
 if OpenPackages then
-	SGPackagesToMakefile(Make, IsRelease);
+	SGPackagesToMakefile(Make, Target, IsRelease);
 if Packages <> nil then
 	if Length(Packages) > 0 then
 		for i := 0 to High(Packages) do
-			SGPackageToMakefile(Make, Packages[i], IsRelease);
+			SGPackageToMakefile(Make, Target, Packages[i], IsRelease);
 end;
 
 procedure PrintTarget(const Target : TSGString);
@@ -331,6 +301,7 @@ TextColor(15);
 Write(Target);
 TextColor(7);
 WriteLn('".');
+SGLog.Source(['Making target: "',Target,'".']);
 end;
 
 var
@@ -340,9 +311,9 @@ Make := TSGMakefileReader.Create('./Makefile');
 if not ReadParams(Make) then
 	begin
 	Make.Destroy();
-	WriteLn('Error while reading console params!');
 	Halt(1);
 	end;
+PrintLogo();
 Make.Execute('clear_files');
 if IsRelease then
 	begin
@@ -378,11 +349,6 @@ end;
 
 begin
 SGPrintEngineVersion();
-TextColor(15);
-SGHint('===============================');
-SGHint('|Building SaGe from executable|');
-SGHint('===============================');
-TextColor(7);
 ExecuteBuild();
 SetLength(Packages, 0);
 end;

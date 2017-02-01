@@ -26,6 +26,7 @@ type
 	FUnits : TSGStringList;
 	FOpen : TSGBool;
 	FDependingPackages : TSGStringList;
+	FUnsupportedTargets : TSGStringList;
 		public
 	property Open : TSGBool read FOpen;
 		public
@@ -37,9 +38,9 @@ function SGGetPackageInfo(const PackagePath : TSGString) : TSGPackageInfo;{$IFDE
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGPackagesToMakefile(var Make : TSGMakefileReader; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGPackagesToMakefile(var Make : TSGMakefileReader; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackageToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackageName : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsPackageOpen(var Make : TSGMakefileReader;const PackageName : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsPackageOpen(const PackagePath : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -52,6 +53,7 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeLog
 	
 	{$INCLUDE SaGeFileRegistrationPackages.inc}
 	;
@@ -99,18 +101,22 @@ if StartSize <> MemStream.Size then
 MemStream.Destroy();
 end;
 
-function SGPackageToMakefile(var Make : TSGMakefileReader; const PackageName : TSGString; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPackageToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackageName : TSGString; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	PackageInfo : TSGPackageInfo;
 	Str : TSGString;
 begin
 Result := False;
 PackageInfo := SGGetPackageInfo(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName);
-if SGUpCaseString(PackageInfo.FName) = SGUpCaseString(PackageName) then
+if (SGUpCaseString(PackageInfo.FName) <> SGUpCaseString(PackageName)) then
+	SGLog.Source(['Package "',PackageName,'" have other name "',PackageInfo.FName,'".'])
+else if (SGUpCaseString(Target) in PackageInfo.FUnsupportedTargets) then
+	SGLog.Source(['Package "',PackageName,'" unsupporting target "',Target,'".'])
+else
 	begin
-	if SGPackagesToMakefile(Make, PackageInfo.FDependingPackages) then
+	Result := SGPackagesToMakefile(Make, Target, PackageInfo.FDependingPackages);
+	if Result then
 		begin
-		Result := True;
 		for Str in PackageInfo.FSourcesPaths do
 			Make.SetConstant(
 				'BASEARGS', 
@@ -121,6 +127,7 @@ if SGUpCaseString(PackageInfo.FName) = SGUpCaseString(PackageName) then
 				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/' + Str + ' ');
 		Make.RecombineIdentifiers();
 		SGRegisterPackage(PackageInfo, Make.GetConstant('SGFILEREGISTRATIONPACKAGES'));
+		SGLog.Source(['Package "',PackageName,'" added.']);
 		if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini') then
 			SGBuildFiles(
 				Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini',
@@ -140,6 +147,7 @@ SetLength(FSourcesPaths, 0);
 SetLength(FIncludesPaths, 0);
 SetLength(FUnits, 0);
 SetLength(FDependingPackages, 0);
+SetLength(FUnsupportedTargets, 0);
 ZeroMemory();
 end;
 
@@ -152,6 +160,7 @@ FIncludesPaths := nil;
 FUnits := nil;
 FDependingPackages := nil;
 FOpen := False;
+FUnsupportedTargets := nil;
 end;
 
 function SGGetPackageInfo(const PackagePath : TSGString) : TSGPackageInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -188,9 +197,15 @@ else if Param = 'OPEN' then
 	begin
 	Result.FOpen := SGUpCaseString(Value) = 'TRUE';
 	end
+else if Param = 'UNSUPPORTEDTARGETS' then
+	begin
+	Result.FUnsupportedTargets := SGStringListFromString(Value,',');
+	SGStringListTrimAll(Result.FUnsupportedTargets, ' ');
+	Result.FUnsupportedTargets := SGUpCaseStringList(Result.FUnsupportedTargets, True);
+	end
 else
 	begin
-	WriteLn('Unknown param name "',Param,'"');
+	SGHint(['Unknown param name "',Param,'"']);
 	end;
 end;
 
@@ -250,14 +265,14 @@ Result := PackageName in PackagesList;
 SetLength(PackagesList, 0);
 end;
 
-function SGPackagesToMakefile(var Make : TSGMakefileReader; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	S : TSGString;
 begin
 Result := True;
 for S in PackagesNames do
 	begin
-	if not SGPackageToMakefile(Make, S) then
+	if not SGPackageToMakefile(Make, Target, S) then
 		begin
 		Result := False;
 		break;
@@ -265,7 +280,7 @@ for S in PackagesNames do
 	end;
 end;
 
-function SGPackagesToMakefile(var Make : TSGMakefileReader; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	PackagesList : TSGStringList = nil;
 	i : TSGUInt32;
@@ -275,7 +290,7 @@ PackagesList := SGGetPackagesList(Make);
 if PackagesList <> nil then
 	if Length(PackagesList) > 0 then
 		for i := 0 to High(PackagesList) do
-			if not SGPackageToMakefile(Make, PackagesList[i], BuildFiles) then
+			if not SGPackageToMakefile(Make, Target, PackagesList[i], BuildFiles) then
 				Result := False;
 SetLength(PackagesList, 0);
 end;

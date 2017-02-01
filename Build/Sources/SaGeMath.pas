@@ -35,7 +35,7 @@ const
 	SG_NOTE =                            $000026;
 
 type
-	TSGMathFloatType = {$IFNDEF ANDROID}Extended{$ELSE}Real{$ENDIF};
+	TSGMathFloat = TSGMaxFloat;
 	
 	TSGExpressionError=class
 			public
@@ -54,7 +54,7 @@ type
 		destructor Destroy;
 			public
 		FType:TSGByte;
-		FConst:TSGMathFloatType;
+		FConst:TSGMathFloat;
 		FVariable:PChar;
 		FQuantity:Longint;
 		Next:PTSGExpressionChunk;
@@ -228,7 +228,7 @@ function TSGExpressionChunkCreateNone:TSGExpressionChunk;
 {$UNDEF SGMATHREADINTERFACE}
 
 type 
-	TSGLineSystemType = TSGMathFloatType;
+	TSGLineSystemFloat = TSGMathFloat;
 	TSGLineSystem = class
 			public
 		constructor Create(const nn : LongWord);
@@ -237,13 +237,14 @@ type
 		procedure CalculateRotate();
 		procedure View();
 			public
-		a : array of array of TSGLineSystemType;
-		b : array of TSGLineSystemType;
+		a : array of array of TSGLineSystemFloat;
+		b : array of TSGLineSystemFloat;
 		n : LongWord;
-		x : array of TSGLineSystemType;
+		x : array of TSGLineSystemFloat;
 		end;
 
 function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStrMathFloat(const Value : TSGMathFloat; const SimbolsAfterPoint : TSGUInt8 = 3) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -251,6 +252,17 @@ uses
 	 SaGeStringUtils
 	,SaGeMathUtils
 	;
+
+function SGStrMathFloat(const Value : TSGMathFloat; const SimbolsAfterPoint : TSGUInt8 = 3) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result :=
+{$IFNDEF WITHOUT_EXTENDED}
+	SGStrExtended
+{$ELSE WITHOUT_EXTENDED}
+	SGStrReal
+{$ENDIF WITHOUT_EXTENDED}
+		(Value, SimbolsAfterPoint);
+end;
 
 function SGCalculateExpression(const VExpression : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -295,7 +307,7 @@ end;
 procedure TSGLineSystem.CalculateRotate();
 var
 	i, ii, iii : LongWord;
-	C, S, r, ai, aii : TSGLineSystemType;
+	C, S, r, ai, aii : TSGLineSystemFloat;
 begin
 for i:=0 to n-2 do
 	for ii:=i+1 to n-1 do
@@ -337,7 +349,7 @@ end;
 
 destructor TSGLineSystem.Destroy();
 var
-	i : LongWord;
+	i : TSGUInt32;
 begin
 SetLength(b,0);
 SetLength(x,0);
@@ -349,7 +361,7 @@ end;
 
 procedure TSGLineSystem.CalculateGauss();
 var
-	r : TSGLineSystemType;
+	r : TSGLineSystemFloat;
 	i, ii,iii:LongWord;
 begin
 for i:=1 to n-1 do
@@ -1119,7 +1131,13 @@ SG_BOOLEAN:
 SG_NUMERIC:
 	write(trunc(FConst));
 SG_REAL:
-	write(SGStrExtended(FConst, 16));
+	write(
+	{$IFNDEF WITHOUT_EXTENDED}
+		SGStrExtended(FConst, 16)
+	{$ELSE}
+		SGStrReal(FConst, 10)
+	{$ENDIF}
+		);
 SG_OPERATOR, SG_OBJECT, SG_FUNCTION, SG_VARIABLE:
 	write(FVariable);
 end;

@@ -39,7 +39,7 @@ DOWITHFPU= -CfVFPV3
 DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
 SAGE="$(SGBINARYPATH)/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
-SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64
+SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android
 SG_TARGET=
 
 release_x32, release:

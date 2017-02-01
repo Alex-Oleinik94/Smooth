@@ -457,39 +457,37 @@ SGRunPaintable(
 end;
 
 var
-	ConsoleCaller : TSGConsoleCaller = nil;
 	Success : TSGBool = True;
 begin
 SGPrintEngineVersion();
 ContextClass := TSGCompatibleContext;
 RenderClass  := TSGCompatibleRender;
 if (VParams<>nil) and (Length(VParams)>0) then
-	begin
-	ConsoleCaller := TSGConsoleCaller.Create(VParams);
-	ConsoleCaller.Category('Context settings');
-	ConsoleCaller.AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
-	ConsoleCaller.Category('Render settings');
-	ConsoleCaller.AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
-	ConsoleCaller.AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
-	ConsoleCaller.AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
-	ConsoleCaller.AddComand(@ProccessOpenGL  ,  ['ogl', 'OpenGL'],      @HelpFuncOGL);
-	ConsoleCaller.Category('Audio settings');
-	ConsoleCaller.AddComand(@ProccessOpenAL  ,  ['oal', 'OpenAL'],      @HelpFuncOAL);
-	ConsoleCaller.AddComand(@ProccessWA      ,  ['wa', 'WithoutAudio'], 'Disable audio support');
-	ConsoleCaller.Category('Window settings');
-	ConsoleCaller.AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
-	ConsoleCaller.AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
-	ConsoleCaller.AddComand(@ProccessMin,       ['MIN'],                'For minimize window arter initialization');
-	ConsoleCaller.AddComand(@ProccessWH,        ['?*X*?'],              'For set window width and height');
-	ConsoleCaller.AddComand(@ProccessTitle,     ['t' + TitleQuote + '*' + TitleQuote],   'For set window title');
-	ConsoleCaller.AddComand(@ProccessWidth,     ['W*?','WIDTH*?'],      'For set window width');
-	ConsoleCaller.AddComand(@ProccessHeight,    ['H*?','HEIGHT*?'],     'For set window height');
-	ConsoleCaller.AddComand(@ProccessLeft,      ['L*?','LEFT*?','X*?'], 'For set window x');
-	ConsoleCaller.AddComand(@ProccessTop,       ['T*?','TOP*?', 'Y*?'], 'For set window y');
-	Success := ConsoleCaller.Execute();
-	ConsoleCaller.Destroy();
-	ConsoleCaller := nil;
-	end;
+	with TSGConsoleCaller.Create(VParams) do
+		begin
+		Category('Context settings');
+		AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
+		Category('Render settings');
+		AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
+		AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
+		AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
+		AddComand(@ProccessOpenGL  ,  ['ogl', 'OpenGL'],      @HelpFuncOGL);
+		Category('Audio settings');
+		AddComand(@ProccessOpenAL  ,  ['oal', 'OpenAL'],      @HelpFuncOAL);
+		AddComand(@ProccessWA      ,  ['wa', 'WithoutAudio'], 'Disable audio support');
+		Category('Window settings');
+		AddComand(@ProccessFullscreen,['F','FULLSCREEN'],     'For set window fullscreen mode');
+		AddComand(@ProccessMax,       ['MAX'],                'For maximize window arter initialization');
+		AddComand(@ProccessMin,       ['MIN'],                'For minimize window arter initialization');
+		AddComand(@ProccessWH,        ['?*X*?'],              'For set window width and height');
+		AddComand(@ProccessTitle,     ['t' + TitleQuote + '*' + TitleQuote],   'For set window title');
+		AddComand(@ProccessWidth,     ['W*?','WIDTH*?'],      'For set window width');
+		AddComand(@ProccessHeight,    ['H*?','HEIGHT*?'],     'For set window height');
+		AddComand(@ProccessLeft,      ['L*?','LEFT*?','X*?'], 'For set window x');
+		AddComand(@ProccessTop,       ['T*?','TOP*?', 'Y*?'], 'For set window y');
+		Success := Execute();
+		Destroy();
+		end;
 if Success then
 	Run();
 end;

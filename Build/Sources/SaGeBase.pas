@@ -20,9 +20,11 @@ type
 	// 32 bit, signed
 	TSGLongInt	= LongInt;
 	PSGLongInt	= ^ TSGLongInt;
-	// 80 bit, float
-	TSGExtended	= Extended;
-	PSGExtended	= ^ TSGExtended;
+	{$IFNDEF WITHOUT_EXTENDED}
+		// 80 bit, float
+		TSGExtended	= Extended;
+		PSGExtended	= ^ TSGExtended;
+	{$ENDIF WITHOUT_EXTENDED}
 	// 32 bit, float
 	TSGFloat	= Single;
 	PSGFloat	= ^ TSGFloat;
@@ -89,6 +91,13 @@ type
 		{$ENDIF}{$ENDIF}{$ENDIF}
 		;
 	TSGMaxEnum = TSGEnumPointer;
+	TSGMaxFloat = 
+		{$IFNDEF WITHOUT_EXTENDED}
+			TSGFloat80
+		{$ELSE WITHOUT_EXTENDED}
+			TSGFloat64
+		{$ENDIF WITHOUT_EXTENDED}
+		;
 type
 	TSGFileOfByte = type file of TSGByte;
 	PSGFileOfByte = ^ TSGFileOfByte;

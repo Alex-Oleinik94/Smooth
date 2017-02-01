@@ -119,12 +119,12 @@ for i:=0 to n-1 do
 	for ii:=0 to n-1 do
 		Gauss.a[i,ii] := FArPoints[i].x**Single(ii);
 Gauss.CalculateRotate();
-Result := SGStrExtended(Gauss.x[0],tttt);
+Result := SGStrMathFloat(Gauss.x[0],tttt);
 for i := 1 to n-1 do
 	begin
 	if Gauss.x[i]>0 then
 		Result+='+';
-	Result+=SGStrExtended(Gauss.x[i],tttt)+'*(x^'+SGStr(i)+')';
+	Result+=SGStrMathFloat(Gauss.x[i],tttt)+'*(x^'+SGStr(i)+')';
 	end;
 Gauss.Destroy();
 WriteLn('Mn=',Result);

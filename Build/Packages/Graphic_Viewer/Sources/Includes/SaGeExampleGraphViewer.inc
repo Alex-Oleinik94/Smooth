@@ -223,9 +223,9 @@ end;
 procedure TSGGraphic.Paint();
 var
 	msd:LongInt;
-	c,q,q1,q2:TSGExtended;
+	c,q,q1,q2:TSGMathFloat;
 	i:LongWord;
-	Absx,Absy,k1,k2,k3:TSGExtended;
+	Absx,Absy,k1,k2,k3:TSGMathFloat;
 
 function SGStTen(const a:Int64):String;
 var
@@ -373,7 +373,7 @@ Screen.Skin.Font.DrawFontFromTwoVertex2f(SGStTen(msd),
 q:=GetFP(View.x1,View.x2,msd);
 while q < View.x2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(Min(0,msd)))),
+	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+2
 			,View.y2/absy*Render.Height),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+500
@@ -385,7 +385,7 @@ while q < View.x2 do
 q:=GetFP(View.y1,View.y2,msd);
 while q < View.y2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrExtended(q,Abs(Min(0,msd)))),
+	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
 		SGVertex2fImport(Render.Width-View.x2/AbsX*Render.Width+2
 			,Render.Height-(q-View.y1)/Absy*Render.Height),
 		SGVertex2fImport(Render.Width-View.x2/absx*Render.Width+500
