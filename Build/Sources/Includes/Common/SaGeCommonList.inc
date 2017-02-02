@@ -4,10 +4,18 @@ type
 {$IF    defined(DATATYPE_LIST_HELPER)}
 	DATATYPE_LIST_HELPER = type helper for DATATYPE_LIST
 		function Copy() : DATATYPE_LIST; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure Free(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure ZeroMemory(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure ReAllocate(const NewLength : TSGUInt64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function Length() : TSGUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function Assigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		end;
 {$ENDIF defined(DATATYPE_LIST_HELPER)}
 {$IFNDEF INC_WITHOUT_FORWARD}
+function Len(const List : DATATYPE_LIST) : TSGUInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$IFNDEF WITHOUT_ASSIGNMENT}
 operator :=(const A : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+{$ENDIF WITHOUT_ASSIGNMENT}
 operator + (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator * (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -19,24 +27,54 @@ operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+function Len(const List : DATATYPE_LIST) : TSGUInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := 0;
+if List.Assigned() then
+	Result := Length(List);
+end;
+
 {$IF    defined(DATATYPE_LIST_HELPER)}
+function DATATYPE_LIST_HELPER.Assigned() : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := (Self <> nil) and (Self.Length() > 0);
+end;
+
+function DATATYPE_LIST_HELPER.Length() : TSGUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := Len(Self);
+end;
+
+procedure DATATYPE_LIST_HELPER.ReAllocate(const NewLength : TSGUInt64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SetLength(Self, NewLength);
+end;
+
+procedure DATATYPE_LIST_HELPER.ZeroMemory(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if Self.Assigned() then
+	fillchar(Self[0], Self.Length() * SizeOf(DATATYPE), 0);
+end;
+
+procedure DATATYPE_LIST_HELPER.Free(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if Self.Assigned() then
+	SetLength(Self, 0);
+Self := nil;
+end;
+
 function DATATYPE_LIST_HELPER.Copy() : DATATYPE_LIST; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-SetLength(Result, Length(Self));
-if Length(Self) > 0 then
-	Move(Self[0], Result[0], Length(Self) * SizeOf(DATATYPE));
+Result := nil;
+if Self.Assigned() then
+	begin
+	SetLength(Result, Self.Length());
+	Move(Self[0], Result[0], Self.Length() * SizeOf(DATATYPE));
+	end;
 end;
 {$ENDIF defined(DATATYPE_LIST_HELPER)}
 
 operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-
-function ListSize(const List : DATATYPE_LIST) : TSGUInt32;
-begin
-Result := 0;
-if List <> nil then
-	Result := Length(List);
-end;
-
 var
 	C : DATATYPE;
 begin
@@ -45,21 +83,13 @@ for C in A do
 	Result += C;
 for C in B do
 	Result += C;
-if ListSize(A) > 0 then
+if Len(A) > 0 then
 	SetLength(A, 0);
-if ListSize(B) > 0 then
+if Len(B) > 0 then
 	SetLength(B, 0);
 end;
 
 operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-
-function ListSize(const List : DATATYPE_LIST) : TSGUInt32;
-begin
-Result := 0;
-if List <> nil then
-	Result := Length(List);
-end;
-
 var
 	C : DATATYPE;
 begin
@@ -68,9 +98,9 @@ for C in A do
 	Result *= C;
 for C in B do
 	Result *= C;
-if ListSize(A) > 0 then
+if Len(A) > 0 then
 	SetLength(A, 0);
-if ListSize(B) > 0 then
+if Len(B) > 0 then
 	SetLength(B, 0);
 end;
 
@@ -129,11 +159,13 @@ else
 	end;
 end;
 
+{$IFNDEF WITHOUT_ASSIGNMENT}
 operator :=(const A : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 SetLength(Result, 1);
 Result[0] := A;
 end;
+{$ENDIF WITHOUT_ASSIGNMENT}
 
 operator + (const A : DATATYPE_LIST;const B : DATATYPE) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin

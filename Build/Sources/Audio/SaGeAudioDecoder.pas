@@ -26,11 +26,11 @@ type
 	TSGAudioDecoderClass = class of TSGAudioDecoder;
 
 {$DEFINE INC_PLACE_INTERFACE}
+{$DEFINE DATATYPE_LIST_HELPER := TSGAudioDecoderClassListHelper}
 {$DEFINE DATATYPE_LIST := TSGAudioDecoderClassList}
 {$DEFINE DATATYPE      := TSGAudioDecoderClass}
 {$INCLUDE SaGeCommonList.inc}
-{$UNDEF DATATYPE_LIST}
-{$UNDEF DATATYPE}
+{$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF INC_PLACE_INTERFACE}
 
 const
@@ -91,11 +91,11 @@ uses
 	;
 
 {$DEFINE INC_PLACE_IMPLEMENTATION}
+{$DEFINE DATATYPE_LIST_HELPER := TSGAudioDecoderClassListHelper}
 {$DEFINE DATATYPE_LIST := TSGAudioDecoderClassList}
 {$DEFINE DATATYPE      := TSGAudioDecoderClass}
 {$INCLUDE SaGeCommonList.inc}
-{$UNDEF DATATYPE_LIST}
-{$UNDEF DATATYPE}
+{$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF INC_PLACE_IMPLEMENTATION}
 
 var

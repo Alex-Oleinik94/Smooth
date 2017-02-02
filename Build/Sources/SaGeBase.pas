@@ -59,7 +59,7 @@ type
 	TSGFloat64 = TSGDouble;
 	{$IFNDEF WITHOUT_EXTENDED}
 		TSGFloat80 = TSGExtended;
-	{$ENDIF}
+	{$ENDIF WITHOUT_EXTENDED}
 type
 	// Common
 	TSGChar		= Char;
