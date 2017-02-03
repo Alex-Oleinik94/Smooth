@@ -63,6 +63,9 @@ function SGIsBoolConsoleParam(const Param : TSGString):TSGBoolean;{$IFDEF SUPPOR
 procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGParseStringToConsoleCallerParams(const VParams : TSGString) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGParseValueFromComand(const Comand : TSGString; const PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
@@ -77,6 +80,48 @@ uses
 	,SaGeFileOpener
 	,SaGeStringUtils
 	;
+
+function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	i : TSGMaxEnum;
+begin
+Result := '';
+if Length(Comand) > Length(PredPart) then
+	begin
+	for i := 1 to Length(Comand) do
+		begin
+		if (i >= 1) and (i <= Length(PredPart)) then
+			begin
+			if UpCase(Comand[i]) <> UpCase(PredPart[i]) then
+				break;
+			end
+		else
+			Result += Comand[i];
+		end;
+	end;
+end;
+
+function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGParseValueFromComand(Comand, SGArConstToArString(PredParts), True);
+end;
+
+function SGParseValueFromComand(const Comand : TSGString; const PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	PredPart : TSGString;
+begin
+Result := '';
+if PredParts.Assigned() then
+	begin
+	for PredPart in PredParts do
+		begin
+		Result := SGParseValueFromComand(Comand, PredPart);
+		if Result <> '' then
+			break;
+		end;
+	PredParts.Free();
+	end;
+end;
 
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

@@ -276,7 +276,7 @@ SGConvertFileToPascalUnit(
 	Make.GetConstant('SGRESOURCESPATH'),
 	Make.GetConstant('SGRESOURCESCACHEPATH'),
 	'SaGeVersionFile',
-	True).Print();
+	True).Hint();
 SGRegisterUnit(
 	'SaGeVersionFile',
 	Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
@@ -327,7 +327,9 @@ if IsRelease then
 else
 	ProcessVersionFile(Make,'False');
 ProcessPackages(Make);
-if IsRelease() then
+if SGUpCaseString(Target) = 'ANDROID' then
+	Bitrate := 32
+else if IsRelease() then
 	begin
 	if Bitrate = 32 then
 		Target := 'release_x32'

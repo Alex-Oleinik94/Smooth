@@ -30,7 +30,7 @@ operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{
 function Len(const List : DATATYPE_LIST) : TSGUInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := 0;
-if List.Assigned() then
+if List <> nil then
 	Result := Length(List);
 end;
 

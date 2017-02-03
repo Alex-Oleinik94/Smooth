@@ -103,6 +103,8 @@ type
 			public
 		procedure Clear();
 		procedure Print();
+		procedure Hint();
+		function GetString() : TSGString;
 		end;
 	
 	TSGConvertedFilesInfo = object
@@ -182,16 +184,22 @@ SGInitResources();
 SGResourceFiles.AddFile(FileWay, Proc);
 end;
 
-procedure TSGConvertedFileInfo.Print();
-
-function StrBool(const B : TSGBoolean) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGConvertedFileInfo.Hint();
 begin
-if B then
-	Result := 'True'
-else
-	Result := 'False';
+Print();
+SGLog.Source(GetString());
 end;
 
+function TSGConvertedFileInfo.GetString() : TSGString;
+begin
+Result += 
+	'Converted' + '"' + SGFileName(FName) + '.' + SGDownCaseString(SGFileExpansion(FName)) + '"' +
+	':in ' + SGGetSizeString(FSize, 'EN') + ';out ' + SGGetSizeString(FOutSize, 'EN') + ';time ' +
+	StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' ') + ';cache ' + 
+	Iff(FConvertationNotNeed, 'True', 'False') + '.';
+end;
+
+procedure TSGConvertedFileInfo.Print();
 begin
 Write('Converted');
 TextColor(14);
@@ -211,7 +219,7 @@ Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' '));
 TextColor(7);
 Write(';cache ');
 TextColor(13);
-Write(StrBool(FConvertationNotNeed));
+Write(Iff(FConvertationNotNeed, 'True', 'False'));
 TextColor(7);
 WriteLn('.');
 end;

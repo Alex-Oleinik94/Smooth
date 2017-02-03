@@ -189,33 +189,6 @@ end;
 
 function ReadParams() : TSGBool;
 
-function SelectCacheDir(const Param : TSGString) : TSGBool;
-begin
-Result := False;
-(** TODO **)
-if Result then
-	SGHint('GRC: Set cache directory to "' + CacheDirectory + '".');
-end;
-
-function SelectTempDir(const Param : TSGString) : TSGBool;
-begin
-Result := False;
-(** TODO **)
-if Result then
-	begin
-	TempDirectoryEnabled := True;
-	SGHint('GRC: Temp directory enabled and set to "' + TempDirectory + '".');
-	end;
-end;
-
-function SelectResultDir(const Param : TSGString) : TSGBool;
-begin
-Result := False;
-(** TODO **)
-if Result then
-	SGHint('GRC: Set result directory to "' + ComplitedDirectory + '".');
-end;
-
 function SelectCacheDirSimject(const Param : TSGString) : TSGBool;
 begin
 Result := False;
@@ -244,11 +217,60 @@ SGHint('GRC: Enabled writing unknows.');
 end;
 
 function SetMask(const Param : TSGString) : TSGBool;
+var
+	Value : TSGString;
 begin
 Result := False;
-(** TODO **)
+Value := SGParseValueFromComand(Param, ['mask:']);
+Result :=  Value <> '';
 if Result then
+	begin
+	Mask := Value;
 	SGHint('GRC: Set mask cached files to "' + Mask + '".');
+	end;
+end;
+
+function SelectCacheDir(const Param : TSGString) : TSGBool;
+var
+	Value : TSGString;
+begin
+Result := False;
+Value := SGParseValueFromComand(Param, ['cd:','cache:']);
+Result := Value <> '';
+if Result then
+	begin
+	CacheDirectory := Value;
+	SGHint(['GRC: Set cache directory to "', CacheDirectory, '".']);
+	end;
+end;
+
+function SelectTempDir(const Param : TSGString) : TSGBool;
+var
+	Value : TSGString;
+begin
+Result := False;
+Value := SGParseValueFromComand(Param, ['td:','temp:']);
+Result := Value <> '';
+if Result then
+	begin
+	TempDirectory := Value;
+	TempDirectoryEnabled := True;
+	SGHint('GRC: Temp directory enabled and set to "' + TempDirectory + '".');
+	end;
+end;
+
+function SelectResultDir(const Param : TSGString) : TSGBool;
+var
+	Value : TSGString;
+begin
+Result := False;
+Value := SGParseValueFromComand(Param, ['rd:','result:']);
+Result := Value <> '';
+if Result then
+	begin
+	ComplitedDirectory := Value;
+	SGHint(['GRC: Set result directory to "', ComplitedDirectory, '".']);
+	end;
 end;
 
 begin

@@ -64,6 +64,7 @@ implementation
 uses
 	 SaGeDateTime
 	,SaGeStringUtils
+	,SaGeBaseUtils
 	
 	,StrMan
 	;
@@ -191,20 +192,12 @@ var
 	ss : TSGString;
 	pc : PSGChar;
 begin
-if SGLogEnable then
-	if not WithTime then
-		begin
-		pc:=SGStringToPChar(s+SGWinEoln);
-		FFileStream.WriteBuffer(pc^,Length(s)+2);
-		FreeMem(pc,Length(s)+3);
-		end
-	else
-		begin
-		SS := SGLogDateTimePredString() + s;
-		pc:=SGStringToPChar(ss+SGWinEoln);
-		FFileStream.WriteBuffer(pc^,Length(ss)+2);
-		FreeMem(pc,Length(ss)+3);
-		end;
+if SGLogEnable and (FFileStream <> nil) then
+	begin
+	pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + s + SGWinEoln);
+	FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
+	SGPCharFree(PC);
+	end;
 end;
 
 constructor TSGLog.Create();
@@ -238,7 +231,8 @@ end;
 
 finalization
 begin
-SGLog.Source('  << Destroy Log >>');
+if SGLogEnable then
+	SGLog.Source('  << Destroy Log >>');
 SGLog.Destroy();
 SGLog := nil;
 end;
