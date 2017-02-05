@@ -313,8 +313,8 @@ else
 	begin
 	Quantity:=RecQuantity(TSGMengerSpunchBoolAr6True,FDepth);
 	CalculateMeshes(Quantity,SGR_QUADS);
-	i:=0;
-	CalculateFromThread(i,i,i);
+	i:=0;ii:=0;iii:=0;
+	CalculateFromThread(i,ii,iii);
 	end;
 end;
 

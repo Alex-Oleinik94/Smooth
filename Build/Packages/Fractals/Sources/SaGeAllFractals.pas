@@ -56,6 +56,8 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeBaseUtils
+	
+	,SaGeFractalSierpinskiCarpet
 	;
 
 constructor TSGAllFractals.Create(const VContext:ISGContext);
@@ -68,6 +70,7 @@ FDrawClasses.Add(TSGFractalKohTriangle);
 FDrawClasses.Add(TSGFractalTetraider);
 FDrawClasses.Add(TSGFractalLomanaya);
 FDrawClasses.Add(TSGFractalPodkova);
+FDrawClasses.Add(TSGFractalSierpinskiCarpet);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 end;

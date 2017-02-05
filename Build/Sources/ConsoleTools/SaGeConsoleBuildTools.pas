@@ -162,7 +162,7 @@ if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGConsoleErrorString,'"@filename"');
+	WriteLn(SGConsoleErrorString, '"@filename"');
 	end;
 end;
 
