@@ -21,6 +21,7 @@ uses
 		{$ENDIF}
 	
 	,SaGeBase
+	,SaGeSysUtils
 	;
 
 {$IFDEF ANDROID}
@@ -178,14 +179,15 @@ function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
 Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
-ThreadClass.PreExecuting();
-ThreadClass.Execute();
-ThreadClass.PostExecuting();
+try
+	ThreadClass.PreExecuting();
+	ThreadClass.Execute();
+	ThreadClass.PostExecuting();
+except on e : TSGException do
+	SGPrintExceptionStackTrace(e, SGViewErrorLog);
+end;
 {$IFDEF ANDROID}
-	while true do
-		begin
-		Sleep(10000);
-		end;
+	while True do Sleep(10000);
 	{$ENDIF}
 end;
 

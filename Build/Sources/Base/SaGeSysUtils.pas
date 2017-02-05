@@ -9,6 +9,7 @@ uses
 	 SysUtils
 	
 	,SaGeBase
+	,SaGeLog
 	;
 
 // Core
@@ -61,7 +62,7 @@ function GetProcAddress(const Lib : TSGLibHandle; const VPChar : TSGString) : TS
 type
 	TSGException = Exception;
 procedure SGPrintStackTrace();
-procedure SGPrintExceptionStackTrace(const e : TSGException);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
 
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
@@ -86,7 +87,6 @@ uses
 	,Classes
 	
 	,SaGeStringUtils
-	,SaGeLog
 	,SaGeFileUtils
 	;
 
@@ -131,22 +131,49 @@ for i := 0 to AStringList.Count - 1 do
 AStringList.Free;
 end;
 
-procedure WriteFromBytes();
+procedure WriteFromBytes(const SkipEolns : TSGBoolean = True);
 var
 	Error : TSGBoolean;
+	C, lC, N : TSGChar;
 begin
 Error := False;
-while AProcess.Active or (not Error) do
+if SkipEolns then
 	begin
-	Error := False;
-	try
-	Write(Char(AProcess.Output.ReadByte));
-	except
-	Error := True;
-	end;
-	if Error then
-		Sleep(10);
-	end;
+	lC  := ' ';
+	C   := ' ';
+	while AProcess.Active or (not Error) do
+		begin
+		Error := False;
+		try
+		N := TSGChar(AProcess.Output.ReadByte);
+		if (N  in [#13,#10]) and
+		   (C  in [#13,#10]) and
+		   (lC in [#13,#10]) then
+		else
+			begin
+			lC := C;
+			C := N;
+			Write(C);
+			end;
+		except
+		Error := True;
+		end;
+		if Error then
+			Sleep(10);
+		end;
+	end
+else
+	while AProcess.Active or (not Error) do
+		begin
+		Error := False;
+		try
+		Write(TSGChar(AProcess.Output.ReadByte));
+		except
+		Error := True;
+		end;
+		if Error then
+			Sleep(10);
+		end;
 end;
 
 begin
@@ -164,7 +191,7 @@ if (poUsePipes in AProcess.Options) and ViewOutput then
 AProcess.Free();
 end;
 
-procedure SGPrintExceptionStackTrace(const e : TSGException);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
 var
 	I, H   : Integer;
 	Frames : PPointer;
@@ -182,7 +209,7 @@ for I := 0 to H do
 	if I <> H then
 		Report += SGWinEoln;
 	end;
-SGHint(Report);
+SGHint(Report, ViewCase);
 Report := '';
 end;
 
