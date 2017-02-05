@@ -5,14 +5,7 @@ unit SaGeConsoleProgramFindInPas;
 interface
 
 uses
-	 SaGeBase
-	,SaGeConsoleToolsBase
-	,SaGeVersion
-	
-	,Dos
-	,Crt
-	,Classes
-	,StrMan
+	 SaGeConsoleToolsBase
 	;
 
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
@@ -20,8 +13,15 @@ procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeBase
+	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeVersion
+	
+	,Dos
+	,Crt
+	,Classes
+	,StrMan
 	;
 
 procedure SGConsoleFindInPas(const VParams : TSGConcoleCallerParams = nil);
@@ -283,15 +283,15 @@ if SGCountConsoleParams(VParams) <> 0 then
 		end;
 
 PF:=0;PS:=0;OY:=0;
-NameFolder:=SGFreeDirectoryName('Find In Pas Results', 'Part');
-SGMakeDirectory(NameFolder);
-Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
 if (not StartingNow) then
 	ConstWords();
-if Length(ArWords)<>0 then
+if Length(ArWords) <> 0 then
 	begin
-	SkanWords;
-	writeln('Find was begining... Psess any key to stop him...');
+	NameFolder := SGFreeDirectoryName('Find In Pas Results', 'Part');
+	SGMakeDirectory(NameFolder);
+	Write('Created results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
+	SkanWords();
+	WriteLn('Find was begining... Psess any key to stop him...');
 	Oy:=WhereY;
 	DoDirectories(FDir);
 	if FArF<>nil then
@@ -306,9 +306,17 @@ if Length(ArWords)<>0 then
 	end;
 if PS=0 then
 	begin
-	RMDIR(NameFolder);
 	if Length(ArWords)<>0 then begin TextColor(12);Writeln('Matches don''t exists...'); end;
-	TextColor(15);Write('Deleted results directory "');TextColor(14);Write(NameFolder);TextColor(15);WriteLn('".');
+	if SGExistsDirectory(NameFolder) then
+		begin
+		RMDIR(NameFolder);
+		TextColor(15);
+		Write('Deleted results directory "');
+		TextColor(14);
+		Write(NameFolder);
+		TextColor(15);
+		WriteLn('".');
+		end;
 	end;
 SetLength(ArF,0);
 SetLength(ArWords,0);
