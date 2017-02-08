@@ -27,6 +27,9 @@ uses
 	,DCPripemd128
 	,dcpripemd160
 	,DCPhaval
+	
+	// crc
+	,crc
 	;
 
 type
@@ -37,13 +40,27 @@ type
 		SGHashTypeMD2,
 		SGHashTypeSHA1,
 		SGHashTypeSHA256,
-		SGHashTypeSHA512
+		SGHashTypeSHA512,
+		SGHashTypeCRC32,
+		SGHashTypeCRC64,
+		SGHashTypeCRC128
 		);
 	TSGHashParam = set of TSGHashType;
 
 const
+	SGHashTypeUUID = SGHashTypeCRC128;
 	SGDefaultHashParam : TSGHashParam = [];
-	SGFullHashParam : TSGHashParam = [SGHashTypeMD5, SGHashTypeMD4, SGHashTypeMD2, SGHashTypeSHA1, SGHashTypeSHA256, SGHashTypeSHA512];
+	SGFullHashParam : TSGHashParam = [
+		SGHashTypeMD5, 
+		SGHashTypeMD4, 
+		SGHashTypeMD2, 
+		SGHashTypeSHA1, 
+		SGHashTypeSHA256, 
+		SGHashTypeSHA512,
+		SGHashTypeCRC32,
+		SGHashTypeCRC64,
+		SGHashTypeCRC128
+		];
 
 type
 	TSGHashTableChunck = object
@@ -51,12 +68,16 @@ type
 		FName : TSGString;
 		FType : TSGHashType;
 		end;
-	TSGHashTable = packed array[0..5] of TSGHashTableChunck;
+	TSGHashTable = packed array[0..8] of TSGHashTableChunck;
 
 function SGHash(var Buffer; const BufferSize : TSGUInt64; const HashType : TSGHashType = SGHashTypeMD5) : TSGString; overload;
 function SGHash(const Stream : TStream; const HashType : TSGHashType = SGHashTypeMD5) : TSGString; overload;
 function SGHash(const FileName : TSGString; const HashType : TSGHashType = SGHashTypeMD5) : TSGString; overload;
 function SGHash_DCP(var Buffer; const BufferSize : TSGUInt64; const HashClass : TDCP_hashclass) : TSGString;
+
+function SGHashCRC32(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGHashCRC64(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGHashCRC128(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGHashMD2(var Buffer; const BufferSize : TSGUInt64) : TSGString;
 function SGHashMD5(var Buffer; const BufferSize : TSGUInt64) : TSGString;
@@ -117,8 +138,32 @@ var
 			FType : SGHashTypeSHA256),
 		(
 			FName : 'SHA512';
-			FType : SGHashTypeSHA512)
+			FType : SGHashTypeSHA512),
+		(
+			FName : 'CRC32';
+			FType : SGHashTypeCRC32),
+		(
+			FName : 'CRC64';
+			FType : SGHashTypeCRC64),
+		(
+			FName : 'CRC128';
+			FType : SGHashTypeCRC128)
 		);
+
+function SGHashCRC32(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGHashStrDiget(crc32(0, @Buffer, BufferSize), SizeOf(cardinal));
+end;
+
+function SGHashCRC64(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGHashStrDiget(crc64(0, @Buffer, BufferSize), SizeOf(QWord));
+end;
+
+function SGHashCRC128(var Buffer; const BufferSize : TSGUInt64) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGHashStrDiget(crc128(0, @Buffer, BufferSize), SizeOf(u128));
+end;
 
 function SGHashMD2(var Buffer; const BufferSize : TSGUInt64) : TSGString;
 begin
@@ -781,6 +826,9 @@ SGHashTypeMD4 : Result := SGHashMD4(Buffer, BufferSize);
 SGHashTypeSHA1 : Result := SGHashSHA1(Buffer, BufferSize);
 SGHashTypeSHA256 : Result := SGHashSHA256(Buffer, BufferSize);
 SGHashTypeSHA512 : Result := SGHashSHA512(Buffer, BufferSize);
+SGHashTypeCRC32 : Result := SGHashCRC32(Buffer, BufferSize);
+SGHashTypeCRC64 : Result := SGHashCRC64(Buffer, BufferSize);
+SGHashTypeCRC128 : Result := SGHashCRC128(Buffer, BufferSize);
 end;
 end;
 
