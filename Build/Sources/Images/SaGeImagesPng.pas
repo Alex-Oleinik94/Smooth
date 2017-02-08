@@ -24,7 +24,9 @@ uses
 
 function SupporedPNG() : Boolean;
 begin
-Result := DllManager.Suppored('png');
+Result := DllManager.Suppored('zlib');
+if Result then
+	Result := DllManager.Suppored('png');
 end;
 
 procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;

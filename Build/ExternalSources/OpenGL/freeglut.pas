@@ -163,17 +163,19 @@ end;
 
 class function TSGDllFreeGLUT.DllNames() : TSGStringList;
 begin
+Result := nil;
+Result += 'freeglut';
 {$IFDEF Windows}
-Result := 'glut32.dll';
+Result += 'glut32.dll';
 {$ELSE}
 {$ifdef darwin}
-Result := '/System/Library/Frameworks/GLUT.framework/GLUT';
+Result += '/System/Library/Frameworks/GLUT.framework/GLUT';
 {$else}
 {$IFDEF haiku}
-Result := 'libglut.so';
+Result += 'libglut.so';
 {$ELSE}
 {$IFNDEF MORPHOS}
-Result := 'libglut.so.3';
+Result += 'libglut.so.3';
 {$ENDIF}
 {$ENDIF}
 {$endif}

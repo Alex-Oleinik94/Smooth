@@ -789,7 +789,11 @@ while FInStream.Size <> FInStream.Position do
 		WriteString('uses ' + SGWinEoln);
 		WriteString('	 SaGeBase' + SGWinEoln);
 		if FWriteMode = SGDDHWriteModeObjectSaGe then
-			WriteString('	,SaGeDllManager' + SGWinEoln);
+			begin
+			WriteLnString('	,SaGeDllManager');
+			WriteLnString('	,SaGeSysUtils');
+			WriteLnString('	,SaGeStringUtils');
+			end;
 		WriteString('	;' + SGWinEoln);
 		end
 	else if SGUpCaseString(Identifier) = 'EXTERNAL' then
@@ -836,8 +840,9 @@ end;
 var
 	Count : TSGUInt32 = 0;
 begin
+FWriteMode := SGUpCaseString(FWriteMode);
 SGPrintEngineVersion();
-WriteLn('ConvertHeaderToDynamic : In file size = ',FInStream.Size,'.');
+WriteLn('ConvertHeaderToDynamic : In file size = ',FInStream.Size,'(',SGGetSizeString(FInStream.Size,'EN'),')','.');
 Count := 0;
 while FInStream.Size <> FInStream.Position do
 	begin
