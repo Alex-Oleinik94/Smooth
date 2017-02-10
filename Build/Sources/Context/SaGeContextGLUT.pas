@@ -30,17 +30,17 @@ uses
 type
 	TSGContextGLUT = class(TSGContext)
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			public
-		procedure Initialize;override;
-		procedure Run;override;
-		procedure Messages;override;
-		procedure SwapBuffers;override;
-		function GetCursorPosition: TSGPoint2int32;override;
-		function GetWindowArea: TSGPoint2int32;override;
-		function GetScreenArea: TSGPoint2int32;override;
-		procedure Resize;override;
+		procedure Initialize();override;
+		procedure Run();override;
+		procedure Messages();override;
+		procedure SwapBuffers();override;
+		function GetCursorPosition(): TSGPoint2int32;override;
+		function GetWindowArea(): TSGPoint2int32;override;
+		function GetScreenArea(): TSGPoint2int32;override;
+		procedure Resize();override;
 		procedure InitFullscreen(const b:boolean); override;
 		class function Suppored() : TSGBoolean; override;
 		procedure Paint();override;
@@ -52,6 +52,7 @@ type
 		function InitRender() : TSGBoolean;
 			protected
 		FCursorMoution: TSGPoint2int32;
+		FFreeGLUTSuppored : TSGBool;
 			public
 		procedure SetGLUTMoution(const VX, VY : TSGInt32);
 		end;
@@ -222,7 +223,6 @@ if ContextGLUT <> nil then
 
 ContextGLUT := Self;
 
-glutInitPascal(True);
 glutInitDisplayMode(GLUT_DOUBLE or GLUT_RGB or GLUT_DEPTH);
 
 if Fullscreen then
@@ -254,15 +254,17 @@ if Active then
 	inherited;
 end;
 
-procedure TSGContextGLUT.Resize;
+procedure TSGContextGLUT.Resize();
 begin
 inherited;
 end;
 
 constructor TSGContextGLUT.Create();
 begin
-inherited;
+inherited Create();
 FCursorMoution.Import();
+glutInitPascal(False);
+FFreeGLUTSuppored := DllManager.Suppored('FreeGLUT');
 end;
 
 destructor TSGContextGLUT.Destroy();
@@ -371,7 +373,7 @@ procedure TSGContextGLUT.Run;
 begin
 StartComputeTimer();
 while Active and (FNewContextType = nil) do
-	glutMainLoop;
+	glutMainLoop();
 end;
 
 procedure TSGContextGLUT.Messages;

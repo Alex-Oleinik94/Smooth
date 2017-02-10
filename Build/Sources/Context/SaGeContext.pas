@@ -516,7 +516,7 @@ end;
 
 function TSGContext.GetDefaultWindowColor():TSGColor3f;
 begin
-Result.Import(1,1,1);
+Result.Import(1, 1, 1);
 end;
 
 function  TSGContext.GetWindow() : TSGPointer;
