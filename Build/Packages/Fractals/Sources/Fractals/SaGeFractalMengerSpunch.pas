@@ -1,7 +1,19 @@
+{$INCLUDE SaGe.inc}
 
-{$IFDEF SGREADINTERFACE}
+unit SaGeFractalMengerSpunch;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeFractals
+	,SaGeCommon
+	,SaGeCommonClasses
+	,SaGeScreen
+	,SaGeUtils
+	;
 type
-	TSGMengerSpunchBoolAr6=array[0..5] of boolean;
+	TSGMengerSpunchBoolAr6=array[0..5] of TSGBool;
 	TSGMengerType = (FMengerCube,FMengerStar,FMengerPlus,FMengerExtendedCube);
 const 
 	TSGMengerSpunchBoolAr6Null:TSGMengerSpunchBoolAr6=(False,False,False,False,False,False);
@@ -11,7 +23,7 @@ type
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		class function ClassName():string;override;
+		class function ClassName():TSGString;override;
 			public
 		FDeep:TSGMengerType;
 		Ar6Normals:packed array [0..5] of  TSGVertex3f;
@@ -54,10 +66,17 @@ type
 		procedure Calculate;override;
 		procedure Paint();override;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
+uses
+	 SaGeStringUtils
+	,SaGeScreenBase
+	,SaGeRenderConstants
+	,SaGeThreads
+	,SaGeFileUtils
+	;
+
 {MENGER SPUNCH RELEASE}
 
 procedure mmmFButtonDepthPlusOnChange(VButton:TSGButton);
@@ -86,8 +105,6 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 		end;
 	end;
 end;
-
-
 
 procedure mmmComboBoxProcedure(a,b:LongInt;VComboBox:TSGComboBox);
 begin
@@ -145,7 +162,10 @@ FFont1.SetContext(Context);
 FFont1.Loading();
 
 InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SGAnchRight]);
+Screen.LastChild.BoundsToNeedBounds();
+
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
+Screen.LastChild.BoundsToNeedBounds();
 
 FComboBox2:=TSGComboBox.Create;
 Screen.CreateChild(FComboBox2);
@@ -159,6 +179,7 @@ Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBox
 Screen.LastChild.AsComboBox.SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FComboBox1:=TSGComboBox.Create();
 Screen.CreateChild(FComboBox1);
@@ -172,6 +193,7 @@ Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBox
 Screen.LastChild.AsComboBox.SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FButtonDepthPlus:=TSGButton.Create();
 Screen.CreateChild(FButtonDepthPlus);
@@ -181,6 +203,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FButtonDepthPlus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLabelDepth:=TSGLabel.Create();
 Screen.CreateChild(FLabelDepth);
@@ -189,6 +212,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='0';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FButtonDepthMinus:=TSGButton.Create();
 Screen.CreateChild(FButtonDepthMinus);
@@ -198,6 +222,7 @@ Screen.LastChild.Caption:='-';
 FButtonDepthMinus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLabelDepthCaption:=TSGLabel.Create();
 Screen.CreateChild(FLabelDepthCaption);
@@ -206,6 +231,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Итерация:';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 Depth:=2;
 {$IFNDEF ANDROID}
@@ -647,6 +673,5 @@ FFaceIndex+=1;
 
 AfterPushIndexes(MeshID,DoAtThreads,FVertexIndex,FFaceIndex);
 end;
-{$ENDIF}
 
-
+end.

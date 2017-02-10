@@ -1,5 +1,17 @@
+{$INCLUDE SaGe.inc}
 
-{$IFDEF SGREADINTERFACE}
+unit SaGeFractalPodkova;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeFractals
+	,SaGeCommon
+	,SaGeCommonClasses
+	,SaGeScreen
+	;
+
 type
 	TSGFractalPodkova=class(TSG3DFractal)
 			public
@@ -10,21 +22,26 @@ type
 		procedure Calculate;override;
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
-			public
+			protected
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
 		FTCB:TSGComboBox;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
+uses
+	 SaGeRenderConstants
+	,SaGeMathUtils
+	,SaGeMesh
+	,SaGeScreenBase
+	,SaGeStringUtils
+	;
 
-class function TSGFractalPodkova.ClassName:string;
+class function TSGFractalPodkova.ClassName() : TSGString;
 begin
-Result:='Кривая Леви/Дракон Хартера';
+Result := 'Кривая Леви/Дракон Хартера';
 end;
-
 
 procedure TSGFractalPodkova.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 begin
@@ -166,7 +183,10 @@ FLightingEnable:=False;
 HasIndexes := False;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
+Screen.LastChild.BoundsToNeedBounds();
+
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
+Screen.LastChild.BoundsToNeedBounds();
 
 FLDC:=TSGLabel.Create;
 Screen.CreateChild(FLDC);
@@ -175,7 +195,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Итерация:';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-
+Screen.LastChild.BoundsToNeedBounds();
 
 FBPD:=TSGButton.Create;
 Screen.CreateChild(FBPD);
@@ -185,6 +205,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKT);
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD:=TSGLabel.Create;
 Screen.CreateChild(FLD);
@@ -193,6 +214,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='0';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FBMD:=TSGButton.Create;
 Screen.CreateChild(FBMD);
@@ -202,6 +224,7 @@ Screen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKT);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FTCB:=TSGComboBox.Create;
 Screen.CreateChild(FTCB);
@@ -213,6 +236,7 @@ Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGFractalP
 Screen.LastChild.AsComboBox.SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
@@ -229,6 +253,4 @@ FTCB.Destroy;
 inherited;
 end;
 
-{$ENDIF}
-
-
+end.

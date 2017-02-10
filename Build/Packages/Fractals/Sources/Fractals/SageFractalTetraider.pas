@@ -1,16 +1,28 @@
+{$INCLUDE SaGe.inc}
 
-{$IFDEF SGREADINTERFACE}
+unit SageFractalTetraider;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeFractals
+	,SaGeCommon
+	,SaGeCommonClasses
+	,SaGeScreen
+	;
+
 type
 	TSGFractalTetraider=class(TSG3DFractal)
 			public
 		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		destructor Destroy();override;
+		class function ClassName():TSGString;override;
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
-			public
+			protected
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
 		Radius:TSGSingle;
@@ -19,16 +31,21 @@ type
 		h:single;
 		c0,c1,c2,c3:TSGColor3f;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
+uses
+	 SaGeRenderConstants
+	,SaGeMathUtils
+	,SaGeMesh
+	,SaGeScreenBase
+	,SaGeStringUtils
+	;
 
-class function TSGFractalTetraider.ClassName:string;
+class function TSGFractalTetraider.ClassName():TSGString;
 begin
 Result:='Тетраидер Серпинского';
 end;
-
 
 procedure TSGFractalTetraider.PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
 var
@@ -199,8 +216,13 @@ c2:=SGGetColor4fFromLongWord($FFFF00);
 c3:=SGGetColor4fFromLongWord($0080FF);
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
+Screen.LastChild.BoundsToNeedBounds();
+
 InitEffectsComboBox(Render.Width-160,40,150,30,[SGAnchRight]);
+Screen.LastChild.BoundsToNeedBounds();
+
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
+Screen.LastChild.BoundsToNeedBounds();
 
 FLDC:=TSGLabel.Create;
 Screen.CreateChild(FLDC);
@@ -209,7 +231,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Итерация:';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-
+Screen.LastChild.BoundsToNeedBounds();
 
 FBPD:=TSGButton.Create;
 Screen.CreateChild(FBPD);
@@ -219,6 +241,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKTTet);
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD:=TSGLabel.Create;
 Screen.CreateChild(FLD);
@@ -227,6 +250,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='0';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FBMD:=TSGButton.Create;
 Screen.CreateChild(FBMD);
@@ -236,13 +260,14 @@ Screen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKTTet);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
 Calculate();
 end;
 
-destructor TSGFractalTetraider.Destroy;
+destructor TSGFractalTetraider.Destroy();
 begin
 FBMD.Destroy();
 FLD.Destroy();
@@ -251,6 +276,4 @@ FBPD.Destroy();
 inherited;
 end;
 
-{$ENDIF}
-
-
+end.

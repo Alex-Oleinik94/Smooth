@@ -1,32 +1,50 @@
+{$INCLUDE SaGe.inc}
 
-{$IFDEF SGREADINTERFACE}
+unit SaGeFractalLomanaya;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeFractals
+	,SaGeCommon
+	,SaGeCommonClasses
+	,SaGeScreen
+	;
+
 type
 	TSGFractalLomanaya=class(TSG3DFractal)
 			public
-		constructor Create(const VContext:ISGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
+		class function ClassName():TSGString;override;
 			public
-		procedure Calculate;override;
+		procedure Calculate();override;
 		procedure CalculateFromThread();
-		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
-			public
+		procedure PushIndexes(var MeshID : TSGUInt32;const v : TSGVertex2f;var FVertexIndex:TSGUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			protected
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
-			public
-		c17,c27,c37,c57:real;
+			protected
+		c17, c27, c37, c57 : TSGFloat64;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
-class function TSGFractalLomanaya.ClassName:string;
+uses
+	 SaGeStringUtils
+	,SaGeRenderConstants
+	,SaGeMesh
+	,SaGeScreenBase
+	,SaGeMathUtils
+	;
+
+class function TSGFractalLomanaya.ClassName():TSGString;
 begin
-Result:='Кривая Миньковского';
+Result := 'Кривая Миньковского';
 end;
 
-
-procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
+procedure TSGFractalLomanaya.PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then
 	FMesh.Objects[MeshID].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
@@ -150,7 +168,10 @@ LightingEnable:=False;
 HasIndexes := False;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
+Screen.LastChild.BoundsToNeedBounds();
+
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
+Screen.LastChild.BoundsToNeedBounds();
 
 FLDC:=TSGLabel.Create();
 Screen.CreateChild(FLDC);
@@ -159,7 +180,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Итерация:';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-
+Screen.LastChild.BoundsToNeedBounds();
 
 FBPD:=TSGButton.Create();
 Screen.CreateChild(FBPD);
@@ -169,6 +190,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD:=TSGLabel.Create();
 Screen.CreateChild(FLD);
@@ -177,6 +199,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='0';
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FBMD:=TSGButton.Create();
 Screen.CreateChild(FBMD);
@@ -186,6 +209,7 @@ Screen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdasadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
+Screen.LastChild.BoundsToNeedBounds();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 
@@ -201,6 +225,4 @@ FBPD.Destroy();
 inherited;
 end;
 
-{$ENDIF}
-
-
+end.

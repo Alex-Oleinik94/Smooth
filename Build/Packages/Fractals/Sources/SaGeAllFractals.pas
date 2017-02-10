@@ -6,36 +6,9 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeThreads
-	,SaGeResourceManager
-	,SaGeFractals
-	,SaGePackages
 	,SaGeCommonClasses
 	,SaGeCommonUtils
-	,SaGeScreen
-	,SaGeCommon
-	,SaGeUtils
-	,SaGeImages
-	,SaGeScreenBase
-	,SaGeRender
-	,SaGeRenderConstants
-	,SaGeImagesBase
-	,SaGeMesh
-	,SaGeDateTime
-	,SaGeSysUtils
-	
-	,Crt
-	,Classes
 	;
-
-{$DEFINE SGREADINTERFACE}
-{$INCLUDE SaGeFractalMengerSpunch.inc}
-{$INCLUDE SaGeFractalMandelbrod.inc}
-{$INCLUDE SaGeFractalKohTriangle.inc}
-{$INCLUDE SaGeFractalPodkova.inc}
-{$INCLUDE SaGeFractalLomanaya.inc}
-{$INCLUDE SageFractalTetraider.inc}
-{$UNDEF SGREADINTERFACE}
 
 type
 	TSGAllFractals = class(TSGDrawable)
@@ -52,12 +25,16 @@ type
 implementation
 
 uses
-	 SaGeStringUtils
-	,SaGeFileUtils
-	,SaGeMathUtils
-	,SaGeBaseUtils
+	 SaGePackages
 	
+	// Fractals
+	,SageFractalTetraider
+	,SaGeFractalPodkova
+	,SaGeFractalMandelbrod
+	,SaGeFractalLomanaya
 	,SaGeFractalSierpinskiCarpet
+	,SaGeFractalKohTriangle
+	,SaGeFractalMengerSpunch
 	;
 
 constructor TSGAllFractals.Create(const VContext:ISGContext);
@@ -92,15 +69,6 @@ begin
 if FDrawClasses<>nil then
 	FDrawClasses.Paint();
 end;
-
-{$DEFINE SGREADIMPLEMENTATION}
-{$INCLUDE SaGeFractalMengerSpunch.inc}
-{$INCLUDE SaGeFractalMandelbrod.inc}
-{$INCLUDE SaGeFractalKohTriangle.inc}
-{$INCLUDE SaGeFractalPodkova.inc}
-{$INCLUDE SaGeFractalLomanaya.inc}
-{$INCLUDE SageFractalTetraider.inc}
-{$UNDEF SGREADIMPLEMENTATION}
 
 initialization
 begin

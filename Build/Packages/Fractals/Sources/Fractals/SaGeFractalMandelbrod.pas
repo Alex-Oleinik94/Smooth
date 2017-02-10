@@ -1,10 +1,26 @@
-{$IFDEF SGREADINTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeFractalMandelbrod;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeFractals
+	,SaGeCommonClasses
+	,SaGeScreen
+	,SaGeCommon
+	,SaGeImages
+	,SaGeDateTime
+	,SaGeUtils
+	;
+
 type
-	TSGMandaPixel=record
-		r,g,b:Byte;
+	TSGMandelbrodPixel = record
+		r, g, b : TSGByte;
 		end;
 	
-	TSGFractalMandelbrodThreadData=class;
+	TSGFractalMandelbrodThreadData = class;
 	TSGFractalMandelbrod=class(TSGImageFractal)
 			public
 		constructor Create(const VContext : ISGContext);override;
@@ -23,9 +39,9 @@ type
 		FSmosh : Byte;
 		procedure InitColor(const x,y:LongInt;const RecNumber:LongInt);override;
 		function Rec(Number:TSGComplexNumber):Word;inline;
-		function MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
+		function MandelbrodRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
 			public
-		function GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandaPixel;inline;
+		function GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandelbrodPixel;inline;
 		procedure CalculateFromThread(Data:TSGFractalMandelbrodThreadData);
 		procedure Calculate;override;
 		procedure Paint();override;
@@ -71,7 +87,7 @@ type
 		SelectPoint,SelectSecondPoint:TSGPoint2int32;
 		
 		SelectPointEnabled:Boolean;
-		Manda:TSGFractalMandelbrod;
+		Mandelbrod:TSGFractalMandelbrod;
 		
 		QuantityThreads:LongInt;
 		
@@ -96,7 +112,7 @@ type
 		
 		ButtonSelectZNumber:TSGButton;
 		
-		MandaInitialized:Boolean;
+		MandelbrodInitialized:Boolean;
 		
 		VideoPanel:TSGPanel;
 		Changet:boolean;
@@ -152,13 +168,26 @@ type
 		procedure DrawBezierPoints();inline;
 		procedure OffComponents();inline;
 		procedure OnComponents();inline;
-		procedure InitManda();inline;
+		procedure InitMandelbrod();inline;
 		function GetPointOnPosOnMand(const Point:TSGPoint2int32):TSGComplexNumber;inline;
 		procedure UpDateLabelCoordCaption();inline;
 		end;
-{$ENDIF}
 
-{$IFDEF SGREADIMPLEMENTATION}
+implementation
+
+uses
+	 SaGeStringUtils
+	,SaGeFileUtils
+	,SaGeRenderConstants
+	,SaGeThreads
+	,SaGeScreenBase
+	,SaGeMathUtils
+	,SaGeImagesBase
+	,SaGeSysUtils
+	,SaGeBaseUtils
+	
+	,Crt
+	;
 
 procedure TSGFractalMandelbrodRelease.UnDatePointCurvePanel();inline;
 begin
@@ -187,7 +216,7 @@ var
 begin
 if (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>0) then
 	begin
-	S:=Abs(Manda.FView.y1-Manda.FView.y2)/60;
+	S:=Abs(Mandelbrod.FView.y1-Mandelbrod.FView.y2)/60;
 	Render.Color4f(1,1,0,0.5);
 	Render.BeginScene(SGR_QUADS);
 	for i:=0 to FBezierCurve.VertexQuantity-1 do
@@ -238,7 +267,7 @@ var
 	Point: TSGPoint2int32;
 begin
 Point:=Context.CursorPosition(SGNowCursorPosition);
-LabelCoord.Caption:=SGStringToPChar('( '+SGFloatToString(Manda.FZNumber.x,3)+' ; '+SGFloatToString(Manda.FZNumber.y,3)+' ) , ( '+
+LabelCoord.Caption:=SGStringToPChar('( '+SGFloatToString(Mandelbrod.FZNumber.x,3)+' ; '+SGFloatToString(Mandelbrod.FZNumber.y,3)+' ) , ( '+
 	SGFloatToString(GetPointOnPosOnMand(Point).x,7)+' ; '
 	+SGFloatToString(GetPointOnPosOnMand(Point).y,7)+' )');
 end;
@@ -298,8 +327,8 @@ procedure SaveImage(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.Width:=SGVal((Button.Parent.LastChild.Caption));
-	Manda.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Render.Height/Render.Width));
+	Mandelbrod.Width:=SGVal((Button.Parent.LastChild.Caption));
+	Mandelbrod.Height:=Trunc(SGVal((Button.Parent.LastChild.Caption))*(Render.Height/Render.Width));
 	Changet:=True;
 	NowSave:=True;
 	SelectPoint.Import;
@@ -321,7 +350,7 @@ procedure ColorComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.FColorScheme:=b;
+	Mandelbrod.FColorScheme:=b;
 	if a<>b then
 		begin
 		Changet:=True;
@@ -335,7 +364,7 @@ procedure TypeComboBoxProcedure(a,b:LongInt;Button:TSGComponent);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.FZMand:=Boolean(b);
+	Mandelbrod.FZMand:=Boolean(b);
 	if a<>b then
 		begin
 		Changet:=True;
@@ -349,11 +378,11 @@ procedure ZumButtonOnChange(Button:TSGButton);
 begin
 with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	begin
-	Manda.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
+	Mandelbrod.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
-	FOldView:=Manda.FView;
+	FOldView:=Mandelbrod.FView;
 	end;
 end;
 
@@ -370,7 +399,7 @@ procedure QuantityRecComboBoxProcedure(a,b:LongInt;aaa:TSGComponent);
 BEGIN
 with TSGFractalMandelbrodRelease(aaa.FUserPointer1) do
 	begin
-	Manda.FZQuantityRec:=QuantityRecComboBox.Items[b].Identifier;
+	Mandelbrod.FZQuantityRec:=QuantityRecComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -381,7 +410,7 @@ procedure StepenComboBoxProcedure(a,b:LongInt;aaa:TSGComponent);
 begin
 with TSGFractalMandelbrodRelease(aaa.FUserPointer1) do
 	begin
-	Manda.FZDegree:=StepenComboBox.Items[b].Identifier;
+	Mandelbrod.FZDegree:=StepenComboBox.Items[b].Identifier;
 	Changet:=True;
 	SelectPoint.Import;
 	SelectSecondPoint.Import;
@@ -447,11 +476,11 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	Changet:=True;
 	SelectPoint.Import();
 	SelectSecondPoint.Import();
-	Manda.FZMand:=False;
+	Mandelbrod.FZMand:=False;
 	FVideoBuffer:=SGFreeDirectoryName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod Buffer', 'Part');
 	SGMakeDirectory(FVideoBuffer);
-	Manda.Width:=1920;//*5;
-	Manda.Height:=1080;//*5;
+	Mandelbrod.Width:=1920;//*5;
+	Mandelbrod.Height:=1080;//*5;
 	FCurveBeginDataTime.Get();
 	end;
 end;
@@ -468,7 +497,7 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGFractalMandelbrodRelease.InitManda();inline;
+procedure TSGFractalMandelbrodRelease.InitMandelbrod();inline;
 var
 	i:LongInt;
 	ii:LongInt = 5;
@@ -502,16 +531,16 @@ AddNameTheme('Розовая пыль');
 AddNameTheme('Зеленая пыль');
 AddNameTheme('Оранжевая пыль');
 
-Manda:=TSGFractalMandelbrod.Create(Context);
-Manda.Width:=StartDepth;
-Manda.Height:=StartDepth;
-Manda.FZNumber.Import(-0.181,0.66);
-Manda.FZMand:=False;
-Manda.FZDegree:=2;
-Manda.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
-Manda.CreateThreads(QuantityThreads);
-Manda.BeginCalculate;
-Manda.FImage.Way:=SGImagesDirectory+DirectorySeparator+'Mand New.jpg';
+Mandelbrod:=TSGFractalMandelbrod.Create(Context);
+Mandelbrod.Width:=StartDepth;
+Mandelbrod.Height:=StartDepth;
+Mandelbrod.FZNumber.Import(-0.181,0.66);
+Mandelbrod.FZMand:=False;
+Mandelbrod.FZDegree:=2;
+Mandelbrod.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
+Mandelbrod.CreateThreads(QuantityThreads);
+Mandelbrod.BeginCalculate;
+Mandelbrod.FImage.Way:=SGImagesDirectory+DirectorySeparator+'Mand New.jpg';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -526,7 +555,7 @@ for i:=0 to QuantityThreads-1 do
 	ii+=23;
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.AsProgressBar.ViewProgress:=True;
-	Manda.BeginThread(i,FArProgressBar[i]);
+	Mandelbrod.BeginThread(i,FArProgressBar[i]);
 	end;
 
 LblProcent:=TSGLabel.Create;
@@ -758,8 +787,8 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 	Button.Parent.Visible:=(False);
 	QuantityThreads:=SGVal((Button.Parent.Children[5].AsComboBox.Items[Button.Parent.Children[5].AsComboBox.SelectItem].Caption));
 	StartDepth:=SGVal(Button.Parent.Children[4].AsComboBox.Items[Button.Parent.Children[4].AsComboBox.SelectItem].Caption);
-	InitManda;
-	MandaInitialized:=True;
+	InitMandelbrod;
+	MandelbrodInitialized:=True;
 	end;
 end;
 
@@ -785,7 +814,7 @@ FEnablePictureStripPanel:=False;
 FArProgressBar:=nil;
 Changet:=False;
 SelectPointEnabled:=False;
-Manda:=nil;
+Mandelbrod:=nil;
 QuantityThreads:=1;
 NowSave:=False;
 SecondImage:=nil;
@@ -800,7 +829,7 @@ StepenComboBox:=nil;
 QuantityRecComboBox:=nil;
 SelectZNimberFlag:=False;
 ButtonSelectZNumber:=nil;
-MandaInitialized:=False;
+MandelbrodInitialized:=False;
 VideoPanel:=nil;
 fmStartPanel:=nil;
 FCurveInfoLbl:=nil;
@@ -939,9 +968,9 @@ VideoPanel:=nil;
 if fmStartPanel<>nil then
 	fmStartPanel.Destroy;
 fmStartPanel:=nil;
-if Manda<>nil then
-	Manda.Destroy;
-Manda:=nil;
+if Mandelbrod<>nil then
+	Mandelbrod.Destroy;
+Mandelbrod:=nil;
 if FArProgressBar<>nil then
 	for i:=0 to High(FArProgressBar) do
 		if FArProgressBar[i]<>nil then
@@ -959,8 +988,8 @@ end;
 function TSGFractalMandelbrodRelease.GetPointOnPosOnMand(const Point: TSGPoint2int32):TSGComplexNumber;inline;
 begin
 Result.Import(
-	Manda.FView.x1+(Point.x/(Render.Width)*abs(Manda.FView.x1-Manda.FView.x2)),
-	Manda.FView.y1+((Render.Height-Point.y)/(Render.Height)*abs(Manda.FView.y1-Manda.FView.y2))
+	Mandelbrod.FView.x1+(Point.x/(Render.Width)*abs(Mandelbrod.FView.x1-Mandelbrod.FView.x2)),
+	Mandelbrod.FView.y1+((Render.Height-Point.y)/(Render.Height)*abs(Mandelbrod.FView.y1-Mandelbrod.FView.y2))
 	);
 end;
 
@@ -1060,8 +1089,8 @@ if SelectPointEnabled and (Context.CursorKeysPressed(SGLeftCursorButton)) then
 		Swap(SelectPoint.x,SelectSecondPoint.x);
 	if SelectPoint.y>SelectSecondPoint.y then
 		Swap(SelectPoint.y,SelectSecondPoint.y);
-	FOldView:=Manda.FView;
-	Manda.FView.Import(
+	FOldView:=Mandelbrod.FView;
+	Mandelbrod.FView.Import(
 		GetPointOnPosOnMand(SelectPoint).x,
 		GetPointOnPosOnMand(SelectSecondPoint).y,
 		GetPointOnPosOnMand(SelectSecondPoint).x,
@@ -1075,14 +1104,14 @@ var
 	i,ii:LongInt;
 	TDT:TSGDateTime;
 begin
-if MandaInitialized then
+if MandelbrodInitialized then
 	begin
 	Render.InitMatrixMode(SG_2D);
 	
-	if Manda.ThreadsReady  then
+	if Mandelbrod.ThreadsReady  then
 		begin
 		Delay(5);
-		Manda.AfterCalculate();
+		Mandelbrod.AfterCalculate();
 		
 		for i:=0 to QuantityThreads-1 do
 			begin
@@ -1104,7 +1133,7 @@ if MandaInitialized then
 		
 		if (not NowSave)  and (not FNowRenderitsiaVideo) then
 			begin
-			Manda.ToTexture();
+			Mandelbrod.ToTexture();
 			OnComponents();
 			{if SecondImage<>nil then
 				begin
@@ -1113,29 +1142,29 @@ if MandaInitialized then
 				end;}
 			end
 		else 
-			if Manda.FImage<>nil then
+			if Mandelbrod.FImage<>nil then
 				begin
 				if not SGExistsDirectory(SGImagesDirectory) then
 					SGMakeDirectory(SGImagesDirectory);
 				if FNowRenderitsiaVideo then
 					begin
-					//Manda.FImage.Image.SetBounds(1920,1080);
-					Manda.FImage.Way:=FVideoBuffer+DirectorySeparator+
+					//Mandelbrod.FImage.Image.SetBounds(1920,1080);
+					Mandelbrod.FImage.Way:=FVideoBuffer+DirectorySeparator+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SGStr(FNowKadr)+'.jpg';
 					end;
-				FTNRF.AddWaterString('made by SaGe',Manda.FImage,0);
-				Manda.FImage.Saveing(SGI_JPEG);
+				FTNRF.AddWaterString('made by SaGe',Mandelbrod.FImage,0);
+				Mandelbrod.FImage.Saveing(SGI_JPEG);
 				if not FNowRenderitsiaVideo then
 					begin
-					Manda.Width:=StartDepth;
-					Manda.Height:=StartDepth;
+					Mandelbrod.Width:=StartDepth;
+					Mandelbrod.Height:=StartDepth;
 					end;
-				Manda.FImage.Destroy();
-				Manda.FImage:=nil;
+				Mandelbrod.FImage.Destroy();
+				Mandelbrod.FImage:=nil;
 				if not FNowRenderitsiaVideo then
 					begin
-					Manda.FImage:=SecondImage;
+					Mandelbrod.FImage:=SecondImage;
 					SecondImage:=nil;
 					end;
 				if FNowRenderitsiaVideo then
@@ -1146,7 +1175,7 @@ if MandaInitialized then
 	
 	UpDateLabelCoordCaption();
 	
-	if LabelProcent.Visible and ( not Manda.ThreadsReady) then
+	if LabelProcent.Visible and ( not Mandelbrod.ThreadsReady) then
 		begin
 		Delay(5);
 		FNewPotokInit:=False;
@@ -1155,41 +1184,41 @@ if MandaInitialized then
 			begin
 			Procent+=
 				FArProgressBar[i].Progress*(
-				(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h2-
-				(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h1
-				)+(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr;
-			if Manda.FThreadsData[i].FFinished and (FArProgressBar[i].Visible) then
+				(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h2-
+				(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h1
+				)+(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr;
+			if Mandelbrod.FThreadsData[i].FFinished and (FArProgressBar[i].Visible) then
 				begin
 				//FArProgressBar[i].Visible:=False;
-				for ii:=0 to Manda.Threads-1 do
+				for ii:=0 to Mandelbrod.Threads-1 do
 					begin
 					{if ii>=i+1 then
 						FArProgressBar[ii].FNeedTop-=25;}
 					FDateTime.Get;
 					if (not FNewPotokInit) then
 					if 
-						(Manda.FThreadsData[ii].FData<>nil) and 
-						(Manda.FThreadsData[ii].FFinished=False) and 
+						(Mandelbrod.FThreadsData[ii].FData<>nil) and 
+						(Mandelbrod.FThreadsData[ii].FFinished=False) and 
 						(ii<>i) and 
-						((Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NewPos=0) and 
+						((Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NewPos=0) and 
 						(
-						((Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
-						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos)
-						*Manda.Width>50000
+						((Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
+						(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos)
+						*Mandelbrod.Width>50000
 						) and
 						(
 						(
 						(FDateTime-
-						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FBeginData).GetPastMiliSeconds
+						(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FBeginData).GetPastMiliSeconds
 						)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
 						>150
 						) then
 						// i - Только что Завершивший свою работу поток
 						//ii - Гасторбайтер, Незавершивший свою работу поток
 						begin
-						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FWait:=True;
+						(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).FWait:=True;
 						
-						if (Manda.FThreadsData[ii].FFinished=False) then
+						if (Mandelbrod.FThreadsData[ii].FFinished=False) then
 			begin
 						
 						FArProgressBar[ii].Color2:=(FArProgressBar[ii].Color2+SGVertex4fImport(0.9,0.45,0,0.8))/2;
@@ -1198,54 +1227,54 @@ if MandaInitialized then
 						FArProgressBar[i].Color1:=(FArProgressBar[i].Color1+SGVertex4fImport(0,1,0,1))/2;
 						
 						iiiC:=0;
-						if Manda.FThreadsData[i].FData<>nil then
+						if Mandelbrod.FThreadsData[i].FData<>nil then
 							begin
-							iiiC:=(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h2-
-									(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h1+
-									(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr;
-							Manda.FThreadsData[i].FData.Destroy;
-							Manda.FThreadsData[i].FData:=nil;
+							iiiC:=(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h2-
+									(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).h1+
+									(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr;
+							Mandelbrod.FThreadsData[i].FData.Destroy;
+							Mandelbrod.FThreadsData[i].FData:=nil;
 							end;
 						
-						if Manda.FThreadsData[i].FThread<>nil then
+						if Mandelbrod.FThreadsData[i].FThread<>nil then
 							begin
-							Manda.FThreadsData[i].FThread.Destroy;
-							Manda.FThreadsData[i].FThread:=nil;
+							Mandelbrod.FThreadsData[i].FThread.Destroy;
+							Mandelbrod.FThreadsData[i].FThread:=nil;
 							end;
 						
-						Manda.FThreadsData[i].FData:=TSGFractalMandelbrodThreadData.Create(
-							Manda,
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos+
+						Mandelbrod.FThreadsData[i].FData:=TSGFractalMandelbrodThreadData.Create(
+							Mandelbrod,
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos+
 							(
 							(
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos
 							) div 2
 							),
 								
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2,
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2,
 							FArProgressBar[i].GetProgressPointer,i);
 
-						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NewPos:=0;
-						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NowPos:=0;
-						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FWait:=False;
-						Manda.FThreadsData[i].FFinished:=False;
-						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FBeginData.Get;
-						(Manda.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr:=iiiC;
+						(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NewPos:=0;
+						(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).NowPos:=0;
+						(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FWait:=False;
+						Mandelbrod.FThreadsData[i].FFinished:=False;
+						(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FBeginData.Get;
+						(Mandelbrod.FThreadsData[i].FData as TSGFractalMandelbrodThreadData).FHePr:=iiiC;
 						FArProgressBar[i].Progress:=0;
 						FArProgressBar[i].ProgressTimer:=0;
 						
-						Manda.FThreadsData[i].FThread:=
+						Mandelbrod.FThreadsData[i].FThread:=
 							TSGThread.Create(
 								TSGPointerProcedure(@TSGFractalMandelbrodThreadProcedure),
-								Manda.FThreadsData[i].FData);
+								Mandelbrod.FThreadsData[i].FData);
 						
-						(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NewPos:=
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos+
+						(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NewPos:=
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos+
 							(
 							(
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
-							(Manda.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).h2-
+							(Mandelbrod.FThreadsData[ii].FData as TSGFractalMandelbrodThreadData).NowPos
 							) div 2
 							);
 						FNewPotokInit:=True;
@@ -1255,7 +1284,7 @@ if MandaInitialized then
 				//LabelProcent.FNeedTop-=25;
 				end;
 			end;
-		Procent/=Manda.Height;
+		Procent/=Mandelbrod.Height;
 		LabelProcent.Progress:=Procent;
 		FDateTime.Get;
 		///FDateTime.ImportFromSeconds((FDateTime-FBeginCalc).GetPastSeconds);
@@ -1268,15 +1297,15 @@ if MandaInitialized then
 		end;
 
 
-	if (Manda.FImage<>nil) and Manda.FImage.Ready then
+	if (Mandelbrod.FImage<>nil) and Mandelbrod.FImage.Ready then
 		begin
 		Render.Color3f(1,1,1);
-		Manda.Paint();
-		//if Manda.FView.VertexInView(Manda.FZNumber) then
+		Mandelbrod.Paint();
+		//if Mandelbrod.FView.VertexInView(Mandelbrod.FZNumber) then
 			//begin
 			VtxForZN.Import(
-				abs(Manda.FZNumber.x-Min(Manda.FView.X1,Manda.FView.X2))/Manda.FView.AbsX*Render.Width,
-				abs(Manda.FZNumber.Y-Max(Manda.FView.Y1,Manda.FView.Y2))/Manda.FView.AbsY*Render.Height
+				abs(Mandelbrod.FZNumber.x-Min(Mandelbrod.FView.X1,Mandelbrod.FView.X2))/Mandelbrod.FView.AbsX*Render.Width,
+				abs(Mandelbrod.FZNumber.Y-Max(Mandelbrod.FView.Y1,Mandelbrod.FView.Y2))/Mandelbrod.FView.AbsY*Render.Height
 				);
 			Render.Color3f(1,1,1);
 			Render.BeginScene(SGR_TRIANGLES);
@@ -1287,17 +1316,17 @@ if MandaInitialized then
 			//end;
 			{
 		else
-			Manda.FZNumber.WriteLn;}
+			Mandelbrod.FZNumber.WriteLn;}
 		if (SelectZNimberFlag and ((Context.CursorKeysPressed(SGLeftCursorButton)))) or (Context.CursorKeysPressed(SGMiddleCursorButton)) then
 			begin
 			ComplexNumber:=GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition));
-			if Manda.FZNumber <> ComplexNumber then
+			if Mandelbrod.FZNumber <> ComplexNumber then
 				begin
-				Manda.FZNumber:=ComplexNumber;
+				Mandelbrod.FZNumber:=ComplexNumber;
 				SelectZNimberFlag:=False;
 				OnComponents();
 				Context.SetCursorKey(SGUpKey,SGLeftCursorButton);
-				if not Manda.FZMand then
+				if not Mandelbrod.FZMand then
 					Changet:=True;
 				SelectPoint.Import;
 				SelectSecondPoint.Import;
@@ -1336,29 +1365,29 @@ if MandaInitialized then
 			end;
 		end;
 	
-	if (not FNowRenderitsiaVideo) and LabelProcent.Visible and ( not Manda.ThreadsReady) then
+	if (not FNowRenderitsiaVideo) and LabelProcent.Visible and ( not Mandelbrod.ThreadsReady) then
 	if (Context.KeyPressedByte=27) and 
 		(Context.KeyPressedType=SGUpKey) and (SecondImage<>nil) then
 			begin
-			for i:=0 to High(Manda.FThreadsData) do
+			for i:=0 to High(Mandelbrod.FThreadsData) do
 				begin
-				if Manda.FThreadsData[i].FThread<>nil then
+				if Mandelbrod.FThreadsData[i].FThread<>nil then
 					begin
-					Manda.FThreadsData[i].FThread.Destroy;
-					Manda.FThreadsData[i].FThread:=nil;
+					Mandelbrod.FThreadsData[i].FThread.Destroy;
+					Mandelbrod.FThreadsData[i].FThread:=nil;
 					end;
-				if Manda.FThreadsData[i].FData<>nil then
+				if Mandelbrod.FThreadsData[i].FData<>nil then
 					begin
-					Manda.FThreadsData[i].FData.Destroy;
-					Manda.FThreadsData[i].FData:=nil;
+					Mandelbrod.FThreadsData[i].FData.Destroy;
+					Mandelbrod.FThreadsData[i].FData:=nil;
 					end;
-				Manda.FThreadsData[i].FFinished:=True;
+				Mandelbrod.FThreadsData[i].FFinished:=True;
 				end;
-			if Manda.FImage<>nil then
-				Manda.FImage.Destroy();
-			Manda.FImage:=SecondImage;
+			if Mandelbrod.FImage<>nil then
+				Mandelbrod.FImage.Destroy();
+			Mandelbrod.FImage:=SecondImage;
 			SecondImage:=nil;
-			Manda.FView := FOldView;
+			Mandelbrod.FView := FOldView;
 			end;
 	
 	if FEnablePictureStripAddingPoints  and 
@@ -1369,7 +1398,7 @@ if MandaInitialized then
 			SetLength(FCurveArPoints,1)
 		else 
 			SetLength(FCurveArPoints,Length(FCurveArPoints)+1);
-		FCurveArPoints[High(FCurveArPoints)]:=Manda.FColorScheme;
+		FCurveArPoints[High(FCurveArPoints)]:=Mandelbrod.FColorScheme;
 		FBezierCurve.AddVertex(
 			SGVertex3fImport(
 				GetPointOnPosOnMand(Context.CursorPosition(SGNowCursorPosition)).x,
@@ -1384,8 +1413,8 @@ if MandaInitialized then
 	if FNowRenderitsiaVideo or 
 	(FEnablePictureStripPanel and FKomponentsNowOffOn)  then
 		begin
-		//Manda.FView.Write();
-		Render.InitOrtho2d(Manda.FView.x1,Manda.FView.y1,Manda.FView.x2,Manda.FView.y2);
+		//Mandelbrod.FView.Write();
+		Render.InitOrtho2d(Mandelbrod.FView.x1,Mandelbrod.FView.y1,Mandelbrod.FView.x2,Mandelbrod.FView.y2);
 		if (FBezierCurve<>nil) then
 			begin
 			FBezierCurve.Paint();
@@ -1394,7 +1423,7 @@ if MandaInitialized then
 				Render.Color3f(1,0,1);
 				Render.PointSize(5);
 				Render.BeginScene(SGR_POINTS);
-				Render.Vertex(Manda.FZNumber);
+				Render.Vertex(Mandelbrod.FZNumber);
 				Render.EndScene();
 				Render.PointSize(1);
 				end;
@@ -1411,10 +1440,10 @@ if MandaInitialized then
 				begin
 				FNowRenderitsiaVideo:=False;
 				Changet:=False;
-				Manda.FImage:=SecondImage;
+				Mandelbrod.FImage:=SecondImage;
 				SecondImage:=nil;
 				FBezierCurveKadrProgressBar.Visible:=False;
-				Manda.FAttitudeForThemeEnable:=False;
+				Mandelbrod.FAttitudeForThemeEnable:=False;
 				FCurveInfoLbl.Visible:=False;
 				Exit;
 				end
@@ -1425,26 +1454,26 @@ if MandaInitialized then
 		if not FNowRenderitsiaVideo then
 			if SecondImage<>nil then
 				SecondImage.Destroy;
-		if (not FNowRenderitsiaVideo) or (FNowRenderitsiaVideo and (Manda.FImage<>nil)) then
+		if (not FNowRenderitsiaVideo) or (FNowRenderitsiaVideo and (Mandelbrod.FImage<>nil)) then
 			begin
-			SecondImage:=Manda.FImage;
-			Manda.FImage:=nil;
+			SecondImage:=Mandelbrod.FImage;
+			Mandelbrod.FImage:=nil;
 			end;
 		if FNowRenderitsiaVideo then
 			begin
-			Manda.FZNumber.x:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x;
-			Manda.FZNumber.y:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y;
-			Manda.FAttitudeForThemeEnable:=True;
-			Manda.FFAttitudeForTheme:=FBezierCurve.LowAttitude;
+			Mandelbrod.FZNumber.x:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).x;
+			Mandelbrod.FZNumber.y:=FBezierCurve.GetResultVertex(FNowKadr/FAllKadrs).y;
+			Mandelbrod.FAttitudeForThemeEnable:=True;
+			Mandelbrod.FFAttitudeForTheme:=FBezierCurve.LowAttitude;
 			if FBezierCurve.LowIndex<>FBezierCurve.VertexQuantity-1 then
 				begin
-				Manda.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
-				Manda.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex+1];
+				Mandelbrod.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
+				Mandelbrod.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex+1];
 				end
 			else
 				begin
-				Manda.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
-				Manda.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex];
+				Mandelbrod.FTheme1:=FCurveArPoints[FBezierCurve.LowIndex];
+				Mandelbrod.FTheme2:=FCurveArPoints[FBezierCurve.LowIndex];
 				end;
 			TDT.Get();
 			if FNowKadr<>1 then
@@ -1458,16 +1487,16 @@ if MandaInitialized then
 			end;
 		if (not FNowRenderitsiaVideo) and (not NowSave) then
 			begin
-			Manda.Width:=StartDepth;
-			Manda.Height:=StartDepth;
+			Mandelbrod.Width:=StartDepth;
+			Mandelbrod.Height:=StartDepth;
 			end;
-		Manda.BeginCalculate();
-		Manda.FImage.Way := SGFreeFileName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod.jpg');
+		Mandelbrod.BeginCalculate();
+		Mandelbrod.FImage.Way := SGFreeFileName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod.jpg');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;
 		FBeginCalc.Get;
-		Manda.ThreadsBoolean(False);
+		Mandelbrod.ThreadsBoolean(False);
 		for i:=0 to QuantityThreads-1 do
 			begin
 			with FArProgressBar[i] do
@@ -1478,7 +1507,7 @@ if MandaInitialized then
 				Top := ii;
 				ii+=25;
 				DefaultColor;
-				Manda.BeginThread(i,GetProgressPointer());
+				Mandelbrod.BeginThread(i,GetProgressPointer());
 				end;
 			end;
 		LabelProcent.Top:=ii;
@@ -1593,11 +1622,11 @@ FColorScheme:=0;
 FSmosh:=1;
 end;
 
-function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandaPixel;inline;
+function TSGFractalMandelbrod.GetPixelColor(const VColorSceme:TSGByte;const RecNumber:Word):TSGMandelbrodPixel;inline;
 var
 	Color : TSGLongWord;
 
-function YellowPil():TSGMandaPixel;
+function YellowPil():TSGMandelbrodPixel;
 begin
 	Result.r := trunc(abs(cos(Color) * Color)) mod 255;
 	Result.g := GetColor(Color Div 2,Color * Color,trunc(abs((cos(Color) * cos(Color)) * Result.r))mod 500);
@@ -1760,26 +1789,26 @@ end;
 
 procedure TSGFractalMandelbrod.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
 var
-	MandaPixel1,MandaPixel2:TSGMandaPixel;
+	MandelbrodPixel1,MandelbrodPixel2:TSGMandelbrodPixel;
 begin
 if FAttitudeForThemeEnable then
 	begin
-	MandaPixel1:=GetPixelColor(FTheme1,RecNumber);
-	MandaPixel2:=GetPixelColor(FTheme2,RecNumber);
-	MandaPixel1.r:=Round(MandaPixel1.r*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.r);
-	MandaPixel1.g:=Round(MandaPixel1.g*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.g);
-	MandaPixel1.b:=Round(MandaPixel1.b*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandaPixel2.b);
+	MandelbrodPixel1:=GetPixelColor(FTheme1,RecNumber);
+	MandelbrodPixel2:=GetPixelColor(FTheme2,RecNumber);
+	MandelbrodPixel1.r:=Round(MandelbrodPixel1.r*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandelbrodPixel2.r);
+	MandelbrodPixel1.g:=Round(MandelbrodPixel1.g*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandelbrodPixel2.g);
+	MandelbrodPixel1.b:=Round(MandelbrodPixel1.b*(1-FFAttitudeForTheme)+FFAttitudeForTheme*MandelbrodPixel2.b);
 	end
 else
 	begin
-	MandaPixel1:=GetPixelColor(FColorScheme,RecNumber);
+	MandelbrodPixel1:=GetPixelColor(FColorScheme,RecNumber);
 	end;
-FImage.FImage.BitMap[(Y*Width+X)*3+0]:=MandaPixel1.r;
-FImage.FImage.BitMap[(Y*Width+X)*3+1]:=MandaPixel1.g;
-FImage.FImage.BitMap[(Y*Width+X)*3+2]:=MandaPixel1.b;
+FImage.FImage.BitMap[(Y*Width+X)*3+0]:=MandelbrodPixel1.r;
+FImage.FImage.BitMap[(Y*Width+X)*3+1]:=MandelbrodPixel1.g;
+FImage.FImage.BitMap[(Y*Width+X)*3+2]:=MandelbrodPixel1.b;
 end;
 
-function TSGFractalMandelbrod.MandaRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
+function TSGFractalMandelbrod.MandelbrodRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;
 var
 	i,ii:Byte;
 begin
@@ -1819,7 +1848,7 @@ for i:=Data.h1 to Data.h2 do
 	ii:=Byte(VBufferNow);
 	while (ii<Width) do
 		begin
-		VKolRec:=MandaRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*i),dx,dy);//(ii/FDepth)*r?
+		VKolRec:=MandelbrodRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*i),dx,dy);//(ii/FDepth)*r?
 		InitColor(ii,i,VKolRec);
 		Data.VBuffer[VBufferNow][ii div 2]:=VKolRec=FZQuantityRec;
 		if (VReady) then
@@ -1831,7 +1860,7 @@ for i:=Data.h1 to Data.h2 do
 					InitColor(ii,i-1,FZQuantityRec)
 			else
 				InitColor(ii,i-1,
-					MandaRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*(i-1)),dx,dy));
+					MandelbrodRec(SGComplexNumberImport(FView.x1+dX*ii,FView.y1+dY*(i-1)),dx,dy));
 			end;
 		ii+=2;
 		end;
@@ -1896,5 +1925,4 @@ CalculateFromThread(TSGFractalMandelbrodThreadData.Create(Self,0,Depth-1,nil,-1)
 ToTexture();
 end;
 
-
-{$ENDIF}
+end.
