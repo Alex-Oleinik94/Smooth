@@ -15,7 +15,7 @@ type
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		class function ClassName():string;override;
+		class function ClassName():TSGString;override;
 			private
 		FDrawClasses : TSGDrawClasses;
 			public
@@ -35,6 +35,7 @@ uses
 	,SaGeFractalSierpinskiCarpet
 	,SaGeFractalKohTriangle
 	,SaGeFractalMengerSpunch
+	,SaGeFractalSixAngle
 	;
 
 constructor TSGAllFractals.Create(const VContext:ISGContext);
@@ -48,6 +49,7 @@ FDrawClasses.Add(TSGFractalTetraider);
 FDrawClasses.Add(TSGFractalLomanaya);
 FDrawClasses.Add(TSGFractalPodkova);
 FDrawClasses.Add(TSGFractalSierpinskiCarpet);
+FDrawClasses.Add(TSGFractalSixAngle);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 end;
@@ -59,7 +61,7 @@ FDrawClasses:=nil;
 inherited;
 end;
 
-class function TSGAllFractals.ClassName():string;
+class function TSGAllFractals.ClassName():TSGString;
 begin
 Result := 'Фракталы';
 end;

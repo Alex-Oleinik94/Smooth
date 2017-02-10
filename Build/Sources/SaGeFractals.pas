@@ -68,7 +68,6 @@ type
 		property ThreadsEnable:Boolean read FThreadsEnable write FThreadsEnable;
 		property Threads:LongWord read GetThreadsQuantity write SetThreadsQuantity;
 		end;
-	SGFractal = TSGFractal;
 	
 	TSG3DFractal=class (TSGFractal)
 			public

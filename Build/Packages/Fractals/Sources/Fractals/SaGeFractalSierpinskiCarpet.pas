@@ -7,7 +7,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeFractals
-	,SaGeScreenBase
 	,SaGeScreen
 	,SaGeCommonClasses
 	,SageCommon
@@ -24,7 +23,7 @@ type
 		procedure Calculate();override;
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const v1,v2,v3,v4:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			public
+			protected
 		FLD,FLDC:TSGLabel;
 		FBPD,FBMD:TSGButton;
 		end;
@@ -33,6 +32,7 @@ implementation
 
 uses
 	 SaGeMesh
+	,SaGeScreenBase
 	,SaGeRenderConstants
 	,SaGeStringUtils
 	;
@@ -41,7 +41,6 @@ class function TSGFractalSierpinskiCarpet.ClassName():TSGString;
 begin
 Result := 'Ковёр (квадрат) Серпинского';
 end;
-
 
 procedure TSGFractalSierpinskiCarpet.PushIndexes(var MeshID:LongWord;const v1, v2, v3, v4 : TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -231,7 +230,7 @@ FEnableNormals := False;
 	Threads:=1;
 	{$ENDIF}
 Depth:=3;
-FLightingEnable:=False;
+FLightingEnable := False;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
 Screen.LastChild.BoundsToNeedBounds();
@@ -284,10 +283,10 @@ end;
 
 destructor TSGFractalSierpinskiCarpet.Destroy;
 begin
-FBMD.Destroy;
-FLD.Destroy;
-FLDC.Destroy;
-FBPD.Destroy;
+FBMD.Destroy();
+FLD.Destroy();
+FLDC.Destroy();
+FBPD.Destroy();
 inherited;
 end;
 

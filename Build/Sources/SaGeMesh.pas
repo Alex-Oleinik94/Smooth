@@ -277,7 +277,9 @@ type
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
 		// Добавляет еще элемент(ы) в массив индексов
 		procedure AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
-	
+		
+		procedure SetVertex(const VVertexIndex : TSGUInt32; const x, y : TSGFloat32; const z : TSGFloat32 = 0; const w : TSGFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure SetVertex(const VVertexIndex : TSGUInt32; const v2 : TSGVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 	private
 		function GetColor3f(const Index:TSGMaxEnum):PSGColor3f;inline;
 		function GetColor4f(const Index:TSGMaxEnum):PSGColor4f;inline;
@@ -373,7 +375,7 @@ type
 		property Vertexes                 : TSGQuadWord read GetVertexLength      write SetVertexLength;
 		property RealQuantityFaces[Index : TSGLongWord]: TSGQuadWord   read GetFaceLength;
     protected
-		// Вклбючено ли VBO
+		// Включено ли VBO
 		// VBO - Vertex Buffer Object
 		// Vertex Buffer Object - это технология, при которой можно отображать обьекты на экране, 
 		//    держа все массивы в памяти видеокарте, а не в оперативной памяти
@@ -999,6 +1001,26 @@ else if (FColorType=SGMeshColorType4b) then
 		Result.Import(ArColor4b[Index]^.b / 255, ArColor4b[Index]^.g / 255, ArColor4b[Index]^.r / 255, ArColor4b[Index]^.a / 255);
 		end;
 	end;
+end;
+
+procedure TSG3DObject.SetVertex(const VVertexIndex : TSGUInt32; const v2 : TSGVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if FVertexType = SGMeshVertexType2f then
+	ArVertex2f[VVertexIndex]^ := v2
+else if FVertexType = SGMeshVertexType3f then
+	ArVertex3f[VVertexIndex]^.Import(v2.x, v2.y)
+else if FVertexType = SGMeshVertexType4f then
+	ArVertex4f[VVertexIndex]^.Import(v2.x, v2.y);
+end;
+
+procedure TSG3DObject.SetVertex(const VVertexIndex : TSGUInt32; const x, y : TSGFloat32; const z : TSGFloat32 = 0; const w : TSGFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if FVertexType = SGMeshVertexType2f then
+	ArVertex2f[VVertexIndex]^.Import(x, y)
+else if FVertexType = SGMeshVertexType3f then
+	ArVertex3f[VVertexIndex]^.Import(x, y, z)
+else if FVertexType = SGMeshVertexType4f then
+	ArVertex4f[VVertexIndex]^.Import(x, y, z, w);
 end;
 
 procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
