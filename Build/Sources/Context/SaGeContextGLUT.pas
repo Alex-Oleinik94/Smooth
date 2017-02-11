@@ -1,6 +1,9 @@
 {$INCLUDE SaGe.inc}
 
 //{$DEFINE GLUT_DEBUG}
+{$IFDEF GLUT_DEBUG}
+	//{$DEFINE GLUT_PAINT_DEBUG}
+	{$ENDIF}
 
 unit SaGeContextGLUT;
 
@@ -45,6 +48,7 @@ type
 		class function Suppored() : TSGBoolean; override;
 		procedure Paint();override;
 		class function ClassName() : TSGString;override;
+		procedure Close();override;
 			public
 		function  GetClientWidth() : TSGAreaInt;override;
 		function  GetClientHeight() : TSGAreaInt;override;
@@ -66,28 +70,28 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeBaseUtils
 	;
 
 var
 	ContextGLUT : TSGContextGLUT = nil;
 
+procedure TSGContextGLUT.Close();
+begin
+inherited;
+if FFreeGLUTSuppored and (glutLeaveMainLoop <> nil) then
+	glutLeaveMainLoop();
+end;
+
 class function TSGContextGLUT.ClassName() : TSGString;
 begin
-Result := 'TSGContextGLUT';
+Result := 'TSGContext' + Iff(DllManager.Suppored('FreeGLUT'), 'Free') + 'GLUT';
 end;
 
 procedure TSGContextGLUT.SetGLUTMoution(const VX, VY : TSGInt32);
 begin
 FCursorMoution.Import(VX, VY);
 end;
-
-{$IFDEF GLUT_DEBUG}
-procedure GLUTHint(const S : TSGString);
-begin
-SGLog.Source(S);
-WriteLn(S);
-end;
-{$ENDIF}
 
 class function TSGContextGLUT.Suppored() : TSGBoolean;
 begin
@@ -136,27 +140,27 @@ for I := 0 to CmdCount - 1 do
 glutInit(@CmdCount, @Cmd);
 end;
 
-procedure GLUTDrawGLScreen; cdecl;
+procedure GLUTDrawGLScreen(); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTDrawGLScreen');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTDrawGLScreen');{$ENDIF}
 ContextGLUT.Paint();
 end;
 
-procedure GLUTIdle; cdecl;
+procedure GLUTIdle(); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTIdle');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTIdle()');{$ENDIF}
 glutPostWindowRedisplay(glutGetWindow());
 end;
 
 procedure GLUTVisible(vis:integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTVisible(Visible='+SGStr(vis)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTVisible(Visible='+SGStr(vis)+')');{$ENDIF}
 glutIdleFunc(@GLUTIdle);
 end;
 
 procedure GLUTReSizeScreen(Width, Height: Integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTReSizeScreen(Width='+SGStr(Width)+',Height='+SGStr(Height)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTReSizeScreen(Width='+SGStr(Width)+',Height='+SGStr(Height)+')');{$ENDIF}
 if Height = 0 then
 	Height := 1;
 ContextGLUT.Width  := Width;
@@ -166,48 +170,62 @@ end;
 
 procedure GLUTKeyboard(Key: byte{glint}; X, Y: Longint); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTReSizeScreen(Key='+SGStr(Key)+',X='+SGStr(X)+',Y='+SGStr(Y)+'), Char(Key)="'+Char(Key)+'"');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTReSizeScreen(Key='+SGStr(Key)+',X='+SGStr(X)+',Y='+SGStr(Y)+'), Char(Key)="'+Char(Key)+'"');{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 ContextGLUT.SetKey(SGDownKey, Key);
 end;
 
 procedure GLUTMouse(Button:integer; State:integer; x,y:integer);cdecl;
 var
-	Bnt:TSGCursorButtons;
-	BntType:TSGCursorButtonType;
+	ContextButton : TSGCursorButtons;
+	ContextButtonType : TSGCursorButtonType;
+	ContextButtonUnknown : TSGBoolean = False;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMouse');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUTMouse(',Button,',',State,',',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 case Button of
 GLUT_LEFT_BUTTON:
-	Bnt:=SGLeftCursorButton;
+	ContextButton := SGLeftCursorButton;
 GLUT_RIGHT_BUTTON:
-	Bnt:=SGRightCursorButton;
+	ContextButton := SGRightCursorButton;
 GLUT_MIDDLE_BUTTON:
-	Bnt:=SGMiddleCursorButton;
-end;
-if State=0 then
-	BntType:=SGDownKey
+	ContextButton := SGMiddleCursorButton;
 else
-	BntType:=SGUpKey;
-ContextGLUT.SetCursorKey(BntType, Bnt);
+	ContextButtonUnknown := True;
+end;
+if State = 0 then
+	ContextButtonType := SGDownKey
+else
+	ContextButtonType := SGUpKey;
+if not ContextButtonUnknown then
+	ContextGLUT.SetCursorKey(ContextButtonType, ContextButton);
 end;
 
 procedure GLUTMotionPassive(x,y:longint);cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMotionPassive');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUTMotionPassive(',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure GLUTMotion(x,y:longint);cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTMotion');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUTMotion(',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure GLUTWindowStatus(Status:integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}GLUTHint('GLUTWindowStatus(Status='+SGStr(Status)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUTWindowStatus(Status='+SGStr(Status)+')');{$ENDIF}
+end;
+
+procedure FreeGLUTWheel(Wheel, Direction, X, Y: Integer); cdecl;
+begin
+{$IFDEF GLUT_DEBUG}SGHint(['GLUTWindowStatus(',Wheel, ',', Direction, ',', X, ',', Y,')']);{$ENDIF}
+if Direction = -1 then
+	ContextGLUT.SetCursorWheel(SGDownCursorWheel)
+else if Direction = 1 then
+	ContextGLUT.SetCursorWheel(SGUpCursorWheel);
+ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure TSGContextGLUT.Initialize();
@@ -246,6 +264,11 @@ glutKeyboardFunc(TF(@GLUTKeyboard));
 glutMouseFunc(@GLUTMouse);
 glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
+if FFreeGLUTSuppored then
+	begin
+	glutMouseWheelFunc(@FreeGLUTWheel);
+	end;
+
 //glutSetIconTitle(PChar(5));
 //glutWindowStatusFunc(@GLUTWindowStatus);
 
@@ -331,36 +354,36 @@ procedure TSGContextGLUT.Paint();
 var
 	SCR : TSGBool;
 begin
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : Begining, Before "UpdateTimer();"');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
 SCR := Screen.UpDateScreen();
 UpdateTimer();
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : Before "Render.Clear(...);"');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
-	{$IFDEF GLUT_DEBUG}
-		WriteLn('TSGContextGLUT.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
+	{$IFDEF GLUT_PAINT_DEBUG}
+		SGHint('TSGContextGLUT.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
 		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : Before "ClearKeys();" & "Messages();"');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : Before "ClearKeys();" & "Messages();"');
 	{$ENDIF}
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : Before "SGScreen.Paint();"');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : Before "SGScreen.Paint();"');
 	{$ENDIF}
 Screen.CustomPaint(SCR);
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : Before "SwapBuffers();"');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
 SwapBuffers();
-{$IFDEF GLUT_DEBUG}
-	WriteLn('TSGContextGLUT.Paint() : End');
+{$IFDEF GLUT_PAINT_DEBUG}
+	SGHint('TSGContextGLUT.Paint() : End');
 	{$ENDIF}
 if FPaintWithHandlingMessages then
 	begin
@@ -369,36 +392,36 @@ if FPaintWithHandlingMessages then
 	end;
 end;
 
-procedure TSGContextGLUT.Run;
+procedure TSGContextGLUT.Run();
 begin
 StartComputeTimer();
 while Active and (FNewContextType = nil) do
 	glutMainLoop();
 end;
 
-procedure TSGContextGLUT.Messages;
+procedure TSGContextGLUT.Messages();
 begin
 inherited;
 end;
 
-procedure TSGContextGLUT.SwapBuffers;
+procedure TSGContextGLUT.SwapBuffers();
 begin
-glutSwapBuffers;
+glutSwapBuffers();
 end;
 
-function TSGContextGLUT.GetCursorPosition: TSGPoint2int32;
+function TSGContextGLUT.GetCursorPosition(): TSGPoint2int32;
 begin
-Result:=FCursorMoution;
+Result := FCursorMoution;
 end;
 
-function TSGContextGLUT.GetWindowArea: TSGPoint2int32;
+function TSGContextGLUT.GetWindowArea(): TSGPoint2int32;
 begin
 Result.Import(
 	glutGet(GLUT_WINDOW_X),
 	glutGet(GLUT_WINDOW_Y));
 end;
 
-function TSGContextGLUT.GetScreenArea: TSGPoint2int32;
+function TSGContextGLUT.GetScreenArea(): TSGPoint2int32;
 begin
 Result.Import(
 	glutGet(GLUT_SCREEN_WIDTH),
