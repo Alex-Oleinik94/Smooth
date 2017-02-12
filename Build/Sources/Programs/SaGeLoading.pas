@@ -300,6 +300,11 @@ if FArrayOfLines<>nil then
 			SetLength(FArrayOfLines[i].FLengths,0);
 	SetLength(FArrayOfLines,0);
 	end;
+if FFont <> nil then
+	begin
+	FFont.Destroy();
+	FFont := nil;
+	end;
 inherited Destroy();
 end;
 
