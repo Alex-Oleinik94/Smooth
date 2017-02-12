@@ -74,22 +74,22 @@ uses
 procedure TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass);
 begin
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass = ',SGAddrStr(VRenderClass),') : Begining');
+	WriteLn('TSGEngineConfigurationPanel__InitRender(const VRenderClass : TSGRenderClass = ',SGAddrStr(VRenderClass),') : Begining');
 	{$ENDIF}
 Context.SetRenderClass(VRenderClass);
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitRender(const VRenderClass : TSGRenderClass) : End');
+	WriteLn('TSGEngineConfigurationPanel__InitRender(const VRenderClass : TSGRenderClass) : End');
 	{$ENDIF}
 end;
 
 procedure TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass);
 begin
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass = ',SGAddrStr(VContextClass),') : Begining');
+	WriteLn('TSGEngineConfigurationPanel__InitContext(const VContextClass : TSGContextClass = ',SGAddrStr(VContextClass),') : Begining');
 	{$ENDIF}
 Context.NewContext := VContextClass;
 {$IFDEF CONFIGURATION_DEBUG}
-	WriteLn('TSGEngineConfigurationPanel.InitContext(const VContextClass : TSGContextClass) : End');
+	WriteLn('TSGEngineConfigurationPanel__InitContext(const VContextClass : TSGContextClass) : End');
 	{$ENDIF}
 end;
 

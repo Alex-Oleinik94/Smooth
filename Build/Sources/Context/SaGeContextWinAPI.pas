@@ -1,4 +1,4 @@
-{$include SaGe.inc}
+{$INCLUDE SaGe.inc}
 
 {$R .\..\..\SaGe.res}
 
@@ -983,32 +983,66 @@ Result := hWindow2;
 end;
 
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
+
+function CreateRender() : TSGBoolean;
+begin
+Result := False;
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Createing render');
+	{$ENDIF}
+if FRender <> nil then
+	KillRender();
+FRender := FRenderClass.Create();
+FRender.Context := Self as ISGContext;
+Result := FRender.CreateContext();
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Create render context (Result=',Result,')']);
+	{$ENDIF}
+if Result then
+	FRender.Init()
+else
+	begin
+	SGLog.Source('TSGContextWinAPI__WindowInit(...). Failed creating render "' + FRenderClass.ClassName() + '".');
+	KillRender();
+	end;
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Created render (Render='+SGAddrStr(FRender)+')');
+	{$ENDIF}
+end;
+
 begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Enter']);
 	{$ENDIF}
+Result := False;
 dcWindow := GetDC( hParent );
-if FRender = nil then
+if (FRender = nil) and (FRenderClass <> nil) then
 	begin
-	{$IFDEF SGWinAPIDebug}
-		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Createing render');
-		{$ENDIF}
-	FRender := FRenderClass.Create();
-	FRender.Context := Self as ISGContext;
-	Result := FRender.CreateContext();
-	{$IFDEF SGWinAPIDebug}
-		SGLog.Source(['TSGContextWinAPI__WindowInit(HWnd) : Create render context (Result=',Result,')']);
-		{$ENDIF}
-	if Result then
-		FRender.Init();
-	{$IFDEF SGWinAPIDebug}
-		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Created render (Render='+SGAddrStr(FRender)+')');
-		{$ENDIF}
+	Result := CreateRender();
+	if (not Result) then
+		begin
+		if FRender = nil then
+			FRender := FRenderClass.Create();
+		if (TSGCompatibleRender <> nil) and (not (FRender is TSGCompatibleRender)) then
+			begin
+			KillRender();
+			FRenderClass := TSGCompatibleRender;
+			Result := CreateRender();
+			end
+		else
+			KillRender();
+		end;
 	end
-else
+else if (FRender = nil) and (FRenderClass = nil) then
+	begin
+	FRenderClass := TSGCompatibleRender;
+	if FRenderClass <> nil then
+		Result := CreateRender();
+	end
+else if (FRender <> nil) then
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Source('TSGContextWinAPI__WindowInit(HWnd) : Formating render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.SetPixelFormat();
@@ -1016,7 +1050,7 @@ else
 		Render.MakeCurrent();
 	end;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source(['TSGContextWinAPI__WindowInit : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 

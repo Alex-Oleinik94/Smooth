@@ -216,6 +216,7 @@ type
 		FScreen : TSGScreen;
 			protected
 		procedure SetPaintableSettings(); virtual;
+		procedure KillRender(); virtual;
 			private
 		function GetScreen() : TSGPointer; virtual;
 		procedure DestroyScreen(); virtual;
@@ -325,6 +326,15 @@ if FAudioRenderClass <> nil then
 		KillAudio();
 	FAudioRender := FAudioRenderClass.Create();
 	FAudioRender.Initialize();
+	end;
+end;
+
+procedure TSGContext.KillRender();
+begin
+if FRender <> nil then
+	begin
+	FRender.Destroy();
+	FRender := nil;
 	end;
 end;
 
@@ -561,7 +571,7 @@ begin
 if FormerContext = nil then
 	Exit;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
-	SGLog.Source(['TSGContext(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Enter.']);
+	SGLog.Source([ClassName(), '(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Enter.']);
 	{$ENDIF}
 DestroyScreen();
 FSelfLink      := FormerContext.FSelfLink;
@@ -581,7 +591,7 @@ FormerContext.FScreen      := nil;
 FormerContext.FPaintable   := nil;
 FormerContext.FAudioRender := nil;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
-	SGLog.Source(['TSGContext(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Leave.']);
+	SGLog.Source([ClassName(), '(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Leave.']);
 	{$ENDIF}
 end;
 
@@ -750,6 +760,12 @@ if Context.Active then
 	InitPlacement();
 	repeat
 	Context.Run();
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGHint
+	{$ELSE CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source
+	{$ENDIF CONTEXT_CHANGE_DEBUGING}
+			(['Leving from ', Context.ClassName(), ' loop!']);
 	until not SGTryChangeContextType(Context, IContext);
 	end;
 Context.Kill();

@@ -142,25 +142,25 @@ end;
 
 procedure GLUTDrawGLScreen(); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTDrawGLScreen');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:DrawGLScreen()');{$ENDIF}
 ContextGLUT.Paint();
 end;
 
 procedure GLUTIdle(); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTIdle()');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:Idle()');{$ENDIF}
 glutPostWindowRedisplay(glutGetWindow());
 end;
 
 procedure GLUTVisible(vis:integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTVisible(Visible='+SGStr(vis)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:Visible(Visible='+SGStr(vis)+')');{$ENDIF}
 glutIdleFunc(@GLUTIdle);
 end;
 
 procedure GLUTReSizeScreen(Width, Height: Integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTReSizeScreen(Width='+SGStr(Width)+',Height='+SGStr(Height)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:ReSizeScreen(Width='+SGStr(Width)+',Height='+SGStr(Height)+')');{$ENDIF}
 if Height = 0 then
 	Height := 1;
 ContextGLUT.Width  := Width;
@@ -170,7 +170,7 @@ end;
 
 procedure GLUTKeyboard(Key: byte{glint}; X, Y: Longint); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTReSizeScreen(Key='+SGStr(Key)+',X='+SGStr(X)+',Y='+SGStr(Y)+'), Char(Key)="'+Char(Key)+'"');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:ReSizeScreen(Key='+SGStr(Key)+',X='+SGStr(X)+',Y='+SGStr(Y)+'), Char(Key)="'+Char(Key)+'"');{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 ContextGLUT.SetKey(SGDownKey, Key);
 end;
@@ -181,7 +181,7 @@ var
 	ContextButtonType : TSGCursorButtonType;
 	ContextButtonUnknown : TSGBoolean = False;
 begin
-{$IFDEF GLUT_DEBUG}SGHint(['GLUTMouse(',Button,',',State,',',x,',',y,')']);{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUT:Mouse(',Button,',',State,',',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 case Button of
 GLUT_LEFT_BUTTON:
@@ -203,24 +203,24 @@ end;
 
 procedure GLUTMotionPassive(x,y:longint);cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint(['GLUTMotionPassive(',x,',',y,')']);{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUT:MotionPassive(',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure GLUTMotion(x,y:longint);cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint(['GLUTMotion(',x,',',y,')']);{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUT:Motion(',x,',',y,')']);{$ENDIF}
 ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure GLUTWindowStatus(Status:integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint('GLUTWindowStatus(Status='+SGStr(Status)+')');{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint('GLUT:WindowStatus(Status='+SGStr(Status)+')');{$ENDIF}
 end;
 
 procedure FreeGLUTWheel(Wheel, Direction, X, Y: Integer); cdecl;
 begin
-{$IFDEF GLUT_DEBUG}SGHint(['GLUTWindowStatus(',Wheel, ',', Direction, ',', X, ',', Y,')']);{$ENDIF}
+{$IFDEF GLUT_DEBUG}SGHint(['GLUT:WindowStatus(',Wheel, ',', Direction, ',', X, ',', Y,')']);{$ENDIF}
 if Direction = -1 then
 	ContextGLUT.SetCursorWheel(SGDownCursorWheel)
 else if Direction = 1 then
@@ -232,7 +232,7 @@ procedure TSGContextGLUT.Initialize();
 begin
 if ContextGLUT <> nil then
 	begin
-	SGLog.Source('TSGContextGLUT__InitRender() : Finded other GLUT context, destroyed!');
+	SGLog.Source([ClassName(), '__InitRender() : Finded other GLUT context, destroyed!']);
 	ContextGLUT.Destroy();
 	ContextGLUT := nil;
 	end;
@@ -300,51 +300,51 @@ inherited;
 end;
 
 function TSGContextGLUT.InitRender() : TSGBoolean;
-const
+
+function TestRender() : TSGBool;
+var
 	TempRender : TSGRender = nil;
 begin
+TempRender := FRenderClass.Create();
+Result := TempRender is TSGRenderOpenGL;
+TempRender.Destroy();
+TempRender := nil;
+end;
+
+begin
 if (FRenderClass = nil) then
+	FRenderClass := TSGRenderOpenGL
+else if not TestRender() then
 	begin
+	SGLog.Source([ClassName(), '__InitRender() : GLUT can work only with OpenGL! Render replaced from "', FRenderClass.ClassName(), '"!']);
 	FRenderClass := TSGRenderOpenGL;
-	end
-else
-	begin
-	SGLog.Source('TSGContextGLUT__InitRender() : Testing render class!');
-	TempRender := FRenderClass.Create();
-	if not (TempRender is TSGRenderOpenGL) then
-		begin
-		SGLog.Source('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render replaced!');
-		FRenderClass := TSGRenderOpenGL;
-		end;
-	TempRender.Destroy();
-	TempRender := nil;
 	end;
 
 if FRender = nil then
 	begin
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Source('TSGContextGLUT__InitRender() : Createing render');
+		SGLog.Source([ClassName(), '__InitRender() : Creating render...']);
 		{$ENDIF}
 	FRender := FRenderClass.Create();
 	FRender.Context := Self as ISGContext;
 	FRender.Init();
 	Result := FRender <> nil;
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Source('TSGContextGLUT__InitRender() : Created render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source([ClassName(), '__InitRender() : Created render (Render='+SGAddrStr(FRender)+').']);
 		{$ENDIF}
 	end
 else
 	begin
 	if not (FRender is TSGRenderOpenGL) then
 		begin
-		SGLog.Source('TSGContextGLUT__InitRender() : GLUT can work only with OpenGL! Render recreated!');
-		FRender.Destroy();
-		FRender := nil;
+		SGLog.Source([ClassName(), '__InitRender() : GLUT can work only with OpenGL! Render recreated from "', FRender.ClassName(), '"!']);
+		FRenderClass := TSGRenderOpenGL;
+		KillRender();
 		Result := InitRender();
 		end;
 
 	{$IFDEF GLUT_DEBUG}
-		SGLog.Source('TSGContextGLUT__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source([ClassName(), '__InitRender() : Formating render (Render='+SGAddrStr(FRender)+')']);
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.MakeCurrent();
@@ -356,35 +356,39 @@ var
 	SCR : TSGBool;
 begin
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : Begining, Before "UpdateTimer();"');
-	{$ENDIF}
+	SGHint([ClassName(), '__Paint() : Begining, Before "UpdateTimer();"']);
+{$ELSE GLUT_PAINT_DEBUG}
+{$IFDEF GLUT_DEBUG}
+	SGHint([ClassName(), '__Paint().']);
+{$ENDIF GLUT_DEBUG}
+{$ENDIF GLUT_PAINT_DEBUG}
 SCR := Screen.UpDateScreen();
 UpdateTimer();
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : Before "Render.Clear(...);"');
+	SGHint([ClassName(), 'Paint() : Before "Render.Clear(...);"']);
 	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
 	{$IFDEF GLUT_PAINT_DEBUG}
-		SGHint('TSGContextGLUT.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
+		SGHint([ClassName(), '__Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"']);
 		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : Before "ClearKeys();" & "Messages();"');
+	SGHint([ClassName(), 'Paint() : Before "ClearKeys();" & "Messages();"']);
 	{$ENDIF}
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : Before "SGScreen.Paint();"');
+	SGHint([ClassName(), 'Paint() : Before "SGScreen.Paint();"']);
 	{$ENDIF}
 Screen.CustomPaint(SCR);
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : Before "SwapBuffers();"');
+	SGHint([ClassName(), 'Paint() : Before "SwapBuffers();"']);
 	{$ENDIF}
 SwapBuffers();
 {$IFDEF GLUT_PAINT_DEBUG}
-	SGHint('TSGContextGLUT.Paint() : End');
+	SGHint([ClassName(), 'Paint() : End.']);
 	{$ENDIF}
 if FPaintWithHandlingMessages then
 	begin

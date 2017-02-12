@@ -289,13 +289,13 @@ end;
 
 destructor TSGRender.Destroy();
 begin
-SGLog.Source(['TSGRender__Destroy()']);
 {$IFDEF RENDER_DEBUG}
-	WriteLn('TSGRender.Destroy(): Before "inherited"');
+	SGLog.Source(['TSGRender__Destroy()']);
+	WriteLn('TSGRender__Destroy(): Before "inherited"');
 	{$ENDIF}
 inherited Destroy();
 {$IFDEF RENDER_DEBUG}
-	WriteLn('TSGRender.Destroy(): After "inherited"');
+	WriteLn('TSGRender__Destroy(): After "inherited"');
 	{$ENDIF}
 end;
 
