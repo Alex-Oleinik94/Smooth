@@ -599,7 +599,7 @@ SetLength(SGContexts, 0);
 inherited;
 end;
 
-destructor TSGContextWinAPI.Destroy;
+destructor TSGContextWinAPI.Destroy();
 begin
 inherited;
 end;
@@ -813,7 +813,8 @@ wm_move
 ,WM_WINDOWPOSCHANGED
 ,WM_WINDOWPOSCHANGING:
 	begin
-	HandlingSizingFromRect();
+	if FActive then
+		HandlingSizingFromRect();
 	end;
 else
 	begin
@@ -1075,17 +1076,29 @@ if FWindowClassName <> '' then
 end;
 
 begin
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source(['TSGContextWinAPI__KillWindow(). Release DC.']);
+	{$ENDIF}
 if (hWindow <> 0) and (dcWindow <> 0) then
 	begin
 	ReleaseDC(hWindow, dcWindow);
 	dcWindow := 0;
 	end;
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source(['TSGContextWinAPI__KillWindow(). Destroying window.']);
+	{$ENDIF}
 if hWindow <> 0 then
 	begin
 	DestroyWindow(hWindow);
 	hWindow := 0;
 	end;
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source(['TSGContextWinAPI__KillWindow(). Unregister window class.']);
+	{$ENDIF}
 UnregisterWindowClass();
+{$IFDEF SGWinAPIDebug}
+	SGLog.Source(['TSGContextWinAPI__KillWindow().']);
+	{$ENDIF}
 end;
 
 procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean);

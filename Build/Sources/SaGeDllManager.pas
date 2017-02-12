@@ -51,6 +51,7 @@ type
 		procedure LogExtStat();
 		function StatString(const LoadObjectId : TSGUInt32 = 0) : TSGString;
 		function ChunkName(const i : TSGUInt32) : TSGString;
+		function ChunkCount() : TSGUInt32;
 			private
 		FOwner         : TSGDllManager;
 
@@ -77,9 +78,9 @@ type
 		class function ChildNames() : TSGStringList; virtual;
 
 		class function ChunkNames() : TSGStringList; virtual;
-		class function DllChunkNames() : TSGStringList; virtual;
+		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; virtual;
 		class function LoadChunk(const VChunk : TSGString;const VDll : TSGLibHandle) : TSGDllLoadObject; virtual;
-		class function LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList; virtual;
+		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; virtual;
 		class function ChunksLoadJointly() : TSGBool; virtual;
 
 		class function SystemNames() : TSGStringList; virtual; abstract;
@@ -359,20 +360,16 @@ Result := 0;
 if FDlls <> nil then
 	if Length(FDlls) > 0 then
 		for i := 0 to High(FDlls) do
-			begin
-			SL := FDlls[i].ChunkNames();
-			if SL <> nil then
+			if FDlls[i].ChunkCount() <> 0 then
 				begin
-				if Length(SL) > 0 then
+				SL := FDlls[i].ChunkNames();
+				for ii := 0 to FDlls[i].ChunkCount() - 1 do
 					begin
-					for ii := 0 to High(SL) do
-						if Length(SL[i]) > Result then
-							Result := Length(SL[i]);
-					SetLength(SL, 0);
+					if Length(SL[ii]) > Result then
+						Result := Length(SL[ii]);
 					end;
-				SL := nil;
+				SetLength(SL, 0);
 				end;
-			end;
 end;
 
 procedure TSGDllManager.PrintStat();
@@ -474,8 +471,9 @@ FErrorDllNames := nil;
 FLibHandles    := nil;
 FOwner         := nil;
 FDllFileNames  := nil;
-if DllManager <> nil then
-	DllManager.Add(Self);
+if DllManager = nil then
+	DllManager := TSGDllManager.Create();
+DllManager.Add(Self);
 end;
 
 destructor TSGDll.Destroy();
@@ -535,6 +533,23 @@ if StringList <> nil then
 		SetLength(StringList, 0);
 		end;
 	StringList := nil;
+	end;
+end;
+
+function TSGDll.ChunkCount() : TSGUInt32;
+var
+	SL : TSGStringList;
+begin
+Result := 0;
+SL := ChunkNames();
+if SL <> nil then
+	begin
+	if Length(SL) > 0 then
+		begin
+		Result := Length(SL);
+		SetLength(SL, 0);
+		end;
+	SL := nil;
 	end;
 end;
 
@@ -734,16 +749,31 @@ function TSGDll.CustomLoading() : TSGBool;
 
 function LoadJointly() : TSGBool;
 var
-	i : TSGUInt32;
+	i, ii : TSGUInt32;
+	ChunckDllNames : TSGStringList = nil;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
 SGLog.Source('TSGDll.LoadJointly()');
 {$ENDIF}
 Result := False;
-FDllFileNames := DllChunkNames();
-SetLength(FLibHandles, Length(FDllFileNames));
-for i := 0 to High(FLibHandles) do
-	FLibHandles[i] := DllManager.OpenLibrary(FDllFileNames[i], FDllFileNames[i]);
+SetLength(FDllFileNames, ChunkCount());
+for i := 0 to ChunkCount() - 1 do
+	FDllFileNames[i] := '';
+SetLength(FLibHandles, ChunkCount());
+for i := 0 to ChunkCount() - 1 do
+	begin
+	ChunckDllNames := DllChunkNames(i);
+	FLibHandles[i] := 0;
+	if ChunckDllNames <> nil then
+		if Length(ChunckDllNames) > 0 then
+			for ii := 0 to High(ChunckDllNames) do
+				begin
+				FLibHandles[i] := DllManager.OpenLibrary(ChunckDllNames[ii], FDllFileNames[i]);
+				if FLibHandles[i] <> 0 then
+					break;
+				end;
+	SetLength(ChunckDllNames, 0);
+	end;
 FLoadObjects := LoadChunks(FLibHandles);
 Result := True;
 if FLoadObjects <> nil then
@@ -938,7 +968,7 @@ begin
 Result := nil;
 end;
 
-class function TSGDll.DllChunkNames() : TSGStringList;
+class function TSGDll.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
 begin
 Result := nil;
 end;
@@ -948,7 +978,7 @@ begin
 Result.Clear();
 end;
 
-class function TSGDll.LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList;
+class function TSGDll.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
 begin
 Result := nil;
 end;
@@ -965,13 +995,17 @@ end;
 
 initialization
 begin
-DllManager := TSGDllManager.Create();
+if DllManager = nil then
+	DllManager := TSGDllManager.Create();
 end;
 
 finalization
 begin
-DllManager.Destroy();
-DllManager := nil;
+if DllManager <> nil then
+	begin
+	DllManager.Destroy();
+	DllManager := nil;
+	end;
 end;
 
 end.

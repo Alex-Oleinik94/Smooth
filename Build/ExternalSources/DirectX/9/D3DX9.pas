@@ -12309,7 +12309,7 @@ type
 		class function DllNames() : TSGStringList; override;
 		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
 		class procedure Free(); override;
-		class function DllChunkNames() : TSGStringList; override;
+		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
 		class function ChunkNames() : TSGStringList; override;
 		class function LoadChunk(const VChunk : TSGString; const VDll : TSGLibHandle) : TSGDllLoadObject; override;
 			private
@@ -12380,7 +12380,7 @@ Result += 'Tex';
 Result += 'Anim';
 end;
 
-class function TSGDllD3DX9.DllChunkNames() : TSGStringList;
+class function TSGDllD3DX9.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
 begin
 Result := nil;
 Result += d3dx9mathDLL;

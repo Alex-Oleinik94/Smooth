@@ -117,7 +117,7 @@ if FInitialized then
 			glutFullScreen()
 		else
 			begin
-			glutReshapeWindow(Width,Height);
+			glutReshapeWindow(Width, Height);
 			if glutPositionWindow <> nil then
 				glutPositionWindow(0, 0);
 			end;
@@ -229,8 +229,6 @@ ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
 procedure TSGContextGLUT.Initialize();
-type
-	TF = procedure (a:Byte;b,c:LongInt);cdecl;
 begin
 if ContextGLUT <> nil then
 	begin
@@ -251,7 +249,7 @@ if Fullscreen then
 else
 	begin
 	glutInitWindowSize(Width, Height);
-	glutInitWindowPosition((GetScreenArea.x - Width) div 2,(GetScreenArea.y - Height) div 2);
+	glutInitWindowPosition((GetScreenArea.x - Width) div 2, (GetScreenArea.y - Height) div 2);
 	glutCreateWindow(SGStringToPChar(FTitle));
 	end;
 
@@ -260,13 +258,16 @@ glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 glutDisplayFunc(@GLUTDrawGLScreen);
 glutVisibilityFunc(@GLUTVisible);
 glutReshapeFunc(@GLUTReSizeScreen);
-glutKeyboardFunc(TF(@GLUTKeyboard));
+glutKeyboardFunc(@GLUTKeyboard);
 glutMouseFunc(@GLUTMouse);
 glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
 if FFreeGLUTSuppored then
 	begin
-	glutMouseWheelFunc(@FreeGLUTWheel);
+	if glutMouseWheelFunc <> nil then
+		glutMouseWheelFunc(@FreeGLUTWheel);
+	if glutSetOption <> nil then
+		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 	end;
 
 //glutSetIconTitle(PChar(5));
@@ -396,7 +397,11 @@ procedure TSGContextGLUT.Run();
 begin
 StartComputeTimer();
 while Active and (FNewContextType = nil) do
+	begin
 	glutMainLoop();
+	if glutSetOption <> nil then
+		FActive := False;
+	end;
 end;
 
 procedure TSGContextGLUT.Messages();

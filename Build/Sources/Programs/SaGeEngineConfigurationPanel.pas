@@ -7,16 +7,11 @@ unit SaGeEngineConfigurationPanel;
 interface
 
 uses
-	 SaGeCommon
+	 SaGeBase
+	,SaGeCommon
 	,SaGeContext
 	,SaGeScreen
-	,SaGeBase
 	,SaGeRender
-	,SaGeVersion
-	,SaGeRenderConstants
-	,SaGeScreenBase
-	
-	,Classes
 	,SaGeUtils
 	;
 
@@ -48,7 +43,14 @@ type
 implementation
 
 uses
-	SaGeRenderOpenGL
+	 SaGeStringUtils
+	,SaGeVersion
+	,SaGeRenderConstants
+	,SaGeScreenBase
+	
+	,Classes
+	
+	,SaGeRenderOpenGL
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinAPI
 		,SaGeRenderDirectX12

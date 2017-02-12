@@ -20350,8 +20350,8 @@ type
 		class procedure Free(); override;
 
 		class function ChunkNames() : TSGStringList; override;
-		class function DllChunkNames() : TSGStringList; override;
-		class function LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList; override;
+		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
+		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; override;
 		class function ChunksLoadJointly() : TSGBool; override;
 
 		function LoadExtensions() : TSGDllLoadExtensionsObject; override;
@@ -20377,11 +20377,13 @@ Result += 'GL';
 Result += 'GLU';
 end;
 
-class function TSGDllOpenGL.DllChunkNames() : TSGStringList;
+class function TSGDllOpenGL.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
 begin
 Result := nil;
-Result += OPENGL_LIBNAME;
-Result += GLU_LIBNAME;
+case ChunkIndex of
+0 : Result += OPENGL_LIBNAME;
+1 : Result += GLU_LIBNAME;
+end;
 end;
 
 class function TSGDllOpenGL.DllNames() : TSGStringList;
@@ -20397,15 +20399,15 @@ LoadObjectGL  := nil;
 LoadObjectGLU := nil;
 end;
 
-class function TSGDllOpenGL.LoadChunks(const VDll : TSGLibHandleList) : TSGDllLoadObjectList;
+class function TSGDllOpenGL.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
 begin
 SetLength(Result, 2);
 Result[0].Clear();
 Result[1].Clear();
 LoadObjectGL  := @Result[0];
 LoadObjectGLU := @Result[1];
-GL_LibHandle  := Pointer(VDll[0]);
-GLU_LibHandle := Pointer(VDll[1]);
+GL_LibHandle  := Pointer(VDlls[0]);
+GLU_LibHandle := Pointer(VDlls[1]);
 InitOpenGL();
 LoadObjectGL  := nil;
 LoadObjectGLU := nil;

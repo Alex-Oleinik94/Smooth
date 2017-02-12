@@ -1,6 +1,7 @@
 {$INCLUDE SaGe.inc}
 
 //{$DEFINE CONTEXT_DEBUGING}
+//{$DEFINE CONTEXT_CHANGE_DEBUGING}
 
 unit SaGeContext;
 
@@ -559,6 +560,9 @@ procedure TSGContext.MoveInfo(var FormerContext : TSGContext);
 begin
 if FormerContext = nil then
 	Exit;
+{$IFDEF CONTEXT_CHANGE_DEBUGING}
+	SGLog.Source(['TSGContext(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Enter.']);
+	{$ENDIF}
 DestroyScreen();
 FSelfLink      := FormerContext.FSelfLink;
 FRenderClass   := FormerContext.FRenderClass;
@@ -576,6 +580,9 @@ FAudioRender   := FormerContext.FAudioRender;
 FormerContext.FScreen      := nil;
 FormerContext.FPaintable   := nil;
 FormerContext.FAudioRender := nil;
+{$IFDEF CONTEXT_CHANGE_DEBUGING}
+	SGLog.Source(['TSGContext(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Leave.']);
+	{$ENDIF}
 end;
 
 function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
@@ -583,20 +590,48 @@ function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGCont
 // Result = False : Exit loop
 var
 	NewContext : TSGContext = nil;
+	OldContextName : TSGString = '';
 begin
 Result := False;
+{$IFDEF CONTEXT_CHANGE_DEBUGING}
+	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Enter.']);
+	{$ENDIF}
 if Context.Active and (Context.NewContext <> nil) then
 	begin
+	OldContextName := Context.ClassName();
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Begin changing.']);
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Creating new context.']);
+		{$ENDIF}
 	NewContext := Context.NewContext.Create();
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Delete old context device recources.']);
+		{$ENDIF}
 	Context.DeleteDeviceResources();
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Moving info.']);
+		{$ENDIF}
 	NewContext.MoveInfo(Context);
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Change "IContext".']);
+		{$ENDIF}
 	IContext := NewContext;
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Destroying old context.']);
+		{$ENDIF}
 	Context.Destroy();
+	{$IFDEF CONTEXT_CHANGE_DEBUGING}
+		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Initializing new context.']);
+		{$ENDIF}
 	Context := NewContext;
 	Context.Initialize();
 	Context.LoadDeviceResources();
 	Result := Context.Active;
+	SGHint(['Changing context (`' + OldContextName + '` --> `' + Context.ClassName() + '`)' + Iff(Result, ' successfull.', ' failed!')]);
 	end;
+{$IFDEF CONTEXT_CHANGE_DEBUGING}
+	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Leave.']);
+	{$ENDIF}
 end;
 
 function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
@@ -799,7 +834,7 @@ begin
 OldRenderClassName := FRender.ClassName();
 DT1.Get();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.ReinitializeRender() : Begining');
+	WriteLn('TSGContext__ReinitializeRender() : Begining');
 	{$ENDIF}
 if FPaintable <> nil then
 	FPaintable.DeleteDeviceResources();
@@ -807,7 +842,7 @@ Screen.DeleteDeviceResources();
 if FRender <> nil then
 	DestroyRender();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.ReinitializeRender() : After destroying, before creating');
+	WriteLn('TSGContext__ReinitializeRender() : After destroying, before creating');
 	{$ENDIF}
 ResultSuccess := InitNewRenderClass(FRenderClass);
 if not ResultSuccess then
@@ -816,7 +851,7 @@ if (not ResultSuccess) and (TSGCompatibleRender <> nil) then
 	ResultSuccess := InitNewRenderClass(TSGCompatibleRender);
 if not ResultSuccess then
 	begin
-	SGHint('TSGContext.ReinitializeRender() : Can''t initialize render.');
+	SGHint('TSGContext__ReinitializeRender() : Can''t initialize render.');
 	Halt(1);
 	end;
 FRenderClassChanget := False;
@@ -824,10 +859,10 @@ if FPaintable <> nil then
 	FPaintable.LoadDeviceResources();
 Screen.LoadDeviceResources();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.ReinitializeRender() : End');
+	WriteLn('TSGContext__ReinitializeRender() : End');
 	{$ENDIF}
 DT2.Get();
-SGLog.Source('TSGContext.ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SGSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SGStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
+SGLog.Source('TSGContext__ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SGSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SGStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
 end;
 
 procedure TSGContext.SwapBuffers();
@@ -839,7 +874,7 @@ end;
 procedure TSGContext.SetRenderClass(const NewRender : TSGPointer);
 begin
 {$IFDEF CONTEXT_DEBUGING}
-WriteLn('TSGContext.SetRenderClass(...) : Begining');
+WriteLn('TSGContext__SetRenderClass(...) : Begining');
 	{$ENDIF}
 FRenderClassOld := FRenderClass;
 FRenderClass := TSGRenderClass(NewRender);
@@ -848,7 +883,7 @@ if FInitialized and (not (Render is FRenderClass)) then
 	FRenderClassChanget := True;
 	end;
 {$IFDEF CONTEXT_DEBUGING}
-WriteLn('TSGContext.SetRenderClass(...) : End');
+WriteLn('TSGContext__SetRenderClass(...) : End');
 	{$ENDIF}
 end;
 
@@ -998,7 +1033,6 @@ if FPaintableClass <> nil then
 		FPaintable.LoadDeviceResources();
 		end;
 	end;
-Paint();
 end;
 
 procedure TSGContext.UpdateTimer();
@@ -1024,7 +1058,7 @@ while Active and (FNewContextType = nil) do
 		Paint();
 		end;
 	{$IFDEF CONTEXT_DEBUGING}
-		WriteLn('TSGContext.Run(): Before continue looping');
+		WriteLn('TSGContext__Run(): Before continue looping');
 		{$ENDIF}
 	if FRenderClassChanget then
 		ReinitializeRender();
@@ -1034,23 +1068,23 @@ end;
 procedure TSGContext.Paint();
 begin
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Begining, Before "UpdateTimer();"');
+	WriteLn('TSGContext__Paint() : Begining, Before "UpdateTimer();"');
 	{$ENDIF}
 UpdateTimer();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Before "Render.Clear(...);"');
+	WriteLn('TSGContext__Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
 Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
 	{$IFDEF CONTEXT_DEBUGING}
-		WriteLn('TSGContext.Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
+		WriteLn('TSGContext__Paint() : Before "Render.InitMatrixMode(SG_3D);" & "FPaintable.Paint();"');
 		{$ENDIF}
 	Render.InitMatrixMode(SG_3D);
 	FPaintable.Paint();
 	end;
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Before "ClearKeys();" & "Messages();"');
+	WriteLn('TSGContext__Paint() : Before "ClearKeys();" & "Messages();"');
 	{$ENDIF}
 if FPaintWithHandlingMessages then
 	begin
@@ -1058,15 +1092,15 @@ if FPaintWithHandlingMessages then
 	Messages();
 	end;
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Before "Screen.Paint();"');
+	WriteLn('TSGContext__Paint() : Before "Screen.Paint();"');
 	{$ENDIF}
 Screen.Paint();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : Before "SwapBuffers();"');
+	WriteLn('TSGContext__Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
 SwapBuffers();
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext.Paint() : End');
+	WriteLn('TSGContext__Paint() : End');
 	{$ENDIF}
 end;
 
@@ -1125,7 +1159,7 @@ end;
 
 procedure TSGContext.Messages();
 var
-	Point:TSGPoint2int32;
+	Point : TSGPoint2int32;
 begin
 Point := GetCursorPosition();
 Point -= ShiftClientArea();
@@ -1140,11 +1174,12 @@ if CursorCentered and (@SetCursorPosition<>nil) then
 	FCursorPosition[SGNowCursorPosition] := Point;
 	end;
 
-if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyPressedType=SGDownKey)) or
-	((KeyPressed) and (KeyPressedByte=122)  and (KeyPressedType=SGDownKey))then
+if  ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyPressedType=SGDownKey)) or
+	((KeyPressed) and (KeyPressedByte=122)  and (KeyPressedType=SGDownKey)) then
 	begin
 	Fullscreen:= not Fullscreen;
-	SetKey(SGUpKey,13);
+	if ((KeyPressed) and (KeyPressedByte=13) and (KeysPressed(SG_ALT_KEY)) and (KeyPressedType=SGDownKey)) then
+		SetKey(SGUpKey, 13);
 	end;
 end;
 
@@ -1308,6 +1343,7 @@ end;
 
 destructor TSGContext.Destroy();
 begin
+FActive := False;
 Kill();
 inherited;
 end;
