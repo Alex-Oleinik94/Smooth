@@ -199,7 +199,7 @@ type
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
 		procedure MoveInfo(var FormerContext : TSGContext);virtual;
-		procedure SetNewContext(const NewContext : TSGPointer);virtual;
+		procedure SetNewContext(const NewContextClass : TSGPointer);virtual;
 			protected
 		FNewContextType : TSGContextClass;
 		FSelfLink       : PISGContext;
@@ -545,9 +545,9 @@ begin
 Result := False;
 end;
 
-procedure TSGContext.SetNewContext(const NewContext : TSGPointer);
+procedure TSGContext.SetNewContext(const NewContextClass : TSGPointer);
 begin
-FNewContextType := TSGContextClass(NewContext);
+FNewContextType := TSGContextClass(NewContextClass);
 end;
 
 procedure TSGContext.DeleteDeviceResources();
@@ -606,7 +606,7 @@ Result := False;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
 	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Enter.']);
 	{$ENDIF}
-if Context.Active and (Context.NewContext <> nil) then
+if (Context.NewContext <> nil) and (Context.Active or (not (Context is Context.NewContext))) then
 	begin
 	OldContextName := Context.ClassName();
 	{$IFDEF CONTEXT_CHANGE_DEBUGING}

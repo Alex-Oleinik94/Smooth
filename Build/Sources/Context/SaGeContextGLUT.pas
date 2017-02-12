@@ -52,6 +52,7 @@ type
 			public
 		function  GetClientWidth() : TSGAreaInt;override;
 		function  GetClientHeight() : TSGAreaInt;override;
+		procedure SetNewContext(const NewContextClass : TSGPointer);override;
 			protected
 		function InitRender() : TSGBoolean;
 			protected
@@ -75,6 +76,14 @@ uses
 
 var
 	ContextGLUT : TSGContextGLUT = nil;
+
+procedure TSGContextGLUT.SetNewContext(const NewContextClass : TSGPointer);
+begin
+inherited;
+{$IFDEF GLUT_DEBUG}SGHint([ClassName(), '__SetNewContext(', FNewContextType.ClassName(), ').']);{$ENDIF}
+if (not (Self is FNewContextType)) and  FFreeGLUTSuppored and (glutLeaveMainLoop <> nil) then
+	glutLeaveMainLoop();
+end;
 
 procedure TSGContextGLUT.Close();
 begin
@@ -267,7 +276,7 @@ if FFreeGLUTSuppored then
 	if glutMouseWheelFunc <> nil then
 		glutMouseWheelFunc(@FreeGLUTWheel);
 	if glutSetOption <> nil then
-		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+		glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 	end;
 
 //glutSetIconTitle(PChar(5));
