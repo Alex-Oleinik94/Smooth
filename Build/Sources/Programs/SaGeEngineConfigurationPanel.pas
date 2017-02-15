@@ -178,7 +178,7 @@ FFPS := nil;
 
 FCaptionLabel := TSGLabel.Create();
 CreateChild(FCaptionLabel);
-FCaptionLabel.Caption := 'SaGe Engine Configuration (x' + SGVerCPU + ')';
+FCaptionLabel.Caption := 'SaGe Engine Configuration (' + SGVerCPU + ' bit)';
 FCaptionLabel.Visible := True;
 
 FVersionLabel := TSGLabel.Create();

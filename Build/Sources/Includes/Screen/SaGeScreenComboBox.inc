@@ -1,7 +1,7 @@
 {$IFDEF SCREEN_INTERFACE}
 type
 	TSGComboBoxProcedure = TSGButtonMenuProcedure;
-	TSGComboBox=class(TSGOpenComponent, ISGComboBox)
+	TSGComboBox = class(TSGOpenComponent, ISGComboBox)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -128,9 +128,48 @@ else
 end;
 
 procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+
+procedure MoveUpOrDown();
+var
+	FNewSelectItemIndex : TSGUInt32 = 0;
+
+procedure DoMove();
+begin
+CanRePleace:=False;
+ClearPriority();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__FromUpDateUnderCursor() : Before calling "FProcedure(...)"');
+	{$ENDIF}
+if FProcedure<>nil then
+	FProcedure(FSelectedItemIndex,FNewSelectItemIndex,Self);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__FromUpDateUnderCursor() : After calling "FProcedure(...)"');
+	{$ENDIF}
+SelectedItemIndex := FNewSelectItemIndex;
+FTextColor:=SGVertex4fImport();
+FBodyColor:=SGVertex4fImport();
+if OnChange <> nil then
+	OnChange(Self);
+end;
+
+begin
+if (Lines - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
+	begin
+	Context.SetCursorWheel(SGNullCursorWheel);
+	FNewSelectItemIndex := FSelectedItemIndex + 1;
+	DoMove();
+	end
+else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
+	begin
+	Context.SetCursorWheel(SGNullCursorWheel);
+	FNewSelectItemIndex := FSelectedItemIndex - 1;
+	DoMove();
+	end;
+end;
+
 begin
 {$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox.FromUpDateUnderCursor() : Begining');
+WriteLn('TSGComboBox__FromUpDateUnderCursor() : Begining');
 	{$ENDIF}
 if CursorInComponentNow then
 	begin
@@ -144,6 +183,8 @@ if CursorInComponentNow then
 		end
 	else
 		FCursorOnThisItem:=-1;
+	if (not FOpen) and (Context.CursorWheel <> SGNullCursorWheel) then
+		MoveUpOrDown();
 	if FOpen and CanRePleace then
 		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 			begin
@@ -171,7 +212,7 @@ if CursorInComponentNow then
 	end;
 inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 {$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox.FromUpDateUnderCursor() : End');
+WriteLn('TSGComboBox__FromUpDateUnderCursor() : End');
 	{$ENDIF}
 end;
 
@@ -205,12 +246,12 @@ if  FOpen and (FCursorOnComponent) then
 					FOpen:=False;
 					ClearPriority();
 					{$IFDEF SCREEN_DEBUG}
-						WriteLn('TSGComboBox.FromUpDate() : Before calling "FProcedure(...)"');
+						WriteLn('TSGComboBox__FromUpDate() : Before calling "FProcedure(...)"');
 						{$ENDIF}
 					if FProcedure<>nil then
 						FProcedure(FSelectedItemIndex,FCursorOnThisItem,Self);
 					{$IFDEF SCREEN_DEBUG}
-						WriteLn('TSGComboBox.FromUpDate() : After calling "FProcedure(...)"');
+						WriteLn('TSGComboBox__FromUpDate() : After calling "FProcedure(...)"');
 						{$ENDIF}
 					SelectedItemIndex:=FCursorOnThisItem;
 					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
