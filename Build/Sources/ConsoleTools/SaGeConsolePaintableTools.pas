@@ -40,6 +40,7 @@ uses
 	,SaGeVersion
 	,SaGeStringUtils
 	,SaGeBaseUtils
+	,SaGeLog
 	
 	// System-dependent includes
 	{$IFDEF MSWINDOWS}
@@ -443,19 +444,6 @@ if Result then
 {$ENDIF}
 end;
 
-procedure Run();
-begin
-if (AudioRenderClass = nil) and (not AudioDisabled) then
-	AudioRenderClass := TSGCompatibleAudioRender;
-if (AudioRenderClass <> nil) then
-	ContextSettings += SGContextOptionAudioRender(AudioRenderClass);
-SGRunPaintable(
-	VPaintabeClass
-	,ContextClass
-	,RenderClass
-	,ContextSettings);
-end;
-
 var
 	Success : TSGBool = True;
 begin
@@ -488,8 +476,31 @@ if (VParams<>nil) and (Length(VParams)>0) then
 		Success := Execute();
 		Destroy();
 		end;
-if Success then
-	Run();
+if ContextClass = nil then
+	ContextClass := TSGCompatibleContext;
+if RenderClass = nil then
+	RenderClass  := TSGCompatibleRender;
+if (AudioRenderClass = nil) and (not AudioDisabled) then
+	AudioRenderClass := TSGCompatibleAudioRender;
+if (AudioRenderClass <> nil) then
+	ContextSettings += SGContextOptionAudioRender(AudioRenderClass);
+if (ContextClass <> nil) and (RenderClass <> nil) then
+	begin
+	if Success then
+		SGRunPaintable(
+			VPaintabeClass,
+			ContextClass,
+			RenderClass,
+			ContextSettings);
+	end
+else
+	begin
+	if ContextClass = nil then
+		SGHint('Error : Not suppored contexts found!');
+	if RenderClass = nil then
+		SGHint('Error : Not suppored renders found!');
+	SGHint('Fatal : Failed to run graphical user interface!');
+	end;
 end;
 
 class function TSGAllApplicationsDrawable.ClassName() : TSGString;

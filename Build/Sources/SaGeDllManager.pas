@@ -220,27 +220,12 @@ end;
 
 class function TSGDllManager.LibrariesDirectory() : TSGString;
 begin
-Result := '.'+DirectorySeparator+'..'+DirectorySeparator+'Libraries' + DirectorySeparator + SGEngineTarget();
+Result := '..' + DirectorySeparator + 'Libraries' + DirectorySeparator + SGEngineTarget();
 end;
 
 class function TSGDllManager.OpenLibrary(const VLibName : TSGString; var VFileName : TSGString) : TSGLibHandle;
-
-function GetDirectoryList() : TSGStringList;
 var
-	sr:dos.searchrec;
-begin
-Result := nil;
-if not SGExistsDirectory(LibrariesDirectory) then
-	exit;
-dos.findfirst(LibrariesDirectory + DirectorySeparator + '*',$10,sr);
-while DosError<>18 do
-	begin
-	if (sr.name<>'.') and (sr.name<>'..') and (not(SGFileExists(LibrariesDirectory + DirectorySeparator + sr.name))) then
-		Result += TSGString(LibrariesDirectory + DirectorySeparator + sr.name);
-	dos.findnext(sr);
-	end;
-dos.findclose(sr);
-end;
+	AbsoluteLibrariesDirectory : TSGString;
 
 function LL(const VIN : TSGString; var VON : TSGString):TSGLibHandle;
 begin
@@ -253,17 +238,20 @@ var
 	DL : TSGStringList = nil;
 	i : TSGUInt32;
 begin
-Result := LL(LibrariesDirectory + DirectorySeparator + VLibName, VFileName);
+AbsoluteLibrariesDirectory := LibrariesDirectory;
+if (not SGExistsDirectory(AbsoluteLibrariesDirectory)) and (SGAplicationFileDirectory() <> '') then
+	AbsoluteLibrariesDirectory := SGAplicationFileDirectory() + LibrariesDirectory;
+Result := LL(AbsoluteLibrariesDirectory + DirectorySeparator + VLibName, VFileName);
 if Result = 0 then
 	begin
-	DL := GetDirectoryList();
+	DL := SGDirectoryDirectories(AbsoluteLibrariesDirectory);
 	if DL <> nil then
 		begin
 		if Length(DL) > 0 then
 			begin
 			for i := 0 to High(DL) do
 				begin
-				Result := LL(DL[i] + DirectorySeparator + VLibName, VFileName);
+				Result := LL(AbsoluteLibrariesDirectory + DirectorySeparator + DL[i] + DirectorySeparator + VLibName, VFileName);
 				if Result <> 0 then
 					break;
 				end;

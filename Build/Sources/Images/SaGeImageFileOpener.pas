@@ -364,11 +364,15 @@ end;
 
 class function TSGImageFileOpener.GetExpansions() : TSGStringList;
 begin
-Result := TSGImageFileOpener_GetAlwaysSuporedExpansions();
-{$IFDEF WITHLIBPNG}
-if SupporedPNG() then
-	Result *= 'PNG';
-{$ENDIF}
+Result := nil;
+if (TSGCompatibleContext <> nil) and (TSGCompatibleRender <> nil) then
+	begin
+	Result := TSGImageFileOpener_GetAlwaysSuporedExpansions();
+	{$IFDEF WITHLIBPNG}
+	if SupporedPNG() then
+		Result *= 'PNG';
+	{$ENDIF}
+	end;
 end;
 
 class function TSGImageFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
@@ -377,6 +381,9 @@ var
 	PNGInExpansions : TSGBool = False;
 	S : TSGString = '';
 begin
+Result := False;
+if (TSGCompatibleContext = nil) or (TSGCompatibleRender = nil) then
+	exit;
 ASE := TSGImageFileOpener_GetAlwaysSuporedExpansions();
 Result := True;
 for S in VExpansions do

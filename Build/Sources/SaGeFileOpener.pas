@@ -74,11 +74,6 @@ var
 	SL2 : TSGStringList = nil;
 	i, ii : TSGLongWord;
 
-procedure Wrt(const S : TSGString);
-begin
-WriteLn('You may open files wich expansion(-s) is ',S,'.');
-SGLog.Source(['Suppored to open files which expansion(-s) is ',S,'.']);
-end;
 begin
 SGPrintEngineVersion();
 if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
@@ -92,7 +87,8 @@ if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
 			SetLength(SL2, 0);
 			end;
 		end;
-Wrt(SGDownCaseString(SGStringFromStringList(SL,', ')));
+SGHint(SGDownCaseString(SGStringFromStringList(SL,', ')));
+SetLength(SL, 0);
 end;
 
 procedure TSGFileOpenerDrawable.SetOption(const VName : TSGString; const VValue : TSGPointer);

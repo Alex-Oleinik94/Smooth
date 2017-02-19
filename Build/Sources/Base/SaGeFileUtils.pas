@@ -87,11 +87,12 @@ function SGFileExists(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTIN
 (** DIRECTORY **)
 (***************)
 
-function SGCurrentDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAplicationFileDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFreeDirectoryName(const Name : TSGString; const sl : TSGString = 'Copy') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMakeDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGMakeDirectories(const FinalDirectory : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGExistsDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGDirectoryDirectories(Catalog : TSGString; const What : TSGString = '') : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (************************)
 (** DIRECTORY AND FILES**)
@@ -316,7 +317,7 @@ end;
 (** DIRECTORY **)
 (***************)
 
-function SGCurrentDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAplicationFileDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if argc > 0 then
 	Result := SGFilePath(argv[0])
@@ -398,6 +399,30 @@ end;
 function SGExistsDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := DirectoryExists(SGCheckDirectorySeparators(Directory));
+end;
+
+function SGDirectoryDirectories(Catalog : TSGString; const What : TSGString = '') : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Found : Integer;
+	SearchRec : TSearchRec;
+begin
+Result := nil;
+if Catalog = '' then
+	Catalog := '.';
+Catalog := SGCheckDirectorySeparators(Catalog);
+if Catalog[Length(Catalog)] <> DirectorySeparator then
+	Catalog += DirectorySeparator;
+if What <> '' then
+	Found := FindFirst(Catalog + What, faDirectory, SearchRec)
+else
+	Found := FindFirst(Catalog + '*', faDirectory, SearchRec);
+while Found = 0 do
+	begin
+	if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') and (not SGFileExists(Catalog + DirectorySeparator + SearchRec.Name)) then
+		Result += SearchRec.Name;
+	Found := FindNext(SearchRec);
+	end;
+SysUtils.FindClose(SearchRec);
 end;
 
 end.

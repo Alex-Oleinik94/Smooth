@@ -152,7 +152,9 @@ end;
 
 class function TSGAudioFileOpener.GetExpansions() : TSGStringList;
 begin
-Result := TSGCompatibleAudioFormats();
+Result := nil;
+if TSGCompatibleAudioRender <> nil then
+	Result := TSGCompatibleAudioFormats;
 end;
 
 initialization

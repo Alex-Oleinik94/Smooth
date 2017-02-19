@@ -979,7 +979,7 @@ var
 	i : TSGMaxEnum;
 	CD : TSGString;
 begin
-CD := SGCurrentDirectory();
+CD := SGAplicationFileDirectory();
 Result:=False;
 if Stream=nil then
 	Exit;
