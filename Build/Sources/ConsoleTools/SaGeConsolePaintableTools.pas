@@ -207,6 +207,17 @@ if Result then
 {$ENDIF}
 end;
 
+function ProccessDirectX(const Comand : TSGString):TSGBool;
+begin
+Result := False;
+if IsD3DX12Suppored and (not Result) then
+	Result := ProccessDirectX12('');
+if IsD3DX9Suppored and (not Result) then
+	Result := ProccessDirectX9('');
+if IsD3DX8Suppored and (not Result) then
+	Result := ProccessDirectX8('');
+end;
+
 function ProccessOpenGL(const Comand : TSGString):TSGBool;
 begin
 Result := True;
@@ -374,7 +385,7 @@ end;
 
 function ImposibleParam(const B : TSGBool):TSGString;
 begin
-Result := Iff(not B,', but it is impossible!','')
+Result := Iff(not B, ', but now it is impossible!')
 end;
 
 function HelpFuncGLUT() : TSGString;
@@ -395,6 +406,11 @@ end;
 function HelpFuncDX12() : TSGString;
 begin
 Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored());
+end;
+
+function HelpFuncDX() : TSGString;
+begin
+Result := 'For use Direct3D X, with most highest version' + ImposibleParam(IsD3DX12Suppored() or IsD3DX9Suppored() or IsD3DX8Suppored());
 end;
 
 function HelpFuncOGL() : TSGString;
@@ -448,14 +464,13 @@ var
 	Success : TSGBool = True;
 begin
 SGPrintEngineVersion();
-ContextClass := TSGCompatibleContext;
-RenderClass  := TSGCompatibleRender;
 if (VParams<>nil) and (Length(VParams)>0) then
 	with TSGConsoleCaller.Create(VParams) do
 		begin
 		Category('Context settings');
 		AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
 		Category('Render settings');
+		AddComand(@ProccessDirectX,   ['D3D','D3DX'],         @HelpFuncDX);
 		AddComand(@ProccessDirectX12, ['D3D12','D3DX12'],     @HelpFuncDX12);
 		AddComand(@ProccessDirectX9,  ['D3D9', 'D3DX9'],      @HelpFuncDX9);
 		AddComand(@ProccessDirectX8,  ['D3D8', 'D3DX8'],      @HelpFuncDX8);
@@ -484,23 +499,21 @@ if (AudioRenderClass = nil) and (not AudioDisabled) then
 	AudioRenderClass := TSGCompatibleAudioRender;
 if (AudioRenderClass <> nil) then
 	ContextSettings += SGContextOptionAudioRender(AudioRenderClass);
-if (ContextClass <> nil) and (RenderClass <> nil) then
-	begin
-	if Success then
+if Success then
+	if (ContextClass <> nil) and (RenderClass <> nil) then
 		SGRunPaintable(
 			VPaintabeClass,
 			ContextClass,
 			RenderClass,
-			ContextSettings);
-	end
-else
-	begin
-	if ContextClass = nil then
-		SGHint('Error : Not suppored contexts found!');
-	if RenderClass = nil then
-		SGHint('Error : Not suppored renders found!');
-	SGHint('Fatal : Failed to run graphical user interface!');
-	end;
+			ContextSettings)
+	else
+		begin
+		if ContextClass = nil then
+			SGHint('Error : Not suppored contexts found!');
+		if RenderClass = nil then
+			SGHint('Error : Not suppored renders found!');
+		SGHint('Fatal : Failed to run graphical user interface!');
+		end;
 end;
 
 class function TSGAllApplicationsDrawable.ClassName() : TSGString;

@@ -140,7 +140,7 @@ if Length(VFiles)>1 then
 	SGHint('Hint: Opening ' + SGStr(Length(VFiles)) + ' files:');
 	for i := 0 to High(VFiles) do
 		SGHint('  ' + VFiles[i]);
-	SGHint('Warrning: Suppored playing only one of files.');
+	SGHint('Warning: Suppored playing only one of files.');
 	end;
 ConsolePlayFile(VFiles[0]);
 end;

@@ -182,6 +182,7 @@ uses
 
 function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
+Result := nil;
 if TSGRenderOpenGL.Suppored then
 	Result := TSGRenderOpenGL;
 {$IFDEF MSWINDOWS}

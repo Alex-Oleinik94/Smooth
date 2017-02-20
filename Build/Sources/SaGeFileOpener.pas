@@ -49,6 +49,7 @@ uses
 	,SaGeContext
 	,SaGeLog
 	,SaGeFileUtils
+	,SaGeBaseUtils
 	
 	// Openers :
 	,SaGeImageFileOpener
@@ -73,7 +74,7 @@ var
 	SL : TSGStringList = nil;
 	SL2 : TSGStringList = nil;
 	i, ii : TSGLongWord;
-
+	Len : TSGUInt32 = 0;
 begin
 SGPrintEngineVersion();
 if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
@@ -87,7 +88,11 @@ if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
 			SetLength(SL2, 0);
 			end;
 		end;
-SGHint(SGDownCaseString(SGStringFromStringList(SL,', ')));
+Len := Length(SL);
+if Len <> 0 then
+	SGHint(['Suppored to open files which expansion', Iff(Len > 1, 's'), ' is ', SGDownCaseString(SGStringFromStringList(SL,', ')),'.'])
+else
+	SGHint('No suppored to open expansions found!');
 SetLength(SL, 0);
 end;
 
