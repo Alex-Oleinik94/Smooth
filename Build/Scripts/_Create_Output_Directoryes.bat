@@ -2,6 +2,7 @@
 cd ..
 if not exist Output MKDIR Output
 if not exist ..\Binaries MKDIR ..\Binaries
+if not exist Output\i386-android MKDIR Output\i386-android
 if not exist Output\arm-android MKDIR Output\arm-android
 if not exist Output\i386-library MKDIR Output\i386-library
 if not exist Output\x86_64-library MKDIR Output\x86_64-library

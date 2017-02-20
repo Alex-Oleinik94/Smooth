@@ -65,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (********************************************************************************)
 
 {$IF not defined(DARWIN)}
-	{$IF defined(CPU386) and defined(CPU32)}
+	{$IF defined(CPU386) and defined(CPU32) and (not defined(ANDROID))}
 		{$DEFINE WITHASMINC}
 		{$ENDIF}
 	{$ENDIF}

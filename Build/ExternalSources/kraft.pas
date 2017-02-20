@@ -134,7 +134,9 @@ unit kraft;
  {$undef SIMD}
 {$else}
  {$ifdef cpu386}
-  {$define CPU386ASMForSinglePrecision}
+  {$ifndef ANDROID}
+   {$define CPU386ASMForSinglePrecision}
+  {$endif}
  {$endif}
  {$undef SIMD}
  {$ifdef CPU386ASMForSinglePrecision}

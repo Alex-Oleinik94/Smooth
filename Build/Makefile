@@ -16,7 +16,7 @@ SGRESOURCESCACHEPATH=$(SGBUILDPATH)/$(SGRESOURCESCACHEDIR)
 SGFILEREGISTRATIONRESOURCES=$(SGRESOURCESPATH)/SaGeFileRegistrationResources.inc
 SGFILEREGISTRATIONPACKAGES=$(SGRESOURCESPATH)/SaGeFileRegistrationPackages.inc
 PASCALCOMPILER=fpc
-CROSSPASCALCOMPILER="./../FPC/bin/i386-win32/$(PASCALCOMPILER)"
+CROSSPASCALCOMPILER=$(PASCALCOMPILER)
 DESKTOPFILENAME=Main
 LIBRARYFILENAME=SaGe
 PROJECTSDIR=Sources/Projects
@@ -29,17 +29,20 @@ BASEARGS= -FiOutput/Resources -FuOutput/Resources -Sm -dENGINE  $(EXAMPLESARGS) 
 RENDERARGS= -FuExternalSources/DirectX/9 -FuExternalSources/DirectX/12 -FuExternalSources/OpenGL
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
-ANDROIDARGS= -FuExternalSources/Android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -FuExternalSources/OpenGL
+ANDROIDARGS= -FuExternalSources/Android -FuExternalSources/OpenGL
 OUTPUTDESKTOP= -FE$(SGBINARYPATH)
-OUTPUTANDROID= -FUOutput/arm-android -oAndroidTools/SaGe/libs/armeabi/libmain.so
+OUTPUTANDROID_ARM= -FUOutput/arm-android -FlAndroidTools/Libs/Others -FlAndroidTools/Libs -oAndroidTools/SaGe/libs/armeabi/libmain.so
+OUTPUTANDROID_I386= -FUOutput/i386-android -oAndroidTools/SaGe/libs/i386eabi/libmain.so
 DESKTOPARGS= $(ARGS) $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
-DOANDROID= -Tandroid -Parm -dANDROID -CpARMV6 -Xs -Sgic -XParm-linux-androideabi- -XX -O3 -CX
+DOANDROID= -Tandroid -dANDROID -Xs -Sgic -XX -O3 -CX
+DOANDROID_ARM= $(DOANDROID) -Parm -CpARMV6 -XParm-linux-androideabi-
+DOANDROID_I386= $(DOANDROID) -Pi386 -XPi686-linux-android- 
 SAGE="$(SGBINARYPATH)/$(DESKTOPFILENAME)"
 SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
-SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android
+SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android_arm, android_i386
 SG_TARGET=
 
 release_x32, release:
@@ -62,8 +65,10 @@ lib_x32, lib:
 	@$(PASCALCOMPILER) -dLIBRARY $(LX32) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
 lib_x64:
 	@$(PASCALCOMPILER) -dLIBRARY $(LX64) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
-android:
-	@$(CROSSPASCALCOMPILER) $(DOANDROID) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID) $(DESKTOPFILE)
+android_arm:
+	@$(CROSSPASCALCOMPILER) $(DOANDROID_ARM) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID_ARM) $(DESKTOPFILE)
+android_i386:
+	@$(CROSSPASCALCOMPILER) $(DOANDROID_I386) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID_I386) $(DESKTOPFILE)
 ios:
 
 inc_version_debug:
@@ -81,6 +86,7 @@ clear_files:
 	@$(SAGE) -cfrr $(SGFILEREGISTRATIONRESOURCES)
 	@$(SAGE) -cfrp $(SGFILEREGISTRATIONPACKAGES)
 clear:
+	@rm -f $(OutputDirectory)/i386-android/*
 	@rm -f $(OutputDirectory)/arm-android/*
 	@rm -f $(OutputDirectory)/i386-library/*
 	@rm -f $(OutputDirectory)/x86_64-library/*

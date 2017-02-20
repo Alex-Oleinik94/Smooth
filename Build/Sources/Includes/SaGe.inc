@@ -60,7 +60,7 @@
 {$NOTES OFF}
 {$HINTS OFF}
 
-{$IF defined(CPU386) and defined(CPU32) and (not defined(DARWIN))}
+{$IF defined(CPU386) and defined(CPU32) and (not defined(DARWIN)) and (not defined(MOBILE))}
 	{$DEFINE WITHASMINC}
 	{$ENDIF}
 

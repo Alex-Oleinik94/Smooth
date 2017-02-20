@@ -34,7 +34,7 @@ implementation
 function LoadTGA(const Stream:TStream):TSGBitmap;
 
 procedure TGACopySwapPixel(const Source, Destination: Pointer);
-{$IF defined(CPU32) and defined(CPU386))}
+{$IF defined(WITHASMINC))}
 	assembler;
 	asm
 	push eax
