@@ -41,7 +41,7 @@ const
 type
 	TSGLog = class(TObject)
 			public
-		constructor Create();
+		constructor Create(const LogFile : TSGString = SGLogFileName);
 		destructor Destroy();override;
 		procedure Source(const s:string;const WithTime:Boolean = True);overload;
 		procedure Source(const Ar : array of const;const WithTime:Boolean = True);overload;
@@ -200,11 +200,11 @@ if SGLogEnable and (FFileStream <> nil) then
 	end;
 end;
 
-constructor TSGLog.Create();
+constructor TSGLog.Create(const LogFile : TSGString = SGLogFileName);
 begin
-inherited;
+inherited Create();
 if SGLogEnable then
-	FFileStream := TFileStream.Create(SGLogFileName, fmCreate);
+	FFileStream := TFileStream.Create(LogFile, fmCreate);
 end;
 
 destructor TSGLog.Destroy;
@@ -214,19 +214,46 @@ if SGLogEnable then
 inherited;
 end;
 
+function SGCreateLog(var Log : TSGLog; const LogFile : TSGString = SGLogFileName) : TSGBoolean;
+
+procedure KillLog();
+begin
+if Log <> nil then
+	begin
+	Log.Destroy();
+	Log := nil;
+	end;
+end;
+
+begin
+KillLog();
+Result := True;
+try
+	Log := TSGLog.Create(LogFile);
+except
+	Result := False;
+	KillLog();
+end;
+end;
+
 initialization
 begin
 {$IFDEF ANDROID}
 	SGMakeDirectory(SGLogDirectory);
 	{$ENDIF}
-try
-	SGLog := TSGLog.Create();
+SGCreateLog(SGLog, SGLogFileName);
+if (SGLog = nil) and (SGAplicationFileDirectory() <> '') then
+	SGCreateLog(SGLog, SGAplicationFileDirectory() + SGLogFileName);
+if SGLog = nil then
+	begin
+	SGLogEnable := False;
+	SGCreateLog(SGLog);
+	end;
+if SGLogEnable then
+	begin
 	SGLog.Source('(***) SaGe Engine Log (***)', False);
 	SGLog.Source('  << Create Log >>');
-except
-	SGLogEnable := False;
-	SGLog := TSGLog.Create();
-end;
+	end;
 end;
 
 finalization

@@ -32,8 +32,8 @@ type
 			protected
 		FFiles : TSGStringList;
 			public
-		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);override;
 		end;
@@ -50,6 +50,7 @@ uses
 	,SaGeLog
 	,SaGeFileUtils
 	,SaGeBaseUtils
+	,SaGeConsoleUtils
 	
 	// Openers :
 	,SaGeImageFileOpener
@@ -167,9 +168,14 @@ else
 			S += SGWinEoln;
 		end;
 	Hint([
-		'Can''t open file(-s):',SGWinEoln,S,SGWinEoln,
-		'Which expansion(-s) is ',SGStringFromStringList(SL1,','),'.',SGWinEoln,
-		'Error : Class which can open all of this expansions is missing!']);
+		'Can''t open file' + Iff(Length(VFiles) > 1, 's') + ':',SGWinEoln,S,SGWinEoln,
+		'Which expansion' + Iff(Length(SL1) > 1, 's') + ' is ',SGStringFromStringList(SL1,','),'.',SGWinEoln,
+		'Error : Class which can open' + Iff(Length(SL1) > 1, ' all of') + ' this expansion' + Iff(Length(SL1) > 1, 's') + ' is missing!']);
+	if SGIsConsole() then
+		begin
+		Write('Press Enter to exit...');
+		ReadLn();
+		end;
 	end;
 SetLength(SL1, 0);
 end;
@@ -202,4 +208,5 @@ finalization
 begin
 SetLength(SGFileOpeners, 0);
 end;
+
 end.
