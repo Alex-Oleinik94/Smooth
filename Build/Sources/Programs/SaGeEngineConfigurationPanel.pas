@@ -183,7 +183,7 @@ FCaptionLabel.Visible := True;
 
 FVersionLabel := TSGLabel.Create();
 CreateChild(FVersionLabel);
-FVersionLabel.Caption := 'Version: ' + SGGetEngineVersion();
+FVersionLabel.Caption := 'Version: ' + SGEngineVersion();
 FVersionLabel.Visible := True;
 
 FContextsComboBox := TSGComboBox.Create();

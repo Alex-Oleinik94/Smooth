@@ -7,6 +7,9 @@ interface
 
 uses
 	 SysUtils
+	{$IFDEF MSWINDOWS}
+		,Windows
+		{$ENDIF}
 	
 	,SaGeBase
 	,SaGeLog
@@ -67,6 +70,7 @@ procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TS
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
 procedure SGRunComand(const Comand : TSGString; const ViewOutput : TSGBoolean = True);
+function SGOperatingSystemVersion(): TSGString;
 
 implementation
 
@@ -74,9 +78,6 @@ uses
 	 Crt
 	{$IFDEF USE_uSMBIOS}
 		,uSMBIOS
-		{$ENDIF}
-	{$IFDEF MSWINDOWS}
-		,Windows
 		{$ENDIF}
 	{$IFDEF UNIX}
 		,unix
@@ -88,8 +89,21 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeVersion
+	{$IFDEF MSWINDOWS}
+		,SaGeWindowsUtils
+		{$ENDIF}
 	;
 
+function SGOperatingSystemVersion(): TSGString;
+begin
+Result := '';
+{$IFDEF MSWINDOWS}
+Result := SGWindowsVersion();
+{$ELSE}
+Result := SGEngineTargetVersion();
+{$ENDIF}
+end;
 
 destructor TSGLibrary.Destroy;
 begin

@@ -17,8 +17,8 @@ uses
 const
 	VersionFileName = SGEngineDirectory + DirectorySeparator + 'version.txt';
 
-function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -71,25 +71,32 @@ const
 		;
 
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGEngineTargetVersion(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 uses
 	 SaGeLog
 	,SaGeBaseUtils
+	,SaGeSysUtils
 	;
+
+function SGEngineTargetVersion(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGEngineTarget(C) + ' bit';
+end;
 
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := SGVerOS + C + SGVerCPU;
 end;
 
-function SGGetEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := 'SaGe Engine version '+SGGetEngineVersion()+' (' + SGEngineTarget(' ') + ' bit)';
+Result := 'SaGe Engine version '+SGEngineVersion()+' (' + SGEngineTargetVersion(' ') + ')';
 end;
 
-function SGGetEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream: TMemoryStream;
 	S : TSGString;
@@ -126,8 +133,9 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	SGHint(SGGetEngineFullVersion());
+	SGHint(SGEngineFullVersion());
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
+	SGLog.Source('Operating system: ' + SGOperatingSystemVersion());
 	end;
 VersionPrinted := True;
 end;
@@ -162,7 +170,7 @@ end;
 
 {$IF defined(LIBRARY)}
 exports
-	SGGetEngineVersion
+	SGEngineVersion
 	;
 {$ENDIF}
 
