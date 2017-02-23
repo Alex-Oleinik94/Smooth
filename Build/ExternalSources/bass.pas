@@ -1534,9 +1534,9 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SGPCharToString(Name)
 else
-LoadResult^.FFunctionLoaded += 1;
+	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
 end;
 

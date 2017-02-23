@@ -984,6 +984,9 @@ uses
 	,SaGeSysUtils
 	,SaGeStringUtils
 	;
+
+var
+	LoadObjectList : TSGDllLoadObjectList = nil;
 {
   Compatibility functions
 }
@@ -2937,10 +2940,31 @@ begin
 end;
 
 function GetProcAddr(module: HModule; const ProcName: string): SslPtr;
+var
+	Index : TSGUInt32;
 begin
   Result := GetProcAddress(module, PChar(ProcName));
   if LoadVerbose and (Result = nil) then
     OpenSSL_unavailable_functions := OpenSSL_unavailable_functions + ProcName + LineEnding;
+
+// Process SaGe Dll
+if LoadObjectList <> nil then
+	begin
+	if Module = SSLLibHandle then
+		Index := 1
+	else if Module = SSLUtilHandle then
+		Index := 0
+	else
+		Index := 100;
+	if Index in [0, 1] then
+		begin
+		LoadObjectList[Index].FFunctionCount += 1;
+		if Result = nil then
+			LoadObjectList[Index].FFunctionErrors += ProcName
+		else
+			LoadObjectList[Index].FFunctionLoaded += 1;
+		end;
+	end;
 end;
 
 // The AVerboseLoading parameter can be used to check which particular
@@ -3393,110 +3417,6 @@ begin
     LeaveCriticalSection(Locks[ltype]);
 end;
 
-type
-	TSGDllOpenSSL = class(TSGDll)
-			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
-		class procedure Free(); override;
-		
-		class function ChunkNames() : TSGStringList; override;
-		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
-		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; override;
-		class function ChunksLoadJointly() : TSGBool; override;
-		end;
-
-class function TSGDllOpenSSL.ChunksLoadJointly() : TSGBool;
-begin
-Result := True;
-end;
-
-class function TSGDllOpenSSL.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
-var
-	i : TSGUInt32;
-begin
-SetLength(Result, Length(VDlls));
-for i := 0 to High(Result) do
-	Result[i].Clear();
-end;
-
-class function TSGDllOpenSSL.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
-var
-	i : TSGUInt32;
-begin
-Result := nil;
-{$IFDEF WINDOWS}
-case ChunkIndex of
-0 : begin
-	Result += DLLSSLName;
-	Result += DLLSSLName2;
-	end;
-1 : Result += DLLUtilName;
-end;
-{$ELSE}
- {$IFDEF OS2}
-  {$IFDEF OS2GCC}
-	case ChunkIndex of
-	0 : begin
-		Result += DLLSSLName;
-		Result += DLLSSLName2;
-		end;
-	1 : begin
-		Result += DLLUtilName;
-		Result += DLLUtilName2;
-		end;
-	end;
-    {$ELSE OS2GCC}
-	case ChunkIndex of
-	0 : begin
-		Result += DLLSSLName;
-		Result += DLLSSLName2;
-		end;
-	1 : begin
-		Result += DLLUtilName;
-		Result += DLLUtilName2;
-		end;
-	end;
-    {$ENDIF OS2GCC}
-   {$ELSE OS2}
-	case ChunkIndex of
-	0 : for i := Low(DLLVersions) to High(DLLVersions) do
-			Result += DLLSSLName + DLLVersions[i];
-	1 : for i := Low(DLLVersions) to High(DLLVersions) do
-			Result += DLLUtilName + DLLVersions[i];
-	end;
-   {$ENDIF OS2}
-  {$ENDIF WINDOWS}
-end;
-
-class function TSGDllOpenSSL.ChunkNames() : TSGStringList;
-begin
-Result := nil;
-Result += 'SSL';
-Result += 'Utils';
-end;
-
-class function TSGDllOpenSSL.SystemNames() : TSGStringList;
-begin
-Result := nil;
-Result += 'OpenSSL';
-Result += 'OSSL';
-end;
-
-class function TSGDllOpenSSL.DllNames() : TSGStringList;
-begin
-Result := nil;
-end;
-
-class function TSGDllOpenSSL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
-begin
-Result.Clear();
-end;
-
-class procedure TSGDllOpenSSL.Free();
-begin
-end;
 
 procedure InitLocks;
 var
@@ -3518,6 +3438,145 @@ begin
   for n := 0 to Length(Locks)-1 do
     DoneCriticalSection(Locks[n]);
   SetLength(Locks,0);
+end;
+
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+
+type
+	TSGDllOpenSSL = class(TSGDll)
+			public
+		class function SystemNames() : TSGStringList; override;
+		class function DllNames() : TSGStringList; override;
+		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class procedure Free(); override;
+		
+		class function ChunkNames() : TSGStringList; override;
+		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
+		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; override;
+		class function ChunksLoadJointly() : TSGBool; override;
+		end;
+
+class function TSGDllOpenSSL.ChunksLoadJointly() : TSGBool;
+begin
+Result := True;
+end;
+
+class function TSGDllOpenSSL.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
+var
+	i : TSGUInt32;
+begin
+Result := nil;
+{$IFDEF WINDOWS}
+case ChunkIndex of
+1 : begin
+	Result += DLLSSLName;
+	Result += DLLSSLName2;
+	end;
+0 : Result += DLLUtilName;
+end;
+{$ELSE}
+ {$IFDEF OS2}
+  {$IFDEF OS2GCC}
+	case ChunkIndex of
+	1 : begin
+		Result += DLLSSLName;
+		Result += DLLSSLName2;
+		end;
+	0 : begin
+		Result += DLLUtilName;
+		Result += DLLUtilName2;
+		end;
+	end;
+    {$ELSE OS2GCC}
+	case ChunkIndex of
+	1 : begin
+		Result += DLLSSLName;
+		Result += DLLSSLName2;
+		end;
+	0 : begin
+		Result += DLLUtilName;
+		Result += DLLUtilName2;
+		end;
+	end;
+    {$ENDIF OS2GCC}
+   {$ELSE OS2}
+	case ChunkIndex of
+	1 : for i := Low(DLLVersions) to High(DLLVersions) do
+			Result += DLLSSLName + DLLVersions[i];
+	0 : for i := Low(DLLVersions) to High(DLLVersions) do
+			Result += DLLUtilName + DLLVersions[i];
+	end;
+   {$ENDIF OS2}
+  {$ENDIF WINDOWS}
+end;
+
+class function TSGDllOpenSSL.ChunkNames() : TSGStringList;
+begin
+Result := nil;
+Result += 'Utils';
+Result += 'SSL';
+end;
+
+class function TSGDllOpenSSL.SystemNames() : TSGStringList;
+begin
+Result := nil;
+Result += 'OpenSSL';
+Result += 'OSSL';
+Result += 'SSL';
+end;
+
+class function TSGDllOpenSSL.DllNames() : TSGStringList;
+begin
+Result := nil;
+end;
+
+class function TSGDllOpenSSL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+begin
+Result.Clear();
+end;
+
+class procedure TSGDllOpenSSL.Free();
+begin
+DestroySSLInterface();
+end;
+
+class function TSGDllOpenSSL.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
+var
+	i : TSGUInt32;
+begin
+SetLength(Result, Length(VDlls));
+for i := 0 to High(Result) do
+	Result[i].Clear();
+LoadObjectList := Result;
+// SSL Code
+EnterCriticalSection(SSLCS);
+try
+	SSLLibHandle := VDlls[1];
+	SSLUtilHandle := VDlls[0];
+	
+	LoadSSLEntryPoints();
+	LoadUtilEntryPoints();
+	//init library
+	if assigned(_SslLibraryInit) then
+		_SslLibraryInit;
+	if assigned(_SslLoadErrorStrings) then
+		_SslLoadErrorStrings;
+	if assigned(_OPENSSLaddallalgorithms) then
+		_OPENSSLaddallalgorithms;
+	if assigned(_RandScreen) then
+		_RandScreen;
+	if assigned(_CRYPTOnumlocks) and assigned(_CRYPTOsetlockingcallback) then
+		InitLocks;
+	SSLloaded := True;
+	{$IFDEF OS2}
+	InitEMXHandles;
+	{$ENDIF OS2}
+finally
+	LeaveCriticalSection(SSLCS);
+end;
+LoadObjectList := nil;
 end;
 
 Procedure UnloadLibraries;
@@ -3597,7 +3656,7 @@ end;
 
 function DestroySSLInterface: Boolean;
 begin
-  Result:=Not isSSLLoaded;
+  Result:= Not isSSLLoaded;
   if Result then
    exit;
   EnterCriticalSection(SSLCS);
@@ -3621,6 +3680,5 @@ initialization
   InitCriticalSection(SSLCS);
 
 finalization
-  DestroySSLInterface;
   DoneCriticalSection(SSLCS);
 end.
