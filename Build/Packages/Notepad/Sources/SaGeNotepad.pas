@@ -90,6 +90,7 @@ type
 		procedure LoadDeviceResources();override;
 		procedure DeleteDeviceResources();override;
 		class function ClassName() : TSGString;override;
+		procedure Resize(); override;
 			private
 		FNotepad : TSGNotepad;
 		end;
@@ -121,12 +122,19 @@ FNotepad.AddMakeFile('.' + DirectorySeparator + '..' + DirectorySeparator + 'Bui
 FNotepad.OpenMakefileProjects();
 end;
 
+procedure TSGNotepadApplication.Resize();
+begin
+FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
+end;
+
 procedure TSGNotepadApplication.LoadDeviceResources();
 begin
+inherited;
 end;
 
 procedure TSGNotepadApplication.DeleteDeviceResources();
 begin
+inherited;
 end;
 
 destructor TSGNotepadApplication.Destroy();
@@ -279,7 +287,6 @@ if CountInsets() >0 then
 end;
 
 begin
-SetBounds(0, 50, ScreenWidth, ScreenHeight - 50);
 ResizeInsets();
 inherited;
 end;

@@ -76,6 +76,7 @@ var
 	SL2 : TSGStringList = nil;
 	i, ii : TSGLongWord;
 	Len : TSGUInt32 = 0;
+
 begin
 SGPrintEngineVersion();
 if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
@@ -91,7 +92,23 @@ if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
 		end;
 Len := Length(SL);
 if Len <> 0 then
-	SGHint(['Suppored to open files which expansion', Iff(Len > 1, 's'), ' is ', SGDownCaseString(SGStringFromStringList(SL,', ')),'.'])
+	begin
+	ii := Length(SGFileOpeners);
+	SGHint(['Suppored expansion', Iff(Len > 1, 's'), ' (', Len, '), file opener list (', ii, ') :']);
+	if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
+		for i := 0 to High(SGFileOpeners) do
+			begin
+			SL2 := SGFileOpeners[i].GetExpansions();
+			if (SL2 <> nil) and (Length(SL2) > 0) then
+				begin
+				Len := Length(SL2);
+				SGHint(['  ', SGFileOpeners[i].ClassName(), ' (', Len, ') : ', SGDownCaseString(SGStringFromStringList(SL2, ', ')), '.']);
+				SetLength(SL2, 0);
+				end
+			else
+				SGHint(['  ', SGFileOpeners[i].ClassName(), ' not suppored!']);
+			end;
+	end
 else
 	SGHint('No suppored to open expansions found!');
 SetLength(SL, 0);
@@ -127,19 +144,6 @@ var
 	C, EC : TSGFileOpenerClass;
 	SL1 : TSGStringList;
 	i : TSGLongWord;
-	S : TSGString;
-
-procedure Hint(const A : array of const);
-var
-	SL : TSGStringList;
-	S : TSGString;
-begin
-SL := SGArConstToArString(A);
-S := SGStringFromStringList(SL,'');
-SGLog.Source(['SGTryOpenFiles returned hint:',SGWinEoln,S]);
-WriteLn(S);
-SetLength(SL, 0);
-end;
 
 begin
 if VFiles = nil then
@@ -160,22 +164,18 @@ if EC <> nil then
 	EC.Execute(VFiles)
 else
 	begin
-	S := '';
+	SGHint(['Can''t open file' + Iff(Length(VFiles) > 1, 's') + ':']);
 	for i := 0 to High(VFiles) do
-		begin
-		S += '    ' + VFiles[i];
-		if i <> High(VFiles) then
-			S += SGWinEoln;
-		end;
-	Hint([
-		'Can''t open file' + Iff(Length(VFiles) > 1, 's') + ':',SGWinEoln,S,SGWinEoln,
-		'Which expansion' + Iff(Length(SL1) > 1, 's') + ' is ',SGStringFromStringList(SL1,','),'.',SGWinEoln,
-		'Error : Class which can open' + Iff(Length(SL1) > 1, ' all of') + ' this expansion' + Iff(Length(SL1) > 1, 's') + ' is missing!']);
+		SGHint('    ' + VFiles[i]);
+	SGHint(['Which expansion' + Iff(Length(SL1) > 1, 's') + ' is ', SGStringFromStringList(SL1,','),'.']);
+	SGHint(['Error : Class which can open' + Iff(Length(SL1) > 1, ' all of') + ' this expansion' + Iff(Length(SL1) > 1, 's') + ' is missing!']);
+	{$IFDEF MSWINDOWS}
 	if SGIsConsole() then
 		begin
 		Write('Press Enter to exit...');
 		ReadLn();
 		end;
+	{$ENDIF}
 	end;
 SetLength(SL1, 0);
 end;

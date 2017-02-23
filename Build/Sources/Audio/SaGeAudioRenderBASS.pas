@@ -258,7 +258,8 @@ end;
 
 class function TSGAudioRenderBASS.Suppored() : TSGBool;
 begin
-Result := DllManager.Suppored('BASS');
+//Result := DllManager.Suppored('BASS');
+Result := False;
 end;
 
 end.

@@ -382,8 +382,6 @@ var
 	S : TSGString = '';
 begin
 Result := False;
-if (TSGCompatibleContext = nil) or (TSGCompatibleRender = nil) then
-	exit;
 ASE := TSGImageFileOpener_GetAlwaysSuporedExpansions();
 Result := True;
 for S in VExpansions do
@@ -402,6 +400,9 @@ if Result = True then
 	if PNGInExpansions then
 		Result := SupporedPNG();
 {$ENDIF}
+if Result then
+	if (TSGCompatibleContext = nil) or (TSGCompatibleRender = nil) then
+		Result := False;
 end;
 
 initialization

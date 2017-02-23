@@ -26,6 +26,7 @@ type
 		class function ClassName() : TSGString; override;
 		procedure DeleteDeviceResources();override;
 		procedure LoadDeviceResources();override;
+		procedure Resize(); override;
 			private
 		FNotepad : TSGNotepad;
 		end;
@@ -68,6 +69,10 @@ Result += 'CFG';
 Result += 'TXT';
 Result += 'XML';
 Result += 'HTML';
+
+Result += 'gitignore';
+Result += 'md';
+Result += 'gitconfig';
 end;
 
 class function TSGNotepadFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
@@ -128,6 +133,12 @@ if FFiles <> nil then if (Length(FFiles) > 0) then
 		FNotepad.AddFile(FileName);
 	SetLength(FFiles, 0);
 	end;
+end;
+
+procedure TSGNotepadFileOpenerDrawable.Resize();
+begin
+if FNotepad <> nil then
+	FNotepad.SetBounds(0, 0, Render.Width, Render.Height);
 end;
 
 initialization

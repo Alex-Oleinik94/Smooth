@@ -86,12 +86,13 @@ end;
 
 class function TSGAudioDecoderOGG.Suppored() : TSGBool;
 begin
-Result := False;
-Result :=
-	DllManager.Suppored('Vorbis') and
-	DllManager.Suppored('VorbisEnc') and
-	DllManager.Suppored('Ogg') and
-	DllManager.Suppored('VorbisFile');
+Result := DllManager.Suppored('Ogg');
+if Result then
+	Result := DllManager.Suppored('Vorbis');
+if Result then
+	Result := DllManager.Suppored('VorbisEnc');
+if Result then
+	Result := DllManager.Suppored('VorbisFile');
 end;
 
 procedure TSGAudioDecoderOGG.LogFileInfo();

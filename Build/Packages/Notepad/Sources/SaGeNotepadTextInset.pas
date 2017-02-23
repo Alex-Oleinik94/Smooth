@@ -268,8 +268,9 @@ if not FCursorOnComponent then
 CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealLeft, FRealTop);
 CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
-Result := (Skin.Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
-		  (5 <= CursorPos.x);
+if Line < CountLines() then
+	Result := (Skin.Font.StringLength(FFile[Line].FString) + 5 >= CursorPos.x) and
+			  (5 <= CursorPos.x);
 end;
 
 procedure PutCursor();
