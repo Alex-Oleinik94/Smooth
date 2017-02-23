@@ -41,6 +41,7 @@ type
 procedure SGRegistryFileOpener(const VClass : TSGFileOpenerClass);
 procedure SGTryOpenFiles(const VFiles : TSGStringList);
 procedure SGWriteOpenableExpansions();
+procedure SGOpenFilesWithMenu(const VFiles : TSGStringList);
 
 implementation
 
@@ -51,6 +52,9 @@ uses
 	,SaGeFileUtils
 	,SaGeBaseUtils
 	,SaGeConsoleUtils
+	{$IFDEF MSWINDOWS}
+		,SaGeWindowsUtils
+		{$ENDIF}
 	
 	// Openers :
 	,SaGeImageFileOpener
@@ -60,14 +64,30 @@ uses
 var
 	SGFileOpeners : packed array of TSGFileOpenerClass = nil;
 
-class function TSGFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+procedure SGOpenFilesWithMenu(const VFiles : TSGStringList);
+
+procedure ExecuteFileOpener(const Index : TSGConsoleRecordIndex);
 begin
-Result := False;
+SGFileOpeners[Index].Execute(VFiles);
 end;
 
-class function TSGFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
+var
+	ConsoleList : TSGConsoleMenuList = nil;
+	i : TSGUInt32;
 begin
-Result := nil;
+if (SGFileOpeners <> nil) and (Length(SGFileOpeners) > 0) then
+	begin
+	for i := 0 to High(SGFileOpeners) do
+		ConsoleList += SGConsoleRecord(SGFileOpeners[i].ClassName(), @ExecuteFileOpener);
+	SGConsoleMenu(ConsoleList,
+		SGConsoleMenuDefaultBackGroundColor,
+		SGConsoleMenuDefaultTextColor,
+		SGConsoleMenuDefaultActiveBackGroundColor,
+		SGConsoleMenuDefaultActiveTextColor,
+		SGConsoleMenuDefaultKoima,
+		True);
+	SetLength(ConsoleList, 0);
+	end;
 end;
 
 procedure SGWriteOpenableExpansions();
@@ -114,42 +134,14 @@ else
 SetLength(SL, 0);
 end;
 
-procedure TSGFileOpenerDrawable.SetOption(const VName : TSGString; const VValue : TSGPointer);
-begin
-if VName = 'FILES TO OPEN' then
-	FFiles := TSGStringList(VValue)
-else
-	inherited;
-end;
-
-destructor TSGFileOpenerDrawable.Destroy();
-begin
-SetLength(FFiles, 0);
-inherited;
-end;
-
-constructor TSGFileOpenerDrawable.Create(const VContext : ISGContext);
-begin
-inherited Create(VContext);
-FFiles := nil;
-end;
-
-class function TSGFileOpenerDrawable.ClassName() : TSGString;
-begin
-Result := 'TSGFileOpenerDrawable';
-end;
-
 procedure SGTryOpenFiles(const VFiles : TSGStringList);
+
+procedure FindFileOpenerAndOpenFiles();
 var
 	C, EC : TSGFileOpenerClass;
 	SL1 : TSGStringList;
 	i : TSGLongWord;
-
 begin
-if VFiles = nil then
-	Exit;
-if Length(VFiles) = 0 then
-	Exit;
 EC := nil;
 SL1 := nil;
 for i := 0 to High(VFiles) do
@@ -180,6 +172,19 @@ else
 SetLength(SL1, 0);
 end;
 
+begin
+if VFiles = nil then
+	Exit;
+if Length(VFiles) = 0 then
+	Exit;
+{$IFDEF MSWINDOWS}
+	if SGIsConsole() and SGSystemKeyPressed(17) then //CTRL
+		SGOpenFilesWithMenu(VFiles)
+	else
+	{$ENDIF}
+		FindFileOpenerAndOpenFiles();
+end;
+
 procedure SGRegistryFileOpener(const VClass : TSGFileOpenerClass);
 begin
 if SGFileOpeners = nil then
@@ -187,6 +192,41 @@ if SGFileOpeners = nil then
 else
 	SetLength(SGFileOpeners, Length(SGFileOpeners) + 1);
 SGFileOpeners[High(SGFileOpeners)] := VClass;
+end;
+
+class function TSGFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+begin
+Result := False;
+end;
+
+class function TSGFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
+begin
+Result := nil;
+end;
+
+procedure TSGFileOpenerDrawable.SetOption(const VName : TSGString; const VValue : TSGPointer);
+begin
+if VName = 'FILES TO OPEN' then
+	FFiles := TSGStringList(VValue)
+else
+	inherited;
+end;
+
+destructor TSGFileOpenerDrawable.Destroy();
+begin
+SetLength(FFiles, 0);
+inherited;
+end;
+
+constructor TSGFileOpenerDrawable.Create(const VContext : ISGContext);
+begin
+inherited Create(VContext);
+FFiles := nil;
+end;
+
+class function TSGFileOpenerDrawable.ClassName() : TSGString;
+begin
+Result := 'TSGFileOpenerDrawable';
 end;
 
 class function TSGFileOpener.ClassName() : TSGString;

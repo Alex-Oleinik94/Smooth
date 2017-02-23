@@ -96,7 +96,7 @@ type
 		class procedure GetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const  clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
 		class function CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
 		class function CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
-		class function CreateGlassyCursor() : HCURSOR;
+		class function CreateGlassyCursor() : Windows.HCURSOR;
 		procedure HandlingSizingFromRect(const PR : PRect = nil);
 			protected
 		FCursorHandle : Windows.HCURSOR;
@@ -108,7 +108,7 @@ type
 		function  FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
 
-function SGFullscreenQueschionWinAPIMethod():boolean;
+function SGWinAPIQueschionFullscreen():TSGBoolean;
 function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
 //procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
 
@@ -117,6 +117,7 @@ implementation
 uses
 	 SaGeScreen
 	,SaGeLog
+	,SaGeWindowsUtils
 	
 	,SysUtils
 	;
@@ -127,6 +128,11 @@ uses
 // »щет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
 var
 	SGContexts : packed array of TSGContextWinAPI = nil;
+
+function SGWinAPIQueschionFullscreen():TSGBoolean;
+begin
+Result := SGWinAPIQueschion('Fullscreen Mode?', 'Question!');
+end;
 
 class function TSGContextWinAPI.UserProfilePath() : TSGString;
 const 
@@ -444,7 +450,7 @@ ofn^.lpstrDefExt := SGStringToPChar(extension);
 if not GetSaveFileName (ofn) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Source('TSGContextWinAPI.FileSaveDlg - GetSaveFileName(...) results with FALSE');
+		SGLog.Source('TSGContextWinAPI__FileSaveDlg - GetSaveFileName(...) results with FALSE');
 		{$ENDIF}
 	end;
 Result := SGPCharToString(ofn^.lpstrFile);
@@ -484,7 +490,7 @@ fillchar(ofn^.lpstrFile^,1000,0);
 if not GetOpenFileName (ofn) then
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Source('TSGContextWinAPI.FileOpenDlg - GetOpenFileName(...) results with FALSE');
+		SGLog.Source('TSGContextWinAPI__FileOpenDlg - GetOpenFileName(...) results with FALSE');
 		{$ENDIF}
 	end;
 Result := SGPCharToString(ofn^.lpstrFile);
@@ -496,25 +502,12 @@ if ofn^.lpstrTitle <> nil then
 FreeMem(ofn,sizeof(ofn^));
 end;
 
-function TSGContextWinAPI.KeysPressed(const  Index : integer ) : Boolean;overload;
-var
-	Ar:PByte;
+function TSGContextWinAPI.KeysPressed(const  Index : integer ) : TSGBoolean;overload;
 begin
-if Index=20 then //Caps Lock
-	begin
-	GetMem(Ar,256);
-	if GetKeyboardState(Ar) then
-		begin
-		Result:=Boolean(Ar[20]);
-		FreeMem(Ar,256);
-		end
-	else
-		Result:=False;
-	end
+if Index = 20 then //Caps Lock
+	Result := SGSystemKeyPressed(20)
 else
-	begin
 	Result:=inherited;
-	end;
 end;
 
 procedure TSGContextWinAPI.SetCursorPosition(const VPosition : TSGPoint2int32);
@@ -627,11 +620,6 @@ if Active then
 	HandlingReSizingFromRect();
 	inherited;
 	end;
-end;
-
-function SGFullscreenQueschionWinAPIMethod:boolean;
-begin
-Result:=MessageBox(0,'Fullscreen Mode?', 'Question!',MB_YESNO OR MB_ICONQUESTION) <> IDNO;
 end;
 
 procedure TSGContextWinAPI.SwapBuffers();

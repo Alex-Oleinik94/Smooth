@@ -112,7 +112,7 @@ type
 	PTextFile = ^ TextFile;
 	
 	TSGProcedure = type TProcedure;
-
+	TSGNestedProcedure = type procedure() is nested;
 	SGFrameButtonsType = type TSGByte;
 type
 	// Начальный класс SaGe

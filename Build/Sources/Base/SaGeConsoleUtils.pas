@@ -14,22 +14,39 @@ uses
 	;
 
 type
-	TSGConsoleRecord = packed record
-			FTitle : TSGString;
-			FProcedure : TSGProcedure;
-			end;
+	TSGConsoleRecordIndex = TSGUInt32;
+	TSGConsoleRecordProcedure = procedure (const Index : TSGConsoleRecordIndex);
+	TSGConsoleRecordNestedProcedure = procedure (const Index : TSGConsoleRecordIndex) is nested;
+	TSGConsoleRecord = object
+			public
+		procedure Clear();
+		procedure Execute(const Index : TSGConsoleRecordIndex);
+			public
+		FTitle : TSGString;
+		FProcedure : TSGConsoleRecordProcedure;
+		FNestedProcedure : TSGConsoleRecordNestedProcedure;
+		end;
 	TSGConsoleMenuList = packed array of TSGConsoleRecord;
+const
+	SGConsoleMenuDefaultBackGroundColor = 0;
+	SGConsoleMenuDefaultTextColor = 15;
+	SGConsoleMenuDefaultActiveBackGroundColor = 0;
+	SGConsoleMenuDefaultActiveTextColor = 10;
+	SGConsoleMenuDefaultKoima = False;
+	SGConsoleMenuDefaultExitAfterExecuting = False;
 
 operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const a : TSGConsoleMenuList; b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGConsoleRecord(const S : TSGString; const P : TSGPointer) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConsoleRecord(const S : TSGString; const P : TSGConsoleRecordProcedure) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGConsoleRecord(const S : TSGString; const P : TSGConsoleRecordNestedProcedure) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 procedure SGConsoleMenu(const Ar : TSGConsoleMenuList;
-	const VBackGround : TSGByte = 0;
-	const VText : TSGByte = 15;
-	const VActiveBackGround : TSGByte = 0;
-	const VActiveText : TSGByte = 10;
-	const Koima : TSGBoolean = True);
+	const VBackGround : TSGByte = SGConsoleMenuDefaultBackGroundColor;
+	const VText : TSGByte = SGConsoleMenuDefaultTextColor;
+	const VActiveBackGround : TSGByte = SGConsoleMenuDefaultActiveBackGroundColor;
+	const VActiveText : TSGByte = SGConsoleMenuDefaultActiveTextColor;
+	const Koima : TSGBoolean = SGConsoleMenuDefaultKoima;
+	const ExitAfterExecuting : TSGBool = SGConsoleMenuDefaultExitAfterExecuting);
 
 function SGReadLnByte() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCharRead() : TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -51,6 +68,21 @@ uses
 	 StrMan
 	,SaGeStringUtils
 	;
+
+procedure TSGConsoleRecord.Execute(const Index : TSGConsoleRecordIndex);
+begin
+if FNestedProcedure <> nil then
+	FNestedProcedure(Index)
+else if FProcedure <> nil then
+	FProcedure(Index);
+end;
+
+procedure TSGConsoleRecord.Clear();
+begin
+FNestedProcedure := nil;
+FProcedure := nil;
+FTitle := '';
+end;
 
 function SGExtractComand(const Comand : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
@@ -154,10 +186,18 @@ begin
 ReadLn(Result);
 end;
 
-function SGConsoleRecord(const S : TSGString; const P : TSGPointer) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConsoleRecord(const S : TSGString; const P : TSGConsoleRecordProcedure) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
+Result.Clear();
 Result.FTitle := S;
-Result.FProcedure := TSGProcedure(P);
+Result.FProcedure := P;
+end;
+
+function SGConsoleRecord(const S : TSGString; const P : TSGConsoleRecordNestedProcedure) : TSGConsoleRecord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result.Clear();
+Result.FTitle := S;
+Result.FNestedProcedure := P;
 end;
 
 operator + (const a, b : TSGConsoleRecord) : TSGConsoleMenuList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -175,11 +215,12 @@ Result[High(Result)] := b;
 end;
 
 procedure SGConsoleMenu(const Ar : TSGConsoleMenuList;
-	const VBackGround : TSGByte = 0;
-	const VText : TSGByte = 15;
-	const VActiveBackGround : TSGByte = 0;
-	const VActiveText : TSGByte = 10;
-	const Koima : TSGBoolean = True);
+	const VBackGround : TSGByte = SGConsoleMenuDefaultBackGroundColor;
+	const VText : TSGByte = SGConsoleMenuDefaultTextColor;
+	const VActiveBackGround : TSGByte = SGConsoleMenuDefaultActiveBackGroundColor;
+	const VActiveText : TSGByte = SGConsoleMenuDefaultActiveTextColor;
+	const Koima : TSGBoolean = SGConsoleMenuDefaultKoima;
+	const ExitAfterExecuting : TSGBool = SGConsoleMenuDefaultExitAfterExecuting);
 var
 	NowActive:LongWord;
 	OldActive:LongWord = 0;
@@ -193,7 +234,7 @@ var
 begin
 Crt.TextBackGround(VBackGround);
 if DAll then
-	Crt.ClrScr;
+	Crt.ClrScr();
 i:=2;
 for ii:=0 to High(Ar) do
 	begin
@@ -246,31 +287,42 @@ NowActive:=Random(Length(Ar));
 DS;
 while not GoExit do
 	begin
-	c:=Crt.ReadKey;
-	case c of
-	#27:GoExit:=True;
-	#80:if NowActive<High(Ar) then
+	if Crt.KeyPressed() then
 		begin
-		OldActive:=NowActive;
-		NowActive+=1;
-		DS;
+		C := Crt.ReadKey();
+		case c of
+		#27:GoExit:=True;
+		#80:if NowActive<High(Ar) then
+				begin
+				OldActive:=NowActive;
+				NowActive+=1;
+				DS;
+				end;
+		#72:if NowActive>0 then
+				begin
+				OldActive:=NowActive;
+				NowActive-=1;
+				DS;
+				end;
+		#13:begin
+			Crt.ClrScr();
+			Crt.TextColor(7);
+			Crt.TextBackGround(0);
+			Ar[NowActive].Execute(NowActive);
+			if ExitAfterExecuting then
+				GoExit := True
+			else
+				begin
+				DAll:=true;
+				DS;
+				end;
+			end;
 		end;
-	#72:if NowActive>0 then
-		begin
-		OldActive:=NowActive;
-		NowActive-=1;
-		DS;
-		end;
-	#13:if Ar[NowActive].FProcedure=nil then
-		GoExit:=True
+		end
 	else
-		begin
-		Ar[NowActive].FProcedure();
-		DAll:=true;
-		DS;
-		end;
+		Sleep(10);
 	end;
-	end;
+Crt.ClrScr();
 end;
 
 function SGCharRead() : TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

@@ -14,6 +14,8 @@ uses
 
 function SGWindowsVersion(): TSGString;
 function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
+function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
+function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 
 implementation
 
@@ -21,7 +23,33 @@ uses
 	 Registry
 	
 	,SaGeBaseUtils
+	,SaGeStringUtils
 	;
+
+function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
+var
+	PQuestion, PCaption : PSGChar;
+begin
+PQuestion := SGStringToPChar(VQuestion);
+PCaption := SGStringToPChar(VCaption);
+Result := MessageBox(0, PQuestion, PCaption, MB_YESNO OR MB_ICONQUESTION) <> IDNO;
+SGPCharFree(PCaption);
+SGPCharFree(PQuestion);
+end;
+
+function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
+const
+	KeyboardStateLength = 256;
+var
+	KeyboardState : PSGByte;
+begin
+GetMem(KeyboardState, KeyboardStateLength);
+if GetKeyboardState(KeyboardState) then
+	Result := TSGBoolean(KeyboardState[Index])
+else
+	Result := False;
+FreeMem(KeyboardState, KeyboardStateLength);
+end;
 
 function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
 begin
