@@ -758,7 +758,7 @@ else
 		LoadMBMToBitMap();
 	{$IFDEF WITHLIBPNG}
 	SGI_PNG :
-		if SGResourceManager.LoadingIsSuppored('PNG') then
+		if SGResourceManager.LoadingIsSuppored('PNG') and SupporedPNG() then
 			begin
 			if FImage <> nil then
 				FImage.Destroy();

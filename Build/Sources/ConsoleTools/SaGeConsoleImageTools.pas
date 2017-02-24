@@ -27,6 +27,7 @@ uses
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (
+	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = '?') or
 	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = 'H') or
 	(StringTrimLeft(SGUpCaseString(VParams[0]), '-') = 'HELP')) then
 	begin
@@ -42,7 +43,7 @@ else if (VParams = nil) or (Length(VParams)<2) then
 	WriteLn('Error count of parameters!');
 	end
 else if (VParams <> nil) and (Length(VParams) = 2) and SGResourceFiles.FileExists(VParams[0]) then
-	SGConvertToSGIA(VParams[0],VParams[1])
+	SGConvertToSGIA(VParams[0], VParams[1])
 else
 	begin
 	SGPrintEngineVersion();
