@@ -1,4 +1,5 @@
-{$INCLUDE Includes\SaGe.inc}
+{$INCLUDE SaGe.inc}
+
 unit SaGeScene;
 
 interface

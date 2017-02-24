@@ -224,7 +224,7 @@ function TSGExpressionChunkCreateReal(const VReal:Real):TSGExpressionChunk;
 function TSGExpressionChunkCreateNone:TSGExpressionChunk;
 
 {$DEFINE SGMATHREADINTERFACE}
-{$i Includes\SaGeMathOperators.inc}
+{$INCLUDE SaGeMathOperators.inc}
 {$UNDEF SGMATHREADINTERFACE}
 
 type 
@@ -386,7 +386,7 @@ for i:=n-1 downto 0 do
 end;
 
 {$DEFINE SGMATHREADIMPLEMENTATION}
-{$i Includes\SaGeMathOperators.inc}
+{$INCLUDE SaGeMathOperators.inc}
 {$UNDEF SGMATHREADIMPLEMENTATION}
 
 constructor TSGMathGraphicThread.Create(const VClass:Pointer;const VBegin,VEnd:real;const VPosBegin,VPosEnd:LongWord);
