@@ -15,7 +15,7 @@ uses
 	,SaGeContext
 	,SaGeClasses
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	;
 
 const

@@ -15,7 +15,7 @@ uses
 	,SaGeFont
 	,SaGeCommon
 	,SaGeRender
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommonClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager

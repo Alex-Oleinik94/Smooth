@@ -2,7 +2,7 @@
 
 //{$DEFINE SG_IMAGES_DEBUG}
 
-unit SaGeImagesBase;
+unit SaGeBitMap;
 
 interface
 
@@ -10,7 +10,7 @@ uses
 	 Crt
 	
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommon
 	;

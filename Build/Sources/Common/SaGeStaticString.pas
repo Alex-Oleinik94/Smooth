@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-	 SaGeRenderConstants
+	 SaGeRenderBase
 	,SaGeCommon
 	;
 

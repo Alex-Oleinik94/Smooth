@@ -15,12 +15,12 @@ uses
 	,SaGeMesh
 	,SaGeContext
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeFont
 	,SaGeScreen
-	,SaGeImages
-	,SaGeImagesBase
+	,SaGeImage
+	,SaGeBitMap
 	,SaGeGasDiffusionReliefRedactor
 	,SaGeScreenBase
 	,SaGePackages
@@ -215,6 +215,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeMathUtils
+	,SaGeRenderInterface
 	;
 
 //Algorithm

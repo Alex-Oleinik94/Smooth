@@ -16,8 +16,7 @@ uses
 	,SaGeRender
 	,SaGeClasses
 	,SaGeCommonClasses
-	,SaGeImagesBase
-	,SaGeStringUtils
+	,SaGeBitMap
 	,SaGeCursor
 	
 	// Windows units
@@ -119,6 +118,7 @@ uses
 	 SaGeScreen
 	,SaGeLog
 	,SaGeWindowsUtils
+	,SaGeStringUtils
 	
 	,SysUtils
 	;

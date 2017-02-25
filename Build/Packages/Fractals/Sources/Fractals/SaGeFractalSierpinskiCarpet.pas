@@ -33,7 +33,7 @@ implementation
 uses
 	 SaGeMesh
 	,SaGeScreenBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeStringUtils
 	;
 

@@ -41,7 +41,7 @@ implementation
 
 uses
 	 SaGeMathUtils
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeScreenBase
 	;
 

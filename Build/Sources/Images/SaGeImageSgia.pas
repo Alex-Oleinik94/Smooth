@@ -4,7 +4,7 @@
 
 // SGIA Image = ['SGIA',QuadWordJpegImage1Size,JpegImage1(RGB(3)),QuadWordJpegImage2Size,JpegImage2(Alpha(3))]
 
-unit SaGeImagesSgia;
+unit SaGeImageSgia;
 
 interface
 
@@ -13,9 +13,9 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeImagesJpeg
-	,SaGeImagesBmp
-	,SaGeImagesBase
+	,SaGeImageJpeg
+	,SaGeImageBmp
+	,SaGeBitMap
 	,SaGeStringUtils
 	;
 

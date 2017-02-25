@@ -10,7 +10,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeScreen
 	,SaGeCommon
-	,SaGeImages
+	,SaGeImage
 	,SaGeDateTime
 	,SaGeFont
 	,SaGeBezierCurve
@@ -74,7 +74,6 @@ type
 		end;
 
 procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadData);
-
 
 type
 	TSGFractalMandelbrodRelease=class(TSGScreenedDrawable)
@@ -179,11 +178,11 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeFileUtils
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeThreads
 	,SaGeScreenBase
 	,SaGeMathUtils
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeSysUtils
 	,SaGeBaseUtils
 	

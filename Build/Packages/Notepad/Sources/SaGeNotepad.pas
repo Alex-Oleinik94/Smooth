@@ -14,7 +14,7 @@ uses
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeRender
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommonClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager
@@ -101,6 +101,7 @@ uses
 	 SaGeNotepadTextInset
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeRenderInterface
 	
 	,StrMan
 	;

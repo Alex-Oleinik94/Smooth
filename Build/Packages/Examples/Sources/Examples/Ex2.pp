@@ -11,7 +11,7 @@ uses
 		{$ENDIF}
 	 SaGeBase
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase

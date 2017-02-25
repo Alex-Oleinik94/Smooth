@@ -8,7 +8,6 @@ uses
 	 SaGeBase
 	,SaGeCommonClasses
 	,SaGeDrawClasses
-	,SaGeRenderConstants
 	,SaGeGraphicViewer
 	,SaGePackages
 	
@@ -55,6 +54,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeRenderBase
+	;
 
 constructor TSGAllExamples.Create(const VContext : ISGContext);
 begin

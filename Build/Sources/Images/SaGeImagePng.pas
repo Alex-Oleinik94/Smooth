@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeImagesPng;
+unit SaGeImagePng;
 
 interface
 
@@ -14,10 +14,10 @@ uses
 	
 	,png
 	
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeLog
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeDllManager
 	;

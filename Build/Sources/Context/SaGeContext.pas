@@ -11,14 +11,15 @@ uses
 	 SaGeBase
 	,SaGeDateTime
 	,SaGeCommon
+	,SaGeRenderBase
 	,SaGeRender
-	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeClasses
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeScreen
 	,SaGeAudioRender
 	,SaGeCursor
+	,SaGeRenderInterface
 	
 	,Classes
 	,Crt

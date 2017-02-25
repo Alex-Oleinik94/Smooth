@@ -10,6 +10,7 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeCommon
+	,SaGeRenderInterface
 	,SaGeAudioDecoder
 	,SaGeThreads
 	

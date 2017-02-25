@@ -15,7 +15,6 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeCommon
-	,SaGeRenderConstants
 	,SaGeScreen
 	,SaGeClasses
 	
@@ -72,6 +71,7 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeBaseUtils
+	,SaGeRenderBase
 	;
 
 var

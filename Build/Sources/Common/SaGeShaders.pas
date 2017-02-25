@@ -23,7 +23,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeResourceManager
 	,SaGeMath
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	;
 type
 	TSGShaderParams = TSGStringList;

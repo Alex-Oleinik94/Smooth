@@ -10,9 +10,9 @@ uses
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
-	,SaGeImages
+	,SaGeImage
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeScreenBase
@@ -98,6 +98,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeMathUtils
+	,SaGeRenderInterface
 	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

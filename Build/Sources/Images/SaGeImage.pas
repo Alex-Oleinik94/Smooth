@@ -1,16 +1,17 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeImages;
+unit SaGeImage;
 
 interface
 
 uses
 		// Engine
 	 SaGeBase
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeCommonClasses
 	,SaGeCommon
-	,SaGeRenderConstants
+	,SaGeRenderBase
+	,SaGeRenderInterface
 		// System
 	,Classes
 	;
@@ -138,13 +139,13 @@ implementation
 
 uses
 		// Image formats
-	 SaGeImagesBmp
-	,SaGeImagesJpeg
+	 SaGeImageBmp
+	,SaGeImageJpeg
 	{$IFDEF WITHLIBPNG}
-		,SaGeImagesPng
+		,SaGeImagePng
 		{$ENDIF}
-	,SaGeImagesTga
-	,SaGeImagesSgia
+	,SaGeImageTga
+	,SaGeImageSgia
 	,SaGeImageFormatDeterminer
 	,SaGeLog
 	

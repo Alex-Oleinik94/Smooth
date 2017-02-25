@@ -12,11 +12,11 @@ uses
 	
 	,SaGeCommonClasses
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
-	,SaGeImages
+	,SaGeImage
 	,SaGeResourceManager
 	;
 

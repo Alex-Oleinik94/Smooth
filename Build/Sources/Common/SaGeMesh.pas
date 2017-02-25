@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeDateTime
 	,SaGeCommon
-	,SaGeImages
+	,SaGeImage
 	,SaGeRender
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommonClasses
 	
 	,Classes

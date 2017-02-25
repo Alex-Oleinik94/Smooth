@@ -15,7 +15,7 @@ uses
 	,SaGeFont
 	,SaGeCommonClasses
 	,SaGeCommon
-	,SaGeImages
+	,SaGeImage
 	,SaGeThreads
 	;
 
@@ -64,10 +64,10 @@ implementation
 uses
 	 SaGeStringUtils
 	{$IFDEF WITHLIBPNG}
-		,SaGeImagesPng
+		,SaGeImagePng
 	{$ENDIF}
 	,SaGeRender
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeFileUtils
 	
 	,SysUtils

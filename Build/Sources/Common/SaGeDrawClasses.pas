@@ -11,9 +11,9 @@ uses
 	,SaGeBase
 	,SaGeScreen
 	,SaGeRender
-	,SaGeImages
+	,SaGeImage
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeScreenBase
 	;
 

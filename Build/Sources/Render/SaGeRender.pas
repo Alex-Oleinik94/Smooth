@@ -9,7 +9,8 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
+	,SaGeRenderInterface
 	,SaGeCommon
 	{$IFDEF MSWINDOWS}
 		,multimon

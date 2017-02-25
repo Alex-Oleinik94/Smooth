@@ -15,7 +15,7 @@ uses
 	,SaGeGraphicViewer
 	,SaGeMath
 	,SaGePackages
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	;
 

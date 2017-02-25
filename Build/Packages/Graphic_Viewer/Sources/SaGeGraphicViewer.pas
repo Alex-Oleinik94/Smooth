@@ -14,8 +14,8 @@ uses
 	,SaGeFractals
 	,SaGeCommon
 	,SaGeMath
-	,SaGeImages
-	,SaGeRenderConstants
+	,SaGeImage
+	,SaGeRenderBase
 	,SaGeMesh
 	,SaGePackages
 	,SaGeConsoleToolsBase

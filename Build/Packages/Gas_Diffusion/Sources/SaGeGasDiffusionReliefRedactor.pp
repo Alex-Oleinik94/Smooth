@@ -14,14 +14,15 @@ uses
 	,SaGeBase
 	,SaGeMesh
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeContext
 	,SaGeCommon
 	,SaGeFont
 	,SaGeScreen
-	,SaGeImages
-	,SaGeImagesBase
+	,SaGeImage
+	,SaGeBitMap
 	,SaGeCamera
+	,SaGeRenderInterface
 	;
 type
 	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;

@@ -41,7 +41,7 @@ implementation
 
 uses
 	 SaGeFileUtils
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeStringUtils
 	,SaGeCommon
 	;

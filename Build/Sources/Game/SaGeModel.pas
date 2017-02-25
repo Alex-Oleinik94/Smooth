@@ -7,7 +7,7 @@ uses
 	  Classes
 	, SaGeCommon
 	, SaGeBase
-	, SaGeImages
+	, SaGeImage
 	, SaGeRender
 	, SaGeCommonClasses
 	, SaGeMesh

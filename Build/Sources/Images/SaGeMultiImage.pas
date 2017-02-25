@@ -6,9 +6,9 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeImages
+	,SaGeImage
 	,SaGeCommon
-	,SaGeImagesBase
+	,SaGeBitMap
 	;
 
 type

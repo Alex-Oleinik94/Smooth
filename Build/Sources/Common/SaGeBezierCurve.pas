@@ -44,7 +44,7 @@ type
 implementation
 
 uses
-	 SaGeRenderConstants
+	 SaGeRenderBase
 	;
 
 function TSGBezierCurve.VertexQuantity:TSGMaxEnum;inline;

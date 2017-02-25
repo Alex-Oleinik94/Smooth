@@ -72,7 +72,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeScreenBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeThreads
 	,SaGeFileUtils
 	;

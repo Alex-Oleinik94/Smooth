@@ -11,12 +11,12 @@ uses
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeFont
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeMesh
-	,SaGeImages
+	,SaGeImage
 	,SaGeCamera
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools

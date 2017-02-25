@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeImages
+	,SaGeImage
 	,SaGeCommon
 	;
 
@@ -71,10 +71,10 @@ uses
 	,SaGeMathUtils
 	,SaGeResourceManager
 	,SaGeStringUtils
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeLog
 	,SaGeFileUtils
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	;
 
 function TSGFont.LoadSGF():TSGBoolean;

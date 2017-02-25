@@ -7,10 +7,10 @@ interface
 uses
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeShaders
-	,SaGeImages
+	,SaGeImage
 	
 	,Crt
 	

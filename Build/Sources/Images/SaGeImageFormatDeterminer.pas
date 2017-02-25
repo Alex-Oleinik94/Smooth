@@ -7,7 +7,7 @@ interface
 uses
 	 Classes
 	,SaGeBase
-	,SaGeImagesBase
+	,SaGeBitMap
 	;
 type
 	TSGImageFormatDeterminer = class

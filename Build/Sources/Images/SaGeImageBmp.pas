@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeImagesBmp;
+unit SaGeImageBmp;
 
 interface
 
@@ -11,7 +11,7 @@ uses
 	,Dos
 	
 	,SaGeBase
-	,SaGeImagesBase
+	,SaGeBitMap
 	;
 
 procedure LoadBMP(Stream: TStream; BitMap: TSGBitMap);

@@ -10,9 +10,9 @@ uses
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
-	,SaGeImages
+	,SaGeImage
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	;

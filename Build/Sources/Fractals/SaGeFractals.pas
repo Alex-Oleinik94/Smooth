@@ -15,10 +15,10 @@ uses
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeFont
-	,SaGeImages
-	,SaGeImagesBase
+	,SaGeImage
+	,SaGeBitMap
 	,SaGeRender
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	,SaGeThreads

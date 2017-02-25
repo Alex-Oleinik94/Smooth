@@ -19,7 +19,7 @@ uses
 	,SaGeFont
 	,SaGeMesh
 	,SaGeScreen
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeMathUtils
 	;

@@ -156,7 +156,7 @@
 {$endif not KambiConf_ALREADY_INCLUDED}
 
 {$MODE DELPHI}
-unit SaGeImagesJpeg;
+unit SaGeImageJpeg;
 
 (*Look for string "Kambi" to find my changes.
   Mainly, stream and error managers were moved to separate units
@@ -196,8 +196,8 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeImagesBmp
-	,SaGeImagesBase
+	,SaGeImageBmp
+	,SaGeBitMap
 	;
 
 type

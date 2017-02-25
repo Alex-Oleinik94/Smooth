@@ -9,10 +9,10 @@ uses
 	,SaGeCommon
 	,SaGeClasses
 	,SaGeBase
-	,SaGeImages
+	,SaGeImage
 	,SaGeCommonClasses
 	,SaGeMesh
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	;
 type
 	TSGFTGCornersAltitudes = array [0..3] of TSGFloat;

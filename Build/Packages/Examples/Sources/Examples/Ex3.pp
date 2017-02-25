@@ -11,7 +11,7 @@ uses
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeFont
 	,SaGeScreen
 	,SaGeCamera

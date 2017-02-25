@@ -13,8 +13,8 @@ uses
 	,SaGeMesh
 	,SaGeCommonClasses
 	,SaGeCommon
-	,SaGeRenderConstants
-	,SaGeImages
+	,SaGeRenderBase
+	,SaGeImage
 	
 	,PAPPE
 	;

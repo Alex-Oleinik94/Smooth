@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeImagesTga;
+unit SaGeImageTga;
 
 interface
 
@@ -10,7 +10,7 @@ uses
 	,Classes
 		// Engine
 	,SaGeBase
-	,SaGeImagesBase;
+	,SaGeBitMap;
 
 type
 	TSGTGAHeader = packed record

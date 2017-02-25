@@ -11,7 +11,8 @@ uses
 	 SaGeBase
 	,SaGeRender
 	,SaGeCommon
-	,SaGeRenderConstants
+	,SaGeRenderBase
+	,SaGeRenderInterface
 	,SaGeClasses
 	
 	// System

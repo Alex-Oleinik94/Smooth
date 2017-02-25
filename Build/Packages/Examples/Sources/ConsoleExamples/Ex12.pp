@@ -19,7 +19,7 @@ uses
 	,SaGeRender
 	,SaGeStringUtils
 	,SaGeCamera
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeEncodingUtils
 	,SaGeCommonClasses
 	{$IF defined(ENGINE)}

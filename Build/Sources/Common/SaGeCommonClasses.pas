@@ -8,9 +8,10 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeCommon
+	,SaGeRenderInterface
 	,SaGeRender
 	,SaGeCursor
-	,SaGeImagesBase
+	,SaGeBitMap
 	;
 type
 	TSGCursorButtons = (SGNullCursorButton, SGMiddleCursorButton, SGLeftCursorButton, SGRightCursorButton);

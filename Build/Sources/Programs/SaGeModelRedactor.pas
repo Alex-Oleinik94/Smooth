@@ -11,7 +11,7 @@ uses
 	,SaGeBase
 	,SaGeCommon
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommonClasses
 	,SaGeContext
 	,SaGeMesh

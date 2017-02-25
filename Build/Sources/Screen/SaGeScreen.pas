@@ -13,9 +13,9 @@ uses
 	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
-	,SaGeImages
+	,SaGeImage
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeScreenBase
@@ -99,6 +99,7 @@ uses
 	,SaGeLog
 	,SaGeBaseUtils
 	,SaGeMathUtils
+	,SaGeRenderInterface
 	;
 
 {$DEFINE SCREEN_IMPLEMENTATION}

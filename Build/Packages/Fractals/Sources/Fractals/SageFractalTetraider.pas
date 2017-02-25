@@ -35,7 +35,7 @@ type
 implementation
 
 uses
-	 SaGeRenderConstants
+	 SaGeRenderBase
 	,SaGeMathUtils
 	,SaGeMesh
 	,SaGeScreenBase

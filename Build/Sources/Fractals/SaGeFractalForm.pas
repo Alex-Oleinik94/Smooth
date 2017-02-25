@@ -36,7 +36,7 @@ implementation
 
 uses
 	 SaGeStringUtils
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeMesh
 	,SaGeScreenBase
 	;

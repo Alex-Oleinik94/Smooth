@@ -1,13 +1,14 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeRenderConstants;
+unit SaGeRenderBase;
 
 interface
 
 uses
 	 SaGeBase
 	;
-
+type
+	TSGVertexFormat = (SGVertexFormat2f, SGVertexFormat3f, SGVertexFormat4f);
 const
 	TSGRenderFar  = 5000;
 	TSGRenderNear = 1;

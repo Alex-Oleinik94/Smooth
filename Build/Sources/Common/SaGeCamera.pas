@@ -61,7 +61,7 @@ type
 implementation
 
 uses
-	 SaGeRenderConstants
+	 SaGeRenderBase
 	,SaGeContext
 	;
 

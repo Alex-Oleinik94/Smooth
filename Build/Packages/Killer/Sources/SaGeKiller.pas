@@ -10,9 +10,9 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeImages
+	,SaGeImage
 	,SaGeCommonClasses
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeScreenBase
 	,SaGePackages
 	,SaGeDateTime

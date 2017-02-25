@@ -12,7 +12,7 @@ uses
 	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh

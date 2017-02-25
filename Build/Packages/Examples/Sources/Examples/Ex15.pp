@@ -12,12 +12,12 @@ uses
 	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
-	,SaGeImages
+	,SaGeImage
 	,SaGeScreenBase
 	,SaGeStringUtils
 	,SaGeFileUtils

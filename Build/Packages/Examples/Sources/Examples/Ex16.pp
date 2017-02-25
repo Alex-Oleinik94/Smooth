@@ -15,12 +15,12 @@ uses
 	,SaGeCommonClasses
 	,SaGeBase
 	,SaGeFont
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
-	,SaGeImages
+	,SaGeImage
 	,SaGeFractalTerrain
 	,SaGeStringUtils
 	,SaGeFileUtils

@@ -46,7 +46,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeVersion
-	,SaGeRenderConstants
+	,SaGeRenderBase
 	,SaGeScreenBase
 	
 	,Classes

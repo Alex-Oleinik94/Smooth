@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeImagesBase
+	,SaGeBitMap
 	,SaGeCommon
 	;
 
@@ -52,7 +52,7 @@ type
 implementation
 
 uses
-	 SaGeImages
+	 SaGeImage
 	;
 
 procedure TSGCursor.CopyFrom(const VCursor : TSGCursor);
