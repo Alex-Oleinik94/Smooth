@@ -11,7 +11,7 @@ uses
 	,SaGeBase
 	,SaGeClasses
 	,SaGeImages
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeResourceManager
 	,SaGeCommonClasses

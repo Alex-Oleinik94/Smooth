@@ -10,8 +10,8 @@ uses
 	,SaGeCommonClasses
 	,SaGeMesh
 	,SaGeModel
-	,SaGeUtils
 	,SaGeGameBase
+	,SaGeCamera
 	;
 
 type

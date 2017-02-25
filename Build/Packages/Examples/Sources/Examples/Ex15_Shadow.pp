@@ -7,11 +7,8 @@ interface
 uses
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
-	,SaGeScreen
-	,SaGeMesh
 	,SaGeShaders
 	,SaGeImages
 	

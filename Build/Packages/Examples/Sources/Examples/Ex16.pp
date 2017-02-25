@@ -19,7 +19,7 @@ uses
 	
 	,SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
@@ -30,6 +30,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeCamera
 	
 	,Ex5_Physics
 	;

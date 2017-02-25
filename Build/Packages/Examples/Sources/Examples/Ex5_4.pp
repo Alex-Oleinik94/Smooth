@@ -16,12 +16,13 @@ uses
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeDateTime
+	,SaGeCamera
 	
 	,Crt
 	

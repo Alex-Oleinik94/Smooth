@@ -6,12 +6,10 @@ interface
 
 uses
 	 SaGeCommon
-	,SaGeMesh
-	,SaGeUtils
+	,SaGeFont
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeRender
 	,SaGeImages
 	,SaGeCommonClasses
 	,SaGeRenderConstants

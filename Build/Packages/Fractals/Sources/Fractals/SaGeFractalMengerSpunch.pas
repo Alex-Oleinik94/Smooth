@@ -10,7 +10,7 @@ uses
 	,SaGeCommon
 	,SaGeCommonClasses
 	,SaGeScreen
-	,SaGeUtils
+	,SaGeFont
 	;
 type
 	TSGMengerSpunchBoolAr6=array[0..5] of TSGBool;

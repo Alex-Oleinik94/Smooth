@@ -14,14 +14,15 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeRenderConstants
-	,SaGeUtils
+	,SaGeFont
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeMesh
 	,SaGeImages
+	,SaGeCamera
 	
 	,Ex6_D
 	,Ex6_N

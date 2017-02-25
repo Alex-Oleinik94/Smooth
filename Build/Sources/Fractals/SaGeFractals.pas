@@ -14,15 +14,15 @@ uses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
-	,SaGeUtils
+	,SaGeFont
 	,SaGeImages
 	,SaGeImagesBase
 	,SaGeRender
-	,SaGeCommonUtils
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	,SaGeThreads
+	,SaGeCamera
 	;
 type
 	TSGFractal = class;

@@ -19,7 +19,7 @@ uses
 	,SaGeMakefileReader
 	,SaGeResourceManager
 	,SaGeScreenBase
-	,SaGeUtils
+	,SaGeFont
 	,SaGePackages
 	;
 

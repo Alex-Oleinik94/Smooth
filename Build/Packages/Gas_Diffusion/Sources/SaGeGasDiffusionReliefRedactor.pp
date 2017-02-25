@@ -17,10 +17,11 @@ uses
 	,SaGeRenderConstants
 	,SaGeContext
 	,SaGeCommon
-	,SaGeUtils
+	,SaGeFont
 	,SaGeScreen
 	,SaGeImages
 	,SaGeImagesBase
+	,SaGeCamera
 	;
 type
 	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;

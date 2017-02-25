@@ -16,7 +16,7 @@ uses
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen
@@ -26,6 +26,8 @@ uses
 	,SaGeScreenBase
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeFPSViewer
+	,SaGeCamera
 	
 	,Math
 	,crt

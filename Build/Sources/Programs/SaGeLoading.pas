@@ -9,7 +9,7 @@ uses
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeCommon
-	,SaGeUtils
+	,SaGeFont
 	;
 
 type

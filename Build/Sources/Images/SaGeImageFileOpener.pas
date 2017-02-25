@@ -12,7 +12,7 @@ uses
 	,SaGeFileOpener
 	,SaGeContext
 	,SaGeLoading
-	,SaGeUtils
+	,SaGeFont
 	,SaGeCommonClasses
 	,SaGeCommon
 	,SaGeImages

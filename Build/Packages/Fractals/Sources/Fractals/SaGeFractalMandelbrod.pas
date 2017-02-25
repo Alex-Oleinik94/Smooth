@@ -12,7 +12,8 @@ uses
 	,SaGeCommon
 	,SaGeImages
 	,SaGeDateTime
-	,SaGeUtils
+	,SaGeFont
+	,SaGeBezierCurve
 	;
 
 type

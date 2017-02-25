@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeCommonClasses
-	,SaGeCommonUtils
+	,SaGeDrawClasses
 	;
 
 type

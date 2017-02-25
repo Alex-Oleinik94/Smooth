@@ -14,20 +14,23 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeCommon
-	,crt
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
 	,SaGeScreenBase
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeFPSViewer
+	,SaGeCamera
 	
 	,Ex13_Model
+	
+	,Crt
 	;
 
 const

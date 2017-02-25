@@ -36,7 +36,7 @@ uses
 	,SaGePackages
 	,SaGeRender
 	,SaGeAudioRender
-	,SaGeCommonUtils
+	,SaGeDrawClasses
 	,SaGeVersion
 	,SaGeStringUtils
 	,SaGeBaseUtils

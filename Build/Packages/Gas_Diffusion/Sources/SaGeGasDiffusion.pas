@@ -17,7 +17,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeRenderConstants
 	,SaGeCommon
-	,SaGeUtils
+	,SaGeFont
 	,SaGeScreen
 	,SaGeImages
 	,SaGeImagesBase
@@ -25,6 +25,7 @@ uses
 	,SaGeScreenBase
 	,SaGePackages
 	,SaGeFileUtils
+	,SaGeCamera
 	;
 
 const

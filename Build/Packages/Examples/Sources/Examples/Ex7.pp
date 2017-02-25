@@ -17,7 +17,7 @@ uses
 	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeScreen
-	,SaGeUtils
+	,SaGeFont
 	,SaGeMath
 	,SaGeGraphicViewer
 	,SaGeCommon

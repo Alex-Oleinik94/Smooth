@@ -20,6 +20,7 @@ uses
 	,SaGeVersion
 	,SaGeResourceManager
 	,SaGeImages
+	,SaGeMultiImage
 	,SaGeStringUtils
 	,SaGeFileUtils
 	;

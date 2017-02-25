@@ -16,7 +16,7 @@ uses
 	,SaGeGameNet
 	,SaGeNet
 	,SaGeLoading
-	,SaGeUtils
+	,SaGeFont
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeRenderConstants

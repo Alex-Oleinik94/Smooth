@@ -1,13 +1,13 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeCommonUtils;
+unit SaGeDrawClasses;
 
 interface
 
 uses
 	 SaGeCommon
 	,SaGeMesh
-	,SaGeUtils
+	,SaGeFont
 	,SaGeBase
 	,SaGeScreen
 	,SaGeRender

@@ -12,7 +12,6 @@ uses
 	
 	,SaGeCommonClasses
 	,SaGeBase
-	,SaGeUtils
 	,SaGeRenderConstants
 	,SaGeCommon
 	,SaGeScreen

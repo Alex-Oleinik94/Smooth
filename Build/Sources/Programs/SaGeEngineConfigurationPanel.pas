@@ -12,7 +12,8 @@ uses
 	,SaGeContext
 	,SaGeScreen
 	,SaGeRender
-	,SaGeUtils
+	,SaGeFont
+	,SaGeFPSViewer
 	;
 
 type

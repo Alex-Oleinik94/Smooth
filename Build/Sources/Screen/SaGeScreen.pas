@@ -14,12 +14,13 @@ uses
 	,SaGeBase
 	,SaGeClasses
 	,SaGeImages
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	,SaGeScreenSkin
+	,SaGeStaticString
 	;
 
 type

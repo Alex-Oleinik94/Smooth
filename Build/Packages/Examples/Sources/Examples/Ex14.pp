@@ -17,13 +17,14 @@ uses
 	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeRenderConstants
-	,SaGeUtils
+	,SaGeFont
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeCommon
 	,SaGeShaders
 	,SaGeResourceManager
 	,SaGeFileUtils
+	,SaGeCamera
 	
 	,Classes
 	,SysUtils

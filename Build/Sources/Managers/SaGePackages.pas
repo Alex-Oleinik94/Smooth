@@ -8,7 +8,7 @@ uses
 	 SaGeBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
-	,SaGeCommonUtils
+	,SaGeDrawClasses
 	,SaGeMakefileReader
 	
 	,Classes

@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeUtils
+	,SaGeFont
 	,SaGeCommon
 	,SaGeRender
 	,SaGeRenderConstants

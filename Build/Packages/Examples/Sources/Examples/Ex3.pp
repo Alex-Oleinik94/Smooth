@@ -14,11 +14,12 @@ uses
 			{$ENDIF}
 		SaGeBaseExample,
 		{$ENDIF}
-	SaGeCommonClasses
+	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeRenderConstants
-	,SaGeUtils
+	,SaGeFont
 	,SaGeScreen
+	,SaGeCamera
 	;
 type
 	TSGExample3=class(TSGScreenedDrawable)

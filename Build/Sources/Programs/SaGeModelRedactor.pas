@@ -10,13 +10,14 @@ uses
 	
 	,SaGeBase
 	,SaGeCommon
-	,SaGeUtils
+	,SaGeFont
 	,SaGeRenderConstants
 	,SaGeCommonClasses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeResourceManager
+	,SaGeCamera
 	;
 type
 	TSGModelRedactor=class(TSGScreenedDrawable)
