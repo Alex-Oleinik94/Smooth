@@ -6,13 +6,8 @@
 	program Example4_3;
 	{$ENDIF}
 uses
-	{$IFNDEF ENGINE}
-		{$IFDEF UNIX}
-			{$IFNDEF ANDROID}
-				cthreads,
-				{$ENDIF}
-			{$ENDIF}
-		SaGeBaseExample,
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
@@ -21,9 +16,13 @@ uses
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeCamera
+	{$IF not defined(ENGINE)}
+		,SaGeConsolePaintableTools
+		,SaGeConsoleToolsBase
+		{$ENDIF}
 	;
 type
-	TSGExample4_3=class(TSGDrawable)
+	TSGExample4_3 = class(TSGDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -191,7 +190,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	ExampleClass := TSGExample4_3;
-	RunApplication();
+	SGConsoleRunPaintable(TSGExample4_3, SGSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

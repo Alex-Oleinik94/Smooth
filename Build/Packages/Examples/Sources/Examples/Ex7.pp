@@ -6,13 +6,8 @@
 	program Example7;
 	{$ENDIF}
 uses
-	{$IFNDEF ENGINE}
-		{$IFDEF UNIX}
-			{$IFNDEF ANDROID}
-				cthreads,
-				{$ENDIF}
-			{$ENDIF}
-		SaGeBaseExample,
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
@@ -26,6 +21,10 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	{$IF not defined(ENGINE)}
+		,SaGeConsolePaintableTools
+		,SaGeConsoleToolsBase
+		{$ENDIF}
 	;
 type
 	TSGApprFunction = class(TSGScreenedDrawable)
@@ -324,10 +323,8 @@ if FGraphic<>nil then
 	end;
 end;
 
-
 {$IFNDEF ENGINE}
 	begin
-	ExampleClass := TSGApprFunction;
-	RunApplication();
+	SGConsoleRunPaintable(TSGApprFunction, SGSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

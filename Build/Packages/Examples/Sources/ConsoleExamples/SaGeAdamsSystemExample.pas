@@ -5,54 +5,31 @@ unit SaGeAdamsSystemExample;
 interface
 
 uses
-	crt
-	,SaGeBase
-	{$IFDEF MSWINDOWS}
-		,Windows
-		,SaGeRenderDirectX
-		,SaGeContextWinAPI
-	{$ENDIF}
-	{$IFDEF LINUX}
-		,SaGeContextLinux
-		{$ENDIF}
-	,dos
-	,Classes
-	,SysUtils
-	,SaGeContext
-	,SaGeCommon
-	,SaGeFractals
-	,SaGeUtils
-	,SaGeScreen
-	,SaGeCommonUtils
-	,SaGeMesh
+	 SaGeBase
 	,SaGeMath
-	,SaGeExamples
-	,SaGeFPCToC
-	,SaGeNet
-	,SaGeGeneticalAlgoritm
-	,SaGeRender
-	,SaGeRenderOpenGL
-	,SaGeModel
-	,SaGeTron
-	,SaGeLoading
-	,SaGeImages
 	;
 
 type
-	TSGExtenededArray = packed array of Extended;
+	TSGExtenededArray = packed array of TSGMaxFloat;
 	TSGExtenededArrayArray = packed array of TSGExtenededArray;
 	TSGFunctionArray = packed array of TSGExpression;
 
-function AdamsSystem(const a, b, Epsilon : Extended; const nsystem : LongWord; const npoints : LongWord; const Functions : TSGFunctionArray; const BeginPoints : TSGExtenededArray; const FileNameToOut : String = '') : TSGExtenededArrayArray;
+function AdamsSystem(const a, b, Epsilon : TSGMaxFloat; const nsystem : LongWord; const npoints : LongWord; const Functions : TSGFunctionArray; const BeginPoints : TSGExtenededArray; const FileNameToOut : String = '') : TSGExtenededArrayArray;
 
 implementation
 
-function AdamsSystem(const a, b, Epsilon : Extended; const nsystem : LongWord; const npoints : LongWord; const Functions : TSGFunctionArray; const BeginPoints : TSGExtenededArray; const FileNameToOut : String = '') : TSGExtenededArrayArray;
+uses
+	 SaGeStringUtils
+	
+	,Crt
+	;
+
+function AdamsSystem(const a, b, Epsilon : TSGMaxFloat; const nsystem : LongWord; const npoints : LongWord; const Functions : TSGFunctionArray; const BeginPoints : TSGExtenededArray; const FileNameToOut : String = '') : TSGExtenededArrayArray;
 var
 	f : TextFile;
-	Coords : array[0..2] of array of Extended;
+	Coords : array[0..2] of array of TSGMaxFloat;
 
-function MyFunc(const index_of_function : LongWord; const index_of_array : LongWord):Extended;inline;
+function MyFunc(const index_of_function : LongWord; const index_of_array : LongWord):TSGMaxFloat;inline;
 var
 	i : LongWord;
 begin
@@ -78,15 +55,15 @@ if not (Functions[index_of_function].ErrorsQuantity = 0) then
 Result:=Functions[index_of_function].Resultat.FConst;
 end;
 
-function x(const i: LongWord):Extended;
+function x(const i: LongWord):TSGMaxFloat;
 begin
 Result := a + abs(b-a)*(i/npoints)
 end;
 
 var
-	max_eps : Extended;
+	max_eps : TSGMaxFloat;
 	i, ii : LongWord;
-	h : Extended;
+	h : TSGMaxFloat;
 
 procedure OutToFile();
 var

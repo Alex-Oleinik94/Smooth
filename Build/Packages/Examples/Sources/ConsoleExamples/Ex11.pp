@@ -1,21 +1,28 @@
 // Use CP866
 {$INCLUDE SaGe.inc}
-program Example10;
+{$IFDEF ENGINE}
+	unit Ex11;
+	interface
+	implementation
+{$ELSE}
+	program Example11;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeBaseExample
-	,SaGeUtils
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommon
-	,Crt
 	,SaGeAdamsSystemExample
+	{$IF defined(ENGINE)}
+		,SaGeConsoleToolsBase
+		,SaGeConsoleTools
+		{$ENDIF}
+	,SaGeStringUtils
+	
+	,Crt
 	;
 var
 	FuncP : TSGExpression = nil;
@@ -180,10 +187,26 @@ TotalPoint := Point2 - Coord1 * (Point2 - Point1) / (Coord2 - Coord1);
 
 UpdateBeginningParams(TotalPoint);
 
-TR := AdamsSystem(a,b,eps,2,n,Expressions,BeginningParams,'Ex11_Output.txt');
+TR := AdamsSystem(a,b,eps,2,n,Expressions, BeginningParams, 'Ex11_Output.txt');
+WriteLn('Результат сохранен в "', 'Ex11_Output.txt', '".');
 end;
 
+{$IFDEF ENGINE}
+	procedure SGConsoleEx11(const VParams : TSGConcoleCallerParams = nil);
+	{$ENDIF}
 begin
+ClrScr();
 ReadAll();
 Go();
-end.
+
+{$IFNDEF ENGINE}
+	end.
+{$ELSE}
+	end;
+	initialization
+	begin
+	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx11, ['ex11'], 'Example 11');
+	end;
+	
+	end.
+	{$ENDIF}

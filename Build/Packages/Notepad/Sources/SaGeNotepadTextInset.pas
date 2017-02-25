@@ -21,6 +21,7 @@ uses
 	,SaGeResourceManager
 	,SaGeNotepad
 	,SaGeScreenBase
+	,SaGeCursor
 	;
 
 type

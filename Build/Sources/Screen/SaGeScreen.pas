@@ -21,6 +21,7 @@ uses
 	,SaGeScreenBase
 	,SaGeScreenSkin
 	,SaGeStaticString
+	,SaGeCursor
 	;
 
 type

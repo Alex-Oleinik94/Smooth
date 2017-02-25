@@ -18,6 +18,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeImagesBase
 	,SaGeStringUtils
+	,SaGeCursor
 	
 	// Windows units
 	,Windows

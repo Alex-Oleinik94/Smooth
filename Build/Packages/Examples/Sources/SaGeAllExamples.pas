@@ -12,6 +12,7 @@ uses
 	,SaGeGraphicViewer
 	,SaGePackages
 	
+	// Visual examples
 	,Ex1
 	,Ex2_2
 	,Ex2
@@ -30,6 +31,15 @@ uses
 	,Ex15
 	,Ex16
 	//,ExKraft
+	
+	// Console examples
+	{$IFNDEF MOBILE}
+		,Ex8
+		,Ex9
+		,Ex10
+		,Ex11
+		,Ex12
+		{$ENDIF}
 	;
 
 type

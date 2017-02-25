@@ -1,20 +1,30 @@
 // Use CP866
 //Решение нелинейных систему. Метод простой итерации + delta^2 процесс Эйткена.
 {$INCLUDE SaGe.inc}
-program Example8;
+{$IFDEF ENGINE}
+	unit Ex8;
+	interface
+	implementation
+{$ELSE}
+	program Example8;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
-	,SaGeBaseExample
-	,SaGeUtils
+	 SaGeBase
+	,SaGeContext
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommon
+	,SaGeStringUtils
+	,SaGeDateTime
+	,SaGeEncodingUtils
+	,SaGeFileUtils
+	{$IF defined(ENGINE)}
+		,SaGeConsoleToolsBase
+		,SaGeConsoleTools
+		{$ENDIF}
+	
 	,Crt
 	;
 var
@@ -71,7 +81,7 @@ var
 	s:String;
 	c,c1 : TSGBoolean;
 	Ex : TSGExpression  = nil;
-	ExVariables : TArPChar = nil;
+	ExVariables : TSGPCharList = nil;
 	f : TextFile;
 begin
 if FileName<>'' then
@@ -311,7 +321,7 @@ for i:=0 to High(Xs[Ind]) do
 	TextColor(15);
 	Write('  ',Variables[i],'=');
 	TextColor(10);
-	WriteLn(SGStrExtended(Xs[Ind,i],10));
+	WriteLn(SGStrMathFloat(Xs[Ind,i],10));
 	end;
 TextColor(7);
 end;
@@ -413,7 +423,7 @@ for i:= 0 to High(NotLineSystem) do
 	s := Variables[i];
 	for ii := 0 to High(Variables) do
 		if abs(Matrix[i][ii])>eps*eps then
-			s += '+('+SGStrExtended(Matrix[i][ii],10)+')*('+SGPCharToString(NotLineSystem[ii].Expression)+')';
+			s += '+('+SGStrMathFloat(Matrix[i][ii],10)+')*('+SGPCharToString(NotLineSystem[ii].Expression)+')';
 	
 	IterationSystem[i]:= TSGExpression.Create();
 	IterationSystem[i].Expression := SGStringToPChar(s);
@@ -537,7 +547,7 @@ while abs(r) > eps do
 		Windows1251ToOEM866(s);
 		if S[Length(S)]=' ' then
 			SetLength(S,Length(S)-1);
-		Write('Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrExtended(r,10),'. ');
+		Write('Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrMathFloat(r,10),'. ');
 		WriteXs(Index,'Промежуточные корни(-ень)');
 		d3 := d2;
 		end;
@@ -587,10 +597,23 @@ else
 	ReadSystemFromFile();
 end;
 
+{$IFDEF ENGINE}
+	procedure SGConsoleEx8(const VParams : TSGConcoleCallerParams = nil);
+	{$ENDIF}
 begin
 ClrScr();
-WriteLn('Это программа решает нелинейные системы уравнений методом простой итерации');
+WriteLn('Этa программа решает нелинейные системы уравнений методом простой итерации');
 ReadSystem();
 DoIneration();
 
-end.
+{$IFNDEF ENGINE}
+	end.
+{$ELSE}
+	end;
+	initialization
+	begin
+	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx8, ['ex8'], 'Example 8');
+	end;
+	
+	end.
+	{$ENDIF}

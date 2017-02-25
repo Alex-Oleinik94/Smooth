@@ -1,19 +1,31 @@
 // Use CP866
 {$INCLUDE SaGe.inc}
-program Example9;
+{$IFDEF ENGINE}
+	unit Ex9;
+	interface
+	implementation
+{$ELSE}
+	program Example9;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeBaseExample
-	,SaGeUtils
+	{$IF defined(ENGINE)}
+		,SaGeConsoleToolsBase
+		,SaGeConsoleTools
+		{$ENDIF}
+	,SaGeConsolePaintableTools
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommon
+	,SaGeStringUtils
+	,SaGeCommonClasses
+	,SaGeGraphicViewer
+	,SaGeEncodingUtils
+	,SaGeMathUtils
+	
 	,Crt
 	;
 var
@@ -21,6 +33,7 @@ var
 	x0 : Extended = 0;
 	n,p : LongWord;
 	S : TSGLineSystem = nil;
+
 procedure ReadAll();
 var
 	S : String;
@@ -62,7 +75,7 @@ if not (Ex.ErrorsQuantity = 0) then
 	i := 0;
 	end;
 if i = 0 then
-	Write('Братишка давайка еще раз: f(?)=')
+	Write('Давайка еще раз: f(?)=')
 else
 	begin
 	Func := TSGExpression.Create();
@@ -90,34 +103,39 @@ Result:=Func.Resultat.FConst;
 end;
 
 type
-	TSGApprFunction=class(TSGDrawClass)
+	TSGApprFunction=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		FGraphic : TSGGraphic;
 		end;
 
-procedure TSGApprFunction.Draw();
+procedure TSGApprFunction.Paint();
 begin
-FGraphic.Draw();
+FGraphic.Paint();
 end;
 
 destructor TSGApprFunction.Destroy();
 begin
-FGraphic.Destroy();
+if FGraphic <> nil then
+	begin
+	FGraphic.Destroy();
+	FGraphic := nil;
+	end;
 end;
 
-constructor TSGApprFunction.Create(const VContext : TSGContext);
+constructor TSGApprFunction.Create(const VContext : ISGContext);
+
 function GetInterPaliasionMnogoclen():TSGString;
 var
 	i : LongWord;
 begin
 Result:='';
 for i := 0 to p do
-	Result += '('+SGStrExtended(S.x[i],16)+')*(x^'+SGStr(i)+')+';
+	Result += '('+SGStrMathFloat(S.x[i],16)+')*(x^'+SGStr(i)+')+';
 Result+='0';
 WriteLn(Result);
 end;
@@ -168,13 +186,28 @@ for i := 0 to p do
 	xx += S.x[i]*(x0**Extended(i));
 WriteLn('Ответ: ',xx:0:15);
 
-ExampleClass := TSGApprFunction;
-RunApplication();
+
+SGConsoleRunPaintable(TSGApprFunction);
 
 S.Destroy();
 end;
 
+{$IFDEF ENGINE}
+	procedure SGConsoleEx9(const VParams : TSGConcoleCallerParams = nil);
+	{$ENDIF}
 begin
+ClrScr();
 ReadAll();
 Go();
-end.
+
+{$IFNDEF ENGINE}
+	end.
+{$ELSE}
+	end;
+	initialization
+	begin
+	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx9, ['ex9'], 'Example 9');
+	end;
+	
+	end.
+	{$ENDIF}

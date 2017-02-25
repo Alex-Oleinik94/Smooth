@@ -1,22 +1,34 @@
 // Use CP866
 {$INCLUDE SaGe.inc}
-program Example10;
+{$IFDEF ENGINE}
+	unit Ex12;
+	interface
+	implementation
+{$ELSE}
+	program Example12;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeBaseExample
-	,SaGeUtils
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommon
-	,Crt
 	,SaGeMesh
 	,SaGeRender
+	,SaGeStringUtils
+	,SaGeCamera
+	,SaGeRenderConstants
+	,SaGeEncodingUtils
+	,SaGeCommonClasses
+	{$IF defined(ENGINE)}
+		,SaGeConsoleToolsBase
+		,SaGeConsoleTools
+		{$ENDIF}
+	,SaGeConsolePaintableTools
+	
+	,Crt
 	;
 var
 	FuncMU1 : TSGExpression = nil;
@@ -146,13 +158,12 @@ begin
 Result := FuncOneVariable(FuncU0,x);
 end;
 
-
 type
-	TSGApprFunction=class(TSGDrawClass)
+	TSGApprFunction=class(TSGDrawable)
 			public
-		constructor Create(const VContext : TSGContext);override;
+		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Draw();override;
+		procedure Paint();override;
 		class function ClassName():TSGString;override;
 			private
 		function CalculateMesh():TSGCustomModel;
@@ -218,10 +229,10 @@ for i := 0 to High(Setka)-1 do
 Result.LoadToVBO();
 end;
 
-procedure TSGApprFunction.Draw();
+procedure TSGApprFunction.Paint();
 begin
 FCamera.CallAction();
-FMesh.Draw();
+FMesh.Paint();
 end;
 
 destructor TSGApprFunction.Destroy();
@@ -230,7 +241,7 @@ FMesh.Destroy();
 FCamera.Destroy();
 end;
 
-constructor TSGApprFunction.Create(const VContext : TSGContext);
+constructor TSGApprFunction.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FMesh := CalculateMesh();
@@ -311,15 +322,29 @@ for ii := 2 to High(Setka) do
 
 OutToFile('Ex12_OutPut.txt');
 
-ExampleClass := TSGApprFunction;
-RunApplication();
+SGConsoleRunPaintable(TSGApprFunction);
 
 for i := 0 to High(Setka) do
 	SetLength(Setka[i],0);
 SetLength(Setka,0);
 end;
 
+{$IFDEF ENGINE}
+	procedure SGConsoleEx12(const VParams : TSGConcoleCallerParams = nil);
+	{$ENDIF}
 begin
+ClrScr();
 ReadAll();
 Go();
-end.
+
+{$IFNDEF ENGINE}
+	end.
+{$ELSE}
+	end;
+	initialization
+	begin
+	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx12, ['ex12'], 'Example 12');
+	end;
+	
+	end.
+	{$ENDIF}

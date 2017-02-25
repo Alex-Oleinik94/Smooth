@@ -1,21 +1,28 @@
 // Use CP866
 {$INCLUDE SaGe.inc}
-program Example10;
+{$IFDEF ENGINE}
+	unit Ex10;
+	interface
+	implementation
+{$ELSE}
+	program Example10;
+	{$ENDIF}
 uses
-	{$IFDEF UNIX}
-		{$IFNDEF ANDROID}
-			cthreads,
-			{$ENDIF}
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeBaseExample
-	,SaGeUtils
 	,SaGeMath
-	,SaGeExamples
 	,SaGeCommon
-	,Crt
 	,SaGeAdamsSystemExample
+	,SaGeStringUtils
+	{$IF defined(ENGINE)}
+		,SaGeConsoleToolsBase
+		,SaGeConsoleTools
+		{$ENDIF}
+	
+	,Crt
 	;
 var
 	Functions : TSGFunctionArray = nil;
@@ -125,17 +132,35 @@ ReadLn(eps);
 end;
 
 procedure Go();
+const
+	Output_file = 'Ex10_output.txt';
 var
 	AdamsResult : TSGExtenededArrayArray;
 	i : LongWord;
 begin
-AdamsResult := SaGeAdamsSystemExample.AdamsSystem(a, b, eps, ns, n, Functions, Y0, 'Ex10_output.txt');
+AdamsResult := SaGeAdamsSystemExample.AdamsSystem(a, b, eps, ns, n, Functions, Y0, Output_file);
+WriteLn('Результат сохранен в "', Output_file, '".');
 for i := 0 to High(AdamsResult) do
 	SetLength(AdamsResult[i],0);
 SetLength(AdamsResult,0);
 end;
 
+{$IFDEF ENGINE}
+	procedure SGConsoleEx10(const VParams : TSGConcoleCallerParams = nil);
+	{$ENDIF}
 begin
+ClrScr();
 ReadAll();
 Go();
-end.
+
+{$IFNDEF ENGINE}
+	end.
+{$ELSE}
+	end;
+	initialization
+	begin
+	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx10, ['ex10'], 'Example 10');
+	end;
+	
+	end.
+	{$ENDIF}

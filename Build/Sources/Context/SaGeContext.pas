@@ -18,6 +18,7 @@ uses
 	,SaGeImagesBase
 	,SaGeScreen
 	,SaGeAudioRender
+	,SaGeCursor
 	
 	,Classes
 	,Crt

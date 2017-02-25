@@ -6,13 +6,8 @@
 	program Example6;
 	{$ENDIF}
 uses
-	{$IFNDEF ENGINE}
-		{$IFDEF UNIX}
-			{$IFNDEF ANDROID}
-				cthreads,
-				{$ENDIF}
-			{$ENDIF}
-		SaGeBaseExample,
+	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
+		cthreads,
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
@@ -23,6 +18,10 @@ uses
 	,SaGeMesh
 	,SaGeImages
 	,SaGeCamera
+	{$IF not defined(ENGINE)}
+		,SaGeConsolePaintableTools
+		,SaGeConsoleToolsBase
+		{$ENDIF}
 	
 	,Ex6_D
 	,Ex6_N
@@ -193,7 +192,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	ExampleClass := TSGExample6;
-	RunApplication();
+	SGConsoleRunPaintable(TSGExample6, SGSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.
