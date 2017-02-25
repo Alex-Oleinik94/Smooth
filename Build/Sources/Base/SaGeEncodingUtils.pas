@@ -8,6 +8,30 @@ uses
 	 SaGeBase
 	;
 
+type
+	TSGEncoding = (
+		SGEncodingNull,
+		SGEncodingUTF8,
+		SGEncodingWindows1251,
+		SGEncodingCP866
+		);
+const
+	SGEncodingError   = SGEncodingNull;
+	SGEncodingNone    = SGEncodingNull;
+	SGEncodingWin1251 = SGEncodingWindows1251;
+	SGEncodingW1251   = SGEncodingWindows1251;
+	SGEncodingOEM866  = SGEncodingCP866;
+type
+	TSGEncodingDeterminer = class
+			public
+		class function DetermineEncoding(const VString : TSGString) : TSGEncoding;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function IsWindows1251(const VString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function IsCP866(const VString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function IsUTF8(const VString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		end;
+
+function SGConvertString(const VString : TSGString; const VEncoding : TSGEncoding) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 procedure Windows1251ToUTF8(var Str: TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure UTF8ToWindows1251(var Str: TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure OEM866ToUTF8(var Str: TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -29,9 +53,56 @@ uses
 	 StrMan
 	
 	{$IFDEF MSWINDOWS}
-		,Windows
-	{$ENDIF}
+		,SaGeWindowsUtils
+		{$ENDIF}
 	;
+
+function SGConvertString(const VString : TSGString; const VEncoding : TSGEncoding) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	SourceFormat : TSGEncoding = SGEncodingNull;
+begin
+Result := VString;
+SourceFormat := TSGEncodingDeterminer.DetermineEncoding(VString);
+if SourceFormat <> SGEncodingNull then
+	begin
+	case SourceFormat of
+	SGEncodingUTF8 :
+		case VEncoding of
+		SGEncodingWindows1251 : UTF8ToWindows1251(Result);
+		SGEncodingCP866       : UTF8ToOEM866     (Result);
+		end;
+	SGEncodingWindows1251 :
+		case VEncoding of
+		SGEncodingUTF8  : Windows1251ToUTF8  (Result);
+		SGEncodingCP866 : Windows1251ToOEM866(Result);
+		end;
+	SGEncodingCP866 :
+		case VEncoding of
+		SGEncodingUTF8        : OEM866ToUTF8       (Result);
+		SGEncodingWindows1251 : OEM866ToWindows1251(Result);
+		end;
+	end;
+	end;
+end;
+
+{$INCLUDE SaGeEncodingCP866.inc}
+{$INCLUDE SaGeEncodingWindows1251.inc}
+
+class function TSGEncodingDeterminer.IsUTF8(const VString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := False;
+end;
+
+class function TSGEncodingDeterminer.DetermineEncoding(const VString : TSGString) : TSGEncoding;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := SGEncodingNull;
+if (Result = SGEncodingNull) and IsWindows1251(VString) then
+	Result := SGEncodingWindows1251;
+if (Result = SGEncodingNull) and IsCP866(VString) then
+	Result := SGEncodingCP866;
+if (Result = SGEncodingNull) and IsUTF8(VString) then
+	Result := SGEncodingUTF8;
+end;
 
 const
 	SGAnsiToASCII : packed array[TSGChar] of TSGChar = {Ansi - WINDOWS1251(CP1251); ASCII - CP866 }
@@ -188,19 +259,11 @@ end;
 end;
 
 function SGGetLanguage(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-{$IFDEF MSWINDOWS}
-	var
-		Layout : array [0..kl_namelength] of TSGChar;
-	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
-	GetKeyboardLayoutname(Layout);
-	if layout='00000409' then
-		Result:='EN'
-	else
-		Result:='RU';
+	Result := SGKeyboardLayout();
 {$ELSE}
-	Result:='EN';
+	Result := 'EN';
 	{$ENDIF}
 end;
 

@@ -11,6 +11,7 @@ uses
 	,Classes
 	
 	,SaGeBase
+	,SaGeEncodingUtils
 	;
 
 type
@@ -62,12 +63,30 @@ procedure SGPrintParams(const ArS : TSGStringList; const Title : TSGString; cons
 procedure SGPrintStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGWriteStream(const Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
+function SGConvertStringToConsoleEncoding(const VString : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGConsoleEncoding() : TSGEncoding; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
 implementation
 
 uses
 	 StrMan
 	,SaGeStringUtils
 	;
+
+function SGConsoleEncoding() : TSGEncoding; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SGEncodingNull;
+{$IF defined(MSWINDOWS)}
+	Result := SGEncodingCP866;
+{$ELSE} {$IF defined(LINUX)}
+	Result := SGEncodingUTF8;
+{$ENDIF} {$ENDIF}
+end;
+
+function SGConvertStringToConsoleEncoding(const VString : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SGConvertString(VString, SGConsoleEncoding());
+end;
 
 procedure TSGConsoleRecord.Execute(const Index : TSGConsoleRecordIndex);
 begin

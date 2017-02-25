@@ -192,7 +192,7 @@ type
 		FThread:TSGMathGraphicThread;
 		FVariable:PChar;
 		FYShift:real;
-		FArVertexes:TArSGVisibleVertex;
+		FArVertexes:TSGVisibleVertexList;
 		FVertexFunction:TSGVisibleVertexFunction;
 		FUseThread:boolean;
 		FVertexFunctionPointer:Pointer;

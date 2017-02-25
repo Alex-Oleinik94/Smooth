@@ -10,6 +10,7 @@
 unit SaGeShaders;
 
 interface
+
 uses
 	 Crt
 	,SysUtils
@@ -32,8 +33,8 @@ type
 			public
 		constructor Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 		destructor Destroy();override;
-		function Compile():Boolean;inline;
-		procedure Source(const s:string);overload;
+		function Compile():TSGBoolean;inline;
+		procedure Source(const S : TSGString);overload;
 		procedure PrintInfoLog();
 			private
 		FShader : TSGLongWord;
@@ -50,10 +51,10 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 		procedure Attach(const NewShader:TSGShader);
-		function Link():Boolean;
+		function Link():TSGBoolean;
 		procedure PrintInfoLog();
 		procedure Use();
-		function GetUniformLocation(const VLocationName : PChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		function GetUniformLocation(const VLocationName : PSGChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		function GetUniformLocation(const VLocationName : TSGString): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 			private
 		FProgram : TSGLongWord;
@@ -100,6 +101,8 @@ type
 		property FileParams : TSGShaderParams write FFileParams;
 		end;
 
+procedure SGShaderLog(const VLog : PSGChar);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGShaderLog(const VLog : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVertexSource, VFragmentSource : TSGString): TSGShaderProgram;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGSaveShaderSourceToFile(const VFileName, VSource : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadShaderSourceFromFile(const VFileName : TSGString):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -239,7 +242,7 @@ Result := Render.GetUniformLocation(FProgram,c);
 FreeMem(c,Length(VLocationName));
 end;
 
-function TSGShaderProgram.GetUniformLocation(const VLocationName : PChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGShaderProgram.GetUniformLocation(const VLocationName : PSGChar): TSGLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := Render.GetUniformLocation(FProgram,VLocationName);
 end;
@@ -248,12 +251,14 @@ function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVert
 var
 	FFragmentShader, FVertexShader : TSGShader;
 begin
-FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
+Result := nil;
+
+FVertexShader := TSGShader.Create(Context, SGR_VERTEX_SHADER);
 FVertexShader.Source(VVertexSource);
 if not FVertexShader.Compile() then
 	FVertexShader.PrintInfoLog();
 
-FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
+FFragmentShader := TSGShader.Create(Context, SGR_FRAGMENT_SHADER);
 FFragmentShader.Source(VFragmentSource);
 if not FFragmentShader.Compile() then
 	FFragmentShader.PrintInfoLog();
@@ -746,12 +751,33 @@ FShaders[High(FShaders)]:=NewShader;
 Render.AttachShader(FProgram,NewShader.Shader);
 end;
 
+procedure SGShaderLog(const VLog : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	Stream : TMemoryStream = nil;
+	Str : TSGString;
+begin
+Stream := SGStringToStream(VLog);
+Stream.Position := 0;
+repeat
+Str := '';
+Str := SGReadStringFromStream(Stream);
+if Str <> '' then
+	SGLog.Source('     ' + Str, False);
+until (Stream.Size = Stream.Position);
+Stream.Destroy();
+end;
+
+procedure SGShaderLog(const VLog : PSGChar);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+SGShaderLog(SGPCharToString(VLog));
+end;
+
 procedure TSGShaderProgram.PrintInfoLog();
 var
 	MaxLength, Length: Integer;
 	InfoLog: array of Char;
 	i : LongInt;
-	Log : String = '';
+	Log : TSGString = '';
 begin
 Render.GetObjectParameteriv(FProgram, SGR_OBJECT_INFO_LOG_LENGTH_ARB, @MaxLength);
 if MaxLength > 1 then
@@ -759,12 +785,10 @@ if MaxLength > 1 then
 	Length := MaxLength;
 	SetLength(InfoLog, MaxLength);
 	Render.GetInfoLog(FProgram, MaxLength, Length, @infolog[0]);
-	for i := 0 to High(InfoLog) do
-		if (InfoLog[i] = #13) then
-			Log += '/n'
-		else if (InfoLog[i] <> #10) then
-			Log += InfoLog[i];
-	SGLog.Source('TSGShaderProgram.PrintInfoLog : Program="'+SGStr(FProgram)+'", Log="'+Log+'".');
+	for i := 0 to Length - 1 do
+		Log += InfoLog[i];
+	SGLog.Source('TSGShaderProgram__PrintInfoLog(). Program : ' + SGStr(FProgram) + ', Log --->');
+	SGShaderLog(Log);
 	SetLength(InfoLog, 0);
 	end;
 end;
@@ -796,22 +820,24 @@ if RenderAssigned() then
 inherited;
 end;
 
-procedure TSGShader.PrintInfoLog;
+procedure TSGShader.PrintInfoLog();
 var
 	InfoLogLength:LongInt = 0;
 	InfoLog:PChar = nil;
 	CharsWritten:LongInt  = 0;
 begin
-Render.GetObjectParameteriv(FShader, SGR_INFO_LOG_LENGTH,@InfoLogLength);
+Render.GetObjectParameteriv(FShader, SGR_INFO_LOG_LENGTH, @InfoLogLength);
 if InfoLogLength>0 then
 	begin
-	GetMem(InfoLog,InfoLogLength);
+	GetMem(InfoLog, InfoLogLength);
 	Render.GetInfoLog(FShader, InfoLogLength, CharsWritten, InfoLog);
-	SGLog.Source('TSGShader.PrintInfoLog : "'+SGPCharToString(InfoLog)+'".');
-	FreeMem(InfoLog,InfoLogLength);
+	SGLog.Source(['TSGShader__PrintInfoLog(). Shader : ', FShader, ', Type : ', StringType(), ', Log --->']);
+	SGShaderLog(InfoLog);
+	FreeMem(InfoLog, InfoLogLength);
 	end;
 end;
-procedure TSGShader.Source(const s:string);
+
+procedure TSGShader.Source(const S : TSGString);
 var
 	pc:PChar = nil;
 begin
@@ -819,7 +845,7 @@ begin
 SGLog.Source('TSGShader.Source : Begin to Source shader "'+SGStr(FShader)+'"');// : "'+s+'"');
 {$ENDIF}
 pc:=SGStringToPChar(s);
-Render.ShaderSource(FShader,pc,SGPCharLength(pc));
+Render.ShaderSource(FShader, pc, SGPCharLength(pc));
 {$IFDEF SG_DEBUG_SHADERS}
 SGLog.Source('TSGShader.Source : Shader Sourced "'+SGStr(FShader)+'"');
 {$ENDIF}

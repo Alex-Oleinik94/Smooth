@@ -16,6 +16,7 @@ function SGWindowsVersion(): TSGString;
 function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
 function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
+function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -25,6 +26,17 @@ uses
 	,SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Layout : array [0..kl_namelength] of TSGChar;
+begin
+GetKeyboardLayoutName(Layout);
+if layout = '00000409' then
+	Result := 'EN'
+else
+	Result := 'RU';
+end;
 
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 var

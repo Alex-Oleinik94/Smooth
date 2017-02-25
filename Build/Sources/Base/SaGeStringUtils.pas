@@ -70,6 +70,7 @@ function SGStringListFromString(const S : TSGString; const Separators : TSGStrin
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGUpCaseStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TStream
 function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -115,6 +116,28 @@ uses
 (************)
 (** STRING **)
 (************)
+
+function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	C, lC : TSGChar;
+	i : TSGUInt32;
+begin
+Result := '';
+lC  := ' ';
+C   := ' ';
+if Length(VString) > 0 then
+	for i := 1 to Length(VString) do
+		if  ( not (
+				(VString[i]  in [#13,#10]) and
+				(C           in [#13,#10]) and
+				(lC          in [#13,#10])
+			) ) then
+			begin
+			lC := C;
+			C := VString[i];
+			Result += C;
+			end;
+end;
 
 function SGStringLength(const S : TSGString) : TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -822,7 +845,7 @@ var
 	First : TSGBool = True;
 begin
 Result:='';
-while (not (C in Eolns)) or First do
+while ((not (C in Eolns)) or First) and (Stream.Position <> Stream.Size) do
 	begin
 	Stream.ReadBuffer(C, 1);
 	if not (C in Eolns) then

@@ -22,7 +22,7 @@ LIBRARYFILENAME=SaGe
 PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
 EXTERNALARGS= -FuExternalSources/OpenAL -FuExternalSources/OpenSSL -FuExternalSources/sdl2 -FuExternalSources/sdl -FuExternalSources/ffmpeg -FuExternalSources/DCP/Ciphers -FuExternalSources/DCP/Hashes -FuExternalSources/DCP -FuExternalSources/Ogg -FuExternalSources/Synapse -FuExternalSources/lNet -FuExternalSources/lNet/sys -FuExternalSources -FuExternalSources/PasJpeg 
-INCLUDESARGS= -FiSources/Includes/Screen -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FiSources/Includes
+INCLUDESARGS= -FiSources/Includes/Screen -FiSources/Includes/Encoding -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FiSources/Includes
 SOURCEARGS= -FuSources/Images -FuSources/ConsoleTools -FuSources/Base -FuSources/Game -FuSources/Common -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsoleTools/Programs -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources -FuSources/Programs 
 BASEARGS= -FiOutput/Resources -FuOutput/Resources -Sm $(SOURCEARGS) $(INCLUDESARGS) $(EXTERNALARGS)
 RENDERARGS= -FuExternalSources/DirectX/9 -FuExternalSources/DirectX/12 -FuExternalSources/OpenGL
@@ -46,28 +46,28 @@ SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, l
 SG_TARGET=
 
 examples:
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex1
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2_2
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex3
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_1
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_2
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_3
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_2
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_4
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6_2
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex7
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex8
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex9
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex10
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex11
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex12
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex13
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex14
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex15
-	@$(PASCALCOMPILER) $(RX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex16
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex1
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex3
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_1
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_3
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_4
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex7
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex8
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex9
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex10
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex11
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex12
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex13
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex14
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex15
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex16
 release_x32, release:
 	@$(PASCALCOMPILER) $(RX32) $(DORELEASE) $(DESKTOPARGS)
 release_x64:

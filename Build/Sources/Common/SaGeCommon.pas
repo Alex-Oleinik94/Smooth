@@ -5,13 +5,7 @@ unit SaGeCommon;
 interface
 
 uses
-	 Crt
-	,Math
-	,Classes
-	,SysUtils
-	
-	,SaGeBase
-	,SaGeRenderBase
+	 SaGeBase
 	,SaGeMathUtils
 	;
 
@@ -46,15 +40,12 @@ type
 		function AbsY:TSGFloat32;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
-	TSGVisibleVertex=object(TSGVertex3f)
-		Visible:Boolean;
+	TSGVisibleVertex = object(TSGVertex3f)
+		Visible : TSGBoolean;
 		end;
-	SGVisibleVertex = TSGVisibleVertex;
-	PSGVisibleVertex = ^SGVisibleVertex;
-	TArSGVisibleVertex = type packed array of TSGVisibleVertex;
-	TArTSGVisibleVertex = TArSGVisibleVertex;
-	TSGVisibleVertexFunction = function (a:TSGVisibleVertex;CONST b:Pointer):TSGVisibleVertex;
-	TSGPointerProcedure = procedure (a:Pointer);
+	TSGVisibleVertexList = packed array of TSGVisibleVertex;
+	TSGVisibleVertexFunction = function (a : TSGVisibleVertex; const b : Pointer) : TSGVisibleVertex;
+	TSGPointerProcedure = procedure (a : Pointer);
 	TSGProcedure = procedure;
 
 	TSGCustomPosition = record
@@ -171,6 +162,14 @@ function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPP
 function SGPoint2int32ToVertex3f(const P : TSGPoint2int32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+uses
+	 Math
+	,Crt
+	
+	,SysUtils
+	,SaGeRenderBase
+	;
 
 {$DEFINE INC_PLACE_IMPLEMENTATION}
 {$INCLUDE SaGeCommonStructs.inc}
@@ -704,14 +703,14 @@ type
 var
 	i : TSGByte;
 begin
-textcolor(10);
+TextColor(10);
 for i:=0 to 15 do
 	begin
 	Write(PTSGMatrix4Type(P)[i]:0:10,' ');
 	if (i+1)mod 4 = 0 then
 		WriteLn();
 	end;
-Textcolor(7);
+TextColor(7);
 end;
 
 operator * (const A:TSGVertex3f;const B:TSGMatrix4):TSGVertex3f;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -1024,8 +1023,8 @@ for i:=0 to High(FPoints) do
 			MinCos:=TemCos;
 			end;
 		end;
-if Result=Length(FPoints) then
-	raise  Exception.Create('Ebat ti loh!!!');
+if Result = Length(FPoints) then
+	raise Exception.Create('GetNext(const p1,p2:LongWord) : Result = Length(FPoints).');
 end;
 
 vAR

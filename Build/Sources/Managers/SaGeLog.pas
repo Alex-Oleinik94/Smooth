@@ -65,6 +65,8 @@ uses
 	 SaGeDateTime
 	,SaGeStringUtils
 	,SaGeBaseUtils
+	,SaGeConsoleUtils
+	,SaGeEncodingUtils
 	
 	,StrMan
 	;
@@ -121,7 +123,7 @@ begin
 if SGLogError in ViewCase then
 	SGLog.Source(MessageStr);
 if SGPrintError in ViewCase then
-	WriteLn(MessageStr);
+	WriteLn(SGConvertStringToConsoleEncoding(MessageStr));
 end;
 
 procedure TSGLog.Source(const Ar : array of const; const WithTime:Boolean = True);
@@ -194,7 +196,7 @@ var
 begin
 if SGLogEnable and (FFileStream <> nil) then
 	begin
-	pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + s + SGWinEoln);
+	pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + SGStringDeleteEndOfLineDublicates(SGConvertString(S, SGEncodingWindows1251) + SGWinEoln));
 	FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
 	SGPCharFree(PC);
 	end;

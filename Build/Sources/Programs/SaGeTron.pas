@@ -32,7 +32,7 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():string;override;
+		class function ClassName():TSGString;override;
 			protected
 		FScene      : TSGScene;
 		FLoadThread : TSGThread;
@@ -48,7 +48,7 @@ uses
 	 SaGeLog
 	;
 
-class function TSGGameTron.ClassName():string;
+class function TSGGameTron.ClassName():TSGString;
 begin
 Result := 'Трон';
 end;
