@@ -20,6 +20,7 @@ uses
 	,SaGeMesh
 	,SaGeThreads
 	,SaGeCamera
+	,SaGeClasses
 	;
 
 const
@@ -74,18 +75,23 @@ end;
 end;
 
 procedure TSGGameTron.Load();
-var
-	Model : TSGCustomModel;
-begin
-Model:=TSGCustomModel.Create();
 
-while FLoadClass.Progress < 1 do
-	begin
-	FLoadClass.Progress := FLoadClass.Progress + 0.01;
-	Sleep(20);
-	end;
-FLoadClass.Progress:=1.0001;
-FState:=SGTStateStarting;
+procedure Add3DSModel(const FileName : TSGString);
+var
+	Model : TSGModel = nil;
+begin
+Model := TSGModel.Create(Context);
+Model.Mesh.Load3DSFromFile(FileName);
+FScene.AddNod(Model);
+end;
+
+begin
+FLoadClass.Progress := 0.04001;
+Add3DSModel('./../Data/Tron/motoBike.3ds');
+FLoadClass.Progress := 0.5001;
+Add3DSModel('./../Data/Tron/Map.3ds');
+FLoadClass.Progress := 1.0001;
+FState := SGTStateStarting;
 end;
 
 procedure LoadThread(VThronClass:TSGGameTron);
@@ -110,18 +116,27 @@ FScene.AddMutator(TSGPhysics3D);
 
 FLoadClass := TSGLoading.Create(Context);
 FLoadClass.Progress := 0;
-FLoadThread := TSGThread.Create(TSGThreadProcedure(@LoadThread),Self,False);
+FLoadThread := TSGThread.Create(TSGThreadProcedure(@LoadThread), Self, False);
 FLoadThread.Start();
 end;
 
 destructor TSGGameTron.Destroy();
 begin
 if FLoadThread<>nil then
+	begin
 	FLoadThread.Destroy();
+	FLoadThread := nil;
+	end;
 if FLoadClass<>nil then
+	begin
 	FLoadClass.Destroy();
+	FLoadClass := nil;
+	end;
 if FScene<>nil then
+	begin
 	FScene.Destroy();
+	FScene := nil;
+	end;
 inherited Destroy();
 end;
 

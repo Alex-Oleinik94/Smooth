@@ -22,6 +22,7 @@ uses
 	
 	,SaGeBase
 	,SaGeSysUtils
+	,SaGeClasses
 	;
 
 {$IFDEF ANDROID}
@@ -86,7 +87,7 @@ type
 	TSGThreadFunction = function ( p : TSGPointer ): TSGThreadFunctionResult;
 		{$IFDEF ANDROID}cdecl;{$ELSE} {$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 	
-	TSGThread = class
+	TSGThread = class(TSGNamed)
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 		destructor Destroy();override;

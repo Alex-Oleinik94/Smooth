@@ -54,7 +54,7 @@ function TSGScene.AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGB
 var
 	i : TSGLongWord;
 begin
-Result:=TSGModel.Create(Context);
+Result := TSGModel.Create(Context);
 Result.Context:=Context;
 Result.Mesh := NewModel;
 AddNod(Result);
@@ -71,8 +71,9 @@ var
 begin
 if FNods<>nil then
 	for i:=0 to High(FNods) do
-		if (FNods[i] as TSGModel)<>nil then
+		if (FNods[i] as TSGModel) <> nil then
 			Models[i].LoadToVBO();
+
 for i := 0 to High(FMutators) do
 	if FMutators[i] <> nil then
 		FMutators[i].Start();
@@ -80,18 +81,18 @@ end;
 
 function TSGScene.GetModel(const Index : TSGLongWord):TSGModel;inline;
 begin
-if (FNods<>nil) and (FNods[Index]<>nil) then
-	Result:=FNods[Index] as TSGModel
+if (FNods<>nil) and (Index >= 0) and (Index <= High(FNods)) and (FNods[Index]<>nil) then
+	Result := FNods[Index] as TSGModel
 else
-	Result:=nil;
+	Result := nil;
 end;
 
 function TSGScene.AddMutator( const NewMutatorClass : TSGMutatorClass ):TSGMutator;
 begin
 if FMutators<> nil then
-	SetLength(FMutators,Length(FMutators)+1)
+	SetLength(FMutators, Length(FMutators) + 1)
 else
-	SetLength(FMutators,1);
+	SetLength(FMutators, 1);
 Result:=NewMutatorClass.Create(Context);
 FMutators[High(FMutators)]:=Result;
 Result.SetParent(Self);
@@ -111,7 +112,10 @@ var
 	i : TSGLongWord;
 begin
 if FCamera<>nil then
+	begin
 	FCamera.Destroy();
+	FCamera := nil;
+	end;
 if FMutators <> nil then
 	begin
 	for i := 0 to High(FMutators) do

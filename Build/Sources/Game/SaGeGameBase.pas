@@ -28,7 +28,9 @@ type
 		function  AddNod(const NewNodClass : TSGNodClass):TSGNod;virtual;overload;
 		procedure AddNod(const NewNod : TSGNod);virtual;overload;
 		function DeleteNod(const Nod : TSGNod):TSGBoolean;virtual;
-		procedure SetParent(const Nod : TSGNod );
+		procedure SetParent(const Nod : TSGNod);
+		procedure RemoveParent();
+		procedure DestroyNods();
 			private
 		function GetNod(const Index : TSGLongWord):TSGNod;inline;
 		function GetQuantityNods():TSGLongWord;inline;
@@ -99,19 +101,36 @@ FNods:=nil;
 FParent:=nil;
 end;
 
-destructor TSGNod.Destroy();
-var
-	i : TSGLongWord;
+procedure TSGNod.RemoveParent();
 begin
-if FNods<>nil then
-	begin
-	for i:=0 to High(FNods) do
-		if FNods[i]<>nil then
-			FNods[i].Destroy();
-	SetLength(FNods,0);
-	end;
 if FParent<>nil then
+	begin
 	FParent.DeleteNod(Self);
+	FParent := nil;
+	end;
+end;
+
+procedure TSGNod.DestroyNods();
+var
+	i : TSGInt32;
+	FNod : TSGNod = nil;
+begin
+while (FNods <> nil) and (Length(FNods) > 0) do
+	begin
+	FNod := FNods[High(FNods)];
+	DeleteNod(FNod);
+	if FNod <> nil then
+		begin
+		FNod.Destroy();
+		FNod := nil;
+		end;
+	end;
+end;
+
+destructor TSGNod.Destroy();
+begin
+RemoveParent();
+DestroyNods();
 inherited;
 end;
 
@@ -145,11 +164,11 @@ function TSGNod.DeleteNod(const Nod : TSGNod):TSGBoolean;
 var
 	i, ii: TSGLongWord;
 begin
-Result:=False;
-if FNods<>nil then
+Result := False;
+if FNods <> nil then
 	begin
 	ii := Length(FNods);
-	for i:=0 to High(FNods) do
+	for i := 0 to High(FNods) do
 		if FNods[i] = Nod then
 			begin
 			ii:=i;
@@ -157,10 +176,13 @@ if FNods<>nil then
 			end;
 	if ii <> Length(FNods) then
 		begin
-		for i := ii to Length(FNods)-1 do
-			FNods[i]:=FNods[i+1];
-		SetLength(FNods,Length(FNods)-1);
-		Result:=True;
+		if ii <> High(FNods) then
+			for i := ii to High(FNods) - 1 do
+				FNods[i] := FNods[i + 1];
+		SetLength(FNods, Length(FNods) - 1);
+		if Length(FNods) = 0 then
+			FNods := nil;
+		Result := True;
 		end;
 	end;
 end;

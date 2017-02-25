@@ -146,8 +146,6 @@ uses
 		{$ENDIF}
 	,SaGeImageTga
 	,SaGeImageSgia
-	,SaGeImageFormatDeterminer
-	,SaGeLog
 	
 		// System
 	,Crt
@@ -155,21 +153,26 @@ uses
 	,SysUtils
 	
 		// Engine
+	,SaGeImageFormatDeterminer
 	,SaGeResourceManager
 	,SaGeFileUtils
 	,SaGeStringUtils
+	,SaGeLog
 	;
 
 procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-try
-Image.Destroy();
-except
-end;
-try
-Image := nil;
-except
-end;
+if Image <> nil then
+	begin
+	try
+	Image.Destroy();
+	except
+	end;
+	try
+	Image := nil;
+	except
+	end;
+	end;
 end;
 
 procedure TSGImage.LoadDeviceResources();

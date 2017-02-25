@@ -141,6 +141,7 @@ type
 	TSGMaterial = class (TSGDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
+		class function ClassName() : TSGString; override;
 		destructor Destroy();override;
 			private
 		FColorDiffuse, FColorSpecular, FColorAmbient : TSGColor4f;
@@ -2375,8 +2376,18 @@ FMapOpacity:=nil;
 FMapSpecular:=nil;
 end;
 
+class function TSGMaterial.ClassName() : TSGString;
+begin
+Result := 'TSGMaterial';
+end;
+
 destructor TSGMaterial.Destroy();
 begin
+SGKillImage(FMapDiffuse);
+SGKillImage(FMapBump);
+SGKillImage(FMapOpacity);
+SGKillImage(FMapSpecular);
+SGKillImage(FMapAmbient);
 inherited;
 end;
 

@@ -20,6 +20,7 @@ type
 	TSGPhysicsModel=class(TSGNodProperty)
 			public
 		constructor Create(const VContext : ISGContext);override;
+		class function ClassName() : TSGString; override;
 			private
 		FPhysicsObject : TSGPhysicsObject;
 			public
@@ -32,6 +33,7 @@ type
 	TSGPhysics3D = class(TSGCustomPhysics)
 			public
 		constructor Create(const VContext : ISGContext);override;
+		class function ClassName() : TSGString; override;
 		destructor Destroy();override;
 		procedure Paint();override;
 			private
@@ -43,6 +45,11 @@ type
 		end;
 
 implementation
+
+class function TSGPhysicsModel.ClassName() : TSGString;
+begin
+Result := 'TSGPhysicsModel';
+end;
 
 constructor TSGPhysicsModel.Create(const VContext : ISGContext);
 begin
@@ -56,6 +63,11 @@ FLastNodProperty:=TSGPhysicsModel.Create(Context);
 NewParentNod.AddNod(FLastNodProperty);
 end;
 
+class function TSGPhysics3D.ClassName() : TSGString;
+begin
+Result := 'TSGPhysics3D';
+end;
+
 procedure TSGPhysics3D.Start();
 var
 	i : TSGLongWord;
@@ -65,9 +77,9 @@ FPhysics.Start();
 if FParent.QuantityNods <> 0 then
 	for i:=0 to FParent.QuantityNods-1 do
 		begin
-		m:=((FParent.Nods[i] as TSGModel).FindProperty(TSGPhysicsModel)) as TSGPhysicsModel;
+		m := ((FParent.Nods[i] as TSGModel).FindProperty(TSGPhysicsModel)) as TSGPhysicsModel;
 		if m<>nil then
-			(FParent.Nods[i] as TSGModel).Matrix:=m.PhysicsObject.GetMatrix();
+			(FParent.Nods[i] as TSGModel).Matrix := m.PhysicsObject.GetMatrix();
 		end;
 end;
 

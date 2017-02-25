@@ -28,11 +28,15 @@ type
 		function FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
 		procedure LoadToVBO();inline;
 			public
-		property Mesh   : TSGCustomModel write FMesh;
-		property Matrix : TSGPointer     write FMatrix;
+		property Mesh   : TSGCustomModel read FMesh   write FMesh;
+		property Matrix : TSGPointer     read FMatrix write FMatrix;
 		end;
 
 implementation
+
+uses
+	 SaGeLog
+	;
 
 procedure TSGModel.LoadToVBO();
 begin
@@ -73,18 +77,24 @@ end;
 constructor TSGModel.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-FMesh:=nil;
-FMatrix:=nil;
+FMesh   := TSGCustomModel.Create();
+FMatrix := nil;
+FMesh.Context := Context;
 end;
 
 destructor TSGModel.Destroy(); 
 begin
+if FMesh <> nil then
+	begin
+	FMesh.Destroy();
+	FMesh := nil;
+	end;
 inherited;
 end;
 
 class function TSGModel.ClassName():String;
 begin
-Result:='TSGModel';
+Result := 'TSGModel';
 end;
 
 end.

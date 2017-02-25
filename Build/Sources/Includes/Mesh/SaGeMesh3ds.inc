@@ -98,16 +98,17 @@ var Ch:TSGChunk;
 	x0,x1,x2:TSGSingle;
 	i:TSGWord;
 	iii,t1,t2,t3:TSGWord;
+	TempStr : TSGString;
 begin
 Result:=Self;
 FQO := AModel.QuantityObjects;
 Sucsses:=False;
-SGLog.Source(['TSGLoad3DS.Import3DS : Loading "',FFileName,'"']);
+SGLog.Source(['TSGLoad3DS.Import3DS : Loading "',FFileName,'".']);
 if TFile= nil then
 	Tfile:=TFileStream.Create(FFileName,fmOpenRead);
 if Tfile=nil then
 	begin
-	SGLog.Source(['TSGLoad3DS.Import3DS : Не удалось открыть файл "',FFileName,'"']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Не удалось открыть файл "',FFileName,'".']);
 	exit;
 	end;
 //Читаем заголовок
@@ -116,7 +117,7 @@ Tfile.Read(Ch.Length,4);
 Tfile.Position:=Tfile.Position-6;
 if Ch.ID<>MAIN3DS then
 	begin
-	SGLog.Source(['TSGLoad3DS.Import3DS : Это не 3d файл! "',FFileName,'"']);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Это не 3d файл! "',FFileName,'".']);
 	exit;
 	end;
 //находим блок редактора
@@ -137,6 +138,7 @@ while Ch.ID=cMATERIAL do
 	ChPos:=Self.FindChunk(cMATNAME,true);
 	Tfile.Position:=Tfile.Position+6;
 	AModel.LastMaterial().Name := SGReadStringFromStream(TFile);
+	SGLog.Source(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'".']);
 	//Tfile.Position:=ObjectsPos;
 	ChPos:=Self.FindChunk(cMATMAP,true);
 	ReadHeader(@Ch);
@@ -147,10 +149,12 @@ while Ch.ID=cMATERIAL do
 		if Ch.ID=cMATMAPFILE then
 			begin
 			Tfile.Position:=Tfile.Position+6;
-			AModel.LastMaterial().AddDiffuseMap(SGFilePath(FFileName) + SGReadStringFromStream(TFile));
+			TempStr := SGFilePath(FFileName) + SGReadStringFromStream(TFile);
+			SGLog.Source(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'", File: "',TempStr,'".']);
+			AModel.LastMaterial().AddDiffuseMap(TempStr);
 			end;
 		end;
-	SGLog.Source(['TSGLoad3DS.Import3DS : Material: "',AModel.LastMaterial().Name,'.']);
+	
 	//Ищем новый материал
 	Tfile.Position:=ObjectsPos;
 	Tfile.Read(Ch.ID,2);
@@ -386,8 +390,8 @@ if AModel.QuantityObjects>0 then
 		end;
 	end;
 DT2.Get();
-SGLog.Source('TSGLoad3DS.ComputeNormals : Endng ( '+
-	SGSecondsToStringTime((DT2-DT).GetPastSeconds)+' '+SGStr((DT2-DT).GetPastMiliSeconds div 100)+' милисек'+' )');
+SGLog.Source('TSGLoad3DS.ComputeNormals : End ('+
+	SGSecondsToStringTime((DT2-DT).GetPastSeconds)+' '+SGStr((DT2-DT).GetPastMiliSeconds div 100)+' милисек'+')');
 end;
 
 procedure TSGLoad3DS.SkipHeader;inline;
