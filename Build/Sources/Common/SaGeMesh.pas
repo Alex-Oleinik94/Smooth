@@ -525,11 +525,7 @@ type
 		function FacesSize():TSGQWord;
 		function Size():TSGQWord;
     end;
-    PSGCustomModel = ^TSGCustomModel;
-    
-{$DEFINE SGREADINTERFACE}
-{$INCLUDE SaGeMesh3ds.inc}
-{$UNDEF SGREADINTERFACE}
+    PSGCustomModel = ^ TSGCustomModel;
 
 implementation
 
@@ -538,11 +534,10 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	
+	// Formats
+	,SaGeMesh3ds
 	;
-
-{$DEFINE SGREADIMPLEMENTATION}
-{$INCLUDE SaGeMesh3ds.inc}
-{$UNDEF SGREADIMPLEMENTATION}
 
 {$INCLUDE SaGeMeshObj.inc}
 
@@ -2212,12 +2207,12 @@ end;
 
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
 begin
-TSGLoad3DS.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
+TSGMesh3DSLoader.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
 end;
 
 function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
 begin
-TSGLoad3DS.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
+TSGMesh3DSLoader.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
 end;
 
 constructor TSGCustomModel.Create();
@@ -2239,7 +2234,7 @@ procedure TSGCustomModel.DrawObject(const Index : TSGLongWord);
 var
     CurrentMesh : TSG3DObject;
 begin
-CurrentMesh:=FArObjects[Index].FMesh;
+CurrentMesh := FArObjects[Index].FMesh;
 if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
 	begin
 	if FArObjects[Index].FCopired<>-1 then

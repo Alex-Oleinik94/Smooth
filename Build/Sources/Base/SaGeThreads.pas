@@ -91,6 +91,7 @@ type
 			public
 		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 		destructor Destroy();override;
+		class function ClassName() : TSGString; override;
 			public
 		FHandle    : TSGThreadHandle;
 		FFinished  : Boolean;
@@ -119,6 +120,11 @@ uses
 	 SaGeLog
 	,SaGeStringUtils
 	;
+
+class function TSGThread.ClassName() : TSGString;
+begin
+Result := 'TSGThread';
+end;
 
 constructor TSGThread.Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
 begin
@@ -185,7 +191,10 @@ try
 	ThreadClass.Execute();
 	ThreadClass.PostExecuting();
 except on e : TSGException do
+	begin
+	SGLog.Source(['TSGThread_Run(). While executing thread ',ThreadClass.ClassName(), ':"', SGAddrStr(ThreadClass), '" raised exception --->']);
 	SGPrintExceptionStackTrace(e, SGViewErrorLog);
+	end;
 end;
 {$IFDEF ANDROID}
 	while True do Sleep(10000);

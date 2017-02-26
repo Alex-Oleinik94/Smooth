@@ -65,7 +65,7 @@ function GetProcAddress(const Lib : TSGLibHandle; const VPChar : TSGString) : TS
 type
 	TSGException = Exception;
 procedure SGPrintStackTrace();
-procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);
 
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
@@ -205,7 +205,7 @@ if (poUsePipes in AProcess.Options) and ViewOutput then
 AProcess.Free();
 end;
 
-procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);
 var
 	I, H   : Integer;
 	Frames : PPointer;
@@ -223,7 +223,7 @@ for I := 0 to H do
 	if I <> H then
 		Report += SGWinEoln;
 	end;
-SGHint(Report, ViewCase);
+SGHint(Report, ViewCase, ViewTime);
 Report := '';
 end;
 

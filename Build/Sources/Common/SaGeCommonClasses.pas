@@ -9,7 +9,6 @@ uses
 	,SaGeClasses
 	,SaGeCommon
 	,SaGeRenderInterface
-	,SaGeRender
 	,SaGeCursor
 	,SaGeBitMap
 	;

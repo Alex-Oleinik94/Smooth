@@ -74,6 +74,7 @@ function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGStrin
 
 // TStream
 function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGReadPCharFromStream(const Stream : TStream) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadLnStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteStringToStream(const String1 : TSGString; const Stream : TStream; const Stavit0 : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -837,6 +838,18 @@ while (Stream.Position < Stream.Size) and ((not ToOut) or (C in Eolns))  do
 	end;
 if Stream.Position <> Stream.Size then
 	Stream.Position := Stream.Position - 1;
+end;
+
+function SGReadPCharFromStream(const Stream : TStream) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	C : TSGChar;
+begin
+Result := '';
+repeat
+Stream.Read(C, 1);
+if C <> #0 then
+	Result += C;
+until C = #0;
 end;
 
 function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

@@ -10,10 +10,6 @@ uses
 	
 	,SaGeBase
 	,SaGeCommonClasses
-	,SaGeModel
-	,SaGeScene
-	,SaGeGamePhysics
-	,SaGeGameNet
 	,SaGeNet
 	,SaGeLoading
 	,SaGeFont
@@ -21,6 +17,11 @@ uses
 	,SaGeThreads
 	,SaGeCamera
 	,SaGeClasses
+	
+	,SaGeModel
+	,SaGeScene
+	,SaGeGamePhysics
+	,SaGeGameNet
 	;
 
 const
