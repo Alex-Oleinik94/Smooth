@@ -159,7 +159,14 @@ end;
 procedure TSGMesh3DSLoader.InitInput();
 begin
 if FFile = nil then
+	begin
+	try
 	FFile := TFileStream.Create(FFileName, fmOpenRead);
+	except
+	SGLog.Source(['TSGMesh3DSLoader__InitInput : Fatal : Error while open file "', FFileName, '".']);
+	FFile := nil;
+	end;
+	end;
 end;
 
 procedure TSGMesh3DSLoader.ReadMaterial();

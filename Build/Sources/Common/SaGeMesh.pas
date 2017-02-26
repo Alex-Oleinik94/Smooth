@@ -2110,12 +2110,11 @@ end;
 
 procedure TSGCustomModel.LoadToVBO();
 var	
-	i : TSGLongWord;
+	i : TSGUInt32;
 begin
-for i:=0 to FQuantityObjects-1 do
-	begin
-	FArObjects[i].FMesh.LoadToVBO();
-	end;
+if FQuantityObjects > 0 then
+	for i := 0 to FQuantityObjects - 1 do
+		FArObjects[i].FMesh.LoadToVBO();
 end;
 
 procedure TSGCustomModel.LoadFromFile(const FileWay : TSGString);
