@@ -247,6 +247,7 @@ GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit,
 GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
 GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
 GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
+GeneralConsoleCaller.AddComand(@SGConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
 GeneralConsoleCaller.Category('System tools');
 GeneralConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
 GeneralConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
