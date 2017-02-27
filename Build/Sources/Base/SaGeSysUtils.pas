@@ -66,6 +66,7 @@ type
 	TSGException = Exception;
 procedure SGPrintStackTrace();
 procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);
+procedure SGLogException(const Title : TSGString; const e : Exception);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
@@ -94,6 +95,12 @@ uses
 		,SaGeWindowsUtils
 		{$ENDIF}
 	;
+
+procedure SGLogException(const Title : TSGString; const e : Exception);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SGLog.Source([Title, ' --->']);
+SGPrintExceptionStackTrace(e, [SGLogError]);
+end;
 
 function SGOperatingSystemVersion(): TSGString;
 begin

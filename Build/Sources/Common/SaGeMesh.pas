@@ -12,6 +12,7 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeCommonClasses
+	,SaGeLog
 	
 	,Classes
 	,Crt
@@ -149,6 +150,12 @@ type
 		FMapDiffuse, FMapBump, FMapOpacity, FMapSpecular, FMapAmbient : TSGImage;
 		FName : TSGString;
 		FEnableBump, FEnableTexture : TSGBoolean;
+			private
+		FBlendPushed : TSGBoolean;
+		FBlend : TSGBoolean;
+			protected
+		procedure PushBlend(const CurrentBlend : TSGBoolean);
+		procedure PopBlend();
 			public
 		procedure SetColorAmbient(const r,g,b :TSGSingle);
 		procedure SetColorSpecular(const r,g,b :TSGSingle);
@@ -157,6 +164,7 @@ type
 		procedure AddBumpMap(const VFileName : TSGString);
 		function MapDiffuseWay():TSGString;inline;
 		function MapBumpWay():TSGString;inline;
+		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 			public
 		procedure Bind(const VObject : TSG3DObject);
 		procedure UnBind(const VObject : TSG3DObject);
@@ -426,7 +434,7 @@ type
 		//procedure Stripificate(var VertexesAndTriangles:TSGArTSGArTSGFaceType;var OutputStrip:TSGArTSGFaceType);overload;
 		
 		// Выводит полную информацию о характеристиках модельки
-		procedure WriteInfo(const PredStr:string = '');
+		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
 		// Загрузка из текстовова формата файлов *.obj
@@ -501,7 +509,7 @@ type
 		procedure DrawObject(const Index : TSGLongWord);
         procedure Paint(); override;
 		procedure LoadToVBO();
-        procedure WriteInfo();
+        procedure WriteInfo(const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
         procedure Clear();virtual;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
@@ -530,10 +538,12 @@ type
 implementation
 
 uses
-	 SaGeLog
-	,SaGeStringUtils
+	 SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeSysUtils
+	
+	,SysUtils
 	
 	// Formats
 	,SaGeMesh3ds
@@ -1244,91 +1254,78 @@ begin
 Result:='TSG3dObject';
 end;
 
-procedure TSG3DObject.WriteInfo(const PredStr:string = '');
+procedure TSG3DObject.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+
+function LinksVBO() : TSGString;
 var
-	Index : TSGLongWord;
+	Index : TSGUInt32;
 begin
-TextColor(7);
-WriteLn('TSG3DObject__WriteInfo()');
-WriteLn(PredStr,'NOfVerts            = "',FNOfVerts,'"');
-WriteLn(PredStr,'HasColors           = "',FHasColors,'"');
-WriteLn(PredStr,'HasNormals          = "',FHasNormals,'"');
-WriteLn(PredStr,'HasTexture          = "',FHasTexture,'"');
-if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
-WriteLn(PredStr,'QuantityFaceArrays  = "',FQuantityFaceArrays,'"');
-TextColor(7);
-if FQuantityFaceArrays<>0 then
-	for Index:=0 to FQuantityFaceArrays-1 do
-		begin
-		WriteLn(PredStr,'  ',Index+1,')','Index           = "',Index,'"');
-		WriteLn(PredStr,'  ',Index+1,')','NOfFaces        = "',ArFaces[Index].FNOfFaces,'"');
-		WriteLn(PredStr,'  ',Index+1,')','RealFaceLength  = "',GetFaceLength(Index),'"');
-		WriteLn(PredStr,'  ',Index+1,')','MaterialID      = "',ArFaces[Index].FMaterialID,'"');
-		case ArFaces[Index].FIndexFormat of
-		SGMeshIndexFormat1b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat1b"');
-		SGMeshIndexFormat2b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat2b"');
-		SGMeshIndexFormat4b: WriteLn(PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat4b"');
-		end;
-		Write(PredStr,'  ',Index+1,')','PoligonesType   = ');
-		case ArFaces[Index].FPoligonesType of
-		SGR_LINES:WriteLn('"SGR_LINES"');
-		SGR_TRIANGLES:WriteLn('"SGR_TRIANGLES"');
-		SGR_QUADS:WriteLn('"SGR_QUADS"');
-		SGR_POINTS:WriteLn('"SGR_POINTS"');
-		SGR_LINE_STRIP:WriteLn('"SGR_LINE_STRIP"');
-		SGR_LINE_LOOP:WriteLn('"SGR_LINE_LOOP"');
-		else WriteLn('"SGR_INVALID"');
-		end;
-		TextColor(15);
-		WriteLn(PredStr,'  ',Index+1,')','FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index),'EN'),'"');
-		TextColor(7);
-		end;
-Write(PredStr,'ObjectPoligonesType = ');
-case FObjectPoligonesType of
-SGR_LINES:WriteLn('"SGR_LINES"');
-SGR_TRIANGLES:WriteLn('"SGR_TRIANGLES"');
-SGR_QUADS:WriteLn('"SGR_QUADS"');
-SGR_POINTS:WriteLn('"SGR_POINTS"');
-SGR_LINE_STRIP:WriteLn('"SGR_LINE_STRIP"');
-SGR_LINE_LOOP:WriteLn('"SGR_LINE_LOOP"');
-else WriteLn('"SGR_INVALID"');
-end;
-WriteLn(PredStr,'GetSizeOfOneVertex  = "',GetSizeOfOneVertex(),'"');
-Write(PredStr,'FVertexFormat       = ');
-if FVertexType = SGMeshVertexType2f then
-	WriteLn('"SGMeshVertexType2f"')
-else if FVertexType = SGMeshVertexType3f then
-	WriteLn('"SGMeshVertexType3f"')
-else if FVertexType = SGMeshVertexType4f then
-	WriteLn('"SGMeshVertexType4f"')
-else
-	WriteLn('Unknown! "',TSGMaxEnum(FVertexType),'"');
-WriteLn(PredStr,'FCountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"');
-Write(PredStr,'FColorType          = ');
-case FColorType of
-SGMeshColorType3b:WriteLn('"SGMeshColorType3b"');
-SGMeshColorType4b:WriteLn('"SGMeshColorType4b"');
-SGMeshColorType3f:WriteLn('"SGMeshColorType3f"');
-SGMeshColorType4f:WriteLn('"SGMeshColorType4f"');
-end;
-TextColor(15);
-WriteLn(PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"');
-if FQuantityFaceArrays>0 then
-	WriteLn(PredStr,'AllSize             = "',SGGetSizeString(Size(),'EN'),'"');
-TextColor(7);
-WriteLn(PredStr,'EnableVBO           = "',FEnableVBO,'"');
-Write(PredStr,  'LinksVBO            = "',FVertexesBuffer,'", (');
+Result := '';
 if FFacesBuffers <> nil then
 	for Index := 0 to High(FFacesBuffers) do
 		begin
-		Write(FFacesBuffers[Index]);
+		Result += SGStr(FFacesBuffers[Index]);
 		if Index <> High(FFacesBuffers) then
-			Write(',');
+			Result += ',';
 		end;
-WriteLn(')');
-WriteLn(PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"');
-WriteLn(PredStr,'Name                = "',FName,'"');
+end;
+
+procedure WriteFaceArray(const Index : TSGUInt32);
+begin
+SGHint([PredStr,'  ',Index+1,')','Index           = "',Index,'"'], ViewError);
+SGHint([PredStr,'  ',Index+1,')','CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], ViewError);
+SGHint([PredStr,'  ',Index+1,')','RealFaceLength  = "',GetFaceLength(Index),'"'], ViewError);
+SGHint([PredStr,'  ',Index+1,')','MaterialID      = "',ArFaces[Index].FMaterialID,'"'], ViewError);
+case ArFaces[Index].FIndexFormat of
+SGMeshIndexFormat1b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat1b"'], ViewError);
+SGMeshIndexFormat2b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat2b"'], ViewError);
+SGMeshIndexFormat4b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat4b"'], ViewError);
+end;
+SGHint([PredStr,'  ',Index+1,')', 'PoligonesType   = "', SGStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], ViewError);
+TextColor(15);
+SGHint([PredStr,'  ',Index+1,')','FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index),'EN'),'"'], ViewError);
 TextColor(7);
+end;
+
+procedure WriteFaceArrays();
+var
+	Index : TSGUInt32;
+begin
+TextColor(7);
+if FQuantityFaceArrays <> 0 then
+	for Index:=0 to FQuantityFaceArrays - 1 do
+		WriteFaceArray(Index);
+end;
+
+begin
+TextColor(7);
+SGHint(PredStr + 'TSG3DObject__WriteInfo(..)', ViewError);
+SGHint([PredStr,'Name                = "',FName,'"'], ViewError);
+SGHint([PredStr,'CountOfVertexes     = "',FNOfVerts,'"'], ViewError);
+SGHint([PredStr,'HasColors           = "',FHasColors,'"'], ViewError);
+SGHint([PredStr,'HasNormals          = "',FHasNormals,'"'], ViewError);
+SGHint([PredStr,'HasTexture          = "',FHasTexture,'"'], ViewError);
+if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
+SGHint([PredStr,'QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], ViewError);
+WriteFaceArrays();
+SGHint([PredStr,'ObjectPoligonesType = "', SGStrPoligonesType(FObjectPoligonesType), '"'], ViewError);
+SGHint([PredStr,'SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], ViewError);
+SGHint([PredStr,'VertexFormat        = "', SGStrVertexFormat(FVertexType), '"'], ViewError);
+SGHint([PredStr,'CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], ViewError);
+case FColorType of
+SGMeshColorType3b:SGHint(PredStr+'ColorType           = "SGMeshColorType3b"', ViewError);
+SGMeshColorType4b:SGHint(PredStr+'ColorType           = "SGMeshColorType4b"', ViewError);
+SGMeshColorType3f:SGHint(PredStr+'ColorType           = "SGMeshColorType3f"', ViewError);
+SGMeshColorType4f:SGHint(PredStr+'ColorType           = "SGMeshColorType4f"', ViewError);
+end;
+TextColor(15);
+SGHint([PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"'], ViewError);
+if FQuantityFaceArrays>0 then
+	SGHint([PredStr,'AllSize             = "',SGGetSizeString(Size(),'EN'),'"'], ViewError);
+TextColor(7);
+SGHint([PredStr,'EnableVBO           = "',FEnableVBO,'"'], ViewError);
+SGHint([PredStr,'LinksVBO            = "',FVertexesBuffer,'", (', LinksVBO(), ')'], ViewError);
+SGHint([PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"'], ViewError);
 end;
 
 function TSG3DObject.VertexesSize():TSGQuadWord;Inline;
@@ -1748,10 +1745,10 @@ end;
 
 procedure TSG3dObject.BasicDraw(); inline;
 var
-	Index : TSGLongWord;
+	Index : TSGUInt32;
 begin
-if (FObjectMaterialID=-1) and (FQuantityFaceArrays=0) then
-	Render.ColorMaterial(FObjectColor.r,FObjectColor.g,FObjectColor.b,FObjectColor.a);
+if (FObjectMaterialID = -1) and (FQuantityFaceArrays = 0) then
+	Render.ColorMaterial(FObjectColor.r, FObjectColor.g, FObjectColor.b, FObjectColor.a);
 
 Render.EnableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
@@ -1942,8 +1939,8 @@ if (FBumpFormat = SGMeshBumpTypeCopyTexture2f) or (FBumpFormat = SGMeshBumpType2
 if FHasColors then
 	Render.DisableClientState(SGR_COLOR_ARRAY);
 
-if (FObjectMaterialID=-1) and (FQuantityFaceArrays=0) then
-	Render.ColorMaterial(1,1,1,1);
+if (FObjectMaterialID = -1) and (FQuantityFaceArrays = 0) then
+	Render.ColorMaterial(1, 1, 1, 1);
 end;
 
 procedure TSG3dObject.LoadToVBO();
@@ -2139,23 +2136,24 @@ end;
 
 class function TSGCustomModel.ClassName() : TSGString;
 begin
-Result:='TSGCustomModel';
+Result := 'TSGCustomModel';
 end;
 
-procedure TSGCustomModel.WriteInfo();
+procedure TSGCustomModel.WriteInfo(const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 var
-	i : TSGLongWord;
+	i : TSGUInt32;
 begin
 TextColor(7);
-WriteLn('TSGCustomModel__WriteInfo()');
-WriteLn('  QuantityMaterials = ',FQuantityMaterials);
-WriteLn('  QuantityObjects   = ',FQuantityObjects);
+SGHint('TSGCustomModel__WriteInfo(..)', ViewError);
+SGHint(['  QuantityMaterials = ', FQuantityMaterials], ViewError);
+SGHint(['  QuantityObjects   = ', FQuantityObjects], ViewError);
 if FQuantityMaterials<>0 then
 	for i:=0 to FQuantityMaterials-1 do
-		;//FArMaterials[i].WriteInfo('  '+SGStr(i+1)+')');
+		FArMaterials[i].WriteInfo('  '+SGStr(i+1)+') ', ViewError);
 if FQuantityObjects <> 0 then
 	for i:=0 to FQuantityObjects-1 do
-		FArObjects[i].FMesh.WriteInfo('  '+SGStr(i+1)+') ');
+		if FArObjects[i].FMesh <> nil then
+			FArObjects[i].FMesh.WriteInfo('  '+SGStr(i+1)+') ', ViewError);
 end;
 
 
@@ -2192,26 +2190,46 @@ var
 begin
 Result:=0;
 for i:=0 to FQuantityObjects-1 do
-	Result+=FArObjects[i].FMesh.Size();
+	Result += FArObjects[i].FMesh.Size();
 end;
-
 
 procedure TSGCustomModel.AddObjectColor(const ObjColor: TSGColor4f);
 var
     i: TSGLongWord;
 begin
-    for i := 0 to High(FArObjects) do
-        FArObjects[i].FMesh.FObjectColor := ObjColor;
+for i := 0 to High(FArObjects) do
+	FArObjects[i].FMesh.FObjectColor := ObjColor;
 end;
 
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
 begin
-TSGMesh3DSLoader.Create().SetStream(VStream).SetFileName(VFileName).Import3DS(Self,Result).Destroy();
+Result := False;
+with TSGMesh3DSLoader.Create() do
+	begin
+	try
+		SetStream(VStream);
+		SetFileName(VFileName);
+		Import3DS(Self, Result);
+	except on e : Exception do
+		SGLogException('TSGCustomModel__Load3DSFromStream(...). Raised exception', e);
+	end;
+	Destroy();
+	end;
 end;
 
 function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
 begin
-TSGMesh3DSLoader.Create().SetFileName(FileWay).Import3DS(Self,Result).Destroy();
+Result := False;
+with TSGMesh3DSLoader.Create() do
+	begin
+	try
+		SetFileName(FileWay);
+		Import3DS(Self, Result);
+	except on e : Exception do
+		SGLogException('TSGCustomModel__Load3DSFromFile(...). Raised exception', e);
+	end;
+	Destroy();
+	end;
 end;
 
 constructor TSGCustomModel.Create();
@@ -2233,11 +2251,12 @@ procedure TSGCustomModel.DrawObject(const Index : TSGLongWord);
 var
     CurrentMesh : TSG3DObject;
 begin
-CurrentMesh := FArObjects[Index].FMesh;
-if (CurrentMesh<>nil) or (FArObjects[Index].FCopired<>-1) then
+if FArObjects[Index].FCopired <> -1 then
+	CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh
+else
+	CurrentMesh := FArObjects[Index].FMesh;
+if (CurrentMesh <> nil) then
 	begin
-	if FArObjects[Index].FCopired<>-1 then
-		CurrentMesh := FArObjects[FArObjects[Index].FCopired].FMesh;
 	Render.PushMatrix();
 	Render.MultMatrixf(@FArObjects[Index].FMatrix);
 	CurrentMesh.Paint();
@@ -2247,11 +2266,11 @@ end;
 
 procedure TSGCustomModel.Paint();
 var
-    i: TSGLongWord;
+    Index: TSGLongWord;
 begin
-if FQuantityObjects<>0 then
-	for i := 0 to FQuantityObjects - 1 do
-		DrawObject(i);
+if FQuantityObjects <> 0 then
+	for Index := 0 to FQuantityObjects - 1 do
+		DrawObject(Index);
 end;
 
 function TSGCustomModel.AddMaterial():TSGMaterial;inline;
@@ -2352,6 +2371,63 @@ end;
 (*********************************){TSGMaterial}(************************************)
 (************************************************************************************)
 
+procedure TSGMaterial.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+
+procedure WriteImageInfo(const Image : TSGImage; const ImagePredStr : TSGString);
+begin
+if Image <> nil then
+	if Image.Image <> nil then
+		Image.Image.WriteInfo(ImagePredStr, ViewError);
+end;
+
+begin
+SGHint(PredStr + 'TSGMaterial__WriteInfo(..)', ViewError);
+SGHint([PredStr,'Name                = "', FName, '"'], ViewError);
+SGHint([PredStr,'EnableTexture       = "', EnableTexture, '"'], ViewError);
+SGHint([PredStr,'EnableBump          = "', FEnableBump, '"'], ViewError);
+SGHint([PredStr,'MapDiffuse          = "', SGAddrStr(FMapDiffuse), '"'], ViewError);
+WriteImageInfo(FMapDiffuse, PredStr + ' d) ');
+SGHint([PredStr,'MapBump             = "', SGAddrStr(FMapBump), '"'], ViewError);
+WriteImageInfo(FMapBump, PredStr + ' b) ');
+SGHint([PredStr,'MapOpacity          = "', SGAddrStr(FMapOpacity), '"'], ViewError);
+WriteImageInfo(FMapOpacity, PredStr + ' o) ');
+SGHint([PredStr,'MapSpecular         = "', SGAddrStr(FMapSpecular), '"'], ViewError);
+WriteImageInfo(FMapSpecular, PredStr + ' s) ');
+SGHint([PredStr,'MapAmbient          = "', SGAddrStr(FMapAmbient), '"'], ViewError);
+WriteImageInfo(FMapAmbient, PredStr + ' a) ');
+end;
+
+procedure TSGMaterial.PushBlend(const CurrentBlend : TSGBoolean);
+var
+	BlendEnabled : TSGBoolean = False;
+begin
+if FBlendPushed then
+	PopBlend();
+BlendEnabled := Render.IsEnabled(SGR_BLEND);
+if CurrentBlend <> BlendEnabled then
+	begin
+	FBlendPushed := True;
+	FBlend := CurrentBlend;
+	if CurrentBlend then
+		Render.Enable(SGR_BLEND)
+	else
+		Render.Disable(SGR_BLEND);
+	end;
+end;
+
+procedure TSGMaterial.PopBlend();
+begin
+if FBlendPushed then
+	begin
+	if FBlend then
+		Render.Enable(SGR_BLEND)
+	else
+		Render.Disable(SGR_BLEND);
+	FBlend := False;
+	FBlendPushed := False;
+	end;
+end;
+
 constructor TSGMaterial.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
@@ -2368,6 +2444,8 @@ FMapBump:=nil;
 FMapDiffuse:=nil;
 FMapOpacity:=nil;
 FMapSpecular:=nil;
+FBlendPushed := False;
+FBlend := False;
 end;
 
 class function TSGMaterial.ClassName() : TSGString;
@@ -2409,6 +2487,7 @@ if (VObject.BumpFormat = SGMeshBumpTypeNone) and (VObject.HasTexture) then
 		begin
 		FMapDiffuse.TextureNumber := -1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		PushBlend(FMapDiffuse.HasAlpha);
 		FMapDiffuse.BindTexture();
 		end;
 	end
@@ -2426,6 +2505,7 @@ else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTextu
 		begin
 		FMapDiffuse.TextureNumber := 1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
+		PushBlend(FMapDiffuse.HasAlpha);
 		FMapDiffuse.BindTexture();
 		FMapDiffuse.TextureNumber := -1;
 		end;
@@ -2441,6 +2521,7 @@ if (VObject.BumpFormat = SGMeshBumpTypeNone) and (VObject.HasTexture) then
 		FMapDiffuse.TextureNumber := -1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
 		FMapDiffuse.DisableTexture();
+		PopBlend();
 		end;
 	end
 else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTexture) then
@@ -2458,6 +2539,7 @@ else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTextu
 		FMapDiffuse.TextureNumber := 1;
 		FMapDiffuse.TextureType := SGITextureTypeTexture;
 		FMapDiffuse.DisableTexture();
+		PopBlend();
 		FMapDiffuse.TextureNumber := -1;
 		end;
 	end;

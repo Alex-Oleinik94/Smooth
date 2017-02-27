@@ -60,18 +60,16 @@ begin
 if (FLoadClass <> nil) then
 	FLoadClass.Paint();
 case FState of
-SGTStateStarting:
+SGTStateLoading : ;
+SGTStateStarting :
 	begin
 	FScene.Start();
-	FState:=SGTStateViewing;
-	{$IFDEF ANDROID}SGLog.Source('SGTStateStarting');{$ENDIF}
+	FState := SGTStateViewing;
+	SGLog.Source('TSGGameTron__Paint(). Starting...');
 	end;
-SGTStateViewing:
-	begin
-	{$IFDEF ANDROID}SGLog.Source('SGTStateViewing');{$ENDIF}
-	FScene.Paint();
-	{$IFDEF ANDROID}SGLog.Source('SGTStateViewing');{$ENDIF}
-	end;
+SGTStateViewing :
+	if FScene <> nil then
+		FScene.Paint();
 end;
 end;
 

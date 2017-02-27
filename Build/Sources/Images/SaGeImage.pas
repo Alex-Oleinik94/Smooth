@@ -66,6 +66,7 @@ type
 		procedure SetBitMapBits(const Value:TSGBitMapUInt);
 		class function GetLongWord(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
 		class function GetLongWordBack(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
+		function HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure Saveing(const Format:TSGByte = SGI_DEFAULT);
 		function Loading():TSGBoolean;virtual;
@@ -97,6 +98,7 @@ type
 		property ReadyGoToTexture   : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property Name               : TSGString   read FName               write FName;
+		property HasAlpha           : TSGBool     read HasAlphaChannel;
 			public //Render Functions:
 		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2: TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DrawImageFromTwoPoint2int32(Vertex1,Vertex2: TSGPoint2int32;const RePlace:Boolean = True;const RePlaceY:TSGByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -173,6 +175,11 @@ if Image <> nil then
 	except
 	end;
 	end;
+end;
+
+function TSGImage.HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Channels > 3;
 end;
 
 procedure TSGImage.LoadDeviceResources();

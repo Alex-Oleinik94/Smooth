@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE SG_SCENE_DEBUG}
+
 unit SaGeScene;
 
 interface
@@ -41,6 +43,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeLog
+	;
 
 function TSGScene.LastModel():TSGModel;inline;
 begin
@@ -121,28 +127,34 @@ if FMutators <> nil then
 	for i := 0 to High(FMutators) do
 		if FMutators[i] <> nil then
 			FMutators[i].Destroy();
-	SetLength(FMutators,0);
+	SetLength(FMutators, 0);
 	end;
 inherited;
 end;
 
 procedure TSGScene.InitCameraPosition();
 begin
-FCamera.InitMatrix();
+if FCamera <> nil then
+	//FCamera.InitMatrix();
+	FCamera.CallAction();
 end;
 
 procedure TSGScene.Paint();
 var
 	i : TSGLongWord;
 begin
-//SGLog.Sourse('TSGScene.Draw : Processing mutators..');
+{$IF defined(SG_SCENE_DEBUG)}
+SGLog.Source('TSGScene__Paint(). Processing mutators...');
+{$ENDIF}
 if FMutators <> nil then
 	for i := 0 to High ( FMutators ) do
 		if FMutators[i]<>nil then
 			FMutators[i].UpDate();
-//SGLog.Sourse('TSGScene.Draw : Draw nods..');
+{$IF defined(SG_SCENE_DEBUG)}
+SGLog.Source('TSGScene__Paint(). : Paint nods...');
+{$ENDIF}
 InitCameraPosition();
-if FNods<>nil then
+if FNods <> nil then
 	for i:=0 to High(FNods) do
 		if FNods[i]<>nil then
 			begin

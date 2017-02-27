@@ -13,6 +13,7 @@ uses
 	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommon
+	,SaGeLog
 	;
 type
 	TSGImageByte = type TSGByte;
@@ -76,7 +77,7 @@ type
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure WriteInfo(const PredStr : TSGString = '');
+		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 		procedure ReAllocateMemory();
 			public
 		procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
@@ -389,15 +390,15 @@ case FChannels*FSizeChannel of
 end;
 end;
 
-procedure TSGBitMap.WriteInfo(const PredStr : TSGString = '');
+procedure TSGBitMap.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 begin
-WriteLn('TSGBitMap__WriteInfo()');
-WriteLn(PredStr,' Width    = ',FWidth);
-WriteLn(PredStr,' Height   = ',FHeight);
-WriteLn(PredStr,' Channels = ',FChannels);
-WriteLn(PredStr,' BitDepth = ',FSizeChannel);
+SGHint(PredStr + 'TSGBitMap__WriteInfo(..)', ViewError);
+SGHint([PredStr,' Width    = ',FWidth], ViewError);
+SGHint([PredStr,' Height   = ',FHeight], ViewError);
+SGHint([PredStr,' Channels = ',FChannels], ViewError);
+SGHint([PredStr,' BitDepth = ',FSizeChannel], ViewError);
 TextColor(15);
-WriteLn(PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN'));
+SGHint([PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN')], ViewError);
 TextColor(7);
 end;
 

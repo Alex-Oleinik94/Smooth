@@ -111,7 +111,11 @@ implementation
 
 uses
 	 StrMan
+	
+	,Variants
+	
 	,SaGeMathUtils
+	,SaGeBaseUtils
 	;
 
 (************)
@@ -376,51 +380,39 @@ var
 	i : TSGUInt32;
 begin
 SetLength(Result, Length(Ar));
-if High(Ar)>=0 then
-	begin
+if Length(Ar) > 0 then
 	for i := 0 to High(Ar) do
-		case Ar[i].vtype of
-		vtInteger:
-			Result[i] := SGStr(Ar[i].vInteger);
-		vtString:
-			Result[i] := Ar[i].vString^;
-		vtAnsiString:
-			Result[i] := AnsiString(Ar[i].vPointer);
-		vtBoolean:
-			Result[i] := SGStr(Ar[i].vBoolean);
-		vtChar:
-			Result[i] := Ar[i].vChar;
-		vtExtended:
-			Result[i] := SGStrReal(TSGExtended(Ar[i].vPointer^), 5);
-		end;
-	end;
+		with Ar[i] do
+			case vType of
+			vtInteger    : Result[i] := SGStr(vInteger);
+			vtBoolean    : Result[i] := SGStr(vBoolean);
+			vtChar       : Result[i] := vChar;
+			vtWideChar   : Result[i] := vWideChar;
+			vtExtended   : Result[i] := SGStrReal(TSGExtended(vExtended^), 5);
+			vtString     : Result[i] := vString^;
+			vtPointer    : Result[i] := SGAddrStr(vPointer);
+			vtPChar      : Result[i] := SGPCharToString(vPChar);
+			vtObject     : Result[i] := Iff(vObject <> nil, vObject.ClassName(), 'TObject') + '(' + SGAddrStr(vObject) + ')';
+			vtClass      : Result[i] := Iff(vClass <> nil, vClass.ClassName(), 'TClass') + '(' + SGAddrStr(vClass) + ')';
+			vtPWideChar  : Result[i] := WideCharLenToString(vPWideChar, Length(vPWideChar));
+			vtAnsiString : Result[i] := AnsiString(vPointer);
+			vtCurrency   : Result[i] := SGStrReal(vCurrency^, 4);
+			vtVariant    : Result[i] := VarToStr(vVariant^);
+			vtInterface  : Result[i] := 'Interface(' + SGAddrStr(vInterface) + ')';
+			vtWideString : Result[i] := AnsiString(vWideString);
+			vtInt64      : Result[i] := SGStr(vInt64^);
+			vtQWord      : Result[i] := SGStr(vQWord^);
+			end;
 end;
 
 function SGGetStringFromConstArray(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-type
-	TSGExtended = Extended;
 var
-	i : TSGUInt32;
+	StringList : TSGStringList = nil;
 begin
 Result := '';
-if High(Ar) >= 0 then
-	begin
-	for i := 0 to High(Ar) do
-		case Ar[i].vtype of
-		vtInteger:
-			Result += SGStr(Ar[i].vInteger);
-		vtString:
-			Result += Ar[i].vString^;
-		vtAnsiString:
-			Result += AnsiString(ar[i].vPointer);
-		vtBoolean:
-			Result += SGStr(Ar[i].vBoolean);
-		vtChar:
-			Result += Ar[i].vChar;
-		vtExtended:
-			Result += SGStrReal(TSGExtended(Ar[i].vPointer^), 5);
-		end;
-	end;
+StringList := SGArConstToArString(Ar);
+Result := SGStringFromStringList(StringList, '');
+SetLength(StringList, 0);
 end;
 
 function SGFloatToString(const R : TSGDouble; const Zeros : TSGInt32 = 0):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

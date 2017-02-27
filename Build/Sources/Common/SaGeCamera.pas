@@ -78,8 +78,8 @@ end;
 constructor TSGCamera.Create();
 begin
 inherited;
-FMatrixMode:=SG_3D;
-FViewMode:=SG_VIEW_WATCH_OBJECT;
+FMatrixMode := SG_3D;
+FViewMode := SG_VIEW_WATCH_OBJECT;
 FLocation.Import();
 FView.Import();
 FUp.Import(0,0,0);
@@ -151,7 +151,7 @@ SG_VIEW_WATCH_OBJECT:
 		begin
 		FZum*=0.89;
 		end;
-	if (Context.KeyPressed) and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SGDownKey) and (Context.KeysPressed('V')) then
+	if (Context.KeyPressed) and (Context.KeyPressedChar = 'W') and (Context.KeyPressedType = SGDownKey) and (Context.KeysPressed('C')) then
 		begin
 		WriteLn('Zum=',FZum:0:4);
 		WriteLn('TranslateY=',FTranslateY:0:4);
@@ -163,23 +163,23 @@ SG_VIEW_WATCH_OBJECT:
 end;
 end;
 
-procedure TSGCamera.InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGCamera.InitMatrix(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Matrix:TSGMatrix4;
 begin
 case FViewMode of
-SG_VIEW_WATCH_OBJECT:
+SG_VIEW_WATCH_OBJECT :
 	begin
-	Render.InitMatrixMode(FMatrixMode,FZum);
-	Render.Translatef(FTranslateX,FTranslateY,-10*FZum);
-	Render.Rotatef(FRotateX,1,0,0);
-	Render.Rotatef(FRotateY,0,1,0);
+	Render.InitMatrixMode(FMatrixMode, FZum);
+	Render.Translatef(FTranslateX, FTranslateY, -10 * FZum);
+	Render.Rotatef(FRotateX, 1, 0, 0);
+	Render.Rotatef(FRotateY, 0, 1, 0);
 	end;
-SG_VIEW_LOOK_AT_OBJECT:
+SG_VIEW_LOOK_AT_OBJECT :
 	begin
 	FUp := FUp.Normalized();
 	Render.InitMatrixMode(SG_3D);
-	Matrix:=SGGetLookAtMatrix(FLocation,FView + FLocation,FUp);
+	Matrix:=SGGetLookAtMatrix(FLocation, FView + FLocation, FUp);
 	Render.MultMatrixf(@Matrix);
 	end;
 end;
