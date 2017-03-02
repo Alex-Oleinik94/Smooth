@@ -55,10 +55,14 @@ type
 	TSGInt32   = TSGLongInt;
 	TSGUInt64  = TSGQuadWord;
 	// TSGInt64 allready defined
+type
 	TSGFloat32 = TSGFloat;
+	PSGFloat32 = ^ TSGFloat32;
 	TSGFloat64 = TSGDouble;
+	PSGFloat64 = ^ TSGFloat64;
 	{$IFNDEF WITHOUT_EXTENDED}
 		TSGFloat80 = TSGExtended;
+		PSGFloat80 = ^ TSGFloat80;
 	{$ENDIF WITHOUT_EXTENDED}
 type
 	// Common

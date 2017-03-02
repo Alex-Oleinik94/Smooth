@@ -8,15 +8,17 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeMesh
+	,SaGeMeshLoader
 	
 	,Classes
 	;
 type
-	TSGMeshOBJLoader = class(TSGNamed)
+	TSGMeshOBJLoader = class(TSGMeshLoader)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
+		function Load() : TSGBoolean; override;
 		function ImportOBJ(const AModel : TSGCustomModel; out Sucsses : TSGBoolean) : TSGMeshOBJLoader;
 		function ImportOBJ() : TSGBoolean; 
 		function SetFileName(const VFileName : TSGString) : TSGMeshOBJLoader;
@@ -28,11 +30,6 @@ type
 		procedure ReadObject(const VObject : TSG3DObject; const VFile : PTextFile);
 			protected
 		function LoadMaterialLibrary(const MaterialFileName : TSGString):TSGBoolean;
-			private
-		FFileName  : TSGString;
-		FModel     : TSGCustomModel;
-			public
-		property Model : TSGCustomModel read FModel;
 		end;
 
 implementation
@@ -43,8 +40,12 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog
-	,SaGeDateTime
 	;
+
+function TSGMeshOBJLoader.Load() : TSGBoolean;
+begin
+Result := ImportOBJ();
+end;
 
 function TSGMeshOBJLoader.LoadMaterialLibrary(const MaterialFileName : TSGString) : TSGBoolean;
 var

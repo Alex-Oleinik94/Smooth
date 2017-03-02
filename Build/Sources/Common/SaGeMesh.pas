@@ -435,10 +435,6 @@ type
 		
 		// Выводит полную информацию о характеристиках модельки
 		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
-		// Загрузка из файла
-		procedure LoadFromFile(const FileWay:string);
-		// Загрузка из текстовова формата файлов *.obj
-		procedure LoadFromOBJ(const VFileName : TSGString);
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
@@ -470,6 +466,8 @@ type
     PSG3dObject = ^TSG3dObject;
 
     { TSGCustomModel }
+	TSGModelLoadProgress = PSGFloat32;
+	
 	TSGCustomModelMesh = record
 		FMesh    : TSG3DObject;
 		FCopired : TSGInt64;
@@ -516,16 +514,16 @@ type
     public
 		// Загрузка и соxранение
 		procedure SaveToFile(const FileWay: TSGString);
-        procedure LoadFromFile(const FileWay:TSGString);
+        procedure LoadFromFile(const FileWay:TSGString; const LoadProgress : TSGModelLoadProgress = nil);
     public
         procedure LoadFromSG3DMFile(const FileWay: TSGString);
         procedure SaveToSG3DMFile(const FileWay: TSGString);
         procedure LoadFromSG3DM(const Stream : TStream);
         procedure SaveToSG3DM(const Stream : TStream);
         // Загрузить формат 3DS-Max-а
-        function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
-        function Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
-        function LoadOBJFromFile(const FilePath : TSGString) : TSGBoolean;
+        function Load3DSFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
+        function Load3DSFromStream(const VStream : TStream; const VFileName : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
+        function LoadOBJFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
     public
 		procedure Dublicate(const Index:TSGLongWord);
 		procedure Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
@@ -547,6 +545,7 @@ uses
 	,SaGeMathUtils
 	,SaGeSysUtils
 	,SaGeBaseUtils
+	,SaGeMeshLoader
 	
 	,SysUtils
 	
@@ -1262,11 +1261,6 @@ end;
 function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PSGVertex2f;inline;
 begin
 Result:=PSGVertex2f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
-end;
-
-procedure TSG3DObject.LoadFromFile(const FileWay:string);
-begin
-(**)
 end;
 
 class function TSG3DObject.GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
@@ -2133,23 +2127,19 @@ if FQuantityObjects > 0 then
 		FArObjects[i].FMesh.LoadToVBO();
 end;
 
-procedure TSGCustomModel.LoadFromFile(const FileWay : TSGString);
+procedure TSGCustomModel.LoadFromFile(const FileWay : TSGString; const LoadProgress : TSGModelLoadProgress = nil);
+var
+	Expansion : TSGString = '';
 begin
 if SGFileExists(FileWay) then
 	begin
-	if SGUpCaseString(SGFileExpansion(FileWay))='3DS' then
-		begin
-		Load3DSFromFile(FileWay);
-		end
+	Expansion := SGUpCaseString(SGFileExpansion(FileWay));
+	if Expansion = '3DS' then
+		Load3DSFromFile(FileWay, LoadProgress)
+	else if Expansion = 'OBJ' then
+		LoadOBJFromFile(FileWay, LoadProgress)
 	else
-		if SGUpCaseString(SGFileExpansion(FileWay))='OBJ' then
-			begin
-			AddObject().LoadFromOBJ(FileWay);
-			end
-		else
-			begin
-			LoadFromSG3DMFile(FileWay);
-			end;
+		LoadFromSG3DMFile(FileWay);
 	end;
 end;
 
@@ -2220,23 +2210,13 @@ for i := 0 to High(FArObjects) do
 	FArObjects[i].FMesh.FObjectColor := ObjColor;
 end;
 
-procedure TSG3DObject.LoadFromOBJ(const VFileName : TSGString);
-begin
-with TSGMeshOBJLoader.Create() do
-	begin
-	SetFileName(VFileName);
-	SetModel(Parent);
-	ImportOBJ();
-	Destroy();
-	end;
-end;
-
-function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
+function TSGCustomModel.Load3DSFromStream(const VStream : TStream; const VFileName : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
 begin
 Result := False;
 with TSGMesh3DSLoader.Create() do
 	begin
 	try
+		Progress := LoadProgress;
 		SetStream(VStream);
 		SetFileName(VFileName);
 		Import3DS(Self, Result);
@@ -2247,34 +2227,14 @@ with TSGMesh3DSLoader.Create() do
 	end;
 end;
 
-function TSGCustomModel.LoadOBJFromFile(const FilePath : TSGString) : TSGBoolean;
+function TSGCustomModel.LoadOBJFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
 begin
-Result := False;
-with TSGMeshOBJLoader.Create() do
-	begin
-	try
-		SetFileName(FilePath);
-		ImportOBJ(Self, Result);
-	except on e : Exception do
-		SGLogException('TSGCustomModel__LoadOBJFromFile(...). Raised exception', e);
-	end;
-	Destroy();
-	end;
+Result := SGLoadMesh(TSGMeshOBJLoader, Self, FilePath, LoadProgress);
 end;
 
-function TSGCustomModel.Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
+function TSGCustomModel.Load3DSFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
 begin
-Result := False;
-with TSGMesh3DSLoader.Create() do
-	begin
-	try
-		SetFileName(FileWay);
-		Import3DS(Self, Result);
-	except on e : Exception do
-		SGLogException('TSGCustomModel__Load3DSFromFile(...). Raised exception', e);
-	end;
-	Destroy();
-	end;
+Result := SGLoadMesh(TSGMesh3DSLoader, Self, FilePath, LoadProgress);
 end;
 
 constructor TSGCustomModel.Create();

@@ -31,17 +31,26 @@ const
 type
 	TSGGameTron=class(TSGDrawable)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		procedure Paint(); override;
+		class function ClassName() : TSGString; override;
 			protected
 		FScene      : TSGScene;
 		FLoadThread : TSGThread;
 		FLoadClass  : TSGLoading;
 		FState      : TSGLongWord;
 			private
+		FProgressInterfaceLocked : TSGBoolean;
+		FTotalProgress     : TSGFloat32;
+		FSectionProgress   : TSGFloat32;
+		FSectionProportion : TSGFloat32;
+		FProgress          : TSGFloat32;
+			private
 		procedure Load();
+		procedure UpdateProgress();
+		procedure FinishLoadSection();
+		function AddLoadSection(const Name : TSGString; const Proportion : TSGFloat32) : PSGFloat32;
 		end;
 
 implementation
@@ -50,9 +59,42 @@ uses
 	 SaGeLog
 	;
 
-class function TSGGameTron.ClassName():TSGString;
+class function TSGGameTron.ClassName() : TSGString;
 begin
 Result := 'Трон';
+end;
+
+function TSGGameTron.AddLoadSection(const Name : TSGString; const Proportion : TSGFloat32) : PSGFloat32;
+begin
+while FProgressInterfaceLocked do
+	Sleep(2);
+FProgressInterfaceLocked := True;
+FSectionProgress := 0;
+FSectionProportion := Proportion;
+FProgress := FTotalProgress;
+FProgressInterfaceLocked := False;
+Result := @FSectionProgress;
+end;
+
+procedure TSGGameTron.FinishLoadSection();
+begin
+while FProgressInterfaceLocked do
+	Sleep(2);
+FProgressInterfaceLocked := True;
+FTotalProgress += FSectionProportion;
+FProgress := FTotalProgress;
+FSectionProportion := 0;
+FSectionProgress := 0;
+FProgressInterfaceLocked := False;
+end;
+
+procedure TSGGameTron.UpdateProgress();
+begin
+while FProgressInterfaceLocked do
+	Sleep(2);
+FProgress := FTotalProgress + FSectionProgress * FSectionProportion;
+if FLoadClass <> nil then
+	FLoadClass.Progress := FProgress;
 end;
 
 procedure TSGGameTron.Paint();
@@ -60,7 +102,7 @@ begin
 if (FLoadClass <> nil) then
 	FLoadClass.Paint();
 case FState of
-SGTStateLoading : ;
+SGTStateLoading : UpdateProgress();
 SGTStateStarting :
 	begin
 	FScene.Start();
@@ -76,20 +118,21 @@ end;
 
 procedure TSGGameTron.Load();
 
-procedure Add3DSModel(const FileName : TSGString);
+procedure Add3DSModel(const FileName : TSGString; const LoadProgressProportion : TSGFloat32);
 var
 	Model : TSGModel = nil;
 begin
+AddLoadSection('"' + FileName + '"', LoadProgressProportion);
 Model := TSGModel.Create(Context);
-Model.Mesh.Load3DSFromFile(FileName);
+Model.Mesh.Load3DSFromFile(FileName, @FSectionProgress);
 FScene.AddNod(Model);
+FinishLoadSection();
 end;
 
 begin
-FLoadClass.Progress := 0.04001;
-Add3DSModel('./../Data/Tron/motoBike.3ds');
-FLoadClass.Progress := 0.5001;
-Add3DSModel('./../Data/Tron/Map.3ds');
+FTotalProgress := 0.04;
+Add3DSModel('./../Data/Tron/motoBike.3ds', (1 - 0.04) * 0.9);
+Add3DSModel('./../Data/Tron/Map.3ds', (1 - 0.04) * 0.1);
 FLoadClass.Progress := 1.0001;
 FState := SGTStateStarting;
 end;
@@ -102,6 +145,12 @@ end;
 constructor TSGGameTron.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
+
+FProgressInterfaceLocked := False;
+FTotalProgress     := 0;
+FSectionProgress   := 0;
+FSectionProportion := 0;
+FProgress          := 0;
 
 FScene      := nil;
 FLoadClass  := nil;

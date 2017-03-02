@@ -48,6 +48,7 @@ uses
 	 SaGeFileUtils
 	,SaGeSysUtils
 	,SaGeLog
+	,SaGeStringUtils
 	;
 
 procedure mmmButtonFormEsc(Button:TSGButton);
@@ -95,18 +96,16 @@ Result := FCustomModel.QuantityObjects + FCustomModel.QuantityMaterials;
 end;
 
 var
+	Expansion : TSGString = '';
 	OldObjectsCount : TSGUInt64 = 0;
 begin
 Result := False;
+Expansion := SGUpCaseString(SGFileExpansion(FileName));
 try
-	if SGFileExpansion(FileName) = '3DS' then
+	if Expansion = '3DS' then
 		Result := FCustomModel.Load3DSFromStream(Stream, FileName)
-	else if SGFileExpansion(FileName) = 'OBJ' then
-		begin
-		OldObjectsCount := ObjectCount();
-		FCustomModel.AddObject().LoadFromOBJ(FileName);
-		Result := ObjectCount() > OldObjectsCount;
-		end
+	else if Expansion = 'OBJ' then
+		Result := FCustomModel.LoadOBJFromFile(FileName)
 	else
 		begin
 		OldObjectsCount := ObjectCount();

@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeMesh
+	,SaGeMeshLoader
 	
 	,Classes
 	;
@@ -48,12 +49,13 @@ type
 		end;
 	PSGMesh3DSChunk = ^ TSGMesh3DSChunk;
 
-	TSGMesh3DSLoader = class(TSGNamed)
+	TSGMesh3DSLoader = class(TSGMeshLoader)
 			public
 		constructor Create(); override; overload;
 		constructor Create(const VStream : TFileStream); virtual; overload;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
+		function Load() : TSGBoolean; override;
 		function Import3DS(const AModel : TSGCustomModel; out Sucsses : TSGBoolean) : TSGMesh3DSLoader;
 		function Import3DS() : TSGBoolean; 
 		function SetFileName(const VFileName : TSGString) : TSGMesh3DSLoader;
@@ -76,12 +78,9 @@ type
 		procedure ReadMaterial();
 		procedure ReadGeometry();
 		procedure ReadObject();
-			private
-		FFile      : TStream;
-		FFileName  : TSGString;
-		FModel     : TSGCustomModel;
+			protected
+		FFile : TStream;
 		FObjectsCountBeforeImport : TSGUInt32;
-			private
 		FChunkPositionEDIT3DS : TSGMesh3DSChunkPosition;
 		end;
 
@@ -96,10 +95,15 @@ uses
 	,SaGeDateTime
 	;
 
+function TSGMesh3DSLoader.Load() : TSGBoolean;
+begin
+Result := Import3DS();
+end;
+
 function TSGMesh3DSLoader.SetModel(const VModel : TSGCustomModel) : TSGMesh3DSLoader;
 begin
-FModel := VModel;
-FObjectsCountBeforeImport := VModel.QuantityObjects;
+Model := VModel;
+FObjectsCountBeforeImport := Model.QuantityObjects;
 Result := Self;
 end;
 
@@ -117,28 +121,21 @@ end;
 
 function TSGMesh3DSLoader.SetFileName(const VFileName : TSGString) : TSGMesh3DSLoader;
 begin
-FFileName := VFileName;
-Result    := Self;
+FileName := VFileName;
+Result   := Self;
 end;
 
 constructor TSGMesh3DSLoader.Create();overload;
 begin
 inherited Create();
 FFile := nil;
-FFileName := '';
-FModel := nil;
 FChunkPositionEDIT3DS := 0;
 end;
 
 constructor TSGMesh3DSLoader.Create(const VStream : TFileStream);overload;
 begin
 Create();
-FFile := nil;
-if VStream <> nil then
-	begin
-	DestroyInput();
-	FFile := VStream;
-	end;
+FFile := VStream;
 end;
 
 procedure TSGMesh3DSLoader.DestroyInput();
@@ -384,10 +381,14 @@ if Chunk.ID <> MAIN3DS then
 	end;
 //находим блок редактора
 FChunkPositionEDIT3DS := FindChunk(EDIT3DS, True);
+SetProgress(0.05);
 ReadMaterials();
+SetProgress(0.1);
 ReadGeometry();
+SetProgress(0.15);
 DestroyInput();
 ComputeNormals();
+SetProgress(1.001);
 Result := True;
 end;
 
@@ -430,7 +431,7 @@ end;
 procedure TSGMesh3DSLoader.ComputeNormals();
 var vVector1, vVector2, vNormal,vSum:TSGVertex3f;
 	vPoly:array[0..2]of TSGVertex3f;
-	pNormals,pTempNormals:array of TSGVertex3f;
+	pNormals, pTempNormals : packed array of TSGVertex3f;
 	iObject,i,ii,shared:longword;
 
 function Cross(const vVector1,vVector2:TSGVertex3f):TSGVertex3f;inline;
@@ -439,20 +440,27 @@ begin
 	result.y:=((vVector1.z * vVector2.x) - (vVector1.x * vVector2.z));
 	result.z:=((vVector1.x * vVector2.y) - (vVector1.y * vVector2.x));
 end;
+
 var
-	DT,DT2:TSGDateTime;
+	DT, DT2 : TSGDateTime;
+	ProcessObjectsCount : TSGUInt32 = 0;
+	TotalProgressProportion : TSGFloat32 = 0;
+	ObjectProgressProportion : TSGFloat32 = 0;
 begin
-DT.Get();
-SGLog.Source('TSGMesh3DSLoader__ComputeNormals : Started');
-if FModel.QuantityObjects>0 then
+if FModel.QuantityObjects > 0 then
 	begin
+	DT.Get();
+	SGLog.Source('TSGMesh3DSLoader__ComputeNormals : Started');
+	ProcessObjectsCount := FModel.QuantityObjects - FObjectsCountBeforeImport;
+	TotalProgressProportion := 1.001 - 0.15;
+	ObjectProgressProportion := TotalProgressProportion / ProcessObjectsCount;
+	SetProgress(0.151);
 	for iObject := FObjectsCountBeforeImport to FModel.QuantityObjects - 1 do
 		begin
 		with FModel.Objects[iObject] do
 			begin
-			//SetLength(ArNormals,FNOfVerts);
-			SetLength(pNormals,Faces[0]);
-			SetLength(pTempNormals,Faces[0]);
+			SetLength(pNormals,     Faces[0]);
+			SetLength(pTempNormals, Faces[0]);
 			for i:=0 to Faces[0]-1 do
 				begin
 				vPoly[0]:=ArVertex3f[ArFacesTriangles(0,i).p0]^;
@@ -467,6 +475,7 @@ if FModel.QuantityObjects>0 then
 				vNormal := vNormal.Normalized();
 				pNormals[i]:=vNormal;
 				end;
+			SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 0.2) * ObjectProgressProportion);
 			vSum.Import();
 			shared:=0;
 			for i:=0 to QuantityVertexes-1 do
@@ -483,15 +492,21 @@ if FModel.QuantityObjects>0 then
 				ArNormal[i]^ := ArNormal[i]^.Normalized();
 				vSum.Import();
 				shared:=0;
+				SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 0.2 + 0.8 * (i / (QuantityVertexes - 1))) * ObjectProgressProportion);
 				end;
+			SetProgress(0.15 + (iObject - FObjectsCountBeforeImport + 1) * ObjectProgressProportion);
 			end;
 		SetLength(pNormals,0);
 		SetLength(pTempNormals,0);
 		end;
+	DT2.Get();
+	SGLog.Source(
+		'TSGMesh3DSLoader__ComputeNormals : End (' +
+		SGSecondsToStringTime((DT2-DT).GetPastSeconds) +
+		' ' + 
+		SGStr((DT2-DT).GetPastMiliSeconds div 100) + 
+		' милисек)');
 	end;
-DT2.Get();
-SGLog.Source('TSGMesh3DSLoader__ComputeNormals : End ('+
-	SGSecondsToStringTime((DT2-DT).GetPastSeconds)+' '+SGStr((DT2-DT).GetPastMiliSeconds div 100)+' милисек'+')');
 end;
 
 procedure TSGMesh3DSLoader.ReturnHeader();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
