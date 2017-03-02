@@ -14,7 +14,7 @@ uses
 	, SaGeGameBase
 	;
 type
-	TSGModel=class(TSGNod)
+	TSGModel = class(TSGNod)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy(); override;
@@ -63,15 +63,24 @@ end;
 
 procedure TSGModel.InitModelMatrix();
 begin
-if FMatrix<>nil then
+if FMatrix <> nil then
 	Render.MultMatrixf(FMatrix);
 end;
 
 procedure TSGModel.Paint();
 begin
-InitModelMatrix();
-if FMesh<>nil then
-	FMesh.Paint();
+if FMesh <> nil then
+	begin
+	if FMatrix <> nil then
+		begin
+		Render.PushMatrix();
+		InitModelMatrix();
+		FMesh.Paint();
+		Render.PopMatrix()
+		end
+	else
+		FMesh.Paint();
+	end;
 end;
 
 constructor TSGModel.Create(const VContext : ISGContext);

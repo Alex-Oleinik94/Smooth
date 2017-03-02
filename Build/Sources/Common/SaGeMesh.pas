@@ -438,7 +438,7 @@ type
 		// Загрузка из файла
 		procedure LoadFromFile(const FileWay:string);
 		// Загрузка из текстовова формата файлов *.obj
-		procedure LoadFromOBJ(const FFileName:string;const opf : PTextFile = nil);virtual;
+		procedure LoadFromOBJ(const VFileName : TSGString);
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
@@ -509,7 +509,7 @@ type
 		procedure DrawObject(const Index : TSGLongWord);
         procedure Paint(); override;
 		procedure LoadToVBO();
-        procedure WriteInfo(const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+        procedure WriteInfo(const PredString : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
         procedure Clear();virtual;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
@@ -525,6 +525,7 @@ type
         // Загрузить формат 3DS-Max-а
         function Load3DSFromFile(const FileWay:TSGString):TSGBoolean;
         function Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
+        function LoadOBJFromFile(const FilePath : TSGString) : TSGBoolean;
     public
 		procedure Dublicate(const Index:TSGLongWord);
 		procedure Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
@@ -535,6 +536,9 @@ type
     end;
     PSGCustomModel = ^ TSGCustomModel;
 
+function SGStrMeshIndexFormat(const IndexFormat : TSGMeshIndexFormat) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStrMeshColorFormat(const ColorFormat : TSGMeshColorType) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+ 
 implementation
 
 uses
@@ -542,14 +546,35 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeSysUtils
+	,SaGeBaseUtils
 	
 	,SysUtils
 	
 	// Formats
 	,SaGeMesh3ds
+	,SaGeMeshObj
 	;
 
-{$INCLUDE SaGeMeshObj.inc}
+function SGStrMeshColorFormat(const ColorFormat : TSGMeshColorType) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case ColorFormat of
+SGMeshColorType3b : Result := 'SGMeshColorFormat3b';
+SGMeshColorType4b : Result := 'SGMeshColorFormat4b';
+SGMeshColorType3f : Result := 'SGMeshColorFormat3f';
+SGMeshColorType4f : Result := 'SGMeshColorFormat4f';
+else                Result := 'INVALID(' + SGStr(TSGByte(ColorFormat)) + ')';
+end;
+end;
+
+function SGStrMeshIndexFormat(const IndexFormat : TSGMeshIndexFormat) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case IndexFormat of
+SGMeshIndexFormat1b : Result := 'SGMeshIndexFormat1b';
+SGMeshIndexFormat2b : Result := 'SGMeshIndexFormat2b';
+SGMeshIndexFormat4b : Result := 'SGMeshIndexFormat4b';
+else                  Result := 'INVALID(' + SGStr(TSGByte(IndexFormat)) + ')';
+end;
+end;
 
 procedure TSG3DObject.CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
 var
@@ -1271,19 +1296,18 @@ if FFacesBuffers <> nil then
 end;
 
 procedure WriteFaceArray(const Index : TSGUInt32);
+var
+	FacePredString : TSGString = '';
 begin
-SGHint([PredStr,'  ',Index+1,')','Index           = "',Index,'"'], ViewError);
-SGHint([PredStr,'  ',Index+1,')','CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], ViewError);
-SGHint([PredStr,'  ',Index+1,')','RealFaceLength  = "',GetFaceLength(Index),'"'], ViewError);
-SGHint([PredStr,'  ',Index+1,')','MaterialID      = "',ArFaces[Index].FMaterialID,'"'], ViewError);
-case ArFaces[Index].FIndexFormat of
-SGMeshIndexFormat1b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat1b"'], ViewError);
-SGMeshIndexFormat2b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat2b"'], ViewError);
-SGMeshIndexFormat4b: SGHint([PredStr,'  ',Index+1,')','IndexFormat     = "SGMeshIndexFormat4b"'], ViewError);
-end;
-SGHint([PredStr,'  ',Index+1,')', 'PoligonesType   = "', SGStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], ViewError);
+FacePredString := PredStr + '   ' + SGStr(Index + 1) + ') ';
+SGHint([FacePredString,'Index           = "',Index,'"'], ViewError);
+SGHint([FacePredString,'CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], ViewError);
+SGHint([FacePredString,'RealFaceLength  = "',GetFaceLength(Index),'"'], ViewError);
+SGHint([FacePredString,'MaterialID      = "',ArFaces[Index].FMaterialID,'"'], ViewError);
+SGHint([FacePredString,'IndexFormat     = "'+SGStrMeshIndexFormat(ArFaces[Index].FIndexFormat)+'"'], ViewError);
+SGHint([FacePredString,'PoligonesType   = "', SGStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], ViewError);
 TextColor(15);
-SGHint([PredStr,'  ',Index+1,')','FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index),'EN'),'"'], ViewError);
+SGHint([FacePredString,'FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], ViewError);
 TextColor(7);
 end;
 
@@ -1300,32 +1324,27 @@ end;
 begin
 TextColor(7);
 SGHint(PredStr + 'TSG3DObject__WriteInfo(..)', ViewError);
-SGHint([PredStr,'Name                = "',FName,'"'], ViewError);
-SGHint([PredStr,'CountOfVertexes     = "',FNOfVerts,'"'], ViewError);
-SGHint([PredStr,'HasColors           = "',FHasColors,'"'], ViewError);
-SGHint([PredStr,'HasNormals          = "',FHasNormals,'"'], ViewError);
-SGHint([PredStr,'HasTexture          = "',FHasTexture,'"'], ViewError);
+SGHint([PredStr,'  Name                = "',FName,'"'], ViewError);
+SGHint([PredStr,'  CountOfVertexes     = "',FNOfVerts,'"'], ViewError);
+SGHint([PredStr,'  HasColors           = "',FHasColors,'"'], ViewError);
+SGHint([PredStr,'  HasNormals          = "',FHasNormals,'"'], ViewError);
+SGHint([PredStr,'  HasTexture          = "',FHasTexture,'"'], ViewError);
 if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
-SGHint([PredStr,'QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], ViewError);
+SGHint([PredStr,'  QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], ViewError);
 WriteFaceArrays();
-SGHint([PredStr,'ObjectPoligonesType = "', SGStrPoligonesType(FObjectPoligonesType), '"'], ViewError);
-SGHint([PredStr,'SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], ViewError);
-SGHint([PredStr,'VertexFormat        = "', SGStrVertexFormat(FVertexType), '"'], ViewError);
-SGHint([PredStr,'CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], ViewError);
-case FColorType of
-SGMeshColorType3b:SGHint(PredStr+'ColorType           = "SGMeshColorType3b"', ViewError);
-SGMeshColorType4b:SGHint(PredStr+'ColorType           = "SGMeshColorType4b"', ViewError);
-SGMeshColorType3f:SGHint(PredStr+'ColorType           = "SGMeshColorType3f"', ViewError);
-SGMeshColorType4f:SGHint(PredStr+'ColorType           = "SGMeshColorType4f"', ViewError);
-end;
+SGHint([PredStr,'  ObjectPoligonesType = "', SGStrPoligonesType(FObjectPoligonesType), '"'], ViewError);
+SGHint([PredStr,'  SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], ViewError);
+SGHint([PredStr,'  VertexFormat        = "', SGStrVertexFormat(FVertexType), '"'], ViewError);
+SGHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], ViewError);
+SGHint([PredStr,'  ColorType           = "' + SGStrMeshColorFormat(FColorType) + '"'], ViewError);
 TextColor(15);
-SGHint([PredStr,'VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"'], ViewError);
+SGHint([PredStr,'  VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"'], ViewError);
 if FQuantityFaceArrays>0 then
-	SGHint([PredStr,'AllSize             = "',SGGetSizeString(Size(),'EN'),'"'], ViewError);
+	SGHint([PredStr,'  AllSize             = "',SGGetSizeString(Size(),'EN'),'"'], ViewError);
 TextColor(7);
-SGHint([PredStr,'EnableVBO           = "',FEnableVBO,'"'], ViewError);
-SGHint([PredStr,'LinksVBO            = "',FVertexesBuffer,'", (', LinksVBO(), ')'], ViewError);
-SGHint([PredStr,'ObjectMaterialID    = "',FObjectMaterialID,'"'], ViewError);
+SGHint([PredStr,'  EnableVBO           = "',FEnableVBO,'"'], ViewError);
+SGHint([PredStr,'  LinksVBO            = Vertex:',FVertexesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], ViewError);
+SGHint([PredStr,'  ObjectMaterialID    = "',FObjectMaterialID,'"'], ViewError);
 end;
 
 function TSG3DObject.VertexesSize():TSGQuadWord;Inline;
@@ -2139,21 +2158,21 @@ begin
 Result := 'TSGCustomModel';
 end;
 
-procedure TSGCustomModel.WriteInfo(const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure TSGCustomModel.WriteInfo(const PredString : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 var
 	i : TSGUInt32;
 begin
 TextColor(7);
-SGHint('TSGCustomModel__WriteInfo(..)', ViewError);
-SGHint(['  QuantityMaterials = ', FQuantityMaterials], ViewError);
-SGHint(['  QuantityObjects   = ', FQuantityObjects], ViewError);
+SGHint(PredString + 'TSGCustomModel__WriteInfo(..)', ViewError);
+SGHint([PredString, '  QuantityMaterials = ', FQuantityMaterials], ViewError);
+SGHint([PredString, '  QuantityObjects   = ', FQuantityObjects], ViewError);
 if FQuantityMaterials<>0 then
 	for i:=0 to FQuantityMaterials-1 do
-		FArMaterials[i].WriteInfo('  '+SGStr(i+1)+') ', ViewError);
+		FArMaterials[i].WriteInfo(PredString + '  ' + SGStr(i + 1) + ') ', ViewError);
 if FQuantityObjects <> 0 then
 	for i:=0 to FQuantityObjects-1 do
 		if FArObjects[i].FMesh <> nil then
-			FArObjects[i].FMesh.WriteInfo('  '+SGStr(i+1)+') ', ViewError);
+			FArObjects[i].FMesh.WriteInfo(PredString + '  ' + SGStr(i + 1) + ') ', ViewError);
 end;
 
 
@@ -2201,6 +2220,17 @@ for i := 0 to High(FArObjects) do
 	FArObjects[i].FMesh.FObjectColor := ObjColor;
 end;
 
+procedure TSG3DObject.LoadFromOBJ(const VFileName : TSGString);
+begin
+with TSGMeshOBJLoader.Create() do
+	begin
+	SetFileName(VFileName);
+	SetModel(Parent);
+	ImportOBJ();
+	Destroy();
+	end;
+end;
+
 function TSGCustomModel.Load3DSFromStream(const VStream:TStream;const VFileName:TSGString):TSGBoolean;
 begin
 Result := False;
@@ -2212,6 +2242,21 @@ with TSGMesh3DSLoader.Create() do
 		Import3DS(Self, Result);
 	except on e : Exception do
 		SGLogException('TSGCustomModel__Load3DSFromStream(...). Raised exception', e);
+	end;
+	Destroy();
+	end;
+end;
+
+function TSGCustomModel.LoadOBJFromFile(const FilePath : TSGString) : TSGBoolean;
+begin
+Result := False;
+with TSGMeshOBJLoader.Create() do
+	begin
+	try
+		SetFileName(FilePath);
+		ImportOBJ(Self, Result);
+	except on e : Exception do
+		SGLogException('TSGCustomModel__LoadOBJFromFile(...). Raised exception', e);
 	end;
 	Destroy();
 	end;
@@ -2382,19 +2427,19 @@ end;
 
 begin
 SGHint(PredStr + 'TSGMaterial__WriteInfo(..)', ViewError);
-SGHint([PredStr,'Name                = "', FName, '"'], ViewError);
-SGHint([PredStr,'EnableTexture       = "', EnableTexture, '"'], ViewError);
-SGHint([PredStr,'EnableBump          = "', FEnableBump, '"'], ViewError);
-SGHint([PredStr,'MapDiffuse          = "', SGAddrStr(FMapDiffuse), '"'], ViewError);
-WriteImageInfo(FMapDiffuse, PredStr + ' d) ');
-SGHint([PredStr,'MapBump             = "', SGAddrStr(FMapBump), '"'], ViewError);
-WriteImageInfo(FMapBump, PredStr + ' b) ');
-SGHint([PredStr,'MapOpacity          = "', SGAddrStr(FMapOpacity), '"'], ViewError);
-WriteImageInfo(FMapOpacity, PredStr + ' o) ');
-SGHint([PredStr,'MapSpecular         = "', SGAddrStr(FMapSpecular), '"'], ViewError);
-WriteImageInfo(FMapSpecular, PredStr + ' s) ');
-SGHint([PredStr,'MapAmbient          = "', SGAddrStr(FMapAmbient), '"'], ViewError);
-WriteImageInfo(FMapAmbient, PredStr + ' a) ');
+SGHint([PredStr,'  Name                = "', FName, '"'], ViewError);
+SGHint([PredStr,'  EnableTexture       = "', EnableTexture, '"'], ViewError);
+SGHint([PredStr,'  EnableBump          = "', FEnableBump, '"'], ViewError);
+SGHint([PredStr,'  MapDiffuse          = "', SGAddrStr(FMapDiffuse), '"'], ViewError);
+WriteImageInfo(FMapDiffuse,  PredStr + '   d) ');
+SGHint([PredStr,'  MapBump             = "', SGAddrStr(FMapBump), '"'], ViewError);
+WriteImageInfo(FMapBump,     PredStr + '   b) ');
+SGHint([PredStr,'  MapOpacity          = "', SGAddrStr(FMapOpacity), '"'], ViewError);
+WriteImageInfo(FMapOpacity,  PredStr + '   o) ');
+SGHint([PredStr,'  MapSpecular         = "', SGAddrStr(FMapSpecular), '"'], ViewError);
+WriteImageInfo(FMapSpecular, PredStr + '   s) ');
+SGHint([PredStr,'  MapAmbient          = "', SGAddrStr(FMapAmbient), '"'], ViewError);
+WriteImageInfo(FMapAmbient,  PredStr + '   a) ');
 end;
 
 procedure TSGMaterial.PushBlend(const CurrentBlend : TSGBoolean);

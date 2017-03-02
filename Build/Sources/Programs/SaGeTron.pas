@@ -64,6 +64,7 @@ SGTStateLoading : ;
 SGTStateStarting :
 	begin
 	FScene.Start();
+	FScene.ViewInfo('', [SGLogType]);
 	FState := SGTStateViewing;
 	SGLog.Source('TSGGameTron__Paint(). Starting...');
 	end;
@@ -101,16 +102,16 @@ end;
 constructor TSGGameTron.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-FScene:=nil;
-FLoadClass:=nil;
-FLoadThread:=nil;
-FState := SGTStateLoading;
 
-FScene := TSGScene.Create(VContext);
+FScene      := nil;
+FLoadClass  := nil;
+FLoadThread := nil;
+FState      := SGTStateLoading;
+
+FScene := TSGScene.Create(Context);
 FScene.Camera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 
 FScene.AddMutator(TSGPhysics3D);
-
 (FScene.AddMutator(TSGNet) as TSGNet).ConnectionMode := SGClientMode;
 
 FLoadClass := TSGLoading.Create(Context);

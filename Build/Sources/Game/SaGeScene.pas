@@ -14,6 +14,7 @@ uses
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeCamera
+	,SaGeLog
 	;
 
 type
@@ -40,20 +41,35 @@ type
 		property Player : TSGInt64  read FPlayerModel;
 		property Camera : TSGCamera read FCamera;
 		property Models[Index : TSGLongWord]:TSGModel read GetModel;
+			public
+		procedure ViewInfo(const PredString : TSGString = ''; const ViewType : TSGViewType = [SGLogType, SGPrintType]);
 		end;
 
 implementation
 
 uses
-	 SaGeLog
+	 SaGeStringUtils
 	;
+
+procedure TSGScene.ViewInfo(const PredString : TSGString = ''; const ViewType : TSGViewType = [SGLogType, SGPrintType]);
+var
+	i : TSGUInt32;
+begin
+SGHint([PredString, 'TSGScene__ViewInfo(..)'], ViewType);
+SGHint([PredString, '  Camera   = ', SGAddrStr(FCamera)], ViewType);
+if (FNods <> nil) and (Length(FNods) > 0) then
+	for i := 0 to High(FNods) do
+		if FNods[i] is TSGModel then
+			if (FNods[i] as TSGModel).Mesh <> nil then
+				(FNods[i] as TSGModel).Mesh.WriteInfo(PredString + '  ' + SGStr(i + 1) + ') ', ViewType);
+end;
 
 function TSGScene.LastModel():TSGModel;inline;
 begin
-if FNods=nil then
-	Result:=nil
+if FNods = nil then
+	Result := nil
 else
-	Result:=FNods[High(FNods)] as TSGModel;
+	Result := FNods[High(FNods)] as TSGModel;
 end;
 
 function TSGScene.AddModel(const NewModel : TSGCustomModel;const VDynamic : TSGBoolean = False):TSGModel;
@@ -87,7 +103,7 @@ end;
 
 function TSGScene.GetModel(const Index : TSGLongWord):TSGModel;inline;
 begin
-if (FNods<>nil) and (Index >= 0) and (Index <= High(FNods)) and (FNods[Index]<>nil) then
+if (FNods <> nil) and (Index >= 0) and (Index <= High(FNods)) and (FNods[Index] <> nil) then
 	Result := FNods[Index] as TSGModel
 else
 	Result := nil;
@@ -156,17 +172,13 @@ SGLog.Source('TSGScene__Paint(). : Paint nods...');
 InitCameraPosition();
 if FNods <> nil then
 	for i:=0 to High(FNods) do
-		if FNods[i]<>nil then
-			begin
-			Render.PushMatrix();
+		if FNods[i] <> nil then
 			FNods[i].Paint();
-			Render.PopMatrix()
-			end;
 end;
 
 class function TSGScene.ClassName():TSGString;
 begin
-Result:='TSGScene';
+Result := 'TSGScene';
 end;
 
 end.

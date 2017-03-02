@@ -16,11 +16,18 @@ type
 		SGPrintError,
 		SGLogError);
 	TSGViewErrorType = set of TSGViewErrorCase;
+	TSGViewType = TSGViewErrorType;
 const
+	SGLogType = SGLogError;
+	SGPrintType = SGPrintError;
 	SGViewErrorFull  : TSGViewErrorType = [SGPrintError, SGLogError];
 	SGViewErrorPrint : TSGViewErrorType = [SGPrintError];
 	SGViewErrorLog   : TSGViewErrorType = [SGLogError];
 	SGViewErrorNULL  : TSGViewErrorType = [];
+	SGViewTypeFull  : TSGViewType = [SGLogType, SGPrintType];
+	SGViewTypePrint : TSGViewType = [SGPrintType];
+	SGViewTypeLog   : TSGViewType = [SGLogType];
+	SGViewTypeNULL  : TSGViewType = [];
 var
 	SGLogEnable : TSGBoolean = 
 		{$IFDEF RELEASE}
