@@ -160,6 +160,7 @@ uses
 	,SaGeResourceManager
 	,SaGeFileUtils
 	,SaGeStringUtils
+	,SaGeBaseUtils
 	,SaGeLog
 	;
 
@@ -372,20 +373,20 @@ DrawImageFromTwoVertex2f(
 	RePlace,SG_2D);
 end;
 
-procedure TSGImage.RePlacVertex(var Vertex1,Vertex2: TSGVertex2f;const RePlaceY:TSGByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.RePlacVertex(var Vertex1, Vertex2 : TSGVertex2f;const RePlaceY : TSGByte = SG_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if Vertex1.x>Vertex2.x then
-	SGQuickRePlaceVertexType(Vertex1.x,Vertex2.x);
+if Vertex1.x > Vertex2.x then
+	Swap(Vertex1.x, Vertex2.x);
 case RePlaceY of
 SG_2D:
 	begin
-	if Vertex1.y>Vertex2.y then
-		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
+	if Vertex1.y > Vertex2.y then
+		Swap(Vertex1.y, Vertex2.y);
 	end;
 else
 	begin
-	if Vertex1.y<Vertex2.y then
-		SGQuickRePlaceVertexType(Vertex1.y,Vertex2.y);
+	if Vertex1.y < Vertex2.y then
+		Swap(Vertex1.y, Vertex2.y);
 	end;
 end;
 end;

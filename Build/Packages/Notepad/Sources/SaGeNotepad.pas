@@ -331,13 +331,13 @@ if CountInsets() > 0 then
 		begin
 		if FInsets[i] = ActiveInset() then
 			begin
-			Color1 := SGGetColor4fFromLongWord($00FF00).WithAlpha(0.6);
-			Color2 := SGGetColor4fFromLongWord($00FFFF).WithAlpha(0.8);
+			Color1 := SGColor4fFromUInt32($00FF00).WithAlpha(0.6);
+			Color2 := SGColor4fFromUInt32($00FFFF).WithAlpha(0.8);
 			end
 		else
 			begin
-			Color1 := SGGetColor4fFromLongWord($009900).WithAlpha(0.6);
-			Color2 := SGGetColor4fFromLongWord($009999).WithAlpha(0.8);
+			Color1 := SGColor4fFromUInt32($009900).WithAlpha(0.6);
+			Color2 := SGColor4fFromUInt32($009999).WithAlpha(0.8);
 			end;
 		SGRoundQuad(Render,
 			SGVertex3fImport(

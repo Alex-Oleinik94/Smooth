@@ -14,7 +14,6 @@ uses
 	 SaGeContext
 	,SaGeBase
 	,SaGeMath
-	,SaGeCommon
 	,SaGeAdamsSystemExample
 	{$IF defined(ENGINE)}
 		,SaGeConsoleToolsBase

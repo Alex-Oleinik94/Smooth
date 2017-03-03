@@ -84,13 +84,17 @@ function SGComputeDeterminantMatrix3x3(const m1, m2, m3, m4, m5, m6, m7, m8, m9 
 type
 	PSGPlane3D = ^ TSGPlane3D;
 	TSGPlane3D  = object
+			public
 		a, b, c, d : TSGMathFloat;
+			public
 		procedure Import(const a1 : TSGMathFloat = 0; const b1 : TSGMathFloat = 0; const c1 : TSGMathFloat = 0; const d1 : TSGMathFloat = 0);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		procedure Write();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		end;
 
-function SGPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-//function SGPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+function SGPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+function SGCosSinAngle(const Cosinus, Sinus : TSGMathFloat) : TSGMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -99,6 +103,30 @@ uses
 	
 	,SaGeBaseUtils
 	;
+
+function SGCosSinAngle(const Cosinus, Sinus : TSGMathFloat) : TSGMathFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Cosinus = -1 then
+	Result := PI
+else if Cosinus = 1 then
+	Result := 0
+else if Sinus = -1 then
+	Result := 3 * PI / 2
+else if Sinus = 1 then
+	Result := PI / 2
+else if Sinus > SGZero then
+	Result := ArcCos(Cosinus)
+else
+	Result := ArcCos(- Cosinus) + PI;
+end;
+
+function SGPlane3DFrom2VectorsAndPoint(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SGPlane3DFrom3Points(
+	x0,      y0,      z0,
+	x0 + x1, y0 + y1, z0 + z1,
+	x0 + x2, y0 + y2, z0 + z2);
+end;
 
 function SGPlane3DFrom3Points(const x1, y1, z1, x2, y2, z2, x0, y0, z0 : TSGMathFloat) : TSGPlane3D;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin

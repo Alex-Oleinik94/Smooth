@@ -15,7 +15,6 @@ uses
 	 SaGeBase
 	,SaGeContext
 	,SaGeMath
-	,SaGeCommon
 	,SaGeStringUtils
 	,SaGeDateTime
 	,SaGeEncodingUtils

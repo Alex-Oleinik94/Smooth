@@ -110,14 +110,14 @@ type
 	TSGSetOfByte  = type packed set of byte;
 	TSGConstList  = type packed array of TVarRec;
 	TSGPCharList  = type packed array of PSGChar;
-	
+type
 	PText     = ^ TextFile;
 	Text      = TextFile;
 	PTextFile = ^ TextFile;
-	
+type
 	TSGProcedure = type TProcedure;
 	TSGNestedProcedure = type procedure() is nested;
-	SGFrameButtonsType = type TSGByte;
+	TSGPointerProcedure = procedure (Void : TSGPointer);
 type
 	// Начальный класс SaGe
 	TSGClass = class;

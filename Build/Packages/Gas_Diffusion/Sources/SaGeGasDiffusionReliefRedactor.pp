@@ -128,6 +128,7 @@ uses
 	 SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeCommon
+	,SaGeBaseUtils
 	;
 
 var
@@ -628,7 +629,7 @@ if (v1i <> Length(sr.FPoints)) and (v2i <> Length(sr.FPoints)) then
 		while (ii < Length(sr.FPolygones[i])) do
 			begin
 			i1 := ii;
-			i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+			i2 := SGNextCircularDynamicIndex(i1,High(sr.FPolygones[i]));
 			ii += 1;
 			if IsPointInLine(i,i1,i2,v1,v2) then
 				begin
@@ -640,7 +641,7 @@ if (v1i <> Length(sr.FPoints)) and (v2i <> Length(sr.FPoints)) then
 		while (ii < Length(sr.FPolygones[i])) do
 			begin
 			i1 := ii;
-			i2 := SGGetNextDynamicArrayIndex(i1,High(sr.FPolygones[i]));
+			i2 := SGNextCircularDynamicIndex(i1,High(sr.FPolygones[i]));
 			ii += 1;
 			if IsPointInLine(i,i1,i2,v2,v1) then
 				begin

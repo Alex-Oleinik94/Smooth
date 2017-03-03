@@ -64,7 +64,7 @@ procedure SGPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGParseStringToConsoleCallerParams(const VParams : TSGString) : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGParseValueFromComand(const Comand : TSGString; const PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
@@ -106,7 +106,7 @@ begin
 Result := SGParseValueFromComand(Comand, SGArConstToArString(PredParts), True);
 end;
 
-function SGParseValueFromComand(const Comand : TSGString; const PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	PredPart : TSGString;
 begin

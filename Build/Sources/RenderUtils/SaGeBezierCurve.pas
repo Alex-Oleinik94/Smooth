@@ -78,12 +78,12 @@ begin
 if VLength=1 then
 	Result:=FArray[0]
 else if VLength=2 then
-	Result:=SGGetVertexInAttitude(FArray[0],FArray[1],Attitude)
+	Result:=SGVectorInAttitude(FArray[0],FArray[1],Attitude)
 else
 	begin
 	SetLength(VArray,VLength-1);
 	for i:=0 to High(VArray) do
-		VArray[i]:=SGGetVertexInAttitude(FArray[i],FArray[i+1],Attitude);
+		VArray[i]:=SGVectorInAttitude(FArray[i],FArray[i+1],Attitude);
 	Result:=GetResultVertex(Attitude,@VArray[0],VLength-1);
 	SetLength(VArray,0);
 	end;
@@ -125,7 +125,7 @@ if (FStartArray=nil) or (Length(FStartArray)=0) then
 	Exit;
 FMesh:=TSG3DObject.Create();
 FMesh.SetContext(Context);
-FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+FMesh.ObjectColor:=SGColor4fFromUInt32($FFFFFF);
 FMesh.EnableCullFace:=False;
 FMesh.ObjectPoligonesType:=SGR_LINE_STRIP;
 FMesh.VertexType := SGMeshVertexType3f;

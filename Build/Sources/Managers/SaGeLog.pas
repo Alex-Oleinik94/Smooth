@@ -53,7 +53,7 @@ type
 		procedure Source(const s:string;const WithTime:Boolean = True);overload;
 		procedure Source(const Ar : array of const;const WithTime:Boolean = True);overload;
 		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-		procedure Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 			private
 		FFileStream : TFileStream;
 		end;
@@ -145,7 +145,7 @@ begin
 	end;
 end;
 
-procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 var
 	i, WordCount, MaxLength, n, ii: TSGLongWord;
 	TempS : TSGString;
@@ -155,7 +155,7 @@ if ArS <> nil then
 	WordCount := Length(ArS);
 if WordCount > 0 then
 	begin
-	Source(Title + ' (' + SGStr(WordCount) + ')',True);
+	Source(Title + ' (' + SGStr(WordCount) + ')', ViewTime);
 	MaxLength := Length(ArS[0]);
 	if Length(ArS) > 1 then
 		begin
@@ -192,7 +192,7 @@ var
 	ArS : TSGStringList = nil;
 begin
 ArS := SGStringListFromString(S, Separators);
-Source(ArS, Title, SimbolsLength);
+Source(ArS, Title, True, SimbolsLength);
 SetLength(ArS, 0);
 end;
 

@@ -70,7 +70,7 @@ procedure SGLogException(const Title : TSGString; const e : Exception);{$IFDEF S
 
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
-procedure SGRunComand(const Comand : TSGString; const ViewOutput : TSGBoolean = True);
+procedure SGRunComand(const Comand : TSGString; const ViewCase : TSGViewType = [SGPrintType, SGLogType]);
 function SGOperatingSystemVersion(): TSGString;
 
 implementation
@@ -91,6 +91,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeVersion
+	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeWindowsUtils
 		{$ENDIF}
@@ -133,7 +134,7 @@ begin
 Result := GetProcAddress(FLibrary, VProcedureName);
 end;
 
-procedure SGRunComand(const Comand : TSGString; const ViewOutput : TSGBoolean = True);
+procedure SGRunComand(const Comand : TSGString; const ViewCase : TSGViewType = [SGPrintType, SGLogType]);
 var
 	AProcess: TProcess;
 
@@ -153,9 +154,22 @@ AStringList.Free;
 end;
 
 procedure WriteFromBytes(const SkipEolns : TSGBoolean = True);
+const
+	Eolns = [#13, #10];
 var
 	Error : TSGBoolean;
 	C, lC, N : TSGChar;
+	Str : TSGString = '';
+
+procedure ProcessString();
+begin
+if Str <> '' then
+	begin
+	SGHint(Str, ViewCase, False);
+	Str := '';
+	end;
+end;
+
 begin
 Error := False;
 if SkipEolns then
@@ -167,21 +181,25 @@ if SkipEolns then
 		Error := False;
 		try
 		N := TSGChar(AProcess.Output.ReadByte);
-		if (N  in [#13,#10]) and
-		   (C  in [#13,#10]) and
-		   (lC in [#13,#10]) then
+		if (N  in Eolns) and
+		   (C  in Eolns) and
+		   (lC in Eolns) then
 		else
 			begin
 			lC := C;
 			C := N;
-			Write(C);
+			if C in Eolns then
+				ProcessString()
+			else
+				Str += C;
 			end;
 		except
-		Error := True;
+			Error := True;
 		end;
 		if Error then
 			Sleep(10);
 		end;
+	ProcessString();
 	end
 else
 	while AProcess.Active or (not Error) do
@@ -197,13 +215,39 @@ else
 		end;
 end;
 
+procedure LogComand();
+var
+	StringList : TSGStringList = nil;
+	Index : TSGUInt32;
 begin
+SGLog.Source(['SGRunComand(..). Executing comand ', Iff(Length(Comand) < 80, ': ' + Comand, '--->')]);
+if Length(Comand) >= 80 then
+	if Length(Comand) < 137 then
+		SGLog.Source(['	Comand : ', Comand], False)
+	else
+		begin
+		StringList := SGStringListFromString(Comand, ' ');
+		SGLog.Source(['	Executable : ', Iff(Length(StringList) > 0, StringList[0], '???')], False);
+		if Length(StringList) > 1 then
+			begin
+			for Index := 0 to High(StringList) - 1 do
+				StringList[Index] := StringList[Index + 1];
+			SetLength(StringList, Length(StringList) - 1);
+			SGLog.Source(StringList, '	Params : ', False);
+			end;
+		SetLength(StringList, 0);
+		end;
+end;
+
+begin
+if SGLogType in ViewCase then
+	LogComand();
 AProcess := TProcess.Create(nil);
 AProcess.CommandLine := Comand;
 AProcess.Options := AProcess.Options + [poUsePipes, poStderrToOutPut];
 AProcess.Execute();
 
-if (poUsePipes in AProcess.Options) and ViewOutput then
+if (poUsePipes in AProcess.Options) and (ViewCase <> []) then
 	begin
 	//WriteFromStringList();
 	WriteFromBytes();

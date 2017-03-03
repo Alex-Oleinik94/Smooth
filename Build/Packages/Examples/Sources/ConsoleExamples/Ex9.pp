@@ -19,7 +19,6 @@ uses
 		{$ENDIF}
 	,SaGeConsolePaintableTools
 	,SaGeMath
-	,SaGeCommon
 	,SaGeStringUtils
 	,SaGeCommonClasses
 	,SaGeGraphicViewer

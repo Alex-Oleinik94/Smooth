@@ -16,6 +16,8 @@ uses
 	,SaGeCommonClasses
 	,SaGeCommonStructs
 	;
+type
+	SGFrameButtonsType = type TSGByte;
 const
 	SGFrameAnimationConst = 200;
 	SGObjectTimerConst : TSGFloat64 = 0.02;

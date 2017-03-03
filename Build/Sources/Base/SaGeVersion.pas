@@ -133,7 +133,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
-	SGHint(SGEngineFullVersion());
+	SGHint(SGEngineFullVersion(), SGViewTypeFull, True);
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	SGLog.Source('Operating system: ' + SGOperatingSystemVersion());
 	end;

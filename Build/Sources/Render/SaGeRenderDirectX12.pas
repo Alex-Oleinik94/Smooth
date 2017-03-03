@@ -10,7 +10,6 @@ uses
 	// SaGe units
 	 SaGeBase
 	,SaGeRender
-	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses

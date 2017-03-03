@@ -53,7 +53,14 @@ procedure Swap(var a, b : TSGPointer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}over
 procedure Swap(var a, b : TSGFloat80); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 {$ENDIF WITHOUT_EXTENDED}
 
+function SGNextCircularDynamicIndex(const Index, HighOfArray : TSGMaxEnum): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+function SGNextCircularDynamicIndex(const Index, HighOfArray : TSGMaxEnum): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (Index + 1) * TSGByte(Index <> HighOfArray);
+end;
 
 procedure Swap(var a, b : TSGInt64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var c : TSGInt64;

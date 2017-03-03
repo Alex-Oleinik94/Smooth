@@ -937,12 +937,12 @@ if not FHasNormals then
 SetLength(ArPoligonesNormals,Faces[0]);
 for i:=0 to Faces[0]-1 do
 	begin
-	Plane:=SGGetPlaneFromThreeVertex(
+	Plane := SGPlane3DFrom3Points(
 		ArVertex3f[ArFacesTriangles(0,i).p[0]]^,
 		ArVertex3f[ArFacesTriangles(0,i).p[1]]^,
 		ArVertex3f[ArFacesTriangles(0,i).p[2]]^);
 	ArPoligonesNormals[i].Import(
-		Plane.a,Plane.b,Plane.c);
+		Plane.a, Plane.b, Plane.c);
 	end;
 for i:=0 to QuantityVertexes-1 do
 	begin

@@ -76,7 +76,7 @@ FMesh := TSG3DObject.Create();
 FMesh.SetContext(Context);
 FMesh.HasColors := False;
 FMesh.ObjectPoligonesType:=SGR_TRIANGLES;
-FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFFFF);
+FMesh.ObjectColor:=SGColor4fFromUInt32($FFFFFFFF);
 FMesh.EnableCullFace:=False;
 FMesh.HasNormals:=False;
 FMesh.QuantityFaceArrays := 0;

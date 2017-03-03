@@ -822,7 +822,7 @@ if artype.FType=2 then
 	end
 else if artype.FWay=FForestHeight*FForestWidth then
 	begin
-	Render.Color(SGGetColor4fFromLongWord($FFFF00));
+	Render.Color(SGColor4fFromUInt32($FFFF00));
 	NeedsExtension := False;
 	end;
 if not NeedsExtension then

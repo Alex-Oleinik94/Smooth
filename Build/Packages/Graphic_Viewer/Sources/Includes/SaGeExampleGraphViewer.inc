@@ -55,7 +55,7 @@ type
 
 
 {$IFDEF SGREADIMPLEMENTATION}
-function VertexFunction(Vertex:TSGVisibleVertex;const p:Pointer):TSGVisibleVertex;
+function VertexFunction(Vertex:TSGVisibleVector;const p:Pointer):TSGVisibleVector;
 begin
 with TSGGraphViewer(p) do
 	begin

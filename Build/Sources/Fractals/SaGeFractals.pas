@@ -314,7 +314,7 @@ while Quantity<>0 do
 	SetLength(FMeshesInfo,Length(FMeshesInfo)+1);
 	FMeshesInfo[High(FMeshesInfo)]:=SG_FALSE;
 	FMesh.AddObject();
-	FMesh.LastObject().ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+	FMesh.LastObject().ObjectColor:=SGColor4fFromUInt32($FFFFFF);
 	FMesh.LastObject().EnableCullFace:=False;
 	if (PoligoneType=SGR_QUADS) and (Render.RenderType<>SGRenderOpenGL) then
 		FMesh.LastObject().ObjectPoligonesType:=SGR_TRIANGLES

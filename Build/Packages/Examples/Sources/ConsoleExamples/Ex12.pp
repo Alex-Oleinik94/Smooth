@@ -14,7 +14,6 @@ uses
 	 SaGeContext
 	,SaGeBase
 	,SaGeMath
-	,SaGeCommon
 	,SaGeMesh
 	,SaGeRender
 	,SaGeStringUtils

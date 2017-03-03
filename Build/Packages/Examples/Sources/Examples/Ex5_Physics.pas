@@ -366,7 +366,7 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	FMesh.QuantityFaceArrays := 0;
 	FMesh.HasColors := False;
 	FMesh.ObjectPoligonesType:=SGR_TRIANGLES;
-	FMesh.ObjectColor:=SGGetColor4fFromLongWord($FFFFFF);
+	FMesh.ObjectColor:=SGColor4fFromUInt32($FFFFFF);
 	FMesh.EnableCullFace:=False;
 	FMesh.HasNormals:=True;
 	ii:=0;

@@ -9,7 +9,7 @@ uses
 	,Math
 	,Classes
 	
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeBase
 	,SaGeRender
 	,SaGeContext
@@ -178,8 +178,14 @@ type
 		FClass:pointer;
 		FPEnd,FPBegin:LongWord;
 		end;
-	
-
+type
+	TSGVisibleVector = object(TSGVector3f)
+			public
+		Visible : TSGBoolean;
+		end;
+	TSGVisibleVectorList = packed array of TSGVisibleVector;
+	TSGVisibleVectorFunction = function (Vector : TSGVisibleVector; const Void : TSGPointer) : TSGVisibleVector;
+type
 	TSGMathGraphic=class(TSGDrawable)
 			public
 		constructor Create();override;
@@ -192,8 +198,8 @@ type
 		FThread:TSGMathGraphicThread;
 		FVariable:PChar;
 		FYShift:real;
-		FArVertexes:TSGVisibleVertexList;
-		FVertexFunction:TSGVisibleVertexFunction;
+		FArVertexes:TSGVisibleVectorList;
+		FVertexFunction:TSGVisibleVectorFunction;
 		FUseThread:boolean;
 		FVertexFunctionPointer:Pointer;
 		FAss:Boolean;
@@ -213,7 +219,7 @@ type
 		property Expression:PChar read GetExpression write SetExpression;
 		property Complexity:LongInt read FComplexity write SetComplexity;
 		property YShift:Real read FYShift write FYShift;
-		property VertexFunction:TSGVisibleVertexFunction read FVertexFunction write FVertexFunction;
+		property VertexFunction:TSGVisibleVectorFunction read FVertexFunction write FVertexFunction;
 		property UseThread:boolean read FUseThread write FUseThread;
 		function Assigned:Boolean;inline;
 		end;

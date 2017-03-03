@@ -93,7 +93,7 @@ for i := 0 to 3 do
 		ii := i + 1;
 	if PointsExists[i] and PointsExists[ii] then
 		begin
-		Result += SGGetVertexWhichNormalFromThreeVertex(VVector, Points[ii], Points[i]);
+		Result += SGTriangleNormal(VVector, Points[ii], Points[i]);
 		TotalExists += 1;
 		end;
 	end;
