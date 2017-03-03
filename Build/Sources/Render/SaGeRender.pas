@@ -12,6 +12,7 @@ uses
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeCommon
+	,SaGeMatrix
 	{$IFDEF MSWINDOWS}
 		,multimon
 		{$ENDIF}
@@ -106,10 +107,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);virtual;abstract;
 		procedure Vertex3fv(const Variable : TSGPointer);virtual;abstract;
 		procedure Normal3fv(const Variable : TSGPointer);virtual;abstract;
-		procedure MultMatrixf(const Variable : TSGPointer);virtual;abstract;
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);virtual;abstract;
 		procedure ColorMaterial(const r,g,b,a:TSGSingle);virtual;abstract;
 		procedure MatrixMode(const Par:TSGLongWord);virtual;abstract;
-		procedure LoadMatrixf(const Variable : TSGPointer);virtual;abstract;
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);virtual;abstract;
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);virtual;abstract;
 		procedure ActiveTexture(const VTexture : TSGLongWord);virtual;abstract;
 		procedure ActiveTextureDiffuse();virtual;abstract;
@@ -140,7 +141,7 @@ type
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;virtual;abstract;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);virtual;abstract;
 		procedure UseProgram(const VProgram : TSGLongWord);virtual;abstract;
-		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);virtual;abstract;
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : PSGMatrix4x4);virtual;abstract;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);virtual;abstract;
 		procedure Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);virtual;abstract;
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;

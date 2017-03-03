@@ -32,13 +32,14 @@ uses
 	,SaGeRenderInterface
 	,SaGeClasses
 	,SaGeDllManager
-
+	,SaGeMatrix
+	
 	//* ==================== System Units ====================
 	,DynLibs
 	,SysUtils
 	,Math
 	,Classes
-
+	
 	//* ====================== OS Units ======================
 	{$IFDEF DARWIN}
 		,AGL
@@ -165,10 +166,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
-		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
-		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
@@ -197,7 +198,7 @@ type
 		procedure DeleteShaderProgram(const VProgram : TSGLongWord);override;
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;override;
 		procedure UseProgram(const VProgram : TSGLongWord);override;
-		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);override;
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : PSGMatrix4x4);override;
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);override;
 		procedure Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);override;
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
@@ -271,15 +272,15 @@ type
 
 //Эта функция позволяет задавать текущую (В зависимости от выбранной матрици процедурой glMatrixMode) матрицу
 //в соответствии с типом TSGMatrix4.
-procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
+procedure SGRGLSetMatrix(vMatrix : TSGMatrix4x4);inline;
 
-//Это функция - собственная замена gluPerspective в движке.
-procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type);inline;
+//Это функция - собственная замена gluPerspective.
+procedure SGRGLPerspective(const vAngle, vAspectRatio, vNear, vFar : TSGMatrix4x4Type);inline;
 
 //Эта функция - собственная замена gluLookAt в движке.
-procedure SGRGLLookAt(const Eve,At,Up:TSGVertex3f);inline;
+procedure SGRGLLookAt(const Eve, At, Up : TSGVertex3f);inline;
 
-procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
+procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4x4Type);inline;
 
 implementation
 
@@ -452,10 +453,10 @@ begin
 {$IFDEF MOBILE}glUseProgram{$ELSE}glUseProgramObjectARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF});
 end;
 
-procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
+procedure TSGRenderOpenGL.UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : PSGMatrix4x4);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glUniformMatrix4fv = nil then TSGRenderOpenGL_DynLinkError('glUniformMatrix4fv');{$ENDIF}
-glUniformMatrix4fv(VLocationName,VCount,{$IFNDEF USE_GLEXT}ByteBool{$ELSE}Byte{$ENDIF}(VTranspose),VData);
+glUniformMatrix4fv(VLocationName,VCount,{$IFNDEF USE_GLEXT}ByteBool{$ELSE}Byte{$ENDIF}(VTranspose), PSGFloat(VData));
 end;
 
 function TSGRenderOpenGL.GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
@@ -684,7 +685,7 @@ begin
 glColor4f(r,g,b,a);
 end;
 
-procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4Type);inline;
+procedure SGRGLOrtho(const l,r,b,t,vNear,vFar:TSGMatrix4x4Type);inline;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
@@ -711,16 +712,16 @@ begin
 	{$ENDIF}
 end;
 
-procedure TSGRenderOpenGL.LoadMatrixf(const Variable : TSGPointer);
+procedure TSGRenderOpenGL.LoadMatrixf(const Matrix : PSGMatrix4x4);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLoadMatrixf = nil then TSGRenderOpenGL_DynLinkError('glLoadMatrixf');{$ENDIF}
-glLoadMatrixf(Variable);
+glLoadMatrixf(PGLFloat(Matrix));
 end;
 
-procedure TSGRenderOpenGL.MultMatrixf(const Variable : TSGPointer);
+procedure TSGRenderOpenGL.MultMatrixf(const Matrix : PSGMatrix4x4);
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMultMatrixf = nil then TSGRenderOpenGL_DynLinkError('glMultMatrixf');{$ENDIF}
-glMultMatrixf(Variable);
+glMultMatrixf(PGLFloat(Matrix));
 end;
 
 procedure TSGRenderOpenGL.PushMatrix();
@@ -742,14 +743,14 @@ glMatrixMode(GL_PROJECTION);
 SGRGLSetMatrix(SGGetLookAtMatrix(Eve,At,Up));
 end;
 
-procedure SGRGLPerspective(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4Type);inline;
+procedure SGRGLPerspective(const vAngle, vAspectRatio, vNear, vFar : TSGMatrix4x4Type);inline;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glMatrixMode = nil then TSGRenderOpenGL_DynLinkError('glMatrixMode');{$ENDIF}
 glMatrixMode(GL_PROJECTION);
 SGRGLSetMatrix(SGGetPerspectiveMatrix(vAngle,vAspectRatio,vNear,vFar));
 end;
 
-procedure SGRGLSetMatrix( vMatrix:TSGMatrix4);inline;
+procedure SGRGLSetMatrix( vMatrix:TSGMatrix4x4);inline;
 begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glLoadMatrixf = nil then TSGRenderOpenGL_DynLinkError('glLoadMatrixf');{$ENDIF}
 glLoadMatrixf(@vMatrix);
@@ -1001,12 +1002,12 @@ end;
 procedure TSGRenderOpenGL.Translatef(const x, y, z : TSGSingle);
 {$IF defined(INTERPRITATEROTATETRANSLATE)}
 var
-	Matrix : TSGMatrix4;
+	Matrix : TSGMatrix4x4;
 {$ENDIF}
 begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTranslatef = nil then TSGRenderOpenGL_DynLinkError('glTranslatef');{$ENDIF}
-glTranslatef(x,y,z);
+glTranslatef(x, y, z);
 {$ELSE}
 Matrix := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
 MultMatrixf(@Matrix);
@@ -1018,7 +1019,7 @@ procedure TSGRenderOpenGL.Rotatef(const Angle : TSGSingle; const x, y, z : TSGSi
 const
 	DEG2RAD = PI/180;
 var
-	Matrix : TSGMatrix4;
+	Matrix : TSGMatrix4x4;
 {$ENDIF}
 begin
 {$IF not defined(INTERPRITATEROTATETRANSLATE)}

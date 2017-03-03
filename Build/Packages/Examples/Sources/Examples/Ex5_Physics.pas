@@ -15,6 +15,7 @@ uses
 	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeImage
+	,SaGeMatrix
 	
 	,PAPPE
 	;
@@ -243,7 +244,7 @@ if FDrawable then
 			if FLigths<>nil then
 				for ii:=0 to High(FLigths) do
 					begin
-					LigthPos := FLigths[ii].FLocation * TSGMatrix4(FObjects[i].PhysicsObject.InterpolatedTransform);
+					LigthPos := FLigths[ii].FLocation * TSGMatrix4x4(FObjects[i].PhysicsObject.InterpolatedTransform);
 					Render.Lightfv(FLigths[ii].FNumber, SGR_POSITION, @LigthPos);
 					end;
 			FObjects[i].Paint();

@@ -23,6 +23,7 @@ uses
 	,SaGeBitMap
 	,SaGeCamera
 	,SaGeRenderInterface
+	,SaGeMatrix
 	;
 type
 	TSGGDRPrimetiveIndexes = packed array of TSGLongWord;
@@ -119,7 +120,7 @@ type
 		property SingleRelief : PSGGasDiffusionSingleRelief read FSingleRelief;
 		end;
 
-function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function GetReliefMatrix(const i : byte) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -129,7 +130,7 @@ uses
 	;
 
 var
-	Matrixes : array[-1..5] of TSGMatrix4;
+	Matrixes : array[-1..5] of TSGMatrix4x4;
 
 
 function TSGGasDiffusionRelief.Saved():TMemoryStream;
@@ -922,7 +923,7 @@ for i := 0 to High(FPixelPrimitives) do
 ProcessPixelPrimitives();
 end;
 
-function GetReliefMatrix(const i : byte) : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function GetReliefMatrix(const i : byte) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Matrixes[i];
 end;

@@ -23,6 +23,7 @@ uses
 	,SaGeFileUtils
 	,SaGeFPSViewer
 	,SaGeCamera
+	,SaGeMatrix
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
@@ -457,7 +458,7 @@ const
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
 var
 	VStringLength, i : TSGLongWord;
-	FLightInverseModelViewMatrix : TSGMatrix4;
+	FLightInverseModelViewMatrix : TSGMatrix4x4;
 begin
 if Render.SupporedShaders() then
 	begin

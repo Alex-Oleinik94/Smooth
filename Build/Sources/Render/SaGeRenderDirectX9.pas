@@ -14,6 +14,7 @@ uses
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
+	,SaGeMatrix
 	
 	// System
 	,crt
@@ -104,10 +105,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
-		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
-		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
@@ -588,18 +589,18 @@ FNowColor:=D3DCOLOR_ARGB(
 	Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b));
 end;
 
-procedure TSGRenderDirectX9.LoadMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX9.LoadMatrixf(const Matrix : PSGMatrix4x4);
 begin
-pDevice.SetTransform(FNowMatrixMode,PD3DMATRIX(Variable)^);
+pDevice.SetTransform(FNowMatrixMode, PD3DMATRIX(Matrix)^);
 end;
 
-procedure TSGRenderDirectX9.MultMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX9.MultMatrixf(const Matrix : PSGMatrix4x4);
 var
 	Matrix1,MatrixOut:D3DMATRIX;
 begin
-pDevice.GetTransform(FNowMatrixMode,Matrix1);
-D3DXMatrixMultiply(MatrixOut,PD3DMATRIX(Variable)^,Matrix1);
-pDevice.SetTransform(FNowMatrixMode,MatrixOut);
+pDevice.GetTransform(FNowMatrixMode, Matrix1);
+D3DXMatrixMultiply(MatrixOut, PD3DMATRIX(Matrix)^, Matrix1);
+pDevice.SetTransform(FNowMatrixMode, MatrixOut);
 end;
 
 procedure TSGRenderDirectX9.Translatef(const x,y,z:single);

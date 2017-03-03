@@ -7,17 +7,21 @@ unit SaGeRenderDirectX12;
 interface
 
 uses
+	// SaGe units
 	 SaGeBase
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
+	,SaGeMatrix
 	
+	// OS units
 	,crt
 	,windows
 	,DynLibs
 	
+	// DirectX unit
 	,DX12.D3D12
 	,DX12.D2D1
 	,DX12.DXGI
@@ -95,10 +99,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
-		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
-		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
@@ -240,12 +244,12 @@ begin
 
 end;
 
-procedure TSGRenderDirectX12.LoadMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX12.LoadMatrixf(const Matrix : PSGMatrix4x4);
 begin
 
 end;
 
-procedure TSGRenderDirectX12.MultMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX12.MultMatrixf(const Matrix : PSGMatrix4x4);
 begin 
 
 end;

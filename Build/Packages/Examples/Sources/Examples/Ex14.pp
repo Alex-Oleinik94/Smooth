@@ -20,6 +20,7 @@ uses
 	,SaGeResourceManager
 	,SaGeFileUtils
 	,SaGeCamera
+	,SaGeMatrix
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
@@ -81,7 +82,7 @@ type
 			FCameraInverseModelViewMatrix,
 			FLightProjectionMatrix,
 			FLightModelViewMatrix,
-			FLightMatrix : TSGMatrix4;
+			FLightMatrix : TSGMatrix4x4;
 		
 		FUseLightAnimation,
 			FShadowRenderType,
@@ -385,7 +386,7 @@ var
 	FUniformShadow_lightPos    : TSGLongWord = 0;
 	FUniformShadow_shadowMap   : TSGLongWord = 0;
 	{FMVLightPos,} FLightDir     : TSGVertex3f;
-	FLightInverseModelViewMatrix : TSGMatrix4;
+	FLightInverseModelViewMatrix : TSGMatrix4x4;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
 Render.ClearColor(0,0,0,1);

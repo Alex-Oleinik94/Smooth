@@ -11,6 +11,7 @@ uses
 	,SaGeCommon
 	,SaGeShaders
 	,SaGeImage
+	,SaGeMatrix
 	
 	,Crt
 	
@@ -55,7 +56,7 @@ type
 				
 				FLightProjectionMatrix,
 					FLightModelViewMatrix,
-					FLightMatrix : TSGMatrix4;
+					FLightMatrix : TSGMatrix4x4;
 				
 				FUniformShadowTex2D_shadowMap,
 					FUniformShadowTex2D_lightMatrix,
@@ -82,7 +83,7 @@ type
 		// Матрицы
 		FCameraProjectionMatrix,
 			FCameraModelViewMatrix,
-			FCameraInverseModelViewMatrix : TSGMatrix4;
+			FCameraInverseModelViewMatrix : TSGMatrix4x4;
 		
 		FShadowRenderType  : TSGBoolean;
 		
@@ -90,7 +91,7 @@ type
 			private
 		function GetLightAngle(const index : TSGLongWord):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetLightAngle(const index : TSGLongWord; const VAngle : TSGFloat);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetLightModelViewMatrix(const index : TSGLongWord):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetLightModelViewMatrix(const index : TSGLongWord):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetLightPos(const index : TSGLongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetLightPos(const index : TSGLongWord; const VPos : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetLightEye(const index : TSGLongWord; const VEye : TSGVertex3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -98,9 +99,9 @@ type
 		function GetLightDir(const index : TSGLongWord):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property LightAngle [index : TSGLongWord]: TSGFloat read  GetLightAngle write SetLightAngle;
-		property CameraProjectionMatrix : TSGMatrix4  write FCameraProjectionMatrix;
-		property CameraModelViewMatrix  : TSGMatrix4  write FCameraModelViewMatrix;
-		property LightModelViewMatrix [index : TSGLongWord] : TSGMatrix4  read  GetLightModelViewMatrix;
+		property CameraProjectionMatrix : TSGMatrix4x4  write FCameraProjectionMatrix;
+		property CameraModelViewMatrix  : TSGMatrix4x4  write FCameraModelViewMatrix;
+		property LightModelViewMatrix [index : TSGLongWord] : TSGMatrix4x4  read  GetLightModelViewMatrix;
 		property LightPos [index : TSGLongWord] : TSGVertex3f read  GetLightPos write SetLightPos;
 		property LightEye [index : TSGLongWord] : TSGVertex3f write SetLightEye;
 		property LightUp  [index : TSGLongWord] : TSGVertex3f write SetLightUp;
@@ -126,7 +127,7 @@ begin
 FLights[index].FLightAngle := VAngle;
 end;
 
-function TSGExample15_Shadow.GetLightModelViewMatrix(const index : TSGLongWord):TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGExample15_Shadow.GetLightModelViewMatrix(const index : TSGLongWord):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := FLights[index].FLightModelViewMatrix;
 end;

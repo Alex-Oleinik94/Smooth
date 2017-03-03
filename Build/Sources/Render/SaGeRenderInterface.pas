@@ -9,6 +9,7 @@ uses
 	,SaGeCommon
 	,SaGeClasses
 	,SaGeRenderBase
+	,SaGeMatrix
 	;
 
 type
@@ -89,10 +90,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);
 		procedure Vertex3fv(const Variable : TSGPointer);
 		procedure Normal3fv(const Variable : TSGPointer);
-		procedure MultMatrixf(const Variable : TSGPointer);
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);
 		procedure ColorMaterial(const r,g,b,a:TSGSingle);
 		procedure MatrixMode(const Par:TSGLongWord);
-		procedure LoadMatrixf(const Variable : TSGPointer);
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);
 		procedure ActiveTexture(const VTexture : TSGLongWord);
 		procedure ActiveTextureDiffuse();
@@ -123,7 +124,7 @@ type
 		function GetUniformLocation(const VProgram : TSGLongWord; const VLocationName : PChar): TSGLongWord;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);
 		procedure UseProgram(const VProgram : TSGLongWord);
-		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : TSGPointer);
+		procedure UniformMatrix4fv(const VLocationName : TSGLongWord; const VCount : TSGLongWord; const VTranspose : TSGBoolean; const VData : PSGMatrix4x4);
 		procedure Uniform3f(const VLocationName : TSGLongWord; const VX,VY,VZ : TSGFloat);
 		procedure Uniform1f(const VLocationName : TSGLongWord; const V : TSGFloat);
 		procedure Uniform1iv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
@@ -166,7 +167,6 @@ procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSG
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
 	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGConstructRoundQuad(const VRender:ISGRender;const ArVertex:TSGVertex3fList;const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
-procedure SGMultMatrixInRender(const VRender : ISGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2i32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF}
@@ -183,11 +183,6 @@ VRender.GetVertexUnderPixel(Pixel.x,Pixel.y,x,y,z);
 Result.Import(x,y,z);
 end;
 {$ENDIF}
-
-procedure SGMultMatrixInRender(const VRender : ISGRender; Matrix : TSGMatrix4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-VRender.MultMatrixf(@Matrix);
-end;
 
 procedure SGWndSomeQuad(const a,c: TSGVertex3f;const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

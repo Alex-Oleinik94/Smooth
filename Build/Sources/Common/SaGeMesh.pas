@@ -13,6 +13,7 @@ uses
 	,SaGeRenderBase
 	,SaGeCommonClasses
 	,SaGeLog
+	,SaGeMatrix
 	
 	,Classes
 	,Crt
@@ -449,16 +450,16 @@ type
 		FObjectMaterialID : TSGInt64;
 		
 		FEnableObjectMatrix : TSGBoolean;
-		FObjectMatrix : TSGMatrix4;
+		FObjectMatrix : TSGMatrix4x4;
 	public
-		procedure SetMatrix(const m : TSGMatrix4);
+		procedure SetMatrix(const Matrix : TSGMatrix4x4);
 	public
 		// Свойство : Имя модельки
 		property Name             : TSGString      read FName             write FName;
 		// Свойство : Идентификатор материала
 		property ObjectMaterialID : TSGInt64       read FObjectMaterialID write FObjectMaterialID;
 		property Parent           : TSGCustomModel read FParent           write FParent;
-		property ObjectMatrix     : TSGMatrix4     read FObjectMatrix     write SetMatrix;
+		property ObjectMatrix     : TSGMatrix4x4   read FObjectMatrix     write SetMatrix;
 	public
 		procedure CopyTo(const Destination : TSG3dObject);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
     end;
@@ -471,7 +472,7 @@ type
 	TSGCustomModelMesh = record
 		FMesh    : TSG3DObject;
 		FCopired : TSGInt64;
-		FMatrix  : TSGMatrix4;
+		FMatrix  : TSGMatrix4x4;
 		end;
 	
     TSGCustomModel = class(TSGDrawable)
@@ -487,14 +488,14 @@ type
         FArObjects   : packed array of TSGCustomModelMesh;
     private
 		function GetObject(const Index : TSGMaxEnum):TSG3dObject;
-		function GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
+		function GetObjectMatrix(const Index : TSGMaxEnum):PSGMatrix4x4;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
         function GetMaterial(const Index : TSGMaxEnum):TSGMaterial;
     public
 		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
 		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
-		property ObjectMatrix[Index : TSGMaxEnum]:TSGPointer read GetObjectMatrix;
+		property ObjectMatrix[Index : TSGMaxEnum]:PSGMatrix4x4 read GetObjectMatrix;
 		property ObjectColor: TSGColor4f write AddObjectColor;
 		property Materials[Index : TSGMaxEnum] : TSGMaterial read GetMaterial;
     public
@@ -1517,10 +1518,10 @@ FEnableObjectMatrix := False;
 FObjectMatrix := SGGetIdentityMatrix();
 end;
 
-procedure TSG3dObject.SetMatrix(const m : TSGMatrix4);
+procedure TSG3dObject.SetMatrix(const Matrix : TSGMatrix4x4);
 begin
-FEnableObjectMatrix := m <> SGGetIdentityMatrix();
-FObjectMatrix := m;
+FEnableObjectMatrix := Matrix <> SGGetIdentityMatrix();
+FObjectMatrix := Matrix;
 end;
 
 destructor TSG3dObject.Destroy();
@@ -2367,7 +2368,7 @@ begin
 FArObjects[Index].FMatrix:= FArObjects[Index].FMatrix * SGGetTranslateMatrix(Vertex);
 end;
 
-function TSGCustomModel.GetObjectMatrix(const Index : TSGMaxEnum):TSGPointer;
+function TSGCustomModel.GetObjectMatrix(const Index : TSGMaxEnum):PSGMatrix4x4;
 begin
 Result:=@FArObjects[Index].FMatrix;
 end;

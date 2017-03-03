@@ -17,6 +17,7 @@ uses
 	,SaGeDateTime
 	,SaGeScreen
 	,SaGeCamera
+	,SaGeMatrix	
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
@@ -221,7 +222,7 @@ var
 begin
 Render.PushMatrix();
 Render.MultMatrixf(@AObject.InterpolatedTransform);
-FNowLightPos := Licht0Pos*TSGMatrix4(AObject.InterpolatedTransform);
+FNowLightPos := Licht0Pos * TSGMatrix4x4(AObject.InterpolatedTransform);
 Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FNowLightPos);
 for I:=0 to AObject.NumMeshs-1 do
 	DrawObjectMesh(AObject.Meshs^[i]^);

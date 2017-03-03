@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeCommon
 	,SaGeCommonClasses
+	,SaGeMatrix
 	;
 
 type
@@ -34,8 +35,8 @@ type
 		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetProjectionMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetModelViewMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetProjectionMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetModelViewMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure InitViewModeComboBox();virtual;abstract;
 		procedure Move(const Param : TSGSingle);
@@ -65,12 +66,12 @@ uses
 	,SaGeContext
 	;
 
-function TSGCamera.GetProjectionMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGCamera.GetProjectionMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SGR_PROJECTION_MATRIX, @Result);
 end;
 
-function TSGCamera.GetModelViewMatrix() : TSGMatrix4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSGCamera.GetModelViewMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Render.GetFloatv(SGR_MODELVIEW_MATRIX, @Result);
 end;
@@ -164,8 +165,17 @@ end;
 end;
 
 procedure TSGCamera.InitMatrix(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure InitLookAt();
 var
-	Matrix:TSGMatrix4;
+	Matrix : TSGMatrix4x4;
+begin
+FUp := FUp.Normalized();
+Render.InitMatrixMode(SG_3D);
+Matrix := SGGetLookAtMatrix(FLocation, FView + FLocation, FUp);
+Render.MultMatrixf(@Matrix);
+end;
+
 begin
 case FViewMode of
 SG_VIEW_WATCH_OBJECT :
@@ -176,12 +186,7 @@ SG_VIEW_WATCH_OBJECT :
 	Render.Rotatef(FRotateY, 0, 1, 0);
 	end;
 SG_VIEW_LOOK_AT_OBJECT :
-	begin
-	FUp := FUp.Normalized();
-	Render.InitMatrixMode(SG_3D);
-	Matrix:=SGGetLookAtMatrix(FLocation, FView + FLocation, FUp);
-	Render.MultMatrixf(@Matrix);
-	end;
+	InitLookAt();
 end;
 end;
 

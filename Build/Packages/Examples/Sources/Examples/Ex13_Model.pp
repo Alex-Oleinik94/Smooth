@@ -18,6 +18,8 @@ uses
 	,SaGeMesh
 	,SaGeImage
 	,SaGeResourceManager
+	,SaGeMatrix
+	,SaGeQuaternion
 	;
 
 type
@@ -58,10 +60,10 @@ type
 
 	// Кость скелета (система координат сустава)
 	TBonePos = record
-		FTrans : TSGVertex3f;         // перемещение
-		FRot   : TSGVertex3f;         // поворот
-		FAbsoluteMatrix : TSGMatrix4; // абсолютная матрица кости
-		FRelativeMatrix : TSGMatrix4; // относительная матрица кости
+		FTrans : TSGVertex3f;           // перемещение
+		FRot   : TSGVertex3f;           // поворот
+		FAbsoluteMatrix : TSGMatrix4x4; // абсолютная матрица кости
+		FRelativeMatrix : TSGMatrix4x4; // относительная матрица кости
 		FQuat  : TSGQuaternion;         // кватернион кости
 		end;
 
@@ -90,7 +92,7 @@ type
 		FNextAction : TIndex;  // следующее действие
 		FSkelTime   : single;  // время (меняется от нуля до единицы между предыдущим и следующим кадром)
 		FCurrentPos : TFrame;  // текущая поза персонажа с учётом интерполяции по времени skelTime
-		FShaderAbsoluteMatrixes : packed array[0..31] of TSGMatrix4; // массив абсолютных матриц для передачи в шейдер
+		FShaderAbsoluteMatrixes : packed array[0..31] of TSGMatrix4x4; // массив абсолютных матриц для передачи в шейдер
 		FSpeed      : TSGFloat;
 		
 		procedure ResetState(const VNodesNum : TIndex);
@@ -561,7 +563,7 @@ procedure TModel.PrepareSkeletalAnimation();
 var
 	i, k : TIndex;
 	FinalVertex, FinalNormal, TempVertex : TSGVertex3f;
-	Matrix : TSGMatrix4;
+	Matrix : TSGMatrix4x4;
 begin
 FAnimation.MakeReferenceMatrixes();
 FAnimation.MakeBoneMatrixes();

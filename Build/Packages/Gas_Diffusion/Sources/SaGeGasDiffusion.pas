@@ -216,6 +216,7 @@ uses
 	 SaGeStringUtils
 	,SaGeMathUtils
 	,SaGeRenderInterface
+	,SaGeMatrix
 	;
 
 //Algorithm

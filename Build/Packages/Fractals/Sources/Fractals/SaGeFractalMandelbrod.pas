@@ -14,6 +14,7 @@ uses
 	,SaGeDateTime
 	,SaGeFont
 	,SaGeBezierCurve
+	,SaGeComplex
 	;
 
 type

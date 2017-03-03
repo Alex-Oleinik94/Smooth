@@ -8,16 +8,20 @@ unit SaGeRenderDirectX8;
 interface
 
 uses
+	// SaGe units
 	 SaGeBase
 	,SaGeRender
 	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
-
+	,SageMatrix
+	
+	// OS units
 	,crt
 	,windows
-
+	
+	// DirectX 8 units
 	,DXTypes
 	,D3DX8
 	,Direct3D8
@@ -33,9 +37,8 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			protected
-			//FOR USE
-		pD3D:IDirect3D8;
-		pDevice:IDirect3DDevice8;
+		pD3D        : IDirect3D8;
+		pDevice     : IDirect3DDevice8;
 		D3DX8Loaded : TSGBoolean;
 			public
 		class function Suppored() : TSGBoolean;override;
@@ -100,10 +103,10 @@ type
 		procedure DrawArrays(const VParam:TSGCardinal;const VFirst,VCount:TSGLongWord);override;
 		procedure Vertex3fv(const Variable : TSGPointer);override;
 		procedure Normal3fv(const Variable : TSGPointer);override;
-		procedure MultMatrixf(const Variable : TSGPointer);override;
+		procedure MultMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ColorMaterial(const r,g,b,a : TSGSingle);override;
 		procedure MatrixMode(const Par:TSGLongWord);override;
-		procedure LoadMatrixf(const Variable : TSGPointer);override;
+		procedure LoadMatrixf(const Matrix : PSGMatrix4x4);override;
 		procedure ClientActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTexture(const VTexture : TSGLongWord);override;
 		procedure ActiveTextureDiffuse();override;
@@ -250,6 +253,10 @@ function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
+operator := (const Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator := (const Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator *  (const Matrix1, Matrix2 : D3DMATRIX) : D3DMATRIX;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
@@ -257,6 +264,21 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	;
+
+operator := (const Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := TSGMatrix4x4(Matrix);
+end;
+
+operator := (const Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := D3DMATRIX(Matrix);
+end;
+
+operator *  (const Matrix1, Matrix2 : D3DMATRIX) : D3DMATRIX;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := TSGMatrix4x4(Matrix1) * TSGMatrix4x4(Matrix2);
+end;
 
 class function TSGRenderDirectX8.ClassName() : TSGString;
 begin
@@ -617,48 +639,48 @@ FNowColor:=D3DCOLOR_ARGB(
 	Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b));
 end;
 
-procedure TSGRenderDirectX8.LoadMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX8.LoadMatrixf(const Matrix : PSGMatrix4x4);
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LoadMatrixf'); {$ENDIF}
-pDevice.SetTransform(FNowMatrixMode,PD3DMATRIX(Variable)^);
+pDevice.SetTransform(FNowMatrixMode, PD3DMATRIX(Matrix)^);
 end;
 
-procedure TSGRenderDirectX8.MultMatrixf(const Variable : TSGPointer);
+procedure TSGRenderDirectX8.MultMatrixf(const Matrix : PSGMatrix4x4);
 var
-	Matrix1,MatrixOut:D3DMATRIX;
+	Matrix1, MatrixOut : D3DMATRIX;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.MultMatrixf'); {$ENDIF}
-pDevice.GetTransform(FNowMatrixMode,Matrix1);
+pDevice.GetTransform(FNowMatrixMode, Matrix1);
 if D3DX8Loaded then
-	D3DXMatrixMultiply(MatrixOut,PD3DMATRIX(Variable)^,Matrix1)
+	D3DXMatrixMultiply(MatrixOut, PD3DMATRIX(Matrix)^, Matrix1)
 else
-	MatrixOut := D3DMATRIX(TSGMatrix4(PD3DMATRIX(Variable)^) * TSGMatrix4(Matrix1));
-pDevice.SetTransform(FNowMatrixMode,MatrixOut);
+	MatrixOut := Matrix^ * Matrix1;
+pDevice.SetTransform(FNowMatrixMode, MatrixOut);
 end;
 
 procedure TSGRenderDirectX8.Translatef(const x,y,z:single);
 var
-	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
+	Matrix1, Matrix2, MatrixOut : D3DMATRIX;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Translatef'); {$ENDIF}
 pDevice.GetTransform(FNowMatrixMode,Matrix1);
 if D3DX8Loaded then
 	begin
-	D3DXMatrixTranslation(Matrix2,x,y,z);
-	D3DXMatrixMultiply(MatrixOut,Matrix1,Matrix2);
+	D3DXMatrixTranslation(Matrix2, x, y, z);
+	D3DXMatrixMultiply(MatrixOut, Matrix1, Matrix2);
 	end
 else
 	begin
-	Matrix2 := D3DMATRIX(SGGetTranslateMatrix(SGVertex3fImport(x,y,z)));
-	MatrixOut := D3DMATRIX(TSGMatrix4(Matrix1) * TSGMatrix4(Matrix2));
+	Matrix2 := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
+	MatrixOut := Matrix1 * Matrix2;
 	end;
-pDevice.SetTransform(FNowMatrixMode,MatrixOut);
+pDevice.SetTransform(FNowMatrixMode, MatrixOut);
 end;
 
 procedure TSGRenderDirectX8.Rotatef(const angle:single;const x,y,z:single);
 var
-	Matrix1,Matrix2,MatrixOut:D3DMATRIX;
-	v:TD3DXVector3;
+	Matrix1, Matrix2, MatrixOut : D3DMATRIX;
+	v : TD3DXVector3;
 begin
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Rotatef'); {$ENDIF}
 v.x:=x;
@@ -667,15 +689,15 @@ v.z:=z;
 pDevice.GetTransform(FNowMatrixMode,Matrix1);
 if D3DX8Loaded then
 	begin
-	D3DXMatrixRotationAxis(Matrix2,v,angle/180*pi);
-	D3DXMatrixMultiply(MatrixOut,Matrix2,Matrix1);
+	D3DXMatrixRotationAxis(Matrix2, v, angle / 180 * pi);
+	D3DXMatrixMultiply(MatrixOut, Matrix2, Matrix1);
 	end
 else
 	begin
-	Matrix2 := D3DMATRIX(SGGetRotateMatrix(angle, SGVertex3fImport(x,y,z)));
-	MatrixOut := D3DMATRIX(TSGMatrix4(Matrix1) * TSGMatrix4(Matrix2));
+	Matrix2 := SGGetRotateMatrix(angle, SGVertex3fImport(x, y, z));
+	MatrixOut := Matrix1 * Matrix2;
 	end;
-pDevice.SetTransform(FNowMatrixMode,MatrixOut);
+pDevice.SetTransform(FNowMatrixMode, MatrixOut);
 end;
 
 procedure TSGRenderDirectX8.Enable(VParam:Cardinal);
