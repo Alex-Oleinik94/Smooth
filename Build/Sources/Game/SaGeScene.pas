@@ -8,7 +8,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeMesh
 	,SaGeModel
@@ -123,8 +123,10 @@ end;
 constructor TSGScene.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
+
 FCamera := TSGCamera.Create();
 FCamera.SetContext(Context);
+
 FMutators := nil;
 FPlayerModel:=-1;
 end;
@@ -170,6 +172,7 @@ if FMutators <> nil then
 SGLog.Source('TSGScene__Paint(). : Paint nods...');
 {$ENDIF}
 InitCameraPosition();
+Render.Color3f(1, 1, 1);
 if FNods <> nil then
 	for i:=0 to High(FNods) do
 		if FNods[i] <> nil then

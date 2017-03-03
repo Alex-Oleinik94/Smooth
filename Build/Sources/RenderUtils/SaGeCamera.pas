@@ -9,6 +9,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeMatrix
+	,SaGeLog
 	;
 
 type
@@ -17,21 +18,23 @@ const
 	SG_VIEW_WATCH_OBJECT        = $001001;
 	SG_VIEW_LOOK_AT_OBJECT      = $001002;
 type
+	TSGMode = TSGUInt32;
 	TSGCamera = class(TSGContextabled)
 			public
 		constructor Create();override;
-			public
-		FMatrixMode: TSGByte; // SG_3D, SG_2D, SG_ORTHO_3D
-		FViewMode  : TSGByte; // SG_VIEW_...
-		FChangingLookAtObject : TSGBoolean;
+			private
+		FMatrixMode: TSGMode; // SG_3D, SG_2D, SG_ORTHO_3D
+		FViewMode  : TSGMode; // SG_VIEW_...
 			// for SG_VIEW_WATCH_OBJECT
 		FRotateX, FRotateY, FTranslateX, FTranslateY, FZum : TSGSingle;
 			// for SG_VIEW_LOOK_AT_OBJECT
 		FLocation : TSGVertex3f;
 		FView   :TSGVertex3f;
 		FUp : TSGVertex3f;
+		FChangingLookAtObject : TSGBoolean;
 		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
+		procedure ViewInfo(const PredString : TSGString = ''; const ViewCase : TSGViewType = [SGLogType, SGPrintType]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -54,10 +57,13 @@ type
 		property Location  : TSGVertex3f read FLocation   write FLocation;
 		property Position  : TSGVertex3f read FLocation   write FLocation;
 		property View      : TSGVertex3f read FView       write FView;
-		property MatrixMode: TSGByte   read FMatrixMode write FMatrixMode;
-		property ViewMode  : TSGByte   read FViewMode   write FViewMode;
-		property ChangingLookAtObject : TSGBoolean write FChangingLookAtObject;
+		property MatrixMode: TSGMode     read FMatrixMode write FMatrixMode;
+		property ViewMode  : TSGMode     read FViewMode   write FViewMode;
+		property ChangingLookAtObject : TSGBoolean read FChangingLookAtObject write FChangingLookAtObject;
 		end;
+
+function SGStrMatrixMode(const Mode : TSGMode) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStrViewMode(const Mode : TSGMode) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -65,7 +71,51 @@ uses
 	 SaGeRenderBase
 	,SaGeContext
 	,SaGeCommon
+	,SaGeStringUtils
 	;
+
+function SGStrMatrixMode(const Mode : TSGMode) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case Mode of
+SG_3D       : Result := 'SG_3D';
+SG_2D       : Result := 'SG_2D';
+SG_3D_ORTHO : Result := 'SG_3D_ORTHO';
+else          Result := 'INVALID(' + SGStr(Mode) + ')';
+end;
+end;
+
+function SGStrViewMode(const Mode : TSGMode) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case Mode of
+SG_VIEW_WATCH_OBJECT   : Result := 'SG_VIEW_WATCH_OBJECT';
+SG_VIEW_LOOK_AT_OBJECT : Result := 'SG_VIEW_LOOK_AT_OBJECT';
+else                     Result := 'INVALID(' + SGStr(Mode) + ')';
+end;
+end;
+
+procedure TSGCamera.ViewInfo(const PredString : TSGString = ''; const ViewCase : TSGViewType = [SGLogType, SGPrintType]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SGHint([PredString, 'TSGCamera__ViewInfo(..).'], ViewCase);
+SGHint([PredString,     '  MatrixMode     = "', SGStrMatrixMode(FMatrixMode), '"'], ViewCase);
+SGHint([PredString,     '  ViewMode       = "', SGStrViewMode(FViewMode), '"'], ViewCase);
+case FViewMode of
+SG_VIEW_LOOK_AT_OBJECT :
+	begin
+	SGHint([PredString, '  ChangingLookAt = "', FChangingLookAtObject, '"'], ViewCase);
+	SGHint([PredString, '  Location       = "', SGStrVector3f(FLocation, 7), '"'], ViewCase);
+	SGHint([PredString, '  Up             = "', SGStrVector3f(FUp, 7), '"'], ViewCase);
+	SGHint([PredString, '  View           = "', SGStrVector3f(FView, 7), '"'], ViewCase);
+	end;
+SG_VIEW_WATCH_OBJECT :
+	begin
+	SGHint([PredString, '  Rotate.X       = "', SGStrReal(FRotateX, 7), '"'], ViewCase);
+	SGHint([PredString, '  Rotate.Y       = "', SGStrReal(FRotateY, 7), '"'], ViewCase);
+	SGHint([PredString, '  Translate.X    = "', SGStrReal(FTranslateX, 7), '"'], ViewCase);
+	SGHint([PredString, '  Translate.Y    = "', SGStrReal(FTranslateY, 7), '"'], ViewCase);
+	SGHint([PredString, '  Zum            = "', SGStrReal(FZum, 7), '"'], ViewCase);
+	end;
+end;
+end;
 
 function TSGCamera.GetProjectionMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -97,6 +147,8 @@ var
 	RotateZ : TSGFloat = 0;
 	o : TSGFloat;
 begin
+if (Context.KeysPressed(SG_SHIFT_KEY) and (Context.KeyPressed) and (Context.KeyPressedChar = 'W') and (Context.KeyPressedType = SGDownKey) and (Context.KeysPressed('C'))) then
+	ViewInfo();
 case FViewMode of
 SG_VIEW_LOOK_AT_OBJECT: if FChangingLookAtObject then
 	begin
@@ -152,14 +204,6 @@ SG_VIEW_WATCH_OBJECT:
 	if  (Context.KeyPressed and (Context.KeysPressed(char(17))) and (Context.KeyPressedByte=187) and (Context.KeyPressedType=SGDownKey))  then
 		begin
 		FZum*=0.89;
-		end;
-	if (Context.KeyPressed) and (Context.KeyPressedChar = 'W') and (Context.KeyPressedType = SGDownKey) and (Context.KeysPressed('C')) then
-		begin
-		WriteLn('Zum=',FZum:0:4);
-		WriteLn('TranslateY=',FTranslateY:0:4);
-		WriteLn('TranslateY=',FTranslateY:0:4);
-		WriteLn('RotateY=',FRotateY:0:4);
-		WriteLn('RotateX=',FRotateX:0:4);
 		end;
 	end;
 end;

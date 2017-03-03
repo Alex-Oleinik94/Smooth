@@ -47,6 +47,7 @@ type
 		FSectionProportion : TSGFloat32;
 		FProgress          : TSGFloat32;
 			private
+		procedure KillLoad();
 		procedure Load();
 		procedure UpdateProgress();
 		procedure FinishLoadSection();
@@ -57,6 +58,7 @@ implementation
 
 uses
 	 SaGeLog
+	,SaGeCommonStructs
 	;
 
 class function TSGGameTron.ClassName() : TSGString;
@@ -98,6 +100,18 @@ if FLoadClass <> nil then
 end;
 
 procedure TSGGameTron.Paint();
+
+procedure InitCamera();
+begin
+Context.CursorCentered := True;
+Context.ShowCursor(not Context.CursorCentered);
+FScene.Camera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
+FScene.Camera.Up       := SGVertex3fImport(0.0913988, 0.7369644, -0.6697236);
+FScene.Camera.Location := SGVertex3fImport(-2.0990655, 20.3042564, 22.1641521);
+FScene.Camera.View     := SGVertex3fImport(0.0729761, -0.6756871, -0.7335674);
+FScene.Camera.ChangingLookAtObject := True;
+end;
+
 begin
 if (FLoadClass <> nil) then
 	FLoadClass.Paint();
@@ -105,14 +119,19 @@ case FState of
 SGTStateLoading : UpdateProgress();
 SGTStateStarting :
 	begin
+	InitCamera();
 	FScene.Start();
-	FScene.ViewInfo('', [SGLogType]);
 	FState := SGTStateViewing;
 	SGLog.Source('TSGGameTron__Paint(). Starting...');
 	end;
 SGTStateViewing :
+	begin
+	if (FLoadClass <> nil) then
+		if FLoadClass.Alpha < 0.15 then
+			KillLoad();
 	if FScene <> nil then
 		FScene.Paint();
+	end;
 end;
 end;
 
@@ -169,7 +188,7 @@ FLoadThread := TSGThread.Create(TSGThreadProcedure(@LoadThread), Self, False);
 FLoadThread.Start();
 end;
 
-destructor TSGGameTron.Destroy();
+procedure TSGGameTron.KillLoad();
 begin
 if FLoadThread<>nil then
 	begin
@@ -181,11 +200,18 @@ if FLoadClass<>nil then
 	FLoadClass.Destroy();
 	FLoadClass := nil;
 	end;
+end;
+
+destructor TSGGameTron.Destroy();
+begin
+KillLoad();
 if FScene<>nil then
 	begin
 	FScene.Destroy();
 	FScene := nil;
 	end;
+Context.CursorCentered := False;
+Context.ShowCursor(True);
 inherited Destroy();
 end;
 

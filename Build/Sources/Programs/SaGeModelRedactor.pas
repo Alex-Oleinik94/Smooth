@@ -227,12 +227,15 @@ if FCustomModel <> nil then
 	Render.Disable(SGR_BLEND);
 	Render.Enable(SGR_LIGHTING);
 	Render.Enable(SGR_LIGHT0);
-	Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@FSun);
-	Render.BeginBumpMapping(@FSun);
+	Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FSun);
+	
+	//Render.BeginBumpMapping(@FSun);
+	Render.Color3f(1, 1, 1);
 	
 	FCustomModel.Paint();
 	
-	Render.EndBumpMapping();
+	//Render.EndBumpMapping();
+	
 	Render.Enable(SGR_BLEND);
 	Render.Disable(SGR_LIGHTING);
 	Render.Disable(SGR_LIGHT0);

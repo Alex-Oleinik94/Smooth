@@ -4,14 +4,15 @@ unit SaGeModel;
 
 interface
 uses 
-	  Classes
-	, SaGeCommon
-	, SaGeBase
-	, SaGeImage
-	, SaGeRender
-	, SaGeCommonClasses
-	, SaGeMesh
-	, SaGeGameBase
+	 Classes
+	,SaGeCommon
+	,SaGeBase
+	,SaGeImage
+	,SaGeRender
+	,SaGeCommonClasses
+	,SaGeMesh
+	,SaGeGameBase
+	,SaGeMatrix
 	;
 type
 	TSGModel = class(TSGNod)
@@ -21,7 +22,7 @@ type
 		class function ClassName():TSGString;override;
 			protected
 		FMesh           : TSGCustomModel;
-		FMatrix         : TSGPointer;
+		FMatrix         : PSGMatrix4x4;
 			public
 		procedure Paint();override;
 		procedure InitModelMatrix();
@@ -29,7 +30,7 @@ type
 		procedure LoadToVBO();inline;
 			public
 		property Mesh   : TSGCustomModel read FMesh   write FMesh;
-		property Matrix : TSGPointer     read FMatrix write FMatrix;
+		property Matrix : PSGMatrix4x4   read FMatrix write FMatrix;
 		end;
 
 implementation
@@ -40,25 +41,23 @@ uses
 
 procedure TSGModel.LoadToVBO();
 begin
-FMesh.LoadToVBO();
+if FMesh <> nil then
+	FMesh.LoadToVBO();
 end;
 
-function TSGModel.FindProperty(const PropertyClass : TSGNodClass):TSGNod;inline;
+function TSGModel.FindProperty(const PropertyClass : TSGNodClass) : TSGNod;inline;
 var
 	Index : TSGLongWord;
 begin
+Result := nil;
 if FNods <> nil then
-	begin
-	if QuantityNods<>0 then
-		for Index := 0 to QuantityNods-1 do
+	if QuantityNods <> 0 then
+		for Index := 0 to QuantityNods - 1 do
 			if Nods[Index] is PropertyClass then
 				begin
-				Result:=Nods[Index];
+				Result := Nods[Index];
 				Break;
 				end;
-	end
-else
-	Result:=nil;
 end;
 
 procedure TSGModel.InitModelMatrix();

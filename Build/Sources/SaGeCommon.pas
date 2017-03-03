@@ -118,6 +118,7 @@ function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTI
 function SGCosSinAngle(const Coodrs : TSGCommonVector2) : TSGCommonFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 function SGPoint2int32ToVertex3f(const Point : TSGPoint2int32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStrVector3f(const Vector : TSGVector3f; const Numbers : TSGByte = 6) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -127,7 +128,13 @@ uses
 	,SysUtils
 	
 	,SaGeRenderBase
+	,SaGeStringUtils
 	;
+
+function SGStrVector3f(const Vector : TSGVector3f; const Numbers : TSGByte = 6) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := '(' + SGStrReal(Vector.x, Numbers) + ', ' + SGStrReal(Vector.y, Numbers) + ', ' + SGStrReal(Vector.z, Numbers) + ')';
+end;
 
 function SGPoint2int32ToVertex3f(const Point : TSGPoint2int32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

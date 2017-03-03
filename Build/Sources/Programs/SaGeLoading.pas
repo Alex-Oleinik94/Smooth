@@ -46,7 +46,8 @@ type
 		procedure CallAction();                //Тут обрабатываются дорожки, их кусочки и ширины
 		procedure SetProgress(const NewProgress:TSGSingle);
 			public
-		property Progress:TSGSingle read FProgress write SetProgress;
+		property Progress : TSGSingle read FProgress write SetProgress;
+		property Alpha : TSGFloat32 read FAlpha;
 		end;
 
 	TSGWaiting = class(TSGDrawable)

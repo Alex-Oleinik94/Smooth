@@ -119,6 +119,18 @@ end;
 
 destructor TSGExample6_2.Destroy();
 begin
+FImageBump := nil;
+FImageTexture := nil;
+if FCamera <> nil then
+	begin
+	FCamera.Destroy();
+	FCamera := nil;
+	end;
+if FMesh <> nil then
+	begin
+	FMesh.Destroy();
+	FMesh := nil;
+	end;
 inherited;
 end;
 

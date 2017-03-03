@@ -100,6 +100,7 @@ implementation
 
 uses
 	 SaGeCommon
+	,SaGeLog
 	;
 
 function TSGPhysics.GetObjectCount():TSGLongWord;inline;
@@ -428,7 +429,9 @@ if Image.Loading() then
 	PAPPE.PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
 	PAPPE.PhysicsObjectFinish(FObject);
 	SetLength(HMD,0);
-	end;
+	end
+else
+	SGLog.Source(['TSGPhysicsObject__InitHeightMapFromImage(..). Error while open image file "', VFileName, '".']);
 Image.Destroy();
 end;
 
