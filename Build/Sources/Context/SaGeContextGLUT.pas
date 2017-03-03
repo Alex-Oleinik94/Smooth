@@ -14,9 +14,9 @@ uses
 	
 	,SaGeBase
 	,SaGeContext
-	,SaGeCommon
 	,SaGeScreen
 	,SaGeClasses
+	,SaGeCommonStructs
 	
 	{$IFNDEF MOBILE}
 		,dglOpenGL

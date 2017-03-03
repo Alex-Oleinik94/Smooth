@@ -14,7 +14,7 @@ uses
 	,SaGeRenderBase
 	,SaGeFont
 	,SaGeScreen
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCamera
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools

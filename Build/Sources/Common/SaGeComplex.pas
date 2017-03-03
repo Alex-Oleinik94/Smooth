@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	;
 
 type

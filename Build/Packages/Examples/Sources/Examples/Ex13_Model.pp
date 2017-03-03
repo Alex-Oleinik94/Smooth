@@ -13,7 +13,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeBase
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeScreen
 	,SaGeMesh
 	,SaGeImage

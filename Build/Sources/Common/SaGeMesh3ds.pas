@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeMesh
 	,SaGeMeshLoader
+	,SaGeCommonStructs
 	
 	,Classes
 	;

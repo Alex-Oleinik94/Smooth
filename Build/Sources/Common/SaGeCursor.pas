@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeBitMap
 	,SaGeCommon
+	,SaGeCommonStructs
 	;
 
 type

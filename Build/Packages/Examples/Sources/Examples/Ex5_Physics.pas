@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeMesh
 	,SaGeCommonClasses
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRenderBase
 	,SaGeImage
 	,SaGeMatrix
@@ -97,6 +97,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeCommon
+	;
 
 function TSGPhysics.GetObjectCount():TSGLongWord;inline;
 begin

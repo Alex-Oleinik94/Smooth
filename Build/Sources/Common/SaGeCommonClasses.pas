@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRenderInterface
 	,SaGeCursor
 	,SaGeBitMap

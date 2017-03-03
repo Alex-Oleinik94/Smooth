@@ -9,7 +9,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRenderInterface
 	,SaGeAudioDecoder
 	,SaGeThreads

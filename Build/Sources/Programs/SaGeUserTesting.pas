@@ -20,7 +20,7 @@ uses
 	,SaGeMesh
 	,SaGeScreen
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeMathUtils
 	;
 
@@ -39,6 +39,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeCommon
+	;
 
 class function TSGUserTesting.ClassName():string;
 begin

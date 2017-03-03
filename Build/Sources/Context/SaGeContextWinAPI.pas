@@ -12,12 +12,12 @@ uses
 	// Engine
 	 SaGeBase
 	,SaGeContext
-	,SaGeCommon
 	,SaGeRender
 	,SaGeClasses
 	,SaGeCommonClasses
 	,SaGeBitMap
 	,SaGeCursor
+	,SaGeCommonStructs
 	
 	// Windows units
 	,Windows

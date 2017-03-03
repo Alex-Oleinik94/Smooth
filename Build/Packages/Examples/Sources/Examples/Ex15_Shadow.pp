@@ -8,7 +8,7 @@ uses
 	 SaGeCommonClasses
 	,SaGeBase
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeShaders
 	,SaGeImage
 	,SaGeMatrix

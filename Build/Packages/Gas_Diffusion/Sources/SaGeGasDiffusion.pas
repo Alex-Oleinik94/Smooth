@@ -16,7 +16,7 @@ uses
 	,SaGeContext
 	,SaGeCommonClasses
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeScreen
 	,SaGeImage
@@ -217,6 +217,7 @@ uses
 	,SaGeMathUtils
 	,SaGeRenderInterface
 	,SaGeMatrix
+	,SaGeCommon
 	;
 
 //Algorithm

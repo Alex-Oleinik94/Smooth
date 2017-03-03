@@ -1,5 +1,11 @@
 {$INCLUDE SaGe.inc}
 
+{$DEFINE COMMON_FLOAT32}
+//{$DEFINE COMMON_FLOAT64}
+{$IFNDEF WITHOUT_EXTENDED}
+	//{$DEFINE COMMON_FLOAT80}
+	{$ENDIF}
+
 unit SaGeCommon;
 
 interface
@@ -7,12 +13,28 @@ interface
 uses
 	 SaGeBase
 	,SaGeMathUtils
+	,SaGeCommonStructs
 	;
 
-{$DEFINE INC_PLACE_INTERFACE}
-{$INCLUDE SaGeCommonStructs.inc}
-{$UNDEF INC_PLACE_INTERFACE}
-
+type
+{$IFDEF COMMON_FLOAT80}
+	TSGCommonFloat = TSGFloat80;
+	TSGCommonVector2 = TSGVector2e;
+	TSGCommonVector3 = TSGVector3e;
+	TSGCommonVector4 = TSGVector4e;
+{$ELSE  COMMON_FLOAT80}
+{$IFDEF COMMON_FLOAT64}
+	TSGCommonFloat = TSGFloat64;
+	TSGCommonVector2 = TSGVector2d;
+	TSGCommonVector3 = TSGVector3d;
+	TSGCommonVector4 = TSGVector4d;
+{$ELSE  COMMON_FLOAT64}
+	TSGCommonFloat = TSGFloat32;
+	TSGCommonVector2 = TSGVector2f;
+	TSGCommonVector3 = TSGVector3f;
+	TSGCommonVector4 = TSGVector4f;
+{$ENDIF COMMON_FLOAT64}
+{$ENDIF COMMON_FLOAT80}
 type
 	TSGArLongWord = type packed array of LongWord;
 	TSGScreenVertexes = object
@@ -106,23 +128,19 @@ function SGPoint2int32ToVertex3f(const P : TSGPoint2int32):TSGVertex3f;{$IFDEF S
 implementation
 
 uses
-	 Math
-	,Crt
-	
+	 Crt
+	,Math
 	,SysUtils
+	
 	,SaGeRenderBase
 	;
-
-{$DEFINE INC_PLACE_IMPLEMENTATION}
-{$INCLUDE SaGeCommonStructs.inc}
-{$UNDEF INC_PLACE_IMPLEMENTATION}
 
 function SGPoint2int32ToVertex3f(const P : TSGPoint2int32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(P.x, P.y);
 end;
 
-function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f):TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetAngleFromCosSin(const Coodrs : TSGVertex2f) : TSGFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if Coodrs.x = -1 then
 	Result := PI
@@ -138,7 +156,7 @@ else
 	Result := ArcCos(-Coodrs.x) + PI;
 end;
 
-function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1, v2, v3 : TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	sv1, sv2, sv3 : TSGFloat;
 begin
@@ -245,17 +263,18 @@ p := (a + b + c) / 2;
 Result := sqrt(p*(p-a)*(p-b)*(p-c));
 end;
 
-function SGTriangleSize(const a,b,c:TSGVertex2f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGTriangleSize(const a, b, c:TSGVertex2f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGTriangleSize(Abs(a-c),Abs(c-b),Abs(b-a));
+Result := SGTriangleSize(Abs(a - c), Abs(c - b), Abs(b - a));
 end;
 
-function SGTriangleSize(const a,b,c:TSGVertex3f):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGTriangleSize(const a, b, c:TSGVertex3f) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGTriangleSize(Abs(a-c),Abs(c-b),Abs(b-a));
+Result := SGTriangleSize(Abs(a - c), Abs(c - b), Abs(b - a));
 end;
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 Procedure RotatePoint(Var Xp, Yp, Zp: TSGSingle;const Xv, Yv, Zv, Angle: TSGSingle); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Temp, TempV, Nx, Ny, Nz: TSGSingle;

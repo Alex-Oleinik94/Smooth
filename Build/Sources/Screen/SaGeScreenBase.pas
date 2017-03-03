@@ -7,7 +7,6 @@ interface
 uses
 	 Crt
 	
-	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
 	,SaGeImage
@@ -15,6 +14,7 @@ uses
 	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommonClasses
+	,SaGeCommonStructs
 	;
 const
 	SGFrameAnimationConst = 200;

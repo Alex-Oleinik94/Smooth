@@ -11,7 +11,7 @@ uses
 
 type
 	PSGQuaternion = ^ TSGQuaternion;
-	TSGQuaternion = object(TSGVertex4f)
+	TSGQuaternion = object(TSGCommonVector4)
 			public
 		procedure Inverse();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function Intersed() : TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -23,7 +23,7 @@ operator - (const A,B : TSGQuaternion):TSGQuaternion;overload;{$IFDEF SUPPORTINL
 operator * (const A : TSGQuaternion;const B:TSGFloat32):TSGQuaternion;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator * (const A,B : TSGQuaternion):TSGFloat;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetQuaternionFromAngleVector3f(const Angles : TSGCommonVector3):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGQuaternionSlerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGQuaternionLerp(q1,q2:TSGQuaternion; interp:TSGFloat):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -132,7 +132,7 @@ else
 		end;
 end;
 
-function SGGetQuaternionFromAngleVector3f(const Angles : TSGVertex3f):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetQuaternionFromAngleVector3f(const Angles : TSGCommonVector3):TSGQuaternion;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var angle             : single;
     sr,sp,sy,cr,cp,cy : single;
     crcp,srsp         : single;

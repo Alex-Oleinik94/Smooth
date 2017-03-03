@@ -1,10 +1,12 @@
 {$INCLUDE SaGe.inc}
+
 unit SaGeContextAndroid;
+
 interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeContext
 	,SaGeCommonClasses
@@ -21,6 +23,7 @@ uses
 	,android_native_app_glue
 	,log
 	;
+
 type
 	TSGContextAndroid=class(TSGContext)
 			public

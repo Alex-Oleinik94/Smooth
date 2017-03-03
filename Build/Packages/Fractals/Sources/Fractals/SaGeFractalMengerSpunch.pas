@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
 	,SaGeFont

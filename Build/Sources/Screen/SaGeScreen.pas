@@ -10,7 +10,6 @@ interface
 uses
 	 Crt
 	
-	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
 	,SaGeImage
@@ -22,6 +21,7 @@ uses
 	,SaGeScreenSkin
 	,SaGeStaticString
 	,SaGeCursor
+	,SaGeCommonStructs
 	;
 
 type
@@ -100,6 +100,7 @@ uses
 	,SaGeBaseUtils
 	,SaGeMathUtils
 	,SaGeRenderInterface
+	,SaGeCommon
 	;
 
 {$DEFINE SCREEN_IMPLEMENTATION}

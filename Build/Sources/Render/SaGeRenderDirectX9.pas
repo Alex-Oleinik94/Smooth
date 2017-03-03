@@ -10,11 +10,11 @@ uses
 	// Engine
 	 SaGeBase
 	,SaGeRender
-	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
 	,SaGeMatrix
+	,SaGeCommonStructs
 	
 	// System
 	,crt

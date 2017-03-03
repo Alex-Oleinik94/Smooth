@@ -13,7 +13,7 @@ uses
 	,SaGeBase
 	,SaGeFont
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeDateTime
 	,SaGeScreen
 	,SaGeCamera

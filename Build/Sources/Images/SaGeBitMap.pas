@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeResourceManager
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeLog
 	;
 type

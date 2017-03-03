@@ -43,7 +43,7 @@ uses
 	 SaGeFileUtils
 	,SaGeRenderBase
 	,SaGeStringUtils
-	,SaGeCommon
+	,SaGeCommonStructs
 	;
 
 function TSGFPSViewer.FrameSum():TSGWord;inline;

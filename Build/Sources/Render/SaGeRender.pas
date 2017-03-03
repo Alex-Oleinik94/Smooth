@@ -11,11 +11,8 @@ uses
 	,SaGeClasses
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeCommon
 	,SaGeMatrix
-	{$IFDEF MSWINDOWS}
-		,multimon
-		{$ENDIF}
+	,SaGeCommonStructs
 	;
 
 type
@@ -179,6 +176,10 @@ uses
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
+		{$ENDIF}
+	
+	{$IFDEF MSWINDOWS}
+		,multimon
 		{$ENDIF}
 	;
 

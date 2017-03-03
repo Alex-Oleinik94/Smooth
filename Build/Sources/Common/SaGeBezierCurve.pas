@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeMesh
 	,SaGeCommonClasses
 	;
@@ -45,6 +45,7 @@ implementation
 
 uses
 	 SaGeRenderBase
+	,SaGeCommon
 	;
 
 function TSGBezierCurve.VertexQuantity:TSGMaxEnum;inline;

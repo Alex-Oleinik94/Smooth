@@ -7,7 +7,6 @@ interface
 uses
 	 Crt
 	
-	,SaGeCommon
 	,SaGeBase
 	,SaGeClasses
 	,SaGeImage
@@ -17,6 +16,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	,SaGeFileUtils
+	,SaGeCommonStructs
 	;
 
 type
@@ -99,6 +99,7 @@ uses
 	 SaGeStringUtils
 	,SaGeMathUtils
 	,SaGeRenderInterface
+	,SaGeCommon
 	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

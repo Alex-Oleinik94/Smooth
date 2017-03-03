@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeCommonClasses
@@ -102,6 +102,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeRenderInterface
+	,SaGeCommon
 	
 	,StrMan
 	;

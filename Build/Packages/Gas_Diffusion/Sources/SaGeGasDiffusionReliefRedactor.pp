@@ -16,7 +16,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeRenderBase
 	,SaGeContext
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeScreen
 	,SaGeImage
@@ -127,6 +127,7 @@ implementation
 uses
 	 SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeCommon
 	;
 
 var

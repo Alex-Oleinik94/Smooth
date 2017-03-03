@@ -5,7 +5,7 @@ unit SaGeKiller;
 interface
 
 uses
-	 SaGeCommon
+	 SaGeCommonStructs
 	,SaGeFont
 	,SaGeBase
 	,SaGeContext
@@ -116,6 +116,7 @@ uses
 	 SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeCommon
 	;
 
 {$OVERFLOWCHECKS OFF}

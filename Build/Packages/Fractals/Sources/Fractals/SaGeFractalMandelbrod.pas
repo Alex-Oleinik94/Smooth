@@ -10,6 +10,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeScreen
 	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeDateTime
 	,SaGeFont

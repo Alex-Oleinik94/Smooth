@@ -16,7 +16,7 @@ uses
 	,SaGeMath
 	,SaGePackages
 	,SaGeRenderBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	;
 
 {$DEFINE SGREADINTERFACE}

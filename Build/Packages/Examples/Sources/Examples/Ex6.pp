@@ -14,7 +14,7 @@ uses
 	,SaGeRenderBase
 	,SaGeFont
 	,SaGeScreen
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeMesh
 	,SaGeImage
 	,SaGeCamera

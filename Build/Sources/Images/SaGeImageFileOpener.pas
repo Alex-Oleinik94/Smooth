@@ -14,7 +14,7 @@ uses
 	,SaGeLoading
 	,SaGeFont
 	,SaGeCommonClasses
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeThreads
 	;

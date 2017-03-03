@@ -8,7 +8,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeContext
 	,SaGeScreen
 	,SaGeRender

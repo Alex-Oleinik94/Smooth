@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeDateTime
 	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeRender
 	,SaGeRenderBase

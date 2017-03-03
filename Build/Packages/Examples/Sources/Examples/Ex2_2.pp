@@ -13,7 +13,7 @@ uses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeFont
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCamera
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools

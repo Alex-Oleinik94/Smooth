@@ -5,8 +5,8 @@ unit SaGeFractalTerrain;
 interface
 uses 
 	 Classes
-
-	,SaGeCommon
+	
+	,SaGeCommonStructs
 	,SaGeClasses
 	,SaGeBase
 	,SaGeImage
@@ -40,6 +40,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeCommon
+	;
 
 procedure TSGFractalTerrainGenerator.SetSize(const VSize : TSGLongInt);
 

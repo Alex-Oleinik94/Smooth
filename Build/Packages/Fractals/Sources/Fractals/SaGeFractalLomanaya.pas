@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeFractals
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
 	;

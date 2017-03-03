@@ -15,7 +15,7 @@ uses
 	,SaGeFont
 	,SaGeScreen
 	,SaGeMesh
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeShaders
 	,SaGeResourceManager
 	,SaGeFileUtils

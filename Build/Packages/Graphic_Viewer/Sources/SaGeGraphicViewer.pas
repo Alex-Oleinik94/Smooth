@@ -13,6 +13,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeFractals
 	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeMath
 	,SaGeImage
 	,SaGeRenderBase

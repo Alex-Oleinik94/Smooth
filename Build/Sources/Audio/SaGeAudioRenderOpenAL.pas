@@ -10,7 +10,7 @@ uses
 	// Engine
 	 SaGeBase
 	,SaGeClasses
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeAudioRender
 	,SaGeAudioDecoder
 	

@@ -27,12 +27,12 @@ uses
 	//* ===================== SaGe Units =====================
 	 SaGeBase
 	,SaGeRender
-	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
 	,SaGeDllManager
 	,SaGeMatrix
+	,SaGeCommonStructs
 	
 	//* ==================== System Units ====================
 	,DynLibs

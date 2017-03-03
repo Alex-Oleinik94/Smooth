@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeImage
-	,SaGeCommon
+	,SaGeCommonStructs
 	;
 
 type

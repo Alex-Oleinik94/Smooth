@@ -10,15 +10,15 @@ uses
 	// Engine
 	 SaGeBase
 	,SaGeClasses
-	,SaGeCommon
 	,SaGeAudioRender
 	,SaGeAudioDecoder
-
+	,SaGeCommonStructs
+	
 	// System
 	,Classes
 	,SysUtils
 	,SyncObjs
-
+	
 	// Audio Library
 	,bass
 	;

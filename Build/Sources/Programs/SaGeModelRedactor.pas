@@ -9,7 +9,7 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeRenderBase
 	,SaGeCommonClasses

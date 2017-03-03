@@ -12,6 +12,7 @@ uses
 	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
+	,SaGeCommonStructs
 		// System
 	,Classes
 	;

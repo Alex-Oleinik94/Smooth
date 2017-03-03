@@ -6,10 +6,10 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
 	,SaGeClasses
 	,SaGeRenderBase
 	,SaGeMatrix
+	,SaGeCommonStructs
 	;
 
 type
@@ -173,6 +173,10 @@ function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint
 
 
 implementation
+
+uses
+	 SaGeCommon
+	;
 
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2i32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

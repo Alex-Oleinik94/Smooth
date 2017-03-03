@@ -11,11 +11,11 @@ uses
 	// SaGe units
 	 SaGeBase
 	,SaGeRender
-	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeClasses
-	,SageMatrix
+	,SaGeMatrix
+	,SaGeCommonStructs
 	
 	// OS units
 	,crt

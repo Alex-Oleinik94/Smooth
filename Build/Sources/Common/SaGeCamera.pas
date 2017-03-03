@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeMatrix
 	;
@@ -64,6 +64,7 @@ implementation
 uses
 	 SaGeRenderBase
 	,SaGeContext
+	,SaGeCommon
 	;
 
 function TSGCamera.GetProjectionMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

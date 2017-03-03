@@ -9,7 +9,7 @@ uses
 	,SaGeFractals
 	,SaGeScreen
 	,SaGeCommonClasses
-	,SageCommon
+	,SaGeCommonStructs
 	;
 
 type

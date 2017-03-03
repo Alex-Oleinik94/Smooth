@@ -15,7 +15,7 @@ uses
 	,SaGeFont
 	,SaGeMath
 	,SaGeGraphicViewer
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRenderBase
 	,SaGeScreenBase
 	,SaGeStringUtils

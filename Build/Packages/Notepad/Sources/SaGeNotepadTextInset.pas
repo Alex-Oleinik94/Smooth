@@ -13,7 +13,7 @@ uses
 	,SaGeContext
 	,SaGeScreen
 	,SaGeFont
-	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeCommonClasses
@@ -78,6 +78,7 @@ uses
 	,SaGeEncodingUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeCommon
 	
 	,StrMan
 	;

@@ -11,6 +11,7 @@ uses
 	
 	,SaGeBase
 	,SaGeCommon
+	,SaGeCommonStructs
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen

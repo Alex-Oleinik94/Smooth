@@ -10,7 +10,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeDateTime
-	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRender
 	,SaGeCommonClasses
@@ -20,6 +19,7 @@ uses
 	,SaGeAudioRender
 	,SaGeCursor
 	,SaGeRenderInterface
+	,SaGeCommonStructs
 	
 	,Classes
 	,Crt
