@@ -179,8 +179,8 @@ begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
 FCamera.Context := Context;
-FCamera.FZum := 10;
-FCamera.FRotateX := 50;
+FCamera.Zum := 10;
+FCamera.RotateX := 50;
 
 FLightPos.Import(0,0,0);
 FLightUp.Import(0,1,0);

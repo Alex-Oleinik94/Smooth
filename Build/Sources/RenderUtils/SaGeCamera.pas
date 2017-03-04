@@ -32,8 +32,8 @@ type
 		FView   :TSGVertex3f;
 		FUp : TSGVertex3f;
 		FChangingLookAtObject : TSGBoolean;
-		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
+		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ViewInfo(const PredString : TSGString = ''; const ViewCase : TSGViewType = [SGLogType, SGPrintType]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

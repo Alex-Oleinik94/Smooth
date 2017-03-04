@@ -3392,7 +3392,7 @@ FRelefRedactor.Relief := @FRelief;
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
-FCamera.FZum := Render.Height/Render.Width;
+FCamera.Zum := Render.Height/Render.Width;
 
 FTahomaFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 FTahomaFont.SetContext(Context);

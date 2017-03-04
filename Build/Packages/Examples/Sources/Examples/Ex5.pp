@@ -107,8 +107,8 @@ begin
 inherited Create(VContext);
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
-FCamera.FZum := 6;
-FCamera.FRotateX := 90;
+FCamera.Zum := 6;
+FCamera.RotateX := 90;
 FPhysicsTimeCount:=Context.Width;
 SetLength(FPhysicsTime,FPhysicsTimeCount);
 FillChar(FPhysicsTime[0],FPhysicsTimeCount*SizeOf(FPhysicsTime[0]),0);
