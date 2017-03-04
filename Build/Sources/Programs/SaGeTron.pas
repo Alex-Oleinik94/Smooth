@@ -39,7 +39,7 @@ type
 		FScene      : TSGScene;
 		FLoadThread : TSGThread;
 		FLoadClass  : TSGLoading;
-		FState      : TSGLongWord;
+		FState      : TSGUInt32;
 			private
 		FProgressInterfaceLocked : TSGBoolean;
 		FTotalProgress     : TSGFloat32;
@@ -59,6 +59,8 @@ implementation
 uses
 	 SaGeLog
 	,SaGeCommonStructs
+	,SaGeMathUtils
+	,SaGeFileUtils
 	;
 
 class function TSGGameTron.ClassName() : TSGString;
@@ -104,7 +106,7 @@ procedure TSGGameTron.Paint();
 procedure InitCamera();
 begin
 Context.CursorCentered := True;
-Context.ShowCursor(not Context.CursorCentered);
+Context.ShowCursor(False);
 FScene.Camera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
 FScene.Camera.Up       := SGVertex3fImport(0.0913988, 0.7369644, -0.6697236);
 FScene.Camera.Location := SGVertex3fImport(-2.0990655, 20.3042564, 22.1641521);
@@ -113,10 +115,9 @@ FScene.Camera.ChangingLookAtObject := True;
 end;
 
 begin
-if (FLoadClass <> nil) then
-	FLoadClass.Paint();
 case FState of
-SGTStateLoading : UpdateProgress();
+SGTStateLoading : 
+	UpdateProgress();
 SGTStateStarting :
 	begin
 	InitCamera();
@@ -127,20 +128,23 @@ SGTStateStarting :
 SGTStateViewing :
 	begin
 	if (FLoadClass <> nil) then
-		if FLoadClass.Alpha < 0.15 then
+		if FLoadClass.Alpha < SGZero then
 			KillLoad();
 	if FScene <> nil then
 		FScene.Paint();
 	end;
 end;
+if (FLoadClass <> nil) then
+	FLoadClass.Paint();
 end;
 
 procedure TSGGameTron.Load();
 
-procedure Add3DSModel(const FileName : TSGString; const LoadProgressProportion : TSGFloat32);
+procedure Add3DSModel(FileName : TSGString; const LoadProgressProportion : TSGFloat32);
 var
 	Model : TSGModel = nil;
 begin
+FileName := SGCheckDirectorySeparators(FileName);
 AddLoadSection('"' + FileName + '"', LoadProgressProportion);
 Model := TSGModel.Create(Context);
 Model.Mesh.Load3DSFromFile(FileName, @FSectionProgress);

@@ -127,8 +127,8 @@ inherited Create(VContext);
 FCamera := TSGCamera.Create();
 FCamera.SetContext(Context);
 
-FMutators := nil;
-FPlayerModel:=-1;
+FMutators    := nil;
+FPlayerModel := -1;
 end;
 
 destructor TSGScene.Destroy();

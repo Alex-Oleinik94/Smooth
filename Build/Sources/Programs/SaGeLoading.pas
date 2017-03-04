@@ -311,9 +311,9 @@ end;
 
 procedure TSGLoading.Paint();
 var
-	FCOlor:TSGColor4f;
+	FColor : TSGColor4f;
 
-procedure MiniDraw(VProjectionAngle, VRadius:TSGSingle);
+procedure MiniDraw(VProjectionAngle, VRadius : TSGSingle);
 var
 	i,ii : TSGWord;
 	iii  : TSGSingle;
@@ -328,17 +328,16 @@ var
 	VVCosAngle, VVSinAngle, VVCosAngle2, VVSinAngle2 : TSGSingle;
 
 begin
-Render.Color(FColor);
-
 VVSinAngle:=sin(VProjectionAngle);
 VVSinAngle2:=sin(Pi*FProjectionAngle);
 VVCosAngle:=cos(VProjectionAngle);
 VVCosAngle2:=cos(Pi*FProjectionAngle);
 
+Render.Color(FColor);
 Render.InitOrtho2d(
 	-Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
-	Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
-	Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
+	 Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
+	 Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
 	-Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius);
 FFont.DrawFontFromTwoVertex2f(SGStrReal(100*FProgress,0)+'%',
 	SGVertex2fImport(-35,-FFont.FontHeight/2),
@@ -381,20 +380,27 @@ const
 var
 	i : TSGWord;
 	r : TSGSingle;
-
+	depthEnabled : TSGBool = False;
 begin
 CallAction();
-FCOlor:=(SGVertex4fImport(1,0,0,1)*(1-FProgress)+SGVertex4fImport(0,1,0,1)*FProgress);
+FCOlor := (SGVertex4fImport(1,0,0,1) * (1-FProgress) + SGVertex4fImport(0,1,0,1) * FProgress);
 TSGVertex3f(FCOlor) := FCOlor.Normalized();
 FColor.AddAlpha(FAlpha);
 Render.LineWidth(1);
 
-r:=FProjectionAngle;
-for i:=1 to QuantityMiniDraws do
+depthEnabled := Render.IsEnabled(SGR_DEPTH_TEST);
+if depthEnabled then
+	Render.Disable(SGR_DEPTH_TEST);
+
+r := FProjectionAngle;
+for i := 1 to QuantityMiniDraws do
 	begin
-	r+=2*pi/QuantityMiniDraws;
-	MiniDraw(r,RadiusCentre*(1-FProgress));
+	r += 2 * pi / QuantityMiniDraws;
+	MiniDraw(r, RadiusCentre * (1 - FProgress));
 	end;
+
+if depthEnabled then
+	Render.Enable(SGR_DEPTH_TEST);
 
 FAngle+=FAngleShift*Context.ElapsedTime;
 FProjectionAngle+=FProjectionAngleShift*Context.ElapsedTime;

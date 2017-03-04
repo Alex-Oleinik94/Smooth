@@ -3,6 +3,7 @@
 unit SaGeModel;
 
 interface
+
 uses 
 	 Classes
 	,SaGeCommon
@@ -14,6 +15,7 @@ uses
 	,SaGeGameBase
 	,SaGeMatrix
 	;
+
 type
 	TSGModel = class(TSGNod)
 			public

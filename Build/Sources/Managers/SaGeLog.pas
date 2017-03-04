@@ -65,6 +65,8 @@ procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType
 procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogDateTimePredString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
+function SGCreateLog(var Log : TSGLog; const LogFile : TSGString = SGLogFileName) : TSGBoolean;
 
 implementation
 
@@ -74,6 +76,7 @@ uses
 	,SaGeBaseUtils
 	,SaGeConsoleUtils
 	,SaGeEncodingUtils
+	,SaGeConsoleToolsBase
 	
 	,StrMan
 	;
@@ -201,12 +204,13 @@ var
 	ss : TSGString;
 	pc : PSGChar;
 begin
-if SGLogEnable and (FFileStream <> nil) then
-	begin
-	pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + SGStringDeleteEndOfLineDublicates(SGConvertString(S, SGEncodingWindows1251) + SGWinEoln));
-	FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
-	SGPCharFree(PC);
-	end;
+if Self <> nil then
+	if SGLogEnable and (FFileStream <> nil) then
+		begin
+		pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + SGStringDeleteEndOfLineDublicates(SGConvertString(S, SGEncodingWindows1251) + SGWinEoln));
+		FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
+		SGPCharFree(PC);
+		end;
 end;
 
 constructor TSGLog.Create(const LogFile : TSGString = SGLogFileName);
@@ -245,6 +249,23 @@ except
 end;
 end;
 
+procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
+var
+	Str : TSGString = '';
+begin
+Str := SGStringFromStringList(Params, ' ');
+if Length(Str) < 106 then
+	Log.Source('Params : ' + Str)
+else if Length(Str) < 150 then
+	begin
+	Log.Source('Params --> (' + SGStr(Length(Params)) + ')');
+	Log.Source('  ' + Str);
+	end
+else
+	Log.Source(Params, 'Params -->');
+SetLength(Params, 0);
+end;
+
 initialization
 begin
 {$IFDEF ANDROID}
@@ -262,6 +283,7 @@ if SGLogEnable then
 	begin
 	SGLog.Source('(***) SaGe Engine Log (***)', False);
 	SGLog.Source('  << Create Log >>');
+	SGLogParams(SGLog, SGSystemParamsToConcoleCallerParams());
 	end;
 end;
 
