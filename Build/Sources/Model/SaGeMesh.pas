@@ -19,8 +19,6 @@ uses
 	,Classes
 	,Crt
 	;
-const
-	SGMeshVersion : TSGQuadWord = 169;
 type
 	// Это тип типа хранения цветов в модели
 	TSGMeshColorType = (SGMeshColorType3f,SGMeshColorType4f,SGMeshColorType3b,SGMeshColorType4b);
@@ -159,13 +157,13 @@ type
 		procedure PushBlend(const CurrentBlend : TSGBoolean);
 		procedure PopBlend();
 			public
-		procedure SetColorAmbient(const r,g,b :TSGSingle);
-		procedure SetColorSpecular(const r,g,b :TSGSingle);
-		procedure SetColorDiffuse(const r,g,b :TSGSingle);
+		procedure SetColorAmbient(const r,g,b : TSGSingle);
+		procedure SetColorSpecular(const r,g,b : TSGSingle);
+		procedure SetColorDiffuse(const r,g,b : TSGSingle);
 		procedure AddDiffuseMap(const VFileName : TSGString);
 		procedure AddBumpMap(const VFileName : TSGString);
-		function MapDiffuseWay():TSGString;inline;
-		function MapBumpWay():TSGString;inline;
+		function MapDiffuseWay():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function MapBumpWay():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
 			public
 		procedure Bind(const VObject : TSG3DObject);
@@ -178,6 +176,17 @@ type
 		property EnableTexture : TSGBoolean read FEnableTexture write FEnableTexture;
 		property ImageBump     : TSGImage   read FMapBump       write FMapBump;
 		property ImageTexture  : TSGImage   read FMapDiffuse    write FMapDiffuse;
+		end;
+type
+	PSG3DObjectFace = ^ TSG3DObjectFace;
+	TSG3DObjectFace = packed record 
+		FIndexFormat      : TSGMeshIndexFormat;
+		FPoligonesType    : TSGLongWord;
+		FNOfFaces         : TSGQuadWord;
+		// Указательл на первый элемент области памяти, где находятся индексы
+		FArray            : TSGPointer;
+		// Идентификатор материала
+		FMaterialID       : TSGInt64;
 		end;
 	
     { TSG3dObject }
@@ -210,23 +219,23 @@ type
         // Тип хранение цветов
         FColorType        : TSGMeshColorType;
     private
-		function GetSizeOfOneVertex():LongWord;inline;
+		function GetSizeOfOneVertex():LongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function GetSizeOfOneTextureCoord():TSGLongWord;inline;
-		function GetSizeOfOneVertexCoord():TSGLongWord;inline;
-		function GetSizeOfOneColorCoord():TSGLongWord;inline;
-		function GetSizeOfOneNormalCoord():TSGLongWord;inline;
+		function GetSizeOfOneTextureCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetSizeOfOneVertexCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetSizeOfOneColorCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetSizeOfOneNormalCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function GetCountOfOneTextureCoord():TSGLongWord;inline;
-		function GetCountOfOneVertexCoord():TSGLongWord;inline;
-		function GetCountOfOneColorCoord():TSGLongWord;inline;
-		function GetCountOfOneNormalCoord():TSGLongWord;inline;
+		function GetCountOfOneTextureCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetCountOfOneVertexCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetCountOfOneColorCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetCountOfOneNormalCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function GetVertexLength():QWord;inline;
-		procedure SetHasTexture(const VHasTexture:TSGBoolean);inline;
-		function GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
-		function GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord;inline;
-		procedure SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
+		function GetVertexLength():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure SetHasTexture(const VHasTexture:TSGBoolean); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		procedure SetColorType(const VNewColorType:TSGMeshColorType);
 		procedure SetVertexType(const VNewVertexType:TSGMeshVertexType);
@@ -246,15 +255,7 @@ type
     protected
         // Это массив индексов
 		ArFaces : packed array of 
-			packed record 
-				FIndexFormat      : TSGMeshIndexFormat;
-				FPoligonesType    : TSGLongWord;
-				FNOfFaces         : TSGQuadWord;
-				// Указательл на первый элемент области памяти, где находятся индексы
-				FArray            : TSGPointer;
-				// Идентификатор материала
-				FMaterialID       : TSGInt64;
-				end;
+			TSG3DObjectFace;
 		
 		// Это массив самих вершин. Его пришлось сделать таким. 
 		// Не смотрите что он такой ебанутый (TSGPointer). 
@@ -266,15 +267,15 @@ type
 		ArVertex : TSGPointer;
 	public
 		// Возвращает указатель на первый элемент массива вершин
-		function GetArVertexes():TSGPointer;inline;
+		function GetArVertexes():TSGPointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает указатель на первый элемент массива индексов
-		function GetArFaces(const Index : LongWord = 0):TSGPointer;inline;
-		
+		function GetArFaces(const Index : LongWord = 0):TSGPointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	private
-		function GetVertex3f(const Index : TSGMaxEnum):PSGVertex3f;inline;
-		function GetVertex2f(const Index : TSGMaxEnum):PSGVertex2f;inline;
-		function GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f;inline;
+		function GetVertex3f(const Index : TSGMaxEnum):PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetVertex2f(const Index : TSGMaxEnum):PSGVertex2f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
+		function GetObjectFace(const Index : TSGMaxEnum = 0) : PSG3DObjectFace; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		// Эти совйтсва возвращают указатель на Index-ый элемент массива вершин 
 		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType3f, иначе Result = nil
@@ -286,16 +287,18 @@ type
 		
 		// Добавляет пустую(ые) вершины в массив вершин
 		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
-		// Добавляет еще элемент(ы) в массив индексов
-		procedure AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
 		
 		procedure SetVertex(const VVertexIndex : TSGUInt32; const x, y : TSGFloat32; const z : TSGFloat32 = 0; const w : TSGFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure SetVertex(const VVertexIndex : TSGUInt32; const v2 : TSGVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		
+		// Добавляет еще элемент(ы) в массив индексов
+		procedure AddFace(const ArIndex:TSGLongWord;const FQuantityNewFaces:LongWord = 1);
+		property ObjectFace[Index : TSGMaxEnum] : PSG3DObjectFace read GetObjectFace;
 	private
-		function GetColor3f(const Index:TSGMaxEnum):PSGColor3f;inline;
-		function GetColor4f(const Index:TSGMaxEnum):PSGColor4f;inline;
-		function GetColor3b(const Index:TSGMaxEnum):PSGColor3b;inline;
-		function GetColor4b(const Index:TSGMaxEnum):PSGColor4b;inline;
+		function GetColor3f(const Index:TSGMaxEnum):PSGColor3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetColor4f(const Index:TSGMaxEnum):PSGColor4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetColor3b(const Index:TSGMaxEnum):PSGColor3b; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetColor4b(const Index:TSGMaxEnum):PSGColor4b; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 	public
 		// Возвращает указатель на структуру данных,
@@ -309,22 +312,22 @@ type
 		property ArColor4b[Index : TSGMaxEnum]:PSGColor4b read GetColor4b;
 		
 		// Эта процедура устанавливает цвет вершины. Работает для любого формата хранение цвета.
-		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1);inline;
-		function GetColor(const Index:TSGMaxEnum) : TSGColor4f;inline;
+		procedure SetColor(const Index:TSGMaxEnum;const r,g,b:TSGSingle; const a:TSGSingle = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetColor(const Index:TSGMaxEnum) : TSGColor4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Автоматически определяет нужный формат хранения цветов. (В зависимости от рендера)
-		procedure AutoSetColorType(const VWithAlpha:Boolean = False);inline;
+		procedure AutoSetColorType(const VWithAlpha:Boolean = False); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		procedure AutoSetIndexFormat(const ArIndex : TSGLongWord; const MaxVertexLength : TSGQuadWord );
 	private
-		function GetNormal(const Index:TSGMaxEnum):PSGVertex3f;inline;
+		function GetNormal(const Index:TSGMaxEnum):PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	
 	public
 		// Свойство для редактирования нормалей
 		property ArNormal[Index : TSGMaxEnum]:PSGVertex3f read GetNormal;
 		
 	private
-		function GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f;inline;
-		function GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f;inline;
-		function GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f;inline;
+		function GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 	public
 		property ArTexVertex[Index : TSGMaxEnum] : PSGVertex2f read GetTexVertex;
@@ -333,10 +336,10 @@ type
 		property ArTexVertex4f[Index : TSGMaxEnum] : PSGVertex4f read GetTexVertex4f;
 		
 		// Устанавливает количество вершин
-		procedure SetVertexLength(const NewVertexLength:TSGQuadWord);inline;
+		procedure SetVertexLength(const NewVertexLength:TSGQuadWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 		// Возвращает сколько в байтах занимают массив вершин
-		function GetVertexesSize():TSGMaxEnum;overload;inline;
+		function GetVertexesSize():TSGMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 		// Эта процедура для DirectX. Дело в том, что там нету SGR_QUADS. Так что он разбивается на 2 треугольника.
 		procedure SetFaceQuad(const ArIndex:TSGLongWord;const Index :TSGMaxEnum; const p0,p1,p2,p3:TSGLongWord);
@@ -347,38 +350,38 @@ type
 		// Возвращает индекс на первый элемент массива индексов. Не просто возвращает, а хитро возвращает.
 		// Теперь эти функции можно использовать как массивы. Так что их очень просто использовать.
 		// Но нужно соблюдать тип хранения индексов
-		function ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;     inline;
-		function ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;     inline;
-		function ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b; inline;
-		function ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;    inline;
+		function ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;     inline;
-		function ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;     inline;
-		function ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b; inline;
-		function ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;    inline;
+		function ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;     inline;
-		function ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;     inline;
-		function ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b; inline;
-		function ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;    inline;
+		function ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
-		function ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
-		function ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
-		function ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
-		function ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
+		function ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		function ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		
 		procedure CreateMaterialIDInLastFaceArray(const VMAterialName : TSGString);
 		procedure SetFaceArLength(const NewArLength : TSGLongWord);
 		procedure AddFaceArray(const QuantityNewArrays : TSGLongWord = 1);
 		// Устанавливает длинну массива индексов
-		procedure SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord);inline;
+		procedure SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает действительную длинну массива индексов
-		function GetFaceLength(const Index:TSGLongWord):TSGQuadWord;overload;inline;
+		function GetFaceLength(const Index:TSGLongWord):TSGQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает действительную длинну массива индексов в зависимости он их длинны и их типа, заданых параметрами
-		class function GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
+		class function GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает, сколько в TSGFaceType*Result байтов занимает одна структура индексов. Очень прикольная функция.
-		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
-		class function GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte;inline;
+		class function GetPoligoneInt(const ThisPoligoneType:LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		class function GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		// Ствойства для получения и редактирования длинн массивов
 		property QuantityFaceArrays       : TSGLongWord read FQuantityFaceArrays  write SetFaceArLength;
@@ -414,7 +417,7 @@ type
         // Когда включен Cull Face, то Draw нужно делать 2 раза.
         // Так что вод тут делается Draw, а в Draw просто проверяется, включен или не  Cull Face, 
         //   и в зависимости от этого он вызывает эту процедуду 1 или 2 раза
-        procedure BasicDraw(); inline;
+        procedure BasicDraw();  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
         // Подгрузка массивов в память видеокарты
         procedure LoadToVBO();
         // Очищение памяти видеокарты от массивов этого класса
@@ -425,14 +428,8 @@ type
         // Эта процедурка автоматически выделяет память под нормали и вычесляет их, исходя из данных вершин
         procedure AddNormals();virtual;
         
-		procedure SaveToSG3DOFile(const FileWay:TSGString);
-		procedure LoadFromSG3DOFile(const FileWay:TSGString);
-		
-		procedure SaveToSG3DO(const Stream:TStream);
-		procedure LoadFromSG3DO(const Stream:TStream);
-		
         (* Я ж переписывал этот класс. Это то, что я не написал. *)
-		//procedure Stripificate;overload;inline;
+		//procedure Stripificate;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		//procedure Stripificate(var VertexesAndTriangles:TSGArTSGArTSGFaceType;var OutputStrip:TSGArTSGFaceType);overload;
 		
 		// Выводит полную информацию о характеристиках модельки
@@ -441,9 +438,9 @@ type
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
 		// Возвращает, сколько занимают байтов индексы
-		function FacesSize():QWord;inline;
+		function FacesSize():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Возвращает, сколько занимают байтов вершины и индексы
-		function Size():QWord;inline;
+		function Size():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	protected 
 		// Имя модельки
 		FName : TSGString;
@@ -453,6 +450,7 @@ type
 		FEnableObjectMatrix : TSGBoolean;
 		FObjectMatrix : TSGMatrix4x4;
 	public
+		property ObjectMatrixEnabled : TSGBoolean read FEnableObjectMatrix;
 		procedure SetMatrix(const Matrix : TSGMatrix4x4);
 	public
 		// Свойство : Имя модельки
@@ -470,7 +468,8 @@ type
     { TSGCustomModel }
 	TSGModelLoadProgress = PSGFloat32;
 	
-	TSGCustomModelMesh = record
+	PSGCustomModelMesh = ^ TSGCustomModelMesh;
+	TSGCustomModelMesh = packed record
 		FMesh    : TSG3DObject;
 		FCopired : TSGInt64;
 		FMatrix  : TSGMatrix4x4;
@@ -478,12 +477,12 @@ type
 	
     TSGCustomModel = class(TSGDrawable)
     public
-        constructor Create;override;
-        destructor Destroy; override;
-        class function ClassName:String;override;
+        constructor Create(); override;
+        destructor Destroy(); override;
+        class function ClassName() : TSGString; override;
     protected
-        FQuantityObjects   : TSGQuadWord;
-        FQuantityMaterials : TSGQuadWord;
+        FQuantityObjects   : TSGUInt64;
+        FQuantityMaterials : TSGUInt64;
 	
         FArMaterials : packed array of TSGMaterial;
         FArObjects   : packed array of TSGCustomModelMesh;
@@ -492,40 +491,29 @@ type
 		function GetObjectMatrix(const Index : TSGMaxEnum):PSGMatrix4x4;
         procedure AddObjectColor(const ObjColor: TSGColor4f);
         function GetMaterial(const Index : TSGMaxEnum):TSGMaterial;
+        function GetModelMesh(const Index : TSGMaxEnum) : PSGCustomModelMesh;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
     public
-		property QuantityMaterials : TSGQuadWord read FQuantityMaterials;
-		property QuantityObjects   : TSGQuadWord read FQuantityObjects;
+		property QuantityMaterials : TSGUInt64 read FQuantityMaterials;
+		property QuantityObjects   : TSGUInt64 read FQuantityObjects;
 		property Objects[Index : TSGMaxEnum]:TSG3dObject read GetObject;
 		property ObjectMatrix[Index : TSGMaxEnum]:PSGMatrix4x4 read GetObjectMatrix;
 		property ObjectColor: TSGColor4f write AddObjectColor;
 		property Materials[Index : TSGMaxEnum] : TSGMaterial read GetMaterial;
+		property ModelMesh[Index : TSGMaxEnum] : PSGCustomModelMesh read GetModelMesh;
     public
-		function AddMaterial():TSGMaterial;inline;
-		function LastMaterial():TSGMaterial;inline;
-		function AddObject():TSG3DObject;inline;
-		function LastObject():TSG3DObject;inline;
+		function AddMaterial():TSGMaterial;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function LastMaterial():TSGMaterial;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AddObject():TSG3DObject;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function LastObject():TSG3DObject;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function CreateMaterialIDInLastObject(const VMaterialName : TSGString):TSGBoolean;
     public
 		procedure DrawObject(const Index : TSGLongWord);
         procedure Paint(); override;
 		procedure LoadToVBO();
         procedure WriteInfo(const PredString : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
-        procedure Clear();virtual;
+        procedure Clear(); virtual;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
-    public
-		// Загрузка и соxранение
-		procedure SaveToFile(const FileWay: TSGString);
-        procedure LoadFromFile(const FileWay:TSGString; const LoadProgress : TSGModelLoadProgress = nil);
-    public
-        procedure LoadFromSG3DMFile(const FileWay: TSGString);
-        procedure SaveToSG3DMFile(const FileWay: TSGString);
-        procedure LoadFromSG3DM(const Stream : TStream);
-        procedure SaveToSG3DM(const Stream : TStream);
-        // Загрузить формат 3DS-Max-а
-        function Load3DSFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
-        function Load3DSFromStream(const VStream : TStream; const VFileName : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
-        function LoadOBJFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
     public
 		procedure Dublicate(const Index:TSGLongWord);
 		procedure Translate(const Index:TSGLongWord;const Vertex : TSGVertex3f);
@@ -538,7 +526,9 @@ type
 
 function SGStrMeshIndexFormat(const IndexFormat : TSGMeshIndexFormat) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStrMeshColorFormat(const ColorFormat : TSGMeshColorType) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
- 
+procedure SGKill(var O : TSG3DObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var M : TSGCustomModel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
@@ -550,11 +540,25 @@ uses
 	,SaGeMeshLoader
 	
 	,SysUtils
-	
-	// Formats
-	,SaGeMesh3ds
-	,SaGeMeshObj
 	;
+
+procedure SGKill(var O : TSG3DObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if O <> nil then
+	begin
+	O.Destroy();
+	O := nil;
+	end;
+end;
+
+procedure SGKill(var M : TSGCustomModel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if M <> nil then
+	begin
+	M.Destroy();
+	M := nil;
+	end;
+end;
 
 function SGStrMeshColorFormat(const ColorFormat : TSGMeshColorType) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -593,7 +597,7 @@ if (FParent<>nil) then
 	end;
 end;
 
-function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;     inline;
+function TSG3DObject.ArFacesLines(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceLine;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FillChar(Result,SizeOf(Result),0);
 case ArFaces[ArIndex].FIndexFormat of
@@ -615,7 +619,7 @@ SGMeshIndexFormat4b:
 end;
 end;
 
-function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;     inline;
+function TSG3DObject.ArFacesQuads(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)     : TSGFaceQuad;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FillChar(Result, SizeOf(Result), 0);
 if Render.RenderType <> SGRenderOpenGL then
@@ -668,7 +672,7 @@ else
 	end;
 end;
 
-function TSG3DObject.ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle; inline;
+function TSG3DObject.ArFacesTriangles(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0) : TSGFaceTriangle;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FillChar(Result,SizeOf(Result),0);
 case ArFaces[ArIndex].FIndexFormat of
@@ -693,7 +697,7 @@ SGMeshIndexFormat4b:
 end;
 end;
 
-function TSG3DObject.ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;    inline;
+function TSG3DObject.ArFacesPoints(const ArIndex:TSGLongWord = 0;const Index:TSGLongWord = 0)    : TSGFacePoint;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FillChar(Result,SizeOf(Result),0);
 case ArFaces[ArIndex].FIndexFormat of
@@ -706,12 +710,12 @@ SGMeshIndexFormat4b:
 end;
 end;
 
-procedure TSG3DObject.SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord);inline;
+procedure TSG3DObject.SetPoligonesType(const ArIndex : TSGLongWord;const NewPoligonesType : TSGLongWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 ArFaces[ArIndex].FPoligonesType:=NewPoligonesType;
 end;
 
-function TSG3DObject.GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord;inline;
+function TSG3DObject.GetPoligonesType(const ArIndex : TSGLongWord):TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=ArFaces[ArIndex].FPoligonesType;
 end;
@@ -806,7 +810,7 @@ begin
 SetFaceArLength(FQuantityFaceArrays+QuantityNewArrays);
 end;
 
-class function  TSG3DObject.GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte;inline;
+class function  TSG3DObject.GetFaceInt(const ThisFaceFormat : TSGMeshIndexFormat):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=
 	TSGByte(ThisFaceFormat=SGMeshIndexFormat1b)+
@@ -814,17 +818,17 @@ Result:=
 	TSGByte(ThisFaceFormat=SGMeshIndexFormat4b)*4;
 end;
 
-function TSG3DObject.GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord;inline;
+function TSG3DObject.GetQuantityFaces(const Index : TSGLongWord):TSGQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := ArFaces[Index].FNOfFaces;
 end;
 
-procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean);inline;
+procedure TSG3DObject.SetHasTexture(const VHasTexture:TSGBoolean); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FHasTexture:=VHasTexture;
 end;
 
-function TSG3DObject.GetVertexLength():QWord;inline;
+function TSG3DObject.GetVertexLength():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=FNOfVerts;
 end;
@@ -989,7 +993,7 @@ for i:=0 to Vertexes - 1 do
 	end;
 end;
 
-procedure TSG3DObject.AutoSetColorType(const VWithAlpha:Boolean = False);inline;
+procedure TSG3DObject.AutoSetColorType(const VWithAlpha:Boolean = False); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if Render<>nil then
 	begin
@@ -1007,7 +1011,7 @@ if Render<>nil then
 	end;
 end;
 
-function TSG3DObject.GetColor(const Index:TSGMaxEnum) : TSGColor4f;inline;
+function TSG3DObject.GetColor(const Index:TSGMaxEnum) : TSGColor4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result.Import();
 if (FColorType=SGMeshColorType3f) then
@@ -1055,7 +1059,7 @@ else if FVertexType = SGMeshVertexType4f then
 	ArVertex4f[VVertexIndex]^.Import(x, y, z, w);
 end;
 
-procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1);inline;
+procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (FColorType=SGMeshColorType3f) then
 	begin
@@ -1093,7 +1097,7 @@ else if (FColorType=SGMeshColorType4b) then
 	end;
 end;
 
-function TSG3DObject.GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f;inline;
+function TSG3DObject.GetTexVertex3f(const Index : TSGMaxEnum): PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex3f(
 	TSGMaxEnum(ArVertex)
@@ -1103,7 +1107,7 @@ Result:=PSGVertex3f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f;inline;
+function TSG3DObject.GetTexVertex4f(const Index : TSGMaxEnum): PSGVertex4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex4f(
 	TSGMaxEnum(ArVertex)
@@ -1113,7 +1117,7 @@ Result:=PSGVertex4f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f;inline;
+function TSG3DObject.GetTexVertex(const Index : TSGMaxEnum): PSGVertex2f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex2f(
 	TSGMaxEnum(ArVertex)
@@ -1123,7 +1127,7 @@ Result:=PSGVertex2f(
 	+GetSizeOfOneNormalCoord());
 end;
 
-function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PSGVertex3f;inline;
+function TSG3DObject.GetNormal(const Index:TSGMaxEnum):PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex3f( 
 	TSGMaxEnum(ArVertex)+
@@ -1132,7 +1136,7 @@ Result:=PSGVertex3f(
 	+GetSizeOfOneColorCoord());
 end;
 
-function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PSGColor4f;inline;
+function TSG3DObject.GetColor4f(const Index:TSGMaxEnum):PSGColor4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGColor4f( 
 	TSGMaxEnum(ArVertex)+
@@ -1140,7 +1144,7 @@ Result:=PSGColor4f(
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PSGColor3b;inline;
+function TSG3DObject.GetColor3b(const Index:TSGMaxEnum):PSGColor3b; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGColor3b( 
 	TSGMaxEnum(ArVertex)+
@@ -1148,7 +1152,7 @@ Result:=PSGColor3b(
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PSGColor4b;inline;
+function TSG3DObject.GetColor4b(const Index:TSGMaxEnum):PSGColor4b; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGColor4b(Pointer(
 	TSGMaxEnum(ArVertex)+
@@ -1156,7 +1160,7 @@ Result:=PSGColor4b(Pointer(
 	GetSizeOfOneVertexCoord()));
 end;
 
-function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PSGColor3f;inline;
+function TSG3DObject.GetColor3f(const Index:TSGMaxEnum):PSGColor3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGColor3f( 
 	TSGMaxEnum(ArVertex)+
@@ -1164,7 +1168,7 @@ Result:=PSGColor3f(
 	GetSizeOfOneVertexCoord());
 end;
 
-function TSG3DObject.GetArFaces(const Index : LongWord = 0):Pointer;inline;
+function TSG3DObject.GetArFaces(const Index : LongWord = 0):Pointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if ArFaces=nil then
 	Result:=nil
@@ -1172,9 +1176,17 @@ else
 	Result:=@ArFaces[Index].FArray;
 end;
 
-function TSG3DObject.GetArVertexes():Pointer;inline;
+function TSG3DObject.GetObjectFace(const Index : TSGMaxEnum = 0) : PSG3DObjectFace; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=ArVertex;
+if ArFaces = nil then
+	Result := nil
+else
+	Result := @ArFaces[Index];
+end;
+
+function TSG3DObject.GetArVertexes():Pointer; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := ArVertex;
 end;
 
 procedure TSG3DObject.SetVertexType(const VNewVertexType:TSGMeshVertexType);
@@ -1188,7 +1200,7 @@ FHasColors:=True;
 FColorType:=VNewColorType;
 end;
 
-procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord);inline;
+procedure TSG3DObject.SetVertexLength(const NewVertexLength:QWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 FNOfVerts:=NewVertexLength;
 if ArVertex = nil then
@@ -1197,47 +1209,47 @@ else
 	ReallocMem(ArVertex,GetVertexesSize());
 end;
 
-function TSG3DObject.GetCountOfOneTextureCoord():TSGLongWord;inline;
+function TSG3DObject.GetCountOfOneTextureCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := Byte(FHasTexture)*FCountTextureFloatsInVertexArray;
 end;
 
-function TSG3DObject.GetCountOfOneVertexCoord():TSGLongWord;inline;
+function TSG3DObject.GetCountOfOneVertexCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := (2 + Byte(FVertexType=SGMeshVertexType3f) + 2 * Byte(FVertexType = SGMeshVertexType4f));
 end;
 
-function TSG3DObject.GetCountOfOneColorCoord():TSGLongWord;inline;
+function TSG3DObject.GetCountOfOneColorCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := Byte(FHasColors)*(3+byte((FColorType=SGMeshColorType4b) xor (FColorType=SGMeshColorType4f)));
 end;
 
-function TSG3DObject.GetCountOfOneNormalCoord():TSGLongWord;inline;
+function TSG3DObject.GetCountOfOneNormalCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := Byte(FHasNormals)*3;
 end;
 
-function TSG3DObject.GetSizeOfOneTextureCoord():TSGLongWord;inline;
+function TSG3DObject.GetSizeOfOneTextureCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := GetCountOfOneTextureCoord()*SizeOf(Single);
 end;
 
-function TSG3DObject.GetSizeOfOneVertexCoord():TSGLongWord;inline;
+function TSG3DObject.GetSizeOfOneVertexCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := GetCountOfOneVertexCoord()*SizeOf(Single);
 end;
 
-function TSG3DObject.GetSizeOfOneColorCoord():TSGLongWord;inline;
+function TSG3DObject.GetSizeOfOneColorCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := GetCountOfOneColorCoord() * (1 + byte((FColorType=SGMeshColorType3f) xor (FColorType=SGMeshColorType4f))*(SizeOf(TSGSingle)-1));
 end;
 
-function TSG3DObject.GetSizeOfOneNormalCoord():TSGLongWord;inline;
+function TSG3DObject.GetSizeOfOneNormalCoord():TSGLongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result := GetCountOfOneNormalCoord()*SizeOf(Single);
 end;
 
-function TSG3DObject.GetSizeOfOneVertex():LongWord;
+function TSG3DObject.GetSizeOfOneVertex():LongWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:= GetSizeOfOneVertexCoord() +
 	GetSizeOfOneColorCoord() +
@@ -1245,27 +1257,27 @@ Result:= GetSizeOfOneVertexCoord() +
 	GetSizeOfOneTextureCoord();
 end;
 
-function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload;inline;
+function TSG3DObject.GetVertexesSize():TSGMaxEnum;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=FNOfVerts*GetSizeOfOneVertex();
 end;
 
-function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PSGVertex3f;inline;
+function TSG3DObject.GetVertex3f(const Index:TSGMaxEnum):PSGVertex3f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex3f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-function TSG3DObject.GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f;inline;
+function TSG3DObject.GetVertex4f(const Index : TSGMaxEnum):PSGVertex4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex4f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PSGVertex2f;inline;
+function TSG3DObject.GetVertex2f(const Index:TSGMaxEnum):PSGVertex2f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=PSGVertex2f(TSGMaxEnum(ArVertex)+Index*(GetSizeOfOneVertex()));
 end;
 
-class function TSG3DObject.GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload;inline;
+class function TSG3DObject.GetFaceLength(const FaceLength:TSGQuadWord; const ThisPoligoneType:LongWord):TSGQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=FaceLength*GetPoligoneInt(ThisPoligoneType);
 end;
@@ -1348,7 +1360,7 @@ begin
 Result:=GetSizeOfOneVertex()*FNOfVerts;
 end;
 
-function TSG3DObject.FacesSize():TSGQuadWord;inline;
+function TSG3DObject.FacesSize():TSGQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	Index : TSGLongWord;
 begin
@@ -1358,14 +1370,14 @@ if FQuantityFaceArrays<>0 then
 		Result += GetFaceInt(ArFaces[Index].FIndexFormat)*GetFaceLength(Index);
 end;
 
-function TSG3DObject.Size():QWord;inline;
+function TSG3DObject.Size():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=
 	FacesSize()+
 	VertexesSize();
 end;
 
-class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte;inline;
+class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=
 	Byte(
@@ -1378,12 +1390,12 @@ Result:=
 	+2*Byte( ThisPoligoneType = SGR_LINES );
 end;
 
-function TSG3DObject.GetFaceLength(const Index : TSGLongWord):TSGQuadWord;overload;inline;
+function TSG3DObject.GetFaceLength(const Index : TSGLongWord):TSGQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 Result:=GetFaceLength(ArFaces[Index].FNOfFaces,ArFaces[Index].FPoligonesType);
 end;
 
-procedure TSG3DObject.SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord);inline;
+procedure TSG3DObject.SetFaceLength(const ArIndex:TSGLongWord;const NewLength:TSGQuadWord); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces[ArIndex].FNOfFaces=0) or (ArFaces[ArIndex].FArray=nil) then
 	GetMem(ArFaces[ArIndex].FArray,
@@ -1394,7 +1406,7 @@ else
 ArFaces[ArIndex].FNOfFaces:=NewLength;
 end;
 
-function TSG3DObject.ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;     inline;
+function TSG3DObject.ArFacesLines1b(const Index:TSGLongWord = 0)     : PTSGFaceLine1b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1402,7 +1414,7 @@ else
 	Result:=PTSGFaceLine1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;     inline;
+function TSG3DObject.ArFacesQuads1b(const Index:TSGLongWord = 0)     : PTSGFaceQuad1b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1410,7 +1422,7 @@ else
 	Result:=PTSGFaceQuad1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b; inline;
+function TSG3DObject.ArFacesTriangles1b(const Index:TSGLongWord = 0) : PTSGFaceTriangle1b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1418,7 +1430,7 @@ else
 	Result:=PTSGFaceTriangle1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;    inline;
+function TSG3DObject.ArFacesPoints1b(const Index:TSGLongWord = 0)    : PTSGFacePoint1b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1426,7 +1438,7 @@ else
 	Result:=PTSGFacePoint1b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;     inline;
+function TSG3DObject.ArFacesLines2b(const Index:TSGLongWord = 0)     : PTSGFaceLine2b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1434,7 +1446,7 @@ else
 	Result:=PTSGFaceLine2b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;     inline;
+function TSG3DObject.ArFacesQuads2b(const Index:TSGLongWord = 0)     : PTSGFaceQuad2b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1442,7 +1454,7 @@ else
 	Result:=PTSGFaceQuad2b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b; inline;
+function TSG3DObject.ArFacesTriangles2b(const Index:TSGLongWord = 0) : PTSGFaceTriangle2b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1450,7 +1462,7 @@ else
 	Result:=PTSGFaceTriangle2b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;    inline;
+function TSG3DObject.ArFacesPoints2b(const Index:TSGLongWord = 0)    : PTSGFacePoint2b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1458,7 +1470,7 @@ else
 	Result:=PTSGFacePoint2b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;     inline;
+function TSG3DObject.ArFacesLines4b(const Index:TSGLongWord = 0)     : PTSGFaceLine4b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1466,7 +1478,7 @@ else
 	Result:=PTSGFaceLine4b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;     inline;
+function TSG3DObject.ArFacesQuads4b(const Index:TSGLongWord = 0)     : PTSGFaceQuad4b;      {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1474,7 +1486,7 @@ else
 	Result:=PTSGFaceQuad4b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b; inline;
+function TSG3DObject.ArFacesTriangles4b(const Index:TSGLongWord = 0) : PTSGFaceTriangle4b;  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
@@ -1482,14 +1494,13 @@ else
 	Result:=PTSGFaceTriangle4b(TSGPointer(ArFaces[Index].FArray));
 end;
 
-function TSG3DObject.ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;    inline;
+function TSG3DObject.ArFacesPoints4b(const Index:TSGLongWord = 0)    : PTSGFacePoint4b;     {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if (ArFaces=nil) or (Length(ArFaces)=0) then
 	Result:=nil
 else
 	Result:=PTSGFacePoint4b(TSGPointer(ArFaces[Index].FArray));
 end;
-
 
 constructor TSG3dObject.Create();
 begin
@@ -1600,34 +1611,7 @@ if ClearN then
 	end;
 end;
 
-procedure TSG3DObject.SaveToSG3DOFile(const FileWay:TSGString);
-var
-	Stream:TStream = nil;
-begin
-Stream:=TFileStream.Create(FileWay,fmCreate);
-if Stream<>nil then
-	begin
-	SaveToSG3DO(Stream);
-	Stream.Destroy();
-	end;
-end;
-
-procedure TSG3DObject.LoadFromSG3DOFile(const FileWay:TSGString);
-var
-	Stream:TStream = nil;
-begin
-if SGFileExists(FileWay) then
-	begin
-	Stream:=TFileStream.Create(FileWay,fmOpenRead);
-	if Stream<>nil then
-		begin
-		LoadFromSG3DO(Stream);
-		Stream.Destroy();
-		end;
-	end;
-end;
-
-procedure TSG3DObject.CopyTo(const Destination : TSG3dObject);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSG3DObject.CopyTo(const Destination : TSG3dObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i: TSGLongWord;
 begin
@@ -1667,98 +1651,7 @@ if QuantityFaceArrays <> 0 then
 		end;
 end;
 
-procedure TSG3DObject.SaveToSG3DO(const Stream:TStream);
-var
-	S:array[0..8] of TSGChar = 'SaGe3DObj';
-	i : TSGLongWord;
-begin
-Stream.WriteBuffer(S[0],SizeOf(S[0])*9);
-Stream.WriteBuffer(SGMeshVersion,SizeOf(SGMeshVersion));
-
-Stream.WriteBuffer(FHasTexture,SizeOf(FHasTexture));
-Stream.WriteBuffer(FHasColors,SizeOf(FHasColors));
-Stream.WriteBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-Stream.WriteBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
-Stream.WriteBuffer(FVertexType,SizeOf(FVertexType));
-Stream.WriteBuffer(FColorType,SizeOf(FColorType));
-Stream.WriteBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
-Stream.WriteBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
-Stream.WriteBuffer(FEnableObjectMatrix,SizeOf(FEnableObjectMatrix));
-SGWriteStringToStream(FName,Stream);
-
-if FEnableObjectMatrix then
-	Stream.WriteBuffer(FObjectMatrix,SizeOf(FObjectMatrix));
-
-Stream.WriteBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.WriteBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-
-if FQuantityFaceArrays<>0 then
-	for i:=0 to FQuantityFaceArrays-1 do
-		begin
-		Stream.WriteBuffer(ArFaces[i].FPoligonesType,SizeOf(ArFaces[i].FPoligonesType));
-		Stream.WriteBuffer(ArFaces[i].FIndexFormat,SizeOf(ArFaces[i].FIndexFormat));
-		Stream.WriteBuffer(ArFaces[i].FNOfFaces,SizeOf(ArFaces[i].FNOfFaces));
-		Stream.WriteBuffer(ArFaces[i].FMaterialID,SizeOf(ArFaces[i].FMaterialID));
-		Stream.WriteBuffer(ArFaces[i].FArray^,GetFaceLength(i)*GetFaceInt(ArFaces[i].FIndexFormat));
-		end;
-
-Stream.WriteBuffer(ArVertex^,VertexesSize());
-end;
-
-procedure TSG3DObject.LoadFromSG3DO(const Stream:TStream);
-var
-	S,S2:array[0..8] of TSGChar;
-	Version : TSGQuadWord = 0;
-	i : TSGLongWord;
-begin
-S2:='SaGe3DObj';
-Stream.ReadBuffer(S[0],SizeOf(S[0])*9);
-if S<>S2 then
-	begin
-	SGLog.Source(['TSG3DObject.LoadFromSG3DO : Fatal : It is not "SaGe3DObj" file!']);
-	Exit;
-	end;
-Stream.ReadBuffer(Version,SizeOf(Version));
-if Version <> SGMeshVersion then
-	begin
-	SGLog.Source(['TSG3DObject.LoadFromSG3DO : Fatal : (Program.MeshVersion!=Mesh.MeshVersion)!']);
-	Exit;
-	end;
-Stream.ReadBuffer(FHasTexture,SizeOf(FHasTexture));
-Stream.ReadBuffer(FHasColors,SizeOf(FHasColors));
-Stream.ReadBuffer(FHasNormals,SizeOf(FHasNormals));
-Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-Stream.ReadBuffer(FObjectPoligonesType,SizeOf(FObjectPoligonesType));
-Stream.ReadBuffer(FVertexType,SizeOf(FVertexType));
-Stream.ReadBuffer(FColorType,SizeOf(FColorType));
-Stream.ReadBuffer(FObjectMaterialID,SizeOf(FObjectMaterialID));
-Stream.ReadBuffer(FEnableCullFace,SizeOf(FEnableCullFace));
-Stream.ReadBuffer(FEnableObjectMatrix,SizeOf(FEnableObjectMatrix));
-FName := SGReadStringFromStream(Stream);
-
-if FEnableObjectMatrix then
-	Stream.ReadBuffer(FObjectMatrix,SizeOf(FObjectMatrix));
-
-Stream.ReadBuffer(FNOfVerts,SizeOf(FNOfVerts));
-Stream.ReadBuffer(FQuantityFaceArrays,SizeOf(FQuantityFaceArrays));
-
-SetVertexLength(FNOfVerts);
-
-if FQuantityFaceArrays<>0 then
-	for i:=0 to FQuantityFaceArrays-1 do
-		begin
-		Stream.ReadBuffer(ArFaces[i].FPoligonesType,SizeOf(ArFaces[i].FPoligonesType));
-		Stream.ReadBuffer(ArFaces[i].FIndexFormat,SizeOf(ArFaces[i].FIndexFormat));
-		Stream.ReadBuffer(ArFaces[i].FNOfFaces,SizeOf(ArFaces[i].FNOfFaces));
-		Stream.ReadBuffer(ArFaces[i].FMaterialID,SizeOf(ArFaces[i].FMaterialID));
-		Stream.ReadBuffer(ArFaces[i].FArray^,GetFaceLength(i)*GetFaceInt(ArFaces[i].FIndexFormat));
-		end;
-
-Stream.ReadBuffer(ArVertex^,VertexesSize());
-end;
-
-procedure TSG3dObject.BasicDraw(); inline;
+procedure TSG3dObject.BasicDraw();  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	Index : TSGUInt32;
 begin
@@ -1915,7 +1808,7 @@ else
 		end;
 	
 	if FQuantityFaceArrays<>0 then
-		for Index := 0 to FQuantityFaceArrays-1 do
+		for Index := 0 to FQuantityFaceArrays - 1 do
 			begin
 			if (FParent<>nil) then
 				if (ArFaces[Index].FMaterialID <> -1) then
@@ -1993,7 +1886,7 @@ ClearArrays(False);
 FEnableVBO:=True;
 end;
 
-procedure TSG3DObject.ClearVBO();inline;
+procedure TSG3DObject.ClearVBO(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	Index : TSGLongWord;
 begin
@@ -2016,87 +1909,6 @@ end;
 (************************************************************************************)
 (************************************){TSGModel}(************************************)
 (************************************************************************************)
-
-procedure TSGCustomModel.LoadFromSG3DMFile(const FileWay: TSGString);
-var
-	Stream : TStream = nil;
-begin
-Stream := TFileStream.Create(FileWay,fmOpenRead);
-if Stream<>nil then
-	begin
-	LoadFromSG3DM(Stream);
-	Stream.Destroy();
-	end;
-end;
-
-procedure TSGCustomModel.SaveToSG3DMFile(const FileWay: TSGString);
-var
-	Stream : TStream = nil;
-begin
-Stream := TFileStream.Create(FileWay,fmCreate);
-if Stream<>nil then
-	begin
-	SaveToSG3DM(Stream);
-	Stream.Destroy();
-	end;
-end;
-
-procedure TSGCustomModel.LoadFromSG3DM(const Stream : TStream);
-var
-	i : TSGLongWord;
-	QuantityO,QuantityM : TSGQuadWord;
-begin
-Stream.ReadBuffer(QuantityO,SizeOf(QuantityO));
-Stream.ReadBuffer(QuantityM,SizeOf(QuantityM));
-if QuantityO>0 then
-	for i:=0 to QuantityO-1 do
-		begin
-		AddObject().Destroy();
-		FArObjects[i].FMesh:=nil;
-		Stream.ReadBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
-		Stream.ReadBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
-		if FArObjects[i].FCopired=-1 then
-			begin
-			FArObjects[i].FMesh:=TSG3DObject.Create();
-			FArObjects[i].FMesh.Context := Context;
-			FArObjects[i].FMesh.Parent := Self;
-			Objects[i].LoadFromSG3DO(Stream);
-			end;
-		end;
-if QuantityM>0 then
-	for i:=0 to QuantityM-1 do
-		begin
-		AddMaterial().Name:=SGReadStringFromStream(Stream);
-		LastMaterial().AddDiffuseMap(SGReadStringFromStream(Stream));
-		end;
-end;
-
-procedure TSGCustomModel.SaveToSG3DM(const Stream : TStream);
-var
-	i : TSGLongWord;
-begin
-Stream.WriteBuffer(FQuantityObjects,SizeOf(FQuantityObjects));
-Stream.WriteBuffer(FQuantityMaterials,SizeOf(FQuantityMaterials));
-if FQuantityObjects>0 then
-	for i:=0 to FQuantityObjects-1 do
-		begin
-		Stream.WriteBuffer(FArObjects[i].FMatrix,SizeOf(FArObjects[i].FMatrix));
-		Stream.WriteBuffer(FArObjects[i].FCopired,SizeOf(FArObjects[i].FCopired));
-		if FArObjects[i].FCopired=-1 then
-			Objects[i].SaveToSG3DO(Stream);
-		end;
-if FQuantityMaterials>0 then
-	for i:=0 to FQuantityMaterials-1 do
-		begin
-		SGWriteStringToStream(FArMaterials[i].MapDiffuseWay,Stream);
-		SGWriteStringToStream(FArMaterials[i].Name,Stream);
-		end;
-end;
-
-procedure TSGCustomModel.SaveToFile(const FileWay: string);
-begin
-SaveToSG3DMFile(FileWay);
-end;
 
 procedure TSGCustomModel.Clear();
 var
@@ -2127,22 +1939,6 @@ begin
 if FQuantityObjects > 0 then
 	for i := 0 to FQuantityObjects - 1 do
 		FArObjects[i].FMesh.LoadToVBO();
-end;
-
-procedure TSGCustomModel.LoadFromFile(const FileWay : TSGString; const LoadProgress : TSGModelLoadProgress = nil);
-var
-	Expansion : TSGString = '';
-begin
-if SGFileExists(FileWay) then
-	begin
-	Expansion := SGUpCaseString(SGFileExpansion(FileWay));
-	if Expansion = '3DS' then
-		Load3DSFromFile(FileWay, LoadProgress)
-	else if Expansion = 'OBJ' then
-		LoadOBJFromFile(FileWay, LoadProgress)
-	else
-		LoadFromSG3DMFile(FileWay);
-	end;
 end;
 
 class function TSGCustomModel.ClassName() : TSGString;
@@ -2176,7 +1972,7 @@ for i:=0 to FQuantityObjects-1 do
 	;//ArObjects[i].Stripificate;
 end;
 
-function TSGCustomModel.VertexesSize():QWord;Inline;
+function TSGCustomModel.VertexesSize():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	i : TSGLongWord;
 begin
@@ -2185,7 +1981,7 @@ for i:=0 to FQuantityObjects-1 do
 	Result+=FArObjects[i].FMesh.VertexesSize();
 end;
 
-function TSGCustomModel.FacesSize():TSGQuadWord;inline;
+function TSGCustomModel.FacesSize():TSGQuadWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	i : TSGLongWord;
 begin
@@ -2195,7 +1991,7 @@ if FQuantityObjects<>0 then
 		Result+=Objects[i].FacesSize();
 end;
 
-function TSGCustomModel.Size():QWord;inline;
+function TSGCustomModel.Size():QWord; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	i : TSGLongWord;
 begin
@@ -2210,33 +2006,6 @@ var
 begin
 for i := 0 to High(FArObjects) do
 	FArObjects[i].FMesh.FObjectColor := ObjColor;
-end;
-
-function TSGCustomModel.Load3DSFromStream(const VStream : TStream; const VFileName : TSGString; const LoadProgress : TSGModelLoadProgress = nil):TSGBoolean;
-begin
-Result := False;
-with TSGMesh3DSLoader.Create() do
-	begin
-	try
-		Progress := LoadProgress;
-		SetStream(VStream);
-		SetFileName(VFileName);
-		Import3DS(Self, Result);
-	except on e : Exception do
-		SGLogException('TSGCustomModel__Load3DSFromStream(...). Raised exception', e);
-	end;
-	Destroy();
-	end;
-end;
-
-function TSGCustomModel.LoadOBJFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
-begin
-Result := SGLoadMesh(TSGMeshOBJLoader, Self, FilePath, LoadProgress);
-end;
-
-function TSGCustomModel.Load3DSFromFile(const FilePath : TSGString; const LoadProgress : TSGModelLoadProgress = nil) : TSGBoolean;
-begin
-Result := SGLoadMesh(TSGMesh3DSLoader, Self, FilePath, LoadProgress);
 end;
 
 constructor TSGCustomModel.Create();
@@ -2280,7 +2049,7 @@ if FQuantityObjects <> 0 then
 		DrawObject(Index);
 end;
 
-function TSGCustomModel.AddMaterial():TSGMaterial;inline;
+function TSGCustomModel.AddMaterial():TSGMaterial;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FQuantityMaterials+=1;
 SetLength(FArMaterials,FQuantityMaterials);
@@ -2288,7 +2057,7 @@ FArMaterials[FQuantityMaterials-1]:=TSGMaterial.Create(Context);
 Result:=FArMaterials[FQuantityMaterials-1];
 end;
 
-function TSGCustomModel.LastMaterial():TSGMaterial;inline;
+function TSGCustomModel.LastMaterial():TSGMaterial;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FArMaterials=nil) or (FQuantityMaterials=0) then
 	Result:=nil
@@ -2296,7 +2065,7 @@ else
 	Result:=FArMaterials[FQuantityMaterials-1];
 end;
 
-function TSGCustomModel.AddObject():TSG3DObject;inline;
+function TSGCustomModel.AddObject():TSG3DObject;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FQuantityObjects+=1;
 SetLength(FArObjects,FQuantityObjects);
@@ -2308,7 +2077,7 @@ FArObjects[FQuantityObjects-1].FCopired:=-1;
 FArObjects[FQuantityObjects-1].FMatrix:=SGGetIdentityMatrix();
 end;
 
-function TSGCustomModel.LastObject():TSG3DObject;inline;
+function TSGCustomModel.LastObject():TSG3DObject;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FQuantityObjects=0) or(FArObjects=nil) then
 	Result:=nil
@@ -2329,6 +2098,14 @@ for i := 0 to FQuantityMaterials - 1 do
 		Result:=True;
 		Break;
 		end;
+end;
+
+function TSGCustomModel.GetModelMesh(const Index : TSGMaxEnum) : PSGCustomModelMesh;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (Index >= 0) and (Index < QuantityObjects) then
+	Result := @FArObjects[Index]
+else
+	Result := nil;
 end;
 
 function TSGCustomModel.GetMaterial(const Index : TSGMaxEnum):TSGMaterial;
@@ -2462,11 +2239,11 @@ end;
 
 destructor TSGMaterial.Destroy();
 begin
-SGKillImage(FMapDiffuse);
-SGKillImage(FMapBump);
-SGKillImage(FMapOpacity);
-SGKillImage(FMapSpecular);
-SGKillImage(FMapAmbient);
+SGKill(FMapDiffuse);
+SGKill(FMapBump);
+SGKill(FMapOpacity);
+SGKill(FMapSpecular);
+SGKill(FMapAmbient);
 inherited;
 end;
 
@@ -2552,7 +2329,7 @@ else if (VObject.BumpFormat = SGMeshBumpTypeCopyTexture2f) and (VObject.HasTextu
 	end;
 end;
 
-function TSGMaterial.MapDiffuseWay():TSGString;inline;
+function TSGMaterial.MapDiffuseWay():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if FMapDiffuse<>nil then
 	Result:=FMapDiffuse.Way
@@ -2560,7 +2337,7 @@ else
 	Result:='';
 end;
 
-function TSGMaterial.MapBumpWay():TSGString;inline;
+function TSGMaterial.MapBumpWay():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if FMapBump<>nil then
 	Result:=FMapBump.Way

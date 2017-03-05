@@ -218,6 +218,7 @@ uses
 	,SaGeRenderInterface
 	,SaGeMatrix
 	,SaGeCommon
+	,SaGeMeshSg3dm
 	;
 
 //Algorithm
@@ -1247,10 +1248,8 @@ end;
 
 procedure TSGGasDiffusion.SaveStageToStream();
 begin
-if FFileStream<>nil then
-	begin
-	FMesh.SaveToSG3DM(FFileStream);
-	end;
+if FFileStream <> nil then
+	TSGMeshSG3DMLoader.SaveModel(FMesh, FFileStream);
 end;
 
 procedure TSGGasDiffusion.ClearDisplayButtons();
@@ -2811,7 +2810,7 @@ while FFileStream.Position<>FFileStream.Size do
 	
 	FMesh:=TSGCustomModel.Create();
 	FMesh.Context := Context;
-	FMesh.LoadFromSG3DM(FFileStream);
+	TSGMeshSG3DMLoader.LoadModel(FMesh, FFileStream);
 	FMesh.Destroy();
 	FMesh:=nil;
 	end;
@@ -2832,7 +2831,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FMesh:=TSGCustomModel.Create();
 	FMesh.Context := Context;
 	FFileStream.Position:=FArCadrs[FNowCadr];
-	FMesh.LoadFromSG3DM(FFileStream);
+	TSGMeshSG3DMLoader.LoadModel(FMesh, FFileStream);
 	
 	if FMovieBackToMenuButton = nil then
 		begin
@@ -3784,7 +3783,7 @@ if FMesh <> nil then
 		if FNowCadr > High(FArCadrs) then
 			FNowCadr:=0;
 		FFileStream.Position:=FArCadrs[FNowCadr];
-		FMesh.LoadFromSG3DM(FFileStream);
+		TSGMeshSG3DMLoader.LoadModel(FMesh, FFileStream);
 		if (Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8]) then
 			if FMesh.QuantityObjects<>0 then
 				for i := 0 to FMesh.QuantityObjects-1 do 

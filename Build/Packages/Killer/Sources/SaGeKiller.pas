@@ -123,11 +123,11 @@ uses
 
 procedure TSGKiller.DeleteDeviceResources();
 begin
-SGKillImage(FImageSkull);
-SGKillImage(FImageBlock);
-SGKillImage(FImageBullet);
-SGKillImage(FImageZombi);
-SGKillImage(FImageYou);
+SGKill(FImageSkull);
+SGKill(FImageBlock);
+SGKill(FImageBullet);
+SGKill(FImageZombi);
+SGKill(FImageYou);
 end;
 
 procedure TSGKiller.LoadDeviceResources();
@@ -671,11 +671,11 @@ FComboBoxRespamn.Destroy;
 FGroundComboBox.Destroy;
 FTimerLabel.Destroy;
 
-SGKillImage(FImageSkull);
-SGKillImage(FImageBlock);
-SGKillImage(FImageBullet);
-SGKillImage(FImageZombi);
-SGKillImage(FImageYou);
+SGKill(FImageSkull);
+SGKill(FImageBlock);
+SGKill(FImageBullet);
+SGKill(FImageZombi);
+SGKill(FImageYou);
 inherited;
 end;
 

@@ -136,7 +136,7 @@ type
 		end;
 
 procedure SGConvertToSGIA(const InFile, OutFile : TSGString);
-procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -164,7 +164,7 @@ uses
 	,SaGeLog
 	;
 
-procedure SGKillImage(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var Image : TSGImage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 if Image <> nil then
 	begin

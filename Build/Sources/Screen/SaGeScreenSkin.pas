@@ -335,11 +335,8 @@ end;
 
 procedure TSGScreenSkin.DestroyFont();
 begin
-if FDestroyFontSuppored and (FFont <> nil) then
-	begin
-	FFont.Destroy();
-	FFont := nil;
-	end;
+if FDestroyFontSuppored then
+	SGKill(FFont);
 end;
 
 function TSGScreenSkin.FontReady() : TSGBool;
@@ -370,7 +367,7 @@ end;
 
 destructor TSGScreenSkin.Destroy();
 begin
-SGKillImage(FComboBoxImage);
+SGKill(FComboBoxImage);
 DestroyFont();
 inherited;
 end;

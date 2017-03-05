@@ -26,14 +26,21 @@ type
 		FModel     : TSGCustomModel;
 		FProgress  : TSGMeshLoaderProgress;
 			public
-		property Model    : TSGCustomModel        read FModel    write FModel;
-		property FileName : TSGString             read FFileName write FFileName;
+		procedure SetFileName(const VFileName : TSGString); virtual;
+		procedure SetModel(const VModel : TSGCustomModel); virtual;
+			public
+		property Model    : TSGCustomModel        read FModel    write SetModel;
+		property FileName : TSGString             read FFileName write SetFileName;
 		property Progress : TSGMeshLoaderProgress read FProgress write FProgress;
 			protected
 		procedure SetProgress(const ProgressNow : TSGFloat32); virtual;
 		end;
 
-function SGLoadMesh(const LoadClass : TSGMeshLoaderClass; const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean;
+function SGLoadMesh(const LoadModel : TSGCustomModel; const LoadClass : TSGMeshLoaderClass; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+function SGLoadMesh3DS(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+function SGLoadMesh3DS(const LoadModel : TSGCustomModel; const LoadStream : TStream; const LoadFileName : TSGString = ''; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+function SGLoadMeshOBJ(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+function SGLoadMeshSG3DM(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
 
 implementation
 
@@ -42,9 +49,46 @@ uses
 	,SaGeSysUtils
 	
 	,SysUtils
+	
+	// Formats
+	,SaGeMesh3ds
+	,SaGeMeshObj
+	,SaGeMeshSg3dm
 	;
 
-function SGLoadMesh(const LoadClass : TSGMeshLoaderClass; const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean;
+function SGLoadMeshSG3DM(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+begin
+Result := SGLoadMesh(LoadModel, TSGMeshSG3DMLoader, LoadFileName, LoadProgress);
+end;
+
+function SGLoadMeshOBJ(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+begin
+Result := SGLoadMesh(LoadModel, TSGMeshOBJLoader, LoadFileName, LoadProgress);
+end;
+
+function SGLoadMesh3DS(const LoadModel : TSGCustomModel; const LoadStream : TStream; const LoadFileName : TSGString = ''; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+begin
+Result := False;
+with TSGMesh3DSLoader.Create() do
+	begin
+	try
+		Progress := LoadProgress;
+		SetStream(LoadStream);
+		FileName := LoadFileName;
+		Import3DS(LoadModel, Result);
+	except on e : Exception do
+		SGLogException('SGLoadMesh3DS<Stream>(...). Raised exception', e);
+	end;
+	Destroy();
+	end;
+end;
+
+function SGLoadMesh3DS(const LoadModel : TSGCustomModel; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
+begin
+Result := SGLoadMesh(LoadModel, TSGMesh3DSLoader, LoadFileName, LoadProgress);
+end;
+
+function SGLoadMesh(const LoadModel : TSGCustomModel; const LoadClass : TSGMeshLoaderClass; const LoadFileName : TSGString; const LoadProgress : TSGMeshLoaderProgress = nil) : TSGBoolean; overload;
 begin
 Result := False;
 if LoadClass <> nil then
@@ -60,6 +104,16 @@ if LoadClass <> nil then
 		end;
 		Destroy();
 		end;
+end;
+
+procedure TSGMeshLoader.SetFileName(const VFileName : TSGString);
+begin
+FFileName := VFileName;
+end;
+
+procedure TSGMeshLoader.SetModel(const VModel : TSGCustomModel);
+begin
+FModel := VModel;
 end;
 
 procedure TSGMeshLoader.SetProgress(const ProgressNow : TSGFloat32);

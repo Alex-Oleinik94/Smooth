@@ -61,6 +61,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeMathUtils
 	,SaGeFileUtils
+	,SaGeMeshLoader
 	;
 
 class function TSGGameTron.ClassName() : TSGString;
@@ -147,7 +148,7 @@ begin
 FileName := SGCheckDirectorySeparators(FileName);
 AddLoadSection('"' + FileName + '"', LoadProgressProportion);
 Model := TSGModel.Create(Context);
-Model.Mesh.Load3DSFromFile(FileName, @FSectionProgress);
+SGLoadMesh3DS(Model.Mesh, FileName, @FSectionProgress);
 FScene.AddNod(Model);
 FinishLoadSection();
 end;

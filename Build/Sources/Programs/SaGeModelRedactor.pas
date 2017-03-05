@@ -49,6 +49,7 @@ uses
 	,SaGeSysUtils
 	,SaGeLog
 	,SaGeStringUtils
+	,SaGeMeshLoader
 	;
 
 procedure mmmButtonFormEsc(Button:TSGButton);
@@ -103,13 +104,13 @@ Result := False;
 Expansion := SGUpCaseString(SGFileExpansion(FileName));
 try
 	if Expansion = '3DS' then
-		Result := FCustomModel.Load3DSFromStream(Stream, FileName)
+		Result := SGLoadMesh3DS(FCustomModel, Stream, FileName)
 	else if Expansion = 'OBJ' then
-		Result := FCustomModel.LoadOBJFromFile(FileName)
+		Result := SGLoadMesh3DS(FCustomModel, FileName)
 	else
 		begin
 		OldObjectsCount := ObjectCount();
-		FCustomModel.LoadFromSG3DM(Stream);
+		SGLoadMeshSG3DM(FCustomModel, FileName);
 		Result := ObjectCount() > OldObjectsCount;
 		end;
 except on e : Exception do

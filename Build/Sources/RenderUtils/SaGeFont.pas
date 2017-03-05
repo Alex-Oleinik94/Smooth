@@ -62,6 +62,7 @@ type
 		end;
 
 procedure SGTranslateFont(const FontInWay, FontOutWay : TSGString;const RunInConsole : TSGBoolean = True);
+procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -76,6 +77,15 @@ uses
 	,SaGeFileUtils
 	,SaGeRenderBase
 	;
+
+procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if Font <> nil then
+	begin
+	Font.Destroy();
+	Font := nil;
+	end;
+end;
 
 function TSGFont.LoadSGF():TSGBoolean;
 var

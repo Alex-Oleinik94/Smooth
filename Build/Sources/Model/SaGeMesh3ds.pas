@@ -59,9 +59,9 @@ type
 		function Load() : TSGBoolean; override;
 		function Import3DS(const AModel : TSGCustomModel; out Sucsses : TSGBoolean) : TSGMesh3DSLoader;
 		function Import3DS() : TSGBoolean; 
-		function SetFileName(const VFileName : TSGString) : TSGMesh3DSLoader;
-		function SetStream(const VStream : TStream) : TSGMesh3DSLoader;
-		function SetModel(const VModel : TSGCustomModel) : TSGMesh3DSLoader;
+		procedure SetFileName(const VFileName : TSGString); override;
+		procedure SetModel(const VModel : TSGCustomModel); override;
+		procedure SetStream(const VStream : TStream);
 			private
 		function FindChunk(const ChunkID : TSGMesh3DSChunkIdentifier; const IsParent : TSGBoolean = False) : TSGMesh3DSChunkPosition; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SkipHeader();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -101,11 +101,10 @@ begin
 Result := Import3DS();
 end;
 
-function TSGMesh3DSLoader.SetModel(const VModel : TSGCustomModel) : TSGMesh3DSLoader;
+procedure TSGMesh3DSLoader.SetModel(const VModel : TSGCustomModel);
 begin
-Model := VModel;
+FModel := VModel;
 FObjectsCountBeforeImport := Model.QuantityObjects;
-Result := Self;
 end;
 
 class function TSGMesh3DSLoader.ClassName() : TSGString;
@@ -113,17 +112,15 @@ begin
 Result := 'TSGMesh3DSLoader';
 end;
 
-function TSGMesh3DSLoader.SetStream(const VStream : TStream) : TSGMesh3DSLoader;
+procedure TSGMesh3DSLoader.SetStream(const VStream : TStream);
 begin
 DestroyInput();
 FFile      := VStream;
-Result     := Self;
 end;
 
-function TSGMesh3DSLoader.SetFileName(const VFileName : TSGString) : TSGMesh3DSLoader;
+procedure TSGMesh3DSLoader.SetFileName(const VFileName : TSGString);
 begin
-FileName := VFileName;
-Result   := Self;
+FFileName := VFileName;
 end;
 
 constructor TSGMesh3DSLoader.Create();overload;
