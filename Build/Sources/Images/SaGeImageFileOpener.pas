@@ -156,7 +156,7 @@ end;
 begin
 Iterator.Import(5, FRenderSize.y - (FFont.FontHeight + 1) * 5 - 2);
 Render.Color3f(0.5,0.5,0.5);
-PaintString('FileName = ' + FImage.Way);
+PaintString('FileName = ' + FImage.FileName);
 PaintString('Width = ' + SGStr(FImage.Width));
 PaintString('Height = ' + SGStr(FImage.Height));
 PaintString('Channels = ' + SGStr(FImage.Channels));

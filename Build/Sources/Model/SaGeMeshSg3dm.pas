@@ -22,6 +22,7 @@ uses
 	,SaGeMatrix
 	,SaGeVertexObject
 	,SaGeMaterial
+	,SaGeImage
 	
 	,Classes
 	;
@@ -29,6 +30,8 @@ const
 	SGMeshVersion : TSGQuadWord = 187;
 	SGMeshDefaultLogo = 'SaGe3DObj';
 type
+	TSGMeshSG3DImageSaveFormat = (SGMeshSG3DNoImage, SGMeshSG3DImagePath, SGMeshSG3DImageSGIA);
+	TSGMeshSG3DImageType = (SGMeshSG3DNullImage, SGMeshSG3DImageTexture, SGMeshSG3DImageBump);
 	TSGMeshSG3DEnum = TSGUInt64;
 	TSGMeshSG3DBool = TSGBool8;
 	TSGMeshSG3DMatrix = TSGMatrix4x4;
@@ -41,6 +44,8 @@ type
 		class function ClassName() : TSGString; override;
 		function Load() : TSGBoolean; override;
 			protected
+		class procedure WriteImageSaveFormat(const Stream : TStream; Format : TSGMeshSG3DImageSaveFormat); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function  ReadImageSaveFormat (const Stream : TStream)        : TSGMeshSG3DImageSaveFormat;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure WriteString(const Stream : TStream; Str : TSGString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  ReadString (const Stream : TStream)      : TSGString;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure WriteEnum(const Stream : TStream; Enum : TSGMeshSG3DEnum); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -53,8 +58,10 @@ type
 		class function  ReadColorFormat (const Stream : TStream)             : TSGMeshColorType;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class procedure WriteVertexFormat(const Stream : TStream; VertexFormat : TSGMeshVertexType); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  ReadVertexFormat (const Stream : TStream)              : TSGMeshVertexType;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		
 		class procedure WriteHead(const Stream : TStream);              {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function  ReadHead (const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		
 		class function  IdentifyMaterial(const M : TSGCustomModel; const MaterialName : TSGString) : ISGMaterial;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		class function  MaterialName(const Material : ISGMaterial) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
@@ -62,10 +69,14 @@ type
 		class procedure SaveObject(const O : TSG3DObject; const Stream : TStream);
 		class procedure LoadModel(const M : TSGCustomModel; const Stream : TStream);
 		class procedure SaveModel(const M : TSGCustomModel; const Stream : TStream);
+		class procedure LoadMaterial(const Material : TSGMaterial; const Stream : TStream);
+		class procedure SaveMaterial(const Material : TSGMaterial; const Stream : TStream);
 		class procedure LoadModelFromFile(const M : TSGCustomModel; const VFileName : TSGString);
 		class procedure SaveModelToFile  (const M : TSGCustomModel; const VFileName : TSGString);
 		class procedure LoadObjectFromFile(const O : TSG3DObject; const VFileName : TSGString);
 		class procedure SaveObjectToFile  (const O : TSG3DObject; const VFileName : TSGString);
+		class procedure LoadImage(var Image : TSGImage; var ImageType : TSGMeshSG3DImageType; const Stream : TStream);
+		class procedure SaveImage(const Image : TSGImage; ImageType : TSGMeshSG3DImageType; const Stream : TStream);
 			public
 		procedure SetStream(const VStream : TStream);
 			private
@@ -89,6 +100,16 @@ uses
 	
 	,SysUtils
 	;
+
+class procedure TSGMeshSG3DMLoader.WriteImageSaveFormat(const Stream : TStream; Format : TSGMeshSG3DImageSaveFormat); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Stream.WriteBuffer(Format, SizeOf(Format));
+end;
+
+class function  TSGMeshSG3DMLoader.ReadImageSaveFormat (const Stream : TStream)        : TSGMeshSG3DImageSaveFormat;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Stream.ReadBuffer(Result, SizeOf(Result));
+end;
 
 class procedure TSGMeshSG3DMLoader.WriteString(const Stream : TStream; Str : TSGString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -313,6 +334,122 @@ SGHint([Result]);
 {$ENDIF}
 end;
 
+class procedure TSGMeshSG3DMLoader.LoadImage(var Image : TSGImage; var ImageType : TSGMeshSG3DImageType; const Stream : TStream);
+
+procedure LoadSGIA();
+var
+	MemoryStream : TMemoryStream = nil;
+	MemoryStreamSize : TSGMeshSG3DEnum = 0;
+begin
+MemoryStreamSize  := ReadEnum(Stream);
+MemoryStream := TMemoryStream.Create();
+SGCopyPartStreamToStream(Stream, MemoryStream, MemoryStreamSize);
+MemoryStream.Position := 0;
+Image.LoadingFromStream(MemoryStream);
+MemoryStream.Destroy();
+SGLog.Source(['TSGMeshSG3DMLoader_LoadImage()__LoadSGIA(). Current stream size = ', SGGetSizeString(MemoryStreamSize, 'EN'), '.']);
+end;
+
+var
+	ImageSaveFormat : TSGMeshSG3DImageSaveFormat;
+begin
+SGKill(Image);
+Stream.ReadBuffer(ImageType, SizeOf(ImageType));
+if ImageType <> SGMeshSG3DNullImage then
+	begin
+	ImageSaveFormat := ReadImageSaveFormat(Stream);
+	case ImageSaveFormat of
+	SGMeshSG3DImageSGIA :
+		begin
+		Image := TSGImage.Create();
+		LoadSGIA();
+		end;
+	SGMeshSG3DImagePath :
+		begin
+		Image := TSGImage.Create();
+		Image.FileName := ReadString(Stream);
+		Image.Loading();
+		end;
+	end;
+	end;
+end;
+
+class procedure TSGMeshSG3DMLoader.SaveImage(const Image : TSGImage; ImageType : TSGMeshSG3DImageType; const Stream : TStream);
+
+procedure SaveSGIA();
+var
+	MemoryStream : TMemoryStream = nil;
+	MemoryStreamSize : TSGMeshSG3DEnum = 0;
+begin
+MemoryStream := TMemoryStream.Create();
+MemoryStream.Position := 0;
+Image.SaveingToStream(MemoryStream);
+MemoryStream.Position := 0;
+MemoryStreamSize := MemoryStream.Size;
+WriteEnum(Stream, MemoryStreamSize);
+SGCopyPartStreamToStream(MemoryStream, Stream, MemoryStreamSize);
+MemoryStream.Destroy();
+SGLog.Source(['TSGMeshSG3DMLoader_SaveImage()__SaveSGIA(). Result stream size = ', SGGetSizeString(MemoryStreamSize, 'EN'), '.']);
+end;
+
+begin
+Stream.WriteBuffer(ImageType, SizeOf(ImageType));
+if (Image <> nil) and (Image.Image <> nil) and (Image.Image.BitMap <> nil) then
+	begin
+	WriteImageSaveFormat(Stream, SGMeshSG3DImageSGIA);
+	SaveSGIA();
+	end
+else if (Image <> nil) and SGFileExists(Image.FileName) then
+	begin
+	WriteImageSaveFormat(Stream, SGMeshSG3DImagePath);
+	WriteString(Stream, Image.FileName);
+	end
+else
+	WriteImageSaveFormat(Stream, SGMeshSG3DNoImage);
+end;
+
+class procedure TSGMeshSG3DMLoader.LoadMaterial(const Material : TSGMaterial; const Stream : TStream);
+
+procedure PutImage(var Image : TSGImage; const ImageType : TSGMeshSG3DImageType);
+begin
+if Image <> nil then
+	case ImageType of
+	SGMeshSG3DImageTexture :
+		begin
+		Material.ImageTexture := Image;
+		Image := nil;
+		end;
+	SGMeshSG3DImageBump :
+		begin
+		Material.ImageBump := Image;
+		Image := nil;
+		end;
+	end;
+SGKill(Image);
+end;
+
+var
+	Image : TSGImage = nil;
+	ImageType : TSGMeshSG3DImageType;
+begin
+Material.Name := ReadString(Stream);
+repeat
+LoadImage(Image, ImageType, Stream);
+PutImage(Image, ImageType);
+until ImageType = SGMeshSG3DNullImage;
+end;
+
+class procedure TSGMeshSG3DMLoader.SaveMaterial(const Material : TSGMaterial; const Stream : TStream);
+var
+	ImageType : TSGMeshSG3DImageType;
+begin
+WriteString(Stream, Material.Name);
+SaveImage(Material.ImageTexture, SGMeshSG3DImageTexture, Stream);
+SaveImage(Material.ImageBump,    SGMeshSG3DImageBump,    Stream);
+ImageType := SGMeshSG3DNullImage;
+Stream.WriteBuffer(ImageType, SizeOf(ImageType));
+end;
+
 class procedure TSGMeshSG3DMLoader.LoadModel(const M : TSGCustomModel; const Stream : TStream);
 var
 	Index : TSGMaxEnum;
@@ -327,10 +464,7 @@ QuantityMaterials := ReadEnum(Stream);
 QuantityObjects   := ReadEnum(Stream);
 if QuantityMaterials > 0 then
 	for Index :=0 to QuantityMaterials - 1 do
-		begin
-		M.AddMaterial().Name := ReadString(Stream);
-		M.LastMaterial().AddDiffuseMap(ReadString(Stream));
-		end;
+		LoadMaterial(M.AddMaterial(), Stream);
 {$IFDEF SGM3D_D_R}
 SGHint(['Mat length = ', Stream.Position]);
 {$ENDIF}
@@ -359,10 +493,7 @@ WriteEnum(Stream, M.QuantityMaterials);
 WriteEnum(Stream, M.QuantityObjects);
 if M.QuantityMaterials > 0 then
 	for Index := 0 to M.QuantityMaterials - 1 do
-		begin
-		WriteString(Stream, M.Materials[Index].Name);
-		WriteString(Stream, M.Materials[Index].MapDiffusePath);
-		end;
+		SaveMaterial(M.Materials[Index], Stream);
 if M.QuantityObjects > 0 then
 	for Index := 0 to M.QuantityObjects - 1 do
 		with M.ModelMesh[Index]^ do

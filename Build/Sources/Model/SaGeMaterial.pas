@@ -36,6 +36,7 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		class function ClassName() : TSGString; override;
 		destructor Destroy();override;
+		procedure SetContext(const VContext : ISGContext); override;
 			private
 		FColorDiffuse, FColorSpecular, FColorAmbient : TSGColor4f;
 		FIllum, FNS : TSGSingle;
@@ -49,6 +50,8 @@ type
 		procedure PushBlend(const CurrentBlend : TSGBoolean);
 		procedure PopBlend();
 		function GetName() : TSGString;
+		procedure SetImageTexture(const Image : TSGImage);
+		procedure SetImageBump(const Image : TSGImage);
 			public
 		procedure SetColorAmbient(const r,g,b : TSGSingle);
 		procedure SetColorSpecular(const r,g,b : TSGSingle);
@@ -67,8 +70,8 @@ type
 		property Ns            : TSGSingle  read FNS            write FNS;
 		property EnableBump    : TSGBoolean read FEnableBump    write FEnableBump;
 		property EnableTexture : TSGBoolean read FEnableTexture write FEnableTexture;
-		property ImageBump     : TSGImage   read FMapBump       write FMapBump;
-		property ImageTexture  : TSGImage   read FMapDiffuse    write FMapDiffuse;
+		property ImageBump     : TSGImage   read FMapBump       write SetImageBump;
+		property ImageTexture  : TSGImage   read FMapDiffuse    write SetImageTexture;
 		end;
 
 implementation
@@ -77,6 +80,35 @@ uses
 	 SaGeStringUtils,
 	 SaGeRenderBase
 	;
+
+procedure TSGMaterial.SetContext(const VContext : ISGContext);
+
+procedure SetContextToImage(var Image : TSGImage);
+begin
+if Image <> nil then
+	Image.Context := Context;
+end;
+
+begin
+inherited SetContext(VContext);
+SetContextToImage(FMapDiffuse);
+SetContextToImage(FMapBump);
+SetContextToImage(FMapOpacity);
+SetContextToImage(FMapSpecular);
+SetContextToImage(FMapAmbient);
+end;
+
+procedure TSGMaterial.SetImageTexture(const Image : TSGImage);
+begin
+FEnableTexture := True;
+FMapDiffuse := Image;
+end;
+
+procedure TSGMaterial.SetImageBump(const Image : TSGImage);
+begin
+FEnableBump := True;
+FMapBump := Image;
+end;
 
 function TSGMaterial.GetName() : TSGString;
 begin
@@ -179,7 +211,7 @@ procedure TSGMaterial.AddDiffuseMap(const VFileName : TSGString);
 begin
 FMapDiffuse:=TSGImage.Create();
 FMapDiffuse.Context := Context;
-FMapDiffuse.Way := VFileName;
+FMapDiffuse.FileName := VFileName;
 FEnableTexture := FMapDiffuse.Loading();
 end;
 
@@ -187,7 +219,7 @@ procedure TSGMaterial.AddBumpMap(const VFileName : TSGString);
 begin
 FMapBump:=TSGImage.Create();
 FMapBump.Context := Context;
-FMapBump.Way := VFileName;
+FMapBump.FileName := VFileName;
 FEnableBump := FMapBump.Loading();
 end;
 
@@ -260,17 +292,17 @@ end;
 function TSGMaterial.MapDiffusePath():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if FMapDiffuse<>nil then
-	Result:=FMapDiffuse.Way
+	Result := FMapDiffuse.FileName
 else
-	Result:='';
+	Result := '';
 end;
 
 function TSGMaterial.MapBumpPath():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
 if FMapBump<>nil then
-	Result:=FMapBump.Way
+	Result := FMapBump.FileName
 else
-	Result:='';
+	Result := '';
 end;
 
 procedure TSGMaterial.SetColorAmbient(const r,g,b :TSGSingle);

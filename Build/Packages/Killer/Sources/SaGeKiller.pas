@@ -117,6 +117,7 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeCommon
+	,SaGeBaseUtils
 	;
 
 {$OVERFLOWCHECKS OFF}
@@ -498,84 +499,33 @@ for i:=o to High(FZombies) do
 end;
 
 procedure TSGKiller.InitImages(const VWidthHeight : TSGLongWord; const VRadBool : TSGBoolean);
+
+procedure ProcessImage(var Image : TSGImage; const ImageFileName : TSGString; const BoundsSize : TSGUInt32);
 begin
-if (FImageBlock=nil) or VRadBool then
+if (Image=nil) or VRadBool then
 	begin
-	if FImageBlock<>nil then
-		FImageBlock.Destroy;
-	FImageBlock:=TSGImage.Create;
-	FImageBlock.SetContext(Context);
-	with FImageBlock do
+	if Image <> nil then
+		Image.Destroy();
+	Image := TSGImage.Create;
+	Image.SetContext(Context);
+	with Image do
 		begin
-		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Block.sgia';
+		FileName := ImageFileName;
 		Loading();
-		Image.SetBounds(VWidthHeight,VWidthHeight);
+		Image.SetBounds(BoundsSize, BoundsSize);
 		ToTexture();
 		end;
 	end;
+end;
 
-if (FImageBullet=nil) or VRadBool then
-	begin
-	if FImageBullet<>nil then
-		FImageBullet.Destroy;
-	FImageBullet:=TSGImage.Create;
-	FImageBullet.SetContext(Context);
-	with FImageBullet do
-		begin
-		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Bullet.sgia';
-		Loading();
-		if VWidthHeight>64 then
-			Image.SetBounds(64,64)
-		else
-			Image.SetBounds(VWidthHeight,VWidthHeight);
-		ToTexture();
-		end;
-	end;
-
-if (FImageZombi=nil) or VRadBool then
-	begin
-	if FImageZombi<>nil then
-		FImageZombi.Destroy;
-	FImageZombi:=TSGImage.Create;
-	FImageZombi.SetContext(Context);
-	with FImageZombi do
-		begin
-		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Zombie.sgia';
-		Loading();
-		Image.SetBounds(VWidthHeight,VWidthHeight);
-		ToTexture();
-		end;
-	end;
-
-if (FImageYou=nil) or VRadBool then
-	begin
-	if FImageYou<>nil then
-		FImageYou.Destroy;
-	FImageYou:=TSGImage.Create;
-	FImageYou.SetContext(Context);
-	with FImageYou do
-		begin
-		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'You.sgia';
-		Loading();
-		Image.SetBounds(VWidthHeight,VWidthHeight);
-		ToTexture();
-		end;
-	end;
-	
-if (FImageSkull=nil) or VRadBool then
-	begin
-	if FImageSkull<>nil then
-		FImageSkull.Destroy;
-	FImageSkull:=TSGImage.Create;
-	FImageSkull.SetContext(Context);
-	with FImageSkull do
-		begin
-		Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'Skull.sgia';
-		Loading();
-		Image.SetBounds(VWidthHeight,VWidthHeight);
-		ToTexture();
-		end;
-	end;
+const
+	KillerImagePredPath = SGTextureDirectory + DirectorySeparator + 'Killer' + DirectorySeparator;
+begin
+ProcessImage(FImageBlock,  KillerImagePredPath + 'Block.sgia',  VWidthHeight);
+ProcessImage(FImageBullet, KillerImagePredPath + 'Bullet.sgia', Iff(VWidthHeight > 64, 64, VWidthHeight));
+ProcessImage(FImageZombi,  KillerImagePredPath + 'Zombie.sgia', VWidthHeight);
+ProcessImage(FImageYou,    KillerImagePredPath + 'You.sgia',    VWidthHeight);
+ProcessImage(FImageSkull,  KillerImagePredPath + 'Skull.sgia',  VWidthHeight);
 end;
 
 procedure TSGKiller.InitGame;

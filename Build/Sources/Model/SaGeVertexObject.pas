@@ -25,7 +25,7 @@ const
 	SGMeshVertexType3f = SGVertexFormat3f;
 	SGMeshVertexType4f = SGVertexFormat4f;
 type
-	TSG3dObject    = class;
+	TSG3dObject = class;
 	
 	(**=========================1b===========================**)
 	
@@ -212,8 +212,8 @@ type
 	
 		// Это массив самих вершин. 
 		// Он в себе содерщит много всего, и обрабатывается соответствующе...
-		//! B каком порядке записывается в памяти информация о вершине
-		(* Vertex = [Vertexes, Colors, Normals, TexVertexes] *)
+		//! B таком порядке записывается в памяти информация о вершине
+		(* Vertex = [Vertex, Color, Normal, TexVertex] *)
 		(* Array of Vertex *)
 		ArVertex : TSGPointer;
 	public
@@ -229,15 +229,15 @@ type
 		function GetObjectFace(const Index : TSGMaxEnum = 0) : PSG3DObjectFace; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 	public
 		// Эти совйтсва возвращают указатель на Index-ый элемент массива вершин 
-		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType3f, иначе Result = nil
+		//! Это можно пользоваться только когда, когда VertexType = SGMeshVertexType3f, иначе Result = nil
 		property ArVertex3f[Index : TSGMaxEnum]:PSGVertex3f read GetVertex3f;
-		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType2f, иначе Result = nil
+		//! Это можно пользоваться только когда, когда VertexType = SGMeshVertexType2f, иначе Result = nil
 		property ArVertex2f[Index : TSGMaxEnum]:PSGVertex2f read GetVertex2f;
-		//! Это можно пользоваться только когда, когда FVertexType = SGMeshVertexType4f, иначе Result = nil
+		//! Это можно пользоваться только когда, когда VertexType = SGMeshVertexType4f, иначе Result = nil
 		property ArVertex4f[Index : TSGMaxEnum]:PSGVertex4f read GetVertex4f;
 		
 		// Добавляет пустую(ые) вершины в массив вершин
-		procedure AddVertex(const FQuantityNewVertexes:LongWord = 1);
+		procedure AddVertex(const QuantityNewVertexes : LongWord = 1);
 		
 		procedure SetVertex(const VVertexIndex : TSGUInt32; const x, y : TSGFloat32; const z : TSGFloat32 = 0; const w : TSGFloat32 = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure SetVertex(const VVertexIndex : TSGUInt32; const v2 : TSGVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -849,10 +849,10 @@ begin
 SetFaceLength(ArIndex,Faces[ArIndex]+FQuantityNewFaces);
 end;
 
-procedure TSG3DObject.AddVertex(const FQuantityNewVertexes:LongWord = 1);
+procedure TSG3DObject.AddVertex(const QuantityNewVertexes : LongWord = 1);
 begin
-FNOfVerts+=FQuantityNewVertexes;
-ReAllocMem(ArVertex,GetVertexesSize());
+FNOfVerts += QuantityNewVertexes;
+ReAllocMem(ArVertex, GetVertexesSize());
 end;
 
 procedure TSG3DObject.ChangeMeshColorType4b(); // BGRA to RGBA
@@ -1444,7 +1444,7 @@ if FEnableCullFace then
 		if FEnableCullFaceBack then
 			begin
 			Render.CullFace(SGR_BACK);
-			BasicDraw;
+			BasicDraw();
 			end;
 		if FEnableCullFaceFront then
 			begin

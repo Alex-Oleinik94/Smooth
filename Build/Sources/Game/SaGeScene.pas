@@ -93,7 +93,7 @@ var
 begin
 if FNods<>nil then
 	for i:=0 to High(FNods) do
-		if (FNods[i] as TSGModel) <> nil then
+		if FNods[i] is TSGModel then
 			Models[i].LoadToVBO();
 
 for i := 0 to High(FMutators) do

@@ -542,7 +542,7 @@ Mandelbrod.FZDegree:=2;
 Mandelbrod.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Mandelbrod.CreateThreads(QuantityThreads);
 Mandelbrod.BeginCalculate;
-Mandelbrod.FImage.Way:=SGImagesDirectory+DirectorySeparator+'Mand New.jpg';
+Mandelbrod.FImage.FileName:=SGImagesDirectory+DirectorySeparator+'Mand New.jpg';
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -1151,7 +1151,7 @@ if MandelbrodInitialized then
 				if FNowRenderitsiaVideo then
 					begin
 					//Mandelbrod.FImage.Image.SetBounds(1920,1080);
-					Mandelbrod.FImage.Way:=FVideoBuffer+DirectorySeparator+
+					Mandelbrod.FImage.FileName:=FVideoBuffer+DirectorySeparator+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
 						SGStr(FNowKadr)+'.jpg';
 					end;
@@ -1493,7 +1493,7 @@ if MandelbrodInitialized then
 			Mandelbrod.Height:=StartDepth;
 			end;
 		Mandelbrod.BeginCalculate();
-		Mandelbrod.FImage.Way := SGFreeFileName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod.jpg');
+		Mandelbrod.FImage.FileName := SGFreeFileName(SGImagesDirectory + DirectorySeparator + 'Mandelbrod.jpg');
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;

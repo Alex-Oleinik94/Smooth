@@ -38,6 +38,7 @@ type
         constructor Create(); override;
         destructor Destroy(); override;
         class function ClassName() : TSGString; override;
+        procedure SetContext(const VContext : ISGContext); override;
     protected
         FQuantityObjects   : TSGUInt64;
         FQuantityMaterials : TSGUInt64;
@@ -109,6 +110,20 @@ if M <> nil then
 end;
 
 // TSGModel
+
+procedure TSGCustomModel.SetContext(const VContext : ISGContext);
+var
+	Index : TSGMaxEnum;
+begin
+inherited SetContext(VContext);
+if FQuantityObjects > 0 then
+	for Index :=0 to FQuantityObjects - 1 do
+		if FArObjects[Index].FMesh <> nil then
+			FArObjects[Index].FMesh.Context := Context;
+if FQuantityMaterials > 0 then
+	for Index := 0 to FQuantityMaterials - 1 do
+		FArMaterials[Index].Context := Context;
+end;
 
 procedure TSGCustomModel.Clear();
 var

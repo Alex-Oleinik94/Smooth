@@ -44,7 +44,10 @@ uses
 procedure TSGModel.LoadToVBO();
 begin
 if FMesh <> nil then
+	begin
+	FMesh.Context := Context;
 	FMesh.LoadToVBO();
+	end;
 end;
 
 function TSGModel.FindProperty(const PropertyClass : TSGNodClass) : TSGNod;inline;

@@ -54,17 +54,17 @@ end;
 
 procedure SGConsoleImageResizer(const VParams : TSGConcoleCallerParams = nil);
 var
-	Image:TSGImage;
+	Image : TSGImage;
 begin
 if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
 	begin
 	Image := TSGImage.Create();
-	Image.Way := VParams[0];
+	Image.FileName := VParams[0];
 	Image.Loading();
 	Image.Image.SetBounds(
 		SGVal(VParams[1]),
 		SGVal(VParams[2]));
-	Image.Way := SGFreeFileName(Image.Way);
+	Image.FileName := SGFreeFileName(Image.FileName);
 	Image.Saveing();
 	Image.Destroy();
 	end

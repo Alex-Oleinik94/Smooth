@@ -89,7 +89,7 @@ if t <> FType then
 		FImage.Destroy();
 	FImage := TSGImage.Create();
 	FImage.Context := Context;
-	FImage.Way := '../Data/Textures/' + Iff(FType <> SGCheckButton ,'radiobox','checkbox') + '.sgia';
+	FImage.FileName := '../Data/Textures/' + Iff(FType <> SGCheckButton ,'radiobox','checkbox') + '.sgia';
 	FImage.Loading();
 	FImage.ToTexture();
 	end;

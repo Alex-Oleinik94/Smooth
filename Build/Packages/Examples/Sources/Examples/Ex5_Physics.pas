@@ -413,8 +413,8 @@ var
 	HMD : packed array of TSGSingle = nil;
 begin
 Image := TSGImage.Create();
-Image .Context := Context;
-Image .Way := VFileName;
+Image .Context  := Context;
+Image .FileName := VFileName;
 if Image.Loading() then
 	begin
 	PAPPE.PhysicsObjectAddMesh(FObject);

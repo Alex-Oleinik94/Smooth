@@ -25,7 +25,7 @@ type
 	
 	TSGFont = class(TSGImage)
 			public
-		constructor Create(const FileName:string = '');
+		constructor Create(const VFileName : TSGString = '');
 		class function ClassName() : TSGString; override;
 		destructor Destroy();override;
 			protected
@@ -144,7 +144,7 @@ var
 begin
 Result:=False;
 Stream := TMemoryStream.Create();
-SGResourceFiles.LoadMemoryStreamFromFile(Stream,FWay);
+SGResourceFiles.LoadMemoryStreamFromFile(Stream, FFileName);
 Stream.Position:=0;
 if Stream.Size=0 then
 	begin
@@ -366,21 +366,21 @@ var
 	i:LongInt = 0;
 	ii:LongInt = 0;
 begin
-if SGFileExpansion(FWay)='SGF' then
+if SGFileExpansion(FFileName)='SGF' then
 	begin
-	Result:=LoadSGF();
+	Result := LoadSGF();
 	Exit;
 	end;
 Result:=inherited Loading();
 if not Result then
 	Exit;
-i:=Length(FWay);
-while (FWay[i]<>'.')and(FWay[i]<>'/')and(i>0)do
+i:=Length(FFileName);
+while (FFileName[i]<>'.')and(FFileName[i]<>'/')and(i>0)do
 	i-=1;
-if (i>0)and (FWay[i]='.') then
+if (i>0)and (FFileName[i]='.') then
 	begin
 	for ii:=1 to i do
-		FontWay+=FWay[ii];
+		FontWay+=FFileName[ii];
 	FontWay+='txt';
 	if SGFileExists(FontWay) then
 		begin
@@ -394,12 +394,12 @@ begin
 Result := 'TSGFont';
 end;
 
-constructor TSGFont.Create(const FileName:string = '');
+constructor TSGFont.Create(const VFileName : TSGString = '');
 begin
-inherited Create(FileName);
-FFontReady:=False;
-FFontParams:=nil;
-FTextureParams:=nil;
+inherited Create(VFileName);
+FFontReady     := False;
+FFontParams    := nil;
+FTextureParams := nil;
 end;
 
 destructor TSGFont.Destroy;

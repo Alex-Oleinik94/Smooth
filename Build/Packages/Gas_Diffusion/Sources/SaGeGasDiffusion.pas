@@ -2333,10 +2333,10 @@ if d = 2 then
 
 SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
-	Image.Way := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.png', 'number');
+	Image.FileName := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.png', 'number');
 	Image.Saveing(SGI_PNG);
 {$ELSE}
-	Image.Way := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.jpg', 'number');
+	Image.FileName := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.jpg', 'number');
 	Image.Saveing(SGI_JPEG);
 	{$ENDIF}
 

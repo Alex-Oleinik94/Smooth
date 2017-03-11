@@ -26,7 +26,7 @@ type
 	// Класс изображения и текстуры
 	TSGImage = class(TSGDrawable)
 			public
-		constructor Create(const NewWay : string = '');
+		constructor Create(const VFileName : TSGString = '');
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 		procedure DeleteDeviceResources();override;
@@ -50,7 +50,7 @@ type
 		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
 		FReadyToGoToTexture : TSGBoolean;
 		//Путь в файлу
-		FWay                : TSGString;
+		FFileName           : TSGString;
 		//ФОрмат, в который сохранится изображзение прии его сохранении
 		FSaveFormat:TSGIByte;
 
@@ -69,7 +69,10 @@ type
 		class function GetLongWordBack(const FileBits:PByte;const Position:TSGUInt32):TSGUInt32;
 		function HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
-		procedure Saveing(const Format:TSGByte = SGI_DEFAULT);
+		function LoadingFromStream(const Stream : TStream) : TSGBool;
+		procedure SaveingToStream(const Stream : TStream);
+			public
+		procedure Saveing(const Format : TSGByte = SGI_DEFAULT);
 		function Loading():TSGBoolean;virtual;
 		procedure SaveToStream(const Stream:TStream);
 		procedure ToTexture();virtual;
@@ -94,7 +97,7 @@ type
 		property Bits               : TSGBitMapUInt read GetBitMapBits       write SetBitMapBits;
 		property BitMap             : PSGByte       read FImage.FBitMap      write FImage.FBitMap;
 		property Image              : TSGBitMap   read FImage;
-		property Way                : TSGString   read FWay                write FWay;
+		property FileName           : TSGString   read FFileName           write FFileName;
 		property ReadyToGoToTexture : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyGoToTexture   : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
 		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
@@ -179,25 +182,21 @@ if Image <> nil then
 	end;
 end;
 
-function TSGImage.HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := Channels > 3;
-end;
-
-procedure TSGImage.LoadDeviceResources();
-begin
-if not (ReadyGoToTexture or (Texture <> 0)) then
-	Loading();
-end;
-
-procedure TSGImage.DeleteDeviceResources();
+procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
 var
-	IsHasTexture : TSGBoolean;
+	Image: TSGImage = nil;
 begin
-IsHasTexture := FTexture <> 0;
-FreeTexture();
-FReadyToGoToTexture := IsHasTexture and (FImage.BitMap <> nil);
+Image:=TSGImage.Create();
+Image.FileName := InFile;
+Image.Loading();
+Image.FileName := OutFile;
+Image.Saveing(SGI_SGIA);
+Image.Destroy();
 end;
+
+(***************)
+(*TEXTURE BLOCK*)
+(***************)
 
 constructor TSGTextureBlock.Create(const VContext : ISGContext);
 begin
@@ -214,7 +213,7 @@ if FTextures <> nil then
 	if Length(FTextures) > 0 then
 		for i := 0 to High(FTextures) do
 			if (not FTextures[i].FWasUsed) and (FTextures[i].FHandle > 0) then
-				Render.DeleteTextures(1,@FTextures[i].FHandle);
+				Render.DeleteTextures(1, @FTextures[i].FHandle);
 	SetLength(FTextures,0);
 	end;
 inherited;
@@ -284,18 +283,6 @@ if (FTextures <> nil) then
 				FTextures[i].FWasUsed := True;
 				break;
 				end;
-end;
-
-procedure SGConvertToSGIA(const InFile,OutFile:TSGString);
-var
-	Image: TSGImage = nil;
-begin
-Image:=TSGImage.Create();
-Image.Way := InFile;
-Image.Loading();
-Image.Way := OutFile;
-Image.Saveing(SGI_SGIA);
-Image.Destroy();
 end;
 
 (****************************)
@@ -430,6 +417,44 @@ end;
 (*OTHERS FUNCTIONS FOR IMAGE*)
 (****************************)
 
+function TSGImage.LoadingFromStream(const Stream : TStream) : TSGBool;
+begin
+Result := False;
+if FStream <> nil then
+	FStream.Destroy();
+FStream := TMemoryStream.Create();
+Stream.Position := 0;
+SGCopyPartStreamToStream(Stream, FStream, Stream.Size);
+FStream.Position := 0;
+if (FStream <> nil) and (FStream.Size <> 0) then
+	Result := LoadToBitMap();
+end;
+
+procedure TSGImage.SaveingToStream(const Stream : TStream);
+begin
+SaveSGIA(Stream, FImage);
+end;
+
+function TSGImage.HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Channels > 3;
+end;
+
+procedure TSGImage.LoadDeviceResources();
+begin
+if not (ReadyGoToTexture or (Texture <> 0)) then
+	Loading();
+end;
+
+procedure TSGImage.DeleteDeviceResources();
+var
+	IsHasTexture : TSGBoolean;
+begin
+IsHasTexture := FTexture <> 0;
+FreeTexture();
+FReadyToGoToTexture := IsHasTexture and (FImage.BitMap <> nil);
+end;
+
 procedure TSGImage.SaveToStream(const Stream:TStream);
 begin
 if (FImage<>nil) and (FImage.BitMap<>nil) then
@@ -441,10 +466,10 @@ if (FImage<>nil) and (FImage.BitMap<>nil) then
 			SGResourceManager.SaveResourceToStream(Stream,'BMP',FImage);
 	end
 else
-	if (FWay<>'') and FileExists(FWay) then
+	if (FFileName<>'') and SGFileExists(FFileName) then
 		with TMemoryStream.Create() do
 			begin
-			LoadFromFile(FWay);
+			LoadFromFile(FFileName);
 			SaveToStream(Stream);
 			Destroy();
 			end;
@@ -524,7 +549,7 @@ SGI_SGIA:
 	SGI_PNG:
 		begin
 		{$IFDEF SGDebuging}
-			SGLog.Source('TSGImage  : Saveing "'+FWay+'" as PNG');
+			SGLog.Source('TSGImage  : Saveing "'+FFileName+'" as PNG');
 			{$ENDIF}
 		if SGResourceManager.SaveingIsSuppored('PNG') then
 			SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage);
@@ -533,14 +558,14 @@ SGI_SGIA:
 SGI_JPEG:
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Saveing "'+FWay+'" as JPEG');
+		SGLog.Source('TSGImage  : Saveing "'+FFileName+'" as JPEG');
 		{$ENDIF}
 	SaveJpg();
 	end;
 SGI_BMP:
 	begin
 	{$IFDEF SGDebuging}
-		SGLog.Source('TSGImage  : Saveing "'+FWay+'" as BMP');
+		SGLog.Source('TSGImage  : Saveing "'+FFileName+'" as BMP');
 		{$ENDIF}
 	SaveBMP(FImage,Stream);
 	end;
@@ -553,7 +578,7 @@ end;
 if Stream<>nil then
 	begin
 	Stream.Position:=0;
-	Stream.SaveToFile(SGSetExpansionToFileName(Way, TSGImageFormatDeterminer.DetermineExpansionFromFormat(SaveFormat)));
+	Stream.SaveToFile(SGSetExpansionToFileName(FileName, TSGImageFormatDeterminer.DetermineExpansionFromFormat(SaveFormat)));
 	Stream.Destroy();
 	end;
 end;
@@ -749,10 +774,10 @@ begin
 Result:=False;
 FStream.Position:=0;
 ImageFormat := TSGImageFormatDeterminer.DetermineFormat(FStream);
-if (ImageFormat = 0) and (SGUpCaseString(SGFileExpansion(Way)) = 'TGA') then
+if (ImageFormat = 0) and (SGUpCaseString(SGFileExpansion(FileName)) = 'TGA') then
 	ImageFormat := SGI_TGA;
 if ImageFormat = 0 then
-	SGLog.Source(['TSGImage.LoadToBitMap() : Determining image format for "' + Way + '" failed!'])
+	SGLog.Source(['TSGImage__LoadToBitMap() : Determining image format for "' + FileName + '" failed!'])
 else
 	case ImageFormat of
 	SGI_TGA :
@@ -779,13 +804,13 @@ else
 			end;
 	{$ENDIF}
 	else
-		SGLog.Source(['TSGImage.LoadToBitMap() : Unknown image format "' + Way + '"!'])
+		SGLog.Source(['TSGImage__LoadToBitMap() : Unknown image format "' + FileName + '"!'])
 	end;
 if FImage = nil then
 	FImage := TSGBitMap.Create();
 Result:=FImage.BitMap<>nil;
 {$IFDEF SGDebuging}
-	SGLog.Source('TSGImage  : Loaded "' + FWay + '" as ' + SGUpCaseString(TSGImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat)) + ' is "'+SGStr(Result)+'"');
+	SGLog.Source('TSGImage  : Loaded "' + FileName + '" as ' + SGUpCaseString(TSGImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat)) + ' is "'+SGStr(Result)+'"');
 	{$ENDIF}
 FReadyToGoToTexture:=Result;
 {$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
@@ -815,9 +840,9 @@ else
 	FStream.Free();
 	FStream:=TMemoryStream.Create();
 	end;
-SGResourceFiles.LoadMemoryStreamFromFile(FStream,FWay);
+SGResourceFiles.LoadMemoryStreamFromFile(FStream, FFileName);
 FStream.Position:=0;
-{$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToMemory". Way="'+FWay+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
+{$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToMemory". FileName="'+FFileName+'", FStream.Size="'+SGStr(FStream.Size)+'".');{$ENDIF}
 end;
 
 procedure TSGImage.ToTexture();
@@ -849,7 +874,7 @@ Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.Disable(SGR_TEXTURE_2D);
 FReadyToGoToTexture:=False;
 {$IFDEF SGDebuging}
-	SGLog.Source('TSGImage  : Loaded to texture "'+FWay+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
+	SGLog.Source('TSGImage  : Loaded to texture "'+FFileName+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
 end;
 
@@ -864,14 +889,14 @@ begin
 Result := 'TSGImage';
 end;
 
-constructor TSGImage.Create(const NewWay:string = '');
+constructor TSGImage.Create(const VFileName : TSGString = '');
 begin
 inherited Create();
 FTextureNumber := -1;
 FTextureType := SGITextureTypeTexture;
 FTexture:=0;
 FReadyToGoToTexture:=False;
-Way:=NewWay;
+FFileName:=VFileName;
 FImage:=TSGBitMap.Create();
 FStream:=nil;
 FName:='';
