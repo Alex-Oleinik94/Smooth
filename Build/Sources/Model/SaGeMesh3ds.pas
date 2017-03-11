@@ -10,6 +10,7 @@ uses
 	,SaGeMesh
 	,SaGeMeshLoader
 	,SaGeCommonStructs
+	,SaGeVertexObject
 	
 	,Classes
 	;
@@ -328,7 +329,7 @@ with FModel.LastObject() do
 	if Chunk.ID = TRI_MATERIAL then
 		begin
 		SkipHeader();
-		FModel.CreateMaterialIDInLastObject(SGReadStringFromStream(FFile));
+		FModel.IdentifyLastObjectMaterial(SGReadStringFromStream(FFile));
 		end;
 	end;
 end;

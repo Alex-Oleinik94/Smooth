@@ -12,6 +12,7 @@ uses
 	,Classes
 	
 	,SaGeBase
+	,SaGeVertexObject
 	,SaGeMesh
 	,SaGeCommonClasses
 	,SaGeRenderBase
@@ -1638,13 +1639,13 @@ end;
 
 initialization
 begin
-Matrixes[-1] := SGGetIdentityMatrix();
-Matrixes[0] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(1,0,0)),SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
-Matrixes[1] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(-1,0,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
-Matrixes[2] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,1,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
-Matrixes[3] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,-1,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
-Matrixes[4] := SGMultiplyPartMatrix(SGGetRotateMatrix(pi/2,SGVertex3fImport(0,0,-1)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
-Matrixes[5] := SGMultiplyPartMatrix(SGGetRotateMatrix(2*pi/2,SGVertex3fImport(1,0,0)) , SGGetTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[-1] := SGIdentityMatrix();
+Matrixes[0] := SGMultiplyPartMatrix(SGRotateMatrix(pi/2,SGVertex3fImport(1,0,0)),SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[1] := SGMultiplyPartMatrix(SGRotateMatrix(pi/2,SGVertex3fImport(-1,0,0)) , SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[2] := SGMultiplyPartMatrix(SGRotateMatrix(pi/2,SGVertex3fImport(0,1,0)) , SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[3] := SGMultiplyPartMatrix(SGRotateMatrix(pi/2,SGVertex3fImport(0,-1,0)) , SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[4] := SGMultiplyPartMatrix(SGRotateMatrix(pi/2,SGVertex3fImport(0,0,-1)) , SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
+Matrixes[5] := SGMultiplyPartMatrix(SGRotateMatrix(2*pi/2,SGVertex3fImport(1,0,0)) , SGTranslateMatrix(SGVertex3fImport(0,0,-1)));
 end
 
 finalization

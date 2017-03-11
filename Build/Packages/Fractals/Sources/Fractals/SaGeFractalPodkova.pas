@@ -33,9 +33,9 @@ implementation
 uses
 	 SaGeRenderBase
 	,SaGeMathUtils
-	,SaGeMesh
 	,SaGeScreenBase
 	,SaGeStringUtils
+	,SaGeVertexObject
 	;
 
 class function TSGFractalPodkova.ClassName() : TSGString;

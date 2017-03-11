@@ -1009,7 +1009,7 @@ begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glTranslatef = nil then TSGRenderOpenGL_DynLinkError('glTranslatef');{$ENDIF}
 glTranslatef(x, y, z);
 {$ELSE}
-Matrix := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
+Matrix := SGTranslateMatrix(SGVertex3fImport(x, y, z));
 MultMatrixf(@Matrix);
 {$ENDIF}
 end;
@@ -1026,7 +1026,7 @@ begin
 {$IFDEF RENDER_OGL_DEBUG_DYNLINK} if glRotatef = nil then TSGRenderOpenGL_DynLinkError('glRotatef');{$ENDIF}
 glRotatef(angle,x,y,z);
 {$ELSE}
-Matrix := SGGetRotateMatrix(Angle * DEG2RAD, SGVertex3fImport(x, y, z));
+Matrix := SGRotateMatrix(Angle * DEG2RAD, SGVertex3fImport(x, y, z));
 MultMatrixf(@Matrix);
 {$ENDIF}
 end;

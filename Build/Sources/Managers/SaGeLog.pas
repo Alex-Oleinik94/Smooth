@@ -49,9 +49,9 @@ type
 	TSGLog = class(TObject)
 			public
 		constructor Create(const LogFile : TSGString = SGLogFileName);
-		destructor Destroy();override;
-		procedure Source(const s:string;const WithTime:Boolean = True);overload;
-		procedure Source(const Ar : array of const;const WithTime:Boolean = True);overload;
+		destructor Destroy(); override;
+		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True);overload;
+		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True);overload;
 		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 			private
@@ -150,7 +150,7 @@ end;
 
 procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 var
-	i, WordCount, MaxLength, n, ii: TSGLongWord;
+	i, WordCount, MaxLength, n, ii, TitleLength : TSGMaxEnum;
 	TempS : TSGString;
 begin
 WordCount := 0;
@@ -158,35 +158,42 @@ if ArS <> nil then
 	WordCount := Length(ArS);
 if WordCount > 0 then
 	begin
-	Source(Title + ' (' + SGStr(WordCount) + ')', ViewTime);
-	MaxLength := Length(ArS[0]);
-	if Length(ArS) > 1 then
+	if (WordCount = 1) and ((Length(Title + ' ->') + 1 + Length(SGStringFromStringList(ArS, ' '))) < (SimbolsLength - 30)) then
+		Source(Title + ' -> ' + SGStringFromStringList(ArS, ' '), ViewTime)
+	else if (Length(Title + ' (' + SGStr(WordCount) + ') ->') + 1 + Length(SGStringFromStringList(ArS, ' '))) < (SimbolsLength - 30) then
+		Source(Title + ' (' + SGStr(WordCount) + ') -> ' + SGStringFromStringList(ArS, ' '), ViewTime)
+	else
 		begin
-		for i := 1 to High(ArS) do
-			if Length(ArS[i]) > MaxLength then
-				MaxLength := Length(ArS[i]);
-		end;
-	MaxLength += 2;
-	n := 150 div MaxLength;
-	MaxLength += (150 mod MaxLength) div n;
-	ii := 0;
-	TempS := '  ';
-	for i := 0 to High(ArS) do
-		begin
-		if (ii = n - 1) or (i = High(ArS)) then
-			TempS += ArS[i]
-		else
-			TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
-		ii +=1;
-		if ii = n then
+		Source(Title + ' (' + SGStr(WordCount) + ') --->', ViewTime);
+		MaxLength := Length(ArS[0]);
+		if Length(ArS) > 1 then
 			begin
-			ii := 0;
-			Source(TempS, False);
-			TempS := '  ';
+			for i := 1 to High(ArS) do
+				if Length(ArS[i]) > MaxLength then
+					MaxLength := Length(ArS[i]);
 			end;
+		MaxLength += 2;
+		n := 150 div MaxLength;
+		MaxLength += (150 mod MaxLength) div n;
+		ii := 0;
+		TempS := '  ';
+		for i := 0 to High(ArS) do
+			begin
+			if (ii = n - 1) or (i = High(ArS)) then
+				TempS += ArS[i]
+			else
+				TempS += StringJustifyLeft(ArS[i], MaxLength, ' ');
+			ii +=1;
+			if ii = n then
+				begin
+				ii := 0;
+				Source(TempS, False);
+				TempS := '  ';
+				end;
+			end;
+		if TempS <> '  ' then
+			Source(TempS, False);
 		end;
-	if TempS <> '  ' then
-		Source(TempS, False);
 	end;
 end;
 
@@ -255,14 +262,14 @@ var
 begin
 Str := SGStringFromStringList(Params, ' ');
 if Length(Str) < 106 then
-	Log.Source('Params : ' + Str)
+	Log.Source('Executable params: ' + Str)
 else if Length(Str) < 150 then
 	begin
-	Log.Source('Params --> (' + SGStr(Length(Params)) + ')');
+	Log.Source('Executable params --> (' + SGStr(Length(Params)) + ')');
 	Log.Source('  ' + Str);
 	end
 else
-	Log.Source(Params, 'Params -->');
+	Log.Source(Params, 'Executable params -->');
 SetLength(Params, 0);
 end;
 

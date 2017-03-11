@@ -15,7 +15,7 @@ uses
 	,SaGeRenderBase
 	,SaGeCommonStructs
 	,SaGeScreen
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeImage
 	,SaGeResourceManager
 	,SaGeMatrix

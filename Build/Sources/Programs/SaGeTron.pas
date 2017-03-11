@@ -62,6 +62,7 @@ uses
 	,SaGeMathUtils
 	,SaGeFileUtils
 	,SaGeMeshLoader
+	,SaGeMeshSg3dm
 	;
 
 class function TSGGameTron.ClassName() : TSGString;
@@ -148,15 +149,23 @@ begin
 FileName := SGCheckDirectorySeparators(FileName);
 AddLoadSection('"' + FileName + '"', LoadProgressProportion);
 Model := TSGModel.Create(Context);
-SGLoadMesh3DS(Model.Mesh, FileName, @FSectionProgress);
+
+if SGFileExists(FileName + '.Sg3dm') then
+	TSGMeshSG3DMLoader.LoadModelFromFile(Model.Mesh, FileName + '.Sg3dm')
+else
+	begin
+	SGLoadMesh3DS(Model.Mesh, FileName, @FSectionProgress);
+	TSGMeshSG3DMLoader.SaveModelToFile(Model.Mesh, FileName + '.Sg3dm');
+	end;
+
 FScene.AddNod(Model);
 FinishLoadSection();
 end;
 
 begin
 FTotalProgress := 0.04;
-Add3DSModel('./../Data/Tron/motoBike.3ds', (1 - 0.04) * 0.9);
 Add3DSModel('./../Data/Tron/Map.3ds', (1 - 0.04) * 0.1);
+Add3DSModel('./../Data/Tron/motoBike.3ds', (1 - 0.04) * 0.9);
 FLoadClass.Progress := 1.0001;
 FState := SGTStateStarting;
 end;

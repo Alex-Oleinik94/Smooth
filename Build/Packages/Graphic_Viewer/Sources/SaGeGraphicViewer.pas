@@ -37,6 +37,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog
+	,SaGeVertexObject
 	,SaGeMathUtils
 	,SaGeBaseUtils
 	;

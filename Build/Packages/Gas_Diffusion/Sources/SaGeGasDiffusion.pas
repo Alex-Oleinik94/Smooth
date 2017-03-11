@@ -13,6 +13,7 @@ uses
 	,SaGeBase
 	,SaGeThreads
 	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeContext
 	,SaGeCommonClasses
 	,SaGeRenderBase

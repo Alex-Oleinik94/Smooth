@@ -11,7 +11,7 @@ uses
 	,SaGeBase
 	,SaGeImage
 	,SaGeCommonClasses
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeRenderBase
 	;
 type

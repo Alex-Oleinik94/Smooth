@@ -10,7 +10,7 @@ uses
 	,Classes
 	
 	,SaGeBase
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeCommonClasses
 	,SaGeCommonStructs
 	,SaGeRenderBase

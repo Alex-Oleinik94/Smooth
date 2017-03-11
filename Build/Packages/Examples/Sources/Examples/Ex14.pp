@@ -14,7 +14,7 @@ uses
 	,SaGeRenderBase
 	,SaGeFont
 	,SaGeScreen
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeCommonStructs
 	,SaGeShaders
 	,SaGeResourceManager
@@ -404,8 +404,8 @@ FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
 FLightMatrix := FCameraInverseModelViewMatrix *
 	FLightModelViewMatrix * 
 	FLightProjectionMatrix *
-	SGGetScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
-	SGGetTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
+	SGScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
+	SGTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
 
 if FShadowRenderType then
 	begin // Вариант #1

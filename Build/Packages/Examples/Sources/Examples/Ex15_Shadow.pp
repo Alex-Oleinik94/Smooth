@@ -437,8 +437,8 @@ for i := 0 to FLightsCount - 1 do
 	FLights[i].FLightMatrix := FCameraInverseModelViewMatrix *
 		FLights[i].FLightModelViewMatrix * 
 		FLights[i].FLightProjectionMatrix *
-		SGGetScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
-		SGGetTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
+		SGScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
+		SGTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
 
 	Render.Uniform1i(FLights[i].FUniformShadow_shadowMap, i + 7);
 	Render.UniformMatrix4fv(FLights[i].FUniformShadow_lightMatrix, 1, False, @FLights[i].FLightMatrix );

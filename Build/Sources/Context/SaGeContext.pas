@@ -20,6 +20,7 @@ uses
 	,SaGeCursor
 	,SaGeRenderInterface
 	,SaGeCommonStructs
+	,SaGeLog
 	
 	,Classes
 	,Crt
@@ -264,7 +265,7 @@ function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{
 procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
 procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
 function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings);
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
 function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
 
 implementation
@@ -273,7 +274,6 @@ uses
 	 SysUtils
 	
 	,SaGeStringUtils
-	,SaGeLog
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
@@ -410,7 +410,7 @@ begin
 Result.Import(VName, VOption);
 end;
 
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings);
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
 
 function WordName(const S : TSGString):TSGString;
 begin
@@ -479,7 +479,7 @@ for O in VSettings do
 	end;
 SetLength(StandartOptions, 0);
 S += ')';
-SGHint(S);
+SGHint(S, ViewCase, True);
 S := '';
 end;
 
@@ -722,7 +722,7 @@ if MaxExists or MinExists then
 		begin
 		PaintableSettings -= 'MAX';
 		PaintableSettings -= 'MIN';
-		SGHint('Run : warning : maximization and minimization are not available at the same time!');
+		SGHint('Run : warning : maximization and minimization are not available at the same time!', SGViewTypeFull, True);
 		end;
 	end;
 end;
@@ -736,7 +736,7 @@ end;
 end;
 
 begin
-SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)');
+SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)', SGViewTypeFull, True);
 SGPrintContextSettings(VSettings);
 Settings := VSettings;
 if not VRenderClass.Suppored then

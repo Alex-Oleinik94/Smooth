@@ -31,7 +31,7 @@ type
 implementation
 
 uses
-	 SaGeMesh
+	 SaGeVertexObject
 	,SaGeScreenBase
 	,SaGeRenderBase
 	,SaGeStringUtils

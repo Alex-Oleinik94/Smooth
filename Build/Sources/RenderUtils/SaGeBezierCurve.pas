@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeCommonStructs
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeCommonClasses
 	;
 

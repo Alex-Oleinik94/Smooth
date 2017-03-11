@@ -377,31 +377,31 @@ function SGArConstToArString(const Ar : array of const) : TSGStringList;{$IFDEF 
 type
 	TSGExtended = Extended;
 var
-	i : TSGUInt32;
+	Index : TSGUInt32;
 begin
 SetLength(Result, Length(Ar));
 if Length(Ar) > 0 then
-	for i := 0 to High(Ar) do
-		with Ar[i] do
+	for Index := 0 to High(Ar) do
+		with Ar[Index] do
 			case vType of
-			vtInteger    : Result[i] := SGStr(vInteger);
-			vtBoolean    : Result[i] := SGStr(vBoolean);
-			vtChar       : Result[i] := vChar;
-			vtWideChar   : Result[i] := vWideChar;
-			vtExtended   : Result[i] := SGStrReal(TSGExtended(vExtended^), 5);
-			vtString     : Result[i] := vString^;
-			vtPointer    : Result[i] := SGAddrStr(vPointer);
-			vtPChar      : Result[i] := SGPCharToString(vPChar);
-			vtObject     : Result[i] := Iff(vObject <> nil, vObject.ClassName(), 'TObject') + '(' + SGAddrStr(vObject) + ')';
-			vtClass      : Result[i] := Iff(vClass <> nil, vClass.ClassName(), 'TClass') + '(' + SGAddrStr(vClass) + ')';
-			vtPWideChar  : Result[i] := WideCharLenToString(vPWideChar, Length(vPWideChar));
-			vtAnsiString : Result[i] := AnsiString(vPointer);
-			vtCurrency   : Result[i] := SGStrReal(vCurrency^, 4);
-			vtVariant    : Result[i] := VarToStr(vVariant^);
-			vtInterface  : Result[i] := 'Interface(' + SGAddrStr(vInterface) + ')';
-			vtWideString : Result[i] := AnsiString(vWideString);
-			vtInt64      : Result[i] := SGStr(vInt64^);
-			vtQWord      : Result[i] := SGStr(vQWord^);
+			vtInteger    : Result[Index] := SGStr(vInteger);
+			vtBoolean    : Result[Index] := SGStr(vBoolean);
+			vtChar       : Result[Index] := vChar;
+			vtWideChar   : Result[Index] := vWideChar;
+			vtExtended   : Result[Index] := SGStrReal(TSGExtended(vExtended^), 5);
+			vtString     : Result[Index] := vString^;
+			vtPointer    : Result[Index] := SGAddrStr(vPointer);
+			vtPChar      : Result[Index] := SGPCharToString(vPChar);
+			vtObject     : Result[Index] := Iff(vObject <> nil, vObject.ClassName(), 'TObject') + '(' + SGAddrStr(vObject) + ')';
+			vtClass      : Result[Index] := Iff(vClass <> nil, vClass.ClassName(), 'TClass') + '(' + SGAddrStr(vClass) + ')';
+			vtPWideChar  : Result[Index] := WideCharLenToString(vPWideChar, Length(vPWideChar));
+			vtAnsiString : Result[Index] := AnsiString(vPointer);
+			vtCurrency   : Result[Index] := SGStrReal(vCurrency^, 4);
+			vtVariant    : Result[Index] := VarToStr(vVariant^);
+			vtInterface  : Result[Index] := 'Interface(' + SGAddrStr(vInterface) + ')';
+			vtWideString : Result[Index] := AnsiString(vWideString);
+			vtInt64      : Result[Index] := SGStr(vInt64^);
+			vtQWord      : Result[Index] := SGStr(vQWord^);
 			end;
 end;
 

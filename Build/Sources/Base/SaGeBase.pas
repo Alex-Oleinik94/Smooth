@@ -68,8 +68,6 @@ type
 	// Common
 	TSGChar		= Char;
 	PSGChar		= ^ TSGChar;
-	TSGBoolean	= Boolean;
-	PSGBoolean	= ^ TSGBoolean;
 	TSGPointer  = Pointer;
 	PSGPointer  = ^ TSGPointer;
 	TSGString 	= String;
@@ -78,12 +76,23 @@ type
 	TSGCharSet = set of TSGChar;
 type
 	// Aditional
-	TSGBool     = TSGBoolean;
 	TSGQWord	= QWord;
 	TSGSingle	= TSGFloat;
 	TSGReal     = TSGDouble;
 	TSGGuid     = TGuid;
 	TSGCardinal = Cardinal;
+type
+	// Boolean
+	TSGBoolean	= Boolean;
+	PSGBoolean	= ^ TSGBoolean;
+	TSGBool     = TSGBoolean;
+	
+	TSGWordBool = WordBool;
+	TSGLongBool = LongBool;
+	
+	TSGBool8 = TSGBool;
+	TSGBool16 = TSGWordBool;
+	TSGBool32 = TSGLongBool;
 type
 	TSGEnumPointer = 
 		{$IFDEF CPU64}
@@ -95,6 +104,7 @@ type
 		{$ENDIF}{$ENDIF}{$ENDIF}
 		;
 	TSGMaxEnum = TSGEnumPointer;
+	TSGMaxUnsignedEnum = TSGMaxEnum;
 	TSGMaxFloat = 
 		{$IFNDEF WITHOUT_EXTENDED}
 			TSGFloat80
@@ -102,6 +112,16 @@ type
 			TSGFloat64
 		{$ENDIF WITHOUT_EXTENDED}
 		;
+	TSGMaxSignedEnum =
+		{$IFDEF CPU64}
+			TSGInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGInt16
+		{$ENDIF}{$ENDIF}{$ENDIF}
+		;
+	TSGSize = TSGUInt64;
 type
 	TSGFileOfByte = type file of TSGByte;
 	PSGFileOfByte = ^ TSGFileOfByte;

@@ -14,6 +14,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeContext
 	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeScreen
 	,SaGeFont
 	,SaGeImage

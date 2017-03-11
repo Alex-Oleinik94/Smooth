@@ -597,7 +597,7 @@ else
 if LF = 0 then
 	Result +=
 		'Failed to load' +
-		Iff(TF > 0,' all of ' + SGStr(TF) + ' functions','')
+		Iff(TF > 0, ' all of ' + SGStr(TF) + ' functions', '')
 else
 	Result +=
 		'Loaded ' +
@@ -645,9 +645,21 @@ if IsSeparate then
 	SourceSeparate()
 else
 	SGLog.Source(StatString());
-SGLog.Source(FErrorDllNames, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load from this libraries :');
+SGLog.Source(
+	FErrorDllNames, 
+	StringJustifyLeft(FirstName(), MNL + 1, ' ') + 
+		': Can''t load from librar' + 
+		Iff(Length(FErrorDllNames) > 1, 'ies', 'y') + 
+		':'
+	);
 NotLoadedFunc := GenerateAllNotLoadedFunc();
-SGLog.Source(NotLoadedFunc, StringJustifyLeft(FirstName(), MNL + 1, ' ') + ': Can''t load this functions :');
+SGLog.Source(
+	NotLoadedFunc, 
+	StringJustifyLeft(FirstName(), MNL + 1, ' ') + 
+		': Can''t load function' +
+		Iff(Length(NotLoadedFunc) > 1, 's') + 
+		':'
+	);
 SetLength(NotLoadedFunc, 0);
 end;
 

@@ -11,6 +11,7 @@ uses
 	
 	,Classes
 	;
+	// Manipulator
 type
 	TSGMeshLoader = class;
 	TSGMeshLoaderClass = class of TSGMeshLoader;

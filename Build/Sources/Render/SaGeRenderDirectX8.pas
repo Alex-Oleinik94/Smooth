@@ -671,7 +671,7 @@ if D3DX8Loaded then
 	end
 else
 	begin
-	Matrix2 := SGGetTranslateMatrix(SGVertex3fImport(x, y, z));
+	Matrix2 := SGTranslateMatrix(SGVertex3fImport(x, y, z));
 	MatrixOut := Matrix1 * Matrix2;
 	end;
 pDevice.SetTransform(FNowMatrixMode, MatrixOut);
@@ -694,7 +694,7 @@ if D3DX8Loaded then
 	end
 else
 	begin
-	Matrix2 := SGGetRotateMatrix(angle, SGVertex3fImport(x, y, z));
+	Matrix2 := SGRotateMatrix(angle, SGVertex3fImport(x, y, z));
 	MatrixOut := Matrix1 * Matrix2;
 	end;
 pDevice.SetTransform(FNowMatrixMode, MatrixOut);
@@ -1580,7 +1580,7 @@ if D3DX8Loaded then
 	end
 else
 	begin
-	Matrix2 := D3DMATRIX(SGGetIdentityMatrix());
+	Matrix2 := D3DMATRIX(SGIdentityMatrix());
 	Matrix1 := D3DMATRIX(SGGetOrthoMatrix(x0,x1,y0,y1,0,0.1));
 	end;
 pDevice.SetTransform(D3DTS_PROJECTION, Matrix1);
@@ -1687,7 +1687,7 @@ begin
 if D3DX8Loaded then
 	D3DXMatrixIdentity(Matrix)
 else
-	Matrix := D3DMATRIX(SGGetIdentityMatrix());
+	Matrix := D3DMATRIX(SGIdentityMatrix());
 pDevice.SetTransform(FNowMatrixMode,Matrix);
 {$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LoadIdentity - End'); {$ENDIF}
 end;

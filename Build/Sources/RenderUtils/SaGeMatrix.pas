@@ -22,6 +22,9 @@ type
 	TSGMatrix4x4 = array [0..3, 0..3] of TSGMatrix4x4Type;
 	PSGMatrix4x4 = ^ TSGMatrix4x4;
 	TSGMatrix4x4Array = array [0..15] of TSGMatrix4x4Type;
+	
+	TSGMatrix4x4f = TSGMatrix4x4;
+	PSGMatrix4x4f = PSGMatrix4x4;
 
 operator * (const A, B : TSGMatrix4x4) : TSGMatrix4x4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator = (const A, B : TSGMatrix4x4) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -31,25 +34,26 @@ operator * (const Vector3 : TSGMatrixVector3; const Matrix : TSGMatrix4x4) : TSG
 function SGMatrix4x4Import(const _0x0, _0x1, _0x2, _0x3, _1x0, _1x1, _1x2, _1x3, _2x0, _2x1, _2x2, _2x3, _3x0, _3x1, _3x2, _3x3 : TSGMatrix4x4Type) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetLookAtMatrix(const Eve, At:TSGMatrixVector3;Up:TSGMatrixVector3):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetLookAtMatrix(const Eve, At:TSGMatrixVector3; Up:TSGMatrixVector3):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetOrthoMatrix(const l, r, b, t, vNear, vFar : TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGWriteMatrix4x4(const Matrix : TSGMatrix4x4);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetIdentityMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetTranslateMatrix(const Vertex : TSGMatrixVector3) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTranslateMatrix(const Matrix : TSGMatrix4x4; const Vector : TSGMatrixVector3) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetRotateMatrix(const Angle : TSGMatrix4x4Type; const Axis : TSGMatrixVector3) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGMultiplyPartMatrix(const m1:TSGMatrix4x4;const m2:TSGMatrix4x4):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGSetMatrixRotation(var Matrix : TSGMatrix4x4;const Angles : TSGMatrixVector3);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGSetMatrixRotationQuaternion(var Matrix : TSGMatrix4x4;const Quat : TSGQuaternion);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGSetMatrixTranslation(var Matrix : TSGMatrix4x4; const Trans : TSGMatrixVector3);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGRotateVectorInverse(const Matrix : TSGMatrix4x4;const Vec : TSGMatrixVector3):TSGMatrixVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTranslateVectorInverse(const Matrix : TSGMatrix4x4;const Vec : TSGMatrixVector3):TSGMatrixVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTransformVector(const Matrix : TSGMatrix4x4; const Vec : TSGMatrixVector3):TSGMatrixVector3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+function SGIdentityMatrix() : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGRotateMatrix(const Angle : TSGMatrix4x4Type; const Axis : TSGMatrixVector3) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTranslateMatrix(const Vertex : TSGMatrixVector3) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGInverseMatrix(const VSourseMatrix : TSGMatrix4x4) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetScaleMatrix(const Vector : TSGMatrixVector3): TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGScaleMatrix(const Vector : TSGMatrixVector3): TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMatrixDiagonalInverse(const Matrix : TSGMatrix4x4) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure SGSetMatrixRotation(var Matrix : TSGMatrix4x4;const Angles : TSGMatrixVector3);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSetMatrixRotationQuaternion(var Matrix : TSGMatrix4x4;const Quat : TSGQuaternion);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGSetMatrixTranslation(var Matrix : TSGMatrix4x4; const Trans : TSGMatrixVector3);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -74,27 +78,27 @@ for i := 0 to 3 do
 			end;
 end;
 
-function SGGetRotateMatrix(const Angle : TSGMatrix4x4Type; const Axis : TSGMatrixVector3) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGRotateMatrix(const Angle : TSGMatrix4x4Type; const Axis : TSGMatrixVector3) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
     CosinusAngle, SinusAngle : TSGMatrix4x4Type;
 begin
- Result:=SGGetIdentityMatrix();
- CosinusAngle:=cos(Angle);
- SinusAngle:=sin(Angle);
- Result[0,0]:=CosinusAngle+((1-CosinusAngle)*Axis.x*Axis.x);
- Result[1,0]:=((1-CosinusAngle)*Axis.x*Axis.y)-(Axis.z*SinusAngle);
- Result[2,0]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.y*SinusAngle);
- Result[0,1]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.z*SinusAngle);
- Result[1,1]:=CosinusAngle+((1-CosinusAngle)*Axis.y*Axis.y);
- Result[2,1]:=((1-CosinusAngle)*Axis.y*Axis.z)-(Axis.x*SinusAngle);
- Result[0,2]:=((1-CosinusAngle)*Axis.x*Axis.z)-(Axis.y*SinusAngle);
- Result[1,2]:=((1-CosinusAngle)*Axis.y*Axis.z)+(Axis.x*SinusAngle);
- Result[2,2]:=CosinusAngle+((1-CosinusAngle)*Axis.z*Axis.z);
+Result := SGIdentityMatrix();
+CosinusAngle:=cos(Angle);
+SinusAngle:=sin(Angle);
+Result[0,0]:=CosinusAngle+((1-CosinusAngle)*Axis.x*Axis.x);
+Result[1,0]:=((1-CosinusAngle)*Axis.x*Axis.y)-(Axis.z*SinusAngle);
+Result[2,0]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.y*SinusAngle);
+Result[0,1]:=((1-CosinusAngle)*Axis.x*Axis.z)+(Axis.z*SinusAngle);
+Result[1,1]:=CosinusAngle+((1-CosinusAngle)*Axis.y*Axis.y);
+Result[2,1]:=((1-CosinusAngle)*Axis.y*Axis.z)-(Axis.x*SinusAngle);
+Result[0,2]:=((1-CosinusAngle)*Axis.x*Axis.z)-(Axis.y*SinusAngle);
+Result[1,2]:=((1-CosinusAngle)*Axis.y*Axis.z)+(Axis.x*SinusAngle);
+Result[2,2]:=CosinusAngle+((1-CosinusAngle)*Axis.z*Axis.z);
 end;
 
-function SGGetScaleMatrix(const Vector : TSGMatrixVector3): TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGScaleMatrix(const Vector : TSGMatrixVector3): TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := SGGetIdentityMatrix();
+Result := SGIdentityMatrix();
 Result[0][0] := Vector.x;
 Result[1][1] := Vector.y;
 Result[2][2] := Vector.z;
@@ -118,7 +122,7 @@ var
 begin
 det:=((((((((mat(0)*mat(5)*mat(10))+(mat(4)*mat(9)*mat(2))))+(mat(8)*mat(1)*mat(6)))-(mat(8)*mat(5)*mat(2))))-(mat(4)*mat(1)*mat(10)))-(mat(0)*mat(9)*mat(6)));
 if abs(det) < 0.0000001 then
-	Result := SGGetIdentityMatrix()
+	Result := SGIdentityMatrix()
 else
 	begin
 	idet := 1/det;
@@ -234,7 +238,7 @@ Matrix[3,1] := Trans.y;
 Matrix[3,2] := Trans.z;
 end;
 
-function SGGetTranslateMatrix(const Vertex : TSGMatrixVector3):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTranslateMatrix(const Vertex : TSGMatrixVector3):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Index : TSGUInt8;
 begin
@@ -246,7 +250,7 @@ Result[3,1] := Vertex.y;
 Result[3,2] := Vertex.z;
 end;
 
-function SGGetIdentityMatrix():TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIdentityMatrix():TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSGByte;
 begin

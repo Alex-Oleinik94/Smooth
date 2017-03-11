@@ -10,6 +10,7 @@ uses
 	,SaGeMesh
 	,SaGeMeshLoader
 	,SaGeCommonStructs
+	,SaGeVertexObject
 	
 	,Classes
 	;
@@ -41,6 +42,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog
+	,SaGeMaterial
 	;
 
 function TSGMeshOBJLoader.Load() : TSGBoolean;
@@ -280,7 +282,7 @@ with VObject do
 	VertexType := SGMeshVertexType3f;
 	Vertexes := ObjQuantityAllVertexes;
 	//if Render.CanBumpMapping then
-		BumpFormat := SGMeshBumpTypeCopyTexture2f;
+		BumpFormat := SGBumpFormatCopyTexture2f;
 	for i:= 0 to ObjQuantityAllVertexes-1 do
 		begin
 		ArVertex3f [i]^ := ObjArVertex  [ObjArAllVertexes[i][0] - 1];
@@ -294,7 +296,7 @@ with VObject do
 		AutoSetIndexFormat(QuantityFaceArrays-1,ObjQuantityAllVertexes);
 		PoligonesType[QuantityFaceArrays-1] := SGR_TRIANGLES;
 		Faces[QuantityFaceArrays-1] := i64r - ObjArMaterials[i].FFaceIndex + 1;
-		CreateMaterialIDInLastFaceArray(ObjArMaterials[i].FName);
+		Model.IdentifyLastObjectMaterial(ObjArMaterials[i].FName);
 		iii := 0;
 		for ii := ObjArMaterials[i].FFaceIndex to i64r do
 			begin

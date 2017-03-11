@@ -18,7 +18,7 @@ uses
 	,SaGeRenderBase
 	,SaGeCommonStructs
 	,SaGeScreen
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeShaders
 	,SaGeImage
 	,SaGeFractalTerrain

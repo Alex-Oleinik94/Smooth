@@ -37,7 +37,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeRenderBase
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeScreenBase
 	;
 

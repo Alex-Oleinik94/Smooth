@@ -16,6 +16,8 @@ uses
 	,SaGeScreen
 	,SaGeCommonStructs
 	,SaGeMesh
+	,SaGeVertexObject
+	,SaGeMaterial
 	,SaGeImage
 	,SaGeCamera
 	{$IF not defined(ENGINE)}
@@ -71,7 +73,7 @@ FMesh := TSGCustomModel.Create();
 FMesh.Context := Context;
 
 FMesh.AddObject();
-FMesh.LastObject().BumpFormat := SGMeshBumpTypeCopyTexture2f;
+FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
 FMesh.LastObject().HasNormals := True;
 FMesh.LastObject().HasTexture := True;
 FMesh.LastObject().HasColors  := False;
@@ -107,7 +109,7 @@ FMesh.AddMaterial ().Name := 'name';
 FMesh.LastMaterial().AddDiffuseMap('Ex6_D.jpg');
 FMesh.LastMaterial().AddBumpMap   ('Ex6_N.jpg');
 
-FMesh.LastObject().CreateMaterialIDInLastFaceArray('name');
+FMesh.LastObject().LastObjectFace()^.FMaterial := FMesh.IdentifyMaterial('name');
 
 FMesh.LoadToVBO();
 
@@ -189,7 +191,7 @@ if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
 case Context.KeyPressedChar of
 '1' : 
 	begin
-	FMesh.LastObject().BumpFormat := SGMeshBumpTypeCopyTexture2f;
+	FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
 	FMesh.LastMaterial().EnableBump := True;
 	FMesh.LastMaterial().EnableTexture := True;
 	FMesh.LastMaterial().ImageBump := FImageBump;
@@ -197,21 +199,21 @@ case Context.KeyPressedChar of
 	end;
 '2' :
 	begin
-	FMesh.LastObject().BumpFormat := SGMeshBumpTypeNone;
+	FMesh.LastObject().BumpFormat := SGBumpFormatNone;
 	FMesh.LastMaterial().EnableBump := False;
 	FMesh.LastMaterial().EnableTexture := True;
 	FMesh.LastMaterial().ImageTexture := FImageTexture;
 	end;
 '3' :
 	begin
-	FMesh.LastObject().BumpFormat := SGMeshBumpTypeNone;
+	FMesh.LastObject().BumpFormat := SGBumpFormatNone;
 	FMesh.LastMaterial().EnableBump := False;
 	FMesh.LastMaterial().EnableTexture := True;
 	FMesh.LastMaterial().ImageTexture := FImageBump;
 	end;
 '4' :
 	begin
-	FMesh.LastObject().BumpFormat := SGMeshBumpTypeCopyTexture2f;
+	FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
 	FMesh.LastMaterial().EnableBump := True;
 	FMesh.LastMaterial().EnableTexture := True;
 	FMesh.LastMaterial().ImageBump := FImageTexture;

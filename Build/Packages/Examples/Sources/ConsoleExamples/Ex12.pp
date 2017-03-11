@@ -13,8 +13,9 @@ uses
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeMath
 	,SaGeMesh
+	,SaGeMath
+	,SaGeVertexObject
 	,SaGeRender
 	,SaGeStringUtils
 	,SaGeCamera

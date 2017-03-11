@@ -38,7 +38,7 @@ implementation
 uses
 	 SaGeRenderBase
 	,SaGeMathUtils
-	,SaGeMesh
+	,SaGeVertexObject
 	,SaGeScreenBase
 	,SaGeStringUtils
 	;
