@@ -1163,7 +1163,7 @@ if FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer=0 then
 	end
 else
 	begin
-	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer-1].FVertexDeclaration = nil then
+	if FArBuffers[FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer - 1].FVertexDeclaration = nil then
 		begin
 		VertexManipulator:=TSGRDXVertexDeclarationManipulator.Create();
 		if FEnabledClientStateVertex then

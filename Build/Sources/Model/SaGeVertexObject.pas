@@ -368,7 +368,10 @@ type
         // Когда включен Cull Face, то Draw нужно делать 2 раза.
         // Так что вод тут делается Draw, а в Draw просто проверяется, включен или не  Cull Face, 
         //   и в зависимости от этого он вызывает эту процедуду 1 или 2 раза
-        procedure BasicDraw();  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+        procedure InitAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+        procedure DisableAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+        procedure BasicDraw(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+        procedure BasicDrawWithAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
         // Подгрузка массивов в память видеокарты
         procedure LoadToVBO();
         // Очищение памяти видеокарты от массивов этого класса
@@ -1260,17 +1263,17 @@ Result:=
 	VertexesSize();
 end;
 
-class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType:LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+class function TSG3DObject.GetPoligoneInt(const ThisPoligoneType : LongWord):Byte; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result:=
-	Byte(
-		(ThisPoligoneType=SGR_POINTS) or
-		(ThisPoligoneType=SGR_TRIANGLE_STRIP) or
-		(ThisPoligoneType=SGR_LINE_LOOP) or
-		(ThisPoligoneType=SGR_LINE_STRIP))
-	+4*Byte( ThisPoligoneType = SGR_QUADS )
-	+3*Byte( ThisPoligoneType = SGR_TRIANGLES )
-	+2*Byte( ThisPoligoneType = SGR_LINES );
+case ThisPoligoneType of
+SGR_POINTS,
+	SGR_TRIANGLE_STRIP,
+	SGR_LINE_LOOP,
+	SGR_LINE_STRIP : Result := 1;
+SGR_QUADS          : Result := 4;
+SGR_TRIANGLES      : Result := 3;
+SGR_LINES          : Result := 2;
+end;
 end;
 
 function TSG3DObject.GetFaceLength(const Index : TSGLongWord):TSGQuadWord;overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -1426,20 +1429,23 @@ ClearVBO();
 inherited Destroy();
 end;
 
+procedure TSG3dObject.BasicDrawWithAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+InitAttributes();
+BasicDraw();
+DisableAttributes();
+end;
+
 procedure TSG3dObject.Paint();
 begin
 {$IFDEF SGMoreDebuging}
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
-if FEnableObjectMatrix then
-	begin
-	Render.PushMatrix();
-	Render.MultMatrixf(@FObjectMatrix);
-	end;
 if FEnableCullFace then
 	begin
 	if (FEnableCullFaceBack or FEnableCullFaceFront) then
 		begin
+		InitAttributes();
 		Render.Enable(SGR_CULL_FACE);
 		if FEnableCullFaceBack then
 			begin
@@ -1452,18 +1458,17 @@ if FEnableCullFace then
 			BasicDraw();
 			end;
 		Render.Disable(SGR_CULL_FACE);
+		DisableAttributes();
 		end
 	else
 		begin
 		{$IFDEF SGDebuging}
-			WriteLn('"TSG3dObject.Draw" : "'+ClassName+'" - CullFace enabled, but Front and Back node disabled...');
+			WriteLn('"TSG3dObject__Draw" : "'+ClassName+'" - CullFace enabled, but Front and Back draw types disabled...');
 			{$ENDIF}
 		end;
 	end
 else
-	BasicDraw();
-if FEnableObjectMatrix then
-	Render.PopMatrix();
+	BasicDrawWithAttributes();
 end;
 
 procedure TSG3DObject.ClearArrays(const ClearN : boolean = True);
@@ -1534,10 +1539,14 @@ if QuantityFaceArrays <> 0 then
 		end;
 end;
 
-procedure TSG3dObject.BasicDraw();  {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	Index : TSGUInt32;
+procedure TSG3dObject.InitAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
+if FEnableObjectMatrix then
+	begin
+	Render.PushMatrix();
+	Render.MultMatrixf(@FObjectMatrix);
+	end;
+
 if (FObjectMaterial = nil) and (FQuantityFaceArrays = 0) then
 	Render.ColorMaterial(FObjectColor.r, FObjectColor.g, FObjectColor.b, FObjectColor.a);
 
@@ -1561,8 +1570,8 @@ if FHasColors then
 
 if FEnableVBO then
 	begin
-	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FVertexesBuffer);
-	Render.VertexPointer(GetCountOfOneVertexCoord(),SGR_FLOAT,GetSizeOfOneVertex(),nil);
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB, FVertexesBuffer);
+	Render.VertexPointer(GetCountOfOneVertexCoord(), SGR_FLOAT, GetSizeOfOneVertex(), nil);
 	
 	if FHasColors then
 		begin
@@ -1605,34 +1614,10 @@ if FEnableVBO then
 				GetSizeOfOneColorCoord()+
 				GetSizeOfOneNormalCoord()));
 		end;
-	
-	if FQuantityFaceArrays<>0 then
-		begin
-		for Index := 0 to FQuantityFaceArrays-1 do
-			begin
-				if (ArFaces[Index].FMaterial <> nil) then
-					ArFaces[Index].FMaterial.Bind(BumpFormat, HasTexture)
-				else if (FObjectMaterial <> nil) then
-					FObjectMaterial.Bind(BumpFormat, HasTexture);
-			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB ,FFacesBuffers[Index]);
-			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
-				SGMeshToRenderIndexFormat(ArFaces[Index].FIndexFormat), nil);
-			if (ArFaces[Index].FMaterial <> nil) then
-				ArFaces[Index].FMaterial.UnBind(BumpFormat, HasTexture)
-			else if (FObjectMaterial <> nil) then
-				FObjectMaterial.UnBind(BumpFormat, HasTexture);
-			end;
-		end
-	else
-		Render.DrawArrays(FObjectPoligonesType,0,FNOfVerts);
-	
-	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
-	if FQuantityFaceArrays<>0 then
-		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,0);
 	end
 else
 	begin
-    Render.VertexPointer(
+	Render.VertexPointer(
 		GetCountOfOneVertexCoord(),
 		SGR_FLOAT, 
 		GetSizeOfOneVertex(), 
@@ -1684,25 +1669,23 @@ else
 				GetCountOfOneColorCoord()+
 				GetCountOfOneNormalCoord()));
 		end;
-	
-	if FQuantityFaceArrays<>0 then
-		for Index := 0 to FQuantityFaceArrays - 1 do
-			begin
-			if (ArFaces[Index].FMaterial <> nil) then
-				ArFaces[Index].FMaterial.Bind(BumpFormat, HasTexture)
-			else if (FObjectMaterial <> nil) then
-				FObjectMaterial.Bind(BumpFormat, HasTexture);
-			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
-				SGMeshToRenderIndexFormat(ArFaces[Index].FIndexFormat),
-				ArFaces[Index].FArray);
-			if (ArFaces[Index].FMaterial <> nil) then
-				ArFaces[Index].FMaterial.UnBind(BumpFormat, HasTexture)
-			else if (FObjectMaterial <> nil) then
-				FObjectMaterial.UnBind(BumpFormat, HasTexture);
-			end
-	else
-		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts);
-    end;
+	end;
+
+if (FObjectMaterial <> nil) then
+	FObjectMaterial.Bind(BumpFormat, HasTexture);
+end;
+
+procedure TSG3dObject.DisableAttributes();{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+if (FObjectMaterial <> nil) then
+	FObjectMaterial.UnBind(BumpFormat, HasTexture);
+
+if FEnableVBO then
+	begin
+	Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB, 0);
+	if FQuantityFaceArrays <> 0 then
+		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB, 0);
+	end;
 Render.DisableClientState(SGR_VERTEX_ARRAY);
 if FHasNormals then
 	Render.DisableClientState(SGR_NORMAL_ARRAY);
@@ -1723,11 +1706,65 @@ if FHasColors then
 
 if (FObjectMaterial = nil) and (FQuantityFaceArrays = 0) then
 	Render.ColorMaterial(1, 1, 1, 1);
+
+if FEnableObjectMatrix then
+	Render.PopMatrix();
+end;
+
+procedure TSG3dObject.BasicDraw(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+procedure InitFaceArrayMeterial(const Material : ISGMaterial); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+if (Material <> nil) then
+	begin
+	if FObjectMaterial <> nil then
+		FObjectMaterial.UnBind(BumpFormat, HasTexture);
+	Material.Bind(BumpFormat, HasTexture);
+	end;
+end;
+
+procedure DisableFaceArrayMeterial(const Material : ISGMaterial); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+if (Material <> nil) then
+	begin
+	Material.UnBind(BumpFormat, HasTexture);
+	if FObjectMaterial <> nil then
+		FObjectMaterial.Bind(BumpFormat, HasTexture);
+	end;
+end;
+
+var
+	Index : TSGMaxEnum;
+begin
+if FEnableVBO then
+	if FQuantityFaceArrays <> 0 then
+		for Index := 0 to FQuantityFaceArrays-1 do
+			begin
+			InitFaceArrayMeterial(ArFaces[Index].FMaterial);
+			Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB, FFacesBuffers[Index]);
+			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
+				SGMeshToRenderIndexFormat(ArFaces[Index].FIndexFormat), nil);
+			DisableFaceArrayMeterial(ArFaces[Index].FMaterial);
+			end
+	else
+		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts)
+else
+	if FQuantityFaceArrays <> 0 then
+		for Index := 0 to FQuantityFaceArrays - 1 do
+			begin
+			InitFaceArrayMeterial(ArFaces[Index].FMaterial);
+			Render.DrawElements(ArFaces[Index].FPoligonesType, GetFaceLength(Index),
+				SGMeshToRenderIndexFormat(ArFaces[Index].FIndexFormat),
+				ArFaces[Index].FArray);
+			DisableFaceArrayMeterial(ArFaces[Index].FMaterial);
+			end
+	else
+		Render.DrawArrays(FObjectPoligonesType, 0, FNOfVerts);
 end;
 
 procedure TSG3dObject.LoadToVBO();
 var
-	Index : TSGUInt32;
+	Index : TSGMaxEnum;
 begin
 if Self = nil then
 	begin
@@ -1740,6 +1777,7 @@ if FEnableVBO then
 	SGLog.Source('TSG3dObject__LoadToVBO : It is not possible to do this several counts!');
 	Exit;
 	end;
+
 Render.GenBuffersARB(1, @FVertexesBuffer);
 Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB, FVertexesBuffer);
 Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB, FNOfVerts * GetSizeOfOneVertex(), ArVertex, SGR_STATIC_DRAW_ARB);
@@ -1747,13 +1785,14 @@ Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB, 0);
 
 if FQuantityFaceArrays <> 0 then
 	begin
-	SetLength(FFacesBuffers,FQuantityFaceArrays);
+	SetLength(FFacesBuffers, FQuantityFaceArrays);
 	for Index := 0 to FQuantityFaceArrays - 1 do
 		begin
 		Render.GenBuffersARB(1, @FFacesBuffers[Index]);
 		Render.BindBufferARB(SGR_ELEMENT_ARRAY_BUFFER_ARB, FFacesBuffers[Index]);
 		Render.BufferDataARB(SGR_ELEMENT_ARRAY_BUFFER_ARB,
-			GetFaceLength(Index) * GetFaceInt(ArFaces[Index].FIndexFormat), ArFaces[Index].FArray,
+			GetFaceLength(Index) * GetFaceInt(ArFaces[Index].FIndexFormat),
+			ArFaces[Index].FArray,
 			SGR_STATIC_DRAW_ARB,
 			SGMeshToRenderIndexFormat(ArFaces[Index].FIndexFormat));
 		end;
@@ -1766,7 +1805,7 @@ end;
 
 procedure TSG3DObject.ClearVBO(); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	Index : TSGLongWord;
+	Index : TSGMaxEnum;
 begin
 if FEnableVBO and (Render<>nil) then
 	begin

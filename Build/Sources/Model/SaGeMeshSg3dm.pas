@@ -254,7 +254,6 @@ SGHint(['QuantityFaceArrays=',O.QuantityFaceArrays]);
 {$ENDIF}
 if O.QuantityFaceArrays <> 0 then
 	for Index := 0 to O.QuantityFaceArrays - 1 do
-		//O.AddFaceArray()
 		with O.ObjectFace[Index]^ do
 			begin
 			Stream.ReadBuffer(FPoligonesType, SizeOf(FPoligonesType));
