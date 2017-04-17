@@ -626,8 +626,8 @@ end;
 
 function SGValFloat(const Text : TSGString) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 var
-	i, iii : TSGInt32;
-	ii : TSGUInt32;
+	i, iii : TSGMaxEnum;
+	ii : TSGMaxEnum;
 begin
 Result := 0;
 if Length(Text) = 0 then Exit;
@@ -651,7 +651,8 @@ while i <= Length(Text) do
 	begin
 	Result += SGVal(Text[i]) / ii;
 	i += 1;
-	ii *= 10;
+	ii := ii * 10;
+	WriteLn(ii);ReadLn();
 	end;
 for i := 1 to Length(Text) do
 	if Text[i] = '-' then

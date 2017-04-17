@@ -36,12 +36,20 @@ operator - (const a, b : TSGDateTime) : TSGDateTime;{$IFDEF SUPPORTINLINE}inline
 
 function SGSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMiliSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 uses
 	 SaGeStringUtils
+	
+	,StrMan
 	;
+
+function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := StringTrimAll(SGMiliSecondsToStringTime((D2 - D1).GetPastMiliSeconds()), ' ');
+end;
 
 function SGMiliSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
