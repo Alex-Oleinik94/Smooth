@@ -1406,7 +1406,7 @@ FNOfVerts := 0;
 ArVertex := nil;
 ArFaces := nil;
 FObjectMaterial := nil;
-FObjectPoligonesType:=SGR_TRIANGLES;
+FObjectPoligonesType := SGR_TRIANGLES;
 FColorType:=SGMeshColorType3b;
 FVertexType:=SGMeshVertexType3f;
 FEnableVBO:=False;
@@ -1442,7 +1442,6 @@ begin
 	WriteLn('Call "TSG3dObject.Draw" : "'+ClassName+'" is sucsesfull');
 	{$ENDIF}
 if FEnableCullFace then
-	begin
 	if (FEnableCullFaceBack or FEnableCullFaceFront) then
 		begin
 		InitAttributes();
@@ -1461,12 +1460,7 @@ if FEnableCullFace then
 		DisableAttributes();
 		end
 	else
-		begin
-		{$IFDEF SGDebuging}
-			WriteLn('"TSG3dObject__Draw" : "'+ClassName+'" - CullFace enabled, but Front and Back draw types disabled...');
-			{$ENDIF}
-		end;
-	end
+		SGLog.Source('TSG3dObject__Draw : "' + ClassName + '" - CullFace enabled, but Front and Back draw types disabled...')
 else
 	BasicDrawWithAttributes();
 end;

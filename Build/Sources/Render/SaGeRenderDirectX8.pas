@@ -253,8 +253,8 @@ function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
 
-operator := (const Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-operator := (const Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator := (Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator := (Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 operator *  (const Matrix1, Matrix2 : D3DMATRIX) : D3DMATRIX;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
@@ -265,14 +265,14 @@ uses
 	,SaGeLog
 	;
 
-operator := (const Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator := (Matrix : D3DMATRIX) : TSGMatrix4x4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-Result := TSGMatrix4x4(Matrix);
+Move(Matrix, Result, SizeOf(Matrix));
 end;
 
-operator := (const Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator := (Matrix : TSGMatrix4x4) : D3DMATRIX; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-Result := D3DMATRIX(Matrix);
+Move(Matrix, Result, SizeOf(Matrix));
 end;
 
 operator *  (const Matrix1, Matrix2 : D3DMATRIX) : D3DMATRIX;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -285,17 +285,9 @@ begin
 Result := 'TSGRenderDirectX8';
 end;
 
-{$IFDEF RENDER_DX8_DEBUG_LINK}
-procedure DXDebugLinc(const S : TSGString);
-begin
-WriteLn(S);
-SGLog.Source(S);
-end;
-{$ENDIF}
-
 class function TSGRenderDirectX8.Suppored() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Suppored'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Suppored'); {$ENDIF}
 Result := DllManager.Suppored('Direct3D8');
 if Result then
 	DllManager.Suppored('Direct3DX8');
@@ -303,7 +295,7 @@ end;
 
 function TSGRenderDirectX8.SupporedShaders() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.SupporedShaders'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedShaders'); {$ENDIF}
 Result := False;
 end;
 
@@ -314,7 +306,7 @@ var
 	pViewport : D3DVIEWPORT8;
 	a,b : D3DXVector3;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.GetVertexUnderPixel'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.GetVertexUnderPixel'); {$ENDIF}
 pDevice.GetViewport(pViewport);
 x := 0;
 y := 0;
@@ -350,26 +342,26 @@ procedure TSGRenderDirectX8.BeginBumpMapping(const Point : Pointer );
 var
 	v : TSGVertex3f;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.BeginBumpMapping'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.BeginBumpMapping'); {$ENDIF}
 v := TSGVertex3f(Point^).Normalized();
 pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, SGRDXVertex3fToRGBA(v));
 end;
 
 procedure TSGRenderDirectX8.EndBumpMapping();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.EndBumpMapping'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.EndBumpMapping'); {$ENDIF}
 pDevice.SetRenderState(D3DRS_TEXTUREFACTOR, 0);
 end;
 
 procedure TSGRenderDirectX8.ActiveTexture(const VTexture : TSGLongWord);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ActiveTexture'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ActiveTexture'); {$ENDIF}
 FNowActiveNumberTexture := VTexture;
 end;
 
 procedure TSGRenderDirectX8.ActiveTextureDiffuse();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ActiveTextureDiffuse'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ActiveTextureDiffuse'); {$ENDIF}
 if FNowActiveNumberTexture = 0 then
 	begin
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0);
@@ -388,7 +380,7 @@ end;
 
 procedure TSGRenderDirectX8.ActiveTextureBump();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ActiveTextureBump'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ActiveTextureBump'); {$ENDIF}
 if FNowActiveNumberTexture = 0 then
 	begin
 	pDevice.SetTextureStageState( FNowActiveNumberTexture, D3DTSS_TEXCOORDINDEX, 0 );
@@ -400,13 +392,13 @@ end;
 
 procedure TSGRenderDirectX8.ClientActiveTexture(const VTexture : TSGLongWord);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ClientActiveTexture'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ClientActiveTexture'); {$ENDIF}
 FNowActiveClientNumberTexture := VTexture;
 end;
 
 procedure TSGRenderDirectX8.ColorMaterial(const r,g,b,a : TSGSingle);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ColorMaterial'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ColorMaterial'); {$ENDIF}
 FMaterial.Diffuse:=SGRDXGetD3DCOLORVALUE(r,g,b,a);
 pDevice.SetMaterial(FMaterial);
 end;
@@ -492,7 +484,7 @@ end;
 
 procedure TSGRenderDirectX8.PushMatrix();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.PushMatrix'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.PushMatrix'); {$ENDIF}
 if FQuantitySavedMatrix+1<=FLengthArSavedMatrix then
 	begin
 	pDevice.GetTransform(FNowMatrixMode,FArSavedMatrix[FQuantitySavedMatrix]);
@@ -509,7 +501,7 @@ end;
 
 procedure TSGRenderDirectX8.PopMatrix();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.PopMatrix'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.PopMatrix'); {$ENDIF}
 if FQuantitySavedMatrix=0 then
 	SGLog.Source('TSGRenderDirectX8.PopMatrix : Pop matrix before pushing')
 else
@@ -521,13 +513,13 @@ end;
 
 procedure TSGRenderDirectX8.SwapBuffers();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.SwapBuffers'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SwapBuffers'); {$ENDIF}
 pDevice.Present(nil, nil, 0, nil);
 end;
 
 procedure TSGRenderDirectX8.AfterVertexProc();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.AfterVertexProc'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.AfterVertexProc'); {$ENDIF}
 if (FNumberOfPoints=3) and  ((FPrimetiveType=SGR_QUADS) or (FPrimetiveType=SGR_TRIANGLES) or (FPrimetiveType=SGR_TRIANGLE_STRIP)) then
 	begin
 	pDevice.DrawPrimitiveUP( D3DPT_TRIANGLELIST, 1, FArPoints[0], sizeof(FArPoints[0]));
@@ -591,36 +583,36 @@ end;
 
 function TSGRenderDirectX8.SupporedVBOBuffers():Boolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.SupporedVBOBuffers'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedVBOBuffers'); {$ENDIF}
 Result:=False;
 end;
 
 procedure TSGRenderDirectX8.PointSize(const PS:Single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.PointSize'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.PointSize'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.LineWidth(const VLW:Single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LineWidth'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.LineWidth'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.Color3f(const r,g,b:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Color3f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Color3f'); {$ENDIF}
 Color4f(r,g,b,1);
 end;
 
 procedure TSGRenderDirectX8.TexCoord2f(const x,y:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexCoord2f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.TexCoord2f'); {$ENDIF}
 FArPoints[FNumberOfPoints].tx:=x;
 FArPoints[FNumberOfPoints].ty:=y;
 end;
 
 procedure TSGRenderDirectX8.Vertex2f(const x,y:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Vertex2f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Vertex2f'); {$ENDIF}
 FArPoints[FNumberOfPoints].Color:=FNowColor;
 FArPoints[FNumberOfPoints].x:=x;
 FArPoints[FNumberOfPoints].y:=y;
@@ -631,7 +623,7 @@ end;
 
 procedure TSGRenderDirectX8.Color4f(const r,g,b,a:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Color4f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Color4f'); {$ENDIF}
 FNowColor:=D3DCOLOR_ARGB(
 	Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a),
 	Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r),
@@ -641,7 +633,7 @@ end;
 
 procedure TSGRenderDirectX8.LoadMatrixf(const Matrix : PSGMatrix4x4);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LoadMatrixf'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.LoadMatrixf'); {$ENDIF}
 pDevice.SetTransform(FNowMatrixMode, PD3DMATRIX(Matrix)^);
 end;
 
@@ -649,7 +641,7 @@ procedure TSGRenderDirectX8.MultMatrixf(const Matrix : PSGMatrix4x4);
 var
 	Matrix1, MatrixOut : D3DMATRIX;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.MultMatrixf'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.MultMatrixf'); {$ENDIF}
 pDevice.GetTransform(FNowMatrixMode, Matrix1);
 if D3DX8Loaded then
 	D3DXMatrixMultiply(MatrixOut, PD3DMATRIX(Matrix)^, Matrix1)
@@ -662,7 +654,7 @@ procedure TSGRenderDirectX8.Translatef(const x,y,z:single);
 var
 	Matrix1, Matrix2, MatrixOut : D3DMATRIX;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Translatef'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Translatef'); {$ENDIF}
 pDevice.GetTransform(FNowMatrixMode,Matrix1);
 if D3DX8Loaded then
 	begin
@@ -682,7 +674,7 @@ var
 	Matrix1, Matrix2, MatrixOut : D3DMATRIX;
 	v : TD3DXVector3;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Rotatef'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Rotatef'); {$ENDIF}
 v.x:=x;
 v.y:=y;
 v.z:=z;
@@ -702,7 +694,7 @@ end;
 
 procedure TSGRenderDirectX8.Enable(VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Enable - Begin'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Enable - Begin'); {$ENDIF}
 case VParam of
 SGR_DEPTH_TEST:
 	begin
@@ -721,12 +713,12 @@ SGR_BLEND:
 	pDevice.SetRenderState( D3DRS_ALPHABLENDENABLE, 1);
 	end;
 end;
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Enable - End'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Enable - End'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.Disable(const VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Disable'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Disable'); {$ENDIF}
 case VParam of
 SGR_DEPTH_TEST:
 	begin
@@ -760,7 +752,7 @@ procedure TSGRenderDirectX8.DeleteTextures(const VQuantity:Cardinal;const VTextu
 var
 	i:LongWord;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DeleteTextures'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DeleteTextures'); {$ENDIF}
 for i:=0 to VQuantity-1 do
 	begin
 	if (VTextures[i]>0) and (VTextures[i]<=Length(FArTextures)) and (FArTextures[VTextures[i]-1].FTexture<>nil) then
@@ -778,7 +770,7 @@ procedure TSGRenderDirectX8.Lightfv(const VLight,VParam:Cardinal;const VParam2:P
 type
 	PArS = ^ Single;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Lightfv'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Lightfv'); {$ENDIF}
 case VLight of
 SGR_LIGHT0:
 	begin
@@ -831,7 +823,7 @@ procedure TSGRenderDirectX8.GenTextures(const VQuantity:Cardinal;const VTextures
 var
 	I:LongWord;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.GenTextures'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.GenTextures'); {$ENDIF}
 for i:=0 to VQuantity-1 do
 	begin
 	if FArTextures=nil then
@@ -846,7 +838,7 @@ end;
 
 procedure TSGRenderDirectX8.BindTexture(const VParam:Cardinal;const VTexture:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.BindTexture'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.BindTexture'); {$ENDIF}
 FNowTexture:=VTexture;
 if (FArTextures<>nil) and (FNowTexture-1>=0) and (Length(FArTextures)>FNowTexture-1) and (FArTextures[FNowTexture-1].FTexture<>nil) then
 	pDevice.SetTexture(FNowActiveNumberTexture, FArTextures[FNowTexture-1].FTexture);
@@ -855,7 +847,7 @@ end;
 procedure TSGRenderDirectX8.TexParameteri(const VP1,VP2,VP3:Cardinal);
 //var Caps : D3DCAPS8;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexParameteri'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.TexParameteri'); {$ENDIF}
 {!!
 if (VP1 = SGR_TEXTURE_2D) or (VP1 = SGR_TEXTURE_1D) then
 	begin
@@ -903,12 +895,12 @@ end;
 
 procedure TSGRenderDirectX8.PixelStorei(const VParamName:Cardinal;const VParam:TSGInt32);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.PixelStorei'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.PixelStorei'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.TexEnvi(const VP1,VP2,VP3:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexEnvi'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.TexEnvi'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.TexImage2D(const VTextureType:Cardinal;const VP1:Cardinal;const VChannels,VWidth,VHeight,VP2,VFormatType,VDataType:Cardinal;VBitMap:Pointer);
@@ -950,7 +942,7 @@ until i=ii;
 end;
 
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexImage2D'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.TexImage2D'); {$ENDIF}
 VTFormat:=0;
 case VFormatType of
 SGR_RGBA:VTFormat:=D3DFMT_A8R8G8B8;
@@ -992,12 +984,12 @@ end;
 
 procedure TSGRenderDirectX8.ReadPixels(const x,y:Integer;const Vwidth,Vheight:Integer;const format, atype: Cardinal;const pixels: Pointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ReadPixels'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ReadPixels'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.CullFace(const VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.CullFace'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.CullFace'); {$ENDIF}
 case VParam of
 SGR_BACK :pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CW );
 SGR_FRONT:pDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
@@ -1006,7 +998,7 @@ end;
 
 procedure TSGRenderDirectX8.EnableClientState(const VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.EnableClientState'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.EnableClientState'); {$ENDIF}
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=True;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=True;
@@ -1017,7 +1009,7 @@ end;
 
 procedure TSGRenderDirectX8.DisableClientState(const VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DisableClientState'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DisableClientState'); {$ENDIF}
 case VParam of
 SGR_VERTEX_ARRAY:FEnabledClientStateVertex:=False;
 SGR_NORMAL_ARRAY:FEnabledClientStateNormal:=False;
@@ -1030,7 +1022,7 @@ procedure TSGRenderDirectX8.GenBuffersARB(const VQ:Integer;const PT:PCardinal);
 var
 	i:LongWord;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.GenBuffersARB'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.GenBuffersARB'); {$ENDIF}
 for i:=0 to VQ-1 do
 	begin
 	if FArBuffers=nil then
@@ -1066,7 +1058,7 @@ procedure TSGRenderDirectX8.DeleteBuffersARB(const VQuantity:LongWord;VPoint:Poi
 var
 	i:LongWord;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DeleteBuffersARB'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DeleteBuffersARB'); {$ENDIF}
 for i:=0 to VQuantity-1 do
 	if FArBuffers[PLongWord(VPoint)[i]-1].FResource<>nil then
 		begin
@@ -1088,7 +1080,7 @@ end;
 
 procedure TSGRenderDirectX8.BindBufferARB(const VParam:Cardinal;const VParam2:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.BindBufferARB'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.BindBufferARB'); {$ENDIF}
 case VParam of
 SGR_ARRAY_BUFFER_ARB        :FVBOData[0]:=VParam2;
 SGR_ELEMENT_ARRAY_BUFFER_ARB:FVBOData[1]:=VParam2;
@@ -1104,7 +1096,7 @@ procedure TSGRenderDirectX8.BufferDataARB(
 var
 	VVBuffer:PByte = nil;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.BufferDataARB'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.BufferDataARB'); {$ENDIF}
 if (VParam=SGR_ARRAY_BUFFER_ARB) and (FVBOData[0]>0) then
 	begin
 	if pDevice.CreateVertexBuffer(VSize,0,0,D3DPOOL_DEFAULT,
@@ -1176,7 +1168,7 @@ procedure TSGRenderDirectX8.DrawElements(
 	VBuffer:Pointer);
 //var VertexManipulator:TSGRDXVertexDeclarationManipulator = nil;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DrawElements'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DrawElements'); {$ENDIF}
 if (VBuffer<>nil) or (not FEnabledClientStateVertex) then
 	Exit;
 if (FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer<>0) and (VBuffer=nil) then
@@ -1233,7 +1225,7 @@ var
 	BeginArray:TSGMaxEnum;
 	VertexType:LongWord = D3DFVF_XYZ;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DrawArrays'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DrawArrays'); {$ENDIF}
 if not FEnabledClientStateVertex then
 	Exit;
 
@@ -1296,7 +1288,7 @@ end;
 
 procedure TSGRenderDirectX8.ColorPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.ColorPointer'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.ColorPointer'); {$ENDIF}
 FArDataBuffers[SGRDTypeDataBufferColor].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferColor].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferColor].FDataType:=VType;
@@ -1306,7 +1298,7 @@ end;
 
 procedure TSGRenderDirectX8.TexCoordPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.TexCoordPointer'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.TexCoordPointer'); {$ENDIF}
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferTexVertex].FDataType:=VType;
@@ -1316,7 +1308,7 @@ end;
 
 procedure TSGRenderDirectX8.NormalPointer(const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.NormalPointer'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.NormalPointer'); {$ENDIF}
 FArDataBuffers[SGRDTypeDataBufferNormal].FQuantityParams:=3;
 FArDataBuffers[SGRDTypeDataBufferNormal].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferNormal].FDataType:=VType;
@@ -1326,7 +1318,7 @@ end;
 
 procedure TSGRenderDirectX8.VertexPointer(const VQChannels:LongWord;const VType:Cardinal;const VSize:Int64;VBuffer:Pointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.VertexPointer'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.VertexPointer'); {$ENDIF}
 FArDataBuffers[SGRDTypeDataBufferVertex].FQuantityParams:=VQChannels;
 FArDataBuffers[SGRDTypeDataBufferVertex].FVBOBuffer:=FVBOData[0];
 FArDataBuffers[SGRDTypeDataBufferVertex].FDataType:=VType;
@@ -1341,7 +1333,7 @@ end;
 
 procedure TSGRenderDirectX8.Clear(const VParam:Cardinal);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Clear'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Clear'); {$ENDIF}
 pDevice.Clear( 0, nil, D3DCLEAR_TARGET or D3DCLEAR_ZBUFFER, FClearColor, 1.0, 0 );
 end;
 
@@ -1349,7 +1341,7 @@ procedure TSGRenderDirectX8.BeginScene(const VPrimitiveType:TSGPrimtiveType);
 const
 	MyVertexType:LongWord = D3DFVF_XYZ or D3DFVF_NORMAL or D3DFVF_DIFFUSE  or D3DFVF_TEX1;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.BeginScene'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.BeginScene'); {$ENDIF}
 FPrimetiveType:=VPrimitiveType;
 FPrimetivePrt:=0;
 FNumberOfPoints:=0;
@@ -1359,7 +1351,7 @@ end;
 
 procedure TSGRenderDirectX8.EndScene();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.EndScene'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.EndScene'); {$ENDIF}
 if (FPrimetiveType=SGR_LINE_LOOP) and (FNumberOfPoints=1) and (FPrimetivePrt=1) then
 	begin
 	pDevice.DrawPrimitiveUP( D3DPT_LINELIST, 1, FArPoints[1], sizeof(FArPoints[0]));
@@ -1370,7 +1362,7 @@ end;
 procedure TSGRenderDirectX8.Init();
 //var VectorDir:D3DXVECTOR3;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Init'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Init'); {$ENDIF}
 FNowColor:=D3DCOLOR_ARGB(255,255,255,255);
 FClearColor:=D3DCOLOR_COLORVALUE(0.0,0.0,0.0,1.0);
 FNowTexture:=0;
@@ -1492,7 +1484,7 @@ procedure TSGRenderDirectX8.DropDeviceResources();
 var
 	i : TSGLongWord;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.DropDeviceResources'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.DropDeviceResources'); {$ENDIF}
 if FArBuffers<>nil then if Length(FArBuffers)>0 then
 	begin
 	for i:=0 to High(FArBuffers) do
@@ -1534,7 +1526,7 @@ end;
 
 procedure TSGRenderDirectX8.Kill();
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Kill'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Kill'); {$ENDIF}
 DropDeviceResources();
 if (pDevice<>nil)  then
 	begin
@@ -1563,7 +1555,7 @@ procedure TSGRenderDirectX8.InitOrtho2d(const x0,y0,x1,y1:TSGSingle);
 var
 	Matrix1,Matrix2:D3DMATRIX;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.InitOrtho2d'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.InitOrtho2d'); {$ENDIF}
 if D3DX8Loaded then
 	begin
 	if x0<x1 then
@@ -1593,7 +1585,7 @@ end;
 
 procedure TSGRenderDirectX8.MatrixMode(const Par:TSGLongWord);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.MatrixMode'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.MatrixMode'); {$ENDIF}
 case Par of
 SGR_PROJECTION:
 	FNowMatrixMode:=D3DTS_PROJECTION;
@@ -1622,7 +1614,7 @@ end;
 end;
 {$ENDIF}
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.InitMatrixMode - Begin, Mode = "' + StrMatrixMode() +'"'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.InitMatrixMode - Begin, Mode = "' + StrMatrixMode() +'"'); {$ENDIF}
 CWidth := Width;
 CHeight := Height;
 FNowMatrixMode:=D3DTS_WORLD;
@@ -1671,7 +1663,7 @@ else if Mode=SG_2D then
 		pDevice.SetTransform(D3DTS_PROJECTION, Matrix1);
 		Disable(SGR_DEPTH_TEST);
 		end;
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.InitMatrixMode - End'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.InitMatrixMode - End'); {$ENDIF}
 end;
 
 procedure TSGRenderDirectX8.Viewport(const a,b,c,d:TSGAreaInt);
@@ -1683,19 +1675,19 @@ procedure TSGRenderDirectX8.LoadIdentity();
 var
 	Matrix:D3DMATRIX;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LoadIdentity - Begin'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.LoadIdentity - Begin'); {$ENDIF}
 if D3DX8Loaded then
 	D3DXMatrixIdentity(Matrix)
 else
 	Matrix := D3DMATRIX(SGIdentityMatrix());
 pDevice.SetTransform(FNowMatrixMode,Matrix);
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.LoadIdentity - End'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.LoadIdentity - End'); {$ENDIF}
 end;
 
 
 procedure TSGRenderDirectX8.Vertex3fv(const Variable : TSGPointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Vertex3fv'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Vertex3fv'); {$ENDIF}
 FArPoints[FNumberOfPoints].Color:=FNowColor;
 System.Move(FNowNormal,FArPoints[FNumberOfPoints].Normalx,3*SizeOf(TSGSingle));
 System.Move(Variable^,FArPoints[FNumberOfPoints].x,SizeOf(TSGSingle)*3);
@@ -1705,7 +1697,7 @@ end;
 
 procedure TSGRenderDirectX8.Normal3f(const x,y,z:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Normal3f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Normal3f'); {$ENDIF}
 FNowNormal.x:=x;
 FNowNormal.y:=y;
 FNowNormal.z:=z;
@@ -1713,13 +1705,13 @@ end;
 
 procedure TSGRenderDirectX8.Normal3fv(const Variable : TSGPointer);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Normal3fv'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Normal3fv'); {$ENDIF}
 System.Move(Variable^,FNowNormal,3*SizeOf(TSGSingle));
 end;
 
 procedure TSGRenderDirectX8.Vertex3f(const x,y,z:single);
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} DXDebugLinc('TSGRenderDirectX8.Vertex3f'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Vertex3f'); {$ENDIF}
 FArPoints[FNumberOfPoints].Color:=FNowColor;
 System.Move(FNowNormal,FArPoints[FNumberOfPoints].Normalx,3*SizeOf(TSGSingle));
 FArPoints[FNumberOfPoints].x:=x;
