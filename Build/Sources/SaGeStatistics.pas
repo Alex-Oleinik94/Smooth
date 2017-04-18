@@ -51,13 +51,15 @@ type
 			// Attr : 'SUM_COMP_{index}' deprecated
 			// Attr : 'SUM_SQUARED_{index}' deprecated
 			// Attr : 'CORR_{index}
+			//   Regression
+			// Attr : 'REG_EXCESS_{index}'
 		FProperties : TSGSettings;
 			public
 		property Name : TSGString read FName write FName;
 			public
 		function GetProperty(const PropertyName : TSGString):TSGOptionPointer;
 		function ExistsProperty(const PropertyName : TSGString) : TSGBool;
-		procedure SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer);
+		procedure SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer = nil);
 		procedure Nominate(const NewName : TSGString);
 		procedure Kill();
 		end;
@@ -96,6 +98,9 @@ type
 		procedure CalculationOfTypes();
 		procedure ExportTypesInfo(const OutputFile : TSGString = '');
 		procedure CorrelationExport(const FileName : TSGString);
+		procedure RegainRegression(const RegressionVariable : TSGString;  const OutputFileName : TSGString);overload;
+		procedure RegainRegression(const RegressionVariable : TSGMaxEnum; const OutputFileName : TSGString);overload;
+		procedure MarkExcessAttributes(const RegressionVariable : TSGMaxEnum);
 		end;
 
 implementation
@@ -107,11 +112,50 @@ uses
 	,SaGeDateTime
 	,SaGeStringUtils
 	,SaGeBaseUtils
+	,SaGeEncodingUtils
 	
 	,StrMan
 	
 	,SysUtils
 	;
+
+procedure TSGStatictics.RegainRegression(const RegressionVariable : TSGMaxEnum; const OutputFileName : TSGString);overload;
+begin
+MarkExcessAttributes(RegressionVariable);
+
+end;
+
+procedure TSGStatictics.MarkExcessAttributes(const RegressionVariable : TSGMaxEnum);
+var
+	i : TSGMaxEnum;
+begin
+for i := 0 to High(FAttributes) do
+	if i <> RegressionVariable then
+		if  (TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) or 
+			(Abs(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(RegressionVariable)))) < 0.05) then
+				begin
+				FAttributes[i].SetProperty('REG_EXCESS_' + SGStr(RegressionVariable));
+				SGHint(['Statistics : Attribute "', FAttributes[i].Name, '" marked as excess!']);
+				end;
+end;
+
+procedure TSGStatictics.RegainRegression(const RegressionVariable : TSGString; const OutputFileName : TSGString);overload;
+var
+	i : TSGMaxEnum;
+	Index : TSGMaxEnum;
+begin
+Index := Length(FAttributes);
+for i := 0 to High(FAttributes) do
+	if FAttributes[i].Name = RegressionVariable then
+		begin
+		Index := i;
+		break
+		end;
+if Index = Length(FAttributes) then
+	SGHint(['Statistics : Variable "', RegressionVariable, '" is not exists!'])
+else
+	RegainRegression(Index, OutputFileName);
+end;
 
 procedure TSGStatictics.CorrelationExport(const FileName : TSGString);
 var
@@ -131,21 +175,29 @@ Assign(f, FileName);
 Rewrite(f);
 Write(f, StringJustifyRight('', CharCount, ' '));
 for i := 0 to High(FAttributes) do
-	Write(f, StringJustifyRight(FAttributes[i].Name, CharCount, ' '));
+	if not (TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) then
+		Write(f, StringJustifyRight(FAttributes[i].Name, CharCount, ' '));
 WriteLn(f);
 for i := 0 to High(FAttributes) do
-	begin
-	Write(f, StringJustifyLeft(FAttributes[i].Name, CharCount, ' '));
-	for ii := 0 to High(FAttributes) do
+	if not (TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) then
 		begin
-		Str := '-';
-		if FAttributes[i].ExistsProperty('CORR_' + SGStr(ii)) then
-			Str := SGStrReal(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(ii))), 6);
-		Str := StringJustifyRight(Str, CharCount, ' ');
-		Write(f, Str);
+		Write(f, StringJustifyLeft(FAttributes[i].Name, CharCount, ' '));
+		for ii := 0 to High(FAttributes) do
+			if not (TSGStaticticsItemType(FAttributes[ii].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) then
+				begin
+				if FAttributes[i].ExistsProperty('CORR_' + SGStr(ii)) then
+					Str := SGStrReal(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(ii))), 6)
+				else if FAttributes[ii].ExistsProperty('CORR_' + SGStr(i)) then
+					Str := SGStrReal(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(i))), 6)
+				else if i = ii then
+					Str := SGStrReal(1.000, 6)
+				else
+					Str := '-';
+				Str := StringJustifyRight(Str, CharCount, ' ');
+				Write(f, Str);
+				end;
+		WriteLn(f);
 		end;
-	WriteLn(f);
-	end;
 Close(f);
 end;
 
@@ -293,7 +345,7 @@ begin
 Result := PropertyName in FProperties;
 end;
 
-procedure TSGStaticticsFeature.SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer);
+procedure TSGStaticticsFeature.SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer = nil);
 var
 	TempProperty : TSGOption;
 	i : TSGMaxEnum;
@@ -408,7 +460,7 @@ if (Value <> '') and (Value <> '-') then
 	else
 		begin
 		Result.ItemType := SGStaticticsItemTypeText;
-		Result.Text := Value;
+		Result.Text := SGConvertString(Value, SGEncodingWin1251);
 		end;
 	end;
 end;
@@ -535,35 +587,57 @@ end;
 procedure SGConcoleRunStatistics(const VParams : TSGConcoleCallerParams = nil);
 
 var
-	ImportFile : TSGString = '';
-	CorrExport : TSGString = '';
-	TypesExport : TSGString = '';
+	ImportFile          : TSGString = '';
+	CorrelationFileName : TSGString = '';
+	TypesFileName       : TSGString = '';
+	RegressionVariable  : TSGString = '';
+	RegressionFileName  : TSGString = '';
 
-function ProccessTypeExport(const Comand : TSGString):TSGBool;
+function ProccessRegressionExport(const Comand : TSGString):TSGBool;
 var
 	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['types:']);
+Value := SGParseValueFromComand(Comand, ['out_regression:']);
 Result := Value <> '';
 if Result then
-	TypesExport := Value;
+	RegressionFileName := Value;
 end;
 
-function ProccessCorrExport(const Comand : TSGString):TSGBool;
+function ProccessRegressionVariable(const Comand : TSGString):TSGBool;
 var
 	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['corr:']);
+Value := SGParseValueFromComand(Comand, ['regression_variable:']);
 Result := Value <> '';
 if Result then
-	CorrExport := Value;
+	RegressionVariable := SGConvertString(Value, SGEncodingWin1251);
+end;
+
+function ProccessTypesExport(const Comand : TSGString):TSGBool;
+var
+	Value : TSGString;
+begin
+Value := SGParseValueFromComand(Comand, ['out_types:']);
+Result := Value <> '';
+if Result then
+	TypesFileName := Value;
+end;
+
+function ProccessCorrelationExport(const Comand : TSGString):TSGBool;
+var
+	Value : TSGString;
+begin
+Value := SGParseValueFromComand(Comand, ['out_correlation:']);
+Result := Value <> '';
+if Result then
+	CorrelationFileName := Value;
 end;
 
 function ProccessImporting(const Comand : TSGString):TSGBool;
 var
 	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['i:']);
+Value := SGParseValueFromComand(Comand, ['input:']);
 Result := Value <> '';
 if Result then
 	ImportFile := Value;
@@ -574,9 +648,11 @@ var
 begin
 with TSGConsoleCaller.Create(VParams) do
 	begin
-	AddComand(@ProccessImporting,      ['i:*'],    'Import data');
-	AddComand(@ProccessTypeExport,     ['types:*'], 'Export types info');
-	AddComand(@ProccessCorrExport,     ['corr:*'], 'Export correlation');
+	AddComand(@ProccessImporting,          ['input:*'],               'Import data');
+	AddComand(@ProccessTypesExport,        ['out_types:*'],           'Export types info');
+	AddComand(@ProccessCorrelationExport,  ['out_correlation:*'],     'Export correlation');
+	AddComand(@ProccessRegressionExport,   ['out_regression:*'],      'Export regression data');
+	AddComand(@ProccessRegressionVariable, ['regression_variable:*'], 'Set regression variable');
 	Success := Execute();
 	Destroy();
 	end;
@@ -586,22 +662,23 @@ if Success then
 		begin
 		Import(ImportFile);
 		CalculationOfTypes();
-		if TypesExport <> '' then
-			ExportTypesInfo(TypesExport);
+		if TypesFileName <> '' then
+			ExportTypesInfo(TypesFileName);
 		CalculationOfCorrelation();
-		if CorrExport <> '' then
-			CorrelationExport(CorrExport);
-		// TODO
+		if CorrelationFileName <> '' then
+			CorrelationExport(CorrelationFileName);
+		if RegressionVariable <> '' then
+			RegainRegression(RegressionVariable, RegressionFileName);
 		Destroy();
 		end;
 	end
 else
-	SGHint('Some errors!');
+	SGHint('Statistics : Some errors!');
 end;
 
 initialization
 begin
-SGGeneralConsoleCaller().AddComand(@SGConcoleRunStatistics, ['stat'], 'Statictics');
+SGGeneralConsoleCaller().AddComand(@SGConcoleRunStatistics, ['statistics'], 'Statictics');
 end;
 
 end.
