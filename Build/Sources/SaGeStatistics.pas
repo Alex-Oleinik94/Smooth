@@ -11,7 +11,16 @@ uses
 	,SaGeConsoleToolsBase
 	;
 type
-	TSGStaticticsItemType = (SGStaticticsItemTypeNull, SGStaticticsItemTypeBool, SGStaticticsItemTypeNumeric, SGStaticticsItemTypeFloat, SGStaticticsItemTypeText);
+	TSGStaticticsItemType = (
+		SGStaticticsItemTypeNull, 
+		SGStaticticsItemTypeBool, 
+		SGStaticticsItemTypeNumeric, 
+		SGStaticticsItemTypeFloat, 
+		SGStaticticsItemTypeText);
+
+function SGStrStatItemType(const ItemType : TSGStaticticsItemType) : TSGString;
+
+type
 	TSGStaticticsItem = object
 			private
 		FType : TSGStaticticsItemType;
@@ -28,10 +37,27 @@ type
 	TSGStaticticsFeature = object
 			private
 		FName : TSGString;
+			// Obj  : 'INCORRECT'
+			// Attr : 'TYPE'
+			//   Type:
+			// Attr : 'COUNT_NULL'
+			// Attr : 'COUNT_BOOL'
+			// Attr : 'COUNT_NUMER'
+			// Attr : 'COUNT_FLOAT'
+			// Attr : 'COUNT_TEXT'
+			//   Correlation:
+			// Attr : 'SUM_LEN_{index}' deprecated
+			// Attr : 'SUM_{index}' deprecated
+			// Attr : 'SUM_COMP_{index}' deprecated
+			// Attr : 'SUM_SQUARED_{index}' deprecated
+			// Attr : 'CORR_{index}
 		FProperties : TSGSettings;
 			public
 		property Name : TSGString read FName write FName;
 			public
+		function GetProperty(const PropertyName : TSGString):TSGOptionPointer;
+		function ExistsProperty(const PropertyName : TSGString) : TSGBool;
+		procedure SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer);
 		procedure Nominate(const NewName : TSGString);
 		procedure Kill();
 		end;
@@ -61,9 +87,15 @@ type
 		FData : TSGStaticticsData;
 		FObjects : TSGStaticticsFeatures;
 		FAttributes : TSGStaticticsFeatures;
+			private
+		function CalculationOfAttributeType(const Index : TSGMaxEnum) : TSGStaticticsItemType;
 			public
 		procedure Clear();
 		procedure Import(const FileName : TSGString);
+		procedure CalculationOfCorrelation();
+		procedure CalculationOfTypes();
+		procedure ExportTypesInfo(const OutputFile : TSGString = '');
+		procedure CorrelationExport(const FileName : TSGString);
 		end;
 
 implementation
@@ -80,6 +112,204 @@ uses
 	
 	,SysUtils
 	;
+
+procedure TSGStatictics.CorrelationExport(const FileName : TSGString);
+var
+	f : TextFile;
+	i, ii : TSGMaxEnum;
+	MaxNameLength : TSGMaxEnum = 0;
+	CharCount : TSGMaxEnum = 0;
+	Str : TSGString;
+begin
+for i := 0 to High(FAttributes) do
+	if Length(FAttributes[i].Name) > MaxNameLength then
+		MaxNameLength := Length(FAttributes[i].Name);
+CharCount := MaxNameLength + 2;
+if CharCount < 8 then
+	CharCount := 8;
+Assign(f, FileName);
+Rewrite(f);
+Write(f, StringJustifyRight('', CharCount, ' '));
+for i := 0 to High(FAttributes) do
+	Write(f, StringJustifyRight(FAttributes[i].Name, CharCount, ' '));
+WriteLn(f);
+for i := 0 to High(FAttributes) do
+	begin
+	Write(f, StringJustifyLeft(FAttributes[i].Name, CharCount, ' '));
+	for ii := 0 to High(FAttributes) do
+		begin
+		Str := '-';
+		if FAttributes[i].ExistsProperty('CORR_' + SGStr(ii)) then
+			Str := SGStrReal(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(ii))), 6);
+		Str := StringJustifyRight(Str, CharCount, ' ');
+		Write(f, Str);
+		end;
+	WriteLn(f);
+	end;
+Close(f);
+end;
+
+procedure TSGStatictics.CalculationOfCorrelation();
+
+procedure Calculation(const Index0, Index1 : TSGMaxEnum);
+var
+	i : TSGMaxEnum;
+	Num : TSGMaxEnum = 0;
+	Sum_0 : TSGFloat64 = 0;
+	Sum_Squared_0 : TSGFloat64 = 0;
+	Sum_1 : TSGFloat64 = 0;
+	Sum_Squared_1 : TSGFloat64 = 0;
+	Sum_Comp : TSGFloat64 = 0;
+	Correlation : TSGFloat64;
+begin
+if FAttributes[Index0].ExistsProperty('CORR_' + SGStr(Index1)) then
+	Exit;
+for i := 0 to High(FObjects) do
+	if  (FData[i][Index0].ItemType <> SGStaticticsItemTypeNull)
+	and (FData[i][Index1].ItemType <> SGStaticticsItemTypeNull) then
+		begin
+		Num += 1;
+		Sum_0 += FData[i][Index0].Value;
+		Sum_1 += FData[i][Index1].Value;
+		Sum_Squared_0 += Sqr(FData[i][Index0].Value);
+		Sum_Squared_1 += Sqr(FData[i][Index1].Value);
+		Sum_Comp += FData[i][Index0].Value * FData[i][Index1].Value;
+		end;
+Correlation := (Num * Sum_Comp - Sum_0 * Sum_1) / Sqrt((Num * Sum_Squared_0 - Sqr(Sum_0)) * (Num * Sum_Squared_1 - Sqr(Sum_1)));
+FAttributes[Index0].SetProperty('CORR_' + SGStr(Index1), TSGOptionPointer(TSGFloat32(Correlation)));
+FAttributes[Index1].SetProperty('CORR_' + SGStr(Index0), TSGOptionPointer(TSGFloat32(Correlation)));
+end;
+
+var
+	D1, D2 : TSGDateTime;
+	i, ii : TSGMaxEnum;
+begin
+D1.Get();
+for i := 0 to High(FAttributes) do
+	if not (TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) then
+		for ii := 0 to High(FAttributes) do
+			if i > ii then
+				if not (TSGStaticticsItemType(FAttributes[ii].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) then
+					Calculation(i, ii);
+D2.Get();
+SGHint(['Statistics : Calculation of correlation done at ', SGTextTimeBetweenDates(D1, D2), '.']);
+end;
+
+function TSGStatictics.CalculationOfAttributeType(const Index : TSGMaxEnum) : TSGStaticticsItemType;
+var
+	CountNull  : TSGMaxEnum = 0;
+	CountBool  : TSGMaxEnum = 0;
+	CountNumer : TSGMaxEnum = 0;
+	CountFloat : TSGMaxEnum = 0;
+	CountText  : TSGMaxEnum = 0;
+	i : TSGMaxEnum;
+begin
+for i := 0 to High(FObjects) do
+	case FData[i][Index].ItemType of
+	SGStaticticsItemTypeNull    : CountNull  += 1;
+	SGStaticticsItemTypeBool    : CountBool  += 1;
+	SGStaticticsItemTypeNumeric : CountNumer += 1;
+	SGStaticticsItemTypeFloat   : CountFloat += 1;
+	SGStaticticsItemTypeText    : CountText  += 1;
+	end;
+FAttributes[Index].SetProperty('COUNT_NULL', TSGOptionPointer(CountNull));
+FAttributes[Index].SetProperty('COUNT_BOOL', TSGOptionPointer(CountBool));
+FAttributes[Index].SetProperty('COUNT_NUMER', TSGOptionPointer(CountNumer));
+FAttributes[Index].SetProperty('COUNT_FLOAT', TSGOptionPointer(CountFloat));
+FAttributes[Index].SetProperty('COUNT_TEXT', TSGOptionPointer(CountText));
+if CountText <> 0 then
+	Result := SGStaticticsItemTypeText
+else if CountFloat <> 0 then
+	Result := SGStaticticsItemTypeFloat
+else if CountNumer <> 0 then
+	Result := SGStaticticsItemTypeNumeric
+else if CountBool <> 0 then
+	Result := SGStaticticsItemTypeBool
+else
+	Result := SGStaticticsItemTypeNull;
+FAttributes[Index].SetProperty('TYPE', TSGOptionPointer(Result));
+end;
+
+procedure TSGStatictics.ExportTypesInfo(const OutputFile : TSGString = '');
+var
+	f : TextFile;
+	i : TSGMaxEnum;
+	MaxNameLength : TSGMaxEnum = 0;
+begin
+for i := 0 to High(FAttributes) do
+	if Length(FAttributes[i].Name) > MaxNameLength then
+		MaxNameLength := Length(FAttributes[i].Name);
+Assign(f, OutputFile);
+Rewrite(f);
+for i := 0 to High(FAttributes) do
+	begin
+	Write(f, StringJustifyLeft(FAttributes[i].Name, MaxNameLength, ' ') + ' : ');
+	Write(f, 'Type = ', StringJustifyRight(SGStrStatItemType(TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE'))) + ';', 7, ' ') + ' ');
+	Write(f, 'Count Null = ',  StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_NULL'))) + ';',  7, ' ') + ' ');
+	Write(f, 'Count Bool = ',  StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_BOOL'))) + ';',  7, ' ') + ' ');
+	Write(f, 'Count Numer = ', StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_NUMER'))) + ';', 7, ' ') + ' ');
+	Write(f, 'Count Float = ', StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_FLOAT'))) + ';', 7, ' ') + ' ');
+	Write(f, 'Count Text = ',  StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_TEXT'))) + '.',  7, ' '));
+	WriteLn(f);
+	end;
+CLose(f);
+end;
+
+procedure TSGStatictics.CalculationOfTypes();
+var
+	i : TSGMaxEnum;
+begin
+for i := 0 to High(FAttributes) do
+	CalculationOfAttributeType(i);
+end;
+
+function SGStrStatItemType(const ItemType : TSGStaticticsItemType) : TSGString;
+begin
+case ItemType of
+SGStaticticsItemTypeNull    : Result := 'Null';
+SGStaticticsItemTypeBool    : Result := 'Bool';
+SGStaticticsItemTypeNumeric : Result := 'Numer';
+SGStaticticsItemTypeFloat   : Result := 'Float';
+SGStaticticsItemTypeText    : Result := 'Text';
+end;
+end;
+
+function TSGStaticticsFeature.GetProperty(const PropertyName : TSGString):TSGOptionPointer;
+var
+	i : TSGMaxEnum;
+begin
+Result := nil;
+if (FProperties <> nil) and (Length(FProperties) > 0) then
+	for i := 0 to High(FProperties) do
+		if FProperties[i].FName = PropertyName then
+			begin
+			Result := FProperties[i].FOption;
+			break;
+			end;
+end;
+
+function TSGStaticticsFeature.ExistsProperty(const PropertyName : TSGString) : TSGBool;
+begin
+Result := PropertyName in FProperties;
+end;
+
+procedure TSGStaticticsFeature.SetProperty(const PropertyName : TSGString; const Value : TSGOptionPointer);
+var
+	TempProperty : TSGOption;
+	i : TSGMaxEnum;
+begin
+if ExistsProperty(PropertyName) then
+	begin
+	for i := 0 to High(FProperties) do
+		if FProperties[i].FName = PropertyName then
+			FProperties[i].FOption := Value;
+	end
+else
+	begin
+	TempProperty.Import(PropertyName, Value);
+	FProperties += TempProperty;
+	end;
+end;
 
 function SGStaticticsFeatureCreate(const TextName : TSGString) : TSGStaticticsFeature;
 begin
@@ -144,6 +374,7 @@ var
 	i : TSGMaxEnum;
 	Numeric : TSGBool = True;
 	Float : TSGBool = True;
+	Bool : TSGBool = True;
 	Str : TSGString = '';
 begin
 Result.Clear();
@@ -151,17 +382,22 @@ if (Value <> '') and (Value <> '-') then
 	begin
 	for i := 1 to Length(Value) do
 		begin
-		if not (Value[i] in '1234567890 ') then
+		if not (Value[i] in '10 ') then
+			Bool := False;
+		if not (Value[i] in '-1234567890 ') then
 			Numeric := False;
-		if not (Value[i] in '1234567890 ,.') then
+		if not (Value[i] in '-1234567890 ,.') then
 			Float := False;
 		end;
-	if Numeric then
+	if Numeric or Bool then
 		begin
 		for i := 1 to Length(Value) do
 			if Value[i] <> ' ' then
 				Str += Value[i];
-		Result.ItemType := SGStaticticsItemTypeNumeric;
+		if Bool then
+			Result.ItemType := SGStaticticsItemTypeBool
+		else
+			Result.ItemType := SGStaticticsItemTypeNumeric;
 		Result.Value := SGVal(Str);
 		end
 	else if Float then
@@ -207,14 +443,13 @@ if not SGFileExists(FileName) then
 	exit;
 	end;
 Clear();
-SGHint(['Statictics : Importing from "', FileName, '"...']);
 D1.Get();
 Assign(f, FileName);
 Reset(f);
 Importing(f);
 Close(f);
 D2.Get();
-SGHint(['Statictics : Importing done (', SGTextTimeBetweenDates(D1, D2), ').']);
+SGHint(['Statictics : Importing from "', FileName, '" done at ', SGTextTimeBetweenDates(D1, D2), '.']);
 end;
 
 constructor TSGStatictics.Create();
@@ -301,6 +536,28 @@ procedure SGConcoleRunStatistics(const VParams : TSGConcoleCallerParams = nil);
 
 var
 	ImportFile : TSGString = '';
+	CorrExport : TSGString = '';
+	TypesExport : TSGString = '';
+
+function ProccessTypeExport(const Comand : TSGString):TSGBool;
+var
+	Value : TSGString;
+begin
+Value := SGParseValueFromComand(Comand, ['types:']);
+Result := Value <> '';
+if Result then
+	TypesExport := Value;
+end;
+
+function ProccessCorrExport(const Comand : TSGString):TSGBool;
+var
+	Value : TSGString;
+begin
+Value := SGParseValueFromComand(Comand, ['corr:']);
+Result := Value <> '';
+if Result then
+	CorrExport := Value;
+end;
 
 function ProccessImporting(const Comand : TSGString):TSGBool;
 var
@@ -317,7 +574,9 @@ var
 begin
 with TSGConsoleCaller.Create(VParams) do
 	begin
-	AddComand(@ProccessImporting,      ['i:*'], 'Import');
+	AddComand(@ProccessImporting,      ['i:*'],    'Import data');
+	AddComand(@ProccessTypeExport,     ['types:*'], 'Export types info');
+	AddComand(@ProccessCorrExport,     ['corr:*'], 'Export correlation');
 	Success := Execute();
 	Destroy();
 	end;
@@ -326,6 +585,12 @@ if Success then
 	with TSGStatictics.Create() do
 		begin
 		Import(ImportFile);
+		CalculationOfTypes();
+		if TypesExport <> '' then
+			ExportTypesInfo(TypesExport);
+		CalculationOfCorrelation();
+		if CorrExport <> '' then
+			CorrelationExport(CorrExport);
 		// TODO
 		Destroy();
 		end;
