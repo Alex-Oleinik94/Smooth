@@ -11,6 +11,8 @@ uses
 	,SaGeConsoleToolsBase
 	;
 type
+	PSGStringList = ^ TSGStringList;
+type
 	TSGStaticticsItemType = (
 		SGStaticticsItemTypeNull, 
 		SGStaticticsItemTypeBool, 
@@ -32,6 +34,7 @@ type
 		property Text : TSGString read FValueText write FValueText;
 			public
 		procedure Clear();
+		function ToString() : TSGString;
 		end;
 type
 	TSGStaticticsFeature = object
@@ -45,6 +48,9 @@ type
 			// Attr : 'COUNT_NUMER'
 			// Attr : 'COUNT_FLOAT'
 			// Attr : 'COUNT_TEXT'
+			//   Discrete
+			// Attr : 'DISC_COUNT'
+			// Attr : 'DISC_VALUES'
 			//   Correlation:
 			// Attr : 'SUM_LEN_{index}' deprecated
 			// Attr : 'SUM_{index}' deprecated
@@ -96,6 +102,7 @@ type
 		procedure Import(const FileName : TSGString);
 		procedure CalculationOfCorrelation();
 		procedure CalculationOfTypes();
+		procedure DetermineDiscreteValues(const Index : TSGMaxEnum);
 		procedure ExportTypesInfo(const OutputFile : TSGString = '');
 		procedure CorrelationExport(const FileName : TSGString);
 		procedure RegainRegression(const RegressionVariable : TSGString;  const OutputFileName : TSGString);overload;
@@ -247,6 +254,36 @@ D2.Get();
 SGHint(['Statistics : Calculation of correlation done at ', SGTextTimeBetweenDates(D1, D2), '.']);
 end;
 
+procedure TSGStatictics.DetermineDiscreteValues(const Index : TSGMaxEnum);
+var
+	i : TSGMaxEnum;
+	Values : TSGStringList = nil;
+	TempString : TSGString;
+	StringPointer : PSGString;
+begin
+for i := 0 to High(FObjects) do
+	begin
+	TempString := FData[i][Index].ToString();
+	if TempString = '0' then
+		TempString := '';
+	if TempString <> '' then
+		Values *= TempString;
+	end;
+FAttributes[Index].SetProperty('DISC_COUNT',  TSGOptionPointer(Length(Values)));
+TempString := '';
+for i := 0 to High(Values) do
+	begin
+	TempString += Values[i];
+	if i <> High(Values) then
+		TempString += #0;
+	end;
+SetLength(Values, 0);
+New(StringPointer);
+StringPointer^ := TempString;
+FAttributes[Index].SetProperty('DISC_VALUES', TSGOptionPointer(StringPointer));
+StringPointer := nil;
+end;
+
 function TSGStatictics.CalculationOfAttributeType(const Index : TSGMaxEnum) : TSGStaticticsItemType;
 var
 	CountNull  : TSGMaxEnum = 0;
@@ -280,12 +317,14 @@ else if CountBool <> 0 then
 else
 	Result := SGStaticticsItemTypeNull;
 FAttributes[Index].SetProperty('TYPE', TSGOptionPointer(Result));
+if Result = SGStaticticsItemTypeText then
+	DetermineDiscreteValues(Index);
 end;
 
 procedure TSGStatictics.ExportTypesInfo(const OutputFile : TSGString = '');
 var
 	f : TextFile;
-	i : TSGMaxEnum;
+	i, ii : TSGMaxEnum;
 	MaxNameLength : TSGMaxEnum = 0;
 begin
 for i := 0 to High(FAttributes) do
@@ -304,6 +343,19 @@ for i := 0 to High(FAttributes) do
 	Write(f, 'Count Text = ',  StringJustifyRight(SGStr(TSGMaxEnum(FAttributes[i].GetProperty('COUNT_TEXT'))) + '.',  7, ' '));
 	WriteLn(f);
 	end;
+for i := 0 to High(FAttributes) do
+	if FAttributes[i].ExistsProperty('DISC_COUNT') then
+		begin
+		Write(f, 'The attribute "', FAttributes[i].Name, '" is discrete and takes the values (', TSGMaxEnum(FAttributes[i].GetProperty('DISC_COUNT')), ') : ');
+		for ii := 0 to TSGMaxEnum(FAttributes[i].GetProperty('DISC_COUNT')) - 1 do
+			begin
+			Write(f, StringWordGet(PSGString(FAttributes[i].GetProperty('DISC_VALUES'))^, #0, ii + 1));
+			if ii = TSGMaxEnum(FAttributes[i].GetProperty('DISC_COUNT')) - 1 then
+				WriteLn(f, '.')
+			else
+				Write(f, ', ');
+			end;
+		end;
 CLose(f);
 end;
 
@@ -380,6 +432,18 @@ end;
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF INC_PLACE_IMPLEMENTATION}
+
+function TSGStaticticsItem.ToString() : TSGString;
+begin
+Result := '';
+if FType <> SGStaticticsItemTypeNull then
+	if FType = SGStaticticsItemTypeText then
+		Result := FValueText
+	else if FType = SGStaticticsItemTypeFloat then
+		Result := SGStrReal(FValue, 8)
+	else
+		Result := SGStr(Round(FValue));
+end;
 
 procedure TSGStaticticsItem.Clear();
 begin
