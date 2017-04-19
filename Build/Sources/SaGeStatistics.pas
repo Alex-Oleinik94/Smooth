@@ -52,10 +52,7 @@ type
 			// Attr : 'DISC_COUNT'
 			// Attr : 'DISC_VALUES'
 			//   Correlation:
-			// Attr : 'SUM_LEN_{index}' deprecated
-			// Attr : 'SUM_{index}' deprecated
-			// Attr : 'SUM_COMP_{index}' deprecated
-			// Attr : 'SUM_SQUARED_{index}' deprecated
+			// Attr : 'SUM_LEN_{index}'
 			// Attr : 'CORR_{index}
 			//   Regression
 			// Attr : 'REG_EXCESS_{index}'
@@ -84,7 +81,8 @@ operator = (const A, B : TSGStaticticsFeature) : TSGBool;{$IFDEF SUPPORTINLINE}i
 
 type
 		// FData[Lines = Objects][Columns = Attribute]
-	TSGStaticticsData = packed array of packed array of TSGStaticticsItem;
+	TSGStaticticsObjectData = packed array of TSGStaticticsItem;
+	TSGStaticticsData = packed array of TSGStaticticsObjectData;
 	
 	TSGStatictics = class(TSGNamed)
 			public
@@ -108,7 +106,11 @@ type
 		procedure RegainRegression(const RegressionVariable : TSGString;  const OutputFileName : TSGString);overload;
 		procedure RegainRegression(const RegressionVariable : TSGMaxEnum; const OutputFileName : TSGString);overload;
 		procedure MarkExcessAttributes(const RegressionVariable : TSGMaxEnum);
+		procedure MarkExcessObjects(const RegressionVariable : TSGMaxEnum);
 		end;
+
+function SGStatisticsTDistribution(const x : TSGFloat64; const N : TSGMaxEnum) : TSGFloat64;
+function SGStatisticsTCorr(const Corr : TSGFloat64; const N : TSGMaxEnum) : TSGFloat64;
 
 implementation
 
@@ -120,30 +122,207 @@ uses
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeEncodingUtils
+	,SaGeMathUtils
+	,SaGeConsoleUtils
 	
 	,StrMan
 	
 	,SysUtils
+	,Math
 	;
 
 procedure TSGStatictics.RegainRegression(const RegressionVariable : TSGMaxEnum; const OutputFileName : TSGString);overload;
-begin
-MarkExcessAttributes(RegressionVariable);
 
+function IterFunc(var Coef : TSGFloat64List; var Obj : TSGStaticticsObjectData) : TSGFloat64;
+var
+	i, ic : TSGMaxEnum;
+begin
+Result := Coef[0];
+i := 0;
+ic := 1;
+while i < Length(FAttributes) do
+	begin
+	if i <> RegressionVariable then
+		begin
+		if not FAttributes[i].ExistsProperty('REG_EXCESS_' + SGStr(RegressionVariable)) then
+			Result += Coef[ic] * Obj[i].Value;
+		ic += 1;
+		end;
+	i += 1;
+	end;
 end;
 
-procedure TSGStatictics.MarkExcessAttributes(const RegressionVariable : TSGMaxEnum);
+function IterFuncSquaderError(var Coef : TSGFloat64List) : TSGFloat64; overload;
+var
+	i, m : TSGMaxEnum;
+begin
+Result := 0;
+m := 0;
+for i := 0 to High(FObjects) do
+	begin
+	Result += Sqr(IterFunc(Coef, FData[i]) - FData[i][RegressionVariable].Value);
+	m += 1;
+	end;
+Result /= 2 * m;
+// ads
+end;
+
+procedure MoveCoef(var CL1, CL2 : TSGFloat64List);
 var
 	i : TSGMaxEnum;
 begin
+for i := 0 to High(CL1) do
+	CL1[i] := CL2[i];
+end;
+
+procedure StepAttributes(var Coef1 : TSGFloat64List; var Coef2 : TSGFloat64List);
+var
+	Coe : TSGFloat64List;
+	ic, i, ii, m : TSGMaxEnum;
+begin
+SetLength(Coe, Length(Coef1));
+i := 0;
+ic := 1;
+while i < Length(FAttributes) do
+	begin
+	if (i <> RegressionVariable) and (not FAttributes[i].ExistsProperty('REG_EXCESS_' + SGStr(RegressionVariable))) then
+		begin
+		Coe[ic] := 0;
+		m := 0;
+		for ii := 0 to High(FObjects) do
+			begin
+			Coe[ic] += (IterFunc(Coef1, FData[ii]) - FData[ii][RegressionVariable].Value) * FData[ii][i].Value;
+			m += 1;
+			end;
+		Coe[ic] := - Coe[ic] / m * 0.1 + Coef1[ic];
+		ic += 1;
+		end;
+	i += 1;
+	end;
+MoveCoef(Coef2, Coe);
+SetLength(Coe, 0);
+end;
+
+var
+	Coef1 : TSGFloat64List;
+	Coef2 : TSGFloat64List;
+	S1, S2 : TSGFloat64;
+
+function IterFuncSquaderError() : TSGFloat64; overload;
+begin
+Result := IterFuncSquaderError(Coef2);
+end;
+
+procedure MoveCoefAndRes();
+begin
+MoveCoef(Coef1, Coef2);
+S1 := S2;
+end;
+
+procedure OutFile();
+var
+	f : TextFile;
+	i, ic : TSGMaxEnum;
+begin
+Assign(f, OutputFileName);
+Rewrite(f);
+WriteLn(f, '				', Coef2[0] :0:10);
+i := 0;
+ic := 1;
+while i < Length(FAttributes) do
+	begin
+	if (i <> RegressionVariable) and (not FAttributes[i].ExistsProperty('REG_EXCESS_' + SGStr(RegressionVariable))) then
+		begin
+		WriteLn(f, FAttributes[i].Name, '		', Coef2[ic] :0:10);
+		ic += 1;
+		end;
+	i += 1;
+	end;
+Close(f);
+end;
+
+var
+	i : TSGMaxEnum;
+begin
+MarkExcessAttributes(RegressionVariable);
+MarkExcessObjects(RegressionVariable);
+SetLength(Coef1, Length(FAttributes));
+SetLength(Coef2, Length(FAttributes));
+Coef1[0] := 0;
+for i := 1 to High(Coef1) do
+	Coef1[i] := 1;
+S1 := IterFuncSquaderError(Coef1);
+StepAttributes(Coef1, Coef2);
+S2 := IterFuncSquaderError();
+while Abs(S2 - S1) >  0.05 do
+	begin
+	MoveCoefAndRes();
+	StepAttributes(Coef1, Coef2);
+	S2 := IterFuncSquaderError();
+	end;
+OutFile();
+SetLength(Coef1, 0);
+SetLength(Coef2, 0);
+end;
+
+procedure TSGStatictics.MarkExcessObjects(const RegressionVariable : TSGMaxEnum);
+var
+	i, ii, n : TSGMaxEnum;
+begin
+for i := 0 to High(FAttributes) do
+	if (not FAttributes[i].ExistsProperty('REG_EXCESS_' + SGStr(RegressionVariable))) then
+		begin
+		n := 0;
+		for ii := 0 to High(FObjects) do
+			if FData[ii][i].ItemType <> SGStaticticsItemTypeNull then
+				n += 1;
+		if n / Length(FObjects) < 0.6 then
+			begin
+			FAttributes[i].SetProperty('REG_EXCESS_' + SGStr(RegressionVariable));
+			SGHint(['Statistics : Attribute "', FAttributes[i].Name, '" marked as excess (', n / Length(FObjects) * 100,')!']);
+			end;
+		end;
+n := 0;
+for i := 0 to High(FObjects) do
+	for ii := 0 to High(FAttributes) do
+		if (not FAttributes[ii].ExistsProperty('REG_EXCESS_' + SGStr(RegressionVariable))) then
+			if FData[i][ii].ItemType = SGStaticticsItemTypeNull then
+				begin
+				FObjects[i].SetProperty('REG_EXCESS_' + SGStr(RegressionVariable));
+				n += 1;
+				break;
+				end;
+SGHint(['Statistics : ', n,' objects marked as excess!']);
+end;
+
+procedure TSGStatictics.MarkExcessAttributes(const RegressionVariable : TSGMaxEnum);
+
+function CorrelationStatisticallySignificant(const Corr : TSGFloat64; const N : TSGMaxEnum) : TSGBool;
+begin
+if Corr < 0.05 then
+	Result := False
+else
+	Result := SGStatisticsTCorr(Corr, N) >= SGStatisticsTDistribution(0.95, N);
+end;
+
+var
+	i, N : TSGMaxEnum;
+	Corr : TSGFloat64;
+begin
 for i := 0 to High(FAttributes) do
 	if i <> RegressionVariable then
-		if  (TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull, SGStaticticsItemTypeText]) or 
-			(Abs(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(RegressionVariable)))) < 0.05) then
+		begin
+		if  ((TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) in [SGStaticticsItemTypeNull]) or 
+			{(not CorrelationStatisticallySignificant(
+				TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(RegressionVariable))), 
+				TSGMaxEnum(FAttributes[i].GetProperty('SUM_LEN_' + SGStr(RegressionVariable)))))) and }
+			(Abs(TSGFloat32(FAttributes[i].GetProperty('CORR_' + SGStr(RegressionVariable)))) < 0.05)) and 
+			(TSGStaticticsItemType(FAttributes[i].GetProperty('TYPE')) <> SGStaticticsItemTypeText) then
 				begin
 				FAttributes[i].SetProperty('REG_EXCESS_' + SGStr(RegressionVariable));
 				SGHint(['Statistics : Attribute "', FAttributes[i].Name, '" marked as excess!']);
 				end;
+		end;
 end;
 
 procedure TSGStatictics.RegainRegression(const RegressionVariable : TSGString; const OutputFileName : TSGString);overload;
@@ -208,6 +387,62 @@ for i := 0 to High(FAttributes) do
 Close(f);
 end;
 
+function SGStatisticsTCorr(const Corr : TSGFloat64; const N : TSGMaxEnum) : TSGFloat64;
+begin
+Result := Corr * Sqrt(N - 2) / Sqrt(1 - Sqr(Corr));
+end;
+
+function SGStatisticsTDistribution(const x : TSGFloat64; const N : TSGMaxEnum) : TSGFloat64;
+
+function gamma(const x : TSGFloat64) : TSGFloat64;
+var
+	tmp, ser : TSGFloat64;
+begin
+tmp := (x - 0.5) * Ln(x + 4.5) - (x + 4.5);
+ser := 1.0 + 
+	76.18009173   / (x + 0.0) -  86.50532033   / (x + 1.0) +
+	24.01409822   / (x + 2.0) -  1.231739516   / (x + 3.0) +
+	0.00120858003 / (x + 4.0) -  0.00000536382 / (x + 5.0);    
+Result := Exp(tmp + Ln(ser * Sqrt(2 * PI)));
+end;
+
+function gammaRatio(const x, y : TSGFloat64) : TSGFloat64;
+var
+	m : TSGFloat64;
+begin
+m := Abs(Max(x, y));
+if (m <= 100.0) then
+	Result :=  gamma(x) / gamma(y)
+else
+	Result :=  (2.0 ** (x - y))  *  
+				gammaRatio(x * 0.5, y * 0.5)  * 
+				gammaRatio(x * 0.5 + 0.5, y * 0.5 + 0.5);
+end;
+
+function hyperGeom(const a, b, c, z : TSGFloat64; const deep : TSGMaxEnum) : TSGFloat64; overload;
+var
+	M, d : TSGFloat64;
+	i, j : TSGMaxEnum;
+begin
+Result := 1;   
+for i := 1 to deep do
+	begin
+	M := z ** TSGFloat64(i);
+	for j := 0 to i - 1 do
+		M *= (a + j) * (b + j) / ((1.0 + j) * (c + j));
+	Result += M;      
+	end;
+end;
+
+function hyperGeom(const a, b, c, z : TSGFloat64) : TSGFloat64; overload;
+begin
+Result := hyperGeom(a, b, c, z, 20);
+end;
+
+begin
+Result := 0.5 + x * gammaRatio(0.5 * (N + 1.0), 0.5 * N) * hyperGeom(0.5, 0.5 * (N + 1.0), 1.5, -x*x / N) / Sqrt(PI * N);
+end;
+
 procedure TSGStatictics.CalculationOfCorrelation();
 
 procedure Calculation(const Index0, Index1 : TSGMaxEnum);
@@ -235,6 +470,8 @@ for i := 0 to High(FObjects) do
 		Sum_Comp += FData[i][Index0].Value * FData[i][Index1].Value;
 		end;
 Correlation := (Num * Sum_Comp - Sum_0 * Sum_1) / Sqrt((Num * Sum_Squared_0 - Sqr(Sum_0)) * (Num * Sum_Squared_1 - Sqr(Sum_1)));
+FAttributes[Index0].SetProperty('SUM_LEN_' + SGStr(Index1), TSGOptionPointer(Num));
+FAttributes[Index1].SetProperty('SUM_LEN_' + SGStr(Index0), TSGOptionPointer(Num));
 FAttributes[Index0].SetProperty('CORR_' + SGStr(Index1), TSGOptionPointer(TSGFloat32(Correlation)));
 FAttributes[Index1].SetProperty('CORR_' + SGStr(Index0), TSGOptionPointer(TSGFloat32(Correlation)));
 end;

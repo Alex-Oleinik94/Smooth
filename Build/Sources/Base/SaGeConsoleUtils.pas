@@ -53,6 +53,8 @@ function SGReadLnByte() : TSGByte;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCharRead() : TSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadLnString() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPCharRead() : PSGChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGReadFloat64() : TSGFloat64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGReadEnum() : TSGMaxEnum; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGIsConsole() : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGExtractComand(const Comand : TSGString) : TSGString;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -72,6 +74,16 @@ uses
 	 StrMan
 	,SaGeStringUtils
 	;
+
+function SGReadFloat64() : TSGFloat64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Read(Result);
+end;
+
+function SGReadEnum() : TSGMaxEnum; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Read(Result);
+end;
 
 function SGConsoleEncoding() : TSGEncoding; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
