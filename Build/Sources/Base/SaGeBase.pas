@@ -112,6 +112,13 @@ type
 			TSGFloat64
 		{$ENDIF WITHOUT_EXTENDED}
 		;
+	TSGMaxFPUFloat = 
+		{$IFDEF CPU64}
+			TSGFloat64
+		{$ELSE} {$IFDEF CPU32}
+			TSGFloat32
+		{$ENDIF}{$ENDIF}
+		;
 	TSGMaxSignedEnum =
 		{$IFDEF CPU64}
 			TSGInt64
@@ -174,6 +181,9 @@ operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$END
 {$DEFINE  INC_PLACE_INTERFACE}
 {$INCLUDE SaGeCommonLists.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
+
+type
+	PSGStringList = ^ TSGStringList;
 
 operator in(const S : TSGString; const A : TSGSettings):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
