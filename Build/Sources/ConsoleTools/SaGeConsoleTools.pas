@@ -27,7 +27,6 @@ uses
 	// Engine includes
 	 SaGeVersion
 	,SaGeFPCToC
-	,SaGeStatistics
 	
 	// Aditional console tool includes
 	,SaGeConsoleEngineTools
