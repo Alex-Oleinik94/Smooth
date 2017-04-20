@@ -48,9 +48,12 @@ type
 			// Attr : 'DISC_VALUES'
 			//   Correlation:
 			// Attr : 'SUM_LEN_{index}'
-			// Attr : 'CORR_{index}
+			// Attr : 'CORR_{index}'
+			// Attr : 'CORR_SUM_{index}'
+			// Attr : 'CORR_SQUAR_SUM_{index}'
+			// Attr : 'CORR_COMB_{index}'
 			//   Regression
-			// Attr : 'REG_EXCESS_{index}'
+			// Attr/Obj : 'REG_EXCESS_{index}'
 		FProperties : TSGSettings;
 			public
 		property Name : TSGString read FName write FName;

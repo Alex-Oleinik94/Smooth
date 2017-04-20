@@ -33,6 +33,7 @@ type
 		procedure DetermineDiscreteValues(const Index : TSGMaxEnum);
 		procedure ExportTypesInfo(const OutputFile : TSGString = '');
 		procedure CorrelationExport(const FileName : TSGString);
+		procedure CalculateLinearRegression(const VariableIndex, RegressionVariableIndex : TSGMaxEnum; var A, B :  TSGFloat64);
 			public
 		property Data : TSGStaticticsData read FData;
 		property Objects : TSGStaticticsFeatures read FObjects;
@@ -100,6 +101,13 @@ end;
 procedure TSGStaticticsTable.CalculationOfCorrelation();
 
 procedure Calculation(const Index0, Index1 : TSGMaxEnum);
+
+procedure SetCorrelationProperty(const PropertyName : TSGString; const PropertyValue : TSGOptionPointer);
+begin
+FAttributes[Index0].SetProperty(PropertyName + SGStr(Index1), PropertyValue);
+FAttributes[Index1].SetProperty(PropertyName + SGStr(Index0), PropertyValue);
+end;
+
 var
 	i : TSGMaxEnum;
 	Num : TSGMaxEnum = 0;
@@ -124,10 +132,13 @@ for i := 0 to High(FObjects) do
 		Sum_Comp += FData[i][Index0].Value * FData[i][Index1].Value;
 		end;
 Correlation := (Num * Sum_Comp - Sum_0 * Sum_1) / Sqrt((Num * Sum_Squared_0 - Sqr(Sum_0)) * (Num * Sum_Squared_1 - Sqr(Sum_1)));
-FAttributes[Index0].SetProperty('SUM_LEN_' + SGStr(Index1), TSGOptionPointer(Num));
-FAttributes[Index1].SetProperty('SUM_LEN_' + SGStr(Index0), TSGOptionPointer(Num));
-FAttributes[Index0].SetProperty('CORR_' + SGStr(Index1), TSGOptionPointer(TSGFloat32(Correlation)));
-FAttributes[Index1].SetProperty('CORR_' + SGStr(Index0), TSGOptionPointer(TSGFloat32(Correlation)));
+FAttributes[Index0].SetProperty('CORR_SUM_'       + SGStr(Index1), TSGOptionPointer(TSGFloat32(Sum_0)));
+FAttributes[Index0].SetProperty('CORR_SQUAR_SUM_' + SGStr(Index1), TSGOptionPointer(TSGFloat32(Sum_Squared_0)));
+FAttributes[Index1].SetProperty('CORR_SUM_'       + SGStr(Index0), TSGOptionPointer(TSGFloat32(Sum_1)));
+FAttributes[Index1].SetProperty('CORR_SQUAR_SUM_' + SGStr(Index0), TSGOptionPointer(TSGFloat32(Sum_Squared_1)));
+SetCorrelationProperty('CORR_COMB_', TSGOptionPointer(TSGFloat32(Sum_Comp)));
+SetCorrelationProperty('SUM_LEN_',   TSGOptionPointer(Num));
+SetCorrelationProperty('CORR_',      TSGOptionPointer(TSGFloat32(Correlation)));
 end;
 
 var
@@ -143,6 +154,21 @@ for i := 0 to High(FAttributes) do
 					Calculation(i, ii);
 D2.Get();
 SGHint(['Statistics : Calculation of correlation done at ', SGTextTimeBetweenDates(D1, D2), '.']);
+end;
+
+
+procedure TSGStaticticsTable.CalculateLinearRegression(const VariableIndex, RegressionVariableIndex : TSGMaxEnum; var A, B :  TSGFloat64);
+var
+	SC, SQ0, S0, S1 : TSGFloat64;
+	N : TSGMaxEnum;
+begin
+N   := TSGMaxEnum(Attributes[VariableIndex]          .GetProperty('SUM_LEN_'        + SGStr(RegressionVariableIndex)));
+SC  := TSGFloat32(Attributes[VariableIndex]          .GetProperty('CORR_COMB_'      + SGStr(RegressionVariableIndex)));
+S0  := TSGFloat32(Attributes[VariableIndex]          .GetProperty('CORR_SUM_'       + SGStr(RegressionVariableIndex)));
+SQ0 := TSGFloat32(Attributes[VariableIndex]          .GetProperty('CORR_SQUAR_SUM_' + SGStr(RegressionVariableIndex)));
+S1  := TSGFloat32(Attributes[RegressionVariableIndex].GetProperty('CORR_SUM_'       + SGStr(VariableIndex)));
+A := (SC - S0 * S1 / N) / (SQ0 - Sqr(S0) / N);
+B := S1 / N - S0 / N * (SC - S0 * S1 / N) / (SQ0 - - Sqr(S0) / N);
 end;
 
 procedure TSGStaticticsTable.DetermineDiscreteValues(const Index : TSGMaxEnum);

@@ -141,7 +141,7 @@ for i := 0 to High(FTable.Attributes) do
 			{(not CorrelationStatisticallySignificant(
 				TSGFloat32(FTable.Attributes[i].GetProperty('CORR_' + SGStr(FRegressionVariableIndex))), 
 				TSGMaxEnum(FTable.Attributes[i].GetProperty('SUM_LEN_' + SGStr(FRegressionVariableIndex)))))) and }
-			(Abs(TSGFloat32(FTable.Attributes[i].GetProperty('CORR_' + SGStr(FRegressionVariableIndex)))) < 0.05)) and 
+			(Abs(TSGFloat32(FTable.Attributes[i].GetProperty('CORR_' + SGStr(FRegressionVariableIndex)))) < 0.7)) and 
 			(TSGStaticticsItemType(FTable.Attributes[i].GetProperty('TYPE')) <> SGStaticticsItemTypeText) then
 				begin
 				FTable.Attributes[i].SetProperty('REG_EXCESS_' + SGStr(FRegressionVariableIndex));
