@@ -48,6 +48,7 @@ implementation
 uses
 	 SaGeLog
 	,SaGeStringUtils
+	,SaGeBaseUtils
 	;
 
 procedure TSGStaticticsRegression.SetRegressionVariable(const RegressionVariable : TSGString);
@@ -82,18 +83,28 @@ end;
 procedure TSGStaticticsRegression.MarkExcessObjects();
 var
 	i, ii, n : TSGMaxEnum;
+	excess : TSGBool;
+	extra  : TSGBool;
 begin
 for i := 0 to High(FTable.Attributes) do
 	if (not FTable.Attributes[i].ExistsProperty('REG_EXCESS_' + SGStr(FRegressionVariableIndex))) then
 		begin
-		n := 0;
-		for ii := 0 to High(FTable.Objects) do
-			if FTable.Data[ii][i].ItemType <> SGStaticticsItemTypeNull then
-				n += 1;
-		if (n / Length(FTable.Objects) < 0.6) or (TSGStaticticsItemType(FTable.Attributes[i].GetProperty('TYPE')) = SGStaticticsItemTypeText) then
+		extra := False;
+		excess := TSGStaticticsItemType(FTable.Attributes[i].GetProperty('TYPE')) = SGStaticticsItemTypeText;
+		if not excess then
+			begin
+			n := 0;
+			for ii := 0 to High(FTable.Objects) do
+				if FTable.Data[ii][i].ItemType <> SGStaticticsItemTypeNull then
+					n += 1;
+			excess := n / Length(FTable.Objects) < 0.6;
+			extra := True;
+			end;
+		if excess then
 			begin
 			FTable.Attributes[i].SetProperty('REG_EXCESS_' + SGStr(FRegressionVariableIndex));
-			SGHint(['Statistics : Attribute "', FTable.Attributes[i].Name, '" marked as excess (', n / Length(FTable.Objects) * 100,')!']);
+			SGHint(['Statistics : Attribute "', FTable.Attributes[i].Name, '" marked as excess (', 
+				Iff(extra, SGStrReal(n / Length(FTable.Objects) * 100, 3) + '% fullness', 'Is text referense'),')!']);
 			end;
 		end;
 n := 0;

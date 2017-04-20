@@ -14,8 +14,14 @@ uses
 	,SaGeStatisticsRegression
 	;
 
+const
+	MaxCoeficientsListLength = 2; // >= 2
+	GradientRegressionEpsilon = 0.05;
+	GradientRegressionAlpha = 0.01;
 type
 	TSGStaticticsLinearCoeficients = TSGFloat64List;
+	TSGStaticticsLinearCoeficientsList = packed array of TSGStaticticsLinearCoeficients;
+	
 	TSGStaticticsGradientRegression = class(TSGStaticticsRegression)
 			public
 		constructor Create(); override;
@@ -24,12 +30,24 @@ type
 			private
 		FDataPower : TSGMaxEnum;
 		FFinalCoeficients : TSGStaticticsLinearCoeficients;
+		FCoeficientsLength : TSGMaxEnum;
+		FCoeficientsAttributes : TSGUInt32List;
+		FExcessObjects : TSGBooleanList;
 			private
-		class procedure MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients);
+		function CalculateCoeficientsLength() : TSGMaxEnum;
+		procedure CalculatateCoeficientsAttributes();
+		class procedure MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients);overload;
+		class procedure MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients; const DestinationLength : TSGMaxEnum); overload;
 		procedure OutCoeficientsToFile(const Coeficients : TSGStaticticsLinearCoeficients);
 		function IterationFunction(var Coeficients : TSGFloat64List; var ObjectData : TSGStaticticsObjectData) : TSGFloat64;
 		function IterationFunctionSquaderError(var Coeficients : TSGStaticticsLinearCoeficients) : TSGFloat64;
 		procedure RegainGradientRegression();
+		procedure CalculateExcessObjects();
+			private
+		function CalculateNextCoeficients(const CoeficientsList : TSGStaticticsLinearCoeficientsList) : TSGStaticticsLinearCoeficients;
+		function CalculateStartCoeficients() : TSGStaticticsLinearCoeficients;
+		procedure InsertNewCoeficients(var CoeficientsList : TSGStaticticsLinearCoeficientsList; const Coeficients : TSGStaticticsLinearCoeficients);
+		procedure InsertNewCoeficientsAndClear(var CoeficientsList : TSGStaticticsLinearCoeficientsList; var Coeficients : TSGStaticticsLinearCoeficients; var Error : TSGFloat64);
 			public
 		procedure Clear(); override;
 		procedure RegainRegression(); override;
@@ -41,34 +59,39 @@ implementation
 uses
 	 SaGeLog
 	,SaGeDateTime
+	,SaGeBaseUtils
 	;
 
-class procedure TSGStaticticsGradientRegression.MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients);
+class procedure TSGStaticticsGradientRegression.MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients; const DestinationLength : TSGMaxEnum); overload;
 var
 	i : TSGMaxEnum;
 begin
-SetLength(Destination, Length(Source));
-for i := 0 to High(Source) do
+SetLength(Destination, DestinationLength);
+for i := 0 to DestinationLength - 1 do
 	Destination[i] := Source[i];
 end;
 
-function TSGStaticticsGradientRegression.IterationFunction(var Coeficients : TSGFloat64List; var ObjectData : TSGStaticticsObjectData) : TSGFloat64;
+class procedure TSGStaticticsGradientRegression.MoveCoeficients(const Source : TSGStaticticsLinearCoeficients; var Destination : TSGStaticticsLinearCoeficients); overload;
+begin
+MoveCoeficients(Source, Destination, Length(Source));
+end;
+
+function TSGStaticticsGradientRegression.IterationFunction(var Coeficients : TSGStaticticsLinearCoeficients; var ObjectData : TSGStaticticsObjectData) : TSGFloat64;
 var
-	i, ic : TSGMaxEnum;
+	i : TSGMaxEnum;
 begin
 Result := Coeficients[0];
-i := 0;
-ic := 1;
-while i < Length(Table.Attributes) do
-	begin
-	if i <> RegressionVariableIndex then
-		begin
-		if Table.Attributes[i].NotExcess(RegressionVariableIndex) then
-			Result += Coeficients[ic] * ObjectData[i].Value;
-		ic += 1;
-		end;
-	i += 1;
-	end;
+for i := 0 to FCoeficientsLength - 2 do
+	Result += Coeficients[i + 1] * ObjectData[FCoeficientsAttributes[i]].Value;
+end;
+
+procedure TSGStaticticsGradientRegression.CalculateExcessObjects();
+var
+	i : TSGMaxEnum;
+begin
+SetLength(FExcessObjects, Length(Table.Objects));
+for i := 0 to High(FExcessObjects) do
+	FExcessObjects[i] := not Table.Objects[i].NotExcess(RegressionVariableIndex);
 end;
 
 function TSGStaticticsGradientRegression.IterationFunctionSquaderError(var Coeficients : TSGStaticticsLinearCoeficients) : TSGFloat64;
@@ -77,79 +100,99 @@ var
 begin
 Result := 0;
 for i := 0 to High(Table.Objects) do
-	if Table.Objects[i].NotExcess(RegressionVariableIndex) then
+	if not FExcessObjects[i] then
 		Result += Sqr(IterationFunction(Coeficients, Table.Data[i]) - Table.Data[i][RegressionVariableIndex].Value) / (2 * FDataPower);
 Write(Result :0:10);ReadLn();
 end;
 
-procedure TSGStaticticsGradientRegression.RegainGradientRegression();
-
-procedure StepAttributes(var Coef1 : TSGFloat64List; var Coef2 : TSGFloat64List);
+function TSGStaticticsGradientRegression.CalculateNextCoeficients(const CoeficientsList : TSGStaticticsLinearCoeficientsList) : TSGStaticticsLinearCoeficients;
 var
-	Coe : TSGFloat64List;
-	ic, i, ii : TSGMaxEnum;
-	alpha : TSGFloat64 = -0.0001;
+	i, ii : TSGMaxEnum;
 begin
-SetLength(Coe, Length(Coef1));
-i := 0;
-ic := 1;
-while i < Length(Table.Attributes) do
+SetLength(Result, FCoeficientsLength);
+fillchar(Result[0], SizeOf(Result[0]) * FCoeficientsLength, 0);
+for i := 0 to FCoeficientsLength - 2 do
 	begin
-	if (i <> RegressionVariableIndex) then
-		begin
-		if Table.Attributes[i].NotExcess(RegressionVariableIndex) then
-			begin
-			Coe[ic] := 0;
-			for ii := 0 to High(Table.Objects) do
-				if Table.Objects[ii].NotExcess(RegressionVariableIndex) then
-					Coe[ic] += (IterationFunction(Coef1, Table.Data[ii]) - Table.Data[ii][RegressionVariableIndex].Value) * alpha / FDataPower * Table.Data[ii][i].Value;
-			Coe[ic] := Coef1[ic] - Coe[ic];
-			end;
-		ic += 1;
-		end;
-	i += 1;
+	Result[i + 1] := 0;
+	for ii := 0 to High(Table.Objects) do
+		if not FExcessObjects[i] then
+			Result[i + 1] += (IterationFunction(CoeficientsList[High(CoeficientsList)], Table.Data[ii]) - Table.Data[ii][RegressionVariableIndex].Value) * GradientRegressionAlpha / FDataPower * Table.Data[ii][FCoeficientsAttributes[i]].Value;
+	Result[i + 1] := CoeficientsList[High(CoeficientsList)][i + 1] - Result[i + 1];
 	end;
-MoveCoeficients(Coe, Coef2);
-SetLength(Coe, 0);
-OutCoeficientsToFile(Coef2);
+OutCoeficientsToFile(Result);
 end;
 
-var
-	Coef1 : TSGFloat64List;
-	Coef2 : TSGFloat64List;
-	S1, S2 : TSGFloat64;
-
-function IterFuncSquaderError() : TSGFloat64; overload;
-begin
-Result := IterationFunctionSquaderError(Coef2);
-end;
-
-procedure MoveCoefAndRes();
-begin
-MoveCoeficients(Coef2, Coef1);
-S1 := S2;
-end;
-
+function TSGStaticticsGradientRegression.CalculateStartCoeficients() : TSGStaticticsLinearCoeficients;
 var
 	i : TSGMaxEnum;
 begin
-SetLength(Coef1, Length(Table.Attributes));
-SetLength(Coef2, Length(Table.Attributes));
-Coef1[0] := 0;
-for i := 1 to High(Coef1) do
-	Coef1[i] := 1;
-S1 := IterationFunctionSquaderError(Coef1);
-StepAttributes(Coef1, Coef2);
-S2 := IterFuncSquaderError();
-while Abs(S2 - S1) >  0.05 do
+SetLength(Result, FCoeficientsLength);
+Result[0] := 0;
+for i := 1 to FCoeficientsLength - 1 do
+	Result[i] := 1;
+end;
+
+procedure TSGStaticticsGradientRegression.InsertNewCoeficients(var CoeficientsList : TSGStaticticsLinearCoeficientsList; const Coeficients : TSGStaticticsLinearCoeficients);
+
+procedure ReplaceOld();
+var
+	i : TSGMaxEnum;
+begin
+SetLength(CoeficientsList[0], 0);
+for i := 1 to MaxCoeficientsListLength - 1 do
+	CoeficientsList[i - 1] := CoeficientsList[i];
+CoeficientsList[MaxCoeficientsListLength - 1] := nil;
+end;
+
+begin
+if Length(CoeficientsList) < MaxCoeficientsListLength then
+	SetLength(CoeficientsList, Length(CoeficientsList) + 1)
+else
+	ReplaceOld();
+SetLength(CoeficientsList[High(CoeficientsList)], FCoeficientsLength + 1);
+Move(Coeficients[0], CoeficientsList[High(CoeficientsList)][0], (FCoeficientsLength + 1) * SizeOf(CoeficientsList[High(CoeficientsList)][0]));
+end;
+
+procedure TSGStaticticsGradientRegression.InsertNewCoeficientsAndClear(var CoeficientsList : TSGStaticticsLinearCoeficientsList; var Coeficients : TSGStaticticsLinearCoeficients; var Error : TSGFloat64);
+begin
+SetLength(Coeficients, FCoeficientsLength + 1);
+Coeficients[FCoeficientsLength] := Error;
+InsertNewCoeficients(CoeficientsList, Coeficients);
+SetLength(Coeficients, 0);
+Error := 0;
+end;
+
+procedure TSGStaticticsGradientRegression.RegainGradientRegression();
+var
+	CoeficientsList : TSGStaticticsLinearCoeficientsList = nil;
+	NewCoeficients : TSGStaticticsLinearCoeficients = nil;
+	NewCoeficientsSquaderError : TSGFloat64;
+
+procedure ClearCoeficientsData();
+var
+	i : TSGMaxEnum;
+begin
+for i := 0 to High(CoeficientsList) do
+	SetLength(CoeficientsList[i], 0);
+SetLength(CoeficientsList, 0);
+SetLength(NewCoeficients, 0);
+end;
+
+begin
+NewCoeficients := CalculateStartCoeficients();
+NewCoeficientsSquaderError := IterationFunctionSquaderError(NewCoeficients);
+InsertNewCoeficientsAndClear(CoeficientsList, NewCoeficients, NewCoeficientsSquaderError);
+NewCoeficients := CalculateNextCoeficients(CoeficientsList);
+NewCoeficientsSquaderError := IterationFunctionSquaderError(NewCoeficients);
+InsertNewCoeficientsAndClear(CoeficientsList, NewCoeficients, NewCoeficientsSquaderError);
+while Abs(CoeficientsList[High(CoeficientsList)][FCoeficientsLength] - CoeficientsList[High(CoeficientsList) - 1][FCoeficientsLength]) >  GradientRegressionEpsilon do
 	begin
-	MoveCoefAndRes();
-	StepAttributes(Coef1, Coef2);
-	S2 := IterFuncSquaderError();
+	NewCoeficients := CalculateNextCoeficients(CoeficientsList);
+	NewCoeficientsSquaderError := IterationFunctionSquaderError(NewCoeficients);
+	InsertNewCoeficientsAndClear(CoeficientsList, NewCoeficients, NewCoeficientsSquaderError);
 	end;
-OutCoeficientsToFile(Coef2);
-SetLength(Coef1, 0);
-SetLength(Coef2, 0);
+MoveCoeficients(CoeficientsList[High(CoeficientsList)], FFinalCoeficients, FCoeficientsLength);
+ClearCoeficientsData();
 end;
 
 procedure TSGStaticticsGradientRegression.RegainRegression();
@@ -157,6 +200,9 @@ begin
 MarkExcessAttributes();
 MarkExcessObjects();
 FDataPower := DataPower();
+FCoeficientsLength := CalculateCoeficientsLength();
+CalculatateCoeficientsAttributes();
+CalculateExcessObjects();
 RegainGradientRegression();
 end;
 
@@ -165,26 +211,41 @@ begin
 OutCoeficientsToFile(FFinalCoeficients);
 end;
 
+procedure TSGStaticticsGradientRegression.CalculatateCoeficientsAttributes();
+var
+	i, ic : TSGMaxEnum;
+begin
+SetLength(FCoeficientsAttributes, CalculateCoeficientsLength() - 1);
+ic := 0;
+for i := 0 to High(Table.Attributes) do
+	if (i <> RegressionVariableIndex) and Table.Attributes[i].NotExcess(RegressionVariableIndex) then
+		begin
+		FCoeficientsAttributes[ic] := i;
+		ic += 1;
+		end;
+end;
+
+function TSGStaticticsGradientRegression.CalculateCoeficientsLength() : TSGMaxEnum;
+var
+	i : TSGMaxEnum;
+begin
+Result := 1;
+for i := 0 to High(Table.Attributes) do
+	if (i <> RegressionVariableIndex) and Table.Attributes[i].NotExcess(RegressionVariableIndex) then
+		Result += 1;
+end;
+
 procedure TSGStaticticsGradientRegression.OutCoeficientsToFile(const Coeficients : TSGStaticticsLinearCoeficients);
 var
 	f : TextFile;
-	i, ic : TSGMaxEnum;
+	i : TSGMaxEnum;
 begin
 Assign(f, OutputFileName);
 Rewrite(f);
-WriteLn(f, '				', Coeficients[0] :0:10);
-i := 0;
-ic := 1;
-while i < Length(Table.Attributes) do
-	begin
-	if (i <> RegressionVariableIndex) then
-		begin
-		if Table.Attributes[i].NotExcess(RegressionVariableIndex) then
-			WriteLn(f, Table.Attributes[i].Name, '		', Coeficients[ic] :0:10);
-		ic += 1;
-		end;
-	i += 1;
-	end;
+WriteLn(f, '"', Table.Attributes[RegressionVariableIndex].Name, '" =');
+WriteLn(f, '	', Coeficients[0] :0:10, ' +');
+for i := 0 to FCoeficientsLength - 2 do
+	WriteLn(f, '	', Coeficients[i + 1] :0:10, ' * "', Table.Attributes[FCoeficientsAttributes[i]].Name, '"', Iff(i <> FCoeficientsLength - 2, ' +'));
 Close(f);
 end;
 
