@@ -145,7 +145,7 @@ for i := 0 to High(FTable.Attributes) do
 			(TSGStaticticsItemType(FTable.Attributes[i].GetProperty('TYPE')) <> SGStaticticsItemTypeText) then
 				begin
 				FTable.Attributes[i].SetProperty('REG_EXCESS_' + SGStr(FRegressionVariableIndex));
-				SGHint(['Statistics : Attribute "', FTable.Attributes[i].Name, '" marked as excess!']);
+				SGHint(['Statistics : Attribute "', FTable.Attributes[i].Name, '" marked as excess (Correlation ',TSGFloat32(FTable.Attributes[i].GetProperty('CORR_' + SGStr(FRegressionVariableIndex))),')!']);
 				end;
 		end;
 end;

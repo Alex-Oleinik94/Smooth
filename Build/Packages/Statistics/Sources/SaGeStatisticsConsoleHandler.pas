@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeStatisticsTest;
+unit SaGeStatisticsConsoleHandler;
 
 interface
 
