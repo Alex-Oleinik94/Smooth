@@ -105,12 +105,11 @@ if Success then
 			RegressionVariable := RegressionVariableName;
 			OutputFileName := RegressionFileName;
 			RegainRegression();
+			OutToFile();
 			end;
 		Destroy();
 		end;
-	end
-else
-	SGHint('Statistics : Some errors!');
+	end;
 end;
 
 initialization
