@@ -27,53 +27,30 @@ var
 	RegressionFileName  : TSGString = '';
 
 function ProccessRegressionExport(const Comand : TSGString):TSGBool;
-var
-	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['out_regression:']);
-Result := Value <> '';
-if Result then
-	RegressionFileName := Value;
+Result := SGParseValueFromComandAndReturn(Comand, ['out_regression:'], RegressionFileName);
 end;
 
 function ProccessRegressionVariable(const Comand : TSGString):TSGBool;
-var
-	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['regression_variable:']);
-Result := Value <> '';
+Result := SGParseValueFromComandAndReturn(Comand, ['regression_variable:'], RegressionVariableName);
 if Result then
-	RegressionVariableName := SGConvertString(Value, SGEncodingWin1251);
+	RegressionVariableName := SGConvertString(RegressionVariableName, SGEncodingWin1251);
 end;
 
 function ProccessTypesExport(const Comand : TSGString):TSGBool;
-var
-	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['out_types:']);
-Result := Value <> '';
-if Result then
-	TypesFileName := Value;
+Result := SGParseValueFromComandAndReturn(Comand, ['out_types:'], TypesFileName);
 end;
 
 function ProccessCorrelationExport(const Comand : TSGString):TSGBool;
-var
-	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['out_correlation:']);
-Result := Value <> '';
-if Result then
-	CorrelationFileName := Value;
+Result := SGParseValueFromComandAndReturn(Comand, ['out_correlation:'], CorrelationFileName);
 end;
 
 function ProccessImporting(const Comand : TSGString):TSGBool;
-var
-	Value : TSGString;
 begin
-Value := SGParseValueFromComand(Comand, ['input:']);
-Result := Value <> '';
-if Result then
-	ImportFile := Value;
+Result := SGParseValueFromComandAndReturn(Comand, ['input:'], ImportFile);
 end;
 
 var

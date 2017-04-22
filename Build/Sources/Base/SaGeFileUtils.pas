@@ -69,6 +69,7 @@ const
 (************)
 
 function SGCheckDirectorySeparators(const Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGExportStringToFile(const FileName, Data : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (**********)
 (** FILE **)
@@ -120,6 +121,16 @@ for C in Path do
 		Result += DirectorySeparator
 	else
 		Result += C;
+end;
+
+procedure SGExportStringToFile(const FileName, Data : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	f : TextFile;
+begin
+Assign(f, FileName);
+Rewrite(f);
+Write(f, Data);
+Close(f);
 end;
 
 (************************)

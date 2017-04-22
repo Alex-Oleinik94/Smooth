@@ -14,11 +14,12 @@ procedure SGConsoleShaderReadWrite                       (const VParams : TSGCon
 implementation
 
 uses
-	StrMan
+	 StrMan
 	
 	,SaGeVersion
 	,SaGeResourceManager
 	,SaGeShaders
+	,SaGeShaderReader
 	;
 
 procedure SGConsoleShaderReadWrite(const VParams : TSGConcoleCallerParams = nil);

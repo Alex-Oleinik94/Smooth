@@ -66,6 +66,7 @@ function SGSystemParamsToConcoleCallerParams() : TSGConcoleCallerParams;{$IFDEF 
 function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGParseValueFromComandAndReturn(const Comand : TSGString; const PredParts : array of const; out OutString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
@@ -80,6 +81,16 @@ uses
 	,SaGeFileOpener
 	,SaGeStringUtils
 	;
+
+function SGParseValueFromComandAndReturn(const Comand : TSGString; const PredParts : array of const; out OutString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	Value : TSGString;
+begin
+Value := SGParseValueFromComand(Comand, PredParts);
+Result := Value <> '';
+if Result then
+	OutString := Value;
+end;
 
 function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var

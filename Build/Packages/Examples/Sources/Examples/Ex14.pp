@@ -17,6 +17,7 @@ uses
 	,SaGeVertexObject
 	,SaGeCommonStructs
 	,SaGeShaders
+	,SaGeShaderReader
 	,SaGeResourceManager
 	,SaGeFileUtils
 	,SaGeCamera

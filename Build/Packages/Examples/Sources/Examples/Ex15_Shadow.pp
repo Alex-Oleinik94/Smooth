@@ -12,6 +12,7 @@ uses
 	,SaGeShaders
 	,SaGeImage
 	,SaGeMatrix
+	,SaGeShaderReader
 	
 	,Crt
 	
