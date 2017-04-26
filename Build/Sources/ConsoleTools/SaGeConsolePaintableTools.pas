@@ -60,7 +60,6 @@ uses
 	,SaGeLoading
 	,SaGeModelRedactor
 	,SaGeClientWeb
-	,SaGeUserTesting
 	,SaGeTron
 	;
 
@@ -73,7 +72,6 @@ with TSGDrawClasses.Create(Context) do
 	Add(TSGLoading);
 	
 	Add(SGGetRegisteredDrawClasses());
-	//Add(TSGUserTesting);
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
 	Add(TSGModelRedactor);

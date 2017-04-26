@@ -90,10 +90,11 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeFileUtils
-	,SaGeVersion
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeWindowsUtils
+	{$ELSE}
+		,SaGeVersion
 		{$ENDIF}
 	;
 
