@@ -193,7 +193,6 @@ type
 
 implementation
 
-
 operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	i, ii : TSGMaxEnum;

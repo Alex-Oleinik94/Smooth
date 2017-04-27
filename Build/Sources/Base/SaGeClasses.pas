@@ -8,9 +8,6 @@ uses
 	 Classes
 	
 	,SaGeBase
-	{$IFDEF WITHLEAKSDETECTOR}
-		,SaGeLeaksDetector
-		{$ENDIF}
 	;
 
 type
@@ -20,7 +17,9 @@ type
 		end;
 
 	TSGObject = class(TObject)
+			public
 		constructor Create();virtual;
+		class function ObjectName() : TSGString; virtual;
 		end;
 
 	TSGInterfacedObject = class(TSGObject, ISGInterface)
@@ -43,6 +42,7 @@ type
 		destructor Destroy(); override;
 		{$ENDIF}
 		class function ClassName() : TSGString; virtual;
+		class function ExistedName() : TSGString; virtual;
 		end;
 
 	ISGOptionGetSeter = interface
@@ -165,6 +165,7 @@ type
 		end;
 
 procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var Stream : TStream); overload;
 
 implementation
 
@@ -172,24 +173,34 @@ uses
 	 SysUtils
 	
 	,SaGeLog
+	{$IFDEF WITHLEAKSDETECTOR}
+		,SaGeLeaksDetector
+		{$ENDIF}
 	;
+
+procedure SGKill(var Stream : TStream); overload;
+begin
+if Stream <> nil then
+	begin
+	Stream.Destroy();
+	Stream := nil;
+	end;
+end;
 
 {$IFDEF WITHLEAKSDETECTOR}
 constructor TSGNamed.Create();
 begin
 inherited;
-if LeaksDetector <> nil then
-	LeaksDetector.AddReference(ClassName())
-else
-	SGLog.Source(['TSGLeaksDetector : Error : AddReferense(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+if LeaksDetector = nil then
+	SGInitLeaksDetector();
+LeaksDetector.AddReference(ObjectName());
 end;
 
 destructor TSGNamed.Destroy();
 begin
-if LeaksDetector <> nil then
-	LeaksDetector.ReleaseReference(ClassName())
-else
-	SGLog.Source(['TSGLeaksDetector : Error : ReleaseReference(''',ClassName(),''') without specimen of TSGLeaksDetector']);
+if LeaksDetector = nil then
+	SGInitLeaksDetector();
+LeaksDetector.ReleaseReference(ObjectName());
 inherited;
 end;
 {$ENDIF}
@@ -259,6 +270,18 @@ end;
 class function TSGPaintable.ClassName() : TSGString;
 begin
 Result := 'TSGPaintable';
+end;
+
+class function TSGObject.ObjectName() : TSGString;
+begin
+Result := ClassName;
+end;
+
+class function TSGNamed.ExistedName() : TSGString;
+begin
+Result := ClassName();
+if Result = '' then
+	Result := ObjectName();
 end;
 
 class function TSGNamed.ClassName() : TSGString;

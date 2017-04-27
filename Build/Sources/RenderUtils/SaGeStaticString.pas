@@ -114,6 +114,7 @@ end;
 
 destructor TSGStaticString.Destroy();
 begin
+SGKill(FMesh);
 inherited;
 end;
 

@@ -32,10 +32,13 @@ var
 	Layout : array [0..kl_namelength] of TSGChar;
 begin
 GetKeyboardLayoutName(Layout);
-if layout = '00000409' then
+// HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layouts
+if Layout = '00000409' then
 	Result := 'EN'
+else if Layout = '00000419' then
+	Result := 'RU'
 else
-	Result := 'RU';
+	Result := 'Unknown';
 end;
 
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;

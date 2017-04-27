@@ -12,7 +12,10 @@ type
 	TSGLeaksDetectorReference = object
 			public
 		FName : TSGString;
-		FCount : TSGLongWord;
+		FCount : TSGMaxEnum;
+		FMaxCount : TSGMaxEnum;
+			public
+		procedure CheckCount();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
 	TSGLeaksDetectorReferences = packed array of TSGLeaksDetectorReference;
@@ -32,6 +35,8 @@ type
 var
 	LeaksDetector : TSGLeaksDetector = nil;
 
+procedure SGInitLeaksDetector();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
@@ -50,6 +55,12 @@ SetLength(FReferences, 0);
 inherited;
 end;
 
+procedure TSGLeaksDetectorReference.CheckCount();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if FCount > FMaxCount then
+	FMaxCount := FCount;
+end;
+
 procedure TSGLeaksDetector.AddReference(const VName : TSGString);
 
 procedure AddNew();
@@ -60,6 +71,7 @@ else
 	SetLength(FReferences, Length(FReferences) + 1);
 FReferences[High(FReferences)].FName := VName;
 FReferences[High(FReferences)].FCount := 1;
+FReferences[High(FReferences)].FMaxCount := 1;
 end;
 
 var
@@ -73,6 +85,7 @@ if FReferences <> nil then
 			if FReferences[i].FName = VName then
 				begin
 				FReferences[i].FCount += 1;
+				FReferences[i].CheckCount();
 				f := True;
 				break;
 				end;
@@ -116,7 +129,7 @@ function ItemTitle(const IName : TSGString):TSGString;
 var
 	i : TSGInt32;
 begin
-Result := '"' + IName + '"';
+Result := IName;
 for i := Length(IName) to iii do
 	Result += ' ';
 end;
@@ -135,10 +148,10 @@ if FReferences <> nil then
 		for i := 0 to High(FReferences) do
 			begin
 			ii += FReferences[i].FCount;
-			if Length(FReferences[i].FName) > iii then
-				iii := Length(FReferences[i].FName);
+			if Length(FReferences[i].FName + SGStr(FReferences[i].FMaxCount)) + 2 > iii then
+				iii := Length(FReferences[i].FName + SGStr(FReferences[i].FMaxCount)) + 2;
 			if FReferences[i].FCount <= 0 then
-				S += FReferences[i].FName + ';'
+				S += FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')' + ';'
 			else if Length(SGStr(FReferences[i].FCount)) > lc then
 				lc := Length(SGStr(FReferences[i].FCount));
 			end;
@@ -152,8 +165,7 @@ else
 		if Length(FReferences) > 0 then
 			for i := 0 to High(FReferences) do
 				if FReferences[i].FCount > 0 then
-					SL += (ItemTitle(FReferences[i].FName) + '- ' + SGStr(FReferences[i].FCount) + ';');
-					//SGLog.Source(['   ',,' - ',FReferences[i].FCount,' references.']);
+					SL += (ItemTitle(FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')') + '- ' + SGStr(FReferences[i].FCount) + ';');
 	SGLog.Source(SL, 'TSGLeaksDetector : Leaks :');
 	SetLength(SL, 0);
 	end;
@@ -161,17 +173,35 @@ SGLog.Source(S,'TSGLeaksDetector : Lines without references',';');
 S := '';
 end;
 
-initialization
+// ==================================
+// ==================================
+// ==================================
+
+procedure SGInitLeaksDetector();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if LeaksDetector = nil then
 	LeaksDetector := TSGLeaksDetector.Create();
 end;
 
+procedure SGFinalizeLeaksDetector();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if LeaksDetector <> nil then
+	begin
+	LeaksDetector.WriteToLog();
+	LeaksDetector.Destroy();
+	LeaksDetector := nil;
+	end;
+end;
+
+initialization
+begin
+SGInitLeaksDetector();
+end;
+
 finalization
 begin
-LeaksDetector.WriteToLog();
-LeaksDetector.Destroy();
-LeaksDetector := nil;
+SGFinalizeLeaksDetector();
+SGFinalizeLog();
 end;
 
 end.

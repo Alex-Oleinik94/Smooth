@@ -23,10 +23,20 @@ operator in(const B : DATATYPE; const A : DATATYPE_LIST) : TSGBoolean;{$IFDEF SU
 operator in(const A, B : DATATYPE_LIST) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator + (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator * (A, B : DATATYPE_LIST) : DATATYPE_LIST;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var List : DATATYPE_LIST); overload;
 {$ENDIF INC_WITHOUT_FORWARD}
 {$ENDIF INC_PLACE_INTERFACE}
 
 {$IFDEF INC_PLACE_IMPLEMENTATION}
+procedure SGKill(var List : DATATYPE_LIST); overload;
+begin
+if List <> nil then
+	begin
+	SetLength(List, 0);
+	List := nil;
+	end;
+end;
+
 function Len(const List : DATATYPE_LIST) : TSGUInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := 0;

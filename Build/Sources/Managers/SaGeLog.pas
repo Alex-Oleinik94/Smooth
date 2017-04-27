@@ -67,6 +67,7 @@ procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inl
 function SGLogDateTimePredString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
 function SGCreateLog(var Log : TSGLog; const LogFile : TSGString = SGLogFileName) : TSGBoolean;
+procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -273,6 +274,14 @@ else
 SetLength(Params, 0);
 end;
 
+procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if SGLogEnable then
+	SGLog.Source('  << Destroy Log >>');
+SGLog.Destroy();
+SGLog := nil;
+end;
+
 initialization
 begin
 {$IFDEF ANDROID}
@@ -294,12 +303,11 @@ if SGLogEnable then
 	end;
 end;
 
+{$IFNDEF WITHLEAKSDETECTOR}
 finalization
 begin
-if SGLogEnable then
-	SGLog.Source('  << Destroy Log >>');
-SGLog.Destroy();
-SGLog := nil;
+SGFinalizeLog();
 end;
+{$ENDIF WITHLEAKSDETECTOR}
 
 end.

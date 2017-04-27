@@ -106,14 +106,14 @@ function SGTriangleSize(const a,b,c:TSGFloat)   :TSGFloat;{$IFDEF SUPPORTINLINE}
 
 function SGIsVectorOnQuad(const Vector, QuadVector1, QuadVector3 : TSGCommonVector3) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SGIsVectorOnQuad(const Vector, QuadVector1, QuadVector2, QuadVector3, QuadVector4: TSGCommonVector3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1, t2, t3, v : TSGCommonVector2; const Zero : TSGCommonFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1, t2, t3, v : TSGCommonVector3; const Zero : TSGCommonFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1, t2, v : TSGCommonVector3; const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1, t2, v : TSGCommonVector2; const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1, t2, v : TSGCommonFloat;   const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
-function SGIsTriangleConvex(const v1,v2,v3:TSGVertex3f):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGIsTriangleConvex(const v1,v2,v3:TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1, v2, v3 : TSGCommonVector3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1, v2, v3 : TSGCommonFloat  ) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 function SGCosSinAngle(const Coodrs : TSGCommonVector2) : TSGCommonFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
@@ -146,9 +146,9 @@ begin
 Result := SGCosSinAngle(Coodrs.x, Coodrs.y);
 end;
 
-function SGIsTriangleConvex(const v1, v2, v3 : TSGFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1, v2, v3 : TSGCommonFloat):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	sv1, sv2, sv3 : TSGFloat;
+	sv1, sv2, sv3 : TSGCommonFloat;
 begin
 sv1 := Sqr(v1);
 sv2 := Sqr(v2);
@@ -159,40 +159,40 @@ Result :=
 	(sv3 < sv2 + sv1);
 end;
 
-function SGIsTriangleConvex(const v1, v2, v3 : TSGVertex3f) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsTriangleConvex(const v1, v2, v3 : TSGCommonVector3) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result := SGIsTriangleConvex(Abs(v3 - v2), Abs(v3 - v1), Abs(v1 - v2));
 end;
 
-function SGIsVertexOnLine(const t1,t2,v : TSGFloat;    const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnLine(const t1,t2,v : TSGCommonFloat;    const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	l : TSGFloat;
+	l : TSGCommonFloat;
+begin
+l := Abs(t2-t1);
+Result := Abs(l - Abs(t1 - v) - Abs(t2 - v)) < Zero * l;
+end;
+
+function SGIsVertexOnLine(const t1, t2, v : TSGCommonVector3; const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	l : TSGCommonFloat;
+begin
+l := Abs(t2-t1);
+Result := Abs(l - Abs(t1 - v) - Abs(t2 - v)) < Zero * l;
+end;
+
+function SGIsVertexOnLine(const t1, t2, v : TSGCommonVector2; const Zero : TSGCommonFloat = SGZero) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	l : TSGCommonFloat;
 begin
 l := Abs(t2-t1);
 Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
 end;
 
-function SGIsVertexOnLine(const t1,t2,v : TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1, t2, t3, v : TSGCommonVector2; const Zero : TSGCommonFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	l : TSGFloat;
+	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGCommonFloat;
 begin
-l := Abs(t2-t1);
-Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
-end;
-
-function SGIsVertexOnLine(const t1,t2,v : TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	l : TSGFloat;
-begin
-l := Abs(t2-t1);
-Result := Abs(l - Abs(t1-v) - Abs(t2-v)) < Zero * l;
-end;
-
-function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex2f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
-begin
-Result := SGIsVertexOnLine(t1,t2,v) or SGIsVertexOnLine(t1,t3,v) or SGIsVertexOnLine(t3,t2,v);
+Result := SGIsVertexOnLine(t1, t2, v) or SGIsVertexOnLine(t1, t3, v) or SGIsVertexOnLine(t3, t2, v);
 if not Result then
 	begin
 	t1t2 := Abs(t1 - t2);
@@ -214,11 +214,11 @@ if not Result then
 	end;
 end;
 
-function SGIsVertexOnTriangle(const t1,t2,t3,v:TSGVertex3f; const Zero : TSGFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGIsVertexOnTriangle(const t1, t2, t3, v : TSGCommonVector3; const Zero : TSGCommonFloat = SGZero):TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
-	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGFloat;
+	t1t2, t2t3, t3t1, vt1, vt2, vt3, s: TSGCommonFloat;
 begin
-Result := SGIsVertexOnLine(t1,t2,v) or SGIsVertexOnLine(t1,t3,v) or SGIsVertexOnLine(t3,t2,v);
+Result := SGIsVertexOnLine(t1, t2, v) or SGIsVertexOnLine(t1, t3, v) or SGIsVertexOnLine(t3, t2, v);
 if not Result then
 	begin
 	t1t2 := Abs(t1 - t2);

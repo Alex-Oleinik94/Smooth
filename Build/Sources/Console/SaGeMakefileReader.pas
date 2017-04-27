@@ -5,15 +5,9 @@ unit SaGeMakefileReader;
 interface
 
 uses
-	 Classes
-	,Crt
-	,SysUtils
-	
+	 SaGeBase
 	,SaGeMath
-	,SaGeBase
-	,StrMan
-	,SaGeVersion
-	,SaGeResourceManager
+	,SaGeClasses
 	;
 
 type
@@ -75,7 +69,7 @@ type
 		SGMRIdentifierTypeAbsolute,
 		SGMRIdentifierTypeDependent);
 	
-	TSGMakefileReader = class(TSGClass)
+	TSGMakefileReader = class(TSGNamed)
 			public
 		constructor Create(const VFileName : TSGString);
 		destructor Destroy();override;
@@ -112,6 +106,14 @@ uses
 	 SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeSysUtils
+	,SaGeVersion
+	,SaGeResourceManager
+	
+	,StrMan
+	
+	,Crt
+	,Classes
+	,SysUtils
 	;
 
 function TSGMakefileReader.GetTarget(const VIndex : TSGLongWord):TSGMRTarget;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
