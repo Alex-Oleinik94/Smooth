@@ -42,7 +42,7 @@ type
 		procedure SetOneLineCommentIdentifiers(const OneLineCommentIdentifiersList : TSGStringList ); overload;
 		procedure SetSeparators(const SeparatorsList : array of const); overload;
 		procedure SetSeparators(const SeparatorsList : TSGStringList ); overload;
-		procedure SetIdentifierContent(const IdentifierContent : TSGString);
+		procedure SetIdentifierContent(const VIdentifierContent : TSGString);
 		function ReadIdentifier() : TSGString;
 		function ReadCommentString(const CommentQuotes : array of const; const EndQuote : TSGString) : TSGString; overload;
 		function ReadCommentString(const CommentQuotes : TSGStringList; const EndQuote : TSGString) : TSGString; overload;
@@ -88,32 +88,45 @@ end;
 
 destructor TSGCodeFileReader.Destroy();
 begin
+SGKill(FSeparators);
+SGKill(FQuotesInfo);
+SGKill(FOneLineCommentIdentifiers);
 inherited;
 end;
 
 procedure TSGCodeFileReader.SetOneLineCommentIdentifiers(const OneLineCommentIdentifiersList : array of const); overload;
+var
+	List : TSGStringList;
 begin
-
+List := SGArConstToArString(OneLineCommentIdentifiersList);
+SetOneLineCommentIdentifiers(List);
+SGKill(List);
 end;
 
 procedure TSGCodeFileReader.SetOneLineCommentIdentifiers(const OneLineCommentIdentifiersList : TSGStringList ); overload;
 begin
-
+SGKill(FOneLineCommentIdentifiers);
+FOneLineCommentIdentifiers := OneLineCommentIdentifiersList.Copy();
 end;
 
 procedure TSGCodeFileReader.SetSeparators(const SeparatorsList : array of const); overload;
+var
+	List : TSGStringList;
 begin
-
+List := SGArConstToArString(SeparatorsList);
+SetOneLineCommentIdentifiers(List);
+SGKill(List);
 end;
 
 procedure TSGCodeFileReader.SetSeparators(const SeparatorsList : TSGStringList); overload;
 begin
-
+SGKill(FSeparators);
+FSeparators := SeparatorsList.Copy();
 end;
 
-procedure TSGCodeFileReader.SetIdentifierContent(const IdentifierContent : TSGString);
+procedure TSGCodeFileReader.SetIdentifierContent(const VIdentifierContent : TSGString);
 begin
-
+FIdentifierContent := VIdentifierContent;
 end;
 
 function TSGCodeFileReader.ReadIdentifier() : TSGString;
@@ -122,8 +135,12 @@ begin
 end;
 
 function TSGCodeFileReader.ReadCommentString(const CommentQuotes : array of const; const EndQuote : TSGString) : TSGString; overload;
+var
+	List : TSGStringList;
 begin
-
+List := SGArConstToArString(CommentQuotes);
+Result := ReadCommentString(List, EndQuote);
+SGKill(List);
 end;
 
 function TSGCodeFileReader.ReadCommentString(const CommentQuotes : TSGStringList; const EndQuote : TSGString) : TSGString; overload;

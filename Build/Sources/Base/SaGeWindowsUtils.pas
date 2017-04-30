@@ -10,6 +10,7 @@ uses
 	,Windows
 	
 	,SaGeBase
+	,SaGeLog
 	;
 
 function SGWindowsVersion(): TSGString;
@@ -17,15 +18,80 @@ function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; co
 function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
 uses
 	 Registry
+	,multimon
+	,StrMan
 	
 	,SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Names : TSGStringList = nil;
+	Paths : TSGStringList = nil;
+
+procedure ConstructLists();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	lpDisplayDevice : TDisplayDevice;
+	dwFlags : TSGLongWord;
+	cc : TSGLongWord;
+begin
+lpDisplayDevice.cb := sizeof(lpDisplayDevice);
+dwFlags := 0;
+cc := 0;
+while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
+	begin
+	Names += lpDisplayDevice.DeviceString;
+	Paths += lpDisplayDevice.DeviceName;
+	cc := cc + 1;
+	end;
+end;
+
+const
+	QuoteChar : TSGChar = '"';
+var
+	i, ml0, ml1, ml2, h : TSGMaxEnum;
+begin
+ConstructLists();
+h := Min(High(Names), High(Paths));
+if h <> 0 then
+	begin
+	ml0 := 0;
+	ml1 := 0;
+	ml2 := 0;
+	for i := 0 to h do
+		begin
+		if Length(SGStr(i)) > ml0 then
+			ml0 := Length(SGStr(i));
+		if Length(Names[i]) > ml1 then
+			ml1 := Length(Names[i]);
+		if Length(Paths[i]) > ml2 then
+			ml2 := Length(Paths[i]);
+		end;
+	ml1 += 3;
+	ml2 += 3;
+	SGHint('Display devices: (' + SGStr(h + 1) + ') --->', ViewType, True);
+	for i := 0 to h do
+		SGHint([
+				'	#', 
+				StringJustifyRight(SGStr(i), ml0, ' '),
+				' - Name : ',
+				StringJustifyLeft(QuoteChar + Names[i] + QuoteChar + ',', ml1, ' '),
+				' Path : ',
+				StringTrimAll(StringJustifyLeft(QuoteChar + Paths[i] + QuoteChar + Iff(i = h, '.', ';'), ml2, ' '), ' ')
+			], ViewType);
+	end
+else
+	SGHint('Display devices are not found!', ViewType, True);
+SGKill(Names);
+SGKill(Paths);
+end;
 
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

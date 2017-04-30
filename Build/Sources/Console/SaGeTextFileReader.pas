@@ -61,8 +61,21 @@ if FFile <> nil then
 end;
 
 function TSGTextFileReader.EndOfLine() : TSGBoolean;
-begin
 
+function CheckReadedChar() : TSGBoolean;
+var
+	C : TSGChar;
+begin
+C := ReadChar();
+FFile.Position := FFile.Position - 1;
+Result := C in [#10,#13,#0];
+end;
+
+begin
+if FFile.Position = FFile.Size then
+	Result := True
+else
+	Result := CheckReadedChar();
 end;
 
 function TSGTextFileReader.ReadString() : TSGString;

@@ -164,8 +164,10 @@ type
 
 	TSGRenderClass  = class of TSGRender;
 
-procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$IFDEF MSWINDOWS}
+procedure SGLogVideoInfo();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+{$ENDIF}
 
 implementation
 
@@ -176,12 +178,30 @@ uses
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
-		{$ENDIF}
-	
-	{$IFDEF MSWINDOWS}
-		,multimon
+		,SaGeNvidiaUtils
+		,SaGeWindowsUtils
 		{$ENDIF}
 	;
+
+{$IFDEF MSWINDOWS}
+var
+	VideoDevicesInfo : TSGBoolean = False;
+	NvidiaVideoInfo  : TSGBoolean = False;
+
+procedure SGLogVideoInfo();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if not VideoDevicesInfo then
+	begin
+	SGViewVideoDevices([SGLogType]);
+	VideoDevicesInfo := True;
+	end;
+if not NvidiaVideoInfo then
+	begin
+	SGNVidiaViewInfo([SGLogType]);
+	NvidiaVideoInfo := True;
+	end;
+end;
+{$ENDIF}
 
 function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -204,25 +224,6 @@ end;
 {$UNDEF INC_PLACE_RENDER_IMPLEMENTATION}
 {$UNDEF RENDER_CLASS}
 
-procedure SGPrintVideoDevices();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-{$IFDEF MSWINDOWS}
-var
-	lpDisplayDevice : TDisplayDevice;
-	dwFlags : TSGLongWord;
-	cc : TSGLongWord;
-{$ENDIF}
-begin
-{$IFDEF MSWINDOWS}
-lpDisplayDevice.cb := sizeof(lpDisplayDevice);
-dwFlags := 0;
-cc := 0;
-while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
-	begin
-	WriteLn(cc,' - ',lpDisplayDevice.DeviceString,' - ',lpDisplayDevice.DeviceName);
-	cc := cc + 1;
-	end;
-{$ENDIF}
-end;
 
 class function TSGRender.Suppored() : TSGBoolean;
 begin
@@ -276,7 +277,7 @@ end;
 
 procedure TSGRender.Enable(VParam:Cardinal);
 begin
-SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited methad!!');
+SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited method!!');
 end;
 
 function TSGRender.SupporedVBOBuffers():Boolean;
@@ -289,6 +290,9 @@ begin
 inherited Create();
 FContext := nil;
 FType    := SGRenderNone;
+{$IFDEF MSWINDOWS}
+SGLogVideoInfo();
+{$ENDIF}
 end;
 
 destructor TSGRender.Destroy();
