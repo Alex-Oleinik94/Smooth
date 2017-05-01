@@ -119,12 +119,12 @@ var
 	res : NvAPI_Status;
 	b   : NvU8;
 begin
-SGHint('Stereoscopic:', ViewType, WithTime);
 res := NvAPI_Stereo_IsEnabled(b);
 if res = NVAPI_OK then
-	SGHint(Shift + 'Stereo is available and now ' + Iff(b = 0, 'disabled', 'enabled') + '.')
-else
-	SGHint(Shift + 'Stereo is unavailable!', ViewType, WithTime);
+	begin
+	SGHint('Stereoscopic:', ViewType, WithTime);
+	SGHint(Shift + 'Stereo is available and now ' + Iff(b = 0, 'disabled', 'enabled') + '.');
+	end;
 end;
 
 procedure SGNVidiaViewSystemInfo(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -139,7 +139,8 @@ res := NvAPI_SYS_GetChipSetInfo (info);
 if res = NVAPI_OK then
 	begin
 	SGHint([Shift, 'Vendor:    ', info.szVendorName], ViewType, WithTime);
-	SGHint([Shift, 'Chipset:   ', info.szChipsetName], ViewType, WithTime);
+	if 'Unknown' <> info.szChipsetName then
+		SGHint([Shift, 'Chipset:   ', info.szChipsetName], ViewType, WithTime);
 	SGHint([Shift, 'Vendor ID: ', IntToHex(info.vendorId, 4)], ViewType, WithTime);
 	SGHint([Shift, 'Device ID: ', IntToHex(info.deviceId, 4)], ViewType, WithTime);
 	end;
@@ -171,5 +172,10 @@ end;
 // For set to High Performance Graphics
 var
 	NvOptimusEnablement : TSGUInt32 = 1; export;
+
+initialization
+begin
+NvOptimusEnablement := 1;
+end;
 
 end.

@@ -183,7 +183,6 @@ uses
 		{$ENDIF}
 	;
 
-
 {$IFDEF MSWINDOWS}
 var
 	VideoInfoLoged : TSGBoolean = False;

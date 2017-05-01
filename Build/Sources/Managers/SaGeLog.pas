@@ -262,15 +262,16 @@ var
 	Str : TSGString = '';
 begin
 Str := SGStringFromStringList(Params, ' ');
-if Length(Str) < 106 then
-	Log.Source('Executable params: ' + Str)
-else if Length(Str) < 150 then
-	begin
-	Log.Source('Executable params --> (' + SGStr(Length(Params)) + ')');
-	Log.Source('  ' + Str);
-	end
-else
-	Log.Source(Params, 'Executable params -->');
+if StringTrimAll(Str, ' ') <> '' then
+	if Length(Str) < 106 then
+		Log.Source('Executable params: ' + Str)
+	else if Length(Str) < 150 then
+		begin
+		Log.Source('Executable params --> (' + SGStr(Length(Params)) + ')');
+		Log.Source('  ' + Str);
+		end
+	else
+		Log.Source(Params, 'Executable params');
 SetLength(Params, 0);
 end;
 

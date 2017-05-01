@@ -767,7 +767,7 @@ if Context.Active then
 	{$ELSE CONTEXT_CHANGE_DEBUGING}
 		SGLog.Source
 	{$ENDIF CONTEXT_CHANGE_DEBUGING}
-			(['Leaving from ', Context.ClassName(), ' loop!']);
+			([Context.ClassName(), ' : Leaving from loop!']);
 	until not SGTryChangeContextType(Context, IContext);
 	end;
 Context.Kill();

@@ -83,7 +83,7 @@ uses
 
 function SGEngineTargetVersion(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := SGEngineTarget(C) + ' bit';
+Result := SGEngineTarget(C) + C + 'bit';
 end;
 
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

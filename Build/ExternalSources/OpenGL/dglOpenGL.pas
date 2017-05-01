@@ -20419,12 +20419,20 @@ Result.Clear();
 end;
 
 function TSGDllOpenGL.LoadExtensions() : TSGDllLoadExtensionsObject;
+var
+	List : TSGStringList = nil;
+	i : TSGMaxEnum;
 begin
 Result.Clear();
 LoadObjectGL  := @Result;
 dglOpenGL.ReadExtensions();
 LoadObjectGL  := nil;
-Result.FExtensions := SGStringListFromString(Int_GetExtensionString, ' ');;
+List := SGStringListFromString(Int_GetExtensionString, ' ');
+if List <> nil then
+	if Length(List) <> 0 then
+		for i := 0 to High(List) do
+			Result.FExtensions *= List[i];
+SGKill(List);
 end;
 
 initialization
