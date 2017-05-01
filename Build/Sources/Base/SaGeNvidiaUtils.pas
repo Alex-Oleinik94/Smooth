@@ -168,4 +168,8 @@ if DllManager.Suppored('nvapi') then
 	end;
 end;
 
+// For set to High Performance Graphics
+var
+	NvOptimusEnablement : TSGUInt32 = 1; export;
+
 end.

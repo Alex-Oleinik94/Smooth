@@ -2981,8 +2981,13 @@ end;
 class function TSGDllNVAPI.DllNames() : TSGStringList;
 begin
 Result := nil;
+{$IFDEF CPU64}
+Result += 'nvapi64';
+Result += 'nvapi64.dll';
+{$ELSE}
 Result += 'nvapi';
 Result += 'nvapi.dll';
+{$ENDIF}
 end;
 
 class procedure TSGDllNVAPI.Free();

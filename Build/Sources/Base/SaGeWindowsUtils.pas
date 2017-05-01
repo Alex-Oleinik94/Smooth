@@ -33,8 +33,8 @@ uses
 
 procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
+	Devices : TSGStringList = nil;
 	Names : TSGStringList = nil;
-	Paths : TSGStringList = nil;
 
 procedure ConstructLists();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -47,8 +47,8 @@ dwFlags := 0;
 cc := 0;
 while (EnumDisplayDevices(nil, cc, @lpDisplayDevice, dwFlags)) do
 	begin
-	Names += lpDisplayDevice.DeviceString;
-	Paths += lpDisplayDevice.DeviceName;
+	Devices += lpDisplayDevice.DeviceString;
+	Names += lpDisplayDevice.DeviceName;
 	cc := cc + 1;
 	end;
 end;
@@ -59,7 +59,7 @@ var
 	i, ml0, ml1, ml2, h : TSGMaxEnum;
 begin
 ConstructLists();
-h := Min(High(Names), High(Paths));
+h := Min(High(Devices), High(Names));
 if h <> 0 then
 	begin
 	ml0 := 0;
@@ -69,10 +69,10 @@ if h <> 0 then
 		begin
 		if Length(SGStr(i)) > ml0 then
 			ml0 := Length(SGStr(i));
-		if Length(Names[i]) > ml1 then
-			ml1 := Length(Names[i]);
-		if Length(Paths[i]) > ml2 then
-			ml2 := Length(Paths[i]);
+		if Length(Devices[i]) > ml1 then
+			ml1 := Length(Devices[i]);
+		if Length(Names[i]) > ml2 then
+			ml2 := Length(Names[i]);
 		end;
 	ml1 += 3;
 	ml2 += 3;
@@ -81,16 +81,16 @@ if h <> 0 then
 		SGHint([
 				'	#', 
 				StringJustifyRight(SGStr(i), ml0, ' '),
-				' - Name : ',
-				StringJustifyLeft(QuoteChar + Names[i] + QuoteChar + ',', ml1, ' '),
-				' Path : ',
-				StringTrimAll(StringJustifyLeft(QuoteChar + Paths[i] + QuoteChar + Iff(i = h, '.', ';'), ml2, ' '), ' ')
+				' - Device : ',
+				StringJustifyLeft(QuoteChar + Devices[i] + QuoteChar + ',', ml1, ' '),
+				' Name : ',
+				StringTrimAll(StringJustifyLeft(QuoteChar + Names[i] + QuoteChar + Iff(i = h, '.', ';'), ml2, ' '), ' ')
 			], ViewType);
 	end
 else
 	SGHint('Display devices are not found!', ViewType, True);
+SGKill(Devices);
 SGKill(Names);
-SGKill(Paths);
 end;
 
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

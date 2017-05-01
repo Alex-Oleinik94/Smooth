@@ -254,6 +254,7 @@ function SGRDXGetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
 function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
+procedure SGDX9LogAdapters(const pD3D : IDirect3D9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -261,7 +262,44 @@ uses
 	 SaGeDllManager
 	,SaGeStringUtils
 	,SaGeLog
+	,SaGeBaseUtils
+	
+	,SysUtils
 	;
+
+var
+	AdaptersLoged : TSGBool = False;
+
+procedure SGDX9LogAdapters(const pD3D : IDirect3D9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	AdapterCount : TSGMaxEnum;
+	i : TSGMaxEnum;
+	Adapter : TD3DAdapterIdentifier9;
+begin
+AdapterCount := pD3D.GetAdapterCount();
+SGLog.Source(['IDirect3D9: Finded ', AdapterCount, ' adapter(-s)', Iff(AdapterCount = 0, '.', ':')]);
+if AdapterCount > 0 then
+	for i := 0 to AdapterCount - 1 do
+		if pD3D.GetAdapterIdentifier(i, 0, Adapter) = D3D_OK then
+			begin
+			SGLog.Source('Adapter #' + SGStr(i) + ':', False);
+			SGLog.Source('	Driver:           ' + Adapter.Driver, False);
+			SGLog.Source('	Description:      ' + Adapter.Description, False);
+			SGLog.Source('	DeviceName:       ' + Adapter.DeviceName, False);
+{$IFDEF WIN32}
+			SGLog.Source(['	DriverVersion:    ', Adapter.DriverVersion], False);
+{$ELSE}
+			SGLog.Source(['	DriverVersionLowPart:   ', Adapter.DriverVersionLowPart], False);
+			SGLog.Source(['	DriverVersionHighPart:  ', Adapter.DriverVersionHighPart], False);
+{$ENDIF}
+			SGLog.Source(['	VendorIdentifier: ', Adapter.VendorId], False);
+			SGLog.Source(['	DeviceIdentifier: ', Adapter.DeviceId], False);
+			SGLog.Source(['	SubSysIdentifier: ', Adapter.SubSysId], False);
+			SGLog.Source(['	Revision:         ', Adapter.Revision], False);
+			SGLog.Source(['	DeviceIdentifier: ', GUIDToString(Adapter.DeviceIdentifier)], False);
+			SGLog.Source(['	WHQLLevel:        ', Adapter.WHQLLevel], False);
+			end;
+end;
 
 class function TSGRenderDirectX9.ClassName() : TSGString;
 begin
@@ -1569,7 +1607,6 @@ FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
-
 function TSGRenderDirectX9.CreateContext():Boolean;
 var
 	d3dpp                 : D3DPRESENT_PARAMETERS;
@@ -1796,7 +1833,12 @@ if (pD3D = nil) then
 		pD3D := Direct3DCreate9(D3D_SDK_VERSION);
 	SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3D9',SGStringIf(pD3DEx <> nil,'Ex'),'="',SGAddrStr(pD3D),'"']);
 	if pD3D = nil then
-		exit;
+		exit
+	else if not AdaptersLoged then
+		begin
+		SGDX9LogAdapters(pD3D);
+		AdaptersLoged := True;
+		end;
 	end;
 if pDevice = nil then
 	begin
@@ -1830,7 +1872,7 @@ else
 	begin
 	SGDestroyInterface(pDevice);
 	if Self <> nil then
-		pDevice:=nil;
+		pDevice := nil;
 	Result := CreateContext();
 	end;
 end;

@@ -183,23 +183,15 @@ uses
 		{$ENDIF}
 	;
 
+
 {$IFDEF MSWINDOWS}
 var
-	VideoDevicesInfo : TSGBoolean = False;
-	NvidiaVideoInfo  : TSGBoolean = False;
+	VideoInfoLoged : TSGBoolean = False;
 
 procedure SGLogVideoInfo();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if not VideoDevicesInfo then
-	begin
-	SGViewVideoDevices([SGLogType]);
-	VideoDevicesInfo := True;
-	end;
-if not NvidiaVideoInfo then
-	begin
-	SGNVidiaViewInfo([SGLogType]);
-	NvidiaVideoInfo := True;
-	end;
+SGViewVideoDevices([SGLogType]);
+SGNVidiaViewInfo([SGLogType]);
 end;
 {$ENDIF}
 
@@ -223,7 +215,6 @@ end;
 {$INCLUDE SaGeCommonStructs.inc}
 {$UNDEF INC_PLACE_RENDER_IMPLEMENTATION}
 {$UNDEF RENDER_CLASS}
-
 
 class function TSGRender.Suppored() : TSGBoolean;
 begin
@@ -291,7 +282,11 @@ inherited Create();
 FContext := nil;
 FType    := SGRenderNone;
 {$IFDEF MSWINDOWS}
-SGLogVideoInfo();
+if not VideoInfoLoged then
+	begin
+	SGLogVideoInfo();
+	VideoInfoLoged := True;
+	end;
 {$ENDIF}
 end;
 

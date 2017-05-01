@@ -20,6 +20,9 @@ if exist "../Binaries/Main_Console.exe" (
 	if not "%1" equ "android" (
 		if %errorlevel% equ 0 (
 			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe
+			rem cd Scripts
+			rem CALL _Check_Console
+			rem cd ..
 			)
 		)
 ) else (
