@@ -19,6 +19,7 @@ uses
 	,SaGeAudioRender
 	,SaGeCursor
 	,SaGeRenderInterface
+	,SaGeAudioRenderInterface
 	,SaGeCommonStructs
 	,SaGeLog
 	

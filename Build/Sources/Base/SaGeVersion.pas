@@ -22,6 +22,8 @@ function SGEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+var
+	SGApplicationName : TSGString = 'Sun';
 const
 	SGVerUnknown = 'unknown';
 

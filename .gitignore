@@ -1,7 +1,6 @@
 *.bak
 *.ppu
 *.o
-*.exe
 *.so.*
 *.dll
 *.so
@@ -27,6 +26,7 @@ Build/AndroidTools/SaGe
 Build/AndroidTools/Libs/platforms
 Build/AndroidTools/Libs
 Build/ExternalSources/Imaging
-Data/EngineLog.log
 Data/Images
 Data/Tron
+Log
+Binaries

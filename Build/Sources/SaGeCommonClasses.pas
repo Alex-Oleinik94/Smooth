@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeCommonStructs
 	,SaGeRenderInterface
+	,SaGeAudioRenderInterface
 	,SaGeCursor
 	,SaGeBitMap
 	;
