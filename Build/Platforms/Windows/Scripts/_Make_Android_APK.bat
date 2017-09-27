@@ -5,7 +5,9 @@ DEL AndroidTools\SaGe /F/S/Q
 cls
 make build_files
 @echo off
-CALL _Make_Android apk
+cd Scripts
+CALL _Make_Android_ARM apk
+cd ..
 make clear_files
 
 if exist "AndroidTools\SaGe\libs\armeabi\libmain.so" ( 

@@ -92,9 +92,8 @@ begin
 DateTime.Get();
 Result := 
 {$IFNDEF MOBILE}
-	SGAplicationFileDirectory() 
-	{$ENDIF}
-	+ SGLogDirectory;
+	SGAplicationFileDirectory() + 
+	{$ENDIF}SGLogDirectory;
 SGMakeDirectory(Result);
 Result += DirectorySeparator +
 	'[' +

@@ -4,6 +4,7 @@
 *.o
 *.so.*
 *.dll
+*.db
 *.so
 *.apk
 *.dbg
