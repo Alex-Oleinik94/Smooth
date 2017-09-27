@@ -7,7 +7,7 @@ echo "======================================="
 make build_files
 make inc_version_release
 @echo off
-make release_libpng
+make release
 @echo off
 make clear_files
 @echo off

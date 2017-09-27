@@ -1,7 +1,5 @@
 {$INCLUDE SaGe.inc}
 
-{$R .\..\..\SaGe.res}
-
 //{$DEFINE SGWinAPIDebug}
 
 unit SaGeContextWinAPI;
@@ -28,7 +26,7 @@ uses
 	;
 
 const
-	SGCWAPI_ICON = 5;
+	SGCWAPI_ICON = 2;
 type
 	WinAPIParam =
 		{$IFDEF CPU64}

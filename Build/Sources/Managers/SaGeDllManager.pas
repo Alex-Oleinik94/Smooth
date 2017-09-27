@@ -699,7 +699,7 @@ var
 	NotLoadedFunc : TSGStringList;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.PrintStat(' + SGStr(Extended) + ')');
+SGLog.Source('TSGDll__PrintStat(' + SGStr(Extended) + ')');
 {$ENDIF}
 MNL  := FOwner.GenerateMaxNameLength();
 Loading();
@@ -753,7 +753,7 @@ var
 	ChunckDllNames : TSGStringList = nil;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.LoadJointly()');
+SGLog.Source('TSGDll__LoadJointly()');
 {$ENDIF}
 Result := False;
 SetLength(FDllFileNames, ChunkCount());
@@ -789,7 +789,7 @@ end;
 function LoadSeparate() : TSGBool;
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.LoadSeparate()');
+SGLog.Source('TSGDll__LoadSeparate()');
 {$ENDIF}
 Result := False;
 if ChunksLoadJointly() then
@@ -828,7 +828,7 @@ var
 procedure FinalizeLoad(const Sucs : TSGBool);
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.FinalizeLoad(' + SGStr(Sucs) + ') - Beging');
+SGLog.Source('TSGDll__FinalizeLoad(' + SGStr(Sucs) + ') - Beging');
 {$ENDIF}
 SetLength(FLoadObjects, 1);
 FLoadObjects[0] := TestLoadObject;
@@ -847,7 +847,7 @@ end;
 
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.LoadNormal() - Begin');
+SGLog.Source('TSGDll__LoadNormal() - Begin');
 {$ENDIF}
 Result := False;
 DllFileNames := DllNames();
@@ -855,11 +855,11 @@ if DllFileNames <> nil then if Length(DllFileNames) > 0 then
 	for i := 0 to High(DllFileNames) do
 		begin
 		{$IFDEF DLL_MANAGER_DEBUG}
-		SGLog.Source('TSGDll.LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
+		SGLog.Source('TSGDll__LoadNormal() - Try load from ''' + DllFileNames[i] + '''');
 		{$ENDIF}
 		TestLibHandle := DllManager.OpenLibrary(DllFileNames[i], TestFileName);
 		{$IFDEF DLL_MANAGER_DEBUG}
-		SGLog.Source('TSGDll.LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
+		SGLog.Source('TSGDll__LoadNormal() - LibHandle = ''' + SGStr(TestLibHandle) + '''');
 		{$ENDIF}
 		if TestLibHandle <> 0 then
 			begin
@@ -888,7 +888,7 @@ end;
 
 begin
 {$IFDEF DLL_MANAGER_DEBUG}
-SGLog.Source('TSGDll.CustomLoading()');
+SGLog.Source('TSGDll__CustomLoading()');
 {$ENDIF}
 if not FLoaded then
 	if IsSeparate() then

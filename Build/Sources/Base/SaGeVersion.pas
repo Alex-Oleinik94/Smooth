@@ -74,6 +74,7 @@ const
 
 function SGEngineTarget(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGEngineTargetVersion(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGPushVersionToWindowsResourseFile(const FileName : TSGString; const Define : TSGString; const WithQuotes : TSGBoolean = True);
 
 implementation
 
@@ -82,6 +83,39 @@ uses
 	,SaGeBaseUtils
 	,SaGeSysUtils
 	;
+
+procedure SGPushVersionToWindowsResourseFile(const FileName : TSGString; const Define : TSGString; const WithQuotes : TSGBoolean = True);
+
+function IsStringFounded(const Str : TSGString) : TSGBoolean;
+begin
+
+end;
+
+var
+	InputStream : TMemoryStream;
+	OutputStream : TMemoryStream;
+
+procedure Loop();
+var
+	Str : TSGString;
+begin
+Str := '';
+repeat
+Str := SGReadLnStringFromStream(InputStream);
+until IsStringFounded(Str);
+end;
+
+begin
+OutputStream := TMemoryStream.Create();
+InputStream := TMemoryStream.Create();
+InputStream.LoadFromFile(FileName);
+Loop();
+InputStream.Destroy();
+InputStream := nil;
+OutputStream.SaveToFile(FileName);
+OutputStream.Destroy();
+OutputStream := nil;
+end;
 
 function SGEngineTargetVersion(const C : TSGChar = ' ') : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

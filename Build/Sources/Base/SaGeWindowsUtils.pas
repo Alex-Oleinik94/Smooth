@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+{$R .\..\..\Platforms\Windows\ExecutableResourse\Sun.res}
+
 unit SaGeWindowsUtils;
 
 interface

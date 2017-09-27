@@ -200,35 +200,16 @@ end;
 
 procedure TSGEdit.TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if (FTextType<>SGEditTypeText) and (FTextTypeFunction<>nil) then
+if (FTextType <> SGEditTypeText) and (FTextTypeFunction <> nil) then
 	begin
-	FTextComplite:=FTextTypeFunction(Self);
+	FTextComplite := FTextTypeFunction(Self);
 	end;
 end;
 
-procedure TSGEdit.FromDraw;
-var
-	FirsColor1:TSGColor4f = (x:0;y:0.5;z:1;w:1);
-	SecondColor1:TSGColor4f = (x:0;y:0.9;z:1;w:1);
-	ThreeColor1:TSGColor4f = (x:0.95;y:0.95;z:0.95;w:1);
-	
-	FirsColor2:TSGColor4f = (x:0;y:0.75;z:1;w:1);
-	SecondColor2:TSGColor4f = (x:0;y:1;z:1;w:1);
-	ThreeColor2:TSGColor4f = (x:1;y:1;z:1;w:1);
-	
-	FirsColor3:TSGColor4f = (x:0.8;y:0;z:0;w:0.8);
-	SecondColor3:TSGColor4f = (x:0.8;y:0;z:0;w:1);
-	
-	FirsColor4:TSGColor4f = (x:0;y:0.8;z:0;w:0.8);
-	SecondColor4:TSGColor4f = (x:0;y:0.8;z:0;w:1);
-	
-	ReqAct : Boolean = false;
-	TempTimer : Real = 0;
+procedure TSGEdit.FromDraw();
 begin
-if (FVisibleTimer>SGZero) then
-	begin
+if (FVisibleTimer > SGZero) then
 	FSkin.PaintEdit(Self);
-	end;
 inherited;
 end;
 

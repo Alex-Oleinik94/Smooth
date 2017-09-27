@@ -89,8 +89,9 @@ begin
 Result := DllManager.Suppored('Ogg');
 if Result then
 	Result := DllManager.Suppored('Vorbis');
-if Result then
-	Result := DllManager.Suppored('VorbisEnc');
+(*
+if Result then Result := DllManager.Suppored('VorbisEnc'); // Vorbis Encoder
+*)
 if Result then
 	Result := DllManager.Suppored('VorbisFile');
 end;

@@ -90,7 +90,11 @@ var
 	DateTime  : TSGDateTime;
 begin
 DateTime.Get();
-Result := SGLogDirectory;
+Result := 
+{$IFNDEF MOBILE}
+	SGAplicationFileDirectory() 
+	{$ENDIF}
+	+ SGLogDirectory;
 SGMakeDirectory(Result);
 Result += DirectorySeparator +
 	'[' +

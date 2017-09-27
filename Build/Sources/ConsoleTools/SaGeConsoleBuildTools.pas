@@ -21,6 +21,7 @@ procedure SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : 
 procedure SGConsoleIsConsole                                   (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleMake                                        (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleDefineSkiper                                (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleVersionTo_RC_WindowsFile                    (const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -39,6 +40,17 @@ uses
 	,SaGeFileUtils
 	,SaGeDefinesSkiper
 	;
+
+procedure SGConsoleVersionTo_RC_WindowsFile                    (const VParams : TSGConcoleCallerParams = nil);
+begin
+if (SGCountConsoleParams(VParams) = 2) and (SGResourceFiles.FileExists(VParams[0])) then
+	SGPushVersionToWindowsResourseFile(VParams[0], VParams[1])
+else
+	begin
+	SGPrintEngineVersion();
+	WriteLn(SGConsoleErrorString, '"@file_name @define_name"');
+	end;
+end;
 
 procedure SGConsoleDefineSkiper(const VParams : TSGConcoleCallerParams = nil);
 begin

@@ -43,6 +43,7 @@ uses
 	,SaGeConsoleProgramGoogleReNameCache
 	,SaGeConsoleProgramConvertHeaderToDynamic
 	,SaGeConsoleProgramUSMBIOS
+	,SaGeConsoleProgramEngineRenamer
 	;
 
 var
@@ -248,6 +249,7 @@ GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegiste
 GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
 GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
 GeneralConsoleCaller.AddComand(@SGConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
+GeneralConsoleCaller.AddComand(@SGConsoleVersionTo_RC_WindowsFile, ['vtrc'], 'curent Version To RC windows file');
 GeneralConsoleCaller.Category('System tools');
 GeneralConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
 GeneralConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is console or not');

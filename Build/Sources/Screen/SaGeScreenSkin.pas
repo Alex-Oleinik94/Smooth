@@ -683,57 +683,6 @@ if FontReady and (Edit.Caption <> '') then
 		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
 		end;
 	end;
-{if ((not FActive) or (FActiveTimer<1-SGZero)) and (FVisibleTimer>SGZero) then
-	begin
-	SGRoundQuad(Render,
-		SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-		SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-		2,
-		10,
-		SGVertex4fImport(0,0,0,0),
-		ThreeColor2.WithAlpha(0.7*FVisibleTimer*(1-FActiveTimer)),
-		True);
-	end;
-ReqAct := ReqursiveActive();
-if (1-FNowChangetTimer>SGZero) then
-		begin
-		TempTimer := (1-FCursorOnComponentTimer)*(1-FNowChangetTimer);
-		if not ReqAct then
-			TempTimer := 1;
-		SGRoundQuad(Render,
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-			2,10,
-			((FirsColor1*Byte(FTextType=SGEditTypeText)+
-				Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-					.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer),
-			((FirsColor2*Byte(FTextType=SGEditTypeText)+
-				Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))
-					.WithAlpha(0.3*FVisibleTimer*TempTimer*FActiveTimer)*1.3,
-			True);
-		end;
-if ReqAct and (FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer>SGZero) then
-SGRoundQuad(Render,
-	SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-	SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-	2,10,
-	((SecondColor1/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer)))/(1+Byte(FTextType<>SGEditTypeText)))
-		.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer),
-	(((SecondColor2/1.3+1.3*Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))))/(1+Byte(FTextType<>SGEditTypeText)))
-		.WithAlpha(0.3/(1-0.4*(Byte(FTextType<>SGEditTypeText)))*FVisibleTimer*FCursorOnComponentTimer*(1-FNowChangetTimer)*FActiveTimer)*1.3,
-	True);
-if (FVisibleTimer*FNowChangetTimer*FActiveTimer>SGZero) then
-SGRoundQuad(Render,
-	SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-	SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-	2,10,
-	((ThreeColor1*Byte(FTextType=SGEditTypeText)+
-		Byte(FTextType<>SGEditTypeText)*(FirsColor4*FTextCompliteTimer+FirsColor3*(1-FTextCompliteTimer))))
-		.WithAlpha(0.4*FVisibleTimer*FNowChangetTimer*FActiveTimer),
-	((ThreeColor2*Byte(FTextType=SGEditTypeText)+
-		Byte(FTextType<>SGEditTypeText)*(SecondColor4*FTextCompliteTimer+SecondColor3*(1-FTextCompliteTimer))*2))
-		.WithAlpha(0.3*FVisibleTimer*FNowChangetTimer*FActiveTimer)*1.3,
-	True);}
 end;
 
 procedure TSGScreenSkin.PaintProgressBar(constref ProgressBar : ISGProgressBar);
