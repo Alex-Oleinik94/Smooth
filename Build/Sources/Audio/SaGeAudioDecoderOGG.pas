@@ -137,30 +137,46 @@ begin
 if FInfoReaded then
 	exit;
 
+ov_clear(FFile);
+
+FInputStream.Position := 0;
 Res := ov_test_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
 if Res <> 0 then
-	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test callbacks finded error. ['+ErrorString(Res)+']');
+	begin
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test callbacks finded error : "'+ErrorString(Res)+'".');
+	FError := True;
+	end;
+
+FInputStream.Position := 0;
+Res := ov_test_open(FFile);
+if Res <> 0 then
+	begin
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test open finded error : "'+ErrorString(Res)+'".');
+	FError := True;
+	end;
+
+FInputStream.Position := 0;
 Res := ov_open_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
 if Res <> 0 then
 	begin
-	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Could not open Ogg stream. ['+ErrorString(Res)+']');
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Could not open Ogg stream : "'+ErrorString(Res)+'".');
 	FError := True;
-	exit;
 	end;
-Res := ov_test_open(FFile);
-if Res <> 0 then
-	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test open finded error. ['+ErrorString(Res)+']');
-FVorbisInfo    := ov_info(FFile, -1)^;
-FVorbisComment := ov_comment(FFile, -1)^;
 
-FInfo.FBitsPerSample := 16;
-FInfo.FChannels      := FVorbisInfo.Channels;
-FInfo.FFrequency     := FVorbisInfo.Rate;
+if not FError then
+	begin
+	FVorbisInfo    := ov_info(FFile, -1)^;
+	FVorbisComment := ov_comment(FFile, -1)^;
+	
+	FInfo.FBitsPerSample := 16;
+	FInfo.FChannels      := FVorbisInfo.Channels;
+	FInfo.FFrequency     := FVorbisInfo.Rate;
+	
+	LogFileInfo();
+	end;
 
-LogFileInfo();
-
-FInfoReaded := True;
-FError      := (FVorbisInfo.Channels = 0) or (FVorbisInfo.Rate = 0);
+FError      := FError or (FVorbisInfo.Channels = 0) or (FVorbisInfo.Rate = 0);
+FInfoReaded := not FError;
 end;
 
 function TSGAudioDecoderOGG.Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64;
@@ -178,7 +194,7 @@ if Res > 0 then
 	Result += Res
 else if Res < 0 then
 	begin
-	SGLog.Source('TSGAudioDecoderOGG.Read : Error! [' + ErrorString(Res) + ']');
+	SGLog.Source('TSGAudioDecoderOGG__Read : Error! [' + ErrorString(Res) + ']');
 	Result := 0;
 	end
 else
@@ -186,7 +202,7 @@ else
 until (Result >= VBufferSize) or ToExit;
 
 if (Result > VBufferSize) then
-	SGLog.Source('TSGAudioDecoderOGG.Read : Hint Readed data > Buffer size!');
+	SGLog.Source('TSGAudioDecoderOGG__Read : Hint Readed data > Buffer size!');
 end;
 
 function TSGAudioDecoderOGG.GetSize() : TSGUInt64;
@@ -219,11 +235,11 @@ end;
 procedure TSGAudioDecoderOGG.KillInput();
 begin
 //ov_clear(FFile);
-if FInputStream <> nil then
-	begin
-	FInputStream.Destroy();
-	FInputStream := nil;
-	end;
+SGLog.SOurce([TSGPointer(FInputStream)]);
+try
+SGKill(FInputStream);
+except
+end;
 FDataPosition := 0;
 FDataSize := 0;
 FPosition := 0;

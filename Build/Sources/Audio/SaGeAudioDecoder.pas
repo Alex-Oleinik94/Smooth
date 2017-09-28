@@ -149,7 +149,7 @@ Result := TFileStream.Create(VFileName, fmOpenRead);
 end;
 
 begin
-Result := CreateFileStream();
+Result := CreateMemoryStream();
 Result.Position := 0;
 end;
 
