@@ -46,6 +46,7 @@ type
 		FDataPosition : TSGUInt64;
 		FDataSize     : TSGUInt64;
 		FPosition     : TSGUInt64;
+		FError        : TSGBool;
 			private
 		FInputStream   : TStream;
 		FFile          : OGGVorbis_File;
@@ -136,25 +137,30 @@ begin
 if FInfoReaded then
 	exit;
 
+Res := ov_test_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
+if Res <> 0 then
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test callbacks finded error. ['+ErrorString(Res)+']');
 Res := ov_open_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
 if Res <> 0 then
 	begin
-	SGLog.Source('TSGAudioDecoderOGG.AttachInput : Could not open Ogg stream. ['+ErrorString(Res)+']');
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Could not open Ogg stream. ['+ErrorString(Res)+']');
+	FError := True;
 	exit;
 	end;
+Res := ov_test_open(FFile);
+if Res <> 0 then
+	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Test open finded error. ['+ErrorString(Res)+']');
 FVorbisInfo    := ov_info(FFile, -1)^;
 FVorbisComment := ov_comment(FFile, -1)^;
 
-with FVorbisInfo do
-	begin
-	FInfo.FBitsPerSample := 16;
-	FInfo.FChannels      := Channels;
-	FInfo.FFrequency     := Rate;
-	end;
+FInfo.FBitsPerSample := 16;
+FInfo.FChannels      := FVorbisInfo.Channels;
+FInfo.FFrequency     := FVorbisInfo.Rate;
 
 LogFileInfo();
 
 FInfoReaded := True;
+FError      := (FVorbisInfo.Channels = 0) or (FVorbisInfo.Rate = 0);
 end;
 
 function TSGAudioDecoderOGG.Read(var VData; const VBufferSize : TSGUInt64) : TSGUInt64;
@@ -164,6 +170,8 @@ var
 	ToExit  : TSGBool = False;
 begin
 Result := 0;
+if FError then
+	exit;
 repeat
 Res := ov_read(FFile, VData, Result, 0, 2, 1, @Section);
 if Res > 0 then
@@ -201,6 +209,7 @@ inherited;
 FDataPosition := 0;
 FDataSize := 0;
 FPosition := 0;
+FError := False;
 FInputStream := nil;
 FillChar(FFile, SizeOf(FFile), 0);
 FillChar(FVorbisComment, SizeOf(FVorbisComment), 0);

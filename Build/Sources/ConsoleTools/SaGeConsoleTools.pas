@@ -18,7 +18,7 @@ procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGeneralConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGOtherConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGBuildConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGApplicationsConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGApplicationsConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGHttpConsoleCaller()    : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGUdpConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGNetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
