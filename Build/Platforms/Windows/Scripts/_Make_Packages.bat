@@ -16,7 +16,7 @@ if exist "../Binaries/Main_Console.exe" (
 	echo %S1%
 	echo %S2%
 	echo %S1%
-	"../Binaries/Main_Console.exe" --build --packages --%TARGET%
+	"../Binaries/Main_Console.exe" --bt --build --packages --%TARGET%
 	if not "%1" equ "android" (
 		if %errorlevel% equ 0 (
 			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe

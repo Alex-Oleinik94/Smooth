@@ -17,7 +17,7 @@ if "%1"=="" (
 		echo %S1%
 		echo %S2%
 		echo %S3%
-		"../Binaries/Main_Console.exe" --build --p%1 --%p2%
+		"../Binaries/Main_Console.exe" --bt --build --p%1 --%p2%
 		if %errorlevel% equ 0 (
 			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe
 			)

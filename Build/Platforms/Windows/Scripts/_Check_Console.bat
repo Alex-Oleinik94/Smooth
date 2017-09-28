@@ -1,7 +1,7 @@
 @echo off
 cd ..
 cd ../Binaries
-Main.exe -ic
+Main.exe --bt -ic
 if %errorlevel% equ 1 (
 	del "Main_Console.exe"
 	copy "Main.exe" "Main_Console.exe"

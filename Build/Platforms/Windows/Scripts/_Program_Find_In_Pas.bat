@@ -1,4 +1,4 @@
 @echo off
 cd ../../Binaries
-"Main.exe" -FIP -FD.\..
+"Main.exe" --app --FIP -FD.\..
 pause

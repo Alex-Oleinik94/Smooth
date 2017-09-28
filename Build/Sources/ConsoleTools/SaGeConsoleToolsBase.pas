@@ -67,6 +67,7 @@ function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGSt
 function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComandAndReturn(const Comand : TSGString; const PredParts : array of const; out OutString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -81,6 +82,15 @@ uses
 	,SaGeFileOpener
 	,SaGeStringUtils
 	;
+
+procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if ConsoleCaller <> nil then
+	begin
+	ConsoleCaller.Destroy();
+	ConsoleCaller := nil;
+	end;
+end;
 
 function SGParseValueFromComandAndReturn(const Comand : TSGString; const PredParts : array of const; out OutString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var

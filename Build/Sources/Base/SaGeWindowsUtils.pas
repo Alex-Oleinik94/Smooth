@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-{$R .\..\..\Platforms\Windows\ExecutableResourse\Sun.res}
+{$RESOURCE .\..\..\Platforms\Windows\ExecutableResourse\Sun.res}
 
 unit SaGeWindowsUtils;
 

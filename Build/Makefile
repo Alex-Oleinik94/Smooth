@@ -95,19 +95,19 @@ android_i386:
 ios:
 
 inc_version_debug:
-	@$(SAGE) -iv 0
-	@$(SAGE) -CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
+	@$(SAGE) --bt --iv 0
+	@$(SAGE) --bt --CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
 inc_version_release:
-	@$(SAGE) -iv 1
-	@$(SAGE) -CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
+	@$(SAGE) --bt --iv 1
+	@$(SAGE) --bt --CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
 build_files:
 	@$(MAKE) clear_files
-	@$(SAGE) -bf "$(SGBUILDPATH)/BuildFiles.ini" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) $(SGFILEREGISTRATIONRESOURCES)
+	@$(SAGE) --bt --bf "$(SGBUILDPATH)/BuildFiles.ini" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) $(SGFILEREGISTRATIONRESOURCES)
 clear_files:
 	@rm -f $(SGRESOURCESDIR)/*.pas
 	@rm -f $(SGRESOURCESDIR)/*.inc
-	@$(SAGE) -cfrr $(SGFILEREGISTRATIONRESOURCES)
-	@$(SAGE) -cfrp $(SGFILEREGISTRATIONPACKAGES)
+	@$(SAGE) --bt --cfrr $(SGFILEREGISTRATIONRESOURCES)
+	@$(SAGE) --bt --cfrp $(SGFILEREGISTRATIONPACKAGES)
 clear:
 	@rm -f $(OutputDirectory)/i386-android/*
 	@rm -f $(OutputDirectory)/arm-android/*
@@ -134,6 +134,6 @@ clear:
 	@$(MAKE) clear_files
 sg_compile:
 	$(MAKE) clear_files
-	$(SAGE) --sco $(SG_TARGET)
+	$(SAGE) --bt --sco $(SG_TARGET)
 	$(MAKE) $(SG_TARGET)
 	$(MAKE) clear_files

@@ -17,6 +17,8 @@ procedure SGStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGGeneralConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGOtherConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGBuildConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGApplicationsConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGHttpConsoleCaller()    : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGUdpConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGNetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -49,6 +51,8 @@ uses
 var
 	GeneralConsoleCaller : TSGConsoleCaller = nil;
 	OtherConsoleCaller   : TSGConsoleCaller = nil;
+	BuildConsoleCaller   : TSGConsoleCaller = nil;
+	ApplicationsConsoleCaller   : TSGConsoleCaller = nil;
 	HttpConsoleCaller    : TSGConsoleCaller = nil;
 	UdpConsoleCaller     : TSGConsoleCaller = nil;
 	NetConsoleCaller     :  TSGConsoleCaller = nil;
@@ -92,15 +96,6 @@ end;
 (*============Udp===========*)
 //============================
 
-procedure DestroyUdpConsoleCaller();
-begin
-if UdpConsoleCaller <> nil then
-	begin
-	UdpConsoleCaller.Destroy();
-	UdpConsoleCaller := nil;
-	end;
-end;
-
 procedure RunUdpConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 UdpConsoleCaller.Params := VParams;
@@ -121,15 +116,6 @@ end;
 (*============Http===========*)
 //============================
 
-procedure DestroyHttpConsoleCaller();
-begin
-if HttpConsoleCaller <> nil then
-	begin
-	HttpConsoleCaller.Destroy();
-	HttpConsoleCaller := nil;
-	end;
-end;
-
 procedure RunHttpConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 HttpConsoleCaller.Params := VParams;
@@ -149,15 +135,6 @@ end;
 (*=============Net===========*)
 //============================
 
-procedure DestroyNetConsoleCaller();
-begin
-if NetConsoleCaller <> nil then
-	begin
-	NetConsoleCaller.Destroy();
-	NetConsoleCaller := nil;
-	end;
-end;
-
 procedure RunNetConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 NetConsoleCaller.Params := VParams;
@@ -175,6 +152,61 @@ NetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
 end;
 
 //============================
+(*=====BuildConsoleCaller====*)
+//============================
+
+procedure RunBuildConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+BuildConsoleCaller.Params := VParams;
+BuildConsoleCaller.Execute();
+end;
+
+procedure InitBuildConsoleCaller();
+begin
+if BuildConsoleCaller <> nil then
+	Exit;
+BuildConsoleCaller := TSGConsoleCaller.Create(nil);
+BuildConsoleCaller.Category('Build tools');
+BuildConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
+BuildConsoleCaller.AddComand(@SGConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
+BuildConsoleCaller.AddComand(@SGConsoleClearFileRegistrationPackages, ['Cfrp'], 'Clear File Registration Packages');
+BuildConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
+BuildConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
+BuildConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
+BuildConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
+BuildConsoleCaller.AddComand(@SGConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
+BuildConsoleCaller.AddComand(@SGConsoleVersionTo_RC_WindowsFile, ['vtrc'], 'curent Version To RC windows file');
+BuildConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
+BuildConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
+BuildConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
+BuildConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
+end;
+
+//===================================
+(*=====ApplicationsConsoleCaller====*)
+//===================================
+
+procedure RunApplicationsConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+ApplicationsConsoleCaller.Params := VParams;
+ApplicationsConsoleCaller.Execute();
+end;
+
+procedure InitApplicationsConsoleCaller();
+begin
+if ApplicationsConsoleCaller <> nil then
+	Exit;
+ApplicationsConsoleCaller := TSGConsoleCaller.Create(nil);
+ApplicationsConsoleCaller.Category('Applications');
+ApplicationsConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
+ApplicationsConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
+ApplicationsConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
+ApplicationsConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
+ApplicationsConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
+ApplicationsConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
+end;
+
+//============================
 (*=====OtherConsoleCaller====*)
 //============================
 
@@ -182,15 +214,6 @@ procedure RunOtherConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$
 begin
 OtherConsoleCaller.Params := VParams;
 OtherConsoleCaller.Execute();
-end;
-
-procedure DestroyOtherConsoleCaller();
-begin
-if OtherConsoleCaller <> nil then
-	begin
-	OtherConsoleCaller.Destroy();
-	OtherConsoleCaller := nil;
-	end;
 end;
 
 procedure InitOtherConsoleCaller();
@@ -213,15 +236,6 @@ end;
 (*===========General=========*)
 //============================
 
-procedure DestroyGeneralConsoleCaller();
-begin
-if GeneralConsoleCaller <> nil then
-	begin
-	GeneralConsoleCaller.Destroy();
-	GeneralConsoleCaller := nil;
-	end;
-end;
-
 procedure InitGeneralConsoleCaller();
 begin
 if GeneralConsoleCaller <> nil then
@@ -229,30 +243,13 @@ if GeneralConsoleCaller <> nil then
 GeneralConsoleCaller := TSGConsoleCaller.Create(nil);
 GeneralConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console caller');
 GeneralConsoleCaller.Category('Applications');
-GeneralConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
-GeneralConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
-GeneralConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI',''], 'Shows all 3D/2D scenes');
-GeneralConsoleCaller.Category('System applications');
-GeneralConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD','DDH'], 'Convert pascal Header to Dynamic utility');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
-GeneralConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
-GeneralConsoleCaller.AddComand(@RunNetConsoleCaller, ['net'], 'Internet tools');
-GeneralConsoleCaller.AddComand(@RunOtherConsoleCaller, ['oecp'], 'Other Engine''s Console Programs');
-GeneralConsoleCaller.Category('Build tools');
-GeneralConsoleCaller.AddComand(@SGConsoleBuild, ['BUILD'], 'Building SaGe Engine');
-GeneralConsoleCaller.AddComand(@SGConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
-GeneralConsoleCaller.AddComand(@SGConsoleClearFileRegistrationPackages, ['Cfrp'], 'Clear File Registration Packages');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
-GeneralConsoleCaller.AddComand(@SGConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
-GeneralConsoleCaller.AddComand(@SGConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
-GeneralConsoleCaller.AddComand(@SGConsoleBuildFiles, ['BF'], 'Build files in datafile');
-GeneralConsoleCaller.AddComand(@SGConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
-GeneralConsoleCaller.AddComand(@SGConsoleVersionTo_RC_WindowsFile, ['vtrc'], 'curent Version To RC windows file');
+GeneralConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
+GeneralConsoleCaller.Category('Other tools');
+GeneralConsoleCaller.AddComand(@RunNetConsoleCaller, ['net', 'nt'], 'Internet tools');
+GeneralConsoleCaller.AddComand(@RunOtherConsoleCaller, ['oa'], 'Other Engine''s Console Programs');
+GeneralConsoleCaller.AddComand(@RunBuildConsoleCaller, ['bt'], 'Build tools');
+GeneralConsoleCaller.AddComand(@RunApplicationsConsoleCaller, ['app'], 'Applications');
 GeneralConsoleCaller.Category('System tools');
-GeneralConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
-GeneralConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
 GeneralConsoleCaller.AddComand(@SGConsoleExtractFiles, ['EF'], 'Extract all files in this application');
 GeneralConsoleCaller.AddComand(@SGConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
 GeneralConsoleCaller.AddComand(@SGConsoleWriteFiles, ['WF'], 'Write all files in this application');
@@ -264,6 +261,18 @@ end;
 (* == == == == == ==GETTERS== == == == == == *)
 (* == == == == == == == == == == == == == == *)
 (* == == == == == == == == == == == == == == *)
+
+function SGApplicationsConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+InitApplicationsConsoleCaller();
+Result := ApplicationsConsoleCaller;
+end;
+
+function SGBuildConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+InitBuildConsoleCaller();
+Result := BuildConsoleCaller;
+end;
 
 function SGGeneralConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -302,17 +311,21 @@ begin
 InitUdpConsoleCaller();
 InitHttpConsoleCaller();
 InitNetConsoleCaller();
-InitGeneralConsoleCaller();
 InitOtherConsoleCaller();
+InitBuildConsoleCaller();
+InitApplicationsConsoleCaller();
+InitGeneralConsoleCaller();
 end;
 
 procedure DestroyConsoleCallers();
 begin
-DestroyUdpConsoleCaller();
-DestroyHttpConsoleCaller();
-DestroyNetConsoleCaller();
-DestroyOtherConsoleCaller();
-DestroyGeneralConsoleCaller();
+SGKill(UdpConsoleCaller);
+SGKill(HttpConsoleCaller);
+SGKill(NetConsoleCaller);
+SGKill(OtherConsoleCaller);
+SGKill(BuildConsoleCaller);
+SGKill(ApplicationsConsoleCaller);
+SGKill(GeneralConsoleCaller);
 end;
 
 initialization
