@@ -10,12 +10,11 @@ CALL _Make_Android_ARM apk
 cd ..
 make clear_files
 
-set P=""
-if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set P="1"
-if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set P="1"
+set OR=""
+if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set OR="1"
+if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set OR="1"
 
-if "%P%" == "1" ( 
-	@echo off
+if "%OR%" == "1" ( 
 	echo "================"
 	echo "| Building APK |"
 	echo "================"

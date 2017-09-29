@@ -12,7 +12,7 @@ make release
 make clear_files
 rm ./../Binaries/Main_Compressed.exe
 copy ".\..\Binaries\Main.exe" ".\..\Binaries\Main_Release.exe"
-"./Utility/upx.exe" -9 -o ./../Binaries/Main_Compressed.exe ./../Binaries/Main.exe
+"./Platforms/Windows/Utility/upx.exe" -9 -o ./../Binaries/Main_Compressed.exe ./../Binaries/Main.exe
 cd Scripts
 if "%2"=="" ( CALL _Check_Console )
 if "%1"=="" ( pause )
