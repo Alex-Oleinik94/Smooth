@@ -1,7 +1,7 @@
 @echo off
 CALL _Create_Output_Directoryes
 cd ..
-DEL AndroidTools\SaGe /F/S/Q
+DEL Output\AndroidApplication /F/S/Q
 cls
 make build_files
 @echo off
@@ -10,34 +10,38 @@ CALL _Make_Android_ARM apk
 cd ..
 make clear_files
 
-if exist "AndroidTools\SaGe\libs\armeabi\libmain.so" ( 
+set P=""
+if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set P="1"
+if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set P="1"
+
+if "%P%" == "1" ( 
 	@echo off
 	echo "================"
 	echo "| Building APK |"
 	echo "================"
-	CD AndroidTools\SaGe
-	MKDIR bin
-	MKDIR res
-	MKDIR src
-	MKDIR res\drawable-hdpi
-	MKDIR res\drawable-ldpi
-	MKDIR res\drawable-mdpi
-	MKDIR res\values
+	CD Output\AndroidApplication
+	if not exist bin MKDIR bin
+	if not exist res MKDIR res
+	if not exist src MKDIR src
+	if not exist res\drawable-hdpi MKDIR res\drawable-hdpi
+	if not exist res\drawable-ldpi MKDIR res\drawable-ldpi
+	if not exist res\drawable-mdpi MKDIR res\drawable-mdpi
+	if not exist res\values MKDIR res\values
 	CD ..\..
 
-	COPY AndroidTools\Android\AndroidManifest.xml AndroidTools\SaGe\AndroidManifest.xml
+	COPY Platforms\Android\SaGeKeystore.keystore Output\AndroidApplication\bin\SaGeKeystore.keystore
+	
+	COPY Platforms\Android\Application\AndroidManifest.xml Output\AndroidApplication\AndroidManifest.xml
 
-	COPY AndroidTools\SaGeKeystore.keystore AndroidTools\SaGe\bin\SaGeKeystore.keystore
+	COPY Platforms\Android\Application\icon-hdpi.png Output\AndroidApplication\res\drawable-hdpi\icon.png
+	COPY Platforms\Android\Application\icon-ldpi.png Output\AndroidApplication\res\drawable-ldpi\icon.png
+	COPY Platforms\Android\Application\icon-mdpi.png Output\AndroidApplication\res\drawable-mdpi\icon.png
+	COPY Platforms\Android\Application\strings.xml Output\AndroidApplication\res\values\strings.xml
 
-	COPY AndroidTools\Android\icon-hdpi.png AndroidTools\SaGe\res\drawable-hdpi\icon.png
-	COPY AndroidTools\Android\icon-ldpi.png AndroidTools\SaGe\res\drawable-ldpi\icon.png
-	COPY AndroidTools\Android\icon-mdpi.png AndroidTools\SaGe\res\drawable-mdpi\icon.png
-	COPY AndroidTools\Android\strings.xml AndroidTools\SaGe\res\values\strings.xml
-
-	COPY AndroidTools\Android\build.xml AndroidTools\SaGe\build.xml
-	COPY AndroidTools\Android\build.properties AndroidTools\SaGe\build.properties
-	COPY AndroidTools\Android\default.properties AndroidTools\SaGe\default.properties
-	COPY AndroidTools\Android\local.properties AndroidTools\SaGe\local.properties
+	COPY Platforms\Android\Application\build.xml Output\AndroidApplication\build.xml
+	COPY Platforms\Android\Application\build.properties Output\AndroidApplication\build.properties
+	COPY Platforms\Android\Application\default.properties Output\AndroidApplication\default.properties
+	COPY Platforms\Android\Application\local.properties Output\AndroidApplication\local.properties
 
 	REM for adding user resourses
 	if "%1"=="res" ( 
@@ -45,26 +49,41 @@ if exist "AndroidTools\SaGe\libs\armeabi\libmain.so" (
 		pause 
 		)
 
-	DEL ..\Binaries\SaGe.apk
-
-	CD AndroidTools
-	IF "%1"=="" (
-		CALL BuildApk.bat debug
-		CD ..
-		COPY AndroidTools\SaGe\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
-	) ELSE (
-		CALL BuildApk.bat release
-		CD ..
-		COPY AndroidTools\SaGe\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+	if exist ..\Binaries\SaGe.apk ( 
+		DEL ..\Binaries\SaGe.apk 
 	)
-
-	PAUSE
-	DEL AndroidTools\SaGe /F/S/Q
+	
+	CD Output
+	SET PATH=C:\Programming\jdk\bin;C:\Programming\android-sdk\tools;C:\Programming\apache-ant\bin;C:\Programming\jdk\lib
+	SET APP_NAME=SaGeGameEngine-release
+	SET TARGETVER=
+	IF "%1"=="" (
+		set TARGETVER=debug
+	) else (
+		set TARGETVER=release
+	)
+	cd AndroidApplication
+	
+	ant %TARGETVER%
+	
+	if %TARGETVER% == release (
+		del bin\%APP_NAME%-unaligned.apk
+		jarsigner -verbose -keystore bin\SaGeKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SaGeKeystore
+		C:\Programming\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
+	)
+	
+	CD ..\..
+	if %TARGETVER% == debug (
+		COPY Output\AndroidApplication\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
+	) else (
+		COPY Output\AndroidApplication\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+	)
+	DEL Output\AndroidApplication /F/S/Q
 ) else (
 	@echo off
 	echo "==========================="
 	echo "| Error while compilation |"
 	echo "==========================="
-	PAUSE
-	DEL AndroidTools\SaGe /F/S/Q
+	DEL Output\AndroidApplication /F/S/Q
 )
+PAUSE

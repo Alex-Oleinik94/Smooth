@@ -1,9 +1,9 @@
 @echo off
 cd ..
 if not exist Output MKDIR Output
-if not exist Output\AndroidApk MKDIR Output\AndroidApk
-if not exist Output\AndroidApk\libs MKDIR Output\AndroidApk\libs
-if not exist Output\AndroidApk\libs\armeabi MKDIR Output\AndroidApk\SaGe\libs\armeabi
+if not exist Output\AndroidApplication MKDIR Output\AndroidApplication
+if not exist Output\AndroidApplication\libs MKDIR Output\AndroidApplication\libs
+if not exist Output\AndroidApplication\libs\armeabi MKDIR Output\AndroidApplication\libs\armeabi
 cd Scripts
 CALL _Make_Packages android_arm false
 if "%1"=="" ( pause )
