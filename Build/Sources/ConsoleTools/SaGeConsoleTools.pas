@@ -180,6 +180,7 @@ BuildConsoleCaller.AddComand(@SGConsoleIsConsole, ['ic'], 'Return bool value, is
 BuildConsoleCaller.AddComand(@SGConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
 BuildConsoleCaller.AddComand(@SGConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
 BuildConsoleCaller.AddComand(@SGConsoleAddToLog, ['ATL'], 'Add line To Log');
+BuildConsoleCaller.AddComand(@SGConsoleOpenLastLog, ['oll'], 'Open Last Log file');
 end;
 
 //===================================

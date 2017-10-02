@@ -130,7 +130,10 @@ if Result then
 	if FileName <> '' then
 		Stream.SaveToFile(FileName)
 	else
+		begin
 		SGPrintStream(Stream);
+		SGLog.Source(Stream);
+		end;
 	Stream.Destroy();
 	end;
 end;

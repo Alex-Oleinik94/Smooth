@@ -67,7 +67,7 @@ function SGParseValueFromComand(const Comand : TSGString; const PredPart : TSGSt
 function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGParseValueFromComandAndReturn(const Comand : TSGString; const PredParts : array of const; out OutString : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -83,7 +83,7 @@ uses
 	,SaGeStringUtils
 	;
 
-procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 if ConsoleCaller <> nil then
 	begin

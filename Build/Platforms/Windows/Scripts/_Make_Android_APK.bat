@@ -14,7 +14,7 @@ set OR=""
 if exist "Output\AndroidApplication\libs\armeabi\libmain.so" set OR="1"
 if exist "Output\AndroidApplication\libs\i386eabi\libmain.so" set OR="1"
 
-if "%OR%" == "1" ( 
+if "%OR%"=="1" (
 	echo "================"
 	echo "| Building APK |"
 	echo "================"
@@ -43,7 +43,7 @@ if "%OR%" == "1" (
 	COPY Platforms\Android\Application\local.properties Output\AndroidApplication\local.properties
 
 	REM for adding user resourses
-	if "%1"=="res" ( 
+	if "%1"=="res" (
 		ECHO Push!!!!!!!!!!!!!!!
 		pause 
 		)
@@ -55,24 +55,24 @@ if "%OR%" == "1" (
 	CD Output
 	SET PATH=C:\Programming\jdk\bin;C:\Programming\android-sdk\tools;C:\Programming\apache-ant\bin;C:\Programming\jdk\lib
 	SET APP_NAME=SaGeGameEngine-release
-	SET TARGETVER=
+	SET TARGETVER=""
 	IF "%1"=="" (
-		set TARGETVER=debug
+		set TARGETVER="debug"
 	) else (
-		set TARGETVER=release
+		set TARGETVER="release"
 	)
 	cd AndroidApplication
 	
 	ant %TARGETVER%
 	
-	if %TARGETVER% == release (
+	if "%TARGETVER%"=="release" (
 		del bin\%APP_NAME%-unaligned.apk
 		jarsigner -verbose -keystore bin\SaGeKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SaGeKeystore
 		C:\Programming\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
 	)
 	
 	CD ..\..
-	if %TARGETVER% == debug (
+	if "%TARGETVER%"=="debug" (
 		COPY Output\AndroidApplication\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
 	) else (
 		COPY Output\AndroidApplication\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk

@@ -20,7 +20,7 @@ const
 function SGEngineVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGEngineFullVersion() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIncEngineVersion(const IsRelease : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 var
 	SGApplicationName : TSGString = 'Sun';
@@ -176,10 +176,10 @@ if not VersionPrinted then
 VersionPrinted := True;
 end;
 
-procedure SGIncEngineVersion(const IsRelease : TSGBoolean = False);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIncEngineVersion(const IsRelease : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Stream : TMemoryStream;
-	s1,s2,s3 : TSGString;
+	s1, s2, s3, s4 : TSGString;
 	n : TSGLongWord;
 	d : TSGDateTime;
 begin
@@ -191,17 +191,22 @@ s2 := SGReadLnStringFromStream(Stream);
 s3 := SGReadLnStringFromStream(Stream);
 n := SGVal(SGReadLnStringFromStream(Stream));
 Stream.Destroy();
+s4 := SGStr(n + 1 + Byte(IsRelease));
 Stream := TMemoryStream.Create();
 SGWriteStringToStream(s1 + SGWinEoln, Stream, False);
 SGWriteStringToStream(s2 + SGWinEoln, Stream, False);
 SGWriteStringToStream(s3 + SGWinEoln, Stream, False);
-SGWriteStringToStream(SGStr(n + 1 + Byte(IsRelease)) + SGWinEoln, Stream, False);
-SGWriteStringToStream(Iff(IsRelease,'Release','Debug') + SGWinEoln, Stream, False);
+SGWriteStringToStream(s4 + SGWinEoln, Stream, False);
+SGWriteStringToStream(Iff(IsRelease, 'Release', 'Debug') + SGWinEoln, Stream, False);
 d.Get();
 SGWriteStringToStream(SGStr(d.Years) + '/' + SGStr(d.Month) + '/' + SGStr(d.Day) + SGWinEoln, Stream, False);
 Stream.Position := 0;
 Stream.SaveToFile(VersionFileName);
 Stream.Destroy();
+Result := 
+	s1 + '.' + s2 + '.' + s3 + '.' + s4 + ' ' +
+	Iff(IsRelease, 'Release', 'Debug') + ' ' +
+	'[' + SGStr(d.Years) + '/' + SGStr(d.Month) + '/' + SGStr(d.Day) + ']';
 end;
 
 {$IF defined(LIBRARY)}

@@ -22,6 +22,7 @@ procedure SGConsoleIsConsole                                   (const VParams : 
 procedure SGConsoleMake                                        (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleDefineSkiper                                (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleVersionTo_RC_WindowsFile                    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleOpenLastLog                                 (const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -29,6 +30,7 @@ uses
 	 StrMan
 	,Crt
 	,Process
+	,SysUtils
 	
 	,SaGeVersion
 	,SaGeResourceManager
@@ -41,7 +43,22 @@ uses
 	,SaGeDefinesSkiper
 	;
 
-procedure SGConsoleVersionTo_RC_WindowsFile                    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleOpenLastLog(const VParams : TSGConcoleCallerParams = nil);
+var
+	SL : TSGStringList = nil;
+begin
+if SGCountConsoleParams(VParams) = 0 then
+	begin
+	SL := SGDirectoryFiles(SGLogDirectory() + DirectorySeparator);
+	SGLog.Source('Opens ' + '"' + SGLogDirectory() + DirectorySeparator + SL[High(SL) - 1] + '"');
+	ExecuteProcess('"' + SGLogDirectory() + DirectorySeparator + SL[High(SL) - 1] + '"', []);
+	SGKill(SL);
+	end
+else
+	SGHint('Params are not alowed here!');
+end;
+
+procedure SGConsoleVersionTo_RC_WindowsFile(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (SGCountConsoleParams(VParams) = 2) and (SGResourceFiles.FileExists(VParams[0])) then
 	SGPushVersionToWindowsResourseFile(VParams[0], VParams[1])
@@ -122,7 +139,7 @@ if  (SGCountConsoleParams(VParams) = 0) or
 		Param := VParams[0]
 	else
 		Param := 'false';
-	SGIncEngineVersion((Param='1') or (SGUpCaseString(Param)='TRUE'))
+	SGLog.Source(['Current version: ', SGIncEngineVersion((Param='1') or (SGUpCaseString(Param)='TRUE'))]);
 	end
 else
 	begin

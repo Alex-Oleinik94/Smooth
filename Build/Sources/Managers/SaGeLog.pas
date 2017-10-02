@@ -36,27 +36,21 @@ var
 			True
 		{$ENDIF}
 	;
-const
-	SGLogDirectory =
-		{$IFDEF ANDROID}
-			DirectorySeparator +'sdcard' + DirectorySeparator +'.SaGe'
-		{$ELSE}
-			'.' + DirectorySeparator + '..' + DirectorySeparator + 'Log'
-		{$ENDIF}
-	;
-var
-	SGLogFileName : TSGString = SGLogDirectory + DirectorySeparator + 'Application.log';
 type
 	TSGLog = class(TObject)
 			public
 		constructor Create(const LogFile : TSGString);
 		destructor Destroy(); override;
 		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True);overload;
+		procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False);overload;
 		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True);overload;
 		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 			private
 		FFileStream : TFileStream;
+		FFileName   : TSGString;
+			public
+		property FileName : TSGString read FFileName;
 		end;
 var
 	//Экземпляр класса лога программы
@@ -65,11 +59,12 @@ var
 procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGLogDateTimePredString(const A : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
-function SGCreateLog(var Log : TSGLog; const LogFile : TSGString) : TSGBoolean;
 procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGCreateLog(var Log : TSGLog; const LogFile : TSGString) : TSGBoolean;
+function SGLogDateTimePredString(const A : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -84,16 +79,27 @@ uses
 	
 	,StrMan
 	;
+function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 
+{$IF not defined(MOBILE)}
+	SGAplicationFileDirectory() + '.' + DirectorySeparator + '..' + DirectorySeparator + 'Log'
+{$ELSE}
+	{$IF defined(ANDROID)}
+		DirectorySeparator +'sdcard' + DirectorySeparator +'.SaGe'
+	{$ELSE}
+		''
+	{$ENDIF}
+{$ENDIF}
+	;
+end;
 
 function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	DateTime  : TSGDateTime;
 begin
 DateTime.Get();
-Result := 
-{$IFNDEF MOBILE}
-	SGAplicationFileDirectory() + 
-	{$ENDIF}SGLogDirectory;
+Result := SGLogDirectory();
 SGMakeDirectory(Result);
 Result += DirectorySeparator +
 	'[' +
@@ -235,7 +241,17 @@ Source(ArS, Title, True, SimbolsLength);
 SetLength(ArS, 0);
 end;
 
-procedure TSGLog.Source(const s:string;const WithTime:Boolean = True);
+procedure TSGLog.Source(const Stream : TStream; const WithTime : TSGBoolean = False);overload;
+begin
+Stream.Position := 0;
+while Stream.Position <> Stream.Size do
+	begin
+	Source(SGReadLnStringFromStream(Stream), WithTime);
+	end;
+Stream.Position := 0;
+end;
+
+procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True);overload;
 var
 	ss : TSGString;
 	pc : PSGChar;
@@ -253,7 +269,10 @@ constructor TSGLog.Create(const LogFile : TSGString);
 begin
 inherited Create();
 if SGLogEnable then
+	begin
+	FFileName := LogFile;
 	FFileStream := TFileStream.Create(LogFile, fmCreate);
+	end;
 end;
 
 destructor TSGLog.Destroy;
@@ -314,15 +333,13 @@ end;
 initialization
 begin
 SGMakeDirectory(SGLogDirectory);
-SGLogFileName := SGFreeLogFileName();
-SGCreateLog(SGLog, SGLogFileName);
+SGCreateLog(SGLog, SGFreeLogFileName());
 if (SGLog = nil) and (SGAplicationFileDirectory() <> '') then
-	SGCreateLog(SGLog, SGAplicationFileDirectory() + SGLogFileName);
+	SGCreateLog(SGLog, SGAplicationFileDirectory() + SGFreeLogFileName());
 if SGLog = nil then
 	begin
 	SGLogEnable := False;
-	SGLogFileName := '';
-	SGCreateLog(SGLog, SGLogFileName);
+	SGCreateLog(SGLog, '');
 	end;
 if SGLogEnable then
 	begin
