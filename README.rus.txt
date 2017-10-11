@@ -7,10 +7,16 @@
 	(Например билдить файлы в юниты) при компиляции используется исполняемый файл движка.
 Отдельно из движка в папки Build\Packages\{PACKAGE_NAME} вынесены пакеты всяких прикалюх, 
 	для компиляции пакетов в испольняемый файл так-же есть специальные скрипты.
+Чтобы прикрепить файл ресурсов к исполняемому файлу в винде нужно сначала его скомпилировать.
+	Для этого необходимо перейти в папку Build\Platforms\Windows\ExecutableResourse и
+	запустить соответствующий скрипт.
+
+Чтобы полноценно использовать функции движка необходимо отсюда https://yadi.sk/d/5jxtxd6w3Ng6cd
+	скачать и поместить в корень папку Libraries, где много библиотек.
 
 Чтобы билдить под Android:
 	C:\Programming\android-ndk   --- Сюда устанавливаем Android Native Development Kit 
-	C:\Programming\android-sdk   --- Сюда устанавливаем Android SDK
+	C:\Programming\android-sdk   --- Сюда устанавливаем Android Software Development Kit
 	C:\Programming\apache-ant    --- Сюда устанавливаем Apache Ant
 	C:\Programming\jdk           --- Сюда устанавливаем Java Development Kit
 

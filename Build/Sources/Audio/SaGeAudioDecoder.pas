@@ -62,6 +62,7 @@ type
 		FInfoReaded : TSGBool;
 			protected
 		class function CreateInputStream(const VFileName : TSGString) : TStream; virtual;
+		class function CreateInputMemoryStream(const VFileName : TSGString) : TMemoryStream; virtual;
 		function GetSize() : TSGUInt64; virtual; abstract;
 		function GetPosition() : TSGUInt64; virtual; abstract;
 		procedure SetPosition(const VPosition : TSGUInt64); virtual; abstract;
@@ -135,21 +136,16 @@ for C in AudioDecoders do
 	end;
 end;
 
-class function TSGAudioDecoder.CreateInputStream(const VFileName : TSGString) : TStream;
-
-function CreateMemoryStream() : TStream;
+class function TSGAudioDecoder.CreateInputMemoryStream(const VFileName : TSGString) : TMemoryStream;
 begin
 Result := TMemoryStream.Create();
-(Result as TMemoryStream).LoadFromFile(VFileName);
+Result.LoadFromFile(VFileName);
+Result.Position := 0;
 end;
 
-function CreateFileStream() : TStream;
+class function TSGAudioDecoder.CreateInputStream(const VFileName : TSGString) : TStream;
 begin
 Result := TFileStream.Create(VFileName, fmOpenRead);
-end;
-
-begin
-Result := CreateMemoryStream();
 Result.Position := 0;
 end;
 

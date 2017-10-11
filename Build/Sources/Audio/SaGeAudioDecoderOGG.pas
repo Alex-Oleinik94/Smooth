@@ -19,6 +19,7 @@ uses
 	,VCEdit
 	,VorbisEnc
 	,VorbisFile
+	//,OggStatic
 	;
 
 type
@@ -49,6 +50,7 @@ type
 		FError        : TSGBool;
 			private
 		FInputStream   : TStream;
+		FInputMemoryStream : TMemoryStream;
 		FFile          : OGGVorbis_File;
 		FVorbisInfo    : Vorbis_Info;
 		FVorbisComment : Vorbis_Comment;
@@ -64,6 +66,8 @@ uses
 	,SaGeStringUtils
 	,SaGeDllManager
 	,SaGeLog
+	
+	,SaGeOGGCommon
 	;
 
 class function TSGAudioDecoderOGG.ErrorString(Code : Integer) : String;
@@ -116,6 +120,7 @@ procedure TSGAudioDecoderOGG.AttachInput(const VStream : TStream);
 begin
 KillInput();
 FInputStream := VStream;
+FInputMemoryStream := VStream as TMemoryStream;
 end;
 
 function TSGAudioDecoderOGG.SetInput(const VStream : TStream): TSGAudioDecoder; overload;
@@ -126,7 +131,7 @@ end;
 
 function TSGAudioDecoderOGG.SetInput(const VFileName : TSGString) : TSGAudioDecoder; overload;
 begin
-AttachInput(CreateInputStream(VFileName));
+AttachInput(CreateInputMemoryStream(VFileName));
 Result := Self;
 end;
 
@@ -156,7 +161,7 @@ if Res <> 0 then
 	end;
 
 FInputStream.Position := 0;
-Res := ov_open_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);
+Res := ov_open_callbacks(FInputStream, FFile, nil, 0, ops_callbacks);//ops_callbacks
 if Res <> 0 then
 	begin
 	SGLog.Source('TSGAudioDecoderOGG__ReadInfo : Could not open Ogg stream : "'+ErrorString(Res)+'".');
@@ -237,7 +242,11 @@ begin
 //ov_clear(FFile);
 SGLog.SOurce([TSGPointer(FInputStream)]);
 try
-SGKill(FInputStream);
+if FInputStream <> nil then
+	begin
+	FInputStream.Destroy();
+	FInputStream := nil;
+	end;
 except
 end;
 FDataPosition := 0;
