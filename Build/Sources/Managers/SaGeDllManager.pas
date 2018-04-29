@@ -422,7 +422,7 @@ if FDlls <> nil then
 		for i := 0 to High(FDlls) do
 			begin
 			StringList := FDlls[i].SystemNames();
-			UpCasedStringList := SGUpCaseStringList(StringList);
+			UpCasedStringList := SGUpCasedStringList(StringList);
 			if SGUpCaseString(VSystemName) in UpCasedStringList then
 				Result := FDlls[i];
 			SetLength(StringList, 0);

@@ -68,7 +68,8 @@ operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF 
 function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGUpCaseStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGUpCaseStringList(var SL : TSGStringList);overload;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;overload;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
@@ -198,7 +199,16 @@ for i := 1 to Length(S) do
 LoopIteration();
 end;
 
-function SGUpCaseStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure SGUpCaseStringList(var SL : TSGStringList);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	i : TSGUInt32;
+begin
+if (SL <> nil) and (Length(SL) > 0) then
+	for i := 0 to High(SL) do
+		SL[i] := SGUpCaseString(SL[i]);
+end;
+
+function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	i : TSGUInt32;
 begin

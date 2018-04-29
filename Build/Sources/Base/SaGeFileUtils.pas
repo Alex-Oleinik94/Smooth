@@ -92,6 +92,7 @@ function SGAplicationFileDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$
 function SGFreeDirectoryName(const Name : TSGString; const sl : TSGString = 'Copy') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMakeDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGMakeDirectories(const FinalDirectory : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGDeleteDirectory(const Directory : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGExistsDirectory(const Directory : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDirectoryDirectories(Catalog : TSGString; const What : TSGString = '') : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -327,6 +328,11 @@ end;
 (***************)
 (** DIRECTORY **)
 (***************)
+
+procedure SGDeleteDirectory(const Directory : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+RMDIR(Directory);
+end;
 
 function SGAplicationFileDirectory() : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

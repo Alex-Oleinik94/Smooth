@@ -36,7 +36,8 @@ operator - (const a, b : TSGDateTime) : TSGDateTime;{$IFDEF SUPPORTINLINE}inline
 
 function SGSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMiliSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGNow() : TSGDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -46,9 +47,14 @@ uses
 	,StrMan
 	;
 
-function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGNow() : TSGDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := StringTrimAll(SGMiliSecondsToStringTime((D2 - D1).GetPastMiliSeconds()), ' ');
+Result.Get();
+end;
+
+function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := StringTrimAll(SGMiliSecondsToStringTime((D2 - D1).GetPastMiliSeconds(), Encoding), ' 	');
 end;
 
 function SGMiliSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -64,6 +70,7 @@ if (VSeconds mod 100 <> 0) or (Result = '') then
 	else
 		Result += ' msec ';
 	end;
+Result := StringTrimAll(Result, ' 	');
 end;
 
 function SGSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

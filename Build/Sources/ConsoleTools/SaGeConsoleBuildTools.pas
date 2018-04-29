@@ -291,7 +291,7 @@ begin
 Result := True;
 AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
 SGStringListTrimAll(AllTargets, ' ');
-AllTargets := SGUpCaseStringList(AllTargets, True);
+AllTargets := SGUpCasedStringList(AllTargets, True);
 with TSGConsoleCaller.Create(VParams) do
 	begin
 	Category('Bitrate');

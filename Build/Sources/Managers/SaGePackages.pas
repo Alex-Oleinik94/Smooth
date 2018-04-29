@@ -201,7 +201,7 @@ else if Param = 'UNSUPPORTEDTARGETS' then
 	begin
 	Result.FUnsupportedTargets := SGStringListFromString(Value,',');
 	SGStringListTrimAll(Result.FUnsupportedTargets, ' ');
-	Result.FUnsupportedTargets := SGUpCaseStringList(Result.FUnsupportedTargets, True);
+	Result.FUnsupportedTargets := SGUpCasedStringList(Result.FUnsupportedTargets, True);
 	end
 else
 	begin

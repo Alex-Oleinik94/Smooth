@@ -462,7 +462,7 @@ var
 	Success : TSGBool = True;
 begin
 SGPrintEngineVersion();
-if (VParams<>nil) and (Length(VParams)>0) then
+if (VParams <> nil) and (Length(VParams) > 0) then
 	with TSGConsoleCaller.Create(VParams) do
 		begin
 		Category('Context settings');

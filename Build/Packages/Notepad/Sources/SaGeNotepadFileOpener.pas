@@ -85,7 +85,7 @@ var
 	SL : TSGStringList = nil;
 begin
 SL := GetExpansions();
-SL := SGUpCaseStringList(SL, True);
+SL := SGUpCasedStringList(SL, True);
 Result := VExpansions in SL;
 SetLength(SL, 0);
 end;

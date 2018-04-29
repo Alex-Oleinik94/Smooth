@@ -41,7 +41,7 @@ uses
 	,SaGeConsoleHashTools
 	
 	// Aditional console program includes
-	,SaGeConsoleProgramFindInPas
+	,SaGeConsoleProgramFindInSources
 	,SaGeConsoleProgramGoogleReNameCache
 	,SaGeConsoleProgramConvertHeaderToDynamic
 	,SaGeConsoleProgramUSMBIOS
@@ -203,7 +203,7 @@ ApplicationsConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI', ''], 
 ApplicationsConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
 ApplicationsConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
 ApplicationsConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
-ApplicationsConsoleCaller.AddComand(@SGConsoleFindInPas, ['FIP'], 'Find In Pas program');
+ApplicationsConsoleCaller.AddComand(@SGConsoleFindInSources, ['FIS','SIS'], 'Program for searching in the sources');
 ApplicationsConsoleCaller.AddComand(@SGConsoleMake, ['MAKE'], 'Make utility');
 end;
 

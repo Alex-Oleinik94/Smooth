@@ -82,6 +82,8 @@ uses
 	 SaGeLog
 	,SaGeBaseUtils
 	,SaGeSysUtils
+	
+	,Crt
 	;
 
 procedure SGPushVersionToWindowsResourseFile(const FileName : TSGString; const Define : TSGString; const WithQuotes : TSGBoolean = True);
@@ -169,6 +171,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if not VersionPrinted then
 	begin
+	TextColor(7);
 	SGHint(SGEngineFullVersion(), SGViewTypeFull, True);
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	SGLog.Source('Operating system: ' + SGOperatingSystemVersion());

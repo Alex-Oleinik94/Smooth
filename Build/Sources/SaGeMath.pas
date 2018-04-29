@@ -106,19 +106,19 @@ type
 	
 	TSGCalculateAlgoritmChunk=object
 			public
-		constructor Create;
+		constructor Create();
 			public
-		FFunction:LongWord;
-		FParametrs:packed array of LongWord;
+		FFunction : TSGLongWord;
+		FParametrs : packed array of TSGLongWord;
 		end;
-	TSGCalculateAlgoritm=packed array of TSGCalculateAlgoritmChunk;
+	TSGCalculateAlgoritm = packed array of TSGCalculateAlgoritmChunk;
 	
 	PTSGExpression = ^TSGExpression;
 	PSGExpression = PTSGExpression;
 	TSGExpression=class(TSGObject)
 			public
-		constructor Create;
-		destructor Destroy;override;
+		constructor Create();override;
+		destructor Destroy();override;
 			public
 		FExpression:PChar;
 		FResultat:TArTArTSGExpressionChunk;

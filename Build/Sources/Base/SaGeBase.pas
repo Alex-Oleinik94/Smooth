@@ -184,6 +184,8 @@ operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$END
 
 type
 	PSGStringList = ^ TSGStringList;
+procedure SGStringListDeleteByIndex(var StringList : TSGStringList; const Index : TSGMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStringListLength(const StringList : TSGStringList): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 operator in(const S : TSGString; const A : TSGSettings):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -192,6 +194,27 @@ type
 	generic TSGList<T> = packed array of T;
 
 implementation
+
+function SGStringListLength(const StringList : TSGStringList): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if StringList = nil then
+	Result := 0
+else
+	Result := Length(StringList);
+end;
+
+procedure SGStringListDeleteByIndex(var StringList : TSGStringList; const Index : TSGMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	i : TSGMaxEnum;
+begin
+if (Index >= 0) and (Index < SGStringListLength(StringList)) then
+	begin
+	if Index <> SGStringListLength(StringList) - 1 then
+		for i := Index to SGStringListLength(StringList) - 2 do
+			StringList[Index] := StringList[Index + 1];
+	SetLength(StringList, SGStringListLength(StringList) - 1);
+	end;
+end;
 
 operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
