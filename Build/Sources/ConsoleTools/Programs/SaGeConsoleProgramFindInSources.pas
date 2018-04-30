@@ -521,12 +521,17 @@ end;
 
 destructor TSGFinderInSources.Destroy();
 begin
+DestroyFiles();
 SetLength(FFileExtensions, 0);
 SetLength(FWords, 0);
 FSearchingDirectory := '';
 FOutDirectory := '';
 inherited Destroy();
 end;
+
+//===================================
+//==========GENERAL=FUNCTION=========
+//===================================
 
 procedure SGConsoleFindInSources(const VParams : TSGConcoleCallerParams = nil);
 begin
