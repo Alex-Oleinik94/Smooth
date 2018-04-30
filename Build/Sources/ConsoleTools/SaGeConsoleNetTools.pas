@@ -12,6 +12,7 @@ uses
 procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPackageRedirector(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -24,8 +25,13 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeConsoleUtils
+	,SaGeInternetPackageRedirector
 	;
 
+procedure SGConsoleInternetPackageRedirector(const VParams : TSGConcoleCallerParams = nil);
+begin
+SGInternetPackageRedirector();
+end;
 
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
 var
