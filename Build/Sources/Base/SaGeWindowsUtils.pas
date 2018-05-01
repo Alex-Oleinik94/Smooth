@@ -22,6 +22,7 @@ function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogInternetAdaptersInfo() : TSGMaxEnum;
+function SGInternetAdapterNames() : TSGStringList;
 
 implementation
 
@@ -37,6 +38,30 @@ uses
 	,SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+function SGInternetAdapterNames() : TSGStringList;
+var
+	BufferLength : TSGUInt32 = 0;
+	AdaptersInfo : PIP_ADAPTER_INFO = nil;
+	AdapterInfo : PIP_ADAPTER_INFO = nil;
+begin
+Result := nil;
+GetAdaptersInfo(nil, BufferLength);
+if BufferLength = 0 then
+	exit;
+AdaptersInfo := GetMem(BufferLength);
+if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
+	begin
+	AdapterInfo := AdaptersInfo;
+	SGLog.Source('Internet adapters:');
+	while AdapterInfo <> nil do
+		begin
+		Result += AdapterInfo^.AdapterName;
+		AdapterInfo := AdapterInfo^.Next;
+		end;
+	end;
+FreeMem(AdaptersInfo);
+end;
 
 function SGLogInternetAdaptersInfo() : TSGMaxEnum;
 type

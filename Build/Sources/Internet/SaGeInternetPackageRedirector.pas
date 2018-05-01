@@ -24,6 +24,7 @@ implementation
 uses
 	 SaGeLog
 	,SaGePcapUtils
+	,SaGeStringUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeWindowsUtils
 		{$ENDIF}
@@ -33,21 +34,35 @@ uses
 
 procedure SGInternetPackageRedirector();
 var
-	Device : TSGPCAPDeviceName = nil;
-	IP, Mask : TSGUInt32;
-	Handle : TSGPCAPDeviceHandle = nil;
-
+	Devices : packed array of
+		packed record
+			Device : TSGPCAPDeviceName;
+			Net, Mask : TSGUInt32;
+			Handle : TSGPCAPDeviceHandle;
+			end = nil;
+	DeviceNames : TSGStringList = nil;
+	i : TSGMaxEnum;
 begin
-//SGLogInternetAdaptersInfo();
-Handle := SGPCAPInitializeDevice(Device, @IP, @Mask);
-if Handle = nil then
+SGPCAPLogInternetDevices();
+DeviceNames := SGInternetAdapterNames();
+if (DeviceNames = nil) or (Length(DeviceNames) = 0) then
 	exit;
 
-SGPCAPInitializeDeviceFilter(Handle, 'port 23', IP);
+SetLength(Devices, Length(DeviceNames));
+FillChar(Devices[0], SizeOf(Devices[0]) * Length(DeviceNames), 0);
+for i := 0 to High(DeviceNames) do
+	with Devices[i] do
+		begin
+		Device := SGStringToPChar(DeviceNames[i]);
+		Handle := SGPCAPInitializeDevice(Device, @Net, @Mask);
+		WriteLn();
+		end;
 
-SGPCAPJackOnePacket(Handle).Free();
+//SGPCAPInitializeDeviceFilter(Handle, 'port 23', IP);
 
-pcap_close(Handle);
+//SGPCAPJackOnePacket(Handle).Free();
+
+//pcap_close(Handle);
 end;
 
 constructor TSGInternetPackageRedirector.Create();

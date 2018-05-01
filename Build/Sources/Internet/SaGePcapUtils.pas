@@ -34,6 +34,9 @@ function SGPCAPInitializeDevice(Device : TSGPCAPDevice; const P_NET : PSGUInt32 
 function SGPCAPInitializeDeviceFilter(const DeviceHandle : TSGPCAPDeviceHandle; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : TSGPCAPDeviceFilter;
 function SGPCAPErrorString(const Error : TSGPCAPErrorString; const WithComma : TSGBoolean = False) : TSGString;
 function SGPCAPJackOnePacket(const DeviceHandle : TSGPCAPDeviceHandle) : TSGPCAPPacket;
+procedure SGPCAPJackOnePacketFromDefaultDevice();
+procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
+procedure SGPCAPLogInternetDevices();
 
 implementation
 
@@ -48,6 +51,67 @@ uses
 	,JwaIpTypes
 	{$ENDIF}
 	;
+
+procedure SGPCAPLogInternetDevices();
+var
+	Error : TSGPCAPErrorString;
+	Devices : PPPcap_If = nil;
+	Device : PPcap_If = nil;
+	i : TSGMaxEnum;
+begin
+if not DllManager.Suppored('pcap') then
+	begin
+	SGHint(['Ќевозможно использовать библиотеку PCAP!']);
+	exit;
+	end;
+
+{Devices := GetMem(SizeOf(TSGPointer));
+Devices^ := GetMem(SizeOf(Devices^^) * 100);}
+if pcap_findalldevs(Devices, Error) = -1 then
+	begin
+	i := 0;
+	SGHint(['All PCAP internet devices=',Devices]);
+	Device := Devices^;
+	SGHint(['All PCAP internet devices:']);
+	while Device <> nil do
+		begin
+		SGHint(['    Device ',i,':']);
+		SGHint(['        Name : ', Device^.Name]);
+		SGHint(['        Description : ', Device^.description]);
+		SGHint(['        Flags : ', Device^.flags]);
+		Device := Device^.Next;
+		i += 1;
+		end;
+	end
+else
+	SGHint(['PCAP:pcap_findalldevs(..) : Returned error!']);
+end;
+
+procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
+var
+	Device : TSGPCAPDeviceName = nil;
+	IP, Mask : TSGUInt32;
+	Handle : TSGPCAPDeviceHandle = nil;
+begin
+Device := SGStringToPChar(DeviceName);
+Handle := SGPCAPInitializeDevice(Device, @IP, @Mask);
+if Handle <> nil then
+	pcap_close(Handle);
+end;
+
+procedure SGPCAPJackOnePacketFromDefaultDevice();
+var
+	Device : TSGPCAPDeviceName = nil;
+	IP, Mask : TSGUInt32;
+	Handle : TSGPCAPDeviceHandle = nil;
+begin
+Handle := SGPCAPInitializeDevice(Device, @IP, @Mask);
+if Handle = nil then
+	exit;
+//SGPCAPInitializeDeviceFilter(Handle, 'port 23', IP);
+SGPCAPJackOnePacket(Handle).Free();
+pcap_close(Handle);
+end;
 
 procedure TSGPCAPPacket.Free();
 begin
