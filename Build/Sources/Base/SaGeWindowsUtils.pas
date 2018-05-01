@@ -21,17 +21,108 @@ function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGLogInternetAdaptersInfo() : TSGMaxEnum;
 
 implementation
 
 uses
 	 Registry
-	,multimon
+	,MultiMon
 	,StrMan
+	
+	// Internet tools
+	,JwaIpHlpApi
+	,JwaIpTypes
 	
 	,SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+function SGLogInternetAdaptersInfo() : TSGMaxEnum;
+type
+	TAddress = array [0..MAX_ADAPTER_ADDRESS_LENGTH - 1] of TSGUInt8;
+
+function AddressToString(const Address : TAddress; const AddressLength : TSGUInt32) : TSGString;
+var
+	i : TSGMaxEnum;
+begin
+Result := '';
+for i := 0 to AddressLength - 1 do
+	begin
+	Result += SGStr(Address[i]);
+	if i <> AddressLength - 1 then
+		Result += ' ';
+	end;
+end;
+
+function IPAddressToString(const Address : IP_ADDR_STRING) : TSGString;
+begin
+Result := '';
+Result += 'IP=';
+Result += Address.IpAddress.S;
+Result += ', Mask=';
+Result += Address.IpMask.S;
+Result += ', Context=';
+Result += SGStr(Address.Context);
+end;
+
+procedure LogCurrentIPAddresses(const AdapterInfo : IP_ADAPTER_INFO);
+var
+	Address : PIP_ADDR_STRING = nil;
+	Index : TSGMaxEnum;
+begin
+Address := AdapterInfo.CurrentIpAddress;
+Index := 0;
+if Address = nil then
+	begin
+	SGLog.Source(['        CurrentIpAddress(es): nil']);
+	exit;
+	end
+else
+	SGLog.Source(['        CurrentIpAddress(es):']);
+while Address <> nil do
+	begin
+	SGLog.Source(['            Address ', Index, ': ', IPAddressToString(Address^), '.']);
+	Index += 1;
+	Address := Address^.Next;
+	end;
+end;
+
+var
+	BufferLength : TSGUInt32 = 0;
+	AdaptersInfo : PIP_ADAPTER_INFO = nil;
+	AdapterInfo : PIP_ADAPTER_INFO = nil;
+begin
+Result := 0;
+GetAdaptersInfo(nil, BufferLength);
+if BufferLength = 0 then
+	exit;
+AdaptersInfo := GetMem(BufferLength);
+if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
+	begin
+	AdapterInfo := AdaptersInfo;
+	SGLog.Source('Internet adapters:');
+	while AdapterInfo <> nil do
+		begin
+		SGLog.Source(['    Name:"', AdapterInfo^.AdapterName, '", Description:"', AdapterInfo^.Description, '".']);
+		SGLog.Source(['        Address:       ', AddressToString(AdapterInfo^.Address, AdapterInfo^.AddressLength)]);
+		SGLog.Source(['        Index:         ', AdapterInfo^.Index]);
+		SGLog.Source(['        Type:          ', AdapterInfo^.Type_]);
+		SGLog.Source(['        DhcpEnabled:   ', AdapterInfo^.DhcpEnabled]);
+		LogCurrentIPAddresses(AdapterInfo^);
+		SGLog.Source(['        IpAddressList: ', IPAddressToString(AdapterInfo^.IpAddressList)]);
+		SGLog.Source(['        GatewayList:   ', IPAddressToString(AdapterInfo^.GatewayList)]);
+		SGLog.Source(['        DhcpServer:    ', IPAddressToString(AdapterInfo^.DhcpServer)]);
+		SGLog.Source(['        HaveWins:      ', AdapterInfo^.HaveWins]);
+		SGLog.Source(['        PrimaryWinsServer:   ', IPAddressToString(AdapterInfo^.PrimaryWinsServer)]);
+		SGLog.Source(['        SecondaryWinsServer: ', IPAddressToString(AdapterInfo^.SecondaryWinsServer)]);
+		
+		Result += 1;
+		AdapterInfo := AdapterInfo^.Next;
+		end;
+	end;
+FreeMem(AdaptersInfo);
+end;
 
 procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var

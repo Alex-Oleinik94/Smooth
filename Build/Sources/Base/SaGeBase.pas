@@ -48,13 +48,21 @@ type
 	PSGWord     = ^ TSGWord;
 type
 	TSGUInt8   = TSGByte;
+	PSGUInt8   = ^TSGUInt8;
 	TSGInt8    = TSGShortInt;
+	PSGInt8   = ^TSGInt8;
 	TSGUInt16  = TSGWord;
+	PSGUInt16   = ^TSGUInt16;
 	TSGInt16   = TSGSmallInt;
+	PSGInt16   = ^TSGInt16;
 	TSGUInt32  = TSGLongWord;
+	PSGUInt32   = ^TSGUInt32;
 	TSGInt32   = TSGLongInt;
+	PSGInt32   = ^TSGInt32;
 	TSGUInt64  = TSGQuadWord;
+	PSGUInt64   = ^TSGUInt64;
 	// TSGInt64 allready defined
+	// PSGInt64 allready defined
 type
 	TSGFloat32 = TSGFloat;
 	PSGFloat32 = ^ TSGFloat32;
