@@ -23,6 +23,7 @@ function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogInternetAdaptersInfo() : TSGMaxEnum;
 function SGInternetAdapterNames() : TSGStringList;
+function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 
 implementation
 
@@ -38,6 +39,34 @@ uses
 	,SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
+var
+	BufferLength : TSGUInt32 = 0;
+	AdaptersInfo : PIP_ADAPTER_INFO = nil;
+	AdapterInfo : PIP_ADAPTER_INFO = nil;
+begin
+Result := '';
+GetAdaptersInfo(nil, BufferLength);
+if BufferLength = 0 then
+	exit;
+
+AdaptersInfo := GetMem(BufferLength);
+if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
+	begin
+	AdapterInfo := AdaptersInfo;
+	while AdapterInfo <> nil do
+		begin
+		if AdapterInfo^.AdapterName = AdapterName then
+			begin
+			Result := AdapterInfo^.Description;
+			break;
+			end;
+		AdapterInfo := AdapterInfo^.Next;
+		end;
+	end;
+FreeMem(AdaptersInfo);
+end;
 
 function SGInternetAdapterNames() : TSGStringList;
 var

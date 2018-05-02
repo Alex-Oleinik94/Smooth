@@ -1,4 +1,5 @@
 {$INCLUDE SaGe.inc}
+{$DEFINE PCAP_TEST}
 
 unit SaGePcapUtils;
 
@@ -43,6 +44,10 @@ procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
 function SGPCAPLogInternetDevices() : TSGMaxEnum;
 function SGPCAPInternetAdapterNames() : TSGStringList;
 function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
+function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPCAPInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
+function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPCAPTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
 
 implementation
 
@@ -50,7 +55,33 @@ uses
 	 SaGeLog
 	,SaGeDllManager
 	,SaGeStringUtils
+	{$IFDEF MSWINDOWS}
+		,SaGeWindowsUtils
+		{$ENDIF}
 	;
+
+function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
+begin
+Result := '';
+{$IFDEF MSWINDOWS}
+Result := SGInternetAdapterDescriptionFromName(
+	SGPCAPInternetAdapterSystemName(AdapterName));
+{$ENDIF}
+end;
+
+function SGPCAPInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
+{$IFDEF MSWINDOWS}
+const
+	WindowsStringBegin = '\Device\NPF_';
+{$ENDIF}
+begin
+Result := AdapterName;
+{$IFDEF MSWINDOWS}
+if SGExistsFirstPartString(AdapterName, WindowsStringBegin) and 
+	(Length(WindowsStringBegin) + 1 <= Length(AdapterName)) then
+	Result := SGStringGetPart(AdapterName, Length(WindowsStringBegin) + 1, Length(AdapterName));
+{$ENDIF}
+end;
 
 function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 var
@@ -59,6 +90,7 @@ var
 	FirstDevice : PPcap_If = nil;
 	ReturnedValue : TSGInt32 = 0;
 	Index : TSGMaxEnum = 0;
+	SystemDescription : TSGString = '';
 begin
 Result := '';
 if AdapterName <> '' then
@@ -101,6 +133,10 @@ if AdapterName <> '' then
 	else
 		SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 	end;
+
+SystemDescription := SGPCAPInternetAdapterSystemDescriptionFromName(AdapterName);
+if Length(Result) < Length(SystemDescription) then
+	Result := SystemDescription;
 end;
 
 function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
@@ -290,7 +326,9 @@ function SGPCAPJackOnePacket(const DeviceHandle : PPcap) : TSGPCAPPacket;
 begin
 Result.ZeroMemory();
 Result.Data := PSGByte(pcap_next(DeviceHandle, @Result.Header));
+{$IFDEF PCAP_TEST}
 SGHint(['Перехвачен пакет с длинной "', Result.Header.Len, '", Packet = "', TSGPointer(Result.Data), '".']);
+{$ENDIF}
 end;
 
 function SGPCAPErrorString(const Error : TSGPCAPErrorString; const WithComma : TSGBoolean = False) : TSGString;
@@ -314,7 +352,9 @@ FillChar(Result, SizeOf(Result), 0);
 
 if not DllManager.Suppored('pcap') then
 	begin
+	{$IFDEF PCAP_TEST}
 	SGHint(['Невозможно использовать библиотеку PCAP!']);
+	{$ENDIF}
 	exit;
 	end;
 
@@ -323,11 +363,17 @@ if Device = nil then
 	Device := pcap_lookupdev(@Error);
 	if Device = nil then
 		begin
+		{$IFDEF PCAP_TEST}
 		SGHint(['Невозможно найти устройство по-умолчанию!', SGPCAPErrorString(Error)]);
+		{$ENDIF}
 		exit;
 		end
 	else
+		begin
+		{$IFDEF PCAP_TEST}
 		SGHint(['Устройство по-умолчанию найдено! DeviceName = "', Device, '"']);
+		{$ENDIF}
+		end;
 	end;
 
 Description := SGPCAPInternetAdapterDescriptionFromName(SGPCharToString(Device));
@@ -337,29 +383,73 @@ if Description = '' then
 if (P_NET <> nil) or (P_Mask <> nil) then
 	if (pcap_lookupnet(Device, P_NET, P_Mask, Error) = -1) then
 		begin
+		{$IFDEF PCAP_TEST}
 		SGHint(['Невозможно узнать маску для устройства "', Description, '"!']);
 		if P_NET <> nil then
 			P_NET^ := 0;
 		if P_Mask <> nil then
 			P_Mask^ := 0;
+		{$ENDIF}
 		end
 	else
 		begin
+		{$IFDEF PCAP_TEST}
 		SGHint(['Данные устройства "', Description, '":']);
 		if (P_NET <> nil) then
 			SGHint(['    NET = ', SGPCAPAddressToString(P_NET^)]);
 		if (P_Mask <> nil) then
 			SGHint(['    Маска = ', SGPCAPAddressToString(P_Mask^)]);
+		{$ENDIF}
 		end;
 
 Result := pcap_open_live(Device, BUFSIZ, 1, 1000, Error);
 if Result = nil then
 	begin
+	{$IFDEF PCAP_TEST}
 	SGHint(['Невозможно открыть устройство "', Description, '"', SGPCAPErrorString(Error, True), '!']);
+	{$ENDIF}
 	exit;
 	end
 else
+	begin
+	{$IFDEF PCAP_TEST}
 	SGHint(['Устройство "', Description, '" открыто.']);
+	{$ENDIF}
+	end;
+end;
+
+function SGPCAPTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
+var
+	Error : TSGPCAPErrorString;
+	Net, Mask : TSGPCAPAddress;
+	Device : TSGPCAPDevice;
+begin
+Result := False;
+if not DllManager.Suppored('pcap') then
+	begin
+	{$IFDEF PCAP_TEST}
+	SGHint(['Невозможно использовать библиотеку PCAP!']);
+	{$ENDIF}
+	exit;
+	end;
+if pcap_lookupnet = nil then
+	begin
+	{$IFDEF PCAP_TEST}
+	SGHint(['Невозможно использовать функцию PCAP.pcap_lookupnet(..)!']);
+	{$ENDIF}
+	exit;
+	end;
+
+Device := SGStringToPChar(AdapterName);
+if (pcap_lookupnet(Device, @Net, @Mask, Error) <> -1) then
+	Result := (Net <> 0) and (Mask <> 0)
+else
+	begin
+	{$IFDEF PCAP_TEST}
+	SGHint(['PCAP.pcap_lookupnet(..) : Error "', Error, '"!']);
+	{$ENDIF}
+	end;
+FreeMem(Device);
 end;
 
 function SGPCAPInitializeDeviceFilter(const DeviceHandle : PPcap; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : PBPF_Program;
@@ -369,12 +459,16 @@ if DeviceHandle = nil then
 
 if (pcap_compile(DeviceHandle, @Result, FilterString, 0, IP) = -1) then
 	begin
+	{$IFDEF PCAP_TEST}
 	SGHint(['Couldn''t parse filter "', FilterString, '", Error: "', pcap_geterr(DeviceHandle), '"!']);
+	{$ENDIF}
 	exit;
 	end;
 if (pcap_setfilter(DeviceHandle, @Result) = -1) then
 	begin
+	{$IFDEF PCAP_TEST}
 	SGHint(['Couldn''t install filter "', FilterString, '", Error: "', pcap_geterr(DeviceHandle), '"!']);
+	{$ENDIF}
 	exit;
 	end;
 end;

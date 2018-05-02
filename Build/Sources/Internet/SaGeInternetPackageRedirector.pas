@@ -56,9 +56,14 @@ for i := 0 to High(DeviceNames) do
 	with Devices[i] do
 		begin
 		Device := SGStringToPChar(DeviceNames[i]);
-		Handle := SGPCAPInitializeDevice(Device, @Net, @Mask);
-		WriteLn();
+		if SGPCAPTestDeviceNetMask(Device) then
+			begin
+			Handle := SGPCAPInitializeDevice(Device, @Net, @Mask);
+			pcap_close(Handle);
+			end;
+		FreeMem(Device);
 		end;
+SetLength(Devices, 0);
 
 //SGPCAPInitializeDeviceFilter(Handle, 'port 23', IP);
 
