@@ -517,6 +517,8 @@ var pcap_setmintocopy : function( p : PPcap ; size : Longint ) : Longint ; cdecl
 var pcap_get_selectable_fd : function( para1 : PPcap ) : Longint ; cdecl ; 
 
 {$endif}
+
+
 implementation
 
 uses 

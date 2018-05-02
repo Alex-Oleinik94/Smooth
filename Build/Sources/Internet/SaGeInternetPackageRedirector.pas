@@ -1,5 +1,6 @@
 {$INCLUDE SaGe.inc}
 
+//listener
 unit SaGeInternetPackageRedirector;
 
 interface
@@ -43,8 +44,9 @@ var
 	DeviceNames : TSGStringList = nil;
 	i : TSGMaxEnum;
 begin
-SGPCAPLogInternetDevices();
-DeviceNames := SGInternetAdapterNames();
+//SGPCAPLogInternetDevices();
+//SGLogInternetAdaptersInfo();
+DeviceNames := SGPCAPInternetAdapterNames();
 if (DeviceNames = nil) or (Length(DeviceNames) = 0) then
 	exit;
 

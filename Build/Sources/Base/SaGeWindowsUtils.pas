@@ -53,7 +53,6 @@ AdaptersInfo := GetMem(BufferLength);
 if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
 	begin
 	AdapterInfo := AdaptersInfo;
-	SGLog.Source('Internet adapters:');
 	while AdapterInfo <> nil do
 		begin
 		Result += AdapterInfo^.AdapterName;
@@ -113,6 +112,24 @@ while Address <> nil do
 	end;
 end;
 
+function TypeToString(const TheType : TSGUInt32) : TSGString;
+var
+	TextType : TSGString = '';
+begin
+Result := SGStr(TheType);
+case TheType of
+1  : TextType := 'MIB_IF_TYPE_OTHER';
+6  : TextType := 'MIB_IF_TYPE_ETHERNET';
+9  : TextType := 'IF_TYPE_ISO88025_TOKENRING';
+23 : TextType := 'MIB_IF_TYPE_PPP';
+24 : TextType := 'MIB_IF_TYPE_LOOPBACK';
+28 : TextType := 'MIB_IF_TYPE_SLIP';
+71 : TextType := 'IF_TYPE_IEEE80211';
+end;
+if TextType <> '' then
+	Result += ' is ' + TextType;
+end;
+
 var
 	BufferLength : TSGUInt32 = 0;
 	AdaptersInfo : PIP_ADAPTER_INFO = nil;
@@ -129,10 +146,12 @@ if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
 	SGLog.Source('Internet adapters:');
 	while AdapterInfo <> nil do
 		begin
-		SGLog.Source(['    Name:"', AdapterInfo^.AdapterName, '", Description:"', AdapterInfo^.Description, '".']);
+		SGLog.Source(['    Device ',Result,':']);
+		SGLog.Source(['        Name:          ', AdapterInfo^.AdapterName]);
+		SGLog.Source(['        Description:   ', AdapterInfo^.Description]);
 		SGLog.Source(['        Address:       ', AddressToString(AdapterInfo^.Address, AdapterInfo^.AddressLength)]);
 		SGLog.Source(['        Index:         ', AdapterInfo^.Index]);
-		SGLog.Source(['        Type:          ', AdapterInfo^.Type_]);
+		SGLog.Source(['        Type:          ', TypeToString(AdapterInfo^.Type_)]);
 		SGLog.Source(['        DhcpEnabled:   ', AdapterInfo^.DhcpEnabled]);
 		LogCurrentIPAddresses(AdapterInfo^);
 		SGLog.Source(['        IpAddressList: ', IPAddressToString(AdapterInfo^.IpAddressList)]);

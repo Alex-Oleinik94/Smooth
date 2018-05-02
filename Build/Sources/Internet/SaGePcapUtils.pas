@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	
 	,Pcap
+	,Sockets
 	;
 
 const
@@ -20,6 +21,9 @@ type
 	TSGPCAPDeviceName = TSGPCAPString;
 	TSGPCAPDeviceHandle = PPcap;
 	TSGPCAPDeviceFilter = PBPF_Program;
+	TSGPCAPAddress = TSGUInt32;
+	TSGPCAPIPAddress = TSGPCAPAddress;
+	TSGPCAPMask = TSGPCAPAddress;
 	
 	TSGPCAPPacket = object
 			public
@@ -36,7 +40,9 @@ function SGPCAPErrorString(const Error : TSGPCAPErrorString; const WithComma : T
 function SGPCAPJackOnePacket(const DeviceHandle : TSGPCAPDeviceHandle) : TSGPCAPPacket;
 procedure SGPCAPJackOnePacketFromDefaultDevice();
 procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
-procedure SGPCAPLogInternetDevices();
+function SGPCAPLogInternetDevices() : TSGMaxEnum;
+function SGPCAPInternetAdapterNames() : TSGStringList;
+function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
 
 implementation
 
@@ -44,47 +50,203 @@ uses
 	 SaGeLog
 	,SaGeDllManager
 	,SaGeStringUtils
-	
-	{$IFDEF WINDOWS}
-	,Windows
-	,JwaIpHlpApi
-	,JwaIpTypes
-	{$ENDIF}
 	;
 
-procedure SGPCAPLogInternetDevices();
+function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 var
 	Error : TSGPCAPErrorString;
-	Devices : PPPcap_If = nil;
 	Device : PPcap_If = nil;
-	i : TSGMaxEnum;
+	FirstDevice : PPcap_If = nil;
+	ReturnedValue : TSGInt32 = 0;
+	Index : TSGMaxEnum = 0;
 begin
+Result := '';
+if AdapterName <> '' then
+	begin
+	if not DllManager.Suppored('pcap') then
+		begin
+		SGLog.Source(['Невозможно использовать библиотеку PCAP!']);
+		exit;
+		end;
+	if pcap_findalldevs = nil then
+		begin
+		SGLog.Source(['Невозможно использовать функцию PCAP.pcap_findalldevs(..)!']);
+		exit;
+		end;
+	Error := '';
+	
+	ReturnedValue := pcap_findalldevs(@Device, Error);
+	if ReturnedValue <> -1 then
+		begin
+		FirstDevice := Device;
+		while Device <> nil do
+			begin
+			if Device^.Name = AdapterName then
+				begin
+				Result := Device^.description;
+				break;
+				end;
+			
+			Device := Device^.Next;
+			Index += 1;
+			end;
+		{if FirstDevice <> nil then
+			FreeMem(FirstDevice);}
+		
+		{$IFDEF MSWINDOWS}
+		if (AdapterName = '\') and (Result = '') then
+			Result := 'Default';
+		{$ENDIF}
+		end
+	else
+		SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
+	end;
+end;
+
+function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
+begin
+Result := 
+	SGStr(PSGByte(@Address)[0]) + '.' +
+	SGStr(PSGByte(@Address)[1]) + '.' +
+	SGStr(PSGByte(@Address)[2]) + '.' +
+	SGStr(PSGByte(@Address)[3]) ;
+end;
+
+function SGPCAPInternetAdapterNames() : TSGStringList;
+var
+	Error : TSGPCAPErrorString;
+	Device : PPcap_If = nil;
+	FirstDevice : PPcap_If = nil;
+	ReturnedValue : TSGInt32 = 0;
+	Index : TSGMaxEnum = 0;
+begin
+Result := nil;
 if not DllManager.Suppored('pcap') then
 	begin
-	SGHint(['Невозможно использовать библиотеку PCAP!']);
+	SGLog.Source(['Невозможно использовать библиотеку PCAP!']);
 	exit;
 	end;
-
-{Devices := GetMem(SizeOf(TSGPointer));
-Devices^ := GetMem(SizeOf(Devices^^) * 100);}
-if pcap_findalldevs(Devices, Error) = -1 then
+if pcap_findalldevs = nil then
 	begin
-	i := 0;
-	SGHint(['All PCAP internet devices=',Devices]);
-	Device := Devices^;
-	SGHint(['All PCAP internet devices:']);
+	SGLog.Source(['Невозможно использовать функцию PCAP.pcap_findalldevs(..)!']);
+	exit;
+	end;
+Error := '';
+
+ReturnedValue := pcap_findalldevs(@Device, Error);
+if ReturnedValue <> -1 then
+	begin
+	FirstDevice := Device;
 	while Device <> nil do
 		begin
-		SGHint(['    Device ',i,':']);
-		SGHint(['        Name : ', Device^.Name]);
-		SGHint(['        Description : ', Device^.description]);
-		SGHint(['        Flags : ', Device^.flags]);
+		Result += Device^.Name;
 		Device := Device^.Next;
-		i += 1;
+		Index += 1;
 		end;
+	{if FirstDevice <> nil then
+		FreeMem(FirstDevice);}
 	end
 else
-	SGHint(['PCAP:pcap_findalldevs(..) : Returned error!']);
+	SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
+end;
+
+function SGPCAPLogInternetDevices() : TSGMaxEnum;
+
+function LogAddresses(const Addresses : PPcap_Addr = nil) : TSGMaxEnum;
+
+procedure LogSocketAddress(const Name : TSGString; const SocketAddress :  PSockAddr);
+type
+	TDataList14 = array [0..13] of TSGUInt8;
+
+function DataToString(const Data : TDataList14) : TSGString;
+var
+	Index : TSGMaxEnum;
+begin
+Result := '';
+for Index := 0 to 13 do
+	begin
+	Result += SGStr(Data[Index]);
+	if Index <> 13 then
+		Result += ' ';
+	end;
+end;
+
+begin
+if SocketAddress = nil then
+	SGLog.Source(['            ', Name, ' : nil'])
+else
+	begin
+	SGLog.Source(['            ', Name, ' : ']);
+	SGLog.Source(['                Address family : ', SocketAddress^.sa_family]);
+	SGLog.Source(['                Addres data    : ', DataToString(SocketAddress^.sa_data)]);
+	end;
+end;
+
+var
+	Address : PPcap_Addr = nil;
+begin
+Result := 0;
+if Addresses = nil then
+	begin
+	SGLog.Source(['        Addresses : nil']);
+	end
+else
+	begin
+	Address := Addresses;
+	while Address <> nil do
+		begin
+		SGLog.Source(['        Address ', Result, ':']);
+		LogSocketAddress('addr', Address^.addr);
+		LogSocketAddress('netmask', Address^.netmask);
+		LogSocketAddress('broadaddr', Address^.broadaddr);
+		LogSocketAddress('dstaddr', Address^.dstaddr);
+		
+		Result += 1;
+		Address := Address^.Next;
+		end;
+	end;
+end;
+
+var
+	Error : TSGPCAPErrorString;
+	Device : PPcap_If = nil;
+	FirstDevice : PPcap_If = nil;
+	ReturnedValue : TSGInt32 = 0;
+begin
+Result := 0;
+if not DllManager.Suppored('pcap') then
+	begin
+	SGLog.Source(['Невозможно использовать библиотеку PCAP!']);
+	exit;
+	end;
+if pcap_findalldevs = nil then
+	begin
+	SGLog.Source(['Невозможно использовать функцию PCAP.pcap_findalldevs(..)!']);
+	exit;
+	end;
+Error := '';
+
+ReturnedValue := pcap_findalldevs(@Device, Error);
+if ReturnedValue <> -1 then
+	begin
+	SGLog.Source(['All PCAP internet devices:']);
+	FirstDevice := Device;
+	while Device <> nil do
+		begin
+		SGLog.Source(['    Device ', Result, ':']);
+		SGLog.Source(['        Name : ', Device^.Name]);
+		SGLog.Source(['        Description : ', Device^.description]);
+		SGLog.Source(['        Flags : ', Device^.flags]);
+		LogAddresses(Device^.addresses);
+		
+		Device := Device^.Next;
+		Result += 1;
+		end;
+	{if FirstDevice <> nil then
+		FreeMem(FirstDevice);}
+	end
+else
+	SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 end;
 
 procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
@@ -146,6 +308,7 @@ end;
 function SGPCAPInitializeDevice(Device : TSGPCAPDevice; const P_NET : PSGUInt32 = nil; const P_Mask : PSGUInt32 = nil) : PPcap;
 var
 	Error : TSGPCAPErrorString;
+	Description : TSGString;
 begin
 FillChar(Result, SizeOf(Result), 0);
 
@@ -164,13 +327,17 @@ if Device = nil then
 		exit;
 		end
 	else
-		SGHint(['Устройство по-умолчанию найдено! Device = "', Device, '"']);
+		SGHint(['Устройство по-умолчанию найдено! DeviceName = "', Device, '"']);
 	end;
+
+Description := SGPCAPInternetAdapterDescriptionFromName(SGPCharToString(Device));
+if Description = '' then
+	Description := SGPCharToString(Device);
 
 if (P_NET <> nil) or (P_Mask <> nil) then
 	if (pcap_lookupnet(Device, P_NET, P_Mask, Error) = -1) then
 		begin
-		SGHint(['Невозможно узнать маску для устройства "', Device, '"!']);
+		SGHint(['Невозможно узнать маску для устройства "', Description, '"!']);
 		if P_NET <> nil then
 			P_NET^ := 0;
 		if P_Mask <> nil then
@@ -178,22 +345,21 @@ if (P_NET <> nil) or (P_Mask <> nil) then
 		end
 	else
 		begin
-		if (P_NET <> nil) and (P_Mask <> nil) then
-			SGHint(['Данные устройства "', Device, '": NET = ', P_NET^, ', Маска = ', P_Mask^, '.'])
-		else if (P_NET <> nil) then
-			SGHint(['Данные устройства "', Device, '": NET = ', P_NET^, '.'])
-		else if (P_Mask <> nil) then
-			SGHint(['Данные устройства "', Device, '": Маска = ', P_Mask^, '.']);
+		SGHint(['Данные устройства "', Description, '":']);
+		if (P_NET <> nil) then
+			SGHint(['    NET = ', SGPCAPAddressToString(P_NET^)]);
+		if (P_Mask <> nil) then
+			SGHint(['    Маска = ', SGPCAPAddressToString(P_Mask^)]);
 		end;
 
 Result := pcap_open_live(Device, BUFSIZ, 1, 1000, Error);
 if Result = nil then
 	begin
-	SGHint(['Невозможно открыть устройство "', Device, '"', SGPCAPErrorString(Error, True), '!']);
+	SGHint(['Невозможно открыть устройство "', Description, '"', SGPCAPErrorString(Error, True), '!']);
 	exit;
 	end
 else
-	SGHint(['Устройство "', Device, '" открыто.']);
+	SGHint(['Устройство "', Description, '" открыто.']);
 end;
 
 function SGPCAPInitializeDeviceFilter(const DeviceHandle : PPcap; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : PBPF_Program;
