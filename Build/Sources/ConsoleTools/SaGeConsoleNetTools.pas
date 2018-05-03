@@ -12,7 +12,7 @@ uses
 procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleInternetPackageRedirector(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketListener(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -25,12 +25,12 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeConsoleUtils
-	,SaGeInternetPackageRedirector
+	,SaGeInternetPacketListener
 	;
 
-procedure SGConsoleInternetPackageRedirector(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketListener(const VParams : TSGConcoleCallerParams = nil);
 begin
-SGInternetPackageRedirector();
+SGInternetPacketListener();
 end;
 
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);

@@ -149,7 +149,7 @@ NetConsoleCaller := TSGConsoleCaller.Create(nil);
 NetConsoleCaller.Category('Internet tools');
 NetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
 NetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
-NetConsoleCaller.AddComand(@SGConsoleInternetPackageRedirector, ['ipr'], 'Internet Package Redirector');
+NetConsoleCaller.AddComand(@SGConsoleInternetPacketListener, ['ipl'], 'Internet Packet Listener');
 end;
 
 //============================

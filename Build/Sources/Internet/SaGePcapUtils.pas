@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-{$DEFINE PCAP_TEST}
+//{$DEFINE PCAP_TEST}
 
 unit SaGePcapUtils;
 
@@ -14,7 +14,7 @@ uses
 	;
 
 const
-	BUFSIZ = 8192;
+	MAX_BUFFER_SIZE = 2000000000; //8192
 type
 	TSGPCAPErrorString = array[0..PCAP_ERRBUF_SIZE-1] of TSGChar;
 	TSGPCAPString = PSGChar;
@@ -25,11 +25,22 @@ type
 	TSGPCAPAddress = TSGUInt32;
 	TSGPCAPIPAddress = TSGPCAPAddress;
 	TSGPCAPMask = TSGPCAPAddress;
+	TSGPCAPCallBack = TPcapHandler;
+	TSGPCAPHandler = TSGPCAPCallBack;
+	PSGPCAPPacket = PPcap_Pkthdr;
 	
 	TSGPCAPPacket = object
 			public
 		Header : TPcap_Pkthdr;
 		Data : PSGByte;
+			public
+		procedure Free();
+		procedure ZeroMemory();
+		end;
+	
+	TSGPCAPDevicePacket = object(TSGPCAPPacket)
+			public
+		Device : TSGString;
 			public
 		procedure Free();
 		procedure ZeroMemory();
@@ -48,6 +59,8 @@ function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString)
 function SGPCAPInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
 function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
 function SGPCAPTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
+function SGPCAPEndlessLoop(const Handle : TSGPCAPDeviceHandle; const Handler : TSGPCAPHandler; const UserData : TSGPointer = nil) : TSGInt32;
+procedure SGPCAPClose(const Handle : TSGPCAPDeviceHandle);
 
 implementation
 
@@ -59,6 +72,26 @@ uses
 		,SaGeWindowsUtils
 		{$ENDIF}
 	;
+
+procedure SGPCAPClose(const Handle : TSGPCAPDeviceHandle);
+begin
+pcap_close(Handle);
+end;
+
+function SGPCAPEndlessLoop(const Handle : TSGPCAPDeviceHandle; const Handler : TSGPCAPHandler; const UserData : TSGPointer = nil) : TSGInt32;
+begin
+Result := 0;
+if not DllManager.Suppored('pcap') then
+	begin
+	SGLog.Source(['Невозможно использовать библиотеку PCAP!']);
+	exit;
+	end;
+Result := pcap_loop ( // Возвращает количество считаных пакетов, -1 если ошибка
+	Handle,    // Устройство
+	-1,        // Количество пакетов, прослушаных до возврата функции
+	Handler,   // Функция обратного вызова
+	UserData); // Пользовательские данные
+end;
 
 function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
 begin
@@ -311,6 +344,18 @@ SGPCAPJackOnePacket(Handle).Free();
 pcap_close(Handle);
 end;
 
+procedure TSGPCAPDevicePacket.Free();
+begin
+FreeMem(Data);
+ZeroMemory();
+end;
+
+procedure TSGPCAPDevicePacket.ZeroMemory();
+begin
+FillChar(Self, SizeOf(TSGPCAPPacket), 0);
+Device := '';
+end;
+
 procedure TSGPCAPPacket.Free();
 begin
 FreeMem(Data);
@@ -319,7 +364,7 @@ end;
 
 procedure TSGPCAPPacket.ZeroMemory();
 begin
-FillChar(Self, SizeOf(Self), 0);
+FillChar(Self, SizeOf(TSGPCAPPacket), 0);
 end;
 
 function SGPCAPJackOnePacket(const DeviceHandle : PPcap) : TSGPCAPPacket;
@@ -402,7 +447,12 @@ if (P_NET <> nil) or (P_Mask <> nil) then
 		{$ENDIF}
 		end;
 
-Result := pcap_open_live(Device, BUFSIZ, 1, 1000, Error);
+Result := pcap_open_live(
+	Device, // Имя устройства
+	MAX_BUFFER_SIZE, // Максимальное количество байтов, которое будет записано
+	0,      // TRUE - беспорядочный режим работы устройства
+	2,      // Таймаут
+	Error);
 if Result = nil then
 	begin
 	{$IFDEF PCAP_TEST}

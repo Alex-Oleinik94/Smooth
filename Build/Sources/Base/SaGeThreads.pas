@@ -57,6 +57,16 @@ uses
 	function pthread_join(thread:pthread_t; a:pointer):LongInt;cdecl;external 'libc.so';
 	{$ENDIF}
 type
+	TSGCriticalSection = class (TSGNamed)
+			public
+		constructor Create(); override;
+		destructor Destroy(); override;
+		procedure Enter(); virtual;
+		procedure Leave(); virtual;
+			private
+		FCriticalSection : TRTLCriticalSection;
+		end;
+	
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
 
@@ -89,8 +99,8 @@ type
 	
 	TSGThread = class(TSGNamed)
 			public
-		constructor Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
-		destructor Destroy();override;
+		constructor Create(const Proc : TSGThreadProcedure; const Para : TSGPointer = nil; const QuickStart : TSGBoolean = True);
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			public
 		FHandle    : TSGThreadHandle;
@@ -121,12 +131,42 @@ uses
 	,SaGeStringUtils
 	;
 
+// =========================
+// ===TSGCriticalSection====
+// =========================
+
+constructor TSGCriticalSection.Create();
+begin
+inherited;
+InitCriticalSection(FCriticalSection)
+end;
+
+destructor TSGCriticalSection.Destroy();
+begin
+DoneCriticalSection(FCriticalSection);
+inherited;
+end;
+
+procedure TSGCriticalSection.Enter();
+begin
+EnterCriticalSection(FCriticalSection);
+end;
+
+procedure TSGCriticalSection.Leave();
+begin
+LeaveCriticalSection(FCriticalSection);
+end;
+
+// =========================
+// ========TSGThread========
+// =========================
+
 class function TSGThread.ClassName() : TSGString;
 begin
 Result := 'TSGThread';
 end;
 
-constructor TSGThread.Create(const Proc:TSGThreadProcedure;const Para:Pointer = nil;const QuickStart:Boolean = True);
+constructor TSGThread.Create(const Proc : TSGThreadProcedure; const Para : TSGPointer = nil; const QuickStart : TSGBoolean = True);
 begin
 inherited Create;
 FFinished:=True;
@@ -235,21 +275,21 @@ end;
 procedure TSGThread.Start();
 begin
 {$IFDEF MSWINDOWS}
-	FHandle:=CreateThread(nil,0,@TSGThreadStart,Self,0,FThreadID);
+	FHandle := CreateThread(nil, 0, @TSGThreadStart, Self, 0, FThreadID);
 {$ELSE} {$IFDEF ANDROID}
 	SGLog.Source('Start thread');
 	pthread_mutex_init(@mutex, nil);
 	pthread_cond_init(@cond, nil);
 	pthread_attr_init(@attr);
-	pthread_attr_setdetachstate(@attr,PTHREAD_CREATE_DETACHED);
-	FThreadID:=pthread_create(@FHandle,@attr,TSGThreadFunction(@TSGThreadStart),Self);
+	pthread_attr_setdetachstate(@attr, PTHREAD_CREATE_DETACHED);
+	FThreadID := pthread_create(@FHandle, @attr, TSGThreadFunction(@TSGThreadStart), Self);
 	pthread_mutex_lock(@mutex);
 	while FFinished do
 		pthread_cond_wait(@cond, @mutex);
 	pthread_mutex_unlock(@mutex);
 	SGLog.Source('End start thread : FHandle = '+SGStr(LongWord(FHandle))+', FThreadID = '+SGStr(FThreadID)+', Self = '+SGStr(TSGLongWord(Self))+'.');
 {$ELSE}
-	FHandle := BeginThread(TSGThreadFunction(@TSGThreadStart),Self);
+	FHandle := BeginThread(TSGThreadFunction(@TSGThreadStart), Self);
 {$ENDIF} {$ENDIF}
 end;
 
