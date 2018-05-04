@@ -28,6 +28,8 @@ const
 	SGViewTypePrint : TSGViewType = [SGPrintType];
 	SGViewTypeLog   : TSGViewType = [SGLogType];
 	SGViewTypeNULL  : TSGViewType = [];
+const
+	SGLogExtension = 'log';
 var
 	SGLogEnable : TSGBoolean = 
 		{$IFDEF RELEASE}
@@ -63,7 +65,7 @@ procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
 procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGCreateLog(var Log : TSGLog; const LogFile : TSGString) : TSGBoolean;
-function SGLogDateTimePredString(const A : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
@@ -79,6 +81,7 @@ uses
 	
 	,StrMan
 	;
+
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := 
@@ -95,46 +98,16 @@ Result :=
 end;
 
 function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	DateTime  : TSGDateTime;
 begin
-DateTime.Get();
 Result := SGLogDirectory();
 SGMakeDirectory(Result);
-Result += DirectorySeparator +
-	'[' +
-		StringJustifyRight(SGStr(DateTime.Years), 4, '0') + '.' + 
-		StringJustifyRight(SGStr(DateTime.Month), 2, '0') + '.' +
-		StringJustifyRight(SGStr(DateTime.Day),   2, '0') +
-	']' +
-	'[' +
-		StringJustifyRight(SGStr(DateTime.Hours),   2, '0') + '.' + 
-		StringJustifyRight(SGStr(DateTime.Minutes), 2, '0') + '.' + 
-		StringJustifyRight(SGStr(DateTime.Seconds), 2, '0') + '.' + 
-		StringJustifyRight(SGStr(DateTime.Sec100),  2, '0') + 
-	']' + SGApplicationName + '.log';
+Result += DirectorySeparator + SGDateTimeString(True, False, True) + ' ' + SGApplicationName + '.' + SGLogExtension;
 Result := SGFreeFileName(Result, '');
 end;
 
-function SGLogDateTimePredString(const A : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	DateTime  : TSGDateTime;
+function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-DateTime.Get();
-Result := 
-	'[' +
-		StringJustifyRight(SGStr(DateTime.Day),   2, '0') + '.' + 
-		StringJustifyRight(SGStr(DateTime.Month), 2, '0') + '.' +
-		StringJustifyRight(SGStr(DateTime.Years), 4, '0') + '/' + 
-		SGStr(DateTime.Week) + 
-	']' +
-	'[' +
-		StringJustifyRight(SGStr(DateTime.Hours),   2, '0') + ':' + 
-		StringJustifyRight(SGStr(DateTime.Minutes), 2, '0') + ':' + 
-		StringJustifyRight(SGStr(DateTime.Seconds), 2, '0') + '/' + 
-		StringJustifyRight(SGStr(DateTime.Sec100),  2, '0') + 
-	']' + Iff(A, ' -->');
-	;
+Result := SGDateTimeString(ForFileSystem) + Iff(WithArrow, ' -->');
 end;
 
 procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -149,7 +122,7 @@ if SGFileExists(FileName) then
 	FFileStream.LoadFromFile(FileName);
 	FFileStream.Position := FFileStream.Size;
 	end;
-ss := SGLogDateTimePredString() + Line;
+ss := SGLogDateTimeString() + Line;
 pc := SGStringToPChar(ss + SGWinEoln);
 FFileStream.WriteBuffer(pc^, Length(ss) + 2);
 FreeMem(pc, Length(ss) + 3);
@@ -259,7 +232,11 @@ begin
 if Self <> nil then
 	if SGLogEnable and (FFileStream <> nil) then
 		begin
-		pc := SGStringToPChar(Iff(WithTime, SGLogDateTimePredString()) + SGStringDeleteEndOfLineDublicates(SGConvertString(S, SGEncodingWindows1251) + SGWinEoln));
+		pc := SGStringToPChar(
+			Iff(WithTime, SGLogDateTimeString()) + 
+			SGStringDeleteEndOfLineDublicates(
+				SGConvertString(S, SGEncodingWindows1251) + 
+				SGWinEoln));
 		FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
 		SGPCharFree(PC);
 		end;

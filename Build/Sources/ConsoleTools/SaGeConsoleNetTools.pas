@@ -12,7 +12,7 @@ uses
 procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleInternetPacketListener(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -25,12 +25,17 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeConsoleUtils
-	,SaGeInternetPacketListener
+	,SaGeInternetPacketDumper
 	;
 
-procedure SGConsoleInternetPacketListener(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
 begin
-SGInternetPacketListener();
+if SGCountConsoleParams(VParams) = 0 then
+	begin
+	SGInternetPacketDumper();
+	end
+else
+	SGHint('Params are not alowed here!');
 end;
 
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);

@@ -38,14 +38,48 @@ function SGSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString =
 function SGMiliSecondsToStringTime(VSeconds : TSGInt64; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime; const Encoding : TSGString = 'RUS1251') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGNow() : TSGDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGDateTimeString(const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGDateTimeString(const DateTime : TSGDateTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeBaseUtils
 	
 	,StrMan
 	;
+
+function SGDateTimeString(const DateTime : TSGDateTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+with DateTime do
+	begin
+	Result := '[';
+	Result += StringJustifyRight(SGStr(Years), 4, '0') + '.';
+	Result += StringJustifyRight(SGStr(Month), 2, '0') + '.';
+	Result += StringJustifyRight(SGStr(Day),   2, '0');
+	if AddWeek then
+		begin
+		Result += Iff(ForFileSystem, ',', '/');
+		Result += SGStr(Week);
+		end;
+	Result += '][';
+	Result += StringJustifyRight(SGStr(Hours),   2, '0') + Iff(ForFileSystem, '.', ':');
+	Result += StringJustifyRight(SGStr(Minutes), 2, '0') + Iff(ForFileSystem, '.', ':'); 
+	Result += StringJustifyRight(SGStr(Seconds), 2, '0');
+	if AddMiliSeconds then
+		begin
+		Result += Iff(ForFileSystem, ',', '/'); 
+		Result += StringJustifyRight(SGStr(Sec100),  2, '0');
+		end;
+	Result += ']';
+	end;
+end;
+
+function SGDateTimeString(const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := SGDateTimeString(SGNow(), ForFileSystem, AddWeek, AddMiliSeconds);
+end;
 
 function SGNow() : TSGDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

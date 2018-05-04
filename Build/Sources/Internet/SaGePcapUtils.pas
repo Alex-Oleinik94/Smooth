@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-//{$DEFINE PCAP_TEST}
+//{$DEFINE PCAP_HINT_TEST}
 
 unit SaGePcapUtils;
 
@@ -13,23 +13,32 @@ uses
 	,Sockets
 	;
 
-const
-	MAX_BUFFER_SIZE = 2000000000; //8192
 type
-	TSGPCAPErrorString = array[0..PCAP_ERRBUF_SIZE-1] of TSGChar;
-	TSGPCAPString = PSGChar;
-	TSGPCAPDevice = TSGPCAPString;
-	TSGPCAPDeviceName = TSGPCAPString;
-	TSGPCAPDeviceHandle = PPcap;
-	TSGPCAPDeviceFilter = PBPF_Program;
-	TSGPCAPAddress = TSGUInt32;
-	TSGPCAPIPAddress = TSGPCAPAddress;
-	TSGPCAPMask = TSGPCAPAddress;
-	TSGPCAPCallBack = TPcapHandler;
-	TSGPCAPHandler = TSGPCAPCallBack;
-	PSGPCAPPacket = PPcap_Pkthdr;
+	TPcap_PacketHeader = TPcap_Pkthdr;
+	PPcap_PacketHeader = PPcap_Pkthdr;
+type
+	TSGPcapString = PSGChar;
+const
+	SGPcapMaxBufferSize = 2000000000; //8192
+	SGPcapTimeOut  = 5;
+type
+	TSGPcapDevice = TSGPcapString;
+	TSGPcapDeviceName = TSGPcapString;
 	
-	TSGPCAPPacket = object
+	TSGPcapErrorString = array[0..PCAP_ERRBUF_SIZE-1] of TSGChar;
+	TSGPcapDeviceHandle = PPcap;
+	TSGPcapDeviceFilter = PBPF_Program;
+	TSGPcapCallBack = TPcapHandler;
+	PSGPcapPacketHeader = PPcap_PacketHeader;
+	TSGPcapPacketHeader = TPcap_PacketHeader;
+	
+	TSGPcapAddress = TSGUInt32;
+	TSGPcapIPAddress = TSGPcapAddress;
+	TSGPcapMask = TSGPcapAddress;
+	TSGPcapNet = TSGPcapAddress;
+	TSGPcapHandler = TSGPcapCallBack;
+	
+	TSGPcapPacket = object
 			public
 		Header : TPcap_Pkthdr;
 		Data : PSGByte;
@@ -38,29 +47,23 @@ type
 		procedure ZeroMemory();
 		end;
 	
-	TSGPCAPDevicePacket = object(TSGPCAPPacket)
-			public
-		Device : TSGString;
-			public
-		procedure Free();
-		procedure ZeroMemory();
-		end;
-
-function SGPCAPInitializeDevice(Device : TSGPCAPDevice; const P_NET : PSGUInt32 = nil; const P_Mask : PSGUInt32 = nil) : TSGPCAPDeviceHandle;
-function SGPCAPInitializeDeviceFilter(const DeviceHandle : TSGPCAPDeviceHandle; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : TSGPCAPDeviceFilter;
-function SGPCAPErrorString(const Error : TSGPCAPErrorString; const WithComma : TSGBoolean = False) : TSGString;
-function SGPCAPJackOnePacket(const DeviceHandle : TSGPCAPDeviceHandle) : TSGPCAPPacket;
-procedure SGPCAPJackOnePacketFromDefaultDevice();
-procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
-function SGPCAPLogInternetDevices() : TSGMaxEnum;
-function SGPCAPInternetAdapterNames() : TSGStringList;
-function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
-function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
-function SGPCAPInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
-function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
-function SGPCAPTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
-function SGPCAPEndlessLoop(const Handle : TSGPCAPDeviceHandle; const Handler : TSGPCAPHandler; const UserData : TSGPointer = nil) : TSGInt32;
-procedure SGPCAPClose(const Handle : TSGPCAPDeviceHandle);
+function SGPcapInitializeDevice(Device : TSGPcapDevice; const P_NET : PSGUInt32 = nil; const P_Mask : PSGUInt32 = nil) : TSGPcapDeviceHandle;
+function SGPcapInitializeDeviceFilter(const DeviceHandle : TSGPcapDeviceHandle; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : TSGPcapDeviceFilter;
+function SGPcapErrorString(const Error : TSGPcapErrorString; const WithComma : TSGBoolean = False) : TSGString;
+function SGPcapJackOnePacket(const DeviceHandle : TSGPcapDeviceHandle) : TSGPcapPacket;
+procedure SGPcapJackOnePacketFromDefaultDevice();
+procedure SGPcapTryOpenDevice(const DeviceName : TSGString);
+function SGPcapLogInternetDevices() : TSGMaxEnum;
+function SGPcapInternetAdapterNames() : TSGStringList;
+function SGPcapAddressToString(Address : TSGPcapAddress) : TSGString;
+function SGPcapInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterPcapDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
+function SGPcapTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
+function SGPcapEndlessLoop(const Handle : TSGPcapDeviceHandle; const Handler : TSGPcapHandler; const UserData : TSGPointer = nil) : TSGInt32;
+procedure SGPcapClose(const Handle : TSGPcapDeviceHandle);
+function SGPcapNext(const Handle : TSGPcapDeviceHandle; const Handler : TSGPcapHandler; const UserData : TSGPointer = nil) : TSGBoolean;
 
 implementation
 
@@ -73,12 +76,33 @@ uses
 		{$ENDIF}
 	;
 
-procedure SGPCAPClose(const Handle : TSGPCAPDeviceHandle);
+procedure SGPcapClose(const Handle : TSGPcapDeviceHandle);
 begin
 pcap_close(Handle);
 end;
 
-function SGPCAPEndlessLoop(const Handle : TSGPCAPDeviceHandle; const Handler : TSGPCAPHandler; const UserData : TSGPointer = nil) : TSGInt32;
+function SGPcapNext(const Handle : TSGPcapDeviceHandle; const Handler : TSGPcapHandler; const UserData : TSGPointer = nil) : TSGBoolean;
+var
+	Data : PChar;
+	Header : TSGPcapPacketHeader;
+begin
+Result := False;
+if not DllManager.Suppored('pcap') then
+	begin
+	SGLog.Source(['Невозможно использовать библиотеку PCAP!']);
+	exit;
+	end;
+Data := pcap_next(Handle, @Header);
+Result := Data <> nil;
+if Result then
+	begin
+	if Handler <> nil then
+		Handler(UserData, @Header, Data);
+	//FreeMem(Data);
+	end;
+end;
+
+function SGPcapEndlessLoop(const Handle : TSGPcapDeviceHandle; const Handler : TSGPcapHandler; const UserData : TSGPointer = nil) : TSGInt32;
 begin
 Result := 0;
 if not DllManager.Suppored('pcap') then
@@ -93,16 +117,16 @@ Result := pcap_loop ( // Возвращает количество считаных пакетов, -1 если ошибка
 	UserData); // Пользовательские данные
 end;
 
-function SGPCAPInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
 begin
 Result := '';
 {$IFDEF MSWINDOWS}
 Result := SGInternetAdapterDescriptionFromName(
-	SGPCAPInternetAdapterSystemName(AdapterName));
+	SGPcapInternetAdapterSystemName(AdapterName));
 {$ENDIF}
 end;
 
-function SGPCAPInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterSystemName(const AdapterName : TSGString) : TSGString;
 {$IFDEF MSWINDOWS}
 const
 	WindowsStringBegin = '\Device\NPF_';
@@ -116,14 +140,23 @@ if SGExistsFirstPartString(AdapterName, WindowsStringBegin) and
 {$ENDIF}
 end;
 
-function SGPCAPInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
+function SGPcapInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 var
-	Error : TSGPCAPErrorString;
+	SystemDescription : TSGString = '';
+begin
+Result := SGPcapInternetAdapterPcapDescriptionFromName(AdapterName);
+SystemDescription := SGPcapInternetAdapterSystemDescriptionFromName(AdapterName);
+if Length(Result) < Length(SystemDescription) then
+	Result := SystemDescription;
+end;
+
+function SGPcapInternetAdapterPcapDescriptionFromName(const AdapterName : TSGString) : TSGString;
+var
+	Error : TSGPcapErrorString;
 	Device : PPcap_If = nil;
 	FirstDevice : PPcap_If = nil;
 	ReturnedValue : TSGInt32 = 0;
 	Index : TSGMaxEnum = 0;
-	SystemDescription : TSGString = '';
 begin
 Result := '';
 if AdapterName <> '' then
@@ -166,13 +199,9 @@ if AdapterName <> '' then
 	else
 		SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 	end;
-
-SystemDescription := SGPCAPInternetAdapterSystemDescriptionFromName(AdapterName);
-if Length(Result) < Length(SystemDescription) then
-	Result := SystemDescription;
 end;
 
-function SGPCAPAddressToString(Address : TSGPCAPAddress) : TSGString;
+function SGPcapAddressToString(Address : TSGPcapAddress) : TSGString;
 begin
 Result := 
 	SGStr(PSGByte(@Address)[0]) + '.' +
@@ -181,9 +210,9 @@ Result :=
 	SGStr(PSGByte(@Address)[3]) ;
 end;
 
-function SGPCAPInternetAdapterNames() : TSGStringList;
+function SGPcapInternetAdapterNames() : TSGStringList;
 var
-	Error : TSGPCAPErrorString;
+	Error : TSGPcapErrorString;
 	Device : PPcap_If = nil;
 	FirstDevice : PPcap_If = nil;
 	ReturnedValue : TSGInt32 = 0;
@@ -219,7 +248,7 @@ else
 	SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 end;
 
-function SGPCAPLogInternetDevices() : TSGMaxEnum;
+function SGPcapLogInternetDevices() : TSGMaxEnum;
 
 function LogAddresses(const Addresses : PPcap_Addr = nil) : TSGMaxEnum;
 
@@ -277,7 +306,7 @@ else
 end;
 
 var
-	Error : TSGPCAPErrorString;
+	Error : TSGPcapErrorString;
 	Device : PPcap_If = nil;
 	FirstDevice : PPcap_If = nil;
 	ReturnedValue : TSGInt32 = 0;
@@ -318,56 +347,44 @@ else
 	SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 end;
 
-procedure SGPCAPTryOpenDevice(const DeviceName : TSGString);
+procedure SGPcapTryOpenDevice(const DeviceName : TSGString);
 var
-	Device : TSGPCAPDeviceName = nil;
+	Device : TSGPcapDeviceName = nil;
 	IP, Mask : TSGUInt32;
-	Handle : TSGPCAPDeviceHandle = nil;
+	Handle : TSGPcapDeviceHandle = nil;
 begin
 Device := SGStringToPChar(DeviceName);
-Handle := SGPCAPInitializeDevice(Device, @IP, @Mask);
+Handle := SGPcapInitializeDevice(Device, @IP, @Mask);
 if Handle <> nil then
 	pcap_close(Handle);
 end;
 
-procedure SGPCAPJackOnePacketFromDefaultDevice();
+procedure SGPcapJackOnePacketFromDefaultDevice();
 var
-	Device : TSGPCAPDeviceName = nil;
+	Device : TSGPcapDeviceName = nil;
 	IP, Mask : TSGUInt32;
-	Handle : TSGPCAPDeviceHandle = nil;
+	Handle : TSGPcapDeviceHandle = nil;
 begin
-Handle := SGPCAPInitializeDevice(Device, @IP, @Mask);
+Handle := SGPcapInitializeDevice(Device, @IP, @Mask);
 if Handle = nil then
 	exit;
-//SGPCAPInitializeDeviceFilter(Handle, 'port 23', IP);
-SGPCAPJackOnePacket(Handle).Free();
+//SGPcapInitializeDeviceFilter(Handle, 'port 23', IP);
+SGPcapJackOnePacket(Handle).Free();
 pcap_close(Handle);
 end;
 
-procedure TSGPCAPDevicePacket.Free();
+procedure TSGPcapPacket.Free();
 begin
 FreeMem(Data);
 ZeroMemory();
 end;
 
-procedure TSGPCAPDevicePacket.ZeroMemory();
+procedure TSGPcapPacket.ZeroMemory();
 begin
-FillChar(Self, SizeOf(TSGPCAPPacket), 0);
-Device := '';
+FillChar(Self, SizeOf(TSGPcapPacket), 0);
 end;
 
-procedure TSGPCAPPacket.Free();
-begin
-FreeMem(Data);
-ZeroMemory();
-end;
-
-procedure TSGPCAPPacket.ZeroMemory();
-begin
-FillChar(Self, SizeOf(TSGPCAPPacket), 0);
-end;
-
-function SGPCAPJackOnePacket(const DeviceHandle : PPcap) : TSGPCAPPacket;
+function SGPcapJackOnePacket(const DeviceHandle : PPcap) : TSGPcapPacket;
 begin
 Result.ZeroMemory();
 Result.Data := PSGByte(pcap_next(DeviceHandle, @Result.Header));
@@ -376,7 +393,7 @@ SGHint(['Перехвачен пакет с длинной "', Result.Header.Len, '", Packet = "', TSGP
 {$ENDIF}
 end;
 
-function SGPCAPErrorString(const Error : TSGPCAPErrorString; const WithComma : TSGBoolean = False) : TSGString;
+function SGPcapErrorString(const Error : TSGPcapErrorString; const WithComma : TSGBoolean = False) : TSGString;
 begin
 Result := '';
 if Error <> '' then
@@ -388,9 +405,9 @@ if Error <> '' then
 	end;
 end;
 
-function SGPCAPInitializeDevice(Device : TSGPCAPDevice; const P_NET : PSGUInt32 = nil; const P_Mask : PSGUInt32 = nil) : PPcap;
+function SGPcapInitializeDevice(Device : TSGPcapDevice; const P_NET : PSGUInt32 = nil; const P_Mask : PSGUInt32 = nil) : PPcap;
 var
-	Error : TSGPCAPErrorString;
+	Error : TSGPcapErrorString;
 	Description : TSGString;
 begin
 FillChar(Result, SizeOf(Result), 0);
@@ -409,7 +426,7 @@ if Device = nil then
 	if Device = nil then
 		begin
 		{$IFDEF PCAP_TEST}
-		SGHint(['Невозможно найти устройство по-умолчанию!', SGPCAPErrorString(Error)]);
+		SGHint(['Невозможно найти устройство по-умолчанию!', SGPcapErrorString(Error)]);
 		{$ENDIF}
 		exit;
 		end
@@ -421,7 +438,7 @@ if Device = nil then
 		end;
 	end;
 
-Description := SGPCAPInternetAdapterDescriptionFromName(SGPCharToString(Device));
+Description := SGPcapInternetAdapterDescriptionFromName(SGPCharToString(Device));
 if Description = '' then
 	Description := SGPCharToString(Device);
 
@@ -441,22 +458,22 @@ if (P_NET <> nil) or (P_Mask <> nil) then
 		{$IFDEF PCAP_TEST}
 		SGHint(['Данные устройства "', Description, '":']);
 		if (P_NET <> nil) then
-			SGHint(['    NET = ', SGPCAPAddressToString(P_NET^)]);
+			SGHint(['    NET = ', SGPcapAddressToString(P_NET^)]);
 		if (P_Mask <> nil) then
-			SGHint(['    Маска = ', SGPCAPAddressToString(P_Mask^)]);
+			SGHint(['    Маска = ', SGPcapAddressToString(P_Mask^)]);
 		{$ENDIF}
 		end;
 
 Result := pcap_open_live(
-	Device, // Имя устройства
-	MAX_BUFFER_SIZE, // Максимальное количество байтов, которое будет записано
-	0,      // TRUE - беспорядочный режим работы устройства
-	2,      // Таймаут
+	Device,              // Имя устройства
+	SGPcapMaxBufferSize, // Максимальное количество байтов, которое будет записано
+	0,                   // TRUE - беспорядочный режим работы устройства
+	SGPcapTimeOut,       // Таймаут
 	Error);
 if Result = nil then
 	begin
 	{$IFDEF PCAP_TEST}
-	SGHint(['Невозможно открыть устройство "', Description, '"', SGPCAPErrorString(Error, True), '!']);
+	SGHint(['Невозможно открыть устройство "', Description, '"', SGPcapErrorString(Error, True), '!']);
 	{$ENDIF}
 	exit;
 	end
@@ -468,11 +485,11 @@ else
 	end;
 end;
 
-function SGPCAPTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
+function SGPcapTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
 var
-	Error : TSGPCAPErrorString;
-	Net, Mask : TSGPCAPAddress;
-	Device : TSGPCAPDevice;
+	Error : TSGPcapErrorString;
+	Net, Mask : TSGPcapAddress;
+	Device : TSGPcapDevice;
 begin
 Result := False;
 if not DllManager.Suppored('pcap') then
@@ -502,7 +519,7 @@ else
 FreeMem(Device);
 end;
 
-function SGPCAPInitializeDeviceFilter(const DeviceHandle : PPcap; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : PBPF_Program;
+function SGPcapInitializeDeviceFilter(const DeviceHandle : PPcap; const FilterString : PSGChar = ''; const IP : TSGUInt32 = 0) : PBPF_Program;
 begin
 if DeviceHandle = nil then
 	Exit;
