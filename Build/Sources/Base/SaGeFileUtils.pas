@@ -266,7 +266,7 @@ if SGFileExists(Name) then
 	FileExpansion := SGFileExpansion(Name);
 	FileName := SGFileNameWithoutExpansion(Name);
 	while SGFileExists(FileNameFromNumber(Number)) do
-		Number+=1;
+		Number += 1;
 	Result := FileNameFromNumber(Number);
 	end
 else

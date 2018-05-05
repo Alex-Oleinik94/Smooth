@@ -53,7 +53,7 @@ function SGVal(const Text : TSGString) : TSGInt64;{$IFDEF SUPPORTINLINE}inline;{
 function SGValFloat(const Text : TSGString) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 	//Проверяет, не образована ли строка AString как Part + [хз]
 function SGExistsFirstPartString(const AString : TSGString; const Part : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-	//Возвращает строку, которая содержит размер файла, занимающего Size байт
+	//Возвращает строку, которая содержит размер "файла"/"буфера", занимающего Size байт
 function SGGetSizeString(const Size : TSGUInt64; const Language : TSGString = 'RU') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращаето часть строки, находящуюся между [a..b] включительно
 function SGStringGetPart(const S : TSGString; const a, b : TSGUInt32) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

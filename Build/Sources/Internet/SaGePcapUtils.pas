@@ -20,7 +20,10 @@ type
 	TSGPcapString = PSGChar;
 const
 	SGPcapMaxBufferSize = 2000000000; //8192
-	SGPcapTimeOut  = 5;
+const
+	pcap_default_timeout  = 0;
+	pcap_promiscuous_mode = $0001;
+	pcap_default_mode     = $0000;
 type
 	TSGPcapDevice = TSGPcapString;
 	TSGPcapDeviceName = TSGPcapString;
@@ -465,10 +468,10 @@ if (P_NET <> nil) or (P_Mask <> nil) then
 		end;
 
 Result := pcap_open_live(
-	Device,              // Имя устройства
-	SGPcapMaxBufferSize, // Максимальное количество байтов, которое будет записано
-	0,                   // TRUE - беспорядочный режим работы устройства
-	SGPcapTimeOut,       // Таймаут
+	Device,               // Имя устройства
+	SGPcapMaxBufferSize,  // Максимальное количество байтов, которое будет записано
+	pcap_promiscuous_mode,// TRUE - promiscuous mode или default mode
+	pcap_default_timeout, // Таймаут
 	Error);
 if Result = nil then
 	begin

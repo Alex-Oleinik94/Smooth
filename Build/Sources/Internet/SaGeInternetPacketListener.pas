@@ -59,12 +59,14 @@ type
 			private
 		procedure StartThreads();
 		procedure InitThreads();
-		function AllThreadsFinished() : TSGBoolean;
 		function InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketListenerDevice) : TSGBoolean;
 		procedure AddDevice(const DeviceData : TSGInternetPacketListenerDevice);
 		function DevicesConstruct() : TSGBoolean;
 		procedure DevicesFree();
 			public
+		procedure DefaultDelay();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function AllThreadsFinished() : TSGBoolean;
+		function BeginLoopThreads(const WithDelay : TSGBoolean = False) : TSGBoolean; 
 		procedure LoopThreads(); virtual;
 		procedure LoopNonThread(); deprecated;
 		end;
@@ -190,17 +192,28 @@ while Runs do
 	end;
 end;
 
+function TSGInternetPacketListener.BeginLoopThreads(const WithDelay : TSGBoolean = False) : TSGBoolean; 
+begin
+Result := DevicesConstruct();
+if Result then
+	begin
+	InitThreads();
+	StartThreads();
+	if WithDelay then
+		Delay(SGInternetPacketListenerDefaultDelay * Length(FDevices));
+	end;
+end;
+
 procedure TSGInternetPacketListener.LoopThreads();
 begin
-if not DevicesConstruct() then
-	exit;
+if BeginLoopThreads(True) then
+	while not AllThreadsFinished() do
+		DefaultDelay();
+end;
 
-InitThreads();
-StartThreads();
-
-Delay(SGInternetPacketListenerDefaultDelay * Length(FDevices));
-while not AllThreadsFinished() do
-	Delay(SGInternetPacketListenerDefaultDelay);
+procedure TSGInternetPacketListener.DefaultDelay();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Delay(SGInternetPacketListenerDefaultDelay);
 end;
 
 function TSGInternetPacketListener.InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketListenerDevice) : TSGBoolean;

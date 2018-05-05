@@ -7,15 +7,17 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
+	,SaGeDateTime
 	,SaGeInternetPacketListener
 	;
 
 type
+	PSGInternetPacketDumperDeviceData = ^ TSGInternetPacketDumperDeviceData;
 	TSGInternetPacketDumperDeviceData = object
 			public
 		Device : TSGString;
 		DeviceDescription : TSGString;
-		DeviceDerictory : TSGString;
+		DeviceDirectory : TSGString;
 		CountPackets : TSGUInt64;
 		CountPacketsSize : TSGUInt64;
 			public
@@ -32,10 +34,17 @@ type
 		FDevicesData : TSGInternetPacketDumperDevicesData;
 		FPacketDataFileExtension : TSGString;
 		FDeviceInfarmationFileExtension : TSGString;
+		FPacketListener : TSGInternetPacketListener;
+		FInfoTimeOut : TSGUInt64;
+		FBeginingTime : TSGDateTime;
 			private
-		function FindDeviceDirectory(const DeviceName : TSGString):TSGString;
-		procedure AddDevice(const DeviceData : TSGInternetPacketListenerDeviceData);
+		function AllDataSize() : TSGUInt64;
+		function FindDeviceDirectory(const DeviceName : TSGString) : TSGString;
+		function FindDevice(const DeviceName : TSGString) : PSGInternetPacketDumperDeviceData;
+		function AddDevice(const DeviceData : TSGInternetPacketListenerDeviceData) : PSGInternetPacketDumperDeviceData;
 		procedure CreateDeviceInformationFile(const DumpDeviceData : TSGInternetPacketDumperDeviceData; const DeviceData : TSGInternetPacketListenerDeviceData);
+		procedure PrintInformation(const NowDateTime : TSGDateTime);
+		procedure DumpPacketData(const Directory : TSGString; const Packet : TSGInternetPacket);
 			public
 		procedure Start(); virtual;
 		procedure DumpPacket(const Packet : TSGInternetPacket);
@@ -47,10 +56,11 @@ implementation
 
 uses
 	 SaGeFileUtils
-	,SaGeDateTime
 	,SaGeStringUtils
 	,SaGePcapUtils
+	,SaGeVersion
 	
+	,Crt
 	,Classes
 	;
 
@@ -76,51 +86,80 @@ end;
 // ======TSGInternetPacketDumper======
 // ===================================
 
-procedure TSGInternetPacketDumper.DumpPacket(const Packet : TSGInternetPacket);
+function TSGInternetPacketDumper.AllDataSize() : TSGUInt64;
 var
-	DeviceDirectory : TSGString = '';
-	Stream : TFileStream = nil;
+	Index : TSGMaxEnum;
 begin
-DeviceDirectory := FindDeviceDirectory(SGPCharToString(Packet.Device^.DeviceName));
-if DeviceDirectory = '' then
-	begin
-	AddDevice(Packet.Device^);
-	DeviceDirectory := FindDeviceDirectory(SGPCharToString(Packet.Device^.DeviceName));
-	end;
+Result := 0;
+if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
+	for Index := 0 to High(FDevicesData) do
+		Result := FDevicesData[Index].CountPacketsSize;
+end;
 
-Stream := TFileStream.Create(DeviceDirectory + DirectorySeparator + SGDateTimeString(True) + '.' + FPacketDataFileExtension, fmCreate);
+procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Packet : TSGInternetPacket);
+var
+	Stream : TFileStream = nil;
+	FileName : TSGString = '';
+begin
+FileName := Directory + DirectorySeparator + SGDateTimeString(True) + '.' + FPacketDataFileExtension;
+FileName := SGFreeFileName(FileName, '');
+Stream := TFileStream.Create(FileName, fmCreate);
 Stream.WriteBuffer(Packet.Data.Data^, Packet.Data.Header.Len);
 Stream.Destroy();
+Stream := nil;
+end;
+
+procedure TSGInternetPacketDumper.DumpPacket(const Packet : TSGInternetPacket);
+var
+	Device : PSGInternetPacketDumperDeviceData = nil;
+begin
+Device := FindDevice(SGPCharToString(Packet.Device^.DeviceName));
+if Device = nil then
+	Device := AddDevice(Packet.Device^);
+Device^.CountPackets += 1;
+Device^.CountPacketsSize += Packet.Data.Header.Len;
+
+DumpPacketData(Device^.DeviceDirectory, Packet);
+end;
+
+function TSGInternetPacketDumper.FindDevice(const DeviceName : TSGString) : PSGInternetPacketDumperDeviceData;
+var
+	Index : TSGMaxEnum;
+begin
+Result := nil;
+if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
+	for Index := 0 to High(FDevicesData) do
+		if FDevicesData[Index].Device = DeviceName then
+			begin
+			Result := @FDevicesData[Index];
+			break;
+			end;
 end;
 
 function TSGInternetPacketDumper.FindDeviceDirectory(const DeviceName : TSGString):TSGString;
 var
-	Index : TSGMaxEnum;
+	DeviceData : PSGInternetPacketDumperDeviceData = nil;
 begin
-Result := '';
-if (FDevicesData = nil) or (Length(FDevicesData) = 0) then
-	exit;
-
-for Index := 0 to High(FDevicesData) do
-	if FDevicesData[Index].Device = DeviceName then
-		begin
-		Result := FDevicesData[Index].DeviceDerictory;
-		break;
-		end;
+DeviceData := FindDevice(DeviceName);
+if DeviceData = nil then
+	Result := ''
+else
+	Result := DeviceData^.DeviceDirectory;
 end;
 
-procedure TSGInternetPacketDumper.AddDevice(const DeviceData : TSGInternetPacketListenerDeviceData);
+function TSGInternetPacketDumper.AddDevice(const DeviceData : TSGInternetPacketListenerDeviceData) : PSGInternetPacketDumperDeviceData;
 begin
 if (FDevicesData = nil) or (Length(FDevicesData) = 0) then
 	SetLength(FDevicesData, 1)
 else
 	SetLength(FDevicesData, Length(FDevicesData) + 1);
-FDevicesData[High(FDevicesData)].Device := SGPCharToString(DeviceData.DeviceName);
-FDevicesData[High(FDevicesData)].DeviceDescription := DeviceData.DeviceDescription;
-FDevicesData[High(FDevicesData)].CountPackets := 0;
-FDevicesData[High(FDevicesData)].CountPacketsSize := 0;
-FDevicesData[High(FDevicesData)].DeviceDerictory := FGeneralDirectory + DirectorySeparator + FDevicesData[High(FDevicesData)].DeviceDescription;
-SGMakeDirectory(FDevicesData[High(FDevicesData)].DeviceDerictory);
+Result := @FDevicesData[High(FDevicesData)];
+Result^.Device := SGPCharToString(DeviceData.DeviceName);
+Result^.DeviceDescription := DeviceData.DeviceDescription;
+Result^.CountPackets := 0;
+Result^.CountPacketsSize := 0;
+Result^.DeviceDirectory := FGeneralDirectory + DirectorySeparator + Result^.DeviceDescription;
+SGMakeDirectory(Result^.DeviceDirectory);
 
 CreateDeviceInformationFile(FDevicesData[High(FDevicesData)], DeviceData);
 end;
@@ -140,11 +179,46 @@ SGWriteStringToStream('Mask: ' + SGPcapAddressToString(DeviceData.DeviceMask) + 
 Stream.Destroy();
 end;
 
-procedure TSGInternetPacketDumper.Start();
+procedure TSGInternetPacketDumper.PrintInformation(const NowDateTime : TSGDateTime);
 begin
-SGInternetPacketListener(
-	TSGInternetPacketListenerCallBack(@SGPacketDumping_CallBack),
-	Self);
+SGPrintEngineVersion();
+TextColor(15);
+Write('После ');
+TextColor(10);
+Write(SGTextTimeBetweenDates(FBeginingTime, NowDateTime, 'ENG'));
+TextColor(15);
+Write(' всего перехвачено ');
+TextColor(12);
+Write(SGGetSizeString(AllDataSize(), 'EN'));
+TextColor(15);
+WriteLn(' данных.');
+TextColor(7);
+end;
+
+procedure TSGInternetPacketDumper.Start();
+var
+	LastInfoTime, NowInfoTime : TSGDateTime;
+begin
+FPacketListener := TSGInternetPacketListener.Create();
+FPacketListener.CallBack := TSGInternetPacketListenerCallBack(@SGPacketDumping_CallBack);
+FPacketListener.CallBackData := Self;
+if FPacketListener.BeginLoopThreads(True) then
+	begin
+	FBeginingTime.Get();
+	LastInfoTime := FBeginingTime;
+	while not FPacketListener.AllThreadsFinished() do
+		begin
+		NowInfoTime.Get();
+		if (NowInfoTime - LastInfoTime).GetPastMiliSeconds() > FInfoTimeOut then
+			begin
+			LastInfoTime := NowInfoTime;
+			PrintInformation(NowInfoTime);
+			end;
+		FPacketListener.DefaultDelay();
+		end;
+	end;
+FPacketListener.Destroy();
+FPacketListener := nil;
 end;
 
 constructor TSGInternetPacketDumper.Create();
@@ -153,12 +227,22 @@ inherited;
 FGeneralDirectory := SGAplicationFileDirectory() + DirectorySeparator + SGDateTimeString(True) + ' Packet Dump';
 SGMakeDirectory(FGeneralDirectory);
 FDevicesData := nil;
-FPacketDataFileExtension := 'hexdata';
+FPacketDataFileExtension := 'ipdpd';
 FDeviceInfarmationFileExtension := 'txt';
+FPacketListener := nil;
+FInfoTimeOut := 100;
+FillChar(FBeginingTime, SizeOf(FBeginingTime), 0);
 end;
 
 destructor TSGInternetPacketDumper.Destroy();
 begin
+if FPacketListener <> nil then
+	begin
+	FPacketListener.Destroy();
+	FPacketListener := nil;
+	end;
+if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
+	SetLength(FDevicesData, 0);
 inherited;
 end;
 
