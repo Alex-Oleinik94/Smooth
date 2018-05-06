@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeDateTime
 	,SaGeInternetPacketListener
+	,SaGeInternetPacketHeaders
 	;
 
 type
