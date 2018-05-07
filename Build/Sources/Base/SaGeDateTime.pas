@@ -6,9 +6,24 @@ interface
 
 uses
 	 Dos
-	
+	 
 	,SaGeBase
 	;
+type
+	TSGTimeNumber = TSGInt64;
+	TSGTimeMiniNumber = TSGInt8;
+	TSGTime = object
+			public
+		AllSeconds : TSGTimeNumber;
+		Microseconds : TSGTimeNumber;
+			public
+		function Hours() : TSGTimeMiniNumber;
+		function Minutes() : TSGTimeMiniNumber;
+		function Seconds() : TSGTimeMiniNumber;
+			public
+		class function Import(const ValueSeconds, ValueMicroseconds : TSGTimeNumber) : TSGTime;
+		end;
+	TSGTimeVal = TSGTime;
 type
 	// Used Int64 (not UInt64) becouse "Ariphmetic overflow"
 	TSGInt32List8 = array[0..7] of TSGInt32;
@@ -40,6 +55,8 @@ function SGTextTimeBetweenDates(const D1, D2 : TSGDateTime; const Encoding : TSG
 function SGNow() : TSGDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDateTimeString(const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SGDateTimeString(const DateTime : TSGDateTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGDateTimeCorrectionString(const Time : TSGTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGDateTimeCorrectionString(const Date : TSGDateTime; const Time : TSGTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -49,6 +66,61 @@ uses
 	
 	,StrMan
 	;
+
+function TSGTime.Hours() : TSGTimeMiniNumber;
+begin
+Result := AllSeconds div 60 * 60;
+end;
+
+function TSGTime.Minutes() : TSGTimeMiniNumber;
+begin
+Result := AllSeconds div 60 mod 60;
+end;
+
+function TSGTime.Seconds() : TSGTimeMiniNumber;
+begin
+Result := AllSeconds mod 60;
+end;
+
+class function TSGTime.Import(const ValueSeconds, ValueMicroseconds : TSGTimeNumber) : TSGTime;
+begin
+Result.AllSeconds := ValueSeconds;
+Result.Microseconds := ValueMicroseconds;
+end;
+
+function SGDateTimeCorrectionString(const Date : TSGDateTime; const Time : TSGTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+with Date do
+	begin
+	Result := '[';
+	Result += StringJustifyRight(SGStr(Years), 4, '0') + '.';
+	Result += StringJustifyRight(SGStr(Month), 2, '0') + '.';
+	Result += StringJustifyRight(SGStr(Day),   2, '0');
+	if AddWeek then
+		begin
+		Result += Iff(ForFileSystem, ',', '/');
+		Result += SGStr(Week);
+		end;
+	Result += '][';
+	Result += StringJustifyRight(SGStr(Hours),   2, '0') + Iff(ForFileSystem, '.', ':');
+	end;
+with Time do
+	begin
+	Result += StringJustifyRight(SGStr(Minutes), 2, '0') + Iff(ForFileSystem, '.', ':'); 
+	Result += StringJustifyRight(SGStr(Seconds), 2, '0');
+	if AddMiliSeconds then
+		begin
+		Result += Iff(ForFileSystem, ',', '/'); 
+		Result += StringJustifyRight(SGStr(Microseconds),  6, '0');
+		end;
+	Result += ']';
+	end;
+end;
+
+function SGDateTimeCorrectionString(const Time : TSGTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := SGDateTimeCorrectionString(SGNow(), Time, ForFileSystem, AddWeek, AddMiliSeconds);
+end;
 
 function SGDateTimeString(const DateTime : TSGDateTime; const ForFileSystem : TSGBoolean = False; const AddWeek : TSGBoolean = True; const AddMiliSeconds : TSGBoolean = True) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin

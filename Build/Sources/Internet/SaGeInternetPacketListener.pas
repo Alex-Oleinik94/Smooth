@@ -9,6 +9,8 @@ uses
 	,SaGeClasses
 	,SaGeThreads
 	,SaGePcapUtils
+	,SaGeInternetBase
+	,SaGeCriticalSection
 	;
 
 const
@@ -21,8 +23,8 @@ type
 			public
 		DeviceName : TSGPcapDeviceName;
 		DeviceDescription : TSGString;
-		DeviceNet  : TSGUInt32;
-		DeviceMask : TSGUInt32;
+		DeviceNet  : TSGIPv4Address;
+		DeviceMask : TSGIPv4Address;
 		end;
 	
 	PSGInternetPacketListenerDevice = ^ TSGInternetPacketListenerDevice;

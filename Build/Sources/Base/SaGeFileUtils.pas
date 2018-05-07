@@ -59,10 +59,11 @@ const
 	SGAbsoluteTexturesDirectory = SGAbsoluteTextureDirectory;
 	SGAbsoluteFontsDirectory    = SGAbsoluteFontDirectory;
 const
-	// End Of File
+	// End Of Line$File
 	SGUnixEoln = #10;
 	SGWinEoln  = #13#10;
 	SGMacEoln  = #13;
+	SGEof      = #$1A;
 
 (************)
 (** COMMON **)

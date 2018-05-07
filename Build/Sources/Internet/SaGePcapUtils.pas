@@ -8,6 +8,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
+	,SaGeInternetBase
 	
 	,Pcap
 	,Sockets
@@ -35,15 +36,14 @@ type
 	PSGPcapPacketHeader = PPcap_PacketHeader;
 	TSGPcapPacketHeader = TPcap_PacketHeader;
 	
-	TSGPcapAddress = TSGUInt32;
-	TSGPcapIPAddress = TSGPcapAddress;
-	TSGPcapMask = TSGPcapAddress;
-	TSGPcapNet = TSGPcapAddress;
+	TSGPcapIPv4Address = TSGIPv4Address;
+	TSGPcapIPv4Mask = TSGIPv4Address;
+	TSGPcapIPv4Net = TSGIPv4Address;
 	TSGPcapHandler = TSGPcapCallBack;
 	
 	TSGPcapPacket = object
 			public
-		Header : TPcap_Pkthdr;
+		Header : TPcap_PacketHeader;
 		Data : PSGByte;
 			public
 		procedure Free();
@@ -58,7 +58,6 @@ procedure SGPcapJackOnePacketFromDefaultDevice();
 procedure SGPcapTryOpenDevice(const DeviceName : TSGString);
 function SGPcapLogInternetDevices() : TSGMaxEnum;
 function SGPcapInternetAdapterNames() : TSGStringList;
-function SGPcapAddressToString(Address : TSGPcapAddress) : TSGString;
 function SGPcapInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 function SGPcapInternetAdapterPcapDescriptionFromName(const AdapterName : TSGString) : TSGString;
 function SGPcapInternetAdapterSystemDescriptionFromName(const AdapterName : TSGString) : TSGString;
@@ -202,15 +201,6 @@ if AdapterName <> '' then
 	else
 		SGLog.Source(['PCAP:pcap_findalldevs(..) : Returned value "', ReturnedValue, '", error: "', Error, '".']);
 	end;
-end;
-
-function SGPcapAddressToString(Address : TSGPcapAddress) : TSGString;
-begin
-Result := 
-	SGStr(PSGByte(@Address)[0]) + '.' +
-	SGStr(PSGByte(@Address)[1]) + '.' +
-	SGStr(PSGByte(@Address)[2]) + '.' +
-	SGStr(PSGByte(@Address)[3]) ;
 end;
 
 function SGPcapInternetAdapterNames() : TSGStringList;
@@ -491,7 +481,7 @@ end;
 function SGPcapTestDeviceNetMask(const AdapterName : TSGString) : TSGBoolean;
 var
 	Error : TSGPcapErrorString;
-	Net, Mask : TSGPcapAddress;
+	Net, Mask : TSGIPv4Address;
 	Device : TSGPcapDevice;
 begin
 Result := False;

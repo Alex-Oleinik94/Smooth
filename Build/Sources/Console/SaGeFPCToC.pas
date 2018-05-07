@@ -1080,7 +1080,7 @@ var
 	I:LongWord;
 begin
 OutString:='';
-OutString:=SGGetStringFromConstArray(Ar);
+OutString:=SGStr(Ar);
 SGLog.Source(['[ ',FReadClass.StringInfo,' ] ',OutString]);
 SetLength(OutString,0);
 end;

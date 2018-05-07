@@ -133,7 +133,7 @@ end;
 
 procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 begin
-SGHint(SGGetStringFromConstArray(MessagePtrs), ViewCase, ViewTime);
+SGHint(SGStr(MessagePtrs), ViewCase, ViewTime);
 end;
 
 procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
@@ -144,16 +144,10 @@ if SGPrintError in ViewCase then
 	WriteLn(SGConvertStringToConsoleEncoding(MessageStr));
 end;
 
-procedure TSGLog.Source(const Ar : array of const; const WithTime:Boolean = True);
-var
-	OutString:String = '';
+procedure TSGLog.Source(const Ar : array of const; const WithTime : TSGBoolean = True);
 begin
- if SGLogEnable then
-	begin
-	OutString:=SGGetStringFromConstArray(Ar);
-	Source(OutString,WithTime);
-	SetLength(OutString,0);
-	end;
+if SGLogEnable then
+	Source(SGStr(Ar), WithTime);
 end;
 
 procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;

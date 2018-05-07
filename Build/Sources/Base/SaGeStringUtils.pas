@@ -57,8 +57,9 @@ function SGExistsFirstPartString(const AString : TSGString; const Part : TSGStri
 function SGGetSizeString(const Size : TSGUInt64; const Language : TSGString = 'RU') : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращаето часть строки, находящуюся между [a..b] включительно
 function SGStringGetPart(const S : TSGString; const a, b : TSGUInt32) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetStringFromConstArray(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGArConstToArString(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConstArrayToString(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGStr(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGConstArrayToStringList(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator Enumerator(const List : TSGStringList): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -383,7 +384,7 @@ for i := 1 to Length(str) do
 	Result += SGDownCase(str[i]);
 end;
 
-function SGArConstToArString(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConstArrayToStringList(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 type
 	TSGExtended = Extended;
 var
@@ -415,12 +416,17 @@ if Length(Ar) > 0 then
 			end;
 end;
 
-function SGGetStringFromConstArray(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStr(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Result := SGConstArrayToString(Ar);
+end;
+
+function SGConstArrayToString(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	StringList : TSGStringList = nil;
 begin
 Result := '';
-StringList := SGArConstToArString(Ar);
+StringList := SGConstArrayToStringList(Ar);
 Result := SGStringFromStringList(StringList, '');
 SetLength(StringList, 0);
 end;

@@ -124,7 +124,7 @@ end;
 
 function SGParseValueFromComand(const Comand : TSGString; const PredParts : array of const) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGParseValueFromComand(Comand, SGArConstToArString(PredParts), True);
+Result := SGParseValueFromComand(Comand, SGConstArrayToStringList(PredParts), True);
 end;
 
 function SGParseValueFromComand(const Comand : TSGString; PredParts : TSGStringList; const FreeList : TSGBool = True) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -446,7 +446,7 @@ FComands[Index].Free();
 FComands[Index].FComand := VComand;
 FComands[Index].FHelpString := VHelp;
 FComands[Index].FCategory := VCategory;
-FComands[Index].FSyntax := SGArConstToArString(VSyntax);
+FComands[Index].FSyntax := SGConstArrayToStringList(VSyntax);
 CheckForComand(FComands[Index]);
 end;
 
@@ -460,7 +460,7 @@ FComands[High(FComands)].Free();
 FComands[High(FComands)].FComand := VComand;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
-FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
+FComands[High(FComands)].FSyntax := SGConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 
@@ -474,7 +474,7 @@ FComands[High(FComands)].Free();
 FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FHelpString := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
-FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
+FComands[High(FComands)].FSyntax := SGConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 
@@ -488,7 +488,7 @@ FComands[High(FComands)].Free();
 FComands[High(FComands)].FNestedComand := VNestedComand;
 FComands[High(FComands)].FNestedHelpFunction := VHelp;
 FComands[High(FComands)].FCategory := FCurrentCategory;
-FComands[High(FComands)].FSyntax := SGArConstToArString(VSyntax);
+FComands[High(FComands)].FSyntax := SGConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 

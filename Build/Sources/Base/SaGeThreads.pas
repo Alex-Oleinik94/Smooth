@@ -57,16 +57,6 @@ uses
 	function pthread_join(thread:pthread_t; a:pointer):LongInt;cdecl;external 'libc.so';
 	{$ENDIF}
 type
-	TSGCriticalSection = class (TSGNamed)
-			public
-		constructor Create(); override;
-		destructor Destroy(); override;
-		procedure Enter(); virtual;
-		procedure Leave(); virtual;
-			private
-		FCriticalSection : TRTLCriticalSection;
-		end;
-	
 	//Это для потоков
 	TSGThreadProcedure     = procedure ( p : Pointer );
 
@@ -130,32 +120,6 @@ uses
 	 SaGeLog
 	,SaGeStringUtils
 	;
-
-// =========================
-// ===TSGCriticalSection====
-// =========================
-
-constructor TSGCriticalSection.Create();
-begin
-inherited;
-InitCriticalSection(FCriticalSection)
-end;
-
-destructor TSGCriticalSection.Destroy();
-begin
-DoneCriticalSection(FCriticalSection);
-inherited;
-end;
-
-procedure TSGCriticalSection.Enter();
-begin
-EnterCriticalSection(FCriticalSection);
-end;
-
-procedure TSGCriticalSection.Leave();
-begin
-LeaveCriticalSection(FCriticalSection);
-end;
 
 // =========================
 // ========TSGThread========

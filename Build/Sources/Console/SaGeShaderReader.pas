@@ -101,7 +101,7 @@ var
 	FileParams : TSGShaderParams;
 begin
 Result:='';
-FileParams := SGArConstToArString(VFileParams);
+FileParams := SGConstArrayToStringList(VFileParams);
 Result := SGReadShaderSourceFromFile(VFileName,FileParams);
 SetLength(FileParams,0);
 end;

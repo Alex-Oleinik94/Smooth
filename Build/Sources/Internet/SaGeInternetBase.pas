@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeInternetHeaders;
+unit SaGeInternetBase;
 
 interface
 
@@ -26,12 +26,18 @@ type TSGEthernetHeader = object
 
 // IPv4 address
 type
+	TSGIPv4AddressBytes = packed array[0..3] of TSGUInt8;
+	TSGIPv4AddressValue = TSGUInt32;
 	PSGIPv4Address = ^TSGIPv4Address;
 	TSGIPv4Address = packed record
 		case TSGBoolean of
-		True: (s_addr  : TSGUInt32);
-		False: (s_bytes : packed array[1..4] of TSGUInt8);
+		True: (Address  : TSGIPv4AddressValue);
+		False: (AddressByte : TSGIPv4AddressBytes);
 	end;
+
+operator := (const AddressValue : TSGIPv4AddressValue) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // IPv4 header
 type TSGIPv4Header = object
@@ -108,7 +114,37 @@ type TSGUDPHeader = object
 	uh_check : TSGUInt16;
 	end;
 
+function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+uses
+	 SaGeStringUtils
+	;
+
+operator := (const AddressValue : TSGIPv4AddressValue) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Address := AddressValue;
+end;
+
+operator = (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Address.Address = AddressValue;
+end;
+
+operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Address.Address <> AddressValue;
+end;
+
+function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 
+	SGStr(Address.AddressByte[0]) + '.' +
+	SGStr(Address.AddressByte[1]) + '.' +
+	SGStr(Address.AddressByte[2]) + '.' +
+	SGStr(Address.AddressByte[3]) ;
+end;
 
 function TSGTcpHeader.th_off() : TSGUInt16;
 begin
