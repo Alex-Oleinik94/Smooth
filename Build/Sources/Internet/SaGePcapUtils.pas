@@ -16,17 +16,20 @@ uses
 	,Pcap
 	;
 
+// PCap extensions
 type
 	TPcap_PacketHeader = TPcap_Pkthdr;
 	PPcap_PacketHeader = PPcap_Pkthdr;
-type
-	TSGPcapString = PSGChar;
-const
-	SGPcapMaxBufferSize = 2000000000; //8192
 const
 	pcap_default_timeout  = 0;
 	pcap_promiscuous_mode = $0001;
 	pcap_default_mode     = $0000;
+
+// PCap
+type
+	TSGPcapString = PSGChar;
+const
+	SGPcapMaxBufferSize = 2000000000; //8192
 type
 	TSGPcapDevice = TSGPcapString;
 	TSGPcapDeviceName = TSGPcapString;

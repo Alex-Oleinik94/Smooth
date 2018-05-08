@@ -110,5 +110,11 @@ type
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
 
+{$DEFINE DATATYPE_LIST_HELPER := TSGDoubleStringHelper}
+{$DEFINE DATATYPE_LIST        := TSGDoubleStrings}
+{$DEFINE DATATYPE             := TSGDoubleString}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+
 
 

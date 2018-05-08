@@ -186,22 +186,49 @@ type
 
 operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+type
+	TSGDoubleString = packed array[0..1] of TSGString;
+
+operator = (const A, B : TSGDoubleString) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$DEFINE  INC_PLACE_INTERFACE}
 {$INCLUDE SaGeCommonLists.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
 
+operator in(const S : TSGString; const A : TSGDoubleStrings) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGDoubleString(const FirstString, SecondString : TSGString) : TSGDoubleString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 type
 	PSGStringList = ^ TSGStringList;
 procedure SGStringListDeleteByIndex(var StringList : TSGStringList; const Index : TSGMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGStringListLength(const StringList : TSGStringList): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStringListLength(const StringList : TSGStringList) : TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-operator in(const S : TSGString; const A : TSGSettings):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-operator - (const A : TSGSettings; const S : TSGString):TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator in(const S : TSGString; const A : TSGSettings) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+operator - (const A : TSGSettings; const S : TSGString) : TSGSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 type
 	generic TSGList<T> = packed array of T;
 
 implementation
+
+operator in(const S : TSGString; const A : TSGDoubleStrings) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+var
+	Index : TSGMaxEnum;
+begin
+Result := '';
+if (A <> nil) and (Length(A) > 0) then
+	for Index := 0 to High(A) do
+		if A[Index][0] = S then
+			begin
+			Result := A[Index][1];
+			break;
+			end;
+end;
+
+function SGDoubleString(const FirstString, SecondString : TSGString) : TSGDoubleString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result[0] := FirstString;
+Result[1] := SecondString;
+end;
 
 function SGStringListLength(const StringList : TSGStringList): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -272,6 +299,11 @@ procedure TSGOption.Import(const VName : TSGString; const VPointer : TSGOptionPo
 begin
 FName := VName;
 FOption := VPointer;
+end;
+
+operator = (const A, B : TSGDoubleString) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := (A[0] = B[0]) and (A[1] = B[1]);
 end;
 
 operator = (const A, B : TSGOption) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

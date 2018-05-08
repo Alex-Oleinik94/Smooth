@@ -200,7 +200,7 @@ uses
 
 function TSGEthernetHeader.GetProtocol() : TSGEnthernetProtocol;
 begin
-PSGEnthernetProtocolBytes(@Result)^ := ProtocolBytes;
+Result := TSGEnthernetProtocol(ProtocolBytes);
 SwapBytes(Result);
 end;
 

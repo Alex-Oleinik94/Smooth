@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeInternetPacketListener;
+unit SaGeInternetPacketCaptor;
 
 interface
 
@@ -14,12 +14,12 @@ uses
 	;
 
 const
-	SGInternetPacketListenerDefaultDelay = 5;
+	SGInternetPacketCaptorDefaultDelay = 5;
 type
-	TSGInternetPacketListener = class;
+	TSGInternetPacketCaptor = class;
 	
-	PSGInternetPacketListenerDeviceData = ^ TSGInternetPacketListenerDeviceData;
-	TSGInternetPacketListenerDeviceData = object
+	PSGInternetPacketCaptorDeviceData = ^ TSGInternetPacketCaptorDeviceData;
+	TSGInternetPacketCaptorDeviceData = object
 			public
 		DeviceName : TSGPcapDeviceName;
 		DeviceDescription : TSGString;
@@ -27,42 +27,42 @@ type
 		DeviceMask : TSGIPv4Address;
 		end;
 	
-	PSGInternetPacketListenerDevice = ^ TSGInternetPacketListenerDevice;
-	TSGInternetPacketListenerDevice = object(TSGInternetPacketListenerDeviceData)
+	PSGInternetPacketCaptorDevice = ^ TSGInternetPacketCaptorDevice;
+	TSGInternetPacketCaptorDevice = object(TSGInternetPacketCaptorDeviceData)
 			public
 		DeviceHandle  : TSGPcapDeviceHandle;
-		Handler       : TSGInternetPacketListener;
+		Handler       : TSGInternetPacketCaptor;
 		HandlerThread : TSGThread;
 		end;
-	TSGInternetPacketListenerDevices = packed array of TSGInternetPacketListenerDevice;
+	TSGInternetPacketCaptorDevices = packed array of TSGInternetPacketCaptorDevice;
 	
-	PSGInternetListenerPacket = ^ TSGInternetListenerPacket;
-	TSGInternetListenerPacket = object
+	PSGInternetCaptorPacket = ^ TSGInternetCaptorPacket;
+	TSGInternetCaptorPacket = object
 			public
 		Data   : TSGPcapPacket;
-		Device : PSGInternetPacketListenerDeviceData;
+		Device : PSGInternetPacketCaptorDeviceData;
 		end;
 	
-	TSGInternetPacketListenerCallBack = procedure (Data : TSGPointer; Packet : TSGInternetListenerPacket);
+	TSGInternetPacketCaptorCallBack = procedure (Data : TSGPointer; Packet : TSGInternetCaptorPacket);
 	
-	TSGInternetPacketListener = class(TSGNamed)
+	TSGInternetPacketCaptor = class(TSGNamed)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			private
 		FCriticalSection : TSGCriticalSection;
-		FCallBack : TSGInternetPacketListenerCallBack;
+		FCallBack : TSGInternetPacketCaptorCallBack;
 		FCallBackData : TSGPointer;
-		FDevices : TSGInternetPacketListenerDevices;
+		FDevices : TSGInternetPacketCaptorDevices;
 			public
 		property CriticalSection : TSGCriticalSection read FCriticalSection;
-		property CallBack : TSGInternetPacketListenerCallBack read FCallBack write FCallBack;
+		property CallBack : TSGInternetPacketCaptorCallBack read FCallBack write FCallBack;
 		property CallBackData : TSGPointer read FCallBackData write FCallBackData;
 			private
 		procedure StartThreads();
 		procedure InitThreads();
-		function InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketListenerDevice) : TSGBoolean;
-		procedure AddDevice(const DeviceData : TSGInternetPacketListenerDevice);
+		function InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketCaptorDevice) : TSGBoolean;
+		procedure AddDevice(const DeviceData : TSGInternetPacketCaptorDevice);
 		function DevicesConstruct() : TSGBoolean;
 		procedure DevicesFree();
 			public
@@ -73,7 +73,7 @@ type
 		procedure LoopNonThread(); deprecated;
 		end;
 
-procedure SGInternetPacketListener(const ListenerCallBack : TSGInternetPacketListenerCallBack; const ListenerCallBackData : TSGPointer = nil);
+procedure SGInternetPacketCaptor(const CaptorCallBack : TSGInternetPacketCaptorCallBack; const CaptorCallBackData : TSGPointer = nil);
 
 implementation
 
@@ -88,24 +88,24 @@ uses
 	,Crt
 	;
 
-procedure SGInternetPacketListener(const ListenerCallBack : TSGInternetPacketListenerCallBack; const ListenerCallBackData : TSGPointer = nil);
+procedure SGInternetPacketCaptor(const CaptorCallBack : TSGInternetPacketCaptorCallBack; const CaptorCallBackData : TSGPointer = nil);
 begin
-with TSGInternetPacketListener.Create() do
+with TSGInternetPacketCaptor.Create() do
 	begin
-	CallBack := ListenerCallBack;
-	CallBackData := ListenerCallBackData;
+	CallBack := CaptorCallBack;
+	CallBackData := CaptorCallBackData;
 	LoopThreads();
 	Destroy();
 	end;
 end;
 
 // ===============================================
-// ======TSGInternetPacketListener CallBacks======
+// ======TSGInternetPacketCaptor CallBacks======
 // ===============================================
 
-procedure TSGInternetPacketListener_LoopCallBack(DeviceData: PSGInternetPacketListenerDevice; Header: PSGPcapPacketHeader; Data: PByte);cdecl;
+procedure TSGInternetPacketCaptor_LoopCallBack(DeviceData: PSGInternetPacketCaptorDevice; Header: PSGPcapPacketHeader; Data: PByte);cdecl;
 var
-	Packet : TSGInternetListenerPacket;
+	Packet : TSGInternetCaptorPacket;
 begin
 DeviceData^.Handler.CriticalSection.Enter();
 try
@@ -122,19 +122,19 @@ finally
 end;
 end;
 
-procedure TSGInternetPacketListener_ThreadCallBack(DeviceData : PSGInternetPacketListenerDevice);
+procedure TSGInternetPacketCaptor_ThreadCallBack(DeviceData : PSGInternetPacketCaptorDevice);
 begin
 SGPCAPEndlessLoop(
 	DeviceData^.DeviceHandle,
-	TSGPcapCallBack(@TSGInternetPacketListener_LoopCallBack),
+	TSGPcapCallBack(@TSGInternetPacketCaptor_LoopCallBack),
 	DeviceData);
 end;
 
 // =====================================
-// ======TSGInternetPacketListener======
+// ======TSGInternetPacketCaptor======
 // =====================================
 
-procedure TSGInternetPacketListener.InitThreads();
+procedure TSGInternetPacketCaptor.InitThreads();
 var
 	Index : TSGMaxEnum;
 begin
@@ -146,13 +146,13 @@ for Index := 0 to High(FDevices) do
 		FDevices[Index].HandlerThread := nil;
 		end;
 	FDevices[Index].HandlerThread := TSGThread.Create(
-		TSGThreadProcedure(@TSGInternetPacketListener_ThreadCallBack), 
+		TSGThreadProcedure(@TSGInternetPacketCaptor_ThreadCallBack), 
 		@FDevices[Index],
 		False);
 	end;
 end;
 
-function TSGInternetPacketListener.AllThreadsFinished() : TSGBoolean;
+function TSGInternetPacketCaptor.AllThreadsFinished() : TSGBoolean;
 var
 	Index : TSGMaxEnum;
 begin
@@ -165,7 +165,7 @@ for Index := 0 to High(FDevices) do
 		end;
 end;
 
-procedure TSGInternetPacketListener.StartThreads();
+procedure TSGInternetPacketCaptor.StartThreads();
 var
 	Index : TSGMaxEnum;
 begin
@@ -174,7 +174,7 @@ for Index := 0 to High(FDevices) do
 		FDevices[Index].HandlerThread.Start();
 end;
 
-procedure TSGInternetPacketListener.LoopNonThread(); deprecated;
+procedure TSGInternetPacketCaptor.LoopNonThread(); deprecated;
 var
 	Index : TSGMaxEnum;
 	Runs : TSGBoolean = True;
@@ -187,14 +187,14 @@ while Runs do
 	for Index := 0 to High(FDevices) do
 		SGPcapNext(
 			FDevices[Index].DeviceHandle,
-			TSGPcapCallBack(@TSGInternetPacketListener_LoopCallBack),
+			TSGPcapCallBack(@TSGInternetPacketCaptor_LoopCallBack),
 			@FDevices[Index]);
 	if KeyPressed and (ReadKey = #27) then
 		Runs := False;
 	end;
 end;
 
-function TSGInternetPacketListener.BeginLoopThreads(const WithDelay : TSGBoolean = False) : TSGBoolean; 
+function TSGInternetPacketCaptor.BeginLoopThreads(const WithDelay : TSGBoolean = False) : TSGBoolean; 
 begin
 Result := DevicesConstruct();
 if Result then
@@ -202,23 +202,23 @@ if Result then
 	InitThreads();
 	StartThreads();
 	if WithDelay then
-		Delay(SGInternetPacketListenerDefaultDelay * Length(FDevices));
+		Delay(SGInternetPacketCaptorDefaultDelay * Length(FDevices));
 	end;
 end;
 
-procedure TSGInternetPacketListener.LoopThreads();
+procedure TSGInternetPacketCaptor.LoopThreads();
 begin
 if BeginLoopThreads(True) then
 	while not AllThreadsFinished() do
 		DefaultDelay();
 end;
 
-procedure TSGInternetPacketListener.DefaultDelay();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGInternetPacketCaptor.DefaultDelay();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Delay(SGInternetPacketListenerDefaultDelay);
+Delay(SGInternetPacketCaptorDefaultDelay);
 end;
 
-function TSGInternetPacketListener.InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketListenerDevice) : TSGBoolean;
+function TSGInternetPacketCaptor.InitDevice(const DeviceName : TSGString; var DeviceData : TSGInternetPacketCaptorDevice) : TSGBoolean;
 begin
 Result := False;
 DeviceData.DeviceName := SGStringToPChar(DeviceName);
@@ -247,7 +247,7 @@ else
 	end;
 end;
 
-procedure TSGInternetPacketListener.AddDevice(const DeviceData : TSGInternetPacketListenerDevice);
+procedure TSGInternetPacketCaptor.AddDevice(const DeviceData : TSGInternetPacketCaptorDevice);
 begin
 if FDevices = nil then
 	SetLength(FDevices, 1)
@@ -256,10 +256,10 @@ else
 FDevices[High(FDevices)] := DeviceData;
 end;
 
-function TSGInternetPacketListener.DevicesConstruct() : TSGBoolean;
+function TSGInternetPacketCaptor.DevicesConstruct() : TSGBoolean;
 var
 	DeviceNames : TSGStringList = nil;
-	TempDeviceData : TSGInternetPacketListenerDevice;
+	TempDeviceData : TSGInternetPacketCaptorDevice;
 	Index : TSGMaxEnum;
 begin
 Result := False;
@@ -289,7 +289,7 @@ if (FDevices <> nil) and (Length(FDevices) > 0) then
 	Result := True;
 end;
 
-procedure TSGInternetPacketListener.DevicesFree();
+procedure TSGInternetPacketCaptor.DevicesFree();
 var
 	Index : TSGMaxEnum;
 begin
@@ -321,7 +321,7 @@ for Index := 0 to High(FDevices) do
 SetLength(FDevices, 0);
 end;
 
-constructor TSGInternetPacketListener.Create();
+constructor TSGInternetPacketCaptor.Create();
 begin
 inherited;
 FCriticalSection := TSGCriticalSection.Create();
@@ -329,7 +329,7 @@ FCallBack := nil;
 FDevices := nil;
 end;
 
-destructor TSGInternetPacketListener.Destroy();
+destructor TSGInternetPacketCaptor.Destroy();
 begin
 DevicesFree();
 FCriticalSection.Destroy();
