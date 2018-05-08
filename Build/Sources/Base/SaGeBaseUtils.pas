@@ -34,28 +34,35 @@ function Iff(const b : TSGBoolean; const s1 : TSGFloat80; const s2 : TSGFloat80 
 
 // Swap
 procedure Swap(var x, y : TSGInt32); {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
-procedure Swap(var a, b; const Size : TSGUInt64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure Swap(var a, b; const Size : TSGUInt64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
-procedure Swap(var a, b : TSGInt64  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGUInt64 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGUInt32 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGInt16  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGUInt16 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGInt8   ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGUInt8  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGFloat32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGFloat64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGString ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGBoolean); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : PSGChar   ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure Swap(var a, b : TSGPointer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure Swap(var a, b : TSGInt64  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGUInt64 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGUInt32 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGInt16  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGUInt16 ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGInt8   ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGUInt8  ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGFloat32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGFloat64); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGString ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGBoolean); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : PSGChar   ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure Swap(var a, b : TSGPointer); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 {$IFNDEF WITHOUT_EXTENDED}
-procedure Swap(var a, b : TSGFloat80); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure Swap(var a, b : TSGFloat80); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 {$ENDIF WITHOUT_EXTENDED}
+
+procedure SwapBytes(var a : TSGUInt16); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 function SGNextCircularDynamicIndex(const Index, HighOfArray : TSGMaxEnum): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure SwapBytes(var a : TSGUInt16); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Swap(PSGUInt8(@a)[0], PSGUInt8(@a)[1]);
+end;
 
 function SGNextCircularDynamicIndex(const Index, HighOfArray : TSGMaxEnum): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

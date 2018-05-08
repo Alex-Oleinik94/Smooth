@@ -34,6 +34,7 @@ type
 		procedure WriteLines(const Strings : TSGStringList);
 		procedure WriteLines(const Stream : TStream);
 			public
+		property FileStream : TFileStream read FStream;
 		property Stream : TFileStream read FStream;
 		property CriticalSection : TSGCriticalSection read FCriticalSection;
 		property FileName : TSGString read FFileName;

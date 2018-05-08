@@ -45,11 +45,11 @@ type
 		function AddDevice(const DeviceData : TSGInternetPacketListenerDeviceData) : PSGInternetPacketDumperDeviceData;
 		procedure CreateDeviceInformationFile(const DumpDeviceData : TSGInternetPacketDumperDeviceData; const DeviceData : TSGInternetPacketListenerDeviceData);
 		procedure PrintInformation(const NowDateTime : TSGDateTime);
-		procedure DumpPacketData(const Directory : TSGString; const Packet : TSGInternetPacket);
+		procedure DumpPacketData(const Directory : TSGString; const Packet : TSGInternetListenerPacket);
 		procedure DumpPacketDataToFile(const FileName : TSGString; const Data; const DataLength : TSGUInt64);
 			public
 		procedure Start(); virtual;
-		procedure DumpPacket(const Packet : TSGInternetPacket);
+		procedure DumpPacket(const Packet : TSGInternetListenerPacket);
 		end;
 
 procedure SGInternetPacketDumper();
@@ -82,7 +82,7 @@ end;
 // ======TSGInternetPacketDumper CallBack======
 // ============================================
 
-procedure SGPacketDumping_CallBack(Self : TSGInternetPacketDumper; Packet : TSGInternetPacket);
+procedure SGPacketDumping_CallBack(Self : TSGInternetPacketDumper; Packet : TSGInternetListenerPacket);
 begin
 Self.DumpPacket(Packet);
 end;
@@ -112,7 +112,7 @@ with TFileStream.Create(FileName, fmCreate) do
 	end;
 end;
 
-procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Packet : TSGInternetPacket);
+procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Packet : TSGInternetListenerPacket);
 var
 	DateTimeString : TSGString;
 
@@ -139,7 +139,7 @@ Stream.WriteLn(['Length=', Packet.Data.Header.Len]);
 Stream.WriteLn(['ActualLength=', Packet.Data.Header.CapLen]);
 Stream.WriteLn();
 if Packet.Data.Header.CapLen = Packet.Data.Header.Len then
-	SGWritePacketInfo(Stream, Packet.Data.Data^, Packet.Data.Header.CapLen);
+	SGWritePacketInfo(Stream, Packet.Data.CreateStream(), True);
 Stream.Destroy();
 Stream := nil;
 end;
@@ -150,7 +150,7 @@ ProcessPacket();
 ProcessPacketInfo();
 end;
 
-procedure TSGInternetPacketDumper.DumpPacket(const Packet : TSGInternetPacket);
+procedure TSGInternetPacketDumper.DumpPacket(const Packet : TSGInternetListenerPacket);
 var
 	Device : PSGInternetPacketDumperDeviceData = nil;
 begin

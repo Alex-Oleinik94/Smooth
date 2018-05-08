@@ -36,16 +36,16 @@ type
 		end;
 	TSGInternetPacketListenerDevices = packed array of TSGInternetPacketListenerDevice;
 	
-	PSGInternetPacket = ^ TSGInternetPacket;
-	TSGInternetPacket = object
+	PSGInternetListenerPacket = ^ TSGInternetListenerPacket;
+	TSGInternetListenerPacket = object
 			public
 		Data   : TSGPcapPacket;
 		Device : PSGInternetPacketListenerDeviceData;
 		end;
 	
-	TSGInternetPacketListenerCallBack = procedure (Data : TSGPointer; Packet : TSGInternetPacket);
+	TSGInternetPacketListenerCallBack = procedure (Data : TSGPointer; Packet : TSGInternetListenerPacket);
 	
-	TSGInternetPacketListener = class(TSGObject)
+	TSGInternetPacketListener = class(TSGNamed)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -105,7 +105,7 @@ end;
 
 procedure TSGInternetPacketListener_LoopCallBack(DeviceData: PSGInternetPacketListenerDevice; Header: PSGPcapPacketHeader; Data: PByte);cdecl;
 var
-	Packet : TSGInternetPacket;
+	Packet : TSGInternetListenerPacket;
 begin
 DeviceData^.Handler.CriticalSection.Enter();
 try

@@ -62,17 +62,21 @@ function SGStr(const Ar: array of const) : TSGString;{$IFDEF SUPPORTINLINE}inlin
 function SGConstArrayToStringList(const Ar : array of const) : TSGStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGDeleteExcessSpaces(const S : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringReplace(const VString : TSGString; const C1, C2 : TSGChar):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator Enumerator(const List : TSGStringList): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator in(const VString : TSGString; const VList : TSGStringList) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator +(const VList : TSGStringList; const VString : TSGString) : TSGStringList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGAddrStr(const Source : TSGPointer; const RegisterType : TSGBoolean = True; const Prefix : TSGString = '$'):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringListFromString(const S : TSGString; const Separators : TSGString) : TSGStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringFromStringList(const S : TSGStringList; const Separator : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGUpCaseStringList(var SL : TSGStringList);overload;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList;overload;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStr4BitsHex(const Bits : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGChar; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+operator Enumerator(const List : TSGStringList): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in(const VString : TSGString; const VList : TSGStringList) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator +(const VList : TSGStringList; const VString : TSGString) : TSGStringList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // TStream
 function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -123,6 +127,39 @@ uses
 (************)
 (** STRING **)
 (************)
+
+function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SGStrByteHex(PSGByte(@Value)[1]) + SGStrByteHex(PSGByte(@Value)[0]);
+end;
+
+function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := SGStr4BitsHex(Value shr 4, RegisterType) + SGStr4BitsHex(Value and 15, RegisterType);
+end;
+
+function SGStr4BitsHex(const Bits : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGChar; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+case Bits of
+0  : Result := '0';
+1  : Result := '1';
+2  : Result := '2';
+3  : Result := '3';
+4  : Result := '4';
+5  : Result := '5';
+6  : Result := '6';
+7  : Result := '7';
+8  : Result := '8';
+9  : Result := '9';
+10 : if RegisterType then Result := 'A' else Result := 'a';
+11 : if RegisterType then Result := 'B' else Result := 'b';
+12 : if RegisterType then Result := 'C' else Result := 'c';
+13 : if RegisterType then Result := 'D' else Result := 'd';
+14 : if RegisterType then Result := 'E' else Result := 'e';
+15 : if RegisterType then Result := 'F' else Result := 'f';
+else Result := '?';
+end;
+end;
 
 function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
@@ -241,42 +278,13 @@ if S <> nil then
 		end;
 end;
 
-function SGAddrStr(const Source : TSGPointer):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function HexStr(const b : TSGByte):TSGChar;
-begin
-Result := ' ';
-case b of
-0:Result := '0';
-1:Result := '1';
-2:Result := '2';
-3:Result := '3';
-4:Result := '4';
-5:Result := '5';
-6:Result := '6';
-7:Result := '7';
-8:Result := '8';
-9:Result := '9';
-10:Result := 'A';
-11:Result := 'B';
-12:Result := 'C';
-13:Result := 'D';
-14:Result := 'E';
-15:Result := 'F';
-end;
-end;
-
-function ByteStr(const B : TSGByte):TSGString;
-begin
-Result := HexStr(b shr 4) + HexStr(b and 15);
-end;
-
+function SGAddrStr(const Source : TSGPointer; const RegisterType : TSGBoolean = True; const Prefix : TSGString = '$'):TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSGByte;
+	Index : TSGByte;
 begin
-Result := '$';
-for i := {$IFDEF CPU64} 7 {$ELSE} {$IFDEF CPU32} 3 {$ELSE} 1 {$ENDIF} {$ENDIF} downto 0 do
-	Result += ByteStr(PSGByte(@Source)[i]);
+Result := Prefix;
+for Index := SizeOf(TSGPointer) - 1 downto 0 do
+	Result += SGStrByteHex(PSGByte(@Source)[Index], RegisterType);
 end;
 
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

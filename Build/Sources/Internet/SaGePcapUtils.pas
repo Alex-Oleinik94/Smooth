@@ -10,8 +10,10 @@ uses
 	,SaGeClasses
 	,SaGeInternetBase
 	
-	,Pcap
 	,Sockets
+	,Classes
+	
+	,Pcap
 	;
 
 type
@@ -46,6 +48,7 @@ type
 		Header : TPcap_PacketHeader;
 		Data : PSGByte;
 			public
+		function CreateStream() : TMemoryStream;
 		procedure Free();
 		procedure ZeroMemory();
 		end;
@@ -77,6 +80,14 @@ uses
 		,SaGeWindowsUtils
 		{$ENDIF}
 	;
+
+
+function TSGPcapPacket.CreateStream() : TMemoryStream;
+begin
+Result := TMemoryStream.Create();
+Result.WriteBuffer(Data^, Header.CapLen);
+Result.Position := 0;
+end;
 
 procedure SGPcapClose(const Handle : TSGPcapDeviceHandle);
 begin
