@@ -8,7 +8,6 @@ uses
 	 SaGeBase
 	,SaGeModel
 	,SaGeGameBase
-	,SaGeNet
 	,SaGeContext
 	,SaGeCommonClasses
 	

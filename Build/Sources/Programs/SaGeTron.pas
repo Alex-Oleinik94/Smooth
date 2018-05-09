@@ -10,7 +10,8 @@ uses
 	
 	,SaGeBase
 	,SaGeCommonClasses
-	,SaGeNet
+	,SaGelNetBase
+	,SaGelNetUDPConnection
 	,SaGeLoading
 	,SaGeFont
 	,SaGeMesh
@@ -29,7 +30,7 @@ const
 	SGTStateStarting = $006002;
 	SGTStateViewing  = $006003;
 type
-	TSGGameTron=class(TSGDrawable)
+	TSGGameTron = class(TSGDrawable)
 			public
 		constructor Create(const VContext : ISGContext); override;
 		destructor Destroy(); override;

@@ -8,7 +8,8 @@ uses
 	 SaGeBase
 	,SaGeModel
 	,SaGeGameBase
-	,SaGeNet
+	,SaGelNetBase
+	,SaGelNetUDPConnection
 	;
 
 type

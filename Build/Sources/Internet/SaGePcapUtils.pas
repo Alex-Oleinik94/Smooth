@@ -1,7 +1,7 @@
 {$INCLUDE SaGe.inc}
 //{$DEFINE PCAP_HINT_TEST}
 
-unit SaGePcapUtils;
+unit SaGePCapUtils;
 
 interface
 

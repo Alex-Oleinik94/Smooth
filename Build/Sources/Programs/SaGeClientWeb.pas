@@ -10,8 +10,8 @@ uses
 	,SaGeBase
 	,SaGeRender
 	,SaGeCommonClasses
-	,SaGeNet
 	,SaGeDateTime
+	,SaGelNetHTTPUtils
 	
 	,fpjson
 	,jsonparser

@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeConsoleNetTools;
+unit SaGeConsoleInternetTools;
 
 interface
 
@@ -21,12 +21,14 @@ uses
 	,Classes
 	
 	,SaGeVersion
-	,SaGeNet
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeConsoleUtils
 	,SaGeInternetPacketDumper
 	,SaGeCasesOfPrint
+	,SaGelNetHTTPUtils
+	,SaGelNetUDPConnection
+	,SaGelNetConnectionClasses
 	;
 
 procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);

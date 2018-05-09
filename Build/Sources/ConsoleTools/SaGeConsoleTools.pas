@@ -21,7 +21,7 @@ function SGBuildConsoleCaller()   : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inli
 function SGApplicationsConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGHttpConsoleCaller()    : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGUdpConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGNetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGInternetConsoleCaller() : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -36,7 +36,7 @@ uses
 	,SaGeConsoleMathTools
 	,SaGeConsoleImageTools
 	,SaGeConsoleBuildTools
-	,SaGeConsoleNetTools
+	,SaGeConsoleInternetTools
 	,SaGeConsoleShaderTools
 	,SaGeConsoleHashTools
 	
@@ -55,7 +55,7 @@ var
 	ApplicationsConsoleCaller   : TSGConsoleCaller = nil;
 	HttpConsoleCaller    : TSGConsoleCaller = nil;
 	UdpConsoleCaller     : TSGConsoleCaller = nil;
-	NetConsoleCaller     :  TSGConsoleCaller = nil;
+	InternetConsoleCaller :  TSGConsoleCaller = nil;
 
 procedure SGConcoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -131,25 +131,25 @@ HttpConsoleCaller.Category('HTTP tools');
 HttpConsoleCaller.AddComand(@SGConsoleHTTPGet,  ['get'], 'GET Method');
 end;
 
-//============================
-(*=============Net===========*)
-//============================
+//=================================
+(*=============Internet===========*)
+//=================================
 
-procedure RunNetConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunInternetConsoleCaller(const VParams : TSGConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-NetConsoleCaller.Params := VParams;
-NetConsoleCaller.Execute();
+InternetConsoleCaller.Params := VParams;
+InternetConsoleCaller.Execute();
 end;
 
-procedure InitNetConsoleCaller();
+procedure InitInternetConsoleCaller();
 begin
-if NetConsoleCaller <> nil then
+if InternetConsoleCaller <> nil then
 	Exit;
-NetConsoleCaller := TSGConsoleCaller.Create(nil);
-NetConsoleCaller.Category('Internet tools');
-NetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
-NetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
-NetConsoleCaller.AddComand(@SGConsoleInternetPacketDumper, ['ipd'], 'Internet Packet Dumper');
+InternetConsoleCaller := TSGConsoleCaller.Create(nil);
+InternetConsoleCaller.Category('Internet tools');
+InternetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
+InternetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
+InternetConsoleCaller.AddComand(@SGConsoleInternetPacketDumper, ['ipd'], 'Internet Packet Dumper');
 end;
 
 //============================
@@ -247,7 +247,7 @@ GeneralConsoleCaller.AddComand(@SGConcoleCaller, ['CONSOLE'], 'Run console calle
 GeneralConsoleCaller.Category('Applications');
 GeneralConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
 GeneralConsoleCaller.Category('Other tools');
-GeneralConsoleCaller.AddComand(@RunNetConsoleCaller, ['net', 'nt'], 'Internet tools');
+GeneralConsoleCaller.AddComand(@RunInternetConsoleCaller, ['inet'], 'Internet tools');
 GeneralConsoleCaller.AddComand(@RunOtherConsoleCaller, ['oa'], 'Other Engine''s Console Programs');
 GeneralConsoleCaller.AddComand(@RunBuildConsoleCaller, ['bt'], 'Build tools');
 GeneralConsoleCaller.AddComand(@RunApplicationsConsoleCaller, ['app'], 'Applications');
@@ -300,10 +300,10 @@ InitUdpConsoleCaller();
 Result := UdpConsoleCaller;
 end;
 
-function SGNetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGInternetConsoleCaller()     : TSGConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitNetConsoleCaller();
-Result := NetConsoleCaller;
+InitInternetConsoleCaller();
+Result := InternetConsoleCaller;
 end;
 
 //============================
@@ -312,7 +312,7 @@ procedure InitConsoleCallers();
 begin
 InitUdpConsoleCaller();
 InitHttpConsoleCaller();
-InitNetConsoleCaller();
+InitInternetConsoleCaller();
 InitOtherConsoleCaller();
 InitBuildConsoleCaller();
 InitApplicationsConsoleCaller();
@@ -323,7 +323,7 @@ procedure DestroyConsoleCallers();
 begin
 SGKill(UdpConsoleCaller);
 SGKill(HttpConsoleCaller);
-SGKill(NetConsoleCaller);
+SGKill(InternetConsoleCaller);
 SGKill(OtherConsoleCaller);
 SGKill(BuildConsoleCaller);
 SGKill(ApplicationsConsoleCaller);
