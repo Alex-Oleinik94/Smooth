@@ -9,7 +9,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeCommonStructs
 	,SaGeImage
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 type
 	TSGMaterial    = class;
@@ -60,7 +60,7 @@ type
 		procedure AddBumpMap(const VFileName : TSGString);
 		function MapDiffusePath():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		function MapBumpPath():TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+		procedure WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 			public
 		procedure Bind(const BumpFormat : TSGBumpFormat; const HasTexture : TSGBoolean);
 		procedure UnBind(const BumpFormat : TSGBumpFormat; const HasTexture : TSGBoolean);
@@ -77,8 +77,9 @@ type
 implementation
 
 uses
-	 SaGeStringUtils,
-	 SaGeRenderBase
+	 SaGeStringUtils
+	,SaGeRenderBase
+	,SaGeLog
 	;
 
 procedure TSGMaterial.SetContext(const VContext : ISGContext);
@@ -115,29 +116,29 @@ begin
 Result := FName;
 end;
 
-procedure TSGMaterial.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure TSGMaterial.WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 
 procedure WriteImageInfo(const Image : TSGImage; const ImagePredStr : TSGString);
 begin
 if Image <> nil then
 	if Image.Image <> nil then
-		Image.Image.WriteInfo(ImagePredStr, ViewError);
+		Image.Image.WriteInfo(ImagePredStr, CasesOfPrint);
 end;
 
 begin
-SGHint(PredStr + 'TSGMaterial__WriteInfo(..)', ViewError);
-SGHint([PredStr,'  Name                = "', FName, '"'], ViewError);
-SGHint([PredStr,'  EnableTexture       = "', EnableTexture, '"'], ViewError);
-SGHint([PredStr,'  EnableBump          = "', FEnableBump, '"'], ViewError);
-SGHint([PredStr,'  MapDiffuse          = "', SGAddrStr(FMapDiffuse), '"'], ViewError);
+SGHint(PredStr + 'TSGMaterial__WriteInfo(..)', CasesOfPrint);
+SGHint([PredStr,'  Name                = "', FName, '"'], CasesOfPrint);
+SGHint([PredStr,'  EnableTexture       = "', EnableTexture, '"'], CasesOfPrint);
+SGHint([PredStr,'  EnableBump          = "', FEnableBump, '"'], CasesOfPrint);
+SGHint([PredStr,'  MapDiffuse          = "', SGAddrStr(FMapDiffuse), '"'], CasesOfPrint);
 WriteImageInfo(FMapDiffuse,  PredStr + '   d) ');
-SGHint([PredStr,'  MapBump             = "', SGAddrStr(FMapBump), '"'], ViewError);
+SGHint([PredStr,'  MapBump             = "', SGAddrStr(FMapBump), '"'], CasesOfPrint);
 WriteImageInfo(FMapBump,     PredStr + '   b) ');
-SGHint([PredStr,'  MapOpacity          = "', SGAddrStr(FMapOpacity), '"'], ViewError);
+SGHint([PredStr,'  MapOpacity          = "', SGAddrStr(FMapOpacity), '"'], CasesOfPrint);
 WriteImageInfo(FMapOpacity,  PredStr + '   o) ');
-SGHint([PredStr,'  MapSpecular         = "', SGAddrStr(FMapSpecular), '"'], ViewError);
+SGHint([PredStr,'  MapSpecular         = "', SGAddrStr(FMapSpecular), '"'], CasesOfPrint);
 WriteImageInfo(FMapSpecular, PredStr + '   s) ');
-SGHint([PredStr,'  MapAmbient          = "', SGAddrStr(FMapAmbient), '"'], ViewError);
+SGHint([PredStr,'  MapAmbient          = "', SGAddrStr(FMapAmbient), '"'], CasesOfPrint);
 WriteImageInfo(FMapAmbient,  PredStr + '   a) ');
 end;
 

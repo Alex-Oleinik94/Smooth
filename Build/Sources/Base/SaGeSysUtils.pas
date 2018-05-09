@@ -12,7 +12,7 @@ uses
 		{$ENDIF}
 	
 	,SaGeBase
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 
 // Core
@@ -65,12 +65,12 @@ function GetProcAddress(const Lib : TSGLibHandle; const VPChar : TSGString) : TS
 type
 	TSGException = Exception;
 procedure SGPrintStackTrace();
-procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);
 procedure SGLogException(const Title : TSGString; const e : Exception);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // Other
 function SGShortIntToInt(Value : TSGShortInt) : TSGInteger; {$IFDEF WITHASMINC} assembler; register; {$ENDIF} overload;
-procedure SGRunComand(const Comand : TSGString; const ViewCase : TSGViewType = [SGPrintType, SGLogType]);
+procedure SGRunComand(const Comand : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 function SGOperatingSystemVersion(): TSGString;
 
 implementation
@@ -88,6 +88,7 @@ uses
 	,Process
 	,Classes
 	
+	,SaGeLog
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeBaseUtils
@@ -101,7 +102,7 @@ uses
 procedure SGLogException(const Title : TSGString; const e : Exception);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SGLog.Source([Title, ' --->']);
-SGPrintExceptionStackTrace(e, [SGLogError]);
+SGPrintExceptionStackTrace(e, [SGCaseLog]);
 end;
 
 function SGOperatingSystemVersion(): TSGString;
@@ -135,7 +136,7 @@ begin
 Result := GetProcAddress(FLibrary, VProcedureName);
 end;
 
-procedure SGRunComand(const Comand : TSGString; const ViewCase : TSGViewType = [SGPrintType, SGLogType]);
+procedure SGRunComand(const Comand : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 var
 	AProcess: TProcess;
 
@@ -166,7 +167,7 @@ procedure ProcessString();
 begin
 if Str <> '' then
 	begin
-	SGHint(Str, ViewCase, False);
+	SGHint(Str, CasesOfPrint, False);
 	Str := '';
 	end;
 end;
@@ -241,14 +242,14 @@ if Length(Comand) >= 80 then
 end;
 
 begin
-if SGLogType in ViewCase then
+if SGCaseLog in CasesOfPrint then
 	LogComand();
 AProcess := TProcess.Create(nil);
 AProcess.CommandLine := Comand;
 AProcess.Options := AProcess.Options + [poUsePipes, poStderrToOutPut];
 AProcess.Execute();
 
-if (poUsePipes in AProcess.Options) and (ViewCase <> []) then
+if (poUsePipes in AProcess.Options) and (CasesOfPrint <> []) then
 	begin
 	//WriteFromStringList();
 	WriteFromBytes();
@@ -257,7 +258,7 @@ if (poUsePipes in AProcess.Options) and (ViewCase <> []) then
 AProcess.Free();
 end;
 
-procedure SGPrintExceptionStackTrace(const e : TSGException; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);
+procedure SGPrintExceptionStackTrace(const e : TSGException; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);
 var
 	I, H   : Integer;
 	Frames : PPointer;
@@ -275,7 +276,7 @@ for I := 0 to H do
 	if I <> H then
 		Report += SGWinEoln;
 	end;
-SGHint(Report, ViewCase, ViewTime);
+SGHint(Report, CasesOfPrint, ViewTime);
 Report := '';
 end;
 

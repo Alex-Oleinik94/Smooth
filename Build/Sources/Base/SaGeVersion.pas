@@ -82,6 +82,7 @@ uses
 	 SaGeLog
 	,SaGeBaseUtils
 	,SaGeSysUtils
+	,SaGeCasesOfPrint
 	
 	,Crt
 	;
@@ -172,7 +173,7 @@ begin
 if not VersionPrinted then
 	begin
 	TextColor(7);
-	SGHint(SGEngineFullVersion(), SGViewTypeFull, True);
+	SGHint(SGEngineFullVersion(), SGCasesOfPrintFull, True);
 	//WriteLn('Copyright (c) 2012-2016 by Alex');
 	SGLog.Source('Operating system: ' + SGOperatingSystemVersion());
 	end;

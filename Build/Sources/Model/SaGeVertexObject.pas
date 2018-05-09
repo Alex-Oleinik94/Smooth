@@ -10,8 +10,8 @@ uses
 	,SaGeCommonClasses
 	,SaGeCommonStructs
 	,SaGeMaterial
-	,SaGeLog
 	,SaGeMatrix
+	,SaGeCasesOfPrint
 	;
 type
 	// Это тип типа хранения цветов в модели
@@ -387,7 +387,7 @@ type
 		//procedure Stripificate(var VertexesAndTriangles:TSGArTSGArTSGFaceType;var OutputStrip:TSGArTSGFaceType);overload;
 		
 		// Выводит полную информацию о характеристиках модельки
-		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+		procedure WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 	public
 		// Возвращает, сколько занимают байтов вершины
 		function VertexesSize():QWord;Inline;
@@ -426,6 +426,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLog
 	,SaGeMathUtils
 	,SaGeCommon
 	,SaGeBaseUtils
@@ -1173,7 +1174,7 @@ begin
 Result:='TSG3dObject';
 end;
 
-procedure TSG3DObject.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure TSG3DObject.WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 
 function LinksVBO() : TSGString;
 var
@@ -1194,14 +1195,14 @@ var
 	FacePredString : TSGString = '';
 begin
 FacePredString := PredStr + '   ' + SGStr(Index + 1) + ') ';
-SGHint([FacePredString,'Index           = "',Index,'"'], ViewError);
-SGHint([FacePredString,'CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], ViewError);
-SGHint([FacePredString,'RealFaceLength  = "',GetFaceLength(Index),'"'], ViewError);
-SGHint([FacePredString,'MaterialID      = "',ArFaces[Index].FMaterial,'"'], ViewError);
-SGHint([FacePredString,'IndexFormat     = "'+SGStrMeshIndexFormat(ArFaces[Index].FIndexFormat)+'"'], ViewError);
-SGHint([FacePredString,'PoligonesType   = "', SGStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], ViewError);
+SGHint([FacePredString,'Index           = "',Index,'"'], CasesOfPrint);
+SGHint([FacePredString,'CountOfFaces    = "',ArFaces[Index].FNOfFaces,'"'], CasesOfPrint);
+SGHint([FacePredString,'RealFaceLength  = "',GetFaceLength(Index),'"'], CasesOfPrint);
+SGHint([FacePredString,'MaterialID      = "',ArFaces[Index].FMaterial,'"'], CasesOfPrint);
+SGHint([FacePredString,'IndexFormat     = "'+SGStrMeshIndexFormat(ArFaces[Index].FIndexFormat)+'"'], CasesOfPrint);
+SGHint([FacePredString,'PoligonesType   = "', SGStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], CasesOfPrint);
 TextColor(15);
-SGHint([FacePredString,'FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], ViewError);
+SGHint([FacePredString,'FacesSize       = "',SGGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], CasesOfPrint);
 TextColor(7);
 end;
 
@@ -1217,28 +1218,28 @@ end;
 
 begin
 TextColor(7);
-SGHint(PredStr + 'TSG3DObject__WriteInfo(..)', ViewError);
-SGHint([PredStr,'  Name                = "',FName,'"'], ViewError);
-SGHint([PredStr,'  CountOfVertexes     = "',FNOfVerts,'"'], ViewError);
-SGHint([PredStr,'  HasColors           = "',FHasColors,'"'], ViewError);
-SGHint([PredStr,'  HasNormals          = "',FHasNormals,'"'], ViewError);
-SGHint([PredStr,'  HasTexture          = "',FHasTexture,'"'], ViewError);
+SGHint(PredStr + 'TSG3DObject__WriteInfo(..)', CasesOfPrint);
+SGHint([PredStr,'  Name                = "',FName,'"'], CasesOfPrint);
+SGHint([PredStr,'  CountOfVertexes     = "',FNOfVerts,'"'], CasesOfPrint);
+SGHint([PredStr,'  HasColors           = "',FHasColors,'"'], CasesOfPrint);
+SGHint([PredStr,'  HasNormals          = "',FHasNormals,'"'], CasesOfPrint);
+SGHint([PredStr,'  HasTexture          = "',FHasTexture,'"'], CasesOfPrint);
 if FQuantityFaceArrays>0 then TextColor(10) else TextColor(12);
-SGHint([PredStr,'  QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], ViewError);
+SGHint([PredStr,'  QuantityFaceArrays  = "',FQuantityFaceArrays,'"'], CasesOfPrint);
 WriteFaceArrays();
-SGHint([PredStr,'  ObjectPoligonesType = "', SGStrPoligonesType(FObjectPoligonesType), '"'], ViewError);
-SGHint([PredStr,'  SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], ViewError);
-SGHint([PredStr,'  VertexFormat        = "', SGStrVertexFormat(FVertexType), '"'], ViewError);
-SGHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], ViewError);
-SGHint([PredStr,'  ColorType           = "' + SGStrMeshColorFormat(FColorType) + '"'], ViewError);
+SGHint([PredStr,'  ObjectPoligonesType = "', SGStrPoligonesType(FObjectPoligonesType), '"'], CasesOfPrint);
+SGHint([PredStr,'  SizeOfOneVertex     = "',GetSizeOfOneVertex(),'"'], CasesOfPrint);
+SGHint([PredStr,'  VertexFormat        = "', SGStrVertexFormat(FVertexType), '"'], CasesOfPrint);
+SGHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], CasesOfPrint);
+SGHint([PredStr,'  ColorType           = "' + SGStrMeshColorFormat(FColorType) + '"'], CasesOfPrint);
 TextColor(15);
-SGHint([PredStr,'  VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"'], ViewError);
+SGHint([PredStr,'  VertexesSize        = "',SGGetSizeString(VertexesSize(),'EN'),'"'], CasesOfPrint);
 if FQuantityFaceArrays>0 then
-	SGHint([PredStr,'  AllSize             = "',SGGetSizeString(Size(),'EN'),'"'], ViewError);
+	SGHint([PredStr,'  AllSize             = "',SGGetSizeString(Size(),'EN'),'"'], CasesOfPrint);
 TextColor(7);
-SGHint([PredStr,'  EnableVBO           = "',FEnableVBO,'"'], ViewError);
-SGHint([PredStr,'  LinksVBO            = Vertex:',FVertexesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], ViewError);
-SGHint([PredStr,'  ObjectMaterialID    = "',FObjectMaterial,'"'], ViewError);
+SGHint([PredStr,'  EnableVBO           = "',FEnableVBO,'"'], CasesOfPrint);
+SGHint([PredStr,'  LinksVBO            = Vertex:',FVertexesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], CasesOfPrint);
+SGHint([PredStr,'  ObjectMaterialID    = "',FObjectMaterial,'"'], CasesOfPrint);
 end;
 
 function TSG3DObject.VertexesSize():TSGQuadWord;Inline;

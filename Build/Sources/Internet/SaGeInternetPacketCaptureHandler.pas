@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeDateTime
 	,SaGeInternetPacketCaptor
+	,SaGeCasesOfPrint
 	
 	,Classes
 	;
@@ -40,23 +41,29 @@ type
 		FDevicesData  : TSGInternetPacketCaptureHandlerDevicesData;
 		FPacketCaptor : TSGInternetPacketCaptor;
 			protected
-		FBeginingTime : TSGDateTime;
+		FTimeBegining : TSGDateTime;
+		FTimeLastUpdateInfo : TSGDateTime;
 		FPossibilityBreakLoopFromConsole : TSGBoolean;
-		FInfoTimeOut : TSGUInt64;
 		FProcessTimeOutUpdates : TSGBoolean;
+		FInfoTimeOut : TSGUInt64;
 			public
 		property PossibilityBreakLoopFromConsole : TSGBoolean read FPossibilityBreakLoopFromConsole write FPossibilityBreakLoopFromConsole;
 		property ProcessTimeOutUpdates : TSGBoolean read FProcessTimeOutUpdates write FProcessTimeOutUpdates;
 		property InfoTimeOut : TSGUInt64 read FInfoTimeOut write FInfoTimeOut;
-		property BeginingTime : TSGDateTime read FBeginingTime;
+		property TimeBegining : TSGDateTime read FTimeBegining;
 		property PacketCaptor : TSGInternetPacketCaptor read FPacketCaptor;
 			protected
 		function AllDataSize() : TSGUInt64;
 		function FindDevice(const DeviceName : TSGString) : PSGInternetPacketCaptureHandlerDeviceData;
 		function FindDevice(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator) : PSGInternetPacketCaptureHandlerDeviceData;
 		function AddDevice(const DeviceData : TSGInternetPacketCaptorDeviceData) : PSGInternetPacketCaptureHandlerDeviceData;
+			protected
+		procedure PrintStatistic(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure CreateDeviceInformationFile(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const FileName : TSGString);
 			public
+		function Start() : TSGBoolean;
+		procedure Stop();
+		function Update() : TSGBoolean;
 		procedure Loop(); virtual;
 		procedure HandlePacket(const Packet : TSGInternetCaptorPacket);
 			protected
@@ -69,6 +76,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLog
 	,SaGeVersion
 	,SaGeInternetBase
 	,SaGeTextFileStream
@@ -90,6 +98,24 @@ end;
 // ======TSGInternetPacketCaptureHandler======
 // ===========================================
 
+procedure TSGInternetPacketCaptureHandler.PrintStatistic(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
+var
+	Index : TSGMaxEnum;
+begin
+if (CasesOfPrint <> []) and (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
+	begin
+	TextColor(7);
+	SGHint(['Capture statistics:'], CasesOfPrint);
+	for Index := 0 to High(FDevicesData) do
+		begin
+		SGHint(['    Device "', FDevicesData[Index].DeviceDescription, '":'], CasesOfPrint);
+		SGHint(['        Count packets = ', FDevicesData[Index].CountPackets], CasesOfPrint);
+		SGHint(['        Size packets = ', SGGetSizeString(FDevicesData[Index].CountPacketsSize, 'EN')], CasesOfPrint);
+		SGHint(['        Defective packets = ', FDevicesData[Index].CountDefectivePackets], CasesOfPrint);
+		end;
+	end;
+end;
+
 procedure TSGInternetPacketCaptureHandler.CreateDeviceInformationFile(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const FileName : TSGString);
 var
 	TextFile : TSGTextFileStream = nil;
@@ -100,9 +126,9 @@ Device := FindDevice(Identificator);
 TextFile := TSGTextFileStream.Create(FileName);
 TextFile.WriteLn('[Device]');
 TextFile.WriteLn(['Name= ', Device^.DeviceName]);
-TextFile.WriteLn(['SystemName= ', SGPcapInternetAdapterSystemName(Device^.DeviceName)]);
-TextFile.WriteLn(['PcapDescription= ', SGPcapInternetAdapterPcapDescriptionFromName(Device^.DeviceName)]);
-TextFile.WriteLn(['SystemDescription= ', SGPcapInternetAdapterSystemDescriptionFromName(Device^.DeviceName)]);
+TextFile.WriteLn(['System Name= ', SGPcapInternetAdapterSystemName(Device^.DeviceName)]);
+TextFile.WriteLn(['Pcap Description= ', SGPcapInternetAdapterPcapDescriptionFromName(Device^.DeviceName)]);
+TextFile.WriteLn(['System Description= ', SGPcapInternetAdapterSystemDescriptionFromName(Device^.DeviceName)]);
 if (Device^.AdditionalOptions <> nil) and (Length(Device^.AdditionalOptions) > 0) then
 	for Index := 0 to High(Device^.AdditionalOptions) do
 		TextFile.WriteLn([Device^.AdditionalOptions[Index][0], '= ', Device^.AdditionalOptions[Index][1]]);
@@ -204,44 +230,68 @@ Result^.AdditionalOptions += SGDoubleString('IPv4 Mask', SGIPv4AddressToString(D
 HandleDevice(Result^.Identificator);
 end;
 
-procedure TSGInternetPacketCaptureHandler.Loop();
-var
-	LastInfoTime, NowInfoTime : TSGDateTime;
-	BreakLoopingFlag : TSGBoolean = False;
+function TSGInternetPacketCaptureHandler.Start() : TSGBoolean;
 begin
-if FPossibilityBreakLoopFromConsole then
-	begin
-	SGPrintEngineVersion();
-	WriteLn('Internet Packet Capture Handler: Press ESC to exit');
-	end;
+Result := False;
+FillChar(FTimeBegining, SizeOf(FTimeBegining), 0);
 
 FPacketCaptor := TSGInternetPacketCaptor.Create();
 FPacketCaptor.CallBack := TSGInternetPacketCaptorCallBack(@SGPacketCaptureHandler_CallBack);
 FPacketCaptor.CallBackData := Self;
-if FPacketCaptor.BeginLoopThreads(True) then
+Result := FPacketCaptor.BeginLoopThreads(False);
+if Result then
 	begin
-	FBeginingTime.Get();
+	FTimeBegining.Get();
 	if FProcessTimeOutUpdates then
-		LastInfoTime := FBeginingTime;
-	while (not BreakLoopingFlag) and (not FPacketCaptor.AllThreadsFinished()) do
+		FTimeLastUpdateInfo := FTimeBegining;
+	
+	if FPossibilityBreakLoopFromConsole then
 		begin
-		if FPossibilityBreakLoopFromConsole and KeyPressed() and (ReadKey = #27) then
-			break;
-		if FProcessTimeOutUpdates then
-			begin
-			NowInfoTime.Get();
-			if (NowInfoTime - LastInfoTime).GetPastMiliSeconds() > FInfoTimeOut then
-				begin
-				LastInfoTime := NowInfoTime;
-				BreakLoopingFlag := HandleTimeOutUpdate(NowInfoTime);
-				end;
-			end;
-		if BreakLoopingFlag then
-			FPacketCaptor.DefaultDelay();
+		SGPrintEngineVersion();
+		WriteLn('Capturing begins. Press Escape to stop!');
+		end;
+	
+	FPacketCaptor.DefaultDelay();
+	end
+else
+	Stop();
+end;
+
+procedure TSGInternetPacketCaptureHandler.Stop();
+begin
+if FPacketCaptor <> nil then
+	begin
+	FPacketCaptor.Destroy();
+	FPacketCaptor := nil;
+	end;
+end;
+
+function TSGInternetPacketCaptureHandler.Update() : TSGBoolean;
+var
+	Now : TSGDateTime;
+begin
+Result := FPacketCaptor.AllThreadsFinished();
+if (not Result) and FPossibilityBreakLoopFromConsole and KeyPressed() and (ReadKey = #27) then
+	Result := True;
+if (not Result) and FProcessTimeOutUpdates then
+	begin
+	Now.Get();
+	if (Now - FTimeLastUpdateInfo).GetPastMiliSeconds() > FInfoTimeOut then
+		begin
+		FTimeLastUpdateInfo := Now;
+		Result := HandleTimeOutUpdate(Now);
 		end;
 	end;
-FPacketCaptor.Destroy();
-FPacketCaptor := nil;
+end;
+
+procedure TSGInternetPacketCaptureHandler.Loop();
+begin
+if Start() then
+	begin
+	while not Update() do
+		FPacketCaptor.DefaultDelay();
+	Stop();
+	end;
 end;
 
 constructor TSGInternetPacketCaptureHandler.Create();
@@ -250,7 +300,8 @@ inherited;
 FDevicesData := nil;
 FPacketCaptor := nil;
 FInfoTimeOut := 100;
-FillChar(FBeginingTime, SizeOf(FBeginingTime), 0);
+FillChar(FTimeBegining, SizeOf(FTimeBegining), 0);
+FillChar(FTimeLastUpdateInfo, SizeOf(FTimeLastUpdateInfo), 0);
 FPossibilityBreakLoopFromConsole := False;
 FProcessTimeOutUpdates := False;
 end;
@@ -259,11 +310,7 @@ destructor TSGInternetPacketCaptureHandler.Destroy();
 var
 	Index : TSGMaxEnum;
 begin
-if FPacketCaptor <> nil then
-	begin
-	FPacketCaptor.Destroy();
-	FPacketCaptor := nil;
-	end;
+Stop();
 if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 	begin
 	for Index := 0 to High(FDevicesData) do

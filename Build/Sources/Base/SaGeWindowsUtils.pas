@@ -12,7 +12,7 @@ uses
 	,Windows
 	
 	,SaGeBase
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 
 function SGWindowsVersion(): TSGString;
@@ -20,7 +20,7 @@ function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; co
 function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGViewVideoDevices(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogInternetAdaptersInfo() : TSGMaxEnum;
 function SGInternetAdapterNames() : TSGStringList;
 function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
@@ -38,6 +38,7 @@ uses
 	
 	,SaGeBaseUtils
 	,SaGeStringUtils
+	,SaGeLog
 	;
 
 function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
@@ -197,7 +198,7 @@ if GetAdaptersInfo(AdaptersInfo, BufferLength) = NO_ERROR then
 FreeMem(AdaptersInfo);
 end;
 
-procedure SGViewVideoDevices(const ViewType : TSGViewErrorType = [SGLogType, SGPrintType]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGViewVideoDevices(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	Devices : TSGStringList = nil;
 	Names : TSGStringList = nil;
@@ -242,7 +243,7 @@ if h <> 0 then
 		end;
 	ml1 += 3;
 	ml2 += 3;
-	SGHint('Display devices: (' + SGStr(h + 1) + ') --->', ViewType, True);
+	SGHint('Display devices: (' + SGStr(h + 1) + ') --->', CasesOfPrint, True);
 	for i := 0 to h do
 		SGHint([
 				'	#', 
@@ -251,10 +252,10 @@ if h <> 0 then
 				StringJustifyLeft(QuoteChar + Devices[i] + QuoteChar + ',', ml1, ' '),
 				' Name : ',
 				StringTrimAll(StringJustifyLeft(QuoteChar + Names[i] + QuoteChar + Iff(i = h, '.', ';'), ml2, ' '), ' ')
-			], ViewType);
+			], CasesOfPrint);
 	end
 else
-	SGHint('Display devices are not found!', ViewType, True);
+	SGHint('Display devices are not found!', CasesOfPrint, True);
 SGKill(Devices);
 SGKill(Names);
 end;

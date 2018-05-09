@@ -118,6 +118,7 @@ implementation
 
 uses
 	 SaGeLog
+	,SaGeCasesOfPrint
 	,SaGeStringUtils
 	;
 
@@ -197,7 +198,7 @@ try
 except on e : TSGException do
 	begin
 	SGLog.Source(['TSGThread_Run(). While executing ',ThreadClass.ClassName(), '(', SGAddrStr(ThreadClass), ') raised exception --->']);
-	SGPrintExceptionStackTrace(e, SGViewErrorLog);
+	SGPrintExceptionStackTrace(e, SGCasesOfPrintLog);
 	end;
 end;
 {$IFDEF ANDROID}

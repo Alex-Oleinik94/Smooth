@@ -26,13 +26,18 @@ uses
 	,SaGeLog
 	,SaGeConsoleUtils
 	,SaGeInternetPacketDumper
+	,SaGeCasesOfPrint
 	;
 
 procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
 begin
 if SGCountConsoleParams(VParams) = 0 then
 	begin
-	SGInternetPacketDumper();
+	with TSGInternetPacketDumper.Create() do
+		begin
+		Loop();
+		Destroy();
+		end;
 	end
 else
 	SGHint('Params are not alowed here!');
@@ -128,13 +133,13 @@ end;
 function HTTPGet() : TSGBool;
 var
 	Stream : TMemoryStream = nil;
-	ViewCase : TSGViewErrorType = [];
+	CasesOfPrint : TSGCasesOfPrint = [];
 begin
 if Errors then
-	ViewCase := SGViewErrorFull;
-if SGPrintError in ViewCase then
+	CasesOfPrint := SGCasesOfPrintFull;
+if SGCasePrint in CasesOfPrint then
 	SGPrintEngineVersion();
-Stream := SGHTTPGetMemoryStream(URL, TimeOut, ViewCase);
+Stream := SGHTTPGetMemoryStream(URL, TimeOut, CasesOfPrint);
 Result := Stream <> nil;
 if Result then
 	begin
@@ -155,7 +160,7 @@ if Parse() and (URL <> '') then
 	if not HTTPGet() then
 		begin
 		SGPrintEngineVersion();
-		SGHint('HTTP:GET - Error!', SGViewErrorFull);
+		SGHint('HTTP:GET - Error!', SGCasesOfPrintFull);
 		end;
 	end
 else

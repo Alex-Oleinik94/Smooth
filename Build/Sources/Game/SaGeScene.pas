@@ -14,7 +14,7 @@ uses
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeCamera
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 
 type
@@ -42,26 +42,27 @@ type
 		property Camera : TSGCamera read FCamera;
 		property Models[Index : TSGLongWord]:TSGModel read GetModel;
 			public
-		procedure ViewInfo(const PredString : TSGString = ''; const ViewType : TSGViewType = [SGLogType, SGPrintType]);
+		procedure ViewInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);
 		end;
 
 implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLog
 	;
 
-procedure TSGScene.ViewInfo(const PredString : TSGString = ''; const ViewType : TSGViewType = [SGLogType, SGPrintType]);
+procedure TSGScene.ViewInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);
 var
 	i : TSGUInt32;
 begin
-SGHint([PredString, 'TSGScene__ViewInfo(..)'], ViewType);
-SGHint([PredString, '  Camera   = ', SGAddrStr(FCamera)], ViewType);
+SGHint([PredString, 'TSGScene__ViewInfo(..)'], CasesOfPrint);
+SGHint([PredString, '  Camera   = ', SGAddrStr(FCamera)], CasesOfPrint);
 if (FNods <> nil) and (Length(FNods) > 0) then
 	for i := 0 to High(FNods) do
 		if FNods[i] is TSGModel then
 			if (FNods[i] as TSGModel).Mesh <> nil then
-				(FNods[i] as TSGModel).Mesh.WriteInfo(PredString + '  ' + SGStr(i + 1) + ') ', ViewType);
+				(FNods[i] as TSGModel).Mesh.WriteInfo(PredString + '  ' + SGStr(i + 1) + ') ', CasesOfPrint);
 end;
 
 function TSGScene.LastModel():TSGModel;inline;

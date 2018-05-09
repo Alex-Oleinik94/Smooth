@@ -16,7 +16,7 @@ uses
 	,SaGeVersion
 	,SaGeClasses
 	,SaGeDateTime
-	,SaGeLog
+	,SaGeCasesOfPrint
 	
 	,lCommon
 	,lhttp
@@ -45,7 +45,7 @@ type
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 			protected
-		FViewErrorCase : TSGViewErrorType;
+		FViewErrorCase : TSGCasesOfPrint;
 		FConnection : TSGUDPConnectionClass;
 		FReceiveProcedure : TSGReceiveProcedure;
 		FNestedReceiveProcedure : TSGNestedReceiveProcedure;
@@ -163,10 +163,10 @@ type
 		procedure ClientProcessHeaders(ASocket: TLHTTPClientSocket);
 		end;
 
-function SGHTTPGetString      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGHTTPGetStream      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGHTTPGet            (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetString      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetStream      (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGet            (const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGMemoryStreamToString(MS : TMemoryStream;const DestroyStream : Boolean = False):String;
 
 function SGCheckURL(const URL : TSGString; const Protocol : TSGString = ''; const Port : TSGUInt16 = 0) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -183,6 +183,7 @@ implementation
 uses
 	 StrMan
 	
+	,SaGeLog
 	,SaGeConsoleTools
 	,SaGeConsoleUtils
 	,SaGeStringUtils
@@ -403,22 +404,22 @@ Result := ASize;
 	{$ENDIF}
 end;
 
-function SGHTTPGetString(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetString(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGMemoryStreamToString(SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase), True);
+Result := SGMemoryStreamToString(SGHTTPGetMemoryStream(URL, Timeout, CasesOfPrint), True);
 end;
 
-function SGHTTPGetStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase);
+Result := SGHTTPGetMemoryStream(URL, Timeout, CasesOfPrint);
 end;
 
-function SGHTTPGet(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGet(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGHTTPGetMemoryStream(URL, Timeout, ErrorViewCase);
+Result := SGHTTPGetMemoryStream(URL, Timeout, CasesOfPrint);
 end;
 
-function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const ErrorViewCase : TSGViewErrorType = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGHTTPGetMemoryStream(const URL : TSGString; const Timeout : TSGLongWord = SGDefaultHTTPTimeOut; const CasesOfPrint : TSGCasesOfPrint = []) : TMemoryStream;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	Client : TSGHTTPHandler = nil;
 	HttpClient : TLHTTPClient = nil;
@@ -430,19 +431,19 @@ var
 begin
 Result:=nil;
 Protocol := SGGetURLProtocol(URL);
-SGHint(['HTTP:Get<lNet>: Protocol="', Protocol, '"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Protocol="', Protocol, '"'], CasesOfPrint);
 if Protocol = '' then
 	Protocol := 'http';
 FinalURL := SGCheckURL(URL, Protocol);
 UseSSL := DecomposeURL(FinalURL, Host, URI, Port);
-SGHint(['HTTP:Get<lNet>: URL="', FinalURL, '"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: URL="', FinalURL, '"'], CasesOfPrint);
 if UseSSL then
 	begin
-	SGHint(['HTTP:Get<lNet>: SSL does not supporting! Exit.'], ErrorViewCase + [SGLogError]);
+	SGHint(['HTTP:Get<lNet>: SSL does not supporting! Exit.'], CasesOfPrint + [SGCaseLog]);
 	Exit;
 	end;
 
-SGHint(['HTTP:Get<lNet>: Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Try get from: Host="',Host,'", URI="',URI,'", Port="',Port,'", TimeOut="',TimeOut,'"'], CasesOfPrint);
 
 Client := TSGHTTPHandler.Create();
 Client.Done := False;
@@ -464,7 +465,7 @@ HttpClient.SendRequest();
 Client.Done := False;
 Client.Error := False;
 
-SGHint('HTTP:Get<lNet>: Begin looping...', ErrorViewCase);
+SGHint('HTTP:Get<lNet>: Begin looping...', CasesOfPrint);
 
 while (not Client.Done) and (not Client.Error) do
 	begin
@@ -481,7 +482,7 @@ else
 
 Client.Destroy();
 
-SGHint(['HTTP:Get<lNet>: Done with  Result=',SGAddrStr(Result),'.'], ErrorViewCase);
+SGHint(['HTTP:Get<lNet>: Done with  Result=',SGAddrStr(Result),'.'], CasesOfPrint);
 if Result <> nil then
 	Result.Position := 0;
 end;
@@ -532,7 +533,7 @@ begin
 inherited;
 FNestedReceiveProcedure := nil;
 FReceiveProcedure := nil;
-FViewErrorCase := [SGPrintError, SGLogError];
+FViewErrorCase := [SGCasePrint, SGCaseLog];
 FConnection := TSGUDPConnectionClass.Create(nil);
 FConnection.OnError := TLSocketErrorEvent(@OnError);
 FConnection.OnReceive := @OnReceive;

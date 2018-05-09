@@ -174,6 +174,7 @@ implementation
 uses
 	 SaGeRenderOpenGL
 	,SaGeLog
+	,SaGeCasesOfPrint
 	{$IFDEF MSWINDOWS}
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
@@ -189,8 +190,8 @@ var
 
 procedure SGLogVideoInfo();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SGViewVideoDevices([SGLogType]);
-SGNVidiaViewInfo([SGLogType]);
+SGViewVideoDevices([SGCaseLog]);
+SGNVidiaViewInfo([SGCaseLog]);
 end;
 {$ENDIF}
 

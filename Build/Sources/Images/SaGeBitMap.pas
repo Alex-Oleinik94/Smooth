@@ -13,7 +13,7 @@ uses
 	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeCommonStructs
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 type
 	TSGImageByte = type TSGByte;
@@ -77,7 +77,7 @@ type
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+		procedure WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure ReAllocateMemory();
 			public
 		procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
@@ -112,7 +112,8 @@ function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUP
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeLog
+	,SaGeStringUtils
 	,SaGeMathUtils
 	;
 
@@ -390,15 +391,15 @@ case FChannels*FSizeChannel of
 end;
 end;
 
-procedure TSGBitMap.WriteInfo(const PredStr : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure TSGBitMap.WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 begin
-SGHint(PredStr + 'TSGBitMap__WriteInfo(..)', ViewError);
-SGHint([PredStr,' Width    = ',FWidth], ViewError);
-SGHint([PredStr,' Height   = ',FHeight], ViewError);
-SGHint([PredStr,' Channels = ',FChannels], ViewError);
-SGHint([PredStr,' BitDepth = ',FSizeChannel], ViewError);
+SGHint(PredStr + 'TSGBitMap__WriteInfo(..)', CasesOfPrint);
+SGHint([PredStr,' Width    = ',FWidth], CasesOfPrint);
+SGHint([PredStr,' Height   = ',FHeight], CasesOfPrint);
+SGHint([PredStr,' Channels = ',FChannels], CasesOfPrint);
+SGHint([PredStr,' BitDepth = ',FSizeChannel], CasesOfPrint);
 TextColor(15);
-SGHint([PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN')], ViewError);
+SGHint([PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN')], CasesOfPrint);
 TextColor(7);
 end;
 

@@ -9,7 +9,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeMatrix
-	,SaGeLog
+	,SaGeCasesOfPrint
 	;
 
 type
@@ -34,7 +34,7 @@ type
 		FChangingLookAtObject : TSGBoolean;
 			public
 		procedure Change();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ViewInfo(const PredString : TSGString = ''; const ViewCase : TSGViewType = [SGLogType, SGPrintType]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ViewInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure InitMatrix();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CallAction();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -69,6 +69,7 @@ implementation
 
 uses
 	 SaGeRenderBase
+	,SaGeLog
 	,SaGeContext
 	,SaGeCommon
 	,SaGeStringUtils
@@ -93,26 +94,26 @@ else                     Result := 'INVALID(' + SGStr(Mode) + ')';
 end;
 end;
 
-procedure TSGCamera.ViewInfo(const PredString : TSGString = ''; const ViewCase : TSGViewType = [SGLogType, SGPrintType]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGCamera.ViewInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SGHint([PredString, 'TSGCamera__ViewInfo(..).'], ViewCase);
-SGHint([PredString,     '  MatrixMode     = "', SGStrMatrixMode(FMatrixMode), '"'], ViewCase);
-SGHint([PredString,     '  ViewMode       = "', SGStrViewMode(FViewMode), '"'], ViewCase);
+SGHint([PredString, 'TSGCamera__ViewInfo(..).'], CasesOfPrint);
+SGHint([PredString,     '  MatrixMode     = "', SGStrMatrixMode(FMatrixMode), '"'], CasesOfPrint);
+SGHint([PredString,     '  ViewMode       = "', SGStrViewMode(FViewMode), '"'], CasesOfPrint);
 case FViewMode of
 SG_VIEW_LOOK_AT_OBJECT :
 	begin
-	SGHint([PredString, '  ChangingLookAt = "', FChangingLookAtObject, '"'], ViewCase);
-	SGHint([PredString, '  Location       = "', SGStrVector3f(FLocation, 7), '"'], ViewCase);
-	SGHint([PredString, '  Up             = "', SGStrVector3f(FUp, 7), '"'], ViewCase);
-	SGHint([PredString, '  View           = "', SGStrVector3f(FView, 7), '"'], ViewCase);
+	SGHint([PredString, '  ChangingLookAt = "', FChangingLookAtObject, '"'], CasesOfPrint);
+	SGHint([PredString, '  Location       = "', SGStrVector3f(FLocation, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  Up             = "', SGStrVector3f(FUp, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  View           = "', SGStrVector3f(FView, 7), '"'], CasesOfPrint);
 	end;
 SG_VIEW_WATCH_OBJECT :
 	begin
-	SGHint([PredString, '  Rotate.X       = "', SGStrReal(FRotateX, 7), '"'], ViewCase);
-	SGHint([PredString, '  Rotate.Y       = "', SGStrReal(FRotateY, 7), '"'], ViewCase);
-	SGHint([PredString, '  Translate.X    = "', SGStrReal(FTranslateX, 7), '"'], ViewCase);
-	SGHint([PredString, '  Translate.Y    = "', SGStrReal(FTranslateY, 7), '"'], ViewCase);
-	SGHint([PredString, '  Zum            = "', SGStrReal(FZum, 7), '"'], ViewCase);
+	SGHint([PredString, '  Rotate.X       = "', SGStrReal(FRotateX, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  Rotate.Y       = "', SGStrReal(FRotateY, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  Translate.X    = "', SGStrReal(FTranslateX, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  Translate.Y    = "', SGStrReal(FTranslateY, 7), '"'], CasesOfPrint);
+	SGHint([PredString, '  Zum            = "', SGStrReal(FZum, 7), '"'], CasesOfPrint);
 	end;
 end;
 end;

@@ -13,10 +13,10 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeCommonClasses
-	,SaGeLog
 	,SaGeMatrix
 	,SaGeVertexObject
 	,SaGeMaterial
+	,SaGeCasesOfPrint
 	
 	,Classes
 	,Crt
@@ -71,7 +71,7 @@ type
 		procedure DrawObject(const Index : TSGLongWord);
         procedure Paint(); override;
 		procedure LoadToVBO();
-        procedure WriteInfo(const PredString : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+        procedure WriteInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
         procedure Clear(); virtual;
         // SGR_TRIANGLES -> SGR_TRIANGLE_STRIP
         procedure Stripificate();
@@ -91,6 +91,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLog
 	,SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeSysUtils
@@ -163,21 +164,21 @@ begin
 Result := 'TSGCustomModel';
 end;
 
-procedure TSGCustomModel.WriteInfo(const PredString : TSGString = ''; const ViewError : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure TSGCustomModel.WriteInfo(const PredString : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 var
 	Index : TSGMaxEnum;
 begin
 TextColor(7);
-SGHint(PredString + 'TSGCustomModel__WriteInfo(..)', ViewError);
-SGHint([PredString, '  QuantityMaterials = ', FQuantityMaterials], ViewError);
-SGHint([PredString, '  QuantityObjects   = ', FQuantityObjects], ViewError);
+SGHint(PredString + 'TSGCustomModel__WriteInfo(..)', CasesOfPrint);
+SGHint([PredString, '  QuantityMaterials = ', FQuantityMaterials], CasesOfPrint);
+SGHint([PredString, '  QuantityObjects   = ', FQuantityObjects], CasesOfPrint);
 if FQuantityMaterials <> 0 then
 	for Index :=0 to FQuantityMaterials - 1 do
-		FArMaterials[Index].WriteInfo(PredString + '  ' + SGStr(Index + 1) + ') ', ViewError);
+		FArMaterials[Index].WriteInfo(PredString + '  ' + SGStr(Index + 1) + ') ', CasesOfPrint);
 if FQuantityObjects <> 0 then
 	for Index := 0 to FQuantityObjects - 1 do
 		if FArObjects[Index].FMesh <> nil then
-			FArObjects[Index].FMesh.WriteInfo(PredString + '  ' + SGStr(Index + 1) + ') ', ViewError);
+			FArObjects[Index].FMesh.WriteInfo(PredString + '  ' + SGStr(Index + 1) + ') ', CasesOfPrint);
 end;
 
 

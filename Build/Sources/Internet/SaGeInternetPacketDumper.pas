@@ -28,6 +28,7 @@ type
 		procedure PrintInformation(const NowDateTime : TSGDateTime);
 		procedure DumpPacketDataToFile(const FileName : TSGString; const Stream : TStream);
 		procedure DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
+		procedure ExportPacketInfoToFile(const DateTimeString, FileNameWithOutExtension : TSGString; const Stream : TStream);
 			public
 		procedure Loop(); override;
 			protected
@@ -35,8 +36,6 @@ type
 		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
 		function HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean; override;
 		end;
-
-procedure SGInternetPacketDumper();
 
 implementation
 
@@ -50,18 +49,15 @@ uses
 	,Crt
 	;
 
-procedure SGInternetPacketDumper();
-begin
-with TSGInternetPacketDumper.Create() do
-	begin
-	Loop();
-	Destroy();
-	end;
-end;
-
 // ===================================
 // ======TSGInternetPacketDumper======
 // ===================================
+
+procedure TSGInternetPacketDumper.Loop();
+begin
+inherited Loop();
+PrintStatistic();
+end;
 
 procedure TSGInternetPacketDumper.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
 var
@@ -102,40 +98,30 @@ if DeviceDirectory <> '' then
 	DumpPacketData(DeviceDirectory, Stream, Time);
 end;
 
-procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
+procedure TSGInternetPacketDumper.ExportPacketInfoToFile(const DateTimeString, FileNameWithOutExtension : TSGString; const Stream : TStream);
 var
-	DateTimeString : TSGString;
-
-procedure ProcessPacket();
-var
-	FileName : TSGString;
-begin
-FileName := Directory + DirectorySeparator + DateTimeString + '.' + FPacketDataFileExtension;
-FileName := SGFreeFileName(FileName, '');
-DumpPacketDataToFile(FileName, Stream);
-end;
-
-procedure ProcessPacketInfo();
-var
-	FileName : TSGString;
 	TextFile : TSGTextFileStream = nil;
 begin
-FileName := Directory + DirectorySeparator + DateTimeString + '.' + FPacketInfoFileExtension;
-FileName := SGFreeFileName(FileName, '');
-TextFile := TSGTextFileStream.Create(FileName);
+TextFile := TSGTextFileStream.Create(SGFreeFileName(FileNameWithOutExtension + FPacketInfoFileExtension, ''));
 TextFile.WriteLn('[packet]');
 TextFile.WriteLn(['DataTime=', DateTimeString]);
 TextFile.WriteLn(['Size=', Stream.Size]);
 TextFile.WriteLn();
+Stream.Position := 0;
 SGWritePacketInfo(TextFile, Stream, False);
 TextFile.Destroy();
 TextFile := nil;
 end;
 
+procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
+var
+	DateTimeString : TSGString;
+	FileNameWithOutExtension : TSGString;
 begin
 DateTimeString := SGDateTimeCorrectionString(Time, True);
-ProcessPacket();
-ProcessPacketInfo();
+FileNameWithOutExtension := Directory + DirectorySeparator + DateTimeString + '.';
+DumpPacketDataToFile(SGFreeFileName(FileNameWithOutExtension + FPacketDataFileExtension, ''), Stream);
+ExportPacketInfoToFile(DateTimeString, FileNameWithOutExtension, Stream);
 end;
 
 procedure TSGInternetPacketDumper.PrintInformation(const NowDateTime : TSGDateTime);
@@ -144,7 +130,7 @@ SGPrintEngineVersion();
 TextColor(15);
 Write('После ');
 TextColor(10);
-Write(SGTextTimeBetweenDates(FBeginingTime, NowDateTime, 'ENG'));
+Write(SGTextTimeBetweenDates(FTimeBegining, NowDateTime, 'ENG'));
 TextColor(15);
 Write(' всего перехвачено ');
 TextColor(12);
@@ -152,13 +138,6 @@ Write(SGGetSizeString(AllDataSize(), 'EN'));
 TextColor(15);
 WriteLn(' данных.');
 TextColor(7);
-end;
-
-procedure TSGInternetPacketDumper.Loop();
-begin
-PossibilityBreakLoopFromConsole := True;
-ProcessTimeOutUpdates := True;
-inherited Loop();
 end;
 
 constructor TSGInternetPacketDumper.Create();
@@ -169,6 +148,9 @@ SGMakeDirectory(FGeneralDirectory);
 FPacketDataFileExtension := 'ipdpd';
 FDeviceInfarmationFileExtension := 'ini';
 FPacketInfoFileExtension := 'ini';
+PossibilityBreakLoopFromConsole := True;
+ProcessTimeOutUpdates := True;
+InfoTimeOut := 90;
 end;
 
 destructor TSGInternetPacketDumper.Destroy();

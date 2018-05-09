@@ -9,25 +9,9 @@ uses
 	,SysUtils
 	
 	,SaGeBase
+	,SaGeCasesOfPrint
 	,SaGeFileUtils
 	;
-type
-	TSGViewErrorCase = (
-		SGPrintError,
-		SGLogError);
-	TSGViewErrorType = set of TSGViewErrorCase;
-	TSGViewType = TSGViewErrorType;
-const
-	SGLogType = SGLogError;
-	SGPrintType = SGPrintError;
-	SGViewErrorFull  : TSGViewErrorType = [SGPrintError, SGLogError];
-	SGViewErrorPrint : TSGViewErrorType = [SGPrintError];
-	SGViewErrorLog   : TSGViewErrorType = [SGLogError];
-	SGViewErrorNULL  : TSGViewErrorType = [];
-	SGViewTypeFull  : TSGViewType = [SGLogType, SGPrintType];
-	SGViewTypePrint : TSGViewType = [SGPrintType];
-	SGViewTypeLog   : TSGViewType = [SGLogType];
-	SGViewTypeNULL  : TSGViewType = [];
 const
 	SGLogExtension = 'log';
 var
@@ -58,8 +42,8 @@ var
 	//Экземпляр класса лога программы
 	SGLog : TSGLog = nil;
 
-procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
-procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessageStr : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessagePtrs : array of const; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
 procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -131,16 +115,16 @@ FFileStream.SaveToFile(FileName);
 FFileStream.Destroy();
 end;
 
-procedure SGHint(const MessagePtrs : array of const; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessagePtrs : array of const; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 begin
-SGHint(SGStr(MessagePtrs), ViewCase, ViewTime);
+SGHint(SGStr(MessagePtrs), CasesOfPrint, ViewTime);
 end;
 
-procedure SGHint(const MessageStr : TSGString; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
+procedure SGHint(const MessageStr : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 begin
-if SGLogError in ViewCase then
+if SGCaseLog in CasesOfPrint then
 	SGLog.Source(MessageStr, ViewTime);
-if SGPrintError in ViewCase then
+if SGCasePrint in CasesOfPrint then
 	WriteLn(SGConvertStringToConsoleEncoding(MessageStr));
 end;
 

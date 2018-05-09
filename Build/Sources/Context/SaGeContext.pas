@@ -21,7 +21,7 @@ uses
 	,SaGeRenderInterface
 	,SaGeAudioRenderInterface
 	,SaGeCommonStructs
-	,SaGeLog
+	,SaGeCasesOfPrint
 	
 	,Classes
 	,Crt
@@ -266,7 +266,7 @@ function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{
 procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
 procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
 function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
 
 implementation
@@ -274,6 +274,7 @@ implementation
 uses
 	 SysUtils
 	
+	,SaGeLog
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
@@ -411,7 +412,7 @@ begin
 Result.Import(VName, VOption);
 end;
 
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const ViewCase : TSGViewErrorType = [SGPrintError, SGLogError]);
+procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 
 function WordName(const S : TSGString):TSGString;
 begin
@@ -480,7 +481,7 @@ for O in VSettings do
 	end;
 SetLength(StandartOptions, 0);
 S += ')';
-SGHint(S, ViewCase, True);
+SGHint(S, CasesOfPrint, True);
 S := '';
 end;
 
@@ -723,7 +724,7 @@ if MaxExists or MinExists then
 		begin
 		PaintableSettings -= 'MAX';
 		PaintableSettings -= 'MIN';
-		SGHint('Run : warning : maximization and minimization are not available at the same time!', SGViewTypeFull, True);
+		SGHint('Run : warning : maximization and minimization are not available at the same time!', SGCasesOfPrintFull, True);
 		end;
 	end;
 end;
@@ -737,7 +738,7 @@ end;
 end;
 
 begin
-SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)', SGViewTypeFull, True);
+SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)', SGCasesOfPrintFull, True);
 SGPrintContextSettings(VSettings);
 Settings := VSettings;
 if not VRenderClass.Suppored then
