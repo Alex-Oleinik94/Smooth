@@ -9,31 +9,25 @@ uses
 	,SaGeClasses
 	,SaGeInternetBase
 	,SaGeTextFileStream
+	,SaGeEthernetPacketFrame
 	
 	,Classes
 	;
 
 type
-	TSGEthernetProtocolData = object
-		
-		end;
-	
 	TSGInternetPacketDeterminer = class(TSGNamed)
 			public
 		destructor Destroy(); override;
 		constructor Create(); override;
 			private
-		FEthernetHeader : TSGEthernetHeader;
-		FProtocolData : TSGEthernetProtocolData;
+		FEthernetFrame : TSGEthernetPacketFrame;
 			private
 		procedure DeterminePacket(const Stream : TStream);
 			public
 		procedure Determine(const Stream : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
 		procedure WriteInfoToStream(const Stream : TSGTextFileStream);
 			public
-		function EthernetDestination() : TSGString;
-		function EthernetSource() : TSGString;
-		function EthernetProtocol() : TSGString;
+		property EthernetFrame : TSGEthernetPacketFrame read FEthernetFrame;
 		end;
 
 procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
@@ -56,8 +50,13 @@ end;
 
 procedure TSGInternetPacketDeterminer.DeterminePacket(const Stream : TStream);
 begin
-Stream.ReadBuffer(FEthernetHeader, SizeOf(TSGEthernetHeader));
-//todo
+if FEthernetFrame <> nil then
+	begin
+	FEthernetFrame.Destroy();
+	FEthernetFrame := nil;
+	end;
+FEthernetFrame := TSGEthernetPacketFrame.Create();
+FEthernetFrame.Read(Stream);
 end;
 
 procedure TSGInternetPacketDeterminer.Determine(const Stream : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
@@ -72,43 +71,24 @@ end;
 
 procedure TSGInternetPacketDeterminer.WriteInfoToStream(const Stream : TSGTextFileStream);
 begin
-with Stream do
-	begin
-	WriteLn('[ethernet]');
-	WriteLn(['Destination = ', EthernetDestination()]);
-	WriteLn(['Source      = ', EthernetSource()]);
-	WriteLn(['Protocol    = ', EthernetProtocol()]);
-	WriteLn();
-	end;
-//todo
-end;
-
-
-function TSGInternetPacketDeterminer.EthernetDestination() : TSGString;
-begin
-Result := SGEthernetAddesssToString(FEthernetHeader.Destination);
-end;
-
-function TSGInternetPacketDeterminer.EthernetSource() : TSGString;
-begin
-Result := SGEthernetAddesssToString(FEthernetHeader.Source);
-end;
-
-function TSGInternetPacketDeterminer.EthernetProtocol() : TSGString;
-begin
-Result := SGEthernetProtocolToStringExtended(FEthernetHeader.Protocol);
+if FEthernetFrame <> nil then
+	FEthernetFrame.ExportInfo(Stream);
 end;
 
 destructor TSGInternetPacketDeterminer.Destroy();
 begin
-FillChar(FEthernetHeader, SizeOf(FEthernetHeader), 0);
+if FEthernetFrame <> nil then
+	begin
+	FEthernetFrame.Destroy();
+	FEthernetFrame := nil;
+	end;
 inherited;
 end;
 
 constructor TSGInternetPacketDeterminer.Create();
 begin
 inherited;
-FillChar(FEthernetHeader, SizeOf(FEthernetHeader), 0);
+FEthernetFrame := nil;
 end;
 
 end.

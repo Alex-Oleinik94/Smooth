@@ -27,7 +27,7 @@ type
 			public
 		Destination   : TSGEnthernetAddress;       // Destination host address
 		Source        : TSGEnthernetAddress;       // Source host address
-		ProtocolBytes : TSGEnthernetProtocolBytes; // IP? ARP? RARP? etc
+		FProtocol     : TSGEnthernetProtocolBytes; // IP? ARP? RARP? etc
 			private
 		function GetProtocol() : TSGEnthernetProtocol;
 			public
@@ -99,7 +99,7 @@ type
 	PSGIPv4Address = ^TSGIPv4Address;
 	TSGIPv4Address = packed record
 		case TSGBoolean of
-		True: (Address  : TSGIPv4AddressValue);
+		True : (Address     : TSGIPv4AddressValue);
 		False: (AddressByte : TSGIPv4AddressBytes);
 		end;
 
@@ -111,43 +111,198 @@ function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; over
 
 // IPv4 header
 type
+	TSGInternetProtocol = TSGUInt8;
 	TSGIPv4Header = object
 			public
-		ip_vhl : TSGUInt8; // version << 4 | header length >> 2
-		ip_tos : TSGUInt8; // type of service
-		ip_len : TSGUInt16; // total length
-		ip_id : TSGUInt16; // identification
-		ip_off : TSGUInt16; // fragment offset field
-		ip_ttl : TSGUInt8; // time to live
-		ip_p : TSGUInt8; // protocol
-		ip_sum : TSGUInt16; // checksum
-		ip_src, ip_dst : TSGIPv4Address; // source and dest address
+		VersionAndHeaderLength : TSGUInt8;  // version | header length
+		DifferentiatedServices : TSGUInt8;  // type of service
+		FTotalLength           : TSGUInt16; // total length
+		FIdentification        : TSGUInt16; // identification
+		FFragment              : TSGUInt16; // fragment offset field
+		TimeToLive             : TSGUInt8;  // time to live
+		Protocol               : TSGInternetProtocol; // protocol (TCP? UDP? etc)
+		FChecksum              : TSGUInt16; // checksum
+		Source, Destination    : TSGIPv4Address; // source and destination address
 			public
-		function ip_hl() : TSGUInt16;
-		function ip_v() : TSGUInt16;
+		function Version()      : TSGUInt8;
+		function HeaderLength() : TSGUInt8;
 		end;
 
-const SG_IP_RF = $8000; // reserved fragment flag
-const SG_IP_DF = $4000; // dont fragment flag
-const SG_IP_MF = $2000; // more fragments flag
-const SG_IP_OFFMASK = $1fff; // mask for fragmenting bits
-
-// ARP Header, (assuming Ethernet+IPv4)             
+// Masks
+const 
+	SGIPVersionMask      = $f0; // ???? .... version
+	SGIPHeaderLengthMask = $0f; // .... ???? header length
 const
-	SG_ARP_REQUEST = 1;   // ARP Request              
-	SG_ARP_REPLY   = 2;   // ARP Reply                
+	SGIPReservedBit    = $8000; // ?... .... .... .... reserved bit
+	SGIPDontFragment   = $4000; // .?.. .... .... .... dont fragment flag
+	SGIPMoreFragments  = $2000; // ..?. .... .... .... more fragments flag
+	SGIPFragmentOffset = $1fff; // ...? ???? ???? ???? mask for fragmenting bits
+
+// Internet protocols
+const
+	SGIP_HOPOPT = 0;     //IPv6 Hop-by-Hop Option
+	SGIP_ICMP   = 1;     //Internet Control Message Protocol
+	SGIP_IGMP   = 2;     //Internet Group Management Protocol
+	SGIP_GGP    = 3;     //Gateway-to-Gateway Protocol
+	SGIP_IPv4   = 4;     //IPv4 (encapsulation)
+	SGIP_ST     = 5;     //Internet Stream Protocol
+	SGIP_TCP    = 6;     //Transmission Control Protocol
+	SGIP_CBT    = 7;     //Core-based trees
+	SGIP_EGP    = 8;     //Exterior Gateway Protocol
+	SGIP_IGP    = 9;     //Interior Gateway Protocol
+	SGIP_BBN_RCC_MON = 10; //BBN RCC Monitoring
+	SGIP_NVP_II = 11;    //Network Voice Protocol
+	SGIP_PUP    = 12;    //Xerox PUP
+	SGIP_ARGUS  = 13;    //ARGUS
+	SGIP_EMCON  = 14;    //EMCON
+	SGIP_XNET   = 15;    //Cross Net Debugger
+	SGIP_CHAOS  = 16;    //Chaosnet
+	SGIP_UDP    = 17;    //User Datagram Protocol
+	SGIP_MUX    = 18;    //Multiplexing
+	SGIP_DCN_MEAS = 19;  //DCN Measurement Subsystems
+	SGIP_HMP    = 20;    //Host Monitoring Protocol
+	SGIP_PRM    = 21;    //Packet Radio Measurement
+	SGIP_XNS_IDP = 22;   //XEROX NS IDP
+	SGIP_TRUNK_1 = 23;   //Trunk-1
+	SGIP_TRUNK_2 = 24;   //Trunk-2
+	SGIP_LEAF_1 = 25;    //Leaf-1
+	SGIP_LEAF_2 = 26;    //Leaf-2
+	SGIP_RDP    = 27;    //Reliable Datagram Protocol
+	SGIP_IRTP   = 28;    //Internet Reliable Transaction Protocol
+	SGIP_ISO_TP4 = 29;   //ISO Transport Protocol Class 4
+	SGIP_NETBLT = 30;    //Bulk Data Transfer Protocol
+	SGIP_MFE_NSP = 31;   //MFE Network Services Protocol
+	SGIP_MERIT_INP = 32; //MERIT Internodal Protocol
+	SGIP_DCCP   = 33;    //Datagram Congestion Control Protocol
+	SGIP_3PC    = 34;    //Third Party Connect Protocol
+	SGIP_IDPR   = 35;    //Inter-Domain Policy Routing Protocol    
+	SGIP_XTP    = 36;    //Xpress Transport Protocol
+	SGIP_DDP    = 37;    //Datagram Delivery Protocol
+	SGIP_IDPR_CMTP = 38; //IDPR Control Message Transport Protocol
+	SGIP_TPpp   = 39;    //TP++ Transport Protocol
+	SGIP_IL     = 40;    //IL Protocol
+	SGIP_IPv6   = 41;    //IPv6 (Encapsulation)
+	SGIP_SDRP   = 42;    //Source Demand Routing Protocol
+	SGIP_IPv6_Route = 43; //Routing Header for IPv6
+	SGIP_IPv6_Frag = 44; //Fragment Header for IPv6
+	SGIP_IDRP   = 45;    //Inter-Domain Routing Protocol
+	SGIP_RSVP   = 46;    //Resource Reservation Protocol
+	SGIP_GRE    = 47;    //Generic Routing Encapsulation
+	SGIP_MHRP   = 48;    //Mobile Host Routing Protocol
+	SGIP_BNA    = 49;    //BNA    
+	SGIP_ESP    = 50;    //Encapsulating Security Payload
+	SGIP_AH     = 51;    //Authentication Header
+	SGIP_I_NLSP = 52;    //Integrated Net Layer Security Protocol
+	SGIP_SWIPE  = 53;    //SwIPe
+	SGIP_NARP   = 54;    //NBMA Address Resolution Protocol
+	SGIP_MOBILE = 55;    //Mobile IP (Min Encap)
+	SGIP_TLSP   = 56;    //Transport Layer Security Protocol (using Kryptonet key management)
+	SGIP_SKIP   = 57;    //Simple Key-Management for Internet Protocol
+	SGIP_IPv6_ICMP = 58; //ICMP for IPv6
+	SGIP_IPv6_NoNxt = 59; //No Next Header for IPv6
+	SGIP_IPv6_Opts = 60; //Destination Options for IPv6
+	SGIP__AHIP  = 61;    //Any host internal protocol
+	SGIP_CFTP   = 62;    //CFTP
+	SGIP__ALN   = 63;    //Any local network
+	SGIP_SAT_EXPAK = 64; //SATNET and Backroom EXPAK
+	SGIP_KRYPTOLAN = 65; //Kryptolan
+	SGIP_RVD    = 66;    //Remote Virtual Disk Protocol
+	SGIP_IPPC   = 67;    //Internet Pluribus Packet Core
+	SGIP__ADFS  = 68;    //Any distributed file system
+	SGIP_SAT_MON = 69;   //SATNET Monitoring
+	SGIP_VISA   = 70;    //VISA Protocol
+	SGIP_IPCV   = 71;    //Internet Packet Core Utility
+	SGIP_CPNX   = 72;    //Computer Protocol Network Executive
+	SGIP_CPHB   = 73;    //Computer Protocol Heart Beat
+	SGIP_WSN    = 74;    //Wang Span Network
+	SGIP_PVP    = 75;    //Packet Video Protocol
+	SGIP_BR_SAT_MON = 76; //Backroom SATNET Monitoring
+	SGIP_SUN_ND = 77;    //SUN ND PROTOCOL-Temporary
+	SGIP_WB_MON = 78;    //WIDEBAND Monitoring
+	SGIP_WB_EXPAK = 79;  //WIDEBAND EXPAK
+	SGIP_ISO_IP = 80;    //International Organization for Standardization Internet Protocol
+	SGIP_VMTP   = 81;    //Versatile Message Transaction Protocol
+	SGIP_SECURE_VMTP = 82; //Secure Versatile Message Transaction Protocol
+	SGIP_VINES  = 83;    //VINES
+	SGIP_TTP    = 84;    //TTP
+	SGIP_IPTM   = 84;    //Internet Protocol Traffic Manager
+	SGIP_NSFNET_IGP = 85; //NSFNET-IGP
+	SGIP_DGP    = 86;    //Dissimilar Gateway Protocol
+	SGIP_TCF    = 87;    //TCF
+	SGIP_EIGRP  = 88;    //EIGRP
+	SGIP_OSPF   = 89;    //Open Shortest Path First
+	SGIP_Sprite_RPC = 90; //Sprite RPC Protocol
+	SGIP_LARP   = 91;    //Locus Address Resolution Protocol
+	SGIP_MTP    = 92;    //Multicast Transport Protocol
+	SGIP_AX_25  = 93;    //AX.25
+	SGIP_IPIP   = 94;    //IP-within-IP Encapsulation Protocol
+	SGIP_MICP   = 95;    //Mobile Internetworking Control Protocol
+	SGIP_SCC_SP = 96;    //Semaphore Communications Sec. Pro
+	SGIP_ETHERIP = 97;   //Ethernet-within-IP Encapsulation
+	SGIP_ENCAP  = 98;    //Encapsulation Header
+	SGIP__APES  = 99;    //Any private encryption scheme
+	SGIP_GMTP   = 100;   //GMTP
+	SGIP_IFMP   = 101;   //Ipsilon Flow Management Protocol
+	SGIP_PNNI   = 102;   //PNNI over IP
+	SGIP_PIM    = 103;   //Protocol Independent Multicast
+	SGIP_ARIS   = 104;   //IBM''s ARIS (Aggregate Route IP Switching) Protocol    
+	SGIP_SCPS   = 105;   //SCPS (Space Communications Protocol Standards)]
+	SGIP_AN     = 107;   //Active Networks
+	SGIP_IPComp = 108;   //IP Payload Compression Protocol
+	SGIP_SNP    = 109;   //Sitara Networks Protocol
+	SGIP_Compaq_Peer = 110; //Compaq Peer Protocol
+	SGIP_IPX_in_IP = 111; //IPX in IP
+	SGIP_VRRP   = 112;   //Virtual Router Redundancy Protocol
+	SGIP_PGM    = 113;   //PGM Reliable Transport Protocol
+	SGIP__A0LP  = 114;   //Any 0-hop protocol
+	SGIP_L2TP   = 115;   //Layer Two Tunneling Protocol Version 3
+	SGIP_DDX    = 116;   //D-II Data Exchange (DDX)
+	SGIP_IATP   = 117;   //Interactive Agent Transfer Protocol
+	SGIP_STP    = 118;   //Schedule Transfer Protocol
+	SGIP_SRP    = 119;   //SpectraLink Radio Protocol
+	SGIP_UTI    = 120;   //UTI
+	SGIP_SMP    = 121;   //Simple Message Protocol
+	SGIP_SM     = 122;   //SM
+	SGIP_PTP    = 123;   //Performance Transparency Protocol
+	SGIP_IS_ISoIPv4 = 124; //IS-IS over IPv4
+	SGIP_FIRE   = 125;   //Flexible Intra-AS Routing Environment
+	SGIP_CRTP   = 126;   //Combat Radio Transport Protocol
+	SGIP_CRUDP  = 127;   //Combat Radio User Datagram
+	SGIP_SSCOPMCE = 128; //Service-Specific Connection-Oriented Protocol in a Multilink and Connectionless Environment
+	SGIP_IPLT   = 129;
+	SGIP_SPS    = 130;   //Secure Packet Shield
+	SGIP_PIPE   = 131;   //Private IP Encapsulation within IP
+	SGIP_SCTP   = 132;   //Stream Control Transmission Protocol 
+	SGIP_FC     = 133;   //Fibre Channel
+	SGIP_RSVP_E2E_IGNORE = 134; //Reservation Protocol (RSVP) End-to-End Ignore
+	SGIP__MH    = 135;   //Mobility Header
+	SGIP_UDPL   = 136;   //UDP Lite
+	SGIP_MPLS_in_IP = 137; //MPLS-in-IP
+	SGIP_manet  = 138;   //MANET Protocols
+	SGIP_HIP    = 139;   //Host Identity Protocol
+	SGIP_Shim6  = 140;   //Site Multihoming by IPv6 Intermediation
+	SGIP_WESP   = 141;   //Wrapped Encapsulating Security Payload
+	SGIP_ROHC   = 142;   //Robust Header Compression
+	SGIP__empty : TSGSetOfByte = [143..252]; // UNASSIGNED
+	SGIP__TEST  : TSGSetOfByte = [253..254]; // Use for experimentation and testing
+	SGIP__255   = 255;   // Reserved for extra.
+
+// ARP Header, (assuming Ethernet + IPv4)
+const
+	SG_ARP_REQUEST = 1;   // ARP Request
+	SG_ARP_REPLY   = 2;   // ARP Reply
 type
 	TSGARPIPv4Header = object
 			public
-		htype : TSGUInt16;    // Hardware Type            
-		ptype : TSGUInt16;    // Protocol Type            
-		hlen : TSGUInt8;      // Hardware Address Length  
-		plen : TSGUInt8;      // Protocol Address Length  
-		oper : TSGUInt16;     // Operation Code           
-		sha : TSGEnthernetAddress; // Sender hardware address  
-		spa : TSGIPv4Address;      // Sender IP address        
-		tha : TSGEnthernetAddress; // Target hardware address  
-		tpa : TSGIPv4Address;      // Target IP address        
+		htype : TSGUInt16;    // Hardware Type
+		ptype : TSGUInt16;    // Protocol Type
+		hlen : TSGUInt8;      // Hardware Address Length
+		plen : TSGUInt8;      // Protocol Address Length
+		oper : TSGUInt16;     // Operation Code
+		sha : TSGEnthernetAddress; // Sender hardware address
+		spa : TSGIPv4Address;      // Sender IP address
+		tha : TSGEnthernetAddress; // Target hardware address
+		tpa : TSGIPv4Address;      // Target IP address
 		end;
 
 type
@@ -198,9 +353,160 @@ uses
 	,SaGeStringUtils
 	;
 
+function SGInternetProtocolToString(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+case Protocol of
+SGIP_HOPOPT : Result := 'IPv6 Hop-by-Hop Option';
+SGIP_ICMP   : Result := 'Internet Control Message Protocol';
+SGIP_IGMP   : Result := 'Internet Group Management Protocol';
+SGIP_GGP    : Result := 'Gateway-to-Gateway Protocol';
+SGIP_IPv4   : Result := 'IPv4 (encapsulation)';
+SGIP_ST     : Result := 'Internet Stream Protocol';
+SGIP_TCP    : Result := 'Transmission Control Protocol';
+SGIP_CBT    : Result := 'Core-based trees';
+SGIP_EGP    : Result := 'Exterior Gateway Protocol';
+SGIP_IGP    : Result := 'Interior Gateway Protocol';
+SGIP_BBN_RCC_MON : Result := 'BBN RCC Monitoring';
+SGIP_NVP_II : Result := 'Network Voice Protocol';
+SGIP_PUP    : Result := 'Xerox PUP';
+SGIP_ARGUS  : Result := 'ARGUS';
+SGIP_EMCON  : Result := 'EMCON';
+SGIP_XNET   : Result := 'Cross Net Debugger';
+SGIP_CHAOS  : Result := 'Chaosnet';
+SGIP_UDP    : Result := 'User Datagram Protocol';
+SGIP_MUX    : Result := 'Multiplexing';
+SGIP_DCN_MEAS : Result := 'DCN Measurement Subsystems';
+SGIP_HMP    : Result := 'Host Monitoring Protocol';
+SGIP_PRM    : Result := 'Packet Radio Measurement';
+SGIP_XNS_IDP : Result := 'XEROX NS IDP';
+SGIP_TRUNK_1 : Result := 'Trunk-1';
+SGIP_TRUNK_2 : Result := 'Trunk-2';
+SGIP_LEAF_1 : Result := 'Leaf-1';
+SGIP_LEAF_2 : Result := 'Leaf-2';
+SGIP_RDP    : Result := 'Reliable Datagram Protocol';
+SGIP_IRTP   : Result := 'Internet Reliable Transaction Protocol';
+SGIP_ISO_TP4 : Result := 'ISO Transport Protocol Class 4';
+SGIP_NETBLT : Result := 'Bulk Data Transfer Protocol';
+SGIP_MFE_NSP : Result := 'MFE Network Services Protocol';
+SGIP_MERIT_INP : Result := 'MERIT Internodal Protocol';
+SGIP_DCCP   : Result := 'Datagram Congestion Control Protocol';
+SGIP_3PC    : Result := 'Third Party Connect Protocol';
+SGIP_IDPR   : Result := 'Inter-Domain Policy Routing Protocol';
+SGIP_XTP    : Result := 'Xpress Transport Protocol';
+SGIP_DDP    : Result := 'Datagram Delivery Protocol';
+SGIP_IDPR_CMTP: Result := 'IDPR Control Message Transport Protocol';
+SGIP_TPpp   : Result := 'TP++ Transport Protocol';
+SGIP_IL     : Result := 'IL Protocol';
+SGIP_IPv6   : Result := 'IPv6 (Encapsulation)';
+SGIP_SDRP   : Result := 'Source Demand Routing Protocol';
+SGIP_IPv6_Route: Result := 'Routing Header for IPv6';
+SGIP_IPv6_Frag : Result := 'Fragment Header for IPv6';
+SGIP_IDRP   : Result := 'Inter-Domain Routing Protocol';
+SGIP_RSVP   : Result := 'Resource Reservation Protocol';
+SGIP_GRE    : Result := 'Generic Routing Encapsulation';
+SGIP_MHRP   : Result := 'Mobile Host Routing Protocol';
+SGIP_BNA    : Result := 'Burroughs Network Architecture';
+SGIP_ESP    : Result := 'Encapsulating Security Payload';
+SGIP_AH     : Result := 'Authentication Header';
+SGIP_I_NLSP : Result := 'Integrated Net Layer Security Protocol';
+SGIP_SWIPE  : Result := 'SwIPe';
+SGIP_NARP   : Result := 'NBMA Address Resolution Protocol';
+SGIP_MOBILE: Result := 'Mobile IP (Min Encap)';
+SGIP_TLSP   : Result := 'Transport Layer Security Protocol (using Kryptonet key management)';
+SGIP_SKIP   : Result := 'Simple Key-Management for Internet Protocol';
+SGIP_IPv6_ICMP : Result := 'ICMP for IPv6';
+SGIP_IPv6_NoNxt : Result := 'No Next Header for IPv6';
+SGIP_IPv6_Opts : Result := 'Destination Options for IPv6';
+SGIP__AHIP  : Result := 'Any host internal protocol';
+SGIP_CFTP   : Result := 'CFTP';
+SGIP__ALN   : Result := 'Any local network';
+SGIP_SAT_EXPAK : Result := 'SATNET and Backroom EXPAK';
+SGIP_KRYPTOLAN : Result := 'Kryptolan';
+SGIP_RVD    : Result := 'Remote Virtual Disk Protocol';
+SGIP_IPPC   : Result := 'Internet Pluribus Packet Core';
+SGIP__ADFS  : Result := 'Any distributed file system';
+SGIP_SAT_MON : Result := 'SATNET Monitoring';
+SGIP_VISA   : Result := 'VISA Protocol';
+SGIP_IPCV   : Result := 'Internet Packet Core Utility';
+SGIP_CPNX   : Result := 'Computer Protocol Network Executive';
+SGIP_CPHB   : Result := 'Computer Protocol Heart Beat';
+SGIP_WSN    : Result := 'Wang Span Network';
+SGIP_PVP    : Result := 'Packet Video Protocol';
+SGIP_BR_SAT_MON : Result := 'Backroom SATNET Monitoring';
+SGIP_SUN_ND : Result := 'SUN ND PROTOCOL-Temporary';
+SGIP_WB_MON : Result := 'WIDEBAND Monitoring';
+SGIP_WB_EXPAK : Result := 'WIDEBAND EXPAK';
+SGIP_ISO_IP : Result := 'International Organization for Standardization Internet Protocol';
+SGIP_VMTP   : Result := 'Versatile Message Transaction Protocol';
+SGIP_SECURE_VMTP : Result := 'Secure Versatile Message Transaction Protocol';
+SGIP_VINES  : Result := 'VINES';
+SGIP_TTP{=SGIP_IPTM} : Result := '(TTP) or (Internet Protocol Traffic Manager)';
+SGIP_NSFNET_IGP: Result := 'NSFNET-IGP';
+SGIP_DGP    : Result := 'Dissimilar Gateway Protocol';
+SGIP_TCF    : Result := 'TCF';
+SGIP_EIGRP  : Result := 'EIGRP';
+SGIP_OSPF   : Result := 'Open Shortest Path First';
+SGIP_Sprite_RPC : Result := 'Sprite RPC Protocol';
+SGIP_LARP   : Result := 'Locus Address Resolution Protocol';
+SGIP_MTP    : Result := 'Multicast Transport Protocol';
+SGIP_AX_25  : Result := 'AX.25';
+SGIP_IPIP   : Result := 'IP-within-IP Encapsulation Protocol';
+SGIP_MICP   : Result := 'Mobile Internetworking Control Protocol';
+SGIP_SCC_SP : Result := 'Semaphore Communications Sec. Pro';
+SGIP_ETHERIP : Result := 'Ethernet-within-IP Encapsulation';
+SGIP_ENCAP  : Result := 'Encapsulation Header';
+SGIP__APES  : Result := 'Any private encryption scheme';
+SGIP_GMTP   : Result := 'GMTP';
+SGIP_IFMP   : Result := 'Ipsilon Flow Management Protocol';
+SGIP_PNNI   : Result := 'PNNI over IP';
+SGIP_PIM    : Result := 'Protocol Independent Multicast';
+SGIP_ARIS   : Result := 'IBM''s ARIS (Aggregate Route IP Switching) Protocol';
+SGIP_SCPS   : Result := 'SCPS (Space Communications Protocol Standards)]';
+SGIP_AN     : Result := 'Active Networks';
+SGIP_IPComp : Result := 'IP Payload Compression Protocol';
+SGIP_SNP    : Result := 'Sitara Networks Protocol';
+SGIP_Compaq_Peer : Result := 'Compaq Peer Protocol';
+SGIP_IPX_in_IP : Result := 'IPX in IP';
+SGIP_VRRP   : Result := 'Virtual Router Redundancy Protocol';
+SGIP_PGM    : Result := 'PGM Reliable Transport Protocol';
+SGIP__A0LP  : Result := 'Any 0-hop protocol';
+SGIP_L2TP   : Result := 'Layer Two Tunneling Protocol Version 3';
+SGIP_DDX    : Result := 'D-II Data Exchange (DDX)';
+SGIP_IATP   : Result := 'Interactive Agent Transfer Protocol';
+SGIP_STP    : Result := 'Schedule Transfer Protocol';
+SGIP_SRP    : Result := 'SpectraLink Radio Protocol';
+SGIP_UTI    : Result := 'Universal Transport Interface Protocol';
+SGIP_SMP    : Result := 'Simple Message Protocol';
+SGIP_SM     : Result := 'Simple Multicast Protocol';
+SGIP_PTP    : Result := 'Performance Transparency Protocol';
+SGIP_IS_ISoIPv4 : Result := 'IS-IS over IPv4';
+SGIP_FIRE   : Result := 'Flexible Intra-AS Routing Environment';
+SGIP_CRTP   : Result := 'Combat Radio Transport Protocol';
+SGIP_CRUDP  : Result := 'Combat Radio User Datagram';
+SGIP_SSCOPMCE : Result := 'Service-Specific Connection-Oriented Protocol in a Multilink and Connectionless Environment';
+SGIP_IPLT   : Result := 'IPLT';
+SGIP_SPS    : Result := 'Secure Packet Shield';
+SGIP_PIPE   : Result := 'Private IP Encapsulation within IP';
+SGIP_SCTP   : Result := 'Stream Control Transmission Protocol';
+SGIP_FC     : Result := 'Fibre Channel';
+SGIP_RSVP_E2E_IGNORE : Result := 'Reservation Protocol (RSVP) End-to-End Ignore';
+SGIP__MH    : Result := 'Mobility Header';
+SGIP_UDPL   : Result := 'UDP Lite';
+SGIP_MPLS_in_IP : Result := 'MPLS-in-IP';
+SGIP_manet  : Result := 'MANET Protocols';
+SGIP_HIP    : Result := 'Host Identity Protocol';
+SGIP_Shim6  : Result := 'Site Multihoming by IPv6 Intermediation';
+SGIP_WESP   : Result := 'Wrapped Encapsulating Security Payload';
+SGIP_ROHC   : Result := 'Robust Header Compression';
+SGIP__255   : Result := 'Protocol wich reserved for extra';
+else if Protocol in SGIP__TEST then Result := 'Protocol wich uses for experimentation and testing'
+else Result := '';
+end;
+end;
+
 function TSGEthernetHeader.GetProtocol() : TSGEnthernetProtocol;
 begin
-Result := TSGEnthernetProtocol(ProtocolBytes);
+Result := TSGEnthernetProtocol(FProtocol);
 SwapBytes(Result);
 end;
 
@@ -312,14 +618,14 @@ begin
 Result := (th_offx2 and $f0) shl 4;
 end;
 
-function TSGIPv4Header.ip_hl() : TSGUInt16;
+function TSGIPv4Header.HeaderLength() : TSGUInt8;
 begin
-Result := ip_vhl and $0f;
+Result := (VersionAndHeaderLength and SGIPHeaderLengthMask) * 4;
 end;
 
-function TSGIPv4Header.ip_v() : TSGUInt16;
+function TSGIPv4Header.Version() : TSGUInt8;
 begin
-Result := ip_vhl shl 4;
+Result := (VersionAndHeaderLength and SGIPVersionMask) shr 4;
 end;
 
 end.
