@@ -130,7 +130,7 @@ uses
 
 function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin
-Result := SGStrByteHex(PSGByte(@Value)[1]) + SGStrByteHex(PSGByte(@Value)[0]);
+Result := SGStrByteHex(PSGByte(@Value)[1], RegisterType) + SGStrByteHex(PSGByte(@Value)[0], RegisterType);
 end;
 
 function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}

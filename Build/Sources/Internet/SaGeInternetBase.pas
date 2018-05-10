@@ -116,7 +116,7 @@ type
 			public
 		VersionAndHeaderLength : TSGUInt8;  // version | header length
 		DifferentiatedServices : TSGUInt8;  // type of service
-		FTotalLength           : TSGUInt16; // total length
+		FTotalLength           : TSGUInt16; // total length, Size(IPv4) + Size(IPv4.Protocol), without Ethernet header length
 		FIdentification        : TSGUInt16; // identification
 		FFragment              : TSGUInt16; // fragment offset field
 		TimeToLive             : TSGUInt8;  // time to live
@@ -126,17 +126,32 @@ type
 			public
 		function Version()      : TSGUInt8;
 		function HeaderLength() : TSGUInt8;
+		function DifferentiatedServicesCodepoint() : TSGUInt8;
+		function ExpilitCongestionNotification() : TSGUInt8;
+		function TotalLength() : TSGUInt16;
+		function Identification() : TSGUInt16;
+		function ReservedBit() : TSGBoolean;
+		function DontFragment() : TSGBoolean;
+		function MoreFragments() : TSGBoolean;
+		function FragmentOffset() : TSGUInt16;
+		function Checksum() : TSGUInt16;
 		end;
 
 // Masks
 const 
-	SGIPVersionMask      = $f0; // ???? .... version
-	SGIPHeaderLengthMask = $0f; // .... ???? header length
+	SGIPVersionMask      = $f0; // 1111 .... version
+	SGIPHeaderLengthMask = $0f; // .... 1111 header length
 const
-	SGIPReservedBit    = $8000; // ?... .... .... .... reserved bit
-	SGIPDontFragment   = $4000; // .?.. .... .... .... dont fragment flag
-	SGIPMoreFragments  = $2000; // ..?. .... .... .... more fragments flag
-	SGIPFragmentOffset = $1fff; // ...? ???? ???? ???? mask for fragmenting bits
+	SGIPDifferentiatedServicesCodepoint = $fc; // 1111 11.. 
+	SGIPExpilitCongestionNotification   = $03; // .... ..11
+const
+	SGIPReservedBit    = $8000; // 1... .... .... .... reserved bit
+	SGIPDontFragment   = $4000; // .1.. .... .... .... dont fragment flag
+	SGIPMoreFragments  = $2000; // ..1. .... .... .... more fragments flag
+	SGIPFragmentOffset = $1fff; // ...1 1111 1111 1111 mask for fragmenting bits
+
+function SGInternetProtocolToString(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGInternetProtocolToStringExtended(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // Internet protocols
 const
@@ -353,6 +368,14 @@ uses
 	,SaGeStringUtils
 	;
 
+function SGInternetProtocolToStringExtended(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result :=  SGInternetProtocolToString(Protocol);
+if Result = '' then
+	Result := 'Unknown Internet Protocol';
+Result := '(0x' + SGStrByteHex(Protocol, False) + '[hex], ' + SGStr(Protocol) + '[dec]) ' + Result;
+end;
+
 function SGInternetProtocolToString(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Protocol of
@@ -527,8 +550,8 @@ function SGEthernetProtocolToStringExtended(const Protocol : TSGEnthernetProtoco
 begin
 Result := SGEthernetProtocolToString(Protocol);
 if Result = '' then
-	Result := 'Unknown Internet Protocol';
-Result := '(0x' + SGStr2BytesHex(Protocol) + ') ' + Result;
+	Result := 'Unknown Ethernet Protocol';
+Result := '(0x' + SGStr2BytesHex(Protocol, False) + '[hex], ' + SGStr(Protocol) + '[dec]) ' + Result;
 end;
 
 function SGEthernetProtocolToString(const Protocol : TSGEnthernetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -616,6 +639,66 @@ end;
 function TSGTcpHeader.th_off() : TSGUInt16;
 begin
 Result := (th_offx2 and $f0) shl 4;
+end;
+
+function TSGIPv4Header.ReservedBit() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FFragment;
+SwapBytes(Flags);
+Result := (Flags and SGIPReservedBit) > 0;
+end;
+
+function TSGIPv4Header.DontFragment() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FFragment;
+SwapBytes(Flags);
+Result := (Flags and SGIPDontFragment) > 0;
+end;
+
+function TSGIPv4Header.MoreFragments() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Result := (Flags and SGIPMoreFragments) > 0;
+end;
+
+function TSGIPv4Header.FragmentOffset() : TSGUInt16;
+begin
+Result := FFragment;
+SwapBytes(Result);
+Result := Result and SGIPFragmentOffset;
+end;
+
+function TSGIPv4Header.Checksum() : TSGUInt16;
+begin
+Result := FChecksum;
+SwapBytes(Result);
+end;
+
+function TSGIPv4Header.Identification() : TSGUInt16;
+begin
+Result := FIdentification;
+SwapBytes(Result);
+end;
+
+function TSGIPv4Header.TotalLength() : TSGUInt16;
+begin
+Result := FTotalLength;
+SwapBytes(Result);
+end;
+
+function TSGIPv4Header.DifferentiatedServicesCodepoint() : TSGUInt8;
+begin
+Result := (DifferentiatedServices and SGIPDifferentiatedServicesCodepoint) shr 2;
+end;
+
+function TSGIPv4Header.ExpilitCongestionNotification() : TSGUInt8;
+begin
+Result := DifferentiatedServices and SGIPExpilitCongestionNotification;
 end;
 
 function TSGIPv4Header.HeaderLength() : TSGUInt8;
