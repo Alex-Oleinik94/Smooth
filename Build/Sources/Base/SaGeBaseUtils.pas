@@ -54,10 +54,17 @@ procedure Swap(var a, b : TSGFloat80); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} ove
 {$ENDIF WITHOUT_EXTENDED}
 
 procedure SwapBytes(var a : TSGUInt16); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure ReverseBytes(var a : TSGUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 function SGNextCircularDynamicIndex(const Index, HighOfArray : TSGMaxEnum): TSGMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+procedure ReverseBytes(var a : TSGUInt32); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Swap(PSGUInt8(@a)[0], PSGUInt8(@a)[3]);
+Swap(PSGUInt8(@a)[1], PSGUInt8(@a)[2]);
+end;
 
 procedure SwapBytes(var a : TSGUInt16); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin

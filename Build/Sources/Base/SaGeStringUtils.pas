@@ -86,6 +86,7 @@ function SGReadLnStringFromStream(const Stream : TStream; const Eolns : TSGCharS
 procedure SGWriteStringToStream(const String1 : TSGString; const Stream : TStream; const Stavit0 : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStreamToHexString(const Stream : TStream; const RegisterType : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TextFile
 function SGReadStringInQuotesFromTextFile(const TextFile : PText) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -794,6 +795,19 @@ for i := 1 to Length(S) do
 end;
 
 // TStream
+function SGStreamToHexString(const Stream : TStream; const RegisterType : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+var
+	ByteData : TSGUInt8;
+begin
+Stream.Position := 0;
+Result := '';
+while Stream.Position <> Stream.Size do
+	begin
+	Stream.ReadBuffer(ByteData, 1);
+	Result += SGStrByteHex(ByteData, RegisterType);
+	end;
+Stream.Position := 0;
+end;
 
 function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var

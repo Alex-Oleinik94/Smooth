@@ -6,6 +6,8 @@ interface
 
 uses
 	 SaGeBase
+	
+	,Classes
 	;
 
 
@@ -110,6 +112,8 @@ operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4Address
 function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // IPv4 header
+const
+	SG_IPv4_HEADER_SIZE = 20;
 type
 	TSGInternetProtocol = TSGUInt8;
 	TSGIPv4Header = object
@@ -125,30 +129,34 @@ type
 		Source, Destination    : TSGIPv4Address; // source and destination address
 			public
 		function Version()      : TSGUInt8;
-		function HeaderLength() : TSGUInt8;
+		function HeaderSize()   : TSGUInt8;
 		function DifferentiatedServicesCodepoint() : TSGUInt8;
 		function ExpilitCongestionNotification() : TSGUInt8;
-		function TotalLength() : TSGUInt16;
+		function TotalSize()    : TSGUInt16;
 		function Identification() : TSGUInt16;
-		function ReservedBit() : TSGBoolean;
+		function ReservedBit()  : TSGBoolean;
 		function DontFragment() : TSGBoolean;
 		function MoreFragments() : TSGBoolean;
 		function FragmentOffset() : TSGUInt16;
 		function Checksum() : TSGUInt16;
 		end;
+	TSGIPv4Options = TMemoryStream;
+
+function SGIPv4Options(const Stream : TStream; const Header : TSGIPv4Header) : TSGIPv4Options; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGIPv4Options(const Source : TStream; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // Masks
 const 
-	SGIPVersionMask      = $f0; // 1111 .... version
-	SGIPHeaderLengthMask = $0f; // .... 1111 header length
+	SGIPVersionMask      = $f0; // 1111 .... Version
+	SGIPHeaderLengthMask = $0f; // .... 1111 Header length
 const
 	SGIPDifferentiatedServicesCodepoint = $fc; // 1111 11.. 
 	SGIPExpilitCongestionNotification   = $03; // .... ..11
 const
-	SGIPReservedBit    = $8000; // 1... .... .... .... reserved bit
-	SGIPDontFragment   = $4000; // .1.. .... .... .... dont fragment flag
-	SGIPMoreFragments  = $2000; // ..1. .... .... .... more fragments flag
-	SGIPFragmentOffset = $1fff; // ...1 1111 1111 1111 mask for fragmenting bits
+	SGIPReservedBit    = $8000; // 1... .... .... .... Reserved bit
+	SGIPDontFragment   = $4000; // .1.. .... .... .... Dont fragment flag
+	SGIPMoreFragments  = $2000; // ..1. .... .... .... More fragments flag
+	SGIPFragmentOffset = $1fff; // ...1 1111 1111 1111 Fragmenting bits
 
 function SGInternetProtocolToString(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGInternetProtocolToStringExtended(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -322,33 +330,78 @@ type
 
 type
 	// TCP Sequence
-	TSGTcpSequence = TSGUInt16;
+	TSGTcpSequence = TSGUInt32;
 	
 	// TCP header
-	TSGTcpHeader = object
+	TSGTCPHeader = object
+			private
+		FSourcePort            : TSGUInt16;       // Порт источника,      Source Port 
+		FDestinationPort       : TSGUInt16;       // Порт назначения,     Destination Port
+		FSequenceNumber        : TSGTcpSequence;  // Порядковый номер,    Sequence Number (SN)
+		FAcknowledgementNumber : TSGTcpSequence;  // Номер подтверждения, Acknowledgment Number (ACK SN)
+		FHeaderLenghtAndFlags  : TSGUInt16;       // Длина заголовка, Зарезервированные биты, Флаги; Data Offset, Reserved bites, Flags.
+		FWindowSize            : TSGUInt16;       // Размер Окна,         Window Size Value
+		FChecksum              : TSGUInt16;       // Контрольная сумма,   Checksum
+		FUrgentPointer         : TSGUInt16;       // Указатель важности,  Urgent Pointer
 			public
-		th_sport : TSGUInt16;	// source port
-		th_dport : TSGUInt16;	// destination port
-		th_seq : TSGTcpSequence; // sequence number
-		th_ack : TSGTcpSequence; // acknowledgement number
-		th_offx2 : TSGUInt8;	// data offset, rsvd
-		th_flags : TSGUInt8;
-		th_win : TSGUInt16; // window
-		th_sum : TSGUInt16; // checksum
-		th_urp : TSGUInt16; // urgent pointer
+		function ReservedBitsAsBoolString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			protected
+		function GetSourcePort() : TSGUInt16;
+		function GetDestinationPort() : TSGUInt16;
+		function GetSequenceNumber() : TSGTcpSequence;
+		function GetAcknowledgementNumber() : TSGTcpSequence;
+		function GetHeaderSize() : TSGUInt8;
+		function GetReservedBits() : TSGUInt8;
+		function GetECN_Nonce() : TSGBoolean;
+		function GetCWR() : TSGBoolean;
+		function GetECN_Echo() : TSGBoolean;
+		function GetUrgent() : TSGBoolean;
+		function GetAcknowledgement() : TSGBoolean;
+		function GetPush() : TSGBoolean;
+		function GetReset() : TSGBoolean;
+		function GetSynchronize() : TSGBoolean;
+		function GetFinal() : TSGBoolean;
+		function IsFlagsEmpty() : TSGBoolean;
+		function GetWindowSize() : TSGUInt16;
+		function GetChecksum() : TSGUInt16;
+		function GetUrgentPointer() : TSGUInt16;
 			public
-		function th_off() : TSGUInt16;
+		property SourcePort  : TSGUInt16 read GetSourcePort;
+		property DestinationPort : TSGUInt16 read GetDestinationPort;
+		property SequenceNumber : TSGTcpSequence read GetSequenceNumber;
+		property AcknowledgementNumber : TSGTcpSequence read GetAcknowledgementNumber;
+		property HeaderSize  : TSGUInt8 read GetHeaderSize;
+		property ReservedBits : TSGUInt8 read GetReservedBits;
+		property ECN_Nonce   : TSGBoolean read GetECN_Nonce;
+		property CWR         : TSGBoolean read GetCWR;
+		property ECN_Echo    : TSGBoolean read GetECN_Echo;
+		property Urgent      : TSGBoolean read GetUrgent;
+		property Acknowledgement : TSGBoolean read GetAcknowledgement;
+		property Push        : TSGBoolean read GetPush;
+		property Reset       : TSGBoolean read GetReset;
+		property Synchronize : TSGBoolean read GetSynchronize;
+		property Final       : TSGBoolean read GetFinal;
+		property FlagsEmpty  : TSGBoolean read IsFlagsEmpty;
+		property WindowSize  : TSGUInt16 read GetWindowSize;
+		property Checksum  : TSGUInt16 read GetChecksum;
+		property UrgentPointer  : TSGUInt16 read GetUrgentPointer;
 		end;
+	TSGTCPOptions = TMemoryStream;
+
+// Masks
 const 
-	SG_TH_FIN = $01;
-	SG_TH_SYN = $02;
-	SG_TH_RST = $04;
-	SG_TH_PUSH = $08;
-	SG_TH_ACK = $10;
-	SG_TH_URG = $20;
-	SG_TH_ECE = $40;
-	SG_TH_CWR = $80;
-	SG_TH_FLAGS = SG_TH_FIN or SG_TH_SYN or SG_TH_RST or SG_TH_ACK or SG_TH_URG or SG_TH_ECE or SG_TH_CWR;
+	SGTCPFinal           = $0001; // .... .... .... ...1 Final bit used for connection termination
+	SGTCPSynchronize     = $0002; // .... .... .... ..1. Synchronize sequence numbers
+	SGTCPReset           = $0004; // .... .... .... .1.. Reset the connection
+	SGTCPPush            = $0008; // .... .... .... 1... Push function
+	SGTCPAcknowledgement = $0010; // .... .... ...1 .... Acknowledgement field is significant
+	SGTCPUrgent          = $0020; // .... .... ..1. .... Urgent pointer field is significant
+	SGTCPECN_Echo        = $0040; // .... .... .1.. .... ECN-Echo 
+	SGTCPCWR             = $0080; // .... .... 1... .... Congestion Window Reduced
+	SGTCPECN_Nonce       = $0100; // .... ...1 .... .... ECN-Nonce - concealment protection
+	SGTCPReserved        = $0e00; // .... 111. .... .... Reserved bits
+	SGTCPHeaderLength    = $f000; // 1111 .... .... .... Header length mask
+	SGTCPFlags           = $01ff; // .... ...1 1111 1111 All TCP flags
 
 // UDP header
 // total udp header length: 8 bytes (=64 bits)
@@ -367,6 +420,27 @@ uses
 	 SaGeBaseUtils
 	,SaGeStringUtils
 	;
+
+procedure SGIPv4Options(const Source : TStream; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (Source <> nil) and (Destination <> nil) and (Source.Size > 0) then
+	begin
+	Source.Position := 0;
+	SGCopyPartStreamToStream(Source, Destination, Source.Size);
+	Source.Position := 0;
+	end;
+end;
+
+function SGIPv4Options(const Stream : TStream; const Header : TSGIPv4Header) : TSGIPv4Options; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := nil;
+if Header.HeaderSize() > SG_IPv4_HEADER_SIZE then
+	begin
+	Result := TSGIPv4Options.Create();
+	SGCopyPartStreamToStream(Stream, Result, Header.HeaderSize() - SG_IPv4_HEADER_SIZE);
+	Result.Position := 0;
+	end;
+end;
 
 function SGInternetProtocolToStringExtended(const Protocol : TSGInternetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -612,6 +686,185 @@ else                  Result := '';
 end;
 end;
 
+function TSGTCPHeader.ReservedBitsAsBoolString() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+const
+	Mask001 = $1;
+	Mask010 = $2;
+	Mask100 = $4;
+var
+	ReservedBitsValue : TSGUInt8;
+begin
+ReservedBitsValue := ReservedBits;
+Result := 
+	SGStr((ReservedBitsValue and Mask100) > 0) + ', ' +
+	SGStr((ReservedBitsValue and Mask010) > 0) + ', ' +
+	SGStr((ReservedBitsValue and Mask001) > 0);
+end;
+
+function TSGTCPHeader.GetWindowSize() : TSGUInt16;
+begin
+Result := FWindowSize;
+SwapBytes(Result);
+end;
+
+function TSGTCPHeader.GetChecksum() : TSGUInt16;
+begin
+Result := FChecksum;
+SwapBytes(Result);
+end;
+
+function TSGTCPHeader.GetUrgentPointer() : TSGUInt16;
+begin
+Result := FUrgentPointer;
+SwapBytes(Result);
+end;
+
+function TSGTCPHeader.GetSourcePort() : TSGUInt16;
+begin
+Result := FSourcePort;
+SwapBytes(Result);
+end;
+
+function TSGTCPHeader.GetDestinationPort() : TSGUInt16;
+begin
+Result := FDestinationPort;
+SwapBytes(Result);
+end;
+
+function TSGTCPHeader.GetSequenceNumber() : TSGTcpSequence;
+begin
+Result := FSequenceNumber;
+ReverseBytes(Result);
+end;
+
+function TSGTCPHeader.GetAcknowledgementNumber() : TSGTcpSequence;
+begin
+Result := FAcknowledgementNumber;
+ReverseBytes(Result);
+end;
+
+function TSGTCPHeader.GetHeaderSize() : TSGUInt8;
+var
+	HeaderLenght : TSGUInt16;
+begin
+HeaderLenght := FHeaderLenghtAndFlags;
+SwapBytes(HeaderLenght);
+HeaderLenght := HeaderLenght and SGTCPHeaderLength;
+HeaderLenght := HeaderLenght shr 12;
+Result := HeaderLenght * 4;
+end;
+
+function TSGTCPHeader.GetReservedBits() : TSGUInt8;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPReserved;
+Flags := Flags shr 9;
+Result := Flags;
+end;
+
+function TSGTCPHeader.GetECN_Nonce() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPECN_Nonce;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetCWR() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPCWR;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetECN_Echo() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPECN_Echo;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetUrgent() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPUrgent;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetAcknowledgement() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPAcknowledgement;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetPush() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPPush;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetReset() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPReset;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetSynchronize() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPSynchronize;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.GetFinal() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPFinal;
+Result := Flags > 0;
+end;
+
+function TSGTCPHeader.IsFlagsEmpty() : TSGBoolean;
+var
+	Flags : TSGUInt16;
+begin
+Flags := FHeaderLenghtAndFlags;
+SwapBytes(Flags);
+Flags := Flags and SGTCPFlags;
+Result := Flags = 0;
+end;
+
 operator := (const AddressValue : TSGIPv4AddressValue) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Address := AddressValue;
@@ -634,11 +887,6 @@ Result :=
 	SGStr(Address.AddressByte[1]) + '.' +
 	SGStr(Address.AddressByte[2]) + '.' +
 	SGStr(Address.AddressByte[3]) ;
-end;
-
-function TSGTcpHeader.th_off() : TSGUInt16;
-begin
-Result := (th_offx2 and $f0) shl 4;
 end;
 
 function TSGIPv4Header.ReservedBit() : TSGBoolean;
@@ -685,7 +933,7 @@ Result := FIdentification;
 SwapBytes(Result);
 end;
 
-function TSGIPv4Header.TotalLength() : TSGUInt16;
+function TSGIPv4Header.TotalSize() : TSGUInt16;
 begin
 Result := FTotalLength;
 SwapBytes(Result);
@@ -701,7 +949,7 @@ begin
 Result := DifferentiatedServices and SGIPExpilitCongestionNotification;
 end;
 
-function TSGIPv4Header.HeaderLength() : TSGUInt8;
+function TSGIPv4Header.HeaderSize() : TSGUInt8;
 begin
 Result := (VersionAndHeaderLength and SGIPHeaderLengthMask) * 4;
 end;

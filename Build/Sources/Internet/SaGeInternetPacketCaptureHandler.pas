@@ -57,6 +57,7 @@ type
 		function FindDevice(const DeviceName : TSGString) : PSGInternetPacketCaptureHandlerDeviceData;
 		function FindDevice(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator) : PSGInternetPacketCaptureHandlerDeviceData;
 		function AddDevice(const DeviceData : TSGInternetPacketCaptorDeviceData) : PSGInternetPacketCaptureHandlerDeviceData;
+		procedure WriteConsoleString(const Str : TSGString);
 			protected
 		procedure PrintStatistic(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure CreateDeviceInformationFile(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const FileName : TSGString);
@@ -230,11 +231,22 @@ Result^.AdditionalOptions += SGDoubleString('IPv4 Mask', SGIPv4AddressToString(D
 HandleDevice(Result^.Identificator);
 end;
 
+procedure TSGInternetPacketCaptureHandler.WriteConsoleString(const Str : TSGString);
+begin
+SGPrintEngineVersion();
+SGHint([Str], [SGCasePrint]);
+end;
+
 function TSGInternetPacketCaptureHandler.Start() : TSGBoolean;
+var
+	InitStartTime : TSGDateTime;
 begin
 Result := False;
 FillChar(FTimeBegining, SizeOf(FTimeBegining), 0);
 
+InitStartTime.Get();
+if FPossibilityBreakLoopFromConsole then
+	WriteConsoleString('Initializing devices...');
 FPacketCaptor := TSGInternetPacketCaptor.Create();
 FPacketCaptor.CallBack := TSGInternetPacketCaptorCallBack(@SGPacketCaptureHandler_CallBack);
 FPacketCaptor.CallBackData := Self;
@@ -247,8 +259,8 @@ if Result then
 	
 	if FPossibilityBreakLoopFromConsole then
 		begin
-		SGPrintEngineVersion();
-		WriteLn('Capturing begins. Press Escape to stop!');
+		WriteConsoleString('Initializing was completed in ' + SGTextTimeBetweenDates(InitStartTime, FTimeBegining, 'ENG') + '.');
+		WriteConsoleString('Capturing begins. Press Escape to stop!');
 		end;
 	
 	FPacketCaptor.DefaultDelay();
