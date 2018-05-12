@@ -57,6 +57,7 @@ implementation
 uses
 	 SaGeDateTime
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeBaseUtils
 	,SaGeConsoleUtils
 	,SaGeEncodingUtils

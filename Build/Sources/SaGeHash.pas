@@ -7,7 +7,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeDateTime
-	,SaGeStringUtils
 	
 	,Classes
 	,SysUtils
@@ -112,6 +111,8 @@ implementation
 uses
 	 SaGeResourceManager
 	,SaGeVersion
+	,SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog
 	

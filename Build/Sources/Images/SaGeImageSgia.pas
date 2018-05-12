@@ -4,26 +4,29 @@
 
 // SGIA Image = ['SGIA',QuadWordJpegImage1Size,JpegImage1(RGB(3)),QuadWordJpegImage2Size,JpegImage2(Alpha(3))]
 
-unit SaGeImageSgia;
+unit SaGeImageSGIA;
 
 interface
 
 uses
-	 SysUtils
-	,Classes
+	 SaGeBitMap
 	
-	,SaGeBase
-	,SaGeImageJpeg
-	,SaGeImageBmp
-	,SaGeBitMap
-	,SaGeStringUtils
+	,Classes
 	;
 
-procedure SaveSGIA(const Stream:TStream;var FImage:TSGBitMap);
-procedure LoadSGIAToBitMap(const FStream:TStream;var FImage:TSGBitMap);
+procedure SaveSGIA(const Stream : TStream; var FImage : TSGBitMap);
+procedure LoadSGIAToBitMap(const FStream : TStream; var FImage : TSGBitMap);
 
 implementation
 
+uses
+	 SaGeBase
+	,SaGeImageJpeg
+	,SaGeImageBmp
+	,SaGeStreamUtils
+	
+	,SysUtils
+	;
 
 procedure LoadSGIAToBitMap(const FStream:TStream;var FImage:TSGBitMap);
 var

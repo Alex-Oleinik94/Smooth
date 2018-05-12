@@ -418,6 +418,7 @@ implementation
 
 uses
 	 SaGeBaseUtils
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	;
 

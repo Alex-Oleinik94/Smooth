@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
 	;
 
 procedure TSGEthernetPacketTCPFrame.FreeData();

@@ -92,6 +92,7 @@ uses
 	 SaGeCommon
 	,SaGeRenderBase
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeLog
 	,SaGeDateTime

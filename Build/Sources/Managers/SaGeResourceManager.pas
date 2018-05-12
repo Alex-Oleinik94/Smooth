@@ -172,6 +172,7 @@ implementation
 
 uses
 	 SaGeVersion
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog

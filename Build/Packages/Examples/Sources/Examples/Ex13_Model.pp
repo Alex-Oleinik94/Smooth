@@ -153,7 +153,8 @@ function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	;
 
 function TModel.GetTexturesCount():TSGLongWord;inline;

@@ -33,7 +33,8 @@ type
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeEthernetPacketTCPFrame
 	;
 

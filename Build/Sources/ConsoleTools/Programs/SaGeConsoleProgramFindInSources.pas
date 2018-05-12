@@ -13,8 +13,6 @@ uses
 	,Classes
 	;
 
-procedure SGConsoleFindInSources(const VParams : TSGConcoleCallerParams = nil);
-
 type
 	TSGFinderInSources = class(TSGObject)
 			public
@@ -57,10 +55,13 @@ type
 		procedure Search(const VParams : TSGConcoleCallerParams = nil);
 		end;
 
+procedure SGConsoleFindInSources(const VParams : TSGConcoleCallerParams = nil);
+
 implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeVersion
 	
@@ -68,6 +69,23 @@ uses
 	,Crt
 	,StrMan
 	;
+
+//===================================
+//==========GENERAL=FUNCTION=========
+//===================================
+
+procedure SGConsoleFindInSources(const VParams : TSGConcoleCallerParams = nil);
+begin
+with TSGFinderInSources.Create() do
+	begin
+	Search(VParams);
+	Destroy();
+	end;
+end;
+
+//=====================================
+//==========TSGFinderInSources=========
+//=====================================
 
 procedure TSGFinderInSources.AddMatchesToResults(const FileName : TSGString; const NumLineMatches : TSGUInt64; const CurentLine : TSGUInt64);
 var
@@ -527,19 +545,6 @@ SetLength(FWords, 0);
 FSearchingDirectory := '';
 FOutDirectory := '';
 inherited Destroy();
-end;
-
-//===================================
-//==========GENERAL=FUNCTION=========
-//===================================
-
-procedure SGConsoleFindInSources(const VParams : TSGConcoleCallerParams = nil);
-begin
-with TSGFinderInSources.Create() do
-	begin
-	Search(VParams);
-	Destroy();
-	end;
 end;
 
 end.

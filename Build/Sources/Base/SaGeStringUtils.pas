@@ -78,16 +78,6 @@ operator in(const VString : TSGString; const VList : TSGStringList) : TSGBoolean
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator +(const VList : TSGStringList; const VString : TSGString) : TSGStringList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-// TStream
-function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGReadPCharFromStream(const Stream : TStream) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGReadLnStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGWriteStringToStream(const String1 : TSGString; const Stream : TStream; const Stavit0 : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStreamToHexString(const Stream : TStream; const RegisterType : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-
 // TextFile
 function SGReadStringInQuotesFromTextFile(const TextFile : PText) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGReadWordFromTextFile(const TextFile : PTextFile) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -792,110 +782,6 @@ begin
 SetLength(Result, Length(S));
 for i := 1 to Length(S) do
 	Result[i] := UpCase(S[i]);
-end;
-
-// TStream
-function SGStreamToHexString(const Stream : TStream; const RegisterType : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	ByteData : TSGUInt8;
-begin
-Stream.Position := 0;
-Result := '';
-while Stream.Position <> Stream.Size do
-	begin
-	Stream.ReadBuffer(ByteData, 1);
-	Result += SGStrByteHex(ByteData, RegisterType);
-	end;
-Stream.Position := 0;
-end;
-
-function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-var
-	Str2 : TSGString = '';
-	C : TSGChar;
-begin
-Result := False;
-while (Stream.Size <> Stream.Position) and (Length(Str2) < Length(Str)) do
-	begin
-	Stream.Read(C, 1);
-	Str2 += C;
-	end;
-Result := Str2 = Str;
-if DestroyingStream then
-	Stream.Destroy();
-end;
-
-function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-Result := TMemoryStream.Create();
-SGWriteStringToStream(Str, Result, False);
-end;
-
-function SGReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSGChar = #39) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar;
-begin
-Result := '';
-Stream.ReadBuffer(C, SizeOf(C));
-repeat
-Stream.ReadBuffer(C, SizeOf(C));
-if C <> Quote then
-	Result += C;
-until C = Quote;
-end;
-
-procedure SGWriteStringToStream(const String1 : TSGString; const Stream : TStream; const Stavit0 : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar = #0;
-begin
-Stream.WriteBuffer(String1[1], Length(String1));
-if Stavit0 then
-	Stream.WriteBuffer(C, SizeOf(TSGChar));
-end;
-
-function SGReadLnStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar = #1;
-	ToOut : TSGBoolean = False;
-begin
-Result:='';
-while (Stream.Position < Stream.Size) and ((not ToOut) or (C in Eolns))  do
-	begin
-	Stream.ReadBuffer(c, 1);
-	if (C in Eolns) then
-		ToOut := True
-	else if (not ToOut) then
-		Result += c;
-	end;
-if Stream.Position <> Stream.Size then
-	Stream.Position := Stream.Position - 1;
-end;
-
-function SGReadPCharFromStream(const Stream : TStream) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar;
-begin
-Result := '';
-repeat
-Stream.Read(C, 1);
-if C <> #0 then
-	Result += C;
-until C = #0;
-end;
-
-function SGReadStringFromStream(const Stream : TStream; const Eolns : TSGCharSet = [#0,#27,#13,#10]) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	C : TSGChar = #1;
-	First : TSGBool = True;
-begin
-Result:='';
-while ((not (C in Eolns)) or First) and (Stream.Position <> Stream.Size) do
-	begin
-	Stream.ReadBuffer(C, 1);
-	if not (C in Eolns) then
-		Result += C;
-	First := False;
-	end;
 end;
 
 // TextFile

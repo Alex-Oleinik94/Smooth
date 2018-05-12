@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeInternetPacketDumper;
+unit SaGeInternetPacketRuntimeDumper;
 
 interface
 
@@ -15,7 +15,7 @@ uses
 const
 	SGDumperDeviceDirectoryIdentifier = '#DeviceDirectory';
 type
-	TSGInternetPacketDumper = class(TSGInternetPacketCaptureHandler)
+	TSGInternetPacketRuntimeDumper = class(TSGInternetPacketCaptureHandler)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -29,6 +29,8 @@ type
 		procedure DumpPacketDataToFile(const FileName : TSGString; const Stream : TStream);
 		procedure DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
 		procedure ExportPacketInfoToFile(const DateTimeString, FileNameWithOutExtension : TSGString; const Stream : TStream);
+			protected
+		procedure UpdateGeneralDirectory(const MakeDirectory : TSGBoolean = True);
 			public
 		procedure Loop(); override;
 			protected
@@ -41,6 +43,7 @@ implementation
 
 uses
 	 SaGeFileUtils
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	,SaGeVersion
 	,SaGeInternetPacketDeterminer
@@ -50,16 +53,16 @@ uses
 	;
 
 // ===================================
-// ======TSGInternetPacketDumper======
+// ======TSGInternetPacketRuntimeDumper======
 // ===================================
-
-procedure TSGInternetPacketDumper.Loop();
+procedure TSGInternetPacketRuntimeDumper.Loop();
 begin
+UpdateGeneralDirectory(True);
 inherited Loop();
 PrintStatistic();
 end;
 
-procedure TSGInternetPacketDumper.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
+procedure TSGInternetPacketRuntimeDumper.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
 var
 	DeviceDirectory : TSGString;
 	Device : PSGInternetPacketCaptureHandlerDeviceData;
@@ -71,13 +74,13 @@ CreateDeviceInformationFile(Identificator, DeviceDirectory + '.' + FDeviceInfarm
 Device^.AdditionalOptions += SGDoubleString(SGDumperDeviceDirectoryIdentifier, DeviceDirectory);
 end;
 
-function TSGInternetPacketDumper.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
+function TSGInternetPacketRuntimeDumper.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
 begin
 Result := inherited HandleTimeOutUpdate(Now);
 PrintInformation(Now);
 end;
 
-procedure TSGInternetPacketDumper.DumpPacketDataToFile(const FileName : TSGString; const Stream : TStream);
+procedure TSGInternetPacketRuntimeDumper.DumpPacketDataToFile(const FileName : TSGString; const Stream : TStream);
 var
 	FileStream : TFileStream = nil;
 begin
@@ -89,7 +92,7 @@ FileStream.Destroy();
 FileStream := nil;
 end;
 
-procedure TSGInternetPacketDumper.HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime);
+procedure TSGInternetPacketRuntimeDumper.HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime);
 var
 	DeviceDirectory : TSGString = '';
 begin
@@ -98,7 +101,7 @@ if DeviceDirectory <> '' then
 	DumpPacketData(DeviceDirectory, Stream, Time);
 end;
 
-procedure TSGInternetPacketDumper.ExportPacketInfoToFile(const DateTimeString, FileNameWithOutExtension : TSGString; const Stream : TStream);
+procedure TSGInternetPacketRuntimeDumper.ExportPacketInfoToFile(const DateTimeString, FileNameWithOutExtension : TSGString; const Stream : TStream);
 var
 	TextFile : TSGTextFileStream = nil;
 begin
@@ -113,7 +116,7 @@ TextFile.Destroy();
 TextFile := nil;
 end;
 
-procedure TSGInternetPacketDumper.DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
+procedure TSGInternetPacketRuntimeDumper.DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
 var
 	DateTimeString : TSGString;
 	FileNameWithOutExtension : TSGString;
@@ -124,7 +127,7 @@ DumpPacketDataToFile(SGFreeFileName(FileNameWithOutExtension + FPacketDataFileEx
 ExportPacketInfoToFile(DateTimeString, FileNameWithOutExtension, Stream);
 end;
 
-procedure TSGInternetPacketDumper.PrintInformation(const NowDateTime : TSGDateTime);
+procedure TSGInternetPacketRuntimeDumper.PrintInformation(const NowDateTime : TSGDateTime);
 begin
 SGPrintEngineVersion();
 TextColor(15);
@@ -140,11 +143,17 @@ WriteLn(' данных.');
 TextColor(7);
 end;
 
-constructor TSGInternetPacketDumper.Create();
+procedure TSGInternetPacketRuntimeDumper.UpdateGeneralDirectory(const MakeDirectory : TSGBoolean = True);
+begin
+FGeneralDirectory := SGAplicationFileDirectory() + DirectorySeparator + SGDateTimeString(True) + ' Packet Dump';
+if MakeDirectory then
+	SGMakeDirectory(FGeneralDirectory);
+end;
+
+constructor TSGInternetPacketRuntimeDumper.Create();
 begin
 inherited;
-FGeneralDirectory := SGAplicationFileDirectory() + DirectorySeparator + SGDateTimeString(True) + ' Packet Dump';
-SGMakeDirectory(FGeneralDirectory);
+UpdateGeneralDirectory(False);
 FPacketDataFileExtension := 'ipdpd';
 FDeviceInfarmationFileExtension := 'ini';
 FPacketInfoFileExtension := 'ini';
@@ -153,7 +162,7 @@ ProcessTimeOutUpdates := True;
 InfoTimeOut := 90;
 end;
 
-destructor TSGInternetPacketDumper.Destroy();
+destructor TSGInternetPacketRuntimeDumper.Destroy();
 begin
 inherited;
 end;

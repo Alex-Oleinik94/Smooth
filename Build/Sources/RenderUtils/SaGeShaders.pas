@@ -63,7 +63,8 @@ function SGCreateShaderProgramFromSources(const Context : ISGContext;const VVert
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeLog
 	;
 

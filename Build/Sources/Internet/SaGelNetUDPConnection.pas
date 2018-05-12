@@ -65,6 +65,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeLog
 	,SaGeVersion
 	,SaGelNetURIParser

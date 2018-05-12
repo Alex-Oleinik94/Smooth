@@ -43,7 +43,8 @@ type
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeFileUtils
 	;
 

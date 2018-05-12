@@ -52,6 +52,7 @@ uses
 	 Crt
 	
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeLog
 	

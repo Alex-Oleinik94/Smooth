@@ -92,6 +92,7 @@ implementation
 uses
 	 SaGeCommon
 	,SaGeRenderBase
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog

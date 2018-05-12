@@ -24,7 +24,8 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeConsoleUtils
-	,SaGeInternetPacketDumper
+	,SaGeInternetPacketRuntimeDumper
+	,SaGeInternetPacketFileDumper
 	,SaGeCasesOfPrint
 	,SaGelNetHTTPUtils
 	,SaGelNetUDPConnection
@@ -35,7 +36,7 @@ procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams =
 begin
 if SGCountConsoleParams(VParams) = 0 then
 	begin
-	with TSGInternetPacketDumper.Create() do
+	with TSGInternetPacketRuntimeDumper.Create() do
 		begin
 		Loop();
 		Destroy();

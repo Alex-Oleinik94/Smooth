@@ -26,6 +26,7 @@ uses
 	,SaGeContext
 	,SaGeVersion
 	,SaGeImageFormatDeterminer
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeLog

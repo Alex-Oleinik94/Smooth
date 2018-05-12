@@ -104,6 +104,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeSysUtils
 	,SaGeVersion

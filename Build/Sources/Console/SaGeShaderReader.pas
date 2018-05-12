@@ -60,7 +60,8 @@ procedure SGReadAndSaveShaderSourceFile(const VInFileName, VOutFileName : TSGStr
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeLog
 	,SaGeFileUtils
 	,SaGeMath

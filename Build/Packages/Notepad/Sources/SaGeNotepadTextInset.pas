@@ -74,7 +74,8 @@ type
 implementation
 
 uses
-	 SaGeStringUtils
+	 SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeEncodingUtils
 	,SaGeFileUtils
 	,SaGeMathUtils

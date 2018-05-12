@@ -170,9 +170,6 @@ const
 	SG_FALSE = TSGByte(0);
 	SG_UNKNOWN = TSGByte(2);
 
-procedure SGCopyPartStreamToStream(const Source, Destination : TStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemoryStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
 type
 	TSGOptionPointer = TSGPointer;
 	
@@ -334,26 +331,6 @@ end;
 destructor TSGClass.Destroy();
 begin
 inherited;
-end;
-
-procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemoryStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	DestinationSizeOld : TSGUInt64;
-begin
-DestinationSizeOld := Destination.Size;
-Destination.Size := DestinationSizeOld + Size;
-Source.ReadBuffer(PSGByte(Destination.Memory)[DestinationSizeOld], Size);
-Destination.Position := Size + DestinationSizeOld;
-end;
-
-procedure SGCopyPartStreamToStream(const Source, Destination : TStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	Point : PSGByte;
-begin
-GetMem(Point, Size);
-Source.ReadBuffer(Point^, Size);
-Destination.WriteBuffer(Point^, Size);
-FreeMem(Point, Size);
 end;
 
 end.

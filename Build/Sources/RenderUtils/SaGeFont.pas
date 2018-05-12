@@ -72,6 +72,7 @@ uses
 	,SaGeMathUtils
 	,SaGeResourceManager
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeBitMap
 	,SaGeLog
 	,SaGeFileUtils

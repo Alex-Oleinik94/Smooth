@@ -72,6 +72,7 @@ implementation
 
 uses
 	 StrMan
+	,SaGeStreamUtils
 	,SaGeStringUtils
 	;
 

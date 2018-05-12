@@ -5,10 +5,10 @@ unit SaGeFileUtils;
 interface
 
 uses
-	 Classes
-	,SysUtils
+	 SaGeBase
 	
-	,SaGeBase
+	,Classes
+	,SysUtils
 	;
 
 const

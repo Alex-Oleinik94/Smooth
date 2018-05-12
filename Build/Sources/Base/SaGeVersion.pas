@@ -8,7 +8,6 @@ uses
 	 SaGeBase
 	,SaGeResourceManager
 	,SaGeDateTime
-	,SaGeStringUtils
 	,SaGeFileUtils
 	
 	,Classes
@@ -80,6 +79,8 @@ implementation
 
 uses
 	 SaGeLog
+	,SaGeStreamUtils
+	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeSysUtils
 	,SaGeCasesOfPrint

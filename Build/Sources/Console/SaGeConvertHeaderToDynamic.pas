@@ -63,6 +63,7 @@ uses
 	 SaGeResourceManager
 	,SaGeVersion
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeLog
 	,SaGeFileUtils
 	

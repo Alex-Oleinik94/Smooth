@@ -163,6 +163,7 @@ uses
 	,SaGeResourceManager
 	,SaGeFileUtils
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeBaseUtils
 	,SaGeLog
 	;
