@@ -33,3 +33,9 @@ Data/Images
 Data/Tron
 Log
 Binaries
+Data/Textures/*.sgia
+Data/Textures/*/*.sgia
+Data/Examples/13/*.jpg
+Data/Examples/13/*.smd
+Data/Examples/14/model.bin
+Data/Fonts/*.sgf
