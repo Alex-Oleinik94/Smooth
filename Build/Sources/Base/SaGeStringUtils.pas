@@ -677,7 +677,7 @@ while i <= Length(Text) do
 	Result += SGVal(Text[i]) / ii;
 	i += 1;
 	ii := ii * 10;
-	WriteLn(ii);ReadLn();
+	//WriteLn(ii);ReadLn();
 	end;
 for i := 1 to Length(Text) do
 	if Text[i] = '-' then
