@@ -24,21 +24,21 @@ type
 			private
 		procedure DeterminePacket(const Stream : TStream);
 			public
-		procedure Determine(const Stream : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
+		procedure Determine(const Stream : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 		procedure WriteInfoToStream(const Stream : TSGTextFileStream);
 			public
 		property EthernetFrame : TSGEthernetPacketFrame read FEthernetFrame;
 		end;
 
-procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
+procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 
 implementation
 
-procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
+procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 begin
 with TSGInternetPacketDeterminer.Create() do
 	begin
-	Determine(Packet, DestryPacketStreamAfter);
+	Determine(Packet, DestroyPacketStreamAfter);
 	WriteInfoToStream(Stream);
 	Destroy();
 	end;
@@ -59,12 +59,12 @@ FEthernetFrame := TSGEthernetPacketFrame.Create();
 FEthernetFrame.Read(Stream);
 end;
 
-procedure TSGInternetPacketDeterminer.Determine(const Stream : TStream; const DestryPacketStreamAfter : TSGBoolean = True);
+procedure TSGInternetPacketDeterminer.Determine(const Stream : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 begin
 if Stream <> nil then
 	begin
 	DeterminePacket(Stream);
-	if DestryPacketStreamAfter then
+	if DestroyPacketStreamAfter then
 		Stream.Destroy();
 	end;
 end;

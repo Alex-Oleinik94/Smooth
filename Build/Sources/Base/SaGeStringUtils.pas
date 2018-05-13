@@ -70,6 +70,7 @@ function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = Fals
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStr4BytesHex(const Value : TSGUInt32; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStr4BitsHex(const Bits : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGChar; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
@@ -118,6 +119,15 @@ uses
 (************)
 (** STRING **)
 (************)
+
+function SGStr4BytesHex(const Value : TSGUInt32; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result :=
+	SGStrByteHex(PSGByte(@Value)[3], RegisterType) +
+	SGStrByteHex(PSGByte(@Value)[2], RegisterType) +
+	SGStrByteHex(PSGByte(@Value)[1], RegisterType) +
+	SGStrByteHex(PSGByte(@Value)[0], RegisterType);
+end;
 
 function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 begin

@@ -150,6 +150,7 @@ InternetConsoleCaller.Category('Internet tools');
 InternetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
 InternetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
 InternetConsoleCaller.AddComand(@SGConsoleInternetPacketDumper, ['ipd'], 'Internet Packet Dumper');
+InternetConsoleCaller.AddComand(@SGConsoleDescriptPCapNG, ['dpcapng'], 'Descript PCapNG file');
 end;
 
 //============================

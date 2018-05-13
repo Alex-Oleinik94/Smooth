@@ -13,6 +13,7 @@ procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -25,12 +26,36 @@ uses
 	,SaGeLog
 	,SaGeConsoleUtils
 	,SaGeInternetPacketRuntimeDumper
-	,SaGeInternetPacketFileDumper
 	,SaGeCasesOfPrint
 	,SaGelNetHTTPUtils
 	,SaGelNetUDPConnection
 	,SaGelNetConnectionClasses
+	,SaGePCapNGUtils
+	,SaGeFileUtils
 	;
+
+procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
+var
+	Index : TSGMaxEnum;
+	AllParamsFileExists : TSGBoolean = True;
+begin
+if (SGCountConsoleParams(VParams) > 0) then
+	begin
+	AllParamsFileExists := True;
+	for Index := 0 to High(VParams) do
+		if not SGFileExists(VParams[Index]) then
+			begin
+			AllParamsFileExists := False;
+			SGPrintEngineVersion();
+			SGHint('Error: File "' + VParams[Index] + '" not exists!');
+			end;
+	if AllParamsFileExists then
+		for Index := 0 to High(VParams) do
+			SGDescriptPCapNGFile(VParams[Index]);
+	end
+else
+	SGHint('Error: Specify PCapNG file(s)!');
+end;
 
 procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
 begin

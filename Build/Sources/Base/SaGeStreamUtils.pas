@@ -24,7 +24,39 @@ function SGStringToStream(const Str : TSGString) : TMemoryStream; {$IFDEF SUPPOR
 function SGMatchingStreamString(const Stream : TStream; const Str : TSGString; const DestroyingStream : TSGBoolean = False) : TSGBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStreamToHexString(const Stream : TStream; const RegisterType : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
+type
+	TSGInputStreamType = (SGInputFileStream, SGInputMemoryStream);
+
+function SGCreateInputStream(const FileName : TSGString; const InputStreamType : TSGInputStreamType = SGInputFileStream) : TStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
 implementation
+
+uses
+	 SaGeFileUtils
+	;
+
+function SGCreateInputStream(const FileName : TSGString; const InputStreamType : TSGInputStreamType = SGInputFileStream) : TStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+function CreateInputFileStream() : TFileStream;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := TFileStream.Create(FileName, fmOpenRead);
+end;
+
+function CreateInputMemoryStream() : TMemoryStream;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+begin
+Result := TMemoryStream.Create();
+Result.LoadFromFile(FileName);
+Result.Position := 0;
+end;
+
+begin
+Result := nil;
+if SGFileExists(FileName) then
+	case InputStreamType of
+	SGInputFileStream   : Result := CreateInputFileStream();
+	SGInputMemoryStream : Result := CreateInputMemoryStream();
+	end;
+end;
 
 procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemoryStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
