@@ -55,7 +55,7 @@ Result := 0;
 PCapNGFile := TSGPCapNGFile.Create();
 PCapNGFile.FileName := FileName;
 DirectoryName := SGFreeDirectoryName('Description of the ' + FileName + ' file', '');
-SGHint(DirectoryName);
+//SGHint(DirectoryName);
 SGMakeDirectory(DirectoryName);
 if PCapNGFile.CreateInput() then
 	begin

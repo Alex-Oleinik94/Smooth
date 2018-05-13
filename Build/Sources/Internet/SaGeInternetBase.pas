@@ -912,6 +912,8 @@ function TSGIPv4Header.MoreFragments() : TSGBoolean;
 var
 	Flags : TSGUInt16;
 begin
+Flags := FFragment;
+SwapBytes(Flags);
 Result := (Flags and SGIPMoreFragments) > 0;
 end;
 

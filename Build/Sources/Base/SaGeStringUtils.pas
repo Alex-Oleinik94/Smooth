@@ -69,15 +69,19 @@ procedure SGUpCaseStringList(var SL : TSGStringList);overload;{$IFDEF SUPPORTINL
 function SGUpCasedStringList(SL : TSGStringList; const FreeList : TSGBool = False):TSGStringList; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 procedure SGStringListTrimAll(var SL : TSGStringList; const Garbage : TSGChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SGStringDeleteEndOfLineDublicates(const VString : TSGString) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStr4BytesHex(const Value : TSGUInt32; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-function SGStr4BitsHex(const Bits : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGChar; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 operator Enumerator(const List : TSGStringList): TSGArStringEnumerator;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in(const VString : TSGString; const VList : TSGStringList) : TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator in (const C : TSGChar;const S : TSGString):TSGBoolean;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator +(const VList : TSGStringList; const VString : TSGString) : TSGStringList;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+// Hex
+var
+	SGDefaultHexPrefix : TSGString = '$'; // "0x"
+function SGStr2BytesHex(const Value : TSGUInt16; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStr4BytesHex(const Value : TSGUInt32; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStrByteHex(const Value : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGString; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGStr4BitsHex(const Bits : TSGUInt8; const RegisterType : TSGBoolean = True) : TSGChar; overload; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
 // TextFile
 function SGReadStringInQuotesFromTextFile(const TextFile : PText) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

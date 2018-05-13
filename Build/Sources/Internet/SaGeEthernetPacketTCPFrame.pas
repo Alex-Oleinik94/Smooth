@@ -33,6 +33,7 @@ implementation
 
 uses
 	 SaGeStreamUtils
+	,SaGeStringUtils
 	;
 
 procedure TSGEthernetPacketTCPFrame.FreeData();
@@ -80,25 +81,24 @@ end;
 procedure TSGEthernetPacketTCPFrame.ExportInfo(const Stream : TSGTextFileStream);
 begin
 inherited;
-Stream.WriteLn(['Protocol type= ', SGInternetProtocolToString(SGIP_TCP)]);
-Stream.WriteLn(['Source port= ', FTCPHeader.SourcePort]);
-Stream.WriteLn(['Destination port= ', FTCPHeader.DestinationPort]);
-Stream.WriteLn(['Sequence number= ', FTCPHeader.SequenceNumber]);
-Stream.WriteLn(['Acknowledgement number= ', FTCPHeader.AcknowledgementNumber]);
-Stream.WriteLn(['Reserved bits= ', FTCPHeader.ReservedBitsAsBoolString]);
-Stream.WriteLn(['Flags.ECN_Nonce= ', FTCPHeader.ECN_Nonce]);
-Stream.WriteLn(['Flags.CWR= ', FTCPHeader.CWR]);
-Stream.WriteLn(['Flags.ECN_Echo= ', FTCPHeader.ECN_Echo]);
-Stream.WriteLn(['Flags.Urgent= ', FTCPHeader.Urgent]);
-Stream.WriteLn(['Flags.Acknowledgement= ', FTCPHeader.Acknowledgement]);
-Stream.WriteLn(['Flags.Push= ', FTCPHeader.Push]);
-Stream.WriteLn(['Flags.Reset= ', FTCPHeader.Reset]);
-Stream.WriteLn(['Flags.Final= ', FTCPHeader.Final]);
-Stream.WriteLn(['Flags.WindowSize= ', FTCPHeader.WindowSize]);
-Stream.WriteLn(['Flags.Checksum= ', FTCPHeader.Checksum]);
-Stream.WriteLn(['Flags.UrgentPointer= ', FTCPHeader.UrgentPointer]);
+Stream.WriteLn(['Protocol type      = ', SGInternetProtocolToString(SGIP_TCP)]);
+Stream.WriteLn(['Source port        = ', FTCPHeader.SourcePort]);
+Stream.WriteLn(['Destination port   = ', FTCPHeader.DestinationPort]);
+Stream.WriteLn(['Sequence number    = 0x', SGStr4BytesHex(FTCPHeader.SequenceNumber, False), '[hex]']);
+Stream.WriteLn(['Acknowledgement num= 0x', SGStr4BytesHex(FTCPHeader.AcknowledgementNumber, False), '[hex]']);
+Stream.WriteLn(['Reserved bits      = ', FTCPHeader.ReservedBitsAsBoolString]);
+Stream.WriteLn(['Flags.ECN_Nonce    = ', FTCPHeader.ECN_Nonce]);
+Stream.WriteLn(['Flags.CWR          = ', FTCPHeader.CWR]);
+Stream.WriteLn(['Flags.ECN_Echo     = ', FTCPHeader.ECN_Echo]);
+Stream.WriteLn(['Flags.Urgent       = ', FTCPHeader.Urgent]);
+Stream.WriteLn(['Flags.Acknowledgeme= ', FTCPHeader.Acknowledgement]);
+Stream.WriteLn(['Flags.Push         = ', FTCPHeader.Push]);
+Stream.WriteLn(['Flags.Reset        = ', FTCPHeader.Reset]);
+Stream.WriteLn(['Flags.Final        = ', FTCPHeader.Final]);
+Stream.WriteLn(['Flags.WindowSize   = ', FTCPHeader.WindowSize, ', ', SGGetSizeString(FTCPHeader.WindowSize, 'EN')]);
+Stream.WriteLn(['Flags.Checksum     = 0x', SGStr2BytesHex(FTCPHeader.Checksum, False), '[hex]']);
+Stream.WriteLn(['Flags.UrgentPointer= 0x', SGStr2BytesHex(FTCPHeader.UrgentPointer), '[hex], ', FTCPHeader.UrgentPointer, '[dec]']);
 Stream.WriteLn();
-
 end;
 
 end.

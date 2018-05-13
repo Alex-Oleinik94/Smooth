@@ -101,32 +101,32 @@ end;
 
 procedure TSGEthernetPacketIPv4Frame.ExportOptionsInfo(const Stream : TSGTextFileStream);
 begin
-Stream.WriteLn(['Options sets= ', (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0)]);
+Stream.WriteLn(['Options sets   = ', (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0)]);
 if (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0) then
 	begin
-	Stream.WriteLn(['Options size= ', FProtocolOptions.Size]);
-	Stream.WriteLn(['Options= ', '0x', SGStreamToHexString(FProtocolOptions), '[hex]']);
+	Stream.WriteLn(['Options size   = ', FProtocolOptions.Size]);
+	Stream.WriteLn(['Options        = 0x', SGStreamToHexString(FProtocolOptions), '[hex]']);
 	end;
 end;
 
 procedure TSGEthernetPacketIPv4Frame.ExportInfo(const Stream : TSGTextFileStream);
 begin
 inherited;
-Stream.WriteLn(['Protocol type= ', SGEthernetProtocolToString(SGEP_IPv4)]);
-Stream.WriteLn(['Version= ', FIPv4Header.Version]);
-Stream.WriteLn(['Header size= ', FIPv4Header.HeaderSize]);
+Stream.WriteLn(['Protocol type  = ', SGEthernetProtocolToString(SGEP_IPv4)]);
+Stream.WriteLn(['Version        = ', FIPv4Header.Version]);
+Stream.WriteLn(['Header size    = ', FIPv4Header.HeaderSize]);
 Stream.WriteLn(['Differentiated services codepoint= ', FIPv4Header.DifferentiatedServicesCodepoint]);
 Stream.WriteLn(['Expilit congestion notification= ', FIPv4Header.ExpilitCongestionNotification]);
-Stream.WriteLn(['Total size= ', FIPv4Header.TotalSize]);
-Stream.WriteLn(['Reserved bit= ', FIPv4Header.ReservedBit]);
-Stream.WriteLn(['Dont fragment= ', FIPv4Header.DontFragment]);
-Stream.WriteLn(['More fragments= ', FIPv4Header.MoreFragments]);
+Stream.WriteLn(['Total size     = ', FIPv4Header.TotalSize]);
+Stream.WriteLn(['Reserved bit   = ', FIPv4Header.ReservedBit]);
+Stream.WriteLn(['Dont fragment  = ', FIPv4Header.DontFragment]);
+Stream.WriteLn(['More fragments = ', FIPv4Header.MoreFragments]);
 Stream.WriteLn(['Fragment offset= ', FIPv4Header.FragmentOffset]);
-Stream.WriteLn(['Time to live= ', FIPv4Header.TimeToLive]);
-Stream.WriteLn(['Protocol= ', SGInternetProtocolToStringExtended(FIPv4Header.Protocol)]);
-Stream.WriteLn(['Checksum= 0x', SGStr2BytesHex(FIPv4Header.Checksum, False), '[hex]']);
-Stream.WriteLn(['Source= ', SGIPv4AddressToString(FIPv4Header.Source)]);
-Stream.WriteLn(['Destination= ', SGIPv4AddressToString(FIPv4Header.Destination)]);
+Stream.WriteLn(['Time to live   = ', FIPv4Header.TimeToLive]);
+Stream.WriteLn(['Protocol       = ', SGInternetProtocolToStringExtended(FIPv4Header.Protocol)]);
+Stream.WriteLn(['Checksum       = 0x', SGStr2BytesHex(FIPv4Header.Checksum, False), '[hex]']);
+Stream.WriteLn(['Source         = ', SGIPv4AddressToString(FIPv4Header.Source)]);
+Stream.WriteLn(['Destination    = ', SGIPv4AddressToString(FIPv4Header.Destination)]);
 ExportOptionsInfo(Stream);
 Stream.WriteLn();
 
