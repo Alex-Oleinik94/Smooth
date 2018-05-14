@@ -29,11 +29,42 @@ type
 
 function SGCreateInputStream(const FileName : TSGString; const InputStreamType : TSGInputStreamType = SGInputFileStream) : TStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 
+procedure SGKill(var Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+procedure SGKill(var Stream : TMemoryStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+procedure SGKill(var Stream : TFileStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+
 implementation
 
 uses
 	 SaGeFileUtils
 	;
+
+procedure SGKill(var Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+begin
+if Stream <> nil then
+	begin
+	Stream.Destroy();
+	Stream := nil;
+	end;
+end;
+
+procedure SGKill(var Stream : TMemoryStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+begin
+if Stream <> nil then
+	begin
+	Stream.Destroy();
+	Stream := nil;
+	end;
+end;
+
+procedure SGKill(var Stream : TFileStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+begin
+if Stream <> nil then
+	begin
+	Stream.Destroy();
+	Stream := nil;
+	end;
+end;
 
 function SGCreateInputStream(const FileName : TSGString; const InputStreamType : TSGInputStreamType = SGInputFileStream) : TStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 

@@ -94,6 +94,12 @@ const
 	SGEP_ECTP      = $9000; //Ethernet Configuration Testing Protocol
 	SGEP_IEEE_VLAN = $9100; //VLAN-tagged (IEEE 802.1Q) frame with double tagging
 
+// Protocol options
+type
+	TSGProtocolOptions = TMemoryStream;
+function SGProtocolOptions(const Stream : TStream; const OptionsSize : TSGUInt64) : TSGProtocolOptions; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGProtocolOptions(const Source : TSGProtocolOptions; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 // IPv4 address
 type
 	TSGIPv4AddressBytes = packed array[0..3] of TSGUInt8;
@@ -140,10 +146,7 @@ type
 		function FragmentOffset() : TSGUInt16;
 		function Checksum() : TSGUInt16;
 		end;
-	TSGIPv4Options = TMemoryStream;
-
-function SGIPv4Options(const Stream : TStream; const Header : TSGIPv4Header) : TSGIPv4Options; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGIPv4Options(const Source : TStream; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	TSGIPv4Options = TSGProtocolOptions;
 
 // Masks
 const 
@@ -386,7 +389,7 @@ type
 		property Checksum  : TSGUInt16 read GetChecksum;
 		property UrgentPointer  : TSGUInt16 read GetUrgentPointer;
 		end;
-	TSGTCPOptions = TMemoryStream;
+	TSGTCPOptions = TSGProtocolOptions;
 
 // Masks
 const 
@@ -422,7 +425,7 @@ uses
 	,SaGeStringUtils
 	;
 
-procedure SGIPv4Options(const Source : TStream; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGProtocolOptions(const Source : TSGProtocolOptions; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (Source <> nil) and (Destination <> nil) and (Source.Size > 0) then
 	begin
@@ -432,13 +435,13 @@ if (Source <> nil) and (Destination <> nil) and (Source.Size > 0) then
 	end;
 end;
 
-function SGIPv4Options(const Stream : TStream; const Header : TSGIPv4Header) : TSGIPv4Options; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGProtocolOptions(const Stream : TStream; const OptionsSize : TSGUInt64) : TSGProtocolOptions; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := nil;
-if Header.HeaderSize() > SG_IPv4_HEADER_SIZE then
+if OptionsSize > 0 then
 	begin
-	Result := TSGIPv4Options.Create();
-	SGCopyPartStreamToStream(Stream, Result, Header.HeaderSize() - SG_IPv4_HEADER_SIZE);
+	Result := TSGProtocolOptions.Create();
+	SGCopyPartStreamToStream(Stream, Result, OptionsSize);
 	Result.Position := 0;
 	end;
 end;

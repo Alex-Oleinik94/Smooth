@@ -19,24 +19,37 @@ type
 			private
 		FEthernetPacketHeader : TSGEthernetHeader;
 		FProtocolFrame : TSGEthernetPacketProtocolFrame;
+		FEthernetSize : TSGEthernetPacketFrameSize;
 			public
-		procedure Read(const Stream : TSGEthernetPacketDataFrameStream); override;
-		procedure Write(const Stream : TSGEthernetPacketDataFrameStream); override;
+		procedure Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize); override;
+		procedure Write(const Stream : TSGEthernetPacketFrameStream); override;
 		procedure ExportInfo(const Stream : TSGTextFileStream); override;
+		function Size() : TSGEthernetPacketFrameSize; override;
+		function SizeEncapsulated() : TSGEthernetPacketFrameSize;
 			protected
-		procedure KillProtocolFrame();
 		class function ProtocolClass(const ProtocolValue : TSGEnthernetProtocol) : TSGEthernetPacketProtocolFrameClass;
 			public
 		function Destination() : TSGString;
 		function Source() : TSGString;
 		function Protocol() : TSGString;
 		end;
-	
+
 implementation
 
 uses
 	 SaGeEthernetPacketIPv4Frame
+	,SaGeStringUtils
 	;
+
+function TSGEthernetPacketFrame.SizeEncapsulated() : TSGEthernetPacketFrameSize;
+begin
+Result := FEthernetSize - SG_ETHERNET_HEADER_SIZE;
+end;
+
+function TSGEthernetPacketFrame.Size() : TSGEthernetPacketFrameSize;
+begin
+Result := FEthernetSize;
+end;
 
 class function TSGEthernetPacketFrame.ProtocolClass(const ProtocolValue : TSGEnthernetProtocol) : TSGEthernetPacketProtocolFrameClass;
 begin
@@ -44,15 +57,6 @@ case ProtocolValue of
 SGEP_IPv4 : Result := TSGEthernetPacketIPv4Frame;
 else Result := nil;
 end;
-end;
-
-procedure TSGEthernetPacketFrame.KillProtocolFrame();
-begin
-if FProtocolFrame <> nil then
-	begin
-	FProtocolFrame.Destroy();
-	FProtocolFrame := nil;
-	end;
 end;
 
 function TSGEthernetPacketFrame.Destination() : TSGString;
@@ -75,30 +79,30 @@ begin
 inherited;
 FillChar(FEthernetPacketHeader, SizeOf(FEthernetPacketHeader), 0);
 FProtocolFrame := nil;
+FEthernetSize := 0;
+FFrameName := 'Ethernet';
 end;
 
 destructor TSGEthernetPacketFrame.Destroy();
 begin
-KillProtocolFrame();
+KillProtocol(FProtocolFrame);
 FillChar(FEthernetPacketHeader, SizeOf(FEthernetPacketHeader), 0);
+FEthernetSize := 0;
 inherited;
 end;
 
-procedure TSGEthernetPacketFrame.Read(const Stream : TSGEthernetPacketDataFrameStream);
-var
-	EthernetPacketProtocol : TSGEthernetPacketProtocolFrameClass = nil;
+procedure TSGEthernetPacketFrame.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
 begin
-KillProtocolFrame();
+FEthernetSize := BlockSize;
 Stream.ReadBuffer(FEthernetPacketHeader, SizeOf(TSGEthernetHeader));
-EthernetPacketProtocol := ProtocolClass(FEthernetPacketHeader.Protocol);
-if EthernetPacketProtocol <> nil then
-	begin
-	FProtocolFrame := EthernetPacketProtocol.Create();
-	FProtocolFrame.Read(Stream);
-	end;
+TSGEthernetPacketProtocolFrame.ReadProtocolClass(
+	ProtocolClass(FEthernetPacketHeader.Protocol),
+	SizeEncapsulated(),
+	FProtocolFrame,
+	Stream);
 end;
 
-procedure TSGEthernetPacketFrame.Write(const Stream : TSGEthernetPacketDataFrameStream);
+procedure TSGEthernetPacketFrame.Write(const Stream : TSGEthernetPacketFrameStream);
 begin
 Stream.WriteBuffer(FEthernetPacketHeader, SizeOf(TSGEthernetHeader));
 if FProtocolFrame <> nil then
@@ -110,9 +114,12 @@ begin
 with Stream do
 	begin
 	WriteLn('[ethernet]');
-	WriteLn(['Destination = ', Destination()]);
-	WriteLn(['Source      = ', Source()]);
-	WriteLn(['Protocol    = ', Protocol()]);
+	WriteLn(['Frame.Protocol= ', FrameName]);
+	WriteLn(['Frame.Size    = ', Size(), ', ', SGGetSizeString(Size(), 'EN')]);
+	WriteLn(['Frame.EncapsulatedSize = ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
+	WriteLn(['Destination   = ', Destination()]);
+	WriteLn(['Source        = ', Source()]);
+	WriteLn(['Protocol      = ', Protocol()]);
 	WriteLn();
 	end;
 if FProtocolFrame <> nil then

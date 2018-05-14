@@ -28,6 +28,19 @@ uses
 	;
 
 function SGDescriptPCapNGFile(const FileName : TSGString) : TSGUInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function FileSystemFileName(const FileName : TSGString) : TSGString;
+var
+	Index : TSGMaxEnum;
+	BadSimbols : set of TSGChar = ['/', '\'];
+begin
+Result := FileName;
+if Length(Result) > 0 then
+	for Index := 1 to Length(Result) do
+		if Result[Index] in BadSimbols then
+			Result[Index] := '_';
+end;
+
 var
 	PCapNGFile : TSGPCapNGFile = nil;
 	DirectoryName : TSGString = '';
@@ -54,7 +67,7 @@ begin
 Result := 0;
 PCapNGFile := TSGPCapNGFile.Create();
 PCapNGFile.FileName := FileName;
-DirectoryName := SGFreeDirectoryName('Description of the ' + FileName + ' file', '');
+DirectoryName := SGFreeDirectoryName('Description of the ' + FileSystemFileName(FileName) + ' file', '');
 //SGHint(DirectoryName);
 SGMakeDirectory(DirectoryName);
 if PCapNGFile.CreateInput() then

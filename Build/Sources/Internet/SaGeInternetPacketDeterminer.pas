@@ -23,6 +23,7 @@ type
 		FEthernetFrame : TSGEthernetPacketFrame;
 			private
 		procedure DeterminePacket(const Stream : TStream);
+		procedure KillFrame();
 			public
 		procedure Determine(const Stream : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 		procedure WriteInfoToStream(const Stream : TSGTextFileStream);
@@ -48,15 +49,20 @@ end;
 // ===TSGInternetPacketDeterminer===
 // =================================
 
-procedure TSGInternetPacketDeterminer.DeterminePacket(const Stream : TStream);
+procedure TSGInternetPacketDeterminer.KillFrame();
 begin
 if FEthernetFrame <> nil then
 	begin
 	FEthernetFrame.Destroy();
 	FEthernetFrame := nil;
 	end;
+end;
+
+procedure TSGInternetPacketDeterminer.DeterminePacket(const Stream : TStream);
+begin
+KillFrame();
 FEthernetFrame := TSGEthernetPacketFrame.Create();
-FEthernetFrame.Read(Stream);
+FEthernetFrame.Read(Stream, Stream.Size - Stream.Position);
 end;
 
 procedure TSGInternetPacketDeterminer.Determine(const Stream : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
@@ -77,11 +83,7 @@ end;
 
 destructor TSGInternetPacketDeterminer.Destroy();
 begin
-if FEthernetFrame <> nil then
-	begin
-	FEthernetFrame.Destroy();
-	FEthernetFrame := nil;
-	end;
+KillFrame();
 inherited;
 end;
 

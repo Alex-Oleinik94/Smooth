@@ -165,7 +165,6 @@ type
 		end;
 
 procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGKill(var Stream : TStream); overload;
 
 implementation
 
@@ -177,15 +176,6 @@ uses
 		,SaGeLeaksDetector
 		{$ENDIF}
 	;
-
-procedure SGKill(var Stream : TStream); overload;
-begin
-if Stream <> nil then
-	begin
-	Stream.Destroy();
-	Stream := nil;
-	end;
-end;
 
 {$IFDEF WITHLEAKSDETECTOR}
 constructor TSGNamed.Create();
