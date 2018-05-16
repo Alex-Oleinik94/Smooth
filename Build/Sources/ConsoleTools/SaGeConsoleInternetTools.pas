@@ -32,6 +32,7 @@ uses
 	,SaGelNetConnectionClasses
 	,SaGePCapNGUtils
 	,SaGeFileUtils
+	,SaGeTCPStreamHandler
 	;
 
 procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
