@@ -9,6 +9,12 @@ uses
 	,SaGeCasesOfPrint
 	;
 
+// Method That Enable NVIDIA High Performance Graphics Rendering on Optimus Systems
+// Global Variable NvOptimusEnablement (new in Driver Release 302)
+var
+	NvOptimusEnablement : TSGUInt32 = $00000001; cvar;
+	AmdPowerXpressRequestHighPerformance : TSGUInt32 = $00000001; cvar;
+
 const
 	SGNVidiaViewingShift = '	';
 
@@ -170,13 +176,12 @@ if DllManager.Suppored('nvapi') then
 	end;
 end;
 
-// For set to High Performance Graphics
-var
-	NvOptimusEnablement : TSGUInt32 = 1; export;
+exports NvOptimusEnablement, AmdPowerXpressRequestHighPerformance;
 
 initialization
 begin
-NvOptimusEnablement := 1;
+NvOptimusEnablement :=  $00000001;
+AmdPowerXpressRequestHighPerformance :=  $00000001;
 end;
 
 end.
