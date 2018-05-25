@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeEthernetPacketTCPFrame;
+unit SaGeEthernetPacketFrameTCP;
 
 interface
 
@@ -14,7 +14,7 @@ uses
 	;
 
 type
-	TSGEthernetPacketTCPFrame = class(TSGEthernetPacketProtocolFrame)
+	TSGEthernetPacketFrameTCP = class(TSGEthernetPacketProtocolFrame)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -44,23 +44,23 @@ uses
 	,SaGeClasses
 	;
 
-function TSGEthernetPacketTCPFrame.Size() : TSGEthernetPacketFrameSize;
+function TSGEthernetPacketFrameTCP.Size() : TSGEthernetPacketFrameSize;
 begin
 Result := FSize;
 end;
 
-function TSGEthernetPacketTCPFrame.SizeEncapsulated() : TSGEthernetPacketFrameSize;
+function TSGEthernetPacketFrameTCP.SizeEncapsulated() : TSGEthernetPacketFrameSize;
 begin
 Result := FSize - FTCPHeader.HeaderSize;
 end;
 
-procedure TSGEthernetPacketTCPFrame.FreeData();
+procedure TSGEthernetPacketFrameTCP.FreeData();
 begin
 SGKill(FData);
 SGKill(FOptions);
 end;
 
-constructor TSGEthernetPacketTCPFrame.Create();
+constructor TSGEthernetPacketFrameTCP.Create();
 begin
 inherited;
 FillChar(FTCPHeader, SizeOf(TSGTCPHeader), 0);
@@ -70,7 +70,7 @@ FOptions := nil;
 FFrameName := SGInternetProtocolToString(SGIP_TCP);
 end;
 
-destructor TSGEthernetPacketTCPFrame.Destroy();
+destructor TSGEthernetPacketFrameTCP.Destroy();
 begin
 FreeData();
 FillChar(FTCPHeader, SizeOf(TSGTCPHeader), 0);
@@ -78,7 +78,7 @@ FSize := 0;
 inherited;
 end;
 
-procedure TSGEthernetPacketTCPFrame.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
+procedure TSGEthernetPacketFrameTCP.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
 begin
 FreeData();
 FSize := BlockSize;
@@ -91,7 +91,7 @@ SGCopyPartStreamToStream(Stream, FData, BlockSize - FTCPHeader.HeaderSize);
 FData.Position := 0;
 end;
 
-procedure TSGEthernetPacketTCPFrame.Write(const Stream : TSGEthernetPacketFrameStream);
+procedure TSGEthernetPacketFrameTCP.Write(const Stream : TSGEthernetPacketFrameStream);
 begin
 Stream.WriteBuffer(FTCPHeader, SizeOf(TSGTCPHeader));
 if (FData <> nil) and (FData.Size > 0) then
@@ -101,7 +101,7 @@ if (FData <> nil) and (FData.Size > 0) then
 	end;
 end;
 
-procedure TSGEthernetPacketTCPFrame.ExportOptionsInfo(const Stream : TSGTextFileStream);
+procedure TSGEthernetPacketFrameTCP.ExportOptionsInfo(const Stream : TSGTextFileStream);
 begin
 inherited;
 Stream.WriteLn(['Options sets   = ', (FOptions <> nil) and (FOptions.Size > 0)]);
@@ -112,12 +112,12 @@ if (FOptions <> nil) and (FOptions.Size > 0) then
 	end;
 end;
 
-function TSGEthernetPacketTCPFrame.DataExists() : TSGBoolean;
+function TSGEthernetPacketFrameTCP.DataExists() : TSGBoolean;
 begin
 Result := (FData <> nil) and (FData.Size > 0);
 end;
 
-procedure TSGEthernetPacketTCPFrame.ExportData(const Stream : TSGTextFileStream);
+procedure TSGEthernetPacketFrameTCP.ExportData(const Stream : TSGTextFileStream);
 var
 	DataByte : TSGUInt8;
 	BytesWrited : TSGUInt8;
@@ -151,7 +151,7 @@ while FData.Position < FData.Size do
 FData.Position := 0;
 end;
 
-procedure TSGEthernetPacketTCPFrame.ExportInfo(const Stream : TSGTextFileStream);
+procedure TSGEthernetPacketFrameTCP.ExportInfo(const Stream : TSGTextFileStream);
 begin
 inherited;
 Stream.WriteLn(['Frame.Protocol     = ', ProtocolName]);

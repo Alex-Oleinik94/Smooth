@@ -20,8 +20,19 @@ type
 			private
 		FCriticalSection : TRTLCriticalSection;
 		end;
-	
+
+procedure SGKill(var CriticalSection : TSGCriticalSection); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
+
+procedure SGKill(var CriticalSection : TSGCriticalSection); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if CriticalSection <> nil then
+	begin
+	CriticalSection.Destroy();
+	CriticalSection := nil;
+	end;
+end;
 
 // =========================
 // ===TSGCriticalSection====

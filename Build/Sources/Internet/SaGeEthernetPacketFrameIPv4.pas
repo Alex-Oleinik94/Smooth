@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeEthernetPacketIPv4Frame;
+unit SaGeEthernetPacketFrameIPv4;
 
 interface
 
@@ -12,7 +12,7 @@ uses
 	;
 
 type
-	TSGEthernetPacketIPv4Frame = class(TSGEthernetPacketProtocolFrame)
+	TSGEthernetPacketFrameIPv4 = class(TSGEthernetPacketProtocolFrame)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -37,19 +37,19 @@ implementation
 uses
 	 SaGeStreamUtils
 	,SaGeStringUtils
-	,SaGeEthernetPacketTCPFrame
+	,SaGeEthernetPacketFrameTCP
 	;
 
-class function TSGEthernetPacketIPv4Frame.ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
+class function TSGEthernetPacketFrameIPv4.ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
 begin
 case ProtocolValue of
-SGIP_TCP : Result := TSGEthernetPacketTCPFrame;
+SGIP_TCP : Result := TSGEthernetPacketFrameTCP;
 SGIP_UDP : Result := nil;
 else Result := nil;
 end;
 end;
 
-procedure TSGEthernetPacketIPv4Frame.KillProtocolFrame();
+procedure TSGEthernetPacketFrameIPv4.KillProtocolFrame();
 begin
 if FProtocolOptions <> nil then
 	begin
@@ -59,7 +59,7 @@ if FProtocolOptions <> nil then
 KillProtocol(FProtocolFrame);
 end;
 
-constructor TSGEthernetPacketIPv4Frame.Create();
+constructor TSGEthernetPacketFrameIPv4.Create();
 begin
 inherited;
 FillChar(FIPv4Header, SizeOf(TSGIPv4Header), 0);
@@ -68,14 +68,14 @@ FProtocolOptions := nil;
 FFrameName := SGEthernetProtocolToString(SGEP_IPv4);
 end;
 
-destructor TSGEthernetPacketIPv4Frame.Destroy();
+destructor TSGEthernetPacketFrameIPv4.Destroy();
 begin
 KillProtocolFrame();
 FillChar(FIPv4Header, SizeOf(TSGIPv4Header), 0);
 inherited;
 end;
 
-procedure TSGEthernetPacketIPv4Frame.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
+procedure TSGEthernetPacketFrameIPv4.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
 begin
 KillProtocolFrame();
 Stream.ReadBuffer(FIPv4Header, SizeOf(TSGIPv4Header));
@@ -87,17 +87,17 @@ ReadProtocolClass(
 	Stream);
 end;
 
-function TSGEthernetPacketIPv4Frame.SizeEncapsulated() : TSGEthernetPacketFrameSize;
+function TSGEthernetPacketFrameIPv4.SizeEncapsulated() : TSGEthernetPacketFrameSize;
 begin
 Result := FIPv4Header.TotalSize - FIPv4Header.HeaderSize;
 end;
 
-function TSGEthernetPacketIPv4Frame.Size() : TSGEthernetPacketFrameSize;
+function TSGEthernetPacketFrameIPv4.Size() : TSGEthernetPacketFrameSize;
 begin
 Result := FIPv4Header.TotalSize;
 end;
 
-procedure TSGEthernetPacketIPv4Frame.Write(const Stream : TSGEthernetPacketFrameStream);
+procedure TSGEthernetPacketFrameIPv4.Write(const Stream : TSGEthernetPacketFrameStream);
 begin
 Stream.WriteBuffer(FIPv4Header, SizeOf(TSGIPv4Header));
 SGProtocolOptions(FProtocolOptions, Stream);
@@ -105,7 +105,7 @@ if FProtocolFrame <> nil then
 	FProtocolFrame.Write(Stream);
 end;
 
-procedure TSGEthernetPacketIPv4Frame.ExportOptionsInfo(const Stream : TSGTextFileStream);
+procedure TSGEthernetPacketFrameIPv4.ExportOptionsInfo(const Stream : TSGTextFileStream);
 begin
 Stream.WriteLn(['Options sets   = ', (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0)]);
 if (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0) then
@@ -115,7 +115,7 @@ if (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0) then
 	end;
 end;
 
-procedure TSGEthernetPacketIPv4Frame.ExportInfo(const Stream : TSGTextFileStream);
+procedure TSGEthernetPacketFrameIPv4.ExportInfo(const Stream : TSGTextFileStream);
 begin
 inherited;
 Stream.WriteLn(['Frame.Protocol = ', ProtocolName]);

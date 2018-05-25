@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-	 SaGeEthernetPacketIPv4Frame
+	 SaGeEthernetPacketFrameIPv4
 	,SaGeStringUtils
 	;
 
@@ -54,7 +54,7 @@ end;
 class function TSGEthernetPacketFrame.ProtocolClass(const ProtocolValue : TSGEnthernetProtocol) : TSGEthernetPacketProtocolFrameClass;
 begin
 case ProtocolValue of
-SGEP_IPv4 : Result := TSGEthernetPacketIPv4Frame;
+SGEP_IPv4 : Result := TSGEthernetPacketFrameIPv4;
 else Result := nil;
 end;
 end;

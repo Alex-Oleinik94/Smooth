@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeTCPStreamHandler;
+unit SaGeInternetConnectionTCP;
 
 interface
 
@@ -10,20 +10,19 @@ uses
 	,SaGeInternetBase
 	,SaGeInternetPacketDeterminer
 	,SaGeCriticalSection
-	,SaGeTCPConnectionHandler
+	,SaGeInternetConnection
 	
 	,Classes
 	;
 
 type
-	TSGTCPStreamHandler = class(TSGNamed)
+	TSGInternetConnectionTCP = class(TSGInternetConnection)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			private
 		FPacketDeterminer : TSGInternetPacketDeterminer;
 		FCritacalSection : TSGCriticalSection;
-		FPacketHandler : TSGTCPConnectionHandler;
 			protected
 		procedure HandlePacket();
 			public
@@ -34,41 +33,46 @@ type
 
 implementation
 
-procedure TSGTCPStreamHandler.HandlePacket();
+uses
+	 SaGeInternetConnections
+	;
+
+procedure TSGInternetConnectionTCP.HandlePacket();
 begin
 FCritacalSection.Enter();
 
 FCritacalSection.Leave();
 end;
 
-constructor TSGTCPStreamHandler.Create();
+constructor TSGInternetConnectionTCP.Create();
 begin
 inherited;
 FCritacalSection := TSGCriticalSection.Create();
 end;
 
-destructor TSGTCPStreamHandler.Destroy();
+destructor TSGInternetConnectionTCP.Destroy();
 begin
-if FCritacalSection <> nil then
-	begin
-	FCritacalSection.Destroy();
-	FCritacalSection := nil;
-	end;
+SGKill(FCritacalSection);
 inherited;
 end;
 
-procedure TSGTCPStreamHandler.HandleData(const Stream : TStream);
+procedure TSGInternetConnectionTCP.HandleData(const Stream : TStream);
 begin
 end;
 
-function TSGTCPStreamHandler.HasData() : TSGBoolean;
+function TSGInternetConnectionTCP.HasData() : TSGBoolean;
 begin
 Result := False;
 end;
 
-function TSGTCPStreamHandler.CountData() : TSGMaxEnum;
+function TSGInternetConnectionTCP.CountData() : TSGMaxEnum;
 begin
 Result := 0;
+end;
+
+initialization
+begin
+SGRegisterInternetConnectionClass(TSGInternetConnectionTCP);
 end;
 
 end.
