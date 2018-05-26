@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeDateTime
+	,SaGeEthernetPacketFrame
 	
 	,Classes
 	;
@@ -15,15 +16,22 @@ uses
 
 
 type
+	TSGInternetConnectionSizeInt = TSGUInt64;
 	TSGInternetConnection = class(TSGNamed)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			private
-		FDataSize : TSGUInt64;
-		FFirstPacketTime : TSGTime;
-		FFirstPacketDate : TSGDateTime;
+		FDataSize : TSGInternetConnectionSizeInt;
+		FTimeFirstPacket : TSGTime;
+		FDateFirstPacket : TSGDateTime;
 		
+			public
+		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
+			public
+		property DataSize : TSGInternetConnectionSizeInt read FDataSize;
+		property TimeFirstPacket : TSGTime read FTimeFirstPacket;
+		property DateFirstPacket : TSGDateTime read FDateFirstPacket;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -56,6 +64,11 @@ implementation
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF   INC_PLACE_IMPLEMENTATION}
+
+function TSGInternetConnection.PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+begin
+Result := False;
+end;
 
 constructor TSGInternetConnection.Create();
 begin

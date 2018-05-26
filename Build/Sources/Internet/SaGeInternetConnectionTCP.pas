@@ -8,9 +8,10 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeInternetBase
-	,SaGeInternetPacketDeterminer
 	,SaGeCriticalSection
 	,SaGeInternetConnection
+	,SaGeDateTime
+	,SaGeEthernetPacketFrame
 	
 	,Classes
 	;
@@ -21,10 +22,10 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			private
-		FPacketDeterminer : TSGInternetPacketDeterminer;
 		FCritacalSection : TSGCriticalSection;
+		
 			protected
-		procedure HandlePacket();
+		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 			public
 		procedure HandleData(const Stream : TStream); virtual;
 		function HasData() : TSGBoolean; virtual;
@@ -37,8 +38,9 @@ uses
 	 SaGeInternetConnections
 	;
 
-procedure TSGInternetConnectionTCP.HandlePacket();
+function TSGInternetConnectionTCP.PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
+Result := False;
 FCritacalSection.Enter();
 
 FCritacalSection.Leave();

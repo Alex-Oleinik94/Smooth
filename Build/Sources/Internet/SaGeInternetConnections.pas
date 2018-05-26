@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeInternetPacketCaptureHandler
 	,SaGeInternetConnection
+	,SaGeDateTime
 	
 	,Classes
 	;
@@ -21,6 +22,10 @@ type
 			private
 		FConnections : TSGInternetConnectionList;
 		
+			protected
+		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
+		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
+		function HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean; override;
 		end;
 
 procedure SGRegisterInternetConnectionClass(const ClassVariable : TSGInternetConnectionClass);
@@ -54,6 +59,23 @@ else
 	end;
 if Add then
 	ConnectionClasses += ClassVariable;
+end;
+
+// ==================================
+// ======TSGInternetConnections======
+// ==================================
+
+function TSGInternetConnections.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
+begin
+Result := False;
+end;
+
+procedure TSGInternetConnections.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); 
+begin
+end;
+
+procedure TSGInternetConnections.HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime);
+begin
 end;
 
 constructor TSGInternetConnections.Create();
