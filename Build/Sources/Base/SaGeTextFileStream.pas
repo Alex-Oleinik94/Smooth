@@ -8,12 +8,13 @@ uses
 	 SaGeBase
 	,SaGeCriticalSection
 	,SaGeClasses
+	,SaGeTextStream
 	
 	,Classes
 	;
 
 type
-	TSGTextFileStream = class(TSGNamed)
+	TSGTextFileStream = class(TSGTextStream)
 			public
 		constructor Create(const FileName : TSGString);
 		destructor Destroy(); override;
@@ -25,14 +26,8 @@ type
 		FEoln : TSGString;
 		FEof : TSGString;
 			public
-		procedure Write(const StringToWrite : TSGString);
-		procedure WriteLn(const StringToWrite : TSGString);
-		procedure Write(const ValuesToWrite : array of const);
-		procedure WriteLn(const ValuesToWrite : array of const);
-		procedure WriteLn();
-			public
-		procedure WriteLines(const Strings : TSGStringList);
-		procedure WriteLines(const Stream : TStream);
+		procedure Write(const StringToWrite : TSGString); override;
+		procedure WriteLn(); override;
 			public
 		property FileStream : TFileStream read FStream;
 		property Stream : TFileStream read FStream;
@@ -53,43 +48,11 @@ begin
 Write(FEoln);
 end;
 
-procedure TSGTextFileStream.Write(const ValuesToWrite : array of const);
-begin
-Write(SGStr(ValuesToWrite));
-end;
-
-procedure TSGTextFileStream.WriteLn(const ValuesToWrite : array of const);
-begin
-Write(SGStr(ValuesToWrite) + FEoln);
-end;
-
-procedure TSGTextFileStream.WriteLines(const Strings : TSGStringList);
-var
-	Index : TSGMaxEnum;
-begin
-if (Strings <> nil) and (Length(Strings) > 0) then
-	for Index := 0 to High(Strings) do
-		WriteLn(Strings[Index]);
-end;
-
-procedure TSGTextFileStream.WriteLines(const Stream : TStream);
-begin
-Stream.Position := 0;
-while Stream.Position <> Stream.Size do
-	WriteLn(SGReadLnStringFromStream(Stream));
-Stream.Position := 0;
-end;
-
 procedure TSGTextFileStream.Write(const StringToWrite : TSGString);
 begin
 FCriticalSection.Enter();
 SGWriteStringToStream(StringToWrite, FStream, False);
 FCriticalSection.Leave();
-end;
-
-procedure TSGTextFileStream.WriteLn(const StringToWrite : TSGString);
-begin
-Write(StringToWrite + FEoln);
 end;
 
 constructor TSGTextFileStream.Create(const FileName : TSGString);
