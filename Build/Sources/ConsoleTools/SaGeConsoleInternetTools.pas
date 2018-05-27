@@ -12,7 +12,7 @@ uses
 procedure SGConsoleHTTPGet(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketRuntimeDumper(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
@@ -58,7 +58,7 @@ else
 	SGHint('Error: Specify PCapNG file(s)!');
 end;
 
-procedure SGConsoleInternetPacketDumper(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleInternetPacketRuntimeDumper(const VParams : TSGConcoleCallerParams = nil);
 begin
 if SGCountConsoleParams(VParams) = 0 then
 	begin

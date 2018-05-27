@@ -18,7 +18,6 @@ type
 	TSGInternetPacketRuntimeDumper = class(TSGInternetPacketCaptureHandler)
 			public
 		constructor Create(); override;
-		destructor Destroy(); override;
 			private
 		FGeneralDirectory : TSGString;
 		FPacketDataFileExtension : TSGString;
@@ -161,11 +160,6 @@ FPacketInfoFileExtension := 'ini';
 PossibilityBreakLoopFromConsole := True;
 ProcessTimeOutUpdates := True;
 InfoTimeOut := 90;
-end;
-
-destructor TSGInternetPacketRuntimeDumper.Destroy();
-begin
-inherited;
 end;
 
 end.

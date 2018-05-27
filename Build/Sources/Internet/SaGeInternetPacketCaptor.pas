@@ -74,6 +74,7 @@ type
 		end;
 
 procedure SGInternetPacketCaptor(const CaptorCallBack : TSGInternetPacketCaptorCallBack; const CaptorCallBackData : TSGPointer = nil);
+procedure SGKill(var Variable : TSGInternetPacketCaptor);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
@@ -87,6 +88,15 @@ uses
 	
 	,Crt
 	;
+
+procedure SGKill(var Variable : TSGInternetPacketCaptor);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if Variable <> nil then
+	begin
+	Variable.Destroy();
+	Variable := nil;
+	end;
+end;
 
 procedure SGInternetPacketCaptor(const CaptorCallBack : TSGInternetPacketCaptorCallBack; const CaptorCallBackData : TSGPointer = nil);
 begin

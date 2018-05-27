@@ -271,11 +271,7 @@ end;
 
 procedure TSGInternetPacketCaptureHandler.Stop();
 begin
-if FPacketCaptor <> nil then
-	begin
-	FPacketCaptor.Destroy();
-	FPacketCaptor := nil;
-	end;
+SGKill(FPacketCaptor);
 end;
 
 function TSGInternetPacketCaptureHandler.Update() : TSGBoolean;
