@@ -34,6 +34,9 @@ type
 		procedure ExportData(const Stream : TSGTextFileStream);
 			protected
 		procedure FreeData();
+			public // Headers
+		function TCP() : PSGTCPHeader;
+		function Data() : TSGEthernetPacketFrameStream; override;
 		end;
 	
 implementation
@@ -43,6 +46,24 @@ uses
 	,SaGeStringUtils
 	,SaGeClasses
 	;
+
+// =============================================
+// ======TSGEthernetPacketFrameTCP HEADERS======
+// =============================================
+
+function TSGEthernetPacketFrameTCP.TCP() : PSGTCPHeader;
+begin
+Result := @FTCPHeader;
+end;
+
+function TSGEthernetPacketFrameTCP.Data() : TSGEthernetPacketFrameStream;
+begin
+Result := FData;
+end;
+
+// =====================================
+// ======TSGEthernetPacketFrameTCP======
+// =====================================
 
 function TSGEthernetPacketFrameTCP.Size() : TSGEthernetPacketFrameSize;
 begin

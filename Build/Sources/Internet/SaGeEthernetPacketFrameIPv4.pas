@@ -30,6 +30,10 @@ type
 			protected
 		procedure KillProtocolFrame();
 		class function ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
+			public // Headers
+		function IPv4() : PSGIPv4Header;
+		function TCP() : PSGTCPHeader;
+		function Data() : TSGEthernetPacketFrameStream; override;
 		end;
 	
 implementation
@@ -39,6 +43,32 @@ uses
 	,SaGeStringUtils
 	,SaGeEthernetPacketFrameTCP
 	;
+
+// ==============================================
+// ======TSGEthernetPacketFrameIPv4 HEADERS======
+// ==============================================
+
+function TSGEthernetPacketFrameIPv4.IPv4() : PSGIPv4Header;
+begin
+Result := @FIPv4Header;
+end;
+
+function TSGEthernetPacketFrameIPv4.TCP() : PSGTCPHeader;
+begin
+Result := nil;
+if (FProtocolFrame <> nil) and (FProtocolFrame is TSGEthernetPacketFrameTCP) then
+	Result := (FProtocolFrame as TSGEthernetPacketFrameTCP).TCP();
+end;
+
+function TSGEthernetPacketFrameIPv4.Data() : TSGEthernetPacketFrameStream;
+begin
+if (FProtocolFrame <> nil) then
+	Result := FProtocolFrame.Data();
+end;
+
+// ======================================
+// ======TSGEthernetPacketFrameIPv4======
+// ======================================
 
 class function TSGEthernetPacketFrameIPv4.ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
 begin

@@ -52,9 +52,10 @@ uses
 	,Crt
 	;
 
-// ===================================
+// ==========================================
 // ======TSGInternetPacketRuntimeDumper======
-// ===================================
+// ==========================================
+
 procedure TSGInternetPacketRuntimeDumper.Loop();
 begin
 UpdateGeneralDirectory(True);

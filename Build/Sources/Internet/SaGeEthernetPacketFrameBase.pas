@@ -43,6 +43,7 @@ type
 		procedure Write(const Stream : TSGEthernetPacketFrameStream); virtual;
 		procedure ExportInfo(const Stream : TSGTextFileStream); virtual; abstract;
 		function Size() : TSGEthernetPacketFrameSize; virtual;
+		function Data() : TSGEthernetPacketFrameStream; virtual;
 			public
 		class procedure KillProtocol(var Protocol : TSGEthernetPacketProtocolFrame);
 		class function ReadProtocolClass(
@@ -75,14 +76,17 @@ uses
 // =TSGEthernetPacketDataFrame=
 // ============================
 
+function TSGEthernetPacketDataFrame.Data() : TSGEthernetPacketFrameStream;
+begin
+Result := nil;
+end;
+
 procedure TSGEthernetPacketDataFrame.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
 begin
-
 end;
 
 procedure TSGEthernetPacketDataFrame.Write(const Stream : TSGEthernetPacketFrameStream);
 begin
-
 end;
 
 constructor TSGEthernetPacketDataFrame.Create();

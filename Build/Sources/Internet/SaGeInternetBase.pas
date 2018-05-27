@@ -26,14 +26,16 @@ type
 	
 	PSGEthernetHeader = ^ TSGEthernetHeader;
 	TSGEthernetHeader = object
-			public
-		Destination   : TSGEnthernetAddress;       // Destination host address
-		Source        : TSGEnthernetAddress;       // Source host address
-		FProtocol     : TSGEnthernetProtocolBytes; // IP? ARP? RARP? etc
+			protected
+		FDestination   : TSGEnthernetAddress;       // Destination host address
+		FSource        : TSGEnthernetAddress;       // Source host address
+		FProtocol      : TSGEnthernetProtocolBytes; // IP? ARP? RARP? etc
 			private
 		function GetProtocol() : TSGEnthernetProtocol;
 			public
 		property Protocol : TSGEnthernetProtocol read GetProtocol;
+		property Destination : TSGEnthernetAddress read FDestination;
+		property Source : TSGEnthernetAddress read FSource;
 		end;
 
 function SGEthernetProtocolToString(const Protocol : TSGEnthernetProtocol) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -122,17 +124,18 @@ const
 	SG_IPv4_HEADER_SIZE = 20;
 type
 	TSGInternetProtocol = TSGUInt8;
+	PSGIPv4Header = ^ TSGIPv4Header;
 	TSGIPv4Header = object
-			public
-		VersionAndHeaderLength : TSGUInt8;  // version | header length
-		DifferentiatedServices : TSGUInt8;  // type of service
-		FTotalLength           : TSGUInt16; // total length, Size(IPv4) + Size(IPv4.Protocol), without Ethernet header length
-		FIdentification        : TSGUInt16; // identification
-		FFragment              : TSGUInt16; // fragment offset field
-		TimeToLive             : TSGUInt8;  // time to live
-		Protocol               : TSGInternetProtocol; // protocol (TCP? UDP? etc)
-		FChecksum              : TSGUInt16; // checksum
-		Source, Destination    : TSGIPv4Address; // source and destination address
+			protected
+		FVersionAndHeaderLength : TSGUInt8;  // version | header length
+		FDifferentiatedServices : TSGUInt8;  // type of service
+		FTotalLength            : TSGUInt16; // total length, Size(IPv4) + Size(IPv4.Protocol), without Ethernet header length
+		FIdentification         : TSGUInt16; // identification
+		FFragment               : TSGUInt16; // fragment offset field
+		FTimeToLive             : TSGUInt8;  // time to live
+		FProtocol               : TSGInternetProtocol; // protocol (TCP? UDP? etc)
+		FChecksum               : TSGUInt16; // checksum
+		FSource, FDestination   : TSGIPv4Address; // source and destination address
 			public
 		function Version()      : TSGUInt8;
 		function HeaderSize()   : TSGUInt8;
@@ -145,6 +148,11 @@ type
 		function MoreFragments() : TSGBoolean;
 		function FragmentOffset() : TSGUInt16;
 		function Checksum() : TSGUInt16;
+			public
+		property TimeToLive : TSGUInt8 read FTimeToLive;
+		property Protocol : TSGInternetProtocol read FProtocol;
+		property Source : TSGIPv4Address read FSource;
+		property Destination : TSGIPv4Address read FDestination;
 		end;
 	TSGIPv4Options = TSGProtocolOptions;
 
@@ -336,6 +344,7 @@ type
 	TSGTcpSequence = TSGUInt32;
 	
 	// TCP header
+	PSGTCPHeader = ^ TSGTCPHeader;
 	TSGTCPHeader = object
 			private
 		FSourcePort            : TSGUInt16;       // Порт источника,      Source Port 
@@ -947,22 +956,22 @@ end;
 
 function TSGIPv4Header.DifferentiatedServicesCodepoint() : TSGUInt8;
 begin
-Result := (DifferentiatedServices and SGIPDifferentiatedServicesCodepoint) shr 2;
+Result := (FDifferentiatedServices and SGIPDifferentiatedServicesCodepoint) shr 2;
 end;
 
 function TSGIPv4Header.ExpilitCongestionNotification() : TSGUInt8;
 begin
-Result := DifferentiatedServices and SGIPExpilitCongestionNotification;
+Result := FDifferentiatedServices and SGIPExpilitCongestionNotification;
 end;
 
 function TSGIPv4Header.HeaderSize() : TSGUInt8;
 begin
-Result := (VersionAndHeaderLength and SGIPHeaderLengthMask) * 4;
+Result := (FVersionAndHeaderLength and SGIPHeaderLengthMask) * 4;
 end;
 
 function TSGIPv4Header.Version() : TSGUInt8;
 begin
-Result := (VersionAndHeaderLength and SGIPVersionMask) shr 4;
+Result := (FVersionAndHeaderLength and SGIPVersionMask) shr 4;
 end;
 
 end.

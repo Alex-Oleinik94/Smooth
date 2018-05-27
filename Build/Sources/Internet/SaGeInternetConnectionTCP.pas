@@ -26,6 +26,7 @@ type
 		
 			protected
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
+		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 			public
 		procedure HandleData(const Stream : TStream); virtual;
 		function HasData() : TSGBoolean; virtual;
@@ -37,6 +38,11 @@ implementation
 uses
 	 SaGeInternetConnections
 	;
+
+class function TSGInternetConnectionTCP.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+begin
+Result := Packet.TCPIP() <> nil;
+end;
 
 function TSGInternetConnectionTCP.PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin

@@ -32,8 +32,18 @@ type
 		end;
 
 procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
+procedure SGKill(var Variable : TSGInternetPacketDeterminer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+procedure SGKill(var Variable : TSGInternetPacketDeterminer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if Variable <> nil then
+	begin
+	Variable.Destroy();
+	Variable := nil;
+	end;
+end;
 
 procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 begin

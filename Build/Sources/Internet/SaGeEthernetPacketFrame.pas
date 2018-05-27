@@ -9,6 +9,7 @@ uses
 	,SaGeTextFileStream
 	,SaGeEthernetPacketFrameBase
 	,SaGeInternetBase
+	
 	;
 
 type
@@ -32,7 +33,14 @@ type
 		function Destination() : TSGString;
 		function Source() : TSGString;
 		function Protocol() : TSGString;
+			public // Headers
+		function Ethernet() : PSGEthernetHeader;
+		function IPv4() : PSGIPv4Header;
+		function TCPIP() : PSGTCPHeader;
+		function Data() : TSGEthernetPacketFrameStream; override;
 		end;
+
+procedure SGKill(var Variable : TSGEthernetPacketFrame);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
@@ -40,6 +48,48 @@ uses
 	 SaGeEthernetPacketFrameIPv4
 	,SaGeStringUtils
 	;
+
+procedure SGKill(var Variable : TSGEthernetPacketFrame);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+if Variable <> nil then
+	begin
+	Variable.Destroy();
+	Variable := nil;
+	end;
+end;
+
+// ==========================================
+// ======TSGEthernetPacketFrame HEADERS======
+// ==========================================
+
+function TSGEthernetPacketFrame.Ethernet() : PSGEthernetHeader;
+begin
+Result := @FEthernetPacketHeader;
+end;
+
+function TSGEthernetPacketFrame.IPv4() : PSGIPv4Header;
+begin
+Result := nil;
+if (FProtocolFrame <> nil) and (FProtocolFrame is TSGEthernetPacketFrameIPv4) then
+	Result := (FProtocolFrame as TSGEthernetPacketFrameIPv4).IPv4();
+end;
+
+function TSGEthernetPacketFrame.TCPIP() : PSGTCPHeader;
+begin
+Result := nil;
+if (FProtocolFrame <> nil) and (FProtocolFrame is TSGEthernetPacketFrameIPv4) then
+	Result := (FProtocolFrame as TSGEthernetPacketFrameIPv4).TCP();
+end;
+
+function TSGEthernetPacketFrame.Data() : TSGEthernetPacketFrameStream;
+begin
+if (FProtocolFrame <> nil) then
+	Result := FProtocolFrame.Data();
+end;
+
+// ==================================
+// ======TSGEthernetPacketFrame======
+// ==================================
 
 function TSGEthernetPacketFrame.SizeEncapsulated() : TSGEthernetPacketFrameSize;
 begin
