@@ -2853,7 +2853,7 @@ type
   end;
 
 const
-  NvAPIFunctions: array[0..89] of TNvAPIFuncRec = (
+  NvAPIFunctions: array[0..122] of TNvAPIFuncRec = (
     (ID: $6C2D048C; Func: @@NvAPI_GetErrorMessage),
     (ID: $01053FA5; Func: @@NvAPI_GetInterfaceVersionString),
 
@@ -2953,6 +2953,41 @@ const
     (ID: $3CD58F89; Func: @@NvAPI_Stereo_ReverseStereoBlitControl), //100 NvAPI_Stereo_ReverseStereoBlitControl
     (ID: $6B9B409E; Func: @@NvAPI_Stereo_SetNotificationMessage), //101 NvAPI_Stereo_SetNotificationMessage
     
+	(ID: $1DAE4FBC; Func: nil), // NvAPI_DRS_GetNumProfiles
+	(ID: $ED1F8C69; Func: nil), // NvAPI_DRS_GetApplicationInfo
+	(ID: $617BFF9F; Func: nil), // NvAPI_DRS_GetCurrentGlobalProfile
+	(ID: $4347A9DE; Func: nil), // NvAPI_DRS_CreateApplication
+	(ID: $F020614A; Func: nil), // NvAPI_DRS_EnumAvailableSettingIds
+	(ID: $61CD6FD6; Func: nil), // NvAPI_DRS_GetProfileInfo
+	(ID: $1C89C5DF; Func: nil), // NvAPI_DRS_SetCurrentGlobalProfile
+	(ID: $53F0381E; Func: nil), // NvAPI_DRS_RestoreProfileDefaultSetting
+	(ID: $AE3039DA; Func: nil), // NvAPI_DRS_EnumSettings
+	(ID: $7FA2173A; Func: nil), // NvAPI_DRS_EnumApplications
+	(ID: $D61CBE6E; Func: nil), // NvAPI_DRS_GetSettingNameFromId
+	(ID: $2EC39F90; Func: nil), // NvAPI_DRS_EnumAvailableSettingValues
+	(ID: $DA8466A0; Func: nil), // NvAPI_DRS_GetBaseProfile
+	(ID: $C5EA85A1; Func: nil), // NvAPI_DRS_DeleteApplicationEx
+	(ID: $7E4A9A0B; Func: nil), // NvAPI_DRS_FindProfileByName
+	(ID: $BC371EE0; Func: nil), // NvAPI_DRS_EnumProfiles
+	(ID: $CC176068; Func: nil), // NvAPI_DRS_CreateProfile
+	(ID: $73BF8338; Func: nil), // NvAPI_DRS_GetSetting
+	(ID: $EEE566B2; Func: nil), // NvAPI_DRS_FindApplicationByName
+	(ID: $577DD202; Func: nil), // NvAPI_DRS_SetSetting
+	(ID: $17093206; Func: nil), // NvAPI_DRS_DeleteProfile
+	(ID: $CB7309CD; Func: nil), // NvAPI_DRS_GetSettingIdFromName
+	(ID: $5927B094; Func: nil), // NvAPI_DRS_RestoreAllDefaults
+	(ID: $16ABD3A9; Func: nil), // NvAPI_DRS_SetProfileInfo
+	(ID: $FA5F6134; Func: nil), // NvAPI_DRS_RestoreProfileDefault
+	(ID: $E4A26362; Func: nil), // NvAPI_DRS_DeleteProfileSetting
+	(ID: $2C694BC6; Func: nil), // NvAPI_DRS_DeleteApplication
+
+	(ID: $D3EDE889; Func: nil), // NvAPI_DRS_LoadSettingsFromFile
+	(ID: $375DBD6B; Func: nil), // NvAPI_DRS_LoadSettings
+	(ID: $DAD9CFF8; Func: nil), // NvAPI_DRS_DestroySession
+	(ID: $2BE25DF8; Func: nil), // NvAPI_DRS_SaveSettingsToFile
+	(ID: $0694D52E; Func: nil), // NvAPI_DRS_CreateSession
+	(ID: $FCBC7E14; Func: nil), // NvAPI_DRS_SaveSettings
+	
     (ID: 0; Func: nil) // stop signal
   );
 
@@ -2998,7 +3033,8 @@ begin
 Rec := @NvAPIFunctions;
 while Rec.ID <> 0 do
 	begin
-	PPointer(Rec.Func)^ := @NotImplemented;
+	if Rec.Func <> nil then
+		PPointer(Rec.Func)^ := @NotImplemented;
 	Inc(Rec);
 	end;
 Initialized := False;
@@ -3027,12 +3063,14 @@ if Assigned(nvapi_QueryInterface) then
 			Rec := @NvAPIFunctions;
 			while Rec.ID <> 0 do
 				begin
-				PPointer(Rec.Func)^ := @NotImplemented;
+				if Rec.Func <> nil then
+					PPointer(Rec.Func)^ := @NotImplemented;
 				P := nvapi_QueryInterface(Rec.ID);
 				if P <> nil then
 					begin
 					Result.FFunctionLoaded += 1;
-					PPointer(Rec.Func)^ := P;
+					if Rec.Func <> nil then
+						PPointer(Rec.Func)^ := P;
 					end;
 				Result.FFunctionCount += 1;
 				Inc(Rec);
