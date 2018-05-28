@@ -9,11 +9,6 @@ uses
 	,SaGeCasesOfPrint
 	;
 
-// Method That Enable NVIDIA High Performance Graphics Rendering on Optimus Systems
-// Global Variable NvOptimusEnablement (new in Driver Release 302)
-var
-	NvOptimusEnablement : TSGUInt32 = $00000001; cvar;
-
 type
 	TSGNVidiaDriverOptimusMode = (
 		SGNVidiaUnknown,
@@ -278,13 +273,6 @@ d1.Get();
 SetDriverOptimusMode();
 d2.Get();
 SGHint(['NVidia : Driver optimus enabling at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!']);
-end;
-
-exports NvOptimusEnablement;
-
-initialization
-begin
-NvOptimusEnablement :=  $00000001;
 end;
 
 end.

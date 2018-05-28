@@ -46,34 +46,32 @@ interface
 // ====================================================
 type
 	{$ifndef FPC}
-	NvHandle = LongWord;
+		NvHandle = LongWord;
 	{$else}
-	NvHandle = PtrUInt;
+		NvHandle = PtrUInt;
 	{$endif}
 	
 	{ 64-bit types for compilers that support them, plus some obsolete variants }
 	{$IF declared(UInt64)}
-	NvU64 = UInt64;                 { 0 to 18446744073709551615 }
+		NvU64 = UInt64;                { 0 to 18446744073709551615 }
 	{$ELSE}
-	NvU64 = Int64;                 { 0 to 18446744073709551615 }
+		NvU64 = Int64;                 { 0 to 18446744073709551615 }
 	{$IFEND}
-
+	
 	// mac os 32-bit still needs this
 	NvS32 = Longint;                { -2147483648 to 2147483647 }
-
+	
 	NvU32 = LongWord;
 	NvU16 = Word;
 	NvU8 = Byte;
-
+	
 	pNvU8 = ^NvU8;
 	pNvU32 = ^ NvU32;
-
 const
 	NVAPI_GENERIC_STRING_MAX = 4096;
 	NVAPI_LONG_STRING_MAX    = 256;
 	NVAPI_SHORT_STRING_MAX   = 64;
 	NVAPI_DEFAULT_HANDLE     = 0;
-
 type
 	NvSBox = record
 		sX: NvS32;
@@ -81,7 +79,6 @@ type
 		sWidth: NvS32;
 		sHeight: NvS32;
 		end;
-
 const
 	NVAPI_MAX_PHYSICAL_GPUS            = 64;
 	NVAPI_MAX_LOGICAL_GPUS             = 64;
@@ -90,11 +87,10 @@ const
 	NVAPI_MAX_GPU_PER_TOPOLOGY         = 8;
 	NVAPI_MAX_DISPLAY_HEADS            = 2;
 	NVAPI_MAX_DISPLAYS                 = NVAPI_MAX_PHYSICAL_GPUS * NVAPI_MAX_DISPLAY_HEADS;
-
+	
 	NV_MAX_HEADS        = 4;   // Maximum heads, each with NVAPI_DESKTOP_RES resolution
 	NV_MAX_VID_STREAMS  = 4;   // Maximum input video streams, each with a NVAPI_VIDEO_SRC_INFO
 	NV_MAX_VID_PROFILES = 4;   // Maximum output video profiles supported
-
 type
 	NvAPI_String = array[0..NVAPI_GENERIC_STRING_MAX - 1] of AnsiChar;
 	NvAPI_LongString = array[0..NVAPI_LONG_STRING_MAX - 1] of AnsiChar;

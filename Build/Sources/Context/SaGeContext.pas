@@ -279,6 +279,8 @@ uses
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinApi
+		,SaGeNvidiaOptimusEnablement
+		,SaGeNvidiaDriverSettingsUtils
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux
@@ -747,6 +749,9 @@ if not VRenderClass.Suppored then
 	SetLength(Settings, 0);
 	exit;
 	end;
+
+// NVidia enabling high perfomance
+SGNVidiaSetDriverOptimusMode(SGNVidiaHighPerfomance);
 
 Context := VContextClass.Create();
 IContext := Context;
