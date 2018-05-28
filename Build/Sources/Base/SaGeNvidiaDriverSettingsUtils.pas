@@ -1,4 +1,5 @@
 {$INCLUDE SaGe.inc}
+//{$DEFINE NVDRS_DEBUG}
 
 unit SaGeNvidiaDriverSettingsUtils;
 
@@ -7,7 +8,13 @@ interface
 uses
 	 SaGeBase
 	,SaGeCasesOfPrint
+	
+	// NVidia
+	,NvApiDriverSettings
+	,nvapi_lite_common
 	;
+
+function SGNVidiaGetNumProfilies(const hSession : NvDRSSessionHandle) : NvU32;
 
 type
 	TSGNVidiaDriverOptimusMode = (
@@ -27,9 +34,6 @@ uses
 	,SaGeDllManager
 	,SaGeDateTime
 	
-	// NVidia
-	,NvApiDriverSettings
-	,nvapi_lite_common
 	;
 
 function SGNVidiaGetDriverOptimusMode() : TSGNVidiaDriverOptimusMode;
@@ -47,7 +51,9 @@ hSession := 0;
 status := NvAPI_DRS_CreateSession(@hSession);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_CreateSession error!']);
+	{$ENDIF}
 	exit;
 	end;
 
@@ -55,10 +61,14 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_LoadSettings(hSession);
 if (status <> NVAPI_OK) then 
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_LoadSettings error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
+
+//WriteLn('SGNVidiaGetNumProfilies=',SGNVidiaGetNumProfilies(hSession));
 
 // (3) Obtain the Base profile. Any setting needs to be inside
 // a profile, putting a setting on the Base Profile enforces it
@@ -67,7 +77,9 @@ hProfile := 0;
 status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile);
 if (status <> NVAPI_OK) then 
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_GetBaseProfile error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -79,16 +91,18 @@ drsSetting.settingId := SHIM_MCCOMPAT_ID;
 drsSetting.settingType := NVDRS_DWORD_TYPE;
 
 status := NvAPI_DRS_GetSetting(hSession, hProfile, SHIM_MCCOMPAT_ID, @drsSetting);
-if(drsSetting.u32CurrentValue = 1) then
+if(drsSetting.u32CurrentValue = SHIM_MCCOMPAT_ENABLE) then
 	Result := SGNVidiaHighPerfomance
-else if(drsSetting.u32CurrentValue = 0) then
+else if(drsSetting.u32CurrentValue = SHIM_MCCOMPAT_INTEGRATED) then
 	Result := SGNVidiaIntegrated
 else
 	Result := SGNVidiaAutoSelect;
 
 status := NvAPI_DRS_DestroySession(hSession);
+{$IFDEF NVDRS_DEBUG}
 if (status <> NVAPI_OK) then
 	SGHint(['NvAPI_DRS_DestroySession error!']);
+{$ENDIF}
 end;
 
 function SGNVidiaStrDriverOptimusMode(const Mode : TSGNVidiaDriverOptimusMode) : TSGString;
@@ -115,7 +129,9 @@ hSession := 0;
 status := NvAPI_DRS_CreateSession(@hSession);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_CreateSession error!']);
+	{$ENDIF}
 	exit;
 	end;
 
@@ -123,7 +139,9 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_LoadSettings(hSession);
 if (status <> NVAPI_OK) then 
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_LoadSettings error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -135,7 +153,9 @@ hProfile := 0;
 status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile);
 if (status <> NVAPI_OK) then 
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_GetBaseProfile error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -231,7 +251,9 @@ else
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting1);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_SetSetting 1 error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -239,7 +261,9 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting2);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_SetSetting 2 error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -247,7 +271,9 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting3);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_SetSetting 3 error!']);
+	{$ENDIF}
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -255,24 +281,43 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SaveSettings(hSession);
 if (status <> NVAPI_OK) then
 	begin
+	{$IFDEF NVDRS_DEBUG}
 	SGHint(['NvAPI_DRS_SaveSettings error!!!']);
+	{$ENDIF}
 	end;
 
 status := NvAPI_DRS_DestroySession(hSession);
+{$IFDEF NVDRS_DEBUG}
 if (status <> NVAPI_OK) then
 	SGHint(['NvAPI_DRS_DestroySession error!']);
+{$ENDIF}
 end;
 
+{$IFDEF NVDRS_DEBUG}
 var
 	d1, d2 : TSGDateTime;
+{$ENDIF}
 begin
+//SGNVidiaGetDriverOptimusMode();
 Result := False;
 if not DllManager.Suppored('nvapi') then
 	exit;
+{$IFDEF NVDRS_DEBUG}
 d1.Get();
+{$ENDIF}
 SetDriverOptimusMode();
+{$IFDEF NVDRS_DEBUG}
 d2.Get();
-SGHint(['NVidia : Driver optimus enabling at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!']);
+SGHint(['NVidia : Driver optimus sets at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!']);
+{$ENDIF}
+end;
+
+function SGNVidiaGetNumProfilies(const hSession : NvDRSSessionHandle) : NvU32;
+begin
+Result := 0;
+if not DllManager.Suppored('nvapi') then
+	exit;
+NvAPI_DRS_GetNumProfiles(hSession, Result);
 end;
 
 end.
