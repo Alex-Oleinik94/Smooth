@@ -6,6 +6,9 @@ interface
 
 uses
 	 SaGeBase
+	,SaGeLogStream
+	
+	,Classes
 	;
 
 type
@@ -20,7 +23,7 @@ type
 
 	TSGLeaksDetectorReferences = packed array of TSGLeaksDetectorReference;
 
-	TSGLeaksDetector = class
+	TSGLeaksDetector = class(TObject)
 			public
 		constructor Create();
 		destructor Destroy(); override;
@@ -41,7 +44,6 @@ implementation
 
 uses
 	 SaGeStringUtils
-	,SaGeLog
 	;
 
 constructor TSGLeaksDetector.Create();
@@ -97,7 +99,7 @@ procedure TSGLeaksDetector.ReleaseReference(const VName : TSGString);
 
 procedure Error(const ErrorString : TSGString);
 begin
-SGLog.Source(['TSGLeaksDetector : Error when releasing reference ''',VName,''' ',ErrorString]);
+SGLogWriteLn(SGStr(['TSGLeaksDetector : Error when releasing reference ''',VName,''' ',ErrorString]));
 end;
 
 var
@@ -136,10 +138,10 @@ end;
 
 var
 	i, ii, {ln,} lc : TSGInt32;
-	S : TSGString;
+	SSS : TSGStringList;
 	SL : TSGStringList;
 begin
-S := '';
+SSS := nil;
 iii := 0;
 ii := 0;
 lc := 0;
@@ -151,26 +153,26 @@ if FReferences <> nil then
 			if Length(FReferences[i].FName + SGStr(FReferences[i].FMaxCount)) + 2 > iii then
 				iii := Length(FReferences[i].FName + SGStr(FReferences[i].FMaxCount)) + 2;
 			if FReferences[i].FCount <= 0 then
-				S += FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')' + ';'
+				SSS += FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')'
 			else if Length(SGStr(FReferences[i].FCount)) > lc then
 				lc := Length(SGStr(FReferences[i].FCount));
 			end;
 if ii = 0 then
-	SGLog.Source(['TSGLeaksDetector : Leaks not detected.'])
+	SGLogWriteLn('TSGLeaksDetector : Leaks not detected.')
 else
 	begin
-	SGLog.Source(['TSGLeaksDetector : Total ',ii,' leaks.']);
+	SGLogWriteLn(SGStr(['TSGLeaksDetector : Total ', ii, ' leaks.']));
 	SL := nil;
 	if FReferences <> nil then
 		if Length(FReferences) > 0 then
 			for i := 0 to High(FReferences) do
 				if FReferences[i].FCount > 0 then
-					SL += (ItemTitle(FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')') + '- ' + SGStr(FReferences[i].FCount) + ';');
-	SGLog.Source(SL, 'TSGLeaksDetector : Leaks :');
+					SL += (ItemTitle(FReferences[i].FName + '(' + SGStr(FReferences[i].FMaxCount) + ')') + '- ' + SGStr(FReferences[i].FCount));
+	SGLogWrite(SL, 'TSGLeaksDetector : Leaks :');
 	SetLength(SL, 0);
 	end;
-SGLog.Source(S,'TSGLeaksDetector : Lines without references',';');
-S := '';
+SGLogWrite(SSS, 'TSGLeaksDetector : Lines without references');
+SetLength(SSS, 0);
 end;
 
 // ==================================
@@ -201,7 +203,6 @@ end;
 finalization
 begin
 SGFinalizeLeaksDetector();
-SGFinalizeLog();
 end;
 
 end.

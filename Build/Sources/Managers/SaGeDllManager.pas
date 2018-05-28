@@ -45,6 +45,7 @@ type
 		constructor Create(); override;
 		destructor  Destroy(); override;
 		class function ClassName() : TSGString; override;
+		class function ObjectName() : TSGString; override;
 			public
 		procedure PrintStat(const Extended : TSGBool = False);
 		procedure LogStat();
@@ -439,6 +440,11 @@ Result := VDll.Loading();
 end;
 
 // ======================================== TSGDll
+
+class function TSGDll.ObjectName() : TSGString;
+begin
+Result := 'TSGDll*?';
+end;
 
 class function TSGDll.ClassName() : TSGString;
 begin

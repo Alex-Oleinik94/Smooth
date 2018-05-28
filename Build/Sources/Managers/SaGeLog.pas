@@ -5,38 +5,21 @@ unit SaGeLog;
 interface
 
 uses
-	 Classes
-	,SysUtils
-	
-	,SaGeBase
+	 SaGeBase
 	,SaGeCasesOfPrint
 	,SaGeFileUtils
-	;
-const
-	SGLogExtension = 'log';
-var
-	SGLogEnable : TSGBoolean = 
-		{$IFDEF RELEASE}
-			False
-		{$ELSE}
-			True
-		{$ENDIF}
+	,SaGeClasses
+	
+	,Classes
 	;
 type
-	TSGLog = class(TObject)
+	TSGLog = class(TSGNamed)
 			public
-		constructor Create(const LogFile : TSGString);
-		destructor Destroy(); override;
 		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True); overload;
 		procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False); overload;
 		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True); overload;
 		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150); overload;
 		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150); overload;
-			private
-		FFileStream : TFileStream;
-		FFileName   : TSGString;
-			public
-		property FileName : TSGString read FFileName;
 		end;
 var
 	//Экземпляр класса лога программы
@@ -44,13 +27,11 @@ var
 
 procedure SGHint(const MessageStr : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGHint(const MessagePtrs : array of const; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
-procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
-procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGCreateLog(var Log : TSGLog; const LogFile : TSGString) : TSGBoolean;
 function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -62,32 +43,14 @@ uses
 	,SaGeConsoleUtils
 	,SaGeEncodingUtils
 	,SaGeConsoleToolsBase
-	,SaGeVersion
+	,SaGeLogStream
 	
 	,StrMan
 	;
 
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := 
-{$IF not defined(MOBILE)}
-	SGAplicationFileDirectory() + '.' + DirectorySeparator + '..' + DirectorySeparator + 'Log'
-{$ELSE}
-	{$IF defined(ANDROID)}
-		DirectorySeparator +'sdcard' + DirectorySeparator +'.SaGe'
-	{$ELSE}
-		''
-	{$ENDIF}
-{$ENDIF}
-	;
-end;
-
-function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result := SGLogDirectory();
-SGMakeDirectory(Result);
-Result += DirectorySeparator + SGDateTimeString(True, False, True) + ' ' + SGApplicationName + '.' + SGLogExtension;
-Result := SGFreeFileName(Result, '');
+Result := SaGeLogStream.SGLogDirectory();
 end;
 
 function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -204,60 +167,12 @@ Stream.Position := 0;
 end;
 
 procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True);overload;
-var
-	ss : TSGString;
-	pc : PSGChar;
 begin
-if Self <> nil then
-	if SGLogEnable and (FFileStream <> nil) then
-		begin
-		pc := SGStringToPChar(
-			Iff(WithTime, SGLogDateTimeString()) + 
-			SGStringDeleteEndOfLineDublicates(
-				SGConvertString(S, SGEncodingWindows1251) + 
-				Iff(WithEoln, SGWinEoln)));
-		FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
-		SGPCharFree(PC);
-		end;
-end;
-
-constructor TSGLog.Create(const LogFile : TSGString);
-begin
-inherited Create();
-if SGLogEnable then
-	begin
-	FFileName := LogFile;
-	FFileStream := TFileStream.Create(LogFile, fmCreate);
-	end;
-end;
-
-destructor TSGLog.Destroy;
-begin
-if SGLogEnable then
-	FFileStream.Destroy;
-inherited;
-end;
-
-function SGCreateLog(var Log : TSGLog; const LogFile : TSGString) : TSGBoolean;
-
-procedure KillLog();
-begin
-if Log <> nil then
-	begin
-	Log.Destroy();
-	Log := nil;
-	end;
-end;
-
-begin
-KillLog();
-Result := True;
-try
-	Log := TSGLog.Create(LogFile);
-except
-	Result := False;
-	KillLog();
-end;
+SGLogWrite(
+	Iff(WithTime, SGLogDateTimeString()) + 
+	SGStringDeleteEndOfLineDublicates(
+		SGConvertString(S, SGEncodingWindows1251) + 
+		Iff(WithEoln, SGWinEoln)))
 end;
 
 procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
@@ -278,38 +193,22 @@ if StringTrimAll(Str, ' ') <> '' then
 SetLength(Params, 0);
 end;
 
-procedure SGFinalizeLog(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if SGLogEnable then
-	SGLog.Source('  << Destroy Log >>');
-SGLog.Destroy();
-SGLog := nil;
-end;
-
 initialization
 begin
-SGMakeDirectory(SGLogDirectory);
-SGCreateLog(SGLog, SGFreeLogFileName());
-if (SGLog = nil) and (SGAplicationFileDirectory() <> '') then
-	SGCreateLog(SGLog, SGAplicationFileDirectory() + SGFreeLogFileName());
-if SGLog = nil then
-	begin
-	SGLogEnable := False;
-	SGCreateLog(SGLog, '');
-	end;
 if SGLogEnable then
 	begin
-	SGLog.Source('(***) SaGe Engine Log (***)', False);
-	SGLog.Source('  << Create Log >>');
+	SGLog.Source('*************************************************', False);
+	SGLog.Source('* (v)_(O_o)_(V)  SaGe Engine Log  (V)_(o_O)_(v) *', False);
+	SGLog.Source('*************************************************', False);
+	SGLog.Source('		<< Log created >>');
 	SGLogParams(SGLog, SGSystemParamsToConcoleCallerParams());
 	end;
 end;
 
-{$IFNDEF WITHLEAKSDETECTOR}
 finalization
 begin
-SGFinalizeLog();
+if SGLogEnable then
+	SGLog.Source('		<< Log destroyed >>');
 end;
-{$ENDIF WITHLEAKSDETECTOR}
 
 end.
