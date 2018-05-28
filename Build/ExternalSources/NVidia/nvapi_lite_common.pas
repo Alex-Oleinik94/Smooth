@@ -44,9 +44,14 @@ interface
 // ====================================================
 // Universal NvAPI Definitions
 // ====================================================
-
-{ 64-bit types for compilers that support them, plus some obsolete variants }
 type
+	{$ifndef FPC}
+	NvHandle = LongWord;
+	{$else}
+	NvHandle = PtrUInt;
+	{$endif}
+	
+	{ 64-bit types for compilers that support them, plus some obsolete variants }
 	{$IF declared(UInt64)}
 	NvU64 = UInt64;                 { 0 to 18446744073709551615 }
 	{$ELSE}

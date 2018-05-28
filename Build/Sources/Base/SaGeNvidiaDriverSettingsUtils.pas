@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeNvidiaUtils;
+unit SaGeNvidiaDriverSettingsUtils;
 
 interface
 
@@ -13,18 +13,6 @@ uses
 // Global Variable NvOptimusEnablement (new in Driver Release 302)
 var
 	NvOptimusEnablement : TSGUInt32 = $00000001; cvar;
-	AmdPowerXpressRequestHighPerformance : TSGUInt32 = $00000001; cvar;
-
-const
-	SGNVidiaViewingShift = '	';
-
-procedure SGNVidiaViewInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-procedure SGNVidiaViewGraphicInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGNVidiaViewSystemInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGNVidiaViewStereoscopicInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGNVidiaViewDisplayInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGNVidiaViewGPUInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 type
 	TSGNVidiaDriverOptimusMode = (
@@ -42,17 +30,9 @@ implementation
 uses
 	 SaGeLog
 	,SaGeDllManager
-	,SaGeBaseUtils
-	,SaGeStringUtils
 	,SaGeDateTime
 	
-	,SysUtils
-	,Crt
-	
-	,StrMan
-	
 	// NVidia
-	,nvapi
 	,NvApiDriverSettings
 	,nvapi_lite_common
 	;
@@ -100,10 +80,10 @@ if (status <> NVAPI_OK) then
 // Now get the settings
 fillchar(drsSetting, SizeOf(drsSetting), 0);
 drsSetting.version := NVDRS_SETTING_VER;
-drsSetting.settingId := NvU32(SHIM_MCCOMPAT_ID);
+drsSetting.settingId := SHIM_MCCOMPAT_ID;
 drsSetting.settingType := NVDRS_DWORD_TYPE;
 
-status := NvAPI_DRS_GetSetting(hSession, hProfile, NvU32(SHIM_MCCOMPAT_ID), @drsSetting);
+status := NvAPI_DRS_GetSetting(hSession, hProfile, SHIM_MCCOMPAT_ID, @drsSetting);
 if(drsSetting.u32CurrentValue = 1) then
 	Result := SGNVidiaHighPerfomance
 else if(drsSetting.u32CurrentValue = 0) then
@@ -168,26 +148,26 @@ if (status <> NVAPI_OK) then
 // Now modify the settings to set NVIDIA global
 fillchar(drsSetting1, SizeOf(drsSetting1), 0);
 drsSetting1.version := NVDRS_SETTING_VER;
-drsSetting1.settingId := NvU32(SHIM_MCCOMPAT_ID);
+drsSetting1.settingId := SHIM_MCCOMPAT_ID;
 drsSetting1.settingType := NVDRS_DWORD_TYPE;
 
 fillchar(drsSetting2, SizeOf(drsSetting1), 0);
 drsSetting2.version := NVDRS_SETTING_VER;
-drsSetting2.settingId := NvU32(SHIM_RENDERING_MODE_ID);
+drsSetting2.settingId := SHIM_RENDERING_MODE_ID;
 drsSetting2.settingType := NVDRS_DWORD_TYPE;
 
 fillchar(drsSetting3, SizeOf(drsSetting1), 0);
 drsSetting3.version := NVDRS_SETTING_VER;
-drsSetting3.settingId := NvU32(SHIM_RENDERING_OPTIONS_ID);
+drsSetting3.settingId := SHIM_RENDERING_OPTIONS_ID;
 drsSetting3.settingType := NVDRS_DWORD_TYPE;
 
 // Optimus flags for enabled applications
 if(Mode = SGNVidiaHighPerfomance) then
-	drsSetting1.u32CurrentValue := NvU32(SHIM_MCCOMPAT_ENABLE)
+	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_ENABLE
 else if(Mode = SGNVidiaIntegrated) then
-	drsSetting1.u32CurrentValue := NvU32(SHIM_MCCOMPAT_INTEGRATED)
+	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_INTEGRATED
 else
-	drsSetting1.u32CurrentValue := NvU32(SHIM_MCCOMPAT_AUTO_SELECT);
+	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_AUTO_SELECT;
 // other options
 //		SHIM_MCCOMPAT_INTEGRATED		// 1
 //		SHIM_MCCOMPAT_USER_EDITABLE
@@ -197,11 +177,11 @@ else
 // Enable application for Optimus
 // drsSetting2.u32CurrentValue = SHIM_RENDERING_MODE_ENABLE;
 if(Mode = SGNVidiaHighPerfomance)then
-	drsSetting2.u32CurrentValue := NvU32(SHIM_RENDERING_MODE_ENABLE)
+	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_ENABLE
 else if(Mode = SGNVidiaIntegrated)then
-	drsSetting2.u32CurrentValue := NvU32(SHIM_RENDERING_MODE_INTEGRATED)
+	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_INTEGRATED
 else
-	drsSetting2.u32CurrentValue := NvU32(SHIM_RENDERING_MODE_ENABLE);
+	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_ENABLE;
 // other options
 //		SHIM_RENDERING_MODE_INTEGRATED		// 1
 //		SHIM_RENDERING_MODE_USER_EDITABLE
@@ -213,11 +193,11 @@ else
 // Shim rendering modes per application for Optimus
 // drsSetting3.u32CurrentValue = SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE;
 if(Mode = SGNVidiaHighPerfomance)then
-	drsSetting3.u32CurrentValue := NvU32(SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE)
+	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE
 else if(Mode = SGNVidiaIntegrated)then
-	drsSetting3.u32CurrentValue := NvU32(SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE) or NvU32(SHIM_RENDERING_OPTIONS_IGPU_TRANSCODING)
+	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE or SHIM_RENDERING_OPTIONS_IGPU_TRANSCODING
 else
-	drsSetting3.u32CurrentValue := NvU32(SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE);
+	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE;
 // other options
 //		SHIM_RENDERING_OPTIONS_DISABLE_ASYNC_PRESENT,
 //		SHIM_RENDERING_OPTIONS_EHSHELL_DETECT,
@@ -300,148 +280,11 @@ d2.Get();
 SGHint(['NVidia : Driver optimus enabling at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!']);
 end;
 
-procedure SGNVidiaViewGraphicInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-  info  : NV_DISPLAY_DRIVER_VERSION;
-  res   : NvAPI_Status;
-begin
-SGHint('Graphic driver: ', CasesOfPrint, WithTime);
-FillChar(info, sizeof(info), 0);
-info.version := NV_DISPLAY_DRIVER_VERSION_VER;
-res := NvAPI_GetDisplayDriverVersion(0, @info);
-if res = NVAPI_OK then
-	begin
-	SGHint([Shift, 'Driver version: ', info.drvVersion div 100, '.', info.drvVersion mod 100], CasesOfPrint, WithTime);
-	SGHint([Shift, 'Branch:         ', info.szBuildBranchString], CasesOfPrint, WithTime);
-	SGHint([Shift, 'Adpater:        ', info.szAdapterString], CasesOfPrint, WithTime);
-	end
-else
-	SGHint([Shift, 'Not available or Failed (err ', Integer(res),')'], CasesOfPrint, WithTime);
-end;
-
-procedure SGNVidiaViewGPUInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	phys  : TNvPhysicalGpuHandleArray;
-	log   : TNvLogicalGpuHandleArray;
-	cnt   : LongWord;
-	i     : Integer;
-	name  : NvAPI_ShortString;
-	thermal : TNvGPUThermalSettings;
-	res   : NvAPI_Status;
-	s     : TSGString;
-	inited : TSGBool = False;
-begin
-if NvAPI_EnumPhysicalGPUs(phys, cnt) = NVAPI_OK then
-	begin
-	SGHint('GPU:', CasesOfPrint, WithTime);
-	inited := True;
-	SGHint([Shift, 'Physical GPUs ', cnt], CasesOfPrint, WithTime);
-	for i:=0 to cnt - 1 do
-	if NvAPI_GPU_GetFullName(phys[i], name) = NVAPI_OK then
-		begin
-		s := Shift;
-		S += '	Name: ' + Name;
-		FillChar(thermal, sizeof(thermal), 0);
-		thermal.version := NV_GPU_THERMAL_SETTINGS_VER;
-		res := NvAPI_GPU_GetThermalSettings(phys[i], 0, @thermal);
-		if res = NVAPI_OK then
-			S += ', Temp: ' + SGStr(thermal.sensor[0].currentTemp) + ' C';
-		SGHint(S, CasesOfPrint, WithTime);
-		end;
-	end;
-if NvAPI_EnumLogicalGPUs(log, cnt) = NVAPI_OK then
-	begin
-	if not inited then
-		SGHint('GPU:', CasesOfPrint, WithTime);
-	SGHint([Shift, 'Logical GPUs ', cnt], CasesOfPrint, WithTime);
-	end;
-end;
-
-procedure SGNVidiaViewDisplayInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	i      : Integer;
-	hnd    : NvDisplayHandle;
-	name   : NvAPI_ShortString;
-	inited : TSGBool = False;
-begin
-i   := 0;
-hnd := 0;
-while NvAPI_EnumNVidiaDisplayHandle(i, hnd) = NVAPI_OK do
-	begin
-	if NvAPI_GetAssociatedNVidiaDisplayName(hnd, name) = NVAPI_OK then
-		begin
-		if not inited then
-			begin
-			SGHint('Display:', CasesOfPrint, WithTime);
-			inited := True;
-			end;
-		SGHint(Shift + 'Display: ' + name, CasesOfPrint, WithTime);
-		end;
-	inc(i);
-	end;
-end;
-
-procedure SGNVidiaViewStereoscopicInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	res : NvAPI_Status;
-	b   : NvU8;
-begin
-res := NvAPI_Stereo_IsEnabled(b);
-if res = NVAPI_OK then
-	begin
-	SGHint('Stereoscopic:', CasesOfPrint, WithTime);
-	SGHint(Shift + 'Stereo is available and now ' + Iff(b = 0, 'disabled', 'enabled') + '.');
-	end;
-end;
-
-procedure SGNVidiaViewSystemInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	info  : NV_CHIPSET_INFO_v1;
-	res   : NvAPI_Status;
-begin
-SGHint('System: ', CasesOfPrint, WithTime);
-FillChar(info, sizeof(info), 0);
-info.version := NV_CHIPSET_INFO_VER_1;
-res := NvAPI_SYS_GetChipSetInfo (info);
-if res = NVAPI_OK then
-	begin
-	SGHint([Shift, 'Vendor:    ', info.szVendorName], CasesOfPrint, WithTime);
-	if 'Unknown' <> info.szChipsetName then
-		SGHint([Shift, 'Chipset:   ', info.szChipsetName], CasesOfPrint, WithTime);
-	SGHint([Shift, 'Vendor ID: ', IntToHex(info.vendorId, 4)], CasesOfPrint, WithTime);
-	SGHint([Shift, 'Device ID: ', IntToHex(info.deviceId, 4)], CasesOfPrint, WithTime);
-	end;
-end;
-
-procedure SGNVidiaViewInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-procedure ViewNVidiaVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	ver  : NvAPI_ShortString;
-begin
-NvAPI_GetInterfaceVersionString(ver);
-SGHint([SGNVidiaViewingShift, 'Version: ', ver], CasesOfPrint);
-end;
-
-begin
-if DllManager.Suppored('nvapi') then
-	begin
-	SGHint('NVidia information:', CasesOfPrint, True);
-	ViewNVidiaVersion();
-	SGNVidiaViewSystemInfo      (CasesOfPrint, False);
-	SGNVidiaViewGraphicInfo     (CasesOfPrint, False);
-	SGNVidiaViewDisplayInfo     (CasesOfPrint, False);
-	SGNVidiaViewGPUInfo         (CasesOfPrint, False);
-	SGNVidiaViewStereoscopicInfo(CasesOfPrint, False);
-	end;
-end;
-
-exports NvOptimusEnablement, AmdPowerXpressRequestHighPerformance;
+exports NvOptimusEnablement;
 
 initialization
 begin
 NvOptimusEnablement :=  $00000001;
-AmdPowerXpressRequestHighPerformance :=  $00000001;
 end;
 
 end.

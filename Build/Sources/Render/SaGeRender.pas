@@ -179,7 +179,7 @@ uses
 		,SaGeRenderDirectX12
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
-		,SaGeNvidiaUtils
+		,SaGeNvidiaInformationUtils
 		,SaGeWindowsUtils
 		{$ENDIF}
 	;

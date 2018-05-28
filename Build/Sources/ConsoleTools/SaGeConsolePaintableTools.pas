@@ -47,6 +47,7 @@ uses
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
 		,SaGeRenderDirectX12
+		,SaGeNvidiaDriverSettingsUtils
 		{$ENDIF}
 	,SaGeRenderOpenGL
 	{$IFDEF WITH_GLUT}
