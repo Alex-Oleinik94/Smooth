@@ -38,6 +38,7 @@ uses
 	
 	,StrMan
 	,nvapi
+	,NvApiDriverSettings
 	;
 
 procedure SGNVidiaViewGraphicInfo(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]; const WithTime : TSGBoolean = True; const Shift : TSGString = SGNVidiaViewingShift);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
