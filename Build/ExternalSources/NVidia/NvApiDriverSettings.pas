@@ -42,7 +42,7 @@ unit NvApiDriverSettings;
 interface
 
 uses
-	nvapi;
+	nvapi_lite_common;
 
 const
 	OGL_AA_LINE_GAMMA_STRING = 'Antialiasing - Line gamma'; 

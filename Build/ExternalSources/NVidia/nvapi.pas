@@ -73,27 +73,8 @@ unit nvapi;
 interface
 
 uses
+  nvapi_lite_common,
   Windows;
-
-// ====================================================
-// Universal NvAPI Definitions
-// ====================================================
-
-{ 64-bit types for compilers that support them, plus some obsolete variants }
-type
-  {$IF declared(UInt64)}
-  NvU64 = UInt64;                 { 0 to 18446744073709551615 }
-  {$ELSE}
-  NvU64 = Int64;                 { 0 to 18446744073709551615 }
-  {$IFEND}
-
-// mac os 32-bit still needs this
-  NvS32 = Longint;                { -2147483648 to 2147483647 }
-
-  NvU32 = LongWord;
-  NvU16 = Word;
-  NvU8 = Byte;
-  PNvU8 = ^NvU8;
 
 // NVAPI Handles - These handles are retrieved from various calls and passed in to others in NvAPI
 //                 These are meant to be opaque types.  Do not assume they correspond to indices, HDCs,
@@ -103,7 +84,7 @@ type
 //                 reconfiguration (going into or out of SLI modes) occurs.  If NVAPI_HANDLE_INVALIDATED
 //                 is received by an app, it should discard all handles, and re-enumerate them.
 //
-
+type
 {$ifndef FPC}
   NvHandle = LongWord;
 {$else}
@@ -120,38 +101,6 @@ type
   NvPhysicalGpuHandle = NvHandle;
   // A handle to an event registration instance
   NvEventHandle = NvHandle;
-
-const
-  NVAPI_DEFAULT_HANDLE     = 0;
-  NVAPI_GENERIC_STRING_MAX = 4096;
-  NVAPI_LONG_STRING_MAX    = 256;
-  NVAPI_SHORT_STRING_MAX   = 64;
-
-type
-  NvSBox = record
-    sX: NvS32;
-    sY: NvS32;
-    sWidth: NvS32;
-    sHeight: NvS32;
-  end;
-
-const
-  NVAPI_MAX_PHYSICAL_GPUS            = 64;
-  NVAPI_MAX_LOGICAL_GPUS             = 64;
-  NVAPI_MAX_AVAILABLE_GPU_TOPOLOGIES = 256;
-  NVAPI_MAX_GPU_TOPOLOGIES           = NVAPI_MAX_PHYSICAL_GPUS;
-  NVAPI_MAX_GPU_PER_TOPOLOGY         = 8;
-  NVAPI_MAX_DISPLAY_HEADS            = 2;
-  NVAPI_MAX_DISPLAYS                 = NVAPI_MAX_PHYSICAL_GPUS * NVAPI_MAX_DISPLAY_HEADS;
-
-  NV_MAX_HEADS        = 4;   // Maximum heads, each with NVAPI_DESKTOP_RES resolution
-  NV_MAX_VID_STREAMS  = 4;   // Maximum input video streams, each with a NVAPI_VIDEO_SRC_INFO
-  NV_MAX_VID_PROFILES = 4;   // Maximum output video profiles supported
-
-type
-  NvAPI_String = array[0..NVAPI_GENERIC_STRING_MAX - 1] of AnsiChar;
-  NvAPI_LongString = array[0..NVAPI_LONG_STRING_MAX - 1] of AnsiChar;
-  NvAPI_ShortString = array[0..NVAPI_SHORT_STRING_MAX - 1] of AnsiChar;
 
 type
   TNvPhysicalGpuHandleArray = array[0..NVAPI_MAX_PHYSICAL_GPUS - 1] of NvPhysicalGpuHandle;
@@ -175,65 +124,6 @@ type
 function GetNvAPIVersion(Ver: NvU32): NvU32; {$ifdef USEINLINE} inline; {$endif}
 function GetNvAPISize(Ver: NvU32): NvU32; {$ifdef USEINLINE} inline; {$endif}
 
-// ====================================================
-// NvAPI Status Values
-//    All NvAPI functions return one of these codes.
-// ====================================================
-
-type
-  NvAPI_Status = (
-    NVAPI_OK                                    =  0,      // Success
-    NVAPI_ERROR                                 = -1,      // Generic error
-    NVAPI_LIBRARY_NOT_FOUND                     = -2,      // nvapi.dll can not be loaded
-    NVAPI_NO_IMPLEMENTATION                     = -3,      // not implemented in current driver installation
-    NVAPI_API_NOT_INTIALIZED                    = -4,      // NvAPI_Initialize has not been called (successfully)
-    NVAPI_INVALID_ARGUMENT                      = -5,      // invalid argument
-    NVAPI_NVIDIA_DEVICE_NOT_FOUND               = -6,      // no NVIDIA display driver was found
-    NVAPI_END_ENUMERATION                       = -7,      // no more to enum
-    NVAPI_INVALID_HANDLE                        = -8,      // invalid handle
-    NVAPI_INCOMPATIBLE_STRUCT_VERSION           = -9,      // an argument's structure version is not supported
-    NVAPI_HANDLE_INVALIDATED                    = -10,     // handle is no longer valid (likely due to GPU or display re-configuration)
-    NVAPI_OPENGL_CONTEXT_NOT_CURRENT            = -11,     // no NVIDIA OpenGL context is current (but needs to be)
-    NVAPI_NO_GL_EXPERT                          = -12,     // OpenGL Expert is not supported by the current drivers
-    NVAPI_INSTRUMENTATION_DISABLED              = -13,     // OpenGL Expert is supported, but driver instrumentation is currently disabled
-    NVAPI_EXPECTED_LOGICAL_GPU_HANDLE           = -100,    // expected a logical GPU handle for one or more parameters
-    NVAPI_EXPECTED_PHYSICAL_GPU_HANDLE          = -101,    // expected a physical GPU handle for one or more parameters
-    NVAPI_EXPECTED_DISPLAY_HANDLE               = -102,    // expected an NV display handle for one or more parameters
-    NVAPI_INVALID_COMBINATION                   = -103,    // used in some commands to indicate that the combination of parameters is not valid
-    NVAPI_NOT_SUPPORTED                         = -104,    // Requested feature not supported in the selected GPU
-    NVAPI_PORTID_NOT_FOUND                      = -105,    // NO port ID found for I2C transaction
-    NVAPI_EXPECTED_UNATTACHED_DISPLAY_HANDLE    = -106,    // expected an unattached display handle as one of the input param
-    NVAPI_INVALID_PERF_LEVEL                    = -107,    // invalid perf level
-    NVAPI_DEVICE_BUSY                           = -108,    // device is busy, request not fulfilled
-    NVAPI_NV_PERSIST_FILE_NOT_FOUND             = -109,    // NV persist file is not found
-    NVAPI_PERSIST_DATA_NOT_FOUND                = -110,    // NV persist data is not found
-    NVAPI_EXPECTED_TV_DISPLAY                   = -111,    // expected TV output display
-    NVAPI_EXPECTED_TV_DISPLAY_ON_DCONNECTOR     = -112,    // expected TV output on D Connector - HDTV_EIAJ4120.
-    NVAPI_NO_ACTIVE_SLI_TOPOLOGY                = -113,    // SLI is not active on this device
-    NVAPI_SLI_RENDERING_MODE_NOTALLOWED         = -114,    // setup of SLI rendering mode is not possible right now
-    NVAPI_EXPECTED_DIGITAL_FLAT_PANEL           = -115,    // expected digital flat panel
-    NVAPI_ARGUMENT_EXCEED_MAX_SIZE              = -116,    // argument exceeds expected size
-    NVAPI_DEVICE_SWITCHING_NOT_ALLOWED          = -117,    // inhibit ON due to one of the flags in NV_GPU_DISPLAY_CHANGE_INHIBIT or SLI Active
-    NVAPI_TESTING_CLOCKS_NOT_SUPPORTED          = -118,    // testing clocks not supported
-    NVAPI_UNKNOWN_UNDERSCAN_CONFIG              = -119,    // the specified underscan config is from an unknown source (e.g. INF)
-    NVAPI_TIMEOUT_RECONFIGURING_GPU_TOPO        = -120,    // timeout while reconfiguring GPUs
-    NVAPI_DATA_NOT_FOUND                        = -121,    // Requested data was not found
-    NVAPI_EXPECTED_ANALOG_DISPLAY               = -122,    // expected analog display
-    NVAPI_NO_VIDLINK                            = -123,    // No SLI video bridge present
-    NVAPI_REQUIRES_REBOOT                       = -124,    // NVAPI requires reboot for its settings to take effect
-    NVAPI_INVALID_HYBRID_MODE                   = -125,    // the function is not supported with the current hybrid mode.
-    NVAPI_MIXED_TARGET_TYPES                    = -126,    // The target types are not all the same
-    NVAPI_SYSWOW64_NOT_SUPPORTED                = -127,    // the function is not supported from 32-bit on a 64-bit system
-    NVAPI_IMPLICIT_SET_GPU_TOPOLOGY_CHANGE_NOT_ALLOWED = -128,    //there is any implicit GPU topo active. Use NVAPI_SetHybridMode to change topology.
-    NVAPI_REQUEST_USER_TO_CLOSE_NON_MIGRATABLE_APPS = -129,      //Prompt the user to close all non-migratable apps.
-    NVAPI_OUT_OF_MEMORY                         = -130,    // Could not allocate sufficient memory to complete the call
-    NVAPI_WAS_STILL_DRAWING                     = -131,    // The previous operation that is transferring information to or from this surface is incomplete
-    NVAPI_FILE_NOT_FOUND                        = -132,    // The file was not found
-    NVAPI_TOO_MANY_UNIQUE_STATE_OBJECTS         = -133,    // There are too many unique instances of a particular type of state object
-    NVAPI_INVALID_CALL                          = -134,    // The method call is invalid. For example, a method's parameter may not be a valid pointer
-    NVAPI_D3D10_1_LIBRARY_NOT_FOUND             = -135,    // d3d10_1.dll can not be loaded
-    NVAPI_FUNCTION_NOT_FOUND                    = -136     // Couldn't find the function in loaded dll library
-  );
 ///////////////////////////////////////////////////////////////////////////////
 //
 // FUNCTION NAME: NvAPI_Initialize
@@ -2804,6 +2694,172 @@ var
   NvAPI_Stereo_SetNotificationMessage : function (Handle: StereoHandle;
     hWnd: NvU64; messageID : NvU64): NvAPI_Status; cdecl;
 
+///////////////////////////////////////////////////////////////////////////////
+// Driver Settings (DRS) APIs
+///////////////////////////////////////////////////////////////////////////////
+type
+	NvDRSSessionHandle  = NvHandle;
+	NvDRSProfileHandle  = NvHandle;
+	pNvDRSSessionHandle = ^ NvDRSSessionHandle;
+	pNvDRSProfileHandle = ^ NvDRSProfileHandle;
+const
+	NVAPI_UNICODE_STRING_MAX = 2048;
+	NVAPI_BINARY_DATA_MAX = 4096;
+	NVAPI_SETTING_MAX_VALUES = 100;
+type
+	NvAPI_UnicodeString = array[0..NVAPI_UNICODE_STRING_MAX-1] of NvU16;
+	
+	_NVDRS_SETTING_TYPE = (
+		NVDRS_DWORD_TYPE,
+		NVDRS_BINARY_TYPE,
+		NVDRS_STRING_TYPE,
+		NVDRS_WSTRING_TYPE);
+	NVDRS_SETTING_TYPE = _NVDRS_SETTING_TYPE;
+	
+	_NVDRS_BINARY_SETTING = record
+		valueLength : NvU32;
+		valueData : array [0..NVAPI_BINARY_DATA_MAX-1] of NvU8;
+		end;
+	NVDRS_BINARY_SETTING = _NVDRS_BINARY_SETTING;
+	
+	_NVDRS_SETTING_VALUES = record
+		version : NvU32;
+		numSettingValues : NvU32;
+		settingType : NVDRS_SETTING_TYPE;
+		
+		// union
+		u32DefaultValue : NvU32;
+		binaryDefaultValue : NVDRS_BINARY_SETTING;
+		wszDefaultValue : NvAPI_UnicodeString;
+		
+		settingValues : array [0..NVAPI_SETTING_MAX_VALUES-1] of 
+			record
+			// union
+			u32Value : NvU32;
+			binaryValue : NVDRS_BINARY_SETTING;
+			wszValue : NvAPI_UnicodeString;
+			end;
+		end;
+	NVDRS_SETTING_VALUES = _NVDRS_SETTING_VALUES;
+	
+	_NVDRS_SETTING_LOCATION = (
+		NVDRS_CURRENT_PROFILE_LOCATION,
+		NVDRS_GLOBAL_PROFILE_LOCATION,
+		NVDRS_BASE_PROFILE_LOCATION,
+		NVDRS_DEFAULT_PROFILE_LOCATION);
+	NVDRS_SETTING_LOCATION = _NVDRS_SETTING_LOCATION;
+	
+	_NVDRS_SETTING_V1 = record
+		version : NvU32;
+		settingName : NvAPI_UnicodeString;
+		settingId : NvU32;
+		settingType : NVDRS_SETTING_TYPE;
+		settingLocation : NVDRS_SETTING_LOCATION;
+		isCurrentPredefined : NvU32;
+		isPredefinedValid : NvU32;
+		
+		// union
+		u32PredefinedValue : NvU32;
+		binaryPredefinedValue : NVDRS_BINARY_SETTING;
+		wszPredefinedValue : NvAPI_UnicodeString;
+		
+		// union
+		u32CurrentValue : NvU32;
+		binaryCurrentValue : NVDRS_BINARY_SETTING;
+		wszCurrentValue : NvAPI_UnicodeString;
+		end;
+	NVDRS_SETTING_V1 =  _NVDRS_SETTING_V1;
+	NVDRS_SETTING = NVDRS_SETTING_V1;
+	pNVDRS_SETTING = ^ NVDRS_SETTING;
+const
+	NVDRS_SETTING_VER1 : NvU32 = SizeOf(NVDRS_SETTING_V1) or (1 shr 16);
+	NVDRS_SETTING_VER : NvU32 = SizeOf(NVDRS_SETTING_V1) or (1 shr 16);
+type
+	_NVDRS_APPLICATION_V4 = record
+		version : NvU32;
+		isPredefined : NvU32;
+		appName : NvAPI_UnicodeString;
+		userFriendlyName: NvAPI_UnicodeString;
+		launcher: NvAPI_UnicodeString;
+		fileInFolder: NvAPI_UnicodeString;
+		flags : NvU32;
+		commandLine : NvAPI_UnicodeString;
+		end;
+const
+	NVDRS_APPLICATION_V4_isMetro       = $8000000000;
+	NVDRS_APPLICATION_V4_isCommandLine = $4000000000;
+type
+	NVDRS_APPLICATION_V4 = _NVDRS_APPLICATION_V4;
+	NVDRS_APPLICATION = NVDRS_APPLICATION_V4;
+	pNVDRS_APPLICATION = ^ NVDRS_APPLICATION;
+var
+  NvAPI_DRS_GetNumProfiles : function (hSession : NvDRSSessionHandle; numProfiles :  pNvU32) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetApplicationInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; appName : NvAPI_UnicodeString; pApplication : pNVDRS_APPLICATION) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetCurrentGlobalProfile : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_CreateApplication : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_EnumAvailableSettingIds : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetProfileInfo : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_SetCurrentGlobalProfile : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_RestoreProfileDefaultSetting : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_EnumSettings : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_EnumApplications : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetSettingNameFromId : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_EnumAvailableSettingValues : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetBaseProfile : function (hSession : NvDRSSessionHandle; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_DeleteApplicationEx : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_FindProfileByName : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_EnumProfiles : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_CreateProfile : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32; pSetting : pNVDRS_SETTING) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_FindApplicationByName : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_SetSetting : function (hSession : NvDRSSessionHandle; phProfile : NvDRSProfileHandle; pSetting : pNVDRS_SETTING) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_DeleteProfile : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_GetSettingIdFromName : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_RestoreAllDefaults : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_SetProfileInfo : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_RestoreProfileDefault : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_DeleteProfileSetting : function () : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_DeleteApplication : function () : NvAPI_Status; cdecl;
+
+var
+  NvAPI_DRS_LoadSettingsFromFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_LoadSettings : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_DestroySession : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_SaveSettingsToFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_CreateSession : function (phSession : pNvDRSSessionHandle) : NvAPI_Status; cdecl;
+var
+  NvAPI_DRS_SaveSettings : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
+
 implementation
 
 uses
@@ -2953,40 +3009,40 @@ const
     (ID: $3CD58F89; Func: @@NvAPI_Stereo_ReverseStereoBlitControl), //100 NvAPI_Stereo_ReverseStereoBlitControl
     (ID: $6B9B409E; Func: @@NvAPI_Stereo_SetNotificationMessage), //101 NvAPI_Stereo_SetNotificationMessage
     
-	(ID: $1DAE4FBC; Func: nil), // NvAPI_DRS_GetNumProfiles
-	(ID: $ED1F8C69; Func: nil), // NvAPI_DRS_GetApplicationInfo
-	(ID: $617BFF9F; Func: nil), // NvAPI_DRS_GetCurrentGlobalProfile
-	(ID: $4347A9DE; Func: nil), // NvAPI_DRS_CreateApplication
-	(ID: $F020614A; Func: nil), // NvAPI_DRS_EnumAvailableSettingIds
-	(ID: $61CD6FD6; Func: nil), // NvAPI_DRS_GetProfileInfo
-	(ID: $1C89C5DF; Func: nil), // NvAPI_DRS_SetCurrentGlobalProfile
-	(ID: $53F0381E; Func: nil), // NvAPI_DRS_RestoreProfileDefaultSetting
-	(ID: $AE3039DA; Func: nil), // NvAPI_DRS_EnumSettings
-	(ID: $7FA2173A; Func: nil), // NvAPI_DRS_EnumApplications
-	(ID: $D61CBE6E; Func: nil), // NvAPI_DRS_GetSettingNameFromId
-	(ID: $2EC39F90; Func: nil), // NvAPI_DRS_EnumAvailableSettingValues
-	(ID: $DA8466A0; Func: nil), // NvAPI_DRS_GetBaseProfile
-	(ID: $C5EA85A1; Func: nil), // NvAPI_DRS_DeleteApplicationEx
-	(ID: $7E4A9A0B; Func: nil), // NvAPI_DRS_FindProfileByName
-	(ID: $BC371EE0; Func: nil), // NvAPI_DRS_EnumProfiles
-	(ID: $CC176068; Func: nil), // NvAPI_DRS_CreateProfile
-	(ID: $73BF8338; Func: nil), // NvAPI_DRS_GetSetting
-	(ID: $EEE566B2; Func: nil), // NvAPI_DRS_FindApplicationByName
-	(ID: $577DD202; Func: nil), // NvAPI_DRS_SetSetting
-	(ID: $17093206; Func: nil), // NvAPI_DRS_DeleteProfile
-	(ID: $CB7309CD; Func: nil), // NvAPI_DRS_GetSettingIdFromName
-	(ID: $5927B094; Func: nil), // NvAPI_DRS_RestoreAllDefaults
-	(ID: $16ABD3A9; Func: nil), // NvAPI_DRS_SetProfileInfo
-	(ID: $FA5F6134; Func: nil), // NvAPI_DRS_RestoreProfileDefault
-	(ID: $E4A26362; Func: nil), // NvAPI_DRS_DeleteProfileSetting
-	(ID: $2C694BC6; Func: nil), // NvAPI_DRS_DeleteApplication
+	(ID: $1DAE4FBC; Func: @@NvAPI_DRS_GetNumProfiles), // NvAPI_DRS_GetNumProfiles
+	(ID: $ED1F8C69; Func: @@NvAPI_DRS_GetApplicationInfo), // NvAPI_DRS_GetApplicationInfo
+	(ID: $617BFF9F; Func: @@NvAPI_DRS_GetCurrentGlobalProfile), // NvAPI_DRS_GetCurrentGlobalProfile
+	(ID: $4347A9DE; Func: @@NvAPI_DRS_CreateApplication), // NvAPI_DRS_CreateApplication
+	(ID: $F020614A; Func: @@NvAPI_DRS_EnumAvailableSettingIds), // NvAPI_DRS_EnumAvailableSettingIds
+	(ID: $61CD6FD6; Func: @@NvAPI_DRS_GetProfileInfo), // NvAPI_DRS_GetProfileInfo
+	(ID: $1C89C5DF; Func: @@NvAPI_DRS_SetCurrentGlobalProfile), // NvAPI_DRS_SetCurrentGlobalProfile
+	(ID: $53F0381E; Func: @@NvAPI_DRS_RestoreProfileDefaultSetting), // NvAPI_DRS_RestoreProfileDefaultSetting
+	(ID: $AE3039DA; Func: @@NvAPI_DRS_EnumSettings), // NvAPI_DRS_EnumSettings
+	(ID: $7FA2173A; Func: @@NvAPI_DRS_EnumApplications), // NvAPI_DRS_EnumApplications
+	(ID: $D61CBE6E; Func: @@NvAPI_DRS_GetSettingNameFromId), // NvAPI_DRS_GetSettingNameFromId
+	(ID: $2EC39F90; Func: @@NvAPI_DRS_EnumAvailableSettingValues), // NvAPI_DRS_EnumAvailableSettingValues
+	(ID: $DA8466A0; Func: @@NvAPI_DRS_GetBaseProfile), // NvAPI_DRS_GetBaseProfile
+	(ID: $C5EA85A1; Func: @@NvAPI_DRS_DeleteApplicationEx), // NvAPI_DRS_DeleteApplicationEx
+	(ID: $7E4A9A0B; Func: @@NvAPI_DRS_FindProfileByName), // NvAPI_DRS_FindProfileByName
+	(ID: $BC371EE0; Func: @@NvAPI_DRS_EnumProfiles), // NvAPI_DRS_EnumProfiles
+	(ID: $CC176068; Func: @@NvAPI_DRS_CreateProfile), // NvAPI_DRS_CreateProfile
+	(ID: $73BF8338; Func: @@NvAPI_DRS_GetSetting), // NvAPI_DRS_GetSetting
+	(ID: $EEE566B2; Func: @@NvAPI_DRS_FindApplicationByName), // NvAPI_DRS_FindApplicationByName
+	(ID: $577DD202; Func: @@NvAPI_DRS_SetSetting), // NvAPI_DRS_SetSetting
+	(ID: $17093206; Func: @@NvAPI_DRS_DeleteProfile), // NvAPI_DRS_DeleteProfile
+	(ID: $CB7309CD; Func: @@NvAPI_DRS_GetSettingIdFromName), // NvAPI_DRS_GetSettingIdFromName
+	(ID: $5927B094; Func: @@NvAPI_DRS_RestoreAllDefaults), // NvAPI_DRS_RestoreAllDefaults
+	(ID: $16ABD3A9; Func: @@NvAPI_DRS_SetProfileInfo), // NvAPI_DRS_SetProfileInfo
+	(ID: $FA5F6134; Func: @@NvAPI_DRS_RestoreProfileDefault), // NvAPI_DRS_RestoreProfileDefault
+	(ID: $E4A26362; Func: @@NvAPI_DRS_DeleteProfileSetting), // NvAPI_DRS_DeleteProfileSetting
+	(ID: $2C694BC6; Func: @@NvAPI_DRS_DeleteApplication), // NvAPI_DRS_DeleteApplication
 
-	(ID: $D3EDE889; Func: nil), // NvAPI_DRS_LoadSettingsFromFile
-	(ID: $375DBD6B; Func: nil), // NvAPI_DRS_LoadSettings
-	(ID: $DAD9CFF8; Func: nil), // NvAPI_DRS_DestroySession
-	(ID: $2BE25DF8; Func: nil), // NvAPI_DRS_SaveSettingsToFile
-	(ID: $0694D52E; Func: nil), // NvAPI_DRS_CreateSession
-	(ID: $FCBC7E14; Func: nil), // NvAPI_DRS_SaveSettings
+	(ID: $D3EDE889; Func: @@NvAPI_DRS_LoadSettingsFromFile), // NvAPI_DRS_LoadSettingsFromFile
+	(ID: $375DBD6B; Func: @@NvAPI_DRS_LoadSettings), // NvAPI_DRS_LoadSettings
+	(ID: $DAD9CFF8; Func: @@NvAPI_DRS_DestroySession), // NvAPI_DRS_DestroySession
+	(ID: $2BE25DF8; Func: @@NvAPI_DRS_SaveSettingsToFile), // NvAPI_DRS_SaveSettingsToFile
+	(ID: $0694D52E; Func: @@NvAPI_DRS_CreateSession), // NvAPI_DRS_CreateSession
+	(ID: $FCBC7E14; Func: @@NvAPI_DRS_SaveSettings), // NvAPI_DRS_SaveSettings
 	
     (ID: 0; Func: nil) // stop signal
   );
