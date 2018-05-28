@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
 	,SaGeTextStream
 	
 	,Classes
@@ -22,19 +21,17 @@ type
 implementation
 
 uses
-	 SaGeStreamUtils
-	,SaGeFileUtils
-	,SaGeLog
+	 SaGeLog
 	;
 
 procedure TSGTextLogStream.WriteLn;
 begin
-SGLog.Source(SGWinEoln, False);
+SGLog.Source('', False);
 end;
 
 procedure TSGTextLogStream.Write(const StringToWrite : TSGString);
 begin
-SGLog.Source(StringToWrite, False);
+SGLog.Source(StringToWrite, False, False);
 end;
 
 end.

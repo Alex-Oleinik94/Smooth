@@ -7,24 +7,19 @@ interface
 uses
 	 SaGeBase
 	,SaGeClasses
+	,SaGeTextStreamInterface
 	
 	,Classes
 	;
 
 type
-	ISGTextStream = interface(ISGInterface)
-		['{9bf4a36d-9767-4a2e-8a97-6cb95bb1ecef}']
-		procedure WriteLn();
-		procedure Write(const StringToWrite : TSGString);
-		procedure TextColor(const Color : TSGUInt8);
-		end;
-	
 	TSGTextStream = class(TSGNamed, ISGTextStream)
 			public
 		procedure WriteLn(); virtual; abstract; overload;
 		procedure WriteLn(const StringToWrite : TSGString); virtual; overload;
 		procedure WriteLn(const ValuesToWrite : array of const); virtual; overload;
 		procedure Write(const StringToWrite : TSGString); virtual; abstract; overload;
+		procedure Write(const Value : TSGUInt32); virtual; overload;
 		procedure Write(const ValuesToWrite : array of const); virtual; overload;
 		procedure TextColor(const Color : TSGUInt8); virtual; overload; // not abstract becouse may be not suported
 			public
@@ -49,6 +44,11 @@ uses
 
 procedure TSGTextStream.TextColor(const Color : TSGUInt8);
 begin
+end;
+
+procedure TSGTextStream.Write(const Value : TSGUInt32);
+begin
+Write(SGStr(Value));
 end;
 
 procedure TSGTextStream.Write(const ValuesToWrite : array of const);

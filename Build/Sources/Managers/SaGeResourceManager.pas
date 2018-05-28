@@ -177,6 +177,8 @@ uses
 	,SaGeFileUtils
 	,SaGeLog
 	,SaGeBaseUtils
+	,SaGeCasesOfPrint
+	,SaGeTextMultiStream
 	{$INCLUDE SaGeFileRegistrationResources.inc}
 	;
 
@@ -203,27 +205,30 @@ end;
 
 procedure TSGConvertedFileInfo.Print();
 begin
-Write('Converted');
-TextColor(14);
-Write('"',SGFileName(FName) + '.' + SGDownCaseString(SGFileExpansion(FName)), '"');
-TextColor(7);
-Write(':in ');
-TextColor(10);
-Write(SGGetSizeString(FSize, 'EN'));
-TextColor(7);
-Write(';out ');
-TextColor(12);
-Write(SGGetSizeString(FOutSize, 'EN'));
-TextColor(7);
-Write(';time ');
-TextColor(11);
-Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' '));
-TextColor(7);
-Write(';cache ');
-TextColor(13);
-Write(Iff(FConvertationNotNeed, 'True', 'False'));
-TextColor(7);
-WriteLn('.');
+with TSGTextMultiStream.Create([SGCaseLog, SGCasePrint]) do
+	begin
+	Write('Converted');
+	TextColor(14);
+	Write(['"',SGFileName(FName) + '.' + SGDownCaseString(SGFileExpansion(FName)), '"']);
+	TextColor(7);
+	Write(':in ');
+	TextColor(10);
+	Write(SGGetSizeString(FSize, 'EN'));
+	TextColor(7);
+	Write(';out ');
+	TextColor(12);
+	Write(SGGetSizeString(FOutSize, 'EN'));
+	TextColor(7);
+	Write(';time ');
+	TextColor(11);
+	Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' '));
+	TextColor(7);
+	Write(';cache ');
+	TextColor(13);
+	Write(Iff(FConvertationNotNeed, 'True', 'False'));
+	TextColor(7);
+	WriteLn('.');
+	end;
 end;
 
 operator + (const A, B : TSGConvertedFilesInfo) : TSGConvertedFilesInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -397,28 +402,31 @@ end;
 
 procedure TSGConvertedFilesInfo.Print();
 begin
-TextColor(7);
-Write('Converted files:count ');
-TextColor(14);
-Write(FCount);
-TextColor(7);
-Write(';cached ');
-TextColor(13);
-Write(FCountCopyedFromCache);
-TextColor(7);
-Write(';in size ');
-TextColor(10);
-Write(SGGetSizeString(FSize,'EN'));
-TextColor(7);
-Write(';out size ');
-TextColor(12);
-Write(SGGetSizeString(FOutSize,'EN'));
-TextColor(7);
-Write(';time ');
-TextColor(11);
-Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
-TextColor(7);
-WriteLn('.');
+with TSGTextMultiStream.Create([SGCaseLog, SGCasePrint]) do
+	begin
+	TextColor(7);
+	Write('Converted files:count ');
+	TextColor(14);
+	Write(FCount);
+	TextColor(7);
+	Write(';cached ');
+	TextColor(13);
+	Write(FCountCopyedFromCache);
+	TextColor(7);
+	Write(';in size ');
+	TextColor(10);
+	Write(SGGetSizeString(FSize,'EN'));
+	TextColor(7);
+	Write(';out size ');
+	TextColor(12);
+	Write(SGGetSizeString(FOutSize,'EN'));
+	TextColor(7);
+	Write(';time ');
+	TextColor(11);
+	Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
+	TextColor(7);
+	WriteLn('.');
+	end;
 end;
 
 function TSGBuildResources.Process(const FileForRegistration : TSGString) : TSGConvertedFilesInfo;

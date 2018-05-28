@@ -27,11 +27,11 @@ type
 			public
 		constructor Create(const LogFile : TSGString);
 		destructor Destroy(); override;
-		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True);overload;
-		procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False);overload;
-		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True);overload;
-		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
-		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
+		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True); overload;
+		procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False); overload;
+		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True); overload;
+		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150); overload;
+		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150); overload;
 			private
 		FFileStream : TFileStream;
 		FFileName   : TSGString;
@@ -203,7 +203,7 @@ while Stream.Position <> Stream.Size do
 Stream.Position := 0;
 end;
 
-procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True);overload;
+procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True);overload;
 var
 	ss : TSGString;
 	pc : PSGChar;
@@ -215,7 +215,7 @@ if Self <> nil then
 			Iff(WithTime, SGLogDateTimeString()) + 
 			SGStringDeleteEndOfLineDublicates(
 				SGConvertString(S, SGEncodingWindows1251) + 
-				SGWinEoln));
+				Iff(WithEoln, SGWinEoln)));
 		FFileStream.WriteBuffer(PC^, SGPCharLength(PC));
 		SGPCharFree(PC);
 		end;

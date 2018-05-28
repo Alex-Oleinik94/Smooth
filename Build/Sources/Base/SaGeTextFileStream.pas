@@ -7,7 +7,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeCriticalSection
-	,SaGeClasses
 	,SaGeTextStream
 	
 	,Classes
@@ -41,6 +40,7 @@ uses
 	 SaGeStreamUtils
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeEncodingUtils
 	;
 
 procedure TSGTextFileStream.WriteLn();
@@ -51,7 +51,7 @@ end;
 procedure TSGTextFileStream.Write(const StringToWrite : TSGString);
 begin
 FCriticalSection.Enter();
-SGWriteStringToStream(StringToWrite, FStream, False);
+SGWriteStringToStream(SGConvertString(StringToWrite, SGEncodingWindows1251), FStream, False);
 FCriticalSection.Leave();
 end;
 
