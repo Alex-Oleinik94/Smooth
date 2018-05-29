@@ -38,6 +38,7 @@
 \*****************************************************************************)
 
 {$MODE OBJFPC}
+{$PACKRECORDS C}
 
 unit NvApiDriverSettings;
 
@@ -45,8 +46,6 @@ interface
 
 uses
 	 nvapi_lite_common
-	
-	,SaGeBase
 	;
 
 const
@@ -1079,6 +1078,7 @@ const
 	NVAPI_SETTING_MAX_VALUES = 100;
 type
 	NvAPI_UnicodeString = array[0..NVAPI_UNICODE_STRING_MAX-1] of WideChar;
+	//NvAPI_UnicodeString = PWideChar;
 	pNvAPI_UnicodeString = ^ NvAPI_UnicodeString;
 	
 	_NVDRS_SETTING_TYPE = (
@@ -1118,8 +1118,8 @@ type
 	_NVDRS_SETTING_LOCATION = (
 		NVDRS_CURRENT_PROFILE_LOCATION,
 		NVDRS_GLOBAL_PROFILE_LOCATION,
-		NVDRS_BASE_PROFILE_LOCATION,
-		NVDRS_DEFAULT_PROFILE_LOCATION);
+		NVDRS_BASE_PROFILE_LOCATION);
+	//NVDRS_DEFAULT_PROFILE_LOCATION = ?
 	NVDRS_SETTING_LOCATION = _NVDRS_SETTING_LOCATION;
 	
 	_NVDRS_SETTING_V1 = record
@@ -1144,9 +1144,13 @@ type
 	NVDRS_SETTING_V1 =  _NVDRS_SETTING_V1;
 	NVDRS_SETTING = NVDRS_SETTING_V1;
 	pNVDRS_SETTING = ^ NVDRS_SETTING;
-const
-	NVDRS_SETTING_VER1 : NvU32 = SizeOf(NVDRS_SETTING_V1) or (1 shr 16);
-	NVDRS_SETTING_VER : NvU32 = SizeOf(NVDRS_SETTING_V1) or (1 shr 16);
+
+// macro NVDRS_SETTING_VER1, NVDRS_SETTING_VER
+function MAKE_NVAPI_VERSION(const SizeOfTypeName, Version : NvU32) : NvU32;
+function NVDRS_SETTING_VER() : NvU32;
+function GET_NVAPI_VERSION(const Version : NvU32) : NvU16;
+function GET_NVAPI_SIZE(const Version : NvU32) : NvU16;
+
 type
 	_NVDRS_APPLICATION_V4 = record
 		version : NvU32;
@@ -1222,27 +1226,30 @@ var
 	NvAPI_DRS_LoadSettingsFromFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
 	NvAPI_DRS_SaveSettingsToFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
 
-function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
-
 implementation
 
 uses
 	 nvapi_loader
-	
-	,SaGeStringUtils
 	;
 
-function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
-var
-	Index : TSGMaxEnum;
+function MAKE_NVAPI_VERSION(const SizeOfTypeName, Version : NvU32) : NvU32;
 begin
-Result := '(size = ' + SGGetSizeString(BinarySetting.valueLength, 'EN') + ')';
-if BinarySetting.valueLength > 0 then
-	begin
-	Result += ' 0x';
-	for Index := 0 to BinarySetting.valueLength - 1 do
-		Result += SGStrByteHex(BinarySetting.valueData[Index], False);
-	end;
+Result := SizeOfTypeName or (Version shl 16);
+end;
+
+function NVDRS_SETTING_VER() : NvU32;
+begin
+Result := MAKE_NVAPI_VERSION(SizeOf(NVDRS_SETTING), 1);
+end;
+
+function GET_NVAPI_VERSION(const Version : NvU32) : NvU16;
+begin
+Result := (Version and $ffff0000) shr 16;
+end;
+
+function GET_NVAPI_SIZE(const Version : NvU32) : NvU16;
+begin
+Result := Version and $ffff;
 end;
 
 end.

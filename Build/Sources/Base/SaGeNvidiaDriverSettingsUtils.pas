@@ -32,12 +32,15 @@ function SGNVidiaGetDriverOptimusMode(const Mode : TSGNVidiaDriverModeOptimus = 
 procedure SGNVidiaViewDriverSetting(const Setting : NvU32; const Mode : TSGNVidiaDriverModeOptimus = SGNVidiaBase; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
 procedure SGNVidiaViewDriverSetting(const Setting : NVDRS_SETTING; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
 
+function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
+
 implementation
 
 uses
 	 SaGeLog
 	,SaGeDllManager
 	,SaGeDateTime
+	,SaGeStringUtils
 	;
 
 procedure SGNVidiaViewDriverSetting(const Setting : NVDRS_SETTING; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
@@ -312,6 +315,19 @@ Result := 0;
 if not DllManager.Suppored('nvapi') then
 	exit;
 NvAPI_DRS_GetNumProfiles(hSession, Result);
+end;
+
+function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
+var
+	Index : TSGMaxEnum;
+begin
+Result := '(size = ' + SGGetSizeString(BinarySetting.valueLength, 'EN') + ')';
+if BinarySetting.valueLength > 0 then
+	begin
+	Result += ' 0x';
+	for Index := 0 to BinarySetting.valueLength - 1 do
+		Result += SGStrByteHex(BinarySetting.valueData[Index], False);
+	end;
 end;
 
 end.
