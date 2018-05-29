@@ -228,6 +228,8 @@ with TSGTextMultiStream.Create([SGCaseLog, SGCasePrint]) do
 	Write(Iff(FConvertationNotNeed, 'True', 'False'));
 	TextColor(7);
 	WriteLn('.');
+	
+	Destroy();
 	end;
 end;
 
@@ -426,6 +428,8 @@ with TSGTextMultiStream.Create([SGCaseLog, SGCasePrint]) do
 	Write(StringTrimAll(SGMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
 	TextColor(7);
 	WriteLn('.');
+	
+	Destroy();
 	end;
 end;
 
