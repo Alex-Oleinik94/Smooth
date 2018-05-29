@@ -37,12 +37,17 @@
 |*                                                                           *|
 \*****************************************************************************)
 
+{$MODE OBJFPC}
+
 unit NvApiDriverSettings;
 
 interface
 
 uses
-	nvapi_lite_common;
+	 nvapi_lite_common
+	
+	,SaGeBase
+	;
 
 const
 	OGL_AA_LINE_GAMMA_STRING = 'Antialiasing - Line gamma'; 
@@ -1073,7 +1078,7 @@ const
 	NVAPI_BINARY_DATA_MAX = 4096;
 	NVAPI_SETTING_MAX_VALUES = 100;
 type
-	NvAPI_UnicodeString = array[0..NVAPI_UNICODE_STRING_MAX-1] of NvU16;
+	NvAPI_UnicodeString = array[0..NVAPI_UNICODE_STRING_MAX-1] of WideChar;
 	pNvAPI_UnicodeString = ^ NvAPI_UnicodeString;
 	
 	_NVDRS_SETTING_TYPE = (
@@ -1217,10 +1222,27 @@ var
 	NvAPI_DRS_LoadSettingsFromFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
 	NvAPI_DRS_SaveSettingsToFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
 
+function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
+
 implementation
 
 uses
 	 nvapi_loader
+	
+	,SaGeStringUtils
 	;
+
+function SGNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TSGString;
+var
+	Index : TSGMaxEnum;
+begin
+Result := '(size = ' + SGGetSizeString(BinarySetting.valueLength, 'EN') + ')';
+if BinarySetting.valueLength > 0 then
+	begin
+	Result += ' 0x';
+	for Index := 0 to BinarySetting.valueLength - 1 do
+		Result += SGStrByteHex(BinarySetting.valueData[Index], False);
+	end;
+end;
 
 end.

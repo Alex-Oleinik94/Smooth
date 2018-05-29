@@ -17,6 +17,9 @@ uses
 function SGNVidiaGetNumProfilies(const hSession : NvDRSSessionHandle) : NvU32;
 
 type
+	TSGNVidiaDriverModeOptimus = (
+		SGNVidiaBase,
+		SGNVidiaCurrentGlobal);
 	TSGNVidiaDriverOptimusMode = (
 		SGNVidiaUnknown,
 		SGNVidiaHighPerfomance,
@@ -25,7 +28,9 @@ type
 
 function SGNVidiaStrDriverOptimusMode(const Mode : TSGNVidiaDriverOptimusMode) : TSGString;
 function SGNVidiaSetDriverOptimusMode(const Mode : TSGNVidiaDriverOptimusMode = SGNVidiaHighPerfomance) : TSGBoolean;
-function SGNVidiaGetDriverOptimusMode() : TSGNVidiaDriverOptimusMode;
+function SGNVidiaGetDriverOptimusMode(const Mode : TSGNVidiaDriverModeOptimus = SGNVidiaBase) : TSGNVidiaDriverOptimusMode;
+procedure SGNVidiaViewDriverSetting(const Setting : NvU32; const Mode : TSGNVidiaDriverModeOptimus = SGNVidiaBase; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
+procedure SGNVidiaViewDriverSetting(const Setting : NVDRS_SETTING; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
 
 implementation
 
@@ -33,10 +38,79 @@ uses
 	 SaGeLog
 	,SaGeDllManager
 	,SaGeDateTime
-	
 	;
 
-function SGNVidiaGetDriverOptimusMode() : TSGNVidiaDriverOptimusMode;
+procedure SGNVidiaViewDriverSetting(const Setting : NVDRS_SETTING; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]); overload;
+begin
+SGHint('Driver setting: ', CasesOfPrint);
+SGHint(['    Version = ', Setting.version], CasesOfPrint);
+SGHint(['    Setting name = ', Setting.settingName], CasesOfPrint);
+SGHint(['    Setting ID = ', Setting.settingId], CasesOfPrint);
+SGHint(['    Setting type = ', Setting.settingType], CasesOfPrint);
+SGHint(['    Setting location = ', Setting.settingLocation], CasesOfPrint);
+SGHint(['    Is current predefined = ', Setting.isCurrentPredefined], CasesOfPrint);
+SGHint(['    Is predefined valid = ', Setting.isPredefinedValid], CasesOfPrint);
+SGHint(['    Predefined : Value (uint32) = ', Setting.u32PredefinedValue], CasesOfPrint);
+SGHint(['    Predefined : Binary value = ', SGNvApiStrBinarySetting(Setting.binaryPredefinedValue)], CasesOfPrint);
+SGHint(['    Predefined : Value (wide string) = ', Setting.wszPredefinedValue], CasesOfPrint);
+SGHint(['    Current : Value (uint32) = ', Setting.u32CurrentValue], CasesOfPrint);
+SGHint(['    Current : Binary value = ', SGNvApiStrBinarySetting(Setting.binaryCurrentValue)], CasesOfPrint);
+SGHint(['    Current : Value (wide string) = ', Setting.wszCurrentValue], CasesOfPrint);
+end;
+
+procedure SGNVidiaViewDriverSetting(const Setting : NvU32; const Mode : TSGNVidiaDriverModeOptimus = SGNVidiaBase; const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);
+var
+	hSession : NvDRSSessionHandle;
+	status : NvAPI_Status;
+	hProfile : NvDRSProfileHandle;
+	drsSetting : NVDRS_SETTING;
+begin
+if not DllManager.Suppored('nvapi') then
+	exit;
+
+hSession := 0;
+status := NvAPI_DRS_CreateSession(@hSession);
+if (status <> NVAPI_OK) then
+	exit;
+
+status := NvAPI_DRS_LoadSettings(hSession);
+if (status <> NVAPI_OK) then 
+	begin
+	NvAPI_DRS_DestroySession(hSession);
+	exit;
+	end;
+
+hProfile := 0;
+if Mode = SGNVidiaBase then
+	status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile)
+else
+	status := NvAPI_DRS_GetCurrentGlobalProfile(hSession, @hProfile);
+if (status <> NVAPI_OK) then 
+	begin
+	SGHint(['NVidia : View driver setting : Get*?Profile error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
+	NvAPI_DRS_DestroySession(hSession);
+	exit;
+	end;
+
+fillchar(drsSetting, SizeOf(drsSetting), 0);
+drsSetting.version := NVDRS_SETTING_VER;
+drsSetting.settingId := Setting;
+drsSetting.settingType := NVDRS_DWORD_TYPE;
+
+status := NvAPI_DRS_GetSetting(hSession, hProfile, Setting, @drsSetting);
+if (status <> NVAPI_OK) then
+	begin
+	SGHint(['NVidia : View driver setting : GetSetting error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
+	NvAPI_DRS_DestroySession(hSession);
+	exit;
+	end;
+
+SGNVidiaViewDriverSetting(drsSetting, CasesOfPrint);
+
+NvAPI_DRS_DestroySession(hSession);
+end;
+
+function SGNVidiaGetDriverOptimusMode(const Mode : TSGNVidiaDriverModeOptimus = SGNVidiaBase) : TSGNVidiaDriverOptimusMode;
 var
 	hSession : NvDRSSessionHandle;
 	status : NvAPI_Status;
@@ -51,46 +125,44 @@ hSession := 0;
 status := NvAPI_DRS_CreateSession(@hSession);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_CreateSession error!']);
-	{$ENDIF}
+	SGHint(['NvAPI_DRS_CreateSession error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	exit;
 	end;
 
-// (2) load all the system settings into the session
 status := NvAPI_DRS_LoadSettings(hSession);
 if (status <> NVAPI_OK) then 
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_LoadSettings error!']);
-	{$ENDIF}
+	SGHint(['NvAPI_DRS_LoadSettings error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
 
 //WriteLn('SGNVidiaGetNumProfilies=',SGNVidiaGetNumProfilies(hSession));
 
-// (3) Obtain the Base profile. Any setting needs to be inside
-// a profile, putting a setting on the Base Profile enforces it
-// for all the processes on the system
 hProfile := 0;
-status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile);
+if Mode = SGNVidiaBase then
+	status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile)
+else
+	status := NvAPI_DRS_GetCurrentGlobalProfile(hSession, @hProfile);
 if (status <> NVAPI_OK) then 
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_GetBaseProfile error!']);
-	{$ENDIF}
+	SGHint(['NvAPI_DRS_GetBaseProfile error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
 
-// Now get the settings
 fillchar(drsSetting, SizeOf(drsSetting), 0);
 drsSetting.version := NVDRS_SETTING_VER;
 drsSetting.settingId := SHIM_MCCOMPAT_ID;
 drsSetting.settingType := NVDRS_DWORD_TYPE;
 
 status := NvAPI_DRS_GetSetting(hSession, hProfile, SHIM_MCCOMPAT_ID, @drsSetting);
+if (status <> NVAPI_OK) then
+	begin
+	SGHint(['NVidia : Get driver optimus mode : GetSetting error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
+	NvAPI_DRS_DestroySession(hSession);
+	exit;
+	end;
 if(drsSetting.u32CurrentValue = SHIM_MCCOMPAT_ENABLE) then
 	Result := SGNVidiaHighPerfomance
 else if(drsSetting.u32CurrentValue = SHIM_MCCOMPAT_INTEGRATED) then
@@ -99,10 +171,8 @@ else
 	Result := SGNVidiaAutoSelect;
 
 status := NvAPI_DRS_DestroySession(hSession);
-{$IFDEF NVDRS_DEBUG}
 if (status <> NVAPI_OK) then
-	SGHint(['NvAPI_DRS_DestroySession error!']);
-{$ENDIF}
+	SGHint(['NvAPI_DRS_DestroySession error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 end;
 
 function SGNVidiaStrDriverOptimusMode(const Mode : TSGNVidiaDriverOptimusMode) : TSGString;
@@ -124,43 +194,31 @@ var
 	status : NvAPI_Status;
 	drsSetting1, drsSetting2, drsSetting3 : NVDRS_SETTING;
 begin
-// (1) Create the session handle to access driver settings
 hSession := 0;
 status := NvAPI_DRS_CreateSession(@hSession);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_CreateSession error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : CreateSession error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	exit;
 	end;
 
-// (2) load all the system settings into the session
 status := NvAPI_DRS_LoadSettings(hSession);
 if (status <> NVAPI_OK) then 
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_LoadSettings error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : LoadSettings error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
 
-// (3) Obtain the Base profile. Any setting needs to be inside
-// a profile, putting a setting on the Base Profile enforces it
-// for all the processes on the system
 hProfile := 0;
 status := NvAPI_DRS_GetBaseProfile(hSession, @hProfile);
 if (status <> NVAPI_OK) then 
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_GetBaseProfile error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : GetBaseProfile error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
 
-// Now modify the settings to set NVIDIA global
 fillchar(drsSetting1, SizeOf(drsSetting1), 0);
 drsSetting1.version := NVDRS_SETTING_VER;
 drsSetting1.settingId := SHIM_MCCOMPAT_ID;
@@ -176,84 +234,31 @@ drsSetting3.version := NVDRS_SETTING_VER;
 drsSetting3.settingId := SHIM_RENDERING_OPTIONS_ID;
 drsSetting3.settingType := NVDRS_DWORD_TYPE;
 
-// Optimus flags for enabled applications
 if(Mode = SGNVidiaHighPerfomance) then
 	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_ENABLE
 else if(Mode = SGNVidiaIntegrated) then
 	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_INTEGRATED
 else
 	drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_AUTO_SELECT;
-// other options
-//		SHIM_MCCOMPAT_INTEGRATED		// 1
-//		SHIM_MCCOMPAT_USER_EDITABLE
-//		SHIM_MCCOMPAT_VARYING_BIT
-//		SHIM_MCCOMPAT_AUTO_SELECT		// 2
 
-// Enable application for Optimus
-// drsSetting2.u32CurrentValue = SHIM_RENDERING_MODE_ENABLE;
 if(Mode = SGNVidiaHighPerfomance)then
 	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_ENABLE
 else if(Mode = SGNVidiaIntegrated)then
 	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_INTEGRATED
 else
 	drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_ENABLE;
-// other options
-//		SHIM_RENDERING_MODE_INTEGRATED		// 1
-//		SHIM_RENDERING_MODE_USER_EDITABLE
-//		SHIM_RENDERING_MODE_VARYING_BIT
-//		SHIM_RENDERING_MODE_AUTO_SELECT		// 2
-//		SHIM_RENDERING_MODE_OVERRIDE_BIT
-//		SHIM_MCCOMPAT_OVERRIDE_BIT
 
-// Shim rendering modes per application for Optimus
-// drsSetting3.u32CurrentValue = SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE;
 if(Mode = SGNVidiaHighPerfomance)then
 	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE
 else if(Mode = SGNVidiaIntegrated)then
 	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE or SHIM_RENDERING_OPTIONS_IGPU_TRANSCODING
 else
 	drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE;
-// other options
-//		SHIM_RENDERING_OPTIONS_DISABLE_ASYNC_PRESENT,
-//		SHIM_RENDERING_OPTIONS_EHSHELL_DETECT,
-//		SHIM_RENDERING_OPTIONS_FLASHPLAYER_HOST_DETECT,
-//		SHIM_RENDERING_OPTIONS_VIDEO_DRM_APP_DETECT,
-//		SHIM_RENDERING_OPTIONS_IGNORE_OVERRIDES,
-//		SHIM_RENDERING_OPTIONS_CHILDPROCESS_DETECT,
-//		SHIM_RENDERING_OPTIONS_ENABLE_DWM_ASYNC_PRESENT,
-//		SHIM_RENDERING_OPTIONS_PARENTPROCESS_DETECT,
-//		SHIM_RENDERING_OPTIONS_ALLOW_INHERITANCE,
-//		SHIM_RENDERING_OPTIONS_DISABLE_WRAPPERS,
-//		SHIM_RENDERING_OPTIONS_DISABLE_DXGI_WRAPPERS,
-//		SHIM_RENDERING_OPTIONS_PRUNE_UNSUPPORTED_FORMATS,
-//		SHIM_RENDERING_OPTIONS_ENABLE_ALPHA_FORMAT,
-//		SHIM_RENDERING_OPTIONS_IGPU_TRANSCODING,				// 1 ** include for force integrated
-//		SHIM_RENDERING_OPTIONS_DISABLE_CUDA,
-//		SHIM_RENDERING_OPTIONS_ALLOW_CP_CAPS_FOR_VIDEO,
-//		SHIM_RENDERING_OPTIONS_ENABLE_NEW_HOOKING,
-//		SHIM_RENDERING_OPTIONS_DISABLE_DURING_SECURE_BOOT,
-//		SHIM_RENDERING_OPTIONS_INVERT_FOR_QUADRO,
-//		SHIM_RENDERING_OPTIONS_INVERT_FOR_MSHYBRID,
-//		SHIM_RENDERING_OPTIONS_REGISTER_PROCESS_ENABLE_GOLD,
-
-
-// Code from "SOP" example
-//	if( ForceIntegrated )then begin
-//		drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_INTEGRATED;
-//		drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_INTEGRATED;
-//		drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE or SHIM_RENDERING_OPTIONS_IGPU_TRANSCODING;
-//	end else begin
-//		drsSetting1.u32CurrentValue := SHIM_MCCOMPAT_ENABLE;
-//		drsSetting2.u32CurrentValue := SHIM_RENDERING_MODE_ENABLE;
-//		drsSetting3.u32CurrentValue := SHIM_RENDERING_OPTIONS_DEFAULT_RENDERING_MODE;
-//	end
 
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting1);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_SetSetting 1 error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : SetSetting(1) error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -261,9 +266,7 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting2);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_SetSetting 2 error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : SetSetting(2) error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -271,9 +274,7 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SetSetting(hSession, hProfile, @drsSetting3);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_SetSetting 3 error!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : SetSetting(3) error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	NvAPI_DRS_DestroySession(hSession);
 	exit;
 	end;
@@ -281,35 +282,28 @@ if (status <> NVAPI_OK) then
 status := NvAPI_DRS_SaveSettings(hSession);
 if (status <> NVAPI_OK) then
 	begin
-	{$IFDEF NVDRS_DEBUG}
-	SGHint(['NvAPI_DRS_SaveSettings error!!!']);
-	{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : SaveSettings error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 	end;
 
 status := NvAPI_DRS_DestroySession(hSession);
-{$IFDEF NVDRS_DEBUG}
 if (status <> NVAPI_OK) then
-	SGHint(['NvAPI_DRS_DestroySession error!']);
-{$ENDIF}
+	SGHint(['NVidia : Set driver optimus mode : DestroySession error : ', SGNvApiStrStatus(status), '!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 end;
 
-{$IFDEF NVDRS_DEBUG}
 var
 	d1, d2 : TSGDateTime;
-{$ENDIF}
 begin
-//SGNVidiaGetDriverOptimusMode();
+{SGHint(SGNVidiaStrDriverOptimusMode(SGNVidiaGetDriverOptimusMode(SGNVidiaBase)));
+SGHint(SGNVidiaStrDriverOptimusMode(SGNVidiaGetDriverOptimusMode(SGNVidiaCurrentGlobal)));
+SGNVidiaViewDriverSetting(SHIM_MCCOMPAT_ID, SGNVidiaBase);
+SGNVidiaViewDriverSetting(SHIM_MCCOMPAT_ID, SGNVidiaCurrentGlobal);}
 Result := False;
 if not DllManager.Suppored('nvapi') then
 	exit;
-{$IFDEF NVDRS_DEBUG}
 d1.Get();
-{$ENDIF}
 SetDriverOptimusMode();
-{$IFDEF NVDRS_DEBUG}
 d2.Get();
-SGHint(['NVidia : Driver optimus sets at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!']);
-{$ENDIF}
+SGHint(['NVidia : Driver optimus sets at ', SGTextTimeBetweenDates(d1, d2, 'ENG'), ' seconds!'], [SGCaseLog{$IFDEF NVDRS_DEBUG}, SGCasePrint{$ENDIF}], True);
 end;
 
 function SGNVidiaGetNumProfilies(const hSession : NvDRSSessionHandle) : NvU32;
