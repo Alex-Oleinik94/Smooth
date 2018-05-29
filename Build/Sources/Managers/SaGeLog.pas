@@ -15,19 +15,17 @@ uses
 type
 	TSGLog = class(TSGNamed)
 			public
-		procedure Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True); overload;
-		procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False); overload;
-		procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True); overload;
-		procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150); overload;
-		procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150); overload;
+		class procedure Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True); overload;
+		class procedure Source(const Stream : TStream; const WithTime : TSGBoolean = False); overload;
+		class procedure Source(const Ar : array of const; const WithTime : TSGBoolean = True); overload;
+		class procedure Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150); overload;
+		class procedure Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150); overload;
 		end;
-var
-	//Экземпляр класса лога программы
-	SGLog : TSGLog = nil;
+	SGLog = TSGLog;
 
 procedure SGHint(const MessageStr : TSGString; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
 procedure SGHint(const MessagePtrs : array of const; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog];const ViewTime : TSGBoolean = False);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}overload;
-procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
+procedure SGLogParams(Params : TSGStringList; const FreeMemList : TSGBoolean = True);
 function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -92,13 +90,13 @@ if SGCasePrint in CasesOfPrint then
 	WriteLn(SGConvertStringToConsoleEncoding(MessageStr));
 end;
 
-procedure TSGLog.Source(const Ar : array of const; const WithTime : TSGBoolean = True);
+class procedure TSGLog.Source(const Ar : array of const; const WithTime : TSGBoolean = True);
 begin
 if SGLogEnable then
 	Source(SGStr(Ar), WithTime);
 end;
 
-procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
+class procedure TSGLog.Source(const ArS : TSGStringList; const Title : TSGString; const ViewTime : TSGBoolean = True; const SimbolsLength : TSGUInt16 = 150);overload;
 var
 	i, WordCount, MaxLength, n, ii, TitleLength : TSGMaxEnum;
 	TempS : TSGString;
@@ -147,7 +145,7 @@ if WordCount > 0 then
 	end;
 end;
 
-procedure TSGLog.Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
+class procedure TSGLog.Source(const S : TSGString; const Title : TSGString; const Separators : TSGString; const SimbolsLength : TSGUInt16 = 150);overload;
 var
 	ArS : TSGStringList = nil;
 begin
@@ -156,7 +154,7 @@ Source(ArS, Title, True, SimbolsLength);
 SetLength(ArS, 0);
 end;
 
-procedure TSGLog.Source(const Stream : TStream; const WithTime : TSGBoolean = False);overload;
+class procedure TSGLog.Source(const Stream : TStream; const WithTime : TSGBoolean = False);overload;
 begin
 Stream.Position := 0;
 while Stream.Position <> Stream.Size do
@@ -166,7 +164,7 @@ while Stream.Position <> Stream.Size do
 Stream.Position := 0;
 end;
 
-procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True);overload;
+class procedure TSGLog.Source(const S : TSGString; const WithTime : TSGBoolean = True; const WithEoln : TSGBoolean = True);overload;
 begin
 SGLogWrite(
 	Iff(WithTime, SGLogDateTimeString()) + 
@@ -175,22 +173,23 @@ SGLogWrite(
 		Iff(WithEoln, SGWinEoln)))
 end;
 
-procedure SGLogParams(const Log : TSGLog; Params : TSGStringList);
+procedure SGLogParams(Params : TSGStringList; const FreeMemList : TSGBoolean = True);
 var
 	Str : TSGString = '';
 begin
 Str := SGStringFromStringList(Params, ' ');
 if StringTrimAll(Str, ' ') <> '' then
 	if Length(Str) < 106 then
-		Log.Source('Executable params: ' + Str)
+		TSGLog.Source('Executable params: ' + Str)
 	else if Length(Str) < 150 then
 		begin
-		Log.Source('Executable params --> (' + SGStr(Length(Params)) + ')');
-		Log.Source('  ' + Str);
+		TSGLog.Source('Executable params --> (' + SGStr(Length(Params)) + ')');
+		TSGLog.Source('  ' + Str);
 		end
 	else
-		Log.Source(Params, 'Executable params');
-SetLength(Params, 0);
+		TSGLog.Source(Params, 'Executable params');
+if FreeMemList then
+	SetLength(Params, 0);
 end;
 
 initialization
@@ -201,7 +200,7 @@ if SGLogEnable then
 	SGLog.Source('* (v)_(O_o)_(V)  SaGe Engine Log  (V)_(o_O)_(v) *', False);
 	SGLog.Source('*************************************************', False);
 	SGLog.Source('		<< Log created >>');
-	SGLogParams(SGLog, SGSystemParamsToConcoleCallerParams());
+	SGLogParams(SGSystemParamsToConcoleCallerParams());
 	end;
 end;
 

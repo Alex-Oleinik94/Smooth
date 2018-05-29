@@ -148,6 +148,9 @@ uses
 	,SaGeFileUtils
 	,SaGeConsoleUtils
 	,SaGeBaseUtils
+	{$IFDEF WITHLEAKSDETECTOR}
+	,SaGeLeaksDetector // not delete, for unit init/final procedures
+	{$ENDIF}
 	
 	,StrMan
 	,Crt
