@@ -446,7 +446,7 @@ end;
 
 class function TSGDll.ObjectName() : TSGString;
 begin
-Result := 'TSGDll*?';
+Result := 'TSGDll[*?]';
 end;
 
 class function TSGDll.ClassName() : TSGString;

@@ -186,12 +186,12 @@ if WordCount > 0 then
 			if ii = n then
 				begin
 				ii := 0;
-				SGLogWrite(TempS);
+				SGLogWriteLn(TempS);
 				TempS := '  ';
 				end;
 			end;
 		if TempS <> '  ' then
-			SGLogWrite(TempS);
+			SGLogWriteLn(TempS);
 		end;
 	end;
 end;

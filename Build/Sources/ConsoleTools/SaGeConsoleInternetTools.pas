@@ -14,6 +14,7 @@ procedure SGConsoleNetServer(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleNetClient(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleInternetPacketRuntimeDumper(const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleConnectionsAnalyzer(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -34,6 +35,16 @@ uses
 	,SaGeFileUtils
 	,SaGeInternetConnections
 	;
+
+procedure SGConsoleConnectionsAnalyzer(const VParams : TSGConcoleCallerParams = nil);
+begin
+if SGCountConsoleParams(VParams) = 0 then
+	begin
+	SGConnectionsAnalyzer();
+	end
+else
+	SGHint('Params are not alowed here!');
+end;
 
 procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);
 var

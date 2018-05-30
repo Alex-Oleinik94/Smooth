@@ -19,12 +19,23 @@ type
 		procedure TextColor(const Color : TSGUInt8); override;
 		end;
 
+procedure SGKill( var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
 	 Crt
 	,SaGeEncodingUtils
 	;
+
+procedure SGKill( var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if TextStream <> nil then
+	begin
+	TextStream.Destroy();
+	TextStream := nil;
+	end;
+end;
 
 procedure TSGTextConsoleStream.TextColor(const Color : TSGUInt8);
 begin

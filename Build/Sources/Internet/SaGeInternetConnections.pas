@@ -22,7 +22,11 @@ type
 		destructor Destroy(); override;
 			private
 		FConnections : TSGInternetConnectionList;
-		FSizeOutPackets : TSGUInt64;
+		FOutPacketsSize : TSGUInt64;
+		FOutPacketsCount : TSGUInt64;
+			protected
+		procedure PrintStatistic(const TextTime : TSGString);
+		function ConnectionsLength() : TSGMaxEnum;
 			protected
 		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
 		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
@@ -31,14 +35,22 @@ type
 		function HandleNewConnection(const ConnectionClass : TSGInternetConnectionClass; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 		function HandlePacketNewConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 		function HandlePacketConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+			public
+		property ConnectionsCount : TSGMaxEnum read ConnectionsLength;
 		end;
 
+procedure SGKill(var Connections : TSGInternetConnections); overload;
 procedure SGRegisterInternetConnectionClass(const ClassVariable : TSGInternetConnectionClass);
+procedure SGConnectionsAnalyzer();
 
 implementation
 
 uses
 	 SaGeInternetConnectionTCP
+	,SaGeTextConsoleStream
+	,SaGeTextStream
+	,SaGeBaseUtils
+	,SaGeStringUtils
 	;
 
 var
@@ -66,13 +78,62 @@ if Add then
 	ConnectionClasses += ClassVariable;
 end;
 
+procedure SGKill(var Connections : TSGInternetConnections); overload;
+begin
+if Connections <> nil then
+	begin
+	Connections.Destroy();
+	Connections := nil;
+	end;
+end;
+
+procedure SGConnectionsAnalyzer();
+var
+	Connections : TSGInternetConnections = nil;
+begin
+Connections := TSGInternetConnections.Create();
+Connections.PossibilityBreakLoopFromConsole := True;
+Connections.ProcessTimeOutUpdates := True;
+Connections.InfoTimeOut := 90;
+Connections.Loop();
+SGKill(Connections);
+end;
+
 // ==================================
 // ======TSGInternetConnections======
 // ==================================
 
+function TSGInternetConnections.ConnectionsLength() : TSGMaxEnum;
+begin
+Result := 0;
+if (FConnections <> nil) then
+	Result := Length(FConnections);
+end;
+
+procedure TSGInternetConnections.PrintStatistic(const TextTime : TSGString);
+
+procedure PrintConnectionsList(const TextStream : TSGTextStream);
+begin
+
+end;
+
+var
+	TextStream : TSGTextStream = nil;
+begin
+TextStream := TSGTextConsoleStream.Create();
+TextStream.TextColor(7);
+TextStream.WriteLn(['Connections (time:', TextTime, ') [', ConnectionsCount, ']', Iff(ConnectionsCount = 0, '.', ':')]);
+if ConnectionsCount <> 0 then
+	PrintConnectionsList(TextStream);
+if FOutPacketsCount <> 0 then
+	TextStream.WriteLn(['Out packets [', FOutPacketsCount, ']: ', SGGetSizeString(FOutPacketsSize, 'ENG'), '.']);
+SGKill(TextStream);
+end;
+
 function TSGInternetConnections.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
 begin
-Result := False;
+Result := inherited HandleTimeOutUpdate(Now);
+PrintStatistic(SGTextTimeBetweenDates(TimeBegining, SGNow(), 'EN'));
 end;
 
 procedure TSGInternetConnections.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); 
@@ -138,7 +199,8 @@ if not HandlePacketConnections(Identificator, Frame, Date, Time) then
 	if not HandlePacketNewConnections(Identificator, Frame, Date, Time) then
 		begin
 		SGKill(Frame);
-		FSizeOutPackets += Stream.Size;
+		FOutPacketsSize += Stream.Size;
+		FOutPacketsCount += 1;
 		end;
 end;
 
@@ -146,7 +208,8 @@ constructor TSGInternetConnections.Create();
 begin
 inherited;
 FConnections := nil;
-FSizeOutPackets := 0;
+FOutPacketsSize := 0;
+FOutPacketsCount := 0;
 end;
 
 destructor TSGInternetConnections.Destroy();

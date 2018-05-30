@@ -106,7 +106,7 @@ begin
 if (CasesOfPrint <> []) and (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 	begin
 	TextColor(7);
-	SGHint(['Capture statistics:'], CasesOfPrint);
+	SGHint(['Capture statistics (', SGTextTimeBetweenDates(FTimeBegining, SGNow(), 'EN'), '):'], CasesOfPrint);
 	for Index := 0 to High(FDevicesData) do
 		begin
 		SGHint(['    Device "', FDevicesData[Index].DeviceDescription, '":'], CasesOfPrint);

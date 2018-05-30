@@ -47,8 +47,7 @@ uses
 	,SaGeVersion
 	,SaGeInternetPacketDeterminer
 	,SaGeTextFileStream
-	
-	,Crt
+	,SaGeTextConsoleStream
 	;
 
 // ==========================================
@@ -130,17 +129,22 @@ end;
 procedure TSGInternetPacketRuntimeDumper.PrintInformation(const NowDateTime : TSGDateTime);
 begin
 SGPrintEngineVersion();
-TextColor(15);
-Write('После ');
-TextColor(10);
-Write(SGTextTimeBetweenDates(FTimeBegining, NowDateTime, 'ENG'));
-TextColor(15);
-Write(' всего перехвачено ');
-TextColor(12);
-Write(SGGetSizeString(AllDataSize(), 'EN'));
-TextColor(15);
-WriteLn(' данных.');
-TextColor(7);
+with TSGTextConsoleStream.Create() do
+	begin
+	TextColor(15);
+	Write('╧юёых ');
+	TextColor(10);
+	Write(SGTextTimeBetweenDates(FTimeBegining, NowDateTime, 'ENG'));
+	TextColor(15);
+	Write(' тёхую яхЁхїтрўхэю ');
+	TextColor(12);
+	Write(SGGetSizeString(AllDataSize(), 'EN'));
+	TextColor(15);
+	WriteLn(' фрээ√ї.');
+	TextColor(7);
+	
+	Destroy();
+	end;
 end;
 
 procedure TSGInternetPacketRuntimeDumper.UpdateGeneralDirectory(const MakeDirectory : TSGBoolean = True);

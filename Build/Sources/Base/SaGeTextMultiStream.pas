@@ -31,6 +31,8 @@ type
 		procedure Add(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);
 		end;
 
+procedure SGKill( var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
@@ -38,6 +40,15 @@ uses
 	,SaGeTextFileStream
 	,SaGeTextConsoleStream
 	;
+
+procedure SGKill( var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if TextStream <> nil then
+	begin
+	TextStream.Destroy();
+	TextStream := nil;
+	end;
+end;
 
 constructor TSGTextMultiStream.Create(const CasesOfPrint : TSGCasesOfPrint);
 begin

@@ -27,6 +27,8 @@ type
 		procedure WriteLines(const Stream : TStream); virtual; overload;
 		end;
 
+procedure SGKill( var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 {$DEFINE  INC_PLACE_INTERFACE}
 {$DEFINE DATATYPE_LIST_HELPER := TSGTextStreamListHelper}
 {$DEFINE DATATYPE_LIST        := TSGTextStreamList}
@@ -41,6 +43,15 @@ uses
 	 SaGeStreamUtils
 	,SaGeStringUtils
 	;
+
+procedure SGKill( var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if TextStream <> nil then
+	begin
+	TextStream.Destroy();
+	TextStream := nil;
+	end;
+end;
 
 procedure TSGTextStream.TextColor(const Color : TSGUInt8);
 begin

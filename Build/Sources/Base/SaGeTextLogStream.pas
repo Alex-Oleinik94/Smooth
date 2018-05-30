@@ -18,11 +18,22 @@ type
 		procedure Write(const StringToWrite : TSGString); override;
 		end;
 
+procedure SGKill( var TextStream : TSGTextLogStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
 	 SaGeLog
 	;
+
+procedure SGKill( var TextStream : TSGTextLogStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if TextStream <> nil then
+	begin
+	TextStream.Destroy();
+	TextStream := nil;
+	end;
+end;
 
 procedure TSGTextLogStream.WriteLn;
 begin

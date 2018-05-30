@@ -151,6 +151,7 @@ InternetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
 InternetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
 InternetConsoleCaller.AddComand(@SGConsoleInternetPacketRuntimeDumper, ['ipd', 'iprd'], 'Internet Packet Runtime Dumper');
 InternetConsoleCaller.AddComand(@SGConsoleDescriptPCapNG, ['dpcapng'], 'Descript PCapNG file');
+InternetConsoleCaller.AddComand(@SGConsoleConnectionsAnalyzer, ['ca'], 'Connections analyzer');
 end;
 
 //============================
