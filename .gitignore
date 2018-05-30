@@ -31,6 +31,7 @@ Log
 Binaries
 Data/Textures/*.sgia
 Data/Textures/*/*.sgia
+Data/Examples/6/*.jpg
 Data/Examples/13/*.jpg
 Data/Examples/13/*.smd
 Data/Examples/14/model.bin

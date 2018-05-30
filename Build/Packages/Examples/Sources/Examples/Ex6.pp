@@ -20,13 +20,11 @@ uses
 	,SaGeMaterial
 	,SaGeImage
 	,SaGeCamera
+	,SaGeFileUtils
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
 		{$ENDIF}
-	
-	,Ex6_D
-	,Ex6_N
 	;
 type
 	TSGExample6=class(TSGScreenedDrawable)
@@ -90,8 +88,8 @@ FMesh.LastObject().SetFaceTriangle(0,  0,  0,1,2);
 FMesh.LastObject().SetFaceTriangle(0,  1,  0,2,3);
 
 FMesh.AddMaterial ().Name := 'name';
-FMesh.LastMaterial().AddDiffuseMap('Ex6_D.jpg');
-FMesh.LastMaterial().AddBumpMap   ('Ex6_N.jpg');
+FMesh.LastMaterial().AddDiffuseMap(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
+FMesh.LastMaterial().AddBumpMap   (SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
 
 FMesh.LastObject().LastObjectFace()^.FMaterial := FMesh.IdentifyMaterial('name');
 

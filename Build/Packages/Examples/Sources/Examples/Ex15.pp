@@ -36,8 +36,6 @@ uses
 	,Ex5_Physics
 	,Ex13_Model
 	,Ex15_Shadow
-	,Ex6_D
-	,Ex6_N
 	;
 
 const
@@ -322,12 +320,12 @@ if Render.SupporedShaders() then
 		Screen, 'Количество моделей: ' + SGStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
 		FFont, [SGAnchRight], True, True);
 	
-	FStoneImageD := TSGImage.Create('Ex6_D.jpg');
+	FStoneImageD := TSGImage.Create(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
 	FStoneImageD.Context := Context;
 	FStoneImageD.Loading();
 	FStoneImageD.ToTextureWithBlock(FModel.TexturesBlock);
 	
-	FStoneImageB := TSGImage.Create('Ex6_N.jpg');
+	FStoneImageB := TSGImage.Create(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
 	FStoneImageB.Loading();
 	FStoneImageB.Context := Context;
 	FStoneImageB.ToTextureWithBlock(FModel.TexturesBlock);
