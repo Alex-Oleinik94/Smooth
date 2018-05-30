@@ -53,11 +53,14 @@ type
 		destructor Destroy(); override;
 			protected
 		FChunckList : TSGInternetPacketStorageList;
+		FHasData : TSGBoolean;
 			public
 		procedure Add(const Packet : TSGInternetPacket);
 		procedure Add(const _Time : TSGTime; const _Date : TSGDateTime; const _Packet : TSGEthernetPacketFrame);
 			protected
 		procedure AddNewChunck(const Packet : TSGInternetPacket);
+			public
+		property HasData : TSGBoolean read FHasData;
 		end;
 
 procedure SGKill(var Storage : TSGInternetPacketStorage);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -68,6 +71,7 @@ constructor TSGInternetPacketStorage.Create();
 begin
 inherited;
 FChunckList := nil;
+FHasData := False;
 end;
 
 destructor TSGInternetPacketStorage.Destroy();
@@ -108,6 +112,7 @@ else if FChunckList[High(FChunckList)]^.Length = SGInternetPacketStorageChunckLe
 	AddNewChunck(Packet)
 else if FChunckList[High(FChunckList)]^.Length < SGInternetPacketStorageChunckLength then
 	FChunckList[High(FChunckList)]^.Add(Packet);
+FHasData := True;
 end;
 
 procedure TSGInternetPacketStorage.Add(const _Time : TSGTime; const _Date : TSGDateTime; const _Packet : TSGEthernetPacketFrame);

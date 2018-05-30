@@ -10,6 +10,7 @@ uses
 	,SaGeDateTime
 	,SaGeEthernetPacketFrame
 	,SaGeInternetPacketStorage
+	,SaGeTextStream
 	
 	,Classes
 	;
@@ -25,6 +26,8 @@ type
 		FDateFirstPacket : TSGDateTime;
 		FPacketStorage : TSGInternetPacketStorage;
 		
+			public
+		procedure PrintTextInfo(const TextStream : TSGTextStream); virtual;
 			public
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
@@ -60,6 +63,10 @@ if Variable <> nil then
 	Variable.Destroy();
 	Variable := nil;
 	end;
+end;
+
+procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream);
+begin
 end;
 
 class function TSGInternetConnection.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;

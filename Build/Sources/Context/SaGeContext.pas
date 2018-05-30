@@ -751,7 +751,9 @@ if not VRenderClass.Suppored then
 	end;
 
 // NVidia enabling high perfomance
+{$IFDEF MSWINDOWS}
 //SGNVidiaSetDriverOptimusMode(SGNVidiaHighPerfomance);
+{$ENDIF}
 
 Context := VContextClass.Create();
 IContext := Context;

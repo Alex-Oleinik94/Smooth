@@ -51,6 +51,8 @@ uses
 	,SaGeTextStream
 	,SaGeBaseUtils
 	,SaGeStringUtils
+	
+	,StrMan
 	;
 
 var
@@ -113,8 +115,17 @@ end;
 procedure TSGInternetConnections.PrintStatistic(const TextTime : TSGString);
 
 procedure PrintConnectionsList(const TextStream : TSGTextStream);
+var
+	NumberCount : TSGMaxEnum;
+	Index : TSGMaxEnum;
 begin
-
+NumberCount := Length(SGStr(ConnectionsCount));
+for Index := 0 to High(FConnections) do
+	begin
+	TextStream.Write(['  ', StringJustifyRight(SGStr(Index + 1), NumberCount, ' '), ') ']);
+	FConnections[Index].PrintTextInfo(TextStream);
+	TextStream.WriteLn();
+	end;
 end;
 
 var
@@ -144,7 +155,7 @@ function TSGInternetConnections.HandleNewConnection(const ConnectionClass : TSGI
 var
 	NewConnection : TSGInternetConnection = nil;
 begin
-NewConnection := TSGInternetConnectionClass.Create();
+NewConnection := ConnectionClass.Create();
 Result := NewConnection.PacketPushed(Time, Date, Frame);
 if not Result then
 	SGKill(NewConnection)

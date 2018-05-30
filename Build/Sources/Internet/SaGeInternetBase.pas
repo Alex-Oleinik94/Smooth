@@ -115,6 +115,7 @@ type
 
 operator := (const AddressValue : TSGIPv4AddressValue) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator = (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const Address1, Address2 : TSGIPv4Address) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -881,6 +882,11 @@ end;
 operator := (const AddressValue : TSGIPv4AddressValue) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Address := AddressValue;
+end;
+
+operator = (const Address1, Address2 : TSGIPv4Address) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := Address1.Address = Address2.Address;
 end;
 
 operator = (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
