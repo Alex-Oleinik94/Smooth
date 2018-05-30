@@ -26,11 +26,14 @@ type
 			private
 		FCriticalSection : TSGCriticalSection;
 		FConnections : TSGInternetConnectionList;
+		
 		FOutPacketsSize : TSGUInt64;
 		FOutPacketsCount : TSGUInt64;
 		FComparablePacketsSize : TSGUInt64;
 		FComparablePacketsCount : TSGUInt64;
+		
 		FModeDataTransfer : TSGBoolean;
+		FModeDataDumper : TSGBoolean;
 		FModePacketStorage : TSGBoolean;
 			protected
 		procedure PrintStatistic(const TextTime : TSGString);
@@ -49,6 +52,7 @@ type
 		property ConnectionsCount : TSGMaxEnum read ConnectionsLength;
 		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
+		property ModeDataDumper : TSGBoolean read FModeDataDumper write FModeDataDumper;
 		end;
 
 procedure SGKill(var Connections : TSGInternetConnections); overload;
@@ -111,6 +115,7 @@ Connections.ProcessTimeOutUpdates := True;
 Connections.InfoTimeOut := 120;
 Connections.ModeDataTransfer := False;
 Connections.ModePacketStorage := True;
+Connections.ModeDataDumper := True;
 Connections.Loop();
 Connections.LogStatistic();
 SGKill(Connections);
@@ -158,7 +163,7 @@ end;
 begin
 TextStream.Clear();
 TextStream.TextColor(7);
-TextStream.WriteLn(['Connections (time:', TextTime, ') [', ConnectionsCount, ']', Iff(ConnectionsCount = 0, '.', ':')]);
+TextStream.WriteLn(['Connections (', TextTime, ') [', ConnectionsCount, ']', Iff(ConnectionsCount = 0, '.', ':')]);
 if ConnectionsCount <> 0 then
 	PrintConnectionsList(TextStream);
 if (FOutPacketsCount <> 0) or (FComparablePacketsCount <> 0) then
@@ -192,6 +197,7 @@ begin
 NewConnection := ConnectionClass.Create();
 NewConnection.ModeDataTransfer := FModeDataTransfer;
 NewConnection.ModePacketStorage := FModePacketStorage;
+NewConnection.ModeDataDumper := FModeDataDumper;
 
 IPv4Net := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Net'));
 IPv4Mask := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Mask'));
@@ -204,9 +210,11 @@ if not Result then
 else
 	begin
 	FCriticalSection.Enter();
+	
 	FConnections += NewConnection;
 	FComparablePacketsCount += 1;
 	FComparablePacketsSize += Frame.Size;
+	
 	FCriticalSection.Leave();
 	end;
 end;
@@ -276,12 +284,18 @@ FOutPacketsSize := 0;
 FOutPacketsCount := 0;
 FComparablePacketsCount := 0;
 FComparablePacketsSize := 0;
-FModePacketStorage := True;
+FModePacketStorage := False;
 FModeDataTransfer := True;
+FModeDataDumper := False;
 end;
 
 destructor TSGInternetConnections.Destroy();
+var
+	Index : TSGMaxEnum;
 begin
+if (FConnections <> nil) and (Length(FConnections) > 0) then
+	for Index := 0 to High(FConnections) do
+		SGKill(FConnections[Index]);
 SGKill(FCriticalSection);
 SGKill(FConnections);
 inherited;

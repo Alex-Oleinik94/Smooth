@@ -6,6 +6,7 @@ interface
 
 uses
 	 SaGeBase
+	,SaGeTextStream
 	
 	,Classes
 	;
@@ -118,8 +119,9 @@ operator = (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressV
 operator = (const Address1, Address2 : TSGIPv4Address) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGIPv4AddressView(const Address : TSGIPv4Address; const TextStream : TSGTextStream; const ColorNumber, ColorPoint : TSGUInt8); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure Swap(var Address1, Address2 : TSGIPv4Address); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -343,9 +345,12 @@ type
 		tpa : TSGIPv4Address;      // Target IP address
 		end;
 
+const
+	SG_TCP_BUFFER_SIZE = 2 * $10000;
 type
 	// TCP Sequence
 	TSGTcpSequence = TSGUInt32;
+	TSGTcpSequenceBuffer = PSGUInt8;
 	
 	// TCP header
 	PSGTCPHeader = ^ TSGTCPHeader;
@@ -913,7 +918,26 @@ Address1 := Address2;
 Address2 := Address;
 end;
 
-function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGIPv4AddressView(const Address : TSGIPv4Address; const TextStream : TSGTextStream; const ColorNumber, ColorPoint : TSGUInt8);
+begin
+TextStream.TextColor(ColorNumber);
+TextStream.Write(StringJustifyRight(SGStr(Address.AddressByte[0]), 3, ' '));
+TextStream.TextColor(ColorPoint);
+TextStream.Write('.');
+TextStream.TextColor(ColorNumber);
+TextStream.Write(StringJustifyRight(SGStr(Address.AddressByte[1]), 3, ' '));
+TextStream.TextColor(ColorPoint);
+TextStream.Write('.');
+TextStream.TextColor(ColorNumber);
+TextStream.Write(StringJustifyRight(SGStr(Address.AddressByte[2]), 3, ' '));
+TextStream.TextColor(ColorPoint);
+TextStream.Write('.');
+TextStream.TextColor(ColorNumber);
+TextStream.Write(StringJustifyRight(SGStr(Address.AddressByte[3]), 3, ' '));
+TextStream.TextColor(ColorPoint);
+end;
+
+function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := 0;
 if (Address <> '') and (StringWordCount(Address, '.') = 4) then
@@ -925,7 +949,7 @@ if (Address <> '') and (StringWordCount(Address, '.') = 4) then
 	end;
 end;
 
-function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := 
 	SGStr(Address.AddressByte[0]) + '.' +

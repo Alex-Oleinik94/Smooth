@@ -27,6 +27,7 @@ type
 		FPacketStorage : TSGInternetPacketStorage;
 		FModeDataTransfer : TSGBoolean;
 		FModePacketStorage : TSGBoolean;
+		FModeDataDumper : TSGBoolean;
 		
 		FTimeFirstPacket : TSGTime;
 		FDateFirstPacket : TSGDateTime;
@@ -52,6 +53,7 @@ type
 		property DateFirstPacket : TSGDateTime read FDateFirstPacket;
 		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
+		property ModeDataDumper : TSGBoolean read FModeDataDumper write FModeDataDumper;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -112,8 +114,9 @@ FPacketStorage := TSGInternetPacketStorage.Create();
 FCritacalSection := TSGCriticalSection.Create();
 FDeviceIPv4Supported := False;
 FSecondsMeansConnectionActive := 10;
-FModePacketStorage := True;
+FModePacketStorage := False;
 FModeDataTransfer := True;
+FModeDataDumper := False;
 end;
 
 destructor TSGInternetConnection.Destroy();

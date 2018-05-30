@@ -26,12 +26,16 @@ type
 		FSourcePort, FDestinationPort : TSGUInt16;
 		FSourceAddress, FDestinationAddress : TSGIPv4Address;
 		FActive : TSGBoolean;
+		
+		FBuffer : TSGTcpSequenceBuffer;
+		FAcknowledgement : TSGTcpSequence;
 			public
 		procedure PrintTextInfo(const TextStream : TSGTextStream); override;
 			protected
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		procedure HandlePacket(const Packet : TSGEthernetPacketFrame);
+		procedure PutData(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 			public
 		procedure HandleData(const Stream : TStream); virtual;
 		function HasData() : TSGBoolean; virtual;
@@ -45,11 +49,18 @@ uses
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeLog
+	
+	,StrMan
 	;
+
+procedure TSGInternetConnectionTCP.PutData(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
+begin
+
+end;
 
 procedure TSGInternetConnectionTCP.HandlePacket(const Packet : TSGEthernetPacketFrame);
 begin
-// todo: data transfer mode
+// todo: data transfer/dumper mode
 end;
 
 procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream);
@@ -57,7 +68,8 @@ const
 	ColorPort = 11;
 	ColorSize = 6;
 	ColorBigSize = 14;
-	ColorAddress = 13;
+	ColorAddressNumber = 13;
+	ColorAddressPoint = 15;
 	ColorText = 7;
 	ColorActiveProtocol = 10;
 	ColorActive5secProtocol = 2;
@@ -77,43 +89,40 @@ if FDeviceIPv4Supported then
 	TextStream.TextColor(ColorText);
 	TextStream.Write('Port:');
 	TextStream.TextColor(ColorPort);
-	TextStream.Write([FSourcePort]);
+	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
 	TextStream.Write(';Address:');
-	TextStream.TextColor(ColorAddress);
-	TextStream.Write(SGIPv4AddressToString(FDestinationAddress));
+	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
 	TextStream.Write(';DPort:');
 	TextStream.TextColor(ColorPort);
-	TextStream.Write([FDestinationPort]);
+	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end
 else
 	begin
 	TextStream.TextColor(ColorText);
 	TextStream.Write('sa:');
-	TextStream.TextColor(ColorAddress);
-	TextStream.Write(SGIPv4AddressToString(FSourceAddress));
+	SGIPv4AddressView(FSourceAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
 	TextStream.Write('sp:');
 	TextStream.TextColor(ColorPort);
-	TextStream.Write([FSourcePort]);
+	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
 	TextStream.Write('da:');
-	TextStream.TextColor(ColorAddress);
-	TextStream.Write(SGIPv4AddressToString(FDestinationAddress));
+	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
 	TextStream.Write('dp:');
 	TextStream.TextColor(ColorPort);
-	TextStream.Write([FDestinationPort]);
+	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end;
 TextStream.TextColor(ColorText);
 TextStream.Write(';Size:');
-if FDataSize > 1024 * 700 then
+if FDataSize > 1024 * 400 then
 	TextStream.TextColor(ColorBigSize)
 else
 	TextStream.TextColor(ColorSize);
@@ -175,7 +184,7 @@ if Result then
 		FActive := False
 	else
 		FActive := True;
-	if FModeDataTransfer then
+	if FModeDataTransfer or FModeDataDumper then
 		HandlePacket(Packet);
 	if FModePacketStorage then
 		FPacketStorage.Add(Time, Date, Packet)
@@ -193,10 +202,18 @@ FSourcePort := 0;
 FDestinationAddress := 0;
 FDestinationPort := 0;
 FActive := False;
+FAcknowledgement := 0;
+FBuffer := GetMem(SG_TCP_BUFFER_SIZE);
+FillChar(FBuffer^, SG_TCP_BUFFER_SIZE, 0);
 end;
 
 destructor TSGInternetConnectionTCP.Destroy();
 begin
+if FBuffer <> nil then
+	begin
+	FreeMem(FBuffer, SG_TCP_BUFFER_SIZE);
+	FBuffer := nil;
+	end;
 inherited;
 end;
 
