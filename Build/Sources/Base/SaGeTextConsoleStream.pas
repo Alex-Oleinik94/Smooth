@@ -17,6 +17,7 @@ type
 		procedure WriteLn(); override;
 		procedure Write(const StringToWrite : TSGString); override;
 		procedure TextColor(const Color : TSGUInt8); override;
+		procedure Clear(); override;
 		end;
 
 procedure SGKill( var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -35,6 +36,11 @@ if TextStream <> nil then
 	TextStream.Destroy();
 	TextStream := nil;
 	end;
+end;
+
+procedure TSGTextConsoleStream.Clear();
+begin
+Crt.ClrScr();
 end;
 
 procedure TSGTextConsoleStream.TextColor(const Color : TSGUInt8);

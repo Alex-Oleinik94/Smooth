@@ -56,6 +56,7 @@ type
 		function AllDataSize() : TSGUInt64;
 		function FindDevice(const DeviceName : TSGString) : PSGInternetPacketCaptureHandlerDeviceData;
 		function FindDevice(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator) : PSGInternetPacketCaptureHandlerDeviceData;
+		function FindDeviceOption(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const OptionName : TSGString) : TSGString;
 		function AddDevice(const DeviceData : TSGInternetPacketCaptorDeviceData) : PSGInternetPacketCaptureHandlerDeviceData;
 		procedure WriteConsoleString(const Str : TSGString);
 			protected
@@ -181,6 +182,22 @@ if Device <> nil then
 		end
 	else
 		Device^.CountDefectivePackets += 1;
+end;
+
+function TSGInternetPacketCaptureHandler.FindDeviceOption(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const OptionName : TSGString) : TSGString;
+var
+	Device : PSGInternetPacketCaptureHandlerDeviceData = nil;
+	Index : TSGMaxEnum;
+begin
+Result := '';
+Device := FindDevice(DeviceIdentificator);
+if (Device <> nil) and (Device^.AdditionalOptions <> nil) and (Length(Device^.AdditionalOptions) > 0) then
+	for Index := 0 to High(Device^.AdditionalOptions) do
+		if Device^.AdditionalOptions[Index][0] = OptionName then
+			begin
+			Result := Device^.AdditionalOptions[Index][1];
+			break;
+			end;
 end;
 
 function TSGInternetPacketCaptureHandler.FindDevice(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator) : PSGInternetPacketCaptureHandlerDeviceData;

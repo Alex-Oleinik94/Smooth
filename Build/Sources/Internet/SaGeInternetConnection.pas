@@ -11,6 +11,8 @@ uses
 	,SaGeEthernetPacketFrame
 	,SaGeInternetPacketStorage
 	,SaGeTextStream
+	,SaGeInternetBase
+	,SaGeCriticalSection
 	
 	,Classes
 	;
@@ -20,21 +22,36 @@ type
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
-			private
-		FDataSize : TSGInternetConnectionSizeInt;
+			protected
+		FCritacalSection : TSGCriticalSection;
+		FPacketStorage : TSGInternetPacketStorage;
+		FModeDataTransfer : TSGBoolean;
+		FModePacketStorage : TSGBoolean;
+		
 		FTimeFirstPacket : TSGTime;
 		FDateFirstPacket : TSGDateTime;
-		FPacketStorage : TSGInternetPacketStorage;
+		FTimeLastPacket : TSGTime;
+		FDateLastPacket : TSGDateTime;
+		FSecondsMeansConnectionActive : TSGUInt16;
 		
+		FDataSize : TSGInternetConnectionSizeInt;
+		FPacketCount : TSGInternetConnectionSizeInt;
+		
+		FDeviceIPv4Supported : TSGBoolean;
+		FDeviceIPv4Net  : TSGIPv4Address;
+		FDeviceIPv4Mask : TSGIPv4Address;
 			public
 		procedure PrintTextInfo(const TextStream : TSGTextStream); virtual;
 			public
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
+		procedure AddDeviceIPv4(const Net, Mask : TSGIPv4Address); virtual;
 			public
 		property DataSize : TSGInternetConnectionSizeInt read FDataSize;
 		property TimeFirstPacket : TSGTime read FTimeFirstPacket;
 		property DateFirstPacket : TSGDateTime read FDateFirstPacket;
+		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;
+		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -65,6 +82,13 @@ if Variable <> nil then
 	end;
 end;
 
+procedure TSGInternetConnection.AddDeviceIPv4(const Net, Mask : TSGIPv4Address);
+begin
+FDeviceIPv4Supported := True;
+FDeviceIPv4Net  := Net;
+FDeviceIPv4Mask := Mask;
+end;
+
 procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream);
 begin
 end;
@@ -83,11 +107,18 @@ constructor TSGInternetConnection.Create();
 begin
 inherited;
 FDataSize := 0;
-FPacketStorage := nil;
+FPacketCount := 0;
+FPacketStorage := TSGInternetPacketStorage.Create();
+FCritacalSection := TSGCriticalSection.Create();
+FDeviceIPv4Supported := False;
+FSecondsMeansConnectionActive := 10;
+FModePacketStorage := True;
+FModeDataTransfer := True;
 end;
 
 destructor TSGInternetConnection.Destroy();
 begin
+SGKill(FCritacalSection);
 SGKill(FPacketStorage);
 inherited;
 end;

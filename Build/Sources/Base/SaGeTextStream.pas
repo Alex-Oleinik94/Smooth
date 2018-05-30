@@ -21,7 +21,8 @@ type
 		procedure Write(const StringToWrite : TSGString); virtual; abstract; overload;
 		procedure Write(const Value : TSGUInt32); virtual; overload;
 		procedure Write(const ValuesToWrite : array of const); virtual; overload;
-		procedure TextColor(const Color : TSGUInt8); virtual; overload; // not abstract becouse may be not suported
+		procedure TextColor(const Color : TSGUInt8); virtual; // not abstract becouse may be not suported
+		procedure Clear(); virtual; // not abstract becouse may be not suported
 			public
 		procedure WriteLines(const Strings : TSGStringList); virtual; overload;
 		procedure WriteLines(const Stream : TStream); virtual; overload;
@@ -54,6 +55,10 @@ if TextStream <> nil then
 end;
 
 procedure TSGTextStream.TextColor(const Color : TSGUInt8);
+begin
+end;
+
+procedure TSGTextStream.Clear();
 begin
 end;
 

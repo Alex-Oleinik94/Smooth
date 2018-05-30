@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	
 	,Classes
+	,SysUtils
 	;
 const
 	SGLogExtension = 'log';
@@ -28,8 +29,10 @@ type
 		FStream : TStream;
 		FFileName : TSGString;
 			public
-		property FileName : TSGString read FFileName;
-		property Stream   : TStream read FStream;
+		CriticalSection : TRTLCriticalSection;
+			public
+		property FileName        : TSGString           read FFileName;
+		property Stream          : TStream             read FStream;
 		end;
 	PSGLogStream = ^ TSGLogStream;
 
@@ -79,6 +82,7 @@ end;
 
 destructor TSGLogStream.Destroy();
 begin
+DoneCriticalSection(CriticalSection);
 SGKill(FStream);
 FillChar(Self, SizeOf(TSGLogStream), 0);
 end;
@@ -92,6 +96,7 @@ if SGLogEnable then
 	FStream := TFileStream.Create(FFileName, fmCreate)
 else
 	FStream := nil;
+InitCriticalSection(CriticalSection);
 end;
 
 function SGCreateLog(const FileName : TSGString) : TSGBoolean;
@@ -109,6 +114,7 @@ procedure SGKillLog();
 begin
 if SGLogEnable and (Log <> nil) then
 	begin
+	Log^.Destroy();
 	FreeMem(Log);
 	Log := nil;
 	end;
@@ -134,7 +140,9 @@ begin
 if SGLogEnable then
 	begin
 	SGMakeLog();
+	EnterCriticalSection(Log^.CriticalSection);
 	SGWriteStringToStream(StrintToWrite, Log^.Stream, False);
+	LeaveCriticalSection(Log^.CriticalSection);
 	end;
 end;
 
@@ -143,7 +151,9 @@ begin
 if SGLogEnable then
 	begin
 	SGMakeLog();
+	EnterCriticalSection(Log^.CriticalSection);
 	SGWriteStringToStream(StrintToWrite + SGWinEoln, Log^.Stream, False);
+	LeaveCriticalSection(Log^.CriticalSection);
 	end;
 end;
 

@@ -119,6 +119,9 @@ operator = (const Address1, Address2 : TSGIPv4Address) : TSGBoolean; overload; {
 operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure Swap(var Address1, Address2 : TSGIPv4Address); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // IPv4 header
 const
@@ -433,6 +436,8 @@ uses
 	 SaGeBaseUtils
 	,SaGeStreamUtils
 	,SaGeStringUtils
+	
+	,StrMan
 	;
 
 procedure SGProtocolOptions(const Source : TSGProtocolOptions; const Destination : TStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -897,6 +902,27 @@ end;
 operator <> (const Address : TSGIPv4Address; const AddressValue : TSGIPv4AddressValue) : TSGBoolean; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := Address.Address <> AddressValue;
+end;
+
+procedure Swap(var Address1, Address2 : TSGIPv4Address); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Address : TSGIPv4Address;
+begin
+Address := Address1;
+Address1 := Address2;
+Address2 := Address;
+end;
+
+function SGIPv4StringToAddress(const Address : TSGString) : TSGIPv4Address; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := 0;
+if (Address <> '') and (StringWordCount(Address, '.') = 4) then
+	begin
+	Result.AddressByte[0] := SGVal(StringWordGet(Address, '.' ,1));
+	Result.AddressByte[1] := SGVal(StringWordGet(Address, '.' ,2));
+	Result.AddressByte[2] := SGVal(StringWordGet(Address, '.' ,3));
+	Result.AddressByte[3] := SGVal(StringWordGet(Address, '.' ,4));
+	end;
 end;
 
 function SGIPv4AddressToString(const Address : TSGIPv4Address) : TSGString; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
