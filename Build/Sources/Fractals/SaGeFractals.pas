@@ -143,6 +143,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeScreenHelper
 	;
 
 procedure TSG3DFractal.DeleteDeviceResources();
@@ -205,13 +206,8 @@ end;
 
 procedure TSG3DFractal.InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 begin
-FSizeLabel:=TSGLabel.Create;
-Screen.CreateChild(FSizeLabel);
-Screen.LastChild.SetBounds(a,b,c,d);
-Screen.LastChild.Anchors:=Anch;
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-FSizeLabel.TextPosition:=False;
+FSizeLabel := SGCreateLabel(Screen, '', False, a,b,c,d, Anch, True);
+FSizeLabel.FUserPointer1:=Self;
 end;
 
 procedure TSG3DFractal.InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);

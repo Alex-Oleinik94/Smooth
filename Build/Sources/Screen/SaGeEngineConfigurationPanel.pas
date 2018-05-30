@@ -48,6 +48,7 @@ uses
 	,SaGeVersion
 	,SaGeRenderBase
 	,SaGeScreenBase
+	,SaGeScreenHelper
 	
 	,Classes
 	
@@ -177,15 +178,8 @@ Visible := True;
 
 FFPS := nil;
 
-FCaptionLabel := TSGLabel.Create();
-CreateChild(FCaptionLabel);
-FCaptionLabel.Caption := 'SaGe Engine Configuration (' + SGVerCPU + ' bit)';
-FCaptionLabel.Visible := True;
-
-FVersionLabel := TSGLabel.Create();
-CreateChild(FVersionLabel);
-FVersionLabel.Caption := 'Version: ' + SGEngineVersion();
-FVersionLabel.Visible := True;
+FCaptionLabel := SGCreateLabel(Self, 'SaGe Engine Configuration (' + SGVerCPU + ' bit)', True);
+FVersionLabel := SGCreateLabel(Self, 'Version: ' + SGEngineVersion(), True);
 
 FContextsComboBox := TSGComboBox.Create();
 CreateChild(FContextsComboBox);

@@ -28,8 +28,8 @@ type
 		packed array of
 			TSGKillerArrayType;
 const
-	TSGKillerStringWin = 'Ты выиграл!!!';
-	TSGKillerStringLose = 'Ты проиграл...';
+	SGKillerStringWin = 'Ты выиграл!!!';
+	SGKillerStringLose = 'Ты проиграл...';
 type
 	TSGKiller=class(TSGScreenedDrawable)
 			public
@@ -118,6 +118,7 @@ uses
 	,SaGeMathUtils
 	,SaGeCommon
 	,SaGeBaseUtils
+	,SaGeScreenHelper
 	;
 
 {$OVERFLOWCHECKS OFF}
@@ -435,23 +436,12 @@ Screen.LastChild.AsComboBox.SelectItem:=2;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FTimerLabel:=TSGLabel.Create;
-Screen.CreateChild(FTimerLabel);
-Screen.LastChild.SetBounds(10,Context.Height-25,Context.Width div 2,20);
-Screen.LastChild.Anchors:=[SGAnchBottom];
-Screen.LastChild.Caption:='';
-Screen.LastChild.Visible:=True;
-Screen.LastChild.AsLabel.TextPosition:=False;
-Screen.LastChild.FUserPointer1:=Self;
+FTimerLabel := SGCreateLabel(Screen, '', False, 10,Context.Height-25,Context.Width div 2,20, [SGAnchBottom], True);
+FTimerLabel.FUserPointer1:=Self;
 FTimerLabel.TextColor.Import(0,0,0,1);
 
-FLabebYouLose:=TSGLabel.Create;
-Screen.CreateChild(FLabebYouLose);
-Screen.LastChild.SetBounds(5,Context.Height div 2 - 15,Context.Width-10,30);
-Screen.LastChild.Anchors:=[SGAnchBottom];
-Screen.LastChild.Caption:=TSGKillerStringLose;
-Screen.LastChild.Visible:=False;
-Screen.LastChild.FUserPointer1:=Self;
+FLabebYouLose := SGCreateLabel(Screen, SGKillerStringLose, 5,Context.Height div 2 - 15,Context.Width-10,30, [SGAnchBottom], False);
+FLabebYouLose.FUserPointer1:=Self;
 FLabebYouLose.TextColor.Import(0,0,0,1);
 
 InitGame;
@@ -602,7 +592,7 @@ FLabebYouLose.VisibleTimer:=0;
 FBulletDataTime2.Get;
 FVictory:=False;
 
-FLabebYouLose.Caption:=TSGKillerStringLose;
+FLabebYouLose.Caption:=SGKillerStringLose;
 FTimerLabel.Caption:='0 сек';
 MayByVictory;
 FDTInterval:=0;
@@ -910,7 +900,7 @@ FVictory:= not FVictory;
 if FVictory then
 	FActive:=False;
 if FVictory then
-	FLabebYouLose.Caption:=TSGKillerStringWin;
+	FLabebYouLose.Caption:=SGKillerStringWin;
 end;
 
 function TSGKiller.IsBulletKillZombie(const Bullet:TSGVertex2f;const Zombie:LongWord):Boolean;

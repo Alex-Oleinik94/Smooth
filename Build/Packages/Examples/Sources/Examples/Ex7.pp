@@ -21,6 +21,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeScreenHelper
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
@@ -219,12 +220,7 @@ FPanelStart.Visible := True;
 FPanelStart.Active := True;
 FPanelStart.Skin := FPanelStart.Skin.CreateDependentSkinWithAnotherFont(FFont);
 
-FPanelStart.CreateChild(TSGLabel.Create());
-FPanelStart.LastChild.SetBounds(5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2);
-FPanelStart.LastChild.BoundsToNeedBounds();
-FPanelStart.LastChild.Caption := '¬ведите функцию f(x)';
-FPanelStart.LastChild.Visible:=True;
-FPanelStart.LastChild.Active:=True;
+SGCreateLabel(FPanelStart, '¬ведите функцию f(x)', 5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2, True, True);
 
 FFunctionEdit:=TSGEdit.Create();
 FPanelStart.CreateChild(FFunctionEdit);
@@ -238,12 +234,7 @@ FFunctionEdit.TextType:=SGEditTypeUser;
 FFunctionEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFFunctionEditTextTupeFunction);
 mmmFFunctionEditTextTupeFunction(FFunctionEdit);
 
-FPanelStart.CreateChild(TSGLabel.Create());
-FPanelStart.LastChild.SetBounds(5,5+(FFont.FontHeight+4)*2,FPanelStart.Width - 12,FFont.FontHeight+4);
-FPanelStart.LastChild.BoundsToNeedBounds();
-FPanelStart.LastChild.Caption := '¬ведите количество точек';
-FPanelStart.LastChild.Visible:=True;
-FPanelStart.LastChild.Active:=True;
+SGCreateLabel(FPanelStart, '¬ведите количество точек', 5,5+(FFont.FontHeight+4)*2,FPanelStart.Width - 12,FFont.FontHeight+4, True, True);
 
 FNumberEdit:=TSGEdit.Create();
 FPanelStart.CreateChild(FNumberEdit);
@@ -257,12 +248,7 @@ FNumberEdit.TextType:=SGEditTypeUser;
 FNumberEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFNumberEditTextTupeFunction);
 mmmFNumberEditTextTupeFunction(FNumberEdit);
 
-FPanelStart.CreateChild(TSGLabel.Create());
-FPanelStart.LastChild.SetBounds(5,5+(FFont.FontHeight+4)*4,FPanelStart.Width - 12,FFont.FontHeight+4);
-FPanelStart.LastChild.BoundsToNeedBounds();
-FPanelStart.LastChild.Caption := '¬ведите отрезок';
-FPanelStart.LastChild.Visible:=True;
-FPanelStart.LastChild.Active:=True;
+SGCreateLabel(FPanelStart, '¬ведите отрезок', 5,5+(FFont.FontHeight+4)*4,FPanelStart.Width - 12,FFont.FontHeight+4, True, True);
 
 FNumberAEdit:=TSGEdit.Create();
 FPanelStart.CreateChild(FNumberAEdit);

@@ -22,6 +22,7 @@ uses
 	,SaGeFileUtils
 	,SaGeFPSViewer
 	,SaGeCamera
+	,SaGeScreenHelper
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase
@@ -305,14 +306,9 @@ if Render.SupporedShaders() then
 	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
 	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
-	FCountLabel := TSGLabel.Create();
-	Screen.CreateChild(FCountLabel);
-	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
-	Screen.LastChild.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
-	Screen.LastChild.SetBounds(Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3);
-	Screen.LastChild.BoundsToNeedBounds();
-	Screen.LastChild.Visible := True;
-	Screen.LastChild.Anchors:=[SGAnchRight];
+	FCountLabel := SGCreateLabel(
+		Screen, 'Количество моделей: ' + SGStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
+		FFont, [SGAnchRight], True, True);
 	end;
 end;
 
