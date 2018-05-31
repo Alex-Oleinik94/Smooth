@@ -27,6 +27,7 @@ type
 		procedure ExportInfo(const Stream : TSGTextFileStream); override;
 		function Size() : TSGEthernetPacketFrameSize; override;
 		function SizeEncapsulated() : TSGEthernetPacketFrameSize;
+		function Description() : TSGString; override;
 			protected
 		class function ProtocolClass(const ProtocolValue : TSGEnthernetProtocol) : TSGEthernetPacketProtocolFrameClass;
 			public
@@ -90,6 +91,13 @@ end;
 // ==================================
 // ======TSGEthernetPacketFrame======
 // ==================================
+
+function TSGEthernetPacketFrame.Description() : TSGString;
+begin
+Result := SGEthernetProtocolToString(FEthernetPacketHeader.Protocol);
+if IPv4 <> nil then
+	Result += ', ' + SGInternetProtocolToString(IPv4^.Protocol);
+end;
 
 function TSGEthernetPacketFrame.SizeEncapsulated() : TSGEthernetPacketFrameSize;
 begin

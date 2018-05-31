@@ -44,6 +44,7 @@ type
 		procedure ExportInfo(const Stream : TSGTextFileStream); virtual; abstract;
 		function Size() : TSGEthernetPacketFrameSize; virtual;
 		function Data() : TSGEthernetPacketFrameStream; virtual;
+		function Description() : TSGString; virtual;
 			public
 		class procedure KillProtocol(var Protocol : TSGEthernetPacketProtocolFrame);
 		class function ReadProtocolClass(
@@ -75,6 +76,11 @@ uses
 // ============================
 // =TSGEthernetPacketDataFrame=
 // ============================
+
+function TSGEthernetPacketDataFrame.Description() : TSGString;
+begin
+Result := '';
+end;
 
 function TSGEthernetPacketDataFrame.Data() : TSGEthernetPacketFrameStream;
 begin

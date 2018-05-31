@@ -31,6 +31,7 @@ type
 		property EthernetFrame : TSGEthernetPacketFrame read FEthernetFrame;
 		end;
 
+function SGPacketDescription(const Stream : TStream) : TSGString;
 procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);
 procedure SGKill(var Variable : TSGInternetPacketDeterminer);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
@@ -43,6 +44,18 @@ if Variable <> nil then
 	Variable.Destroy();
 	Variable := nil;
 	end;
+end;
+
+function SGPacketDescription(const Stream : TStream) : TSGString;
+var
+	Frame : TSGEthernetPacketFrame;
+begin
+Frame := TSGEthernetPacketFrame.Create();
+Stream.Position := 0;
+Frame.Read(Stream, Stream.Size);
+Stream.Position := 0;
+Result := Frame.Description;
+SGKill(Frame);
 end;
 
 procedure SGWritePacketInfo(const Stream : TSGTextFileStream; const Packet : TStream; const DestroyPacketStreamAfter : TSGBoolean = True);

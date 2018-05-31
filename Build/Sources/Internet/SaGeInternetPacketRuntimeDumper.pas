@@ -48,6 +48,7 @@ uses
 	,SaGeInternetPacketDeterminer
 	,SaGeTextFileStream
 	,SaGeTextConsoleStream
+	,SaGeBaseUtils
 	;
 
 // ==========================================
@@ -104,7 +105,7 @@ procedure TSGInternetPacketRuntimeDumper.ExportPacketInfoToFile(const DateTimeSt
 var
 	TextFile : TSGTextFileStream = nil;
 begin
-TextFile := TSGTextFileStream.Create(SGFreeFileName(FileNameWithOutExtension + FPacketInfoFileExtension, ''));
+TextFile := TSGTextFileStream.Create(SGFreeFileName(FileNameWithOutExtension + Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension, ''), ''));
 TextFile.WriteLn('[packet]');
 TextFile.WriteLn(['DataTime=', DateTimeString]);
 TextFile.WriteLn(['Size=', Stream.Size]);
@@ -118,11 +119,20 @@ end;
 procedure TSGInternetPacketRuntimeDumper.DumpPacketData(const Directory : TSGString; const Stream : TStream; const Time : TSGTime);
 var
 	DateTimeString : TSGString;
+	Description : TSGString;
 	FileNameWithOutExtension : TSGString;
+	FileName : TSGString;
+	DataFileName : TSGString;
 begin
 DateTimeString := SGDateTimeCorrectionString(Time, True);
-FileNameWithOutExtension := Directory + DirectorySeparator + DateTimeString + '.';
-DumpPacketDataToFile(SGFreeFileName(FileNameWithOutExtension + FPacketDataFileExtension, ''), Stream);
+FileNameWithOutExtension := Directory + DirectorySeparator + DateTimeString;
+Description := SGPacketDescription(Stream);
+if Description <> '' then
+	FileNameWithOutExtension += ' (' + Description + ')';
+FileName := FileNameWithOutExtension + Iff(FPacketDataFileExtension <> '', '.' + FPacketDataFileExtension, '');
+DataFileName := SGFreeFileName(FileName, '');
+
+DumpPacketDataToFile(DataFileName, Stream);
 ExportPacketInfoToFile(DateTimeString, FileNameWithOutExtension, Stream);
 end;
 

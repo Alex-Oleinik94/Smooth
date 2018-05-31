@@ -39,6 +39,9 @@ type
 		
 		// Dump modes
 		FDumpDirectory : TSGString;
+		FOutDumpDirectory : TSGString;
+		FPacketDataFileExtension : TSGString;
+		FPacketInfoFileExtension : TSGString;
 			public
 		procedure Loop(); override;
 			protected
@@ -47,6 +50,7 @@ type
 		procedure LogStatistic();
 		function ConnectionsLength() : TSGMaxEnum;
 		procedure CreateDumpDirectory();
+		procedure DumpOutPacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
 			protected
 		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
 		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
@@ -75,7 +79,9 @@ uses
 	,SaGeTextLogStream
 	,SaGeBaseUtils
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	,SaGeFileUtils
+	,SaGeTextFileStream
 	
 	,StrMan
 	;
@@ -135,6 +141,40 @@ end;
 // ======TSGInternetConnections======
 // ==================================
 
+procedure TSGInternetConnections.DumpOutPacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
+var
+	DateTimeString : TSGString;
+	FileName : TSGString;
+	Description : TSGString;
+	FileNameInfo : TSGString;
+	FileNameData : TSGString;
+	TextStream : TSGTextFileStream = nil;
+	FileStream : TFileStream = nil;
+begin
+DateTimeString := SGDateTimeCorrectionString(Date, Time, True);
+FileName := FOutDumpDirectory + DirectorySeparator + DateTimeString + ' {' + SGStr(FOutPacketsCount) + '}';
+Description := Packet.Description;
+if Description <> '' then
+	FileName += ' (' + Description + ')';
+FileNameInfo := FileName + Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension, '');
+FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketDataFileExtension, '');
+
+TextStream := TSGTextFileStream.Create(FileNameInfo);
+TextStream.WriteLn('[packet]');
+TextStream.WriteLn(['DataTime=', SGDateTimeCorrectionString(Date, Time, False)]);
+TextStream.WriteLn(['Size=', Stream.Size]);
+TextStream.WriteLn();
+Packet.ExportInfo(TextStream);
+SGKill(TextStream);
+
+FileStream := TFileStream.Create(FileNameData, fmCreate);
+Stream.Position := 0;
+SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
+SGKill(FileStream);
+
+Stream.Position := 0;
+end;
+
 procedure TSGInternetConnections.Loop();
 begin
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
@@ -144,8 +184,14 @@ end;
 
 procedure TSGInternetConnections.CreateDumpDirectory();
 begin
-FDumpDirectory := 'Connections analyzer ' + SGDateTimeString(True);
-SGMakeDirectory(FDumpDirectory);
+if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+	begin
+	FDumpDirectory := 'Connections analyzer ' + SGDateTimeString(True);
+	SGMakeDirectory(FDumpDirectory);
+	
+	FOutDumpDirectory := FDumpDirectory + DirectorySeparator + 'Out packets';
+	SGMakeDirectory(FOutDumpDirectory);
+	end;
 end;
 
 function TSGInternetConnections.ConnectionsLength() : TSGMaxEnum;
@@ -295,9 +341,12 @@ Frame.Read(Stream, Stream.Size);
 if not HandlePacketConnections(Identificator, Frame, Date, Time) then
 	if not HandlePacketNewConnections(Identificator, Frame, Date, Time) then
 		begin
-		SGKill(Frame);
 		FOutPacketsSize += Stream.Size;
 		FOutPacketsCount += 1;
+		
+		if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+			DumpOutPacket(Date, Time, Frame, Stream);
+		SGKill(Frame);
 		end;
 end;
 
@@ -315,6 +364,9 @@ FModeDataTransfer := True;
 FModeRuntimeDataDumper := False;
 FModeRuntimePacketDumper := False;
 FDumpDirectory := '';
+FOutDumpDirectory := '';
+FPacketDataFileExtension := 'ipdpd';
+FPacketInfoFileExtension := 'ini';
 end;
 
 destructor TSGInternetConnections.Destroy();
