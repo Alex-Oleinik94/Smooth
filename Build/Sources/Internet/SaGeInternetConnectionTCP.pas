@@ -89,7 +89,7 @@ const
 	ColorText = 7;
 	ColorActiveProtocol = 10;
 	ColorActive5secProtocol = 2;
-	ColorFinalizedProtocol = 12;
+	ColorFinalizedProtocol = 4; {12}
 begin
 if (not FFinalized) then
 	if (SGNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
@@ -163,7 +163,7 @@ FSourcePort := Packet.TCPIP^.SourcePort;
 FDestinationPort := Packet.TCPIP^.DestinationPort;
 FSourceAddress := Packet.IPv4^.Source;
 FDestinationAddress := Packet.IPv4^.Destination;
-FFirstPacketIsSelfSender := not (FDeviceIPv4Mask.Address and FDestinationAddress.Address) = FDeviceIPv4Net.Address;
+FFirstPacketIsSelfSender := not ((FDeviceIPv4Mask.Address and FDestinationAddress.Address) = FDeviceIPv4Net.Address);
 
 if FDeviceIPv4Supported and (not FFirstPacketIsSelfSender) then
 	begin
@@ -210,8 +210,9 @@ if FModeDataTransfer or FModeRuntimeDataDumper then
 if FModeRuntimePacketDumper then
 	DumpPacket(Time, Date, Packet);
 if FModePacketStorage then
-	FPacketStorage.Add(Time, Date, Packet)
-else
+	FPacketStorage.Add(Time, Date, Packet);
+
+if not FModePacketStorage then
 	Packet.Destroy();
 end;
 

@@ -50,6 +50,8 @@ type
 		procedure LogStatistic();
 		function ConnectionsLength() : TSGMaxEnum;
 		procedure CreateDumpDirectory();
+		procedure PutConnectionModesInfo(const Connection : TSGInternetConnection);
+		procedure PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
 		procedure DumpOutPacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
 			protected
 		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
@@ -129,7 +131,7 @@ Connections.PossibilityBreakLoopFromConsole := True;
 Connections.ProcessTimeOutUpdates := True;
 Connections.InfoTimeOut := 120;
 Connections.ModeDataTransfer := False;
-Connections.ModePacketStorage := True;
+Connections.ModePacketStorage := False;
 Connections.ModeRuntimeDataDumper := True;
 Connections.ModeRuntimePacketDumper := True;
 Connections.Loop();
@@ -218,7 +220,6 @@ var
 	NumberCount : TSGMaxEnum;
 	Index : TSGMaxEnum;
 begin
-FCriticalSection.Enter();
 NumberCount := Length(SGStr(ConnectionsCount));
 for Index := 0 to High(FConnections) do
 	begin
@@ -226,7 +227,6 @@ for Index := 0 to High(FConnections) do
 	FConnections[Index].PrintTextInfo(TextStream);
 	TextStream.WriteLn();
 	end;
-FCriticalSection.Leave();
 end;
 
 begin
@@ -258,24 +258,36 @@ procedure TSGInternetConnections.HandleDevice(const Identificator : TSGInternetP
 begin
 end;
 
-function TSGInternetConnections.HandleNewConnection(const ConnectionClass : TSGInternetConnectionClass; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+procedure TSGInternetConnections.PutConnectionModesInfo(const Connection : TSGInternetConnection);
+begin
+Connection.ModeDataTransfer := FModeDataTransfer;
+Connection.ModePacketStorage := FModePacketStorage;
+Connection.ModeRuntimeDataDumper := FModeRuntimeDataDumper;
+Connection.ModeRuntimePacketDumper := FModeRuntimePacketDumper;
+if FModeRuntimePacketDumper or FModeRuntimeDataDumper then
+	Connection.DumpDirectory := FDumpDirectory;
+end;
+
+procedure TSGInternetConnections.PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
 var
-	NewConnection : TSGInternetConnection = nil;
 	IPv4Net, IPv4Mask : TSGIPv4Address;
 begin
-NewConnection := ConnectionClass.Create();
-NewConnection.ModeDataTransfer := FModeDataTransfer;
-NewConnection.ModePacketStorage := FModePacketStorage;
-NewConnection.ModeRuntimeDataDumper := FModeRuntimeDataDumper;
-NewConnection.ModeRuntimePacketDumper := FModeRuntimePacketDumper;
-if FModeRuntimePacketDumper or FModeRuntimeDataDumper then
-	NewConnection.DumpDirectory := FDumpDirectory;
-
 IPv4Net := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Net'));
 IPv4Mask := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Mask'));
 if (IPv4Mask <> 0) or (IPv4Net <> 0) then
-	NewConnection.AddDeviceIPv4(IPv4Net, IPv4Mask);
-	
+	Connection.AddDeviceIPv4(IPv4Net, IPv4Mask);
+end;
+
+function TSGInternetConnections.HandleNewConnection(const ConnectionClass : TSGInternetConnectionClass; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+var
+	NewConnection : TSGInternetConnection = nil;
+	FrameSize : TSGUInt64;
+begin
+NewConnection := ConnectionClass.Create();
+PutConnectionModesInfo(NewConnection);
+PutConnectionIPv4Info(NewConnection, Identificator);
+
+FrameSize := Frame.Size;
 Result := NewConnection.PacketPushed(Time, Date, Frame);
 if not Result then
 	SGKill(NewConnection)
@@ -285,7 +297,7 @@ else
 	
 	FConnections += NewConnection;
 	FComparablePacketsCount += 1;
-	FComparablePacketsSize += Frame.Size;
+	FComparablePacketsSize += FrameSize;
 	
 	FCriticalSection.Leave();
 	end;
@@ -314,16 +326,18 @@ end;
 function TSGInternetConnections.HandlePacketConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 var
 	Index : TSGMaxEnum;
+	FrameSize : TSGUInt64;
 begin
 Result := False;
 FCriticalSection.Enter();
+FrameSize := Frame.Size;
 if (FConnections <> nil) and (Length(FConnections) > 0) then
 	for Index := High(FConnections) downto 0 do
 		if FConnections[Index].PacketPushed(Time, Date, Frame) then
 			begin
 			Result := True;
 			FComparablePacketsCount += 1;
-			FComparablePacketsSize += Frame.Size;
+			FComparablePacketsSize += FrameSize;
 			break;
 			end;
 FCriticalSection.Leave();

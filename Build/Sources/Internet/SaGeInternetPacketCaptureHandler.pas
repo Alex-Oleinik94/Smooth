@@ -156,21 +156,17 @@ end;
 function TSGInternetPacketCaptureHandler.AllDataSize() : TSGUInt64;
 var
 	Index : TSGMaxEnum;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
 Result := 0;
 if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 	for Index := 0 to High(FDevicesData) do
 		Result += FDevicesData[Index].CountPacketsSize;
-FCriticalSection.Leave();
 end;
 
 procedure TSGInternetPacketCaptureHandler.HandlePacket(const Packet : TSGInternetCaptorPacket);
 var
 	Device : PSGInternetPacketCaptureHandlerDeviceData = nil;
 	Stream : TStream = nil;
-	InsideCriticalSection : TSGBoolean;
 begin
 FCriticalSection.Enter();
 
@@ -198,10 +194,7 @@ function TSGInternetPacketCaptureHandler.FindDeviceOption(const DeviceIdentifica
 var
 	Device : PSGInternetPacketCaptureHandlerDeviceData = nil;
 	Index : TSGMaxEnum;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 Result := '';
 Device := FindDevice(DeviceIdentificator);
 if (Device <> nil) and (Device^.AdditionalOptions <> nil) and (Length(Device^.AdditionalOptions) > 0) then
@@ -211,17 +204,12 @@ if (Device <> nil) and (Device^.AdditionalOptions <> nil) and (Length(Device^.Ad
 			Result := Device^.AdditionalOptions[Index][1];
 			break;
 			end;
-
-FCriticalSection.Leave();
 end;
 
 function TSGInternetPacketCaptureHandler.FindDevice(const DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator) : PSGInternetPacketCaptureHandlerDeviceData;
 var
 	Index : TSGMaxEnum;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 Result := nil;
 if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 	for Index := 0 to High(FDevicesData) do
@@ -230,17 +218,12 @@ if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 			Result := @FDevicesData[Index];
 			break;
 			end;
-
-FCriticalSection.Leave();
 end;
 
 function TSGInternetPacketCaptureHandler.FindDevice(const DeviceName : TSGString) : PSGInternetPacketCaptureHandlerDeviceData;
 var
 	Index : TSGMaxEnum;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 Result := nil;
 if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 	for Index := 0 to High(FDevicesData) do
@@ -249,13 +232,9 @@ if (FDevicesData <> nil) and (Length(FDevicesData) > 0) then
 			Result := @FDevicesData[Index];
 			break;
 			end;
-
-FCriticalSection.Leave();
 end;
 
 function TSGInternetPacketCaptureHandler.AddDevice(const DeviceData : TSGInternetPacketCaptorDeviceData) : PSGInternetPacketCaptureHandlerDeviceData;
-var
-	InsideCriticalSection : TSGBoolean;
 begin
 FCriticalSection.Enter();
 
@@ -293,10 +272,7 @@ end;
 function TSGInternetPacketCaptureHandler.Start() : TSGBoolean;
 var
 	InitStartTime : TSGDateTime;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 Result := False;
 FillChar(FTimeBegining, SizeOf(FTimeBegining), 0);
 
@@ -323,28 +299,17 @@ if Result then
 	end
 else
 	Stop();
-
-FCriticalSection.Leave();
 end;
 
 procedure TSGInternetPacketCaptureHandler.Stop();
-var
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 SGKill(FPacketCaptor);
-
-FCriticalSection.Leave();
 end;
 
 function TSGInternetPacketCaptureHandler.Update() : TSGBoolean;
 var
 	Now : TSGDateTime;
-	InsideCriticalSection : TSGBoolean;
 begin
-FCriticalSection.Enter();
-
 Result := FPacketCaptor.AllThreadsFinished();
 if (not Result) and FPossibilityBreakLoopFromConsole and KeyPressed() and (ReadKey = #27) then
 	Result := True;
@@ -357,8 +322,6 @@ if (not Result) and FProcessTimeOutUpdates then
 		Result := HandleTimeOutUpdate(Now);
 		end;
 	end;
-
-FCriticalSection.Leave();
 end;
 
 procedure TSGInternetPacketCaptureHandler.Loop();
