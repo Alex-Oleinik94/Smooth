@@ -30,12 +30,15 @@ type
 		FBuffer : TSGTcpSequenceBuffer;
 		FAcknowledgement : TSGTcpSequence;
 			public
-		procedure PrintTextInfo(const TextStream : TSGTextStream); override;
+		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); override;
 			protected
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
+			protected
+		procedure DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure HandlePacket(const Packet : TSGEthernetPacketFrame);
 		procedure PutData(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
+		procedure PutAcknowledgement(const AcknowledgementNumber : TSGTcpSequence);
 			public
 		procedure HandleData(const Stream : TStream); virtual;
 		function HasData() : TSGBoolean; virtual;
@@ -53,6 +56,11 @@ uses
 	,StrMan
 	;
 
+procedure TSGInternetConnectionTCP.PutAcknowledgement(const AcknowledgementNumber : TSGTcpSequence);
+begin
+
+end;
+
 procedure TSGInternetConnectionTCP.PutData(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 begin
 
@@ -63,7 +71,12 @@ begin
 // todo: data transfer/dumper mode
 end;
 
-procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream);
+procedure TSGInternetConnectionTCP.DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+begin
+
+end;
+
+procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
 const
 	ColorPort = 11;
 	ColorSize = 6;
@@ -87,46 +100,49 @@ TextStream.Write('TCP ');
 if FDeviceIPv4Supported then
 	begin
 	TextStream.TextColor(ColorText);
-	TextStream.Write('Port:');
+	TextStream.Write('Port' + Iff(ForFileSystem, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write(';Address:');
+	TextStream.Write(';Address' + Iff(ForFileSystem, '=', ':'));
 	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write(';DPort:');
+	TextStream.Write(';DPort' + Iff(ForFileSystem, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end
 else
 	begin
 	TextStream.TextColor(ColorText);
-	TextStream.Write('sa:');
+	TextStream.Write('sa' + Iff(ForFileSystem, '=', ':'));
 	SGIPv4AddressView(FSourceAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('sp:');
+	TextStream.Write('sp' + Iff(ForFileSystem, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('da:');
+	TextStream.Write('da' + Iff(ForFileSystem, '=', ':'));
 	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('dp:');
+	TextStream.Write('dp' + Iff(ForFileSystem, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end;
-TextStream.TextColor(ColorText);
-TextStream.Write(';Size:');
-if FDataSize > 1024 * 400 then
-	TextStream.TextColor(ColorBigSize)
-else
-	TextStream.TextColor(ColorSize);
-TextStream.Write(SGGetSizeString(FDataSize, 'EN'));
+if not ForFileSystem then
+	begin
+	TextStream.TextColor(ColorText);
+	TextStream.Write(';Size' + Iff(ForFileSystem, '=', ':'));
+	if FDataSize > 1024 * 400 then
+		TextStream.TextColor(ColorBigSize)
+	else
+		TextStream.TextColor(ColorSize);
+	TextStream.Write(SGGetSizeString(FDataSize, 'EN'));
+	end;
 
 TextStream.TextColor(7);
 end;
@@ -157,6 +173,9 @@ if (not FPacketStorage.HasData) and PacketComparable(Packet) then
 	
 	FTimeFirstPacket := Time;
 	FDateFirstPacket := Date;
+	
+	if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+		CreateConnectionDumpDirectory();
 	end
 else if FPacketStorage.HasData and PacketComparable(Packet) then
 	Result := ((
@@ -184,8 +203,10 @@ if Result then
 		FActive := False
 	else
 		FActive := True;
-	if FModeDataTransfer or FModeDataDumper then
+	if FModeDataTransfer or FModeRuntimeDataDumper then
 		HandlePacket(Packet);
+	if FModeRuntimePacketDumper then
+		DumpPacket(Time, Date, Packet);
 	if FModePacketStorage then
 		FPacketStorage.Add(Time, Date, Packet)
 	else

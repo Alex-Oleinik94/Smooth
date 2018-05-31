@@ -27,7 +27,8 @@ type
 		FPacketStorage : TSGInternetPacketStorage;
 		FModeDataTransfer : TSGBoolean;
 		FModePacketStorage : TSGBoolean;
-		FModeDataDumper : TSGBoolean;
+		FModeRuntimeDataDumper : TSGBoolean;
+		FModeRuntimePacketDumper : TSGBoolean;
 		
 		FTimeFirstPacket : TSGTime;
 		FDateFirstPacket : TSGDateTime;
@@ -41,8 +42,17 @@ type
 		FDeviceIPv4Supported : TSGBoolean;
 		FDeviceIPv4Net  : TSGIPv4Address;
 		FDeviceIPv4Mask : TSGIPv4Address;
+		
+		// Dumper modes
+		FDumpDirectory : TSGString;
+		FConnectionDumpDirectory : TSGString;
+		FConnectionDataDumpDirectory : TSGString;
+		FConnectionPacketDumpDirectory : TSGString;
+			protected
+		procedure CreateConnectionDumpDirectory(); virtual;
+		function PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
 			public
-		procedure PrintTextInfo(const TextStream : TSGTextStream); virtual;
+		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); virtual;
 			public
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
@@ -53,7 +63,9 @@ type
 		property DateFirstPacket : TSGDateTime read FDateFirstPacket;
 		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
-		property ModeDataDumper : TSGBoolean read FModeDataDumper write FModeDataDumper;
+		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
+		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
+		property DumpDirectory : TSGString read FDumpDirectory write FDumpDirectory;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -74,6 +86,10 @@ type
 procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+uses
+	 SaGeStringTextStream
+	,SaGeFileUtils
+	;
 
 procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
@@ -84,6 +100,35 @@ if Variable <> nil then
 	end;
 end;
 
+function TSGInternetConnection.PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
+var
+	StringTextSteam : TSGStringTextStream = nil;
+begin
+StringTextSteam := TSGStringTextStream.Create();
+PrintTextInfo(StringTextSteam, ForFileSystem);
+Result := StringTextSteam.Value;
+SGKill(StringTextSteam);
+end;
+
+procedure TSGInternetConnection.CreateConnectionDumpDirectory();
+begin
+if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+	begin
+	FConnectionDumpDirectory := FDumpDirectory + DirectorySeparator + PrintableTextString();
+	SGMakeDirectory(FConnectionDumpDirectory);
+	end;
+if FModeRuntimeDataDumper then
+	begin
+	FConnectionDataDumpDirectory := FConnectionDumpDirectory + DirectorySeparator + 'Data';
+	SGMakeDirectory(FConnectionDataDumpDirectory);
+	end;
+if FModeRuntimePacketDumper then
+	begin
+	FConnectionPacketDumpDirectory := FConnectionDumpDirectory + DirectorySeparator + 'Packets';
+	SGMakeDirectory(FConnectionPacketDumpDirectory);
+	end;
+end;
+
 procedure TSGInternetConnection.AddDeviceIPv4(const Net, Mask : TSGIPv4Address);
 begin
 FDeviceIPv4Supported := True;
@@ -91,7 +136,7 @@ FDeviceIPv4Net  := Net;
 FDeviceIPv4Mask := Mask;
 end;
 
-procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream);
+procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
 begin
 end;
 
@@ -116,7 +161,12 @@ FDeviceIPv4Supported := False;
 FSecondsMeansConnectionActive := 10;
 FModePacketStorage := False;
 FModeDataTransfer := True;
-FModeDataDumper := False;
+FModeRuntimeDataDumper := False;
+FModeRuntimePacketDumper := False;
+FDumpDirectory := '';
+FConnectionDumpDirectory := '';
+FConnectionDataDumpDirectory := '';
+FConnectionPacketDumpDirectory := '';
 end;
 
 destructor TSGInternetConnection.Destroy();

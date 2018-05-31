@@ -33,13 +33,20 @@ type
 		FComparablePacketsCount : TSGUInt64;
 		
 		FModeDataTransfer : TSGBoolean;
-		FModeDataDumper : TSGBoolean;
+		FModeRuntimeDataDumper : TSGBoolean;
 		FModePacketStorage : TSGBoolean;
+		FModeRuntimePacketDumper : TSGBoolean;
+		
+		// Dump modes
+		FDumpDirectory : TSGString;
+			public
+		procedure Loop(); override;
 			protected
 		procedure PrintStatistic(const TextTime : TSGString);
 		procedure ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
 		procedure LogStatistic();
 		function ConnectionsLength() : TSGMaxEnum;
+		procedure CreateDumpDirectory();
 			protected
 		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
 		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
@@ -52,7 +59,8 @@ type
 		property ConnectionsCount : TSGMaxEnum read ConnectionsLength;
 		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
-		property ModeDataDumper : TSGBoolean read FModeDataDumper write FModeDataDumper;
+		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
+		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
 		end;
 
 procedure SGKill(var Connections : TSGInternetConnections); overload;
@@ -67,6 +75,7 @@ uses
 	,SaGeTextLogStream
 	,SaGeBaseUtils
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	,StrMan
 	;
@@ -115,7 +124,8 @@ Connections.ProcessTimeOutUpdates := True;
 Connections.InfoTimeOut := 120;
 Connections.ModeDataTransfer := False;
 Connections.ModePacketStorage := True;
-Connections.ModeDataDumper := True;
+Connections.ModeRuntimeDataDumper := True;
+Connections.ModeRuntimePacketDumper := True;
 Connections.Loop();
 Connections.LogStatistic();
 SGKill(Connections);
@@ -124,6 +134,19 @@ end;
 // ==================================
 // ======TSGInternetConnections======
 // ==================================
+
+procedure TSGInternetConnections.Loop();
+begin
+if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+	CreateDumpDirectory();
+inherited Loop();
+end;
+
+procedure TSGInternetConnections.CreateDumpDirectory();
+begin
+FDumpDirectory := 'Connections analyzer ' + SGDateTimeString(True);
+SGMakeDirectory(FDumpDirectory);
+end;
 
 function TSGInternetConnections.ConnectionsLength() : TSGMaxEnum;
 begin
@@ -197,7 +220,10 @@ begin
 NewConnection := ConnectionClass.Create();
 NewConnection.ModeDataTransfer := FModeDataTransfer;
 NewConnection.ModePacketStorage := FModePacketStorage;
-NewConnection.ModeDataDumper := FModeDataDumper;
+NewConnection.ModeRuntimeDataDumper := FModeRuntimeDataDumper;
+NewConnection.ModeRuntimePacketDumper := FModeRuntimePacketDumper;
+if FModeRuntimePacketDumper or FModeRuntimeDataDumper then
+	NewConnection.DumpDirectory := FDumpDirectory;
 
 IPv4Net := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Net'));
 IPv4Mask := SGIPv4StringToAddress(FindDeviceOption(Identificator, 'IPv4 Mask'));
@@ -286,7 +312,9 @@ FComparablePacketsCount := 0;
 FComparablePacketsSize := 0;
 FModePacketStorage := False;
 FModeDataTransfer := True;
-FModeDataDumper := False;
+FModeRuntimeDataDumper := False;
+FModeRuntimePacketDumper := False;
+FDumpDirectory := '';
 end;
 
 destructor TSGInternetConnections.Destroy();
