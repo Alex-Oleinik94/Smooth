@@ -187,6 +187,7 @@ uses
 	,SaGeBitMap
 	,SaGeSysUtils
 	,SaGeBaseUtils
+	,SaGeScreenHelper
 	
 	,Crt
 	;
@@ -560,12 +561,7 @@ for i:=0 to QuantityThreads-1 do
 	Mandelbrod.BeginThread(i,FArProgressBar[i]);
 	end;
 
-LblProcent:=TSGLabel.Create;
-Screen.CreateChild(LblProcent);
-LblProcent.SetBounds(10,ii,300,20);
-LblProcent.Caption:='';
-LblProcent.Visible:=True;
-LblProcent.FUserPointer1:=Self;
+LblProcent := SGCreateLabel(Screen, '', 10,ii,300,20, True, True, Self);
 
 LabelProcent:=TSGProgressBar.Create;
 Screen.CreateChild(LabelProcent);
@@ -577,14 +573,7 @@ LabelProcent.ViewCaption := False;
 LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
 
-LabelCoord:=TSGLabel.Create;
-Screen.CreateChild(LabelCoord);
-Screen.LastChild.SetBounds(10,Render.Height-25,Render.Width div 2,20);
-Screen.LastChild.Anchors:=[SGAnchBottom];
-Screen.LastChild.Caption:='';
-Screen.LastChild.Visible:=True;
-Screen.LastChild.AsLabel.TextPosition:=False;
-Screen.LastChild.FUserPointer1:=Self;
+LabelCoord := SGCreateLabel(Screen, '', False, 10,Render.Height-25,Render.Width div 2,20, [SGAnchBottom], True, True, Self);
 
 ScreenshotPanel:=TSGPanel.Create;
 Screen.CreateChild(ScreenshotPanel);
@@ -681,10 +670,7 @@ while i<=13 do
 	i+=1;
 	end;
 
-FCurveInfoLbl:=TSGLabel.Create();
-Screen.CreateChild(FCurveInfoLbl);
-Screen.LastChild.SetBounds(Render.Width-10-(130+140+10)-150-5,Render.Height-30-25,-(-(130+140+10)-150-5),20);
-Screen.LastChild.Anchors:=[SGAnchRight,SGAnchBottom];
+FCurveInfoLbl := SGCreateLabel(Screen, '', Render.Width-10-(130+140+10)-150-5,Render.Height-30-25,-(-(130+140+10)-150-5),20, [SGAnchRight, SGAnchBottom]);
 
 FBezierCurveKadrProgressBar:=TSGProgressBar.Create();
 Screen.CreateChild(FBezierCurveKadrProgressBar);
@@ -735,35 +721,20 @@ FBezierCurvePanel.LastChild.AsButton.OnChange:=TSGComponentProcedure(@bcpAddPoin
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
+FBezierCurveLabelPoints := SGCreateLabel(FBezierCurvePanel, 'Количество точек: 0', 3,47,137,20, False, True, Self);
 
-FBezierCurveLabelPoints:=TSGLabel.Create();
-FBezierCurvePanel.CreateChild(FBezierCurveLabelPoints);
-FBezierCurvePanel.LastChild.Caption:='Количество точек: 0';
-FBezierCurvePanel.LastChild.SetBounds(3,25,275,20);
-FBezierCurvePanel.LastChild.FUserPointer1:=Self;
-FBezierCurvePanel.LastChild.BoundsToNeedBounds();
-
-FBezierCurvePanel.CreateChild(TSGLabel.Create());
-FBezierCurvePanel.LastChild.Caption:='Количество кадров:';
-FBezierCurvePanel.LastChild.AsLabel.TextPosition:=False;
-FBezierCurvePanel.LastChild.SetBounds(3,47,137,20);
-FBezierCurvePanel.LastChild.FUserPointer1:=Self;
-FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+SGCreateLabel(FBezierCurvePanel, 'Количество кадров:', False, 3,25,275,20, False, True, Self);
 
 FBezierCurveEditKadr:=TSGEdit.Create();
 Screen.LastChild.CreateChild(FBezierCurveEditKadr);
-Screen.LastChild.LastChild.SetBounds(123,47,137,20);
+Screen.LastChild.LastChild.SetBounds(123,27,137,20);
 Screen.LastChild.LastChild.BoundsToNeedBounds;
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 (Screen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntionVideo);
 (Screen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
 Screen.LastChild.LastChild.Caption:='200';
 
-FBezierCurvePanel.CreateChild(TSGLabel.Create());
-FBezierCurvePanel.LastChild.Caption:='Примерно займет времени: дохрена!';
-FBezierCurvePanel.LastChild.SetBounds(3,70,275,20);
-FBezierCurvePanel.LastChild.FUserPointer1:=Self;
-FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+SGCreateLabel(FBezierCurvePanel, 'Примерно займет времени: дохрена!', 3,70,275,20, False, True, Self);
 
 FBezierCurveGoButton:=TSGButton.Create();
 FBezierCurvePanel.CreateChild(FBezierCurveGoButton);
@@ -845,19 +816,9 @@ Screen.LastChild.BoundsToNeedBounds;
 Screen.LastChild.FUserPointer1:=Self;
 fmStartPanel:=Screen.LastChild;
 
-Screen.LastChild.CreateChild(TSGLabel.Create);
-Screen.LastChild.LastChild.Visible:=True;
-Screen.LastChild.LastChild.Caption:='Количество потоков:';
-Screen.LastChild.LastChild.SetBounds(5,5,Screen.LastChild.Width-10,20);
-Screen.LastChild.LastChild.BoundsToNeedBounds;
-Screen.LastChild.LastChild.FUserPointer1:=Self;
+SGCreateLabel(Screen.LastChild, 'Количество потоков:', 5,5,Screen.LastChild.Width-10,20, True, True, Self);
 
-Screen.LastChild.CreateChild(TSGLabel.Create);
-Screen.LastChild.LastChild.Visible:=True;
-Screen.LastChild.LastChild.Caption:='Разрешение текстуры:';
-Screen.LastChild.LastChild.SetBounds(5,55,Screen.LastChild.Width-10,20);
-Screen.LastChild.LastChild.BoundsToNeedBounds;
-Screen.LastChild.LastChild.FUserPointer1:=Self;
+SGCreateLabel(Screen.LastChild, 'Количество потоков:', 5,55,Screen.LastChild.Width-10,20, True, True, Self);
 
 Screen.LastChild.CreateChild(TSGButton.Create);
 Screen.LastChild.LastChild.SetBounds(75,115,140,20);

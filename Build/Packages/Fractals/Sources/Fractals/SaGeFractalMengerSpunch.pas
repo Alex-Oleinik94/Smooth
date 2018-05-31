@@ -76,6 +76,7 @@ uses
 	,SaGeRenderBase
 	,SaGeThreads
 	,SaGeFileUtils
+	,SaGeScreenHelper
 	;
 
 {MENGER SPUNCH RELEASE}
@@ -206,14 +207,7 @@ FButtonDepthPlus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FLabelDepth:=TSGLabel.Create();
-Screen.CreateChild(FLabelDepth);
-Screen.LastChild.SetBounds(Render.Width-250-60,5,20,30);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.Caption:='0';
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+FLabelDepth := SGCreateLabel(Screen, '0', Render.Width-250-60,5,20,30, [SGAnchRight], True, True, Self);
 
 FButtonDepthMinus:=TSGButton.Create();
 Screen.CreateChild(FButtonDepthMinus);
@@ -225,14 +219,7 @@ Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FLabelDepthCaption:=TSGLabel.Create();
-Screen.CreateChild(FLabelDepthCaption);
-Screen.LastChild.SetBounds(Render.Width-250-90-125,5,115,30);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.Caption:='Итерация:';
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+FLabelDepthCaption := SGCreateLabel(Screen, 'Итерация:', Render.Width-250-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
 Depth:=2;
 {$IFNDEF ANDROID}

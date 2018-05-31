@@ -70,11 +70,12 @@ type
 		property PositionX : TSGComponentLocationType read FPosition.x write FPosition.x;
 		property PositionY : TSGComponentLocationType read FPosition.y write FPosition.y;
 		end;
-
-	TSGAnchors = type TSGByte;
+	
+	TSGAnchor = type TSGByte;
+	TSGAnchors = set of TSGByte;
 	TSGScreenInt    = TSGAreaInt;
-
-
+	TSGScreenInterfaceData = TSGPointer;
+	
 	TSGScreenSkinFrameColor = object
 			public
 		FFirst  : TSGColor4f;
@@ -84,10 +85,10 @@ type
 		end;
 
 const
-	SGAnchRight  : TSGAnchors = $11;
-	SGAnchLeft   : TSGAnchors = $12;
-	SGAnchTop    : TSGAnchors = $13;
-	SGAnchBottom : TSGAnchors = $14;
+	SGAnchRight  : TSGAnchor = $11;
+	SGAnchLeft   : TSGAnchor = $12;
+	SGAnchTop    : TSGAnchor = $13;
+	SGAnchBottom : TSGAnchor = $14;
 
 	SGS_LEFT   = 1;
 	SGS_BOTTOM = 2;

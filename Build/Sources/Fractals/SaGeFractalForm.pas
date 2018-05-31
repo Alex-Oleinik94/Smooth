@@ -135,8 +135,7 @@ Screen.LastChild.BoundsToNeedBounds();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 Screen.LastChild.BoundsToNeedBounds();
 
-FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True);
-FLDC.FUserPointer1:=Self;
+FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
 FBPD:=TSGButton.Create;
 Screen.CreateChild(FBPD);
@@ -148,8 +147,7 @@ FBPD.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChangeKT);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True);
-FLD.FUserPointer1:=Self;
+FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
 FBMD:=TSGButton.Create;
 Screen.CreateChild(FBMD);

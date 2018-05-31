@@ -41,6 +41,7 @@ uses
 	,SaGeVertexObject
 	,SaGeScreenBase
 	,SaGeStringUtils
+	,SaGeScreenHelper
 	;
 
 class function TSGFractalTetraider.ClassName():TSGString;
@@ -225,14 +226,7 @@ Screen.LastChild.BoundsToNeedBounds();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 Screen.LastChild.BoundsToNeedBounds();
 
-FLDC:=TSGLabel.Create;
-Screen.CreateChild(FLDC);
-Screen.LastChild.SetBounds(Render.Width-160-90-125,5,115,30);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.Caption:='Итерация:';
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
 FBPD:=TSGButton.Create;
 Screen.CreateChild(FBPD);
@@ -244,14 +238,7 @@ FBPD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKTTet);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FLD:=TSGLabel.Create;
-Screen.CreateChild(FLD);
-Screen.LastChild.SetBounds(Render.Width-160-60,5,20,30);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.Caption:='0';
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
 FBMD:=TSGButton.Create;
 Screen.CreateChild(FBMD);
