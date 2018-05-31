@@ -300,6 +300,9 @@ else
 	FComparablePacketsSize += FrameSize;
 	
 	FCriticalSection.Leave();
+	
+	if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+		CreateDeviceInformationFile(Identificator, NewConnection.ConnectionDumpDirectory + DirectorySeparator + 'Device.ini');
 	end;
 end;
 

@@ -68,6 +68,7 @@ type
 		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
 		property DumpDirectory : TSGString read FDumpDirectory write FDumpDirectory;
 		property FirstPacketIsSelfSender : TSGBoolean read FFirstPacketIsSelfSender write FFirstPacketIsSelfSender;
+		property ConnectionDumpDirectory : TSGString read FConnectionDumpDirectory;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
