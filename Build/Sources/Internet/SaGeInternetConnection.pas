@@ -35,6 +35,7 @@ type
 		FTimeLastPacket : TSGTime;
 		FDateLastPacket : TSGDateTime;
 		FSecondsMeansConnectionActive : TSGUInt16;
+		FFirstPacketIsSelfSender : TSGBoolean;
 		
 		FDataSize : TSGInternetConnectionSizeInt;
 		FPacketCount : TSGInternetConnectionSizeInt;
@@ -66,6 +67,7 @@ type
 		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
 		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
 		property DumpDirectory : TSGString read FDumpDirectory write FDumpDirectory;
+		property FirstPacketIsSelfSender : TSGBoolean read FFirstPacketIsSelfSender write FFirstPacketIsSelfSender;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -159,6 +161,7 @@ FPacketStorage := TSGInternetPacketStorage.Create();
 FCritacalSection := TSGCriticalSection.Create();
 FDeviceIPv4Supported := False;
 FSecondsMeansConnectionActive := 10;
+FFirstPacketIsSelfSender := False;
 FModePacketStorage := False;
 FModeDataTransfer := True;
 FModeRuntimeDataDumper := False;
@@ -167,6 +170,10 @@ FDumpDirectory := '';
 FConnectionDumpDirectory := '';
 FConnectionDataDumpDirectory := '';
 FConnectionPacketDumpDirectory := '';
+FillChar(FTimeFirstPacket, SizeOf(FTimeFirstPacket), 0);
+FillChar(FTimeLastPacket, SizeOf(FTimeLastPacket), 0);
+FillChar(FDateFirstPacket, SizeOf(FDateFirstPacket), 0);
+FillChar(FDateLastPacket, SizeOf(FDateLastPacket), 0);
 end;
 
 destructor TSGInternetConnection.Destroy();
