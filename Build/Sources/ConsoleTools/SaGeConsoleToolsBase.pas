@@ -28,6 +28,7 @@ type
 		FCategory           : TSGString;
 			public
 		procedure Free();
+		function HelpString() : TSGString;
 		end;
 	TSGConsoleCallerComands = packed array of TSGConsoleCallerComand;
 
@@ -81,6 +82,7 @@ uses
 	,SaGeVersion
 	,SaGeFileOpener
 	,SaGeStringUtils
+	,SaGeLog
 	;
 
 procedure SGKill(var ConsoleCaller : TSGConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -323,6 +325,14 @@ if (FComands <> nil) and (Length(FComands)>0) then
 	SetLength(FComands,0);
 	end;
 inherited;
+end;
+
+
+function TSGConsoleCallerComand.HelpString() : TSGString;
+begin
+Result := FHelpString;
+if (Result = '') and (FNestedHelpFunction <> nil) then
+	Result := FNestedHelpFunction();
 end;
 
 procedure TSGConsoleCallerComand.Free();
@@ -763,6 +773,7 @@ else if Comand <> '' then
 				else
 					begin
 					Params := SGDecConsoleParams(FParams);
+					TSGLog.Source(['Console caller : Enter "', FComands[i].HelpString(), '".']);
 					FComands[i].FComand(Params);
 					SetLength(Params,0);
 					break;
@@ -793,6 +804,7 @@ else if (Comand = '') and (SGCountConsoleParams(FParams) = 0) then
 						end;
 				if (iii = 1) then
 					begin
+					TSGLog.Source(['Console caller : Enter "', FComands[i].HelpString(), '".']);
 					FComands[i].FComand();
 					break;
 					end;

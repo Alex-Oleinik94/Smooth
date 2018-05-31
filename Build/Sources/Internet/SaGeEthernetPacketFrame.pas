@@ -9,7 +9,6 @@ uses
 	,SaGeTextFileStream
 	,SaGeEthernetPacketFrameBase
 	,SaGeInternetBase
-	
 	;
 
 type
@@ -28,6 +27,7 @@ type
 		function Size() : TSGEthernetPacketFrameSize; override;
 		function SizeEncapsulated() : TSGEthernetPacketFrameSize;
 		function Description() : TSGString; override;
+		function CreateStream() : TSGEthernetPacketFrameCreatedStream; override;
 			protected
 		class function ProtocolClass(const ProtocolValue : TSGEnthernetProtocol) : TSGEthernetPacketProtocolFrameClass;
 			public
@@ -48,6 +48,7 @@ implementation
 uses
 	 SaGeEthernetPacketFrameIPv4
 	,SaGeStringUtils
+	,SaGeStreamUtils
 	;
 
 procedure SGKill(var Variable : TSGEthernetPacketFrame);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -91,6 +92,24 @@ end;
 // ==================================
 // ======TSGEthernetPacketFrame======
 // ==================================
+
+function TSGEthernetPacketFrame.CreateStream() : TSGEthernetPacketFrameCreatedStream;
+var
+	IncapsulatedStream : TSGEthernetPacketFrameCreatedStream = nil;
+begin
+Result := inherited;
+if Result = nil then
+	Result := TSGEthernetPacketFrameCreatedStream.Create();
+Result.Write(FEthernetPacketHeader, SizeOf(FEthernetPacketHeader));
+if (FProtocolFrame <> nil) then
+	IncapsulatedStream := FProtocolFrame.CreateStream();
+if IncapsulatedStream <> nil then
+	begin
+	IncapsulatedStream.Position := 0;
+	SGCopyPartStreamToStream(IncapsulatedStream, Result, IncapsulatedStream.Size);
+	SGKill(IncapsulatedStream);
+	end;
+end;
 
 function TSGEthernetPacketFrame.Description() : TSGString;
 begin
@@ -174,7 +193,7 @@ with Stream do
 	WriteLn('[ethernet]');
 	WriteLn(['Frame.Protocol= ', FrameName]);
 	WriteLn(['Frame.Size    = ', Size(), ', ', SGGetSizeString(Size(), 'EN')]);
-	WriteLn(['Frame.EncapsulatedSize = ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
+	WriteLn(['Frame.Encapsulated size = ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
 	WriteLn(['Destination   = ', Destination()]);
 	WriteLn(['Source        = ', Source()]);
 	WriteLn(['Protocol      = ', Protocol()]);

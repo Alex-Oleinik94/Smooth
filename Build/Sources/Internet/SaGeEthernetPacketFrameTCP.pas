@@ -30,6 +30,7 @@ type
 		function Size() : TSGEthernetPacketFrameSize; override;
 		function SizeEncapsulated() : TSGEthernetPacketFrameSize;
 		procedure ExportOptionsInfo(const Stream : TSGTextFileStream); override;
+		function CreateStream() : TSGEthernetPacketFrameCreatedStream; override;
 		function DataExists() : TSGBoolean;
 		procedure ExportData(const Stream : TSGTextFileStream);
 			protected
@@ -64,6 +65,24 @@ end;
 // =====================================
 // ======TSGEthernetPacketFrameTCP======
 // =====================================
+
+function TSGEthernetPacketFrameTCP.CreateStream() : TSGEthernetPacketFrameCreatedStream;
+begin
+Result := inherited;
+if Result = nil then
+	Result := TSGEthernetPacketFrameCreatedStream.Create();
+Result.Write(FTCPHeader, SizeOf(FTCPHeader));
+if (FOptions <> nil) then
+	begin
+	FOptions.Position := 0;
+	SGCopyPartStreamToStream(FOptions, Result, FOptions.Size);
+	end;
+if FData <> nil then
+	begin
+	FData.Position := 0;
+	SGCopyPartStreamToStream(FData, Result, FData.Size);
+	end;
+end;
 
 function TSGEthernetPacketFrameTCP.Size() : TSGEthernetPacketFrameSize;
 begin
@@ -177,7 +196,7 @@ begin
 inherited;
 Stream.WriteLn(['Frame.Protocol     = ', ProtocolName]);
 Stream.WriteLn(['Frame.Size         = ', Size(), ', ', SGGetSizeString(Size(), 'EN')]);
-Stream.WriteLn(['Frame.EncapsulatedSize= ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
+Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
 Stream.WriteLn(['Source port        = ', FTCPHeader.SourcePort]);
 Stream.WriteLn(['Destination port   = ', FTCPHeader.DestinationPort]);
 Stream.WriteLn(['Sequence number    = 0x', SGStr4BytesHex(FTCPHeader.SequenceNumber, False), '[hex]']);

@@ -163,8 +163,8 @@ FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketData
 
 TextStream := TSGTextFileStream.Create(FileNameInfo);
 TextStream.WriteLn('[packet]');
-TextStream.WriteLn(['DataTime=', SGDateTimeCorrectionString(Date, Time, False)]);
-TextStream.WriteLn(['Size=', Stream.Size]);
+TextStream.WriteLn(['DataTime = ', SGDateTimeCorrectionString(Date, Time, False)]);
+TextStream.WriteLn(['Size     = ', SGGetSizeString(Stream.Size, 'EN')]);
 TextStream.WriteLn();
 Packet.ExportInfo(TextStream);
 SGKill(TextStream);
@@ -265,7 +265,11 @@ Connection.ModePacketStorage := FModePacketStorage;
 Connection.ModeRuntimeDataDumper := FModeRuntimeDataDumper;
 Connection.ModeRuntimePacketDumper := FModeRuntimePacketDumper;
 if FModeRuntimePacketDumper or FModeRuntimeDataDumper then
+	begin
+	Connection.PacketDataFileExtension := FPacketDataFileExtension;
+	Connection.PacketInfoFileExtension := FPacketInfoFileExtension;
 	Connection.DumpDirectory := FDumpDirectory;
+	end;
 end;
 
 procedure TSGInternetConnections.PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);

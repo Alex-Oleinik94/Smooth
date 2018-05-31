@@ -27,6 +27,7 @@ type
 		function Size() : TSGEthernetPacketFrameSize; override;
 		function SizeEncapsulated() : TSGEthernetPacketFrameSize;
 		procedure ExportOptionsInfo(const Stream : TSGTextFileStream); override;
+		function CreateStream() : TSGEthernetPacketFrameCreatedStream; override;
 			protected
 		procedure KillProtocolFrame();
 		class function ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
@@ -69,6 +70,29 @@ end;
 // ======================================
 // ======TSGEthernetPacketFrameIPv4======
 // ======================================
+
+function TSGEthernetPacketFrameIPv4.CreateStream() : TSGEthernetPacketFrameCreatedStream;
+var
+	IncapsulatedStream : TSGEthernetPacketFrameCreatedStream = nil;
+begin
+Result := inherited;
+if Result = nil then
+	Result := TSGEthernetPacketFrameCreatedStream.Create();
+Result.Write(FIPv4Header, SizeOf(FIPv4Header));
+if (FProtocolOptions <> nil) then
+	begin
+	FProtocolOptions.Position := 0;
+	SGCopyPartStreamToStream(FProtocolOptions, Result, FProtocolOptions.Size);
+	end;
+if (FProtocolFrame <> nil) then
+	IncapsulatedStream := FProtocolFrame.CreateStream();
+if IncapsulatedStream <> nil then
+	begin
+	IncapsulatedStream.Position := 0;
+	SGCopyPartStreamToStream(IncapsulatedStream, Result, IncapsulatedStream.Size);
+	SGKill(IncapsulatedStream);
+	end;
+end;
 
 class function TSGEthernetPacketFrameIPv4.ProtocolClass(const ProtocolValue : TSGInternetProtocol) : TSGEthernetPacketProtocolFrameClass;
 begin
@@ -150,7 +174,7 @@ begin
 inherited;
 Stream.WriteLn(['Frame.Protocol = ', ProtocolName]);
 Stream.WriteLn(['Frame.Size     = ', Size(), ', ', SGGetSizeString(Size(), 'EN')]);
-Stream.WriteLn(['Frame.EncapsulatedSize= ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
+Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SGGetSizeString(SizeEncapsulated(), 'EN')]);
 Stream.WriteLn(['Version        = ', FIPv4Header.Version]);
 Stream.WriteLn(['Header size    = ', FIPv4Header.HeaderSize]);
 Stream.WriteLn(['Differentiated services codepoint= ', FIPv4Header.DifferentiatedServicesCodepoint]);

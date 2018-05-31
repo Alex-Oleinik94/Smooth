@@ -49,6 +49,8 @@ type
 		FConnectionDumpDirectory : TSGString;
 		FConnectionDataDumpDirectory : TSGString;
 		FConnectionPacketDumpDirectory : TSGString;
+		FPacketDataFileExtension : TSGString;
+		FPacketInfoFileExtension : TSGString;
 			protected
 		procedure CreateConnectionDumpDirectory(); virtual;
 		function PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
@@ -69,6 +71,8 @@ type
 		property DumpDirectory : TSGString read FDumpDirectory write FDumpDirectory;
 		property FirstPacketIsSelfSender : TSGBoolean read FFirstPacketIsSelfSender write FFirstPacketIsSelfSender;
 		property ConnectionDumpDirectory : TSGString read FConnectionDumpDirectory;
+		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
+		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -158,7 +162,7 @@ begin
 inherited;
 FDataSize := 0;
 FPacketCount := 0;
-FPacketStorage := TSGInternetPacketStorage.Create();
+FPacketStorage := nil;
 FCritacalSection := TSGCriticalSection.Create();
 FDeviceIPv4Supported := False;
 FSecondsMeansConnectionActive := 10;
@@ -175,6 +179,8 @@ FillChar(FTimeFirstPacket, SizeOf(FTimeFirstPacket), 0);
 FillChar(FTimeLastPacket, SizeOf(FTimeLastPacket), 0);
 FillChar(FDateFirstPacket, SizeOf(FDateFirstPacket), 0);
 FillChar(FDateLastPacket, SizeOf(FDateLastPacket), 0);
+FPacketDataFileExtension := 'ipdpd';
+FPacketInfoFileExtension := 'ini';
 end;
 
 destructor TSGInternetConnection.Destroy();

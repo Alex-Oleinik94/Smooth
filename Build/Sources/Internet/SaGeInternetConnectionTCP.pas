@@ -55,6 +55,8 @@ uses
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeLog
+	,SaGeTextFileStream
+	,SaGeStreamUtils
 	
 	,StrMan
 	;
@@ -75,8 +77,41 @@ begin
 end;
 
 procedure TSGInternetConnectionTCP.DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+var
+	DateTimeString : TSGString;
+	FileName : TSGString;
+	Description : TSGString;
+	FileNameInfo : TSGString;
+	FileNameData : TSGString;
+	TextStream : TSGTextFileStream = nil;
+	FileStream : TFileStream = nil;
+	Stream : TMemoryStream = nil;
 begin
+DateTimeString := SGDateTimeCorrectionString(Date, Time, True);
+FileName := FConnectionPacketDumpDirectory + DirectorySeparator + DateTimeString + ' {' + SGStr(FPacketCount) + '}';
+Description := Packet.Description;
+if Description <> '' then
+	FileName += ' (' + Description + ')';
+FileNameInfo := FileName + Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension, '');
+FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketDataFileExtension, '');
 
+TextStream := TSGTextFileStream.Create(FileNameInfo);
+TextStream.WriteLn('[packet]');
+TextStream.WriteLn(['DataTime = ', SGDateTimeCorrectionString(Date, Time, False)]);
+TextStream.WriteLn(['Size     = ', SGGetSizeString(Packet.Size, 'EN')]);
+TextStream.WriteLn();
+Packet.ExportInfo(TextStream);
+SGKill(TextStream);
+
+Stream := Packet.CreateStream();
+if Stream <> nil then
+	begin
+	FileStream := TFileStream.Create(FileNameData, fmCreate);
+	Stream.Position := 0;
+	SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
+	SGKill(FileStream);
+	SGKill(Stream);
+	end;
 end;
 
 procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
@@ -176,6 +211,11 @@ FDateFirstPacket := Date;
 
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	CreateConnectionDumpDirectory();
+if FModePacketStorage then
+	begin
+	SGKill(FPacketStorage);
+	FPacketStorage := TSGInternetPacketStorage.Create();
+	end;
 end;
 
 function TSGInternetConnectionTCP.InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;

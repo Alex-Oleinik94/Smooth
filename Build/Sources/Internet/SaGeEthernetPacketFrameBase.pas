@@ -15,6 +15,7 @@ uses
 type
 	// Base types
 	TSGEthernetPacketFrameStream = TStream;
+	TSGEthernetPacketFrameCreatedStream = TMemoryStream;
 	TSGEthernetPacketFrameSize = TSGUInt64;
 	
 	// Class types
@@ -45,6 +46,7 @@ type
 		function Size() : TSGEthernetPacketFrameSize; virtual;
 		function Data() : TSGEthernetPacketFrameStream; virtual;
 		function Description() : TSGString; virtual;
+		function CreateStream() : TSGEthernetPacketFrameCreatedStream; virtual;
 			public
 		class procedure KillProtocol(var Protocol : TSGEthernetPacketProtocolFrame);
 		class function ReadProtocolClass(
@@ -76,6 +78,11 @@ uses
 // ============================
 // =TSGEthernetPacketDataFrame=
 // ============================
+
+function TSGEthernetPacketDataFrame.CreateStream() : TSGEthernetPacketFrameCreatedStream;
+begin
+Result := nil;
+end;
 
 function TSGEthernetPacketDataFrame.Description() : TSGString;
 begin
