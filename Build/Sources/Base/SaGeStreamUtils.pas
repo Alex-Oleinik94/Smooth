@@ -25,6 +25,7 @@ uses
 {$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
 
+function SGStreamCopyMemory(const Stream : TStream) : TMemoryStream; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGCopyPartStreamToStream(const Source, Destination : TStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemoryStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -52,6 +53,19 @@ implementation
 uses
 	 SaGeFileUtils
 	;
+
+function SGStreamCopyMemory(const Stream : TStream) : TMemoryStream; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if Stream <> nil then
+	begin
+	Result := TMemoryStream.Create();
+	Stream.Position := 0;
+	SGCopyPartStreamToStream(Stream, Result, Stream.Size);
+	Result.Position := 0;
+	end
+else
+	Result := nil;
+end;
 
 procedure SGKill(var Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
 begin

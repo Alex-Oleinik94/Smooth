@@ -18,6 +18,11 @@ uses
 	;
 type
 	TSGInternetConnectionSizeInt = TSGUInt64;
+	TSGConnectionDataType = (
+		SGNoData,
+		SGSenderData,
+		SGRecieverData);
+	
 	TSGInternetConnection = class(TSGNamed)
 			public
 		constructor Create(); override;
@@ -77,7 +82,7 @@ type
 		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
 		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
 			public
-		function HandleData(const Stream : TStream) : TSGBoolean; virtual;
+		function HandleData(const Stream : TStream) : TSGConnectionDataType; virtual;
 		function HasData() : TSGBoolean; virtual;
 		function CountData() : TSGMaxEnum; virtual;
 		end;
@@ -107,6 +112,7 @@ uses
 	,SaGeTextFileStream
 	,SaGeStreamUtils
 	,SaGeStringUtils
+	,SaGeInternetDumperBase
 	;
 
 procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -232,8 +238,8 @@ FillChar(FTimeFirstPacket, SizeOf(FTimeFirstPacket), 0);
 FillChar(FTimeLastPacket, SizeOf(FTimeLastPacket), 0);
 FillChar(FDateFirstPacket, SizeOf(FDateFirstPacket), 0);
 FillChar(FDateLastPacket, SizeOf(FDateLastPacket), 0);
-FPacketDataFileExtension := 'ipdpd';
-FPacketInfoFileExtension := 'ini';
+FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
+FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 end;
 
 destructor TSGInternetConnection.Destroy();
@@ -243,9 +249,9 @@ SGKill(FPacketStorage);
 inherited;
 end;
 
-function TSGInternetConnection.HandleData(const Stream : TStream) : TSGBoolean;
+function TSGInternetConnection.HandleData(const Stream : TStream) : TSGConnectionDataType;
 begin
-Result := False;
+Result := SGNoData;
 end;
 
 function TSGInternetConnection.HasData() : TSGBoolean;

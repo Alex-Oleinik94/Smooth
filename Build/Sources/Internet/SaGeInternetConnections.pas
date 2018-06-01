@@ -42,6 +42,7 @@ type
 		FOutDumpDirectory : TSGString;
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
+		FDeviceInformationFileExtension : TSGString;
 			public
 		procedure Loop(); override;
 			protected
@@ -84,6 +85,7 @@ uses
 	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeTextFileStream
+	,SaGeInternetDumperBase
 	
 	,StrMan
 	;
@@ -308,7 +310,7 @@ else
 	if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 		CreateDeviceInformationFile(Identificator, 
 			NewConnection.ConnectionDumpDirectory + DirectorySeparator + 'Device' + 
-				Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension));
+				Iff(FDeviceInformationFileExtension <> '', '.' + FDeviceInformationFileExtension));
 	end;
 end;
 
@@ -388,8 +390,9 @@ FModeRuntimeDataDumper := False;
 FModeRuntimePacketDumper := False;
 FDumpDirectory := '';
 FOutDumpDirectory := '';
-FPacketDataFileExtension := 'ipdpd';
-FPacketInfoFileExtension := 'ini';
+FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
+FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
+FDeviceInformationFileExtension := SaGeInternetDumperBase.DeviceInformationFileExtension;
 end;
 
 destructor TSGInternetConnections.Destroy();

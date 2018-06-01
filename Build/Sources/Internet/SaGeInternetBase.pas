@@ -346,7 +346,7 @@ type
 		end;
 
 const
-	SG_TCP_BUFFER_SIZE = 2 * $10000;
+	SG_TCP_WINDOW_SIZE = $10000;
 type
 	// TCP Sequence
 	TSGTcpSequence = TSGUInt32;

@@ -21,7 +21,7 @@ type
 			private
 		FGeneralDirectory : TSGString;
 		FPacketDataFileExtension : TSGString;
-		FDeviceInfarmationFileExtension : TSGString;
+		FDeviceInformationFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 			private
 		procedure PrintInformation(const NowDateTime : TSGDateTime);
@@ -49,6 +49,7 @@ uses
 	,SaGeTextFileStream
 	,SaGeTextConsoleStream
 	,SaGeBaseUtils
+	,SaGeInternetDumperBase
 	;
 
 // ==========================================
@@ -70,7 +71,7 @@ begin
 Device := FindDevice(Identificator);
 DeviceDirectory := FGeneralDirectory + DirectorySeparator + Device^.DeviceDescription;
 SGMakeDirectory(DeviceDirectory);
-CreateDeviceInformationFile(Identificator, DeviceDirectory + '.' + FDeviceInfarmationFileExtension);
+CreateDeviceInformationFile(Identificator, DeviceDirectory + '.' + FDeviceInformationFileExtension);
 Device^.AdditionalOptions += SGDoubleString(SGDumperDeviceDirectoryIdentifier, DeviceDirectory);
 end;
 
@@ -168,9 +169,9 @@ constructor TSGInternetPacketRuntimeDumper.Create();
 begin
 inherited;
 UpdateGeneralDirectory(False);
-FPacketDataFileExtension := 'ipdpd';
-FDeviceInfarmationFileExtension := 'ini';
-FPacketInfoFileExtension := 'ini';
+FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
+FDeviceInformationFileExtension := SaGeInternetDumperBase.DeviceInformationFileExtension;
+FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 PossibilityBreakLoopFromConsole := True;
 ProcessTimeOutUpdates := True;
 InfoTimeOut := 90;
