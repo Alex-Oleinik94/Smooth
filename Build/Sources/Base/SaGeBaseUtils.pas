@@ -11,7 +11,8 @@ uses
 // Sort
 type
 	TSGQuickSortFunction = function (var a, b) : TSGBoolean;
-procedure SGQuickSort(var Arr; const ArrLength, SizeOfElement : TSGUInt64; const SortFunction : TSGQuickSortFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+	TSGQuickSortInt = TSGInt64;
+procedure SGQuickSort(var Arr; const ArrLength, SizeOfElement : TSGQuickSortInt; const SortFunction : TSGQuickSortFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 // If
 function Iff(const b : TSGBoolean; const s1 : TSGString;  const s2 : TSGString  = ''   ) : TSGString ;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -340,33 +341,28 @@ else
 	Result := s2;
 end;
 
-procedure SGQuickSort(var Arr; const ArrLength, SizeOfElement : TSGUInt64;const SortFunction : TSGQuickSortFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGQuickSort(var Arr; const ArrLength, SizeOfElement : TSGQuickSortInt; const SortFunction : TSGQuickSortFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure Sort(const L, R : TSGUInt64);
+procedure Sort(const L, R : TSGQuickSortInt);
 var
-	i, j : TSGUInt64;
-	Key, Temp : PSGByte;
+	i, j : TSGQuickSortInt;
+	Key : PSGByte;
 begin
 i := L;
 j := R;
 GetMem(Key, SizeOfElement);
-GetMem(Temp, SizeOfElement);
 Move(PSGByte(TSGMaxEnum(@Arr) + ((L + R) div 2) * SizeOfElement)^, Key^, SizeOfElement);
 repeat
 while SortFunction(PSGByte(TSGMaxEnum(@Arr) + i * SizeOfElement)^, Key^) do i += 1;
 while SortFunction(Key^, PSGByte(TSGMaxEnum(@Arr) + j * SizeOfElement)^) do j -= 1;
 if i <= j then
 	begin
-	Move(PSGByte(TSGMaxEnum(@Arr) + i * SizeOfElement)^, Temp^, SizeOfElement);
-	Move(PSGByte(TSGMaxEnum(@Arr) + j * SizeOfElement)^,
-		 PSGByte(TSGMaxEnum(@Arr) + i * SizeOfElement)^, SizeOfElement);
-	Move(Temp^, PSGByte(TSGMaxEnum(@Arr) + j * SizeOfElement)^, SizeOfElement);
+	Swap(PSGByte(TSGMaxEnum(@Arr) + i * SizeOfElement)^, PSGByte(TSGMaxEnum(@Arr) + j * SizeOfElement)^, SizeOfElement);
 	i += 1;
 	j -= 1;
 	end;
 until i > j;
 FreeMem(Key);
-FreeMem(Temp);
 if L < j Then Sort(L, j);
 if i < R Then Sort(i, R);
 end;
