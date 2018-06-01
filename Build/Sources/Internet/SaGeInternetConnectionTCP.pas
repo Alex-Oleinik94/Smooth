@@ -13,6 +13,8 @@ uses
 	,SaGeEthernetPacketFrame
 	,SaGeTextStream
 	,SaGeInternetPacketStorage
+	,SaGeCriticalSection
+	,SaGeStreamUtils
 	
 	,Classes
 	;
@@ -23,12 +25,23 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			protected
+		FCritacalSectionTCP : TSGCriticalSection;
 		FSourcePort, FDestinationPort : TSGUInt16;
 		FSourceAddress, FDestinationAddress : TSGIPv4Address;
+		
+		// TCP protocol emulation
+		FBuffer : TSGTcpSequenceBuffer;
+		FFirstBufferElement : TSGInt32;
+		FFirstBufferElementAddress : TSGTcpSequence;
+		FFirstBufferElementSeted : TSGBoolean;
+		FAcknowledgement : TSGTcpSequence;
 		FFinalized : TSGBoolean;
 		
-		FBuffer : TSGTcpSequenceBuffer;
-		FAcknowledgement : TSGTcpSequence;
+		// Data transfer
+		FPushedData : TSGMemoryStreamList;
+		
+		// Data dumper
+		FCountDataDumps : TSGUInt64;
 			public
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); override;
 			protected
@@ -42,10 +55,15 @@ type
 		function InitFirstPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 		function InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 		procedure PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+		procedure DumpData(const Stream : TStream);
 			public
-		procedure HandleData(const Stream : TStream); virtual;
-		function HasData() : TSGBoolean; virtual;
-		function CountData() : TSGMaxEnum; virtual;
+		function HandleData(const Stream : TStream) : TSGBoolean; override;
+		function HasData() : TSGBoolean; override;
+		function CountData() : TSGMaxEnum; override;
+			protected
+		procedure ResetBuffer();
+		procedure PushData(const Number : TSGTcpSequence); overload;
+		procedure PushData(var Stream : TMemoryStream); overload;
 		end;
 
 implementation
@@ -55,8 +73,6 @@ uses
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeLog
-	,SaGeTextFileStream
-	,SaGeStreamUtils
 	
 	,StrMan
 	;
@@ -66,14 +82,80 @@ begin
 
 end;
 
+procedure TSGInternetConnectionTCP.PushData(const Number : TSGTcpSequence); overload;
+var
+	Stream : TMemoryStream = nil;
+begin
+if FFirstBufferElementSeted and (Number - FFirstBufferElementAddress > 0) then
+	begin
+	Stream := TMemoryStream.Create();
+	Stream.Write(FBuffer[FFirstBufferElement + Number - FFirstBufferElementAddress], Number - FFirstBufferElementAddress);
+	FFirstBufferElement += Number - FFirstBufferElementAddress;
+	FFirstBufferElementAddress := Number;
+	PushData(Stream);
+	end;
+end;
+
+procedure TSGInternetConnectionTCP.DumpData(const Stream : TStream);
+var
+	FileStream : TFileStream = nil;
+begin
+FCountDataDumps += 1;
+
+FileStream := TFileStream.Create(FConnectionDataDumpDirectory + DirectorySeparator + SGStr(FCountDataDumps), fmCreate);
+Stream.Position := 0;
+SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
+SGKill(FileStream);
+end;
+
+procedure TSGInternetConnectionTCP.PushData(var Stream : TMemoryStream); overload;
+begin
+if FModeDataTransfer then
+	FPushedData += Stream;
+if FModeRuntimeDataDumper then
+	DumpData(Stream);
+if not FModeDataTransfer then
+	SGKill(Stream);
+end;
+
 procedure TSGInternetConnectionTCP.PutData(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 begin
+if not FFirstBufferElementSeted then
+	begin
+	FFirstBufferElement := 0;
+	FFirstBufferElementSeted := True;
+	FFirstBufferElementAddress := TcpSequencePointer;
+	end;
+Stream.Position := 0;
+Stream.Read(FBuffer[FFirstBufferElement + TcpSequencePointer - FFirstBufferElementAddress], Stream.Size);
+end;
 
+procedure TSGInternetConnectionTCP.ResetBuffer();
+begin
+FillChar(FBuffer^, SG_TCP_BUFFER_SIZE, 0);
+FAcknowledgement := 0;
+FFirstBufferElement := 0;
+FFirstBufferElementSeted := False;
+FFirstBufferElementAddress := 0;
 end;
 
 procedure TSGInternetConnectionTCP.HandlePacket(const Packet : TSGEthernetPacketFrame);
 begin
-// todo: data transfer/dumper mode
+if AddressMatchesNetMask(Packet.IPv4^.Destination) then
+	begin
+	FCritacalSectionTCP.Enter();
+	
+	if Packet.Data <> nil then
+		PutData(Packet.TCPIP^.SequenceNumber, Packet.Data);
+	if Packet.TCPIP^.Acknowledgement then
+		PutAcknowledgement(Packet.TCPIP^.AcknowledgementNumber);
+	if Packet.TCPIP^.Push then
+		PushData(Packet.TCPIP^.SequenceNumber + Packet.Data.Size);
+	if Packet.TCPIP^.Reset then
+		ResetBuffer();
+	
+	FCritacalSectionTCP.Leave();
+	end;
 end;
 
 procedure TSGInternetConnectionTCP.DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
@@ -83,9 +165,6 @@ var
 	Description : TSGString;
 	FileNameInfo : TSGString;
 	FileNameData : TSGString;
-	TextStream : TSGTextFileStream = nil;
-	FileStream : TFileStream = nil;
-	Stream : TMemoryStream = nil;
 begin
 DateTimeString := SGDateTimeCorrectionString(Date, Time, True);
 FileName := FConnectionPacketDumpDirectory + DirectorySeparator + DateTimeString + ' {' + SGStr(FPacketCount) + '}';
@@ -95,23 +174,7 @@ if Description <> '' then
 FileNameInfo := FileName + Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension, '');
 FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketDataFileExtension, '');
 
-TextStream := TSGTextFileStream.Create(FileNameInfo);
-TextStream.WriteLn('[packet]');
-TextStream.WriteLn(['DataTime = ', SGDateTimeCorrectionString(Date, Time, False)]);
-TextStream.WriteLn(['Size     = ', SGGetSizeString(Packet.Size, 'EN')]);
-TextStream.WriteLn();
-Packet.ExportInfo(TextStream);
-SGKill(TextStream);
-
-Stream := Packet.CreateStream();
-if Stream <> nil then
-	begin
-	FileStream := TFileStream.Create(FileNameData, fmCreate);
-	Stream.Position := 0;
-	SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
-	SGKill(FileStream);
-	SGKill(Stream);
-	end;
+DumpPacketFiles(Time, Date, Packet, FileNameInfo, FileNameData);
 end;
 
 procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
@@ -198,7 +261,7 @@ FSourcePort := Packet.TCPIP^.SourcePort;
 FDestinationPort := Packet.TCPIP^.DestinationPort;
 FSourceAddress := Packet.IPv4^.Source;
 FDestinationAddress := Packet.IPv4^.Destination;
-FFirstPacketIsSelfSender := not ((FDeviceIPv4Mask.Address and FDestinationAddress.Address) = FDeviceIPv4Net.Address);
+FFirstPacketIsSelfSender := not AddressMatchesNetMask(FDestinationAddress);
 
 if FDeviceIPv4Supported and (not FFirstPacketIsSelfSender) then
 	begin
@@ -221,7 +284,8 @@ end;
 function TSGInternetConnectionTCP.InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := 
-	((((Packet.TCPIP^.SourcePort = FSourcePort) and
+	((
+	  ((Packet.TCPIP^.SourcePort = FSourcePort) and
 	  (Packet.IPv4^.Source = FSourceAddress))
 	  and
 	  ((Packet.TCPIP^.DestinationPort = FDestinationPort) and
@@ -243,7 +307,7 @@ FDateLastPacket := Date;
 FDataSize += Packet.Size;
 FPacketCount += 1;
 
-if Packet.TCPIP^.Final {or Packet.TCPIP^.Reset} then
+if Packet.TCPIP^.Final then
 	FFinalized := True;
 if FModeDataTransfer or FModeRuntimeDataDumper then
 	HandlePacket(Packet);
@@ -277,9 +341,12 @@ FSourcePort := 0;
 FDestinationAddress := 0;
 FDestinationPort := 0;
 FFinalized := False;
-FAcknowledgement := 0;
 FBuffer := GetMem(SG_TCP_BUFFER_SIZE);
 FillChar(FBuffer^, SG_TCP_BUFFER_SIZE, 0);
+ResetBuffer();
+FCritacalSectionTCP := TSGCriticalSection.Create();
+FPushedData := nil;
+FCountDataDumps := 0;
 end;
 
 destructor TSGInternetConnectionTCP.Destroy();
@@ -289,21 +356,36 @@ if FBuffer <> nil then
 	FreeMem(FBuffer, SG_TCP_BUFFER_SIZE);
 	FBuffer := nil;
 	end;
+SGKill(FCritacalSectionTCP);
 inherited;
 end;
 
-procedure TSGInternetConnectionTCP.HandleData(const Stream : TStream);
+function TSGInternetConnectionTCP.HandleData(const Stream : TStream) : TSGBoolean;
+var
+	MemStream : TMemoryStream;
 begin
+Result := False;
+if (FPushedData <> nil) and (Length(FPushedData) > 0) then
+	begin
+	Result := True;
+	MemStream := FPushedData[0];
+	FPushedData -= MemStream;
+	MemStream.Position := 0;
+	SGCopyPartStreamToStream(MemStream, Stream, MemStream.Size);
+	SGKill(MemStream);
+	end;
 end;
 
 function TSGInternetConnectionTCP.HasData() : TSGBoolean;
 begin
-Result := False;
+Result := CountData() > 0;
 end;
 
 function TSGInternetConnectionTCP.CountData() : TSGMaxEnum;
 begin
 Result := 0;
+if (FPushedData <> nil) then
+	Result := Length(FPushedData);
 end;
 
 initialization

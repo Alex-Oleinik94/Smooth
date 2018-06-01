@@ -306,7 +306,9 @@ else
 	FCriticalSection.Leave();
 	
 	if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
-		CreateDeviceInformationFile(Identificator, NewConnection.ConnectionDumpDirectory + DirectorySeparator + 'Device.ini');
+		CreateDeviceInformationFile(Identificator, 
+			NewConnection.ConnectionDumpDirectory + DirectorySeparator + 'Device' + 
+				Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension));
 	end;
 end;
 

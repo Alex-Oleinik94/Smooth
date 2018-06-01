@@ -11,6 +11,20 @@ uses
 	,Classes
 	;
 
+{$DEFINE  INC_PLACE_INTERFACE}
+{$DEFINE DATATYPE_LIST_HELPER := TSGStreamListHelper}
+{$DEFINE DATATYPE_LIST        := TSGStreamList}
+{$DEFINE DATATYPE             := TStream}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+
+{$DEFINE DATATYPE_LIST_HELPER := TSGMemoryStreamListHelper}
+{$DEFINE DATATYPE_LIST        := TSGMemoryStreamList}
+{$DEFINE DATATYPE             := TMemoryStream}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+{$UNDEF   INC_PLACE_INTERFACE}
+
 procedure SGCopyPartStreamToStream(const Source, Destination : TStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemoryStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -213,5 +227,19 @@ while ((not (C in Eolns)) or First) and (Stream.Position <> Stream.Size) do
 	First := False;
 	end;
 end;
+
+{$DEFINE  INC_PLACE_IMPLEMENTATION}
+{$DEFINE DATATYPE_LIST_HELPER := TSGStreamListHelper}
+{$DEFINE DATATYPE_LIST        := TSGStreamList}
+{$DEFINE DATATYPE             := TStream}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+
+{$DEFINE DATATYPE_LIST_HELPER := TSGMemoryStreamListHelper}
+{$DEFINE DATATYPE_LIST        := TSGMemoryStreamList}
+{$DEFINE DATATYPE             := TMemoryStream}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+{$UNDEF   INC_PLACE_IMPLEMENTATION}
 
 end.

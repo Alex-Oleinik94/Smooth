@@ -54,9 +54,12 @@ type
 			protected
 		procedure CreateConnectionDumpDirectory(); virtual;
 		function PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
+		procedure DumpPacketFiles(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName, DataFileName : TSGString);
+		procedure DumpPacketInfoFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName : TSGString);
+		procedure DumpPacketDataFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const DataFileName : TSGString);
+		function AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
 			public
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); virtual;
-			public
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		procedure AddDeviceIPv4(const Net, Mask : TSGIPv4Address); virtual;
@@ -73,6 +76,10 @@ type
 		property ConnectionDumpDirectory : TSGString read FConnectionDumpDirectory;
 		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
 		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
+			public
+		function HandleData(const Stream : TStream) : TSGBoolean; virtual;
+		function HasData() : TSGBoolean; virtual;
+		function CountData() : TSGMaxEnum; virtual;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -93,9 +100,13 @@ type
 procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
 uses
 	 SaGeStringTextStream
 	,SaGeFileUtils
+	,SaGeTextFileStream
+	,SaGeStreamUtils
+	,SaGeStringUtils
 	;
 
 procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -105,6 +116,48 @@ if Variable <> nil then
 	Variable.Destroy();
 	Variable := nil;
 	end;
+end;
+
+function TSGInternetConnection.AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
+begin
+Result := False;
+if FDeviceIPv4Supported then
+	Result := (FDeviceIPv4Mask.Address and AddressValue.Address) = FDeviceIPv4Net.Address;
+end;
+
+procedure TSGInternetConnection.DumpPacketInfoFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName : TSGString);
+var
+	TextStream : TSGTextFileStream = nil;
+begin
+TextStream := TSGTextFileStream.Create(InfoFileName);
+TextStream.WriteLn('[packet]');
+TextStream.WriteLn(['DataTime = ', SGDateTimeCorrectionString(Date, Time, False)]);
+TextStream.WriteLn(['Size     = ', SGGetSizeString(Packet.Size, 'EN')]);
+TextStream.WriteLn();
+Packet.ExportInfo(TextStream);
+SGKill(TextStream);
+end;
+
+procedure TSGInternetConnection.DumpPacketDataFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const DataFileName : TSGString);
+var
+	FileStream : TFileStream = nil;
+	Stream : TMemoryStream = nil;
+begin
+Stream := Packet.CreateStream();
+if Stream <> nil then
+	begin
+	FileStream := TFileStream.Create(DataFileName, fmCreate);
+	Stream.Position := 0;
+	SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
+	SGKill(FileStream);
+	SGKill(Stream);
+	end;
+end;
+
+procedure TSGInternetConnection.DumpPacketFiles(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName, DataFileName : TSGString);
+begin
+DumpPacketInfoFile(Time, Date, Packet, InfoFileName);
+DumpPacketDataFile(Time, Date, Packet, DataFileName);
 end;
 
 function TSGInternetConnection.PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
@@ -188,6 +241,21 @@ begin
 SGKill(FCritacalSection);
 SGKill(FPacketStorage);
 inherited;
+end;
+
+function TSGInternetConnection.HandleData(const Stream : TStream) : TSGBoolean;
+begin
+Result := False;
+end;
+
+function TSGInternetConnection.HasData() : TSGBoolean;
+begin
+Result := False;
+end;
+
+function TSGInternetConnection.CountData() : TSGMaxEnum;
+begin
+Result := 0;
 end;
 
 {$DEFINE  INC_PLACE_IMPLEMENTATION}
