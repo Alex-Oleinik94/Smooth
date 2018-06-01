@@ -1497,6 +1497,7 @@ uses
 	,SaGeDllManager
 	,SaGeSysUtils
 	,SaGeStringUtils
+	,SaGeLists
 	;
 
 

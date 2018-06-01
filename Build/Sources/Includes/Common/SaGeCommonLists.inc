@@ -41,7 +41,7 @@
 
 {$IFDEF  INC_PLACE_INTERFACE}
 type
-	TSGMaxEnumList =
+	TSGMaxFloatList =
 		{$IFNDEF WITHOUT_EXTENDED}
 			TSGFloat80List
 		{$ELSE WITHOUT_EXTENDED}
@@ -103,6 +103,28 @@ type
 {$DEFINE DATATYPE             := TSGInt64}
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
+
+{$IFDEF  INC_PLACE_INTERFACE}
+type
+	TSGMaxEnumList =
+		{$IFDEF CPU64}
+			TSGUInt64List
+		{$ELSE} {$IFDEF CPU32}
+			TSGUInt32List
+		{$ELSE} {$IFDEF CPU16}
+			TSGUInt16List
+		{$ENDIF}{$ENDIF}{$ENDIF}
+		;
+	TSGMaxSignedEnumList =
+		{$IFDEF CPU64}
+			TSGInt64List
+		{$ELSE} {$IFDEF CPU32}
+			TSGInt32List
+		{$ELSE} {$IFDEF CPU16}
+			TSGInt16List
+		{$ENDIF}{$ENDIF}{$ENDIF}
+		;
+{$ENDIF  INC_PLACE_INTERFACE}
 
 {$DEFINE DATATYPE_LIST_HELPER := TSGSettingsHelper}
 {$DEFINE DATATYPE_LIST        := TSGSettings}

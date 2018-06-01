@@ -11,6 +11,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
+	,SaGeScreenHelper
 	;
 
 type
@@ -24,8 +25,8 @@ type
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const n,v0,v1,v2:TSGVertex3f;var FVertexIndex:LongWord);Inline;
 			protected
-		FLD,FLDC:TSGLabel;
-		FBPD,FBMD:TSGButton;
+		FLD, FLDC : TSGScreenLabel;
+		FBPD, FBMD : TSGButton;
 		Radius:TSGSingle;
 		FArNor:packed array[0..3] of TSGVertex3f;
 		bb0,bb1,bb2,bb3:TSGVertex3f;
@@ -41,7 +42,6 @@ uses
 	,SaGeVertexObject
 	,SaGeScreenBase
 	,SaGeStringUtils
-	,SaGeScreenHelper
 	;
 
 class function TSGFractalTetraider.ClassName():TSGString;

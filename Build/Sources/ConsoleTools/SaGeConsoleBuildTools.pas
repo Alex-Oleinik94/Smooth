@@ -33,6 +33,7 @@ uses
 	,SysUtils
 	
 	,SaGeVersion
+	,SaGeLists
 	,SaGeResourceManager
 	,SaGeMakefileReader
 	,SaGePackages

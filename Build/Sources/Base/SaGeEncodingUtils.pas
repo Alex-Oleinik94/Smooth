@@ -52,6 +52,7 @@ implementation
 uses
 	 StrMan
 	
+	,SaGeLists
 	{$IFDEF MSWINDOWS}
 		,SaGeWindowsUtils
 		{$ENDIF}

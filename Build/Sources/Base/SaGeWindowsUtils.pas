@@ -13,6 +13,7 @@ uses
 	
 	,SaGeBase
 	,SaGeCasesOfPrint
+	,SaGeLists
 	;
 
 function SGWindowsVersion(): TSGString;

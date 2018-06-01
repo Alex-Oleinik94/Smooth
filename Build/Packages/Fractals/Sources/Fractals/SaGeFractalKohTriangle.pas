@@ -10,6 +10,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
+	,SaGeScreenHelper
 	;
 
 type
@@ -24,8 +25,8 @@ type
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const v1,v2,v3:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);Inline;
 			protected
-		FLD,FLDC:TSGLabel;
-		FBPD,FBMD:TSGButton;
+		FLD, FLDC : TSGScreenLabel;
+		FBPD, FBMD : TSGButton;
 		end;
 
 implementation
@@ -35,7 +36,6 @@ uses
 	,SaGeStringUtils
 	,SaGeVertexObject
 	,SaGeScreenBase
-	,SaGeScreenHelper
 	;
 
 class function TSGFractalKohTriangle.ClassName():TSGString;

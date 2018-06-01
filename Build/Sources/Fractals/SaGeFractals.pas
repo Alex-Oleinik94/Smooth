@@ -25,6 +25,7 @@ uses
 	,SaGeScreenBase
 	,SaGeThreads
 	,SaGeCamera
+	,SaGeScreenHelper
 	;
 type
 	TSGFractal = class;
@@ -110,7 +111,7 @@ type
 		property EnableColors   : TSGBoolean read FEnableColors   write FEnableColors;
 			public
 		FProjectionComboBox,FEffectsComboBox:TSGComboBox;
-		FSizeLabel:TSGLabel;
+		FSizeLabel : TSGScreenLabel;
 		FSizeLabelFlag:Boolean;
 			public
 		procedure InitProjectionComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
@@ -143,7 +144,6 @@ implementation
 
 uses
 	 SaGeStringUtils
-	,SaGeScreenHelper
 	;
 
 procedure TSG3DFractal.DeleteDeviceResources();

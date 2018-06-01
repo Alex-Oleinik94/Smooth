@@ -980,6 +980,7 @@ implementation
 
 uses
 	 SaGeBase
+	,SaGeLists
 	,SaGeDllManager
 	,SaGeSysUtils
 	,SaGeStringUtils

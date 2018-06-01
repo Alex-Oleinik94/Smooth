@@ -12,6 +12,7 @@ uses
 	
 	,SaGeBase
 	,SaGeEncodingUtils
+	,SaGeLists
 	;
 
 type

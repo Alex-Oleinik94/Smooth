@@ -27,6 +27,7 @@ uses
 	,SaGePackages
 	,SaGeFileUtils
 	,SaGeCamera
+	,SaGeScreenHelper
 	;
 
 const
@@ -127,7 +128,7 @@ type
 		
 		//New Panel
 		FEdgeEdit               : TSGEdit;
-		FNumberLabel            : TSGLabel;
+		FNumberLabel            : TSGScreenLabel;
 		FStartSceneButton,
 		FBoundsTypeButton,
 			FEnableLoadButton   : TSGButton;
@@ -140,7 +141,7 @@ type
 			FLoadButton    : TSGButton;
 		
 		//Экран
-		FInfoLabel : TSGLabel;
+		FInfoLabel : TSGScreenLabel;
 		
 			(* Сечение *)
 		
@@ -163,7 +164,7 @@ type
 		
 			(*Экран моделирования*)
 		FConchLabels : packed array of
-			TSGLabel;
+			TSGScreenLabel;
 		FAddNewSourseButton, 					// новый источник газа
 			FAddNewGazButton,					// навый тип газа
 			FStartEmulatingButton,				// пуск эмуляции
@@ -215,6 +216,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLists
 	,SaGeMathUtils
 	,SaGeRenderInterface
 	,SaGeMatrix
@@ -2028,10 +2030,7 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.LastChild.Caption:='+';
 	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFAddAddNewGazButtonProcedure);
 	
-	FAddNewGazPanel.CreateChild(TSGLabel.Create());//3
-	FAddNewGazPanel.LastChild.SetBounds(0,25,50,18);
-	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	FAddNewGazPanel.LastChild.Caption:='Цвет:';
+	SGCreateLabel(FAddNewGazPanel, 'Цвет:', 0,25,50,18, False, True);//3
 	
 	FAddNewGazPanel.CreateChild(TSGGDrawColor.Create());//4
 	FAddNewGazPanel.LastChild.SetBounds(50,26,75,18);
@@ -2264,10 +2263,7 @@ if FAddNewSoursePanel = nil then
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	(FAddNewSoursePanel.LastChild as TSGEdit).TextType := SGEditTypeNumber;
 	
-	FAddNewSoursePanel.CreateChild(TSGLabel.Create());//5
-	FAddNewSoursePanel.LastChild.SetBounds(3,69-21,(pw div 2) - 10,18);
-	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
-	FAddNewSoursePanel.LastChild.Caption:='Радиус:';
+	SGCreateLabel(FAddNewSoursePanel, 'Радиус:', 3,69-21,(pw div 2) - 10,18, False, True);//5
 	
 	FAddNewSoursePanel.CreateChild(TSGButton.Create());//6
 	FAddNewSoursePanel.LastChild.SetBounds(3,69+21,pw - 10,18);
@@ -2929,7 +2925,7 @@ if (FileWay <> '') and (SGFileExists(FileWay)) then
 	FRelefRedactor.SingleRelief^.FType := T;
 	FRelefRedactor.SingleRelief^.FEnabled := E;
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SGFileName(FileWay)+'.'+SGDownCaseString(SGFileExpansion(FileWay))+')';
-	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(0,1,0,1);
+	(FRelefOptionPanel.Children[1] as TSGScreenLabel).TextColor := SGVertex4fImport(0,1,0,1);
 	end;
 if IsInFullscreen then
 	Context.Fullscreen := True;
@@ -2973,7 +2969,7 @@ Button.Active := False;
 if FRelefOptionPanel <> nil then
 	begin
 	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:теоритически изменен';
-	(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(0,1,0,1);
+	(FRelefOptionPanel.Children[1] as TSGScreenLabel).TextColor := SGVertex4fImport(0,1,0,1);
 	end;
 if FRelefRedactor <> nil then
 	FRelefRedactor.StopRedactoring();
@@ -3036,12 +3032,7 @@ if (FRelefOptionPanel = nil) then
 	Screen.LastChild.Visible:=True;
 	Screen.LastChild.VisibleTimer := 0.3;
 	
-	FRelefOptionPanel.CreateChild(TSGLabel.Create());
-	FRelefOptionPanel.LastChild.Caption := 'Статус рельефа:Неопределен';
-	FRelefOptionPanel.LastChild.Visible := True;
-	FRelefOptionPanel.LastChild.SetBounds(10,10,FRelefOptionPanel.Width - 30,19);
-	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
+	SGCreateLabel(FRelefOptionPanel, 'Статус рельефа:Неопределен', 10,10,FRelefOptionPanel.Width - 30,19, FTahomaFont, True, True, Button.UserPointer);
 	
 	FRelefOptionPanel.CreateChild(TSGButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Загрузить рельеф из файла';
@@ -3083,7 +3074,7 @@ else
 	FRelefOptionPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 	FRelefOptionPanel.VisibleTimer := 0.3;
 	end;
-(FRelefOptionPanel.Children[1] as TSGLabel).TextColor := SGVertex4fImport(1,0,0,1);
+(FRelefOptionPanel.Children[1] as TSGScreenLabel).TextColor := SGVertex4fImport(1,0,0,1);
 FNewScenePanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.Active := False;
@@ -3135,20 +3126,17 @@ FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateD
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 end;end;
 procedure CreteLabel(const vIndex : LongWord; const vPanel : TSGPanel);
+var
+	ScreenLabel : TSGScreenLabel;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FBoundsOptionsPanel.CreateChild(TSGLabel.Create());
-FBoundsOptionsPanel.LastChild.SetBounds(10 ,5+(19+5)*vIndex,FConstLabelsWidth,19);
-FBoundsOptionsPanel.LastChild.Visible:=True;
-FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
-FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
+ScreenLabel := SGCreateLabel(FBoundsOptionsPanel, '', 10 ,5+(19+5)*vIndex,FConstLabelsWidth,19, FTahomaFont, True, True, Button.UserPointer);
 case vIndex of
-0 : FBoundsOptionsPanel.LastChild.Caption := 'Верхняя';
-1 : FBoundsOptionsPanel.LastChild.Caption := 'Нижня';
-2 : FBoundsOptionsPanel.LastChild.Caption := 'Левая';
-3 : FBoundsOptionsPanel.LastChild.Caption := 'Правая';
-4 : FBoundsOptionsPanel.LastChild.Caption := 'Задняя';
-5 : FBoundsOptionsPanel.LastChild.Caption := 'Передняя';
+0 : ScreenLabel.Caption := 'Верхняя';
+1 : ScreenLabel.Caption := 'Нижня';
+2 : ScreenLabel.Caption := 'Левая';
+3 : ScreenLabel.Caption := 'Правая';
+4 : ScreenLabel.Caption := 'Задняя';
+5 : ScreenLabel.Caption := 'Передняя';
 end;
 end;end;
 procedure CreteLoadMeshButton(const vIndex : LongWord; const vPanel : TSGPanel);
@@ -3310,16 +3298,7 @@ if lghl < lghg + 1 then
 	j := lghl;
 	SetLength(FConchLabels,lghg + 1);
 	for i := j to lghg do
-		begin
-		FConchLabels[i] := TSGLabel.Create();
-		Screen.CreateChild(FConchLabels[i]);
-		FConchLabels[i].SetBounds(5,50+i*22,400,20);
-		FConchLabels[i].BoundsToNeedBounds();
-		FConchLabels[i].Visible:=True;
-		FConchLabels[i].Active:=True;
-		FConchLabels[i].TextPosition := False;
-		FConchLabels[i].Skin := FConchLabels[i].Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-		end;
+		FConchLabels[i] := SGCreateLabel(Screen, '', False, 5,50+i*22,400,20, FTahomaFont, True, True);
 	end
 else while lghl > lghg + 1 do
 	begin
@@ -3423,29 +3402,9 @@ Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.UserPointer:=Self;
 Screen.LastChild.Visible:=True;
 
-FNewScenePanel.CreateChild(TSGLabel.Create());
-FNewScenePanel.LastChild.Caption := 'Создание новой сцены';
-FNewScenePanel.LastChild.SetBounds(5,0,275+100,20);
-FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-
-FNewScenePanel.CreateChild(TSGLabel.Create());
-FNewScenePanel.LastChild.Caption := 'Количество точек:';
-FNewScenePanel.LastChild.SetBounds(5,19,280,20);
-FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
-
-FNumberLabel:=TSGLabel.Create();
-FNewScenePanel.CreateChild(FNumberLabel);
-FNewScenePanel.LastChild.Caption:='';
-FNewScenePanel.LastChild.SetBounds(170,19,180,20);
-FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-FNewScenePanel.LastChild.AsLabel.TextPosition:=False;
+SGCreateLabel(FNewScenePanel, 'Создание новой сцены', 5,0,275+100,20, FTahomaFont, True, True);
+SGCreateLabel(FNewScenePanel, 'Количество точек:', False, 5,19,280,20, FTahomaFont, True, True);
+FNumberLabel := SGCreateLabel(FNewScenePanel, '', False, 170,19,180,20, FTahomaFont, True, True);
 
 FStartSceneButton:=TSGButton.Create();
 FNewScenePanel.CreateChild(FStartSceneButton);
@@ -3508,12 +3467,7 @@ Screen.LastChild.Visible:=False;
 Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.UserPointer:=Self;
 
-FLoadScenePanel.CreateChild(TSGLabel.Create());
-FLoadScenePanel.LastChild.Caption := 'Загрузка сохраненной сцены/повтора';
-FLoadScenePanel.LastChild.SetBounds(5,0,275+140,20);
-FLoadScenePanel.LastChild.BoundsToNeedBounds();
-FLoadScenePanel.LastChild.Visible:=False;
-FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
+SGCreateLabel(FLoadScenePanel, 'Загрузка сохраненной сцены/повтора', 5,0,275+140,20, FTahomaFont, False, True);
 
 FLoadComboBox := TSGComboBox.Create();
 FLoadScenePanel.CreateChild(FLoadComboBox);
@@ -3564,14 +3518,7 @@ FLoadScenePanel.LastChild.Caption:='Открыть папку с сохранениями';
 FLoadScenePanel.LastChild.UserPointer:=Self;
 (FLoadScenePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFOpenSaveDir);
 
-FInfoLabel := TSGLabel.Create();
-Screen.CreateChild(FInfoLabel);
-Screen.LastChild.Caption := '';
-Screen.LastChild.SetBounds(5,Render.Height-25,Render.Width-10,20);
-Screen.LastChild.BoundsToNeedBounds();
-Screen.LastChild.Visible:=True;
-Screen.LastChild.Anchors:=[SGAnchBottom];
-Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
+FInfoLabel := SGCreateLabel(Screen, '', 5,Render.Height-25,Render.Width-10,20, FTahomaFont, [SGAnchBottom], True, True);
 end;
 
 procedure TSGGasDiffusion.UpDateChangeSourses();

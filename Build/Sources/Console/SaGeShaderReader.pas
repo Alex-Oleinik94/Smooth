@@ -8,6 +8,7 @@ uses
 	 Classes
 	
 	,SaGeBase
+	,SaGeLists
 	,SaGeClasses
 	,SaGeResourceManager
 	;

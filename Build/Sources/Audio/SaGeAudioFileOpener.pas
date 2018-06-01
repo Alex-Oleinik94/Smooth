@@ -7,6 +7,7 @@ uses
 	 Classes
 	
 	,SaGeBase
+	,SaGeLists
 	,SaGeClasses
 	,SaGeFileOpener
 	,SaGeContext

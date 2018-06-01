@@ -75,7 +75,7 @@ type
 			FP100Button,
 			FM100Button : TSGButton;
 		FFont : TSGFont;
-		FCountLabel : TSGLabel;
+		FCountLabel : TSGScreenLabel;
 		end;
 
 {$IFDEF ENGINE}

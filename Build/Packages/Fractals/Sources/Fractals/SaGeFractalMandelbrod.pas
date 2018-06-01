@@ -16,6 +16,7 @@ uses
 	,SaGeFont
 	,SaGeBezierCurve
 	,SaGeComplex
+	,SaGeScreenHelper
 	;
 
 type
@@ -99,8 +100,8 @@ type
 		SecondImage:TSGImage;
 		
 		LabelProcent:TSGProgressBar;
-		LblProcent:TSGLabel;
-		LabelCoord:TSGLabel;
+		LblProcent : TSGScreenLabel;
+		LabelCoord : TSGScreenLabel;
 		ScreenshotPanel:TSGPanel;
 		
 		StartDepth:LongInt;
@@ -139,7 +140,7 @@ type
 		FButtonEnableCurve:TSGButton;
 		FBezierCurvePanel:TSGPanel;
 		FBezierCurveEditKadr:TSGEdit;
-		FBezierCurveLabelPoints:TSGLabel;
+		FBezierCurveLabelPoints : TSGScreenLabel;
 		FBezierCurveGoButton:TSGButton;
 		
 		FBezierCurveKadrProgressBar:TSGProgressBar;
@@ -159,7 +160,7 @@ type
 		
 		FCurvePointPanel:TSGPanel;
 		FCurvePCB:TSGCOmboBox;
-		FCurveInfoLbl:TSGLabel;
+		FCurveInfoLbl : TSGScreenLabel;
 		FCurveBeginDataTime:TSGDateTime;
 		
 		FTNRF:TSGFont;
@@ -187,7 +188,6 @@ uses
 	,SaGeBitMap
 	,SaGeSysUtils
 	,SaGeBaseUtils
-	,SaGeScreenHelper
 	
 	,Crt
 	;

@@ -10,6 +10,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
+	,SaGeScreenHelper
 	;
 
 type
@@ -23,8 +24,8 @@ type
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID : TSGUInt32;const v : TSGVertex2f;var FVertexIndex:TSGUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
-		FLD,FLDC:TSGLabel;
-		FBPD,FBMD:TSGButton;
+		FLD, FLDC : TSGScreenLabel;
+		FBPD, FBMD : TSGButton;
 			protected
 		c17, c27, c37, c57 : TSGFloat64;
 		end;
@@ -37,7 +38,6 @@ uses
 	,SaGeVertexObject
 	,SaGeScreenBase
 	,SaGeMathUtils
-	,SaGeScreenHelper
 	;
 
 class function TSGFractalLomanaya.ClassName():TSGString;

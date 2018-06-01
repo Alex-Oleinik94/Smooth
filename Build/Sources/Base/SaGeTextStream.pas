@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeClasses
 	,SaGeTextStreamInterface
+	,SaGeLists
 	
 	,Classes
 	;

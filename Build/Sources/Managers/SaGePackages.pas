@@ -6,6 +6,7 @@ interface
 
 uses
 	 SaGeBase
+	,SaGeLists
 	,SaGeResourceManager
 	,SaGeCommonClasses
 	,SaGeDrawClasses

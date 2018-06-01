@@ -12,6 +12,7 @@ uses
 	,SaGeCommonClasses
 	,SaGeScreen
 	,SaGeFont
+	,SaGeScreenHelper
 	;
 type
 	TSGMengerSpunchBoolAr6=array[0..5] of TSGBool;
@@ -62,7 +63,7 @@ type
 			public
 		FComboBox1,FComboBox2:TSGComboBox;
 		FButtonDepthPlus,FButtonDepthMinus:TSGButton;
-		FLabelDepth,FLabelDepthCaption:TSGLabel;
+		FLabelDepth, FLabelDepthCaption : TSGScreenLabel;
 		FFont1:TSGFont;
 		procedure Calculate;override;
 		procedure Paint();override;
@@ -76,7 +77,6 @@ uses
 	,SaGeRenderBase
 	,SaGeThreads
 	,SaGeFileUtils
-	,SaGeScreenHelper
 	;
 
 {MENGER SPUNCH RELEASE}

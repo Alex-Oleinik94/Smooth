@@ -44,6 +44,7 @@ implementation
 
 uses
 	 SaGeStringUtils
+	,SaGeLists
 	;
 
 constructor TSGLeaksDetector.Create();

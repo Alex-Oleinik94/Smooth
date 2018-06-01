@@ -14,6 +14,7 @@ uses
 	,SaGeRender
 	,SaGeFont
 	,SaGeFPSViewer
+	,SaGeScreenHelper
 	;
 
 type
@@ -36,7 +37,7 @@ type
 		FContextsComboBox,
 			FRendersComboBox : TSGComboBox;
 		FCaptionLabel,
-			FVersionLabel : TSGLabel;
+			FVersionLabel : TSGScreenLabel;
 		FCloseButton : TSGButton;
 		FFPS : TSGFPSViewer;
 		end;
@@ -48,7 +49,6 @@ uses
 	,SaGeVersion
 	,SaGeRenderBase
 	,SaGeScreenBase
-	,SaGeScreenHelper
 	
 	,Classes
 	

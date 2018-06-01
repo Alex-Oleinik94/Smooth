@@ -466,6 +466,7 @@ implementation
 
 uses
 	 SaGeBase
+	,SaGeLists
 	,SaGeDllManager
 	,SaGeSysUtils
 	;
@@ -475,6 +476,7 @@ uses
 uses 
 	 FreeGlut
 	,SaGeBase
+	,SaGeLists
 	,SaGeDllManager
 	,SaGeSysUtils
 	;

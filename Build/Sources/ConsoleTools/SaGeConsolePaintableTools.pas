@@ -34,6 +34,7 @@ uses
 	
 	// Aditional Engine includes
 	,SaGePackages
+	,SaGeLists
 	,SaGeRender
 	,SaGeAudioRender
 	,SaGeDrawClasses

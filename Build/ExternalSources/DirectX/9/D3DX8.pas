@@ -5002,6 +5002,7 @@ implementation
 
 uses
 	 SaGeBase
+	,SaGeLists
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeSysUtils

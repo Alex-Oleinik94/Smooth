@@ -16,6 +16,7 @@ uses
 	,SaGeScreenBase
 	,SaGePackages
 	,SaGeDateTime
+	,SaGeScreenHelper
 	;
 
 type
@@ -102,8 +103,8 @@ type
 		procedure InitImages(const VWidthHeight : TSGLongWord; const VRadBool : TSGBoolean);
 			private
 		FButtonReset:TSGButton;
-		FQuantityComboBox,FComboBoxDeep,FDifficultyComboBox:TSGComboBox;
-		FTimerLabel,FLabebYouLose:TSGLabel;
+		FQuantityComboBox, FComboBoxDeep, FDifficultyComboBox:TSGComboBox;
+		FTimerLabel, FLabebYouLose : TSGScreenLabel;
 		FComboBoxRespamn,FGroundComboBox:TSGComboBox;
 			private
 		FImageZombi,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSGImage;
@@ -118,7 +119,6 @@ uses
 	,SaGeMathUtils
 	,SaGeCommon
 	,SaGeBaseUtils
-	,SaGeScreenHelper
 	;
 
 {$OVERFLOWCHECKS OFF}

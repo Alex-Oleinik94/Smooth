@@ -10,6 +10,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeScreen
+	,SaGeScreenHelper
 	;
 
 type
@@ -23,9 +24,9 @@ type
 		procedure CalculateFromThread();
 		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 			protected
-		FLD,FLDC:TSGLabel;
-		FBPD,FBMD:TSGButton;
-		FTCB:TSGComboBox;
+		FLD, FLDC : TSGScreenLabel;
+		FBPD, FBMD : TSGButton;
+		FTCB : TSGComboBox;
 		end;
 
 implementation
@@ -36,7 +37,6 @@ uses
 	,SaGeScreenBase
 	,SaGeStringUtils
 	,SaGeVertexObject
-	,SaGeScreenHelper
 	;
 
 class function TSGFractalPodkova.ClassName() : TSGString;

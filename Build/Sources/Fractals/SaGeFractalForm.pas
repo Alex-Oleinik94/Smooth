@@ -9,6 +9,7 @@ uses
 	,SaGeFractals
 	,SaGeScreen
 	,SaGeCommonClasses
+	,SaGeScreenHelper
 	;
 
 type
@@ -24,7 +25,7 @@ type
 		procedure FinalizeCalculateFromThread(const MeshID : TSGUInt32); virtual;
 		function RecQuantity(const RecDepth : TSGMaxEnum) : TSGMaxEnum; virtual; abstract;
 			protected
-		FLD,FLDC:TSGLabel;
+		FLD, FLDC : TSGScreenLabel;
 		FBPD,FBMD:TSGButton;
 			protected
 		FIs2D : TSGBoolean;
@@ -39,7 +40,6 @@ uses
 	,SaGeRenderBase
 	,SaGeVertexObject
 	,SaGeScreenBase
-	,SaGeScreenHelper
 	;
 
 procedure TSG3DFractalForm.Calculate();

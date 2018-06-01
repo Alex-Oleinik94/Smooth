@@ -42,7 +42,7 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample15=class(TSGScreenedDrawable)
+	TSGExample15 = class(TSGScreenedDrawable)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -77,7 +77,7 @@ type
 			FP100Button,
 			FM100Button : TSGButton;
 		FFont : TSGFont;
-		FCountLabel : TSGLabel;
+		FCountLabel : TSGScreenLabel;
 		
 		FLightsCount : TSGLongWord;
 		FLightsSettings : packed array of

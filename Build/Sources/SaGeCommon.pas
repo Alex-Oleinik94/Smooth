@@ -12,6 +12,7 @@ interface
 
 uses
 	 SaGeBase
+	,SaGeLists
 	,SaGeMathUtils
 	,SaGeCommonStructs
 	;
