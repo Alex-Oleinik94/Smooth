@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-{$DEFINE TCP_DEBUG}
+//{$DEFINE TCP_DEBUG}
 
 unit SaGeTransmissionControlProtocolEmulator;
 
@@ -104,6 +104,7 @@ type
 		procedure Synchronize(const SynchronizeNumber : TSGTcpSequence);
 		function ReceivedSegmentsIncludes(const Segment : TSGTCPReceivedSegment) : TSGBoolean;
 		procedure ReceivedSegmentsExclude(const Segment : TSGTCPReceivedSegment);
+		procedure MoveBuffer(const RemovedSegment : TSGTCPReceivedSegment);
 			public
 		procedure LogSegments(const StringValue : TSGString = '');
 		procedure LogSynchronizing();
@@ -270,8 +271,8 @@ if FBufferInitialized and (Stream.Size > 0) then
 	begin
 	if FSynchronized and (TcpSequencePointer = FBeginSequenceNumber + 1) and (FFirstBufferElementAddress = FBeginSequenceNumber) and (FReceivedSegments = nil) then
 		FFirstBufferElementAddress := TcpSequencePointer;
-	if (not (TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size) in FReceivedSegments)) then
-		FReceivedSegments += TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size);
+	if (not (TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size - 1) in FReceivedSegments)) then
+		FReceivedSegments += TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size - 1);
 	ReadBuffer(TcpSequencePointer, Stream);
 	//{$IFDEF TCP_DEBUG}LogBufferInfo();{$ENDIF}
 	//{$IFDEF TCP_DEBUG}LogSegments('Before');{$ENDIF}
@@ -288,30 +289,88 @@ end;
 function TSGTransmissionControlProtocolEmulator.ReceivedSegmentsIncludes(const Segment : TSGTCPReceivedSegment) : TSGBoolean;
 begin
 Result := False;
+if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
+	begin
+	ConnectSegments();
+	Result := 
+		(FReceivedSegments[0].SegmentBegin <= Segment.SegmentBegin) and 
+		(FReceivedSegments[0].SegmentEnd   >= Segment.SegmentEnd);
+	end;
+end;
 
+procedure TSGTransmissionControlProtocolEmulator.MoveBuffer(const RemovedSegment : TSGTCPReceivedSegment);
+var
+	RemovedSegmentSize : TSGInt64;
+	Index, Index2 : TSGMaxEnum;
+begin
+RemovedSegmentSize := RemovedSegment.SegmentEnd - RemovedSegment.SegmentBegin + 1;
+if (FFirstBufferElementAddress = RemovedSegment.SegmentBegin) and (RemovedSegmentSize > 0) then
+	begin
+	if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
+		for Index := 0 to High(FReceivedSegments) do
+			for Index2 := FReceivedSegments[Index].SegmentBegin to FReceivedSegments[Index].SegmentEnd do
+				FBuffer[FFirstBufferElement + (Index2 - FFirstBufferElementAddress) - RemovedSegmentSize] := 
+					FBuffer[FFirstBufferElement + (Index2 - FFirstBufferElementAddress)] ;
+	FFirstBufferElementAddress := RemovedSegment.SegmentEnd + 1;
+	end;
 end;
 
 procedure TSGTransmissionControlProtocolEmulator.ReceivedSegmentsExclude(const Segment : TSGTCPReceivedSegment);
+var
+	Index : TSGMaxEnum;
+	RemovedSegment : TSGTCPReceivedSegment;
 begin
-
+if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
+	begin
+	ConnectSegments();
+	Index := 0;
+	while Index <= High(FReceivedSegments) do
+		if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
+		   (FReceivedSegments[Index].SegmentEnd = Segment.SegmentEnd) then
+			begin
+			RemovedSegment := FReceivedSegments[Index];
+			FReceivedSegments -= FReceivedSegments[Index];
+			MoveBuffer(RemovedSegment);
+			end
+		else if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
+		        (FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
+		    begin
+		    RemovedSegment := TSGTCPReceivedSegment.Create(FReceivedSegments[Index].SegmentBegin, Segment.SegmentEnd);
+			FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+			MoveBuffer(RemovedSegment);
+			end
+		else if (FReceivedSegments[Index].SegmentBegin <= Segment.SegmentBegin) and 
+		        (FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
+		    begin
+		    FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentBegin, Segment.SegmentBegin - 1);
+		    FReceivedSegments += TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+			ConnectSegments();
+		    end
+		else
+			Index += 1;
+	end;
 end;
 
 procedure TSGTransmissionControlProtocolEmulator.PushProcess();
 var
 	PushingNumber : TSGTcpSequence;
+	ToExit : TSGBoolean = False;
 begin
 if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
 	begin
 	SGQuickSort(FSignificantNumbers[0], Length(FSignificantNumbers), SizeOf(TSGTCPSignificantNumbers), @TSGTCPSignificantNumber_Comparison);
+	repeat
 	PushingNumber := FSignificantNumbers[0].Number;
 	if ReceivedSegmentsIncludes(TSGTCPReceivedSegment.Create(FFirstBufferElementAddress, PushingNumber)) then
 		begin
-		PushData(FFirstBufferElementAddress, PushingNumber - FFirstBufferElementAddress);
+		PushData(FFirstBufferElement, PushingNumber - FFirstBufferElementAddress + 1);
 		ReceivedSegmentsExclude(TSGTCPReceivedSegment.Create(FFirstBufferElementAddress, PushingNumber));
-		end;
+		FSignificantNumbers -= TSGTCPSignificantNumber.Create(SGTCPSignificantPush, PushingNumber);
+		end
+	else
+		ToExit := True;
+	until ToExit or (FSignificantNumbers = nil) or (Length(FSignificantNumbers) = 0);
 	end;
-//LogSignificantNumbers('Push');
-//FFirstBufferElementAddress
 end;
 
 procedure TSGTransmissionControlProtocolEmulator.PushData(const _DataAddress : TSGTCPBufferAddress; const _Size : TSGMaxEnum);
@@ -319,6 +378,7 @@ var
 	Stream : TMemoryStream = nil;
 begin
 FBufferCountWrites += 1;
+//TSGLog.Source([Self, ' Push data:  = 0x', SGStr4BytesHex(FBeginSequenceNumber, False)]);
 Stream := TMemoryStream.Create();
 Stream.Write(FBuffer[_DataAddress], _Size);
 HandleData(Stream);
@@ -366,9 +426,9 @@ if (Data <> nil) then
 	DataToBuffer(Header.SequenceNumber, Data);
 if Header.Push then
 	if (Data = nil) then
-		Push(Header.SequenceNumber)
+		Push(Header.SequenceNumber - 1)
 	else
-		Push(Header.SequenceNumber + Data.Size);
+		Push(Header.SequenceNumber + Data.Size - 1);
 if Header.Reset then
 	Reset();
 if Header.Final then

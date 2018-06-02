@@ -197,6 +197,7 @@ try
 	ThreadClass.PostExecuting();
 except on e : TSGException do
 	begin
+	SGLogMakeSignificant();
 	SGLog.Source(['TSGThread_Run(). While executing ',ThreadClass.ClassName(), '(', SGAddrStr(ThreadClass), ') raised exception --->']);
 	SGPrintExceptionStackTrace(e, SGCasesOfPrintLog);
 	end;
@@ -216,7 +217,7 @@ begin
 	if not FFinished then
 		begin
 		TerminateResult := TerminateThread(FHandle, 0);
-		SGLog.Source(['TSGThread__Destroy(). Handle=', FHandle, ', Thread ID=', FThreadID, ', Terminate Result=', TerminateResult, '.']);
+		SGLog.Source([Self, '__Destroy(). Handle=', FHandle, ', Thread ID=', FThreadID, ', Terminate Result=', TerminateResult, '.']);
 		end;
 	if FHandle <> 0 then
 		CloseHandle(FHandle);

@@ -11,16 +11,21 @@ uses
 	,Classes
 	,SysUtils
 	;
+type
+	TSGLogEnablement = (
+		SGLogDisabled,
+		SGLogEnabled,
+		SGLogSmart);
 const
-	SGLogExtension = 'log';
+	LogExtension = 'log';
 var
-	SGLogEnable : TSGBoolean = 
+	LogEnablement : TSGLogEnablement = 
 		{$IFDEF RELEASE}
-			False
+			SGLogSmart
 		{$ELSE}
-			True
-		{$ENDIF}
-	;
+			SGLogEnabled
+		{$ENDIF};
+	LogSignificant : TSGBoolean = False;
 type
 	TSGLogStream = object
 			public
@@ -47,7 +52,8 @@ function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 implementation
 
 uses
-	 SaGeDateTime
+	 SaGeBaseUtils
+	,SaGeDateTime
 	,SaGeFileUtils
 	,SaGeVersion
 	,SaGeStreamUtils
@@ -77,7 +83,7 @@ function SGFreeLogFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := SGLogDirectory();
 SGMakeDirectory(Result);
-Result += DirectorySeparator + SGDateTimeString(True, False, True) + ' ' + SGApplicationName + '.' + SGLogExtension;
+Result += DirectorySeparator + SGDateTimeString(True, False, True) + ' ' + SGApplicationName + Iff(LogExtension <> '', '.' + LogExtension);
 Result := SGFreeFileName(Result, '');
 end;
 
@@ -93,7 +99,7 @@ begin
 if (FStream <> nil) or (FFileName <> '') then
 	exit;
 FFileName := LogFileName;
-if SGLogEnable then
+if (LogEnablement <> SGLogDisabled) then
 	FStream := TFileStream.Create(FFileName, fmCreate)
 else
 	FStream := nil;
@@ -112,12 +118,18 @@ Result := Log <> nil;
 end;
 
 procedure SGKillLog();
+var
+	FileName : TSGString;
 begin
-if SGLogEnable and (Log <> nil) then
+if (Log <> nil) then
 	begin
+	FileName := Log^.FileName;
 	Log^.Destroy();
 	FreeMem(Log);
 	Log := nil;
+	
+	if (LogEnablement = SGLogSmart) and (not LogSignificant) then
+		SGDeleteFile(FileName);
 	end;
 end;
 
@@ -131,14 +143,14 @@ if not SGCreateLog(SGFreeLogFileName()) then
 		SGCreateLog(SGAplicationFileDirectory() + SGFreeLogFileName());
 if Log = nil then
 	begin
-	SGLogEnable := False;
+	LogEnablement := SGLogDisabled;
 	SGCreateLog('');
 	end;
 end;
 
 procedure SGLogWrite(const StrintToWrite : TSGString);
 begin
-if SGLogEnable then
+if LogEnablement <> SGLogDisabled then
 	begin
 	SGMakeLog();
 	EnterCriticalSection(Log^.CriticalSection);
@@ -149,7 +161,7 @@ end;
 
 procedure SGLogWriteLn(const StrintToWrite : TSGString = '');
 begin
-if SGLogEnable then
+if LogEnablement <> SGLogDisabled then
 	begin
 	SGMakeLog();
 	EnterCriticalSection(Log^.CriticalSection);

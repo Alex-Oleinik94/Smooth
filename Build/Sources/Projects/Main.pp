@@ -21,12 +21,12 @@ uses
 		{$ENDIF}
 	 SaGeSysUtils
 	,SaGeBase
+	,SaGeLog
 	,SaGeResourceManager
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		,SaGeConsolePaintableTools
 		,SaGeContext
-		,SaGeLog
 		{$ENDIF}
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary
@@ -46,7 +46,10 @@ uses
 	SGConsoleShowAllApplications(nil, SGContextOptionAndroidApp(State));
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	except on e : TSGException do
+		begin
+		SGLogMakeSignificant();
 		SGPrintExceptionStackTrace(e);
+		end;
 	end;
 	{$ENDIF}
 	end;
@@ -69,6 +72,7 @@ uses
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	except on e : TSGException do
 		begin
+		SGLogMakeSignificant();
 		SGPrintExceptionStackTrace(e);
 		//Write('Press ENTER! ');ReadLn();
 		end;

@@ -42,7 +42,8 @@ type
 		FCritacalSectionTCP : TSGCriticalSection;
 		FSourcePort, FDestinationPort : TSGUInt16;
 		FSourceAddress, FDestinationAddress : TSGIPv4Address;
-		FFinalized : TSGBoolean;
+		FSenderFinalized : TSGBoolean;
+		FRecieverFinalized : TSGBoolean;
 		
 		// TCP protocol emulation
 		FSenderEmulator : TSGTransmissionControlProtocolEmulator;
@@ -55,6 +56,8 @@ type
 		// Data dumper
 		FDataDumpsCount : TSGUInt64;
 		FDataDumpsSize  : TSGUInt64;
+		FSenderDataStreamFile, FRecieverDataStreamFile : TSGString;
+		FSenderDataStream, FRecieverDataStream : TFileStream;
 			public
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); override;
 			protected
@@ -68,6 +71,7 @@ type
 		procedure PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure DumpData(const Stream : TStream; const EmulatorString : TSGString);
 		procedure PushData(const Stream : TStream; const Emulator : TSGTCPEmulator);
+		procedure CreateBlockStreams();
 			public
 		function HandleData(const Stream : TStream) : TSGConnectionDataType; override;
 		function HasData() : TSGBoolean; override;
@@ -120,9 +124,17 @@ if FModeDataTransfer and (Emulator = FSenderEmulator) then
 if FModeDataTransfer and (Emulator = FRecieverEmulator) then
 	FRecieverData += SGStreamCopyMemory(Stream);
 if FModeRuntimeDataDumper then
+	begin
 	DumpData(Stream, 
 		Iff(Emulator = FSenderEmulator, 'Sender') + 
 		Iff(Emulator = FRecieverEmulator, 'Reciever'));
+	
+	Stream.Position := 0;
+	if Emulator = FSenderEmulator then
+		SGCopyPartStreamToStream(Stream, FSenderDataStream, Stream.Size)
+	else if Emulator = FRecieverEmulator then
+		SGCopyPartStreamToStream(Stream, FRecieverDataStream, Stream.Size);
+	end;
 end;
 
 procedure TSGInternetConnectionTCP.HandlePacket(const Packet : TSGEthernetPacketFrame);
@@ -138,9 +150,10 @@ if AddressMatchesNetMask(Packet.IPv4^.Source) then
 	FSenderEmulator.HandleData(Packet.TCPIP^, Packet.Data);
 	FRecieverEmulator.HandleAcknowledgement(Packet.TCPIP^.AcknowledgementNumber);
 	end;
-if ((FSenderEmulator <> nil) and FSenderEmulator.Finalized) or
-   ((FRecieverEmulator <> nil) and FRecieverEmulator.Finalized) then
-	FFinalized := True;
+if ((FSenderEmulator <> nil) and FSenderEmulator.Finalized) then
+	FSenderFinalized := True;
+if ((FRecieverEmulator <> nil) and FRecieverEmulator.Finalized) then
+	FRecieverFinalized := True;
 FCritacalSectionTCP.Leave();
 end;
 
@@ -239,6 +252,20 @@ begin
 Result := (Packet.TCPIP <> nil) and (Packet.IPv4 <> nil);
 end;
 
+procedure TSGInternetConnectionTCP.CreateBlockStreams();
+begin
+FSenderDataStreamFile   := 
+	FConnectionDumpDirectory + DirectorySeparator + 'Sender_data' + 
+	Iff(PacketDataFileExtension <> '', '.' + SaGeInternetDumperBase.PacketDataFileExtension);
+FRecieverDataStreamFile := 
+	FConnectionDumpDirectory + DirectorySeparator + 'Reciever_data' + 
+	Iff(PacketDataFileExtension <> '', '.' + SaGeInternetDumperBase.PacketDataFileExtension);
+SGKill(FSenderDataStream);
+SGKill(FRecieverDataStream);
+FSenderDataStream := TFileStream.Create(FSenderDataStreamFile, fmCreate);
+FRecieverDataStream := TFileStream.Create(FRecieverDataStreamFile, fmCreate);
+end;
+
 function TSGInternetConnectionTCP.InitFirstPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := True;
@@ -260,6 +287,8 @@ FDateFirstPacket := Date;
 
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	CreateConnectionDumpDirectory();
+if FModeRuntimeDataDumper then
+	CreateBlockStreams();
 if FModePacketStorage then
 	begin
 	SGKill(FPacketStorage);
@@ -313,10 +342,14 @@ function TSGInternetConnectionTCP.PacketPushed(const Time : TSGTime; const Date 
 begin
 Result := False;
 FCritacalSection.Enter();
-if (not FFinalized) and (FPacketCount = 0) and PacketComparable(Packet) then
-	Result := InitFirstPacket(Time, Date, Packet)
-else if (not FFinalized) and (FPacketCount > 0) and PacketComparable(Packet) then
-	Result := InitPacket(Time, Date, Packet);
+if PacketComparable(Packet) then
+	if (FPacketCount = 0) and (not FSenderFinalized) and (not FRecieverFinalized) then
+		Result := InitFirstPacket(Time, Date, Packet)
+	else if (FPacketCount > 0) and (
+			((not FSenderFinalized) and (not FRecieverFinalized)) or
+			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination) and Packet.TCPIP^.Final) or
+			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source) and Packet.TCPIP^.Final) ) then
+		Result := InitPacket(Time, Date, Packet);
 if Result then
 	PushPacket(Time, Date, Packet);
 FCritacalSection.Leave();
@@ -329,7 +362,8 @@ FSourceAddress := 0;
 FSourcePort := 0;
 FDestinationAddress := 0;
 FDestinationPort := 0;
-FFinalized := False;
+FSenderFinalized := False;
+FRecieverFinalized := False;
 FCritacalSectionTCP := TSGCriticalSection.Create();
 FDataDumpsCount := 0;
 FDataDumpsSize := 0;
@@ -337,10 +371,16 @@ FSenderEmulator := nil;
 FRecieverEmulator := nil;
 FRecieverData := nil;
 FSenderData := nil;
+FSenderDataStream := nil;
+FRecieverDataStream := nil;
+FSenderDataStreamFile := '';
+FRecieverDataStreamFile := '';
 end;
 
 destructor TSGInternetConnectionTCP.Destroy();
 begin
+SGKill(FSenderDataStream);
+SGKill(FRecieverDataStream);
 SGKill(FSenderEmulator);
 SGKill(FRecieverEmulator);
 SGKill(FCritacalSectionTCP);

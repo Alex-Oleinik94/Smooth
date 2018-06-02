@@ -180,17 +180,17 @@ procedure TSGInternetConnection.CreateConnectionDumpDirectory();
 begin
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	begin
-	FConnectionDumpDirectory := FDumpDirectory + DirectorySeparator + PrintableTextString();
+	FConnectionDumpDirectory := SGFreeDirectoryName(FDumpDirectory + DirectorySeparator + PrintableTextString(), '');
 	SGMakeDirectory(FConnectionDumpDirectory);
 	end;
 if FModeRuntimeDataDumper then
 	begin
-	FConnectionDataDumpDirectory := FConnectionDumpDirectory + DirectorySeparator + 'Data';
+	FConnectionDataDumpDirectory := SGFreeDirectoryName(FConnectionDumpDirectory + DirectorySeparator + 'Data', '');
 	SGMakeDirectory(FConnectionDataDumpDirectory);
 	end;
 if FModeRuntimePacketDumper then
 	begin
-	FConnectionPacketDumpDirectory := FConnectionDumpDirectory + DirectorySeparator + 'Packets';
+	FConnectionPacketDumpDirectory := SGFreeDirectoryName(FConnectionDumpDirectory + DirectorySeparator + 'Packets', '');
 	SGMakeDirectory(FConnectionPacketDumpDirectory);
 	end;
 end;

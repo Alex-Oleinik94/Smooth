@@ -85,6 +85,7 @@ function SGFileName(const PathName : TSGString) : TSGString;{$IFDEF SUPPORTINLIN
 function SGFilePath(Path : TSGString) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGApplicationFileName() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGFileExists(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGDeleteFile(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 (***************)
 (** DIRECTORY **)
@@ -166,6 +167,11 @@ end;
 (**********)
 (** FILE **)
 (**********)
+
+function SGDeleteFile(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := DeleteFile(FileName);
+end;
 
 function SGFileExists(const FileName : TSGString) : TSGBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

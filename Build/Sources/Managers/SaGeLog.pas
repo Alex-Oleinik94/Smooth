@@ -29,6 +29,7 @@ procedure SGHint(const MessagePtrs : array of const; const CasesOfPrint : TSGCas
 procedure SGLogParams(Params : TSGStringList; const FreeMemList : TSGBoolean = True);
 function SGLogDateTimeString(const WithArrow : TSGBoolean = True; const ForFileSystem : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGLogMakeSignificant();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure SGAddToLog(const FileName, Line : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -46,6 +47,11 @@ uses
 	
 	,StrMan
 	;
+
+procedure SGLogMakeSignificant();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+LogSignificant := True;
+end;
 
 function SGLogDirectory() : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -93,7 +99,7 @@ end;
 
 class procedure TSGLog.Source(const Ar : array of const; const WithTime : TSGBoolean = True);
 begin
-if SGLogEnable then
+if LogEnablement <> SGLogDisabled then
 	Source(SGStr(Ar), WithTime);
 end;
 
@@ -195,7 +201,7 @@ end;
 
 initialization
 begin
-if SGLogEnable then
+if LogEnablement <> SGLogDisabled then
 	begin
 	SGLog.Source('*************************************************', False);
 	SGLog.Source('* (v)_(O_o)_(V)  SaGe Engine Log  (V)_(o_O)_(v) *', False);
@@ -207,7 +213,7 @@ end;
 
 finalization
 begin
-if SGLogEnable then
+if LogEnablement <> SGLogDisabled then
 	SGLog.Source('		<< Log destroyed >>');
 end;
 
