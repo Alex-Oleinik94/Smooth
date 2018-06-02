@@ -36,7 +36,7 @@ type
 		class function ClassName():TSGString;override;
 			public
 		FFont : TSGFont;
-		FPanelStart : TSGPanel;
+		FPanelStart : TSGScreenPanel;
 		FFunctionEdit,FNumberEdit,FNumberAEdit,FNumberBEdit : TSGEdit;
 		FGoButton : TSGButton;
 		FBackButton : TSGButton;
@@ -212,14 +212,7 @@ FBackButton.Active:=True;
 FBackButton.FUserPointer1:=Self;
 FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
 
-FPanelStart := TSGPanel.Create();
-Screen.CreateChild(FPanelStart);
-FPanelStart.SetMiddleBounds(400,(FFont.FontHeight+4)*8+5);
-FPanelStart.BoundsToNeedBounds();
-FPanelStart.Visible := True;
-FPanelStart.Active := True;
-FPanelStart.Skin := FPanelStart.Skin.CreateDependentSkinWithAnotherFont(FFont);
-
+FPanelStart := SGCreatePanel(Screen, 400,(FFont.FontHeight+4)*8+5, FFont, True, True);
 SGCreateLabel(FPanelStart, '¬ведите функцию f(x)', 5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2, True, True);
 
 FFunctionEdit:=TSGEdit.Create();

@@ -29,7 +29,7 @@ type
 		procedure Paint();override;
 			public
 		FLMM, FL1, FL2, FL3, FL4, FL5, FL6, FL7, FL8, FL9, FXL, FLPoint : TSGScreenLabel;
-		FP1:TSGPanel;
+		FP1 : TSGScreenPanel;
 		FB1:TSGButton;
 		FE1,FE2,FE22,FE3,FE4:TSGEdit;
 		FS1:TSGEdit;
@@ -81,7 +81,7 @@ begin
 with TSGGenAlg(Self.FUserPointer1) do
 if Self.SelectItem=1 then
 	begin
-	FL3.Caption:='РџСЂРµРґРїРѕР»РѕРіР°РµРјР°СЏ С‚РѕС‡РєР°, РІРёРґ СЃРµР»РµРєС†РёРё:';
+	FL3.Caption:='Предпологаемая точка, вид селекции:';
 	//Self.SetBounds(260+103,129,167,21);
 	Self.Left:=260+103;
 	Self.Width:=167;
@@ -91,7 +91,7 @@ if Self.SelectItem=1 then
 	end
 else
 	begin
-	FL3.Caption:='Р’РёРґ СЃРµР»РµРєС†РёРё:';
+	FL3.Caption:='Вид селекции:';
 	//FS1.SetBounds(260,129,0,21);
 	//Self.SetBounds(260,129,270,21);
 	FS1.Width:=0;
@@ -274,18 +274,11 @@ FNB:=TSGButton.Create;
 Screen.CreateChild(FNB);
 Screen.LastChild.SetBounds(Render.Width-90,1 ,80,15);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.Caption:='Р—Р°РЅРѕРіРѕ';
+Screen.LastChild.Caption:='Заного';
 Screen.LastChild.FUserPointer1:=Self;
 FNB.OnChange:=TSGComponentProcedure(@New1234543454354);
 
-FP1:=TSGPanel.Create;
-Screen.CreateChild(FP1);
-Screen.LastChild.SetMiddleBounds(550,378);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
-
+FP1 := SGCreatePanel(Screen, 550,378, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, '[', False, 265,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ']', False, 513,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ',', False, 390,38,8,25, [SGAnchRight], True, True, Self);
@@ -310,7 +303,7 @@ FP1.LastChild.Caption:='7';
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 
-FLMM := SGCreateLabel(FP1, 'С„СѓРЅРєС†РёРё.', False, QQQ+280,338,80,25, [SGAnchRight], True, True, Self);
+FLMM := SGCreateLabel(FP1, 'функции.', False, QQQ+280,338,80,25, [SGAnchRight], True, True, Self);
 
 FCBMM:=TSGComboBox.Create;
 FP1.CreateChild(FCBMM);
@@ -319,14 +312,14 @@ FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РњРёРЅРёРјСѓРј');
-(FP1.LastChild as TSGComboBox).CreateItem('РњР°РєСЃРёРјСѓРј');
+(FP1.LastChild as TSGComboBox).CreateItem('Минимум');
+(FP1.LastChild as TSGComboBox).CreateItem('Максимум');
 
 FB1:=TSGButton.Create;
 FP1.CreateChild(FB1);
 FP1.LastChild.SetBounds(QQQ+150,338 ,50,25);
 FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='РќР°Р№С‚Рё';
+FP1.LastChild.Caption:='Найти';
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FB1.OnChange:=TSGComponentProcedure(@GAFindMin);
@@ -372,7 +365,7 @@ FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РњРёРєСЂРѕСЌРІРѕР»СЋС†РёСЏ');
+(FP1.LastChild as TSGComboBox).CreateItem('Микроэволюция');
 
 FCB6:=TSGComboBox.Create;
 FP1.CreateChild(FCB6);
@@ -382,7 +375,7 @@ FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Р­Р»РёС‚РЅС‹Р№');
+(FP1.LastChild as TSGComboBox).CreateItem('Элитный');
 
 FCB5:=TSGComboBox.Create;
 FP1.CreateChild(FCB5);
@@ -391,8 +384,8 @@ FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РџСЂРѕСЃС‚С‹Рµ');
-(FP1.LastChild as TSGComboBox).CreateItem('РўСЂР°РЅСЃС‚РїРѕР·РёС†РёСЏ');
+(FP1.LastChild as TSGComboBox).CreateItem('Простые');
+(FP1.LastChild as TSGComboBox).CreateItem('Транстпозиция');
 
 FCB4:=TSGComboBox.Create;
 FP1.CreateChild(FCB4);
@@ -401,10 +394,10 @@ FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РґРІСѓС‚РѕС‡РµС‡СЊРЅС‹Р№');
-(FP1.LastChild as TSGComboBox).CreateItem('Р§Р°СЃС‚РёС‡РЅРѕ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ РѕРґРЅРѕС‚РѕС‡РµС‡РЅС‹Р№');
-(FP1.LastChild as TSGComboBox).CreateItem('РЈРїРѕСЂСЏРґРѕС‡РёРІР°СЋС‰РёР№ РѕРґРЅРѕС‚РѕС‡РµС‡РЅС‹Р№');
-(FP1.LastChild as TSGComboBox).CreateItem('HР° РѕСЃРЅРѕРІРµ В«Р—РѕР»РѕС‚РѕРіРѕ СЃРµС‡РµРЅРёСЏВ»');
+(FP1.LastChild as TSGComboBox).CreateItem('Стандартный двуточечьный');
+(FP1.LastChild as TSGComboBox).CreateItem('Частично соответствующий одноточечный');
+(FP1.LastChild as TSGComboBox).CreateItem('Упорядочивающий одноточечный');
+(FP1.LastChild as TSGComboBox).CreateItem('Hа основе «Золотого сечения»');
 
 FS1:=TSGEdit.Create;
 FP1.CreateChild(FS1);
@@ -425,9 +418,9 @@ FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РРјР±СЂРёРґРёРЅРі');
-(FP1.LastChild as TSGComboBox).CreateItem('РЎРµР»РµРєС†РёСЏ РїРѕ Р·Р°РґР°РЅРЅРѕР№ С€РєР°Р»Рµ');
-(FP1.LastChild as TSGComboBox).CreateItem('РђСѓС‚Р±СЂРёРґРёРЅРі');
+(FP1.LastChild as TSGComboBox).CreateItem('Имбридинг');
+(FP1.LastChild as TSGComboBox).CreateItem('Селекция по заданной шкале');
+(FP1.LastChild as TSGComboBox).CreateItem('Аутбридинг');
 
 FCB2:=TSGComboBox.Create;
 FP1.CreateChild(FCB2);
@@ -436,8 +429,8 @@ FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('РЎС‚СЂР°С‚РµРіРёСЏ "РћРґРµСЏР»Р°"');
-(FP1.LastChild as TSGComboBox).CreateItem('РЎС‚СЂР°С‚РµРіРёСЏ "Р”СЂРѕР±РѕРІРёРєР°"');
+(FP1.LastChild as TSGComboBox).CreateItem('Стратегия "Одеяла"');
+(FP1.LastChild as TSGComboBox).CreateItem('Стратегия "Дробовика"');
 
 FCB1:=TSGComboBox.Create;
 FP1.CreateChild(FCB1);
@@ -447,19 +440,19 @@ FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
 (FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Р‘РёРЅР°СЂРЅРѕРµ');
+(FP1.LastChild as TSGComboBox).CreateItem('Бинарное');
 
-FL8 := SGCreateLabel(FP1, 'Р¤СѓРЅРєС†РёСЏ:', False, 5,5,200,25, [SGAnchRight], True, True, Self);
-FL9 := SGCreateLabel(FP1, 'РћС‚СЂРµР·РѕРє:', False, 5,35,200,25, [SGAnchRight], True, True, Self);
-FL1 := SGCreateLabel(FP1, 'РљРѕРґРёСЂРѕРІР°РЅРёРµ С…СЂРѕРјРѕСЃРѕРј:', False, 5,65,200,25, [SGAnchRight], True, True, Self);
-FL2 := SGCreateLabel(FP1, 'РЎС‚СЂР°С‚РµРіРёСЏ Р·Р°РґР°РЅРёСЏ РЅР°С‡Р°Р»СЊРЅРѕР№ РїРѕРїСѓР»СЏС†РёРё:', False, 5,95,260,25, [SGAnchRight], True, True, Self);
-FL3 := SGCreateLabel(FP1, 'Р’РёРґ СЃРµР»РµРєС†РёРё:', False, 5,125,250,25, [SGAnchRight], True, True, Self);
-FL4 := SGCreateLabel(FP1, 'РћРїСЂРµСЂР°С‚РѕСЂ РљСЂРѕСЃСЃРёРЅРіРѕРІРµСЂР°:', False, 5,155,200,25, [SGAnchRight], True, True, Self);
-FL5 := SGCreateLabel(FP1, 'РћРїРµСЂР°С‚РѕСЂС‹ РјСѓС‚Р°С†РёРё Рё РёРЅРІРµСЂСЃРёРё:', False, 5,185,200,25, [SGAnchRight], True, True, Self);
-FL6 := SGCreateLabel(FP1, 'РћРїРµСЂР°С‚РѕСЂ РѕС‚Р±РѕСЂР°:', False, 5,215,200,25, [SGAnchRight], True, True, Self);
-FL7 := SGCreateLabel(FP1, 'РЎС…РµРјР° Р­РІРѕР»СЋС†РёРё:', False, 5,245,200,25, [SGAnchRight], True, True, Self);
-FL8 := SGCreateLabel(FP1, 'Р Р°Р·РјРµСЂ РїРѕРїСѓР»СЏС†РёРё:', False, 5,275,200,25, [SGAnchRight], True, True, Self);
-FL9 := SGCreateLabel(FP1, 'Р§РёСЃР»Рѕ РіРµРЅРµСЂР°С†РёР№:', False, 5,305,200,25, [SGAnchRight], True, True, Self);
+FL8 := SGCreateLabel(FP1, 'Функция:', False, 5,5,200,25, [SGAnchRight], True, True, Self);
+FL9 := SGCreateLabel(FP1, 'Отрезок:', False, 5,35,200,25, [SGAnchRight], True, True, Self);
+FL1 := SGCreateLabel(FP1, 'Кодирование хромосом:', False, 5,65,200,25, [SGAnchRight], True, True, Self);
+FL2 := SGCreateLabel(FP1, 'Стратегия задания начальной популяции:', False, 5,95,260,25, [SGAnchRight], True, True, Self);
+FL3 := SGCreateLabel(FP1, 'Вид селекции:', False, 5,125,250,25, [SGAnchRight], True, True, Self);
+FL4 := SGCreateLabel(FP1, 'Опрератор Кроссинговера:', False, 5,155,200,25, [SGAnchRight], True, True, Self);
+FL5 := SGCreateLabel(FP1, 'Операторы мутации и инверсии:', False, 5,185,200,25, [SGAnchRight], True, True, Self);
+FL6 := SGCreateLabel(FP1, 'Оператор отбора:', False, 5,215,200,25, [SGAnchRight], True, True, Self);
+FL7 := SGCreateLabel(FP1, 'Схема Эволюции:', False, 5,245,200,25, [SGAnchRight], True, True, Self);
+FL8 := SGCreateLabel(FP1, 'Размер популяции:', False, 5,275,200,25, [SGAnchRight], True, True, Self);
+FL9 := SGCreateLabel(FP1, 'Число генераций:', False, 5,305,200,25, [SGAnchRight], True, True, Self);
 FLPoint := SGCreateLabel(Screen, '', False, 0,0,0,0, [SGAnchRight], False, True, Self);
 end;
 
@@ -475,7 +468,7 @@ end;
 
 class function TSGGenAlg.ClassName:string;
 begin
-Result:='РџСЂРѕСЃС‚РѕР№ РіРµРЅРµС‚РёС‡РµСЃРєРёР№ Р°Р»РіРѕСЂРёС‚Рј';
+Result:='Простой генетический алгоритм';
 end;
 
 initialization

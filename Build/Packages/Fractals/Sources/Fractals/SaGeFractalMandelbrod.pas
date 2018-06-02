@@ -102,7 +102,7 @@ type
 		LabelProcent:TSGProgressBar;
 		LblProcent : TSGScreenLabel;
 		LabelCoord : TSGScreenLabel;
-		ScreenshotPanel:TSGPanel;
+		ScreenshotPanel : TSGScreenPanel;
 		
 		StartDepth:LongInt;
 		ColorComboBox:TSGComboBox;
@@ -117,10 +117,10 @@ type
 		
 		MandelbrodInitialized:Boolean;
 		
-		VideoPanel:TSGPanel;
+		VideoPanel : TSGScreenPanel;
 		Changet:boolean;
 		
-		fmStartPanel:TSGComponent;
+		FStartPanel : TSGScreenPanel;
 		VtxForZN:TSGVertex2f;
 		
 		Procent:real;
@@ -138,7 +138,7 @@ type
 		FBezierCurve:TSGBezierCurve;
 		
 		FButtonEnableCurve:TSGButton;
-		FBezierCurvePanel:TSGPanel;
+		FBezierCurvePanel : TSGScreenPanel;
 		FBezierCurveEditKadr:TSGEdit;
 		FBezierCurveLabelPoints : TSGScreenLabel;
 		FBezierCurveGoButton:TSGButton;
@@ -158,10 +158,10 @@ type
 		FCurveArPoints:packed array of TSGByte;
 		FCurveSelectPoint:Int64;
 		
-		FCurvePointPanel:TSGPanel;
-		FCurvePCB:TSGCOmboBox;
+		FCurvePointPanel : TSGScreenPanel;
+		FCurvePCB : TSGComboBox;
 		FCurveInfoLbl : TSGScreenLabel;
-		FCurveBeginDataTime:TSGDateTime;
+		FCurveBeginDataTime : TSGDateTime;
 		
 		FTNRF:TSGFont;
 		
@@ -574,14 +574,7 @@ LabelProcent.Visible:=True;
 LabelProcent.FUserPointer1:=Self;
 
 LabelCoord := SGCreateLabel(Screen, '', False, 10,Render.Height-25,Render.Width div 2,20, [SGAnchBottom], True, True, Self);
-
-ScreenshotPanel:=TSGPanel.Create;
-Screen.CreateChild(ScreenshotPanel);
-Screen.LastChild.Caption:='';
-Screen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-30,130+140+10,25);
-Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-Screen.LastChild.BoundsToNeedBounds;
-Screen.LastChild.FUserPointer1:=Self;
+ScreenshotPanel := SGCreatePanel(Screen, Render.Width-10-(130+140+10),Render.Height-30,130+140+10,25, [SGAnchBottom, SGAnchRight], False, True, Self);
 
 Screen.LastChild.CreateChild(TSGButton.Create);
 Screen.LastChild.LastChild.SetBounds(130,5,140,20);
@@ -688,13 +681,7 @@ Screen.LastChild.Caption:='On видео панель';
 FButtonEnableCurve.OnChange:=TSGComponentProcedure(@bcpOnOffVideo);
 Screen.LastChild.FUserPointer1:=Self;
 
-FCurvePointPanel:=TSGPanel.Create();
-Screen.CreateChild(FCurvePointPanel);
-Screen.LastChild.Caption:='';
-Screen.LastChild.SetBounds(Render.Width-10-(140+10),Render.Height-130-130,140+10,125);
-Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-Screen.LastChild.BoundsToNeedBounds;
-Screen.LastChild.FUserPointer1:=Self;
+FCurvePointPanel := SGCreatePanel(Screen, Render.Width-10-(140+10),Render.Height-130-130,140+10,125, [SGAnchBottom, SGAnchRight], False, True, Self);
 
 FCurvePointPanel.CreateChild(TSGComboBox.Create);
 FCurvePointPanel.LastChild.SetBounds(5,5,130,20);
@@ -706,13 +693,7 @@ FCurvePointPanel.LastChild.AsComboBox.MaxLines:=5;
 FCurvePCB:=FCurvePointPanel.LastChild.AsComboBox;
 FCurvePointPanel.LastChild.FUserPointer1:=Self;
 
-FBezierCurvePanel:=TSGPanel.Create();
-Screen.CreateChild(FBezierCurvePanel);
-Screen.LastChild.Caption:='';
-Screen.LastChild.SetBounds(Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125);
-Screen.LastChild.Anchors:=[SGAnchBottom,SGAnchRight];
-Screen.LastChild.BoundsToNeedBounds;
-Screen.LastChild.FUserPointer1:=Self;
+FBezierCurvePanel := SGCreatePanel(Screen, Render.Width-10-(130+140+10),Render.Height-130,130+140+10,125, [SGAnchBottom, SGAnchRight], False, True, Self);
 
 FBezierCurvePanel.CreateChild(TSGButton.Create());
 FBezierCurvePanel.LastChild.AsButton.Caption:='On режим добавления точек';
@@ -722,7 +703,6 @@ FBezierCurvePanel.LastChild.FUserPointer1:=Self;
 FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
 FBezierCurveLabelPoints := SGCreateLabel(FBezierCurvePanel, 'Количество точек: 0', 3,47,137,20, False, True, Self);
-
 SGCreateLabel(FBezierCurvePanel, 'Количество кадров:', False, 3,25,275,20, False, True, Self);
 
 FBezierCurveEditKadr:=TSGEdit.Create();
@@ -768,57 +748,48 @@ end;
 
 constructor TSGFractalMandelbrodRelease.Create(const VContext:ISGContext);
 var
-	i:Byte;
+	i : TSGByte;
 begin
 inherited Create(VContext);
-FTNRF:=nil;
-FCurvePointPanel:=nil;
-FCurveSelectPoint:=-1;
-FCurveArPoints:=nil;
-FNowRenderitsiaVideo:=False;
-FBezierNowSelectPoint:=0;
-FKomponentsNowOffOn:=False;
-FBezierCurveEditKadr:=nil;
-FEnablePictureStripAddingPoints:=False;
-FBezierCurvePanel:=nil;
-FButtonEnableCurve:=nil;
-FBezierCurve:=nil;
-FEnablePictureStripPanel:=False;
-FArProgressBar:=nil;
-Changet:=False;
-SelectPointEnabled:=False;
-Mandelbrod:=nil;
-QuantityThreads:=1;
-NowSave:=False;
-SecondImage:=nil;
-LabelCoord:=nil;
-LabelProcent:=nil;
-ScreenshotPanel:=nil;
-StartDepth:=128;
-ColorComboBox:=nil;
-TypeComboBox:=nil;
-ZumButton:=nil;
-StepenComboBox:=nil;
-QuantityRecComboBox:=nil;
-SelectZNimberFlag:=False;
-ButtonSelectZNumber:=nil;
-MandelbrodInitialized:=False;
-VideoPanel:=nil;
-fmStartPanel:=nil;
-FCurveInfoLbl:=nil;
+FTNRF := nil;
+FCurvePointPanel := nil;
+FCurveSelectPoint := -1;
+FCurveArPoints := nil;
+FNowRenderitsiaVideo := False;
+FBezierNowSelectPoint := 0;
+FKomponentsNowOffOn := False;
+FBezierCurveEditKadr := nil;
+FEnablePictureStripAddingPoints := False;
+FBezierCurvePanel := nil;
+FButtonEnableCurve := nil;
+FBezierCurve := nil;
+FEnablePictureStripPanel := False;
+FArProgressBar := nil;
+Changet := False;
+SelectPointEnabled := False;
+Mandelbrod := nil;
+QuantityThreads := 1;
+NowSave := False;
+SecondImage := nil;
+LabelCoord := nil;
+LabelProcent := nil;
+ScreenshotPanel := nil;
+StartDepth := 128;
+ColorComboBox := nil;
+TypeComboBox := nil;
+ZumButton := nil;
+StepenComboBox := nil;
+QuantityRecComboBox := nil;
+SelectZNimberFlag := False;
+ButtonSelectZNumber := nil;
+MandelbrodInitialized := False;
+VideoPanel := nil;
+FStartPanel := nil;
+FCurveInfoLbl := nil;
 
-Screen.CreateChild(TSGPanel.Create);
-Screen.LastChild.SetMiddleBounds(300,Render.Height-200);
-Screen.LastChild.Visible:=True;
-Screen.LastChild.AsPanel.ViewLines:=False;
-Screen.LastChild.AsPanel.ViewQuad:=False;
-Screen.LastChild.BoundsToNeedBounds;
-Screen.LastChild.FUserPointer1:=Self;
-fmStartPanel:=Screen.LastChild;
-
-SGCreateLabel(Screen.LastChild, 'Количество потоков:', 5,5,Screen.LastChild.Width-10,20, True, True, Self);
-
-SGCreateLabel(Screen.LastChild, 'Количество потоков:', 5,55,Screen.LastChild.Width-10,20, True, True, Self);
+FStartPanel := SGCreatePanel(Screen, False, False, 300,Render.Height-200, True, True, Self);
+SGCreateLabel(FStartPanel, 'Количество потоков:', 5,5,Screen.LastChild.Width-10,20, True, True, Self);
+SGCreateLabel(FStartPanel, 'Количество потоков:', 5,55,Screen.LastChild.Width-10,20, True, True, Self);
 
 Screen.LastChild.CreateChild(TSGButton.Create);
 Screen.LastChild.LastChild.SetBounds(75,115,140,20);
@@ -928,9 +899,9 @@ ButtonSelectZNumber:=nil;
 if VideoPanel<>nil then
 	VideoPanel.Destroy;
 VideoPanel:=nil;
-if fmStartPanel<>nil then
-	fmStartPanel.Destroy;
-fmStartPanel:=nil;
+if FStartPanel<>nil then
+	FStartPanel.Destroy;
+FStartPanel:=nil;
 if Mandelbrod<>nil then
 	Mandelbrod.Destroy;
 Mandelbrod:=nil;
