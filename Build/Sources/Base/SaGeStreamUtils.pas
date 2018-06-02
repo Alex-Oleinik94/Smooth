@@ -121,10 +121,13 @@ procedure SGCopyPartStreamToStream(const Source : TStream; Destination : TMemory
 var
 	DestinationSizeOld : TSGUInt64;
 begin
-DestinationSizeOld := Destination.Size;
-Destination.Size := DestinationSizeOld + Size;
-Source.ReadBuffer(PSGByte(Destination.Memory)[DestinationSizeOld], Size);
-Destination.Position := Size + DestinationSizeOld;
+if (Source <> nil) and (Destination <> nil) then
+	begin
+	DestinationSizeOld := Destination.Size;
+	Destination.Size := DestinationSizeOld + Size;
+	Source.ReadBuffer(PSGByte(Destination.Memory)[DestinationSizeOld], Size);
+	Destination.Position := Size + DestinationSizeOld;
+	end;
 end;
 
 procedure SGCopyPartStreamToStream(const Source, Destination : TStream; const Size : TSGUInt64);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
