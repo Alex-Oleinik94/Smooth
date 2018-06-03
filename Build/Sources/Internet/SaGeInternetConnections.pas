@@ -46,6 +46,7 @@ type
 			public
 		procedure Loop(); override;
 			protected
+		procedure RenameConnectionDirectoriesIncludeSize();
 		procedure PrintStatistic(const TextTime : TSGString);
 		procedure ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
 		procedure LogStatistic();
@@ -86,6 +87,7 @@ uses
 	,SaGeFileUtils
 	,SaGeTextFileStream
 	,SaGeInternetDumperBase
+	,SaGeLog
 	
 	,StrMan
 	;
@@ -396,6 +398,21 @@ FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 FDeviceInformationFileExtension := SaGeInternetDumperBase.DeviceInformationFileExtension;
 end;
 
+procedure TSGInternetConnections.RenameConnectionDirectoriesIncludeSize();
+var
+	CountRenamed, Index : TSGMaxEnum;
+begin
+if (FModeRuntimeDataDumper or FModeRuntimePacketDumper) and (FConnections <> nil) and (Length(FConnections) > 0) then
+	begin
+	SGHint(['Adding size to connection directories...']);
+	CountRenamed := 0;
+	for Index := 0 to High(FConnections) do
+		if FConnections[Index].RenameConnectionDirectoryIncludeSize() then
+			CountRenamed += 1;
+	SGHint(['Added size to ', CountRenamed, '/', Length(FConnections), ' connection directories.']);
+	end;
+end;
+
 destructor TSGInternetConnections.Destroy();
 var
 	Index : TSGMaxEnum;
@@ -403,8 +420,8 @@ begin
 if (FConnections <> nil) and (Length(FConnections) > 0) then
 	for Index := 0 to High(FConnections) do
 		SGKill(FConnections[Index]);
-SGKill(FCriticalSection);
 SGKill(FConnections);
+SGKill(FCriticalSection);
 inherited;
 end;
 

@@ -235,9 +235,12 @@ end;
 
 procedure TSGEmulatorTransmissionControlProtocol.ReadBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 begin
-FBufferCountReads += 1;
-Stream.Position := 0;
-Stream.Read(FBuffer[FFirstBufferElement + (TcpSequencePointer - FFirstBufferElementAddress)], Stream.Size);
+if (Stream <> nil) then
+	begin
+	FBufferCountReads += 1;
+	Stream.Position := 0;
+	Stream.Read(FBuffer[FFirstBufferElement + (TcpSequencePointer - FFirstBufferElementAddress)], Stream.Size);
+	end;
 end;
 
 function TSGTCPSegment_Comparison(var Segment1, Segment2) : TSGBoolean;

@@ -19,12 +19,8 @@ type
 const
 	LogExtension = 'log';
 var
-	LogEnablement : TSGLogEnablement = 
-		{$IFDEF RELEASE}
-			SGLogSmart
-		{$ELSE}
-			SGLogEnabled
-		{$ENDIF};
+	LogEnablement : TSGLogEnablement = SGLogSmart;
+		//{$IFDEF RELEASE}SGLogSmart{$ELSE}SGLogEnabled{$ENDIF}
 	LogSignificant : TSGBoolean = False;
 type
 	TSGLogStream = object

@@ -66,6 +66,7 @@ type
 		procedure DumpPacketDataFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const DataFileName : TSGString);
 		function AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
 			public
+		function RenameConnectionDirectoryIncludeSize() : TSGBoolean;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); virtual;
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
@@ -257,10 +258,23 @@ FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
 FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 end;
 
+function TSGInternetConnection.RenameConnectionDirectoryIncludeSize() : TSGBoolean;
+var
+	NewConnectionDumpDirectory : TSGString;
+begin
+Result := False;
+if (FConnectionDumpDirectory <> '') and (FDataSize > 0) then
+	begin
+	NewConnectionDumpDirectory := FConnectionDumpDirectory + ' [' + SGStr(FPacketCount) + ', ' + SGGetSizeString(FDataSize, 'EN') + ']';
+	SGRenameFile(FConnectionDumpDirectory, NewConnectionDumpDirectory);
+	FConnectionDumpDirectory := NewConnectionDumpDirectory;
+	Result := True;
+	end;
+end;
+
 destructor TSGInternetConnection.Destroy();
 begin
-if (FConnectionDumpDirectory <> '') and (FDataSize > 0) then
-	SGRenameFile(FConnectionDumpDirectory, FConnectionDumpDirectory + ' [' + SGStr(FPacketCount) + ', ' + SGGetSizeString(FDataSize, 'EN') + ']');
+RenameConnectionDirectoryIncludeSize();
 SGKill(FCritacalSection);
 SGKill(FPacketStorage);
 inherited;
