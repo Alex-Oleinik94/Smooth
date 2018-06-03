@@ -1,5 +1,5 @@
 {$INCLUDE SaGe.inc}
-{$DEFINE TCP_DEBUG}
+//{$DEFINE TCP_DEBUG}
 
 unit SaGeEmulatorTCP;
 
@@ -275,10 +275,10 @@ end;
 
 procedure TSGEmulatorTransmissionControlProtocol.AddSegment(const NewSegment : TSGTCPSegment);
 begin
-if (FBufferSize - FFirstBufferElement  < NewSegment.SegmentEnd - FFirstBufferElementAddress + 1) then
+if (FBufferSize < FFirstBufferElement + NewSegment.SegmentEnd - FFirstBufferElementAddress) then
 	begin
 	FBufferSize += SG_TCP_WINDOW_SIZE;
-	ReAllocMem(FBuffer, FBufferSize);
+	FBuffer := ReAllocMemory(FBuffer, FBufferSize);
 	end;
 if (not (NewSegment in FReceivedSegments)) then
 	FReceivedSegments += NewSegment;
@@ -377,6 +377,7 @@ if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
 if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	begin
 	{$IFDEF TCP_DEBUG}TSGLog.Source([Self, ' First element: {(1)}: ', FFirstBufferElement]);{$ENDIF}
+	{$IFDEF TCP_DEBUG}TSGLog.Source([Self, ' First element address: {(1)}: ', FFirstBufferElementAddress]);{$ENDIF}
 	{$IFDEF TCP_DEBUG}LogSegments('Before(1)');{$ENDIF}
 	BreakCircleFlag := False;
 	Index := 0;

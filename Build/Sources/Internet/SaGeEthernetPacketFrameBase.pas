@@ -16,7 +16,7 @@ type
 	// Base types
 	TSGEthernetPacketFrameStream = TStream;
 	TSGEthernetPacketFrameCreatedStream = TMemoryStream;
-	TSGEthernetPacketFrameSize = TSGUInt64;
+	TSGEthernetPacketFrameSize = TSGInt64;
 	
 	// Class types
 	TSGEthernetPacketDataFrame = class;
@@ -48,12 +48,12 @@ type
 		function Description() : TSGString; virtual;
 		function CreateStream() : TSGEthernetPacketFrameCreatedStream; virtual;
 			public
-		class procedure KillProtocol(var Protocol : TSGEthernetPacketProtocolFrame);
+		class procedure KillProtocol(var _Protocol : TSGEthernetPacketProtocolFrame);
 		class function ReadProtocolClass(
-			const ClassTypeVariable : TSGEthernetPacketProtocolFrameClass;
-			const ClassSize : TSGEthernetPacketFrameSize;
-			var Protocol : TSGEthernetPacketProtocolFrame;
-			const Stream : TSGEthernetPacketFrameStream) : TSGBoolean;
+			const _ClassTypeVariable : TSGEthernetPacketProtocolFrameClass;
+			const _ClassSize : TSGEthernetPacketFrameSize;
+			var _Protocol : TSGEthernetPacketProtocolFrame;
+			const _Stream : TSGEthernetPacketFrameStream) : TSGBoolean;
 		end;
 	
 	// ================================
@@ -121,27 +121,27 @@ begin
 Result := 0;
 end;
 
-class procedure TSGEthernetPacketDataFrame.KillProtocol(var Protocol : TSGEthernetPacketProtocolFrame);
+class procedure TSGEthernetPacketDataFrame.KillProtocol(var _Protocol : TSGEthernetPacketProtocolFrame);
 begin
-if Protocol <> nil then
+if _Protocol <> nil then
 	begin
-	Protocol.Destroy();
-	Protocol := nil;
+	_Protocol.Destroy();
+	_Protocol := nil;
 	end;
 end;
 
 class function TSGEthernetPacketDataFrame.ReadProtocolClass(
-	const ClassTypeVariable : TSGEthernetPacketProtocolFrameClass;
-	const ClassSize : TSGEthernetPacketFrameSize;
-	var Protocol : TSGEthernetPacketProtocolFrame;
-	const Stream : TSGEthernetPacketFrameStream) : TSGBoolean;
+	const _ClassTypeVariable : TSGEthernetPacketProtocolFrameClass;
+	const _ClassSize : TSGEthernetPacketFrameSize;
+	var _Protocol : TSGEthernetPacketProtocolFrame;
+	const _Stream : TSGEthernetPacketFrameStream) : TSGBoolean;
 begin
 Result := False;
-KillProtocol(Protocol);
-if (ClassTypeVariable <> nil) and (Stream <> nil) then
+KillProtocol(_Protocol);
+if (_ClassTypeVariable <> nil) and (_Stream <> nil) then
 	begin
-	Protocol := ClassTypeVariable.Create();
-	Protocol.Read(Stream, ClassSize);
+	_Protocol := _ClassTypeVariable.Create();
+	_Protocol.Read(_Stream, _ClassSize);
 	Result := True;
 	end;
 end;

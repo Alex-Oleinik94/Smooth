@@ -87,6 +87,7 @@ uses
 	,SaGeBaseUtils
 	,SaGeLog
 	,SaGeInternetDumperBase
+	//,SaGeTextFileStream
 	
 	,StrMan
 	;
@@ -174,7 +175,12 @@ if Description <> '' then
 FileNameInfo := FileName + Iff(FPacketInfoFileExtension <> '', '.' + FPacketInfoFileExtension, '');
 FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketDataFileExtension, '');
 
-DumpPacketFiles(Time, Date, Packet, FileNameInfo, FileNameData);
+//try
+	DumpPacketFiles(Time, Date, Packet, FileNameInfo, FileNameData);
+{except
+	Packet.ExportInfo(TSGTextFileStream.Create('123.ini'));
+	PSGFloat32(nil)^ := 1/0;
+end;}
 end;
 
 class function TSGInternetConnectionTCPIPv4.ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString;

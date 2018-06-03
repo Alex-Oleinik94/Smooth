@@ -21,7 +21,7 @@ type
 		FProtocolFrame : TSGEthernetPacketProtocolFrame;
 		FEthernetSize : TSGEthernetPacketFrameSize;
 			public
-		procedure Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize); override;
+		procedure Read(const _Stream : TSGEthernetPacketFrameStream; const _BlockSize : TSGEthernetPacketFrameSize); override;
 		procedure Write(const Stream : TSGEthernetPacketFrameStream); override;
 		procedure ExportInfo(const Stream : TSGTextFileStream); override;
 		function Size() : TSGEthernetPacketFrameSize; override;
@@ -168,15 +168,15 @@ FEthernetSize := 0;
 inherited;
 end;
 
-procedure TSGEthernetPacketFrame.Read(const Stream : TSGEthernetPacketFrameStream; const BlockSize : TSGEthernetPacketFrameSize);
+procedure TSGEthernetPacketFrame.Read(const _Stream : TSGEthernetPacketFrameStream; const _BlockSize : TSGEthernetPacketFrameSize);
 begin
-FEthernetSize := BlockSize;
-Stream.ReadBuffer(FEthernetPacketHeader, SizeOf(TSGEthernetHeader));
+FEthernetSize := _BlockSize;
+_Stream.ReadBuffer(FEthernetPacketHeader, SizeOf(TSGEthernetHeader));
 TSGEthernetPacketProtocolFrame.ReadProtocolClass(
 	ProtocolClass(FEthernetPacketHeader.Protocol),
 	SizeEncapsulated(),
 	FProtocolFrame,
-	Stream);
+	_Stream);
 end;
 
 procedure TSGEthernetPacketFrame.Write(const Stream : TSGEthernetPacketFrameStream);
