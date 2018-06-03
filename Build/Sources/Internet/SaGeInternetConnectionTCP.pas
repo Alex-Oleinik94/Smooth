@@ -59,6 +59,7 @@ type
 		FSenderDataStreamFile, FRecieverDataStreamFile : TSGString;
 		FSenderDataStream, FRecieverDataStream : TFileStream;
 			public
+		class function ProtocolAbbreviation() : TSGString; override;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); override;
 			protected
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
@@ -176,6 +177,11 @@ FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketData
 DumpPacketFiles(Time, Date, Packet, FileNameInfo, FileNameData);
 end;
 
+class function TSGInternetConnectionTCP.ProtocolAbbreviation() : TSGString;
+begin
+Result := 'TCP';
+end;
+
 procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
 const
 	ColorPort = 11;
@@ -188,15 +194,17 @@ const
 	ColorActive5secProtocol = 2;
 	ColorFinalizedProtocol = 4; {12}
 begin
-if (FRecieverEmulator <> nil) and (not FRecieverEmulator.Finalized) then
-	if (SGNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
-		TextStream.TextColor(ColorActive5secProtocol)
+if (not ForFileSystem) and (ProtocolAbbreviation() <> '') then
+	begin
+	if (FRecieverEmulator <> nil) and (not FRecieverEmulator.Finalized) then
+		if (SGNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
+			TextStream.TextColor(ColorActive5secProtocol)
+		else
+			TextStream.TextColor(ColorActiveProtocol)
 	else
-		TextStream.TextColor(ColorActiveProtocol)
-else
-	TextStream.TextColor(ColorFinalizedProtocol);
-TextStream.Write('TCP ');
-
+		TextStream.TextColor(ColorFinalizedProtocol);
+	TextStream.Write(ProtocolAbbreviation() +' ');
+	end;
 if FDeviceIPv4Supported then
 	begin
 	TextStream.TextColor(ColorText);
@@ -347,8 +355,8 @@ if PacketComparable(Packet) then
 		Result := InitFirstPacket(Time, Date, Packet)
 	else if (FPacketCount > 0) and (
 			((not FSenderFinalized) and (not FRecieverFinalized)) or
-			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination) and Packet.TCPIP^.Final) or
-			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source) and Packet.TCPIP^.Final) ) then
+			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination){ and Packet.TCPIP^.Final}) or
+			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source){ and Packet.TCPIP^.Final}) ) then
 		Result := InitPacket(Time, Date, Packet);
 if Result then
 	PushPacket(Time, Date, Packet);

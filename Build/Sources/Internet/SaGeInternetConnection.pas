@@ -34,6 +34,7 @@ type
 		FModePacketStorage : TSGBoolean;
 		FModeRuntimeDataDumper : TSGBoolean;
 		FModeRuntimePacketDumper : TSGBoolean;
+		FIdentifier : TSGString;
 		
 		FTimeFirstPacket : TSGTime;
 		FDateFirstPacket : TSGDateTime;
@@ -57,6 +58,7 @@ type
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 			protected
+		class function ProtocolAbbreviation() : TSGString; virtual;
 		procedure CreateConnectionDumpDirectory(); virtual;
 		function PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
 		procedure DumpPacketFiles(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName, DataFileName : TSGString);
@@ -81,6 +83,7 @@ type
 		property ConnectionDumpDirectory : TSGString read FConnectionDumpDirectory;
 		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
 		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
+		property Identifier : TSGString read FIdentifier write FIdentifier;
 			public
 		function HandleData(const Stream : TStream) : TSGConnectionDataType; virtual;
 		function HasData() : TSGBoolean; virtual;
@@ -149,8 +152,9 @@ var
 	FileStream : TFileStream = nil;
 	Stream : TMemoryStream = nil;
 begin
-Stream := Packet.CreateStream();
-if Stream <> nil then
+if (Packet <> nil) then
+	Stream := Packet.CreateStream();
+if (Stream <> nil) then
 	begin
 	FileStream := TFileStream.Create(DataFileName, fmCreate);
 	Stream.Position := 0;
@@ -170,9 +174,14 @@ function TSGInternetConnection.PrintableTextString(const ForFileSystem : TSGBool
 var
 	StringTextSteam : TSGStringTextStream = nil;
 begin
+Result := '';
 StringTextSteam := TSGStringTextStream.Create();
+if ForFileSystem and (ProtocolAbbreviation() <> '') then
+	Result += ProtocolAbbreviation() + ' ';
+if ForFileSystem and (Identifier <> '') then
+	Result += '{' + Identifier + '} ';
 PrintTextInfo(StringTextSteam, ForFileSystem);
-Result := StringTextSteam.Value;
+Result += StringTextSteam.Value;
 SGKill(StringTextSteam);
 end;
 
@@ -216,6 +225,11 @@ begin
 Result := False;
 end;
 
+class function TSGInternetConnection.ProtocolAbbreviation() : TSGString;
+begin
+Result := '';
+end;
+
 constructor TSGInternetConnection.Create();
 begin
 inherited;
@@ -223,6 +237,7 @@ FDataSize := 0;
 FPacketCount := 0;
 FPacketStorage := nil;
 FCritacalSection := TSGCriticalSection.Create();
+FIdentifier := '';
 FDeviceIPv4Supported := False;
 FSecondsMeansConnectionActive := 10;
 FFirstPacketIsSelfSender := False;
@@ -244,6 +259,8 @@ end;
 
 destructor TSGInternetConnection.Destroy();
 begin
+if (FConnectionDumpDirectory <> '') and (FDataSize > 0) then
+	SGRenameFile(FConnectionDumpDirectory, FConnectionDumpDirectory + ' [' + SGStr(FPacketCount) + ', ' + SGGetSizeString(FDataSize, 'EN') + ']');
 SGKill(FCritacalSection);
 SGKill(FPacketStorage);
 inherited;

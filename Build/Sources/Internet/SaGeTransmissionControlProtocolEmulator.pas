@@ -324,30 +324,29 @@ if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	begin
 	ConnectSegments();
 	Index := 0;
-	while Index <= High(FReceivedSegments) do
-		if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
-		   (FReceivedSegments[Index].SegmentEnd = Segment.SegmentEnd) then
-			begin
-			RemovedSegment := FReceivedSegments[Index];
-			FReceivedSegments -= FReceivedSegments[Index];
-			MoveBuffer(RemovedSegment);
-			end
-		else if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
-		        (FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
-		    begin
-		    RemovedSegment := TSGTCPReceivedSegment.Create(FReceivedSegments[Index].SegmentBegin, Segment.SegmentEnd);
-			FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
-			MoveBuffer(RemovedSegment);
-			end
-		else if (FReceivedSegments[Index].SegmentBegin <= Segment.SegmentBegin) and 
-		        (FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
-		    begin
-		    FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentBegin, Segment.SegmentBegin - 1);
-		    FReceivedSegments += TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
-			ConnectSegments();
-		    end
-		else
-			Index += 1;
+	if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
+	   (FReceivedSegments[Index].SegmentEnd = Segment.SegmentEnd) then
+		begin
+		RemovedSegment := FReceivedSegments[Index];
+		FReceivedSegments -= FReceivedSegments[Index];
+		MoveBuffer(RemovedSegment);
+		end
+	else if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
+			(FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
+		begin
+		RemovedSegment := TSGTCPReceivedSegment.Create(FReceivedSegments[Index].SegmentBegin, Segment.SegmentEnd);
+		FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+		MoveBuffer(RemovedSegment);
+		end
+	else if (FReceivedSegments[Index].SegmentBegin <= Segment.SegmentBegin) and 
+			(FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
+		begin
+		FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentBegin, Segment.SegmentBegin - 1);
+		FReceivedSegments += TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+		ConnectSegments();
+		end
+	{else
+		Index += 1};
 	end;
 end;
 
@@ -356,9 +355,12 @@ var
 	PushingNumber : TSGTcpSequence;
 	ToExit : TSGBoolean = False;
 begin
-if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
+if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) and
+   (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	begin
 	SGQuickSort(FSignificantNumbers[0], Length(FSignificantNumbers), SizeOf(TSGTCPSignificantNumbers), @TSGTCPSignificantNumber_Comparison);
+	{$IFDEF TCP_DEBUG}TSGLog.Source([Self, ' First element: {(1)}:', FFirstBufferElement]);{$ENDIF}
+	{$IFDEF TCP_DEBUG}LogSegments('Before(1)');{$ENDIF}
 	repeat
 	PushingNumber := FSignificantNumbers[0].Number;
 	if ReceivedSegmentsIncludes(TSGTCPReceivedSegment.Create(FFirstBufferElementAddress, PushingNumber)) then
@@ -370,6 +372,7 @@ if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
 	else
 		ToExit := True;
 	until ToExit or (FSignificantNumbers = nil) or (Length(FSignificantNumbers) = 0);
+	{$IFDEF TCP_DEBUG}LogSegments('After(1)');{$ENDIF}
 	end;
 end;
 

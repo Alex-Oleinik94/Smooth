@@ -94,10 +94,11 @@ type
 		class function ClassName() : TSGString; override;
 			public
 		FHandle    : TSGThreadHandle;
-		FFinished  : Boolean;
+		FFinished  : TSGBoolean;
 		FProcedure : TSGThreadProcedure;
 		FParametr  : Pointer;
 		FThreadID  : TSGUInt32;
+		FCrashed   : TSGBoolean;
 		{$IFDEF ANDROID}
 			attr : pthread_attr_t;
 			mutex : pthread_mutex_t;
@@ -110,7 +111,8 @@ type
 		procedure PreExecuting();
 		procedure PostExecuting();
 			public
-		property Finished: boolean read FFinished write FFinished;
+		property Finished : TSGBoolean read FFinished write FFinished;
+		property Crashed  : TSGBoolean read FCrashed write FCrashed;
 		end;
 	TSGThreadList = packed array of TSGThread;
 
@@ -133,16 +135,17 @@ end;
 
 constructor TSGThread.Create(const Proc : TSGThreadProcedure; const Para : TSGPointer = nil; const QuickStart : TSGBoolean = True);
 begin
-inherited Create;
-FFinished:=True;
-FParametr:=Para;
-FProcedure:=Proc;
-FillChar(FHandle,SizeOf(FHandle),0);
-FThreadID:=0;
+inherited Create();
+FFinished := True;
+FCrashed := False;
+FParametr := Para;
+FProcedure := Proc;
+FillChar(FHandle, SizeOf(FHandle), 0);
+FThreadID := 0;
 {$IFDEF ANDROID}
-	fillchar(attr,sizeof(attr),0);
-	fillchar(cond,sizeof(cond),0);
-	fillchar(mutex,sizeof(mutex),0);
+	fillchar(attr, sizeof(attr), 0);
+	fillchar(cond, sizeof(cond), 0);
+	fillchar(mutex, sizeof(mutex), 0);
 	{$ENDIF}
 if QuickStart then
 	Start();
@@ -163,7 +166,7 @@ begin
 {$IFDEF ANDROID}
 	pthread_mutex_lock(@mutex);
 	{$ENDIF}
-FFinished:=False;
+FFinished := False;
 {$IFDEF ANDROID}
 	pthread_cond_broadcast(@cond);
 	pthread_mutex_unlock(@mutex);
@@ -175,7 +178,7 @@ begin
 {$IFDEF ANDROID}
 	pthread_mutex_lock(@mutex);
 	{$ENDIF}
-FFinished:=True;
+FFinished := True;
 {$IFDEF ANDROID}
 	pthread_mutex_unlock(@mutex);
 	{$ENDIF}
@@ -187,10 +190,10 @@ if Pointer(FProcedure)<>nil then
 	FProcedure(FParametr);
 end;
 
-function TSGThreadStart(ThreadClass:TSGThread):TSGThreadFunctionResult;
+function TSGThreadStart(ThreadClass : TSGThread) : TSGThreadFunctionResult;
 {$IFDEF ANDROID}cdecl;{$ELSE}{$IF defined(MSWINDOWS)}stdcall;{$ENDIF}{$ENDIF}
 begin
-Result:={$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
+Result := {$IFDEF ANDROID}nil{$ELSE}0{$ENDIF};
 try
 	ThreadClass.PreExecuting();
 	ThreadClass.Execute();
@@ -200,6 +203,7 @@ except on e : TSGException do
 	SGLogMakeSignificant();
 	SGLog.Source(['TSGThread_Run(). While executing ',ThreadClass.ClassName(), '(', SGAddrStr(ThreadClass), ') raised exception --->']);
 	SGPrintExceptionStackTrace(e, SGCasesOfPrintLog);
+	ThreadClass.Crashed := True;
 	end;
 end;
 {$IFDEF ANDROID}
@@ -214,7 +218,7 @@ destructor TSGThread.Destroy();
 	{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
-	if not FFinished then
+	if (not FFinished) and (not FCrashed) then
 		begin
 		TerminateResult := TerminateThread(FHandle, 0);
 		SGLog.Source([Self, '__Destroy(). Handle=', FHandle, ', Thread ID=', FThreadID, ', Terminate Result=', TerminateResult, '.']);

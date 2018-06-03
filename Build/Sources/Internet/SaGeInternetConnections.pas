@@ -262,6 +262,7 @@ end;
 
 procedure TSGInternetConnections.PutConnectionModesInfo(const Connection : TSGInternetConnection);
 begin
+Connection.Identifier := SGStr(Length(FConnections) + 1);
 Connection.ModeDataTransfer := FModeDataTransfer;
 Connection.ModePacketStorage := FModePacketStorage;
 Connection.ModeRuntimeDataDumper := FModeRuntimeDataDumper;
