@@ -210,8 +210,6 @@ type
 		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsPanel:TSGPanel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsLabel:TSGLabel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsPicture:TSGPicture;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -522,26 +520,10 @@ else
 	Result:=nil;
 end;
 
-function TSGComponent.AsLabel:TSGLabel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGLabel then
-	Result:=TSGLabel(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 function TSGComponent.GetChild(a:TSGInt32):TSGComponent;
 begin
 if (a-1 >= 0) and (a-1<=High(FChildren)) then
 	Result:=FChildren[a-1]
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsPanel:TSGPanel;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGPanel then
-	Result:=TSGPanel(Pointer(Self))
 else
 	Result:=nil;
 end;

@@ -10,6 +10,10 @@ uses
 	,SaGeScreen
 	,SaGeScreenSkin
 	,SaGeFont
+	
+	// Screen components
+	,SaGeScreen_Panel
+	,SaGeScreen_Label
 	;
 
 const

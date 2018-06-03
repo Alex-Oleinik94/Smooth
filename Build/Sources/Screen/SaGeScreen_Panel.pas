@@ -1,4 +1,15 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Panel;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	;
+
 type
 	TSGPanel = class(TSGComponent, ISGPanel)
 			public
@@ -16,9 +27,13 @@ type
 		property ViewLines : TSGBoolean read ViewingLines write FViewLines;
 		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	;
+
 class function TSGPanel.ClassName() : TSGString; 
 begin
 Result := 'TSGPanel';
@@ -52,4 +67,5 @@ destructor TSGPanel.Destroy();
 begin
 inherited;
 end;
-{$ENDIF}
+
+end.

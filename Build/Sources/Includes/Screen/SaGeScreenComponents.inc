@@ -4,8 +4,6 @@
 {$INCLUDE SaGeScreenComponent.inc}
 {$INCLUDE SaGeScreenCommonComponents.inc}
 {$INCLUDE SaGeScreenEdit.inc}
-{$INCLUDE SaGeScreenPanel.inc}
-{$INCLUDE SaGeScreenLabel.inc}
 {$INCLUDE SaGeScreenButton.inc}
 {$INCLUDE SaGeScreenPicture.inc}
 {$INCLUDE SaGeScreenProgressBar.inc}

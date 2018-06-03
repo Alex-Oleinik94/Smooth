@@ -1,4 +1,16 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Label;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	,SaGeCommonStructs
+	;
+
 type
 	TSGLabel = class(TSGComponent, ISGLabel)
 			protected
@@ -21,9 +33,12 @@ type
 		property TextColor      : TSGColor4f read GetTextColor      write SetTextColor;
 		property TextColorSeted : TSGBoolean read GetTextColorSeted write SetTextColorSeted;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	;
 
 class function TSGLabel.ClassName() : TSGString; 
 begin
@@ -75,4 +90,5 @@ if FVisibleTimer > SGZero then
 	FSkin.PaintLabel(Self);
 inherited;
 end;
-{$ENDIF}
+
+end.
