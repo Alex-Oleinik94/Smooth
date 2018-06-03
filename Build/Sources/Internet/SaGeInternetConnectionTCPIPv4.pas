@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeInternetConnectionTCP;
+unit SaGeInternetConnectionTCPIPv4;
 
 interface
 
@@ -15,26 +15,26 @@ uses
 	,SaGeInternetPacketStorage
 	,SaGeCriticalSection
 	,SaGeStreamUtils
-	,SaGeTransmissionControlProtocolEmulator
+	,SaGeEmulatorTCP
 	
 	,Classes
 	;
 
 type
-	TSGInternetConnectionTCP = class;
+	TSGInternetConnectionTCPIPv4 = class;
 	
-	TSGTCPEmulator = class(TSGTransmissionControlProtocolEmulator)
+	TSGEmulatorTCP = class(TSGEmulatorTransmissionControlProtocol)
 			public
-		constructor Create(const _Connection : TSGInternetConnectionTCP);
+		constructor Create(const _Connection : TSGInternetConnectionTCPIPv4);
 			protected
-		FConnection : TSGInternetConnectionTCP;
+		FConnection : TSGInternetConnectionTCPIPv4;
 			public
-		property Connection : TSGInternetConnectionTCP read FConnection write FConnection;
+		property Connection : TSGInternetConnectionTCPIPv4 read FConnection write FConnection;
 			public
 		procedure HandleData(const Data : TStream); override;
 		end;
 	
-	TSGInternetConnectionTCP = class(TSGInternetConnection)
+	TSGInternetConnectionTCPIPv4 = class(TSGInternetConnection)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -46,8 +46,8 @@ type
 		FRecieverFinalized : TSGBoolean;
 		
 		// TCP protocol emulation
-		FSenderEmulator : TSGTransmissionControlProtocolEmulator;
-		FRecieverEmulator : TSGTransmissionControlProtocolEmulator;
+		FSenderEmulator : TSGEmulatorTransmissionControlProtocol;
+		FRecieverEmulator : TSGEmulatorTransmissionControlProtocol;
 		
 		// Data transfer
 		FSenderData : TSGMemoryStreamList;
@@ -59,8 +59,8 @@ type
 		FSenderDataStreamFile, FRecieverDataStreamFile : TSGString;
 		FSenderDataStream, FRecieverDataStream : TFileStream;
 			public
-		class function ProtocolAbbreviation() : TSGString; override;
-		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); override;
+		class function ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString; override;
+		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); override;
 			protected
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
@@ -71,7 +71,7 @@ type
 		function InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 		procedure PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure DumpData(const Stream : TStream; const EmulatorString : TSGString);
-		procedure PushData(const Stream : TStream; const Emulator : TSGTCPEmulator);
+		procedure PushData(const Stream : TStream; const Emulator : TSGEmulatorTCP);
 		procedure CreateBlockStreams();
 			public
 		function HandleData(const Stream : TStream) : TSGConnectionDataType; override;
@@ -91,19 +91,19 @@ uses
 	,StrMan
 	;
 
-constructor TSGTCPEmulator.Create(const _Connection : TSGInternetConnectionTCP);
+constructor TSGEmulatorTCP.Create(const _Connection : TSGInternetConnectionTCPIPv4);
 begin
 inherited Create();
 FConnection := _Connection;
 end;
 
-procedure TSGTCPEmulator.HandleData(const Data : TStream);
+procedure TSGEmulatorTCP.HandleData(const Data : TStream);
 begin
 if FConnection <> nil then
 	FConnection.PushData(Data, Self);
 end;
 
-procedure TSGInternetConnectionTCP.DumpData(const Stream : TStream; const EmulatorString : TSGString);
+procedure TSGInternetConnectionTCPIPv4.DumpData(const Stream : TStream; const EmulatorString : TSGString);
 var
 	FileStream : TFileStream = nil;
 begin
@@ -118,7 +118,7 @@ SGCopyPartStreamToStream(Stream, FileStream, Stream.Size);
 SGKill(FileStream);
 end;
 
-procedure TSGInternetConnectionTCP.PushData(const Stream : TStream; const Emulator : TSGTCPEmulator);
+procedure TSGInternetConnectionTCPIPv4.PushData(const Stream : TStream; const Emulator : TSGEmulatorTCP);
 begin
 if FModeDataTransfer and (Emulator = FSenderEmulator) then
 	FSenderData += SGStreamCopyMemory(Stream);
@@ -138,7 +138,7 @@ if FModeRuntimeDataDumper then
 	end;
 end;
 
-procedure TSGInternetConnectionTCP.HandlePacket(const Packet : TSGEthernetPacketFrame);
+procedure TSGInternetConnectionTCPIPv4.HandlePacket(const Packet : TSGEthernetPacketFrame);
 begin
 FCritacalSectionTCP.Enter();
 if AddressMatchesNetMask(Packet.IPv4^.Destination) then
@@ -158,7 +158,7 @@ if ((FRecieverEmulator <> nil) and FRecieverEmulator.Finalized) then
 FCritacalSectionTCP.Leave();
 end;
 
-procedure TSGInternetConnectionTCP.DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+procedure TSGInternetConnectionTCPIPv4.DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 var
 	DateTimeString : TSGString;
 	FileName : TSGString;
@@ -177,12 +177,12 @@ FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketData
 DumpPacketFiles(Time, Date, Packet, FileNameInfo, FileNameData);
 end;
 
-class function TSGInternetConnectionTCP.ProtocolAbbreviation() : TSGString;
+class function TSGInternetConnectionTCPIPv4.ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString;
 begin
-Result := 'TCP';
+Result := 'TCP' + Iff(not FileSystemSuport, '/') + 'IPv4';
 end;
 
-procedure TSGInternetConnectionTCP.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
+procedure TSGInternetConnectionTCPIPv4.PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False);
 const
 	ColorPort = 11;
 	ColorSize = 6;
@@ -194,7 +194,7 @@ const
 	ColorActive5secProtocol = 2;
 	ColorFinalizedProtocol = 4; {12}
 begin
-if (not ForFileSystem) and (ProtocolAbbreviation() <> '') then
+if (not FileSystemSuport) and (ProtocolAbbreviation() <> '') then
 	begin
 	if (FRecieverEmulator <> nil) and (not FRecieverEmulator.Finalized) then
 		if (SGNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
@@ -208,43 +208,43 @@ if (not ForFileSystem) and (ProtocolAbbreviation() <> '') then
 if FDeviceIPv4Supported then
 	begin
 	TextStream.TextColor(ColorText);
-	TextStream.Write('Port' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write('Port' + Iff(FileSystemSuport, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write(';Address' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write(';Address' + Iff(FileSystemSuport, '=', ':'));
 	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write(';DPort' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write(';DPort' + Iff(FileSystemSuport, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end
 else
 	begin
 	TextStream.TextColor(ColorText);
-	TextStream.Write('sa' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write('sa' + Iff(FileSystemSuport, '=', ':'));
 	SGIPv4AddressView(FSourceAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('sp' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write('sp' + Iff(FileSystemSuport, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FSourcePort), 5, ' '));
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('da' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write('da' + Iff(FileSystemSuport, '=', ':'));
 	SGIPv4AddressView(FDestinationAddress, TextStream, ColorAddressNumber, ColorAddressPoint);
 	
 	TextStream.TextColor(ColorText);
-	TextStream.Write('dp' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write('dp' + Iff(FileSystemSuport, '=', ':'));
 	TextStream.TextColor(ColorPort);
 	TextStream.Write(StringJustifyRight(SGStr(FDestinationPort), 5, ' '));
 	end;
-if not ForFileSystem then
+if not FileSystemSuport then
 	begin
 	TextStream.TextColor(ColorText);
-	TextStream.Write(';Size' + Iff(ForFileSystem, '=', ':'));
+	TextStream.Write(';Size' + Iff(FileSystemSuport, '=', ':'));
 	if FDataSize > 1024 * 400 then
 		TextStream.TextColor(ColorBigSize)
 	else
@@ -255,12 +255,12 @@ if not ForFileSystem then
 TextStream.TextColor(7);
 end;
 
-class function TSGInternetConnectionTCP.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+class function TSGInternetConnectionTCPIPv4.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := (Packet.TCPIP <> nil) and (Packet.IPv4 <> nil);
 end;
 
-procedure TSGInternetConnectionTCP.CreateBlockStreams();
+procedure TSGInternetConnectionTCPIPv4.CreateBlockStreams();
 begin
 FSenderDataStreamFile   := 
 	FConnectionDumpDirectory + DirectorySeparator + 'Sender_data' + 
@@ -274,7 +274,7 @@ FSenderDataStream := TFileStream.Create(FSenderDataStreamFile, fmCreate);
 FRecieverDataStream := TFileStream.Create(FRecieverDataStreamFile, fmCreate);
 end;
 
-function TSGInternetConnectionTCP.InitFirstPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+function TSGInternetConnectionTCPIPv4.InitFirstPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := True;
 
@@ -304,12 +304,12 @@ if FModePacketStorage then
 	end;
 if FModeDataTransfer or FModeRuntimeDataDumper then
 	begin
-	FSenderEmulator := TSGTCPEmulator.Create(Self);
-	FRecieverEmulator := TSGTCPEmulator.Create(Self);
+	FSenderEmulator := TSGEmulatorTCP.Create(Self);
+	FRecieverEmulator := TSGEmulatorTCP.Create(Self);
 	end;
 end;
 
-function TSGInternetConnectionTCP.InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+function TSGInternetConnectionTCPIPv4.InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := 
 	((
@@ -327,7 +327,7 @@ Result :=
 	));
 end;
 
-procedure TSGInternetConnectionTCP.PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+procedure TSGInternetConnectionTCPIPv4.PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 begin
 FTimeLastPacket := Time;
 FDateLastPacket := Date;
@@ -346,7 +346,7 @@ if not FModePacketStorage then
 	Packet.Destroy();
 end;
 
-function TSGInternetConnectionTCP.PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+function TSGInternetConnectionTCPIPv4.PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := False;
 FCritacalSection.Enter();
@@ -363,7 +363,7 @@ if Result then
 FCritacalSection.Leave();
 end;
 
-constructor TSGInternetConnectionTCP.Create();
+constructor TSGInternetConnectionTCPIPv4.Create();
 begin
 inherited;
 FSourceAddress := 0;
@@ -385,7 +385,7 @@ FSenderDataStreamFile := '';
 FRecieverDataStreamFile := '';
 end;
 
-destructor TSGInternetConnectionTCP.Destroy();
+destructor TSGInternetConnectionTCPIPv4.Destroy();
 begin
 SGKill(FSenderDataStream);
 SGKill(FRecieverDataStream);
@@ -395,7 +395,7 @@ SGKill(FCritacalSectionTCP);
 inherited;
 end;
 
-function TSGInternetConnectionTCP.HandleData(const Stream : TStream) : TSGConnectionDataType;
+function TSGInternetConnectionTCPIPv4.HandleData(const Stream : TStream) : TSGConnectionDataType;
 var
 	MemStream : TMemoryStream = nil;
 begin
@@ -420,12 +420,12 @@ if (MemStream <> nil) then
 	end;
 end;
 
-function TSGInternetConnectionTCP.HasData() : TSGBoolean;
+function TSGInternetConnectionTCPIPv4.HasData() : TSGBoolean;
 begin
 Result := CountData() > 0;
 end;
 
-function TSGInternetConnectionTCP.CountData() : TSGMaxEnum;
+function TSGInternetConnectionTCPIPv4.CountData() : TSGMaxEnum;
 begin
 Result := 0;
 if (FSenderData <> nil) then
@@ -436,7 +436,7 @@ end;
 
 initialization
 begin
-SGRegisterInternetConnectionClass(TSGInternetConnectionTCP);
+SGRegisterInternetConnectionClass(TSGInternetConnectionTCPIPv4);
 end;
 
 end.

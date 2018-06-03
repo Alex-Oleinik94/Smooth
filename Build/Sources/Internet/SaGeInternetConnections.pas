@@ -77,7 +77,7 @@ procedure SGConnectionsAnalyzer();
 implementation
 
 uses
-	 SaGeInternetConnectionTCP
+	 SaGeInternetConnectionTCPIPv4
 	,SaGeTextConsoleStream
 	,SaGeTextLogStream
 	,SaGeBaseUtils

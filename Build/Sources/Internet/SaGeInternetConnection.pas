@@ -58,15 +58,15 @@ type
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 			protected
-		class function ProtocolAbbreviation() : TSGString; virtual;
+		class function ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString; virtual;
 		procedure CreateConnectionDumpDirectory(); virtual;
-		function PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
+		function PrintableTextString(const FileSystemSuport : TSGBoolean = True) : TSGString;
 		procedure DumpPacketFiles(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName, DataFileName : TSGString);
 		procedure DumpPacketInfoFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName : TSGString);
 		procedure DumpPacketDataFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const DataFileName : TSGString);
 		function AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
 			public
-		procedure PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False); virtual;
+		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); virtual;
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		procedure AddDeviceIPv4(const Net, Mask : TSGIPv4Address); virtual;
@@ -170,17 +170,17 @@ DumpPacketInfoFile(Time, Date, Packet, InfoFileName);
 DumpPacketDataFile(Time, Date, Packet, DataFileName);
 end;
 
-function TSGInternetConnection.PrintableTextString(const ForFileSystem : TSGBoolean = True) : TSGString;
+function TSGInternetConnection.PrintableTextString(const FileSystemSuport : TSGBoolean = True) : TSGString;
 var
 	StringTextSteam : TSGStringTextStream = nil;
 begin
 Result := '';
 StringTextSteam := TSGStringTextStream.Create();
-if ForFileSystem and (ProtocolAbbreviation() <> '') then
-	Result += ProtocolAbbreviation() + ' ';
-if ForFileSystem and (Identifier <> '') then
+if FileSystemSuport and (ProtocolAbbreviation(FileSystemSuport) <> '') then
+	Result += ProtocolAbbreviation(FileSystemSuport) + ' ';
+if FileSystemSuport and (Identifier <> '') then
 	Result += '{' + Identifier + '} ';
-PrintTextInfo(StringTextSteam, ForFileSystem);
+PrintTextInfo(StringTextSteam, FileSystemSuport);
 Result += StringTextSteam.Value;
 SGKill(StringTextSteam);
 end;
@@ -211,7 +211,7 @@ FDeviceIPv4Net  := Net;
 FDeviceIPv4Mask := Mask;
 end;
 
-procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream; const ForFileSystem : TSGBoolean = False);
+procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False);
 begin
 end;
 
@@ -225,7 +225,7 @@ begin
 Result := False;
 end;
 
-class function TSGInternetConnection.ProtocolAbbreviation() : TSGString;
+class function TSGInternetConnection.ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString;
 begin
 Result := '';
 end;

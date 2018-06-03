@@ -1,7 +1,7 @@
 {$INCLUDE SaGe.inc}
-//{$DEFINE TCP_DEBUG}
+{$DEFINE TCP_DEBUG}
 
-unit SaGeTransmissionControlProtocolEmulator;
+unit SaGeEmulatorTCP;
 
 interface
 
@@ -14,9 +14,9 @@ uses
 	,Classes
 	;
 type
-	TSGTCPReceivedSegment = object
+	TSGTCPSegment = object
 			public
-		class function Create(const _SegmentBegin, _SegmentEnd : TSGTcpSequence) : TSGTCPReceivedSegment;
+		class function Create(const _SegmentBegin, _SegmentEnd : TSGTcpSequence) : TSGTCPSegment;
 		procedure Free();
 		function ToString() : TSGString;
 			protected
@@ -26,7 +26,7 @@ type
 		property SegmentEnd : TSGTcpSequence read FSegmentEnd write FSegmentEnd;
 		end;
 
-operator = (const Segment1, Segment2 : TSGTCPReceivedSegment) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator = (const Segment1, Segment2 : TSGTCPSegment) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 type
 	TSGTCPSignificantNumberType = (
@@ -50,9 +50,9 @@ function SGTCPSignificantNumberTypeToString(const _SignificantType : TSGTCPSigni
 operator = (const Number1, Number2 : TSGTCPSignificantNumber) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 {$DEFINE  INC_PLACE_INTERFACE}
-{$DEFINE DATATYPE_LIST_HELPER := TSGTCPReceivedSegmentsHelper}
-{$DEFINE DATATYPE_LIST        := TSGTCPReceivedSegments}
-{$DEFINE DATATYPE             := TSGTCPReceivedSegment}
+{$DEFINE DATATYPE_LIST_HELPER := TSGTCPSegmentsHelper}
+{$DEFINE DATATYPE_LIST        := TSGTCPSegments}
+{$DEFINE DATATYPE             := TSGTCPSegment}
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
 
@@ -64,16 +64,19 @@ operator = (const Number1, Number2 : TSGTCPSignificantNumber) : TSGBoolean; {$IF
 {$UNDEF   INC_PLACE_INTERFACE}
 
 const
-	SG_TCP_BUFFER_SIZE = SG_TCP_WINDOW_SIZE * 3;
+	// SG_TCP_WINDOW_SIZE = 64 KByte
+	// SG_TCP_BUFFER_SIZE = 256 KByte
+	SG_TCP_BUFFER_SIZE = SG_TCP_WINDOW_SIZE * (4 + 1);
 	SG_TCP_BUFFER_POSITION = SG_TCP_WINDOW_SIZE;
 type
 	TSGTCPBufferAddress = TSGInt32;
-	TSGTransmissionControlProtocolEmulator = class(TSGNamed)
+	TSGEmulatorTransmissionControlProtocol = class(TSGNamed)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			protected
 		FBuffer : TSGTcpSequenceBuffer;
+		FBufferSize : TSGUInt64;
 		FFirstBufferElement : TSGTCPBufferAddress;
 		FFirstBufferElementAddress : TSGTcpSequence;
 		FSynchronized : TSGBoolean;
@@ -83,7 +86,7 @@ type
 		FFinalized : TSGBoolean;
 			protected
 		FSignificantNumbers : TSGTCPSignificantNumbers;
-		FReceivedSegments : TSGTCPReceivedSegments;
+		FReceivedSegments : TSGTCPSegments;
 			protected
 		FBufferCountReads, FBufferCountWrites, FCountDataHandles : TSGUInt64;
 			public
@@ -91,6 +94,8 @@ type
 			public
 		procedure HandleData(const Data : TStream); virtual; abstract;
 			public
+		procedure AddSegment(const NewSegment : TSGTCPSegment);
+		procedure KillBuffer();
 		procedure InitBuffer(const InitialBufferNumper : TSGTcpSequence);
 		procedure Reset(); virtual;
 		procedure HandleData(const Header : TSGTCPHeader; const Data : TStream); virtual;
@@ -102,9 +107,9 @@ type
 		procedure ReadBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream); virtual;
 		procedure ConnectSegments();
 		procedure Synchronize(const SynchronizeNumber : TSGTcpSequence);
-		function ReceivedSegmentsIncludes(const Segment : TSGTCPReceivedSegment) : TSGBoolean;
-		procedure ReceivedSegmentsExclude(const Segment : TSGTCPReceivedSegment);
-		procedure MoveBuffer(const RemovedSegment : TSGTCPReceivedSegment);
+		function ReceivedSegmentsIncludes(const Segment : TSGTCPSegment) : TSGBoolean;
+		procedure ReceivedSegmentsExclude(const Segment : TSGTCPSegment);
+		procedure MoveBuffer(const RemovedSegment : TSGTCPSegment);
 			public
 		procedure LogSegments(const StringValue : TSGString = '');
 		procedure LogSynchronizing();
@@ -112,7 +117,7 @@ type
 		procedure LogSignificantNumbers(const StringValue : TSGString = '');
 		end;
 
-procedure SGKill(var Emulator : TSGTransmissionControlProtocolEmulator);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var Emulator : TSGEmulatorTransmissionControlProtocol);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
@@ -155,7 +160,7 @@ begin
 Result := '(' + SGTCPSignificantNumberTypeToString(FNumberType) + ', 0x' + SGStr4BytesHex(FNumber, False) + ')';
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.LogSignificantNumbers(const StringValue : TSGString = '');
+procedure TSGEmulatorTransmissionControlProtocol.LogSignificantNumbers(const StringValue : TSGString = '');
 var
 	Index : TSGMaxEnum;
 	Numbers : TSGString = '';
@@ -172,7 +177,7 @@ if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
 TSGLog.Source([Self, ' Significant numbers: ', Iff(StringValue <> '', '{' + StringValue + '}: '), Numbers]);
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.LogSegments(const StringValue : TSGString = '');
+procedure TSGEmulatorTransmissionControlProtocol.LogSegments(const StringValue : TSGString = '');
 var
 	Index : TSGMaxEnum;
 	Segments : TSGString = '';
@@ -189,64 +194,64 @@ if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 TSGLog.Source([Self, ' Segments: ', Iff(StringValue <> '', '{' + StringValue + '}: '), Segments]);
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.LogBufferInfo();
+procedure TSGEmulatorTransmissionControlProtocol.LogBufferInfo();
 begin
 TSGLog.Source([Self, ' Buffer info: First buffer element         = ', FFirstBufferElement]);
 TSGLog.Source([Self, ' Buffer info: First buffer element address = 0x', SGStr4BytesHex(FFirstBufferElementAddress, False)]);
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.LogSynchronizing();
+procedure TSGEmulatorTransmissionControlProtocol.LogSynchronizing();
 begin
 TSGLog.Source([Self, ' Synchronize: Begin sequence number = 0x', SGStr4BytesHex(FBeginSequenceNumber, False)]);
 LogBufferInfo();
 end;
 
-operator = (const Segment1, Segment2 : TSGTCPReceivedSegment) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+operator = (const Segment1, Segment2 : TSGTCPSegment) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 Result := (Segment1.SegmentBegin = Segment2.SegmentBegin) and (Segment1.SegmentEnd = Segment2.SegmentEnd);
 end;
 
-function TSGTCPReceivedSegment.ToString() : TSGString;
+function TSGTCPSegment.ToString() : TSGString;
 begin
-Result := '(0x' + SGStr4BytesHex(SegmentBegin, False) + ', 0x' + SGStr4BytesHex(SegmentEnd, False) + ')';
+Result := '(0x' + SGStr4BytesHex(SegmentBegin, False) + ', 0x' + SGStr4BytesHex(SegmentEnd, False) + ', ' + SGGetSizeString(SegmentEnd - SegmentBegin + 1) + ')';
 end;
 
-class function TSGTCPReceivedSegment.Create(const _SegmentBegin, _SegmentEnd : TSGTcpSequence) : TSGTCPReceivedSegment;
+class function TSGTCPSegment.Create(const _SegmentBegin, _SegmentEnd : TSGTcpSequence) : TSGTCPSegment;
 begin
 Result.Free();
 Result.FSegmentBegin := _SegmentBegin;
 Result.FSegmentEnd := _SegmentEnd;
 end;
 
-procedure TSGTCPReceivedSegment.Free();
+procedure TSGTCPSegment.Free();
 begin
 FillChar(Self, SizeOf(Self), 0);
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.HandleAcknowledgement(const AcknowledgementValue : TSGTcpSequence);
+procedure TSGEmulatorTransmissionControlProtocol.HandleAcknowledgement(const AcknowledgementValue : TSGTcpSequence);
 begin
 FAcknowledgement := AcknowledgementValue;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.ReadBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
+procedure TSGEmulatorTransmissionControlProtocol.ReadBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 begin
 FBufferCountReads += 1;
 Stream.Position := 0;
 Stream.Read(FBuffer[FFirstBufferElement + (TcpSequencePointer - FFirstBufferElementAddress)], Stream.Size);
 end;
 
-function TSGTCPReceivedSegment_Comparison(var Segment1, Segment2) : TSGBoolean;
+function TSGTCPSegment_Comparison(var Segment1, Segment2) : TSGBoolean;
 begin
-Result := TSGTCPReceivedSegment(Segment1).SegmentBegin < TSGTCPReceivedSegment(Segment2).SegmentBegin;
+Result := TSGTCPSegment(Segment1).SegmentBegin < TSGTCPSegment(Segment2).SegmentBegin;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.ConnectSegments();
+procedure TSGEmulatorTransmissionControlProtocol.ConnectSegments();
 var
 	Index, I : TSGMaxEnum;
 begin
 if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 1) then
 	begin
-	SGQuickSort(FReceivedSegments[0], Length(FReceivedSegments), SizeOf(TSGTCPReceivedSegment), @TSGTCPReceivedSegment_Comparison);
+	SGQuickSort(FReceivedSegments[0], Length(FReceivedSegments), SizeOf(TSGTCPSegment), @TSGTCPSegment_Comparison);
 	Index := 0;
 	while (Index < High(FReceivedSegments)) do
 		begin
@@ -265,19 +270,26 @@ if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 1) then
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.DataToBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
+procedure TSGEmulatorTransmissionControlProtocol.AddSegment(const NewSegment : TSGTCPSegment);
+begin
+if (FBufferSize - FFirstBufferElement  < NewSegment.SegmentEnd - FFirstBufferElementAddress + 1) then
+	begin
+	FBufferSize += SG_TCP_WINDOW_SIZE;
+	ReAllocMem(FBuffer, FBufferSize);
+	end;
+if (not (NewSegment in FReceivedSegments)) then
+	FReceivedSegments += NewSegment;
+ConnectSegments();
+end;
+
+procedure TSGEmulatorTransmissionControlProtocol.DataToBuffer(const TcpSequencePointer : TSGTcpSequence; const Stream : TStream);
 begin
 if FBufferInitialized and (Stream.Size > 0) then
 	begin
 	if FSynchronized and (TcpSequencePointer = FBeginSequenceNumber + 1) and (FFirstBufferElementAddress = FBeginSequenceNumber) and (FReceivedSegments = nil) then
 		FFirstBufferElementAddress := TcpSequencePointer;
-	if (not (TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size - 1) in FReceivedSegments)) then
-		FReceivedSegments += TSGTCPReceivedSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size - 1);
+	AddSegment(TSGTCPSegment.Create(TcpSequencePointer, TcpSequencePointer + Stream.Size - 1));
 	ReadBuffer(TcpSequencePointer, Stream);
-	//{$IFDEF TCP_DEBUG}LogBufferInfo();{$ENDIF}
-	//{$IFDEF TCP_DEBUG}LogSegments('Before');{$ENDIF}
-	ConnectSegments();
-	//{$IFDEF TCP_DEBUG}LogSegments('After');{$ENDIF}
 	end;
 end;
 
@@ -286,19 +298,22 @@ begin
 Result := TSGTCPSignificantNumber(Number1).Number < TSGTCPSignificantNumber(Number2).Number;
 end;
 
-function TSGTransmissionControlProtocolEmulator.ReceivedSegmentsIncludes(const Segment : TSGTCPReceivedSegment) : TSGBoolean;
+function TSGEmulatorTransmissionControlProtocol.ReceivedSegmentsIncludes(const Segment : TSGTCPSegment) : TSGBoolean;
+var
+	FirstElementIndex : TSGMaxEnum;
 begin
 Result := False;
 if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	begin
 	ConnectSegments();
+	FirstElementIndex := 0;
 	Result := 
-		(FReceivedSegments[0].SegmentBegin <= Segment.SegmentBegin) and 
-		(FReceivedSegments[0].SegmentEnd   >= Segment.SegmentEnd);
+		(FReceivedSegments[FirstElementIndex].SegmentBegin <= Segment.SegmentBegin) and 
+		(FReceivedSegments[FirstElementIndex].SegmentEnd   >= Segment.SegmentEnd);
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.MoveBuffer(const RemovedSegment : TSGTCPReceivedSegment);
+procedure TSGEmulatorTransmissionControlProtocol.MoveBuffer(const RemovedSegment : TSGTCPSegment);
 var
 	RemovedSegmentSize : TSGInt64;
 	Index, Index2 : TSGMaxEnum;
@@ -315,10 +330,10 @@ if (FFirstBufferElementAddress = RemovedSegment.SegmentBegin) and (RemovedSegmen
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.ReceivedSegmentsExclude(const Segment : TSGTCPReceivedSegment);
+procedure TSGEmulatorTransmissionControlProtocol.ReceivedSegmentsExclude(const Segment : TSGTCPSegment);
 var
 	Index : TSGMaxEnum;
-	RemovedSegment : TSGTCPReceivedSegment;
+	RemovedSegment : TSGTCPSegment;
 begin
 if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	begin
@@ -334,61 +349,66 @@ if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
 	else if (FReceivedSegments[Index].SegmentBegin = Segment.SegmentBegin) and 
 			(FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
 		begin
-		RemovedSegment := TSGTCPReceivedSegment.Create(FReceivedSegments[Index].SegmentBegin, Segment.SegmentEnd);
-		FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+		RemovedSegment := TSGTCPSegment.Create(FReceivedSegments[Index].SegmentBegin, Segment.SegmentEnd);
+		FReceivedSegments[Index] := TSGTCPSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
 		MoveBuffer(RemovedSegment);
 		end
 	else if (FReceivedSegments[Index].SegmentBegin <= Segment.SegmentBegin) and 
 			(FReceivedSegments[Index].SegmentEnd >= Segment.SegmentEnd) then
 		begin
-		FReceivedSegments[Index] := TSGTCPReceivedSegment.Create(Segment.SegmentBegin, Segment.SegmentBegin - 1);
-		FReceivedSegments += TSGTCPReceivedSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
+		FReceivedSegments[Index] := TSGTCPSegment.Create(Segment.SegmentBegin, Segment.SegmentBegin - 1);
+		FReceivedSegments += TSGTCPSegment.Create(Segment.SegmentEnd + 1, FReceivedSegments[Index].SegmentEnd);
 		ConnectSegments();
-		end
-	{else
-		Index += 1};
+		end;
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.PushProcess();
+procedure TSGEmulatorTransmissionControlProtocol.PushProcess();
 var
 	PushingNumber : TSGTcpSequence;
-	ToExit : TSGBoolean = False;
+	BreakCircleFlag : TSGBoolean = False;
+	Index : TSGMaxEnum;
 begin
-if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) and
-   (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
-	begin
+if (FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0) then
 	SGQuickSort(FSignificantNumbers[0], Length(FSignificantNumbers), SizeOf(TSGTCPSignificantNumbers), @TSGTCPSignificantNumber_Comparison);
-	{$IFDEF TCP_DEBUG}TSGLog.Source([Self, ' First element: {(1)}:', FFirstBufferElement]);{$ENDIF}
+if (FReceivedSegments <> nil) and (Length(FReceivedSegments) > 0) then
+	begin
+	{$IFDEF TCP_DEBUG}TSGLog.Source([Self, ' First element: {(1)}: ', FFirstBufferElement]);{$ENDIF}
 	{$IFDEF TCP_DEBUG}LogSegments('Before(1)');{$ENDIF}
-	repeat
-	PushingNumber := FSignificantNumbers[0].Number;
-	if ReceivedSegmentsIncludes(TSGTCPReceivedSegment.Create(FFirstBufferElementAddress, PushingNumber)) then
+	BreakCircleFlag := False;
+	Index := 0;
+	while ((FSignificantNumbers <> nil) and (Length(FSignificantNumbers) > 0)) and (not BreakCircleFlag) do
 		begin
-		PushData(FFirstBufferElement, PushingNumber - FFirstBufferElementAddress + 1);
-		ReceivedSegmentsExclude(TSGTCPReceivedSegment.Create(FFirstBufferElementAddress, PushingNumber));
-		FSignificantNumbers -= TSGTCPSignificantNumber.Create(SGTCPSignificantPush, PushingNumber);
-		end
-	else
-		ToExit := True;
-	until ToExit or (FSignificantNumbers = nil) or (Length(FSignificantNumbers) = 0);
+		PushingNumber := FSignificantNumbers[Index].Number;
+		if ReceivedSegmentsIncludes(TSGTCPSegment.Create(FFirstBufferElementAddress, PushingNumber)) then
+			begin
+			PushData(FFirstBufferElement, PushingNumber - FFirstBufferElementAddress + 1);
+			ReceivedSegmentsExclude(TSGTCPSegment.Create(FFirstBufferElementAddress, PushingNumber));
+			FSignificantNumbers -= TSGTCPSignificantNumber.Create(SGTCPSignificantPush, PushingNumber);
+			end
+		else
+			BreakCircleFlag := True;
+		end;
 	{$IFDEF TCP_DEBUG}LogSegments('After(1)');{$ENDIF}
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.PushData(const _DataAddress : TSGTCPBufferAddress; const _Size : TSGMaxEnum);
+procedure TSGEmulatorTransmissionControlProtocol.PushData(const _DataAddress : TSGTCPBufferAddress; const _Size : TSGMaxEnum);
 var
 	Stream : TMemoryStream = nil;
 begin
-FBufferCountWrites += 1;
-//TSGLog.Source([Self, ' Push data:  = 0x', SGStr4BytesHex(FBeginSequenceNumber, False)]);
-Stream := TMemoryStream.Create();
-Stream.Write(FBuffer[_DataAddress], _Size);
-HandleData(Stream);
-SGKill(Stream);
+if _Size > 0 then
+	begin
+	FBufferCountWrites += 1;
+	//TSGLog.Source([Self, ' Push data:  = 0x', SGStr4BytesHex(FBeginSequenceNumber, False)]);
+	Stream := TMemoryStream.Create();
+	Stream.Write(FBuffer[_DataAddress], _Size);
+	HandleData(Stream);
+	SGKill(Stream);
+	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.Push(const PushNumber : TSGTcpSequence);
+procedure TSGEmulatorTransmissionControlProtocol.Push(const PushNumber : TSGTcpSequence);
 begin
 if FBufferInitialized then
 	begin
@@ -398,7 +418,7 @@ if FBufferInitialized then
 	end;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.InitBuffer(const InitialBufferNumper : TSGTcpSequence);
+procedure TSGEmulatorTransmissionControlProtocol.InitBuffer(const InitialBufferNumper : TSGTcpSequence);
 begin
 Reset();
 FFirstBufferElement := SG_TCP_BUFFER_POSITION;
@@ -406,7 +426,7 @@ FFirstBufferElementAddress := InitialBufferNumper;
 FBufferInitialized := True;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.Synchronize(const SynchronizeNumber : TSGTcpSequence);
+procedure TSGEmulatorTransmissionControlProtocol.Synchronize(const SynchronizeNumber : TSGTcpSequence);
 begin
 FBeginSequenceNumber := SynchronizeNumber;
 SGKIll(FSignificantNumbers);
@@ -418,7 +438,7 @@ FSynchronized := True;
 {$IFDEF TCP_DEBUG}LogSynchronizing();{$ENDIF}
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.HandleData(const Header : TSGTCPHeader; const Data : TStream);
+procedure TSGEmulatorTransmissionControlProtocol.HandleData(const Header : TSGTCPHeader; const Data : TStream);
 begin
 FCountDataHandles += 1;
 if Header.Synchronize then
@@ -438,15 +458,20 @@ if Header.Final then
 	FFinalized := True;
 end;
 
-procedure TSGTransmissionControlProtocolEmulator.Reset();
+procedure TSGEmulatorTransmissionControlProtocol.Reset();
 begin
-FillChar(FBuffer^, SG_TCP_BUFFER_SIZE, 0);
+if FBuffer = nil then
+	begin
+	FBufferSize := SG_TCP_BUFFER_SIZE;
+	FBuffer := GetMem(FBufferSize);
+	end;
+FillChar(FBuffer^, FBufferSize, 0);
 FFirstBufferElement := SG_TCP_BUFFER_POSITION;
 FFirstBufferElementAddress := 0;
 FBufferInitialized := False;
 end;
 
-constructor TSGTransmissionControlProtocolEmulator.Create();
+constructor TSGEmulatorTransmissionControlProtocol.Create();
 begin
 inherited;
 FCountDataHandles := 0;
@@ -456,25 +481,32 @@ FSignificantNumbers := nil;
 FReceivedSegments := nil;
 FFinalized := False;
 FAcknowledgement := 0;
-FBuffer := GetMem(SG_TCP_BUFFER_SIZE);
+FBuffer := nil;
+FBufferSize := 0;
 FSynchronized := False;
 FBeginSequenceNumber := 0;
 Reset();
 end;
 
-destructor TSGTransmissionControlProtocolEmulator.Destroy();
+procedure TSGEmulatorTransmissionControlProtocol.KillBuffer();
 begin
-if FBuffer <> nil then
+if (FBuffer <> nil) then
 	begin
-	FreeMem(FBuffer, SG_TCP_BUFFER_SIZE);
+	FreeMem(FBuffer, FBufferSize);
 	FBuffer := nil;
+	FBufferSize := 0;
 	end;
+end;
+
+destructor TSGEmulatorTransmissionControlProtocol.Destroy();
+begin
+KillBuffer();
 SGKill(FReceivedSegments);
 SGKill(FSignificantNumbers);
 inherited;
 end;
 
-procedure SGKill(var Emulator : TSGTransmissionControlProtocolEmulator);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var Emulator : TSGEmulatorTransmissionControlProtocol);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 if Emulator <> nil then
 	begin
@@ -484,9 +516,9 @@ if Emulator <> nil then
 end;
 
 {$DEFINE  INC_PLACE_IMPLEMENTATION}
-{$DEFINE DATATYPE_LIST_HELPER := TSGTCPReceivedSegmentsHelper}
-{$DEFINE DATATYPE_LIST        := TSGTCPReceivedSegments}
-{$DEFINE DATATYPE             := TSGTCPReceivedSegment}
+{$DEFINE DATATYPE_LIST_HELPER := TSGTCPSegmentsHelper}
+{$DEFINE DATATYPE_LIST        := TSGTCPSegments}
+{$DEFINE DATATYPE             := TSGTCPSegment}
 {$INCLUDE SaGeCommonList.inc}
 {$INCLUDE SaGeCommonListUndef.inc}
 
