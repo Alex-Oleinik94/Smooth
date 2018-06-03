@@ -17,12 +17,24 @@ uses
 	,Classes
 	;
 type
+	TSGInternetConnection = class;
+	
 	TSGInternetConnectionSizeInt = TSGUInt64;
 	TSGConnectionDataType = (
 		SGNoData,
 		SGSenderData,
 		SGRecieverData);
+type
+	ISGConnectionsHandler = interface(ISGInterface)
+		['{57ac272a-c488-41c5-adae-122ee2dc0540}']
+		procedure HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream);
+		end;
 	
+	TSGConnectionsHandler = class(TSGNamed, ISGConnectionsHandler)
+			public
+		procedure HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream); virtual; abstract;
+		end;
+type
 	TSGInternetConnection = class(TSGNamed)
 			public
 		constructor Create(); override;
@@ -49,6 +61,9 @@ type
 		FDeviceIPv4Supported : TSGBoolean;
 		FDeviceIPv4Net  : TSGIPv4Address;
 		FDeviceIPv4Mask : TSGIPv4Address;
+		
+		// Data ftansfer
+		FConnectionsHandler : TSGConnectionsHandler;
 		
 		// Dumper modes
 		FDumpDirectory : TSGString;
@@ -85,10 +100,7 @@ type
 		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
 		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
 		property Identifier : TSGString read FIdentifier write FIdentifier;
-			public
-		function HandleData(const Stream : TStream) : TSGConnectionDataType; virtual;
-		function HasData() : TSGBoolean; virtual;
-		function CountData() : TSGMaxEnum; virtual;
+		property ConnectionsHandler : TSGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -256,6 +268,7 @@ FillChar(FDateFirstPacket, SizeOf(FDateFirstPacket), 0);
 FillChar(FDateLastPacket, SizeOf(FDateLastPacket), 0);
 FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
 FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
+FConnectionsHandler := nil;
 end;
 
 function TSGInternetConnection.RenameConnectionDirectoryIncludeSize() : TSGBoolean;
@@ -278,21 +291,6 @@ RenameConnectionDirectoryIncludeSize();
 SGKill(FCritacalSection);
 SGKill(FPacketStorage);
 inherited;
-end;
-
-function TSGInternetConnection.HandleData(const Stream : TStream) : TSGConnectionDataType;
-begin
-Result := SGNoData;
-end;
-
-function TSGInternetConnection.HasData() : TSGBoolean;
-begin
-Result := False;
-end;
-
-function TSGInternetConnection.CountData() : TSGMaxEnum;
-begin
-Result := 0;
 end;
 
 {$DEFINE  INC_PLACE_IMPLEMENTATION}

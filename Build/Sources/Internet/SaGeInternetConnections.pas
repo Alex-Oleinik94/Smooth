@@ -43,6 +43,9 @@ type
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 		FDeviceInformationFileExtension : TSGString;
+		
+		// Data ftansfer
+		FConnectionsHandler : TSGConnectionsHandler;
 			public
 		procedure Loop(); override;
 			protected
@@ -69,6 +72,7 @@ type
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
 		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
 		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
+		property ConnectionsHandler : TSGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
 		end;
 
 procedure SGKill(var Connections : TSGInternetConnections); overload;
@@ -275,6 +279,8 @@ if FModeRuntimePacketDumper or FModeRuntimeDataDumper then
 	Connection.PacketInfoFileExtension := FPacketInfoFileExtension;
 	Connection.DumpDirectory := FDumpDirectory;
 	end;
+if FModeDataTransfer then
+	Connection.ConnectionsHandler := FConnectionsHandler;
 end;
 
 procedure TSGInternetConnections.PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
@@ -383,6 +389,7 @@ begin
 inherited;
 FCriticalSection := TSGCriticalSection.Create();
 FConnections := nil;
+FConnectionsHandler := nil;
 FOutPacketsSize := 0;
 FOutPacketsCount := 0;
 FComparablePacketsCount := 0;

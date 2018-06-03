@@ -49,10 +49,6 @@ type
 		FSenderEmulator : TSGEmulatorTransmissionControlProtocol;
 		FRecieverEmulator : TSGEmulatorTransmissionControlProtocol;
 		
-		// Data transfer
-		FSenderData : TSGMemoryStreamList;
-		FRecieverData : TSGMemoryStreamList;
-		
 		// Data dumper
 		FDataDumpsCount : TSGUInt64;
 		FDataDumpsSize  : TSGUInt64;
@@ -73,10 +69,6 @@ type
 		procedure DumpData(const Stream : TStream; const EmulatorString : TSGString);
 		procedure PushData(const Stream : TStream; const Emulator : TSGEmulatorTCP);
 		procedure CreateBlockStreams();
-			public
-		function HandleData(const Stream : TStream) : TSGConnectionDataType; override;
-		function HasData() : TSGBoolean; override;
-		function CountData() : TSGMaxEnum; override;
 		end;
 
 implementation
@@ -120,11 +112,17 @@ SGKill(FileStream);
 end;
 
 procedure TSGInternetConnectionTCPIPv4.PushData(const Stream : TStream; const Emulator : TSGEmulatorTCP);
+var
+	DataType : TSGConnectionDataType = SGNoData;
 begin
-if FModeDataTransfer and (Emulator = FSenderEmulator) then
-	FSenderData += SGStreamCopyMemory(Stream);
-if FModeDataTransfer and (Emulator = FRecieverEmulator) then
-	FRecieverData += SGStreamCopyMemory(Stream);
+if FModeDataTransfer and (FConnectionsHandler <> nil) then
+	begin
+	if Emulator = FSenderEmulator then
+		DataType := SGSenderData
+	else if Emulator = FRecieverEmulator then
+		DataType := SGRecieverData;
+	FConnectionsHandler.HandleConnectionData(Self, DataType, Stream);
+	end;
 if FModeRuntimeDataDumper then
 	begin
 	DumpData(Stream, 
@@ -383,8 +381,6 @@ FDataDumpsCount := 0;
 FDataDumpsSize := 0;
 FSenderEmulator := nil;
 FRecieverEmulator := nil;
-FRecieverData := nil;
-FSenderData := nil;
 FSenderDataStream := nil;
 FRecieverDataStream := nil;
 FSenderDataStreamFile := '';
@@ -393,51 +389,10 @@ end;
 
 destructor TSGInternetConnectionTCPIPv4.Destroy();
 begin
-SGKill(FSenderDataStream);
-SGKill(FRecieverDataStream);
 SGKill(FSenderEmulator);
 SGKill(FRecieverEmulator);
 SGKill(FCritacalSectionTCP);
 inherited;
-end;
-
-function TSGInternetConnectionTCPIPv4.HandleData(const Stream : TStream) : TSGConnectionDataType;
-var
-	MemStream : TMemoryStream = nil;
-begin
-Result := SGNoData;
-if (FSenderData <> nil) and (Length(FSenderData) > 0) then
-	begin
-	Result := SGSenderData;
-	MemStream := FSenderData[0];
-	FSenderData -= MemStream;
-	end;
-if (MemStream = nil) and (FRecieverData <> nil) and (Length(FRecieverData) > 0) then
-	begin
-	Result := SGRecieverData;
-	MemStream := FRecieverData[0];
-	FRecieverData -= MemStream;
-	end;
-if (MemStream <> nil) then
-	begin
-	MemStream.Position := 0;
-	SGCopyPartStreamToStream(MemStream, Stream, MemStream.Size);
-	SGKill(MemStream);
-	end;
-end;
-
-function TSGInternetConnectionTCPIPv4.HasData() : TSGBoolean;
-begin
-Result := CountData() > 0;
-end;
-
-function TSGInternetConnectionTCPIPv4.CountData() : TSGMaxEnum;
-begin
-Result := 0;
-if (FSenderData <> nil) then
-	Result += Length(FSenderData);
-if (FRecieverData <> nil) then
-	Result += Length(FRecieverData);
 end;
 
 initialization
