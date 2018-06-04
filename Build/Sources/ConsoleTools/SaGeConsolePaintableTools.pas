@@ -42,6 +42,7 @@ uses
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeLog
+	,SaGeContextHandler
 	
 	// System-dependent includes
 	{$IFDEF MSWINDOWS}

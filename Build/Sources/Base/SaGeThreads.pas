@@ -116,6 +116,8 @@ type
 		end;
 	TSGThreadList = packed array of TSGThread;
 
+procedure SGKill(var Thread : TSGThread); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
@@ -123,6 +125,15 @@ uses
 	,SaGeCasesOfPrint
 	,SaGeStringUtils
 	;
+
+procedure SGKill(var Thread : TSGThread); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (Thread <> nil) then
+	begin
+	Thread.Destroy();
+	Thread := nil;
+	end;
+end;
 
 // =========================
 // ========TSGThread========

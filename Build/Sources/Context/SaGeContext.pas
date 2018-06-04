@@ -259,23 +259,17 @@ function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
 {$ENDIF}
 function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
 
-function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
-function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
-
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
-procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
-function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
-function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
+function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
+function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
 
 implementation
 
 uses
 	 SysUtils
 	
-	,SaGeLog
+	,SaGeLog,SaGeContextHandler
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
@@ -389,17 +383,6 @@ if VSettings <> nil then if Length(VSettings) > 0 then
 	end;
 end;
 
-procedure SGCompatibleRunPaintable(const VPaintableClass : TSGDrawableClass; const VSettings : TSGContextSettings = nil);
-var
-	Settings : TSGContextSettings = nil;
-begin
-Settings := SGCopyContextSettings(VSettings);
-if not ('AUDIORENDER' in Settings) then if TSGCompatibleAudioRender <> nil then
-	Settings += SGContextOptionAudioRender(TSGCompatibleAudioRender);
-SGRunPaintable(VPaintableClass, TSGCompatibleContext, TSGCompatibleRender, Settings);
-SetLength(Settings, 0);
-end;
-
 function SGContextOptionMax() : TSGContextOption;
 begin
 Result.Import('MAX', nil);
@@ -413,79 +396,6 @@ end;
 function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
 begin
 Result.Import(VName, VOption);
-end;
-
-procedure SGPrintContextSettings(const VSettings : TSGContextSettings; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
-
-function WordName(const S : TSGString):TSGString;
-begin
-Result := SGDownCaseString(S);
-if Length(Result) > 0 then
-	Result[1] := UpCase(Result[1]);
-end;
-
-var
-	O : TSGContextOption;
-	First : TSGBoolean = True;
-	S : TSGString = '';
-	StandartOptions : TSGStringList = nil;
-	i : TSGUInt32;
-begin
-if VSettings = nil then
-	exit;
-if Length(VSettings) = 0 then
-	exit;
-S += 'Options (';
-StandartOptions += 'WIDTH';
-StandartOptions += 'HEIGHT';
-StandartOptions += 'LEFT';
-StandartOptions += 'TOP';
-for O in VSettings do
-	begin
-	if First then
-		First := False
-	else
-		S += ', ';
-	if (O.FName = 'FULLSCREEN') and (TSGMaxEnum(O.FOption) = 0) then
-		S += '!';
-	if O.FName = 'AUDIORENDER' then
-		S += 'Audio'
-	else
-		S += WordName(O.FName);
-	if O.FName in StandartOptions then
-		begin
-		S += '=' + SGStr(TSGMaxEnum(O.FOption));
-		end
-	else if O.FName = 'AUDIORENDER' then
-		S += ' is ' + TSGAudioRenderClass(O.FOption).ClassName()
-	else if O.FName = 'TITLE' then
-		begin
-		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
-		end
-	else if (O.FName = 'FILES TO OPEN') then
-		begin
-		S += '=[';
-		if Length(TSGStringList(O.FOption)) > 0 then
-			for i := 0 to High(TSGStringList(O.FOption)) do
-				begin
-				if i <> 0 then
-					S += ', ';
-				S += '`' + TSGStringList(O.FOption)[i] + '`';
-				end;
-		S += ']';
-		end
-	else if (O.FName = 'MIN') or (O.FName = 'MAX') or (O.FName = 'FULLSCREEN') then
-		begin
-		end
-	else
-		begin
-		S += '=' + SGAddrStr(O.FOption);
-		end;
-	end;
-SetLength(StandartOptions, 0);
-S += ')';
-SGHint(S, CasesOfPrint, True);
-S := '';
 end;
 
 function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
@@ -602,189 +512,9 @@ FormerContext.FAudioRender := nil;
 	{$ENDIF}
 end;
 
-function SGTryChangeContextType(var Context : TSGContext; var IContext : ISGContext):TSGBoolean;
-// Result = True : Continue loop
-// Result = False : Exit loop
-var
-	NewContext : TSGContext = nil;
-	OldContextName : TSGString = '';
-begin
-Result := False;
-{$IFDEF CONTEXT_CHANGE_DEBUGING}
-	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Enter.']);
-	{$ENDIF}
-if (Context.NewContext <> nil) and (Context.Active or (not (Context is Context.NewContext))) then
-	begin
-	OldContextName := Context.ClassName();
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Begin changing.']);
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Creating new context.']);
-		{$ENDIF}
-	NewContext := Context.NewContext.Create();
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Delete old context device recources.']);
-		{$ENDIF}
-	Context.DeleteDeviceResources();
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Moving info.']);
-		{$ENDIF}
-	NewContext.MoveInfo(Context);
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Change "IContext".']);
-		{$ENDIF}
-	IContext := NewContext;
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Destroying old context.']);
-		{$ENDIF}
-	Context.Destroy();
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Initializing new context.']);
-		{$ENDIF}
-	Context := NewContext;
-	Context.Initialize();
-	Context.LoadDeviceResources();
-	Result := Context.Active;
-	SGHint(['Changing context (`' + OldContextName + '` --> `' + Context.ClassName() + '`)' + Iff(Result, ' successfull.', ' failed!')]);
-	end;
-{$IFDEF CONTEXT_CHANGE_DEBUGING}
-	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(Context),', IContext=',SGAddrStr(IContext),'). Leave.']);
-	{$ENDIF}
-end;
-
 function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
 begin
 Result.Import('TITLE', SGStringToPChar(VVariable));
-end;
-
-function SGSetContextSettings(var Context : TSGContext; var Settings : TSGContextSettings):TSGContextSettings;
-var
-	O : TSGContextOption;
-begin
-Result := nil;
-for O in Settings do
-	begin
-	if O.FName  = 'WIDTH' then
-		Context.Width := TSGMaxEnum(O.FOption)
-	else if O.FName  = 'HEIGHT' then
-		Context.Height := TSGMaxEnum(O.FOption)
-	else if O.FName  = 'LEFT' then
-		Context.Left := TSGMaxEnum(O.FOption)
-	else if O.FName  = 'TOP' then
-		Context.Top := TSGMaxEnum(O.FOption)
-	else if O.FName  = 'FULLSCREEN' then
-		Context.Fullscreen := TSGBool(TSGMaxEnum(O.FOption))
-	else if O.FName  = 'CURSOR' then
-		Context.Cursor := TSGCursor(O.FOption)
-	else if O.FName  = 'TITLE' then
-		begin
-		Context.Title := SGPCharToString(PChar(O.FOption));
-		FreeMem(O.FOption);
-		end
-	{$IFDEF ANDROID}
-	else if (Context is TSGContextAndroid) and (O.FName = 'ANDROIDAPP') then
-		(Context as TSGContextAndroid).AndroidApp := PAndroid_App(O.FOption)
-		{$ENDIF}
-	else
-		begin
-		Result += O;
-		end;
-	end;
-if not ('WIDTH' in Settings) then
-	Context.Width  := Context.GetScreenArea().x;
-if not ('HEIGHT' in Settings) then
-	Context.Height  := Context.GetScreenArea().y;
-if not ('FULLSCREEN' in Settings) then
-	Context.Fullscreen := {$IFDEF ANDROID}True{$ELSE}False{$ENDIF};
-if not ('CURSOR' in Settings) then
-	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-if not ('TITLE' in Settings) then
-	Context.Title := 'SaGe Engine Window';
-end;
-
-procedure SGRunPaintable(const VPaintableClass : TSGDrawableClass; const VContextClass : TSGContextClass; const VRenderClass : TSGRenderClass; const VSettings : TSGContextSettings = nil);
-var
-	Context : TSGContext = nil;
-	IContext : ISGContext = nil;
-	Settings : TSGContextSettings = nil;
-var
-	PaintableSettings : TSGPaintableSettings = nil;
-	Placement : TSGByte = 0;
-
-procedure CheckPlacement();
-var
-	MinExists, MaxExists : TSGBool;
-begin
-MinExists := ('MIN' in PaintableSettings);
-MaxExists := ('MAX' in PaintableSettings);
-if MaxExists or MinExists then
-	begin
-	if MinExists xor MaxExists then
-		begin
-		PaintableSettings -= (Iff(MinExists, 'MIN','') + Iff(MaxExists, 'MAX',''));
-		Placement := 2 * Byte(MaxExists) + 1 * Byte(MinExists);
-		end
-	else
-		begin
-		PaintableSettings -= 'MAX';
-		PaintableSettings -= 'MIN';
-		SGHint('Run : warning : maximization and minimization are not available at the same time!', SGCasesOfPrintFull, True);
-		end;
-	end;
-end;
-
-procedure InitPlacement();
-begin
-case Placement of
-2 : Context.Maximize();
-1 : Context.Minimize();
-end;
-end;
-
-begin
-SGHint('Run (Class = `'+VPaintableClass.ClassName() +'`, Context = `'+VContextClass.ClassName()+'`, Render = `'+VRenderClass.ClassName()+'`)', SGCasesOfPrintFull, True);
-SGPrintContextSettings(VSettings);
-Settings := VSettings;
-if not VRenderClass.Suppored then
-	begin
-	SGHint(VRenderClass.ClassName() + ' not suppored!');
-	SetLength(Settings, 0);
-	exit;
-	end;
-
-// NVidia enabling high perfomance
-{$IFDEF MSWINDOWS}
-//SGNVidiaSetDriverOptimusMode(SGNVidiaHighPerfomance);
-{$ENDIF}
-
-Context := VContextClass.Create();
-IContext := Context;
-
-PaintableSettings := SGSetContextSettings(Context, Settings);
-CheckPlacement();
-Context.PaintableSettings := PaintableSettings;
-Context.SelfLink := @IContext;
-Context.RenderClass := VRenderClass;
-Context.Paintable := VPaintableClass;
-
-Context.Initialize();
-if Context.Active then
-	begin
-	InitPlacement();
-	repeat
-	Context.Run();
-	{$IFDEF CONTEXT_CHANGE_DEBUGING}
-		SGHint
-	{$ELSE CONTEXT_CHANGE_DEBUGING}
-		SGLog.Source
-	{$ENDIF CONTEXT_CHANGE_DEBUGING}
-			([Context.ClassName(), ' : Leaving from loop!']);
-	until not SGTryChangeContextType(Context, IContext);
-	end;
-Context.Kill();
-IContext := nil;
-Context.Destroy();
-Context := nil;
-SetLength(Settings, 0);
 end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

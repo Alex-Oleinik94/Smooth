@@ -49,6 +49,7 @@ implementation
 uses
 	 SaGeVersion
 	,SaGeContext
+	,SaGeContextHandler
 	,SaGeLog
 	,SaGeFileUtils
 	,SaGeBaseUtils

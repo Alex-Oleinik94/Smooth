@@ -10,6 +10,7 @@ uses
 	,SaGeConsoleCaller
 	,SaGeWorldOfWarcraftConnectionHandler
 	,SaGeMaz1gWizardWindow
+	,SaGeContextHandler
 	;
 type
 	TSGMaz1gWizard = class(TSGNamed)
@@ -27,7 +28,7 @@ type
 		FHalt : TSGBoolean;
 		FEmbedded : TSGBoolean;
 		FConnectionHandler : TSGWorldOfWarcraftConnectionHandler;
-		FWindow : TSGMaz1gWizardWindow;
+		FWindow : TSGContextHandler;
 		end;
 
 procedure SGConsoleMaz1gWizard(const _Params : TSGConcoleCallerParams = nil);
@@ -38,7 +39,8 @@ implementation
 uses
 	 SaGeConsoleTools
 	,SaGeLog
-	
+	,SaGeContext
+	,SaGeLists
 	,SysUtils
 	;
 
@@ -50,7 +52,10 @@ end;
 procedure TSGMaz1gWizard.InitWindow();
 begin
 SGKill(FWindow);
-//SGCompatibleRunPaintable(TSGMaz1gWizardWindow);
+FWindow := 	TSGContextHandler.Create();
+FWindow.RegisterCompatibleClasses(TSGMaz1gWizardWindow);
+FWindow.RegisterSettings(SGContextOptionMax());
+FWindow.RunAnotherThread();
 end;
 
 procedure TSGMaz1gWizard.ShowWindow();
