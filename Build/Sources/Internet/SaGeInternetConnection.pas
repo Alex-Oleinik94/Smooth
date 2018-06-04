@@ -27,12 +27,7 @@ type
 type
 	ISGConnectionsHandler = interface(ISGInterface)
 		['{57ac272a-c488-41c5-adae-122ee2dc0540}']
-		procedure HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream);
-		end;
-	
-	TSGConnectionsHandler = class(TSGNamed, ISGConnectionsHandler)
-			public
-		procedure HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream); virtual; abstract;
+		function HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream) : TSGBoolean;
 		end;
 type
 	TSGInternetConnection = class(TSGNamed)
@@ -47,6 +42,7 @@ type
 		FModeRuntimeDataDumper : TSGBoolean;
 		FModeRuntimePacketDumper : TSGBoolean;
 		FIdentifier : TSGString;
+		FFictitious : TSGBoolean;
 		
 		FTimeFirstPacket : TSGTime;
 		FDateFirstPacket : TSGDateTime;
@@ -63,7 +59,7 @@ type
 		FDeviceIPv4Mask : TSGIPv4Address;
 		
 		// Data ftansfer
-		FConnectionsHandler : TSGConnectionsHandler;
+		FConnectionsHandler : ISGConnectionsHandler;
 		
 		// Dumper modes
 		FDumpDirectory : TSGString;
@@ -86,6 +82,7 @@ type
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		procedure AddDeviceIPv4(const Net, Mask : TSGIPv4Address); virtual;
+		procedure MakeFictitious(); virtual;
 			public
 		property DataSize : TSGInternetConnectionSizeInt read FDataSize;
 		property TimeFirstPacket : TSGTime read FTimeFirstPacket;
@@ -100,7 +97,8 @@ type
 		property PacketInfoFileExtension : TSGString read FPacketInfoFileExtension write FPacketInfoFileExtension;
 		property PacketDataFileExtension : TSGString read FPacketDataFileExtension write FPacketDataFileExtension;
 		property Identifier : TSGString read FIdentifier write FIdentifier;
-		property ConnectionsHandler : TSGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
+		property ConnectionsHandler : ISGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
+		property Fictitious : TSGBoolean read FFictitious write FFictitious;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -118,7 +116,7 @@ type
 {$INCLUDE SaGeCommonListUndef.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
 
-procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var Variable : TSGInternetConnection); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -131,7 +129,7 @@ uses
 	,SaGeInternetDumperBase
 	;
 
-procedure SGKill(var Variable : TSGInternetConnection);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure SGKill(var Variable : TSGInternetConnection); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 if Variable <> nil then
 	begin
@@ -269,6 +267,17 @@ FillChar(FDateLastPacket, SizeOf(FDateLastPacket), 0);
 FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
 FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 FConnectionsHandler := nil;
+FFictitious := False;
+end;
+
+procedure TSGInternetConnection.MakeFictitious();
+begin
+FFictitious := True;
+FModePacketStorage := False;
+FModeDataTransfer := False;
+FModeRuntimeDataDumper := False;
+FModeRuntimePacketDumper := False;
+SGKill(FPacketStorage);
 end;
 
 function TSGInternetConnection.RenameConnectionDirectoryIncludeSize() : TSGBoolean;

@@ -19,7 +19,7 @@ uses
 	,SaGeRenderBase
 	,SaGeMesh
 	,SaGePackages
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 {$DEFINE SGREADINTERFACE}

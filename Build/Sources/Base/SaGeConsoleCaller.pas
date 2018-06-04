@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeConsoleToolsBase;
+unit SaGeConsoleCaller;
 
 interface
 

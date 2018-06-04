@@ -17,7 +17,7 @@ uses
 	,SaGeAdamsSystemExample
 	,SaGeStringUtils
 	{$IF defined(ENGINE)}
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		,SaGeConsoleTools
 		{$ENDIF}
 	

@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 procedure SGConsoleFPCTCTransliater(const VParams : TSGConcoleCallerParams = nil);
@@ -46,6 +46,7 @@ uses
 	,SaGeConsoleProgramConvertHeaderToDynamic
 	,SaGeConsoleProgramUSMBIOS
 	,SaGeConsoleProgramEngineRenamer
+	,SaGeMaz1gWizard
 	;
 
 var

@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 procedure SGConsoleImageResizer                          (const VParams : TSGConcoleCallerParams = nil);

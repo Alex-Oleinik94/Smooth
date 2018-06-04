@@ -6,7 +6,7 @@ interface
 
 uses 
 	 SaGeBase
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 procedure SGConsoleMB(const VParams : TSGConcoleCallerParams = nil);

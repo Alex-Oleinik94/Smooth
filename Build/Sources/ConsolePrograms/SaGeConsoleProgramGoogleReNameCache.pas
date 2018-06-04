@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeLists
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 procedure SGConsoleGoogleReNameCache(const VParams : TSGConcoleCallerParams = nil);

@@ -14,7 +14,7 @@ uses
 	 SaGeContext
 	,SaGeBase
 	{$IF defined(ENGINE)}
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		,SaGeConsoleTools
 		{$ENDIF}
 	,SaGeConsolePaintableTools

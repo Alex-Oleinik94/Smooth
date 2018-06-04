@@ -58,6 +58,7 @@ type
 		class function ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString; override;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); override;
 			protected
+		procedure KillEmulators();
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 			protected
@@ -121,7 +122,8 @@ if FModeDataTransfer and (FConnectionsHandler <> nil) then
 		DataType := SGSenderData
 	else if Emulator = FRecieverEmulator then
 		DataType := SGRecieverData;
-	FConnectionsHandler.HandleConnectionData(Self, DataType, Stream);
+	if not FConnectionsHandler.HandleConnectionData(Self, DataType, Stream) then
+		MakeFictitious();
 	end;
 if FModeRuntimeDataDumper then
 	begin
@@ -354,16 +356,18 @@ function TSGInternetConnectionTCPIPv4.PacketPushed(const Time : TSGTime; const D
 begin
 Result := False;
 FCritacalSection.Enter();
-if PacketComparable(Packet) then
+if PacketComparable(Packet) and (not FFictitious) then
 	if (FPacketCount = 0) and (not FSenderFinalized) and (not FRecieverFinalized) then
 		Result := InitFirstPacket(Time, Date, Packet)
 	else if (FPacketCount > 0) and (
 			((not FSenderFinalized) and (not FRecieverFinalized)) or
-			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination){ and Packet.TCPIP^.Final}) or
-			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source){ and Packet.TCPIP^.Final}) ) then
+			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination)) or
+			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source)) ) then
 		Result := InitPacket(Time, Date, Packet);
-if Result then
-	PushPacket(Time, Date, Packet);
+if Result and (not FFictitious) then
+	PushPacket(Time, Date, Packet)
+else if FFictitious then
+	KillEmulators();
 FCritacalSection.Leave();
 end;
 
@@ -387,10 +391,15 @@ FSenderDataStreamFile := '';
 FRecieverDataStreamFile := '';
 end;
 
-destructor TSGInternetConnectionTCPIPv4.Destroy();
+procedure TSGInternetConnectionTCPIPv4.KillEmulators();
 begin
 SGKill(FSenderEmulator);
 SGKill(FRecieverEmulator);
+end;
+
+destructor TSGInternetConnectionTCPIPv4.Destroy();
+begin
+KillEmulators();
 SGKill(FCritacalSectionTCP);
 inherited;
 end;

@@ -45,9 +45,9 @@ type
 		FDeviceInformationFileExtension : TSGString;
 		
 		// Data ftansfer
-		FConnectionsHandler : TSGConnectionsHandler;
+		FConnectionsHandler : ISGConnectionsHandler;
 			public
-		procedure Loop(); override;
+		function Start() : TSGBoolean; override;
 			protected
 		procedure RenameConnectionDirectoriesIncludeSize();
 		procedure PrintStatistic(const TextTime : TSGString);
@@ -72,7 +72,7 @@ type
 		property ModePacketStorage : TSGBoolean read FModePacketStorage write FModePacketStorage;
 		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
 		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
-		property ConnectionsHandler : TSGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
+		property ConnectionsHandler : ISGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
 		end;
 
 procedure SGKill(var Connections : TSGInternetConnections); overload;
@@ -185,11 +185,11 @@ SGKill(FileStream);
 Stream.Position := 0;
 end;
 
-procedure TSGInternetConnections.Loop();
+function TSGInternetConnections.Start() : TSGBoolean;
 begin
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	CreateDumpDirectory();
-inherited Loop();
+Result := inherited Start();
 end;
 
 procedure TSGInternetConnections.CreateDumpDirectory();

@@ -66,7 +66,7 @@ type
 		procedure PrintStatistic(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure CreateDeviceInformationFile(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const FileName : TSGString);
 			public
-		function Start() : TSGBoolean;
+		function Start() : TSGBoolean; virtual;
 		procedure Stop();
 		function Update() : TSGBoolean;
 		procedure Loop(); virtual;

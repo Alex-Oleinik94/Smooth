@@ -20,7 +20,7 @@ uses
 	,SaGeEncodingUtils
 	,SaGeFileUtils
 	{$IF defined(ENGINE)}
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		,SaGeConsoleTools
 		{$ENDIF}
 	

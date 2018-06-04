@@ -42,7 +42,7 @@ uses
 	,SaGeBaseUtils
 	,SaGeConsoleUtils
 	,SaGeEncodingUtils
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	,SaGeLogStream
 	
 	,StrMan

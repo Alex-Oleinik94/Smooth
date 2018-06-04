@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeLists
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 procedure SGConsoleEngineRenamer(const VParams : TSGConcoleCallerParams = nil);

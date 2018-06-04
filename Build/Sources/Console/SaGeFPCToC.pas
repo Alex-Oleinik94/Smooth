@@ -9,7 +9,7 @@ uses
 	
 	,SaGeStringUtils
 	,SaGeBase
-	,SaGeConsoleToolsBase
+	,SaGeConsoleCaller
 	;
 
 type
