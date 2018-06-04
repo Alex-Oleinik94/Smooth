@@ -16,11 +16,29 @@ uses
 	,SaGeScreen_Label
 	;
 
+// Base const & types
 const
 	SGDefaultAnchors = [];
+// Edit const & types
+const
+	SGScreenEditTypeNumber = SGEditTypeNumber;
+	SGScreenEditTypeInteger = SGEditTypeInteger;
 type
-	TSGScreenLabel = TSGLabel;
-	TSGScreenPanel = TSGPanel;
+	TSGScreenEditTextTypeFunction = TSGEditTextTypeFunction;
+	TSGScreenEditTextTypeFunc = TSGScreenEditTextTypeFunction;
+// Components types
+type
+	TSGScreenComponent = TSGComponent;
+	TSGScreenLabel     = TSGLabel;
+	TSGScreenPanel     = TSGPanel;
+	TSGScreenEdit      = TSGEdit;
+
+// Edit
+function SGCreateEdit(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 
 // Panel
 function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
@@ -45,6 +63,51 @@ function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGStri
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 
 implementation
+
+//########
+//# Edit #
+//########
+
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result.TextType := SGEditTypeUser;
+Result.TextTypeFunction := TextTypeFunc;
+Result.TextTypeEvent();
+end;
+
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result.TextType := TextType;
+if (TextType <> SGEditTypeUser) then
+	Result.TextTypeEvent();
+end;
+
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, IsVisible, BTNB, InterfaceData);
+if Anchors <> [] then
+	Result.Anchors := Anchors;
+end;
+
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := SGCreateEdit(Parent, IsVisible, InterfaceData);
+Result.Caption := EditText;
+Result.SetBounds(X,Y,W,H);
+if BTNB then
+	Result.BoundsToNeedBounds();
+end;
+
+function SGCreateEdit(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := TSGScreenEdit.Create();
+if (Parent <> nil) then
+	Parent.CreateChild(Result);
+Result.Visible := IsVisible;
+Result.UserPointer := InterfaceData;
+end;
 
 //#########
 //# Label #

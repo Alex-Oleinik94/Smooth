@@ -31,8 +31,8 @@ type
 		FLMM, FL1, FL2, FL3, FL4, FL5, FL6, FL7, FL8, FL9, FXL, FLPoint : TSGScreenLabel;
 		FP1 : TSGScreenPanel;
 		FB1:TSGButton;
-		FE1,FE2,FE22,FE3,FE4:TSGEdit;
-		FS1:TSGEdit;
+		FE1, FE2, FE22, FE3, FE4 : TSGScreenEdit;
+		FS1 : TSGScreenEdit;
 		FCB1,FCBMM,FCB2,FCB4,FCB5,FCB3,FCB6,FCB7:TSGComboBox;
 		FNB:TSGButton;
 			public
@@ -50,7 +50,7 @@ uses
 	,SaGeMathUtils
 	;
 
-procedure GA1MyNumberFucntion(const Self:TSGComponent);
+procedure TSGGenAlg_GenerateComponentActives(const Self : TSGScreenComponent);
 var
 	MyClass:TSGGenAlg;
 begin
@@ -99,10 +99,10 @@ else
 	Self.Width:=270;
 	FS1.Visible:=False;
 	end;
-GA1MyNumberFucntion(Self);
+TSGGenAlg_GenerateComponentActives(Self);
 end;
 
-function MyTTFE(const s:TSGEdit):boolean;
+function MyTTFE(const s : TSGScreenEdit):boolean;
 var
 	Ex:TSGExpression = nil;
 begin
@@ -282,27 +282,10 @@ FP1 := SGCreatePanel(Screen, 550,378, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, '[', False, 265,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ']', False, 513,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ',', False, 390,38,8,25, [SGAnchRight], True, True, Self);
-
-FE2:=TSGEdit.Create;
-FP1.CreateChild(FE2);
-FE2.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FE2.TextType:=SGEditTypeInteger;
-FP1.LastChild.SetBounds(275,39,110,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='3';
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=True;
-
-FE22:=TSGEdit.Create;
-FP1.CreateChild(FE22);
-FE22.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FE22.TextType:=SGEditTypeInteger;
-FP1.LastChild.SetBounds(400,39,110,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='7';
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=True;
-
+FE2 := SGCreateEdit(FP1, '3', SGScreenEditTypeInteger, 275,39,110,21, [SGAnchRight], True, True, Self);
+FE2.OnChange:=TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE22 := SGCreateEdit(FP1, '7', SGScreenEditTypeInteger, 400,39,110,21, [SGAnchRight], True, True, Self);
+FE22.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FLMM := SGCreateLabel(FP1, 'функции.', False, QQQ+280,338,80,25, [SGAnchRight], True, True, Self);
 
 FCBMM:=TSGComboBox.Create;
@@ -324,38 +307,13 @@ FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FB1.OnChange:=TSGComponentProcedure(@GAFindMin);
 
-FE4:=TSGEdit.Create;
-FP1.CreateChild(FE4);
-FP1.LastChild.SetBounds(260,309,270,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='10';
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=True;
-FE4.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FE4.TextType:=SGEditTypeNumber;
-
-FE3:=TSGEdit.Create;
-FP1.CreateChild(FE3);
-FP1.LastChild.SetBounds(260,279,270,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='10';
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=True;
-FE3.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FE3.TextType:=SGEditTypeNumber;
-
+FE4 := SGCreateEdit(FP1, '10', SGScreenEditTypeNumber, 260,309,270,21, [SGAnchRight], True, True, Self);
+FE4.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE3 := SGCreateEdit(FP1, '10', SGScreenEditTypeNumber, 260,279,270,21, [SGAnchRight], True, True, Self);
+FE3.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FXL := SGCreateLabel(FP1, 'f(x)=', False, 260-20-5-5,9,28,21, [SGAnchRight], True, True, Self);
-
-FE1:=TSGEdit.Create;
-FP1.CreateChild(FE1);
-FP1.LastChild.SetBounds(260,9,270,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=True;
-FE1.TextType:=SGEditTypeUser;
-FE1.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FE1.TextTypeFunction:=TSGEditTextTypeFunction(@MyTTFE);
-FP1.LastChild.Caption:='x^2-5*x+6';
+FE1 := SGCreateEdit(FP1, 'x^2-5*x+6', TSGScreenEditTextTypeFunction(@MyTTFE), 260,9,270,21, [SGAnchRight], True, True, Self);
+FE1.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 
 FCB7:=TSGComboBox.Create;
 FP1.CreateChild(FCB7);
@@ -399,16 +357,8 @@ FP1.LastChild.Visible:=True;
 (FP1.LastChild as TSGComboBox).CreateItem('Упорядочивающий одноточечный');
 (FP1.LastChild as TSGComboBox).CreateItem('Hа основе «Золотого сечения»');
 
-FS1:=TSGEdit.Create;
-FP1.CreateChild(FS1);
-FS1.OnChange:=TSGComponentProcedure(@GA1MyNumberFucntion);
-FS1.TextType:=SGEditTypeInteger;
-FS1.TextComplite:=False;
-FP1.LastChild.SetBounds(260,129,270,21);
-FP1.LastChild.Anchors:=[SGAnchRight];
-FP1.LastChild.Caption:='';
-FP1.LastChild.FUserPointer1:=Self;
-FP1.LastChild.Visible:=False;
+FS1 := SGCreateEdit(FP1, '', SGScreenEditTypeInteger, 260,129,270,21, [SGAnchRight], False, True, Self);
+FS1.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 
 FCB3:=TSGComboBox.Create;
 FP1.CreateChild(FCB3);
@@ -466,9 +416,9 @@ FLPoint.Destroy;
 inherited;
 end;
 
-class function TSGGenAlg.ClassName:string;
+class function TSGGenAlg.ClassName() : TSGString;
 begin
-Result:='Простой генетический алгоритм';
+Result := 'Простой генетический алгоритм';
 end;
 
 initialization
@@ -476,4 +426,4 @@ begin
 SGRegisterDrawClass(TSGGenAlg);
 end;
 
-END.
+end.
