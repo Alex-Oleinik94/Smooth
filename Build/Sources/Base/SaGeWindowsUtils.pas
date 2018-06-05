@@ -25,7 +25,6 @@ procedure SGViewVideoDevices(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, 
 function SGLogInternetAdaptersInfo() : TSGMaxEnum;
 function SGInternetAdapterNames() : TSGStringList;
 function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
-procedure WindowsShellAddIcon(const IconRecourceIdentifier, IconIdentifier : TSGUInt32; const Tip : TSGString = '');
 
 implementation
 
@@ -33,7 +32,6 @@ uses
 	 Registry
 	,MultiMon
 	,StrMan
-	,ShellApi
 	
 	// Internet tools
 	,JwaIpHlpApi
@@ -43,25 +41,6 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	;
-
-procedure WindowsShellAddIcon(const IconRecourceIdentifier, IconIdentifier : TSGUInt32; const Tip : TSGString = '');
-var
-	IconData : TNotifyIconData;
-	h : HANDLE;
-begin
-ZeroMemory(@IconData, sizeof(TNotifyIconData));
-IconData.cbSize := sizeof(TNotifyIconData);
-IconData.hWnd := 0;
-IconData.uID := IconRecourceIdentifier;
-IconData.uFlags := NIF_ICON or NIF_MESSAGE;
-if Tip <> '' then
-	IconData.uFlags := IconData.uFlags or NIF_TIP;
-IconData.hIcon := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(IconIdentifier));
-IconData.szTip := Tip;
-IconData.uCallbackMessage := WM_USER;
-if not Shell_NotifyIconA(NIM_ADD, @IconData) then
-	TSGLog.Source(['WinAPI: Shell_NotifyIconA(..) returned error!']);
-end;
 
 function SGInternetAdapterDescriptionFromName(const AdapterName : TSGString) : TSGString;
 var

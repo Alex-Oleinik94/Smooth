@@ -30,7 +30,7 @@ type
 	TSGCursorPosition = (
 		SGDeferenseCursorPosition, // - Это разница между SGNowCursorPosition и SGLastCursorPosition
 		SGNowCursorPosition,       // - Координаты мыши в настоящий момент
-		SGLastCursorPosition);     // - Координаты мыши, полученые при преведущем этапе цикла
+		SGLastCursorPosition);     // - Координаты мыши, полученые при преведущей итерации цикла
 type
 	TSGContextOption = TSGOption;
 	TSGContextSettings = TSGSettings;
