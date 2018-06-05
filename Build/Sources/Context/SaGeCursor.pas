@@ -33,7 +33,7 @@ const
 	SGC_GLASSY = 20000;
 
 type
-	TSGHotPixelType = TSGLongInt;
+	TSGHotPixelType = TSGInt32;
 
 	TSGCursor = class(TSGBitMap)
 			public

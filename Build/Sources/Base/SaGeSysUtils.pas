@@ -94,7 +94,7 @@ uses
 	,SaGeFileUtils
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 	{$ELSE}
 		,SaGeVersion
 		{$ENDIF}
@@ -110,7 +110,7 @@ function SGOperatingSystemVersion(): TSGString;
 begin
 Result := '';
 {$IFDEF MSWINDOWS}
-Result := SGWindowsVersion();
+Result := SGWinAPISystemVersion();
 {$ELSE}
 Result := SGEngineTargetVersion();
 {$ENDIF}

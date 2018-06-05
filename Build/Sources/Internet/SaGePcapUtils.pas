@@ -81,7 +81,7 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	{$IFDEF MSWINDOWS}
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 		{$ENDIF}
 	;
 

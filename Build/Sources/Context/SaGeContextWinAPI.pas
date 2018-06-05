@@ -116,7 +116,7 @@ implementation
 uses
 	 SaGeScreen
 	,SaGeLog
-	,SaGeWindowsUtils
+	,SaGeWinAPIUtils
 	,SaGeStringUtils
 	
 	,SysUtils

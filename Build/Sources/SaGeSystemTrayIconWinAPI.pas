@@ -7,6 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeSystemTrayIcon
+	,SaGeWinAPIIconUtils
 	
 	,ShellAPI
 	,Windows
@@ -18,7 +19,7 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			protected
-		
+		 
 		end;
 
 implementation

@@ -56,7 +56,7 @@ uses
 	,SaGeConsoleUtils
 	,SaGeContextUtils
 	{$IFDEF MSWINDOWS}
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 		{$ENDIF}
 	
 	// Openers :

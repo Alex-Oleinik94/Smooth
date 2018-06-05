@@ -180,7 +180,7 @@ uses
 		,SaGeRenderDirectX9
 		,SaGeRenderDirectX8
 		,SaGeNvidiaInformationUtils
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 		{$ENDIF}
 	;
 

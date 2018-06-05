@@ -83,7 +83,7 @@ uses
 	 SaGeLog
 	,SaGeStringUtils
 	{$IFDEF MSWINDOWS}
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 		{$ENDIF}
 	,SaGeDateTime
 	

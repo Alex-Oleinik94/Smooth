@@ -54,7 +54,7 @@ uses
 	
 	,SaGeLists
 	{$IFDEF MSWINDOWS}
-		,SaGeWindowsUtils
+		,SaGeWinAPIUtils
 		{$ENDIF}
 	;
 

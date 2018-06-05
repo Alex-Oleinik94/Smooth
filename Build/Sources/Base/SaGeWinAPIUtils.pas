@@ -2,7 +2,7 @@
 
 {$RESOURCE .\..\..\Platforms\Windows\ExecutableResourse\Sun.res}
 
-unit SaGeWindowsUtils;
+unit SaGeWinAPIUtils;
 
 interface
 
@@ -16,8 +16,8 @@ uses
 	,SaGeLists
 	;
 
-function SGWindowsVersion(): TSGString;
-function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
+function SGWinAPISystemVersion(): TSGString;
+function SGWinAPIRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
 function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;
 function SGWinAPIQueschion(const VQuestion, VCaption : TSGString):TSGBoolean;
 function SGKeyboardLayout(): TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -300,7 +300,7 @@ else
 FreeMem(KeyboardState, KeyboardStateLength);
 end;
 
-function SGWindowsRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
+function SGWinAPIRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
 begin
 with TRegistry.Create() do
 	begin
@@ -314,7 +314,7 @@ with TRegistry.Create() do
 	end;
 end;
 
-function SGWindowsVersion(): TSGString;
+function SGWinAPISystemVersion(): TSGString;
 const
 	VersionKey = '\SOFTWARE\Microsoft\Windows NT\CurrentVersion';
 var
@@ -324,10 +324,10 @@ var
 	CurrentVersion : TSGString = '';
 begin
 Result := '';
-ProductName := SGWindowsRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'ProductName');
-CSDVersion := SGWindowsRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CSDVersion');
-CurrentBuild := SGWindowsRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CurrentBuild');
-CurrentVersion := SGWindowsRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CurrentVersion');
+ProductName := SGWinAPIRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'ProductName');
+CSDVersion := SGWinAPIRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CSDVersion');
+CurrentBuild := SGWinAPIRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CurrentBuild');
+CurrentVersion := SGWinAPIRegistryRead(HKEY_LOCAL_MACHINE, VersionKey, 'CurrentVersion');
 if ProductName = '' then
 	begin
 	if CurrentVersion <> '' then
