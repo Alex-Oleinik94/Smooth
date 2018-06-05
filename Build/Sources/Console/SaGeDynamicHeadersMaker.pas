@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeConvertHeaderToDynamic;
+unit SaGeDynamicHeadersMaker;
 
 interface
 
@@ -55,7 +55,7 @@ type
 		class procedure NullUtil(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef);
 		end;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef; const VWriteMode : TSGString = SGDDHWriteModeDef);
+procedure SGDynamicHeadersMaker(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef; const VWriteMode : TSGString = SGDDHWriteModeDef);
 
 implementation
 
@@ -106,7 +106,7 @@ OutFileStream.Destroy();
 InFileStream.Destroy();
 end;
 
-procedure SGConvertHeaderToDynamic(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef; const VWriteMode : TSGString = SGDDHWriteModeDef);
+procedure SGDynamicHeadersMaker(const VInFile, VOutFile : TSGString; const VMode : TSGString = SGDDHModeDef; const VWriteMode : TSGString = SGDDHWriteModeDef);
 var
 	V : TSGDoDynamicHeader = nil;
 begin
@@ -132,7 +132,7 @@ end;
 destructor TSGDoDynamicHeader.Destroy();
 begin
 FOutStream.Position := 0;
-WriteLn('ConvertHeaderToDynamic : Out file size = ',FOutStream.Size,'.');
+WriteLn('DynamicHeadersMaker : Out file size = ',FOutStream.Size,'.');
 FOutStream.SaveToFile(FOutFileName);
 FOutStream.Destroy();
 FInStream.Destroy();
@@ -843,18 +843,18 @@ var
 begin
 FWriteMode := SGUpCaseString(FWriteMode);
 SGPrintEngineVersion();
-WriteLn('ConvertHeaderToDynamic : In file size = ',FInStream.Size,'(',SGGetSizeString(FInStream.Size,'EN'),')','.');
+WriteLn('DynamicHeadersMaker : In file size = ',FInStream.Size,'(',SGGetSizeString(FInStream.Size,'EN'),')','.');
 Count := 0;
 while FInStream.Size <> FInStream.Position do
 	begin
 	SGReadLnStringFromStream(FInStream);
 	Count += 1;
 	end;
-WriteLn('ConvertHeaderToDynamic : In file total lines = ',Count,'.');
+WriteLn('DynamicHeadersMaker : In file total lines = ',Count,'.');
 FInStream.Position := 0;
 Count := Process();
-WriteLn('ConvertHeaderToDynamic : In file identifier count = ',Count,'.');
-WriteLn('ConvertHeaderToDynamic : External count = ',ExternalCount,'.');
+WriteLn('DynamicHeadersMaker : In file identifier count = ',Count,'.');
+WriteLn('DynamicHeadersMaker : External count = ',ExternalCount,'.');
 SetLength(ExternalProcedures, 0);
 end;
 

@@ -43,7 +43,7 @@ uses
 	// Aditional console program includes
 	,SaGeConsoleProgramFindInSources
 	,SaGeConsoleProgramGoogleReNameCache
-	,SaGeConsoleProgramConvertHeaderToDynamic
+	,SaGeConsoleProgramDynamicHeadersMaker
 	,SaGeConsoleProgramUSMBIOS
 	,SaGeConsoleProgramEngineRenamer
 	,SaGeMaz1gWizard
@@ -204,7 +204,7 @@ if ApplicationsConsoleCaller <> nil then
 ApplicationsConsoleCaller := TSGConsoleCaller.Create(nil);
 ApplicationsConsoleCaller.Category('Applications');
 ApplicationsConsoleCaller.AddComand(@SGConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
-ApplicationsConsoleCaller.AddComand(@SGConsoleConvertHeaderToDynamic, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
+ApplicationsConsoleCaller.AddComand(@SGConsoleDynamicHeadersMaker, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
 ApplicationsConsoleCaller.AddComand(@SGConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
 ApplicationsConsoleCaller.AddComand(@SGConsoleHash, ['hash'], 'Hash file or directory');
 ApplicationsConsoleCaller.AddComand(@SGConsoleFindInSources, ['FIS','SIS'], 'Program for searching in the sources');

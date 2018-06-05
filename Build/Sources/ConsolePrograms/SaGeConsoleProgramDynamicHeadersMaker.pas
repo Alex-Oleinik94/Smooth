@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeConsoleProgramConvertHeaderToDynamic;
+unit SaGeConsoleProgramDynamicHeadersMaker;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 	,SaGeConsoleCaller
 	;
 
-procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleDynamicHeadersMaker(const VParams : TSGConcoleCallerParams = nil);
 
 implementation
 
@@ -18,11 +18,11 @@ uses
 	
 	,SaGeVersion
 	,SaGeResourceManager
-	,SaGeConvertHeaderToDynamic
+	,SaGeDynamicHeadersMaker
 	,SaGeStringUtils
 	;
 
-procedure SGConsoleConvertHeaderToDynamic(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleDynamicHeadersMaker(const VParams : TSGConcoleCallerParams = nil);
 
 function ParamIsMode(const VParam : TSGString): TSGBool;
 var
@@ -51,13 +51,13 @@ end;
 
 begin
 if (Length(VParams) = 2) and (SGResourceFiles.FileExists(VParams[0])) then
-	SGConvertHeaderToDynamic(VParams[0], VParams[1])
+	SGDynamicHeadersMaker(VParams[0], VParams[1])
 else if (Length(VParams) = 4) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) and ParamIsWriteMode(VParams[3]) then
-	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2], VParams[3])
+	SGDynamicHeadersMaker(VParams[0], VParams[1], VParams[2], VParams[3])
 else if (Length(VParams) = 3) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsWriteMode(VParams[2]) then
-	SGConvertHeaderToDynamic(VParams[0], VParams[1], SGDDHModeDef, VParams[2])
+	SGDynamicHeadersMaker(VParams[0], VParams[1], SGDDHModeDef, VParams[2])
 else if (Length(VParams) = 3) and (SGResourceFiles.FileExists(VParams[0])) and ParamIsMode(VParams[2]) then
-	SGConvertHeaderToDynamic(VParams[0], VParams[1], VParams[2])
+	SGDynamicHeadersMaker(VParams[0], VParams[1], VParams[2])
 else if IsNullUtil() then
 	if (Length(VParams) = 3) then
 		TSGDoDynamicHeader.NullUtil(VParams[1], VParams[2])
