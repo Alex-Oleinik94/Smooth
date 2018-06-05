@@ -25,6 +25,7 @@ uses
 	,SaGeCamera
 	,SaGeMatrix
 	,SaGeScreenHelper
+	,SaGeContextUtils
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase

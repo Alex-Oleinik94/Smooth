@@ -104,6 +104,7 @@ uses
 	,SaGeFileUtils
 	,SaGeRenderInterface
 	,SaGeCommon
+	,SaGeContextUtils
 	
 	,StrMan
 	;

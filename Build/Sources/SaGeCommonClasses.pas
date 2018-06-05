@@ -12,12 +12,8 @@ uses
 	,SaGeAudioRenderInterface
 	,SaGeCursor
 	,SaGeBitMap
+	,SaGeContextUtils
 	;
-type
-	TSGCursorButtons = (SGNullCursorButton, SGMiddleCursorButton, SGLeftCursorButton, SGRightCursorButton);
-	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey);
-	TSGCursorWheel = (SGNullCursorWheel, SGUpCursorWheel, SGDownCursorWheel);
-	TSGCursorPosition = (SGDeferenseCursorPosition, SGNowCursorPosition, SGLastCursorPosition);
 type
 	ISGRenderedTimerArea = interface(ISGNearlyContext)
 		['{ed55d22e-7069-46b1-ad39-fb9fcbe63bcb}']

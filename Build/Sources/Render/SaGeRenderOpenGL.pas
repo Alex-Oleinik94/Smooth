@@ -289,6 +289,9 @@ uses
 	,SaGeLog
 	,SaGeFileUtils
 	,SaGeBaseUtils
+	{$IFDEF NEEDResourceS}
+	,SaGeLists
+	{$ENDIF}
 	;
 
 class function TSGRenderOpenGL.ClassName() : TSGString;

@@ -116,6 +116,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeContextUtils
 	;
 
 function TSGExample15_Shadow.GetLightAngle(const index : TSGLongWord):TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

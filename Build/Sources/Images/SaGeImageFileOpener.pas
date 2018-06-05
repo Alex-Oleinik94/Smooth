@@ -70,6 +70,7 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeFileUtils
+	,SaGeContextUtils
 	
 	,SysUtils
 	;

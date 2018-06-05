@@ -10,6 +10,7 @@ uses
 	,SaGeRender
 	,SaGeContext
 	,SaGeCommonClasses
+	,SaGeContextUtils
 		//android units:
 	,unix
 	,cmem

@@ -119,6 +119,7 @@ uses
 	,SaGeMathUtils
 	,SaGeCommon
 	,SaGeBaseUtils
+	,SaGeContextUtils
 	;
 
 {$OVERFLOWCHECKS OFF}

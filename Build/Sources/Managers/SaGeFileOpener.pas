@@ -54,6 +54,7 @@ uses
 	,SaGeFileUtils
 	,SaGeBaseUtils
 	,SaGeConsoleUtils
+	,SaGeContextUtils
 	{$IFDEF MSWINDOWS}
 		,SaGeWindowsUtils
 		{$ENDIF}

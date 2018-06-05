@@ -22,6 +22,7 @@ uses
 	,SaGeStaticString
 	,SaGeCursor
 	,SaGeCommonStructs
+	,SaGeContextUtils
 	;
 
 type

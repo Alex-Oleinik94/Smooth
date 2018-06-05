@@ -80,6 +80,7 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	,SaGeCommon
+	,SaGeContextUtils
 	
 	,StrMan
 	;

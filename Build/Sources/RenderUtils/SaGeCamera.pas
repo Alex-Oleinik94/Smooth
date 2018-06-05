@@ -73,6 +73,7 @@ uses
 	,SaGeContext
 	,SaGeCommon
 	,SaGeStringUtils
+	,SaGeContextUtils
 	;
 
 function SGStrMatrixMode(const Mode : TSGMode) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

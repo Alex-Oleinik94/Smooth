@@ -18,6 +18,7 @@ uses
 	,SaGeMesh
 	,SaGeDateTime
 	,SaGeCamera
+	,SaGeContextUtils
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase

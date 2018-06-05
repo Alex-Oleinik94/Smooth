@@ -26,7 +26,8 @@ uses
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
 		,SaGeConsolePaintableTools
-		,SaGeContext
+		,SaGeContextUtils
+		,SaGeLists
 		{$ENDIF}
 	{$IF defined(WITHSAGELIBRARY)}
 		,SaGeLibrary

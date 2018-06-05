@@ -40,6 +40,7 @@ uses
 	,SaGeVertexObject
 	,SaGeMathUtils
 	,SaGeBaseUtils
+	,SaGeContextUtils
 	;
 
 {$DEFINE SGREADIMPLEMENTATION}

@@ -9,6 +9,7 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
+	,SaGeContextUtils
 	
 	,MacOSAll
 	,unix

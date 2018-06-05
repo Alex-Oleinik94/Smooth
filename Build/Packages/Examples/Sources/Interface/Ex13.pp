@@ -23,6 +23,7 @@ uses
 	,SaGeFPSViewer
 	,SaGeCamera
 	,SaGeScreenHelper
+	,SaGeContextUtils
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
 		,SaGeConsoleToolsBase

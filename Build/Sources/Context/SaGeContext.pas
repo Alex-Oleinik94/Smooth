@@ -23,47 +23,12 @@ uses
 	,SaGeAudioRenderInterface
 	,SaGeCommonStructs
 	,SaGeCasesOfPrint
+	,SaGeContextUtils
 	
 	,Classes
 	,Crt
-	
-	{$IF defined(ANDROID)}
-		,android_native_app_glue
-		{$ENDIF}
 	;
 
-const
-	SG_ALT_KEY = 18;
-	SG_CTRL_KEY = 17;
-	SG_SHIFT_KEY = 16;
-	SG_ESC_KEY = 27;
-	SG_ESCAPE_KEY = SG_ESC_KEY;
-type
-	TSGCursorButtons =            SaGeCommonClasses.TSGCursorButtons;
-	TSGCursorButtonType =         SaGeCommonClasses.TSGCursorButtonType;
-	TSGCursorWheel =              SaGeCommonClasses.TSGCursorWheel;
-	TSGCursorPosition =           SaGeCommonClasses.TSGCursorPosition;
-const
-	 SGDeferenseCursorPosition =  SaGeCommonClasses.SGDeferenseCursorPosition; // - Это разница между SGNowCursorPosition и SGLastCursorPosition
-	 SGNowCursorPosition =        SaGeCommonClasses.SGNowCursorPosition;       // - Координаты мыши в настоящий момент
-	 SGLastCursorPosition =       SaGeCommonClasses.SGLastCursorPosition;      // - Координаты мыши, полученые при преведущем этапе цикла
-	 SGNullCursorButton =         SaGeCommonClasses.SGNullCursorButton;
-
-	 SGMiddleCursorButton =       SaGeCommonClasses.SGMiddleCursorButton;
-	 SGLeftCursorButton =         SaGeCommonClasses.SGLeftCursorButton;
-	 SGRightCursorButton =        SaGeCommonClasses.SGRightCursorButton;
-
-	 SGDownKey =                  SaGeCommonClasses.SGDownKey;
-	 SGUpKey =                    SaGeCommonClasses.SGUpKey;
-
-	 SGNullCursorWheel =          SaGeCommonClasses.SGNullCursorWheel;
-	 SGUpCursorWheel =            SaGeCommonClasses.SGUpCursorWheel;
-	 SGDownCursorWheel =          SaGeCommonClasses.SGDownCursorWheel;
-type
-	TSGContextOption = TSGOption;
-	TSGContextSettings = TSGSettings;
-	TSGPaintableSettings = TSGSettings;
-	TSGPaintableOption = TSGOption;
 type
 	TSGContext = class;
 	PSGContext = ^ TSGContext;
@@ -154,8 +119,8 @@ type
 		procedure SetClientHeight(const VClientHeight : TSGAreaInt);virtual;
 		function  GetWindow() : TSGPointer;virtual;
 		function  GetDevice() : TSGPointer;virtual;
-		function FileOpenDialog(const VTittle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
-		function FileSaveDialog(const VTittle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual;abstract;
+		function FileOpenDialog(const VTitle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
+		function FileSaveDialog(const VTitle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual;abstract;
 			public
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
@@ -245,35 +210,18 @@ type
 		property AudioRender : ISGAudioRender read GetAudioRender;
 		end;
 
-function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
-function SGContextOptionHeight(const VVariable : TSGLongWord) : TSGContextOption;
-function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
-function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
-function SGContextOptionFullscreen(const VVariable : TSGBoolean) : TSGContextOption;
-function SGContextOptionMax() : TSGContextOption;
-function SGContextOptionMin() : TSGContextOption;
-function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
-function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
-{$IFDEF ANDROID}
-function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
-{$ENDIF}
-function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
-
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-
-function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
-function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
 
 implementation
 
 uses
 	 SysUtils
 	
-	,SaGeLog,SaGeContextHandler
+	,SaGeLog
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	{$IFDEF MSWINDOWS}
-		,SaGeContextWinApi
+		,SaGeContextWinAPI
 		,SaGeNvidiaOptimusEnablement
 		,SaGeNvidiaDriverSettingsUtils
 		{$ENDIF}
@@ -291,26 +239,6 @@ uses
 		{$ENDIF}
 	;
 
-function SGProcessContextOption(const VName : TSGString; var VSettings : TSGContextSettings) : TSGOptionPointer;
-var
-	O, OSets : TSGOption;
-	Sets : TSGBool = False;
-begin
-Result := nil;
-for O in VSettings do
-	if O.FName = VName then
-		begin
-		OSets := O;
-		Sets := True;
-		break;
-		end;
-if Sets then
-	begin
-	Result := OSets.FOption;
-	VSettings -= OSets;
-	end;
-end;
-
 class function TSGContext.UserProfilePath() : TSGString;
 begin
 Result := '.';
@@ -320,7 +248,7 @@ procedure TSGContext.CreateAudio();
 begin
 if FAudioRenderClass = nil then
 	if 'AUDIORENDER' in FPaintableSettings then
-		FAudioRenderClass := TSGAudioRenderClass(SGProcessContextOption('AUDIORENDER', FPaintableSettings));
+		FAudioRenderClass := TSGAudioRenderClass(SGContextOption('AUDIORENDER', FPaintableSettings));
 if FAudioRenderClass <> nil then
 	begin
 	if FAudioRender <> nil then
@@ -369,71 +297,6 @@ end;
 procedure TSGContext.Maximize();
 begin
 end;
-
-function SGCopyContextSettings(const VSettings : TSGContextSettings ) : TSGContextSettings;
-var
-	i : TSGUInt32;
-begin
-Result := nil;
-if VSettings <> nil then if Length(VSettings) > 0 then
-	begin
-	SetLength(Result, Length(VSettings));
-	for i := 0 to High(Result) do
-		Result[i] := VSettings[i];
-	end;
-end;
-
-function SGContextOptionMax() : TSGContextOption;
-begin
-Result.Import('MAX', nil);
-end;
-
-function SGContextOptionMin() : TSGContextOption;
-begin
-Result.Import('MIN', nil);
-end;
-
-function SGContextOptionImport(const VName : TSGString; const VOption : TSGPointer) : TSGContextOption;
-begin
-Result.Import(VName, VOption);
-end;
-
-function SGContextOptionWidth(const VVariable : TSGLongWord) : TSGContextOption;
-begin
-Result.Import('WIDTH', TSGPointer(VVariable));
-end;
-
-function SGContextOptionHeight(const VVariable : TSGLongWord) : TSGContextOption;
-begin
-Result.Import('HEIGHT', TSGPointer(VVariable));
-end;
-
-function SGContextOptionLeft(const VVariable : TSGLongWord) : TSGContextOption;
-begin
-Result.Import('LEFT', TSGPointer(VVariable));
-end;
-
-function SGContextOptionAudioRender(const VAudioRender : TSGAudioRenderClass) : TSGContextOption;
-begin
-Result.Import('AUDIORENDER', TSGPointer(VAudioRender));
-end;
-
-function SGContextOptionTop(const VVariable : TSGLongWord) : TSGContextOption;
-begin
-Result.Import('TOP', TSGPointer(VVariable));
-end;
-
-function SGContextOptionFullscreen(const VVariable : TSGBoolean) : TSGContextOption;
-begin
-Result.Import('FULLSCREEN', TSGPointer(TSGByte(VVariable)));
-end;
-
-{$IFDEF ANDROID}
-function SGContextOptionAndroidApp(const State : TSGPointer) : TSGContextOption;
-begin
-Result.Import('ANDROIDAPP', State);
-end;
-{$ENDIF}
 
 procedure TSGContext.PrintBounds();
 begin
@@ -510,11 +373,6 @@ FormerContext.FAudioRender := nil;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
 	SGLog.Source([ClassName(), '(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Leave.']);
 	{$ENDIF}
-end;
-
-function SGContextOptionTitle(const VVariable : TSGString) : TSGContextOption;
-begin
-Result.Import('TITLE', SGStringToPChar(VVariable));
 end;
 
 function TSGCompatibleContext() : TSGContextClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

@@ -188,6 +188,7 @@ uses
 	,SaGeBitMap
 	,SaGeSysUtils
 	,SaGeBaseUtils
+	,SaGeContextUtils
 	
 	,Crt
 	;

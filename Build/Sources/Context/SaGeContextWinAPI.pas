@@ -16,6 +16,7 @@ uses
 	,SaGeBitMap
 	,SaGeCursor
 	,SaGeCommonStructs
+	,SaGeContextUtils
 	
 	// Windows units
 	,Windows

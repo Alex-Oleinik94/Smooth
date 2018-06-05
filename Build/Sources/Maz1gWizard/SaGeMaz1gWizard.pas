@@ -41,6 +41,8 @@ uses
 	,SaGeLog
 	,SaGeContext
 	,SaGeLists
+	,SaGeContextUtils
+	
 	,SysUtils
 	;
 

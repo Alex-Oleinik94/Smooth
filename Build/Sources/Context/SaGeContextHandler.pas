@@ -12,6 +12,10 @@ uses
 	,SaGeRender
 	,SaGeCasesOfPrint
 	,SaGeThreads
+	,SaGeContextUtils
+	{$IF defined(ANDROID)}
+		,android_native_app_glue
+		{$ENDIF}
 	;
 
 type
@@ -62,6 +66,9 @@ uses
 	,SaGeCursor
 	,SaGeLog
 	,SaGeStringUtils
+	{$IFDEF ANDROID}
+		,SaGeContextAndroid
+		{$ENDIF}
 	;
 
 procedure SGRunPaintable(const _PaintableClass : TSGDrawableClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);
@@ -79,7 +86,7 @@ procedure SGCompatibleRunPaintable(const _PaintableClass : TSGDrawableClass; con
 var
 	Settings : TSGContextSettings = nil;
 begin
-Settings := SGCopyContextSettings(_Settings);
+Settings := SGContextSettingsCopy(_Settings);
 if not ('AUDIORENDER' in Settings) then if TSGCompatibleAudioRender <> nil then
 	Settings += SGContextOptionAudioRender(TSGCompatibleAudioRender);
 SGRunPaintable(_PaintableClass, TSGCompatibleContext, TSGCompatibleRender, Settings);
@@ -330,7 +337,7 @@ for O in FSettings do
 		FreeMem(O.FOption);
 		end
 	{$IFDEF ANDROID}
-	else if (Context is TSGContextAndroid) and (O.FName = 'ANDROIDAPP') then
+	else if (FContext is TSGContextAndroid) and (O.FName = 'ANDROIDAPP') then
 		(FContext as TSGContextAndroid).AndroidApp := PAndroid_App(O.FOption)
 		{$ENDIF}
 	else

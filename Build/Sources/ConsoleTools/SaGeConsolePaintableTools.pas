@@ -9,6 +9,7 @@ uses
 	,SaGeConsoleCaller
 	,SaGeCommonClasses
 	,SaGeContext
+	,SaGeContextUtils
 	;
 
 type
