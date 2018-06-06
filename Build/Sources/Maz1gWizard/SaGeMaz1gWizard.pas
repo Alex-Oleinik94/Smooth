@@ -80,8 +80,14 @@ procedure TSGMaz1gWizard.ChangeWindowVisible();
 begin
 if (FWindow = nil) then
 	InitWindow()
+else if (FWindow.Context = nil) then
+	FWindow.RunAnotherThread()
 else
-	SGKill(FWindow);
+	begin
+	FWindow.Context.Visible := not FWindow.Context.Visible;
+	if FWindow.Context.Visible then
+		FWindow.Context.SetForeground();
+	end;
 end;
 
 procedure TSGMaz1gWizard.InitializeIcon();

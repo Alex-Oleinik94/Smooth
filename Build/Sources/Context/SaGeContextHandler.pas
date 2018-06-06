@@ -35,6 +35,7 @@ type
 		FThread : TSGThread;
 			public
 		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
+		property Context : TSGContext read FContext;
 			protected
 		procedure InitPlacement();
 		procedure CheckPlacement();

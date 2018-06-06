@@ -46,12 +46,14 @@ type
 		procedure Maximize();override;
 		class function UserProfilePath() : TSGString; override;
 			public
+		procedure SetForeground(); override;
 		procedure ShowCursor(const VVisibility : TSGBoolean);override;
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
 		function WndMessagesProc(const AMessage:LongWord; const WParam, LParam: TSGWinAPIParam): TSGWinAPIParam;
 			protected
+		procedure SetVisible(const _Visible : TSGBoolean); override;
 		procedure InitFullscreen(const VFullscreen : TSGBoolean); override;
 		function  GetWindow() : TSGPointer; override;
 		function  GetDevice() : TSGPointer; override;
@@ -92,6 +94,19 @@ uses
 	
 	,SysUtils
 	;
+
+procedure TSGContextWinAPI.SetVisible(const _Visible : TSGBoolean);
+begin
+if (_Visible <> FVisible) then
+	begin
+	if (hWindow <> 0) then
+		if (_Visible) then
+			ShowWindow(hWindow, SW_SHOW)
+		else
+			ShowWindow(hWindow, SW_HIDE);
+	inherited SetVisible(_Visible);
+	end;
+end;
 
 class function TSGContextWinAPI.UserProfilePath() : TSGString;
 const 
@@ -753,13 +768,24 @@ else
 if (Result <> 0) then
 	begin
 	SetWindowLongPtr(Result, GWL_USERDATA, TSGMaxEnum(Self));
-	ShowWindow(Result, CmdShow);
+	if FVisible then
+		begin
+		ShowWindow(Result, SW_SHOW);
+		SetFocus(Result);
+		SetForegroundWindow(Result);
+		end;
 	UpdateWindow(Result);
-	Active:=True;
+	Active := True;
 	end;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__WindowCreate : Exit (Result=',Result,')']);
 	{$ENDIF}
+end;
+
+procedure TSGContextWinAPI.SetForeground();
+begin
+SetFocus(hWindow);
+SetForegroundWindow(hWindow);
 end;
 
 function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;

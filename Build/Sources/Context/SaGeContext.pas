@@ -65,7 +65,9 @@ type
 		function GetScreenArea():TSGPoint2int32;virtual;abstract;
 		function GetClientArea():TSGPoint2int32;virtual;abstract;
 		function GetClientAreaShift() : TSGPoint2int32;virtual;abstract;
+		procedure SetForeground(); virtual;
 			protected
+		FVisible         : TSGBoolean;
 		FActive          : TSGBoolean;
 		FInitialized     : TSGBoolean;
 		FWidth, FHeight  : TSGAreaInt;
@@ -82,46 +84,49 @@ type
 			protected
 		FPaintWithHandlingMessages : TSGBoolean;
 			protected
-		procedure ReinitializeRender();virtual;
-		function  GetRender() : ISGRender;virtual;
-		procedure StartComputeTimer();virtual;
-		function  GetElapsedTime() : TSGTimerInt;virtual;
-		function  GetTitle() : TSGString;virtual;
-		procedure SetTitle(const VTitle : TSGString);virtual;
-		function  GetWidth() : TSGAreaInt;virtual;
-		function  GetHeight() : TSGAreaInt;virtual;
-		procedure SetWidth(const VWidth : TSGAreaInt);virtual;
-		procedure SetHeight(const VHeight : TSGAreaInt);virtual;
-		function  GetLeft() : TSGAreaInt;virtual;
-		function  GetTop() : TSGAreaInt;virtual;
-		procedure SetLeft(const VLeft : TSGAreaInt);virtual;
-		procedure SetTop(const VTop : TSGAreaInt);virtual;
-		function  GetFullscreen() : TSGBoolean;virtual;
-		procedure InitFullscreen(const VFullscreen : TSGBoolean);virtual;
-		procedure SetActive(const VActive : TSGBoolean);virtual;
-		function  GetActive():TSGBoolean;virtual;
-		procedure SetCursorCentered(const VCentered : TSGBoolean);virtual;
-		function  GetCursorCentered() : TSGBoolean;virtual;
-		procedure SetSelfLink(const VLink : PISGContext);virtual;
-		function  GetSelfLink() : PISGContext;virtual;
-		function  GetCursor():TSGCursor;virtual;
-		procedure SetCursor(const VCursor : TSGCursor);virtual;
-		function  GetIcon():TSGBitMap;virtual;
-		procedure SetIcon(const VIcon : TSGBitMap);virtual;
-		procedure BeginIncessantlyPainting();virtual;
-		procedure EndIncessantlyPainting();virtual;
+		procedure SetVisible(const _Visible : TSGBoolean); virtual;
+		function  GetVisible() : TSGBoolean; virtual;
+		procedure ReinitializeRender(); virtual;
+		function  GetRender() : ISGRender; virtual;
+		procedure StartComputeTimer(); virtual;
+		function  GetElapsedTime() : TSGTimerInt; virtual;
+		function  GetTitle() : TSGString; virtual;
+		procedure SetTitle(const VTitle : TSGString); virtual;
+		function  GetWidth() : TSGAreaInt; virtual;
+		function  GetHeight() : TSGAreaInt; virtual;
+		procedure SetWidth(const VWidth : TSGAreaInt); virtual;
+		procedure SetHeight(const VHeight : TSGAreaInt); virtual;
+		function  GetLeft() : TSGAreaInt; virtual;
+		function  GetTop() : TSGAreaInt; virtual;
+		procedure SetLeft(const VLeft : TSGAreaInt); virtual;
+		procedure SetTop(const VTop : TSGAreaInt); virtual;
+		function  GetFullscreen() : TSGBoolean; virtual;
+		procedure InitFullscreen(const VFullscreen : TSGBoolean); virtual;
+		procedure SetActive(const VActive : TSGBoolean); virtual;
+		function  GetActive():TSGBoolean; virtual;
+		procedure SetCursorCentered(const VCentered : TSGBoolean); virtual;
+		function  GetCursorCentered() : TSGBoolean; virtual;
+		procedure SetSelfLink(const VLink : PISGContext); virtual;
+		function  GetSelfLink() : PISGContext; virtual;
+		function  GetCursor():TSGCursor; virtual;
+		procedure SetCursor(const VCursor : TSGCursor); virtual;
+		function  GetIcon():TSGBitMap; virtual;
+		procedure SetIcon(const VIcon : TSGBitMap); virtual;
+		procedure BeginIncessantlyPainting(); virtual;
+		procedure EndIncessantlyPainting(); virtual;
 
-		function  GetClientWidth() : TSGAreaInt;virtual;
-		function  GetClientHeight() : TSGAreaInt;virtual;
-		function  GetOption(const VName : TSGString) : TSGPointer;virtual;abstract;
-		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;abstract;
-		procedure SetClientWidth(const VClientWidth : TSGAreaInt);virtual;
-		procedure SetClientHeight(const VClientHeight : TSGAreaInt);virtual;
-		function  GetWindow() : TSGPointer;virtual;
-		function  GetDevice() : TSGPointer;virtual;
-		function FileOpenDialog(const VTitle: TSGString; const VFilter : TSGString) : TSGString; virtual;abstract;
-		function FileSaveDialog(const VTitle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual;abstract;
+		function  GetClientWidth() : TSGAreaInt; virtual;
+		function  GetClientHeight() : TSGAreaInt; virtual;
+		function  GetOption(const VName : TSGString) : TSGPointer; virtual; abstract;
+		procedure SetOption(const VName : TSGString; const VValue : TSGPointer); virtual; abstract;
+		procedure SetClientWidth(const VClientWidth : TSGAreaInt); virtual;
+		procedure SetClientHeight(const VClientHeight : TSGAreaInt); virtual;
+		function  GetWindow() : TSGPointer; virtual;
+		function  GetDevice() : TSGPointer; virtual;
+		function FileOpenDialog(const VTitle: TSGString; const VFilter : TSGString) : TSGString; virtual; abstract;
+		function FileSaveDialog(const VTitle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual; abstract;
 			public
+		property Visible : TSGBoolean read GetVisible write SetVisible;
 		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
@@ -238,6 +243,10 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+procedure TSGContext.SetForeground();
+begin
+end;
 
 class function TSGContext.UserProfilePath() : TSGString;
 begin
@@ -882,6 +891,16 @@ if FAudioRender <> nil then
 	Result := FAudioRender as ISGAudioRender;
 end;
 
+procedure TSGContext.SetVisible(const _Visible : TSGBoolean);
+begin
+FVisible := _Visible;
+end;
+
+function  TSGContext.GetVisible() : TSGBoolean;
+begin
+Result := FVisible;
+end;
+
 constructor TSGContext.Create();
 var
 	i:LongWord;
@@ -904,8 +923,9 @@ FCursorInCenter:=False;
 FWidth:=0;
 FHeight:=0;
 FTitle:='SaGe Window';
-FFullscreen:=False;
-FActive:=False;
+FFullscreen := False;
+FActive := False;
+FVisible := True;
 FNewContextType:=nil;
 for i:=0 to 255 do
 	FKeysPressed[i]:=False;

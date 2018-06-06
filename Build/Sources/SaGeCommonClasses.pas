@@ -78,7 +78,10 @@ type
 
 		procedure SetActive(const VActive : TSGBoolean);
 		function  GetActive():TSGBoolean;
-
+		procedure SetVisible(const _Visible : TSGBoolean);
+		function  GetVisible() : TSGBoolean;
+		procedure SetForeground();
+		
 		procedure SetCursorCentered(const VCentered : TSGBoolean);
 		function GetCursorCentered() : TSGBoolean;
 
