@@ -12,9 +12,10 @@ uses
 	,SaGeMaz1gWizardWindow
 	,SaGeContextHandler
 	,SaGeSystemTrayIcon
+	,SaGeContextUtils
 	;
 type
-	TSGMaz1gWizard = class(TSGNamed)
+	TSGMaz1gWizard = class(TSGNamed, ISGSystemTrayIconMouseButtonsCallBack)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -23,10 +24,11 @@ type
 		class function Initialize(const _Params : TSGConcoleCallerParams = nil) : TSGMaz1gWizard;
 		procedure Loop();
 			protected
+		procedure IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
 		procedure Iteration();
 		procedure Start();
 		procedure InitWindow();
-		procedure ShowWindow();
+		procedure ChangeWindowVisible();
 		procedure InitializeIcon();
 			protected
 		FHalt : TSGBoolean;
@@ -46,14 +48,23 @@ uses
 	,SaGeLog
 	,SaGeContext
 	,SaGeLists
-	,SaGeContextUtils
 	
 	,SysUtils
+	,Crt
 	;
+
+procedure TSGMaz1gWizard.IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
+begin
+if (ButtonType = SGUpKey) then
+	ChangeWindowVisible();
+end;
 
 procedure TSGMaz1gWizard.Iteration();
 begin
-
+if (FIcon <> nil) then
+	FIcon.Messages();
+if KeyPressed and (ReadKey = #27) then
+	FHalt := True;
 end;
 
 procedure TSGMaz1gWizard.InitWindow();
@@ -65,11 +76,12 @@ FWindow.RegisterSettings(SGContextOptionMax());
 FWindow.RunAnotherThread();
 end;
 
-procedure TSGMaz1gWizard.ShowWindow();
+procedure TSGMaz1gWizard.ChangeWindowVisible();
 begin
-if FWindow = nil then
-	InitWindow();
-
+if (FWindow = nil) then
+	InitWindow()
+else
+	SGKill(FWindow);
 end;
 
 procedure TSGMaz1gWizard.InitializeIcon();
@@ -79,7 +91,9 @@ if TSGCompatibleSystemTrayIcon <> nil then
 	FIcon := TSGCompatibleSystemTrayIcon.Create();
 if (FIcon <> nil) then
 	begin
-	
+	FIcon.Tip := 'Mazig Wizard';
+	FIcon.ButtonsCallBack := Self;
+	FIcon.Initialize();
 	end;
 end;
 
@@ -89,7 +103,7 @@ InitializeIcon();
 SGKill(FConnectionHandler);
 FConnectionHandler := TSGWorldOfWarcraftConnectionHandler.Create();
 if not FEmbedded then
-	ShowWindow();
+	ChangeWindowVisible();
 end;
 
 function TSGMaz1gWizard.Init(const _Params : TSGConcoleCallerParams = nil) : TSGBoolean;

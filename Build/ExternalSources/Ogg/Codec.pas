@@ -357,8 +357,8 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeSysUtils
+	,SaGeLists
 	;
-
 
 function GetVorbisErrorName(ErrorCode: Integer): string;
 begin

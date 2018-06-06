@@ -145,7 +145,7 @@ type
 		FKeyPressedType   : TSGCursorButtonType;
 
 		FCursorPosition       : packed array [TSGCursorPosition] of TSGPoint2int32;
-		FCursorKeyPressed     : TSGCursorButtons;
+		FCursorKeyPressed     : TSGCursorButton;
 		FCursorKeyPressedType : TSGCursorButtonType;
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
 		FCursorWheel          : TSGCursorWheel;
@@ -158,14 +158,14 @@ type
 		function KeyPressedChar():TSGChar;virtual;
 		function KeyPressedByte():TSGLongWord;virtual;
 		procedure ClearKeys();virtual;
-		function CursorKeyPressed():TSGCursorButtons;virtual;
+		function CursorKeyPressed():TSGCursorButton;virtual;
 		function CursorKeyPressedType():TSGCursorButtonType;virtual;
-		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;virtual;
+		function CursorKeysPressed(const Index : TSGCursorButton ):TSGBoolean;virtual;
 		function CursorWheel():TSGCursorWheel;virtual;
 		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;virtual;
 
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);virtual;
-		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);virtual;
+		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButton);virtual;
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
 		procedure MoveInfo(var FormerContext : TSGContext);virtual;
@@ -653,11 +653,16 @@ end;
 
 procedure TSGContext.UpdateTimer();
 var
-	DataTime : TSGDateTime;
+	DateTime : TSGDateTime;
 begin
-DataTime.Get();
-FElapsedTime := (DataTime - FElapsedDateTime).GetPastMiliSeconds();
-FElapsedDateTime := DataTime;
+if (not FElapsedDateTime.IsNull()) then
+	begin
+	DateTime.Get();
+	FElapsedTime := (DateTime - FElapsedDateTime).GetPastMiliSeconds();
+	FElapsedDateTime := DateTime;
+	end
+else
+	FElapsedTime := 0;
 end;
 
 procedure TSGContext.Run();
@@ -736,7 +741,7 @@ begin
 Result:=FKeyPressedType;
 end;
 
-procedure TSGContext.SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
+procedure TSGContext.SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButton);
 begin
 FCursorKeyPressed     := Key;
 FCursorKeyPressedType := ButtonType;
@@ -804,7 +809,7 @@ begin
 Result:=FCursorPosition[Index];
 end;
 
-function TSGContext.CursorKeyPressed():TSGCursorButtons;
+function TSGContext.CursorKeyPressed():TSGCursorButton;
 begin
 Result:=FCursorKeyPressed;
 end;
@@ -814,7 +819,7 @@ begin
 Result:=FCursorKeyPressedType;
 end;
 
-function TSGContext.CursorKeysPressed(const Index : TSGCursorButtons ):Boolean;
+function TSGContext.CursorKeysPressed(const Index : TSGCursorButton):Boolean;
 begin
 if Index = SGNullCursorButton then
 	Result:=False

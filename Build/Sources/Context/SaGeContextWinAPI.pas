@@ -17,6 +17,7 @@ uses
 	,SaGeCursor
 	,SaGeCommonStructs
 	,SaGeContextUtils
+	,SaGeWinAPIUtils
 	
 	// Windows units
 	,Windows
@@ -25,29 +26,6 @@ uses
 	,ActiveX
 	,jwauserenv
 	;
-
-const
-	SGCWAPI_ICON = 2;
-type
-	WinAPIParam =
-		{$IFDEF CPU64}
-			TSGInt64
-		{$ELSE} {$IFDEF CPU32}
-			TSGInt32
-		{$ELSE} {$IFDEF CPU16}
-			TSGInt16
-		{$ENDIF} {$ENDIF} {$ENDIF}
-		;
-type
-	WinAPIHandle =
-		{$IFDEF CPU64}
-			TSGUInt64
-		{$ELSE} {$IFDEF CPU32}
-			TSGUInt32
-		{$ELSE} {$IFDEF CPU16}
-			TSGUInt16
-		{$ENDIF} {$ENDIF} {$ENDIF}
-		;
 type
 	TSGContextWinAPI = class(TSGContext)
 			public
@@ -72,7 +50,7 @@ type
 		procedure SetCursorPosition(const VPosition : TSGPoint2int32);override;
 		function  KeysPressed(const  Index : integer ) : Boolean;override;overload;
 		// If function need puplic, becourse it calls in WinAPI procedure without whis class
-		function WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+		function WndMessagesProc(const AMessage:LongWord; const WParam, LParam: TSGWinAPIParam): TSGWinAPIParam;
 			protected
 		procedure InitFullscreen(const VFullscreen : TSGBoolean); override;
 		function  GetWindow() : TSGPointer; override;
@@ -85,54 +63,35 @@ type
 		clWindow : TSGMaxEnum;
 		FWindowClassName : TSGString;
 		procedure ThrowError(pcErrorMessage : pChar);
-		function  WindowRegister(): Boolean;
+		function  RegisterWindowClass() : TSGBoolean;
 		function  WindowCreate(): Windows.HWnd;
 		function  WindowInit(hParent : Windows.HWnd): Boolean;
 		procedure KillWindow();
 		function  CreateWindow():Boolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		class procedure GetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const  clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
-		class function CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
-		class function CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
-		class function CreateGlassyCursor() : Windows.HCURSOR;
 		procedure HandlingSizingFromRect(const PR : PRect = nil);
 			protected
 		FCursorHandle : Windows.HCURSOR;
 		FIconHandle   : Windows.HICON;
 		FGlassyCursorHandle : Windows.HCURSOR;
+		FNormalCursorHandle : Windows.HCURSOR;
 			public
 		function  GetCursorPosition(): TSGPoint2int32; override;
 		function  FileOpenDialog(const VTittle: String; const VFilter : String):String;override;
 		function  FileSaveDialog(const VTittle: String; const VFilter : String;const extension : String):String;override;
 		end;
 
-function SGWinAPIQueschionFullscreen():TSGBoolean;
-function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
-//procedure GetNativeSystemInfo(var a:SYSTEM_INFO);[stdcall];[external 'kernel32' name 'GetNativeSystemInfo'];
-
 implementation
 
 uses
 	 SaGeScreen
 	,SaGeLog
-	,SaGeWinAPIUtils
+	,SaGeWinAPIIconUtils
 	,SaGeStringUtils
 	
 	,SysUtils
 	;
-
-// А вод это жесткий костыль.
-// Дело в том, что в WinAPI класс нашего hWindow нельзя запихнуть собственную информацию,
-// например указатель на контекст, и поэтому процедура отловления сообщений системы
-// Ищет по hWindow совй контекст из всех открытых в программе контекстов (SGContexts)
-var
-	SGContexts : packed array of TSGContextWinAPI = nil;
-
-function SGWinAPIQueschionFullscreen():TSGBoolean;
-begin
-Result := SGWinAPIQueschion('Fullscreen Mode?', 'Question!');
-end;
 
 class function TSGContextWinAPI.UserProfilePath() : TSGString;
 const 
@@ -203,148 +162,6 @@ begin
 Result := True;
 end;
 
-class function TSGContextWinAPI.CreateGlassyCursor() : HCURSOR;
-const
-	SGCWAPI_Glassy_Cursor_Width = 32;
-	SGCWAPI_Glassy_Cursor_Height = 32;
-var
-	hBM : HBITMAP;
-	bm : PByte = nil;
-begin
-Result := 0;
-hBM := CreateCompatibleBitmap(GetDC(0), SGCWAPI_Glassy_Cursor_Width, SGCWAPI_Glassy_Cursor_Height);
-
-bm := GetMem(SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3);
-fillchar(bm^, SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3, 0);
-SetBitmapBits(hBM, SGCWAPI_Glassy_Cursor_Width * SGCWAPI_Glassy_Cursor_Height * 3, bm);
-FreeMem(bm);
-
-Result := CreateCursorFromBitmap(nil, hBM, RGB(0,0,0), 0, 0);
-DeleteObject(hBM);
-end;
-
-class procedure TSGContextWinAPI.GetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
-var
-	hXorMaskDC, hAndMaskDC, hMainDC, hNullDC : HDC;
-	bm : BITMAP;
-	hOldMainBitmap, hOldAndMaskBitmap, hOldXorMaskBitmap : HBITMAP;
-	x, y, alpha: TSGLongWord;
-	MainBitPixel : COLORREF;
-begin
-hNullDC				:= GetDC(0);
-hMainDC				:= CreateCompatibleDC(hNullDC);
-hAndMaskDC			:= CreateCompatibleDC(hNullDC);
-hXorMaskDC			:= CreateCompatibleDC(hNullDC);
-
-GetObject(hSourceBitmap, sizeof(BITMAP), @bm);
-
-
-hAndMaskBitmap	:= CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
-hXorMaskBitmap	:= CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
-
-hOldMainBitmap      := HBITMAP(SelectObject(hMainDC,   hSourceBitmap ));
-hOldAndMaskBitmap	:= HBITMAP(SelectObject(hAndMaskDC,hAndMaskBitmap));
-hOldXorMaskBitmap	:= HBITMAP(SelectObject(hXorMaskDC,hXorMaskBitmap));
-
-for x := 0 to bm.bmWidth - 1 do
-	begin
-	for y := 0 to bm.bmHeight - 1 do
-		begin
-		MainBitPixel := GetPixel(hMainDC, x, y);
-		if (VCursor = nil) or (VCursor.Channels = 3) then
-			if(MainBitPixel = clrTransparent) then
-				begin
-				SetPixel(hAndMaskDC,x,y,RGB(255,255,255));
-				SetPixel(hXorMaskDC,x,y,RGB(0,0,0));
-				end
-			else
-				begin
-				SetPixel(hAndMaskDC,x,y,RGB(0,0,0));
-				SetPixel(hXorMaskDC,x,y,MainBitPixel);
-				end
-		else
-			begin
-			alpha := VCursor.BitMap[(x + y * bm.bmWidth) * 4 + 3];
-			if alpha < 150 then
-				begin
-				SetPixel(hAndMaskDC,x,y,RGB(255,255,255));
-				SetPixel(hXorMaskDC,x,y,RGB(0,0,0));
-				end
-			else
-				begin
-				SetPixel(hAndMaskDC,x,y,RGB(0,0,0));
-				SetPixel(hXorMaskDC,x,y,RGB(alpha, alpha, alpha));
-				end;
-			end;
-		end;
-	end;
-
-SelectObject(hMainDC,   hOldMainBitmap);
-SelectObject(hAndMaskDC,hOldAndMaskBitmap);
-SelectObject(hXorMaskDC,hOldXorMaskBitmap);
-
-DeleteDC(hXorMaskDC);
-DeleteDC(hAndMaskDC);
-DeleteDC(hMainDC);
-
-ReleaseDC(0, hNullDC);
-end;
-
-class function TSGContextWinAPI.CreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
-var
-	hAndMask : HBITMAP = 0;
-	hXorMask : HBITMAP = 0;
-	iconinfo : _ICONINFO;
-begin
-Result := 0;
-
-if(0 = hSourceBitmap) then
-	begin
-	Exit;
-	end;
-
-GetMaskBitmaps(VCursor, hSourceBitmap, clrTransparent, hAndMask, hXorMask);
-if((0 = hAndMask) or (0 = hXorMask)) then
-	begin
-	Exit;
-	end;
-
-fillchar(iconinfo, sizeof(iconinfo), 0);
-iconinfo.fIcon		:= False;
-iconinfo.xHotspot	:= xHotspot;
-iconinfo.yHotspot	:= yHotspot;
-iconinfo.hbmMask	:= hAndMask;
-iconinfo.hbmColor	:= hXorMask;
-
-Result := CreateIconIndirect(@iconinfo);
-end;
-
-class function TSGContextWinAPI.CreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
-var
-	hBM : HBITMAP;
-	bm : PByte = nil;
-	i : TSGLongWord;
-begin
-Result := 0;
-hBM := CreateCompatibleBitmap(GetDC(0), VCursor.Width, VCursor.Height);
-if VCursor.Channels = 4 then
-	begin
-	bm := GetMem(VCursor.Width * VCursor.Height * 3);
-	for i := 0 to VCursor.Width * VCursor.Height - 1 do
-		begin
-		bm[i * 3 + 0] := VCursor.BitMap[i * 4 + 0];
-		bm[i * 3 + 1] := VCursor.BitMap[i * 4 + 1];
-		bm[i * 3 + 2] := VCursor.BitMap[i * 4 + 2];
-		end;
-	SetBitmapBits(hBM, VCursor.Width * VCursor.Height * 3, bm);
-	FreeMem(bm);
-	end
-else
-	SetBitmapBits(hBM, VCursor.Width * VCursor.Height * VCursor.Channels, VCursor.BitMap);
-Result := CreateCursorFromBitmap(VCursor,hBM, clrTransparent, VCursor.HotPixelX, VCursor.HotPixelY);
-DeleteObject(hBM);
-end;
-
 procedure TSGContextWinAPI.SetCursor(const VCursor : TSGCursor);
 var
 	NewCursor : HCURSOR;
@@ -367,14 +184,14 @@ if VCursor.StandartHandle <> SGC_NULL then
 		end
 	else
 		begin
-		NewCursor := CreateCursor(VCursor,RGB(0,0,0));
+		NewCursor := SGWinAPICreateCursor(VCursor, RGB(0,0,0));
 		if NewCursor <> SGC_NULL then
 			Windows.SetSystemCursor(NewCursor, VCursor.StandartHandle);
 		end;
 	end
 else
 	begin
-	NewCursor := CreateCursor(VCursor,RGB(0,0,0));
+	NewCursor := SGWinAPICreateCursor(VCursor, RGB(0,0,0));
 	if NewCursor <> SGC_NULL then
 		begin
 		FCursorHandle := NewCursor;
@@ -530,15 +347,12 @@ begin
 inherited;
 Windows.ShowCursor(True);
 if FShowCursor then
-	begin
-	Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
-	Windows.SetCursor(FCursorHandle);
-	end
+	FCursorHandle := FNormalCursorHandle
 else
-	begin
-	Windows.SetClassLong(hWindow, GCL_HCURSOR, FGlassyCursorHandle);
-	Windows.SetCursor(FGlassyCursorHandle);
-	end;
+	FCursorHandle := FGlassyCursorHandle;
+Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+Windows.SetClassLong(clWindow, GCL_HCURSOR, FCursorHandle);
+Windows.SetCursor(FCursorHandle);
 Windows.ShowCursor(FShowCursor);
 end;
 
@@ -580,15 +394,15 @@ FWindowClassName := '';
 hWindow  := 0;
 dcWindow := 0;
 clWindow := 0;
-FCursorHandle := LoadCursor(0, IDC_ARROW);
+FNormalCursorHandle := LoadCursor(0, IDC_ARROW);
+FCursorHandle := FNormalCursorHandle;
 FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(SGCWAPI_ICON));
-FGlassyCursorHandle := CreateGlassyCursor();
+FGlassyCursorHandle := SGWinAPICreateGlassyCursor();
 end;
 
 procedure TSGContextWinAPI.Kill();
 begin
 KillWindow();
-SetLength(SGContexts, 0);
 inherited;
 end;
 
@@ -629,15 +443,15 @@ end;
 
 procedure TSGContextWinAPI.Messages;
 var
-	msg:Windows.TMSG;
+	msg : Windows.TMSG;
 begin
-Fillchar(msg,sizeof(msg),0);
-while Windows.PeekMessage(@msg,0,0,0,0) do
+Fillchar(msg, sizeof(msg), 0);
+while Windows.PeekMessage(@msg, 0, 0, 0, 0) do
 	begin
-	Windows.GetMessage(@msg,0,0,0);
+	Windows.GetMessage(@msg, 0, 0, 0);
 	Windows.TranslateMessage(msg);
 	Windows.DispatchMessage(msg);
-	Fillchar(msg,sizeof(msg),0);
+	Fillchar(msg, sizeof(msg), 0);
 	end;
 inherited;
 end;
@@ -674,7 +488,7 @@ FClientHeight := FHeight - Shift.x - Shift.y;
 Resize();
 end;
 
-function TSGContextWinAPI.WndMessagesProc(const VWindow: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam): WinAPIParam;
+function TSGContextWinAPI.WndMessagesProc(const AMessage : TSGUInt32; const WParam, LParam: TSGWinAPIParam): TSGWinAPIParam;
 
 procedure HandlingSizingFromParam();
 begin
@@ -813,48 +627,23 @@ else
 end;
 end;
 
-function StandartWndProc(const Window: WinAPIHandle; const AMessage:LongWord; const WParam, LParam: WinAPIParam; var DoExit:Boolean): WinAPIParam;
+function ContextWindowProcedure(Window : TSGWinAPIHandle; AMessage : TSGUInt32; WParam, LParam : TSGWinAPIParam) : TSGWinAPIParam;  stdcall; export;
 var
-	SGContext:TSGContextWinAPI;
-	i:TSGLongWord;
+	Context : TSGContextWinAPI = nil;
 begin
-SGContext:=nil;
-Result:=0;
-DoExit:=False;
-if SGContexts<>nil then
-for i:=0 to High(SGContexts) do
-	if SGContexts[i].hWindow = Window then
-		begin
-		SGContext:=SGContexts[i];
-		Break;
-		end;
-if SGContext<>nil then
-	begin
-	DoExit:=True;
-	Result:=SGContext.WndMessagesProc(Window,AMessage,WParam,LParam);
-	DoExit:=False;
-	end;
-end;
-
-function MyGLWndProc(Window: WinAPIHandle; AMessage:LongWord; WParam,LParam:WinAPIParam):WinAPIParam;  stdcall; export;
-var
-	DoExit:Boolean;
-begin
-DoExit:=False;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('Enter export proc(Window='+SGStr(Window)+', Message='+SGStr(AMessage)+', wParam='+SGSTr(WParam)+', lParam='+SGStr(LParam)+')');
 	{$ENDIF}
-Result:=StandartWndProc(Window,AMessage,WParam,LParam,DoExit);
-if DoExit then
-	Exit
-else
-	Result := DefWindowProc(Window, AMessage, WParam, LParam);
+Context := TSGContextWinAPI(GetWindowLongPtr(Window, GWLP_USERDATA));
+if (Context <> nil) then
+	Result := Context.WndMessagesProc(AMessage, WParam, LParam);
+Result := DefWindowProc(Window, AMessage, WParam, LParam);
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('Exit export proc(Result='+SGStr(Result)+')');
 	{$ENDIF}
 end;
 
-function TSGContextWinAPI.WindowRegister: Boolean;
+function TSGContextWinAPI.RegisterWindowClass(): TSGBoolean;
 var
   WindowClass: Windows.WndClassEx;
 
@@ -878,31 +667,34 @@ for i:=0 to SizeOf(Si)-1 do
 end;}
 
 begin
-FWindowClassName := 'SaGe Window Class ' + SGStr(Random(100000));
-WindowClass.cbSize        := SizeOf(WNDCLASSEX);
-WindowClass.Style         := cs_hRedraw or cs_vRedraw or CS_OWNDC;
-WindowClass.lpfnWndProc   := WndProc(@MyGLWndProc);
-WindowClass.cbClsExtra    := 0;
-WindowClass.cbWndExtra    := 0;
-WindowClass.hInstance     := System.MainInstance;
-WindowClass.hIcon         := FIconHandle;
-WindowClass.hCursor       := FCursorHandle;
-WindowClass.hbrBackground := 0;
-WindowClass.lpszMenuName  := nil;
-WindowClass.lpszClassName := SGStringAsPChar(FWindowClassName);
-WindowClass.hIconSm       := WindowClass.hIcon;
-
-clWindow:=Windows.RegisterClassEx(WindowClass);
-
+if (FWindowClassName = '') then
+	FWindowClassName := 'SaGe Window Class ' + SGStr(Random(100000));
+if (clWindow = 0) then
+	begin
+	FillChar(WindowClass, SizeOf(WindowClass), 0);
+	WindowClass.cbSize        := SizeOf(Windows.WNDCLASSEX);
+	WindowClass.Style         := cs_hRedraw or cs_vRedraw or CS_OWNDC;
+	WindowClass.lpfnWndProc   := WndProc(@ContextWindowProcedure);
+	WindowClass.cbClsExtra    := 0;
+	WindowClass.cbWndExtra    := 0;
+	WindowClass.hInstance     := System.MainInstance;
+	WindowClass.hIcon         := FIconHandle;
+	WindowClass.hCursor       := FCursorHandle;
+	WindowClass.hbrBackground := 0;
+	WindowClass.lpszMenuName  := nil;
+	WindowClass.lpszClassName := SGStringAsPChar(FWindowClassName);
+	WindowClass.hIconSm       := WindowClass.hIcon;
+	
+	clWindow := Windows.RegisterClassEx(WindowClass);
+	end;
 Result := clWindow <> 0;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source(['TSGContextWinAPI__WindowRegister : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowRegisterClass : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
-function TSGContextWinAPI.WindowCreate: HWnd;
+function TSGContextWinAPI.WindowCreate(): HWnd;
 var
-  hWindow2: HWnd;
   dmScreenSettings : DEVMODE;
 begin
 {$IFDEF SGWinAPIDebug}
@@ -910,7 +702,7 @@ begin
 	{$ENDIF}
 if not FFullscreen then
 	begin
-	hWindow2 := Windows.CreateWindow(SGStringAsPChar(FWindowClassName),
+	Result := Windows.CreateWindow(SGStringAsPChar(FWindowClassName),
 			  SGStringToPChar(FTitle),
 				WS_CAPTION OR
 				WS_POPUPWINDOW OR
@@ -923,12 +715,12 @@ if not FFullscreen then
 			  FWidth,
 			  FHeight,
 			  0, 0,
-			  system.MainInstance,
+			  System.MainInstance,
 			  nil);
 	end
 else
 	begin
-	if (FWidth<>GetScreenArea().x) or (FHeight<>GetScreenArea().y) then
+	if (FWidth <> GetScreenArea().x) or (FHeight <> GetScreenArea().y) then
 		begin
 		dmScreenSettings.dmSize := sizeof(dmScreenSettings);
 		dmScreenSettings.dmPelsWidth := FWidth;
@@ -945,7 +737,7 @@ else
 		end;
 	FTop := 0;
 	FLeft := 0;
-	hWindow2 := CreateWindowEx(WS_EX_APPWINDOW,
+	Result := CreateWindowEx(WS_EX_APPWINDOW,
 		SGStringAsPChar(FWindowClassName),
 		SGStringToPChar(FTitle),
 		WS_EX_TOPMOST OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN,
@@ -954,17 +746,17 @@ else
 		FWidth,
 		FHeight,
 		0, 0,
-		system.MainInstance,
+		System.MainInstance,
 		nil );
 	ShowCursor(FShowCursor);
 	end;
-if hWindow2 <> 0 then
+if (Result <> 0) then
 	begin
-	ShowWindow(hWindow2, CmdShow);
-	UpdateWindow(hWindow2);
+	SetWindowLongPtr(Result, GWL_USERDATA, TSGMaxEnum(Self));
+	ShowWindow(Result, CmdShow);
+	UpdateWindow(Result);
 	Active:=True;
 	end;
-Result := hWindow2;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__WindowCreate : Exit (Result=',Result,')']);
 	{$ENDIF}
@@ -1047,7 +839,7 @@ begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('TSGContextWinAPI__CreateWindow : Enter');
 	{$ENDIF}
-if not WindowRegister then
+if not RegisterWindowClass() then
 		begin
 		ThrowError('Could not register the Application Window!');
 		SGLog.Source('Could not register the Application Window!');
@@ -1055,14 +847,7 @@ if not WindowRegister then
 		Exit;
 		end;
 hWindow := WindowCreate();
-
-if SGContexts=nil then
-	SetLength(SGContexts,1)
-else
-	SetLength(SGContexts,Length(SGContexts)+1);
-SGContexts[High(SGContexts)]:=Self;
-
-if longint(hWindow) = 0 then
+if hWindow = 0 then
 	begin
 	ThrowError('Could not create Application Window!');
 	SGLog.Source('Could not create Application Window!');

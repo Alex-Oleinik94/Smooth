@@ -187,7 +187,7 @@ end;
 
 procedure GLUTMouse(Button:integer; State:integer; x,y:integer);cdecl;
 var
-	ContextButton : TSGCursorButtons;
+	ContextButton : TSGCursorButton;
 	ContextButtonType : TSGCursorButtonType;
 	ContextButtonUnknown : TSGBoolean = False;
 begin

@@ -40,14 +40,14 @@ type
 		function KeyPressedType():TSGCursorButtonType;
 		function KeyPressedChar():TSGChar;
 		function KeyPressedByte():TSGLongWord;
-		function CursorKeyPressed():TSGCursorButtons;
+		function CursorKeyPressed():TSGCursorButton;
 		function CursorKeyPressedType():TSGCursorButtonType;
-		function CursorKeysPressed(const Index : TSGCursorButtons ):TSGBoolean;
+		function CursorKeysPressed(const Index : TSGCursorButton):TSGBoolean;
 		function CursorWheel():TSGCursorWheel;
 		function CursorPosition(const Index : TSGCursorPosition = SGNowCursorPosition ) : TSGPoint2int32;
 		procedure ClearKeys();
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);
-		procedure SetCursorKey(ButtonType:TSGCursorButtonType;Key:TSGCursorButtons);
+		procedure SetCursorKey(ButtonType : TSGCursorButtonType; Key : TSGCursorButton);
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);
 
 		property Left : TSGAreaInt read GetLeft write SetLeft;

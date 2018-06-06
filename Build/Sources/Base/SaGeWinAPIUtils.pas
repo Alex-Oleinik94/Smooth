@@ -16,6 +16,28 @@ uses
 	,SaGeLists
 	;
 
+const
+	SGCWAPI_ICON = 2;
+type
+	TSGWinAPIParam =
+		{$IFDEF CPU64}
+			TSGInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGInt16
+		{$ENDIF} {$ENDIF} {$ENDIF}
+		;
+type
+	TSGWinAPIHandle =
+		{$IFDEF CPU64}
+			TSGUInt64
+		{$ELSE} {$IFDEF CPU32}
+			TSGUInt32
+		{$ELSE} {$IFDEF CPU16}
+			TSGUInt16
+		{$ENDIF} {$ENDIF} {$ENDIF}
+		;
 function SGWinAPISystemVersion(): TSGString;
 function SGWinAPIRegistryRead(const VRootKey : HKEY; const VKey : TSGString; const VStringName : TSGString = '') : TSGString;
 function SGSystemKeyPressed(const Index : TSGByte) : TSGBool;

@@ -81,8 +81,8 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeSysUtils
+	,SaGeLists
 	;
-
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 // =*=*= SaGe DLL IMPLEMENTATION =*=*=*=

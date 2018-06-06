@@ -42,6 +42,7 @@ type
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetPastMiliSeconds() : TSGInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetPastMiliSecondsFrom(const DT : TSGDateTime) : TSGInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function IsNull() : TSGBoolean;
 		end;
 
 //Вычитает одну дату их другой. Из результата можно
@@ -262,6 +263,23 @@ if ((Result='') or (Seconds<>0)) and (QWr<=2) then
 		Result += ' s ';
 	QWr+=1;
 	end;
+end;
+
+function TSGDateTime.IsNull() : TSGBoolean;
+var
+	Size : TSGMaxEnum;
+	Memory : PSGByte;
+	Index : TSGMaxEnum;
+begin
+Result := True;
+Size := SizeOf(TSGDateTime);
+Memory := @Self;
+for Index := 0 to Size - 1 do
+	if Memory[Index] <> 0 then
+		begin
+		Result := False;
+		break;
+		end;
 end;
 
 procedure TSGDateTime.ImportFromSeconds(Sec : TSGInt64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

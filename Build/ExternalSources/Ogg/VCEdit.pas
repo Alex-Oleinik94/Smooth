@@ -143,6 +143,7 @@ uses
 	,SaGeDllManager
 	,SaGeStringUtils
 	,SaGeSysUtils
+	,SaGeLists
 	
 	,Classes
 	;

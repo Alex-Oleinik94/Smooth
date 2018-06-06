@@ -20,12 +20,12 @@ const
 	SG_ESC_KEY = 27;
 	SG_ESCAPE_KEY = SG_ESC_KEY;
 type
-	TSGCursorButtons = (
+	TSGCursorButton = (
 		SGNullCursorButton,
 		SGMiddleCursorButton, 
 		SGLeftCursorButton,
 		SGRightCursorButton);
-	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey);
+	TSGCursorButtonType = (SGNullKey, SGDownKey, SGUpKey, SGDoubleClick);
 	TSGCursorWheel = (SGNullCursorWheel, SGUpCursorWheel, SGDownCursorWheel);
 	TSGCursorPosition = (
 		SGDeferenseCursorPosition, // - Это разница между SGNowCursorPosition и SGLastCursorPosition
