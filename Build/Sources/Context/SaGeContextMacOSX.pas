@@ -22,7 +22,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure Initialize();override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
@@ -106,7 +106,7 @@ ReleaseWindow( wnd_Handle );
 inherited;
 end;
 
-procedure TSGContextMacOSX.Initialize();
+procedure TSGContextMacOSX.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 begin
 Active:=CreateWindow();
 if Active then

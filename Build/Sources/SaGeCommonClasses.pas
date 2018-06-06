@@ -65,7 +65,7 @@ type
 
 	ISGCustomContext = interface(ISGContextHandler)
 		['{b55c5aea-0250-4e89-8889-8f5eae820eb0}']
-		procedure Initialize();
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 		procedure Run();
 		procedure Messages();
 		procedure SwapBuffers();

@@ -36,6 +36,8 @@ type
 	TSGContextSettings = TSGSettings;
 	TSGPaintableSettings = TSGSettings;
 	TSGPaintableOption = TSGOption;
+type
+	TSGContextWindowPlacement = (SGPlacementNormal, SGPlacementMaximized, SGPlacementMinimized);
 
 function SGContextOptionWidth(const VVariable : TSGUInt32) : TSGContextOption;
 function SGContextOptionHeight(const VVariable : TSGUInt32) : TSGContextOption;

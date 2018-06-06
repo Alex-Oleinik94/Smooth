@@ -32,7 +32,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure Initialize();override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
 		function  GetWindowArea(): TSGPoint2int32;override;
@@ -66,10 +66,10 @@ type
 		FWindowClassName : TSGString;
 		procedure ThrowError(pcErrorMessage : pChar);
 		function  RegisterWindowClass() : TSGBoolean;
-		function  WindowCreate(): Windows.HWnd;
+		function  WindowCreate(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal): Windows.HWnd;
 		function  WindowInit(hParent : Windows.HWnd): Boolean;
 		procedure KillWindow();
-		function  CreateWindow():Boolean;
+		function  CreateWindow(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal) : TSGBoolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure HandlingSizingFromRect(const PR : PRect = nil);
@@ -426,7 +426,7 @@ begin
 inherited;
 end;
 
-procedure TSGContextWinAPI.Initialize();
+procedure TSGContextWinAPI.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 
 procedure HandlingReSizingFromRect();
 var
@@ -443,7 +443,7 @@ Resize();
 end;
 
 begin
-Active := CreateWindow();
+Active := CreateWindow(_WindowPlacement);
 if Active then
 	begin
 	HandlingReSizingFromRect();
@@ -703,7 +703,7 @@ Result := clWindow <> 0;
 	{$ENDIF}
 end;
 
-function TSGContextWinAPI.WindowCreate(): HWnd;
+function TSGContextWinAPI.WindowCreate(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal): HWnd;
 var
   dmScreenSettings : DEVMODE;
 begin
@@ -765,7 +765,11 @@ if (Result <> 0) then
 	SetWindowLongPtr(Result, GWL_USERDATA, TSGMaxEnum(Self));
 	if FVisible then
 		begin
-		ShowWindow(Result, SW_SHOW);
+		case _WindowPlacement of
+		SGPlacementNormal    : ShowWindow(Result, SW_SHOW);
+		SGPlacementMaximized : ShowWindow(Result, SW_SHOWMAXIMIZED);
+		SGPlacementMinimized : ShowWindow(Result, SW_SHOWMINIMIZED);
+		end;
 		SetFocus(Result);
 		SetForegroundWindow(Result);
 		end;
@@ -855,7 +859,7 @@ else if (FRender <> nil) then
 	{$ENDIF}
 end;
 
-function TSGContextWinAPI.CreateWindow():Boolean;
+function TSGContextWinAPI.CreateWindow(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal) : TSGBoolean;
 begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('TSGContextWinAPI__CreateWindow : Enter');
@@ -867,7 +871,7 @@ if not RegisterWindowClass() then
 		Result := false;
 		Exit;
 		end;
-hWindow := WindowCreate();
+hWindow := WindowCreate(_WindowPlacement);
 if hWindow = 0 then
 	begin
 	ThrowError('Could not create Application Window!');

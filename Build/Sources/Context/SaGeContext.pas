@@ -40,7 +40,7 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			public
-		procedure Initialize();virtual;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);virtual;
 		procedure Run();virtual;
 		procedure Messages();virtual;
 		procedure Paint();virtual;
@@ -642,7 +642,7 @@ if FIcon <> nil then
 FIcon := VIcon;
 end;
 
-procedure TSGContext.Initialize();
+procedure TSGContext.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 begin
 StartComputeTimer();
 FInitialized := True;

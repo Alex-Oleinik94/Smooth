@@ -28,7 +28,7 @@ type
 		FIContext : ISGContext;
 		FSettings : TSGContextSettings;
 		FPaintableSettings : TSGPaintableSettings;
-		FPlacement : TSGByte;
+		FPlacement : TSGContextWindowPlacement;
 		FPaintableClass : TSGDrawableClass;
 		FContextClass : TSGContextClass;
 		FRenderClass : TSGRenderClass;
@@ -37,7 +37,6 @@ type
 		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
 		property Context : TSGContext read FContext;
 			protected
-		procedure InitPlacement();
 		procedure CheckPlacement();
 		function SetSettings() : TSGContextSettings;
 		function TryChangeContext() : TSGBoolean;
@@ -271,12 +270,9 @@ else
 	FContext.RenderClass := FRenderClass;
 	FContext.Paintable := FPaintableClass;
 	
-	FContext.Initialize();
+	FContext.Initialize(FPlacement);
 	
 	Result := FContext.Active;
-	
-	if Result then
-		InitPlacement();
 	end;
 end;
 
@@ -389,7 +385,10 @@ if MaxExists or MinExists then
 	if MinExists xor MaxExists then
 		begin
 		FPaintableSettings -= (Iff(MinExists, 'MIN','') + Iff(MaxExists, 'MAX',''));
-		FPlacement := 2 * Byte(MaxExists) + 1 * Byte(MinExists);
+		if MaxExists then
+			FPlacement := SGPlacementMaximized
+		else if MinExists then
+			FPlacement := SGPlacementMinimized;
 		end
 	else
 		begin
@@ -400,14 +399,6 @@ if MaxExists or MinExists then
 	end;
 end;
 
-procedure TSGContextHandler.InitPlacement();
-begin
-case FPlacement of
-2 : FContext.Maximize();
-1 : FContext.Minimize();
-end;
-end;
-
 constructor TSGContextHandler.Create();
 begin
 inherited;
@@ -415,7 +406,7 @@ FContext := nil;
 FIContext := nil;
 FSettings := nil;
 FPaintableSettings := nil;
-FPlacement := 0;
+FPlacement := SGPlacementNormal;
 FPaintableClass := nil;
 FContextClass := nil;
 FRenderClass := nil;

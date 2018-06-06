@@ -31,7 +31,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure Initialize();override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
@@ -148,7 +148,7 @@ inherited;
 SGLog.Source('Leaving "TSGContextAndroid.Destroy".');
 end;
 
-procedure TSGContextAndroid.Initialize();
+procedure TSGContextAndroid.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 begin
 Active:=True;
 end;

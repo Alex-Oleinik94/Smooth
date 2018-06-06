@@ -36,7 +36,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure Initialize();override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
@@ -238,7 +238,7 @@ else if Direction = 1 then
 ContextGLUT.SetGLUTMoution(X, Y);
 end;
 
-procedure TSGContextGLUT.Initialize();
+procedure TSGContextGLUT.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 begin
 if ContextGLUT <> nil then
 	begin
