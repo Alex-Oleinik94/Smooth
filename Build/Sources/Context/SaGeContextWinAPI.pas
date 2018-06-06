@@ -365,8 +365,8 @@ if FShowCursor then
 	FCursorHandle := FNormalCursorHandle
 else
 	FCursorHandle := FGlassyCursorHandle;
-Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
-Windows.SetClassLong(clWindow, GCL_HCURSOR, FCursorHandle);
+Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
+Windows.SetClassLongPtr(clWindow, GCL_HCURSOR, FCursorHandle);
 Windows.SetCursor(FCursorHandle);
 Windows.ShowCursor(FShowCursor);
 end;
@@ -539,11 +539,6 @@ end;
 
 begin
 case AMessage of
-WM_SETCURSOR:
-	begin
-	Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
-	Windows.SetCursor(FCursorHandle);
-	end;
 WM_GETMINMAXINFO:
 	begin
 	HandlingMinMaxInfo();
