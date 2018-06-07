@@ -9,9 +9,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeLists
 	,SaGeDateTime
-	,SaGeRenderBase
 	,SaGeRender
 	,SaGeCommonClasses
 	,SaGeClasses
@@ -22,11 +20,7 @@ uses
 	,SaGeRenderInterface
 	,SaGeAudioRenderInterface
 	,SaGeCommonStructs
-	,SaGeCasesOfPrint
 	,SaGeContextUtils
-	
-	,Classes
-	,Crt
 	;
 
 type
@@ -197,6 +191,7 @@ type
 		procedure DestroyScreen(); virtual;
 			public
 		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
+		property PaintableExemplar : TSGDrawable read FPaintable;
 		property Paintable : TSGDrawableClass write FPaintableClass;
 		property RenderClass : TSGPointer write SetRenderClass;
 		property PaintableSettings : TSGPaintableSettings write FPaintableSettings;
@@ -223,8 +218,10 @@ uses
 	 SysUtils
 	
 	,SaGeLog
+	,SaGeLists
 	,SaGeStringUtils
 	,SaGeBaseUtils
+	,SaGeRenderBase
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinAPI
 		,SaGeNvidiaOptimusEnablement

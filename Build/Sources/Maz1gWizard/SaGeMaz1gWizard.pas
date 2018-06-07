@@ -9,7 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeConsoleCaller
 	,SaGeWorldOfWarcraftConnectionHandler
-	,SaGeMaz1gWizardWindow
+	,SaGeMaz1gWizardPaintable
 	,SaGeContextHandler
 	,SaGeSystemTrayIcon
 	,SaGeContextUtils
@@ -30,6 +30,8 @@ type
 		procedure InitWindow();
 		procedure ChangeWindowVisible();
 		procedure InitializeIcon();
+		function PaintableExemplar() : TSGMaz1gWizardPaintable;
+		procedure SetPaintableSettings();
 			protected
 		FHalt : TSGBoolean;
 		FEmbedded : TSGBoolean;
@@ -53,6 +55,25 @@ uses
 	,Crt
 	;
 
+procedure TSGMaz1gWizard.SetPaintableSettings();
+var
+	Paintable : TSGMaz1gWizardPaintable;
+begin
+Paintable := PaintableExemplar();
+if (Paintable <> nil) then
+	begin
+	if (Paintable.ConnectionHandler = nil) then
+		Paintable.ConnectionHandler := FConnectionHandler;
+	end;
+end;
+
+function TSGMaz1gWizard.PaintableExemplar() : TSGMaz1gWizardPaintable;
+begin
+Result := nil;
+if (FWindow <> nil) then
+	Result := FWindow.PaintableExemplar as TSGMaz1gWizardPaintable;
+end;
+
 procedure TSGMaz1gWizard.IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
 begin
 if (ButtonType = SGUpKey) then
@@ -61,6 +82,7 @@ end;
 
 procedure TSGMaz1gWizard.Iteration();
 begin
+SetPaintableSettings();
 if (FIcon <> nil) then
 	FIcon.Messages();
 if KeyPressed and (ReadKey = #27) then
@@ -69,10 +91,12 @@ end;
 
 procedure TSGMaz1gWizard.InitWindow();
 begin
-SGKill(FWindow);
-FWindow := 	TSGContextHandler.Create();
-FWindow.RegisterCompatibleClasses(TSGMaz1gWizardWindow);
-FWindow.RegisterSettings(SGContextOptionMax());
+if (FWindow = nil) then
+	begin
+	FWindow := TSGContextHandler.Create();
+	FWindow.RegisterCompatibleClasses(TSGMaz1gWizardPaintable);
+	FWindow.RegisterSettings(SGContextOptionMax());
+	end;
 FWindow.RunAnotherThread();
 end;
 

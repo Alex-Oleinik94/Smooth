@@ -33,14 +33,16 @@ type
 		FContextClass : TSGContextClass;
 		FRenderClass : TSGRenderClass;
 		FThread : TSGThread;
-			public
-		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
-		property Context : TSGContext read FContext;
 			protected
 		procedure CheckPlacement();
 		function SetSettings() : TSGContextSettings;
 		function TryChangeContext() : TSGBoolean;
 		procedure PrintSettings(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
+		function GetPaintableExemplar() : TSGDrawable;
+			public
+		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
+		property Context : TSGContext read FContext;
+		property PaintableExemplar : TSGDrawable read GetPaintableExemplar;
 			public
 		procedure RegisterSettings(const _Settings : TSGContextSettings);
 		procedure RegisterClasses(const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _PaintableClass : TSGDrawableClass);
@@ -105,6 +107,13 @@ end;
 /////////////////////
 // Context Handler //
 /////////////////////
+
+function TSGContextHandler.GetPaintableExemplar() : TSGDrawable;
+begin
+Result := nil;
+if (FContext <> nil) then
+	Result := FContext.PaintableExemplar;
+end;
 
 procedure TSGContextHandler_ThreadProcedure_Run(ContextHandler : TSGContextHandler);
 begin

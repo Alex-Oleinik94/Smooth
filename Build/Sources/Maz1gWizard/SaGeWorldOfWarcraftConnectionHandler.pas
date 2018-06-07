@@ -9,6 +9,7 @@ uses
 	,SaGeClasses
 	,SaGeInternetConnection
 	,SaGeInternetConnections
+	,SaGeWorldOfWarcraftLogonStructs
 	
 	,Classes
 	;
@@ -29,7 +30,9 @@ implementation
 
 function TSGWorldOfWarcraftConnectionHandler.HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream) : TSGBoolean;
 begin
-
+Result := False;
+if SGIsAuthenticationLogonChallenge(Data) then
+	Writeln('123123123sadsadas');
 end;
 
 constructor TSGWorldOfWarcraftConnectionHandler.Create();
