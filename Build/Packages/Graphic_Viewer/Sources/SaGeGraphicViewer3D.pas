@@ -1,5 +1,17 @@
+{$INCLUDE SaGe.inc}
 
-{$IFDEF SGREADINTERFACE}
+unit SaGeGraphicViewer3D;
+
+interface
+
+uses 
+	 SaGeBase
+	,SaGeCommonClasses
+	,SaGeFractals
+	,SaGeMath
+	,SaGeRenderBase
+	;
+
 type
 	TSGGraphViewer3D=class(TSG3DFractal)
 			public
@@ -12,10 +24,14 @@ type
 		FExpression:TSGExpression;
 		procedure Calculate();override;
 		end;
-{$ENDIF}
 
+implementation
 
-{$IFDEF SGREADIMPLEMENTATION}
+uses
+	 SaGeStringUtils
+	,SaGeVertexObject
+	;
+
 procedure TSGGraphViewer3D.Paint();
 begin
 inherited;
@@ -70,6 +86,4 @@ begin
 Result:='Graph Viewer 3D';
 end;
 
-{$ENDIF}
-
-
+end.

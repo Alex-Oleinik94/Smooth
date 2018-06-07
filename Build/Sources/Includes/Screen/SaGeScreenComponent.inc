@@ -216,7 +216,6 @@ type
 		function AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
@@ -373,14 +372,6 @@ if FDrawClass <> nil then
 	FDrawClass.Paint();
 for Component in Self do
 	Component.DrawDrawClasses();
-end;
-
-function TSGComponent.AsEdit:TSGEdit;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGEdit then
-	Result:=TSGEdit(Pointer(Self))
-else
-	Result:=nil;
 end;
 
 function TSGComponent.NotVisible:boolean;

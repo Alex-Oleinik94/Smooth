@@ -28,7 +28,6 @@ uses
 type
 	TSGForm             = class;
 	TSGButton           = class;
-	TSGEdit             = class;
 	TSGProgressBar      = class;
 	TSGPicture          = class;
 	TSGButtonMenu       = class;

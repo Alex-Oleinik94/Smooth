@@ -118,44 +118,44 @@ type
 		MandelbrodInitialized:Boolean;
 		
 		VideoPanel : TSGScreenPanel;
-		Changet:boolean;
+		Changet : TSGBoolean;
 		
 		FStartPanel : TSGScreenPanel;
-		VtxForZN:TSGVertex2f;
+		VtxForZN : TSGVertex2f;
 		
-		Procent:real;
-		iiiC:LongWord;
-		ComplexNumber:TSGComplexNumber;
+		Procent : TSGFloat64;
+		iiiC : TSGUInt32;
+		ComplexNumber : TSGComplexNumber;
 		FArProgressBar:packed array of
 			TSGProgressBar;
 		
 		//Time
-		FDateTime:TSGDateTime;
-		FBeginCalc:TSGDateTime;
+		FDateTime : TSGDateTime;
+		FBeginCalc : TSGDateTime;
 		
 		//Bezier Curve
-		FEnablePictureStripPanel:Boolean;
-		FBezierCurve:TSGBezierCurve;
+		FEnablePictureStripPanel : TSGBoolean;
+		FBezierCurve : TSGBezierCurve;
 		
-		FButtonEnableCurve:TSGButton;
+		FButtonEnableCurve : TSGButton;
 		FBezierCurvePanel : TSGScreenPanel;
-		FBezierCurveEditKadr:TSGEdit;
+		FBezierCurveEditKadr : TSGScreenEdit;
 		FBezierCurveLabelPoints : TSGScreenLabel;
-		FBezierCurveGoButton:TSGButton;
+		FBezierCurveGoButton : TSGButton;
 		
-		FBezierCurveKadrProgressBar:TSGProgressBar;
+		FBezierCurveKadrProgressBar : TSGProgressBar;
 		
-		FEnablePictureStripAddingPoints:Boolean;
-		FKomponentsNowOffOn:Boolean;
-		FBezierNowSelectPoint:TSGMaxEnum;
-		FNowRenderitsiaVideo:Boolean;
+		FEnablePictureStripAddingPoints : TSGBoolean;
+		FKomponentsNowOffOn : TSGBoolean;
+		FBezierNowSelectPoint : TSGMaxEnum;
+		FNowRenderitsiaVideo : TSGBoolean;
 		
-		FVideoBuffer:String;
+		FVideoBuffer : TSGString;
 		
-		FNowKadr:QWord;
-		FAllKadrs:QWOrd;
+		FNowKadr : TSGUInt64;
+		FAllKadrs : TSGUInt64;
 		
-		FCurveArPoints:packed array of TSGByte;
+		FCurveArPoints : packed array of TSGUInt8;
 		FCurveSelectPoint:Int64;
 		
 		FCurvePointPanel : TSGScreenPanel;
@@ -189,6 +189,7 @@ uses
 	,SaGeSysUtils
 	,SaGeBaseUtils
 	,SaGeContextUtils
+	,SaGeScreen_Edit
 	
 	,Crt
 	;
@@ -421,17 +422,17 @@ with TSGFractalMandelbrodRelease(aaa.FUserPointer1) do
 	end;
 end;
 
-function MyMandNumberFucntion(const Self:TSGEdit):boolean;
+function MyMandNumberFucntion(Self : TSGScreenEdit) : TSGBoolean;
 begin
-Result:=TSGEditTextTypeFunctionNumber(Self);
+Result := TSGEditTextTypeFunctionNumber(Self);
 TSGComponent(Self.FUserPointer2).Active:=Result;
 end;
 
-function MyMandNumberFucntionVideo(const Self:TSGEdit):boolean;
+function MyMandNumberFucntionVideo(Self : TSGScreenEdit) : TSGBoolean;
 begin
-Result:=TSGEditTextTypeFunctionNumber(Self);
+Result := TSGEditTextTypeFunctionNumber(Self);
 with TSGFractalMandelbrodRelease(Self.FUserPointer1) do
-TSGComponent(Self.FUserPointer2).Active:=Result and (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>=2);
+TSGComponent(Self.FUserPointer2).Active := Result and (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>=2);
 end;
 
 procedure bcpOnOffVideo(Button:TSGButton);
@@ -584,14 +585,8 @@ Screen.LastChild.LastChild.BoundsToNeedBounds;
 Screen.LastChild.LastChild.AsButton.OnChange:=TSGComponentProcedure(@SaveImage);
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 
-Screen.LastChild.CreateChild(TSGEdit.Create);
-Screen.LastChild.LastChild.SetBounds(5,5,120,20);
-Screen.LastChild.LastChild.BoundsToNeedBounds;
-Screen.LastChild.LastChild.FUserPointer1:=Self;
+SGCreateEdit(Screen.LastChild, '4096', TSGScreenEditTextTypeFunction(@MyMandNumberFucntion), 5,5,120,20, [], False, True, Self);
 Screen.LastChild.LastChild.FUserPointer2:=Screen.LastChild.Children[Screen.LastChild.ChildCount()-1];
-(Screen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntion);
-(Screen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
-Screen.LastChild.LastChild.Caption:='4096';
 
 Screen.CreateChild(TSGComboBox.Create);
 Screen.LastChild.SetBounds(Render.Width-50-125+45,5{+Context.TopShift},120,20);
@@ -705,16 +700,7 @@ FBezierCurvePanel.LastChild.BoundsToNeedBounds();
 
 FBezierCurveLabelPoints := SGCreateLabel(FBezierCurvePanel, 'Количество точек: 0', 3,47,137,20, False, True, Self);
 SGCreateLabel(FBezierCurvePanel, 'Количество кадров:', False, 3,25,275,20, False, True, Self);
-
-FBezierCurveEditKadr:=TSGEdit.Create();
-Screen.LastChild.CreateChild(FBezierCurveEditKadr);
-Screen.LastChild.LastChild.SetBounds(123,27,137,20);
-Screen.LastChild.LastChild.BoundsToNeedBounds;
-Screen.LastChild.LastChild.FUserPointer1:=Self;
-(Screen.LastChild.LastChild as TSGEdit).TextTypeFunction:=TSGEditTextTypeFunction(@MyMandNumberFucntionVideo);
-(Screen.LastChild.LastChild as TSGEdit).TextType:=SGEditTypeUser;
-Screen.LastChild.LastChild.Caption:='200';
-
+FBezierCurveEditKadr := SGCreateEdit(Screen.LastChild, '200', TSGScreenEditTextTypeFunction(@MyMandNumberFucntionVideo), 123,27,137,20, [], False, True, Self);
 SGCreateLabel(FBezierCurvePanel, 'Примерно займет времени: дохрена!', 3,70,275,20, False, True, Self);
 
 FBezierCurveGoButton:=TSGButton.Create();

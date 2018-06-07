@@ -192,7 +192,8 @@ if VCursor.StandartHandle <> SGC_NULL then
 			FCursorHandle := NewCursor;
 			if Active then
 				begin
-				Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+				Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
+				Windows.SetClassLongPtr(clWindow, GCL_HCURSOR, FCursorHandle);
 				Windows.SetCursor(FCursorHandle);
 				end;
 			end;
@@ -213,7 +214,7 @@ else
 		inherited;
 		if Active then
 			begin
-			Windows.SetClassLong(hWindow, GCL_HCURSOR, FCursorHandle);
+			Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
 			Windows.SetCursor(FCursorHandle);
 			end;
 		end;

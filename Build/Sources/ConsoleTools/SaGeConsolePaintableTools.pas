@@ -78,7 +78,7 @@ with TSGDrawClasses.Create(Context) do
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
 	Add(TSGModelRedactor);
-	Add(TSGGameTron);
+	//Add(TSGGameTron);
 	//Add(TSGClientWeb);
 
 	Initialize();

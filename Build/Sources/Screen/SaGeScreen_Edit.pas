@@ -1,17 +1,29 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Edit;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	;
+
 type
-	TSGEditTextTypeFunction = function (const s:TSGEdit):boolean;
+	TSGEdit = class;
+	TSGEditTextTypeFunction = function (const s:TSGEdit) : TSGBoolean;
 const
 	SGEditTypeText    = 0;
-	SGEditTypeSingle  = 1;
+	SGEditTypeFloat   = 1;
 	SGEditTypeNumber  = 2;
 	SGEditTypeUser    = 3;
 	SGEditTypeInteger = 4;
 	SGEditTypePath    = 5;
 
-function TSGEditTextTypeFunctionNumber(const s:TSGEdit):boolean;
-function TSGEditTextTypeFunctionInteger(const s:TSGEdit):boolean;
-function TSGEditTextTypeFunctionWay(const s:TSGEdit):boolean;
+function TSGEditTextTypeFunctionNumber(const s:TSGEdit) : TSGBoolean;
+function TSGEditTextTypeFunctionInteger(const s:TSGEdit) : TSGBoolean;
+function TSGEditTextTypeFunctionWay(const s:TSGEdit) : TSGBoolean;
 type
 	TSGEdit = class(TSGOverComponent, ISGEdit)
 			public
@@ -54,9 +66,18 @@ type
 		property TextTypeFunction : TSGEditTextTypeFunction read FTextTypeFunction   write FTextTypeFunction;
 		property CursorPosition   : TSGInt32                read GetCursorPosition;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	,SaGeContextUtils
+	,SaGeCursor
+	,SaGeStringUtils
+	,SaGeEncodingUtils
+	,SaGeResourceManager
+	;
+
 class function TSGEdit.ClassName() : TSGString; 
 begin
 Result := 'TSGEdit';
@@ -166,7 +187,7 @@ FTextType:=NewTextType;
 case FTextType of
 SGEditTypePath:
 	FTextTypeFunction:=TSGEditTextTypeFunction(@TSGEditTextTypeFunctionWay);
-SGEditTypeSingle:
+SGEditTypeFloat:
 	begin
 	
 	end;
@@ -416,4 +437,5 @@ destructor TSGEdit.Destroy;
 begin
 inherited;
 end;
-{$ENDIF}
+
+end.

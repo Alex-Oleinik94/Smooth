@@ -14,6 +14,7 @@ uses
 	// Screen components
 	,SaGeScreen_Panel
 	,SaGeScreen_Label
+	,SaGeScreen_Edit
 	;
 
 // Base const & types
@@ -21,8 +22,10 @@ const
 	SGDefaultAnchors = [];
 // Edit const & types
 const
-	SGScreenEditTypeNumber = SGEditTypeNumber;
+	SGScreenEditTypeNumber  = SGEditTypeNumber;
 	SGScreenEditTypeInteger = SGEditTypeInteger;
+	SGScreenEditTypePath    = SGEditTypePath;
+	SGScreenEditTypeFloat   = SGEditTypeFloat;
 type
 	TSGScreenEditTextTypeFunction = TSGEditTextTypeFunction;
 	TSGScreenEditTextTypeFunc = TSGScreenEditTextTypeFunction;
@@ -37,6 +40,7 @@ type
 function SGCreateEdit(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 
@@ -67,6 +71,13 @@ implementation
 //########
 //# Edit #
 //########
+
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+begin
+Result := SGCreateEdit(Parent, EditText, TextTypeFunc, X,Y,W,H, SGDefaultAnchors, IsVisible, BTNB, InterfaceData);
+if (Font <> nil) then
+	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
+end;
 
 function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
@@ -144,14 +155,14 @@ end;
 function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
 Result := SGCreatePanel(Parent, W, H, IsVisible, BTNB, InterfaceData);
-if Font <> nil then
+if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
 function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
 Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, BTNB, InterfaceData);
-if Font <> nil then
+if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
@@ -198,14 +209,14 @@ end;
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
 Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
-if Font <> nil then
+if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
 Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
-if Skin <> nil then
+if (Skin <> nil) then
 	Result.Skin := Skin;
 end;
 

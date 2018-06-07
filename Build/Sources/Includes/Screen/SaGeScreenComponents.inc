@@ -3,7 +3,6 @@
 
 {$INCLUDE SaGeScreenComponent.inc}
 {$INCLUDE SaGeScreenCommonComponents.inc}
-{$INCLUDE SaGeScreenEdit.inc}
 {$INCLUDE SaGeScreenButton.inc}
 {$INCLUDE SaGeScreenPicture.inc}
 {$INCLUDE SaGeScreenProgressBar.inc}

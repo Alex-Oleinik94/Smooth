@@ -127,7 +127,7 @@ type
 		FSourseChangeFlag2   : TSGLongWord;                 //Plane(0,1,2)
 		
 		//New Panel
-		FEdgeEdit               : TSGEdit;
+		FEdgeEdit               : TSGScreenEdit;
 		FNumberLabel            : TSGScreenLabel;
 		FStartSceneButton,
 		FBoundsTypeButton,
@@ -223,6 +223,7 @@ uses
 	,SaGeCommon
 	,SaGeMeshSg3dm
 	,SaGeContextUtils
+	,SaGeScreen_Edit
 	;
 
 //Algorithm
@@ -1864,8 +1865,8 @@ a.Parent.Children[7].Active:=not Boolean(c);
 a.Parent.Children[8].Active:=not Boolean(c);
 a.Parent.Children[8].Caption := '';
 a.Parent.Children[7].Caption := '';
-(a.Parent.Children[7] as TSGEdit).TextComplite := False;
-(a.Parent.Children[8] as TSGEdit).TextComplite := False;
+(a.Parent.Children[7] as TSGScreenEdit).TextComplite := False;
+(a.Parent.Children[8] as TSGScreenEdit).TextComplite := False;
 end; end;
 
 procedure mmmFAddAddNewGazButtonProcedure(Button:TSGButton);
@@ -2031,15 +2032,8 @@ if FAddNewGazPanel = nil then
 	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewGazPanel.LastChild as TSGComboBox).CallBackProcedure := TSGComboBoxProcedure(@mmmGas123Proc);
 	
-	FAddNewGazPanel.CreateChild(TSGEdit.Create());//7
-	FAddNewGazPanel.LastChild.SetBounds(3,69,(pw div 2) - 10,18);
-	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	(FAddNewGazPanel.LastChild as TSGEdit).TextType := SGEditTypeNumber;
-	
-	FAddNewGazPanel.CreateChild(TSGEdit.Create());//8
-	FAddNewGazPanel.LastChild.SetBounds(3+(pw div 2)+3,69,(pw div 2) - 10,18);
-	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	(FAddNewGazPanel.LastChild as TSGEdit).TextType := SGEditTypeNumber;
+	SGCreateEdit(FAddNewGazPanel, '', SGScreenEditTypeNumber, 3,69,(pw div 2) - 10,18, [], False, True);//7
+	SGCreateEdit(FAddNewGazPanel, '', SGScreenEditTypeNumber, 3+(pw div 2)+3,69,(pw div 2) - 10,18, [], False, True);//8
 	
 	FAddNewGazPanel.CreateChild(TSGButton.Create());//9
 	FAddNewGazPanel.LastChild.SetBounds(3,90,pw - 10,18);
@@ -2113,7 +2107,7 @@ if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 	(FAddNewSoursePanel.Children[5]).Active := False;
 	(FAddNewSoursePanel.Children[7]).Active := False;
 	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.Children[4] as TSGEdit).Caption := '';
+	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).Caption := '';
 	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 		(FAddNewSoursePanel.Children[2]).Active := False;
 	end
@@ -2127,8 +2121,8 @@ else
 	(FAddNewSoursePanel.Children[2]).Active := True;
 	s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
 	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := FCube.FSourses[s].FGazTypeIndex;
-	(FAddNewSoursePanel.Children[4] as TSGEdit).Caption := SGStr(FCube.FSourses[s].FRadius);
-	(FAddNewSoursePanel.Children[4] as TSGEdit).TextComplite := True;
+	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).Caption := SGStr(FCube.FSourses[s].FRadius);
+	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).TextComplite := True;
 	end;
 end;
 
@@ -2235,11 +2229,7 @@ if FAddNewSoursePanel = nil then
 	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
 	(FAddNewSoursePanel.LastChild as TSGComboBox).CallBackProcedure :=TSGComboBoxProcedure(@mmmSourseChageGasProc);
 	
-	FAddNewSoursePanel.CreateChild(TSGEdit.Create());//4
-	FAddNewSoursePanel.LastChild.SetBounds(3+(pw div 2)+3,69-21,(pw div 2) - 10,18);
-	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
-	(FAddNewSoursePanel.LastChild as TSGEdit).TextType := SGEditTypeNumber;
-	
+	SGCreateEdit(FAddNewSoursePanel, '', SGScreenEditTypeNumber, 3+(pw div 2)+3,69-21,(pw div 2) - 10,18, [], False, True);//4
 	SGCreateLabel(FAddNewSoursePanel, 'Радиус:', 3,69-21,(pw div 2) - 10,18, False, True);//5
 	
 	FAddNewSoursePanel.CreateChild(TSGButton.Create());//6
@@ -3176,7 +3166,7 @@ begin
 	{$ENDIF}
 end;
 
-function mmmFEdgeEditTextTypeFunction(const Self:TSGEdit):TSGBoolean;
+function mmmFEdgeEditTextTypeFunction(const Self : TSGScreenEdit) : TSGBoolean;
 var
 	i : TSGQuadWord;
 begin
@@ -3371,17 +3361,7 @@ FNewScenePanel.LastChild.Caption:='Старт';
 FNewScenePanel.LastChild.UserPointer:=Self;
 FStartSceneButton.OnChange:=TSGComponentProcedure(@mmmFStartSceneButtonProcedure);
 
-FEdgeEdit:=TSGEdit.Create();
-FNewScenePanel.CreateChild(FEdgeEdit);
-FNewScenePanel.LastChild.SetBounds(118,19,50,20);
-FNewScenePanel.LastChild.BoundsToNeedBounds();
-FNewScenePanel.LastChild.Visible:=True;
-FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-FNewScenePanel.LastChild.Caption:='75';
-FNewScenePanel.LastChild.UserPointer:=Self;
-FEdgeEdit.TextTypeFunction:=TSGEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction);
-FEdgeEdit.TextType:=SGEditTypeUser;
-mmmFEdgeEditTextTypeFunction(FEdgeEdit);
+FEdgeEdit := SGCreateEdit(FNewScenePanel, '75', TSGScreenEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction), 118,19,50,20, FTahomaFont, True, True, Self);
 
 FEnableLoadButton:=TSGButton.Create();
 FNewScenePanel.CreateChild(FEnableLoadButton);

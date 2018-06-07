@@ -51,6 +51,7 @@ uses
 	,SaGeStringUtils
 	,SaGeMeshLoader
 	,SaGeContextUtils
+	,SaGeScreenHelper
 	;
 
 procedure mmmButtonFormEsc(Button:TSGButton);
@@ -66,11 +67,11 @@ procedure mmmButtonFormGo(Button:TSGButton);
 var
 	Suc : TSGBoolean = False;
 begin
-if not TSGEdit(Button.FUserPointer2).TextComplite then
+if not TSGScreenEdit(Button.FUserPointer2).TextComplite then
 	Exit;
 with TSGModelRedactor(Button.FUserPointer1) do
 	begin
-	Suc := LoadFromFile(TSGEdit(Button.FUserPointer2).Caption);
+	Suc := LoadFromFile(TSGScreenEdit(Button.FUserPointer2).Caption);
 	
 	if Suc then
 		begin
@@ -139,7 +140,7 @@ procedure TSGModelRedactor.StartLoadForm();
 var
 	Form : TSGForm;
 	EscButton , GoButton : TSGButton;
-	Edit : TSGEdit;
+	Edit : TSGScreenEdit;
 begin
 Form := TSGForm.Create();
 Screen.CreateChild(Form);
@@ -147,15 +148,9 @@ Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,10
 Form.Caption := 'Загрузка обьекта';
 Form.FUserPointer1:=Self;
 
-Edit := TSGEdit.Create();
-Form.CreateChild(Edit);
-Form.LastChild.SetBounds(5,5,575,20);
-Form.LastChild.BoundsToNeedBounds();
-Form.LastChild.FUserPointer1:=Self;
-Form.LastChild.FUserPointer2:=Edit;
-(Form.LastChild as TSGEdit).TextType:=SGEditTypePath;
-Form.LastChild.Caption:='./../data\tron/motoBike.3ds';//SGModelsDirectory+Slash;
-(Form.LastChild as TSGEdit).TextComplite:=TSGEditTextTypeFunctionWay(Form.LastChild as TSGEdit);
+Edit := SGCreateEdit(Form, './../data\tron/motoBike.3ds' {SGModelsDirectory+Slash}, SGScreenEditTypePath,
+	5,5,575,20, [], False, True, Self);
+Edit.FUserPointer2:=Edit;
 
 EscButton:=TSGButton.Create();
 Form.CreateChild(EscButton);
