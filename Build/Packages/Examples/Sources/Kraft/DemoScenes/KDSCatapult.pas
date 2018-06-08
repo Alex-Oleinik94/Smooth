@@ -1,10 +1,10 @@
-unit UnitDemoSceneCatapult;
+unit KDSCatapult;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneCatapult=class(TDemoScene)
       public

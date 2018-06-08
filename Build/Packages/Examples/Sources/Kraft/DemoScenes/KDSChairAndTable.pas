@@ -1,10 +1,10 @@
-unit UnitDemoSceneChairAndTable;
+unit KDSChairAndTable;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneChairAndTable=class(TDemoScene)
       public

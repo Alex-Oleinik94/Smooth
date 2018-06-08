@@ -1,10 +1,10 @@
-unit UnitDemoSceneDomino;
+unit KDSDomino;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneDomino=class(TDemoScene)
       public

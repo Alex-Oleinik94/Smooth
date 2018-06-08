@@ -1,4 +1,4 @@
-unit UnitDemoSceneSandBox;
+unit KDSSandBox;
 
 {$MODE Delphi}
 
@@ -6,7 +6,7 @@ unit UnitDemoSceneSandBox;
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneSandBox=class(TDemoScene)
       public
@@ -47,7 +47,21 @@ type TDemoSceneSandBox=class(TDemoScene)
 
 implementation
 
-uses ExKraft_sandboxfile;
+uses
+	 Classes, SaGeFileUtils;
+
+procedure LoadSandBox(const Mesh : TKraftMesh);
+var
+	Stream : TFileStream = nil;
+	Memory : PByte;
+begin
+Stream := TFileStream.Create(SGExamplesDirectory + DirectorySeparator + 'Kraft' + DirectorySeparator + 'SandBox.bin', fmOpenRead);
+Memory := GetMem(Stream.Size);
+Stream.Read(Memory^, Stream.Size);
+Mesh.Load(Memory, Stream.Size);
+FreeMem(Memory);
+Stream.Destroy();
+end;
 
 const ConvexHullPoints:array[0..5] of TKraftVector3=((x:-2.0;y:1.0;z:1.0),
                                                 (x:2.0;y:0.0;z:0.0),
@@ -100,7 +114,7 @@ begin
  RigidBodyMesh.SetRigidBodyType(krbtSTATIC);
  Mesh:=TKraftMesh.Create(KraftPhysics);
  MeshGarbageCollector.Add(Mesh);
- Mesh.Load(@sandboxData,sandboxSize);
+ LoadSandBox(Mesh);
  Mesh.Scale(0.1);
  Mesh.Finish;
  ShapeMesh:=TKraftShapeMesh.Create(KraftPhysics,RigidBodyMesh,Mesh);

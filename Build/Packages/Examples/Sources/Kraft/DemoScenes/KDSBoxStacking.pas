@@ -1,10 +1,10 @@
-unit UnitDemoSceneBoxStacking;
+unit KDSBoxStacking;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneBoxStacking=class(TDemoScene)
       public

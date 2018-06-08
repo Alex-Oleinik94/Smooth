@@ -23,25 +23,25 @@ uses
 	,SaGeScreen
 	
 	,Classes
-	
 	,Kraft
-	,UnitDemoScene
-	,UnitDemoSceneBoxOnPlane
-	,UnitDemoSceneBoxPyramidStacking
-	,UnitDemoSceneBoxStacking
-	,UnitDemoSceneBrickWall
-	,UnitDemoSceneBridge
-	,UnitDemoSceneCar
-	,UnitDemoSceneCarousel
-	,UnitDemoSceneCatapult
-	,UnitDemoSceneChain
-	,UnitDemoSceneChairAndTable
-	,UnitDemoSceneCombinedShapes
-	,UnitDemoSceneConvexHull
-	,UnitDemoSceneDomino
-	,UnitDemoSceneRoundabout
-	,UnitDemoSceneSandBox
-	,UnitDemoSceneStrainedChain
+	,KraftDemoScene
+	// Demo scenes
+	,KDSBoxOnPlane
+	,KDSBoxPyramidStacking
+	,KDSBoxStacking
+	,KDSBrickWall
+	,KDSBridge
+	,KDSCar
+	,KDSCarousel
+	,KDSCatapult
+	,KDSChain
+	,KDSChairAndTable
+	,KDSCombinedShapes
+	,KDSConvexHull
+	,KDSDomino
+	,KDSRoundabout
+	,KDSSandBox
+	,KDSStrainedChain
 	;
 
 type

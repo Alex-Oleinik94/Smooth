@@ -1,10 +1,10 @@
-unit UnitDemoSceneCombinedShapes;
+unit KDSCombinedShapes;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneCombinedShapes=class(TDemoScene)
       public

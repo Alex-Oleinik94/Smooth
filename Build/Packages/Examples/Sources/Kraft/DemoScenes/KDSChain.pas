@@ -1,10 +1,10 @@
-unit UnitDemoSceneChain;
+unit KDSChain;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneChain=class(TDemoScene)
       public

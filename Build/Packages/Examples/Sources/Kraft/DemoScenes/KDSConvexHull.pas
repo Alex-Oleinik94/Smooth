@@ -1,10 +1,10 @@
-unit UnitDemoSceneConvexHull;
+unit KDSConvexHull;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneConvexHull=class(TDemoScene)
       public

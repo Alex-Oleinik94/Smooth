@@ -1,10 +1,10 @@
-unit UnitDemoSceneRoundabout;
+unit KDSRoundabout;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneRoundabout=class(TDemoScene)
       public

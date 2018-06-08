@@ -1,10 +1,10 @@
-unit UnitDemoSceneBridge;
+unit KDSBridge;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft, KraftDemoScene;
 
 type TDemoSceneBridge=class(TDemoScene)
       public

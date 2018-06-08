@@ -1,10 +1,10 @@
-unit UnitDemoSceneBoxOnPlane;
+unit KDSBoxOnPlane;
 
 {$MODE Delphi}
 
 interface
 
-uses Kraft,UnitDemoScene;
+uses Kraft,KraftDemoScene;
 
 type TDemoSceneBoxOnPlane=class(TDemoScene)
       public

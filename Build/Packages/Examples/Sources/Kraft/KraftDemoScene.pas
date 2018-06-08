@@ -1,4 +1,4 @@
-unit UnitDemoScene;
+unit KraftDemoScene;
 
 {$MODE Delphi}
 

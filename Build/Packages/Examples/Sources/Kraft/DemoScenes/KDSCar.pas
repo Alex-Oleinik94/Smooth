@@ -1,10 +1,10 @@
-unit UnitDemoSceneCar;
+unit KDSCar;
 
 {$MODE Delphi}
 
 interface
 
-uses Math,Kraft,UnitDemoScene;
+uses Math,Kraft,KraftDemoScene;
 
 type TDemoSceneCar=class(TDemoScene)
       public
