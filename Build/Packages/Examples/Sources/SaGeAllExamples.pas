@@ -29,7 +29,7 @@ uses
 	,Ex14
 	,Ex15
 	,Ex16
-	//,ExKraft
+	,ExKraft
 	
 	// Console examples
 	{$IFNDEF MOBILE}
@@ -80,7 +80,7 @@ FDrawClasses.Add(TSGExample13);
 FDrawClasses.Add(TSGExample14);
 FDrawClasses.Add(TSGExample15);
 FDrawClasses.Add(TSGExample16);
-//FDrawClasses.Add(TSGKraftExamples);
+FDrawClasses.Add(TSGKraftExamples);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
 end;

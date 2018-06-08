@@ -16,7 +16,6 @@ uses
 		{$ENDIF}
 	 SaGeContext
 	,SaGeBase
-	,SaGeUtils
 	,SaGeRender
 	,SaGeCommon
 	,SaGeCommonClasses
@@ -56,13 +55,6 @@ type
 		Orientation:TKraftQuaternion;
 		Matrix:TKraftMatrix4x4;
 		FOV:TKraftScalar;
-		procedure Reset;
-		procedure MoveForwards(Speed:TKraftScalar);
-		procedure MoveSidewards(Speed:TKraftScalar);
-		procedure MoveUpwards(Speed:TKraftScalar);
-		procedure RotateCamera(const x,y:TKraftScalar);
-		procedure TestCamera;
-		procedure Interpolate(const a,b:TCamera;const t:TKraftScalar);
 		end;
 
 	TThreadTimer=class(TThread)
@@ -99,9 +91,6 @@ type
 		ThreadTimer:TThreadTimer;
 			public
 		procedure LoadScene(DemoSceneClass:TDemoSceneClass);
-		procedure AddRigidBody(RigidBody:TKraftRigidBody);
-		procedure AddConstraint(Constraint:TKraftConstraint);
-		procedure SetObjectInspectorRoot(AObject: TPersistent);
 		end;
 
 {$IF defined(ENGINE)}
@@ -142,67 +131,6 @@ var GrabRigidBody:TKraftRigidBody;
 //  GrabCameraTransform:TKraftMatrix4x4;
     GrabConstraint:TKraftConstraintJointGrab;
 
-procedure TSGKraftExamples.SetObjectInspectorRoot(AObject: TPersistent);
-var Selection: TPersistentSelectionList;
-begin
- if assigned(AObject) then begin
-  ThePropertyEditorHook.LookupRoot:=AObject;
-  Selection:=TPersistentSelectionList.Create;
-  try
-   Selection.Add(AObject);
-   //TheObjectInspector.Selection:=Selection;
-   PropertyGrid.Selection:=Selection;
-  finally
-   Selection.Free;
-  end;
- end else begin
-  ThePropertyEditorHook.LookupRoot:=nil;
-  Selection:=TPersistentSelectionList.Create;
-  try
-   //TheObjectInspector.Selection:=Selection;
-   PropertyGrid.Selection:=Selection;
-  finally
-   Selection.Free;
-  end;
- end;
-end;
-
-procedure TSGKraftExamples.AddConstraint(Constraint:TKraftConstraint);
-var Index:longint;
-    TreeNodeConstraint,TreeNodeRigidBody,TreeNodeRigidBodyShape:TTreeNode;
-    RigidBody:TKraftRigidBody;
-    Shape:TKraftShape;
-begin
- //TreeNodeConstraint:=sTreeViewMain.Items.AddChildObject(TreeNodeKraftPhysics,Constraint.ClassName,Constraint);
- for Index:=0 to length(Constraint.RigidBodies)-1 do begin
-  RigidBody:=Constraint.RigidBodies[Index];
-  if assigned(RigidBody) then begin
-   //TreeNodeRigidBody:=sTreeViewMain.Items.AddChildObject(TreeNodeConstraint,RigidBody.ClassName,RigidBody);
-   Shape:=RigidBody.ShapeFirst;
-   while assigned(Shape) do begin
-    //TreeNodeRigidBodyShape:=sTreeViewMain.Items.AddChildObject(TreeNodeRigidBody,Shape.ClassName,Shape);
-    if assigned(TreeNodeRigidBodyShape) then begin
-    end;
-    Shape:=Shape.ShapeNext;
-   end;
-  end;
- end;
-end;
-
-procedure TSGKraftExamples.AddRigidBody(RigidBody:TKraftRigidBody);
-var TreeNodeRigidBody,TreeNodeRigidBodyShape:TTreeNode;
-    Shape:TKraftShape;
-begin
- //TreeNodeRigidBody:=sTreeViewMain.Items.AddChildObject(TreeNodeKraftPhysics,RigidBody.ClassName,RigidBody);
- Shape:=RigidBody.ShapeFirst;
- while assigned(Shape) do begin
-  //TreeNodeRigidBodyShape:=sTreeViewMain.Items.AddChildObject(TreeNodeRigidBody,Shape.ClassName,Shape);
-  if assigned(TreeNodeRigidBodyShape) then begin
-  end;
-  Shape:=Shape.ShapeNext;
- end;
-end;
-
 procedure TSGKraftExamples.LoadScene(DemoSceneClass:TDemoSceneClass);
 var RigidBody:TKraftRigidBody;
     Constraint:TKraftConstraint;
@@ -222,7 +150,7 @@ begin
 
   //TreeNodeKraftPhysics:=sTreeViewMain.Items.AddObjectFirst(nil,'TKraft',KraftPhysics);
 
-  RigidBody:=KraftPhysics.RigidBodyFirst;
+  {RigidBody:=KraftPhysics.RigidBodyFirst;
   while assigned(RigidBody) do begin
    AddRigidBody(RigidBody);
    RigidBody:=RigidBody.RigidBodyNext;
@@ -232,13 +160,11 @@ begin
   while assigned(Constraint) do begin
    AddConstraint(Constraint);
    Constraint:=Constraint.Next;
-  end;
+  end;}
 
   //sTreeViewMain.Selected:=TreeNodeKraftPhysics;
-  TreeNodeKraftPhysics.Expand(true);
-  SetObjectInspectorRoot(KraftPhysics);
 
-  CurrentCamera.Reset;
+  //s CurrentCamera.Reset;
   LastCamera:=CurrentCamera;
 
  finally
@@ -257,35 +183,19 @@ var Index:longint;
 begin
 inherited Create(VContext);
 
- ThePropertyEditorHook:=TPropertyEditorHook.Create(nil);
-
 {TheObjectInspector:=TObjectInspectorDlg.Create(Application);
  TheObjectInspector.PropertyEditorHook:=ThePropertyEditorHook;
- TheObjectInspector.SetBounds(10,10,240,500);{}
+ TheObjectInspector.SetBounds(10,10,240,500);}
 
- PropertyGrid:=TOIPropertyGrid.CreateWithParams(Self,ThePropertyEditorHook
-      ,[tkUnknown, tkInteger, tkChar, tkEnumeration, tkFloat, tkSet{, tkMethod}
-      , tkSString, tkLString, tkAString, tkWString, tkVariant
-      , tkArray, tkRecord, tkInterface, tkClass, tkObject, tkWChar, tkBool
-      , tkInt64, tkQWord],
-      25);
- PropertyGrid.Name:='PropertyGrid';
- PropertyGrid.Parent:=sGroupBoxPropertyEditor;
- PropertyGrid.Align:=alClient;
- SetObjectInspectorRoot(nil);
+ //SetObjectInspectorRoot(nil);
  //TheObjectInspector.Show;
 
  DemoScene:=nil;
 
  OpenGLInitialized:=false;
 
- PasMPInstance:=TPasMP.Create(-1,0,false);
 
-{$ifdef KraftPasMP}
- KraftPhysics:=TKraft.Create(PasMPInstance);
-{$else}
  KraftPhysics:=TKraft.Create(-1);
-{$endif}
 
  KraftPhysics.SetFrequency(120.0);
 
@@ -314,7 +224,7 @@ inherited Create(VContext);
 
  Rotating:=false;
 
- CurrentCamera.Reset;
+ //s CurrentCamera.Reset;
  LastCamera:=CurrentCamera;
 
  HighResolutionTimer:=TKraftHighResolutionTimer.Create(60);
@@ -336,18 +246,18 @@ inherited Create(VContext);
   for Index:=0 to DemoScenes.Count-1 do begin
    //sTreeViewDemos.Items.AddChildObject(TreeNodeDemos,DemoScenes.Strings[Index],DemoScenes.Objects[Index]);
   end;
-  TreeNodeDemoDefault:=TreeNodeDemos.GetFirstChild;
+  
  finally
   //sTreeViewDemos.Items.EndUpdate;
  end;
- TreeNodeDemos.Expand(true);
 end;
 
 destructor TSGKraftExamples.Destroy();
 begin
-FreeAndNil(DemoScene);
-FreeAndNil(KraftPhysics);
-FreeAndNil(PasMPInstance);
+DemoScene.Free();
+DemoScene := nil;
+KraftPhysics.Free();
+KraftPhysics := nil;
 ThreadTimer.Terminate;
 if ThreadTimer.Suspended then
 	begin
@@ -356,7 +266,6 @@ if ThreadTimer.Suspended then
 ThreadTimer.WaitFor;
 ThreadTimer.Free;
 HighResolutionTimer.Free;
-ThePropertyEditorHook.Free;
 inherited;
 end;
 
