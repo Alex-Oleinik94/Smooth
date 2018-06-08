@@ -20,13 +20,27 @@ function SGWinAPICreateCursor(const VCursor : TSGCursor;const clrTransparent : C
 function SGWinAPICreateGlassyCursor() : Windows.HCURSOR;
 function SGWinAPIShellAddIconFromResources(const WindowHandle : HWND; const IconIdentifier, IconRecourceIdentifier : TSGUInt32; const _CallbackMessage : TSGUInt32; const Tip : TSGString = '') : TSGBoolean;
 function SGWinAPIShellDeleteIcon(const WindowHandle : HWND; const IconIdentifier : TSGUInt32) : TSGBoolean;
-//NIM_MODIFY
+function SGWinAPIShellModifyIconTip(const WindowHandle : HWND; const IconIdentifier : TSGUInt32; const _Tip : TSGString) : TSGBoolean;
 
 implementation
 
 uses
 	 SaGeLog
 	;
+
+function SGWinAPIShellModifyIconTip(const WindowHandle : HWND; const IconIdentifier : TSGUInt32; const _Tip : TSGString) : TSGBoolean;
+var
+	IconData : TNotifyIconDataA;
+begin
+ZeroMemory(@IconData, sizeof(TNotifyIconDataA));
+IconData.cbSize := sizeof(TNotifyIconDataA);
+IconData.uVersion := NOTIFYICON_VERSION;
+IconData.Wnd := WindowHandle;
+IconData.uID := IconIdentifier;
+IconData.uFlags := NIF_TIP;
+IconData.szTip := _Tip;
+Result := Shell_NotifyIconA(NIM_MODIFY, @IconData);
+end;
 
 function SGWinAPIShellDeleteIcon(const WindowHandle : HWND; const IconIdentifier : TSGUInt32) : TSGBoolean;
 var

@@ -30,6 +30,8 @@ type
 		FWindow : HWND;
 		FIconIdentifier : TSGUInt32;
 			protected
+		procedure SetTip(const _Tip : TSGString); override;
+			protected
 		function RegisterWindowClass() : TSGBoolean;
 		procedure ExecuteCallBacks(const Param : TSGWinAPIParam);
 		end;
@@ -41,6 +43,13 @@ uses
 	,SaGeStringUtils
 	,SaGeContextUtils
 	;
+
+procedure TSGSystemTrayIconWinAPI.SetTip(const _Tip : TSGString);
+begin
+if (FInitialized and (_Tip <> FTip)) then
+	SGWinAPIShellModifyIconTip(FWindow, FIconIdentifier, _Tip);
+inherited SetTip(_Tip);
+end;
 
 procedure TSGSystemTrayIconWinAPI.ExecuteCallBacks(const Param : TSGWinAPIParam);
 var
@@ -157,6 +166,7 @@ FWindow := Windows.CreateWindow(FWindowClassName, nil, 0, 0, 0, 0, 0, 0, 0, Syst
 if (FWindow <> 0) then
 	SetWindowLongPtr(FWindow, GWL_USERDATA, TSGMaxEnum(Self));
 SGWinAPIShellAddIconFromResources(FWindow, FIconIdentifier, SGCWAPI_ICON, SG_CALLBACK, FTip);
+inherited Initialize();
 end;
 
 procedure TSGSystemTrayIconWinAPI.Kill();

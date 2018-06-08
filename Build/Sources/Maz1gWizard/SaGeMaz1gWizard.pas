@@ -13,9 +13,10 @@ uses
 	,SaGeContextHandler
 	,SaGeSystemTrayIcon
 	,SaGeContextUtils
+	,SaGeWorldOfWarcraftLogonConnection
 	;
 type
-	TSGMaz1gWizard = class(TSGNamed, ISGSystemTrayIconMouseButtonsCallBack)
+	TSGMaz1gWizard = class(TSGNamed, ISGSystemTrayIconMouseButtonsCallBack, ISGWorldOfWarcraftConnectionHandlerCallBacks)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -25,6 +26,7 @@ type
 		procedure Loop();
 			protected
 		procedure IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
+		procedure LogonConnectionCallBack(const LogonConnection : TSGWOWLogonConnection);
 		procedure Iteration();
 		procedure Start();
 		procedure InitWindow();
@@ -50,10 +52,16 @@ uses
 	,SaGeLog
 	,SaGeContext
 	,SaGeLists
+	,SaGeFileUtils
 	
 	,SysUtils
 	,Crt
 	;
+
+procedure TSGMaz1gWizard.LogonConnectionCallBack(const LogonConnection : TSGWOWLogonConnection);
+begin
+FIcon.Tip := FIcon.Tip + SGWinEoln + LogonConnection.ClientALC.SRP_I;
+end;
 
 procedure TSGMaz1gWizard.SetPaintableSettings();
 var
@@ -132,6 +140,7 @@ begin
 InitializeIcon();
 SGKill(FConnectionHandler);
 FConnectionHandler := TSGWorldOfWarcraftConnectionHandler.Create();
+FConnectionHandler.CallBacks := Self;
 if not FEmbedded then
 	ChangeWindowVisible();
 end;

@@ -25,12 +25,12 @@ type
 	TSGWOWLogonError = TSGUInt8;
 	TSGWOWLogonPacketSize = TSGUInt16;
 	
-	TSGWOW_AL_Comand = packed object
+	TSGWOW_Comand = packed object
 			public
 		Comand : TSGWOWLogonComand;
 		end;
 	
-	TSGWOW_ALC = packed object(TSGWOW_AL_Comand)
+	TSGWOW_ALC = packed object(TSGWOW_Comand)
 			public
 		Error : TSGWOWLogonError;
 		end;
@@ -46,6 +46,11 @@ type
 		TimezoneBias : TSGUInt32;
 		IPAddress : TSGIPv4Address;
 		SRP_I_length : TSGUInt8;
+		end;
+	
+	TSGWOW_ALC_Client_Full = packed object(TSGWOW_ALC_Client)
+			public
+		SRP_I : TSGString;
 		end;
 	
 	TSGWOW_ALC_Array = packed array[0..31] of TSGUInt8;

@@ -19,14 +19,18 @@ type
 			public
 		constructor Create(); override;
 			protected
+		FInitialized : TSGBoolean;
 		FTip : TSGString;
 		FButtonsCallBack : ISGSystemTrayIconMouseButtonsCallBack;
+			protected
+		procedure SetTip(const _Tip : TSGString); virtual;
 			public
-		property Tip : TSGString read FTip write FTip;
+		property Tip : TSGString read FTip write SetTip;
 		property ButtonsCallBack : ISGSystemTrayIconMouseButtonsCallBack read FButtonsCallBack write FButtonsCallBack;
+		property Initialized : TSGBoolean read FInitialized;
 			public
 		procedure Messages(); virtual; abstract;
-		procedure Initialize(); virtual; abstract;
+		procedure Initialize(); virtual;
 		procedure Kill(); virtual; abstract;
 		end;
 	TSGSystemTrayIconClass = class of TSGSystemTrayIcon;
@@ -43,9 +47,20 @@ uses
 		{$ENDIF}
 	;
 
+procedure TSGSystemTrayIcon.Initialize();
+begin
+FInitialized := True;
+end;
+
+procedure TSGSystemTrayIcon.SetTip(const _Tip : TSGString);
+begin
+FTip := _Tip;
+end;
+
 constructor TSGSystemTrayIcon.Create();
 begin
 inherited;
+FInitialized := False;
 FTip := '';
 FButtonsCallBack := nil;
 end;
