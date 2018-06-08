@@ -24,10 +24,15 @@ type
 		SGNoData,
 		SGSenderData,
 		SGRecieverData);
+	TSGConnectionStatus = (
+		SGNoStatus,
+		SGStartStatus,
+		SGFinalStatus);
 type
 	ISGConnectionsHandler = interface(ISGInterface)
 		['{57ac272a-c488-41c5-adae-122ee2dc0540}']
 		function HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream) : TSGBoolean;
+		procedure HandleConnectionStatus(const Connection : TSGInternetConnection; const Status : TSGConnectionStatus);
 		end;
 type
 	TSGInternetConnection = class(TSGNamed)

@@ -299,16 +299,16 @@ if FDeviceIPv4Supported and (not FFirstPacketIsSelfSender) then
 FTimeFirstPacket := Time;
 FDateFirstPacket := Date;
 
-if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
+if (FModeRuntimeDataDumper or FModeRuntimePacketDumper) and (not FFictitious) then
 	CreateConnectionDumpDirectory();
-if FModeRuntimeDataDumper then
+if FModeRuntimeDataDumper and (not FFictitious) then
 	CreateBlockStreams();
-if FModePacketStorage then
+if FModePacketStorage and (not FFictitious) then
 	begin
 	SGKill(FPacketStorage);
 	FPacketStorage := TSGInternetPacketStorage.Create();
 	end;
-if FModeDataTransfer or FModeRuntimeDataDumper then
+if (FModeDataTransfer or FModeRuntimeDataDumper) and (not FFictitious) then
 	begin
 	FSenderEmulator := TSGEmulatorTCP.Create(Self);
 	FRecieverEmulator := TSGEmulatorTCP.Create(Self);
@@ -356,8 +356,8 @@ function TSGInternetConnectionTCPIPv4.PacketPushed(const Time : TSGTime; const D
 begin
 Result := False;
 FCritacalSection.Enter();
-if PacketComparable(Packet) and (not FFictitious) then
-	if (FPacketCount = 0) and (not FSenderFinalized) and (not FRecieverFinalized) then
+if PacketComparable(Packet) then
+	if (FPacketCount = 0) and (not FSenderFinalized) and (not FRecieverFinalized) and (not FFictitious) then
 		Result := InitFirstPacket(Time, Date, Packet)
 	else if (FPacketCount > 0) and (
 			((not FSenderFinalized) and (not FRecieverFinalized)) or

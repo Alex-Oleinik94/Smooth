@@ -11,8 +11,8 @@ uses
 	,Classes
 	;
 type
-	TSGWOWSmallString = array[0..3] of TSGChar;
-	TSGWOWVersion = object
+	TSGWOWSmallString = packed array[0..3] of TSGChar;
+	TSGWOWVersion = packed object
 			public
 		FVersion : array[0..2] of TSGUInt8;
 		FBuildVersion : TSGUInt16;
@@ -25,10 +25,18 @@ type
 	TSGWOWLogonError = TSGUInt8;
 	TSGWOWLogonPacketSize = TSGUInt16;
 	
-	TSGWOW_ALC_Custom = object
+	TSGWOW_AL_Comand = packed object
 			public
 		Comand : TSGWOWLogonComand;
+		end;
+	
+	TSGWOW_ALC = packed object(TSGWOW_AL_Comand)
+			public
 		Error : TSGWOWLogonError;
+		end;
+	
+	TSGWOW_ALC_Client = packed object(TSGWOW_ALC)
+			public
 		PacketSize : TSGWOWLogonPacketSize;
 		GameName : TSGWOWSmallString;
 		Version  : TSGWOWVersion;
@@ -40,9 +48,11 @@ type
 		SRP_I_length : TSGUInt8;
 		end;
 	
-	TSGWOW_ALC = object(TSGWOW_ALC_Custom)
+	TSGWOW_ALC_Array = packed array[0..31] of TSGUInt8;
+	
+	TSGWOW_ALC_Server = packed object(TSGWOW_ALC)
 			public
-		SRM_I : TSGString;
+		
 		end;
 
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
@@ -51,15 +61,17 @@ implementation
 
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
 var
-	Packet : TSGWOW_ALC;
+	Packet : TSGWOW_ALC_Client;
+	TotalSize : TSGMaxEnum;
 begin
 Result := False;
-if (Stream.Size > SizeOf(TSGWOW_ALC_Custom)) then
+if (Stream.Size > SizeOf(TSGWOW_ALC_Client)) then
 	begin
 	Stream.Position := 0;
 	FillChar(Packet, SizeOf(Packet), 0);
-	Stream.Read(Packet, SizeOf(TSGWOW_ALC_Custom));
-	Result := Stream.Size = SizeOf(TSGWOW_ALC_Custom) + Packet.SRP_I_length;
+	Stream.Read(Packet, SizeOf(TSGWOW_ALC_Client));
+	TotalSize := SizeOf(TSGWOW_ALC_Client) + Packet.SRP_I_length;
+	Result := (Stream.Size = TotalSize);
 	end;
 end;
 
