@@ -1595,8 +1595,6 @@ else
 		end
 	else
 		begin
-		//Впринципе теперь можно всегда пользоваться SGRGLPerspective вместо gluPerspective, но я
-		//Думаю все таки надуюсь, что gluPerspective будет работать чуть чуть быстрее чем моя процедурка.
 		{$IFNDEF MOBILE}gluPerspective{$ELSE}SGRGLPerspective{$ENDIF}
 			(45, CWidth / CHeight, TSGRenderNear, TSGRenderFar);
 		Enable(SGR_DEPTH_TEST);

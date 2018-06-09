@@ -1466,7 +1466,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		end;
 	if FSecheniePanel<>nil then
 		begin
-		(FSecheniePanel.LastChild as TSGPicture).Image := nil;
+		(FSecheniePanel.LastChild as TSGScreenPicture).Image := nil;
 		FSecheniePanel.Destroy();
 		FSecheniePanel:=nil;
 		end;
@@ -1543,14 +1543,11 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FSechenieImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
 	FSechenieImage.Image.CreateTypes();
 	
-	FSecheniePanel.CreateChild(TSGPicture.Create());
-	FSecheniePanel.LastChild.SetBounds(5,5,a-10,a-10);
-	FSecheniePanel.LastChild.BoundsToNeedBounds();
-	FSecheniePanel.LastChild.Visible:=True;
+	SGCreatePicture(FSecheniePanel, 5,5,a-10,a-10, True, True);
 	
-	(FSecheniePanel.LastChild as TSGPicture).Image       := FSechenieImage;
-	(FSecheniePanel.LastChild as TSGPicture).EnableLines := True;
-	(FSecheniePanel.LastChild as TSGPicture).SecondPoint.Import(
+	(FSecheniePanel.LastChild as TSGScreenPicture).Image       := FSechenieImage;
+	(FSecheniePanel.LastChild as TSGScreenPicture).EnableLines := True;
+	(FSecheniePanel.LastChild as TSGScreenPicture).SecondPoint.Import(
 		FCube.Edge/FImageSechenieBounds,
 		FCube.Edge/FImageSechenieBounds);
 	
@@ -1576,7 +1573,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		end;
 	if FSecheniePanel<>nil then
 		begin
-		(FSecheniePanel.LastChild as TSGPicture).Image := nil;
+		(FSecheniePanel.LastChild as TSGScreenPicture).Image := nil;
 		FSecheniePanel.Destroy();
 		FSecheniePanel:=nil;
 		end;
@@ -2329,14 +2326,11 @@ if FUsrSechPanel = nil then
 	fillchar(FUsrSechImage.Image.BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
 	FUsrSechImage.ToTexture();
 	
-	FUsrSechPanel.CreateChild(TSGPicture.Create());
-	FUsrSechPanel.LastChild.SetBounds(5,5,a-10,a-10);
-	FUsrSechPanel.LastChild.BoundsToNeedBounds();
-	FUsrSechPanel.LastChild.Visible:=True;
+	SGCreatePicture(FUsrSechPanel, 5,5,a-10,a-10, True, True);
 	
-	(FUsrSechPanel.LastChild as TSGPicture).Image       := FUsrSechImage;
-	(FUsrSechPanel.LastChild as TSGPicture).EnableLines := True;
-	(FUsrSechPanel.LastChild as TSGPicture).SecondPoint.Import(
+	(FUsrSechPanel.LastChild as TSGScreenPicture).Image       := FUsrSechImage;
+	(FUsrSechPanel.LastChild as TSGScreenPicture).EnableLines := True;
+	(FUsrSechPanel.LastChild as TSGScreenPicture).SecondPoint.Import(
 		FCube.Edge/FImageSechenieBounds,
 		FCube.Edge/FImageSechenieBounds);
 	

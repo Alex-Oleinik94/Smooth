@@ -71,6 +71,10 @@ uses
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
 		{$ENDIF}
+	{$IFDEF MSWINDOWS}
+		,SaGeNvidiaOptimusEnablement
+		,SaGeNvidiaDriverSettingsUtils
+		{$ENDIF}
 	;
 
 procedure SGRunPaintable(const _PaintableClass : TSGDrawableClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);

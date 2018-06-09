@@ -22,7 +22,7 @@ type
 		function ViewingLines() : TSGBoolean; virtual;
 		function ViewingQuad()  : TSGBoolean; virtual;
 			public
-		procedure FromDraw;override;
+		procedure FromDraw; override;
 			public
 		property ViewLines : TSGBoolean read ViewingLines write FViewLines;
 		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;

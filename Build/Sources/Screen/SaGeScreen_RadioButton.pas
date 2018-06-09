@@ -1,4 +1,17 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_RadioButton;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeClasses
+	,SaGeScreen
+	,SaGeImage
+	;
+
 type
 	TSGRCButtonType = (SGNoneRadioCheckButton,SGRadioButton,SGCheckButton);
 	TSGRadioButton = class;
@@ -41,9 +54,16 @@ type
 		property Group : TSGRadioGroup read FGroup;
 		property ButtonType : TSGRCButtonType read FType write SetType;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeBaseUtils
+	,SaGeRenderBase
+	,SaGeCommonStructs
+	,SaGeCommon
+	,SaGeContextUtils
+	;
 
 class function TSGRadioButton.ClassName() : TSGString; 
 begin
@@ -260,4 +280,5 @@ if CursorInComponentNow then
 	end;
 inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
 end;
-{$ENDIF}
+
+end.

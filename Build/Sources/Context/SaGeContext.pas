@@ -220,12 +220,9 @@ uses
 	,SaGeLog
 	,SaGeLists
 	,SaGeStringUtils
-	,SaGeBaseUtils
 	,SaGeRenderBase
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinAPI
-		,SaGeNvidiaOptimusEnablement
-		,SaGeNvidiaDriverSettingsUtils
 		{$ENDIF}
 	{$IFDEF LINUX}
 		,SaGeContextLinux

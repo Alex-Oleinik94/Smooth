@@ -167,12 +167,7 @@ uses {$ifdef windows}
       {$endif}
      {$endif}
      {$ifdef DebugDraw}
-      {$ifdef fpc}
-       GL,
-       GLext,
-      {$else}
-       OpenGL,
-      {$endif}
+      dglOpenGL
      {$endif}
      SysUtils,
      Classes,

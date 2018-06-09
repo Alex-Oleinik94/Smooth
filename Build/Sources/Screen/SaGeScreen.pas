@@ -29,7 +29,6 @@ type
 	TSGForm             = class;
 	TSGButton           = class;
 	TSGProgressBar      = class;
-	TSGPicture          = class;
 	TSGButtonMenu       = class;
 	TSGScrollBar        = class;
 	TSGComboBox         = class;

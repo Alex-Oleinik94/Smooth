@@ -362,7 +362,7 @@ FImageBullet.Loading;}
 SetLength(FZombies,1);
 FButtonReset:=TSGButton.Create;
 Screen.CreateChild(FButtonReset);
-Screen.LastChild.SetBounds(Context.Width-50,5,40,20);
+Screen.LastChild.SetBounds(Render.Width-50,5,40,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Reset';
 FButtonReset.OnChange:=TSGComponentProcedure(@TSGButton_Reset_OnChange);
@@ -371,7 +371,7 @@ Screen.LastChild.Visible:=True;
 
 FDifficultyComboBox:=TSGComboBox.Create;
 Screen.CreateChild(FDifficultyComboBox);
-Screen.LastChild.SetBounds(Context.Width-50-125-145,5,118+145,20);
+Screen.LastChild.SetBounds(Render.Width-50-125-145,5,118+145,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
 Screen.LastChild.AsComboBox.CreateItem('Очень сильно легко');
@@ -390,7 +390,7 @@ Screen.LastChild.Visible:=True;
 
 FQuantityComboBox:=TSGComboBox.Create;
 Screen.CreateChild(FQuantityComboBox);
-Screen.LastChild.SetBounds(Context.Width-50-125-145-60,5,55,20);
+Screen.LastChild.SetBounds(Render.Width-50-125-145-60,5,55,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to 8 do
 	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
@@ -402,7 +402,7 @@ Screen.LastChild.Visible:=True;
 
 FComboBoxDeep:=TSGComboBox.Create;
 Screen.CreateChild(FComboBoxDeep);
-Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60,5,55,20);
+Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60,5,55,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=3 to 8 do
 	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
@@ -413,7 +413,7 @@ Screen.LastChild.Visible:=True;
 
 FComboBoxRespamn:=TSGComboBox.Create;
 Screen.CreateChild(FComboBoxRespamn);
-Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130,5,125,20);
+Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60-130,5,125,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
 Screen.LastChild.AsComboBox.CreateItem('Респамн Включeн');
@@ -424,7 +424,7 @@ Screen.LastChild.Visible:=True;
 
 FGroundComboBox:=TSGComboBox.Create;
 Screen.CreateChild(FGroundComboBox);
-Screen.LastChild.SetBounds(Context.Width-50-125-145-60-60-130-140,5,135,20);
+Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60-130-140,5,135,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.AsComboBox.CreateItem('Стенок нету');
 Screen.LastChild.AsComboBox.CreateItem('Стенок мало');
@@ -437,11 +437,11 @@ Screen.LastChild.AsComboBox.SelectItem:=2;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FTimerLabel := SGCreateLabel(Screen, '', False, 10,Context.Height-25,Context.Width div 2,20, [SGAnchBottom], True);
+FTimerLabel := SGCreateLabel(Screen, '', False, 10,Render.Height-25,Render.Width div 2,20, [SGAnchBottom], True);
 FTimerLabel.FUserPointer1:=Self;
 FTimerLabel.TextColor.Import(0,0,0,1);
 
-FLabebYouLose := SGCreateLabel(Screen, SGKillerStringLose, 5,Context.Height div 2 - 15,Context.Width-10,30, [SGAnchBottom], False);
+FLabebYouLose := SGCreateLabel(Screen, SGKillerStringLose, 5,Render.Height div 2 - 15,Render.Width-10,30, [SGAnchBottom], False);
 FLabebYouLose.FUserPointer1:=Self;
 FLabebYouLose.TextColor.Import(0,0,0,1);
 
@@ -526,7 +526,7 @@ var
 begin
 FChanget:=True;
 FActive:=True;
-FStartDeepHeight:=Trunc(((Context.Height/Context.Width)*FStartDeep))+1;
+FStartDeepHeight:=Trunc(((Render.Height/Render.Width)*FStartDeep))+1;
 FSkullsNowPosition:=FQuantitySkulls;
 
 FBulletsGos:=0;
@@ -569,7 +569,7 @@ for i:=0 to High(FZombies) do
 until (FArray[FYou.x][FYou.y].FType=0) and (ii=0);
 
 OldFR:=FR;
-FR.Import(Context.Width/Length(FArray),Context.Height/Length(FArray[0]));
+FR.Import(Render.Width/Length(FArray),Render.Height/Length(FArray[0]));
 
 if FR.x>FR.y then
 	i:=Trunc(FR.x)
@@ -1191,15 +1191,15 @@ if not FActive then
 	else
 		Render.Color4f(1,0,0,FLabebYouLose.VisibleTimer);
 	
-	Render.Vertex2f(Context.Width/2 - 300,Context.Height/2-100);
-	Render.Vertex2f(Context.Width/2 + 300,Context.Height/2-100);
-	Render.Vertex2f(Context.Width/2 + 300,Context.Height/2+100);
-	Render.Vertex2f(Context.Width/2 - 300,Context.Height/2+100);
+	Render.Vertex2f(Render.Width/2 - 300,Render.Height/2-100);
+	Render.Vertex2f(Render.Width/2 + 300,Render.Height/2-100);
+	Render.Vertex2f(Render.Width/2 + 300,Render.Height/2+100);
+	Render.Vertex2f(Render.Width/2 - 300,Render.Height/2+100);
 
-	Render.Vertex2f(0,Context.Height-25);
-	Render.Vertex2f(Context.Width,Context.Height-25);
-	Render.Vertex2f(Context.Width,Context.Height);
-	Render.Vertex2f(0,Context.Height);
+	Render.Vertex2f(0,Render.Height-25);
+	Render.Vertex2f(Render.Width,Render.Height-25);
+	Render.Vertex2f(Render.Width,Render.Height);
+	Render.Vertex2f(0,Render.Height);
 	Render.EndScene();
 	end;
 end;

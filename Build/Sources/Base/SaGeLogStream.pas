@@ -20,7 +20,7 @@ const
 	LogExtension = 'log';
 var
 	LogEnablement : TSGLogEnablement = SGLogSmart;
-		//{$IFDEF RELEASE}SGLogSmart{$ELSE}SGLogEnabled{$ENDIF}
+		//{$IFDEF RELEASE}SGLogSmart{$ELSE}SGLogEnabled{$ENDIF};
 	LogSignificant : TSGBoolean = False;
 type
 	TSGLogStream = object

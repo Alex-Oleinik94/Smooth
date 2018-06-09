@@ -1,9 +1,22 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Picture;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	,SaGeImage
+	,SaGeCommonStructs
+	;
+
 type
 	TSGPicture=class(TSGComponent)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			private
 		FImage       : TSGImage;
@@ -19,9 +32,14 @@ type
 			public
 		procedure FromDraw();override;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	,SaGeRenderBase
+	,SaGeCommon
+	;
 
 class function TSGPicture.ClassName() : TSGString; 
 begin
@@ -30,22 +48,22 @@ end;
 
 procedure TSGPicture.FromDraw;
 var
-	a,b: TSGVertex3f;
+	a, b: TSGVertex3f;
 begin
-if ((FVisible) or (FVisibleTimer>SGZero)) and (FImage<>nil) then
+if (FVisible or (FVisibleTimer > SGZero)) and (FImage <> nil) then
 	begin
-	Render.Color4f(1,1,1,FVisibleTimer);
-	a := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-	b := SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT));
-	FImage.DrawImageFromTwoVertex2fWithTexPoint(a,b,FSecondPoint,True,SG_2D);
+	Render.Color4f(1, 1, 1, FVisibleTimer);
+	a := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP], SG_VERTEX_FOR_PARENT));
+	b := SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM], SG_VERTEX_FOR_PARENT));
+	FImage.DrawImageFromTwoVertex2fWithTexPoint(a, b, FSecondPoint, True, SG_2D);
 	if FEnableLines then
 		begin
 		Render.Color(FLinesColor);
 		Render.BeginScene(SGR_LINE_LOOP);
 		Render.Vertex(a);
-		Render.Vertex2f(a.x,b.y);
+		Render.Vertex2f(a.x, b.y);
 		Render.Vertex(b);
-		Render.Vertex2f(b.x,a.y);
+		Render.Vertex2f(b.x, a.y);
 		Render.EndScene();
 		end;
 	end;
@@ -65,4 +83,5 @@ destructor TSGPicture.Destroy;
 begin
 inherited;
 end;
-{$ENDIF}
+
+end.

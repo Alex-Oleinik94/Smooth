@@ -425,14 +425,16 @@ end;
 function MyMandNumberFucntion(Self : TSGScreenEdit) : TSGBoolean;
 begin
 Result := TSGEditTextTypeFunctionNumber(Self);
-TSGComponent(Self.FUserPointer2).Active:=Result;
+if (Self.FUserPointer2 <> nil) then
+	TSGComponent(Self.FUserPointer2).Active := Result;
 end;
 
 function MyMandNumberFucntionVideo(Self : TSGScreenEdit) : TSGBoolean;
 begin
 Result := TSGEditTextTypeFunctionNumber(Self);
 with TSGFractalMandelbrodRelease(Self.FUserPointer1) do
-TSGComponent(Self.FUserPointer2).Active := Result and (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>=2);
+if (Self.FUserPointer2 <> nil) then
+	TSGComponent(Self.FUserPointer2).Active := Result and (FBezierCurve<>nil) and (FBezierCurve.VertexQuantity>=2);
 end;
 
 procedure bcpOnOffVideo(Button:TSGButton);

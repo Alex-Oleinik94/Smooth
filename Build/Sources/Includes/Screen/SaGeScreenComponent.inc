@@ -210,7 +210,6 @@ type
 		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsPicture:TSGPicture;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -499,14 +498,6 @@ function TSGComponent.AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$
 begin
 if Self is TSGButtonMenu then
 	Result:=TSGButtonMenu(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsPicture:TSGPicture;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGPicture then
-	Result:=TSGPicture(Pointer(Self))
 else
 	Result:=nil;
 end;

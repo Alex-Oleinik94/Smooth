@@ -60,19 +60,22 @@ type
 		procedure SetCursor(const VCursor : TSGCursor); override;
 		procedure SetIcon  (const VIcon   : TSGBitMap); override;
 			protected
-		hWindow  : Windows.HWnd;
-		dcWindow : Windows.HDC;
-		clWindow : TSGMaxEnum;
+		FWindowClass : TSGMaxEnum;
 		FWindowClassName : TSGString;
-		procedure ThrowError(pcErrorMessage : pChar);
+		FWindow  : Windows.HWnd;
+		FDeviceContext : Windows.HDC;
+			protected
 		function  RegisterWindowClass() : TSGBoolean;
 		function  WindowCreate(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal): Windows.HWnd;
-		function  WindowInit(hParent : Windows.HWnd): Boolean;
+		function  WindowInit(): TSGBoolean;
 		procedure KillWindow();
 		function  CreateWindow(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal) : TSGBoolean;
 		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function SetWindowPlacement(const _Placement : TSGUInt32) : TSGBoolean;
+		procedure ThrowError(const ErrorString : TSGString);
 		procedure HandlingSizingFromRect(const PR : PRect = nil);
+		class procedure SetWindowCursor(const _WindowClass : TSGMaxEnum; const _Window : Windows.HWnd; const _Cursor : Windows.HCURSOR);
 			protected
 		FCursorHandle : Windows.HCURSOR;
 		FIconHandle   : Windows.HICON;
@@ -91,6 +94,7 @@ uses
 	,SaGeLog
 	,SaGeWinAPIIconUtils
 	,SaGeStringUtils
+	,SaGeFileUtils
 	
 	,SysUtils
 	;
@@ -99,11 +103,11 @@ procedure TSGContextWinAPI.SetVisible(const _Visible : TSGBoolean);
 begin
 if (_Visible <> FVisible) then
 	begin
-	if (hWindow <> 0) then
+	if (FWindow <> 0) then
 		if (_Visible) then
-			ShowWindow(hWindow, SW_SHOW)
+			ShowWindow(FWindow, SW_SHOW)
 		else
-			ShowWindow(hWindow, SW_HIDE);
+			ShowWindow(FWindow, SW_HIDE);
 	inherited SetVisible(_Visible);
 	end;
 end;
@@ -138,22 +142,26 @@ if hToken <> 0 then
 FreeMem(ProfilePath);
 end;
 
-procedure TSGContextWinAPI.Minimize();
+function TSGContextWinAPI.SetWindowPlacement(const _Placement : TSGUInt32) : TSGBoolean;
 var
 	wp : WINDOWPLACEMENT;
 begin
-GetWindowPlacement(hWindow, @wp);
-wp.showCmd := SW_SHOWMINIMIZED;
-SetWindowPlacement(hWindow, @wp);
+Result := GetWindowPlacement(FWindow, @wp);
+if Result then
+	begin
+	wp.showCmd := _Placement;
+	Result := Windows.SetWindowPlacement(FWindow, @wp);
+	end;
+end;
+
+procedure TSGContextWinAPI.Minimize();
+begin
+SetWindowPlacement(SW_SHOWMINIMIZED);
 end;
 
 procedure TSGContextWinAPI.Maximize();
-var
-	wp : WINDOWPLACEMENT;
 begin
-GetWindowPlacement(hWindow, @wp);
-wp.showCmd := SW_SHOWMAXIMIZED;
-SetWindowPlacement(hWindow, @wp);
+SetWindowPlacement(SW_SHOWMAXIMIZED);
 end;
 
 function TSGContextWinAPI.GetDefaultWindowColor():TSGColor3f;
@@ -177,6 +185,13 @@ begin
 Result := True;
 end;
 
+class procedure TSGContextWinAPI.SetWindowCursor(const _WindowClass : TSGMaxEnum; const _Window : Windows.HWnd; const _Cursor : Windows.HCURSOR);
+begin
+Windows.SetClassLongPtr(_Window, GCL_HCURSOR, _Cursor);
+Windows.SetClassLongPtr(_WindowClass, GCL_HCURSOR, _Cursor);
+Windows.SetCursor(_Cursor);
+end;
+
 procedure TSGContextWinAPI.SetCursor(const VCursor : TSGCursor);
 var
 	NewCursor : HCURSOR;
@@ -191,11 +206,7 @@ if VCursor.StandartHandle <> SGC_NULL then
 			inherited;
 			FCursorHandle := NewCursor;
 			if Active then
-				begin
-				Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
-				Windows.SetClassLongPtr(clWindow, GCL_HCURSOR, FCursorHandle);
-				Windows.SetCursor(FCursorHandle);
-				end;
+				SetWindowCursor(FWindowClass, FWindow, FCursorHandle);
 			end;
 		end
 	else
@@ -213,10 +224,7 @@ else
 		FCursorHandle := NewCursor;
 		inherited;
 		if Active then
-			begin
-			Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
-			Windows.SetCursor(FCursorHandle);
-			end;
+			SetWindowCursor(FWindowClass, FWindow, FCursorHandle);
 		end;
 	end;
 end;
@@ -238,12 +246,12 @@ end;
 
 function  TSGContextWinAPI.GetWindow() : TSGPointer;
 begin
-Result := TSGPointer(hWindow);
+Result := TSGPointer(FWindow);
 end;
 
 function  TSGContextWinAPI.GetDevice() : TSGPointer;
 begin
-Result := TSGPointer(dcWindow);
+Result := TSGPointer(FDeviceContext);
 end;
 
 function  TSGContextWinAPI.ShiftClientArea() : TSGPoint2int32;
@@ -266,7 +274,7 @@ New(ofn);
 fillchar(ofn^,sizeof(ofn^),0);
 ofn^.lStructSize       := sizeof(ofn^);
 ofn^.hInstance         := System.MainInstance;
-ofn^.hwndOwner         := hWindow;
+ofn^.hwndOwner         := FWindow;
 if (VFilter <> '') then
 	ofn^.lpstrFilter   := SGStringToPChar(VFilter);
 ofn^.lpstrFile         := nil;
@@ -307,7 +315,7 @@ New(ofn);
 fillchar(ofn^,sizeof(ofn^),0);
 ofn^.lStructSize       := sizeof(ofn^);
 ofn^.hInstance         := System.MainInstance;
-ofn^.hwndOwner         := hWindow;
+ofn^.hwndOwner         := FWindow;
 if (VFilter <> '') then
 	ofn^.lpstrFilter   := SGStringToPChar(VFilter);
 ofn^.lpstrFile         := nil;
@@ -352,7 +360,7 @@ if FFullscreen then
 	Windows.SetCursorPos(VPosition.x, VPosition.y)
 else
 	begin
-	WindowShift := TSGContextWinAPI.GetWindowRect(hWindow);
+	WindowShift := TSGContextWinAPI.GetWindowRect(FWindow);
 	ClientShift := ShiftClientArea();
 	Windows.SetCursorPos(VPosition.x + WindowShift.left + ClientShift.x, VPosition.y + WindowShift.top + ClientShift.y);
 	end;
@@ -366,17 +374,15 @@ if FShowCursor then
 	FCursorHandle := FNormalCursorHandle
 else
 	FCursorHandle := FGlassyCursorHandle;
-Windows.SetClassLongPtr(hWindow, GCL_HCURSOR, FCursorHandle);
-Windows.SetClassLongPtr(clWindow, GCL_HCURSOR, FCursorHandle);
-Windows.SetCursor(FCursorHandle);
+SetWindowCursor(FWindowClass, FWindow, FCursorHandle);
 Windows.ShowCursor(FShowCursor);
 end;
 
 function TSGContextWinAPI.GetScreenArea(): TSGPoint2int32;
 begin
 Result.Import(
-	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()),HORZRES),
-	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()),VERTRES));
+	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()), HORZRES),
+	Windows.GetDeviceCaps(Windows.GetDC(Windows.GetDesktopWindow()), VERTRES));
 end;
 
 function TSGContextWinAPI.GetCursorPosition: TSGPoint2int32;
@@ -389,27 +395,27 @@ if FFullscreen then
 	Result.Import(Position.x, Position.y)
 else
 	begin
-	Shift := TSGContextWinAPI.GetWindowRect(hWindow);
+	Shift := TSGContextWinAPI.GetWindowRect(FWindow);
 	Result.Import(Position.x - Shift.left, Position.y - Shift.top);
 	end;
 end;
 
 function TSGContextWinAPI.GetWindowArea(): TSGPoint2int32;
 var
-	Rec:TRect;
+	Rec : TRect;
 begin
-Windows.GetWindowRect(hWindow,Rec);
-Result.x:=Rec.Left;
-Result.y:=Rec.Top;
+Windows.GetWindowRect(FWindow, Rec);
+Result.x := Rec.Left;
+Result.y := Rec.Top;
 end;
 
 constructor TSGContextWinAPI.Create;
 begin
 inherited;
 FWindowClassName := '';
-hWindow  := 0;
-dcWindow := 0;
-clWindow := 0;
+FWindow  := 0;
+FWindowClass := 0;
+FDeviceContext := 0;
 FNormalCursorHandle := LoadCursor(0, IDC_ARROW);
 FCursorHandle := FNormalCursorHandle;
 FIconHandle   := LoadIcon(GetModuleHandle(nil), MAKEINTRESOURCE(SGCWAPI_ICON));
@@ -433,13 +439,13 @@ procedure HandlingReSizingFromRect();
 var
 	WRect : Windows.TRect;
 begin
-Windows.GetWindowRect(hWindow, WRect);
+Windows.GetWindowRect(FWindow, WRect);
 FWidth  :=  WRect.Right  - WRect.Left;
 FHeight :=  WRect.Bottom - WRect.Top;
 FLeft := WRect.Left;
 FTop  := WRect.Top;
-FClientHeight := GetClientWindowRect(hWindow).bottom;
-FClientWidth  := GetClientWindowRect(hWindow).right;
+FClientHeight := GetClientWindowRect(FWindow).bottom - GetClientWindowRect(FWindow).top;
+FClientWidth  := GetClientWindowRect(FWindow).right - GetClientWindowRect(FWindow).left;
 Resize();
 end;
 
@@ -472,10 +478,20 @@ while Windows.PeekMessage(@msg, 0, 0, 0, 0) do
 inherited;
 end;
 
-procedure TSGContextWinAPI.ThrowError(pcErrorMessage : pChar);
+procedure TSGContextWinAPI.ThrowError(const ErrorString : TSGString);
+var
+	ErrorChars : PSGChar = nil;
+	LastError : TSGUInt32;
+	FullErrorMessage : TSGString;
 begin
-MessageBox(0, pcErrorMessage, 'Error', MB_OK);
-Halt(0);
+FullErrorMessage := 'TSGContextWinAPI: ' + ErrorString;
+LastError := GetLastError();
+if (LastError <> 0) then
+	FullErrorMessage += ' LastError=' + SGStr(LastError) + '.';
+TSGLog.Source(FullErrorMessage);
+ErrorChars := SGStringToPChar(FullErrorMessage);
+MessageBox(0, ErrorChars, 'WinAPI error!', MB_OK);
+FreeMem(ErrorChars);
 end;
 
 procedure TSGContextWinAPI.HandlingSizingFromRect(const PR : PRect = nil);
@@ -486,7 +502,7 @@ begin
 Shift := ShiftClientArea();
 if PR = nil then
 	begin
-	Windows.GetWindowRect(hWindow, WRect);
+	Windows.GetWindowRect(FWindow, WRect);
 	FWidth  :=  WRect.Right  - WRect.Left;
 	FHeight :=  WRect.Bottom - WRect.Top;
 	FLeft := WRect.Left;
@@ -680,7 +696,7 @@ end;}
 begin
 if (FWindowClassName = '') then
 	FWindowClassName := 'SaGe Window Class ' + SGStr(Random(100000));
-if (clWindow = 0) then
+if (FWindowClass = 0) then
 	begin
 	FillChar(WindowClass, SizeOf(WindowClass), 0);
 	WindowClass.cbSize        := SizeOf(Windows.WNDCLASSEX);
@@ -696,21 +712,38 @@ if (clWindow = 0) then
 	WindowClass.lpszClassName := SGStringAsPChar(FWindowClassName);
 	WindowClass.hIconSm       := WindowClass.hIcon;
 	
-	clWindow := Windows.RegisterClassEx(WindowClass);
+	FWindowClass := Windows.RegisterClassEx(WindowClass);
 	end;
-Result := clWindow <> 0;
+Result := (FWindowClass <> 0);
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__WindowRegisterClass : Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
 function TSGContextWinAPI.WindowCreate(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal): HWnd;
+
+function ChangeScreenSettings() : TSGBoolean;
 var
-  dmScreenSettings : DEVMODE;
+	dmScreenSettings : DEVMODE;
+begin
+Result := True;
+if (FWidth <> GetScreenArea().x) or (FHeight <> GetScreenArea().y) then
+	begin
+	dmScreenSettings.dmSize := sizeof(dmScreenSettings);
+	dmScreenSettings.dmPelsWidth := FWidth;
+	dmScreenSettings.dmPelsHeight := FHeight;
+	dmScreenSettings.dmBitsPerPel := 32;
+	dmScreenSettings.dmFields := DM_BITSPERPEL OR DM_PELSWIDTH OR DM_PELSHEIGHT;
+	if ChangeDisplaySettings(@dmScreenSettings, CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then
+		Result := False;
+	end;
+end;
+
 begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('TSGContextWinAPI__WindowCreate : Enter');
 	{$ENDIF}
+Result := 0;
 if not FFullscreen then
 	begin
 	Result := Windows.CreateWindow(SGStringAsPChar(FWindowClassName),
@@ -731,20 +764,10 @@ if not FFullscreen then
 	end
 else
 	begin
-	if (FWidth <> GetScreenArea().x) or (FHeight <> GetScreenArea().y) then
+	if (not ChangeScreenSettings()) then
 		begin
-		dmScreenSettings.dmSize := sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth := FWidth;
-		dmScreenSettings.dmPelsHeight := FHeight;
-		dmScreenSettings.dmBitsPerPel := 32;
-		dmScreenSettings.dmFields := DM_BITSPERPEL OR DM_PELSWIDTH OR DM_PELSHEIGHT;
-		if ChangeDisplaySettings(@dmScreenSettings,CDS_FULLSCREEN) <> DISP_CHANGE_SUCCESSFUL then
-			begin
-			ThrowError('Screen resolution is not supported by your gfx card!');
-			SGLog.Source('Screen resolution is not supported by your gfx card!');
-			WindowCreate := 0;
-			Exit;
-			end;
+		ThrowError('Screen resolution is not supported by your gfx card!');
+		exit;
 		end;
 	FTop := 0;
 	FLeft := 0;
@@ -784,17 +807,17 @@ end;
 
 procedure TSGContextWinAPI.SetForeground();
 begin
-SetFocus(hWindow);
-SetForegroundWindow(hWindow);
+SetFocus(FWindow);
+SetForegroundWindow(FWindow);
 end;
 
-function TSGContextWinAPI.WindowInit(hParent : HWnd): Boolean;
+function TSGContextWinAPI.WindowInit(): TSGBoolean;
 
 function CreateRender() : TSGBoolean;
 begin
 Result := False;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Createing render');
+	SGLog.Source('TSGContextWinAPI__WindowInit: Createing render');
 	{$ENDIF}
 if FRender <> nil then
 	KillRender();
@@ -802,26 +825,28 @@ FRender := FRenderClass.Create();
 FRender.Context := Self as ISGContext;
 Result := FRender.CreateContext();
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Create render context (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit: Create render context (Result=',Result,')']);
 	{$ENDIF}
 if Result then
 	FRender.Init()
 else
 	begin
-	SGLog.Source('TSGContextWinAPI__WindowInit(...). Failed creating render "' + FRenderClass.ClassName() + '".');
+	SGLog.Source('TSGContextWinAPI__WindowInit. Failed creating render "' + FRenderClass.ClassName() + '".');
 	KillRender();
 	end;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Created render (Render='+SGAddrStr(FRender)+')');
+	SGLog.Source('TSGContextWinAPI__WindowInit: Created render (Render='+SGAddrStr(FRender)+')');
 	{$ENDIF}
 end;
 
 begin
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Enter']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit: Enter']);
 	{$ENDIF}
 Result := False;
-dcWindow := GetDC( hParent );
+FDeviceContext :=
+	GetDC(FWindow);
+	//GetDCEx(FWindow, 0, 0);
 if (FRender = nil) and (FRenderClass <> nil) then
 	begin
 	Result := CreateRender();
@@ -848,7 +873,7 @@ else if (FRender = nil) and (FRenderClass = nil) then
 else if (FRender <> nil) then
 	begin
 	{$IFDEF SGWinAPIDebug}
-		SGLog.Source('TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Formating render (Render='+SGAddrStr(FRender)+')');
+		SGLog.Source('TSGContextWinAPI__WindowInit: Formating render (Render='+SGAddrStr(FRender)+')');
 		{$ENDIF}
 	FRender.Context := Self as ISGContext;
 	Result := FRender.SetPixelFormat();
@@ -856,7 +881,7 @@ else if (FRender <> nil) then
 		Render.MakeCurrent();
 	end;
 {$IFDEF SGWinAPIDebug}
-	SGLog.Source(['TSGContextWinAPI__WindowInit(hParent='+SGStr(hParent)+') : Exit (Result=',Result,')']);
+	SGLog.Source(['TSGContextWinAPI__WindowInit: Exit (Result=',Result,')']);
 	{$ENDIF}
 end;
 
@@ -865,29 +890,24 @@ begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source('TSGContextWinAPI__CreateWindow : Enter');
 	{$ENDIF}
+Result := False;
 if not RegisterWindowClass() then
-		begin
-		ThrowError('Could not register the Application Window!');
-		SGLog.Source('Could not register the Application Window!');
-		Result := false;
-		Exit;
-		end;
-hWindow := WindowCreate(_WindowPlacement);
-if hWindow = 0 then
+	begin
+	ThrowError('Could not register the Application Window!');
+	Exit;
+	end;
+FWindow := WindowCreate(_WindowPlacement);
+if (FWindow = 0) then
 	begin
 	ThrowError('Could not create Application Window!');
-	SGLog.Source('Could not create Application Window!');
-	Result := false;
 	Exit;
 	end;
-if not WindowInit(hWindow) then
+if not WindowInit() then
 	begin
 	ThrowError('Could not initialise Application Window!');
-	SGLog.Source('Could not initialise Application Window!');
-	Result := false;
 	Exit;
 	end;
-Result := true;
+Result := True;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__CreateWindow : Exit (Result=',Result,')']);
 	{$ENDIF}
@@ -899,12 +919,13 @@ procedure UnregisterWindowClass();
 var
 	WindowClassName : PChar;
 begin
-if FWindowClassName <> '' then
+if (FWindowClassName <> '') then
 	begin
 	WindowClassName := SGStringToPChar(FWindowClassName);
 	UnregisterClass(WindowClassName, System.MainInstance);
 	FreeMem(WindowClassName);
 	FWindowClassName := '';
+	FWindowClass := 0;
 	end;
 end;
 
@@ -912,18 +933,18 @@ begin
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__KillWindow(). Release DC.']);
 	{$ENDIF}
-if (hWindow <> 0) and (dcWindow <> 0) then
+if (FWindow <> 0) and (FDeviceContext <> 0) then
 	begin
-	ReleaseDC(hWindow, dcWindow);
-	dcWindow := 0;
+	ReleaseDC(FWindow, FDeviceContext);
+	FDeviceContext := 0;
 	end;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__KillWindow(). Destroying window.']);
 	{$ENDIF}
-if hWindow <> 0 then
+if FWindow <> 0 then
 	begin
-	DestroyWindow(hWindow);
-	hWindow := 0;
+	DestroyWindow(FWindow);
+	FWindow := 0;
 	end;
 {$IFDEF SGWinAPIDebug}
 	SGLog.Source(['TSGContextWinAPI__KillWindow(). Unregister window class.']);
@@ -936,7 +957,7 @@ end;
 
 procedure TSGContextWinAPI.InitFullscreen(const VFullscreen : TSGBoolean);
 begin
-if hWindow = 0 then
+if FWindow = 0 then
 	inherited InitFullscreen(VFullscreen)
 else
 	if Fullscreen <> VFullscreen then
