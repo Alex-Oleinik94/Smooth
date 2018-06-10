@@ -18,7 +18,7 @@ uses
 	;
 
 type
-	TSGEngineConfigurationPanel = class(TSGComponent)
+	TSGEngineConfigurationPanel = class(TSGScreenComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -125,7 +125,7 @@ const
 
 class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreen): TSGBoolean;
 var
-	Component : TSGComponent;
+	Component : TSGScreenComponent;
 begin
 Result := True;
 if VScreen.HasChildren then
@@ -212,7 +212,7 @@ CreateChild(FCloseButton);
 FCloseButton.UserPointer:=Self;
 FCloseButton.Visible := True;
 FCloseButton.Caption := 'Close';
-FCloseButton.OnChange := TSGComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange);
+FCloseButton.OnChange := TSGScreenComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange);
 end;
 
 procedure TSGEngineConfigurationPanel.FromResize();

@@ -10,6 +10,7 @@ uses
 	,SaGeScreen
 	,SaGeImage
 	,SaGeCommonStructs
+	,SaGeScreenComponent
 	;
 
 type

@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeScreenBase
 	,SaGeScreen
+	,SaGeScreenComponent
 	;
 
 type

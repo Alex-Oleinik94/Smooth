@@ -23,22 +23,8 @@ uses
 	,SaGeCursor
 	,SaGeCommonStructs
 	,SaGeContextUtils
+	,SaGeScreenComponent
 	;
-
-type
-	TSGForm             = class;
-	TSGButton           = class;
-	TSGProgressBar      = class;
-	TSGButtonMenu       = class;
-	TSGScrollBar        = class;
-	TSGComboBox         = class;
-	TSGGrid             = class;
-	TSGButtonMenuButton = class;
-	TSGScreen           = class;
-
-{$DEFINE SCREEN_INTERFACE}
-{$INCLUDE SaGeScreenComponents.inc}
-{$UNDEF  SCREEN_INTERFACE}
 
 type
 	TSGScreen = class(TSGComponent, ISGScreen)
@@ -99,10 +85,6 @@ uses
 	,SaGeRenderInterface
 	,SaGeCommon
 	;
-
-{$DEFINE SCREEN_IMPLEMENTATION}
-{$INCLUDE SaGeScreenComponents.inc}
-{$UNDEF  SCREEN_IMPLEMENTATION}
 
 class function TSGScreened.ClassName() : TSGString;
 begin

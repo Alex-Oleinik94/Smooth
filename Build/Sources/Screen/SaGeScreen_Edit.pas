@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeScreenBase
-	,SaGeScreen
+	,SaGeScreenCommonComponents
 	;
 
 type

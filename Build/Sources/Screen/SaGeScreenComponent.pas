@@ -1,4 +1,17 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreenComponent;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeClasses
+	,SaGeCommonClasses
+	,SaGeScreenSkin
+	,SaGeCommonStructs
+	;
 type
 	TSGComponent = class;
 
@@ -28,7 +41,7 @@ type
 	PSGComponent          = ^ TSGComponent;
 	TSGComponentList      = packed array of TSGComponent;
 	TSGComponentListList  = packed array of TSGComponentList;
-	TSGComponentProcedure = procedure ( Component : TSGComponent );
+	TSGComponentProcedure = procedure (Component : TSGComponent);
 	TSGComponent          = class(TSGContextabled, ISGDeviceDependent, ISGComponent)
 			public
 		constructor Create();override;
@@ -38,7 +51,7 @@ type
 			// for-in loop
 		function GetEnumerator(): TSGComponentEnumerator;
 		function GetReverseEnumerator: TSGComponentEnumerator;
-			private
+			protected
 		function GetOption(const VName : TSGString) : TSGPointer;virtual;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;
 			public
@@ -207,15 +220,6 @@ type
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
 		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
 			public
-		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
 		FDrawClass:TSGDrawable;
@@ -226,9 +230,16 @@ type
 			public
 		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+
+implementation
+
+uses
+	 SaGeCommon
+	,SaGeMathUtils
+	,SaGeContextUtils
+	;
+
 class function TSGComponent.ClassName() : TSGString;
 begin
 Result := 'TSGComponent';
@@ -378,22 +389,6 @@ begin
 Result:=FVisibleTimer<0.05;
 end;
 
-function TSGComponent.AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButtonMenuButton then
-	Result:=TSGButtonMenuButton(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGGrid then
-	Result:=TSGGrid(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 function TSGComponent.IndexOf(const VComponent : TSGComponent ): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : LongInt;
@@ -441,22 +436,6 @@ FLeft:=FNeedLeft;
 FTop:=FNeedTop;
 end;
 
-function TSGComponent.AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGComboBox then
-	Result:=TSGComboBox(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGScrollBar then
-	Result:=TSGScrollBar(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 procedure TSGComponent.WriteBounds;
 begin
 writeln('Left = ',Left);
@@ -494,42 +473,10 @@ for Component in Self do
 	Component.Visible := Visible;
 end;
 
-function TSGComponent.AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButtonMenu then
-	Result:=TSGButtonMenu(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 function TSGComponent.GetChild(a:TSGInt32):TSGComponent;
 begin
 if (a-1 >= 0) and (a-1<=High(FChildren)) then
 	Result:=FChildren[a-1]
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGProgressBar then
-	Result:=TSGProgressBar(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButton then
-	Result:=TSGButton(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGForm then
-	Result:=TSGForm(Pointer(Self))
 else
 	Result:=nil;
 end;
@@ -1315,4 +1262,5 @@ else
 	FCurrent := nil;
 Result := FCurrent <> nil;
 end;
-{$ENDIF}
+
+end.

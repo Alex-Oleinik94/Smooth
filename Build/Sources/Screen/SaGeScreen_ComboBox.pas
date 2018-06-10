@@ -1,6 +1,20 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_ComboBox;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreenCommonComponents
+	,SaGeCommonStructs
+	,SaGeImage
+	;
+
 type
-	TSGComboBoxProcedure = TSGButtonMenuProcedure;
+	TSGComboBox = class;
+	TSGComboBoxProcedure = procedure (_OldIndex, _NewIndex : TSGInt32; _ComboBox : TSGComboBox);
 	TSGComboBox = class(TSGOpenComponent, ISGComboBox)
 			public
 		constructor Create();override;
@@ -48,9 +62,14 @@ type
 		property ItemsCount : TSGUInt32 read GetItemsCount;
 		property Items : PSGComboBoxItem read GetItems;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeContextUtils
+	,SaGeMathUtils
+	;
+
 class function TSGComboBox.ClassName() : TSGString;
 begin
 Result := 'TSGComboBox';
@@ -347,4 +366,4 @@ if FItems <> nil then
 inherited;
 end;
 
-{$ENDIF}
+end.

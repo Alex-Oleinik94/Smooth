@@ -1,4 +1,17 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Form;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	,SaGeScreenComponent
+	,SaGeImage
+	;
+
 type
 	PSGForm = ^ TSGForm;
 	TSGForm = class(TSGComponent)
@@ -18,9 +31,15 @@ type
 		procedure FromDraw;override;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeContextUtils
+	,SaGeMathUtils
+	,SaGeCommonStructs
+	,SaGeCommon
+	;
 
 class function TSGForm.ClassName() : TSGString; 
 begin
@@ -200,4 +219,5 @@ FCaption:='';
 FButtonsType:=SGFrameButtonsTypeCleared;
 inherited Destroy;
 end;
-{$ENDIF}
+
+end.

@@ -1,4 +1,15 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_Button;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreenCommonComponents
+	;
+
 type
 	TSGButton = class(TSGClickComponent, ISGButton)
 			public
@@ -18,9 +29,15 @@ type
 		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw;override;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	,SaGeCursor
+	,SaGeContextUtils
+	;
+
 class function TSGButton.ClassName() : TSGString; 
 begin
 Result := 'TSGButton';
@@ -98,4 +115,5 @@ destructor TSGButton.Destroy();
 begin
 inherited Destroy();
 end;
-{$ENDIF}
+
+end.

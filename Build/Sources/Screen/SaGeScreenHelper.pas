@@ -12,11 +12,17 @@ uses
 	,SaGeFont
 	
 	// Screen components
+	,SaGeScreenComponent
+	,SaGeScreenCommonComponents
 	,SaGeScreen_Panel
 	,SaGeScreen_Label
 	,SaGeScreen_Edit
 	,SaGeScreen_Picture
 	,SaGeScreen_RadioButton
+	,SaGeScreen_Button
+	,SaGeScreen_ComboBox
+	,SaGeScreen_Form
+	,SaGeScreen_ProgressBar
 	;
 
 // Base const & types
@@ -31,6 +37,9 @@ const
 type
 	TSGScreenEditTextTypeFunction = TSGEditTextTypeFunction;
 	TSGScreenEditTextTypeFunc = TSGScreenEditTextTypeFunction;
+// Component types
+type
+	TSGScreenComponentProcedure = TSGComponentProcedure;
 // Components types
 type
 	TSGScreenComponent   = TSGComponent;
