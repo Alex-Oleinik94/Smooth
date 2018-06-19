@@ -152,12 +152,17 @@ type
 		property Render : ISGRender read GetRender;
 		end;
 
+type
+	TSGRectangleWithRoundedCornersFloat   = TSGFloat32;
+	TSGRectangleWithRoundedCornersVector2 = TSGVector2f;
+	TSGRectangleWithRoundedCornersVector3 = TSGVector3f;
+
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGRoundQuad(const VRender:ISGRender;const Vertex12,Vertex32: TSGVertex2f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f;
 	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
 	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConstructRoundQuad(const VRender:ISGRender;const ArVertex:TSGVertex3fList;const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
+procedure SGRectangleWithRoundedCornersDraw(const VRender:ISGRender;const ArVertex:TSGVertex3fList;const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2i32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF}
@@ -230,8 +235,8 @@ var
 begin
 Vertex1.Import(Vertex12.x, Vertex12.y);
 Vertex3.Import(Vertex32.x, Vertex32.y);
-ArVertex := SGGetArrayOfRoundQuad(Vertex1,Vertex3,Radius,Interval);
-SGConstructRoundQuad(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
+ArVertex := SGRectangleWithRoundedCornersConstruct(Vertex1,Vertex3,Radius,Interval);
+SGRectangleWithRoundedCornersDraw(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
 SetLength(ArVertex,0);
 end;
 
@@ -247,12 +252,12 @@ procedure SGRoundQuad(
 var
 	ArVertex : TSGVertex3fList = nil;
 begin
-ArVertex := SGGetArrayOfRoundQuad(Vertex1,Vertex3,Radius,Interval);
-SGConstructRoundQuad(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
+ArVertex := SGRectangleWithRoundedCornersConstruct(Vertex1,Vertex3,Radius,Interval);
+SGRectangleWithRoundedCornersDraw(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
 SetLength(ArVertex,0);
 end;
 
-procedure SGConstructRoundQuad(
+procedure SGRectangleWithRoundedCornersDraw(
 	const VRender:ISGRender;
 	const ArVertex:TSGVertex3fList;
 	const Interval:LongInt;

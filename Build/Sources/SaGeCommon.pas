@@ -85,7 +85,7 @@ type
 operator + (const a, b : TSGPosition) : TSGPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const a, b : TSGCustomPosition) : TSGCustomPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGGetArrayOfRoundQuad(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
+function SGRectangleWithRoundedCornersConstruct(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
 function SGGetPointsCirclePoints(const FPoints:TSGVertex2fList):TSGUInt32List;
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -349,7 +349,7 @@ Vertexes[1].x := x2;
 Vertexes[1].y := y2;
 end;
 
-function SGGetArrayOfRoundQuad(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
+function SGRectangleWithRoundedCornersConstruct(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
 var
 	Vertex2,Vertex4: TSGVertex3f;
 	VertexR1,VertexR2,VertexR3,VertexR4: TSGVertex3f;

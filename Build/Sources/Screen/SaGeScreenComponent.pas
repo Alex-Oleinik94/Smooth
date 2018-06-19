@@ -195,6 +195,8 @@ type
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
 		function RightShift():TSGScreenInt;
+		procedure ChildToListEnd(const Index : TSGMaxEnum);
+		procedure ChildToListEnd(const Component : TSGComponent);
 			public
 		procedure ToFront();
 		function MustDestroyed() : TSGBoolean;
@@ -211,8 +213,10 @@ type
 		procedure KillChildren();
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetChildrenCount() : TSGUInt32;
 			public
 		property Children[Index : TSGInt32 (* Indexing [1..Size] *)]:TSGComponent read GetChild;
+		property ChildrenCount : TSGUInt32 read GetChildrenCount;
 		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
 		property Align : TSGByte read FAlign write CreateAlign;
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
@@ -239,6 +243,13 @@ uses
 	,SaGeMathUtils
 	,SaGeContextUtils
 	;
+
+function TSGComponent.GetChildrenCount() : TSGUInt32;
+begin
+Result := 0;
+if (FChildren <> nil) then
+	Result := Length(FChildren);
+end;
 
 class function TSGComponent.ClassName() : TSGString;
 begin
@@ -267,6 +278,37 @@ Result := False;
 if FChildren <> nil then
 	if Length(FChildren) > 0 then
 		Result := True;
+end;
+
+procedure TSGComponent.ChildToListEnd(const Component : TSGComponent);
+var
+	Index, i : TSGMaxEnum;
+begin
+Index := 0;
+if (FChildren <> nil) and (Length(FChildren) > 0) then
+	for i := 0 to High(FChildren) do
+		if FChildren[i] = Component then
+			begin
+			Index := i + 1;
+			break;
+			end;
+if (Index > 0) then
+	ChildToListEnd(Index);
+end;
+
+procedure TSGComponent.ChildToListEnd(const Index : TSGMaxEnum);
+var
+	i : TSGMaxEnum;
+	Component : TSGComponent;
+begin
+Component := nil;
+if (Index > 0) and (Index <= ChildCount) then
+	begin
+	Component := FChildren[Index - 1];
+	for i:= Index - 1 to FParent.ChildrenCount - 1 do
+		FParent.FChildren[i] := FParent.FChildren[i + 1];
+	FParent.FChildren[FParent.ChildrenCount - 1] := Component;
+	end;
 end;
 
 function TSGComponent.ChildCount() : TSGUInt32;
@@ -339,10 +381,14 @@ end;
 
 function TSGComponent.GetLocation() : TSGComponentLocation;
 var
-	Pos : TSGVector3f;
+	Position, Size : TSGVector2int32;
 begin
-Pos := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-Result.Import(Pos, SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)) - Pos);
+Position := GetVertex([SGS_LEFT,SGS_TOP], SG_VERTEX_FOR_PARENT);
+Size := GetVertex([SGS_RIGHT,SGS_BOTTOM], SG_VERTEX_FOR_PARENT);
+Size -= Position;
+Result.Import(
+	TSGComponentLocationVector.Create(Position.x, Position.y),
+	TSGComponentLocationVector.Create(Size.x, Size.y));
 end;
 
 procedure TSGComponent.ToFront();

@@ -50,11 +50,15 @@ const
 	SG_BOTTOM =                          $00001A;
 type
 	TSGCaption =  TSGString;
-	TSGScreenFloat = TSGFloat;
+	TSGScreenFloat = TSGFloat32;
 	TSGScreenTimer = TSGScreenFloat;
-	TSGComponentLocationType = TSGScreenFloat;
-	TSGComponentLocationVectorType = TSGVector2f;
-
+	TSGComponentLocationFloat = TSGFloat32;
+	TSGComponentLocationInt   = TSGInt16;
+	TSGComponentLocationType  = TSGComponentLocationInt;
+	TSGComponentLocationVectorType = TSGVector2int16;
+	TSGComponentLocationVector = TSGVector2int16;
+	TSGComponentLocationVectorFloat = TSGVector2f;
+	
 	TSGComponentLocation = object
 			protected
 		FPosition : TSGComponentLocationVectorType;
@@ -62,6 +66,8 @@ type
 			public
 		procedure Import(const VPosition, VSize : TSGComponentLocationVectorType ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Write(const VName : TSGString = ''); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function FloatPosition() : TSGComponentLocationVectorFloat;
+		function FloatPositionAndSize() : TSGComponentLocationVectorFloat;
 			public
 		property Size      : TSGComponentLocationVectorType read FSize     write FSize;
 		property Position  : TSGComponentLocationVectorType read FPosition write FPosition;
@@ -308,9 +314,19 @@ function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGCompo
 
 implementation
 
+function TSGComponentLocation.FloatPosition() : TSGComponentLocationVectorFloat;
+begin
+Result.Import(Position.x, Position.y);
+end;
+
+function TSGComponentLocation.FloatPositionAndSize() : TSGComponentLocationVectorFloat;
+begin
+Result := FloatPosition + TSGComponentLocationVectorFloat.Create(Size.x, Size.y);
+end;
+
 function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
-Result := SGComponentLocationImport(SGVertex2fImport(VLeft, VTop), SGVertex2fImport(VWidth, VHeight));
+Result := SGComponentLocationImport(TSGComponentLocationVectorType.Create(VLeft, VTop), TSGComponentLocationVectorType.Create(VWidth, VHeight));
 end;
 
 procedure TSGScreenSkinFrameColor.Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

@@ -378,8 +378,13 @@ Result := 'TSGScreenSkin';
 end;
 
 procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5);
+var
+	Position, PositionAndSize : TSGRectangleWithRoundedCornersVector2;
 begin
-SGRoundQuad(Render, Location.Position, Location.Position + Location.Size, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
+Position.Import(Location.Position.x, Location.Position.y);
+PositionAndSize.Import(Location.Size.x, Location.Size.y);
+PositionAndSize += Position;
+SGRoundQuad(Render, Position, PositionAndSize, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
 end;
 
 procedure TSGScreenSkin.PaintPanel(constref Panel : ISGPanel);
@@ -461,7 +466,7 @@ if  (ActiveTimer>SGZero) and
 if (Button.Caption<>'') and FontReady and (VisibleTimer>SGZero) then
 	begin
 	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
-	Font.DrawFontFromTwoVertex2f(Button.Caption, Location.Position, Location.Position + Location.Size);
+	Font.DrawFontFromTwoVertex2f(Button.Caption, Location.FloatPosition, Location.FloatPositionAndSize);
 	end;
 end;
 
@@ -509,21 +514,21 @@ else if Item.Active then
 	Render.Color(TextColor)
 else
 	Render.Color(DisabledTextColor);
-Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.Position, ItemLocation.Position + ItemLocation.Size);
+Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.FloatPosition, ItemLocation.FloatPositionAndSize);
 end;
 
 function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.SizeX := Location.SizeY;
-Result.SizeY := OpenLocation.Size.Y * (ComboBox.Lines / ComboBox.ItemsCount);
+Result.SizeY := Round(OpenLocation.Size.Y * (ComboBox.Lines / ComboBox.ItemsCount));
 Result.PositionX := OpenLocation.PositionX + OpenLocation.SizeX - Location.SizeY;
-Result.PositionY := OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.FirstItemIndex / ComboBox.ItemsCount);
+Result.PositionY := Round(OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.FirstItemIndex / ComboBox.ItemsCount));
 end;
 
 function GetItemLocation(const Index : TSGUInt32; const NeedPaintScroll : TSGBool = False):TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := OpenLocation;
-Result.SizeY := Result.SizeY / ComboBox.Lines;
+Result.SizeY := Round(Result.SizeY / ComboBox.Lines);
 Result.PositionY := Result.PositionY + Index * Result.SizeY;
 if NeedPaintScroll then
 	Result.SizeX := Result.SizeX - Location.SizeY;
@@ -592,7 +597,7 @@ if  (ActiveTimer > SGZero) and
 if OpenTimer > SGZero then
 	begin
 	TextLocation := Location;
-	TextLocation.SizeY := TextLocation.SizeY * ( 1 + (ComboBox.Lines - 1) * OpenTimer);
+	TextLocation.SizeY := Round(TextLocation.SizeY * ( 1 + (ComboBox.Lines - 1) * OpenTimer));
 	
 	PaintOpened(TextLocation);
 	end
@@ -606,13 +611,13 @@ if 1 - OpenTimer > SGZero then
 		Render.Color(FColors.FText.FFirst.WithAlpha(Sqr((1 - OpenTimer) * VisibleTimer)));
 		
 		FComboBoxImage.DrawImageFromTwoVertex2fAsRatio(
-			TextLocation.Position + TextLocation.Size - SGVertex2fImport(Location.SizeY, TextLocation.SizeY),
-			TextLocation.Position + TextLocation.Size,
+			TextLocation.FloatPositionAndSize - TSGComponentLocationVectorFloat.Create(Location.SizeY, TextLocation.SizeY),
+			TextLocation.FloatPositionAndSize,
 			False,0.5);
 		end;
 	if ComboBox.GetSelectedItem() <> nil then
 		begin
-		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.Position, TextLocation.Position + TextLocation.Size);
+		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.FloatPosition, TextLocation.FloatPositionAndSize);
 		end;
 	end;
 end;
@@ -629,7 +634,7 @@ if (VLabel.Caption <> '') and FontReady then
 	else
 		Render.Color(FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer));
 	Font.DrawFontFromTwoVertex2f(VLabel.Caption,
-		Location.Position, Location.Position + Location.Size,
+		Location.FloatPosition, Location.FloatPositionAndSize,
 		VLabel.TextPosition);
 	end;
 end;
@@ -676,11 +681,11 @@ if  (ActiveTimer>SGZero) and
 if FontReady and (Edit.Caption <> '') then
 	begin
 	Render.Color4f(1, 1, 1, VisibleTimer);
-	Font.DrawFontFromTwoVertex2f(Edit.Caption, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
+	Font.DrawFontFromTwoVertex2f(Edit.Caption, Location.FloatPosition + SGX(3), Location.FloatPositionAndSize - SGX(6), False);
 	if (Edit.CursorTimer > 0) and Edit.NowEditing then
 		begin
 		Render.Color4f(1, 0.5, 0, VisibleTimer * Edit.CursorTimer);
-		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, Location.Position + SGX(3), Location.Position + Location.Size - SGX(6), False);
+		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, Location.FloatPosition + SGX(3), Location.FloatPositionAndSize - SGX(6), False);
 		end;
 	end;
 end;
@@ -696,7 +701,7 @@ begin
 Radius := 5;
 Location := ProgressBar.GetLocation();
 Location2 := Location;
-Location2.SizeX := Location2.Size.X * ProgressBar.Progress;
+Location2.SizeX := Round(Location2.Size.X * ProgressBar.Progress);
 
 Active := ProgressBar.Active;
 Visible := ProgressBar.Visible;
@@ -728,7 +733,7 @@ if FontReady and ProgressBar.ViewCaption then
 	Render.Color4f(1, 1, 1, VisibleTimer);
 	Font.DrawFontFromTwoVertex2f(
 		SGStringIf(ProgressBar.ViewCaption, ProgressBar.Caption + ' ') + SGFloatToString(100 * ProgressBar.Progress , 2) + '%',
-		Location.Position, Location.Position + Location.Size);
+		Location.FloatPosition, Location.FloatPositionAndSize);
 	end;
 end;
 

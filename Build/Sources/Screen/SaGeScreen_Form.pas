@@ -48,25 +48,10 @@ end;
 
 procedure TSGForm.FromUpDate(var FCanChange:Boolean);
 var
-	I,Iam:LongInt;
-	VPointer:TSGComponent;
+	i : TSGLongInt;
 begin
-if (FParent<>nil) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
-	begin
-	Iam:=-1;
-	for i:=Low(FParent.FChildren) to High(FParent.FChildren) do
-		if FParent.FChildren[i]=Self then
-			begin
-			Iam:=i;
-			VPointer:=FParent.FChildren[i];
-			end;
-	if Iam<>-1 then
-		begin
-		for i:=Iam to High(FParent.FChildren)-1 do
-			FParent.FChildren[i]:=FParent.FChildren[i+1];
-		FParent.FChildren[High(FParent.FChildren)]:=VPointer;
-		end;
-	end;
+if (FParent <> nil) and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGDownKey)) then
+	FParent.ChildToListEnd(Self);
 if FRePlace then
 	begin
 	if Context.CursorKeysPressed(SGRightCursorButton) then
