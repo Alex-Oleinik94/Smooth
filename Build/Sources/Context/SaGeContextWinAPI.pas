@@ -27,6 +27,8 @@ uses
 	,jwauserenv
 	;
 type
+	TRectangle = Windows.TRect;
+	
 	TSGContextWinAPI = class(TSGContext)
 			public
 		constructor Create();override;
@@ -70,8 +72,8 @@ type
 		function  WindowInit(): TSGBoolean;
 		procedure KillWindow();
 		function  CreateWindow(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal) : TSGBoolean;
-		class function GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		class function GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function GetClientWindowRectangle(const _Window : HWND) : TRectangle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function GetWindowRectangle(const _Window : HWND) : TRectangle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function SetWindowPlacement(const _Placement : TSGUInt32) : TSGBoolean;
 		procedure ThrowError(const ErrorString : TSGString);
 		procedure HandlingSizingFromRect(const PR : PRect = nil);
@@ -234,14 +236,14 @@ begin
 
 end;
 
-class function TSGContextWinAPI.GetWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+class function TSGContextWinAPI.GetWindowRectangle(const _Window : HWND) : TRectangle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Windows.GetWindowRect(VWindow, Result);
+Windows.GetWindowRect(_Window, Result);
 end;
 
-class function TSGContextWinAPI.GetClientWindowRect(const VWindow : HWND) : TRect;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+class function TSGContextWinAPI.GetClientWindowRectangle(const _Window : HWND) : TRectangle;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Windows.GetClientRect(VWindow, Result);
+Windows.GetClientRect(_Window, Result);
 end;
 
 function  TSGContextWinAPI.GetWindow() : TSGPointer;
@@ -353,14 +355,14 @@ end;
 
 procedure TSGContextWinAPI.SetCursorPosition(const VPosition : TSGPoint2int32);
 var
-	WindowShift : Windows.TRect;
+	WindowShift : TRectangle;
 	ClientShift : TSGPoint2int32;
 begin
 if FFullscreen then
 	Windows.SetCursorPos(VPosition.x, VPosition.y)
 else
 	begin
-	WindowShift := TSGContextWinAPI.GetWindowRect(FWindow);
+	WindowShift := GetWindowRectangle(FWindow);
 	ClientShift := ShiftClientArea();
 	Windows.SetCursorPos(VPosition.x + WindowShift.left + ClientShift.x, VPosition.y + WindowShift.top + ClientShift.y);
 	end;
@@ -388,25 +390,25 @@ end;
 function TSGContextWinAPI.GetCursorPosition: TSGPoint2int32;
 var
 	Position : Windows.TPoint;
-	Shift : Windows.TRect;
+	Shift : TRectangle;
 begin
 Windows.GetCursorPos(Position);
 if FFullscreen then
 	Result.Import(Position.x, Position.y)
 else
 	begin
-	Shift := TSGContextWinAPI.GetWindowRect(FWindow);
+	Shift := GetWindowRectangle(FWindow);
 	Result.Import(Position.x - Shift.left, Position.y - Shift.top);
 	end;
 end;
 
 function TSGContextWinAPI.GetWindowArea(): TSGPoint2int32;
 var
-	Rec : TRect;
+	Rectangle : TRectangle;
 begin
-Windows.GetWindowRect(FWindow, Rec);
-Result.x := Rec.Left;
-Result.y := Rec.Top;
+Rectangle := GetWindowRectangle(FWindow);
+Result.x := Rectangle.Left;
+Result.y := Rectangle.Top;
 end;
 
 constructor TSGContextWinAPI.Create;
@@ -437,15 +439,17 @@ procedure TSGContextWinAPI.Initialize(const _WindowPlacement : TSGContextWindowP
 
 procedure HandlingReSizingFromRect();
 var
-	WRect : Windows.TRect;
+	WindowRectangle : Windows.TRect;
+	ClientWindowRectangle : Windows.TRect;
 begin
-Windows.GetWindowRect(FWindow, WRect);
-FWidth  :=  WRect.Right  - WRect.Left;
-FHeight :=  WRect.Bottom - WRect.Top;
-FLeft := WRect.Left;
-FTop  := WRect.Top;
-FClientHeight := GetClientWindowRect(FWindow).bottom - GetClientWindowRect(FWindow).top;
-FClientWidth  := GetClientWindowRect(FWindow).right - GetClientWindowRect(FWindow).left;
+WindowRectangle := GetWindowRectangle(FWindow);
+FWidth  :=  WindowRectangle.Right  - WindowRectangle.Left;
+FHeight :=  WindowRectangle.Bottom - WindowRectangle.Top;
+FLeft := WindowRectangle.Left;
+FTop  := WindowRectangle.Top;
+ClientWindowRectangle := GetClientWindowRectangle(FWindow);
+FClientHeight := ClientWindowRectangle.bottom - ClientWindowRectangle.top;
+FClientWidth  := ClientWindowRectangle.right  - ClientWindowRectangle.left;
 Resize();
 end;
 
