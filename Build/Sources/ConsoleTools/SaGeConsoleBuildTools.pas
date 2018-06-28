@@ -290,7 +290,7 @@ end;
 
 begin
 Result := True;
-AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'),',');
+AllTargets := SGStringListFromString(Make.GetConstant('SG_TARGET_LIST'), ',');
 SGStringListTrimAll(AllTargets, ' ');
 AllTargets := SGUpCasedStringList(AllTargets, True);
 with TSGConsoleCaller.Create(VParams) do
@@ -315,7 +315,7 @@ procedure ProcessVersionFile(var Make : TSGMakefileReader; const ReleaseVersion 
 begin
 SGConsoleIncEngineVersion(ReleaseVersion);
 SGConvertFileToPascalUnit(
-	Make.GetConstant('SGDATAPATH') + '/Engine/version.txt',
+	Make.GetConstant('SGDATAPATH') + DirectorySeparator + 'Engine' + DirectorySeparator + 'version.txt',
 	Make.GetConstant('SGRESOURCESPATH'),
 	Make.GetConstant('SGRESOURCESCACHEPATH'),
 	'SaGeVersionFile',
@@ -327,7 +327,7 @@ end;
 
 procedure ProcessPackages(var Make : TSGMakefileReader);
 var
-	i : TSGUInt32;
+	i : TSGMaxEnum;
 begin
 if OpenPackages then
 	SGPackagesToMakefile(Make, Target, IsRelease);
@@ -350,25 +350,27 @@ end;
 var
 	Make : TSGMakefileReader = nil;
 begin
-Make := TSGMakefileReader.Create('./Makefile');
+Make := TSGMakefileReader.Create('.' + DirectorySeparator + 'Makefile');
 if not ReadParams(Make) then
 	begin
 	Make.Destroy();
-	Halt(1);
-	end;
+	Exit;
+	end
+else
+	SGLogMakeSignificant();
 PrintLogo();
 Make.Execute('clear_files');
 if IsRelease then
 	begin
 	SGBuildFiles(
-		Make.GetConstant('SGBUILDPATH') + '/BuildFiles.ini',
+		Make.GetConstant('SGBUILDPATH') + DirectorySeparator + 'BuildFiles.ini',
 		Make.GetConstant('SGRESOURCESPATH'),
 		Make.GetConstant('SGRESOURCESCACHEPATH'),
 		Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
-	ProcessVersionFile(Make,'True');
+	ProcessVersionFile(Make, 'True');
 	end
 else
-	ProcessVersionFile(Make,'False');
+	ProcessVersionFile(Make, 'False');
 ProcessPackages(Make);
 if SGUpCaseString(Target) = 'ANDROID' then
 	Bitrate := 32
@@ -400,7 +402,7 @@ end;
 
 procedure SGConsoleBuildFiles(const VParams : TSGConcoleCallerParams = nil);
 begin
-SGBuildFiles(VParams[0],VParams[1],VParams[2],VParams[3]);
+SGBuildFiles(VParams[0], VParams[1], VParams[2], VParams[3]);
 end;
 
 end.

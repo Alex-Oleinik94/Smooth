@@ -46,7 +46,6 @@ uses
 	,SaGeConsoleProgramDynamicHeadersMaker
 	,SaGeConsoleProgramUSMBIOS
 	,SaGeConsoleProgramEngineRenamer
-	,SaGeMaz1gWizard
 	;
 
 var

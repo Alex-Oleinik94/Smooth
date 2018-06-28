@@ -313,18 +313,30 @@ end;
 procedure TSGMakefileReader.SetConstant(const Name, Value : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	UpCasedName : TSGString;
-	i : TSGUInt32;
+	i : TSGMaxEnum;
+	ConstantAdded : TSGBoolean;
 begin
 UpCasedName := SGUpCaseString(Name);
-if (FConstants <> nil) and (Length(FConstants)>0) then
+if (FConstants <> nil) and (Length(FConstants) > 0) then
 	begin
+	ConstantAdded := False;
 	for i := 0 to High(FConstants) do
 		if FConstants[i].FName = UpCasedName then
 			begin
 			FConstants[i].FIdentifier.FDependentIdentifier := 
 				Value;
-			break;
+			ConstantAdded := True;
 			end;
+	if not ConstantAdded then
+		begin
+		if ConstantCount() = 0 then
+			SetLength(FConstants, 1)
+		else
+			SetLength(FConstants, Length(FConstants) + 1);
+		FConstants[High(FConstants)].FName := UpCasedName;
+		FConstants[High(FConstants)].FIdentifier.FDependentIdentifier := Value;
+		FConstants[High(FConstants)].FIdentifier.FAbsoluteIdentifier := '';
+		end;
 	end;
 end;
 

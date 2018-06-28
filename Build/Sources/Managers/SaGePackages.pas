@@ -42,6 +42,7 @@ function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORT
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackageToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackageName : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPackageAllreadyInMakefile(var Make : TSGMakefileReader; const PackageName : TSGString) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetPackagesList(var Make : TSGMakefileReader) : TSGStringList; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIsPackageOpen(var Make : TSGMakefileReader;const PackageName : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGIsPackageOpen(const PackagePath : TSGString) : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -103,41 +104,69 @@ if StartSize <> MemStream.Size then
 MemStream.Destroy();
 end;
 
+function SGPackageAllreadyInMakefile(var Make : TSGMakefileReader; const PackageName : TSGString) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	AddedPackages : TSGString;
+	PackageAppellative : TSGString;
+	UpCasedPackageName : TSGString;
+	i : TSGMaxEnum;
+begin
+Result := False;
+AddedPackages := Make.GetConstant('ADDEDPACKAGES', SGMRIdentifierTypeDependent);
+PackageAppellative := '';
+UpCasedPackageName := SGUpCaseString(PackageName);
+for i := 1 to Length(AddedPackages) do
+	begin
+	if (AddedPackages[i] = '"') and (PackageAppellative <> '') then
+		begin
+		if (SGUpCaseString(PackageAppellative) = UpCasedPackageName) then
+			Result := True;
+		PackageAppellative := '';
+		end
+	else if (AddedPackages[i] <> '"') then
+		PackageAppellative += AddedPackages[i];
+	end;
+end;
+
 function SGPackageToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackageName : TSGString; const BuildFiles : TSGBool = False) : TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	PackageInfo : TSGPackageInfo;
 	Str : TSGString;
 begin
 Result := False;
-PackageInfo := SGGetPackageInfo(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageName);
+PackageInfo := SGGetPackageInfo(Make.GetConstant('SGPACKAGESPATH') + DirectorySeparator + PackageName);
 if (SGUpCaseString(PackageInfo.FName) <> SGUpCaseString(PackageName)) then
-	SGLog.Source(['Package "',PackageName,'" have other name "',PackageInfo.FName,'".'])
+	TSGLog.Source(['Package "', PackageName, '" have other name "', PackageInfo.FName, '".'])
 else if (SGUpCaseString(Target) in PackageInfo.FUnsupportedTargets) then
-	SGLog.Source(['Package "',PackageName,'" unsupporting target "',Target,'".'])
+	TSGLog.Source(['Package "', PackageName, '" unsupporting target "', Target, '".'])
 else
 	begin
 	Result := SGPackagesToMakefile(Make, Target, PackageInfo.FDependingPackages);
 	if Result then
-		begin
-		for Str in PackageInfo.FSourcesPaths do
-			Make.SetConstant(
-				'BASEARGS', 
-				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fu' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/' + Str + ' ');
-		for Str in PackageInfo.FIncludesPaths do
-			Make.SetConstant(
-				'BASEARGS', 
-				Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/' + Str + ' ');
-		Make.RecombineIdentifiers();
-		SGRegisterPackage(PackageInfo, Make.GetConstant('SGFILEREGISTRATIONPACKAGES'));
-		SGLog.Source(['Package "',PackageName,'" added.']);
-		if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini') then
-			SGBuildFiles(
-				Make.GetConstant('SGPACKAGESPATH') + '/' + PackageInfo.FName + '/BuildFiles.ini',
-				Make.GetConstant('SGRESOURCESPATH'),
-				Make.GetConstant('SGRESOURCESCACHEPATH'),
-				Make.GetConstant('SGFILEREGISTRATIONRESOURCES'),
-				PackageInfo.FName);
-		end;
+		if SGPackageAllreadyInMakefile(Make, PackageName) then
+			TSGLog.Source(['Package "', PackageName, '" allready in makefile.'])
+		else
+			begin
+			Make.SetConstant('ADDEDPACKAGES', Make.GetConstant('ADDEDPACKAGES', SGMRIdentifierTypeDependent) + '"' + PackageName + '"');
+			for Str in PackageInfo.FSourcesPaths do
+				Make.SetConstant(
+					'BASEARGS', 
+					Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fu' + Make.GetConstant('SGPACKAGESPATH') + DirectorySeparator + PackageInfo.FName + DirectorySeparator + Str + ' ');
+			for Str in PackageInfo.FIncludesPaths do
+				Make.SetConstant(
+					'BASEARGS', 
+					Make.GetConstant('BASEARGS', SGMRIdentifierTypeDependent) + ' -Fi' + Make.GetConstant('SGPACKAGESPATH') + DirectorySeparator + PackageInfo.FName + DirectorySeparator + Str + ' ');
+			Make.RecombineIdentifiers();
+			SGRegisterPackage(PackageInfo, Make.GetConstant('SGFILEREGISTRATIONPACKAGES'));
+			TSGLog.Source(['Package "', PackageName, '" added.']);
+			if BuildFiles and SGFileExists(Make.GetConstant('SGPACKAGESPATH') + DirectorySeparator + PackageInfo.FName + DirectorySeparator + 'BuildFiles.ini') then
+				SGBuildFiles(
+					Make.GetConstant('SGPACKAGESPATH') + DirectorySeparator + PackageInfo.FName + DirectorySeparator + 'BuildFiles.ini',
+					Make.GetConstant('SGRESOURCESPATH'),
+					Make.GetConstant('SGRESOURCESCACHEPATH'),
+					Make.GetConstant('SGFILEREGISTRATIONRESOURCES'),
+					PackageInfo.FName);
+			end;
 	end;
 PackageInfo.Clear();
 end;

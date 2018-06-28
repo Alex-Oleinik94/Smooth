@@ -674,13 +674,16 @@ Messages();
 StartComputeTimer();
 while Active and (FNewContextType = nil) do
 	begin
-	if FIncessantlyPainting > 0 then
-		Paint()
+	if FVisible then
+		if FIncessantlyPainting > 0 then
+			Paint()
+		else
+			begin
+			Sleep(200);
+			Paint();
+			end
 	else
-		begin
-		Sleep(200);
-		Paint();
-		end;
+		Sleep(20);
 	{$IFDEF CONTEXT_DEBUGING}
 		WriteLn('TSGContext__Run(): Before continue looping');
 		{$ENDIF}
