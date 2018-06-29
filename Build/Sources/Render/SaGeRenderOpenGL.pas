@@ -56,7 +56,7 @@ uses
 		,xutil
 		{$ENDIF}
 	{$IFDEF MSWINDOWS}
-		,windows
+		,Windows
 		{$ENDIF}
 	{$IFDEF ANDROID}
 		,egl
@@ -93,8 +93,9 @@ type
 
 	TSGRenderOpenGL = class(TSGRender)
 			public
-		constructor Create ();override;
-		destructor  Destroy();override;
+		constructor Create (); override;
+		destructor  Destroy(); override;
+		class function RenderName() : TSGString; override;
 			protected
 		FContext : TSGRenderOpenGLContext;
 		{$IFDEF DARWIN}
@@ -293,6 +294,17 @@ uses
 	,SaGeLists
 	{$ENDIF}
 	;
+
+class function TSGRenderOpenGL.RenderName() : TSGString;
+begin
+Result := 
+	{$IFNDEF MOBILE}
+		'OpenGL'
+	{$ELSE}
+		'GLES'
+		{$ENDIF}
+	;
+end;
 
 class function TSGRenderOpenGL.ClassName() : TSGString;
 begin

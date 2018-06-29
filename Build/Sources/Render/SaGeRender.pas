@@ -20,8 +20,9 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-		function GetRenderType():TSGRenderType;virtual;
-		class function Suppored() : TSGBoolean;virtual;
+		function GetRenderType():TSGRenderType; virtual;
+		class function Suppored() : TSGBoolean; virtual;
+		class function RenderName() : TSGString; virtual;
 			protected
 		function GetWidth() : TSGAreaInt;virtual;
 		function GetHeight() : TSGAreaInt;virtual;
@@ -215,6 +216,11 @@ end;
 {$INCLUDE SaGeCommonStructs.inc}
 {$UNDEF INC_PLACE_RENDER_IMPLEMENTATION}
 {$UNDEF RENDER_CLASS}
+
+class function TSGRender.RenderName() : TSGString;
+begin
+Result := 'Unknown';
+end;
 
 class function TSGRender.Suppored() : TSGBoolean;
 begin

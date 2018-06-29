@@ -34,8 +34,9 @@ type
 	TSGRDTypeDataBuffer = (SGRDTypeDataBufferVertex, SGRDTypeDataBufferColor, SGRDTypeDataBufferNormal, SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX8 = class(TSGRender)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function RenderName() : TSGString; override;
 			protected
 		pD3D        : IDirect3D8;
 		pDevice     : IDirect3DDevice8;
@@ -278,6 +279,11 @@ end;
 operator *  (const Matrix1, Matrix2 : D3DMATRIX) : D3DMATRIX;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 Result := TSGMatrix4x4(Matrix1) * TSGMatrix4x4(Matrix2);
+end;
+
+class function TSGRenderDirectX8.RenderName() : TSGString;
+begin
+Result := 'Direct X 8';
 end;
 
 class function TSGRenderDirectX8.ClassName() : TSGString;

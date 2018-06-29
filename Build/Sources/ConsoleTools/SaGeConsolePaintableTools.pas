@@ -15,12 +15,12 @@ uses
 type
 	TSGAllApplicationsDrawable = class(TSGDrawable)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		procedure Paint();override;
-		procedure LoadDeviceResources();override;
-		procedure DeleteDeviceResources();override;
-		class function ClassName() : TSGString;override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		procedure Paint(); override;
+		procedure LoadDeviceResources(); override;
+		procedure DeleteDeviceResources(); override;
+		class function ClassName() : TSGString; override;
 		end;
 
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil);overload;
@@ -519,7 +519,7 @@ end;
 
 class function TSGAllApplicationsDrawable.ClassName() : TSGString;
 begin
-Result := 'TSGAllApplicationsDrawable';
+Result := 'Graphical applications';
 end;
 
 procedure TSGAllApplicationsDrawable.LoadDeviceResources();

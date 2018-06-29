@@ -220,7 +220,7 @@ Result := False;
 	{$ENDIF}
 if (FContext.NewContext <> nil) and (FContext.Active or (not (FContext is FContext.NewContext))) then
 	begin
-	OldContextName := FContext.ClassName();
+	OldContextName := FContext.ContextName();
 	{$IFDEF CONTEXT_CHANGE_DEBUGING}
 		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Begin changing.']);
 		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Creating new context.']);
@@ -249,7 +249,7 @@ if (FContext.NewContext <> nil) and (FContext.Active or (not (FContext is FConte
 	FContext.Initialize();
 	FContext.LoadDeviceResources();
 	Result := FContext.Active;
-	SGHint(['Changing context (`' + OldContextName + '` --> `' + FContext.ClassName() + '`)' + Iff(Result, ' successfull.', ' failed!')]);
+	SGHint(['Changing context (`' + OldContextName + '` --> `' + FContext.ContextName() + '`)' + Iff(Result, ' successfull.', ' failed!')]);
 	end;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
 	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Leave.']);
@@ -259,7 +259,7 @@ end;
 function TSGContextHandler.Initialize() : TSGBoolean;
 begin
 Result := False;
-SGHint('Run (Class = `'+FPaintableClass.ClassName() +'`, Context = `'+FContextClass.ClassName()+'`, Render = `'+FRenderClass.ClassName()+'`)', SGCasesOfPrintFull, True);
+SGHint('Run (Class = `'+FPaintableClass.ClassName() +'`, Context = `'+FContextClass.ContextName()+'`, Render = `'+FRenderClass.RenderName()+'`)', SGCasesOfPrintFull, True);
 PrintSettings();
 if not FRenderClass.Suppored then
 	begin

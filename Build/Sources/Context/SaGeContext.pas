@@ -34,6 +34,7 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			public
+		class function ContextName() : TSGString; virtual;
 		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);virtual;
 		procedure Run();virtual;
 		procedure Messages();virtual;
@@ -237,6 +238,11 @@ uses
 		,SaGeContextGLUT
 		{$ENDIF}
 	;
+
+class function TSGContext.ContextName() : TSGString;
+begin
+Result := 'Unknown';
+end;
 
 procedure TSGContext.SetForeground();
 begin

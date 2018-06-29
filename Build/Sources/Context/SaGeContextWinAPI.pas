@@ -31,10 +31,11 @@ type
 	
 	TSGContextWinAPI = class(TSGContext)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 			public
-		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
+		class function ContextName() : TSGString; override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal); override;
 		procedure Messages();override;
 		procedure SwapBuffers();override;
 		function  GetWindowArea(): TSGPoint2int32;override;
@@ -100,6 +101,11 @@ uses
 	
 	,SysUtils
 	;
+
+class function TSGContextWinAPI.ContextName() : TSGString;
+begin
+Result := 'WinAPI';
+end;
 
 procedure TSGContextWinAPI.SetVisible(const _Visible : TSGBoolean);
 begin

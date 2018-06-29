@@ -35,8 +35,9 @@ type
 	TSGRDTypeDataBuffer = (SGRDTypeDataBufferVertex, SGRDTypeDataBufferColor, SGRDTypeDataBufferNormal, SGRDTypeDataBufferTexVertex);
 	TSGRenderDirectX9 = class(TSGRender)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function RenderName() : TSGString; override;
 			protected
 		pD3D      : IDirect3D9;
 		pD3DEx    : IDirect3D9Ex;
@@ -299,6 +300,11 @@ if AdapterCount > 0 then
 			SGLog.Source(['	DeviceIdentifier: ', GUIDToString(Adapter.DeviceIdentifier)], False);
 			SGLog.Source(['	WHQLLevel:        ', Adapter.WHQLLevel], False);
 			end;
+end;
+
+class function TSGRenderDirectX9.RenderName() : TSGString;
+begin
+Result := 'Direct X 9';
 end;
 
 class function TSGRenderDirectX9.ClassName() : TSGString;
