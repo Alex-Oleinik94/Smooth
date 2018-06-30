@@ -1,8 +1,9 @@
-<img src="Data/Engine/Icon.png" align="right" />
+<img src="Data/Engine/Icon.png" align="right" width="200" height="200" />
 
 # [SaGe Engine](http://github.com/SanchesMaan/SaGe)
 
 Initially, [SaGe] was conceived as light cross-platform 3D [game engine] that used [Free Pascal Compiler].
+
 Now [SaGe] supports:
 
  * [OpenGL](https://www.opengl.org), GLES for [Android](https://www.android.com), [FreeGLUT](http://freeglut.sourceforge.net/)/[GLUT](https://www.opengl.org/resources/libraries/glut)
@@ -16,8 +17,8 @@ Now [SaGe] supports:
 
 # Links
 
-Binary data: [Binary data];
-See also: [SaGe Programming].
+ * Binary data(for examples etc.) and libraries: [Binary data]
+ * See also: [SaGe Programming]
 
 [SaGe Programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd
 [Binary data]: http://yadi.sk/d/2dXlhmaQ3VmgBd/SaGe
