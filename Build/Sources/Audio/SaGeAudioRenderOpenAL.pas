@@ -82,6 +82,7 @@ type
 		constructor Create(); override;
 		class function Suppored() : TSGBool; override;
 		class function ClassName() : TSGString; override;
+		class function AudioRenderName() : TSGString; override;
 			private
 		FALUTSuppored : TSGBool;
 			private
@@ -411,6 +412,11 @@ inherited;
 FALUTSuppored := DllManager.Suppored('alut');
 FContext := nil;
 FDevice := nil;
+end;
+
+class function TSGAudioRenderOpenAL.AudioRenderName() : TSGString;
+begin
+Result := 'OpenAL';
 end;
 
 class function TSGAudioRenderOpenAL.ClassName() : TSGString;

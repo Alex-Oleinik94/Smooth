@@ -39,6 +39,7 @@ type
 		function TryChangeContext() : TSGBoolean;
 		procedure PrintSettings(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		function GetPaintableExemplar() : TSGDrawable;
+		procedure ViewRunParams();
 			public
 		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
 		property Context : TSGContext read FContext;
@@ -68,6 +69,8 @@ uses
 	,SaGeCursor
 	,SaGeLog
 	,SaGeStringUtils
+	,SaGeTextMultiStream
+	,SaGeTextLogStream
 	{$IFDEF ANDROID}
 		,SaGeContextAndroid
 		{$ENDIF}
@@ -145,16 +148,26 @@ if Length(Result) > 0 then
 	Result[1] := UpCase(Result[1]);
 end;
 
+const
+	DefaultColor = 7;
+	PropertyNameColor = 15;
+	ProperyValueColor = 10;
+	PunctuationMarkColor = 14;
 var
+	TextStream : TSGTextMultiStream = nil;
 	O : TSGContextOption;
 	First : TSGBoolean = True;
-	S : TSGString = '';
 	StandartOptions : TSGStringList = nil;
 	i : TSGUInt32;
 begin
 if (FSettings = nil) or (Length(FSettings) = 0) then
 	exit;
-S += 'Options (';
+TextStream := TSGTextMultiStream.Create(SGCasesOfPrintFull);
+TextStream.Get(TSGTextLogStream).Write(SGLogDateTimeString());
+TextStream.TextColor(DefaultColor);
+TextStream.Write('Options ');
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write('(');
 StandartOptions += 'WIDTH';
 StandartOptions += 'HEIGHT';
 StandartOptions += 'LEFT';
@@ -164,47 +177,86 @@ for O in FSettings do
 	if First then
 		First := False
 	else
-		S += ', ';
+		begin
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write(', ');
+		end;
 	if (O.FName = 'FULLSCREEN') and (TSGMaxEnum(O.FOption) = 0) then
-		S += '!';
+		begin
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('!');
+		end;
 	if O.FName = 'AUDIORENDER' then
-		S += 'Audio'
+		begin
+		TextStream.TextColor(PropertyNameColor);
+		TextStream.Write('Audio');
+		end
 	else
-		S += WordName(O.FName);
+		begin
+		TextStream.TextColor(PropertyNameColor);
+		TextStream.Write(WordName(O.FName));
+		end;
 	if O.FName in StandartOptions then
 		begin
-		S += '=' + SGStr(TSGMaxEnum(O.FOption));
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('=');
+		TextStream.TextColor(ProperyValueColor);
+		TextStream.Write(SGStr(TSGMaxEnum(O.FOption)));
 		end
 	else if O.FName = 'AUDIORENDER' then
-		S += ' is ' + TSGAudioRenderClass(O.FOption).ClassName()
+		begin
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write(': ');
+		TextStream.TextColor(ProperyValueColor);
+		TextStream.Write(TSGAudioRenderClass(O.FOption).AudioRenderName());
+		end
 	else if O.FName = 'TITLE' then
 		begin
-		S += '=' + '''' + SGPCharToString(PChar(O.FOption)) + '''';
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('=' + '''');
+		TextStream.TextColor(ProperyValueColor);
+		TextStream.Write(SGPCharToString(PChar(O.FOption)));
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('''');
 		end
 	else if (O.FName = 'FILES TO OPEN') then
 		begin
-		S += '=[';
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('=[');
 		if Length(TSGStringList(O.FOption)) > 0 then
 			for i := 0 to High(TSGStringList(O.FOption)) do
 				begin
 				if i <> 0 then
-					S += ', ';
-				S += '`' + TSGStringList(O.FOption)[i] + '`';
+					begin
+					TextStream.TextColor(PunctuationMarkColor);
+					TextStream.Write(', ');
+					end;
+				TextStream.TextColor(PunctuationMarkColor);
+				TextStream.Write('`');
+				TextStream.TextColor(ProperyValueColor);
+				TextStream.Write(TSGStringList(O.FOption)[i]);
+				TextStream.TextColor(PunctuationMarkColor);
+				TextStream.Write('`');
 				end;
-		S += ']';
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write(']');
 		end
 	else if (O.FName = 'MIN') or (O.FName = 'MAX') or (O.FName = 'FULLSCREEN') then
-		begin
-		end
+		begin end
 	else
 		begin
-		S += '=' + SGAddrStr(O.FOption);
+		TextStream.TextColor(PunctuationMarkColor);
+		TextStream.Write('=');
+		TextStream.TextColor(ProperyValueColor);
+		TextStream.Write(SGAddrStr(O.FOption));
 		end;
 	end;
 SetLength(StandartOptions, 0);
-S += ')';
-SGHint(S, CasesOfPrint, True);
-S := '';
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(')');
+TextStream.WriteLn();
+TextStream.TextColor(DefaultColor);
+SGKill(TextStream);
 end;
 
 function TSGContextHandler.TryChangeContext() : TSGBoolean;
@@ -249,17 +301,61 @@ if (FContext.NewContext <> nil) and (FContext.Active or (not (FContext is FConte
 	FContext.Initialize();
 	FContext.LoadDeviceResources();
 	Result := FContext.Active;
-	SGHint(['Changing context (`' + OldContextName + '` --> `' + FContext.ContextName() + '`)' + Iff(Result, ' successfull.', ' failed!')]);
+	SGHint(['Changing context (' + OldContextName + ' --> ' + FContext.ContextName() + ')' + Iff(Result, ' successfull.', ' failed!')]);
 	end;
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
 	SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Leave.']);
 	{$ENDIF}
 end;
 
+procedure TSGContextHandler.ViewRunParams();
+const
+	DefaultColor = 7;
+	PropertyNameColor = 15;
+	ProperyValueColor = 10;
+	PunctuationMarkColor = 14;
+var
+	TextStream : TSGTextMultiStream = nil;
+begin
+TextStream := TSGTextMultiStream.Create(SGCasesOfPrintFull);
+TextStream.Get(TSGTextLogStream).Write(SGLogDateTimeString());
+TextStream.TextColor(DefaultColor);
+TextStream.Write('Run ');
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write('(');
+TextStream.TextColor(PropertyNameColor);
+TextStream.Write('Class');
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(': ');
+TextStream.TextColor(ProperyValueColor);
+TextStream.Write(FPaintableClass.ClassName());
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(', ');
+TextStream.TextColor(PropertyNameColor);
+TextStream.Write('Context');
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(': ');
+TextStream.TextColor(ProperyValueColor);
+TextStream.Write(FContextClass.ContextName());
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(', ');
+TextStream.TextColor(PropertyNameColor);
+TextStream.Write('Render');
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(': ');
+TextStream.TextColor(ProperyValueColor);
+TextStream.Write(FRenderClass.RenderName());
+TextStream.TextColor(PunctuationMarkColor);
+TextStream.Write(')');
+TextStream.WriteLn();
+TextStream.TextColor(DefaultColor);
+SGKill(TextStream);
+end;
+
 function TSGContextHandler.Initialize() : TSGBoolean;
 begin
 Result := False;
-SGHint('Run (Class = `'+FPaintableClass.ClassName() +'`, Context = `'+FContextClass.ContextName()+'`, Render = `'+FRenderClass.RenderName()+'`)', SGCasesOfPrintFull, True);
+ViewRunParams();
 PrintSettings();
 if not FRenderClass.Suppored then
 	begin

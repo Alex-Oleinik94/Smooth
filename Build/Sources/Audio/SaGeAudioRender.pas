@@ -142,6 +142,7 @@ type
 		destructor  Destroy(); override;
 		class function Suppored() : TSGBool; virtual;
 		class function ClassName() : TSGString; override;
+		class function AudioRenderName() : TSGString; virtual;
 			protected
 		FInitialized : TSGBool;
 			public
@@ -166,6 +167,11 @@ uses
 		,SaGeAudioRenderBASS
 		{$ENDIF}
 	;
+
+class function TSGAudioRender.AudioRenderName() : TSGString;
+begin
+Result := 'Unknown';
+end;
 
 function TSGAudioRender.CreateBufferedSource() : TSGAudioBufferedSource;
 begin
