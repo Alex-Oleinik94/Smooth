@@ -13,15 +13,15 @@ uses
 type
 	TSGFont = class;
 	TSGFontInt = TSGUInt32;
-	TSGSimbolParamType = TSGUInt16;
+	TSGSymbolParamType = TSGUInt16;
 	
 	TStringParams=packed array of packed array [0..1] of TSGString;
 	
-	TSGSimbolParam=object
-		X, Y, Width : TSGSimbolParamType;
+	TSGSymbolParam = object
+		X, Y, Width : TSGSymbolParamType;
 		end;
 	
-	TSGSimbolParams = packed array[#0..#255] of TSGSimbolParam;
+	TSGSymbolParams = packed array[#0..#255] of TSGSymbolParam;
 	
 	TSGFont = class(TSGImage)
 			public
@@ -29,17 +29,17 @@ type
 		class function ClassName() : TSGString; override;
 		destructor Destroy();override;
 			protected
-		FSimbolParams : TSGSimbolParams;
+		FSymbolParams : TSGSymbolParams;
 		FFontParams : TStringParams;
 		FTextureParams : TStringParams;
 		FFontReady  : TSGBoolean;
 		FFontHeight : TSGUInt8;
 		procedure LoadFont(const FontWay : TSGString);
 		class function GetLongInt(var Params:TStringParams;const Param:TSGString):TSGInt32;
-		function GetSimbolWidth(const Index:char):LongInt;inline;
+		function GetSymbolWidth(const Index:char):LongInt;inline;
 		function LoadSGF():TSGBoolean;
 			public
-		function GetSimbolInfo(const VSimbol : TSGChar):TSGPoint2int32;inline;
+		function GetSymbolInfo(const VSymbol : TSGChar):TSGPoint2int32;inline;
 		function Loading():TSGBoolean;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:TSGString ):LongWord;overload;
@@ -48,10 +48,10 @@ type
 			public
 		property FontReady :TSGBoolean read FFontReady;
 		property FontHeight:Byte read FFontHeight;
-		property SimbolWidth[Index:char]:LongInt read GetSimbolWidth;
+		property SymbolWidth[Index:char]:LongInt read GetSymbolWidth;
 		property FontParams:TStringParams read FFontParams;
 		property TextureParams:TStringParams read FTextureParams;
-		property SimbolParams:TSGSimbolParams read FSimbolParams;
+		property SymbolParams:TSGSymbolParams read FSymbolParams;
 			public
 		procedure DrawFontFromTwoVertex2f(const S:PChar;const V1,V2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
 		procedure DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -194,7 +194,7 @@ Stream.ReadBuffer(Quantity,SizeOf(Quantity));
 FImage.PixelFormat:=Quantity;
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
 FImage.PixelType:=Quantity;
-Stream.ReadBuffer(FSimbolParams,SizeOf(FSimbolParams));
+Stream.ReadBuffer(FSymbolParams,SizeOf(FSymbolParams));
 GetMem(ColorBitMap,ColorBits*Width*Height div 8);
 Stream.ReadBuffer(ColorBitMap^,ColorBits*Width*Height div 8);
 Stream.Destroy();
@@ -207,14 +207,14 @@ FReadyToGoToTexture := True;
 FFontReady := True;
 end;
 
-function TSGFont.GetSimbolInfo(const VSimbol:Char):TSGPoint2int32;inline;
+function TSGFont.GetSymbolInfo(const VSymbol:Char):TSGPoint2int32;inline;
 begin
-Result.Import(FSimbolParams[VSimbol].x,FSimbolParams[VSimbol].y);
+Result.Import(FSymbolParams[VSymbol].x,FSymbolParams[VSymbol].y);
 end;
 
-function TSGFont.GetSimbolWidth(const Index:char):LongInt;inline;
+function TSGFont.GetSymbolWidth(const Index:char):LongInt;inline;
 begin
-Result:=FSimbolParams[Index].Width;
+Result:=FSymbolParams[Index].Width;
 end;
 
 procedure TSGFont.DrawFontFromTwoVertex2f(const S:string;const Vertex1,Vertex2:TSGVertex2f; const AutoXShift:Boolean = True; const AutoYShift:Boolean = True);overload;
@@ -294,7 +294,7 @@ for i:=P1 to P2 do
 	Result+=S[i];
 end;
 
-procedure LoadSimbol(S:String;var Obj:TSGSimbolParam);
+procedure LoadSymbol(S:String;var Obj:TSGSymbolParam);
 var
 	LastPosition:LongInt = 1;
 	Position:LongInt = 1;
@@ -350,7 +350,7 @@ while not eof(Fail) do
 			Read(Fail,C2);
 			Read(Fail,C);
 			ReadLn(Fail,Identificator);
-			LoadSimbol(Identificator,FSimbolParams[C2]);
+			LoadSymbol(Identificator,FSymbolParams[C2]);
 			end;
 		Identificator:='';
 		end;
@@ -414,7 +414,7 @@ var
 	StringWidth : LongInt = 0;
 	Otstup:TSGVertex2f = (x:0;y:0);
 	ToExit:Boolean = False;
-	ThisSimbolWidth:LongWord = 0;
+	ThisSymbolWidth:LongWord = 0;
 	DirectXShift : TSGVertex2f;
 	RealStringWidth, RealStringHeight : TSGSingle;
 	Vertex1, Vertex2 : TSGVertex2f;
@@ -456,42 +456,42 @@ while (i <= Length(S)) and (not ToExit) do
 	Render.Color(VColorList[i-1]);
 	if s[i] <> '	' then
 		begin
-		ThisSimbolWidth := FSimbolParams[s[i]].Width;
-		if Otstup.x + FSimbolParams[s[i]].Width > RealStringWidth then
+		ThisSymbolWidth := FSymbolParams[s[i]].Width;
+		if Otstup.x + FSymbolParams[s[i]].Width > RealStringWidth then
 			begin
 			ToExit := True;
-			ThisSimbolWidth := Trunc(RealStringWidth - Otstup.x);
+			ThisSymbolWidth := Trunc(RealStringWidth - Otstup.x);
 			end;
 
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y)/Self.Height));
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x + ThisSymbolWidth)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y)/Self.Height));
 		Render.Vertex2f(
-			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.x + Vertex1.x + ThisSymbolWidth,
 			Otstup.y + Vertex1.y);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x + ThisSymbolWidth)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
 		Render.Vertex2f(
-			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.x + Vertex1.x + ThisSymbolWidth,
 			Otstup.y + Vertex1.y + FFontHeight);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y + FFontHeight);
 
-		Otstup.x += FSimbolParams[s[i]].Width;
+		Otstup.x += FSymbolParams[s[i]].Width;
 		end
 	else
-		Otstup.x += FSimbolParams[' '].Width * 4;
+		Otstup.x += FSymbolParams[' '].Width * 4;
 	i+=1;
 	end;
 Render.EndScene();
@@ -504,7 +504,7 @@ var
 	StringWidth : LongInt = 0;
 	Otstup:TSGVertex2f = (x:0;y:0);
 	ToExit:Boolean = False;
-	ThisSimbolWidth:LongWord = 0;
+	ThisSymbolWidth:LongWord = 0;
 	DirectXShift : TSGVertex2f;
 	RealStringWidth, RealStringHeight : TSGSingle;
 	Vertex1, Vertex2 : TSGVertex2f;
@@ -544,42 +544,42 @@ while (s[i]<>#0) and (not ToExit) do
 	begin
 	if s[i] <> '	' then
 		begin
-		ThisSimbolWidth := FSimbolParams[s[i]].Width;
-		if Otstup.x + FSimbolParams[s[i]].Width > RealStringWidth then
+		ThisSymbolWidth := FSymbolParams[s[i]].Width;
+		if Otstup.x + FSymbolParams[s[i]].Width > RealStringWidth then
 			begin
 			ToExit := True;
-			ThisSimbolWidth := Trunc(RealStringWidth - Otstup.x);
+			ThisSymbolWidth := Trunc(RealStringWidth - Otstup.x);
 			end;
 
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y)/Self.Height));
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x + ThisSymbolWidth)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y)/Self.Height));
 		Render.Vertex2f(
-			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.x + Vertex1.x + ThisSymbolWidth,
 			Otstup.y + Vertex1.y);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x + ThisSimbolWidth)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x + ThisSymbolWidth)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
 		Render.Vertex2f(
-			Otstup.x + Vertex1.x + ThisSimbolWidth,
+			Otstup.x + Vertex1.x + ThisSymbolWidth,
 			Otstup.y + Vertex1.y + FFontHeight);
 		Render.TexCoord2f(
-				 (Self.FSimbolParams[s[i]].x + DirectXShift.x)/Self.Width,
-			1 - ((Self.FSimbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
+				 (Self.FSymbolParams[s[i]].x + DirectXShift.x)/Self.Width,
+			1 - ((Self.FSymbolParams[s[i]].y + DirectXShift.y + FFontHeight)/Self.Height));
 		Render.Vertex2f(
 			Otstup.x + Vertex1.x,
 			Otstup.y + Vertex1.y + FFontHeight);
 
-		Otstup.x += FSimbolParams[s[i]].Width;
+		Otstup.x += FSymbolParams[s[i]].Width;
 		end
 	else
-		Otstup.x += FSimbolParams[' '].Width * 4;
+		Otstup.x += FSymbolParams[' '].Width * 4;
 	i+=1;
 	end;
 Render.EndScene();
@@ -600,9 +600,9 @@ i:=0;
 while s[i]<>#0 do
 	begin
 	if s[i] = '	' then
-		Result += FSimbolParams[' '].Width * 4
+		Result += FSymbolParams[' '].Width * 4
 	else
-		Result+=FSimbolParams[s[i]].Width;
+		Result+=FSymbolParams[s[i]].Width;
 	i+=1;
 	end;
 end;
@@ -618,9 +618,9 @@ oldy := 0;
 for i:= 1 to Length(S) do
 	begin
 	if s[i] = '	' then
-		y += FSimbolParams[' '].Width * 4
+		y += FSymbolParams[' '].Width * 4
 	else
-		y += FSimbolParams[s[i]].Width;
+		y += FSymbolParams[s[i]].Width;
 	if (Position >= oldy) and (Position <= y) then
 		begin
 		Placed := True;
@@ -644,9 +644,9 @@ Result:=0;
 for i:=1 to Length(S) do
 	begin
 	if s[i] = '	' then
-		Result += FSimbolParams[' '].Width * 4
+		Result += FSymbolParams[' '].Width * 4
 	else
-		Result += FSimbolParams[s[i]].Width;
+		Result += FSymbolParams[s[i]].Width;
 	end;
 end;
 
@@ -708,8 +708,8 @@ if VType=0 then
 	SumG:=0;
 	for i:=1 to Length(VString) do
 		begin
-		SI:=GetSimbolInfo(VString[i]);
-		for iw:=0 to SimbolWidth[VString[i]]-1 do
+		SI:=GetSymbolInfo(VString[i]);
+		for iw:=0 to SymbolWidth[VString[i]]-1 do
 			begin
 			for ih:=1 to FontHeight do
 				begin
@@ -719,7 +719,7 @@ if VType=0 then
 				SumB+=PBits[VImage.Width*VImage.Height+(PW+iw)-(PH+ih)*VImage.Width].b;
 				end;
 			end;
-		PW+=SimbolWidth[VString[i]];
+		PW+=SymbolWidth[VString[i]];
 		end;
 	SumR:=Trunc(SumR/Sum);
 	SumG:=Trunc(SumG/Sum);
@@ -736,8 +736,8 @@ if VType=0 then
 
 for i:=1 to Length(VString) do
 	begin
-	SI:=GetSimbolInfo(VString[i]);
-	for iw:=0 to SimbolWidth[VString[i]]-1 do
+	SI:=GetSymbolInfo(VString[i]);
+	for iw:=0 to SymbolWidth[VString[i]]-1 do
 		for ih:=1 to FontHeight do
 			begin
 			case VType of
@@ -753,7 +753,7 @@ for i:=1 to Length(VString) do
 					Width*Height+(SI.x+iw)-(SI.y+ih)*Width);
 			end;
 			end;
-	PW+=SimbolWidth[VString[i]];
+	PW+=SymbolWidth[VString[i]];
 	end;
 end;
 
@@ -778,9 +778,9 @@ if AutoYShift then
 while (s[i]<>#0) and (CursorPosition > i) do
 	begin
 	if s[i] = '	' then
-		Otstup.x := FSimbolParams[' '].Width * 4
+		Otstup.x := FSymbolParams[' '].Width * 4
 	else
-		Otstup.x += FSimbolParams[s[i]].Width;
+		Otstup.x += FSymbolParams[s[i]].Width;
 	i+=1;
 	end;
 if Abs(Vertex1.x-Vertex2.x)>Otstup.x then
@@ -825,7 +825,7 @@ var
 		s,g,f:Char;
 		end = (s:'S';g:'G';f:'F');
 	Quantity:TSGFontInt;
-	SP:TSGSimbolParams;
+	SP:TSGSymbolParams;
 	i:TSGLongWord;
 begin
 OutStream := TFileStream.Create(FontOutWay,fmCreate);
@@ -876,7 +876,7 @@ Quantity:=Font.Image.PixelFormat;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 Quantity:=Font.Image.PixelType;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-SP:=Font.SimbolParams;
+SP:=Font.SymbolParams;
 OutStream.WriteBuffer(SP,SizeOf(SP));
 OutStream.WriteBuffer(ColorBitMap^,ColorBits*Font.Width*Font.Height div 8);
 OutStream.Destroy();
