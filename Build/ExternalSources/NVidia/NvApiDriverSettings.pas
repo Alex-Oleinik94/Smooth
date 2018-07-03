@@ -1068,6 +1068,7 @@ type
 // Driver Settings (DRS) APIs
 ///////////////////////////////////////////////////////////////////////////////
 type
+	NVAPI_INTERFACE = NvAPI_Status;
 	NvDRSSessionHandle  = NvHandle;
 	NvDRSProfileHandle  = NvHandle;
 	pNvDRSSessionHandle = ^ NvDRSSessionHandle;
@@ -1191,40 +1192,40 @@ type
 	NVDRS_PROFILE = NVDRS_PROFILE_V1;
 	pNVDRS_PROFILE = ^ NVDRS_PROFILE;
 var
-	NvAPI_DRS_CreateProfile : function (hSession : NvDRSSessionHandle; pProfileInfo : pNVDRS_PROFILE; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_DeleteProfile : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_SetCurrentGlobalProfile : function (hSession : NvDRSSessionHandle; wszGlobalProfileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetCurrentGlobalProfile : function (hSession : NvDRSSessionHandle; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetProfileInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pProfileInfo: pNVDRS_PROFILE) : NvAPI_Status; cdecl;
-	NvAPI_DRS_SetProfileInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pProfileInfo : pNVDRS_PROFILE) : NvAPI_Status; cdecl;
-	NvAPI_DRS_FindProfileByName : function (hSession : NvDRSSessionHandle; profileName : NvAPI_UnicodeString; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_EnumProfiles : function (hSession : NvDRSSessionHandle; index : NvU32; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetNumProfiles : function (hSession : NvDRSSessionHandle; var numProfiles : NvU32) : NvAPI_Status; cdecl;
-	NvAPI_DRS_CreateApplication : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pApplication : pNVDRS_APPLICATION) : NvAPI_Status; cdecl;
-	NvAPI_DRS_DeleteApplicationEx : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pApp : pNVDRS_APPLICATION) : NvAPI_Status; cdecl;
-	NvAPI_DRS_DeleteApplication : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; appName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetApplicationInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; appName : NvAPI_UnicodeString; pApplication : pNVDRS_APPLICATION) : NvAPI_Status; cdecl;
-	NvAPI_DRS_EnumApplications : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; startIndex : NvU32; appCount : pNvU32; pApplication : pNVDRS_APPLICATION) : NvAPI_Status; cdecl;
-	NvAPI_DRS_FindApplicationByName : function (hSession : NvDRSSessionHandle; appName : NvAPI_UnicodeString;{out} phProfile : pNvDRSProfileHandle;{inout} var Application : NVDRS_APPLICATION) : NvAPI_Status; cdecl;
-	NvAPI_DRS_SetSetting : function (hSession : NvDRSSessionHandle; phProfile : NvDRSProfileHandle; pSetting : pNVDRS_SETTING) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32; pSetting : pNVDRS_SETTING) : NvAPI_Status; cdecl;
-	NvAPI_DRS_EnumSettings : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; startIndex : NvU32; settingsCount : pNvU32; pSetting : pNVDRS_SETTING) : NvAPI_Status; cdecl;
-	NvAPI_DRS_EnumAvailableSettingIds : function (pSettingIds : pNvU32; pMaxCount : pNvU32) : NvAPI_Status; cdecl;
-	NvAPI_DRS_EnumAvailableSettingValues : function (settingId : NvU32; pMaxNumValues : pNvU32; pSettingValues : pNVDRS_SETTING_VALUES) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetSettingIdFromName : function (settingName : NvAPI_UnicodeString; pSettingId : pNvU32) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetSettingNameFromId : function (settingId : NvU32; pSettingName : pNvAPI_UnicodeString) : NvAPI_Status; cdecl;
-	NvAPI_DRS_RestoreProfileDefaultSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32) : NvAPI_Status; cdecl;
-	NvAPI_DRS_DeleteProfileSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32) : NvAPI_Status; cdecl;
-	NvAPI_DRS_RestoreAllDefaults : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_RestoreProfileDefault : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_GetBaseProfile : function (hSession : NvDRSSessionHandle; phProfile : pNvDRSProfileHandle) : NvAPI_Status; cdecl;
+	NvAPI_DRS_CreateProfile : function (hSession : NvDRSSessionHandle; pProfileInfo : pNVDRS_PROFILE; phProfile : pNvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_DeleteProfile : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_SetCurrentGlobalProfile : function (hSession : NvDRSSessionHandle; wszGlobalProfileName : NvAPI_UnicodeString) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetCurrentGlobalProfile : function (hSession : NvDRSSessionHandle; phProfile : pNvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetProfileInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pProfileInfo: pNVDRS_PROFILE) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_SetProfileInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pProfileInfo : pNVDRS_PROFILE) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_FindProfileByName : function (hSession : NvDRSSessionHandle; profileName : NvAPI_UnicodeString; phProfile : pNvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_EnumProfiles : function (hSession : NvDRSSessionHandle; index : NvU32; phProfile : pNvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetNumProfiles : function (hSession : NvDRSSessionHandle; var numProfiles : NvU32) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_CreateApplication : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pApplication : pNVDRS_APPLICATION) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_DeleteApplicationEx : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; pApp : pNVDRS_APPLICATION) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_DeleteApplication : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; appName : NvAPI_UnicodeString) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetApplicationInfo : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; appName : NvAPI_UnicodeString; pApplication : pNVDRS_APPLICATION) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_EnumApplications : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; startIndex : NvU32; appCount : pNvU32; pApplication : pNVDRS_APPLICATION) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_FindApplicationByName : function (hSession : NvDRSSessionHandle; appName : NvAPI_UnicodeString;{out} phProfile : pNvDRSProfileHandle;{inout} var Application : NVDRS_APPLICATION) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_SetSetting : function (hSession : NvDRSSessionHandle; phProfile : NvDRSProfileHandle; pSetting : pNVDRS_SETTING) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32; pSetting : pNVDRS_SETTING) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_EnumSettings : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; startIndex : NvU32; settingsCount : pNvU32; pSetting : pNVDRS_SETTING) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_EnumAvailableSettingIds : function (pSettingIds : pNvU32; pMaxCount : pNvU32) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_EnumAvailableSettingValues : function (settingId : NvU32; pMaxNumValues : pNvU32; pSettingValues : pNVDRS_SETTING_VALUES) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetSettingIdFromName : function (settingName : NvAPI_UnicodeString; pSettingId : pNvU32) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetSettingNameFromId : function (settingId : NvU32; pSettingName : pNvAPI_UnicodeString) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_RestoreProfileDefaultSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_DeleteProfileSetting : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle; settingId : NvU32) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_RestoreAllDefaults : function (hSession : NvDRSSessionHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_RestoreProfileDefault : function (hSession : NvDRSSessionHandle; hProfile : NvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_GetBaseProfile : function (hSession : NvDRSSessionHandle; phProfile : pNvDRSProfileHandle) : NVAPI_INTERFACE; cdecl;
 var
-	NvAPI_DRS_CreateSession : function (phSession : pNvDRSSessionHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_DestroySession : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_LoadSettings : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_SaveSettings : function (hSession : NvDRSSessionHandle) : NvAPI_Status; cdecl;
-	NvAPI_DRS_LoadSettingsFromFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
-	NvAPI_DRS_SaveSettingsToFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NvAPI_Status; cdecl;
+	NvAPI_DRS_CreateSession : function (phSession : pNvDRSSessionHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_DestroySession : function (hSession : NvDRSSessionHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_LoadSettings : function (hSession : NvDRSSessionHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_SaveSettings : function (hSession : NvDRSSessionHandle) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_LoadSettingsFromFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NVAPI_INTERFACE; cdecl;
+	NvAPI_DRS_SaveSettingsToFile : function (hSession : NvDRSSessionHandle; fileName : NvAPI_UnicodeString) : NVAPI_INTERFACE; cdecl;
 
 implementation
 

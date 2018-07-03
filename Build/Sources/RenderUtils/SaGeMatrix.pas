@@ -107,12 +107,12 @@ end;
 // Инвертирование матрицы
 function SGInverseMatrix(const VSourseMatrix : TSGMatrix4x4) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function mat(const  i : Byte) : TSGFloat; inline;
+function mat(const  i : TSGByte) : TSGFloat; inline;
 begin
 Result := TSGMatrix4x4Array(VSourseMatrix)[i];
 end;
 
-procedure ret(const i : byte; const f : TSGFloat); inline; overload;
+procedure ret(const i : TSGByte; const f : TSGFloat); inline; overload;
 begin
 TSGMatrix4x4Array(Result)[i] := f;
 end;
@@ -311,7 +311,7 @@ end;
 
 operator * (const A,B:TSGMatrix4x4):TSGMatrix4x4;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i,j,k:byte;
+	i, j, k: TSGByte;
 begin
 FillChar(Result,Sizeof(Result),0);
 for i:=0 to 3 do
@@ -320,42 +320,22 @@ for i:=0 to 3 do
 			Result[i,j]+=A[i,k]*B[k,j];
 end;
 
-function SGMatrix4Import(const _0x0,_0x1,_0x2,_0x3,_1x0,_1x1,_1x2,_1x3,_2x0,_2x1,_2x2,_2x3,_3x0,_3x1,_3x2,_3x3:TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-Result[0,0]:=_0x0;
-Result[0,1]:=_0x1;
-Result[0,2]:=_0x2;
-Result[0,3]:=_0x3;
-Result[1,0]:=_1x0;
-Result[1,1]:=_1x1;
-Result[1,2]:=_1x2;
-Result[1,3]:=_1x3;
-Result[2,0]:=_2x0;
-Result[2,1]:=_2x1;
-Result[2,2]:=_2x2;
-Result[2,3]:=_2x3;
-Result[3,0]:=_3x0;
-Result[3,1]:=_3x1;
-Result[3,2]:=_3x2;
-Result[3,3]:=_3x3;
-end;
-
 function SGGetFrustumMatrix(const vleft,vright,vbottom,vtop,vnear,vfar:TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result:=SGMatrix4Import(
+Result := SGMatrix4x4Import(
 	2.0 * vnear / (vright - vleft), 0, 0, 0,
 	0, 2.0 * vnear / (vtop - vbottom), 0, 0,
 	(vright + vleft) / (vright - vleft), (vtop + vbottom) / (vtop - vbottom), -(vfar + vnear) / (vfar - vnear), -1.0,
 	0,0, -2.0 * vfar * vnear / (vfar - vnear), 0);
 end;
 
-function SGGetPerspectiveMatrix(const vAngle,vAspectRatio,vNear,vFar:TSGMatrix4x4Type):TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetPerspectiveMatrix(const vAngle, vAspectRatio, vNear, vFar : TSGMatrix4x4Type) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	vTop:Single;
+	vTop : TSGMatrixFloat;
 begin
 vTop := vNear * Math.tan(vAngle * 3.1415927 / 360.0);
-Result:=SGGetFrustumMatrix(
-	(-vTop)*vAspectRatio,vTop*vAspectRatio,-vTop,vTop,vNear,vFar);
+Result := SGGetFrustumMatrix(
+	(-vTop) * vAspectRatio, vTop * vAspectRatio, -vTop, vTop, vNear, vFar);
 end;
 
 function SGTranslateMatrix(const Matrix : TSGMatrix4x4; const Vector : TSGMatrixVector3) : TSGMatrix4x4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

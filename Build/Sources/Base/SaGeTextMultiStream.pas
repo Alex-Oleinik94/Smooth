@@ -29,6 +29,7 @@ type
 		procedure AddConsole();
 		procedure AddFile(const FileName : TSGString);
 		procedure Add(const CasesOfPrint : TSGCasesOfPrint = [SGCaseLog, SGCasePrint]);
+		function Get(const StreamClass : TSGTextStreamClass) : TSGTextStream;
 		end;
 
 procedure SGKill( var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -48,6 +49,20 @@ if TextStream <> nil then
 	TextStream.Destroy();
 	TextStream := nil;
 	end;
+end;
+
+function TSGTextMultiStream.Get(const StreamClass : TSGTextStreamClass) : TSGTextStream;
+var
+	Index : TSGMaxEnum;
+begin
+Result := nil;
+if (FOutputs <> nil) and (Length(FOutputs) > 0) then
+	for Index := 0 to High(FOutputs) do
+		if (FOutputs[Index] is StreamClass) then
+			begin
+			Result := FOutputs[Index];
+			break;
+			end;
 end;
 
 constructor TSGTextMultiStream.Create(const CasesOfPrint : TSGCasesOfPrint);

@@ -67,7 +67,7 @@ Result :=
 	SGAplicationFileDirectory() + '.' + DirectorySeparator + '..' + DirectorySeparator + 'Log'
 {$ELSE}
 	{$IF defined(ANDROID)}
-		DirectorySeparator +'sdcard' + DirectorySeparator +'.SaGe'
+		DirectorySeparator + 'sdcard' + DirectorySeparator + '.SaGe'
 	{$ELSE}
 		''
 	{$ENDIF}
@@ -144,7 +144,7 @@ if Log = nil then
 	end;
 end;
 
-procedure SGLogWrite(const StrintToWrite : TSGString);
+procedure SGLogWrite(const StrintToWrite : TSGString); overload;
 begin
 if LogEnablement <> SGLogDisabled then
 	begin

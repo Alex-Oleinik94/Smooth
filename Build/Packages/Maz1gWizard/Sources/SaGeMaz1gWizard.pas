@@ -103,7 +103,7 @@ if (FWindow = nil) then
 	begin
 	FWindow := TSGContextHandler.Create();
 	FWindow.RegisterCompatibleClasses(TSGMaz1gWizardPaintable);
-	FWindow.RegisterSettings(SGContextOptionMax());
+	FWindow.RegisterSettings(SGContextOptionMax() + SGContextOptionTitle('Maz1g Wizard'));
 	end;
 FWindow.RunAnotherThread();
 end;

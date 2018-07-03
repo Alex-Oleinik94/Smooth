@@ -151,7 +151,7 @@ type
     public
         constructor Create(); override;
         destructor Destroy(); override;
-        class function ClassName():string;override;
+        class function ClassName() : TSGString; override;
     protected
         // Количество вершин
         FNOfVerts : TSGQuadWord;
@@ -161,9 +161,9 @@ type
         FCountTextureFloatsInVertexArray : TSGLongWord;
         // Есть ли нормали у модельки
         FHasNormals : TSGBoolean;
-        // Есть ли у нее цвета
+        // Есть ли у модели цвета
         FHasColors  : TSGBoolean;
-        // Используется ли у нее индексированный рендеринг
+        // Используется ли у модели индексированный рендеринг
         FQuantityFaceArrays : TSGLongWord;
         FBumpFormat : TSGBumpFormat;
     protected
@@ -940,6 +940,17 @@ else if FVertexType = SGMeshVertexType4f then
 end;
 
 procedure TSG3DObject.SetColor(const Index:TSGMaxEnum;const r,g,b:Single; const a:Single = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+
+function Convert(const Value : TSGFloat32) : TSGByte; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (Value >= 1) then
+	Result := 255
+else if (Value > 0) then
+	Result := Round(Value * 255)
+else
+	Result := 0;
+end;
+
 begin
 if (FColorType=SGMeshColorType3f) then
 	begin
@@ -956,24 +967,24 @@ else if (FColorType=SGMeshColorType4f) then
 	end
 else if (FColorType=SGMeshColorType3b) then
 	begin
-	ArColor3b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
-	ArColor3b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
-	ArColor3b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+	ArColor3b[Index]^.r := Convert(r);
+	ArColor3b[Index]^.g := Convert(g);
+	ArColor3b[Index]^.b := Convert(b);
 	end
 else if (FColorType=SGMeshColorType4b) then
 	begin 
 	if (Render.RenderType = SGRenderDirectX9) or (Render.RenderType = SGRenderDirectX8) then
 		begin
-		ArColor4b[Index]^.b:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
-		ArColor4b[Index]^.r:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+		ArColor4b[Index]^.b := Convert(r);
+		ArColor4b[Index]^.r := Convert(b);
 		end
 	else
 		begin
-		ArColor4b[Index]^.r:=Byte(r>=1)*255+Byte((r<1) and (r>0))*round(255*r);
-		ArColor4b[Index]^.b:=Byte(b>=1)*255+Byte((b<1) and (b>0))*round(255*b);
+		ArColor4b[Index]^.r := Convert(r);
+		ArColor4b[Index]^.b := Convert(b);
 		end;
-	ArColor4b[Index]^.g:=Byte(g>=1)*255+Byte((g<1) and (g>0))*round(255*g);
-	ArColor4b[Index]^.a:=Byte(a>=1)*255+Byte((a<1) and (a>0))*round(255*a);
+	ArColor4b[Index]^.g := Convert(g);
+	ArColor4b[Index]^.a := Convert(a);
 	end;
 end;
 
@@ -1633,8 +1644,8 @@ else
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				GetCountOfOneVertexCoord()+
-				GetCountOfOneColorCoord()));
+				GetSizeOfOneVertexCoord()+
+				GetSizeOfOneColorCoord()));
 	
     if FHasTexture then
 		begin
@@ -1646,9 +1657,9 @@ else
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				GetCountOfOneVertexCoord()+
-				GetCountOfOneColorCoord()+
-				GetCountOfOneNormalCoord()));
+				GetSizeOfOneVertexCoord()+
+				GetSizeOfOneColorCoord()+
+				GetSizeOfOneNormalCoord()));
 		if FBumpFormat = SGBumpFormatCopyTexture2f then
 			Render.ClientActiveTexture(0);
 		end;
@@ -1661,9 +1672,9 @@ else
 			GetSizeOfOneVertex(), 
 			Pointer(
 				TSGMaxEnum(ArVertex)+
-				GetCountOfOneVertexCoord()+
-				GetCountOfOneColorCoord()+
-				GetCountOfOneNormalCoord()));
+				GetSizeOfOneVertexCoord()+
+				GetSizeOfOneColorCoord()+
+				GetSizeOfOneNormalCoord()));
 		end;
 	end;
 

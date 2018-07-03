@@ -19,7 +19,6 @@ uses
 	,SaGeCommonClasses
 	,SaGeScreenBase
 	,SaGeScreenSkin
-	,SaGeStaticString
 	,SaGeCursor
 	,SaGeCommonStructs
 	,SaGeContextUtils

@@ -120,6 +120,7 @@ function SGCosSinAngle(const Coodrs : TSGCommonVector2) : TSGCommonFloat; {$IFDE
 
 function SGPoint2int32ToVertex3f(const Point : TSGPoint2int32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStrVector3f(const Vector : TSGVector3f; const Numbers : TSGByte = 6) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGColor4fTo4uint8(const Color : TSGVector4f) : TSGVector4uint8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -131,6 +132,25 @@ uses
 	,SaGeRenderBase
 	,SaGeStringUtils
 	;
+
+function SGColor4fTo4uint8(const Color : TSGVector4f) : TSGVector4uint8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+function Convert(const Value : TSGFloat32) : TSGByte; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (Value >= 1) then
+	Result := 255
+else if (Value > 0) then
+	Result := Round(Value * 255)
+else
+	Result := 0;
+end;
+
+begin
+Result.x := Convert(Color.x);
+Result.y := Convert(Color.y);
+Result.z := Convert(Color.z);
+Result.w := Convert(Color.w);
+end;
 
 function SGStrVector3f(const Vector : TSGVector3f; const Numbers : TSGByte = 6) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

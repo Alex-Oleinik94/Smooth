@@ -28,6 +28,7 @@ type
 		procedure WriteLines(const Strings : TSGStringList); virtual; overload;
 		procedure WriteLines(const Stream : TStream); virtual; overload;
 		end;
+	TSGTextStreamClass = class of TSGTextStream;
 
 procedure SGKill( var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 

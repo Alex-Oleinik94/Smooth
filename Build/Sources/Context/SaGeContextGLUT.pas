@@ -33,9 +33,10 @@ uses
 type
 	TSGContextGLUT = class(TSGContext)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 			public
+		class function ContextName() : TSGString; override;
 		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
@@ -93,9 +94,14 @@ if FFreeGLUTSuppored and (glutLeaveMainLoop <> nil) then
 	glutLeaveMainLoop();
 end;
 
+class function TSGContextGLUT.ContextName() : TSGString;
+begin
+Result := Iff(DllManager.Suppored('FreeGLUT'), 'Free') + 'GLUT';
+end;
+
 class function TSGContextGLUT.ClassName() : TSGString;
 begin
-Result := 'TSGContext' + Iff(DllManager.Suppored('FreeGLUT'), 'Free') + 'GLUT';
+Result := 'TSGContext' + ContextName();
 end;
 
 procedure TSGContextGLUT.SetGLUTMoution(const VX, VY : TSGInt32);

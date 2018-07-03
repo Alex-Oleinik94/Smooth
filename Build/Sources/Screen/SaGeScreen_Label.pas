@@ -19,9 +19,10 @@ type
 		FTextColor      : TSGColor4f;
 		FTextPosition   : TSGBoolean;
 			public
-		procedure FromDraw;override;
-		constructor Create;override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
+		procedure FromDraw(); override;
 			protected
 		function  GetTextPosition() : TSGBoolean; virtual;
 		procedure SetTextPosition(const VTextPosition : TSGBoolean); virtual;
@@ -65,6 +66,11 @@ end;
 procedure TSGLabel.SetTextColorSeted(const VTextColorSeted : TSGBoolean);
 begin
 FTextColorSeted := VTextColorSeted;
+end;
+
+destructor TSGLabel.Destroy();
+begin
+inherited;
 end;
 
 constructor TSGLabel.Create();

@@ -31,8 +31,9 @@ uses
 type
 	TSGRenderDirectX12 = class(TSGRender)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function RenderName() : TSGString; override;
 			protected
 		
 			public
@@ -135,6 +136,12 @@ type
 		end;
 
 implementation
+
+
+class function TSGRenderDirectX12.RenderName() : TSGString;
+begin
+Result := 'Direct X 12';
+end;
 
 class function TSGRenderDirectX12.ClassName() : TSGString; 
 begin

@@ -26,11 +26,12 @@ uses
 	;
 
 type
-	TSGContextAndroid=class(TSGContext)
+	TSGContextAndroid = class(TSGContext)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 			public
+		class function ContextName() : TSGString; override;
 		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
@@ -70,6 +71,11 @@ uses
 	,SaGeLog
 	,SaGeStringUtils
 	;
+
+class function TSGContextAndroid.ContextName() : TSGString;
+begin
+Result := 'Android';
+end;
 
 class function TSGContextAndroid.Suppored() : TSGBoolean;
 begin

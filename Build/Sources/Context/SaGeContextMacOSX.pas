@@ -19,9 +19,10 @@ uses
 type
 	TSGContextMacOSX=class(TSGContext)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 			public
+		class function ContextName() : TSGString; override;
 		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
 		procedure Run();override;
 		procedure Messages();override;
@@ -46,7 +47,13 @@ type
 implementation
 
 uses
-	SaGeScreen;
+	 SaGeScreen
+	;
+
+class function TSGContextMacOSX.ContextName() : TSGString;
+begin
+Result := 'Mac OS X';
+end;
 
 class function TSGContextMacOSX.Suppored() : TSGBoolean;
 begin

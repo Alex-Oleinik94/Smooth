@@ -74,6 +74,7 @@ type
 		constructor Create(); override;
 		class function Suppored() : TSGBool; override;
 		class function ClassName() : TSGString; override;
+		class function AudioRenderName() : TSGString; override;
 			private
 		
 			public
@@ -249,6 +250,11 @@ constructor TSGAudioRenderBASS.Create();
 begin
 inherited;
 
+end;
+
+class function TSGAudioRenderBASS.AudioRenderName() : TSGString;
+begin
+Result := 'Bass';
 end;
 
 class function TSGAudioRenderBASS.ClassName() : TSGString;

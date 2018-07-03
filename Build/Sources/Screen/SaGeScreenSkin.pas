@@ -100,6 +100,7 @@ uses
 	,SaGeMathUtils
 	,SaGeRenderInterface
 	,SaGeCommon
+	,SaGeTextVertexObject
 	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -625,17 +626,23 @@ end;
 procedure TSGScreenSkin.PaintLabel(constref VLabel : ISGLabel); 
 var
 	Location : TSGComponentLocation;
+	Color4f     : TSGVector4f;
+	Color4uint8 : TSGVector4uint8;
 begin
 if (VLabel.Caption <> '') and FontReady then
 	begin
 	Location := VLabel.GetLocation();
 	if VLabel.TextColorSeted then
-		Render.Color(VLabel.TextColor.WithAlpha(VLabel.VisibleTimer))
+		Color4f := VLabel.TextColor.WithAlpha(VLabel.VisibleTimer)
 	else
-		Render.Color(FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer));
-	Font.DrawFontFromTwoVertex2f(VLabel.Caption,
+		Color4f := FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer);
+	Color4uint8 := SGColor4fTo4uint8(Color4f);
+	TSGTextVertexObject.Paint(
+		VLabel.Caption,
+		Render, Font,
+		Color4uint8,
 		Location.FloatPosition, Location.FloatPositionAndSize,
-		VLabel.TextPosition);
+		VLabel.TextPosition, True);
 	end;
 end;
 
