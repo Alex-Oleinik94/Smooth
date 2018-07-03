@@ -101,6 +101,7 @@ uses
 	,SaGeRenderInterface
 	,SaGeCommon
 	,SaGeTextVertexObject
+	,SaGeRectangleWithRoundedCorners
 	;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

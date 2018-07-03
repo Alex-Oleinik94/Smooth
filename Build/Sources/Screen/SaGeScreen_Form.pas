@@ -39,6 +39,7 @@ uses
 	,SaGeMathUtils
 	,SaGeCommonStructs
 	,SaGeCommon
+	,SaGeRectangleWithRoundedCorners
 	;
 
 class function TSGForm.ClassName() : TSGString; 
@@ -48,7 +49,9 @@ end;
 
 procedure TSGForm.FromUpDate(var FCanChange:Boolean);
 var
-	i : TSGLongInt;
+	ParentBoundsSize : TSGComponentBoundsSize;
+	ParentRealPosition : TSGComponentLocationVectorInt;
+	ParentLocation : TSGComponentLocation;
 begin
 if (FParent <> nil) and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGDownKey)) then
 	FParent.ChildToListEnd(Self);
@@ -58,50 +61,50 @@ if FRePlace then
 		begin
 		if FParent<>nil then
 			begin
-			if  (CursorPosition.x>FParent.FRealLeft) and 
-				(CursorPosition.x<FParent.FRealLeft+FParent.FLeftShiftForChilds+10) and 
-				(CursorPosition.y>FParent.FRealTop+FParent.FTopShiftForChilds) and 
-				(CursorPosition.y<FParent.FRealTop+FParent.FTopShiftForChilds+FParent.FBottomShiftForChilds+FParent.FHeight) then
+			ParentBoundsSize := FParent.BoundsSize;
+			ParentRealPosition := FParent.RealPosition;
+			ParentLocation := FParent.Location;
+			if  (CursorPosition.x>ParentRealPosition.x) and 
+				(CursorPosition.x<ParentRealPosition.x+ParentBoundsSize.Left+10) and 
+				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentBoundsSize.Top+ParentBoundsSize.Bottom+ParentLocation.Height) then
 					begin
 					if FAlign<>SGAlignNone then
 						DestroyAlign;
 					FAlign:=SGAlignLeft;
 					end
-				else
-					if  (CursorPosition.x>FParent.FRealLeft) and 
-						(CursorPosition.x<FParent.FRealLeft+FParent.FWidth) and 
-						(CursorPosition.y>FParent.FRealTop) and 
-						(CursorPosition.y<FParent.FRealTop+FParent.FTopShiftForChilds+10) then
-							begin
-							if FAlign<>SGAlignNone then
-								DestroyAlign;
-							FAlign:=SGAlignTop;
-							end
-						else
-							if  (CursorPosition.x>FParent.FRealLeft+FParent.FWidth-FParent.FRightShiftForChilds-10) and 
-								(CursorPosition.x<FParent.FRealLeft+FParent.FWidth) and 
-								(CursorPosition.y>FParent.FRealTop+FParent.FTopShiftForChilds) and 
-								(CursorPosition.y<FParent.FRealTop+FParent.FHeight-FParent.FBottomShiftForChilds) then
-									begin
-									if FAlign<>SGAlignNone then
-										DestroyAlign;
-									FAlign:=SGAlignRight;
-									end
-								else
-									if  (CursorPosition.x>FParent.FRealLeft) and 
-										(CursorPosition.x<FParent.FRealLeft+FParent.FWidth) and 
-										(CursorPosition.y>FParent.FRealTop+FParent.FHeight-FParent.FBottomShiftForChilds-10) and 
-										(CursorPosition.y<FParent.FRealTop+FParent.FHeight) then
-											begin
-											if FAlign<>SGAlignNone then
-												DestroyAlign;
-											FAlign:=SGAlignBottom;
-											end
-										else
-											begin
-											if FAlign<>SGAlignNone then
-												DestroyAlign;
-											end;
+			else if  (CursorPosition.x>ParentRealPosition.x) and 
+				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
+				(CursorPosition.y>ParentRealPosition.y) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentBoundsSize.Top+10) then
+					begin
+					if FAlign<>SGAlignNone then
+						DestroyAlign;
+					FAlign:=SGAlignTop;
+					end
+			else if  (CursorPosition.x>ParentRealPosition.x+ParentLocation.Width-ParentBoundsSize.Right-10) and 
+				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
+				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height-ParentBoundsSize.Bottom) then
+					begin
+					if FAlign<>SGAlignNone then
+						DestroyAlign;
+					FAlign:=SGAlignRight;
+					end
+			else if  (CursorPosition.x>ParentRealPosition.x) and 
+				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
+				(CursorPosition.y>ParentRealPosition.y+ParentLocation.Height-ParentBoundsSize.Bottom-10) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height) then
+					begin
+					if FAlign<>SGAlignNone then
+						DestroyAlign;
+					FAlign:=SGAlignBottom;
+					end
+			else
+				begin
+				if FAlign<>SGAlignNone then
+					DestroyAlign;
+				end;
 			end;
 		AddToLeft(Context.CursorPosition(SGDeferenseCursorPosition).x);
 		AddToTop(Context.CursorPosition(SGDeferenseCursorPosition).y);
@@ -109,13 +112,8 @@ if FRePlace then
 	else
 		begin
 		FRePlace:=False;
-		if not (FAlign in [SGAlignBottom,SGAlignClient,SGAlignLeft,SGAlignRight,SGAlignTop]) then
-			begin
-			FNoneHeight:=FNeedHeight;
-			FNoneLeft:=FNeedLeft;
-			FNoneTop:=FNeedTop;
-			FNoneWidth:=FNeedWidth;
-			end;
+		if not (FAlign in [SGAlignBottom, SGAlignClient, SGAlignLeft, SGAlignRight, SGAlignTop]) then
+			FDefaultLocation := FLocation;
 		end;
 	end;
 inherited FromUpDate(FCanChange);
@@ -157,12 +155,12 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 inherited FromDraw;
 end;
 
-constructor TSGForm.Create;
+constructor TSGForm.Create();
 begin
 inherited Create;
 FButtonsType:=SGFrameButtonsType0f;
-FIcon.Create;
-FTopShiftForChilds:=30;
+FIcon.Create();
+FBoundsSize.Top := 30;
 end;
 
 procedure TSGForm.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
@@ -182,10 +180,10 @@ end;
 function TSGForm.CursorInComponentCaption():boolean;
 begin
 Result:=
-	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft) and 
-	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop) and 
-	(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FTopShiftForChilds) and 
-	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth);
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x) and 
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y) and 
+	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FBoundsSize.Top) and 
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+FRealLocation.Width);
 FCursorOnComponentCaption:=Result;
 end;
 

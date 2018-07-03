@@ -115,22 +115,22 @@ FItems:=nil;
 FSelectedItemIndex := -1;
 end;
 
-function TSGComboBox.CursorInComponent():boolean;
+function TSGComboBox.CursorInComponent() : TSGBoolean;
 begin
 Result:=
-	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
-	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
-	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x)and
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+FRealLocation.Width)and
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y)and
 	(
 	(FOpen and
 		(
-		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*Lines*FOpenTimer)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*Lines*FOpenTimer)
 		or
-		(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height)
 		)
 	)
 	or
-	((not FOpen) and (Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight))
+	((not FOpen) and (Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height))
 	);
 FCursorOnComponent:=Result;
 end;
@@ -251,10 +251,10 @@ if  FOpen and (FCursorOnComponent) then
 	begin
 	for i:=0 to Lines-1 do
 		begin
-		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealTop+FHeight*i*FOpenTimer) and
-			(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight*(i+1)*FOpenTimer) and
+		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y+FRealLocation.Height*i*FOpenTimer) and
+			(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*(i+1)*FOpenTimer) and
 			(((FMaxLines<Length(FItems)) and
-			(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
+			(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
 			FItems[i].Active then
 				begin
 				FCursorOnThisItem := FFirstScrollItem + i;

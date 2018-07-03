@@ -7,12 +7,12 @@ interface
 uses
 	 SaGeBase
 	,SaGeScreenBase
-	,SaGeScreen
+	,SaGeScreenComponent
+	,SaGeCommonStructs
 	;
 
 type
-	
-	TSGProgressBar=class(TSGComponent, ISGProgressBar)
+	TSGProgressBar = class(TSGComponent, ISGProgressBar)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -48,6 +48,10 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeMathUtils
+	;
 
 class function TSGProgressBar.ClassName() : TSGString; 
 begin

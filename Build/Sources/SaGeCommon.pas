@@ -85,7 +85,6 @@ type
 operator + (const a, b : TSGPosition) : TSGPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 operator + (const a, b : TSGCustomPosition) : TSGCustomPosition;overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGRectangleWithRoundedCornersConstruct(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
 function SGGetPointsCirclePoints(const FPoints:TSGVertex2fList):TSGUInt32List;
 
 function SGRotatePoint(const Point : TSGVertex3f; const Os : TSGVertex3f; const Angle : TSGSingle):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -367,43 +366,6 @@ Vertexes[0].x := x1;
 Vertexes[0].y := y1;
 Vertexes[1].x := x2;
 Vertexes[1].y := y2;
-end;
-
-function SGRectangleWithRoundedCornersConstruct(const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt):TSGVertex3fList;
-var
-	Vertex2,Vertex4: TSGVertex3f;
-	VertexR1,VertexR2,VertexR3,VertexR4: TSGVertex3f;
-	I,ii:LongInt;
-begin
-Result:=nil;
-Vertex2.Import(Vertex3.x,Vertex1.y,(Vertex1.z+Vertex3.z)/2);
-Vertex4.Import(Vertex1.x,Vertex3.y,(Vertex1.z+Vertex3.z)/2);
-VertexR1.Import(Vertex1.x+Radius,Vertex1.y-Radius,Vertex1.z);
-VertexR2.Import(Vertex2.x-Radius,Vertex2.y-Radius,Vertex2.z);
-VertexR3.Import(Vertex3.x-Radius,Vertex3.y+Radius,Vertex3.z);
-VertexR4.Import(Vertex4.x+Radius,Vertex4.y+Radius,Vertex4.z);
-SetLength(Result,Interval*4+4);
-ii:=0;
-For i:=0 to Interval do
-	begin
-	Result[ii].Import(VertexR2.x+cos((Pi/2)/(Interval)*i)*Radius,VertexR2.y+sin((Pi/2)/(Interval)*i+Pi)*Radius+2*Radius,VertexR2.z);
-	ii+=1;
-	end;
-For i:=0 to Interval do
-	begin
-	Result[ii].Import(VertexR1.x+cos((Pi/2)*i/(Interval)+Pi/2)*Radius,VertexR1.y+sin((Pi/2)*i/(Interval)+3*Pi/2)*Radius+2*Radius,VertexR1.z);
-	ii+=1;
-	end;
-For i:=0 to Interval do
-	begin
-	Result[ii].Import(VertexR4.x+cos((Pi/2)*i/Interval+Pi)*Radius,VertexR4.y+sin((Pi/2)*i/(Interval))*Radius-2*Radius,VertexR4.z);
-	ii+=1;
-	end;
-For i:=0 to Interval do
-	begin
-	Result[ii].Import(VertexR3.x+cos((Pi/2)*i/(Interval)+3*Pi/2)*Radius,VertexR3.y+sin((Pi/2)*i/(Interval)+Pi/2)*Radius-2*Radius,VertexR3.z);
-	ii+=1;
-	end;
 end;
 
 function SGVertex2fImport(const x:real = 0;const y:real = 0):TSGVertex2f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

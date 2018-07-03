@@ -60,6 +60,7 @@ end;
 constructor TSGPanel.Create();
 begin
 inherited;
+SetBoundsSize(5, 5, 5, 5);
 FViewLines := True;
 FViewQuad  := True;
 end;

@@ -21,8 +21,8 @@ uses
 	,SaGeScreen_RadioButton
 	,SaGeScreen_Button
 	,SaGeScreen_ComboBox
-	,SaGeScreen_Form
 	,SaGeScreen_ProgressBar
+	,SaGeScreen_Form
 	;
 
 // Base const & types
@@ -40,6 +40,7 @@ type
 // Component types
 type
 	TSGScreenComponentProcedure = TSGComponentProcedure;
+	TSGScreenComboBoxProcedure = TSGComboBoxProcedure;
 // Components types
 type
 	TSGScreenComponent   = TSGComponent;
@@ -48,6 +49,8 @@ type
 	TSGScreenPicture     = TSGPicture;
 	TSGScreenPanel       = TSGPanel;
 	TSGScreenEdit        = TSGEdit;
+	TSGScreenComboBox    = TSGComboBox;
+	TSGScreenButton      = TSGButton;
 
 // Picture
 function SGCreatePicture(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;

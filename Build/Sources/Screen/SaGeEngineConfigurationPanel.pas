@@ -35,10 +35,10 @@ type
 		procedure InitContext(const VContextClass : TSGContextClass);
 			private
 		FContextsComboBox,
-			FRendersComboBox : TSGComboBox;
+			FRendersComboBox : TSGScreenComboBox;
 		FCaptionLabel,
 			FVersionLabel : TSGScreenLabel;
-		FCloseButton : TSGButton;
+		FCloseButton : TSGScreenButton;
 		FFPS : TSGFPSViewer;
 		end;
 
@@ -137,18 +137,18 @@ if VScreen.HasChildren then
 			end;
 end;
 
-procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGButton);
+procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGScreenButton);
 begin
 VButton.Parent.MarkForDestroy();
 end;
 
-procedure TSGEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGComboBox);
+procedure TSGEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGScreenComboBox);
 begin
 if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitContext(Contexts[VNewIndex].FClass);
 end;
 
-procedure TSGEngineConfigurationPanel_RendersComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGComboBox);
+procedure TSGEngineConfigurationPanel_RendersComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGScreenComboBox);
 begin
 if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitRender(Renders[VNewIndex].FClass);
@@ -181,7 +181,7 @@ FFPS := nil;
 FCaptionLabel := SGCreateLabel(Self, 'SaGe Engine Configuration (' + SGVerCPU + ' bit)', True);
 FVersionLabel := SGCreateLabel(Self, 'Version: ' + SGEngineVersion(), True);
 
-FContextsComboBox := TSGComboBox.Create();
+FContextsComboBox := TSGScreenComboBox.Create();
 CreateChild(FContextsComboBox);
 FContextsComboBox.Visible := True;
 FContextsComboBox.UserPointer:=Self;
@@ -192,9 +192,9 @@ for i := Low(Contexts) to High(Contexts) do
 		FCanUse := Contexts[i].FClass.Suppored();
 	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
 	end;
-FContextsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
+FContextsComboBox.CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
 
-FRendersComboBox := TSGComboBox.Create();
+FRendersComboBox := TSGScreenComboBox.Create();
 CreateChild(FRendersComboBox);
 FRendersComboBox.UserPointer:=Self;
 FRendersComboBox.Visible := True;
@@ -205,9 +205,9 @@ for i := Low(Renders) to High(Renders) do
 		FCanUse := Renders[i].FClass.Suppored();
 	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
-FRendersComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
+FRendersComboBox.CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 
-FCloseButton := TSGButton.Create();
+FCloseButton := TSGScreenButton.Create();
 CreateChild(FCloseButton);
 FCloseButton.UserPointer:=Self;
 FCloseButton.Visible := True;

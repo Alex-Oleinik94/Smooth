@@ -1,6 +1,5 @@
 {$INCLUDE SaGe.inc}
 
-//{$DEFINE CLHINTS}
 //{$DEFINE SCREEN_DEBUG}
 
 unit SaGeScreen;
@@ -8,20 +7,9 @@ unit SaGeScreen;
 interface
 
 uses
-	 Crt
-	
-	,SaGeBase
-	,SaGeClasses
-	,SaGeImage
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeResourceManager
+	 SaGeBase
 	,SaGeCommonClasses
 	,SaGeScreenBase
-	,SaGeScreenSkin
-	,SaGeCursor
-	,SaGeCommonStructs
-	,SaGeContextUtils
 	,SaGeScreenComponent
 	;
 
@@ -75,14 +63,10 @@ implementation
 
 uses
 	 SaGeEngineConfigurationPanel
-	,SaGeContext
-	,SaGeEncodingUtils
-	,SaGeStringUtils
 	,SaGeLog
-	,SaGeBaseUtils
-	,SaGeMathUtils
-	,SaGeRenderInterface
-	,SaGeCommon
+	,SaGeRenderBase
+	,SaGeScreenSkin
+	,SaGeContextUtils
 	;
 
 class function TSGScreened.ClassName() : TSGString;
@@ -130,7 +114,9 @@ else
 	Result := nil;
 end;
 
-// ====================================== TSGScreen
+// =======================
+// ====== TSGScreen ======
+// =======================
 
 constructor TSGScreen.Create();
 begin
@@ -146,13 +132,12 @@ end;
 
 procedure TSGScreen.Load(const VContext : ISGContext);
 begin
-{$IFDEF ANDROID}SGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
+{$IFDEF ANDROID}TSGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
 Context := VContext;
 FSkin := TSGScreenSkin.CreateRandom(Context);
-SetShifts(0, 0, 0, 0);
 Visible := True;
 Resize();
-{$IFDEF ANDROID}SGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
+{$IFDEF ANDROID}TSGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
 end;
 
 procedure TSGScreen.Resize();

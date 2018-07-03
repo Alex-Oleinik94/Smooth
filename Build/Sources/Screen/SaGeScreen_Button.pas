@@ -102,13 +102,9 @@ end;
 constructor TSGButton.Create();
 begin
 inherited Create();
-FLeftShiftForChilds   := 0;
-FTopShiftForChilds    := 0;
-FRightShiftForChilds  := 0;
-FBottomShiftForChilds := 0;
-FCanHaveChildren      := False;
-FCursorOnButtonPrev   := False;
-FCursorOnButton       := False;
+FCanHaveChildren    := False;
+FCursorOnButtonPrev := False;
+FCursorOnButton     := False;
 end;
 
 destructor TSGButton.Destroy();
