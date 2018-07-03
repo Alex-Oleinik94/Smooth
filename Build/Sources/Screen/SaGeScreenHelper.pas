@@ -51,6 +51,18 @@ type
 	TSGScreenEdit        = TSGEdit;
 	TSGScreenComboBox    = TSGComboBox;
 	TSGScreenButton      = TSGButton;
+	TSGScreenForm        = TSGForm;
+	TSGScreenProgressBar = TSGProgressBar;
+
+// Button
+function SGCreateButton(const Parent : TSGComponent; const Caption : TSGString; const CallBack : TSGScreenComponentProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
+function SGCreateButton(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
+
+// ComboBox
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 
 // Picture
 function SGCreatePicture(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
@@ -87,6 +99,60 @@ function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGStri
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 
 implementation
+
+//##########
+//# Button #
+//##########
+
+function SGCreateButton(const Parent : TSGComponent; const Caption : TSGString; const CallBack : TSGScreenComponentProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
+begin
+Result := SGCreateButton(Parent, IsVisible, InterfaceData);
+Result.Caption := Caption;
+Result.OnChange := CallBack;
+end;
+
+function SGCreateButton(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
+begin
+Result := TSGScreenButton.Create();
+if Parent <> nil then
+	Parent.CreateChild(Result);
+Result.Visible := IsVisible;
+Result.UserPointer := InterfaceData;
+end;
+
+//############
+//# ComboBox #
+//############
+
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+begin
+Result := SGCreateComboBox(Parent, X, Y, W, H, CallBack, IsVisible, BTNB, InterfaceData);
+if (Font <> nil) then
+	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
+end;
+
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+begin
+Result := SGCreateComboBox(Parent, CallBack, IsVisible, InterfaceData);
+Result.SetBounds(X, Y, W, H);
+if BTNB then
+	Result.BoundsToNeedBounds();
+end;
+
+function SGCreateComboBox(const Parent : TSGComponent; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+begin
+Result := SGCreateComboBox(Parent, IsVisible, InterfaceData);
+Result.CallBackProcedure := CallBack;
+end;
+
+function SGCreateComboBox(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+begin
+Result := TSGScreenComboBox.Create();
+if Parent <> nil then
+	Parent.CreateChild(Result);
+Result.Visible := IsVisible;
+Result.UserPointer := InterfaceData;
+end;
 
 //###########
 //# Picture #

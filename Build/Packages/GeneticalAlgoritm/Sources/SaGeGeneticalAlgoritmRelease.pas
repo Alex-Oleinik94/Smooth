@@ -30,11 +30,11 @@ type
 			public
 		FLMM, FL1, FL2, FL3, FL4, FL5, FL6, FL7, FL8, FL9, FXL, FLPoint : TSGScreenLabel;
 		FP1 : TSGScreenPanel;
-		FB1:TSGButton;
+		FB1:TSGScreenButton;
 		FE1, FE2, FE22, FE3, FE4 : TSGScreenEdit;
 		FS1 : TSGScreenEdit;
-		FCB1,FCBMM,FCB2,FCB4,FCB5,FCB3,FCB6,FCB7:TSGComboBox;
-		FNB:TSGButton;
+		FCB1,FCBMM,FCB2,FCB4,FCB5,FCB3,FCB6,FCB7:TSGScreenComboBox;
+		FNB:TSGScreenButton;
 			public
 		FG:TSGGraphic;
 		FGA:TSGGA;
@@ -76,7 +76,7 @@ with MyClass do
 	end;
 end;
 
-procedure mmmFCB3OnChange(const Self:TSGComboBox);
+procedure mmmFCB3OnChange(const Self:TSGScreenComboBox);
 begin
 with TSGGenAlg(Self.FUserPointer1) do
 if Self.SelectItem=1 then
@@ -148,7 +148,7 @@ else
 end;
 
 
-procedure New1234543454354(Button:TSGComponent);
+procedure New1234543454354(Button:TSGScreenComponent);
 begin
 with TSGGenAlg(Button.FUserPointer1) do
 	begin
@@ -158,7 +158,7 @@ with TSGGenAlg(Button.FUserPointer1) do
 	end;
 end;
 
-procedure GAFindMin(Button:TSGComponent);
+procedure GAFindMin(Button:TSGScreenComponent);
 var
 	Min,Max:Extended;
 	Ex:TSGExpression = nil;
@@ -270,127 +270,127 @@ FG:=nil;
 a:=0;
 b:=0;
 
-FNB:=TSGButton.Create;
+FNB:=TSGScreenButton.Create;
 Screen.CreateChild(FNB);
 Screen.LastChild.SetBounds(Render.Width-90,1 ,80,15);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Заного';
 Screen.LastChild.FUserPointer1:=Self;
-FNB.OnChange:=TSGComponentProcedure(@New1234543454354);
+FNB.OnChange:=TSGScreenComponentProcedure(@New1234543454354);
 
 FP1 := SGCreatePanel(Screen, 550,378, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, '[', False, 265,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ']', False, 513,38,8,25, [SGAnchRight], True, True, Self);
 SGCreateLabel(FP1, ',', False, 390,38,8,25, [SGAnchRight], True, True, Self);
 FE2 := SGCreateEdit(FP1, '3', SGScreenEditTypeInteger, 275,39,110,21, [SGAnchRight], True, True, Self);
-FE2.OnChange:=TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE2.OnChange:=TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FE22 := SGCreateEdit(FP1, '7', SGScreenEditTypeInteger, 400,39,110,21, [SGAnchRight], True, True, Self);
-FE22.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE22.OnChange := TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FLMM := SGCreateLabel(FP1, 'функции.', False, QQQ+280,338,80,25, [SGAnchRight], True, True, Self);
 
-FCBMM:=TSGComboBox.Create;
+FCBMM:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCBMM);
 FP1.LastChild.SetBounds(QQQ+205,338 ,70,25);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Минимум');
-(FP1.LastChild as TSGComboBox).CreateItem('Максимум');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Минимум');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Максимум');
 
-FB1:=TSGButton.Create;
+FB1:=TSGScreenButton.Create;
 FP1.CreateChild(FB1);
 FP1.LastChild.SetBounds(QQQ+150,338 ,50,25);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.Caption:='Найти';
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-FB1.OnChange:=TSGComponentProcedure(@GAFindMin);
+FB1.OnChange:=TSGScreenComponentProcedure(@GAFindMin);
 
 FE4 := SGCreateEdit(FP1, '10', SGScreenEditTypeNumber, 260,309,270,21, [SGAnchRight], True, True, Self);
-FE4.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE4.OnChange := TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FE3 := SGCreateEdit(FP1, '10', SGScreenEditTypeNumber, 260,279,270,21, [SGAnchRight], True, True, Self);
-FE3.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE3.OnChange := TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 FXL := SGCreateLabel(FP1, 'f(x)=', False, 260-20-5-5,9,28,21, [SGAnchRight], True, True, Self);
 FE1 := SGCreateEdit(FP1, 'x^2-5*x+6', TSGScreenEditTextTypeFunction(@MyTTFE), 260,9,270,21, [SGAnchRight], True, True, Self);
-FE1.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FE1.OnChange := TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 
-FCB7:=TSGComboBox.Create;
+FCB7:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB7);
 FP1.LastChild.SetBounds(260,249,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Микроэволюция');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Микроэволюция');
 
-FCB6:=TSGComboBox.Create;
+FCB6:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB6);
 FP1.LastChild.SetBounds(260,219,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Элитный');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Элитный');
 
-FCB5:=TSGComboBox.Create;
+FCB5:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB5);
 FP1.LastChild.SetBounds(260,189,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Простые');
-(FP1.LastChild as TSGComboBox).CreateItem('Транстпозиция');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Простые');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Транстпозиция');
 
-FCB4:=TSGComboBox.Create;
+FCB4:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB4);
 FP1.LastChild.SetBounds(260,159,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Стандартный двуточечьный');
-(FP1.LastChild as TSGComboBox).CreateItem('Частично соответствующий одноточечный');
-(FP1.LastChild as TSGComboBox).CreateItem('Упорядочивающий одноточечный');
-(FP1.LastChild as TSGComboBox).CreateItem('Hа основе «Золотого сечения»');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Стандартный двуточечьный');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Частично соответствующий одноточечный');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Упорядочивающий одноточечный');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Hа основе «Золотого сечения»');
 
 FS1 := SGCreateEdit(FP1, '', SGScreenEditTypeInteger, 260,129,270,21, [SGAnchRight], False, True, Self);
-FS1.OnChange := TSGComponentProcedure(@TSGGenAlg_GenerateComponentActives);
+FS1.OnChange := TSGScreenComponentProcedure(@TSGGenAlg_GenerateComponentActives);
 
-FCB3:=TSGComboBox.Create;
+FCB3:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB3);
-FCB3.OnChange:=TSGComponentProcedure(@mmmFCB3OnChange);
+FCB3.OnChange:=TSGScreenComponentProcedure(@mmmFCB3OnChange);
 FP1.LastChild.SetBounds(260,129,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Имбридинг');
-(FP1.LastChild as TSGComboBox).CreateItem('Селекция по заданной шкале');
-(FP1.LastChild as TSGComboBox).CreateItem('Аутбридинг');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Имбридинг');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Селекция по заданной шкале');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Аутбридинг');
 
-FCB2:=TSGComboBox.Create;
+FCB2:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB2);
 FP1.LastChild.SetBounds(260,99,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Стратегия "Одеяла"');
-(FP1.LastChild as TSGComboBox).CreateItem('Стратегия "Дробовика"');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Стратегия "Одеяла"');
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Стратегия "Дробовика"');
 
-FCB1:=TSGComboBox.Create;
+FCB1:=TSGScreenComboBox.Create;
 FP1.CreateChild(FCB1);
 FP1.LastChild.SetBounds(260,69,270,21);
 FP1.LastChild.Anchors:=[SGAnchRight];
 FP1.LastChild.FUserPointer1:=Self;
 FP1.LastChild.Visible:=True;
 FP1.LastChild.Active:=False;
-(FP1.LastChild as TSGComboBox).SelectItem:=0;
-(FP1.LastChild as TSGComboBox).CreateItem('Бинарное');
+(FP1.LastChild as TSGScreenComboBox).SelectItem:=0;
+(FP1.LastChild as TSGScreenComboBox).CreateItem('Бинарное');
 
 FL8 := SGCreateLabel(FP1, 'Функция:', False, 5,5,200,25, [SGAnchRight], True, True, Self);
 FL9 := SGCreateLabel(FP1, 'Отрезок:', False, 5,35,200,25, [SGAnchRight], True, True, Self);

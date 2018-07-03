@@ -292,9 +292,9 @@ Component := nil;
 if (Index > 0) and (Index <= ChildCount) then
 	begin
 	Component := FChildren[Index - 1];
-	for i:= Index - 1 to FParent.ChildrenCount - 1 do
-		FParent.FChildren[i] := FParent.FChildren[i + 1];
-	FParent.FChildren[FParent.ChildrenCount - 1] := Component;
+	for i:= Index - 1 to ChildrenCount - 1 do
+		FChildren[i] := FChildren[i + 1];
+	FChildren[ChildrenCount - 1] := Component;
 	end;
 end;
 

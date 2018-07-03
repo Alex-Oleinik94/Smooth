@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeLists
 	,SaGeContext
-	,SaGeScreen
+	,SaGeScreenHelper
 	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
@@ -27,7 +27,7 @@ uses
 type
 	TSGNotepad = class;
 	
-	TSGNInset = class(TSGComponent)
+	TSGNInset = class(TSGScreenComponent)
 			public
 		constructor Create();
 		destructor Destroy();override;
@@ -52,7 +52,7 @@ type
 	
 	TSGNInsetList = packed array of TSGNInset;
 	
-	TSGNotepad = class(TSGComponent)
+	TSGNotepad = class(TSGScreenComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -105,6 +105,8 @@ uses
 	,SaGeRenderInterface
 	,SaGeCommon
 	,SaGeContextUtils
+	,SaGeScreen
+	,SaGeRectangleWithRoundedCorners
 	
 	,StrMan
 	;

@@ -10,7 +10,6 @@ uses
 	 SaGeBase
 	,SaGeCommonStructs
 	,SaGeContext
-	,SaGeScreen
 	,SaGeRender
 	,SaGeFont
 	,SaGeFPSViewer
@@ -30,7 +29,7 @@ type
 		procedure FromDraw();override;
 		procedure FromResize();override;
 			public
-		class function CanCreate(const VScreen : TSGScreen): TSGBoolean;
+		class function CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 		procedure InitRender(const VRenderClass : TSGRenderClass);
 		procedure InitContext(const VContextClass : TSGContextClass);
 			private
@@ -123,7 +122,7 @@ const
 	HeightShift = 2;
 	TotalHeight = FontHeight * 10 + HeightShift * 4;
 
-class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreen): TSGBoolean;
+class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 var
 	Component : TSGScreenComponent;
 begin
@@ -181,10 +180,7 @@ FFPS := nil;
 FCaptionLabel := SGCreateLabel(Self, 'SaGe Engine Configuration (' + SGVerCPU + ' bit)', True);
 FVersionLabel := SGCreateLabel(Self, 'Version: ' + SGEngineVersion(), True);
 
-FContextsComboBox := TSGScreenComboBox.Create();
-CreateChild(FContextsComboBox);
-FContextsComboBox.Visible := True;
-FContextsComboBox.UserPointer:=Self;
+FContextsComboBox := SGCreateComboBox(Self, TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange), True, Self);
 for i := Low(Contexts) to High(Contexts) do
 	begin
 	FCanUse := Contexts[i].FClass <> nil;
@@ -192,12 +188,8 @@ for i := Low(Contexts) to High(Contexts) do
 		FCanUse := Contexts[i].FClass.Suppored();
 	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
 	end;
-FContextsComboBox.CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
 
-FRendersComboBox := TSGScreenComboBox.Create();
-CreateChild(FRendersComboBox);
-FRendersComboBox.UserPointer:=Self;
-FRendersComboBox.Visible := True;
+FRendersComboBox := SGCreateComboBox(Self, TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange), True, Self);
 for i := Low(Renders) to High(Renders) do
 	begin
 	FCanUse := Renders[i].FClass <> nil;
@@ -205,14 +197,8 @@ for i := Low(Renders) to High(Renders) do
 		FCanUse := Renders[i].FClass.Suppored();
 	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
-FRendersComboBox.CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 
-FCloseButton := TSGScreenButton.Create();
-CreateChild(FCloseButton);
-FCloseButton.UserPointer:=Self;
-FCloseButton.Visible := True;
-FCloseButton.Caption := 'Close';
-FCloseButton.OnChange := TSGScreenComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange);
+FCloseButton := SGCreateButton(Self, 'Close', TSGScreenComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange), True, Self);
 end;
 
 procedure TSGEngineConfigurationPanel.FromResize();

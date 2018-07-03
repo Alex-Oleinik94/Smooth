@@ -310,7 +310,10 @@ end;
 
 function TSGDrawable.GetRender():ISGRender;
 begin
-Result := FContext^.Render;
+if (FContext <> nil) and (FContext^ <> nil) then
+	Result := FContext^.Render
+else
+	Result := nil;
 end;
 
 procedure TSGDrawable.SetContext(const VContext : ISGContext);

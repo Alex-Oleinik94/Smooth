@@ -507,7 +507,6 @@ if Item.Over then
 		FColors.FOver.FFirst .WithAlpha(0.3*OpenTimer)     * (1 - ClickTimer) + FColors.FClick.FFirst .WithAlpha(0.3*OpenTimer)     * ClickTimer,
 		FColors.FOver.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * (1 - ClickTimer) + FColors.FClick.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * ClickTimer);
 	end;
-
 if Item.Selected and (not Item.Over) and Item.Active then
 	SetSelectedTextColor()
 else if Item.Selected and Item.Over and Item.Active then
@@ -617,7 +616,7 @@ if 1 - OpenTimer > SGZero then
 			TextLocation.FloatPositionAndSize,
 			False,0.5);
 		end;
-	if ComboBox.GetSelectedItem() <> nil then
+	if (ComboBox.GetSelectedItem() <> nil) and (Font <> nil) then
 		begin
 		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.FloatPosition, TextLocation.FloatPositionAndSize);
 		end;

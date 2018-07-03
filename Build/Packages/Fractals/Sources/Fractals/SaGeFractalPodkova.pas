@@ -25,8 +25,8 @@ type
 		procedure PushIndexes(var MeshID:LongWord;const v:TSGVertex2f;var FVertexIndex:LongWord);Inline;
 			protected
 		FLD, FLDC : TSGScreenLabel;
-		FBPD, FBMD : TSGButton;
-		FTCB : TSGComboBox;
+		FBPD, FBMD : TSGScreenButton;
+		FTCB : TSGScreenComboBox;
 		end;
 
 implementation
@@ -132,7 +132,7 @@ else
 	end;
 end;
 
-procedure PodkovammmFButtonDepthPlusOnChangeKT(Button:TSGButton);
+procedure PodkovammmFButtonDepthPlusOnChangeKT(Button:TSGScreenButton);
 begin
 with TSGFractalPodkova(Button.FUserPointer1) do
 	begin
@@ -144,7 +144,7 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 end;
 
 
-procedure PodkovammmFButtonDepthMinusOnChangeKT(Button:TSGButton);
+procedure PodkovammmFButtonDepthMinusOnChangeKT(Button:TSGScreenButton);
 begin
 with TSGFractalPodkova(Button.FUserPointer1) do
 	begin
@@ -159,7 +159,7 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGFractalPodkova_CamboBox_CallBackProcedure(a,b:LongInt;Button:TSGComponent);
+procedure TSGFractalPodkova_CamboBox_CallBackProcedure(a,b:LongInt;Button:TSGScreenComponent);
 begin
 with TSGFractalPodkova(Button.FUserPointer1) do
 	begin
@@ -191,39 +191,39 @@ Screen.LastChild.BoundsToNeedBounds();
 
 FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
-FBPD:=TSGButton.Create;
+FBPD:=TSGScreenButton.Create;
 Screen.CreateChild(FBPD);
 Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKT);
+FBPD.OnChange:=TSGScreenComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKT);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
 FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
-FBMD:=TSGButton.Create;
+FBMD:=TSGScreenButton.Create;
 Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSGComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKT);
+FBMD.OnChange:=TSGScreenComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKT);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FTCB:=TSGComboBox.Create;
+FTCB:=TSGScreenComboBox.Create;
 Screen.CreateChild(FTCB);
-Screen.LastChild.SetBounds(Render.Width-160-90-125-130-50,5,125+50,20);
-Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Кривая Леви');
-Screen.LastChild.AsComboBox.CreateItem('Дракон Хартера — Хейтуэя');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGFractalPodkova_CamboBox_CallBackProcedure);
-Screen.LastChild.AsComboBox.SelectItem:=0;
-Screen.LastChild.FUserPointer1:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+FTCB.SetBounds(Render.Width-160-90-125-130-50,5,125+50,20);
+FTCB.Anchors:=[SGAnchRight];
+FTCB.CreateItem('Кривая Леви');
+FTCB.CreateItem('Дракон Хартера — Хейтуэя');
+FTCB.CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGFractalPodkova_CamboBox_CallBackProcedure);
+FTCB.SelectItem:=0;
+FTCB.FUserPointer1:=Self;
+FTCB.Visible:=True;
+FTCB.BoundsToNeedBounds();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 

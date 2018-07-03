@@ -269,7 +269,7 @@ begin
 Result := False;
 if not FCursorOnComponent then
 	Exit;
-CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealLeft, FRealTop);
+CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealPosition.x, FRealPosition.y);
 CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
 if Line < CountLines() then

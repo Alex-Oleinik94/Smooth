@@ -76,7 +76,7 @@ type
 			FP15Button,
 			FM15Button,
 			FP100Button,
-			FM100Button : TSGButton;
+			FM100Button : TSGScreenButton;
 		FFont : TSGFont;
 		FCountLabel : TSGScreenLabel;
 		
@@ -138,14 +138,14 @@ begin
 Result := 'Скелетная анимация + Shadow & Bump Mapping';
 end;
 
-procedure mmmFP1ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(1); end;
-procedure mmmFM1ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-1); end;
-procedure mmmFP5ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(5); end;
-procedure mmmFM5ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-5); end;
-procedure mmmFP15ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(15); end;
-procedure mmmFM15ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-15); end;
-procedure mmmFP100ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(100); end;
-procedure mmmFM100ButtonProcedure(Button:TSGButton); begin TSGExample15(Button.UserPointer).AddModels(-100); end;
+procedure mmmFP1ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(1); end;
+procedure mmmFM1ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(-1); end;
+procedure mmmFP5ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(5); end;
+procedure mmmFM5ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(-5); end;
+procedure mmmFP15ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(15); end;
+procedure mmmFM15ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(-15); end;
+procedure mmmFP100ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(100); end;
+procedure mmmFM100ButtonProcedure(Button:TSGScreenButton); begin TSGExample15(Button.UserPointer).AddModels(-100); end;
 
 procedure TSGExample15.DrawPlane(const PlaneSize, PlaneHeight : TSGFloat);
 const
@@ -202,9 +202,9 @@ FLigthSphere.EnableCullFace := True;
 FPhysics.Destroy();
 end;
 
-procedure CreateButton(var VButton : TSGButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
+procedure CreateButton(var VButton : TSGScreenButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
 begin
-VButton := TSGButton.Create();
+VButton := TSGScreenButton.Create();
 Screen.CreateChild(VButton);
 Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
 Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
@@ -213,7 +213,7 @@ Screen.LastChild.UserPointer:=Self;
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Visible:=True;
 Screen.LastChild.Caption := VCaption;
-(Screen.LastChild as TSGButton).OnChange := TSGComponentProcedure(VProc);
+(Screen.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(VProc);
 end;
 
 var

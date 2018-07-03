@@ -26,7 +26,7 @@ type
 		procedure PushIndexes(var MeshID:LongWord;const v1,v2,v3,v4:TSGVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSGScreenLabel;
-		FBPD, FBMD : TSGButton;
+		FBPD, FBMD : TSGScreenButton;
 		end;
 
 implementation
@@ -196,7 +196,7 @@ else
 	Result := 8 * RecQuantity(ThisDepth - 1);
 end;
 
-procedure mmmFButtonDepthPlusOnChangeKT(Button:TSGButton);
+procedure mmmFButtonDepthPlusOnChangeKT(Button:TSGScreenButton);
 begin
 with TSGFractalSierpinskiCarpet(Button.FUserPointer1) do
 	begin
@@ -207,7 +207,7 @@ with TSGFractalSierpinskiCarpet(Button.FUserPointer1) do
 	end;
 end;
 
-procedure mmmFButtonDepthMinusOnChangeKT(Button:TSGButton);
+procedure mmmFButtonDepthMinusOnChangeKT(Button:TSGScreenButton);
 begin
 with TSGFractalSierpinskiCarpet(Button.FUserPointer1) do
 	begin
@@ -241,24 +241,24 @@ Screen.LastChild.BoundsToNeedBounds();
 
 FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
-FBPD:=TSGButton.Create;
+FBPD:=TSGScreenButton.Create;
 Screen.CreateChild(FBPD);
 Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChangeKT);
+FBPD.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthPlusOnChangeKT);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
 FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
-FBMD:=TSGButton.Create;
+FBMD:=TSGScreenButton.Create;
 Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChangeKT);
+FBMD.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthMinusOnChangeKT);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();

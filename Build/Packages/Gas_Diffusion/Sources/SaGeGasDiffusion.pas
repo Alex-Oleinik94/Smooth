@@ -118,7 +118,7 @@ type
 			FRelefOptionPanel,								// опции рельефа границы
 			FNewScenePanel : TSGScreenPanel;				// панель нового проэкта
 		
-		FStartingProgressBar : TSGProgressBar;
+		FStartingProgressBar : TSGScreenProgressBar;
 		FStartingThread      : TSGThread;
 		FStartingFlag        : LongInt;
 		
@@ -131,14 +131,14 @@ type
 		FNumberLabel            : TSGScreenLabel;
 		FStartSceneButton,
 		FBoundsTypeButton,
-			FEnableLoadButton   : TSGButton;
-		FEnableOutputComboBox   : TSGComboBox;
+			FEnableLoadButton   : TSGScreenButton;
+		FEnableOutputComboBox   : TSGScreenComboBox;
 		
 		//Load Panel
-		FLoadComboBox      : TSGComboBox;
+		FLoadComboBox      : TSGScreenComboBox;
 		FBackButton, 
 			FUpdateButton, 
-			FLoadButton    : TSGButton;
+			FLoadButton    : TSGScreenButton;
 		
 		//Экран
 		FInfoLabel : TSGScreenLabel;
@@ -147,7 +147,7 @@ type
 		
 		FNewSecheniePanel, 						// Содержит кнопку и FPlaneComboBox
 			FSecheniePanel : TSGScreenPanel;	// Cодержит картинку сечения
-		FPlaneComboBox : TSGComboBox;			// вычесление осей координат для FPointerSecheniePlace
+		FPlaneComboBox : TSGScreenComboBox;			// вычесление осей координат для FPointerSecheniePlace
 		FPointerSecheniePlace : TSGSingle;		// (-1..1) значение места сечения
 		FSechenieImage : TSGImage; 				// Картинка сечения
 		FImageSechenieBounds : LongWord; 		// Действительное расширение картинки сечения
@@ -175,7 +175,7 @@ type
 			FStopEmulatingButton,				// остановка эмуляции
 			FAddSechSecondPanelButton,			// включение отображение усредненного сечения
 			FSaveImageButton,					// сохранить картинку сечения
-			FRedactorBackButton: TSGButton;
+			FRedactorBackButton: TSGScreenButton;
 		
 		FAddNewSoursePanel : TSGScreenPanel;
 		FAddNewGazPanel : TSGScreenPanel;
@@ -190,7 +190,7 @@ type
 		//Экран повтора
 		FMoviePauseButton,
 			FMovieBackToMenuButton,
-			FMoviePlayButton : TSGButton;
+			FMoviePlayButton : TSGScreenButton;
 		
 		{$IFDEF RELIEFDEBUG}
 			private
@@ -224,6 +224,7 @@ uses
 	,SaGeMeshSg3dm
 	,SaGeContextUtils
 	,SaGeScreen_Edit
+	,SaGeRectangleWithRoundedCorners
 	;
 
 //Algorithm
@@ -1410,7 +1411,7 @@ begin
 Result := 'Моделирование диффузии газа';
 end;
 
-procedure mmmFBackToMenuButtonProcedure(Button:TSGButton);
+procedure mmmFBackToMenuButtonProcedure(Button:TSGScreenButton);
 var
 	i : LongWord;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
@@ -1478,14 +1479,14 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	for i:=0 to High(FConchLabels) do
 		FConchLabels[i].Visible:=False;
 end; end;
-procedure mmmFPauseDiffusionButtonProcedure(Button:TSGButton);
+procedure mmmFPauseDiffusionButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FDiffusionRuned := False;
 	Button.Active := False;
 	FStopEmulatingButton.Active := True;
 	FStartEmulatingButton.Active := True;
 end; end;
-procedure mmmFNewSecheniePanelButtonOnChange(Button:TSGButton);
+procedure mmmFNewSecheniePanelButtonOnChange(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddNewSourseButton.Active := True;
 	FAddNewGazButton.Active := True;
@@ -1493,7 +1494,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddSechSecondPanelButton.Active := True;
 	FSaveImageButton.Active := True;
 end; end;
-procedure mmmFAddSechenieButtonProcedure(Button:TSGButton);
+procedure mmmFAddSechenieButtonProcedure(Button:TSGScreenButton);
 var
 	a : LongWord;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
@@ -1510,7 +1511,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	FNewSecheniePanel := SGCreatePanel(Screen, Render.Width-10-a,Render.Height-10-a,a,a, [SGAnchRight, SGAnchBottom], True, True, Button.UserPointer);
 	
-	FPlaneComboBox := TSGComboBox.Create();
+	FPlaneComboBox := TSGScreenComboBox.Create();
 	FNewSecheniePanel.CreateChild(FPlaneComboBox);
 	FNewSecheniePanel.LastChild.SetBounds(5,5,190,FTahomaFont.FontHeight+2);
 	FNewSecheniePanel.LastChild.BoundsToNeedBounds();
@@ -1521,13 +1522,13 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FPlaneComboBox.CreateItem('ZoY');
 	FPlaneComboBox.SelectItem := 0;
 	
-	FNewSecheniePanel.CreateChild(TSGButton.Create());
+	FNewSecheniePanel.CreateChild(TSGScreenButton.Create());
 	FNewSecheniePanel.LastChild.SetBounds(5,FTahomaFont.FontHeight+10,190,FTahomaFont.FontHeight+2);
 	FNewSecheniePanel.LastChild.BoundsToNeedBounds();
 	FNewSecheniePanel.LastChild.UserPointer:=Button.UserPointer;
 	FNewSecheniePanel.LastChild.Visible:=True;
 	FNewSecheniePanel.LastChild.Caption := 'ОК';
-	(FNewSecheniePanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFNewSecheniePanelButtonOnChange);
+	(FNewSecheniePanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFNewSecheniePanelButtonOnChange);
 	
 	a := (FCube.Edge+1)*2;
 	
@@ -1553,7 +1554,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	UpDateSechenie();
 end; end;
-procedure mmmFDeleteSechenieButtonProcedure(Button:TSGButton);
+procedure mmmFDeleteSechenieButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FAddSechSecondPanelButton.Active := False;
 	FSaveImageButton.Active := False;
@@ -1744,7 +1745,7 @@ for i:=0 to FCube.Edge - 1 do
 FSechenieImage.ToTexture();
 end;
 
-procedure mmmFStopDiffusionButtonProcedure(Button:TSGButton);
+procedure mmmFStopDiffusionButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FDiffusionRuned := False;
 	Button.Active := False;
@@ -1759,7 +1760,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
-procedure mmmFRunDiffusionButtonProcedure(Button:TSGButton);
+procedure mmmFRunDiffusionButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FDiffusionRuned := True;
 	Button.Active := False;
@@ -1773,7 +1774,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 end; end;
 
 type
-	TSGGDrawColor=class(TSGComponent)
+	TSGGDrawColor=class(TSGScreenComponent)
 			public
 		Color : TSGColor4f;
 			public
@@ -1796,13 +1797,13 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 inherited;
 end;
 
-procedure UpdateNewGasPanel(Panel:TSGComponent);
+procedure UpdateNewGasPanel(Panel:TSGScreenComponent);
 var
 	g,i : LongWord;
 begin with TSGGasDiffusion(Panel.UserPointer) do begin
 if not ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 	begin
-	g  := (Panel.Children[1] as TSGComboBox).SelectItem;
+	g  := (Panel.Children[1] as TSGScreenComboBox).SelectItem;
 	(Panel.Children[4] as TSGGDrawColor).Color := FCube.FGazes[g].FColor;
 	Panel.Children[1].Active := True;
 	Panel.Children[5].Active := True;
@@ -1824,7 +1825,7 @@ else
 	end;
 if (not ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0))) and ((FCube.FGazes[g].FArParents[0]<>-1) and (FCube.FGazes[g].FArParents[1]<>-1)) then
 	begin
-	(Panel.Children[6] as TSGComboBox).SelectItem := 0;
+	(Panel.Children[6] as TSGScreenComboBox).SelectItem := 0;
 	Panel.Children[7].Caption := SGStr(FCube.FGazes[g].FArParents[0]+1);
 	Panel.Children[8].Caption := SGStr(FCube.FGazes[g].FArParents[1]+1);
 	Panel.Children[7].Active:=True;
@@ -1832,7 +1833,7 @@ if (not ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0))) and ((FCube.FGazes[g].
 	end
 else
 	begin
-	(Panel.Children[6] as TSGComboBox).SelectItem := 1;
+	(Panel.Children[6] as TSGScreenComboBox).SelectItem := 1;
 	Panel.Children[7].Active:=False;
 	Panel.Children[8].Active:=False;
 	Panel.Children[7].Caption := '';
@@ -1840,13 +1841,13 @@ else
 	end;
 end;end;
 
-procedure mmmGasCBProc(b,c : LongInt;a : TSGComboBox);
+procedure mmmGasCBProc(b,c : LongInt;a : TSGScreenComboBox);
 begin
 a.SelectItem := c;
 UpdateNewGasPanel(a.Parent);
 end;
 
-procedure mmmFCloseAddNewGazButtonProcedure(Button:TSGButton);
+procedure mmmFCloseAddNewGazButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
 FAddNewGazPanel.Visible := False;
 FAddNewGazPanel.Active := False;
@@ -1856,7 +1857,7 @@ FAddSechenieButton.Active := FSecheniePanel=nil;
 FDeleteSechenieButton.Active := FSecheniePanel<>nil;
 end; end;
 
-procedure mmmGas123Proc(b,c : LongInt;a : TSGComboBox);
+procedure mmmGas123Proc(b,c : LongInt;a : TSGScreenComboBox);
 begin with TSGGasDiffusion(a.Parent.UserPointer) do begin
 a.Parent.Children[7].Active:=not Boolean(c);
 a.Parent.Children[8].Active:=not Boolean(c);
@@ -1866,27 +1867,27 @@ a.Parent.Children[7].Caption := '';
 (a.Parent.Children[8] as TSGScreenEdit).TextComplite := False;
 end; end;
 
-procedure mmmFAddAddNewGazButtonProcedure(Button:TSGButton);
+procedure mmmFAddAddNewGazButtonProcedure(Button:TSGScreenButton);
 var
 	i : LongWord;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
 SetLength(FCube.FGazes,Length(FCube.FGazes)+1);
 FCube.FGazes[High(FCube.FGazes)].Create(random,random,random,1,-1,-1);
-(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+(Button.Parent.Children[1] as TSGScreenComboBox).ClearItems();
 for i := 0 to High(FCube.FGazes) do
-	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
-(Button.Parent.Children[1] as TSGComboBox).Active := True;
-(Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
+	(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Газ №'+SGStr(i+1));
+(Button.Parent.Children[1] as TSGScreenComboBox).Active := True;
+(Button.Parent.Children[1] as TSGScreenComboBox).SelectItem := High(FCube.FGazes);
 UpdateNewGasPanel(Button.Parent);
 end;end;
 
-procedure mmmGas1234Proc(Button:TSGButton);//Удаление
+procedure mmmGas1234Proc(Button:TSGScreenButton);//Удаление
 var
 	i,ii,iii,j : LongWord;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
 if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 	Exit;
-ii := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
+ii := (Button.Parent.Children[1] as TSGScreenComboBox).SelectItem;
 if Length(FCube.FGazes)<>1 then
 	for i:= ii to High(FCube.FGazes)-1 do
 		FCube.FGazes[i] := FCube.FGazes[i+1];
@@ -1935,48 +1936,48 @@ if ((FCube.FSourses<>nil) and (Length(FCube.FSourses)<>0)) then
 			i +=1;
 		end;
 	end;
-(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+(Button.Parent.Children[1] as TSGScreenComboBox).ClearItems();
 if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 	begin
-	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Добавьте газы');
-	(Button.Parent.Children[1] as TSGComboBox).SelectItem := 0;
-	(Button.Parent.Children[1] as TSGComboBox).Active := False;
+	(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Добавьте газы');
+	(Button.Parent.Children[1] as TSGScreenComboBox).SelectItem := 0;
+	(Button.Parent.Children[1] as TSGScreenComboBox).Active := False;
 	end
 else
 	begin
 	for i:=0 to High(FCube.FGazes) do
-		(Button.Parent.Children[1] as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
-	(Button.Parent.Children[1] as TSGComboBox).SelectItem := High(FCube.FGazes);
+		(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Газ №'+SGStr(i+1));
+	(Button.Parent.Children[1] as TSGScreenComboBox).SelectItem := High(FCube.FGazes);
 	end;
 UpdateNewGasPanel(Button.Parent);
 FMesh.Destroy();
 FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end;end;
 
-procedure mmmGasChangeProc(Button:TSGButton);
+procedure mmmGasChangeProc(Button:TSGScreenButton);
 var
 	a,b,c : LongWord;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
-if not Boolean((Button.Parent.Children[6] as TSGComboBox).SelectItem) then
+if not Boolean((Button.Parent.Children[6] as TSGScreenComboBox).SelectItem) then
 	begin
 	a := SGVal(Button.Parent.Children[7].Caption);
 	b := SGVal(Button.Parent.Children[8].Caption);
 	if (a<>b) and (a>=1) and (a<=Length(FCube.FGazes)) and (b>=1) and (b<=Length(FCube.FGazes)) then
 		begin
-		c := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
+		c := (Button.Parent.Children[1] as TSGScreenComboBox).SelectItem;
 		FCube.FGazes[c].FArParents[0]:=a-1;
 		FCube.FGazes[c].FArParents[1]:=b-1;
 		end;
 	end
 else
 	begin
-	c := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
+	c := (Button.Parent.Children[1] as TSGScreenComboBox).SelectItem;
 	FCube.FGazes[c].FArParents[0]:=-1;
 	FCube.FGazes[c].FArParents[1]:=-1;
 	end;
 end; end;
 
-procedure mmmFAddNewGazButtonProcedure(Button:TSGButton);
+procedure mmmFAddNewGazButtonProcedure(Button:TSGScreenButton);
 const
 	pw = 200;
 	ph = 143+20;
@@ -1992,23 +1993,23 @@ if FAddNewGazPanel = nil then
 	begin
 	FAddNewGazPanel := SGCreatePanel(Screen, Render.Width - pw - 10, Render.Height - ph - 10, pw, ph, [SGAnchRight,SGAnchBottom], True, True, Button.UserPointer);
 	
-	FAddNewGazPanel.CreateChild(TSGComboBox.Create());//1
+	FAddNewGazPanel.CreateChild(TSGScreenComboBox.Create());//1
 	FAddNewGazPanel.LastChild.SetBounds(0,4,pw - 10 - 25,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
-		(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Добавьте газы')
+		(FAddNewGazPanel.LastChild as TSGScreenComboBox).CreateItem('Добавьте газы')
 	else
 		for i:=0 to High(FCube.FGazes) do
-			(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
-	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewGazPanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmGasCBProc);
-	(FAddNewGazPanel.LastChild as TSGComboBox).MaxLines := 5;
+			(FAddNewGazPanel.LastChild as TSGScreenComboBox).CreateItem('Газ №'+SGStr(i+1));
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).SelectItem := 0;
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmGasCBProc);
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).MaxLines := 5;
 	
-	FAddNewGazPanel.CreateChild(TSGButton.Create());//2
+	FAddNewGazPanel.CreateChild(TSGScreenButton.Create());//2
 	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='+';
-	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFAddAddNewGazButtonProcedure);
+	(FAddNewGazPanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFAddAddNewGazButtonProcedure);
 	
 	SGCreateLabel(FAddNewGazPanel, 'Цвет:', 0,25,50,18, False, True);//3
 	
@@ -2016,39 +2017,39 @@ if FAddNewGazPanel = nil then
 	FAddNewGazPanel.LastChild.SetBounds(50,26,75,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	
-	FAddNewGazPanel.CreateChild(TSGButton.Create());//5
+	FAddNewGazPanel.CreateChild(TSGScreenButton.Create());//5
 	FAddNewGazPanel.LastChild.SetBounds(5+pw - 10 - 25+2-40,25,60,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Править';
 	
-	FAddNewGazPanel.CreateChild(TSGComboBox.Create());//6
+	FAddNewGazPanel.CreateChild(TSGScreenComboBox.Create());//6
 	FAddNewGazPanel.LastChild.SetBounds(3,48,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
-	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Образуется при контакте');
-	(FAddNewGazPanel.LastChild as TSGComboBox).CreateItem('Небудет получаться');
-	(FAddNewGazPanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewGazPanel.LastChild as TSGComboBox).CallBackProcedure := TSGComboBoxProcedure(@mmmGas123Proc);
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).CreateItem('Образуется при контакте');
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).CreateItem('Небудет получаться');
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).SelectItem := 0;
+	(FAddNewGazPanel.LastChild as TSGScreenComboBox).CallBackProcedure := TSGScreenComboBoxProcedure(@mmmGas123Proc);
 	
 	SGCreateEdit(FAddNewGazPanel, '', SGScreenEditTypeNumber, 3,69,(pw div 2) - 10,18, [], False, True);//7
 	SGCreateEdit(FAddNewGazPanel, '', SGScreenEditTypeNumber, 3+(pw div 2)+3,69,(pw div 2) - 10,18, [], False, True);//8
 	
-	FAddNewGazPanel.CreateChild(TSGButton.Create());//9
+	FAddNewGazPanel.CreateChild(TSGScreenButton.Create());//9
 	FAddNewGazPanel.LastChild.SetBounds(3,90,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Удалить этот газ';
-	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmGas1234Proc);
+	(FAddNewGazPanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmGas1234Proc);
 	
-	FAddNewGazPanel.CreateChild(TSGButton.Create());//10
+	FAddNewGazPanel.CreateChild(TSGScreenButton.Create());//10
 	FAddNewGazPanel.LastChild.SetBounds(3,111+21,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Закрыть это окно';
-	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFCloseAddNewGazButtonProcedure);
+	(FAddNewGazPanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFCloseAddNewGazButtonProcedure);
 	
-	FAddNewGazPanel.CreateChild(TSGButton.Create());//11
+	FAddNewGazPanel.CreateChild(TSGScreenButton.Create());//11
 	FAddNewGazPanel.LastChild.SetBounds(3,111,pw - 10,18);
 	FAddNewGazPanel.LastChild.BoundsToNeedBounds();
 	FAddNewGazPanel.LastChild.Caption:='Применить';
-	(FAddNewGazPanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmGasChangeProc);
+	(FAddNewGazPanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmGasChangeProc);
 	end;
 FAddNewGazPanel.Visible := True;
 FAddNewGazPanel.Active := True;
@@ -2056,7 +2057,7 @@ FAddNewGazPanel.Active := True;
 UpdateNewGasPanel(FAddNewGazPanel);
 end; end;
 
-procedure mmmFCloseAddNewSourseButtonProcedure(Button:TSGButton);
+procedure mmmFCloseAddNewSourseButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin
 FAddNewSoursePanel.Visible := False;
 FAddNewSoursePanel.Active := False;
@@ -2066,7 +2067,7 @@ FAddSechenieButton.Active := FSecheniePanel=nil;
 FDeleteSechenieButton.Active := FSecheniePanel<>nil;
 end; end;
 
-procedure mmmSourseChageGasProc(b,c : LongInt;a : TSGComboBox);
+procedure mmmSourseChageGasProc(b,c : LongInt;a : TSGScreenComboBox);
 var
 	o,i : LongWord;
 	j1,j2,j3 : LongInt;
@@ -2074,7 +2075,7 @@ begin with TSGGasDiffusion(a.Parent.UserPointer) do begin
 if b = c then
 	Exit;
 a.SelectItem:=c;
-i := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+i := (FAddNewSoursePanel.Children[1] as TSGScreenComboBox).SelectItem;
 o := FCube.FSourses[i].FGazTypeIndex;
 FCube.FSourses[i].FGazTypeIndex := c;
 for j1:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
@@ -2086,7 +2087,7 @@ FMesh.Destroy();
 FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
-procedure mmmSourseChageSourseProc(b,c : LongInt;a : TSGComboBox);
+procedure mmmSourseChageSourseProc(b,c : LongInt;a : TSGScreenComboBox);
 begin with TSGGasDiffusion(a.Parent.UserPointer) do begin
 a.SelectItem:=c;
 UpDateSoursePanel();
@@ -2103,7 +2104,7 @@ if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 	(FAddNewSoursePanel.Children[4]).Active := False;
 	(FAddNewSoursePanel.Children[5]).Active := False;
 	(FAddNewSoursePanel.Children[7]).Active := False;
-	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := 0;
+	(FAddNewSoursePanel.Children[3] as TSGScreenComboBox).SelectItem := 0;
 	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).Caption := '';
 	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 		(FAddNewSoursePanel.Children[2]).Active := False;
@@ -2116,14 +2117,14 @@ else
 	(FAddNewSoursePanel.Children[5]).Active := True;
 	(FAddNewSoursePanel.Children[7]).Active := True;
 	(FAddNewSoursePanel.Children[2]).Active := True;
-	s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
-	(FAddNewSoursePanel.Children[3] as TSGComboBox).SelectItem := FCube.FSourses[s].FGazTypeIndex;
+	s := (FAddNewSoursePanel.Children[1] as TSGScreenComboBox).SelectItem;
+	(FAddNewSoursePanel.Children[3] as TSGScreenComboBox).SelectItem := FCube.FSourses[s].FGazTypeIndex;
 	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).Caption := SGStr(FCube.FSourses[s].FRadius);
 	(FAddNewSoursePanel.Children[4] as TSGScreenEdit).TextComplite := True;
 	end;
 end;
 
-procedure mmmFAddAddNewSourseButtonProcedure(Button:TSGButton);
+procedure mmmFAddAddNewSourseButtonProcedure(Button:TSGScreenButton);
 var
 	i : LongWord;
 	j1,j2,j3 : LongInt;
@@ -2132,24 +2133,24 @@ SetLength(FCube.FSourses,Length(FCube.FSourses)+1);
 FCube.FSourses[High(FCube.FSourses)].FGazTypeIndex := random(Length(FCube.FGazes));
 FCube.FSourses[High(FCube.FSourses)].FCoord.Import(random(FCube.Edge-10)+5,random(FCube.Edge-10)+5,random(FCube.Edge-10)+5);
 FCube.FSourses[High(FCube.FSourses)].FRadius := random(3)+1;
-(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+(Button.Parent.Children[1] as TSGScreenComboBox).ClearItems();
 for i:=0 to High(FCube.FSourses) do
-	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
+	(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Источник №'+SGStr(i+1));
 i := High(FCube.FSourses);
-(Button.Parent.Children[1] as TSGComboBox).SelectItem := i;
+(Button.Parent.Children[1] as TSGScreenComboBox).SelectItem := i;
 FCube.UpDateSourses();
 UpDateSoursePanel();
 FMesh.Destroy();
 FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end;end;
 
-procedure mmmFDleteSourseAddNewSourseButtonProcedure(Button:TSGButton);
+procedure mmmFDleteSourseAddNewSourseButtonProcedure(Button:TSGScreenButton);
 var
 	s : LongInt;
 	i : LongWord;
 	j1,j2,j3 : LongInt;
 begin with TSGGasDiffusion(Button.Parent.UserPointer) do begin 
-s := (Button.Parent.Children[1] as TSGComboBox).SelectItem;
+s := (Button.Parent.Children[1] as TSGScreenComboBox).SelectItem;
 
 i := s;
 for j1:=-FCube.FSourses[i].FRadius to FCube.FSourses[i].FRadius do
@@ -2163,24 +2164,24 @@ if Length(FCube.FSourses)<>1 then
 		FCube.FSourses[i] := FCube.FSourses[i+1];
 SetLength(FCube.FSourses,Length(FCube.FSourses)-1);
 
-(Button.Parent.Children[1] as TSGComboBox).ClearItems();
+(Button.Parent.Children[1] as TSGScreenComboBox).ClearItems();
 if Length(FCube.FSourses)=0 then
 	begin
-	(Button.Parent.Children[1] as TSGComboBox).CreateItem('Нету источников');
+	(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Нету источников');
 	end
 else
 	begin
 	for i:=0 to High(FCube.FSourses) do
-		(Button.Parent.Children[1] as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
+		(Button.Parent.Children[1] as TSGScreenComboBox).CreateItem('Источник №'+SGStr(i+1));
 	end;
-(Button.Parent.Children[1] as TSGComboBox).SelectItem := 0;
+(Button.Parent.Children[1] as TSGScreenComboBox).SelectItem := 0;
 
 UpDateSoursePanel();
 FMesh.Destroy();
 FMesh:=FCube.CalculateMesh(@FRelief{$IFDEF RELIEFDEBUG},FInReliafDebug{$ENDIF});
 end; end;
 
-procedure FAddNewSourseButtonProcedure(Button:TSGButton);
+procedure FAddNewSourseButtonProcedure(Button:TSGScreenButton);
 const
 	pw = 200;
 	ph = 69+21+5+21+2;
@@ -2195,51 +2196,51 @@ if FAddNewSoursePanel = nil then
 	begin
 	FAddNewSoursePanel := SGCreatePanel(Screen, Render.Width - pw - 10,Render.Height - ph - 10, pw, ph, [SGAnchRight, SGAnchBottom], False, True, Button.UserPointer);
 	
-	FAddNewSoursePanel.CreateChild(TSGComboBox.Create());//1
+	FAddNewSoursePanel.CreateChild(TSGScreenComboBox.Create());//1
 	FAddNewSoursePanel.LastChild.SetBounds(0,4,pw - 10 - 25,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
-		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Нету источников')
+		(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CreateItem('Нету источников')
 	else
 		for i:=0 to High(FCube.FSourses) do
-			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Источник №'+SGStr(i+1));
-	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmSourseChageSourseProc);
-	(FAddNewSoursePanel.LastChild as TSGComboBox).MaxLines := 6;
+			(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CreateItem('Источник №'+SGStr(i+1));
+	(FAddNewSoursePanel.LastChild as TSGScreenComboBox).SelectItem := 0;
+	(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmSourseChageSourseProc);
+	(FAddNewSoursePanel.LastChild as TSGScreenComboBox).MaxLines := 6;
 	
-	FAddNewSoursePanel.CreateChild(TSGButton.Create());//2
+	FAddNewSoursePanel.CreateChild(TSGScreenButton.Create());//2
 	FAddNewSoursePanel.LastChild.SetBounds(5+pw - 10 - 25+2,4,20,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	FAddNewSoursePanel.LastChild.Caption:='+';
-	(FAddNewSoursePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFAddAddNewSourseButtonProcedure);
+	(FAddNewSoursePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFAddAddNewSourseButtonProcedure);
 	
-	FAddNewSoursePanel.CreateChild(TSGComboBox.Create());//3
+	FAddNewSoursePanel.CreateChild(TSGScreenComboBox.Create());//3
 	FAddNewSoursePanel.LastChild.SetBounds(0,4+21,pw - 10,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	if ((FCube.FGazes=nil) or (Length(FCube.FGazes)=0)) then
 		begin
-		(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Добавьте газы');
+		(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CreateItem('Добавьте газы');
 		end
 	else
 		for i:=0 to High(FCube.FGazes) do
-			(FAddNewSoursePanel.LastChild as TSGComboBox).CreateItem('Газ №'+SGStr(i+1));
-	(FAddNewSoursePanel.LastChild as TSGComboBox).SelectItem := 0;
-	(FAddNewSoursePanel.LastChild as TSGComboBox).CallBackProcedure :=TSGComboBoxProcedure(@mmmSourseChageGasProc);
+			(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CreateItem('Газ №'+SGStr(i+1));
+	(FAddNewSoursePanel.LastChild as TSGScreenComboBox).SelectItem := 0;
+	(FAddNewSoursePanel.LastChild as TSGScreenComboBox).CallBackProcedure :=TSGScreenComboBoxProcedure(@mmmSourseChageGasProc);
 	
 	SGCreateEdit(FAddNewSoursePanel, '', SGScreenEditTypeNumber, 3+(pw div 2)+3,69-21,(pw div 2) - 10,18, [], False, True);//4
 	SGCreateLabel(FAddNewSoursePanel, 'Радиус:', 3,69-21,(pw div 2) - 10,18, False, True);//5
 	
-	FAddNewSoursePanel.CreateChild(TSGButton.Create());//6
+	FAddNewSoursePanel.CreateChild(TSGScreenButton.Create());//6
 	FAddNewSoursePanel.LastChild.SetBounds(3,69+21,pw - 10,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	FAddNewSoursePanel.LastChild.Caption:='Закрыть это окно';
-	(FAddNewSoursePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFCloseAddNewSourseButtonProcedure);
+	(FAddNewSoursePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFCloseAddNewSourseButtonProcedure);
 	
-	FAddNewSoursePanel.CreateChild(TSGButton.Create());//7
+	FAddNewSoursePanel.CreateChild(TSGScreenButton.Create());//7
 	FAddNewSoursePanel.LastChild.SetBounds(3,69,pw - 10,18);
 	FAddNewSoursePanel.LastChild.BoundsToNeedBounds();
 	FAddNewSoursePanel.LastChild.Caption:='Удалить';
-	(FAddNewSoursePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFDleteSourseAddNewSourseButtonProcedure);
+	(FAddNewSoursePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFDleteSourseAddNewSourseButtonProcedure);
 	end;
 
 FAddNewSoursePanel.Active  := True;
@@ -2247,7 +2248,7 @@ FAddNewSoursePanel.Visible := True;
 UpDateSoursePanel();
 end; end;
 
-procedure mmmFSaveImageButtonProcedure(Button:TSGButton);
+procedure mmmFSaveImageButtonProcedure(Button:TSGScreenButton);
 procedure PutPixel(const p : TSGPixel4b; const Destination : PByte);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 {$IFDEF WITHLIBPNG}
@@ -2305,7 +2306,7 @@ Image.Image.BitMap := nil;
 Image.Destroy();
 end;end;
 
-procedure mmmFAddSechSecondPanelButtonProcedure(Button:TSGButton);
+procedure mmmFAddSechSecondPanelButtonProcedure(Button:TSGScreenButton);
 var
 	a : LongWord;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
@@ -2334,13 +2335,13 @@ if FUsrSechPanel = nil then
 		FCube.Edge/FImageSechenieBounds,
 		FCube.Edge/FImageSechenieBounds);
 	
-	FUsrSechPanel.CreateChild(TSGProgressBar.Create());
+	FUsrSechPanel.CreateChild(TSGScreenProgressBar.Create());
 	//FUsrSechPanel.LastChild.Font := FTahomaFont;
 	FUsrSechPanel.LastChild.SetBounds(
 		10,FUsrSechPanel.Height div 2 - FUsrSechPanel.LastChild.Skin.Font.FontHeight div 2,
 		FUsrSechPanel.Width - 30,FUsrSechPanel.LastChild.Skin.Font.FontHeight);
 	FUsrSechPanel.LastChild.BoundsToNeedBounds();
-	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
+	(FUsrSechPanel.Children[2] as TSGScreenProgressBar).Visible := True;
 	end;
 
 UpDateUsrSech();
@@ -2408,7 +2409,7 @@ while i < FCube.Edge do
 		ii += 1;
 		end;
 	i +=1;
-	(FUsrSechPanel.Children[2] as TSGProgressBar).Progress := i/(FCube.Edge - 1);
+	(FUsrSechPanel.Children[2] as TSGScreenProgressBar).Progress := i/(FCube.Edge - 1);
 	end;
 FUpdateUsrAfterThread := True;
 end; end;
@@ -2442,9 +2443,9 @@ if (FUsrSechThread = nil) and (not FUpdateUsrAfterThread) then
 		end;
 	FCubeForUsr := FCube.Copy();
 	FUsrSechThread := TSGThread.Create(TSGThreadProcedure(@FUsrImageThreadProcedure),Self);
-	(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := True;
-	(FUsrSechPanel.Children[2] as TSGProgressBar).ProgressTimer := 0;
-	(FUsrSechPanel.Children[2] as TSGProgressBar).Progress := 0;
+	(FUsrSechPanel.Children[2] as TSGScreenProgressBar).Visible := True;
+	(FUsrSechPanel.Children[2] as TSGScreenProgressBar).ProgressTimer := 0;
+	(FUsrSechPanel.Children[2] as TSGScreenProgressBar).Progress := 0;
 	
 	FAddSechSecondPanelButton.Active := False;
 	end;
@@ -2490,7 +2491,7 @@ FStartingProgressBar.Visible := False;
 FNewScenePanel.Visible := False;
 if FBackToMenuButton = nil then
 	begin
-	FBackToMenuButton:=TSGButton.Create();
+	FBackToMenuButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FBackToMenuButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2500,7 +2501,7 @@ if FBackToMenuButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption :='В главное меню';
 	Screen.LastChild.UserPointer:=Klass;
-	FBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFBackToMenuButtonProcedure);
+	FBackToMenuButton.OnChange:=TSGScreenComponentProcedure(@mmmFBackToMenuButtonProcedure);
 	end
 else
 	begin
@@ -2510,7 +2511,7 @@ else
 
 if FAddNewGazButton=nil then
 	begin
-	FAddNewGazButton:=TSGButton.Create();
+	FAddNewGazButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FAddNewGazButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2520,7 +2521,7 @@ if FAddNewGazButton=nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Править типы газа';
 	Screen.LastChild.UserPointer:=Klass;
-	FAddNewGazButton.OnChange:=TSGComponentProcedure(@mmmFAddNewGazButtonProcedure);
+	FAddNewGazButton.OnChange:=TSGScreenComponentProcedure(@mmmFAddNewGazButtonProcedure);
 	end
 else
 	begin
@@ -2530,7 +2531,7 @@ else
 
 if FAddNewSourseButton = nil then
 	begin
-	FAddNewSourseButton:=TSGButton.Create();
+	FAddNewSourseButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FAddNewSourseButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2540,7 +2541,7 @@ if FAddNewSourseButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Править източники газа';
 	Screen.LastChild.UserPointer:=Klass;
-	FAddNewSourseButton.OnChange:=TSGComponentProcedure(@FAddNewSourseButtonProcedure);
+	FAddNewSourseButton.OnChange:=TSGScreenComponentProcedure(@FAddNewSourseButtonProcedure);
 	end
 else
 	begin
@@ -2550,7 +2551,7 @@ else
 
 if FStartEmulatingButton=nil then
 	begin
-	FStartEmulatingButton:=TSGButton.Create();
+	FStartEmulatingButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FStartEmulatingButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*3,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2560,7 +2561,7 @@ if FStartEmulatingButton=nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Эмурировать';
 	Screen.LastChild.UserPointer:=Klass;
-	FStartEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFRunDiffusionButtonProcedure);
+	FStartEmulatingButton.OnChange:=TSGScreenComponentProcedure(@mmmFRunDiffusionButtonProcedure);
 	end
 else
 	begin
@@ -2570,7 +2571,7 @@ else
 
 if FPauseEmulatingButton = nil then
 	begin
-	FPauseEmulatingButton:=TSGButton.Create();
+	FPauseEmulatingButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FPauseEmulatingButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*4,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2580,7 +2581,7 @@ if FPauseEmulatingButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Приостановить эмуляцию';
 	Screen.LastChild.UserPointer:=Klass;
-	FPauseEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFPauseDiffusionButtonProcedure);
+	FPauseEmulatingButton.OnChange:=TSGScreenComponentProcedure(@mmmFPauseDiffusionButtonProcedure);
 	end
 else
 	begin
@@ -2590,7 +2591,7 @@ else
 
 if FStopEmulatingButton = nil then
 	begin
-	FStopEmulatingButton:=TSGButton.Create();
+	FStopEmulatingButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FStopEmulatingButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*5,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2600,7 +2601,7 @@ if FStopEmulatingButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Ocтановить эмуляцию';
 	Screen.LastChild.UserPointer:=Klass;
-	FStopEmulatingButton.OnChange:=TSGComponentProcedure(@mmmFStopDiffusionButtonProcedure);
+	FStopEmulatingButton.OnChange:=TSGScreenComponentProcedure(@mmmFStopDiffusionButtonProcedure);
 	end
 else
 	begin
@@ -2610,7 +2611,7 @@ else
 
 if FAddSechenieButton = nil then 
 	begin
-	FAddSechenieButton:=TSGButton.Create();
+	FAddSechenieButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FAddSechenieButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*6,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2620,7 +2621,7 @@ if FAddSechenieButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Рассмотреть сечение';
 	Screen.LastChild.UserPointer:=Klass;
-	FAddSechenieButton.OnChange:=TSGComponentProcedure(@mmmFAddSechenieButtonProcedure);
+	FAddSechenieButton.OnChange:=TSGScreenComponentProcedure(@mmmFAddSechenieButtonProcedure);
 	end
 else
 	begin
@@ -2630,7 +2631,7 @@ else
 
 if FDeleteSechenieButton = nil then
 	begin
-	FDeleteSechenieButton:=TSGButton.Create();
+	FDeleteSechenieButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FDeleteSechenieButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*7,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2640,7 +2641,7 @@ if FDeleteSechenieButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Не рассмотривать сечение';
 	Screen.LastChild.UserPointer:=Klass;
-	FDeleteSechenieButton.OnChange:=TSGComponentProcedure(@mmmFDeleteSechenieButtonProcedure);
+	FDeleteSechenieButton.OnChange:=TSGScreenComponentProcedure(@mmmFDeleteSechenieButtonProcedure);
 	end
 else
 	begin
@@ -2650,7 +2651,7 @@ else
 
 if FAddSechSecondPanelButton = nil then
 	begin
-	FAddSechSecondPanelButton:=TSGButton.Create();
+	FAddSechSecondPanelButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FAddSechSecondPanelButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*8,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2660,7 +2661,7 @@ if FAddSechSecondPanelButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Вычисление концентрации';
 	Screen.LastChild.UserPointer:=Klass;
-	FAddSechSecondPanelButton.OnChange:=TSGComponentProcedure(@mmmFAddSechSecondPanelButtonProcedure);
+	FAddSechSecondPanelButton.OnChange:=TSGScreenComponentProcedure(@mmmFAddSechSecondPanelButtonProcedure);
 	end
 else
 	begin
@@ -2670,7 +2671,7 @@ else
 
 if FSaveImageButton = nil then
 	begin
-	FSaveImageButton:=TSGButton.Create();
+	FSaveImageButton:=TSGScreenButton.Create();
 	Screen.CreateChild(FSaveImageButton);
 	Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*9,W,FTahomaFont.FontHeight+2);
 	Screen.LastChild.BoundsToNeedBounds();
@@ -2680,7 +2681,7 @@ if FSaveImageButton = nil then
 	Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	Screen.LastChild.Caption:='Сoхранить картинку';
 	Screen.LastChild.UserPointer:=Klass;
-	FSaveImageButton.OnChange:=TSGComponentProcedure(@mmmFSaveImageButtonProcedure);
+	FSaveImageButton.OnChange:=TSGScreenComponentProcedure(@mmmFSaveImageButtonProcedure);
 	end
 else
 	begin
@@ -2689,7 +2690,7 @@ else
 	end;
 end;end;
 
-procedure mmmFStartSceneButtonProcedure(Button:TSGButton);
+procedure mmmFStartSceneButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FStartingFlag := 1;
 	FStartingThread := TSGThread.Create(TSGThreadProcedure(@mmmFStartingThreadProcedure),Button.UserPointer,True);
@@ -2706,12 +2707,12 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	end;
 end;
 
-procedure mmmFUpdateButtonProcedure(Button : TSGButton);
+procedure mmmFUpdateButtonProcedure(Button : TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	UpDateSavesComboBox();
 end;end;
 
-procedure mmmFMovieBackToMenuButtonProcedure(Button:TSGButton);
+procedure mmmFMovieBackToMenuButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FMoviePlayed := False;
 	FMovieBackToMenuButton.Visible:=False;
@@ -2736,21 +2737,21 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		end;
 end;end;
 
-procedure mmmFMoviePauseButtonProcedure(Button:TSGButton);
+procedure mmmFMoviePauseButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FMoviePlayed := False;
 	FMoviePauseButton.Active := False;
 	FMoviePlayButton.Active := True;
 end;end;
 
-procedure mmmFMoviePlayButtonProcedure(Button:TSGButton);
+procedure mmmFMoviePlayButtonProcedure(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 	FMoviePlayed := True;
 	FMoviePauseButton.Active := True;
 	FMoviePlayButton.Active := False;
 end;end;
 
-procedure mmmFLoadButtonProcedure(Button:TSGButton);
+procedure mmmFLoadButtonProcedure(Button:TSGScreenButton);
 procedure ReadCadrs();
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FFileStream.Position := 0;
@@ -2787,7 +2788,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	if FMovieBackToMenuButton = nil then
 		begin
-		FMovieBackToMenuButton:=TSGButton.Create();
+		FMovieBackToMenuButton:=TSGScreenButton.Create();
 		Screen.CreateChild(FMovieBackToMenuButton);
 		Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*0,W,FTahomaFont.FontHeight+2);
 		Screen.LastChild.BoundsToNeedBounds();
@@ -2797,7 +2798,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='В меню загрузок';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
-		FMovieBackToMenuButton.OnChange:=TSGComponentProcedure(@mmmFMovieBackToMenuButtonProcedure);
+		FMovieBackToMenuButton.OnChange:=TSGScreenComponentProcedure(@mmmFMovieBackToMenuButtonProcedure);
 		end
 	else
 		begin
@@ -2807,7 +2808,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	if FMoviePlayButton = nil then
 		begin
-		FMoviePlayButton:=TSGButton.Create();
+		FMoviePlayButton:=TSGScreenButton.Create();
 		Screen.CreateChild(FMoviePlayButton);
 		Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*1,W,FTahomaFont.FontHeight+2);
 		Screen.LastChild.BoundsToNeedBounds();
@@ -2817,7 +2818,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='Воспроизведение';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
-		FMoviePlayButton.OnChange:=TSGComponentProcedure(@mmmFMoviePlayButtonProcedure);
+		FMoviePlayButton.OnChange:=TSGScreenComponentProcedure(@mmmFMoviePlayButtonProcedure);
 		end
 	else
 		begin
@@ -2826,7 +2827,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		end;
 	if FMoviePauseButton = nil then
 		begin
-		FMoviePauseButton:=TSGButton.Create();
+		FMoviePauseButton:=TSGScreenButton.Create();
 		Screen.CreateChild(FMoviePauseButton);
 		Screen.LastChild.SetBounds(Screen.Width-W-10,5+(FTahomaFont.FontHeight+6)*2,W,FTahomaFont.FontHeight+2);
 		Screen.LastChild.BoundsToNeedBounds();
@@ -2836,7 +2837,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 		Screen.LastChild.Caption :='Пауза';
 		Screen.LastChild.UserPointer:=Button.UserPointer;
-		FMoviePauseButton.OnChange:=TSGComponentProcedure(@mmmFMoviePauseButtonProcedure);
+		FMoviePauseButton.OnChange:=TSGScreenComponentProcedure(@mmmFMoviePauseButtonProcedure);
 		end
 	else
 		begin
@@ -2844,7 +2845,7 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 		FMoviePauseButton.Active  := True;
 		end;
 end;end;
-procedure mmmFEnableLoadButtonProcedure(Button:TSGButton);
+procedure mmmFEnableLoadButtonProcedure(Button:TSGScreenButton);
 begin
 with TSGGasDiffusion(Button.UserPointer) do
 	begin
@@ -2856,7 +2857,7 @@ end;
 // =====================================================================
 // =====================================================================
 // =====================================================================
-procedure mmmFRedactrReliefOpenFileButton(Button:TSGButton);
+procedure mmmFRedactrReliefOpenFileButton(Button:TSGScreenButton);
 var
 	FileWay : String = '';
 	IsInFullscreen : Boolean = False;
@@ -2885,7 +2886,7 @@ if (FileWay <> '') and (SGFileExists(FileWay)) then
 if IsInFullscreen then
 	Context.Fullscreen := True;
 end; end;
-procedure mmmFRedactrReliefSaveFileButton(Button:TSGButton);
+procedure mmmFRedactrReliefSaveFileButton(Button:TSGScreenButton);
 var
 	FileWay : String = '';
 	IsInFullscreen : Boolean = False;
@@ -2907,7 +2908,7 @@ if (FileWay <> '') then
 if IsInFullscreen then
 	Context.Fullscreen := True;
 end; end;
-procedure mmmFRedactrReliefBackButton(Button:TSGButton);
+procedure mmmFRedactrReliefBackButton(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FRelefRedactor.SetActiveSingleRelief();
 FRelefOptionPanel.AddToLeft  (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
@@ -2917,7 +2918,7 @@ FNewScenePanel.AddToLeft     (((FRelefOptionPanel.Width + FBoundsOptionsPanel.Wi
 FBoundsOptionsPanel.AddToLeft(((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width) div 2) + 5);
 end;end;
 
-procedure mmmFRedactorBackButton(Button:TSGButton);
+procedure mmmFRedactorBackButton(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 Button.Visible := False;
 Button.Active := False;
@@ -2945,7 +2946,7 @@ if FNewScenePanel <> nil then
 	end;
 end; end;
 
-procedure mmmFRedactrReliefRedactrReliefButton(Button:TSGButton);
+procedure mmmFRedactrReliefRedactrReliefButton(Button:TSGScreenButton);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 FRedactorBackButton.Visible := True;
 FRedactorBackButton.Active := True;
@@ -2968,7 +2969,7 @@ if FNewScenePanel <> nil then
 	end;
 end; end;
 
-procedure mmmFRedactrRelief(Button:TSGButton);
+procedure mmmFRedactrRelief(Button:TSGScreenButton);
 var
 	FConstWidth : LongWOrd = 300;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
@@ -2984,38 +2985,38 @@ if (FRelefOptionPanel = nil) then
 	
 	SGCreateLabel(FRelefOptionPanel, 'Статус рельефа:Неопределен', 10,10,FRelefOptionPanel.Width - 30,19, FTahomaFont, True, True, Button.UserPointer);
 	
-	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.CreateChild(TSGScreenButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Загрузить рельеф из файла';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*1,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
-	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefOpenFileButton);
+	(FRelefOptionPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFRedactrReliefOpenFileButton);
 	
-	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.CreateChild(TSGScreenButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Сохранить рельеф в файл';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*2,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
-	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefSaveFileButton);
+	(FRelefOptionPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFRedactrReliefSaveFileButton);
 	
-	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.CreateChild(TSGScreenButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Редактировать рельеф';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*3,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
-	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefRedactrReliefButton);
+	(FRelefOptionPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFRedactrReliefRedactrReliefButton);
 	FRelefOptionPanel.LastChild.Active := {$IFDEF MOBILE}False{$ELSE}True{$ENDIF};
 	
-	FRelefOptionPanel.CreateChild(TSGButton.Create());
+	FRelefOptionPanel.CreateChild(TSGScreenButton.Create());
 	FRelefOptionPanel.LastChild.Caption := 'Назад';
 	FRelefOptionPanel.LastChild.Visible := True;
 	FRelefOptionPanel.LastChild.SetBounds(10,10+(19+5)*4,FRelefOptionPanel.Width - 30,19);
 	FRelefOptionPanel.LastChild.Skin := FRelefOptionPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FRelefOptionPanel.LastChild.UserPointer := Button.UserPointer;
-	(FRelefOptionPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrReliefBackButton);
+	(FRelefOptionPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFRedactrReliefBackButton);
 	end
 else
 	begin
@@ -3029,19 +3030,19 @@ FNewScenePanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width
 FBoundsOptionsPanel.AddToLeft(- ((FRelefOptionPanel.Width + FBoundsOptionsPanel.Width)div 2) - 5);
 FBoundsOptionsPanel.Active := False;
 end; end;
-procedure mmmChangeBoundTypeComboBoxProcedure(b,c : LongInt;a : TSGComboBox);
+procedure mmmChangeBoundTypeComboBoxProcedure(b,c : LongInt;a : TSGScreenComboBox);
 var
 	index : LongInt;
 begin with TSGGasDiffusion(a.UserPointer) do begin
 index := a.Parent.IndexOf(a);
 if index <> -1 then
 	begin
-	(a.Parent.Children[index + 7] as TSGButton).Active := c > 0;
+	(a.Parent.Children[index + 7] as TSGScreenButton).Active := c > 0;
 	FRelief.FData[index].FEnabled := c > 0;
 	FRelief.FData[index].FType := c > 1
 	end;
 end; end;
-procedure mmmFBoundsBackButtonProcedure(Button:TSGButton);
+procedure mmmFBoundsBackButtonProcedure(Button:TSGScreenButton);
 const
 	FConstHeight : LongWord = 280;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
@@ -3055,7 +3056,7 @@ FBoundsOptionsPanel.VisibleTimer := 0.7;
 FBoundsOptionsPanel.DrawClass := nil;
 end; end;
 
-procedure mmmFBoundsTypeButtonProcedure(Button:TSGButton);
+procedure mmmFBoundsTypeButtonProcedure(Button:TSGScreenButton);
 var
 	FConstWidth : LongWord = 500;
 	FConstLoadMeshButtonWidth : LongWord = 120;
@@ -3063,16 +3064,16 @@ var
 
 procedure CreteCOmboBox(const vIndex : LongWord; const vPanel : TSGScreenPanel);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FBoundsOptionsPanel.CreateChild(TSGComboBox.Create());
+FBoundsOptionsPanel.CreateChild(TSGScreenComboBox.Create());
 FBoundsOptionsPanel.LastChild.SetBounds(10 + FConstLabelsWidth + 10,5+(19+5)*vIndex,FConstWidth-50-FConstLoadMeshButtonWidth - FConstLabelsWidth,19);
 FBoundsOptionsPanel.LastChild.Visible:=True;
 FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
 FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa пропускают газ');
-(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Стенкa не пропускают газ');
-(FBoundsOptionsPanel.LastChild as TSGComboBox).CreateItem('Газ липнет к стенкe');
-(FBoundsOptionsPanel.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmChangeBoundTypeComboBoxProcedure);
-(FBoundsOptionsPanel.LastChild as TSGComboBox).SelectItem:=0;
+(FBoundsOptionsPanel.LastChild as TSGScreenComboBox).CreateItem('Стенкa пропускают газ');
+(FBoundsOptionsPanel.LastChild as TSGScreenComboBox).CreateItem('Стенкa не пропускают газ');
+(FBoundsOptionsPanel.LastChild as TSGScreenComboBox).CreateItem('Газ липнет к стенкe');
+(FBoundsOptionsPanel.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmChangeBoundTypeComboBoxProcedure);
+(FBoundsOptionsPanel.LastChild as TSGScreenComboBox).SelectItem:=0;
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 end;end;
 procedure CreteLabel(const vIndex : LongWord; const vPanel : TSGScreenPanel);
@@ -3091,7 +3092,7 @@ end;
 end;end;
 procedure CreteLoadMeshButton(const vIndex : LongWord; const vPanel : TSGScreenPanel);
 begin with TSGGasDiffusion(Button.UserPointer) do begin
-FBoundsOptionsPanel.CreateChild(TSGButton.Create());
+FBoundsOptionsPanel.CreateChild(TSGScreenButton.Create());
 FBoundsOptionsPanel.LastChild.SetBounds(FConstWidth - 20 - FConstLoadMeshButtonWidth,5+(19+5)*vIndex,FConstLoadMeshButtonWidth,19);
 FBoundsOptionsPanel.LastChild.Visible:=True;
 FBoundsOptionsPanel.LastChild.Active := False;
@@ -3099,7 +3100,7 @@ FBoundsOptionsPanel.LastChild.BoundsToNeedBounds();
 FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 FBoundsOptionsPanel.LastChild.Caption := 'Настроить рельеф';
-(FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFRedactrRelief);
+(FBoundsOptionsPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFRedactrRelief);
 end;end;
 const
 	FConstHeight : LongWord = 280;
@@ -3125,7 +3126,7 @@ if FBoundsOptionsPanel = nil then
 	for i := 0 to 5 do
 		CreteLabel(i,FBoundsOptionsPanel);
 	
-	FBoundsOptionsPanel.CreateChild(TSGButton.Create());
+	FBoundsOptionsPanel.CreateChild(TSGScreenButton.Create());
 	FBoundsOptionsPanel.LastChild.SetBounds((FConstWidth - FConstLoadMeshButtonWidth )div 2,149,FConstLoadMeshButtonWidth,19);
 	FBoundsOptionsPanel.LastChild.Visible:=True;
 	FBoundsOptionsPanel.LastChild.Active := True;
@@ -3133,7 +3134,7 @@ if FBoundsOptionsPanel = nil then
 	FBoundsOptionsPanel.LastChild.Skin := FBoundsOptionsPanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 	FBoundsOptionsPanel.LastChild.UserPointer:=Button.UserPointer;
 	FBoundsOptionsPanel.LastChild.Caption := 'Назад';
-	(FBoundsOptionsPanel.LastChild as TSGButton).OnChange := TSGComponentProcedure(@mmmFBoundsBackButtonProcedure);
+	(FBoundsOptionsPanel.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@mmmFBoundsBackButtonProcedure);
 	end
 else
 	begin
@@ -3145,7 +3146,7 @@ else
 FBoundsOptionsPanel.DrawClass := FRelefRedactor;
 
 end; end;
-procedure mmmFBackButtonProcedure(Button:TSGButton);
+procedure mmmFBackButtonProcedure(Button:TSGScreenButton);
 begin
 with TSGGasDiffusion(Button.UserPointer) do
 	begin
@@ -3153,7 +3154,7 @@ with TSGGasDiffusion(Button.UserPointer) do
 	FNewScenePanel .Visible := True;
 	end;
 end;
-procedure mmmFOpenSaveDir(Button:TSGButton);
+procedure mmmFOpenSaveDir(Button:TSGScreenButton);
 begin
 {$IFDEF MSWINDOWS}
 	Exec('explorer.exe','"'+PredStr+Catalog+'"');
@@ -3323,14 +3324,14 @@ FTahomaFont.SetContext(Context);
 FTahomaFont.Loading();
 FTahomaFont.ToTexture();
 
-FStartingProgressBar := TSGProgressBar.Create();
+FStartingProgressBar := TSGScreenProgressBar.Create();
 Screen.CreateChild(FStartingProgressBar);
 Screen.LastChild.SetBounds(Render.Width div 2 - 151,Render.Height div 2 - 100, 300, 20);
 Screen.LastChild.BoundsToNeedBounds();
 Screen.LastChild.Visible:=False;
 FStartingProgressBar.Progress := 0;
 
-FRedactorBackButton:=TSGButton.Create();
+FRedactorBackButton:=TSGScreenButton.Create();
 Screen.CreateChild(FRedactorBackButton);
 Screen.LastChild.SetBounds(Render.Width div 2 - 75,5,130,20);
 Screen.LastChild.BoundsToNeedBounds();
@@ -3338,14 +3339,14 @@ Screen.LastChild.Visible:=False;
 Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 Screen.LastChild.Caption:='Назад';
 Screen.LastChild.UserPointer:=Self;
-FRedactorBackButton.OnChange:=TSGComponentProcedure(@mmmFRedactorBackButton);
+FRedactorBackButton.OnChange:=TSGScreenComponentProcedure(@mmmFRedactorBackButton);
 
 FNewScenePanel := SGCreatePanel(Screen, 400,110+26, True, True, Self);
 SGCreateLabel(FNewScenePanel, 'Создание новой сцены', 5,0,275+100,20, FTahomaFont, True, True);
 SGCreateLabel(FNewScenePanel, 'Количество точек:', False, 5,19,280,20, FTahomaFont, True, True);
 FNumberLabel := SGCreateLabel(FNewScenePanel, '', False, 170,19,180,20, FTahomaFont, True, True);
 
-FStartSceneButton:=TSGButton.Create();
+FStartSceneButton:=TSGScreenButton.Create();
 FNewScenePanel.CreateChild(FStartSceneButton);
 FNewScenePanel.LastChild.SetBounds(10,44,80,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
@@ -3353,11 +3354,11 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption:='Старт';
 FNewScenePanel.LastChild.UserPointer:=Self;
-FStartSceneButton.OnChange:=TSGComponentProcedure(@mmmFStartSceneButtonProcedure);
+FStartSceneButton.OnChange:=TSGScreenComponentProcedure(@mmmFStartSceneButtonProcedure);
 
 FEdgeEdit := SGCreateEdit(FNewScenePanel, '75', TSGScreenEditTextTypeFunction(@mmmFEdgeEditTextTypeFunction), 118,19,50,20, FTahomaFont, True, True, Self);
 
-FEnableLoadButton:=TSGButton.Create();
+FEnableLoadButton:=TSGScreenButton.Create();
 FNewScenePanel.CreateChild(FEnableLoadButton);
 FNewScenePanel.LastChild.SetBounds(100,44,278,20);
 FNewScenePanel.LastChild.BoundsToNeedBounds();
@@ -3365,9 +3366,9 @@ FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption:='Загрузка сохраненной сцены/повтора';
 FNewScenePanel.LastChild.UserPointer:=Self;
-FEnableLoadButton.OnChange:=TSGComponentProcedure(@mmmFEnableLoadButtonProcedure);
+FEnableLoadButton.OnChange:=TSGScreenComponentProcedure(@mmmFEnableLoadButtonProcedure);
 
-FEnableOutputComboBox := TSGComboBox.Create();
+FEnableOutputComboBox := TSGScreenComboBox.Create();
 FNewScenePanel.CreateChild(FEnableOutputComboBox);
 FEnableOutputComboBox.SetBounds(10,44+26,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
@@ -3375,34 +3376,34 @@ FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FEnableOutputComboBox.CreateItem('Включить непрерывное сохранение эмуляции');
 FEnableOutputComboBox.CreateItem('Не включать непрерывное сохранение эмуляции');
-//FEnableOutputComboBox.FProcedure:=TSGComboBoxProcedure(@FEnableOutputComboBoxProcedure);
+//FEnableOutputComboBox.FProcedure:=TSGScreenComboBoxProcedure(@FEnableOutputComboBoxProcedure);
 FEnableOutputComboBox.SelectItem:={$IFDEF RELIEFDEBUG}1{$ELSE}{$IFDEF MOBILE}1{$ELSE}0{$ENDIF}{$ENDIF};
 FEnableOutputComboBox.UserPointer:=Self;
 
-FBoundsTypeButton := TSGButton.Create();
+FBoundsTypeButton := TSGScreenButton.Create();
 FNewScenePanel.CreateChild(FBoundsTypeButton);
 FBoundsTypeButton.SetBounds(10,44+26+25,380-10,19);
 FNewScenePanel.LastChild.Visible:=True;
 FNewScenePanel.LastChild.BoundsToNeedBounds();
 FNewScenePanel.LastChild.Skin := FNewScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FNewScenePanel.LastChild.Caption := 'Настроить поведение газа на границах';
-FBoundsTypeButton.OnChange:=TSGComponentProcedure(@mmmFBoundsTypeButtonProcedure);
+FBoundsTypeButton.OnChange:=TSGScreenComponentProcedure(@mmmFBoundsTypeButtonProcedure);
 FBoundsTypeButton.UserPointer:=Self;
 
 FLoadScenePanel := SGCreatePanel(Screen, 440,105, False, True,  Self);
 SGCreateLabel(FLoadScenePanel, 'Загрузка сохраненной сцены/повтора', 5,0,275+140,20, FTahomaFont, False, True);
 
-FLoadComboBox := TSGComboBox.Create();
+FLoadComboBox := TSGScreenComboBox.Create();
 FLoadScenePanel.CreateChild(FLoadComboBox);
 FLoadComboBox.SetBounds(5,21,480-60,19);
 FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
-//FLoadComboBox.FProcedure:=TSGComboBoxProcedure(@FLoadComboBoxProcedure);
+//FLoadComboBox.FProcedure:=TSGScreenComboBoxProcedure(@FLoadComboBoxProcedure);
 FLoadComboBox.SelectItem:=-1;
 FLoadComboBox.UserPointer:=Self;
 
-FBackButton:=TSGButton.Create();
+FBackButton:=TSGScreenButton.Create();
 FLoadScenePanel.CreateChild(FBackButton);
 FLoadScenePanel.LastChild.SetBounds(10,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
@@ -3410,9 +3411,9 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Назад';
 FLoadScenePanel.LastChild.UserPointer:=Self;
-FBackButton.OnChange:=TSGComponentProcedure(@mmmFBackButtonProcedure);
+FBackButton.OnChange:=TSGScreenComponentProcedure(@mmmFBackButtonProcedure);
 
-FUpdateButton:=TSGButton.Create();
+FUpdateButton:=TSGScreenButton.Create();
 FLoadScenePanel.CreateChild(FUpdateButton);
 FLoadScenePanel.LastChild.SetBounds(145,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
@@ -3420,9 +3421,9 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Обновить';
 FLoadScenePanel.LastChild.UserPointer:=Self;
-FUpdateButton.OnChange:=TSGComponentProcedure(@mmmFUpdateButtonProcedure);
+FUpdateButton.OnChange:=TSGScreenComponentProcedure(@mmmFUpdateButtonProcedure);
 
-FLoadButton:=TSGButton.Create();
+FLoadButton:=TSGScreenButton.Create();
 FLoadScenePanel.CreateChild(FLoadButton);
 FLoadScenePanel.LastChild.SetBounds(145+135,44,130,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
@@ -3430,16 +3431,16 @@ FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Загрузить';
 FLoadScenePanel.LastChild.UserPointer:=Self;
-FLoadButton.OnChange:=TSGComponentProcedure(@mmmFLoadButtonProcedure);
+FLoadButton.OnChange:=TSGScreenComponentProcedure(@mmmFLoadButtonProcedure);
 
-FLoadScenePanel.CreateChild(TSGButton.Create());
+FLoadScenePanel.CreateChild(TSGScreenButton.Create());
 FLoadScenePanel.LastChild.SetBounds(5,44+24,420,20);
 FLoadScenePanel.LastChild.BoundsToNeedBounds();
 FLoadScenePanel.LastChild.Visible:=False;
 FLoadScenePanel.LastChild.Skin := FLoadScenePanel.LastChild.Skin.CreateDependentSkinWithAnotherFont(FTahomaFont);
 FLoadScenePanel.LastChild.Caption:='Открыть папку с сохранениями';
 FLoadScenePanel.LastChild.UserPointer:=Self;
-(FLoadScenePanel.LastChild as TSGButton).OnChange:=TSGComponentProcedure(@mmmFOpenSaveDir);
+(FLoadScenePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@mmmFOpenSaveDir);
 
 FInfoLabel := SGCreateLabel(Screen, '', 5,Render.Height-25,Render.Width-10,20, FTahomaFont, [SGAnchBottom], True, True);
 end;
@@ -3460,7 +3461,7 @@ end;
 begin
 if ((FCube.FSourses=nil) or (Length(FCube.FSourses)=0)) then
 	Exit;
-s := (FAddNewSoursePanel.Children[1] as TSGComboBox).SelectItem;
+s := (FAddNewSoursePanel.Children[1] as TSGScreenComboBox).SelectItem;
 a.Import(2*FCube.FSourses[s].FCoord.z/FCube.Edge-1,
 		 2*FCube.FSourses[s].FCoord.y/FCube.Edge-1,
 		 2*FCube.FSourses[s].FCoord.x/FCube.Edge-1);
@@ -3601,7 +3602,7 @@ if (FUsrSechThread <> nil) then
 	FUsrSechThread := nil;
 	end;
 FAddSechSecondPanelButton.Active := True;
-(FUsrSechPanel.Children[2] as TSGProgressBar).Visible := False;
+(FUsrSechPanel.Children[2] as TSGScreenProgressBar).Visible := False;
 end;
 var
 	i : LongWord;

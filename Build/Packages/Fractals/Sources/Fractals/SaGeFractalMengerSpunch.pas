@@ -61,8 +61,8 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
 			public
-		FComboBox1,FComboBox2:TSGComboBox;
-		FButtonDepthPlus,FButtonDepthMinus:TSGButton;
+		FComboBox1, FComboBox2 : TSGScreenComboBox;
+		FButtonDepthPlus,FButtonDepthMinus:TSGScreenButton;
 		FLabelDepth, FLabelDepthCaption : TSGScreenLabel;
 		FFont1:TSGFont;
 		procedure Calculate;override;
@@ -81,7 +81,7 @@ uses
 
 {MENGER SPUNCH RELEASE}
 
-procedure mmmFButtonDepthPlusOnChange(VButton:TSGButton);
+procedure mmmFButtonDepthPlusOnChange(VButton:TSGScreenButton);
 begin
 with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 	begin
@@ -94,7 +94,7 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 	end;
 end;
 
-procedure mmmFButtonDepthMinusOnChange(VButton:TSGButton);
+procedure mmmFButtonDepthMinusOnChange(VButton:TSGScreenButton);
 begin
 with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 	begin
@@ -108,7 +108,7 @@ with TSGFractalMengerSpunchRelease(VButton.FUserPointer1) do
 	end;
 end;
 
-procedure mmmComboBoxProcedure(a,b:LongInt;VComboBox:TSGComboBox);
+procedure mmmComboBoxProcedure(a,b:LongInt;VComboBox:TSGScreenComboBox);
 begin
 with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 	begin
@@ -128,7 +128,7 @@ with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 	end;
 end;
 
-procedure mmmComboBoxProcedure2(a,b:LongInt;VComboBox:TSGComboBox);
+procedure mmmComboBoxProcedure2(a,b:LongInt;VComboBox:TSGScreenComboBox);
 begin
 with TSGFractalMengerSpunchRelease(VComboBox.FUserPointer1) do
 	begin
@@ -169,52 +169,52 @@ Screen.LastChild.BoundsToNeedBounds();
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
 Screen.LastChild.BoundsToNeedBounds();
 
-FComboBox2:=TSGComboBox.Create;
+FComboBox2:=TSGScreenComboBox.Create;
 Screen.CreateChild(FComboBox2);
 Screen.LastChild.SetBounds(Render.Width-250,40,230,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Нормали и Цвета');
-Screen.LastChild.AsComboBox.CreateItem('Только Нормали');
-Screen.LastChild.AsComboBox.CreateItem('Только Цвета');
-Screen.LastChild.AsComboBox.CreateItem('Ваще Ничего');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure2);
-Screen.LastChild.AsComboBox.SelectItem:=0;
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Нормали и Цвета');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Только Нормали');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Только Цвета');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Ваще Ничего');
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmComboBoxProcedure2);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FComboBox1:=TSGComboBox.Create();
+FComboBox1:=TSGScreenComboBox.Create();
 Screen.CreateChild(FComboBox1);
 Screen.LastChild.SetBounds(Render.Width-250,5,230,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Звездочка');
-Screen.LastChild.AsComboBox.CreateItem('Губка Менгера');
-Screen.LastChild.AsComboBox.CreateItem('Снежинка (bug)');
-//Screen.LastChild.AsComboBox.CreateItem('New Губка Менгера');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure);
-Screen.LastChild.AsComboBox.SelectItem:=0;
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Звездочка');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Губка Менгера');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Снежинка (bug)');
+//(Screen.LastChild as TSGScreenComboBox).CreateItem('New Губка Менгера');
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmComboBoxProcedure);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
-FButtonDepthPlus:=TSGButton.Create();
+FButtonDepthPlus:=TSGScreenButton.Create();
 Screen.CreateChild(FButtonDepthPlus);
 Screen.LastChild.SetBounds(Render.Width-250-30,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FButtonDepthPlus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthPlusOnChange);
+FButtonDepthPlus.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();
 
 FLabelDepth := SGCreateLabel(Screen, '0', Render.Width-250-60,5,20,30, [SGAnchRight], True, True, Self);
 
-FButtonDepthMinus:=TSGButton.Create();
+FButtonDepthMinus:=TSGScreenButton.Create();
 Screen.CreateChild(FButtonDepthMinus);
 Screen.LastChild.SetBounds(Render.Width-250-90,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='-';
-FButtonDepthMinus.OnChange:=TSGComponentProcedure(@mmmFButtonDepthMinusOnChange);
+FButtonDepthMinus.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthMinusOnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsToNeedBounds();

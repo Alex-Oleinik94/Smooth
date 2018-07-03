@@ -54,7 +54,7 @@ uses
 	,SaGeScreenHelper
 	;
 
-procedure mmmButtonFormEsc(Button:TSGButton);
+procedure mmmButtonFormEsc(Button : TSGScreenButton);
 begin
 with TSGModelRedactor(Button.FUserPointer1) do
 	begin
@@ -63,7 +63,7 @@ with TSGModelRedactor(Button.FUserPointer1) do
 	end;
 end;
 
-procedure mmmButtonFormGo(Button:TSGButton);
+procedure mmmButtonFormGo(Button : TSGScreenButton);
 var
 	Suc : TSGBoolean = False;
 begin
@@ -138,11 +138,11 @@ end;
 
 procedure TSGModelRedactor.StartLoadForm();
 var
-	Form : TSGForm;
-	EscButton , GoButton : TSGButton;
+	Form : TSGScreenForm;
+	EscButton , GoButton : TSGScreenButton;
 	Edit : TSGScreenEdit;
 begin
-Form := TSGForm.Create();
+Form := TSGScreenForm.Create();
 Screen.CreateChild(Form);
 Form.SetBounds((Context.Width - 600 ) div 2, (Context.Height - 300) div 2,600,100);
 Form.Caption := 'Загрузка обьекта';
@@ -152,19 +152,19 @@ Edit := SGCreateEdit(Form, './../data\tron/motoBike.3ds' {SGModelsDirectory+Slas
 	5,5,575,20, [], False, True, Self);
 Edit.FUserPointer2:=Edit;
 
-EscButton:=TSGButton.Create();
+EscButton:=TSGScreenButton.Create();
 Form.CreateChild(EscButton);
 EscButton.SetBounds(375,35,100,24);
 EscButton.Caption:='Отмена';
-EscButton.OnChange:=TSGComponentProcedure(@mmmButtonFormEsc);
+EscButton.OnChange:=TSGScreenComponentProcedure(@mmmButtonFormEsc);
 EscButton.FUserPointer1:=Self;
 EscButton.FUserPointer2:=Edit;
 
-GoButton:=TSGButton.Create();
+GoButton:=TSGScreenButton.Create();
 Form.CreateChild(GoButton);
 GoButton.SetBounds(485,35,100,24);
 GoButton.Caption:='Загрузить';
-GoButton.OnChange:=TSGComponentProcedure(@mmmButtonFormGo);
+GoButton.OnChange:=TSGScreenComponentProcedure(@mmmButtonFormGo);
 GoButton.FUserPointer1:=Self;
 GoButton.FUserPointer2:=Edit;
 
@@ -172,7 +172,7 @@ Form.Active:=True;
 Form.Visible:=True;
 end;
 
-procedure OperCBP(a,b:LongInt;ComboBox:TSGComboBox);
+procedure OperCBP(a,b:LongInt;ComboBox:TSGScreenComboBox);
 begin
 with TSGModelRedactor(ComboBox.FUserPointer1) do
 	begin
