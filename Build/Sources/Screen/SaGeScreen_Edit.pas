@@ -47,8 +47,8 @@ type
 		FDrawCursorElapsedTimeDontChange : TSGUInt32;
 			public
 		procedure FromDraw;override;
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		function GetCursorTimer() : TSGScreenTimer; virtual;
@@ -234,136 +234,124 @@ if (FVisibleTimer > SGZero) then
 inherited;
 end;
 
-procedure TSGEdit.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGEdit.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin 
 if CursorInComponentNow then
-	if CanRePleace then
+	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 		begin
-		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
-			begin
-			FNowChanget:=True;
-			FDrawCursor:=True;
-			FDrawCursorTimer:=1;
-			FDrawCursorElapsedTime:=0;
-			FDrawCursorElapsedTimeDontChange:=30;
-			end;
-		end
-	else
-		if FNowChanget then
-			FNowChanget:=False;
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+		FNowChanget:=True;
+		FDrawCursor:=True;
+		FDrawCursorTimer:=1;
+		FDrawCursorElapsedTime:=0;
+		FDrawCursorElapsedTimeDontChange:=30;
+		end;
+inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
-procedure TSGEdit.FromUpDate(var FCanChange:Boolean);
+procedure TSGEdit.FromUpDate();
 var
 	CaptionCharget:Boolean = False;
 	CursorChanget:Boolean = False;
 begin
-if FCanChange then
+if (not CursorInComponent) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
+	FNowChanget:=False;
+if FNowChanget then
 	begin
-	if (not CursorInComponent) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
+	if Context.KeyPressedChar=#27 then
 		FNowChanget:=False;
-	if FNowChanget then
+	end;
+if FNowChanget and Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
+	begin
+	case Context.KeyPressedChar of
+	#39://ToRight (Arrow)
 		begin
-		if Context.KeyPressedChar=#27 then
-			FNowChanget:=False;
+		if FCursorPosition<Length(Caption) then
+			FCursorPosition+=1;
+		CursorChanget:=True;
 		end;
-	if FNowChanget and Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
+	#37://ToLeft (Arrow)
 		begin
-		case Context.KeyPressedChar of
-		#39://ToRight (Arrow)
+		if FCursorPosition>0 then
+			FCursorPosition-=1;
+		CursorChanget:=True;
+		end;
+	#13://Enter
+		FNowChanget:=False;
+	#46: //Delete
+		begin  
+		if FCursorPosition<Length(Caption) then
 			begin
-			if FCursorPosition<Length(Caption) then
-				FCursorPosition+=1;
-			CursorChanget:=True;
+			FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
+				SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
+			CaptionCharget:=True;
 			end;
-		#37://ToLeft (Arrow)
-			begin
-			if FCursorPosition>0 then
-				FCursorPosition-=1;
-			CursorChanget:=True;
-			end;
-		#13://Enter
-			FNowChanget:=False;
-		#46: //Delete
-			begin  
-			if FCursorPosition<Length(Caption) then
-				begin
-				FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
-					SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
-				CaptionCharget:=True;
-				end;
-			end;
-		#8: //BackSpase
-			if FCursorPosition=1 then
-				begin
-				FCursorPosition:=0;
-				FCaption:=SGStringGetPart(FCaption,2,Length(FCaption));
-				CaptionCharget:=True;
-				end
-			else if FCursorPosition<>0 then
-				begin
-				FCursorPosition-=1;
-				FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
-					SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
-				CaptionCharget:=True;
-				end;
-		Char(SG_ALT_KEY),//Alt
-		#17,//Ctrl
-		#38,//UpKey(Arrow)
-		#40,//DownKey(Arrow)
-		#112..#120,///F1..F9
-		#123,//F12
-		#144,//NumLock
-		#45,//Insert
-		#27,//Escape
-		#19,//Pause (or/and) Break
-		#16,//Shift
-		#9,//Tab
-		#20,//Caps Lock
-		#34,#33,//PageDown,PageUp
-		#93,//Win Property  (Right Menu Key)
-		#91,//Win Menu (Left Menu Key)
-		#255,//Screen яркость(F11,F12 on my netbook)
-		#233//Dinamics Volume (F7,F8,F9 on my netbook)
-			:;// Do NoThink
-		#35://  End
-			begin
-			FCursorPosition:=Length(Caption);
-			CursorChanget:=True;
-			end;
-		#36:// Home 
+		end;
+	#8: //BackSpase
+		if FCursorPosition=1 then
 			begin
 			FCursorPosition:=0;
-			CursorChanget:=True;
-			end;
-		else//Simbol
+			FCaption:=SGStringGetPart(FCaption,2,Length(FCaption));
+			CaptionCharget:=True;
+			end
+		else if FCursorPosition<>0 then
 			begin
-			if FCaption='' then
-				begin
-				FCaption:=
+			FCursorPosition-=1;
+			FCaption:=SGStringGetPart(FCaption,1,FCursorPosition)+
+				SGStringGetPart(FCaption,FCursorPosition+2,Length(FCaption));
+			CaptionCharget:=True;
+			end;
+	Char(SG_ALT_KEY),//Alt
+	#17,//Ctrl
+	#38,//UpKey(Arrow)
+	#40,//DownKey(Arrow)
+	#112..#120,///F1..F9
+	#123,//F12
+	#144,//NumLock
+	#45,//Insert
+	#27,//Escape
+	#19,//Pause (or/and) Break
+	#16,//Shift
+	#9,//Tab
+	#20,//Caps Lock
+	#34,#33,//PageDown,PageUp
+	#93,//Win Property  (Right Menu Key)
+	#91,//Win Menu (Left Menu Key)
+	#255,//Screen яркость(F11,F12 on my netbook)
+	#233//Dinamics Volume (F7,F8,F9 on my netbook)
+		:;// Do NoThink
+	#35://  End
+		begin
+		FCursorPosition:=Length(Caption);
+		CursorChanget:=True;
+		end;
+	#36:// Home 
+		begin
+		FCursorPosition:=0;
+		CursorChanget:=True;
+		end;
+	else//Simbol
+		begin
+		if FCaption='' then
+			begin
+			FCaption:=
+				SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
+				Context.KeysPressed(16) , Context.KeysPressed(20));
+			FCursorPosition:=1;
+			CaptionCharget:=True;
+			end
+		else
+			begin
+			FCursorPosition+=1;
+			FCaption:=
+					SGStringGetPart(FCaption,1,FCursorPosition-1)+
 					SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
-					Context.KeysPressed(16) , Context.KeysPressed(20));
-				FCursorPosition:=1;
-				CaptionCharget:=True;
-				end
-			else
-				begin
-				FCursorPosition+=1;
-				FCaption:=
-						SGStringGetPart(FCaption,1,FCursorPosition-1)+
-						SGWhatIsTheSimbol(longint(Context.KeyPressedChar),
-							Context.KeysPressed(16) , Context.KeysPressed(20))+
-						SGStringGetPart(FCaption,FCursorPosition,Length(FCaption));
-				CaptionCharget:=True;
-				end;
+						Context.KeysPressed(16) , Context.KeysPressed(20))+
+					SGStringGetPart(FCaption,FCursorPosition,Length(FCaption));
+			CaptionCharget:=True;
 			end;
 		end;
-		end;
-	end
-else
-	if FNowChanget then
-		FNowChanget:=False;
+	end;
+	end;
 if CaptionCharget then
 	begin
 	TextTypeEvent();
@@ -412,7 +400,7 @@ UpgradeTimer(FCursorOnComponent,FCursorOnComponentTimer,3);
 UpgradeTimer(FNowChanget,FNowChangetTimer,3);
 UpgradeTimer(FTextComplite,FTextCompliteTimer,1);
 UpgradeTimer(FDrawCursor,FDrawCursorTimer,4);
-inherited FromUpDate(FCanChange);
+inherited FromUpDate();
 end;
 
 constructor TSGEdit.Create;

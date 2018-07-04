@@ -25,8 +25,8 @@ type
 		procedure Load(const VContext : ISGContext);
 		procedure Resize();override;
 		procedure Paint();override;
-		procedure CustomPaint(VCanReplace : TSGBool);
-		function UpDateScreen() : TSGBoolean;
+		procedure CustomPaint();
+		procedure UpDateScreen();
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -150,7 +150,7 @@ if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	end;
 end;
 
-procedure TSGScreen.CustomPaint(VCanReplace : TSGBool);
+procedure TSGScreen.CustomPaint();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
@@ -164,8 +164,6 @@ DrawDrawClasses();
 Render.LineWidth(1);
 Render.InitMatrixMode(SG_2D);
 
-VCanReplace:=False;
-
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Before drawing');
 	{$ENDIF}
@@ -177,24 +175,21 @@ FromDraw();
 InProcessing := False;
 end;
 
-function TSGScreen.UpDateScreen() : TSGBoolean;
+procedure TSGScreen.UpDateScreen();
 begin
 InProcessing := True;
-Result := True;
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor(CanRePleace);"');
 	{$ENDIF}
-FromUpDateUnderCursor(Result);
+FromUpDateUnderCursor();
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate(CanRePleace);"');
 	{$ENDIF}
-FromUpDate(Result);
+FromUpDate();
 InProcessing := False;
 end;
 
 procedure TSGScreen.Paint();
-var
-	CanRePleace : TSGBoolean;
 begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
@@ -210,9 +205,9 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 	Context.SetKey(SGNullKey, 0);
 	end;
 
-CanRePleace := UpDateScreen();
+UpDateScreen();
 Skin.IddleFunction();
-CustomPaint(CanRePleace);
+CustomPaint();
 end;
 
 end.

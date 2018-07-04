@@ -148,9 +148,9 @@ type
 
 		procedure FromDraw();
 		procedure FromResize();
-		procedure FromUpDate(var FCanChange:Boolean);
-		procedure FromUpDateUnderCursor(var CanRePleace:TSGBoolean;const CursorInComponentNow:TSGBoolean = True);
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:TSGBoolean);
+		procedure FromUpDate();
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:TSGBoolean = True);
+		procedure FromUpDateCaptionUnderCursor();
 
 		procedure SetVisible(const b:TSGBoolean);
 		procedure SetCaption(const NewCaption : TSGCaption);
@@ -189,8 +189,8 @@ type
 	ISGScreen = interface(ISGComponent)
 		['{c3c6ea12-c4ff-41de-a250-1e4d856b3e59}']
 		procedure Load(const VContext : ISGContext);
-		procedure CustomPaint(VCanReplace : TSGBool);
-		function UpDateScreen() : TSGBoolean;
+		procedure CustomPaint();
+		procedure UpDateScreen();
 		end;
 
 	ISGOverComponent = interface(ISGComponent)

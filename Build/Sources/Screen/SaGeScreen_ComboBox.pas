@@ -38,10 +38,11 @@ type
 			protected
 		procedure OverItem(const Index : TSGUInt32); virtual;
 		procedure SelectItemFromIndex(const Index : TSGInt32); virtual;
+		procedure SelectingItem(const ItemIndex : TSGInt32); virtual;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
+		procedure FromUpDate();override;
 		procedure FromDraw;override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:TSGInt32 = -1; const VActive : TSGBoolean = True);
@@ -147,48 +148,7 @@ else
 	Result:=0;
 end;
 
-procedure TSGComboBox.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
-
-procedure MoveUpOrDown();
-var
-	FNewSelectItemIndex : TSGUInt32 = 0;
-
-procedure DoMove();
-begin
-CanRePleace:=False;
-ClearPriority();
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComboBox__FromUpDateUnderCursor() : Before calling "FProcedure(...)"');
-	{$ENDIF}
-if FProcedure<>nil then
-	FProcedure(FSelectedItemIndex, FNewSelectItemIndex, Self);
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComboBox__FromUpDateUnderCursor() : After calling "FProcedure(...)"');
-	{$ENDIF}
-SelectedItemIndex := FNewSelectItemIndex;
-FTextColor:=SGVertex4fImport();
-FBodyColor:=SGVertex4fImport();
-if OnChange <> nil then
-	OnChange(Self);
-end;
-
-begin
-if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
-	begin
-	Context.SetCursorWheel(SGNullCursorWheel);
-	FNewSelectItemIndex := FSelectedItemIndex + 1;
-	DoMove();
-	CanRePleace:=False;
-	end
-else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
-	begin
-	Context.SetCursorWheel(SGNullCursorWheel);
-	FNewSelectItemIndex := FSelectedItemIndex - 1;
-	DoMove();
-	CanRePleace:=False;
-	end;
-end;
-
+procedure TSGComboBox.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox__FromUpDateUnderCursor() : Begining');
@@ -196,21 +156,25 @@ WriteLn('TSGComboBox__FromUpDateUnderCursor() : Begining');
 if CursorInComponentNow then
 	begin
 	FBackLight:=True;
-	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) and CanRePleace then
+	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
 		begin
 		FOpen:=True;
-		CanRePleace:=False;
 		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 		MakePriority();
 		end
 	else
 		FCursorOnThisItem:=-1;
 	if (not FOpen) and (Context.CursorWheel <> SGNullCursorWheel) then
-		MoveUpOrDown();
-	if FOpen and CanRePleace then
+		begin
+		if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
+			SelectingItem(FSelectedItemIndex + 1)
+		else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
+			SelectingItem(FSelectedItemIndex - 1);
+		Context.SetCursorWheel(SGNullCursorWheel);
+		end;
+	if FOpen then
 		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 			begin
-			CanRePleace:=False;
 			FClickOnOpenBox:=True;
 			Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 			end;
@@ -229,23 +193,40 @@ if CursorInComponentNow then
 				end;
 			end;
 		Context.SetCursorWheel(SGNullCursorWheel);
-		CanRePleace:=False;
 		end;
 	end;
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+inherited FromUpDateUnderCursor(CursorInComponentNow);
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox__FromUpDateUnderCursor() : End');
 	{$ENDIF}
 end;
 
-procedure TSGComboBox.FromUpDate(var FCanChange:Boolean);
+procedure TSGComboBox.SelectingItem(const ItemIndex : TSGInt32);
+begin
+ClearPriority();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__SelectingItem() : Before calling "FProcedure(...)"');
+	{$ENDIF}
+if (FProcedure <> nil) then
+	FProcedure(FSelectedItemIndex, ItemIndex, Self);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__SelectingItem() : After calling "FProcedure(...)"');
+	{$ENDIF}
+SelectedItemIndex := ItemIndex;
+FTextColor:=SGVertex4fImport();
+FBodyColor:=SGVertex4fImport();
+if (OnChange <> nil) then
+	OnChange(Self);
+end;
+
+procedure TSGComboBox.FromUpDate();
 var
 	i:TSGMaxEnum;
 begin
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox.FromUpDate() : Begining');
 	{$ENDIF}
-if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed<>SGNullCursorButton)) then
+if FOpen and (not FBackLight) and (Context.CursorKeyPressed<>SGNullCursorButton) then
 	begin
 	FOpen:=False;
 	ClearPriority();
@@ -264,23 +245,9 @@ if  FOpen and (FCursorOnComponent) then
 				OverItem(FCursorOnThisItem);
 				if FClickOnOpenBox then
 					begin
-					FCanChange:=False;
 					FOpen:=False;
-					ClearPriority();
-					{$IFDEF SCREEN_DEBUG}
-						WriteLn('TSGComboBox__FromUpDate() : Before calling "FProcedure(...)"');
-						{$ENDIF}
-					if FProcedure<>nil then
-						FProcedure(FSelectedItemIndex,FCursorOnThisItem,Self);
-					{$IFDEF SCREEN_DEBUG}
-						WriteLn('TSGComboBox__FromUpDate() : After calling "FProcedure(...)"');
-						{$ENDIF}
-					SelectedItemIndex:=FCursorOnThisItem;
+					SelectingItem(FCursorOnThisItem);
 					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
-					FTextColor:=SGVertex4fImport();
-					FBodyColor:=SGVertex4fImport();
-					if OnChange<>nil then
-						OnChange(Self);
 					FClickOnOpenBox:=False;
 					end;
 				Break;

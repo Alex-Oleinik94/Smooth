@@ -24,9 +24,9 @@ type
 		FChangingButtonTimer : TSGScreenTimer;
 			public
 		function CursorInComponentCaption():boolean;override;
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateCaptionUnderCursor();override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw;override;
 		end;
 
@@ -43,7 +43,7 @@ begin
 Result := 'TSGButton';
 end;
 
-procedure TSGButton.FromUpDate(var FCanChange:Boolean);
+procedure TSGButton.FromUpDate();
 begin
 if not Active then
 	begin 
@@ -60,10 +60,10 @@ if FCursorOnButtonPrev and (not FCursorOnButton) then
 FCursorOnButtonPrev := FCursorOnComponent;
 UpgradeTimer(FCursorOnButton,FCursorOnButtonTimer,3,2);
 UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
-inherited FromUpDate(FCanChange);
+inherited FromUpDate();
 end;
 
-procedure TSGButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGButton.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 FCursorOnButton     := CursorInComponentNow;
 if CursorInComponentNow then
@@ -75,7 +75,7 @@ if CursorInComponentNow then
 		FChangingButtonTimer:=1;
 		end;
 	end;
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
 procedure TSGButton.FromDraw;
@@ -90,7 +90,7 @@ FClick := False;
 inherited FromDraw;
 end;
 
-procedure TSGButton.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
+procedure TSGButton.FromUpDateCaptionUnderCursor();
 begin
 end;
 

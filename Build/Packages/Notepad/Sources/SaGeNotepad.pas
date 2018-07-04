@@ -33,7 +33,7 @@ type
 		destructor Destroy();override;
 			public
 		procedure FromDraw();override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			protected
 		FTitle : TSGString;
 		FTitleWidth : TSGLongWord;
@@ -57,8 +57,8 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
 		procedure FromResize();override;
 			private
@@ -303,7 +303,7 @@ FCursorOnComponent := False;
 inherited;
 end;
 
-procedure TSGNInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGNInset.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;
@@ -473,7 +473,7 @@ SetLength(FInsets, 0);
 inherited;
 end;
 
-procedure TSGNotepad.FromUpDate(var FCanChange:Boolean);
+procedure TSGNotepad.FromUpDate();
 begin
 if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.KeyPressedByte = 9 {Tab}) and (Context.KeysPressed(SG_CTRL_KEY))) then
 	begin
@@ -485,7 +485,7 @@ if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.Key
 inherited;
 end;
 
-procedure TSGNotepad.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGNotepad.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;

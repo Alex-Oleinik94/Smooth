@@ -24,8 +24,8 @@ type
 		procedure DeleteDeviceResources();override;
 		procedure LoadDeviceResources();override;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
 		procedure FromResize();override;
 			public
@@ -279,7 +279,7 @@ if FVersionLabel <> nil then
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDate(var FCanChange : TSGBoolean);
+procedure TSGEngineConfigurationPanel.FromUpDate();
 var
 	i : TSGLongWord;
 begin
@@ -301,7 +301,7 @@ ToFront();
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGEngineConfigurationPanel.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;

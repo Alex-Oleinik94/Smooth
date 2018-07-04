@@ -141,9 +141,9 @@ type
 			public
 		procedure FromResize();virtual;
 			protected
-		procedure FromUpDate(var FCanChange:Boolean);virtual;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);virtual;
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);virtual;
+		procedure FromUpDate();virtual;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);virtual;
+		procedure FromUpDateCaptionUnderCursor();virtual;
 			protected
 		procedure SetVisible(const b:Boolean);virtual;
 		procedure SetCaption(const NewCaption : TSGCaption);virtual;
@@ -588,12 +588,16 @@ SetBounds(Round(NewLeft), Round(NewTop), Round(NewWidth), Round(NewHeight));
 end;
 
 procedure TSGComponent.SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);
+var
+	IsLocationNull : TSGBoolean;
 begin
+IsLocationNull := (FLocation.Left = 0) and (FLocation.Top = 0) and (FLocation.Width = 0) and (FLocation.Height = 0);
 FLocation.Left := NewLeft;
 FLocation.Top := NewTop;
 FLocation.Width := NewWidth;
 FLocation.Height := NewHeight;
-//FRealLocation := FLocation;
+if IsLocationNull then
+	FRealLocation := FLocation;
 FDefaultLocation := FLocation;
 end;
 
@@ -790,13 +794,13 @@ Result:=
 FCursorOnComponent:=Result;
 end;
 
-procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
+procedure TSGComponent.FromUpDate();
 var
 	PriorityComponent, Component : TSGComponent;
 	Index : TSGLongWord;
 begin
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComponent.FromUpDate(var FCanChange:Boolean = ', FCanChange, ') : Begining');
+	WriteLn('TSGComponent.FromUpDate: Begining');
 	{$ENDIF}
 
 UpDateObjects();
@@ -805,7 +809,7 @@ UpDateSkin();
 
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
-	PriorityComponent.FromUpDate(FCanChange);
+	PriorityComponent.FromUpDate();
 
 Index := 0;
 while Index < Length(FChildren) do
@@ -816,7 +820,7 @@ while Index < Length(FChildren) do
 	else
 		begin
 		if Component <> PriorityComponent then
-			Component.FromUpDate(FCanChange);
+			Component.FromUpDate();
 		Index += 1;
 		end;
 	end;
@@ -1049,7 +1053,7 @@ begin
 Result:=False;
 end;
 
-procedure TSGComponent.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
+procedure TSGComponent.FromUpDateCaptionUnderCursor();
 begin
 end;
 
@@ -1202,13 +1206,13 @@ if (FParent <> nil) then
 	FRealPosition := FParent.FRealPosition + FRealLocation.Position + TSGComponentLocationVectorInt.Create(FParent.FBordersSize.Left, FParent.FBordersSize.Top);
 end;
 
-procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGComponent.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 
 procedure PUpdateComponent(const Component : TSGComponent);
 begin
-Component.FromUpDateUnderCursor(CanRePleace, Component.CursorInComponent());
+Component.FromUpDateUnderCursor(Component.CursorInComponent());
 if Component.CursorInComponentCaption() then
-	Component.FromUpDateCaptionUnderCursor(CanRePleace);
+	Component.FromUpDateCaptionUnderCursor();
 end;
 
 var

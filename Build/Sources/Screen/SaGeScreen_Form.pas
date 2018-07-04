@@ -23,9 +23,9 @@ type
 		FButtonsType : SGFrameButtonsType;
 		FIcon        : TSGImage;
 		FRePlace     : Boolean;
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateCaptionUnderCursor();override;
 		function CursorInComponentCaption():boolean;override;
 			public
 		procedure FromDraw;override;
@@ -47,7 +47,7 @@ begin
 Result := 'TSGForm';
 end;
 
-procedure TSGForm.FromUpDate(var FCanChange:Boolean);
+procedure TSGForm.FromUpDate();
 var
 	ParentBoundsSize : TSGComponentBoundsSize;
 	ParentRealPosition : TSGComponentLocationVectorInt;
@@ -116,7 +116,7 @@ if FRePlace then
 			FDefaultLocation := FLocation;
 		end;
 	end;
-inherited FromUpDate(FCanChange);
+inherited FromUpDate();
 end;
 
 procedure TSGForm.FromDraw;
@@ -163,18 +163,15 @@ FIcon := TSGImage.Create();
 SetBordersSize(5, 30, 5, 5);
 end;
 
-procedure TSGForm.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGForm.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
-procedure TSGForm.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
+procedure TSGForm.FromUpDateCaptionUnderCursor();
 begin
-if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) and CanRePleace then
-	begin
+if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 	FRePlace:=True;
-	CanRePleace:=False;
-	end;
 end;
 
 function TSGForm.CursorInComponentCaption():boolean;
