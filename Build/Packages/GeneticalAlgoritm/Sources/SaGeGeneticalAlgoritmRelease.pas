@@ -214,7 +214,7 @@ with TSGGenAlg(Button.FUserPointer1) do
 		FLPoint.Skin.Font.StringLength(FLPoint.Caption),
 		21);
 	FLPoint.Visible:=True;
-	FLPoint.BoundsToNeedBounds;
+	FLPoint.BoundsMakeReal;
 	end;
 end;
 

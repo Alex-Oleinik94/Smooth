@@ -99,7 +99,7 @@ inherited;
 FNotepad := TSGNotepad.Create();
 TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 0, Render.Width, Render.Height);
-FNotepad.BoundsToNeedBounds();
+FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;
 end;
 

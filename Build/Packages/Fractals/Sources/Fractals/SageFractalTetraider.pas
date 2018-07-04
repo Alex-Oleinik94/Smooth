@@ -218,13 +218,13 @@ c2:=SGColor4fFromUInt32($FFFF00);
 c3:=SGColor4fFromUInt32($0080FF);
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 InitEffectsComboBox(Render.Width-160,40,150,30,[SGAnchRight]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
@@ -236,7 +236,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FBPD.OnChange:=TSGScreenComponentProcedure(@PodkovammmFButtonDepthPlusOnChangeKTTet);
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
@@ -248,7 +248,7 @@ Screen.LastChild.Caption:='-';
 FBMD.OnChange:=TSGScreenComponentProcedure(@PodkovammmFButtonDepthMinusOnChangeKTTet);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 

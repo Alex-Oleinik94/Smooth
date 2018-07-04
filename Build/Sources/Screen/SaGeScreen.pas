@@ -145,7 +145,7 @@ begin
 if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	begin
 	SetBounds(0, 0, Render.Width, Render.Height);
-	BoundsToNeedBounds();
+	BoundsMakeReal();
 	FromResize();
 	end;
 end;

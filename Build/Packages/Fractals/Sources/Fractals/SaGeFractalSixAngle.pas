@@ -107,7 +107,7 @@ with FTypeComboBox do
 	begin
 	Anchors := [SGAnchRight];
 	SetBounds(Render.Width - 550, 5, 180, 30);
-	BoundsToNeedBounds();
+	BoundsMakeReal();
 	CreateItem('Треугольник');
 	CreateItem('Лист');
 	CreateItem('Геометрия');

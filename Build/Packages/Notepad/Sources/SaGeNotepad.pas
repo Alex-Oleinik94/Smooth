@@ -122,7 +122,7 @@ inherited Create(VContext);
 FNotepad := TSGNotepad.Create();
 TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
-FNotepad.BoundsToNeedBounds();
+FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;
 FNotepad.AddMakeFile('.' + DirectorySeparator + '..' + DirectorySeparator + 'Build' + DirectorySeparator + 'Makefile');
 FNotepad.OpenMakefileProjects();
@@ -287,7 +287,7 @@ if CountInsets() >0 then
 	for i := 0 to CountInsets() - 1 do
 		begin
 		FInsets[i].SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
-		FInsets[i].BoundsToNeedBounds();
+		FInsets[i].BoundsMakeReal();
 		FInsets[i].FromResize();
 		end;
 end;
@@ -440,7 +440,7 @@ FInsets[High(FInsets)] := VInset;
 CreateChild(VInset);
 VInset.Owner := Self;
 VInset.SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
-VInset.BoundsToNeedBounds();
+VInset.BoundsMakeReal();
 end;
 
 procedure TSGNotepad.AddFile(const VFileName : TSGString; const VLine : TSGLongWord = 0; const VColumn : TSGLongWord = 0);

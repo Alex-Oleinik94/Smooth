@@ -558,7 +558,7 @@ for i:=0 to QuantityThreads-1 do
 	Screen.CreateChild(FArProgressBar[i]);
 	FArProgressBar[i].ViewCaption := False;
 	FArProgressBar[i].SetBounds(10,ii,300,20);
-	FArProgressBar[i].BoundsToNeedBounds();
+	FArProgressBar[i].BoundsMakeReal();
 	ii+=23;
 	FArProgressBar[i].Visible:=True;
 	FArProgressBar[i].ViewProgress:=True;
@@ -583,7 +583,7 @@ ScreenshotPanel := SGCreatePanel(Screen, Render.Width-10-(130+140+10),Render.Hei
 Screen.LastChild.CreateChild(TSGScreenButton.Create);
 Screen.LastChild.LastChild.SetBounds(130,5,140,20);
 Screen.LastChild.LastChild.Caption:='Сохранить';
-Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.BoundsMakeReal;
 (Screen.LastChild.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@SaveImage);
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 
@@ -631,7 +631,7 @@ Screen.CreateChild(StepenComboBox);
 Screen.LastChild.SetBounds(Render.Width-50-125-185-105-125+45-105,5{+Context.TopShift},100,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='';
-Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.BoundsMakeReal;
 (Screen.LastChild as TSGScreenComboBox).SelectItem:=1;
 (Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@StepenComboBoxProcedure);
 Screen.LastChild.FUserPointer1:=Self;
@@ -647,7 +647,7 @@ Screen.CreateChild(QuantityRecComboBox);
 Screen.LastChild.SetBounds(Render.Width-50-125-185-105-125-105+45-105,5{+Context.TopShift},100,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='';
-Screen.LastChild.BoundsToNeedBounds;
+Screen.LastChild.BoundsMakeReal;
 (Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@QuantityRecComboBoxProcedure);
 Screen.LastChild.FUserPointer1:=Self;
 i:=6;
@@ -698,7 +698,7 @@ FBezierCurvePanel.LastChild.Caption:='On режим добавления точек';
 FBezierCurvePanel.LastChild.SetBounds(3,3,275,20);
 (FBezierCurvePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@bcpAddPoint);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
-FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+FBezierCurvePanel.LastChild.BoundsMakeReal();
 
 FBezierCurveLabelPoints := SGCreateLabel(FBezierCurvePanel, 'Количество точек: 0', 3,47,137,20, False, True, Self);
 SGCreateLabel(FBezierCurvePanel, 'Количество кадров:', False, 3,25,275,20, False, True, Self);
@@ -711,7 +711,7 @@ FBezierCurvePanel.CreateChild(FBezierCurveGoButton);
 (FBezierCurvePanel.LastChild as TSGScreenButton).SetBounds(3,92,275,20);
 (FBezierCurvePanel.LastChild as TSGScreenButton).OnChange:=TSGScreenComponentProcedure(@bcpGoVideo);
 FBezierCurvePanel.LastChild.FUserPointer1:=Self;
-FBezierCurvePanel.LastChild.BoundsToNeedBounds();
+FBezierCurvePanel.LastChild.BoundsMakeReal();
 FBezierCurveEditKadr.FUserPointer2:=Pointer(FBezierCurvePanel.LastChild);
 
 if VNameThemes<>nil then
@@ -785,7 +785,7 @@ Screen.LastChild.LastChild.SetBounds(75,115,140,20);
 Screen.LastChild.LastChild.Visible:=True;
 Screen.LastChild.LastChild.Caption:='Запуск';
 Screen.LastChild.LastChild.OnChange:=TSGScreenComponentProcedure(@BeginInitMand);
-Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.BoundsMakeReal;
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 
 Screen.LastChild.CreateChild(TSGScreenComboBox.Create);
@@ -798,7 +798,7 @@ Screen.LastChild.LastChild.SetBounds(5,80,Screen.LastChild.Width-10,20);
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('512');
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('1024');
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('2048');
-Screen.LastChild.LastChild.BoundsToNeedBounds;
+Screen.LastChild.LastChild.BoundsMakeReal;
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 
 Screen.LastChild.CreateChild(TSGScreenComboBox.Create);
@@ -813,7 +813,7 @@ Screen.LastChild.LastChild.SetBounds(5,30,Screen.LastChild.Width-10,20);
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('10');
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('12');
 (Screen.LastChild.LastChild as TSGScreenComboBox).CreateItem('16');
-Screen.LastChild.LastChild.BoundsToNeedBounds();
+Screen.LastChild.LastChild.BoundsMakeReal();
 Screen.LastChild.LastChild.FUserPointer1:=Self;
 case SGCoreCount() of 
 2:(Screen.LastChild.LastChild as TSGScreenComboBox).SelectItem:=1;

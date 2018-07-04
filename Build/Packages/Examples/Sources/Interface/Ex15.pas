@@ -208,7 +208,7 @@ VButton := TSGScreenButton.Create();
 Screen.CreateChild(VButton);
 Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
 Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 Screen.LastChild.UserPointer:=Self;
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Visible:=True;

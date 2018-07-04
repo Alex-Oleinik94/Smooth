@@ -48,7 +48,7 @@ type
 		procedure ClearItems();
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
-		function GetLines() : TSGUInt32;
+		function GetLinesCount() : TSGUInt32;
 		function GetSelectedItem() : PSGComboBoxItem;
 		function GetFirstItemIndex() : TSGUInt32;
 			public
@@ -56,7 +56,7 @@ type
 		property SelectItem        : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
 		property MaxLines          : LongWord read FMaxLines          write FMaxLines;
 
-		property Lines      : TSGUInt32 read GetLines;
+		property LinesCount        : TSGUInt32 read GetLinesCount;
 		property CallBackProcedure : TSGComboBoxProcedure read FProcedure write FProcedure;
 
 		property ItemsCount : TSGUInt32 read GetItemsCount;
@@ -103,9 +103,10 @@ end;
 
 function TSGComboBox.GetItemsCount() : TSGUInt32;
 begin
-Result := 0;
-if FItems <> nil then
-	Result := Length(FItems);
+if (FItems <> nil) then
+	Result := Length(FItems)
+else
+	Result := 0;
 end;
 
 procedure TSGComboBox.ClearItems();
@@ -124,7 +125,7 @@ Result:=
 	(
 	(FOpen and
 		(
-		(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*Lines*FOpenTimer)
+		(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height * LinesCount * FOpenTimer)
 		or
 		(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height)
 		)
@@ -135,7 +136,7 @@ Result:=
 FCursorOnComponent:=Result;
 end;
 
-function TSGComboBox.GetLines() : TSGUInt32;
+function TSGComboBox.GetLinesCount() : TSGUInt32;
 begin
 if FItems<>nil then
 	if FMaxLines>Length(FItems) then
@@ -160,7 +161,7 @@ ClearPriority();
 	WriteLn('TSGComboBox__FromUpDateUnderCursor() : Before calling "FProcedure(...)"');
 	{$ENDIF}
 if FProcedure<>nil then
-	FProcedure(FSelectedItemIndex,FNewSelectItemIndex,Self);
+	FProcedure(FSelectedItemIndex, FNewSelectItemIndex, Self);
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGComboBox__FromUpDateUnderCursor() : After calling "FProcedure(...)"');
 	{$ENDIF}
@@ -172,17 +173,19 @@ if OnChange <> nil then
 end;
 
 begin
-if (Lines - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
+if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
 	begin
 	Context.SetCursorWheel(SGNullCursorWheel);
 	FNewSelectItemIndex := FSelectedItemIndex + 1;
 	DoMove();
+	CanRePleace:=False;
 	end
 else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
 	begin
 	Context.SetCursorWheel(SGNullCursorWheel);
 	FNewSelectItemIndex := FSelectedItemIndex - 1;
 	DoMove();
+	CanRePleace:=False;
 	end;
 end;
 
@@ -220,7 +223,7 @@ if CursorInComponentNow then
 			end
 		else
 			begin
-			if FFirstScrollItem+Lines-1<>High(FItems) then
+			if FFirstScrollItem + LinesCount - 1 <> High(FItems) then
 				begin
 				FFirstScrollItem+=1;
 				end;
@@ -249,7 +252,7 @@ if FOpen and (not FBackLight) and ((not FCanChange) or (Context.CursorKeyPressed
 	end;
 if  FOpen and (FCursorOnComponent) then
 	begin
-	for i:=0 to Lines-1 do
+	for i := 0 to LinesCount - 1 do
 		begin
 		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y+FRealLocation.Height*i*FOpenTimer) and
 			(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*(i+1)*FOpenTimer) and
@@ -299,10 +302,8 @@ procedure TSGComboBox.FromDraw;
 begin
 if not CursorInComponent then
 	FCursorOnThisItem:=-1;
-if (FVisible) or (FVisibleTimer>SGZero) then
-	begin
+if (FVisible) or (FVisibleTimer > SGZero) then
 	FSkin.PaintComboBox(Self);
-	end;
 FBackLight:=False;
 inherited;
 end;

@@ -462,7 +462,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	Form := TSGScreenForm.Create();
 	Screen.CreateChild(Form);
 	Form.SetMiddleBounds(400,133);
-	Form.BoundsToNeedBounds();
+	Form.BoundsMakeReal();
 	Form.Visible := True;
 	Form.Active := True;
 	Form.Caption := 'Добавление функции';

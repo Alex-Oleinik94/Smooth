@@ -44,7 +44,7 @@ type
 		procedure LoadDeviceResources();override;
 			public
 		procedure IddleFunction(); virtual;
-		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupored : TSGBool = False) : TSGScreenSkin; overload;
+		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupported : TSGBool = False) : TSGScreenSkin; overload;
 		function CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;
 			protected
 		FOwner : TSGScreenSkin;
@@ -256,12 +256,12 @@ begin
 VColors := FColors;
 end;
 
-function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupored : TSGBool = False) : TSGScreenSkin; overload;
+function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupported : TSGBool = False) : TSGScreenSkin; overload;
 begin
 Result := TSGScreenSkin.Create(Context);
 Result.Font  := VFont;
 Result.Owner := Self;
-Result.DestroyFontSuppored := VDestroyFontSupored;
+Result.DestroyFontSuppored := VDestroyFontSupported;
 Result.IddleFunction();
 end;
 
@@ -521,7 +521,7 @@ end;
 function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.SizeX := Location.SizeY;
-Result.SizeY := Round(OpenLocation.Size.Y * (ComboBox.Lines / ComboBox.ItemsCount));
+Result.SizeY := Round(OpenLocation.Size.Y * (ComboBox.LinesCount / ComboBox.ItemsCount));
 Result.PositionX := OpenLocation.PositionX + OpenLocation.SizeX - Location.SizeY;
 Result.PositionY := Round(OpenLocation.PositionY + OpenLocation.Size.Y * (ComboBox.FirstItemIndex / ComboBox.ItemsCount));
 end;
@@ -529,7 +529,7 @@ end;
 function GetItemLocation(const Index : TSGUInt32; const NeedPaintScroll : TSGBool = False):TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := OpenLocation;
-Result.SizeY := Round(Result.SizeY / ComboBox.Lines);
+Result.SizeY := Round(Result.SizeY / ComboBox.LinesCount);
 Result.PositionY := Result.PositionY + Index * Result.SizeY;
 if NeedPaintScroll then
 	Result.SizeX := Result.SizeX - Location.SizeY;
@@ -550,16 +550,16 @@ PaintQuad(OpenLocation,
 	BodyColor.WithAlpha(OpenTimer),
 	BodyColor.WithAlpha(OpenTimer)*1.3);
 
-if ComboBox.Lines > 0 then
+if ComboBox.LinesCount > 0 then
 	begin
-	NeedPaintScroll := ComboBox.ItemsCount > ComboBox.Lines;
+	NeedPaintScroll := ComboBox.ItemsCount > ComboBox.LinesCount;
 	
 	if NeedPaintScroll then
 		PaintQuad(GetScrollLocation(),
 			BodyColor.WithAlpha(OpenTimer),
 			BodyColor.WithAlpha(OpenTimer)*1.3);
 	
-	for i := 0 to ComboBox.Lines - 1 do
+	for i := 0 to ComboBox.LinesCount - 1 do
 		PaintItem(GetItemLocation(i, NeedPaintScroll), ComboBox.Items[i + ComboBox.FirstItemIndex]);
 	end;
 end;
@@ -598,7 +598,7 @@ if  (ActiveTimer > SGZero) and
 if OpenTimer > SGZero then
 	begin
 	TextLocation := Location;
-	TextLocation.SizeY := Round(TextLocation.SizeY * ( 1 + (ComboBox.Lines - 1) * OpenTimer));
+	TextLocation.SizeY := Round(TextLocation.SizeY * ( 1 + (ComboBox.LinesCount - 1) * OpenTimer));
 	
 	PaintOpened(TextLocation);
 	end
@@ -617,9 +617,7 @@ if 1 - OpenTimer > SGZero then
 			False,0.5);
 		end;
 	if (ComboBox.GetSelectedItem() <> nil) and (Font <> nil) then
-		begin
 		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.FloatPosition, TextLocation.FloatPositionAndSize);
-		end;
 	end;
 end;
 

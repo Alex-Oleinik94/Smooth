@@ -205,7 +205,7 @@ FFont.ToTexture();
 FBackButton := TSGScreenButton.Create();
 Screen.CreateChild(FBackButton);
 FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
-FBackButton.BoundsToNeedBounds();
+FBackButton.BoundsMakeReal();
 FBackButton.Caption := 'Назад';
 FBackButton.Visible:=False;
 FBackButton.Anchors:=[SGAnchRight];
@@ -229,7 +229,7 @@ FNumberBEdit := SGCreateEdit(FPanelStart, '7', SGScreenEditTypeInteger,
 FGoButton := TSGScreenButton.Create();
 FPanelStart.CreateChild(FGoButton);
 FGoButton.SetBounds(5,5+(FFont.FontHeight+4)*6 + 3,FPanelStart.Width - 12,FFont.FontHeight+4);
-FGoButton.BoundsToNeedBounds();
+FGoButton.BoundsMakeReal();
 FGoButton.Caption := 'Построить';
 FGoButton.Visible:=True;
 FGoButton.Active:=True;

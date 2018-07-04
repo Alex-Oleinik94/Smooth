@@ -66,7 +66,7 @@ type
 		FRealLocation : TSGComponentLocation;
 		FDefaultLocation : TSGComponentLocation;
 		FRealPosition : TSGComponentLocationVectorInt;
-		FBoundsSize : TSGComponentBoundsSize;
+		FBordersSize : TSGComponentBoundsSize;
 		FUnLimited : TSGBoolean;
 		FParent    : TSGComponent;
 		
@@ -105,12 +105,12 @@ type
 		property ScreenWidth  : TSGScreenInt read GetScreenWidth;
 		property ScreenHeight : TSGScreenInt read GetScreenHeight;
 		property UnLimited    : TSGBoolean   read FUnLimited write FUnLimited;
-		property BoundsSize   : TSGComponentBoundsSize read FBoundsSize;
+		property BoundsSize   : TSGComponentBoundsSize read FBordersSize;
 		property RealPosition : TSGComponentLocationVectorInt read FRealPosition;
 		property Location     : TSGComponentLocation read GetLocation;
 			public
-		procedure BoundsToNeedBounds();virtual;
-		procedure SetBoundsSize(const _L, _T, _R, _B : TSGScreenInt);virtual;
+		procedure BoundsMakeReal();virtual;
+		procedure SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);virtual;
 		procedure SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);virtual;
 		procedure SetBoundsFloat(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenFloat);
 		procedure SetMiddleBounds(const NewWidth, NewHeight : TSGScreenInt);virtual;
@@ -461,7 +461,7 @@ while ChildExists() do
 	end;
 end;
 
-procedure TSGComponent.BoundsToNeedBounds;
+procedure TSGComponent.BoundsMakeReal;
 begin
 FRealLocation := FLocation;
 end;
@@ -546,12 +546,12 @@ end;
 
 function TSGComponent.BottomShift:TSGScreenInt;
 begin
-Result := FBoundsSize.Top + FBoundsSize.Bottom;
+Result := FBordersSize.Top + FBordersSize.Bottom;
 end;
 
 function TSGComponent.RightShift:TSGScreenInt;
 begin
-Result := FBoundsSize.Left + FBoundsSize.Right;
+Result := FBordersSize.Left + FBordersSize.Right;
 end;
 
 function TSGComponent.LastChild:TSGComponent;
@@ -593,7 +593,7 @@ FLocation.Left := NewLeft;
 FLocation.Top := NewTop;
 FLocation.Width := NewWidth;
 FLocation.Height := NewHeight;
-FRealLocation := FLocation;
+//FRealLocation := FLocation;
 FDefaultLocation := FLocation;
 end;
 
@@ -699,7 +699,7 @@ if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	if FOR_THAT = SG_VERTEX_FOR_PARENT then
 		Result.Import(FRealPosition.x,FRealPosition.y)
 	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-		Result.Import(FRealPosition.x + FBoundsSize.Left, FRealPosition.y + FBoundsSize.Top)
+		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FBordersSize.Top)
 	else
 		Result.Import(0,0);
 	end
@@ -708,7 +708,7 @@ else if (SGS_TOP in THAT) and (SGS_RIGHT in THAT) then
 	if FOR_THAT = SG_VERTEX_FOR_PARENT then
 		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y)
 	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-		Result.Import(FRealPosition.x + FRealLocation.Width - FBoundsSize.Right, FRealPosition.y + FBoundsSize.Top)
+		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FBordersSize.Top)
 	else
 		Result.Import(0,0);
 	end
@@ -717,7 +717,7 @@ else if (SGS_BOTTOM in THAT) and (SGS_RIGHT in THAT) then
 	if FOR_THAT = SG_VERTEX_FOR_PARENT then
 		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y + FRealLocation.Height)
 	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-		Result.Import(FRealPosition.x + FRealLocation.Width - FBoundsSize.Right, FRealPosition.y + FRealLocation.Height - FBoundsSize.Bottom)
+		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
 	else
 		Result.Import(0,0);
 	end 
@@ -726,7 +726,7 @@ else if (SGS_LEFT in THAT) and (SGS_BOTTOM in THAT) then
 	if FOR_THAT = SG_VERTEX_FOR_PARENT then
 		Result.Import(FRealPosition.x,FRealPosition.y + FRealLocation.Height)
 	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-		Result.Import(FRealPosition.x + FBoundsSize.Left, FRealPosition.y + FRealLocation.Height - FBoundsSize.Bottom)
+		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
 	else
 		Result.Import(0,0);
 	end
@@ -953,7 +953,7 @@ FLocation.Import(0, 0, 0, 0);
 FRealLocation := FLocation;
 FDefaultLocation := FLocation;
 FRealPosition.Import(0, 0);
-SetBoundsSize(0, 0, 0, 0);
+SetBordersSize(0, 0, 0, 0);
 FAlign:=SGAlignNone;
 FAnchors:=[];
 FVisible:=False;
@@ -973,12 +973,12 @@ FAnchorsData.FParentHeight:=0;
 FAnchorsData.FParentWidth:=0;
 end;
 
-procedure TSGComponent.SetBoundsSize(const _L, _T, _R, _B : TSGScreenInt);
+procedure TSGComponent.SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);
 begin
-FBoundsSize.Left   := _L;
-FBoundsSize.Top    := _T;
-FBoundsSize.Right  := _R;
-FBoundsSize.Bottom := _B;
+FBordersSize.Left   := _L;
+FBordersSize.Top    := _T;
+FBordersSize.Right  := _R;
+FBordersSize.Bottom := _B;
 end;
 
 procedure TSGComponent.FromResize();
@@ -1018,7 +1018,7 @@ if SGAnchRight in FAnchors then
 			end;
 		end;
 	end;
-BoundsToNeedBounds();
+BoundsMakeReal();
 {CW:=FLocation.Width;
 CH:=FLocation.Height;
 case FAlign of
@@ -1087,10 +1087,10 @@ procedure TSGComponent.TestCoords;
 begin
 if (FParent<>nil) and (FParent.FParent<>nil) and (not FUnLimited) then
 	begin
-	if FRealLocation.Height>FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom then
-		FRealLocation.Height:=FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom;
-	if FRealLocation.Width>FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right then
-		FRealLocation.Width:=FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right;
+	if FRealLocation.Height>FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom then
+		FRealLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
+	if FRealLocation.Width>FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right then
+		FRealLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
 	if FRealLocation.Top < 0 then
 		FRealLocation.Top:=0;
 	if FRealLocation.Left < 0 then
@@ -1153,30 +1153,30 @@ if (FParent <> nil) then
 	SGAlignLeft:
 		begin
 		FLocation.Position := TSGComponentLocationVectorInt.Create();
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom;
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignTop:
 		begin
 		FLocation.Position := TSGComponentLocationVectorInt.Create();
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right;
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
 		end;
 	SGAlignRight:
 		begin
 		FLocation.Top := 0;
-		FLocation.Left:=FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right-FRealLocation.Width;
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom;
+		FLocation.Left:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right-FRealLocation.Width;
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignBottom:
 		begin
 		FLocation.Left := 0;
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right;
-		FLocation.Top:=FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom-FRealLocation.Height;
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+		FLocation.Top:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom-FRealLocation.Height;
 		end;
 	SGAlignClient:
 		begin
 		FLocation.Position := TSGComponentLocationVectorInt.Create();
-		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBoundsSize.Left-FParent.FBoundsSize.Right;
-		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBoundsSize.Top-FParent.FBoundsSize.Bottom;
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignNone: begin end;
 	else begin end;
@@ -1199,7 +1199,7 @@ for Component in Self do
 	Component.FRealLocation.Left   := Component.FRealLocation.Left   - ValueLeft;
 	end;
 if (FParent <> nil) then
-	FRealPosition := FParent.FRealPosition + FRealLocation.Position + TSGComponentLocationVectorInt.Create(FParent.FBoundsSize.Left, FParent.FBoundsSize.Top);
+	FRealPosition := FParent.FRealPosition + FRealLocation.Position + TSGComponentLocationVectorInt.Create(FParent.FBordersSize.Left, FParent.FBordersSize.Top);
 end;
 
 procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);

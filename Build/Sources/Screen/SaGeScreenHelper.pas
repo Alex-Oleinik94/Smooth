@@ -59,44 +59,44 @@ function SGCreateButton(const Parent : TSGComponent; const Caption : TSGString; 
 function SGCreateButton(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
 
 // ComboBox
-function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
-function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 function SGCreateComboBox(const Parent : TSGComponent; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 function SGCreateComboBox(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 
 // Picture
 function SGCreatePicture(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
-function SGCreatePicture(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
+function SGCreatePicture(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
 
 // Edit
 function SGCreateEdit(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 
 // Panel
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 function SGCreatePanel(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 
 // Label
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 
 implementation
 
@@ -124,19 +124,19 @@ end;
 //# ComboBox #
 //############
 
-function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 begin
-Result := SGCreateComboBox(Parent, X, Y, W, H, CallBack, IsVisible, BTNB, InterfaceData);
+Result := SGCreateComboBox(Parent, X, Y, W, H, CallBack, IsVisible, IsBoundsReal, InterfaceData);
 if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
-function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+function SGCreateComboBox(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 begin
 Result := SGCreateComboBox(Parent, CallBack, IsVisible, InterfaceData);
 Result.SetBounds(X, Y, W, H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
 function SGCreateComboBox(const Parent : TSGComponent; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
@@ -158,12 +158,12 @@ end;
 //# Picture #
 //###########
 
-function SGCreatePicture(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
+function SGCreatePicture(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
 begin
 Result := SGCreatePicture(Parent, IsVisible, InterfaceData);
 Result.SetBounds(X, Y, W, H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
 function SGCreatePicture(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
@@ -179,43 +179,43 @@ end;
 //# Edit #
 //########
 
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
-Result := SGCreateEdit(Parent, EditText, TextTypeFunc, X,Y,W,H, SGDefaultAnchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateEdit(Parent, EditText, TextTypeFunc, X,Y,W,H, SGDefaultAnchors, IsVisible, IsBoundsReal, InterfaceData);
 if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextTypeFunc : TSGEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
-Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, IsBoundsReal, InterfaceData);
 Result.TextType := SGEditTypeUser;
 Result.TextTypeFunction := TextTypeFunc;
 Result.TextTypeEvent();
 end;
 
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
-Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, Anchors, IsVisible, IsBoundsReal, InterfaceData);
 Result.TextType := TextType;
 if (TextType <> SGEditTypeUser) then
 	Result.TextTypeEvent();
 end;
 
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
-Result := SGCreateEdit(Parent, EditText, X,Y,W,H, IsVisible, BTNB, InterfaceData);
+Result := SGCreateEdit(Parent, EditText, X,Y,W,H, IsVisible, IsBoundsReal, InterfaceData);
 if Anchors <> [] then
 	Result.Anchors := Anchors;
 end;
 
-function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+function SGCreateEdit(const Parent : TSGComponent; const EditText : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 begin
 Result := SGCreateEdit(Parent, IsVisible, InterfaceData);
 Result.Caption := EditText;
 Result.SetBounds(X,Y,W,H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
 function SGCreateEdit(const Parent : TSGComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
@@ -231,44 +231,44 @@ end;
 //# Label #
 //#########
 
-function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, IsBoundsReal, InterfaceData);
 Result.ViewLines := ViewLines;
 Result.ViewQuad := ViewQuad;
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const ViewLines, ViewQuad : TSGBoolean; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, W, H, IsVisible, IsBoundsReal, InterfaceData);
 Result.ViewLines := ViewLines;
 Result.ViewQuad := ViewQuad;
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, IsBoundsReal, InterfaceData);
 if Anchors <> [] then
 	Result.Anchors := Anchors;
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, W, H, IsVisible, IsBoundsReal, InterfaceData);
 if Anchors <> [] then
 	Result.Anchors := Anchors;
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, W, H, IsVisible, IsBoundsReal, InterfaceData);
 if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
-Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, BTNB, InterfaceData);
+Result := SGCreatePanel(Parent, X, Y, W, H, IsVisible, IsBoundsReal, InterfaceData);
 if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
@@ -282,76 +282,76 @@ Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
 Result := SGCreatePanel(Parent, IsVisible, InterfaceData);
 Result.SetMiddleBounds(W, H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
-function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+function SGCreatePanel(const Parent : TSGComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 begin
 Result := SGCreatePanel(Parent, IsVisible, InterfaceData);
 Result.SetBounds(X, Y, W, H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
 //#########
 //# Label #
 //#########
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Font, SGDefaultAnchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Font, SGDefaultAnchors, IsVisible, IsBoundsReal, InterfaceData);
 Result.TextPosition := TextPositionCentered;
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Font, SGDefaultAnchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Font, SGDefaultAnchors, IsVisible, IsBoundsReal, InterfaceData);
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, IsBoundsReal, InterfaceData);
 if (Font <> nil) then
 	Result.Skin := Result.Skin.CreateDependentSkinWithAnotherFont(Font);
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, IsBoundsReal, InterfaceData);
 if (Skin <> nil) then
 	Result.Skin := Skin;
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, IsVisible, IsBoundsReal, InterfaceData);
 Result.TextPosition := TextPositionCentered;
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const TextPositionCentered : TSGBoolean; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, Anchors, IsVisible, IsBoundsReal, InterfaceData);
 Result.TextPosition := TextPositionCentered;
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
-Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, IsVisible, BTNB, InterfaceData);
+Result := SGCreateLabel(Parent, LabelCaption, X,Y,W,H, IsVisible, IsBoundsReal, InterfaceData);
 if Anchors <> [] then
 	Result.Anchors := Anchors;
 end;
 
-function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const BTNB : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 begin
 Result := SGCreateLabel(Parent, LabelCaption, IsVisible, InterfaceData);
 Result.SetBounds(X, Y, W, H);
-if BTNB then
-	Result.BoundsToNeedBounds();
+if IsBoundsReal then
+	Result.BoundsMakeReal();
 end;
 
 function SGCreateLabel(const Parent : TSGComponent; const LabelCaption : TSGString; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;

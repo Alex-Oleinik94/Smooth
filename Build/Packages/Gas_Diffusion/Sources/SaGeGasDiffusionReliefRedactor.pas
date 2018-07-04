@@ -983,7 +983,7 @@ if FPrimetiveTypeButtonPoints = nil then
 	Screen.CreateChild(FPrimetiveTypeButtonPoints);
 	FPrimetiveTypeButtonPoints.Caption := 'Управление точками';
 	FPrimetiveTypeButtonPoints.SetBounds(Context.Width - a - 10, Context.Height div 2 + 0, a, 27);
-	FPrimetiveTypeButtonPoints.BoundsToNeedBounds();
+	FPrimetiveTypeButtonPoints.BoundsMakeReal();
 	//FPrimetiveTypeButtonPoints.Font := FFont;
 	FPrimetiveTypeButtonPoints.OnChange := TSGScreenComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonPoints.UserPointer := Self;
@@ -996,7 +996,7 @@ if FPrimetiveTypeButtonLines = nil then
 	Screen.CreateChild(FPrimetiveTypeButtonLines);
 	FPrimetiveTypeButtonLines.Caption := 'Управление линиями';
 	FPrimetiveTypeButtonLines.SetBounds(Context.Width - a - 10, Context.Height div 2 + 30, a, 27);
-	FPrimetiveTypeButtonLines.BoundsToNeedBounds();
+	FPrimetiveTypeButtonLines.BoundsMakeReal();
 	//FPrimetiveTypeButtonLines.Font := FFont;
 	FPrimetiveTypeButtonLines.OnChange := TSGScreenComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonLines.UserPointer := Self;
@@ -1009,7 +1009,7 @@ if FPrimetiveTypeButtonPolygones = nil then
 	Screen.CreateChild(FPrimetiveTypeButtonPolygones);
 	FPrimetiveTypeButtonPolygones.Caption := 'Управление полигонами';
 	FPrimetiveTypeButtonPolygones.SetBounds(Context.Width - a - 10, Context.Height div 2 + 60, a, 27);
-	FPrimetiveTypeButtonPolygones.BoundsToNeedBounds();
+	FPrimetiveTypeButtonPolygones.BoundsMakeReal();
 	//FPrimetiveTypeButtonPolygones.Font := FFont;
 	FPrimetiveTypeButtonPolygones.OnChange := TSGScreenComponentProcedure(@mmmFPrimetiveTypeButton);
 	FPrimetiveTypeButtonPolygones.UserPointer := Self;
@@ -1022,7 +1022,7 @@ if FCutPolygoneButton = nil then
 	Screen.CreateChild(FCutPolygoneButton);
 	FCutPolygoneButton.Caption := 'Разрезать полигон';
 	FCutPolygoneButton.SetBounds(Context.Width - a - 10, Context.Height div 2 + 90, a, 27);
-	FCutPolygoneButton.BoundsToNeedBounds();
+	FCutPolygoneButton.BoundsMakeReal();
 	//FCutPolygoneButton.Font := FFont;
 	FCutPolygoneButton.UserPointer := Self;
 	FCutPolygoneButton.OnChange := TSGScreenComponentProcedure(@mmmFPrimetiveTypeButton);

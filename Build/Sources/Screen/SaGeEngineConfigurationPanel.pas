@@ -172,7 +172,7 @@ var
 begin
 inherited;
 SetBounds(0, 0, 500, TotalHeight);
-BoundsToNeedBounds();
+BoundsMakeReal();
 Visible := True;
 
 FFPS := nil;
@@ -245,20 +245,20 @@ if Parent <> nil then
 	SetMiddleBounds(CalculateWidth(), TotalHeight)
 else
 	SetBounds(0, 0, CalculateWidth(), TotalHeight);
-BoundsToNeedBounds();
+BoundsMakeReal();
 FCaptionLabel.SetBounds(0, (FontHeight div 4), Width, FontHeight);
-FCaptionLabel.BoundsToNeedBounds();
+FCaptionLabel.BoundsMakeReal();
 FVersionLabel.SetBounds(0, FontHeight * 2 + HeightShift + (FontHeight div 4), Width, FontHeight);
-FVersionLabel.BoundsToNeedBounds();
+FVersionLabel.BoundsMakeReal();
 FContextsComboBox.SetMiddleBounds(CalculateContextsComboBoxWidth(), FontHeight);
 FContextsComboBox.Top := (FontHeight * 2 + HeightShift) * 2 + (FontHeight div 4);
-FContextsComboBox.BoundsToNeedBounds();
+FContextsComboBox.BoundsMakeReal();
 FRendersComboBox.SetMiddleBounds(CalculateRendersComboBoxWidth(), FontHeight);
 FRendersComboBox.Top := (FontHeight * 2 + HeightShift) * 3 + (FontHeight div 4);
-FRendersComboBox.BoundsToNeedBounds();
+FRendersComboBox.BoundsMakeReal();
 FCloseButton.SetMiddleBounds(Skin.Font.StringLength(FCloseButton.Caption) + ShiftWidth, FontHeight);
 FCloseButton.Top := (FontHeight * 2 + HeightShift) * 4 + (FontHeight div 4);
-FCloseButton.BoundsToNeedBounds();
+FCloseButton.BoundsMakeReal();
 inherited;
 end;
 

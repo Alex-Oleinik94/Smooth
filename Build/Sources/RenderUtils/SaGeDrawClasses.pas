@@ -96,7 +96,7 @@ if FNowDraw <> nil then
 if FArClasses <> nil then
 	if (Index >= 0) and (Index <= High(FArClasses)) then
 		begin
-		SGLog.Source('TSGDrawClasses__SwitchTo --> "' + FArClasses[Index].FClass.ClassName() + '".');
+		SGLog.Source('TSGDrawClasses(' + SGAddrStr(Self) + ')__SwitchTo --> "' + FArClasses[Index].FClass.ClassName() + '".');
 		FNowDraw     := FArClasses[Index].FClass.Create(Context);
 		FNowDrawable := FArClasses[Index].FDrawable;
 		FComboBox.Caption := FArClasses[Index].FClass.ClassName();

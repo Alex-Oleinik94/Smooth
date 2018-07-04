@@ -158,9 +158,9 @@ end;
 constructor TSGForm.Create();
 begin
 inherited Create;
-FButtonsType:=SGFrameButtonsType0f;
-FIcon.Create();
-FBoundsSize.Top := 30;
+FButtonsType := SGFrameButtonsType0f;
+FIcon := TSGImage.Create();
+SetBordersSize(5, 30, 5, 5);
 end;
 
 procedure TSGForm.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
@@ -182,7 +182,7 @@ begin
 Result:=
 	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x) and 
 	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y) and 
-	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FBoundsSize.Top) and 
+	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FBordersSize.Top) and 
 	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+FRealLocation.Width);
 FCursorOnComponentCaption:=Result;
 end;
@@ -200,6 +200,7 @@ destructor TSGForm.Destroy;
 begin
 FCaption:='';
 FButtonsType:=SGFrameButtonsTypeCleared;
+SGKIll(FIcon);
 inherited Destroy;
 end;
 

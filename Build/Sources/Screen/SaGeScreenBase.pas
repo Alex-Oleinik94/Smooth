@@ -130,10 +130,10 @@ type
 		function GetScreenHeight() : TSGScreenInt;
 		function GetLocation() : TSGComponentLocation;
 
-		procedure SetBoundsSize(const _L, _T, _R, _B : TSGScreenInt);
+		procedure SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);
-		procedure BoundsToNeedBounds();
+		procedure BoundsMakeReal();
 
 		procedure WriteBounds();
 
@@ -275,12 +275,12 @@ type
 		['{5859810e-163e-4f5d-9622-7b574ebe07d5}']
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
-		function GetLines() : TSGUInt32;
+		function GetLinesCount() : TSGUInt32;
 		function GetSelectedItem() : PSGComboBoxItem;
 		function GetFirstItemIndex() : TSGUInt32;
 
 		property FirstItemIndex : TSGUInt32 read GetFirstItemIndex;
-		property Lines          : TSGUInt32 read GetLines;
+		property LinesCount     : TSGUInt32 read GetLinesCount;
 		property ItemsCount     : TSGUInt32 read GetItemsCount;
 		property Items          : PSGComboBoxItem read GetItems;
 		end;

@@ -509,7 +509,7 @@ var
 	RealStringWidth, RealStringHeight : TSGSingle;
 	Vertex1, Vertex2 : TSGVertex2f;
 begin
-if (Render = nil) then
+if (not RenderAssigned()) then
 	exit;
 Vertex1 := V1;
 Vertex2 := V2;

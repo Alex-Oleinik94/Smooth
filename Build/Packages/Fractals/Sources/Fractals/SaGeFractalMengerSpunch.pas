@@ -164,10 +164,10 @@ FFont1.SetContext(Context);
 FFont1.Loading();
 
 InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SGAnchRight]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FComboBox2:=TSGScreenComboBox.Create;
 Screen.CreateChild(FComboBox2);
@@ -181,7 +181,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 (Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FComboBox1:=TSGScreenComboBox.Create();
 Screen.CreateChild(FComboBox1);
@@ -195,7 +195,7 @@ Screen.LastChild.Anchors:=[SGAnchRight];
 (Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FButtonDepthPlus:=TSGScreenButton.Create();
 Screen.CreateChild(FButtonDepthPlus);
@@ -205,7 +205,7 @@ Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
 FButtonDepthPlus.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthPlusOnChange);
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLabelDepth := SGCreateLabel(Screen, '0', Render.Width-250-60,5,20,30, [SGAnchRight], True, True, Self);
 
@@ -217,7 +217,7 @@ Screen.LastChild.Caption:='-';
 FButtonDepthMinus.OnChange:=TSGScreenComponentProcedure(@mmmFButtonDepthMinusOnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLabelDepthCaption := SGCreateLabel(Screen, 'Итерация:', Render.Width-250-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
