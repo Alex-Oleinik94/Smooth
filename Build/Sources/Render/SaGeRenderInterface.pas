@@ -26,7 +26,8 @@ type
 		function CreateContext():TSGBoolean;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);
 		procedure Init();
-		function SupporedVBOBuffers():TSGBoolean;
+		function SupporedGraphicalBuffers() : TSGBoolean;
+		function SupporedMemoryBuffers() : TSGBoolean;
 		procedure SwapBuffers();
 		procedure LockResources();
 		procedure UnLockResources();

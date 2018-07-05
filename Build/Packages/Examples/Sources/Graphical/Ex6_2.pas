@@ -110,7 +110,8 @@ FMesh.LastMaterial().AddBumpMap   (SGExamplesDirectory + DirectorySeparator + '6
 
 FMesh.LastObject().LastObjectFace()^.FMaterial := FMesh.IdentifyMaterial('name');
 
-FMesh.LoadToVBO();
+if Render.SupporedGraphicalBuffers() then
+	FMesh.LoadToVBO();
 
 FImageBump    := FMesh.LastMaterial().ImageBump;
 FImageTexture := FMesh.LastMaterial().ImageTexture;

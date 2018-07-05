@@ -47,7 +47,8 @@ type
 		procedure Viewport(const a,b,c,d : TSGAreaInt);virtual;abstract;
 		procedure Init();virtual;abstract;
 		procedure Kill();virtual;abstract;
-		function SupporedVBOBuffers():TSGBoolean;virtual;
+		function SupporedGraphicalBuffers() : TSGBoolean; virtual;
+		function SupporedMemoryBuffers() : TSGBoolean; virtual;
 		procedure SwapBuffers();virtual;abstract;
 		procedure LockResources();virtual;
 		procedure UnLockResources();virtual;
@@ -277,7 +278,12 @@ begin
 SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited method!!');
 end;
 
-function TSGRender.SupporedVBOBuffers():Boolean;
+function TSGRender.SupporedMemoryBuffers() : TSGBoolean;
+begin
+Result:=False;
+end;
+
+function TSGRender.SupporedGraphicalBuffers() : TSGBoolean;
 begin
 Result:=False;
 end;

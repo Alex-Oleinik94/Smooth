@@ -150,6 +150,7 @@ type
 		FCursorKeysPressed    : packed array [SGMiddleCursorButton..SGRightCursorButton] of TSGBoolean;
 		FCursorWheel          : TSGCursorWheel;
 		FCursorInCenter       : TSGBoolean;
+		FDefaultCursorPosition: TSGVector2int32;
 			public
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;virtual;overload;
 		function KeysPressed(const  Index : TSGChar ) : Boolean;virtual;overload;
@@ -592,9 +593,16 @@ procedure TSGContext.SetCursorCentered(const VCentered : TSGBoolean);
 var
 	Point : TSGPoint2int32;
 begin
+if (VCentered = FCursorInCenter) then
+	exit;
 FCursorInCenter := VCentered;
+if (FCursorInCenter) then
+	FDefaultCursorPosition := GetCursorPosition()
+else
+	SetCursorPosition(FDefaultCursorPosition);
 if (@SetCursorPosition <> nil) and VCentered then
 	begin
+	FDefaultCursorPosition := GetCursorPosition();
 	Point.Import(Trunc(Render.Width * 0.5), Trunc(Render.Height * 0.5));
 	SetCursorPosition(Point);
 	FCursorPosition[SGLastCursorPosition] := Point;
@@ -923,6 +931,7 @@ FCursor := nil;
 FInitialized := False;
 FShowCursor:=True;
 FCursorInCenter:=False;
+FDefaultCursorPosition.Import();
 FWidth:=0;
 FHeight:=0;
 FTitle:='SaGe Window';

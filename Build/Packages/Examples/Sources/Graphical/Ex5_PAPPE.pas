@@ -70,7 +70,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		{$ENDIF}
 	{$ENDIF}
 
-unit PAPPE;
+unit Ex5_PAPPE;
 
 {$mode delphi}
 {$warnings off}

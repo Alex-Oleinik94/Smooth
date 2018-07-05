@@ -111,7 +111,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedVBOBuffers:Boolean;override;
+		function SupporedGraphicalBuffers() : TSGBoolean; override;
+		function SupporedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -798,15 +799,27 @@ begin
 	{$ENDIF}
 end;
 
-function TSGRenderOpenGL.SupporedVBOBuffers():Boolean;
+function TSGRenderOpenGL.SupporedMemoryBuffers() : TSGBoolean;
 begin
 {$IFDEF MOBILE}
-	Result:=True;
+	Result := True;
 {$ELSE}
-	Result:= dglOpenGL.GL_ARB_vertex_buffer_object;
+	Result := dglOpenGL.GL_VERSION_1_1;
 	{$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Source(['TSGRenderOpenGL.SupporedVBOBuffers : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupporedMemoryBuffers : Result = ', Result]);
+	{$ENDIF}
+end;
+
+function TSGRenderOpenGL.SupporedGraphicalBuffers() : TSGBoolean;
+begin
+{$IFDEF MOBILE}
+	Result := True;
+{$ELSE}
+	Result := dglOpenGL.GL_ARB_vertex_buffer_object;
+	{$ENDIF}
+{$IFDEF RENDER_OGL_DEBUG}
+	SGLog.Source(['TSGRenderOpenGL.SupporedGraphicalBuffers : Result = ', Result]);
 	{$ENDIF}
 end;
 
