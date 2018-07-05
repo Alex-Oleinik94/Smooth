@@ -304,7 +304,7 @@ end;
 
 class function TSGRenderDirectX9.RenderName() : TSGString;
 begin
-Result := 'Direct X 9';
+Result := 'DirectX 9';
 end;
 
 class function TSGRenderDirectX9.ClassName() : TSGString;
@@ -1716,10 +1716,23 @@ D3DFMT_D32           : Result := 'D3DFMT_D32';
 end;
 end;
 
-procedure LogDirectXLastError(const Error : TSGMaxEnum);
+procedure LogDirectXLastError(const Error : TSGUInt32);
+
+function StrErrorCodeHex(const ErrorCode : TSGUInt32) : TSGString;
+var
+	Index : TSGByte;
 begin
-SGLog.Source(['TSGRenderDirectX9__CreateContext: DirectX Error: "',Error,'"/"',SGAddrStr(TSGPointer(Error)),'"']);
-SGLog.Source(['TSGRenderDirectX9__CreateContext: DirectX Error Discription: "',SGPCharToString(DXGetErrorString9(Error)),'"']);
+Result := '0x';
+for Index := SizeOf(TSGUInt32) - 1 downto 0 do
+	Result += SGStrByteHex(PSGByte(@ErrorCode)[Index], True);
+end;
+
+begin
+SGLogMakeSignificant();
+SGLog.Source(['TSGRenderDirectX9: DirectX Error:']);
+SGLog.Source(['    ID (dec): ',Error]);
+SGLog.Source(['    ID (hex): ',StrErrorCodeHex(Error)]);
+SGLog.Source(['    Discription: ',SGPCharToString(DXGetErrorString9(Error))]);
 end;
 
 procedure TryCreateD3DEx(const Version : TSGMaxEnum);
@@ -1729,8 +1742,7 @@ begin
 case Version of
 D3D9b_SDK_VERSION : Result := 'D3D9b_SDK_VERSION';
 D3D_SDK_VERSION   : Result := 'D3D_SDK_VERSION';
-else
-	Result := '';
+else Result := '';
 end;
 end;
 
@@ -1747,6 +1759,7 @@ if (DirectXErrorCode = D3D_OK) and (pD3DEx <> nil) then
 	end
 else
 	begin
+	SGLogMakeSignificant();
 	SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create extension context with sdk version "',StrSDKVersion(Version),'".']);
 	LogDirectXLastError(DirectXErrorCode);
 	end;
@@ -1769,7 +1782,7 @@ d3dpp.MultiSampleQuality     := 0;
 end;
 
 var
-	DirectXErrorCode   : TSGMaxEnum = 0;
+	DirectXErrorCode   : TSGUInt32 = 0;
 
 procedure TryCreateDevice();
 var
@@ -1868,7 +1881,8 @@ if pDevice = nil then
 		end
 	else
 		begin
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with anything params, hWindow="',SGAddrStr(Context.Window),'".']);
+		SGLogMakeSignificant();
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with anything params, WindowHandle="',SGAddrStr(Context.Window),'".']);
 		{$IFNDEF RENDER_DX9_DEBUG}
 		LogDirectXLastError(DirectXErrorCode);
 		{$ENDIF}

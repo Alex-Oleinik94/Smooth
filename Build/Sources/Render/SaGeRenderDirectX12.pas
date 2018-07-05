@@ -140,7 +140,7 @@ implementation
 
 class function TSGRenderDirectX12.RenderName() : TSGString;
 begin
-Result := 'Direct X 12';
+Result := 'DirectX 12';
 end;
 
 class function TSGRenderDirectX12.ClassName() : TSGString; 

@@ -283,7 +283,7 @@ end;
 
 class function TSGRenderDirectX8.RenderName() : TSGString;
 begin
-Result := 'Direct X 8';
+Result := 'DirectX 8';
 end;
 
 class function TSGRenderDirectX8.ClassName() : TSGString;
