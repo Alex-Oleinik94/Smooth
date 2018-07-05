@@ -102,10 +102,10 @@ type
 		function IsBulletKillZombie(const Bullet:TSGVertex2f;const Zombie:LongWord):Boolean;
 		procedure InitImages(const VWidthHeight : TSGLongWord; const VRadBool : TSGBoolean);
 			private
-		FButtonReset:TSGButton;
-		FQuantityComboBox, FComboBoxDeep, FDifficultyComboBox:TSGComboBox;
+		FButtonReset:TSGScreenButton;
+		FQuantityComboBox, FComboBoxDeep, FDifficultyComboBox:TSGScreenComboBox;
 		FTimerLabel, FLabebYouLose : TSGScreenLabel;
-		FComboBoxRespamn,FGroundComboBox:TSGComboBox;
+		FComboBoxRespamn,FGroundComboBox:TSGScreenComboBox;
 			private
 		FImageZombi,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSGImage;
 		FImagesSize : TSGLongWord;
@@ -149,7 +149,7 @@ for i:=0 to 3 do
 		PSingle(@Result)[i]:=1;
 end;
 
-procedure TSGButton_Reset_OnChange(Button:TSGButton);
+procedure TSGScreenButton_Reset_OnChange(Button:TSGScreenButton);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -242,7 +242,7 @@ case b of
 end;
 end;
 
-procedure TSGComboBox_CountZombies_OnChange(a,b:LongInt;Button:TSGComponent);
+procedure TSGScreenComboBox_CountZombies_OnChange(a,b:LongInt;Button:TSGScreenComponent);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -255,7 +255,7 @@ with TSGKiller(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGComboBox_DeepZombies_OnChange(a,b:LongInt;Button:TSGComponent);
+procedure TSGScreenComboBox_DeepZombies_OnChange(a,b:LongInt;Button:TSGScreenComponent);
 var
 	i:LongWord;
 begin
@@ -276,7 +276,7 @@ with TSGKiller(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGComboBox_Difficulty_OnChange(a,b:LongInt;Button:TSGComponent);
+procedure TSGScreenComboBox_Difficulty_OnChange(a,b:LongInt;Button:TSGScreenComponent);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -286,7 +286,7 @@ with TSGKiller(Button.FUserPointer1) do
 		end;
 	end;
 end;
-procedure TSGComboBox_GroundZombies_OnChange(a,b:LongInt;Button:TSGComponent);
+procedure TSGScreenComboBox_GroundZombies_OnChange(a,b:LongInt;Button:TSGScreenComponent);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -305,7 +305,7 @@ with TSGKiller(Button.FUserPointer1) do
 	end;
 end;
 
-procedure TSGComboBox_RespamnZombies_OnChange(a,b:LongInt;Button:TSGComponent);
+procedure TSGScreenComboBox_RespamnZombies_OnChange(a,b:LongInt;Button:TSGScreenComponent);
 begin
 with TSGKiller(Button.FUserPointer1) do
 	begin
@@ -360,80 +360,80 @@ FImageBullet.Way:=SGTextureDirectory+DirectorySeparator+'Killer'+DirectorySepara
 FImageBullet.Loading;}
 
 SetLength(FZombies,1);
-FButtonReset:=TSGButton.Create;
+FButtonReset:=TSGScreenButton.Create;
 Screen.CreateChild(FButtonReset);
 Screen.LastChild.SetBounds(Render.Width-50,5,40,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='Reset';
-FButtonReset.OnChange:=TSGComponentProcedure(@TSGButton_Reset_OnChange);
+FButtonReset.OnChange:=TSGScreenComponentProcedure(@TSGScreenButton_Reset_OnChange);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FDifficultyComboBox:=TSGComboBox.Create;
+FDifficultyComboBox:=TSGScreenComboBox.Create;
 Screen.CreateChild(FDifficultyComboBox);
 Screen.LastChild.SetBounds(Render.Width-50-125-145,5,118+145,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Очень очень сильно легко');
-Screen.LastChild.AsComboBox.CreateItem('Очень сильно легко');
-Screen.LastChild.AsComboBox.CreateItem('Очень легко');
-Screen.LastChild.AsComboBox.CreateItem('Легко');
-Screen.LastChild.AsComboBox.CreateItem('Нормально');
-Screen.LastChild.AsComboBox.CreateItem('Ну так, ничё');
-Screen.LastChild.AsComboBox.CreateItem('Сложно');
-Screen.LastChild.AsComboBox.CreateItem('Очень сложно');
-Screen.LastChild.AsComboBox.CreateItem('Тяжко!');
-Screen.LastChild.AsComboBox.CreateItem('Очень тяжко!!');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_Difficulty_OnChange);
-Screen.LastChild.AsComboBox.SelectItem:=4;
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Очень очень сильно легко');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Очень сильно легко');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Очень легко');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Легко');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Нормально');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Ну так, ничё');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Сложно');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Очень сложно');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Тяжко!');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Очень тяжко!!');
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGScreenComboBox_Difficulty_OnChange);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=4;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FQuantityComboBox:=TSGComboBox.Create;
+FQuantityComboBox:=TSGScreenComboBox.Create;
 Screen.CreateChild(FQuantityComboBox);
 Screen.LastChild.SetBounds(Render.Width-50-125-145-60,5,55,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=0 to 8 do
-	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_DeepZombies_OnChange);
-Screen.LastChild.AsComboBox.SelectItem:=0;
+	(Screen.LastChild as TSGScreenComboBox).CreateItem(SGStringToPChar(SGStr(2**i)));
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGScreenComboBox_DeepZombies_OnChange);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
 
-FComboBoxDeep:=TSGComboBox.Create;
+FComboBoxDeep:=TSGScreenComboBox.Create;
 Screen.CreateChild(FComboBoxDeep);
 Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60,5,55,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
 for i:=3 to 8 do
-	Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(SGStr(2**i)));
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_CountZombies_OnChange);
-Screen.LastChild.AsComboBox.SelectItem:=0;
+	(Screen.LastChild as TSGScreenComboBox).CreateItem(SGStringToPChar(SGStr(2**i)));
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGScreenComboBox_CountZombies_OnChange);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=0;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FComboBoxRespamn:=TSGComboBox.Create;
+FComboBoxRespamn:=TSGScreenComboBox.Create;
 Screen.CreateChild(FComboBoxRespamn);
 Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60-130,5,125,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Респамн Выключен');
-Screen.LastChild.AsComboBox.CreateItem('Респамн Включeн');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_RespamnZombies_OnChange);
-Screen.LastChild.AsComboBox.SelectItem:=1;
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Респамн Выключен');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Респамн Включeн');
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGScreenComboBox_RespamnZombies_OnChange);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=1;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 
-FGroundComboBox:=TSGComboBox.Create;
+FGroundComboBox:=TSGScreenComboBox.Create;
 Screen.CreateChild(FGroundComboBox);
 Screen.LastChild.SetBounds(Render.Width-50-125-145-60-60-130-140,5,135,20);
 Screen.LastChild.Anchors:=[SGAnchRight];
-Screen.LastChild.AsComboBox.CreateItem('Стенок нету');
-Screen.LastChild.AsComboBox.CreateItem('Стенок мало');
-Screen.LastChild.AsComboBox.CreateItem('Стенок немного');
-Screen.LastChild.AsComboBox.CreateItem('Стенок немало');
-Screen.LastChild.AsComboBox.CreateItem('Стенок много');
-Screen.LastChild.AsComboBox.CreateItem('Стенки везде');
-Screen.LastChild.AsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGComboBox_GroundZombies_OnChange);
-Screen.LastChild.AsComboBox.SelectItem:=2;
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенок нету');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенок мало');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенок немного');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенок немало');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенок много');
+(Screen.LastChild as TSGScreenComboBox).CreateItem('Стенки везде');
+(Screen.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@TSGScreenComboBox_GroundZombies_OnChange);
+(Screen.LastChild as TSGScreenComboBox).SelectItem:=2;
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 

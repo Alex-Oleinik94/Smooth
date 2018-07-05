@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE SGMoreDebuging}
+
 unit SaGeDrawClasses;
 
 interface
@@ -10,6 +12,7 @@ uses
 	,SaGeFont
 	,SaGeBase
 	,SaGeScreen
+	,SaGeScreenHelper
 	,SaGeRender
 	,SaGeImage
 	,SaGeCommonClasses
@@ -44,7 +47,8 @@ type
 				FClass    : TSGDrawableClass;
 				FDrawable : TSGBoolean;
 				end;
-		FComboBox : TSGComboBox;
+		FComboBox : TSGScreenComboBox;
+		FFont : TSGFont;
 			public
 		procedure Paint();override;
 		procedure Add(const NewClasses:TSGDrawClassesObjectList);overload;
@@ -54,7 +58,7 @@ type
 		procedure Initialize(const L, T, W, H : TSGScreenFloat);overload;
 		procedure SwitchTo(const Index : TSGLongWord);
 			public
-		property ComboBox : TSGComboBox read FComboBox;
+		property ComboBox : TSGScreenComboBox read FComboBox;
 		end;
 
 implementation
@@ -92,14 +96,14 @@ if FNowDraw <> nil then
 if FArClasses <> nil then
 	if (Index >= 0) and (Index <= High(FArClasses)) then
 		begin
-		SGLog.Source('TSGDrawClasses__SwitchTo --> "' + FArClasses[Index].FClass.ClassName() + '".');
+		SGLog.Source('TSGDrawClasses(' + SGAddrStr(Self) + ')__SwitchTo --> "' + FArClasses[Index].FClass.ClassName() + '".');
 		FNowDraw     := FArClasses[Index].FClass.Create(Context);
 		FNowDrawable := FArClasses[Index].FDrawable;
 		FComboBox.Caption := FArClasses[Index].FClass.ClassName();
 		end;
 end;
 
-procedure TSGDrawClasses_ComboBoxProcedure(a, b :LongInt;VComboBox:TSGComboBox);
+procedure TSGDrawClasses_ComboBoxProcedure(a, b :LongInt;VComboBox:TSGScreenComboBox);
 begin
 if a <> b then
 	TSGDrawClasses(VComboBox.FUserPointer1).SwitchTo(b);
@@ -111,7 +115,7 @@ Initialize(SGComponentLocationImport(5, 5, 300, 18));
 end;
 procedure TSGDrawClasses.Initialize(const L, T, W, H : TSGScreenFloat);overload;
 begin
-Initialize(SGComponentLocationImport(L, T, W, H));
+Initialize(SGComponentLocationImport(Round(L), Round(T), Round(W), Round(H)));
 end;
 
 procedure TSGDrawClasses.Initialize(const Location : TSGComponentLocation);overload;
@@ -119,29 +123,23 @@ var
 	i:LongWord;
 begin
 {$IFDEF SGMoreDebuging}
-	SGLog.Sourse('Begin of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
+	TSGLog.Source('Begin of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
-FComboBox:=TSGComboBox.Create();
-Screen.CreateChild(FComboBox);
-FComboBox.SetBoundsFloat(Location.Position.X, Location.Position.Y, Location.Size.X, Round(Location.Size.Y));
-FComboBox.SelectItem:=0;
-FComboBox.FUserPointer1:=Self;
-FComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure);
-FComboBox.Visible:=True;
-FComboBox.Skin := FComboBox.Skin.CreateDependentSkinWithAnotherFont(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
-FComboBox.Active:=Length(FArClasses)>1;
-FComboBox.FDrawClass:=Self;
-FComboBox.BoundsToNeedBounds();
+
+FComboBox := SGCreateComboBox(Screen, Location.Left, Location.Top, Location.Width, Location.Height, TSGScreenComboBoxProcedure(@TSGDrawClasses_ComboBoxProcedure), FFont, True, True, Self);
+FComboBox.SelectItem := 0;
+FComboBox.Active := Length(FArClasses) > 1;
+FComboBox.FDrawClass := Self;
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	for i:=0 to High(FArClasses) do
-		Screen.LastChild.AsComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
+		FComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	begin
 	FComboBox.SelectItem := Random(Length(FArClasses));
 	SwitchTo(FComboBox.SelectItem);
 	end;
 {$IFDEF SGMoreDebuging}
-	SGLog.Sourse('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
+	TSGLog.Source('End of  "TSGDrawClasses.Initialize" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
@@ -153,16 +151,14 @@ end;
 procedure TSGDrawClasses.Paint();
 begin
 {$IFDEF SGMoreDebuging}
-	SGLog.Sourse('Begin of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
+	TSGLog.Source('Begin of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
 	{$ENDIF}
 if FNowDraw = nil then
-	begin
 	Initialize();
-	end;
-if FNowDrawable then
+if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.Paint();
 {$IFDEF SGMoreDebuging}
-	SGLog.Sourse('End of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
+	TSGLog.Source('End of  "TSGDrawClasses.Draw" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
@@ -191,6 +187,11 @@ inherited Create(VContext);
 FNowDraw   := nil;
 FArClasses := nil;
 FComboBox := nil;
+
+FFont := TSGFont.Create();
+FFont.Context := Context;
+FFont.FileName := SGFontDirectory + DirectorySeparator + 'Tahoma.sgf';
+FFont.Loading();
 end;
 
 destructor TSGDrawClasses.Destroy;
@@ -199,10 +200,12 @@ if FNowDraw <> nil then
 	begin
 	FNowDraw.Destroy();
 	FNowDraw := nil;
+	FNowDrawable := False;
 	end;
 if FComboBox <> nil then
 	begin
 	FComboBox.FDrawClass := nil;
+	FComboBox.Skin.Font := nil;
 	FComboBox.MarkForDestroy();
 	FComboBox := nil;
 	end;
@@ -211,6 +214,7 @@ if FArClasses <> nil then
 	SetLength(FArClasses, 0);
 	FArClasses := nil;
 	end;
+SGKill(FFont);
 inherited;
 end;
 

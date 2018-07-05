@@ -59,7 +59,7 @@ FLastActiveButton:=-1;
 iii:=5+FMiddleTop*Byte(FMiddle);
 for i:=0 to High(FChildren) do
 	begin
-	FChildren[i].FNeedTop:=iii;
+	FChildren[i].NeedTop:=iii;
 	if FActiveButton=i then
 		begin
 		FChildren[i].FNeedHeight:=FActiveButtonTop;

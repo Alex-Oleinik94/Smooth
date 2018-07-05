@@ -10,6 +10,7 @@ uses
 	,SaGeClasses
 	,SaGeScreen
 	,SaGeImage
+	,SaGeScreenComponent
 	;
 
 type
@@ -34,9 +35,9 @@ type
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
+		procedure FromUpDate();override;
 		procedure FromDraw;override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			private
 		FChecked : TSGBoolean;
 		FGroup : TSGRadioGroup;
@@ -200,10 +201,6 @@ end;
 constructor TSGRadioButton.Create();
 begin
 inherited Create();
-FLeftShiftForChilds:=0;
-FTopShiftForChilds:=0;
-FRightShiftForChilds:=0;
-FBottomShiftForChilds:=0;
 FCanHaveChildren:=False;
 FGroup := nil;
 FChecked := False;
@@ -222,9 +219,9 @@ if FImage <> nil then
 inherited;
 end;
 
-procedure TSGRadioButton.FromUpDate(var FCanChange:Boolean);
+procedure TSGRadioButton.FromUpDate();
 begin
-inherited FromUpDate(FCanChange);
+inherited FromUpDate();
 end;
 
 procedure TSGRadioButton.DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
@@ -266,19 +263,18 @@ FCursorOnButton := False;
 inherited FromDraw();
 end;
 
-procedure TSGRadioButton.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGRadioButton.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 if CursorInComponentNow then
 	begin
 	FCursorOnButton := True;
-	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) and CanRePleace then
+	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) then
 		begin
-		CanRePleace:=False;
 		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 		SetChecked(not Checked, True);
 		end
 	end;
-inherited FromUpDateUnderCursor(CanRePleace,CursorInComponentNow);
+inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
 end.

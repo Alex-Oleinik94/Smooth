@@ -509,6 +509,8 @@ var
 	RealStringWidth, RealStringHeight : TSGSingle;
 	Vertex1, Vertex2 : TSGVertex2f;
 begin
+if (not RenderAssigned()) then
+	exit;
 Vertex1 := V1;
 Vertex2 := V2;
 if Render.RenderType in [SGRenderDirectX9,SGRenderDirectX8] then

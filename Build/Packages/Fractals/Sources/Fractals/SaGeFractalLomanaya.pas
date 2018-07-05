@@ -25,7 +25,7 @@ type
 		procedure PushIndexes(var MeshID : TSGUInt32;const v : TSGVertex2f;var FVertexIndex:TSGUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		FLD, FLDC : TSGScreenLabel;
-		FBPD, FBMD : TSGButton;
+		FBPD, FBMD : TSGScreenButton;
 			protected
 		c17, c27, c37, c57 : TSGFloat64;
 		end;
@@ -124,7 +124,7 @@ else
 	end;
 end;
 
-procedure fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf(Button:TSGButton);
+procedure fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf(Button:TSGScreenButton);
 begin
 with TSGFractalLomanaya(Button.FUserPointer1) do
 	begin
@@ -136,7 +136,7 @@ with TSGFractalLomanaya(Button.FUserPointer1) do
 end;
 
 
-procedure fgsdfghjsafhjsdgjfgshddsdsdasadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf(Button:TSGButton);
+procedure fgsdfghjsafhjsdgjfgshddsdsdasadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf(Button:TSGScreenButton);
 begin
 with TSGFractalLomanaya(Button.FUserPointer1) do
 	begin
@@ -169,34 +169,34 @@ LightingEnable:=False;
 HasIndexes := False;
 
 InitProjectionComboBox(Render.Width-160,5,150,30,[SGAnchRight]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 InitSizeLabel(5,Render.Height-25,Render.Width-20,20,[SGAnchBottom]);
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLDC := SGCreateLabel(Screen, 'Итерация:', Render.Width-160-90-125,5,115,30, [SGAnchRight], True, True, Self);
 
-FBPD:=TSGButton.Create();
+FBPD:=TSGScreenButton.Create();
 Screen.CreateChild(FBPD);
 Screen.LastChild.SetBounds(Render.Width-160-30,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='+';
 Screen.LastChild.FUserPointer1:=Self;
-FBPD.OnChange:=TSGComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
+FBPD.OnChange:=TSGScreenComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdaghfjdjshdrfjjssadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLD := SGCreateLabel(Screen, '0', Render.Width-160-60,5,20,30, [SGAnchRight], True, True, Self);
 
-FBMD:=TSGButton.Create();
+FBMD:=TSGScreenButton.Create();
 Screen.CreateChild(FBMD);
 Screen.LastChild.SetBounds(Render.Width-160-90,5,20,30);
 Screen.LastChild.Anchors:=[SGAnchRight];
 Screen.LastChild.Caption:='-';
-FBMD.OnChange:=TSGComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdasadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
+FBMD.OnChange:=TSGScreenComponentProcedure(@fgsdfghjsafhjsdgjfgshddsdsdasadjdsaqwrdcgaewdcfcafdcafewcwscdgdsf);
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
-Screen.LastChild.BoundsToNeedBounds();
+Screen.LastChild.BoundsMakeReal();
 
 FLD.Caption:=SGStringToPChar(SGStr(Depth));
 

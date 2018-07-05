@@ -66,8 +66,8 @@ type
 		property FileName : TSGString write SetFile;
 			public
 		procedure FromDraw();override;
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromResize();override;
 		end;
 
@@ -231,9 +231,9 @@ StandardizateView();
 inherited;
 end;
 
-procedure TSGNTextInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGNTextInset.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
-if Visible then if CanRePleace then if CursorInComponentNow then
+if Visible and CursorInComponentNow then
 	begin
 	if (Context.CursorWheel() <> SGNullCursorWheel)then
 		begin
@@ -258,7 +258,7 @@ StandardizateView();
 FScrolTimer := 1;
 end;
 
-procedure TSGNTextInset.FromUpDate(var FCanChange:Boolean);
+procedure TSGNTextInset.FromUpDate();
 
 var
 	Line : TSGLongWord;
@@ -269,7 +269,7 @@ begin
 Result := False;
 if not FCursorOnComponent then
 	Exit;
-CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealLeft, FRealTop);
+CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealPosition.x, FRealPosition.y);
 CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
 Line := Trunc(FBegin + Abs(FEnd - FBegin) * ((CursorPos.y) / Height));
 if Line < CountLines() then

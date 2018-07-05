@@ -10,7 +10,6 @@ uses
 	 SaGeBase
 	,SaGeCommonStructs
 	,SaGeContext
-	,SaGeScreen
 	,SaGeRender
 	,SaGeFont
 	,SaGeFPSViewer
@@ -18,27 +17,27 @@ uses
 	;
 
 type
-	TSGEngineConfigurationPanel = class(TSGComponent)
+	TSGEngineConfigurationPanel = class(TSGScreenComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 		procedure DeleteDeviceResources();override;
 		procedure LoadDeviceResources();override;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
 		procedure FromResize();override;
 			public
-		class function CanCreate(const VScreen : TSGScreen): TSGBoolean;
+		class function CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 		procedure InitRender(const VRenderClass : TSGRenderClass);
 		procedure InitContext(const VContextClass : TSGContextClass);
 			private
 		FContextsComboBox,
-			FRendersComboBox : TSGComboBox;
+			FRendersComboBox : TSGScreenComboBox;
 		FCaptionLabel,
 			FVersionLabel : TSGScreenLabel;
-		FCloseButton : TSGButton;
+		FCloseButton : TSGScreenButton;
 		FFPS : TSGFPSViewer;
 		end;
 
@@ -123,9 +122,9 @@ const
 	HeightShift = 2;
 	TotalHeight = FontHeight * 10 + HeightShift * 4;
 
-class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreen): TSGBoolean;
+class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 var
-	Component : TSGComponent;
+	Component : TSGScreenComponent;
 begin
 Result := True;
 if VScreen.HasChildren then
@@ -137,18 +136,18 @@ if VScreen.HasChildren then
 			end;
 end;
 
-procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGButton);
+procedure TSGEngineConfigurationPanel_CloseButton_OnChange(VButton : TSGScreenButton);
 begin
 VButton.Parent.MarkForDestroy();
 end;
 
-procedure TSGEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGComboBox);
+procedure TSGEngineConfigurationPanel_ContextsComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGScreenComboBox);
 begin
 if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitContext(Contexts[VNewIndex].FClass);
 end;
 
-procedure TSGEngineConfigurationPanel_RendersComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGComboBox);
+procedure TSGEngineConfigurationPanel_RendersComboBox_OnChange(VOldIndex, VNewIndex : TSGLongInt; VComboBox : TSGScreenComboBox);
 begin
 if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitRender(Renders[VNewIndex].FClass);
@@ -173,7 +172,7 @@ var
 begin
 inherited;
 SetBounds(0, 0, 500, TotalHeight);
-BoundsToNeedBounds();
+BoundsMakeReal();
 Visible := True;
 
 FFPS := nil;
@@ -181,10 +180,7 @@ FFPS := nil;
 FCaptionLabel := SGCreateLabel(Self, 'SaGe Engine Configuration (' + SGVerCPU + ' bit)', True);
 FVersionLabel := SGCreateLabel(Self, 'Version: ' + SGEngineVersion(), True);
 
-FContextsComboBox := TSGComboBox.Create();
-CreateChild(FContextsComboBox);
-FContextsComboBox.Visible := True;
-FContextsComboBox.UserPointer:=Self;
+FContextsComboBox := SGCreateComboBox(Self, TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange), True, Self);
 for i := Low(Contexts) to High(Contexts) do
 	begin
 	FCanUse := Contexts[i].FClass <> nil;
@@ -192,12 +188,8 @@ for i := Low(Contexts) to High(Contexts) do
 		FCanUse := Contexts[i].FClass.Suppored();
 	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
 	end;
-FContextsComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_ContextsComboBox_OnChange);
 
-FRendersComboBox := TSGComboBox.Create();
-CreateChild(FRendersComboBox);
-FRendersComboBox.UserPointer:=Self;
-FRendersComboBox.Visible := True;
+FRendersComboBox := SGCreateComboBox(Self, TSGScreenComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange), True, Self);
 for i := Low(Renders) to High(Renders) do
 	begin
 	FCanUse := Renders[i].FClass <> nil;
@@ -205,14 +197,8 @@ for i := Low(Renders) to High(Renders) do
 		FCanUse := Renders[i].FClass.Suppored();
 	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
-FRendersComboBox.CallBackProcedure:=TSGComboBoxProcedure(@TSGEngineConfigurationPanel_RendersComboBox_OnChange);
 
-FCloseButton := TSGButton.Create();
-CreateChild(FCloseButton);
-FCloseButton.UserPointer:=Self;
-FCloseButton.Visible := True;
-FCloseButton.Caption := 'Close';
-FCloseButton.OnChange := TSGComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange);
+FCloseButton := SGCreateButton(Self, 'Close', TSGScreenComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange), True, Self);
 end;
 
 procedure TSGEngineConfigurationPanel.FromResize();
@@ -259,20 +245,20 @@ if Parent <> nil then
 	SetMiddleBounds(CalculateWidth(), TotalHeight)
 else
 	SetBounds(0, 0, CalculateWidth(), TotalHeight);
-BoundsToNeedBounds();
+BoundsMakeReal();
 FCaptionLabel.SetBounds(0, (FontHeight div 4), Width, FontHeight);
-FCaptionLabel.BoundsToNeedBounds();
+FCaptionLabel.BoundsMakeReal();
 FVersionLabel.SetBounds(0, FontHeight * 2 + HeightShift + (FontHeight div 4), Width, FontHeight);
-FVersionLabel.BoundsToNeedBounds();
+FVersionLabel.BoundsMakeReal();
 FContextsComboBox.SetMiddleBounds(CalculateContextsComboBoxWidth(), FontHeight);
 FContextsComboBox.Top := (FontHeight * 2 + HeightShift) * 2 + (FontHeight div 4);
-FContextsComboBox.BoundsToNeedBounds();
+FContextsComboBox.BoundsMakeReal();
 FRendersComboBox.SetMiddleBounds(CalculateRendersComboBoxWidth(), FontHeight);
 FRendersComboBox.Top := (FontHeight * 2 + HeightShift) * 3 + (FontHeight div 4);
-FRendersComboBox.BoundsToNeedBounds();
+FRendersComboBox.BoundsMakeReal();
 FCloseButton.SetMiddleBounds(Skin.Font.StringLength(FCloseButton.Caption) + ShiftWidth, FontHeight);
 FCloseButton.Top := (FontHeight * 2 + HeightShift) * 4 + (FontHeight div 4);
-FCloseButton.BoundsToNeedBounds();
+FCloseButton.BoundsMakeReal();
 inherited;
 end;
 
@@ -293,7 +279,7 @@ if FVersionLabel <> nil then
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDate(var FCanChange : TSGBoolean);
+procedure TSGEngineConfigurationPanel.FromUpDate();
 var
 	i : TSGLongWord;
 begin
@@ -315,7 +301,7 @@ ToFront();
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGEngineConfigurationPanel.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;

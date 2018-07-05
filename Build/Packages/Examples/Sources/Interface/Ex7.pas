@@ -39,8 +39,8 @@ type
 		FFont : TSGFont;
 		FPanelStart : TSGScreenPanel;
 		FFunctionEdit, FNumberEdit, FNumberAEdit, FNumberBEdit : TSGScreenEdit;
-		FGoButton : TSGButton;
-		FBackButton : TSGButton;
+		FGoButton : TSGScreenButton;
+		FBackButton : TSGScreenButton;
 		
 		FGraphic : TSGGraphic;
 		FArPoints : packed array of TSGVertex2f;
@@ -92,7 +92,7 @@ else
 	end;
 end;
 
-procedure TSGApprFunction_StartButtonProcedure(Self : TSGButton);
+procedure TSGApprFunction_StartButtonProcedure(Self : TSGScreenButton);
 var
 	Ex : TSGExpression;
 	A,B,MinAB,MaxAB:TSGSingle;
@@ -182,7 +182,7 @@ if FNumberEdit.TextComplite and FFunctionEdit.TextComplite and FNumberAEdit.Text
 	end;
 end; end;
 
-procedure TSGApprFunction_BackButtonProcedure(Self:TSGButton);
+procedure TSGApprFunction_BackButtonProcedure(Self:TSGScreenButton);
 begin  with TSGApprFunction(Self.FUserPointer1) do begin
 FGraphic.Destroy();
 FGraphic:=nil;
@@ -202,16 +202,16 @@ FFont.SetContext(Context);
 FFont.Loading();
 FFont.ToTexture();
 
-FBackButton := TSGButton.Create();
+FBackButton := TSGScreenButton.Create();
 Screen.CreateChild(FBackButton);
 FBackButton.SetBounds(Render.Width - 230,5 ,220,FFont.FontHeight+4);
-FBackButton.BoundsToNeedBounds();
+FBackButton.BoundsMakeReal();
 FBackButton.Caption := 'Назад';
 FBackButton.Visible:=False;
 FBackButton.Anchors:=[SGAnchRight];
 FBackButton.Active:=True;
 FBackButton.FUserPointer1:=Self;
-FBackButton.OnChange:=TSGComponentProcedure(@TSGApprFunction_BackButtonProcedure);
+FBackButton.OnChange:=TSGScreenComponentProcedure(@TSGApprFunction_BackButtonProcedure);
 
 FPanelStart := SGCreatePanel(Screen, 400,(FFont.FontHeight+4)*8+5, FFont, True, True);
 SGCreateLabel(FPanelStart, 'Введите функцию f(x)', 5,5+(FFont.FontHeight+4)*0,FPanelStart.Width - 12,FFont.FontHeight+2, True, True);
@@ -226,15 +226,15 @@ FNumberAEdit := SGCreateEdit(FPanelStart, '-7', SGScreenEditTypeInteger,
 FNumberBEdit := SGCreateEdit(FPanelStart, '7', SGScreenEditTypeInteger, 
 	5+((FPanelStart.Width - 12) div 2),5+(FFont.FontHeight+4)*5,(FPanelStart.Width - 17) div 2,FFont.FontHeight+4, [], True, True, Self);
 
-FGoButton := TSGButton.Create();
+FGoButton := TSGScreenButton.Create();
 FPanelStart.CreateChild(FGoButton);
 FGoButton.SetBounds(5,5+(FFont.FontHeight+4)*6 + 3,FPanelStart.Width - 12,FFont.FontHeight+4);
-FGoButton.BoundsToNeedBounds();
+FGoButton.BoundsMakeReal();
 FGoButton.Caption := 'Построить';
 FGoButton.Visible:=True;
 FGoButton.Active:=True;
 FGoButton.FUserPointer1:=Self;
-FGoButton.OnChange:=TSGComponentProcedure(@TSGApprFunction_StartButtonProcedure);
+FGoButton.OnChange:=TSGScreenComponentProcedure(@TSGApprFunction_StartButtonProcedure);
 end;
 
 destructor TSGApprFunction.Destroy();

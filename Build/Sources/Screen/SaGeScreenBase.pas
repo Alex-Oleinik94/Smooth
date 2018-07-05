@@ -50,31 +50,53 @@ const
 	SG_BOTTOM =                          $00001A;
 type
 	TSGCaption =  TSGString;
-	TSGScreenFloat = TSGFloat;
+	TSGScreenFloat = TSGFloat32;
 	TSGScreenTimer = TSGScreenFloat;
-	TSGComponentLocationType = TSGScreenFloat;
-	TSGComponentLocationVectorType = TSGVector2f;
-
+	TSGComponentLocationFloat = TSGFloat32;
+	TSGComponentLocationInt   = TSGInt16;
+	TSGComponentLocationVectorInt   = TSGVector2int16;
+	TSGComponentLocationVectorFloat = TSGVector2f;
+	
 	TSGComponentLocation = object
 			protected
-		FPosition : TSGComponentLocationVectorType;
-		FSize     : TSGComponentLocationVectorType;
+		FPosition : TSGComponentLocationVectorInt;
+		FSize     : TSGComponentLocationVectorInt;
 			public
-		procedure Import(const VPosition, VSize : TSGComponentLocationVectorType ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Import(const _Position, _Size : TSGComponentLocationVectorInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure Import(const _Left, _Top, _Width, _Height : TSGComponentLocationInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		procedure Write(const VName : TSGString = ''); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function FloatPosition() : TSGComponentLocationVectorFloat;
+		function FloatPositionAndSize() : TSGComponentLocationVectorFloat;
 			public
-		property Size      : TSGComponentLocationVectorType read FSize     write FSize;
-		property Position  : TSGComponentLocationVectorType read FPosition write FPosition;
-		property SizeX     : TSGComponentLocationType read FSize.x     write FSize.x;
-		property SizeY     : TSGComponentLocationType read FSize.y     write FSize.y;
-		property PositionX : TSGComponentLocationType read FPosition.x write FPosition.x;
-		property PositionY : TSGComponentLocationType read FPosition.y write FPosition.y;
+		property Size      : TSGComponentLocationVectorInt read FSize     write FSize;
+		property Position  : TSGComponentLocationVectorInt read FPosition write FPosition;
+		property SizeX     : TSGComponentLocationInt read FSize.x     write FSize.x;
+		property SizeY     : TSGComponentLocationInt read FSize.y     write FSize.y;
+		property PositionX : TSGComponentLocationInt read FPosition.x write FPosition.x;
+		property PositionY : TSGComponentLocationInt read FPosition.y write FPosition.y;
+		property Width     : TSGComponentLocationInt read FSize.x     write FSize.x;
+		property Height    : TSGComponentLocationInt read FSize.y     write FSize.y;
+		property Left      : TSGComponentLocationInt read FPosition.x write FPosition.x;
+		property Top       : TSGComponentLocationInt read FPosition.y write FPosition.y;
 		end;
 	
-	TSGAnchor = type TSGByte;
-	TSGAnchors = set of TSGByte;
-	TSGScreenInt    = TSGAreaInt;
+	TSGAnchor    = type TSGByte;
+	TSGAnchors   = set of TSGByte;
+	TSGScreenInt = TSGAreaInt;
 	TSGScreenInterfaceData = TSGPointer;
+	
+	TSGComponentBoundsSize = object
+			protected
+		FLeftSize   : TSGScreenInt;
+		FTopSize    : TSGScreenInt;
+		FRightSize  : TSGScreenInt;
+		FBottomSize : TSGScreenInt;
+			public
+		property Left   : TSGScreenInt read FLeftSize   write FLeftSize;
+		property Top    : TSGScreenInt read FTopSize    write FTopSize;
+		property Right  : TSGScreenInt read FRightSize  write FRightSize;
+		property Bottom : TSGScreenInt read FBottomSize write FBottomSize;
+		end;
 	
 	TSGScreenSkinFrameColor = object
 			public
@@ -98,7 +120,7 @@ const
 type
 	ISGComponent = interface(ISGArea)
 		['{6ee600fd-f8b3-40bc-bf8a-ec7693b21e96}']
-
+		
 		procedure SetRight (NewRight  : TSGScreenInt);
 		procedure SetBottom(NewBottom : TSGScreenInt);
 		function GetRight()  : TSGScreenInt;
@@ -108,12 +130,11 @@ type
 		function GetScreenHeight() : TSGScreenInt;
 		function GetLocation() : TSGComponentLocation;
 
-		procedure SetShifts(const NL,NT,NR,NB:TSGScreenInt);
+		procedure SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);
-		procedure BoundsToNeedBounds();
+		procedure BoundsMakeReal();
 
-		function UpDateObj(var Obj, NObj : TSGScreenInt) : TSGScreenInt;
 		procedure WriteBounds();
 
 		procedure UpDateObjects();
@@ -127,9 +148,9 @@ type
 
 		procedure FromDraw();
 		procedure FromResize();
-		procedure FromUpDate(var FCanChange:Boolean);
-		procedure FromUpDateUnderCursor(var CanRePleace:TSGBoolean;const CursorInComponentNow:TSGBoolean = True);
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:TSGBoolean);
+		procedure FromUpDate();
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:TSGBoolean = True);
+		procedure FromUpDateCaptionUnderCursor();
 
 		procedure SetVisible(const b:TSGBoolean);
 		procedure SetCaption(const NewCaption : TSGCaption);
@@ -168,8 +189,8 @@ type
 	ISGScreen = interface(ISGComponent)
 		['{c3c6ea12-c4ff-41de-a250-1e4d856b3e59}']
 		procedure Load(const VContext : ISGContext);
-		procedure CustomPaint(VCanReplace : TSGBool);
-		function UpDateScreen() : TSGBoolean;
+		procedure CustomPaint();
+		procedure UpDateScreen();
 		end;
 
 	ISGOverComponent = interface(ISGComponent)
@@ -254,12 +275,12 @@ type
 		['{5859810e-163e-4f5d-9622-7b574ebe07d5}']
 		function GetItems() : PSGComboBoxItem;
 		function GetItemsCount() : TSGUInt32;
-		function GetLines() : TSGUInt32;
+		function GetLinesCount() : TSGUInt32;
 		function GetSelectedItem() : PSGComboBoxItem;
 		function GetFirstItemIndex() : TSGUInt32;
 
 		property FirstItemIndex : TSGUInt32 read GetFirstItemIndex;
-		property Lines          : TSGUInt32 read GetLines;
+		property LinesCount     : TSGUInt32 read GetLinesCount;
 		property ItemsCount     : TSGUInt32 read GetItemsCount;
 		property Items          : PSGComboBoxItem read GetItems;
 		end;
@@ -303,14 +324,24 @@ type
 		property IsColorStatic : TSGBool                 read GetIsColorStatic;
 		end;
 
-function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorInt) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationInt) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
 
-function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function TSGComponentLocation.FloatPosition() : TSGComponentLocationVectorFloat;
 begin
-Result := SGComponentLocationImport(SGVertex2fImport(VLeft, VTop), SGVertex2fImport(VWidth, VHeight));
+Result.Import(Position.x, Position.y);
+end;
+
+function TSGComponentLocation.FloatPositionAndSize() : TSGComponentLocationVectorFloat;
+begin
+Result := FloatPosition + TSGComponentLocationVectorFloat.Create(Size.x, Size.y);
+end;
+
+function SGComponentLocationImport(const VLeft, VTop, VWidth, VHeight : TSGComponentLocationInt) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+begin
+Result := SGComponentLocationImport(TSGComponentLocationVectorInt.Create(VLeft, VTop), TSGComponentLocationVectorInt.Create(VWidth, VHeight));
 end;
 
 procedure TSGScreenSkinFrameColor.Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -338,15 +369,23 @@ FSelected   := False;
 FOver       := False;
 end;
 
-function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorType) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorInt) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 Result.Import(VPosition, VSize);
 end;
 
-procedure TSGComponentLocation.Import(const VPosition, VSize : TSGComponentLocationVectorType ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGComponentLocation.Import(const _Left, _Top, _Width, _Height : TSGComponentLocationInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-FPosition := VPosition;
-FSize     := VSize;
+Left   := _Left;
+Top    := _Top;
+Width  := _Width;
+Height := _Height
+end;
+
+procedure TSGComponentLocation.Import(const _Position, _Size : TSGComponentLocationVectorInt); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+FPosition := _Position;
+FSize     := _Size;
 end;
 
 end.

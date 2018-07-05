@@ -152,16 +152,9 @@ type
 		property Render : ISGRender read GetRender;
 		end;
 
-procedure SGRoundQuad(const VRender:ISGRender;const Vertex1,Vertex3: TSGVertex3f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure SGRoundQuad(const VRender:ISGRender;const Vertex12,Vertex32: TSGVertex2f; const Radius:real; const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f;
-	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
-	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGConstructRoundQuad(const VRender:ISGRender;const ArVertex:TSGVertex3fList;const Interval:LongInt;const QuadColor: TSGColor4f; const LinesColor: TSGColor4f; const WithLines:boolean = False;const WithQuad:boolean = True);
 {$IFNDEF MOBILE}
 function SGGetVertexUnderPixel(const VRender : ISGRender; const Pixel : TSGPoint2i32):TSGVertex3f;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 {$ENDIF}
-
 
 implementation
 
@@ -178,123 +171,5 @@ VRender.GetVertexUnderPixel(Pixel.x,Pixel.y,x,y,z);
 Result.Import(x,y,z);
 end;
 {$ENDIF}
-
-procedure SGWndSomeQuad(const a,c: TSGVertex3f;const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	b,d: TSGVertex3f;
-begin
-b.Import(c.x,a.y,a.z);
-d.Import(a.x,c.y,a.z);
-VRender.BeginScene(SGR_QUADS);
-VRender.TexCoord2f(0,1);VRender.Vertex(a);
-VRender.TexCoord2f(1,1);VRender.Vertex(b);
-VRender.TexCoord2f(1,0);VRender.Vertex(c);
-VRender.TexCoord2f(0,0);VRender.Vertex(d);
-VRender.EndScene();
-end;
-
-procedure SGSomeQuad(a,b,c,d: TSGVertex3f;vl,np:TSGPoint2int32;const VRender:ISGRender);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-VRender.BeginScene(SGR_QUADS);
-VRender.TexCoord2f(vl.x, vl.y);
-VRender.Vertex(a);
-VRender.TexCoord2f(np.x, vl.y);
-VRender.Vertex(b);
-VRender.TexCoord2f(np.x, np.y);
-VRender.Vertex(c);
-VRender.TexCoord2f(vl.x, np.y);
-VRender.Vertex(d);
-VRender.EndScene();
-end;
-
-procedure SGRoundWindowQuad(const VRender:ISGRender;const Vertex11,Vertex13: TSGVertex3f;const Vertex21,Vertex23: TSGVertex3f;
-	const Radius1:real;const Radius2:real; const Interval:LongInt;const QuadColor1: TSGColor4f;const QuadColor2: TSGColor4f;
-	const WithLines:boolean; const LinesColor1: TSGColor4f; const LinesColor2: TSGColor4f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-SGRoundQuad(VRender,Vertex11,Vertex13,Radius1,Interval,QuadColor1,LinesColor1,WithLines);
-SGRoundQuad(VRender,Vertex21,Vertex23,Radius2,Interval,QuadColor2,LinesColor2,WithLines);
-end;
-
-procedure SGRoundQuad(
-	const VRender:ISGRender;
-	const Vertex12,Vertex32: TSGVertex2f;
-	const Radius:real;
-	const Interval:LongInt;
-	const QuadColor: TSGColor4f;
-	const LinesColor: TSGColor4f;
-	const WithLines:boolean = False;
-	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	ArVertex : TSGVertex3fList = nil;
-	Vertex1, Vertex3 : TSGVertex3f;
-begin
-Vertex1.Import(Vertex12.x, Vertex12.y);
-Vertex3.Import(Vertex32.x, Vertex32.y);
-ArVertex := SGGetArrayOfRoundQuad(Vertex1,Vertex3,Radius,Interval);
-SGConstructRoundQuad(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
-SetLength(ArVertex,0);
-end;
-
-procedure SGRoundQuad(
-	const VRender:ISGRender;
-	const Vertex1,Vertex3: TSGVertex3f;
-	const Radius:real;
-	const Interval:LongInt;
-	const QuadColor: TSGColor4f;
-	const LinesColor: TSGColor4f;
-	const WithLines:boolean = False;
-	const WithQuad:boolean = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-var
-	ArVertex : TSGVertex3fList = nil;
-begin
-ArVertex := SGGetArrayOfRoundQuad(Vertex1,Vertex3,Radius,Interval);
-SGConstructRoundQuad(VRender,ArVertex,Interval,QuadColor,LinesColor,WithLines,WithQuad);
-SetLength(ArVertex,0);
-end;
-
-procedure SGConstructRoundQuad(
-	const VRender:ISGRender;
-	const ArVertex:TSGVertex3fList;
-	const Interval:LongInt;
-	const QuadColor: TSGColor4f;
-	const LinesColor: TSGColor4f;
-	const WithLines:boolean = False;
-	const WithQuad:boolean = True);
-var
-	I:LongInt;
-begin
-if WithQuad then
-	begin
-	VRender.Color(QuadColor);
-	VRender.BeginScene(SGR_QUADS);
-	for i:=0 to Interval-1 do
-		begin
-		VRender.Vertex(ArVertex[Interval-i]);
-		VRender.Vertex(ArVertex[Interval+1+i]);
-		VRender.Vertex(ArVertex[Interval+2+i]);
-		VRender.Vertex(ArVertex[Interval-i-1]);
-		end;
-	VRender.Vertex(ArVertex[0]);
-	VRender.Vertex(ArVertex[2*Interval+1]);
-	VRender.Vertex(ArVertex[2*Interval+2]);
-	VRender.Vertex(ArVertex[4*(Interval+1)-1]);
-	for i:=0 to Interval-1 do
-		begin
-		VRender.Vertex(ArVertex[(Interval+1)*2+i]);
-		VRender.Vertex(ArVertex[(Interval+1)*2+i+1]);
-		VRender.Vertex(ArVertex[(Interval+1)*4-2-i]);
-		VRender.Vertex(ArVertex[(Interval+1)*4-1-i]);
-		end;
-	VRender.EndScene();
-	end;
-if WithLines then
-	begin
-	VRender.Color(LinesColor);
-	VRender.BeginScene(SGR_LINE_LOOP);
-	for i:=Low(ArVertex) to High(ArVertex) do
-		VRender.Vertex(ArVertex[i]);
-	VRender.EndScene();
-	end;
-end;
 
 end.

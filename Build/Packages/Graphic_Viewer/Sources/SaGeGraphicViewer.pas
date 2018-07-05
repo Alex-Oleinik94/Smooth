@@ -7,6 +7,7 @@ interface
 uses 
 	 SaGeBase
 	,SaGeScreen
+	,SaGeScreenHelper
 	,SaGeCommonClasses
 	,SaGeCommon
 	,SaGeCommonStructs
@@ -65,7 +66,7 @@ type
 		SelectPointEnabled:Boolean ;
 		Image:TSGImage;
 		
-		FNewFunctionButton : TSGButton;
+		FNewFunctionButton : TSGScreenButton;
 		end;
 
 implementation
@@ -76,7 +77,6 @@ uses
 	,SaGeMathUtils
 	,SaGeBaseUtils
 	,SaGeContextUtils
-	,SaGeScreenHelper
 	;
 
 function VertexFunction(Vertex:TSGVisibleVector;const p:Pointer):TSGVisibleVector;
@@ -425,7 +425,7 @@ end;
 //======================================================================================
 //======================================================================================
 
-procedure GoNewGrafic2(Button:TSGComponent);
+procedure GoNewGrafic2(Button:TSGScreenComponent);
 var
 	EulatuonEdit2 : TSGScreenEdit = nil;
 begin
@@ -445,24 +445,24 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	end;
 end;
 
-procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSGComboBox);
+procedure mmmComboBoxProcedure1234567(a,b:LongInt;VComboBox:TSGScreenComboBox);
 begin with TSGGraphViewer(VComboBox.FUserPointer1) do begin
 	(VComboBox.Parent.Children[3] as TSGScreenEdit).Active := Boolean(b);
 end; end;
 
 
-procedure GoNewFunction(Button:TSGComponent);
+procedure GoNewFunction(Button:TSGScreenComponent);
 var
-	Form : TSGForm = nil;
+	Form : TSGScreenForm = nil;
 begin
 with TSGGraphViewer(Button.FUserPointer1) do
 	begin
 	Button.Active := False;
 	
-	Form := TSGForm.Create();
+	Form := TSGScreenForm.Create();
 	Screen.CreateChild(Form);
 	Form.SetMiddleBounds(400,133);
-	Form.BoundsToNeedBounds();
+	Form.BoundsMakeReal();
 	Form.Visible := True;
 	Form.Active := True;
 	Form.Caption := 'Добавление функции';
@@ -470,28 +470,28 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	
 	SGCreateEdit(Form, 'x*sin(x)', 5,5,380,25, True, True);
 	
-	Form.CreateChild(TSGComboBox.Create());
+	Form.CreateChild(TSGScreenComboBox.Create());
 	Form.LastChild.SetBounds(5,35,300,25);
 	Form.LastChild.Visible:=True;
 	Form.LastChild.Active:=True;
-	(Form.LastChild as TSGComboBox).CreateItem('Функция');
-	(Form.LastChild as TSGComboBox).CreateItem('Производная функции');
-	(Form.LastChild as TSGComboBox).SelectItem := 0;
-	(Form.LastChild as TSGComboBox).CallBackProcedure:=TSGComboBoxProcedure(@mmmComboBoxProcedure1234567);
+	(Form.LastChild as TSGScreenComboBox).CreateItem('Функция');
+	(Form.LastChild as TSGScreenComboBox).CreateItem('Производная функции');
+	(Form.LastChild as TSGScreenComboBox).SelectItem := 0;
+	(Form.LastChild as TSGScreenComboBox).CallBackProcedure:=TSGScreenComboBoxProcedure(@mmmComboBoxProcedure1234567);
 	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
 	
 	SGCreateEdit(Form, '0', SGScreenEditTypeNumber, 310,35,75,25, [], True, True);
 	Form.LastChild.Active:=False;
 	
-	Form.CreateChild(TSGButton.Create());
+	Form.CreateChild(TSGScreenButton.Create());
 	Form.LastChild.SetBounds(5,65,188,25);
 	Form.LastChild.Visible := True;
 	Form.LastChild.Active  := True;
 	Form.LastChild.Caption := 'Добавить';
-	(Form.LastChild as TSGButton).OnChange := TSGComponentProcedure(@GoNewGrafic2);
+	(Form.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@GoNewGrafic2);
 	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
 	
-	Form.CreateChild(TSGButton.Create());
+	Form.CreateChild(TSGScreenButton.Create());
 	Form.LastChild.SetBounds(195,65,190,25);
 	Form.LastChild.Visible := True;
 	Form.LastChild.Active  := True;
@@ -509,12 +509,12 @@ Image:=TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'IconArea-hover
 Image.SetContext(Context);
 Image.Loading;
 
-FNewFunctionButton:=TSGButton.Create;
+FNewFunctionButton:=TSGScreenButton.Create;
 Screen.CreateChild(FNewFunctionButton);
 Screen.LastChild.SetBounds(Render.Width-140,Render.Height-28,130,23);
 Screen.LastChild.Visible:=True;
 Screen.LastChild.Caption:='Добавить функцию';
-Screen.LastChild.OnChange:=TSGComponentProcedure(@GoNewFunction);
+Screen.LastChild.OnChange:=TSGScreenComponentProcedure(@GoNewFunction);
 Screen.LastChild.FUserPointer1:=Self;
 end;
 

@@ -1,4 +1,16 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreenCommonComponents;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreen
+	,SaGeScreenComponent
+	;
+
 type
 	TSGOverComponent = class(TSGComponent, ISGOverComponent)
 			public
@@ -42,9 +54,12 @@ type
 		property Open : TSGBoolean read GetOpen write FOpen;
 		property OpenTimer : TSGScreenTimer read GetOpenTimer write FOpenTimer;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeContextUtils
+	;
 
 // TSGOverComponent
 
@@ -140,4 +155,5 @@ function TSGClickComponent.GetClickTimer() : TSGScreenTimer;
 begin
 Result := FClickTimer;
 end;
-{$ENDIF}
+
+end.

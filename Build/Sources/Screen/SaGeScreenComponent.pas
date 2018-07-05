@@ -1,4 +1,17 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreenComponent;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeClasses
+	,SaGeCommonClasses
+	,SaGeScreenSkin
+	,SaGeCommonStructs
+	;
 type
 	TSGComponent = class;
 
@@ -28,7 +41,7 @@ type
 	PSGComponent          = ^ TSGComponent;
 	TSGComponentList      = packed array of TSGComponent;
 	TSGComponentListList  = packed array of TSGComponentList;
-	TSGComponentProcedure = procedure ( Component : TSGComponent );
+	TSGComponentProcedure = procedure (Component : TSGComponent);
 	TSGComponent          = class(TSGContextabled, ISGDeviceDependent, ISGComponent)
 			public
 		constructor Create();override;
@@ -38,7 +51,7 @@ type
 			// for-in loop
 		function GetEnumerator(): TSGComponentEnumerator;
 		function GetReverseEnumerator: TSGComponentEnumerator;
-			private
+			protected
 		function GetOption(const VName : TSGString) : TSGPointer;virtual;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;
 			public
@@ -49,33 +62,14 @@ type
 		procedure LoadDeviceResources();virtual;
 		function Suppored() : TSGBoolean;virtual;
 			protected
-			// Location
-		FWidth  : TSGScreenInt;
-		FHeight : TSGScreenInt;
-		FLeft   : TSGScreenInt;
-		FTop    : TSGScreenInt;
-
-		FNoneTop    : TSGScreenInt;
-		FNoneLeft   : TSGScreenInt;
-		FNoneHeight : TSGScreenInt;
-		FNoneWidth  : TSGScreenInt;
-
-		FNeedLeft   : TSGScreenInt;
-		FNeedTop    : TSGScreenInt;
-		FNeedWidth  : TSGScreenInt;
-		FNeedHeight : TSGScreenInt;
-
-		FTopShiftForChilds    : TSGScreenInt;
-		FLeftShiftForChilds   : TSGScreenInt;
-		FRightShiftForChilds  : TSGScreenInt;
-		FBottomShiftForChilds : TSGScreenInt;
-
-		FRealLeft : TSGScreenInt;
-		FRealTop  : TSGScreenInt;
-
+		FLocation : TSGComponentLocation;
+		FRealLocation : TSGComponentLocation;
+		FDefaultLocation : TSGComponentLocation;
+		FRealPosition : TSGComponentLocationVectorInt;
+		FBordersSize : TSGComponentBoundsSize;
 		FUnLimited : TSGBoolean;
 		FParent    : TSGComponent;
-
+		
 		procedure SetRight (NewRight  : TSGScreenInt);virtual;
 		procedure SetBottom(NewBottom : TSGScreenInt);virtual;
 		function GetRight()  : TSGScreenInt;virtual;
@@ -95,8 +89,9 @@ type
 		function GetScreenWidth()  : TSGScreenInt;virtual;
 		function GetScreenHeight() : TSGScreenInt;virtual;
 		function GetLocation() : TSGComponentLocation;virtual;
-
-		function UpDateObj(var Obj, NObj : TSGScreenInt) : TSGScreenInt;
+		
+		procedure UpDateLocation();
+		function UpDateValue(var RealObj, Obj : TSGComponentLocationInt) : TSGComponentLocationInt;
 		procedure UpDateObjects();virtual;
 		procedure TestCoords();virtual;
 			public
@@ -110,18 +105,21 @@ type
 		property ScreenWidth  : TSGScreenInt read GetScreenWidth;
 		property ScreenHeight : TSGScreenInt read GetScreenHeight;
 		property UnLimited    : TSGBoolean   read FUnLimited write FUnLimited;
+		property BoundsSize   : TSGComponentBoundsSize read FBordersSize;
+		property RealPosition : TSGComponentLocationVectorInt read FRealPosition;
+		property Location     : TSGComponentLocation read GetLocation;
 			public
-		procedure BoundsToNeedBounds();virtual;
-		procedure SetShifts(const NL,NT,NR,NB:TSGScreenInt);virtual;
+		procedure BoundsMakeReal();virtual;
+		procedure SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);virtual;
 		procedure SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);virtual;
 		procedure SetBoundsFloat(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenFloat);
 		procedure SetMiddleBounds(const NewWidth, NewHeight : TSGScreenInt);virtual;
 		procedure WriteBounds();
 		class function RandomOne():TSGScreenInt;
-		procedure AddToLeft(const Value:TSGScreenInt);
-		procedure AddToWidth(const Value:TSGScreenInt);
-		procedure AddToHeight(const Value:TSGScreenInt);
-		procedure AddToTop(const Value:TSGScreenInt);
+		procedure AddToLeft(const Value : TSGScreenInt);
+		procedure AddToWidth(const Value : TSGScreenInt);
+		procedure AddToHeight(const Value : TSGScreenInt);
+		procedure AddToTop(const Value : TSGScreenInt);
 			protected
 		FAlign:TSGByte;
 		FAnchors:TSGSetOfByte;
@@ -140,10 +138,12 @@ type
 		procedure UpgradeTimers();virtual;
 		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
 		procedure FromDraw();virtual;
+			public
 		procedure FromResize();virtual;
-		procedure FromUpDate(var FCanChange:Boolean);virtual;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);virtual;
-		procedure FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);virtual;
+			protected
+		procedure FromUpDate();virtual;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);virtual;
+		procedure FromUpDateCaptionUnderCursor();virtual;
 			protected
 		procedure SetVisible(const b:Boolean);virtual;
 		procedure SetCaption(const NewCaption : TSGCaption);virtual;
@@ -182,6 +182,8 @@ type
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
 		function RightShift():TSGScreenInt;
+		procedure ChildToListEnd(const Index : TSGMaxEnum);
+		procedure ChildToListEnd(const Component : TSGComponent);
 			public
 		procedure ToFront();
 		function MustDestroyed() : TSGBoolean;
@@ -198,23 +200,16 @@ type
 		procedure KillChildren();
 		procedure VisibleAll();
 		function IndexOf(const VComponent : TSGComponent): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetChildrenCount() : TSGUInt32;
 			public
 		property Children[Index : TSGInt32 (* Indexing [1..Size] *)]:TSGComponent read GetChild;
+		property ChildrenCount : TSGUInt32 read GetChildrenCount;
 		property MarkedForDestroy : TSGBoolean read FMarkedForDestroy;
 		property Align : TSGByte read FAlign write CreateAlign;
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
 		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
 		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
-			public
-		function AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
@@ -226,9 +221,23 @@ type
 			public
 		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+
+implementation
+
+uses
+	 SaGeCommon
+	,SaGeMathUtils
+	,SaGeContextUtils
+	;
+
+function TSGComponent.GetChildrenCount() : TSGUInt32;
+begin
+Result := 0;
+if (FChildren <> nil) then
+	Result := Length(FChildren);
+end;
+
 class function TSGComponent.ClassName() : TSGString;
 begin
 Result := 'TSGComponent';
@@ -237,7 +246,7 @@ end;
 procedure TSGComponent.UpDateSkin();
 begin
 if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin))) then
-	Skin.IddleFunction();
+	Skin.UpDate();
 end;
 
 function TSGComponent.GetActive() : TSGBoolean;
@@ -256,6 +265,37 @@ Result := False;
 if FChildren <> nil then
 	if Length(FChildren) > 0 then
 		Result := True;
+end;
+
+procedure TSGComponent.ChildToListEnd(const Component : TSGComponent);
+var
+	Index, i : TSGMaxEnum;
+begin
+Index := 0;
+if (FChildren <> nil) and (Length(FChildren) > 0) then
+	for i := 0 to High(FChildren) do
+		if FChildren[i] = Component then
+			begin
+			Index := i + 1;
+			break;
+			end;
+if (Index > 0) then
+	ChildToListEnd(Index);
+end;
+
+procedure TSGComponent.ChildToListEnd(const Index : TSGMaxEnum);
+var
+	i : TSGMaxEnum;
+	Component : TSGComponent;
+begin
+Component := nil;
+if (Index > 0) and (Index <= ChildCount) then
+	begin
+	Component := FChildren[Index - 1];
+	for i:= Index - 1 to ChildrenCount - 1 do
+		FChildren[i] := FChildren[i + 1];
+	FChildren[ChildrenCount - 1] := Component;
+	end;
 end;
 
 function TSGComponent.ChildCount() : TSGUInt32;
@@ -288,50 +328,54 @@ end;
 
 function  TSGComponent.GetWidth() : TSGAreaInt;
 begin
-Result := FNeedWidth;
+Result := FLocation.Size.x;
 end;
 
 function  TSGComponent.GetHeight() : TSGAreaInt;
 begin
-Result := FNeedHeight;
+Result := FLocation.Size.y;
 end;
 
 procedure TSGComponent.SetWidth(const VWidth : TSGAreaInt);
 begin
-FNeedWidth := VWidth;
+FLocation.Width := VWidth;
 end;
 
 procedure TSGComponent.SetHeight(const VHeight : TSGAreaInt);
 begin
-FNeedHeight := VHeight;
+FLocation.Height := VHeight;
 end;
 
 function  TSGComponent.GetLeft() : TSGAreaInt;
 begin
-Result := FNeedLeft;
+Result := FLocation.Position.x;
 end;
 
 function  TSGComponent.GetTop() : TSGAreaInt;
 begin
-Result := FNeedTop;
+Result := FLocation.Position.y;
 end;
 
 procedure TSGComponent.SetLeft(const VLeft : TSGAreaInt);
 begin
-FNeedLeft := VLeft;
+FLocation.Left := VLeft;
 end;
 
 procedure TSGComponent.SetTop(const VTop : TSGAreaInt);
 begin
-FNeedTop := VTop;
+FLocation.Top := VTop;
 end;
 
 function TSGComponent.GetLocation() : TSGComponentLocation;
 var
-	Pos : TSGVector3f;
+	Position, Size : TSGVector2int32;
 begin
-Pos := SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT));
-Result.Import(Pos, SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)) - Pos);
+Position := GetVertex([SGS_LEFT,SGS_TOP], SG_VERTEX_FOR_PARENT);
+Size := GetVertex([SGS_RIGHT,SGS_BOTTOM], SG_VERTEX_FOR_PARENT);
+Size -= Position;
+Result.Import(
+	TSGComponentLocationVectorInt.Create(Position.x, Position.y),
+	TSGComponentLocationVectorInt.Create(Size.x, Size.y));
 end;
 
 procedure TSGComponent.ToFront();
@@ -378,22 +422,6 @@ begin
 Result:=FVisibleTimer<0.05;
 end;
 
-function TSGComponent.AsButtonMenuButton:TSGButtonMenuButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButtonMenuButton then
-	Result:=TSGButtonMenuButton(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsGrid:TSGGrid;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGGrid then
-	Result:=TSGGrid(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 function TSGComponent.IndexOf(const VComponent : TSGComponent ): TSGLongInt;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : LongInt;
@@ -433,44 +461,22 @@ while ChildExists() do
 	end;
 end;
 
-procedure TSGComponent.BoundsToNeedBounds;
+procedure TSGComponent.BoundsMakeReal;
 begin
-FWidth:=FNeedWidth;
-FHeight:=FNeedHeight;
-FLeft:=FNeedLeft;
-FTop:=FNeedTop;
-end;
-
-function TSGComponent.AsComboBox:TSGComboBox;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGComboBox then
-	Result:=TSGComboBox(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsScrollBar:TSGScrollBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGScrollBar then
-	Result:=TSGScrollBar(Pointer(Self))
-else
-	Result:=nil;
+FRealLocation := FLocation;
 end;
 
 procedure TSGComponent.WriteBounds;
 begin
-writeln('Left = ',Left);
-writeln('Top = ',Top);
-writeln('Width = ',Width);
-writeln('Height = ',Height);
+FLocation.Write('Location ');
 end;
 
 procedure TSGComponent.SetMiddleBounds(const NewWidth,NewHeight:LongInt);
 var
 	PW, PH : TSGLongWord;
 begin
-FNeedHeight:=NewHeight;
-FNeedWidth:=NewWidth;
+FLocation.Height := NewHeight;
+FLocation.Width  := NewWidth;
 if Parent <> nil then
 	begin
 	PW := Parent.Width;
@@ -481,8 +487,8 @@ else
 	PW := Render.Width;
 	PH := Render.Height;
 	end;
-FNeedLeft:=Round((PW-NewWidth)/2);
-FNeedTop:=Round((PH-NewHeight)/2);
+FLocation.Left := Round((PW-NewWidth)/2);
+FLocation.Top  := Round((PH-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
@@ -494,42 +500,10 @@ for Component in Self do
 	Component.Visible := Visible;
 end;
 
-function TSGComponent.AsButtonMenu:TSGButtonMenu;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButtonMenu then
-	Result:=TSGButtonMenu(Pointer(Self))
-else
-	Result:=nil;
-end;
-
 function TSGComponent.GetChild(a:TSGInt32):TSGComponent;
 begin
 if (a-1 >= 0) and (a-1<=High(FChildren)) then
 	Result:=FChildren[a-1]
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsProgressBar:TSGProgressBar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGProgressBar then
-	Result:=TSGProgressBar(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsButton:TSGButton;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGButton then
-	Result:=TSGButton(Pointer(Self))
-else
-	Result:=nil;
-end;
-
-function TSGComponent.AsForm:TSGForm;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-begin
-if Self is TSGForm then
-	Result:=TSGForm(Pointer(Self))
 else
 	Result:=nil;
 end;
@@ -572,12 +546,12 @@ end;
 
 function TSGComponent.BottomShift:TSGScreenInt;
 begin
-Result:=FTopShiftForChilds+FBottomShiftForChilds;
+Result := FBordersSize.Top + FBordersSize.Bottom;
 end;
 
 function TSGComponent.RightShift:TSGScreenInt;
 begin
-Result:=FLeftShiftForChilds+FRightShiftForChilds;
+Result := FBordersSize.Left + FBordersSize.Right;
 end;
 
 function TSGComponent.LastChild:TSGComponent;
@@ -587,24 +561,24 @@ if FChildren <> nil then
 	Result := FChildren[High(FChildren)];
 end;
 
-function TSGComponent.UpDateObj(var Obj,NObj:TSGScreenInt):TSGScreenInt;
+function TSGComponent.UpDateValue(var RealObj, Obj : TSGComponentLocationInt) : TSGComponentLocationInt;
 const
 	Speed = 2;
 var
-	Value:LongInt = 0;
-	OldObj:Longint;
+	Value : TSGComponentLocationInt = 0;
+	OldValue : TSGComponentLocationInt;
 begin
-if Obj <> NObj then
+if (RealObj <> Obj) then
 	begin
-	OldObj:=Obj;
-	Value:=round((NObj * Context.ElapsedTime / Speed + Obj * 5) / (5 + Context.ElapsedTime / Speed));
-	Result:=Value-Obj;
-	Obj:=Value;
-	if (Obj=OldObj) and (NObj<>Obj) then
-		if NObj>Obj then
-			Obj+=1
+	OldValue:=RealObj;
+	Value:=Round((Obj * Context.ElapsedTime / Speed + RealObj * 5) / (5 + Context.ElapsedTime / Speed));
+	Result:=Value-RealObj;
+	RealObj:=Value;
+	if (RealObj=OldValue) and (Obj<>RealObj) then
+		if Obj>RealObj then
+			RealObj+=1
 		else
-			Obj-=1;
+			RealObj-=1;
 	end;
 end;
 
@@ -614,28 +588,17 @@ SetBounds(Round(NewLeft), Round(NewTop), Round(NewWidth), Round(NewHeight));
 end;
 
 procedure TSGComponent.SetBounds(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenInt);
+var
+	IsLocationNull : TSGBoolean;
 begin
-Height:=NewHeight;
-Left:=NewLeft;
-Top:=NewTop;
-Width:=NewWidth;
-
-FNeedHeight:=NewHeight;
-FNeedLeft:=NewLeft;
-FNeedTop:=NewTop;
-FNeedWidth:=NewWidth;
-
-FNoneHeight:=NewHeight;
-FNoneLeft:=NewLeft;
-FNoneTop:=NewTop;
-FNoneWidth:=NewWidth;
-
-{if FParent=SGScreen then
-	begin
-	Top:=Top+Context.TopShift;
-	FNeedTop+=Context.TopShift;
-	FNoneTop+=Context.TopShift;
-	end;}
+IsLocationNull := (FLocation.Left = 0) and (FLocation.Top = 0) and (FLocation.Width = 0) and (FLocation.Height = 0);
+FLocation.Left := NewLeft;
+FLocation.Top := NewTop;
+FLocation.Width := NewWidth;
+FLocation.Height := NewHeight;
+if IsLocationNull then
+	FRealLocation := FLocation;
+FDefaultLocation := FLocation;
 end;
 
 class function TSGComponent.RandomOne:LongInt;
@@ -738,48 +701,41 @@ begin
 if (SGS_LEFT in THAT) and (SGS_TOP in THAT) then
 	begin
 	if FOR_THAT = SG_VERTEX_FOR_PARENT then
-		Result.Import(FRealLeft,FRealTop)
+		Result.Import(FRealPosition.x,FRealPosition.y)
+	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
+		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FBordersSize.Top)
 	else
-		if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-			Result.Import(FRealLeft+FLeftShiftForChilds,FRealTop+FTopShiftForChilds)
-		else
-			Result.Import(0,0);
+		Result.Import(0,0);
+	end
+else if (SGS_TOP in THAT) and (SGS_RIGHT in THAT) then
+	begin
+	if FOR_THAT = SG_VERTEX_FOR_PARENT then
+		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y)
+	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
+		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FBordersSize.Top)
+	else
+		Result.Import(0,0);
+	end
+else if (SGS_BOTTOM in THAT) and (SGS_RIGHT in THAT) then
+	begin
+	if FOR_THAT = SG_VERTEX_FOR_PARENT then
+		Result.Import(FRealPosition.x + FRealLocation.Width, FRealPosition.y + FRealLocation.Height)
+	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
+		Result.Import(FRealPosition.x + FRealLocation.Width - FBordersSize.Right, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
+	else
+		Result.Import(0,0);
+	end 
+else if (SGS_LEFT in THAT) and (SGS_BOTTOM in THAT) then
+	begin
+	if FOR_THAT = SG_VERTEX_FOR_PARENT then
+		Result.Import(FRealPosition.x,FRealPosition.y + FRealLocation.Height)
+	else if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
+		Result.Import(FRealPosition.x + FBordersSize.Left, FRealPosition.y + FRealLocation.Height - FBordersSize.Bottom)
+	else
+		Result.Import(0,0);
 	end
 else
-	if (SGS_TOP in THAT) and (SGS_RIGHT in THAT) then
-		begin
-		if FOR_THAT = SG_VERTEX_FOR_PARENT then
-			Result.Import(FRealLeft+FWidth,FRealTop)
-		else
-			if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-				Result.Import(FRealLeft+FWidth-FRightShiftForChilds,FRealTop+FTopShiftForChilds)
-			else
-				Result.Import(0,0);
-		end
-	else
-		if (SGS_BOTTOM in THAT) and (SGS_RIGHT in THAT) then
-			begin
-			if FOR_THAT = SG_VERTEX_FOR_PARENT then
-				Result.Import(FRealLeft+FWidth,FRealTop+FHeight)
-			else
-				if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-					Result.Import(FRealLeft+FWidth-FRightShiftForChilds,FRealTop+FHeight-FBottomShiftForChilds)
-				else
-					Result.Import(0,0);
-			end
-		else
-			if (SGS_LEFT in THAT) and (SGS_BOTTOM in THAT) then
-				begin
-				if FOR_THAT = SG_VERTEX_FOR_PARENT then
-					Result.Import(FRealLeft,FRealTop+FHeight)
-				else
-					if FOR_THAT = SG_VERTEX_FOR_CHILDREN then
-						Result.Import(FRealLeft+FLeftShiftForChilds,FRealTop+FHeight-FBottomShiftForChilds)
-					else
-						Result.Import(0,0);
-				end
-			else
-				Result.Import(0,0);
+	Result.Import(0, 0);
 end;
 
 procedure TSGComponent.CompleteChild(const VChild : TSGComponent);
@@ -808,43 +764,43 @@ if (Child <> nil) and FCanHaveChildren then
 	end;
 end;
 
-procedure TSGComponent.AddToTop(const Value:LongInt);
+procedure TSGComponent.AddToTop(const Value : TSGScreenInt);
 begin
-FNeedTop+=Value;
+FLocation.Top := FLocation.Top + Value;
 end;
 
-procedure TSGComponent.AddToLeft(const Value:LongInt);
+procedure TSGComponent.AddToLeft(const Value : TSGScreenInt);
 begin
-FNeedLeft+=Value;
+FLocation.Left := FLocation.Left + Value;
 end;
 
-procedure TSGComponent.AddToWidth(const Value:LongInt);
+procedure TSGComponent.AddToWidth(const Value : TSGScreenInt);
 begin
-FNeedWidth+=Value;
+FLocation.Width := FLocation.Width + Value;
 end;
 
-procedure TSGComponent.AddToHeight(const Value:LongInt);
+procedure TSGComponent.AddToHeight(const Value : TSGScreenInt);
 begin
-FNeedHeight+=Value;
+FLocation.Height := FLocation.Height + Value;
 end;
 
-function TSGComponent.CursorInComponent():boolean;
+function TSGComponent.CursorInComponent() : TSGBoolean;
 begin
 Result:=
-	(Context.CursorPosition(SGNowCursorPosition).x>=FRealLeft)and
-	(Context.CursorPosition(SGNowCursorPosition).x<=FRealLeft+FWidth)and
-	(Context.CursorPosition(SGNowCursorPosition).y>=FRealTop)and
-	(Context.CursorPosition(SGNowCursorPosition).y<=FRealTop+FHeight);
+	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x)and
+	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x + FRealLocation.Width)and
+	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y)and
+	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y + FRealLocation.Height);
 FCursorOnComponent:=Result;
 end;
 
-procedure TSGComponent.FromUpDate(var FCanChange:Boolean);
+procedure TSGComponent.FromUpDate();
 var
 	PriorityComponent, Component : TSGComponent;
 	Index : TSGLongWord;
 begin
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComponent.FromUpDate(var FCanChange:Boolean = ', FCanChange, ') : Begining');
+	WriteLn('TSGComponent.FromUpDate: Begining');
 	{$ENDIF}
 
 UpDateObjects();
@@ -853,7 +809,7 @@ UpDateSkin();
 
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
-	PriorityComponent.FromUpDate(FCanChange);
+	PriorityComponent.FromUpDate();
 
 Index := 0;
 while Index < Length(FChildren) do
@@ -864,7 +820,7 @@ while Index < Length(FChildren) do
 	else
 		begin
 		if Component <> PriorityComponent then
-			Component.FromUpDate(FCanChange);
+			Component.FromUpDate();
 		Index += 1;
 		end;
 	end;
@@ -996,27 +952,22 @@ FChildrenPriority:=0;
 FDrawClass:=nil;
 FUnLimited:=False;
 OnChange:=nil;
-Width:=0;
-Height:=0;
 FParent:=nil;
-Left:=0;
-Top:=0;
+FLocation.Import(0, 0, 0, 0);
+FRealLocation := FLocation;
+FDefaultLocation := FLocation;
+FRealPosition.Import(0, 0);
+SetBordersSize(0, 0, 0, 0);
 FAlign:=SGAlignNone;
 FAnchors:=[];
 FVisible:=False;
 FVisibleTimer:=0;
 FActive:=True;
 FActiveTimer:=0;
-FCaption:='Caption';
+FCaption:='';
 FChildren:=nil;
 FCursorOnComponent:=False;
 FCursorOnComponentCaption:=False;
-FLeftShiftForChilds:=5;
-FTopShiftForChilds:=5;
-FRightShiftForChilds:=5;
-FBottomShiftForChilds:=5;
-FRealTop:=0;
-FRealLeft:=0;
 FCanHaveChildren:=True;
 ComponentProcedure:=nil;
 FUserPointer1:=nil;
@@ -1026,12 +977,12 @@ FAnchorsData.FParentHeight:=0;
 FAnchorsData.FParentWidth:=0;
 end;
 
-procedure TSGComponent.SetShifts(const NL,NT,NR,NB:LongInt);
+procedure TSGComponent.SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);
 begin
-FLeftShiftForChilds:=NL;
-FTopShiftForChilds:=NT;
-FRightShiftForChilds:=NR;
-FBottomShiftForChilds:=NB;
+FBordersSize.Left   := _L;
+FBordersSize.Top    := _T;
+FBordersSize.Right  := _R;
+FBordersSize.Bottom := _B;
 end;
 
 procedure TSGComponent.FromResize();
@@ -1045,16 +996,15 @@ if SGAnchBottom in FAnchors then
 		if FParent<>nil then
 			FAnchorsData.FParentHeight:=FParent.Height
 		else
-	else
-		if FParent<>nil then
+	else if FParent<>nil then
+		begin
+		if FAnchorsData.FParentHeight<>FParent.Height then
 			begin
-			if FAnchorsData.FParentHeight<>FParent.Height then
-				begin
-				I := FAnchorsData.FParentHeight - FParent.Height;
-				FNeedTop -= I;
-				FAnchorsData.FParentHeight := FParent.Height;
-				end;
+			I := FAnchorsData.FParentHeight - FParent.Height;
+			FLocation.Top := FLocation.Top - I;
+			FAnchorsData.FParentHeight := FParent.Height;
 			end;
+		end;
 	end;
 if SGAnchRight in FAnchors then
 	begin
@@ -1062,24 +1012,23 @@ if SGAnchRight in FAnchors then
 		if FParent<>nil then
 			FAnchorsData.FParentWidth:=FParent.Width
 		else
-	else
-		if FParent<>nil then
+	else if FParent<>nil then
+		begin
+		if FAnchorsData.FParentWidth<>FParent.Width then
 			begin
-			if FAnchorsData.FParentWidth<>FParent.Width then
-				begin
-				I:=FAnchorsData.FParentWidth-FParent.Width;
-				FNeedLeft-=I;
-				FAnchorsData.FParentWidth:=FParent.Width;
-				end;
+			I:=FAnchorsData.FParentWidth-FParent.Width;
+			FLocation.Left := FLocation.Left - I;
+			FAnchorsData.FParentWidth:=FParent.Width;
 			end;
+		end;
 	end;
-BoundsToNeedBounds();
-{CW:=FNeedWidth;
-CH:=FNeedHeight;
+BoundsMakeReal();
+{CW:=FLocation.Width;
+CH:=FLocation.Height;
 case FAlign of
 SGAlignRight:
 	begin
-	FNeedLeft+=Parent.Width-ParentWidth;
+	FLocation.Left+=Parent.Width-ParentWidth;
 	end;
 end;
 if FAlign in [SGAlignClient] then
@@ -1104,25 +1053,28 @@ begin
 Result:=False;
 end;
 
-procedure TSGComponent.FromUpDateCaptionUnderCursor(var CanRePleace:Boolean);
+procedure TSGComponent.FromUpDateCaptionUnderCursor();
 begin
 end;
 
 procedure TSGComponent.DestroyAlign;
 begin
 if FAlign=SGAlignTop then
-	FNeedLeft:=FNoneLeft;
+	FLocation.Left := FDefaultLocation.Left;
 if FAlign=SGAlignLeft then
-	FNeedTop:=FNoneTop;
+	FLocation.Top := FDefaultLocation.Top;
 if FAlign=SGAlignRight then
-	FNeedTop:=FNoneTop;
+	FLocation.Top := FDefaultLocation.Top;
 if FAlign=SGAlignBottom then
-	FNeedLeft:=FNoneLeft;
+	FLocation.Left := FDefaultLocation.Left;
 if FAlign=SGAlignClient then
-	FNeedLeft:=FNoneLeft;
-FAlign:=SGAlignNone;
-FNeedHeight:=FNoneHeight;
-FNeedWidth:=FNoneWidth;
+	begin
+	FLocation.Top  := FDefaultLocation.Top;
+	FLocation.Left := FDefaultLocation.Left;
+	end;
+FAlign := SGAlignNone;
+FLocation.Height := FDefaultLocation.Height;
+FLocation.Width  := FDefaultLocation.Width;
 end;
 
 function TSGComponent.CursorPosition(): TSGPoint2int32;
@@ -1139,26 +1091,26 @@ procedure TSGComponent.TestCoords;
 begin
 if (FParent<>nil) and (FParent.FParent<>nil) and (not FUnLimited) then
 	begin
-	if FHeight>FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds then
-		FHeight:=FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds;
-	if FWidth>FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds then
-		FWidth:=FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds;
-	if FTop<0 then
-		FTop:=0;
-	if FLeft<0 then
-		FLeft:=0;
-	if (FLeft+FWidth)>FParent.FWidth-FParent.RightShift then
-		FLeft:=FParent.FWidth-FWidth-FParent.RightShift;
-	if (FTop+FHeight)>FParent.FHeight-FParent.BottomShift then
-		FTop:=FParent.FHeight-FHeight-FParent.BottomShift;
-	if FNeedTop<0 then
-		FNeedTop:=0;
-	if FNeedLeft<0 then
-		FNeedLeft:=0;
-	if (FNeedLeft+FNeedWidth)>FParent.FNeedWidth-FParent.RightShift then
-		FNeedLeft:=FParent.FNeedWidth-FNeedWidth-FParent.RightShift;
-	if (FNeedTop+FNeedHeight)>FParent.FNeedHeight-FParent.BottomShift then
-		FNeedTop:=FParent.FNeedHeight-FNeedHeight-FParent.BottomShift;
+	if FRealLocation.Height>FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom then
+		FRealLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
+	if FRealLocation.Width>FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right then
+		FRealLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+	if FRealLocation.Top < 0 then
+		FRealLocation.Top:=0;
+	if FRealLocation.Left < 0 then
+		FRealLocation.Left:=0;
+	if (FRealLocation.Left+FRealLocation.Width)>FParent.FRealLocation.Width-FParent.RightShift then
+		FRealLocation.Left:=FParent.FRealLocation.Width-FRealLocation.Width-FParent.RightShift;
+	if (FRealLocation.Top+FRealLocation.Height)>FParent.FRealLocation.Height-FParent.BottomShift then
+		FRealLocation.Top:=FParent.FRealLocation.Height-FRealLocation.Height-FParent.BottomShift;
+	if FLocation.Top < 0 then
+		FLocation.Top := 0;
+	if FLocation.Left < 0 then
+		FLocation.Left:=0;
+	if (FLocation.Left+FLocation.Width)>FParent.FLocation.Width-FParent.RightShift then
+		FLocation.Left:=FParent.FLocation.Width-FLocation.Width-FParent.RightShift;
+	if (FLocation.Top+FLocation.Height)>FParent.FLocation.Height-FParent.BottomShift then
+		FLocation.Top:=FParent.FLocation.Height-FLocation.Height-FParent.BottomShift;
 	end;
 end;
 
@@ -1167,84 +1119,100 @@ begin
 FCaption := NewCaption;
 end;
 
+procedure TSGComponent.UpDateLocation();
+var
+	Value, RealValue : TSGComponentLocationInt;
+begin
+Value := FLocation.Height;
+RealValue := FRealLocation.Height;
+UpDateValue(RealValue, Value);
+FRealLocation.Height := RealValue;
+
+Value := FLocation.Top;
+RealValue := FRealLocation.Top;
+UpDateValue(RealValue, Value);
+FRealLocation.Top := RealValue;
+
+Value := FLocation.Left;
+RealValue := FRealLocation.Left;
+UpDateValue(RealValue, Value);
+FRealLocation.Left := RealValue;
+
+Value := FLocation.Width;
+RealValue := FRealLocation.Width;
+UpDateValue(RealValue, Value);
+FRealLocation.Width := RealValue;
+end;
+
 procedure TSGComponent.UpDateObjects();
 var
 	Component : TSGComponent;
-	ValueHeight : TSGLongInt = 0;
-	ValueWidth  : TSGLongInt = 0;
-	ValueLeft   : TSGLongInt = 0;
-	ValueTop    : TSGLongInt = 0;
+	ValueHeight : TSGScreenInt = 0;
+	ValueWidth  : TSGScreenInt = 0;
+	ValueLeft   : TSGScreenInt = 0;
+	ValueTop    : TSGScreenInt = 0;
 begin
-if FParent<>nil then
+if (FParent <> nil) then
 	case FAlign of
 	SGAlignLeft:
 		begin
-		FNeedLeft:=0;
-		FNeedTop:=0;
-		FNeedHeight:=FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds;
+		FLocation.Position := TSGComponentLocationVectorInt.Create();
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignTop:
 		begin
-		FNeedLeft:=0;
-		FNeedTop:=0;
-		FNeedWidth:=FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds;
+		FLocation.Position := TSGComponentLocationVectorInt.Create();
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
 		end;
 	SGAlignRight:
 		begin
-		FNeedTop:=0;
-		FNeedLeft:=FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds-FWidth;
-		FNeedHeight:=FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds;
+		FLocation.Top := 0;
+		FLocation.Left:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right-FRealLocation.Width;
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignBottom:
 		begin
-		FNeedLeft:=0;
-		FNeedWidth:=FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds;
-		FNeedTop:=FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds-FHeight;
+		FLocation.Left := 0;
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+		FLocation.Top:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom-FRealLocation.Height;
 		end;
 	SGAlignClient:
 		begin
-		FNeedTop:=0;
-		FNeedLeft:=0;
-		FNeedWidth:=FParent.FWidth-FParent.FLeftShiftForChilds-FParent.FRightShiftForChilds;
-		FNeedHeight:=FParent.FHeight-FParent.FTopShiftForChilds-FParent.FBottomShiftForChilds;
+		FLocation.Position := TSGComponentLocationVectorInt.Create();
+		FLocation.Width:=FParent.FRealLocation.Width-FParent.FBordersSize.Left-FParent.FBordersSize.Right;
+		FLocation.Height:=FParent.FRealLocation.Height-FParent.FBordersSize.Top-FParent.FBordersSize.Bottom;
 		end;
 	SGAlignNone: begin end;
 	else begin end;
 	end;
-ValueTop    := FTop;
-ValueHeight := FHeight;
-ValueWidth  := FWidth;
-ValueLeft   := FLeft;
-UpDateObj(FHeight, FNeedHeight);
-UpDateObj(FTop,    FNeedTop);
-UpDateObj(FLeft,   FNeedLeft);
-UpDateObj(FWidth,  FNeedWidth);
+ValueTop    := FRealLocation.Top;
+ValueHeight := FRealLocation.Height;
+ValueWidth  := FRealLocation.Width;
+ValueLeft   := FRealLocation.Left;
+UpDateLocation();
 TestCoords();
-ValueHeight := FHeight - ValueHeight;
-ValueLeft   := FLeft   - ValueLeft;
-ValueTop    := FTop    - ValueTop;
-ValueWidth  := FWidth  - ValueWidth;
+ValueHeight := FRealLocation.Height - ValueHeight;
+ValueLeft   := FRealLocation.Left   - ValueLeft;
+ValueTop    := FRealLocation.Top    - ValueTop;
+ValueWidth  := FRealLocation.Width  - ValueWidth;
 for Component in Self do
 	begin
-	Component.FTop    -= ValueTop;
-	Component.FWidth  -= ValueWidth;
-	Component.FHeight -= ValueHeight;
-	Component.FLeft   -= ValueLeft;
+	Component.FRealLocation.Top    := Component.FRealLocation.Top    - ValueTop;
+	Component.FRealLocation.Width  := Component.FRealLocation.Width  - ValueWidth;
+	Component.FRealLocation.Height := Component.FRealLocation.Height - ValueHeight;
+	Component.FRealLocation.Left   := Component.FRealLocation.Left   - ValueLeft;
 	end;
-if FParent<>nil then
-	begin
-	FRealLeft := FParent.FRealLeft + FLeft + FParent.FLeftShiftForChilds;
-	FRealTop  := FParent.FRealTop  + FTop  + FParent.FTopShiftForChilds;
-	end;
+if (FParent <> nil) then
+	FRealPosition := FParent.FRealPosition + FRealLocation.Position + TSGComponentLocationVectorInt.Create(FParent.FBordersSize.Left, FParent.FBordersSize.Top);
 end;
 
-procedure TSGComponent.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGComponent.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 
 procedure PUpdateComponent(const Component : TSGComponent);
 begin
-Component.FromUpDateUnderCursor(CanRePleace, Component.CursorInComponent());
+Component.FromUpDateUnderCursor(Component.CursorInComponent());
 if Component.CursorInComponentCaption() then
-	Component.FromUpDateCaptionUnderCursor(CanRePleace);
+	Component.FromUpDateCaptionUnderCursor();
 end;
 
 var
@@ -1315,4 +1283,5 @@ else
 	FCurrent := nil;
 Result := FCurrent <> nil;
 end;
-{$ENDIF}
+
+end.

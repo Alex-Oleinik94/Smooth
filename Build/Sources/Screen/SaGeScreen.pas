@@ -1,6 +1,5 @@
 {$INCLUDE SaGe.inc}
 
-//{$DEFINE CLHINTS}
 //{$DEFINE SCREEN_DEBUG}
 
 unit SaGeScreen;
@@ -8,36 +7,11 @@ unit SaGeScreen;
 interface
 
 uses
-	 Crt
-	
-	,SaGeBase
-	,SaGeClasses
-	,SaGeImage
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeResourceManager
+	 SaGeBase
 	,SaGeCommonClasses
 	,SaGeScreenBase
-	,SaGeScreenSkin
-	,SaGeCursor
-	,SaGeCommonStructs
-	,SaGeContextUtils
+	,SaGeScreenComponent
 	;
-
-type
-	TSGForm             = class;
-	TSGButton           = class;
-	TSGProgressBar      = class;
-	TSGButtonMenu       = class;
-	TSGScrollBar        = class;
-	TSGComboBox         = class;
-	TSGGrid             = class;
-	TSGButtonMenuButton = class;
-	TSGScreen           = class;
-
-{$DEFINE SCREEN_INTERFACE}
-{$INCLUDE SaGeScreenComponents.inc}
-{$UNDEF  SCREEN_INTERFACE}
 
 type
 	TSGScreen = class(TSGComponent, ISGScreen)
@@ -51,8 +25,8 @@ type
 		procedure Load(const VContext : ISGContext);
 		procedure Resize();override;
 		procedure Paint();override;
-		procedure CustomPaint(VCanReplace : TSGBool);
-		function UpDateScreen() : TSGBoolean;
+		procedure CustomPaint();
+		procedure UpDateScreen();
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
@@ -89,19 +63,11 @@ implementation
 
 uses
 	 SaGeEngineConfigurationPanel
-	,SaGeContext
-	,SaGeEncodingUtils
-	,SaGeStringUtils
 	,SaGeLog
-	,SaGeBaseUtils
-	,SaGeMathUtils
-	,SaGeRenderInterface
-	,SaGeCommon
+	,SaGeRenderBase
+	,SaGeScreenSkin
+	,SaGeContextUtils
 	;
-
-{$DEFINE SCREEN_IMPLEMENTATION}
-{$INCLUDE SaGeScreenComponents.inc}
-{$UNDEF  SCREEN_IMPLEMENTATION}
 
 class function TSGScreened.ClassName() : TSGString;
 begin
@@ -148,7 +114,9 @@ else
 	Result := nil;
 end;
 
-// ====================================== TSGScreen
+// =======================
+// ====== TSGScreen ======
+// =======================
 
 constructor TSGScreen.Create();
 begin
@@ -164,13 +132,13 @@ end;
 
 procedure TSGScreen.Load(const VContext : ISGContext);
 begin
-{$IFDEF ANDROID}SGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
+{$IFDEF ANDROID}TSGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
 Context := VContext;
+SGKill(FSkin);
 FSkin := TSGScreenSkin.CreateRandom(Context);
-SetShifts(0, 0, 0, 0);
 Visible := True;
 Resize();
-{$IFDEF ANDROID}SGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
+{$IFDEF ANDROID}TSGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
 end;
 
 procedure TSGScreen.Resize();
@@ -178,12 +146,12 @@ begin
 if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	begin
 	SetBounds(0, 0, Render.Width, Render.Height);
-	BoundsToNeedBounds();
+	BoundsMakeReal();
 	FromResize();
 	end;
 end;
 
-procedure TSGScreen.CustomPaint(VCanReplace : TSGBool);
+procedure TSGScreen.CustomPaint();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
@@ -197,8 +165,6 @@ DrawDrawClasses();
 Render.LineWidth(1);
 Render.InitMatrixMode(SG_2D);
 
-VCanReplace:=False;
-
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Before drawing');
 	{$ENDIF}
@@ -210,24 +176,21 @@ FromDraw();
 InProcessing := False;
 end;
 
-function TSGScreen.UpDateScreen() : TSGBoolean;
+procedure TSGScreen.UpDateScreen();
 begin
 InProcessing := True;
-Result := True;
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor(CanRePleace);"');
 	{$ENDIF}
-FromUpDateUnderCursor(Result);
+FromUpDateUnderCursor();
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate(CanRePleace);"');
 	{$ENDIF}
-FromUpDate(Result);
+FromUpDate();
 InProcessing := False;
 end;
 
 procedure TSGScreen.Paint();
-var
-	CanRePleace : TSGBoolean;
 begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
@@ -243,9 +206,9 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 	Context.SetKey(SGNullKey, 0);
 	end;
 
-CanRePleace := UpDateScreen();
-Skin.IddleFunction();
-CustomPaint(CanRePleace);
+UpDateScreen();
+Skin.UpDate();
+CustomPaint();
 end;
 
 end.

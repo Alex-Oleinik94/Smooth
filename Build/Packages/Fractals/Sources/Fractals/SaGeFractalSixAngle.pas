@@ -9,7 +9,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeCommonClasses
 	,SaGeFractalForm
-	,SaGeScreen
+	,SaGeScreenHelper
 	;
 
 const
@@ -29,7 +29,7 @@ type
 		procedure PushIndexes(var MeshID : TSGUInt32; const v1, v2, v3, v4, v5, v6 : TSGVector2f; var FVertexIndex, FFaceIndex : TSGUInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetType(const NewType : TSGFractalSixAngleType);
 			protected
-		FTypeComboBox : TSGComboBox;
+		FTypeComboBox : TSGScreenComboBox;
 		FType : TSGFractalSixAngleType;
 		end;
 
@@ -86,7 +86,7 @@ if (NewType >= 0) and (NewType <= SGFractalSixAngleTypesCount - 1) and (NewType 
 	end;
 end;
 
-procedure TSGFractalSixAngle__SetType(a, b : TSGUInt32; Component : TSGComboBox);
+procedure TSGFractalSixAngle__SetType(a, b : TSGUInt32; Component : TSGScreenComboBox);
 begin
 TSGFractalSixAngle(Component.FUserPointer1).SetType(b);
 end;
@@ -101,13 +101,13 @@ FPrimetiveParam := 0;
 FType := Random(SGFractalSixAngleTypesCount);
 FDepth := 7;
 
-FTypeComboBox := TSGComboBox.Create();
+FTypeComboBox := TSGScreenComboBox.Create();
 Screen.CreateChild(FTypeComboBox);
 with FTypeComboBox do
 	begin
 	Anchors := [SGAnchRight];
 	SetBounds(Render.Width - 550, 5, 180, 30);
-	BoundsToNeedBounds();
+	BoundsMakeReal();
 	CreateItem('Треугольник');
 	CreateItem('Лист');
 	CreateItem('Геометрия');
@@ -117,7 +117,7 @@ with FTypeComboBox do
 	CreateItem('Случайная');
 	SelectItem := FType;
 	FUserPointer1 := Self;
-	CallBackProcedure := TSGComboBoxProcedure(@TSGFractalSixAngle__SetType);
+	CallBackProcedure := TSGScreenComboBoxProcedure(@TSGFractalSixAngle__SetType);
 	Visible := True;
 	Active := True;
 	end;

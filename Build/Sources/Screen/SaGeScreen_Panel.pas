@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeScreenBase
 	,SaGeScreen
+	,SaGeScreenComponent
 	;
 
 type
@@ -59,6 +60,7 @@ end;
 constructor TSGPanel.Create();
 begin
 inherited;
+SetBordersSize(5, 5, 5, 5);
 FViewLines := True;
 FViewQuad  := True;
 end;

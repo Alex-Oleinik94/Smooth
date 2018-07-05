@@ -12,7 +12,7 @@ uses
 	,SaGeBase
 	,SaGeLists
 	,SaGeContext
-	,SaGeScreen
+	,SaGeScreenHelper
 	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
@@ -27,13 +27,13 @@ uses
 type
 	TSGNotepad = class;
 	
-	TSGNInset = class(TSGComponent)
+	TSGNInset = class(TSGScreenComponent)
 			public
 		constructor Create();
 		destructor Destroy();override;
 			public
 		procedure FromDraw();override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			protected
 		FTitle : TSGString;
 		FTitleWidth : TSGLongWord;
@@ -52,13 +52,13 @@ type
 	
 	TSGNInsetList = packed array of TSGNInset;
 	
-	TSGNotepad = class(TSGComponent)
+	TSGNotepad = class(TSGScreenComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure FromUpDate(var FCanChange:Boolean);override;
-		procedure FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);override;
+		procedure FromUpDate();override;
+		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure FromDraw();override;
 		procedure FromResize();override;
 			private
@@ -105,6 +105,8 @@ uses
 	,SaGeRenderInterface
 	,SaGeCommon
 	,SaGeContextUtils
+	,SaGeScreen
+	,SaGeRectangleWithRoundedCorners
 	
 	,StrMan
 	;
@@ -120,7 +122,7 @@ inherited Create(VContext);
 FNotepad := TSGNotepad.Create();
 TSGScreen(Context.Screen).CreateChild(FNotepad);
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
-FNotepad.BoundsToNeedBounds();
+FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;
 FNotepad.AddMakeFile('.' + DirectorySeparator + '..' + DirectorySeparator + 'Build' + DirectorySeparator + 'Makefile');
 FNotepad.OpenMakefileProjects();
@@ -285,7 +287,7 @@ if CountInsets() >0 then
 	for i := 0 to CountInsets() - 1 do
 		begin
 		FInsets[i].SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
-		FInsets[i].BoundsToNeedBounds();
+		FInsets[i].BoundsMakeReal();
 		FInsets[i].FromResize();
 		end;
 end;
@@ -301,7 +303,7 @@ FCursorOnComponent := False;
 inherited;
 end;
 
-procedure TSGNInset.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGNInset.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;
@@ -438,7 +440,7 @@ FInsets[High(FInsets)] := VInset;
 CreateChild(VInset);
 VInset.Owner := Self;
 VInset.SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
-VInset.BoundsToNeedBounds();
+VInset.BoundsMakeReal();
 end;
 
 procedure TSGNotepad.AddFile(const VFileName : TSGString; const VLine : TSGLongWord = 0; const VColumn : TSGLongWord = 0);
@@ -471,7 +473,7 @@ SetLength(FInsets, 0);
 inherited;
 end;
 
-procedure TSGNotepad.FromUpDate(var FCanChange:Boolean);
+procedure TSGNotepad.FromUpDate();
 begin
 if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.KeyPressedByte = 9 {Tab}) and (Context.KeysPressed(SG_CTRL_KEY))) then
 	begin
@@ -483,7 +485,7 @@ if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.Key
 inherited;
 end;
 
-procedure TSGNotepad.FromUpDateUnderCursor(var CanRePleace:Boolean;const CursorInComponentNow:Boolean = True);
+procedure TSGNotepad.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
 begin
 inherited;
 end;

@@ -368,8 +368,6 @@ else
 end;
 
 procedure TSGContextGLUT.Paint();
-var
-	SCR : TSGBool;
 begin
 {$IFDEF GLUT_PAINT_DEBUG}
 	SGHint([ClassName(), '__Paint() : Begining, Before "UpdateTimer();"']);
@@ -378,7 +376,7 @@ begin
 	SGHint([ClassName(), '__Paint().']);
 {$ENDIF GLUT_DEBUG}
 {$ENDIF GLUT_PAINT_DEBUG}
-SCR := Screen.UpDateScreen();
+Screen.UpDateScreen();
 UpdateTimer();
 {$IFDEF GLUT_PAINT_DEBUG}
 	SGHint([ClassName(), 'Paint() : Before "Render.Clear(...);"']);
@@ -398,7 +396,7 @@ if FPaintable <> nil then
 {$IFDEF GLUT_PAINT_DEBUG}
 	SGHint([ClassName(), 'Paint() : Before "SGScreen.Paint();"']);
 	{$ENDIF}
-Screen.CustomPaint(SCR);
+Screen.CustomPaint();
 {$IFDEF GLUT_PAINT_DEBUG}
 	SGHint([ClassName(), 'Paint() : Before "SwapBuffers();"']);
 	{$ENDIF}

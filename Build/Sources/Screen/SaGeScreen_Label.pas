@@ -9,6 +9,7 @@ uses
 	,SaGeScreenBase
 	,SaGeScreen
 	,SaGeCommonStructs
+	,SaGeScreenComponent
 	;
 
 type

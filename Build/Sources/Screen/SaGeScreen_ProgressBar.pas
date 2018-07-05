@@ -1,7 +1,18 @@
-{$IFDEF SCREEN_INTERFACE}
+{$INCLUDE SaGe.inc}
+
+unit SaGeScreen_ProgressBar;
+
+interface
+
+uses
+	 SaGeBase
+	,SaGeScreenBase
+	,SaGeScreenComponent
+	,SaGeCommonStructs
+	;
+
 type
-	
-	TSGProgressBar=class(TSGComponent, ISGProgressBar)
+	TSGProgressBar = class(TSGComponent, ISGProgressBar)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -35,9 +46,13 @@ type
 		procedure DefaultColor();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function GetProgressPointer() : PSGProgressBarFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
-{$ENDIF}
 
-{$IFDEF SCREEN_IMPLEMENTATION}
+implementation
+
+uses
+	 SaGeMathUtils
+	;
+
 class function TSGProgressBar.ClassName() : TSGString; 
 begin
 Result := 'TSGProgressBar';
@@ -108,4 +123,5 @@ destructor TSGProgressBar.Destroy;
 begin
 inherited;
 end;
-{$ENDIF}
+
+end.
