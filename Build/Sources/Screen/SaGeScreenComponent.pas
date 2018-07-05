@@ -246,7 +246,7 @@ end;
 procedure TSGComponent.UpDateSkin();
 begin
 if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent.Skin <> FSkin))) then
-	Skin.IddleFunction();
+	Skin.UpDate();
 end;
 
 function TSGComponent.GetActive() : TSGBoolean;

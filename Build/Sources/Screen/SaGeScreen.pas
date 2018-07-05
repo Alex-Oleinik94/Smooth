@@ -134,6 +134,7 @@ procedure TSGScreen.Load(const VContext : ISGContext);
 begin
 {$IFDEF ANDROID}TSGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
 Context := VContext;
+SGKill(FSkin);
 FSkin := TSGScreenSkin.CreateRandom(Context);
 Visible := True;
 Resize();
@@ -206,7 +207,7 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
 	end;
 
 UpDateScreen();
-Skin.IddleFunction();
+Skin.UpDate();
 CustomPaint();
 end;
 

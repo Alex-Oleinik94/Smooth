@@ -200,10 +200,12 @@ if FNowDraw <> nil then
 	begin
 	FNowDraw.Destroy();
 	FNowDraw := nil;
+	FNowDrawable := False;
 	end;
 if FComboBox <> nil then
 	begin
 	FComboBox.FDrawClass := nil;
+	FComboBox.Skin.Font := nil;
 	FComboBox.MarkForDestroy();
 	FComboBox := nil;
 	end;

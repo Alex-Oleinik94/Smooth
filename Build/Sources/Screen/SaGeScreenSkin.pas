@@ -20,8 +20,6 @@ uses
 	;
 
 type
-	TSGScreenSkin = class;
-	
 	TSGScreenSkinColors = object
 		FNormal   : TSGScreenSkinFrameColor;
 		FClick    : TSGScreenSkinFrameColor;
@@ -43,20 +41,16 @@ type
 		procedure DeleteDeviceResources();override;
 		procedure LoadDeviceResources();override;
 			public
-		procedure IddleFunction(); virtual;
+		procedure UpDate(); virtual;
 		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupported : TSGBool = False) : TSGScreenSkin; overload;
-		function CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;
+		function CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload; deprecated;
 			protected
-		FOwner : TSGScreenSkin;
-		procedure CopyColors(var VColors : TSGScreenSkinColors); virtual;
-		property Owner : TSGScreenSkin read FOwner write FOwner;
-			protected
+		FOwner       : TSGScreenSkin;
 		FColors      : TSGScreenSkinColors;
 		FColorsTo    : TSGScreenSkinColors;
 		FColorsFrom  : TSGScreenSkinColors;
 		FColorsTimer : TSGScreenTimer;
-			protected
-		FFont : TSGFont;
+		FFont        : TSGFont;
 		FDestroyFontSuppored : TSGBool;
 		procedure CreateFont(); virtual;
 		procedure DestroyFont(); virtual;
@@ -64,13 +58,13 @@ type
 		function FontReady() : TSGBool; virtual;
 		function GetFont() : TSGFont;virtual;
 		procedure SetFont(const VFont : TSGFont); virtual;
+		property Owner : TSGScreenSkin read FOwner write FOwner;
 			public
 		property DestroyFontSuppored : TSGBool read FDestroyFontSuppored write FDestroyFontSuppored;
 		property Font : TSGFont read GetFont write SetFont;
+		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
 		FComboBoxImage : TSGImage;
-			public
-		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
 		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5); virtual;
 			public
@@ -81,8 +75,11 @@ type
 		procedure PaintEdit(constref Edit : ISGEdit); virtual;
 		procedure PaintProgressBar(constref ProgressBar : ISGProgressBar); virtual;
 		end;
+	TSGScreenSkinClass = class of TSGScreenSkin;
 const
 	SGScreenSkinDefaultFontFileName = SGFontDirectory + DirectorySeparator + 'Tahoma.sgf';
+
+procedure SGKill(var Skin : TSGScreenSkin); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 function SGScreenSkinFrameColorImport(const VFirst, VSecond : TSGColor4f ): TSGScreenSkinFrameColor; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGStandartSkinColors() : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -103,6 +100,15 @@ uses
 	,SaGeTextVertexObject
 	,SaGeRectangleWithRoundedCorners
 	;
+
+procedure SGKill(var Skin : TSGScreenSkin); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (Skin <> nil) then
+	begin
+	Skin.Destroy();
+	Skin := nil;
+	end;
+end;
 
 operator + (const A, B : TSGScreenSkinColors) : TSGScreenSkinColors;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -202,7 +208,7 @@ if Random(2) = 1 then
 	end;
 end;
 
-procedure TSGScreenSkin.IddleFunction();
+procedure TSGScreenSkin.UpDate();
 begin
 if FOwner = nil then
 	begin
@@ -218,7 +224,7 @@ if FOwner = nil then
 		FColors := FColorsFrom * (1 - FColorsTimer) + FColorsTo * FColorsTimer;
 	end
 else
-	FOwner.CopyColors(FColors);
+	FColors := FOwner.Colors;
 end;
 
 constructor TSGScreenSkin.CreateRandom(const VContext : ISGContext);
@@ -251,18 +257,13 @@ begin
 Result.Import(VFirst, VSecond);
 end;
 
-procedure TSGScreenSkin.CopyColors(var VColors : TSGScreenSkinColors); 
-begin
-VColors := FColors;
-end;
-
 function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupported : TSGBool = False) : TSGScreenSkin; overload;
 begin
 Result := TSGScreenSkin.Create(Context);
 Result.Font  := VFont;
 Result.Owner := Self;
 Result.DestroyFontSuppored := VDestroyFontSupported;
-Result.IddleFunction();
+Result.UpDate();
 end;
 
 function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFontFileName : TSGString) : TSGScreenSkin; overload;
@@ -338,7 +339,9 @@ end;
 procedure TSGScreenSkin.DestroyFont();
 begin
 if FDestroyFontSuppored then
-	SGKill(FFont);
+	SGKill(FFont)
+else
+	FFont := nil;
 end;
 
 function TSGScreenSkin.FontReady() : TSGBool;
