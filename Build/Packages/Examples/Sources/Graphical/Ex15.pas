@@ -79,6 +79,7 @@ type
 			FM100Button : TSGScreenButton;
 		FFont : TSGFont;
 		FCountLabel : TSGScreenLabel;
+		FHelpLabel : TSGScreenLabel;
 		
 		FLightsCount : TSGLongWord;
 		FLightsSettings : packed array of
@@ -318,8 +319,15 @@ if Render.SupporedShaders() then
 	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
 	
 	FCountLabel := SGCreateLabel(
-		Screen, 'Количество моделей: ' + SGStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
+		Screen, 'Models count: ' + SGStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
 		FFont, [SGAnchRight], True, True);
+	FHelpLabel := SGCreateLabel(Screen,
+		'Press C to change camera mode;' + SGWinEoln +
+		'Use WASD to move camera;' + SGWinEoln +
+		'Use Mouse or QE to rotate camera;' + SGWinEoln +
+		'Use Space or X to move up or down.', 
+		Render.Width - 250, Render.Height - (FFont.FontHeight + 2) * 4 - 10, 240, (FFont.FontHeight + 2) * 4,
+		FFont, [SGAnchRight, SGAnchBottom], True, True);
 	
 	FStoneImageD := TSGImage.Create(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
 	FStoneImageD.Context := Context;
@@ -372,6 +380,8 @@ if (FM100Button <> nil) then
 	FM100Button.Destroy();
 if (FCountLabel <> nil) then
 	FCountLabel.Destroy();
+if (FHelpLabel <> nil) then
+	FHelpLabel.Destroy();
 
 if FFont <> nil then
 	FFont.Destroy();

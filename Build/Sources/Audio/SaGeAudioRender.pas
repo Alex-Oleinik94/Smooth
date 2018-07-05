@@ -8,7 +8,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeCommonStructs
 	,SaGeAudioRenderInterface
 	,SaGeAudioDecoder

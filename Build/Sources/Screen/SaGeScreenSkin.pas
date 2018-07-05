@@ -5,15 +5,14 @@ unit SaGeScreenSkin;
 interface
 
 uses
-	 Crt
-	
-	,SaGeBase
-	,SaGeClasses
+	 SaGeBase
+	,SaGeBaseClasses
 	,SaGeImage
 	,SaGeFont
 	,SaGeRenderBase
 	,SaGeResourceManager
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeScreenBase
 	,SaGeFileUtils
 	,SaGeCommonStructs
@@ -28,7 +27,7 @@ type
 		FText     : TSGScreenSkinFrameColor;
 		end;
 	
-	TSGScreenSkin = class(TSGDrawable)
+	TSGScreenSkin = class(TSGContextObject)
 			public
 		constructor Create(const VContext : ISGContext);override; 
 		constructor Create(const VContext : ISGContext; const VColors : TSGScreenSkinColors);virtual;
@@ -38,8 +37,8 @@ type
 			protected
 		FDeviceResourcesDeleted : TSGBool;
 			public
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			public
 		procedure UpDate(); virtual;
 		function CreateDependentSkinWithAnotherFont(const VFont : TSGFont; const VDestroyFontSupported : TSGBool = False) : TSGScreenSkin; overload;
@@ -65,8 +64,10 @@ type
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
 		FComboBoxImage : TSGImage;
+		FMemoryBuffersSuppored : TSGBoolean;
 			protected
 		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5); virtual;
+		procedure PaintText(const Text : TSGString; const Location : TSGComponentLocation; const Color : TSGColor4f; const WidthCentered : TSGBoolean = True; const HeightCentered : TSGBoolean = True); virtual;
 			public
 		procedure PaintButton(constref Button : ISGButton); virtual;
 		procedure PaintPanel(constref Panel : ISGPanel); virtual;
@@ -288,22 +289,22 @@ Result := SGGenerateRandomSkinColors(Colors);
 until Result <> Colors;
 end;
 
-procedure TSGScreenSkin.DeleteDeviceResources();
+procedure TSGScreenSkin.DeleteRenderResources();
 begin
 if FDeviceResourcesDeleted then
 	Exit;
-FFont.DeleteDeviceResources();
-FComboBoxImage.DeleteDeviceResources();
+FFont.DeleteRenderResources();
+FComboBoxImage.DeleteRenderResources();
 FDeviceResourcesDeleted := True;
 inherited;
 end;
 
-procedure TSGScreenSkin.LoadDeviceResources();
+procedure TSGScreenSkin.LoadRenderResources();
 begin
 if not FDeviceResourcesDeleted then
 	Exit;
-FFont.LoadDeviceResources();
-FComboBoxImage.LoadDeviceResources();
+FFont.LoadRenderResources();
+FComboBoxImage.LoadRenderResources();
 FDeviceResourcesDeleted := False;
 inherited;
 end;
@@ -319,6 +320,7 @@ FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 FComboBoxImage := TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'ComboBoxImage.sgia');
 FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
+FMemoryBuffersSuppored := Render.SupporedMemoryBuffers();
 
 FDeviceResourcesDeleted := False;
 FDestroyFontSuppored := True;
@@ -390,6 +392,22 @@ Position.Import(Location.Position.x, Location.Position.y);
 PositionAndSize.Import(Location.Size.x, Location.Size.y);
 PositionAndSize += Position;
 SGRoundQuad(Render, Position, PositionAndSize, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
+end;
+
+procedure TSGScreenSkin.PaintText(const Text : TSGString; const Location : TSGComponentLocation; const Color : TSGColor4f; const WidthCentered : TSGBoolean = True; const HeightCentered : TSGBoolean = True);
+var
+	Color4uint8 : TSGVector4uint8;
+begin
+if FMemoryBuffersSuppored then
+	begin
+	Color4uint8 := SGColor4fTo4uint8(Color);
+	TSGTextVertexObject.Paint(Text, Render, Font, Color4uint8, Location.FloatPosition, Location.FloatPositionAndSize, WidthCentered, HeightCentered)
+	end
+else
+	begin
+	Render.Color(Color);
+	Font.DrawFontFromTwoVertex2f(Text, Location.FloatPosition, Location.FloatPositionAndSize, WidthCentered, HeightCentered);
+	end;
 end;
 
 procedure TSGScreenSkin.PaintPanel(constref Panel : ISGPanel);
@@ -469,10 +487,7 @@ if  (ActiveTimer>SGZero) and
 		FColors.FClick.FSecond.WithAlpha(0.3*VisibleTimer*ClickTimer*ActiveTimer)*1.3,
 		True);
 if (Button.Caption<>'') and FontReady and (VisibleTimer>SGZero) then
-	begin
-	Render.Color(FColors.FText.FFirst.WithAlpha(VisibleTimer));
-	Font.DrawFontFromTwoVertex2f(Button.Caption, Location.FloatPosition, Location.FloatPositionAndSize);
-	end;
+	PaintText(Button.Caption, Location, FColors.FText.FFirst.WithAlpha(VisibleTimer));
 end;
 
 procedure TSGScreenSkin.PaintComboBox(constref ComboBox : ISGComboBox);
@@ -493,16 +508,15 @@ var
 
 procedure PaintItem(const ItemLocation : TSGComponentLocation; var Item : TSGComboBoxItem); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-procedure SetSelectedTextColor(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	SelectedTextColor : TSGVertex4f;
+function GetSelectedTextColor() : TSGVector4f; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-SelectedTextColor := FColors.FNormal.FFirst;
-TSGColor3f(SelectedTextColor) := SelectedTextColor.Normalized();
-SelectedTextColor.a := OpenTimer;
-Render.Color(SelectedTextColor);
+Result := FColors.FNormal.FFirst;
+TSGColor3f(Result) := Result.Normalized();
+Result.a := OpenTimer;
 end;
 
+var
+	ItemTextColor : TSGVector4f;
 begin
 if Item.Over then
 	begin
@@ -511,14 +525,14 @@ if Item.Over then
 		FColors.FOver.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * (1 - ClickTimer) + FColors.FClick.FSecond.WithAlpha(0.3*OpenTimer)*1.3 * ClickTimer);
 	end;
 if Item.Selected and (not Item.Over) and Item.Active then
-	SetSelectedTextColor()
+	ItemTextColor := GetSelectedTextColor()
 else if Item.Selected and Item.Over and Item.Active then
-	Render.Color(GetTextColor(1 - OverTimer))
+	ItemTextColor := GetTextColor(1 - OverTimer)
 else if Item.Active then
-	Render.Color(TextColor)
+	ItemTextColor := TextColor
 else
-	Render.Color(DisabledTextColor);
-Font.DrawFontFromTwoVertex2f(Item.Caption, ItemLocation.FloatPosition, ItemLocation.FloatPositionAndSize);
+	ItemTextColor := DisabledTextColor;
+PaintText(Item.Caption, ItemLocation,	 ItemTextColor);
 end;
 
 function GetScrollLocation() : TSGComponentLocation;  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -541,7 +555,7 @@ end;
 var
 	NeedPaintScroll : TSGBool;
 	BodyColor : TSGVertex4f;
-	i : TSGUInt32;
+	Index : TSGMaxEnum;
 begin
 BodyColor := (FColors.FText.FSecond * (1 - OverTimer) + FColors.FText.FFirst * (OverTimer)) * 0.5 + 0.5 * FColors.FText.FFirst;
 BodyColor *= 0.8;
@@ -562,11 +576,13 @@ if ComboBox.LinesCount > 0 then
 			BodyColor.WithAlpha(OpenTimer),
 			BodyColor.WithAlpha(OpenTimer)*1.3);
 	
-	for i := 0 to ComboBox.LinesCount - 1 do
-		PaintItem(GetItemLocation(i, NeedPaintScroll), ComboBox.Items[i + ComboBox.FirstItemIndex]);
+	for Index := 0 to ComboBox.LinesCount - 1 do
+		PaintItem(GetItemLocation(Index, NeedPaintScroll), ComboBox.Items[Index + ComboBox.FirstItemIndex]);
 	end;
 end;
 
+var
+	MainItemColor : TSGVector4f;
 begin
 Location := ComboBox.GetLocation();
 
@@ -610,17 +626,20 @@ else
 
 if 1 - OpenTimer > SGZero then
 	begin
-	if (FComboBoxImage<>nil) then
+	MainItemColor := FColors.FText.FFirst.WithAlpha(Sqr((1 - OpenTimer) * VisibleTimer));
+	
+	if (FComboBoxImage <> nil) then
 		begin
-		Render.Color(FColors.FText.FFirst.WithAlpha(Sqr((1 - OpenTimer) * VisibleTimer)));
+		Render.Color(MainItemColor);
 		
 		FComboBoxImage.DrawImageFromTwoVertex2fAsRatio(
 			TextLocation.FloatPositionAndSize - TSGComponentLocationVectorFloat.Create(Location.SizeY, TextLocation.SizeY),
 			TextLocation.FloatPositionAndSize,
 			False,0.5);
 		end;
-	if (ComboBox.GetSelectedItem() <> nil) and (Font <> nil) then
-		Font.DrawFontFromTwoVertex2f(ComboBox.GetSelectedItem()^.Caption, TextLocation.FloatPosition, TextLocation.FloatPositionAndSize);
+	
+	if (ComboBox.GetSelectedItem() <> nil) then
+		PaintText(ComboBox.GetSelectedItem()^.Caption, TextLocation, MainItemColor);
 	end;
 end;
 
@@ -628,7 +647,6 @@ procedure TSGScreenSkin.PaintLabel(constref VLabel : ISGLabel);
 var
 	Location : TSGComponentLocation;
 	Color4f     : TSGVector4f;
-	Color4uint8 : TSGVector4uint8;
 begin
 if (VLabel.Caption <> '') and FontReady then
 	begin
@@ -637,19 +655,13 @@ if (VLabel.Caption <> '') and FontReady then
 		Color4f := VLabel.TextColor.WithAlpha(VLabel.VisibleTimer)
 	else
 		Color4f := FColors.FText.FFirst.WithAlpha(VLabel.VisibleTimer);
-	Color4uint8 := SGColor4fTo4uint8(Color4f);
-	TSGTextVertexObject.Paint(
-		VLabel.Caption,
-		Render, Font,
-		Color4uint8,
-		Location.FloatPosition, Location.FloatPositionAndSize,
-		VLabel.TextPosition, True);
+	PaintText(VLabel.Caption, Location, Color4f, VLabel.TextPosition, True);
 	end;
 end;
 
 procedure TSGScreenSkin.PaintEdit(constref Edit : ISGEdit); 
 var
-	Location : TSGComponentLocation;
+	TextLocation, Location : TSGComponentLocation;
 	Active, Visible : TSGBool;
 	ActiveTimer, VisibleTimer, OverTimer, TextCompliteTimer : TSGScreenTimer;
 	
@@ -688,12 +700,15 @@ if  (ActiveTimer>SGZero) and
 
 if FontReady and (Edit.Caption <> '') then
 	begin
-	Render.Color4f(1, 1, 1, VisibleTimer);
-	Font.DrawFontFromTwoVertex2f(Edit.Caption, Location.FloatPosition + SGX(3), Location.FloatPositionAndSize - SGX(6), False);
+	TextLocation := Location;
+	TextLocation.Left := TextLocation.Left + 3;
+	TextLocation.Width := TextLocation.Width - 9;
+	
+	PaintText(Edit.Caption, TextLocation, TSGVector4f.Create(1, 1, 1, VisibleTimer), False);
 	if (Edit.CursorTimer > 0) and Edit.NowEditing then
 		begin
 		Render.Color4f(1, 0.5, 0, VisibleTimer * Edit.CursorTimer);
-		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, Location.FloatPosition + SGX(3), Location.FloatPositionAndSize - SGX(6), False);
+		Font.DrawCursorFromTwoVertex2f(Edit.Caption, Edit.CursorPosition, TextLocation.FloatPosition, TextLocation.FloatPositionAndSize, False);
 		end;
 	end;
 end;
@@ -737,12 +752,8 @@ if ProgressBar.ViewProgress then
 	end;
 
 if FontReady and ProgressBar.ViewCaption then 
-	begin
-	Render.Color4f(1, 1, 1, VisibleTimer);
-	Font.DrawFontFromTwoVertex2f(
-		SGStringIf(ProgressBar.ViewCaption, ProgressBar.Caption + ' ') + SGFloatToString(100 * ProgressBar.Progress , 2) + '%',
-		Location.FloatPosition, Location.FloatPositionAndSize);
-	end;
+	PaintText(SGStringIf(ProgressBar.ViewCaption, ProgressBar.Caption + ' ') + SGFloatToString(100 * ProgressBar.Progress , 2) + '%', 
+		Location, TSGVector4f.Create(1, 1, 1, VisibleTimer));
 end;
 
 end.

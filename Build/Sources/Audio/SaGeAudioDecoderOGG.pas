@@ -6,7 +6,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeCommon
 	,SaGeAudioDecoder
 	,SaGeLists

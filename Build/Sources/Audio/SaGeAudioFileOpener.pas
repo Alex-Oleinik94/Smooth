@@ -8,7 +8,7 @@ uses
 	
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeFileOpener
 	,SaGeContext
 	,SaGeLoading

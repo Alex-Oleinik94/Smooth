@@ -8,11 +8,12 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeRenderBase
 	,SaGeRenderInterface
 	,SaGeMatrix
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
 	;
 
 type
@@ -27,8 +28,8 @@ type
 		function GetWidth() : TSGAreaInt;virtual;
 		function GetHeight() : TSGAreaInt;virtual;
 			private
-		procedure SetContext(const VContext : ISGNearlyContext);
-		function  GetContext() : ISGNearlyContext;
+		procedure SetContext(const VContext : ISGBaseContext);
+		function  GetContext() : ISGBaseContext;
 		procedure SetWidth(const VWidth : TSGAreaInt);virtual;abstract;
 		procedure SetHeight(const VHeight : TSGAreaInt);virtual;abstract;
 		function  GetOption(const VOption : TSGString) : TSGPointer;virtual;abstract;
@@ -36,7 +37,7 @@ type
 		procedure Paint();virtual;abstract;
 			private
 		FType   : TSGRenderType;
-		FContext : ISGNearlyContext;
+		FContext : ISGBaseContext;
 			protected
 		procedure SetRenderType(const VType : TSGRenderType);
 			public
@@ -47,7 +48,8 @@ type
 		procedure Viewport(const a,b,c,d : TSGAreaInt);virtual;abstract;
 		procedure Init();virtual;abstract;
 		procedure Kill();virtual;abstract;
-		function SupporedVBOBuffers():TSGBoolean;virtual;
+		function SupporedGraphicalBuffers() : TSGBoolean; virtual;
+		function SupporedMemoryBuffers() : TSGBoolean; virtual;
 		procedure SwapBuffers();virtual;abstract;
 		procedure LockResources();virtual;
 		procedure UnLockResources();virtual;
@@ -55,7 +57,7 @@ type
 		property Width : TSGAreaInt read GetWidth write SetWidth;
 		property Height : TSGAreaInt read GetHeight write SetHeight;
 		property RenderType : TSGRenderType read FType;
-		property Context : ISGNearlyContext read GetContext write SetContext;
+		property Context : ISGBaseContext read GetContext write SetContext;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);virtual;abstract;
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);virtual;abstract;
@@ -237,12 +239,12 @@ begin
 Result := FType;
 end;
 
-procedure TSGRender.SetContext(const VContext : ISGNearlyContext);
+procedure TSGRender.SetContext(const VContext : ISGBaseContext);
 begin
 FContext := VContext;
 end;
 
-function TSGRender.GetContext() : ISGNearlyContext;
+function TSGRender.GetContext() : ISGBaseContext;
 begin
 Result := FContext;
 end;
@@ -277,7 +279,12 @@ begin
 SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited method!!');
 end;
 
-function TSGRender.SupporedVBOBuffers():Boolean;
+function TSGRender.SupporedMemoryBuffers() : TSGBoolean;
+begin
+Result:=False;
+end;
+
+function TSGRender.SupporedGraphicalBuffers() : TSGBoolean;
 begin
 Result:=False;
 end;

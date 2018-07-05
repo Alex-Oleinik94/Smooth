@@ -9,7 +9,7 @@ interface
 uses
 	// Engine
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeAudioRender
 	,SaGeAudioDecoder
 	,SaGeCommonStructs

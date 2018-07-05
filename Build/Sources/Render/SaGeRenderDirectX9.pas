@@ -12,7 +12,8 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
+	,SaGeBaseContextInterface
 	,SaGeMatrix
 	,SaGeCommonStructs
 	
@@ -53,7 +54,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedVBOBuffers:Boolean;override;
+		function SupporedGraphicalBuffers() : TSGBoolean; override;
+		function SupporedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -588,9 +590,14 @@ SGR_LINES:
 end;
 end;
 
-function TSGRenderDirectX9.SupporedVBOBuffers():Boolean;
+function TSGRenderDirectX9.SupporedMemoryBuffers() : TSGBoolean;
 begin
-Result:=True;
+Result := True;
+end;
+
+function TSGRenderDirectX9.SupporedGraphicalBuffers() : TSGBoolean;
+begin
+Result := True;
 end;
 
 procedure TSGRenderDirectX9.PointSize(const PS:Single);

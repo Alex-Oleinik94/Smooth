@@ -10,7 +10,7 @@ uses
 	 SaGeCommon
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeSysUtils
 	;
 

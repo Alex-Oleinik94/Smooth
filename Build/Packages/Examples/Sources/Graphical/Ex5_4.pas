@@ -11,10 +11,13 @@ uses
 		{$ENDIF}
 	 SaGeCommonClasses
 	,SaGeBase
+	,SaGeFileUtils
 	,SaGeFont
 	,SaGeRenderBase
 	,SaGeCommonStructs
+	,SaGeScreenBase
 	,SaGeScreen
+	,SaGeScreenHelper
 	,SaGeMesh
 	,SaGeDateTime
 	,SaGeCamera
@@ -50,6 +53,9 @@ type
 		FBike             : TSGCustomModel;
 		
 		FGravitationFlag : TSGBoolean;
+		
+		FFont : TSGFont;
+		FHelpLabel : TSGScreenLabel;
 			private
 		procedure KeyControl();
 		end;
@@ -60,7 +66,7 @@ type
 
 class function TSGExample5_4.ClassName():TSGString;
 begin
-Result := 'Пример физического движка №4';
+Result := 'Пример физического движка PAPPE';
 end;
 
 constructor TSGExample5_4.Create(const VContext : ISGContext);
@@ -106,9 +112,6 @@ begin
 inherited Create(VContext);
 FBike := nil;
 FGravitationFlag := False;
-
-Context.CursorCentered := True;
-Context.ShowCursor(False);
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
@@ -167,6 +170,19 @@ FPhysics.Start();
 
 FGravitationAngle:=pi;
 FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
+
+FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FFont.SetContext(Context);
+FFont.Loading();
+FFont.ToTexture();
+
+FHelpLabel := SGCreateLabel(Screen,
+	'Press C to change camera mode;' + SGWinEoln +
+	'Use WASD to move camera;' + SGWinEoln +
+	'Use Mouse or QE to rotate camera;' + SGWinEoln +
+	'Use Space or X to move up or down.', 
+	Render.Width - 250, Render.Height - (FFont.FontHeight + 2) * 4 - 10, 240, (FFont.FontHeight + 2) * 4,
+	FFont, [SGAnchRight, SGAnchBottom], True, True);
 end;
 
 destructor TSGExample5_4.Destroy();
@@ -177,6 +193,10 @@ if FCamera <> nil then
 	FCamera.Destroy();
 if FPhysics<>nil then
 	FPhysics.Destroy();
+if FHelpLabel<>nil then
+	FHelpLabel.Destroy();
+if FFont<>nil then
+	FFont.Destroy();
 inherited;
 end;
 
@@ -198,13 +218,13 @@ if FPhysics<>nil then
 
 if (not FGravitationFlag) then
 	begin
-	FGravitationAngle += Context.ElapsedTime/100;
+	FGravitationAngle += Context.ElapsedTime/500;
 	if FGravitationAngle>2*pi then
 		FGravitationAngle -= 2*pi;
 	FPhysics.SetGravitation(SGVertex3fImport(
-		GravitationConst*sin(FGravitationAngle),
-		GravitationConst*cos(FGravitationAngle),
-		GravitationConst*sin(FGravitationAngle*3)));
+		GravitationConst*sin(-FGravitationAngle),
+		GravitationConst*cos(-FGravitationAngle),
+		GravitationConst*sin(-FGravitationAngle*3)));
 	end;
 
 if FPhysics<>nil then
@@ -260,7 +280,7 @@ var
 	Q, E : TSGBoolean;
 	RotateZ : TSGFloat = 0;
 begin
-if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
+if (Context.KeyPressed and (Context.KeyPressedChar = 'C') and (Context.KeyPressedType = SGUpKey)) then
 	begin
 	Context.CursorCentered := not Context.CursorCentered;
 	Context.ShowCursor(not Context.CursorCentered);

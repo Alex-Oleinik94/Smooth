@@ -13,7 +13,8 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
+	,SaGeBaseContextInterface
 	,SaGeMatrix
 	,SaGeCommonStructs
 	
@@ -51,7 +52,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedVBOBuffers:Boolean;override;
+		function SupporedGraphicalBuffers() : TSGBoolean; override;
+		function SupporedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -587,10 +589,16 @@ SGR_LINES:
 end;
 end;
 
-function TSGRenderDirectX8.SupporedVBOBuffers():Boolean;
+function TSGRenderDirectX8.SupporedGraphicalBuffers() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedVBOBuffers'); {$ENDIF}
-Result:=False;
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedGraphicalBuffers'); {$ENDIF}
+Result := False;
+end;
+
+function TSGRenderDirectX8.SupporedMemoryBuffers() : TSGBoolean;
+begin
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedMemoryBuffers'); {$ENDIF}
+Result := True;
 end;
 
 procedure TSGRenderDirectX8.PointSize(const PS:Single);

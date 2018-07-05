@@ -12,8 +12,9 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeMatrix
+	,SaGeBaseContextInterface
 	
 	// OS units
 	,crt
@@ -46,7 +47,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedVBOBuffers:Boolean;override;
+		function SupporedGraphicalBuffers() : TSGBoolean; override;
+		function SupporedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -215,7 +217,12 @@ begin
 
 end;
 
-function TSGRenderDirectX12.SupporedVBOBuffers():Boolean;
+function TSGRenderDirectX12.SupporedMemoryBuffers():Boolean;
+begin
+Result:=False;
+end;
+
+function TSGRenderDirectX12.SupporedGraphicalBuffers():Boolean;
 begin
 Result:=False;
 end;

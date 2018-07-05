@@ -8,7 +8,8 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeScreenBase
 	,SaGeScreenComponent
 	;

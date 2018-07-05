@@ -22,7 +22,7 @@ uses
 	
 	,SaGeBase
 	,SaGeSysUtils
-	,SaGeClasses
+	,SaGeBaseClasses
 	;
 
 {$IFDEF ANDROID}

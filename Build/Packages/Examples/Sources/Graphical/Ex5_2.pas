@@ -1,3 +1,4 @@
+// DEPRECATED EXAPLE
 {$INCLUDE SaGe.inc}
 {$IFDEF ENGINE}
 	unit Ex5_2;

@@ -8,13 +8,15 @@ uses
 	 Crt
 	
 	,SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeImage
 	,SaGeFont
 	,SaGeRenderBase
 	,SaGeResourceManager
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
+	,SaGeContextInterface
 	;
 type
 	SGFrameButtonsType = type TSGByte;
@@ -179,6 +181,8 @@ type
 		function GetActive() : TSGBoolean;
 		function GetVisible() : TSGBoolean;
 
+		function GetTitle() : TSGString;
+		
 		property Caption : TSGCaption read GetTitle;
 		property Active : TSGBoolean read GetActive;
 		property Visible : TSGBoolean read GetVisible;

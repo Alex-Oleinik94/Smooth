@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeFont
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeCommonStructs
 	,SaGeRenderInterface
 	,SaGeImage
@@ -27,7 +27,9 @@ type
 		FVertexesCount : TSGMaxEnum;
 		FSizeOfOneVertex : TSGMaxEnum;
 		FUseColors : TSGBoolean;
-		FTextWidth : TSGFloat32;
+		FMaxTextWidth : TSGMaxEnum;
+		FTextWidth : TSGMaxEnum;
+		FTextHeight : TSGMaxEnum;
 			protected
 		procedure SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont); overload;
 		procedure SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont; const Color : TSGVector4uint8); overload;
@@ -80,6 +82,8 @@ FSizeOfOneVertex := 0;
 FUseColors := False;
 FTextWidth := 0;
 FVertexesCount := 0;
+FMaxTextWidth := 0;
+FTextHeight := 0;
 end;
 
 class function TSGTextVertexObject.Create(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont) : TSGTextVertexObject;
@@ -96,11 +100,11 @@ if (FVertexes <> nil) then
 	begin
 	Render.PushMatrix();
 	if WidthCentered then
-		WidthShift := (Abs(Vector1.x - Vector0.x) - FTextWidth) * 0.5
+		WidthShift := (Abs(Vector1.x - Vector0.x) - FMaxTextWidth) * 0.5
 	else
 		WidthShift := 0;
 	if HeightCentered then
-		HeightShift := (Abs(Vector1.y - Vector0.y) - Font.FontHeight) * 0.5
+		HeightShift := (Abs(Vector1.y - Vector0.y) - (FTextHeight + Font.FontHeight)) * 0.5
 	else
 		HeightShift := 0;
 	Render.Translatef(Vector0.x + WidthShift, Vector0.y + HeightShift, 0);
@@ -129,7 +133,7 @@ var
 begin
 X0 := FTextWidth;
 X1 := X0 + SymbolParam.Width;
-Y0 := 0;
+Y0 := FTextHeight;
 Y1 := Y0 + Font.FontHeight;
 
 Symbol.Vectors[0].Import(X0, Y0);
@@ -173,11 +177,16 @@ if FUseColors then
 	Symbol.Color := Color;
 SetSymbol(SymbolNumber, Symbol);
 FTextWidth += SymbolParam.Width;
+if (FTextWidth > FMaxTextWidth) then
+	FMaxTextWidth := FTextWidth;
 end;
 
 var
 	i : TSGMaxEnum;
 	RenderIsDirectX : TSGBoolean;
+	Eolns13 : TSGMaxEnum = 0;
+	Eolns10 : TSGMaxEnum = 0;
+	Eolns : TSGMaxEnum = 0;
 begin
 if (Font = nil) or (Render = nil) or (Text = '') then
 	Exit;
@@ -193,8 +202,28 @@ if (FVertexes <> nil) then
 	end;
 GetMem(FVertexes, FSizeOfOneVertex * FVertexesCount);
 FTextWidth := 0;
+FTextHeight := 0;
+FMaxTextWidth := 0;
 for i := 1 to Length(Text) do
-	SetSymbolData(i, Font.SymbolParams[Text[i]], RenderIsDirectX);
+	if (Text[i] = #10) or (Text[i] = #13) then
+		begin
+		Eolns := Max(Eolns13, Eolns10);
+		if (Text[i] = #10) then
+			Eolns10 += 1
+		else if (Text[i] = #13) then
+			Eolns13 += 1;
+		if (Eolns < Max(Eolns13, Eolns10)) then
+			begin
+			FTextHeight += Font.FontHeight + 1;
+			FTextWidth := 0;
+			end;
+		end
+	else
+		begin
+		Eolns10 := 0;
+		Eolns13 := 0;
+		SetSymbolData(i, Font.SymbolParams[Text[i]], RenderIsDirectX);
+		end;
 end;
 
 procedure TSGTextVertexObject.SetSymbol(const SymbolNumber : TSGMaxEnum; const Symbol : TSGTextVertexObjectSymbol);
@@ -260,6 +289,9 @@ if (FVertexes <> nil) then
 FUseColors := False;
 FVertexesCount := 0;
 FSizeOfOneVertex := 0;
+FMaxTextWidth := 0;
+FTextWidth := 0;
+FTextHeight := 0;
 end;
 
 end.

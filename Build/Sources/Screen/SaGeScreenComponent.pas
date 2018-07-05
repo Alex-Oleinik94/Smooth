@@ -7,10 +7,11 @@ interface
 uses
 	 SaGeBase
 	,SaGeScreenBase
-	,SaGeClasses
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
 	,SaGeScreenSkin
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
 	;
 type
 	TSGComponent = class;
@@ -42,7 +43,7 @@ type
 	TSGComponentList      = packed array of TSGComponent;
 	TSGComponentListList  = packed array of TSGComponentList;
 	TSGComponentProcedure = procedure (Component : TSGComponent);
-	TSGComponent          = class(TSGContextabled, ISGDeviceDependent, ISGComponent)
+	TSGComponent          = class(TSGContextObject, ISGComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -57,9 +58,9 @@ type
 			public
 			// ISGDeviceDependent declaration
 		procedure Paint(); virtual;
-		procedure DeleteDeviceResources();virtual;
+		procedure DeleteRenderResources();override;
 		procedure Resize(); virtual;
-		procedure LoadDeviceResources();virtual;
+		procedure LoadRenderResources();override;
 		function Suppored() : TSGBoolean;virtual;
 			protected
 		FLocation : TSGComponentLocation;
@@ -213,9 +214,9 @@ type
 			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
-		FDrawClass:TSGDrawable;
+		FDrawClass:TSGPaintableObject;
 			public
-		property DrawClass : TSGDrawable read FDrawClass write FDrawClass;
+		property DrawClass : TSGPaintableObject read FDrawClass write FDrawClass;
 			public
 		procedure DrawDrawClasses();virtual;
 			public
@@ -829,28 +830,28 @@ if FComponentProcedure<>nil then
 	FComponentProcedure(Self);
 end;
 
-procedure TSGComponent.DeleteDeviceResources();
+procedure TSGComponent.DeleteRenderResources();
 var
 	Component : TSGComponent;
 begin
 if FSkin <> nil then
-	FSkin.DeleteDeviceResources();
+	FSkin.DeleteRenderResources();
 if FDrawClass <> nil then
-	FDrawClass.DeleteDeviceResources();
+	FDrawClass.DeleteRenderResources();
 for Component in Self do
-	Component.DeleteDeviceResources();
+	Component.DeleteRenderResources();
 end;
 
-procedure TSGComponent.LoadDeviceResources();
+procedure TSGComponent.LoadRenderResources();
 var
 	Component : TSGComponent;
 begin
 if FSkin <> nil then
-	FSkin.LoadDeviceResources();
+	FSkin.LoadRenderResources();
 if FDrawClass <> nil then
-	FDrawClass.LoadDeviceResources();
+	FDrawClass.LoadRenderResources();
 for Component in Self do
-	Component.LoadDeviceResources();
+	Component.LoadRenderResources();
 end;
 
 function TSGComponent.GetOption(const VName : TSGString) : TSGPointer;

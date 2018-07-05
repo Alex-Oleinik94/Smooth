@@ -19,8 +19,8 @@ uses
 	,Ex4_1
 	,Ex4_2
 	,Ex4_3
-	,Ex5
-	,Ex5_2
+	//,Ex5 //deprecated
+	//,Ex5_2 //deprecated
 	,Ex5_4
 	,Ex6
 	,Ex6_2
@@ -70,8 +70,8 @@ FDrawClasses.Add(TSGExample3);
 FDrawClasses.Add(TSGExample4_1);
 FDrawClasses.Add(TSGExample4_2);
 FDrawClasses.Add(TSGExample4_3);
-FDrawClasses.Add(TSGExample5);
-FDrawClasses.Add(TSGExample5_2);
+//FDrawClasses.Add(TSGExample5); //deprecated
+//FDrawClasses.Add(TSGExample5_2); //deprecated
 FDrawClasses.Add(TSGExample5_4);
 FDrawClasses.Add(TSGExample6);
 FDrawClasses.Add(TSGExample6_2);

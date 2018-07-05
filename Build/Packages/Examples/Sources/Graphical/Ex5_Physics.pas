@@ -5,8 +5,7 @@ unit Ex5_Physics;
 interface
 
 uses 
-	 Crt
-	,SysUtils
+	 SysUtils
 	,Classes
 	
 	,SaGeBase
@@ -17,14 +16,14 @@ uses
 	,SaGeImage
 	,SaGeMatrix
 	
-	,PAPPE
+	,Ex5_PAPPE
 	;
 const
-	SGPBodySphere  = PAPPE.BodySphere;
-	SGPBodyBox     = PAPPE.BodyBox;
-	SGPBodyCapsule = PAPPE.BodyCapsule;
-	SGPBodyMesh    = PAPPE.BodyMesh;
-	SGPBodyHeightMap = PAPPE.BodyHeightMap;
+	SGPBodySphere  = Ex5_PAPPE.BodySphere;
+	SGPBodyBox     = Ex5_PAPPE.BodyBox;
+	SGPBodyCapsule = Ex5_PAPPE.BodyCapsule;
+	SGPBodyMesh    = Ex5_PAPPE.BodyMesh;
+	SGPBodyHeightMap = Ex5_PAPPE.BodyHeightMap;
 type
 	TSGPhysics=class;
 	
@@ -36,8 +35,8 @@ type
 		procedure Paint();override;
 			private
 		FDynamic : TSGBoolean;
-		FObject : PAPPE.TPhysicsObject;
-		FRigidBody : PAPPE.TPhysicsRigidBody;
+		FObject : Ex5_PAPPE.TPhysicsObject;
+		FRigidBody : Ex5_PAPPE.TPhysicsRigidBody;
 		FMesh : TSG3DObject;
 		FType : TSGLongWord;
 		FPhysicsClass : TSGPhysics;
@@ -55,7 +54,7 @@ type
 		function GetMatrix():TSGPointer;inline;
 			public
 		property Mesh : TSG3DObject read FMesh write FMesh;
-		property PhysicsObject : PAPPE.TPhysicsObject read FObject;
+		property PhysicsObject : Ex5_PAPPE.TPhysicsObject read FObject;
 		property PhysicsClass  : TSGPhysics           read FPhysicsClass  write FPhysicsClass;
 		end;
 	
@@ -68,8 +67,8 @@ type
 		procedure Update();virtual;
 			private
 		FObjects : packed array of TSGPhysicsObject;
-		FPhysics : PAPPE.TPhysics;
-		FCollide : PAPPE.TPhysicsCollide;
+		FPhysics : Ex5_PAPPE.TPhysics;
+		FCollide : Ex5_PAPPE.TPhysicsCollide;
 		FPhysicsTiks : TSGSingle;
 		FLigths  : packed array of 
 			packed record
@@ -130,7 +129,7 @@ procedure TSGPhysics.SetGravitation(const v:TSGVertex3f;const EraseFrozen : TSGB
 var
 	i:TSGLongWord;
 begin
-FPhysics.Gravitation:=PAPPE.TPhysicsVector3(v*4);
+FPhysics.Gravitation:=Ex5_PAPPE.TPhysicsVector3(v*4);
 if (FObjects<>nil) and EraseFrozen then
 	for i:=0 to High(FObjects) do
 		if FObjects[i].FDynamic then
@@ -147,8 +146,8 @@ end;
 
 procedure TSGPhysics.Start();inline;
 begin
-PAPPE.PhysicsInstance:=@FPhysics;
-PAPPE.PhysicsStart(FPhysics);
+Ex5_PAPPE.PhysicsInstance:=@FPhysics;
+Ex5_PAPPE.PhysicsStart(FPhysics);
 end;
 
 function TSGPhysics.LastObject():TSGPhysicsObject;inline;
@@ -161,7 +160,7 @@ end;
 
 procedure TSGPhysics.AddObjectBegin(const VType : TSGLongWord; const VDynamic: TSGBoolean);
 begin
-PAPPE.PhysicsInstance:=@FPhysics;
+Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 if FObjects=nil then
 	SetLength(FObjects,1)
 else
@@ -171,9 +170,9 @@ FObjects[High(FObjects)].FDynamic := VDynamic;
 FObjects[High(FObjects)].FType := VType;
 FObjects[High(FObjects)].PhysicsClass:=Self;
 if VDynamic or (VType=SGPBodyHeightMap) then
-	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType)
+	Ex5_PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType)
 else
-	PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType,PAPPE.BodyMesh);
+	Ex5_PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType,Ex5_PAPPE.BodyMesh);
 end;
 
 constructor TSGPhysics.Create(const VContext : ISGContext);
@@ -181,12 +180,12 @@ begin
 inherited;
 FLigths:=nil;
 FObjects:=nil;
-PAPPE.PhysicsInit(FPhysics);
-PAPPE.PhysicsInstance:=@FPhysics;
-FPhysics.SweepAndPruneWorkMode:=PAPPE.sapwmAXISAUTO;
+Ex5_PAPPE.PhysicsInit(FPhysics);
+Ex5_PAPPE.PhysicsInstance:=@FPhysics;
+FPhysics.SweepAndPruneWorkMode:=Ex5_PAPPE.sapwmAXISAUTO;
 FPhysics.VelocityMax:=240;
 FPhysics.AngularVelocityMax:=pi*8;
-PAPPE.PhysicsCollideInit(FCollide);
+Ex5_PAPPE.PhysicsCollideInit(FCollide);
 FPhysicsTiks:=0;
 FDrawable:=True;
 end;
@@ -195,7 +194,7 @@ destructor TSGPhysics.Destroy();
 var
 	i : TSGLongWord;
 begin
-PAPPE.PhysicsInstance:=@FPhysics;
+Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 if FObjects<>nil then
 	begin
 	for i:=0 to High(FObjects) do
@@ -203,14 +202,14 @@ if FObjects<>nil then
 		FObjects[i].Destroy();
 		end;
 	end;
-PAPPE.PhysicsCollideDone(FCollide);
-PAPPE.PhysicsDone       (FPhysics);
+Ex5_PAPPE.PhysicsCollideDone(FCollide);
+Ex5_PAPPE.PhysicsDone       (FPhysics);
 inherited;
 end;
 
 procedure TSGPhysics.Update();
 begin
-PAPPE.PhysicsInstance:=@FPhysics;
+Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 
 FPhysicsTiks += Context.ElapsedTime*0.003;
 if FPhysicsTiks > 0.25 then
@@ -218,10 +217,10 @@ if FPhysicsTiks > 0.25 then
 while FPhysicsTiks >= FPhysics.TimeStep do
 	begin
 	FPhysicsTiks -= FPhysics.TimeStep;
-	PAPPE.PhysicsStore(FPhysics);
-	PAPPE.PhysicsUpdate(FPhysics,FPhysics.TimeStep);
+	Ex5_PAPPE.PhysicsStore(FPhysics);
+	Ex5_PAPPE.PhysicsUpdate(FPhysics,FPhysics.TimeStep);
 	end;
-PAPPE.PhysicsInterpolate(FPhysics,FPhysicsTiks/FPhysics.TimeStep);
+Ex5_PAPPE.PhysicsInterpolate(FPhysics,FPhysicsTiks/FPhysics.TimeStep);
 end;
 
 procedure TSGPhysics.Paint();
@@ -290,9 +289,9 @@ if FMesh<>nil then
 	FMesh.Destroy();
 if FType<>0 then
 	begin
-	PAPPE.PhysicsObjectDone(FObject);
+	Ex5_PAPPE.PhysicsObjectDone(FObject);
 	if FDynamic then
-		PAPPE.PhysicsRigidBodyDone(FRigidBody);
+		Ex5_PAPPE.PhysicsRigidBodyDone(FRigidBody);
 	end;
 inherited;
 end;
@@ -336,11 +335,11 @@ if AObjectMesh.NumMeshs<>0 then
 if AObjectMesh.NumTriangles<>0 then
 	for i:=0 to AObjectMesh.NumTriangles -1 do 
 		begin
-		FMesh.ArNormal[ii*3+0]^:=TSGVertex3f(PAPPE.Vector3Norm(PAPPE.Vector3Cross(
-			PAPPE.Vector3Sub(
+		FMesh.ArNormal[ii*3+0]^:=TSGVertex3f(Ex5_PAPPE.Vector3Norm(Ex5_PAPPE.Vector3Cross(
+			Ex5_PAPPE.Vector3Sub(
 				AObjectMesh.Triangles^[I].Vertices[1],
 				AObjectMesh.Triangles^[I].Vertices[0]),
-			PAPPE.Vector3Sub(
+			Ex5_PAPPE.Vector3Sub(
 				AObjectMesh.Triangles^[I].Vertices[2],
 				AObjectMesh.Triangles^[I].Vertices[0]))));
 		FMesh.ArNormal[ii*3+1]^:=FMesh.ArNormal[ii*3+0]^;
@@ -359,7 +358,7 @@ end;
 
 begin
 if FDynamic then
-	PAPPE.PhysicsRigidBodyInit(FRigidBody,@FObject,x,y,z);
+	Ex5_PAPPE.PhysicsRigidBodyInit(FRigidBody,@FObject,x,y,z);
 if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	begin
 	FMesh := TSG3DObject.Create();
@@ -379,31 +378,32 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	if FObject.NumMeshs<>0 then
 		for i:=0 to FObject.NumMeshs-1 do
 			AddingTriangles(FObject.Meshs^[i]^);
-	FMesh.LoadToVBO();
+	if Render.SupporedGraphicalBuffers() then
+		FMesh.LoadToVBO();
 	end;
 end;
 
 procedure TSGPhysicsObject.RotateX(const rx : TSGFloat32 );inline;overload;
 begin
-PAPPE.PhysicsObjectSetMatrix(FObject,PAPPE.Matrix4x4TermMul(FObject.Transform,PAPPE.Matrix4x4RotateX(rx*PAPPE.DEG2RAD)));
+Ex5_PAPPE.PhysicsObjectSetMatrix(FObject,Ex5_PAPPE.Matrix4x4TermMul(FObject.Transform,Ex5_PAPPE.Matrix4x4RotateX(rx*Ex5_PAPPE.DEG2RAD)));
 end;
 
 procedure TSGPhysicsObject.SetVertex( const x,y,z : TSGFloat32 );inline;overload;
 begin
-PAPPE.PhysicsObjectSetVector(FObject,PAPPE.Vector3(x,y,z));
+Ex5_PAPPE.PhysicsObjectSetVector(FObject,Ex5_PAPPE.Vector3(x,y,z));
 end;
 
 procedure TSGPhysicsObject.SetVertex( const v : TSGVertex3f );inline;overload;
 begin
-PAPPE.PhysicsObjectSetVector(FObject,PAPPE.Vector3(v.x,v.y,v.z));
+Ex5_PAPPE.PhysicsObjectSetVector(FObject,Ex5_PAPPE.Vector3(v.x,v.y,v.z));
 end;
 
 procedure TSGPhysicsObject.InitBox ( const x,y,z : TSGSingle );inline;
 begin
-PAPPE.PhysicsObjectAddMesh          (FObject);
-PAPPE.PhysicsObjectMeshCreateBox    (FObject.Meshs^[0]^,x,y,z);
-PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
-PAPPE.PhysicsObjectFinish           (FObject);
+Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
+Ex5_PAPPE.PhysicsObjectMeshCreateBox    (FObject.Meshs^[0]^,x,y,z);
+Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
+Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
 procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
@@ -417,7 +417,7 @@ Image .Context  := Context;
 Image .FileName := VFileName;
 if Image.Loading() then
 	begin
-	PAPPE.PhysicsObjectAddMesh(FObject);
+	Ex5_PAPPE.PhysicsObjectAddMesh(FObject);
 	SetLength(HMD,Image.Width * Image.Height);
 	for i := 0 to Image.Width * Image.Height - 1 do
 		begin
@@ -426,8 +426,8 @@ if Image.Loading() then
 			iii += Image.Image.BitMap[i * Image.Channels + ii];
 		HMD[i] := md + (iii/(Image.Channels*255))*Abs(mt-md);
 		end;
-	PAPPE.PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
-	PAPPE.PhysicsObjectFinish(FObject);
+	Ex5_PAPPE.PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
+	Ex5_PAPPE.PhysicsObjectFinish(FObject);
 	SetLength(HMD,0);
 	end
 else
@@ -437,31 +437,31 @@ end;
 
 procedure TSGPhysicsObject.InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
 begin
-PAPPE.PhysicsObjectAddMesh          (FObject);
-PAPPE.PhysicsObjectMeshCreateCapsule(FObject.Meshs^[0]^,x,y,z);
-PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
-PAPPE.PhysicsObjectFinish           (FObject);
+Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
+Ex5_PAPPE.PhysicsObjectMeshCreateCapsule(FObject.Meshs^[0]^,x,y,z);
+Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
+Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
 procedure TSGPhysicsObject.InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
 begin
-PAPPE.PhysicsObjectAddMesh          (FObject);
-PAPPE.PhysicsObjectMeshCreateSphere (FObject.Meshs^[0]^,x,y);
-PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
-PAPPE.PhysicsObjectFinish           (FObject);
+Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
+Ex5_PAPPE.PhysicsObjectMeshCreateSphere (FObject.Meshs^[0]^,x,y);
+Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
+Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
 procedure TSGPhysicsObject.InitMesh (const Mesh : TSG3DObject);
 var
 	i, ii, iii: TSGLongWord;
 begin
-ii:=PAPPE.PhysicsObjectAddMesh(FObject);
+ii:=Ex5_PAPPE.PhysicsObjectAddMesh(FObject);
 if Mesh.QuantityFaceArrays<>0 then
 	begin
 	for iii:=0 to FMesh.QuantityFaceArrays-1 do
 		if Mesh.Faces[iii]<>0 then
 			for i:=0 to Mesh.Faces[iii]-1 do
-				PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
+				Ex5_PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
 					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[0]]^),
 					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[1]]^),
 					TPhysicsVector3(Mesh.ArVertex3f[Mesh.ArFacesTriangles(iii,i).p[2]]^));
@@ -471,13 +471,13 @@ else
 	if Mesh.QuantityVertexes<>0 then
 		for i:=0 to Mesh.QuantityVertexes-1 do
 			if ((i+1) mod 3 = 0) then
-				PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
+				Ex5_PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
 					TPhysicsVector3(Mesh.ArVertex3f[i+0]^),
 					TPhysicsVector3(Mesh.ArVertex3f[i+1]^),
 					TPhysicsVector3(Mesh.ArVertex3f[i+2]^));
 	end;
-PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[ii]^);
-PAPPE.PhysicsObjectFinish           (FObject);
+Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[ii]^);
+Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
 function TSGPhysicsObject.GetMatrix():TSGPointer;inline;

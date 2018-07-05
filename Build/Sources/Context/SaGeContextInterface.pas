@@ -1,38 +1,21 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeCommonClasses;
+unit SaGeContextInterface;
 
 interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
-	,SaGeCommonStructs
-	,SaGeRenderInterface
-	,SaGeAudioRenderInterface
-	,SaGeCursor
+	,SaGeBaseContextInterface
 	,SaGeBitMap
+	,SaGeCursor
+	,SaGeCommonStructs
+	,SaGeAudioRenderInterface
+	,SaGeRenderInterface
 	,SaGeContextUtils
 	;
 type
-	ISGRenderedTimerArea = interface(ISGNearlyContext)
-		['{ed55d22e-7069-46b1-ad39-fb9fcbe63bcb}']
-		function GetRender() : ISGRender;
-
-		property Left : TSGAreaInt read GetLeft write SetLeft;
-		property Top : TSGAreaInt read GetTop write SetTop;
-		property Width : TSGAreaInt read GetWidth write SetWidth;
-		property Height : TSGAreaInt read GetHeight write SetHeight;
-		property Title : TSGString read GetTitle write SetTitle;
-		property Render : ISGRender read GetRender;
-		property ElapsedTime : TSGTimerInt read GetElapsedTime;
-		property Device : TSGPointer read GetDevice;
-		property Window : TSGPointer read GetWindow;
-		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
-		end;
-
-	ISGContextHandler = interface(ISGRenderedTimerArea)
+	ISGContextHandler = interface(ISGBaseContext)
 		['{a886fa59-2fe5-4ac7-a2ae-829df4b8a911}']
 		function KeysPressed(const  Index : TSGInteger ) : TSGBoolean;overload;
 		function KeysPressed(const  Index : TSGChar ) : TSGBoolean;overload;
@@ -49,7 +32,7 @@ type
 		procedure SetKey(ButtonType:TSGCursorButtonType;Key:TSGLongInt);
 		procedure SetCursorKey(ButtonType : TSGCursorButtonType; Key : TSGCursorButton);
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);
-
+		
 		property Left : TSGAreaInt read GetLeft write SetLeft;
 		property Top : TSGAreaInt read GetTop write SetTop;
 		property Width : TSGAreaInt read GetWidth write SetWidth;
@@ -59,7 +42,6 @@ type
 		property Window : TSGPointer read GetWindow;
 		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
 		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
-		property Render : ISGRender read GetRender;
 		property ElapsedTime : TSGTimerInt read GetElapsedTime;
 		end;
 
@@ -72,7 +54,8 @@ type
 		procedure Close();
 		procedure ShowCursor(const VShowing : TSGBoolean);
 		procedure ReinitializeRender();
-
+		function GetRender() : ISGRender;
+		
 		function  GetFullscreen() : TSGBoolean;
 		procedure InitFullscreen(const VFullscreen : TSGBoolean);
 
@@ -157,7 +140,7 @@ type
 		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
 
-	ISGContextabled = interface(ISGRendered)
+	ISGContextObject = interface(ISGRenderObject)
 		['{ee8df1e3-abe8-4378-8d11-7b5903fea502}']
 		procedure SetContext(const VContext : ISGContext);
 		function GetContext() : ISGContext;
@@ -167,182 +150,6 @@ type
 		property Render  : ISGRender  read GetRender;
 		end;
 
-	TSGContextabled = class(TSGNamed, ISGContextabled)
-			public
-		constructor Create();override;deprecated;
-		destructor Destroy();override;
-		constructor Create(const VContext : ISGContext);virtual;
-			protected
-		FContext : PISGContext;
-			public
-		procedure SetContext(const VContext : ISGContext);virtual;
-		function GetContext() : ISGContext;virtual;
-		function GetRender() : ISGRender;virtual;
-		function GetAudioRender() : ISGAudioRender;virtual;
-
-		function ContextAssigned() : TSGBoolean;virtual;
-		function RenderAssigned() : TSGBoolean;virtual;
-		function AudioRenderAssigned() : TSGBool; virtual;
-
-		property Context : ISGContext read GetContext write SetContext;
-		property Render  : ISGRender  read GetRender;
-		property AudioRender : ISGAudioRender read GetAudioRender;
-		end;
-
-	TSGDrawableClass = class of TSGDrawable;
-	TSGDrawable = class(TSGExtendedPaintable, ISGContextabled)
-			public
-		constructor Create();override;deprecated;
-		destructor Destroy();override;
-		constructor Create(const VContext : ISGContext);virtual;
-		class function ClassName() : TSGString; override;
-			protected
-		FContext : PISGContext;
-			public
-		procedure SetContext(const VContext : ISGContext);virtual;
-		function GetContext() : ISGContext;virtual;
-		function GetRender() : ISGRender;virtual;
-		function GetAudioRender() : ISGAudioRender;virtual;
-
-		function ContextAssigned() : TSGBoolean;virtual;
-		function RenderAssigned() : TSGBoolean;virtual;
-		function AudioRenderAssigned() : TSGBool; virtual;
-
-		property Context : ISGContext read GetContext write SetContext;
-		property Render  : ISGRender  read GetRender;
-		property AudioRender : ISGAudioRender read GetAudioRender;
-		end;
-
 implementation
-
-function TSGDrawable.AudioRenderAssigned() : TSGBool;
-begin
-Result := False;
-if ContextAssigned() then
-	Result := Context.AudioRender <> nil;
-end;
-
-function TSGDrawable.GetAudioRender() : ISGAudioRender;
-begin
-Result := Context.AudioRender;
-end;
-
-function TSGContextabled.AudioRenderAssigned() : TSGBool;
-begin
-Result := False;
-if ContextAssigned() then
-	Result := Context.AudioRender <> nil;
-end;
-
-function TSGContextabled.GetAudioRender() : ISGAudioRender;
-begin
-Result := Context.AudioRender;
-end;
-
-class function TSGDrawable.ClassName() : TSGString;
-begin
-Result := 'TSGDrawable';
-end;
-
-constructor TSGContextabled.Create();
-begin
-inherited;
-FContext := nil;
-end;
-
-destructor TSGContextabled.Destroy();
-begin
-inherited;
-end;
-
-constructor TSGContextabled.Create(const VContext : ISGContext);
-begin
-Create();
-SetContext(VContext);
-end;
-
-procedure TSGContextabled.SetContext(const VContext : ISGContext);
-begin
-if VContext <> nil then
-	FContext := VContext.SelfLink
-else
-	FContext := nil;
-end;
-
-function TSGContextabled.GetContext() : ISGContext;
-begin
-Result := FContext^;
-end;
-
-function TSGContextabled.GetRender() : ISGRender;
-begin
-Result := FContext^.Render;
-end;
-
-function TSGContextabled.ContextAssigned() : TSGBoolean;
-begin
-Result := False;
-if (FContext <> nil) then
-	if (FContext^ <> nil) then
-		Result := True;
-end;
-
-function TSGContextabled.RenderAssigned() : TSGBoolean;
-begin
-Result := False;
-if ContextAssigned() then
-	if FContext^.Render <> nil then
-		Result := True;
-end;
-
-function TSGDrawable.RenderAssigned() : TSGBoolean;
-begin
-if ContextAssigned() then
-	if FContext^.Render <> nil then
-		Result := True;
-end;
-
-constructor TSGDrawable.Create(const VContext:ISGContext);
-begin
-Create();
-SetContext(VContext);
-end;
-
-function TSGDrawable.GetRender():ISGRender;
-begin
-Result := FContext^.Render;
-end;
-
-procedure TSGDrawable.SetContext(const VContext : ISGContext);
-begin
-if VContext <> nil then
-	FContext := VContext.SelfLink
-else
-	FContext := nil;
-end;
-
-function TSGDrawable.ContextAssigned() : TSGBoolean;
-begin
-Result := False;
-if (FContext <> nil) then
-	if (FContext^ <> nil) then
-		Result := True;
-end;
-
-function TSGDrawable.GetContext() : ISGContext;
-begin
-Result := FContext^;
-end;
-
-constructor TSGDrawable.Create();
-begin
-inherited;
-FContext := nil;
-end;
-
-destructor TSGDrawable.Destroy();
-begin
-inherited;
-end;
 
 end.

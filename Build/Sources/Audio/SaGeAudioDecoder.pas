@@ -15,7 +15,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeCommon
 	,SaGeDllManager
 
