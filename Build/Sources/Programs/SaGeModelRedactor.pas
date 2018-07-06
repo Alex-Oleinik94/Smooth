@@ -12,7 +12,8 @@ uses
 	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeContext
 	,SaGeMesh
 	,SaGeScreen
@@ -20,7 +21,7 @@ uses
 	,SaGeCamera
 	;
 type
-	TSGModelRedactor=class(TSGScreenedDrawable)
+	TSGModelRedactor=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

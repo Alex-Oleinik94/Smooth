@@ -13,7 +13,7 @@ uses
 	,SaGeContext
 	,SaGeLoading
 	,SaGeFont
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeCommon
 	;
 

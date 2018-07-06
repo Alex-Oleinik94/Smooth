@@ -148,8 +148,8 @@ type
 		procedure AddToHeight(const Value:TSGScreenInt);
 		procedure AddToTop(const Value:TSGScreenInt);
 
-		procedure FromDraw();
-		procedure FromResize();
+		procedure Paint();
+		procedure Resize();
 		procedure FromUpDate();
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:TSGBoolean = True);
 		procedure FromUpDateCaptionUnderCursor();

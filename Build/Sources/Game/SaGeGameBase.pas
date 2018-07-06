@@ -6,7 +6,8 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	;
 
 type
@@ -16,7 +17,7 @@ type
 	TSGNod = class;
 	TSGNodClass = class of TSGNod;
 	TSGArNod = packed array of TSGNod;
-	TSGNod = class(TSGDrawable)
+	TSGNod = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

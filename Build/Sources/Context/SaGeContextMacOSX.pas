@@ -10,6 +10,9 @@ uses
 	,SaGeRender
 	,SaGeContext
 	,SaGeContextUtils
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	
 	,MacOSAll
 	,unix

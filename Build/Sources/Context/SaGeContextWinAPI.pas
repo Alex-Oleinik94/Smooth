@@ -11,8 +11,9 @@ uses
 	 SaGeBase
 	,SaGeContext
 	,SaGeRender
-	,SaGeClasses
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeBitMap
 	,SaGeCursor
 	,SaGeCommonStructs

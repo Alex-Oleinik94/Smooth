@@ -9,7 +9,7 @@ uses
 	
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeResourceManager
 	;
 type

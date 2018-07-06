@@ -46,7 +46,7 @@ type
 		FDrawCursorElapsedTimeChange : TSGUInt32;
 		FDrawCursorElapsedTimeDontChange : TSGUInt32;
 			public
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		procedure FromUpDate();override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -227,7 +227,7 @@ if (FTextType <> SGEditTypeText) and (FTextTypeFunction <> nil) then
 	end;
 end;
 
-procedure TSGEdit.FromDraw();
+procedure TSGEdit.Paint();
 begin
 if (FVisibleTimer > SGZero) then
 	FSkin.PaintEdit(Self);

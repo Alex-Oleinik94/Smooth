@@ -146,11 +146,6 @@ begin
 Result := 'TSGNamed';
 end;
 
-class function TSGExtendedPaintable.ClassName() : TSGString;
-begin
-Result := 'TSGExtendedPaintable';
-end;
-
 function TSGInterfacedObject.QueryInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} VInterfaceIdentifier : TSGGuid; out VObject) : TSGLongInt;{$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
 begin
 Result := S_OK;

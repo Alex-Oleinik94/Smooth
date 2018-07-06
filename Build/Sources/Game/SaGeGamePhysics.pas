@@ -11,7 +11,8 @@ uses
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeScene
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	
 	,SaGePhysics
 	;

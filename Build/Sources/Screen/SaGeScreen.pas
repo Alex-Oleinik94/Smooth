@@ -32,7 +32,7 @@ type
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
 type
-	ISGScreened = interface(ISGContextabled)
+	ISGScreenObject = interface(ISGContextObject)
 		['{01b2e610-7d81-4db4-bece-19222fbffde9}']
 		function GetScreen() : TSGScreen;
 		function ScreenAssigned() : TSGBoolean;
@@ -40,7 +40,7 @@ type
 		property Screen : TSGScreen read GetScreen;
 		end;
 type
-	TSGScreened = class(TSGContextabled, ISGScreened)
+	TSGScreenObject = class(TSGContextObject, ISGScreenObject)
 			public
 		class function ClassName() : TSGString; override;
 			public
@@ -50,7 +50,7 @@ type
 		property Screen : TSGScreen read GetScreen;
 		end;
 type
-	TSGScreenedDrawable = class(TSGDrawable, ISGScreened)
+	TSGScreenPaintableObject = class(TSGPaintableObject, ISGScreenObject)
 			public
 		class function ClassName() : TSGString; override;
 			public
@@ -70,9 +70,9 @@ uses
 	,SaGeContextUtils
 	;
 
-class function TSGScreened.ClassName() : TSGString;
+class function TSGScreenObject.ClassName() : TSGString;
 begin
-Result := 'TSGScreened';
+Result := 'TSGScreenObject';
 end;
 
 class function TSGScreen.ClassName() : TSGString;
@@ -80,19 +80,19 @@ begin
 Result := 'TSGScreen';
 end;
 
-class function TSGScreenedDrawable.ClassName() : TSGString;
+class function TSGScreenPaintableObject.ClassName() : TSGString;
 begin
-Result := 'TSGScreenedDrawable';
+Result := 'TSGScreenPaintableObject';
 end;
 
-function TSGScreenedDrawable.ScreenAssigned() : TSGBoolean;
+function TSGScreenPaintableObject.ScreenAssigned() : TSGBoolean;
 begin
 Result := ContextAssigned();
 if Result then
 	Result := FContext^.Screen <> nil;
 end;
 
-function TSGScreenedDrawable.GetScreen() : TSGScreen;
+function TSGScreenPaintableObject.GetScreen() : TSGScreen;
 begin
 if ContextAssigned() then
 	Result := TSGScreen(FContext^.Screen)
@@ -100,14 +100,14 @@ else
 	Result := nil;
 end;
 
-function TSGScreened.ScreenAssigned() : TSGBoolean;
+function TSGScreenObject.ScreenAssigned() : TSGBoolean;
 begin
 Result := ContextAssigned();
 if Result then
 	Result := FContext^.Screen <> nil;
 end;
 
-function TSGScreened.GetScreen() : TSGScreen;
+function TSGScreenObject.GetScreen() : TSGScreen;
 begin
 if ContextAssigned() then
 	Result := TSGScreen(FContext^.Screen)
@@ -148,7 +148,7 @@ if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
 	begin
 	SetBounds(0, 0, Render.Width, Render.Height);
 	BoundsMakeReal();
-	FromResize();
+	inherited;
 	end;
 end;
 
@@ -170,7 +170,7 @@ Render.InitMatrixMode(SG_2D);
 	WriteLn('TSGScreen.Paint() : Before drawing');
 	{$ENDIF}
 
-FromDraw();
+Paint();
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining');
 	{$ENDIF}
@@ -203,7 +203,7 @@ if (Context.KeysPressed(SG_CTRL_KEY)) and
    (Context.KeyPressedChar = 'O') and
    TSGEngineConfigurationPanel.CanCreate(Self) then
 	begin
-	CreateChild(TSGEngineConfigurationPanel.Create()).FromResize();
+	CreateChild(TSGEngineConfigurationPanel.Create()).Resize();
 	Context.SetKey(SGNullKey, 0);
 	end;
 

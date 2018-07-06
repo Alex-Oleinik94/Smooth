@@ -9,7 +9,9 @@ uses
 	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeContext
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeContextUtils
 		//android units:
 	,unix

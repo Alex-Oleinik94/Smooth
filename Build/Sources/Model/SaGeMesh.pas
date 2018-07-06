@@ -12,7 +12,8 @@ uses
 	,SaGeImage
 	,SaGeRender
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeMatrix
 	,SaGeVertexObject
 	,SaGeMaterial
@@ -33,7 +34,7 @@ type
 		FMatrix  : TSGMatrix4x4;
 		end;
 	
-    TSGCustomModel = class(TSGDrawable)
+    TSGCustomModel = class(TSGPaintableObject)
     public
         constructor Create(); override;
         destructor Destroy(); override;

@@ -15,7 +15,8 @@ uses
 	,SaGeScreenHelper
 	,SaGeRender
 	,SaGeImage
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeRenderBase
 	,SaGeScreenBase
 	;
@@ -27,24 +28,24 @@ uses
 type
 	TSGDrawClassesObject = object
 		public
-		FClass : TSGDrawableClass;
+		FClass : TSGPaintableObjectClass;
 		FDrawable : TSGBool;
 		end;
 	TSGDrawClassesObjectList = packed array of TSGDrawClassesObject;
 	
-	TSGDrawClasses = class(TSGScreenedDrawable)
+	TSGDrawClasses = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName() : TSGString;override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			public
-		FNowDraw     : TSGDrawable;
+		FNowDraw     : TSGPaintableObject;
 		FNowDrawable : TSGBoolean;
 		FArClasses   : packed array of
 			packed record 
-				FClass    : TSGDrawableClass;
+				FClass    : TSGPaintableObjectClass;
 				FDrawable : TSGBoolean;
 				end;
 		FComboBox : TSGScreenComboBox;
@@ -52,7 +53,7 @@ type
 			public
 		procedure Paint();override;
 		procedure Add(const NewClasses:TSGDrawClassesObjectList);overload;
-		procedure Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
+		procedure Add(const NewClass:TSGPaintableObjectClass; const Drawable : TSGBoolean = True);overload;
 		procedure Initialize();overload;
 		procedure Initialize(const Location : TSGComponentLocation);overload;
 		procedure Initialize(const L, T, W, H : TSGScreenFloat);overload;
@@ -73,23 +74,23 @@ uses
 (*=========TSGDrawClasses==========*)
 (*=================================*)
 
-procedure TSGDrawClasses.DeleteDeviceResources();
+procedure TSGDrawClasses.DeleteRenderResources();
 begin
 if FNowDrawable and (FNowDraw <> nil) then
-	FNowDraw.DeleteDeviceResources();
+	FNowDraw.DeleteRenderResources();
 end;
 
-procedure TSGDrawClasses.LoadDeviceResources();
+procedure TSGDrawClasses.LoadRenderResources();
 begin
 if FNowDrawable and (FNowDraw <> nil) then
-	FNowDraw.LoadDeviceResources();
+	FNowDraw.LoadRenderResources();
 end;
 
 procedure TSGDrawClasses.SwitchTo(const Index : TSGLongWord);
 begin
 if FNowDraw <> nil then
 	begin
-	FNowDraw.DeleteDeviceResources();
+	FNowDraw.DeleteRenderResources();
 	FNowDraw.Destroy();
 	FNowDraw := nil;
 	end;
@@ -172,7 +173,7 @@ if NewClasses <> nil then
 			Add(NewClasses[i].FClass, NewClasses[i].FDrawable);
 end;
 
-procedure TSGDrawClasses.Add(const NewClass:TSGDrawableClass; const Drawable : TSGBoolean = True);overload;
+procedure TSGDrawClasses.Add(const NewClass:TSGPaintableObjectClass; const Drawable : TSGBoolean = True);overload;
 begin
 SetLength(FArClasses, Length(FArClasses) + 1);
 FArClasses[High(FArClasses)].FClass    := NewClass;

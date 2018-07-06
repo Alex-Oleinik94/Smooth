@@ -7,7 +7,8 @@ interface
 uses
 	 SaGeBase
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeCommonStructs
 	,SaGeFont
 	;
@@ -15,14 +16,14 @@ uses
 type
 	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
 	//Класс загрузки.
-	TSGLoading = class(TSGDrawable)
+	TSGLoading = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 		procedure Paint();override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			private
 		FProjectionAngle      : TSGSingle;     //Угол поворота центра
 		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
@@ -50,7 +51,7 @@ type
 		property Alpha : TSGFloat32 read FAlpha;
 		end;
 
-	TSGWaiting = class(TSGDrawable)
+	TSGWaiting = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -456,15 +457,15 @@ begin
 Result:='Модель загрузки';
 end;
 
-procedure TSGLoading.DeleteDeviceResources();
+procedure TSGLoading.DeleteRenderResources();
 begin
-FFont.DeleteDeviceResources();
+FFont.DeleteRenderResources();
 inherited;
 end;
 
-procedure TSGLoading.LoadDeviceResources();
+procedure TSGLoading.LoadRenderResources();
 begin
-FFont.LoadDeviceResources();
+FFont.LoadRenderResources();
 inherited;
 end;
 

@@ -7,26 +7,27 @@ interface
 uses
 	 SaGeBase
 	,SaGeConsoleCaller
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeContext
 	,SaGeContextUtils
 	;
 
 type
-	TSGAllApplicationsDrawable = class(TSGDrawable)
+	TSGAllApplicationsDrawable = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext); override;
 		destructor Destroy(); override;
 		procedure Paint(); override;
-		procedure LoadDeviceResources(); override;
-		procedure DeleteDeviceResources(); override;
+		procedure LoadRenderResources(); override;
+		procedure DeleteRenderResources(); override;
 		class function ClassName() : TSGString; override;
 		end;
 
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil);overload;
 procedure SGConsoleShowAllApplications();overload;
 procedure SGConsoleShowAllApplications(const VParams : TSGConcoleCallerParams = nil;  ContextSettings : TSGContextSettings = nil);overload;
-procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGPaintableObjectClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
 
 implementation
 
@@ -85,7 +86,7 @@ with TSGDrawClasses.Create(Context) do
 	end;
 end;
 
-procedure SGConsoleRunPaintable(const VPaintabeClass : TSGDrawableClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
+procedure SGConsoleRunPaintable(const VPaintabeClass : TSGPaintableObjectClass; const VParams : TSGConcoleCallerParams = nil; ContextSettings : TSGContextSettings = nil);
 var
 	RenderClass   : TSGRenderClass = nil;
 	ContextClass  : TSGContextClass = nil;
@@ -522,11 +523,11 @@ begin
 Result := 'Graphical applications';
 end;
 
-procedure TSGAllApplicationsDrawable.LoadDeviceResources();
+procedure TSGAllApplicationsDrawable.LoadRenderResources();
 begin
 end;
 
-procedure TSGAllApplicationsDrawable.DeleteDeviceResources();
+procedure TSGAllApplicationsDrawable.DeleteRenderResources();
 begin
 end;
 

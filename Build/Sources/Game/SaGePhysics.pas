@@ -9,7 +9,8 @@ uses
 	,SaGeModel
 	,SaGeGameBase
 	,SaGeContext
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	
 	,kraft
 	;

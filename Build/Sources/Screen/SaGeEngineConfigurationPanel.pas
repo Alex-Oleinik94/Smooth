@@ -21,13 +21,13 @@ type
 			public
 		constructor Create();override;
 		destructor Destroy();override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			public
 		procedure FromUpDate();override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
-		procedure FromDraw();override;
-		procedure FromResize();override;
+		procedure Paint(); override;
+		procedure Resize();override;
 			public
 		class function CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 		procedure InitRender(const VRenderClass : TSGRenderClass);
@@ -153,16 +153,16 @@ if VOldIndex <> VNewIndex then
 	TSGEngineConfigurationPanel(VComboBox.UserPointer).InitRender(Renders[VNewIndex].FClass);
 end;
 
-procedure TSGEngineConfigurationPanel.DeleteDeviceResources();
+procedure TSGEngineConfigurationPanel.DeleteRenderResources();
 begin
 if FFPS <> nil then
-	FFPS.DeleteDeviceResources();
+	FFPS.DeleteRenderResources();
 end;
 
-procedure TSGEngineConfigurationPanel.LoadDeviceResources();
+procedure TSGEngineConfigurationPanel.LoadRenderResources();
 begin
 if FFPS <> nil then
-	FFPS.LoadDeviceResources();
+	FFPS.LoadRenderResources();
 end;
 
 constructor TSGEngineConfigurationPanel.Create();
@@ -201,7 +201,7 @@ for i := Low(Renders) to High(Renders) do
 FCloseButton := SGCreateButton(Self, 'Close', TSGScreenComponentProcedure(@TSGEngineConfigurationPanel_CloseButton_OnChange), True, Self);
 end;
 
-procedure TSGEngineConfigurationPanel.FromResize();
+procedure TSGEngineConfigurationPanel.Resize();
 
 const
 	ShiftWidth = 40;
@@ -306,7 +306,7 @@ begin
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromDraw();
+procedure TSGEngineConfigurationPanel.Paint();
 
 function DistanseToQuad(const QuadVertex1, QuadVertex3, Point : TSGVertex2f) : TSGFloat;
 begin

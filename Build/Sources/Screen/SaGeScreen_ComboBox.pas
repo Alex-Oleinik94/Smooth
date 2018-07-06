@@ -41,7 +41,7 @@ type
 		procedure SelectingItem(const ItemIndex : TSGInt32); virtual;
 			public
 		procedure FromUpDate();override;
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
@@ -265,7 +265,7 @@ WriteLn('TSGComboBox.FromUpDate() : End');
 	{$ENDIF}
 end;
 
-procedure TSGComboBox.FromDraw;
+procedure TSGComboBox.Paint();
 begin
 if not CursorInComponent then
 	FCursorOnThisItem:=-1;

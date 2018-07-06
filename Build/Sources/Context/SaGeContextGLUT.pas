@@ -15,8 +15,10 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
+	,SaGeContextInterface
 	,SaGeContextUtils
 	
 	{$IFNDEF MOBILE}
@@ -67,7 +69,7 @@ implementation
 
 uses
 	 SaGeRenderOpenGL
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeRender
 	,SaGeDllManager
 	,SaGeStringUtils

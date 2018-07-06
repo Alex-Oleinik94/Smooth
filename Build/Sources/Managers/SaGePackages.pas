@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeLists
 	,SaGeResourceManager
-	,SaGeCommonClasses
 	,SaGeDrawClasses
 	,SaGeMakefileReader
+	,SaGeContextClasses
 	
 	,Classes
 	,Dos
@@ -37,7 +37,7 @@ type
 
 function SGGetPackageInfo(const PackagePath : TSGString) : TSGPackageInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterDrawClass(const ClassType : TSGPaintableObjectClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
@@ -331,7 +331,7 @@ begin
 Result := PackagesDrawClasses;
 end;
 
-procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterDrawClass(const ClassType : TSGPaintableObjectClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if PackagesDrawClasses = nil then
 	SetLength(PackagesDrawClasses, 1)

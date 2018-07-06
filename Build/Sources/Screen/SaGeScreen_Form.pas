@@ -28,7 +28,7 @@ type
 		procedure FromUpDateCaptionUnderCursor();override;
 		function CursorInComponentCaption():boolean;override;
 			public
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
 		end;
 
@@ -119,7 +119,7 @@ if FRePlace then
 inherited FromUpDate();
 end;
 
-procedure TSGForm.FromDraw;
+procedure TSGForm.Paint();
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin
@@ -152,7 +152,7 @@ if (FVisible) or (FVisibleTimer>SGZero) then
 			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
 		end;
 	end;
-inherited FromDraw;
+inherited;
 end;
 
 constructor TSGForm.Create();

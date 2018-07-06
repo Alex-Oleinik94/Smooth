@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeThreads
 	,SaGePcapUtils
 	,SaGeInternetBase

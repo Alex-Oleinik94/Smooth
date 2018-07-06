@@ -43,7 +43,7 @@ type
 	TSGComponentList      = packed array of TSGComponent;
 	TSGComponentListList  = packed array of TSGComponentList;
 	TSGComponentProcedure = procedure (Component : TSGComponent);
-	TSGComponent          = class(TSGContextObject, ISGComponent)
+	TSGComponent          = class(TSGPaintableObject, ISGComponent)
 			public
 		constructor Create();override;
 		destructor Destroy();override;
@@ -56,12 +56,11 @@ type
 		function GetOption(const VName : TSGString) : TSGPointer;virtual;
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);virtual;
 			public
-			// ISGDeviceDependent declaration
-		procedure Paint(); virtual;
 		procedure DeleteRenderResources();override;
-		procedure Resize(); virtual;
 		procedure LoadRenderResources();override;
 		function Suppored() : TSGBoolean;virtual;
+		procedure Paint(); override;
+		procedure Resize(); override;
 			protected
 		FLocation : TSGComponentLocation;
 		FRealLocation : TSGComponentLocation;
@@ -138,9 +137,6 @@ type
 		procedure UpDateSkin();virtual;
 		procedure UpgradeTimers();virtual;
 		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
-		procedure FromDraw();virtual;
-			public
-		procedure FromResize();virtual;
 			protected
 		procedure FromUpDate();virtual;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);virtual;
@@ -404,8 +400,58 @@ if FParent <> nil then
 end;
 
 procedure TSGComponent.Resize();
+var
+	I : TSGLongInt;
+	Component : TSGComponent;
 begin
-FromResize();
+if SGAnchBottom in FAnchors then
+	begin
+	if FAnchorsData.FParentHeight=0 then
+		if FParent<>nil then
+			FAnchorsData.FParentHeight:=FParent.Height
+		else
+	else if FParent<>nil then
+		begin
+		if FAnchorsData.FParentHeight<>FParent.Height then
+			begin
+			I := FAnchorsData.FParentHeight - FParent.Height;
+			FLocation.Top := FLocation.Top - I;
+			FAnchorsData.FParentHeight := FParent.Height;
+			end;
+		end;
+	end;
+if SGAnchRight in FAnchors then
+	begin
+	if FAnchorsData.FParentWidth=0 then
+		if FParent<>nil then
+			FAnchorsData.FParentWidth:=FParent.Width
+		else
+	else if FParent<>nil then
+		begin
+		if FAnchorsData.FParentWidth<>FParent.Width then
+			begin
+			I:=FAnchorsData.FParentWidth-FParent.Width;
+			FLocation.Left := FLocation.Left - I;
+			FAnchorsData.FParentWidth:=FParent.Width;
+			end;
+		end;
+	end;
+BoundsMakeReal();
+{CW:=FLocation.Width;
+CH:=FLocation.Height;
+case FAlign of
+SGAlignRight:
+	begin
+	FLocation.Left+=Parent.Width-ParentWidth;
+	end;
+end;
+if FAlign in [SGAlignClient] then
+	begin
+	for i:=0 to High(FChildren) do
+		FChildren[i].FromResize(CW,CH);
+	end;}
+for Component in Self do
+	Component.Resize();
 end;
 
 procedure TSGComponent.DrawDrawClasses();
@@ -879,24 +925,19 @@ Result := TSGComponentEnumeratorReverse.Create(Self);
 end;
 
 procedure TSGComponent.Paint();
-begin
-FromDraw();
-end;
-
-procedure TSGComponent.FromDraw();
 var
 	Component, PriorityComponent : TSGComponent;
 begin
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent = nil then
 	for Component in Self do
-		Component.FromDraw()
+		Component.Paint()
 else
 	begin
 	for Component in Self do
 		if Component <> PriorityComponent then
-			Component.FromDraw();
-	PriorityComponent.FromDraw();
+			Component.Paint();
+	PriorityComponent.Paint();
 	end;
 end;
 
@@ -984,61 +1025,6 @@ FBordersSize.Left   := _L;
 FBordersSize.Top    := _T;
 FBordersSize.Right  := _R;
 FBordersSize.Bottom := _B;
-end;
-
-procedure TSGComponent.FromResize();
-var
-	I : TSGLongInt;
-	Component : TSGComponent;
-begin
-if SGAnchBottom in FAnchors then
-	begin
-	if FAnchorsData.FParentHeight=0 then
-		if FParent<>nil then
-			FAnchorsData.FParentHeight:=FParent.Height
-		else
-	else if FParent<>nil then
-		begin
-		if FAnchorsData.FParentHeight<>FParent.Height then
-			begin
-			I := FAnchorsData.FParentHeight - FParent.Height;
-			FLocation.Top := FLocation.Top - I;
-			FAnchorsData.FParentHeight := FParent.Height;
-			end;
-		end;
-	end;
-if SGAnchRight in FAnchors then
-	begin
-	if FAnchorsData.FParentWidth=0 then
-		if FParent<>nil then
-			FAnchorsData.FParentWidth:=FParent.Width
-		else
-	else if FParent<>nil then
-		begin
-		if FAnchorsData.FParentWidth<>FParent.Width then
-			begin
-			I:=FAnchorsData.FParentWidth-FParent.Width;
-			FLocation.Left := FLocation.Left - I;
-			FAnchorsData.FParentWidth:=FParent.Width;
-			end;
-		end;
-	end;
-BoundsMakeReal();
-{CW:=FLocation.Width;
-CH:=FLocation.Height;
-case FAlign of
-SGAlignRight:
-	begin
-	FLocation.Left+=Parent.Width-ParentWidth;
-	end;
-end;
-if FAlign in [SGAlignClient] then
-	begin
-	for i:=0 to High(FChildren) do
-		FChildren[i].FromResize(CW,CH);
-	end;}
-for Component in Self do
-	Component.FromResize();
 end;
 
 function TSGComponent.GetPriorityComponent() : TSGComponent;

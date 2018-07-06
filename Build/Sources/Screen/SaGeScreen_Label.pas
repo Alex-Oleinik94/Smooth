@@ -22,7 +22,7 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
-		procedure FromDraw(); override;
+		procedure Paint(); override;
 			protected
 		function  GetTextPosition() : TSGBoolean; virtual;
 		procedure SetTextPosition(const VTextPosition : TSGBoolean); virtual;
@@ -91,7 +91,7 @@ begin
 FTextPosition := VTextPosition;
 end;
 
-procedure TSGLabel.FromDraw();
+procedure TSGLabel.Paint();
 begin
 if FVisibleTimer > SGZero then
 	FSkin.PaintLabel(Self);

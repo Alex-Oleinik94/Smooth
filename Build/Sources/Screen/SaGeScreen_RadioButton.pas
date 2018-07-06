@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeScreenBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeScreen
 	,SaGeImage
 	,SaGeScreenComponent
@@ -36,7 +36,7 @@ type
 		class function ClassName() : TSGString; override;
 			public
 		procedure FromUpDate();override;
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			private
 		FChecked : TSGBoolean;
@@ -235,7 +235,7 @@ FImage.DrawImageFromTwoVertex2fWith2TexPoint(
 	True,SG_2D);
 end;
 
-procedure TSGRadioButton.FromDraw();
+procedure TSGRadioButton.Paint();
 begin
 if (not Checked) and (FImage <> nil) then
 	begin
@@ -260,7 +260,7 @@ else
 		end;
 	end;
 FCursorOnButton := False;
-inherited FromDraw();
+inherited;
 end;
 
 procedure TSGRadioButton.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);

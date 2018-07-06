@@ -31,7 +31,7 @@ type
 		property LinesColor  : TSGColor4f read FLinesColor write FLinesColor;
 		property SecondPoint : TSGVertex2f read FSecondPoint write FSecondPoint;
 			public
-		procedure FromDraw();override;
+		procedure Paint(); override;
 		end;
 
 implementation
@@ -47,7 +47,7 @@ begin
 Result := 'TSGPicture';
 end;
 
-procedure TSGPicture.FromDraw;
+procedure TSGPicture.Paint();
 var
 	a, b: TSGVertex3f;
 begin

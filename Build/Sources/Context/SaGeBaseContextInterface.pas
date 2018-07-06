@@ -34,28 +34,25 @@ type
 		property Height : TSGAreaInt read GetHeight write SetHeight;
 		end;
 
-	ISGDeviceArea = interface(ISGArea)
+	ISGClientArea = interface(ISGArea)
 		['{f1abd9e3-5eb3-40ae-9d70-0b28a8d4d68b}']
 		function GetClientWidth()  : TSGAreaInt;
 		function GetClientHeight() : TSGAreaInt;
 		procedure SetClientWidth (const VClientWidth  : TSGAreaInt);
 		procedure SetClientHeight(const VClientHeight : TSGAreaInt);
-		function GetWindow() : TSGPointer;
-		function GetDevice() : TSGPointer;
 
-		property ClientWidth : TSGAreaInt read GetClientWidth write SetClientWidth;
-		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		property Left : TSGAreaInt read GetLeft write SetLeft;
 		property Top : TSGAreaInt read GetTop write SetTop;
 		property Width : TSGAreaInt read GetWidth write SetWidth;
 		property Height : TSGAreaInt read GetHeight write SetHeight;
-		property Device : TSGPointer read GetDevice;
-		property Window : TSGPointer read GetWindow;
 		end;
 	
 	TSGTimerInt = TSGUInt32;
-	ISGBaseContext = interface(ISGDeviceArea)
+	ISGBaseContext = interface(ISGClientArea)
 		['{2746e985-11ee-4a85-a840-fe89d1d81f0d}']
+		function GetWindow() : TSGPointer;
+		function GetDevice() : TSGPointer;
+		
 		procedure StartComputeTimer();
 		procedure UpdateTimer();
 		function GetElapsedTime() : TSGTimerInt;

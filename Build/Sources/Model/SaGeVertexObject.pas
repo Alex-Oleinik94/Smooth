@@ -8,7 +8,7 @@ uses
 	 SaGeBase
 	,SaGeLists
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeCommonStructs
 	,SaGeMaterial
 	,SaGeMatrix
@@ -147,7 +147,7 @@ type
     { TSG3dObject }
     // Моделька..
 type
-    TSG3DObject = class(TSGDrawable)
+    TSG3DObject = class(TSGPaintableObject)
     public
         constructor Create(); override;
         destructor Destroy(); override;
