@@ -16,10 +16,12 @@ uses
 	,SaGeScreenBase
 	,SaGeFileUtils
 	,SaGeCommonStructs
+	,SaGeScreenComponentInterfaces
 	;
 
 type
 	TSGScreenSkinColors = object
+			public
 		FNormal   : TSGScreenSkinFrameColor;
 		FClick    : TSGScreenSkinFrameColor;
 		FDisabled : TSGScreenSkinFrameColor;
@@ -64,7 +66,6 @@ type
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
 		FComboBoxImage : TSGImage;
-		FMemoryBuffersSuppored : TSGBoolean;
 			protected
 		procedure PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5); virtual;
 		procedure PaintText(const Text : TSGString; const Location : TSGComponentLocation; const Color : TSGColor4f; const WidthCentered : TSGBoolean = True; const HeightCentered : TSGBoolean = True); virtual;
@@ -320,7 +321,6 @@ FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 FComboBoxImage := TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'ComboBoxImage.sgia');
 FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
-FMemoryBuffersSuppored := Render.SupporedMemoryBuffers();
 
 FDeviceResourcesDeleted := False;
 FDestroyFontSuppored := True;
@@ -398,7 +398,7 @@ procedure TSGScreenSkin.PaintText(const Text : TSGString; const Location : TSGCo
 var
 	Color4uint8 : TSGVector4uint8;
 begin
-if FMemoryBuffersSuppored then
+if Render.SupporedMemoryBuffers() then
 	begin
 	Color4uint8 := SGColor4fTo4uint8(Color);
 	TSGTextVertexObject.Paint(Text, Render, Font, Color4uint8, Location.FloatPosition, Location.FloatPositionAndSize, WidthCentered, HeightCentered)

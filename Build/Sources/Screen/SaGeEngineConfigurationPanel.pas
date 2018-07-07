@@ -13,7 +13,7 @@ uses
 	,SaGeRender
 	,SaGeFont
 	,SaGeFPSViewer
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
@@ -354,7 +354,9 @@ if (FFPS = nil) then
 	FFPS := TSGFPSViewer.Create(Context);
 FFPS.x := Trunc(V1.x + (V2.x - V1.x) / 2 - 25);
 FFPS.y := Trunc(V1.y + (V2.y - V1.y) / 2 - 70);
+(*
 FFPS.Alpha := Alpha * 2;
+*)
 FFPS.Paint();
 end;
 
@@ -409,8 +411,8 @@ Render.Vertex2f(Vertex2.x + Space, Vertex2.y + Space);
 
 Render.EndScene();
 
+(*
 Alpha := DistanseToAlpha(Distanse);
-
 if Visible and (VisibleTimer > Alpha) then
 	begin
 	VisibleTimer := Alpha;
@@ -420,6 +422,7 @@ if Visible and (VisibleTimer > Alpha) then
 	FRendersComboBox.VisibleTimer := Alpha;
 	FCloseButton.VisibleTimer := Alpha;
 	end;
+*)
 
 inherited;
 

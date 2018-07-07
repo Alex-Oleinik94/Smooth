@@ -376,7 +376,8 @@ else
 	FPaintableSettings := SetSettings();
 	CheckPlacement();
 	FContext.PaintableSettings := FPaintableSettings;
-	FContext.SelfLink := @FIContext;
+	FContext.InterfaceLink := @FIContext;
+	FContext.ExtendedLink := @FContext;
 	FContext.RenderClass := FRenderClass;
 	FContext.Paintable := FPaintableClass;
 	

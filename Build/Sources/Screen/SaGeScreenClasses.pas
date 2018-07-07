@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeScreenHelper;
+unit SaGeScreenClasses;
 
 interface
 
@@ -13,6 +13,7 @@ uses
 	
 	// Screen components
 	,SaGeScreenComponent
+	,SaGeScreenComponentInterfaces
 	,SaGeScreenCommonComponents
 	,SaGeScreen_Panel
 	,SaGeScreen_Label

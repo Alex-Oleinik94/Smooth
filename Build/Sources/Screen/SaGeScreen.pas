@@ -15,6 +15,13 @@ uses
 	;
 
 type
+	ISGScreen = interface(ISGComponent)
+		['{c3c6ea12-c4ff-41de-a250-1e4d856b3e59}']
+		procedure Load(const VContext : ISGContext);
+		procedure CustomPaint();
+		procedure UpDateScreen();
+		end;
+	
 	TSGScreen = class(TSGComponent, ISGScreen)
 			public
 		constructor Create();override;
@@ -23,8 +30,7 @@ type
 			private
 		FInProcessing : TSGBoolean;
 			public
-		procedure Load(const VContext : ISGContext);
-		procedure Resize();override;
+		procedure Load(const _Context : ISGContext);
 		procedure Paint();override;
 		procedure CustomPaint();
 		procedure UpDateScreen();
@@ -60,15 +66,25 @@ type
 		property Screen : TSGScreen read GetScreen;
 		end;
 
+procedure SGKill(var Screen : TSGScreen); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
-	 SaGeEngineConfigurationPanel
-	,SaGeLog
+	 SaGeLog
 	,SaGeRenderBase
 	,SaGeScreenSkin
 	,SaGeContextUtils
 	;
+
+procedure SGKill(var Screen : TSGScreen); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (Screen <> nil) then
+	begin
+	Screen.Destroy();
+	Screen := nil;
+	end;
+end;
 
 class function TSGScreenObject.ClassName() : TSGString;
 begin
@@ -121,7 +137,7 @@ end;
 
 constructor TSGScreen.Create();
 begin
-inherited Create();
+inherited;
 FInProcessing := False;
 end;
 
@@ -131,25 +147,15 @@ FInProcessing := False;
 inherited;
 end;
 
-procedure TSGScreen.Load(const VContext : ISGContext);
+procedure TSGScreen.Load(const _Context : ISGContext);
 begin
-{$IFDEF ANDROID}TSGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(VContext) + '"');{$ENDIF}
-Context := VContext;
+{$IFDEF ANDROID}TSGLog.Source('Enterind "SGScreenLoad". Context="' + SGAddrStr(_Context) + '"');{$ENDIF}
+Context := _Context;
 SGKill(FSkin);
 FSkin := TSGScreenSkin.CreateRandom(Context);
 Visible := True;
 Resize();
 {$IFDEF ANDROID}TSGLog.Source('Leaving "SGScreenLoad".');{$ENDIF}
-end;
-
-procedure TSGScreen.Resize();
-begin
-if RenderAssigned() then if Render.Width <> 0 then if Render.Height <> 0 then
-	begin
-	SetBounds(0, 0, Render.Width, Render.Height);
-	BoundsMakeReal();
-	inherited;
-	end;
 end;
 
 procedure TSGScreen.CustomPaint();
@@ -170,7 +176,7 @@ Render.InitMatrixMode(SG_2D);
 	WriteLn('TSGScreen.Paint() : Before drawing');
 	{$ENDIF}
 
-Paint();
+inherited Paint();
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining');
 	{$ENDIF}
@@ -181,11 +187,11 @@ procedure TSGScreen.UpDateScreen();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor(CanRePleace);"');
+	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor();"');
 	{$ENDIF}
 FromUpDateUnderCursor();
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate(CanRePleace);"');
+	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate();"');
 	{$ENDIF}
 FromUpDate();
 InProcessing := False;
@@ -196,16 +202,6 @@ begin
 {$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
 	{$ENDIF}
-
-if (Context.KeysPressed(SG_CTRL_KEY)) and
-   (Context.KeysPressed(SG_ALT_KEY)) and
-   (Context.KeyPressedType = SGDownKey) and
-   (Context.KeyPressedChar = 'O') and
-   TSGEngineConfigurationPanel.CanCreate(Self) then
-	begin
-	CreateChild(TSGEngineConfigurationPanel.Create()).Resize();
-	Context.SetKey(SGNullKey, 0);
-	end;
 
 UpDateScreen();
 Skin.UpDate();

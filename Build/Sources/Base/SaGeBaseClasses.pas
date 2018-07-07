@@ -34,7 +34,7 @@ type
 		destructor Destroy(); override;
 		procedure DestroyFromInterface();virtual;
 		end;
-
+	
 	TSGNamed = class(TSGInterfacedObject)
 			public
 		{$IFDEF WITHLEAKSDETECTOR}
@@ -44,7 +44,8 @@ type
 		class function ClassName() : TSGString; virtual;
 		class function ExistedName() : TSGString; virtual;
 		end;
-
+	TSGNamedClass = class of TSGNamed;
+	
 	ISGOptionGetSeter = interface(ISGInterface)
 		['{8c35573c-38fb-43ab-876f-af746af58650}']
 		function GetOption(const VName : TSGString) : TSGPointer;
@@ -58,6 +59,7 @@ type
 		end;
 
 procedure SGDestroyInterface({$IFDEF FPC_HAS_CONSTREF}constref{$ELSE}const{$ENDIF} i : IInterface);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const Guid1, Guid2 : TSGGuid) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -69,6 +71,23 @@ uses
 		,SaGeLeaksDetector
 		{$ENDIF}
 	;
+
+operator = (const Guid1, Guid2 : TSGGuid) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+var
+	Index : TSGUInt8;
+begin
+Result := 
+	(Guid1.Data1 = Guid2.Data1) and
+	(Guid1.Data2 = Guid2.Data2) and
+	(Guid1.Data3 = Guid2.Data3);
+if Result then
+	for Index := 0 to 7 do
+		if (Guid1.Data4[Index] <> Guid2.Data4[Index]) then
+			begin
+			Result := False;
+			break;
+			end;
+end;
 
 function TSGOptionGetSeter.GetOption(const VName : TSGString) : TSGPointer;
 begin

@@ -8,7 +8,6 @@ uses
 	 SaGeBase
 	,SaGeConsoleCaller
 	,SaGeContextClasses
-	,SaGeContextInterface
 	,SaGeContext
 	,SaGeContextUtils
 	;
@@ -16,7 +15,7 @@ uses
 type
 	TSGAllApplicationsDrawable = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext); override;
+		constructor Create(); override;
 		destructor Destroy(); override;
 		procedure Paint(); override;
 		procedure LoadRenderResources(); override;
@@ -67,9 +66,9 @@ uses
 	,SaGeTron
 	;
 
-constructor TSGAllApplicationsDrawable.Create(const VContext : ISGContext);
+constructor TSGAllApplicationsDrawable.Create();
 begin
-inherited Create(VContext);
+inherited;
 
 with TSGDrawClasses.Create(Context) do
 	begin
@@ -78,7 +77,7 @@ with TSGDrawClasses.Create(Context) do
 	Add(SGGetRegisteredDrawClasses());
 	//Add(TSGMeshViever);
 	//Add(TSGExampleShader);
-	Add(TSGModelRedactor);
+	//Add(TSGModelRedactor);
 	//Add(TSGGameTron);
 	//Add(TSGClientWeb);
 

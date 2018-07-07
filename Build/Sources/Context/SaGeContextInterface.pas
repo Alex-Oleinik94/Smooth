@@ -6,6 +6,7 @@ interface
 
 uses
 	 SaGeBase
+	,SaGeBaseClasses
 	,SaGeBaseContextInterface
 	,SaGeBitMap
 	,SaGeCursor
@@ -106,10 +107,10 @@ type
 	ISGContext = interface(ISGCustomContext)
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
 		function  GetScreen() : TSGPointer;
-		procedure SetSelfLink(const VLink : PISGContext);
-		function  GetSelfLink() : PISGContext;
-		procedure SetRenderClass(const NewRender : TSGPointer);
-		procedure SetNewContext(const NewContext : TSGPointer);
+		procedure SetInterfaceLink(const VLink : PISGContext);
+		function  GetInterfaceLink() : PISGContext;
+		procedure SetRenderClass(const NewRender : TSGNamedClass);
+		procedure SetNewContext(const NewContext : TSGNamedClass);
 		function  GetDefaultWindowColor():TSGColor3f;
 		procedure BeginIncessantlyPainting();
 		procedure EndIncessantlyPainting();
@@ -119,9 +120,9 @@ type
 
 		property AudioRender : ISGAudioRender read GetAudioRender;
 		property Screen : TSGPointer read GetScreen;
-		property NewContext : TSGPointer write SetNewContext;
-		property RenderClass : TSGPointer write SetRenderClass;
-		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
+		property NewContext : TSGNamedClass write SetNewContext;
+		property RenderClass : TSGNamedClass write SetRenderClass;
+		property InterfaceLink : PISGContext read GetInterfaceLink write SetInterfaceLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
@@ -140,14 +141,13 @@ type
 		property ClientHeight : TSGAreaInt read GetClientHeight write SetClientHeight;
 		end;
 
-	ISGContextObject = interface(ISGRenderObject)
+	ISGContextObject = interface(ISGInterface)
 		['{ee8df1e3-abe8-4378-8d11-7b5903fea502}']
 		procedure SetContext(const VContext : ISGContext);
 		function GetContext() : ISGContext;
 		function ContextAssigned() : TSGBoolean;
 
 		property Context : ISGContext read GetContext write SetContext;
-		property Render  : ISGRender  read GetRender;
 		end;
 
 implementation

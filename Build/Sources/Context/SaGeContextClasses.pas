@@ -16,15 +16,15 @@ uses
 	,SaGeContextInterface
 	;
 type
-	TSGContextObject = class(TSGOptionGetSeter, ISGContextObject)
+	TSGContextObject = class(TSGOptionGetSeter, ISGContextObject, ISGRenderObject)
 			public
-		constructor Create();override;deprecated;
-		destructor Destroy();override;
-		constructor Create(const VContext : ISGContext);virtual;
+		constructor Create(); override; deprecated;
+		destructor Destroy(); override;
+		constructor Create(const _Context : ISGContext); virtual;
 			protected
 		FContext : PISGContext;
 			public
-		procedure SetContext(const VContext : ISGContext); virtual;
+		procedure SetContext(const _Context : ISGContext); virtual;
 		function GetContext() : ISGContext; virtual;
 		function GetRender() : ISGRender; virtual;
 		function GetAudioRender() : ISGAudioRender; virtual;
@@ -45,12 +45,19 @@ type
 	TSGPaintableObjectClass = class of TSGPaintableObject;
 	TSGPaintableObject = class(TSGContextObject)
 			public
-		procedure Paint(); virtual; abstract;
-		procedure Resize(); virtual; abstract;
+		procedure Paint(); virtual;
+		procedure Resize(); virtual;
 		end;
 
 implementation
 
+procedure TSGPaintableObject.Paint();
+begin
+end;
+
+procedure TSGPaintableObject.Resize();
+begin
+end;
 
 function TSGContextObject.Suppored() : TSGBoolean;
 begin
@@ -74,30 +81,32 @@ end;
 
 function TSGContextObject.GetAudioRender() : ISGAudioRender;
 begin
-Result := Context.AudioRender;
+Result := FContext^.AudioRender;
 end;
 
 constructor TSGContextObject.Create();
 begin
 inherited;
-FContext := nil;
+if (FContext <> nil) and (not (FContext^ is ISGContext)) then
+	FContext := nil;
 end;
 
 destructor TSGContextObject.Destroy();
 begin
+FContext := nil;
 inherited;
 end;
 
-constructor TSGContextObject.Create(const VContext : ISGContext);
+constructor TSGContextObject.Create(const _Context : ISGContext);
 begin
+SetContext(_Context);
 Create();
-SetContext(VContext);
 end;
 
-procedure TSGContextObject.SetContext(const VContext : ISGContext);
+procedure TSGContextObject.SetContext(const _Context : ISGContext);
 begin
-if VContext <> nil then
-	FContext := VContext.SelfLink
+if _Context <> nil then
+	FContext := _Context.InterfaceLink
 else
 	FContext := nil;
 end;
