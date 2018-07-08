@@ -300,7 +300,7 @@ end;
 
 procedure TSGNInset.Paint();
 begin
-FCursorOnComponent := False;
+FCursorOverComponent := False;
 inherited;
 end;
 

@@ -52,6 +52,7 @@ var
 	ParentBoundsSize : TSGComponentBoundsSize;
 	ParentRealPosition : TSGComponentLocationVectorInt;
 	ParentLocation : TSGComponentLocation;
+	CursorPosition : TSGVector2int32;
 begin
 if (FParent <> nil) and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGDownKey)) then
 	FParent.ChildToListEnd(Self);
@@ -64,6 +65,7 @@ if FRePlace then
 			ParentBoundsSize := FParent.BoundsSize;
 			ParentRealPosition := FParent.RealPosition;
 			ParentLocation := FParent.Location;
+			CursorPosition := CursorPositionAtTheMoment();
 			if  (CursorPosition.x>ParentRealPosition.x) and 
 				(CursorPosition.x<ParentRealPosition.x+ParentBoundsSize.Left+10) and 
 				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
@@ -181,7 +183,7 @@ Result:=
 	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y) and 
 	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FBordersSize.Top) and 
 	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+FRealLocation.Width);
-FCursorOnComponentCaption:=Result;
+FCursorOverComponentCaption:=Result;
 end;
 
 procedure TSGForm.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);

@@ -10,6 +10,7 @@ uses
 	,SaGeScreen
 	,SaGeScreenComponent
 	,SaGeScreenComponentInterfaces
+	,SaGeBaseContextInterface
 	;
 
 type
@@ -18,10 +19,10 @@ type
 		constructor Create();override;
 		class function ClassName() : TSGString; override;
 			protected
-		FOverPrev  : TSGBoolean;
+		FPreviousOver  : TSGBoolean;
 		FOver      : TSGBoolean;
 		FOverTimer : TSGScreenTimer;
-		procedure UpgradeTimers();override;
+		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);override;
 			public 
 		function GetOverTimer() : TSGScreenTimer;virtual;
 		function GetOver() : TSGBool;
@@ -34,7 +35,7 @@ type
 			protected
 		FClick      : TSGBoolean;
 		FClickTimer : TSGScreenTimer;
-		procedure UpgradeTimers();override;
+		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);override;
 			public
 		function GetClickTimer() : TSGScreenTimer;virtual;
 		function GetClick() : TSGBool;virtual;
@@ -47,7 +48,7 @@ type
 			protected
 		FOpen      : TSGBoolean;
 		FOpenTimer : TSGScreenTimer;
-		procedure UpgradeTimers();override;
+		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);override;
 			public
 		function GetOpen() : TSGBoolean;
 		function GetOpenTimer() : TSGScreenTimer;
@@ -74,18 +75,18 @@ begin
 Result := FOver;
 end;
 
-procedure TSGOverComponent.UpgradeTimers();
+procedure TSGOverComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
 inherited;
-FOverPrev := FOver;
-FOver := CursorInComponent() and ReqursiveActive;
-UpgradeTimer(FOver, FOverTimer, 3, 2);
+FPreviousOver := FOver;
+FOver := CursorOverComponent() and ReqursiveActive;
+UpgradeTimer(FOver, FOverTimer, ElapsedTime, 3, 2);
 end;
 
 constructor TSGOverComponent.Create();
 begin
 inherited;
-FOverPrev := False;
+FPreviousOver := False;
 FOver := False;
 FOverTimer := 0;
 end;
@@ -107,11 +108,11 @@ begin
 Result := FOpen;
 end;
 
-procedure TSGOpenComponent.UpgradeTimers();
+procedure TSGOpenComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
 inherited;
 FOpen := FOpen and ReqursiveActive;
-UpgradeTimer(FOpen, FOpenTimer, 3);
+UpgradeTimer(FOpen, FOpenTimer, ElapsedTime, 3);
 end;
 
 constructor TSGOpenComponent.Create();
@@ -138,11 +139,11 @@ begin
 Result := FClick;
 end;
 
-procedure TSGClickComponent.UpgradeTimers();
+procedure TSGClickComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
 inherited;
 FClick := FOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
-UpgradeTimer(FClick, FClickTimer, 4, 2);
+UpgradeTimer(FClick, FClickTimer, ElapsedTime, 4, 2);
 end;
 
 constructor TSGClickComponent.Create();

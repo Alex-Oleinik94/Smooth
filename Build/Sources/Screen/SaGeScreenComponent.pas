@@ -90,8 +90,8 @@ type
 		function GetScreenHeight() : TSGScreenInt;virtual;
 		function GetLocation() : TSGComponentLocation;virtual;
 		
-		procedure UpDateLocation();
-		function UpDateValue(var RealObj, Obj : TSGComponentLocationInt) : TSGComponentLocationInt;
+		procedure UpDateLocation(const ElapsedTime : TSGTimerInt);
+		function UpDateValue(var RealObj, Obj : TSGComponentLocationInt; const ElapsedTime : TSGTimerInt) : TSGComponentLocationInt;
 		procedure UpDateObjects();virtual;
 		procedure TestCoords();virtual;
 			public
@@ -115,7 +115,7 @@ type
 		procedure SetBoundsFloat(const NewLeft, NewTop, NewWidth, NewHeight : TSGScreenFloat);
 		procedure SetMiddleBounds(const NewWidth, NewHeight : TSGScreenInt);virtual;
 		procedure WriteBounds();
-		class function RandomOne():TSGScreenInt;
+		class function RandomOne() : TSGInt8;
 		procedure AddToLeft(const Value : TSGScreenInt);
 		procedure AddToWidth(const Value : TSGScreenInt);
 		procedure AddToHeight(const Value : TSGScreenInt);
@@ -135,8 +135,8 @@ type
 		FSkin    : TSGScreenSkin;
 
 		procedure UpDateSkin();virtual;
-		procedure UpgradeTimers();virtual;
-		procedure UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:TSGScreenInt = 1;const Mn2:single = 1);
+		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);virtual;
+		procedure UpgradeTimer(const Flag : TSGBoolean; var Timer : TSGScreenTimer; const ElapsedTime : TSGTimerInt; const Factor1 : TSGInt16 = 1; const Factor2 : TSGFloat32 = 1);
 			protected
 		procedure FromUpDate();virtual;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);virtual;
@@ -162,8 +162,8 @@ type
 		property Anchors      : TSGSetOfByte  read FAnchors      write FAnchors;
 			protected
 		FChildren:TSGComponentList;
-		FCursorOnComponent:Boolean;
-		FCursorOnComponentCaption:Boolean;
+		FCursorOverComponent:Boolean;
+		FCursorOverComponentCaption:Boolean;
 		FCanHaveChildren:Boolean;
 		FComponentProcedure:TSGComponentProcedure;
 		FChildrenPriority : TSGMaxEnum;
@@ -174,7 +174,7 @@ type
 		procedure ClearPriority();
 		procedure MakePriority();
 		function GetPriorityComponent() : TSGComponent;
-		function CursorInComponent():TSGBoolean;virtual;
+		function CursorOverComponent():TSGBoolean;virtual;
 		function CursorInComponentCaption():boolean;virtual;
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
@@ -183,14 +183,14 @@ type
 		procedure ChildToListEnd(const Component : TSGComponent);
 			public
 		procedure ToFront();
-		function MustDestroyed() : TSGBoolean;
+		function MustBeDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
 		function GetChild(a:TSGInt32):TSGComponent;
 		function CreateChild(const Child : TSGComponent) : TSGComponent;
 		procedure CompleteChild(const VChild : TSGComponent);
 		function LastChild():TSGComponent;
 		procedure CreateAlign(const NewAllign:TSGByte);
-		function CursorPosition(): TSGPoint2int32;
+		function CursorPositionAtTheMoment(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
 		procedure DestroySkin();
@@ -205,8 +205,8 @@ type
 		property Align : TSGByte read FAlign write CreateAlign;
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGComponentProcedure read FComponentProcedure write FComponentProcedure;
-		property CursorOnComponent : Boolean read FCursorOnComponent write FCursorOnComponent;
-		property CursorOnComponentCaption : Boolean read FCursorOnComponentCaption write FCursorOnComponentCaption;
+		property CursorOnComponent : Boolean read FCursorOverComponent write FCursorOverComponent;
+		property CursorOnComponentCaption : Boolean read FCursorOverComponentCaption write FCursorOverComponentCaption;
 			public
 		OnChange : TSGComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
@@ -524,18 +524,18 @@ var
 begin
 FLocation.Height := NewHeight;
 FLocation.Width  := NewWidth;
-if Parent <> nil then
+if (Parent <> nil) then
 	begin
 	PW := Parent.Width;
 	PH := Parent.Height;
+	FLocation.Left := Round((PW-NewWidth)/2);
+	FLocation.Top  := Round((PH-NewHeight)/2);
 	end
 else
 	begin
-	PW := Render.Width;
-	PH := Render.Height;
+	FLocation.Left := 0;
+	FLocation.Top := 0;
 	end;
-FLocation.Left := Round((PW-NewWidth)/2);
-FLocation.Top  := Round((PH-NewHeight)/2);
 end;
 
 procedure TSGComponent.SetVisible(const b:Boolean);
@@ -557,18 +557,18 @@ end;
 
 function TSGComponent.GetScreenWidth : longint;
 begin
-if FParent<>nil then
-	Result:=FParent.Width
+if (FParent <> nil) then
+	Result := FParent.Width
 else
-	Result:=Render.Width;
+	Result := Width;
 end;
 
 function TSGComponent.GetScreenHeight : longint;
 begin
-if FParent<>nil then
-	Result:=FParent.Height
+if (FParent <> nil) then
+	Result := FParent.Height
 else
-	Result:=Render.Height;
+	Result := Height;
 end;
 
 procedure TSGComponent.SetRight(NewRight:TSGScreenInt);
@@ -608,7 +608,7 @@ if FChildren <> nil then
 	Result := FChildren[High(FChildren)];
 end;
 
-function TSGComponent.UpDateValue(var RealObj, Obj : TSGComponentLocationInt) : TSGComponentLocationInt;
+function TSGComponent.UpDateValue(var RealObj, Obj : TSGComponentLocationInt; const ElapsedTime : TSGTimerInt) : TSGComponentLocationInt;
 const
 	Speed = 2;
 var
@@ -618,7 +618,7 @@ begin
 if (RealObj <> Obj) then
 	begin
 	OldValue:=RealObj;
-	Value:=Round((Obj * Context.ElapsedTime / Speed + RealObj * 5) / (5 + Context.ElapsedTime / Speed));
+	Value:=Round((Obj * ElapsedTime / Speed + RealObj * 5) / (5 + ElapsedTime / Speed));
 	Result:=Value-RealObj;
 	RealObj:=Value;
 	if (RealObj=OldValue) and (Obj<>RealObj) then
@@ -648,26 +648,30 @@ if IsLocationNull then
 FDefaultLocation := FLocation;
 end;
 
-class function TSGComponent.RandomOne:LongInt;
+class function TSGComponent.RandomOne() : TSGInt8;
 begin
-Result:=0;
-While Result=0 do
-	Result:=random(3)-1;
+Result := 0;
+Result := Random(2);
+if (Result = 0) then
+	Result := -1;
 end;
 
-procedure TSGComponent.UpgradeTimer(const  Flag:Boolean; var Timer : TSGScreenTimer; const Mnozhitel:LongInt = 1;const Mn2:single = 1);
+procedure TSGComponent.UpgradeTimer(const Flag : TSGBoolean; var Timer : TSGScreenTimer; const ElapsedTime : TSGTimerInt; const Factor1 : TSGInt16 = 1; const Factor2 : TSGFloat32 = 1);
+var
+	GeneralFactor : TSGFloat32;
 begin
+GeneralFactor := SGObjectTimerConst * Factor1 * ElapsedTime;
 if Flag then
 	begin
-	Timer+=SGObjectTimerConst*Mn2*Mnozhitel*Context.ElapsedTime;
-	if Timer>1 then
-		Timer:=1;
+	Timer += GeneralFactor * Factor2;
+	if (Timer > 1) then
+		Timer := 1;
 	end
 else
 	begin
-	Timer-=SGObjectTimerConst*(1/Mn2)*Mnozhitel*Context.ElapsedTime;
-	if Timer<0 then
-		Timer:=0;
+	Timer -= GeneralFactor * (1 / Factor2);
+	if (Timer < 0) then
+		Timer := 0;
 	end;
 end;
 
@@ -679,10 +683,10 @@ else
 	Result := FParent.ReqursiveActive();
 end;
 
-procedure TSGComponent.UpgradeTimers;
+procedure TSGComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
-UpgradeTimer(FVisible,FVisibleTimer);
-UpgradeTimer(FActive and ReqursiveActive, FActiveTimer);
+UpgradeTimer(FVisible, FVisibleTimer, ElapsedTime);
+UpgradeTimer(FActive and ReqursiveActive, FActiveTimer, ElapsedTime);
 end;
 
 // Deleted self in parent
@@ -831,14 +835,17 @@ begin
 FLocation.Height := FLocation.Height + Value;
 end;
 
-function TSGComponent.CursorInComponent() : TSGBoolean;
+function TSGComponent.CursorOverComponent() : TSGBoolean;
+var
+	CursorPosition : TSGVector2int32;
 begin
+CursorPosition := CursorPositionAtTheMoment();
 Result:=
-	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x)and
-	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x + FRealLocation.Width)and
-	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y)and
-	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y + FRealLocation.Height);
-FCursorOnComponent:=Result;
+	(CursorPosition.x >= FRealPosition.x)and
+	(CursorPosition.x <= FRealPosition.x + FRealLocation.Width)and
+	(CursorPosition.y >= FRealPosition.y)and
+	(CursorPosition.y <= FRealPosition.y + FRealLocation.Height);
+FCursorOverComponent := Result;
 end;
 
 procedure TSGComponent.FromUpDate();
@@ -851,7 +858,7 @@ begin
 	{$ENDIF}
 
 UpDateObjects();
-UpgradeTimers();
+UpgradeTimers(Context.ElapsedTime);
 UpDateSkin();
 
 PriorityComponent := GetPriorityComponent();
@@ -862,7 +869,7 @@ Index := 0;
 while Index < Length(FChildren) do
 	begin
 	Component := FChildren[Index];
-	if Component.MustDestroyed() then
+	if Component.MustBeDestroyed() then
 		Component.Destroy()
 	else
 		begin
@@ -957,11 +964,9 @@ if FParent<>nil then
 	end;
 end;
 
-function TSGComponent.MustDestroyed() : TSGBoolean;
+function TSGComponent.MustBeDestroyed() : TSGBoolean;
 begin
-Result := FMarkedForDestroy;
-if Result then
-	Result := (FVisibleTimer + FActiveTimer) < SGZero;
+Result := FMarkedForDestroy and (FVisibleTimer < SGZero) and (FActiveTimer < SGZero);
 end;
 
 procedure TSGComponent.MakePriority();
@@ -1008,8 +1013,8 @@ FActive:=True;
 FActiveTimer:=0;
 FCaption:='';
 FChildren:=nil;
-FCursorOnComponent:=False;
-FCursorOnComponentCaption:=False;
+FCursorOverComponent:=False;
+FCursorOverComponentCaption:=False;
 FCanHaveChildren:=True;
 ComponentProcedure:=nil;
 FUserPointer1:=nil;
@@ -1064,7 +1069,7 @@ FLocation.Height := FDefaultLocation.Height;
 FLocation.Width  := FDefaultLocation.Width;
 end;
 
-function TSGComponent.CursorPosition(): TSGPoint2int32;
+function TSGComponent.CursorPositionAtTheMoment(): TSGPoint2int32;
 begin
 Result := Context.CursorPosition(SGNowCursorPosition);
 end;
@@ -1106,28 +1111,28 @@ begin
 FCaption := NewCaption;
 end;
 
-procedure TSGComponent.UpDateLocation();
+procedure TSGComponent.UpDateLocation(const ElapsedTime : TSGTimerInt);
 var
 	Value, RealValue : TSGComponentLocationInt;
 begin
 Value := FLocation.Height;
 RealValue := FRealLocation.Height;
-UpDateValue(RealValue, Value);
+UpDateValue(RealValue, Value, ElapsedTime);
 FRealLocation.Height := RealValue;
 
 Value := FLocation.Top;
 RealValue := FRealLocation.Top;
-UpDateValue(RealValue, Value);
+UpDateValue(RealValue, Value, ElapsedTime);
 FRealLocation.Top := RealValue;
 
 Value := FLocation.Left;
 RealValue := FRealLocation.Left;
-UpDateValue(RealValue, Value);
+UpDateValue(RealValue, Value, ElapsedTime);
 FRealLocation.Left := RealValue;
 
 Value := FLocation.Width;
 RealValue := FRealLocation.Width;
-UpDateValue(RealValue, Value);
+UpDateValue(RealValue, Value, ElapsedTime);
 FRealLocation.Width := RealValue;
 end;
 
@@ -1176,7 +1181,7 @@ ValueTop    := FRealLocation.Top;
 ValueHeight := FRealLocation.Height;
 ValueWidth  := FRealLocation.Width;
 ValueLeft   := FRealLocation.Left;
-UpDateLocation();
+UpDateLocation(Context.ElapsedTime);
 TestCoords();
 ValueHeight := FRealLocation.Height - ValueHeight;
 ValueLeft   := FRealLocation.Left   - ValueLeft;
@@ -1197,7 +1202,7 @@ procedure TSGComponent.FromUpDateUnderCursor(const CursorInComponentNow:Boolean 
 
 procedure PUpdateComponent(const Component : TSGComponent);
 begin
-Component.FromUpDateUnderCursor(Component.CursorInComponent());
+Component.FromUpDateUnderCursor(Component.CursorOverComponent());
 if Component.CursorInComponentCaption() then
 	Component.FromUpDateCaptionUnderCursor();
 end;
@@ -1216,7 +1221,7 @@ if PriorityComponent <> nil then
 UnderCursorComponent := nil;
 for Component in Self.GetReverseEnumerator() do
 	if Component <> PriorityComponent then
-		if Component.CursorInComponent() and Component.Visible and  Component.Active then
+		if Component.CursorOverComponent() and Component.Visible and  Component.Active then
 			begin
 			UnderCursorComponent := Component;
 			break;

@@ -61,7 +61,7 @@ type
 		procedure SetTitle(const VTitle : TSGString);
 		
 		procedure Resize();
-
+		
 		property Left : TSGAreaInt read GetLeft write SetLeft;
 		property Top : TSGAreaInt read GetTop write SetTop;
 		property Width : TSGAreaInt read GetWidth write SetWidth;

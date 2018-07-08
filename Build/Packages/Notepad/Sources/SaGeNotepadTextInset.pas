@@ -41,8 +41,8 @@ type
 		FFile : TSGNTextInsetFileStrings;
 		FScrolTimer : TSGFloat;
 		
-		FCursorOnText : TSGBoolean;
-		FCursorOnTextPrev : TSGBoolean;
+		FCursorOverText : TSGBoolean;
+		FCursorOverTextPrev : TSGBoolean;
 		
 		FTextCursor : record
 			FLine : TSGLongWord;
@@ -267,7 +267,7 @@ var
 function IsCurOnText():TSGBoolean;
 begin
 Result := False;
-if not FCursorOnComponent then
+if not FCursorOverComponent then
 	Exit;
 CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealPosition.x, FRealPosition.y);
 CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
@@ -284,15 +284,15 @@ end;
 
 procedure ProcessCursor();
 begin
-FCursorOnText := FCursorOnComponent and IsCurOnText();
-if FCursorOnText then
+FCursorOverText := FCursorOverComponent and IsCurOnText();
+if FCursorOverText then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
-if FCursorOnTextPrev and (not FCursorOnText) then
+if FCursorOverTextPrev and (not FCursorOverText) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-FCursorOnTextPrev := FCursorOnText;
-if FCursorOnText and Context.CursorKeysPressed(SGLeftCursorButton) then
+FCursorOverTextPrev := FCursorOverText;
+if FCursorOverText and Context.CursorKeysPressed(SGLeftCursorButton) then
 	PutCursor();
 end;
 
@@ -459,7 +459,7 @@ if FOwner <> nil then
 if Visible then
 	begin
 	UpgradeTimer(False, FScrolTimer, 1, 3);
-	if FCursorOnComponent or FCursorOnText or FCursorOnTextPrev then
+	if FCursorOverComponent or FCursorOverText or FCursorOverTextPrev then
 		ProcessCursor();
 	ProcessTyping();
 	end;

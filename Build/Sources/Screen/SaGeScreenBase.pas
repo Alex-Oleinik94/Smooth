@@ -96,7 +96,7 @@ type
 		FFirst  : TSGColor4f;
 		FSecond : TSGColor4f;
 			public
-		procedure Import(const VFirst, VSecond : TSGColor4f ); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Import(const VFirst, VSecond : TSGColor4f); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
 const
@@ -113,7 +113,6 @@ const
 type
 	ISGComponent = interface(ISGArea)
 		['{6ee600fd-f8b3-40bc-bf8a-ec7693b21e96}']
-		
 		procedure SetRight (NewRight  : TSGScreenInt);
 		procedure SetBottom(NewBottom : TSGScreenInt);
 		function GetRight()  : TSGScreenInt;
@@ -132,7 +131,7 @@ type
 
 		procedure UpDateObjects();
 		procedure TestCoords();
-		procedure UpgradeTimers();
+		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);
 
 		procedure AddToLeft(const Value:TSGScreenInt);
 		procedure AddToWidth(const Value:TSGScreenInt);
@@ -152,16 +151,16 @@ type
 
 		procedure ClearPriority();
 		procedure MakePriority();
-		function CursorInComponent():TSGBoolean;
+		function CursorOverComponent():TSGBoolean;
 		function CursorInComponentCaption():TSGBoolean;
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
 		function RightShift():TSGScreenInt;
 		procedure ToFront();
-		function MustDestroyed() : TSGBoolean;
+		function MustBeDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
 		procedure CreateAlign(const NewAllign:TSGByte);
-		function CursorPosition(): TSGPoint2int32;
+		function CursorPositionAtTheMoment(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
 		procedure KillChildren();

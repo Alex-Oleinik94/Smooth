@@ -32,8 +32,8 @@ type
 		destructor Destroy;override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCursorOnComponentPrev  : TSGBoolean;
-		FCursorOnComponentTimer : TSGScreenTimer;
+		FCursorOverComponentPrev  : TSGBoolean;
+		FCursorOverComponentTimer : TSGScreenTimer;
 		FCursorPosition         : TSGInt32;
 		FNowChanget             : TSGBool;
 		FNowChangetTimer        : TSGScreenTimer;
@@ -254,7 +254,7 @@ var
 	CaptionCharget:Boolean = False;
 	CursorChanget:Boolean = False;
 begin
-if (not CursorInComponent) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
+if (not CursorOverComponent()) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
 	FNowChanget:=False;
 if FNowChanget then
 	begin
@@ -390,14 +390,14 @@ if CaptionCharget or CursorChanget then
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
 	end;
-if FCursorOnComponent and ReqursiveActive and Visible then
+if FCursorOverComponent and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
-if FCursorOnComponentPrev and (not FCursorOnComponent) then
+if FCursorOverComponentPrev and (not FCursorOverComponent) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-FCursorOnComponentPrev := FCursorOnComponent;
-UpgradeTimer(FCursorOnComponent,FCursorOnComponentTimer,3);
+FCursorOverComponentPrev := FCursorOverComponent;
+UpgradeTimer(FCursorOverComponent,FCursorOverComponentTimer,3);
 UpgradeTimer(FNowChanget,FNowChangetTimer,3);
 UpgradeTimer(FTextComplite,FTextCompliteTimer,1);
 UpgradeTimer(FDrawCursor,FDrawCursorTimer,4);
@@ -407,8 +407,8 @@ end;
 constructor TSGEdit.Create;
 begin
 inherited;
-FCursorOnComponentPrev := False;
-FCursorOnComponent     := False;
+FCursorOverComponentPrev := False;
+FCursorOverComponent     := False;
 FCursorPosition        := 0;
 FNowChanget            := False;
 FNowChangetTimer       := 0;
