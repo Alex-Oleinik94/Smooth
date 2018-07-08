@@ -5,7 +5,8 @@ unit Ex15_Shadow;
 interface
 
 uses
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeCommonStructs
@@ -21,7 +22,7 @@ uses
 	;
 
 type
-	TSGExample15_Shadow = class(TSGContextabled)
+	TSGExample15_Shadow = class(TSGContextObject)
 			public
 		constructor Create(const VContext : ISGContext;const Lights : TSGLongWord = 1; const BonesCount : TSGLongWord = 32;const TextureBlock : TSGTextureBlock = nil);
 		destructor Destroy();override;

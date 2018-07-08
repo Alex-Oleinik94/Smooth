@@ -8,8 +8,8 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeScreen
-	,SaGeCommonClasses
-	,SaGeScreenHelper
+	,SaGeContextInterface
+	,SaGeScreenClasses
 	;
 
 type
@@ -111,7 +111,7 @@ end;
 
 constructor TSG3DFractalForm.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 FEnableColors  := False;
 FEnableNormals := False;
 {$IFNDEF ANDROID}

@@ -10,7 +10,8 @@ uses
 	,SaGeBase
 	,SaGeImage
 	,SaGeRender
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeMesh
 	,SaGeGameBase
 	,SaGeMatrix

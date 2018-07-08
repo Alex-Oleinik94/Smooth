@@ -6,10 +6,11 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeRenderBase
 	,SaGeMatrix
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
 	;
 
 type
@@ -31,8 +32,8 @@ type
 		procedure SwapBuffers();
 		procedure LockResources();
 		procedure UnLockResources();
-		procedure SetContext(const VContext : ISGNearlyContext);
-		function GetContext() : ISGNearlyContext;
+		procedure SetContext(const VContext : ISGBaseContext);
+		function GetContext() : ISGBaseContext;
 
 		procedure InitOrtho2d(const x0, y0, x1, y1:TSGSingle);
 		procedure InitMatrixMode(const Mode:TSGMatrixMode = SG_3D; const dncht : TSGFloat = 1);
@@ -137,7 +138,7 @@ type
 
 		property Width : TSGAreaInt read GetWidth write SetWidth;
 		property Height : TSGAreaInt read GetHeight write SetHeight;
-		property Context : ISGNearlyContext read GetContext write SetContext;
+		property Context : ISGBaseContext read GetContext write SetContext;
 		property RenderType : TSGRenderType read GetRenderType;
 
 		{$DEFINE INC_PLACE_RENDER_INTERFACE}
@@ -145,11 +146,14 @@ type
 		{$UNDEF INC_PLACE_RENDER_INTERFACE}
 		end;
 
-	ISGRendered = interface
+	ISGRenderObject = interface(ISGInterface)
 		['{535e900f-03d6-47d1-b2e1-9eadadf877f3}']
 		function GetRender() : ISGRender;
 		function RenderAssigned() : TSGBoolean;
-
+		function Suppored() : TSGBoolean;
+		procedure DeleteRenderResources();
+		procedure LoadRenderResources();
+		
 		property Render : ISGRender read GetRender;
 		end;
 

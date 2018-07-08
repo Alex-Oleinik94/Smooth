@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeScreenBase
 	,SaGeScreenCommonComponents
+	,SaGeScreenComponentInterfaces
 	;
 
 type
@@ -27,7 +28,7 @@ type
 		procedure FromUpDateCaptionUnderCursor();override;
 		procedure FromUpDate();override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		end;
 
 implementation
@@ -78,16 +79,14 @@ if CursorInComponentNow then
 inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
-procedure TSGButton.FromDraw;
+procedure TSGButton.Paint();
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
-	begin
 	FSkin.PaintButton(Self);
-	end;
 FCursorOnButton:=False;
 FChangingButton:=False;
 FClick := False;
-inherited FromDraw;
+inherited;
 end;
 
 procedure TSGButton.FromUpDateCaptionUnderCursor();

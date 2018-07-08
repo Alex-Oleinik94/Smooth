@@ -9,7 +9,8 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeScreen
 	,SaGeFont
@@ -21,7 +22,7 @@ uses
 	,SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	,SaGeScreen_Edit
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
@@ -29,7 +30,7 @@ uses
 		{$ENDIF}
 	;
 type
-	TSGApprFunction = class(TSGScreenedDrawable)
+	TSGApprFunction = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

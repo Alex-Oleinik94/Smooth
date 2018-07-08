@@ -8,7 +8,8 @@ uses
 		// Engine
 	 SaGeBase
 	,SaGeBitMap
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeCommon
 	,SaGeRenderBase
 	,SaGeRenderInterface
@@ -24,13 +25,13 @@ type
 
 	PSGImage  = ^ TSGImage;
 	//  ласс изображени€ и текстуры
-	TSGImage = class(TSGDrawable)
+	TSGImage = class(TSGContextObject)
 			public
 		constructor Create(const VFileName : TSGString = '');
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			public
 		// ј это само изображение ( в оперативной пам€ти, в виде последовательности байнов, и свойств изобрадени€ )
 		// ¬ общем это BitMap (битова€ карта)
@@ -118,7 +119,7 @@ type
 	TSGImageList = packed array of TSGImage;
 
 type
-	TSGTextureBlock = class(TSGDrawable)
+	TSGTextureBlock = class(TSGContextObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -441,13 +442,13 @@ begin
 Result := Channels > 3;
 end;
 
-procedure TSGImage.LoadDeviceResources();
+procedure TSGImage.LoadRenderResources();
 begin
 if not (ReadyGoToTexture or (Texture <> 0)) then
 	Loading();
 end;
 
-procedure TSGImage.DeleteDeviceResources();
+procedure TSGImage.DeleteRenderResources();
 var
 	IsHasTexture : TSGBoolean;
 begin

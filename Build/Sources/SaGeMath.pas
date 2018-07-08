@@ -13,8 +13,8 @@ uses
 	,SaGeBase
 	,SaGeRender
 	,SaGeContext
-	,SaGeClasses
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
 	,SaGeRenderBase
 	;
 
@@ -186,7 +186,7 @@ type
 	TSGVisibleVectorList = packed array of TSGVisibleVector;
 	TSGVisibleVectorFunction = function (Vector : TSGVisibleVector; const Void : TSGPointer) : TSGVisibleVector;
 type
-	TSGMathGraphic=class(TSGDrawable)
+	TSGMathGraphic=class(TSGPaintableObject)
 			public
 		constructor Create();override;
 		destructor Destroy;override;

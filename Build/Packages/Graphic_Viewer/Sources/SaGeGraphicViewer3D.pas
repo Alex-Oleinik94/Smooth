@@ -6,7 +6,7 @@ interface
 
 uses 
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeFractals
 	,SaGeMath
 	,SaGeRenderBase
@@ -65,7 +65,7 @@ end;
 
 constructor TSGGraphViewer3D.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 Depth:=1000;
 Threads:=0;
 FEnableNormals:=True;

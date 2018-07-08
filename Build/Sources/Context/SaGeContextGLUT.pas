@@ -15,8 +15,10 @@ uses
 	,SaGeBase
 	,SaGeContext
 	,SaGeScreen
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
+	,SaGeContextInterface
 	,SaGeContextUtils
 	
 	{$IFNDEF MOBILE}
@@ -53,7 +55,7 @@ type
 			public
 		function  GetClientWidth() : TSGAreaInt;override;
 		function  GetClientHeight() : TSGAreaInt;override;
-		procedure SetNewContext(const NewContextClass : TSGPointer);override;
+		procedure SetNewContext(const NewContextClass : TSGNamedClass);override;
 			protected
 		function InitRender() : TSGBoolean;
 			protected
@@ -67,7 +69,7 @@ implementation
 
 uses
 	 SaGeRenderOpenGL
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeRender
 	,SaGeDllManager
 	,SaGeStringUtils
@@ -79,7 +81,7 @@ uses
 var
 	ContextGLUT : TSGContextGLUT = nil;
 
-procedure TSGContextGLUT.SetNewContext(const NewContextClass : TSGPointer);
+procedure TSGContextGLUT.SetNewContext(const NewContextClass : TSGNamedClass);
 begin
 inherited;
 {$IFDEF GLUT_DEBUG}SGHint([ClassName(), '__SetNewContext(', FNewContextType.ClassName(), ').']);{$ENDIF}

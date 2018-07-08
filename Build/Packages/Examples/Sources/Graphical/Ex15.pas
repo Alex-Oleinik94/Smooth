@@ -9,7 +9,8 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeFont
 	,SaGeRenderBase
@@ -24,7 +25,7 @@ uses
 	,SaGeFPSViewer
 	,SaGeCamera
 	,SaGeMatrix
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	,SaGeContextUtils
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
@@ -43,7 +44,7 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample15 = class(TSGScreenedDrawable)
+	TSGExample15 = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

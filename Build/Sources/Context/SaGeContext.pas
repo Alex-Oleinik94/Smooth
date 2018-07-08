@@ -11,8 +11,8 @@ uses
 	 SaGeBase
 	,SaGeDateTime
 	,SaGeRender
-	,SaGeCommonClasses
-	,SaGeClasses
+	,SaGeContextClasses
+	,SaGeBaseClasses
 	,SaGeBitMap
 	,SaGeScreen
 	,SaGeAudioRender
@@ -21,6 +21,8 @@ uses
 	,SaGeAudioRenderInterface
 	,SaGeCommonStructs
 	,SaGeContextUtils
+	,SaGeContextInterface
+	,SaGeBaseContextInterface
 	;
 
 type
@@ -28,7 +30,15 @@ type
 	PSGContext = ^ TSGContext;
 	TSGContextClass = class of TSGContext;
 	TSGContextProcedure = procedure(const a:TSGContext);
-
+	
+	ISGExtendedContextObject = interface(ISGInterface)
+		['{2cc5e532-35f5-441f-8f18-11991415e602}']
+		procedure SetContextExemplar(const _ContextExemplar : PSGContext);
+		function GetContextExemplar() : PSGContext;
+		
+		property ContextExemplar : PSGContext read GetContextExemplar write SetContextExemplar;
+		end;
+	
 	TSGContext = class(TSGNamed, ISGContext)
 			public
 		constructor Create(); override;
@@ -44,7 +54,7 @@ type
 		procedure Close();virtual;
 		function ShiftClientArea() : TSGPoint2int32; virtual;
 		procedure SwapBuffers();virtual;
-		procedure SetRenderClass(const NewRender : TSGPointer);virtual;
+		procedure SetRenderClass(const NewRender : TSGNamedClass);virtual;
 		procedure Kill();virtual;
 		class function Suppored() : TSGBoolean; virtual;
 		function GetDefaultWindowColor():TSGColor3f; virtual;
@@ -101,8 +111,8 @@ type
 		function  GetActive():TSGBoolean; virtual;
 		procedure SetCursorCentered(const VCentered : TSGBoolean); virtual;
 		function  GetCursorCentered() : TSGBoolean; virtual;
-		procedure SetSelfLink(const VLink : PISGContext); virtual;
-		function  GetSelfLink() : PISGContext; virtual;
+		procedure SetInterfaceLink(const VLink : PISGContext); virtual;
+		function  GetInterfaceLink() : PISGContext; virtual;
 		function  GetCursor():TSGCursor; virtual;
 		procedure SetCursor(const VCursor : TSGCursor); virtual;
 		function  GetIcon():TSGBitMap; virtual;
@@ -122,7 +132,7 @@ type
 		function FileSaveDialog(const VTitle: TSGString; const VFilter : TSGString;const Extension : TSGString) : TSGString; virtual; abstract;
 			public
 		property Visible : TSGBoolean read GetVisible write SetVisible;
-		property SelfLink : PISGContext read GetSelfLink write SetSelfLink;
+		property InterfaceLink : PISGContext read GetInterfaceLink write SetInterfaceLink;
 		property Fullscreen : TSGBoolean read GetFullscreen write InitFullscreen;
 		property Active : TSGBoolean read GetActive write SetActive;
 		property Cursor : TSGCursor read GetCursor write SetCursor;
@@ -170,13 +180,14 @@ type
 		procedure SetCursorWheel(const VCursorWheel : TSGCursorWheel);virtual;
 			public
 		procedure MoveInfo(var FormerContext : TSGContext);virtual;
-		procedure SetNewContext(const NewContextClass : TSGPointer);virtual;
+		procedure SetNewContext(const NewContextClass : TSGNamedClass);virtual;
 			protected
 		FNewContextType : TSGContextClass;
-		FSelfLink       : PISGContext;
+		FInterfaceLink  : PISGContext;
+		FExtendedLink   : PSGContext;
 			protected
-		FPaintableClass    : TSGDrawableClass;
-		FPaintable         : TSGDrawable;
+		FPaintableClass    : TSGPaintableObjectClass;
+		FPaintable         : TSGPaintableObject;
 		FPaintableSettings : TSGPaintableSettings;
 			protected
 		FRenderClassOld     : TSGRenderClass;
@@ -186,21 +197,22 @@ type
 			protected
 		FScreen : TSGScreen;
 			protected
+		procedure PaintScreen();
 		procedure SetPaintableSettings(); virtual;
 		procedure KillRender(); virtual;
 			private
 		function GetScreen() : TSGPointer; virtual;
-		procedure DestroyScreen(); virtual;
 			public
+		property ExtendedLink : PSGContext read FExtendedLink write FExtendedLink;
 		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
-		property PaintableExemplar : TSGDrawable read FPaintable;
-		property Paintable : TSGDrawableClass write FPaintableClass;
-		property RenderClass : TSGPointer write SetRenderClass;
+		property PaintableExemplar : TSGPaintableObject read FPaintable;
+		property Paintable : TSGPaintableObjectClass write FPaintableClass;
+		property RenderClass : TSGNamedClass write SetRenderClass;
 		property PaintableSettings : TSGPaintableSettings write FPaintableSettings;
 		property Screen : TSGScreen read FScreen;
 			public
-		procedure DeleteDeviceResources();
-		procedure LoadDeviceResources();
+		procedure DeleteRenderResources(); virtual;
+		procedure LoadRenderResources(); virtual;
 			protected
 		FAudioRender      : TSGAudioRender;
 		FAudioRenderClass : TSGAudioRenderClass;
@@ -223,6 +235,7 @@ uses
 	,SaGeLists
 	,SaGeStringUtils
 	,SaGeRenderBase
+	,SaGeEngineConfigurationPanel
 	{$IFDEF MSWINDOWS}
 		,SaGeContextWinAPI
 		{$ENDIF}
@@ -286,15 +299,6 @@ if FAudioRender <> nil then
 	end;
 end;
 
-procedure TSGContext.DestroyScreen();
-begin
-if FScreen <> nil then
-	begin
-	FScreen.Destroy();
-	FScreen := nil;
-	end;
-end;
-
 function TSGContext.GetScreen() : TSGPointer;
 begin
 Result := FScreen;
@@ -335,25 +339,25 @@ begin
 Result := False;
 end;
 
-procedure TSGContext.SetNewContext(const NewContextClass : TSGPointer);
+procedure TSGContext.SetNewContext(const NewContextClass : TSGNamedClass);
 begin
 FNewContextType := TSGContextClass(NewContextClass);
 end;
 
-procedure TSGContext.DeleteDeviceResources();
+procedure TSGContext.DeleteRenderResources();
 begin
-if FPaintable <> nil then
-	FPaintable.DeleteDeviceResources();
-if Screen <> nil then
-	Screen.DeleteDeviceResources();
+if (FPaintable <> nil) then
+	FPaintable.DeleteRenderResources();
+if (FScreen <> nil) then
+	FScreen.DeleteRenderResources();
 end;
 
-procedure TSGContext.LoadDeviceResources();
+procedure TSGContext.LoadRenderResources();
 begin
-if FPaintable <> nil then
-	FPaintable.LoadDeviceResources();
-if Screen <> nil then
-	Screen.LoadDeviceResources();
+if (FPaintable <> nil) then
+	FPaintable.LoadRenderResources();
+if (FScreen <> nil) then
+	FScreen.LoadRenderResources();
 end;
 
 procedure TSGContext.MoveInfo(var FormerContext : TSGContext);
@@ -363,8 +367,9 @@ if FormerContext = nil then
 {$IFDEF CONTEXT_CHANGE_DEBUGING}
 	SGLog.Source([ClassName(), '(',SGAddrStr(Self),')__MoveInfo(FormerContext=',SGAddrStr(FormerContext),'). Enter.']);
 	{$ENDIF}
-DestroyScreen();
-FSelfLink      := FormerContext.FSelfLink;
+SGKill(FScreen);
+FInterfaceLink := FormerContext.FInterfaceLink;
+FExtendedLink  := FormerContext.FExtendedLink;
 FRenderClass   := FormerContext.FRenderClass;
 FWidth         := FormerContext.FWidth;
 FHeight        := FormerContext.FHeight;
@@ -462,9 +467,7 @@ DT1.Get();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext__ReinitializeRender() : Begining');
 	{$ENDIF}
-if FPaintable <> nil then
-	FPaintable.DeleteDeviceResources();
-Screen.DeleteDeviceResources();
+DeleteRenderResources();
 if FRender <> nil then
 	DestroyRender();
 {$IFDEF CONTEXT_DEBUGING}
@@ -481,9 +484,7 @@ if not ResultSuccess then
 	Halt(1);
 	end;
 FRenderClassChanget := False;
-if FPaintable <> nil then
-	FPaintable.LoadDeviceResources();
-Screen.LoadDeviceResources();
+LoadRenderResources();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext__ReinitializeRender() : End');
 	{$ENDIF}
@@ -497,7 +498,7 @@ if FRender <> nil then
 	FRender.SwapBuffers();
 end;
 
-procedure TSGContext.SetRenderClass(const NewRender : TSGPointer);
+procedure TSGContext.SetRenderClass(const NewRender : TSGNamedClass);
 begin
 {$IFDEF CONTEXT_DEBUGING}
 WriteLn('TSGContext__SetRenderClass(...) : Begining');
@@ -616,14 +617,14 @@ begin
 Result := FCursorInCenter;
 end;
 
-procedure TSGContext.SetSelfLink(const VLink : PISGContext);
+procedure TSGContext.SetInterfaceLink(const VLink : PISGContext);
 begin
-FSelfLink := VLink;
+FInterfaceLink := VLink;
 end;
 
-function TSGContext.GetSelfLink() : PISGContext;
+function TSGContext.GetInterfaceLink() : PISGContext;
 begin
-Result := FSelfLink;
+Result := FInterfaceLink;
 end;
 
 function TSGContext.GetCursor():TSGCursor;
@@ -656,14 +657,14 @@ StartComputeTimer();
 FInitialized := True;
 if FPaintableClass <> nil then
 	begin
-	if not Screen.ContextAssigned() then
-		Screen.Load(Self);
+	if (not FScreen.ContextAssigned()) then
+		FScreen.Load(Self);
 	CreateAudio();
 	if (FPaintable = nil) and (FPaintableClass <> nil) then
 		begin
 		FPaintable := FPaintableClass.Create(Self);
 		SetPaintableSettings();
-		FPaintable.LoadDeviceResources();
+		FPaintable.LoadRenderResources();
 		end;
 	end;
 end;
@@ -706,6 +707,21 @@ while Active and (FNewContextType = nil) do
 	end;
 end;
 
+procedure TSGContext.PaintScreen();
+begin
+if (KeysPressed(SG_CTRL_KEY)) and
+   (KeysPressed(SG_ALT_KEY)) and
+   (KeyPressedType = SGDownKey) and
+   (KeyPressedChar = 'O') and
+   TSGEngineConfigurationPanel.CanCreate(FScreen) then
+	begin
+	FScreen.CreateChild(TSGEngineConfigurationPanel.Create()).Resize();
+	SetKey(SGNullKey, 0);
+	end;
+
+FScreen.Paint();
+end;
+
 procedure TSGContext.Paint();
 begin
 {$IFDEF CONTEXT_DEBUGING}
@@ -733,9 +749,9 @@ if FPaintWithHandlingMessages then
 	Messages();
 	end;
 {$IFDEF CONTEXT_DEBUGING}
-	WriteLn('TSGContext__Paint() : Before "Screen.Paint();"');
+	WriteLn('TSGContext__Paint() : Before "PaintScreen();"');
 	{$ENDIF}
-Screen.Paint();
+PaintScreen();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext__Paint() : Before "SwapBuffers();"');
 	{$ENDIF}
@@ -788,8 +804,13 @@ end;
 
 procedure TSGContext.Resize();
 begin
-Screen.Resize();
-if FPaintable <> nil then
+with FScreen do
+	begin
+	SetBounds(0, 0, ClientWidth, ClientHeight);
+	BoundsMakeReal();
+	Resize();
+	end;
+if (FPaintable <> nil) then
 	FPaintable.Resize();
 end;
 
@@ -917,6 +938,8 @@ var
 	i:LongWord;
 begin
 inherited;
+FExtendedLink := nil;
+FInterfaceLink := nil;
 FAudioRender := nil;
 FLeft := 0;
 FTop := 0;
@@ -981,11 +1004,7 @@ if FPaintable <> nil then
 	FPaintable.Destroy();
 	FPaintable := nil;
 	end;
-if FScreen <> nil then
-	begin
-	FScreen.Destroy();
-	FScreen := nil;
-	end;
+SGKill(FScreen);
 KillAudio();
 if FRender <> nil then
 	begin

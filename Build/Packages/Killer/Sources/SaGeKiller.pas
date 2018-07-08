@@ -11,12 +11,13 @@ uses
 	,SaGeContext
 	,SaGeScreen
 	,SaGeImage
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeRenderBase
 	,SaGeScreenBase
 	,SaGePackages
 	,SaGeDateTime
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
@@ -32,14 +33,14 @@ const
 	SGKillerStringWin = 'Ты выиграл!!!';
 	SGKillerStringLose = 'Ты проиграл...';
 type
-	TSGKiller=class(TSGScreenedDrawable)
+	TSGKiller=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext:ISGContext);override;
 		destructor Destroy;override;
 		class function ClassName:string;override;
 		procedure Paint;override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			private
 		FStartDeep,FStartDeepHeight:LongWord;
 		FArray:TSGKillerArray;
@@ -124,7 +125,7 @@ uses
 
 {$OVERFLOWCHECKS OFF}
 
-procedure TSGKiller.DeleteDeviceResources();
+procedure TSGKiller.DeleteRenderResources();
 begin
 SGKill(FImageSkull);
 SGKill(FImageBlock);
@@ -133,7 +134,7 @@ SGKill(FImageZombi);
 SGKill(FImageYou);
 end;
 
-procedure TSGKiller.LoadDeviceResources();
+procedure TSGKiller.LoadRenderResources();
 begin
 InitImages(FImagesSize, True);
 end;

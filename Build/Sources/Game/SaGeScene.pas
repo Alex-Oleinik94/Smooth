@@ -9,7 +9,8 @@ interface
 uses
 	 SaGeBase
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeMesh
 	,SaGeModel
 	,SaGeGameBase

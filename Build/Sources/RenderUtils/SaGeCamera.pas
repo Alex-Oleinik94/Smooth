@@ -7,19 +7,16 @@ interface
 uses
 	 SaGeBase
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeMatrix
 	,SaGeCasesOfPrint
 	;
-
-type
-	TSGCamera = class;
 const
 	SG_VIEW_WATCH_OBJECT        = $001001;
 	SG_VIEW_LOOK_AT_OBJECT      = $001002;
 type
 	TSGMode = TSGUInt32;
-	TSGCamera = class(TSGContextabled)
+	TSGCamera = class(TSGContextObject)
 			public
 		constructor Create();override;
 			private

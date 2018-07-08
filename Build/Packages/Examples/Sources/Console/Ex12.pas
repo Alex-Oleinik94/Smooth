@@ -21,7 +21,8 @@ uses
 	,SaGeCamera
 	,SaGeRenderBase
 	,SaGeEncodingUtils
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	{$IF defined(ENGINE)}
 		,SaGeConsoleCaller
 		,SaGeConsoleTools
@@ -159,7 +160,7 @@ Result := FuncOneVariable(FuncU0,x);
 end;
 
 type
-	TSGApprFunction=class(TSGDrawable)
+	TSGApprFunction=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

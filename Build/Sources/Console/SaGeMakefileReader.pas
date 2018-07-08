@@ -8,7 +8,7 @@ uses
 	 SaGeBase
 	,SaGeLists
 	,SaGeMath
-	,SaGeClasses
+	,SaGeBaseClasses
 	;
 
 type

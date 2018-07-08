@@ -15,7 +15,8 @@ uses
 	,SaGeMesh
 	,SaGeVertexObject
 	,SaGeContext
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeRenderBase
 	,SaGeCommonStructs
 	,SaGeFont
@@ -27,7 +28,7 @@ uses
 	,SaGePackages
 	,SaGeFileUtils
 	,SaGeCamera
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 const
@@ -61,7 +62,7 @@ type
 	TSGSubsidenceVertexes = type packed array of TSGSubsidenceVertex;
 	
 	TSGGGDC = ^ TSGByte;
-	TSGGasDiffusionCube = class(TSGScreenedDrawable)
+	TSGGasDiffusionCube = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;
@@ -69,11 +70,11 @@ type
 		class function ClassName():TSGString;override;
 			public
 		procedure UpDateSourses();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure InitCube(const Edge : TSGLongWord; const VProgress : PSGProgressBarFloat = nil);
+		procedure InitCube(const Edge : TSGLongWord; const VProgress : PSGScreenProgressBarFloat = nil);
 		procedure UpDateCube();
 		function  CalculateMesh(const VRelief : PSGGasDiffusionRelief = nil{$IFDEF RELIEFDEBUG};const FInReliafDebug : TSGLongWord = 0{$ENDIF}) : TSGCustomModel;
 		procedure ClearGaz();
-		procedure InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
+		procedure InitReliefIndexes(const VProgress : PSGScreenProgressBarFloat = nil);
 			public
 		function Cube (const x, y, z : Word) : TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function ReliefCubeIndex (const x,y,z : Word):TSGGGDC;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -94,7 +95,7 @@ type
 		property Edge : TSGLongWord read FEdge;
 		end;
 type
-	TSGGasDiffusion = class(TSGScreenedDrawable)
+	TSGGasDiffusion = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;
@@ -301,7 +302,7 @@ FillChar(FCube^,FEdge*FEdge*FEdge,0);
 UpDateCube();
 end;
 
-procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord; const VProgress : PSGProgressBarFloat = nil);
+procedure TSGGasDiffusionCube.InitCube(const Edge : TSGLongWord; const VProgress : PSGScreenProgressBarFloat = nil);
 const
 	o = 1.98;
 var
@@ -372,7 +373,7 @@ begin
 Result:=@FCube[(x*FEdge+y)*FEdge+z];
 end;
 
-procedure TSGGasDiffusionCube.InitReliefIndexes(const VProgress : PSGProgressBarFloat = nil);
+procedure TSGGasDiffusionCube.InitReliefIndexes(const VProgress : PSGScreenProgressBarFloat = nil);
 
 function Invert(const i : LongWord; const Inverting : TSGBoolean = True) : TSGFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -1774,14 +1775,14 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 end; end;
 
 type
-	TSGGDrawColor=class(TSGScreenComponent)
+	TSGGDrawColor = class(TSGScreenComponent)
 			public
 		Color : TSGColor4f;
 			public
-		procedure FromDraw();override;
+		procedure Paint(); override;
 		end;
 
-procedure TSGGDrawColor.FromDraw();
+procedure TSGGDrawColor.Paint();
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
 	begin

@@ -8,7 +8,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeInternetBase
 	
 	,Classes

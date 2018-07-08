@@ -45,7 +45,7 @@ implementation
 uses
 	 SaGeStreamUtils
 	,SaGeStringUtils
-	,SaGeClasses
+	,SaGeBaseClasses
 	;
 
 // =============================================

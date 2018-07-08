@@ -16,7 +16,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager
 	,SaGeNotepad
@@ -65,10 +65,10 @@ type
 		procedure GoToPosition(const Line, Column : TSGLongWord);
 		property FileName : TSGString write SetFile;
 			public
-		procedure FromDraw();override;
+		procedure Paint();override;
 		procedure FromUpDate();override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
-		procedure FromResize();override;
+		procedure Resize();override;
 		end;
 
 implementation
@@ -225,7 +225,7 @@ else
 	end;
 end;
 
-procedure TSGNTextInset.FromResize();
+procedure TSGNTextInset.Resize();
 begin
 StandardizateView();
 inherited;
@@ -512,7 +512,7 @@ else if FTextCursor.FLine + 2 > FEnd then
 StandardizateView();
 end;
 
-procedure TSGNTextInset.FromDraw();
+procedure TSGNTextInset.Paint();
 
 procedure DrawTextAndNumLines();
 var

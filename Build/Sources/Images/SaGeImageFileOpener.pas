@@ -9,12 +9,13 @@ uses
 	
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeFileOpener
 	,SaGeContext
 	,SaGeLoading
 	,SaGeFont
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeThreads
@@ -34,8 +35,8 @@ type
 		destructor Destroy();override;
 		constructor Create(const VContext : ISGContext);override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 		procedure Paint();override;
 		procedure Resize();override;
 			private
@@ -133,7 +134,7 @@ begin
 RescaleImagePosition();
 end;
 
-procedure TSGImageViewer.DeleteDeviceResources();
+procedure TSGImageViewer.DeleteRenderResources();
 begin
 if FImage <> nil then
 	begin
@@ -342,9 +343,9 @@ if (FRenderSize.x > FSize.x) and (FRenderSize.y > FSize.y) then
 		end;
 end;
 
-procedure TSGImageViewer.LoadDeviceResources();
+procedure TSGImageViewer.LoadRenderResources();
 begin
-DeleteDeviceResources();
+DeleteRenderResources();
 FImage := TSGImage.Create(FFiles[0]);
 FImage.Context := Context;
 end;

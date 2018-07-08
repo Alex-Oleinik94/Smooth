@@ -6,18 +6,18 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
-	,SaGeDrawClasses
+	,SaGeContextClasses
+	,SaGePaintableObjectContainer
 	;
 
 type
-	TSGAllFractals = class(TSGDrawable)
+	TSGAllFractals = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create();override;
 		destructor Destroy();override;
 		class function ClassName():TSGString;override;
 			private
-		FDrawClasses : TSGDrawClasses;
+		FDrawClasses : TSGPaintableObjectContainer;
 			public
 		procedure Paint();override;
 		end;
@@ -38,10 +38,10 @@ uses
 	,SaGeFractalSixAngle
 	;
 
-constructor TSGAllFractals.Create(const VContext:ISGContext);
+constructor TSGAllFractals.Create();
 begin
-inherited Create(VContext);
-FDrawClasses := TSGDrawClasses.Create(Context);
+inherited;
+FDrawClasses := TSGPaintableObjectContainer.Create(Context);
 FDrawClasses.Add(TSGFractalMengerSpunchRelease);
 FDrawClasses.Add(TSGFractalMandelbrodRelease);
 FDrawClasses.Add(TSGFractalKohTriangle);
@@ -68,7 +68,7 @@ end;
 
 procedure TSGAllFractals.Paint();
 begin
-if FDrawClasses<>nil then
+if (FDrawClasses <> nil) then
 	FDrawClasses.Paint();
 end;
 

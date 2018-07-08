@@ -9,6 +9,7 @@ uses
 	,SaGeScreenBase
 	,SaGeScreenComponent
 	,SaGeCommonStructs
+	,SaGeScreenComponentInterfaces
 	;
 
 type
@@ -25,7 +26,7 @@ type
 		FViewCaption   : TSGBool;
 		FIsColorStatic : TSGBool;
 			public
-		procedure FromDraw();override;
+		procedure Paint(); override;
 			public
 		function GetProgress() : TSGProgressBarFloat;
 		function GetColor() : TSGScreenSkinFrameColor;
@@ -88,7 +89,7 @@ begin
 Result := FViewProgress;
 end;
 
-procedure TSGProgressBar.FromDraw;
+procedure TSGProgressBar.Paint();
 begin
 if FVisibleTimer > SGZero then
 	FSkin.PaintProgressBar(Self);

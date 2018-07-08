@@ -15,12 +15,13 @@ uses
 	 Classes
 	
 	,SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeRenderBase
 	;
 type
 	TSGShaderProgram = class;
-	TSGShader = class(TSGContextabled)
+	TSGShader = class(TSGContextObject)
 			public
 		constructor Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 		destructor Destroy();override;
@@ -37,7 +38,7 @@ type
 		function StringType() : TSGString;
 		end;
 	
-	TSGShaderProgram = class(TSGContextabled)
+	TSGShaderProgram = class(TSGContextObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;

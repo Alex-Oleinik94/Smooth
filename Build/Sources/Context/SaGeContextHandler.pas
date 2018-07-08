@@ -6,9 +6,10 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeContext
-	,SaGeCommonClasses
 	,SaGeRender
 	,SaGeCasesOfPrint
 	,SaGeThreads
@@ -29,7 +30,7 @@ type
 		FSettings : TSGContextSettings;
 		FPaintableSettings : TSGPaintableSettings;
 		FPlacement : TSGContextWindowPlacement;
-		FPaintableClass : TSGDrawableClass;
+		FPaintableClass : TSGPaintableObjectClass;
 		FContextClass : TSGContextClass;
 		FRenderClass : TSGRenderClass;
 		FThread : TSGThread;
@@ -38,16 +39,16 @@ type
 		function SetSettings() : TSGContextSettings;
 		function TryChangeContext() : TSGBoolean;
 		procedure PrintSettings(const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
-		function GetPaintableExemplar() : TSGDrawable;
+		function GetPaintableExemplar() : TSGPaintableObject;
 		procedure ViewRunParams();
 			public
-		property PaintableClass : TSGDrawableClass read FPaintableClass write FPaintableClass;
+		property PaintableClass : TSGPaintableObjectClass read FPaintableClass write FPaintableClass;
 		property Context : TSGContext read FContext;
-		property PaintableExemplar : TSGDrawable read GetPaintableExemplar;
+		property PaintableExemplar : TSGPaintableObject read GetPaintableExemplar;
 			public
 		procedure RegisterSettings(const _Settings : TSGContextSettings);
-		procedure RegisterClasses(const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _PaintableClass : TSGDrawableClass);
-		procedure RegisterCompatibleClasses(const _PaintableClass : TSGDrawableClass);
+		procedure RegisterClasses(const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _PaintableClass : TSGPaintableObjectClass);
+		procedure RegisterCompatibleClasses(const _PaintableClass : TSGPaintableObjectClass);
 		function Initialize() : TSGBoolean;
 		procedure Run();
 		procedure Loop();
@@ -57,8 +58,8 @@ type
 		end;
 
 procedure SGKill(var ContextHandler : TSGContextHandler); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-procedure SGRunPaintable(const _PaintableClass : TSGDrawableClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);
-procedure SGCompatibleRunPaintable(const _PaintableClass : TSGDrawableClass; const _Settings : TSGContextSettings = nil);
+procedure SGRunPaintable(const _PaintableClass : TSGPaintableObjectClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);
+procedure SGCompatibleRunPaintable(const _PaintableClass : TSGPaintableObjectClass; const _Settings : TSGContextSettings = nil);
 
 implementation
 
@@ -80,7 +81,7 @@ uses
 		{$ENDIF}
 	;
 
-procedure SGRunPaintable(const _PaintableClass : TSGDrawableClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);
+procedure SGRunPaintable(const _PaintableClass : TSGPaintableObjectClass; const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _Settings : TSGContextSettings = nil);
 begin
 with TSGContextHandler.Create() do
 	begin
@@ -91,7 +92,7 @@ with TSGContextHandler.Create() do
 	end;
 end;
 
-procedure SGCompatibleRunPaintable(const _PaintableClass : TSGDrawableClass; const _Settings : TSGContextSettings = nil);
+procedure SGCompatibleRunPaintable(const _PaintableClass : TSGPaintableObjectClass; const _Settings : TSGContextSettings = nil);
 var
 	Settings : TSGContextSettings = nil;
 begin
@@ -115,7 +116,7 @@ end;
 // Context Handler //
 /////////////////////
 
-function TSGContextHandler.GetPaintableExemplar() : TSGDrawable;
+function TSGContextHandler.GetPaintableExemplar() : TSGPaintableObject;
 begin
 Result := nil;
 if (FContext <> nil) then
@@ -281,7 +282,7 @@ if (FContext.NewContext <> nil) and (FContext.Active or (not (FContext is FConte
 	{$IFDEF CONTEXT_CHANGE_DEBUGING}
 		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Delete old context device recources.']);
 		{$ENDIF}
-	FContext.DeleteDeviceResources();
+	FContext.DeleteRenderResources();
 	{$IFDEF CONTEXT_CHANGE_DEBUGING}
 		SGLog.Source(['SGTryChangeContextType(Context=',SGAddrStr(FContext),', IContext=',SGAddrStr(FIContext),'). Moving info.']);
 		{$ENDIF}
@@ -299,7 +300,7 @@ if (FContext.NewContext <> nil) and (FContext.Active or (not (FContext is FConte
 		{$ENDIF}
 	FContext := NewContext;
 	FContext.Initialize();
-	FContext.LoadDeviceResources();
+	FContext.LoadRenderResources();
 	Result := FContext.Active;
 	SGHint(['Changing context (' + OldContextName + ' --> ' + FContext.ContextName() + ')' + Iff(Result, ' successfull.', ' failed!')]);
 	end;
@@ -375,7 +376,8 @@ else
 	FPaintableSettings := SetSettings();
 	CheckPlacement();
 	FContext.PaintableSettings := FPaintableSettings;
-	FContext.SelfLink := @FIContext;
+	FContext.InterfaceLink := @FIContext;
+	FContext.ExtendedLink := @FContext;
 	FContext.RenderClass := FRenderClass;
 	FContext.Paintable := FPaintableClass;
 	
@@ -469,14 +471,14 @@ SGKill(FSettings);
 FSettings := _Settings;
 end;
 
-procedure TSGContextHandler.RegisterClasses(const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _PaintableClass : TSGDrawableClass);
+procedure TSGContextHandler.RegisterClasses(const _ContextClass : TSGContextClass; const _RenderClass : TSGRenderClass; const _PaintableClass : TSGPaintableObjectClass);
 begin
 FContextClass := _ContextClass;
 FRenderClass := _RenderClass;
 FPaintableClass := _PaintableClass;
 end;
 
-procedure TSGContextHandler.RegisterCompatibleClasses(const _PaintableClass : TSGDrawableClass);
+procedure TSGContextHandler.RegisterCompatibleClasses(const _PaintableClass : TSGPaintableObjectClass);
 begin
 FContextClass := TSGCompatibleContext;
 FRenderClass := TSGCompatibleRender;

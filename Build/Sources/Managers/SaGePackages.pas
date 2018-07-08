@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeLists
 	,SaGeResourceManager
-	,SaGeCommonClasses
-	,SaGeDrawClasses
+	,SaGePaintableObjectContainer
 	,SaGeMakefileReader
+	,SaGeContextClasses
 	
 	,Classes
 	,Dos
@@ -37,8 +37,8 @@ type
 
 function SGGetPackageInfo(const PackagePath : TSGString) : TSGPackageInfo;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterDrawClass(const ClassType : TSGPaintableObjectClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetRegisteredDrawClasses() : TSGPaintableObjectContainerItemList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackagesToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackagesNames : TSGStringList):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SGPackageToMakefile(var Make : TSGMakefileReader; const Target : TSGString; const PackageName : TSGString; const BuildFiles : TSGBool = False):TSGBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -61,7 +61,7 @@ uses
 	{$INCLUDE SaGeFileRegistrationPackages.inc}
 	;
 var
-	PackagesDrawClasses : TSGDrawClassesObjectList = nil;
+	PackagesDrawClasses : TSGPaintableObjectContainerItemList = nil;
 
 procedure SGRegisterPackage(const PackageInfo : TSGPackageInfo;const FileRegistrationResources : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -318,27 +318,25 @@ var
 begin
 Result := True;
 PackagesList := SGGetPackagesList(Make);
-if PackagesList <> nil then
-	if Length(PackagesList) > 0 then
-		for i := 0 to High(PackagesList) do
-			if not SGPackageToMakefile(Make, Target, PackagesList[i], BuildFiles) then
-				Result := False;
+if (PackagesList <> nil) and (Length(PackagesList) > 0) then
+	for i := 0 to High(PackagesList) do
+		if not SGPackageToMakefile(Make, Target, PackagesList[i], BuildFiles) then
+			Result := False;
 SetLength(PackagesList, 0);
 end;
 
-function SGGetRegisteredDrawClasses() : TSGDrawClassesObjectList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGGetRegisteredDrawClasses() : TSGPaintableObjectContainerItemList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PackagesDrawClasses;
 end;
 
-procedure SGRegisterDrawClass(const ClassType : TSGDrawableClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGRegisterDrawClass(const ClassType : TSGPaintableObjectClass; const Drawable : TSGBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	PaintableObjectContainerItem : TSGPaintableObjectContainerItem;
 begin
-if PackagesDrawClasses = nil then
-	SetLength(PackagesDrawClasses, 1)
-else
-	SetLength(PackagesDrawClasses, Length(PackagesDrawClasses) + 1);
-PackagesDrawClasses[High(PackagesDrawClasses)].FClass := ClassType;
-PackagesDrawClasses[High(PackagesDrawClasses)].FDrawable := Drawable;
+PaintableObjectContainerItem.PaintableObjectClass := ClassType;
+PaintableObjectContainerItem.IsDrawable := Drawable;
+PackagesDrawClasses += PaintableObjectContainerItem;
 end;
 
 procedure SGClearFileRegistrationPackages(const FileRegistrationPackages : TSGString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}

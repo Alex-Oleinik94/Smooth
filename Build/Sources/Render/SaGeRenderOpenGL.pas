@@ -29,10 +29,11 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeDllManager
 	,SaGeMatrix
 	,SaGeCommonStructs
+	,SaGeBaseContextInterface
 	
 	//* ==================== System Units ====================
 	,DynLibs

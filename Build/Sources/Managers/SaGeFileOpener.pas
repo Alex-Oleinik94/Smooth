@@ -9,8 +9,9 @@ uses
 	
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeStringUtils
 	;
 
@@ -29,7 +30,7 @@ type
 		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; virtual;
 		end;
 
-	TSGFileOpenerDrawable = class (TSGDrawable)
+	TSGFileOpenerDrawable = class(TSGPaintableObject)
 			protected
 		FFiles : TSGStringList;
 			public

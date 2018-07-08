@@ -10,6 +10,7 @@ uses
 	,SaGeScreenCommonComponents
 	,SaGeCommonStructs
 	,SaGeImage
+	,SaGeScreenComponentInterfaces
 	;
 
 type
@@ -41,7 +42,7 @@ type
 		procedure SelectingItem(const ItemIndex : TSGInt32); virtual;
 			public
 		procedure FromUpDate();override;
-		procedure FromDraw;override;
+		procedure Paint(); override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		function CursorInComponent():boolean;override;
 			public
@@ -149,6 +150,37 @@ else
 end;
 
 procedure TSGComboBox.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
+
+procedure MouseWheelSelecting();
+var
+	NewSelectedItemIndex : TSGInt64 = -1;
+
+procedure FindNewSelectedItem(const One : TSGInt8);
+var
+	Index : TSGInt64;
+begin
+Index :=  FSelectedItemIndex;
+while (Index >=0) and (Index < ItemsCount) do
+	begin
+	Index += One;
+	if (Index >=0) and (Index < ItemsCount) and FItems[Index].Active then
+		begin
+		NewSelectedItemIndex := Index;
+		break;
+		end;
+	end;
+end;
+
+begin
+if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
+	FindNewSelectedItem(1)
+else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
+	FindNewSelectedItem(-1);
+Context.SetCursorWheel(SGNullCursorWheel);
+if (NewSelectedItemIndex <> -1) then
+	SelectingItem(NewSelectedItemIndex);
+end;
+
 begin
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox__FromUpDateUnderCursor() : Begining');
@@ -165,13 +197,7 @@ if CursorInComponentNow then
 	else
 		FCursorOnThisItem:=-1;
 	if (not FOpen) and (Context.CursorWheel <> SGNullCursorWheel) then
-		begin
-		if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWheel) then
-			SelectingItem(FSelectedItemIndex + 1)
-		else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
-			SelectingItem(FSelectedItemIndex - 1);
-		Context.SetCursorWheel(SGNullCursorWheel);
-		end;
+		MouseWheelSelecting();
 	if FOpen then
 		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 			begin
@@ -265,7 +291,7 @@ WriteLn('TSGComboBox.FromUpDate() : End');
 	{$ENDIF}
 end;
 
-procedure TSGComboBox.FromDraw;
+procedure TSGComboBox.Paint();
 begin
 if not CursorInComponent then
 	FCursorOnThisItem:=-1;

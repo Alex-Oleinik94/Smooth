@@ -9,7 +9,8 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGelNetBase
 	,SaGelNetUDPConnection
 	,SaGeLoading
@@ -17,7 +18,7 @@ uses
 	,SaGeMesh
 	,SaGeThreads
 	,SaGeCamera
-	,SaGeClasses
+	,SaGeBaseClasses
 	
 	,SaGeModel
 	,SaGeScene
@@ -30,7 +31,7 @@ const
 	SGTStateStarting = $006002;
 	SGTStateViewing  = $006003;
 type
-	TSGGameTron = class(TSGDrawable)
+	TSGGameTron = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext); override;
 		destructor Destroy(); override;

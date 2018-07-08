@@ -9,6 +9,7 @@ uses
 	,SaGeScreenBase
 	,SaGeScreen
 	,SaGeScreenComponent
+	,SaGeScreenComponentInterfaces
 	;
 
 type
@@ -23,7 +24,7 @@ type
 		function ViewingLines() : TSGBoolean; virtual;
 		function ViewingQuad()  : TSGBoolean; virtual;
 			public
-		procedure FromDraw; override;
+		procedure Paint(); override;
 			public
 		property ViewLines : TSGBoolean read ViewingLines write FViewLines;
 		property ViewQuad  : TSGBoolean read ViewingQuad  write FViewQuad;
@@ -50,7 +51,7 @@ begin
 Result := FViewQuad;
 end;
 
-procedure TSGPanel.FromDraw();
+procedure TSGPanel.Paint();
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
 	FSkin.PaintPanel(Self);

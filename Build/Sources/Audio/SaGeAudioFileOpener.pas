@@ -8,12 +8,12 @@ uses
 	
 	,SaGeBase
 	,SaGeLists
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeFileOpener
 	,SaGeContext
 	,SaGeLoading
 	,SaGeFont
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeCommon
 	;
 

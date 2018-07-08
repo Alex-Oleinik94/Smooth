@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeScreen
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeCommonStructs
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
@@ -224,7 +224,7 @@ end;
 
 constructor TSGFractalSierpinskiCarpet.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 FEnableColors  := False;
 FEnableNormals := False;
 {$IFNDEF ANDROID}

@@ -12,8 +12,9 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeMatrix
+	,SaGeBaseContextInterface
 	
 	// OS units
 	,crt

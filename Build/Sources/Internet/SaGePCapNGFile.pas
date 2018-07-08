@@ -10,7 +10,7 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeStreamUtils
 	
 	,Classes

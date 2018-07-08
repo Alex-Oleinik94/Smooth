@@ -8,17 +8,16 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeCommonStructs
-	,SaGeCommonClasses
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
 	TSGFractalPodkova=class(TSG3DFractal)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		constructor Create(); override;
+		destructor Destroy; override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
@@ -171,9 +170,9 @@ with TSGFractalPodkova(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalPodkova.Create(const VContext : ISGContext);
+constructor TSGFractalPodkova.Create();
 begin
-inherited Create(VContext);
+inherited;
 FEnableColors:=False;
 FEnableNormals:=False;
 {$IFNDEF ANDROID}

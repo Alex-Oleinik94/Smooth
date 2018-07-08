@@ -10,7 +10,7 @@ uses
 	,SysUtils
 	
 	,SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	;
 
 type

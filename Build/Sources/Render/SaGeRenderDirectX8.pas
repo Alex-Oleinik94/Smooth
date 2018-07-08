@@ -13,7 +13,8 @@ uses
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeRenderInterface
-	,SaGeClasses
+	,SaGeBaseClasses
+	,SaGeBaseContextInterface
 	,SaGeMatrix
 	,SaGeCommonStructs
 	

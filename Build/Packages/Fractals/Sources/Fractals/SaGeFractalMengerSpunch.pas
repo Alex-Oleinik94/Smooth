@@ -9,10 +9,10 @@ uses
 	,SaGeFractals
 	,SaGeCommon
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeScreen
 	,SaGeFont
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 type
 	TSGMengerSpunchBoolAr6=array[0..5] of TSGBool;
@@ -334,7 +334,7 @@ end;
 
 constructor TSGFractalMengerSpunch.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 FDeep:=FMengerCube;
 EnableColors:=True;
 EnableNormals:=True;

@@ -9,7 +9,8 @@ uses
 	
 	,SaGeBase
 	,SaGeRender
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeDateTime
 	,SaGelNetHTTPUtils
 	
@@ -18,7 +19,7 @@ uses
 	;
 
 type
-	TSGClientWeb=class(TSGDrawable)
+	TSGClientWeb=class(TSGPaintableObject)
 			private
 		J : TJSONData;
 		Schedules : TJSONData;

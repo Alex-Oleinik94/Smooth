@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
@@ -153,7 +153,7 @@ end;
 
 constructor TSGFractalLomanaya.Create(const VContext:ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 c17:=1/7;
 c27:=2/7;
 c37:=3/7;

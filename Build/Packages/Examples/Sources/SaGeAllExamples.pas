@@ -6,8 +6,9 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
-	,SaGeDrawClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
+	,SaGePaintableObjectContainer
 	,SaGeGraphicViewer
 	,SaGePackages
 	
@@ -19,8 +20,8 @@ uses
 	,Ex4_1
 	,Ex4_2
 	,Ex4_3
-	//,Ex5 //deprecated
-	//,Ex5_2 //deprecated
+	,Ex5 //deprecated
+	,Ex5_2 //deprecated
 	,Ex5_4
 	,Ex6
 	,Ex6_2
@@ -42,13 +43,13 @@ uses
 	;
 
 type
-	TSGAllExamples = class(TSGDrawable)
+	TSGAllExamples = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		class function ClassName():string;override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString;override;
 			private
-		FDrawClasses : TSGDrawClasses;
+		FPaintableObjectContainer : TSGPaintableObjectContainer;
 			public
 		procedure Paint();override;
 		end;
@@ -61,34 +62,34 @@ uses
 
 constructor TSGAllExamples.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
-FDrawClasses := TSGDrawClasses.Create(Context);
-FDrawClasses.Add(TSGExample1);
-FDrawClasses.Add(TSGExample2);
-FDrawClasses.Add(TSGExample2_2);
-FDrawClasses.Add(TSGExample3);
-FDrawClasses.Add(TSGExample4_1);
-FDrawClasses.Add(TSGExample4_2);
-FDrawClasses.Add(TSGExample4_3);
-//FDrawClasses.Add(TSGExample5); //deprecated
-//FDrawClasses.Add(TSGExample5_2); //deprecated
-FDrawClasses.Add(TSGExample5_4);
-FDrawClasses.Add(TSGExample6);
-FDrawClasses.Add(TSGExample6_2);
-FDrawClasses.Add(TSGApprFunction); // Ex 7
-FDrawClasses.Add(TSGExample13);
-FDrawClasses.Add(TSGExample14);
-FDrawClasses.Add(TSGExample15);
-FDrawClasses.Add(TSGExample16);
-FDrawClasses.Add(TSGKraftExamples);
-FDrawClasses.Initialize();
-FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
+inherited;
+FPaintableObjectContainer := TSGPaintableObjectContainer.Create(Context);
+FPaintableObjectContainer.Add(TSGExample1);
+FPaintableObjectContainer.Add(TSGExample2);
+FPaintableObjectContainer.Add(TSGExample2_2);
+FPaintableObjectContainer.Add(TSGExample3);
+FPaintableObjectContainer.Add(TSGExample4_1);
+FPaintableObjectContainer.Add(TSGExample4_2);
+FPaintableObjectContainer.Add(TSGExample4_3);
+//FPaintableObjectContainer.Add(TSGExample5); //deprecated
+//FPaintableObjectContainer.Add(TSGExample5_2); //deprecated
+FPaintableObjectContainer.Add(TSGExample5_4);
+FPaintableObjectContainer.Add(TSGExample6);
+FPaintableObjectContainer.Add(TSGExample6_2);
+FPaintableObjectContainer.Add(TSGApprFunction); // Ex 7
+FPaintableObjectContainer.Add(TSGExample13);
+FPaintableObjectContainer.Add(TSGExample14);
+FPaintableObjectContainer.Add(TSGExample15);
+FPaintableObjectContainer.Add(TSGExample16);
+FPaintableObjectContainer.Add(TSGKraftExamples);
+FPaintableObjectContainer.Initialize();
+FPaintableObjectContainer.ComboBox.SetBounds(FPaintableObjectContainer.ComboBox.Left, 28, FPaintableObjectContainer.ComboBox.Width, FPaintableObjectContainer.ComboBox.Height);
 end;
 
 destructor TSGAllExamples.Destroy();
 begin
-FDrawClasses.Destroy();
-FDrawClasses := nil;
+FPaintableObjectContainer.Destroy();
+FPaintableObjectContainer := nil;
 inherited;
 end;
 
@@ -99,8 +100,8 @@ end;
 
 procedure TSGAllExamples.Paint();
 begin
-if FDrawClasses <> nil then
-	FDrawClasses.Paint();
+if (FPaintableObjectContainer <> nil) then
+	FPaintableObjectContainer.Paint();
 end;
 
 initialization

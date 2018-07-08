@@ -6,7 +6,8 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeCasesOfPrint
@@ -31,7 +32,7 @@ type
 		property Name : TSGString read GetName;
 		end;
 	
-	TSGMaterial = class (TSGDrawable, ISGMaterial)
+	TSGMaterial = class (TSGContextObject, ISGMaterial)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		class function ClassName() : TSGString; override;

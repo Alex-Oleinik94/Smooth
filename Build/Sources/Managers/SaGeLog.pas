@@ -8,7 +8,7 @@ uses
 	 SaGeBase
 	,SaGeCasesOfPrint
 	,SaGeFileUtils
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeLists
 	
 	,Classes

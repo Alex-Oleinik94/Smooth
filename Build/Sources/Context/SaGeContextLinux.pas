@@ -9,8 +9,9 @@ uses
 	,SaGeCommon
 	,SaGeRender
 	,SaGeContext
-	,SaGeClasses
-	,SaGeCommonClasses
+	,SaGeBaseClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeContextUtils
 	
 	,unix

@@ -6,20 +6,21 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeFont
 	;
 
 type
 	TSGFPSViewer = class;
-	TSGFPSViewer = class(TSGDrawable)
+	TSGFPSViewer = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 			private
 		FFont : TSGFont;
 		FX, FY : TSGWord;
@@ -67,7 +68,7 @@ end;
 constructor TSGFPSViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-LoadDeviceResources();
+LoadRenderResources();
 FFrameCount := 30;
 SetLength(FFrameArray,FFrameCount);
 FFrameIndex := 0;
@@ -81,7 +82,7 @@ FFont.Destroy();
 inherited;
 end;
 
-procedure TSGFPSViewer.DeleteDeviceResources();
+procedure TSGFPSViewer.DeleteRenderResources();
 begin
 if FFont <> nil then
 	begin
@@ -90,7 +91,7 @@ if FFont <> nil then
 	end;
 end;
 
-procedure TSGFPSViewer.LoadDeviceResources();
+procedure TSGFPSViewer.LoadRenderResources();
 begin
 if FFont <> nil then
 	begin
