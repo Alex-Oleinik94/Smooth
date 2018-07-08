@@ -8,13 +8,13 @@ uses
 	 SaGeBase
 	,SaGeCommonStructs
 	,SaGeVertexObject
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	;
 
 type
 	TSGBezierCurve = class;
 	TSGBezierCurveType = (SG_Bezier_Curve_High, SG_Bezier_Curve_Low);
-	TSGBezierCurve = class(TSGDrawable)
+	TSGBezierCurve = class(TSGPaintableObject)
 			public
 		constructor Create();override;
 		destructor Destroy();override;

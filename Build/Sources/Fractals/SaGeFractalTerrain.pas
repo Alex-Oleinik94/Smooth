@@ -7,10 +7,10 @@ uses
 	 Classes
 	
 	,SaGeCommonStructs
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeBase
 	,SaGeImage
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeVertexObject
 	,SaGeRenderBase
 	;

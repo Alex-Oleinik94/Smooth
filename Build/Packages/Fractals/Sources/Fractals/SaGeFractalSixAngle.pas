@@ -7,9 +7,9 @@ interface
 uses
 	 SaGeBase
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeFractalForm
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 const

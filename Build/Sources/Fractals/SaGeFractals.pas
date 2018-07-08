@@ -5,8 +5,7 @@ unit SaGeFractals;
 interface
 
 uses 
-	 Crt
-	,Classes
+	 Classes
 	,SysUtils
 	
 	,SaGeBase
@@ -21,11 +20,11 @@ uses
 	,SaGeBitMap
 	,SaGeRender
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
 	,SaGeScreenBase
 	,SaGeThreads
 	,SaGeCamera
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 type
 	TSGFractal = class;
@@ -38,11 +37,11 @@ type
 		FFractal:TSGFractal;
 		end;
 	
-	TSGFractal = class(TSGScreenedDrawable)
+	TSGFractal = class(TSGScreenPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy;override;
-		class function ClassName:string;override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
 			public
 		FDepth:LongInt;
 		
@@ -74,7 +73,7 @@ type
 	
 	TSG3DFractal=class (TSGFractal)
 			public
-		constructor Create(const VContext:ISGContext);override;
+		constructor Create();override;
 		destructor Destroy();override;
 		class function ClassName():string;override;
 			protected
@@ -94,8 +93,8 @@ type
 		FEnableNormals  : TSGBoolean;
 		FHasIndexes     : TSGBoolean;
 			public
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 		procedure Paint();override;
 		procedure Calculate();override;
 		procedure SetMeshArLength(const MID,LFaces,LVertexes:int64);inline;
@@ -118,11 +117,11 @@ type
 		procedure InitEffectsComboBox(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 		procedure InitSizeLabel(const a,b,c,d:LongWord;const Anch:TSGSetOfByte = []);
 		end;
-	TSGFractal3D=TSG3DFractal;
+	TSGFractal3D = TSG3DFractal;
 	
 	TSGImageFractal=class(TSGFractal)
 			public
-		constructor Create(const VContext:ISGContext);override;
+		constructor Create();override;
 		class function ClassName():string;override;
 			protected
 		FImage:TSGImage;
@@ -146,12 +145,12 @@ uses
 	 SaGeStringUtils
 	;
 
-procedure TSG3DFractal.DeleteDeviceResources();
+procedure TSG3DFractal.DeleteRenderResources();
 begin
 ClearMesh();
 end;
 
-procedure TSG3DFractal.LoadDeviceResources();
+procedure TSG3DFractal.LoadRenderResources();
 begin
 Calculate();
 end;
@@ -383,9 +382,9 @@ FFractal:=Fractal;
 FThreadID:=ThreadID;
 end;
 
-constructor TSG3DFractal.Create(const VContext : ISGContext);
+constructor TSG3DFractal.Create();
 begin
-inherited Create(VContext);
+inherited;
 FSunAbs:=10;
 FSun.Import(0,0,-FSunAbs);
 FSunTrigonometry[0]:=pi/2;
@@ -641,9 +640,9 @@ end;
 	{$UNDEFINE RANGECHECKS_OFFED}
 	{$ENDIF}
 
-constructor TSGImageFractal.Create(const VContext : ISGContext);
+constructor TSGImageFractal.Create();
 begin
-inherited Create(VContext);
+inherited;
 FDepthHeight:=0;
 FImage:=nil;
 end;
@@ -726,9 +725,9 @@ begin
 Result:=Length(FThreadsData);
 end;
 
-constructor TSGFractal.Create(const VContext : ISGContext);
+constructor TSGFractal.Create();
 begin
-inherited Create(VContext);
+inherited;
 FDepth:=3;
 FThreadsEnable:=False;
 FThreadsData:=nil;

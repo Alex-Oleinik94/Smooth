@@ -20,7 +20,8 @@ uses
 	,SaGeConsolePaintableTools
 	,SaGeMath
 	,SaGeStringUtils
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeGraphicViewer
 	,SaGeEncodingUtils
 	,SaGeMathUtils
@@ -102,7 +103,7 @@ Result:=Func.Resultat.FConst;
 end;
 
 type
-	TSGApprFunction=class(TSGDrawable)
+	TSGApprFunction=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

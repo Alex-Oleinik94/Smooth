@@ -14,13 +14,14 @@ uses
 	,SaGeBase
 	,SaGeVertexObject
 	,SaGeMesh
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeRenderBase
 	,SaGeContext
 	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	,SaGeImage
 	,SaGeBitMap
 	,SaGeCamera
@@ -69,7 +70,7 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGasDiffusionReliefRedactor = class(TSGScreenedDrawable)
+	TSGGasDiffusionReliefRedactor = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;

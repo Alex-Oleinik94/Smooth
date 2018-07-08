@@ -38,7 +38,7 @@ uses
 	,SaGeLists
 	,SaGeRender
 	,SaGeAudioRender
-	,SaGeDrawClasses
+	,SaGePaintableObjectContainer
 	,SaGeVersion
 	,SaGeStringUtils
 	,SaGeBaseUtils
@@ -70,7 +70,7 @@ constructor TSGAllApplicationsDrawable.Create();
 begin
 inherited;
 
-with TSGDrawClasses.Create(Context) do
+with TSGPaintableObjectContainer.Create(Context) do
 	begin
 	Add(TSGLoading);
 	

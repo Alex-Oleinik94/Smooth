@@ -9,7 +9,8 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeFont
@@ -28,7 +29,7 @@ uses
 		{$ENDIF}
 	;
 type
-	TSGExample6=class(TSGScreenedDrawable)
+	TSGExample6=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

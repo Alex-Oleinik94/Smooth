@@ -10,7 +10,8 @@ uses
 	
 	,SaGeBase
 	,SaGeVertexObject
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeCommonStructs
 	,SaGeRenderBase
 	,SaGeImage
@@ -28,7 +29,7 @@ type
 	TSGPhysics=class;
 	
 	PSGPhysicsObject = ^ TSGPhysicsObject;
-	TSGPhysicsObject=class(TSGDrawable)
+	TSGPhysicsObject=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -58,7 +59,7 @@ type
 		property PhysicsClass  : TSGPhysics           read FPhysicsClass  write FPhysicsClass;
 		end;
 	
-	TSGPhysics=class(TSGDrawable)
+	TSGPhysics=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

@@ -12,7 +12,8 @@ uses
 	 Crt
 	,Math
 	
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeFont
 	,SaGeRenderBase
@@ -36,14 +37,14 @@ uses
 	;
 
 type
-	TSGExample16 = class(TSGDrawable)
+	TSGExample16 = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
-		procedure LoadDeviceResources();override;
-		procedure DeleteDeviceResources();override;
+		procedure LoadRenderResources();override;
+		procedure DeleteRenderResources();override;
 			protected
 		FCamera : TSGCamera;
 		FFont : TSGFont;
@@ -60,18 +61,14 @@ type
 	{$ENDIF}
 
 
-procedure TSGExample16.LoadDeviceResources();
+procedure TSGExample16.LoadRenderResources();
 begin
 Generate();
 end;
 
-procedure TSGExample16.DeleteDeviceResources();
+procedure TSGExample16.DeleteRenderResources();
 begin
-if FMesh <> nil then
-	begin
-	FMesh.Destroy();
-	FMesh := nil;
-	end;
+SGKill(FMesh);
 end;
 
 class function TSGExample16.ClassName():TSGString;

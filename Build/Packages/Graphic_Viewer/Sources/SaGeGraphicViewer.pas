@@ -7,8 +7,8 @@ interface
 uses 
 	 SaGeBase
 	,SaGeScreen
-	,SaGeScreenHelper
-	,SaGeCommonClasses
+	,SaGeScreenClasses
+	,SaGeContextInterface
 	,SaGeCommon
 	,SaGeCommonStructs
 	,SaGeMath
@@ -17,7 +17,7 @@ uses
 	;
 
 type
-	TSGGraphic=class(TSGScreenedDrawable)
+	TSGGraphic=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;

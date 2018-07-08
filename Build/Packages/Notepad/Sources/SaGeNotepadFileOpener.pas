@@ -9,7 +9,7 @@ uses
 	,SaGeLists
 	,SaGeNotepad
 	,SaGeFileOpener
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	;
 type
 	TSGNotepadFileOpener = class(TSGFileOpener)
@@ -25,8 +25,8 @@ type
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteDeviceResources();override;
-		procedure LoadDeviceResources();override;
+		procedure DeleteRenderResources();override;
+		procedure LoadRenderResources();override;
 		procedure Resize(); override;
 			private
 		FNotepad : TSGNotepad;
@@ -118,12 +118,12 @@ begin
 Result := 'TSGNotepadFileOpenerDrawable';
 end;
 
-procedure TSGNotepadFileOpenerDrawable.DeleteDeviceResources();
+procedure TSGNotepadFileOpenerDrawable.DeleteRenderResources();
 begin
 inherited;
 end;
 
-procedure TSGNotepadFileOpenerDrawable.LoadDeviceResources();
+procedure TSGNotepadFileOpenerDrawable.LoadRenderResources();
 var
 	FileName : TSGString;
 begin

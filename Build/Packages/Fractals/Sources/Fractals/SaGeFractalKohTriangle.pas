@@ -8,9 +8,9 @@ uses
 	 SaGeBase
 	,SaGeFractals
 	,SaGeCommonStructs
-	,SaGeCommonClasses
+	,SaGeContextInterface
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
@@ -187,7 +187,7 @@ end;
 
 constructor TSGFractalKohTriangle.Create(const VContext : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 FEnableColors:=False;
 FEnableNormals:=False;
 {$IFNDEF ANDROID}

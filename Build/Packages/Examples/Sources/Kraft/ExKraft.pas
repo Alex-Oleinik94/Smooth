@@ -18,8 +18,9 @@ uses
 	,SaGeBase
 	,SaGeRender
 	,SaGeCommon
-	,SaGeCommonClasses
-	,SaGeClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
+	,SaGeBaseClasses
 	,SaGeScreen
 	
 	,Classes
@@ -69,7 +70,7 @@ type
 		destructor Destroy; override;
 		end;
 	
-	TSGKraftExamples = class(TSGScreenedDrawable)
+	TSGKraftExamples = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

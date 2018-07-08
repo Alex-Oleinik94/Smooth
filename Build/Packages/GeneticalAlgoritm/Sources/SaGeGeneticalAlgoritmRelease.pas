@@ -5,23 +5,22 @@ unit SaGeGeneticalAlgoritmRelease;
 interface
 
 uses 
-	 Crt
-	
-	,SaGeBase
+	 SaGeBase
 	,SaGeGeneticalAlgoritm
 	,SaGeScreen
 	,SaGeScreenBase
-	,SaGeCommonClasses
+	,SaGeContextClasses
+	,SaGeContextInterface
 	,SaGeGraphicViewer
 	,SaGeMath
 	,SaGePackages
 	,SaGeRenderBase
 	,SaGeCommonStructs
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
-	TSGGenAlg=class(TSGScreenedDrawable)
+	TSGGenAlg=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;

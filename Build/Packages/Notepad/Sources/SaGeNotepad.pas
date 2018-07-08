@@ -12,11 +12,12 @@ uses
 	,SaGeBase
 	,SaGeLists
 	,SaGeContext
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	,SaGeCommonStructs
 	,SaGeRender
 	,SaGeRenderBase
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeMakefileReader
 	,SaGeResourceManager
 	,SaGeScreenBase
@@ -30,9 +31,9 @@ type
 	TSGNInset = class(TSGScreenComponent)
 			public
 		constructor Create();
-		destructor Destroy();override;
+		destructor Destroy(); override;
 			public
-		procedure FromDraw();override;
+		procedure Paint(); override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			protected
 		FTitle : TSGString;
@@ -59,8 +60,8 @@ type
 			public
 		procedure FromUpDate();override;
 		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
-		procedure FromDraw();override;
-		procedure FromResize();override;
+		procedure Paint();override;
+		procedure Resize();override;
 			private
 		procedure ProcessMakefileComand(const Comand : TSGString);
 		procedure OpenMakefileProjects();
@@ -83,13 +84,13 @@ type
 		function ActiveInset() : TSGNInset;
 		end;
 	
-	TSGNotepadApplication = class(TSGDrawable)
+	TSGNotepadApplication = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		procedure LoadDeviceResources();override;
-		procedure DeleteDeviceResources();override;
+		procedure LoadRenderResources();override;
+		procedure DeleteRenderResources();override;
 		class function ClassName() : TSGString;override;
 		procedure Resize(); override;
 			private
@@ -133,12 +134,12 @@ begin
 FNotepad.SetBounds(0, 50, Render.Width, Render.Height - 50);
 end;
 
-procedure TSGNotepadApplication.LoadDeviceResources();
+procedure TSGNotepadApplication.LoadRenderResources();
 begin
 inherited;
 end;
 
-procedure TSGNotepadApplication.DeleteDeviceResources();
+procedure TSGNotepadApplication.DeleteRenderResources();
 begin
 inherited;
 end;
@@ -277,7 +278,7 @@ if FMakefile <> nil then
 	end;
 end;
 
-procedure TSGNotepad.FromResize();
+procedure TSGNotepad.Resize();
 
 procedure ResizeInsets();
 var
@@ -288,7 +289,7 @@ if CountInsets() >0 then
 		begin
 		FInsets[i].SetBounds(0, Skin.Font.FontHeight + 10, Width, Height - (Skin.Font.FontHeight + 10));
 		FInsets[i].BoundsMakeReal();
-		FInsets[i].FromResize();
+		FInsets[i].Resize();
 		end;
 end;
 
@@ -297,7 +298,7 @@ ResizeInsets();
 inherited;
 end;
 
-procedure TSGNInset.FromDraw();
+procedure TSGNInset.Paint();
 begin
 FCursorOnComponent := False;
 inherited;
@@ -318,7 +319,7 @@ else
 	Result := nil;
 end;
 
-procedure TSGNotepad.FromDraw();
+procedure TSGNotepad.Paint();
 
 procedure DrawInsetsTitles();
 var

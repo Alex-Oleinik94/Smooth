@@ -42,6 +42,7 @@ type
 type
 	TSGScreenComponentProcedure = TSGComponentProcedure;
 	TSGScreenComboBoxProcedure = TSGComboBoxProcedure;
+	PSGScreenProgressBarFloat = PSGProgressBarFloat;
 // Components types
 type
 	TSGScreenComponent   = TSGComponent;

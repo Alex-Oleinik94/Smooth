@@ -4,13 +4,13 @@ unit Ex13_Model;
 interface
 
 uses
-	Crt
-	,Classes
+	 Classes
 	,SysUtils
 	
 	,StrMan
 	
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeCommonStructs
@@ -118,7 +118,7 @@ type
 	// - полигонов
 	// - вершин
 	// - инверсно преобразованной модели скелетной анимации
-	TModel = class(TSGDrawable)
+	TModel = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

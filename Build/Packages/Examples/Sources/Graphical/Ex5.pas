@@ -10,7 +10,8 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeFont
 	,SaGeRenderBase
@@ -30,7 +31,7 @@ uses
 const
 	QuantityObjects = 15;
 type
-	TSGExample5=class(TSGScreenedDrawable)
+	TSGExample5=class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

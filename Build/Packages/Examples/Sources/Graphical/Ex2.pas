@@ -10,7 +10,8 @@ uses
 		cthreads,
 		{$ENDIF}
 	 SaGeBase
-	,SaGeCommonClasses
+	,SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeRenderBase
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
@@ -18,7 +19,7 @@ uses
 		{$ENDIF}
 	;
 type
-	TSGExample2=class(TSGDrawable)
+	TSGExample2=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

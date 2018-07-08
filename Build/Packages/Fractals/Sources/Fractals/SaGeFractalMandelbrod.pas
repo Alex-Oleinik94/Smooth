@@ -7,7 +7,6 @@ interface
 uses
 	 SaGeBase
 	,SaGeFractals
-	,SaGeCommonClasses
 	,SaGeScreen
 	,SaGeCommon
 	,SaGeCommonStructs
@@ -16,7 +15,8 @@ uses
 	,SaGeFont
 	,SaGeBezierCurve
 	,SaGeComplex
-	,SaGeScreenHelper
+	,SaGeContextInterface
+	,SaGeScreenClasses
 	;
 
 type
@@ -25,10 +25,9 @@ type
 		end;
 	
 	TSGFractalMandelbrodThreadData = class;
-	TSGFractalMandelbrod=class(TSGImageFractal)
+	TSGFractalMandelbrod = class(TSGImageFractal)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		//destructor Destroy;override;
+		constructor Create(const _Context : ISGContext); override;
 			public
 		FZNumber      : TSGComplexNumber;
 		FZDegree      : LongInt;
@@ -79,12 +78,12 @@ type
 procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadData);
 
 type
-	TSGFractalMandelbrodRelease=class(TSGScreenedDrawable)
+	TSGFractalMandelbrodRelease=class(TSGScreenPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		class function ClassName() : TSGString;override;
-		procedure Paint();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+		procedure Paint(); override;
 			protected
 		FNewPotokInit:Boolean;
 		SelectPoint,SelectSecondPoint:TSGPoint2int32;
@@ -190,8 +189,9 @@ uses
 	,SaGeBaseUtils
 	,SaGeContextUtils
 	,SaGeScreen_Edit
+	,SaGeLists
 	
-	,Crt
+	,SysUtils
 	;
 
 procedure TSGFractalMandelbrodRelease.UnDatePointCurvePanel();inline;
@@ -508,7 +508,7 @@ procedure TSGFractalMandelbrodRelease.InitMandelbrod();inline;
 var
 	i:LongInt;
 	ii:LongInt = 5;
-	VNameThemes:packed array of string = nil;
+	VNameThemes : TSGStringList = nil;
 
 procedure AddNameTheme(const s:string);inline;
 begin
@@ -538,7 +538,7 @@ AddNameTheme('Розовая пыль');
 AddNameTheme('Зеленая пыль');
 AddNameTheme('Оранжевая пыль');
 
-Mandelbrod:=TSGFractalMandelbrod.Create(Context);
+Mandelbrod := TSGFractalMandelbrod.Create(Context);
 Mandelbrod.Width:=StartDepth;
 Mandelbrod.Height:=StartDepth;
 Mandelbrod.FZNumber.Import(-0.181,0.66);
@@ -735,11 +735,11 @@ with TSGFractalMandelbrodRelease(Button.FUserPointer1) do
 end;
 
 
-constructor TSGFractalMandelbrodRelease.Create(const VContext:ISGContext);
+constructor TSGFractalMandelbrodRelease.Create();
 var
 	i : TSGByte;
 begin
-inherited Create(VContext);
+inherited;
 FTNRF := nil;
 FCurvePointPanel := nil;
 FCurveSelectPoint := -1;
@@ -1033,7 +1033,7 @@ if MandelbrodInitialized then
 	
 	if Mandelbrod.ThreadsReady  then
 		begin
-		Delay(5);
+		Sleep(5);
 		Mandelbrod.AfterCalculate();
 		
 		for i:=0 to QuantityThreads-1 do
@@ -1100,7 +1100,7 @@ if MandelbrodInitialized then
 	
 	if LabelProcent.Visible and ( not Mandelbrod.ThreadsReady) then
 		begin
-		Delay(5);
+		Sleep(5);
 		FNewPotokInit:=False;
 		Procent:=0;
 		for i:=0 to QuantityThreads-1 do
@@ -1528,9 +1528,9 @@ if FImage.Ready then
 end;
 
 
-constructor TSGFractalMandelbrod.Create(const VContext : ISGContext);
+constructor TSGFractalMandelbrod.Create(const _Context : ISGContext);
 begin
-inherited Create(VContext);
+inherited;
 FTheme1:=0;
 FTheme2:=0;
 FFAttitudeForTheme:=0;
@@ -1806,7 +1806,7 @@ for i:=Data.h1 to Data.h2 do
 			Data.FWait:=False;
 			Data.NewPos:=0;
 			end;
-		Delay(5);
+		Sleep(5);
 		end;
 	if i+1>Data.h2 then
 		Break;

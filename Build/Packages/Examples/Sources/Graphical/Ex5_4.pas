@@ -9,7 +9,8 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeCommonClasses
+	 SaGeContextInterface
+	,SaGeContextClasses
 	,SaGeBase
 	,SaGeFileUtils
 	,SaGeFont
@@ -17,7 +18,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeScreenBase
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	,SaGeMesh
 	,SaGeDateTime
 	,SaGeCamera
@@ -35,7 +36,7 @@ const
 	QuantityObjects = 15;
 	GravitationConst = 9.81*2.25;
 type
-	TSGExample5_4 = class(TSGScreenedDrawable)
+	TSGExample5_4 = class(TSGScreenPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

@@ -9,17 +9,16 @@ uses
 	,SaGeFractals
 	,SaGeCommon
 	,SaGeCommonStructs
-	,SaGeCommonClasses
 	,SaGeScreen
-	,SaGeScreenHelper
+	,SaGeScreenClasses
 	;
 
 type
 	TSGFractalTetraider=class(TSG3DFractal)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		class function ClassName():TSGString;override;
+		constructor Create(); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
 			public
 		procedure Calculate;override;
 		procedure CalculateFromThread();
@@ -201,9 +200,9 @@ with TSGFractalTetraider(Button.FUserPointer1) do
 	end;
 end;
 
-constructor TSGFractalTetraider.Create(const VContext: ISGContext);
+constructor TSGFractalTetraider.Create();
 begin
-inherited Create(VContext);
+inherited;
 EnableColors   := True;
 EnableNormals  := True;
 LightingEnable := True;
