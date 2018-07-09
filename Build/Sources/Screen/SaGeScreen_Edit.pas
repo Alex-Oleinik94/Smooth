@@ -49,7 +49,6 @@ type
 			public
 		procedure Paint(); override;
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		function GetCursorTimer() : TSGScreenTimer; virtual;
@@ -235,27 +234,21 @@ if (FVisibleTimer > SGZero) then
 inherited;
 end;
 
-procedure TSGEdit.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin 
-if CursorInComponentNow then
-	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
-		begin
-		FNowChanget:=True;
-		FDrawCursor:=True;
-		FDrawCursorTimer:=1;
-		FDrawCursorElapsedTime:=0;
-		FDrawCursorElapsedTimeDontChange:=30;
-		end;
-inherited FromUpDateUnderCursor(CursorInComponentNow);
-end;
-
 procedure TSGEdit.FromUpDate();
 var
 	CaptionCharget:Boolean = False;
 	CursorChanget:Boolean = False;
 begin
 if (not CursorOverComponent()) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
-	FNowChanget:=False;
+	FNowChanget:=False
+else if (CursorOverComponent()) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
+	begin
+	FNowChanget:=True;
+	FDrawCursor:=True;
+	FDrawCursorTimer:=1;
+	FDrawCursorElapsedTime:=0;
+	FDrawCursorElapsedTimeDontChange:=30;
+	end;
 if FNowChanget then
 	begin
 	if Context.KeyPressedChar=#27 then

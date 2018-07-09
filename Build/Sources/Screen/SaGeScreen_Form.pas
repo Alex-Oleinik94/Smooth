@@ -24,9 +24,7 @@ type
 		FIcon        : TSGImage;
 		FRePlace     : Boolean;
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
-		procedure FromUpDateCaptionUnderCursor();override;
-		function CursorInComponentCaption():boolean;override;
+		function CursorOverComponentTitle():boolean;
 			public
 		procedure Paint(); override;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
@@ -54,6 +52,8 @@ var
 	ParentLocation : TSGComponentLocation;
 	CursorPosition : TSGVector2int32;
 begin
+if CursorOverComponent() and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
+	FRePlace:=True;
 if (FParent <> nil) and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGDownKey)) then
 	FParent.ChildToListEnd(Self);
 if FRePlace then
@@ -65,7 +65,7 @@ if FRePlace then
 			ParentBoundsSize := FParent.BoundsSize;
 			ParentRealPosition := FParent.RealPosition;
 			ParentLocation := FParent.Location;
-			CursorPosition := CursorPositionAtTheMoment();
+			CursorPosition := Context.CursorPosition(SGNowCursorPosition);
 			if  (CursorPosition.x>ParentRealPosition.x) and 
 				(CursorPosition.x<ParentRealPosition.x+ParentBoundsSize.Left+10) and 
 				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
@@ -165,18 +165,7 @@ FIcon := TSGImage.Create();
 SetBordersSize(5, 30, 5, 5);
 end;
 
-procedure TSGForm.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
-inherited FromUpDateUnderCursor(CursorInComponentNow);
-end;
-
-procedure TSGForm.FromUpDateCaptionUnderCursor();
-begin
-if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
-	FRePlace:=True;
-end;
-
-function TSGForm.CursorInComponentCaption():boolean;
+function TSGForm.CursorOverComponentTitle():boolean;
 begin
 Result:=
 	(Context.CursorPosition(SGNowCursorPosition).x>=FRealPosition.x) and 

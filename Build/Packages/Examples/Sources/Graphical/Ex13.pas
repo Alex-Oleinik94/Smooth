@@ -195,14 +195,14 @@ procedure CreateButton(var VButton : TSGScreenButton; const x, y : TSGLongWord; 
 begin
 VButton := TSGScreenButton.Create();
 Screen.CreateChild(VButton);
-Screen.LastChild.Skin := Screen.LastChild.Skin.CreateDependentSkinWithAnotherFont(FFont);
-Screen.LastChild.SetBounds(x,y,100,FFont.FontHeight+3);
-Screen.LastChild.BoundsMakeReal();
-Screen.LastChild.UserPointer:=Self;
-Screen.LastChild.Visible:=True;
-Screen.LastChild.Caption := VCaption;
-Screen.LastChild.Anchors:=[SGAnchRight];
-(Screen.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(VProc);
+VButton.Skin := VButton.Skin.CreateDependentSkinWithAnotherFont(FFont);
+VButton.SetBounds(x,y,100,FFont.FontHeight+3);
+VButton.BoundsMakeReal();
+VButton.UserPointer:=Self;
+VButton.Visible:=True;
+VButton.Caption := VCaption;
+VButton.Anchors:=[SGAnchRight];
+VButton.OnChange := TSGScreenComponentProcedure(VProc);
 end;
 
 var

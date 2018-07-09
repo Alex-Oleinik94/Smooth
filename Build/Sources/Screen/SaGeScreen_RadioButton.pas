@@ -37,13 +37,12 @@ type
 			public
 		procedure FromUpDate();override;
 		procedure Paint(); override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			private
 		FChecked : TSGBoolean;
 		FGroup : TSGRadioGroup;
 		FType : TSGRCButtonType;
 		FImage : TSGImage;
-		FCursorOnButton : TSGBoolean;
+		FCursorOverButton : TSGBoolean;
 			private
 		procedure DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
 			public
@@ -207,7 +206,7 @@ FChecked := False;
 FType := SGCheckButton;
 FImage := nil;
 FType := SGNoneRadioCheckButton;
-FCursorOnButton := False;
+FCursorOverButton := False;
 end;
 
 destructor TSGRadioButton.Destroy();
@@ -221,7 +220,13 @@ end;
 
 procedure TSGRadioButton.FromUpDate();
 begin
-inherited FromUpDate();
+FCursorOverButton := CursorOverComponent();
+if FCursorOverButton and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) then
+	begin
+	Context.SetCursorKey(SGNullKey, SGNullCursorButton);
+	SetChecked(not Checked, True);
+	end;
+inherited;
 end;
 
 procedure TSGRadioButton.DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}
@@ -239,7 +244,7 @@ procedure TSGRadioButton.Paint();
 begin
 if (not Checked) and (FImage <> nil) then
 	begin
-	if not FCursorOnButton then
+	if not FCursorOverButton then
 		begin
 		DrawImage(Iff(FType = SGCheckButton,0.27,0.25),0.5);
 		end
@@ -250,7 +255,7 @@ if (not Checked) and (FImage <> nil) then
 	end
 else
 	begin
-	if not FCursorOnButton then
+	if not FCursorOverButton then
 		begin
 		DrawImage(Iff(FType = SGCheckButton,0.77,0.75),1);
 		end
@@ -259,22 +264,8 @@ else
 		DrawImage(0.5,0.75);
 		end;
 	end;
-FCursorOnButton := False;
+FCursorOverButton := False;
 inherited;
-end;
-
-procedure TSGRadioButton.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
-if CursorInComponentNow then
-	begin
-	FCursorOnButton := True;
-	if ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) then
-		begin
-		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
-		SetChecked(not Checked, True);
-		end
-	end;
-inherited FromUpDateUnderCursor(CursorInComponentNow);
 end;
 
 end.

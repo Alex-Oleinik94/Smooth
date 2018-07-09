@@ -67,7 +67,6 @@ type
 			public
 		procedure Paint();override;
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure Resize();override;
 		end;
 
@@ -228,25 +227,6 @@ end;
 procedure TSGNTextInset.Resize();
 begin
 StandardizateView();
-inherited;
-end;
-
-procedure TSGNTextInset.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
-if Visible and CursorInComponentNow then
-	begin
-	if (Context.CursorWheel() <> SGNullCursorWheel)then
-		begin
-		if Context.CursorWheel() = SGUpCursorWheel then
-			begin
-			MoveVertical(-3);
-			end
-		else
-			begin
-			MoveVertical( 3);
-			end;
-		end;
-	end;
 inherited;
 end;
 
@@ -454,6 +434,20 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 end;
 
 begin
+if Visible and CursorOverComponent() then
+	begin
+	if (Context.CursorWheel() <> SGNullCursorWheel)then
+		begin
+		if Context.CursorWheel() = SGUpCursorWheel then
+			begin
+			MoveVertical(-3);
+			end
+		else
+			begin
+			MoveVertical( 3);
+			end;
+		end;
+	end;
 if FOwner <> nil then
 	Visible := FOwner.ActiveInset() = Self;
 if Visible then

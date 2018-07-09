@@ -24,10 +24,7 @@ type
 		FChangingButton      : TSGBoolean;
 		FChangingButtonTimer : TSGScreenTimer;
 			public
-		function CursorInComponentCaption():boolean;override;
-		procedure FromUpDateCaptionUnderCursor();override;
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure Paint(); override;
 		end;
 
@@ -46,6 +43,16 @@ end;
 
 procedure TSGButton.FromUpDate();
 begin
+FCursorOverButton := CursorOverComponent();
+if FCursorOverButton then
+	begin
+	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
+		begin
+		if (OnChange<>nil) then
+			OnChange(Self);
+		FChangingButtonTimer:=1;
+		end;
+	end;
 if not Active then
 	begin 
 	FCursorOverComponent := False;
@@ -64,21 +71,6 @@ UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
 inherited FromUpDate();
 end;
 
-procedure TSGButton.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
-FCursorOverButton     := CursorInComponentNow;
-if CursorInComponentNow then
-	begin
-	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
-		begin
-		if (OnChange<>nil) then
-			OnChange(Self);
-		FChangingButtonTimer:=1;
-		end;
-	end;
-inherited FromUpDateUnderCursor(CursorInComponentNow);
-end;
-
 procedure TSGButton.Paint();
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
@@ -87,15 +79,6 @@ FCursorOverButton:=False;
 FChangingButton:=False;
 FClick := False;
 inherited;
-end;
-
-procedure TSGButton.FromUpDateCaptionUnderCursor();
-begin
-end;
-
-function TSGButton.CursorInComponentCaption():boolean;
-begin
-Result:=False;
 end;
 
 constructor TSGButton.Create();

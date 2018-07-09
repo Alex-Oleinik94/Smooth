@@ -187,10 +187,6 @@ procedure TSGScreen.UpDateScreen();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDateUnderCursor();"');
-	{$ENDIF}
-FromUpDateUnderCursor();
-{$IFDEF SCREEN_DEBUG}
 	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate();"');
 	{$ENDIF}
 FromUpDate();

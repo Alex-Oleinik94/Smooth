@@ -43,7 +43,6 @@ type
 			public
 		procedure FromUpDate();override;
 		procedure Paint(); override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		function CursorOverComponent() : TSGBoolean; override;
 			public
 		procedure CreateItem(const ItemCaption:TSGCaption;const ItemImage:TSGImage = nil;const FIdent:TSGInt32 = -1; const VActive : TSGBoolean = True);
@@ -123,7 +122,7 @@ function TSGComboBox.CursorOverComponent() : TSGBoolean;
 var
 	CursorPosition : TSGVector2int32;
 begin
-CursorPosition := CursorPositionAtTheMoment();
+CursorPosition := Context.CursorPosition(SGNowCursorPosition);
 Result:=
 	(CursorPosition.x >= FRealPosition.x)and
 	(CursorPosition.x <= FRealPosition.x+FRealLocation.Width)and
@@ -147,7 +146,25 @@ else
 	Result:=0;
 end;
 
-procedure TSGComboBox.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
+procedure TSGComboBox.SelectingItem(const ItemIndex : TSGInt32);
+begin
+ClearPriority();
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__SelectingItem() : Before calling "FProcedure(...)"');
+	{$ENDIF}
+if (FProcedure <> nil) then
+	FProcedure(FSelectedItemIndex, ItemIndex, Self);
+{$IFDEF SCREEN_DEBUG}
+	WriteLn('TSGComboBox__SelectingItem() : After calling "FProcedure(...)"');
+	{$ENDIF}
+SelectedItemIndex := ItemIndex;
+FTextColor:=SGVertex4fImport();
+FBodyColor:=SGVertex4fImport();
+if (OnChange <> nil) then
+	OnChange(Self);
+end;
+
+procedure TSGComboBox.FromUpDate();
 
 procedure MouseWheelSelecting();
 var
@@ -179,11 +196,13 @@ if (NewSelectedItemIndex <> -1) then
 	SelectingItem(NewSelectedItemIndex);
 end;
 
+var
+	i : TSGMaxEnum;
 begin
 {$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox__FromUpDateUnderCursor() : Begining');
+WriteLn('TSGComboBox.FromUpDate() : Begining');
 	{$ENDIF}
-if CursorInComponentNow then
+if CursorOverComponent() then
 	begin
 	FBackLight:=True;
 	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
@@ -206,50 +225,19 @@ if CursorInComponentNow then
 		begin
 		if Context.CursorWheel=SGUpCursorWheel then
 			begin
-			if FFirstScrollItem<>0 then
-				FFirstScrollItem-=1;
+			if FFirstScrollItem <> 0 then
+				FFirstScrollItem -= 1;
 			end
 		else
 			begin
 			if FFirstScrollItem + LinesCount - 1 <> High(FItems) then
 				begin
-				FFirstScrollItem+=1;
+				FFirstScrollItem += 1;
 				end;
 			end;
 		Context.SetCursorWheel(SGNullCursorWheel);
 		end;
 	end;
-inherited FromUpDateUnderCursor(CursorInComponentNow);
-{$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox__FromUpDateUnderCursor() : End');
-	{$ENDIF}
-end;
-
-procedure TSGComboBox.SelectingItem(const ItemIndex : TSGInt32);
-begin
-ClearPriority();
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComboBox__SelectingItem() : Before calling "FProcedure(...)"');
-	{$ENDIF}
-if (FProcedure <> nil) then
-	FProcedure(FSelectedItemIndex, ItemIndex, Self);
-{$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGComboBox__SelectingItem() : After calling "FProcedure(...)"');
-	{$ENDIF}
-SelectedItemIndex := ItemIndex;
-FTextColor:=SGVertex4fImport();
-FBodyColor:=SGVertex4fImport();
-if (OnChange <> nil) then
-	OnChange(Self);
-end;
-
-procedure TSGComboBox.FromUpDate();
-var
-	i:TSGMaxEnum;
-begin
-{$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox.FromUpDate() : Begining');
-	{$ENDIF}
 if FOpen and (not FBackLight) and (Context.CursorKeyPressed<>SGNullCursorButton) then
 	begin
 	FOpen:=False;

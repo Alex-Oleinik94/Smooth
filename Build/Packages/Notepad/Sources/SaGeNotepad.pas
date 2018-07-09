@@ -34,7 +34,6 @@ type
 		destructor Destroy(); override;
 			public
 		procedure Paint(); override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 			protected
 		FTitle : TSGString;
 		FTitleWidth : TSGLongWord;
@@ -59,7 +58,6 @@ type
 		destructor Destroy();override;
 			public
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure Paint();override;
 		procedure Resize();override;
 			private
@@ -304,11 +302,6 @@ FCursorOverComponent := False;
 inherited;
 end;
 
-procedure TSGNInset.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
-inherited;
-end;
-
 function TSGNotepad.ActiveInset() : TSGNInset;
 begin
 if CountInsets() = 0 then
@@ -483,11 +476,6 @@ if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.Key
 		FActiveInset := 0;
 	Context.SetKey(SGNullKey,0);
 	end;
-inherited;
-end;
-
-procedure TSGNotepad.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
 inherited;
 end;
 

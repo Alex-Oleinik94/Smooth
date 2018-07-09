@@ -25,7 +25,6 @@ type
 		procedure LoadRenderResources();override;
 			public
 		procedure FromUpDate();override;
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);override;
 		procedure Paint(); override;
 		procedure Resize();override;
 			public
@@ -48,6 +47,7 @@ uses
 	,SaGeVersion
 	,SaGeRenderBase
 	,SaGeScreenBase
+	,SaGeScreenCustomComponent
 	
 	,Classes
 	
@@ -124,7 +124,7 @@ const
 
 class function TSGEngineConfigurationPanel.CanCreate(const VScreen : TSGScreenComponent): TSGBoolean;
 var
-	Component : TSGScreenComponent;
+	Component : TSGScreenCustomComponent;
 begin
 Result := True;
 if VScreen.HasChildren then
@@ -298,11 +298,6 @@ if (FRendersComboBox.SelectItem = -1) or ((FRendersComboBox.SelectItem <> -1) an
 			break;
 			end;
 ToFront();
-inherited;
-end;
-
-procedure TSGEngineConfigurationPanel.FromUpDateUnderCursor(const CursorInComponentNow:Boolean = True);
-begin
 inherited;
 end;
 

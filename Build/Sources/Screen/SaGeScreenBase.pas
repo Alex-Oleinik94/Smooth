@@ -111,7 +111,7 @@ const
 	SGS_TOP    = 4;
 
 type
-	ISGComponent = interface(ISGArea)
+	ISGCustomComponent = interface(ISGArea)
 		['{6ee600fd-f8b3-40bc-bf8a-ec7693b21e96}']
 		procedure SetRight (NewRight  : TSGScreenInt);
 		procedure SetBottom(NewBottom : TSGScreenInt);
@@ -141,8 +141,6 @@ type
 		procedure Paint();
 		procedure Resize();
 		procedure FromUpDate();
-		procedure FromUpDateUnderCursor(const CursorInComponentNow:TSGBoolean = True);
-		procedure FromUpDateCaptionUnderCursor();
 
 		procedure SetVisible(const b:TSGBoolean);
 		procedure SetCaption(const NewCaption : TSGCaption);
@@ -151,7 +149,6 @@ type
 
 		procedure ClearPriority();
 		procedure MakePriority();
-		function CursorOverComponent():TSGBoolean;
 		function CursorInComponentCaption():TSGBoolean;
 		function GetVertex(const THAT:TSGSetOfByte;const FOR_THAT:TSGByte): TSGPoint2int32;
 		function BottomShift():TSGScreenInt;
@@ -160,7 +157,6 @@ type
 		function MustBeDestroyed() : TSGBoolean;
 		procedure MarkForDestroy();
 		procedure CreateAlign(const NewAllign:TSGByte);
-		function CursorPositionAtTheMoment(): TSGPoint2int32;
 		procedure DestroyAlign();
 		procedure DestroyParent();
 		procedure KillChildren();
@@ -178,6 +174,11 @@ type
 		property Visible : TSGBoolean read GetVisible;
 		property VisibleTimer : TSGScreenTimer read GetVisibleTimer;
 		property ActiveTimer : TSGScreenTimer read GetActiveTimer;
+		end;
+
+	ISGComponent = interface(ISGCustomComponent)
+		['{4beeab5e-72bc-430e-81a7-f5b499143514}']
+		function CursorOverComponent():TSGBoolean;
 		end;
 
 function SGComponentLocationImport(const VPosition, VSize : TSGComponentLocationVectorInt) : TSGComponentLocation; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
