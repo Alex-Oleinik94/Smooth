@@ -22,7 +22,7 @@ procedure SGPrintEngineVersion();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGIncEngineVersion(const IsRelease : TSGBoolean = False) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 var
-	SGApplicationName : TSGString = 'Sun';
+	SGApplicationName : TSGString = 'SaGe';
 const
 	SGVerUnknown = 'unknown';
 

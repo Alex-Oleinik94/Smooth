@@ -16,12 +16,11 @@ uses
 	,SaGeContextInterface
 	,SaGeContext
 	,SaGeMesh
-	,SaGeScreen
 	,SaGeResourceManager
 	,SaGeCamera
 	;
 type
-	TSGModelRedactor=class(TSGScreenPaintableObject)
+	TSGModelRedactor=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

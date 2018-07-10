@@ -9,7 +9,6 @@ uses
 	,SaGeFont
 	,SaGeBase
 	,SaGeContext
-	,SaGeScreen
 	,SaGeImage
 	,SaGeContextInterface
 	,SaGeContextClasses
@@ -33,7 +32,7 @@ const
 	SGKillerStringWin = 'Ты выиграл!!!';
 	SGKillerStringLose = 'Ты проиграл...';
 type
-	TSGKiller=class(TSGScreenPaintableObject)
+	TSGKiller=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext:ISGContext);override;
 		destructor Destroy;override;

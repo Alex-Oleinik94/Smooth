@@ -6,7 +6,6 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeScreen
 	,SaGeContextInterface
 	,SaGeContextClasses
 	,SaGeWorldOfWarcraftConnectionHandler
@@ -14,7 +13,7 @@ uses
 	;
 
 type
-	TSGMaz1gWizardPaintable = class(TSGScreenPaintableObject)
+	TSGMaz1gWizardPaintable = class(TSGPaintableObject)
 			public
 		constructor Create(const _Context : ISGContext); override;
 		destructor Destroy(); override;

@@ -37,34 +37,6 @@ type
 			public
 		property InProcessing : TSGBoolean read FInProcessing write FInProcessing;
 		end;
-type
-	ISGScreenObject = interface(ISGContextObject)
-		['{01b2e610-7d81-4db4-bece-19222fbffde9}']
-		function GetScreen() : TSGScreen;
-		function ScreenAssigned() : TSGBoolean;
-
-		property Screen : TSGScreen read GetScreen;
-		end;
-type
-	TSGScreenObject = class(TSGContextObject, ISGScreenObject)
-			public
-		class function ClassName() : TSGString; override;
-			public
-		function GetScreen() : TSGScreen; virtual;
-		function ScreenAssigned() : TSGBoolean; virtual;
-			public
-		property Screen : TSGScreen read GetScreen;
-		end;
-type
-	TSGScreenPaintableObject = class(TSGPaintableObject, ISGScreenObject)
-			public
-		class function ClassName() : TSGString; override;
-			public
-		function GetScreen() : TSGScreen; virtual;
-		function ScreenAssigned() : TSGBoolean; virtual;
-			public
-		property Screen : TSGScreen read GetScreen;
-		end;
 
 procedure SGKill(var Screen : TSGScreen); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
@@ -86,54 +58,14 @@ if (Screen <> nil) then
 	end;
 end;
 
-class function TSGScreenObject.ClassName() : TSGString;
-begin
-Result := 'TSGScreenObject';
-end;
+// =======================
+// ====== TSGScreen ======
+// =======================
 
 class function TSGScreen.ClassName() : TSGString;
 begin
 Result := 'TSGScreen';
 end;
-
-class function TSGScreenPaintableObject.ClassName() : TSGString;
-begin
-Result := 'TSGScreenPaintableObject';
-end;
-
-function TSGScreenPaintableObject.ScreenAssigned() : TSGBoolean;
-begin
-Result := ContextAssigned();
-if Result then
-	Result := FContext^.Screen <> nil;
-end;
-
-function TSGScreenPaintableObject.GetScreen() : TSGScreen;
-begin
-if ContextAssigned() then
-	Result := TSGScreen(FContext^.Screen)
-else
-	Result := nil;
-end;
-
-function TSGScreenObject.ScreenAssigned() : TSGBoolean;
-begin
-Result := ContextAssigned();
-if Result then
-	Result := FContext^.Screen <> nil;
-end;
-
-function TSGScreenObject.GetScreen() : TSGScreen;
-begin
-if ContextAssigned() then
-	Result := TSGScreen(FContext^.Screen)
-else
-	Result := nil;
-end;
-
-// =======================
-// ====== TSGScreen ======
-// =======================
 
 constructor TSGScreen.Create();
 begin

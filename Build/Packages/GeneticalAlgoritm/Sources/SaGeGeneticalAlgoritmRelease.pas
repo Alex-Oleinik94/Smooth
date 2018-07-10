@@ -7,7 +7,6 @@ interface
 uses 
 	 SaGeBase
 	,SaGeGeneticalAlgoritm
-	,SaGeScreen
 	,SaGeScreenBase
 	,SaGeContextClasses
 	,SaGeContextInterface
@@ -20,7 +19,7 @@ uses
 	;
 
 type
-	TSGGenAlg=class(TSGScreenPaintableObject)
+	TSGGenAlg=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;

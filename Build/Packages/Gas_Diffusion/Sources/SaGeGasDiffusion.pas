@@ -20,7 +20,6 @@ uses
 	,SaGeRenderBase
 	,SaGeCommonStructs
 	,SaGeFont
-	,SaGeScreen
 	,SaGeImage
 	,SaGeBitMap
 	,SaGeGasDiffusionReliefRedactor
@@ -62,7 +61,7 @@ type
 	TSGSubsidenceVertexes = type packed array of TSGSubsidenceVertex;
 	
 	TSGGGDC = ^ TSGByte;
-	TSGGasDiffusionCube = class(TSGScreenPaintableObject)
+	TSGGasDiffusionCube = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;
@@ -95,7 +94,7 @@ type
 		property Edge : TSGLongWord read FEdge;
 		end;
 type
-	TSGGasDiffusion = class(TSGScreenPaintableObject)
+	TSGGasDiffusion = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;

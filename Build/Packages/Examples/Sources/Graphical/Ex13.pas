@@ -15,7 +15,6 @@ uses
 	,SaGeFont
 	,SaGeRenderBase
 	,SaGeCommonStructs
-	,SaGeScreen
 	,SaGeMesh
 	,SaGeShaders
 	,SaGeScreenBase
@@ -39,7 +38,7 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample13=class(TSGScreenPaintableObject)
+	TSGExample13=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -424,12 +423,12 @@ else
 	Render.InitMatrixMode(SG_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := Screen.Skin.Font.StringLength(WarningString1);
-	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
+	VStringLength := (Screen as TSGScreenComponent).Skin.Font.StringLength(WarningString1);
+	(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
-	VStringLength := Screen.Skin.Font.StringLength(WarningString2);
-	Screen.Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
+	VStringLength := (Screen as TSGScreenComponent).Skin.Font.StringLength(WarningString2);
+	(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
 		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
 		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;

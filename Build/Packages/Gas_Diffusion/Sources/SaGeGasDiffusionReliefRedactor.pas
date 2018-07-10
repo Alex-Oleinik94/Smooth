@@ -20,7 +20,6 @@ uses
 	,SaGeContext
 	,SaGeCommonStructs
 	,SaGeFont
-	,SaGeScreen
 	,SaGeScreenClasses
 	,SaGeImage
 	,SaGeBitMap
@@ -70,7 +69,7 @@ type
 	PSGGasDiffusionRelief = ^ TSGGasDiffusionRelief;
 type
 	TSGGDRRedactingType = (TSGGDRRedactingPoints,TSGGDRRedactingLines,TSGGDRRedactingPolygones);
-	TSGGasDiffusionReliefRedactor = class(TSGScreenPaintableObject)
+	TSGGasDiffusionReliefRedactor = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		procedure Paint();override;

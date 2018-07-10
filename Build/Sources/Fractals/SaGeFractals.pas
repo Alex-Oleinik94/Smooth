@@ -14,7 +14,6 @@ uses
 	,SaGeContext
 	,SaGeMesh
 	,SaGeVertexObject
-	,SaGeScreen
 	,SaGeFont
 	,SaGeImage
 	,SaGeBitMap
@@ -37,7 +36,7 @@ type
 		FFractal:TSGFractal;
 		end;
 	
-	TSGFractal = class(TSGScreenPaintableObject)
+	TSGFractal = class(TSGPaintableObject)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;

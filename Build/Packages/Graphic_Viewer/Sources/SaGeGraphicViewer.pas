@@ -6,18 +6,19 @@ interface
 
 uses 
 	 SaGeBase
-	,SaGeScreen
+	,SaGeContextClasses
 	,SaGeScreenClasses
 	,SaGeContextInterface
 	,SaGeCommon
 	,SaGeCommonStructs
 	,SaGeMath
+	,SaGeFont
 	,SaGeImage
 	,SaGeRenderBase
 	;
 
 type
-	TSGGraphic=class(TSGScreenPaintableObject)
+	TSGGraphic=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy;override;
@@ -33,6 +34,7 @@ type
 			private
 		FArMathGraphic : packed array of 
 			TSGMathGraphic;
+		function Font() : TSGFont;
 			public
 		View:TSGScreenVertexes;
 		Changet:boolean;
@@ -387,21 +389,21 @@ Render.Vertex2f(		(q2+c-View.x1)/absx*Render.Width,
 				Render.Height-(q1-View.y1)/AbsY*Render.Height);
 Render.EndScene();
 
-Screen.Skin.Font.DrawFontFromTwoVertex2f(SGStTen(msd),
+Font.DrawFontFromTwoVertex2f(SGStTen(msd),
 	SGVertex2fImport(1+(q2-View.x1)/absx*Render.Width,
 				Render.Height-(q1-View.y1)/absy*Render.Height),
 	SGVertex2fImport((q2+c*3-View.x1)/AbsX*Render.Width,
-				Screen.Skin.Font.FontHeight+Render.Height-(q1-View.y1)/AbsY*Render.Height),
+				Font.FontHeight+Render.Height-(q1-View.y1)/AbsY*Render.Height),
 				False,False);
 
 q:=GetFP(View.x1,View.x2,msd);
 while q < View.x2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
+	Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+2
 			,View.y2/absy*Render.Height),
 		SGVertex2fImport((q-View.x1)/absx*Render.Width+500
-			,View.y2/absy*Render.Height+Screen.Skin.Font.FontHeight),
+			,View.y2/absy*Render.Height+Font.FontHeight),
 		False,False);
 	q+=c;
 	end;
@@ -409,14 +411,19 @@ while q < View.x2 do
 q:=GetFP(View.y1,View.y2,msd);
 while q < View.y2 do
 	begin
-	Screen.Skin.Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
+	Font.DrawFontFromTwoVertex2f((SGStrMathFloat(q, Abs(Min(0,msd)))),
 		SGVertex2fImport(Render.Width-View.x2/AbsX*Render.Width+2
 			,Render.Height-(q-View.y1)/Absy*Render.Height),
 		SGVertex2fImport(Render.Width-View.x2/absx*Render.Width+500
-			,Render.Height-(q-View.y1)/absy*Render.Height+Screen.Skin.Font.FontHeight),
+			,Render.Height-(q-View.y1)/absy*Render.Height+Font.FontHeight),
 		False,False);
 	q+=c;
 	end;
+end;
+
+function TSGGraphic.Font() : TSGFont;
+begin
+Result := (Screen as TSGScreenComponent).Skin.Font
 end;
 
 //======================================================================================

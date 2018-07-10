@@ -14,7 +14,7 @@ uses
 	,SaGeBase
 	,SaGeRenderBase
 	,SaGeFont
-	,SaGeScreen
+	,SaGeScreenClasses
 	,SaGeCommonStructs
 	,SaGeMesh
 	,SaGeVertexObject
@@ -29,7 +29,7 @@ uses
 		{$ENDIF}
 	;
 type
-	TSGExample6=class(TSGScreenPaintableObject)
+	TSGExample6=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -127,17 +127,17 @@ begin
 i:= Context.Height - 70;
 Render.InitMatrixMode(SG_2D);
 Render.Color3f(1,1,1);
-Screen.Skin.Font.DrawFontFromTwoVertex2f('Press "1" to associate Diffuse as Diffuse and Bump as Bump.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + Screen.Skin.Font.FontHeight));
-i += Screen.Skin.Font.FontHeight;
-Screen.Skin.Font.DrawFontFromTwoVertex2f('Press "2" to associate Diffuse as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + Screen.Skin.Font.FontHeight));
-i += Screen.Skin.Font.FontHeight;
-Screen.Skin.Font.DrawFontFromTwoVertex2f('Press "3" to associate Bump as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + Screen.Skin.Font.FontHeight));
-i += Screen.Skin.Font.FontHeight;
-Screen.Skin.Font.DrawFontFromTwoVertex2f('Press "4" to associate Diffuse as Bump and Bump as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + Screen.Skin.Font.FontHeight));
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "1" to associate Diffuse as Diffuse and Bump as Bump.',
+	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "2" to associate Diffuse as Diffuse.',
+	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "3" to associate Bump as Diffuse.',
+	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "4" to associate Diffuse as Bump and Bump as Diffuse.',
+	SGVertex2fImport(0,i),SGVertex2fImport(Context.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
 end;
 var
 	FSun : TSGVertex3f;

@@ -7,7 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeFractals
-	,SaGeScreen
+	,SaGeContextClasses
 	,SaGeCommon
 	,SaGeCommonStructs
 	,SaGeImage
@@ -78,7 +78,7 @@ type
 procedure TSGFractalMandelbrodThreadProcedure(Data:TSGFractalMandelbrodThreadData);
 
 type
-	TSGFractalMandelbrodRelease=class(TSGScreenPaintableObject)
+	TSGFractalMandelbrodRelease=class(TSGPaintableObject)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;

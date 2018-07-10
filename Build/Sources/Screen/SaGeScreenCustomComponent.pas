@@ -199,7 +199,13 @@ type
 			public
 		property UserPointer : Pointer read FUserPointer1 write FUserPointer1;
 		end;
-
+	
+	ISGScreenObject = interface(ISGInterface)
+		['{bed22c55-1611-4358-bfab-9596302ee968}']
+		function GetScreen() : TSGScreenCustomComponent;
+		
+		property Screen : TSGScreenCustomComponent read GetScreen;
+		end;
 
 implementation
 

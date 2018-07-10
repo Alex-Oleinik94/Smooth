@@ -14,9 +14,10 @@ uses
 	,SaGeBitMap
 	,SaGeContextUtils
 	,SaGeContextInterface
+	,SaGeScreenCustomComponent
 	;
 type
-	TSGContextObject = class(TSGOptionGetSeter, ISGContextObject, ISGRenderObject)
+	TSGContextObject = class(TSGOptionGetSeter, ISGContextObject, ISGRenderObject, ISGScreenObject)
 			public
 		constructor Create(); override; deprecated;
 		destructor Destroy(); override;
@@ -28,6 +29,7 @@ type
 		function GetContext() : ISGContext; virtual;
 		function GetRender() : ISGRender; virtual;
 		function GetAudioRender() : ISGAudioRender; virtual;
+		function GetScreen() : TSGScreenCustomComponent; virtual;
 		
 		function Suppored() : TSGBoolean; virtual;
 		procedure DeleteRenderResources(); virtual;
@@ -40,6 +42,7 @@ type
 		property Context : ISGContext read GetContext write SetContext;
 		property Render  : ISGRender  read GetRender;
 		property AudioRender : ISGAudioRender read GetAudioRender;
+		property Screen : TSGScreenCustomComponent read GetScreen;
 		end;
 
 	TSGPaintableObjectClass = class of TSGPaintableObject;
@@ -119,6 +122,11 @@ end;
 function TSGContextObject.GetRender() : ISGRender;
 begin
 Result := FContext^.Render;
+end;
+
+function TSGContextObject.GetScreen() : TSGScreenCustomComponent;
+begin
+Result := FContext^.Screen;
 end;
 
 function TSGContextObject.ContextAssigned() : TSGBoolean;

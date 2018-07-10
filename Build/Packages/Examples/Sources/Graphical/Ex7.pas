@@ -12,7 +12,6 @@ uses
 	 SaGeContextInterface
 	,SaGeContextClasses
 	,SaGeBase
-	,SaGeScreen
 	,SaGeFont
 	,SaGeMath
 	,SaGeGraphicViewer
@@ -30,7 +29,7 @@ uses
 		{$ENDIF}
 	;
 type
-	TSGApprFunction = class(TSGScreenPaintableObject)
+	TSGApprFunction = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

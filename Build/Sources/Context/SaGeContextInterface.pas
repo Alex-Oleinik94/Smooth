@@ -14,6 +14,7 @@ uses
 	,SaGeAudioRenderInterface
 	,SaGeRenderInterface
 	,SaGeContextUtils
+	,SaGeScreenCustomComponent
 	;
 type
 	ISGContextHandler = interface(ISGBaseContext)
@@ -106,7 +107,7 @@ type
 	PISGContext = ^ ISGContext;
 	ISGContext = interface(ISGCustomContext)
 		['{b4b36fe5-b99e-4cb5-9745-ec1218816a26}']
-		function  GetScreen() : TSGPointer;
+		function  GetScreen() : TSGScreenCustomComponent;
 		procedure SetInterfaceLink(const VLink : PISGContext);
 		function  GetInterfaceLink() : PISGContext;
 		procedure SetRenderClass(const NewRender : TSGNamedClass);
@@ -119,7 +120,7 @@ type
 		function GetAudioRender() : ISGAudioRender;
 
 		property AudioRender : ISGAudioRender read GetAudioRender;
-		property Screen : TSGPointer read GetScreen;
+		property Screen : TSGScreenCustomComponent read GetScreen;
 		property NewContext : TSGNamedClass write SetNewContext;
 		property RenderClass : TSGNamedClass write SetRenderClass;
 		property InterfaceLink : PISGContext read GetInterfaceLink write SetInterfaceLink;

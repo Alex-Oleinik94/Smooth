@@ -11,7 +11,6 @@ uses
 	,SaGeMesh
 	,SaGeFont
 	,SaGeBase
-	,SaGeScreen
 	,SaGeScreenClasses
 	,SaGeRender
 	,SaGeImage
@@ -46,7 +45,7 @@ operator = (const Item1, Item2 : TSGPaintableObjectContainerItem) : TSGBool; {$I
 {$UNDEF   INC_PLACE_INTERFACE}
 
 type
-	TSGPaintableObjectContainer = class(TSGScreenPaintableObject)
+	TSGPaintableObjectContainer = class(TSGPaintableObject)
 			public
 		constructor Create(const _Context : ISGContext); override;
 		destructor Destroy();override;

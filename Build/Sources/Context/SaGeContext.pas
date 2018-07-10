@@ -23,6 +23,7 @@ uses
 	,SaGeContextUtils
 	,SaGeContextInterface
 	,SaGeBaseContextInterface
+	,SaGeScreenCustomComponent
 	;
 
 type
@@ -201,7 +202,7 @@ type
 		procedure SetPaintableSettings(); virtual;
 		procedure KillRender(); virtual;
 			private
-		function GetScreen() : TSGPointer; virtual;
+		function GetScreen() : TSGScreenCustomComponent; virtual;
 			public
 		property ExtendedLink : PSGContext read FExtendedLink write FExtendedLink;
 		property NewContext : TSGContextClass read FNewContextType write FNewContextType;
@@ -299,7 +300,7 @@ if FAudioRender <> nil then
 	end;
 end;
 
-function TSGContext.GetScreen() : TSGPointer;
+function TSGContext.GetScreen() : TSGScreenCustomComponent;
 begin
 Result := FScreen;
 end;

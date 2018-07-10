@@ -17,7 +17,7 @@ uses
 	,SaGeRenderBase
 	,SaGeCommonStructs
 	,SaGeDateTime
-	,SaGeScreen
+	,SaGeScreenClasses
 	,SaGeCamera
 	,SaGeMatrix	
 	{$IF not defined(ENGINE)}
@@ -31,7 +31,7 @@ uses
 const
 	QuantityObjects = 15;
 type
-	TSGExample5=class(TSGScreenPaintableObject)
+	TSGExample5=class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
@@ -307,15 +307,15 @@ Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
 Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
-Screen.Skin.Font.DrawFontFromTwoVertex2f('2ms',
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('2ms',
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+Screen.Skin.Font.FontHeight));
-Screen.Skin.Font.DrawFontFromTwoVertex2f('0ms',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
 	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+Screen.Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+Screen.Skin.Font.FontHeight));
-Screen.Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
+(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
 	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+Screen.Skin.Font.FontHeight-10));
+	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSGScreenComponent).Skin.Font.FontHeight-10));
 	
 end;
 
