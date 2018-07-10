@@ -66,7 +66,7 @@ type
 		property FileName : TSGString write SetFile;
 			public
 		procedure Paint();override;
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Resize();override;
 		end;
 
@@ -238,7 +238,7 @@ StandardizateView();
 FScrolTimer := 1;
 end;
 
-procedure TSGNTextInset.FromUpDate();
+procedure TSGNTextInset.UpDate();
 
 var
 	Line : TSGLongWord;
@@ -247,7 +247,7 @@ var
 function IsCurOnText():TSGBoolean;
 begin
 Result := False;
-if not FCursorOverComponent then
+if not CursorOver then
 	Exit;
 CursorPos := Context.CursorPosition(SGNowCursorPosition) - SGVertex2int32Import(FRealPosition.x, FRealPosition.y);
 CursorPos.x -= Skin.Font.StringLength(SGStr(CountLines()));
@@ -264,7 +264,7 @@ end;
 
 procedure ProcessCursor();
 begin
-FCursorOverText := FCursorOverComponent and IsCurOnText();
+FCursorOverText := CursorOver and IsCurOnText();
 if FCursorOverText then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
@@ -434,7 +434,8 @@ if Context.KeyPressed and (Context.KeyPressedType = SGDownKey) then
 end;
 
 begin
-if Visible and CursorOverComponent() then
+inherited;
+if Visible and CursorOver then
 	begin
 	if (Context.CursorWheel() <> SGNullCursorWheel)then
 		begin
@@ -453,11 +454,10 @@ if FOwner <> nil then
 if Visible then
 	begin
 	UpgradeTimer(False, FScrolTimer, 1, 3);
-	if FCursorOverComponent or FCursorOverText or FCursorOverTextPrev then
+	if CursorOverComponent or FCursorOverText or FCursorOverTextPrev then
 		ProcessCursor();
 	ProcessTyping();
 	end;
-inherited;
 end;
 
 procedure TSGNTextInset.StandardizateView();

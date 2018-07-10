@@ -23,12 +23,13 @@ uses
 	,SaGeScreenBase
 	,SaGeFont
 	,SaGePackages
+	,SaGeScreenCommonComponents
 	;
 
 type
 	TSGNotepad = class;
 	
-	TSGNInset = class(TSGScreenComponent)
+	TSGNInset = class(TSGOverComponent)
 			public
 		constructor Create();
 		destructor Destroy(); override;
@@ -57,7 +58,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			public
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Paint();override;
 		procedure Resize();override;
 			private
@@ -298,7 +299,6 @@ end;
 
 procedure TSGNInset.Paint();
 begin
-FCursorOverComponent := False;
 inherited;
 end;
 
@@ -467,7 +467,7 @@ SetLength(FInsets, 0);
 inherited;
 end;
 
-procedure TSGNotepad.FromUpDate();
+procedure TSGNotepad.UpDate();
 begin
 if (Context.KeyPressed and (Context.KeyPressedType = SGDownKey) and (Context.KeyPressedByte = 9 {Tab}) and (Context.KeysPressed(SG_CTRL_KEY))) then
 	begin

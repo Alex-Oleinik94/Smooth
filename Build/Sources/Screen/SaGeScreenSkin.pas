@@ -17,6 +17,7 @@ uses
 	,SaGeFileUtils
 	,SaGeCommonStructs
 	,SaGeScreenComponentInterfaces
+	,SaGeScreenSkinInterface
 	;
 
 type
@@ -29,7 +30,7 @@ type
 		FText     : TSGScreenSkinFrameColor;
 		end;
 	
-	TSGScreenSkin = class(TSGContextObject)
+	TSGScreenSkin = class(TSGContextObject, ISGScreenSkin)
 			public
 		constructor Create(const VContext : ISGContext);override; 
 		constructor Create(const VContext : ISGContext; const VColors : TSGScreenSkinColors);virtual;
@@ -446,7 +447,7 @@ procedure TSGScreenSkin.PaintButton(constref Button : ISGButton);
 var
 	Location : TSGComponentLocation;
 	Active, Visible : TSGBool;
-	ActiveTimer, VisibleTimer, OverTimer, ClickTimer : TSGScreenTimer;
+	ActiveTimer, VisibleTimer, CursorOverTimer, ClickTimer : TSGScreenTimer;
 begin
 Location := Button.GetLocation();
 
@@ -454,7 +455,7 @@ Active := Button.Active;
 Visible := Button.Visible;
 
 ClickTimer := Button.ClickTimer;
-OverTimer := Button.OverTimer;
+CursorOverTimer := Button.CursorOverTimer;
 VisibleTimer := Button.VisibleTimer;
 ActiveTimer := Button.ActiveTimer;
 
@@ -464,20 +465,20 @@ if (not Active) or (ActiveTimer < 1 - SGZero) then
 		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
 		True);
 if  (ActiveTimer > SGZero) and 
-	(1-OverTimer>SGZero) and 
+	(1-CursorOverTimer>SGZero) and 
 	(1-ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
 	PaintQuad(Location,
-		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer),
-		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-OverTimer)*(1-ClickTimer)*ActiveTimer)*1.3,
+		FColors.FNormal.FFirst.WithAlpha(0.3*VisibleTimer*(1-CursorOverTimer)*(1-ClickTimer)*ActiveTimer),
+		FColors.FNormal.FSecond.WithAlpha(0.3*VisibleTimer*(1-CursorOverTimer)*(1-ClickTimer)*ActiveTimer)*1.3,
 		True);
 if  (ActiveTimer>SGZero) and 
-	(OverTimer>SGZero) and 
+	(CursorOverTimer>SGZero) and 
 	(1-ClickTimer>SGZero) and
 	(VisibleTimer>SGZero) then
 	PaintQuad(Location,
-		FColors.FOver.FFirst.WithAlpha(0.5*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer),
-		FColors.FOver.FSecond.WithAlpha(0.5*VisibleTimer*OverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
+		FColors.FOver.FFirst.WithAlpha(0.5*VisibleTimer*CursorOverTimer*(1-ClickTimer)*ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.5*VisibleTimer*CursorOverTimer*(1-ClickTimer)*ActiveTimer)*1.3,
 		True);
 if  (ActiveTimer>SGZero) and 
 	(ClickTimer>SGZero) and
@@ -493,13 +494,13 @@ end;
 procedure TSGScreenSkin.PaintComboBox(constref ComboBox : ISGComboBox);
 var
 	Location, TextLocation : TSGComponentLocation;
-	ActiveTimer, VisibleTimer, OverTimer, ClickTimer, OpenTimer : TSGScreenTimer;
+	ActiveTimer, VisibleTimer, CursorOverTimer, ClickTimer, OpenTimer : TSGScreenTimer;
 
 procedure PaintOpened(const OpenLocation : TSGComponentLocation); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function GetTextColor(const VOverTimer : TSGScreenTimer) : TSGVertex4f; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function GetTextColor(const VCursorOverTimer : TSGScreenTimer) : TSGVertex4f; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := FColors.FText.FSecond * (VOverTimer) + FColors.FText.FFirst * (1 - VOverTimer);
+Result := FColors.FText.FSecond * (VCursorOverTimer) + FColors.FText.FFirst * (1 - VCursorOverTimer);
 Result.a := 0.9 * OpenTimer;
 end;
 
@@ -527,7 +528,7 @@ if Item.Over then
 if Item.Selected and (not Item.Over) and Item.Active then
 	ItemTextColor := GetSelectedTextColor()
 else if Item.Selected and Item.Over and Item.Active then
-	ItemTextColor := GetTextColor(1 - OverTimer)
+	ItemTextColor := GetTextColor(1 - CursorOverTimer)
 else if Item.Active then
 	ItemTextColor := TextColor
 else
@@ -557,9 +558,9 @@ var
 	BodyColor : TSGVertex4f;
 	Index : TSGMaxEnum;
 begin
-BodyColor := (FColors.FText.FSecond * (1 - OverTimer) + FColors.FText.FFirst * (OverTimer)) * 0.5 + 0.5 * FColors.FText.FFirst;
+BodyColor := (FColors.FText.FSecond * (1 - CursorOverTimer) + FColors.FText.FFirst * (CursorOverTimer)) * 0.5 + 0.5 * FColors.FText.FFirst;
 BodyColor *= 0.8;
-TextColor := GetTextColor(OverTimer);
+TextColor := GetTextColor(CursorOverTimer);
 DisabledTextColor := FColors.FDisabled.FSecond * 0.1 + SGVertex4fImport(1,0,0,1) * 0.9;
 DisabledTextColor.a := OpenTimer;
 
@@ -587,21 +588,21 @@ begin
 Location := ComboBox.GetLocation();
 
 ClickTimer   := ComboBox.ClickTimer;
-OverTimer    := ComboBox.OverTimer;
+CursorOverTimer    := ComboBox.CursorOverTimer;
 VisibleTimer := ComboBox.VisibleTimer;
 ActiveTimer  := ComboBox.ActiveTimer;
 OpenTimer    := ComboBox.OpenTimer;
 
-if  (1 - OverTimer > SGZero) and 
+if  (1 - CursorOverTimer > SGZero) and 
 	(1 - OpenTimer > SGZero)  then
 	PaintQuad(Location,
-		FColors.FNormal.FFirst.WithAlpha(0.3 * VisibleTimer * (1-OverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)),
-		FColors.FNormal.FSecond.WithAlpha(0.3 * VisibleTimer * (1-OverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)) * 1.3);
-if  (OverTimer > SGZero) and 
+		FColors.FNormal.FFirst.WithAlpha(0.3 * VisibleTimer * (1-CursorOverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)),
+		FColors.FNormal.FSecond.WithAlpha(0.3 * VisibleTimer * (1-CursorOverTimer) * (1-ClickTimer) * ActiveTimer * (1 - OpenTimer)) * 1.3);
+if  (CursorOverTimer > SGZero) and 
 	(1-OpenTimer > SGZero)  then
 	PaintQuad(Location,
-		FColors.FOver.FFirst.WithAlpha(0.5 * VisibleTimer * OverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer),
-		FColors.FOver.FSecond.WithAlpha(0.5 * VisibleTimer * OverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer) * 1.3);
+		FColors.FOver.FFirst.WithAlpha(0.5 * VisibleTimer * CursorOverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer),
+		FColors.FOver.FSecond.WithAlpha(0.5 * VisibleTimer * CursorOverTimer * (1-OpenTimer) * (1-ClickTimer) * ActiveTimer) * 1.3);
 if (ActiveTimer < 1 - SGZero) then
 	PaintQuad(Location,
 		FColors.FDisabled.FFirst.WithAlpha(0.7 * VisibleTimer * (1-ActiveTimer)) * 0.54,
@@ -663,7 +664,7 @@ procedure TSGScreenSkin.PaintEdit(constref Edit : ISGEdit);
 var
 	TextLocation, Location : TSGComponentLocation;
 	Active, Visible : TSGBool;
-	ActiveTimer, VisibleTimer, OverTimer, TextCompliteTimer : TSGScreenTimer;
+	ActiveTimer, VisibleTimer, CursorOverTimer, TextCompliteTimer : TSGScreenTimer;
 	
 	NormalFirst, NormalSecond : TSGColor4f;
 	RedColor  : TSGColor4f;
@@ -674,7 +675,7 @@ Location := Edit.GetLocation();
 Active := Edit.Active;
 Visible := Edit.Visible;
 
-OverTimer := Edit.OverTimer;
+CursorOverTimer := Edit.CursorOverTimer;
 VisibleTimer := Edit.VisibleTimer;
 ActiveTimer := Edit.ActiveTimer;
 

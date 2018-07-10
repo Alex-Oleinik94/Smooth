@@ -130,7 +130,7 @@ type
 		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);virtual;
 		procedure UpgradeTimer(const Flag : TSGBoolean; var Timer : TSGScreenTimer; const ElapsedTime : TSGTimerInt; const Factor1 : TSGInt16 = 1; const Factor2 : TSGFloat32 = 1);
 			protected
-		procedure FromUpDate();virtual;
+		procedure UpDate();virtual;
 			protected
 		procedure SetVisible(const b:Boolean);virtual;
 		procedure SetCaption(const NewCaption : TSGCaption);virtual;
@@ -151,8 +151,6 @@ type
 		property Anchors      : TSGSetOfByte  read FAnchors      write FAnchors;
 			protected
 		FChildren:TSGScreenCustomComponentList;
-		FCursorOverComponent:Boolean;
-		FCursorOverComponentCaption:Boolean;
 		FCanHaveChildren:Boolean;
 		FComponentProcedure:TSGScreenCustomComponentProcedure;
 		FChildrenPriority : TSGMaxEnum;
@@ -191,8 +189,6 @@ type
 		property Align : TSGByte read FAlign write CreateAlign;
 		property ChildrenPriority : TSGMaxEnum write FChildrenPriority;
 		property ComponentProcedure : TSGScreenCustomComponentProcedure read FComponentProcedure write FComponentProcedure;
-		property CursorOnComponent : Boolean read FCursorOverComponent write FCursorOverComponent;
-		property CursorOnComponentCaption : Boolean read FCursorOverComponentCaption write FCursorOverComponentCaption;
 			public
 		OnChange : TSGScreenCustomComponentProcedure ;
 		FUserPointer1, FUserPointer2, FUserPointer3 : Pointer;
@@ -786,20 +782,20 @@ begin
 FLocation.Height := FLocation.Height + Value;
 end;
 
-procedure TSGScreenCustomComponent.FromUpDate();
+procedure TSGScreenCustomComponent.UpDate();
 var
 	PriorityComponent, Component : TSGScreenCustomComponent;
 	Index : TSGLongWord;
 begin
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreenCustomComponent__FromUpDate: Begining');
+	WriteLn('TSGScreenCustomComponent__UpDate: Begining');
 	{$ENDIF}
 
 UpDateObjects();
 
 PriorityComponent := GetPriorityComponent();
 if PriorityComponent <> nil then
-	PriorityComponent.FromUpDate();
+	PriorityComponent.UpDate();
 
 Index := 0;
 while Index < Length(FChildren) do
@@ -810,7 +806,7 @@ while Index < Length(FChildren) do
 	else
 		begin
 		if Component <> PriorityComponent then
-			Component.FromUpDate();
+			Component.UpDate();
 		Index += 1;
 		end;
 	end;
@@ -931,8 +927,6 @@ FActive:=True;
 FActiveTimer:=0;
 FCaption:='';
 FChildren:=nil;
-FCursorOverComponent:=False;
-FCursorOverComponentCaption:=False;
 FCanHaveChildren:=True;
 ComponentProcedure:=nil;
 FUserPointer1:=nil;

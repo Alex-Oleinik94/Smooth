@@ -94,23 +94,23 @@ procedure TSGScreen.CustomPaint();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before "DrawDrawClasses();"');
+	WriteLn('TSGScreen__Paint() : Before "DrawDrawClasses();"');
 	{$ENDIF}
 DrawDrawClasses();
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before over updating');
+	WriteLn('TSGScreen__Paint() : Before over updating');
 	{$ENDIF}
 
 Render.LineWidth(1);
 Render.InitMatrixMode(SG_2D);
 
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Before drawing');
+	WriteLn('TSGScreen__Paint() : Before drawing');
 	{$ENDIF}
 
 inherited Paint();
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Beining');
+	WriteLn('TSGScreen__Paint() : Beining');
 	{$ENDIF}
 InProcessing := False;
 end;
@@ -119,16 +119,16 @@ procedure TSGScreen.UpDateScreen();
 begin
 InProcessing := True;
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.UpDateScreen() : Before "FromUpDate();"');
+	WriteLn('TSGScreen__UpDateScreen() : Before "UpDate();"');
 	{$ENDIF}
-FromUpDate();
+UpDate();
 InProcessing := False;
 end;
 
 procedure TSGScreen.Paint();
 begin
 {$IFDEF SCREEN_DEBUG}
-	WriteLn('TSGScreen.Paint() : Beining, before check ECP');
+	WriteLn('TSGScreen__Paint() : Beining, before check ECP');
 	{$ENDIF}
 
 UpDateScreen();

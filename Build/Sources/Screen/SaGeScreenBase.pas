@@ -140,7 +140,7 @@ type
 
 		procedure Paint();
 		procedure Resize();
-		procedure FromUpDate();
+		procedure UpDate();
 
 		procedure SetVisible(const b:TSGBoolean);
 		procedure SetCaption(const NewCaption : TSGCaption);

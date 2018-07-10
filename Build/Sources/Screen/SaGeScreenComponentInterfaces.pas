@@ -13,11 +13,11 @@ uses
 type
 	ISGOverComponent = interface(ISGComponent)
 		['{ac52a3a2-e62d-4473-a2b9-1d36f56389a9}']
-		function GetOverTimer() : TSGScreenTimer;
-		function GetOver() : TSGBool;
+		function GetCursorOverTimer() : TSGScreenTimer;
+		function GetCursorOver() : TSGBool;
 
-		property Over : TSGBoolean read GetOver;
-		property OverTimer : TSGScreenTimer read GetOverTimer;
+		property CursorOver : TSGBoolean read GetCursorOver;
+		property CursorOverTimer : TSGScreenTimer read GetCursorOverTimer;
 		end;
 
 	ISGClickComponent = interface(ISGOverComponent)
@@ -25,7 +25,7 @@ type
 		function GetClickTimer() : TSGScreenTimer;
 		function GetClick() : TSGBool;
 
-		property Click : TSGBoolean read GetOver;
+		property Click : TSGBoolean read GetClick;
 		property ClickTimer : TSGScreenTimer read GetClickTimer;
 		end;
 

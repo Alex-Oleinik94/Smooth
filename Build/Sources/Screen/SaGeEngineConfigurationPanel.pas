@@ -24,7 +24,7 @@ type
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
 			public
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Paint(); override;
 		procedure Resize();override;
 			public
@@ -279,9 +279,9 @@ if FVersionLabel <> nil then
 inherited;
 end;
 
-procedure TSGEngineConfigurationPanel.FromUpDate();
+procedure TSGEngineConfigurationPanel.UpDate();
 var
-	i : TSGLongWord;
+	i : TSGMaxEnum;
 begin
 if FContextsComboBox.SelectItem = -1 then
 	for i := Low(Contexts) to High(Contexts) do
@@ -297,8 +297,8 @@ if (FRendersComboBox.SelectItem = -1) or ((FRendersComboBox.SelectItem <> -1) an
 			FRendersComboBox.SelectItem := i;
 			break;
 			end;
-ToFront();
 inherited;
+ToFront();
 end;
 
 procedure TSGEngineConfigurationPanel.Paint();

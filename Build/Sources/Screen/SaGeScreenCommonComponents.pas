@@ -19,13 +19,17 @@ type
 		constructor Create();override;
 		class function ClassName() : TSGString; override;
 			protected
-		FPreviousOver  : TSGBoolean;
-		FOver      : TSGBoolean;
-		FOverTimer : TSGScreenTimer;
+		FPreviousCursorOver : TSGBoolean;
+		FCursorOver : TSGBoolean;
+		FCursorOverTimer : TSGScreenTimer;
 		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);override;
 			public 
-		function GetOverTimer() : TSGScreenTimer;virtual;
-		function GetOver() : TSGBool;
+		function GetCursorOverTimer() : TSGScreenTimer; virtual;
+		function GetCursorOver() : TSGBool; virtual;
+			public
+		property PreviousCursorOver : TSGBool read FPreviousCursorOver;
+		property CursorOver : TSGBool read FCursorOver;
+		property CursorOverTimer : TSGScreenTimer read FCursorOverTimer;
 		end;
 	
 	TSGClickComponent = class(TSGOverComponent, ISGClickComponent)
@@ -70,30 +74,30 @@ begin
 Result := 'TSGOverComponent';
 end;
 
-function TSGOverComponent.GetOver() : TSGBool;
+function TSGOverComponent.GetCursorOver() : TSGBool;
 begin
-Result := FOver;
+Result := FCursorOver;
 end;
 
 procedure TSGOverComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
+FPreviousCursorOver := FCursorOver;
+FCursorOver := CursorOverComponent() and ReqursiveActive;
+UpgradeTimer(FCursorOver, FCursorOverTimer, ElapsedTime, 3, 2);
 inherited;
-FPreviousOver := FOver;
-FOver := CursorOverComponent() and ReqursiveActive;
-UpgradeTimer(FOver, FOverTimer, ElapsedTime, 3, 2);
 end;
 
 constructor TSGOverComponent.Create();
 begin
 inherited;
-FPreviousOver := False;
-FOver := False;
-FOverTimer := 0;
+FPreviousCursorOver := False;
+FCursorOver := False;
+FCursorOverTimer := 0;
 end;
 
-function TSGOverComponent.GetOverTimer() : TSGScreenTimer;
+function TSGOverComponent.GetCursorOverTimer() : TSGScreenTimer;
 begin
-Result := FOverTimer;
+Result := FCursorOverTimer;
 end;
 
 // TSGOpenComponent
@@ -142,7 +146,7 @@ end;
 procedure TSGClickComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
 inherited;
-FClick := FOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
+FClick := FCursorOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
 UpgradeTimer(FClick, FClickTimer, ElapsedTime, 4, 2);
 end;
 

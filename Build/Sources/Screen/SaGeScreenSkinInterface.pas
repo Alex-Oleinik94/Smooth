@@ -6,11 +6,12 @@ interface
 
 uses
 	 SaGeBase
-	,SaGeClasses
+	,SaGeBaseClasses
 	,SaGeScreenBase
+	,SaGeScreenComponentInterfaces
 	;
 type
-	ISGSkin = interface
+	ISGScreenSkin = interface(ISGInterface)
 		['{f55a3794-246d-4bac-b8f8-47a971209b1f}']
 		procedure PaintButton(constref Button : ISGButton);
 		procedure PaintPanel(constref Panel : ISGPanel);

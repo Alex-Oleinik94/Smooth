@@ -177,7 +177,7 @@ FFont.Loading();
 FFont.ToTexture();
 
 FHelpLabel := SGCreateLabel(Screen,
-	'Press C to change camera mode;' + SGWinEoln +
+	'Press C to change mouse mode;' + SGWinEoln +
 	'Use WASD to move camera;' + SGWinEoln +
 	'Use Mouse or QE to rotate camera;' + SGWinEoln +
 	'Use Space or X to move up or down.', 

@@ -41,7 +41,7 @@ type
 		procedure SelectItemFromIndex(const Index : TSGInt32); virtual;
 		procedure SelectingItem(const ItemIndex : TSGInt32); virtual;
 			public
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Paint(); override;
 		function CursorOverComponent() : TSGBoolean; override;
 			public
@@ -132,7 +132,6 @@ Result:=
 		(CursorPosition.y <= FRealPosition.y+FRealLocation.Height))) or
 	((not FOpen) and
 		(CursorPosition.y <= FRealPosition.y+FRealLocation.Height)));
-FCursorOverComponent := Result;
 end;
 
 function TSGComboBox.GetLinesCount() : TSGUInt32;
@@ -164,7 +163,7 @@ if (OnChange <> nil) then
 	OnChange(Self);
 end;
 
-procedure TSGComboBox.FromUpDate();
+procedure TSGComboBox.UpDate();
 
 procedure MouseWheelSelecting();
 var
@@ -199,8 +198,9 @@ end;
 var
 	i : TSGMaxEnum;
 begin
+inherited;
 {$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox.FromUpDate() : Begining');
+WriteLn('TSGComboBox__UpDate() : Begining');
 	{$ENDIF}
 if CursorOverComponent() then
 	begin
@@ -243,7 +243,7 @@ if FOpen and (not FBackLight) and (Context.CursorKeyPressed<>SGNullCursorButton)
 	FOpen:=False;
 	ClearPriority();
 	end;
-if  FOpen and (FCursorOverComponent) then
+if  FOpen and CursorOver then
 	begin
 	for i := 0 to LinesCount - 1 do
 		begin
@@ -271,9 +271,8 @@ if  FOpen and (FCursorOverComponent) then
 else
 	OverItem(ItemsCount);
 UpgradeTimer(FBackLight,FBackLightTimer,3,2);
-inherited;
 {$IFDEF SCREEN_DEBUG}
-WriteLn('TSGComboBox.FromUpDate() : End');
+WriteLn('TSGComboBox__UpDate() : End');
 	{$ENDIF}
 end;
 

@@ -18,13 +18,10 @@ type
 		destructor Destroy;override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCursorOverButtonTimer : TSGScreenTimer;
-		FCursorOverButtonPrev  : TSGBoolean;
-		FCursorOverButton      : TSGBoolean;
 		FChangingButton      : TSGBoolean;
 		FChangingButtonTimer : TSGScreenTimer;
 			public
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Paint(); override;
 		end;
 
@@ -41,10 +38,10 @@ begin
 Result := 'TSGButton';
 end;
 
-procedure TSGButton.FromUpDate();
+procedure TSGButton.UpDate();
 begin
-FCursorOverButton := CursorOverComponent();
-if FCursorOverButton then
+inherited;
+if CursorOver then
 	begin
 	if Active and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 		begin
@@ -54,28 +51,20 @@ if FCursorOverButton then
 		end;
 	end;
 if not Active then
-	begin 
-	FCursorOverComponent := False;
-	FCursorOverButton    := False;
 	FChangingButton    := False;
-	end;
-if FCursorOverButton and ReqursiveActive and Visible then
+if CursorOver and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
 		Context.Cursor := TSGCursor.Create(SGC_HAND);
-if FCursorOverButtonPrev and (not FCursorOverButton) then
+if PreviousCursorOver and (not CursorOver) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_HAND)) then
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-FCursorOverButtonPrev := FCursorOverComponent;
-UpgradeTimer(FCursorOverButton,FCursorOverButtonTimer,3,2);
-UpgradeTimer(FChangingButton,FChangingButtonTimer,5,2);
-inherited FromUpDate();
+UpgradeTimer(FChangingButton, FChangingButtonTimer, 5, 2);
 end;
 
 procedure TSGButton.Paint();
 begin
 if (FVisible) or (FVisibleTimer > SGZero) then
 	FSkin.PaintButton(Self);
-FCursorOverButton:=False;
 FChangingButton:=False;
 FClick := False;
 inherited;
@@ -85,8 +74,6 @@ constructor TSGButton.Create();
 begin
 inherited Create();
 FCanHaveChildren    := False;
-FCursorOverButtonPrev := False;
-FCursorOverButton     := False;
 end;
 
 destructor TSGButton.Destroy();

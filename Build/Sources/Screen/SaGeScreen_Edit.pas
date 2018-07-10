@@ -32,8 +32,6 @@ type
 		destructor Destroy;override;
 		class function ClassName() : TSGString; override;
 			protected
-		FCursorOverComponentPrev  : TSGBoolean;
-		FCursorOverComponentTimer : TSGScreenTimer;
 		FCursorPosition         : TSGInt32;
 		FNowChanget             : TSGBool;
 		FNowChangetTimer        : TSGScreenTimer;
@@ -48,7 +46,7 @@ type
 		FDrawCursorElapsedTimeDontChange : TSGUInt32;
 			public
 		procedure Paint(); override;
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			protected
 		function GetCursorTimer() : TSGScreenTimer; virtual;
@@ -234,11 +232,12 @@ if (FVisibleTimer > SGZero) then
 inherited;
 end;
 
-procedure TSGEdit.FromUpDate();
+procedure TSGEdit.UpDate();
 var
 	CaptionCharget:Boolean = False;
 	CursorChanget:Boolean = False;
 begin
+inherited;
 if (not CursorOverComponent()) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
 	FNowChanget:=False
 else if (CursorOverComponent()) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
@@ -383,25 +382,20 @@ if CaptionCharget or CursorChanget then
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
 	end;
-if FCursorOverComponent and ReqursiveActive and Visible then
+if CursorOver and ReqursiveActive and Visible then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_IBEAM)) then
 		Context.Cursor := TSGCursor.Create(SGC_IBEAM);
-if FCursorOverComponentPrev and (not FCursorOverComponent) then
+if PreviousCursorOver and (not CursorOver) then
 	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_IBEAM)) then
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-FCursorOverComponentPrev := FCursorOverComponent;
-UpgradeTimer(FCursorOverComponent,FCursorOverComponentTimer,3);
 UpgradeTimer(FNowChanget,FNowChangetTimer,3);
 UpgradeTimer(FTextComplite,FTextCompliteTimer,1);
 UpgradeTimer(FDrawCursor,FDrawCursorTimer,4);
-inherited FromUpDate();
 end;
 
 constructor TSGEdit.Create;
 begin
 inherited;
-FCursorOverComponentPrev := False;
-FCursorOverComponent     := False;
 FCursorPosition        := 0;
 FNowChanget            := False;
 FNowChangetTimer       := 0;

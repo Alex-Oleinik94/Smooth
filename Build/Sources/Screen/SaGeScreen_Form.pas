@@ -23,7 +23,7 @@ type
 		FButtonsType : SGFrameButtonsType;
 		FIcon        : TSGImage;
 		FRePlace     : Boolean;
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		function CursorOverComponentTitle():boolean;
 			public
 		procedure Paint(); override;
@@ -45,13 +45,14 @@ begin
 Result := 'TSGForm';
 end;
 
-procedure TSGForm.FromUpDate();
+procedure TSGForm.UpDate();
 var
 	ParentBoundsSize : TSGComponentBoundsSize;
 	ParentRealPosition : TSGComponentLocationVectorInt;
 	ParentLocation : TSGComponentLocation;
 	CursorPosition : TSGVector2int32;
 begin
+inherited;
 if CursorOverComponent() and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 	FRePlace:=True;
 if (FParent <> nil) and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGDownKey)) then
@@ -118,7 +119,6 @@ if FRePlace then
 			FDefaultLocation := FLocation;
 		end;
 	end;
-inherited FromUpDate();
 end;
 
 procedure TSGForm.Paint();
@@ -172,7 +172,6 @@ Result:=
 	(Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y) and 
 	(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FBordersSize.Top) and 
 	(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+FRealLocation.Width);
-FCursorOverComponentCaption:=Result;
 end;
 
 procedure TSGForm.SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:LongInt);

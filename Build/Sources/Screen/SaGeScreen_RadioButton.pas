@@ -35,7 +35,7 @@ type
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 			public
-		procedure FromUpDate();override;
+		procedure UpDate();override;
 		procedure Paint(); override;
 			private
 		FChecked : TSGBoolean;
@@ -218,15 +218,15 @@ if FImage <> nil then
 inherited;
 end;
 
-procedure TSGRadioButton.FromUpDate();
+procedure TSGRadioButton.UpDate();
 begin
+inherited;
 FCursorOverButton := CursorOverComponent();
 if FCursorOverButton and ((Context.CursorKeyPressed = SGLeftCursorButton) and (Context.CursorKeyPressedType = SGUpKey)) then
 	begin
 	Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 	SetChecked(not Checked, True);
 	end;
-inherited;
 end;
 
 procedure TSGRadioButton.DrawImage(const x,y:TSGFloat);{$IFDEF SUPPORTINLINE}{$IFDEF SUPPORTINLINE}inline;{$ENDIF}{$ENDIF}

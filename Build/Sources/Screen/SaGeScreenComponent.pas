@@ -37,19 +37,19 @@ type
 		procedure DeleteRenderResources(); override;
 		procedure LoadRenderResources(); override;
 			protected
-		procedure UpDateObjects(); override;
-			protected
 		FSkin    : TSGScreenSkin;
 		procedure UpDateSkin();virtual;
-			protected
-		procedure FromUpDate(); override;
+			public
+		procedure DestroySkin();
 			public
 		property Skin : TSGScreenSkin read FSkin write FSkin;
+			protected
+		procedure UpDateObjects(); override;
+		procedure UpDate(); override;
 			public
 		function CursorOverComponent():TSGBoolean;virtual;
 			public
 		procedure CompleteChild(const VChild : TSGScreenCustomComponent); override;
-		procedure DestroySkin();
 			public
 		FDrawClass:TSGPaintableObject;
 			public
@@ -159,10 +159,9 @@ Result:=
 	(CursorPosition.x <= FRealPosition.x + FRealLocation.Width)and
 	(CursorPosition.y >= FRealPosition.y)and
 	(CursorPosition.y <= FRealPosition.y + FRealLocation.Height);
-FCursorOverComponent := Result;
 end;
 
-procedure TSGComponent.FromUpDate();
+procedure TSGComponent.UpDate();
 begin
 UpgradeTimers(Context.ElapsedTime);
 UpDateSkin();
