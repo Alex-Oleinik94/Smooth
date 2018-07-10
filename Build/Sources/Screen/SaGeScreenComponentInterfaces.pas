@@ -11,7 +11,7 @@ uses
 	,SaGeImage
 	;
 type
-	ISGOverComponent = interface(ISGComponent)
+	ISGCursorOverComponent = interface(ISGComponent)
 		['{ac52a3a2-e62d-4473-a2b9-1d36f56389a9}']
 		function GetCursorOverTimer() : TSGScreenTimer;
 		function GetCursorOver() : TSGBool;
@@ -20,13 +20,13 @@ type
 		property CursorOverTimer : TSGScreenTimer read GetCursorOverTimer;
 		end;
 
-	ISGClickComponent = interface(ISGOverComponent)
+	ISGMouseClickComponent = interface(ISGCursorOverComponent)
 		['{9b21d96d-b820-41cd-b18f-14ed09d5c218}']
-		function GetClickTimer() : TSGScreenTimer;
-		function GetClick() : TSGBool;
+		function GetMouseClickTimer() : TSGScreenTimer;
+		function GetMouseClick() : TSGBool;
 
-		property Click : TSGBoolean read GetClick;
-		property ClickTimer : TSGScreenTimer read GetClickTimer;
+		property MouseClick : TSGBoolean read GetMouseClick;
+		property MouseClickTimer : TSGScreenTimer read GetMouseClickTimer;
 		end;
 
 	ISGLabel = interface(ISGComponent)
@@ -43,7 +43,7 @@ type
 		property TextColorSeted : TSGBoolean read GetTextColorSeted write SetTextColorSeted;
 		end;
 
-	ISGButton = interface(ISGClickComponent)
+	ISGButton = interface(ISGMouseClickComponent)
 		['{ec439dc0-edd6-42e2-af41-42e9805c2e77}']
 		end;
 
@@ -56,7 +56,7 @@ type
 		property ViewQuad : TSGBool read ViewingQuad;
 		end;
 
-	ISGOpenComponent = interface(ISGClickComponent)
+	ISGOpenComponent = interface(ISGMouseClickComponent)
 		['{84a57b91-b224-45f1-a25d-938dbec2ad0f}']
 		function GetOpen() : TSGBoolean;
 		function GetOpenTimer() : TSGScreenTimer;
@@ -104,7 +104,7 @@ type
 		end;
 
 	TSGEditTextType = TSGByte;
-	ISGEdit = interface(ISGOverComponent)
+	ISGEdit = interface(ISGCursorOverComponent)
 		['{468c7f6f-795a-48a1-b5be-615448c2dcbe}']
 		function GetTextType() : TSGEditTextType;
 		function GetTextComplite() : TSGBoolean;

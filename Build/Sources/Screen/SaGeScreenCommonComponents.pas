@@ -14,7 +14,7 @@ uses
 	;
 
 type
-	TSGOverComponent = class(TSGComponent, ISGOverComponent)
+	TSGOverComponent = class(TSGComponent, ISGCursorOverComponent)
 			public
 		constructor Create();override;
 		class function ClassName() : TSGString; override;
@@ -32,17 +32,17 @@ type
 		property CursorOverTimer : TSGScreenTimer read FCursorOverTimer;
 		end;
 	
-	TSGClickComponent = class(TSGOverComponent, ISGClickComponent)
+	TSGClickComponent = class(TSGOverComponent, ISGMouseClickComponent)
 			public
 		constructor Create();override;
 		class function ClassName() : TSGString; override;
 			protected
-		FClick      : TSGBoolean;
-		FClickTimer : TSGScreenTimer;
+		FMouseClick      : TSGBoolean;
+		FMouseClickTimer : TSGScreenTimer;
 		procedure UpgradeTimers(const ElapsedTime : TSGTimerInt);override;
 			public
-		function GetClickTimer() : TSGScreenTimer;virtual;
-		function GetClick() : TSGBool;virtual;
+		function GetMouseClickTimer() : TSGScreenTimer;virtual;
+		function GetMouseClick() : TSGBool;virtual;
 		end;
 	
 	TSGOpenComponent = class(TSGClickComponent, ISGOpenComponent)
@@ -81,10 +81,10 @@ end;
 
 procedure TSGOverComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
+inherited;
 FPreviousCursorOver := FCursorOver;
 FCursorOver := CursorOverComponent() and ReqursiveActive;
 UpgradeTimer(FCursorOver, FCursorOverTimer, ElapsedTime, 3, 2);
-inherited;
 end;
 
 constructor TSGOverComponent.Create();
@@ -138,28 +138,28 @@ begin
 Result := 'TSGClickComponent';
 end;
 
-function TSGClickComponent.GetClick() : TSGBool;
+function TSGClickComponent.GetMouseClick() : TSGBool;
 begin
-Result := FClick;
+Result := FMouseClick;
 end;
 
 procedure TSGClickComponent.UpgradeTimers(const ElapsedTime : TSGTimerInt);
 begin
 inherited;
-FClick := FCursorOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
-UpgradeTimer(FClick, FClickTimer, ElapsedTime, 4, 2);
+FMouseClick := FCursorOver and Context.CursorKeysPressed(SGLeftCursorButton) and ReqursiveActive;
+UpgradeTimer(FMouseClick, FMouseClickTimer, ElapsedTime, 4, 2);
 end;
 
 constructor TSGClickComponent.Create();
 begin
 inherited;
-FClick := False;
-FClickTimer := 0;
+FMouseClick := False;
+FMouseClickTimer := 0;
 end;
 
-function TSGClickComponent.GetClickTimer() : TSGScreenTimer;
+function TSGClickComponent.GetMouseClickTimer() : TSGScreenTimer;
 begin
-Result := FClickTimer;
+Result := FMouseClickTimer;
 end;
 
 end.

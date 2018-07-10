@@ -454,7 +454,7 @@ Location := Button.GetLocation();
 Active := Button.Active;
 Visible := Button.Visible;
 
-ClickTimer := Button.ClickTimer;
+ClickTimer := Button.MouseClickTimer;
 CursorOverTimer := Button.CursorOverTimer;
 VisibleTimer := Button.VisibleTimer;
 ActiveTimer := Button.ActiveTimer;
@@ -587,7 +587,7 @@ var
 begin
 Location := ComboBox.GetLocation();
 
-ClickTimer   := ComboBox.ClickTimer;
+ClickTimer   := ComboBox.MouseClickTimer;
 CursorOverTimer    := ComboBox.CursorOverTimer;
 VisibleTimer := ComboBox.VisibleTimer;
 ActiveTimer  := ComboBox.ActiveTimer;

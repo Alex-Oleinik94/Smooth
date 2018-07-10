@@ -217,12 +217,10 @@ if not CC then
 	end;
 end;
 
-procedure TSGEdit.TextTypeEvent;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGEdit.TextTypeEvent(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FTextType <> SGEditTypeText) and (FTextTypeFunction <> nil) then
-	begin
 	FTextComplite := FTextTypeFunction(Self);
-	end;
 end;
 
 procedure TSGEdit.Paint();
@@ -238,15 +236,16 @@ var
 	CursorChanget:Boolean = False;
 begin
 inherited;
-if (not CursorOverComponent()) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
+if (not CursorOver) and ((Context.CursorKeyPressed <> SGNullCursorButton)) then
 	FNowChanget:=False
-else if (CursorOverComponent()) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
+else if (CursorOver) and ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGDownKey)) then
 	begin
 	FNowChanget:=True;
 	FDrawCursor:=True;
 	FDrawCursorTimer:=1;
 	FDrawCursorElapsedTime:=0;
 	FDrawCursorElapsedTimeDontChange:=30;
+	Context.SetCursorKey(SGNullKey, SGNullCursorButton);
 	end;
 if FNowChanget then
 	begin
@@ -348,7 +347,7 @@ if FNowChanget and Context.KeyPressed and (Context.KeyPressedType=SGDownKey) the
 if CaptionCharget then
 	begin
 	TextTypeEvent();
-	if OnChange<>nil then
+	if OnChange <> nil then
 		OnChange(Self);
 	end;
 if FNowChanget then

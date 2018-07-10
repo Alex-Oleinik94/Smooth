@@ -22,20 +22,16 @@ type
 		destructor Destroy();override;
 		class function ClassName() : TSGString; override;
 			protected
-		FBackLight : Boolean;
-		FBackLightTimer  :  TSGScreenTimer;
 		FItems : TSGComboBoxItemList;
 		FProcedure : TSGComboBoxProcedure;
-		FMaxLines : longWord;
-		FSelectedItemIndex : LongInt;
-		FFirstScrollItem : LongInt;
-		FCursorOverThisItem : LongInt;
-		FScrollWidth : LongInt;
+		FMaxLines : TSGUInt32;
+		FSelectedItemIndex : TSGInt32;
+		FFirstScrollItem : TSGInt32;
+		FCursorOverThisItem : TSGInt32;
+		FScrollWidth : TSGInt32;
 
 		FTextColor : TSGColor4f;
 		FBodyColor : TSGColor4f;
-
-		FClickOnOpenBox : Boolean;
 			protected
 		procedure OverItem(const Index : TSGUInt32); virtual;
 		procedure SelectItemFromIndex(const Index : TSGInt32); virtual;
@@ -52,6 +48,7 @@ type
 		function GetLinesCount() : TSGUInt32;
 		function GetSelectedItem() : PSGComboBoxItem;
 		function GetFirstItemIndex() : TSGUInt32;
+		procedure MouseWheelSelecting();
 			public
 		property SelectedItemIndex : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
 		property SelectItem        : LongInt  read FSelectedItemIndex write SelectItemFromIndex;
@@ -163,9 +160,7 @@ if (OnChange <> nil) then
 	OnChange(Self);
 end;
 
-procedure TSGComboBox.UpDate();
-
-procedure MouseWheelSelecting();
+procedure TSGComboBox.MouseWheelSelecting();
 var
 	NewSelectedItemIndex : TSGInt64 = -1;
 
@@ -190,11 +185,11 @@ if (ItemsCount - 1 > FSelectedItemIndex) and (Context.CursorWheel = SGUpCursorWh
 	FindNewSelectedItem(1)
 else if (0 < FSelectedItemIndex) and (Context.CursorWheel = SGDownCursorWheel) then
 	FindNewSelectedItem(-1);
-Context.SetCursorWheel(SGNullCursorWheel);
 if (NewSelectedItemIndex <> -1) then
 	SelectingItem(NewSelectedItemIndex);
 end;
 
+procedure TSGComboBox.UpDate();
 var
 	i : TSGMaxEnum;
 begin
@@ -202,26 +197,25 @@ inherited;
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox__UpDate() : Begining');
 	{$ENDIF}
-if CursorOverComponent() then
+if CursorOver and Active and Visible then
 	begin
-	FBackLight:=True;
-	if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) and (not FOpen) then
+	if (not FOpen) then
 		begin
-		FOpen:=True;
-		Context.SetCursorKey(SGNullKey, SGNullCursorButton);
-		MakePriority();
-		end
-	else
-		FCursorOverThisItem:=-1;
-	if (not FOpen) and (Context.CursorWheel <> SGNullCursorWheel) then
-		MouseWheelSelecting();
-	if FOpen then
 		if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 			begin
-			FClickOnOpenBox:=True;
+			FOpen := True;
 			Context.SetCursorKey(SGNullKey, SGNullCursorButton);
+			MakePriority();
+			end
+		else
+			FCursorOverThisItem := -1;
+		if (Context.CursorWheel <> SGNullCursorWheel) then
+			begin
+			MouseWheelSelecting();
+			Context.SetCursorWheel(SGNullCursorWheel);
 			end;
-	if FOpen and (Context.CursorWheel<>SGNullCursorWheel) then
+		end
+	else if (Context.CursorWheel<>SGNullCursorWheel) then
 		begin
 		if Context.CursorWheel=SGUpCursorWheel then
 			begin
@@ -231,46 +225,38 @@ if CursorOverComponent() then
 		else
 			begin
 			if FFirstScrollItem + LinesCount - 1 <> High(FItems) then
-				begin
 				FFirstScrollItem += 1;
-				end;
 			end;
 		Context.SetCursorWheel(SGNullCursorWheel);
 		end;
-	end;
-if FOpen and (not FBackLight) and (Context.CursorKeyPressed<>SGNullCursorButton) then
+	end
+else if FOpen and (((not CursorOver) and (Context.CursorKeyPressed <> SGNullCursorButton)) or (not Active) or (not Visible))  then
 	begin
-	FOpen:=False;
+	FOpen := False;
 	ClearPriority();
 	end;
-if  FOpen and CursorOver then
-	begin
+if FOpen and CursorOver and Active and Visible then
 	for i := 0 to LinesCount - 1 do
-		begin
 		if  (Context.CursorPosition(SGNowCursorPosition).y>=FRealPosition.y+FRealLocation.Height*i*FOpenTimer) and
 			(Context.CursorPosition(SGNowCursorPosition).y<=FRealPosition.y+FRealLocation.Height*(i+1)*FOpenTimer) and
-			(((FMaxLines<Length(FItems)) and
+			(((FMaxLines < Length(FItems)) and
 			(Context.CursorPosition(SGNowCursorPosition).x<=FRealPosition.x+Width-FScrollWidth)) or (FMaxLines>=Length(FItems))) and
 			FItems[i].Active then
 				begin
 				FCursorOverThisItem := FFirstScrollItem + i;
 				OverItem(FCursorOverThisItem);
-				if FClickOnOpenBox then
+				if ((Context.CursorKeyPressed=SGLeftCursorButton) and (Context.CursorKeyPressedType=SGUpKey)) then
 					begin
-					FOpen:=False;
+					FOpen := False;
 					SelectingItem(FCursorOverThisItem);
 					Context.SetCursorKey(SGNullKey, SGNullCursorButton);
-					FClickOnOpenBox:=False;
 					end;
-				Break;
+				break;
 				end
 		else
-			OverItem(ItemsCount);
-		end;
-	end
+			OverItem(ItemsCount)
 else
 	OverItem(ItemsCount);
-UpgradeTimer(FBackLight,FBackLightTimer,3,2);
 {$IFDEF SCREEN_DEBUG}
 WriteLn('TSGComboBox__UpDate() : End');
 	{$ENDIF}
@@ -278,11 +264,10 @@ end;
 
 procedure TSGComboBox.Paint();
 begin
-if not CursorOverComponent() then
+if not CursorOver then
 	FCursorOverThisItem := -1;
 if (FVisible) or (FVisibleTimer > SGZero) then
 	FSkin.PaintComboBox(Self);
-FBackLight:=False;
 inherited;
 end;
 
@@ -316,11 +301,8 @@ end;
 constructor TSGComboBox.Create();
 begin
 inherited;
-FClickOnOpenBox:=False;
 FOpenTimer:=0;
 FOpen:=False;
-FBackLight:=False;
-FBackLightTimer:=0;
 FMaxLines:=30;
 FSelectedItemIndex:=-1;
 FFirstScrollItem:=0;
