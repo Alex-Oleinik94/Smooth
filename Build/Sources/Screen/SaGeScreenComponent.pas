@@ -189,28 +189,9 @@ end;
 procedure TSGComponent.UpDateObjects();
 var
 	Component : TSGScreenCustomComponent;
-	ValueHeight : TSGScreenInt = 0;
-	ValueWidth  : TSGScreenInt = 0;
-	ValueLeft   : TSGScreenInt = 0;
-	ValueTop    : TSGScreenInt = 0;
 begin
-ValueTop    := FRealLocation.Top;
-ValueHeight := FRealLocation.Height;
-ValueWidth  := FRealLocation.Width;
-ValueLeft   := FRealLocation.Left;
 UpDateLocation(Context.ElapsedTime);
 TestCoords();
-ValueHeight := FRealLocation.Height - ValueHeight;
-ValueLeft   := FRealLocation.Left   - ValueLeft;
-ValueTop    := FRealLocation.Top    - ValueTop;
-ValueWidth  := FRealLocation.Width  - ValueWidth;
-for Component in Self do
-	begin
-	Component.RealLocation.Top    := Component.RealLocation.Top    - ValueTop;
-	Component.RealLocation.Width  := Component.RealLocation.Width  - ValueWidth;
-	Component.RealLocation.Height := Component.RealLocation.Height - ValueHeight;
-	Component.RealLocation.Left   := Component.RealLocation.Left   - ValueLeft;
-	end;
 inherited;
 end;
 
