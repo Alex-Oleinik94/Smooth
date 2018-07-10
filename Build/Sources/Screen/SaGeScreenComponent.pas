@@ -116,22 +116,15 @@ end;
 
 procedure TSGComponent.DestroySkin();
 begin
-if (FSkin <> nil) then
-	begin
-	if (FParent = nil) or ((FParent <> nil) and (FParent is TSGComponent) and ((FParent as TSGComponent).Skin <> FSkin)) then
-		SGKill(FSkin);
-	end;
+if (FSkin <> nil) and ((FParent = nil) or ((FParent <> nil) and (FParent is TSGComponent) and ((FParent as TSGComponent).Skin <> FSkin))) then
+	SGKill(FSkin);
 end;
 
 destructor TSGComponent.Destroy();
 begin
-if FDrawClass <> nil then
-	begin
-	FDrawClass.Destroy();
-	FDrawClass := nil;
-	end;
-DestroySkin();
 inherited;
+SGKill(FDrawClass);
+DestroySkin();
 end;
 
 procedure TSGComponent.CompleteChild(const VChild : TSGScreenCustomComponent);

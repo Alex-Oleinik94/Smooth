@@ -52,7 +52,28 @@ type
 		procedure Resize(); virtual;
 		end;
 
+procedure SGKill(var ContextObject : TSGContextObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var PaintableObject : TSGPaintableObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
+
+procedure SGKill(var ContextObject : TSGContextObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if ContextObject <> nil then
+	begin
+	ContextObject.Destroy();
+	ContextObject := nil;
+	end;
+end;
+
+procedure SGKill(var PaintableObject : TSGPaintableObject); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if PaintableObject <> nil then
+	begin
+	PaintableObject.Destroy();
+	PaintableObject := nil;
+	end;
+end;
 
 procedure TSGPaintableObject.Paint();
 begin
