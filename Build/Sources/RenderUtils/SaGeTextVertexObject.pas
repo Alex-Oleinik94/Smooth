@@ -107,7 +107,7 @@ if (FVertexes <> nil) then
 		HeightShift := (Abs(Vector1.y - Vector0.y) - (FTextHeight + Font.FontHeight)) * 0.5
 	else
 		HeightShift := 0;
-	Render.Translatef(Vector0.x + WidthShift, Vector0.y + HeightShift, 0);
+	Render.Translatef(Trunc(Vector0.x + WidthShift), Trunc(Vector0.y + HeightShift), 0);
 	Font.BindTexture();
 	Render.EnableClientState(SGR_VERTEX_ARRAY);
 	Render.EnableClientState(SGR_TEXTURE_COORD_ARRAY);

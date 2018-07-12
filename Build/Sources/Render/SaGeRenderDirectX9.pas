@@ -16,6 +16,7 @@ uses
 	,SaGeBaseContextInterface
 	,SaGeMatrix
 	,SaGeCommonStructs
+	,SaGeDirectX9Utils
 	
 	// System
 	,crt
@@ -257,7 +258,6 @@ function SGRDXGetD3DCOLORVALUE(const r,g,b,a:TSGSingle):D3DCOLORVALUE;inline;
 function SGRDXGetNumPrimetives(const VParam:TSGLongWord;const VSize:TSGMaxEnum):TSGMaxEnum;inline;
 function SGRDXConvertPrimetiveType(const VParam:TSGLongWord):_D3DPRIMITIVETYPE;inline;
 function SGRDXVertex3fToRGBA(const v : TSGVertex3f ):TSGLongWord;inline;
-procedure SGDX9LogAdapters(const pD3D : IDirect3D9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -266,43 +266,10 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	,SaGeBaseUtils
+	,SaGeLists
 	
 	,SysUtils
 	;
-
-var
-	AdaptersLoged : TSGBool = False;
-
-procedure SGDX9LogAdapters(const pD3D : IDirect3D9);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-var
-	AdapterCount : TSGMaxEnum;
-	i : TSGMaxEnum;
-	Adapter : TD3DAdapterIdentifier9;
-begin
-AdapterCount := pD3D.GetAdapterCount();
-SGLog.Source(['IDirect3D9: Finded ', AdapterCount, ' adapter(-s)', Iff(AdapterCount = 0, '.', ':')]);
-if AdapterCount > 0 then
-	for i := 0 to AdapterCount - 1 do
-		if pD3D.GetAdapterIdentifier(i, 0, Adapter) = D3D_OK then
-			begin
-			SGLog.Source('Adapter #' + SGStr(i) + ':', False);
-			SGLog.Source('	Driver:           ' + Adapter.Driver, False);
-			SGLog.Source('	Description:      ' + Adapter.Description, False);
-			SGLog.Source('	DeviceName:       ' + Adapter.DeviceName, False);
-{$IFDEF WIN32}
-			SGLog.Source(['	DriverVersion:    ', Adapter.DriverVersion], False);
-{$ELSE}
-			SGLog.Source(['	DriverVersionLowPart:   ', Adapter.DriverVersionLowPart], False);
-			SGLog.Source(['	DriverVersionHighPart:  ', Adapter.DriverVersionHighPart], False);
-{$ENDIF}
-			SGLog.Source(['	VendorIdentifier: ', Adapter.VendorId], False);
-			SGLog.Source(['	DeviceIdentifier: ', Adapter.DeviceId], False);
-			SGLog.Source(['	SubSysIdentifier: ', Adapter.SubSysId], False);
-			SGLog.Source(['	Revision:         ', Adapter.Revision], False);
-			SGLog.Source(['	DeviceIdentifier: ', GUIDToString(Adapter.DeviceIdentifier)], False);
-			SGLog.Source(['	WHQLLevel:        ', Adapter.WHQLLevel], False);
-			end;
-end;
 
 class function TSGRenderDirectX9.RenderName() : TSGString;
 begin
@@ -1620,11 +1587,11 @@ FNumberOfPoints+=1;
 AfterVertexProc();
 end;
 
-function TSGRenderDirectX9.CreateContext():Boolean;
+function TSGRenderDirectX9.CreateContext():TSGBoolean;
 var
 	d3dpp                 : D3DPRESENT_PARAMETERS;
 	MultiSampleType       : D3DMULTISAMPLE_TYPE;
-	MultiSampleMaxQuality : TSGLongWord;
+	MultiSampleMaxQuality : TSGUInt32;
 
 procedure FindMaxMultisample();
 var
@@ -1646,31 +1613,8 @@ var
 		D3DMULTISAMPLE_14_SAMPLES,
 		D3DMULTISAMPLE_15_SAMPLES,
 		D3DMULTISAMPLE_16_SAMPLES );
-	Index : TSGLongWord;
+	Index : TSGMaxEnum;
 	Finded : TSGBoolean = False;
-
-function D3DMULTISAMPLE_Str(const MS : D3DMULTISAMPLE_TYPE):TSGString;
-begin
-case MS of
-D3DMULTISAMPLE_NONE       : Result := 'D3DMULTISAMPLE_NONE';
-D3DMULTISAMPLE_NONMASKABLE: Result := 'D3DMULTISAMPLE_NONMASKABLE';
-D3DMULTISAMPLE_2_SAMPLES  : Result := 'D3DMULTISAMPLE_2_SAMPLES';
-D3DMULTISAMPLE_3_SAMPLES  : Result := 'D3DMULTISAMPLE_3_SAMPLES';
-D3DMULTISAMPLE_4_SAMPLES  : Result := 'D3DMULTISAMPLE_4_SAMPLES';
-D3DMULTISAMPLE_5_SAMPLES  : Result := 'D3DMULTISAMPLE_5_SAMPLES';
-D3DMULTISAMPLE_6_SAMPLES  : Result := 'D3DMULTISAMPLE_6_SAMPLES';
-D3DMULTISAMPLE_7_SAMPLES  : Result := 'D3DMULTISAMPLE_7_SAMPLES';
-D3DMULTISAMPLE_8_SAMPLES  : Result := 'D3DMULTISAMPLE_8_SAMPLES';
-D3DMULTISAMPLE_9_SAMPLES  : Result := 'D3DMULTISAMPLE_9_SAMPLES';
-D3DMULTISAMPLE_10_SAMPLES : Result := 'D3DMULTISAMPLE_10_SAMPLES';
-D3DMULTISAMPLE_11_SAMPLES : Result := 'D3DMULTISAMPLE_11_SAMPLES';
-D3DMULTISAMPLE_12_SAMPLES : Result := 'D3DMULTISAMPLE_12_SAMPLES';
-D3DMULTISAMPLE_13_SAMPLES : Result := 'D3DMULTISAMPLE_13_SAMPLES';
-D3DMULTISAMPLE_14_SAMPLES : Result := 'D3DMULTISAMPLE_14_SAMPLES';
-D3DMULTISAMPLE_15_SAMPLES : Result := 'D3DMULTISAMPLE_15_SAMPLES';
-D3DMULTISAMPLE_16_SAMPLES : Result := 'D3DMULTISAMPLE_16_SAMPLES';
-end;
-end;
 
 begin
 for Index := High(Samples) downto Low(Samples) do
@@ -1686,7 +1630,7 @@ for Index := High(Samples) downto Low(Samples) do
 		begin
 		Finded := True;
 		MultiSampleType := Samples[Index];
-		SGLog.Source(['TSGRenderDirectX9__CreateContext_FindMaxMultisample : ',D3DMULTISAMPLE_Str(MultiSampleType),', MaxQuality = ',MultiSampleMaxQuality,'']);
+		SGLog.Source(['TSGRenderDirectX9__CreateContext_FindMaxMultisample : ', SGD3D9StrMULTISAMPLE(MultiSampleType), ', MaxQuality = ', MultiSampleMaxQuality, '.']);
 		break;
 		end;
 	end;
@@ -1697,80 +1641,40 @@ if not Finded then
 	end;
 end;
 
-var
-	D3DFMT_List : array[0..7] of TSGMaxEnum = (
-		D3DFMT_UNKNOWN,
-		D3DFMT_D15S1,
-		D3DFMT_D16_LOCKABLE,
-		D3DFMT_D16,
-		D3DFMT_D24X8,
-		D3DFMT_D24S8,
-		D3DFMT_D24X4S4,
-		D3DFMT_D32
-		);
-
-function D3DFMT_Str(const FMT : TSGMaxEnum) : TSGString;
-begin
-case FMT of
-D3DFMT_UNKNOWN       : Result := 'D3DFMT_UNKNOWN';
-D3DFMT_D15S1         : Result := 'D3DFMT_D15S1';
-D3DFMT_D16_LOCKABLE  : Result := 'D3DFMT_D16_LOCKABLE';
-D3DFMT_D16           : Result := 'D3DFMT_D16';
-D3DFMT_D24X8         : Result := 'D3DFMT_D24X8';
-D3DFMT_D24S8         : Result := 'D3DFMT_D24S8';
-D3DFMT_D24X4S4       : Result := 'D3DFMT_D24X4S4';
-D3DFMT_D32           : Result := 'D3DFMT_D32';
-end;
-end;
-
-procedure LogDirectXLastError(const Error : TSGUInt32);
-
-function StrErrorCodeHex(const ErrorCode : TSGUInt32) : TSGString;
-var
-	Index : TSGByte;
-begin
-Result := '0x';
-for Index := SizeOf(TSGUInt32) - 1 downto 0 do
-	Result += SGStrByteHex(PSGByte(@ErrorCode)[Index], True);
-end;
-
-begin
-SGLogMakeSignificant();
-SGLog.Source(['TSGRenderDirectX9: DirectX Error:']);
-SGLog.Source(['    ID (dec): ',Error]);
-SGLog.Source(['    ID (hex): ',StrErrorCodeHex(Error)]);
-SGLog.Source(['    Discription: ',SGPCharToString(DXGetErrorString9(Error))]);
-end;
-
 procedure TryCreateD3DEx(const Version : TSGMaxEnum);
-
-function StrSDKVersion(const Version : TSGMaxEnum) : TSGString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
-begin
-case Version of
-D3D9b_SDK_VERSION : Result := 'D3D9b_SDK_VERSION';
-D3D_SDK_VERSION   : Result := 'D3D_SDK_VERSION';
-else Result := '';
-end;
-end;
-
 var
-	DirectXErrorCode : TSGMaxEnum = 0;
+	DirectXErrorCode : HRESULT = 0;
 begin
 if pD3DEx <> nil then
 	Exit;
 DirectXErrorCode := Direct3DCreate9Ex(Version, pD3DEx);
 if (DirectXErrorCode = D3D_OK) and (pD3DEx <> nil) then
 	begin
-	SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension context with sdk version "',StrSDKVersion(Version),'".']);
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension context with sdk version ',SGD3D9StrSDKVersion(Version),'.']);
 	pD3D := pD3DEx;
 	end
 else
 	begin
 	SGLogMakeSignificant();
-	SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create extension context with sdk version "',StrSDKVersion(Version),'".']);
-	LogDirectXLastError(DirectXErrorCode);
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create extension context with sdk version ',SGD3D9StrSDKVersion(Version),'.']);
+	SGD3D9LogError(DirectXErrorCode);
 	end;
 end;
+
+var
+	D3DFMT_List : array[0..11] of TSGUInt32 = (
+		D3DFMT_UNKNOWN,
+		D3DFMT_S8_LOCKABLE,
+		D3DFMT_D15S1,
+		D3DFMT_D16_LOCKABLE,
+		D3DFMT_D16,
+		D3DFMT_D24X8,
+		D3DFMT_D24S8,
+		D3DFMT_D24X4S4,
+		D3DFMT_D32,
+		D3DFMT_D32F_LOCKABLE,
+		D3DFMT_D24FS8,
+		D3DFMT_D32_LOCKABLE);
 
 procedure FillPresendParameters(var d3dpp : D3DPRESENT_PARAMETERS);
 begin
@@ -1779,8 +1683,8 @@ d3dpp.Windowed               := True;
 d3dpp.SwapEffect             := D3DSWAPEFFECT_DISCARD;
 d3dpp.hDeviceWindow          := TSGMaxEnum(Context.Window);
 d3dpp.BackBufferFormat       := D3DFMT_X8R8G8B8;
-d3dpp.BackBufferWidth        := Context.Width;
-d3dpp.BackBufferHeight       := Context.Height;
+d3dpp.BackBufferWidth        := Context.ClientWidth;
+d3dpp.BackBufferHeight       := Context.ClientHeight;
 d3dpp.EnableAutoDepthStencil := True;
 d3dpp.AutoDepthStencilFormat := D3DFMT_D24S8;
 d3dpp.PresentationInterval   := D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -1788,12 +1692,11 @@ d3dpp.MultiSampleType        := MultiSampleType;
 d3dpp.MultiSampleQuality     := 0;
 end;
 
-var
-	DirectXErrorCode   : TSGUInt32 = 0;
-
 procedure TryCreateDevice();
 var
 	Index : TSGByte;
+	DirectXErrorCode   : HRESULT = 0;
+	FmtErrList : TSGStringList = nil;
 begin
 for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
 	begin
@@ -1801,23 +1704,26 @@ for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
 	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
 	
 	DirectXErrorCode :=  pD3D.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
-			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, pDevice);
+			D3DCREATE_HARDWARE_VERTEXPROCESSING, @d3dpp, pDevice);
 	
 	if( DirectXErrorCode <> D3D_OK) then
-		begin
-		{$IFDEF RENDER_DX9_DEBUG}
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with: DepthFormat = ', D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
-		LogDirectXLastError(DirectXErrorCode);
-		{$ENDIF}
-		end
+		FmtErrList += SGD3D9StrDepthFormat(d3dpp.AutoDepthStencilFormat) + ' : ' + SGD3D9StrErrorCodeHex(DirectXErrorCode)
 	else
 		break;
+	end;
+if (FmtErrList <> nil) then
+	begin
+	SGLogMakeSignificant();
+	TSGLog.Source(FmtErrList, 'Direct3D9 : Device creating errors');
+	SetLength(FmtErrList, 0);
 	end;
 end;
 
 procedure TryCreateDeviceEx();
 var
 	Index : TSGByte;
+	DirectXErrorCode : HRESULT = 0;
+	FmtErrList : TSGStringList = nil;
 begin
 if pD3DEx = nil then
 	exit;
@@ -1826,24 +1732,27 @@ for Index := High(D3DFMT_List) downto Low(D3DFMT_List) do
 	FillPresendParameters(d3dpp);
 	d3dpp.AutoDepthStencilFormat := D3DFMT_List[Index];
 	
-	DirectXErrorCode :=  pD3DEx.CreateDeviceEx( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
-			D3DCREATE_SOFTWARE_VERTEXPROCESSING, @d3dpp, nil, pDeviceEx);
+	DirectXErrorCode :=  pD3DEx.CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, TSGMaxEnum(Context.Window),
+			D3DCREATE_HARDWARE_VERTEXPROCESSING, @d3dpp, nil, pDeviceEx);
 	
 	if(DirectXErrorCode <> D3D_OK) then
 		begin
 		pDeviceEx := nil;
 		pDevice := nil;
-		{$IFDEF RENDER_DX9_DEBUG}
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with: DepthFormat = ', D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
-		LogDirectXLastError(DirectXErrorCode);
-		{$ENDIF}
+		FmtErrList += SGD3D9StrDepthFormat(d3dpp.AutoDepthStencilFormat) + ' : ' + SGD3D9StrErrorCodeHex(DirectXErrorCode);
 		end
 	else
 		begin
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension device.']);
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Created extension device; Depth format = ', SGD3D9StrDepthFormat(d3dpp.AutoDepthStencilFormat), '.']);
 		pDevice := pDeviceEx;
 		break;
 		end;
+	end;
+if (FmtErrList <> nil) then
+	begin
+	SGLogMakeSignificant();
+	TSGLog.Source(FmtErrList, 'Direct3D9 : Extension device creating errors');
+	SetLength(FmtErrList, 0);
 	end;
 end;
 
@@ -1853,17 +1762,15 @@ if (pD3D = nil) then
 	begin
 	pD3DEx := nil;
 	TryCreateD3DEx(D3D9b_SDK_VERSION);
-	if pD3DEx = nil then
-		TryCreateD3DEx(D3D_SDK_VERSION);
 	if pD3D = nil then
 		pD3D := Direct3DCreate9(D3D_SDK_VERSION);
-	SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3D9',SGStringIf(pD3DEx <> nil,'Ex'),'="',SGAddrStr(pD3D),'"']);
+	SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3D9', SGStringIf(pD3DEx <> nil,'Ex'), ' = ', SGAddrStr(pD3D), '.']);
 	if pD3D = nil then
 		exit
-	else if not AdaptersLoged then
+	else if not SGD3D9AdaptersLoged then
 		begin
-		SGDX9LogAdapters(pD3D);
-		AdaptersLoged := True;
+		SGD3D9LogAdapters(pD3D);
+		SGD3D9AdaptersLoged := True;
 		end;
 	end;
 if pDevice = nil then
@@ -1883,16 +1790,13 @@ if pDevice = nil then
 		TryCreateDevice();
 	if pDevice <> nil then
 		begin
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3DDevice9',SGStringIf(pDeviceEx <> nil, 'Ex'),'="',SGAddrStr(pDevice),'", DepthFormat = ',D3DFMT_Str(d3dpp.AutoDepthStencilFormat)]);
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: IDirect3DDevice9', SGStringIf(pDeviceEx <> nil, 'Ex'), ' = ',SGAddrStr(pDevice), ', DepthFormat = ',SGD3D9StrDepthFormat(d3dpp.AutoDepthStencilFormat)]);
 		Result := True;
 		end
 	else
 		begin
 		SGLogMakeSignificant();
-		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with anything params, WindowHandle="',SGAddrStr(Context.Window),'".']);
-		{$IFNDEF RENDER_DX9_DEBUG}
-		LogDirectXLastError(DirectXErrorCode);
-		{$ENDIF}
+		SGLog.Source(['TSGRenderDirectX9__CreateContext: Failed create device with anything params, WindowHandle = ',SGAddrStr(Context.Window), '.']);
 		end;
 	end
 else
