@@ -452,6 +452,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	Changet := True;
 	
 	FNewFunctionButton.Active := True;
+	Button.Parent.MarkForDestroy();
 	end;
 end;
 
