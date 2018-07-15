@@ -19,6 +19,7 @@ type
 		procedure PaintLabel(constref VLabel : ISGLabel);
 		procedure PaintEdit(constref Edit : ISGEdit);
 		procedure PaintProgressBar(constref ProgressBar : ISGProgressBar);
+		procedure PaintForm(constref Form : ISGForm);
 		end;
 
 implementation

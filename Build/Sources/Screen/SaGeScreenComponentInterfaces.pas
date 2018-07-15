@@ -141,6 +141,10 @@ type
 		property Color         : TSGScreenSkinFrameColor read GetColor;
 		property IsColorStatic : TSGBool                 read GetIsColorStatic;
 		end;
+	
+	ISGForm = interface(ISGComponent)
+		['{214e57d5-4aea-4410-a7e6-c5d2bcaf170d}']
+		end;
 
 implementation
 

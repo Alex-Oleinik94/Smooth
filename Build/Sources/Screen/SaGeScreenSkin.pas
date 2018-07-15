@@ -77,6 +77,7 @@ type
 		procedure PaintLabel(constref VLabel : ISGLabel); virtual;
 		procedure PaintEdit(constref Edit : ISGEdit); virtual;
 		procedure PaintProgressBar(constref ProgressBar : ISGProgressBar); virtual;
+		procedure PaintForm(constref Form : ISGForm); virtual;
 		end;
 	TSGScreenSkinClass = class of TSGScreenSkin;
 const
@@ -386,13 +387,8 @@ Result := 'TSGScreenSkin';
 end;
 
 procedure TSGScreenSkin.PaintQuad(const Location : TSGComponentLocation; const LinesColor, QuadColor : TSGVertex4f; const ViewingLines : TSGBool = True; const ViewingQuad : TSGBool = True;const Radius : TSGFloat = 5);
-var
-	Position, PositionAndSize : TSGRectangleWithRoundedCornersVector2;
 begin
-Position.Import(Location.Position.x, Location.Position.y);
-PositionAndSize.Import(Location.Size.x, Location.Size.y);
-PositionAndSize += Position;
-SGRoundQuad(Render, Position, PositionAndSize, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
+SGRoundQuad(Render, Location.FloatPosition, Location.FloatPositionAndSize, Radius, 10, LinesColor, QuadColor, ViewingLines, ViewingQuad);
 end;
 
 procedure TSGScreenSkin.PaintText(const Text : TSGString; const Location : TSGComponentLocation; const Color : TSGColor4f; const WidthCentered : TSGBoolean = True; const HeightCentered : TSGBoolean = True);
@@ -692,6 +688,11 @@ if Edit.TextTypeAssigned then
 	NormalSecond := TextCompliteTimer  * GreenColor + (1 - TextCompliteTimer) * RedColor;
 	end;
 
+if (not Active) or (ActiveTimer < 1 - SGZero) then
+	PaintQuad(Location,
+		FColors.FDisabled.FFirst.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.54,
+		FColors.FDisabled.FSecond.WithAlpha(0.7*VisibleTimer*(1-ActiveTimer))*0.8,
+		True, True, 2);
 if  (ActiveTimer>SGZero) and 
 	(VisibleTimer>SGZero) then
 	PaintQuad(Location,
@@ -723,7 +724,7 @@ var
 	Radius : TSGFloat;
 begin
 Radius := 5;
-Location := ProgressBar.GetLocation();
+Location := ProgressBar.Location;
 Location2 := Location;
 Location2.SizeX := Round(Location2.Size.X * ProgressBar.Progress);
 
@@ -755,6 +756,42 @@ if ProgressBar.ViewProgress then
 if FontReady and ProgressBar.ViewCaption then 
 	PaintText(SGStringIf(ProgressBar.ViewCaption, ProgressBar.Caption + ' ') + SGFloatToString(100 * ProgressBar.Progress , 2) + '%', 
 		Location, TSGVector4f.Create(1, 1, 1, VisibleTimer));
+end;
+
+procedure TSGScreenSkin.PaintForm(constref Form : ISGForm);
+var
+	Location, ChildLocation, TextLocation : TSGComponentLocation;
+	Borders : TSGComponentBordersSize;
+	Active, Visible : TSGBool;
+	ActiveTimer, VisibleTimer : TSGScreenTimer;
+	FrameColor : TSGScreenSkinFrameColor;
+begin
+Location := Form.Location;
+ChildLocation := Form.ChildLocation;
+Borders := Form.BordersSize;
+TextLocation.Position := Location.Position;
+TextLocation.Width := Location.Width;
+TextLocation.Height := Borders.Top;
+Active := Form.Active;
+Visible := Form.Visible;
+VisibleTimer := Form.VisibleTimer;
+ActiveTimer := Form.ActiveTimer;
+FrameColor := FColors.FNormal;
+
+if (VisibleTimer > SGZero) and (ActiveTimer > SGZero) then
+	SGRoundWindowQuad(Render,
+		Location.FloatPosition, Location.FloatPositionAndSize,
+		ChildLocation.FloatPosition, ChildLocation.FloatPositionAndSize,
+		Borders.Left, Borders.Left,
+		10,
+		FrameColor.FFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),
+		FrameColor.FSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3,
+		True,
+		FrameColor.FFirst .WithAlpha(0.4 * VisibleTimer * ActiveTimer),
+		FrameColor.FSecond.WithAlpha(0.3 * VisibleTimer * ActiveTimer) * 1.3);
+
+if FontReady and (VisibleTimer > SGZero) then 
+	PaintText(Form.Caption, TextLocation, TSGVector4f.Create(1, 1, 1, VisibleTimer));
 end;
 
 end.

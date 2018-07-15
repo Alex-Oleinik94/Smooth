@@ -8,10 +8,10 @@ Initially, [SaGe] was conceived as light cross-platform 3D [game engine] that us
  
  * Platforms:
    - [Microsoft Windows] (32 and 64 bit)
-   - Linux (32 and 64 bit)
+   - [Linux] (32 and 64 bit)
    - [Android] (ARM and i386)
  * Renders:
-   - [OpenGL], GLES for [Android], [FreeGLUT]/[GLUT]
+   - [OpenGL], [GLES] for [Android], [FreeGLUT]/[GLUT]
    - [DirectX] 8
    - [DirectX] 9
  * [NVidia API] inclusive DRS APIs
@@ -56,3 +56,5 @@ Initially, [SaGe] was conceived as light cross-platform 3D [game engine] that us
 [Microsoft Windows]: http://www.microsoft.com/en-us/windows "Microsoft Windows Homepage"
 [Mac OS]: https://www.apple.com/macos "Mac OS Homepage"
 [PCap]: http://en.wikipedia.org/wiki/Pcap "PCap - Wiki"
+[GLES]: http://www.khronos.org/opengles "OpenGL ES Homepage"
+[Linux]: http://en.wikipedia.org/wiki/Linux "Linux - Wiki"

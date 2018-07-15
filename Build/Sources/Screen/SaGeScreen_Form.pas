@@ -10,21 +10,22 @@ uses
 	,SaGeScreen
 	,SaGeScreenComponent
 	,SaGeImage
+	,SaGeScreenComponentInterfaces
 	;
 
 type
 	PSGForm = ^ TSGForm;
-	TSGForm = class(TSGComponent)
+	TSGForm = class(TSGComponent, ISGForm)
 			public
-		constructor Create;override;
-		destructor Destroy;override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
 			public
 		FButtonsType : SGFrameButtonsType;
 		FIcon        : TSGImage;
-		FRePlace     : Boolean;
-		procedure UpDate();override;
-		function CursorOverComponentTitle():boolean;
+		FRePlace     : TSGBoolean;
+		procedure UpDate(); override;
+		function CursorOverComponentTitle() : TSGBoolean;
 			public
 		procedure Paint(); override;
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);override;
@@ -47,7 +48,7 @@ end;
 
 procedure TSGForm.UpDate();
 var
-	ParentBoundsSize : TSGComponentBoundsSize;
+	ParentBordersSize : TSGComponentBordersSize;
 	ParentRealPosition : TSGComponentLocationVectorInt;
 	ParentLocation : TSGComponentLocation;
 	CursorPosition : TSGVector2int32;
@@ -63,14 +64,14 @@ if FRePlace then
 		begin
 		if FParent<>nil then
 			begin
-			ParentBoundsSize := FParent.BoundsSize;
+			ParentBordersSize := FParent.BordersSize;
 			ParentRealPosition := FParent.RealPosition;
 			ParentLocation := FParent.Location;
 			CursorPosition := Context.CursorPosition(SGNowCursorPosition);
 			if  (CursorPosition.x>ParentRealPosition.x) and 
-				(CursorPosition.x<ParentRealPosition.x+ParentBoundsSize.Left+10) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentBoundsSize.Top+ParentBoundsSize.Bottom+ParentLocation.Height) then
+				(CursorPosition.x<ParentRealPosition.x+ParentBordersSize.Left+10) and 
+				(CursorPosition.y>ParentRealPosition.y+ParentBordersSize.Top) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentBordersSize.Top+ParentBordersSize.Bottom+ParentLocation.Height) then
 					begin
 					if FAlign<>SGAlignNone then
 						DestroyAlign;
@@ -79,16 +80,16 @@ if FRePlace then
 			else if  (CursorPosition.x>ParentRealPosition.x) and 
 				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
 				(CursorPosition.y>ParentRealPosition.y) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentBoundsSize.Top+10) then
+				(CursorPosition.y<ParentRealPosition.y+ParentBordersSize.Top+10) then
 					begin
 					if FAlign<>SGAlignNone then
 						DestroyAlign;
 					FAlign:=SGAlignTop;
 					end
-			else if  (CursorPosition.x>ParentRealPosition.x+ParentLocation.Width-ParentBoundsSize.Right-10) and 
+			else if  (CursorPosition.x>ParentRealPosition.x+ParentLocation.Width-ParentBordersSize.Right-10) and 
 				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentBoundsSize.Top) and 
-				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height-ParentBoundsSize.Bottom) then
+				(CursorPosition.y>ParentRealPosition.y+ParentBordersSize.Top) and 
+				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height-ParentBordersSize.Bottom) then
 					begin
 					if FAlign<>SGAlignNone then
 						DestroyAlign;
@@ -96,7 +97,7 @@ if FRePlace then
 					end
 			else if  (CursorPosition.x>ParentRealPosition.x) and 
 				(CursorPosition.x<ParentRealPosition.x+ParentLocation.Width) and 
-				(CursorPosition.y>ParentRealPosition.y+ParentLocation.Height-ParentBoundsSize.Bottom-10) and 
+				(CursorPosition.y>ParentRealPosition.y+ParentLocation.Height-ParentBordersSize.Bottom-10) and 
 				(CursorPosition.y<ParentRealPosition.y+ParentLocation.Height) then
 					begin
 					if FAlign<>SGAlignNone then
@@ -124,36 +125,7 @@ end;
 procedure TSGForm.Paint();
 begin
 if (FVisible) or (FVisibleTimer>SGZero) then
-	begin
-	if FVisibleTimer>SGZero then
-		begin
-		SGRoundWindowQuad(Render,
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_BOTTOM],SG_VERTEX_FOR_CHILDREN)),
-			Abs(
-				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)) -
-				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
-			Abs(
-				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_CHILDREN)) -
-				SGPoint2int32ToVertex3f(GetVertex([SGS_BOTTOM,SGS_RIGHT],SG_VERTEX_FOR_PARENT))),
-			10,
-			SGVertex4fImport(
-				0,1,1,0.5*FVisibleTimer),
-			SGVertex4fImport(
-				1,1,1,0.3*FVisibleTimer),
-			True,
-			SGVertex4fImport(
-				0,1,1,0.5*FVisibleTimer)*1.3,
-			SGVertex4fImport(
-				1,1,1,0.3*FVisibleTimer)*1.3);
-		Render.Color4f(1,1,1,FVisibleTimer);
-		Skin.Font.DrawFontFromTwoVertex2f(FCaption,
-			SGPoint2int32ToVertex3f(GetVertex([SGS_LEFT,SGS_TOP],SG_VERTEX_FOR_PARENT)),
-			SGPoint2int32ToVertex3f(GetVertex([SGS_RIGHT,SGS_TOP],SG_VERTEX_FOR_CHILDREN)));
-		end;
-	end;
+	FSkin.PaintForm(Self);
 inherited;
 end;
 

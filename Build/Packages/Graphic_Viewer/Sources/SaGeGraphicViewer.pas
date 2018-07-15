@@ -432,6 +432,12 @@ end;
 //======================================================================================
 //======================================================================================
 
+procedure TSGGraphViewer_FormClose(Button:TSGScreenComponent);
+begin
+TSGGraphViewer(Button.FUserPointer1).FNewFunctionButton.Active := True;
+Button.Parent.MarkForDestroy();
+end;
+
 procedure GoNewGrafic2(Button:TSGScreenComponent);
 var
 	EulatuonEdit2 : TSGScreenEdit = nil;
@@ -444,10 +450,7 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	View.Import(-15,-15*(Render.Height/Render.Width),15,15*(Render.Height/Render.Width));
 	MathGraphic.Construct(View.x1,View.x2);
 	Changet := True;
-	EulatuonEdit2.Caption:='';
 	
-	Button.Parent.Active := False;
-	Button.Parent.Visible := False;
 	FNewFunctionButton.Active := True;
 	end;
 end;
@@ -503,6 +506,8 @@ with TSGGraphViewer(Button.FUserPointer1) do
 	Form.LastChild.Visible := True;
 	Form.LastChild.Active  := True;
 	Form.LastChild.Caption := 'Отмена';
+	Form.LastChild.FUserPointer1 := Button.FUserPointer1;
+	(Form.LastChild as TSGScreenButton).OnChange := TSGScreenComponentProcedure(@TSGGraphViewer_FormClose);
 	end;
 end;
 

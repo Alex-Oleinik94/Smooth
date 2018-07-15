@@ -78,7 +78,7 @@ type
 	TSGScreenInt = TSGAreaInt;
 	TSGScreenInterfaceData = TSGPointer;
 	
-	TSGComponentBoundsSize = object
+	TSGComponentBordersSize = object
 			protected
 		FLeftSize   : TSGScreenInt;
 		FTopSize    : TSGScreenInt;
@@ -118,10 +118,12 @@ type
 		function GetRight()  : TSGScreenInt;
 		function GetBottom() : TSGScreenInt;
 
+		function GetBordersSize() : TSGComponentBordersSize;
 		function GetScreenWidth()  : TSGScreenInt;
 		function GetScreenHeight() : TSGScreenInt;
 		function GetLocation() : TSGComponentLocation;
-
+		function GetChildLocation() : TSGComponentLocation;
+		
 		procedure SetBordersSize(const _L, _T, _R, _B : TSGScreenInt);
 		procedure SetBounds(const NewLeft,NewTop,NewWidth,NewHeight:TSGScreenInt);
 		procedure SetMiddleBounds(const NewWidth,NewHeight:TSGScreenInt);
@@ -174,6 +176,9 @@ type
 		property Visible : TSGBoolean read GetVisible;
 		property VisibleTimer : TSGScreenTimer read GetVisibleTimer;
 		property ActiveTimer : TSGScreenTimer read GetActiveTimer;
+		property BordersSize : TSGComponentBordersSize read GetBordersSize;
+		property ChildLocation : TSGComponentLocation read GetChildLocation;
+		property Location : TSGComponentLocation read GetLocation;
 		end;
 
 	ISGComponent = interface(ISGCustomComponent)

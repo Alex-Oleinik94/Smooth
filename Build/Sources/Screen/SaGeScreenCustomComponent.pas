@@ -61,7 +61,7 @@ type
 		FRealLocation : TSGComponentLocation;
 		FDefaultLocation : TSGComponentLocation;
 		FRealPosition : TSGComponentLocationVectorInt;
-		FBordersSize : TSGComponentBoundsSize;
+		FBordersSize : TSGComponentBordersSize;
 		FUnLimited : TSGBoolean;
 		FParent    : TSGScreenCustomComponent;
 		
@@ -80,10 +80,12 @@ type
 		function  GetTop() : TSGAreaInt;virtual;
 		procedure SetLeft(const VLeft : TSGAreaInt);virtual;
 		procedure SetTop(const VTop : TSGAreaInt);virtual;
-
-		function GetScreenWidth()  : TSGScreenInt;virtual;
-		function GetScreenHeight() : TSGScreenInt;virtual;
-		function GetLocation() : TSGComponentLocation;virtual;
+		
+		function GetScreenWidth()  : TSGScreenInt; virtual;
+		function GetScreenHeight() : TSGScreenInt; virtual;
+		function GetLocation() : TSGComponentLocation; virtual;
+		function GetChildLocation() : TSGComponentLocation; virtual;
+		function GetBordersSize() : TSGComponentBordersSize; virtual;
 		
 		procedure UpDateLocation(const ElapsedTime : TSGTimerInt);
 		function UpDateValue(var RealObj, Obj : TSGComponentLocationInt; const ElapsedTime : TSGTimerInt) : TSGComponentLocationInt;
@@ -100,9 +102,10 @@ type
 		property ScreenWidth  : TSGScreenInt read GetScreenWidth;
 		property ScreenHeight : TSGScreenInt read GetScreenHeight;
 		property UnLimited    : TSGBoolean   read FUnLimited write FUnLimited;
-		property BoundsSize   : TSGComponentBoundsSize read FBordersSize;
+		property BordersSize  : TSGComponentBordersSize read GetBordersSize;
 		property RealPosition : TSGComponentLocationVectorInt read FRealPosition;
 		property Location     : TSGComponentLocation read GetLocation;
+		property ChildLocation: TSGComponentLocation read GetChildLocation;
 		property RealLocation : TSGComponentLocation read FRealLocation write FRealLocation;
 			public
 		procedure BoundsMakeReal();virtual;
@@ -340,12 +343,29 @@ begin
 FLocation.Top := VTop;
 end;
 
+function TSGScreenCustomComponent.GetBordersSize() : TSGComponentBordersSize;
+begin
+Result := FBordersSize;
+end;
+
+function TSGScreenCustomComponent.GetChildLocation() : TSGComponentLocation;
+var
+	Position, Size : TSGVector2int32;
+begin
+Position := GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_CHILDREN);
+Size := GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_CHILDREN);
+Size -= Position;
+Result.Import(
+	TSGComponentLocationVectorInt.Create(Position.x, Position.y),
+	TSGComponentLocationVectorInt.Create(Size.x, Size.y));
+end;
+
 function TSGScreenCustomComponent.GetLocation() : TSGComponentLocation;
 var
 	Position, Size : TSGVector2int32;
 begin
-Position := GetVertex([SGS_LEFT,SGS_TOP], SG_VERTEX_FOR_PARENT);
-Size := GetVertex([SGS_RIGHT,SGS_BOTTOM], SG_VERTEX_FOR_PARENT);
+Position := GetVertex([SGS_LEFT, SGS_TOP], SG_VERTEX_FOR_PARENT);
+Size := GetVertex([SGS_RIGHT, SGS_BOTTOM], SG_VERTEX_FOR_PARENT);
 Size -= Position;
 Result.Import(
 	TSGComponentLocationVectorInt.Create(Position.x, Position.y),
