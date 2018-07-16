@@ -4,7 +4,7 @@ unit SaGeImagePng;
 
 interface
 
-function SupporedPNG() : Boolean;
+function SupportedPNG() : Boolean;
 
 implementation
 
@@ -22,11 +22,11 @@ uses
 	,SaGeDllManager
 	;
 
-function SupporedPNG() : Boolean;
+function SupportedPNG() : Boolean;
 begin
-Result := DllManager.Suppored('zlib');
+Result := DllManager.Supported('zlib');
 if Result then
-	Result := DllManager.Suppored('png');
+	Result := DllManager.Supported('png');
 end;
 
 procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;

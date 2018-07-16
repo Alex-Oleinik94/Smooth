@@ -44,6 +44,8 @@ type
 		destructor Destroy();override;
 		procedure Paint();override;
 		class function ClassName():TSGString;override;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
+			public
 		procedure KeyControl();
 		function GetVertexShaderSource():TSGString;
 		function GetFragmentShaderSource(const VTexturesCount : TSGLongWord):TSGString;
@@ -227,7 +229,7 @@ FM100Button := nil;
 FFont := nil;
 FCountLabel := nil;
 
-if Render.SupporedShaders() then
+if Render.SupportedShaders() then
 	begin
 	FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 	FFont.SetContext(Context);
@@ -362,6 +364,11 @@ if FFPS <> nil then
 inherited;
 end;
 
+class function TSGExample13.Supported(const _Context : ISGContext) : TSGBoolean;
+begin
+Result := _Context.Render.SupportedShaders();
+end;
+
 procedure TSGExample13.Paint();
 const
 	WarningString1 : String = '¬ы не сможете просмотреть это пример!';
@@ -370,7 +377,7 @@ var
 	VStringLength : TSGLongWord;
 	i : LongWord;
 begin
-if Render.SupporedShaders() then
+if Render.SupportedShaders() then
 	begin
 	FCamera.CallAction();
 	FRotateAngle += Context.ElapsedTime/10;

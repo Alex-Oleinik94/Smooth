@@ -379,7 +379,7 @@ if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	if FObject.NumMeshs<>0 then
 		for i:=0 to FObject.NumMeshs-1 do
 			AddingTriangles(FObject.Meshs^[i]^);
-	if Render.SupporedGraphicalBuffers() then
+	if Render.SupportedGraphicalBuffers() then
 		FMesh.LoadToVBO();
 	end;
 end;

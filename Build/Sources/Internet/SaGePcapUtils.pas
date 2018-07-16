@@ -104,7 +104,7 @@ var
 	Header : TSGPcapPacketHeader;
 begin
 Result := False;
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	SGLog.Source(['Ќевозможно использовать библиотеку PCAP!']);
 	exit;
@@ -122,7 +122,7 @@ end;
 function SGPcapEndlessLoop(const Handle : TSGPcapDeviceHandle; const Handler : TSGPcapHandler; const UserData : TSGPointer = nil) : TSGInt32;
 begin
 Result := 0;
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	SGLog.Source(['Ќевозможно использовать библиотеку PCAP!']);
 	exit;
@@ -178,7 +178,7 @@ begin
 Result := '';
 if AdapterName <> '' then
 	begin
-	if not DllManager.Suppored('pcap') then
+	if not DllManager.Supported('pcap') then
 		begin
 		SGLog.Source(['Ќевозможно использовать библиотеку PCAP!']);
 		exit;
@@ -227,7 +227,7 @@ var
 	Index : TSGMaxEnum = 0;
 begin
 Result := nil;
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	SGLog.Source(['Ќевозможно использовать библиотеку PCAP!']);
 	exit;
@@ -320,7 +320,7 @@ var
 	ReturnedValue : TSGInt32 = 0;
 begin
 Result := 0;
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	SGLog.Source(['Ќевозможно использовать библиотеку PCAP!']);
 	exit;
@@ -420,7 +420,7 @@ var
 begin
 FillChar(Result, SizeOf(Result), 0);
 
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	{$IFDEF PCAP_TEST}
 	SGHint(['Ќевозможно использовать библиотеку PCAP!']);
@@ -500,7 +500,7 @@ var
 	Device : TSGPcapDevice;
 begin
 Result := False;
-if not DllManager.Suppored('pcap') then
+if not DllManager.Supported('pcap') then
 	begin
 	{$IFDEF PCAP_TEST}
 	SGHint(['Ќевозможно использовать библиотеку PCAP!']);

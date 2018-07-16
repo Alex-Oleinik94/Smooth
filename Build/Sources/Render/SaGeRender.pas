@@ -22,7 +22,7 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 		function GetRenderType():TSGRenderType; virtual;
-		class function Suppored() : TSGBoolean; virtual;
+		class function Supported() : TSGBoolean; virtual;
 		class function RenderName() : TSGString; virtual;
 			protected
 		function GetWidth() : TSGAreaInt;virtual;
@@ -48,8 +48,8 @@ type
 		procedure Viewport(const a,b,c,d : TSGAreaInt);virtual;abstract;
 		procedure Init();virtual;abstract;
 		procedure Kill();virtual;abstract;
-		function SupporedGraphicalBuffers() : TSGBoolean; virtual;
-		function SupporedMemoryBuffers() : TSGBoolean; virtual;
+		function SupportedGraphicalBuffers() : TSGBoolean; virtual;
+		function SupportedMemoryBuffers() : TSGBoolean; virtual;
 		procedure SwapBuffers();virtual;abstract;
 		procedure LockResources();virtual;
 		procedure UnLockResources();virtual;
@@ -125,7 +125,7 @@ type
 			{$ENDIF}
 
 			(* Shaders *)
-		function SupporedShaders() : TSGBoolean;virtual;abstract;
+		function SupportedShaders() : TSGBoolean;virtual;abstract;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;virtual;abstract;
 		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);virtual;abstract;
 		procedure CompileShader(const VShader : TSGLongWord);virtual;abstract;
@@ -148,7 +148,7 @@ type
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);virtual;abstract;
 
-		function SupporedDepthTextures():TSGBoolean;virtual;
+		function SupportedDepthTextures():TSGBoolean;virtual;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);virtual;abstract;
 		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); virtual;abstract;
 		procedure DrawBuffer(const VType : TSGCardinal);virtual;abstract;
@@ -201,14 +201,14 @@ end;
 function TSGCompatibleRender():TSGRenderClass;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := nil;
-if TSGRenderOpenGL.Suppored then
+if TSGRenderOpenGL.Supported then
 	Result := TSGRenderOpenGL;
 {$IFDEF MSWINDOWS}
-if (Result = nil) and (TSGRenderDirectX12.Suppored) then
+if (Result = nil) and (TSGRenderDirectX12.Supported) then
 	Result := TSGRenderDirectX12;
-if (Result = nil) and (TSGRenderDirectX9.Suppored) then
+if (Result = nil) and (TSGRenderDirectX9.Supported) then
 	Result := TSGRenderDirectX9;
-if (Result = nil) and (TSGRenderDirectX8.Suppored) then
+if (Result = nil) and (TSGRenderDirectX8.Supported) then
 	Result := TSGRenderDirectX8;
 {$ENDIF}
 end;
@@ -224,7 +224,7 @@ begin
 Result := 'Unknown';
 end;
 
-class function TSGRender.Suppored() : TSGBoolean;
+class function TSGRender.Supported() : TSGBoolean;
 begin
 Result := False;
 end;
@@ -249,7 +249,7 @@ begin
 Result := FContext;
 end;
 
-function TSGRender.SupporedDepthTextures():TSGBoolean;
+function TSGRender.SupportedDepthTextures():TSGBoolean;
 begin
 Result := False;
 end;
@@ -279,12 +279,12 @@ begin
 SGLog.Source('TSGRender__Enable(Cardinal) : Error : Call inherited method!!');
 end;
 
-function TSGRender.SupporedMemoryBuffers() : TSGBoolean;
+function TSGRender.SupportedMemoryBuffers() : TSGBoolean;
 begin
 Result:=False;
 end;
 
-function TSGRender.SupporedGraphicalBuffers() : TSGBoolean;
+function TSGRender.SupportedGraphicalBuffers() : TSGBoolean;
 begin
 Result:=False;
 end;

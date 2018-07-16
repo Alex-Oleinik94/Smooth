@@ -17,7 +17,7 @@ type
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
 		class function GetDrawableClass() : TSGFileOpenerDrawableClass;override;
-		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
+		class function ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
 
 	TSGNotepadFileOpenerDrawable = class (TSGFileOpenerDrawable)
@@ -81,7 +81,7 @@ begin
 Result := TSGNotepadFileOpenerDrawable;
 end;
 
-class function TSGNotepadFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+class function TSGNotepadFileOpener.ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool;
 var
 	SL : TSGStringList = nil;
 begin

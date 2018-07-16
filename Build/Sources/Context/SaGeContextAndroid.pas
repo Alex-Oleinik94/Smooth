@@ -41,7 +41,7 @@ type
 		function  GetCursorPosition(): TSGPoint2int32;override;
 		function  GetWindowArea(): TSGPoint2int32;override;
 		function  GetScreenArea(): TSGPoint2int32;override;
-		class function Suppored() : TSGBoolean; override;
+		class function Supported() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -79,7 +79,7 @@ begin
 Result := 'Android';
 end;
 
-class function TSGContextAndroid.Suppored() : TSGBoolean;
+class function TSGContextAndroid.Supported() : TSGBoolean;
 begin
 Result := True;
 end;

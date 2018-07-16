@@ -72,7 +72,7 @@ type
 	TSGAudioRenderBASS = class(TSGAudioRender)
 			public
 		constructor Create(); override;
-		class function Suppored() : TSGBool; override;
+		class function Supported() : TSGBool; override;
 		class function ClassName() : TSGString; override;
 		class function AudioRenderName() : TSGString; override;
 			private
@@ -262,9 +262,9 @@ begin
 Result := 'TSGAudioRenderBASS';
 end;
 
-class function TSGAudioRenderBASS.Suppored() : TSGBool;
+class function TSGAudioRenderBASS.Supported() : TSGBool;
 begin
-//Result := DllManager.Suppored('BASS');
+//Result := DllManager.Supported('BASS');
 Result := False;
 end;
 

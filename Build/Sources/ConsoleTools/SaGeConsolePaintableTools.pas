@@ -116,37 +116,37 @@ else
 	ContextSettings += SGContextOptionFullscreen(True);
 end;
 
-function IsGLUTSuppored() : TSGBool;
+function IsGLUTSupported() : TSGBool;
 begin
 {$IFDEF WITH_GLUT}
-Result := TSGContextGLUT.Suppored();
+Result := TSGContextGLUT.Supported();
 {$ELSE}
 Result := False;
 {$ENDIF}
 end;
 
-function IsD3DX8Suppored() : TSGBool;
+function IsD3DX8Supported() : TSGBool;
 begin
 {$IFDEF MSWINDOWS}
-Result := TSGRenderDirectX8.Suppored();
+Result := TSGRenderDirectX8.Supported();
 {$ELSE}
 Result := False;
 {$ENDIF}
 end;
 
-function IsD3DX9Suppored() : TSGBool;
+function IsD3DX9Supported() : TSGBool;
 begin
 {$IFDEF MSWINDOWS}
-Result := TSGRenderDirectX9.Suppored();
+Result := TSGRenderDirectX9.Supported();
 {$ELSE}
 Result := False;
 {$ENDIF}
 end;
 
-function IsD3DX12Suppored() : TSGBool;
+function IsD3DX12Supported() : TSGBool;
 begin
 {$IFDEF MSWINDOWS}
-Result := TSGRenderDirectX12.Suppored();
+Result := TSGRenderDirectX12.Supported();
 {$ELSE}
 Result := False;
 {$ENDIF}
@@ -155,7 +155,7 @@ end;
 function ProccessGLUT(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not IsGLUTSuppored() then
+if not IsGLUTSupported() then
 	begin
 	WriteLn('GLUT can''t be used in your system!');
 	Result := False;
@@ -169,7 +169,7 @@ end;
 function ProccessDirectX12(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not IsD3DX12Suppored() then
+if not IsD3DX12Supported() then
 	begin
 	WriteLn('Direct3D X 12 can''t be used in your system!');
 	Result := False;
@@ -183,7 +183,7 @@ end;
 function ProccessDirectX9(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not IsD3DX9Suppored() then
+if not IsD3DX9Supported() then
 	begin
 	WriteLn('Direct3D X 9 can''t be used in your system!');
 	Result := False;
@@ -197,7 +197,7 @@ end;
 function ProccessDirectX8(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not IsD3DX8Suppored() then
+if not IsD3DX8Supported() then
 	begin
 	WriteLn('Direct3D X 8 can''t be used in your system!');
 	Result := False;
@@ -211,18 +211,18 @@ end;
 function ProccessDirectX(const Comand : TSGString):TSGBool;
 begin
 Result := False;
-if IsD3DX12Suppored and (not Result) then
+if IsD3DX12Supported and (not Result) then
 	Result := ProccessDirectX12('');
-if IsD3DX9Suppored and (not Result) then
+if IsD3DX9Supported and (not Result) then
 	Result := ProccessDirectX9('');
-if IsD3DX8Suppored and (not Result) then
+if IsD3DX8Supported and (not Result) then
 	Result := ProccessDirectX8('');
 end;
 
 function ProccessOpenGL(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not TSGRenderOpenGL.Suppored() then
+if not TSGRenderOpenGL.Supported() then
 	begin
 	WriteLn('OpenGL can''t be used in your system!');
 	Result := False;
@@ -391,48 +391,48 @@ end;
 
 function HelpFuncGLUT() : TSGString;
 begin
-Result := 'For use GLUT' + ImposibleParam(IsGLUTSuppored());
+Result := 'For use GLUT' + ImposibleParam(IsGLUTSupported());
 end;
 
 function HelpFuncDX8() : TSGString;
 begin
-Result := 'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Suppored());
+Result := 'For use Direct3D X 8' +  ImposibleParam(IsD3DX8Supported());
 end;
 
 function HelpFuncDX9() : TSGString;
 begin
-Result := 'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Suppored());
+Result := 'For use Direct3D X 9' +  ImposibleParam(IsD3DX9Supported());
 end;
 
 function HelpFuncDX12() : TSGString;
 begin
-Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Suppored());
+Result := 'For use Direct3D X 12' + ImposibleParam(IsD3DX12Supported());
 end;
 
 function HelpFuncDX() : TSGString;
 begin
-Result := 'For use Direct3D X, with most highest version' + ImposibleParam(IsD3DX12Suppored() or IsD3DX9Suppored() or IsD3DX8Suppored());
+Result := 'For use Direct3D X, with most highest version' + ImposibleParam(IsD3DX12Supported() or IsD3DX9Supported() or IsD3DX8Supported());
 end;
 
 function HelpFuncOGL() : TSGString;
 begin
-Result := 'For use OpenGL' + ImposibleParam(TSGRenderOpenGL.Suppored());
+Result := 'For use OpenGL' + ImposibleParam(TSGRenderOpenGL.Supported());
 end;
 
-function IsOpenALSuppored() : TSGBoolean;
+function IsOpenALSupported() : TSGBoolean;
 begin
 Result :=
 	{$IFDEF MOBILE}
 	False
 	{$ELSE}
-	TSGAudioRenderOpenAL.Suppored()
+	TSGAudioRenderOpenAL.Supported()
 	{$ENDIF}
 	;
 end;
 
 function HelpFuncOAL() : TSGString;
 begin
-Result := 'For use OpenAL' + ImposibleParam(IsOpenALSuppored());
+Result := 'For use OpenAL' + ImposibleParam(IsOpenALSupported());
 end;
 
 function ProccessWA(const Comand : TSGString):TSGBool;
@@ -445,7 +445,7 @@ end;
 function ProccessOpenAL(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-if not IsOpenALSuppored() then
+if not IsOpenALSupported() then
 	begin
 	WriteLn('OpenAL can''t be used in your system!');
 	Result := False;

@@ -159,7 +159,7 @@ SGHint([SGNVidiaViewingShift, 'Version: ', ver], CasesOfPrint);
 end;
 
 begin
-if DllManager.Suppored('nvapi') then
+if DllManager.Supported('nvapi') then
 	begin
 	SGHint('NVidia information:', CasesOfPrint, True);
 	ViewNVidiaVersion();

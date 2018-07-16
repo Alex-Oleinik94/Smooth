@@ -34,7 +34,7 @@ type
 		function  GetCursorPosition(): TSGPoint2int32;override;
 		function  GetScreenArea(): TSGPoint2int32;override;
 		procedure Kill();override;
-		class function Suppored() : TSGBoolean; override;
+		class function Supported() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -79,7 +79,7 @@ begin
 Result := 'Linux';
 end;
 
-class function TSGContextLinux.Suppored() : TSGBoolean; 
+class function TSGContextLinux.Supported() : TSGBoolean; 
 begin
 Result := True;
 end;

@@ -46,7 +46,7 @@ type
 		pDevice   : IDirect3DDevice9;
 		pDeviceEx : IDirect3DDevice9Ex;
 			public
-		class function Suppored() : TSGBoolean;override;
+		class function Supported() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -55,8 +55,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedGraphicalBuffers() : TSGBoolean; override;
-		function SupporedMemoryBuffers() : TSGBoolean; override;
+		function SupportedGraphicalBuffers() : TSGBoolean; override;
+		function SupportedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -123,7 +123,7 @@ type
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
 
-		function SupporedShaders() : TSGBoolean;override;
+		function SupportedShaders() : TSGBoolean;override;
 		// Остальное потом
 		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
 		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
@@ -281,14 +281,14 @@ begin
 Result := 'TSGRenderDirectX9';
 end;
 
-class function TSGRenderDirectX9.Suppored() : TSGBoolean;
+class function TSGRenderDirectX9.Supported() : TSGBoolean;
 begin
-Result := DllManager.Suppored('Direct3D9');
+Result := DllManager.Supported('Direct3D9');
 if Result then
-	DllManager.Suppored('Direct3DX9');
+	DllManager.Supported('Direct3DX9');
 end;
 
-function TSGRenderDirectX9.SupporedShaders() : TSGBoolean;
+function TSGRenderDirectX9.SupportedShaders() : TSGBoolean;
 begin
 Result := False;
 end;
@@ -557,12 +557,12 @@ SGR_LINES:
 end;
 end;
 
-function TSGRenderDirectX9.SupporedMemoryBuffers() : TSGBoolean;
+function TSGRenderDirectX9.SupportedMemoryBuffers() : TSGBoolean;
 begin
 Result := True;
 end;
 
-function TSGRenderDirectX9.SupporedGraphicalBuffers() : TSGBoolean;
+function TSGRenderDirectX9.SupportedGraphicalBuffers() : TSGBoolean;
 begin
 Result := True;
 end;

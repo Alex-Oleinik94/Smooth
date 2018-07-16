@@ -27,7 +27,7 @@ type
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
 		class function GetDrawableClass() : TSGFileOpenerDrawableClass; override;
-		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
+		class function ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
 	
 	TSGImageViewer = class(TSGFileOpenerDrawable)
@@ -372,13 +372,13 @@ if (TSGCompatibleContext <> nil) and (TSGCompatibleRender <> nil) then
 	begin
 	Result := TSGImageFileOpener_GetAlwaysSuporedExpansions();
 	{$IFDEF WITHLIBPNG}
-	if SupporedPNG() then
+	if SupportedPNG() then
 		Result *= 'PNG';
 	{$ENDIF}
 	end;
 end;
 
-class function TSGImageFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+class function TSGImageFileOpener.ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool;
 var
 	ASE : TSGStringList = nil;
 	PNGInExpansions : TSGBool = False;
@@ -401,7 +401,7 @@ for S in VExpansions do
 {$IFDEF WITHLIBPNG}
 if Result = True then
 	if PNGInExpansions then
-		Result := SupporedPNG();
+		Result := SupportedPNG();
 {$ENDIF}
 if Result then
 	if (TSGCompatibleContext = nil) or (TSGCompatibleRender = nil) then

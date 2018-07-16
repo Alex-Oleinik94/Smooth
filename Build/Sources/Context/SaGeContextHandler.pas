@@ -358,7 +358,7 @@ begin
 Result := False;
 ViewRunParams();
 PrintSettings();
-if not FRenderClass.Suppored then
+if not FRenderClass.Supported then
 	begin
 	SGHint(FRenderClass.ClassName() + ' not suppored!');
 	SetLength(FSettings, 0);

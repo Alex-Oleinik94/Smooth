@@ -33,7 +33,7 @@ type
 		function  GetCursorPosition():TSGPoint2f;override;
 		function  GetWindowRect():TSGPoint2f;override;
 		function  GetScreenResolution():TSGPoint2f;override;
-		class function Suppored() : TSGBoolean; override;
+		class function Supported() : TSGBoolean; override;
 			protected
 		procedure InitFullscreen(const b:boolean); override;
 			public
@@ -58,7 +58,7 @@ begin
 Result := 'Mac OS X';
 end;
 
-class function TSGContextMacOSX.Suppored() : TSGBoolean;
+class function TSGContextMacOSX.Supported() : TSGBoolean;
 begin
 Result := True;
 end;

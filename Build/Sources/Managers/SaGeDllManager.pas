@@ -92,7 +92,7 @@ type
 
 		function LoadExtensions() : TSGDllLoadExtensionsObject; virtual;
 			protected
-		function GetSuppored() : TSGBool;
+		function GetSupported() : TSGBool;
 		procedure SetOwner(const VOwner : TSGDllManager);
 		function TotalFunctions() : TSGUInt32;
 		function LoadedFunctions() : TSGUInt32;
@@ -102,7 +102,7 @@ type
 			public
 		procedure ReadExtensions(); virtual;
 			public
-		property Suppored     : TSGBool read GetSuppored;
+		property Supported     : TSGBool read GetSupported;
 		property Loaded       : TSGBool read FLoaded write FLoaded;
 		property LoadExecuted : TSGBool read FLoadExecuted write FLoadExecuted;
 		property Owner        : TSGDllManager read FOwner write SetOwner;
@@ -124,7 +124,7 @@ type
 		procedure Del(const VDll : TSGDll);
 			public
 		function Dll(const VSystemName : TSGString) : TSGDll;
-		function Suppored(const VSystemName : TSGString) : TSGBool;
+		function Supported(const VSystemName : TSGString) : TSGBool;
 		function MayUnloadDll(const VFileName : TSGString): TSGBool;
 		function CountUsesLibrary(const VFileName : TSGString) : TSGUInt32;
 
@@ -390,8 +390,8 @@ else
 		begin
 		FDlls[i].PrintStat();
 
-		LibLoaded    += TSGByte(FDlls[i].Suppored);
-		LibNotLoaded += TSGByte(not FDlls[i].Suppored);
+		LibLoaded    += TSGByte(FDlls[i].Supported);
+		LibNotLoaded += TSGByte(not FDlls[i].Supported);
 		FuncLoaded += FDlls[i].LoadedFunctions();
 		AllFunc += FDlls[i].TotalFunctions();
 		FuncNotLoaded += FDlls[i].TotalFunctions() - FDlls[i].LoadedFunctions();
@@ -406,14 +406,14 @@ else
 	end;
 end;
 
-function TSGDllManager.Suppored(const VSystemName : TSGString) : TSGBool;
+function TSGDllManager.Supported(const VSystemName : TSGString) : TSGBool;
 var
 	DynLibrary : TSGDll;
 begin
 Result := False;
 DynLibrary := Dll(VSystemName);
 if DynLibrary <> nil then
-	Result := DynLibrary.Suppored;
+	Result := DynLibrary.Supported;
 end;
 
 function TSGDllManager.Dll(const VSystemName : TSGString) : TSGDll;
@@ -925,7 +925,7 @@ if FOwner <> nil then
 		if Length(Childs) > 0 then
 			begin
 			for i := 0 to High(Childs) do
-				FOwner.Suppored(Childs[i]);
+				FOwner.Supported(Childs[i]);
 			SetLength(Childs, 0);
 			end;
 		Childs := nil;
@@ -963,7 +963,7 @@ if not FLoadExecuted then
 	Result := CustomLoading();
 end;
 
-function TSGDll.GetSuppored() : TSGBool;
+function TSGDll.GetSupported() : TSGBool;
 begin
 Result := Loading();
 end;

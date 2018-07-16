@@ -43,7 +43,7 @@ type
 		function  GetScreenArea(): TSGPoint2int32;override;
 		function  ShiftClientArea() : TSGPoint2int32; override;
 		procedure Kill();override;
-		class function Suppored() : TSGBoolean; override;
+		class function Supported() : TSGBoolean; override;
 		class function ClassName() : TSGString;override;
 		function GetDefaultWindowColor():TSGColor3f;override;
 		procedure Minimize();override;
@@ -189,7 +189,7 @@ begin
 Result := 'TSGContextWinAPI';
 end;
 
-class function TSGContextWinAPI.Suppored() : TSGBoolean;
+class function TSGContextWinAPI.Supported() : TSGBoolean;
 begin
 Result := True;
 end;

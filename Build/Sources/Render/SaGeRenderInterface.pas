@@ -27,8 +27,8 @@ type
 		function CreateContext():TSGBoolean;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);
 		procedure Init();
-		function SupporedGraphicalBuffers() : TSGBoolean;
-		function SupporedMemoryBuffers() : TSGBoolean;
+		function SupportedGraphicalBuffers() : TSGBoolean;
+		function SupportedMemoryBuffers() : TSGBoolean;
 		procedure SwapBuffers();
 		procedure LockResources();
 		procedure UnLockResources();
@@ -101,7 +101,7 @@ type
 			{$ENDIF}
 
 			(* Shaders *)
-		function SupporedShaders() : TSGBoolean;
+		function SupportedShaders() : TSGBoolean;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;
 		procedure ShaderSource(const VShader : TSGLongWord; VSourse : PChar; VSourseLength : integer);
 		procedure CompileShader(const VShader : TSGLongWord);
@@ -124,7 +124,7 @@ type
 		procedure Uniform1uiv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);
 
-		function SupporedDepthTextures():TSGBoolean;
+		function SupportedDepthTextures():TSGBoolean;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);
 		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal);
 		procedure DrawBuffer(const VType : TSGCardinal);
@@ -150,7 +150,6 @@ type
 		['{535e900f-03d6-47d1-b2e1-9eadadf877f3}']
 		function GetRender() : ISGRender;
 		function RenderAssigned() : TSGBoolean;
-		function Suppored() : TSGBoolean;
 		procedure DeleteRenderResources();
 		procedure LoadRenderResources();
 		

@@ -27,7 +27,7 @@ type
 		class function GetExpansions() : TSGStringList; virtual;
 		class procedure Execute(const VFiles : TSGStringList);virtual;
 		class function GetDrawableClass() : TSGFileOpenerDrawableClass;virtual;
-		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; virtual;
+		class function ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool; virtual;
 		end;
 
 	TSGFileOpenerDrawable = class(TSGPaintableObject)
@@ -118,7 +118,7 @@ Len := Length(SL);
 if Len <> 0 then
 	begin
 	ii := Length(SGFileOpeners);
-	SGHint(['Suppored expansion', Iff(Len > 1, 's'), ' (', Len, '), file opener list (', ii, ') :']);
+	SGHint(['Supported expansion', Iff(Len > 1, 's'), ' (', Len, '), file opener list (', ii, ') :']);
 	if SGFileOpeners <> nil then if Length(SGFileOpeners) > 0 then
 		for i := 0 to High(SGFileOpeners) do
 			begin
@@ -151,7 +151,7 @@ SL1 := nil;
 for i := 0 to High(VFiles) do
 	SL1 *= SGUpCaseString(SGFileExpansion(VFiles[i]));
 for C in SGFileOpeners do
-	if C.ExpansionsSuppored(SL1) then
+	if C.ExpansionsSupported(SL1) then
 		begin
 		EC := C;
 		break;
@@ -198,7 +198,7 @@ else
 SGFileOpeners[High(SGFileOpeners)] := VClass;
 end;
 
-class function TSGFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+class function TSGFileOpener.ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool;
 begin
 Result := False;
 end;

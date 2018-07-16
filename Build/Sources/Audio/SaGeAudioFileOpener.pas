@@ -23,7 +23,7 @@ type
 		class function ClassName() : TSGString; override;
 		class function GetExpansions() : TSGStringList; override;
 		class procedure Execute(const VFiles : TSGStringList);override;
-		class function ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool; override;
+		class function ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool; override;
 		end;
 
 implementation
@@ -119,7 +119,7 @@ BufferedSource.Destroy();
 AudioRender.Destroy();
 end;
 
-class function TSGAudioFileOpener.ExpansionsSuppored(const VExpansions : TSGStringList) : TSGBool;
+class function TSGAudioFileOpener.ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool;
 var
 	S : TSGString;
 begin
@@ -141,7 +141,7 @@ if Length(VFiles)>1 then
 	SGHint('Hint: Opening ' + SGStr(Length(VFiles)) + ' files:');
 	for i := 0 to High(VFiles) do
 		SGHint('  ' + VFiles[i]);
-	SGHint('Warning: Suppored playing only one of files.');
+	SGHint('Warning: Supported playing only one of files.');
 	end;
 ConsolePlayFile(VFiles[0]);
 end;

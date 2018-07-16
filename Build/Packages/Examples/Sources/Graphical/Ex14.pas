@@ -40,10 +40,11 @@ const
 type
 	TSGExample14 = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		procedure Paint(); override;
+		class function ClassName():TSGString; override;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
 			private
 		FCamera : TSGCamera;
 		
@@ -103,6 +104,12 @@ type
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
+
+
+class function TSGExample14.Supported(const _Context : ISGContext) : TSGBoolean;
+begin
+Result := _Context.Render.SupportedShaders();
+end;
 
 procedure TSGExample14.LoadModel(const FileName : TSGString);
 var
@@ -223,7 +230,7 @@ Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_CLAMP);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_CLAMP);
-if Render.SupporedDepthTextures() then
+if Render.SupportedDepthTextures() then
 	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_R16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RED, SGR_UNSIGNED_SHORT, nil)
 else
 	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_RGBA16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RGBA, SGR_UNSIGNED_SHORT, nil);

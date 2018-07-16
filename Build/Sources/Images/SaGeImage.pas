@@ -461,10 +461,10 @@ procedure TSGImage.SaveToStream(const Stream:TStream);
 begin
 if (FImage<>nil) and (FImage.BitMap<>nil) then
 	begin
-	if SGResourceManager.SaveingIsSuppored('PNG') then
+	if SGResourceManager.SaveingIsSupported('PNG') then
 		SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage)
 	else
-		if SGResourceManager.SaveingIsSuppored('BMP') then
+		if SGResourceManager.SaveingIsSupported('BMP') then
 			SGResourceManager.SaveResourceToStream(Stream,'BMP',FImage);
 	end
 else
@@ -498,7 +498,7 @@ begin
 if Channels=3 then
 	begin
 	{$IFDEF WITHLIBPNG}
-	if SupporedPNG() then
+	if SupportedPNG() then
 		Result := SGI_PNG
 	else
 	{$ELSE}
@@ -508,7 +508,7 @@ if Channels=3 then
 else if Channels=4 then
 	begin
 	{$IFDEF WITHLIBPNG}
-	if SupporedPNG() then
+	if SupportedPNG() then
 		Result := SGI_PNG
 	else
 	{$ELSE}
@@ -527,7 +527,7 @@ if Format=SGI_DEFAULT then
 else
 	SaveFormat:=Format;
 {$IFDEF WITHLIBPNG}
-if (SaveFormat = SGI_PNG) and (not SupporedPNG()) then
+if (SaveFormat = SGI_PNG) and (not SupportedPNG()) then
 	begin
 	if Channels = 4 then
 		begin
@@ -553,7 +553,7 @@ SGI_SGIA:
 		{$IFDEF SGDebuging}
 			SGLog.Source('TSGImage  : Saveing "'+FFileName+'" as PNG');
 			{$ENDIF}
-		if SGResourceManager.SaveingIsSuppored('PNG') then
+		if SGResourceManager.SaveingIsSupported('PNG') then
 			SGResourceManager.SaveResourceToStream(Stream,'PNG',FImage);
 		end;
 	{$ENDIF}
@@ -798,7 +798,7 @@ else
 		LoadMBMToBitMap();
 	{$IFDEF WITHLIBPNG}
 	SGI_PNG :
-		if SGResourceManager.LoadingIsSuppored('PNG') and SupporedPNG() then
+		if SGResourceManager.LoadingIsSupported('PNG') and SupportedPNG() then
 			begin
 			if FImage <> nil then
 				FImage.Destroy();

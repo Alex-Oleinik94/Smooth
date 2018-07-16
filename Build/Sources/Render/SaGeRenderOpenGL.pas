@@ -103,7 +103,7 @@ type
 			ogl_Format  : TAGLPixelFormat;
 			{$ENDIF}
 			public
-		class function Suppored() : TSGBoolean;override;
+		class function Supported() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -112,8 +112,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedGraphicalBuffers() : TSGBoolean; override;
-		function SupporedMemoryBuffers() : TSGBoolean; override;
+		function SupportedGraphicalBuffers() : TSGBoolean; override;
+		function SupportedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -187,7 +187,7 @@ type
 			{$ENDIF}
 
 			(* Shaders *)
-		function SupporedShaders() : TSGBoolean;override;
+		function SupportedShaders() : TSGBoolean;override;
 		function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
 		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
 		procedure CompileShader(const VShader : TSGLongWord);override;
@@ -209,7 +209,7 @@ type
 		procedure Uniform3fv (const VLocationName: TSGLongWord; const VCount: TSGLongWord; const VValue: Pointer);override;
 		procedure Uniform1i(const VLocationName : TSGLongWord; const VData:TSGLongWord);override;
 
-		function SupporedDepthTextures():TSGBoolean;override;
+		function SupportedDepthTextures():TSGBoolean;override;
 		procedure BindFrameBuffer(const VType : TSGCardinal; const VHandle : TSGLongWord);override;
 		procedure GenFrameBuffers(const VCount : TSGLongWord;const VBuffers : PCardinal); override;
 		procedure DrawBuffer(const VType : TSGCardinal);override;
@@ -326,13 +326,13 @@ SGLog.Source(ErStr);
 end;
 {$ENDIF}
 
-class function TSGRenderOpenGL.Suppored() : TSGBoolean;
+class function TSGRenderOpenGL.Supported() : TSGBoolean;
 begin
 Result :=
 	{$IFDEF MOBILE}
 		True
 	{$ELSE}
-		DllManager.Suppored('OpenGL')
+		DllManager.Supported('OpenGL')
 	{$ENDIF}
 	;
 end;
@@ -390,11 +390,11 @@ begin
 glClearColor(r,g,b,a);
 end;
 
-function TSGRenderOpenGL.SupporedDepthTextures():TSGBoolean;
+function TSGRenderOpenGL.SupportedDepthTextures():TSGBoolean;
 begin
 Result := {$IFDEF MOBILE} False {$ELSE} dglOpenGL.GL_ARB_texture_rg {$ENDIF};
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Source(['TSGRenderOpenGL.SupporedDepthTextures : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupportedDepthTextures : Result = ',Result]);
 	{$ENDIF}
 end;
 
@@ -482,11 +482,11 @@ begin
 {$IFDEF MOBILE}glGetUniformLocation{$ELSE}glGetUniformLocationARB{$ENDIF}({$IFDEF SHADERSISPOINTERS}Pointer(VProgram){$ELSE}VProgram{$ENDIF},VLocationName);
 end;
 
-function TSGRenderOpenGL.SupporedShaders() : TSGBoolean;
+function TSGRenderOpenGL.SupportedShaders() : TSGBoolean;
 begin
 Result := {$IFDEF MOBILE}False{$ELSE}dglOpenGL.GL_ARB_shader_objects{$ENDIF};
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Source(['TSGRenderOpenGL.SupporedShaders : Result = ',Result]);
+	SGLog.Source(['TSGRenderOpenGL.SupportedShaders : Result = ',Result]);
 	{$ENDIF}
 end;
 
@@ -800,7 +800,7 @@ begin
 	{$ENDIF}
 end;
 
-function TSGRenderOpenGL.SupporedMemoryBuffers() : TSGBoolean;
+function TSGRenderOpenGL.SupportedMemoryBuffers() : TSGBoolean;
 begin
 {$IFDEF MOBILE}
 	Result := True;
@@ -808,11 +808,11 @@ begin
 	Result := dglOpenGL.GL_VERSION_1_1;
 	{$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Source(['TSGRenderOpenGL.SupporedMemoryBuffers : Result = ', Result]);
+	SGLog.Source(['TSGRenderOpenGL__SupportedMemoryBuffers : Result = ', Result]);
 	{$ENDIF}
 end;
 
-function TSGRenderOpenGL.SupporedGraphicalBuffers() : TSGBoolean;
+function TSGRenderOpenGL.SupportedGraphicalBuffers() : TSGBoolean;
 begin
 {$IFDEF MOBILE}
 	Result := True;
@@ -820,7 +820,7 @@ begin
 	Result := dglOpenGL.GL_ARB_vertex_buffer_object;
 	{$ENDIF}
 {$IFDEF RENDER_OGL_DEBUG}
-	SGLog.Source(['TSGRenderOpenGL.SupporedGraphicalBuffers : Result = ', Result]);
+	SGLog.Source(['TSGRenderOpenGL__SupportedGraphicalBuffers : Result = ', Result]);
 	{$ENDIF}
 end;
 

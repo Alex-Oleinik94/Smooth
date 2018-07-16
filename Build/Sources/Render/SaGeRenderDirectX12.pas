@@ -38,7 +38,7 @@ type
 			protected
 		
 			public
-		class function Suppored() : TSGBoolean;override;
+		class function Supported() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -47,8 +47,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedGraphicalBuffers() : TSGBoolean; override;
-		function SupporedMemoryBuffers() : TSGBoolean; override;
+		function SupportedGraphicalBuffers() : TSGBoolean; override;
+		function SupportedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -115,7 +115,7 @@ type
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
 		
-		function SupporedShaders() : TSGBoolean;override;
+		function SupportedShaders() : TSGBoolean;override;
 		// Остальное потом
 		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
 		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
@@ -150,12 +150,12 @@ begin
 Result := 'TSGRenderDirectX12';
 end;
 
-class function TSGRenderDirectX12.Suppored() : TSGBoolean;
+class function TSGRenderDirectX12.Supported() : TSGBoolean;
 begin
 Result := False;
 end;
 
-function TSGRenderDirectX12.SupporedShaders() : TSGBoolean;
+function TSGRenderDirectX12.SupportedShaders() : TSGBoolean;
 begin
 Result := False;
 end;
@@ -217,12 +217,12 @@ begin
 
 end;
 
-function TSGRenderDirectX12.SupporedMemoryBuffers():Boolean;
+function TSGRenderDirectX12.SupportedMemoryBuffers():Boolean;
 begin
 Result:=False;
 end;
 
-function TSGRenderDirectX12.SupporedGraphicalBuffers():Boolean;
+function TSGRenderDirectX12.SupportedGraphicalBuffers():Boolean;
 begin
 Result:=False;
 end;

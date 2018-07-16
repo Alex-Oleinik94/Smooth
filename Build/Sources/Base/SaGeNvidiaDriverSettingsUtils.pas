@@ -68,7 +68,7 @@ var
 	hProfile : NvDRSProfileHandle;
 	drsSetting : NVDRS_SETTING;
 begin
-if not DllManager.Suppored('nvapi') then
+if not DllManager.Supported('nvapi') then
 	exit;
 
 hSession := 0;
@@ -121,7 +121,7 @@ var
 	drsSetting : NVDRS_SETTING;
 begin
 Result := SGNVidiaUnknown;
-if not DllManager.Suppored('nvapi') then
+if not DllManager.Supported('nvapi') then
 	exit;
 
 hSession := 0;
@@ -301,7 +301,7 @@ SGHint(SGNVidiaStrDriverOptimusMode(SGNVidiaGetDriverOptimusMode(SGNVidiaCurrent
 SGNVidiaViewDriverSetting(SHIM_MCCOMPAT_ID, SGNVidiaBase);
 SGNVidiaViewDriverSetting(SHIM_MCCOMPAT_ID, SGNVidiaCurrentGlobal);}
 Result := False;
-if not DllManager.Suppored('nvapi') then
+if not DllManager.Supported('nvapi') then
 	exit;
 d1.Get();
 SetDriverOptimusMode();
@@ -312,7 +312,7 @@ end;
 function SGNVidiaGetNumProfilies(const hSession : NvDRSSessionHandle) : NvU32;
 begin
 Result := 0;
-if not DllManager.Suppored('nvapi') then
+if not DllManager.Supported('nvapi') then
 	exit;
 NvAPI_DRS_GetNumProfiles(hSession, Result);
 end;

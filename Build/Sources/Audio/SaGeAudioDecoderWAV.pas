@@ -43,8 +43,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
-		class function SupporedFormats() : TSGStringList; override;
-		class function Suppored() : TSGBool; override;
+		class function SupportedFormats() : TSGStringList; override;
+		class function Supported() : TSGBool; override;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; override; overload;
 		function SetInput(const VFileName : TSGString) : TSGAudioDecoder; override; overload;
@@ -77,14 +77,14 @@ uses
 	,SaGeSysUtils
 	;
 
-class function TSGAudioDecoderWAV.SupporedFormats() : TSGStringList;
+class function TSGAudioDecoderWAV.SupportedFormats() : TSGStringList;
 begin
 Result := nil;
 Result += 'WAV';
 Result += 'WAVE';
 end;
 
-class function TSGAudioDecoderWAV.Suppored() : TSGBool;
+class function TSGAudioDecoderWAV.Supported() : TSGBool;
 begin
 Result := True;
 end;

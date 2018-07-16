@@ -29,8 +29,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
-		class function SupporedFormats() : TSGStringList; override;
-		class function Suppored() : TSGBool; override;
+		class function SupportedFormats() : TSGStringList; override;
+		class function Supported() : TSGBool; override;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; override; overload;
 		function SetInput(const VFileName : TSGString) : TSGAudioDecoder; override; overload;
@@ -84,22 +84,22 @@ else
 end;
 end;
 
-class function TSGAudioDecoderOGG.SupporedFormats() : TSGStringList;
+class function TSGAudioDecoderOGG.SupportedFormats() : TSGStringList;
 begin
 Result := nil;
 Result += 'OGG';
 end;
 
-class function TSGAudioDecoderOGG.Suppored() : TSGBool;
+class function TSGAudioDecoderOGG.Supported() : TSGBool;
 begin
-Result := DllManager.Suppored('Ogg');
+Result := DllManager.Supported('Ogg');
 if Result then
-	Result := DllManager.Suppored('Vorbis');
+	Result := DllManager.Supported('Vorbis');
 (*
-if Result then Result := DllManager.Suppored('VorbisEnc'); // Vorbis Encoder
+if Result then Result := DllManager.Supported('VorbisEnc'); // Vorbis Encoder
 *)
 if Result then
-	Result := DllManager.Suppored('VorbisFile');
+	Result := DllManager.Supported('VorbisFile');
 end;
 
 procedure TSGAudioDecoderOGG.LogFileInfo();

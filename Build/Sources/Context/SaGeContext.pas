@@ -57,7 +57,7 @@ type
 		procedure SwapBuffers();virtual;
 		procedure SetRenderClass(const NewRender : TSGNamedClass);virtual;
 		procedure Kill();virtual;
-		class function Suppored() : TSGBoolean; virtual;
+		class function Supported() : TSGBoolean; virtual;
 		function GetDefaultWindowColor():TSGColor3f; virtual;
 		procedure Minimize();virtual;
 		procedure Maximize();virtual;
@@ -335,7 +335,7 @@ begin
 Result := nil;
 end;
 
-class function TSGContext.Suppored() : TSGBoolean;
+class function TSGContext.Supported() : TSGBoolean;
 begin
 Result := False;
 end;

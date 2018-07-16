@@ -51,8 +51,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
-		class function SupporedFormats() : TSGStringList; virtual;
-		class function Suppored() : TSGBool; virtual;
+		class function SupportedFormats() : TSGStringList; virtual;
+		class function Supported() : TSGBool; virtual;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; virtual; abstract; overload;
 		function SetInput(const VFileName : TSGString): TSGAudioDecoder; virtual; abstract; overload;
@@ -114,8 +114,8 @@ var
 begin
 Result := nil;
 for C in AudioDecoders do
-	if C.Suppored then
-		Result *= C.SupporedFormats();
+	if C.Supported then
+		Result *= C.SupportedFormats();
 end;
 
 function TSGCompatibleAudioDecoder(const VExpansion : TSGString) : TSGAudioDecoderClass;
@@ -126,11 +126,11 @@ begin
 Result := nil;
 for C in AudioDecoders do
 	begin
-	SF := C.SupporedFormats();
+	SF := C.SupportedFormats();
 	if VExpansion in SF then
 		Result := C;
 	SetLength(SF, 0);
-	if (Result <> nil) and (not C.Suppored) then
+	if (Result <> nil) and (not C.Supported) then
 		Result := nil;
 	if Result <> nil then
 		break;
@@ -150,12 +150,12 @@ Result := TFileStream.Create(VFileName, fmOpenRead);
 Result.Position := 0;
 end;
 
-class function TSGAudioDecoder.Suppored() : TSGBool;
+class function TSGAudioDecoder.Supported() : TSGBool;
 begin
 Result := False;
 end;
 
-class function TSGAudioDecoder.SupporedFormats() : TSGStringList;
+class function TSGAudioDecoder.SupportedFormats() : TSGStringList;
 begin
 Result := nil;
 end;

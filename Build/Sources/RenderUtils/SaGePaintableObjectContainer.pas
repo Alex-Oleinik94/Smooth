@@ -52,7 +52,7 @@ type
 		class function ClassName() : TSGString;override;
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
-			public
+			protected
 		FNowDraw     : TSGPaintableObject;
 		FNowDrawable : TSGBoolean;
 		FArClasses   : packed array of
@@ -62,6 +62,8 @@ type
 				end;
 		FComboBox : TSGScreenComboBox;
 		FFont : TSGFont;
+			protected
+		procedure RestoreActiveStatuses();
 			public
 		procedure Paint();override;
 		procedure Add(const NewClasses:TSGPaintableObjectContainerItemList);overload;
@@ -108,8 +110,18 @@ if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.DeleteRenderResources();
 end;
 
+procedure TSGPaintableObjectContainer.RestoreActiveStatuses();
+var
+	Index : TSGMaxEnum;
+begin
+if (FComboBox <> nil) then
+	for Index := 0 to FComboBox.ItemsCount - 1 do
+		FComboBox.Items[Index].Active := FArClasses[Index].FClass.Supported(Context);
+end;
+
 procedure TSGPaintableObjectContainer.LoadRenderResources();
 begin
+RestoreActiveStatuses();
 if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.LoadRenderResources();
 end;
@@ -149,10 +161,10 @@ end;
 
 procedure TSGPaintableObjectContainer.Initialize(const Location : TSGComponentLocation);overload;
 var
-	i:LongWord;
+	i : TSGMaxEnum;
 begin
 {$IFDEF SGMoreDebuging}
-	TSGLog.Source('Begin of  "TSGPaintableObjectContainer.Initialize" : "'+ClassName+'".');
+	TSGLog.Source('Begin of  "TSGPaintableObjectContainer__Initialize" : "'+ClassName+'".');
 	{$ENDIF}
 
 FComboBox := SGCreateComboBox(Screen, Location.Left, Location.Top, Location.Width, Location.Height, TSGScreenComboBoxProcedure(@TSGPaintableObjectContainer_ComboBoxProcedure), FFont, True, True, Self);
@@ -161,18 +173,18 @@ FComboBox.Active := Length(FArClasses) > 1;
 FComboBox.FDrawClass := Self;
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	for i:=0 to High(FArClasses) do
-		FComboBox.CreateItem(SGStringToPChar(FArClasses[i].FClass.ClassName));
+		FComboBox.CreateItem(FArClasses[i].FClass.ClassName, nil, -1, FArClasses[i].FClass.Supported(Context));
 if (FArClasses <> nil) and (Length(FArClasses) > 0) then
 	begin
 	FComboBox.SelectItem := Random(Length(FArClasses));
 	SwitchTo(FComboBox.SelectItem);
 	end;
 {$IFDEF SGMoreDebuging}
-	TSGLog.Source('End of  "TSGPaintableObjectContainer.Initialize" : "'+ClassName+'".');
+	TSGLog.Source('End of  "TSGPaintableObjectContainer__Initialize" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 
-class function TSGPaintableObjectContainer.ClassName():string;
+class function TSGPaintableObjectContainer.ClassName() : TSGString;
 begin
 Result := 'SaGe Draw Classes';
 end;
@@ -180,14 +192,14 @@ end;
 procedure TSGPaintableObjectContainer.Paint();
 begin
 {$IFDEF SGMoreDebuging}
-	TSGLog.Source('Begin of  "TSGPaintableObjectContainer.Draw" : "'+ClassName+'".');
+	TSGLog.Source('Begin of  "TSGPaintableObjectContainer__Draw" : "'+ClassName+'".');
 	{$ENDIF}
 if FNowDraw = nil then
 	Initialize();
 if FNowDrawable and (FNowDraw <> nil) then
 	FNowDraw.Paint();
 {$IFDEF SGMoreDebuging}
-	TSGLog.Source('End of  "TSGPaintableObjectContainer.Draw" : "'+ClassName+'".');
+	TSGLog.Source('End of  "TSGPaintableObjectContainer__Draw" : "'+ClassName+'".');
 	{$ENDIF}
 end;
 

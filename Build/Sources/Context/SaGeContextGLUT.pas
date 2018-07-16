@@ -48,7 +48,7 @@ type
 		function GetScreenArea(): TSGPoint2int32;override;
 		procedure Resize();override;
 		procedure InitFullscreen(const b:boolean); override;
-		class function Suppored() : TSGBoolean; override;
+		class function Supported() : TSGBoolean; override;
 		procedure Paint();override;
 		class function ClassName() : TSGString;override;
 		procedure Close();override;
@@ -60,7 +60,7 @@ type
 		function InitRender() : TSGBoolean;
 			protected
 		FCursorMoution: TSGPoint2int32;
-		FFreeGLUTSuppored : TSGBool;
+		FFreeGLUTSupported : TSGBool;
 			public
 		procedure SetGLUTMoution(const VX, VY : TSGInt32);
 		end;
@@ -85,20 +85,20 @@ procedure TSGContextGLUT.SetNewContext(const NewContextClass : TSGNamedClass);
 begin
 inherited;
 {$IFDEF GLUT_DEBUG}SGHint([ClassName(), '__SetNewContext(', FNewContextType.ClassName(), ').']);{$ENDIF}
-if (not (Self is FNewContextType)) and  FFreeGLUTSuppored and (glutLeaveMainLoop <> nil) then
+if (not (Self is FNewContextType)) and  FFreeGLUTSupported and (glutLeaveMainLoop <> nil) then
 	glutLeaveMainLoop();
 end;
 
 procedure TSGContextGLUT.Close();
 begin
 inherited;
-if FFreeGLUTSuppored and (glutLeaveMainLoop <> nil) then
+if FFreeGLUTSupported and (glutLeaveMainLoop <> nil) then
 	glutLeaveMainLoop();
 end;
 
 class function TSGContextGLUT.ContextName() : TSGString;
 begin
-Result := Iff(DllManager.Suppored('FreeGLUT'), 'Free') + 'GLUT';
+Result := Iff(DllManager.Supported('FreeGLUT'), 'Free') + 'GLUT';
 end;
 
 class function TSGContextGLUT.ClassName() : TSGString;
@@ -111,9 +111,9 @@ begin
 FCursorMoution.Import(VX, VY);
 end;
 
-class function TSGContextGLUT.Suppored() : TSGBoolean;
+class function TSGContextGLUT.Supported() : TSGBoolean;
 begin
-Result := DllManager.Suppored('glut');
+Result := DllManager.Supported('glut');
 end;
 
 function  TSGContextGLUT.GetClientWidth() : TSGAreaInt;
@@ -280,7 +280,7 @@ glutKeyboardFunc(@GLUTKeyboard);
 glutMouseFunc(@GLUTMouse);
 glutMotionFunc(@GLUTMotion);
 glutPassiveMotionFunc(@GLUTMotionPassive);
-if FFreeGLUTSuppored then
+if FFreeGLUTSupported then
 	begin
 	if glutMouseWheelFunc <> nil then
 		glutMouseWheelFunc(@FreeGLUTWheel);
@@ -306,7 +306,7 @@ begin
 inherited Create();
 FCursorMoution.Import();
 glutInitPascal(False);
-FFreeGLUTSuppored := DllManager.Suppored('FreeGLUT');
+FFreeGLUTSupported := DllManager.Supported('FreeGLUT');
 end;
 
 destructor TSGContextGLUT.Destroy();

@@ -53,7 +53,7 @@ type
 		FColorsFrom  : TSGScreenSkinColors;
 		FColorsTimer : TSGScreenTimer;
 		FFont        : TSGFont;
-		FDestroyFontSuppored : TSGBool;
+		FDestroyFontSupported : TSGBool;
 		procedure CreateFont(); virtual;
 		procedure DestroyFont(); virtual;
 		function FontAssigned() : TSGBool; virtual;
@@ -62,7 +62,7 @@ type
 		procedure SetFont(const VFont : TSGFont); virtual;
 		property Owner : TSGScreenSkin read FOwner write FOwner;
 			public
-		property DestroyFontSuppored : TSGBool read FDestroyFontSuppored write FDestroyFontSuppored;
+		property DestroyFontSupported : TSGBool read FDestroyFontSupported write FDestroyFontSupported;
 		property Font : TSGFont read GetFont write SetFont;
 		property Colors : TSGScreenSkinColors read FColors write FColors;
 			protected
@@ -266,7 +266,7 @@ begin
 Result := TSGScreenSkin.Create(Context);
 Result.Font  := VFont;
 Result.Owner := Self;
-Result.DestroyFontSuppored := VDestroyFontSupported;
+Result.DestroyFontSupported := VDestroyFontSupported;
 Result.UpDate();
 end;
 
@@ -325,7 +325,7 @@ FComboBoxImage.SetContext(VContext);
 FComboBoxImage.Loading();
 
 FDeviceResourcesDeleted := False;
-FDestroyFontSuppored := True;
+FDestroyFontSupported := True;
 FFont := nil;
 
 FOwner := nil;
@@ -342,7 +342,7 @@ end;
 
 procedure TSGScreenSkin.DestroyFont();
 begin
-if FDestroyFontSuppored then
+if FDestroyFontSupported then
 	SGKill(FFont)
 else
 	FFont := nil;
@@ -395,7 +395,7 @@ procedure TSGScreenSkin.PaintText(const Text : TSGString; const Location : TSGCo
 var
 	Color4uint8 : TSGVector4uint8;
 begin
-if Render.SupporedMemoryBuffers() then
+if Render.SupportedMemoryBuffers() then
 	begin
 	Color4uint8 := SGColor4fTo4uint8(Color);
 	TSGTextVertexObject.Paint(Text, Render, Font, Color4uint8, Location.FloatPosition, Location.FloatPositionAndSize, WidthCentered, HeightCentered)

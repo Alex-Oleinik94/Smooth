@@ -32,7 +32,7 @@ type
 		FTextHeight : TSGMaxEnum;
 			protected
 		procedure SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont); overload;
-		procedure SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont; const Color : TSGVector4uint8); overload;
+		procedure SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont; Color : TSGVector4uint8); overload;
 		procedure SetSymbol(const SymbolNumber : TSGMaxEnum; const Symbol : TSGTextVertexObjectSymbol);
 		procedure SetSymbolPoligone(var Symbol : TSGTextVertexObjectSymbol; const SymbolNumber : TSGMaxEnum; const SymbolParam : TSGSymbolParam; const PaintWithXShift : TSGBoolean; const Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 			public
@@ -166,7 +166,7 @@ Color.Import(255, 255, 255, 255);
 SetText(Text, Render, Font, Color);
 end;
 
-procedure TSGTextVertexObject.SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont; const Color : TSGVector4uint8); overload;
+procedure TSGTextVertexObject.SetText(const Text : TSGString; constref Render : ISGRender; const Font : TSGFont; Color : TSGVector4uint8); overload;
 
 procedure SetSymbolData(const SymbolNumber : TSGMaxEnum; const SymbolParam : TSGSymbolParam; const PaintWithXShift : TSGBoolean);  {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 var
@@ -191,6 +191,8 @@ begin
 if (Font = nil) or (Render = nil) or (Text = '') then
 	Exit;
 RenderIsDirectX := Render.RenderType in [SGRenderDirectX9, SGRenderDirectX8];
+if RenderIsDirectX then
+	Color.ConvertType();
 FSizeOfOneVertex := SizeOf(TSGVector3f) + SizeOf(TSGVector2f);
 if FUseColors then
 	FSizeOfOneVertex += SizeOf(TSGVector4uint8);

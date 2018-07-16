@@ -39,8 +39,8 @@ type
 			protected
 		procedure AddExpansion(const VExpansion:TSGString;const VLoadIsSupported, VSaveIsSupported : TSGBoolean);
 			public
-		function LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
-		function SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+		function LoadingIsSupported(const VExpansion : TSGString):TSGBoolean;
+		function SaveingIsSupported(const VExpansion : TSGString):TSGBoolean;
 		function LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
 		function SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;virtual;
@@ -56,8 +56,8 @@ type
 		FArManipulators : packed array of TSGResourceManipulator;
 			public
 		procedure AddManipulator(const VManipulatorClass : TSGResourceManipulatorClass);
-		function LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
-		function SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+		function LoadingIsSupported(const VExpansion : TSGString):TSGBoolean;
+		function SaveingIsSupported(const VExpansion : TSGString):TSGBoolean;
 		function LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
 		function SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
@@ -1109,7 +1109,7 @@ FArExpansions[FQuantityExpansions-1].RLoadIsSupported:=VLoadIsSupported;
 FArExpansions[FQuantityExpansions-1].RSaveIsSupported:=VSaveIsSupported;
 end;
 
-function TSGResourceManipulator.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManipulator.SaveingIsSupported(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -1123,7 +1123,7 @@ if FQuantityExpansions<>0 then
 			end;
 end;
 
-function TSGResourceManipulator.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManipulator.LoadingIsSupported(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
@@ -1152,7 +1152,7 @@ begin
 Result:=nil;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSuppored(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
 			begin
 			Result:=FArManipulators[Index].LoadResource(VFileName,SGUpCaseString(VExpansion));
 			if Result <> nil then
@@ -1167,7 +1167,7 @@ begin
 Result:=False;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].SaveingIsSuppored(VExpansion) then
+		if FArManipulators[Index].SaveingIsSupported(VExpansion) then
 			begin
 			Result:=FArManipulators[Index].SaveResource(VFileName,SGUpCaseString(VExpansion),VResource);
 			if Result then
@@ -1184,7 +1184,7 @@ Result:=nil;
 StreamPosition := VStream.Position;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSuppored(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
 			begin
 			Result:=FArManipulators[Index].LoadResourceFromStream(VStream,SGUpCaseString(VExpansion));
 			if Result <> nil then
@@ -1203,7 +1203,7 @@ Result:=False;
 StreamPosition := VStream.Position;
 if FQuantityManipulators<>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].SaveingIsSuppored(SGUpCaseString(VExpansion)) then
+		if FArManipulators[Index].SaveingIsSupported(SGUpCaseString(VExpansion)) then
 			begin
 			Result:=FArManipulators[Index].SaveResourceToStream(VStream,SGUpCaseString(VExpansion),VResource);
 			if Result  then
@@ -1225,27 +1225,27 @@ SetLength(FArManipulators,FQuantityManipulators);
 FArManipulators[FQuantityManipulators-1]:=VManipulatorClass.Create();
 end;
 
-function TSGResourceManager.SaveingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManager.SaveingIsSupported(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
 Result:=False;
 for Index := 0 to FQuantityManipulators - 1 do
-	if FArManipulators[Index].SaveingIsSuppored(VExpansion) then
+	if FArManipulators[Index].SaveingIsSupported(VExpansion) then
 		begin
 		Result:=True;
 		Break;
 		end;
 end;
 
-function TSGResourceManager.LoadingIsSuppored(const VExpansion : TSGString):TSGBoolean;
+function TSGResourceManager.LoadingIsSupported(const VExpansion : TSGString):TSGBoolean;
 var
 	Index : TSGLongWord;
 begin
 Result:=False;
 if FQuantityManipulators <> 0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSuppored(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
 			begin
 			Result:=True;
 			Break;

@@ -18,12 +18,13 @@ type
 	//Класс загрузки.
 	TSGLoading = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		class function ClassName():TSGString;override;
-		procedure Paint();override;
-		procedure DeleteRenderResources();override;
-		procedure LoadRenderResources();override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+		procedure Paint(); override;
+		procedure DeleteRenderResources(); override;
+		procedure LoadRenderResources(); override;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
 			private
 		FProjectionAngle      : TSGSingle;     //Угол поворота центра
 		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
@@ -53,10 +54,11 @@ type
 
 	TSGWaiting = class(TSGPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
-		destructor Destroy();override;
-		class function ClassName():TSGString;override;
-		procedure Paint();override;
+		constructor Create(const VContext : ISGContext); override;
+		destructor Destroy(); override;
+		class function ClassName() : TSGString; override;
+		procedure Paint(); override;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
 			private
 		FX, FY, FWidth, FHeight : TSGLongWord;
 		FTime : TSGFloat;
@@ -77,6 +79,11 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	;
+
+class function TSGWaiting.Supported(const _Context : ISGContext) : TSGBoolean;
+begin
+Result := True;
+end;
 
 function TSGWaiting.PaintAt(const VX, VY, VW, VH : TSGLongWord; const VActive : TSGBool = True) : TSGBool;
 begin
@@ -467,6 +474,11 @@ procedure TSGLoading.LoadRenderResources();
 begin
 FFont.LoadRenderResources();
 inherited;
+end;
+
+class function TSGLoading.Supported(const _Context : ISGContext) : TSGBoolean;
+begin
+Result := True;
 end;
 
 end.

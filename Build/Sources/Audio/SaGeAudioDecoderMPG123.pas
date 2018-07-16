@@ -22,8 +22,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 		class function ClassName() : TSGString; override;
-		class function SupporedFormats() : TSGStringList; override;
-		class function Suppored() : TSGBool; override;
+		class function SupportedFormats() : TSGStringList; override;
+		class function Supported() : TSGBool; override;
 			public
 		function SetInput(const VStream : TStream): TSGAudioDecoder; override; overload;
 		function SetInput(const VFileName : TSGString) : TSGAudioDecoder; override; overload;
@@ -60,16 +60,16 @@ uses
 	,SaGeSysUtils
 	;
 
-class function TSGAudioDecoderMPG123.SupporedFormats() : TSGStringList;
+class function TSGAudioDecoderMPG123.SupportedFormats() : TSGStringList;
 begin
 Result := nil;
 Result += 'MP3';
 end;
 
-class function TSGAudioDecoderMPG123.Suppored() : TSGBool;
+class function TSGAudioDecoderMPG123.Supported() : TSGBool;
 begin
 Result := False;
-if DllManager.Suppored('mpg123') then
+if DllManager.Supported('mpg123') then
 	if mpg123_inited() then
 		Result := True;
 end;
@@ -261,7 +261,7 @@ FMPGHandle := nil;
 FRate := 0;
 FChannels := 0;
 FEncoding := 0;
-if not DllManager.Suppored('mpg123') then
+if not DllManager.Supported('mpg123') then
 	raise Exception.Create('MPG123 is not suppored!');
 if not mpg123_inited() then
 	raise Exception.Create('MPG123 is not inited!');

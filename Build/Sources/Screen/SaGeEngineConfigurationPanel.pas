@@ -185,7 +185,7 @@ for i := Low(Contexts) to High(Contexts) do
 	begin
 	FCanUse := Contexts[i].FClass <> nil;
 	if FCanUse then
-		FCanUse := Contexts[i].FClass.Suppored();
+		FCanUse := Contexts[i].FClass.Supported();
 	FContextsComboBox.CreateItem(Contexts[i].FName, nil, -1, FCanUse);
 	end;
 
@@ -194,7 +194,7 @@ for i := Low(Renders) to High(Renders) do
 	begin
 	FCanUse := Renders[i].FClass <> nil;
 	if FCanUse then
-		FCanUse := Renders[i].FClass.Suppored();
+		FCanUse := Renders[i].FClass.Supported();
 	FRendersComboBox.CreateItem(Renders[i].FName, nil, -1, FCanUse);
 	end;
 

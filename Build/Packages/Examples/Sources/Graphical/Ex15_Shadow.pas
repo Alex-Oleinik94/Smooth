@@ -233,7 +233,7 @@ if VRenderBuffer = nil then
 	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_DEPTH_COMPONENT, SGR_UNSIGNED_SHORT, nil)
 else
 	// Создаём текстуру - текстура прикреплённая как буффер цвета, для теста глубины мы создадим рендербуффер
-	if Render.SupporedDepthTextures() then
+	if Render.SupportedDepthTextures() then
 		Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_R16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RED, SGR_UNSIGNED_SHORT, nil)
 	else
 		Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_RGBA16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RGBA, SGR_UNSIGNED_SHORT, nil);

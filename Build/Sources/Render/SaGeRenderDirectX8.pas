@@ -43,7 +43,7 @@ type
 		pDevice     : IDirect3DDevice8;
 		D3DX8Loaded : TSGBoolean;
 			public
-		class function Suppored() : TSGBoolean;override;
+		class function Supported() : TSGBoolean;override;
 		function SetPixelFormat():Boolean;override;overload;
 		function CreateContext():Boolean;override;
 		function MakeCurrent():Boolean;override;
@@ -52,8 +52,8 @@ type
 		procedure Kill();override;
 		procedure Viewport(const a,b,c,d:TSGAreaInt);override;
 		procedure SwapBuffers();override;
-		function SupporedGraphicalBuffers() : TSGBoolean; override;
-		function SupporedMemoryBuffers() : TSGBoolean; override;
+		function SupportedGraphicalBuffers() : TSGBoolean; override;
+		function SupportedMemoryBuffers() : TSGBoolean; override;
 		class function ClassName() : TSGString; override;
 			public
 		procedure InitOrtho2d(const x0,y0,x1,y1:TSGSingle);override;
@@ -120,7 +120,7 @@ type
 			procedure GetVertexUnderPixel(const px,py : LongWord; out x,y,z : Real);override;
 			{$ENDIF}
 
-		function SupporedShaders() : TSGBoolean;override;
+		function SupportedShaders() : TSGBoolean;override;
 		// Остальное потом
 		{function CreateShader(const VShaderType : TSGCardinal):TSGLongWord;override;
 		procedure ShaderSource(const VShader : TSGLongWord; VSource : PChar; VSourceLength : integer);override;
@@ -293,17 +293,17 @@ begin
 Result := 'TSGRenderDirectX8';
 end;
 
-class function TSGRenderDirectX8.Suppored() : TSGBoolean;
+class function TSGRenderDirectX8.Supported() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Suppored'); {$ENDIF}
-Result := DllManager.Suppored('Direct3D8');
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.Supported'); {$ENDIF}
+Result := DllManager.Supported('Direct3D8');
 if Result then
-	DllManager.Suppored('Direct3DX8');
+	DllManager.Supported('Direct3DX8');
 end;
 
-function TSGRenderDirectX8.SupporedShaders() : TSGBoolean;
+function TSGRenderDirectX8.SupportedShaders() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedShaders'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupportedShaders'); {$ENDIF}
 Result := False;
 end;
 
@@ -589,15 +589,15 @@ SGR_LINES:
 end;
 end;
 
-function TSGRenderDirectX8.SupporedGraphicalBuffers() : TSGBoolean;
+function TSGRenderDirectX8.SupportedGraphicalBuffers() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedGraphicalBuffers'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupportedGraphicalBuffers'); {$ENDIF}
 Result := False;
 end;
 
-function TSGRenderDirectX8.SupporedMemoryBuffers() : TSGBoolean;
+function TSGRenderDirectX8.SupportedMemoryBuffers() : TSGBoolean;
 begin
-{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupporedMemoryBuffers'); {$ENDIF}
+{$IFDEF RENDER_DX8_DEBUG_LINK} SGHint('DX8_Debug_Linck' + 'TSGRenderDirectX8.SupportedMemoryBuffers'); {$ENDIF}
 Result := True;
 end;
 
@@ -1474,7 +1474,7 @@ end;
 constructor TSGRenderDirectX8.Create();
 begin
 inherited Create();
-D3DX8Loaded := DllManager.Suppored('Direct3DX8');
+D3DX8Loaded := DllManager.Supported('Direct3DX8');
 FNowActiveNumberTexture:=0;
 FNowActiveClientNumberTexture:=0;
 SetRenderType(SGRenderDirectX8);

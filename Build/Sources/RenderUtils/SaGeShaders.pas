@@ -263,7 +263,7 @@ end;
 constructor TSGShader.Create(const VContext : ISGContext;const ShaderType:LongWord = SGR_VERTEX_SHADER);
 begin
 inherited Create(VContext);
-if Render.SupporedShaders() then
+if Render.SupportedShaders() then
 	begin
 	FShader:=Render.CreateShader(ShaderType);
 	end

@@ -140,7 +140,7 @@ type
 			public
 		constructor Create(); override;
 		destructor  Destroy(); override;
-		class function Suppored() : TSGBool; virtual;
+		class function Supported() : TSGBool; virtual;
 		class function ClassName() : TSGString; override;
 		class function AudioRenderName() : TSGString; virtual;
 			protected
@@ -490,9 +490,9 @@ begin
 Result := nil;
 
 {$IFNDEF MOBILE}
-if (Result = nil) and (TSGAudioRenderOpenAL.Suppored()) then
+if (Result = nil) and (TSGAudioRenderOpenAL.Supported()) then
 	Result := TSGAudioRenderOpenAL;
-if (Result = nil) and (TSGAudioRenderBASS.Suppored()) then
+if (Result = nil) and (TSGAudioRenderBASS.Supported()) then
 	Result := TSGAudioRenderBASS;
 {$ENDIF}
 end;
@@ -502,7 +502,7 @@ begin
 Result := 'TSGAudioRender';
 end;
 
-class function TSGAudioRender.Suppored() : TSGBool;
+class function TSGAudioRender.Supported() : TSGBool;
 begin
 Result := False;
 end;

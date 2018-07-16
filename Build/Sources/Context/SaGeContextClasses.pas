@@ -31,7 +31,7 @@ type
 		function GetAudioRender() : ISGAudioRender; virtual;
 		function GetScreen() : TSGScreenCustomComponent; virtual;
 		
-		function Suppored() : TSGBoolean; virtual;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; virtual;
 		procedure DeleteRenderResources(); virtual;
 		procedure LoadRenderResources(); virtual;
 		
@@ -83,9 +83,9 @@ procedure TSGPaintableObject.Resize();
 begin
 end;
 
-function TSGContextObject.Suppored() : TSGBoolean;
+class function TSGContextObject.Supported(const _Context : ISGContext) : TSGBoolean;
 begin
-Result := False;
+Result := True;
 end;
 
 procedure TSGContextObject.DeleteRenderResources();

@@ -47,8 +47,10 @@ type
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;
-		procedure Paint();override;
 		class function ClassName():TSGString;override;
+		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
+		procedure Paint();override;
+			public
 		procedure KeyControl();
 		procedure AddModels(const VCount : TIndex);
 			private
@@ -101,6 +103,11 @@ type
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
+
+class function TSGExample15.Supported(const _Context : ISGContext) : TSGBoolean;
+begin
+Result := _Context.Render.SupportedShaders();
+end;
 
 procedure TSGExample15.AddModels(const VCount : TIndex);
 var
@@ -256,7 +263,7 @@ if FLightsCount > 0 then
 			FLightsSettings[i].FMn *= -1;
 		end;
 
-if Render.SupporedShaders() then
+if Render.SupportedShaders() then
 	begin
 	FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 	FFont.SetContext(Context);
@@ -465,7 +472,7 @@ var
 	VStringLength, i : TSGLongWord;
 	FLightInverseModelViewMatrix : TSGMatrix4x4;
 begin
-if Render.SupporedShaders() then
+if Render.SupportedShaders() then
 	begin
 	if FUseLightAnimation then
 		FRotateAngleLight += Context.ElapsedTime/10;

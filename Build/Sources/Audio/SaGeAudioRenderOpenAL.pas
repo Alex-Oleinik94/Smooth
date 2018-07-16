@@ -80,11 +80,11 @@ type
 	TSGAudioRenderOpenAL = class(TSGAudioRender)
 			public
 		constructor Create(); override;
-		class function Suppored() : TSGBool; override;
+		class function Supported() : TSGBool; override;
 		class function ClassName() : TSGString; override;
 		class function AudioRenderName() : TSGString; override;
 			private
-		FALUTSuppored : TSGBool;
+		FALUTSupported : TSGBool;
 			private
 		FContext      : PALCcontext;
 		FDevice       : PALCdevice;
@@ -381,7 +381,7 @@ end;
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;
 begin
 Result := False;
-if not FALUTSuppored then
+if not FALUTSupported then
 	int_alutInit()
 else
 	ext_alutInit(nil, nil);
@@ -397,7 +397,7 @@ end;
 
 procedure TSGAudioRenderOpenAL.Kill();
 begin
-if not FALUTSuppored then
+if not FALUTSupported then
 	int_alutExit()
 else
 	ext_alutExit();
@@ -409,7 +409,7 @@ end;
 constructor TSGAudioRenderOpenAL.Create();
 begin
 inherited;
-FALUTSuppored := DllManager.Suppored('alut');
+FALUTSupported := DllManager.Supported('alut');
 FContext := nil;
 FDevice := nil;
 end;
@@ -424,9 +424,9 @@ begin
 Result := 'TSGAudioRenderOpenAL';
 end;
 
-class function TSGAudioRenderOpenAL.Suppored() : TSGBool;
+class function TSGAudioRenderOpenAL.Supported() : TSGBool;
 begin
-Result := DllManager.Suppored('OpenAL');
+Result := DllManager.Supported('OpenAL');
 end;
 
 end.
