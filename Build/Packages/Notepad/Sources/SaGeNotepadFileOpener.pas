@@ -36,7 +36,6 @@ implementation
 
 uses
 	 SaGeStringUtils
-	,SaGeScreen
 	;
 
 // TSGNotepadFileOpener
@@ -74,6 +73,8 @@ Result += 'HTML';
 Result += 'gitignore';
 Result += 'md';
 Result += 'gitconfig';
+
+Result += 'vmg';
 end;
 
 class function TSGNotepadFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
@@ -97,7 +98,7 @@ constructor TSGNotepadFileOpenerDrawable.Create(const VContext : ISGContext);
 begin
 inherited;
 FNotepad := TSGNotepad.Create();
-TSGScreen(Context.Screen).CreateChild(FNotepad);
+Context.Screen.CreateChild(FNotepad);
 FNotepad.SetBounds(0, 0, Render.Width, Render.Height);
 FNotepad.BoundsMakeReal();
 FNotepad.Visible := True;

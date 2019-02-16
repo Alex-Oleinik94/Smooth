@@ -678,7 +678,7 @@ Stream.Position := 0;
 while Stream.Position <> Stream.Size do
 	begin
 	SetLength(FFile, CountLines() + 1);
-	FFile[High(FFile)].FString := SGReadLnStringFromStream(Stream);
+	FFile[High(FFile)].FString := SGConvertString(SGReadLnStringFromStream(Stream), SGEncodingWindows1251);
 	FFile[High(FFile)].FColors := nil;
 	end;
 Stream.Destroy();

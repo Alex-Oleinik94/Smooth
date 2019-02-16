@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeMaz1gWizardPaintable;
+unit SaGeWorldOfWarcraftWatcherPaintable;
 
 interface
 
@@ -13,7 +13,7 @@ uses
 	;
 
 type
-	TSGMaz1gWizardPaintable = class(TSGPaintableObject)
+	TSGWorldOfWarcraftWatcherPaintable = class(TSGPaintableObject)
 			public
 		constructor Create(const _Context : ISGContext); override;
 		destructor Destroy(); override;
@@ -26,7 +26,7 @@ type
 		property ConnectionHandler : TSGWorldOfWarcraftConnectionHandler read FConnectionHandler write FConnectionHandler;
 		end;
 
-procedure SGKill(var Maz1gWizardPaintable : TSGMaz1gWizardPaintable); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var WorldOfWarcraftWatcherPaintable : TSGWorldOfWarcraftWatcherPaintable); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -34,19 +34,19 @@ uses
 	 SaGeStringUtils
 	;
 
-class function TSGMaz1gWizardPaintable.ClassName() : TSGString;
+class function TSGWorldOfWarcraftWatcherPaintable.ClassName() : TSGString;
 begin
 Result := 'Maz1g Wizard';
 end;
 
-procedure TSGMaz1gWizardPaintable.Paint();
+procedure TSGWorldOfWarcraftWatcherPaintable.Paint();
 begin
 Write('Paint');
 if (ConnectionHandler <> nil) then
 	FSizeLabel.Caption := SGStr(FConnectionHandler.AllDataSize);
 end;
 
-constructor TSGMaz1gWizardPaintable.Create(const _Context : ISGContext);
+constructor TSGWorldOfWarcraftWatcherPaintable.Create(const _Context : ISGContext);
 begin
 inherited Create(_Context);
 FConnectionHandler := nil;
@@ -54,7 +54,7 @@ FSizeLabel := SGCreateLabel(Screen, '0', 100, 100, 500, 40, True, True);
 WriteLn('Create');
 end;
 
-destructor TSGMaz1gWizardPaintable.Destroy();
+destructor TSGWorldOfWarcraftWatcherPaintable.Destroy();
 begin
 WriteLn('Destroy');
 FConnectionHandler := nil;
@@ -66,12 +66,12 @@ if (FSizeLabel <> nil) then
 inherited;
 end;
 
-procedure SGKill(var Maz1gWizardPaintable : TSGMaz1gWizardPaintable); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var WorldOfWarcraftWatcherPaintable : TSGWorldOfWarcraftWatcherPaintable); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-if Maz1gWizardPaintable <> nil then
+if WorldOfWarcraftWatcherPaintable <> nil then
 	begin
-	Maz1gWizardPaintable.Destroy();
-	Maz1gWizardPaintable := nil;
+	WorldOfWarcraftWatcherPaintable.Destroy();
+	WorldOfWarcraftWatcherPaintable := nil;
 	end;
 end;
 

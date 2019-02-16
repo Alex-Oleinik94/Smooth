@@ -1,0 +1,11 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+            "name": "Build",
+            "file_include_patterns": ["*.pas", "*.pp", "*.inc", "*.cmd", "*.bat", "*.sh", "*.ini",],
+            "folder_exclude_patterns": ["Output"]
+		}
+	]
+}

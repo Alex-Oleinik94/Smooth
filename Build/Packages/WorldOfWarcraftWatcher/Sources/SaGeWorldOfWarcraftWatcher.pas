@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeMaz1gWizard;
+unit SaGeWorldOfWarcraftWatcher;
 
 interface
 
@@ -9,20 +9,20 @@ uses
 	,SaGeBaseClasses
 	,SaGeConsoleCaller
 	,SaGeWorldOfWarcraftConnectionHandler
-	,SaGeMaz1gWizardPaintable
+	,SaGeWorldOfWarcraftWatcherPaintable
 	,SaGeContextHandler
 	,SaGeSystemTrayIcon
 	,SaGeContextUtils
 	,SaGeWorldOfWarcraftLogonConnection
 	;
 type
-	TSGMaz1gWizard = class(TSGNamed, ISGSystemTrayIconMouseButtonsCallBack, ISGWorldOfWarcraftConnectionHandlerCallBacks)
+	TSGWorldOfWarcraftWatcher = class(TSGNamed, ISGSystemTrayIconMouseButtonsCallBack, ISGWorldOfWarcraftConnectionHandlerCallBacks)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			public
 		function Init(const _Params : TSGConcoleCallerParams = nil) : TSGBoolean;
-		class function Initialize(const _Params : TSGConcoleCallerParams = nil) : TSGMaz1gWizard;
+		class function Initialize(const _Params : TSGConcoleCallerParams = nil) : TSGWorldOfWarcraftWatcher;
 		procedure Loop();
 			protected
 		procedure IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
@@ -32,7 +32,7 @@ type
 		procedure InitWindow();
 		procedure ChangeWindowVisible();
 		procedure InitializeIcon();
-		function PaintableExemplar() : TSGMaz1gWizardPaintable;
+		function PaintableExemplar() : TSGWorldOfWarcraftWatcherPaintable;
 		procedure SetPaintableSettings();
 			protected
 		FHalt : TSGBoolean;
@@ -42,8 +42,8 @@ type
 		FIcon : TSGSystemTrayIcon;
 		end;
 
-procedure SGConsoleMaz1gWizard(const _Params : TSGConcoleCallerParams = nil);
-procedure SGKill(var Maz1gWizard : TSGMaz1gWizard); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGConsoleWorldOfWarcraftWatcher(const _Params : TSGConcoleCallerParams = nil);
+procedure SGKill(var WorldOfWarcraftWatcher : TSGWorldOfWarcraftWatcher); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -58,14 +58,14 @@ uses
 	,Crt
 	;
 
-procedure TSGMaz1gWizard.LogonConnectionCallBack(const LogonConnection : TSGWOWLogonConnection);
+procedure TSGWorldOfWarcraftWatcher.LogonConnectionCallBack(const LogonConnection : TSGWOWLogonConnection);
 begin
 FIcon.Tip := FIcon.Tip + SGWinEoln + LogonConnection.ClientALC.SRP_I;
 end;
 
-procedure TSGMaz1gWizard.SetPaintableSettings();
+procedure TSGWorldOfWarcraftWatcher.SetPaintableSettings();
 var
-	Paintable : TSGMaz1gWizardPaintable;
+	Paintable : TSGWorldOfWarcraftWatcherPaintable;
 begin
 Paintable := PaintableExemplar();
 if (Paintable <> nil) then
@@ -75,20 +75,20 @@ if (Paintable <> nil) then
 	end;
 end;
 
-function TSGMaz1gWizard.PaintableExemplar() : TSGMaz1gWizardPaintable;
+function TSGWorldOfWarcraftWatcher.PaintableExemplar() : TSGWorldOfWarcraftWatcherPaintable;
 begin
 Result := nil;
 if (FWindow <> nil) then
-	Result := FWindow.PaintableExemplar as TSGMaz1gWizardPaintable;
+	Result := FWindow.PaintableExemplar as TSGWorldOfWarcraftWatcherPaintable;
 end;
 
-procedure TSGMaz1gWizard.IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
+procedure TSGWorldOfWarcraftWatcher.IconMouseCallBack(const Button : TSGCursorButton; const ButtonType : TSGCursorButtonType);
 begin
 if (ButtonType = SGUpKey) then
 	ChangeWindowVisible();
 end;
 
-procedure TSGMaz1gWizard.Iteration();
+procedure TSGWorldOfWarcraftWatcher.Iteration();
 begin
 SetPaintableSettings();
 if (FIcon <> nil) then
@@ -97,18 +97,18 @@ if KeyPressed and (ReadKey = #27) then
 	FHalt := True;
 end;
 
-procedure TSGMaz1gWizard.InitWindow();
+procedure TSGWorldOfWarcraftWatcher.InitWindow();
 begin
 if (FWindow = nil) then
 	begin
 	FWindow := TSGContextHandler.Create();
-	FWindow.RegisterCompatibleClasses(TSGMaz1gWizardPaintable);
+	FWindow.RegisterCompatibleClasses(TSGWorldOfWarcraftWatcherPaintable);
 	FWindow.RegisterSettings(SGContextOptionMax() + SGContextOptionTitle('Maz1g Wizard'));
 	end;
 FWindow.RunAnotherThread();
 end;
 
-procedure TSGMaz1gWizard.ChangeWindowVisible();
+procedure TSGWorldOfWarcraftWatcher.ChangeWindowVisible();
 begin
 if (FWindow = nil) then
 	InitWindow()
@@ -122,7 +122,7 @@ else
 	end;
 end;
 
-procedure TSGMaz1gWizard.InitializeIcon();
+procedure TSGWorldOfWarcraftWatcher.InitializeIcon();
 begin
 SGKill(FIcon);
 if TSGCompatibleSystemTrayIcon <> nil then
@@ -135,7 +135,7 @@ if (FIcon <> nil) then
 	end;
 end;
 
-procedure TSGMaz1gWizard.Start();
+procedure TSGWorldOfWarcraftWatcher.Start();
 begin
 InitializeIcon();
 SGKill(FConnectionHandler);
@@ -145,7 +145,7 @@ if not FEmbedded then
 	ChangeWindowVisible();
 end;
 
-function TSGMaz1gWizard.Init(const _Params : TSGConcoleCallerParams = nil) : TSGBoolean;
+function TSGWorldOfWarcraftWatcher.Init(const _Params : TSGConcoleCallerParams = nil) : TSGBoolean;
 
 function ProccessEmbedded(const Comand : TSGString) : TSGBoolean;
 begin
@@ -167,7 +167,7 @@ if Result then
 	Start();
 end;
 
-procedure TSGMaz1gWizard.Loop();
+procedure TSGWorldOfWarcraftWatcher.Loop();
 begin
 while (not FHalt) do
 	begin
@@ -176,13 +176,13 @@ while (not FHalt) do
 	end;
 end;
 
-class function TSGMaz1gWizard.Initialize(const _Params : TSGConcoleCallerParams = nil) : TSGMaz1gWizard;
+class function TSGWorldOfWarcraftWatcher.Initialize(const _Params : TSGConcoleCallerParams = nil) : TSGWorldOfWarcraftWatcher;
 begin
-Result := TSGMaz1gWizard.Create();
+Result := TSGWorldOfWarcraftWatcher.Create();
 Result.Init(_Params);
 end;
 
-constructor TSGMaz1gWizard.Create();
+constructor TSGWorldOfWarcraftWatcher.Create();
 begin
 inherited;
 FWindow := nil;
@@ -192,7 +192,7 @@ FEmbedded := False;
 FIcon := nil;
 end;
 
-destructor TSGMaz1gWizard.Destroy();
+destructor TSGWorldOfWarcraftWatcher.Destroy();
 begin
 SGKill(FWindow);
 SGKill(FConnectionHandler);
@@ -201,33 +201,33 @@ inherited;
 end;
 
 var
-	Maz1gWizard : TSGMaz1gWizard = nil;
+	WorldOfWarcraftWatcher : TSGWorldOfWarcraftWatcher = nil;
 
-procedure SGConsoleMaz1gWizard(const _Params : TSGConcoleCallerParams = nil);
+procedure SGConsoleWorldOfWarcraftWatcher(const _Params : TSGConcoleCallerParams = nil);
 begin
-if Maz1gWizard = nil then
+if WorldOfWarcraftWatcher = nil then
 	begin
-	Maz1gWizard := TSGMaz1gWizard.Create();
-	if Maz1gWizard.Init(_Params) then
-		Maz1gWizard.Loop();
-	SGKill(Maz1gWizard);
+	WorldOfWarcraftWatcher := TSGWorldOfWarcraftWatcher.Create();
+	if WorldOfWarcraftWatcher.Init(_Params) then
+		WorldOfWarcraftWatcher.Loop();
+	SGKill(WorldOfWarcraftWatcher);
 	end
 else
-	TSGLog.Source('TSGMaz1gWizard: Allready initialized!');
+	TSGLog.Source('TSGWorldOfWarcraftWatcher: Allready initialized!');
 end;
 
-procedure SGKill(var Maz1gWizard : TSGMaz1gWizard); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var WorldOfWarcraftWatcher : TSGWorldOfWarcraftWatcher); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-if Maz1gWizard <> nil then
+if WorldOfWarcraftWatcher <> nil then
 	begin
-	Maz1gWizard.Destroy();
-	Maz1gWizard := nil;
+	WorldOfWarcraftWatcher.Destroy();
+	WorldOfWarcraftWatcher := nil;
 	end;
 end;
 
 initialization
 begin
-SGApplicationsConsoleCaller.AddComand(@SGConsoleMaz1gWizard, ['mw'], 'Maz1g Wizard');
+SGApplicationsConsoleCaller.AddComand(@SGConsoleWorldOfWarcraftWatcher, ['mw'], 'Maz1g Wizard');
 end;
 
 end.
