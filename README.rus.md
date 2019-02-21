@@ -15,10 +15,10 @@ SaGe собирается скриптами (`.bat(.cmd)`, `.sh`). Перед �
 	
 * **Android**: Скрипты для сборки программы имеют константные директории.
 
- - `C:\Programming\android-ndk`   - Каталог для Android Native Development Kit 
- - `C:\Programming\android-sdk`   - Каталог для Android Software Development Kit
- - `C:\Programming\apache-ant`    - Каталог для Apache Ant
- - `C:\Programming\jdk`           - Каталог для Java Development Kit
+  - `C:\Programming\android-ndk`   - Каталог для Android Native Development Kit 
+  - `C:\Programming\android-sdk`   - Каталог для Android Software Development Kit
+  - `C:\Programming\apache-ant`    - Каталог для Apache Ant
+  - `C:\Programming\jdk`           - Каталог для Java Development Kit
 
 ### Пример порядка действий для сборки (OS Windows).
 
