@@ -227,7 +227,7 @@ end;
 
 initialization
 begin
-SGApplicationsConsoleCaller.AddComand(@SGConsoleWorldOfWarcraftWatcher, ['mw'], 'Maz1g Wizard');
+SGApplicationsConsoleCaller.AddComand(@SGConsoleWorldOfWarcraftWatcher, ['woww'], 'World of Warcraft Watcher');
 end;
 
 end.

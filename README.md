@@ -1,8 +1,8 @@
 <img src="Data/Engine/Icon.png" align="right" width="210" height="210" />
 
-# SaGe Engine
+# SaGe
 
-Initially, [SaGe] was conceived as light cross-platform 3D [game engine] that used [Free Pascal Compiler].
+[SaGe] is a set of modules (software framework) for creating three-dimensional applications. 
 
 [SaGe] supports:
  
