@@ -2,7 +2,7 @@
 
 # SaGe
 
-[SaGe] is a set of modules (software framework) for creating three-dimensional applications. 
+[SaGe] is a set of modules (software framework) for creating three-dimensional applications. Compiler: [Free Pascal Compiler].
 
 [SaGe] supports:
  

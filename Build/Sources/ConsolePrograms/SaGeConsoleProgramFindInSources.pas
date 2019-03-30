@@ -50,7 +50,7 @@ type
 		procedure SearchingFilesInDirectory(const Directory : TSGString);
 		procedure SearchingInFile(const FileName : TSGString);
 		procedure SearchingDirectoriesInDirectory(const Directory : TSGString);
-		procedure PrintProgress();
+		procedure PrintProgress(const TimeCase : TSGBool = True);
 		procedure AddMatchesToResults(const FileName : TSGString; const NumLineMatches : TSGUInt64; const CurentLine : TSGUInt64);
 			public
 		procedure Search(const VParams : TSGConcoleCallerParams = nil);
@@ -65,6 +65,7 @@ uses
 	,SaGeStreamUtils
 	,SaGeFileUtils
 	,SaGeVersion
+	,SaGeLog
 	
 	,Dos
 	,Crt
@@ -127,48 +128,61 @@ var
 	CurentLine : TSGUInt64;
 	SearchFile : TextFile;
 	TempString : TSGString;
-	i : TSGMaxEnum;
+	Index : TSGMaxEnum;
+	FileOpen : TSGBoolean;
 begin
-FSearchedFiles += 1;
-
 Assign(SearchFile, FileName);
-Reset(SearchFile);
-CurentLine := 0;
-while not Eof(SearchFile) do
+try
+	Reset(SearchFile);
+	FileOpen := True;
+except
+	FileOpen := False;
+end;
+if (FileOpen) then
 	begin
-	CurentLine += 1;
-	ReadLn(SearchFile, TempString);
-	TempString := SGUpCaseString(TempString);
-	NumLineMatches := 0;
-	for i := 0 to High(FWords) do
-		if Pos(FWords[i], TempString) <> 0 then
-			NumLineMatches += 1;
-	if NumLineMatches > 0 then
+	TSGLog.Source('Searching in file "' + FileName + '".');
+	FSearchedFiles += 1;
+	
+	CurentLine := 0;
+	while not Eof(SearchFile) do
 		begin
-		FFoundedMatches += NumLineMatches;
-		AddMatchesToResults(FileName, NumLineMatches, CurentLine);
+		CurentLine += 1;
+		ReadLn(SearchFile, TempString);
+		TempString := SGUpCaseString(TempString);
+		NumLineMatches := 0;
+		for Index := 0 to High(FWords) do
+			if Pos(FWords[Index], TempString) <> 0 then
+				NumLineMatches += 1;
+		if NumLineMatches > 0 then
+			begin
+			FFoundedMatches += NumLineMatches;
+			AddMatchesToResults(FileName, NumLineMatches, CurentLine);
+			end;
 		end;
-	end;
-Close(SearchFile);
+	Close(SearchFile);
 
-if FRealTimeProgress then
-	PrintProgress();
+	if FRealTimeProgress then
+		PrintProgress();
+	end;
 end;
 
-procedure TSGFinderInSources.PrintProgress();
+procedure TSGFinderInSources.PrintProgress(const TimeCase : TSGBool = True);
 var
 	FDateTimeNow : TSGDateTime;
 begin
-if FUpdateInterval > 0 then
+if (TimeCase) then
 	begin
-	FDateTimeNow.Get();
-	if (FDateTimeNow - FDateTimeLastProgress).GetPastMiliSeconds() >= FUpdateInterval then
-		FDateTimeLastProgress := FDateTimeNow
-	else
-		exit;
+	if FUpdateInterval > 0 then
+		begin
+		FDateTimeNow.Get();
+		if (FDateTimeNow - FDateTimeLastProgress).GetPastMiliSeconds() >= FUpdateInterval then
+			FDateTimeLastProgress := FDateTimeNow
+		else
+			exit;
+		end;
+	if FRealTimeProgress then
+		GoToXY(1, FWhereYOnBegin);
 	end;
-if FRealTimeProgress then
-	GoToXY(1, FWhereYOnBegin);
 TextColor(15);
 Write('Finded ');
 TextColor(10);
@@ -244,9 +258,11 @@ procedure TSGFinderInSources.Searching();
 begin
 ScaningWords();
 ClearSearchData();
-
 FOutDirectory := SGFreeDirectoryName('Find In Sources Results', 'Part');
 SGMakeDirectory(FOutDirectory);
+
+if (FSearchingDirectory = '') then
+	FSearchingDirectory := '.';
 
 TextColor(15);
 Write('Created results directory "');
@@ -272,6 +288,8 @@ TextColor(10);
 Write(SGTextTimeBetweenDates(FDateTimeStart, FDateTimeEnd, 'ENG'));
 TextColor(15);
 WriteLn('.');
+
+PrintProgress(False);
 
 if FFoundedMatches = 0 then
 	begin
