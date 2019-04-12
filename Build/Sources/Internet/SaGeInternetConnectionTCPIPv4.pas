@@ -60,7 +60,7 @@ type
 			protected
 		procedure KillEmulators();
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
-		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
+		class function PacketCompatible(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 			protected
 		procedure DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure HandlePacket(const Packet : TSGEthernetPacketFrame);
@@ -261,7 +261,7 @@ if not FileSystemSuport then
 TextStream.TextColor(7);
 end;
 
-class function TSGInternetConnectionTCPIPv4.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+class function TSGInternetConnectionTCPIPv4.PacketCompatible(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := (Packet.TCPIP <> nil) and (Packet.IPv4 <> nil);
 end;
@@ -356,7 +356,7 @@ function TSGInternetConnectionTCPIPv4.PacketPushed(const Time : TSGTime; const D
 begin
 Result := False;
 FCritacalSection.Enter();
-if PacketComparable(Packet) then
+if PacketCompatible(Packet) then
 	if (FPacketCount = 0) and (not FSenderFinalized) and (not FRecieverFinalized) and (not FFictitious) then
 		Result := InitFirstPacket(Time, Date, Packet)
 	else if (FPacketCount > 0) and (

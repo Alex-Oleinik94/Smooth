@@ -309,18 +309,25 @@ end;
 
 function TSGInternetPacketCaptureHandler.Update() : TSGBoolean;
 var
-	Now : TSGDateTime;
+	TimeNow : TSGDateTime;
+	CrashedDevicesNumber : TSGMaxEnum;
 begin
-Result := FPacketCaptor.AllThreadsFinished();
-if (not Result) and FPossibilityBreakLoopFromConsole and KeyPressed() and (ReadKey = #27) then
-	Result := True;
+CrashedDevicesNumber := FPacketCaptor.DevicesWithCrashedThreads();
+Result := CrashedDevicesNumber <> 0;
+if Result then
+	WriteConsoleString('Error: ' + SGStr(CrashedDevicesNumber) + ' of ' + SGStr(FPacketCaptor.DevicesNumber()) + ' thread(-s) crashed while capturing. Stopping.');
+if (not Result) then
+	Result := FPacketCaptor.AllThreadsFinished();
+if  (not Result) and FPossibilityBreakLoopFromConsole and
+	(KeyPressed() and (ReadKey = #27)) then
+		Result := True;
 if (not Result) and FProcessTimeOutUpdates then
 	begin
-	Now.Get();
-	if (Now - FTimeLastUpdateInfo).GetPastMiliSeconds() > FInfoTimeOut then
+	TimeNow.Get();
+	if (TimeNow - FTimeLastUpdateInfo).GetPastMiliSeconds() > FInfoTimeOut then
 		begin
-		FTimeLastUpdateInfo := Now;
-		Result := HandleTimeOutUpdate(Now);
+		FTimeLastUpdateInfo := TimeNow;
+		Result := HandleTimeOutUpdate(TimeNow);
 		end;
 	end;
 end;

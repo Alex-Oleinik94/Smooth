@@ -4,6 +4,7 @@
 // PCap Next Generation Dump File Format
 // =====================================
 // CaptureFileFormat
+
 unit SaGePCapNGFile;
 
 interface

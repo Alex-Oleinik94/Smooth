@@ -85,7 +85,7 @@ type
 		function RenameConnectionDirectoryIncludeSize() : TSGBoolean;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); virtual;
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
-		class function PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
+		class function PacketCompatible(const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
 		procedure AddDeviceIPv4(const Net, Mask : TSGIPv4Address); virtual;
 		procedure MakeFictitious(); virtual;
 			public
@@ -231,7 +231,7 @@ procedure TSGInternetConnection.PrintTextInfo(const TextStream : TSGTextStream; 
 begin
 end;
 
-class function TSGInternetConnection.PacketComparable(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
+class function TSGInternetConnection.PacketCompatible(const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 begin
 Result := False;
 end;

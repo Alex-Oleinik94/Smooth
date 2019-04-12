@@ -27,10 +27,10 @@ type
 		FCriticalSection : TSGCriticalSection;
 		FConnections : TSGInternetConnectionList;
 		
-		FOutPacketsSize : TSGUInt64;
-		FOutPacketsCount : TSGUInt64;
-		FComparablePacketsSize : TSGUInt64;
-		FComparablePacketsCount : TSGUInt64;
+		FIncompatiblePacketsSize : TSGUInt64;
+		FIncompatiblePacketsCount : TSGUInt64;
+		FCompatiblePacketsSize : TSGUInt64;
+		FCompatiblePacketsCount : TSGUInt64;
 		
 		FModeDataTransfer : TSGBoolean;
 		FModeRuntimeDataDumper : TSGBoolean;
@@ -39,12 +39,12 @@ type
 		
 		// Dump modes
 		FDumpDirectory : TSGString;
-		FOutDumpDirectory : TSGString;
+		FIncompatibleDumpDirectory : TSGString;
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 		FDeviceInformationFileExtension : TSGString;
 		
-		// Data ftansfer
+		// Data tansfer
 		FConnectionsHandler : ISGConnectionsHandler;
 			public
 		function Start() : TSGBoolean; override;
@@ -57,7 +57,7 @@ type
 		procedure CreateDumpDirectory();
 		procedure PutConnectionModesInfo(const Connection : TSGInternetConnection);
 		procedure PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
-		procedure DumpOutPacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
+		procedure DumpIncompatiblePacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
 			protected
 		procedure HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime); override;
 		procedure HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); override;
@@ -151,7 +151,7 @@ end;
 // ======TSGInternetConnections======
 // ==================================
 
-procedure TSGInternetConnections.DumpOutPacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
+procedure TSGInternetConnections.DumpIncompatiblePacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
 var
 	DateTimeString : TSGString;
 	FileName : TSGString;
@@ -162,7 +162,7 @@ var
 	FileStream : TFileStream = nil;
 begin
 DateTimeString := SGDateTimeCorrectionString(Date, Time, True);
-FileName := FOutDumpDirectory + DirectorySeparator + DateTimeString + ' {' + SGStr(FOutPacketsCount) + '}';
+FileName := FIncompatibleDumpDirectory + DirectorySeparator + DateTimeString + ' {' + SGStr(FIncompatiblePacketsCount) + '}';
 Description := Packet.Description;
 if Description <> '' then
 	FileName += ' (' + Description + ')';
@@ -199,8 +199,8 @@ if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	FDumpDirectory := 'Connections analyzer ' + SGDateTimeString(True);
 	SGMakeDirectory(FDumpDirectory);
 	
-	FOutDumpDirectory := FDumpDirectory + DirectorySeparator + 'Out packets';
-	SGMakeDirectory(FOutDumpDirectory);
+	FIncompatibleDumpDirectory := FDumpDirectory + DirectorySeparator + 'Incompatible packets';
+	SGMakeDirectory(FIncompatibleDumpDirectory);
 	end;
 end;
 
@@ -243,13 +243,13 @@ TextStream.TextColor(7);
 TextStream.WriteLn(['Connections (', TextTime, ') [', ConnectionsCount, ']', Iff(ConnectionsCount = 0, '.', ':')]);
 if ConnectionsCount <> 0 then
 	PrintConnectionsList(TextStream);
-if (FOutPacketsCount <> 0) or (FComparablePacketsCount <> 0) then
+if (FIncompatiblePacketsCount <> 0) or (FCompatiblePacketsCount <> 0) then
 	begin
 	TextStream.Write('Packets: ');
-	if (FComparablePacketsCount <> 0) then
-		TextStream.Write(['Comparable[', FComparablePacketsCount, ']: ', SGGetSizeString(FComparablePacketsSize, 'ENG'), Iff((FOutPacketsCount <> 0), '; ', '.')]);
-	if (FOutPacketsCount <> 0) then
-		TextStream.Write(['Out[', FOutPacketsCount, ']: ', SGGetSizeString(FOutPacketsSize, 'ENG'), '.']);
+	if (FCompatiblePacketsCount <> 0) then
+		TextStream.Write(['Compatible[', FCompatiblePacketsCount, ']: ', SGGetSizeString(FCompatiblePacketsSize, 'ENG'), Iff((FIncompatiblePacketsCount <> 0), '; ', '.')]);
+	if (FIncompatiblePacketsCount <> 0) then
+		TextStream.Write(['Incompatible[', FIncompatiblePacketsCount, ']: ', SGGetSizeString(FIncompatiblePacketsSize, 'ENG'), '.']);
 	TextStream.WriteLn();
 	end;
 if DestroyTextStream then
@@ -311,8 +311,8 @@ else
 	FCriticalSection.Enter();
 	
 	FConnections += NewConnection;
-	FComparablePacketsCount += 1;
-	FComparablePacketsSize += FrameSize;
+	FCompatiblePacketsCount += 1;
+	FCompatiblePacketsSize += FrameSize;
 	
 	FCriticalSection.Leave();
 	
@@ -330,7 +330,7 @@ begin
 Result := False;
 if (ConnectionClasses <> nil) and (Length(ConnectionClasses) > 0) then
 	for Index := High(ConnectionClasses) downto 0 do
-		if ConnectionClasses[Index].PacketComparable(Frame) then
+		if ConnectionClasses[Index].PacketCompatible(Frame) then
 			begin
 			Result := HandleNewConnection(
 				ConnectionClasses[Index],
@@ -356,8 +356,8 @@ if (FConnections <> nil) and (Length(FConnections) > 0) then
 		if FConnections[Index].PacketPushed(Time, Date, Frame) then
 			begin
 			Result := True;
-			FComparablePacketsCount += 1;
-			FComparablePacketsSize += FrameSize;
+			FCompatiblePacketsCount += 1;
+			FCompatiblePacketsSize += FrameSize;
 			break;
 			end;
 FCriticalSection.Leave();
@@ -375,11 +375,11 @@ Frame.Read(Stream, Stream.Size);
 if not HandlePacketConnections(Identificator, Frame, Date, Time) then
 	if not HandlePacketNewConnections(Identificator, Frame, Date, Time) then
 		begin
-		FOutPacketsSize += Stream.Size;
-		FOutPacketsCount += 1;
+		FIncompatiblePacketsSize += Stream.Size;
+		FIncompatiblePacketsCount += 1;
 		
 		if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
-			DumpOutPacket(Date, Time, Frame, Stream);
+			DumpIncompatiblePacket(Date, Time, Frame, Stream);
 		SGKill(Frame);
 		end;
 end;
@@ -390,16 +390,16 @@ inherited;
 FCriticalSection := TSGCriticalSection.Create();
 FConnections := nil;
 FConnectionsHandler := nil;
-FOutPacketsSize := 0;
-FOutPacketsCount := 0;
-FComparablePacketsCount := 0;
-FComparablePacketsSize := 0;
+FIncompatiblePacketsSize := 0;
+FIncompatiblePacketsCount := 0;
+FCompatiblePacketsCount := 0;
+FCompatiblePacketsSize := 0;
 FModePacketStorage := False;
 FModeDataTransfer := True;
 FModeRuntimeDataDumper := False;
 FModeRuntimePacketDumper := False;
 FDumpDirectory := '';
-FOutDumpDirectory := '';
+FIncompatibleDumpDirectory := '';
 FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
 FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 FDeviceInformationFileExtension := SaGeInternetDumperBase.DeviceInformationFileExtension;

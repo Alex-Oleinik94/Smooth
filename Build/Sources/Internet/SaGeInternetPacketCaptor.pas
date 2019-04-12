@@ -72,6 +72,8 @@ type
 		function BeginLoopThreads(const WithDelay : TSGBoolean = False) : TSGBoolean; 
 		procedure LoopThreads(); virtual;
 		procedure LoopNonThread(); deprecated;
+		function DevicesNumber() : TSGMaxEnum;
+		function DevicesWithCrashedThreads() : TSGMaxEnum;
 		end;
 
 procedure SGInternetPacketCaptor(const CaptorCallBack : TSGInternetPacketCaptorCallBack; const CaptorCallBackData : TSGPointer = nil);
@@ -144,6 +146,26 @@ end;
 // =====================================
 // ======TSGInternetPacketCaptor======
 // =====================================
+
+function TSGInternetPacketCaptor.DevicesNumber() : TSGMaxEnum;
+begin
+if (FDevices <> nil) then
+	Result := Length(FDevices)
+else
+	Result := 0;
+end;
+
+function TSGInternetPacketCaptor.DevicesWithCrashedThreads() : TSGMaxEnum;
+var
+	Index : TSGMaxEnum;
+begin
+Result := 0;
+if (FDevices <> nil) then
+	for Index := 0 to High(FDevices) do
+		if FDevices[Index].HandlerThread <> nil then
+			if FDevices[Index].HandlerThread.Crashed then
+				Result += 1;
+end;
 
 procedure TSGInternetPacketCaptor.InitThreads();
 var
