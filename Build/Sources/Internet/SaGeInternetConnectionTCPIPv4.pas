@@ -75,7 +75,7 @@ type
 implementation
 
 uses
-	 SaGeInternetConnections
+	 SaGeInternetConnectionsCaptor
 	,SaGeStringUtils
 	,SaGeBaseUtils
 	,SaGeLog

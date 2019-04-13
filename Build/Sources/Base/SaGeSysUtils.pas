@@ -264,18 +264,32 @@ var
 	I, H   : Integer;
 	Frames : PPointer;
 	Report : TSGString;
+	{Frame  : Pointer;   // How to get long stack trace
+	OldFrame : Pointer;}
 begin
 Report := 'An unhandled exception occurred at ' + SGAddrStr(ExceptAddr) + ':' + SGWinEoln;
 if E <> nil then
 	Report += E.ClassName + ': ' + E.Message + SGWinEoln;
 Report += BackTraceStrFunc(ExceptAddr) + SGWinEoln;
-Frames := ExceptFrames;
-H := ExceptFrameCount - 1;
-for I := 0 to H do
+if (ExceptFrameCount > 0) then
 	begin
-	Report += BackTraceStrFunc(Frames[I]);
-	if I <> H then
-		Report += SGWinEoln;
+	H := ExceptFrameCount - 1;
+	Frames := ExceptFrames;
+	for I := 0 to H do
+		begin
+		Report += BackTraceStrFunc(Frames[I]);
+		if I <> H then
+			Report += SGWinEoln;
+		end;
+	{Frame := get_caller_frame(Frames[H], get_caller_addr(Frames[H]));
+	while (Frame <> nil) do
+		begin
+		Report += BackTraceStrFunc(get_caller_addr(Frame));
+		OldFrame := Frame;
+		Frame := get_caller_frame(Frame);
+		if (Frame <= OldFrame) then
+			Frame := nil;
+		end;}
 	end;
 SGHint(Report, CasesOfPrint, ViewTime);
 Report := '';

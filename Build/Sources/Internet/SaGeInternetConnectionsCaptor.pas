@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeInternetConnections;
+unit SaGeInternetConnectionsCaptor;
 
 interface
 
@@ -19,7 +19,7 @@ uses
 	;
 
 type
-	TSGInternetConnections = class(TSGInternetPacketCaptureHandler)
+	TSGInternetConnectionsCaptor = class(TSGInternetPacketCaptureHandler)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -75,9 +75,9 @@ type
 		property ConnectionsHandler : ISGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
 		end;
 
-procedure SGKill(var Connections : TSGInternetConnections); overload;
+procedure SGKill(var Connections : TSGInternetConnectionsCaptor); overload;
 procedure SGRegisterInternetConnectionClass(const ClassVariable : TSGInternetConnectionClass);
-procedure SGConnectionsAnalyzer();
+procedure SGConnectionsCaptor();
 
 implementation
 
@@ -121,7 +121,7 @@ if Add then
 	ConnectionClasses += ClassVariable;
 end;
 
-procedure SGKill(var Connections : TSGInternetConnections); overload;
+procedure SGKill(var Connections : TSGInternetConnectionsCaptor); overload;
 begin
 if Connections <> nil then
 	begin
@@ -130,11 +130,11 @@ if Connections <> nil then
 	end;
 end;
 
-procedure SGConnectionsAnalyzer();
+procedure SGConnectionsCaptor();
 var
-	Connections : TSGInternetConnections = nil;
+	Connections : TSGInternetConnectionsCaptor = nil;
 begin
-Connections := TSGInternetConnections.Create();
+Connections := TSGInternetConnectionsCaptor.Create();
 Connections.PossibilityBreakLoopFromConsole := True;
 Connections.ProcessTimeOutUpdates := True;
 Connections.InfoTimeOut := 120;
@@ -147,11 +147,11 @@ Connections.LogStatistic();
 SGKill(Connections);
 end;
 
-// ==================================
-// ======TSGInternetConnections======
-// ==================================
+// ========================================
+// ======TSGInternetConnectionsCaptor======
+// ========================================
 
-procedure TSGInternetConnections.DumpIncompatiblePacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
+procedure TSGInternetConnectionsCaptor.DumpIncompatiblePacket(const Date : TSGDateTime; const Time : TSGTime; const Packet : TSGEthernetPacketFrame; const Stream : TStream);
 var
 	DateTimeString : TSGString;
 	FileName : TSGString;
@@ -185,14 +185,14 @@ SGKill(FileStream);
 Stream.Position := 0;
 end;
 
-function TSGInternetConnections.Start() : TSGBoolean;
+function TSGInternetConnectionsCaptor.Start() : TSGBoolean;
 begin
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	CreateDumpDirectory();
 Result := inherited Start();
 end;
 
-procedure TSGInternetConnections.CreateDumpDirectory();
+procedure TSGInternetConnectionsCaptor.CreateDumpDirectory();
 begin
 if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	begin
@@ -204,24 +204,24 @@ if FModeRuntimeDataDumper or FModeRuntimePacketDumper then
 	end;
 end;
 
-function TSGInternetConnections.ConnectionsLength() : TSGMaxEnum;
+function TSGInternetConnectionsCaptor.ConnectionsLength() : TSGMaxEnum;
 begin
 Result := 0;
 if (FConnections <> nil) then
 	Result := Length(FConnections);
 end;
 
-procedure TSGInternetConnections.PrintStatistic(const TextTime : TSGString);
+procedure TSGInternetConnectionsCaptor.PrintStatistic(const TextTime : TSGString);
 begin
 ViewStatistic(TextTime, TSGTextConsoleStream.Create(), True);
 end;
 
-procedure TSGInternetConnections.LogStatistic();
+procedure TSGInternetConnectionsCaptor.LogStatistic();
 begin
 ViewStatistic(SGTextTimeBetweenDates(TimeBegining, SGNow(), 'EN'), TSGTextLogStream.Create(), True);
 end;
 
-procedure TSGInternetConnections.ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
+procedure TSGInternetConnectionsCaptor.ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
 
 procedure PrintConnectionsList(const TextStream : TSGTextStream);
 var
@@ -256,17 +256,17 @@ if DestroyTextStream then
 	TextStream.Destroy();
 end;
 
-function TSGInternetConnections.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
+function TSGInternetConnectionsCaptor.HandleTimeOutUpdate(const Now : TSGDateTime) : TSGBoolean;
 begin
 Result := inherited HandleTimeOutUpdate(Now);
 PrintStatistic(SGTextTimeBetweenDates(TimeBegining, SGNow(), 'EN'));
 end;
 
-procedure TSGInternetConnections.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); 
+procedure TSGInternetConnectionsCaptor.HandleDevice(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator); 
 begin
 end;
 
-procedure TSGInternetConnections.PutConnectionModesInfo(const Connection : TSGInternetConnection);
+procedure TSGInternetConnectionsCaptor.PutConnectionModesInfo(const Connection : TSGInternetConnection);
 begin
 Connection.Identifier := SGStr(Length(FConnections) + 1);
 Connection.ModeDataTransfer := FModeDataTransfer;
@@ -283,7 +283,7 @@ if FModeDataTransfer then
 	Connection.ConnectionsHandler := FConnectionsHandler;
 end;
 
-procedure TSGInternetConnections.PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
+procedure TSGInternetConnectionsCaptor.PutConnectionIPv4Info(const Connection : TSGInternetConnection; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator);
 var
 	IPv4Net, IPv4Mask : TSGIPv4Address;
 begin
@@ -293,7 +293,7 @@ if (IPv4Mask <> 0) or (IPv4Net <> 0) then
 	Connection.AddDeviceIPv4(IPv4Net, IPv4Mask);
 end;
 
-function TSGInternetConnections.HandleNewConnection(const ConnectionClass : TSGInternetConnectionClass; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+function TSGInternetConnectionsCaptor.HandleNewConnection(const ConnectionClass : TSGInternetConnectionClass; const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 var
 	NewConnection : TSGInternetConnection = nil;
 	FrameSize : TSGUInt64;
@@ -323,7 +323,7 @@ else
 	end;
 end;
 
-function TSGInternetConnections.HandlePacketNewConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+function TSGInternetConnectionsCaptor.HandlePacketNewConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 var
 	Index : TSGMaxEnum;
 begin
@@ -343,7 +343,7 @@ if (ConnectionClasses <> nil) and (Length(ConnectionClasses) > 0) then
 			end;
 end;
 
-function TSGInternetConnections.HandlePacketConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
+function TSGInternetConnectionsCaptor.HandlePacketConnections(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Frame : TSGEthernetPacketFrame; const Date : TSGDateTime; const Time : TSGTime) : TSGBoolean;
 var
 	Index : TSGMaxEnum;
 	FrameSize : TSGUInt64;
@@ -363,7 +363,7 @@ if (FConnections <> nil) and (Length(FConnections) > 0) then
 FCriticalSection.Leave();
 end;
 
-procedure TSGInternetConnections.HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime);
+procedure TSGInternetConnectionsCaptor.HandlePacket(const Identificator : TSGInternetPacketCaptureHandlerDeviceIdentificator; const Stream : TStream; const Time : TSGTime);
 var
 	Frame : TSGEthernetPacketFrame;
 	Date : TSGDateTime;
@@ -384,7 +384,7 @@ if not HandlePacketConnections(Identificator, Frame, Date, Time) then
 		end;
 end;
 
-constructor TSGInternetConnections.Create();
+constructor TSGInternetConnectionsCaptor.Create();
 begin
 inherited;
 FCriticalSection := TSGCriticalSection.Create();
@@ -405,7 +405,7 @@ FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 FDeviceInformationFileExtension := SaGeInternetDumperBase.DeviceInformationFileExtension;
 end;
 
-procedure TSGInternetConnections.RenameConnectionDirectoriesIncludeSize();
+procedure TSGInternetConnectionsCaptor.RenameConnectionDirectoriesIncludeSize();
 var
 	CountRenamed, Index : TSGMaxEnum;
 begin
@@ -420,7 +420,7 @@ if (FModeRuntimeDataDumper or FModeRuntimePacketDumper) and (FConnections <> nil
 	end;
 end;
 
-destructor TSGInternetConnections.Destroy();
+destructor TSGInternetConnectionsCaptor.Destroy();
 var
 	Index : TSGMaxEnum;
 begin
