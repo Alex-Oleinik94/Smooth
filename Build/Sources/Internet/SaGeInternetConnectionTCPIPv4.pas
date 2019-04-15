@@ -61,12 +61,14 @@ type
 		procedure KillEmulators();
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
 		class function PacketCompatible(const Packet : TSGEthernetPacketFrame) : TSGBoolean; override;
+		function Finalized() : TSGBoolean; override;
 			protected
 		procedure DumpPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure HandlePacket(const Packet : TSGEthernetPacketFrame);
 		function InitFirstPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 		function InitPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean;
 		procedure PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+		procedure UpDateStatistic(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 		procedure DumpData(const Stream : TStream; const EmulatorString : TSGString);
 		procedure PushData(const Stream : TStream; const Emulator : TSGEmulatorTCP);
 		procedure CreateBlockStreams();
@@ -183,9 +185,14 @@ FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketData
 end;}
 end;
 
+function TSGInternetConnectionTCPIPv4.Finalized() : TSGBoolean; 
+begin
+Result := ((FRecieverEmulator <> nil) and FRecieverEmulator.Finalized and MinimumOneDataModeEnabled());
+end;
+
 class function TSGInternetConnectionTCPIPv4.ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString;
 begin
-Result := 'TCP' + Iff(not FileSystemSuport, '/') + 'IPv4';
+Result := 'TCP' + Iff(not FileSystemSuport, '&', '_') + 'IPv4';
 end;
 
 procedure TSGInternetConnectionTCPIPv4.PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False);
@@ -202,7 +209,7 @@ const
 begin
 if (not FileSystemSuport) and (ProtocolAbbreviation() <> '') then
 	begin
-	if (FRecieverEmulator <> nil) and (not FRecieverEmulator.Finalized) then
+	if (not Finalized()) then
 		if (SGNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
 			TextStream.TextColor(ColorActive5secProtocol)
 		else
@@ -308,8 +315,10 @@ if FModePacketStorage and (not FFictitious) then
 	SGKill(FPacketStorage);
 	FPacketStorage := TSGInternetPacketStorage.Create();
 	end;
-if (FModeDataTransfer or FModeRuntimeDataDumper) and (not FFictitious) then
+if MinimumOneDataModeEnabled() and (not FFictitious) then
 	begin
+	SGKill(FSenderEmulator);
+	SGKill(FRecieverEmulator);
 	FSenderEmulator := TSGEmulatorTCP.Create(Self);
 	FRecieverEmulator := TSGEmulatorTCP.Create(Self);
 	end;
@@ -333,14 +342,17 @@ Result :=
 	));
 end;
 
-procedure TSGInternetConnectionTCPIPv4.PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+procedure TSGInternetConnectionTCPIPv4.UpDateStatistic(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
 begin
 FTimeLastPacket := Time;
 FDateLastPacket := Date;
 
 FDataSize += Packet.Size;
 FPacketCount += 1;
+end;
 
+procedure TSGInternetConnectionTCPIPv4.PushPacket(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame);
+begin
 if FModeDataTransfer or FModeRuntimeDataDumper then
 	HandlePacket(Packet);
 if FModeRuntimePacketDumper then
@@ -364,6 +376,8 @@ if PacketCompatible(Packet) then
 			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination)) or
 			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source)) ) then
 		Result := InitPacket(Time, Date, Packet);
+if Result then
+	UpDateStatistic(Time, Date, Packet);
 if Result and (not FFictitious) then
 	PushPacket(Time, Date, Packet)
 else if FFictitious then

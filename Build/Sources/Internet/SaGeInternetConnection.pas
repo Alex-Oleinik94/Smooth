@@ -13,6 +13,7 @@ uses
 	,SaGeTextStream
 	,SaGeInternetBase
 	,SaGeCriticalSection
+	,SaGeInternetPacketCaptureHandler
 	
 	,Classes
 	;
@@ -59,6 +60,7 @@ type
 		FDataSize : TSGInternetConnectionSizeInt;
 		FPacketCount : TSGInternetConnectionSizeInt;
 		
+		FDeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator;
 		FDeviceIPv4Supported : TSGBoolean;
 		FDeviceIPv4Net  : TSGIPv4Address;
 		FDeviceIPv4Mask : TSGIPv4Address;
@@ -81,6 +83,9 @@ type
 		procedure DumpPacketInfoFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName : TSGString);
 		procedure DumpPacketDataFile(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const DataFileName : TSGString);
 		function AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
+		function MinimumOneModeEnabled() : TSGBoolean;
+		function MinimumOneDataModeEnabled() : TSGBoolean;
+		function Finalized() : TSGBoolean; virtual;
 			public
 		function RenameConnectionDirectoryIncludeSize() : TSGBoolean;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); virtual;
@@ -104,6 +109,7 @@ type
 		property Identifier : TSGString read FIdentifier write FIdentifier;
 		property ConnectionsHandler : ISGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
 		property Fictitious : TSGBoolean read FFictitious write FFictitious;
+		property DeviceIdentificator : TSGInternetPacketCaptureHandlerDeviceIdentificator read FDeviceIdentificator write FDeviceIdentificator;
 		end;
 	TSGInternetConnectionClass = class of TSGInternetConnection;
 
@@ -141,6 +147,21 @@ if Variable <> nil then
 	Variable.Destroy();
 	Variable := nil;
 	end;
+end;
+
+function TSGInternetConnection.Finalized() : TSGBoolean;
+begin
+Result := False;
+end;
+
+function TSGInternetConnection.MinimumOneDataModeEnabled() : TSGBoolean;
+begin
+Result := FModeDataTransfer or FModeRuntimeDataDumper;
+end;
+
+function TSGInternetConnection.MinimumOneModeEnabled() : TSGBoolean;
+begin
+Result := FModeDataTransfer or FModePacketStorage or FModeRuntimeDataDumper or FModeRuntimePacketDumper;
 end;
 
 function TSGInternetConnection.AddressMatchesNetMask(const AddressValue : TSGIPv4Address) : TSGBoolean;
@@ -273,6 +294,7 @@ FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;
 FPacketInfoFileExtension := SaGeInternetDumperBase.PacketInfoFileExtension;
 FConnectionsHandler := nil;
 FFictitious := False;
+FDeviceIdentificator := 0;
 end;
 
 procedure TSGInternetConnection.MakeFictitious();

@@ -37,13 +37,66 @@ uses
 	;
 
 procedure SGConsoleConnectionsCaptor(const VParams : TSGConcoleCallerParams = nil);
+var
+	ModeDataTransfer : TSGBoolean = False;
+	ModePacketStorage : TSGBoolean = False;
+	ModeRuntimeDataDumper : TSGBoolean = False;
+	ModeRuntimePacketDumper : TSGBoolean = False;
+
+function ProccessModeDataTransfer(const Comand : TSGString):TSGBool;
 begin
-if SGCountConsoleParams(VParams) = 0 then
+Result := True;
+ModeDataTransfer := not ModeDataTransfer;
+end;
+
+function ProccessModePacketStorage(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+ModePacketStorage := not ModePacketStorage;
+end;
+
+function ProccessModeRuntimeDataDumper(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+ModeRuntimePacketDumper := not ModeRuntimePacketDumper;
+end;
+
+function ProccessModeRuntimePacketDumper(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+ModeDataTransfer := not ModeDataTransfer;
+end;
+
+var
+	Connections : TSGInternetConnectionsCaptor = nil;
+	Success : TSGBoolean = True;
+begin
+SGPrintEngineVersion();
+if (VParams <> nil) and (Length(VParams) > 0) then
+	with TSGConsoleCaller.Create(VParams) do
+		begin
+		Category('Modes');
+		AddComand(@ProccessModeDataTransfer,        ['mdt'],  'Enable/disable data transfer mode');
+		AddComand(@ProccessModePacketStorage,       ['mps'],  'Enable/disable packet starage mode');
+		AddComand(@ProccessModeRuntimeDataDumper,   ['mrdd'], 'Enable/disable runtime data dumping (carefully)');
+		AddComand(@ProccessModeRuntimePacketDumper, ['mrpd'], 'Enable/disable runtime packet dumping (carefully)');
+		Success := Execute();
+		Destroy();
+		end;
+if Success then
 	begin
-	SGConnectionsCaptor();
-	end
-else
-	SGHint('Params are not alowed here!');
+	Connections := TSGInternetConnectionsCaptor.Create();
+	Connections.PossibilityBreakLoopFromConsole := True;
+	Connections.ProcessTimeOutUpdates := True;
+	Connections.InfoTimeOut := 120;
+	Connections.ModeDataTransfer := ModeDataTransfer;
+	Connections.ModePacketStorage := ModePacketStorage;
+	Connections.ModeRuntimeDataDumper := ModeRuntimeDataDumper;
+	Connections.ModeRuntimePacketDumper := ModeRuntimePacketDumper;
+	Connections.Loop();
+	Connections.LogStatistic();
+	SGKill(Connections);
+	end;
 end;
 
 procedure SGConsoleDescriptPCapNG(const VParams : TSGConcoleCallerParams = nil);

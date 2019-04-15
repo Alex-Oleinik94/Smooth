@@ -48,11 +48,11 @@ type
 		FConnectionsHandler : ISGConnectionsHandler;
 			public
 		function Start() : TSGBoolean; override;
+		procedure LogStatistic();
 			protected
 		procedure RenameConnectionDirectoriesIncludeSize();
 		procedure PrintStatistic(const TextTime : TSGString);
 		procedure ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
-		procedure LogStatistic();
 		function ConnectionsLength() : TSGMaxEnum;
 		procedure CreateDumpDirectory();
 		procedure PutConnectionModesInfo(const Connection : TSGInternetConnection);
@@ -77,7 +77,6 @@ type
 
 procedure SGKill(var Connections : TSGInternetConnectionsCaptor); overload;
 procedure SGRegisterInternetConnectionClass(const ClassVariable : TSGInternetConnectionClass);
-procedure SGConnectionsCaptor();
 
 implementation
 
@@ -128,23 +127,6 @@ if Connections <> nil then
 	Connections.Destroy();
 	Connections := nil;
 	end;
-end;
-
-procedure SGConnectionsCaptor();
-var
-	Connections : TSGInternetConnectionsCaptor = nil;
-begin
-Connections := TSGInternetConnectionsCaptor.Create();
-Connections.PossibilityBreakLoopFromConsole := True;
-Connections.ProcessTimeOutUpdates := True;
-Connections.InfoTimeOut := 120;
-Connections.ModeDataTransfer := False;
-Connections.ModePacketStorage := False;
-Connections.ModeRuntimeDataDumper := True;
-Connections.ModeRuntimePacketDumper := True;
-Connections.Loop();
-Connections.LogStatistic();
-SGKill(Connections);
 end;
 
 // ========================================
@@ -301,6 +283,7 @@ begin
 NewConnection := ConnectionClass.Create();
 PutConnectionModesInfo(NewConnection);
 PutConnectionIPv4Info(NewConnection, Identificator);
+NewConnection.DeviceIdentificator := Identificator;
 
 FrameSize := Frame.Size;
 Result := NewConnection.PacketPushed(Time, Date, Frame);
@@ -353,7 +336,7 @@ FCriticalSection.Enter();
 FrameSize := Frame.Size;
 if (FConnections <> nil) and (Length(FConnections) > 0) then
 	for Index := High(FConnections) downto 0 do
-		if FConnections[Index].PacketPushed(Time, Date, Frame) then
+		if (FConnections[Index].DeviceIdentificator = Identificator) and FConnections[Index].PacketPushed(Time, Date, Frame) then
 			begin
 			Result := True;
 			FCompatiblePacketsCount += 1;
