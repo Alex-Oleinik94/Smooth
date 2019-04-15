@@ -76,7 +76,6 @@ type
 		FPacketDataFileExtension : TSGString;
 		FPacketInfoFileExtension : TSGString;
 			protected
-		class function ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString; virtual;
 		procedure CreateConnectionDumpDirectory(); virtual;
 		function PrintableTextString(const FileSystemSuport : TSGBoolean = True) : TSGString;
 		procedure DumpPacketFiles(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame; const InfoFileName, DataFileName : TSGString);
@@ -87,6 +86,7 @@ type
 		function MinimumOneDataModeEnabled() : TSGBoolean;
 		function Finalized() : TSGBoolean; virtual;
 			public
+		class function ProtocolAbbreviation(const FileSystemSuport : TSGBoolean = False) : TSGString; virtual;
 		function RenameConnectionDirectoryIncludeSize() : TSGBoolean;
 		procedure PrintTextInfo(const TextStream : TSGTextStream; const FileSystemSuport : TSGBoolean = False); virtual;
 		function PacketPushed(const Time : TSGTime; const Date : TSGDateTime; const Packet : TSGEthernetPacketFrame) : TSGBoolean; virtual;
@@ -95,6 +95,7 @@ type
 		procedure MakeFictitious(); virtual;
 			public
 		property DataSize : TSGInternetConnectionSizeInt read FDataSize;
+		property PacketCount : TSGInternetConnectionSizeInt read FPacketCount;
 		property TimeFirstPacket : TSGTime read FTimeFirstPacket;
 		property DateFirstPacket : TSGDateTime read FDateFirstPacket;
 		property ModeDataTransfer : TSGBoolean read FModeDataTransfer write FModeDataTransfer;

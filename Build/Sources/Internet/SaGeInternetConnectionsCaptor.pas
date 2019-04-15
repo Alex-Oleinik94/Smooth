@@ -37,6 +37,8 @@ type
 		FModePacketStorage : TSGBoolean;
 		FModeRuntimePacketDumper : TSGBoolean;
 		
+		FLargeStatisticsInformation : TSGBoolean;
+		
 		// Dump modes
 		FDumpDirectory : TSGString;
 		FIncompatibleDumpDirectory : TSGString;
@@ -73,6 +75,7 @@ type
 		property ModeRuntimeDataDumper : TSGBoolean read FModeRuntimeDataDumper write FModeRuntimeDataDumper;
 		property ModeRuntimePacketDumper : TSGBoolean read FModeRuntimePacketDumper write FModeRuntimePacketDumper;
 		property ConnectionsHandler : ISGConnectionsHandler read FConnectionsHandler write FConnectionsHandler;
+		property LargeStatisticsInformation : TSGBoolean read FLargeStatisticsInformation write FLargeStatisticsInformation;
 		end;
 
 procedure SGKill(var Connections : TSGInternetConnectionsCaptor); overload;
@@ -205,6 +208,81 @@ end;
 
 procedure TSGInternetConnectionsCaptor.ViewStatistic(const TextTime : TSGString; const TextStream : TSGTextStream; const DestroyTextStream : TSGBoolean = True);
 
+procedure PrintNotLargeStatisticsInformation(const TextStream : TSGTextStream);
+type
+	PSGShortConnectionInfo = ^ TSGShortConnectionInfo;
+	TSGShortConnectionInfo = packed record
+		FAbbreviation : TSGString;
+		FPacketCount : TSGUInt64;
+		FDataSize : TSGUInt64;
+		FCount : TSGUInt64;
+		end;
+	TSGShortConnectionsInfo = packed array of TSGShortConnectionInfo;
+var
+	ShortConnectionsInfo : TSGShortConnectionsInfo = nil;
+
+function FindShortConnectionInfo(const ProtocolAbbreviation : TSGString) : PSGShortConnectionInfo;
+var
+	Index : TSGMaxEnum;
+begin
+Result := nil;
+if (ShortConnectionsInfo <> nil) then
+	for Index := 0 to High(ShortConnectionsInfo) do
+		if (ShortConnectionsInfo[Index].FAbbreviation = ProtocolAbbreviation) then
+			begin
+			Result := @ShortConnectionsInfo[Index];
+			break;
+			end;
+end;
+
+procedure AddNotExistsConnectionInfo(const Index : TSGMaxEnum);
+var
+	ShortConnectionInfo : PSGShortConnectionInfo = nil;
+begin
+if (ShortConnectionsInfo = nil) then
+	SetLength(ShortConnectionsInfo, 1)
+else
+	SetLength(ShortConnectionsInfo, Length(ShortConnectionsInfo) + 1);
+ShortConnectionInfo := @ShortConnectionsInfo[High(ShortConnectionsInfo)];
+ShortConnectionInfo^.FAbbreviation := FConnections[Index].ProtocolAbbreviation();
+ShortConnectionInfo^.FPacketCount := FConnections[Index].PacketCount;
+ShortConnectionInfo^.FDataSize := FConnections[Index].DataSize;
+ShortConnectionInfo^.FCount := 1;
+end;
+
+var
+	Index : TSGMaxEnum;
+	NumberCount : TSGMaxEnum;
+	ShortConnectionInfo : PSGShortConnectionInfo = nil;
+begin
+for Index := 0 to High(FConnections) do
+	begin
+	ShortConnectionInfo := FindShortConnectionInfo(FConnections[Index].ProtocolAbbreviation());
+	if (ShortConnectionInfo = nil) then
+		AddNotExistsConnectionInfo(Index)
+	else
+		begin
+		ShortConnectionInfo^.FPacketCount += FConnections[Index].PacketCount;
+		ShortConnectionInfo^.FDataSize += FConnections[Index].DataSize;
+		ShortConnectionInfo^.FCount += 1;
+		end;
+	end;
+if (ShortConnectionInfo <> nil) then
+	begin
+	NumberCount := Length(SGStr(Length(ShortConnectionsInfo)));
+	for Index := 0 to High(ShortConnectionsInfo) do
+		begin
+		TextStream.Write(['  ', StringJustifyRight(SGStr(Index + 1), NumberCount, ' '), ') ']);
+		TextStream.TextColor(15);
+		TextStream.Write([ShortConnectionsInfo[Index].FAbbreviation]);
+		TextStream.TextColor(7);
+		TextStream.Write(['(', ShortConnectionsInfo[Index].FCount, ')[', ShortConnectionsInfo[Index].FPacketCount, ']: ', SGGetSizeString(ShortConnectionsInfo[Index].FDataSize, 'EN')]);
+		TextStream.WriteLn();
+		end;
+	SetLength(ShortConnectionsInfo, 0);
+	end;
+end;
+
 procedure PrintConnectionsList(const TextStream : TSGTextStream);
 var
 	NumberCount : TSGMaxEnum;
@@ -222,9 +300,12 @@ end;
 begin
 TextStream.Clear();
 TextStream.TextColor(7);
-TextStream.WriteLn(['Connections (', TextTime, ') [', ConnectionsCount, ']', Iff(ConnectionsCount = 0, '.', ':')]);
-if ConnectionsCount <> 0 then
-	PrintConnectionsList(TextStream);
+TextStream.WriteLn(['Capturing connections ', TextTime, ' (', ConnectionsCount, ')', Iff(ConnectionsCount = 0, '.', ':')]);
+if (ConnectionsCount <> 0) then
+	if LargeStatisticsInformation then
+		PrintConnectionsList(TextStream)
+	else
+		PrintNotLargeStatisticsInformation(TextStream);
 if (FIncompatiblePacketsCount <> 0) or (FCompatiblePacketsCount <> 0) then
 	begin
 	TextStream.Write('Packets: ');
@@ -381,6 +462,7 @@ FModePacketStorage := False;
 FModeDataTransfer := True;
 FModeRuntimeDataDumper := False;
 FModeRuntimePacketDumper := False;
+FLargeStatisticsInformation := False;
 FDumpDirectory := '';
 FIncompatibleDumpDirectory := '';
 FPacketDataFileExtension := SaGeInternetDumperBase.PacketFileExtension;

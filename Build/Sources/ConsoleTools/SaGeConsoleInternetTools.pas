@@ -42,6 +42,13 @@ var
 	ModePacketStorage : TSGBoolean = False;
 	ModeRuntimeDataDumper : TSGBoolean = False;
 	ModeRuntimePacketDumper : TSGBoolean = False;
+	LargeStatisticsInformation : TSGBool = False;
+
+function ProccessLargeStatisticsInformation(const Comand : TSGString):TSGBool;
+begin
+Result := True;
+LargeStatisticsInformation := not LargeStatisticsInformation;
+end;
 
 function ProccessModeDataTransfer(const Comand : TSGString):TSGBool;
 begin
@@ -75,11 +82,12 @@ SGPrintEngineVersion();
 if (VParams <> nil) and (Length(VParams) > 0) then
 	with TSGConsoleCaller.Create(VParams) do
 		begin
+		AddComand(@ProccessLargeStatisticsInformation, ['lsi'],  'Large statistics information');
 		Category('Modes');
-		AddComand(@ProccessModeDataTransfer,        ['mdt'],  'Enable/disable data transfer mode');
-		AddComand(@ProccessModePacketStorage,       ['mps'],  'Enable/disable packet starage mode');
-		AddComand(@ProccessModeRuntimeDataDumper,   ['mrdd'], 'Enable/disable runtime data dumping (carefully)');
-		AddComand(@ProccessModeRuntimePacketDumper, ['mrpd'], 'Enable/disable runtime packet dumping (carefully)');
+		AddComand(@ProccessModeDataTransfer,           ['mdt'],  'Enable/disable data transfer mode');
+		AddComand(@ProccessModePacketStorage,          ['mps'],  'Enable/disable packet starage mode');
+		AddComand(@ProccessModeRuntimeDataDumper,      ['mrdd'], 'Enable/disable runtime data dumping (carefully)');
+		AddComand(@ProccessModeRuntimePacketDumper,    ['mrpd'], 'Enable/disable runtime packet dumping (carefully)');
 		Success := Execute();
 		Destroy();
 		end;
@@ -88,11 +96,12 @@ if Success then
 	Connections := TSGInternetConnectionsCaptor.Create();
 	Connections.PossibilityBreakLoopFromConsole := True;
 	Connections.ProcessTimeOutUpdates := True;
-	Connections.InfoTimeOut := 120;
+	Connections.InfoTimeOut := 60;
 	Connections.ModeDataTransfer := ModeDataTransfer;
 	Connections.ModePacketStorage := ModePacketStorage;
 	Connections.ModeRuntimeDataDumper := ModeRuntimeDataDumper;
 	Connections.ModeRuntimePacketDumper := ModeRuntimePacketDumper;
+	Connections.LargeStatisticsInformation := LargeStatisticsInformation;
 	Connections.Loop();
 	Connections.LogStatistic();
 	SGKill(Connections);
