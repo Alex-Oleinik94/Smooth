@@ -1412,7 +1412,7 @@ glFogf(GL_FOG_DENSITY, 0.55);
 
 glDisable(GL_FOG);
 
-glClearColor(0,0,0,0);
+glClearColor(0, 0, 0, 0);
 glEnable(GL_DEPTH_TEST);
 {$IFNDEF MOBILE}glClearDepth{$ELSE}glClearDepthf{$ENDIF}(1.0);
 glDepthFunc(GL_LESS);

@@ -56,6 +56,7 @@ uses
 	
 	,SysUtils
 	,Crt
+	//,SaGeGraphicViewer
 	;
 
 procedure TSGWorldOfWarcraftWatcher.LogonConnectionCallBack(const LogonConnection : TSGWOWLogonConnection);
@@ -78,7 +79,7 @@ end;
 function TSGWorldOfWarcraftWatcher.PaintableExemplar() : TSGWorldOfWarcraftWatcherPaintable;
 begin
 Result := nil;
-if (FWindow <> nil) then
+if (FWindow <> nil) and (FWindow.PaintableExemplar is TSGWorldOfWarcraftWatcherPaintable) then
 	Result := FWindow.PaintableExemplar as TSGWorldOfWarcraftWatcherPaintable;
 end;
 
@@ -103,7 +104,8 @@ if (FWindow = nil) then
 	begin
 	FWindow := TSGContextHandler.Create();
 	FWindow.RegisterCompatibleClasses(TSGWorldOfWarcraftWatcherPaintable);
-	FWindow.RegisterSettings(SGContextOptionMax() + SGContextOptionTitle('Maz1g Wizard'));
+	//FWindow.RegisterCompatibleClasses(TSGGraphViewer);
+	FWindow.RegisterSettings(SGContextOptionMax() + SGContextOptionTitle('World of Warcraft Watcher'));
 	end;
 FWindow.RunAnotherThread();
 end;
@@ -116,9 +118,10 @@ else if (FWindow.Context = nil) then
 	FWindow.RunAnotherThread()
 else
 	begin
-	FWindow.Context.Visible := not FWindow.Context.Visible;
+	FWindow.Context.Active := not FWindow.Context.Active; // For "World of Warcraft Watcher" no need to waste RAM on the initialized window
+	{FWindow.Context.Visible := not FWindow.Context.Visible;
 	if FWindow.Context.Visible then
-		FWindow.Context.SetForeground();
+		FWindow.Context.SetForeground();}
 	end;
 end;
 
@@ -129,7 +132,7 @@ if TSGCompatibleSystemTrayIcon <> nil then
 	FIcon := TSGCompatibleSystemTrayIcon.Create();
 if (FIcon <> nil) then
 	begin
-	FIcon.Tip := 'Mazig Wizard';
+	FIcon.Tip := 'World of Warcraft Watcher';
 	FIcon.ButtonsCallBack := Self;
 	FIcon.Initialize();
 	end;
@@ -158,7 +161,7 @@ Result := True;
 if (_Params <> nil) and (Length(_Params) > 0) then
 	with TSGConsoleCaller.Create(_Params) do
 		begin
-		Category('Maz1g Wizard help');
+		Category('"World of Warcraft Watcher" help');
 		AddComand(@ProccessEmbedded, ['e', 'embedded'],  'Runs embedded');
 		Result := Execute();
 		Destroy();

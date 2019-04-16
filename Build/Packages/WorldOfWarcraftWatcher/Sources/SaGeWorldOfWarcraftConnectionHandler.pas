@@ -8,7 +8,7 @@ uses
 	 SaGeBase
 	,SaGeBaseClasses
 	,SaGeInternetConnection
-	,SaGeInternetConnections
+	,SaGeInternetConnectionsCaptor
 	,SaGeWorldOfWarcraftLogonStructs
 	,SaGeWorldOfWarcraftLogonConnection
 	
@@ -29,7 +29,7 @@ type
 		procedure HandleConnectionStatus(const Connection : TSGInternetConnection; const Status : TSGConnectionStatus);
 			protected
 		FLogonConnections : TSGWOWLogonConnectionList;
-		FConnections : TSGInternetConnections;
+		FConnectionsCaptor : TSGInternetConnectionsCaptor;
 		FCallBacks : ISGWorldOfWarcraftConnectionHandlerCallBacks;
 			protected
 		function LogonConnectionExists(const Connection : TSGInternetConnection) : TSGBoolean;
@@ -102,15 +102,15 @@ begin
 inherited;
 FCallBacks := nil;
 FLogonConnections := nil;
-FConnections := TSGInternetConnections.Create();
-FConnections.PossibilityBreakLoopFromConsole := False;
-FConnections.ProcessTimeOutUpdates := False;
-FConnections.ModeDataTransfer := True;
-FConnections.ModePacketStorage := False;
-FConnections.ModeRuntimeDataDumper := False;
-FConnections.ModeRuntimePacketDumper := False;
-FConnections.ConnectionsHandler := Self;
-FConnections.Start();
+FConnectionsCaptor := TSGInternetConnectionsCaptor.Create();
+FConnectionsCaptor.PossibilityBreakLoopFromConsole := False;
+FConnectionsCaptor.ProcessTimeOutUpdates := False;
+FConnectionsCaptor.ModeDataTransfer := True;
+FConnectionsCaptor.ModePacketStorage := False;
+FConnectionsCaptor.ModeRuntimeDataDumper := False;
+FConnectionsCaptor.ModeRuntimePacketDumper := False;
+FConnectionsCaptor.ConnectionsHandler := Self;
+FConnectionsCaptor.Start();
 end;
 
 procedure TSGWorldOfWarcraftConnectionHandler.KillLogonConnections();
@@ -126,7 +126,7 @@ end;
 destructor TSGWorldOfWarcraftConnectionHandler.Destroy();
 begin
 KillLogonConnections();
-SGKill(FConnections);
+SGKill(FConnectionsCaptor);
 inherited;
 end;
 

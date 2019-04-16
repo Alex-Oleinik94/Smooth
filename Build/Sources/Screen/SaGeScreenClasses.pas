@@ -62,6 +62,7 @@ function SGCreateButton(const Parent : TSGScreenCustomComponent; const Caption :
 function SGCreateButton(const Parent : TSGScreenCustomComponent; const Caption : TSGString; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComponentProcedure; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
 function SGCreateButton(const Parent : TSGScreenCustomComponent; const Caption : TSGString; const CallBack : TSGScreenComponentProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
 function SGCreateButton(const Parent : TSGScreenCustomComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
+procedure SGKill(var _Button : TSGScreenButton); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 // ComboBox
 function SGCreateComboBox(const Parent : TSGScreenCustomComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
@@ -69,10 +70,12 @@ function SGCreateComboBox(const Parent : TSGScreenCustomComponent; const X,Y,W,H
 function SGCreateComboBox(const Parent : TSGScreenCustomComponent; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 function SGCreateComboBox(const Parent : TSGScreenCustomComponent; const CallBack : TSGScreenComboBoxProcedure; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
 function SGCreateComboBox(const Parent : TSGScreenCustomComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenComboBox; overload;
+procedure SGKill(var _ComboBox : TSGScreenComboBox); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 // Picture
 function SGCreatePicture(const Parent : TSGScreenCustomComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
 function SGCreatePicture(const Parent : TSGScreenCustomComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPicture; overload;
+procedure SGKill(var _Picture : TSGScreenPicture); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 // Edit
 function SGCreateEdit(const Parent : TSGScreenCustomComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
@@ -81,6 +84,7 @@ function SGCreateEdit(const Parent : TSGScreenCustomComponent; const EditText : 
 function SGCreateEdit(const Parent : TSGScreenCustomComponent; const EditText : TSGString; const TextTypeFunc : TSGScreenEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGScreenCustomComponent; const EditText : TSGString; const TextTypeFunc : TSGScreenEditTextTypeFunction; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
 function SGCreateEdit(const Parent : TSGScreenCustomComponent; const EditText : TSGString; const TextType : TSGEditTextType; const X,Y,W,H : TSGScreenInt; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenEdit; overload;
+procedure SGKill(var _Edit : TSGScreenEdit); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 // Panel
 function SGCreatePanel(const Parent : TSGScreenCustomComponent; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
@@ -92,6 +96,7 @@ function SGCreatePanel(const Parent : TSGScreenCustomComponent; const ViewLines,
 function SGCreatePanel(const Parent : TSGScreenCustomComponent; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 function SGCreatePanel(const Parent : TSGScreenCustomComponent; const W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
 function SGCreatePanel(const Parent : TSGScreenCustomComponent; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
+procedure SGKill(var _Panel : TSGScreenPanel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 // Label
 function SGCreateLabel(const Parent : TSGScreenCustomComponent; const LabelCaption : TSGString; const IsVisible : TSGBoolean = True; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
@@ -103,6 +108,7 @@ function SGCreateLabel(const Parent : TSGScreenCustomComponent; const LabelCapti
 function SGCreateLabel(const Parent : TSGScreenCustomComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Skin : TSGScreenSkin; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 function SGCreateLabel(const Parent : TSGScreenCustomComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const Anchors : TSGAnchors; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
 function SGCreateLabel(const Parent : TSGScreenCustomComponent; const LabelCaption : TSGString; const X,Y,W,H : TSGScreenInt; const Font : TSGFont; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenLabel; overload;
+procedure SGKill(var _Label : TSGScreenLabel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -139,6 +145,15 @@ if Parent <> nil then
 	Parent.CreateChild(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
+end;
+
+procedure SGKill(var _Button : TSGScreenButton); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Button <> nil then
+	begin
+	_Button.Destroy();
+	_Button := nil;
+	end;
 end;
 
 //############
@@ -180,6 +195,15 @@ Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
 
+procedure SGKill(var _ComboBox : TSGScreenComboBox); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _ComboBox <> nil then
+	begin
+	_ComboBox.Destroy();
+	_ComboBox := nil;
+	end;
+end;
+
 //###########
 //# Picture #
 //###########
@@ -199,6 +223,15 @@ if (Parent <> nil) then
 	Parent.CreateChild(Result);
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
+end;
+
+procedure SGKill(var _Picture : TSGScreenPicture); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Picture <> nil then
+	begin
+	_Picture.Destroy();
+	_Picture := nil;
+	end;
 end;
 
 //########
@@ -253,8 +286,17 @@ Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
 end;
 
+procedure SGKill(var _Edit : TSGScreenEdit); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Edit <> nil then
+	begin
+	_Edit.Destroy();
+	_Edit := nil;
+	end;
+end;
+
 //#########
-//# Label #
+//# Panel #
 //#########
 
 function SGCreatePanel(const Parent : TSGScreenCustomComponent; const ViewLines, ViewQuad : TSGBoolean; const X,Y,W,H : TSGScreenInt; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenPanel; overload;
@@ -324,6 +366,15 @@ if IsBoundsReal then
 	Result.BoundsMakeReal();
 end;
 
+procedure SGKill(var _Panel : TSGScreenPanel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Panel <> nil then
+	begin
+	_Panel.Destroy();
+	_Panel := nil;
+	end;
+end;
+
 //#########
 //# Label #
 //#########
@@ -388,6 +439,15 @@ if Parent <> nil then
 Result.Caption := LabelCaption;
 Result.Visible := IsVisible;
 Result.UserPointer := InterfaceData;
+end;
+
+procedure SGKill(var _Label : TSGScreenLabel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _Label <> nil then
+	begin
+	_Label.Destroy();
+	_Label := nil;
+	end;
 end;
 
 end.

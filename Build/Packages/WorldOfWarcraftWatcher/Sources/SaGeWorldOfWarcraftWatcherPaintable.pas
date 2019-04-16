@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+{$DEFINE WOWW_CD} //Console Debug
+
 unit SaGeWorldOfWarcraftWatcherPaintable;
 
 interface
@@ -36,14 +38,17 @@ uses
 
 class function TSGWorldOfWarcraftWatcherPaintable.ClassName() : TSGString;
 begin
-Result := 'Maz1g Wizard';
+Result := 'World of Warcraft Watcher';
 end;
 
 procedure TSGWorldOfWarcraftWatcherPaintable.Paint();
 begin
-Write('Paint');
+{$IFDEF WOWW_CD}Write('P');{$ENDIF} //Paint
 if (ConnectionHandler <> nil) then
+	begin
+	//WriteLn(FConnectionHandler.AllDataSize);
 	FSizeLabel.Caption := SGStr(FConnectionHandler.AllDataSize);
+	end;
 end;
 
 constructor TSGWorldOfWarcraftWatcherPaintable.Create(const _Context : ISGContext);
@@ -51,18 +56,14 @@ begin
 inherited Create(_Context);
 FConnectionHandler := nil;
 FSizeLabel := SGCreateLabel(Screen, '0', 100, 100, 500, 40, True, True);
-WriteLn('Create');
+{$IFDEF WOWW_CD}Write('C');{$ENDIF} //Create
 end;
 
 destructor TSGWorldOfWarcraftWatcherPaintable.Destroy();
 begin
-WriteLn('Destroy');
+{$IFDEF WOWW_CD}WriteLn('D');{$ENDIF} //Destroy
 FConnectionHandler := nil;
-if (FSizeLabel <> nil) then
-	begin
-	FSizeLabel.Destroy();
-	FSizeLabel := nil;
-	end;
+SGKill(FSizeLabel);
 inherited;
 end;
 
