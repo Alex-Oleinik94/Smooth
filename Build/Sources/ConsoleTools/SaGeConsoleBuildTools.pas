@@ -12,7 +12,7 @@ uses
 procedure SGConsoleBuildFiles                                  (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleBuild                                       (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleClearFileRegistrationResources              (const VParams : TSGConcoleCallerParams = nil);
-procedure SGConsoleClearFileRegistrationPackages               (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleClearFileForRegistrationExtensions          (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertFileToPascalUnitAndRegisterUnit      (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleIncEngineVersion                            (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertDirectoryFilesToPascalUnits          (const VParams : TSGConcoleCallerParams = nil);
@@ -36,7 +36,7 @@ uses
 	,SaGeLists
 	,SaGeResourceManager
 	,SaGeMakefileReader
-	,SaGePackages
+	,SaGeExtensionManager
 	,SaGeStringUtils
 	,SaGeConsoleUtils
 	,SaGeLog
@@ -187,10 +187,10 @@ else
 	end;
 end;
 
-procedure SGConsoleClearFileRegistrationPackages(const VParams : TSGConcoleCallerParams = nil);
+procedure SGConsoleClearFileForRegistrationExtensions(const VParams : TSGConcoleCallerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
-	SGClearFileRegistrationPackages(VParams[0])
+	SGClearFileForRegistrationExtensions(VParams[0])
 else
 	begin
 	SGPrintEngineVersion();
@@ -330,11 +330,11 @@ var
 	i : TSGMaxEnum;
 begin
 if OpenPackages then
-	SGPackagesToMakefile(Make, Target, IsRelease);
+	SGExtensionsToMakefile(Make, Target, IsRelease);
 if Packages <> nil then
 	if Length(Packages) > 0 then
 		for i := 0 to High(Packages) do
-			SGPackageToMakefile(Make, Target, Packages[i], IsRelease);
+			SGExtensionToMakefile(Make, Target, Packages[i], IsRelease);
 end;
 
 procedure PrintTarget(const Target : TSGString);

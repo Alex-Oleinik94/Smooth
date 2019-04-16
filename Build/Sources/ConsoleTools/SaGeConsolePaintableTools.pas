@@ -34,7 +34,7 @@ uses
 	StrMan
 	
 	// Aditional Engine includes
-	,SaGePackages
+	,SaGeExtensionManager
 	,SaGeLists
 	,SaGeRender
 	,SaGeAudioRender
