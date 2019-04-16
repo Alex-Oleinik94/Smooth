@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SanPackage;
+unit SanExtension;
 
 interface
 

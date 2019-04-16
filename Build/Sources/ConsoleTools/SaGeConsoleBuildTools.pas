@@ -221,8 +221,8 @@ const
 			{$ENDIF};
 var
 	Target : TSGString = '';
-	Packages : TSGStringList = nil;
-	OpenPackages : TSGBool = False;
+	Extensions : TSGStringList = nil;
+	OpenExtensions : TSGBool = False;
 	Bitrate : TSGByte = 0;
 
 procedure PrintLogo();
@@ -246,7 +246,7 @@ function ReadParams(const Make : TSGMakefileReader) : TSGBool;
 var
 	i : TSGUInt32;
 	AllTargets : TSGStringList = nil;
-	S, SUP, P : TSGString;
+	S, SUP, E : TSGString;
 
 function Proccess32(const Comand : TSGString):TSGBool;
 begin
@@ -260,28 +260,28 @@ Result := True;
 Bitrate := 64;
 end;
 
-function ProccessPS(const Comand : TSGString):TSGBool;
+function ProccessOE(const Comand : TSGString):TSGBool;
 begin
 Result := True;
-OpenPackages := True;
+OpenExtensions := True;
 end;
 
-function ProccessPackage(const Comand : TSGString):TSGBool;
+function ProccessExtension(const Comand : TSGString) : TSGBool;
 var
 	i : TSGUInt32;
-	PackageName : TSGString = '';
+	ExtensionName : TSGString = '';
 begin
 if Length(Comand) > 1 then
 	begin
 	for i := 2 to Length(Comand) do
-		PackageName += Comand[i];
+		ExtensionName += Comand[i];
 	end;
-Result := PackageName <> '';
+Result := ExtensionName <> '';
 if Result then
-	Packages += P;
+	Extensions += E;
 end;
 
-function ProccessTarget(const Comand : TSGString):TSGBool;
+function ProccessTarget(const Comand : TSGString) : TSGBool;
 begin
 Result := (Target = '') and (SGUpCaseString(Comand) in AllTargets);
 if Result then
@@ -298,9 +298,9 @@ with TSGConsoleCaller.Create(VParams) do
 	Category('Bitrate');
 	AddComand(@Proccess32, ['32', 'x32', 'i386'], 'Building 32 bit target');
 	AddComand(@Proccess64, ['64', 'x64', '86_64', 'x86_64'], 'Building 64 bit target');
-	Category('Packages');
-	AddComand(@ProccessPS, ['ps', 'packages', 'pall'], 'Building all open packages');
-	AddComand(@ProccessPackage, ['p*?'], 'Building an package');
+	Category('Extensions');
+	AddComand(@ProccessOE, ['oe', 'extensions', 'eall'], 'Building all open extensions');
+	AddComand(@ProccessExtension, ['e*?'], 'Building an extension');
 	Category('Target');
 	AddComand(@ProccessTarget, ['*?'], 'Building an target');
 	Result := Execute();
@@ -325,16 +325,16 @@ SGRegisterUnit(
 	Make.GetConstant('SGFILEREGISTRATIONRESOURCES'));
 end;
 
-procedure ProcessPackages(var Make : TSGMakefileReader);
+procedure ProcessExtensions(var Make : TSGMakefileReader);
 var
 	i : TSGMaxEnum;
 begin
-if OpenPackages then
+if OpenExtensions then
 	SGExtensionsToMakefile(Make, Target, IsRelease);
-if Packages <> nil then
-	if Length(Packages) > 0 then
-		for i := 0 to High(Packages) do
-			SGExtensionToMakefile(Make, Target, Packages[i], IsRelease);
+if Extensions <> nil then
+	if Length(Extensions) > 0 then
+		for i := 0 to High(Extensions) do
+			SGExtensionToMakefile(Make, Target, Extensions[i], IsRelease);
 end;
 
 procedure PrintTarget(const Target : TSGString);
@@ -371,7 +371,7 @@ if IsRelease then
 	end
 else
 	ProcessVersionFile(Make, 'False');
-ProcessPackages(Make);
+ProcessExtensions(Make);
 if SGUpCaseString(Target) = 'ANDROID' then
 	Bitrate := 32
 else if IsRelease() then
@@ -397,7 +397,7 @@ end;
 begin
 SGPrintEngineVersion();
 ExecuteBuild();
-SetLength(Packages, 0);
+SetLength(Extensions, 0);
 end;
 
 procedure SGConsoleBuildFiles(const VParams : TSGConcoleCallerParams = nil);

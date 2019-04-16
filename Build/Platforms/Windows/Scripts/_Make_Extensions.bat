@@ -3,9 +3,9 @@ CALL _Create_Output_Directoryes
 cd ..
 set S1="=============================="
 if "%1" equ "android" (
-	set S2="Compiling Packages for Android"
+	set S2="Compiling Extensions for Android"
 ) else (
-	set S2="Compiling Packages for Windows"
+	set S2="Compiling Extensions for Windows"
 )
 if "%1" equ "" (
 	set TARGET=debug
@@ -16,10 +16,10 @@ if exist "../Binaries/Main_Console.exe" (
 	echo %S1%
 	echo %S2%
 	echo %S1%
-	"../Binaries/Main_Console.exe" --bt --build --packages --%TARGET%
+	"../Binaries/Main_Console.exe" --bt --build --extensions --%TARGET%
 	if not "%1" equ "android" (
 		if %errorlevel% equ 0 (
-			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Packages.exe
+			copy .\..\Binaries\Main.exe .\..\Binaries\Main_Extensions.exe
 			rem cd Scripts
 			rem CALL _Check_Console
 			rem cd ..
