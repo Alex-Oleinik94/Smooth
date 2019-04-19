@@ -23,10 +23,10 @@ type
 			protected
 		FConnection : TSGInternetConnection;
 		FClientALC_Sets : TSGBoolean;
-		FClientALC : TSGWOW_ALC_Client_Full;
+		FClientALC : TSGWOW_ALC_Client;
 			public
 		property Connection : TSGInternetConnection read FConnection write FConnection;
-		property ClientALC : TSGWOW_ALC_Client_Full read FClientALC;
+		property ClientALC : TSGWOW_ALC_Client read FClientALC;
 		end;
 
 {$DEFINE  INC_PLACE_INTERFACE}
@@ -40,24 +40,8 @@ type
 implementation
 
 procedure TSGWOWLogonConnection.ReadClientALC(const Stream : TStream);
-
-function ReadString(const StringLength : TSGMaxEnum) : TSGString;
-var
-	Index : TSGMaxEnum;
-	C : TSGChar;
 begin
-Result := '';
-for Index := 1 to StringLength do
-	begin
-	Stream.Read(C, 1);
-	Result += C;
-	end;
-end;
-
-begin
-Stream.Position := 0;
-Stream.Read(FClientALC, SizeOf(TSGWOW_ALC_Client));
-FClientALC.SRP_I := ReadString(FClientALC.SRP_I_length);
+FClientALC := SGReadAuthenticationLogonChallenge(Stream);
 FClientALC_Sets := True;
 end;
 

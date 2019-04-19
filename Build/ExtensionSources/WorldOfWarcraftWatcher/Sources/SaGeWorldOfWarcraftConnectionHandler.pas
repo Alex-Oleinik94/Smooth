@@ -35,14 +35,25 @@ type
 		function LogonConnectionExists(const Connection : TSGInternetConnection) : TSGBoolean;
 		procedure KillLogonConnections();
 		procedure CreateNewLogonConnection(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream);
+		function GetLogonConnectionsNumber() : TSGMaxEnum;
 			public
 		function AllDataSize() : TSGUInt64;
 		property CallBacks : ISGWorldOfWarcraftConnectionHandlerCallBacks read FCallBacks write FCallBacks;
+		property LogonConnections : TSGWOWLogonConnectionList read FLogonConnections;
+		property LogonConnectionsNumber : TSGMaxEnum read GetLogonConnectionsNumber;
 		end;
 
 procedure SGKill(var WorldOfWarcraftConnectionHandler : TSGWorldOfWarcraftConnectionHandler); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
+
+function TSGWorldOfWarcraftConnectionHandler.GetLogonConnectionsNumber() : TSGMaxEnum;
+begin
+if (FLogonConnections = nil) then
+	Result := 0
+else
+	Result := Length(FLogonConnections);
+end;
 
 function TSGWorldOfWarcraftConnectionHandler.LogonConnectionExists(const Connection : TSGInternetConnection) : TSGBoolean;
 var

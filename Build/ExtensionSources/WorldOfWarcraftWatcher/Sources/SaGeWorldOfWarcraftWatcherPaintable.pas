@@ -1,7 +1,5 @@
 {$INCLUDE SaGe.inc}
 
-//{$DEFINE WOWW_CD} //Console Debug
-
 unit SaGeWorldOfWarcraftWatcherPaintable;
 
 interface
@@ -13,6 +11,7 @@ uses
 	,SaGeWorldOfWarcraftConnectionHandler
 	,SaGeScreenClasses
 	,SaGeFont
+	,SaGeWorldOfWarcraftWatcherLogonConnectionsPaintable
 	;
 
 type
@@ -24,8 +23,7 @@ type
 		class function ClassName() : TSGString; override;
 			protected
 		FConnectionHandler : TSGWorldOfWarcraftConnectionHandler;
-		FSizeLabel : TSGScreenLabel;
-		FFont : TSGFont;
+		FWoWLogonConnectionsPaintable : TSGWorldOfWarcraftWatcherLogonConnectionsPaintable;
 			public
 		property ConnectionHandler : TSGWorldOfWarcraftConnectionHandler read FConnectionHandler write FConnectionHandler;
 		end;
@@ -46,34 +44,23 @@ end;
 
 procedure TSGWorldOfWarcraftWatcherPaintable.Paint();
 begin
-{$IFDEF WOWW_CD}Write('P');{$ENDIF} //Paint
-if (ConnectionHandler <> nil) then
-	begin
-	//WriteLn(FConnectionHandler.AllDataSize);
-	FSizeLabel.Caption := SGStr(FConnectionHandler.AllDataSize);
-	end;
+if (FWoWLogonConnectionsPaintable = nil) and (FConnectionHandler <> nil) then
+	FWoWLogonConnectionsPaintable := TSGWorldOfWarcraftWatcherLogonConnectionsPaintable.Create(Context, FConnectionHandler);
+if (FWoWLogonConnectionsPaintable <> nil) then
+	FWoWLogonConnectionsPaintable.Paint();
 end;
 
 constructor TSGWorldOfWarcraftWatcherPaintable.Create(const _Context : ISGContext);
 begin
 inherited Create(_Context);
 FConnectionHandler := nil;
-
-FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
-FFont.SetContext(Context);
-FFont.Loading();
-FFont.ToTexture();
-
-FSizeLabel := SGCreateLabel(Screen, '0', 100, 100, 500, 40, FFont, True, True);
-{$IFDEF WOWW_CD}Write('C');{$ENDIF} //Create
+FWoWLogonConnectionsPaintable := nil;
 end;
 
 destructor TSGWorldOfWarcraftWatcherPaintable.Destroy();
 begin
-{$IFDEF WOWW_CD}WriteLn('D');{$ENDIF} //Destroy
 FConnectionHandler := nil;
-SGKill(FSizeLabel);
-SGKill(FFont);
+SGKill(FWoWLogonConnectionsPaintable);
 inherited;
 end;
 

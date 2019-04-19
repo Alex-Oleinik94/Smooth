@@ -36,22 +36,22 @@ type
 		Error : TSGWOWLogonError;
 		end;
 	
-	TSGWOW_ALC_Client = packed object(TSGWOW_Error)
-			public
-		PacketSize : TSGWOWLogonPacketSize;
-		GameName : TSGWOWSmallString;
-		Version  : TSGWOWVersion;
-		Platform : TSGWOWSmallString;
-		OperatingSystem : TSGWOWSmallString;
-		Country  : TSGWOWSmallString;
-		TimezoneBias : TSGUInt32;
-		IPAddress : TSGIPv4Address;
-		SRP_I_length : TSGUInt8;
+	TSGWOW_ALC_Client_HardData = packed object(TSGWOW_Error)
+			public                            //	--> for example <--
+		PacketSize : TSGWOWLogonPacketSize;   // 40
+		GameName : TSGWOWSmallString;         // "WoW"
+		Version  : TSGWOWVersion;             // 3 3 5, 12340
+		Platform : TSGWOWSmallString;         // x86
+		OperatingSystem : TSGWOWSmallString;  // "Win"
+		Country  : TSGWOWSmallString;         // "ruRU"
+		TimezoneBias : TSGUInt32;             // 180
+		IPAddress : TSGIPv4Address;           // 192.168.0.5
+		SRP_I_length : TSGUInt8;              // 10 ("LOGIN" string length); Next packet data is login, that size is this value
 		end;
 	
-	TSGWOW_ALC_Client_Full = packed object(TSGWOW_ALC_Client)
+	TSGWOW_ALC_Client = packed object(TSGWOW_ALC_Client_HardData)
 			public
-		SRP_I : TSGString;
+		SRP_I : TSGString;                    // ("LOGIN")
 		end;
 	
 	TSGWOW_Array32 = packed array[0..31] of TSGUInt8;
@@ -105,21 +105,44 @@ type
 		end;
 
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
+function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
 
 implementation
 
+function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
+
+function ReadString(const StringLength : TSGMaxEnum) : TSGString;
+var
+	Index : TSGMaxEnum;
+	C : TSGChar;
+begin
+Result := '';
+for Index := 1 to StringLength do
+	begin
+	Stream.Read(C, 1);
+	Result += C;
+	end;
+end;
+
+begin
+FillChar(Result, SizeOf(Result), 0);
+Stream.Position := 0;
+Stream.Read(Result, SizeOf(TSGWOW_ALC_Client_HardData));
+Result.SRP_I := ReadString(Result.SRP_I_length);
+end;
+
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
 var
-	Packet : TSGWOW_ALC_Client;
+	Packet : TSGWOW_ALC_Client_HardData;
 	TotalSize : TSGMaxEnum;
 begin
 Result := False;
-if (Stream.Size > SizeOf(TSGWOW_ALC_Client)) then
+if (Stream.Size > SizeOf(TSGWOW_ALC_Client_HardData)) then
 	begin
 	Stream.Position := 0;
 	FillChar(Packet, SizeOf(Packet), 0);
-	Stream.Read(Packet, SizeOf(TSGWOW_ALC_Client));
-	TotalSize := SizeOf(TSGWOW_ALC_Client) + Packet.SRP_I_length;
+	Stream.Read(Packet, SizeOf(TSGWOW_ALC_Client_HardData));
+	TotalSize := SizeOf(TSGWOW_ALC_Client_HardData) + Packet.SRP_I_length;
 	Result := (Stream.Size = TotalSize);
 	end;
 end;
