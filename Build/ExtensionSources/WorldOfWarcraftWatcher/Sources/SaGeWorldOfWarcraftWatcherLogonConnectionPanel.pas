@@ -58,6 +58,7 @@ procedure TSGWorldOfWarcraftWatcherLogonConnectionPanel.SetLogonConnection(const
 procedure AddLabel(const Text : TSGString);
 begin
 FLabels += SGCreateLabel(Self, Text, 0, 5 + (FFont.FontHeight + 5) * LabelsCount, Width, FFont.FontHeight, FFont, True, True);
+FLabels[High(FLabels)].TextPosition := False;
 end;
 
 begin
@@ -89,6 +90,7 @@ end;
 
 procedure TSGWorldOfWarcraftWatcherLogonConnectionPanel.Paint();
 begin
+inherited;
 end;
 
 constructor TSGWorldOfWarcraftWatcherLogonConnectionPanel.Create();
@@ -97,6 +99,8 @@ inherited Create();
 FLogonConnection := nil;
 FLabels := nil;
 FFont := nil;
+ViewLines := False;
+ViewQuad := False;
 end;
 
 procedure TSGWorldOfWarcraftWatcherLogonConnectionPanel.DestroyLabels();

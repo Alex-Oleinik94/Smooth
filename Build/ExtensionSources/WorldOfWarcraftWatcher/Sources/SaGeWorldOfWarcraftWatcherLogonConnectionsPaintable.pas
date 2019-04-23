@@ -46,16 +46,6 @@ uses
 	;
 
 procedure TSGWorldOfWarcraftWatcherLogonConnectionsPaintable.UpDateLogonPanel();
-var
-	lc :TSGUInt32 = 2;
-
-procedure AddLabel(const Text : TSGString);
-begin
-with SGCreateLabel(Screen, Text, 0, 5 + (FFont.FontHeight + 5) * lc, Screen.Width, FFont.FontHeight, FFont, True, True) do
-	TextPosition := False;
-lc += 1;
-end;
-
 begin
 if (FConnectionHandler = nil) then
 	exit;
@@ -76,17 +66,6 @@ else if (FConnectionHandler.LogonConnectionsNumber > 0) and (FLogonConnectionPan
 	FLogonConnectionPanel.LogonConnection := FConnectionHandler.LogonConnections[FConnectionHandler.LogonConnectionsNumber - 1];
 	
 	FConnectionsInfoLabel.Visible := False;
-	
-	AddLabel('Game:"' + SGStrSmallString(FLogonConnectionPanel.LogonConnection.ClientALC.GameName) + '"');
-	AddLabel('Version:' + 
-		SGStr(FLogonConnectionPanel.LogonConnection.ClientALC.Version.FVersion[0]) + '.' + 
-		SGStr(FLogonConnectionPanel.LogonConnection.ClientALC.Version.FVersion[1]) + '.' + 
-		SGStr(FLogonConnectionPanel.LogonConnection.ClientALC.Version.FVersion[2]) + ' (' + 
-		SGStr(FLogonConnectionPanel.LogonConnection.ClientALC.Version.FBuildVersion) + ')');
-	AddLabel('Platform:"' + SGStrSmallString(FLogonConnectionPanel.LogonConnection.ClientALC.Platform) + '"');
-	AddLabel('OperatingSystem:"' + SGStrSmallString(FLogonConnectionPanel.LogonConnection.ClientALC.OperatingSystem) + '"');
-	AddLabel('Country:"' + SGStrSmallString(FLogonConnectionPanel.LogonConnection.ClientALC.Country) + '"');
-	AddLabel('Login:"' + FLogonConnectionPanel.LogonConnection.ClientALC.SRP_I + '"');
 	end
 else if (FLogonConnectionPanel <> nil) then
 	begin
