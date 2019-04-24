@@ -163,6 +163,7 @@ if ii = 0 then
 else
 	begin
 	SGLogWriteLn(SGStr(['TSGLeaksDetector : Total ', ii, ' leaks.']));
+	LogSignificant := True;
 	SL := nil;
 	if FReferences <> nil then
 		if Length(FReferences) > 0 then

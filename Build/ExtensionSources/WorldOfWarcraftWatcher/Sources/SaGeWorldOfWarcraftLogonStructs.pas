@@ -106,8 +106,21 @@ type
 
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
 function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
+function SGStrSmallString(Text : TSGWOWSmallString) : TSGString; overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
+
+function SGStrSmallString(Text : TSGWOWSmallString) : TSGString; overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+var
+	Index : TSGUInt32;
+	TempString : TSGString;
+begin
+TempString := Text;
+Result := '';
+for Index := Length(TempString) downto 1 do
+	Result += TempString[Index];
+TempString := '';
+end;
 
 function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
 

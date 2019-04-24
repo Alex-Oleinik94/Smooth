@@ -44,6 +44,7 @@ type
 	TSGScreenComponentProcedure = TSGScreenCustomComponentProcedure;
 	TSGScreenComboBoxProcedure = TSGComboBoxProcedure;
 	PSGScreenProgressBarFloat = PSGProgressBarFloat;
+
 // Components types
 type
 	TSGScreenComponent   = TSGComponent;
@@ -56,6 +57,14 @@ type
 	TSGScreenButton      = TSGButton;
 	TSGScreenForm        = TSGForm;
 	TSGScreenProgressBar = TSGProgressBar;
+
+{$DEFINE  INC_PLACE_INTERFACE}
+{$DEFINE DATATYPE_LIST_HELPER := TSGScreenLabelListHelper}
+{$DEFINE DATATYPE_LIST        := TSGScreenLabelList}
+{$DEFINE DATATYPE             := TSGScreenLabel}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+{$UNDEF   INC_PLACE_INTERFACE}
 
 // Button
 function SGCreateButton(const Parent : TSGScreenCustomComponent; const Caption : TSGString; const X,Y,W,H : TSGScreenInt; const CallBack : TSGScreenComponentProcedure; const IsVisible : TSGBoolean = True; const IsBoundsReal : TSGBoolean = False; const InterfaceData : TSGScreenInterfaceData = nil) : TSGScreenButton; overload;
@@ -449,5 +458,13 @@ if _Label <> nil then
 	_Label := nil;
 	end;
 end;
+
+{$DEFINE  INC_PLACE_IMPLEMENTATION}
+{$DEFINE DATATYPE_LIST_HELPER := TSGScreenLabelListHelper}
+{$DEFINE DATATYPE_LIST        := TSGScreenLabelList}
+{$DEFINE DATATYPE             := TSGScreenLabel}
+{$INCLUDE SaGeCommonList.inc}
+{$INCLUDE SaGeCommonListUndef.inc}
+{$UNDEF   INC_PLACE_IMPLEMENTATION}
 
 end.

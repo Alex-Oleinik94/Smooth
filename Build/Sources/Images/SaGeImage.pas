@@ -1,5 +1,7 @@
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE SGDebuging}
+
 unit SaGeImage;
 
 interface
@@ -869,12 +871,12 @@ Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
 Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.BitMap);
-Render.BindTexture(SGR_TEXTURE_2D, 0);
 {$IFDEF MOBILE}
 	Render.GenerateMipmap(SGR_TEXTURE_2D);
 	{$ENDIF}
+Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.Disable(SGR_TEXTURE_2D);
-FReadyToGoToTexture:=False;
+FReadyToGoToTexture := False;
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGImage  : Loaded to texture "'+FFileName+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
