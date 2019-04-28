@@ -59,14 +59,14 @@ type
 	TSGWOW_Array20 = packed array[0..19] of TSGUInt8;
 	
 	TSGWOW_ALC_Server = packed object(TSGWOW_Error)
-			public
-		SRP_B : TSGWOW_Array32;
-		SRP_g_length : TSGUInt8;
-		SRP_g : PSGByte;
-		SRP_N_length : TSGUInt8;
-		SRP_N : PSGByte;
-		SRP_s : TSGWOW_Array32;
-		SRP_  : TSGWOW_Array16;
+			public                //	--> for example <--
+		SRP_B : TSGWOW_Array32;   // 0xcd:c5:75:bb:c0:af:8c:4b:02:54:88:97:0a:6d:9d:63:01:c8:8d:78:b3:2f:92:50:c7:f6:7d:c4:42:8a:59:53
+		SRP_g_length : TSGUInt8;  // 1
+		SRP_g : PSGByte;          // 0x07
+		SRP_N_length : TSGUInt8;  // 32
+		SRP_N : PSGByte;          // 0xb7:9b:3e:2a:87:82:3c:ab:8f:5e:bf:bf:8e:b1:01:08:53:50:06:29:8b:5b:ad:bd:5b:53:e1:89:5e:64:4b:89
+		SRP_s : TSGWOW_Array32;   // 0xc3:f7:b2:50:e6:4b:69:80:66:d5:b3:b7:cc:b4:02:eb:3d:11:c6:c1:f6:04:bf:ef:13:cf:9c:22:58:0b:28:95
+		SRP_  : TSGWOW_Array16;   // ?
 		end;
 	
 	TSGWOW_ALP_Client = packed object(TSGWOW_Comand)
@@ -105,10 +105,46 @@ type
 		end;
 
 function SGIsAuthenticationLogonChallenge(const Stream : TStream) : TSGBoolean;
-function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
+function SGReadClientAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
+function SGReadServerAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Server;
 function SGStrSmallString(Text : TSGWOWSmallString) : TSGString; overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGStrWoWArray(const _Data : PByte; const _Length : TSGUInt8) : TSGString;
 
 implementation
+
+uses
+	 SaGeStringUtils
+	;
+
+function SGStrWoWArray(const _Data : PByte; const _Length : TSGUInt8) : TSGString;
+var
+	Index : TSGMaxEnum;
+begin
+Result := '';
+for Index := 0 to _Length - 1 do
+	Result += SGStrByteHex(_Data[Index]);
+end;
+
+function SGReadServerAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Server;
+
+function ReadPByte(const _Length : TSGUInt8) : PSGByte;
+begin
+Result := GetMem(_Length);
+Stream.Read(Result^, _Length);
+end;
+
+begin
+FillChar(Result, SizeOf(Result), 0);
+Stream.Position := 0;
+Stream.Read(Result, SizeOf(TSGWOW_Error));
+Stream.Read(Result.SRP_B, SizeOf(TSGWOW_Array32));
+Stream.Read(Result.SRP_g_length, SizeOf(TSGUInt8));
+Result.SRP_g := ReadPByte(Result.SRP_g_length);
+Stream.Read(Result.SRP_N_length, SizeOf(TSGUInt8));
+Result.SRP_N := ReadPByte(Result.SRP_N_length);
+Stream.Read(Result.SRP_s, SizeOf(TSGWOW_Array32));
+Stream.Read(Result.SRP_, SizeOf(TSGWOW_Array16));
+end;
 
 function SGStrSmallString(Text : TSGWOWSmallString) : TSGString; overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
@@ -122,7 +158,7 @@ for Index := Length(TempString) downto 1 do
 TempString := '';
 end;
 
-function SGReadAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
+function SGReadClientAuthenticationLogonChallenge(const Stream : TStream) : TSGWOW_ALC_Client;
 
 function ReadString(const StringLength : TSGMaxEnum) : TSGString;
 var

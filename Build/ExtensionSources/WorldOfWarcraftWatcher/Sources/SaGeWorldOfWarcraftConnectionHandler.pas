@@ -36,6 +36,7 @@ type
 		procedure KillLogonConnections();
 		procedure CreateNewLogonConnection(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream);
 		function GetLogonConnectionsNumber() : TSGMaxEnum;
+		function FindLogonConnection(const Connection : TSGInternetConnection) : TSGWOWLogonConnection;
 			public
 		function AllDataSize() : TSGUInt64;
 		property CallBacks : ISGWorldOfWarcraftConnectionHandlerCallBacks read FCallBacks write FCallBacks;
@@ -91,13 +92,33 @@ if (FCallBacks <> nil) then
 	FCallBacks.LogonConnectionCallBack(LogonConnection);
 end;
 
+function TSGWorldOfWarcraftConnectionHandler.FindLogonConnection(const Connection : TSGInternetConnection) : TSGWOWLogonConnection;
+var
+	Index : TSGMaxEnum;
+begin
+Result := nil;
+if (FLogonConnections <> nil) and (Length(FLogonConnections) > 0) then
+	for Index := 0 to High(FLogonConnections) do
+		if FLogonConnections[Index].Connection = Connection then
+			begin
+			Result := FLogonConnections[Index];
+			break;
+			end;
+end;
+
 function TSGWorldOfWarcraftConnectionHandler.HandleConnectionData(const Connection : TSGInternetConnection; const DataType : TSGConnectionDataType; const Data : TStream) : TSGBoolean;
 begin
 Result := False;
 if (DataType = SGSenderData) and SGIsAuthenticationLogonChallenge(Data) and (not LogonConnectionExists(Connection)) then
+	begin
 	CreateNewLogonConnection(Connection, DataType, Data);
-if (not Result) and LogonConnectionExists(Connection) then
 	Result := True;
+	end
+else if (LogonConnectionExists(Connection)) then
+	begin
+	FindLogonConnection(Connection).HandleData(DataType, Data);
+	Result := True;
+	end;
 end;
 
 procedure TSGWorldOfWarcraftConnectionHandler.HandleConnectionStatus(const Connection : TSGInternetConnection; const Status : TSGConnectionStatus);
