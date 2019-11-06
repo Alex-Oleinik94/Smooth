@@ -577,11 +577,12 @@ wm_create:
 	Result := 0;
 	end;
 wm_paint:
-	begin
-	FPaintWithHandlingMessages := False;
-	Paint();
-	FPaintWithHandlingMessages := True;
-	end;
+	if (not(Render = nil)) then //fixed bug: runtime error while opening WinAPI gui
+		begin
+		FPaintWithHandlingMessages := False;
+		Paint();
+		FPaintWithHandlingMessages := True;
+		end;
 260: //Alt Down
 	SetKey(SGDownKey,SG_ALT_KEY);
 261: //Alt Up
@@ -607,17 +608,17 @@ wm_mousewheel:
 		end;
 	end;
 wm_lbuttondown:
-	SetCursorKey(SGDownKey,SGLeftCursorButton);
+	SetCursorKey(SGDownKey, SGLeftCursorButton);
 wm_rbuttondown:
-	SetCursorKey(SGDownKey,SGRightCursorButton);
+	SetCursorKey(SGDownKey, SGRightCursorButton);
 wm_mbuttondown:
-	SetCursorKey(SGDownKey,SGMiddleCursorButton);
+	SetCursorKey(SGDownKey, SGMiddleCursorButton);
 wm_lbuttonup:
-	SetCursorKey(SGUpKey,SGLeftCursorButton);
+	SetCursorKey(SGUpKey, SGLeftCursorButton);
 wm_rbuttonup:
-	SetCursorKey(SGUpKey,SGRightCursorButton);
+	SetCursorKey(SGUpKey, SGRightCursorButton);
 wm_mbuttonup:
-	SetCursorKey(SGUpKey,SGMiddleCursorButton);
+	SetCursorKey(SGUpKey, SGMiddleCursorButton);
 wm_destroy:
 	begin
 	SGLog.Source('TSGContextWinAPI__Messages : Note : Window is closed from OS.');
@@ -648,10 +649,7 @@ wm_sizing:
 	HandlingPaint();
 	Result := 1;
 	end;
-wm_move
-,wm_moving
-,WM_WINDOWPOSCHANGED
-,WM_WINDOWPOSCHANGING:
+wm_move ,wm_moving ,WM_WINDOWPOSCHANGED, WM_WINDOWPOSCHANGING:
 	begin
 	if FActive then
 		HandlingSizingFromRect();

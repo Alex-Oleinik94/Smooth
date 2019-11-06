@@ -246,7 +246,7 @@ function ReadParams(const Make : TSGMakefileReader) : TSGBool;
 var
 	i : TSGUInt32;
 	AllTargets : TSGStringList = nil;
-	S, SUP, E : TSGString;
+	S, SUP: TSGString;
 
 function Proccess32(const Comand : TSGString):TSGBool;
 begin
@@ -278,7 +278,7 @@ if Length(Comand) > 1 then
 	end;
 Result := ExtensionName <> '';
 if Result then
-	Extensions += E;
+	Extensions += ExtensionName;
 end;
 
 function ProccessTarget(const Comand : TSGString) : TSGBool;

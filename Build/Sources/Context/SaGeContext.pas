@@ -732,7 +732,7 @@ UpdateTimer();
 {$IFDEF CONTEXT_DEBUGING}
 	WriteLn('TSGContext__Paint() : Before "Render.Clear(...);"');
 	{$ENDIF}
-Render.Clear(SGR_COLOR_BUFFER_BIT OR SGR_DEPTH_BUFFER_BIT);
+Render.Clear(SGR_COLOR_BUFFER_BIT or SGR_DEPTH_BUFFER_BIT);
 if FPaintable <> nil then
 	begin
 	{$IFDEF CONTEXT_DEBUGING}
