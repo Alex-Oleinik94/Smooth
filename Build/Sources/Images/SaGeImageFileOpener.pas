@@ -45,6 +45,8 @@ type
 		
 		FBackgroundImage : TSGImage;
 		FImage : TSGImage;
+		FImageBackground : TSGImage;
+		
 		FLoadingThread : TSGThread;
 		FFont : TSGFont;
 		FLoadingDone : TSGBool;
@@ -52,9 +54,12 @@ type
 		FPosition, FSize, FRenderSize : TSGVector2f;
 			private
 		procedure InitImagePosition();
+		procedure InitBackgroundImage();
 		procedure RescaleImagePosition();
 		procedure PaintImageInfo();
+		procedure PaintHintAndLoadingAnimation();
 		procedure ProccessMouseWheel(const VWheel : TSGBool);
+		procedure ProccessContextKeys();
 		procedure OpenFileDialog();
 		procedure SaveFileDialog();
 			public
@@ -76,23 +81,15 @@ uses
 	,SysUtils
 	;
 
-class function TSGImageFileOpener.ClassName() : TSGString;
-begin
-Result := 'TSGImageFileOpener';
-end;
+//================
+//=TSGImageViewer=
+//================
 
 destructor TSGImageViewer.Destroy();
 begin
-if FWaitAnimation <> nil then
-	begin
-	FWaitAnimation.Destroy();
-	FWaitAnimation := nil;
-	end;
-if FImage <> nil then
-	begin
-	FImage.Destroy();
-	FImage := nil;
-	end;
+SGKill(FWaitAnimation);
+SGKill(FImageBackground);
+SGKill(FImage);
 inherited;
 end;
 
@@ -105,6 +102,7 @@ constructor TSGImageViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FImage := nil;
+FImageBackground := nil;
 FLoadingDone := False;
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
@@ -126,7 +124,16 @@ while FImage = nil do
 	Sleep(10);
 FImage.Loading();
 InitImagePosition();
+if FImage.Image.Channels = 4 then
+	InitBackgroundImage();
 FLoadingDone := True;
+end;
+
+procedure TSGImageViewer.InitBackgroundImage();
+begin
+SGKill(FImageBackground);
+FImageBackground := TSGImage.Create();
+
 end;
 
 procedure TSGImageViewer.Resize();
@@ -215,6 +222,16 @@ if  (CursorPosF.x > FPosition.x) and
 	end;
 end;
 
+procedure TSGImageViewer.ProccessContextKeys();
+begin
+if Context.CursorWheel() <> SGNullCursorWheel then
+	ProccessMouseWheel(SGUpCursorWheel = Context.CursorWheel());
+if Context.KeyPressed and (Context.KeyPressedChar = 'S') and Context.KeysPressed(SG_CTRL_KEY) then
+	SaveFileDialog();
+if Context.KeyPressed and (Context.KeyPressedChar = 'O') and Context.KeysPressed(SG_CTRL_KEY) then
+	OpenFileDialog();
+end;
+
 procedure TSGImageViewer.OpenFileDialog();
 begin
 
@@ -232,14 +249,9 @@ end;
 
 procedure TSGImageViewer.Paint();
 begin
-if Context.CursorWheel() <> SGNullCursorWheel then
-	ProccessMouseWheel(SGUpCursorWheel = Context.CursorWheel());
-if Context.KeyPressed and (Context.KeyPressedChar = 'S') and Context.KeysPressed(SG_CTRL_KEY) then
-	begin
-	SaveFileDialog();
-	end;
+ProccessContextKeys();
 Render.InitMatrixMode(SG_2D);
-Render.Color(FBackgroundColor);
+{Render.Color(FBackgroundColor);
 with Render do
 	begin
 	BeginScene(SGR_QUADS);
@@ -248,29 +260,29 @@ with Render do
 	Vertex2f(Width,Height);
 	Vertex2f(0,Height);
 	EndScene();
-	Color3f(1,1,1);
+	end;}
+if (FImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+	begin
+	Render.Color3f(1, 1, 1);
+	if (FBackgroundImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+		FBackgroundImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
+	FImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
 	end;
-if FImage <> nil then
-	if FImage.ReadyTexture() or FImage.ReadyToTexture then
-		FImage.DrawImageFromTwoVertex2f(
-			FPosition,
-			FSize + FPosition,
-			True,SG_2D);
-if FFont <> nil then
-	if FFont.FontReady then
+PaintHintAndLoadingAnimation();
+end;
+
+procedure TSGImageViewer.PaintHintAndLoadingAnimation();
+begin
+if (FFont <> nil) and FFont.FontReady then
+	if (FImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+		PaintImageInfo()
+	else
 		begin
-		if FImage.ReadyTexture() or FImage.ReadyToTexture then
-			begin
-			PaintImageInfo();
-			end
-		else
-			begin
-			Render.Color3f(0.5,0.5,0.5);
-			FFont.DrawFontFromTwoVertex2f(
-				'Загрузка...',
-				SGVertex2fImport(5,FRenderSize.y - FFont.FontHeight - 5),
-				SGVertex2fImport(5 + FFont.StringLength('Загрузка...'),FRenderSize.y - 5));
-			end;
+		Render.Color3f(0.5, 0.5, 0.5);
+		FFont.DrawFontFromTwoVertex2f(
+			'Загрузка...',
+			SGVertex2fImport(5, FRenderSize.y - FFont.FontHeight - 5),
+			SGVertex2fImport(5 + FFont.StringLength('Загрузка...'), FRenderSize.y - 5));
 		end;
 FWaitAnimation.PaintAt(Render.Width - 200, 50, 150, 150, not FLoadingDone);
 end;
@@ -349,6 +361,15 @@ DeleteRenderResources();
 FImage := TSGImage.Create(FFiles[0]);
 FImage.Context := Context;
 end;
+
+class function TSGImageFileOpener.ClassName() : TSGString;
+begin
+Result := 'TSGImageFileOpener';
+end;
+
+//====================
+//=TSGImageFileOpener=
+//====================
 
 class function TSGImageFileOpener.GetDrawableClass() : TSGFileOpenerDrawableClass;
 begin

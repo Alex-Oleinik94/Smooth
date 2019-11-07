@@ -638,17 +638,19 @@ wm_syscommand:
 		end;
 	end;
 wm_size:
-	begin
-	Result := 0;
-	HandlingSizingFromParam();
-	HandlingPaint();
-	end;
+	if (not(Render = nil)) then //fixed bug: runtime error while opening WinAPI gui
+		begin
+		Result := 0;
+		HandlingSizingFromParam();
+		HandlingPaint();
+		end;
 wm_sizing:
-	begin
-	HandlingSizingFromRect(PRect(lParam));
-	HandlingPaint();
-	Result := 1;
-	end;
+	if (not(Render = nil)) then //fixed bug: runtime error while opening WinAPI gui
+		begin
+		HandlingSizingFromRect(PRect(lParam));
+		HandlingPaint();
+		Result := 1;
+		end;
 wm_move ,wm_moving ,WM_WINDOWPOSCHANGED, WM_WINDOWPOSCHANGING:
 	begin
 	if FActive then

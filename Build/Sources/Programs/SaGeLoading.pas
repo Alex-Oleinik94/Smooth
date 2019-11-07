@@ -14,7 +14,7 @@ uses
 	;
 
 type
-	TSGLType = (SGBeforeLoading,SGInLoading,SGAfterLoading);
+	TSGLType = (SGBeforeLoading, SGInLoading, SGAfterLoading);
 	//Класс загрузки.
 	TSGLoading = class(TSGPaintableObject)
 			public
@@ -72,6 +72,9 @@ type
 		property VisibleTimer : TSGFloat write FVisibleTimer;
 		end;
 
+procedure SGKill(var Waiting : TSGWaiting); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var Loading : TSGLoading); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
@@ -79,6 +82,15 @@ uses
 	,SaGeFileUtils
 	,SaGeMathUtils
 	;
+
+procedure SGKill(var Waiting : TSGWaiting); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if Waiting <> nil then
+	begin
+	Waiting.Destroy();
+	Waiting := nil;
+	end;
+end;
 
 class function TSGWaiting.Supported(const _Context : ISGContext) : TSGBoolean;
 begin
@@ -207,6 +219,15 @@ while Angle - FMoveTime < FTime + FRealLength do
 	Angle += Elapse;
 	end;
 Render.EndScene();
+end;
+
+procedure SGKill(var Loading : TSGLoading); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if Loading <> nil then
+	begin
+	Loading.Destroy();
+	Loading := nil;
+	end;
 end;
 
 procedure TSGLoading.SetProgress(const NewProgress:TSGSingle);
