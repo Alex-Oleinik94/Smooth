@@ -23,7 +23,7 @@ PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
 EXTERNALARGS= -FuExternalSources/NVidia -FuExternalSources/OpenAL -FuExternalSources/OpenSSL -FuExternalSources/sdl2 -FuExternalSources/sdl -FuExternalSources/ffmpeg -FuExternalSources/DCP/Ciphers -FuExternalSources/DCP/Hashes -FuExternalSources/DCP -FuExternalSources/Ogg -FuExternalSources/Synapse -FuExternalSources/lNet -FuExternalSources/lNet/sys -FuExternalSources -FuExternalSources/PasJpeg 
 INCLUDESARGS= -FiSources/Includes/Screen -FiSources/Includes/Encoding -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FiSources/Includes
-SOURCEARGS= -FuSources/Images -FuSources/ConsoleTools -FuSources/SystemTray -FuSources/Maz1gWizard -FuSources/Base -FuSources/Game -FuSources/Model -FuSources/RenderUtils -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsolePrograms -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources -FuSources/Programs -FuSources/Internet 
+SOURCEARGS= -FuSources/Images -FuSources/ConsoleTools -FuSources/SystemTray -FuSources/Base -FuSources/Game -FuSources/Model -FuSources/RenderUtils -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsolePrograms -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources -FuSources/Programs -FuSources/Internet 
 BASEARGS= -FiOutput/Resources -FuOutput/Resources -Sm $(SOURCEARGS) $(INCLUDESARGS) $(EXTERNALARGS)
 RENDERARGS= -FuExternalSources/DirectX/9 -FuExternalSources/DirectX/12 -FuExternalSources/OpenGL
 DARWINARGS=-k-framework -kOpenGL
@@ -32,7 +32,7 @@ ANDROIDARGS= -FuExternalSources/Android -FuExternalSources/OpenGL -dENGINE
 OUTPUTDESKTOP= -FE$(SGBINARYPATH)
 OUTPUTANDROID_ARM= -FUOutput/arm-android -FlPlatforms/Android/Libs -FlPlatforms/Android/Libs/Others -oOutput/AndroidApplication/libs/armeabi/libmain.so
 OUTPUTANDROID_I386= -FUOutput/i386-android -oOutput/AndroidApplication/libs/i386eabi/libmain.so
-EXAMPLESARGS= $(ARGS) -FuPackages\Examples\Sources\Examples -FuPackages\Examples\Sources\ConsoleExamples -FuPackages/Graphic_Viewer/Sources -FiPackages/Graphic_Viewer/Sources/Includes -FuPackages/Genetical_Algoritm/Sources $(OUTPUTDESKTOP)
+EXAMPLESARGS= $(ARGS) -Fu$(SGEXTENSIONSPATH)\Examples\Sources -Fu$(SGEXTENSIONSPATH)\Examples\Sources\Graphical -Fu$(SGEXTENSIONSPATH)\Examples\Sources\Console -Fu$(SGEXTENSIONSPATH)/Graphic_Viewer/Sources -Fi$(SGEXTENSIONSPATH)/Graphic_Viewer/Sources/Includes -Fu$(SGEXTENSIONSPATH)/Genetical_Algoritm/Sources $(OUTPUTDESKTOP)
 DESKTOPARGS= $(ARGS) -dENGINE $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
@@ -46,28 +46,29 @@ SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, l
 SG_TARGET=
 
 examples:
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex1
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex2_2
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex3
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_1
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_2
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex4_3
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_2
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex5_4
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex6_2
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex7
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex8
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex9
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex10
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex11
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/ConsoleExamples/Ex12
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex13
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex14
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex15
-	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) Packages/Examples/Sources/Examples/Ex16
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex1
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex2_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex3
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex4_1
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex4_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex4_3
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex5
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex5_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex5_4
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex6
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex6_2
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex7
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Console/Ex8
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Console/Ex9
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Console/Ex10
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Console/Ex11
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Console/Ex12
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex13
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex14
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex15
+	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex16
+	#@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Kraft/ExKraft
 release_x32, release:
 	@$(PASCALCOMPILER) $(RX32) $(DORELEASE) $(DESKTOPARGS)
 release_x64:
@@ -93,7 +94,7 @@ android_arm:
 android_i386:
 	@$(CROSSPASCALCOMPILER) $(DOANDROID_I386) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID_I386) $(DESKTOPFILE)
 ios:
-
+	
 inc_version_debug:
 	@$(SAGE) --bt --iv 0
 	@$(SAGE) --bt --CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)

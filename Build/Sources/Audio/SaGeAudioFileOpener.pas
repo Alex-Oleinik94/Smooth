@@ -11,7 +11,7 @@ uses
 	,SaGeBaseClasses
 	,SaGeFileOpener
 	,SaGeContext
-	,SaGeLoading
+	//,SaGeLoading
 	,SaGeFont
 	,SaGeContextClasses
 	,SaGeCommon

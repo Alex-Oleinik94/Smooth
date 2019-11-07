@@ -60,7 +60,7 @@ uses
 		{$ENDIF}
 	
 	// Aditiolnal includes
-	,SaGeLoading
+	,SaGeFullscreenLoading
 	,SaGeModelRedactor
 	,SaGeClientWeb
 	,SaGeTron

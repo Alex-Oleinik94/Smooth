@@ -51,8 +51,8 @@ type
 	TSGPixelInfo = object
 		FArray : packed array of 
 			packed record 
-				FProcent:real;
-				FIdentifity:LongWord;
+				FProcent : TSGFloat64;
+				FIdentifity : TSGUInt32;
 				end;
 		procedure Get(const Old,New,Position:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -74,22 +74,23 @@ type
 		FFormatType : TSGBitMapUInt;
 		FDataType   : TSGBitMapUInt;
 			public
-		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure CopyFrom(const VBitMap : TSGBitMap);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Clear(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure ClearBitMapBits(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure CopyFrom(const VBitMap : TSGBitMap); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure ReAllocateMemory();
 			public
 		procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
-		function PixelsRGBA(const x,y:TSGBitMapUInt):PSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function PixelsRGBA(const x,y:TSGBitMapUInt):PSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure PutImage(const VImage : TSGBitMap; const VX, VY : TSGBitMapUInt);
 		procedure PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGBitMapUInt);
 			public
 		procedure ReAllocateForBounds(const NewWidth, NewHeight : TSGBitMapUInt);
-		procedure SetWidth(const NewWidth:TSGBitMapUInt);
-		procedure SetHeight(const NewHeight:TSGBitMapUInt);
-		procedure SetBounds(const NewWidth,NewHeight:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetBounds(const NewBound:TSGBitMapUInt);overload;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetWidth(const NewWidth : TSGBitMapUInt);
+		procedure SetHeight(const NewHeight : TSGBitMapUInt);
+		procedure SetBounds(const NewWidth, NewHeight : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetBounds(const NewBound : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetPixel(const _X, _Y : TSGUInt32; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Width       : TSGBitMapUInt read FWidth       write FWidth;
 		property Height      : TSGBitMapUInt read FHeight      write FHeight;
@@ -131,6 +132,14 @@ MultByte(Result.x, Pixel2.x);
 MultByte(Result.y, Pixel2.y);
 MultByte(Result.z, Pixel2.z);
 MultByte(Result.w, Pixel2.w);
+end;
+
+procedure TSGBitMap.SetPixel(const _X, _Y : TSGUInt32; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (FSizeChannel = 8) and (FChannels = 3) then
+	begin
+	
+	end;
 end;
 
 procedure TSGBitMap.PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGBitMapUInt);

@@ -13,7 +13,7 @@ uses
 	,SaGeContextInterface
 	,SaGelNetBase
 	,SaGelNetUDPConnection
-	,SaGeLoading
+	,SaGeFullscreenLoading
 	,SaGeFont
 	,SaGeMesh
 	,SaGeThreads

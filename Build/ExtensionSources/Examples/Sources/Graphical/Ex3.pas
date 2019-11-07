@@ -18,7 +18,7 @@ uses
 	,SaGeScreenClasses
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		{$ENDIF}
 	;
 type

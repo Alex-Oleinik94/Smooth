@@ -18,7 +18,7 @@ uses
 	,SaGeCamera
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		{$ENDIF}
 	;
 type

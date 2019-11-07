@@ -14,11 +14,11 @@ uses
 	,SaGeContextClasses
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample1=class(TSGPaintableObject)
+	TSGExample1 = class(TSGPaintableObject)
 			public
 		constructor Create(const VContext : ISGContext);override;
 		destructor Destroy();override;

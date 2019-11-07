@@ -12,7 +12,7 @@ uses
 	,SaGeBaseClasses
 	,SaGeFileOpener
 	,SaGeContext
-	,SaGeLoading
+	,SaGeLoadingFrame
 	,SaGeFont
 	,SaGeContextClasses
 	,SaGeContextInterface
@@ -32,16 +32,16 @@ type
 	
 	TSGImageViewer = class(TSGFileOpenerDrawable)
 			public
-		destructor Destroy();override;
-		constructor Create(const VContext : ISGContext);override;
+		destructor Destroy(); override;
+		constructor Create(const VContext : ISGContext); override;
 		class function ClassName() : TSGString; override;
-		procedure DeleteRenderResources();override;
-		procedure LoadRenderResources();override;
-		procedure Paint();override;
-		procedure Resize();override;
+		procedure DeleteRenderResources(); override;
+		procedure LoadRenderResources(); override;
+		procedure Paint(); override;
+		procedure Resize(); override;
 			private
 		FBackgroundColor : TSGColor3f;
-		FWaitAnimation : TSGWaiting;
+		FWaitAnimation : TSGLoadingFrame;
 		
 		FBackgroundImage : TSGImage;
 		FImage : TSGImage;
@@ -106,7 +106,7 @@ FImageBackground := nil;
 FLoadingDone := False;
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
-FWaitAnimation := TSGWaiting.Create(Context);
+FWaitAnimation := TSGLoadingFrame.Create(Context);
 FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 FFont.SetContext(Context);
 FLoadingThread := TSGThread.Create(TSGThreadProcedure(@TSGImageViewer_LoadThreadProc), Self, True);
@@ -133,7 +133,13 @@ procedure TSGImageViewer.InitBackgroundImage();
 begin
 SGKill(FImageBackground);
 FImageBackground := TSGImage.Create();
-
+FImageBackground.Image.Width := FImage.Image.Width;
+FImageBackground.Image.Height := FImage.Image.Height;
+FImageBackground.Image.SizeChannel := 8;
+FImageBackground.Image.Channels := 3;
+FImageBackground.Image.CreateTypes();
+FImageBackground.Image.ReAllocateMemory();
+//todo
 end;
 
 procedure TSGImageViewer.Resize();

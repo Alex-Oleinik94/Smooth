@@ -15,7 +15,7 @@ uses
 	,SaGeRenderBase
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		{$ENDIF}
 	;
 type

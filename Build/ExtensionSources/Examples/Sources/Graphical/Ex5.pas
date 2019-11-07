@@ -22,7 +22,7 @@ uses
 	,SaGeMatrix	
 	{$IF not defined(ENGINE)}
 		,SaGeConsolePaintableTools
-		,SaGeConsoleToolsBase
+		,SaGeConsoleCaller
 		{$ENDIF}
 	
 	,Crt
