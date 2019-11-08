@@ -1220,7 +1220,7 @@ if MandelbrodInitialized then
 		end;
 
 
-	if (Mandelbrod.FImage<>nil) and Mandelbrod.FImage.Ready then
+	if (Mandelbrod.FImage<>nil) and Mandelbrod.FImage.Loaded then
 		begin
 		Render.Color3f(1,1,1);
 		Mandelbrod.Paint();
@@ -1264,7 +1264,7 @@ if MandelbrodInitialized then
 		if SecondImage<>nil then
 			begin
 			Render.Color3f(1,1,1);
-			if SecondImage.Ready then
+			if SecondImage.Loaded then
 				SecondImage.DrawImageFromTwoPoint2int32(
 					SGVertex2int32Import(1,1),
 					SGVertex2int32Import(Render.Width,Render.Height),
@@ -1520,7 +1520,7 @@ end;
 procedure TSGFractalMandelbrod.Paint();
 begin
 inherited;
-if FImage.Ready then
+if FImage.Loaded then
 	FImage.DrawImageFromTwoPoint2int32(
 		SGVertex2int32Import(1,1),
 		SGVertex2int32Import(Render.Width,Render.Height),

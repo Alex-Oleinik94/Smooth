@@ -658,7 +658,7 @@ FImage.FImage.Clear;
 FImage.Width:=FDepth;
 FImage.Height:=FDepth*Byte(FDepthHeight=0)+FDepthHeight;
 FImage.FImage.Channels:=3;
-FImage.FImage.SizeChannel:=8;
+FImage.FImage.ChannelSize:=8;
 FImage.FImage.ReAllocateMemory();
 FImage.FImage.CreateTypes();
 end;

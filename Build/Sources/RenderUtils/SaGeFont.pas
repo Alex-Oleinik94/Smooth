@@ -32,7 +32,7 @@ type
 		FSymbolParams : TSGSymbolParams;
 		FFontParams : TStringParams;
 		FTextureParams : TStringParams;
-		FFontReady  : TSGBoolean;
+		FFontLoaded  : TSGBoolean;
 		FFontHeight : TSGUInt8;
 		procedure LoadFont(const FontWay : TSGString);
 		class function GetLongInt(var Params:TStringParams;const Param:TSGString):TSGInt32;
@@ -44,10 +44,10 @@ type
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:TSGString ):LongWord;overload;
 		function CursorPlace(const S : TSGString; const Position : TSGLongWord):TSGUInt32;
-		function Ready():TSGBoolean;override;
+		function Loaded() : TSGBoolean; override;
 			public
-		property FontReady :TSGBoolean read FFontReady;
-		property FontHeight:Byte read FFontHeight;
+		property FontLoaded : TSGBoolean read FFontLoaded;
+		property FontHeight : TSGByte read FFontHeight;
 		property SymbolWidth[Index:char]:LongInt read GetSymbolWidth;
 		property FontParams:TStringParams read FFontParams;
 		property TextureParams:TStringParams read FTextureParams;
@@ -203,8 +203,8 @@ CalcucateBitMap();
 FreeMem(ColorBitMap,ColorBits*Width*Height div 8);
 SetLength(ArColors,0);
 Result:=True;
-FReadyToGoToTexture := True;
-FFontReady := True;
+FLoadedIntoRAM := True;
+FFontLoaded := True;
 end;
 
 function TSGFont.GetSymbolInfo(const VSymbol:Char):TSGPoint2int32;inline;
@@ -238,9 +238,9 @@ DrawCursorFromTwoVertex2f(P,CursorPosition,Vertex1,Vertex2,AutoXShift,AutoYShift
 FreeMem(P,SGPCharLength(P)+1);
 end;
 
-function TSGFont.Ready:Boolean;
+function TSGFont.Loaded() : TSGBoolean;
 begin
-Result:= (Inherited Ready) and FontReady;
+Result:= (inherited Loaded()) and FontLoaded;
 end;
 
 class function TSGFont.GetLongInt(var Params:TStringParams;const Param:string):LongInt;
@@ -357,8 +357,8 @@ while not eof(Fail) do
 	ReadLn(Fail);
 	end;
 Close(Fail);
-FFontHeight:=GetLongInt(FFontParams,'Height');
-FFontReady:=True;
+FFontHeight := GetLongInt(FFontParams, 'Height');
+FFontLoaded := True;
 end;
 
 function TSGFont.Loading():TSGBoolean;
@@ -398,7 +398,7 @@ end;
 constructor TSGFont.Create(const VFileName : TSGString = '');
 begin
 inherited Create(VFileName);
-FFontReady     := False;
+FFontLoaded    := False;
 FFontParams    := nil;
 FTextureParams := nil;
 end;
@@ -682,9 +682,9 @@ end;
 var
 	TempR:real;
 begin
-if (Self=nil) or (not(FontReady)) then
+if (Self=nil) or (not(FontLoaded)) then
 	begin
-	SGLog.Source('TSGFont__AddWaterString : Error : Font not ready!');
+	SGLog.Source('TSGFont__AddWaterString : Error : Font not loaded!');
 	Exit;
 	end;
 if (VImage.Image=nil) or (VImage.Channels<>3) or (Channels<>4) or (Image=nil)or (Image.BitMap=nil) then

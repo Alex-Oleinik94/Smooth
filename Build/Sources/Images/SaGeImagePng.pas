@@ -162,7 +162,7 @@ try
 	BitMap.Width := png_get_image_width(png_ptr, info_ptr);
 	BitMap.Height := png_get_image_height(png_ptr, info_ptr);
 	BitMap.Channels:=png_get_channels(png_ptr, info_ptr);
-	BitMap.SizeChannel:=png_get_bit_depth(png_ptr, info_ptr);
+	BitMap.ChannelSize:=png_get_bit_depth(png_ptr, info_ptr);
 	BitMap.ReAllocateMemory();
 	BitMap.CreateTypes();
 

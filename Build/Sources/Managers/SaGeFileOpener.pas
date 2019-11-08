@@ -40,6 +40,9 @@ type
 		procedure SetOption(const VName : TSGString; const VValue : TSGPointer);override;
 		end;
 
+var
+	FileOpenerConsoleMenuEnabled : TSGBoolean = False; //Выключено по умолчанию из-за неправильно функционирования
+
 procedure SGRegistryFileOpener(const VClass : TSGFileOpenerClass);
 procedure SGTryOpenFiles(const VFiles : TSGStringList);
 procedure SGWriteOpenableExpansions();
@@ -182,7 +185,7 @@ if VFiles = nil then
 if Length(VFiles) = 0 then
 	Exit;
 {$IFDEF MSWINDOWS}
-	if SGIsConsole() and SGSystemKeyPressed(17) then //CTRL
+	if SGIsConsole() and SGSystemKeyPressed(17){CTRL} and FileOpenerConsoleMenuEnabled then
 		SGOpenFilesWithMenu(VFiles)
 	else
 	{$ENDIF}

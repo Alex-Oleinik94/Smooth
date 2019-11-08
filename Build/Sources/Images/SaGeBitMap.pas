@@ -69,7 +69,7 @@ type
 		FHeight : TSGBitMapUInt;
 		
 		FChannels    : TSGBitMapUInt;
-		FSizeChannel : TSGBitMapUInt;
+		FChannelSize : TSGBitMapUInt;
 		
 		FFormatType : TSGBitMapUInt;
 		FDataType   : TSGBitMapUInt;
@@ -90,13 +90,13 @@ type
 		procedure SetHeight(const NewHeight : TSGBitMapUInt);
 		procedure SetBounds(const NewWidth, NewHeight : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetBounds(const NewBound : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetPixel(const _X, _Y : TSGUInt32; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; //{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Width       : TSGBitMapUInt read FWidth       write FWidth;
 		property Height      : TSGBitMapUInt read FHeight      write FHeight;
 		property Channels    : TSGBitMapUInt read FChannels    write FChannels;
-		property BitDepth    : TSGBitMapUInt read FSizeChannel write FSizeChannel;
-		property SizeChannel : TSGBitMapUInt read FSizeChannel write FSizeChannel;
+		property BitDepth    : TSGBitMapUInt read FChannelSize write FChannelSize;
+		property ChannelSize : TSGBitMapUInt read FChannelSize write FChannelSize;
 		property PixelFormat : TSGBitMapUInt read FFormatType  write FFormatType;
 		property PixelType   : TSGBitMapUInt read FDataType    write FDataType;
 		property BitMap      : PSGByte       read FBitMap      write FBitMap;
@@ -134,11 +134,11 @@ MultByte(Result.z, Pixel2.z);
 MultByte(Result.w, Pixel2.w);
 end;
 
-procedure TSGBitMap.SetPixel(const _X, _Y : TSGUInt32; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGBitMap.SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; //{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if (FSizeChannel = 8) and (FChannels = 3) then
+if (FChannelSize = 8) and (FChannels = 3) then
 	begin
-	
+	PSGPixel3b(FBitMap)[_X + _Y * Width] := _Pixel;
 	end;
 end;
 
@@ -322,7 +322,7 @@ if NewHeight=FHeight then
 	Exit;
 	end;
 
-case FChannels*FSizeChannel of
+case FChannels*FChannelSize of
 24,32:
 	begin
 	GetMem(NewBitMap,FChannels*Width*NewHeight);
@@ -374,7 +374,7 @@ if NewWidth=FWidth then
 	Exit;
 	end;
 
-case FChannels*FSizeChannel of
+case FChannels*FChannelSize of
 24,32:
 	begin
 	GetMem(NewBitMap,FChannels*NewWidth*Height);
@@ -406,9 +406,9 @@ SGHint(PredStr + 'TSGBitMap__WriteInfo(..)', CasesOfPrint);
 SGHint([PredStr,' Width    = ',FWidth], CasesOfPrint);
 SGHint([PredStr,' Height   = ',FHeight], CasesOfPrint);
 SGHint([PredStr,' Channels = ',FChannels], CasesOfPrint);
-SGHint([PredStr,' BitDepth = ',FSizeChannel], CasesOfPrint);
+SGHint([PredStr,' BitDepth = ',FChannelSize], CasesOfPrint);
 TextColor(15);
-SGHint([PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FSizeChannel div 8,'EN')], CasesOfPrint);
+SGHint([PredStr,' Size     = ',SGGetSizeString(FWidth*FHeight*FChannels*FChannelSize div 8,'EN')], CasesOfPrint);
 TextColor(7);
 end;
 
@@ -447,7 +447,7 @@ case FChannels of
 else
 	FFormatType:=0;
 end;
-case FSizeChannel of
+case FChannelSize of
 8:
 	FDataType:=SGR_UNSIGNED_BYTE;
 else
@@ -476,7 +476,7 @@ begin
 ClearBitMapBits();
 FWidth      := 0;
 FHeight     := 0;
-FSizeChannel:= 0;
+FChannelSize:= 0;
 FFormatType := 0;
 FDataType   := 0;
 FChannels   := 0;
@@ -489,7 +489,7 @@ begin
 Clear();
 FWidth  := VBitMap.Width;
 FHeight := VBitMap.Height;
-FSizeChannel := VBitMap.BitDepth;
+FChannelSize := VBitMap.BitDepth;
 FChannels := VBitMap.Channels;
 FFormatType := VBitMap.PixelFormat;
 FDataType := VBitMap.PixelType;

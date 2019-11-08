@@ -68,7 +68,7 @@ examples:
 	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex14
 	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex15
 	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex16
-	#@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Kraft/ExKraft
+#@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Kraft/ExKraft
 release_x32, release:
 	@$(PASCALCOMPILER) $(RX32) $(DORELEASE) $(DESKTOPARGS)
 release_x64:

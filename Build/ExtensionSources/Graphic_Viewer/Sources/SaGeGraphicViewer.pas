@@ -558,7 +558,7 @@ if Context.CursorKeysPressed(SGRightCursorButton)  then
 if SelectPointEnabled then
 	begin
 	SelectSecondPoint:=Context.CursorPosition;
-	if Image.ReadyTexture then
+	if Image.TextureLoaded then
 		begin
 		Render.Color4f(0,0.5,0.70,0.6);
 		Image.DrawImageFromTwoPoint2int32(SelectPoint,SelectSecondPoint,True,SG_2D)

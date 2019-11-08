@@ -50,6 +50,8 @@ type
 		FLoadingThread : TSGThread;
 		FFont : TSGFont;
 		FLoadingDone : TSGBool;
+		
+		FHintColor : TSGColor3f;
 			private
 		FPosition, FSize, FRenderSize : TSGVector2f;
 			private
@@ -87,6 +89,8 @@ uses
 
 destructor TSGImageViewer.Destroy();
 begin
+SGKill(FLoadingThread);
+SGKill(FFont);
 SGKill(FWaitAnimation);
 SGKill(FImageBackground);
 SGKill(FImage);
@@ -104,6 +108,7 @@ inherited Create(VContext);
 FImage := nil;
 FImageBackground := nil;
 FLoadingDone := False;
+FHintColor.Import(0.5, 0.5, 0.5);
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
 FWaitAnimation := TSGLoadingFrame.Create(Context);
@@ -130,16 +135,31 @@ FLoadingDone := True;
 end;
 
 procedure TSGImageViewer.InitBackgroundImage();
+const
+	ColorWhite = 255;
+	ColorGray  = 187;
+	QuadSize   = 10;
+var
+	Index, Index2 : TSGMaxEnum;
+	ValueColorWhite, ValueColorGray : TSGVertex3uint8;
 begin
+ValueColorWhite := SGVertex3uint8Import(ColorWhite, ColorWhite, ColorWhite);
+ValueColorGray := SGVertex3uint8Import(ColorGray, ColorGray, ColorGray);
 SGKill(FImageBackground);
 FImageBackground := TSGImage.Create();
 FImageBackground.Image.Width := FImage.Image.Width;
 FImageBackground.Image.Height := FImage.Image.Height;
-FImageBackground.Image.SizeChannel := 8;
 FImageBackground.Image.Channels := 3;
+FImageBackground.Image.ChannelSize := 8;
 FImageBackground.Image.CreateTypes();
 FImageBackground.Image.ReAllocateMemory();
-//todo
+for Index := 0 to FImage.Image.Width - 1 do
+	for Index2 := 0 to FImage.Image.Height - 1 do
+		if ((((Index div QuadSize) + (Index2 div QuadSize)) mod 2) = 0) then
+			FImageBackground.Image.SetPixel(Index, Index2, ValueColorWhite)
+		else
+			FImageBackground.Image.SetPixel(Index, Index2, ValueColorGray);
+FBackgroundImage.LoadedIntoRAM := True;
 end;
 
 procedure TSGImageViewer.Resize();
@@ -267,10 +287,10 @@ with Render do
 	Vertex2f(0,Height);
 	EndScene();
 	end;}
-if (FImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+if (FImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
 	begin
 	Render.Color3f(1, 1, 1);
-	if (FBackgroundImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+	if (FBackgroundImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
 		FBackgroundImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
 	FImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
 	end;
@@ -279,12 +299,14 @@ end;
 
 procedure TSGImageViewer.PaintHintAndLoadingAnimation();
 begin
-if (FFont <> nil) and FFont.FontReady then
-	if (FImage <> nil) and (FImage.ReadyTexture() or FImage.ReadyToTexture) then
+if (FFont <> nil) and FFont.FontLoaded then
+	if (FImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
 		PaintImageInfo()
 	else
 		begin
-		Render.Color3f(0.5, 0.5, 0.5);
+		if FLoadingThread.Crashed then
+			FHintColor.Import(1, 0, 0);
+		Render.Color(FHintColor);
 		FFont.DrawFontFromTwoVertex2f(
 			'Загрузка...',
 			SGVertex2fImport(5, FRenderSize.y - FFont.FontHeight - 5),

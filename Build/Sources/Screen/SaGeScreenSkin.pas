@@ -352,7 +352,7 @@ function TSGScreenSkin.FontReady() : TSGBool;
 begin
 Result := FontAssigned;
 if Result then
-	Result := Font.Ready;
+	Result := Font.Loaded;
 end;
 
 function TSGScreenSkin.FontAssigned() : TSGBool;

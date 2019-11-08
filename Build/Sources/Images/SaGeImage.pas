@@ -51,7 +51,7 @@ type
 		FTextureType   : TSGITextureType;
 
 		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
-		FReadyToGoToTexture : TSGBoolean;
+		FLoadedIntoRAM : TSGBoolean;
 		//Путь в файлу
 		FFileName           : TSGString;
 		//ФОрмат, в который сохранится изображзение прии его сохранении
@@ -76,24 +76,24 @@ type
 		procedure SaveingToStream(const Stream : TStream);
 			public
 		procedure Saveing(const Format : TSGByte = SGI_DEFAULT);
-		function Loading():TSGBoolean;virtual;
+		function Loading() : TSGBoolean; virtual;
 		procedure SaveToStream(const Stream:TStream);
-		procedure ToTexture();virtual;
+		procedure ToTexture(); virtual;
 		procedure ToTextureWithBlock(const VTexturesBlock : TSGTextureBlock);
 		procedure BindTexture();
 		procedure DisableTexture();
-		function ReadyTexture():TSGBoolean;
 		procedure FreeSream();
 		procedure FreeBits();
 		procedure FreeSome();
 		procedure FreeTexture();
 		procedure FreeAll();
-		function Ready():TSGBoolean;virtual;
+		function Loaded() : TSGBoolean; virtual;
+		function TextureLoaded() : TSGBoolean;
 			public
 		property FormatType         : TSGBitMapUInt read FImage.FFormatType  write FImage.FFormatType;
 		property DataType           : TSGBitMapUInt read FImage.FDataType    write FImage.FDataType;
 		property Channels           : TSGBitMapUInt read FImage.FChannels    write FImage.FChannels;
-		property BitDepth           : TSGBitMapUInt read FImage.FSizeChannel write FImage.FSizeChannel;
+		property BitDepth           : TSGBitMapUInt read FImage.FChannelSize write FImage.FChannelSize;
 		property Texture            : TSGRenderTexture read FTexture            write FTexture;
 		property Height             : TSGBitMapUInt read FImage.FHeight      write FImage.FHeight;
 		property Width              : TSGBitMapUInt read FImage.FWidth       write FImage.FWidth;
@@ -101,9 +101,7 @@ type
 		property BitMap             : PSGByte       read FImage.FBitMap      write FImage.FBitMap;
 		property Image              : TSGBitMap   read FImage;
 		property FileName           : TSGString   read FFileName           write FFileName;
-		property ReadyToGoToTexture : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
-		property ReadyGoToTexture   : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
-		property ReadyToTexture     : TSGBoolean  read FReadyToGoToTexture write FReadyToGoToTexture;
+		property LoadedIntoRAM      : TSGBoolean  read FLoadedIntoRAM      write FLoadedIntoRAM;
 		property Name               : TSGString   read FName               write FName;
 		property HasAlpha           : TSGBool     read HasAlphaChannel;
 			public //Render Functions:
@@ -414,7 +412,7 @@ Render.ReadPixels(
 	SGR_RGBA * TSGByte(NeedAlpha) + SGR_RGB * TSGByte(not NeedAlpha),
 	SGR_UNSIGNED_BYTE,
 	FImage.BitMap);
-FReadyToGoToTexture := True;
+FLoadedIntoRAM := True;
 end;
 
 (****************************)
@@ -446,7 +444,7 @@ end;
 
 procedure TSGImage.LoadRenderResources();
 begin
-if not (ReadyGoToTexture or (Texture <> 0)) then
+if not (LoadedIntoRAM or (Texture <> 0)) then
 	Loading();
 end;
 
@@ -456,7 +454,7 @@ var
 begin
 IsHasTexture := FTexture <> 0;
 FreeTexture();
-FReadyToGoToTexture := IsHasTexture and (FImage.BitMap <> nil);
+FLoadedIntoRAM := IsHasTexture and (FImage.BitMap <> nil);
 end;
 
 procedure TSGImage.SaveToStream(const Stream:TStream);
@@ -595,7 +593,7 @@ Result:=False;
 LoadToMemory();
 if (FStream<>nil) and (FStream.Size<>0) then
 	LoadToBitMap();
-Result:=ReadyToGoToTexture;
+Result := LoadedIntoRAM;
 
 {$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__Loading". Result = "'+SGStr(Result)+'"');{$ENDIF}
 end;
@@ -605,23 +603,23 @@ begin
 case Value of
 16:
 	begin
-	FImage.SizeChannel:=4;
+	FImage.ChannelSize:=4;
 	FImage.Channels:=4;
 	end;
 24:
 	begin
 	FImage.Channels:=3;
-	FImage.SizeChannel:=8;
+	FImage.ChannelSize:=8;
 	end;
 32:
 	begin
 	FImage.Channels:=4;
-	FImage.SizeChannel:=8;
+	FImage.ChannelSize:=8;
 	end;
 else
 	begin
 	FImage.Channels:=0;
-	FImage.SizeChannel:=0;
+	FImage.ChannelSize:=0;
 	end;
 end;
 FImage.CreateTypes();
@@ -629,12 +627,12 @@ end;
 
 function TSGImage.GetBitMapBits() : TSGBitMapUInt;
 begin
-Result := FImage.SizeChannel * FImage.Channels;
+Result := FImage.ChannelSize * FImage.Channels;
 end;
 
-function TSGImage.Ready:Boolean;
+function TSGImage.Loaded() : TSGBoolean;
 begin
-Result:=ReadyTexture;
+Result := TextureLoaded();
 end;
 
 procedure TSGImage.LoadMBMToBitMap(const Position:TSGUInt32 = 20);
@@ -736,7 +734,7 @@ end;
 
 procedure TSGImage.BindTexture();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if (FTexture=0) and (FReadyToGoToTexture) then
+if (FTexture=0) and (FLoadedIntoRAM) then
 	begin
 	ToTexture();
 	FreeBits();
@@ -812,11 +810,11 @@ else
 	end;
 if FImage = nil then
 	FImage := TSGBitMap.Create();
-Result:=FImage.BitMap<>nil;
+Result := FImage.BitMap <> nil;
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGImage  : Loaded "' + FileName + '" as ' + SGUpCaseString(TSGImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat)) + ' is "'+SGStr(Result)+'"');
 	{$ENDIF}
-FReadyToGoToTexture:=Result;
+FLoadedIntoRAM := Result;
 {$IFDEF ANDROID}SGLog.Source('Leaving "TSGImage__LoadToBitMap". Result="'+SGStr(Result)+'"');{$ENDIF}
 end;
 
@@ -876,16 +874,15 @@ Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, Dat
 	{$ENDIF}
 Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.Disable(SGR_TEXTURE_2D);
-FReadyToGoToTexture := False;
+FLoadedIntoRAM := False;
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGImage  : Loaded to texture "'+FFileName+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
 end;
 
-
-function TSGImage.ReadyTexture:Boolean;
+function TSGImage.TextureLoaded() : TSGBoolean;
 begin
-Result:=FTexture<>0;
+Result := FTexture <> 0;
 end;
 
 class function TSGImage.ClassName() : TSGString;
@@ -898,14 +895,13 @@ begin
 inherited Create();
 FTextureNumber := -1;
 FTextureType := SGITextureTypeTexture;
-FTexture:=0;
-FReadyToGoToTexture:=False;
-FFileName:=VFileName;
-FImage:=TSGBitMap.Create();
-FStream:=nil;
-FName:='';
+FTexture := 0;
+FLoadedIntoRAM := False;
+FFileName := VFileName;
+FImage := TSGBitMap.Create();
+FStream := nil;
+FName := '';
 end;
-
 
 initialization
 begin

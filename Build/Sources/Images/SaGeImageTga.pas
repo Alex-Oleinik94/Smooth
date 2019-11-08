@@ -94,7 +94,7 @@ try
 		end;
 	Result.Width:=TGAHeader.Width[0]  + TGAHeader.Width[1]  * 256;
 	Result.Height:=TGAHeader.Height[0] + TGAHeader.Height[1] * 256;
-	Result.SizeChannel:=8;
+	Result.ChannelSize:=8;
 	Result.Channels:= TGAHeader.BPP div 8;
 	ImageSize:=Result.Width*Result.Height*Result.Channels;
 	if (Result.Channels<3) then  

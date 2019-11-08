@@ -45,6 +45,7 @@ implementation
 uses
 	 SaGeStringUtils
 	,SaGeLists
+	,SaGeBaseUtils
 	;
 
 constructor TSGLeaksDetector.Create();
@@ -162,7 +163,7 @@ if ii = 0 then
 	SGLogWriteLn('TSGLeaksDetector : Leaks not detected.')
 else
 	begin
-	SGLogWriteLn(SGStr(['TSGLeaksDetector : Total ', ii, ' leaks.']));
+	SGLogWriteLn(SGStr(['TSGLeaksDetector : Total ', ii, ' leak', Iff(ii > 1, 's'), '.']));
 	LogSignificant := True;
 	SL := nil;
 	if FReferences <> nil then
