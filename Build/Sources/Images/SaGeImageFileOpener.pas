@@ -45,25 +45,30 @@ type
 		
 		FBackgroundImage : TSGImage;
 		FImage : TSGImage;
-		FImageBackground : TSGImage;
 		
 		FLoadingThread : TSGThread;
 		FFont : TSGFont;
 		FLoadingDone : TSGBool;
 		
 		FHintColor : TSGColor3f;
-			private
+		
 		FPosition, FSize, FRenderSize : TSGVector2f;
+		FCursorOverImage : TSGBoolean;
 			private
 		procedure InitImagePosition();
 		procedure InitBackgroundImage();
+		procedure FillBackgroundImage();
+		procedure PrepareBackgroundImageMainThread();
 		procedure RescaleImagePosition();
 		procedure PaintImageInfo();
+		procedure PaintImage();
 		procedure PaintHintAndLoadingAnimation();
 		procedure ProccessMouseWheel(const VWheel : TSGBool);
 		procedure ProccessContextKeys();
 		procedure OpenFileDialog();
 		procedure SaveFileDialog();
+		function CursorOverImage(const _CursorPosition : PSGVector2f = nil) : TSGBoolean;
+		procedure ProccessCursorIcon();
 			public
 		procedure LoadingFromThread();
 		end;
@@ -79,6 +84,7 @@ uses
 	,SaGeRenderBase
 	,SaGeFileUtils
 	,SaGeContextUtils
+	,SaGeCursor
 	
 	,SysUtils
 	;
@@ -92,7 +98,7 @@ begin
 SGKill(FLoadingThread);
 SGKill(FFont);
 SGKill(FWaitAnimation);
-SGKill(FImageBackground);
+SGKill(FBackgroundImage);
 SGKill(FImage);
 inherited;
 end;
@@ -106,9 +112,10 @@ constructor TSGImageViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 FImage := nil;
-FImageBackground := nil;
+FBackgroundImage := nil;
 FLoadingDone := False;
-FHintColor.Import(0.5, 0.5, 0.5);
+FCursorOverImage := False;
+FHintColor.Import(0, 0, 0);
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
 FWaitAnimation := TSGLoadingFrame.Create(Context);
@@ -129,37 +136,74 @@ while FImage = nil do
 	Sleep(10);
 FImage.Loading();
 InitImagePosition();
-if FImage.Image.Channels = 4 then
-	InitBackgroundImage();
 FLoadingDone := True;
 end;
 
-procedure TSGImageViewer.InitBackgroundImage();
+procedure TSGImageViewer.PrepareBackgroundImageMainThread();
+begin
+InitBackgroundImage();
+FillBackgroundImage();
+end;
+
+procedure TSGImageViewer.FillBackgroundImage();
 const
-	ColorWhite = 255;
-	ColorGray  = 187;
-	QuadSize   = 10;
+	DefaultQuadSize   = 10;
+	ColorThemesValues : array [0..1] of record FColor1, FColor2 : TSGUInt8; end =
+		((FColor1 : 255; FColor2 : 187), (FColor1 : 117; FColor2 : 143));
+	DefaultColorIndex = 1;
+var
+	ColorThemes : packed array of record FColor1, FColor2 : TSGVertex3uint8; end = nil;
+
+procedure FillImage();
+var
+	OverageX, OverageY : TSGMaxEnum;
+
+function PixelColor(const _x, _y : TSGMaxEnum) : TSGVertex3uint8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+//todo
+if ((((_x div DefaultQuadSize) + (_y div DefaultQuadSize)) mod 2) = 0) then
+	Result := ColorThemes[DefaultColorIndex].FColor1
+else
+	Result := ColorThemes[DefaultColorIndex].FColor2;
+end;
+
 var
 	Index, Index2 : TSGMaxEnum;
-	ValueColorWhite, ValueColorGray : TSGVertex3uint8;
 begin
-ValueColorWhite := SGVertex3uint8Import(ColorWhite, ColorWhite, ColorWhite);
-ValueColorGray := SGVertex3uint8Import(ColorGray, ColorGray, ColorGray);
-SGKill(FImageBackground);
-FImageBackground := TSGImage.Create();
-FImageBackground.Image.Width := FImage.Image.Width;
-FImageBackground.Image.Height := FImage.Image.Height;
-FImageBackground.Image.Channels := 3;
-FImageBackground.Image.ChannelSize := 8;
-FImageBackground.Image.CreateTypes();
-FImageBackground.Image.ReAllocateMemory();
-for Index := 0 to FImage.Image.Width - 1 do
-	for Index2 := 0 to FImage.Image.Height - 1 do
-		if ((((Index div QuadSize) + (Index2 div QuadSize)) mod 2) = 0) then
-			FImageBackground.Image.SetPixel(Index, Index2, ValueColorWhite)
-		else
-			FImageBackground.Image.SetPixel(Index, Index2, ValueColorGray);
+OverageX := FBackgroundImage.Image.Width mod DefaultQuadSize;
+OverageY := FBackgroundImage.Image.Height mod DefaultQuadSize;
+for Index := 0 to FBackgroundImage.Image.Width - 1 do
+	for Index2 := 0 to FBackgroundImage.Image.Height - 1 do
+		FBackgroundImage.Image.SetPixel(Index, Index2, PixelColor(Index, Index2));
+end;
+
+var
+	Index : TSGMaxEnum;
+begin
+if (FBackgroundImage = nil) then
+	exit;
+SetLength(ColorThemes, Length(ColorThemesValues));
+for Index := 0 to High(ColorThemes) do
+	begin
+	ColorThemes[Index].FColor1 := SGVertex3uint8Import(ColorThemesValues[Index].FColor1, ColorThemesValues[Index].FColor1, ColorThemesValues[Index].FColor1);
+	ColorThemes[Index].FColor2 := SGVertex3uint8Import(ColorThemesValues[Index].FColor2, ColorThemesValues[Index].FColor2, ColorThemesValues[Index].FColor2);
+	end;
+FillImage();
+SetLength(ColorThemes, 0);
 FBackgroundImage.LoadedIntoRAM := True;
+end;
+
+procedure TSGImageViewer.InitBackgroundImage();
+begin
+SGKill(FBackgroundImage);
+FBackgroundImage := TSGImage.Create();
+FBackgroundImage.Context := Context;
+FBackgroundImage.Image.Width := FImage.Image.Width;
+FBackgroundImage.Image.Height := FImage.Image.Height;
+FBackgroundImage.Image.Channels := 3;
+FBackgroundImage.Image.ChannelSize := 8;
+FBackgroundImage.Image.CreateTypes();
+FBackgroundImage.Image.ReAllocateMemory();
 end;
 
 procedure TSGImageViewer.Resize();
@@ -169,11 +213,8 @@ end;
 
 procedure TSGImageViewer.DeleteRenderResources();
 begin
-if FImage <> nil then
-	begin
-	FImage.Destroy();
-	FImage := nil;
-	end;
+SGKill(FImage);
+SGKill(FBackgroundImage);
 end;
 
 procedure TSGImageViewer.PaintImageInfo();
@@ -191,29 +232,44 @@ end;
 
 begin
 Iterator.Import(5, FRenderSize.y - (FFont.FontHeight + 1) * 5 - 2);
-Render.Color3f(0.5,0.5,0.5);
-PaintString('FileName = ' + FImage.FileName);
-PaintString('Width = ' + SGStr(FImage.Width));
-PaintString('Height = ' + SGStr(FImage.Height));
-PaintString('Channels = ' + SGStr(FImage.Channels));
-PaintString('Bitmap Size = ' + SGGetSizeString(FImage.Width * FImage.Height * FImage.Channels,'EN'));
+Render.Color(FHintColor);
+PaintString('width = ' + SGStr(FImage.Width));
+PaintString('height = ' + SGStr(FImage.Height));
+PaintString('channels = ' + SGStr(FImage.Channels));
+PaintString('bitmap size = ' + SGGetSizeString(FImage.Width * FImage.Height * FImage.Channels,'EN'));
+PaintString('filename = ' + FImage.FileName);
+end;
+
+function TSGImageViewer.CursorOverImage(const _CursorPosition : PSGVector2f = nil) : TSGBoolean;
+var
+	CursorPosition : TSGPoint2int32;
+	CursorPositionFloat : TSGVector2f;
+begin
+CursorPosition := Context.CursorPosition();
+CursorPositionFloat.Import(CursorPosition.x, CursorPosition.y);
+Result := 
+	(CursorPositionFloat.x > FPosition.x) and
+	(CursorPositionFloat.y > FPosition.y) and
+	(CursorPositionFloat.x < FPosition.x + FSize.x) and
+	(CursorPositionFloat.y < FPosition.y + FSize.y);
+if (_CursorPosition <> nil) then
+	_CursorPosition^ := CursorPositionFloat;
 end;
 
 procedure TSGImageViewer.ProccessMouseWheel(const VWheel : TSGBool);
 var
-	CursorPos : TSGPoint2int32;
-	CursorPosF : TSGVector2f;
+	CursorPosition : TSGVector2f;
 
 procedure ToVectors(out V1, V2 : TSGVector2f);
 begin
-V1 := FPosition - CursorPosF;
-V2 := FPosition + FSize - CursorPosF;
+V1 := FPosition - CursorPosition;
+V2 := FPosition + FSize - CursorPosition;
 end;
 
 procedure FromVectors(const V1, V2 : TSGVector2f);
 begin
-FPosition := V1 + CursorPosF;
-FSize := V2 + CursorPosF - FPosition;
+FPosition := V1 + CursorPosition;
+FSize := V2 + CursorPosition - FPosition;
 end;
 
 procedure MultVectors(var V1, V2 : TSGVector2f; const MN : TSGFloat);
@@ -227,31 +283,37 @@ const
 var
 	V1, V2 : TSGVector2f;
 begin
-CursorPos := Context.CursorPosition();
-CursorPosF.Import(CursorPos.x, CursorPos.y);
-if  (CursorPosF.x > FPosition.x) and
-	(CursorPosF.y > FPosition.y) and
-	(CursorPosF.x < FPosition.x + FSize.x) and
-	(CursorPosF.y < FPosition.y + FSize.y) then
+if CursorOverImage(@CursorPosition) then
 	begin
 	ToVectors(V1, V2);
 	if VWheel then
-		begin
-		MultVectors(V1, V2, WheelRank);
-		end
+		MultVectors(V1, V2, WheelRank)
 	else
-		begin
 		MultVectors(V1, V2, 1 / WheelRank);
-		end;
 	FromVectors(V1, V2);
 	RescaleImagePosition();
 	end;
+end;
+
+procedure TSGImageViewer.ProccessCursorIcon();
+var
+	_CursorOverImage : TSGBoolean = False;
+begin
+_CursorOverImage := CursorOverImage();
+if _CursorOverImage then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
+		Context.Cursor := TSGCursor.Create(SGC_HAND);
+if FCursorOverImage and (not _CursorOverImage) then
+	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_HAND)) then
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+FCursorOverImage := _CursorOverImage;
 end;
 
 procedure TSGImageViewer.ProccessContextKeys();
 begin
 if Context.CursorWheel() <> SGNullCursorWheel then
 	ProccessMouseWheel(SGUpCursorWheel = Context.CursorWheel());
+ProccessCursorIcon();
 if Context.KeyPressed and (Context.KeyPressedChar = 'S') and Context.KeysPressed(SG_CTRL_KEY) then
 	SaveFileDialog();
 if Context.KeyPressed and (Context.KeyPressedChar = 'O') and Context.KeysPressed(SG_CTRL_KEY) then
@@ -277,6 +339,12 @@ procedure TSGImageViewer.Paint();
 begin
 ProccessContextKeys();
 Render.InitMatrixMode(SG_2D);
+PaintImage();
+PaintHintAndLoadingAnimation();
+end;
+
+procedure TSGImageViewer.PaintImage();
+begin
 {Render.Color(FBackgroundColor);
 with Render do
 	begin
@@ -289,12 +357,13 @@ with Render do
 	end;}
 if (FImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
 	begin
+	if (FImage.Image.Channels = 4) and (FBackgroundImage = nil) then
+		PrepareBackgroundImageMainThread();
 	Render.Color3f(1, 1, 1);
-	if (FBackgroundImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
+	if (FBackgroundImage <> nil) and (FBackgroundImage.TextureLoaded() or FBackgroundImage.LoadedIntoRAM) then
 		FBackgroundImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
 	FImage.DrawImageFromTwoVertex2f(FPosition, FSize + FPosition, True, SG_2D);
 	end;
-PaintHintAndLoadingAnimation();
 end;
 
 procedure TSGImageViewer.PaintHintAndLoadingAnimation();

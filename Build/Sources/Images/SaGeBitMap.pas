@@ -90,7 +90,7 @@ type
 		procedure SetHeight(const NewHeight : TSGBitMapUInt);
 		procedure SetBounds(const NewWidth, NewHeight : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure SetBounds(const NewBound : TSGBitMapUInt); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; //{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		property Width       : TSGBitMapUInt read FWidth       write FWidth;
 		property Height      : TSGBitMapUInt read FHeight      write FHeight;
@@ -134,12 +134,10 @@ MultByte(Result.z, Pixel2.z);
 MultByte(Result.w, Pixel2.w);
 end;
 
-procedure TSGBitMap.SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; //{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGBitMap.SetPixel(const _X, _Y : TSGBitMapUInt; const _Pixel : TSGPixel3b); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FChannelSize = 8) and (FChannels = 3) then
-	begin
-	PSGPixel3b(FBitMap)[_X + _Y * Width] := _Pixel;
-	end;
+	PSGPixel3b(FBitMap)[_Y * Width + _X] := _Pixel;
 end;
 
 procedure TSGBitMap.PaintSquare(const VColor : TSGPixel4b;  const VX, VY, VWidth, VHeight : TSGBitMapUInt);
