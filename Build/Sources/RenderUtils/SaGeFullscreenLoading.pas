@@ -11,6 +11,7 @@ uses
 	,SaGeContextInterface
 	,SaGeCommonStructs
 	,SaGeFont
+	,SaGeScreenClasses
 	;
 
 type
@@ -26,29 +27,35 @@ type
 		procedure LoadRenderResources(); override;
 		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
 			private
-		FProjectionAngle      : TSGSingle;     //Угол поворота центра
-		FProjectionAngleShift : TSGSingle;     //Скорость узманения угла поворота центра
-		FAngle                : TSGSingle;     //Начальный угол поворота
-		FAngleShift           : TSGSingle;     //Срорость кручения
-		FProgress             : TSGSingle;     //[0..1]
+		FProjectionAngle      : TSGFloat32;     //Угол поворота центра
+		FProjectionAngleShift : TSGFloat32;     //Скорость узманения угла поворота центра
+		FAngle                : TSGFloat32;     //Начальный угол поворота
+		FAngleShift           : TSGFloat32;     //Срорость кручения
+		FProgress             : TSGFloat32;     //[0..1]
 		FCountLines           : TSGLongWord;   //Количество разделений экранчика
 		FFont                 : TSGFont;       //Шрифт для надписи процентов
 		FArrayOfLines:packed array of          //Массив дорожкок
 			packed record
-			FLengths:packed array of TSGSingle;//Длины кусочков дорожкок экрана
-			FSpeed  :TSGSingle;                //Скорость убывания в середину экрана
-			FWidth  :TSGSingle;                //Ширина дорожки в градусах
+			FLengths:packed array of TSGFloat32;//Длины кусочков дорожкок экрана
+			FSpeed  :TSGFloat32;                //Скорость убывания в середину экрана
+			FWidth  :TSGFloat32;                //Ширина дорожки в градусах
 		    end;
-		FProgressIsSet        : Boolean;       //Если пользователь не устанавливал не разу прогресс, то
+		FProgressIsSet        : Boolean;       //Если "пользователь" не устанавливал не разу прогресс, то
 		                                       //Запускатеся режим, где просто показывается работа этой программы,
-		                                       //Если установил, то отображается прогресс пользователя
-		FMaxRadius            : TSGSingle;     //Максимальный радиус (максимальная длинна дорожек)
-		FAlpha                : TSGSingle;     //Это для начала и конца загрузки. ЧТобы плавно уходило.
+		                                       //Если установил, то отображается прогресс "пользователя"
+		FMaxRadius            : TSGFloat32;     //Максимальный радиус (максимальная длинна дорожек)
+		FAlpha                : TSGFloat32;     //Это для начала и конца загрузки. Чтобы "плавно уходило".
 		FType                 : TSGLType;      //Тип работы загрузки в данный момент времени.
-		procedure CallAction();                //Тут обрабатываются дорожки, их кусочки и ширины
-		procedure SetProgress(const NewProgress:TSGSingle);
+		FRadiusCentre         : TSGMaxEnum;
+		FQuantityParts        : TSGMaxEnum;
+		FPartsSigns           : packed array of TSGFloat32;
+		FHintLabel            : TSGScreenLabel;
+		procedure CallAction();                //Здесь обрабатываются дорожки, их кусочки и ширины
+		procedure SetProgress(const NewProgress:TSGFloat32);
+		procedure MiniDrawsSignsUpDate();
+		procedure PaintPart(const VProjectionAngle, VRadius : TSGFloat32; const Color : TSGColor4f; const Sign : TSGFloat32);
 			public
-		property Progress : TSGSingle read FProgress write SetProgress;
+		property Progress : TSGFloat32 read FProgress write SetProgress;
 		property Alpha : TSGFloat32 read FAlpha;
 		end;
 
@@ -60,6 +67,7 @@ uses
 	 SaGeStringUtils
 	,SaGeFileUtils
 	,SaGeMathUtils
+	,SaGeScreenBase
 	;
 
 procedure SGKill(var Loading : TSGLoading); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -71,7 +79,7 @@ if Loading <> nil then
 	end;
 end;
 
-procedure TSGLoading.SetProgress(const NewProgress:TSGSingle);
+procedure TSGLoading.SetProgress(const NewProgress:TSGFloat32);
 begin
 if not FProgressIsSet then
 	FProgressIsSet:=True;
@@ -80,8 +88,8 @@ end;
 
 procedure TSGLoading.CallAction();
 var
-	i, iii : TSGWord;
-	iiii   : TSGSingle;
+	i, iii : TSGUInt16;
+	iiii   : TSGFloat32;
 begin
 for i:=0 to FCountLines-1 do
 	begin
@@ -129,40 +137,54 @@ for i:=0 to FCountLines-1 do
 	end;
 end;
 
+procedure TSGLoading.MiniDrawsSignsUpDate();
+var
+	Index : TSGMaxEnum;
+begin
+SetLength(FPartsSigns, FQuantityParts);
+for Index := 0 to FQuantityParts - 1 do
+	FPartsSigns[Index] := SGRandomOne();
+end;
 
 constructor TSGLoading.Create(const VContext : ISGContext);
 var
-	i :    TSGLongWord;
+	Index : TSGMaxEnum;
 begin
 inherited Create(VContext);
+FRadiusCentre := 200;
+FQuantityParts := 5;
+MiniDrawsSignsUpDate();
 FProgress:=0;
 FCountLines:=14;
 if FCountLines mod 2 = 1 then
 	FCountLines+=1;
 FAngle:=Random(360);
 FProjectionAngle:=600;
-FProjectionAngleShift:=SGRandomOne()*0.01; //Тут в радианах, поэтому так мало
-FAngleShift:=SGRandomOne()*0.7;            //А тут в градусах
+FProjectionAngleShift := SGRandomOne() * 0.01; //Здесь в радианах, поэтому так мало
+FAngleShift := SGRandomOne() * 0.7;            //А здесь в градусах
 FMaxRadius:=280;
 SetLength(FArrayOfLines,FCountLines);
-for i:=0 to FCountLines-1 do
+for Index := 0 to FCountLines - 1 do
 	begin
-	FArrayOfLines[i].FLengths:=nil;
-	FArrayOfLines[i].FSpeed:=(Random(400)+100)/200;
-	FArrayOfLines[i].FWidth:=360/FCountLines;
+	FArrayOfLines[Index].FLengths := nil;
+	FArrayOfLines[Index].FSpeed := (Random(400) + 100) / 200;
+	FArrayOfLines[Index].FWidth := 360 / FCountLines;
 	end;
-FFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
-FFont.SetContext(Context);
+FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
+FFont.Context := Context;
 FFont.Loading();
 FProgressIsSet:=False;
 FAlpha:=0;
 FType:=SGBeforeLoading;
+FHintLabel := SGCreateLabel(Screen, 'progress', 
+	Render.Width - 90 - 10, Render.Height - FFont.FontHeight + 2 - 10, 90, FFont.FontHeight + 2,
+	FFont, [SGAnchRight, SGAnchBottom], True, True);
+FHintLabel.TextPosition := False;
 end;
-
 
 destructor TSGLoading.Destroy();
 var
-	i : TSGWord;
+	i : TSGUInt16;
 begin
 if FArrayOfLines<>nil then
 	begin
@@ -171,39 +193,31 @@ if FArrayOfLines<>nil then
 			SetLength(FArrayOfLines[i].FLengths,0);
 	SetLength(FArrayOfLines,0);
 	end;
-if FFont <> nil then
-	begin
-	FFont.Destroy();
-	FFont := nil;
-	end;
-inherited Destroy();
+SetLength(FPartsSigns, 0);
+SGKill(FFont);
+SGKill(FHintLabel);
+inherited;
 end;
 
-procedure TSGLoading.Paint();
+procedure TSGLoading.PaintPart(const VProjectionAngle, VRadius : TSGFloat32; const Color : TSGColor4f; const Sign : TSGFloat32);
 var
-	FColor : TSGColor4f;
-
-procedure MiniDraw(VProjectionAngle, VRadius : TSGSingle);
-var
-	i,ii : TSGWord;
-	iii  : TSGSingle;
+	i, ii : TSGUInt16;
+	iii   : TSGFloat32;
 
 function DrawFirst():TSGBoolean;
 begin
 Result:=FArrayOfLines[i].FLengths[0]>6;
 end;
 
-// For quik job
 var
-	VVCosAngle, VVSinAngle, VVCosAngle2, VVSinAngle2 : TSGSingle;
-
+	VVCosAngle, VVSinAngle, VVCosAngle2, VVSinAngle2 : TSGFloat32; // for quik job
 begin
 VVSinAngle:=sin(VProjectionAngle);
 VVSinAngle2:=sin(Pi*FProjectionAngle);
 VVCosAngle:=cos(VProjectionAngle);
 VVCosAngle2:=cos(Pi*FProjectionAngle);
 
-Render.Color(FColor);
+Render.Color(Color);
 Render.InitOrtho2d(
 	-Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
 	 Render.Height/2+(VVCosAngle+VVCosAngle2)*VRadius,
@@ -218,21 +232,20 @@ Render.InitOrtho2d(
 	-Render.Height/2-(VVCosAngle+VVCosAngle2)*VRadius,
 	Render.Width/2-(VVSinAngle+VVSinAngle2)*VRadius,
 	Render.Height/2-(VVCosAngle+VVCosAngle2)*VRadius);
-Render.Rotatef(FAngle*FAlpha,0,0,1);
+Render.Rotatef(FAngle*FAlpha*Sign,0,0,1);
 for i:=0 to FCountLines-1 do
 	begin
 	iii:=50+Byte(not DrawFirst())*FArrayOfLines[i].FLengths[0];
+	VVCosAngle:=cos(FArrayOfLines[i].FWidth/180*pi);
+	VVSinAngle:=sin(FArrayOfLines[i].FWidth/180*pi);
 	for ii:=Byte(not DrawFirst()) to High(FArrayOfLines[i].FLengths) do
 		begin
-		VVCosAngle:=cos(FArrayOfLines[i].FWidth/180*pi);
-		VVSinAngle:=sin(FArrayOfLines[i].FWidth/180*pi);
-		
 		Render.BeginScene(SGR_LINE_LOOP);
-		Render.Color(FColor.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius));
+		Render.Color(Color.WithAlpha(FAlpha).WithAlpha(1-(iii+FArrayOfLines[i].FLengths[ii]-6)/FMaxRadius+50/FMaxRadius));
 		Render.Vertex2f(iii+FArrayOfLines[i].FLengths[ii]-6,6);
 		Render.Vertex2f((iii+FArrayOfLines[i].FLengths[ii]-6)*VVCosAngle,
 			(iii+FArrayOfLines[i].FLengths[ii]-6)*VVSinAngle);
-		Render.Color(FColor.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius));
+		Render.Color(Color.WithAlpha(FAlpha).WithAlpha(1-iii/FMaxRadius+50/FMaxRadius));
 		Render.Vertex2f(iii*VVCosAngle,iii*VVSinAngle);
 		Render.Vertex2f(iii,6);
 		Render.EndScene();
@@ -243,19 +256,17 @@ for i:=0 to FCountLines-1 do
 	end;
 end;
 
-const
-	RadiusCentre      = 200;
-	QuantityMiniDraws = 3;
-
+procedure TSGLoading.Paint();
 var
-	i : TSGWord;
-	r : TSGSingle;
+	Color : TSGColor4f;
+	i : TSGUInt16;
+	r : TSGFloat32;
 	depthEnabled : TSGBool = False;
 begin
 CallAction();
-FCOlor := (SGVertex4fImport(1,0,0,1) * (1-FProgress) + SGVertex4fImport(0,1,0,1) * FProgress);
-TSGVertex3f(FCOlor) := FCOlor.Normalized();
-FColor.AddAlpha(FAlpha);
+Color := SGVertex4fImport(1,0,0,1) * (1-FProgress) + SGVertex4fImport(0,1,0,1) * FProgress;
+TSGVertex3f(Color) := Color.Normalized();
+Color.AddAlpha(FAlpha);
 Render.LineWidth(1);
 
 depthEnabled := Render.IsEnabled(SGR_DEPTH_TEST);
@@ -263,10 +274,10 @@ if depthEnabled then
 	Render.Disable(SGR_DEPTH_TEST);
 
 r := FProjectionAngle;
-for i := 1 to QuantityMiniDraws do
+for i := 1 to FQuantityParts do
 	begin
-	r += 2 * pi / QuantityMiniDraws;
-	MiniDraw(r, RadiusCentre * (1 - FProgress));
+	r += 2 * pi / FQuantityParts;
+	PaintPart(r * FPartsSigns[i - 1], FRadiusCentre * (1 - FProgress) * FPartsSigns[i - 1], Color, FPartsSigns[i - 1]); // don't now what is it ...
 	end;
 
 if depthEnabled then
@@ -286,6 +297,8 @@ SGBeforeLoading:
 			FType:=SGInLoading;
 			end;
 		end;
+	FHintLabel.Visible := True;
+	FHintLabel.Caption := SGStrReal(FProgress * 100, 2) + '%';
 	end;
 SGInLoading:
 	begin
@@ -293,7 +306,12 @@ SGInLoading:
 		begin
 		FType:=SGAfterLoading;
 		FProjectionAngle:=600;
-		end;
+		MiniDrawsSignsUpDate();
+		FHintLabel.Caption := '100%';
+		FHintLabel.Visible := False;
+		end
+	else
+		FHintLabel.Caption := SGStrReal(FProgress * 100, 2) + '%';
 	end;
 SGAfterLoading:
 	begin
