@@ -33,7 +33,7 @@ procedure LoadPNG(const Stream: TStream;const BitMap:TSGBitMap);forward;
 procedure SavePNG(const BitMap: TSGBitMap;const Stream: TStream;const  Interlaced: boolean = false);forward;
 
 type
-	TSGResourceManipulatorImagesPNG=class(TSGResourceManipulator)
+	TSGResourceManipulatorImagesPNG = class(TSGResourceManipulator)
 			public
 		constructor Create();override;
 		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;override;
@@ -43,7 +43,7 @@ type
 constructor TSGResourceManipulatorImagesPNG.Create();
 begin
 inherited;
-AddExpansion('PNG',True,True);
+AddExpansion('PNG', True, True);
 end;
 
 function TSGResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
@@ -54,7 +54,7 @@ end;
 
 function TSGResourceManipulatorImagesPNG.SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
 begin
-if (VExpansion<>'PNG') or (not(VResource is TSGBitMap)) then
+if (VExpansion <> 'PNG') or (not(VResource is TSGBitMap)) then
 	Result:=False
 else
 	begin

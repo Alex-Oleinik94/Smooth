@@ -35,11 +35,11 @@ type
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
 			public
-		// ј это само изображение ( в оперативной пам€ти, в виде последовательности байнов, и свойств изобрадени€ )
-		// ¬ общем это BitMap (битова€ карта)
+		// ƒанные изображени€ (свойства изображени€ и последовательность байтов, характеризующих цвета пикселей)
+		// ¬ общем "BitMap" ("карта BIT-ов")
 		FImage   : TSGBitMap;
 
-		// ѕоток, в которы подгружаетс€ изобрадени€, при его загрузке.
+		// ѕоток, в которы подгружаетс€ изображени€, при его загрузке.
 		// —делано MemoryStream чтобы очень быстро грузилось.
 		FStream  : TMemoryStream;
 
@@ -153,6 +153,7 @@ uses
 		{$ENDIF}
 	,SaGeImageTga
 	,SaGeImageSgia
+	,SaGeImageICO
 	
 		// System
 	,Crt

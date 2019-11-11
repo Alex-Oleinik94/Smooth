@@ -6,12 +6,14 @@ interface
 
 uses
 	 Classes
+	
 	,SaGeBase
 	,SaGeBitMap
 	;
 type
 	TSGImageFormatDeterminer = class
 			public
+		class function IsICO(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function IsBMP(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function IsMBM(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function IsPNG(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -23,6 +25,15 @@ type
 		end;
 
 implementation
+
+uses
+	 SaGeImageICO
+	;
+
+class function TSGImageFormatDeterminer.IsICO(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := IsICOData(Stream);
+end;
 
 class function TSGImageFormatDeterminer.DetermineExpansion(const Stream : TStream) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

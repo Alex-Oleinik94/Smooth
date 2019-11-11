@@ -17,7 +17,7 @@ uses
 	;
 
 type
-	TSGResource=class(TSGClass)
+	TSGResource = class(TSGClass)
 		end;
 type
 	TSGResourceManipulatorExpansions = packed array of
@@ -49,8 +49,8 @@ type
 type
 	TSGResourceManager = class(TSGClass)
 			public
-		constructor Create();override;
-		destructor Destroy();override;
+		constructor Create(); override;
+		destructor Destroy(); override;
 			private
 		FQuantityManipulators : TSGLongWord;
 		FArManipulators : packed array of TSGResourceManipulator;
@@ -58,10 +58,10 @@ type
 		procedure AddManipulator(const VManipulatorClass : TSGResourceManipulatorClass);
 		function LoadingIsSupported(const VExpansion : TSGString):TSGBoolean;
 		function SaveingIsSupported(const VExpansion : TSGString):TSGBoolean;
-		function LoadResource(const VFileName,VExpansion : TSGString):TSGResource;
-		function SaveResource(const VFileName,VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
-		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
-		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
+		function LoadResource(const VFileName, VExpansion : TSGString):TSGResource;
+		function SaveResource(const VFileName, VExpansion : TSGString; const VResource : TSGResource):TSGBoolean;
+		function LoadResourceFromStream(const VStream : TStream; const VExpansion : TSGString):TSGResource;
+		function SaveResourceToStream(const VStream : TStream; const VExpansion : TSGString; const VResource : TSGResource):TSGBoolean;
 		end;
 var
 	SGResourceManager : TSGResourceManager = nil;

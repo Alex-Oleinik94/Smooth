@@ -14,8 +14,8 @@ uses
 	,SaGeBitMap
 	;
 
-procedure LoadBMP(Stream: TStream; BitMap: TSGBitMap);
-procedure SaveBMP(BitMap: TSGBitMap; Stream: TStream);
+procedure LoadBMP(Stream : TStream; BitMap : TSGBitMap);
+procedure SaveBMP(BitMap : TSGBitMap; Stream : TStream);
 
 implementation
 
