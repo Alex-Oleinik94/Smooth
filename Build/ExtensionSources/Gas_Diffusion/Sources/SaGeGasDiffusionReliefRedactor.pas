@@ -971,12 +971,7 @@ const
 begin
 FInRedactoring := True;
 if FFont = nil then
-	begin
-	FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-	FFont.SetContext(Context);
-	FFont.Loading();
-	FFont.ToTexture();
-	end;
+	FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 if FPrimetiveTypeButtonPoints = nil then
 	begin
 	FPrimetiveTypeButtonPoints := TSGScreenButton.Create();

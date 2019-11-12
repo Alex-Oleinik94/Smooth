@@ -127,7 +127,7 @@ type
 		end;
 
 procedure SGKill(var Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SGCreateImageFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGImage;
+function SGCreateImageFromFile(const _Context : ISGContext; const _FileName : TSGString; const _LoadTexture : TSGBoolean = False) : TSGImage;
 
 implementation
 
@@ -146,6 +146,15 @@ uses
 	,SaGeLog
 	,SaGeBitMapUtils
 	;
+
+function SGCreateImageFromFile(const _Context : ISGContext; const _FileName : TSGString; const _LoadTexture : TSGBoolean = False) : TSGImage;
+begin
+Result := TSGImage.Create(_FileName);
+Result.Context := _Context;
+Result.Load();
+if (_LoadTexture) then
+	Result.ToTexture();
+end;
 
 procedure SGKill(var Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
@@ -385,13 +394,6 @@ end;
 (****************************)
 (*OTHERS FUNCTIONS FOR IMAGE*)
 (****************************)
-
-function SGCreateImageFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGImage;
-begin
-Result := TSGImage.Create(_FileName);
-Result.Context := _Context;
-Result.Load();
-end;
 
 function TSGImage.Load(const Stream : TStream) : TSGBool;
 begin

@@ -195,12 +195,8 @@ end; end;
 constructor TSGApprFunction.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-FGraphic:=nil;
-
-FFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FFont.SetContext(Context);
-FFont.Loading();
-FFont.ToTexture();
+FGraphic := nil;
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF}, True);
 
 FBackButton := TSGScreenButton.Create();
 Screen.CreateChild(FBackButton);

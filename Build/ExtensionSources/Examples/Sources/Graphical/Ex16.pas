@@ -86,10 +86,7 @@ FLightAngle := 0;
 
 inherited Create(VContext);
 
-FFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FFont.SetContext(Context);
-FFont.Loading();
-FFont.ToTexture();
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 
 FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);

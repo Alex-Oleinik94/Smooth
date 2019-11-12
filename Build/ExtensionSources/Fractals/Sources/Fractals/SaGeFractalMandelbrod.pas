@@ -190,6 +190,7 @@ uses
 	,SaGeContextUtils
 	,SaGeScreen_Edit
 	,SaGeLists
+	,SaGeImageFormatDeterminer
 	
 	,SysUtils
 	;
@@ -827,9 +828,7 @@ case SGCoreCount() of
 else (Screen.LastChild.LastChild as TSGScreenComboBox).SelectItem:=3;
 end;
 
-FTNRF:=TSGFont.Create(SGFontDirectory+DirectorySeparator+'Times New Roman.sgf');
-FTNRF.SetContext(Context);
-FTNRF.Loading();
+FTNRF := SGCreateFontFromFile(Context, SGFontDirectory+DirectorySeparator+'Times New Roman.sgf');
 end;
 
 destructor TSGFractalMandelbrodRelease.Destroy();
@@ -1077,7 +1076,7 @@ if MandelbrodInitialized then
 						SGStr(FNowKadr)+'.jpg';
 					end;
 				FTNRF.AddWaterString('made by SaGe',Mandelbrod.FImage,0);
-				Mandelbrod.FImage.Saveing(SGI_JPEG);
+				Mandelbrod.FImage.Save(SGImageFormatJpeg);
 				if not FNowRenderitsiaVideo then
 					begin
 					Mandelbrod.Width:=StartDepth;

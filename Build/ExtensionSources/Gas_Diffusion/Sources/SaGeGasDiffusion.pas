@@ -225,6 +225,7 @@ uses
 	,SaGeContextUtils
 	,SaGeScreen_Edit
 	,SaGeRectangleWithRoundedCorners
+	,SaGeImageFormatDeterminer
 	;
 
 //Algorithm
@@ -2295,10 +2296,10 @@ if d = 2 then
 SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
 	Image.FileName := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.png', 'number');
-	Image.Saveing(SGI_PNG);
+	Image.Save(SGImageFormatPNG);
 {$ELSE}
 	Image.FileName := SGFreeFileName(PredStr + Catalog + DirectorySeparator + 'Image.jpg', 'number');
-	Image.Saveing(SGI_JPEG);
+	Image.Save(SGImageFormatJpeg);
 	{$ENDIF}
 
 FreeMem(Image.Image.BitMap);
@@ -3277,10 +3278,7 @@ FCamera:=TSGCamera.Create();
 FCamera.SetContext(Context);
 FCamera.Zum := Render.Height/Render.Width;
 
-FTahomaFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FTahomaFont.SetContext(Context);
-FTahomaFont.Loading();
-FTahomaFont.ToTexture();
+FTahomaFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 
 FStartingProgressBar := TSGScreenProgressBar.Create();
 Screen.CreateChild(FStartingProgressBar);

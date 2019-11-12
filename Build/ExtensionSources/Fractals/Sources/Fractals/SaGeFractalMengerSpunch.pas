@@ -158,10 +158,7 @@ end;
 constructor TSGFractalMengerSpunchRelease.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
-
-FFont1:=TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
-FFont1.SetContext(Context);
-FFont1.Loading();
+FFont1 := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 
 InitProjectionComboBox(Render.Width-250-90-125-155,5,150,30,[SGAnchRight]);
 Screen.LastChild.BoundsMakeReal();

@@ -171,10 +171,7 @@ FPhysics.Start();
 FGravitationAngle:=pi;
 FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
 
-FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FFont.SetContext(Context);
-FFont.Loading();
-FFont.ToTexture();
+FFont := SGCreateFontFromFile(Context, SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 
 FHelpLabel := SGCreateLabel(Screen,
 	'Press C to change mouse mode;' + SGWinEoln +

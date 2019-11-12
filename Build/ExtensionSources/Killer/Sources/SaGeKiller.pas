@@ -495,17 +495,10 @@ procedure ProcessImage(var Image : TSGImage; const ImageFileName : TSGString; co
 begin
 if (Image=nil) or VRadBool then
 	begin
-	if Image <> nil then
-		Image.Destroy();
-	Image := TSGImage.Create;
-	Image.SetContext(Context);
-	with Image do
-		begin
-		FileName := ImageFileName;
-		Loading();
-		Image.SetBounds(BoundsSize, BoundsSize);
-		ToTexture();
-		end;
+	SGKill(Image);
+	Image := SGCreateImageFromFile(Context, ImageFileName);
+	Image.Image.SetBounds(BoundsSize, BoundsSize);
+	Image.ToTexture();
 	end;
 end;
 

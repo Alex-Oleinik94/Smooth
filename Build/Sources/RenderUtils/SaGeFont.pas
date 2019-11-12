@@ -64,7 +64,7 @@ type
 
 procedure SGTranslateFont(const FontInWay, FontOutWay : TSGString;const RunInConsole : TSGBoolean = True);
 procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGFont;
+function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString; const _LoadTexture : TSGBoolean = False) : TSGFont;
 
 implementation
 
@@ -81,11 +81,13 @@ uses
 	,SaGeRenderBase
 	;
 
-function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGFont;
+function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString; const _LoadTexture : TSGBoolean = False) : TSGFont;
 begin
 Result := TSGFont.Create(_FileName);
 Result.Context := _Context;
 Result.Load();
+if (_LoadTexture) then
+	Result.ToTexture();
 end;
 
 procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;

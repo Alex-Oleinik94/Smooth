@@ -416,7 +416,7 @@ begin
 Image := TSGImage.Create();
 Image .Context  := Context;
 Image .FileName := VFileName;
-if Image.Loading() then
+if Image.Load() then
 	begin
 	Ex5_PAPPE.PhysicsObjectAddMesh(FObject);
 	SetLength(HMD,Image.Width * Image.Height);

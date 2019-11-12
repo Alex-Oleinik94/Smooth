@@ -265,10 +265,7 @@ if FLightsCount > 0 then
 
 if Render.SupportedShaders() then
 	begin
-	FFont:=TSGFont.Create(SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-	FFont.SetContext(Context);
-	FFont.Loading();
-	FFont.ToTexture();
+	FFont := SGCreateFontFromFile(Context, SGFontDirectory+DirectorySeparator+{$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF}, True);
 	
 	FFPS := TSGFPSViewer.Create(Context);
 	FFPS.X := Render.Width div 2;
@@ -336,14 +333,10 @@ if Render.SupportedShaders() then
 		Render.Width - 250, Render.Height - (FFont.FontHeight + 2) * 4 - 10, 240, (FFont.FontHeight + 2) * 4,
 		FFont, [SGAnchRight, SGAnchBottom], True, True);
 	
-	FStoneImageD := TSGImage.Create(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
-	FStoneImageD.Context := Context;
-	FStoneImageD.Loading();
+	FStoneImageD := SGCreateImageFromFile(Context, SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
 	FStoneImageD.ToTextureWithBlock(FModel.TexturesBlock);
 	
-	FStoneImageB := TSGImage.Create(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
-	FStoneImageB.Loading();
-	FStoneImageB.Context := Context;
+	FStoneImageB := SGCreateImageFromFile(Context, SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
 	FStoneImageB.ToTextureWithBlock(FModel.TexturesBlock);
 	end;
 end;

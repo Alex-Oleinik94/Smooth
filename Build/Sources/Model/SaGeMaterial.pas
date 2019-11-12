@@ -211,13 +211,13 @@ end;
 
 procedure TSGMaterial.AddDiffuseMap(const VFileName : TSGString);
 begin
-FMapDiffuse := SGCreateImageFromFile(Context, VFileName);
+FMapDiffuse := SGCreateImageFromFile(Context, VFileName, True);
 FEnableTexture := FMapDiffuse.Loaded();
 end;
 
 procedure TSGMaterial.AddBumpMap(const VFileName : TSGString);
 begin
-FMapBump := SGCreateImageFromFile(Context, VFileName);
+FMapBump := SGCreateImageFromFile(Context, VFileName, True);
 FEnableBump := FMapBump.Loaded();
 end;
 

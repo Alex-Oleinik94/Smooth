@@ -88,14 +88,8 @@ begin
 inherited Create(_Context);
 FConnectionHandler := WoWConnectionHandler;
 FLogonConnectionPanel := nil;
-
-FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
-FFont.SetContext(Context);
-FFont.Loading();
-FFont.ToTexture();
-
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
 FConnectionsInfoLabel := SGCreateLabel(Screen, 'Клиент WoW 3.3.5a не подключался к серверу входа в игровой мир.', 0, 0, Screen.Width, Screen.Height, FFont, True, True);
-
 UpDateLogonPanel();
 end;
 

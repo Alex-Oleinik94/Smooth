@@ -95,12 +95,7 @@ begin
 FLogonConnection := _LogonConnection;
 DestroyLabels();
 if (FFont = nil) then
-	begin
-	FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
-	FFont.SetContext(Context);
-	FFont.Loading();
-	FFont.ToTexture();
-	end;
+	FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
 UpDateLabels();
 end;
 

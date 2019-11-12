@@ -231,10 +231,7 @@ FCountLabel := nil;
 
 if Render.SupportedShaders() then
 	begin
-	FFont:=TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE} 'Times New Roman.sgf' {$ELSE} 'Tahoma.sgf' {$ENDIF});
-	FFont.SetContext(Context);
-	FFont.Loading();
-	FFont.ToTexture();
+	FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE} 'Times New Roman.sgf' {$ELSE} 'Tahoma.sgf' {$ENDIF}, True);
 	
 	FFPS := TSGFPSViewer.Create(Context);
 	FFPS.X := Render.Width div 2;

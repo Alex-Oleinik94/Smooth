@@ -433,9 +433,7 @@ for i := 0 to High(FPoligons) do
 				SetLength(FTextures,1)
 			else
 				SetLength(FTextures,Length(FTextures)+1);
-			FTextures[High(FTextures)] := TSGImage.Create(VPath+FPoligons[i].FTextureName);
-			FTextures[High(FTextures)].Context := Context;
-			FTextures[High(FTextures)].Loading();
+			FTextures[High(FTextures)] := SGCreateImageFromFile(Context, VPath+FPoligons[i].FTextureName);
 			FTextures[High(FTextures)].Name := FPoligons[i].FTextureName;
 			end;
 		end;

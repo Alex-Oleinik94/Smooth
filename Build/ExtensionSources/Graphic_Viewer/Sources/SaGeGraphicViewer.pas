@@ -516,11 +516,7 @@ constructor TSGGraphViewer.Create(const VContext : ISGContext);
 begin
 inherited Create(VContext);
 SelectPointEnabled:=False;
-Image:=nil;
-
-Image:=TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'IconArea-hover.png');
-Image.SetContext(Context);
-Image.Loading;
+Image := SGCreateImageFromFile(Context, SGTextureDirectory + DirectorySeparator + 'IconArea-hover.png');
 
 FNewFunctionButton:=TSGScreenButton.Create;
 Screen.CreateChild(FNewFunctionButton);
