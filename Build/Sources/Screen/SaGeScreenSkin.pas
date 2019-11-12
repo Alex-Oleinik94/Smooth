@@ -274,9 +274,7 @@ function TSGScreenSkin.CreateDependentSkinWithAnotherFont(const VFontFileName : 
 var
 	VFont : TSGFont;
 begin
-VFont := TSGFont.Create(VFontFileName);
-VFont.Context := Context;
-VFont.Loading();
+VFont := SGCreateFontFromFile(Context, VFontFileName);
 Result := CreateDependentSkinWithAnotherFont(VFont, True);
 end;
 
@@ -320,9 +318,7 @@ FColorsTimer := 0;
 FColorsFrom := FColors;
 FColorsTo := SGGenerateUnequalRandomSkinColors(FColorsFrom);
 
-FComboBoxImage := TSGImage.Create(SGTextureDirectory + DirectorySeparator + 'ComboBoxImage.sgia');
-FComboBoxImage.SetContext(VContext);
-FComboBoxImage.Loading();
+FComboBoxImage := SGCreateImageFromFile(Context, SGTextureDirectory + DirectorySeparator + 'ComboBoxImage.sgia');
 
 FDeviceResourcesDeleted := False;
 FDestroyFontSupported := True;
@@ -334,10 +330,7 @@ end;
 procedure TSGScreenSkin.CreateFont();
 begin
 DestroyFont();
-
-FFont := TSGFont.Create(SGScreenSkinDefaultFontFileName);
-FFont.Context := Context;
-FFont.Loading();
+FFont := SGCreateFontFromFile(Context, SGScreenSkinDefaultFontFileName);
 end;
 
 procedure TSGScreenSkin.DestroyFont();

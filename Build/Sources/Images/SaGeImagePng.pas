@@ -4,7 +4,11 @@ unit SaGeImagePng;
 
 interface
 
-function SupportedPNG() : Boolean;
+uses
+	 SaGeBase
+	;
+
+function SupportedPNG() : TSGBoolean;
 
 implementation
 
@@ -16,13 +20,12 @@ uses
 	
 	,SaGeBitMap
 	,SaGeLog
-	,SaGeBase
 	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeDllManager
 	;
 
-function SupportedPNG() : Boolean;
+function SupportedPNG() : TSGBoolean;
 begin
 Result := DllManager.Supported('zlib');
 if Result then

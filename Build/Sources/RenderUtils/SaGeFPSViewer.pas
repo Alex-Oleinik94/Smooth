@@ -98,9 +98,7 @@ if FFont <> nil then
 	FFont.Destroy();
 	FFont := nil;
 	end;
-FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
-FFont.Context := Context;
-FFont.Loading();
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
 end;
 
 procedure TSGFPSViewer.Paint();

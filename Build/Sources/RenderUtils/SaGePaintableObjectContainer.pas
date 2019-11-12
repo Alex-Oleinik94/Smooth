@@ -227,11 +227,7 @@ inherited;
 FNowDraw   := nil;
 FArClasses := nil;
 FComboBox := nil;
-
-FFont := TSGFont.Create();
-FFont.Context := Context;
-FFont.FileName := SGFontDirectory + DirectorySeparator + 'Tahoma.sgf';
-FFont.Loading();
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
 end;
 
 destructor TSGPaintableObjectContainer.Destroy;

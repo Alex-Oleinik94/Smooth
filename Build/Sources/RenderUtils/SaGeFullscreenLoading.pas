@@ -170,9 +170,7 @@ for Index := 0 to FCountLines - 1 do
 	FArrayOfLines[Index].FSpeed := (Random(400) + 100) / 200;
 	FArrayOfLines[Index].FWidth := 360 / FCountLines;
 	end;
-FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
-FFont.Context := Context;
-FFont.Loading();
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Times New Roman.sgf');
 FProgressIsSet:=False;
 FAlpha:=0;
 FType:=SGBeforeLoading;

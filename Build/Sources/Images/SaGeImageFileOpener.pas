@@ -131,10 +131,10 @@ end;
 
 procedure TSGImageViewer.LoadingFromThread();
 begin
-FFont.Loading();
+FFont.Load();
 while FImage = nil do
 	Sleep(10);
-FImage.Loading();
+FImage.Load();
 InitImagePosition();
 FLoadingDone := True;
 end;
@@ -481,6 +481,8 @@ Result *= 'JPEG';
 Result *= 'BMP';
 Result *= 'TGA';
 Result *= 'SGIA';
+Result *= 'ICO';
+Result *= 'CUR';
 end;
 
 class function TSGImageFileOpener.GetExpansions() : TSGStringList;

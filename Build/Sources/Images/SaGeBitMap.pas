@@ -18,27 +18,7 @@ uses
 type
 	TSGImageByte = type TSGByte;
 	TSGIByte = TSGImageByte;
-	TSGImageFormat = TSGUInt32;
-const 
-	SGI_NONE =              $00000000;
-	SGI_LOADING =           $00000001;
-	SGI_LOAD = SGI_LOADING;
-	SGI_SAVE =              $00000002;
-	SGI_SAVEING = SGI_SAVE;
-	SGI_BMP =               $00000003;
-	SGI_SAVEING_COMPLITE =  $00000004;
-	SGI_SAVE_COMPLITE =  SGI_SAVEING_COMPLITE;
-	{$IFDEF WITHLIBPNG}
-		SGI_PNG =           $00000005;
-		{$ENDIF}
-	SGI_JPG =               $00000006;
-	SGI_JPEG = SGI_JPG;
-	SGI_TGA =               $00000007;
-	SGI_TARGA =             SGI_TGA;
-	SGI_SGIA =              $00000008;
-	SGI_DEFAULT =           $00000009;
-	SGI_MBM  =              $00000010;
-type
+	
 	PSGPixel3b = PSGVertex3ui8;
 	TSGPixel3b = TSGVertex3ui8;
 	
@@ -74,11 +54,12 @@ type
 		FFormatType : TSGBitMapUInt;
 		FDataType   : TSGBitMapUInt;
 			public
-		procedure Clear(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		procedure Clear(); virtual;
 		procedure ClearBitMapBits(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure CopyFrom(const VBitMap : TSGBitMap); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure WriteInfo(const PredStr : TSGString = ''; const CasesOfPrint : TSGCasesOfPrint = [SGCasePrint, SGCaseLog]);
 		procedure ReAllocateMemory();
+		function DataSize() : TSGUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
 		function PixelsRGBA(const x,y:TSGBitMapUInt):PSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -110,6 +91,8 @@ operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+procedure SGKill(var _BitMap : TSGBitMap); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
@@ -117,6 +100,15 @@ uses
 	,SaGeStringUtils
 	,SaGeMathUtils
 	;
+
+procedure SGKill(var _BitMap : TSGBitMap); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (_BitMap <> nil) then
+	begin
+	_BitMap.Destroy();
+	_BitMap := nil;
+	end;
+end;
 
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
@@ -453,11 +445,21 @@ else
 end;
 end;
 
+function TSGBitMap.DataSize() : TSGUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+// BitsPerPixel = ChannelSize * Channels
+// DataSize = Width * Height * (BitsPerPixel div 8)
+Result := Width * Height * Channels; // if ChannelSize = 8 bit
+end;
+
 procedure TSGBitMap.ReAllocateMemory();
+var
+	BitMapDataSize : TSGUInt64;
 begin
 ClearBitMapBits();
-GetMem(FBitMap, Width * Height * Channels);
-fillchar(FBitMap^, Width * Height * Channels, 0);
+BitMapDataSize := DataSize();
+GetMem(FBitMap, BitMapDataSize);
+fillchar(FBitMap^, BitMapDataSize, 0);
 end;
 
 procedure TSGBitMap.ClearBitMapBits();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -469,7 +471,7 @@ if FBitMap <> nil then
 	end;
 end;
 
-procedure TSGBitMap.Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGBitMap.Clear();
 begin
 ClearBitMapBits();
 FWidth      := 0;
@@ -491,9 +493,9 @@ FChannelSize := VBitMap.BitDepth;
 FChannels := VBitMap.Channels;
 FFormatType := VBitMap.PixelFormat;
 FDataType := VBitMap.PixelType;
-if VBitMap.BitMap <> nil then
+if (VBitMap.BitMap <> nil) then
 	begin
-	Size := Width * Height * Channels;
+	Size := VBitMap.DataSize();
 	FBitMap := GetMem(Size);
 	Move(VBitMap.BitMap^, FBitMap^, Size); 
 	end;
@@ -502,7 +504,7 @@ end;
 constructor TSGBitMap.Create();
 begin
 inherited;
-FBitMap:=nil;
+FBitMap := nil;
 Clear();
 end;
 

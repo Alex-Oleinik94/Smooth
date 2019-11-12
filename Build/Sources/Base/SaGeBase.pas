@@ -173,7 +173,28 @@ const
 type
 	generic TSGList<T> = packed array of T;
 
+procedure SGKill(var _Stream : TStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var _Stream : TMemoryStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
+
+procedure SGKill(var _Stream : TStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (_Stream <> nil) then
+	begin
+	_Stream.Destroy();
+	_Stream := nil;
+	end;
+end;
+
+procedure SGKill(var _Stream : TMemoryStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (_Stream <> nil) then
+	begin
+	_Stream.Destroy();
+	_Stream := nil;
+	end;
+end;
 
 class function TSGClass.ClassName():TSGString;
 begin

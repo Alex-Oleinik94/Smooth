@@ -345,7 +345,7 @@ MemoryStreamSize  := ReadEnum(Stream);
 MemoryStream := TMemoryStream.Create();
 SGCopyPartStreamToStream(Stream, MemoryStream, MemoryStreamSize);
 MemoryStream.Position := 0;
-Image.LoadingFromStream(MemoryStream);
+Image.Load(MemoryStream);
 MemoryStream.Destroy();
 SGLog.Source(['TSGMeshSG3DMLoader_LoadImage()__LoadSGIA(). Current stream size = ', SGGetSizeString(MemoryStreamSize, 'EN'), '.']);
 end;
@@ -365,11 +365,7 @@ if ImageType <> SGMeshSG3DNullImage then
 		LoadSGIA();
 		end;
 	SGMeshSG3DImagePath :
-		begin
-		Image := TSGImage.Create();
-		Image.FileName := ReadString(Stream);
-		Image.Loading();
-		end;
+		Image := SGCreateImageFromFile(nil, ReadString(Stream));
 	end;
 	end;
 end;
@@ -383,7 +379,7 @@ var
 begin
 MemoryStream := TMemoryStream.Create();
 MemoryStream.Position := 0;
-Image.SaveingToStream(MemoryStream);
+Image.Save(MemoryStream);
 MemoryStream.Position := 0;
 MemoryStreamSize := MemoryStream.Size;
 WriteEnum(Stream, MemoryStreamSize);

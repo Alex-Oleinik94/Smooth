@@ -211,18 +211,14 @@ end;
 
 procedure TSGMaterial.AddDiffuseMap(const VFileName : TSGString);
 begin
-FMapDiffuse:=TSGImage.Create();
-FMapDiffuse.Context := Context;
-FMapDiffuse.FileName := VFileName;
-FEnableTexture := FMapDiffuse.Loading();
+FMapDiffuse := SGCreateImageFromFile(Context, VFileName);
+FEnableTexture := FMapDiffuse.Loaded();
 end;
 
 procedure TSGMaterial.AddBumpMap(const VFileName : TSGString);
 begin
-FMapBump:=TSGImage.Create();
-FMapBump.Context := Context;
-FMapBump.FileName := VFileName;
-FEnableBump := FMapBump.Loading();
+FMapBump := SGCreateImageFromFile(Context, VFileName);
+FEnableBump := FMapBump.Loaded();
 end;
 
 procedure TSGMaterial.Bind(const BumpFormat : TSGBumpFormat; const HasTexture : TSGBoolean);

@@ -11,6 +11,7 @@ uses
 
 procedure SGConsoleImageResizer                          (const VParams : TSGConcoleCallerParams = nil);
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat    (const VParams : TSGConcoleCallerParams = nil);
+procedure SGConvertToSGIA(const InFile, OutFile : TSGString);
 
 implementation
 
@@ -23,7 +24,18 @@ uses
 	,SaGeMultiImage
 	,SaGeStringUtils
 	,SaGeFileUtils
+	,SaGeImageFormatDeterminer
 	;
+
+procedure SGConvertToSGIA(const InFile, OutFile : TSGString);
+var
+	Image: TSGImage = nil;
+begin
+Image := SGCreateImageFromFile(nil, InFile); 
+Image.FileName := OutFile;
+Image.Save(SGImageFormatSGIA);
+SGKill(Image);
+end;
 
 procedure SGConsoleConvertImageToSaGeImageAlphaFormat(const VParams : TSGConcoleCallerParams = nil);
 begin
@@ -58,15 +70,13 @@ var
 begin
 if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
 	begin
-	Image := TSGImage.Create();
-	Image.FileName := VParams[0];
-	Image.Loading();
+	Image := SGCreateImageFromFile(nil, VParams[0]);
 	Image.Image.SetBounds(
 		SGVal(VParams[1]),
 		SGVal(VParams[2]));
 	Image.FileName := SGFreeFileName(Image.FileName);
-	Image.Saveing();
-	Image.Destroy();
+	Image.Save();
+	SGKill(Image);
 	end
 else
 	begin

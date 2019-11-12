@@ -11,6 +11,44 @@ uses
 	,SaGeBitMap
 	;
 type
+	TSGImageFormat = (SGImageFormatNull,
+			// bit map
+			// mime-тип "image/bmp"
+			// .bmp, .dib или .rle
+		SGImageFormatBMP,
+			// portable network graphics
+			// mime-тип "image/png"
+			// .png
+		SGImageFormatPNG,
+			// Joint Photographic Experts Group
+			// mime-тип "image/jpeg"
+			// .jpg, .jfif, .jpe или .jpeg
+		SGImageFormatJpeg,
+			// Truevision TGA
+			// mime-типы "image/x-targa" и "image/x-tga"
+			// .tga, .tpic, .vda, .vst или .icb
+		SGImageFormatTarga,
+			// SaGeImageAlpha format (32-bit jpeg with alpha channel)
+			// .sgia
+		SGImageFormatSaGeImageAlpha,
+			// MultiBitMap (Symbian OS image file format. suppored Nokia smartphones);
+			// .mbm
+		SGImageFormatMBM,
+			// Microsoft Windows OS icon
+			// mime-типы: "image/vnd.microsoft.icon" и "image/x-icon"
+			// .ico
+		SGImageFormatICO,
+			// Microsoft Windows OS cursors
+			// mime-типы: "image/vnd.microsoft.icon" и "image/x-icon"
+			// .cur
+		SGImageFormatCUR
+		);
+const
+	SGImageFormatJpg = SGImageFormatJpeg;
+	SGImageFormatTga = SGImageFormatTarga;
+	SGImageFormatSGImageAlpha = SGImageFormatSaGeImageAlpha;
+	SGImageFormatSGIA = SGImageFormatSaGeImageAlpha;
+type
 	TSGImageFormatDeterminer = class
 			public
 		class function IsICO(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -19,6 +57,7 @@ type
 		class function IsPNG(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function IsJPEG(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function IsSGIA(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			public
 		class function DetermineFormat(const Stream : TStream) : TSGImageFormat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function DetermineExpansion(const Stream : TStream) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		class function DetermineExpansionFromFormat(const Format : TSGImageFormat) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -43,34 +82,31 @@ end;
 class function TSGImageFormatDeterminer.DetermineExpansionFromFormat(const Format : TSGImageFormat) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Format of
-SGI_TGA  : Result := 'tga';
-SGI_BMP  : Result := 'bmp';
-SGI_JPG  : Result := 'jpeg';
-SGI_SGIA : Result := 'sgia';
-{$IFDEF WITHLIBPNG}
-SGI_PNG  : Result := 'png';
-{$ENDIF}
-else
-	Result:='';
+SGImageFormatTga  : Result := 'tga';
+SGImageFormatBMP  : Result := 'bmp';
+SGImageFormatJpeg : Result := 'jpeg';
+SGImageFormatSGIA : Result := 'sgia';
+SGImageFormatPNG  : Result := 'png';
+SGImageFormatICO  : Result := 'ico';
+SGImageFormatCUR  : Result := 'cur';
+SGImageFormatMBM  : Result := 'mbm';
+else Result := '';
 end;
 end;
 
 class function TSGImageFormatDeterminer.DetermineFormat(const Stream : TStream) : TSGImageFormat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := 0;
-{$IFDEF WITHLIBPNG}
+Result := SGImageFormatNull;
 if IsPNG(Stream) then
-	Result := SGI_PNG
-else
-{$ENDIF}
-if IsBMP(Stream) then
-	Result := SGI_BMP
+	Result := SGImageFormatPNG
+else if IsBMP(Stream) then
+	Result := SGImageFormatBMP
 else if IsMBM(Stream) then
-	Result := SGI_MBM
+	Result := SGImageFormatMBM
 else if IsJPEG(Stream) then
-	Result := SGI_JPG
+	Result := SGImageFormatJpeg
 else if IsSGIA(Stream) then
-	Result := SGI_SGIA;
+	Result := SGImageFormatSGIA;
 end;
 
 class function TSGImageFormatDeterminer.IsPNG(const Stream : TStream):TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

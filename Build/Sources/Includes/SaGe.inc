@@ -15,9 +15,9 @@
 	//{$ASMMODE DIRECT}
 	{$ENDIF}
 
-{$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))}
+(*{$IF (not defined(MOBILE)) and (not (defined(DARWIN) and defined(CPU32)))}
 	{$DEFINE WITHLIBPNG}
-	{$ENDIF}
+	{$ENDIF}*)
 
 {$IFDEF RELEASE}
 	{$DEFINE SUPPORTINLINE}

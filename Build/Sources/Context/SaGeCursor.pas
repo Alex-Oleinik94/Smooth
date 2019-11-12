@@ -33,28 +33,43 @@ const
 	SGC_GLASSY = 20000;
 
 type
-	TSGHotPixelType = TSGInt32;
-
+	TSGHotPixelType = TSGPoint2int32;
+	TSGHotPixelValueType = TSGInt32;
+	
 	TSGCursor = class(TSGBitMap)
 			public
-		constructor Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);virtual;
-		function LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;virtual;
-		class function Copy(const VCursor : TSGCursor):TSGCursor;
+		constructor Create(); override;
+		constructor Create(const VStandartCursor : TSGCursorHandle); virtual;
+		function LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor; virtual;
+		class function Copy(const VCursor : TSGCursor) : TSGCursor;
 		procedure CopyFrom(const VCursor : TSGCursor);
+		procedure Clear(); override;
 			private
-		FHotPixel : TSGPoint2int32;
+		FHotPixel : TSGHotPixelType;
 		FStandartCursor : TSGCursorHandle;
 			public
-		property HotPixelX : TSGHotPixelType read FHotPixel.x write FHotPixel.x;
-		property HotPixelY : TSGHotPixelType read FHotPixel.y write FHotPixel.y;
+		property HotPixelX : TSGHotPixelValueType read FHotPixel.x write FHotPixel.x;
+		property HotPixelY : TSGHotPixelValueType read FHotPixel.y write FHotPixel.y;
+		property HotPixel : TSGHotPixelType read FHotPixel write FHotPixel;
 		property StandartHandle : TSGCursorHandle read FStandartCursor;
 		end;
+
+procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
 uses
-	 SaGeImage
+	 SaGeBitMapUtils
 	;
+
+procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (_Cursor <> nil) then
+	begin
+	_Cursor.Destroy();
+	_Cursor := nil;
+	end;
+end;
 
 procedure TSGCursor.CopyFrom(const VCursor : TSGCursor);
 begin
@@ -69,28 +84,38 @@ Result := TSGCursor.Create();
 Result.CopyFrom(VCursor);
 end;
 
-function TSGCursor.LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0):TSGCursor;
+function TSGCursor.LoadFrom(const VFileName : TSGString; const HotX : TSGFloat = 0; const HotY : TSGFloat = 0) : TSGCursor;
 var
-	Image : TSGImage;
+	Image : TSGBitMap;
 begin
-Image := TSGImage.Create(VFileName);
-Image.Loading();
+Image := SGLoadBitMapFromFile(VFileName);
 
-(Self as TSGBitMap).CopyFrom(Image.Image);
+(Self as TSGBitMap).CopyFrom(Image);
 HotPixelX := Trunc(HotX * Width );
 HotPixelY := Trunc(HotY * Height);
 
-Image.Destroy();
-Image := nil;
+SGKill(Image);
 
 Result := Self;
 end;
 
-constructor TSGCursor.Create(const VStandartCursor : TSGCursorHandle = SGC_NULL);
+constructor TSGCursor.Create();
 begin
 inherited Create();
-FHotPixel.Import(0, 0);
+//Clear(); allready in TSGBitMap
+end;
+
+constructor TSGCursor.Create(const VStandartCursor : TSGCursorHandle);
+begin
+Create();
 FStandartCursor := VStandartCursor;
+end;
+
+procedure TSGCursor.Clear();
+begin
+inherited;
+FHotPixel.Import(0, 0);
+FStandartCursor := SGC_NULL;
 end;
 
 end.

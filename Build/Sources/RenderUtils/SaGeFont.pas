@@ -8,6 +8,7 @@ uses
 	 SaGeBase
 	,SaGeImage
 	,SaGeCommonStructs
+	,SaGeContextInterface
 	;
 
 type
@@ -40,7 +41,7 @@ type
 		function LoadSGF():TSGBoolean;
 			public
 		function GetSymbolInfo(const VSymbol : TSGChar):TSGPoint2int32;inline;
-		function Loading():TSGBoolean;override;
+		function Load():TSGBoolean;override;
 		function StringLength(const S:PChar ):LongWord;overload;
 		function StringLength(const S:TSGString ):LongWord;overload;
 		function CursorPlace(const S : TSGString; const Position : TSGLongWord):TSGUInt32;
@@ -63,6 +64,7 @@ type
 
 procedure SGTranslateFont(const FontInWay, FontOutWay : TSGString;const RunInConsole : TSGBoolean = True);
 procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGFont;
 
 implementation
 
@@ -78,6 +80,13 @@ uses
 	,SaGeFileUtils
 	,SaGeRenderBase
 	;
+
+function SGCreateFontFromFile(const _Context : ISGContext; const _FileName : TSGString) : TSGFont;
+begin
+Result := TSGFont.Create(_FileName);
+Result.Context := _Context;
+Result.Load();
+end;
 
 procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
@@ -361,7 +370,7 @@ FFontHeight := GetLongInt(FFontParams, 'Height');
 FFontLoaded := True;
 end;
 
-function TSGFont.Loading():TSGBoolean;
+function TSGFont.Load():TSGBoolean;
 var
 	FontWay:string = '';
 	i:LongInt = 0;
@@ -372,7 +381,7 @@ if SGFileExpansion(FFileName)='SGF' then
 	Result := LoadSGF();
 	Exit;
 	end;
-Result:=inherited Loading();
+Result:=inherited Load();
 if not Result then
 	Exit;
 i:=Length(FFileName);
@@ -903,7 +912,7 @@ Fillchar(Colors,SizeOf(Colors),0);
 if RunInConsole then
 	SGLog.Source(['SGTranslateFont : Translete "',FontInWay,'" to "',FontOutWay,'".']);
 Font := TSGFont.Create(FontInWay);
-if Font.Loading() then
+if Font.Load() then
 	if RunInConsole then
 		SGLog.Source(['SGTranslateFont : Font loaded!'])
 	else
