@@ -25,6 +25,9 @@ function SGLoadBitMapFromStream(const _Stream : TStream; const _FileName : TSGSt
 function SGLoadMBMFromStream(const _Stream : TMemoryStream; const Position : TSGUInt32 = 20) : TSGBitMap; overload;
 function SGLoadMBMFromStream(const _Stream : TStream) : TSGBitMap; overload;
 
+function SGBGRAToRGBAPixel(const _Pixel : TSGPixel4b) : TSGPixel4b;
+procedure SGBGRAToRGBAImage(const _Image : TSGBitMap);
+
 implementation
 
 uses
@@ -41,6 +44,22 @@ uses
 	,SaGeImageSgia
 	,SaGeImageICO
 	;
+
+function SGBGRAToRGBAPixel(const _Pixel : TSGPixel4b) : TSGPixel4b;
+begin
+Result := _Pixel;
+Result.r := _Pixel.b;
+Result.b := _Pixel.r;
+end;
+
+procedure SGBGRAToRGBAImage(const _Image : TSGBitMap);
+var
+	Index : TSGMaxEnum;
+begin
+if (_Image.Channels = 4) and (_Image.ChannelSize = 8) then
+	for Index := 0 to _Image.Width * _Image.Height - 1 do
+		PSGPixel4b(_Image.BitMap)[Index] := SGBGRAToRGBAPixel(PSGPixel4b(_Image.BitMap)[Index]);
+end;
 
 function SGLoadMBMFromStream(const _Stream : TMemoryStream; const Position : TSGUInt32 = 20) : TSGBitMap; overload;
 var
@@ -144,6 +163,7 @@ _Stream.Position := 0;
 ImageFormat := TSGImageFormatDeterminer.DetermineFormat(_Stream);
 if (ImageFormat = SGImageFormatNull) and (_FileName <> '') and (SGUpCaseString(SGFileExpansion(_FileName)) = 'TGA') then
 	ImageFormat := SGImageFormatTga;
+SGLog.Source(['SGLoadBitMapFromStream: Determined format "', TSGImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat), '" for "', _FileName, '".']);
 _Stream.Position := 0;
 Result := TSGBitMap.Create();
 case ImageFormat of
@@ -159,7 +179,7 @@ SGImageFormatBmp:
 SGImageFormatSGIA:
 	LoadSGIAToBitMap(_Stream, Result);
 SGImageFormatIco, SGImageFormatCur:
-	LoadICO(_Stream, Result);
+	SGLoadICO(_Stream, Result);
 SGImageFormatMbm:
 	Result := SGLoadMBMFromStream(_Stream);
 SGImageFormatPng:
@@ -271,7 +291,7 @@ SGImageFormatPNG :
 	else
 		SGResourceManager.SaveResourceToStream(_Stream, 'PNG', _Image);
 SGImageFormatIco, SGImageFormatCur:
-	Result := SaveICO(_Stream, _Image);
+	Result := SGSaveICO(_Stream, _Image);
 SGImageFormatJpeg :
 	begin
 	SGSaveBitMapAsJpegToStream(_Stream, _Image);

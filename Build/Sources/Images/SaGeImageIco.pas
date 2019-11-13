@@ -42,7 +42,7 @@ type
 		FOffset : TSGUInt32; // Specifies the offset of BMP or PNG data from the beginning of the ICO/CUR file
 		end;
 	
-	TSGIcoImageDataType = (SGIcoImageBMPData, SGIcoImagePNG);
+	TSGIcoImageDataType = (SGIcoImageNullData, SGIcoImageBMPData, SGIcoImagePNG);
 	
 	TSGIcoImage = object
 			public
@@ -67,15 +67,16 @@ type
 		end;
 	PSGIcoFile = ^ TSGIcoFile;
 
-function SaveICO(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean; overload;
-function SaveCUR(const _Stream : TStream; const _Cursor : TSGCursor) : TSGBoolean; overload;
-function LoadICO(const _Stream : TStream; var _Image : TSGBitMap; const _ImageNumber : TSGUInt32 = 0) : TSGBoolean; overload;
-function LoadICO(const _Stream : TStream; const _ImageNumber : TSGUInt32 = 0) : TSGBitMap; overload;
-function LoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;
-function LoadCUR(const _Stream : TStream; const _CursorNumber : TSGUInt32 = 0) : TSGCursor; overload;
-function LoadICOImage(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
-function IsICOData(const _Stream : TStream) : TSGBoolean;
-procedure CopyIcoImageProperties(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap);
+function SGSaveICO(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean; overload;
+function SGSaveCUR(const _Stream : TStream; const _Cursor : TSGCursor) : TSGBoolean; overload;
+function SGLoadICO(const _Stream : TStream; var _Image : TSGBitMap; const _ImageNumber : TSGUInt32 = 0) : TSGBoolean; overload;
+function SGLoadICO(const _Stream : TStream; const _ImageNumber : TSGUInt32 = 0) : TSGBitMap; overload;
+function SGLoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;
+function SGLoadCUR(const _Stream : TStream; const _CursorNumber : TSGUInt32 = 0) : TSGCursor; overload;
+function SGLoadICOImage(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
+function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoImageDataType) : TSGString;
+function SGIsICOData(const _Stream : TStream) : TSGBoolean;
+procedure SGCopyIcoImageProperties(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap);
 
 implementation
 
@@ -86,6 +87,9 @@ uses
 	,SaGeImageBmp // BMP
 	,SaGeResourceManager // PNG and others
 	,SaGeCommonStructs
+	,SaGeLog
+	,SaGeMathUtils
+	,SaGeBitMapUtils
 	
 	,SysUtils
 	;
@@ -109,12 +113,11 @@ function TSGResourceManipulatorImagesICO.LoadResourceFromStream(const VStream : 
 var
 	ExpansionUpCase : TSGString;
 begin
-//WriteLn('123213');
 ExpansionUpCase := SGUpCaseString(VExpansion);
 if (ExpansionUpCase = 'ICO') then
-	Result := LoadICO(VStream)
+	Result := SGLoadICO(VStream)
 else if (ExpansionUpCase = 'CUR') then
-	Result := LoadCUR(VStream)
+	Result := SGLoadCUR(VStream)
 else
 	Result := nil;
 end;
@@ -123,12 +126,11 @@ function TSGResourceManipulatorImagesICO.SaveResourceToStream(const VStream : TS
 var
 	ExpansionUpCase : TSGString;
 begin
-WriteLn('123213');
 ExpansionUpCase := SGUpCaseString(VExpansion);
 if (ExpansionUpCase = 'ICO') then
-	Result := SaveICO(VStream, VResource as TSGBitMap)
+	Result := SGSaveICO(VStream, VResource as TSGBitMap)
 else if (ExpansionUpCase = 'CUR') then
-	Result := SaveCUR(VStream, VResource as TSGCursor)
+	Result := SGSaveCUR(VStream, VResource as TSGCursor)
 else
 	Result := False;
 end;
@@ -165,14 +167,20 @@ begin
 _Stream.Position := 0;
 _Stream.ReadBuffer(FHeader, SizeOf(FHeader));
 SetLength(FImages, FHeader.FCount);
-for Index := 0 to High(FImages) do
-	FillChar(FImages[Index], SizeOf(FImages[Index]), 0);
-for Index := 0 to High(FImages) do
+FillChar(FImages[0], SizeOf(FImages[0]) * FHeader.FCount, 0);
+SGLog.Source(['TSGIcoFile__Load: Images count = "', FHeader.FCount, '".']);
+for Index := 0 to FHeader.FCount - 1 do
 	begin
 	_Stream.ReadBuffer(FImages[Index].FHeader, SizeOf(FImages[Index].FHeader));
+	SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Size = "', FImages[Index].FHeader.FSize, '" (', SGGetSizeString(FImages[Index].FHeader.FSize, 'EN'), ').']);
+	SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Offset = "', FImages[Index].FHeader.FOffset, '".']);
+	end;
+for Index := 0 to FHeader.FCount - 1 do
+	begin
 	if (FImages[Index].FHeader.FSize <> 0) then
 		begin
 		FImages[Index].FData := TMemoryStream.Create();
+		_Stream.Position := FImages[Index].FHeader.FOffset;
 		SGCopyPartStreamToStream(_Stream, FImages[Index].FData, FImages[Index].FHeader.FSize);
 		end;
 	end;
@@ -199,26 +207,42 @@ begin
 FData.Position := 0;
 if TSGImageFormatDeterminer.IsPNG(FData) then
 	Result := SGIcoImagePNG
-else
+else // BMP image data without header
 	Result := SGIcoImageBMPData;
 FData.Position := 0;
+end;
+
+function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoImageDataType) : TSGString;
+begin
+case _DataType of
+SGIcoImageBMPData : Result := 'bmp';
+SGIcoImagePNG : Result := 'png';
+else Result := '';
+end;
 end;
 
 //======================================================================
 //======================================================================
 //======================================================================
 
-function LoadICOImage(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
+function SGLoadICOImage(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
 var
 	ImageDataType : TSGIcoImageDataType;
 	FileExpansion : TSGString;
 	LoadedImage : TSGBitMap = nil;
 begin
 ImageDataType := _IcoImage^.DataType();
+SGLog.Source(['SGLoadICOImage: Determined format "', SGIcoImageExpansionFromDataType(ImageDataType), '".']);
 case ImageDataType of
 SGIcoImageBMPData :
 	begin
-	Result := False; // todo
+	_Image.CreateTypes();
+	_Image.ReAllocateMemory();
+	//SGLog.Source(['SGLoadICOImage: BitMap data size = "', _Image.DataSize(), '".']);
+	//SGLog.Source(['SGLoadICOImage: ICO image data size = "', _IcoImage^.FData.Size, '".']);
+	Move(_IcoImage^.FData.Memory^, _Image.BitMap^, _Image.DataSize()); // may be "Min(TSGUInt64(_IcoImage^.FData.Size), _Image.DataSize())" ?
+	SGBGRAToRGBAImage(_Image);
+	Result := True;
 	end;
 else // SGIcoImagePNG
 	begin
@@ -239,23 +263,22 @@ else // SGIcoImagePNG
 end;
 end;
 
-procedure CopyIcoImageProperties(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap);
+procedure SGCopyIcoImageProperties(const _IcoImage : PSGIcoImage; const _Image : TSGBitMap);
 begin
 _Image.Width := _IcoImage^.FHeader.FWidth;
 _Image.Height := _IcoImage^.FHeader.FHeight;
 // DataSize = Width * Height * Channels (if ChannelSize = 8 bit)
 // Channels = DataSize / (Width * Height)
+_Image.ChannelSize := 8;
 _Image.Channels := Trunc(_IcoImage^.FHeader.FSize / (_Image.Width * _Image.Height));
 // _IcoImage^.FHeader.FBpp
 //      In CUR format: Specifies the vertical coordinates of the hotspot in number of pixels from the top.
 //      DataSize = Width * Height * (BitsPerPixel div 8)
 //      BitsPerPixel = ChannelSize * Channels
-WriteLn(_Image.Width);
-WriteLn(_Image.Height);
-WriteLn(_Image.Channels);
+SGLog.Source(['SGCopyIcoImageProperties: Width = "', _Image.Width, '"; Height = "', _Image.Height, '"; Channels = "', _Image.Channels, '"; ChannelSize = "', _Image.ChannelSize, '".']);
 end;
 
-function LoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;
+function SGLoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;
 var
 	IcoFile : TSGIcoFile;
 	CursorImage : PSGIcoImage = nil;
@@ -270,8 +293,8 @@ IcoFile.Load(_Stream);
 CursorImage := @IcoFile.FImages[_CursorNumber];
 if (CursorImage <> nil) then
 	begin
-	CopyIcoImageProperties(CursorImage, _Cursor);
-	if LoadICOImage(CursorImage, _Cursor) then
+	SGCopyIcoImageProperties(CursorImage, _Cursor);
+	if SGLoadICOImage(CursorImage, _Cursor) then
 		begin
 		_Cursor.HotPixel := SGVertex2int32Import(CursorImage^.FHeader.FPlanes, CursorImage^.FHeader.FBpp);
 		Result := True;
@@ -282,7 +305,7 @@ IcoFile.Destroy();
 FillChar(IcoFile, SizeOf(IcoFile), 0);
 end;
 
-function IsICOData(const _Stream : TStream) : TSGBoolean;
+function SGIsICOData(const _Stream : TStream) : TSGBoolean;
 var
 	IcoHeader_Reserved : TSGUInt16; // Reserved. Must always be 0.
 	IcoHeader_Type : TSGUInt16; // SGIcoFile(1) or SGCurFile(2) (type TSGIcoFileType)
@@ -298,7 +321,7 @@ if (_Stream <> nil) then
 	end;
 end;
 
-function LoadICO(const _Stream : TStream; var _Image : TSGBitMap; const _ImageNumber : TSGUInt32 = 0) : TSGBoolean; overload;
+function SGLoadICO(const _Stream : TStream; var _Image : TSGBitMap; const _ImageNumber : TSGUInt32 = 0) : TSGBoolean; overload;
 var
 	IcoFile : TSGIcoFile;
 	ICOImage : PSGIcoImage = nil;
@@ -313,29 +336,29 @@ IcoFile.Load(_Stream);
 ICOImage :=  @IcoFile.FImages[_ImageNumber];
 if (ICOImage <> nil) then
 	begin
-	CopyIcoImageProperties(ICOImage, _Image);
-	Result := LoadICOImage(ICOImage, _Image);
+	SGCopyIcoImageProperties(ICOImage, _Image);
+	Result := SGLoadICOImage(ICOImage, _Image);
 	ICOImage := nil;
 	end;
 IcoFile.Destroy();
 FillChar(IcoFile, SizeOf(IcoFile), 0);
 end;
 
-function LoadICO(const _Stream : TStream; const _ImageNumber : TSGUInt32 = 0) : TSGBitMap; overload;
+function SGLoadICO(const _Stream : TStream; const _ImageNumber : TSGUInt32 = 0) : TSGBitMap; overload;
 begin
 Result := TSGBitMap.Create();
-if (not LoadICO(_Stream, Result, _ImageNumber)) then
+if (not SGLoadICO(_Stream, Result, _ImageNumber)) then
 	SGKill(Result);
 end;
 
-function LoadCUR(const _Stream : TStream; const _CursorNumber : TSGUInt32 = 0) : TSGCursor; overload;
+function SGLoadCUR(const _Stream : TStream; const _CursorNumber : TSGUInt32 = 0) : TSGCursor; overload;
 begin
 Result := TSGCursor.Create();
-if (not LoadCUR(_Stream, Result, _CursorNumber)) then
+if (not SGLoadCUR(_Stream, Result, _CursorNumber)) then
 	SGKill(Result);
 end;
 
-function SaveICO(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean; overload;
+function SGSaveICO(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean; overload;
 begin
 Result := False;
 if (_Image <> nil) then // is necessary
@@ -344,7 +367,7 @@ if (_Image <> nil) then // is necessary
 	end;
 end;
 
-function SaveCUR(const _Stream : TStream; const _Cursor : TSGCursor) : TSGBoolean; overload;
+function SGSaveCUR(const _Stream : TStream; const _Cursor : TSGCursor) : TSGBoolean; overload;
 begin
 Result := False;
 if (_Cursor <> nil) then // is necessary

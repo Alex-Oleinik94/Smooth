@@ -71,7 +71,7 @@ uses
 
 class function TSGImageFormatDeterminer.IsICO(const Stream : TStream) : TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := IsICOData(Stream);
+Result := SGIsICOData(Stream);
 end;
 
 class function TSGImageFormatDeterminer.DetermineExpansion(const Stream : TStream) : TSGString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -96,9 +96,10 @@ end;
 
 class function TSGImageFormatDeterminer.DetermineFormat(const Stream : TStream) : TSGImageFormat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := SGImageFormatNull;
 if IsPNG(Stream) then
 	Result := SGImageFormatPNG
+else if IsICO(Stream) then
+	Result := SGImageFormatICO
 else if IsBMP(Stream) then
 	Result := SGImageFormatBMP
 else if IsMBM(Stream) then
@@ -106,7 +107,8 @@ else if IsMBM(Stream) then
 else if IsJPEG(Stream) then
 	Result := SGImageFormatJpeg
 else if IsSGIA(Stream) then
-	Result := SGImageFormatSGIA;
+	Result := SGImageFormatSGIA
+else Result := SGImageFormatNull;
 end;
 
 class function TSGImageFormatDeterminer.IsPNG(const Stream : TStream):TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
