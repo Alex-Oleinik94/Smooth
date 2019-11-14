@@ -20,7 +20,7 @@ type
 		procedure Clear(); override;
 		end;
 
-procedure SGKill( var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -29,7 +29,7 @@ uses
 	,SaGeEncodingUtils
 	;
 
-procedure SGKill( var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextConsoleStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if TextStream <> nil then
 	begin

@@ -22,15 +22,15 @@ type
 		procedure Write(const StringToWrite : TSGString); virtual; abstract; overload;
 		procedure Write(const Value : TSGUInt32); virtual; overload;
 		procedure Write(const ValuesToWrite : array of const); virtual; overload;
-		procedure TextColor(const Color : TSGUInt8); virtual; // not abstract becouse may be not suported
-		procedure Clear(); virtual; // not abstract becouse may be not suported
+		procedure TextColor(const Color : TSGUInt8); virtual; // not abstract because may be not supported
+		procedure Clear(); virtual; // not abstract because may be not supported
 			public
 		procedure WriteLines(const Strings : TSGStringList); virtual; overload;
 		procedure WriteLines(const Stream : TStream); virtual; overload;
 		end;
 	TSGTextStreamClass = class of TSGTextStream;
 
-procedure SGKill( var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 {$DEFINE  INC_PLACE_INTERFACE}
 {$DEFINE DATATYPE_LIST_HELPER := TSGTextStreamListHelper}
@@ -47,7 +47,7 @@ uses
 	,SaGeStringUtils
 	;
 
-procedure SGKill( var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if TextStream <> nil then
 	begin

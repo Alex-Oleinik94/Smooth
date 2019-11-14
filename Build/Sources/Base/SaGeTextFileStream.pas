@@ -34,7 +34,7 @@ type
 		property FileName : TSGString read FFileName;
 		end;
 
-procedure SGKill( var TextStream : TSGTextFileStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextFileStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -45,7 +45,7 @@ uses
 	,SaGeEncodingUtils
 	;
 
-procedure SGKill( var TextStream : TSGTextFileStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextFileStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if TextStream <> nil then
 	begin

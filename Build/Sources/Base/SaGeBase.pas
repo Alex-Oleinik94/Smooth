@@ -175,8 +175,18 @@ type
 
 procedure SGKill(var _Stream : TStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 procedure SGKill(var _Stream : TMemoryStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var _Data : PSGByte); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
+
+procedure SGKill(var _Data : PSGByte); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if (_Data <> nil) then
+	begin
+	FreeMem(_Data);
+	_Data := nil;
+	end;
+end;
 
 procedure SGKill(var _Stream : TStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin

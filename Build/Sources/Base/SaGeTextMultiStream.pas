@@ -32,7 +32,7 @@ type
 		function Get(const StreamClass : TSGTextStreamClass) : TSGTextStream;
 		end;
 
-procedure SGKill( var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -42,7 +42,7 @@ uses
 	,SaGeTextConsoleStream
 	;
 
-procedure SGKill( var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SGKill(var TextStream : TSGTextMultiStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if TextStream <> nil then
 	begin
