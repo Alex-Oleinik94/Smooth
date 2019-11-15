@@ -1,4 +1,4 @@
-//Спецификация форматов ICO и CUR найдены в онлайн-библиотеке Wikipedia
+//Спецификация форматов ICO и CUR найдены в онлайн-библиотеке Wikipedia (Russian and english languages).
 
 {$INCLUDE SaGe.inc}
 

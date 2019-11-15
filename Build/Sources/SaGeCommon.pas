@@ -121,6 +121,8 @@ function SGPoint2int32ToVertex3f(const Point : TSGPoint2int32):TSGVertex3f;{$IFD
 function SGStrVector3f(const Vector : TSGVector3f; const Numbers : TSGByte = 6) : TSGString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGColor4fTo4uint8(const Color : TSGVector4f) : TSGVector4uint8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
+operator + (const a : TSGVertex2f; const b : TSGVertex2int32) : TSGVertex2f; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 implementation
 
 uses
@@ -131,6 +133,11 @@ uses
 	,SaGeRenderBase
 	,SaGeStringUtils
 	;
+
+operator + (const a : TSGVertex2f; const b : TSGVertex2int32) : TSGVertex2f; overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result.Import(a.x + b.x, a.y + b.y);
+end;
 
 function SGColor4fTo4uint8(const Color : TSGVector4f) : TSGVector4uint8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 

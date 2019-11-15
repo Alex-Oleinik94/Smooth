@@ -83,7 +83,7 @@ if SGResourceFiles.LoadMemoryStreamFromFile(Stream, _FileName) then
 	else
 		SGLog.Source(['TSGIcoFile__Load: Unsupported cursor file format "', _FileName, '".']);
 	end;
-	SGKill(Stream);
+SGKill(Stream);
 end;
 
 procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;

@@ -5,8 +5,9 @@ unit SaGeImageFileOpener;
 interface
 
 uses
+		// System
 	 Classes
-	
+		// Engine
 	,SaGeBase
 	,SaGeLists
 	,SaGeBaseClasses
@@ -81,12 +82,15 @@ type
 implementation
 
 uses
+		// Engine
 	 SaGeStringUtils
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeFileUtils
 	,SaGeContextUtils
-	
+	,SaGeCommon
+	,SaGeResourceManager
+		// System
 	,SysUtils
 	;
 
@@ -304,17 +308,33 @@ var
 	_CursorOverImage : TSGBoolean = False;
 begin
 _CursorOverImage := CursorOverImage();
-if _CursorOverImage and (FCursorType = 0) then
-	begin
-	Context.Cursor := TSGCursor.Copy(FCursorDragAndDropNotPressed);
-	FCursorType := 2;
-	end;
-if FCursorOverImage and (not _CursorOverImage) and (FCursorType = 2) then
+if FCursorOverImage and (not _CursorOverImage) and (FCursorType in [1, 2]) then
 	begin
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
 	FCursorType := 0;
 	end;
+if (FSize.x > Render.Width) or (FSize.y > Render.Height) then
+	begin
+	if _CursorOverImage and ((FCursorType = 0) or ((FCursorType = 1) and (not Context.CursorKeysPressed(SGLeftCursorButton)))) then
+		begin
+		Context.Cursor := TSGCursor.Copy(FCursorDragAndDropNotPressed);
+		FCursorType := 2;
+		end;
+	if FCursorOverImage and (FCursorType = 2) and Context.CursorKeysPressed(SGLeftCursorButton) and (Context.CursorKeyPressed = SGLeftCursorButton) then
+		begin
+		Context.Cursor := TSGCursor.Copy(FCursorDragAndDropPressed);
+		FCursorType := 1;
+		end;
+	end
+else
+	if (FCursorType in [1, 2]) then
+		begin
+		Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+		FCursorType := 0;
+		end;
 FCursorOverImage := _CursorOverImage;
+if (FCursorType = 1) then
+	FPosition += Context.CursorPosition(SGDeferenseCursorPosition);
 end;
 
 procedure TSGImageViewer.ProccessContextKeys();
@@ -481,59 +501,38 @@ begin
 Result := TSGImageViewer;
 end;
 
-function TSGImageFileOpener_GetAlwaysSuporedExpansions() : TSGStringList;
-begin
-Result := nil;
-Result *= 'JPG';
-Result *= 'JPEG';
-Result *= 'BMP';
-Result *= 'TGA';
-Result *= 'SGIA';
-Result *= 'ICO';
-Result *= 'CUR';
-end;
-
 class function TSGImageFileOpener.GetExpansions() : TSGStringList;
 begin
 Result := nil;
 if (TSGCompatibleContext <> nil) and (TSGCompatibleRender <> nil) then
 	begin
-	Result := TSGImageFileOpener_GetAlwaysSuporedExpansions();
-	{$IFDEF WITHLIBPNG}
-	if SupportedPNG() then
+	Result := nil;
+	Result *= 'JPG';
+	Result *= 'JPEG';
+	Result *= 'BMP';
+	Result *= 'TGA';
+	Result *= 'SGIA';
+	Result *= 'ICO';
+	Result *= 'CUR';
+	if SGResourceManager.LoadingIsSupported('PNG') then
 		Result *= 'PNG';
-	{$ENDIF}
 	end;
 end;
 
 class function TSGImageFileOpener.ExpansionsSupported(const VExpansions : TSGStringList) : TSGBool;
 var
-	ASE : TSGStringList = nil;
-	PNGInExpansions : TSGBool = False;
+	SupportedExpansions : TSGStringList = nil;
 	S : TSGString = '';
 begin
-Result := False;
-ASE := TSGImageFileOpener_GetAlwaysSuporedExpansions();
-Result := True;
-for S in VExpansions do
-	if not (S in ASE) then
-		begin
-		if S = 'PNG' then
-			PNGInExpansions := True
-		else
+SupportedExpansions := GetExpansions();
+Result := (SupportedExpansions <> nil);
+if Result then
+	for S in VExpansions do
+		if (not (S in SupportedExpansions)) then
 			begin
 			Result := False;
 			break;
 			end;
-		end;
-{$IFDEF WITHLIBPNG}
-if Result = True then
-	if PNGInExpansions then
-		Result := SupportedPNG();
-{$ENDIF}
-if Result then
-	if (TSGCompatibleContext = nil) or (TSGCompatibleRender = nil) then
-		Result := False;
 end;
 
 initialization

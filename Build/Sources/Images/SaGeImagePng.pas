@@ -46,7 +46,7 @@ type
 constructor TSGResourceManipulatorImagesPNG.Create();
 begin
 inherited;
-AddExpansion('PNG', True, True);
+AddExpansion('PNG', SupportedPNG(), SupportedPNG());
 end;
 
 function TSGResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;

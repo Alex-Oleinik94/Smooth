@@ -41,7 +41,7 @@ type
 		end;
 
 var
-	FileOpenerConsoleMenuEnabled : TSGBoolean = False; //Выключено по умолчанию из-за неправильно функционирования
+	FileOpenerConsoleMenuEnabled : TSGBoolean = False; //Выключено по умолчанию из-за неправильного функционирования
 
 procedure SGRegistryFileOpener(const VClass : TSGFileOpenerClass);
 procedure SGTryOpenFiles(const VFiles : TSGStringList);
