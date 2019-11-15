@@ -21,6 +21,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeFont
 	,SaGeImage
+	,SaGeBitMapBase
 	,SaGeBitMap
 	,SaGeGasDiffusionReliefRedactor
 	,SaGeScreenBase

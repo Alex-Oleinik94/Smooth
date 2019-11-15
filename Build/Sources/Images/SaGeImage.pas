@@ -17,6 +17,7 @@ uses
 	,SaGeRenderInterface
 	,SaGeCommonStructs
 	,SaGeImageFormatDeterminer
+	,SaGeBitMapBase
 		// System
 	,Classes
 	;
@@ -51,8 +52,6 @@ type
 		FLoadedIntoRAM : TSGBoolean;
 		//Путь в файлу
 		FFileName           : TSGString;
-		//Формат, в который сохранится изображзение прии его сохранении
-		FSaveFormat:TSGIByte;
 		
 		//Имя изображения или материала
 		FName : TSGString;

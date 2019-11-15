@@ -11,6 +11,7 @@ uses
 	,SaGeBase
 	,SaGeCursor
 	,SaGeCasesOfPrint
+	,SaGeBitMapBase
 	
 	,Classes
 	;

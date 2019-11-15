@@ -7,6 +7,7 @@ interface
 uses
 	 SaGeBase
 	,SaGeImage
+	,SaGeBitMapBase
 	,SaGeCommonStructs
 	,SaGeContextInterface
 	;
