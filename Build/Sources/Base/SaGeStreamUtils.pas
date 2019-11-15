@@ -43,6 +43,7 @@ type
 	TSGInputStreamType = (SGInputFileStream, SGInputMemoryStream);
 
 function SGCreateInputStream(const FileName : TSGString; const InputStreamType : TSGInputStreamType = SGInputFileStream) : TStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+function SGCreateMemoryStreamFromFile(const _FileName : TSGString) : TMemoryStream;
 
 procedure SGKill(var Stream : TStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
 procedure SGKill(var Stream : TMemoryStream); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
@@ -53,6 +54,21 @@ implementation
 uses
 	 SaGeFileUtils
 	;
+
+function SGCreateMemoryStreamFromFile(const _FileName : TSGString) : TMemoryStream;
+begin
+if SGFileExists(_FileName) then
+	begin
+	Result := TMemoryStream.Create();
+	Result.LoadFromFile(_FileName);
+	if (Result.Size > 0) then
+		Result.Position := 0
+	else
+		SGKill(Result);
+	end
+else
+	Result := nil
+end;
 
 function SGStreamCopyMemory(const Stream : TStream) : TMemoryStream; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

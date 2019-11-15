@@ -635,8 +635,7 @@ end;
 
 procedure TSGContext.SetCursor(const VCursor : TSGCursor);
 begin
-if FCursor <> nil then
-	FCursor.Destroy();
+SGKill(FCursor);
 FCursor := VCursor;
 end;
 

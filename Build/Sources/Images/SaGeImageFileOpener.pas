@@ -19,6 +19,7 @@ uses
 	,SaGeCommonStructs
 	,SaGeImage
 	,SaGeThreads
+	,SaGeCursor
 	;
 
 type
@@ -54,6 +55,10 @@ type
 		
 		FPosition, FSize, FRenderSize : TSGVector2f;
 		FCursorOverImage : TSGBoolean;
+		
+		FCursorDragAndDropPressed : TSGCursor; // drag and drop cursor (pressed)
+		FCursorDragAndDropNotPressed : TSGCursor; // drag and drop cursor (not  pressed)
+		FCursorType : TSGUInt8; // 0 if standart; 1 if DragAndDropPressed; 2 if DragAndDropNotPressed
 			private
 		procedure InitImagePosition();
 		procedure InitBackgroundImage();
@@ -77,14 +82,10 @@ implementation
 
 uses
 	 SaGeStringUtils
-	{$IFDEF WITHLIBPNG}
-		,SaGeImagePng
-	{$ENDIF}
 	,SaGeRender
 	,SaGeRenderBase
 	,SaGeFileUtils
 	,SaGeContextUtils
-	,SaGeCursor
 	
 	,SysUtils
 	;
@@ -95,6 +96,8 @@ uses
 
 destructor TSGImageViewer.Destroy();
 begin
+SGKill(FCursorDragAndDropPressed);
+SGKill(FCursorDragAndDropNotPressed);
 SGKill(FLoadingThread);
 SGKill(FFont);
 SGKill(FWaitAnimation);
@@ -119,8 +122,10 @@ FHintColor.Import(0, 0, 0);
 FBackgroundColor := Context.GetDefaultWindowColor();
 Render.ClearColor(FBackgroundColor.r, FBackgroundColor.g, FBackgroundColor.b, 1);
 FWaitAnimation := TSGLoadingFrame.Create(Context);
-FFont := TSGFont.Create(SGFontDirectory + DirectorySeparator + 'Tahoma.sgf');
-FFont.SetContext(Context);
+FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + 'Tahoma.sgf', True);
+FCursorDragAndDropPressed := SGCreateCursorFromFile(SGEngineDirectory + DirectorySeparator + 'drag and drop cursor (pressed).cur');
+FCursorDragAndDropNotPressed := SGCreateCursorFromFile(SGEngineDirectory + DirectorySeparator + 'drag and drop cursor (not  pressed).cur');
+FCursorType := 0;
 FLoadingThread := TSGThread.Create(TSGThreadProcedure(@TSGImageViewer_LoadThreadProc), Self, True);
 end;
 
@@ -131,8 +136,7 @@ end;
 
 procedure TSGImageViewer.LoadingFromThread();
 begin
-FFont.Load();
-while FImage = nil do
+while (FImage = nil) do
 	Sleep(10);
 FImage.Load();
 InitImagePosition();
@@ -300,12 +304,16 @@ var
 	_CursorOverImage : TSGBoolean = False;
 begin
 _CursorOverImage := CursorOverImage();
-if _CursorOverImage then
-	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle <> SGC_HAND)) then
-		Context.Cursor := TSGCursor.Create(SGC_HAND);
-if FCursorOverImage and (not _CursorOverImage) then
-	if (Context.Cursor = nil) or ((Context.Cursor <> nil) and (Context.Cursor.StandartHandle = SGC_HAND)) then
+if _CursorOverImage and (FCursorType = 0) then
+	begin
+	Context.Cursor := TSGCursor.Copy(FCursorDragAndDropNotPressed);
+	FCursorType := 2;
+	end;
+if FCursorOverImage and (not _CursorOverImage) and (FCursorType = 2) then
+	begin
 	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+	FCursorType := 0;
+	end;
 FCursorOverImage := _CursorOverImage;
 end;
 

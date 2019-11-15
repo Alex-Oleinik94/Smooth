@@ -55,12 +55,36 @@ type
 		end;
 
 procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SGCreateCursorFromFile(const _FileName : TSGString) : TSGCursor;
 
 implementation
 
 uses
+		// Engine
 	 SaGeBitMapUtils
+	,SaGeLog
+	,SaGeResourceManager
+		// System
+	,Classes
+		// Cursor file formats
+	,SaGeImageICO // .cur
 	;
+
+function SGCreateCursorFromFile(const _FileName : TSGString) : TSGCursor;
+var
+	Stream : TMemoryStream;
+begin
+Stream := TMemoryStream.Create();
+if SGResourceFiles.LoadMemoryStreamFromFile(Stream, _FileName) then
+	begin
+	Stream.Position := 0;
+	if SGIsICOData(Stream) then
+		Result := SGLoadCUR(Stream)
+	else
+		SGLog.Source(['TSGIcoFile__Load: Unsupported cursor file format "', _FileName, '".']);
+	end;
+	SGKill(Stream);
+end;
 
 procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
