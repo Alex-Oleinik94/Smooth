@@ -36,15 +36,55 @@ operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDI
 function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGBGRAToRGBAPixel(const _Pixel : TSGPixel4b) : TSGPixel4b;
+function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b;
+function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b;
+function SGConsoleColor(const _ColorNumber : TSGUInt8) : TSGPixel3b; {"bad code"}
 
 implementation
 
 uses
 	 SaGeMathUtils
+	//,SaGeBaseUtils
 	;
 
-function SGBGRAToRGBAPixel(const _Pixel : TSGPixel4b) : TSGPixel4b;
+function SGConsoleColor(const _ColorNumber : TSGUInt8) : TSGPixel3b; {"bad code"}
+begin
+case _ColorNumber of
+00: Result.Import(0, 0, 0);       // black
+01: Result.Import(0, 0, 127);     // blue
+02: Result.Import(0, 127, 0);     // green
+03: Result.Import(127, 127, 0);   // yellow(+)
+04: Result.Import(127, 0, 0);     // red
+05: Result.Import(127, 0, 127);   // magenta
+06: Result.Import(0, 127, 127);   // azure
+07: Result.Import(127, 127, 127); // gray
+08: Result.Import(64, 64, 64);    // taupe
+09: Result.Import(0, 0, 255);     // bright blue
+10: Result.Import(0, 255, 0);     // bright green
+11: Result.Import(255, 255, 0);   // bright yellow(+)
+12: Result.Import(255, 0, 0);     // bright red
+13: Result.Import(255, 0, 255);   // bright magenta
+14: Result.Import(0, 255, 255);   // bright azure
+15: Result.Import(255, 255, 255); // white
+else Result.Import(0, 0, 0);
+end;
+end;
+
+function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b;
+const
+	BlueMask = $1FF; // 9 bit size
+	RedMask = $1FE00; // 8 bit size
+	GreenMask = $FE0000; // 7 bit size
+var
+	PixelBits : TSGUInt32;
+begin
+PSGPixel3b(@PixelBits)^ := _Pixel;
+Result.b := Trunc((PixelBits and BlueMask) / BlueMask * 255);
+Result.r := (PixelBits and RedMask) shr 9;
+Result.g := Trunc(((PixelBits and GreenMask) shr (8 + 9)) / $7F * 255);
+end;
+
+function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b;
 begin
 Result := _Pixel;
 Result.r := _Pixel.b;

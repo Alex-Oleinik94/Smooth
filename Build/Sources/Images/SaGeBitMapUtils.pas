@@ -49,7 +49,7 @@ var
 begin
 if (_Image.Channels = 4) and (_Image.ChannelSize = 8) then
 	for Index := 0 to _Image.Width * _Image.Height - 1 do
-		PSGPixel4b(_Image.BitMap)[Index] := SGBGRAToRGBAPixel(PSGPixel4b(_Image.BitMap)[Index]);
+		PSGPixel4b(_Image.BitMap)[Index] := SGPixelBGRAToRGBA(PSGPixel4b(_Image.BitMap)[Index]);
 end;
 
 function SGLoadBitMapFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGBitMap;

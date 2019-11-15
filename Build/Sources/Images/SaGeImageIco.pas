@@ -171,17 +171,20 @@ type
 
 function SGSaveICO(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean; overload;
 function SGSaveCUR(const _Stream : TStream; const _Cursor : TSGCursor) : TSGBoolean; overload;
+
 function SGLoadICO(const _Stream : TStream; var _Image : TSGBitMap; const _ImageNumber : TSGUInt32 = 0) : TSGBoolean; overload;
 function SGLoadICO(const _Stream : TStream; const _ImageNumber : TSGUInt32 = 0) : TSGBitMap; overload;
 function SGLoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;
 function SGLoadCUR(const _Stream : TStream; const _CursorNumber : TSGUInt32 = 0) : TSGCursor; overload;
+
+procedure SGIcoLoad4bitBitMap(const _Image : TSGBitMap; var _ImageData : TSGIconImageData);
 function SGLoadICOImage(const _IcoFile : PSGIcoFileHeader; const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
-function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGString;
-function SGIcoIsImageHaveMasksFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGBoolean;
-procedure SGPrintIcoBitMapInfoHeader(const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
-function SGIsICOData(const _Stream : TStream) : TSGBoolean;
-function SGCopyIcoImageProperties(const _IcoFile : PSGIcoFileHeader; const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean;
 function SGIcoBitMapDataSize(var _ImageHeader : TSGIcoImageHeader; var _BitMapInfoHeader : TSGIcoBitMapInfoHeader) : TSGUInt64;
+function SGCopyIcoImageProperties(const _IcoFile : PSGIcoFileHeader; const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean;
+function SGIsICOData(const _Stream : TStream) : TSGBoolean;
+
+function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGString;
+procedure SGPrintIcoBitMapInfoHeader(const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
 
 implementation
 
@@ -318,7 +321,7 @@ for Index := 0 to FHeader.FCount - 1 do
 				GetMem(FImages[Index].FData.FColors, ColorDataSize);
 				_Stream.ReadBuffer(FImages[Index].FData.FColors^, ColorDataSize);
 				
-				if SGIcoIsImageHaveMasksFromDataType(FImages[Index].FData.FHeader.FCompression) then
+				if (FImages[Index].FData.FHeader.FCompression in [BI_BITFIELDS, BI_ALPHABITFIELDS]) then
 					begin
 					MaskSize := MaskDataSize(FImages[Index].FData.FHeader.FWidth, Abs(FImages[Index].FData.FHeader.FHeight));
 					
@@ -361,7 +364,7 @@ for Index := 0 to High(FImages) do
 			begin
 			ColorDataSize := SGIcoBitMapDataSize(FImages[Index].FHeader, FImages[Index].FData.FHeader);
 			_Stream.WriteBuffer(FImages[Index].FData.FColors^, ColorDataSize);
-			if SGIcoIsImageHaveMasksFromDataType(FImages[Index].FData.FHeader.FCompression) then
+			if (FImages[Index].FData.FHeader.FCompression in [BI_BITFIELDS, BI_ALPHABITFIELDS]) then
 				begin
 				MaskSize := MaskDataSize(FImages[Index].FData.FHeader.FWidth, Abs(FImages[Index].FData.FHeader.FHeight));
 				_Stream.WriteBuffer(FImages[Index].FData.FXOR^, MaskSize);
@@ -376,11 +379,6 @@ for Index := 0 to High(FImages) do
 		else
 			SGLog.Source(['TSGIcoFile__Save: Unsuppored data format: "', FImages[Index].FData.FHeader.FCompression, '".']);
 		end;
-end;
-
-function SGIcoIsImageHaveMasksFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGBoolean;
-begin
-Result := (_DataType = BI_BITFIELDS) or (_DataType = BI_ALPHABITFIELDS);
 end;
 
 function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGString;
@@ -417,6 +415,7 @@ function SGIcoBitMapDataSize(var _ImageHeader : TSGIcoImageHeader; var _BitMapIn
 var
 	PixelSize : TSGMaxEnum;
 	Width, Height : TSGMaxEnum;
+	TempDataSize : TSGUInt64;
 begin
 if (_BitMapInfoHeader.FSizeImage <> 0) then
 	begin
@@ -435,7 +434,17 @@ else
 		SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Width(', Width, ') <>  BitMapInfoHeader.Width(', _BitMapInfoHeader.FWidth, ').']);
 	if (_BitMapInfoHeader.FHeight <> Height) then
 		SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Height(', Height, ') <>  BitMapInfoHeader.Height(', _BitMapInfoHeader.FHeight, ').']);
-	Result := Width * Height * PixelSize;
+	if (_BitMapInfoHeader.FBitCount = 4) then
+		begin
+		TempDataSize := Width * Height;
+		Result := TempDataSize div 2;
+		if (TempDataSize mod 2 <> 0) then
+			Result += 1;
+		if (_BitMapInfoHeader.FClrUsed > 0) then // FClrUsed = 2 ** FBitCount
+			Result += _BitMapInfoHeader.FClrUsed{16 colors} * 4{24 bpp + 8};
+		end
+	else
+		Result := Width * Height * PixelSize;
 	end;
 SGLog.Source(['SGIcoBitMapDataSize(', Result, ').']);
 end;
@@ -444,41 +453,44 @@ end;
 //======================================================================
 //======================================================================
 
+procedure SGIcoLoad4bitBitMap(const _Image : TSGBitMap; var _ImageData : TSGIconImageData);
+var
+	TempIndex, Index, W, H, ColorIndex : TSGMaxEnum;
+	ImageBitMap : PSGPixel3b;
+	ColorArray : PSGPixel3b;
+	IcoImageBitMap : PSGUInt8;
+begin
+ImageBitMap := PSGPixel3b(_Image.BitMap);
+ColorArray := PSGPixel3b(_ImageData.FColors);
+IcoImageBitMap := PSGUInt8(TSGMaxEnum(ColorArray) + 16{colors} * 4{24 bpp + 8});
+for H := 0 to _Image.Height - 1 do
+	for W := 0 to _Image.Width - 1 do
+		begin
+		TempIndex := H * _Image.Width + W;
+		Index := TempIndex div 2;
+		ColorIndex := IcoImageBitMap[Index];
+		if (TempIndex mod 2 = 0) then
+			ColorIndex := ColorIndex and $0F
+		else
+			ColorIndex := (ColorIndex and $F0) shr 4;
+		TempIndex := H * _Image.Width + (_Image.Width - 1 - W); // should ?
+		ImageBitMap[TempIndex] := ColorArray[ColorIndex]; // SGPixelR8G7B9ToRGB24 ?
+		end;
+ImageBitMap := nil;
+ColorArray := nil;
+IcoImageBitMap := nil;
+end;
+
 function SGLoadICOImage(const _IcoFile : PSGIcoFileHeader; const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean; overload;
 var
 	ImageDataType : TSGIcoBitMapCompression;
 	FileExpansion : TSGString;
 	LoadedImage : TSGBitMap = nil;
+	HaveAdditionalProperties : TSGBoolean = False; // is ".ico" (not ".cur")
+var
 	// fixed palette: 256, 60 or 2 (number colors); may be 16 colors?
 	ColorPlanes : TSGUInt16 = 0; // Should be 0 or 1 (or 255(icon encoder built into .NET (System.Drawing.Icon.Save)))
 	BitsPerPixel : TSGUInt16 = 0; // Should be 16, 24 or 32 (bit per pixel)
-	HaveAdditionalProperties : TSGBoolean = False; // is ".ico" (not ".cur")
-	Index : TSGMaxEnum;
-	B : TSGUInt8;
-
-function IcoGetColor16(const _ColorNumber : TSGUInt8) : TSGPixel3b;
-begin
-case _ColorNumber of
-00: Result.Import(0, 0, 0);       // black
-01: Result.Import(0, 0, 127);     // blue
-02: Result.Import(0, 127, 0);     // green
-03: Result.Import(127, 127, 0);   // yellow(+)
-04: Result.Import(127, 0, 0);     // red
-05: Result.Import(127, 0, 127);   // magenta
-06: Result.Import(0, 127, 127);   // azure
-07: Result.Import(127, 127, 127); // gray
-08: Result.Import(64, 64, 64);    // taupe
-09: Result.Import(0, 0, 255);     // bright blue
-10: Result.Import(0, 255, 0);     // bright green
-11: Result.Import(255, 255, 0);   // bright yellow(+)
-12: Result.Import(255, 0, 0);     // bright red
-13: Result.Import(255, 0, 255);   // bright magenta
-14: Result.Import(0, 255, 255);   // bright azure
-15: Result.Import(255, 255, 255); // white
-else Result.Import(0, 0, 0);
-end;
-end;
-
 begin
 ImageDataType := _IcoImage^.FData.FHeader.FCompression;
 SGLog.Source(['SGLoadICOImage: Determined format "', SGIcoImageExpansionFromDataType(ImageDataType), '".']);
@@ -507,12 +519,7 @@ BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 			_Image.ChannelSize := 8;
 			_Image.CreateTypes();
 			_Image.ReAllocateMemory();
-			for Index := 0 to ((_Image.Width * _Image.Height) div 2) - 1 do
-				begin
-				B := _IcoImage^.FData.FColors[Index];
-				PSGPixel3b(_Image.BitMap)[Index * 2 + 0] := IcoGetColor16(B and $0F);
-				PSGPixel3b(_Image.BitMap)[Index * 2 + 1] := IcoGetColor16((B and $F0) shr 4)
-				end;
+			SGIcoLoad4bitBitMap(_Image, _IcoImage^.FData);
 			end;
 		end
 	else SGLog.Source(['SGLoadICOImage: Couldn''t load BMP data from ICO container.']);
@@ -547,10 +554,11 @@ end;
 
 function SGCopyIcoImageProperties(const _IcoFile : PSGIcoFileHeader; const _IcoImage : PSGIcoImage; const _Image : TSGBitMap) : TSGBoolean;
 var
+	HaveAdditionalProperties : TSGBoolean = False; // is ".ico" (not ".cur")
+var
 	// fixed palette: 256, 60 or 2 (number colors); may be 16 colors?
 	ColorPlanes : TSGUInt16 = 0; // Should be 0 or 1 (or 255(icon encoder built into .NET (System.Drawing.Icon.Save)))
 	BitsPerPixel : TSGUInt16 = 0; // Should be 16, 24 or 32 (bit per pixel)
-	HaveAdditionalProperties : TSGBoolean = False; // is ".ico" (not ".cur")
 begin
 Result := False;
 HaveAdditionalProperties := (_IcoFile <> nil) and (_IcoFile^.FType = SGIcoFile);
