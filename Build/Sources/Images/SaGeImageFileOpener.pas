@@ -307,6 +307,8 @@ procedure TSGImageViewer.ProccessCursorIcon();
 var
 	_CursorOverImage : TSGBoolean = False;
 begin
+if (FCursorType = 1) then
+	FPosition += Context.CursorPosition(SGDeferenseCursorPosition);
 _CursorOverImage := CursorOverImage();
 if FCursorOverImage and (not _CursorOverImage) and (FCursorType in [1, 2]) then
 	begin
@@ -326,15 +328,12 @@ if (FSize.x > Render.Width) or (FSize.y > Render.Height) then
 		FCursorType := 1;
 		end;
 	end
-else
-	if (FCursorType in [1, 2]) then
-		begin
-		Context.Cursor := TSGCursor.Create(SGC_NORMAL);
-		FCursorType := 0;
-		end;
+else if (FCursorType in [1, 2]) then
+	begin
+	Context.Cursor := TSGCursor.Create(SGC_NORMAL);
+	FCursorType := 0;
+	end;
 FCursorOverImage := _CursorOverImage;
-if (FCursorType = 1) then
-	FPosition += Context.CursorPosition(SGDeferenseCursorPosition);
 end;
 
 procedure TSGImageViewer.ProccessContextKeys();

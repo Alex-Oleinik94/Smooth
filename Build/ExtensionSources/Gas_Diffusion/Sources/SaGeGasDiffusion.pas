@@ -2287,12 +2287,12 @@ fillchar(Image.Image.BitMap^, FCube.Edge * FCube.Edge * Image.Image.Channels * d
 
 for i := 0 to FCube.Edge-1 do
 	for ii := 0 to FCube.Edge-1 do
-		PutPixel(FSechenieImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^,@Image.Image.BitMap[(i*Image.Width+ii)*Image.Image.Channels]);
+		PutPixel(FSechenieImage.Image.PixelRGBA32(ii,FCube.Edge-i-1),@Image.Image.BitMap[(i*Image.Width+ii)*Image.Image.Channels]);
 
 if d = 2 then
 	for i := 0 to FCube.Edge-1 do
 		for ii := 0 to FCube.Edge-1 do
-			PutPixel(FUsrSechImage.Image.PixelsRGBA(ii,FCube.Edge-i-1)^,@Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*Image.Image.Channels]);
+			PutPixel(FUsrSechImage.Image.PixelRGBA32(ii,FCube.Edge-i-1),@Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*Image.Image.Channels]);
 
 SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
@@ -2407,7 +2407,7 @@ while i < FCube.Edge do
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
-		FUsrSechImageForThread.Image.PixelsRGBA(i,ii)^ := InitPixel(ii,i,z,range);
+		FUsrSechImageForThread.Image.SetPixelRGBA32(i, ii, InitPixel(ii,i,z,range));
 		ii += 1;
 		end;
 	i +=1;

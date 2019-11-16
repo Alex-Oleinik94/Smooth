@@ -15,9 +15,11 @@ uses
 	;
 
 procedure SGWinAPIGetMaskBitmaps(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const  clrTransparent : COLORREF; var hAndMaskBitmap : HBITMAP; var hXorMaskBitmap : HBITMAP);
+
 function SGWinAPICreateCursorFromBitmap(const VCursor : TSGCursor;const hSourceBitmap : HBITMAP;const clrTransparent : COLORREF;const xHotspot : DWORD;const yHotspot : DWORD) : HCURSOR;
 function SGWinAPICreateCursor(const VCursor : TSGCursor;const clrTransparent : COLORREF):HCURSOR;
 function SGWinAPICreateGlassyCursor() : Windows.HCURSOR;
+
 function SGWinAPIShellAddIconFromResources(const WindowHandle : HWND; const IconIdentifier, IconRecourceIdentifier : TSGUInt32; const _CallbackMessage : TSGUInt32; const Tip : TSGString = '') : TSGBoolean;
 function SGWinAPIShellDeleteIcon(const WindowHandle : HWND; const IconIdentifier : TSGUInt32) : TSGBoolean;
 function SGWinAPIShellModifyIconTip(const WindowHandle : HWND; const IconIdentifier : TSGUInt32; const _Tip : TSGString) : TSGBoolean;
@@ -101,7 +103,7 @@ var
 	bm : BITMAP;
 	hOldMainBitmap, hOldAndMaskBitmap, hOldXorMaskBitmap : HBITMAP;
 	x, y, alpha: TSGUInt32;
-	MainBitPixel : COLORREF;
+	Pixel : COLORREF;
 
 procedure SetPixel(const _DC : HDC; const _Color : COLORREF); overload;
 begin
@@ -115,14 +117,14 @@ SetPixel(hXorMaskDC, _ColorXor);
 end;
 
 begin
-hOldMainBitmap := 0;
+hOldMainBitmap    := 0;
 hOldAndMaskBitmap := 0;
 hOldXorMaskBitmap := 0;
 
-hNullDC				:= GetDC(0);
-hMainDC				:= CreateCompatibleDC(hNullDC);
-hAndMaskDC			:= CreateCompatibleDC(hNullDC);
-hXorMaskDC			:= CreateCompatibleDC(hNullDC);
+hNullDC    := GetDC(0);
+hMainDC    := CreateCompatibleDC(hNullDC);
+hAndMaskDC := CreateCompatibleDC(hNullDC);
+hXorMaskDC := CreateCompatibleDC(hNullDC);
 
 FillChar(bm, SizeOf(bm), 0);
 GetObject(hSourceBitmap, sizeof(BITMAP), @bm);
@@ -130,39 +132,28 @@ GetObject(hSourceBitmap, sizeof(BITMAP), @bm);
 hAndMaskBitmap := CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
 hXorMaskBitmap := CreateCompatibleBitmap(hNullDC, bm.bmWidth, bm.bmHeight);
 
-{hAndMaskBitmap := CreateCompatibleBitmap(hNullDC, VCursor.Width, VCursor.Height);
-hXorMaskBitmap := CreateCompatibleBitmap(hNullDC, VCursor.Width, VCursor.Height);}
-hOldMainBitmap      := HBITMAP(SelectObject(hMainDC,   hSourceBitmap ));
-hOldAndMaskBitmap	:= HBITMAP(SelectObject(hAndMaskDC,hAndMaskBitmap));
-hOldXorMaskBitmap	:= HBITMAP(SelectObject(hXorMaskDC,hXorMaskBitmap));
+hOldMainBitmap    := HBITMAP(SelectObject(hMainDC,   hSourceBitmap ));
+hOldAndMaskBitmap := HBITMAP(SelectObject(hAndMaskDC,hAndMaskBitmap));
+hOldXorMaskBitmap := HBITMAP(SelectObject(hXorMaskDC,hXorMaskBitmap));
 
-for x := 0 to bm.bmWidth - 1 do // why not VCursor.Width ?
-	begin
-	for y := 0 to bm.bmHeight - 1 do // why not VCursor.Height ?
+for x := 0 to bm.bmWidth - 1 do
+	for y := 0 to bm.bmHeight - 1 do
 		begin
-		MainBitPixel := GetPixel(hMainDC, x, y);
+		Pixel := GetPixel(hMainDC, x, y);
 		if (VCursor = nil) or (VCursor.Channels = 3) then
-			if(MainBitPixel = clrTransparent) then
-				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask})
+			if(Pixel = clrTransparent) then
+				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask}) // Transparent("glassy") color
 			else
-				SetPixels(RGB(0,0,0){and mask}, MainBitPixel{xor mask})
-		else
-			begin
-			alpha := VCursor.BitMap[(x + y * VCursor.Width) * 4 + 3];
-			if (alpha < 150) then
-				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask})
+				SetPixels(RGB(0,0,0){and mask}, Pixel{xor mask})
+		else if (SGPixelRGBA32FromMemory(VCursor.BitMap, x + y * VCursor.Width).a = 0) then
+				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask}) // Transparent("glassy") color
 			else
-				SetPixels(RGB(0,0,0){and mask}, RGB(alpha, alpha, alpha){xor mask});
-			end;
+				SetPixels(RGB(0,0,0){and mask}, Pixel{xor mask});
 		end;
-	end;
 
-{SelectObject(hMainDC,   hOldMainBitmap);
-SelectObject(hAndMaskDC,hOldAndMaskBitmap);
-SelectObject(hXorMaskDC,hOldXorMaskBitmap);}
-SelectObject(hMainDC,   0);
-SelectObject(hAndMaskDC,0);
-SelectObject(hXorMaskDC,0);
+SelectObject(hMainDC,    hOldMainBitmap);
+SelectObject(hAndMaskDC, hOldAndMaskBitmap);
+SelectObject(hXorMaskDC, hOldXorMaskBitmap);
 
 if (bm.bmBits <> nil) then
 	FreeMem(bm.bmBits);
@@ -213,12 +204,11 @@ if((0 = hAndMask) or (0 = hXorMask)) then
 // color bitmap is applied (using XOR) to the destination by using the SRCINVERT flag.
 
 fillchar(iconinfo, sizeof(iconinfo), 0);
-iconinfo.fIcon      := False;
+iconinfo.fIcon      := False; // is cursor
 iconinfo.xHotspot   := xHotspot;
 iconinfo.yHotspot   := yHotspot;
-iconinfo.hbmMask    := hAndMask; // hXorMask ?
+iconinfo.hbmMask    := hAndMask;
 iconinfo.hbmColor   := hXorMask;
-//iconinfo.hbmColor   := hSourceBitmap; // ?
 
 Result := CreateIconIndirect(@iconinfo);
 end;
@@ -237,9 +227,9 @@ for h := 0 to VCursor.Height - 1 do
 		begin
 		Index := h * VCursor.Width + w;
 		if (VCursor.Channels = 4) then
-			PSGPixel3b(bm)[Index] := TSGPixel3b(PSGPixel4b(VCursor.BitMap)[Index])
+			PSGPixel3b(bm)[Index] := SGPixelRGB24FromMemory(VCursor.BitMap, Index)
 		else
-			PSGPixel3b(bm)[Index] := PSGPixel3b(VCursor.BitMap)[Index];
+			PSGPixel3b(bm)[Index] := SGPixelRGBA32FromMemory(VCursor.BitMap, Index);
 		end;
 SetBitmapBits(hBM, VCursor.Width * VCursor.Height * VCursor.Channels, bm);
 FreeMem(bm);

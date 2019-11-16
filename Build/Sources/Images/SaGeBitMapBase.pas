@@ -9,6 +9,8 @@ uses
 	,SaGeCommonStructs
 	;
 type
+	TSGBitMapMemory = PSGByte;
+	
 	PSGPixel3b = PSGVertex3ui8;
 	TSGPixel3b = TSGVertex3ui8;
 	
@@ -28,17 +30,19 @@ type
 		procedure Clear; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
-operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator + (const a,b:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const a,b:TSGPixel3b):TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a:TSGPixel3b; const b:TSGFloat64):TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a,b:TSGPixel3b):TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator not (const a:TSGPixel3b):TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b;
-function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b;
+function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGConsoleColor(const _ColorNumber : TSGUInt8) : TSGPixel3b; {"bad code"}
+function SGPixelRGB24FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -46,6 +50,16 @@ uses
 	 SaGeMathUtils
 	//,SaGeBaseUtils
 	;
+
+function SGPixelRGB24FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := PSGPixel3b(_Memory)[_Index];
+end;
+
+function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Result := PSGPixel4b(_Memory)[_Index];
+end;
 
 function SGConsoleColor(const _ColorNumber : TSGUInt8) : TSGPixel3b; {"bad code"}
 begin
@@ -70,7 +84,7 @@ else Result.Import(0, 0, 0);
 end;
 end;
 
-function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b;
+function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 const
 	BlueMask = $1FF; // 9 bit size
 	RedMask = $1FE00; // 8 bit size
@@ -84,14 +98,14 @@ Result.r := (PixelBits and RedMask) shr 9;
 Result.g := Trunc(((PixelBits and GreenMask) shr (8 + 9)) / $7F * 255);
 end;
 
-function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b;
+function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := _Pixel;
 Result.r := _Pixel.b;
 Result.b := _Pixel.r;
 end;
 
-function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure MultByte(var a : TSGByte; const b : TSGByte);
 begin
@@ -107,7 +121,7 @@ MultByte(Result.z, Pixel2.z);
 MultByte(Result.w, Pixel2.w);
 end;
 
-function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGConvertPixelRGBToAlpha(const P : TSGPixel4b) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	max : byte;
 	s : single;
@@ -131,12 +145,12 @@ else
 	end;
 end;
 
-operator not (const a:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator not (const a:TSGPixel3b):TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(255-a.r,255-a.g,255-a.b);
 end;
 
-operator + (const a,b:TSGPixel3b):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator + (const a,b:TSGPixel3b):TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(
 	SGTruncUp((a.r+b.r)/2),
@@ -144,23 +158,23 @@ Result.Import(
 	SGTruncUp((a.b+b.b)/2));
 end;
 
-operator * (const a:TSGPixel3b; const b:Real):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator * (const a:TSGPixel3b; const b:TSGFloat64):TSGPixel3b;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result.Import(SGTruncUp(a.r*b),SGTruncUp(a.g*b),SGTruncUp(a.b*b));
 end;
 
-operator = (const a,b:TSGPixel3b):Boolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+operator = (const a,b:TSGPixel3b):TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin 
 Result:=(a.r=b.r) and (a.g=b.g) and (a.b=b.b);
 end;
 
-procedure TSGPixelInfo.Clear;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGPixelInfo.Clear; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 SetLength(FArray,0);
 FArray:=nil;
 end;
 
-procedure TSGPixelInfo.Get(const Old,New,Position:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGPixelInfo.Get(const Old,New,Position:LongWord); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 // Old - Old Width; 
 // New - New Width;
 // Position - i
