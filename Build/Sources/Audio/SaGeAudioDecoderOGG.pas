@@ -67,8 +67,7 @@ uses
 	,SaGeStringUtils
 	,SaGeDllManager
 	,SaGeLog
-	
-	,SaGeOGGCommon
+	,SaGeAudioDecoderOGGCommon
 	;
 
 class function TSGAudioDecoderOGG.ErrorString(Code : Integer) : String;

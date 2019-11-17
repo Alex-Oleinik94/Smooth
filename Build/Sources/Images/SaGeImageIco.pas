@@ -2,6 +2,8 @@
 
 {$INCLUDE SaGe.inc}
 
+//{$DEFINE DEBUGINFO}
+
 unit SaGeImageICO;
 
 interface
@@ -184,7 +186,7 @@ function SGCopyIcoImageProperties(const _IcoFile : PSGIcoFileHeader; const _IcoI
 function SGIsICOData(const _Stream : TStream) : TSGBoolean;
 
 function SGIcoImageExpansionFromDataType(const _DataType : TSGIcoBitMapCompression) : TSGString;
-procedure SGPrintIcoBitMapInfoHeader(const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
+procedure SGPrintIcoBitMapInfoHeader(const _Name : TSGString; const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
 
 implementation
 
@@ -291,29 +293,43 @@ var
 	Index : TSGMaxEnum;
 	MaskSize : TSGUInt64;
 	ColorDataSize : TSGUInt64;
+	CurrentDataOffset : TSGUInt64;
+
+function VerificationOfHeaderSize(const _Size : TSGUInt64) : TSGBoolean;
+begin
+Result := not ((_Size = 0) or (_Size > 150));
+end;
+
 begin
 _Stream.Position := 0;
 _Stream.ReadBuffer(FHeader, SizeOf(FHeader));
 SetLength(FImages, FHeader.FCount);
 FillChar(FImages[0], SizeOf(FImages[0]) * FHeader.FCount, 0);
-SGLog.Source(['TSGIcoFile__Load: Images count = "', FHeader.FCount, '".']);
+{$IFDEF DEBUGINFO} SGLog.Source(['TSGIcoFile__Load: Images count = "', FHeader.FCount, '".']); {$ENDIF}
 for Index := 0 to FHeader.FCount - 1 do
 	begin
 	_Stream.ReadBuffer(FImages[Index].FHeader, SizeOf(FImages[Index].FHeader));
-	SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Size = "', FImages[Index].FHeader.FSize, '" (', SGGetSizeString(FImages[Index].FHeader.FSize, 'EN'), ').']);
-	SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Offset = "', FImages[Index].FHeader.FOffset, '".']);
+	{$IFDEF DEBUGINFO} SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Size = "', FImages[Index].FHeader.FSize, '" (', SGGetSizeString(FImages[Index].FHeader.FSize, 'EN'), ').']); {$ENDIF}
+	{$IFDEF DEBUGINFO} SGLog.Source(['TSGIcoFile__Load: Image[', Index, '].Offset = "', FImages[Index].FHeader.FOffset, '".']); {$ENDIF}
 	end;
 for Index := 0 to FHeader.FCount - 1 do
-	begin
 	if (FImages[Index].FHeader.FSize <> 0) then
 		begin
-		_Stream.Position := FImages[Index].FHeader.FOffset;
+		CurrentDataOffset := FImages[Index].FHeader.FOffset;
+		_Stream.Position := CurrentDataOffset;
 		_Stream.ReadBuffer(FImages[Index].FHeader.FSize, SizeOf(FImages[Index].FHeader.FSize));
-		if (not ((FImages[Index].FHeader.FSize = 0) or (FImages[Index].FHeader.FSize > 150))) then
+		if (not VerificationOfHeaderSize(FImages[Index].FHeader.FSize)) and (Index <> 0) then
 			begin
-			_Stream.Position := FImages[Index].FHeader.FOffset;
+			CurrentDataOffset := FImages[Index - 1].FHeader.FOffset + FImages[Index - 1].FHeader.FSize;
+			_Stream.Position := CurrentDataOffset;
+			_Stream.ReadBuffer(FImages[Index].FHeader.FSize, SizeOf(FImages[Index].FHeader.FSize));
+			SGLog.Source(['TSGIcoFile__Load: FileImages[', Index, ']. Try restore image data offset.']);
+			end;
+		if VerificationOfHeaderSize(FImages[Index].FHeader.FSize) then
+			begin
+			_Stream.Position := CurrentDataOffset;
 			_Stream.ReadBuffer(FImages[Index].FData.FHeader, FImages[Index].FHeader.FSize);
-			SGPrintIcoBitMapInfoHeader(FImages[Index].FData.FHeader);
+			{$IFDEF DEBUGINFO} SGPrintIcoBitMapInfoHeader('FileImages[' + SGStr(Index) + ']', FImages[Index].FData.FHeader); {$ENDIF}
 			
 			if (FImages[Index].FData.FHeader.FCompression in [BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS]) then
 				begin
@@ -342,9 +358,8 @@ for Index := 0 to FHeader.FCount - 1 do
 				SGLog.Source(['TSGIcoFile__Load: Unsuppored data format: "', FImages[Index].FData.FHeader.FCompression, '".']);
 			end
 		else
-			SGLog.Source(['TSGIcoFile__Load: Unsuppored header size.']);
+			SGLog.Source(['TSGIcoFile__Load: FileImages[', Index, ']. Unsuppored header size "', FImages[Index].FHeader.FSize, '".']);
 		end;
-	end;
 end;
 
 procedure TSGIcoFile.Save(const _Stream : TStream);
@@ -391,12 +406,12 @@ else Result := '';
 end;
 end;
 
-procedure SGPrintIcoBitMapInfoHeader(const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
+procedure SGPrintIcoBitMapInfoHeader(const _Name : TSGString; const _Header : TSGIcoBitMapInfoHeader; const _PrintCase : TSGCasesOfPrint = [SGCaseLog]);
 var
 	TextStream : TSGTextStream = nil;
 begin
 TextStream := TSGTextMultiStream.Create(_PrintCase);
-TextStream.WriteLn(['     TSGIcoBitMapInfoHeader data struct:']);
+TextStream.WriteLn(['     TSGIcoBitMapInfoHeader(', _Name, '):']);
 TextStream.WriteLn([' Size = ', _Header.FSize]);
 TextStream.WriteLn([' Width = ', _Header.FWidth]);
 TextStream.WriteLn([' Height = ', _Header.FHeight]);
@@ -430,10 +445,8 @@ else
 	Height := _ImageHeader.FHeight;
 	if (Height = 0) then
 		Height := 256;
-	if (_BitMapInfoHeader.FWidth <> Width) then
-		SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Width(', Width, ') <>  BitMapInfoHeader.Width(', _BitMapInfoHeader.FWidth, ').']);
-	if (_BitMapInfoHeader.FHeight <> Height) then
-		SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Height(', Height, ') <>  BitMapInfoHeader.Height(', _BitMapInfoHeader.FHeight, ').']);
+	{$IFDEF DEBUGINFO} if (_BitMapInfoHeader.FWidth <> Width) then SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Width(', Width, ') <>  BitMapInfoHeader.Width(', _BitMapInfoHeader.FWidth, ').']); {$ENDIF}
+	{$IFDEF DEBUGINFO} if (_BitMapInfoHeader.FHeight <> Height) then SGLog.Source(['SGIcoBitMapDataSize: ImageHeader.Height(', Height, ') <>  BitMapInfoHeader.Height(', _BitMapInfoHeader.FHeight, ').']); {$ENDIF}
 	if (_BitMapInfoHeader.FBitCount = 4) then
 		begin
 		TempDataSize := Width * Height;
@@ -446,7 +459,7 @@ else
 	else
 		Result := Width * Height * PixelSize;
 	end;
-SGLog.Source(['SGIcoBitMapDataSize(', Result, ').']);
+{$IFDEF DEBUGINFO} SGLog.Source(['SGIcoBitMapDataSize(', Result, ').']); {$ENDIF}
 end;
 
 //======================================================================
@@ -493,7 +506,7 @@ var
 	BitsPerPixel : TSGUInt16 = 0; // Should be 16, 24 or 32 (bit per pixel)
 begin
 ImageDataType := _IcoImage^.FData.FHeader.FCompression;
-SGLog.Source(['SGLoadICOImage: Determined format "', SGIcoImageExpansionFromDataType(ImageDataType), '".']);
+{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: Determined format "', SGIcoImageExpansionFromDataType(ImageDataType), '".']); {$ENDIF}
 case ImageDataType of
 BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 	begin
@@ -502,9 +515,9 @@ BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 		begin
 		_Image.CreateTypes();
 		_Image.ReAllocateMemory();
-		SGLog.Source(['SGLoadICOImage: BitMap data size = "', _Image.DataSize(), '".']);
-		SGLog.Source(['SGLoadICOImage: Data.Header.SizeImage = "', _IcoImage^.FData.FHeader.FSizeImage, '".']);
-		SGLog.Source(['SGLoadICOImage: Header.Size = "', _IcoImage^.FHeader.FSize, '".']);
+		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: BitMap data size = "', _Image.DataSize(), '".']); {$ENDIF}
+		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: Data.Header.SizeImage = "', _IcoImage^.FData.FHeader.FSizeImage, '".']); {$ENDIF}
+		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: Header.Size = "', _IcoImage^.FHeader.FSize, '".']); {$ENDIF}
 		Move(_IcoImage^.FData.FColors^, _Image.BitMap^, _Image.DataSize());
 		SGBGRAToRGBAImage(_Image);
 		Result := True;
@@ -566,7 +579,7 @@ if HaveAdditionalProperties then
 	begin
 	BitsPerPixel := _IcoImage^.FHeader.FBpp;
 	ColorPlanes := _IcoImage^.FHeader.FPlanes;
-	SGLog.Source(['SGCopyIcoImageProperties: AdditionalProperties: BitsPerPixel = "', BitsPerPixel, '"; ColorPlanes = "', ColorPlanes, '".']);
+	{$IFDEF DEBUGINFO} SGLog.Source(['SGCopyIcoImageProperties: AdditionalProperties: BitsPerPixel = "', BitsPerPixel, '"; ColorPlanes = "', ColorPlanes, '".']); {$ENDIF}
 	end;
 
 _Image.Width := _IcoImage^.FHeader.FWidth;
@@ -597,7 +610,7 @@ else
 	SGLog.Source(['SGCopyIcoImageProperties: Unsupported IcoImage__Data__Header__BitCount.']);
 
 Result := (_Image.Width * _Image.Height) <> 0;
-SGLog.Source(['SGCopyIcoImageProperties(Result=', Result, '): Width = "', _Image.Width, '"; Height = "', _Image.Height, '"; Channels = "', _Image.Channels, '"; ChannelSize = "', _Image.ChannelSize, '".']);
+{$IFDEF DEBUGINFO} SGLog.Source(['SGCopyIcoImageProperties(Result=', Result, '): Width = "', _Image.Width, '"; Height = "', _Image.Height, '"; Channels = "', _Image.Channels, '"; ChannelSize = "', _Image.ChannelSize, '".']); {$ENDIF}
 end;
 
 function SGLoadCUR(const _Stream : TStream; var _Cursor : TSGCursor; const _CursorNumber : TSGUInt32 = 0) : TSGBoolean; overload;

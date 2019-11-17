@@ -97,6 +97,7 @@ type
 
 function SGOpenALFormatFromAudioInfo(const VInfo : TSGAudioInfo) : TSGALFormat;
 function SGOpenALStrFormat(const VFormat : TSGALFormat) : TSGString;
+function SGOpenALStrError(const _Error : TALenum) : TSGString;
 
 implementation
 
@@ -105,6 +106,19 @@ uses
 	,SaGeStringUtils
 	,SaGeLog
 	;
+
+function SGOpenALStrError(const _Error : TALenum) : TSGString;
+begin
+case _Error of
+AL_NO_ERROR: Result := 'AL_NO_ERROR';
+AL_INVALID_NAME: Result := 'AL_INVALID_NAME';
+AL_ILLEGAL_ENUM: Result := 'AL_ILLEGAL_ENUM or AL_INVALID_ENUM';
+AL_INVALID_VALUE: Result := 'AL_INVALID_VALUE';
+AL_ILLEGAL_COMMAND: Result := 'AL_ILLEGAL_COMMAND or AL_INVALID_OPERATION';
+AL_OUT_OF_MEMORY: Result := 'AL_OUT_OF_MEMORY';
+else Result := 'Can''t determine error!'
+end;
+end;
 
 function SGOpenALFormatFromAudioInfo(const VInfo : TSGAudioInfo) : TSGALFormat;
 begin
@@ -138,6 +152,10 @@ else
 	Result := '?';
 end;
 end;
+
+// =============================
+// ===TSGOpenALBufferedSource===
+// =============================
 
 procedure TSGOpenALBufferedSource.BufferSource(const VBuffer : TSGALBuffer; var Data; const VDataLength : TSGUInt64);
 begin
@@ -223,6 +241,10 @@ alSourceQueueBuffers(FCustomSource.Source, 2, @FBuffers[0]);
 FreeMem(Data);
 SGLog.Source('TSGOpenALBufferedSource__PreBuffer : Done.');
 end;
+
+// ===========================
+// ===TSGOpenALCustomSource===
+// ===========================
 
 constructor TSGOpenALCustomSource.Create(const VAudioRender : TSGAudioRender);
 begin
@@ -358,6 +380,10 @@ alGetSourcei(FSource, AL_SOURCE_STATE, @State);
 Result := AL_STOPPED = State;
 end;
 
+// ==========================
+// ===TSGAudioRenderOpenAL===
+// ==========================
+
 function TSGAudioRenderOpenAL.CreateBufferedSource() : TSGAudioBufferedSource;
 begin
 Result := TSGOpenALBufferedSource.Create(Self);
@@ -370,7 +396,7 @@ var
 	ListenerOri: array [0..5] of TALfloat= ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
 
 begin
-if DllManager.Dll('OpenAL') <> nil then
+if (DllManager.Dll('OpenAL') <> nil) then
 	DllManager.Dll('OpenAL').ReadExtensions();
 
 alListenerfv(AL_POSITION,    @ListenerPos);
@@ -379,25 +405,40 @@ alListenerfv(AL_ORIENTATION, @ListenerOri);
 end;
 
 function TSGAudioRenderOpenAL.CreateDevice() : TSGBool;
+var
+	ErrorHandle : TALenum;
 begin
 Result := False;
-if not FALUTSupported then
+if (not FALUTSupported) then
 	int_alutInit()
 else
 	ext_alutInit(nil, nil);
 
 FContext := alcGetCurrentContext();
-if FContext <> nil then
-	FDevice := alcGetContextsDevice(FContext);
+ErrorHandle := alGetError();
+if (ErrorHandle <> AL_NO_ERROR) then
+	SGLog.Source([ClassName(), ': Error "', SGOpenALStrError(ErrorHandle), '".'])
+else if (FContext = nil) then
+	SGLog.Source([ClassName(), ': Couldn''t to create OpenAL context but not returned any error!']);
+
+FDevice := alcGetContextsDevice(FContext);
+ErrorHandle := alGetError();
+if (ErrorHandle <> AL_NO_ERROR) then
+	SGLog.Source([ClassName(), ': Error "', SGOpenALStrError(ErrorHandle), '".'])
+else if (FDevice = nil) then
+	SGLog.Source([ClassName(), ': Couldn''t to create OpenAL device but not returned any error!']);
 
 Result := (FContext <> nil) and (FDevice <> nil);
 
-SGLog.Source('TSGAudioRenderOpenAL : Context = ' + SGAddrStr(FContext) + ', Device = ' + SGAddrStr(FDevice) + '.');
+if ((FContext = nil) and (FDevice = nil)) then
+	SGLog.Source(ClassName() + ': Couldn''t to create OpenAL audio render!')
+else
+	SGLog.Source(ClassName() + ': Context = ' + SGAddrStr(FContext) + ', Device = ' + SGAddrStr(FDevice) + '.');
 end;
 
 procedure TSGAudioRenderOpenAL.Kill();
 begin
-if not FALUTSupported then
+if (not FALUTSupported) then
 	int_alutExit()
 else
 	ext_alutExit();

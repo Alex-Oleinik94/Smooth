@@ -5,10 +5,13 @@ unit SaGeCursor;
 interface
 
 uses
+		// Engine
 	 SaGeBase
 	,SaGeBitMap
 	,SaGeCommon
 	,SaGeCommonStructs
+		// System
+	,Classes
 	;
 
 type
@@ -56,6 +59,7 @@ type
 
 procedure SGKill(var _Cursor : TSGCursor); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SGCreateCursorFromFile(const _FileName : TSGString) : TSGCursor;
+function SGLoadCursorFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGCursor;
 
 implementation
 
@@ -64,11 +68,21 @@ uses
 	 SaGeBitMapUtils
 	,SaGeLog
 	,SaGeResourceManager
-		// System
-	,Classes
 		// Cursor file formats
 	,SaGeImageICO // .cur
 	;
+
+function SGLoadCursorFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGCursor;
+begin
+_Stream.Position := 0;
+if SGIsICOData(_Stream) then
+	begin
+	SGLog.Source(['SGLoadCursorFromStream: Determined format "cur" for "', _FileName, '".']);
+	Result := SGLoadCUR(_Stream);
+	end
+else
+	SGLog.Source(['SGLoadCursorFromStream: Unsupported cursor file format "', _FileName, '".']);
+end;
 
 function SGCreateCursorFromFile(const _FileName : TSGString) : TSGCursor;
 var
@@ -76,13 +90,9 @@ var
 begin
 Stream := TMemoryStream.Create();
 if SGResourceFiles.LoadMemoryStreamFromFile(Stream, _FileName) then
-	begin
-	Stream.Position := 0;
-	if SGIsICOData(Stream) then
-		Result := SGLoadCUR(Stream)
-	else
-		SGLog.Source(['TSGIcoFile__Load: Unsupported cursor file format "', _FileName, '".']);
-	end;
+	Result := SGLoadCursorFromStream(Stream, _FileName)
+else
+	SGLog.Source(['SGCreateCursorFromFile: Can''t load data from "', _FileName, '".']);
 SGKill(Stream);
 end;
 

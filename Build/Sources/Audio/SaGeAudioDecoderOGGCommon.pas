@@ -1,6 +1,6 @@
 {$INCLUDE SaGe.inc}
 
-unit SaGeOGGCommon;
+unit SaGeAudioDecoderOGGCommon;
 
 interface
 
