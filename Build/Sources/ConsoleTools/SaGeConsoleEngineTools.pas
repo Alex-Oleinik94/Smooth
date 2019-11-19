@@ -36,7 +36,7 @@ if (SGCountConsoleParams(VParams) = 2) and SGResourceFiles.FileExists(VParams[0]
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGConsoleErrorString,'"@log_file_name @line"');
+	WriteLn(SGConsoleErrorString,'"@log_file_name @line".');
 	end;
 end;
 
@@ -54,7 +54,7 @@ if ((SGCountConsoleParams(VParams) = 1) or ((SGCountConsoleParams(VParams) = 2) 
 else
 	begin
 	SGPrintEngineVersion();
-	WriteLn(SGConsoleErrorString,'"@outdirname @flag", @flag is true when need to keeps file system file names');
+	WriteLn(SGConsoleErrorString,'"@outdirname @flag"; @flag is "true" when keep file system file names.');
 	end;
 end;
 
@@ -99,7 +99,7 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 	if Dll = nil then
 		begin
 		SGPrintEngineVersion();
-		WriteLn(SGConsoleErrorString,'"[@library]". Param @library is Engine''s name of this Library.');
+		WriteLn(SGConsoleErrorString,'"[@library]". Param @library is name of this library of engine.');
 		end;
 	end
 else

@@ -24,7 +24,7 @@ procedure SGSaveBitMapAsJpegToStream(const _Stream : TStream; const _Image : TSG
 function SGLoadBitMapFromFile(const _FileName : TSGString) : TSGBitMap;
 function SGLoadBitMapFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGBitMap;
 
-procedure SGBGRAToRGBAImage(const _Image : TSGBitMap);
+procedure SGBitMapBGRAToRGBA(const _BitMap : TSGBitMap);
 
 implementation
 
@@ -43,13 +43,13 @@ uses
 	,SaGeImageMbm
 	;
 
-procedure SGBGRAToRGBAImage(const _Image : TSGBitMap);
+procedure SGBitMapBGRAToRGBA(const _BitMap : TSGBitMap);
 var
 	Index : TSGMaxEnum;
 begin
-if (_Image.Channels = 4) and (_Image.ChannelSize = 8) then
-	for Index := 0 to _Image.Width * _Image.Height - 1 do
-		PSGPixel4b(_Image.BitMap)[Index] := SGPixelBGRAToRGBA(PSGPixel4b(_Image.BitMap)[Index]);
+if (_BitMap.Channels = 4) and (_BitMap.ChannelSize = 8) then
+	for Index := 0 to _BitMap.Width * _BitMap.Height - 1 do
+		PSGPixel4b(_BitMap.Data)[Index] := SGPixelBGRAToRGBA(PSGPixel4b(_BitMap.Data)[Index]);
 end;
 
 function SGLoadBitMapFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGBitMap;
@@ -94,10 +94,14 @@ function SGLoadBitMapFromFile(const _FileName : TSGString) : TSGBitMap;
 var
 	Stream  : TMemoryStream = nil;
 begin
+Result := nil;
 Stream := TMemoryStream.Create();
 SGResourceFiles.LoadMemoryStreamFromFile(Stream, _FileName);
-Stream.Position:=0;
-Result := SGLoadBitMapFromStream(Stream, _FileName);
+if (Stream.Size > 0) then
+	begin
+	Stream.Position:=0;
+	Result := SGLoadBitMapFromStream(Stream, _FileName);
+	end;
 SGKill(Stream);
 end;
 

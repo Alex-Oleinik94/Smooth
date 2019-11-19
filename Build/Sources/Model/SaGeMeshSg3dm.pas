@@ -390,7 +390,7 @@ end;
 
 begin
 Stream.WriteBuffer(ImageType, SizeOf(ImageType));
-if (Image <> nil) and (Image.Image <> nil) and (Image.Image.BitMap <> nil) then
+if (Image <> nil) and (Image.BitMap <> nil) and (Image.BitMap.Data <> nil) then
 	begin
 	WriteImageSaveFormat(Stream, SGMeshSG3DImageSGIA);
 	SaveSGIA();

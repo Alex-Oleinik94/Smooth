@@ -21,8 +21,8 @@ uses
 
 type
 	TSGKillerArrayType = packed record
-		FType:Byte;
-		FWay:LongWord;
+		FType : TSGUInt8;
+		FWay  : TSGUInt32;
 		end;
 	
 	TSGKillerArray = packed array of
@@ -497,8 +497,8 @@ if (Image=nil) or VRadBool then
 	begin
 	SGKill(Image);
 	Image := SGCreateImageFromFile(Context, ImageFileName);
-	Image.Image.SetBounds(BoundsSize, BoundsSize);
-	Image.ToTexture();
+	Image.BitMap.SetBounds(BoundsSize, BoundsSize);
+	Image.LoadTexture();
 	end;
 end;
 

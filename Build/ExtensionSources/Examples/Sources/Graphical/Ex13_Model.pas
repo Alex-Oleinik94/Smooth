@@ -442,7 +442,7 @@ FTexturesBlock := TSGTextureBlock.Create(Context);
 FTexturesBlock.Size := Length(FTextures) + EnafTexCount;
 FTexturesBlock.Generate();
 for i := 0 to High(FTextures) do
-	FTextures[i].ToTextureWithBlock(FTexturesBlock);
+	FTextures[i].LoadTextureWithBlock(FTexturesBlock);
 for i := 0 to High(FPoligons) do
 	begin
 	for j := 0 to High(FTextures) do

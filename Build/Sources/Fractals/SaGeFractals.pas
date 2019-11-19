@@ -649,23 +649,19 @@ end;
 procedure TSGImageFractal.BeginCalculate;
 begin
 inherited;
-if FImage=nil then
-	FImage:=TSGImage.Create
-else
-	FImage.FreeAll;
-FImage.SetContext(Context);
-FImage.FImage.Clear;
-FImage.Width:=FDepth;
-FImage.Height:=FDepth*Byte(FDepthHeight=0)+FDepthHeight;
-FImage.FImage.Channels:=3;
-FImage.FImage.ChannelSize:=8;
-FImage.FImage.ReAllocateMemory();
-FImage.FImage.CreateTypes();
+if (FImage = nil) then FImage := TSGImage.Create() else FImage.FreeAll();
+FImage.Context := Context;
+FImage.BitMap.Clear();
+FImage.BitMap.Width:=FDepth;
+FImage.BitMap.Height:=FDepth*Byte(FDepthHeight=0)+FDepthHeight;
+FImage.BitMap.Channels:=3;
+FImage.BitMap.ChannelSize:=8;
+FImage.BitMap.ReAllocateMemory();
 end;
 
 procedure TSGImageFractal.ToTexture;
 begin
-FImage.ToTexture;
+FImage.LoadTexture();
 ThreadsBoolean(False);
 end;
 
@@ -701,7 +697,7 @@ end;
 
 procedure TSGImageFractal.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
 begin
-FImage.FImage.BitMap[((FDepth-Y)*FDepth+X)*3]:=trunc((RecNumber/15)*255);
+FImage.BitMap.Data[((FDepth-Y)*FDepth+X)*3]:=trunc((RecNumber/15)*255);
 end;
 
 procedure TSGFractal.Paint();

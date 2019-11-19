@@ -411,7 +411,7 @@ procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;co
 var
 	Image : TSGImage = nil;
 	i, ii, iii : TSGMaxEnum;
-	HMD : packed array of TSGSingle = nil;
+	HMD : packed array of TSGFloat32 = nil;
 begin
 Image := TSGImage.Create();
 Image .Context  := Context;
@@ -423,9 +423,9 @@ if Image.Load() then
 	for i := 0 to Image.Width * Image.Height - 1 do
 		begin
 		iii :=0;
-		for ii := 0 to Image.Channels - 1 do
-			iii += Image.Image.BitMap[i * Image.Channels + ii];
-		HMD[i] := md + (iii/(Image.Channels*255))*Abs(mt-md);
+		for ii := 0 to Image.BitMap.Channels - 1 do
+			iii += Image.BitMap.Data[i * Image.BitMap.Channels + ii];
+		HMD[i] := md + (iii/(Image.BitMap.Channels*255))*Abs(mt-md);
 		end;
 	Ex5_PAPPE.PhysicsObjectSetHeightMap(FObject,@HMD[0],Image.Width,Image.Height,llx,lly);
 	Ex5_PAPPE.PhysicsObjectFinish(FObject);

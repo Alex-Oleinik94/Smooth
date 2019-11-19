@@ -88,19 +88,17 @@ try
 	Stream.ReadBuffer(TGAHeader, SizeOf(TGAHeader));
 	if ((TGAHeader.ImageType <> 2) and (TGAHeader.ImageType <> 10)) or (TGAHeader.ColorMapType<>0) then  
 		begin
-		Result.Destroy;
-		Result:=nil;
+		SGKill(Result);
 		Exit;
 		end;
-	Result.Width:=TGAHeader.Width[0]  + TGAHeader.Width[1]  * 256;
-	Result.Height:=TGAHeader.Height[0] + TGAHeader.Height[1] * 256;
-	Result.ChannelSize:=8;
-	Result.Channels:= TGAHeader.BPP div 8;
-	ImageSize:=Result.Width*Result.Height*Result.Channels;
-	if (Result.Channels<3) then  
+	Result.Width  := TGAHeader.Width[0]  + TGAHeader.Width[1]  * 256;
+	Result.Height := TGAHeader.Height[0] + TGAHeader.Height[1] * 256;
+	Result.ChannelSize := 8;
+	Result.Channels    := TGAHeader.BPP div 8;
+	ImageSize := Result.DataSize;
+	if (Result.Channels < 3) then  
 		begin
-		Result.Destroy;
-		Result:=nil;
+		SGKill(Result);
 		Exit;
 		end;
 	Result.ReAllocateMemory();
@@ -108,15 +106,14 @@ try
 		begin
 		if Stream.Size-Stream.Position < ImageSize then
 			begin
-			Result.Destroy();
-			Result:=nil;
+			SGKill(Result);
 			Exit;
 			end;
-		Stream.ReadBuffer(Result.BitMap^, ImageSize);
+		Stream.ReadBuffer(Result.Data^, ImageSize);
 		for I :=0 to Result.Width * Result.Height - 1 do
 			begin
-			Front := TSGPointer(TSGMaxEnum(Result.BitMap) + I * Result.Channels);
-			Back := TSGPointer(TSGMaxEnum(Result.BitMap) + I * Result.Channels + 2);
+			Front := TSGPointer(TSGMaxEnum(Result.Data) + I * Result.Channels);
+			Back := TSGPointer(TSGMaxEnum(Result.Data) + I * Result.Channels + 2);
 			Temp := Front^;
 			Front^ := Back^;
 			Back^ := Temp;
@@ -125,16 +122,16 @@ try
 		for I :=0 to (Result.Height div 2) - 1 do
 			begin
 			Move(
-				TSGPointer(TSGMaxEnum(Result.BitMap) + I * Result.Width * Result.Channels)^,
+				TSGPointer(TSGMaxEnum(Result.Data) + I * Result.Width * Result.Channels)^,
 				CompImage^,
 				Result.Width * Result.Channels);
 			Move(
-				TSGPointer(TSGMaxEnum(Result.BitMap) + (Result.Height - I) * Result.Width * Result.Channels)^,
-				TSGPointer(TSGMaxEnum(Result.BitMap) + I * Result.Width * Result.Channels)^,
+				TSGPointer(TSGMaxEnum(Result.Data) + (Result.Height - I) * Result.Width * Result.Channels)^,
+				TSGPointer(TSGMaxEnum(Result.Data) + I * Result.Width * Result.Channels)^,
 				Result.Width * Result.Channels);
 			Move(
 				CompImage^,
-				TSGPointer(TSGMaxEnum(Result.BitMap) + (Result.Height - I) * Result.Width * Result.Channels)^,
+				TSGPointer(TSGMaxEnum(Result.Data) + (Result.Height - I) * Result.Width * Result.Channels)^,
 				Result.Width * Result.Channels);
 			end;
 		FreeMem(CompImage);
@@ -154,7 +151,7 @@ try
 			begin
 			For I := 0 to Front^ do
 				begin
-				TGACopySwapPixel(TSGPointer(TSGMaxEnum(CompImage)+BufferIndex+I*ColorDepth), TSGPointer(TSGMaxEnum(Result.BitMap)+CurrentByte));
+				TGACopySwapPixel(TSGPointer(TSGMaxEnum(CompImage)+BufferIndex+I*ColorDepth), TSGPointer(TSGMaxEnum(Result.Data)+CurrentByte));
 				CurrentByte := CurrentByte + ColorDepth;
 				Inc(CurrentPixel);
 				end;
@@ -164,7 +161,7 @@ try
 			begin
 			For I := 0 to Front^ -128 do
 				begin
-				TGACopySwapPixel(TSGPointer(TSGMaxEnum(CompImage)+BufferIndex), TSGPointer(TSGMaxEnum(Result.BitMap)+CurrentByte));
+				TGACopySwapPixel(TSGPointer(TSGMaxEnum(CompImage)+BufferIndex), TSGPointer(TSGMaxEnum(Result.Data)+CurrentByte));
 				CurrentByte := CurrentByte + ColorDepth;
 				Inc(CurrentPixel);
 				end;
@@ -172,18 +169,9 @@ try
 			end;
 		until CurrentPixel >= Result.Width*Result.Height;
 		end;
-	Result.CreateTypes;
 except
-	if Result<>nil then
-		begin
-		if Result.BitMap<>nil then
-			begin
-			FreeMem(Result.BitMap);
-			Result.BitMap:=nil;
-			end;
-		Result.Destroy;
-		Result:=nil;
-		end;
+	if (Result <> nil) then
+		SGKill(Result);
 end;
 end;
 

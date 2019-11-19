@@ -334,10 +334,10 @@ if Render.SupportedShaders() then
 		FFont, [SGAnchRight, SGAnchBottom], True, True);
 	
 	FStoneImageD := SGCreateImageFromFile(Context, SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
-	FStoneImageD.ToTextureWithBlock(FModel.TexturesBlock);
+	FStoneImageD.LoadTextureWithBlock(FModel.TexturesBlock);
 	
 	FStoneImageB := SGCreateImageFromFile(Context, SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
-	FStoneImageB.ToTextureWithBlock(FModel.TexturesBlock);
+	FStoneImageB.LoadTextureWithBlock(FModel.TexturesBlock);
 	end;
 end;
 

@@ -178,11 +178,11 @@ end;
 var
 	Index, Index2 : TSGMaxEnum;
 begin
-OverageX := FBackgroundImage.Image.Width mod DefaultQuadSize;
-OverageY := FBackgroundImage.Image.Height mod DefaultQuadSize;
-for Index := 0 to FBackgroundImage.Image.Width - 1 do
-	for Index2 := 0 to FBackgroundImage.Image.Height - 1 do
-		FBackgroundImage.Image.SetPixel(Index, Index2, PixelColor(Index, Index2));
+OverageX := FBackgroundImage.Width mod DefaultQuadSize;
+OverageY := FBackgroundImage.Height mod DefaultQuadSize;
+for Index := 0 to FBackgroundImage.Width - 1 do
+	for Index2 := 0 to FBackgroundImage.Height - 1 do
+		FBackgroundImage.BitMap.SetPixel(Index, Index2, PixelColor(Index, Index2));
 end;
 
 var
@@ -206,12 +206,11 @@ begin
 SGKill(FBackgroundImage);
 FBackgroundImage := TSGImage.Create();
 FBackgroundImage.Context := Context;
-FBackgroundImage.Image.Width := FImage.Image.Width;
-FBackgroundImage.Image.Height := FImage.Image.Height;
-FBackgroundImage.Image.Channels := 3;
-FBackgroundImage.Image.ChannelSize := 8;
-FBackgroundImage.Image.CreateTypes();
-FBackgroundImage.Image.ReAllocateMemory();
+FBackgroundImage.BitMap.Width := FImage.BitMap.Width;
+FBackgroundImage.BitMap.Height := FImage.BitMap.Height;
+FBackgroundImage.BitMap.Channels := 3;
+FBackgroundImage.BitMap.ChannelSize := 8;
+FBackgroundImage.BitMap.ReAllocateMemory();
 end;
 
 procedure TSGImageViewer.Resize();
@@ -243,8 +242,8 @@ Iterator.Import(5, FRenderSize.y - (FFont.FontHeight + 1) * 5 - 2);
 Render.Color(FHintColor);
 PaintString('width = ' + SGStr(FImage.Width));
 PaintString('height = ' + SGStr(FImage.Height));
-PaintString('channels = ' + SGStr(FImage.Channels));
-PaintString('bitmap size = ' + SGGetSizeString(FImage.Width * FImage.Height * FImage.Channels,'EN'));
+PaintString('channels = ' + SGStr(FImage.BitMap.Channels));
+PaintString('bitmap size = ' + SGGetSizeString(FImage.BitMap.Width * FImage.BitMap.Height * FImage.BitMap.Channels,'EN'));
 PaintString('filename = ' + FImage.FileName);
 end;
 
@@ -384,7 +383,7 @@ with Render do
 	end;}
 if (FImage <> nil) and (FImage.TextureLoaded() or FImage.LoadedIntoRAM) then
 	begin
-	if (FImage.Image.Channels = 4) and (FBackgroundImage = nil) then
+	if (FImage.BitMap.Channels = 4) and (FBackgroundImage = nil) then
 		PrepareBackgroundImageMainThread();
 	Render.Color3f(1, 1, 1);
 	if (FBackgroundImage <> nil) and (FBackgroundImage.TextureLoaded() or FBackgroundImage.LoadedIntoRAM) then

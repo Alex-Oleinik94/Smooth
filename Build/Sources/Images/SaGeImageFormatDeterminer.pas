@@ -96,7 +96,10 @@ end;
 
 class function TSGImageFormatDeterminer.DetermineFormat(const Stream : TStream) : TSGImageFormat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if IsPNG(Stream) then
+Result := SGImageFormatNull;
+if (Stream.Size = 0) then
+	Exit
+else if IsPNG(Stream) then
 	Result := SGImageFormatPNG
 else if IsICO(Stream) then
 	Result := SGImageFormatICO
@@ -107,8 +110,7 @@ else if IsMBM(Stream) then
 else if IsJPEG(Stream) then
 	Result := SGImageFormatJpeg
 else if IsSGIA(Stream) then
-	Result := SGImageFormatSGIA
-else Result := SGImageFormatNull;
+	Result := SGImageFormatSGIA;
 end;
 
 class function TSGImageFormatDeterminer.IsPNG(const Stream : TStream):TSGBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}

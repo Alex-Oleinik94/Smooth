@@ -213,7 +213,7 @@ begin
 
    palette := nil;
    rowdata := nil;
-   BitMap.BitMap := nil;
+   BitMap.FreeData();
    
    try
     try
@@ -262,9 +262,8 @@ begin
        24:BitMap.Channels:=3;
        8:BitMap.Channels:=1;
        end;
-       BitMap.BitDepth := biBitCount div BitMap.Channels;
+       BitMap.ChannelSize := biBitCount div BitMap.Channels;
        BitMap.ReAllocateMemory();
-       BitMap.CreateTypes();
        
      for i := 0 to biHeight - 1 do
      begin
@@ -272,7 +271,7 @@ begin
       { skip row 32bit padding }
       with Stream do Position := Position + Round(rowLength/ 4)*4 - rowLength;
       if rowsGoingUp then rownum := i else rownum := biHeight-i-1;
-      WriteRow(@BitMap.BitMap[rownum*(BitMap.Width)*BitMap.Channels], rowData);
+      WriteRow(@BitMap.Data[rownum*(BitMap.Width)*BitMap.Channels], rowData);
      end;
      
     finally
@@ -297,7 +296,7 @@ var fhead: TBitmapFileHeader;
     rowPaddedLength, PadSize: cardinal;
     i : TSGMaxEnum;
 begin
- rowPaddedLength := BitMap.Width*BitMap.Channels;
+ rowPaddedLength := BitMap.Width * BitMap.Channels;
  if rowPaddedLength mod 4 <> 0 then
   padsize := 4-(rowPaddedLength mod 4) else
   padsize := 0;
@@ -314,9 +313,9 @@ begin
  ihead.biWidth := BitMap.Width;
  ihead.biHeight := BitMap.Height;
  ihead.biPlanes := 1;
- ihead.biBitCount := BitMap.Channels*BitMap.BitDepth;
+ ihead.biBitCount := BitMap.BitsPerPixel;
  ihead.biCompression := BI_RGB;
- ihead.biSizeImage := BitMap.Channels*BitMap.Height*BitMap.Width;
+ ihead.biSizeImage := BitMap.DataSize;
 
 if BitMap.Channels = 4 then
 	begin
@@ -339,23 +338,23 @@ if BitMap.Channels=4 then
 	begin
 	for i:=0 to BitMap.Width*BitMap.Height-1 do
 		begin
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+2],1);
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+1],1);
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+0],1);
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+3],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+2],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+1],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+0],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+3],1);
 		end;
 	end
 else if BitMap.Channels=3 then
 	begin
 	for i:=0 to BitMap.Width*BitMap.Height-1 do
 		begin
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+2],1);
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+1],1);
-		Stream.WriteBuffer(BitMap.BitMap[i*BitMap.Channels+0],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+2],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+1],1);
+		Stream.WriteBuffer(BitMap.Data[i*BitMap.Channels+0],1);
 		end;
 	end
 else
-	Stream.WriteBuffer(BitMap.BitMap^, rowPaddedLength*BitMap.Height);
+	Stream.WriteBuffer(BitMap.Data^, rowPaddedLength * BitMap.Height);
 
 end;
 

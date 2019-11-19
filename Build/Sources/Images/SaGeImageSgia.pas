@@ -14,8 +14,8 @@ uses
 	,Classes
 	;
 
-procedure SaveSGIA(const Stream : TStream; var FImage : TSGBitMap);
-procedure LoadSGIAToBitMap(const FStream : TStream; var FImage : TSGBitMap);
+procedure SaveSGIA(const Stream : TStream; var FBitMap : TSGBitMap);
+procedure LoadSGIAToBitMap(const FStream : TStream; var FBitMap : TSGBitMap);
 
 implementation
 
@@ -24,92 +24,83 @@ uses
 	,SaGeImageJpeg
 	,SaGeImageBmp
 	,SaGeStreamUtils
+	,SaGeBitMapBase
 	
 	,SysUtils
 	;
 
-procedure LoadSGIAToBitMap(const FStream:TStream;var FImage:TSGBitMap);
+procedure LoadSGIAToBitMap(const FStream : TStream; var FBitMap : TSGBitMap);
 var
-	q : TSGQuadWord;
-	Stream:TMemoryStream;
-	BitMapRGB,BitMapAlpha:TSGBitMap;
-	PBits : PByte;
+	JpegSize : TSGUInt64;
+	Stream : TMemoryStream;
+	BitMapRGB, BitMapAlpha : TSGBitMap;
 	i : TSGMaxEnum;
 begin
-if FImage=nil then
-	begin
-	FImage:=TSGBitMap.Create();
-	end
-else
-	FImage.Clear();
+if (FBitMap = nil) then FBitMap := TSGBitMap.Create() else FBitMap.Clear();
 BitMapRGB:=TSGBitMap.Create();
 BitMapAlpha:=TSGBitMap.Create();
 
 FStream.Position:=FStream.Position+4;
-FStream.ReadBuffer(q,SizeOf(q));
+FStream.ReadBuffer(JpegSize, SizeOf(JpegSize));
 
 Stream:=TMemoryStream.Create();
-SGCopyPartStreamToStream(FStream, Stream, q);
+SGCopyPartStreamToStream(FStream, Stream, JpegSize);
 Stream.Position:=0;
 LoadJPEGToBitMap(Stream,BitMapRGB);
 Stream.Destroy();
 
-FStream.ReadBuffer(q,SizeOf(q));
+FStream.ReadBuffer(JpegSize, SizeOf(JpegSize));
 
 Stream:=TMemoryStream.Create();
-SGCopyPartStreamToStream(FStream, Stream, q);
+SGCopyPartStreamToStream(FStream, Stream, JpegSize);
 Stream.Position:=0;
 LoadJPEGToBitMap(Stream,BitMapAlpha);
 Stream.Destroy();
 
-FImage.Width:=BitMapRGB.Width;
-FImage.Height:=BitMapRGB.Height;
-FImage.BitDepth:=8;
-FImage.Channels:=4;
-GetMem(PBits,4*FImage.Width*FImage.Height);
+FBitMap.Width:=BitMapRGB.Width;
+FBitMap.Height:=BitMapRGB.Height;
+FBitMap.ChannelSize:=8;
+FBitMap.Channels:=4;
+FBitMap.ReAllocateMemory();
 
-for i:=0 to FImage.Width*FImage.Height-1 do
+for i:=0 to FBitMap.Width*FBitMap.Height-1 do
 	begin
-	PBits[4*i+0]:=BitMapRGB.BitMap[BitMapRGB.Channels*i+0];
-	PBits[4*i+1]:=BitMapRGB.BitMap[BitMapRGB.Channels*i+1];
-	PBits[4*i+2]:=BitMapRGB.BitMap[BitMapRGB.Channels*i+2];
-	PBits[4*i+3]:=BitMapAlpha.BitMap[BitMapAlpha.Channels*i];
+	FBitMap.Data[4*i+0]:=BitMapRGB.Data[BitMapRGB.Channels*i+0];
+	FBitMap.Data[4*i+1]:=BitMapRGB.Data[BitMapRGB.Channels*i+1];
+	FBitMap.Data[4*i+2]:=BitMapRGB.Data[BitMapRGB.Channels*i+2];
+	FBitMap.Data[4*i+3]:=BitMapAlpha.Data[BitMapAlpha.Channels*i];
 	end;
 
-FImage.BitMap:=PBits;
-BitMapRGB.Destroy();
-BitMapAlpha.Destroy();
-FImage.CreateTypes();
+SGKill(BitMapRGB);
+SGKill(BitMapAlpha);
 end;
 
-procedure SaveSGIA(const Stream:TStream;var FImage:TSGBitMap);
+procedure SaveSGIA(const Stream : TStream; var FBitMap : TSGBitMap);
 var
-	ImageBitMap:TSGBitMap;
-	PBits : PByte = nil;
+	ImageBitMap : TSGBitMap;
 	i : TSGMaxEnum;
 	MemStream2 : TMemoryStream = nil;
-	q : TSGQuadWord;
+	JpegSize : TSGUInt64;
 begin
-if FImage.Channels<>4 then
+if (FBitMap.Channels <> 4) then
 	Exit;
 
 {$IFDEF SGIA_DEBUG}
-	FImage.WriteInfo('Total Image: ');
+	FBitMap.WriteInfo('Total Image: ');
 	{$ENDIF}
 
 ImageBitMap:=TSGBitMap.Create();
-ImageBitMap.Width:=FImage.Width;
-ImageBitMap.Height:=FImage.Height;
+ImageBitMap.Width:=FBitMap.Width;
+ImageBitMap.Height:=FBitMap.Height;
 ImageBitMap.Channels:=3;
-ImageBitMap.BitDepth:=8;
+ImageBitMap.ChannelSize:=8;
+ImageBitMap.ReAllocateMemory();
 
-GetMem(PBits,FImage.Width*FImage.Height*3);
-ImageBitMap.BitMap:=PBits;
-for i:=0 to FImage.Width*FImage.Height-1 do
+for i:=0 to FBitMap.Width*FBitMap.Height-1 do
 	begin
-	PBits[i*3+0]:=FImage.BitMap[i*4+0];
-	PBits[i*3+1]:=FImage.BitMap[i*4+1];
-	PBits[i*3+2]:=FImage.BitMap[i*4+2];
+	ImageBitMap.Data[i*3+0]:=FBitMap.Data[i*4+0];
+	ImageBitMap.Data[i*3+1]:=FBitMap.Data[i*4+1];
+	ImageBitMap.Data[i*3+2]:=FBitMap.Data[i*4+2];
 	end;
 
 {$IFDEF SGIA_DEBUG}
@@ -118,32 +109,26 @@ for i:=0 to FImage.Width*FImage.Height-1 do
 
 MemStream2 := TMemoryStream.Create();
 SaveJPEGFromBitMap(MemStream2,ImageBitMap);
-FreeMem(PBits,FImage.Width*FImage.Height*3);
-PBits:=nil;
-ImageBitMap.BitMap:=nil;
-ImageBitMap.Destroy();
-SGWriteStringToStream('SGIA',Stream,False);
-q := MemStream2.Size;
-Stream.WriteBuffer(q,SizeOf(q));
+SGKill(ImageBitMap);
+SGWriteStringToStream('SGIA', Stream, False);
+JpegSize := MemStream2.Size;
+Stream.WriteBuffer(JpegSize, SizeOf(JpegSize));
 MemStream2.Position:=0;
 MemStream2.SaveToStream(Stream);
-MemStream2.Destroy();
-MemStream2:=nil;
-
+SGKill(MemStream2);
 
 ImageBitMap:=TSGBitMap.Create();
-ImageBitMap.Width:=FImage.Width;
-ImageBitMap.Height:=FImage.Height;
-ImageBitMap.Channels:=3;
-ImageBitMap.BitDepth:=8;
+ImageBitMap.Width := FBitMap.Width;
+ImageBitMap.Height := FBitMap.Height;
+ImageBitMap.Channels := 3;
+ImageBitMap.ChannelSize := 8;
+ImageBitMap.ReAllocateMemory();
 
-GetMem(PBits,FImage.Width*FImage.Height*3);
-ImageBitMap.BitMap:=PBits;
-for i:=0 to FImage.Width*FImage.Height-1 do
+for i:=0 to FBitMap.Width*FBitMap.Height-1 do
 	begin
-	PBits[i*3+0]:=FImage.BitMap[i*4+3];
-	PBits[i*3+1]:=FImage.BitMap[i*4+3];
-	PBits[i*3+2]:=FImage.BitMap[i*4+3];
+	ImageBitMap.Data[i*3+0]:=FBitMap.Data[i*4+3];
+	ImageBitMap.Data[i*3+1]:=FBitMap.Data[i*4+3];
+	ImageBitMap.Data[i*3+2]:=FBitMap.Data[i*4+3];
 	end;
 
 {$IFDEF SGIA_DEBUG}
@@ -152,16 +137,12 @@ for i:=0 to FImage.Width*FImage.Height-1 do
 
 MemStream2 := TMemoryStream.Create();
 SaveJPEGFromBitMap(MemStream2,ImageBitMap);
-FreeMem(PBits,FImage.Width*FImage.Height*3);
-PBits:=nil;
-ImageBitMap.BitMap:=nil;
-ImageBitMap.Destroy();
-q := MemStream2.Size;
-Stream.WriteBuffer(q,SizeOf(q));
+SGKill(ImageBitMap);
+JpegSize := MemStream2.Size;
+Stream.WriteBuffer(JpegSize, SizeOf(JpegSize));
 MemStream2.Position:=0;
 MemStream2.SaveToStream(Stream);
-MemStream2.Destroy();
-MemStream2:=nil;
+SGKill(MemStream2);
 end;
 
 end.

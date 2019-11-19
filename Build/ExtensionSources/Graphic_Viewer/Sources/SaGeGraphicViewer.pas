@@ -36,9 +36,9 @@ type
 			TSGMathGraphic;
 		function Font() : TSGFont;
 			public
-		View:TSGScreenVertexes;
-		Changet:boolean;
-		NotUsedInGraphic:Boolean;
+		View : TSGScreenVertexes;
+		Changet : TSGBoolean;
+		NotUsedInGraphic : TSGBoolean;
 		Colors: packed array of
 			TSGColor4f;
 			private
@@ -65,7 +65,7 @@ type
 		procedure Paint();override;
 			public
 		SelectPoint,SelectSecondPoint:TSGPoint2int32;
-		SelectPointEnabled:Boolean ;
+		SelectPointEnabled : TSGBoolean;
 		Image:TSGImage;
 		
 		FNewFunctionButton : TSGScreenButton;
@@ -116,7 +116,7 @@ end;
 
 procedure TSGGraphic.SetLengthGraphics(Index : TSGLongWord);
 var
-	i,ii : TSGLongWord;
+	i,ii : TSGUInt32;
 begin
 ii := MathGraphics;
 SetLength(FArMathGraphic,Index);
@@ -167,7 +167,7 @@ end;
 
 destructor TSGGraphic.Destroy();
 var
-	i  : TSGLongWord;
+	i  : TSGMaxEnum;
 begin
 for i:=0 to MathGraphics-1 do
 	if ArMathGraphics[i] <> nil then
@@ -234,7 +234,7 @@ end;
 
 procedure TSGGraphic.Construct(const VB:Boolean = False);
 var
-	i : TSGLongWord;
+	i : TSGMaxEnum;
 begin
 if Changet or VB then
 	begin
@@ -529,8 +529,8 @@ end;
 
 destructor TSGGraphViewer.Destroy;
 begin
-FNewFunctionButton.Destroy();
-Image.Destroy;
+SGKill(FNewFunctionButton);
+SGKill(Image);
 inherited;
 end;
 
@@ -542,7 +542,7 @@ end;
 
 procedure TSGGraphViewer.Paint();
 var
-	Changet2:boolean = False;
+	Changet2 : TSGBoolean = False;
 begin
 inherited;
 

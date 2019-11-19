@@ -10,7 +10,7 @@ uses
 	;
 
 const
-	SGConsoleErrorString = 'Error of parameters, use ';
+	SGConsoleErrorString = 'Error of parameters. Use ';
 	SGConcoleCallerHelpParams = ' --help, --h, --?';
 	SGConcoleCallerUnknownCategory = '--unknown--';
 

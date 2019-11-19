@@ -1610,7 +1610,7 @@ case VColorSceme of
 4:
 	begin
 		Result.r := Color mod 256;
-		Result.g := (SizeOf(FImage.FImage.BitMap) * Color) div 255;
+		Result.g := (SizeOf(FImage.BitMap.Data) * Color) div 255;
 		Result.b := 0;	// nil
 	end;
 
@@ -1725,9 +1725,9 @@ else
 	begin
 	MandelbrodPixel1:=GetPixelColor(FColorScheme,RecNumber);
 	end;
-FImage.FImage.BitMap[(Y*Width+X)*3+0]:=MandelbrodPixel1.r;
-FImage.FImage.BitMap[(Y*Width+X)*3+1]:=MandelbrodPixel1.g;
-FImage.FImage.BitMap[(Y*Width+X)*3+2]:=MandelbrodPixel1.b;
+FImage.BitMap.Data[(Y*Width+X)*3+0]:=MandelbrodPixel1.r;
+FImage.BitMap.Data[(Y*Width+X)*3+1]:=MandelbrodPixel1.g;
+FImage.BitMap.Data[(Y*Width+X)*3+2]:=MandelbrodPixel1.b;
 end;
 
 function TSGFractalMandelbrod.MandelbrodRec(const Number:TSGComplexNumber;const dx,dy:single):Word;inline;

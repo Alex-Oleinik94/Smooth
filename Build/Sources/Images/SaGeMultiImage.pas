@@ -105,10 +105,10 @@ end;
 var
 	Point, Point2 : TSGPoint2ui32;
 begin
-if FImage = nil then
+if (FBitMap = nil) then
 	begin
-	FImage := TSGBitMap.Create();
-	FImage.CopyFrom(VImage);
+	FBitMap := TSGBitMap.Create();
+	FBitMap.CopyFrom(VImage);
 	SetLength(FPoints, 0);
 	Point.Import(VImage.Width, 0);
 	FPoints += Point;
@@ -120,8 +120,8 @@ else
 	begin
 	Point := FindPoint();
 	FPoints -= Point;
-	Image.ReAllocateForBounds(Max(Width, Point.x + VImage.Width),Max(Height, Point.y + VImage.Height));
-	Image.PutImage(VImage, Point.x, Point.y);
+	FBitMap.ReAllocateForBounds(Max(Width, Point.x + VImage.Width),Max(Height, Point.y + VImage.Height));
+	FBitMap.PutImage(VImage, Point.x, Point.y);
 	Point2.Import(Point.x + VImage.Width, Point.y);
 	FPoints += Point2;
 	Point2.Import(Point.x, Point.y + VImage.Height);
@@ -130,7 +130,7 @@ else
 	end;
 AddImageInfo(VImageIdentifier, Point.x, Point.y, VImage.Width, VImage.Height);
 if Color <> SGVertex4uint8Import(255,255,255,255) then
-	Image.PaintSquare(Color, Point.x, Point.y, VImage.Width, VImage.Height);
+	FBitMap.PaintSquare(Color, Point.x, Point.y, VImage.Width, VImage.Height);
 end;
 
 end.

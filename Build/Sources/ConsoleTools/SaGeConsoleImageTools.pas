@@ -71,7 +71,7 @@ begin
 if (SGCountConsoleParams(VParams) = 3) and SGResourceFiles.FileExists(VParams[0]) and (SGVal(VParams[1]) > 0) and (SGVal(VParams[2]) > 0)  then
 	begin
 	Image := SGCreateImageFromFile(nil, VParams[0]);
-	Image.Image.SetBounds(
+	Image.BitMap.SetBounds(
 		SGVal(VParams[1]),
 		SGVal(VParams[2]));
 	Image.FileName := SGFreeFileName(Image.FileName);

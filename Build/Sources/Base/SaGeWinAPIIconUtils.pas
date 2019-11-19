@@ -145,7 +145,7 @@ for x := 0 to bm.bmWidth - 1 do
 				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask}) // Transparent("glassy") color
 			else
 				SetPixels(RGB(0,0,0){and mask}, Pixel{xor mask})
-		else if (SGPixelRGBA32FromMemory(VCursor.BitMap, x + y * VCursor.Width).a = 0) then
+		else if (SGPixelRGBA32FromMemory(VCursor.Data, x + y * VCursor.Width).a = 0) then
 				SetPixels(RGB(255,255,255){and mask}, RGB(0,0,0){xor mask}) // Transparent("glassy") color
 			else
 				SetPixels(RGB(0,0,0){and mask}, Pixel{xor mask});
@@ -227,9 +227,9 @@ for h := 0 to VCursor.Height - 1 do
 		begin
 		Index := h * VCursor.Width + w;
 		if (VCursor.Channels = 4) then
-			PSGPixel3b(bm)[Index] := SGPixelRGB24FromMemory(VCursor.BitMap, Index)
+			PSGPixel3b(bm)[Index] := SGPixelRGB24FromMemory(VCursor.Data, Index)
 		else
-			PSGPixel3b(bm)[Index] := SGPixelRGBA32FromMemory(VCursor.BitMap, Index);
+			PSGPixel3b(bm)[Index] := SGPixelRGBA32FromMemory(VCursor.Data, Index);
 		end;
 SetBitmapBits(hBM, VCursor.Width * VCursor.Height * VCursor.Channels, bm);
 FreeMem(bm);

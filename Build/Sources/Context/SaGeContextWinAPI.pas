@@ -207,7 +207,7 @@ var
 begin
 if VCursor.StandartHandle <> SGC_NULL then
 	begin
-	if VCursor.BitMap = nil then
+	if (not VCursor.HasData()) then
 		begin
 		NewCursor := LoadCursor(0, MAKEINTRESOURCE(VCursor.StandartHandle));
 		if NewCursor <> SGC_NULL then

@@ -473,7 +473,7 @@ var
 	ColorArray : PSGPixel3b;
 	IcoImageBitMap : PSGUInt8;
 begin
-ImageBitMap := PSGPixel3b(_Image.BitMap);
+ImageBitMap := PSGPixel3b(_Image.Data);
 ColorArray := PSGPixel3b(_ImageData.FColors);
 IcoImageBitMap := PSGUInt8(TSGMaxEnum(ColorArray) + 16{colors} * 4{24 bpp + 8});
 for H := 0 to _Image.Height - 1 do
@@ -513,13 +513,12 @@ BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 	HaveAdditionalProperties := (_IcoFile <> nil) and (_IcoFile^.FType = SGIcoFile);
 	if (not HaveAdditionalProperties) or (_Image.Channels * _Image.ChannelSize <> 0) then
 		begin
-		_Image.CreateTypes();
 		_Image.ReAllocateMemory();
 		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: BitMap data size = "', _Image.DataSize(), '".']); {$ENDIF}
 		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: Data.Header.SizeImage = "', _IcoImage^.FData.FHeader.FSizeImage, '".']); {$ENDIF}
 		{$IFDEF DEBUGINFO} SGLog.Source(['SGLoadICOImage: Header.Size = "', _IcoImage^.FHeader.FSize, '".']); {$ENDIF}
-		Move(_IcoImage^.FData.FColors^, _Image.BitMap^, _Image.DataSize());
-		SGBGRAToRGBAImage(_Image);
+		Move(_IcoImage^.FData.FColors^, _Image.Data^, _Image.DataSize());
+		SGBitMapBGRAToRGBA(_Image);
 		Result := True;
 		end
 	else if HaveAdditionalProperties then
@@ -530,7 +529,6 @@ BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 			begin
 			_Image.Channels := 3;
 			_Image.ChannelSize := 8;
-			_Image.CreateTypes();
 			_Image.ReAllocateMemory();
 			SGIcoLoad4bitBitMap(_Image, _IcoImage^.FData);
 			end;

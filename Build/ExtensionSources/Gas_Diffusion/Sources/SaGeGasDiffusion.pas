@@ -1538,13 +1538,12 @@ begin with TSGGasDiffusion(Button.UserPointer) do begin
 	
 	FSechenieImage:=TSGImage.Create();
 	FSechenieImage.Context := Context;
-	FSechenieImage.Image.Clear();
-	FSechenieImage.Width          := FImageSechenieBounds;
-	FSechenieImage.Height         := FImageSechenieBounds;
-	FSechenieImage.Image.Channels := 4;
-	FSechenieImage.Image.BitDepth := 8;
-	FSechenieImage.Image.BitMap   := GetMem(FCube.Edge*FCube.Edge*FSechenieImage.Image.Channels);
-	FSechenieImage.Image.CreateTypes();
+	FSechenieImage.BitMap.Clear();
+	FSechenieImage.BitMap.Width    := FImageSechenieBounds;
+	FSechenieImage.BitMap.Height   := FImageSechenieBounds;
+	FSechenieImage.BitMap.Channels := 4;
+	FSechenieImage.BitMap.ChannelSize := 8;
+	FSechenieImage.BitMap.ReAllocateMemory();
 	
 	SGCreatePicture(FSecheniePanel, 5,5,a-10,a-10, True, True);
 	
@@ -1712,10 +1711,8 @@ if FNewSecheniePanel.Visible then
 	{$ENDIF}
 iii := Trunc(((FPointerSecheniePlace+1)/2)*FCube.Edge);
 FSechenieImage.FreeTexture();
-FreeMem(FSechenieImage.Image.BitMap);
-GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FSechenieImage.Image.BitMap := BitMap;
-fillchar(BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
+FSechenieImage.BitMap.FreeData();
+FSechenieImage.BitMap.ReAllocateMemory();
 for i:=0 to FCube.Edge - 1 do
 	for ii:=0 to FCube.Edge - 1 do
 		begin
@@ -1723,10 +1720,10 @@ for i:=0 to FCube.Edge - 1 do
 		if iiii <> 0 then
 			begin
 			color := FCube.FGazes[iiii-1].FColor;
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(color.r*255);
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(color.g*255);
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(color.b*255);
-			BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=255;
+			FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+0]:=trunc(color.r*255);
+			FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+1]:=trunc(color.g*255);
+			FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+2]:=trunc(color.b*255);
+			FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+3]:=255;
 			end
 		else
 			begin
@@ -1737,14 +1734,14 @@ for i:=0 to FCube.Edge - 1 do
 			if iiii<>0 then
 				begin
 				color := FCube.FGazes[iiii-1].FColor;
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+0]:=trunc(color.r*255);
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+1]:=trunc(color.g*255);
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+2]:=trunc(color.b*255);
-				BitMap[(i*FImageSechenieBounds + ii)*FSechenieImage.Image.Channels+3]:=127;
+				FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+0]:=trunc(color.r*255);
+				FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+1]:=trunc(color.g*255);
+				FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+2]:=trunc(color.b*255);
+				FSechenieImage.BitMap.Data[(i*FImageSechenieBounds + ii)*FSechenieImage.BitMap.Channels+3]:=127;
 				end;
 			end;
 		end;
-FSechenieImage.ToTexture();
+FSechenieImage.LoadTexture();
 end;
 
 procedure mmmFStopDiffusionButtonProcedure(Button:TSGScreenButton);
@@ -2263,7 +2260,7 @@ begin
 end;
 var
 	Image : TSGImage = nil;
-	i, ii, d : LongWord;
+	i, ii, d : TSGUInt32;
 	p : TSGPixel4b;
 begin with TSGGasDiffusion(Button.UserPointer) do begin
 if (FUsrSechPanel<>nil) and (FUsrSechPanel.Visible) then
@@ -2272,27 +2269,25 @@ else
 	d := 1;
 Image := TSGImage.Create();
 Image.Context := Context;
-Image.Image.Clear();
-Image.Width          := FCube.Edge * d;
-Image.Height         := FCube.Edge;
+Image.BitMap.Clear();
+Image.BitMap.Width  := FCube.Edge * d;
+Image.BitMap.Height := FCube.Edge;
 {$IFDEF WITHLIBPNG}
-	Image.Image.Channels := 4;
+	Image.BitMap.Channels := 4;
 {$ELSE}
-	Image.Image.Channels := 3;
+	Image.BitMap.Channels := 3;
 	{$ENDIF}
-Image.Image.BitDepth := 8;
-Image.Image.BitMap   := GetMem(FCube.Edge * FCube.Edge * Image.Image.Channels * d);
-Image.Image.CreateTypes();
-fillchar(Image.Image.BitMap^, FCube.Edge * FCube.Edge * Image.Image.Channels * d, 0);
+Image.BitMap.ChannelSize := 8;
+Image.BitMap.ReAllocateMemory();
 
 for i := 0 to FCube.Edge-1 do
 	for ii := 0 to FCube.Edge-1 do
-		PutPixel(FSechenieImage.Image.PixelRGBA32(ii,FCube.Edge-i-1),@Image.Image.BitMap[(i*Image.Width+ii)*Image.Image.Channels]);
+		PutPixel(FSechenieImage.BitMap.PixelRGBA32(ii,FCube.Edge-i-1),@Image.BitMap.Data[(i*Image.Width+ii)*Image.BitMap.Channels]);
 
 if d = 2 then
 	for i := 0 to FCube.Edge-1 do
 		for ii := 0 to FCube.Edge-1 do
-			PutPixel(FUsrSechImage.Image.PixelRGBA32(ii,FCube.Edge-i-1),@Image.Image.BitMap[(i*Image.Width+ii+FCube.Edge)*Image.Image.Channels]);
+			PutPixel(FUsrSechImage.BitMap.PixelRGBA32(ii,FCube.Edge-i-1),@Image.BitMap.Data[(i*Image.Width+ii+FCube.Edge)*Image.BitMap.Channels]);
 
 SGMakeDirectory(PredStr + Catalog);
 {$IFDEF WITHLIBPNG}
@@ -2303,9 +2298,7 @@ SGMakeDirectory(PredStr + Catalog);
 	Image.Save(SGImageFormatJpeg);
 	{$ENDIF}
 
-FreeMem(Image.Image.BitMap);
-Image.Image.BitMap := nil;
-Image.Destroy();
+SGKill(Image);
 end;end;
 
 procedure mmmFAddSechSecondPanelButtonProcedure(Button:TSGScreenButton);
@@ -2319,15 +2312,13 @@ if FUsrSechPanel = nil then
 	
 	FUsrSechImage:=TSGImage.Create();
 	FUsrSechImage.Context := Context;
-	FUsrSechImage.Image.Clear();
-	FUsrSechImage.Width          := FImageSechenieBounds;
-	FUsrSechImage.Height         := FImageSechenieBounds;
-	FUsrSechImage.Image.Channels := FSechenieImage.Image.Channels;
-	FUsrSechImage.Image.BitDepth := 8;
-	FUsrSechImage.Image.BitMap   := GetMem(FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-	FUsrSechImage.Image.CreateTypes();
-	fillchar(FUsrSechImage.Image.BitMap^,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels,0);
-	FUsrSechImage.ToTexture();
+	FUsrSechImage.BitMap.Clear();
+	FUsrSechImage.BitMap.Width       := FImageSechenieBounds;
+	FUsrSechImage.BitMap.Height      := FImageSechenieBounds;
+	FUsrSechImage.BitMap.Channels    := FSechenieImage.BitMap.Channels;
+	FUsrSechImage.BitMap.ChannelSize := 8;
+	FUsrSechImage.BitMap.ReAllocateMemory();
+	FUsrSechImage.LoadTexture();
 	
 	SGCreatePicture(FUsrSechPanel, 5,5,a-10,a-10, True, True);
 	
@@ -2407,7 +2398,7 @@ while i < FCube.Edge do
 	ii := 0;
 	while ii < FCube.Edge do
 		begin
-		FUsrSechImageForThread.Image.SetPixelRGBA32(i, ii, InitPixel(ii,i,z,range));
+		FUsrSechImageForThread.BitMap.SetPixelRGBA32(i, ii, InitPixel(ii,i,z,range));
 		ii += 1;
 		end;
 	i +=1;
@@ -2429,14 +2420,12 @@ if (FUsrSechThread = nil) and (not FUpdateUsrAfterThread) then
 		end;
 	FUsrSechImageForThread:=TSGImage.Create();
 	FUsrSechImageForThread.Context := Context;
-	FUsrSechImageForThread.Image.Clear();
-	FUsrSechImageForThread.Width          := FImageSechenieBounds;
-	FUsrSechImageForThread.Height         := FImageSechenieBounds;
-	FUsrSechImageForThread.Image.Channels := 4;
-	FUsrSechImageForThread.Image.BitDepth := 8;
-	GetMem(BitMap, FImageSechenieBounds * FImageSechenieBounds * FUsrSechImageForThread.Image.Channels);
-	FUsrSechImageForThread.Image.BitMap   := BitMap;
-	FUsrSechImageForThread.Image.CreateTypes();
+	FUsrSechImageForThread.BitMap.Clear();
+	FUsrSechImageForThread.BitMap.Width       := FImageSechenieBounds;
+	FUsrSechImageForThread.BitMap.Height      := FImageSechenieBounds;
+	FUsrSechImageForThread.BitMap.Channels    := 4;
+	FUsrSechImageForThread.BitMap.ChannelSize := 8;
+	FUsrSechImageForThread.BitMap.ReAllocateMemory();
 	
 	if FCubeForUsr <> nil then
 		begin
@@ -3461,26 +3450,15 @@ Render.Color4f($80/255,0,$80/255,0.7);
 DrawQuadSec(SGR_LINE_LOOP);
 end;
 procedure UpDateAfterUsrThread();
-var
-	BitMap : PByte;
 begin
 FUsrSechImage.FreeTexture();
-FreeMem(FUsrSechImage.Image.BitMap);
-GetMem(BitMap,FImageSechenieBounds*FImageSechenieBounds*FSechenieImage.Image.Channels);
-FUsrSechImage.Image.BitMap := BitMap;
-Move(FUsrSechImageForThread.Image.BitMap^,FUsrSechImage.Image.BitMap^, FUsrSechImage.Width * FUsrSechImage.Height * FUsrSechImage.Channels);
-FUsrSechImage.ToTexture();
-if FUsrSechImageForThread <> nil then
-	begin
-	FUsrSechImageForThread.Destroy();
-	FUsrSechImageForThread := nil;
-	end;
+FUsrSechImage.BitMap.FreeData();
+FUsrSechImage.BitMap.ReAllocateMemory();
+Move(FUsrSechImageForThread.BitMap.Data^,FUsrSechImage.BitMap.Data^, FUsrSechImage.BitMap.DataSize);
+FUsrSechImage.LoadTexture();
+SGKill(FUsrSechImageForThread);
 FUpdateUsrAfterThread := False;
-if (FUsrSechThread <> nil) then
-	begin
-	FUsrSechThread.Destroy();
-	FUsrSechThread := nil;
-	end;
+SGKill(FUsrSechThread);
 FAddSechSecondPanelButton.Active := True;
 (FUsrSechPanel.Children[2] as TSGScreenProgressBar).Visible := False;
 end;

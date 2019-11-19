@@ -66,7 +66,6 @@ try
 	end;
 	Compression:=(GetLongWord(PByte(_Stream.Memory),Position+36)<>0);
 	Result.ReAllocateMemory();
-	Result.CreateTypes();
 	case BitsPerPixel of
 	24:
 		begin
@@ -78,9 +77,9 @@ try
 			begin
 			for i:=0 to Result.Width*Result.Height-1 do
 				begin
-				Result.BitMap[i*3+0]:=PByte(_Stream.Memory)[Position+40+i*3+2];
-				Result.BitMap[i*3+1]:=PByte(_Stream.Memory)[Position+40+i*3+1];
-				Result.BitMap[i*3+2]:=PByte(_Stream.Memory)[Position+40+i*3+0];
+				Result.Data[i*3+0]:=PByte(_Stream.Memory)[Position+40+i*3+2];
+				Result.Data[i*3+1]:=PByte(_Stream.Memory)[Position+40+i*3+1];
+				Result.Data[i*3+2]:=PByte(_Stream.Memory)[Position+40+i*3+0];
 				end;
 			end;
 		end;
@@ -94,7 +93,7 @@ try
 		end;
 	end;
 except
-	Result.ClearBitMapBits();
+	Result.FreeData();
 	end;
 
 	{writeln(Width);

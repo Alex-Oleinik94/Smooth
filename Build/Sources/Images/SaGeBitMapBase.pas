@@ -9,7 +9,7 @@ uses
 	,SaGeCommonStructs
 	;
 type
-	TSGBitMapMemory = PSGByte;
+	TSGBitMapData = PSGByte;
 	
 	PSGPixel3b = PSGVertex3ui8;
 	TSGPixel3b = TSGVertex3ui8;
@@ -41,8 +41,8 @@ function SGMultPixel4b(const Pixel1, Pixel2 : TSGPixel4b):TSGPixel4b; {$IFDEF SU
 function SGPixelBGRAToRGBA(const _Pixel : TSGPixel4b) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGPixelR8G7B9ToRGB24(const _Pixel : TSGPixel3b) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SGConsoleColor(const _ColorNumber : TSGUInt8) : TSGPixel3b; {"bad code"}
-function SGPixelRGB24FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelRGB24FromMemory(const _Memory : TSGBitMapData; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapData; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -51,12 +51,12 @@ uses
 	//,SaGeBaseUtils
 	;
 
-function SGPixelRGB24FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelRGB24FromMemory(const _Memory : TSGBitMapData; const _Index : TSGMaxEnum) : TSGPixel3b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PSGPixel3b(_Memory)[_Index];
 end;
 
-function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapMemory; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SGPixelRGBA32FromMemory(const _Memory : TSGBitMapData; const _Index : TSGMaxEnum) : TSGPixel4b; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := PSGPixel4b(_Memory)[_Index];
 end;

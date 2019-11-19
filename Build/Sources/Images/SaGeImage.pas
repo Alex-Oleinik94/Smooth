@@ -39,10 +39,11 @@ type
 			public
 		// Данные изображения (свойства изображения и последовательность байтов, характеризующих цвета пикселей)
 		// В общем "BitMap" ("карта BIT-ов")
-		FImage   : TSGBitMap;
+		FBitMap : TSGBitMap;
 		
 		// Идентификатор текстуры
 		FTexture : TSGRenderTexture;
+		FIsBitsFreeAfterTextureLoad : TSGBoolean;
 		// for ActiveTexture
 		FTextureNumber : TSGInteger;
 		// what it the texture
@@ -50,7 +51,7 @@ type
 		
 		// Возвращает, загружено изображение в оперативную память в виде TSGBitMap, или нет
 		FLoadedIntoRAM : TSGBoolean;
-		//Путь в файлу
+		// Путь в файлу
 		FFileName           : TSGString;
 		
 		//Имя изображения или материала
@@ -67,8 +68,8 @@ type
 		function Save(const Format : TSGImageFormat = SGImageFormatNull) : TSGBoolean; virtual;
 		function Loaded() : TSGBoolean; virtual;
 			public
-		procedure ToTexture(); virtual;
-		procedure ToTextureWithBlock(const VTexturesBlock : TSGTextureBlock);
+		procedure LoadTexture(); virtual;
+		procedure LoadTextureWithBlock(const VTexturesBlock : TSGTextureBlock);
 		procedure BindTexture();
 		procedure DisableTexture();
 		procedure FreeBits();
@@ -77,20 +78,16 @@ type
 		function TextureLoaded() : TSGBoolean;
 		function BitMapHasData() : TSGBoolean;
 			public
-		property FormatType         : TSGBitMapUInt read FImage.FFormatType  write FImage.FFormatType;
-		property DataType           : TSGBitMapUInt read FImage.FDataType    write FImage.FDataType;
-		property Channels           : TSGBitMapUInt read FImage.FChannels    write FImage.FChannels;
-		property BitDepth           : TSGBitMapUInt read FImage.FChannelSize write FImage.FChannelSize;
-		property Texture            : TSGRenderTexture read FTexture            write FTexture;
-		property Height             : TSGBitMapUInt read FImage.FHeight      write FImage.FHeight;
-		property Width              : TSGBitMapUInt read FImage.FWidth       write FImage.FWidth;
-		property BitMap             : PSGByte       read FImage.FBitMap      write FImage.FBitMap;
-		property Image              : TSGBitMap   read FImage;
-		property FileName           : TSGString   read FFileName           write FFileName;
-		property LoadedIntoRAM      : TSGBoolean  read FLoadedIntoRAM      write FLoadedIntoRAM;
-		property Name               : TSGString   read FName               write FName;
-		property HasAlpha           : TSGBool     read HasAlphaChannel;
-			public //Render Functions:
+		property Height             : TSGBitMapUInt    read FBitMap.FHeight;
+		property Width              : TSGBitMapUInt    read FBitMap.FWidth;
+		property BitMap             : TSGBitMap        read FBitMap;
+		property LoadedIntoRAM      : TSGBoolean       read FLoadedIntoRAM write FLoadedIntoRAM;
+		property Texture            : TSGRenderTexture read FTexture;
+		property IsBitsFreeAfterTextureLoad : TSGBoolean read FIsBitsFreeAfterTextureLoad write FIsBitsFreeAfterTextureLoad;
+		property FileName           : TSGString        read FFileName write FFileName;
+		property Name               : TSGString        read FName     write FName;
+		property HasAlpha           : TSGBool          read HasAlphaChannel;
+			public // Render functions:
 		procedure DrawImageFromTwoVertex2f(Vertex1,Vertex2: TSGVertex2f;const RePlace:Boolean = True;const RePlaceY:TSGByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure DrawImageFromTwoPoint2int32(Vertex1,Vertex2: TSGPoint2int32;const RePlace:Boolean = True;const RePlaceY:TSGByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ImportFromDispley(const Point1,Point2: TSGPoint2int32;const NeedAlpha:Boolean = True);
@@ -125,7 +122,10 @@ type
 		property Size : TSGLongWord read GetSize write SetSize;
 		end;
 
-procedure SGKill(var Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+var
+	ImageIsBitsFreeAfterTextureLoad : TSGBoolean = True;
+
+procedure SGKill(var _Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SGCreateImageFromFile(const _Context : ISGContext; const _FileName : TSGString; const _LoadTexture : TSGBoolean = False) : TSGImage;
 
 implementation
@@ -152,19 +152,19 @@ Result := TSGImage.Create(_FileName);
 Result.Context := _Context;
 Result.Load();
 if (_LoadTexture) then
-	Result.ToTexture();
+	Result.LoadTexture();
 end;
 
-procedure SGKill(var Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SGKill(var _Image : TSGImage); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-if Image <> nil then
+if (_Image <> nil) then
 	begin
 	try
-	Image.Destroy();
+	_Image.Destroy();
 	except
 	end;
 	try
-	Image := nil;
+	_Image := nil;
 	except
 	end;
 	end;
@@ -265,12 +265,12 @@ end;
 (*RENDER FUNCTIONS FOR IMAGE*)
 (****************************)
 
-procedure TSGImage.ToTextureWithBlock(const VTexturesBlock : TSGTextureBlock);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSGImage.LoadTextureWithBlock(const VTexturesBlock : TSGTextureBlock);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if FTexture <> 0 then
+if (FTexture <> 0) then
 	FreeTexture();
 FTexture := VTexturesBlock.GetNextUnusebleTexture();
-ToTexture();
+LoadTexture();
 end;
 
 procedure TSGImage.DrawImageFromTwoPoint2int32(Vertex1,Vertex2: TSGPoint2int32;const RePlace:Boolean = True;const RePlaceY:TSGByte = SG_3D;const Rotation:Byte = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -371,14 +371,12 @@ end;
 
 procedure TSGImage.ImportFromDispley(const Point1,Point2: TSGPoint2int32;const NeedAlpha:Boolean = True);
 begin
-if Self <> nil then
-	FreeAll()
-else
-	Self := TSGImage.Create();
-Width := Point2.x - Point1.x + 1;
-Height := Point2.y - Point1.y + 1;
-Channels := 3 + TSGByte(NeedAlpha);
-FImage.ChannelSize := 8;
+if (Self <> nil) then FreeAll() else Self := TSGImage.Create();
+FBitMap.Width := Point2.x - Point1.x + 1;
+FBitMap.Height := Point2.y - Point1.y + 1;
+FBitMap.Channels := 3 + TSGByte(NeedAlpha);
+FBitMap.ChannelSize := 8;
+FBitMap.ReAllocateMemory();
 Render.ReadPixels(
 	Point1.x-1,
 	Point1.y-1,
@@ -386,7 +384,7 @@ Render.ReadPixels(
 	Point2.y-Point1.y+1,
 	SGR_RGBA * TSGByte(NeedAlpha) + SGR_RGB * TSGByte(not NeedAlpha),
 	SGR_UNSIGNED_BYTE,
-	FImage.BitMap);
+	FBitMap.Data);
 FLoadedIntoRAM := True;
 end;
 
@@ -396,8 +394,8 @@ end;
 
 function TSGImage.Load(const Stream : TStream) : TSGBool;
 begin
-SGKill(FImage);
-FImage := SGLoadBitMapFromStream(Stream, FFileName);
+SGKill(FBitMap);
+FBitMap := SGLoadBitMapFromStream(Stream, FFileName);
 Result := BitMapHasData();
 FLoadedIntoRAM := Result;
 end;
@@ -412,32 +410,32 @@ if (not BitMapHasData()) and (FFileName <> '') and SGFileExists(FFileName) then
 		Destroy();
 		end
 else if BitMapHasData() then
-	Result := SGSaveBitMapToStream(Stream, FImage)
+	Result := SGSaveBitMapToStream(Stream, FBitMap)
 else
 	Result := False;
 end;
 
 function TSGImage.Load() : TSGBoolean;
 begin
-SGKill(FImage);
-FImage := SGLoadBitMapFromFile(FFileName);
+SGKill(FBitMap);
+FBitMap := SGLoadBitMapFromFile(FFileName);
 Result := BitMapHasData();
 FLoadedIntoRAM := Result;
 end;
 
 function TSGImage.Save(const Format : TSGImageFormat = SGImageFormatNull) : TSGBoolean;
 begin
-Result := SGSaveBitMapToFile(FImage, FFileName, Format);
+Result := SGSaveBitMapToFile(FBitMap, FFileName, Format);
 end;
 
 function TSGImage.BitMapHasData() : TSGBoolean;
 begin
-Result := (FImage <> nil) and (FImage.DataSize() <> 0) and (FImage.BitMap <> nil);
+Result := (FBitMap <> nil) and FBitMap.HasData();
 end;
 
 function TSGImage.HasAlphaChannel() : TSGBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := Channels > 3;
+Result := FBitMap.Channels > 3;
 end;
 
 procedure TSGImage.LoadRenderResources();
@@ -452,7 +450,7 @@ var
 begin
 IsHasTexture := FTexture <> 0;
 FreeTexture();
-FLoadedIntoRAM := IsHasTexture and (FImage.BitMap <> nil);
+FLoadedIntoRAM := IsHasTexture and (FBitMap.Data <> nil);
 end;
 
 function TSGImage.Loaded() : TSGBoolean;
@@ -472,19 +470,15 @@ end;
 destructor TSGImage.Destroy();
 begin
 FreeAll();
-if FImage <> nil then
-	begin
-	FImage.Destroy();
-	FImage := nil;
-	end;
+SGKill(FBitMap);
 inherited;
 end;
 
-procedure TSGImage.FreeAll;
+procedure TSGImage.FreeAll();
 begin
-FreeTexture;
-if FImage <> nil then
-	FImage.Clear();
+FreeTexture();
+if (FBitMap <> nil) then
+	FBitMap.Clear();
 end;
 
 procedure TSGImage.DisableTexture();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -507,10 +501,11 @@ procedure TSGImage.BindTexture();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 if (FTexture=0) and (FLoadedIntoRAM) then
 	begin
-	ToTexture();
-	FreeBits();
+	LoadTexture();
+	if FIsBitsFreeAfterTextureLoad then
+		FreeBits();
 	end;
-if FTextureNumber = -1 then
+if (FTextureNumber = -1) then
 	begin
 	Render.Enable(SGR_TEXTURE_2D);
 	Render.BindTexture(SGR_TEXTURE_2D,FTexture);
@@ -531,19 +526,56 @@ end;
 
 procedure TSGImage.FreeBits();
 begin
-if FImage <> nil then
-	FImage.ClearBitMapBits();
+if (FBitMap <> nil) then
+	FBitMap.FreeData();
 end;
 
-procedure TSGImage.ToTexture();
+procedure TSGImage.LoadTexture();
+var
+	FormatType : TSGBitMapUInt;
+	DataType   : TSGBitMapUInt;
+
+procedure CreateTypes(const Alpha:TSGBitMapUInt = SG_UNKNOWN;const Grayscale:TSGBitMapUInt = SG_UNKNOWN);
+begin
+FormatType:=0;
+DataType:=0;
+case FBitMap.Channels of 
+1:
+	if (Grayscale = SG_TRUE) then 
+		FormatType := SGR_LUMINANCE
+	else if (Alpha = SG_TRUE) then
+		FormatType := SGR_ALPHA
+	else if ((Alpha = SG_FALSE) and (Grayscale = SG_FALSE)) then
+		FormatType := SGR_INTENSITY
+	else
+		FormatType := SGR_RED;
+2:
+	//if (Grayscale = SG_TRUE) and (Alpha = SG_TRUE) then
+		FormatType := SGR_LUMINANCE_ALPHA;
+3:
+	FormatType := SGR_RGB;
+4:
+	FormatType := SGR_RGBA;
+else
+	FormatType := 0;
+end;
+case FBitMap.ChannelSize of
+8:
+	DataType := SGR_UNSIGNED_BYTE;
+else
+	DataType := SGR_BITMAP;
+end;
+end;
+
 begin
 Render.Enable(SGR_TEXTURE_2D);
 
-if FTexture = 0 then
+if (FTexture = 0) then
 	Render.GenTextures(1, @FTexture);
-
-if FTexture = 0 then
+if (FTexture = 0) then
 	Exit;
+
+CreateTypes();
 
 Render.BindTexture(SGR_TEXTURE_2D, FTexture);
 {$IFNDEF MOBILE}
@@ -556,13 +588,12 @@ Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_REPEAT);
 Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_REPEAT);
-Render.TexImage2D(SGR_TEXTURE_2D, 0, Channels, Width, Height, 0, FormatType, DataType, FImage.BitMap);
+Render.TexImage2D(SGR_TEXTURE_2D, 0, FBitMap.Channels, Width, Height, 0, FormatType, DataType, FBitMap.Data);
 {$IFDEF MOBILE}
 	Render.GenerateMipmap(SGR_TEXTURE_2D);
 	{$ENDIF}
 Render.BindTexture(SGR_TEXTURE_2D, 0);
 Render.Disable(SGR_TEXTURE_2D);
-FLoadedIntoRAM := False;
 {$IFDEF SGDebuging}
 	SGLog.Source('TSGImage  : Loaded to texture "'+FFileName+'" is "'+SGStr(FTexture<>0)+'"("'+SGStr(FTexture)+'").');
 	{$ENDIF}
@@ -586,8 +617,9 @@ FTextureType := SGITextureTypeTexture;
 FTexture := 0;
 FLoadedIntoRAM := False;
 FFileName := VFileName;
-FImage := TSGBitMap.Create();
+FBitMap := TSGBitMap.Create();
 FName := '';
+FIsBitsFreeAfterTextureLoad := ImageIsBitsFreeAfterTextureLoad;
 end;
 
 initialization

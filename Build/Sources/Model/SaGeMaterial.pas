@@ -122,8 +122,8 @@ procedure TSGMaterial.WriteInfo(const PredStr : TSGString = ''; const CasesOfPri
 procedure WriteImageInfo(const Image : TSGImage; const ImagePredStr : TSGString);
 begin
 if Image <> nil then
-	if Image.Image <> nil then
-		Image.Image.WriteInfo(ImagePredStr, CasesOfPrint);
+	if (Image.BitMap <> nil) then
+		Image.BitMap.WriteInfo(ImagePredStr, CasesOfPrint);
 end;
 
 begin

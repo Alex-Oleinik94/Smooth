@@ -20,7 +20,6 @@ uses
 	
 	,SaGeBitMap
 	,SaGeLog
-	,SaGeRenderBase
 	,SaGeResourceManager
 	,SaGeDllManager
 	;
@@ -52,7 +51,7 @@ end;
 function TSGResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSGString):TSGResource;
 begin
 Result := TSGBitMap.Create();
-LoadPNG(VStream,Result as TSGBitMap);
+LoadPNG(VStream, Result as TSGBitMap);
 end;
 
 function TSGResourceManipulatorImagesPNG.SaveResourceToStream(const VStream : TStream;const VExpansion : TSGString;const VResource : TSGResource):TSGBoolean;
@@ -167,14 +166,13 @@ try
 	BitMap.Channels:=png_get_channels(png_ptr, info_ptr);
 	BitMap.ChannelSize:=png_get_bit_depth(png_ptr, info_ptr);
 	BitMap.ReAllocateMemory();
-	BitMap.CreateTypes();
 
 	png_read_update_info(png_ptr, info_ptr);
 
 	SetLEngth(row_pointers,BitMap.Height);
 
 	for i := 0 to BitMap.Height-1 do
-		row_pointers[i] := @BitMap.BitMap[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
+		row_pointers[i] := @BitMap.Data[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
 
 	png_read_image(png_ptr, @row_pointers[0]);
 
@@ -189,14 +187,14 @@ try
 			png_destroy_read_struct(@png_ptr, @info_ptr, nil);
 		end;
 except
-	SGLog.Source('SaGeImagesPNG : Exeption while loading png!');
+	SGLog.Source('SaGeImagesPNG: Exeption while loading png!');
 	BitMap.Clear();
 	end;
 
 if (WarningsList<>nil) or (Length(WarningsList)<>0) then
 	begin
 	for i:= 0 to High(WarningsList) do
-		SGLog.Source('LoadPNG(TStream,TBitMap) WarningsList : '+WarningsList[i]);
+		SGLog.Source('LoadPNG(TStream, TBitMap) WarningsList : '+WarningsList[i]);
 	SetLength(WarningsList,0);
 	end;
 end;
@@ -218,20 +216,13 @@ try
 	png_ptr := png_create_write_struct(PNG_LIBPNG_VER_STRING,Pointer(WarningsList),@our_png_error_fn,@our_png_warning_fn);
 	info_ptr := png_create_info_struct(png_ptr);
 	png_set_write_fn(png_ptr, Stream,@our_png_write_fn,@our_png_flush_fn);
-	BitMap.CreateTypes();
-	if BitMap.PixelFormat=SGR_RGB then
-		ColorType:=PNG_COLOR_MASK_COLOR
-	else
-		if BitMap.PixelFormat=SGR_RGBA then
-			ColorType:=PNG_COLOR_TYPE_RGBA
-		else
-			if BitMap.PixelFormat=SGR_LUMINANCE then
-				ColorType:=PNG_COLOR_TYPE_GRAY
-			else
-				if BitMap.PixelFormat=SGR_LUMINANCE_ALPHA then
-					ColorType:=PNG_COLOR_TYPE_GRAY_ALPHA
-				else
-					ColorType:=0;
+	case BitMap.Channels of
+	4 : ColorType:=PNG_COLOR_TYPE_RGBA;
+	3 : ColorType:=PNG_COLOR_MASK_COLOR;
+	2 : ColorType:=PNG_COLOR_TYPE_GRAY;
+	1 : ColorType:=PNG_COLOR_TYPE_GRAY_ALPHA;
+	else ColorType:=0;
+	end;
 	if ColorType=0 then
 		Exit;
 
@@ -241,7 +232,7 @@ try
 	SetLength(row_pointers,BitMap.Height);
 	try
 		for i := 0 to BitMap.Height-1 do
-			row_pointers[i] := @BitMap.BitMap[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
+			row_pointers[i] := @BitMap.Data[(BitMap.Height-1 -i )*(BitMap.Width)*BitMap.Channels];
 		png_write_image(png_ptr, @row_pointers[0]);
 	finally
 		SetLength(row_pointers,0);

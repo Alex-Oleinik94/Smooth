@@ -88,7 +88,7 @@ Result := TSGFont.Create(_FileName);
 Result.Context := _Context;
 Result.Load();
 if (_LoadTexture) then
-	Result.ToTexture();
+	Result.LoadTexture();
 end;
 
 procedure SGKill(var Font : TSGFont); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -126,19 +126,17 @@ end;
 procedure CalcucateBitMap();
 var
 	i      : TSGMaxEnum;
-	BitMap : PByte;
 begin
-GetMem(BitMap,Width*Height*Channels);
-FImage.BitMap := BitMap;
+FBitMap.ReAllocateMemory();
 Mask := 0;
 for i:=0 to ColorBits-1 do
 	Mask += 2**i;
 for i:=0 to Width*Height-1 do
 	begin
-	BitMap[i*Channels+0]:=255;
-	BitMap[i*Channels+1]:=255;
-	BitMap[i*Channels+2]:=255;
-	BitMap[i*Channels+3]:=ArColors[GetColor(i)];
+	FBitMap.Data[i*FBitMap.Channels+0]:=255;
+	FBitMap.Data[i*FBitMap.Channels+1]:=255;
+	FBitMap.Data[i*FBitMap.Channels+2]:=255;
+	FBitMap.Data[i*FBitMap.Channels+3]:=ArColors[GetColor(i)];
 	end;
 end;
 
@@ -191,28 +189,26 @@ SetLength(ArColors,QuantityColors);
 Stream.ReadBuffer(ArColors[0],QuantityColors);
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
 FFontHeight:=Quantity;
-if FImage<>nil then
-	FImage.Destroy();
-FImage:=TSGBitMap.Create();
+SGKill(FBitMap);
+FBitMap :=TSGBitMap.Create();
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.Width:=Quantity;
+FBitMap.Width:=Quantity;
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.Height:=Quantity;
+FBitMap.Height:=Quantity;
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.Channels:=Quantity;
+FBitMap.Channels:=Quantity;
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.BitDepth:=Quantity;
+FBitMap.ChannelSize:=Quantity;
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.PixelFormat:=Quantity;
+//FBitMap.PixelFormat:=Quantity; // deprecated
 Stream.ReadBuffer(Quantity,SizeOf(Quantity));
-FImage.PixelType:=Quantity;
+//FBitMap.PixelType:=Quantity; // deprecated
 Stream.ReadBuffer(FSymbolParams,SizeOf(FSymbolParams));
 GetMem(ColorBitMap,ColorBits*Width*Height div 8);
 Stream.ReadBuffer(ColorBitMap^,ColorBits*Width*Height div 8);
-Stream.Destroy();
-Stream:=nil;
+SGKill(Stream);
 CalcucateBitMap();
-FreeMem(ColorBitMap,ColorBits*Width*Height div 8);
+SGKill(ColorBitMap);
 SetLength(ArColors,0);
 Result:=True;
 FLoadedIntoRAM := True;
@@ -667,11 +663,11 @@ end;
 procedure TSGFont.AddWaterString(const VString:String;const VImage:TSGImage;const VType:LongWord = 0);
 var
 	PBits:PSGPixel3b;
-	StrL:LongWord;
-	PW,PH:LongWord;
-	i:LongWord;
+	StrL:TSGUInt32;
+	PW,PH:TSGUInt32;
+	i:TSGUInt32;
 	PFontBits:PSGPixel4b;
-	iw,ih:LongWord;
+	iw,ih:TSGUInt32;
 	SI:TSGPoint2int32;
 
 procedure Invert(const a,b:TSGMaxEnum);inline;
@@ -692,19 +688,19 @@ PBits[a].b:=trunc(PBits[a].b*(255-PFontBits[b].a)/255+(SumB)*(PFontBits[b].a)/25
 end;
 
 var
-	TempR:real;
+	TempR:TSGFloat64;
 begin
 if (Self=nil) or (not(FontLoaded)) then
 	begin
-	SGLog.Source('TSGFont__AddWaterString : Error : Font not loaded!');
+	SGLog.Source('TSGFont__AddWaterString: Error: Font not loaded!');
 	Exit;
-	end;
-if (VImage.Image=nil) or (VImage.Channels<>3) or (Channels<>4) or (Image=nil)or (Image.BitMap=nil) then
+	end
+else if (not VImage.BitMapHasData()) or (not BitMapHasData()) or (VImage.BitMap.Channels<>3) or (FBitMap.Channels<>4) then
 	begin
-	SGLog.Source('TSGFont__AddWaterString : Error : Invalid arametrs!');
+	SGLog.Source('TSGFont__AddWaterString: Error: Invalid parametrs!');
 	Exit;
 	end;
-PBits:=PSGPixel3b(VImage.Image.BitMap);
+PBits:=PSGPixel3b(VImage.BitMap.Data);
 StrL:=StringLength(VString);
 if (StrL>VImage.Width) or (FontHeight>VImage.Height) then
 	begin
@@ -713,7 +709,7 @@ if (StrL>VImage.Width) or (FontHeight>VImage.Height) then
 	end;
 PW:=VImage.Width-StrL-5;
 PH:=VImage.Height-FontHeight-4;
-PFontBits:=PSGPixel4b(FImage.BitMap);
+PFontBits:=PSGPixel4b(FBitMap.Data);
 if VType=0 then
 	begin
 	SumB:=0;
@@ -820,16 +816,16 @@ end;
 
 (*=== SGTranslateFont ===*)
 
-procedure SGTranslateFont(const FontInWay,FontOutWay : TSGString;const RunInConsole:TSGBoolean = True);
+procedure SGTranslateFont(const FontInWay, FontOutWay : TSGString; const RunInConsole:TSGBoolean = True);
 var
-	Font:TSGFont = nil;
-	BitMap:PByte = nil;
+	Font : TSGFont = nil;
+	BitMap : TSGBitMapData = nil;
 	Colors : array [0..255] of TSGMaxEnum;
-	ObrColors : array [0..255] of Byte;
-	TudaColors : array of byte = nil;
-	QuantityColors : Byte = 0;
-	ColorBits : Byte = 0;
-	ColorBitMap : PByte = nil;
+	ObrColors : array [0..255] of TSGUInt8;
+	TudaColors : array of TSGUInt8 = nil;
+	QuantityColors : TSGUInt8 = 0;
+	ColorBits : TSGUInt8 = 0;
+	ColorBitMap : TSGBitMapData = nil;
 var
 	i,q : TSGMaxEnum;
 procedure WriteFileToStream();
@@ -882,13 +878,13 @@ Quantity:=Font.Width;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 Quantity:=Font.Height;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-Quantity:=Font.Channels;
+Quantity:=Font.BitMap.Channels;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-Quantity:=Font.Image.BitDepth;
+Quantity:=Font.BitMap.ChannelSize;
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-Quantity:=Font.Image.PixelFormat;
+Quantity:=0; // Font.BitMap.PixelFormat; // deprecated
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
-Quantity:=Font.Image.PixelType;
+Quantity:=0; // Font.BitMap.PixelType; // deprecated
 OutStream.WriteBuffer(Quantity,SizeOf(Quantity));
 SP:=Font.SymbolParams;
 OutStream.WriteBuffer(SP,SizeOf(SP));
@@ -896,9 +892,9 @@ OutStream.WriteBuffer(ColorBitMap^,ColorBits*Font.Width*Font.Height div 8);
 OutStream.Destroy();
 end;
 
-procedure SetColor(const Index : TSGMaxEnum;const Number:Byte);
+procedure SetColor(const Index : TSGMaxEnum;const Number:TSGUInt8);
 var
-	m:Byte;
+	m:TSGUInt8;
 	d:TSGMaxEnum;
 begin
 m:=(Index*ColorBits) mod 8;
@@ -925,16 +921,16 @@ else
 		SGLog.Source(['SGTranslateFont : While loading font exeption error!']);
 	Exit;
 	end;
-if Font.Channels <> 4 then
+if (Font.BitMap.Channels <> 4) then
 	begin
 	if RunInConsole then
 		SGLog.Source(['SGTranslateFont : (Font.Channels!=4), exiting!']);
 	Exit;
 	end;
-BitMap := Font.BitMap;
+BitMap := Font.BitMap.Data;
 q:=0;
 Fillchar(Colors,SizeOf(Colors),0);
-for i:=0 to Font.Width*Font.Height*Font.Channels-1 do
+for i:=0 to Font.Width*Font.Height*Font.BitMap.Channels-1 do
 	begin
 	Colors[BitMap[i]]+=1;
 	case BitMap[i] of
@@ -945,7 +941,7 @@ for i:=0 to Font.Width*Font.Height*Font.Channels-1 do
 	end;
 if RunInConsole then
 	begin
-	SGLog.Source(['SGTranslateFont : Font : Total [1..254] variables quantyti : "',q,'" of "'+SGStr(Font.Width*Font.Height*Font.Channels)+'" ('+SGStrReal(q/(Font.Width*Font.Height*Font.Channels)*100,2)+' per cent)!']);
+	SGLog.Source(['SGTranslateFont : Font : Total [1..254] variables quantyti : "',q,'" of "'+SGStr(Font.Width*Font.Height*Font.BitMap.Channels)+'" ('+SGStrReal(q/(Font.Width*Font.Height*Font.BitMap.Channels)*100,2)+' per cent)!']);
 	for i:=0 to 255 do
 		if Colors[i]<>0 then
 			begin
@@ -955,9 +951,9 @@ if RunInConsole then
 q:=0;
 for i:=0 to Font.Width*Font.Height-1 do
 	begin
-	if (BitMap[i*Font.Channels+0]<>255) then q+=1;
-	if (BitMap[i*Font.Channels+1]<>255) then q+=1;
-	if (BitMap[i*Font.Channels+2]<>255) then q+=1;
+	if (BitMap[i*Font.BitMap.Channels+0]<>255) then q+=1;
+	if (BitMap[i*Font.BitMap.Channels+1]<>255) then q+=1;
+	if (BitMap[i*Font.BitMap.Channels+2]<>255) then q+=1;
 	end;
 if RunInConsole then
 	begin
@@ -969,7 +965,7 @@ Fillchar(Colors,SizeOf(Colors),0);
 Fillchar(ObrColors,SizeOf(ObrColors),0);
 for i:=0 to Font.Width*Font.Height-1 do
 	begin
-	Colors[BitMap[i*Font.Channels+3]]+=1;
+	Colors[BitMap[i*Font.BitMap.Channels+3]]+=1;
 	end;
 SetLength(TudaColors,0);
 for i:=0 to 255 do
@@ -1004,12 +1000,11 @@ if RunInConsole then
 	end;
 for i:=0 to Font.Width*Font.Height-1 do
 	begin
-	SetColor(i,ObrColors[BitMap[i*Font.Channels+3]]);
+	SetColor(i,ObrColors[BitMap[i*Font.BitMap.Channels+3]]);
 	end;
 WriteFileToStream();
-FreeMem(ColorBitMap);
-if Font<>nil then
-	Font.Destroy();
+SGKill(ColorBitMap);
+SGKill(Font);
 if TudaColors<>nil then
 	SetLength(TudaColors,0);
 end;
