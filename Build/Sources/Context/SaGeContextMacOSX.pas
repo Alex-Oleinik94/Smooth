@@ -1,7 +1,7 @@
 {$INCLUDE SaGe.inc}
 
 unit SaGeContextMacOSX;
-// просто текст для автоматического определения кодировки компелятором FPC ;)
+
 interface
 
 uses 
@@ -20,31 +20,31 @@ uses
 	;
 	
 type
-	TSGContextMacOSX=class(TSGContext)
+	TSGContextMacOSX = class(TSGContext)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
 			public
 		class function ContextName() : TSGString; override;
-		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);override;
-		procedure Run();override;
-		procedure Messages();override;
-		procedure SwapBuffers();override;
-		function  GetCursorPosition():TSGPoint2f;override;
-		function  GetWindowRect():TSGPoint2f;override;
-		function  GetScreenResolution():TSGPoint2f;override;
+		procedure Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal); override;
+		procedure Run(); override;
+		procedure Messages(); override;
+		procedure SwapBuffers(); override;
+		function  GetCursorPosition() : TSGPoint2f; override;
+		function  GetWindowRect() : TSGPoint2f; override;
+		function  GetScreenResolution() : TSGPoint2f; override;
 		class function Supported() : TSGBoolean; override;
 			protected
-		procedure InitFullscreen(const b:boolean); override;
+		procedure InitFullscreen(const b : TSGBoolean); override;
 			public
-		procedure ShowCursor(const b:Boolean);override;
-		procedure SetCursorPosition(const a:TSGPoint2f);override;
-		procedure SetTittle(const NewTittle:TSGString);override;
+		procedure ShowCursor(const b : TSGBoolean); override;
+		procedure SetCursorPosition(const a : TSGPoint2f); override;
+		procedure SetTittle(const NewTittle : TSGString); override;
 			public
 		wnd_Handle  : WindowRef;
-		function  CreateWindow():Boolean;
+		function  CreateWindow() : TSGBoolean;
 			public
-		function Get(const What:string):Pointer;override;
+		function Get(const What : TSGString) : TSGPointer; override;
 		end;
 
 implementation
@@ -63,43 +63,42 @@ begin
 Result := True;
 end;
 
-procedure TSGContextMacOSX.SetTittle(const NewTittle:TSGString);
+procedure TSGContextMacOSX.SetTittle(const NewTittle : TSGString);
 begin
 inherited SetTittle(NewTittle);
 end;
 
-function TSGContextMacOSX.Get(const What:string):Pointer;
+function TSGContextMacOSX.Get(const What : TSGString) : TSGPointer;
 begin
-IF What='DESKTOP WINDOW HANDLE' then
-	Result:=Pointer(wnd_Handle)
+IF (What = 'DESKTOP WINDOW HANDLE') then
+	Result := TSGPointer(wnd_Handle)
 else
-	Result:=Inherited Get(What);
+	Result := inherited Get(What);
 end;
 
-procedure TSGContextMacOSX.SetCursorPosition(const a:TSGPoint2f);
+procedure TSGContextMacOSX.SetCursorPosition(const a : TSGPoint2f);
 begin
 SGLog.Source('"TSGContextMacOSX.SetCursorPosition" isn''t possible!');
 end;
 
-procedure TSGContextMacOSX.ShowCursor(const b:Boolean);
+procedure TSGContextMacOSX.ShowCursor(const b : TSGBoolean);
 begin
 SGLog.Source('"TSGContextMacOSX.ShowCursor" isn''t possible!');
 end;
 
-function TSGContextMacOSX.GetScreenResolution:TSGPoint2f;
+function TSGContextMacOSX.GetScreenResolution() : TSGPoint2f;
 begin
 Result.Import(
 	CGDisplayPixelsWide(CGMainDisplayID()),
-	CGDisplayPixelsHigh(CGMainDisplayID())
-);
+	CGDisplayPixelsHigh(CGMainDisplayID()));
 end;
 
-function TSGContextMacOSX.GetCursorPosition:TSGPoint2f;
+function TSGContextMacOSX.GetCursorPosition() : TSGPoint2f;
 begin
 
 end;
 
-function TSGContextMacOSX.GetWindowRect():TSGPoint2f;
+function TSGContextMacOSX.GetWindowRect() : TSGPoint2f;
 begin
 Result.Import();
 end;
@@ -107,22 +106,22 @@ end;
 constructor TSGContextMacOSX.Create();
 begin
 inherited;
-wnd_Handle:=nil;
+wnd_Handle := nil;
 end;
 
 destructor TSGContextMacOSX.Destroy();
 begin
-ReleaseWindow( wnd_Handle );
+ReleaseWindow(wnd_Handle);
 inherited;
 end;
 
 procedure TSGContextMacOSX.Initialize(const _WindowPlacement : TSGContextWindowPlacement = SGPlacementNormal);
 begin
-Active:=CreateWindow();
+Active := CreateWindow();
 if Active then
 	begin
 	SGScreen.Load(Self);
-	if FCallInitialize<>nil then
+	if (FCallInitialize <> nil) then
 		FCallInitialize(Self);
 	end;
 end;
@@ -130,8 +129,8 @@ end;
 procedure TSGContextMacOSX.Run();
 begin
 Messages();
-FElapsedDateTime.Get;
-while FActive and (FNewContextType=nil) do
+FElapsedDateTime.Get();
+while (FActive and (FNewContextType = nil)) do
 	Paint();
 end;
 
@@ -144,58 +143,55 @@ procedure TSGContextMacOSX.Messages();
 var
 	Event : EventRecord;
 begin
-while GetNextEvent( everyEvent, Event ) do
+while GetNextEvent(everyEvent, Event) do
 	begin
 	
 	end;
 inherited;
 end;
 
-function TSGContextMacOSX.CreateWindow():Boolean;
+function TSGContextMacOSX.CreateWindow() : TSGBoolean;
 var
-	size   : MAcOSAll.Rect;
-	status : OSStatus;
-	ScreenRS:TSGPoint2f;
+	size     : MAcOSAll.Rect;
+	status   : OSStatus;
+	ScreenRS : TSGPoint2f;
 begin 
-Result:=agl.InitAGL();
+Result := agl.InitAGL();
 if not Result then
 	Exit;
-ScreenRS:=GetScreenResolution();
-size.Left   := (ScreenRS.x-FWidth) div 2;
-size.Top    := (ScreenRS.y-FHeight) div 2;
+ScreenRS := GetScreenResolution();
+size.Left   := (ScreenRS.x - FWidth) div 2;
+size.Top    := (ScreenRS.y - FHeight) div 2;
 size.Right  := FWidth + (ScreenRS.x-FWidth) div 2;
 size.Bottom := FHeight + (ScreenRS.y-FHeight) div 2;
-status      := CreateNewWindow( kDocumentWindowClass, 
+status      := CreateNewWindow(kDocumentWindowClass, 
 	kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute, 
-	size, wnd_Handle );
-if ( status <> noErr ) or ( wnd_Handle = nil ) Then
+	size, wnd_Handle);
+if (status <> noErr) or (wnd_Handle = nil) Then
 	Exit;
-SelectWindow( wnd_Handle );
-ShowWindow( wnd_Handle );
-if FRender=nil then
+SelectWindow(wnd_Handle);
+ShowWindow(wnd_Handle);
+if (FRender = nil) then
 	begin
-	FRender:=FRenderClass.Create();
-	FRender.Window:=Self;
-	Result:=FRender.CreateContext();
-	if Result then 
+	FRender := FRenderClass.Create();
+	FRender.Window := Self;
+	Result := FRender.CreateContext();
+	if (Result) then 
 		FRender.Init();
 	end
 else
 	begin
-	FRender.Window:=Self;
-	Result:=FRender.SetPixelFormat();
-	if Result then
+	FRender.Window := Self;
+	Result := FRender.SetPixelFormat();
+	if (Result) then
 		Render.MakeCurrent();
-	
 	end;
-SetWTitle(wnd_Handle,FTitle);
+SetWTitle(wnd_Handle, FTitle);
 end;
 
-procedure TSGContextMacOSX.InitFullscreen(const b:boolean); 
+procedure TSGContextMacOSX.InitFullscreen(const b : TSGBoolean); 
 begin
-
 inherited InitFullscreen(b);
-
 end;
 
 end.
