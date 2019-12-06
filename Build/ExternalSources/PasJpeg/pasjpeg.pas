@@ -1,16 +1,206 @@
-unit PasJPeg;
+{ Handling JPEG files.
+  This is a reorganized version of pasjpeg.pas unit from PasJPEG package. }
 
-{$I jconfig.inc}
+{
+  Copyright 2002-2010 Michalis Kamburelis.
+
+  This file is part of "Kambi VRML game engine".
+
+  "Kambi VRML game engine" is free software; see the file COPYING.txt,
+  included in this distribution, for details about the copyright.
+
+  "Kambi VRML game engine" is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+  ----------------------------------------------------------------------------
+}
+{$MACRO ON}
+{ This file defines many symbols that I use in my sources.
+
+  I *do not* have to include it in all my units, I include it only when
+  I use some particular symbol (e.g. DELPHI) in my unit. Then I want to include
+  this file to make sure that such symbol is correctly defined
+  (e.g. that DELPHI is defined if and only if I'm compiling with Delphi).
+
+  This file does not define some basic compiler settings, like
+  syntax things (hugestrings ? which FPC mode to use ? ...) or what
+  checks to do (io checks ? range checks ? assertions ? ...).
+  Instead I depend on the fact that all my units must be compiled with
+  my ../kambi.cfg configuration file. That file defines such basic
+  compiler options. That's because I can't control everything using
+  include file, like this one. E.g. I can't say here to add HeapTrc
+  and LineInfo at the beginning of "uses" clause of current unit/program.
+  But I can say it easily in ../kambi.cfg using "-gl -gh" options.
+}
+
+{$ifndef KambiConf_ALREADY_INCLUDED}
+{$define KambiConf_ALREADY_INCLUDED}
+
+{ Configurable: define KAMBI_VRMLENGINE_LGPL to compile only
+  components available on permissive LGPL (see
+  http://vrmlengine.sourceforge.net/kambi_vrml_game_engine.php#section_license) }
+{ $define KAMBI_VRMLENGINE_LGPL}
+
+{ Define KAMBI_HAS_NURBS only when not defined KAMBI_VRMLENGINE_LGPL.
+  NURBS implementatton uses GPL-only (strict) code from White Dune. }
+{$define KAMBI_HAS_NURBS}
+{$ifdef KAMBI_VRMLENGINE_LGPL}
+  {$undef KAMBI_HAS_NURBS}
+{$endif}
+
+{ According to Borland starting from Delphi 6 MSWINDOWS
+  is the preferred symbol to mark Windows-only code
+  (that is not necessarily tied only to 32-bit Windows).
+  But older Delphi and FPC 1.0.x did not define this symbol,
+  I fix this below. }
+{$ifdef WIN32} {$define MSWINDOWS} {$endif}
+
+{ A hack to detect Kylix 1, that AFAIK does not define any VERxxx }
+{$IFNDEF FPC} {$ifdef LINUX} {$define VER140} {$endif} {$endif}
+
+{ Symbols to check that we're compiled with Delphi (DELPHI symbol)
+  and Delphi version.
+
+  Note that Delphi 6 = Kylix 1. To differentiate between Delphi on Windows
+  and Kylix use MSWINDOWS / LINUX symbols. }
+{$ifdef VER80}  {$define DELPHI}                                                                                     {$endif}
+{$ifdef VER90}  {$define DELPHI}                                                                                     {$endif}
+{$ifdef VER93}  {$define DELPHI}                                                                                     {$endif}
+{$ifdef VER100} {$define DELPHI}                                                                                     {$endif}
+{$ifdef VER110} {$define DELPHI}                                                                                     {$endif}
+{$ifdef VER120} {$define DELPHI} {$define DELPHI4_UP}                                                                {$endif}
+{$ifdef VER125} {$define DELPHI} {$define DELPHI4_UP}                                                                {$endif}
+{$ifdef VER130} {$define DELPHI} {$define DELPHI4_UP} {$define DELPHI5_UP}                                           {$endif}
+{$ifdef VER140} {$define DELPHI} {$define DELPHI4_UP} {$define DELPHI5_UP} {$define DELPHI6_UP}                      {$endif}
+{$ifdef VER150} {$define DELPHI} {$define DELPHI4_UP} {$define DELPHI5_UP} {$define DELPHI6_UP} {$define DELPHI7_UP} {$endif}
+
+{ Borland does not define UNIX symbol, but I often use it. }
+{$ifdef DELPHI} {$ifdef LINUX} {$define UNIX} {$endif} {$endif}
+
+{ Does compiler support various things ?
+  DEFPARS - Default parameters,
+  SUPPORTS_INTERFACE - interfaces }
+{$ifdef DELPHI4_UP}
+  {$define DEFPARS}
+  {$define SUPPORTS_INTERFACE}
+{$endif}
+{$ifdef FPC}
+  {$ifndef VER1_0}
+    {$define DEFPARS}
+    {$define SUPPORTS_INTERFACE}
+  {$endif}
+{$endif}
+
+{ I don't like Delphi warnings that "faXxx is specific to platform" }
+{$ifdef DELPHI} {$warn SYMBOL_PLATFORM OFF} {$endif}
+
+{ Always define USE_LIBC under FPC 1.0.x under UNIX,
+  see README.use_libc }
+{$ifdef FPC} {$ifdef VER1_0} {$ifdef UNIX}
+  {$define USE_LIBC}
+{$endif} {$endif} {$endif}
+
+(*EXTENDED_EQUALS_DOUBLE should be defined when Extended type is
+  the same thing as Double type on this platform.
+
+  One typical case when this is important is when you overload
+  one procedure like
+    p(single)
+    p(double)
+    p(extended)
+  In such cases you must do it like this:
+    p(single)
+    p(double)
+    {$ifndef EXTENDED_EQUALS_DOUBLE} p(extended) {$endif}
+
+  According to FPC docs (Programmers Manual, 8.2.0: floating point types),
+  there's no Extended (i.e. Extended = Double) for most of non-i386 architectures.
+  Exception to the above is Linux on x86-64, that allows to use normal Extended.
+  Maybe Darwin on x86-64 also?
+*)
+{$ifdef FPC}
+  {$ifndef FPC_HAS_TYPE_EXTENDED}
+    {$define EXTENDED_EQUALS_DOUBLE}
+  {$endif}
+{$endif}
+
+{$ifdef FPC}
+  { We do *not* define inline functions/methods when compiling from
+    Lazarus package. This is to workaround FPC bug
+    http://bugs.freepascal.org/view.php?id=12223 }
+  {$ifndef KAMBI_FROM_LAZARUS_PACKAGE}
+    {$define SUPPORTS_INLINE}
+  {$endif}
+
+  {$ifdef VER2_0}   {$define USE_KAMBI_XMLREAD} {$endif}
+  {$ifdef VER2_2_0} {$define USE_KAMBI_XMLREAD} {$endif}
+  {$ifdef VER2_2_2} {$define USE_KAMBI_XMLREAD} {$endif}
+
+  { Do not use KambiXMLRead for FPC > 2.2.2, no need
+    (http://bugs.freepascal.org/view.php?id=11957 already fixed there)
+    and no way (not compatible, internal things in DOM unit changed). }
+
+  {$ifndef USE_KAMBI_XMLREAD}
+    {$define KambiXMLRead := XMLRead}
+  {$endif}
+
+  {$define TOBJECT_HAS_EQUALS}
+  {$ifdef VER2_0}   {$undef TOBJECT_HAS_EQUALS} {$endif}
+  {$ifdef VER2_2_0} {$undef TOBJECT_HAS_EQUALS} {$endif}
+  {$ifdef VER2_2_2} {$undef TOBJECT_HAS_EQUALS} {$endif}
+  {$ifdef VER2_2_4} {$undef TOBJECT_HAS_EQUALS} {$endif}
+  {$ifdef VER2_4_0} {$undef TOBJECT_HAS_EQUALS} {$endif}
+{$endif}
+
+{$endif not KambiConf_ALREADY_INCLUDED}
+
+{$MODE DELPHI}
+unit pasjpeg;
+
+(*Look for string "Kambi" to find my changes.
+  Mainly, stream and error managers were moved to separate units
+  (and error manager changed greatly).
+  Also {$I jconfig.inc} was removed (it is not needed for this unit)
+  so this file can be used even if someone does not have pasjpeg sources
+  with FPC (e.g. he has a precompiled FPC snapshot or install).
+
+  TODO: I'm planning to hack this file even
+  more some day so that I can make nice&clean implementation of
+  Images_jpeg.inc
+*)
+
+{ Instead of including jconfig.inc I just always define here
+  BITS_IN_JSAMPLE_IS_8 (but you must make sure that PasJPEG is really compiled
+  with BITS_IN_JSAMPLE_IS_8 defined ! If you're using standard FPC pasjpeg
+  package then this is valid.) }
+{$define BITS_IN_JSAMPLE_IS_8}
+
+{ Turned off some checks to be safe, I know that some units in pasjpeg
+  require range/overflow checking OFF (i.e. it is sometimes legal for them
+  to do some overflow and/or range error). I'm not sure whether this
+  unit wants it. But I want to be safe so I turned it off. }
+{$R-,Q-}
+
+{ inmemory is always treated as false under Unix and / or FPC -
+  because FPC+Linux / Kylix / FPC+Win32 compiled applications
+  go crazy and crash when they try to handle large jpegs with
+  inmemory=true. }
+{$ifdef FPC}  {$define INMEMORY_FALSE} {$endif}
+{$ifdef UNIX} {$define INMEMORY_FALSE} {$endif}
 
 interface
 
 uses
-  Classes, SysUtils;
+	 Classes
+	,SysUtils
+	;
 
 type
-  EJPEG = class(Exception);
+  { }
   JPEG_ProgressMonitor = procedure(Percent: Integer);
 
+{ }
 procedure LoadJPEG(
   {streams:}
   const infile, outfile: TStream; inmemory: boolean;
@@ -19,6 +209,7 @@ procedure LoadJPEG(
   {progress monitor}
   callback: JPEG_ProgressMonitor);
 
+{ }
 procedure StoreJPEG(
   {streams}
   const infile, outfile: TStream; inmemory: boolean;
@@ -27,10 +218,11 @@ procedure StoreJPEG(
   {progress monitor}
   callback: JPEG_ProgressMonitor);
 
+procedure SaveJPEG(const infile, outfile: TStream);overload;
+
 implementation
 
 uses
-//  WinTypes, Dialogs,
   {PASJPG10 library}
   jmorecfg,
   jpeglib,
@@ -45,37 +237,40 @@ uses
   jcapistd,
   jcomapi;
 
-{ ---------------------------------------------------------------------- }
-{   source manager to read compressed data                               }
-{   for reference: JDATASRC.PAS in PASJPG10 library                      }
-{ ---------------------------------------------------------------------- }
-
-type
-  my_src_ptr = ^my_source_mgr;
-  my_source_mgr = record
-    pub    : jpeg_source_mgr;   {public fields}
-    infile : TStream;           {source stream}
-    buffer : JOCTET_FIELD_PTR;  {start of buffer}
-    start_of_file : boolean;    {have we gotten any data yet?}
+ type
+  { }
+  passtream_source_mgr = record
+    pub    : jpeg_source_mgr;   {< public fields}
+    infile : TStream;           {< source stream}
+    buffer : JOCTET_FIELD_PTR;  {< start of buffer}
+    start_of_file : boolean;    {< have we gotten any data yet?}
   end;
+  passtream_source_ptr = ^passtream_source_mgr;
 
+  passtream_dest_mgr = record
+    pub     : jpeg_destination_mgr;  {< public fields}
+    outfile : TStream;               {< target stream}
+    buffer  : JOCTET_FIELD_PTR;      {< start of buffer}
+  end;
+  passtream_dest_ptr = ^passtream_dest_mgr;
+  
 const
   INPUT_BUF_SIZE = 4096;
 
-procedure init_source(cinfo : j_decompress_ptr); far;
+procedure init_source(cinfo : j_decompress_ptr);
 var
-  src : my_src_ptr;
+  src : passtream_source_ptr;
 begin
-  src := my_src_ptr(cinfo^.src);
+  src := passtream_source_ptr(cinfo^.src);
   src^.start_of_file := TRUE;
 end;
 
-function fill_input_buffer(cinfo : j_decompress_ptr) : boolean; far;
+function fill_input_buffer(cinfo : j_decompress_ptr) : boolean;
 var
-  src : my_src_ptr;
+  src : passtream_source_ptr;
   nbytes : size_t;
 begin
-  src := my_src_ptr(cinfo^.src);
+  src := passtream_source_ptr(cinfo^.src);
   nbytes := src^.infile.Read(src^.buffer^, INPUT_BUF_SIZE);
   if (nbytes <= 0) then begin
     if (src^.start_of_file) then   {Treat empty input file as fatal error}
@@ -93,11 +288,11 @@ begin
 end;
 
 procedure skip_input_data(cinfo : j_decompress_ptr;
-                      num_bytes : long); far;
+                      num_bytes : long);
 var
-  src : my_src_ptr;
+  src : passtream_source_ptr;
 begin
-  src := my_src_ptr (cinfo^.src);
+  src := passtream_source_ptr (cinfo^.src);
   if (num_bytes > 0) then begin
     while (num_bytes > long(src^.pub.bytes_in_buffer)) do begin
       Dec(num_bytes, long(src^.pub.bytes_in_buffer));
@@ -110,31 +305,31 @@ begin
   end;
 end;
 
-procedure term_source(cinfo : j_decompress_ptr); far;
+procedure term_source(cinfo : j_decompress_ptr);
 begin
   { no work necessary here }
 end;
 
-procedure jpeg_stream_src(cinfo : j_decompress_ptr; const infile: TStream);
+procedure jpeg_stream_source(cinfo : j_decompress_ptr; const infile: TStream);
 var
-  src : my_src_ptr;
+  src : passtream_source_ptr;
 begin
   if (cinfo^.src = nil) then begin {first time for this JPEG object?}
     cinfo^.src := jpeg_source_mgr_ptr(
       cinfo^.mem^.alloc_small (j_common_ptr(cinfo), JPOOL_PERMANENT,
-                                  SIZEOF(my_source_mgr)) );
-    src := my_src_ptr (cinfo^.src);
+                                  SIZEOF(passtream_source_mgr)) );
+    src := passtream_source_ptr (cinfo^.src);
     src^.buffer := JOCTET_FIELD_PTR(
       cinfo^.mem^.alloc_small (j_common_ptr(cinfo), JPOOL_PERMANENT,
                                   INPUT_BUF_SIZE * SIZEOF(JOCTET)) );
   end;
-  src := my_src_ptr (cinfo^.src);
+  src := passtream_source_ptr (cinfo^.src);
   {override pub's method pointers}
-  src^.pub.init_source := init_source;
-  src^.pub.fill_input_buffer := fill_input_buffer;
-  src^.pub.skip_input_data := skip_input_data;
-  src^.pub.resync_to_restart := jpeg_resync_to_restart; {use default method}
-  src^.pub.term_source := term_source;
+  src^.pub.init_source := {$ifdef FPC_OBJFPC} @ {$endif} {$ifdef DELPHI} @ {$endif} init_source;
+  src^.pub.fill_input_buffer := {$ifdef FPC_OBJFPC} @ {$endif} fill_input_buffer;
+  src^.pub.skip_input_data := {$ifdef FPC_OBJFPC} @ {$endif} skip_input_data;
+  src^.pub.resync_to_restart := {$ifdef FPC_OBJFPC} @ {$endif} jpeg_resync_to_restart; {use default method}
+  src^.pub.term_source := {$ifdef FPC_OBJFPC} @ {$endif} term_source;
   {define our fields}
   src^.infile := infile;
   src^.pub.bytes_in_buffer := 0;   {forces fill_input_buffer on first read}
@@ -144,24 +339,24 @@ end;
 { ---------------------------------------------------------------------- }
 {   destination manager to write compressed data                         }
 {   for reference: JDATADST.PAS in PASJPG10 library                      }
+{
+  Kambi notes : this code was originally in pasjpeg.pas written by Nomssi.
+  I only changed name of manager from my_dest_mgr to
+  passtream_dest_mgr since this is the purpose of this manager :
+  write destination data to a pascal stream - that is, TStream class.
+  Almost whole Nomsii code for this looks good, I did only minimal changes
+  not worth noticing !
+}
 { ---------------------------------------------------------------------- }
-
-type
-  my_dest_ptr = ^my_destination_mgr;
-  my_destination_mgr = record
-    pub     : jpeg_destination_mgr;  {public fields}
-    outfile : TStream;               {target stream}
-    buffer  : JOCTET_FIELD_PTR;      {start of buffer}
-  end;
 
 const
   OUTPUT_BUF_SIZE = 4096;
 
-procedure init_destination(cinfo : j_compress_ptr); far;
+procedure init_destination(cinfo : j_compress_ptr);
 var
-  dest : my_dest_ptr;
+  dest : passtream_dest_ptr;
 begin
-  dest := my_dest_ptr(cinfo^.dest);
+  dest := passtream_dest_ptr(cinfo^.dest);
   dest^.buffer := JOCTET_FIELD_PTR(
       cinfo^.mem^.alloc_small (j_common_ptr(cinfo), JPOOL_IMAGE,
                                   OUTPUT_BUF_SIZE * SIZEOF(JOCTET)) );
@@ -169,11 +364,11 @@ begin
   dest^.pub.free_in_buffer := OUTPUT_BUF_SIZE;
 end;
 
-function empty_output_buffer(cinfo : j_compress_ptr) : boolean; far;
+function empty_output_buffer(cinfo : j_compress_ptr) : boolean;
 var
-  dest : my_dest_ptr;
+  dest : passtream_dest_ptr;
 begin
-  dest := my_dest_ptr(cinfo^.dest);
+  dest := passtream_dest_ptr(cinfo^.dest);
   if (dest^.outfile.Write(dest^.buffer^, OUTPUT_BUF_SIZE)
         <> size_t(OUTPUT_BUF_SIZE))
   then
@@ -183,12 +378,12 @@ begin
   empty_output_buffer := TRUE;
 end;
 
-procedure term_destination(cinfo : j_compress_ptr); far;
+procedure term_destination(cinfo : j_compress_ptr);
 var
-  dest : my_dest_ptr;
+  dest : passtream_dest_ptr;
   datacount : size_t;
 begin
-  dest := my_dest_ptr (cinfo^.dest);
+  dest := passtream_dest_ptr (cinfo^.dest);
   datacount := OUTPUT_BUF_SIZE - dest^.pub.free_in_buffer;
   {write any data remaining in the buffer}
   if (datacount > 0) then
@@ -198,21 +393,174 @@ end;
 
 procedure jpeg_stream_dest(cinfo : j_compress_ptr; const outfile: TStream);
 var
-  dest : my_dest_ptr;
+  dest : passtream_dest_ptr;
 begin
   if (cinfo^.dest = nil) then begin {first time for this JPEG object?}
     cinfo^.dest := jpeg_destination_mgr_ptr(
       cinfo^.mem^.alloc_small (j_common_ptr(cinfo), JPOOL_PERMANENT,
-                                  SIZEOF(my_destination_mgr)) );
+                                  SIZEOF(passtream_dest_mgr)) );
   end;
-  dest := my_dest_ptr (cinfo^.dest);
+  dest := passtream_dest_ptr (cinfo^.dest);
   {override pub's method pointers}
-  dest^.pub.init_destination := init_destination;
-  dest^.pub.empty_output_buffer := empty_output_buffer;
-  dest^.pub.term_destination := term_destination;
+  dest^.pub.init_destination := {$ifdef FPC_OBJFPC} @ {$endif} init_destination;
+  dest^.pub.empty_output_buffer := {$ifdef FPC_OBJFPC} @ {$endif} empty_output_buffer;
+  dest^.pub.term_destination := {$ifdef FPC_OBJFPC} @ {$endif} term_destination;
   {define our fields}
   dest^.outfile := outfile;
 end;
+
+type
+		EJPEG = class(Exception);
+
+	pascal_error_mgr = record
+		pub: jpeg_error_mgr;
+		end;
+	pascal_error_ptr = ^pascal_error_mgr;
+
+procedure error_exit (cinfo : j_common_ptr);
+var
+  buffer : string;
+begin
+ cinfo^.err^.format_message(cinfo, buffer);
+ raise EJPEG.Create(buffer);
+end;
+
+procedure output_message (cinfo : j_common_ptr);
+var
+ buffer : string;
+begin
+ cinfo^.err^.format_message (cinfo, buffer);
+
+ { to nie jest dobre takie wypisywanie czegos na stdout/err w dowolnej chwili
+   lub przerywanie programu zeby wyswietlic MessageBoxa. Pomijam juz nawet
+   fakt ze pod Windowsem obydwie metody moga zawiesc (aplikacje GUI
+   nie maja stdout a co do MessageBoxa to cos nienajlepiej sie wyswietla
+   gdy mamy otwarte okno OpenGL'a fullscreen).
+   Tym samym wiec rzeczy ponizej sa zakomentarzowane - nigdy nie wyswietlaj
+   warningow czy czegos takiego. Moduly jpeg'a moga tylko zaladowac obrazek
+   lub rzucic wyjatek. }
+
+{ TODO: jak tylko bedzie potrzeba i okazja, zrobi sie jednak jakis mechanizm
+  wypuszczania tych warningow na zewnatrz, np. zmienna OnJpegWarning }
+
+(*
+ { show message using WinAPI or Writeln }
+ {$ifdef MSWINDOWS} if not IsConsole then MessageBox(0,PChar(buffer),'jpeg message',MB_OK) else
+ {$else}            Writeln(ErrOutput, buffer);
+ {$endif}
+*)
+end;
+
+{ Kambi*: copied from jerror.pas to workaround a bug in pasjpeg (original
+  PasJPEG from Nomssi pages and in FPC pasjpeg package) that defined
+  NO_FORMAT symbol for FPC. This makes incorrect (unformatted, with
+  things like '%d' left !) error messages.
+
+  ALL below is exactly copied from jerror.format_message (it's just that
+  NO_FORMAT is undefined here). }
+procedure format_message (cinfo : j_common_ptr; var buffer : string);
+var
+  err : jpeg_error_mgr_ptr;
+  msg_code : J_MESSAGE_CODE;
+  msgtext : string;
+  isstring : boolean;
+begin
+  err := cinfo^.err;
+  msg_code := J_MESSAGE_CODE(err^.msg_code);
+  msgtext := '';
+
+  { Look up message string in proper table }
+  if (msg_code > JMSG_NOMESSAGE)
+    and (msg_code <= J_MESSAGE_CODE(err^.last_jpeg_message)) then
+  begin
+    msgtext := err^.jpeg_message_table^[msg_code];
+  end
+  else
+  if (err^.addon_message_table <> NIL) and
+     (msg_code >= err^.first_addon_message) and
+     (msg_code <= err^.last_addon_message) then
+  begin
+    msgtext := err^.addon_message_table^[J_MESSAGE_CODE
+           (ord(msg_code) - ord(err^.first_addon_message))];
+  end;
+
+  { Defend against bogus message number }
+  if (msgtext = '') then
+  begin
+    err^.msg_parm.i[0] := int(msg_code);
+    msgtext := err^.jpeg_message_table^[JMSG_NOMESSAGE];
+  end;
+
+  { Check for string parameter, as indicated by %s in the message text }
+  isstring := Pos('%s', msgtext) > 0;
+
+  { Format the message into the passed buffer }
+  if (isstring) then
+    buffer := Concat(msgtext, err^.msg_parm.s)
+  else
+  begin
+ {$IFDEF VER70}
+    FormatStr(buffer, msgtext, err^.msg_parm.i);
+ {$ELSE}
+   {$IFDEF NO_FORMAT}
+   buffer := msgtext;
+   {$ELSE}
+   buffer := Format(msgtext, [
+        err^.msg_parm.i[0], err^.msg_parm.i[1],
+        err^.msg_parm.i[2], err^.msg_parm.i[3],
+        err^.msg_parm.i[4], err^.msg_parm.i[5],
+        err^.msg_parm.i[6], err^.msg_parm.i[7] ]);
+   {$ENDIF}
+ {$ENDIF}
+  end;
+end;
+
+function jpeg_pascal_error (var err : pascal_error_mgr) : jpeg_error_mgr_ptr;
+begin
+ jpeg_std_error(err.pub);
+ err.pub.error_exit := {$ifdef FPC_OBJFPC} @ {$endif} error_exit;
+ err.pub.output_message := {$ifdef FPC_OBJFPC} @ {$endif} output_message;
+ { Kambi+, register ours format_message }
+ err.pub.format_message := {$ifdef FPC_OBJFPC} @ {$endif} format_message;
+ result:=@err;
+end;
+
+{ Kambi+ : things from Windows unit (TbitmapXxx types),
+  needed under other OSes }
+
+type
+  PBitmapFileHeader = ^TBitmapFileHeader;
+  TBitmapFileHeader = packed record
+    bfType: Word;
+    bfSize: LongWord;
+    bfReserved1: Word;
+    bfReserved2: Word;
+    bfOffBits: LongWord;
+  end;
+
+  PBitmapInfoHeader = ^TBitmapInfoHeader;
+  TBitmapInfoHeader = packed record
+    biSize: LongWord;
+    biWidth: Longint;
+    biHeight: Longint;
+    biPlanes: Word;
+    biBitCount: Word;
+    biCompression: LongWord;
+    biSizeImage: LongWord;
+    biXPelsPerMeter: Longint;
+    biYPelsPerMeter: Longint;
+    biClrUsed: LongWord;
+    biClrImportant: LongWord;
+  end;
+
+  PBitmapCoreHeader = ^TBitmapCoreHeader;
+  TBitmapCoreHeader = packed record { structures for defining DIBs - used to get to color table }
+    bcSize: LongWord;
+    bcWidth: Word;
+    bcHeight: Word;
+    bcPlanes: Word;
+    bcBitCount: Word;
+  end;
 
 { ------------------------------------------------------------------------ }
 {   Bitmap writing routines                                                }
@@ -254,7 +602,7 @@ type
     buffer_height : JDIMENSION;     {normally, we'll use 1}
     {image buffer}
     image_buffer : jvirt_sarray_ptr;{needed to reverse row order BMP<>JPG}
-    image_buffer_height : JDIMENSION;  {}
+    image_buffer_height : JDIMENSION;  { }
     cur_output_row : JDIMENSION;    {next row# to write to virtual array}
     row_offset : INT32;             {position of next row to write to BMP}
   end;
@@ -425,7 +773,7 @@ end;
 procedure write_bmp_image (cinfo : j_decompress_ptr;
                             dest : bmp_dest_ptr);
 var
-  row, col  : JDIMENSION;
+  row  : JDIMENSION;
   image_ptr : JSAMPARRAY;
   data_ptr  : JSAMPLE_PTR;
 begin
@@ -700,7 +1048,7 @@ begin
   end;
   image_ptr := cinfo^.mem^.access_virt_sarray ( j_common_ptr (cinfo),
     source^.image_buffer, row, JDIMENSION (1), FALSE);
-  {}
+
   inptr := JSAMPLE_PTR(image_ptr^[0]);
   case source^.bits_per_pixel of
      8: begin
@@ -736,7 +1084,7 @@ end;
 procedure read_bmp_image(cinfo : j_compress_ptr;
                         source : bmp_source_ptr);
 var
-  row, col : JDIMENSION;
+  row : JDIMENSION;
   image_ptr : JSAMPARRAY;
   inptr : JSAMPLE_PTR;
 begin
@@ -781,7 +1129,7 @@ type
     total_extra_passes : INT;
   end;
 
-procedure progress_monitor(cinfo: j_common_ptr); far;
+procedure progress_monitor(cinfo: j_common_ptr);
 var
   progress : my_progress_ptr;
   total_passes : INT;
@@ -794,7 +1142,7 @@ begin
     ( ((progress^.pub.completed_passes+progress^.completed_extra_passes)*100) +
       ((progress^.pub.pass_counter*100) div progress^.pub.pass_limit)
     ) div total_passes;
-  {}
+
   if percent_done <> progress^.percent_done then begin
     progress^.percent_done := percent_done;
     progress^.proc(percent_done);
@@ -805,10 +1153,10 @@ procedure jpeg_my_progress(cinfo : j_common_ptr;
                         progress : my_progress_ptr;
                         callback : JPEG_ProgressMonitor);
 begin
-  if @callback = nil then
+  if {$ifndef FPC_OBJFPC} @ {$endif} callback = nil then
     Exit;
   {set method}
-  progress^.pub.progress_monitor := progress_monitor;
+  progress^.pub.progress_monitor := {$ifdef FPC_OBJFPC} @ {$endif} progress_monitor;
   {set fields}
   progress^.proc := callback;
   progress^.percent_done := -1;
@@ -823,95 +1171,14 @@ var
   progress : my_progress_ptr;
 begin
   progress := my_progress_ptr(cinfo^.progress);
+
+  if progress = nil then exit;
+   {Kambi+, progress may be not initialized if callback = nil in call to Store/LoadJPEG}
+
   if progress^.percent_done <> 100 then begin
     progress^.percent_done := 100;
     progress^.proc(progress^.percent_done);
   end;
-end;
-
-{ ------------------------------------------------------------------------ }
-{   JPEG error handler                                                     }
-{   for reference: JERROR.PAS in PASJPG10 library                          }
-{                  LIPJPEG.DOC in \JPEG\C directory                        }
-{   NOTE: we have replaced jpeg_std_error because it stores a static       }
-{         message table (JDEFERR.PAS) in the jpeg_message_table field.     }
-{ ------------------------------------------------------------------------ }
-
-type
-  my_error_ptr = ^my_error_mgr;
-  my_error_mgr = record
-    pub: jpeg_error_mgr;
-  end;
-
-procedure error_exit (cinfo : j_common_ptr); far;
-var
-  buffer : string;
-begin
-  cinfo^.err^.format_message(cinfo, buffer);
-  raise EJPEG.Create(buffer);
-end;
-
-procedure emit_message (cinfo : j_common_ptr; msg_level : int); far;
-var
-  err : jpeg_error_mgr_ptr;
-begin
-  err := cinfo^.err;
-  if (msg_level < 0) then begin
-    {It's a warning message. Since corrupt files may generate many warnings,}
-    {the policy implemented here is to show only the first warning,}
-    {unless trace_level >= 3}
-    if (err^.num_warnings = 0) or (err^.trace_level >= 3) then
-      err^.output_message(cinfo);
-    {Always count warnings in num_warnings}
-    Inc( err^.num_warnings );
-  end else
-    {It's a trace message. Show it if trace_level >= msg_level}
-    if (err^.trace_level >= msg_level) then
-      err^.output_message (cinfo);
-end;
-
-procedure output_message (cinfo : j_common_ptr); far;
-var
-  buffer : string;
-begin
-  cinfo^.err^.format_message (cinfo, buffer);
-  {message dialog}
-  ShowMessage(buffer);
-end;
-
-procedure format_message (cinfo : j_common_ptr; var buffer : string); far;
-begin
-  buffer :=
-    'JPEG ERROR -- #' + IntToStr(cinfo^.err^.msg_code);
-end;
-
-procedure reset_error_mgr (cinfo : j_common_ptr); far;
-begin
-  cinfo^.err^.num_warnings := 0;
-  {trace_level is not reset since it is an application-supplied parameter}
-  cinfo^.err^.msg_code := 0;      {may be useful as a flag for "no error"}
-end;
-
-function jpeg_my_error (var err : my_error_mgr) : jpeg_error_mgr_ptr;
-begin
-  {methods}
-  err.pub.error_exit := error_exit;
-  err.pub.emit_message := emit_message;
-  err.pub.output_message := output_message;
-  err.pub.format_message := format_message;
-  err.pub.reset_error_mgr := reset_error_mgr;
-  {fields}
-  err.pub.trace_level := 0;         {default := no tracing}
-  err.pub.num_warnings := 0;        {no warnings emitted yet}
-  err.pub.msg_code := 0;            {may be useful as a flag for "no error"}
-  {message table(s)}
-  err.pub.jpeg_message_table := nil;    {we don't want to use a static table}
-  err.pub.last_jpeg_message := pred(JMSG_LASTMSGCODE);
-  err.pub.addon_message_table := nil;
-  err.pub.first_addon_message := JMSG_NOMESSAGE;   {for safety}
-  err.pub.last_addon_message := JMSG_NOMESSAGE;
-  {return result}
-  jpeg_my_error := @err;
 end;
 
 { ------------------------------------------------------------------------ }
@@ -926,17 +1193,19 @@ procedure LoadJPEG(const infile, outfile: TStream; inmemory: boolean;
                    callback: JPEG_ProgressMonitor);
 var
   cinfo : jpeg_decompress_struct;
-  err   : my_error_mgr;
+  err   : pascal_error_mgr;
   dest  : bmp_dest_ptr;
   progress : my_progress_mgr;
   num_scanlines : JDIMENSION;
 begin
+  {$ifdef INMEMORY_FALSE} inmemory:=false; {$endif}
+
   {initialize the JPEG decompression object with default error handling.}
-  cinfo.err := jpeg_my_error(err);
+  cinfo.err := jpeg_pascal_error(err);
   jpeg_create_decompress(@cinfo);
   try
     {specify the source of the compressed data}
-      jpeg_stream_src(@cinfo, infile);
+      jpeg_stream_source(@cinfo, infile);
     {progress monitor}
       jpeg_my_progress(@cinfo, @progress, callback);
     {obtain image info from header, set default decompression parameters}
@@ -974,18 +1243,20 @@ end;
 
 procedure StoreJPEG(const infile, outfile: TStream; inmemory: boolean;
                     {compression parameters:}
-                    quality: INT;
+                    quality: integer;
                     {progress monitor}
                     callback: JPEG_ProgressMonitor);
 var
   cinfo  : jpeg_compress_struct;
-  err    : my_error_mgr;
+  err    : pascal_error_mgr;
   source : bmp_source_ptr;
   progress : my_progress_mgr;
   num_scanlines : JDIMENSION;
 begin
+  {$ifdef INMEMORY_FALSE} inmemory:=false; {$endif}
+
   {initialize the JPEG compression object with default error handling.}
-  cinfo.err := jpeg_my_error(err);
+  cinfo.err := jpeg_pascal_error(err);
   jpeg_create_compress(@cinfo);
   try
     {specify the destination for the compressed data}
@@ -1020,4 +1291,11 @@ begin
   end;
 end;
 
+
+procedure SaveJPEG(const infile, outfile: TStream);overload;
+begin
+StoreJPEG(infile,outfile,False,90,nil);
+end;
+
 end.
+

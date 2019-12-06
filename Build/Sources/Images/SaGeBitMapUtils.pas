@@ -19,7 +19,6 @@ function SGDefaultSaveImageFormat(const _Channels : TSGUInt8) : TSGImageFormat; 
 function SGSaveBitMapToFile(const _Image : TSGBitMap; const _FileName : TSGString; const _Format : TSGImageFormat = SGImageFormatNull) : TSGBoolean;
 function SGSaveBitMapToStream(const _Stream : TStream; const _Image : TSGBitMap; const _Format : TSGImageFormat = SGImageFormatNull) : TSGBoolean;
 function SGSaveBitMapAsSgiaToStream(const _Stream : TStream; const _Image : TSGBitMap) : TSGBoolean;
-procedure SGSaveBitMapAsJpegToStream(const _Stream : TStream; const _Image : TSGBitMap);
 
 function SGLoadBitMapFromFile(const _FileName : TSGString) : TSGBitMap;
 function SGLoadBitMapFromStream(const _Stream : TStream; const _FileName : TSGString = '') : TSGBitMap;
@@ -70,7 +69,7 @@ SGImageFormatTga:
 	Result := LoadTGA(_Stream);
 	end;
 SGImageFormatJpeg:
-	LoadJPEGToBitMap(_Stream, Result);
+	SGLoadBitMapAsJpegToStream(_Stream, Result);
 SGImageFormatBmp:
 	LoadBMP(_Stream, Result);
 SGImageFormatSGIA:
@@ -133,18 +132,6 @@ if (Image <> nil) then
 	SGKill(Image);
 	Result := True;
 	end;
-end;
-
-procedure SGSaveBitMapAsJpegToStream(const _Stream : TStream; const _Image : TSGBitMap);
-var
-	BmpStream : TMemoryStream = nil;
-begin
-BmpStream := TMemoryStream.Create();
-SaveBMP(_Image, BmpStream);
-BmpStream.Position:=0;
-SaveJPEG(BmpStream, _Stream);
-BmpStream.Destroy();
-SGKill(BmpStream);
 end;
 
 function SGDefaultSaveImageFormat() : TSGImageFormat; overload;

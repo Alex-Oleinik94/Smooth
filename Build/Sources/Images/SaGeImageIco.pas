@@ -538,7 +538,7 @@ BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 BI_JPEG:
 	begin
 	LoadedImage := TSGBitMap.Create();
-	LoadJPEGToBitMap(_IcoImage^.FData.FEmbeddedImageData, LoadedImage);
+	SGLoadBitMapAsJpegToStream(_IcoImage^.FData.FEmbeddedImageData, LoadedImage);
 	Result := LoadedImage.DataSize() <> 0;
 	if Result then
 		_Image.CopyFrom(LoadedImage);

@@ -46,7 +46,7 @@ FStream.ReadBuffer(JpegSize, SizeOf(JpegSize));
 Stream:=TMemoryStream.Create();
 SGCopyPartStreamToStream(FStream, Stream, JpegSize);
 Stream.Position:=0;
-LoadJPEGToBitMap(Stream,BitMapRGB);
+SGLoadBitMapAsJpegToStream(Stream, BitMapRGB);
 Stream.Destroy();
 
 FStream.ReadBuffer(JpegSize, SizeOf(JpegSize));
@@ -54,7 +54,7 @@ FStream.ReadBuffer(JpegSize, SizeOf(JpegSize));
 Stream:=TMemoryStream.Create();
 SGCopyPartStreamToStream(FStream, Stream, JpegSize);
 Stream.Position:=0;
-LoadJPEGToBitMap(Stream,BitMapAlpha);
+SGLoadBitMapAsJpegToStream(Stream, BitMapAlpha);
 Stream.Destroy();
 
 FBitMap.Width:=BitMapRGB.Width;
@@ -108,7 +108,7 @@ for i:=0 to FBitMap.Width*FBitMap.Height-1 do
 	{$ENDIF}
 
 MemStream2 := TMemoryStream.Create();
-SaveJPEGFromBitMap(MemStream2,ImageBitMap);
+SGSaveBitMapAsJpegToStream(MemStream2, ImageBitMap);
 SGKill(ImageBitMap);
 SGWriteStringToStream('SGIA', Stream, False);
 JpegSize := MemStream2.Size;
@@ -136,7 +136,7 @@ for i:=0 to FBitMap.Width*FBitMap.Height-1 do
 	{$ENDIF}
 
 MemStream2 := TMemoryStream.Create();
-SaveJPEGFromBitMap(MemStream2,ImageBitMap);
+SGSaveBitMapAsJpegToStream(MemStream2, ImageBitMap);
 SGKill(ImageBitMap);
 JpegSize := MemStream2.Size;
 Stream.WriteBuffer(JpegSize, SizeOf(JpegSize));
