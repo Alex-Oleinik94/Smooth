@@ -1,28 +1,28 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 
 unit SanExtension;
 
 interface
 
 uses 
-	 SaGeBase
-	,SaGeConsoleCaller
+	 SmoothBase
+	,SmoothConsoleCaller
 	;
 
-procedure SGConsoleSan(const VParams : TSGConcoleCallerParams = nil);
+procedure SConsoleSan(const VParams : TSConcoleCallerParams = nil);
 
 implementation
 
 uses
-	SaGeConsoleTools
+	SmoothConsoleTools
 	,san,sanprograms,crt,gl
 	;
 
-procedure SGConsoleSan(const VParams : TSGConcoleCallerParams = nil);
+procedure SConsoleSan(const VParams : TSConcoleCallerParams = nil);
 var
 	fogColor:array[0..3]of real = (0,0,0,1);
 begin
-GlSanCOGWAIOG(GlSanStringToPChar('SG System'));
+GlSanCOGWAIOG(GlSanStringToPChar('S System'));
 InitWindowDoska;
 
 glEnable(GL_FOG);
@@ -47,7 +47,7 @@ end;
 
 initialization
 begin
-SGOtherConsoleCaller.AddComand(@SGConsoleSan, ['san'], 'Run San');
+SOtherConsoleCaller.AddComand(@SConsoleSan, ['san'], 'Run San');
 end;
 
 END.

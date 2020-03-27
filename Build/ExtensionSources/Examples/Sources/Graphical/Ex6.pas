@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex6;
 	interface
@@ -9,100 +9,100 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeFont
-	,SaGeScreenClasses
-	,SaGeCommonStructs
-	,SaGeMesh
-	,SaGeVertexObject
-	,SaGeMaterial
-	,SaGeImage
-	,SaGeCamera
-	,SaGeFileUtils
-	,SaGeContextUtils
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothFont
+	,SmoothScreenClasses
+	,SmoothCommonStructs
+	,Smooth3dObject
+	,SmoothVertexObject
+	,SmoothMaterial
+	,SmoothImage
+	,SmoothCamera
+	,SmoothFileUtils
+	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample6=class(TSGPaintableObject)
+	TSExample6=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera : TSGCamera;
-		FMesh   : TSGCustomModel;
+		FCamera : TSCamera;
+		F3dObject   : TSCustomModel;
 		
-		FSunAngle : TSGSingle;
-		FImageBump, FImageTexture : TSGImage;
+		FSunAngle : TSSingle;
+		FImageBump, FImageTexture : TSImage;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-class function TSGExample6.ClassName():TSGString;
+class function TSExample6.ClassName():TSString;
 begin
 Result := 'Bump Mapping';
 end;
 
-constructor TSGExample6.Create(const VContext : ISGContext);
+constructor TSExample6.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
-FMesh := nil;
+F3dObject := nil;
 FSunAngle:=0;
 
-FMesh := TSGCustomModel.Create();
-FMesh.Context := Context;
+F3dObject := TSCustomModel.Create();
+F3dObject.Context := Context;
 
-FMesh.AddObject();
-FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
-FMesh.LastObject().HasNormals := True;
-FMesh.LastObject().HasTexture := True;
-FMesh.LastObject().HasColors  := False;
-FMesh.LastObject().VertexType := SGMeshVertexType3f;
-FMesh.LastObject().Vertexes   := 4;
-FMesh.LastObject().ArVertex3f[0]^.Import(-1,-1);
-FMesh.LastObject().ArVertex3f[1]^.Import(-1,1);
-FMesh.LastObject().ArVertex3f[2]^.Import(1,1);
-FMesh.LastObject().ArVertex3f[3]^.Import(1,-1);
-FMesh.LastObject().ArTexVertex[0]^.Import(0,0);
-FMesh.LastObject().ArTexVertex[1]^.Import(0,1);
-FMesh.LastObject().ArTexVertex[2]^.Import(1,1);
-FMesh.LastObject().ArTexVertex[3]^.Import(1,0);
-FMesh.LastObject().ArNormal[0]^.Import(0,0,1);
-FMesh.LastObject().ArNormal[1]^.Import(0,0,1);
-FMesh.LastObject().ArNormal[2]^.Import(0,0,1);
-FMesh.LastObject().ArNormal[3]^.Import(0,0,1);
-FMesh.LastObject().AddFaceArray();
-FMesh.LastObject().AutoSetIndexFormat(0,4);
-FMesh.LastObject().PoligonesType[0] := SGR_TRIANGLES;
-FMesh.LastObject().Faces [0] := 2;
-FMesh.LastObject().SetFaceTriangle(0,  0,  0,1,2);
-FMesh.LastObject().SetFaceTriangle(0,  1,  0,2,3);
+F3dObject.AddObject();
+F3dObject.LastObject().BumpFormat := SBumpFormatCopyTexture2f;
+F3dObject.LastObject().HasNormals := True;
+F3dObject.LastObject().HasTexture := True;
+F3dObject.LastObject().HasColors  := False;
+F3dObject.LastObject().VertexType := S3dObjectVertexType3f;
+F3dObject.LastObject().Vertexes   := 4;
+F3dObject.LastObject().ArVertex3f[0]^.Import(-1,-1);
+F3dObject.LastObject().ArVertex3f[1]^.Import(-1,1);
+F3dObject.LastObject().ArVertex3f[2]^.Import(1,1);
+F3dObject.LastObject().ArVertex3f[3]^.Import(1,-1);
+F3dObject.LastObject().ArTexVertex[0]^.Import(0,0);
+F3dObject.LastObject().ArTexVertex[1]^.Import(0,1);
+F3dObject.LastObject().ArTexVertex[2]^.Import(1,1);
+F3dObject.LastObject().ArTexVertex[3]^.Import(1,0);
+F3dObject.LastObject().ArNormal[0]^.Import(0,0,1);
+F3dObject.LastObject().ArNormal[1]^.Import(0,0,1);
+F3dObject.LastObject().ArNormal[2]^.Import(0,0,1);
+F3dObject.LastObject().ArNormal[3]^.Import(0,0,1);
+F3dObject.LastObject().AddFaceArray();
+F3dObject.LastObject().AutoSetIndexFormat(0,4);
+F3dObject.LastObject().PoligonesType[0] := SR_TRIANGLES;
+F3dObject.LastObject().Faces [0] := 2;
+F3dObject.LastObject().SetFaceTriangle(0,  0,  0,1,2);
+F3dObject.LastObject().SetFaceTriangle(0,  1,  0,2,3);
 
-FMesh.AddMaterial ().Name := 'name';
-FMesh.LastMaterial().AddDiffuseMap(SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
-FMesh.LastMaterial().AddBumpMap   (SGExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
+F3dObject.AddMaterial ().Name := 'name';
+F3dObject.LastMaterial().AddDiffuseMap(SExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'D.jpg');
+F3dObject.LastMaterial().AddBumpMap   (SExamplesDirectory + DirectorySeparator + '6' + DirectorySeparator + 'N.jpg');
 
-FMesh.LastObject().LastObjectFace()^.FMaterial := FMesh.IdentifyMaterial('name');
+F3dObject.LastObject().LastObjectFace()^.FMaterial := F3dObject.IdentifyMaterial('name');
 
 if Render.SupportedGraphicalBuffers() then
-	FMesh.LoadToVBO();
+	F3dObject.LoadToVBO();
 
-FImageBump    := FMesh.LastMaterial().ImageBump;
-FImageTexture := FMesh.LastMaterial().ImageTexture;
+FImageBump    := F3dObject.LastMaterial().ImageBump;
+FImageTexture := F3dObject.LastMaterial().ImageTexture;
 end;
 
-destructor TSGExample6.Destroy();
+destructor TSExample6.Destroy();
 begin
 FImageBump := nil;
 FImageTexture := nil;
@@ -111,36 +111,36 @@ if FCamera <> nil then
 	FCamera.Destroy();
 	FCamera := nil;
 	end;
-if FMesh <> nil then
+if F3dObject <> nil then
 	begin
-	FMesh.Destroy();
-	FMesh := nil;
+	F3dObject.Destroy();
+	F3dObject := nil;
 	end;
 inherited;
 end;
 
-procedure TSGExample6.Paint();
+procedure TSExample6.Paint();
 procedure DrawHints();
 var
-	i : TSGWord;
+	i : TSWord;
 begin
 i:= Render.Height - 70;
-Render.InitMatrixMode(SG_2D);
+Render.InitMatrixMode(S_2D);
 Render.Color3f(1,1,1);
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "1" to associate Diffuse as Diffuse and Bump as Bump.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Render.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
-i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "2" to associate Diffuse as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Render.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
-i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "3" to associate Bump as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Render.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
-i += (Screen as TSGScreenComponent).Skin.Font.FontHeight;
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "4" to associate Diffuse as Bump and Bump as Diffuse.',
-	SGVertex2fImport(0,i),SGVertex2fImport(Render.Width,i + (Screen as TSGScreenComponent).Skin.Font.FontHeight), False);
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "1" to associate Diffuse as Diffuse and Bump as Bump.',
+	SVertex2fImport(0,i),SVertex2fImport(Render.Width,i + (Screen as TSScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSScreenComponent).Skin.Font.FontHeight;
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "2" to associate Diffuse as Diffuse.',
+	SVertex2fImport(0,i),SVertex2fImport(Render.Width,i + (Screen as TSScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSScreenComponent).Skin.Font.FontHeight;
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "3" to associate Bump as Diffuse.',
+	SVertex2fImport(0,i),SVertex2fImport(Render.Width,i + (Screen as TSScreenComponent).Skin.Font.FontHeight), False);
+i += (Screen as TSScreenComponent).Skin.Font.FontHeight;
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Press "4" to associate Diffuse as Bump and Bump as Diffuse.',
+	SVertex2fImport(0,i),SVertex2fImport(Render.Width,i + (Screen as TSScreenComponent).Skin.Font.FontHeight), False);
 end;
 var
-	FSun : TSGVertex3f;
+	FSun : TSVertex3f;
 begin
 FCamera.CallAction();
 
@@ -148,65 +148,65 @@ FSunAngle += Context.ElapsedTime*0.01;
 FSun.Import(cos(FSunAngle)*2,sin(FSunAngle)*2,2);
 
 Render.Color3f(1,1,1);
-Render.BeginScene(SGR_POINTS);
+Render.BeginScene(SR_POINTS);
 Render.Vertex(FSun);
 Render.EndScene();
 
-Render.Disable(SGR_BLEND);
-Render.Enable(SGR_LIGHTING);
-Render.Enable(SGR_LIGHT0);
-Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FSun);
+Render.Disable(SR_BLEND);
+Render.Enable(SR_LIGHTING);
+Render.Enable(SR_LIGHT0);
+Render.Lightfv(SR_LIGHT0, SR_POSITION, @FSun);
 
-if FMesh.LastMaterial().EnableBump then
+if F3dObject.LastMaterial().EnableBump then
 	Render.BeginBumpMapping(@FSun);
 
-FMesh.Paint();
+F3dObject.Paint();
 
-if FMesh.LastMaterial().EnableBump then
+if F3dObject.LastMaterial().EnableBump then
 	Render.EndBumpMapping();
 
-Render.Enable(SGR_BLEND);
-Render.Disable(SGR_LIGHTING);
-Render.Disable(SGR_LIGHT0);
+Render.Enable(SR_BLEND);
+Render.Disable(SR_LIGHTING);
+Render.Disable(SR_LIGHT0);
 
 DrawHints();
-if Context.KeyPressed and (Context.KeyPressedType=SGDownKey) then
+if Context.KeyPressed and (Context.KeyPressedType=SDownKey) then
 case Context.KeyPressedChar of
 '1' : 
 	begin
-	FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
-	FMesh.LastMaterial().EnableBump := True;
-	FMesh.LastMaterial().EnableTexture := True;
-	FMesh.LastMaterial().ImageBump := FImageBump;
-	FMesh.LastMaterial().ImageTexture := FImageTexture;
+	F3dObject.LastObject().BumpFormat := SBumpFormatCopyTexture2f;
+	F3dObject.LastMaterial().EnableBump := True;
+	F3dObject.LastMaterial().EnableTexture := True;
+	F3dObject.LastMaterial().ImageBump := FImageBump;
+	F3dObject.LastMaterial().ImageTexture := FImageTexture;
 	end;
 '2' :
 	begin
-	FMesh.LastObject().BumpFormat := SGBumpFormatNone;
-	FMesh.LastMaterial().EnableBump := False;
-	FMesh.LastMaterial().EnableTexture := True;
-	FMesh.LastMaterial().ImageTexture := FImageTexture;
+	F3dObject.LastObject().BumpFormat := SBumpFormatNone;
+	F3dObject.LastMaterial().EnableBump := False;
+	F3dObject.LastMaterial().EnableTexture := True;
+	F3dObject.LastMaterial().ImageTexture := FImageTexture;
 	end;
 '3' :
 	begin
-	FMesh.LastObject().BumpFormat := SGBumpFormatNone;
-	FMesh.LastMaterial().EnableBump := False;
-	FMesh.LastMaterial().EnableTexture := True;
-	FMesh.LastMaterial().ImageTexture := FImageBump;
+	F3dObject.LastObject().BumpFormat := SBumpFormatNone;
+	F3dObject.LastMaterial().EnableBump := False;
+	F3dObject.LastMaterial().EnableTexture := True;
+	F3dObject.LastMaterial().ImageTexture := FImageBump;
 	end;
 '4' :
 	begin
-	FMesh.LastObject().BumpFormat := SGBumpFormatCopyTexture2f;
-	FMesh.LastMaterial().EnableBump := True;
-	FMesh.LastMaterial().EnableTexture := True;
-	FMesh.LastMaterial().ImageBump := FImageTexture;
-	FMesh.LastMaterial().ImageTexture := FImageBump;
+	F3dObject.LastObject().BumpFormat := SBumpFormatCopyTexture2f;
+	F3dObject.LastMaterial().EnableBump := True;
+	F3dObject.LastMaterial().EnableTexture := True;
+	F3dObject.LastMaterial().ImageBump := FImageTexture;
+	F3dObject.LastMaterial().ImageTexture := FImageBump;
 	end;
 end;
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample6, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample6, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

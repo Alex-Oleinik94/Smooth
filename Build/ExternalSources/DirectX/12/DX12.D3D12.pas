@@ -2351,27 +2351,27 @@ var D3D12GetDebugInterface : function( const riid : TGUID ; out ppvDebug ) : HRe
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD3D12 = class(TSGDll)
+	TSDllD3D12 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD3D12.SystemNames() : TSGStringList;
+class function TSDllD3D12.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'DX12.D3D12';
@@ -2380,12 +2380,12 @@ Result += 'Direct3D12';
 Result += 'D3D12';
 end;
 
-class function TSGDllD3D12.DllNames() : TSGStringList;
+class function TSDllD3D12.DllNames() : TSStringList;
 begin
 Result := D3D12_DLL;
 end;
 
-class procedure TSGDllD3D12.Free();
+class procedure TSDllD3D12.Free();
 begin
 D3D12SerializeRootSignature := nil;
 D3D12CreateRootSignatureDeserializer := nil;
@@ -2393,15 +2393,15 @@ D3D12CreateDevice := nil;
 D3D12GetDebugInterface := nil;
 end;
 
-class function TSGDllD3D12.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3D12.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -2418,6 +2418,6 @@ end;
 
 initialization
 begin
-TSGDllD3D12.Create();
+TSDllD3D12.Create();
 end;
 end.

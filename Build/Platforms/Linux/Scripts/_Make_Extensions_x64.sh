@@ -2,9 +2,9 @@
 ./_Create_Output_Directoryes.sh
 cd ./..
 if [ -e ./../Binaries/Main_Console ]; then
-	echo "====================================="
-	echo "| Compiling Extensions for Windows  |"
-	echo "====================================="
+	echo "=================================="
+	echo "| Compiling extensions for Unix  |"
+	echo "=================================="
 	target=$1
 	if [$target -eq ""]; then
 		target= "debug"

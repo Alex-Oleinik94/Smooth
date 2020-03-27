@@ -1493,11 +1493,11 @@ procedure zlibFreeMem(AppData, Block: Pointer);  cdecl;
 implementation
 
 uses 
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeSysUtils
-	,SaGeStringUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothSysUtils
+	,SmoothStringUtils
+	,SmoothLists
 	;
 
 
@@ -1539,19 +1539,19 @@ procedure zlibFreeMem(AppData, Block: Pointer); cdecl;
   end;
 
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*= Smooth DLL IMPLEMENTATION =*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllzlib = class(TSGDll)
+	TSDllzlib = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllzlib.Free();
+class procedure TSDllzlib.Free();
 begin
 zlibVersion := nil;
 deflateInit_ := nil;
@@ -1609,25 +1609,25 @@ zError := nil;
 inflateSyncPoint := nil;
 get_crc_table := nil;
 end;
-class function TSGDllzlib.SystemNames() : TSGStringList;
+class function TSDllzlib.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'zlib';
 end;
-class function TSGDllzlib.DllNames() : TSGStringList;
+class function TSDllzlib.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += libz;
 end;
-class function TSGDllzlib.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllzlib.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -1694,5 +1694,5 @@ Pointer(get_crc_table) := LoadProcedure('get_crc_table');
 end;
 
 initialization
-	TSGDllzlib.Create();
+	TSDllzlib.Create();
 end.

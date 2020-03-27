@@ -303,11 +303,11 @@ var
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeLists
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothLists
+	,SmoothSysUtils
 	
 	,Classes
 	;
@@ -379,19 +379,19 @@ begin
   end;
 end;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllVorbisFile = class(TSGDll)
+	TSDllVorbisFile = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllVorbisFile.Free();
+class procedure TSDllVorbisFile.Free();
 begin
 ov_clear := nil;
 ov_open := nil;
@@ -419,26 +419,26 @@ ov_info := nil;
 ov_comment := nil;
 ov_read := nil;
 end;
-class function TSGDllVorbisFile.SystemNames() : TSGStringList;
+class function TSDllVorbisFile.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'VorbisFile';
 Result += 'LibVorbisFile';
 end;
-class function TSGDllVorbisFile.DllNames() : TSGStringList;
+class function TSDllVorbisFile.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += VorbisfileLib;
 end;
-class function TSGDllVorbisFile.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllVorbisFile.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -479,5 +479,5 @@ initialization
 	ops_callbacks.seek_func := ops_seek_func;
 	ops_callbacks.close_func := ops_close_func;
 	ops_callbacks.tell_func := ops_tell_func;
-	TSGDllVorbisFile.Create();
+	TSDllVorbisFile.Create();
 end.

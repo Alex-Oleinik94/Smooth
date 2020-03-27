@@ -44,7 +44,7 @@ unit nvapi_lite_common;
 interface
 
 uses
-	 SaGeBase
+	 SmoothBase
 	;
 
 // ====================================================
@@ -161,11 +161,11 @@ type
 		NVAPI_D3D10_1_LIBRARY_NOT_FOUND             = -135,    // d3d10_1.dll can not be loaded
 		NVAPI_FUNCTION_NOT_FOUND                    = -136);   // Couldn't find the function in loaded dll library
 
-function SGNvApiStrStatus(const Status : NvAPI_Status) : TSGString;
+function SNvApiStrStatus(const Status : NvAPI_Status) : TSString;
 
 implementation
 
-function SGNvApiStrStatus(const Status : NvAPI_Status) : TSGString;
+function SNvApiStrStatus(const Status : NvAPI_Status) : TSString;
 begin
 case Status of
 NVAPI_OK : Result := 'NVAPI_OK';

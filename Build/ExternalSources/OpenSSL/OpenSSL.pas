@@ -979,15 +979,15 @@ var
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeSysUtils
-	,SaGeStringUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothSysUtils
+	,SmoothStringUtils
 	;
 
 var
-	LoadObjectList : TSGDllLoadObjectList = nil;
+	LoadObjectList : TSDllLoadObjectList = nil;
 {
   Compatibility functions
 }
@@ -2942,7 +2942,7 @@ end;
 
 function GetProcAddr(module: HModule; const ProcName: string): SslPtr;
 var
-	Index : TSGUInt32;
+	Index : TSUInt32;
 begin
   Result := GetProcAddress(module, PChar(ProcName));
   if LoadVerbose and (Result = nil) then
@@ -3441,32 +3441,32 @@ begin
   SetLength(Locks,0);
 end;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllOpenSSL = class(TSGDll)
+	TSDllOpenSSL = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		
-		class function ChunkNames() : TSGStringList; override;
-		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
-		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; override;
-		class function ChunksLoadJointly() : TSGBool; override;
+		class function ChunkNames() : TSStringList; override;
+		class function DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList; override;
+		class function LoadChunks(const VDlls : TSLibHandleList) : TSDllLoadObjectList; override;
+		class function ChunksLoadJointly() : TSBool; override;
 		end;
 
-class function TSGDllOpenSSL.ChunksLoadJointly() : TSGBool;
+class function TSDllOpenSSL.ChunksLoadJointly() : TSBool;
 begin
 Result := True;
 end;
 
-class function TSGDllOpenSSL.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
+class function TSDllOpenSSL.DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList;
 var
-	i : TSGUInt32;
+	i : TSUInt32;
 begin
 Result := nil;
 {$IFDEF WINDOWS}
@@ -3513,14 +3513,14 @@ end;
   {$ENDIF WINDOWS}
 end;
 
-class function TSGDllOpenSSL.ChunkNames() : TSGStringList;
+class function TSDllOpenSSL.ChunkNames() : TSStringList;
 begin
 Result := nil;
 Result += 'Utils';
 Result += 'SSL';
 end;
 
-class function TSGDllOpenSSL.SystemNames() : TSGStringList;
+class function TSDllOpenSSL.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'OpenSSL';
@@ -3528,24 +3528,24 @@ Result += 'OSSL';
 Result += 'SSL';
 end;
 
-class function TSGDllOpenSSL.DllNames() : TSGStringList;
+class function TSDllOpenSSL.DllNames() : TSStringList;
 begin
 Result := nil;
 end;
 
-class function TSGDllOpenSSL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllOpenSSL.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 begin
 Result.Clear();
 end;
 
-class procedure TSGDllOpenSSL.Free();
+class procedure TSDllOpenSSL.Free();
 begin
 DestroySSLInterface();
 end;
 
-class function TSGDllOpenSSL.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
+class function TSDllOpenSSL.LoadChunks(const VDlls : TSLibHandleList) : TSDllLoadObjectList;
 var
-	i : TSGUInt32;
+	i : TSUInt32;
 begin
 SetLength(Result, Length(VDlls));
 for i := 0 to High(Result) do
@@ -3677,7 +3677,7 @@ begin
 end;
 
 initialization
-  TSGDllOpenSSL.Create();
+  TSDllOpenSSL.Create();
   InitCriticalSection(SSLCS);
 
 finalization

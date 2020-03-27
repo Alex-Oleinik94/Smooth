@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 
 unit Ex5_Physics;
 
@@ -8,102 +8,102 @@ uses
 	 SysUtils
 	,Classes
 	
-	,SaGeBase
-	,SaGeVertexObject
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeCommonStructs
-	,SaGeRenderBase
-	,SaGeImage
-	,SaGeMatrix
+	,SmoothBase
+	,SmoothVertexObject
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothCommonStructs
+	,SmoothRenderBase
+	,SmoothImage
+	,SmoothMatrix
 	
 	,Ex5_PAPPE
 	;
 const
-	SGPBodySphere  = Ex5_PAPPE.BodySphere;
-	SGPBodyBox     = Ex5_PAPPE.BodyBox;
-	SGPBodyCapsule = Ex5_PAPPE.BodyCapsule;
-	SGPBodyMesh    = Ex5_PAPPE.BodyMesh;
-	SGPBodyHeightMap = Ex5_PAPPE.BodyHeightMap;
+	SPBodySphere  = Ex5_PAPPE.BodySphere;
+	SPBodyBox     = Ex5_PAPPE.BodyBox;
+	SPBodyCapsule = Ex5_PAPPE.BodyCapsule;
+	SPBodyMesh    = Ex5_PAPPE.BodyMesh;
+	SPBodyHeightMap = Ex5_PAPPE.BodyHeightMap;
 type
-	TSGPhysics=class;
+	TSPhysics=class;
 	
-	PSGPhysicsObject = ^ TSGPhysicsObject;
-	TSGPhysicsObject=class(TSGPaintableObject)
+	PSPhysicsObject = ^ TSPhysicsObject;
+	TSPhysicsObject=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
 			private
-		FDynamic : TSGBoolean;
+		FDynamic : TSBoolean;
 		FObject : Ex5_PAPPE.TPhysicsObject;
 		FRigidBody : Ex5_PAPPE.TPhysicsRigidBody;
-		FMesh : TSG3DObject;
-		FType : TSGLongWord;
-		FPhysicsClass : TSGPhysics;
+		F3dObject : TS3DObject;
+		FType : TSLongWord;
+		FPhysicsClass : TSPhysics;
 			public
-		procedure InitBox ( const x,y,z : TSGSingle );inline;
-		procedure InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
-		procedure InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
-		procedure InitMesh (const Mesh : TSG3DObject);
-		procedure InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
-		procedure SetDrawableMesh(const Mesh : TSG3DObject);
-		procedure SetVertex( const x,y,z : TSGFloat32 );inline;overload;
-		procedure SetVertex( const v : TSGVertex3f );inline;overload;
-		procedure RotateX(const rx : TSGFloat32 );inline;overload;
-		procedure AddObjectEnd(const x : TSGSingle = 10; const y :TSGSingle = 0.5; const z : TSGSingle = 0.8);inline;
-		function GetMatrix():TSGPointer;inline;
+		procedure InitBox ( const x,y,z : TSSingle );inline;
+		procedure InitCapsule ( const x,y : TSSingle; const z: TSLongInt );inline;
+		procedure InitSphere ( const x : TSSingle; const y : TSLongInt );inline;
+		procedure InitMesh (const Mesh : TS3DObject);
+		procedure InitHeightMapFromImage(const VFileName : TSString;const mt,md,llx,lly : TSSingle);
+		procedure SetDrawableMesh(const Mesh : TS3DObject);
+		procedure SetVertex( const x,y,z : TSFloat32 );inline;overload;
+		procedure SetVertex( const v : TSVertex3f );inline;overload;
+		procedure RotateX(const rx : TSFloat32 );inline;overload;
+		procedure AddObjectEnd(const x : TSSingle = 10; const y :TSSingle = 0.5; const z : TSSingle = 0.8);inline;
+		function GetMatrix():TSPointer;inline;
 			public
-		property Mesh : TSG3DObject read FMesh write FMesh;
+		property Object3d : TS3dObject read F3dObject write F3dObject;
 		property PhysicsObject : Ex5_PAPPE.TPhysicsObject read FObject;
-		property PhysicsClass  : TSGPhysics           read FPhysicsClass  write FPhysicsClass;
+		property PhysicsClass  : TSPhysics           read FPhysicsClass  write FPhysicsClass;
 		end;
 	
-	TSGPhysics=class(TSGPaintableObject)
+	TSPhysics=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 		procedure Update();virtual;
 			private
-		FObjects : packed array of TSGPhysicsObject;
+		FObjects : packed array of TSPhysicsObject;
 		FPhysics : Ex5_PAPPE.TPhysics;
 		FCollide : Ex5_PAPPE.TPhysicsCollide;
-		FPhysicsTiks : TSGSingle;
+		FPhysicsTiks : TSSingle;
 		FLigths  : packed array of 
 			packed record
-			FLocation : TSGVertex3f;
-			FNumber   : TSGLongWord;
+			FLocation : TSVertex3f;
+			FNumber   : TSLongWord;
 			end;
-		FDrawable : TSGBoolean;
+		FDrawable : TSBoolean;
 			private
-		function GetGravitation():TSGVertex3f;inline;
-		function GetObjectCount():TSGLongWord;inline;
-		function GetObject(const Index : TSGLongWord):TSGPhysicsObject;inline;
+		function GetGravitation():TSVertex3f;inline;
+		function GetObjectCount():TSLongWord;inline;
+		function GetObject(const Index : TSLongWord):TSPhysicsObject;inline;
 			public
-		procedure AddObjectBegin(const VType : TSGLongWord; const VDynamic: TSGBoolean);
-		function LastObject():TSGPhysicsObject;inline;
+		procedure AddObjectBegin(const VType : TSLongWord; const VDynamic: TSBoolean);
+		function LastObject():TSPhysicsObject;inline;
 		procedure Start();inline;
-		procedure AddLigth(const VNumber : TSGLongWord;const VLocation : TSGVertex3f);inline;
-		procedure SetGravitation(const v:TSGVertex3f;const EraseFrozen : TSGBoolean = False);inline;
+		procedure AddLigth(const VNumber : TSLongWord;const VLocation : TSVertex3f);inline;
+		procedure SetGravitation(const v:TSVertex3f;const EraseFrozen : TSBoolean = False);inline;
 			public
-		property VelocityMax        : TSGSingle   read FPhysics.VelocityMax        write FPhysics.VelocityMax;
-		property AngularVelocityMax : TSGSingle   read FPhysics.AngularVelocityMax write FPhysics.AngularVelocityMax;
-		property Gravitation        : TSGVertex3f read GetGravitation;
-		property Drawable           : TSGBoolean  read FDrawable                   write FDrawable;
-		property Objects[Index : TSGLongWord]:TSGPhysicsObject read GetObject;
-		property ObjectsCount       : TSGLongWord read GetObjectCount;
+		property VelocityMax        : TSSingle   read FPhysics.VelocityMax        write FPhysics.VelocityMax;
+		property AngularVelocityMax : TSSingle   read FPhysics.AngularVelocityMax write FPhysics.AngularVelocityMax;
+		property Gravitation        : TSVertex3f read GetGravitation;
+		property Drawable           : TSBoolean  read FDrawable                   write FDrawable;
+		property Objects[Index : TSLongWord]:TSPhysicsObject read GetObject;
+		property ObjectsCount       : TSLongWord read GetObjectCount;
 		end;
 
 implementation
 
 uses
-	 SaGeCommon
-	,SaGeLog
+	 SmoothCommon
+	,SmoothLog
 	;
 
-function TSGPhysics.GetObjectCount():TSGLongWord;inline;
+function TSPhysics.GetObjectCount():TSLongWord;inline;
 begin
 if FObjects<>nil then
 	Result:=Length(FObjects)
@@ -111,12 +111,12 @@ else
 	Result:=0;
 end;
 
-function TSGPhysics.GetObject(const Index : TSGLongWord):TSGPhysicsObject;inline;
+function TSPhysics.GetObject(const Index : TSLongWord):TSPhysicsObject;inline;
 begin
 Result:=FObjects[Index];
 end;
 
-procedure TSGPhysics.AddLigth(const VNumber : TSGLongWord;const VLocation : TSGVertex3f);inline;
+procedure TSPhysics.AddLigth(const VNumber : TSLongWord;const VLocation : TSVertex3f);inline;
 begin
 if FLigths=nil then
 	SetLength(FLigths,1)
@@ -126,9 +126,9 @@ FLigths[High(FLigths)].FNumber   := VNumber;
 FLigths[High(FLigths)].FLocation := VLocation;
 end;
 
-procedure TSGPhysics.SetGravitation(const v:TSGVertex3f;const EraseFrozen : TSGBoolean = False);inline;
+procedure TSPhysics.SetGravitation(const v:TSVertex3f;const EraseFrozen : TSBoolean = False);inline;
 var
-	i:TSGLongWord;
+	i:TSLongWord;
 begin
 FPhysics.Gravitation:=Ex5_PAPPE.TPhysicsVector3(v*4);
 if (FObjects<>nil) and EraseFrozen then
@@ -140,18 +140,18 @@ if (FObjects<>nil) and EraseFrozen then
 			end;
 end;
 
-function TSGPhysics.GetGravitation():TSGVertex3f;inline;
+function TSPhysics.GetGravitation():TSVertex3f;inline;
 begin
-Result:=TSGVertex3f(FPhysics.Gravitation)*0.25;
+Result:=TSVertex3f(FPhysics.Gravitation)*0.25;
 end;
 
-procedure TSGPhysics.Start();inline;
+procedure TSPhysics.Start();inline;
 begin
 Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 Ex5_PAPPE.PhysicsStart(FPhysics);
 end;
 
-function TSGPhysics.LastObject():TSGPhysicsObject;inline;
+function TSPhysics.LastObject():TSPhysicsObject;inline;
 begin
 if FObjects=nil then
 	Result:=nil
@@ -159,24 +159,24 @@ else
 	Result:=FObjects[High(FObjects)];
 end;
 
-procedure TSGPhysics.AddObjectBegin(const VType : TSGLongWord; const VDynamic: TSGBoolean);
+procedure TSPhysics.AddObjectBegin(const VType : TSLongWord; const VDynamic: TSBoolean);
 begin
 Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 if FObjects=nil then
 	SetLength(FObjects,1)
 else
 	SetLength(FObjects,Length(FObjects)+1);
-FObjects[High(FObjects)]:=TSGPhysicsObject.Create(Context);
+FObjects[High(FObjects)]:=TSPhysicsObject.Create(Context);
 FObjects[High(FObjects)].FDynamic := VDynamic;
 FObjects[High(FObjects)].FType := VType;
 FObjects[High(FObjects)].PhysicsClass:=Self;
-if VDynamic or (VType=SGPBodyHeightMap) then
+if VDynamic or (VType=SPBodyHeightMap) then
 	Ex5_PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType)
 else
 	Ex5_PAPPE.PhysicsObjectInit(FObjects[High(FObjects)].FObject,VType,Ex5_PAPPE.BodyMesh);
 end;
 
-constructor TSGPhysics.Create(const VContext : ISGContext);
+constructor TSPhysics.Create(const VContext : ISContext);
 begin
 inherited;
 FLigths:=nil;
@@ -191,9 +191,9 @@ FPhysicsTiks:=0;
 FDrawable:=True;
 end;
 
-destructor TSGPhysics.Destroy();
+destructor TSPhysics.Destroy();
 var
-	i : TSGLongWord;
+	i : TSLongWord;
 begin
 Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 if FObjects<>nil then
@@ -208,7 +208,7 @@ Ex5_PAPPE.PhysicsDone       (FPhysics);
 inherited;
 end;
 
-procedure TSGPhysics.Update();
+procedure TSPhysics.Update();
 begin
 Ex5_PAPPE.PhysicsInstance:=@FPhysics;
 
@@ -224,18 +224,18 @@ while FPhysicsTiks >= FPhysics.TimeStep do
 Ex5_PAPPE.PhysicsInterpolate(FPhysics,FPhysicsTiks/FPhysics.TimeStep);
 end;
 
-procedure TSGPhysics.Paint();
+procedure TSPhysics.Paint();
 var
-	II : TSGLongWord;
+	II : TSLongWord;
 var
-	I : TSGLongWord;
-	LigthPos : TSGVertex3f;
+	I : TSLongWord;
+	LigthPos : TSVertex3f;
 begin
 if FDrawable then
 	begin
 	if FLigths<>nil then
 		begin
-		Render.Enable(SGR_LIGHTING);
+		Render.Enable(SR_LIGHTING);
 		for i:=0 to High(FLigths) do
 			Render.Enable(FLigths[i].FNumber);
 		end;
@@ -249,8 +249,8 @@ if FDrawable then
 			if FLigths<>nil then
 				for ii:=0 to High(FLigths) do
 					begin
-					LigthPos := FLigths[ii].FLocation * TSGMatrix4x4(FObjects[i].PhysicsObject.InterpolatedTransform);
-					Render.Lightfv(FLigths[ii].FNumber, SGR_POSITION, @LigthPos);
+					LigthPos := FLigths[ii].FLocation * TSMatrix4x4(FObjects[i].PhysicsObject.InterpolatedTransform);
+					Render.Lightfv(FLigths[ii].FNumber, SR_POSITION, @LigthPos);
 					end;
 			FObjects[i].Paint();
 			Render.PopMatrix();
@@ -259,35 +259,35 @@ if FDrawable then
 	
 	if FLigths<>nil then
 		begin
-		Render.Disable(SGR_LIGHTING);
+		Render.Disable(SR_LIGHTING);
 		for i:=0 to High(FLigths) do
 			Render.Disable(FLigths[i].FNumber);
 		end;
 	end;
 end;
 
-class function TSGPhysics.ClassName():TSGString;
+class function TSPhysics.ClassName():TSString;
 begin
-Result:='TSGPhysics';
+Result:='TSPhysics';
 
 end;
 
-(* ======================TSGPhysicsObject====================== *)
+(* ======================TSPhysicsObject====================== *)
 
-constructor TSGPhysicsObject.Create(const VContext : ISGContext);
+constructor TSPhysicsObject.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
-FMesh:=nil;
+F3dObject:=nil;
 Fillchar(FObject,SizeOf(FObject),0);
 Fillchar(FRigidBody,SizeOf(FRigidBody),0);
 FDynamic:=False;
 FType:=0;
 end;
 
-destructor TSGPhysicsObject.Destroy();
+destructor TSPhysicsObject.Destroy();
 begin
-if FMesh<>nil then
-	FMesh.Destroy();
+if F3dObject<>nil then
+	F3dObject.Destroy();
 if FType<>0 then
 	begin
 	Ex5_PAPPE.PhysicsObjectDone(FObject);
@@ -297,20 +297,20 @@ if FType<>0 then
 inherited;
 end;
 
-procedure TSGPhysicsObject.Paint();
+procedure TSPhysicsObject.Paint();
 begin
-if FMesh<>nil then
+if F3dObject<>nil then
 	begin
-	FMesh.Paint();
+	F3dObject.Paint();
 	end;
 end;
 
-procedure TSGPhysicsObject.AddObjectEnd(const x : TSGSingle = 10; const y :TSGSingle = 0.5; const z : TSGSingle = 0.8);inline;
+procedure TSPhysicsObject.AddObjectEnd(const x : TSSingle = 10; const y :TSSingle = 0.5; const z : TSSingle = 0.8);inline;
 var
-	i,ii : TSGLongWord;
+	i,ii : TSLongWord;
 procedure Calculate(var AObjectMesh: TPhysicsObjectMesh);
 var
-	j:TSGLongWord;
+	j:TSLongWord;
 begin
 if AObjectMesh.NumMeshs<>0 then
 	for j:=0 to AObjectMesh.NumMeshs-1 do
@@ -320,7 +320,7 @@ if AObjectMesh.NumMeshs<>0 then
 ii+=AObjectMesh.NumTriangles;
 end;
 
-// $RANGECHECKS
+// $RANGECHECK
 {$IFOPT R+}
 	{$DEFINE RANGECHECKS_OFFED}
 	{$R-}
@@ -336,18 +336,18 @@ if AObjectMesh.NumMeshs<>0 then
 if AObjectMesh.NumTriangles<>0 then
 	for i:=0 to AObjectMesh.NumTriangles -1 do 
 		begin
-		FMesh.ArNormal[ii*3+0]^:=TSGVertex3f(Ex5_PAPPE.Vector3Norm(Ex5_PAPPE.Vector3Cross(
+		F3dObject.ArNormal[ii*3+0]^:=TSVertex3f(Ex5_PAPPE.Vector3Norm(Ex5_PAPPE.Vector3Cross(
 			Ex5_PAPPE.Vector3Sub(
 				AObjectMesh.Triangles^[I].Vertices[1],
 				AObjectMesh.Triangles^[I].Vertices[0]),
 			Ex5_PAPPE.Vector3Sub(
 				AObjectMesh.Triangles^[I].Vertices[2],
 				AObjectMesh.Triangles^[I].Vertices[0]))));
-		FMesh.ArNormal[ii*3+1]^:=FMesh.ArNormal[ii*3+0]^;
-		FMesh.ArNormal[ii*3+2]^:=FMesh.ArNormal[ii*3+0]^;
-		FMesh.ArVertex3f[ii*3+0]^:=TSGVertex3f(AObjectMesh.Triangles^[I].Vertices[0]);
-		FMesh.ArVertex3f[ii*3+1]^:=TSGVertex3f(AObjectMesh.Triangles^[I].Vertices[1]);
-		FMesh.ArVertex3f[ii*3+2]^:=TSGVertex3f(AObjectMesh.Triangles^[I].Vertices[2]);
+		F3dObject.ArNormal[ii*3+1]^:=F3dObject.ArNormal[ii*3+0]^;
+		F3dObject.ArNormal[ii*3+2]^:=F3dObject.ArNormal[ii*3+0]^;
+		F3dObject.ArVertex3f[ii*3+0]^:=TSVertex3f(AObjectMesh.Triangles^[I].Vertices[0]);
+		F3dObject.ArVertex3f[ii*3+1]^:=TSVertex3f(AObjectMesh.Triangles^[I].Vertices[1]);
+		F3dObject.ArVertex3f[ii*3+2]^:=TSVertex3f(AObjectMesh.Triangles^[I].Vertices[2]);
 		ii+=1;
 		end;
 end;
@@ -362,44 +362,44 @@ if FDynamic then
 	Ex5_PAPPE.PhysicsRigidBodyInit(FRigidBody,@FObject,x,y,z);
 if (FPhysicsClass<>nil) and FPhysicsClass.Drawable then
 	begin
-	FMesh := TSG3DObject.Create();
-	FMesh.Context := Context;
-	FMesh.QuantityFaceArrays := 0;
-	FMesh.HasColors := False;
-	FMesh.ObjectPoligonesType:=SGR_TRIANGLES;
-	FMesh.ObjectColor:=SGColor4fFromUInt32($FFFFFF);
-	FMesh.EnableCullFace:=False;
-	FMesh.HasNormals:=True;
+	F3dObject := TS3DObject.Create();
+	F3dObject.Context := Context;
+	F3dObject.QuantityFaceArrays := 0;
+	F3dObject.HasColors := False;
+	F3dObject.ObjectPoligonesType:=SR_TRIANGLES;
+	F3dObject.ObjectColor:=SColor4fFromUInt32($FFFFFF);
+	F3dObject.EnableCullFace:=False;
+	F3dObject.HasNormals:=True;
 	ii:=0;
 	if FObject.NumMeshs<>0 then
 		for i:=0 to FObject.NumMeshs-1 do
 			Calculate(FObject.Meshs^[i]^);
-	FMesh.SetVertexLength(ii*3);
+	F3dObject.SetVertexLength(ii*3);
 	ii:=0;
 	if FObject.NumMeshs<>0 then
 		for i:=0 to FObject.NumMeshs-1 do
 			AddingTriangles(FObject.Meshs^[i]^);
 	if Render.SupportedGraphicalBuffers() then
-		FMesh.LoadToVBO();
+		F3dObject.LoadToVBO();
 	end;
 end;
 
-procedure TSGPhysicsObject.RotateX(const rx : TSGFloat32 );inline;overload;
+procedure TSPhysicsObject.RotateX(const rx : TSFloat32 );inline;overload;
 begin
 Ex5_PAPPE.PhysicsObjectSetMatrix(FObject,Ex5_PAPPE.Matrix4x4TermMul(FObject.Transform,Ex5_PAPPE.Matrix4x4RotateX(rx*Ex5_PAPPE.DEG2RAD)));
 end;
 
-procedure TSGPhysicsObject.SetVertex( const x,y,z : TSGFloat32 );inline;overload;
+procedure TSPhysicsObject.SetVertex( const x,y,z : TSFloat32 );inline;overload;
 begin
 Ex5_PAPPE.PhysicsObjectSetVector(FObject,Ex5_PAPPE.Vector3(x,y,z));
 end;
 
-procedure TSGPhysicsObject.SetVertex( const v : TSGVertex3f );inline;overload;
+procedure TSPhysicsObject.SetVertex( const v : TSVertex3f );inline;overload;
 begin
 Ex5_PAPPE.PhysicsObjectSetVector(FObject,Ex5_PAPPE.Vector3(v.x,v.y,v.z));
 end;
 
-procedure TSGPhysicsObject.InitBox ( const x,y,z : TSGSingle );inline;
+procedure TSPhysicsObject.InitBox ( const x,y,z : TSSingle );inline;
 begin
 Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
 Ex5_PAPPE.PhysicsObjectMeshCreateBox    (FObject.Meshs^[0]^,x,y,z);
@@ -407,13 +407,13 @@ Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
 Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
-procedure TSGPhysicsObject.InitHeightMapFromImage(const VFileName : TSGString;const mt,md,llx,lly : TSGSingle);
+procedure TSPhysicsObject.InitHeightMapFromImage(const VFileName : TSString;const mt,md,llx,lly : TSSingle);
 var
-	Image : TSGImage = nil;
-	i, ii, iii : TSGMaxEnum;
-	HMD : packed array of TSGFloat32 = nil;
+	Image : TSImage = nil;
+	i, ii, iii : TSMaxEnum;
+	HMD : packed array of TSFloat32 = nil;
 begin
-Image := TSGImage.Create();
+Image := TSImage.Create();
 Image .Context  := Context;
 Image .FileName := VFileName;
 if Image.Load() then
@@ -432,11 +432,11 @@ if Image.Load() then
 	SetLength(HMD,0);
 	end
 else
-	SGLog.Source(['TSGPhysicsObject__InitHeightMapFromImage(..). Error while open image file "', VFileName, '".']);
+	SLog.Source(['TSPhysicsObject__InitHeightMapFromImage(..). Error while open image file "', VFileName, '".']);
 Image.Destroy();
 end;
 
-procedure TSGPhysicsObject.InitCapsule ( const x,y : TSGSingle; const z: TSGLongInt );inline;
+procedure TSPhysicsObject.InitCapsule ( const x,y : TSSingle; const z: TSLongInt );inline;
 begin
 Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
 Ex5_PAPPE.PhysicsObjectMeshCreateCapsule(FObject.Meshs^[0]^,x,y,z);
@@ -444,7 +444,7 @@ Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
 Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
-procedure TSGPhysicsObject.InitSphere ( const x : TSGSingle; const y : TSGLongInt );inline;
+procedure TSPhysicsObject.InitSphere ( const x : TSSingle; const y : TSLongInt );inline;
 begin
 Ex5_PAPPE.PhysicsObjectAddMesh          (FObject);
 Ex5_PAPPE.PhysicsObjectMeshCreateSphere (FObject.Meshs^[0]^,x,y);
@@ -452,14 +452,14 @@ Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[0]^);
 Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
-procedure TSGPhysicsObject.InitMesh (const Mesh : TSG3DObject);
+procedure TSPhysicsObject.InitMesh (const Mesh : TS3DObject);
 var
-	i, ii, iii: TSGLongWord;
+	i, ii, iii: TSLongWord;
 begin
 ii:=Ex5_PAPPE.PhysicsObjectAddMesh(FObject);
 if Mesh.QuantityFaceArrays<>0 then
 	begin
-	for iii:=0 to FMesh.QuantityFaceArrays-1 do
+	for iii:=0 to F3dObject.QuantityFaceArrays-1 do
 		if Mesh.Faces[iii]<>0 then
 			for i:=0 to Mesh.Faces[iii]-1 do
 				Ex5_PAPPE.PhysicsObjectMeshAddTriangle(FObject.Meshs^[ii]^,
@@ -481,16 +481,16 @@ Ex5_PAPPE.PhysicsObjectMeshSubdivide    (FObject.Meshs^[ii]^);
 Ex5_PAPPE.PhysicsObjectFinish           (FObject);
 end;
 
-function TSGPhysicsObject.GetMatrix():TSGPointer;inline;
+function TSPhysicsObject.GetMatrix():TSPointer;inline;
 begin
 Result:=@FObject.InterpolatedTransform;
 end;
 
-procedure TSGPhysicsObject.SetDrawableMesh(const Mesh : TSG3DObject);
+procedure TSPhysicsObject.SetDrawableMesh(const Mesh : TS3DObject);
 begin
-if (FMesh<>nil) and (FMesh<>Mesh) then
-	FMesh.Destroy();
-FMesh:=Mesh;
+if (F3dObject<>nil) and (F3dObject<>Mesh) then
+	F3dObject.Destroy();
+F3dObject:=Mesh;
 end;
 
 end.

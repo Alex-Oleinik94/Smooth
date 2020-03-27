@@ -522,26 +522,26 @@ var pcap_get_selectable_fd : function( para1 : PPcap ) : Longint ; cdecl ;
 implementation
 
 uses 
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeSysUtils
-	,SaGeStringUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothSysUtils
+	,SmoothStringUtils
 	;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllPcap = class(TSGDll)
+	TSDllPcap = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllPcap.Free();
+class procedure TSDllPcap.Free();
 begin
 pcap_lookupdev := nil;
 pcap_lookupnet := nil;
@@ -599,25 +599,25 @@ pcap_setmintocopy := nil;
 pcap_get_selectable_fd := nil;
 {$endif}
 end;
-class function TSGDllPcap.SystemNames() : TSGStringList;
+class function TSDllPcap.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'Pcap';
 end;
-class function TSGDllPcap.DllNames() : TSGStringList;
+class function TSDllPcap.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += PCAP_LIB_NAME;
 end;
-class function TSGDllPcap.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllPcap.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -690,5 +690,5 @@ pcap_get_selectable_fd := LoadProcedure('pcap_get_selectable_fd');
 end;
 
 initialization
-	TSGDllPcap.Create();
+	TSDllPcap.Create();
 end.

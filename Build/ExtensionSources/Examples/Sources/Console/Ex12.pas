@@ -1,5 +1,5 @@
 // Use CP866
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex12;
 	interface
@@ -11,31 +11,31 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
-	,SaGeMesh
-	,SaGeMath
-	,SaGeVertexObject
-	,SaGeRender
-	,SaGeStringUtils
-	,SaGeCamera
-	,SaGeRenderBase
-	,SaGeEncodingUtils
-	,SaGeContextClasses
-	,SaGeContextInterface
+	 SmoothContext
+	,SmoothBase
+	,Smooth3dObject
+	,SmoothMath
+	,SmoothVertexObject
+	,SmoothRender
+	,SmoothStringUtils
+	,SmoothCamera
+	,SmoothRenderBase
+	,SmoothEncodingUtils
+	,SmoothContextClasses
+	,SmoothContextInterface
 	{$IF defined(ENGINE)}
-		,SaGeConsoleCaller
-		,SaGeConsoleTools
+		,SmoothConsoleCaller
+		,SmoothConsoleTools
 		{$ENDIF}
-	,SaGeConsolePaintableTools
+	,SmoothConsolePaintableTools
 	
 	,Crt
 	;
 var
-	FuncMU1 : TSGExpression = nil;
-	FuncMU2 : TSGExpression = nil;
-	FuncU0D : TSGExpression = nil;
-	FuncU0 : TSGExpression = nil;
+	FuncMU1 : TSExpression = nil;
+	FuncMU2 : TSExpression = nil;
+	FuncU0D : TSExpression = nil;
+	FuncU0 : TSExpression = nil;
 	a, b : Extended;
 	n : LongWord;
 	T : Extended;
@@ -47,10 +47,10 @@ var
 var
 	h : Extended;
 
-function EnterFunction(const ss: String; const cout_variables: LongWord):TSGExpression;
+function EnterFunction(const ss: String; const cout_variables: LongWord):TSExpression;
 var
 	s: String;
-	Ex : TSGExpression = nil;
+	Ex : TSExpression = nil;
 	iii,ii,i : LongWord;
 begin
 Write('Введите функцию: ');
@@ -61,9 +61,9 @@ Write(')=');
 repeat
 i := 1;
 ReadLn(S);
-Ex := TSGExpression.Create();
+Ex := TSExpression.Create();
 Ex.QuickCalculation := False;
-Ex.Expression := SGStringToPChar(S);
+Ex.Expression := SStringToPChar(S);
 Ex.CanculateExpression();
 if (Ex.ErrorsQuantity=0) and (Length(Ex.Variables)>0) then
 	begin
@@ -72,7 +72,7 @@ if (Ex.ErrorsQuantity=0) and (Length(Ex.Variables)>0) then
 	while (ii <= cout_variables - 1) do
 		begin
 		if (Length(Ex.Variables) >= ii+1) then
-			Ex.ChangeVariables(Ex.Variables[ii],TSGExpressionChunkCreateReal(random));
+			Ex.ChangeVariables(Ex.Variables[ii],TSExpressionChunkCreateReal(random));
 		ii+=1;
 		end;
 	Ex.Calculate();
@@ -99,8 +99,8 @@ if i = 0 then
 	end
 else
 	begin
-	Result := TSGExpression.Create();
-	Result.Expression := SGStringToPChar(S);
+	Result := TSExpression.Create();
+	Result.Expression := SStringToPChar(S);
 	Result.CanculateExpression();
 	end;
 Ex.Destroy();
@@ -133,11 +133,11 @@ Write('Введите T {numeric}:');
 ReadLn(T);
 end;
 
-function FuncOneVariable(var Func : TSGExpression; const x : Extended):Extended;
+function FuncOneVariable(var Func : TSExpression; const x : Extended):Extended;
 begin
 Func.BeginCalculate();
 if (Length(Func.Variables) >= 1) then
-	Func.ChangeVariables(Func.Variables[0],TSGExpressionChunkCreateReal(x));
+	Func.ChangeVariables(Func.Variables[0],TSExpressionChunkCreateReal(x));
 Func.Calculate();
 Result:=Func.Resultat.FConst;
 end;
@@ -160,39 +160,39 @@ Result := FuncOneVariable(FuncU0,x);
 end;
 
 type
-	TSGApprFunction=class(TSGPaintableObject)
+	TSApprFunction=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		function CalculateMesh():TSGCustomModel;
+		function Calculate3dObject():TSCustomModel;
 			private
-		FMesh : TSGCustomModel;
-		FCamera : TSGCamera;
+		F3dObject : TSCustomModel;
+		FCamera : TSCamera;
 		end;
 
-function TSGApprFunction.CalculateMesh():TSGCustomModel;
+function TSApprFunction.Calculate3dObject():TSCustomModel;
 var
-	i, ii, iii : TSGLongWord;
+	i, ii, iii : TSLongWord;
 	max, min, c : Extended;
 begin
-Result:=TSGCustomModel.Create();
+Result:=TSCustomModel.Create();
 Result.Context := Context;
 
 Result.AddObject();
-Result.LastObject().ObjectPoligonesType := SGR_TRIANGLES;
+Result.LastObject().ObjectPoligonesType := SR_TRIANGLES;
 Result.LastObject().HasNormals := False;
 Result.LastObject().HasTexture := False;
 Result.LastObject().HasColors  := True;
 Result.LastObject().EnableCullFace := False;
-Result.LastObject().VertexType := SGMeshVertexType3f;
-Result.LastObject().SetColorType(SGMeshColorType4b);
+Result.LastObject().VertexType := S3dObjectVertexType3f;
+Result.LastObject().SetColorType(S3dObjectColorType4b);
 
 Result.LastObject().Vertexes   := Length(Setka)*Length(Setka[0]);
 Result.LastObject().QuantityFaceArrays := 1;
-Result.LastObject().PoligonesType[0]:=SGR_TRIANGLES;
+Result.LastObject().PoligonesType[0]:=SR_TRIANGLES;
 
 Result.LastObject().AutoSetIndexFormat(0,Result.LastObject().Vertexes);
 Result.LastObject().SetFaceLength(0,High(Setka)*High(Setka[0])*2);
@@ -230,29 +230,29 @@ for i := 0 to High(Setka)-1 do
 Result.LoadToVBO();
 end;
 
-procedure TSGApprFunction.Paint();
+procedure TSApprFunction.Paint();
 begin
 FCamera.CallAction();
-FMesh.Paint();
+F3dObject.Paint();
 end;
 
-destructor TSGApprFunction.Destroy();
+destructor TSApprFunction.Destroy();
 begin
-FMesh.Destroy();
+F3dObject.Destroy();
 FCamera.Destroy();
 end;
 
-constructor TSGApprFunction.Create(const VContext : ISGContext);
+constructor TSApprFunction.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
-FMesh := CalculateMesh();
-FCamera := TSGCamera.Create();
+F3dObject := Calculate3dObject();
+FCamera := TSCamera.Create();
 FCamera.Context := Context;
-FCamera.MatrixMode := SG_3D;
-FCamera.ViewMode:=SG_VIEW_WATCH_OBJECT;
+FCamera.MatrixMode := S_3D;
+FCamera.ViewMode:=S_VIEW_WATCH_OBJECT;
 end;
 
-class function TSGApprFunction.ClassName():TSGString;
+class function TSApprFunction.ClassName():TSString;
 begin
 Result := 'Уравнение колебаний';
 OEM866ToWindows1251(Result);
@@ -323,7 +323,7 @@ for ii := 2 to High(Setka) do
 
 OutToFile('Ex12_OutPut.txt');
 
-SGConsoleRunPaintable(TSGApprFunction);
+SConsoleRunPaintable(TSApprFunction);
 
 for i := 0 to High(Setka) do
 	SetLength(Setka[i],0);
@@ -331,7 +331,7 @@ SetLength(Setka,0);
 end;
 
 {$IFDEF ENGINE}
-	procedure SGConsoleEx12(const VParams : TSGConcoleCallerParams = nil);
+	procedure SConsoleEx12(const VParams : TSConcoleCallerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -344,7 +344,7 @@ Go();
 	end;
 	initialization
 	begin
-	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx12, ['ex12'], 'Example 12');
+	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx12, ['ex12'], 'Example 12');
 	end;
 	
 	end.

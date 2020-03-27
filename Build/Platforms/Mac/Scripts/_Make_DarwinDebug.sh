@@ -1,7 +1,7 @@
 #echo off
 cd ..
 echo "=========================================="
-echo "| Compiling  Debug  Version for Mac OSX  |"
+echo "| Compiling  debug  version for Mac OS X |"
 echo "=========================================="
 mkdir Output
 mkdir Output/i386-debug-desktop

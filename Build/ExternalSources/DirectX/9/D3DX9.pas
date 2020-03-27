@@ -11447,11 +11447,11 @@ implementation
 //***************************************************************************//
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -12300,54 +12300,54 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD3DX9 = class(TSGDll)
+	TSDllD3DX9 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
-		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
-		class function ChunkNames() : TSGStringList; override;
-		class function LoadChunk(const VChunk : TSGString; const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList; override;
+		class function ChunkNames() : TSStringList; override;
+		class function LoadChunk(const VChunk : TSString; const VDll : TSLibHandle) : TSDllLoadObject; override;
 			private
-		class function Load_Math(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Core(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Shader(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Effect(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Mesh(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Shapes(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Tex(const VDll : TSGLibHandle) : TSGDllLoadObject;
-		class function Load_Anim(const VDll : TSGLibHandle) : TSGDllLoadObject;
+		class function Load_Math(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Core(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Shader(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Effect(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Mesh(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Shapes(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Tex(const VDll : TSLibHandle) : TSDllLoadObject;
+		class function Load_Anim(const VDll : TSLibHandle) : TSDllLoadObject;
 		end;
 
-class function TSGDllD3DX9.SystemNames() : TSGStringList;
+class function TSDllD3DX9.SystemNames() : TSStringList;
 begin
 Result := 'Direct3DX9';
 Result += 'D3DX9';
 end;
 
-class function TSGDllD3DX9.DllNames() : TSGStringList;
+class function TSDllD3DX9.DllNames() : TSStringList;
 var
-	i : TSGUInt32;
+	i : TSUInt32;
 begin
 Result := nil;
 Result += 'd3dx9_33.dll';
 Result += 'd3dx9.dll';
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9_'+SGStr(i)+'.dll';
+		Result += 'd3dx9_'+SStr(i)+'.dll';
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9d_'+SGStr(i)+'.dll';
+		Result += 'd3dx9d_'+SStr(i)+'.dll';
 Result += 'd3dx9d_33.dll';
 Result += 'd3dx9d.dll';
 end;
 
-class function TSGDllD3DX9.LoadChunk(const VChunk : TSGString; const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.LoadChunk(const VChunk : TSString; const VDll : TSLibHandle) : TSDllLoadObject;
 begin
 Result.Clear();
 if VChunk = 'Math' then
@@ -12368,7 +12368,7 @@ else if VChunk = 'Anim' then
 	Result := Load_Anim(VDll);
 end;
 
-class function TSGDllD3DX9.ChunkNames() : TSGStringList;
+class function TSDllD3DX9.ChunkNames() : TSStringList;
 begin
 Result := nil;
 Result += 'Math';
@@ -12381,7 +12381,7 @@ Result += 'Tex';
 Result += 'Anim';
 end;
 
-class function TSGDllD3DX9.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
+class function TSDllD3DX9.DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList;
 begin
 Result := nil;
 Result += d3dx9mathDLL;
@@ -12394,7 +12394,7 @@ Result += d3dx9texDLL;
 Result += d3dx9animDLL;
 end;
 
-class procedure TSGDllD3DX9.Free();
+class procedure TSDllD3DX9.Free();
 begin
 D3DXFloat32To16Array := nil;
 D3DXFloat16To32Array := nil;
@@ -12780,14 +12780,14 @@ D3DXCreateCompressedAnimationSet := nil;
 D3DXCreateAnimationController := nil;
 end;
 
-class function TSGDllD3DX9.Load_Math(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Math(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12900,14 +12900,14 @@ D3DXSHEvalConeLight := LoadProcedure('D3DXSHEvalConeLight');
 D3DXSHEvalHemisphereLight := LoadProcedure('D3DXSHEvalHemisphereLight');
 D3DXSHProjectCubeMap := LoadProcedure('D3DXSHProjectCubeMap');
 end;
-class function TSGDllD3DX9.Load_Core(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Core(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12930,14 +12930,14 @@ D3DXCreateRenderToEnvMap := LoadProcedure('D3DXCreateRenderToEnvMap');
 D3DXCreateLine := LoadProcedure('D3DXCreateLine');
 end;
 
-class function TSGDllD3DX9.Load_Shader(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Shader(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12987,14 +12987,14 @@ D3DXPreprocessShaderFromResource := LoadProcedure('D3DXPreprocessShaderFromResou
 D3DXPreprocessShader := LoadProcedure('D3DXPreprocessShader');
 end;
 
-class function TSGDllD3DX9.Load_Effect(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Effect(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13027,14 +13027,14 @@ D3DXCreateEffectCompiler := LoadProcedure('D3DXCreateEffectCompiler');
 D3DXDisassembleEffect := LoadProcedure('D3DXDisassembleEffect');
 end;
 
-class function TSGDllD3DX9.Load_Mesh(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Mesh(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13126,14 +13126,14 @@ D3DXSHPRTCompSuperCluster := LoadProcedure('D3DXSHPRTCompSuperCluster');
 D3DXSHPRTCompSplitMeshSC := LoadProcedure('D3DXSHPRTCompSplitMeshSC');
 end;
 
-class function TSGDllD3DX9.Load_Shapes(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Shapes(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13152,14 +13152,14 @@ D3DXCreateTextW := LoadProcedure('D3DXCreateTextW');
 D3DXCreateText := LoadProcedure('D3DXCreateTextA');
 end;
 
-class function TSGDllD3DX9.Load_Tex(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Tex(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13264,14 +13264,14 @@ D3DXFillVolumeTextureTX := LoadProcedure('D3DXFillVolumeTextureTX');
 D3DXComputeNormalMap := LoadProcedure('D3DXComputeNormalMap');
 end;
 
-class function TSGDllD3DX9.Load_Anim(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load_Anim(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13297,7 +13297,7 @@ D3DXCreateCompressedAnimationSet := LoadProcedure('D3DXCreateCompressedAnimation
 D3DXCreateAnimationController := LoadProcedure('D3DXCreateAnimationController');
 end;
 
-class function TSGDllD3DX9.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX9.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 begin
 Result.Clear();
 Result += Load_Math(VDll);
@@ -13312,6 +13312,6 @@ end;
 
 initialization
 begin
-TSGDllD3DX9.Create();
+TSDllD3DX9.Create();
 end;
 end.

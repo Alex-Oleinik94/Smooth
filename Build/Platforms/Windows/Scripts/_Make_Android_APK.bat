@@ -28,7 +28,7 @@ if "%LIB%"==""1"" (
 	if not exist res\values MKDIR res\values
 	CD ..\..
 
-	COPY Platforms\Android\SaGeKeystore.keystore Output\AndroidApplication\bin\SaGeKeystore.keystore
+	COPY Platforms\Android\SmoothKeystore.keystore Output\AndroidApplication\bin\SmoothKeystore.keystore
 	
 	COPY Platforms\Android\Application\AndroidManifest.xml Output\AndroidApplication\AndroidManifest.xml
 
@@ -48,13 +48,13 @@ if "%LIB%"==""1"" (
 		pause 
 		)
 
-	if exist ..\Binaries\SaGe.apk ( 
-		DEL ..\Binaries\SaGe.apk 
+	if exist ..\Binaries\Smooth.apk ( 
+		DEL ..\Binaries\Smooth.apk 
 	)
 	
 	CD Output
 	SET PATH=C:\Programming\jdk\bin;C:\Programming\android-sdk\tools;C:\Programming\apache-ant\bin;C:\Programming\jdk\lib
-	SET APP_NAME=SaGeGameEngine-release
+	SET APP_NAME=SmoothGameEngine-release
 	SET TARGETVER=""
 	IF "%1"=="" (
 		set TARGETVER="debug"
@@ -67,15 +67,15 @@ if "%LIB%"==""1"" (
 	
 	if "%TARGETVER%"==""release"" (
 		del bin\%APP_NAME%-unaligned.apk
-		jarsigner -verbose -keystore bin\SaGeKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SaGeKeystore
+		jarsigner -verbose -keystore bin\SmoothKeystore.keystore -keypass 12345678 -storepass 12345678 -signedjar bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%-unsigned.apk SmoothKeystore
 		C:\Programming\android-sdk\tools\zipalign -v 4 bin\%APP_NAME%-unaligned.apk bin\%APP_NAME%.apk
 	)
 	
 	CD ..\..
 	if "%TARGETVER%"==""debug"" (
-		COPY Output\AndroidApplication\bin\SaGeGameEngine-debug.apk ..\Binaries\SaGe.apk
+		COPY Output\AndroidApplication\bin\SmoothGameEngine-debug.apk ..\Binaries\Smooth.apk
 	) else (
-		COPY Output\AndroidApplication\bin\SaGeGameEngine-release.apk ..\Binaries\SaGe.apk
+		COPY Output\AndroidApplication\bin\SmoothGameEngine-release.apk ..\Binaries\Smooth.apk
 	)
 	DEL Output\AndroidApplication /F/S/Q
 ) else (

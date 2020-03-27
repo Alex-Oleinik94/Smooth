@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IF defined(ENGINE)}
 	unit ExKraft;
 	interface
@@ -12,15 +12,15 @@ uses
 				cthreads,
 				{$ENDIF}
 			{$ENDIF}
-		SaGeBaseExample,
+		SmoothBaseExample,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
-	,SaGeRender
-	,SaGeCommon
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBaseClasses
+	 SmoothContext
+	,SmoothBase
+	,SmoothRender
+	,SmoothCommon
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBaseClasses
 	
 	,Classes
 	,Kraft
@@ -45,7 +45,7 @@ uses
 	;
 
 type
-	TSGKraftExamples = class;
+	TSKraftExamples = class;
 	
 	TCamera=object
 			public
@@ -59,7 +59,7 @@ type
 
 	TThreadTimer=class(TThread)
 			public
-		FClass : TSGKraftExamples;
+		FClass : TSKraftExamples;
 			private
 		procedure Draw;
 			protected
@@ -69,24 +69,24 @@ type
 		destructor Destroy; override;
 		end;
 	
-	TSGKraftExamples = class(TSGPaintableObject)
+	TSKraftExamples = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
-		class function ClassName() : TSGString;override;
+		class function ClassName() : TSString;override;
 		procedure Paint();override;
 			public
 		KraftPhysics : TKraft;
 		DemoScene : TDemoScene;
 		OpenGLInitialized:boolean;
 		CurrentCamera,LastCamera,InterpolatedCamera:TCamera;
-		LastTime, NowTime, DeltaTime, FST2, FET2, Frames : TSGInt64;
-		FPS : TSGDouble;
-		FloatDeltaTime : TSGDouble;
-		TimeAccumulator : TSGDouble;
-		LastMouseX, LastMouseY : TSGLongInt;
-		Grabbing, Rotating : TSGBoolean;
-		KeyLeft, KeyRight, KeyBackwards, KeyForwards, KeyUp, KeyDown : TSGBoolean;
+		LastTime, NowTime, DeltaTime, FST2, FET2, Frames : TSInt64;
+		FPS : TSDouble;
+		FloatDeltaTime : TSDouble;
+		TimeAccumulator : TSDouble;
+		LastMouseX, LastMouseY : TSLongInt;
+		Grabbing, Rotating : TSBoolean;
+		KeyLeft, KeyRight, KeyBackwards, KeyForwards, KeyUp, KeyDown : TSBoolean;
 		HighResolutionTimer : TKraftHighResolutionTimer;
 		ThreadTimer:TThreadTimer;
 			public
@@ -131,7 +131,7 @@ var GrabRigidBody:TKraftRigidBody;
 //  GrabCameraTransform:TKraftMatrix4x4;
     GrabConstraint:TKraftConstraintJointGrab;
 
-procedure TSGKraftExamples.LoadScene(DemoSceneClass:TDemoSceneClass);
+procedure TSKraftExamples.LoadScene(DemoSceneClass:TDemoSceneClass);
 var RigidBody:TKraftRigidBody;
     Constraint:TKraftConstraint;
 begin
@@ -178,7 +178,7 @@ begin
 
 end;
 
-constructor TSGKraftExamples.Create(const VContext : ISGContext);
+constructor TSKraftExamples.Create(const VContext : ISContext);
 var Index:longint;
 begin
 inherited Create(VContext);
@@ -252,7 +252,7 @@ inherited Create(VContext);
  end;
 end;
 
-destructor TSGKraftExamples.Destroy();
+destructor TSKraftExamples.Destroy();
 begin
 DemoScene.Free();
 DemoScene := nil;
@@ -269,19 +269,19 @@ HighResolutionTimer.Free;
 inherited;
 end;
 
-class function TSGKraftExamples.ClassName() : TSGString;
+class function TSKraftExamples.ClassName() : TSString;
 begin
 Result := 'Дэмо физического движка Kraft'; 
 end;
 
-procedure TSGKraftExamples.Paint();
+procedure TSKraftExamples.Paint();
 begin
 
 end;
 
 {$IF not defined(ENGINE)}
 	begin
-	ExampleClass := TSGKraftExamples;
+	ExampleClass := TSKraftExamples;
 	RunApplication();
 	end.
 {$ELSE}

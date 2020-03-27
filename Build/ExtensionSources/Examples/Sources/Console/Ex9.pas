@@ -1,5 +1,5 @@
 // Use CP866
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex9;
 	interface
@@ -11,33 +11,33 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
+	 SmoothContext
+	,SmoothBase
 	{$IF defined(ENGINE)}
-		,SaGeConsoleCaller
-		,SaGeConsoleTools
+		,SmoothConsoleCaller
+		,SmoothConsoleTools
 		{$ENDIF}
-	,SaGeConsolePaintableTools
-	,SaGeMath
-	,SaGeStringUtils
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeGraphicViewer
-	,SaGeEncodingUtils
-	,SaGeMathUtils
+	,SmoothConsolePaintableTools
+	,SmoothMath
+	,SmoothStringUtils
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothGraphicViewer
+	,SmoothEncodingUtils
+	,SmoothMathUtils
 	
 	,Crt
 	;
 var
-	Func : TSGExpression = nil;
+	Func : TSExpression = nil;
 	x0 : Extended = 0;
 	n,p : LongWord;
-	S : TSGLineSystem = nil;
+	S : TSLineSystem = nil;
 
 procedure ReadAll();
 var
 	S : String;
-	Ex : TSGExpression = nil;
+	Ex : TSExpression = nil;
 	ii,i : LongWord;
 begin
 ClrScr();
@@ -45,9 +45,9 @@ Write('Введите функцию: f(?)=');
 repeat
 i := 1;
 ReadLn(S);
-Ex := TSGExpression.Create();
+Ex := TSExpression.Create();
 Ex.QuickCalculation := False;
-Ex.Expression := SGStringToPChar(S);
+Ex.Expression := SStringToPChar(S);
 Ex.CanculateExpression();
 if (Ex.ErrorsQuantity=0) then
 	begin
@@ -59,7 +59,7 @@ if (Ex.ErrorsQuantity=0) then
 		i := 0;
 		end;
 	Ex.BeginCalculate();
-	Ex.ChangeVariables(Ex.Variable,TSGExpressionChunkCreateReal(random));
+	Ex.ChangeVariables(Ex.Variable,TSExpressionChunkCreateReal(random));
 	Ex.Calculate();
 	end;
 if not (Ex.ErrorsQuantity = 0) then
@@ -78,8 +78,8 @@ if i = 0 then
 	Write('Давайка еще раз: f(?)=')
 else
 	begin
-	Func := TSGExpression.Create();
-	Func.Expression := SGStringToPChar(S);
+	Func := TSExpression.Create();
+	Func.Expression := SStringToPChar(S);
 	Func.CanculateExpression();
 	end;
 Ex.Destroy();
@@ -97,28 +97,28 @@ end;
 function MyFunc(const x : Extended):Extended;inline;
 begin
 Func.BeginCalculate();
-Func.ChangeVariables(Func.Variable,TSGExpressionChunkCreateReal(x));
+Func.ChangeVariables(Func.Variable,TSExpressionChunkCreateReal(x));
 Func.Calculate();
 Result:=Func.Resultat.FConst;
 end;
 
 type
-	TSGApprFunction=class(TSGPaintableObject)
+	TSApprFunction=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FGraphic : TSGGraphic;
+		FGraphic : TSGraphic;
 		end;
 
-procedure TSGApprFunction.Paint();
+procedure TSApprFunction.Paint();
 begin
 FGraphic.Paint();
 end;
 
-destructor TSGApprFunction.Destroy();
+destructor TSApprFunction.Destroy();
 begin
 if FGraphic <> nil then
 	begin
@@ -127,15 +127,15 @@ if FGraphic <> nil then
 	end;
 end;
 
-constructor TSGApprFunction.Create(const VContext : ISGContext);
+constructor TSApprFunction.Create(const VContext : ISContext);
 
-function GetInterPaliasionMnogoclen():TSGString;
+function GetInterPaliasionMnogoclen():TSString;
 var
 	i : LongWord;
 begin
 Result:='';
 for i := 0 to p do
-	Result += '('+SGStrMathFloat(S.x[i],16)+')*(x^'+SGStr(i)+')+';
+	Result += '('+SStrMathFloat(S.x[i],16)+')*(x^'+SStr(i)+')+';
 Result+='0';
 WriteLn(Result);
 end;
@@ -143,17 +143,17 @@ end;
 begin
 inherited Create(VContext);
 
-FGraphic:=TSGGraphic.Create(Context);
+FGraphic:=TSGraphic.Create(Context);
 FGraphic.MathGraphics := 2;
 FGraphic.Colors[0].Import(0,1,1,1);
 FGraphic.ArMathGraphics[0].Expression := Func.Expression;
 FGraphic.Colors[1].Import(1,1,0,1);
-FGraphic.ArMathGraphics[1].Expression := SGStringToPChar(GetInterPaliasionMnogoclen());
+FGraphic.ArMathGraphics[1].Expression := SStringToPChar(GetInterPaliasionMnogoclen());
 FGraphic.Changet := True;
 //InitGraphicView();
 end;
 
-class function TSGApprFunction.ClassName():TSGString;
+class function TSApprFunction.ClassName():TSString;
 begin
 Result := 'Геометрическая интерпритация';
 OEM866ToWindows1251(Result);
@@ -165,7 +165,7 @@ var
 	xx : Extended;
 	i,ii : LongWord;
 begin
-S := TSGLineSystem.Create(p+1);
+S := TSLineSystem.Create(p+1);
 xx := -(p div 2)*e+x0;
 for i:=0 to p do
 	S.b[i] := MyFunc(xx + i * e);
@@ -187,13 +187,13 @@ for i := 0 to p do
 WriteLn('Ответ: ',xx:0:15);
 
 
-SGConsoleRunPaintable(TSGApprFunction);
+SConsoleRunPaintable(TSApprFunction);
 
 S.Destroy();
 end;
 
 {$IFDEF ENGINE}
-	procedure SGConsoleEx9(const VParams : TSGConcoleCallerParams = nil);
+	procedure SConsoleEx9(const VParams : TSConcoleCallerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -206,7 +206,7 @@ Go();
 	end;
 	initialization
 	begin
-	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx9, ['ex9'], 'Example 9');
+	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx9, ['ex9'], 'Example 9');
 	end;
 	
 	end.

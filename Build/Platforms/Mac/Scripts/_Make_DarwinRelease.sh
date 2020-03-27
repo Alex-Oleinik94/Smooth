@@ -1,7 +1,7 @@
 #echo off
 cd ..
 echo "=========================================="
-echo "| Compiling Release Version for Mac OSX  |"
+echo "| Compiling release version for Mac OS X |"
 echo "=========================================="
 MKDIR Output
 MKDIR Output/i386-release-desktop

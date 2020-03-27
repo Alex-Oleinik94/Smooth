@@ -658,11 +658,11 @@ var CreateDXGIFactory1 : function( const riid : TGUID ; out ppFactory ) : HResul
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 { TD3DCOLORVALUE }
@@ -686,44 +686,44 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllDXGI = class(TSGDll)
+	TSDllDXGI = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllDXGI.SystemNames() : TSGStringList;
+class function TSDllDXGI.SystemNames() : TSStringList;
 begin
 Result := 'DX12.DXGI';
 Result += 'DXGI';
 end;
 
-class function TSGDllDXGI.DllNames() : TSGStringList;
+class function TSDllDXGI.DllNames() : TSStringList;
 begin
 Result := DLL_DXGI;
 end;
 
-class procedure TSGDllDXGI.Free();
+class procedure TSDllDXGI.Free();
 begin
 CreateDXGIFactory := nil;
 CreateDXGIFactory1 := nil;
 end;
 
-class function TSGDllDXGI.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllDXGI.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -738,6 +738,6 @@ end;
 
 initialization
 begin
-TSGDllDXGI.Create();
+TSDllDXGI.Create();
 end;
 end.

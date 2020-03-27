@@ -3679,11 +3679,11 @@ type
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 (*==========================================================================;
@@ -3825,30 +3825,30 @@ if Assigned(Result) then Result._Release; // Delphi autoincrement reference coun
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD3D9 = class(TSGDll)
+	TSDllD3D9 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD3D9.SystemNames() : TSGStringList; 
+class function TSDllD3D9.SystemNames() : TSStringList; 
 begin
 Result := 'Direct3D9';
 Result += 'D3D9';
 end;
 
-class function TSGDllD3D9.DllNames() : TSGStringList;
+class function TSDllD3D9.DllNames() : TSStringList;
 begin
 Result := Direct3D9dll;
 end;
 
-class procedure TSGDllD3D9.Free(); 
+class procedure TSDllD3D9.Free(); 
 begin
 D3DPERF_BeginEvent := nil;
 D3DPERF_EndEvent := nil;
@@ -3863,15 +3863,15 @@ Direct3DCreate9Ex := nil;
 {$ENDIF}
 end;
 
-class function TSGDllD3D9.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3D9.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -3900,6 +3900,6 @@ end;
 
 initialization
 begin
-TSGDllD3D9.Create();
+TSDllD3D9.Create();
 end;
 end.

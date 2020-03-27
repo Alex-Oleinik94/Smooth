@@ -1,7 +1,7 @@
 @echo off
 CALL _Create_Output_Directoryes
 cd ..
-copy .\Sources\Includes\SaGeStandartFileRegistrationResources.inc .\Output\Resources\SaGeFileRegistrationResources.inc
-copy .\Sources\Includes\SaGeStandartFileForRegistrationExtensions.inc .\Output\Resources\SaGeFileForRegistrationExtensions.inc
+copy .\Sources\Includes\SmoothStandartFileRegistrationResources.inc .\Output\Resources\SmoothFileRegistrationResources.inc
+copy .\Sources\Includes\SmoothStandartFileForRegistrationExtensions.inc .\Output\Resources\SmoothFileForRegistrationExtensions.inc
 cd Scripts
 if "%1"=="" ( pause )

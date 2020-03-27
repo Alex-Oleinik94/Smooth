@@ -2753,11 +2753,11 @@ var _Direct3DCreate8 : function( SDKVersion : LongWord ) : Pointer ; stdcall ;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 (*==========================================================================;
@@ -2940,43 +2940,43 @@ if Assigned(Result) then Result._Release; // Delphi autoincrement reference coun
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD3D8 = class(TSGDll)
+	TSDllD3D8 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD3D8.SystemNames() : TSGStringList; 
+class function TSDllD3D8.SystemNames() : TSStringList; 
 begin
 Result := 'Direct3D8';
 Result += 'D3D8';
 end;
 
-class function TSGDllD3D8.DllNames() : TSGStringList;
+class function TSDllD3D8.DllNames() : TSStringList;
 begin
 Result := Direct3D8dll;
 end;
 
-class procedure TSGDllD3D8.Free(); 
+class procedure TSDllD3D8.Free(); 
 begin
 _Direct3DCreate8 := nil;
 end;
 
-class function TSGDllD3D8.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3D8.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -2990,6 +2990,6 @@ end;
 
 initialization
 begin
-TSGDllD3D8.Create();
+TSDllD3D8.Create();
 end;
 end.

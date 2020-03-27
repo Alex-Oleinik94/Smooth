@@ -428,33 +428,33 @@ var ogg_packet_clear : procedure( var op : ogg_packet ) ; cdecl ;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
+	,SmoothLists
 	;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllOGG = class(TSGDll)
+	TSDllOGG = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllOGG.SystemNames() : TSGStringList;
+class function TSDllOGG.SystemNames() : TSStringList;
 begin
 Result := 'Ogg';
 Result += 'LibOgg';
 end;
 
-class function TSGDllOGG.DllNames() : TSGStringList;
+class function TSDllOGG.DllNames() : TSStringList;
 begin
 Result := DllPrefix + 'ogg' + DllPostfix;
 {$IFDEF MSWINDOWS}
@@ -462,7 +462,7 @@ Result += DllPrefix + 'libogg' + DllPostfix;
 {$ENDIF}
 end;
 
-class procedure TSGDllOGG.Free();
+class procedure TSDllOGG.Free();
 begin
 oggpack_writeinit := nil;
 oggpack_reset := nil;
@@ -510,15 +510,15 @@ ogg_page_packets := nil;
 ogg_packet_clear := nil;
 end;
 
-class function TSGDllOGG.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllOGG.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -574,5 +574,5 @@ ogg_packet_clear := LoadProcedure('ogg_packet_clear');
 end;
 
 initialization
-	TSGDllOGG.Create();
+	TSDllOGG.Create();
 end.

@@ -77,38 +77,38 @@ var vorbis_encode_ctl : function( var vi : vorbis_info ; number : int ; arg : Po
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
+	,SmoothLists
 	;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllVorbisEnc = class(TSGDll)
+	TSDllVorbisEnc = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllVorbisEnc.Free();
+class procedure TSDllVorbisEnc.Free();
 begin
 vorbis_encode_init := nil;
 vorbis_encode_init_vbr := nil;
 vorbis_encode_ctl := nil;
 end;
-class function TSGDllVorbisEnc.SystemNames() : TSGStringList;
+class function TSDllVorbisEnc.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'VorbisEnc';
 Result += 'LibVorbisEnc';
 end;
-class function TSGDllVorbisEnc.DllNames() : TSGStringList;
+class function TSDllVorbisEnc.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += DllPrefix + 'vorbisenc' + DllPostfix;
@@ -116,15 +116,15 @@ Result += DllPrefix + 'vorbisenc' + DllPostfix;
 Result += DllPrefix + 'libvorbisenc' + DllPostfix;
 {$ENDIF}
 end;
-class function TSGDllVorbisEnc.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllVorbisEnc.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -139,5 +139,5 @@ Pointer(vorbis_encode_ctl) := LoadProcedure('vorbis_encode_ctl');
 end;
 
 initialization
-	TSGDllVorbisEnc.Create();
+	TSDllVorbisEnc.Create();
 end.

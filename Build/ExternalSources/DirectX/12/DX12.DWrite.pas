@@ -1777,11 +1777,11 @@ function DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d: uint8): UINT32;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 // Creates an OpenType tag as a 32bit integer such that
@@ -1799,43 +1799,43 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllDWrite = class(TSGDll)
+	TSDllDWrite = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllDWrite.SystemNames() : TSGStringList;
+class function TSDllDWrite.SystemNames() : TSStringList;
 begin
 Result := 'DX12.DWrite';
 Result += 'DWrite';
 end;
 
-class function TSGDllDWrite.DllNames() : TSGStringList;
+class function TSDllDWrite.DllNames() : TSStringList;
 begin
 Result := DWRITE_DLL;
 end;
 
-class procedure TSGDllDWrite.Free();
+class procedure TSDllDWrite.Free();
 begin
 DWriteCreateFactory := nil;
 end;
 
-class function TSGDllDWrite.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllDWrite.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -1849,6 +1849,6 @@ end;
 
 initialization
 begin
-TSGDllDWrite.Create();
+TSDllDWrite.Create();
 end;
 end.

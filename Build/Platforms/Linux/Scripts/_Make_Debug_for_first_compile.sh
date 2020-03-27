@@ -3,7 +3,7 @@
 ./_Restore_Registration_Files.sh
 cd ./..
 echo "======================================="
-echo "| Compiling  Debug  Version for Unix  |"
+echo "| Compiling  debug  version for Unix  |"
 echo "======================================="
 make debug
 cd ./Scripts

@@ -1,6 +1,6 @@
 // Use CP866
 //Решение нелинейных систему. Метод простой итерации + delta^2 процесс Эйткена.
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex8;
 	interface
@@ -12,24 +12,24 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeBase
-	,SaGeContext
-	,SaGeMath
-	,SaGeStringUtils
-	,SaGeDateTime
-	,SaGeEncodingUtils
-	,SaGeFileUtils
+	 SmoothBase
+	,SmoothContext
+	,SmoothMath
+	,SmoothStringUtils
+	,SmoothDateTime
+	,SmoothEncodingUtils
+	,SmoothFileUtils
 	{$IF defined(ENGINE)}
-		,SaGeConsoleCaller
-		,SaGeConsoleTools
+		,SmoothConsoleCaller
+		,SmoothConsoleTools
 		{$ENDIF}
 	
 	,Crt
 	;
 var
-	NotLineSystem : packed array of TSGExpression = nil;
-	Variables : packed array of TSGString = nil;
-	IterationSystem : packed array of TSGExpression = nil;
+	NotLineSystem : packed array of TSExpression = nil;
+	Variables : packed array of TSString = nil;
+	IterationSystem : packed array of TSExpression = nil;
 
 function abs(const a : Extended):Extended;inline;
 begin
@@ -78,9 +78,9 @@ procedure ReadSystemFromKeyborad(const FileName : String = '');
 var
 	n,i,ii,iii: LongWord;
 	s:String;
-	c,c1 : TSGBoolean;
-	Ex : TSGExpression  = nil;
-	ExVariables : TSGPCharList = nil;
+	c,c1 : TSBoolean;
+	Ex : TSExpression  = nil;
+	ExVariables : TSPCharList = nil;
 	f : TextFile;
 begin
 if FileName<>'' then
@@ -109,7 +109,7 @@ while c do
 		Variables[i] := #0;
 	for i:=0 to n-1 do
 		begin
-		Ex := TSGExpression.Create();
+		Ex := TSExpression.Create();
 		Ex.QuickCalculation := False;
 		c := False;
 		while not c do
@@ -135,7 +135,7 @@ while c do
 						Halt(0);
 						end;
 				end;
-			Ex.Expression := SGStringToPChar(s);
+			Ex.Expression := SStringToPChar(s);
 			Ex.CanculateExpression();
 			if (Ex.ErrorsQuantity=0) then
 				begin
@@ -143,7 +143,7 @@ while c do
 				ExVariables := Ex.Variables;
 				if ExVariables <> nil then
 					for ii:=0 to High(ExVariables) do
-						Ex.ChangeVariables(ExVariables[ii],TSGExpressionChunkCreateReal(0));
+						Ex.ChangeVariables(ExVariables[ii],TSExpressionChunkCreateReal(0));
 				Ex.Calculate();
 				end;
 			C := Ex.ErrorsQuantity = 0;
@@ -173,7 +173,7 @@ while c do
 						begin
 						c1 := False;
 						for iii:=0 to n-1 do
-							if (Variables[iii]<>#0) and (Variables[iii] = SGPCharToString(ExVariables[ii])) then
+							if (Variables[iii]<>#0) and (Variables[iii] = SPCharToString(ExVariables[ii])) then
 								begin
 								c1 := True;
 								Break;
@@ -199,21 +199,21 @@ while c do
 									end;
 								end
 							else
-								Variables[iii] := SGPCharToString(ExVariables[ii]);
+								Variables[iii] := SPCharToString(ExVariables[ii]);
 							end;
 						if not c then
 							Break;
 						end;
 				end;
 			Ex.Destroy();
-			Ex := TSGExpression.Create();
+			Ex := TSExpression.Create();
 			Ex.QuickCalculation := False;
 			SetLength(ExVariables,0);
 			ExVariables:=nil;
 			end;
 		Ex.Destroy();
-		Ex := TSGExpression.Create();
-		Ex.Expression := SGStringToPChar(s);
+		Ex := TSExpression.Create();
+		Ex.Expression := SStringToPChar(s);
 		Ex.CanculateExpression();
 		NotLineSystem[i] := Ex;
 		Ex := nil;
@@ -277,7 +277,7 @@ var
 begin
 NotLineSystem[ExIndex].BeginCalculate();
 for h:=0 to High(Variables) do
-	NotLineSystem[ExIndex].ChangeVariables(SGStringToPChar(Variables[h]),TSGExpressionChunkCreateReal(Xs[ID][h]));
+	NotLineSystem[ExIndex].ChangeVariables(SStringToPChar(Variables[h]),TSExpressionChunkCreateReal(Xs[ID][h]));
 NotLineSystem[ExIndex].Calculate();
 Result:=NotLineSystem[ExIndex].Resultat.FConst;
 end;
@@ -288,7 +288,7 @@ var
 begin
 IterationSystem[ExIndex].BeginCalculate();
 for h:=0 to High(Variables) do
-	IterationSystem[ExIndex].ChangeVariables(SGStringToPChar(Variables[h]),TSGExpressionChunkCreateReal(Xs[ID][h]));
+	IterationSystem[ExIndex].ChangeVariables(SStringToPChar(Variables[h]),TSExpressionChunkCreateReal(Xs[ID][h]));
 IterationSystem[ExIndex].Calculate();
 Result:=IterationSystem[ExIndex].Resultat.FConst;
 end;
@@ -320,7 +320,7 @@ for i:=0 to High(Xs[Ind]) do
 	TextColor(15);
 	Write('  ',Variables[i],'=');
 	TextColor(10);
-	WriteLn(SGStrMathFloat(Xs[Ind,i],10));
+	WriteLn(SStrMathFloat(Xs[Ind,i],10));
 	end;
 TextColor(7);
 end;
@@ -422,10 +422,10 @@ for i:= 0 to High(NotLineSystem) do
 	s := Variables[i];
 	for ii := 0 to High(Variables) do
 		if abs(Matrix[i][ii])>eps*eps then
-			s += '+('+SGStrMathFloat(Matrix[i][ii],10)+')*('+SGPCharToString(NotLineSystem[ii].Expression)+')';
+			s += '+('+SStrMathFloat(Matrix[i][ii],10)+')*('+SPCharToString(NotLineSystem[ii].Expression)+')';
 	
-	IterationSystem[i]:= TSGExpression.Create();
-	IterationSystem[i].Expression := SGStringToPChar(s);
+	IterationSystem[i]:= TSExpression.Create();
+	IterationSystem[i].Expression := SStringToPChar(s);
 	IterationSystem[i].CanculateExpression();
 	end;
 
@@ -461,8 +461,8 @@ else Index += 1;
 end;
 
 var
-	d1,d2,d3 : TSGDateTime;
-	S:TSGString;
+	d1,d2,d3 : TSDateTime;
+	S:TSString;
 begin
 SetLength(Xs,5);
 for i:=0 to High(Xs) do
@@ -542,11 +542,11 @@ while abs(r) > eps do
 	d2.Get();
 	if (d2-d3).GetPastSeconds() >= 3 then
 		begin
-		S:=SGSecondsToStringTime((d2-d1).GetPastSeconds());
+		S:=SSecondsToStringTime((d2-d1).GetPastSeconds());
 		Windows1251ToOEM866(s);
 		if S[Length(S)]=' ' then
 			SetLength(S,Length(S)-1);
-		Write('Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SGStrMathFloat(r,10),'. ');
+		Write('Прошло: '+S+'. Кол-во итераций: ',CountIterations,'. Отклонение: ',SStrMathFloat(r,10),'. ');
 		WriteXs(Index,'Промежуточные корни(-ень)');
 		d3 := d2;
 		end;
@@ -556,7 +556,7 @@ WriteXs(OldIndex,'Окончательный ответ');
 WriteLn('Количество итераций: ',CountIterations,'.');
 if Delta2ProcessEitckenaEnable then
 	WriteLn('Количество вызовов Дельта^2 процесса Эйткена: ',CountDelta2ProcessEitckena,'.');
-S:=SGSecondsToStringTime((d2-d1).GetPastSeconds());
+S:=SSecondsToStringTime((d2-d1).GetPastSeconds());
 Windows1251ToOEM866(s);
 WriteLn('Прошло: ',s,' ',(d2-d1).GetPastMiliSeconds() mod 100,' милисек.');
 end;
@@ -568,12 +568,12 @@ var
 	N,i: LongWord;
 begin
 Write('Введите имя файла:');
-while (not SGFileExists(FileName)) or (FileName='')do
+while (not SFileExists(FileName)) or (FileName='')do
 	begin
 	TextColor(10);
 	ReadLn(FileName);
 	TextColor(7);
-	if not SGFileExists(FileName) then
+	if not SFileExists(FileName) then
 		Write('Файл "',FileName,'" не существует. Введите еще раз:');
 	end;
 ReadSystemFromKeyborad(FileName);
@@ -597,7 +597,7 @@ else
 end;
 
 {$IFDEF ENGINE}
-	procedure SGConsoleEx8(const VParams : TSGConcoleCallerParams = nil);
+	procedure SConsoleEx8(const VParams : TSConcoleCallerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -611,7 +611,7 @@ DoIneration();
 	end;
 	initialization
 	begin
-	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx8, ['ex8'], 'Example 8');
+	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx8, ['ex8'], 'Example 8');
 	end;
 	
 	end.

@@ -465,39 +465,39 @@ implementation
 {$INCLUDE tinygl.inc}
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothSysUtils
 	;
 
 {$ELSE MORPHOS}
 
 uses 
 	 FreeGlut
-	,SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeSysUtils
+	,SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothSysUtils
 	;
 {$ENDIF MORPHOS}
 
 type
-	TSGDllGLUT = class(TSGDll)
+	TSDllGLUT = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
-		class function ChildNames() : TSGStringList; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
+		class function ChildNames() : TSStringList; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllGLUT.ChildNames() : TSGStringList;
+class function TSDllGLUT.ChildNames() : TSStringList;
 begin
 Result := 'freeglut';
 end;
 
-class procedure TSGDllGLUT.Free(); 
+class procedure TSDllGLUT.Free(); 
 begin
 {$IFDEF MORPHOS}
   // MorphOS's GL will closed down by TinyGL unit, nothing is needed here.
@@ -619,7 +619,7 @@ begin
 {$ENDIF MORPHOS}
 end;
 
-class function TSGDllGLUT.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllGLUT.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 {$IFDEF MORPHOS}
 begin
 Result.Clear();
@@ -627,7 +627,7 @@ Result.Clear();
 end;
 {$ELSE MORPHOS}
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function GetGLutProcAddress(const ProcName: PChar): Pointer;
 begin
@@ -772,14 +772,14 @@ LoadResult := @Result;
 end;
 {$ENDIF MORPHOS}
 
-class function TSGDllGLUT.SystemNames() : TSGStringList; 
+class function TSDllGLUT.SystemNames() : TSStringList; 
 begin
 Result := 'GLUT';
 Result += 'LibGlut';
 Result += 'Glut32';
 end;
 
-class function TSGDllGLUT.DllNames() : TSGStringList;
+class function TSDllGLUT.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += 'freeglut';
@@ -802,7 +802,7 @@ end;
 
 initialization
 begin
-TSGDllGLUT.Create();
+TSDllGLUT.Create();
 end;
 
 end.

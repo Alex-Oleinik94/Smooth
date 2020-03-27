@@ -5001,11 +5001,11 @@ implementation
 //***************************************************************************//
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -5730,27 +5730,27 @@ end;
 {$ENDIF}
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD3DX8 = class(TSGDll)
+	TSDllD3DX8 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD3DX8.SystemNames() : TSGStringList;
+class function TSDllD3DX8.SystemNames() : TSStringList;
 begin
 Result := 'Direct3DX8';
 Result += 'D3DX8';
 end;
 
-class function TSGDllD3DX8.DllNames() : TSGStringList;
+class function TSDllD3DX8.DllNames() : TSStringList;
 var
-	i : TSGUInt16;
+	i : TSUInt16;
 begin
 Result := d3dx8dll;
 if d3dx8dll <> 'D3DX81ab.dll' then
@@ -5763,15 +5763,15 @@ Result += 'd3dx9_33.dll';
 Result += 'd3dx9.dll';
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9_'+SGStr(i)+'.dll';
+		Result += 'd3dx9_'+SStr(i)+'.dll';
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9d_'+SGStr(i)+'.dll';
+		Result += 'd3dx9d_'+SStr(i)+'.dll';
 Result += 'd3dx9d_33.dll';
 Result += 'd3dx9d.dll';
 end;
 
-class procedure TSGDllD3DX8.Free();
+class procedure TSDllD3DX8.Free();
 begin
 D3DXVec2Normalize := nil;
 D3DXVec2Hermite := nil;
@@ -6003,15 +6003,15 @@ D3DXFillVolumeTexture := nil;
 D3DXComputeNormalMap := nil;
 end;
 
-class function TSGDllD3DX8.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD3DX8.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -6252,6 +6252,6 @@ end;
 
 initialization
 begin
-TSGDllD3DX8.Create();
+TSDllD3DX8.Create();
 end;
 end.

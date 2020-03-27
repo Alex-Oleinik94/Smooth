@@ -5,45 +5,45 @@ RX32=-Pi386 -FU$(OutputDirectory)/i386-release-desktop
 RX64=-Px86_64 -FU$(OutputDirectory)/x86_64-release-desktop
 LX32=-Pi386 -FU$(OutputDirectory)/i386-library
 LX64=-Px86_64 -FU$(OutputDirectory)/x86_64-library
-SGBUILDPATH=./../Build
-SGBINARYPATH=./../Binaries
-SGDATAPATH=./../Data
-SGEXTENSIONSPATH=ExtensionSources
-SGRESOURCESDIR=$(OutputDirectory)/Resources
-SGRESOURCESPATH=$(SGBUILDPATH)/$(SGRESOURCESDIR)
-SGRESOURCESCACHEDIR=$(OutputDirectory)/ResourcesCache
-SGRESOURCESCACHEPATH=$(SGBUILDPATH)/$(SGRESOURCESCACHEDIR)
-SGFILEREGISTRATIONRESOURCES=$(SGRESOURCESPATH)/SaGeFileRegistrationResources.inc
-SGFILEFORREGISTRATIONEXTENSIONS=$(SGRESOURCESPATH)/SaGeFileForRegistrationExtensions.inc
+SBUILDPATH=./../Build
+SBINARYPATH=./../Binaries
+SDATAPATH=./../Data
+SEXTENSIONSPATH=ExtensionSources
+SRESOURCESDIR=$(OutputDirectory)/Resources
+SRESOURCESPATH=$(SBUILDPATH)/$(SRESOURCESDIR)
+SRESOURCESCACHEDIR=$(OutputDirectory)/ResourcesCache
+SRESOURCESCACHEPATH=$(SBUILDPATH)/$(SRESOURCESCACHEDIR)
+SFILEREGISTRATIONRESOURCES=$(SRESOURCESPATH)/SmoothFileRegistrationResources.inc
+SFILEFORREGISTRATIONEXTENSIONS=$(SRESOURCESPATH)/SmoothFileForRegistrationExtensions.inc
 PASCALCOMPILER=fpc
 CROSSPASCALCOMPILER=$(PASCALCOMPILER)
 DESKTOPFILENAME=Main
-LIBRARYFILENAME=SaGe
+LIBRARYFILENAME=Smooth
 PROJECTSDIR=Sources/Projects
 DESKTOPFILE=$(PROJECTSDIR)/$(DESKTOPFILENAME)
 EXTERNALARGS= -FuExternalSources/NVidia -FuExternalSources/OpenAL -FuExternalSources/OpenSSL -FuExternalSources/sdl2 -FuExternalSources/sdl -FuExternalSources/ffmpeg -FuExternalSources/DCP/Ciphers -FuExternalSources/DCP/Hashes -FuExternalSources/DCP -FuExternalSources/Ogg -FuExternalSources/Synapse -FuExternalSources/lNet -FuExternalSources/lNet/sys -FuExternalSources -FuExternalSources/PasJpeg 
 INCLUDESARGS= -FiSources/Includes/Screen -FiSources/Includes/Encoding -FiSources/Includes -FiSources/Includes/Mesh -FiSources/Includes/Render -FiSources/Includes/Common -FiSources/Includes/Fractals -FiSources/Includes
-SOURCEARGS= -FuSources/Images -FuSources/ConsoleTools -FuSources/SystemTray -FuSources/Base -FuSources/Game -FuSources/Model -FuSources/RenderUtils -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsolePrograms -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources -FuSources/Programs -FuSources/Internet 
+SOURCEARGS= -FuSources/Image -FuSources/ConsoleTools -FuSources/SystemTray -FuSources/Base -FuSources/Game -FuSources/3dObject -FuSources/RenderUtils -FuSources/Screen -FuSources/Fractals -FuSources/Managers -FuSources/ConsolePrograms -FuSources/Audio -FuSources/Console -FuSources/Context -FuSources/Render -FuSources -FuSources/Programs -FuSources/Internet 
 BASEARGS= -FiOutput/Resources -FuOutput/Resources -Sm $(SOURCEARGS) $(INCLUDESARGS) $(EXTERNALARGS)
 RENDERARGS= -FuExternalSources/DirectX/9 -FuExternalSources/DirectX/12 -FuExternalSources/OpenGL
 DARWINARGS=-k-framework -kOpenGL
 ARGS= $(BASEARGS) $(RENDERARGS)
 ANDROIDARGS= -FuExternalSources/Android -FuExternalSources/OpenGL -dENGINE 
-OUTPUTDESKTOP= -FE$(SGBINARYPATH)
+OUTPUTDESKTOP= -FE$(SBINARYPATH)
 OUTPUTANDROID_ARM= -FUOutput/arm-android -FlPlatforms/Android/Libs -FlPlatforms/Android/Libs/Others -oOutput/AndroidApplication/libs/armeabi/libmain.so
 OUTPUTANDROID_I386= -FUOutput/i386-android -oOutput/AndroidApplication/libs/i386eabi/libmain.so
-EXAMPLESARGS= $(ARGS) -Fu$(SGEXTENSIONSPATH)\Examples\Sources -Fu$(SGEXTENSIONSPATH)\Examples\Sources\Graphical -Fu$(SGEXTENSIONSPATH)\Examples\Sources\Console -Fu$(SGEXTENSIONSPATH)/Graphic_Viewer/Sources -Fi$(SGEXTENSIONSPATH)/Graphic_Viewer/Sources/Includes -Fu$(SGEXTENSIONSPATH)/Genetical_Algoritm/Sources $(OUTPUTDESKTOP)
+EXAMPLESARGS= $(ARGS) -Fu$(SEXTENSIONSPATH)\Examples\Sources -Fu$(SEXTENSIONSPATH)\Examples\Sources\Graphical -Fu$(SEXTENSIONSPATH)\Examples\Sources\Console -Fu$(SEXTENSIONSPATH)/Graphic_Viewer/Sources -Fi$(SEXTENSIONSPATH)/Graphic_Viewer/Sources/Includes -Fu$(SEXTENSIONSPATH)/Genetical_Algoritm/Sources $(OUTPUTDESKTOP)
 DESKTOPARGS= $(ARGS) -dENGINE $(OUTPUTDESKTOP) $(DESKTOPFILE)
 DODEBUG= -Ci -Ct -Co -Sa -gl -Xg -dDEBUG
 DORELEASE= -XX -O2 -CX -dRELEASE
 DOWITHFPU= -CfVFPV3
-DOANDROID= -Tandroid -dANDROID -Xs -Sgic -XX -O3 -CX
+DOANDROID= -Tandroid -dANDROID -Xs -Sic -XX -O3 -CX
 DOANDROID_ARM= $(DOANDROID) -Parm -CpARMV6 -XParm-linux-androideabi-
 DOANDROID_I386= $(DOANDROID) -Pi386 -XPi686-linux-android- 
-SAGE="$(SGBINARYPATH)/$(DESKTOPFILENAME)"
-SAGELIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
-SG_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android_arm, android_i386
-SG_TARGET=
+Smooth="$(SBINARYPATH)/$(DESKTOPFILENAME)"
+SmoothLIB=$(PROJECTSDIR)/$(LIBRARYFILENAME)
+S_TARGET_LIST=debug, release, release_x32, release_x64, debug_x32, debug_x64, lib_x32, lib_x64, android_arm, android_i386
+S_TARGET=
 
 examples:
 	@$(PASCALCOMPILER) $(DX32) $(DODEBUG) $(EXAMPLESARGS) ExtensionSources/Examples/Sources/Graphical/Ex1
@@ -86,9 +86,9 @@ darwin_debug_x64:
 darwin_release_x64:
 	@$(PASCALCOMPILER) $(RX64) $(DORELEASE) $(DARWINARGS) $(DESKTOPARGS)
 lib_x32, lib:
-	@$(PASCALCOMPILER) -dLIBRARY $(LX32) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
+	@$(PASCALCOMPILER) -dLIBRARY $(LX32) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SmoothLIB)
 lib_x64:
-	@$(PASCALCOMPILER) -dLIBRARY $(LX64) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SAGELIB)
+	@$(PASCALCOMPILER) -dLIBRARY $(LX64) $(DORELEASE) $(ARGS) $(OUTPUTDESKTOP) $(SmoothLIB)
 android_arm:
 	@$(CROSSPASCALCOMPILER) $(DOANDROID_ARM) $(BASEARGS) $(ANDROIDARGS) $(OUTPUTANDROID_ARM) $(DESKTOPFILE)
 android_i386:
@@ -96,19 +96,19 @@ android_i386:
 ios:
 	
 inc_version_debug:
-	@$(SAGE) --bt --iv 0
-	@$(SAGE) --bt --CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
+	@$(Smooth) --bt --iv 0
+	@$(Smooth) --bt --CCFTPUARU "$(SDATAPATH)/Engine/version.txt" $(SRESOURCESPATH) $(SRESOURCESCACHEPATH) SmoothVersionFile $(SFILEREGISTRATIONRESOURCES)
 inc_version_release:
-	@$(SAGE) --bt --iv 1
-	@$(SAGE) --bt --CCFTPUARU "$(SGDATAPATH)/Engine/version.txt" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) SaGeVersionFile $(SGFILEREGISTRATIONRESOURCES)
+	@$(Smooth) --bt --iv 1
+	@$(Smooth) --bt --CCFTPUARU "$(SDATAPATH)/Engine/version.txt" $(SRESOURCESPATH) $(SRESOURCESCACHEPATH) SmoothVersionFile $(SFILEREGISTRATIONRESOURCES)
 build_files:
 	@$(MAKE) clear_files
-	@$(SAGE) --bt --bf "$(SGBUILDPATH)/BuildFiles.ini" $(SGRESOURCESPATH) $(SGRESOURCESCACHEPATH) $(SGFILEREGISTRATIONRESOURCES)
+	@$(Smooth) --bt --bf "$(SBUILDPATH)/BuildFiles.ini" $(SRESOURCESPATH) $(SRESOURCESCACHEPATH) $(SFILEREGISTRATIONRESOURCES)
 clear_files:
-	@rm -f $(SGRESOURCESDIR)/*.pas
-	@rm -f $(SGRESOURCESDIR)/*.inc
-	@$(SAGE) --bt --cfrr $(SGFILEREGISTRATIONRESOURCES)
-	@$(SAGE) --bt --cffre $(SGFILEFORREGISTRATIONEXTENSIONS)
+	@rm -f $(SRESOURCESDIR)/*.pas
+	@rm -f $(SRESOURCESDIR)/*.inc
+	@$(Smooth) --bt --cfrr $(SFILEREGISTRATIONRESOURCES)
+	@$(Smooth) --bt --cffre $(SFILEFORREGISTRATIONEXTENSIONS)
 clear:
 	@rm -f $(OutputDirectory)/i386-android/*
 	@rm -f $(OutputDirectory)/arm-android/*
@@ -133,8 +133,8 @@ clear:
 	@rm -f Sources/*.ppu
 	@rm -f Main.res
 	@$(MAKE) clear_files
-sg_compile:
+S_compile:
 	$(MAKE) clear_files
-	$(SAGE) --bt --sco $(SG_TARGET)
-	$(MAKE) $(SG_TARGET)
+	$(Smooth) --bt --sco $(S_TARGET)
+	$(MAKE) $(S_TARGET)
 	$(MAKE) clear_files

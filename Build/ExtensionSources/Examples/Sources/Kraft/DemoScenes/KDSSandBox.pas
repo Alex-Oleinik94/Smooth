@@ -48,14 +48,14 @@ type TDemoSceneSandBox=class(TDemoScene)
 implementation
 
 uses
-	 Classes, SaGeFileUtils;
+	 Classes, SmoothFileUtils;
 
 procedure LoadSandBox(const Mesh : TKraftMesh);
 var
 	Stream : TFileStream = nil;
 	Memory : PByte;
 begin
-Stream := TFileStream.Create(SGExamplesDirectory + DirectorySeparator + 'Kraft' + DirectorySeparator + 'SandBox.bin', fmOpenRead);
+Stream := TFileStream.Create(SExamplesDirectory + DirectorySeparator + 'Kraft' + DirectorySeparator + 'SandBox.bin', fmOpenRead);
 Memory := GetMem(Stream.Size);
 Stream.Read(Memory^, Stream.Size);
 Mesh.Load(Memory, Stream.Size);

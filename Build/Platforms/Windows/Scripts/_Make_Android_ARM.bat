@@ -2,7 +2,7 @@
 CALL _Create_Output_Directoryes
 cd ..
 echo "======================================="
-echo "|Compiling  Debug  Version for Android|"
+echo "|Compiling  debug  version for Android|"
 echo "======================================="
 if not exist Output MKDIR Output
 if not exist Output\AndroidApplication MKDIR Output\AndroidApplication

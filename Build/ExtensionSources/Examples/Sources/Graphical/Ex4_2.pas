@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex4_2;
 	interface
@@ -9,32 +9,32 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeFont
-	,SaGeScreen
-	,SaGeCommonStructs
-	,SaGeCamera
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothFont
+	,SmoothScreen
+	,SmoothCommonStructs
+	,SmoothCamera
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample4_2 = class(TSGPaintableObject)
+	TSExample4_2 = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera : TSGCamera;
+		FCamera : TSCamera;
 		FArray  : packed array[0..35] of 
 			packed record
-				FVertex:TSGVertex3f;
-				FColor:TSGColor4b;
+				FVertex:TSVertex3f;
+				FColor:TSColor4b;
 				end;
 		end;
 
@@ -42,17 +42,17 @@ type
 	implementation
 	{$ENDIF}
 
-class function TSGExample4_2.ClassName():TSGString;
+class function TSExample4_2.ClassName():TSString;
 begin
 Result := 'Вывод неиндексированым массивом из оперативки';
 end;
 
-constructor TSGExample4_2.Create(const VContext : ISGContext);
+constructor TSExample4_2.Create(const VContext : ISContext);
 var
-	i:TSGByte;
+	i:TSByte;
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
 
 i:=0;
@@ -115,36 +115,36 @@ FArray[i+5]:=FArray[i+2];
 // Дело в том, что в DirectX можно использовать цвета в формате UNSIGNED_BYTE как (b;g;r;a).
 // А в OpenGL можно использовать как FLOAT (r;g;b) и (r;g;b;a), так и UNSIGNED_BYTE (r;g;b) и (r;g;b;a).
 // И получается, что синий и красный цвета меняются местами. Поэтому мы их меняем обратно.
-// Для решения этой проблемы реализован класс TSGMesh, которы сам делает все эти операции, 
+// Для решения этой проблемы реализован класс TSMesh, которы сам делает все эти операции, 
 //   и поддерживает работу с разными форматами цветов одной процедурой.
-if Render.RenderType=SGRenderOpenGL then
+if Render.RenderType=SRenderOpenGL then
 	for i:=Low(FArray) to High(FArray) do
 		FArray[i].FColor.ConvertType();
 end;
 
-destructor TSGExample4_2.Destroy();
+destructor TSExample4_2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample4_2.Paint();
+procedure TSExample4_2.Paint();
 begin
 FCamera.CallAction();
 
-Render.EnableClientState(SGR_VERTEX_ARRAY);
-Render.EnableClientState(SGR_COLOR_ARRAY);
+Render.EnableClientState(SR_VERTEX_ARRAY);
+Render.EnableClientState(SR_COLOR_ARRAY);
 
-Render.VertexPointer(3, SGR_FLOAT,         SizeOf(FArray[0]), @FArray[0].FVertex);
-Render.ColorPointer (4, SGR_UNSIGNED_BYTE, SizeOf(FArray[0]), @FArray[0].FColor);
+Render.VertexPointer(3, SR_FLOAT,         SizeOf(FArray[0]), @FArray[0].FVertex);
+Render.ColorPointer (4, SR_UNSIGNED_BYTE, SizeOf(FArray[0]), @FArray[0].FColor);
 
-Render.DrawArrays(SGR_TRIANGLES, 0, Length(FArray));
+Render.DrawArrays(SR_TRIANGLES, 0, Length(FArray));
 
-Render.DisableClientState(SGR_COLOR_ARRAY);
-Render.DisableClientState(SGR_VERTEX_ARRAY);
+Render.DisableClientState(SR_COLOR_ARRAY);
+Render.DisableClientState(SR_VERTEX_ARRAY);
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample4_2, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample4_2, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

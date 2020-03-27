@@ -1,0 +1,31 @@
+#define SMOOTH_VERSION 1
+#define SMOOTH_ICON 2
+
+#define SMOOTH_ICON_VALUE "Sun.ico"
+#define SMOOTH_VERSION_VALUE "0.1.2.13010"
+
+SMOOTH_VERSION VERSIONINFO
+FILEVERSION     0,1,2,13010
+PRODUCTVERSION  0,1,2,13010
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904E4"
+    BEGIN
+      VALUE "CompanyName", ""
+      VALUE "FileDescription", "Smooth common application"
+      VALUE "FileVersion", SMOOTH_VERSION_VALUE
+      VALUE "InternalName", "Smooth"
+      VALUE "LegalCopyright", "Byeneg"
+      VALUE "OriginalFilename", "Smooth.exe"
+      VALUE "ProductName", "Smooth"
+      VALUE "ProductVersion", SMOOTH_VERSION_VALUE
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809, 1252
+  END
+END
+
+SMOOTH_ICON ICON SMOOTH_ICON_VALUE

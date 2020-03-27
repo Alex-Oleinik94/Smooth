@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex2_2;
 	interface
@@ -9,55 +9,55 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeFont
-	,SaGeCommonStructs
-	,SaGeCamera
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothFont
+	,SmoothCommonStructs
+	,SmoothCamera
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample2_2=class(TSGPaintableObject)
+	TSExample2_2=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera : TSGCamera;
-		FLightAngle : TSGSingle;
+		FCamera : TSCamera;
+		FLightAngle : TSSingle;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-class function TSGExample2_2.ClassName():TSGString;
+class function TSExample2_2.ClassName():TSString;
 begin
 Result := 'Освещение';
 end;
 
-constructor TSGExample2_2.Create(const VContext : ISGContext);
+constructor TSExample2_2.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
-FCamera := TSGCamera.Create();
+FCamera := TSCamera.Create();
 FCamera.Context := VContext;
 FLightAngle := 0;
 end;
 
-destructor TSGExample2_2.Destroy();
+destructor TSExample2_2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample2_2.Paint();
+procedure TSExample2_2.Paint();
 var
-	Light : TSGVertex3f;
+	Light : TSVertex3f;
 begin
 FCamera.CallAction();
 Light.Import(cos(FLightAngle),sin(FLightAngle),sin(FLightAngle*2));
@@ -67,15 +67,15 @@ FLightAngle += Context.ElapsedTime * 0.01;
 with Render do
 	begin
 	Color3f(0,1,0);
-	BeginScene(SGR_POINTS);
+	BeginScene(SR_POINTS);
 	Render.Vertex(Light);
 	EndScene();
 	
 	Color3f(1,1,1);
-	Enable(SGR_LIGHTING);
-	Enable(SGR_LIGHT0);
-	Lightfv(SGR_LIGHT0,SGR_POSITION,@Light);
-	BeginScene(SGR_QUADS);
+	Enable(SR_LIGHTING);
+	Enable(SR_LIGHT0);
+	Lightfv(SR_LIGHT0,SR_POSITION,@Light);
+	BeginScene(SR_QUADS);
 	
 	Normal3f(1,0,0);
 	Vertex3f(1,1,1);
@@ -114,12 +114,12 @@ with Render do
 	Vertex3f(1,-1,1);
 	
 	EndScene();
-	Disable(SGR_LIGHTING);
+	Disable(SR_LIGHTING);
 	end;
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample2_2, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample2_2, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

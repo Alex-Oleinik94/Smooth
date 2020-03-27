@@ -1323,45 +1323,45 @@ var png_get_libpng_ver : function( png_ptr : png_structp ) : png_charp ; cdecl ;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
+	,SmoothLists
 	;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllPNG = class(TSGDll)
+	TSDllPNG = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllPNG.SystemNames() : TSGStringList;
+class function TSDllPNG.SystemNames() : TSStringList;
 begin
 Result := 'LibPng';
 Result += 'Png';
 end;
 
-class function TSGDllPNG.DllNames() : TSGStringList;
+class function TSDllPNG.DllNames() : TSStringList;
 const
 	WinDllPrefix = {$IFDEF MSWINDOWS}'lib'{$ELSE}''{$ENDIF};
 var
-	i : TSGUInt32;
+	i : TSUInt32;
 begin
 Result := nil;
 for i := {$IFDEF MSWINDOWS}12{$ELSE}13{$ENDIF} downto 1 do
-	Result += WinDllPrefix + 'png' + SGStr(i);
+	Result += WinDllPrefix + 'png' + SStr(i);
 {$IFDEF MSWINDOWS}Result += WinDllPrefix + 'png'; {$ENDIF}
 end;
 
-class procedure TSGDllPNG.Free();
+class procedure TSDllPNG.Free();
 begin
 png_access_version_number := nil;
 png_set_sig_bytes := nil;
@@ -1536,15 +1536,15 @@ png_get_header_version := nil;
 png_get_libpng_ver := nil;
 end;
 
-class function TSGDllPNG.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllPNG.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -1728,6 +1728,6 @@ end;
 
 initialization
 begin
-TSGDllPNG.Create();
+TSDllPNG.Create();
 end;
 end.

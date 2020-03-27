@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex14;
 	interface
@@ -9,24 +9,24 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeFont
-	,SaGeScreen
-	,SaGeVertexObject
-	,SaGeCommonStructs
-	,SaGeShaders
-	,SaGeShaderReader
-	,SaGeResourceManager
-	,SaGeFileUtils
-	,SaGeCamera
-	,SaGeMatrix
-	,SaGeContextUtils
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothFont
+	,SmoothScreen
+	,SmoothVertexObject
+	,SmoothCommonStructs
+	,SmoothShaders
+	,SmoothShaderReader
+	,SmoothResourceManager
+	,SmoothFileUtils
+	,SmoothCamera
+	,SmoothMatrix
+	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	
 	,Classes
@@ -38,38 +38,38 @@ uses
 const
 	TextureSize = 1024;
 type
-	TSGExample14 = class(TSGPaintableObject)
+	TSExample14 = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext); override;
+		constructor Create(const VContext : ISContext); override;
 		destructor Destroy(); override;
 		procedure Paint(); override;
-		class function ClassName():TSGString; override;
-		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
+		class function ClassName():TSString; override;
+		class function Supported(const _Context : ISContext) : TSBoolean; override;
 			private
-		FCamera : TSGCamera;
+		FCamera : TSCamera;
 		
-		FModel, FLigthSphere: TSG3DObject;
+		FModel, FLigthSphere: TS3DObject;
 		FModelBBoxMin,
 			FModelBBoxMax,
-			FModelCenter : TSGVertex3f;
+			FModelCenter : TSVertex3f;
 		
-		FTexDepth  : TSGLongWord;
-		FTexDepth2 : TSGLongWord;
+		FTexDepth  : TSLongWord;
+		FTexDepth2 : TSLongWord;
 		
-		FLightAngle : TSGFloat;
-		FLightPos : TSGVertex3f;
-		FLightEye : TSGVertex3f;
-		FLightUp  : TSGVertex3f;
+		FLightAngle : TSFloat;
+		FLightPos : TSVertex3f;
+		FLightEye : TSVertex3f;
+		FLightUp  : TSVertex3f;
 		
-		FTexDepthSizeX, FTexDepthSizeY : TSGLongWord;
+		FTexDepthSizeX, FTexDepthSizeY : TSLongWord;
 		FFrameBufferDepth, 
 			FFrameBufferDepth2,
-			FRenderBufferDepth : TSGLongWord;
+			FRenderBufferDepth : TSLongWord;
 		// Шейдерные программы и uniform'ы
 		FCurrentShader,
 			FShaderDepth,
 			FShaderShadowTex2D,
-			FShaderShadowShad2D : TSGShaderProgram;
+			FShaderShadowShad2D : TSShaderProgram;
 		
 		FUniformShadowTex2D_shadowMap,
 			FUniformShadowTex2D_lightMatrix,
@@ -78,7 +78,7 @@ type
 			FUniformShadowShad2D_shadowMap,
 			FUniformShadowShad2D_lightMatrix,
 			FUniformShadowShad2D_lightPos,
-			FUniformShadowShad2D_lightDir : TSGLongWord;
+			FUniformShadowShad2D_lightDir : TSLongWord;
 		
 		// Матрицы
 		FCameraProjectionMatrix,
@@ -86,14 +86,14 @@ type
 			FCameraInverseModelViewMatrix,
 			FLightProjectionMatrix,
 			FLightModelViewMatrix,
-			FLightMatrix : TSGMatrix4x4;
+			FLightMatrix : TSMatrix4x4;
 		
 		FUseLightAnimation,
 			FShadowRenderType,
-			FShadowFilter : TSGBoolean;
+			FShadowFilter : TSBoolean;
 		
 			private
-		procedure LoadModel(const FileName : TSGString);
+		procedure LoadModel(const FileName : TSString);
 		procedure RenderToShadowMap();
 		procedure RenderShadowedScene();
 		procedure DrawModel();
@@ -106,36 +106,36 @@ type
 	{$ENDIF}
 
 
-class function TSGExample14.Supported(const _Context : ISGContext) : TSGBoolean;
+class function TSExample14.Supported(const _Context : ISContext) : TSBoolean;
 begin
 Result := _Context.Render.SupportedShaders();
 end;
 
-procedure TSGExample14.LoadModel(const FileName : TSGString);
+procedure TSExample14.LoadModel(const FileName : TSString);
 var
 	Stream : TMemoryStream = nil;
 	CountOfVertexes, CountOfIndexes : Integer;
-	Indexes : packed array of packed array [0..2] of TSGLongWord;
+	Indexes : packed array of packed array [0..2] of TSLongWord;
 	i : LongWord;
 begin
-FModel := TSG3DObject.Create();
+FModel := TS3DObject.Create();
 FModel.Context := Context;
 FModel.CountTextureFloatsInVertexArray := 2;
-FModel.ObjectPoligonesType := SGR_TRIANGLES;
+FModel.ObjectPoligonesType := SR_TRIANGLES;
 FModel.HasNormals := True;
-FModel.SetColorType(SGMeshColorType4f);
+FModel.SetColorType(S3dObjectColorType4f);
 FModel.HasTexture := False;
 FModel.HasColors  := False;
 FModel.EnableCullFace := True;
 FModel.EnableCullFaceFront := False;
 FModel.EnableCullFaceBack := True;
-FModel.VertexType := SGMeshVertexType3f;
+FModel.VertexType := S3dObjectVertexType3f;
 
 FModel.QuantityFaceArrays := 1;
 FModel.PoligonesType[0] := FModel.ObjectPoligonesType;
 
 Stream := TMemoryStream.Create();
-SGResourceFiles.LoadMemoryStreamFromFile(Stream,FileName);
+SResourceFiles.LoadMemoryStreamFromFile(Stream,FileName);
 Stream.ReadBuffer(FModelBBoxMin,SizeOf(FModelBBoxMin));
 Stream.ReadBuffer(FModelBBoxMax,SizeOf(FModelBBoxMax));
 FModelCenter := (FModelBBoxMax + FModelBBoxMin)/2;
@@ -159,27 +159,27 @@ SetLength(Indexes, 0);
 FModel.LoadToVBO();
 end;
 
-class function TSGExample14.ClassName():TSGString;
+class function TSExample14.ClassName():TSString;
 begin
 Result := 'Shadow Mapping';
 end;
 
-constructor TSGExample14.Create(const VContext : ISGContext);
+constructor TSExample14.Create(const VContext : ISContext);
 
 procedure LoadLigthModel();
 var
-	FPhysics : TSGPhysics;
+	FPhysics : TSPhysics;
 begin
-FPhysics:=TSGPhysics.Create(Context);
+FPhysics:=TSPhysics.Create(Context);
 
-FPhysics.AddObjectBegin(SGPBodySphere,True);
+FPhysics.AddObjectBegin(SPBodySphere,True);
 FPhysics.LastObject().InitSphere(1,30);
 FPhysics.LastObject().SetVertex(0,-56,18);
 FPhysics.LastObject().AddObjectEnd(50);
 
-FLigthSphere := FPhysics.LastObject().Mesh;
-FPhysics.LastObject().Mesh := nil;
-FLigthSphere.ObjectColor:=SGVertex4fImport(1,1,1,1);
+FLigthSphere := FPhysics.LastObject().Object3d;
+FPhysics.LastObject().Object3d := nil;
+FLigthSphere.ObjectColor:=SVertex4fImport(1,1,1,1);
 FLigthSphere.EnableCullFace := True;
 
 FPhysics.Destroy();
@@ -187,7 +187,7 @@ end;
 
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.Context := Context;
 FCamera.Zum := 10;
 FCamera.RotateX := 50;
@@ -225,53 +225,53 @@ FTexDepth2 := 0;
 
 // Создаём текстуру FTexDepth - текстура прикреплённая как буффер цвета, для теста глубины мы создадим рендербуффер
 Render.GenTextures(1, @FTexDepth);
-Render.BindTexture(SGR_TEXTURE_2D, FTexDepth);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_CLAMP);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_CLAMP);
+Render.BindTexture(SR_TEXTURE_2D, FTexDepth);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_MIN_FILTER, SR_NEAREST);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_MAG_FILTER, SR_NEAREST);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_WRAP_S, SR_CLAMP);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_WRAP_T, SR_CLAMP);
 if Render.SupportedDepthTextures() then
-	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_R16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RED, SGR_UNSIGNED_SHORT, nil)
+	Render.TexImage2D(SR_TEXTURE_2D, 0, SR_R16, FTexDepthSizeX, FTexDepthSizeY, 0, SR_RED, SR_UNSIGNED_SHORT, nil)
 else
-	Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_RGBA16, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_RGBA, SGR_UNSIGNED_SHORT, nil);
-Render.BindTexture(SGR_TEXTURE_2D,0);
+	Render.TexImage2D(SR_TEXTURE_2D, 0, SR_RGBA16, FTexDepthSizeX, FTexDepthSizeY, 0, SR_RGBA, SR_UNSIGNED_SHORT, nil);
+Render.BindTexture(SR_TEXTURE_2D,0);
 // Создаём рендербуффер глубины
 Render.GenRenderBuffers(1,@FRenderBufferDepth);
-Render.BindRenderBuffer(SGR_RENDERBUFFER_EXT, FRenderBufferDepth);
-Render.RenderBufferStorage(SGR_RENDERBUFFER_EXT, SGR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY);
-Render.BindRenderBuffer(SGR_RENDERBUFFER_EXT, 0);
+Render.BindRenderBuffer(SR_RENDERBUFFER_EXT, FRenderBufferDepth);
+Render.RenderBufferStorage(SR_RENDERBUFFER_EXT, SR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY);
+Render.BindRenderBuffer(SR_RENDERBUFFER_EXT, 0);
 // Создаём фреймбуффер
 Render.GenFrameBuffers(1, @FFrameBufferDepth);
-Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth);
-Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_COLOR_ATTACHMENT0_EXT, SGR_TEXTURE_2D, FTexDepth, 0);
-Render.FrameBufferRenderBuffer(SGR_FRAMEBUFFER_EXT,SGR_DEPTH_ATTACHMENT_EXT, SGR_RENDERBUFFER_EXT, FRenderBufferDepth);
-Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
+Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, FFrameBufferDepth);
+Render.FrameBufferTexture2D(SR_FRAMEBUFFER_EXT, SR_COLOR_ATTACHMENT0_EXT, SR_TEXTURE_2D, FTexDepth, 0);
+Render.FrameBufferRenderBuffer(SR_FRAMEBUFFER_EXT,SR_DEPTH_ATTACHMENT_EXT, SR_RENDERBUFFER_EXT, FRenderBufferDepth);
+Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, 0);
 // Создаём текстуру FTexDepth2 - текстура прикреплённая как буффер глубины
 Render.GenTextures(1, @FTexDepth2);
-Render.BindTexture(SGR_TEXTURE_2D, FTexDepth2);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_S, SGR_CLAMP);
-Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_WRAP_T, SGR_CLAMP);
-Render.TexImage2D(SGR_TEXTURE_2D, 0, SGR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY, 0, SGR_DEPTH_COMPONENT, SGR_UNSIGNED_SHORT, nil);
-Render.BindTexture(SGR_TEXTURE_2D, 0);
+Render.BindTexture(SR_TEXTURE_2D, FTexDepth2);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_MIN_FILTER, SR_NEAREST);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_MAG_FILTER, SR_NEAREST);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_WRAP_S, SR_CLAMP);
+Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_WRAP_T, SR_CLAMP);
+Render.TexImage2D(SR_TEXTURE_2D, 0, SR_DEPTH_COMPONENT24, FTexDepthSizeX, FTexDepthSizeY, 0, SR_DEPTH_COMPONENT, SR_UNSIGNED_SHORT, nil);
+Render.BindTexture(SR_TEXTURE_2D, 0);
 // Создаём фреймбуффер
 Render.GenFrameBuffers(1, @FFrameBufferDepth2);
-Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth2);
-Render.DrawBuffer(SGR_NONE);
-Render.ReadBuffer(SGR_NONE);
-Render.FrameBufferTexture2D(SGR_FRAMEBUFFER_EXT, SGR_DEPTH_ATTACHMENT_EXT, SGR_TEXTURE_2D, FTexDepth2, 0);
-Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
+Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, FFrameBufferDepth2);
+Render.DrawBuffer(SR_NONE);
+Render.ReadBuffer(SR_NONE);
+Render.FrameBufferTexture2D(SR_FRAMEBUFFER_EXT, SR_DEPTH_ATTACHMENT_EXT, SR_TEXTURE_2D, FTexDepth2, 0);
+Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, 0);
 
-FShaderDepth := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.frag'));
-FShaderShadowTex2D := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_tex2D.frag'));
-FShaderShadowShad2D := SGCreateShaderProgramFromSources(Context,
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
-	SGReadShaderSourceFromFile(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_shad2D.frag'));
+FShaderDepth := SCreateShaderProgramFromSources(Context,
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.vert'),
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'depth.frag'));
+FShaderShadowTex2D := SCreateShaderProgramFromSources(Context,
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_tex2D.frag'));
+FShaderShadowShad2D := SCreateShaderProgramFromSources(Context,
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow.vert'),
+	SReadShaderSourceFromFile(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'shadow_shad2D.frag'));
 
 
 FUniformShadowTex2D_shadowMap    := FShaderShadowTex2D.GetUniformLocation('shadowMap');
@@ -284,11 +284,11 @@ FUniformShadowShad2D_lightMatrix := FShaderShadowShad2D.GetUniformLocation('ligh
 FUniformShadowShad2D_lightPos    := FShaderShadowShad2D.GetUniformLocation('lightPos');
 FUniformShadowShad2D_lightDir    := FShaderShadowShad2D.GetUniformLocation('lightDir');
 
-LoadModel(SGExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'model.bin');
+LoadModel(SExamplesDirectory + DirectorySeparator + '14' + DirectorySeparator + 'model.bin');
 LoadLigthModel();
 end;
 
-destructor TSGExample14.Destroy();
+destructor TSExample14.Destroy();
 begin
 Render.DeleteTextures(1,@FTexDepth);
 Render.DeleteTextures(1,@FTexDepth2);
@@ -300,15 +300,15 @@ FCamera.Destroy();
 inherited;
 end;
 
-procedure TSGExample14.DrawPlane();
+procedure TSExample14.DrawPlane();
 // Плоскость не отбрасывает тень, поэтому она не рендерится в текстуру глубины
 const
 	PlaneSize = 35.0;
 	NumTriangles = 50;
 var
-	PlaneHeight : TSGFloat;
-	x,y,a : TSGFloat;
-	i : TSGLongWord;
+	PlaneHeight : TSFloat;
+	x,y,a : TSFloat;
+	i : TSLongWord;
 begin
 PlaneHeight := FModelCenter.y * 0.005 + 4.36;
 Render.Color3f(0.4,0.5,0.6);
@@ -316,7 +316,7 @@ Render.Color3f(0.4,0.5,0.6);
 x := sin(0) * PlaneSize;
 y := cos(0) * PlaneSize;
 a := PI*2/50;
-Render.BeginScene(SGR_TRIANGLES);
+Render.BeginScene(SR_TRIANGLES);
 Render.Normal3f(0,1,0);
 for i := 0 to 49 do
 	begin
@@ -330,35 +330,35 @@ for i := 0 to 49 do
 Render.EndScene();
 end;
 
-procedure TSGExample14.RenderToShadowMap();
+procedure TSExample14.RenderToShadowMap();
 begin
 Render.Viewport(0,0,FTexDepthSizeX,FTexDepthSizeY);
 if (FShadowRenderType) then
 	begin // Вариант #1
-	Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, FFrameBufferDepth);
+	Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, FFrameBufferDepth);
 	// Очищать текстуру нужно значением соответствующим дальней плоскости отсечения
 	Render.ClearColor(1,1,1,1);
-	Render.Clear(SGR_COLOR_BUFFER_BIT or SGR_DEPTH_BUFFER_BIT);
+	Render.Clear(SR_COLOR_BUFFER_BIT or SR_DEPTH_BUFFER_BIT);
 	end
 else
 	begin // Вариант #2
-	Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT,FFrameBufferDepth2);
+	Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT,FFrameBufferDepth2);
 	// В этом случае у нас нет буфера цвета, поэтому очищать его не нужно
-	Render.Clear(SGR_DEPTH_BUFFER_BIT);
+	Render.Clear(SR_DEPTH_BUFFER_BIT);
 	end;
 // Сдвиг полигонов - нужен для того, чтобы не было z-fighting'а
-Render.Enable(SGR_POLYGON_OFFSET_FILL);
+Render.Enable(SR_POLYGON_OFFSET_FILL);
 Render.PolygonOffset ( 2, 500);
 
 // Сохраняем эти матрицы, они нам понадобятся для расчёта матрицы света
-FLightProjectionMatrix := SGGetPerspectiveMatrix(50.0, 1.0, TSGRenderNear, TSGRenderFar);
-FLightModelViewMatrix  := SGGetLookAtMatrix(FLightPos, FLightEye, FLightUp);
+FLightProjectionMatrix := SGetPerspectiveMatrix(50.0, 1.0, TSRenderNear, TSRenderFar);
+FLightModelViewMatrix  := SGetLookAtMatrix(FLightPos, FLightEye, FLightUp);
 
 // Установить матрицы камеры света
-Render.MatrixMode(SGR_PROJECTION);
+Render.MatrixMode(SR_PROJECTION);
 Render.LoadIdentity();
 Render.MultMatrixf(@FLightProjectionMatrix);
-Render.MatrixMode(SGR_MODELVIEW);
+Render.MatrixMode(SR_MODELVIEW);
 Render.LoadIdentity();
 Render.MultMatrixf(@FLightModelViewMatrix);
 
@@ -374,11 +374,11 @@ else
 	DrawModel();
 	end;
 
-Render.Disable(SGR_POLYGON_OFFSET_FILL);
-Render.BindFrameBuffer(SGR_FRAMEBUFFER_EXT, 0);
+Render.Disable(SR_POLYGON_OFFSET_FILL);
+Render.BindFrameBuffer(SR_FRAMEBUFFER_EXT, 0);
 end;
 
-procedure TSGExample14.DrawModel();
+procedure TSExample14.DrawModel();
 begin
 Render.Color3f(0.9,0.9,0.9);
 Render.PushMatrix();
@@ -388,19 +388,19 @@ FModel.Paint();
 Render.PopMatrix();
 end;
 
-procedure TSGExample14.RenderShadowedScene();
+procedure TSExample14.RenderShadowedScene();
 var
-	FShaderShadow : TSGShaderProgram = nil;
-	FUniformShadow_lightDir    : TSGLongWord = 0;
-	FUniformShadow_lightMatrix : TSGLongWord = 0;
-	FUniformShadow_lightPos    : TSGLongWord = 0;
-	FUniformShadow_shadowMap   : TSGLongWord = 0;
-	{FMVLightPos,} FLightDir     : TSGVertex3f;
-	FLightInverseModelViewMatrix : TSGMatrix4x4;
+	FShaderShadow : TSShaderProgram = nil;
+	FUniformShadow_lightDir    : TSLongWord = 0;
+	FUniformShadow_lightMatrix : TSLongWord = 0;
+	FUniformShadow_lightPos    : TSLongWord = 0;
+	FUniformShadow_shadowMap   : TSLongWord = 0;
+	{FMVLightPos,} FLightDir     : TSVertex3f;
+	FLightInverseModelViewMatrix : TSMatrix4x4;
 begin
 Render.Viewport(0,0,Context.Width,Context.Height);
 Render.ClearColor(0,0,0,1);
-Render.Clear(SGR_COLOR_BUFFER_BIT or SGR_DEPTH_BUFFER_BIT);
+Render.Clear(SR_COLOR_BUFFER_BIT or SR_DEPTH_BUFFER_BIT);
 
 // Устанавливаем матрицы камеры
 FCamera.CallAction();
@@ -409,17 +409,17 @@ FCamera.CallAction();
 // Инвертированная матрица используется в расчёте матрицы источника света
 FCameraProjectionMatrix := FCamera.GetProjectionMatrix();
 FCameraModelViewMatrix := FCamera.GetModelViewMatrix();
-FCameraInverseModelViewMatrix := SGInverseMatrix(FCameraModelViewMatrix);
+FCameraInverseModelViewMatrix := SInverseMatrix(FCameraModelViewMatrix);
 
 FLightMatrix := FCameraInverseModelViewMatrix *
 	FLightModelViewMatrix * 
 	FLightProjectionMatrix *
-	SGScaleMatrix(SGVertex3fImport(0.5,0.5,0.5)) *
-	SGTranslateMatrix(SGVertex3fImport(0.5,0.5,0.5));
+	SScaleMatrix(SVertex3fImport(0.5,0.5,0.5)) *
+	STranslateMatrix(SVertex3fImport(0.5,0.5,0.5));
 
 if FShadowRenderType then
 	begin // Вариант #1
-	Render.BindTexture(SGR_TEXTURE_2D, FTexDepth);
+	Render.BindTexture(SR_TEXTURE_2D, FTexDepth);
 	
 	FShaderShadow := FShaderShadowTex2D;
 	FUniformShadow_lightDir    := FUniformShadowTex2D_lightDir;
@@ -429,11 +429,11 @@ if FShadowRenderType then
 	end
 else
 	begin // Вариант #2
-	Render.BindTexture(SGR_TEXTURE_2D, FTexDepth2);
+	Render.BindTexture(SR_TEXTURE_2D, FTexDepth2);
 	
 	// Для второго варианта включаем режим сравнения текстуры
-	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE, SGR_COMPARE_R_TO_TEXTURE);
-	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_FUNC, SGR_LEQUAL);
+	Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_COMPARE_MODE, SR_COMPARE_R_TO_TEXTURE);
+	Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_COMPARE_FUNC, SR_LEQUAL);
 	
 	FShaderShadow := FShaderShadowShad2D;
 	FUniformShadow_lightDir    := FUniformShadowShad2D_lightDir;
@@ -459,26 +459,26 @@ Render.UseProgram(0);
 if (not FShadowRenderType) then
 	begin // Вариант #2
 	// Не забываем выключать режим сравнения
-	Render.TexParameteri(SGR_TEXTURE_2D, SGR_TEXTURE_COMPARE_MODE,SGR_NONE);
+	Render.TexParameteri(SR_TEXTURE_2D, SR_TEXTURE_COMPARE_MODE,SR_NONE);
 	end;
-Render.BindTexture(SGR_TEXTURE_2D, 0);
+Render.BindTexture(SR_TEXTURE_2D, 0);
 
 // Отображаем положение источника света
 Render.PushMatrix();
-FLightInverseModelViewMatrix := SGInverseMatrix(FLightModelViewMatrix);
+FLightInverseModelViewMatrix := SInverseMatrix(FLightModelViewMatrix);
 Render.MultMatrixf(@FLightInverseModelViewMatrix);
 FLigthSphere.Paint();
 Render.PopMatrix();
 
 {
-Render.BeginScene(SGR_LINES);
+Render.BeginScene(SR_LINES);
 FLightPos.Vertex(Render);
 (FLightPos + FLightDir * 10).Vertex(Render);
 Render.EndScene();
 }
 end;
 
-procedure TSGExample14.Paint();
+procedure TSExample14.Paint();
 begin
 FLightPos.Import(30 * cos (FLightAngle), 40, 30 * sin(FLightAngle));
 
@@ -492,42 +492,42 @@ if (FUseLightAnimation) then
 KeyboardUpCallback();
 end;
 
-procedure TSGExample14.KeyboardUpCallback();
+procedure TSExample14.KeyboardUpCallback();
 begin
-if (Context.KeyPressed and (Context.KeyPressedType = SGUpKey)) then
+if (Context.KeyPressed and (Context.KeyPressedType = SUpKey)) then
 	case Context.KeyPressedChar of
 	' ' : FUseLightAnimation := not FUseLightAnimation;
 	'1' : FShadowRenderType := True;
 	'2' : FShadowRenderType := False;
 	'3' : 
 		begin
-		Render.Enable(SGR_TEXTURE_2D);
-		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_LINEAR);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
-		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth2);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_LINEAR);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_LINEAR);
-		Render.BindTexture(SGR_TEXTURE_2D,0);
-		Render.Disable(SGR_TEXTURE_2D);
+		Render.Enable(SR_TEXTURE_2D);
+		Render.BindTexture(SR_TEXTURE_2D,FTexDepth);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_LINEAR);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_LINEAR);
+		Render.BindTexture(SR_TEXTURE_2D,FTexDepth2);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_LINEAR);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_LINEAR);
+		Render.BindTexture(SR_TEXTURE_2D,0);
+		Render.Disable(SR_TEXTURE_2D);
 		end;
 	'4' : 
 		begin
-		Render.Enable(SGR_TEXTURE_2D);
-		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
-		Render.BindTexture(SGR_TEXTURE_2D,FTexDepth2);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MAG_FILTER, SGR_NEAREST);
-		Render.TexParameteri(SGR_TEXTURE_2D,SGR_TEXTURE_MIN_FILTER, SGR_NEAREST);
-		Render.BindTexture(SGR_TEXTURE_2D,0);
-		Render.Disable(SGR_TEXTURE_2D);
+		Render.Enable(SR_TEXTURE_2D);
+		Render.BindTexture(SR_TEXTURE_2D,FTexDepth);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_NEAREST);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_NEAREST);
+		Render.BindTexture(SR_TEXTURE_2D,FTexDepth2);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MAG_FILTER, SR_NEAREST);
+		Render.TexParameteri(SR_TEXTURE_2D,SR_TEXTURE_MIN_FILTER, SR_NEAREST);
+		Render.BindTexture(SR_TEXTURE_2D,0);
+		Render.Disable(SR_TEXTURE_2D);
 		end;
 	end;
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample14, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample14, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

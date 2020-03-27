@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex13;
 	interface
@@ -9,24 +9,24 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeCommonStructs
-	,SaGeMesh
-	,SaGeShaders
-	,SaGeScreenBase
-	,SaGeStringUtils
-	,SaGeFileUtils
-	,SaGeFPSViewer
-	,SaGeCamera
-	,SaGeScreenClasses
-	,SaGeContextUtils
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothFont
+	,SmoothRenderBase
+	,SmoothCommonStructs
+	,Smooth3dObject
+	,SmoothShaders
+	,SmoothScreenBase
+	,SmoothStringUtils
+	,SmoothFileUtils
+	,SmoothFPSViewer
+	,SmoothCamera
+	,SmoothScreenClasses
+	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	
 	,Ex13_Model
@@ -38,36 +38,36 @@ const
 	ScaleForDepth = 12;
 
 type
-	TSGExample13=class(TSGPaintableObject)
+	TSExample13=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
-		class function Supported(const _Context : ISGContext) : TSGBoolean; override;
+		class function ClassName():TSString;override;
+		class function Supported(const _Context : ISContext) : TSBoolean; override;
 			public
 		procedure KeyControl();
-		function GetVertexShaderSource():TSGString;
-		function GetFragmentShaderSource(const VTexturesCount : TSGLongWord):TSGString;
+		function GetVertexShaderSource():TSString;
+		function GetFragmentShaderSource(const VTexturesCount : TSLongWord):TSString;
 		procedure AddModels(const VCount : TIndex);
 			private
-		FCamera : TSGCamera;
-		FFPS : TSGFPSViewer;
-		FShaderProgram : TSGShaderProgram;
-		FVertexShader, FFragmentShader : TSGShader;
-		FRotateAngle : TSGFloat;
+		FCamera : TSCamera;
+		FFPS : TSFPSViewer;
+		FShaderProgram : TSShaderProgram;
+		FVertexShader, FFragmentShader : TSShader;
+		FRotateAngle : TSFloat;
 		
-		F_ShaderBoneMat  : TSGLongWord;
-		F_ShaderTextures : array[0..6] of TSGLongWord;
+		F_ShaderBoneMat  : TSLongWord;
+		F_ShaderTextures : array[0..6] of TSLongWord;
 		
-		FTexturesHandles : array[0..6] of TSGLongWord;
+		FTexturesHandles : array[0..6] of TSLongWord;
 		
 		// массив с меняющимися данными скелетной анимации
 		FAnimationStates  : array of TSkelAnimState;
 		
 		FModel : TModel;
 		
-		FQuantityModels : TSGLongWord;
+		FQuantityModels : TSLongWord;
 		
 		FP1Button, 
 			FM1Button,
@@ -76,16 +76,16 @@ type
 			FP15Button,
 			FM15Button,
 			FP100Button,
-			FM100Button : TSGScreenButton;
-		FFont : TSGFont;
-		FCountLabel : TSGScreenLabel;
+			FM100Button : TSScreenButton;
+		FFont : TSFont;
+		FCountLabel : TSScreenLabel;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-procedure TSGExample13.AddModels(const VCount : TIndex);
+procedure TSExample13.AddModels(const VCount : TIndex);
 var
 	NewLength, i, Temp : TIndex;
 begin
@@ -111,10 +111,10 @@ else if Length(FAnimationStates) < NewLength then
 	end
 else if Length(FAnimationStates) >= NewLength then
 	FQuantityModels := NewLength;
-FCountLabel.Caption := 'Количество моделей: ' + SGStr(FQuantityModels);
+FCountLabel.Caption := 'Количество моделей: ' + SStr(FQuantityModels);
 end;
 
-function TSGExample13.GetVertexShaderSource():TSGString;
+function TSExample13.GetVertexShaderSource():TSString;
 begin
 Result := '// Vertex Shader '+#13+#10+
 	'uniform mat4 boneMat[32]; '+#13+#10+
@@ -152,14 +152,14 @@ Result := '// Vertex Shader '+#13+#10+
 	'}';
 end;
 
-function TSGExample13.GetFragmentShaderSource(const VTexturesCount : TSGLongWord):TSGString;
+function TSExample13.GetFragmentShaderSource(const VTexturesCount : TSLongWord):TSString;
 var
 	i : TIndex;
 begin
 Result := 
 	'// Fragment Shader '+#13+#10;
 for i := 0 to VTexturesCount - 1 do
-	Result += 'uniform sampler2D myTexture'+SGStr(i)+'; '+#13+#10;
+	Result += 'uniform sampler2D myTexture'+SStr(i)+'; '+#13+#10;
 Result += 
 	'varying float texNum; '+#13+#10+
 	'void main() '+#13+#10+
@@ -170,31 +170,31 @@ for i := 0 to VTexturesCount - 1 do
 	if (i <> 0) then
 		Result += ' else';
 	if i <> VTexturesCount - 1 then
-		Result += ' if (texNum2=='+SGStr(i)+'.0) '+#13+#10;
-	Result += '  gl_FragColor = texture2D( myTexture'+SGStr(i)+', gl_TexCoord[0].st );  '+#13+#10;
+		Result += ' if (texNum2=='+SStr(i)+'.0) '+#13+#10;
+	Result += '  gl_FragColor = texture2D( myTexture'+SStr(i)+', gl_TexCoord[0].st );  '+#13+#10;
 	end;
 Result += '}';
 end;
 
-class function TSGExample13.ClassName():TSGString;
+class function TSExample13.ClassName():TSString;
 begin
 Result := 'Скелетная анимация';
 end;
 
-procedure mmmFP1ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(1); end;
-procedure mmmFM1ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(-1); end;
-procedure mmmFP5ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(5); end;
-procedure mmmFM5ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(-5); end;
-procedure mmmFP15ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(15); end;
-procedure mmmFM15ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(-15); end;
-procedure mmmFP100ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(100); end;
-procedure mmmFM100ButtonProcedure(Button:TSGScreenButton); begin TSGExample13(Button.UserPointer).AddModels(-100); end;
+procedure SExample13P1ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(1); end;
+procedure SExample13M1ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(-1); end;
+procedure SExample13P5ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(5); end;
+procedure SExample13M5ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(-5); end;
+procedure SExample13P15ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(15); end;
+procedure SExample13M15ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(-15); end;
+procedure SExample13P100ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(100); end;
+procedure SExample13M100ButtonProcedure(Button:TSScreenButton); begin TSExample13(Button.UserPointer).AddModels(-100); end;
 
-constructor TSGExample13.Create(const VContext : ISGContext);
+constructor TSExample13.Create(const VContext : ISContext);
 
-procedure CreateButton(var VButton : TSGScreenButton; const x, y : TSGLongWord; const VCaption : TSGString; const VProc : Pointer);inline;
+procedure CreateButton(var VButton : TSScreenButton; const x, y : TSLongWord; const VCaption : TSString; const VProc : Pointer);inline;
 begin
-VButton := TSGScreenButton.Create();
+VButton := TSScreenButton.Create();
 Screen.CreateChild(VButton);
 VButton.Skin := VButton.Skin.CreateDependentSkinWithAnotherFont(FFont);
 VButton.SetBounds(x,y,100,FFont.FontHeight+3);
@@ -202,12 +202,12 @@ VButton.BoundsMakeReal();
 VButton.UserPointer:=Self;
 VButton.Visible:=True;
 VButton.Caption := VCaption;
-VButton.Anchors:=[SGAnchRight];
-VButton.OnChange := TSGScreenComponentProcedure(VProc);
+VButton.Anchors:=[SAnchRight];
+VButton.OnChange := TSScreenComponentProcedure(VProc);
 end;
 
 var
-	i : TSGWord;
+	i : TSWord;
 	TempPChar : PChar;
 begin
 inherited Create(VContext);
@@ -231,24 +231,24 @@ FCountLabel := nil;
 
 if Render.SupportedShaders() then
 	begin
-	FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE} 'Times New Roman.sgf' {$ELSE} 'Tahoma.sgf' {$ENDIF}, True);
+	FFont := SCreateFontFromFile(Context, SDefaultFontFileName, True);
 	
-	FFPS := TSGFPSViewer.Create(Context);
+	FFPS := TSFPSViewer.Create(Context);
 	FFPS.X := Render.Width div 2;
 	FFPS.Y := 5;
 	
-	FCamera:=TSGCamera.Create();
+	FCamera:=TSCamera.Create();
 	FCamera.SetContext(Context);
-	FCamera.ViewMode := SG_VIEW_LOOK_AT_OBJECT;
-	FCamera.Up:=SGVertex3fImport(0,0,1);
-	FCamera.Location:=SGVertex3fImport(0,-350,100);
-	FCamera.View:=(SGVertex3fImport(0,0,0)-SGVertex3fImport(0,-350,100)).Normalized();
+	FCamera.ViewMode := S_VIEW_LOOK_AT_OBJECT;
+	FCamera.Up:=SVertex3fImport(0,0,1);
+	FCamera.Location:=SVertex3fImport(0,-350,100);
+	FCamera.View:=(SVertex3fImport(0,0,0)-SVertex3fImport(0,-350,100)).Normalized();
 	FCamera.Location := FCamera.Location / ScaleForDepth;
 	
 	FModel := TModel.Create(Context);
-	FModel.Load(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'c_marine.smd');
-	FModel.LoadAnimation(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'run.smd');
-	FModel.LoadTextures(SGExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator);
+	FModel.Load(SExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'c_marine.smd');
+	FModel.LoadAnimation(SExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator + 'run.smd');
+	FModel.LoadTextures(SExamplesDirectory + DirectorySeparator + '13' + DirectorySeparator);
 	FModel.PrepareSkeletalAnimation();
 	
 	FTexturesHandles[0] := FModel.GetTextureHandle('SM_4B.jpg');
@@ -271,19 +271,19 @@ if Render.SupportedShaders() then
 		FAnimationStates[i].FSkelTime:=random(100)/100; // случайный сдвиг анимации
 		end;
 	
-	FModel.MakeMesh();
+	FModel.Make3dObject();
 	
-	FVertexShader := TSGShader.Create(Context,SGR_VERTEX_SHADER);
+	FVertexShader := TSShader.Create(Context,SR_VERTEX_SHADER);
 	FVertexShader.Source(GetVertexShaderSource());
 	if not FVertexShader.Compile() then
 		FVertexShader.PrintInfoLog();
 
-	FFragmentShader := TSGShader.Create(Context,SGR_FRAGMENT_SHADER);
+	FFragmentShader := TSShader.Create(Context,SR_FRAGMENT_SHADER);
 	FFragmentShader.Source(GetFragmentShaderSource(FModel.GetTexturesCount()));
 	if not FFragmentShader.Compile() then
 		FFragmentShader.PrintInfoLog();
 
-	FShaderProgram := TSGShaderProgram.Create(Context);
+	FShaderProgram := TSShaderProgram.Create(Context);
 	FShaderProgram.Attach(FVertexShader);
 	FShaderProgram.Attach(FFragmentShader);
 	if not FShaderProgram.Link() then
@@ -292,27 +292,27 @@ if Render.SupportedShaders() then
 	F_ShaderBoneMat := Render.GetUniformLocation(FShaderProgram.Handle,'boneMat');
 	for i := 0 to High(F_ShaderTextures) do
 		begin
-		TempPChar := SGStringToPChar('myTexture'+SGStr(i));
+		TempPChar := SStringToPChar('myTexture'+SStr(i));
 		F_ShaderTextures[i] := Render.GetUniformLocation(FShaderProgram.Handle, TempPChar);
 		FreeMem(TempPChar)
 		end;
 	
-	CreateButton(FP1Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@mmmFP1ButtonProcedure);
-	CreateButton(FM1Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@mmmFM1ButtonProcedure);
-	CreateButton(FP5Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@mmmFP5ButtonProcedure);
-	CreateButton(FM5Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@mmmFM5ButtonProcedure);
-	CreateButton(FP15Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@mmmFP15ButtonProcedure);
-	CreateButton(FM15Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@mmmFM15ButtonProcedure);
-	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@mmmFP100ButtonProcedure);
-	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@mmmFM100ButtonProcedure);
+	CreateButton(FP1Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 0,'+1',@SExample13P1ButtonProcedure);
+	CreateButton(FM1Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 0,'-1',@SExample13M1ButtonProcedure);
+	CreateButton(FP5Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 1,'+5',@SExample13P5ButtonProcedure);
+	CreateButton(FM5Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 1,'-5',@SExample13M5ButtonProcedure);
+	CreateButton(FP15Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 2,'+15',@SExample13P15ButtonProcedure);
+	CreateButton(FM15Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 2,'-15',@SExample13M15ButtonProcedure);
+	CreateButton(FP100Button,Render.Width - 220,10 + (FFont.FontHeight+7) * 3,'+100',@SExample13P100ButtonProcedure);
+	CreateButton(FM100Button,Render.Width - 110,10 + (FFont.FontHeight+7) * 3,'-100',@SExample13M100ButtonProcedure);
 	
-	FCountLabel := SGCreateLabel(
-		Screen, 'Количество моделей: ' + SGStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
-		FFont, [SGAnchRight], True, True);
+	FCountLabel := SCreateLabel(
+		Screen, 'Количество моделей: ' + SStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
+		FFont, [SAnchRight], True, True);
 	end;
 end;
 
-destructor TSGExample13.Destroy();
+destructor TSExample13.Destroy();
 var
 	i : TIndex;
 begin
@@ -355,23 +355,23 @@ if FFont <> nil then
 	FFont.Destroy();
 if FFPS <> nil then
 	FFPS.Destroy();
-//    allready processed in TSGShaderProgram.Destroy()
+//    allready processed in TSShaderProgram.Destroy()
 //FVertexShader.Destroy();
 //FFragmentShader.Destroy();
 inherited;
 end;
 
-class function TSGExample13.Supported(const _Context : ISGContext) : TSGBoolean;
+class function TSExample13.Supported(const _Context : ISContext) : TSBoolean;
 begin
 Result := _Context.Render.SupportedShaders();
 end;
 
-procedure TSGExample13.Paint();
+procedure TSExample13.Paint();
 const
 	WarningString1 : String = 'Вы не сможете просмотреть это пример!';
 	WarningString2 : String = 'На вашем устройстве не поддерживаются шейдеры!';
 var
-	VStringLength : TSGLongWord;
+	VStringLength : TSLongWord;
 	i : LongWord;
 begin
 if Render.SupportedShaders() then
@@ -381,15 +381,15 @@ if Render.SupportedShaders() then
 	if (not Context.CursorCentered) then
 		Render.Rotatef(FRotateAngle,FCamera.Up.x,FCamera.Up.y,FCamera.Up.z);
 	Render.Color3f(1,1,1);
-	Render.Disable(SGR_BLEND);
+	Render.Disable(SR_BLEND);
 	FShaderProgram.Use();
 	Render.Scale(1/ScaleForDepth,1/ScaleForDepth,1/ScaleForDepth);
 	
 	for i := 0 to High(F_ShaderTextures) do
 		begin
 		Render.ActiveTexture(i);
-		Render.Enable(SGR_TEXTURE_2D);
-		Render.BindTexture(SGR_TEXTURE_2D,FTexturesHandles[i]);
+		Render.Enable(SR_TEXTURE_2D);
+		Render.BindTexture(SR_TEXTURE_2D,FTexturesHandles[i]);
 		Render.Uniform1i(F_ShaderTextures[i],i);
 		end;
 	
@@ -410,13 +410,13 @@ if Render.SupportedShaders() then
 	for i := High(F_ShaderTextures) downto 0 do
 		begin
 		Render.ActiveTexture(i);
-		Render.BindTexture(SGR_TEXTURE_2D,0);
-		Render.Disable(SGR_TEXTURE_2D);
+		Render.BindTexture(SR_TEXTURE_2D,0);
+		Render.Disable(SR_TEXTURE_2D);
 		end;
 	
 	Render.Scale(1,1,1);
 	Render.UseProgram(0);
-	Render.Enable(SGR_BLEND);
+	Render.Enable(SR_BLEND);
 	
 	//KeyControl();
 	
@@ -424,28 +424,28 @@ if Render.SupportedShaders() then
 	end
 else
 	begin
-	Render.InitMatrixMode(SG_2D);
+	Render.InitMatrixMode(S_2D);
 	
 	Render.Color3f(1,0,0);
-	VStringLength := (Screen as TSGScreenComponent).Skin.Font.StringLength(WarningString1);
-	(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
-		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
-		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
-	VStringLength := (Screen as TSGScreenComponent).Skin.Font.StringLength(WarningString2);
-	(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
-		SGVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
-		SGVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
+	VStringLength := (Screen as TSScreenComponent).Skin.Font.StringLength(WarningString1);
+	(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString1,
+		SVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height - 20) div 2),
+		SVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 00) div 2));
+	VStringLength := (Screen as TSScreenComponent).Skin.Font.StringLength(WarningString2);
+	(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f(WarningString2,
+		SVertex2fImport((Render.Width - VStringLength) div 2, (Render.Height + 00) div 2),
+		SVertex2fImport((Render.Width + VStringLength) div 2, (Render.Height + 20) div 2));
 	end;
 end;
 
-procedure TSGExample13.KeyControl();
+procedure TSExample13.KeyControl();
 const
 	RotateConst = 0.002;
 var
-	Q, E : TSGBoolean;
-	RotateZ : TSGFloat = 0;
+	Q, E : TSBoolean;
+	RotateZ : TSFloat = 0;
 begin
-if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SGUpKey)) then
+if (Context.KeyPressed and (Context.KeyPressedChar = #27) and (Context.KeyPressedType = SUpKey)) then
 	begin
 	Context.CursorCentered := not Context.CursorCentered;
 	Context.ShowCursor(not Context.CursorCentered);
@@ -474,11 +474,11 @@ if (Context.KeysPressed(' ')) then
 if (Context.KeysPressed('X')) then
 	FCamera.MoveUp(-Context.ElapsedTime*0.7);
 if (Context.CursorCentered) then
-	FCamera.Rotate(Context.CursorPosition(SGDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SGDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
+	FCamera.Rotate(Context.CursorPosition(SDeferenseCursorPosition).y*RotateConst,Context.CursorPosition(SDeferenseCursorPosition).x/Render.Width*Render.Height*RotateConst,RotateZ*RotateConst);
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample13, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample13, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

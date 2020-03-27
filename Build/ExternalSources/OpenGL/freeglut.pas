@@ -138,22 +138,22 @@ var
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothSysUtils
 	;
 
 type
-	TSGDllFreeGLUT = class(TSGDll)
+	TSDllFreeGLUT = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllFreeGLUT.SystemNames() : TSGStringList;
+class function TSDllFreeGLUT.SystemNames() : TSStringList;
 begin
 Result := 'FreeGLUT';
 Result += 'LibFreeGlut';
@@ -162,7 +162,7 @@ Result += 'FGlut';
 Result += 'FGlut32';
 end;
 
-class function TSGDllFreeGLUT.DllNames() : TSGStringList;
+class function TSDllFreeGLUT.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += 'freeglut';
@@ -183,9 +183,9 @@ Result += 'libglut.so.3';
 {$ENDIF}
 end;
 
-class function TSGDllFreeGLUT.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllFreeGLUT.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function fglutGetProcAddress(const S : PChar):Pointer;
 begin
@@ -226,7 +226,7 @@ LoadResult := @Result;
   @glutInitContextProfile := fglutGetProcAddress('glutInitContextProfile');
 end;
 
-class procedure TSGDllFreeGLUT.Free();
+class procedure TSDllFreeGLUT.Free();
 begin
   @glutMainLoopEvent := nil;
   @glutLeaveMainLoop := nil;
@@ -258,7 +258,7 @@ end;
 
 initialization
 begin
-TSGDllFreeGLUT.Create();
+TSDllFreeGLUT.Create();
 end;
 
 end.

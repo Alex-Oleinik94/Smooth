@@ -1,4 +1,4 @@
 @echo off
-set app=Sun
+set app=Smooth
 windres.exe -i %app%.rc %app%.res
-pause
+if "%1"=="" ( pause )

@@ -3,7 +3,7 @@
 ./_Restore_Registration_Files.sh
 cd ./..
 echo "======================================="
-echo "| Compiling Release Version for Unix  |"
+echo "| Compiling release version for Unix  |"
 echo "======================================="
 make build_files
 make inc_version_release

@@ -353,11 +353,11 @@ function GetVorbisErrorName(ErrorCode: Integer): string;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
+	,SmoothLists
 	;
 
 function GetVorbisErrorName(ErrorCode: Integer): string;
@@ -383,18 +383,18 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllCodec = class(TSGDll)
+	TSDllCodec = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllCodec.Free();
+class procedure TSDllCodec.Free();
 begin
 vorbis_info_init := nil;
 vorbis_info_clear := nil;
@@ -422,26 +422,26 @@ vorbis_synthesis_pcmout := nil;
 vorbis_synthesis_read := nil;
 vorbis_packet_blocksize := nil;
 end;
-class function TSGDllCodec.SystemNames() : TSGStringList;
+class function TSDllCodec.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'Vorbis';
 Result += 'LibVorbis';
 end;
-class function TSGDllCodec.DllNames() : TSGStringList;
+class function TSDllCodec.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += VorbisLib;
 end;
-class function TSGDllCodec.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllCodec.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -478,5 +478,5 @@ Pointer(vorbis_packet_blocksize) := LoadProcedure('vorbis_packet_blocksize');
 end;
 
 initialization
-	TSGDllCodec.Create();
+	TSDllCodec.Create();
 end.

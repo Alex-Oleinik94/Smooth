@@ -1,5 +1,5 @@
 // Use CP866
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex11;
 	interface
@@ -11,32 +11,32 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
-	,SaGeMath
-	,SaGeAdamsSystemExample
+	 SmoothContext
+	,SmoothBase
+	,SmoothMath
+	,SmoothAdamsSystemExample
 	{$IF defined(ENGINE)}
-		,SaGeConsoleCaller
-		,SaGeConsoleTools
+		,SmoothConsoleCaller
+		,SmoothConsoleTools
 		{$ENDIF}
-	,SaGeStringUtils
+	,SmoothStringUtils
 	
 	,Crt
 	;
 var
-	FuncP : TSGExpression = nil;
-	FuncQ : TSGExpression = nil;
-	FuncF : TSGExpression = nil;
+	FuncP : TSExpression = nil;
+	FuncQ : TSExpression = nil;
+	FuncF : TSExpression = nil;
 	a, b, eps : Extended;
 	n : LongWord;
 	y_a : Extended;
 	y_b : Extended;
 	alpha_1, alpha_2, betta_1, betta_2 : Extended;
 
-function EnterFunction(const ss: String; const cout_variables: LongWord):TSGExpression;
+function EnterFunction(const ss: String; const cout_variables: LongWord):TSExpression;
 var
 	s: String;
-	Ex : TSGExpression = nil;
+	Ex : TSExpression = nil;
 	iii,ii,i : LongWord;
 begin
 Write('Введите функцию: ');
@@ -47,9 +47,9 @@ Write(')=');
 repeat
 i := 1;
 ReadLn(S);
-Ex := TSGExpression.Create();
+Ex := TSExpression.Create();
 Ex.QuickCalculation := False;
-Ex.Expression := SGStringToPChar(S);
+Ex.Expression := SStringToPChar(S);
 Ex.CanculateExpression();
 if (Ex.ErrorsQuantity=0) then
 	begin
@@ -60,7 +60,7 @@ if (Ex.ErrorsQuantity=0) then
 	if (iii <> 0) then
 		for ii := 0 to LongInt(iii)-1 do
 			if (Length(Ex.Variables) >= ii+1) then
-				Ex.ChangeVariables(Ex.Variables[ii],TSGExpressionChunkCreateReal(random));
+				Ex.ChangeVariables(Ex.Variables[ii],TSExpressionChunkCreateReal(random));
 	Ex.Calculate();
 	end;
 if not (Ex.ErrorsQuantity = 0) then
@@ -85,8 +85,8 @@ if i = 0 then
 	end
 else
 	begin
-	Result := TSGExpression.Create();
-	Result.Expression := SGStringToPChar(S);
+	Result := TSExpression.Create();
+	Result.Expression := SStringToPChar(S);
 	Result.CanculateExpression();
 	end;
 Ex.Destroy();
@@ -133,9 +133,9 @@ end;
 
 procedure Go();
 var
-	Expressions : TSGFunctionArray = nil;
-	FR, SR, TR : TSGExtenededArrayArray;
-	BeginningParams:TSGExtenededArray;
+	Expressions : TSFunctionArray = nil;
+	FR, SR, TR : TSExtenededArrayArray;
+	BeginningParams:TSExtenededArray;
 	Point1,Point2, TotalPoint, Coord1, Coord2: Extended;
 procedure UpdateBeginningParams(const Point : Extended);
 begin
@@ -156,15 +156,15 @@ end;
 begin
 SetLength(Expressions,2);
 SetLength(BeginningParams,2);
-Expressions[0] := TSGExpression.Create();
+Expressions[0] := TSExpression.Create();
 Expressions[0].Expression := 'y1';
 Expressions[0].CanculateExpression();
-Expressions[1] := TSGExpression.Create();
+Expressions[1] := TSExpression.Create();
 Expressions[1].Expression := 
-	SGStringToPChar('('+
-		SGPCharToString(FuncF.Expression)+')-y1*('+
-		SGPCharToString(FuncP.Expression)+')-y0*('+
-		SGPCharToString(FuncQ.Expression)+')');
+	SStringToPChar('('+
+		SPCharToString(FuncF.Expression)+')-y1*('+
+		SPCharToString(FuncP.Expression)+')-y0*('+
+		SPCharToString(FuncQ.Expression)+')');
 Expressions[1].CanculateExpression();
 
 Point1 := Random()*10 - 5;
@@ -191,7 +191,7 @@ WriteLn('Результат сохранен в "', 'Ex11_Output.txt', '".');
 end;
 
 {$IFDEF ENGINE}
-	procedure SGConsoleEx11(const VParams : TSGConcoleCallerParams = nil);
+	procedure SConsoleEx11(const VParams : TSConcoleCallerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -204,7 +204,7 @@ Go();
 	end;
 	initialization
 	begin
-	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx11, ['ex11'], 'Example 11');
+	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx11, ['ex11'], 'Example 11');
 	end;
 	
 	end.

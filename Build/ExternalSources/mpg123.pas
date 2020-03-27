@@ -405,27 +405,27 @@ function mpg123_inited() : Boolean;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeLog
-	,SaGeBaseUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothLog
+	,SmoothBaseUtils
+	,SmoothSysUtils
 	;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 var
-	FInited : TSGBool = False;
+	FInited : TSBool = False;
 
 type
-	TSGDllMPG123 = class(TSGDll)
+	TSDllMPG123 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
@@ -434,16 +434,16 @@ begin
 Result := FInited;
 end;
 
-class function TSGDllMPG123.SystemNames() : TSGStringList;
+class function TSDllMPG123.SystemNames() : TSStringList;
 begin
 Result := 'mpg123';
 Result += 'libmpg123';
 end;
 
-class function TSGDllMPG123.DllNames() : TSGStringList;
+class function TSDllMPG123.DllNames() : TSStringList;
 
 {$IFDEF UNIX}
-procedure UnixLib(const VLib : TSGString);
+procedure UnixLib(const VLib : TSString);
 begin
 Result += VLib + '.so.3';
 Result += VLib + '.so.2';
@@ -469,12 +469,12 @@ UnixLib('mpg123');
 {$ENDIF}
 end;
 
-class procedure TSGDllMPG123.Free();
+class procedure TSDllMPG123.Free();
 begin
 if FInited then
 	begin
 	mpg123_exit();
-	SGLog.Source(JustifedFirstName() + ': Exited.');
+	SLog.Source(JustifedFirstName() + ': Exited.');
 	FInited := False;
 	end;
 mpg123_init := nil;
@@ -545,15 +545,15 @@ mpg123_outblock := nil;
 mpg123_replace_reader := nil;
 end;
 
-class function TSGDllMPG123.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllMPG123.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -564,14 +564,14 @@ type
 	TArrayOfPChar = array [0..100000] of PChar;
 var
 	SD : PPChar;
-	i : TSGUInt32;
-	Decoders : TSGString = '';
+	i : TSUInt32;
+	Decoders : TSString = '';
 begin
 if FInited then
 	exit;
 if Result.FFunctionLoaded > 0 then
 	FInited := mpg123_init() = 0;
-SGLog.Source(JustifedFirstName() + ': ' + Iff(FInited, 'Initialized.', 'Initialization fail.'));
+SLog.Source(JustifedFirstName() + ': ' + Iff(FInited, 'Initialized.', 'Initialization fail.'));
 if FInited then
 	begin
 	SD := mpg123_supported_decoders();
@@ -580,10 +580,10 @@ if FInited then
 		begin
 		if i <> 0 then
 			Decoders += ', ';
-		Decoders += SGPCharToString(TArrayOfPChar(SD)[i]);
+		Decoders += SPCharToString(TArrayOfPChar(SD)[i]);
 		i += 1;
 		end;
-	SGLog.Source(JustifedFirstName() + ': Supored decoders - ' + Decoders + '.');
+	SLog.Source(JustifedFirstName() + ': Supored decoders - ' + Decoders + '.');
 	end;
 end;
 
@@ -660,7 +660,7 @@ mpg123_inialize();
 end;
 
 initialization
-	TSGDllMPG123.Create();
+	TSDllMPG123.Create();
 
 end.
 

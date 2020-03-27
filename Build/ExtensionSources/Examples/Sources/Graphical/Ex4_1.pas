@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex4_1;
 	interface
@@ -9,28 +9,28 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeFont
-	,SaGeScreen
-	,SaGeCommonStructs
-	,SaGeCamera
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothFont
+	,SmoothScreen
+	,SmoothCommonStructs
+	,SmoothCamera
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample4_1=class(TSGPaintableObject)
+	TSExample4_1=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera : TSGCamera;
+		FCamera : TSCamera;
 		FBuffer : LongWord;
 		end;
 
@@ -38,22 +38,22 @@ type
 	implementation
 	{$ENDIF}
 
-class function TSGExample4_1.ClassName():TSGString;
+class function TSExample4_1.ClassName():TSString;
 begin
 Result := 'Вывод неиндексированым массивом с VBO';
 end;
 
-constructor TSGExample4_1.Create(const VContext : ISGContext);
+constructor TSExample4_1.Create(const VContext : ISContext);
 var
-	i:TSGByte;
+	i:TSByte;
 	FArray  : packed array of 
 		packed record
-			FVertex:TSGVertex3f;
-			FColor:TSGColor4b;
+			FVertex:TSVertex3f;
+			FColor:TSColor4b;
 			end;
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
 FBuffer:=0;
 SetLength(FArray,36);
@@ -123,48 +123,48 @@ FArray[i+5]:=FArray[i+2];
 // В DirectX можно использовать цвета в формате UNSIGNED_BYTE как (b;g;r;a).
 // А в OpenGL можно использовать как FLOAT (r;g;b) и (r;g;b;a), так и UNSIGNED_BYTE (r;g;b) и (r;g;b;a).
 // И получается, что синий и красный цвета меняются местами. Поэтому мы их меняем обратно.
-// Для решения этой проблемы реализован класс TSGMesh, которы сам делает все эти операции, 
+// Для решения этой проблемы реализован класс TSMesh, которы сам делает все эти операции, 
 //   и поддерживает работу с разными форматами цветов одной процедурой.
-if Render.RenderType=SGRenderOpenGL then
+if Render.RenderType=SRenderOpenGL then
 	for i:=Low(FArray) to High(FArray) do
 		FArray[i].FColor.ConvertType();
 
 Render.GenBuffersARB(1,@FBuffer);
-Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
-Render.BufferDataARB(SGR_ARRAY_BUFFER_ARB,Length(FArray)*(SizeOf(TSGVertex3f)+SizeOf(TSGColor4b)),@FArray[0], SGR_STATIC_DRAW_ARB);
-Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,FBuffer);
+Render.BufferDataARB(SR_ARRAY_BUFFER_ARB,Length(FArray)*(SizeOf(TSVertex3f)+SizeOf(TSColor4b)),@FArray[0], SR_STATIC_DRAW_ARB);
+Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,0);
 
 SetLength(FArray,0);
 end;
 
-destructor TSGExample4_1.Destroy();
+destructor TSExample4_1.Destroy();
 begin
 Render.DeleteBuffersARB(1,@FBuffer);
 inherited;
 end;
 
-procedure TSGExample4_1.Paint();
+procedure TSExample4_1.Paint();
 begin
 FCamera.CallAction();
 
-Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,FBuffer);
+Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,FBuffer);
 
-Render.EnableClientState(SGR_VERTEX_ARRAY);
-Render.EnableClientState(SGR_COLOR_ARRAY);
+Render.EnableClientState(SR_VERTEX_ARRAY);
+Render.EnableClientState(SR_COLOR_ARRAY);
 
-Render.VertexPointer(3, SGR_FLOAT,         SizeOf(TSGVertex3f)+SizeOf(TSGColor4b), nil);
-Render.ColorPointer (4, SGR_UNSIGNED_BYTE, SizeOf(TSGVertex3f)+SizeOf(TSGColor4b), Pointer(SizeOf(TSGVertex3f)));
+Render.VertexPointer(3, SR_FLOAT,         SizeOf(TSVertex3f)+SizeOf(TSColor4b), nil);
+Render.ColorPointer (4, SR_UNSIGNED_BYTE, SizeOf(TSVertex3f)+SizeOf(TSColor4b), Pointer(SizeOf(TSVertex3f)));
 
-Render.DrawArrays(SGR_TRIANGLES, 0, 36);
+Render.DrawArrays(SR_TRIANGLES, 0, 36);
 
-Render.DisableClientState(SGR_COLOR_ARRAY);
-Render.DisableClientState(SGR_VERTEX_ARRAY);
+Render.DisableClientState(SR_COLOR_ARRAY);
+Render.DisableClientState(SR_VERTEX_ARRAY);
 
-Render.BindBufferARB(SGR_ARRAY_BUFFER_ARB,0);
+Render.BindBufferARB(SR_ARRAY_BUFFER_ARB,0);
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample4_1, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample4_1, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

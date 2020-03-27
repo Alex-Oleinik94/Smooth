@@ -3,9 +3,9 @@ CALL _Create_Output_Directoryes
 cd ..
 set S1="=============================="
 if "%1" equ "android" (
-	set S2="Compiling Extensions for Android"
+	set S2="Compiling extensions for Android"
 ) else (
-	set S2="Compiling Extensions for Windows"
+	set S2="Compiling extensions for Windows"
 )
 if "%1" equ "" (
 	set TARGET=debug

@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex2;
 	interface
@@ -9,52 +9,52 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeBase
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeRenderBase
+	 SmoothBase
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothRenderBase
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	;
 type
-	TSGExample2=class(TSGPaintableObject)
+	TSExample2=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FAngle : TSGSingle;
+		FAngle : TSSingle;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-class function TSGExample2.ClassName():TSGString;
+class function TSExample2.ClassName():TSString;
 begin
 Result := 'Крутящиеся треугольники';
 end;
 
-constructor TSGExample2.Create(const VContext : ISGContext);
+constructor TSExample2.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
 FAngle:=0;
 end;
 
-destructor TSGExample2.Destroy();
+destructor TSExample2.Destroy();
 begin
 inherited;
 end;
 
-procedure TSGExample2.Paint();
+procedure TSExample2.Paint();
 begin
-Render.InitMatrixMode(SG_3D);
+Render.InitMatrixMode(S_3D);
 Render.Translatef(2,0,-6);
 Render.Rotatef(FAngle,0,0,1);
-Render.BeginScene(SGR_TRIANGLES);
+Render.BeginScene(SR_TRIANGLES);
 Render.Color3f(1,0,0);
 Render.Vertex2f(1,0);
 Render.Color3f(0,1,0);
@@ -63,10 +63,10 @@ Render.Color3f(0,0,1);
 Render.Vertex2f(0,1);
 Render.EndScene();
 
-Render.InitMatrixMode(SG_2D);
+Render.InitMatrixMode(S_2D);
 Render.Translatef(Context.Width/2-Context.Width/4,Context.Height/2,0);
 Render.Rotatef(FAngle,0,0,1);
-Render.BeginScene(SGR_TRIANGLES);
+Render.BeginScene(SR_TRIANGLES);
 Render.Color3f(0,1,1);
 Render.Vertex2f(Context.Height/3,0);
 Render.Color3f(1,0,1);
@@ -80,6 +80,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample2, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample2, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 unit Ex13_Model;
 
 interface
@@ -9,34 +9,34 @@ uses
 	
 	,StrMan
 	
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeRenderBase
-	,SaGeCommonStructs
-	,SaGeScreen
-	,SaGeVertexObject
-	,SaGeImage
-	,SaGeResourceManager
-	,SaGeMatrix
-	,SaGeQuaternion
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothRenderBase
+	,SmoothCommonStructs
+	,SmoothScreen
+	,SmoothVertexObject
+	,SmoothImage
+	,SmoothResourceManager
+	,SmoothMatrix
+	,SmoothQuaternion
 	;
 
 type
-	TIndex = TSGLongInt;
+	TIndex = TSLongInt;
 	TModel = class;
 	
 	// Кость под номером .. имеет степень (вес) влияния
 	TWeight = record
 		FBoneNum : TIndex;       // Номер кости
-		FWeight  : TSGFloat;     // Степень слияния
+		FWeight  : TSFloat;     // Степень слияния
 		end;
 
 	// Вершина имеет координату, нормаль и данные о
 	// прикреплённых влияющих на неё костях
 	TVertex = object
-		FCoord   : TSGVertex3f;              // координата вершины
-		FNorm    : TSGVertex3f;              // нормаль, выходящая из вершины
+		FCoord   : TSVertex3f;              // координата вершины
+		FNorm    : TSVertex3f;              // нормаль, выходящая из вершины
 		FParents : packed array  of TWeight; // список костей, влияющих на вершину
 		
 		procedure Clear();
@@ -47,8 +47,8 @@ type
 		FTextureName      : string;                      // имя файла с текстурой
 		FVertexCoordNum   : TIndex;                      // количество вершин (3 ил 4)
 		FVertexIndexes    : array [0..3] of TIndex;      // ссылки на индексы массива с вершинами
-		FTexCoord         : array [0..3] of TSGVertex2f; // массив с текстурными координатами
-		FTexture          : TSGLongWord;                 // OpenGL-евский идентификатор текстуры
+		FTexCoord         : array [0..3] of TSVertex2f; // массив с текстурными координатами
+		FTexture          : TSLongWord;                 // OpenGL-евский идентификатор текстуры
 		FHasTexture       : boolean;                     // признак наличия текстуры
 		end;
 
@@ -60,11 +60,11 @@ type
 
 	// Кость скелета (система координат сустава)
 	TBonePos = record
-		FTrans : TSGVertex3f;           // перемещение
-		FRot   : TSGVertex3f;           // поворот
-		FAbsoluteMatrix : TSGMatrix4x4; // абсолютная матрица кости
-		FRelativeMatrix : TSGMatrix4x4; // относительная матрица кости
-		FQuat  : TSGQuaternion;         // кватернион кости
+		FTrans : TSVertex3f;           // перемещение
+		FRot   : TSVertex3f;           // поворот
+		FAbsoluteMatrix : TSMatrix4x4; // абсолютная матрица кости
+		FRelativeMatrix : TSMatrix4x4; // относительная матрица кости
+		FQuat  : TSQuaternion;         // кватернион кости
 		end;
 
 	// Кадр анимации
@@ -92,11 +92,11 @@ type
 		FNextAction : TIndex;  // следующее действие
 		FSkelTime   : single;  // время (меняется от нуля до единицы между предыдущим и следующим кадром)
 		FCurrentPos : TFrame;  // текущая поза персонажа с учётом интерполяции по времени skelTime
-		FShaderAbsoluteMatrixes : packed array[0..31] of TSGMatrix4x4; // массив абсолютных матриц для передачи в шейдер
-		FSpeed      : TSGFloat;
+		FShaderAbsoluteMatrixes : packed array[0..31] of TSMatrix4x4; // массив абсолютных матриц для передачи в шейдер
+		FSpeed      : TSFloat;
 		
 		procedure ResetState(const VNodesNum : TIndex);
-		procedure Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSGBoolean);
+		procedure Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSBoolean);
 		procedure CopyBonesForShader();
 		end;
 
@@ -118,46 +118,46 @@ type
 	// - полигонов
 	// - вершин
 	// - инверсно преобразованной модели скелетной анимации
-	TModel = class(TSGPaintableObject)
+	TModel = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			public
 		FFileName  : string;            // имя файла
 		FPoligons  : array of TPoligon; // полигоны
 		FVertexes  : array of TVertex;  // вершины
 		FLocalized : array of TVertex;  // вывернутая модель (инверсно преобразованная)
 		FAnimation : TSkelAnimation;    // скелетная анимация модели
-		FMesh      : TSG3DObject;
-		FTextures  : array of TSGImage;
-		FTexturesBlock :  TSGTextureBlock;
+		F3dObject      : TS3DObject;
+		FTextures  : array of TSImage;
+		FTexturesBlock :  TSTextureBlock;
 			public
-		procedure MakeMesh();
+		procedure Make3dObject();
 		procedure PrepareSkeletalAnimation();
-		procedure LoadTextures(const VPath : TSGString;const EnafTexCount : LongWord = 0);
-		procedure Load(const VFileName : TSGString);
-		procedure LoadAnimation(const VFileName : TSGString);
+		procedure LoadTextures(const VPath : TSString;const EnafTexCount : LongWord = 0);
+		procedure Load(const VFileName : TSString);
+		procedure LoadAnimation(const VFileName : TSString);
 		function GetTextureHandle (const FileName : String):LongWord;
-		function GetTexturesCount():TSGLongWord;inline;
+		function GetTexturesCount():TSLongWord;inline;
 			private
 		function GetAnimation():PTSkelAnimation;inline;
 			public
-		property TexturesBlock : TSGTextureBlock read FTexturesBlock;
+		property TexturesBlock : TSTextureBlock read FTexturesBlock;
 		property Animation : PTSkelAnimation read GetAnimation;
 		end;
 
-function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
+function GetValue(S1 : ShortString; const Index : TIndex):TSFloat;inline;
 
 implementation
 
 uses
-	 SaGeStreamUtils
-	,SaGeStringUtils
+	 SmoothStreamUtils
+	,SmoothStringUtils
 	;
 
-function TModel.GetTexturesCount():TSGLongWord;inline;
+function TModel.GetTexturesCount():TSLongWord;inline;
 begin
 if FTextures <> nil then
 	Result := Length(FTextures)
@@ -206,8 +206,8 @@ destructor TModel.Destroy();
 var
 	i : TIndex;
 begin
-if FMesh <> nil then
-	FMesh.Destroy();
+if F3dObject <> nil then
+	F3dObject.Destroy();
 if FVertexes <> nil then
 	begin
 	for i := 0 to High(FVertexes) do
@@ -254,32 +254,32 @@ if FTextures <> nil then
 			end;
 end;
 
-function GetValue(S1 : ShortString; const Index : TIndex):TSGFloat;inline;
+function GetValue(S1 : ShortString; const Index : TIndex):TSFloat;inline;
 var
 	S : String;
 begin
 S := String(S1);
 S := Trim(S);
 S := StringWordGet(S,' ',Index);
-Result := SGValFloat(S);
+Result := SValFloat(S);
 end;
 
-procedure TModel.Load(const VFileName : TSGString);
+procedure TModel.Load(const VFileName : TSString);
 var 
 	Stream: TMemoryStream;
 	s     : string;
 	i,j,k : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
-while SGReadLnStringFromStream(Stream) <> 'nodes' do ;
+while SReadLnStringFromStream(Stream) <> 'nodes' do ;
 
 i:=0;
 SetLength(FAnimation.FNodes,0);
 repeat
-	s := SGReadLnStringFromStream(Stream);
+	s := SReadLnStringFromStream(Stream);
 	if s<>'end' then
 		begin
 		SetLength(FAnimation.FNodes, i+1);
@@ -292,11 +292,11 @@ until s='end';
 FAnimation.FNodesNum :=Length(FAnimation.FNodes);
 SetLength(FAnimation.FReferencePos,FAnimation.FNodesNum);
 
-while SGReadLnStringFromStream(Stream) <> 'time 0' do ;
+while SReadLnStringFromStream(Stream) <> 'time 0' do ;
 
 i:=0;
 repeat
-	s := SGReadLnStringFromStream(Stream);
+	s := SReadLnStringFromStream(Stream);
 	if s<>'end' then
 	with FAnimation.FReferencePos[i] do
 		begin
@@ -308,18 +308,18 @@ repeat
 			GetValue(S,5),
 			GetValue(S,6),
 			GetValue(S,7));
-		FQuat := SGGetQuaternionFromAngleVector3f(FRot);
+		FQuat := SGetQuaternionFromAngleVector3f(FRot);
 		Inc(i);
 		end;
 until s='end';
 
-while SGReadLnStringFromStream(Stream) <> 'triangles' do ;
+while SReadLnStringFromStream(Stream) <> 'triangles' do ;
 
 i := 0;
 SetLength(FPoligons,0);
 SetLength(FVertexes,0);
 repeat
-	s := SGReadLnStringFromStream(Stream);
+	s := SReadLnStringFromStream(Stream);
 	if s<>'end' then
 		begin
 		SetLength(FPoligons,i+1);
@@ -329,7 +329,7 @@ repeat
 			begin
 			SetLength(FVertexes,Length(FVertexes)+1);
 			k := High(FVertexes);
-			s := SGReadLnStringFromStream(Stream);
+			s := SReadLnStringFromStream(Stream);
 			SetLength(FVertexes[k].FParents,1);
 			FVertexes[k].FParents[0].FBoneNum := StrToInt(StringWordGet(Trim(s),' ',1));
 			FVertexes[k].FParents[0].FWeight  := 1;
@@ -353,14 +353,14 @@ until s='end';
 Stream.Destroy();
 end;
 
-procedure TModel.LoadAnimation(const VFileName : TSGString);
+procedure TModel.LoadAnimation(const VFileName : TSString);
 var Stream       : TMemoryStream;
     s            : string;
     i, j         : TIndex;
     ActionIndex  : TIndex;
 begin
 Stream := TMemoryStream.Create();
-SGResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
+SResourceFiles.LoadMemoryStreamFromFile(Stream,VFileName);
 Stream.Position := 0;
 
 SetLength(FAnimation.FActions,Length(FAnimation.FActions)+1);
@@ -369,13 +369,13 @@ ActionIndex := High(FAnimation.FActions);
 FAnimation.FActions[ActionIndex].FName  := VFileName;
 FAnimation.FActions[ActionIndex].FSpeed := 15; //default
 
-while SGReadLnStringFromStream(Stream) <> 'skeleton' do ;
+while SReadLnStringFromStream(Stream) <> 'skeleton' do ;
 
 s:='';
 i:=0;
 j:=0;
 repeat
-	s := SGReadLnStringFromStream(Stream);
+	s := SReadLnStringFromStream(Stream);
 	if s='end' then
 		break;
 	if StringWordGet (s, ' ', 1) = 'time' then
@@ -399,7 +399,7 @@ repeat
 				GetValue(S,5),
 				GetValue(S,6),
 				GetValue(S,7));
-			FBones[i - 1].FQuat := SGGetQuaternionFromAngleVector3f(FBones[i - 1].FRot);
+			FBones[i - 1].FQuat := SGetQuaternionFromAngleVector3f(FBones[i - 1].FRot);
 			end;
 		end;
 	FAnimation.FActions[ActionIndex].FFramesCount := Length(FAnimation.FActions[ActionIndex].FFrames);
@@ -408,10 +408,10 @@ until False;
 Stream.Destroy();
 end;
 
-procedure TModel.LoadTextures(const VPath : TSGString;const EnafTexCount : LongWord = 0);
+procedure TModel.LoadTextures(const VPath : TSString;const EnafTexCount : LongWord = 0);
 var
 	i, j: TIndex;
-	Loaded : TSGBoolean;
+	Loaded : TSBoolean;
 begin
 for i := 0 to High(FPoligons) do
 	begin
@@ -433,12 +433,12 @@ for i := 0 to High(FPoligons) do
 				SetLength(FTextures,1)
 			else
 				SetLength(FTextures,Length(FTextures)+1);
-			FTextures[High(FTextures)] := SGCreateImageFromFile(Context, VPath+FPoligons[i].FTextureName);
+			FTextures[High(FTextures)] := SCreateImageFromFile(Context, VPath+FPoligons[i].FTextureName);
 			FTextures[High(FTextures)].Name := FPoligons[i].FTextureName;
 			end;
 		end;
 	end;
-FTexturesBlock := TSGTextureBlock.Create(Context);
+FTexturesBlock := TSTextureBlock.Create(Context);
 FTexturesBlock.Size := Length(FTextures) + EnafTexCount;
 FTexturesBlock.Generate();
 for i := 0 to High(FTextures) do
@@ -462,9 +462,9 @@ for i := 0 to High(FCurrentPos.FBones) do
 	FShaderAbsoluteMatrixes[i] := FCurrentPos.FBones[i].FAbsoluteMatrix;
 end;
 
-procedure TSkelAnimState.Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSGBoolean);
+procedure TSkelAnimState.Animate(var VModel : TModel;const VActionNum : TIndex;const VDelta : TIndex; const VPlayOnce : TSBoolean);
 var
-	Delta : TSGFloat;
+	Delta : TSFloat;
 	i : TIndex;
 begin
 if Length(FCurrentPos.FBones) = 0 then
@@ -510,12 +510,12 @@ for i := 0 to VModel.FAnimation.FNodesNum - 1 do
 	FCurrentPos.FBones[i].FTrans :=   VModel.FAnimation.FActions[FPrevAction].FFrames[FPrevFrame].FBones[i].FTrans +
 									( VModel.FAnimation.FActions[FNextAction].FFrames[FNextFrame].FBones[i].FTrans -
 									  VModel.FAnimation.FActions[FPrevAction].FFrames[FPrevFrame].FBones[i].FTrans ) * FSkelTime;
-	FCurrentPos.FBones[i].FQuat := SGQuaternionLerp(VModel.FAnimation.FActions[FPrevAction].FFrames[FPrevFrame].FBones[i].FQuat,
+	FCurrentPos.FBones[i].FQuat := SQuaternionLerp(VModel.FAnimation.FActions[FPrevAction].FFrames[FPrevFrame].FBones[i].FQuat,
 													VModel.FAnimation.FActions[FNextAction].FFrames[FNextFrame].FBones[i].FQuat,FSkelTime);
-	SGSetMatrixRotationQuaternion(FCurrentPos.FBones[i].FRelativeMatrix, FCurrentPos.FBones[i].FQuat);
-	SGSetMatrixTranslation(FCurrentPos.FBones[i].FRelativeMatrix,FCurrentPos.FBones[i].FTrans);
+	SSetMatrixRotationQuaternion(FCurrentPos.FBones[i].FRelativeMatrix, FCurrentPos.FBones[i].FQuat);
+	SSetMatrixTranslation(FCurrentPos.FBones[i].FRelativeMatrix,FCurrentPos.FBones[i].FTrans);
 	if VModel.FAnimation.FNodes[i].FParent <> -1 then
-		FCurrentPos.FBones[i].FAbsoluteMatrix := SGMultiplyPartMatrix(FCurrentPos.FBones[VModel.FAnimation.FNodes[i].FParent].FAbsoluteMatrix,FCurrentPos.FBones[i].FRelativeMatrix)
+		FCurrentPos.FBones[i].FAbsoluteMatrix := SMultiplyPartMatrix(FCurrentPos.FBones[VModel.FAnimation.FNodes[i].FParent].FAbsoluteMatrix,FCurrentPos.FBones[i].FRelativeMatrix)
 	else
 		FCurrentPos.FBones[i].FAbsoluteMatrix := FCurrentPos.FBones[i].FRelativeMatrix;
 	end;
@@ -527,11 +527,11 @@ var
 begin
 for i := 0 to FNodesNum - 1 do
 	begin
-	SGSetMatrixRotation   (FReferencePos[i].FRelativeMatrix,FReferencePos[i].FRot);
-	SGSetMatrixTranslation(FReferencePos[i].FRelativeMatrix,FReferencePos[i].FTrans);
-	FReferencePos[i].FQuat := SGGetQuaternionFromAngleVector3f(FReferencePos[i].FRot);
+	SSetMatrixRotation   (FReferencePos[i].FRelativeMatrix,FReferencePos[i].FRot);
+	SSetMatrixTranslation(FReferencePos[i].FRelativeMatrix,FReferencePos[i].FTrans);
+	FReferencePos[i].FQuat := SGetQuaternionFromAngleVector3f(FReferencePos[i].FRot);
 	if FNodes[i].FParent <> -1 then
-		FReferencePos[i].FAbsoluteMatrix := SGMultiplyPartMatrix(FReferencePos[FNodes[i].FParent].FAbsoluteMatrix,FReferencePos[i].FRelativeMatrix)
+		FReferencePos[i].FAbsoluteMatrix := SMultiplyPartMatrix(FReferencePos[FNodes[i].FParent].FAbsoluteMatrix,FReferencePos[i].FRelativeMatrix)
 	else
 		FReferencePos[i].FAbsoluteMatrix := FReferencePos[i].FRelativeMatrix;
 	end;
@@ -545,12 +545,12 @@ for i:=0 to Length(FActions)-1 do
 	for j:=0 to length(FActions[i].FFrames)-1 do
 		for k:=0 to FNodesNum -1 do
 			begin
-			SGSetMatrixRotation   (FActions[i].FFrames[j].FBones[k].FRelativeMatrix,FActions[i].FFrames[j].FBones[k].FRot);
-			SGSetMatrixTranslation(FActions[i].FFrames[j].FBones[k].FRelativeMatrix,FActions[i].FFrames[j].FBones[k].FTrans);
-			FActions[i].FFrames[j].FBones[k].FQuat := SGGetQuaternionFromAngleVector3f(FActions[i].FFrames[j].FBones[k].FRot);
+			SSetMatrixRotation   (FActions[i].FFrames[j].FBones[k].FRelativeMatrix,FActions[i].FFrames[j].FBones[k].FRot);
+			SSetMatrixTranslation(FActions[i].FFrames[j].FBones[k].FRelativeMatrix,FActions[i].FFrames[j].FBones[k].FTrans);
+			FActions[i].FFrames[j].FBones[k].FQuat := SGetQuaternionFromAngleVector3f(FActions[i].FFrames[j].FBones[k].FRot);
 			if FNodes[k].FParent <> -1 then
 				FActions[i].FFrames[j].FBones[k].FAbsoluteMatrix := 
-					SGMultiplyPartMatrix(
+					SMultiplyPartMatrix(
 						FActions[i].FFrames[j].FBones[FNodes[k].FParent].FAbsoluteMatrix,
 						FActions[i].FFrames[j].FBones[k].FRelativeMatrix)
 			else
@@ -561,8 +561,8 @@ end;
 procedure TModel.PrepareSkeletalAnimation();
 var
 	i, k : TIndex;
-	FinalVertex, FinalNormal, TempVertex : TSGVertex3f;
-	Matrix : TSGMatrix4x4;
+	FinalVertex, FinalNormal, TempVertex : TSVertex3f;
+	Matrix : TSMatrix4x4;
 begin
 FAnimation.MakeReferenceMatrixes();
 FAnimation.MakeBoneMatrixes();
@@ -577,22 +577,22 @@ for i := 0 to High(FLocalized) do
 		begin
 		Matrix := FAnimation.FReferencePos[FVertexes[i].FParents[k].FBoneNum].FAbsoluteMatrix;
 		
-		TempVertex  := SGTranslateVectorInverse(Matrix, FVertexes[i].FCoord);
-		TempVertex  := SGRotateVectorInverse   (Matrix, TempVertex);
+		TempVertex  := STranslateVectorInverse(Matrix, FVertexes[i].FCoord);
+		TempVertex  := SRotateVectorInverse   (Matrix, TempVertex);
 		FinalVertex += TempVertex * FLocalized[i].FParents[k].FWeight;
 		
-		FinalNormal += SGRotateVectorInverse   (Matrix, FVertexes[i].FNorm);
+		FinalNormal += SRotateVectorInverse   (Matrix, FVertexes[i].FNorm);
 		end;
 	FLocalized[i].FCoord := FinalVertex;
 	FLocalized[i].FNorm  := FinalNormal;
 	end;
 end;
 
-procedure TModel.MakeMesh();
+procedure TModel.Make3dObject();
 
-function TexNum(const Texture : TSGLongWord):TSGLongWord;
+function TexNum(const Texture : TSLongWord):TSLongWord;
 var
-	i : TSGLongWord;
+	i : TSLongWord;
 begin
 Result := 0;
 if (FTextures <> nil) and (Length(FTextures)>0) then
@@ -608,41 +608,41 @@ var
 	i, j : TIndex;
 	TotalBones : TIndex;
 begin
-if FMesh <> nil then
-	FMesh.Destroy();
-FMesh := TSG3DObject.Create();
-FMesh.Context := Context;
-FMesh.ObjectPoligonesType := SGR_TRIANGLES;
-FMesh.HasNormals := True;
-FMesh.HasTexture := True;
-FMesh.HasColors  := True;
-FMesh.EnableCullFace := False;
-FMesh.VertexType := SGMeshVertexType4f;
-FMesh.SetColorType(SGMeshColorType4f);
-FMesh.CountTextureFloatsInVertexArray := 4;
-FMesh.Vertexes   := 3*Length(FPoligons);
+if F3dObject <> nil then
+	F3dObject.Destroy();
+F3dObject := TS3DObject.Create();
+F3dObject.Context := Context;
+F3dObject.ObjectPoligonesType := SR_TRIANGLES;
+F3dObject.HasNormals := True;
+F3dObject.HasTexture := True;
+F3dObject.HasColors  := True;
+F3dObject.EnableCullFace := False;
+F3dObject.VertexType := S3dObjectVertexType4f;
+F3dObject.SetColorType(S3dObjectColorType4f);
+F3dObject.CountTextureFloatsInVertexArray := 4;
+F3dObject.Vertexes   := 3*Length(FPoligons);
 for i := 0 to Length(FPoligons) - 1 do
 	for j := 0 to 2 do
 		begin
 		TotalBones := Length(FVertexes[FPoligons[i].FVertexIndexes[j]].FParents);
-		FMesh.ArVertex4f[3*i+j]^.Import(
+		F3dObject.ArVertex4f[3*i+j]^.Import(
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.x,
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.y,
 			FLocalized[FPoligons[i].FVertexIndexes[j]].FCoord.z,
 			TexNum(FPoligons[i].FTexture)/255);
-		FMesh.ArTexVertex4f[3*i+j]^.Import(
+		F3dObject.ArTexVertex4f[3*i+j]^.Import(
 			FPoligons[i].FTexCoord[j].x,
 			FPoligons[i].FTexCoord[j].y,
 			FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[0].FBoneNum/255,
 			FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[0].FWeight);
-		FMesh.ArNormal[3*i+j]^ := FVertexes[FPoligons[i].FVertexIndexes[j]].FNorm;
-		FMesh.ArColor4f[3*i+j]^.Import(
+		F3dObject.ArNormal[3*i+j]^ := FVertexes[FPoligons[i].FVertexIndexes[j]].FNorm;
+		F3dObject.ArColor4f[3*i+j]^.Import(
 			Byte(TotalBones>1)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[1].FBoneNum/255,
 			Byte(TotalBones>1)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[1].FWeight,
 			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FBoneNum/255,
 			Byte(TotalBones>2)*FVertexes[FPoligons[i].FVertexIndexes[j]].FParents[2].FWeight);
 		end;
-FMesh.LoadToVBO();
+F3dObject.LoadToVBO();
 end;
 
 procedure TSkelAnimState.ResetState(const VNodesNum : TIndex);
@@ -661,21 +661,21 @@ begin
 Result := @FAnimation;
 end;
 
-constructor TModel.Create(const VContext : ISGContext);
+constructor TModel.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
-FMesh := nil;
+F3dObject := nil;
 FTextures := nil;
 FTexturesBlock := nil;
 end;
 
 procedure TModel.Paint();
 begin
-if FMesh <> nil then
-	FMesh.Paint();
+if F3dObject <> nil then
+	F3dObject.Paint();
 end;
 
-class function TModel.ClassName():TSGString;
+class function TModel.ClassName():TSString;
 begin
 Result := 'Ex13_Model';
 end;

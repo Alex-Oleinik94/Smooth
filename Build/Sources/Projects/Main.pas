@@ -1,7 +1,7 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 
 {$IF not defined(MOBILE)}
-	//{$DEFINE WITHSAGELIBRARY}
+	//{$DEFINE WITHSmoothLIBRARY}
 	{$IF not defined(DARWIN)}
 		{$IF defined(RELEASE)}
 			{$APPTYPE GUI}
@@ -19,37 +19,37 @@ uses
 	{$IF defined(UNIX) and defined(UseCThreads)}
 		cthreads,
 		{$ENDIF}
-	 SaGeSysUtils
-	,SaGeBase
-	,SaGeLog
-	,SaGeResourceManager
+	 SmoothSysUtils
+	,SmoothBase
+	,SmoothLog
+	,SmoothResourceManager
 	{$IF defined(ANDROID)}
 		,android_native_app_glue
-		,SaGeConsolePaintableTools
-		,SaGeContextUtils
-		,SaGeLists
+		,SmoothConsolePaintableTools
+		,SmoothContextUtils
+		,SmoothLists
 		{$ENDIF}
-	{$IF defined(WITHSAGELIBRARY)}
-		,SaGeLibrary
+	{$IF defined(WITHSmoothLIBRARY)}
+		,SmoothLibrary
 		{$ENDIF}
-	{$IF (not defined(WITHSAGELIBRARY)) and (not defined(ANDROID))}
-		,SaGeConsoleTools
+	{$IF (not defined(WITHSmoothLIBRARY)) and (not defined(ANDROID))}
+		,SmoothConsoleTools
 		{$ENDIF}
 	;
 
 {$IF defined(ANDROID)}
 	procedure android_main(State: PAndroid_App); cdecl; export;
 	begin
-	SGLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
+	SLog.Source('Entering "procedure android_main(state: Pandroid_app); cdecl; export;" in "Main"');
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	try
 	{$ENDIF}
-	SGConsoleShowAllApplications(nil, SGContextOptionAndroidApp(State));
+	SConsoleShowAllApplications(nil, SContextOptionAndroidApp(State));
 	{$IFDEF WITHEXCEPTIONTRACEING}
-	except on e : TSGException do
+	except on e : TSException do
 		begin
-		SGLogMakeSignificant();
-		SGPrintExceptionStackTrace(e);
+		SLogMakeSignificant();
+		SPrintExceptionStackTrace(e);
 		end;
 	end;
 	{$ENDIF}
@@ -65,16 +65,16 @@ uses
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	try
 	{$ENDIF}
-	{$IF defined(WITHSAGELIBRARY)}
-		SGStandartLabraryCallConcoleCaller();
+	{$IF defined(WITHSMOOTHLIBRARY)}
+		SStandartLabraryCallConcoleCaller();
 	{$ELSE}
-		SGStandartCallConcoleCaller();
+		SStandartCallConcoleCaller();
 	{$ENDIF}
 	{$IFDEF WITHEXCEPTIONTRACEING}
-	except on e : TSGException do
+	except on e : TSException do
 		begin
-		SGLogMakeSignificant();
-		SGPrintExceptionStackTrace(e);
+		SLogMakeSignificant();
+		SPrintExceptionStackTrace(e);
 		//Write('Press ENTER! ');ReadLn();
 		end;
 	end;

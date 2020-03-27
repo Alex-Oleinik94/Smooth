@@ -1323,11 +1323,11 @@ function BASS_SetEAXPreset(env: LongInt): BOOL;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 function BASS_SPEAKER_N(n: DWORD): DWORD;
@@ -1398,18 +1398,18 @@ end;
 {$ENDIF}
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllbass = class(TSGDll)
+	TSDllbass = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllbass.Free();
+class procedure TSDllbass.Free();
 begin
 BASS_SetConfig := nil;
 BASS_GetConfig := nil;
@@ -1517,25 +1517,25 @@ BASS_FXGetParameters := nil;
 BASS_FXReset := nil;
 BASS_FXSetPriority := nil;
 end;
-class function TSGDllbass.SystemNames() : TSGStringList;
+class function TSDllbass.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'bass';
 end;
-class function TSGDllbass.DllNames() : TSGStringList;
+class function TSDllbass.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += bassdll;
 end;
-class function TSGDllbass.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllbass.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -1652,6 +1652,6 @@ BASS_FXSetPriority := LoadProcedure('BASS_FXSetPriority');
 end;
 
 initialization
-	TSGDllbass.Create();
+	TSDllbass.Create();
 end.
 

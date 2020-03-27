@@ -2,7 +2,7 @@
 CALL _Create_Output_Directoryes
 cd ..
 echo "======================================="
-echo "|Compiling Release Version for Windows|"
+echo "|Compiling release version for Windows|"
 echo "======================================="
 make build_files
 make inc_version_release

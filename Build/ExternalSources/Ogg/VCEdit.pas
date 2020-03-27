@@ -139,11 +139,11 @@ function ops_write_func(var buffer; size: size_t; count: size_t; const stream): 
 implementation
 
 uses
-	 SaGeBase
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
-	,SaGeLists
+	 SmoothBase
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
+	,SmoothLists
 	
 	,Classes
 	;
@@ -165,19 +165,19 @@ begin
   end;
 end;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllVCEdit = class(TSGDll)
+	TSDllVCEdit = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
-class procedure TSGDllVCEdit.Free();
+class procedure TSDllVCEdit.Free();
 begin
 vcedit_new_state := nil;
 vcedit_clear := nil;
@@ -186,26 +186,26 @@ vcedit_open_callbacks := nil;
 vcedit_write := nil;
 vcedit_error := nil;
 end;
-class function TSGDllVCEdit.SystemNames() : TSGStringList;
+class function TSDllVCEdit.SystemNames() : TSStringList;
 begin
 Result := nil;
 Result += 'VCEdit';
 Result += 'LibVCEdit';
 end;
-class function TSGDllVCEdit.DllNames() : TSGStringList;
+class function TSDllVCEdit.DllNames() : TSStringList;
 begin
 Result := nil;
 Result += VCEditLib;
 end;
-class function TSGDllVCEdit.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllVCEdit.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SGPCharToString(Name)
+LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 LoadResult^.FFunctionLoaded += 1;
 end;
@@ -223,5 +223,5 @@ Pointer(vcedit_error) := LoadProcedure('vcedit_error');
 end;
 
 initialization
-	TSGDllVCEdit.Create();
+	TSDllVCEdit.Create();
 end.

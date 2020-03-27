@@ -1,7 +1,7 @@
 #echo off
 cd ..
 echo "==========================================="
-echo "| Compiling  Debug  Version for Mac OS X  |"
+echo "| Compiling  debug  version for Mac OS X  |"
 echo "==========================================="
 mkdir Sources/Temp
 mkdir Output

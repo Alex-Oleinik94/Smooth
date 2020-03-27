@@ -1,9 +1,9 @@
 @echo off
 CALL _Create_Output_Directoryes
 cd ..
-echo "========================================"
-echo "|Compiling Examples Version for Windows|"
-echo "========================================"
+echo "================================"
+echo "|Compiling examples for Windows|"
+echo "================================"
 make clear_files
 @echo off
 make examples

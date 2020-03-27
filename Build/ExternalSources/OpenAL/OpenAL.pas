@@ -1820,36 +1820,36 @@ var
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
-// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=*
+// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllOpenAL = class(TSGDll)
+	TSDllOpenAL = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
-		function LoadExtensions() : TSGDllLoadExtensionsObject; override;
-		class function ChildNames() : TSGStringList; override;
+		function LoadExtensions() : TSDllLoadExtensionsObject; override;
+		class function ChildNames() : TSStringList; override;
 		end;
 
-class function TSGDllOpenAL.ChildNames() : TSGStringList;
+class function TSDllOpenAL.ChildNames() : TSStringList;
 begin
 Result := 'alut';
 end;
 
-function TSGDllOpenAL.LoadExtensions() : TSGDllLoadExtensionsObject;
+function TSDllOpenAL.LoadExtensions() : TSDllLoadExtensionsObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function alProcedure(const Name : PChar) : Pointer;
 begin
@@ -1858,7 +1858,7 @@ if (FLibHandles <> nil) then if Length(FLibHandles) = 1 then
 if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
 	Result := alGetProcAddress(Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -1932,14 +1932,14 @@ else
 	Result.FFunctionCount += 33;
 end;
 
-class function TSGDllOpenAL.SystemNames() : TSGStringList;
+class function TSDllOpenAL.SystemNames() : TSStringList;
 begin
 Result := 'OpenAL';
 Result += 'OAL';
 Result += 'AL';
 end;
 
-class function TSGDllOpenAL.DllNames() : TSGStringList;
+class function TSDllOpenAL.DllNames() : TSStringList;
 begin
 Result := nil;
 {$IFDEF MSWINDOWS}
@@ -1952,13 +1952,13 @@ Result += 'libopenal.so';
 {$ENDIF}
 end;
 
-class procedure TSGDllOpenAL.Free();
+class procedure TSDllOpenAL.Free();
 begin
 end;
 
-class function TSGDllOpenAL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllOpenAL.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function alProcedure(const Name : PChar) : Pointer;
 begin
@@ -1966,7 +1966,7 @@ Result := GetProcAddress(VDll, Name);
 if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
 	Result := alGetProcAddress(Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -2087,7 +2087,7 @@ end;
 
 initialization
 begin
-TSGDllOpenAL.Create();
+TSDllOpenAL.Create();
 end;
 
 end.

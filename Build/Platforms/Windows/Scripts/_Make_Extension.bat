@@ -2,7 +2,7 @@
 CALL _Create_Output_Directoryes
 cd ..
 set S1="==============================="
-set S2="Compiling Extension for Windows"
+set S2="Compiling extension for Windows"
 set e2=
 if "%2"=="" (
 	set e2=release

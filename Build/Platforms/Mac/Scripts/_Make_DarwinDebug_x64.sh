@@ -1,8 +1,8 @@
 #echo off
 cd ..
-echo "=========================================="
-echo "| Compiling  Debug  Version for Mac OSX  |"
-echo "=========================================="
+echo "==========================================="
+echo "| Compiling  debug  version for Mac OS X  |"
+echo "==========================================="
 mkdir Output
 mkdir Output/x86_64-debug-desktop
 make inc_version_debug

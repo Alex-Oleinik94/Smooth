@@ -1,4 +1,4 @@
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex16;
 	interface
@@ -12,45 +12,45 @@ uses
 	 Crt
 	,Math
 	
-	,SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeCommonStructs
-	,SaGeScreen
-	,SaGeVertexObject
-	,SaGeShaders
-	,SaGeImage
-	,SaGeFractalTerrain
-	,SaGeStringUtils
-	,SaGeFileUtils
-	,SaGeMathUtils
-	,SaGeCamera
-	,SaGeContextUtils
+	,SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothFont
+	,SmoothRenderBase
+	,SmoothCommonStructs
+	,SmoothScreen
+	,SmoothVertexObject
+	,SmoothShaders
+	,SmoothImage
+	,SmoothFractalTerrain
+	,SmoothStringUtils
+	,SmoothFileUtils
+	,SmoothMathUtils
+	,SmoothCamera
+	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	
 	,Ex5_Physics
 	;
 
 type
-	TSGExample16 = class(TSGPaintableObject)
+	TSExample16 = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 		procedure LoadRenderResources();override;
 		procedure DeleteRenderResources();override;
 			protected
-		FCamera : TSGCamera;
-		FFont : TSGFont;
-		FMesh : TSG3DObject;
-		FSize : TSGLongWord;
-		FLightAngle : TSGSingle;
+		FCamera : TSCamera;
+		FFont : TSFont;
+		F3dObject : TS3DObject;
+		FSize : TSLongWord;
+		FLightAngle : TSSingle;
 			protected
 		procedure Generate();
 		procedure DrawDebugCube();
@@ -61,34 +61,34 @@ type
 	{$ENDIF}
 
 
-procedure TSGExample16.LoadRenderResources();
+procedure TSExample16.LoadRenderResources();
 begin
 Generate();
 end;
 
-procedure TSGExample16.DeleteRenderResources();
+procedure TSExample16.DeleteRenderResources();
 begin
-SGKill(FMesh);
+SKill(F3dObject);
 end;
 
-class function TSGExample16.ClassName():TSGString;
+class function TSExample16.ClassName():TSString;
 begin
 Result := 'Фрактальный ландшафт';
 end;
 
-constructor TSGExample16.Create(const VContext : ISGContext);
+constructor TSExample16.Create(const VContext : ISContext);
 begin
 FFont := nil;
 FCamera := nil;
-FMesh := nil;
+F3dObject := nil;
 FSize := 9;
 FLightAngle := 0;
 
 inherited Create(VContext);
 
-FFont := SGCreateFontFromFile(Context, SGFontDirectory + DirectorySeparator + {$IFDEF MOBILE}'Times New Roman.sgf'{$ELSE}'Tahoma.sgf'{$ENDIF});
+FFont := SCreateFontFromFile(Context, SDefaultFontFileName);
 
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
 FCamera.Zum := 15.47;
 FCamera.RotateY := -42.66;
@@ -96,24 +96,24 @@ FCamera.RotateX := 37.66;
 Generate();
 end;
 
-function TSGExample16CorrectFloat(const A, S : TSGFloat):TSGFloat;
+function TSExample16CorrectFloat(const A, S : TSFloat):TSFloat;
 begin
 Result := ((A / S) - 0.5) * 100;
 end;
 
-function TSGExample16VertexFunction(const VX, VY, VSize : TSGLongWord; const VAltitude : TSGFloat) : TSGVector3f;
+function TSExample16VertexFunction(const VX, VY, VSize : TSLongWord; const VAltitude : TSFloat) : TSVector3f;
 
 begin
 Result.Import(
-	TSGExample16CorrectFloat(VX, VSize),
+	TSExample16CorrectFloat(VX, VSize),
 	((VAltitude + 0.41) / 0.82) * ((VAltitude + 0.41) / 0.82) * 40, 
-	TSGExample16CorrectFloat(VY, VSize));
+	TSExample16CorrectFloat(VY, VSize));
 end;
 
-function TSGExample16ColorShiftFunction(const P, P1, P2 : TSGFloat;const C1, C2 : TSGColor4f):TSGColor4f;
+function TSExample16ColorShiftFunction(const P, P1, P2 : TSFloat;const C1, C2 : TSColor4f):TSColor4f;
 begin
 Result.Import(0,0,0,0);
-if (P >= P1 - SGZero) and (P <= P2 + SGZero) then
+if (P >= P1 - SZero) and (P <= P2 + SZero) then
 	begin
 	Result := 
 		C1 * ((P2 - P) / Abs(P2 - P1)) +
@@ -121,38 +121,38 @@ if (P >= P1 - SGZero) and (P <= P2 + SGZero) then
 	end;
 end;
 
-function TSGExample16ColorFunction(const VAltitude : TSGFloat) : TSGColor4f;
+function TSExample16ColorFunction(const VAltitude : TSFloat) : TSColor4f;
 var
-	A : TSGFloat;
+	A : TSFloat;
 begin
 A := (VAltitude + 0.41) / 0.82;
-Result := TSGExample16ColorShiftFunction(A, 0,    0.33, SGVertex4fImport(0,0,1,1), SGVertex4fImport(0.3,0.3,0.3,1))
-	    + TSGExample16ColorShiftFunction(A, 0.33, 0.66, SGVertex4fImport(0.3,0.3,0.3,1), SGVertex4fImport(0.545,0.411,0.007,1))
-        + TSGExample16ColorShiftFunction(A, 0.66,    1, SGVertex4fImport(0.545,0.411,0.007,1), SGVertex4fImport(0,1,0,1));
+Result := TSExample16ColorShiftFunction(A, 0,    0.33, SVertex4fImport(0,0,1,1), SVertex4fImport(0.3,0.3,0.3,1))
+	    + TSExample16ColorShiftFunction(A, 0.33, 0.66, SVertex4fImport(0.3,0.3,0.3,1), SVertex4fImport(0.545,0.411,0.007,1))
+        + TSExample16ColorShiftFunction(A, 0.66,    1, SVertex4fImport(0.545,0.411,0.007,1), SVertex4fImport(0,1,0,1));
 if A > 1 then
 	Result.Import(1,1,1,1)
 else if A < 0 then
 	Result.Import(0, 0, 1/4, 1);
 end;
 
-procedure TSGExample16.Generate();
+procedure TSExample16.Generate();
 var
-	TerrainGenerator : TSGFractalTerrainGenerator;
+	TerrainGenerator : TSFractalTerrainGenerator;
 begin
-if FMesh <> nil then
+if F3dObject <> nil then
 	begin
-	FMesh.Destroy();
-	FMesh := nil;
+	F3dObject.Destroy();
+	F3dObject := nil;
 	end;
-TerrainGenerator := TSGFractalTerrainGenerator.Create();
+TerrainGenerator := TSFractalTerrainGenerator.Create();
 TerrainGenerator.Size := FSize;
-FMesh := TerrainGenerator.GenerateMesh(Context, @TSGExample16VertexFunction, @TSGExample16ColorFunction);
+F3dObject := TerrainGenerator.Generate3dObject(Context, @TSExample16VertexFunction, @TSExample16ColorFunction);
 TerrainGenerator.Destroy();
-if FMesh <> nil then
-	FMesh.LoadToVBO();
+if F3dObject <> nil then
+	F3dObject.LoadToVBO();
 end;
 
-destructor TSGExample16.Destroy();
+destructor TSExample16.Destroy();
 begin
 if FFont <> nil then
 	begin
@@ -167,9 +167,9 @@ if FCamera <> nil then
 inherited;
 end;
 
-procedure TSGExample16.Paint();
+procedure TSExample16.Paint();
 var
-	Light : TSGVertex3f;
+	Light : TSVertex3f;
 begin
 FCamera.CallAction();
 
@@ -178,39 +178,39 @@ Light *= 40;
 FLightAngle += Context.ElapsedTime * 0.01;
 
 Render.Color3f(1,1,1);
-Render.BeginScene(SGR_POINTS);
+Render.BeginScene(SR_POINTS);
 Render.Vertex(Light);
 Render.EndScene();
 
-Render.Enable(SGR_LIGHTING);
-Render.Enable(SGR_LIGHT0);
-Render.Lightfv(SGR_LIGHT0,SGR_POSITION,@Light);
+Render.Enable(SR_LIGHTING);
+Render.Enable(SR_LIGHT0);
+Render.Lightfv(SR_LIGHT0,SR_POSITION,@Light);
 
-if FMesh <> nil then
-	FMesh.Paint();
+if F3dObject <> nil then
+	F3dObject.Paint();
 //DrawDebugCube();
 
-Render.Disable(SGR_LIGHTING);
+Render.Disable(SR_LIGHTING);
 
-if (Context.KeyPressedType = SGDownKey) and 
+if (Context.KeyPressedType = SDownKey) and 
    (Context.KeyPressedChar = 'R') then
 	Generate();
-if (Context.KeyPressedType = SGDownKey) and 
+if (Context.KeyPressedType = SDownKey) and 
    (Context.KeyPressedChar in ['0'..'9']) then
 	begin
 	if Context.KeyPressedChar = '0' then
 		FSize := 10
 	else
-		FSize := SGVal(Context.KeyPressedChar);
+		FSize := SVal(Context.KeyPressedChar);
 	Generate();
 	end;
 end;
 
-procedure TSGExample16.DrawDebugCube();
+procedure TSExample16.DrawDebugCube();
 begin
 with Render do 
 	begin
-	BeginScene(SGR_QUADS);
+	BeginScene(SR_QUADS);
 	
 	Normal3f(1,0,0);
 	Vertex3f(1,1,1);
@@ -254,6 +254,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample16, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample16, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

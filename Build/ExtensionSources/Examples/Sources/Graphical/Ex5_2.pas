@@ -1,5 +1,5 @@
 // DEPRECATED EXAPLE
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex5_2;
 	interface
@@ -10,18 +10,18 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeCommonStructs
-	,SaGeScreenClasses
-	,SaGeDateTime
-	,SaGeCamera
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothFont
+	,SmoothRenderBase
+	,SmoothCommonStructs
+	,SmoothScreenClasses
+	,SmoothDateTime
+	,SmoothCamera
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	
 	,Crt
@@ -31,36 +31,36 @@ uses
 const
 	QuantityObjects = 60;
 type
-	TSGExample5_2 = class(TSGPaintableObject)
+	TSExample5_2 = class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera           : TSGCamera;
-		FGravitationAngle : TSGSingle;
-		FPhysics          : TSGPhysics;
+		FCamera           : TSCamera;
+		FGravitationAngle : TSSingle;
+		FPhysics          : TSPhysics;
 		
-		FPhysicsTime      : packed array of TSGWord;
-		FPhysicsTimeCount : TSGLongWord;
-		FPhysicsTimeIndex : TSGLongWord;
+		FPhysicsTime      : packed array of TSWord;
+		FPhysicsTimeCount : TSLongWord;
+		FPhysicsTimeIndex : TSLongWord;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-class function TSGExample5_2.ClassName():TSGString;
+class function TSExample5_2.ClassName():TSString;
 begin
 Result := 'Пример физического движка №2';
 end;
 
-constructor TSGExample5_2.Create(const VContext : ISGContext);
+constructor TSExample5_2.Create(const VContext : ISContext);
 procedure InitCubes();
 var
-	i,j,r,x,k,y,kk:TSGLongWord;
-	sx:TSGSingle;
+	i,j,r,x,k,y,kk:TSLongWord;
+	sx:TSSingle;
 begin
 kk:=1;
 x:=1;
@@ -77,11 +77,11 @@ k:=kk;
 r:=0;
 for i:=0 to QuantityObjects-1 do 
 	begin
-	FPhysics.AddObjectBegin(SGPBodyBox,True);
+	FPhysics.AddObjectBegin(SPBodyBox,True);
 	FPhysics.LastObject().InitBox(8,8,8);
 	FPhysics.LastObject().SetVertex((-(8.5*kk*0.5))+((x+sx)*8.5),-65+(y*8.5),0);
 	FPhysics.LastObject().AddObjectEnd();
-	FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0,1,0,1);
+	FPhysics.LastObject().Object3d.ObjectColor:=SVertex4fImport(0,1,0,1);
 	x:=x+1;
 	inc(j);
 	if j>k then
@@ -101,7 +101,7 @@ end;
 begin
 inherited Create(VContext);
 
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
 FCamera.Zum := 6;
 FCamera.RotateX := 90;
@@ -111,46 +111,46 @@ SetLength(FPhysicsTime,FPhysicsTimeCount);
 FillChar(FPhysicsTime[0],FPhysicsTimeCount*SizeOf(FPhysicsTime[0]),0);
 FPhysicsTimeIndex:=0;
 
-FPhysics:=TSGPhysics.Create(Context);
+FPhysics:=TSPhysics.Create(Context);
 
-FPhysics.AddObjectBegin(SGPBodyHeightMap,False);
+FPhysics.AddObjectBegin(SPBodyHeightMap,False);
 FPhysics.LastObject().InitHeightMapFromImage('Map.jpg',50,0,1024,1024);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(1,1,1,1);
+FPhysics.LastObject().Object3d.ObjectColor:=SVertex4fImport(1,1,1,1);
 
-FPhysics.AddObjectBegin(SGPBodySphere,True);
+FPhysics.AddObjectBegin(SPBodySphere,True);
 FPhysics.LastObject().InitSphere(8,16);
 FPhysics.LastObject().SetVertex(0,-56,18);
 FPhysics.LastObject().AddObjectEnd(50);
-FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.1,0.5,1,1);
+FPhysics.LastObject().Object3d.ObjectColor:=SVertex4fImport(0.1,0.5,1,1);
 
-FPhysics.AddObjectBegin(SGPBodyCapsule,True);
+FPhysics.AddObjectBegin(SPBodyCapsule,True);
 FPhysics.LastObject().InitCapsule(4,2.5,24);
 FPhysics.LastObject().SetVertex(0,-60,-18);
 FPhysics.LastObject().RotateX(90);
 FPhysics.LastObject().AddObjectEnd();
-FPhysics.LastObject().Mesh.ObjectColor:=SGVertex4fImport(0.5,0.1,1,1);
+FPhysics.LastObject().Object3d.ObjectColor:=SVertex4fImport(0.5,0.1,1,1);
 
 InitCubes();
 
-FPhysics.SetGravitation(SGVertex3fImport(0,-9.81,0));
+FPhysics.SetGravitation(SVertex3fImport(0,-9.81,0));
 FPhysics.Start();
 
 FGravitationAngle:=pi;
-FPhysics.AddLigth(SGR_LIGHT0,SGVertex3fImport(2,45,160));
+FPhysics.AddLigth(SR_LIGHT0,SVertex3fImport(2,45,160));
 end;
 
-destructor TSGExample5_2.Destroy();
+destructor TSExample5_2.Destroy();
 begin
 if FPhysics<>nil then
 	FPhysics.Destroy();
 inherited;
 end;
 
-procedure TSGExample5_2.Paint();
+procedure TSExample5_2.Paint();
 var
-	i,ii      : TSGLongWord;
-	dt1,dt2   : TSGDateTime;
+	i,ii      : TSLongWord;
+	dt1,dt2   : TSDateTime;
 
 begin
 FCamera.CallAction();
@@ -166,12 +166,12 @@ dt2.Get();
 FGravitationAngle += Context.ElapsedTime/100;
 if FGravitationAngle>2*pi then
 	FGravitationAngle -= 2*pi;
-FPhysics.SetGravitation(SGVertex3fImport(
+FPhysics.SetGravitation(SVertex3fImport(
 	9.81*2.25*sin(FGravitationAngle),
 	9.81*2.25*cos(FGravitationAngle),
 	9.81*2.25*sin(FGravitationAngle*3)));
 
-Render.InitMatrixMode(SG_2D);
+Render.InitMatrixMode(S_2D);
 FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
 FPhysicsTimeIndex+=1;
 if FPhysicsTimeIndex=FPhysicsTimeCount then
@@ -182,7 +182,7 @@ else
 	i:=FPhysicsTimeIndex-1;
 ii:=10;
 Render.Color3f(1,0,0);
-Render.BeginScene(SGR_LINE_STRIP);
+Render.BeginScene(SR_LINE_STRIP);
 while i<>FPhysicsTimeIndex do
 	begin
 	Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
@@ -194,26 +194,26 @@ while i<>FPhysicsTimeIndex do
 	end;
 Render.EndScene();
 Render.Color3f(0,0,0);
-Render.BeginScene(SGR_LINE_STRIP);
+Render.BeginScene(SR_LINE_STRIP);
 Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
 Render.Vertex2f(5/1.5,Render.Height-5/1.5);
 Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
 Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('2ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
-	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSGScreenComponent).Skin.Font.FontHeight-10));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('2ms',
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSScreenComponent).Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+(Screen as TSScreenComponent).Skin.Font.FontHeight));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSScreenComponent).Skin.Font.FontHeight));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics & Draw Time',
+	SVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSScreenComponent).Skin.Font.FontHeight-10));
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample5_2, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample5_2, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

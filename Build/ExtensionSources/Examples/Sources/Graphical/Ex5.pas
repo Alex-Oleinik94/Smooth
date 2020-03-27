@@ -1,5 +1,5 @@
 // DEPRECATED EXAPLE
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex5;
 	interface
@@ -10,19 +10,19 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContextInterface
-	,SaGeContextClasses
-	,SaGeBase
-	,SaGeFont
-	,SaGeRenderBase
-	,SaGeCommonStructs
-	,SaGeDateTime
-	,SaGeScreenClasses
-	,SaGeCamera
-	,SaGeMatrix	
+	 SmoothContextInterface
+	,SmoothContextClasses
+	,SmoothBase
+	,SmoothFont
+	,SmoothRenderBase
+	,SmoothCommonStructs
+	,SmoothDateTime
+	,SmoothScreenClasses
+	,SmoothCamera
+	,SmoothMatrix	
 	{$IF not defined(ENGINE)}
-		,SaGeConsolePaintableTools
-		,SaGeConsoleCaller
+		,SmoothConsolePaintableTools
+		,SmoothConsoleCaller
 		{$ENDIF}
 	
 	,Crt
@@ -31,17 +31,17 @@ uses
 const
 	QuantityObjects = 15;
 type
-	TSGExample5=class(TSGPaintableObject)
+	TSExample5=class(TSPaintableObject)
 			public
-		constructor Create(const VContext : ISGContext);override;
+		constructor Create(const VContext : ISContext);override;
 		destructor Destroy();override;
 		procedure Paint();override;
-		class function ClassName():TSGString;override;
+		class function ClassName():TSString;override;
 			private
-		FCamera           : TSGCamera;
-		FGravitationAngle : TSGSingle;
+		FCamera           : TSCamera;
+		FGravitationAngle : TSSingle;
 		
-		PhysicsTiks       : TSGSingle;
+		PhysicsTiks       : TSSingle;
 		Physics           : Ex5_PAPPE.TPhysics;
 		Collide           : Ex5_PAPPE.TPhysicsCollide;
 		
@@ -53,25 +53,25 @@ type
 		Objects           : array[0..QuantityObjects-1] of Ex5_PAPPE.TPhysicsObject;
 		ObjectRigidBodies : array[0..QuantityObjects-1] of Ex5_PAPPE.TPhysicsRigidBody;
 		
-		FPhysicsTime      : array of TSGWord;
-		FPhysicsTimeCount : TSGLongWord;
-		FPhysicsTimeIndex : TSGLongWord;
+		FPhysicsTime      : array of TSWord;
+		FPhysicsTimeCount : TSLongWord;
+		FPhysicsTimeIndex : TSLongWord;
 		end;
 
 {$IFDEF ENGINE}
 	implementation
 	{$ENDIF}
 
-class function TSGExample5.ClassName():TSGString;
+class function TSExample5.ClassName():TSString;
 begin
 Result := 'Пример физического движка №1';
 end;
 
-constructor TSGExample5.Create(const VContext : ISGContext);
+constructor TSExample5.Create(const VContext : ISContext);
 procedure InitCubes();
 var
-	i,j,r,x,k,y,kk:TSGLongWord;
-	sx:TSGSingle;
+	i,j,r,x,k,y,kk:TSLongWord;
+	sx:TSSingle;
 begin
 sx:=0;
 x:=0;
@@ -107,7 +107,7 @@ end;
 
 begin
 inherited Create(VContext);
-FCamera:=TSGCamera.Create();
+FCamera:=TSCamera.Create();
 FCamera.SetContext(Context);
 FCamera.Zum := 6;
 FCamera.RotateX := 90;
@@ -156,9 +156,9 @@ PhysicsTiks:=0;
 FGravitationAngle:=pi;
 end;
 
-destructor TSGExample5.Destroy();
+destructor TSExample5.Destroy();
 var
-	i:TSGLongWord;
+	i:TSLongWord;
 begin
 Ex5_PAPPE.PhysicsObjectDone   (Object0);
 Ex5_PAPPE.PhysicsObjectDone   (Object1);
@@ -175,13 +175,13 @@ Ex5_PAPPE.PhysicsDone       (Physics);
 inherited;
 end;
 
-procedure TSGExample5.Paint();
+procedure TSExample5.Paint();
 var
-	i,ii      : TSGLongWord;
-	Licht0Pos : TSGVertex3f;
-	dt1,dt2   : TSGDateTime;
+	i,ii      : TSLongWord;
+	Licht0Pos : TSVertex3f;
+	dt1,dt2   : TSDateTime;
 
-// $RANGECHECKS
+// $RANGECHECK
 {$IFOPT R+}
 	{$DEFINE RANGECHECKS_OFFED}
 	{$R-}
@@ -192,7 +192,7 @@ var
 	I : integer;
 	N: Ex5_PAPPE.TPhysicsVector3;
 begin
-Render.BeginScene(SGR_TRIANGLES);
+Render.BeginScene(SR_TRIANGLES);
 for I:=0 to AObjectMesh.NumMeshs-1 do
 	DrawObjectMesh(AObjectMesh.Meshs^[i]^);
 for I:=0 to AObjectMesh.NumTriangles-1 do
@@ -219,13 +219,13 @@ end;
 
 procedure DrawObject(var AObject: TPhysicsObject); register;
 var
-	I: TSGLongWord;
-	FNowLightPos : TSGVertex3f;
+	I: TSLongWord;
+	FNowLightPos : TSVertex3f;
 begin
 Render.PushMatrix();
 Render.MultMatrixf(@AObject.InterpolatedTransform);
-FNowLightPos := Licht0Pos * TSGMatrix4x4(AObject.InterpolatedTransform);
-Render.Lightfv(SGR_LIGHT0, SGR_POSITION, @FNowLightPos);
+FNowLightPos := Licht0Pos * TSMatrix4x4(AObject.InterpolatedTransform);
+Render.Lightfv(SR_LIGHT0, SR_POSITION, @FNowLightPos);
 for I:=0 to AObject.NumMeshs-1 do
 	DrawObjectMesh(AObject.Meshs^[i]^);
 Render.PopMatrix();
@@ -258,8 +258,8 @@ FCamera.CallAction();
 
 Licht0Pos.Import(2,45,160);
 
-Render.Enable (SGR_LIGHTING);
-Render.Enable (SGR_LIGHT0);
+Render.Enable (SR_LIGHTING);
+Render.Enable (SR_LIGHT0);
 
 Render.Color4f(1,1,1,1);
 DrawObject(Object0);
@@ -274,10 +274,10 @@ DrawObject(Object1);
 Render.Color4f(0.5,0.1,1,1);
 DrawObject(Object2);
 
-Render.Disable(SGR_LIGHT0);
-Render.Disable(SGR_LIGHTING);
+Render.Disable(SR_LIGHT0);
+Render.Disable(SR_LIGHTING);
 
-Render.InitMatrixMode(SG_2D);
+Render.InitMatrixMode(S_2D);
 FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
 FPhysicsTimeIndex+=1;
 if FPhysicsTimeIndex=FPhysicsTimeCount then
@@ -288,7 +288,7 @@ else
 	i:=FPhysicsTimeIndex-1;
 ii:=10;
 Render.Color3f(1,0,0);
-Render.BeginScene(SGR_LINE_STRIP);
+Render.BeginScene(SR_LINE_STRIP);
 while i<>FPhysicsTimeIndex do
 	begin
 	Render.Vertex2f(ii/1.5,Render.Height-20*FPhysicsTime[i]-10/1.5);
@@ -300,27 +300,27 @@ while i<>FPhysicsTimeIndex do
 	end;
 Render.EndScene();
 Render.Color3f(0,0,0);
-Render.BeginScene(SGR_LINE_STRIP);
+Render.BeginScene(SR_LINE_STRIP);
 Render.Vertex2f(5/1.5,Render.Height-30-5/1.5);
 Render.Vertex2f(5/1.5,Render.Height-5/1.5);
 Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-5/1.5);
 Render.Vertex2f(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5);
 Render.EndScene();
 Render.Color3f(0,0,0);
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('2ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSGScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSGScreenComponent).Skin.Font.FontHeight));
-(Screen as TSGScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
-	SGVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
-	SGVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSGScreenComponent).Skin.Font.FontHeight-10));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('2ms',
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-50-5/1.5-3),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSScreenComponent).Skin.Font.StringLength('2ms'),Render.Height-50-5/1.5-3+(Screen as TSScreenComponent).Skin.Font.FontHeight));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSScreenComponent).Skin.Font.FontHeight));
+(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
+	SVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
+	SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSScreenComponent).Skin.Font.FontHeight-10));
 	
 end;
 
 {$IFNDEF ENGINE}
 	begin
-	SGConsoleRunPaintable(TSGExample5, SGSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample5, SSystemParamsToConcoleCallerParams());
 	{$ENDIF}
 end.

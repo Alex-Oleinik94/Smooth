@@ -2,7 +2,7 @@
 CALL _Create_Output_Directoryes
 cd ..
 set S1="================================"
-set S2="Compiling Extensions for Windows"
+set S2="Compiling extensions for Windows"
 if "%1" equ "" (
 	set TARGET=debug
 ) else (

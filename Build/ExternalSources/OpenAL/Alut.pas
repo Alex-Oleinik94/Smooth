@@ -13,7 +13,7 @@ uses
 		,Windows
 		{$ENDIF}
 	,OpenAL
-	,SaGeAudioDecoderWAV
+	,SmoothAudioDecoderWAV
 	;
 
 var
@@ -37,11 +37,11 @@ var
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 //Internal Alut replacement procedures
@@ -167,25 +167,25 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllAlut = class(TSGDll)
+	TSDllAlut = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllAlut.SystemNames() : TSGStringList;
+class function TSDllAlut.SystemNames() : TSStringList;
 begin
 Result := 'ALUT';
 Result += 'LibAlut';
 end;
 
-class function TSGDllAlut.DllNames() : TSGStringList;
+class function TSDllAlut.DllNames() : TSStringList;
 begin
 Result := nil;
 {$IFDEF MSWINDOWS}
@@ -200,15 +200,15 @@ Result += 'libalut.so';
 {$ENDIF}
 end;
 
-class function TSGDllAlut.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllAlut.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -224,7 +224,7 @@ ext_alutLoadWAVMemory:= LoadProcedure('alutLoadWAVMemory');
 ext_alutUnloadWAV:= LoadProcedure('alutUnloadWAV');
 end;
 
-class procedure TSGDllAlut.Free();
+class procedure TSDllAlut.Free();
 begin
 ext_alutInit := nil;
 ext_alutExit := nil;
@@ -235,7 +235,7 @@ end;
 
 initialization
 begin
-TSGDllAlut.Create();
+TSDllAlut.Create();
 end;
 
 end.

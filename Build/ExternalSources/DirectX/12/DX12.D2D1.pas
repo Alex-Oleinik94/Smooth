@@ -3076,11 +3076,11 @@ function ComputeFlatteningTolerance(matrix: TD2D1_MATRIX_3X2_F; dpiX: single = 9
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothSysUtils
 	;
 
 function FloatMax: single;
@@ -4474,30 +4474,30 @@ begin
 end;
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllD1D2 = class(TSGDll)
+	TSDllD1D2 = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 		end;
 
-class function TSGDllD1D2.SystemNames() : TSGStringList;
+class function TSDllD1D2.SystemNames() : TSStringList;
 begin
 Result := 'DX12.D1D2';
 Result += 'D1D2';
 end;
 
-class function TSGDllD1D2.DllNames() : TSGStringList;
+class function TSDllD1D2.DllNames() : TSStringList;
 begin
 Result := D2D1_DLL;
 end;
 
-class procedure TSGDllD1D2.Free();
+class procedure TSDllD1D2.Free();
 begin
 D2D1CreateFactory := nil;
 D2D1MakeRotateMatrix := nil;
@@ -4513,15 +4513,15 @@ D2D1Vec3Length := nil;
 D2D1ComputeMaximumScaleFactor := nil;
 end;
 
-class function TSGDllD1D2.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllD1D2.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
-	LoadResult : PSGDllLoadObject = nil;
+	LoadResult : PSDllLoadObject = nil;
 
 function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SGPCharToString(Name)
+	LoadResult^.FFunctionErrors += SPCharToString(Name)
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -4546,6 +4546,6 @@ end;
 
 initialization
 begin
-TSGDllD1D2.Create();
+TSDllD1D2.Create();
 end;
 end.

@@ -1,10 +1,10 @@
 <img src="Data/Engine/Icon.png" align="right" width="210" height="210" />
 
-# SaGe
+# Smooth
 
-[SaGe] is a set of modules (software framework) for creating three-dimensional applications. Compiler: [Free Pascal Compiler].
+[Smooth] is a set of modules (software framework) for creating three-dimensional applications. Compiler: [Free Pascal Compiler].
 
-[SaGe] supports:
+[Smooth] supports:
  
  * Platforms:
    - [Microsoft Windows] (32 and 64 bit)
@@ -30,12 +30,12 @@
 ### Links
 
  * Binary data(for examples etc.) and libraries: [Binary data]
- * See also: [SaGe Programming]
+ * See also: [Smooth Programming]
 
-[SaGe Programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd "SaGe programming files"
-[Binary data]: http://yadi.sk/d/2dXlhmaQ3VmgBd/SaGe "SaGe binary data"
+[Smooth Programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd "Smooth programming files"
+[Binary data]: http://yadi.sk/d/2dXlhmaQ3VmgBd/Smooth "Smooth binary data"
 [Free Pascal Compiler]: http://www.freepascal.org "Free Pascal Compiler Homepage"
-[SaGe]: http://github.com/SanchesMaan/SaGe "SaGe Repository"
+[Smooth]: http://github.com/Byeneg/Smooth "Smooth Repository"
 [OpenGL]: http://www.opengl.org "OpenGL Homepage"
 [Android]: http://www.android.com "Android Homepage"
 [OpenAL]: http://www.openal.org "OpenAL Homepage"
@@ -49,7 +49,7 @@
 [obj_format]: http://en.wikipedia.org/wiki/Wavefront_.obj_file "OBJ format - Wiki"
 [png_format]: http://en.wikipedia.org/wiki/Portable_Network_Graphics "PNG format - Wiki"
 [jpeg_format]: http://en.wikipedia.org/wiki/JPEG "JPEG format - Wiki"
-[sgia_format]: Build/Sources/Images/SaGeImageSgia.pas "SGIA source code"
+[sgia_format]: Build/Sources/Images/SmoothImageSgia.pas "SGIA source code"
 [bmp_format]: http://en.wikipedia.org/wiki/BMP_file_format "BMP format - Wiki"
 [tga_format]: http://en.wikipedia.org/wiki/Truevision_TGA "TARGA format - Wiki"
 [DirectX]: http://en.wikipedia.org/wiki/DirectX "DirectX - Wiki"

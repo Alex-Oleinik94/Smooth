@@ -1,5 +1,5 @@
 // Use CP866
-{$INCLUDE SaGe.inc}
+{$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex10;
 	interface
@@ -11,28 +11,28 @@ uses
 	{$IF defined(UNIX) and (not defined(ANDROID)) and (not defined(ENGINE))}
 		cthreads,
 		{$ENDIF}
-	 SaGeContext
-	,SaGeBase
-	,SaGeMath
-	,SaGeAdamsSystemExample
-	,SaGeStringUtils
+	 SmoothContext
+	,SmoothBase
+	,SmoothMath
+	,SmoothAdamsSystemExample
+	,SmoothStringUtils
 	{$IF defined(ENGINE)}
-		,SaGeConsoleCaller
-		,SaGeConsoleTools
+		,SmoothConsoleCaller
+		,SmoothConsoleTools
 		{$ENDIF}
 	
 	,Crt
 	;
 var
-	Functions : TSGFunctionArray = nil;
-	Y0 : TSGExtenededArray;
+	Functions : TSFunctionArray = nil;
+	Y0 : TSExtenededArray;
 	a, b, eps : Extended;
 	n, ns: LongWord;
 
-function EnterFunction(const ss: String; const cout_variables: LongWord; const variables:String = ''):TSGExpression;
+function EnterFunction(const ss: String; const cout_variables: LongWord; const variables:String = ''):TSExpression;
 var
 	s: String;
-	Ex : TSGExpression = nil;
+	Ex : TSExpression = nil;
 	iii,ii,i : LongWord;
 begin
 Write('Введите функцию: ');
@@ -40,9 +40,9 @@ Write(ss+'('+variables+')=');
 repeat
 i := 1;
 ReadLn(S);
-Ex := TSGExpression.Create();
+Ex := TSExpression.Create();
 Ex.QuickCalculation := False;
-Ex.Expression := SGStringToPChar(S);
+Ex.Expression := SStringToPChar(S);
 Ex.CanculateExpression();
 if (Ex.ErrorsQuantity=0) then
 	begin
@@ -53,7 +53,7 @@ if (Ex.ErrorsQuantity=0) then
 	if (iii <> 0) then
 		for ii := 0 to LongInt(iii)-1 do
 			if (Length(Ex.Variables) >= ii+1) then
-				Ex.ChangeVariables(Ex.Variables[ii],TSGExpressionChunkCreateReal(random));
+				Ex.ChangeVariables(Ex.Variables[ii],TSExpressionChunkCreateReal(random));
 	Ex.Calculate();
 	end;
 if not (Ex.ErrorsQuantity = 0) then
@@ -75,8 +75,8 @@ if i = 0 then
 	end
 else
 	begin
-	Result := TSGExpression.Create();
-	Result.Expression := SGStringToPChar(S);
+	Result := TSExpression.Create();
+	Result.Expression := SStringToPChar(S);
 	Result.CanculateExpression();
 	end;
 Ex.Destroy();
@@ -87,7 +87,7 @@ end;
 procedure ReadAll();
 var
 	S : String;
-	Ex : TSGExpression = nil;
+	Ex : TSExpression = nil;
 	ii,i : LongWord;
 begin
 ClrScr();
@@ -96,15 +96,15 @@ Write('Введите размерность системы: ');
 ReadLn(ns);
 S :='';
 for i := 0 to ns-1 do
-	S += 'y' + SGStr(i)+',';
+	S += 'y' + SStr(i)+',';
 S +='x';
 
 WriteLn('Система:');
 for i := 0 to ns - 1 do
-	WriteLn('    y'+SGStr(i)+''' = f'+SGStr(i)+'('+S+')');
+	WriteLn('    y'+SStr(i)+''' = f'+SStr(i)+'('+S+')');
 WriteLn('Условия:');
 for i := 0 to ns - 1 do
-	WriteLn('    y'+SGStr(i)+'(a) = Y'+SGStr(i));
+	WriteLn('    y'+SStr(i)+'(a) = Y'+SStr(i));
 
 SetLength(Functions,ns);
 SetLength(Y0,ns);
@@ -115,12 +115,12 @@ Write('Введите конец отрезка {float}: b=');
 ReadLn(b);
 
 for i := 0 to High(Functions) do
-	Functions[i] := EnterFunction('f'+SGStr(i),ns+1,S);
+	Functions[i] := EnterFunction('f'+SStr(i),ns+1,S);
 
 WriteLn('Введите начальные условия:');
 for i := 0 to High(Functions) do
 	begin
-	Write('    y'+SGStr(i)+'(a) = ');
+	Write('    y'+SStr(i)+'(a) = ');
 	ReadLn(Y0[i]);
 	end;
 
@@ -134,10 +134,10 @@ procedure Go();
 const
 	Output_file = 'Ex10_output.txt';
 var
-	AdamsResult : TSGExtenededArrayArray;
+	AdamsResult : TSExtenededArrayArray;
 	i : LongWord;
 begin
-AdamsResult := SaGeAdamsSystemExample.AdamsSystem(a, b, eps, ns, n, Functions, Y0, Output_file);
+AdamsResult := SmoothAdamsSystemExample.AdamsSystem(a, b, eps, ns, n, Functions, Y0, Output_file);
 WriteLn('Результат сохранен в "', Output_file, '".');
 for i := 0 to High(AdamsResult) do
 	SetLength(AdamsResult[i],0);
@@ -145,7 +145,7 @@ SetLength(AdamsResult,0);
 end;
 
 {$IFDEF ENGINE}
-	procedure SGConsoleEx10(const VParams : TSGConcoleCallerParams = nil);
+	procedure SConsoleEx10(const VParams : TSConcoleCallerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -158,7 +158,7 @@ Go();
 	end;
 	initialization
 	begin
-	SGOtherConsoleCaller.AddComand('Examples', @SGConsoleEx10, ['ex10'], 'Example 10');
+	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx10, ['ex10'], 'Example 10');
 	end;
 	
 	end.

@@ -14852,12 +14852,12 @@ procedure Read_WIN_swap_hint;
 implementation
 
 uses
-	 SaGeBase
-	,SaGeLists
-	,SaGeDllManager
-	,SaGeStringUtils
-	,SaGeLog
-	,SaGeSysUtils
+	 SmoothBase
+	,SmoothLists
+	,SmoothDllManager
+	,SmoothStringUtils
+	,SmoothLog
+	,SmoothSysUtils
 	;
 
 var
@@ -14941,8 +14941,8 @@ begin
 end;
 
 var
-	LoadObjectGL  : PSGDllLoadObject = nil;
-	LoadObjectGLU : PSGDllLoadObject = nil;
+	LoadObjectGL  : PSDllLoadObject = nil;
+	LoadObjectGLU : PSDllLoadObject = nil;
 
 function dglGetProcAddress(ProcName: PAnsiChar; LibHandle: Pointer = nil {$IFDEF DGL_LINUX}; ForceDLSym: Boolean = False{$ENDIF}): Pointer;
 begin
@@ -14951,7 +14951,7 @@ begin
   Result := nil;
 
   {$IFDEF DGL_WIN}
-    Result := GetProcAddress(TSGMaxEnum(LibHandle), ProcName);
+    Result := GetProcAddress(TSMaxEnum(LibHandle), ProcName);
 
     if result = nil then
       if Assigned(@wglGetProcAddress) then
@@ -20339,31 +20339,31 @@ end;
 {$ENDIF}
 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
-// =*=*= SaGe DLL IMPLEMENTATION =*=*=*=
+// =*=*= Smooth DLL IMPLEMENTATION =*=*=
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 type
-	TSGDllOpenGL = class(TSGDll)
+	TSDllOpenGL = class(TSDll)
 			public
-		class function SystemNames() : TSGStringList; override;
-		class function DllNames() : TSGStringList; override;
-		class function Load(const VDll : TSGLibHandle) : TSGDllLoadObject; override;
+		class function SystemNames() : TSStringList; override;
+		class function DllNames() : TSStringList; override;
+		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;
 		class procedure Free(); override;
 
-		class function ChunkNames() : TSGStringList; override;
-		class function DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList; override;
-		class function LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList; override;
-		class function ChunksLoadJointly() : TSGBool; override;
+		class function ChunkNames() : TSStringList; override;
+		class function DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList; override;
+		class function LoadChunks(const VDlls : TSLibHandleList) : TSDllLoadObjectList; override;
+		class function ChunksLoadJointly() : TSBool; override;
 
-		function LoadExtensions() : TSGDllLoadExtensionsObject; override;
+		function LoadExtensions() : TSDllLoadExtensionsObject; override;
 		end;
 
-class function TSGDllOpenGL.ChunksLoadJointly() : TSGBool;
+class function TSDllOpenGL.ChunksLoadJointly() : TSBool;
 begin
 Result := True;
 end;
 
-class function TSGDllOpenGL.SystemNames() : TSGStringList;
+class function TSDllOpenGL.SystemNames() : TSStringList;
 begin
 Result := 'OpenGL';
 Result += 'OGL';
@@ -20371,14 +20371,14 @@ Result += 'GL';
 Result += 'GLES';
 end;
 
-class function TSGDllOpenGL.ChunkNames() : TSGStringList;
+class function TSDllOpenGL.ChunkNames() : TSStringList;
 begin
 Result := nil;
 Result += 'GL';
 Result += 'GLU';
 end;
 
-class function TSGDllOpenGL.DllChunkNames(const ChunkIndex : TSGUInt32) : TSGStringList;
+class function TSDllOpenGL.DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList;
 begin
 Result := nil;
 case ChunkIndex of
@@ -20387,12 +20387,12 @@ case ChunkIndex of
 end;
 end;
 
-class function TSGDllOpenGL.DllNames() : TSGStringList;
+class function TSDllOpenGL.DllNames() : TSStringList;
 begin
 Result := nil;
 end;
 
-class procedure TSGDllOpenGL.Free();
+class procedure TSDllOpenGL.Free();
 begin
 GL_LibHandle  := 0;
 GLU_LibHandle := 0;
@@ -20400,7 +20400,7 @@ LoadObjectGL  := nil;
 LoadObjectGLU := nil;
 end;
 
-class function TSGDllOpenGL.LoadChunks(const VDlls : TSGLibHandleList) : TSGDllLoadObjectList;
+class function TSDllOpenGL.LoadChunks(const VDlls : TSLibHandleList) : TSDllLoadObjectList;
 begin
 SetLength(Result, 2);
 Result[0].Clear();
@@ -20414,26 +20414,26 @@ LoadObjectGL  := nil;
 LoadObjectGLU := nil;
 end;
 
-class function TSGDllOpenGL.Load(const VDll : TSGLibHandle) : TSGDllLoadObject;
+class function TSDllOpenGL.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 begin
 Result.Clear();
 end;
 
-function TSGDllOpenGL.LoadExtensions() : TSGDllLoadExtensionsObject;
+function TSDllOpenGL.LoadExtensions() : TSDllLoadExtensionsObject;
 var
-	List : TSGStringList = nil;
-	i : TSGMaxEnum;
+	List : TSStringList = nil;
+	i : TSMaxEnum;
 begin
 Result.Clear();
 LoadObjectGL  := @Result;
 dglOpenGL.ReadExtensions();
 LoadObjectGL  := nil;
-List := SGStringListFromString(Int_GetExtensionString, ' ');
+List := SStringListFromString(Int_GetExtensionString, ' ');
 if List <> nil then
 	if Length(List) <> 0 then
 		for i := 0 to High(List) do
 			Result.FExtensions *= List[i];
-SGKill(List);
+SKill(List);
 end;
 
 initialization
@@ -20444,7 +20444,7 @@ begin
 {$IFDEF DGL_64BIT}
   SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
 {$ENDIF}
-TSGDllOpenGL.Create();
+TSDllOpenGL.Create();
 end;
 
 finalization

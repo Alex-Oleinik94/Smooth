@@ -1,7 +1,7 @@
 #echo off
 cd ..
 echo "======================================="
-echo "| Compiling  Debug  Version for Unix  |"
+echo "| Compiling  debug  version for Unix  |"
 echo "======================================="
 mkdir Output
 mkdir Output/i386-debug-desktop
