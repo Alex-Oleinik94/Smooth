@@ -140,8 +140,50 @@ begin
   but there is no "flush" method in TStream or any of its descendant; }
 end;
 
-procedure LoadPNG(const Stream: TStream;const BitMap:TSBitMap);
+procedure ConvertGRAYToRGBA(const BitMap : TSBitMap);
+var
+	NewBitMap : TSBitMap;
+	x, y : TSMaxEnum;
 
+function MultiplyByte(const b : TSByte; const m : TSFloat32) : TSByte;
+var
+	z : TSMaxEnum;
+begin
+z := Trunc(b * m);
+if z > 255 then
+	Result := 255
+else
+	Result := z;
+end;
+
+begin
+NewBitMap := TSBitMap.Create();
+NewBitMap.Width := BitMap.Width;
+NewBitMap.Height := BitMap.Height;
+NewBitMap.Channels := 4;
+NewBitMap.ChannelSize := 8;
+NewBitMap.ReAllocateMemory();
+for x := 0 to NewBitMap.Width - 1 do
+	for y := 0 to NewBitMap.Height - 1 do
+		begin
+		NewBitMap.Data[(y + x * NewBitMap.Height) * 4 + 0] := BitMap.Data[(y + x * BitMap.Height) * 2 + 0];
+		NewBitMap.Data[(y + x * NewBitMap.Height) * 4 + 1] := BitMap.Data[(y + x * BitMap.Height) * 2 + 0];
+		NewBitMap.Data[(y + x * NewBitMap.Height) * 4 + 2] := BitMap.Data[(y + x * BitMap.Height) * 2 + 0];
+		//NewBitMap.Data[(y + x * NewBitMap.Height) * 4 + 3] := MultiplyByte(BitMap.Data[(y + x * BitMap.Height) * 2 + 1], 3); 28 March 2020ã. png ilpha channel for one image
+		NewBitMap.Data[(y + x * NewBitMap.Height) * 4 + 3] := BitMap.Data[(y + x * BitMap.Height) * 2 + 1];
+		end;
+
+BitMap.Clear();
+BitMap.Width := NewBitMap.Width;
+BitMap.Height := NewBitMap.Height;
+BitMap.Channels := 4;
+BitMap.ChannelSize := 8;
+BitMap.ReAllocateMemory();
+Move(NewBitMap.Data^, BitMap.Data^, NewBitMap.DataSize());
+SKill(NewBitMap);
+end;
+
+procedure LoadPNG(const Stream: TStream;const BitMap:TSBitMap);
 var
   png_ptr: png_structp;
   info_ptr: png_infop;
@@ -163,8 +205,8 @@ try
 
 	BitMap.Width := png_get_image_width(png_ptr, info_ptr);
 	BitMap.Height := png_get_image_height(png_ptr, info_ptr);
-	BitMap.Channels:=png_get_channels(png_ptr, info_ptr);
-	BitMap.ChannelSize:=png_get_bit_depth(png_ptr, info_ptr);
+	BitMap.Channels := png_get_channels(png_ptr, info_ptr);
+	BitMap.ChannelSize := png_get_bit_depth(png_ptr, info_ptr);
 	BitMap.ReAllocateMemory();
 
 	png_read_update_info(png_ptr, info_ptr);
@@ -199,6 +241,10 @@ except
 	SLog.Source('SmoothImagesPNG: Exeption while loading png!');
 	BitMap.Clear();
 	end;
+
+//BitMap.WriteInfo();
+if (BitMap.Channels = 2) then //PNG_COLOR_TYPE_GRAY
+	ConvertGRAYToRGBA(BitMap);
 end;
 
 procedure SavePNG(const BitMap: TSBitMap; const Stream: TStream;const  Interlaced: boolean = false);

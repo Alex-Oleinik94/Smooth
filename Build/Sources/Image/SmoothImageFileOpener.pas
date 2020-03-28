@@ -384,8 +384,8 @@ NewImage.BitMap.ReAllocateMemory();
 for x := 0 to NewImage.BitMap.Width - 1 do
 	for y := 0 to NewImage.BitMap.Height - 1 do
 		ProcessPixel(x, y);
-//NewImage.Save(SImageFormatBMP);
-NewImage.Save(SImageFormatPNG);
+NewImage.Save(SImageFormatBMP);
+//NewImage.Save(SImageFormatPNG);
 NewImage.LoadTexture();
 SKill(FImage);
 FImage := NewImage;
@@ -418,6 +418,11 @@ begin
 	'All files(*.*)'+#0+'*.*'+#0+
 	#0,
 	'sggdrf');}
+
+FImage.Load();
+//WriteLn(FImage.BitMap.HasData);
+FImage.FileName := SFreeFileName(FImage.FileName, '');
+FImage.Save(SImageFormatBMP);
 end;
 
 procedure TSImageViewer.Paint();
