@@ -32,8 +32,8 @@ procedure SCopyPartStreamToStream(const Source : TStream; Destination : TMemoryS
 // TSString
 function SReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSChar = #39) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SReadPCharFromStream(const Stream : TStream) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SReadStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0,#27,#13,#10]) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SReadLnStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0,#27,#13,#10]) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SReadStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SReadLnStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SWriteStringToStream(const String1 : TSString; const Stream : TStream; const Stavit0 : TSBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SStringToStream(const Str : TSString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SMatchingStreamString(const Stream : TStream; const Str : TSString; const DestroyingStream : TSBoolean = False) : TSBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -218,22 +218,45 @@ if Stavit0 then
 	Stream.WriteBuffer(C, SizeOf(TSChar));
 end;
 
-function SReadLnStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0,#27,#13,#10]) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SReadLnStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	C : TSChar = #1;
-	ToOut : TSBoolean = False;
+	C : TSChar = #0;
+	FindedEolnSign : TSBoolean = False;
+	(*EolnStrings : array[0..4] of TSString = ({CR+LF}}#13#10, {CR}#13, {LF}#10, {null character code}#0, {Escape},#27);
+	EolnSigns : array[0..4] of TSBoolean = (True, True, True, True, True);*)
+
+{procedure CheckEolnStrings();
+var	
+	z, x : TSMaxEnum;
 begin
-Result:='';
-while (Stream.Position < Stream.Size) and ((not ToOut) or (C in Eolns))  do
+for z := 0 to High(EolnStrings) do
+	for x := 1 to Length(EolnStrings[z]) do
+		if (not (EolnStrings[z][x] in Eolns)) then
+			begin
+			EolnSigns[z] := False;
+			break;
+			end;
+end;}
+
+begin
+Result := '';
+//CheckEolnStrings();
+while (Stream.Position < Stream.Size) and (not FindedEolnSign)  do
 	begin
-	Stream.ReadBuffer(c, 1);
+	Stream.ReadBuffer(C, 1);
 	if (C in Eolns) then
-		ToOut := True
-	else if (not ToOut) then
-		Result += c;
+		begin
+		FindedEolnSign := True;
+		if (C = #13) and (#10 in Eolns) and (#13 in Eolns) and (Stream.Position < Stream.Size) then //check CR+LF
+			begin
+			Stream.ReadBuffer(C, 1);
+			if (C <> #10) then
+				Stream.Position := Stream.Position - 1;	
+			end;
+		end
+	else
+		Result += C;
 	end;
-if Stream.Position <> Stream.Size then
-	Stream.Position := Stream.Position - 1;
 end;
 
 function SReadPCharFromStream(const Stream : TStream) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -248,18 +271,19 @@ if C <> #0 then
 until C = #0;
 end;
 
-function SReadStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0,#27,#13,#10]) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SReadStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	C : TSChar = #1;
-	First : TSBool = True;
+	C : TSChar = #0;
+	FindedEolnSign : TSBool = False;
 begin
-Result:='';
-while ((not (C in Eolns)) or First) and (Stream.Position <> Stream.Size) do
+Result := '';
+while (Stream.Position <> Stream.Size) and (not FindedEolnSign) do
 	begin
 	Stream.ReadBuffer(C, 1);
-	if not (C in Eolns) then
+	if (C in Eolns) then
+		FindedEolnSign := True
+	else
 		Result += C;
-	First := False;
 	end;
 end;
 

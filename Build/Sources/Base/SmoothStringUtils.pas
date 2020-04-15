@@ -50,8 +50,15 @@ function SStrExtended(R : TSExtended; const l : TSInt32):TSString;{$IFDEF SUPPOR
 {$ENDIF WITHOUT_EXTENDED}
 function SFloatToString(const R : TSFloat64; const Zeros : TSInt32 = 0):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SCheckFloatString(const S : TSString; const Point : TSChar = '.') : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SVal(const Text : TSString) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-function SValFloat(const Text : TSString) : TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSUInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSUInt16; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSInt16; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSUInt8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSInt8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SValFloat(const Text : TSString) : TSFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 	//Проверяет, не образована ли строка AString как Part + [хз]
 function SExistsFirstPartString(const AString : TSString; const Part : TSString) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращает строку, которая содержит размер "файла"/"буфера", занимающего Size байт
@@ -170,21 +177,21 @@ end;
 function SStringDeleteEndOfLineDublicates(const VString : TSString) : TSString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
 	C, lC : TSChar;
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 Result := '';
 lC  := ' ';
 C   := ' ';
 if Length(VString) > 0 then
-	for i := 1 to Length(VString) do
+	for Index := 1 to Length(VString) do
 		if  ( not (
-				(VString[i]  in [#13,#10]) and
-				(C           in [#13,#10]) and
-				(lC          in [#13,#10])
+				(VString[Index]  in [#13, #10]) and
+				(C               in [#13, #10]) and
+				(lC              in [#13, #10])
 			) ) then
 			begin
 			lC := C;
-			C := VString[i];
+			C := VString[Index];
 			Result += C;
 			end;
 end;
@@ -206,12 +213,12 @@ end;
 
 procedure SStringListTrimAll(var SL : TSStringList; const Garbage : TSChar = ' ');{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 if SL <> nil then
 	if Length(SL) > 0 then
-		for i := 0 to High(SL) do
-			SL[i] := StringTrimAll(SL[i], Garbage);
+		for Index := 0 to High(SL) do
+			SL[Index] := StringTrimAll(SL[Index], Garbage);
 end;
 
 function SStringListFromString(const S : TSString; const Separators : TSString) : TSStringList; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -228,40 +235,40 @@ if TempS <> '' then
 end;
 
 var
-	i : TSLongWord;
+	Index : TSLongWord;
 begin
 Result := nil;
-i := 1;
+Index := 1;
 TempS := '';
-for i := 1 to Length(S) do
+for Index := 1 to Length(S) do
 	begin
-	if S[i] in Separators then
+	if S[Index] in Separators then
 		LoopIteration()
 	else
-		TempS += S[i];
+		TempS += S[Index];
 	end;
 LoopIteration();
 end;
 
 procedure SUpCaseStringList(var SL : TSStringList);{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 if (SL <> nil) and (Length(SL) > 0) then
-	for i := 0 to High(SL) do
-		SL[i] := SUpCaseString(SL[i]);
+	for Index := 0 to High(SL) do
+		SL[Index] := SUpCaseString(SL[Index]);
 end;
 
 function SUpCasedStringList(SL : TSStringList; const FreeList : TSBool = False):TSStringList;{$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 Result := nil;
 if (SL <> nil) and (Length(SL) > 0) then
 	begin
 	SetLength(Result, Length(SL));
-	for i := 0 to High(SL) do
-		Result[i] := SUpCaseString(SL[i]);
+	for Index := 0 to High(SL) do
+		Result[Index] := SUpCaseString(SL[Index]);
 	end;
 if FreeList then
 	SetLength(SL, 0);
@@ -269,16 +276,16 @@ end;
 
 function SStringFromStringList(const S : TSStringList; const Separator : TSString) : TSString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 var
-	i : TSLongWord;
+	Index : TSLongWord;
 begin
 Result := '';
 if S <> nil then
 	if Length(S) > 0 then
 		begin
-		for i := 0 to High(S) do
+		for Index := 0 to High(S) do
 			begin
-			Result += S[i];
-			if i <> High(S) then
+			Result += S[Index];
+			if Index <> High(S) then
 				Result += Separator;
 			end;
 		end;
@@ -353,12 +360,12 @@ end;
 
 function SStringReplace(const VString : TSString; const C1, C2 : TSChar):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSLongWord;
+	Index : TSLongWord;
 begin
 Result := VString;
-for i := 1 to Length(Result) do
-	if Result[i] = C1 then
-		Result[i] := C2;
+for Index := 1 to Length(Result) do
+	if Result[Index] = C1 then
+		Result[Index] := C2;
 end;
 
 function SDeleteExcessSpaces(const S : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -371,31 +378,31 @@ if (S <> '') and (S[Length(S)] = ' ') then
 end;
 
 var
-	i : TSLongWord;
+	Index : TSLongWord;
 begin
 Result := '';
 if Length(S) > 0 then
-	for i := 1 to Length(S) do
+	for Index := 1 to Length(S) do
 		begin
-		if S[i] = ' ' then
+		if S[Index] = ' ' then
 			begin
 			if LastCharacter(Result) <> ' ' then
-				Result += S[i];
+				Result += S[Index];
 			end
 		else
 			begin
-			Result += S[i];
+			Result += S[Index];
 			end;
 		end;
 end;
 
 function SDownCaseString(const Str : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSMaxEnum;
+	Index : TSMaxEnum;
 begin
 Result := '';
-for i := 1 to Length(str) do
-	Result += SDownCase(str[i]);
+for Index := 1 to Length(str) do
+	Result += SDownCase(str[Index]);
 end;
 
 function SConstArrayToStringList(const Ar : array of const) : TSStringList;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -447,7 +454,7 @@ end;
 
 function SFloatToString(const R : TSDouble; const Zeros : TSInt32 = 0):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 Result := '';
 if Trunc(R)=0 then
@@ -462,11 +469,11 @@ if Zeros <> 0 then
 	begin
 	if Abs(R - Trunc(R)) * 10 ** Zeros <> 0 then
 		begin
-		i := Zeros - SCountSimbolsInNumber(Trunc(Abs(R - Trunc(R)) * (10 ** Zeros)));
+		Index := Zeros - SCountSimbolsInNumber(Trunc(Abs(R - Trunc(R)) * (10 ** Zeros)));
 		Result += '.';
-		while i > 0 do
+		while Index > 0 do
 			begin
-			i -= 1;
+			Index -= 1;
 			Result += '0';
 			end;
 		Result += SStr(Trunc(Abs(R - Trunc(R)) * (10 ** Zeros)));
@@ -482,11 +489,11 @@ function SCheckFloatString(const S : TSString; const Point : TSChar = '.') : TSS
 
 function ExistPoint(const S : TSString) : TSBool;
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 Result := False;
-for i := 1 to Length(S) do
-	if S[i] = Point then
+for Index := 1 to Length(S) do
+	if S[Index] = Point then
 		begin
 		Result := True;
 		break;
@@ -583,7 +590,7 @@ end;
 
 function SStrReal(R : TSReal; const l : TSInt32) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 if R < 0 then
 	Result := '-'
@@ -596,7 +603,7 @@ R := abs(R);
 if R > 1 / (10 ** l) then
 	begin
 	Result += '.';
-	for i := 1 to l do
+	for Index := 1 to l do
 		begin
 		if R = 0 then
 			Break;
@@ -613,7 +620,7 @@ end;
 {$IFNDEF WITHOUT_EXTENDED}
 function SStrExtended(R : TSExtended; const l : TSInt32):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 if R < 0 then
 	Result := '-'
@@ -634,7 +641,7 @@ R := abs(R);
 if R > 1 / (10 ** l) then
 	begin
 	Result += '.';
-	for i := 1 to l do
+	for Index := 1 to l do
 		begin
 		if R = 0 then
 			Break;
@@ -649,43 +656,76 @@ Result := SCheckFloatString(Result);
 end;
 {$ENDIF WITHOUT_EXTENDED}
 
-function SVal(const Text : TSString) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+function SVal(const Text : TSString) : TSUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 Val(Text, Result);
 end;
 
-function SValFloat(const Text : TSString) : TSFloat;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SVal(const Text : TSString) : TSInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSUInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSUInt16; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSInt16; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSUInt8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SVal(const Text : TSString) : TSInt8; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
+
+function SValFloat(const Text : TSString) : TSFloat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 var
-	i, iii : TSMaxEnum;
-	ii : TSMaxEnum;
+	Index, Index2, Index3 : TSMaxEnum;
 begin
 Result := 0;
 if Length(Text) = 0 then Exit;
-for i := 1 to Length(Text) do
-	if (Text[i] = ',') or (Text[i] = '.') then
+for Index := 1 to Length(Text) do
+	if (Text[Index] = ',') or (Text[Index] = '.') then
 		break;
-iii := i;
-if (Text[i] = ',') or (Text[i] = '.') then
-	i -= 1;
-ii := 1;
-while i >= 1 do
+Index3 := Index;
+if (Text[Index] = ',') or (Text[Index] = '.') then
+	Index -= 1;
+Index2 := 1;
+while Index >= 1 do
 	begin
-	Result += ii * SVal(Text[i]);
-	ii *= 10;
-	i -= 1;
+	Result += Index2 * SVal(Text[Index]);
+	Index2 *= 10;
+	Index -= 1;
 	end;
-i := iii;
-i += 1;
-ii := 10;
-while i <= Length(Text) do
+Index := Index3;
+Index += 1;
+Index2 := 10;
+while Index <= Length(Text) do
 	begin
-	Result += SVal(Text[i]) / ii;
-	i += 1;
-	ii := ii * 10;
-	//WriteLn(ii);ReadLn();
+	Result += SVal(Text[Index]) / Index2;
+	Index += 1;
+	Index2 := Index2 * 10;
 	end;
-for i := 1 to Length(Text) do
-	if Text[i] = '-' then
+for Index := 1 to Length(Text) do
+	if Text[Index] = '-' then
 		begin
 		Result *= -1;
 		break;
@@ -694,11 +734,11 @@ end;
 
 function SStringGetPart(const S : TSString; const a, b : TSUInt32) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 Result := '';
-for i := a to b do
-	Result += S[i];
+for Index := a to b do
+	Result += S[Index];
 end;
 
 function SGetSizeString(const Size : TSUInt64; const Language : TSString = 'RU') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -757,7 +797,7 @@ end;
 
 function SExistsFirstPartString(const AString : TSString; const Part : TSString) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 if Length(Part) > Length(AString) then
 	Result := False
@@ -767,9 +807,9 @@ else
 	else
 		begin
 		Result := True;
-		for i := 1 to Length(Part) do
+		for Index := 1 to Length(Part) do
 			begin
-			if Part[i] <> AString[i] then
+			if Part[Index] <> AString[Index] then
 				Result := False;
 			if Result = False then
 				Break;
@@ -792,11 +832,11 @@ end;
 
 function SUpCaseString(const S : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 SetLength(Result, Length(S));
-for i := 1 to Length(S) do
-	Result[i] := UpCase(S[i]);
+for Index := 1 to Length(S) do
+	Result[Index] := UpCase(S[Index]);
 end;
 
 // TextFile
@@ -874,24 +914,24 @@ end;
 
 function SStringToPChar(const S : TSString) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 GetMem(Result, Length(s) + 1);
-for i := 1 to Length(s) do
-	Result[i-1] := s[i];
-Result[i] := #0;
+for Index := 1 to Length(s) do
+	Result[Index - 1] := s[Index];
+Result[Index] := #0;
 end;
 
 function SPCharToString(const VChar : PSChar) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 Result := '';
 try
-	while TSByte(VChar[i]) <> 0 do
+	while TSByte(VChar[Index]) <> 0 do
 		begin
-		Result += VChar[i];
-		i += 1;
+		Result += VChar[Index];
+		Index += 1;
 		end;
 except
 	Result := '';
@@ -900,14 +940,14 @@ end;
 
 function SPCharGetPart(const VPChar : PSChar; const Position1, Position2 : TSUInt32) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 begin
 Result := '';
-i := Position1;
-while (VPChar[i] <> #0) and (i <> Position2 + 1) do
+Index := Position1;
+while (VPChar[Index] <> #0) and (Index <> Position2 + 1) do
 	begin
-	SPCharAddSimbol(Result, VPChar[i]);
-	i += 1;
+	SPCharAddSimbol(Result, VPChar[Index]);
+	Index += 1;
 	end;
 end;
 
@@ -915,48 +955,48 @@ function SPCharTotal(const VPChar1, VPChar2 : PSChar) : PSChar;{$IFDEF SUPPORTIN
 var
 	Length1 : TSInt32 = 0;
 	Length2 : TSInt32 = 0;
-	I : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 Length1 := SPCharLength(VPChar1);
 Length2 := SPCharLength(VPChar2);
 Result := nil;
 GetMem(Result, Length1 + Length2 + 1);
 Result[Length1+Length2] := #0;
-for I := 0 to Length1 - 1 do
-	Result[I] := VPChar1[i];
-for i:=Length1 to Length1 + Length2 - 1 do
-	Result[I] := VPChar2[I - Length1];
+for Index := 0 to Length1 - 1 do
+	Result[Index] := VPChar1[Index];
+for Index:=Length1 to Length1 + Length2 - 1 do
+	Result[Index] := VPChar2[Index - Length1];
 end;
 
 function SPCharDeleteSpaces(const VPChar : PSChar) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	I : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 GetMem(Result, 1);
 Result^ := #0;
-while VPChar[i] <> #0 do
+while VPChar[Index] <> #0 do
 	begin
-	if VPChar[i] <> ' ' then
-		SPCharAddSimbol(Result, VPChar[i]);
-	I += 1;
+	if VPChar[Index] <> ' ' then
+		SPCharAddSimbol(Result, VPChar[Index]);
+	Index += 1;
 	end;
 end;
 
 function SPCharUpCase(const VPChar : PSChar) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 Result := nil;
 if (VPChar <> nil) then
 	begin
-	I := SPCharLength(VPChar);
-	GetMem(Result, I + 1);
-	Result[I] := #0;
-	I := 0;
-	while VPChar[i] <> #0 do
+	Index := SPCharLength(VPChar);
+	GetMem(Result, Index + 1);
+	Result[Index] := #0;
+	Index := 0;
+	while VPChar[Index] <> #0 do
 		begin
-		Result[i] := UpCase(VPChar[i]);
-		I += 1;
+		Result[Index] := UpCase(VPChar[Index]);
+		Index += 1;
 		end;
 	end;
 end;
@@ -965,12 +1005,12 @@ function SPCharDecFromEnd(var VPChar : PSChar; const Number : TSUInt32 = 1) : PS
 var
 	NewVPChar : PSChar = nil;
 	LengthOld : TSInt32 = 0;
-	I : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 LengthOld := SPCharLength(VPChar);
 GetMem(NewVPChar, LengthOld - Number + 1);
-for I := 0 to LengthOld - Number-1 do
-	NewVPChar[i] := VPChar[i];
+for Index := 0 to LengthOld - Number-1 do
+	NewVPChar[Index] := VPChar[Index];
 NewVPChar[LengthOld - Number] := #0;
 VPChar := NewVPChar;
 Result := NewVPChar;
@@ -991,29 +1031,29 @@ end;
 
 function SPCharsEqual(const PChar1, PChar2 : PSChar) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	I : TSInt32 = 0;
+	Index : TSInt32 = 0;
 	VExit : TSBoolean = False;
 begin
 Result := True;
 if not ((PChar1 = nil) and (PChar2 = nil)) then
 	while Result and (not VExit) do
 		begin
-		if (PChar1 = nil) or (PChar2 = nil) or (PChar1[i] = #0) or (PChar2[i] = #0) then
+		if (PChar1 = nil) or (PChar2 = nil) or (PChar1[Index] = #0) or (PChar2[Index] = #0) then
 			VExit := True;
-		if  ((PChar1 = nil) and (PChar2 <> nil) and (PChar2[i] <> #0)) or
-			((PChar2 = nil) and (PChar1 <> nil) and (PChar1[i] <> #0)) then
+		if  ((PChar1 = nil) and (PChar2 <> nil) and (PChar2[Index] <> #0)) or
+			((PChar2 = nil) and (PChar1 <> nil) and (PChar1[Index] <> #0)) then
 				Result := False
 		else
 			if (PChar1 <> nil) and (PChar2 <> nil) and
-				(((PChar1[i] = #0) and (PChar2[i] <> #0)) or
-				 ((PChar2[i] = #0) and (PChar1[i] <> #0))) then
+				(((PChar1[Index] = #0) and (PChar2[Index] <> #0)) or
+				 ((PChar2[Index] = #0) and (PChar1[Index] <> #0))) then
 					Result := False
 			else
 				if (PChar1 <> nil) and (PChar2 <> nil) and
-					(PChar1[i] <> #0) and (PChar2[i] <> #0) and
-					(PChar1[i] <> PChar2[i]) then
+					(PChar1[Index] <> #0) and (PChar2[Index] <> #0) and
+					(PChar1[Index] <> PChar2[Index]) then
 						Result := False;
-		I += 1;
+		Index += 1;
 		end;
 end;
 
@@ -1021,7 +1061,7 @@ function SPCharAddSimbol(var VPChar : PSChar; const VChar : TSChar) : PSChar;{$I
 var
 	NewVPChar : PSChar = nil;
 	LengthOld : TSInt32 = 0;
-	I : TSInt32 = 0;
+	Index : TSInt32 = 0;
 begin
 if VPChar <> nil then
 	begin
@@ -1029,8 +1069,8 @@ if VPChar <> nil then
 		LengthOld += 1;
 	end;
 GetMem(NewVPChar, LengthOld + 2);
-for I := 0 to LengthOld - 1 do
-	NewVPChar[i] := VPChar[i];
+for Index := 0 to LengthOld - 1 do
+	NewVPChar[Index] := VPChar[Index];
 NewVPChar[LengthOld] := VChar;
 NewVPChar[LengthOld + 1] := #0;
 VPChar := NewVPChar;
