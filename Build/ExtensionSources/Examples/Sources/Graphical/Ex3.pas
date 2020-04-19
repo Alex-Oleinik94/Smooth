@@ -39,7 +39,7 @@ type
 
 class function TSExample3.ClassName():TSString;
 begin
-Result := 'Кубики и текстура шрифта вместе с камерой';
+Result := 'Три полупрозрачных куба и текстура шрифта';
 end;
 
 constructor TSExample3.Create(const VContext : ISContext);

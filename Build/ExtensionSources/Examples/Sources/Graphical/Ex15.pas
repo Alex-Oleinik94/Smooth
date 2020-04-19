@@ -143,7 +143,7 @@ end;
 
 class function TSExample15.ClassName():TSString;
 begin
-Result := 'Скелетная анимация + Shadow & Bump Mapping';
+Result := 'Скелетная анимация, Shadow and Bump Mapping';
 end;
 
 procedure mmmFP1ButtonProcedure(Button:TSScreenButton); begin TSExample15(Button.UserPointer).AddModels(1); end;

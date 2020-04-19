@@ -66,7 +66,7 @@ type
 
 class function TSExample5_4.ClassName():TSString;
 begin
-Result := 'Пример физического движка PAPPE';
+Result := 'Столкновения геометрических фигур (PAPPE)';
 end;
 
 constructor TSExample5_4.Create(const VContext : ISContext);
@@ -262,7 +262,7 @@ if FPhysics<>nil then
 	(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('0ms',
 		SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3,Render.Height-10-5/1.5-3),
 		SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5+3+(Screen as TSScreenComponent).Skin.Font.StringLength('0ms'),Render.Height-10-5/1.5-3+(Screen as TSScreenComponent).Skin.Font.FontHeight));
-	(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics Time',
+	(Screen as TSScreenComponent).Skin.Font.DrawFontFromTwoVertex2f('Physics time',
 		SVertex2fImport(5/1.5,Render.Height-30-5/1.5-10),
 		SVertex2fImport(10/1.5+FPhysicsTimeCount/1.5,Render.Height-30-5/1.5+(Screen as TSScreenComponent).Skin.Font.FontHeight-10));
 	end;

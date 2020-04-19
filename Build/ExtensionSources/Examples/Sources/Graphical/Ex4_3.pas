@@ -41,7 +41,7 @@ type
 
 class function TSExample4_3.ClassName():TSString;
 begin
-Result := 'Вывод индексированым массивом с VBO';
+Result := 'Куб (индексированый массив и VBO)';
 end;
 
 constructor TSExample4_3.Create(const VContext : ISContext);

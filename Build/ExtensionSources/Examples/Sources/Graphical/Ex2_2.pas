@@ -39,7 +39,7 @@ type
 
 class function TSExample2_2.ClassName():TSString;
 begin
-Result := 'Освещение';
+Result := 'Куб и источник света';
 end;
 
 constructor TSExample2_2.Create(const VContext : ISContext);

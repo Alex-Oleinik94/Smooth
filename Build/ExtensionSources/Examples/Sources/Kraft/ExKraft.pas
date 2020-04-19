@@ -271,7 +271,7 @@ end;
 
 class function TSKraftExamples.ClassName() : TSString;
 begin
-Result := 'Дэмо физического движка Kraft'; 
+Result := 'Пример физического движка Kraft'; 
 end;
 
 procedure TSKraftExamples.Paint();

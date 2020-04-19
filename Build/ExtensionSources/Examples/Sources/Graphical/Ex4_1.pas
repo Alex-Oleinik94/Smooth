@@ -40,7 +40,7 @@ type
 
 class function TSExample4_1.ClassName():TSString;
 begin
-Result := 'Вывод неиндексированым массивом с VBO';
+Result := 'Куб (неиндексированый массив и VBO)';
 end;
 
 constructor TSExample4_1.Create(const VContext : ISContext);

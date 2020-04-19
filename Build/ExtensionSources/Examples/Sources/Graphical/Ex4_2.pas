@@ -44,7 +44,7 @@ type
 
 class function TSExample4_2.ClassName():TSString;
 begin
-Result := 'Вывод неиндексированым массивом из оперативки';
+Result := 'Куб (неиндексированый массив)';
 end;
 
 constructor TSExample4_2.Create(const VContext : ISContext);

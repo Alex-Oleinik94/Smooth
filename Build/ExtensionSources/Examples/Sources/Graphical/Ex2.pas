@@ -35,7 +35,7 @@ type
 
 class function TSExample2.ClassName():TSString;
 begin
-Result := 'Крутящиеся треугольники';
+Result := 'Два разноцветных треугольника';
 end;
 
 constructor TSExample2.Create(const VContext : ISContext);
