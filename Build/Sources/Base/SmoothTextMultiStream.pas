@@ -22,7 +22,7 @@ type
 		FOutputs : TSTextStreamList;
 			public
 		procedure WriteLn(); override;
-		procedure Write(const StringToWrite : TSString); override;
+		procedure Write(const S : TSString); override;
 		procedure TextColor(const Color : TSUInt8); override;
 			public
 		procedure AddLog();
@@ -131,12 +131,12 @@ for TextStream in FOutputs do
 	TextStream.WriteLn();
 end;
 
-procedure TSTextMultiStream.Write(const StringToWrite : TSString);
+procedure TSTextMultiStream.Write(const S : TSString);
 var
 	TextStream : TSTextStream;
 begin
 for TextStream in FOutputs do
-	TextStream.Write(StringToWrite);
+	TextStream.Write(S);
 end;
 
 end.

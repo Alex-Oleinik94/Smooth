@@ -28,7 +28,7 @@ uses
 	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	
 	,Math
@@ -326,9 +326,9 @@ if Render.SupportedShaders() then
 		Screen, 'Models count: ' + SStr(FQuantityModels), Render.Width - 220,10 + (FFont.FontHeight+7) * 4,210,FFont.FontHeight+3,
 		FFont, [SAnchRight], True, True);
 	FHelpLabel := SCreateLabel(Screen,
-		'Press C to change camera mode;' + SWinEoln +
-		'Use WASD to move camera;' + SWinEoln +
-		'Use Mouse or QE to rotate camera;' + SWinEoln +
+		'Press C to change camera mode;' + DefaultEndOfLine +
+		'Use WASD to move camera;' + DefaultEndOfLine +
+		'Use Mouse or QE to rotate camera;' + DefaultEndOfLine +
 		'Use Space or X to move up or down.', 
 		Render.Width - 250, Render.Height - (FFont.FontHeight + 2) * 4 - 10, 240, (FFont.FontHeight + 2) * 4,
 		FFont, [SAnchRight, SAnchBottom], True, True);
@@ -599,6 +599,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample15, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample15, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

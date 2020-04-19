@@ -6,10 +6,10 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleShaderReadWrite                       (const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleShaderReadWrite                       (const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -22,10 +22,10 @@ uses
 	,SmoothShaderReader
 	;
 
-procedure SConsoleShaderReadWrite(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleShaderReadWrite(const VParams : TSConsoleHandlerParams = nil);
 var
 	i, ii : TSLongWord;
-	Params : TSConcoleCallerParams;
+	Params : TSConsoleHandlerParams;
 begin
 ii := 0;
 if (VParams <> nil) then

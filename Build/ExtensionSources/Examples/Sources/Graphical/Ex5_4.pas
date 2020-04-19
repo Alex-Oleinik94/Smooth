@@ -24,7 +24,7 @@ uses
 	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	
 	,Crt
@@ -174,9 +174,9 @@ FPhysics.AddLigth(SR_LIGHT0,SVertex3fImport(2,45,160));
 FFont := SCreateFontFromFile(Context, SDefaultFontFileName);
 
 FHelpLabel := SCreateLabel(Screen,
-	'Press C to change mouse mode;' + SWinEoln +
-	'Use WASD to move camera;' + SWinEoln +
-	'Use Mouse or QE to rotate camera;' + SWinEoln +
+	'Press C to change mouse mode;' + DefaultEndOfLine +
+	'Use WASD to move camera;' + DefaultEndOfLine +
+	'Use Mouse or QE to rotate camera;' + DefaultEndOfLine +
 	'Use Space or X to move up or down.', 
 	Render.Width - 250, Render.Height - (FFont.FontHeight + 2) * 4 - 10, 240, (FFont.FontHeight + 2) * 4,
 	FFont, [SAnchRight, SAnchBottom], True, True);
@@ -227,7 +227,7 @@ if (not FGravitationFlag) then
 if FPhysics<>nil then
 	begin
 	Render.InitMatrixMode(S_2D);
-	FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
+	FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMilliseconds();
 	FPhysicsTimeIndex+=1;
 	if FPhysicsTimeIndex=FPhysicsTimeCount then
 		FPhysicsTimeIndex:=0;
@@ -320,6 +320,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample5_4, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample5_4, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

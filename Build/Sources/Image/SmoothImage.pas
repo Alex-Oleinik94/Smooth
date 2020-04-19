@@ -31,8 +31,10 @@ type
 	// Класс изображения и текстуры
 	TSImage = class(TSContextObject)
 			public
-		constructor Create(const VFileName : TSString = '');
-		destructor Destroy();override;
+		constructor Create(const _Context : ISContext; const VFileName : TSString);
+		constructor Create(const VFileName : TSString);
+		constructor Create(); override;
+		destructor Destroy(); override;
 		class function ClassName() : TSString; override;
 		procedure DeleteRenderResources();override;
 		procedure LoadRenderResources();override;
@@ -99,7 +101,13 @@ type
 		procedure RePlacVertex(var Vertex1,Vertex2: TSVertex2f;const RePlaceY:TSByte = S_3D);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 	
-	TSImageList = packed array of TSImage;
+	{$DEFINE  INC_PLACE_INTERFACE}
+	{$DEFINE DATATYPE_LIST_HELPER := TSImageListHelper}
+	{$DEFINE DATATYPE_LIST        := TSImageList}
+	{$DEFINE DATATYPE             := TSImage}
+	{$INCLUDE SmoothCommonList.inc}
+	{$INCLUDE SmoothCommonListUndef.inc}
+	{$UNDEF   INC_PLACE_INTERFACE}
 
 type
 	TSTextureBlock = class(TSContextObject)
@@ -611,18 +619,37 @@ begin
 Result := 'TSImage';
 end;
 
-constructor TSImage.Create(const VFileName : TSString = '');
+constructor TSImage.Create(const _Context : ISContext; const VFileName : TSString);
+begin
+Create(VFileName);
+Context := _Context;
+end;
+
+constructor TSImage.Create();
 begin
 inherited Create();
 FTextureNumber := -1;
 FTextureType := SITextureTypeTexture;
 FTexture := 0;
 FLoadedIntoRAM := False;
-FFileName := VFileName;
 FBitMap := TSBitMap.Create();
 FName := '';
 FIsBitsFreeAfterTextureLoad := ImageIsBitsFreeAfterTextureLoad;
 end;
+
+constructor TSImage.Create(const VFileName : TSString);
+begin
+Create();
+FFileName := VFileName;
+end;
+
+{$DEFINE  INC_PLACE_IMPLEMENTATION}
+{$DEFINE DATATYPE_LIST_HELPER := TSImageListHelper}
+{$DEFINE DATATYPE_LIST        := TSImageList}
+{$DEFINE DATATYPE             := TSImage}
+{$INCLUDE SmoothCommonList.inc}
+{$INCLUDE SmoothCommonListUndef.inc}
+{$UNDEF   INC_PLACE_IMPLEMENTATION}
 
 initialization
 begin

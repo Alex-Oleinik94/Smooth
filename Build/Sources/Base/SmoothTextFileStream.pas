@@ -25,7 +25,7 @@ type
 		FEoln : TSString;
 		FEof : TSString;
 			public
-		procedure Write(const StringToWrite : TSString); override;
+		procedure Write(const S : TSString); override;
 		procedure WriteLn(); override;
 			public
 		property FileStream : TFileStream read FStream;
@@ -59,10 +59,10 @@ begin
 Write(FEoln);
 end;
 
-procedure TSTextFileStream.Write(const StringToWrite : TSString);
+procedure TSTextFileStream.Write(const S : TSString);
 begin
 FCriticalSection.Enter();
-SWriteStringToStream(SConvertString(StringToWrite, SEncodingWindows1251), FStream, False);
+SWriteStringToStream(SConvertString(S, SEncodingWindows1251), FStream, False);
 FCriticalSection.Leave();
 end;
 
@@ -99,8 +99,8 @@ inherited;
 FStream := nil;
 FCriticalSection := nil;
 FFileName := '';
-FEof := SEof;
-FEoln := SWinEoln;
+FEof := EndOfFile;
+FEoln := DefaultEndOfLine;
 end;
 
 end.

@@ -1,6 +1,6 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothConsoleProgramFindInSources;
+unit SmoothConsoleProgramSearchInSources;
 
 interface
 
@@ -8,14 +8,14 @@ uses
 	 SmoothBase
 	,SmoothLists
 	,SmoothBaseClasses
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	,SmoothDateTime
 	
 	,Classes
 	;
 
 type
-	TSFinderInSources = class(TSObject)
+	TSSearchInSources = class(TSObject)
 			public
 		constructor Create(); override;
 		destructor Destroy(); override;
@@ -28,9 +28,9 @@ type
 		FFileList : packed array of TFileStream;
 			private
 		FOutDirectory : TSString;
-		FFoundedMatches : TSUInt64;
-		FSearchedFolders : TSUInt64;
-		FSearchedFiles : TSUInt64;
+		FNumberOfFoundedConformities : TSUInt64;
+		FNumberOfSearchedFolders : TSUInt64;
+		FNumberOfSearchedFiles : TSUInt64;
 			private
 		FWhereYOnBegin : TSUInt16;
 		FDateTimeStart : TSDateTime;
@@ -39,7 +39,7 @@ type
 		FUpdateInterval : TSUInt64;
 			private
 		procedure InitFileExtensions();
-		function PreccessParams(const VParams : TSConcoleCallerParams = nil) : TSBoolean;
+		function PreccessParams(const VParams : TSConsoleHandlerParams = nil) : TSBoolean;
 		function WordsLength() : TSMaxEnum;
 		procedure Searching();
 		procedure ScaningWords();
@@ -51,12 +51,12 @@ type
 		procedure SearchingInFile(const FileName : TSString);
 		procedure SearchingDirectoriesInDirectory(const Directory : TSString);
 		procedure PrintProgress(const TimeCase : TSBool = True);
-		procedure AddMatchesToResults(const FileName : TSString; const NumLineMatches : TSUInt64; const CurentLine : TSUInt64);
+		procedure AddConformitiesToResults(const FileName : TSString; const NumberOfConformitiesInLine : TSUInt64; const CurrentLine : TSUInt64);
 			public
-		procedure Search(const VParams : TSConcoleCallerParams = nil);
+		procedure Search(const VParams : TSConsoleHandlerParams = nil);
 		end;
 
-procedure SConsoleFindInSources(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleSearchInSources(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -72,13 +72,9 @@ uses
 	,StrMan
 	;
 
-//===================================
-//==========GENERAL=FUNCTION=========
-//===================================
-
-procedure SConsoleFindInSources(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleSearchInSources(const VParams : TSConsoleHandlerParams = nil);
 begin
-with TSFinderInSources.Create() do
+with TSSearchInSources.Create() do
 	begin
 	Search(VParams);
 	Destroy();
@@ -86,46 +82,40 @@ with TSFinderInSources.Create() do
 end;
 
 //=====================================
-//==========TSFinderInSources=========
+//==========TSSearchInSources=========
 //=====================================
 
-procedure TSFinderInSources.AddMatchesToResults(const FileName : TSString; const NumLineMatches : TSUInt64; const CurentLine : TSUInt64);
+procedure TSSearchInSources.AddConformitiesToResults(const FileName : TSString; const NumberOfConformitiesInLine : TSUInt64; const CurrentLine : TSUInt64);
 var
 	OldResultsLength : TSMaxEnum;
 	i : TSMaxEnum;
 	Quote : TSString;
 begin
-if NumLineMatches <= 0 then
+if NumberOfConformitiesInLine <= 0 then
 	exit;
 if FFileList = nil then
 	OldResultsLength := 0
 else
 	OldResultsLength := Length(FFileList);
-if NumLineMatches > OldResultsLength then
+if NumberOfConformitiesInLine > OldResultsLength then
 	begin
-	SetLength(FFileList, NumLineMatches);
-	for i := OldResultsLength to NumLineMatches - 1 do
+	SetLength(FFileList, NumberOfConformitiesInLine);
+	for i := OldResultsLength to NumberOfConformitiesInLine - 1 do
 		FFileList[i] := nil;
-	if FFileList[NumLineMatches - 1] = nil then
-		FFileList[NumLineMatches - 1] := 
-			TFileStream.Create(
-				FOutDirectory + 
-				DirectorySeparator + 
-				'Results of ' + 
-				SStr(NumLineMatches) + 
-				' matches.txt', fmCreate);
+	if FFileList[NumberOfConformitiesInLine - 1] = nil then
+		FFileList[NumberOfConformitiesInLine - 1] := TFileStream.Create(SStr([FOutDirectory, DirectorySeparator, 'Results of ', NumberOfConformitiesInLine, ' conformities.txt']), fmCreate);
 	end;
 if FWithQuotes then
 	Quote := '"'
 else
 	Quote := '';
-SWriteStringToStream(Quote + FileName + Quote + ' : ' + Quote + SStr(CurentLine) + Quote + SWinEoln, FFileList[NumLineMatches - 1], False);
+SWriteStringToStream(Quote + FileName + Quote + ' : ' + Quote + SStr(CurrentLine) + Quote + DefaultEndOfLine, FFileList[NumberOfConformitiesInLine - 1], False);
 end;
 
-procedure TSFinderInSources.SearchingInFile(const FileName : TSString);
+procedure TSSearchInSources.SearchingInFile(const FileName : TSString);
 var
-	NumLineMatches : TSUInt64;
-	CurentLine : TSUInt64;
+	NumberOfConformitiesInLine : TSUInt64;
+	CurrentLine : TSUInt64;
 	SearchFile : TextFile;
 	TempString : TSString;
 	Index : TSMaxEnum;
@@ -140,23 +130,23 @@ except
 end;
 if (FileOpen) then
 	begin
-	TSLog.Source('Searching in file "' + FileName + '".');
-	FSearchedFiles += 1;
+	TSLog.Source('Search in file "' + FileName + '".');
+	FNumberOfSearchedFiles += 1;
 	
-	CurentLine := 0;
+	CurrentLine := 0;
 	while not Eof(SearchFile) do
 		begin
-		CurentLine += 1;
+		CurrentLine += 1;
 		ReadLn(SearchFile, TempString);
 		TempString := SUpCaseString(TempString);
-		NumLineMatches := 0;
+		NumberOfConformitiesInLine := 0;
 		for Index := 0 to High(FWords) do
 			if Pos(FWords[Index], TempString) <> 0 then
-				NumLineMatches += 1;
-		if NumLineMatches > 0 then
+				NumberOfConformitiesInLine += 1;
+		if NumberOfConformitiesInLine > 0 then
 			begin
-			FFoundedMatches += NumLineMatches;
-			AddMatchesToResults(FileName, NumLineMatches, CurentLine);
+			FNumberOfFoundedConformities += NumberOfConformitiesInLine;
+			AddConformitiesToResults(FileName, NumberOfConformitiesInLine, CurrentLine);
 			end;
 		end;
 	Close(SearchFile);
@@ -166,7 +156,7 @@ if (FileOpen) then
 	end;
 end;
 
-procedure TSFinderInSources.PrintProgress(const TimeCase : TSBool = True);
+procedure TSSearchInSources.PrintProgress(const TimeCase : TSBool = True);
 var
 	FDateTimeNow : TSDateTime;
 begin
@@ -175,7 +165,7 @@ if (TimeCase) then
 	if FUpdateInterval > 0 then
 		begin
 		FDateTimeNow.Get();
-		if (FDateTimeNow - FDateTimeLastProgress).GetPastMiliSeconds() >= FUpdateInterval then
+		if (FDateTimeNow - FDateTimeLastProgress).GetPastMilliseconds() >= FUpdateInterval then
 			FDateTimeLastProgress := FDateTimeNow
 		else
 			exit;
@@ -186,20 +176,20 @@ if (TimeCase) then
 TextColor(15);
 Write('Finded ');
 TextColor(10);
-Write(FFoundedMatches);
+Write(FNumberOfFoundedConformities);
 TextColor(15);
-Write(' matches. Processed ');
+Write(' conformities. Processed ');
 TextColor(10);
-Write(FSearchedFiles);
+Write(FNumberOfSearchedFiles);
 TextColor(15);
 Write(' files in ');
 TextColor(14);
-Write(FSearchedFolders);
+Write(FNumberOfSearchedFolders);
 TextColor(15);
-WriteLn(' directories...');
+WriteLn(' directories.');
 end;
 
-procedure TSFinderInSources.SearchingFilesInDirectory(const Directory : TSString);
+procedure TSSearchInSources.SearchingFilesInDirectory(const Directory : TSString);
 var
 	SearchRec : Dos.SearchRec;
 	i : TSMaxEnum;
@@ -216,7 +206,7 @@ for i := 0 to High(FFileExtensions) do
 	end;
 end;
 
-procedure TSFinderInSources.SearchingDirectoriesInDirectory(const Directory : TSString);
+procedure TSSearchInSources.SearchingDirectoriesInDirectory(const Directory : TSString);
 var
 	SearchRec : Dos.SearchRec;
 begin
@@ -231,14 +221,14 @@ while DosError <> 18 do
 Dos.FindClose(SearchRec);
 end;
 
-procedure TSFinderInSources.SearchingInDirectory(const Directory : TSString);
+procedure TSSearchInSources.SearchingInDirectory(const Directory : TSString);
 begin
-FSearchedFolders += 1;
+FNumberOfSearchedFolders += 1;
 SearchingFilesInDirectory(Directory + DirectorySeparator);
 SearchingDirectoriesInDirectory(Directory);
 end;
 
-procedure TSFinderInSources.DestroyFiles();
+procedure TSSearchInSources.DestroyFiles();
 var
 	i : TSMaxEnum;
 begin
@@ -254,11 +244,11 @@ if (FFileList <> nil) and (Length(FFileList) > 0) then
 	end;
 end;
 
-procedure TSFinderInSources.Searching();
+procedure TSSearchInSources.Searching();
 begin
 ScaningWords();
 ClearSearchData();
-FOutDirectory := SFreeDirectoryName('Find In Sources Results', 'Part');
+FOutDirectory := SFreeDirectoryName('Search in sources results', '');
 SMakeDirectory(FOutDirectory);
 
 if (FSearchingDirectory = '') then
@@ -270,7 +260,7 @@ TextColor(14);
 Write(FOutDirectory);
 TextColor(15);
 WriteLn('".');
-WriteLn('Find was begining... Psess any key to stop him...');
+WriteLn('Search was begins. Press any key to stop.');
 
 FWhereYOnBegin := WhereY();
 
@@ -283,7 +273,7 @@ PrintProgress();
 DestroyFiles();
 
 TextColor(15);
-Write('Searching done at ');
+Write('The search lasted ');
 TextColor(10);
 Write(STextTimeBetweenDates(FDateTimeStart, FDateTimeEnd, 'ENG'));
 TextColor(15);
@@ -291,12 +281,12 @@ WriteLn('.');
 
 PrintProgress(False);
 
-if FFoundedMatches = 0 then
+if FNumberOfFoundedConformities = 0 then
 	begin
 	if SStringListLength(FWords) > 0 then
 		begin
 		TextColor(12);
-		WriteLn('Matches don''t exists...');
+		WriteLn('No ñonformities found.');
 		TextColor(15);
 		end;
 	if SExistsDirectory(FOutDirectory) then
@@ -313,14 +303,14 @@ if FFoundedMatches = 0 then
 TextColor(7);
 end;
 
-procedure TSFinderInSources.Search(const VParams : TSConcoleCallerParams = nil);
+procedure TSSearchInSources.Search(const VParams : TSConsoleHandlerParams = nil);
 begin
 if PreccessParams(VParams) then
 	if WordsLength() = 0 then
 		begin
 		SPrintEngineVersion();
 		TextColor(12);
-		WriteLn('Nothing to find!');
+		WriteLn('Words for search don''t set; use command "--word*?" for set word for search.');
 		TextColor(15);
 		end
 	else
@@ -328,7 +318,7 @@ if PreccessParams(VParams) then
 TextColor(7);
 end;
 
-procedure TSFinderInSources.ScaningWords();
+procedure TSSearchInSources.ScaningWords();
 var
 	i : TSMaxEnum;
 	TempWord : TSString;
@@ -345,7 +335,7 @@ while (i <= High(FWords)) do
 	end;
 end;
 
-function TSFinderInSources.WordsLength() : TSMaxEnum;
+function TSSearchInSources.WordsLength() : TSMaxEnum;
 begin
 if FWords = nil then
 	Result := 0
@@ -353,7 +343,7 @@ else
 	Result := Length(FWords);
 end;
 
-function TSFinderInSources.PreccessParams(const VParams : TSConcoleCallerParams = nil) : TSBoolean;
+function TSSearchInSources.PreccessParams(const VParams : TSConsoleHandlerParams = nil) : TSBoolean;
 var
 	ContinueExecuting : TSBoolean = True;
 
@@ -376,7 +366,7 @@ FSearchingDirectory := TempSearchingDirectory;
 
 SPrintEngineVersion();
 TextColor(15);
-Write('Selected searching directory "');
+Write('Set search directory "');
 TextColor(14);
 Write(FSearchingDirectory);
 TextColor(15);
@@ -414,7 +404,7 @@ begin
 Result := True;
 SPrintEngineVersion();
 TextColor(15);
-Write('Finded extensions:');
+Write('Extensions:');
 TextColor(14);
 Write('{');
 for i := 0 to High(FFileExtensions) do
@@ -431,7 +421,7 @@ TextColor(15);
 ContinueExecuting := False;
 end;
 
-function ProccessRealTimeMiliSec(const Comand : TSString):TSBool;
+function ProccessRealTimeMS(const Comand : TSString):TSBool;
 var
 	TempString : TSString;
 	i : TSMaxEnum;
@@ -448,13 +438,13 @@ if Result then
 	FUpdateInterval := TempUpdateInterval;
 	
 	TextColor(15);
-	Write('Updating interval: ');
+	Write('Update interval: ');
 	TextColor(10);
 	Write(FUpdateInterval);
 	TextColor(15);
 	Write(' = ');
 	TextColor(10);
-	Write(SMiliSecondsToStringTime(FUpdateInterval, 'ENG'));
+	Write(SMilliSecondsToStringTime(FUpdateInterval, 'ENG'));
 	TextColor(15);
 	WriteLn('.');
 	end;
@@ -499,16 +489,16 @@ begin
 Result := True;
 TextColor(15);
 if (VParams <> nil) and (Length(VParams) > 0) then
-	with TSConsoleCaller.Create(VParams) do
+	with TSConsoleHandler.Create(VParams) do
 		begin
-		Category('Find in Sources help');
-		AddComand(@ProccessChangeSearchingDirectory, ['fd*?'],  'for change searching directory');
-		AddComand(@ProccessViewExtensions, ['viewext'], 'for view file extension for find');
-		AddComand(@ProccessAddExtension, ['addext*?'], 'for add file extension for find');
-		AddComand(@ProccessNewWord, ['word*?'], 'for add word for searching');
-		AddComand(@ProccessWithQuotes, ['wq'], 'for out to results files with quotes');
-		AddComand(@ProccessRealTimeMiliSec, ['rt*?'], 'for print realtime statistics data one at $num milisec');
-		AddComand(@ProccessRealTime, ['rt'], 'for print realtime statistics data (update when directory was allmost searched)');
+		Category('Search in sources help');
+		AddComand(@ProccessChangeSearchingDirectory, ['fd*?'],  'Set searching directory');
+		AddComand(@ProccessViewExtensions, ['viewext'], 'View file extension for search');
+		AddComand(@ProccessAddExtension, ['addext*?'], 'Add file extension for search');
+		AddComand(@ProccessNewWord, ['word*?'], 'Add word for search');
+		AddComand(@ProccessWithQuotes, ['wq'], 'Write to search result file filenames with quotes');
+		AddComand(@ProccessRealTimeMS, ['rt*?'], 'Set update interval (ms) for print real time statistic');
+		AddComand(@ProccessRealTime, ['rt'], 'Print real time statistic (update when search in directory was done)');
 		Result := Execute();
 		Result := Result and ContinueExecuting;
 		Destroy();
@@ -516,7 +506,7 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 TextColor(7);
 end;
 
-procedure TSFinderInSources.InitFileExtensions();
+procedure TSSearchInSources.InitFileExtensions();
 begin
 SetLength(FFileExtensions, 0);
 FFileExtensions += 'pas';
@@ -535,7 +525,7 @@ FFileExtensions += 'sh';
 FFileExtensions += 'lua';
 end;
 
-constructor TSFinderInSources.Create();
+constructor TSSearchInSources.Create();
 begin
 inherited Create();
 InitFileExtensions();
@@ -548,15 +538,15 @@ FWithQuotes := False;
 FUpdateInterval := 0;
 end;
 
-procedure TSFinderInSources.ClearSearchData();
+procedure TSSearchInSources.ClearSearchData();
 begin
-FFoundedMatches := 0;
-FSearchedFolders := 0;
+FNumberOfFoundedConformities := 0;
+FNumberOfSearchedFolders := 0;
 FWhereYOnBegin := 0;
-FSearchedFiles := 0;
+FNumberOfSearchedFiles := 0;
 end;
 
-destructor TSFinderInSources.Destroy();
+destructor TSSearchInSources.Destroy();
 begin
 DestroyFiles();
 SetLength(FFileExtensions, 0);

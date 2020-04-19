@@ -6,10 +6,10 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleHash(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleHash(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -24,7 +24,7 @@ uses
 	,SmoothFileUtils
 	;
 
-procedure SConsoleHash(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleHash(const VParams : TSConsoleHandlerParams = nil);
 
 procedure PrintHashHelp(const Str : TSString = SConsoleErrorString);
 begin

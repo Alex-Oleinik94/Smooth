@@ -81,7 +81,7 @@ type
 		procedure DumpPacketFiles(const Time : TSTime; const Date : TSDateTime; const Packet : TSEthernetPacketFrame; const InfoFileName, DataFileName : TSString);
 		procedure DumpPacketInfoFile(const Time : TSTime; const Date : TSDateTime; const Packet : TSEthernetPacketFrame; const InfoFileName : TSString);
 		procedure DumpPacketDataFile(const Time : TSTime; const Date : TSDateTime; const Packet : TSEthernetPacketFrame; const DataFileName : TSString);
-		function AddressMatchesNetMask(const AddressValue : TSIPv4Address) : TSBoolean;
+		function AddressCorrespondsToNetMask(const AddressValue : TSIPv4Address) : TSBoolean;
 		function MinimumOneModeEnabled() : TSBoolean;
 		function MinimumOneDataModeEnabled() : TSBoolean;
 		function Finalized() : TSBoolean; virtual;
@@ -165,7 +165,7 @@ begin
 Result := FModeDataTransfer or FModePacketStorage or FModeRuntimeDataDumper or FModeRuntimePacketDumper;
 end;
 
-function TSInternetConnection.AddressMatchesNetMask(const AddressValue : TSIPv4Address) : TSBoolean;
+function TSInternetConnection.AddressCorrespondsToNetMask(const AddressValue : TSIPv4Address) : TSBoolean;
 begin
 Result := False;
 if FDeviceIPv4Supported then
@@ -179,7 +179,7 @@ begin
 TextStream := TSTextFileStream.Create(InfoFileName);
 TextStream.WriteLn('[packet]');
 TextStream.WriteLn(['DataTime = ', SDateTimeCorrectionString(Date, Time, False)]);
-TextStream.WriteLn(['Size     = ', SGetSizeString(Packet.Size, 'EN')]);
+TextStream.WriteLn(['Size     = ', SMemorySizeToString(Packet.Size, 'EN')]);
 TextStream.WriteLn();
 Packet.ExportInfo(TextStream);
 SKill(TextStream);
@@ -315,7 +315,7 @@ begin
 Result := False;
 if (FConnectionDumpDirectory <> '') and (FDataSize > 0) then
 	begin
-	NewConnectionDumpDirectory := FConnectionDumpDirectory + ' [' + SStr(FPacketCount) + ', ' + SGetSizeString(FDataSize, 'EN') + ']';
+	NewConnectionDumpDirectory := FConnectionDumpDirectory + ' [' + SStr(FPacketCount) + ', ' + SMemorySizeToString(FDataSize, 'EN') + ']';
 	SRenameFile(FConnectionDumpDirectory, NewConnectionDumpDirectory);
 	FConnectionDumpDirectory := NewConnectionDumpDirectory;
 	Result := True;

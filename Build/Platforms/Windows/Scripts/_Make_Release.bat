@@ -14,5 +14,5 @@ rm ./../Binaries/Main_Compressed.exe
 copy ".\..\Binaries\Main.exe" ".\..\Binaries\Main_Release.exe"
 "./Platforms/Windows/Utility/upx.exe" -9 -o ./../Binaries/Main_Compressed.exe ./../Binaries/Main.exe
 cd Scripts
-if "%2"=="" ( CALL _Check_Console )
+if "%2"=="" ( CALL _Copy_console_application.bat )
 if "%1"=="" ( pause )

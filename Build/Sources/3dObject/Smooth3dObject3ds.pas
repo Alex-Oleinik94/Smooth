@@ -522,7 +522,7 @@ if FModel.QuantityObjects > 0 then
 		'TS3dObject3DSLoader__ComputeNormals : End (' +
 		SSecondsToStringTime((DT2-DT).GetPastSeconds) +
 		' ' + 
-		SStr((DT2-DT).GetPastMiliSeconds div 100) + 
+		SStr((DT2-DT).GetPastMilliseconds div 100) + 
 		' милисек)');
 	end;
 end;

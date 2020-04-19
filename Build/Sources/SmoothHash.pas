@@ -514,7 +514,7 @@ var
 
 procedure WriteLnString(const S : TSString);
 begin
-SWriteStringToStream(S + SWinEoln, OutStream, False);
+SWriteStringToStream(S + DefaultEndOfLine, OutStream, False);
 end;
 
 begin
@@ -551,31 +551,31 @@ if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			if Files[i].FResult = 1 then
-				WriteLnString('		"' + Files[i].FName + '", ' + SGetSizeString(Files[i].FSize, 'EN'));
+				WriteLnString('		"' + Files[i].FName + '", ' + SMemorySizeToString(Files[i].FSize, 'EN'));
 WriteLnString('	Not equal('+SStr(CountNonEqual)+'):');
 if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			if (Files[i].FResult = 0) then
-				WriteLnString('		"' + Files[i].FName + '", ' + SGetSizeString(Files[i].FSize, 'EN') + ', ' + SGetSizeString(Files[i].FSize2, 'EN'));
+				WriteLnString('		"' + Files[i].FName + '", ' + SMemorySizeToString(Files[i].FSize, 'EN') + ', ' + SMemorySizeToString(Files[i].FSize2, 'EN'));
 WriteLnString('	Unknown('+SStr(CountUnknown)+'):');
 if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			if (Files[i].FResult = 2) then
-				WriteLnString('		"' + Files[i].FName + '", ' + SGetSizeString(Files[i].FSize, 'EN'));
+				WriteLnString('		"' + Files[i].FName + '", ' + SMemorySizeToString(Files[i].FSize, 'EN'));
 WriteLnString('	Exist in first('+SStr(CountExist1)+'):');
 if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			if (Files[i].FIndex2 = -1) then
-				WriteLnString('		"' + Files[i].FName + '", ' + SGetSizeString(Files[i].FSize, 'EN'));
+				WriteLnString('		"' + Files[i].FName + '", ' + SMemorySizeToString(Files[i].FSize, 'EN'));
 WriteLnString('	Exist in second('+SStr(CountExist2)+'):');
 if Files <> nil then
 	if Length(FIles) > 0 then
 		for i := 0 to High(Files) do
 			if (Files[i].FIndex1 = -1) then
-				WriteLnString('		"' + Files[i].FName + '", ' + SGetSizeString(Files[i].FSize, 'EN'));
+				WriteLnString('		"' + Files[i].FName + '", ' + SMemorySizeToString(Files[i].FSize, 'EN'));
 OutStream.Destroy();
 SHint('Results saved "' + OutFIleName + '"');
 end;
@@ -712,7 +712,7 @@ if FileList <> nil then
 if i <> 0 then
 	begin
 	OutStream := TFileStream.Create(ResultFile, fmCreate);
-	SHint('Finded ' + SStr(i) + ' files, ' + SGetSizeString(AllSize, 'EN') + ' size, ' + SMiliSecondsToStringTime((DT2 - DT1).GetPastMiliSeconds(), 'ENG') + '.');
+	SHint('Finded ' + SStr(i) + ' files, ' + SMemorySizeToString(AllSize, 'EN') + ' size, ' + SMillisecondsToStringTime((DT2 - DT1).GetPastMilliseconds(), 'ENG') + '.');
 	SHint('Hashing...');
 	DT1.Get();
 	if FileList <> nil then
@@ -720,13 +720,13 @@ if i <> 0 then
 			begin
 			for i := 0 to High(FileList) do
 				begin
-				SHint('Hashing "' + FileList[i].FPath + '", ' + SGetSizeString(FileList[i].FSize, 'EN') + '...');
+				SHint('Hashing "' + FileList[i].FPath + '", ' + SMemorySizeToString(FileList[i].FSize, 'EN') + '...');
 				PutFile(OutStream, FileList[i].FPath, FileList[i].FSize);
 				end;
 			SetLength(FileList, 0);
 			end;
 	DT2.Get();
-	SHint('Hashing done at ' + SMiliSecondsToStringTime((DT2 - DT1).GetPastMiliSeconds(), 'ENG') + '.');
+	SHint('Hashing done at ' + SMillisecondsToStringTime((DT2 - DT1).GetPastMilliseconds(), 'ENG') + '.');
 	SHint('Results saved to "' + ResultFile + '".');
 	OutStream.Destroy();
 	end
@@ -764,7 +764,7 @@ OutString += DefSpaceString + ': ';
 dt1.Get();
 OutString += SHash(Stream, VType);
 dt2.Get();
-OutString += ' : ' + SMiliSecondsToStringTime((dt2 - dt1).GetPastMiliSeconds(), 'ENG');
+OutString += ' : ' + SMillisecondsToStringTime((dt2 - dt1).GetPastMilliseconds(), 'ENG');
 SHint(OutString);
 end;
 

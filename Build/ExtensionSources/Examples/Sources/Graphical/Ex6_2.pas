@@ -25,7 +25,7 @@ uses
 	,SmoothContextUtils
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	;
 type
@@ -225,6 +225,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample6_2, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample6_2, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

@@ -21,9 +21,9 @@ type
 	TSAudioFileOpener = class(TSFileOpener)
 			public
 		class function ClassName() : TSString; override;
-		class function GetExpansions() : TSStringList; override;
+		class function GetExtensions() : TSStringList; override;
 		class procedure Execute(const VFiles : TSStringList);override;
-		class function ExpansionsSupported(const VExpansions : TSStringList) : TSBool; override;
+		class function ExtensionsSupported(const VExtensions : TSStringList) : TSBool; override;
 		end;
 
 implementation
@@ -45,7 +45,7 @@ procedure ConsolePlayFile(const FileName : TSString);
 var
 	AudioRender : TSAudioRender = nil;
 	BufferedSource : TSAudioBufferedSource = nil;
-	FileExpansion : TSString = '';
+	FileExtension : TSString = '';
 
 var
 	ConsAll, ConsWr : TSUInt32;
@@ -79,7 +79,7 @@ end;
 
 begin
 SHint('Playing "' + FileName + '".');
-FileExpansion := SFileExpansion(FileName);
+FileExtension := SFileExtension(FileName);
 if TSCompatibleAudioRender = nil then
 	begin
 	SHint('Error! No audio renders suppored!');
@@ -94,14 +94,14 @@ if BufferedSource = nil then
 	AudioRender.Destroy();
 	exit;
 	end;
-if TSCompatibleAudioDecoder(FileExpansion) = nil then
+if TSCompatibleAudioDecoder(FileExtension) = nil then
 	begin
-	SHint('Error! No audio decoders suppored for ''' + FileExpansion + '''!');
+	SHint('Error! No audio decoders suppored for ''' + FileExtension + '''!');
 	BufferedSource.Destroy();
 	AudioRender.Destroy();
 	exit;
 	end;
-BufferedSource.Attach(TSCompatibleAudioDecoder(FileExpansion).Create().SetInput(FileName));
+BufferedSource.Attach(TSCompatibleAudioDecoder(FileExtension).Create().SetInput(FileName));
 BufferedSource.Play();
 BufferedSource.Relative := True;
 
@@ -119,12 +119,12 @@ BufferedSource.Destroy();
 AudioRender.Destroy();
 end;
 
-class function TSAudioFileOpener.ExpansionsSupported(const VExpansions : TSStringList) : TSBool;
+class function TSAudioFileOpener.ExtensionsSupported(const VExtensions : TSStringList) : TSBool;
 var
 	S : TSString;
 begin
 Result := True;
-for S in VExpansions do
+for S in VExtensions do
 	if TSCompatibleAudioDecoder(S) = nil then
 		begin
 		Result := False;
@@ -151,7 +151,7 @@ begin
 Result := 'TSAudioFileOpener';
 end;
 
-class function TSAudioFileOpener.GetExpansions() : TSStringList;
+class function TSAudioFileOpener.GetExtensions() : TSStringList;
 begin
 Result := nil;
 if TSCompatibleAudioRender <> nil then

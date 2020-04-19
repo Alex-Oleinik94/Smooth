@@ -250,7 +250,7 @@ SHint([PredStr,' Height   = ',FHeight], CasesOfPrint);
 SHint([PredStr,' Channels = ',FChannels], CasesOfPrint);
 SHint([PredStr,' ChannelSize = ',FChannelSize], CasesOfPrint);
 TextColor(15);
-SHint([PredStr,' Size     = ',SGetSizeString(DataSize(),'EN')], CasesOfPrint);
+SHint([PredStr,' Size     = ',SMemorySizeToString(DataSize(),'EN')], CasesOfPrint);
 TextColor(7);
 end;
 

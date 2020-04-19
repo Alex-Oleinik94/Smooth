@@ -29,8 +29,8 @@ type
 		packed array of
 			TSKillerArrayType;
 const
-	SKillerStringWin = 'Ты выиграл!!!';
-	SKillerStringLose = 'Ты проиграл...';
+	SKillerStringWin = 'Ты выиграл';
+	SKillerStringLose = 'Ты проиграл';
 type
 	TSKiller=class(TSPaintableObject)
 			public
@@ -1019,7 +1019,7 @@ if FActive then
 	
 	FDT.Get;
 	FTimer2:=FDT;
-	FDTInterval:=(FDT-FDataTime).GetPastMiliSeconds;
+	FDTInterval:=(FDT-FDataTime).GetPastMilliseconds;
 	if FDTInterval>FInterval then
 		begin
 		GoZombies;
@@ -1031,7 +1031,7 @@ if FActive then
 	FBulletDataTime1.Get;
 	if Length(FBullets)>0 then
 		begin
-		ii:=(FBulletDataTime1-FBulletDataTime2).GetPastMiliSeconds;
+		ii:=(FBulletDataTime1-FBulletDataTime2).GetPastMilliseconds;
 		for i:=0 to High(FBullets) do
 			FBullets[i][0]+=FBullets[i][1]*ii/17;
 		

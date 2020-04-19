@@ -374,7 +374,7 @@ var
 	i:LongInt = 0;
 	ii:LongInt = 0;
 begin
-if SFileExpansion(FFileName)='SF' then
+if SFileExtension(FFileName)='SF' then
 	begin
 	Result := LoadSF();
 	Exit;

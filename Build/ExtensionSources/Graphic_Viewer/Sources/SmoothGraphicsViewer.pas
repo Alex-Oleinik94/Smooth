@@ -5,10 +5,10 @@ unit SmoothGraphicsViewer;
 interface
 
 uses 
-	 SmoothConsoleCaller
+	 SmoothConsoleHandler
 	;
 
-procedure SConsoleViewGraphic(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleViewGraphic(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -21,9 +21,9 @@ uses
 	,SmoothGraphicViewer3D
 	;
 
-procedure SConsoleViewGraphic(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleViewGraphic(const VParams : TSConsoleHandlerParams = nil);
 begin
-SHint('Todo...');
+SHint('Todo.');
 end;
 
 initialization
@@ -34,7 +34,7 @@ begin
 	//Add(TSGraphViewer3D);
 *)
 SRegisterDrawClass(TSGraphViewer);
-SOtherConsoleCaller.AddComand('Math tools', @SConsoleViewGraphic, ['vg'], 'View graphic');
+SConsoleToolsConsoleHandler.AddComand('Math tools', @SConsoleViewGraphic, ['vg'], 'View graphic');
 end;
 
 END.

@@ -490,7 +490,7 @@ LoadRenderResources();
 	WriteLn('TSContext__ReinitializeRender() : End');
 	{$ENDIF}
 DT2.Get();
-SLog.Source('TSContext__ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SStr((DT2 - DT1).GetPastMiliSeconds() mod 100) + ' ms.');
+SLog.Source('TSContext__ReinitializeRender : ' + OldRenderClassName + ' --> ' + FRender.ClassName() +' : Remaning ' + SSecondsToStringTime((DT2 - DT1).GetPastSeconds(), 'ENG') + SStr((DT2 - DT1).GetPastMilliseconds() mod 100) + ' ms.');
 end;
 
 procedure TSContext.SwapBuffers();
@@ -676,7 +676,7 @@ begin
 if (not FElapsedDateTime.IsNull()) then
 	begin
 	DateTime.Get();
-	FElapsedTime := (DateTime - FElapsedDateTime).GetPastMiliSeconds();
+	FElapsedTime := (DateTime - FElapsedDateTime).GetPastMilliseconds();
 	FElapsedDateTime := DateTime;
 	end
 else

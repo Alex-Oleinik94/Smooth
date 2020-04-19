@@ -1,6 +1,6 @@
 {$INCLUDE Smooth.inc}
 
-unit SmoothConsoleCaller;
+unit SmoothConsoleHandler;
 
 interface
 
@@ -10,66 +10,66 @@ uses
 	;
 
 const
-	SConsoleErrorString = 'Error of parameters. Use ';
-	SConcoleCallerHelpParams = ' --help, --h, --?';
-	SConcoleCallerUnknownCategory = '--unknown--';
+	SConsoleErrorString = 'Parameters error. Use ';
+	SConsoleHandlerHelpParams = ' --help, --h, --?';
+	SConsoleHandlerUnknownCategory = '--unknown--';
 
 type
-	TSConcoleCallerParams = TSStringList;
-	TSConcoleCallerProcedure = procedure (const VParams : TSConcoleCallerParams = nil);
-	TSConcoleCallerNestedHelpFunction = function () : TSString is nested;
-	TSConcoleCallerNestedProcedure = function (const VParam : TSString) : TSBool is nested;
-	TSConsoleCallerComand = object
+	TSConsoleHandlerParams = TSStringList;
+	TSConsoleHandlerProcedure = procedure (const VParams : TSConsoleHandlerParams = nil);
+	TSConsoleHandlerNestedHelpFunction = function () : TSString is nested;
+	TSConsoleHandlerNestedProcedure = function (const VParam : TSString) : TSBool is nested;
+	TSConsoleHandlerComand = object
 			public
-		FComand             : TSConcoleCallerProcedure;
-		FNestedComand       : TSConcoleCallerNestedProcedure;
-		FNestedHelpFunction : TSConcoleCallerNestedHelpFunction;
-		FSyntax             : TSConcoleCallerParams;
+		FComand             : TSConsoleHandlerProcedure;
+		FNestedComand       : TSConsoleHandlerNestedProcedure;
+		FNestedHelpFunction : TSConsoleHandlerNestedHelpFunction;
+		FSyntax             : TSConsoleHandlerParams;
 		FHelpString         : TSString;
 		FCategory           : TSString;
 			public
 		procedure Free();
 		function HelpString() : TSString;
 		end;
-	TSConsoleCallerComands = packed array of TSConsoleCallerComand;
+	TSConsoleHandlerComands = packed array of TSConsoleHandlerComand;
 
-	TSConsoleCaller = class
+	TSConsoleHandler = class
 			public
-		constructor Create(const VParams : TSConcoleCallerParams); overload;
+		constructor Create(const VParams : TSConsoleHandlerParams); overload;
 		constructor Create(); overload;
 		destructor Destroy();override;
-		procedure AddComand(const VComand       : TSConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		procedure AddComand(const VNestedComand : TSConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		procedure AddComand(const VNestedComand : TSConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-		procedure AddComand(const VCategory     : TSString; const VComand       : TSConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VComand       : TSConsoleHandlerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VNestedComand : TSConsoleHandlerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VNestedComand : TSConsoleHandlerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSConsoleHandlerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+		procedure AddComand(const VCategory     : TSString; const VComand       : TSConsoleHandlerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 		procedure CheckForLastComand();
-		procedure CheckForComand(var Comand : TSConsoleCallerComand);
+		procedure CheckForComand(var Comand : TSConsoleHandlerComand);
 		function Execute() : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Category(const VC : TSString);
-		function Execute(const VParams : TSConcoleCallerParams; const ClearParams : TSBool = False) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Execute(const VParams : TSConsoleHandlerParams; const ClearParams : TSBool = False) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			private
 		FCurrentCategory : TSString;
-		FParams : TSConcoleCallerParams;
-		FComands : TSConsoleCallerComands;
+		FParams : TSConsoleHandlerParams;
+		FComands : TSConsoleHandlerComands;
 			private
 		function AllNested() : TSBool;
 		function AllNormal() : TSBool;
 			public
-		property Params : TSConcoleCallerParams write FParams;
+		property Params : TSConsoleHandlerParams write FParams;
 		end;
 
-function SConsoleCallerParamsToPChar(const VParams : TSConcoleCallerParams = nil; const BeginPosition : TSUInt32 = 0) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SDecConsoleParams(const Params : TSConcoleCallerParams) : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SCountConsoleParams(const Params : TSConcoleCallerParams) : TSLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SConsoleHandlerParamsToPChar(const VParams : TSConsoleHandlerParams = nil; const BeginPosition : TSUInt32 = 0) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SDecConsoleParams(const Params : TSConsoleHandlerParams) : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SCountConsoleParams(const Params : TSConsoleHandlerParams) : TSLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SIsBoolConsoleParam(const Param : TSString):TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SParseStringToConsoleCallerParams(const VParams : TSString) : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SSystemParamsToConcoleCallerParams() : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SParseStringToConsoleHandlerParams(const VParams : TSString) : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SSystemParamsToConsoleHandlerParams() : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SParseValueFromComand(const Comand : TSString; const PredPart : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SParseValueFromComand(const Comand : TSString; PredParts : TSStringList; const FreeList : TSBool = True) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SParseValueFromComand(const Comand : TSString; const PredParts : array of const) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 function SParseValueFromComandAndReturn(const Comand : TSString; const PredParts : array of const; out OutString : TSString) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
-procedure SKill(var ConsoleCaller : TSConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SKill(var ConsoleHandler : TSConsoleHandler); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
 
@@ -86,12 +86,12 @@ uses
 	,SmoothLog
 	;
 
-procedure SKill(var ConsoleCaller : TSConsoleCaller); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+procedure SKill(var ConsoleHandler : TSConsoleHandler); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-if ConsoleCaller <> nil then
+if ConsoleHandler <> nil then
 	begin
-	ConsoleCaller.Destroy();
-	ConsoleCaller := nil;
+	ConsoleHandler.Destroy();
+	ConsoleHandler := nil;
 	end;
 end;
 
@@ -147,7 +147,7 @@ if PredParts.Assigned() then
 	end;
 end;
 
-function SSystemParamsToConcoleCallerParams() : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SSystemParamsToConsoleHandlerParams() : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSUInt32;
 begin
@@ -157,7 +157,7 @@ if Length(Result) > 0 then
 		Result[i] := SPCharToString(argv[i + 1]);
 end;
 
-function TSConsoleCaller.Execute(const VParams : TSConcoleCallerParams; const ClearParams : TSBool = False) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSConsoleHandler.Execute(const VParams : TSConsoleHandlerParams; const ClearParams : TSBool = False) : TSBool; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FParams := VParams;
 Result := Execute();
@@ -166,9 +166,9 @@ if ClearParams then
 FParams := nil;
 end;
 
-function SParseStringToConsoleCallerParams(const VParams : TSString) : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SParseStringToConsoleHandlerParams(const VParams : TSString) : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	FunctionResult : TSConcoleCallerParams absolute Result;
+	FunctionResult : TSConsoleHandlerParams absolute Result;
 
 function LastParamIsEmpty() : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
@@ -225,14 +225,14 @@ Result :=   (SUpCaseString(Param) = 'TRUE') or
 			(Param = '1');
 end;
 
-function SCountConsoleParams(const Params : TSConcoleCallerParams) : TSLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SCountConsoleParams(const Params : TSConsoleHandlerParams) : TSLongWord;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := 0;
 if (Params <> nil) then
 	Result := Length(Params);
 end;
 
-function SDecConsoleParams(const Params : TSConcoleCallerParams) : TSConcoleCallerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SDecConsoleParams(const Params : TSConsoleHandlerParams) : TSConsoleHandlerParams;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSLongWord;
 begin
@@ -246,7 +246,7 @@ else
 	end;
 end;
 
-function SConsoleCallerParamsToPChar(const VParams : TSConcoleCallerParams = nil; const BeginPosition : TSUInt32 = 0) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SConsoleHandlerParamsToPChar(const VParams : TSConsoleHandlerParams = nil; const BeginPosition : TSUInt32 = 0) : PSChar;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	S : TSString;
 	i : TSUInt32;
@@ -261,24 +261,24 @@ if S <> '' then
 	Result := SStringToPChar(S);
 end;
 
-procedure TSConsoleCaller.Category(const VC : TSString);
+procedure TSConsoleHandler.Category(const VC : TSString);
 begin
 FCurrentCategory := VC;
 end;
 
-constructor TSConsoleCaller.Create(); overload;
+constructor TSConsoleHandler.Create(); overload;
 begin
 Create(nil);
 end;
 
-constructor TSConsoleCaller.Create(const VParams : TSConcoleCallerParams); overload;
+constructor TSConsoleHandler.Create(const VParams : TSConsoleHandlerParams); overload;
 begin
 FParams := VParams;
 FComands := nil;
-FCurrentCategory := SConcoleCallerUnknownCategory;
+FCurrentCategory := SConsoleHandlerUnknownCategory;
 end;
 
-function TSConsoleCaller.AllNested() : TSBool;
+function TSConsoleHandler.AllNested() : TSBool;
 var
 	i : TSLongWord;
 begin
@@ -296,7 +296,7 @@ if FComands <> nil then
 		end;
 end;
 
-function TSConsoleCaller.AllNormal() : TSBool;
+function TSConsoleHandler.AllNormal() : TSBool;
 var
 	i : TSLongWord;
 begin
@@ -314,7 +314,7 @@ if FComands <> nil then
 		end;
 end;
 
-destructor TSConsoleCaller.Destroy();
+destructor TSConsoleHandler.Destroy();
 var
 	i : TSLongWord;
 begin
@@ -329,14 +329,14 @@ inherited;
 end;
 
 
-function TSConsoleCallerComand.HelpString() : TSString;
+function TSConsoleHandlerComand.HelpString() : TSString;
 begin
 Result := FHelpString;
 if (Result = '') and (FNestedHelpFunction <> nil) then
 	Result := FNestedHelpFunction();
 end;
 
-procedure TSConsoleCallerComand.Free();
+procedure TSConsoleHandlerComand.Free();
 begin
 FComand             := nil;
 FNestedComand       := nil;
@@ -346,12 +346,12 @@ FHelpString         := '';
 FCategory           := '';
 end;
 
-procedure TSConsoleCaller.CheckForLastComand();
+procedure TSConsoleHandler.CheckForLastComand();
 begin
 CheckForComand(FComands[High(FComands)]);
 end;
 
-procedure TSConsoleCaller.CheckForComand(var Comand : TSConsoleCallerComand);
+procedure TSConsoleHandler.CheckForComand(var Comand : TSConsoleHandlerComand);
 var
 	i, iiii : TSLongWord;
 	ii : TSInt32;
@@ -420,7 +420,7 @@ with Comand do
 		end;
 end;
 
-procedure TSConsoleCaller.AddComand(const VCategory     : TSString; const VComand       : TSConcoleCallerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TSConsoleHandler.AddComand(const VCategory     : TSString; const VComand       : TSConsoleHandlerProcedure;       const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var
 	Index, i : TSUInt32;
 begin
@@ -461,7 +461,7 @@ FComands[Index].FSyntax := SConstArrayToStringList(VSyntax);
 CheckForComand(FComands[Index]);
 end;
 
-procedure TSConsoleCaller.AddComand(const VComand : TSConcoleCallerProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TSConsoleHandler.AddComand(const VComand : TSConsoleHandlerProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -475,7 +475,7 @@ FComands[High(FComands)].FSyntax := SConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 
-procedure TSConsoleCaller.AddComand(const VNestedComand : TSConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TSConsoleHandler.AddComand(const VNestedComand : TSConsoleHandlerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -489,7 +489,7 @@ FComands[High(FComands)].FSyntax := SConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 
-procedure TSConsoleCaller.AddComand(const VNestedComand : TSConcoleCallerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSConcoleCallerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
+procedure TSConsoleHandler.AddComand(const VNestedComand : TSConsoleHandlerNestedProcedure; const VSyntax : packed array of const; const VHelp : TSConsoleHandlerNestedHelpFunction);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 begin
 if FComands = nil then
 	SetLength(FComands, 1)
@@ -503,13 +503,13 @@ FComands[High(FComands)].FSyntax := SConstArrayToStringList(VSyntax);
 CheckForLastComand();
 end;
 
-function TSConsoleCaller.Execute() : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSConsoleHandler.Execute() : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 procedure ErrorUnknownComand(const Comand : TSString);
 begin
 SPrintEngineVersion();
 TextColor(12);
-Write('Console caller : error : abstract comand "');
+Write('Console handler: error: abstract comand "');
 TextColor(15);
 Write(SDownCaseString(Comand));
 TextColor(12);
@@ -521,7 +521,7 @@ procedure ErrorUnknownSimbol(const Comand : TSString);
 begin
 SPrintEngineVersion();
 TextColor(12);
-Write('Console caller : error : unknown simbol "');
+Write('Console handler : error : unknown simbol "');
 TextColor(15);
 Write(Comand);
 TextColor(12);
@@ -581,9 +581,9 @@ procedure CalcCategorySpaces();
 function LastCatecory() : TSString;
 begin
 if FCategoriesSpaces = nil then
-	Result := SConcoleCallerUnknownCategory
+	Result := SConsoleHandlerUnknownCategory
 else if Length(FCategoriesSpaces) = 0 then
-	Result := SConcoleCallerUnknownCategory
+	Result := SConsoleHandlerUnknownCategory
 else
 	Result := FCategoriesSpaces[High(FCategoriesSpaces)].FCategory;
 end;
@@ -600,9 +600,9 @@ for ii := 0 to High(FComands[i].FSyntax) do
 			Result += 1;
 		Result += 3 + Length(FComands[i].FSyntax[ii]);
 		end;
-if FComands[i].FCategory = SConcoleCallerUnknownCategory then
-	if Result < Length(SConcoleCallerHelpParams) then
-		Result := Length(SConcoleCallerHelpParams);
+if FComands[i].FCategory = SConsoleHandlerUnknownCategory then
+	if Result < Length(SConsoleHandlerHelpParams) then
+		Result := Length(SConsoleHandlerHelpParams);
 end;
 
 procedure AddNewCatSpase(const C : TSString; const S : TSUInt32);
@@ -664,9 +664,9 @@ if (FComands <> nil) and (Length(FComands)>0) then
 	Write('Help');
 	TextColor(StandartColor);
 	WriteLn(':');
-	WriteLn(SConcoleCallerHelpParams, ' - Shows this');
+	WriteLn(SConsoleHandlerHelpParams, ' - Shows this');
 	CalcCategorySpaces();
-	LCat := SConcoleCallerUnknownCategory;
+	LCat := SConsoleHandlerUnknownCategory;
 	for i := 0 to High(FComands) do
 		begin
 		if (FComands[i].FSyntax <> nil) and (Length(FComands[i].FSyntax)>0) then
@@ -740,7 +740,7 @@ end;
 var
 	i, ii, iii : TSLongWord;
 	Comand : TSString;
-	Params : TSConcoleCallerParams;
+	Params : TSConsoleHandlerParams;
 begin
 Comand := ComandCheck();
 if IsComandHelp(Comand) then
@@ -774,7 +774,7 @@ else if Comand <> '' then
 				else
 					begin
 					Params := SDecConsoleParams(FParams);
-					TSLog.Source(['Console caller : Enter "', FComands[i].HelpString(), '".']);
+					TSLog.Source(['Console handler: Enter "', FComands[i].HelpString(), '".']);
 					FComands[i].FComand(Params);
 					SetLength(Params,0);
 					break;
@@ -805,7 +805,7 @@ else if (Comand = '') and (SCountConsoleParams(FParams) = 0) then
 						end;
 				if (iii = 1) then
 					begin
-					TSLog.Source(['Console caller : Enter "', FComands[i].HelpString(), '".']);
+					TSLog.Source(['Console handler: Enter "', FComands[i].HelpString(), '".']);
 					FComands[i].FComand();
 					break;
 					end;
@@ -815,7 +815,7 @@ else if (Comand = '') and (SCountConsoleParams(FParams) = 0) then
 			begin
 			SPrintEngineVersion();
 			TextColor(12);
-			Write('Console caller : error : You must enter the comand!');
+			Write('Console handler: error: command not entered.');
 			TextColor(7);
 			end;
 		end;
@@ -824,7 +824,7 @@ else
 	begin
 	SPrintEngineVersion();
 	TextColor(12);
-	Write('Console caller : Unknown error!');
+	Write('Console handler: Unknown error!');
 	TextColor(7);
 	end;
 end;
@@ -884,7 +884,7 @@ if (FParams <> nil) and (Length(FParams) > 0) then
 		begin
 		SPrintEngineVersion();
 		TextColor(12);
-		WriteLn('Console caller : fatal : total ',e,' errors!');
+		WriteLn('Console handler: fatal: total ', e ,' errors.');
 		TextColor(7);
 		end;
 	if hi <> Length(FParams) then
@@ -922,7 +922,7 @@ if (FParams <> nil) and (Length(FParams) > 0) then
 					begin
 					SPrintEngineVersion();
 					TextColor(12);
-					Write('Console caller : error : error while executing comand "');
+					Write('Console handler: error: error while executing comand "');
 					TextColor(15);
 					Write(StringTrimLeft(FParams[i],'-'));
 					TextColor(12);
@@ -941,7 +941,7 @@ if (FParams <> nil) and (Length(FParams) > 0) then
 			begin
 			SPrintEngineVersion();
 			TextColor(12);
-			WriteLn('Console caller : fatal : total ',e,' errors!');
+			WriteLn('Console handler: fatal: total ', e, ' errors.');
 			TextColor(7);
 			end;
 		end;
@@ -965,7 +965,7 @@ else
 	begin
 	SPrintEngineVersion();
 	TextColor(12);
-	Write('Console caller : error : unknown configuration!');
+	Write('Console handler: error: unknown configuration.');
 	TextColor(7);
 	Result := False;
 	end;
@@ -973,10 +973,10 @@ end;
 
 procedure SPrintConsoleParams();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	Params : TSConcoleCallerParams;
+	Params : TSConsoleHandlerParams;
 	i : TSLongWord;
 begin
-Params := SSystemParamsToConcoleCallerParams();
+Params := SSystemParamsToConsoleHandlerParams();
 if Params <> nil then
 	if Length(Params) <> 0 then
 		begin

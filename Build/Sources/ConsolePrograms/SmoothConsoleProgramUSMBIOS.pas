@@ -6,10 +6,10 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleUSMBIOS(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleUSMBIOS(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -164,7 +164,7 @@ begin
   end;
 end;   
 
-procedure SConsoleUSMBIOS(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleUSMBIOS(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams = nil) or (Length(VParams) = 0) then
 	GetProcessorInfo
@@ -177,7 +177,7 @@ end;
 
 initialization
 begin
-SOtherConsoleCaller.AddComand('Other tools', @SConsoleUSMBIOS, ['usmbios'], 'Launch uSMBIOS tool for get processor info');
+SOtherConsoleHandler.AddComand('Other tools', @SConsoleUSMBIOS, ['usmbios'], 'Launch uSMBIOS tool for get processor info');
 end;
 
 end.

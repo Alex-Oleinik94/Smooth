@@ -25,7 +25,7 @@ uses
 	,SmoothScreen_Edit
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	;
 type
@@ -263,6 +263,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSApprFunction, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSApprFunction, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

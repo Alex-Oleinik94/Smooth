@@ -11,5 +11,5 @@ make debug
 @echo off
 make clear_files
 cd Scripts
-if "%2"=="" ( CALL _Check_Console )
+if "%2"=="" ( CALL _Copy_console_application.bat )
 if "%1"=="" ( pause )

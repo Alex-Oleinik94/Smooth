@@ -73,7 +73,7 @@ type
 		property Info     : TSAudioInfo read FInfo;
 		end;
 
-function TSCompatibleAudioDecoder(const VExpansion : TSString) : TSAudioDecoderClass;
+function TSCompatibleAudioDecoder(const VExtension : TSString) : TSAudioDecoderClass;
 function TSCompatibleAudioFormats() : TSStringList;
 procedure SAddDecoder(const VDecoder : TSAudioDecoderClass);
 
@@ -118,7 +118,7 @@ for C in AudioDecoders do
 		Result *= C.SupportedFormats();
 end;
 
-function TSCompatibleAudioDecoder(const VExpansion : TSString) : TSAudioDecoderClass;
+function TSCompatibleAudioDecoder(const VExtension : TSString) : TSAudioDecoderClass;
 var
 	C  : TSAudioDecoderClass;
 	SF : TSStringList;
@@ -127,7 +127,7 @@ Result := nil;
 for C in AudioDecoders do
 	begin
 	SF := C.SupportedFormats();
-	if VExpansion in SF then
+	if VExtension in SF then
 		Result := C;
 	SetLength(SF, 0);
 	if (Result <> nil) and (not C.Supported) then

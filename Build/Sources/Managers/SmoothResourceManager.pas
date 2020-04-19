@@ -20,9 +20,9 @@ type
 	TSResource = class(TSClass)
 		end;
 type
-	TSResourceManipulatorExpansions = packed array of
+	TSResourceManipulatorFileExtensions = packed array of
 		packed record
-			RExpansion : TSString;
+			RExtension : TSString;
 			RLoadIsSupported : TSBoolean;
 			RSaveIsSupported : TSBoolean;
 			end;
@@ -34,17 +34,17 @@ type
 		constructor Create();override;
 		destructor Destroy();override;
 			private
-		FQuantityExpansions : TSLongWord;
-		FArExpansions : TSResourceManipulatorExpansions;
+		FQuantityExtensions : TSLongWord;
+		FArExtensions : TSResourceManipulatorFileExtensions;
 			protected
-		procedure AddExpansion(const VExpansion:TSString;const VLoadIsSupported, VSaveIsSupported : TSBoolean);
+		procedure AddFileExtension(const VExtension:TSString;const VLoadIsSupported, VSaveIsSupported : TSBoolean);
 			public
-		function LoadingIsSupported(const VExpansion : TSString):TSBoolean;
-		function SaveingIsSupported(const VExpansion : TSString):TSBoolean;
-		function LoadResource(const VFileName,VExpansion : TSString):TSResource;
-		function SaveResource(const VFileName,VExpansion : TSString;const VResource : TSResource):TSBoolean;
-		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSString):TSResource;virtual;
-		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSString;const VResource : TSResource):TSBoolean;virtual;
+		function LoadingIsSupported(const VExtension : TSString):TSBoolean;
+		function SaveingIsSupported(const VExtension : TSString):TSBoolean;
+		function LoadResource(const VFileName,VExtension : TSString):TSResource;
+		function SaveResource(const VFileName,VExtension : TSString;const VResource : TSResource):TSBoolean;
+		function LoadResourceFromStream(const VStream : TStream;const VExtension : TSString):TSResource;virtual;
+		function SaveResourceToStream(const VStream : TStream;const VExtension : TSString;const VResource : TSResource):TSBoolean;virtual;
 		end;
 type
 	TSResourceManager = class(TSClass)
@@ -56,12 +56,12 @@ type
 		FArManipulators : packed array of TSResourceManipulator;
 			public
 		procedure AddManipulator(const VManipulatorClass : TSResourceManipulatorClass);
-		function LoadingIsSupported(const VExpansion : TSString):TSBoolean;
-		function SaveingIsSupported(const VExpansion : TSString):TSBoolean;
-		function LoadResource(const VFileName, VExpansion : TSString):TSResource;
-		function SaveResource(const VFileName, VExpansion : TSString; const VResource : TSResource):TSBoolean;
-		function LoadResourceFromStream(const VStream : TStream; const VExpansion : TSString):TSResource;
-		function SaveResourceToStream(const VStream : TStream; const VExpansion : TSString; const VResource : TSResource):TSBoolean;
+		function LoadingIsSupported(const VExtension : TSString):TSBoolean;
+		function SaveingIsSupported(const VExtension : TSString):TSBoolean;
+		function LoadResource(const VFileName, VExtension : TSString):TSResource;
+		function SaveResource(const VFileName, VExtension : TSString; const VResource : TSResource):TSBoolean;
+		function LoadResourceFromStream(const VStream : TStream; const VExtension : TSString):TSResource;
+		function SaveResourceToStream(const VStream : TStream; const VExtension : TSString; const VResource : TSResource):TSBoolean;
 		end;
 var
 	SResourceManager : TSResourceManager = nil;
@@ -99,7 +99,7 @@ type
 		FPath : TSString;
 		FSize : TSUInt64;
 		FOutSize : TSUInt64;
-		FPastMiliseconds : TSUInt64;
+		FPastMilliseconds : TSUInt64;
 		FConvertationNotNeed : TSBoolean;
 			public
 		procedure Clear();
@@ -113,7 +113,7 @@ type
 		FCount : TSUInt32;
 		FSize : TSUInt64;
 		FOutSize : TSUInt64;
-		FPastMiliseconds : TSUInt64;
+		FPastMilliseconds : TSUInt64;
 		FCountCopyedFromCache : TSUInt32;
 			public
 		procedure Clear();
@@ -197,9 +197,9 @@ end;
 function TSConvertedFileInfo.GetString() : TSString;
 begin
 Result += 
-	'Converted' + '"' + SFileName(FName) + '.' + SDownCaseString(SFileExpansion(FName)) + '"' +
-	':in ' + SGetSizeString(FSize, 'EN') + ';out ' + SGetSizeString(FOutSize, 'EN') + ';time ' +
-	StringTrimAll(SMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' ') + ';cache ' + 
+	'Converted' + '"' + SFileName(FName) + '.' + SDownCaseString(SFileExtension(FName)) + '"' +
+	':in ' + SMemorySizeToString(FSize, 'EN') + ';out ' + SMemorySizeToString(FOutSize, 'EN') + ';time ' +
+	StringTrimAll(SMillisecondsToStringTime(FPastMilliseconds, 'ENG'), ' ') + ';cache ' + 
 	Iff(FConvertationNotNeed, 'True', 'False') + '.';
 end;
 
@@ -209,19 +209,19 @@ with TSTextMultiStream.Create([SCaseLog, SCasePrint]) do
 	begin
 	Write('Converted');
 	TextColor(14);
-	Write(['"',SFileName(FName) + '.' + SDownCaseString(SFileExpansion(FName)), '"']);
+	Write(['"',SFileName(FName) + '.' + SDownCaseString(SFileExtension(FName)), '"']);
 	TextColor(7);
 	Write(':in ');
 	TextColor(10);
-	Write(SGetSizeString(FSize, 'EN'));
+	Write(SMemorySizeToString(FSize, 'EN'));
 	TextColor(7);
 	Write(';out ');
 	TextColor(12);
-	Write(SGetSizeString(FOutSize, 'EN'));
+	Write(SMemorySizeToString(FOutSize, 'EN'));
 	TextColor(7);
 	Write(';time ');
 	TextColor(11);
-	Write(StringTrimAll(SMiliSecondsToStringTime(FPastMiliseconds, 'ENG'), ' '));
+	Write(StringTrimAll(SMillisecondsToStringTime(FPastMilliseconds, 'ENG'), ' '));
 	TextColor(7);
 	Write(';cache ');
 	TextColor(13);
@@ -239,7 +239,7 @@ Result := A;
 Result.FCount += B.FCount;
 Result.FSize += B.FSize;
 Result.FOutSize += B.FOutSize;
-Result.FPastMiliseconds += B.FPastMiliseconds;
+Result.FPastMilliseconds += B.FPastMilliseconds;
 Result.FCountCopyedFromCache += B.FCountCopyedFromCache;
 end;
 
@@ -249,7 +249,7 @@ Result := A;
 Result.FCount += 1;
 Result.FSize += B.FSize;
 Result.FOutSize += B.FOutSize;
-Result.FPastMiliseconds += B.FPastMiliseconds;
+Result.FPastMilliseconds += B.FPastMilliseconds;
 Result.FCountCopyedFromCache += Byte(B.FConvertationNotNeed);
 end;
 
@@ -257,7 +257,7 @@ procedure TSConvertedFileInfo.Clear();
 begin
 FSize := 0;
 FOutSize := 0;
-FPastMiliseconds := 0;
+FPastMilliseconds := 0;
 FName := '';
 FPath := '';
 FConvertationNotNeed := False;
@@ -269,7 +269,7 @@ begin
 FCount := 0;
 FSize := 0;
 FOutSize := 0;
-FPastMiliseconds := 0;
+FPastMilliseconds := 0;
 FCountCopyedFromCache := 0;
 end;
 
@@ -394,11 +394,11 @@ Result :=
 	';cached ' +
 	SStr(FCountCopyedFromCache) +
 	';in size ' +
-	SGetSizeString(FSize,'EN') +
+	SMemorySizeToString(FSize,'EN') +
 	';out size ' +
-	SGetSizeString(FOutSize,'EN') +
+	SMemorySizeToString(FOutSize,'EN') +
 	';time ' +
-	StringTrimAll(SMiliSecondsToStringTime(FPastMiliseconds,'ENG'), ' ') +
+	StringTrimAll(SMillisecondsToStringTime(FPastMilliseconds,'ENG'), ' ') +
 	'.';
 end;
 
@@ -417,15 +417,15 @@ with TSTextMultiStream.Create([SCaseLog, SCasePrint]) do
 	TextColor(7);
 	Write(';in size ');
 	TextColor(10);
-	Write(SGetSizeString(FSize,'EN'));
+	Write(SMemorySizeToString(FSize,'EN'));
 	TextColor(7);
 	Write(';out size ');
 	TextColor(12);
-	Write(SGetSizeString(FOutSize,'EN'));
+	Write(SMemorySizeToString(FOutSize,'EN'));
 	TextColor(7);
 	Write(';time ');
 	TextColor(11);
-	Write(StringTrimAll(SMiliSecondsToStringTime(FPastMiliseconds,'ENG'),' '));
+	Write(StringTrimAll(SMillisecondsToStringTime(FPastMilliseconds,'ENG'),' '));
 	TextColor(7);
 	WriteLn('.');
 	
@@ -558,8 +558,8 @@ var
 	Stream:TFileStream = nil;
 begin
 Stream := TFileStream.Create(FileRegistrationResources, fmCreate);
-SWriteStringToStream('(*This is part of Smooth Engine*)'+SWinEoln,Stream,False);
-SWriteStringToStream('//File registration resources. Files:'+SWinEoln,Stream,False);
+SWriteStringToStream('(*This is part of Smooth Engine*)'+DefaultEndOfLine,Stream,False);
+SWriteStringToStream('//File registration resources. Files:'+DefaultEndOfLine,Stream,False);
 Stream.Destroy();
 end;
 
@@ -575,7 +575,7 @@ while (MemStream.Position <> MemStream.Size) and (not Exists) do
 	Exists := StringTrimAll(SReadLnStringFromStream(MemStream),' 	,') = UnitName;
 if not Exists then
 	begin
-	SWriteStringToStream('	,' + UnitName + SWinEoln, MemStream, False);
+	SWriteStringToStream('	,' + UnitName + DefaultEndOfLine, MemStream, False);
 	MemStream.SaveToFile(FileRegistrationResources);
 	end;
 MemStream.Destroy();
@@ -665,13 +665,13 @@ procedure Write8Bit();
 var
 	III, II:LongWord;
 begin
-OutString('	A:array [1..'+SStr(ThisStep)+'] of TSUInt8 = ('+SWinEoln+'	');
+OutString('	A:array [1..'+SStr(ThisStep)+'] of TSUInt8 = ('+DefaultEndOfLine+'	');
 II:=0;
 for iii:=0 to ThisStep-1 do
 	begin
 	if II=10 then
 		begin
-		OutString(SWinEoln+'	');
+		OutString(DefaultEndOfLine+'	');
 		II:=0;
 		end;
 	OutString(SStr(A[iIi]));
@@ -679,10 +679,10 @@ for iii:=0 to ThisStep-1 do
 		OutString(', ');
 	II+=1;
 	end;
-OutString(');'+SWinEoln);
-OutString('begin'+SWinEoln);
-OutString('Stream.WriteBuffer(A,'+SStr(ThisStep)+');'+SWinEoln);
-OutString('end;'+SWinEoln);
+OutString(');'+DefaultEndOfLine);
+OutString('begin'+DefaultEndOfLine);
+OutString('Stream.WriteBuffer(A,'+SStr(ThisStep)+');'+DefaultEndOfLine);
+OutString('end;'+DefaultEndOfLine);
 end;
 
 procedure Write64Bit();
@@ -699,7 +699,7 @@ begin
 ArrayLength := ThisStep div 8;
 ArraySize := ArrayLength * 8;
 OtherLength := ThisStep - ArraySize;
-OutString('	A : array [1..'+SStr(ArrayLength)+'] of TSUInt64 = ('+SWinEoln+'	');
+OutString('	A : array [1..'+SStr(ArrayLength)+'] of TSUInt64 = ('+DefaultEndOfLine+'	');
 i := 0;
 ii := 0;
 iii := 0;
@@ -707,7 +707,7 @@ while ii <> ArraySize do
 	begin
 	if (iii = LineSize) then
 		begin
-		OutString(SWinEoln+'	');
+		OutString(DefaultEndOfLine+'	');
 		iii := 0;
 		end;
 	S := '$';
@@ -721,11 +721,11 @@ while ii <> ArraySize do
 		OutString(', ');
 	if (i = ArrayLength) then
 		begin
-		OutString(SWinEoln+'	');
+		OutString(DefaultEndOfLine+'	');
 		iii := 0;
 		end;
 	end;
-OutString('	);'+SWinEoln);
+OutString('	);'+DefaultEndOfLine);
 if OtherLength <> 0 then
 	begin
 	OutString('	B : TSString = ''');
@@ -734,20 +734,20 @@ if OtherLength <> 0 then
 		OutString(Str8Bit(A[ii]));
 		ii += 1;
 		end;
-	OutString(''';'+SWinEoln);
+	OutString(''';'+DefaultEndOfLine);
 	end;
-OutString('begin'+SWinEoln);
-OutString('Stream.WriteBuffer(A, '+SStr(ArraySize)+');'+SWinEoln);
+OutString('begin'+DefaultEndOfLine);
+OutString('Stream.WriteBuffer(A, '+SStr(ArraySize)+');'+DefaultEndOfLine);
 if OtherLength <> 0 then
-	OutString('SWriteHexStringToStream(B, Stream);'+SWinEoln);
-OutString('end;'+SWinEoln);
+	OutString('SWriteHexStringToStream(B, Stream);'+DefaultEndOfLine);
+OutString('end;'+DefaultEndOfLine);
 end;
 
 begin
 InStream.ReadBuffer(A[0], ThisStep);
-OutString('procedure '+'LoadToStream_'+NameUnit+'_'+SStr(I)+'(const Stream:TStream);'+SWinEoln);
+OutString('procedure '+'LoadToStream_'+NameUnit+'_'+SStr(I)+'(const Stream:TStream);'+DefaultEndOfLine);
 I+=1;
-OutString('var'+SWinEoln);
+OutString('var'+DefaultEndOfLine);
 case ArrayType of
 SRMArrayTypeUInt8 :
 	Write8Bit();
@@ -772,27 +772,27 @@ InStream  := TMemoryStream.Create();
 (InStream as TMemoryStream).LoadFromFile(FileName);
 InStream.Position := 0;
 if IsInc then
-	OutString('{$INCLUDE Smooth.inc}'+SWinEoln)
+	OutString('{$INCLUDE Smooth.inc}'+DefaultEndOfLine)
 else
-	OutString('{$MODE OBJFPC}'+SWinEoln);
-OutString('// Engine''s path : "' + FileName + '"'+SWinEoln);
-OutString('// Path : "' + OutputFileName + '"'+SWinEoln);
-OutString('//' + Hash_MD5_Prefix + Hash_MD5 + SWinEoln);
-OutString('//' + Hash_SHA256_Prefix+ Hash_SHA256 + SWinEoln);
-OutString('unit '+NameUnit+';'+SWinEoln);
-OutString('interface'+SWinEoln);
+	OutString('{$MODE OBJFPC}'+DefaultEndOfLine);
+OutString('// Engine''s path : "' + FileName + '"'+DefaultEndOfLine);
+OutString('// Path : "' + OutputFileName + '"'+DefaultEndOfLine);
+OutString('//' + Hash_MD5_Prefix + Hash_MD5 + DefaultEndOfLine);
+OutString('//' + Hash_SHA256_Prefix+ Hash_SHA256 + DefaultEndOfLine);
+OutString('unit '+NameUnit+';'+DefaultEndOfLine);
+OutString('interface'+DefaultEndOfLine);
 if IsInc then
-	OutString('implementation'+SWinEoln);
-OutString('uses'+SWinEoln);
-OutString('	 Classes'+SWinEoln);
-OutString('	,SmoothBase'+SWinEoln);
+	OutString('implementation'+DefaultEndOfLine);
+OutString('uses'+DefaultEndOfLine);
+OutString('	 Classes'+DefaultEndOfLine);
+OutString('	,SmoothBase'+DefaultEndOfLine);
 if IsInc then
-	OutString('	,SmoothResourceManager'+SWinEoln);
-OutString('	;'+SWinEoln);
+	OutString('	,SmoothResourceManager'+DefaultEndOfLine);
+OutString('	;'+DefaultEndOfLine);
 if not IsInc then
 	begin
-	OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SWinEoln);
-	OutString('implementation'+SWinEoln);
+	OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+DefaultEndOfLine);
+	OutString('implementation'+DefaultEndOfLine);
 	end;
 while InStream.Position<=InStream.Size-Step do
 	WriteProc(Step);
@@ -801,19 +801,19 @@ if InStream.Position<>InStream.Size then
 	IIii:=InStream.Size-InStream.Position;
 	WriteProc(IIii);
 	end;
-OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+SWinEoln);
-OutString('begin'+SWinEoln);
+OutString('procedure LoadToStream_'+NameUnit+'(const Stream:TStream);'+DefaultEndOfLine);
+OutString('begin'+DefaultEndOfLine);
 for i5:=0 to i-1 do
-	OutString('LoadToStream_'+NameUnit+'_'+SStr(i5)+'(Stream);'+SWinEoln);
-OutString('end;'+SWinEoln);
+	OutString('LoadToStream_'+NameUnit+'_'+SStr(i5)+'(Stream);'+DefaultEndOfLine);
+OutString('end;'+DefaultEndOfLine);
 if IsInc then
 	begin
-	OutString('initialization'+SWinEoln);
-	OutString('begin'+SWinEoln);
-	OutString('SAddResourceFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+SWinEoln);
-	OutString('end;'+SWinEoln);
+	OutString('initialization'+DefaultEndOfLine);
+	OutString('begin'+DefaultEndOfLine);
+	OutString('SAddResourceFile('''+FileName+''',@LoadToStream_'+NameUnit+');'+DefaultEndOfLine);
+	OutString('end;'+DefaultEndOfLine);
 	end;
-OutString('end.'+SWinEoln);
+OutString('end.'+DefaultEndOfLine);
 SetLength(A,0);
 InStream.Destroy();
 OutStream.Destroy();
@@ -871,7 +871,7 @@ if not (SFileExists(OutputFileName) and CheckForEqualFileHashes(Hash_MD5, Hash_S
 else
 	Result.FConvertationNotNeed := True;
 DateTime2.Get();
-Result.FPastMiliseconds := (DateTime2 - DateTime1).GetPastMiliSeconds();
+Result.FPastMilliseconds := (DateTime2 - DateTime1).GetPastMilliseconds();
 Result.FName := FileName;
 Result.FPath := OutputFileName;
 GetFilesSize();
@@ -896,11 +896,11 @@ if FArFiles <> nil then if Length(FArFiles) > 0 then
 		FArFiles[i].FSelf(Stream);
 		Size := Stream.Size;
 		Stream.Destroy();
-		SHint('    ' + FArFiles[i].FWay + ' (' + SGetSizeString(Size,'EN') + ')');
+		SHint('    ' + FArFiles[i].FWay + ' (' + SMemorySizeToString(Size,'EN') + ')');
 		TotalFilesCount += 1;
 		TotalSize += Size;
 		end;
-SHint('Total files: ' + SStr(TotalFilesCount) + ', total size: ' + SGetSizeString(TotalSize,'EN'));
+SHint('Total files: ' + SStr(TotalFilesCount) + ', total size: ' + SMemorySizeToString(TotalSize,'EN'));
 end;
 
 procedure TSResourceFiles.ExtractFiles(const Dir : TSString; const WithDirs : TSBoolean);
@@ -1047,21 +1047,21 @@ end;
 
 destructor TSResourceManipulator.Destroy();
 begin
-SetLength(FArExpansions,0);
+SetLength(FArExtensions,0);
 inherited;
 end;
 
-function TSResourceManipulator.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSString):TSResource;
+function TSResourceManipulator.LoadResourceFromStream(const VStream : TStream;const VExtension : TSString):TSResource;
 begin
 Result:=nil;
 end;
 
-function TSResourceManipulator.SaveResourceToStream(const VStream : TStream;const VExpansion : TSString;const VResource : TSResource):TSBoolean;
+function TSResourceManipulator.SaveResourceToStream(const VStream : TStream;const VExtension : TSString;const VResource : TSResource):TSBoolean;
 begin
 Result:=False;
 end;
 
-function TSResourceManipulator.SaveResource(const VFileName,VExpansion : TSString;const VResource : TSResource):TSBoolean;
+function TSResourceManipulator.SaveResource(const VFileName,VExtension : TSString;const VResource : TSResource):TSBoolean;
 var
 	Stream : TStream = nil;
 begin
@@ -1069,7 +1069,7 @@ Result:=False;
 Stream := TFileStream.Create(VFileName,fmCreate);
 if Stream<>nil then
 	begin
-	Result:=SaveResourceToStream(Stream,VExpansion,VResource);
+	Result:=SaveResourceToStream(Stream,VExtension,VResource);
 	Stream.Destroy();
 	if not Result then
 		if SFileExists(VFileName) then
@@ -1077,7 +1077,7 @@ if Stream<>nil then
 	end;
 end;
 
-function TSResourceManipulator.LoadResource(const VFileName,VExpansion : TSString):TSResource;
+function TSResourceManipulator.LoadResource(const VFileName,VExtension : TSString):TSResource;
 var
 	Stream : TStream = nil;
 begin
@@ -1087,7 +1087,7 @@ if SFileExists(VFileName) then
 	Stream := TFileStream.Create(VFileName,fmOpenRead);
 	if Stream<>nil then
 		begin
-		Result:=LoadResourceFromStream(Stream,VExpansion);
+		Result:=LoadResourceFromStream(Stream,VExtension);
 		Stream.Destroy();
 		end;
 	end;
@@ -1096,41 +1096,41 @@ end;
 constructor TSResourceManipulator.Create();
 begin
 inherited;
-FQuantityExpansions:=0;
-FArExpansions :=  nil;
+FQuantityExtensions:=0;
+FArExtensions :=  nil;
 end;
 
-procedure TSResourceManipulator.AddExpansion(const VExpansion:TSString;const VLoadIsSupported, VSaveIsSupported : TSBoolean);
+procedure TSResourceManipulator.AddFileExtension(const VExtension:TSString;const VLoadIsSupported, VSaveIsSupported : TSBoolean);
 begin
-FQuantityExpansions+=1;
-SetLength(FArExpansions,FQuantityExpansions);
-FArExpansions[FQuantityExpansions-1].RExpansion:=SUpCaseString(VExpansion);
-FArExpansions[FQuantityExpansions-1].RLoadIsSupported:=VLoadIsSupported;
-FArExpansions[FQuantityExpansions-1].RSaveIsSupported:=VSaveIsSupported;
+FQuantityExtensions+=1;
+SetLength(FArExtensions,FQuantityExtensions);
+FArExtensions[FQuantityExtensions-1].RExtension:=SUpCaseString(VExtension);
+FArExtensions[FQuantityExtensions-1].RLoadIsSupported:=VLoadIsSupported;
+FArExtensions[FQuantityExtensions-1].RSaveIsSupported:=VSaveIsSupported;
 end;
 
-function TSResourceManipulator.SaveingIsSupported(const VExpansion : TSString):TSBoolean;
+function TSResourceManipulator.SaveingIsSupported(const VExtension : TSString):TSBoolean;
 var
 	Index : TSLongWord;
 begin
 Result:=False;
-if FQuantityExpansions<>0 then
-	for Index := 0 to FQuantityExpansions-1 do
-		if (SUpCaseString(VExpansion) = FArExpansions[Index].RExpansion) and (FArExpansions[Index].RSaveIsSupported) then
+if FQuantityExtensions<>0 then
+	for Index := 0 to FQuantityExtensions-1 do
+		if (SUpCaseString(VExtension) = FArExtensions[Index].RExtension) and (FArExtensions[Index].RSaveIsSupported) then
 			begin
 			Result:=True;
 			Break;
 			end;
 end;
 
-function TSResourceManipulator.LoadingIsSupported(const VExpansion : TSString):TSBoolean;
+function TSResourceManipulator.LoadingIsSupported(const VExtension : TSString):TSBoolean;
 var
 	Index : TSLongWord;
 begin
 Result:=False;
-if FQuantityExpansions<>0 then
-	for Index := 0 to FQuantityExpansions-1 do
-		if (SUpCaseString(VExpansion) = FArExpansions[Index].RExpansion) and (FArExpansions[Index].RLoadIsSupported) then
+if FQuantityExtensions<>0 then
+	for Index := 0 to FQuantityExtensions-1 do
+		if (SUpCaseString(VExtension) = FArExtensions[Index].RExtension) and (FArExtensions[Index].RLoadIsSupported) then
 			begin
 			Result:=True;
 			Break;
@@ -1145,37 +1145,37 @@ SetLength(FArManipulators,0);
 inherited;
 end;
 
-function TSResourceManager.LoadResource(const VFileName,VExpansion : TSString):TSResource;
+function TSResourceManager.LoadResource(const VFileName,VExtension : TSString):TSResource;
 var
 	Index : TSLongWord;
 begin
 Result:=nil;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExtension) then
 			begin
-			Result:=FArManipulators[Index].LoadResource(VFileName,SUpCaseString(VExpansion));
+			Result:=FArManipulators[Index].LoadResource(VFileName,SUpCaseString(VExtension));
 			if Result <> nil then
 				Break;
 			end;
 end;
 
-function TSResourceManager.SaveResource(const VFileName,VExpansion : TSString;const VResource : TSResource):TSBoolean;
+function TSResourceManager.SaveResource(const VFileName,VExtension : TSString;const VResource : TSResource):TSBoolean;
 var
 	Index : TSLongWord;
 begin
 Result:=False;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].SaveingIsSupported(VExpansion) then
+		if FArManipulators[Index].SaveingIsSupported(VExtension) then
 			begin
-			Result:=FArManipulators[Index].SaveResource(VFileName,SUpCaseString(VExpansion),VResource);
+			Result:=FArManipulators[Index].SaveResource(VFileName,SUpCaseString(VExtension),VResource);
 			if Result then
 				Break;
 			end;
 end;
 
-function TSResourceManager.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSString):TSResource;
+function TSResourceManager.LoadResourceFromStream(const VStream : TStream;const VExtension : TSString):TSResource;
 var
 	Index : TSLongWord;
 	StreamPosition : TSQuadWord;
@@ -1184,9 +1184,9 @@ Result:=nil;
 StreamPosition := VStream.Position;
 if FQuantityManipulators <>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExtension) then
 			begin
-			Result:=FArManipulators[Index].LoadResourceFromStream(VStream,SUpCaseString(VExpansion));
+			Result:=FArManipulators[Index].LoadResourceFromStream(VStream,SUpCaseString(VExtension));
 			if Result <> nil then
 				Break
 			else
@@ -1194,7 +1194,7 @@ if FQuantityManipulators <>0 then
 			end;
 end;
 
-function TSResourceManager.SaveResourceToStream(const VStream : TStream;const VExpansion : TSString;const VResource : TSResource):TSBoolean;
+function TSResourceManager.SaveResourceToStream(const VStream : TStream;const VExtension : TSString;const VResource : TSResource):TSBoolean;
 var
 	Index : TSLongWord;
 	StreamPosition : TSQuadWord;
@@ -1203,9 +1203,9 @@ Result:=False;
 StreamPosition := VStream.Position;
 if FQuantityManipulators<>0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].SaveingIsSupported(SUpCaseString(VExpansion)) then
+		if FArManipulators[Index].SaveingIsSupported(SUpCaseString(VExtension)) then
 			begin
-			Result:=FArManipulators[Index].SaveResourceToStream(VStream,SUpCaseString(VExpansion),VResource);
+			Result:=FArManipulators[Index].SaveResourceToStream(VStream,SUpCaseString(VExtension),VResource);
 			if Result  then
 				begin
 				Break;
@@ -1225,27 +1225,27 @@ SetLength(FArManipulators,FQuantityManipulators);
 FArManipulators[FQuantityManipulators-1]:=VManipulatorClass.Create();
 end;
 
-function TSResourceManager.SaveingIsSupported(const VExpansion : TSString):TSBoolean;
+function TSResourceManager.SaveingIsSupported(const VExtension : TSString):TSBoolean;
 var
 	Index : TSLongWord;
 begin
 Result:=False;
 for Index := 0 to FQuantityManipulators - 1 do
-	if FArManipulators[Index].SaveingIsSupported(VExpansion) then
+	if FArManipulators[Index].SaveingIsSupported(VExtension) then
 		begin
 		Result:=True;
 		Break;
 		end;
 end;
 
-function TSResourceManager.LoadingIsSupported(const VExpansion : TSString):TSBoolean;
+function TSResourceManager.LoadingIsSupported(const VExtension : TSString):TSBoolean;
 var
 	Index : TSLongWord;
 begin
 Result:=False;
 if FQuantityManipulators <> 0 then
 	for Index := 0 to FQuantityManipulators - 1 do
-		if FArManipulators[Index].LoadingIsSupported(VExpansion) then
+		if FArManipulators[Index].LoadingIsSupported(VExtension) then
 			begin
 			Result:=True;
 			Break;

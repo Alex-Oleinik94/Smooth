@@ -99,15 +99,15 @@ Result := FCustomModel.QuantityObjects + FCustomModel.QuantityMaterials;
 end;
 
 var
-	Expansion : TSString = '';
+	Extension : TSString = '';
 	OldObjectsCount : TSUInt64 = 0;
 begin
 Result := False;
-Expansion := SUpCaseString(SFileExpansion(FileName));
+Extension := SUpCaseString(SFileExtension(FileName));
 try
-	if Expansion = '3DS' then
+	if Extension = '3DS' then
 		Result := SLoad3dObject3DS(FCustomModel, Stream, FileName)
-	else if Expansion = 'OBJ' then
+	else if Extension = 'OBJ' then
 		Result := SLoad3dObject3DS(FCustomModel, FileName)
 	else
 		begin

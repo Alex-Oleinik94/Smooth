@@ -6,7 +6,7 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	,SmoothContextClasses
 	,SmoothContext
 	,SmoothContextUtils
@@ -23,10 +23,10 @@ type
 		class function ClassName() : TSString; override;
 		end;
 
-procedure SConsoleShowAllApplications(const VParams : TSConcoleCallerParams = nil);overload;
+procedure SConsoleShowAllApplications(const VParams : TSConsoleHandlerParams = nil);overload;
 procedure SConsoleShowAllApplications();overload;
-procedure SConsoleShowAllApplications(const VParams : TSConcoleCallerParams = nil;  ContextSettings : TSContextSettings = nil);overload;
-procedure SConsoleRunPaintable(const VPaintabeClass : TSPaintableObjectClass; const VParams : TSConcoleCallerParams = nil; ContextSettings : TSContextSettings = nil);
+procedure SConsoleShowAllApplications(const VParams : TSConsoleHandlerParams = nil;  ContextSettings : TSContextSettings = nil);overload;
+procedure SConsoleRunPaintable(const VPaintabeClass : TSPaintableObjectClass; const VParams : TSConsoleHandlerParams = nil; ContextSettings : TSContextSettings = nil);
 
 implementation
 
@@ -85,7 +85,7 @@ with TSPaintableObjectContainer.Create(Context) do
 	end;
 end;
 
-procedure SConsoleRunPaintable(const VPaintabeClass : TSPaintableObjectClass; const VParams : TSConcoleCallerParams = nil; ContextSettings : TSContextSettings = nil);
+procedure SConsoleRunPaintable(const VPaintabeClass : TSPaintableObjectClass; const VParams : TSConsoleHandlerParams = nil; ContextSettings : TSContextSettings = nil);
 var
 	RenderClass   : TSRenderClass = nil;
 	ContextClass  : TSContextClass = nil;
@@ -466,7 +466,7 @@ var
 begin
 SPrintEngineVersion();
 if (VParams <> nil) and (Length(VParams) > 0) then
-	with TSConsoleCaller.Create(VParams) do
+	with TSConsoleHandler.Create(VParams) do
 		begin
 		Category('Context settings');
 		AddComand(@ProccessGLUT,      ['GLUT'],               @HelpFuncGLUT);
@@ -539,12 +539,12 @@ procedure TSAllApplicationsDrawable.Paint();
 begin
 end;
 
-procedure SConsoleShowAllApplications(const VParams : TSConcoleCallerParams = nil;  ContextSettings : TSContextSettings = nil);overload;
+procedure SConsoleShowAllApplications(const VParams : TSConsoleHandlerParams = nil;  ContextSettings : TSContextSettings = nil);overload;
 begin
 SConsoleRunPaintable(TSAllApplicationsDrawable, VParams, ContextSettings);
 end;
 
-procedure SConsoleShowAllApplications(const VParams : TSConcoleCallerParams = nil);overload;
+procedure SConsoleShowAllApplications(const VParams : TSConsoleHandlerParams = nil);overload;
 begin
 SConsoleRunPaintable(TSAllApplicationsDrawable, VParams);
 end;

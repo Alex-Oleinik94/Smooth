@@ -59,8 +59,8 @@ type
 		class function IsSIA(const Stream : TStream) : TSBoolean; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
 		class function DetermineFormat(const Stream : TStream) : TSImageFormat; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		class function DetermineExpansion(const Stream : TStream) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		class function DetermineExpansionFromFormat(const Format : TSImageFormat) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function DetermineFileExtension(const Stream : TStream) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		class function DetermineFileExtensionFromFormat(const Format : TSImageFormat) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		end;
 
 implementation
@@ -74,12 +74,12 @@ begin
 Result := SIsICOData(Stream);
 end;
 
-class function TSImageFormatDeterminer.DetermineExpansion(const Stream : TStream) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+class function TSImageFormatDeterminer.DetermineFileExtension(const Stream : TStream) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := DetermineExpansionFromFormat(DetermineFormat(Stream));
+Result := DetermineFileExtensionFromFormat(DetermineFormat(Stream));
 end;
 
-class function TSImageFormatDeterminer.DetermineExpansionFromFormat(const Format : TSImageFormat) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+class function TSImageFormatDeterminer.DetermineFileExtensionFromFormat(const Format : TSImageFormat) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 case Format of
 SImageFormatTga  : Result := 'tga';

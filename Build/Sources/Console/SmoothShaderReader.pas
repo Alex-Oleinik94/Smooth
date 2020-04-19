@@ -272,7 +272,7 @@ if (Length(VString)>5) then
 		end
 	else if SUpCaseString(VString) = 'EOLN' then
 		begin
-		Result := SWinEoln;
+		Result := DefaultEndOfLine;
 		end
 	else if SUpCaseString(VString) = 'NOTHINK' then
 		begin
@@ -356,8 +356,8 @@ if VString <> '' then
 		begin
 		S := ProcessStrings(VString,WithParam(VAditionalParams,VVariable,SStr(i)));
 		Result += S;
-		if NeedEolns and (i <> VEnd) and (S <> SWinEoln) then
-			Result += SWinEoln;
+		if NeedEolns and (i <> VEnd) and (S <> DefaultEndOfLine) then
+			Result += DefaultEndOfLine;
 		end;
 end;
 
@@ -453,7 +453,7 @@ else if VComand='FOR' then
 				else if S[i] = '}' then
 					iii -= 1;
 		if (Length(S)>0) and (S[Length(S)] <> '}') then
-			S += SWinEoln;
+			S += DefaultEndOfLine;
 		while (iii > 0) and (FStream.Position <> FStream.Size) do
 			begin
 			FStream.ReadBuffer(CH,1);
@@ -620,8 +620,8 @@ if C='' then
 	if StringTrimAll(S1,' 	') <> '' then
 		begin
 		Result += S1;
-		if UseEoln and (StringTrimAll(S1,' 	') <> SWinEoln) then
-			Result += SWinEoln;
+		if UseEoln and (StringTrimAll(S1,' 	') <> DefaultEndOfLine) then
+			Result += DefaultEndOfLine;
 		end;
 	end
 else
@@ -629,8 +629,8 @@ else
 	S1 := ProcessComand(SUpCaseString(C),Params,Stream,WithComandShift(VAditionalParams,CS));
 	if StringTrimAll(S1,' 	') <> '' then
 		Result += S1;
-	if (StringTrimAll(S1,' 	') <> '') and UseEoln and (S1 <> SWinEoln) then
-		Result += SWinEoln;
+	if (StringTrimAll(S1,' 	') <> '') and UseEoln and (S1 <> DefaultEndOfLine) then
+		Result += DefaultEndOfLine;
 	SetLength(Params,0);
 	end;
 end;

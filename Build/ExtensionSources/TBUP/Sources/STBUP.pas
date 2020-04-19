@@ -6,10 +6,10 @@ interface
 
 uses 
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleMB(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleMB(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -19,20 +19,20 @@ uses
 	,TBUP
 	;
 
-procedure SConsoleMB(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleMB(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams = nil) or (Length(VParams) = 0) then
 	Run_TBUP()
 else
 	begin
 	SPrintEngineVersion();
-	WriteLn('Params is not allowed here!');
+	WriteLn('Params is not allowed here.');
 	end;
 end;
 
 initialization
 begin
-SOtherConsoleCaller.AddComand(@SConsoleMB, ['TBUP'], 'Run TBUP');
+SConsoleToolsConsoleHandler.AddComand(@SConsoleMB, ['TBUP'], 'Run "TBUP"');
 end;
 
 END.

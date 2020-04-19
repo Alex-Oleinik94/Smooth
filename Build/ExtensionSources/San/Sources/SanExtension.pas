@@ -6,10 +6,10 @@ interface
 
 uses 
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleSan(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleSan(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -18,7 +18,7 @@ uses
 	,san,sanprograms,crt,gl
 	;
 
-procedure SConsoleSan(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleSan(const VParams : TSConsoleHandlerParams = nil);
 var
 	fogColor:array[0..3]of real = (0,0,0,1);
 begin
@@ -47,7 +47,7 @@ end;
 
 initialization
 begin
-SOtherConsoleCaller.AddComand(@SConsoleSan, ['san'], 'Run San');
+SApplicationsConsoleHandler.AddComand(@SConsoleSan, ['san'], 'Run "San"');
 end;
 
 END.

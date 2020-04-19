@@ -192,8 +192,8 @@ with Stream do
 	begin
 	WriteLn('[ethernet]');
 	WriteLn(['Frame.Protocol= ', FrameName]);
-	WriteLn(['Frame.Size    = ', Size(), ', ', SGetSizeString(Size(), 'EN')]);
-	WriteLn(['Frame.Encapsulated size = ', SizeEncapsulated(), ', ', SGetSizeString(SizeEncapsulated(), 'EN')]);
+	WriteLn(['Frame.Size    = ', Size(), ', ', SMemorySizeToString(Size(), 'EN')]);
+	WriteLn(['Frame.Encapsulated size = ', SizeEncapsulated(), ', ', SMemorySizeToString(SizeEncapsulated(), 'EN')]);
 	WriteLn(['Destination   = ', Destination()]);
 	WriteLn(['Source        = ', Source()]);
 	WriteLn(['Protocol      = ', Protocol()]);

@@ -6,14 +6,14 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleAddToLog                              (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleExtractFiles                          (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleWriteOpenableExpansions               (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleWriteFiles                            (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleDllPrintStat                          (const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleAddToLog                              (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleExtractFiles                          (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleWriteOpenableExtensions               (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleWriteFiles                            (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleDllPrintStat                          (const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -29,7 +29,7 @@ uses
 	,SmoothLog
 	;
 
-procedure SConsoleAddToLog(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleAddToLog(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (SCountConsoleParams(VParams) = 2) and SResourceFiles.FileExists(VParams[0]) then
 	SAddToLog(VParams[0],VParams[1])
@@ -40,7 +40,7 @@ else
 	end;
 end;
 
-procedure SConsoleExtractFiles(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleExtractFiles(const VParams : TSConsoleHandlerParams = nil);
 var
 	Param : TSString;
 begin
@@ -58,7 +58,7 @@ else
 	end;
 end;
 
-procedure SConsoleWriteOpenableExpansions(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleWriteOpenableExtensions(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) > 0) then
 	begin
@@ -66,10 +66,10 @@ if (VParams <> nil) and (Length(VParams) > 0) then
 	WriteLn('Params is not allowed here!');
 	end
 else
-	SWriteOpenableExpansions();
+	SWriteOpenableExtensions();
 end;
 
-procedure SConsoleWriteFiles(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleWriteFiles(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) > 0) then
 	begin
@@ -80,7 +80,7 @@ else
 	SResourceFiles.WriteFiles();
 end;
 
-procedure SConsoleDllPrintStat(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleDllPrintStat(const VParams : TSConsoleHandlerParams = nil);
 var
 	Dll : TSDll;
 begin

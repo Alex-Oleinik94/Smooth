@@ -10,22 +10,25 @@ uses
 	,SmoothBase
 	;
 type
-	TSTimeNumber = TSInt64;
+	// 1 sec = 1 000 millisec
+	// 1 sec = 1 000 000 microsec
+	// 1 sec = 1 000 000 000 nanosec
+	TSTimeNumber = TSInt64; // разрешены отрицательные значение чтобы функционировал "вычет дат"
 	TSTimeMiniNumber = TSInt8;
 	TSTime = object
 			public
-		AllSeconds : TSTimeNumber;
-		Microseconds : TSTimeNumber;
+		class function Import(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime;
+		constructor Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber);
+			public
+		FSeconds : TSTimeNumber;
+		FMicroseconds : TSTimeNumber;
 			public
 		function Hours() : TSTimeMiniNumber;
 		function Minutes() : TSTimeMiniNumber;
 		function Seconds() : TSTimeMiniNumber;
-			public
-		class function Import(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime;
 		end;
 	TSTimeVal = TSTime;
 type
-	// Used Int64 (not UInt64) becouse "Ariphmetic overflow"
 	TSInt32List8 = array[0..7] of TSInt32;
 	PSInt32List8 = ^ TSInt32List8;
 	TSDateTime = object
@@ -40,24 +43,24 @@ type
 		procedure Import(a1, a2, a3, a4, a5, a6, a7, a8 : TSInt32);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure ImportFromSeconds(Sec : TSInt64);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		procedure Clear();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetPastMiliSeconds() : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		function GetPastMiliSecondsFrom(const DT : TSDateTime) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetPastMilliSeconds() : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function GetPastMilliSecondsFrom(const DT : TSDateTime) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 		function IsNull() : TSBoolean;
 		end;
 
-//Вычитает одну дату их другой. Из результата можно
-//Вызвать функцию, возвращающую прошедшые (мили)секунды
-//И получить разницу во времени этих дат в (мили)секундах
-operator - (const a, b : TSDateTime) : TSDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+//Вычитает одну дату их другой;
+// функция GetPastSeconds (GetPastMilliSeconds) возвращающет прошедшые (милли-)секунды;
+// результат: разница между датами в (милли-)секундах.
+operator - (const a, b : TSDateTime) : TSDateTime; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 function SSecondsToStringTime(VSeconds : TSInt64; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SMiliSecondsToStringTime(VSeconds : TSInt64; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMilliSecondsToStringTime(VSeconds : TSInt64; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function STextTimeBetweenDates(const D1, D2 : TSDateTime; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SNow() : TSDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SDateTimeString(const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SDateTimeString(const DateTime : TSDateTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SDateTimeCorrectionString(const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
-function SDateTimeCorrectionString(const Date : TSDateTime; const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SDateTimeString(const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeString(const DateTime : TSDateTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeCorrectionString(const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeCorrectionString(const Date : TSDateTime; const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -70,26 +73,31 @@ uses
 
 function TSTime.Hours() : TSTimeMiniNumber;
 begin
-Result := AllSeconds div 60 * 60;
+Result := Seconds div 60 * 60;
 end;
 
 function TSTime.Minutes() : TSTimeMiniNumber;
 begin
-Result := AllSeconds div 60 mod 60;
+Result := Seconds div 60 mod 60;
 end;
 
 function TSTime.Seconds() : TSTimeMiniNumber;
 begin
-Result := AllSeconds mod 60;
+Result := Seconds mod 60;
+end;
+
+constructor TSTime.Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber);
+begin
+FSeconds := ValueSeconds;
+FMicroseconds := ValueMicroseconds;
 end;
 
 class function TSTime.Import(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime;
 begin
-Result.AllSeconds := ValueSeconds;
-Result.Microseconds := ValueMicroseconds;
+Result.Create(ValueSeconds, ValueMicroseconds);
 end;
 
-function SDateTimeCorrectionString(const Date : TSDateTime; const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SDateTimeCorrectionString(const Date : TSDateTime; const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 with Date do
 	begin
@@ -109,21 +117,21 @@ with Time do
 	begin
 	Result += StringJustifyRight(SStr(Minutes), 2, '0') + Iff(ForFileSystem, '.', ':'); 
 	Result += StringJustifyRight(SStr(Seconds), 2, '0');
-	if AddMiliSeconds then
+	if AddMilliSeconds then
 		begin
 		Result += Iff(ForFileSystem, ',', '/'); 
-		Result += StringJustifyRight(SStr(Microseconds),  6, '0');
+		Result += StringJustifyRight(SStr(FMicroseconds),  6, '0');
 		end;
 	Result += ']';
 	end;
 end;
 
-function SDateTimeCorrectionString(const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeCorrectionString(const Time : TSTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-Result := SDateTimeCorrectionString(SNow(), Time, ForFileSystem, AddWeek, AddMiliSeconds);
+Result := SDateTimeCorrectionString(SNow(), Time, ForFileSystem, AddWeek, AddMilliSeconds);
 end;
 
-function SDateTimeString(const DateTime : TSDateTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeString(const DateTime : TSDateTime; const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
 with DateTime do
 	begin
@@ -140,7 +148,7 @@ with DateTime do
 	Result += StringJustifyRight(SStr(Hours),   2, '0') + Iff(ForFileSystem, '.', ':');
 	Result += StringJustifyRight(SStr(Minutes), 2, '0') + Iff(ForFileSystem, '.', ':'); 
 	Result += StringJustifyRight(SStr(Seconds), 2, '0');
-	if AddMiliSeconds then
+	if AddMilliSeconds then
 		begin
 		Result += Iff(ForFileSystem, ',', '/'); 
 		Result += StringJustifyRight(SStr(Sec100),  2, '0');
@@ -149,9 +157,9 @@ with DateTime do
 	end;
 end;
 
-function SDateTimeString(const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMiliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+function SDateTimeString(const ForFileSystem : TSBoolean = False; const AddWeek : TSBoolean = True; const AddMilliSeconds : TSBoolean = True) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin
-Result := SDateTimeString(SNow(), ForFileSystem, AddWeek, AddMiliSeconds);
+Result := SDateTimeString(SNow(), ForFileSystem, AddWeek, AddMilliSeconds);
 end;
 
 function SNow() : TSDateTime;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -161,10 +169,10 @@ end;
 
 function STextTimeBetweenDates(const D1, D2 : TSDateTime; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := StringTrimAll(SMiliSecondsToStringTime((D2 - D1).GetPastMiliSeconds(), Encoding), ' 	');
+Result := StringTrimAll(SMilliSecondsToStringTime((D2 - D1).GetPastMilliSeconds(), Encoding), ' 	');
 end;
 
-function SMiliSecondsToStringTime(VSeconds : TSInt64; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMilliSecondsToStringTime(VSeconds : TSInt64; const Encoding : TSString = 'RUS1251') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := '';
 if VSeconds div 100 <> 0 then
@@ -365,14 +373,14 @@ Seconds := 0;
 Sec100  := 0;
 end;
 
-function TSDateTime.GetPastMiliSeconds() : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSDateTime.GetPastMilliSeconds() : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Result := GetPastSeconds() * 100 + Sec100;
 end;
 
-function TSDateTime.GetPastMiliSecondsFrom(const DT : TSDateTime) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function TSDateTime.GetPastMilliSecondsFrom(const DT : TSDateTime) : TSInt64;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-Result := (Self - DT).GetPastMiliSeconds();
+Result := (Self - DT).GetPastMilliSeconds();
 end;
 
 

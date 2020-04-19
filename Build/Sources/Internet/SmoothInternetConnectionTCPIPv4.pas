@@ -144,12 +144,12 @@ end;
 procedure TSInternetConnectionTCPIPv4.HandlePacket(const Packet : TSEthernetPacketFrame);
 begin
 FCritacalSectionTCP.Enter();
-if AddressMatchesNetMask(Packet.IPv4^.Destination) then
+if AddressCorrespondsToNetMask(Packet.IPv4^.Destination) then
 	begin
 	FRecieverEmulator.HandleData(Packet.TCPIP^, Packet.Data);
 	FSenderEmulator.HandleAcknowledgement(Packet.TCPIP^.AcknowledgementNumber);
 	end;
-if AddressMatchesNetMask(Packet.IPv4^.Source) then
+if AddressCorrespondsToNetMask(Packet.IPv4^.Source) then
 	begin
 	FSenderEmulator.HandleData(Packet.TCPIP^, Packet.Data);
 	FRecieverEmulator.HandleAcknowledgement(Packet.TCPIP^.AcknowledgementNumber);
@@ -210,7 +210,7 @@ begin
 if (not FileSystemSuport) and (ProtocolAbbreviation() <> '') then
 	begin
 	if (not Finalized()) then
-		if (SNow() - FDateLastPacket).GetPastMiliSeconds() > 100 * FSecondsMeansConnectionActive then
+		if (SNow() - FDateLastPacket).GetPastMilliseconds() > 100 * FSecondsMeansConnectionActive then
 			TextStream.TextColor(ColorActive5secProtocol)
 		else
 			TextStream.TextColor(ColorActiveProtocol)
@@ -262,7 +262,7 @@ if not FileSystemSuport then
 		TextStream.TextColor(ColorBigSize)
 	else
 		TextStream.TextColor(ColorSize);
-	TextStream.Write(SGetSizeString(FDataSize, 'EN'));
+	TextStream.Write(SMemorySizeToString(FDataSize, 'EN'));
 	end;
 
 TextStream.TextColor(7);
@@ -295,7 +295,7 @@ FSourcePort := Packet.TCPIP^.SourcePort;
 FDestinationPort := Packet.TCPIP^.DestinationPort;
 FSourceAddress := Packet.IPv4^.Source;
 FDestinationAddress := Packet.IPv4^.Destination;
-FFirstPacketIsSelfSender := not AddressMatchesNetMask(FDestinationAddress);
+FFirstPacketIsSelfSender := not AddressCorrespondsToNetMask(FDestinationAddress);
 
 if FDeviceIPv4Supported and (not FFirstPacketIsSelfSender) then
 	begin
@@ -373,8 +373,8 @@ if PacketCompatible(Packet) then
 		Result := InitFirstPacket(Time, Date, Packet)
 	else if (FPacketCount > 0) and (
 			((not FSenderFinalized) and (not FRecieverFinalized)) or
-			(FSenderFinalized and AddressMatchesNetMask(Packet.IPv4^.Destination)) or
-			(FRecieverFinalized and AddressMatchesNetMask(Packet.IPv4^.Source)) ) then
+			(FSenderFinalized and AddressCorrespondsToNetMask(Packet.IPv4^.Destination)) or
+			(FRecieverFinalized and AddressCorrespondsToNetMask(Packet.IPv4^.Source)) ) then
 		Result := InitPacket(Time, Date, Packet);
 if Result then
 	UpDateStatistic(Time, Date, Packet);

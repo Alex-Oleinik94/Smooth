@@ -7,6 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothStringUtils
+	,SmoothFileUtils
 	
 	,Classes
 	;
@@ -34,7 +35,14 @@ function SReadStringInQuotesFromStream(const Stream : TStream; const Quote: TSCh
 function SReadPCharFromStream(const Stream : TStream) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SReadStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SReadLnStringFromStream(const Stream : TStream; const Eolns : TSCharSet = [#0, #27, #13, #10]) : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SWriteStringToStream(const String1 : TSString; const Stream : TStream; const Stavit0 : TSBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SWriteStringToStream(const S : TSString; const Stream : TStream; const EndOfString {#0} : TSBool = True); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} {deprecated}
+
+procedure SWriteStringToTextStream(const Stream : TStream; const S : TSString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SWriteLnStringToTextStream(const Stream : TStream; const S : TSString; const EndOfLine : TSString = DefaultEndOfLine); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
+procedure SWriteArrayOfVariantToTextStream(const Stream : TStream; const ArrayOfVariant : array of const); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SWriteLnArrayOfVariantToTextStream(const Stream : TStream; const ArrayOfVariant : array of const; const EndOfLine : TSString = DefaultEndOfLine); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 function SStringToStream(const Str : TSString) : TMemoryStream; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SMatchingStreamString(const Stream : TStream; const Str : TSString; const DestroyingStream : TSBoolean = False) : TSBool; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 function SStreamToHexString(const Stream : TStream; const RegisterType : TSBoolean = False) : TSString; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -51,9 +59,28 @@ procedure SKill(var Stream : TFileStream); {$IFDEF SUPPORTINLINE} inline; {$ENDI
 
 implementation
 
-uses
-	 SmoothFileUtils
-	;
+procedure SWriteArrayOfVariantToTextStream(const Stream : TStream; const ArrayOfVariant : array of const); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SWriteStringToTextStream(Stream, SStr(ArrayOfVariant));
+end;
+
+procedure SWriteLnArrayOfVariantToTextStream(const Stream : TStream; const ArrayOfVariant : array of const; const EndOfLine : TSString = DefaultEndOfLine); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+SWriteLnStringToTextStream(Stream, SStr(ArrayOfVariant), EndOfLine);
+end;
+
+procedure SWriteStringToTextStream(const Stream : TStream; const S : TSString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (S <> '') then
+	Stream.WriteBuffer(S[1], Length(S));
+end;
+
+procedure SWriteLnStringToTextStream(const Stream : TStream; const S : TSString; const EndOfLine : TSString = DefaultEndOfLine); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+if (S <> '') then
+	Stream.WriteBuffer(S[1], Length(S));
+SWriteStringToTextStream(Stream, EndOfLine);
+end;
 
 function SCreateMemoryStreamFromFile(const _FileName : TSString) : TMemoryStream;
 begin
@@ -209,12 +236,17 @@ if C <> Quote then
 until C = Quote;
 end;
 
-procedure SWriteStringToStream(const String1 : TSString; const Stream : TStream; const Stavit0 : TSBool = True);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SWriteStringToTextStream(const S : TSString; const Stream : TStream); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+begin
+Stream.WriteBuffer(S[1], Length(S));
+end;
+
+procedure SWriteStringToStream(const S : TSString; const Stream : TStream; const EndOfString {#0} : TSBool = True); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	C : TSChar = #0;
 begin
-Stream.WriteBuffer(String1[1], Length(String1));
-if Stavit0 then
+Stream.WriteBuffer(S[1], Length(S));
+if EndOfString then
 	Stream.WriteBuffer(C, SizeOf(TSChar));
 end;
 

@@ -7,10 +7,10 @@ interface
 uses
 	 SmoothBase
 	,SmoothLists
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleGoogleReNameCache(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleGoogleReNameCache(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -33,7 +33,7 @@ uses
 	,SmoothLog
 	;
 
-procedure SConsoleGoogleReNameCache(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleGoogleReNameCache(const VParams : TSConsoleHandlerParams = nil);
 type
 	TSGRCResult = (SBad, SSuccess, SUnknown);
 var
@@ -70,7 +70,7 @@ Result := Stream;
 Result.Position := 0;
 end;
 
-function FindFileExpansion(const Stream : TStream) : TSString;
+function FindFileExtension(const Stream : TStream) : TSString;
 
 function MatchingByte(const B : TSByte) : TSBool;
 var
@@ -103,7 +103,7 @@ if MatchingByte(8508) or
    MatchingByte(28777) or
    MatchingByte(10250) then
 	Result := ' ';
-Result := TSImageFormatDeterminer.DetermineExpansion(Stream);
+Result := TSImageFormatDeterminer.DetermineFileExtension(Stream);
 if MatchingByte(22339) then ; //хз
 if MatchingByte(20617) then Result := 'png';
 if MatchingByte(55551) then Result := 'jpg';
@@ -129,34 +129,34 @@ SetLength(Str, Len);
 Stream.ReadBuffer(Str[0], Len);
 for C in Str do
 	Str2 += C;
-SHint(['GRC: Unknown "',FileName,'", ', SGetSizeString(Stream.Size, 'EN'),' : ', Str2, SStringIf(Len <> Stream.Size, '..')]);
+SHint(['GRC: Unknown "',FileName,'", ', SMemorySizeToString(Stream.Size, 'EN'),' : ', Str2, SStringIf(Len <> Stream.Size, '..')]);
 SetLength(Str, 0);
 end;
 
 function Proccess(const FileName : TSString) : TSGRCResult;
 var
-	Expansion : TSString;
+	Extension : TSString;
 	Stream : TMemoryStream = nil;
 begin
 Result := SBad;
-Expansion := '';
+Extension := '';
 Stream := TMemoryStream.Create();
 Stream.LoadFromFile(CacheDirectory + DirectorySeparator + FileName);
-Expansion := FindFileExpansion(Stream);
-if (Expansion = '') and WriteUnknows then
+Extension := FindFileExtension(Stream);
+if (Extension = '') and WriteUnknows then
 	WriteUnknownFile(FileName, Stream);
 Stream.Destroy();
 Stream := nil;
-if Expansion=' ' then
+if Extension=' ' then
 	begin
 	if TempDirectoryEnabled then
 		MoveCachedFile(CacheDirectory + DirectorySeparator + FileName, TempDirectory + DirectorySeparator + FileName);
 	end
-else if Expansion<>'' then
-	MoveCachedFile(CacheDirectory + DirectorySeparator + FileName, ComplitedDirectory + DirectorySeparator + FileName + '.' + Expansion);
-if Expansion = '' then
+else if Extension<>'' then
+	MoveCachedFile(CacheDirectory + DirectorySeparator + FileName, ComplitedDirectory + DirectorySeparator + FileName + '.' + Extension);
+if Extension = '' then
 	Result := SUnknown
-else if Expansion = ' ' then
+else if Extension = ' ' then
 	Result := SBad
 else
 	Result := SSuccess;
@@ -278,7 +278,7 @@ end;
 begin
 Result := True;
 if (VParams <> nil) and (Length(VParams) > 0) then
-	with TSConsoleCaller.Create(VParams) do
+	with TSConsoleHandler.Create(VParams) do
 		begin
 		Category('Settings');
 		AddComand(@EnableTempDirectory, ['temp'], 'Enable temp directory');

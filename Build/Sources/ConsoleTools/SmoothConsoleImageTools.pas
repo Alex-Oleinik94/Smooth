@@ -6,11 +6,11 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleImageResizer                          (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConvertImageToSmoothImageAlphaFormat    (const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleImageResizer                            (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConvertImageToSmoothImageAlphaFormat    (const VParams : TSConsoleHandlerParams = nil);
 procedure SConvertToSIA(const InFile, OutFile : TSString);
 
 implementation
@@ -37,7 +37,7 @@ Image.Save(SImageFormatSIA);
 SKill(Image);
 end;
 
-procedure SConsoleConvertImageToSmoothImageAlphaFormat(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConvertImageToSmoothImageAlphaFormat(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (
 	(StringTrimLeft(SUpCaseString(VParams[0]), '-') = '?') or
@@ -64,7 +64,7 @@ else
 	end;
 end;
 
-procedure SConsoleImageResizer(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleImageResizer(const VParams : TSConsoleHandlerParams = nil);
 var
 	Image : TSImage;
 begin

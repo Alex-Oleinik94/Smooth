@@ -16,7 +16,7 @@ uses
 	,SmoothMath
 	,SmoothAdamsSystemExample
 	{$IF defined(ENGINE)}
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		,SmoothConsoleTools
 		{$ENDIF}
 	,SmoothStringUtils
@@ -191,7 +191,7 @@ WriteLn('Результат сохранен в "', 'Ex11_Output.txt', '".');
 end;
 
 {$IFDEF ENGINE}
-	procedure SConsoleEx11(const VParams : TSConcoleCallerParams = nil);
+	procedure SConsoleEx11(const VParams : TSConsoleHandlerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -204,7 +204,7 @@ Go();
 	end;
 	initialization
 	begin
-	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx11, ['ex11'], 'Example 11');
+	SConsoleToolsConsoleHandler.AddComand('Examples', @SConsoleEx11, ['ex11'], 'Example 11');
 	end;
 	
 	end.

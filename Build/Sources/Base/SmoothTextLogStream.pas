@@ -15,7 +15,7 @@ type
 	TSTextLogStream = class(TSTextStream)
 			public
 		procedure WriteLn(); override;
-		procedure Write(const StringToWrite : TSString); override;
+		procedure Write(const S : TSString); override;
 		end;
 
 procedure SKill(var TextStream : TSTextLogStream); overload; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -40,9 +40,9 @@ begin
 SLog.Source('', False);
 end;
 
-procedure TSTextLogStream.Write(const StringToWrite : TSString);
+procedure TSTextLogStream.Write(const S : TSString);
 begin
-SLog.Source(StringToWrite, False, False);
+SLog.Source(S, False, False);
 end;
 
 end.

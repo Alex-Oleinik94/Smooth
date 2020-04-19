@@ -17,7 +17,7 @@ uses
 	,SmoothAdamsSystemExample
 	,SmoothStringUtils
 	{$IF defined(ENGINE)}
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		,SmoothConsoleTools
 		{$ENDIF}
 	
@@ -145,7 +145,7 @@ SetLength(AdamsResult,0);
 end;
 
 {$IFDEF ENGINE}
-	procedure SConsoleEx10(const VParams : TSConcoleCallerParams = nil);
+	procedure SConsoleEx10(const VParams : TSConsoleHandlerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -158,7 +158,7 @@ Go();
 	end;
 	initialization
 	begin
-	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx10, ['ex10'], 'Example 10');
+	SConsoleToolsConsoleHandler.AddComand('Examples', @SConsoleEx10, ['ex10'], 'Example 10');
 	end;
 	
 	end.

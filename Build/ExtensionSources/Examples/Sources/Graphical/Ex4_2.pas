@@ -19,7 +19,7 @@ uses
 	,SmoothCamera
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	;
 type
@@ -145,6 +145,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample4_2, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample4_2, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

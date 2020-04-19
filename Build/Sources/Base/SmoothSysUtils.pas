@@ -267,10 +267,10 @@ var
 	{Frame  : Pointer;   // How to get long stack trace
 	OldFrame : Pointer;}
 begin
-Report := 'An unhandled exception occurred at ' + SAddrStr(ExceptAddr) + ':' + SWinEoln;
+Report := 'An unhandled exception occurred at ' + SAddrStr(ExceptAddr) + ':' + DefaultEndOfLine;
 if E <> nil then
-	Report += E.ClassName + ': ' + E.Message + SWinEoln;
-Report += BackTraceStrFunc(ExceptAddr) + SWinEoln;
+	Report += E.ClassName + ': ' + E.Message + DefaultEndOfLine;
+Report += BackTraceStrFunc(ExceptAddr) + DefaultEndOfLine;
 if (ExceptFrameCount > 0) then
 	begin
 	H := ExceptFrameCount - 1;
@@ -279,7 +279,7 @@ if (ExceptFrameCount > 0) then
 		begin
 		Report += BackTraceStrFunc(Frames[I]);
 		if I <> H then
-			Report += SWinEoln;
+			Report += DefaultEndOfLine;
 		end;
 	{Frame := get_caller_frame(Frames[H], get_caller_addr(Frames[H]));
 	while (Frame <> nil) do

@@ -12,16 +12,16 @@ uses
 	;
 
 var
-	SConcoleCaller : procedure(const VParams : TSConcoleCallerParams = nil);cdecl;
+	SConsoleHandler : procedure(const VParams : TSConsoleHandlerParams = nil);cdecl;
 	SGetEngineVersion : function () : TSString;
 
-procedure SStandartLibraryCallConcoleCaller();
+procedure SExecuteLibraryConsoleHandler();
 
 implementation
 
-procedure SStandartLibraryCallConcoleCaller();
+procedure SExecuteLibraryConsoleHandler();
 begin
-if SConcoleCaller = nil then
+if SConsoleHandler = nil then
 	begin
 	SPrintEngineVersion();
 	WriteLn('Error while loading Smooth library!');
@@ -29,7 +29,7 @@ if SConcoleCaller = nil then
 else
 	begin
 	//WriteLn('Running Smooth library version: ', SGetEngineVersion());
-	SConcoleCaller(SSystemParamsToConcoleCallerParams());
+	SConsoleHandler(SSystemParamsToConsoleHandlerParams());
 	end;
 end;
 
@@ -41,7 +41,7 @@ begin
 if Lib <> 0 then
 	UnloadLibrary(Lib);
 Lib := 0;
-SConcoleCaller := nil;
+SConsoleHandler := nil;
 SGetEngineVersion := nil;
 end;
 
@@ -51,7 +51,7 @@ const
 begin
 FreeLibrary();
 Lib := LoadLibrary(LibraryName);
-Pointer(SConcoleCaller) := GetProcAddress(Lib,'SConcoleCaller');
+Pointer(SConsoleHandler) := GetProcAddress(Lib,'SConsoleHandler');
 Pointer(SGetEngineVersion) := GetProcAddress(Lib,'SGetEngineVersion');
 end;
 

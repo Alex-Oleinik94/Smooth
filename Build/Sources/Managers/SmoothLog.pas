@@ -42,7 +42,7 @@ uses
 	,SmoothBaseUtils
 	,SmoothConsoleUtils
 	,SmoothEncodingUtils
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	,SmoothLogStream
 	
 	,StrMan
@@ -76,7 +76,7 @@ if SFileExists(FileName) then
 	FFileStream.Position := FFileStream.Size;
 	end;
 ss := SLogDateTimeString() + Line;
-pc := SStringToPChar(ss + SWinEoln);
+pc := SStringToPChar(ss + DefaultEndOfLine);
 FFileStream.WriteBuffer(pc^, Length(ss) + 2);
 FreeMem(pc, Length(ss) + 3);
 FFileStream.Position := 0;
@@ -177,7 +177,7 @@ SLogWrite(
 	Iff(WithTime, SLogDateTimeString()) + 
 	SStringDeleteEndOfLineDublicates(
 		SConvertString(S, SEncodingWindows1251) + 
-		Iff(WithEoln, SWinEoln)))
+		Iff(WithEoln, DefaultEndOfLine)))
 end;
 
 procedure SLogParams(Params : TSStringList; const FreeMemList : TSBoolean = True);
@@ -207,7 +207,7 @@ if LogEnablement <> SLogDisabled then
 	SLog.Source('* (v)_(O_o)_(V)  Smooth log  (V)_(o_O)_(v) *', False);
 	SLog.Source('********************************************', False);
 	SLog.Source('		<< Log created >>');
-	SLogParams(SSystemParamsToConcoleCallerParams());
+	SLogParams(SSystemParamsToConsoleHandlerParams());
 	end;
 end;
 

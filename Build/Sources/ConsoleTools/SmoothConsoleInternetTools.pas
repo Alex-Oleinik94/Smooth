@@ -6,15 +6,15 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleHTTPGet(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleNetServer(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleNetClient(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleInternetPacketRuntimeDumper(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleDescriptPCapNG(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConnectionsCaptor(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleHTTPGet(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleNetServer(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleNetClient(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleInternetPacketRuntimeDumper(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleDescriptPCapNG(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConnectionsCaptor(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -36,7 +36,7 @@ uses
 	,SmoothInternetConnectionsCaptor
 	;
 
-procedure SConsoleConnectionsCaptor(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConnectionsCaptor(const VParams : TSConsoleHandlerParams = nil);
 var
 	ModeDataTransfer : TSBoolean = False;
 	ModePacketStorage : TSBoolean = False;
@@ -80,7 +80,7 @@ var
 begin
 SPrintEngineVersion();
 if (VParams <> nil) and (Length(VParams) > 0) then
-	with TSConsoleCaller.Create(VParams) do
+	with TSConsoleHandler.Create(VParams) do
 		begin
 		AddComand(@ProccessLargeStatisticsInformation, ['lsi'],  'Large statistics information');
 		Category('Modes');
@@ -108,7 +108,7 @@ if Success then
 	end;
 end;
 
-procedure SConsoleDescriptPCapNG(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleDescriptPCapNG(const VParams : TSConsoleHandlerParams = nil);
 var
 	Index : TSMaxEnum;
 	AllParamsFileExists : TSBoolean = True;
@@ -131,7 +131,7 @@ else
 	SHint('Error: Specify PCapNG file(s)!');
 end;
 
-procedure SConsoleInternetPacketRuntimeDumper(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleInternetPacketRuntimeDumper(const VParams : TSConsoleHandlerParams = nil);
 begin
 if SCountConsoleParams(VParams) = 0 then
 	begin
@@ -145,7 +145,7 @@ else
 	SHint('Params are not alowed here!');
 end;
 
-procedure SConsoleNetClient(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleNetClient(const VParams : TSConsoleHandlerParams = nil);
 var
 	URL : TSString = '';
 begin
@@ -159,7 +159,7 @@ else
 	end;
 end;
 
-procedure SConsoleNetServer(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleNetServer(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (SCountConsoleParams(VParams) = 1) and (SVal(VParams[0]) <> 0) then
 	begin
@@ -172,7 +172,7 @@ else
 	end;
 end;
 
-procedure SConsoleHTTPGet(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleHTTPGet(const VParams : TSConsoleHandlerParams = nil);
 var
 	URL : TSString = '';
 	FileName : TSString = '';

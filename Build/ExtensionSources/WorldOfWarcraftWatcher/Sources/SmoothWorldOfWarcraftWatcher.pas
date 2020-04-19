@@ -7,7 +7,7 @@ interface
 uses
 	 SmoothBase
 	,SmoothBaseClasses
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	,SmoothWorldOfWarcraftConnectionHandler
 	,SmoothWorldOfWarcraftWatcherPaintable
 	,SmoothContextHandler
@@ -21,8 +21,8 @@ type
 		constructor Create(); override;
 		destructor Destroy(); override;
 			public
-		function Init(const _Params : TSConcoleCallerParams = nil) : TSBoolean;
-		class function Initialize(const _Params : TSConcoleCallerParams = nil) : TSWorldOfWarcraftWatcher;
+		function Init(const _Params : TSConsoleHandlerParams = nil) : TSBoolean;
+		class function Initialize(const _Params : TSConsoleHandlerParams = nil) : TSWorldOfWarcraftWatcher;
 		procedure Loop();
 			protected
 		procedure IconMouseCallBack(const Button : TSCursorButton; const ButtonType : TSCursorButtonType);
@@ -42,7 +42,7 @@ type
 		FIcon : TSSystemTrayIcon;
 		end;
 
-procedure SConsoleWorldOfWarcraftWatcher(const _Params : TSConcoleCallerParams = nil);
+procedure SConsoleWorldOfWarcraftWatcher(const _Params : TSConsoleHandlerParams = nil);
 procedure SKill(var WorldOfWarcraftWatcher : TSWorldOfWarcraftWatcher); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 implementation
@@ -61,7 +61,7 @@ uses
 
 procedure TSWorldOfWarcraftWatcher.LogonConnectionCallBack(const LogonConnection : TSWOWLogonConnection);
 begin
-FIcon.Tip := FIcon.Tip + SWinEoln + LogonConnection.ClientALC.SRP_I;
+FIcon.Tip := FIcon.Tip + DefaultEndOfLine + LogonConnection.ClientALC.SRP_I;
 end;
 
 procedure TSWorldOfWarcraftWatcher.SetPaintableSettings();
@@ -148,7 +148,7 @@ if not FEmbedded then
 	ChangeWindowVisible();
 end;
 
-function TSWorldOfWarcraftWatcher.Init(const _Params : TSConcoleCallerParams = nil) : TSBoolean;
+function TSWorldOfWarcraftWatcher.Init(const _Params : TSConsoleHandlerParams = nil) : TSBoolean;
 
 function ProccessEmbedded(const Comand : TSString) : TSBoolean;
 begin
@@ -159,7 +159,7 @@ end;
 begin
 Result := True;
 if (_Params <> nil) and (Length(_Params) > 0) then
-	with TSConsoleCaller.Create(_Params) do
+	with TSConsoleHandler.Create(_Params) do
 		begin
 		Category('"World of Warcraft Watcher" help');
 		AddComand(@ProccessEmbedded, ['e', 'embedded'],  'Runs embedded');
@@ -179,7 +179,7 @@ while (not FHalt) do
 	end;
 end;
 
-class function TSWorldOfWarcraftWatcher.Initialize(const _Params : TSConcoleCallerParams = nil) : TSWorldOfWarcraftWatcher;
+class function TSWorldOfWarcraftWatcher.Initialize(const _Params : TSConsoleHandlerParams = nil) : TSWorldOfWarcraftWatcher;
 begin
 Result := TSWorldOfWarcraftWatcher.Create();
 Result.Init(_Params);
@@ -206,7 +206,7 @@ end;
 var
 	WorldOfWarcraftWatcher : TSWorldOfWarcraftWatcher = nil;
 
-procedure SConsoleWorldOfWarcraftWatcher(const _Params : TSConcoleCallerParams = nil);
+procedure SConsoleWorldOfWarcraftWatcher(const _Params : TSConsoleHandlerParams = nil);
 begin
 if WorldOfWarcraftWatcher = nil then
 	begin
@@ -230,7 +230,7 @@ end;
 
 initialization
 begin
-SApplicationsConsoleCaller.AddComand(@SConsoleWorldOfWarcraftWatcher, ['woww'], 'World of Warcraft Watcher');
+SApplicationsConsoleHandler.AddComand(@SConsoleWorldOfWarcraftWatcher, ['woww'], 'World of Warcraft Watcher');
 end;
 
 end.

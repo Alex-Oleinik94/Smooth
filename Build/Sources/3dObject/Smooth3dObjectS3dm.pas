@@ -347,7 +347,7 @@ SCopyPartStreamToStream(Stream, MemoryStream, MemoryStreamSize);
 MemoryStream.Position := 0;
 Image.Load(MemoryStream);
 MemoryStream.Destroy();
-SLog.Source(['TS3dObjectS3DMLoader_LoadImage()__LoadSIA(). Current stream size = ', SGetSizeString(MemoryStreamSize, 'EN'), '.']);
+SLog.Source(['TS3dObjectS3DMLoader_LoadImage()__LoadSIA(). Current stream size = ', SMemorySizeToString(MemoryStreamSize, 'EN'), '.']);
 end;
 
 var
@@ -385,7 +385,7 @@ MemoryStreamSize := MemoryStream.Size;
 WriteEnum(Stream, MemoryStreamSize);
 SCopyPartStreamToStream(MemoryStream, Stream, MemoryStreamSize);
 MemoryStream.Destroy();
-SLog.Source(['TS3dObjectS3DMLoader_SaveImage()__SaveSIA(). Result stream size = ', SGetSizeString(MemoryStreamSize, 'EN'), '.']);
+SLog.Source(['TS3dObjectS3DMLoader_SaveImage()__SaveSIA(). Result stream size = ', SMemorySizeToString(MemoryStreamSize, 'EN'), '.']);
 end;
 
 begin

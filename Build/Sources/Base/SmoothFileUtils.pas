@@ -65,12 +65,14 @@ const
 	SAbsoluteTexturesDirectory = SAbsoluteTextureDirectory;
 	SAbsoluteFontsDirectory    = SAbsoluteFontDirectory;
 const
-	// End Of Line or File
-	SUnixEoln = #10;
-	SWinEoln  = #13#10;
-	SMacEoln  = #13;
-	SEof      = #$1A;
-
+	// end of line
+	CR = #13; // "Mac end of line"
+	LF = #10; // "Unix end of line"
+	CRLF = #13#10; // "Win end of line"
+	DefaultEndOfLine = CRLF;
+	// end of file
+	EndOfFile = #$1A;
+	
 (************)
 (** COMMON **)
 (************)
@@ -82,10 +84,10 @@ procedure SExportStringToFile(const FileName, Data : TSString);{$IFDEF SUPPORTIN
 (** FILE **)
 (**********)
 
-function SFileExpansion(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SFileNameWithoutExpansion(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileNameWithoutExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SFreeFileName(const Name : TSString; const Sl : TSString = 'Copy') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SSetExpansionToFileName(const FileName, Expansion : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SSetExtensionToFileName(const FileName, Extension : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SFileName(const PathName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SFilePath(Path : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SApplicationFileName() : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -199,7 +201,7 @@ end;
 
 function SFilePath(Path : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i, ii : TSUInt32;
+	Index, Index2 : TSUInt32;
 begin
 Path := SCheckDirectorySeparators(Path);
 if SFileName(Path) = '' then
@@ -207,31 +209,31 @@ if SFileName(Path) = '' then
 else
 	begin
 	Result:='';
-	ii := 0;
-	for i:=1 to Length(Path) do
-		if Path[i] in [UnixDirectorySeparator, WinDirectorySeparator] then
-			ii:=i;
-	if ii<>0 then
+	Index2 := 0;
+	for Index:=1 to Length(Path) do
+		if Path[Index] in [UnixDirectorySeparator, WinDirectorySeparator] then
+			Index2:=Index;
+	if Index2<>0 then
 		begin
-		for i:=1 to ii do
-			Result += Path[i];
+		for Index:=1 to Index2 do
+			Result += Path[Index];
 		end;
 	end;
 end;
 
 function SFileName(const PathName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 	B : TSBool   = False;
 	E : TSBool   = False;
 	S : TSString = '';
 begin
 Result:='';
-i:=Length(PathName);
-while (not E) and (i>0) and (PathName[i]<>UnixDirectorySeparator) and (PathName[i]<>WinDirectorySeparator)  do
+Index:=Length(PathName);
+while (not E) and (Index>0) and (PathName[Index]<>UnixDirectorySeparator) and (PathName[Index]<>WinDirectorySeparator)  do
 	begin
-	Result+=PathName[i];
-	if PathName[i]='.' then
+	Result+=PathName[Index];
+	if PathName[Index]='.' then
 		if b then
 			E:=True
 		else
@@ -239,28 +241,28 @@ while (not E) and (i>0) and (PathName[i]<>UnixDirectorySeparator) and (PathName[
 			b:=True;
 			Result:='';
 			end;
-	i-=1;
+	Index-=1;
 	end;
 S:=Result;
 Result:='';
-for i:=Length(S) downto 1 do
-	Result+=S[i];
+for Index:=Length(S) downto 1 do
+	Result+=S[Index];
 SetLength(S,0);
 Result := SCheckDirectorySeparators(Result);
 end;
 
-function SSetExpansionToFileName(const FileName, Expansion : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SSetExtensionToFileName(const FileName, Extension : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if Expansion <> '' then
-	Result := SFilePath(FileName) + SFileNameWithoutExpansion(SFileName(FileName)) + '.' + Expansion
+if Extension <> '' then
+	Result := SFilePath(FileName) + SFileNameWithoutExtension(SFileName(FileName)) + '.' + Extension
 else
-	Result := SFilePath(FileName) + SFileNameWithoutExpansion(SFileName(FileName));
+	Result := SFilePath(FileName) + SFileNameWithoutExtension(SFileName(FileName));
 Result := SCheckDirectorySeparators(Result);
 end;
 
 function SFreeFileName(const Name : TSString; const Sl : TSString = 'Copy') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	FileExpansion : TSString = '';
+	FileExtension : TSString = '';
 	FileName      : TSString = '';
 
 function FileNameFromNumber(const Number : TSInt32) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -273,8 +275,8 @@ if Number > 0 then
 		Result += Sl + ' ';
 	Result += SStr(Number) + ')';
 	end;
-if FileExpansion <> '' then
-	Result += '.' + FileExpansion;
+if FileExtension <> '' then
+	Result += '.' + FileExtension;
 end;
 
 var
@@ -282,8 +284,8 @@ var
 begin
 if SFileExists(Name) then
 	begin
-	FileExpansion := SFileExpansion(Name);
-	FileName := SFileNameWithoutExpansion(Name);
+	FileExtension := SFileExtension(Name);
+	FileName := SFileNameWithoutExtension(Name);
 	while SFileExists(FileNameFromNumber(Number)) do
 		Number += 1;
 	Result := FileNameFromNumber(Number);
@@ -293,16 +295,16 @@ else
 Result := SCheckDirectorySeparators(Result);
 end;
 
-function SFileNameWithoutExpansion(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileNameWithoutExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	i : TSInt32;
+	Index : TSInt32;
 	PointPosition : TSInt32 = 0;
 begin
-for i:=1 to Length(FileName) do
+for Index:=1 to Length(FileName) do
 	begin
-	if FileName[i]='.' then
+	if FileName[Index]='.' then
 		begin
-		PointPosition:=i;
+		PointPosition:=Index;
 		end;
 	end;
 if (PointPosition=0) then
@@ -310,16 +312,16 @@ if (PointPosition=0) then
 else
 	begin
 	Result:='';
-	for i:=1 to PointPosition-1 do
-		Result+=FileName[i];
+	for Index:=1 to PointPosition-1 do
+		Result+=FileName[Index];
 	end;
 Result := SCheckDirectorySeparators(Result);
 end;
 
-function SFileExpansion(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SFileExtension(const FileName : TSString) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	i : TSInt32;
-	Expansion : TSString = '';
+	Extension : TSString = '';
 begin
 Result:='';
 i:=Length(FileName);
@@ -332,12 +334,12 @@ if FileName=Result then
 	Result:=''
 else
 	begin
-	Expansion:=Result;
+	Extension:=Result;
 	Result:='';
-	i:=Length(Expansion);
+	i:=Length(Extension);
 	while i<>0 do
 		begin
-		Result+=Expansion[i];
+		Result+=Extension[i];
 		i-=1;
 		end;
 	end;

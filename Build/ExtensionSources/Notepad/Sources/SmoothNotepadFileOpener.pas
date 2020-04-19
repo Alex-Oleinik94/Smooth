@@ -15,9 +15,9 @@ type
 	TSNotepadFileOpener = class(TSFileOpener)
 			public
 		class function ClassName() : TSString; override;
-		class function GetExpansions() : TSStringList; override;
+		class function GetExtensions() : TSStringList; override;
 		class function GetDrawableClass() : TSFileOpenerDrawableClass;override;
-		class function ExpansionsSupported(const VExpansions : TSStringList) : TSBool; override;
+		class function ExtensionsSupported(const VExtensions : TSStringList) : TSBool; override;
 		end;
 
 	TSNotepadFileOpenerDrawable = class (TSFileOpenerDrawable)
@@ -45,7 +45,7 @@ begin
 Result := 'TSNotepadFileOpener';
 end;
 
-class function TSNotepadFileOpener.GetExpansions() : TSStringList;
+class function TSNotepadFileOpener.GetExtensions() : TSStringList;
 begin
 Result := nil;
 
@@ -82,13 +82,13 @@ begin
 Result := TSNotepadFileOpenerDrawable;
 end;
 
-class function TSNotepadFileOpener.ExpansionsSupported(const VExpansions : TSStringList) : TSBool;
+class function TSNotepadFileOpener.ExtensionsSupported(const VExtensions : TSStringList) : TSBool;
 var
 	SL : TSStringList = nil;
 begin
-SL := GetExpansions();
+SL := GetExtensions();
 SL := SUpCasedStringList(SL, True);
-Result := VExpansions in SL;
+Result := VExtensions in SL;
 SetLength(SL, 0);
 end;
 

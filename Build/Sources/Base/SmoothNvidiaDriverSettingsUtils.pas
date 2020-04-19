@@ -321,7 +321,7 @@ function SNvApiStrBinarySetting(const BinarySetting : NVDRS_BINARY_SETTING) : TS
 var
 	Index : TSMaxEnum;
 begin
-Result := '(size = ' + SGetSizeString(BinarySetting.valueLength, 'EN') + ')';
+Result := '(size = ' + SMemorySizeToString(BinarySetting.valueLength, 'EN') + ')';
 if BinarySetting.valueLength > 0 then
 	begin
 	Result += ' 0x';

@@ -96,7 +96,7 @@ while InFileStream.Position <> InFileStream.Size do
 		SWriteStringToStream(W, OutFileStream, False);
 		//if VMode = SDDHModeDelphi then
 		//	SWriteStringToStream(') ', OutFileStream, False);
-		SWriteStringToStream(' := nil;' + SWinEoln, OutFileStream, False);
+		SWriteStringToStream(' := nil;' + DefaultEndOfLine, OutFileStream, False);
 		end;
 	end;
 SHint('Total lines : ' + SStr(l));
@@ -332,7 +332,7 @@ end;
 
 procedure TSDoDynamicHeader.WriteLnString(const S : TSString);
 begin
-SWriteStringToStream(S + SWinEoln, FOutStream, False);
+SWriteStringToStream(S + DefaultEndOfLine, FOutStream, False);
 end;
 
 function TSDoDynamicHeader.StringInQuotes(const S : TSString):TSString;
@@ -350,7 +350,7 @@ if FMode <> SDDHModeObjFpc then
 	WriteString(Ex.FPascalName);
 	{WriteString(
 		' if @' + Ex.FPascalName + ' = nil then begin WriteLn(''Error while loading "'+
-		Ex.FPascalName+'" from "'',UnitName,''".''); Result := False; end;' + SWinEoln);}
+		Ex.FPascalName+'" from "'',UnitName,''".''); Result := False; end;' + DefaultEndOfLine);}
 	end
 else
 	begin
@@ -548,7 +548,7 @@ for i := 1 to Length(S) do
 	end;
 AddExternalProcedure(GetProcName(), GetProcExternalName(), GetProcLib());
 Result := 'var ' + GetProcName() + ' : ' + GetProcType();
-Result += SWinEoln;
+Result += DefaultEndOfLine;
 end;
 
 function ReadChar() : TSChar;
@@ -624,141 +624,141 @@ end;
 var
 	ii : TSLongWord;
 begin
-//WriteString(SWinEoln + '{$mode '+FMode+'}' + SWinEoln);
+//WriteString(DefaultEndOfLine + '{$mode '+FMode+'}' + DefaultEndOfLine);
 ProcessTypification();
 
-WriteString('// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=' + SWinEoln);
-WriteString('// =*=*= Smooth DLL IMPLEMENTATION =*=*=*=' + SWinEoln);
-WriteString('// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=' + SWinEoln);
-WriteString(SWinEoln);
+WriteString('// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=' + DefaultEndOfLine);
+WriteString('// =*=*= Smooth DLL IMPLEMENTATION =*=*=*=' + DefaultEndOfLine);
+WriteString('// =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=' + DefaultEndOfLine);
+WriteString(DefaultEndOfLine);
 
 if FWriteMode <> SDDHWriteModeObjectSmooth then
 	begin
-	WriteString(SWinEoln + 'procedure Load_HINT(const Er : String);' + SWinEoln);
-	WriteString('begin' + SWinEoln);
+	WriteString(DefaultEndOfLine + 'procedure Load_HINT(const Er : String);' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
 	if FWriteMode = SDDHWriteModeSmooth then
 		WriteString('//');
-	WriteString('WriteLn(Er);' + SWinEoln);
+	WriteString('WriteLn(Er);' + DefaultEndOfLine);
 	if not (FWriteMode = SDDHWriteModeFpc) then
-		WriteString('SLog.Source(Er);' + SWinEoln)
+		WriteString('SLog.Source(Er);' + DefaultEndOfLine)
 	else
-		WriteString('//Can source Er to log' + SWinEoln);
-	WriteString('end;' + SWinEoln);
+		WriteString('//Can source Er to log' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
 	end;
 
 if FWriteMode = SDDHWriteModeObjectSmooth then
 	begin
-	WriteString('type' + SWinEoln);
-	WriteString('	TSDll' + UnitName + ' = class(TSDll)' + SWinEoln);
-	WriteString('			public' + SWinEoln);
-	WriteString('		class function SystemNames() : TSStringList; override;' + SWinEoln);
-	WriteString('		class function DllNames() : TSStringList; override;' + SWinEoln);
-	WriteString('		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;' + SWinEoln);
-	WriteString('		class procedure Free(); override;' + SWinEoln);
-	WriteString('		end;' + SWinEoln);
+	WriteString('type' + DefaultEndOfLine);
+	WriteString('	TSDll' + UnitName + ' = class(TSDll)' + DefaultEndOfLine);
+	WriteString('			public' + DefaultEndOfLine);
+	WriteString('		class function SystemNames() : TSStringList; override;' + DefaultEndOfLine);
+	WriteString('		class function DllNames() : TSStringList; override;' + DefaultEndOfLine);
+	WriteString('		class function Load(const VDll : TSLibHandle) : TSDllLoadObject; override;' + DefaultEndOfLine);
+	WriteString('		class procedure Free(); override;' + DefaultEndOfLine);
+	WriteString('		end;' + DefaultEndOfLine);
 	end;
 
 if FWriteMode <> SDDHWriteModeObjectSmooth then
-	WriteString('procedure Free_'+UnitName+'();' + SWinEoln)
+	WriteString('procedure Free_'+UnitName+'();' + DefaultEndOfLine)
 else
-	WriteString('class procedure TSDll' + UnitName + '.Free();' + SWinEoln);
-WriteString('begin' + SWinEoln);
+	WriteString('class procedure TSDll' + UnitName + '.Free();' + DefaultEndOfLine);
+WriteString('begin' + DefaultEndOfLine);
 for i := 0 to High(ExternalProcedures) do
-	WriteString(''+ExternalProcedures[i].FPascalName+' := nil;' + SWinEoln);
-WriteString('end;' + SWinEoln);
+	WriteString(''+ExternalProcedures[i].FPascalName+' := nil;' + DefaultEndOfLine);
+WriteString('end;' + DefaultEndOfLine);
 
 if FWriteMode = SDDHWriteModeObjectSmooth then
 	begin
-	WriteString('class function TSDll' + UnitName + '.SystemNames() : TSStringList;' + SWinEoln);
-	WriteString('begin' + SWinEoln);
-	WriteString('Result := nil;' + SWinEoln);
-	WriteString('Result += '''+UnitName+''';' + SWinEoln);
-	WriteString('end;' + SWinEoln);
-	WriteString('class function TSDll' + UnitName + '.DllNames() : TSStringList;' + SWinEoln);
-	WriteString('begin' + SWinEoln);
-	WriteString('Result := nil;' + SWinEoln);
+	WriteString('class function TSDll' + UnitName + '.SystemNames() : TSStringList;' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Result := nil;' + DefaultEndOfLine);
+	WriteString('Result += '''+UnitName+''';' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
+	WriteString('class function TSDll' + UnitName + '.DllNames() : TSStringList;' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Result := nil;' + DefaultEndOfLine);
 	if Typification <> nil then if Length(Typification) > 0 then
 		for i := 0 to High(Typification) do
-		WriteString('Result += '+Typification[i][0].FExternalLibrary+';' + SWinEoln);
-	WriteString('end;' + SWinEoln);
-	WriteString('class function TSDll' + UnitName + '.Load(const VDll : TSLibHandle) : TSDllLoadObject;' + SWinEoln);
-	WriteString('var' + SWinEoln);
-	WriteString('	LoadResult : PSDllLoadObject = nil;' + SWinEoln);
+		WriteString('Result += '+Typification[i][0].FExternalLibrary+';' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
+	WriteString('class function TSDll' + UnitName + '.Load(const VDll : TSLibHandle) : TSDllLoadObject;' + DefaultEndOfLine);
+	WriteString('var' + DefaultEndOfLine);
+	WriteString('	LoadResult : PSDllLoadObject = nil;' + DefaultEndOfLine);
 	WriteLnString('');
-	WriteString('function LoadProcedure(const Name : PChar) : Pointer;' + SWinEoln);
-	WriteString('begin' + SWinEoln);
-	WriteString('Result := GetProcAddress(VDll, Name);' + SWinEoln);
-	WriteString('if Result = nil then' + SWinEoln);
-		WriteString('LoadResult^.FFunctionErrors += SPCharToString(Name)' + SWinEoln);
-	WriteString('else' + SWinEoln);
-		WriteString('LoadResult^.FFunctionLoaded += 1;' + SWinEoln);
-	WriteString('end;' + SWinEoln);
+	WriteString('function LoadProcedure(const Name : PChar) : Pointer;' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Result := GetProcAddress(VDll, Name);' + DefaultEndOfLine);
+	WriteString('if Result = nil then' + DefaultEndOfLine);
+		WriteString('LoadResult^.FFunctionErrors += SPCharToString(Name)' + DefaultEndOfLine);
+	WriteString('else' + DefaultEndOfLine);
+		WriteString('LoadResult^.FFunctionLoaded += 1;' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
 	WriteLnString('');
-	WriteString('begin' + SWinEoln);
-	WriteString('Result.Clear();' + SWinEoln);
-	WriteString('Result.FFunctionCount := ' + SStr(ExternalCount) + ';' + SWinEoln);
-	WriteString('LoadResult := @Result;' + SWinEoln);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Result.Clear();' + DefaultEndOfLine);
+	WriteString('Result.FFunctionCount := ' + SStr(ExternalCount) + ';' + DefaultEndOfLine);
+	WriteString('LoadResult := @Result;' + DefaultEndOfLine);
 	WriteLoadExternals();
-	WriteString('end;' + SWinEoln);
+	WriteString('end;' + DefaultEndOfLine);
 	WriteLnString('');
-	WriteString('initialization' + SWinEoln);
-	WriteString('	TSDll' + UnitName + '.Create();' + SWinEoln);
+	WriteString('initialization' + DefaultEndOfLine);
+	WriteString('	TSDll' + UnitName + '.Create();' + DefaultEndOfLine);
 	end
 else
 	begin
 	for ii := 0 to High(Typification) do
 		begin
-		WriteString('function Load_'+UnitName+'_'+SStr(ii)+'(const UnitName : PChar) : Boolean;' + SWinEoln);
-		WriteString('const' + SWinEoln);
-		WriteString('	TotalProcCount = '+SStr(Length(Typification[ii]))+';' + SWinEoln);
-		WriteString('var' + SWinEoln);
-		WriteString('	UnitLib : TSMaxEnum;' + SWinEoln);
-		WriteString('	CountLoadSuccs : LongWord;' + SWinEoln);
-		WriteString('function LoadProcedure(const Name : PChar) : Pointer;' + SWinEoln);
-		WriteString('begin' + SWinEoln);
-		WriteString('Result := GetProcAddress(UnitLib, Name);' + SWinEoln);
-		WriteString('if Result = nil then' + SWinEoln);
-		WriteString('	Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+'': Error while loading "''+SPCharToString(Name)+''"!'')' + SWinEoln);
-		WriteString('else' + SWinEoln);
-		WriteString('	CountLoadSuccs := CountLoadSuccs + 1;' + SWinEoln);
-		WriteString('end;' + SWinEoln);
-		WriteString('begin' + SWinEoln);
-		WriteString('UnitLib := LoadLibrary(UnitName);' + SWinEoln);
-		WriteString('Result := UnitLib <> 0;' + SWinEoln);
-		WriteString('CountLoadSuccs := 0;' + SWinEoln);
-		WriteString('if not Result then' + SWinEoln);
-		WriteString('	begin' + SWinEoln);
-		WriteString('	Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+'': Error while loading dynamic library!'');' + SWinEoln);
-		WriteString('	exit;' + SWinEoln);
-		WriteString('	end;' + SWinEoln);
+		WriteString('function Load_'+UnitName+'_'+SStr(ii)+'(const UnitName : PChar) : Boolean;' + DefaultEndOfLine);
+		WriteString('const' + DefaultEndOfLine);
+		WriteString('	TotalProcCount = '+SStr(Length(Typification[ii]))+';' + DefaultEndOfLine);
+		WriteString('var' + DefaultEndOfLine);
+		WriteString('	UnitLib : TSMaxEnum;' + DefaultEndOfLine);
+		WriteString('	CountLoadSuccs : LongWord;' + DefaultEndOfLine);
+		WriteString('function LoadProcedure(const Name : PChar) : Pointer;' + DefaultEndOfLine);
+		WriteString('begin' + DefaultEndOfLine);
+		WriteString('Result := GetProcAddress(UnitLib, Name);' + DefaultEndOfLine);
+		WriteString('if Result = nil then' + DefaultEndOfLine);
+		WriteString('	Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+'': Error while loading "''+SPCharToString(Name)+''"!'')' + DefaultEndOfLine);
+		WriteString('else' + DefaultEndOfLine);
+		WriteString('	CountLoadSuccs := CountLoadSuccs + 1;' + DefaultEndOfLine);
+		WriteString('end;' + DefaultEndOfLine);
+		WriteString('begin' + DefaultEndOfLine);
+		WriteString('UnitLib := LoadLibrary(UnitName);' + DefaultEndOfLine);
+		WriteString('Result := UnitLib <> 0;' + DefaultEndOfLine);
+		WriteString('CountLoadSuccs := 0;' + DefaultEndOfLine);
+		WriteString('if not Result then' + DefaultEndOfLine);
+		WriteString('	begin' + DefaultEndOfLine);
+		WriteString('	Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+'': Error while loading dynamic library!'');' + DefaultEndOfLine);
+		WriteString('	exit;' + DefaultEndOfLine);
+		WriteString('	end;' + DefaultEndOfLine);
 		for i := 0 to High(Typification[ii]) do
 			WriteLoadExternal(Typification[ii][i]);
-		WriteString('Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+''/''+'+StringInQuotes(Typification[ii][0].FExternalLibrary)+'+'': Loaded ''+SStrReal(CountLoadSuccs/TotalProcCount*100,3)+''% (''+SStr(CountLoadSuccs)+''/''+SStr(TotalProcCount)+'').'');' + SWinEoln);
-		WriteString('end;' + SWinEoln);
+		WriteString('Load_HINT(''Initialization '+SUpCaseString(UnitName)+' unit from ''+SPCharToString(UnitName)+''/''+'+StringInQuotes(Typification[ii][0].FExternalLibrary)+'+'': Loaded ''+SStrReal(CountLoadSuccs/TotalProcCount*100,3)+''% (''+SStr(CountLoadSuccs)+''/''+SStr(TotalProcCount)+'').'');' + DefaultEndOfLine);
+		WriteString('end;' + DefaultEndOfLine);
 		end;
 
-	WriteString(SWinEoln + 'function Load_'+UnitName+'() : Boolean;' + SWinEoln);
-	WriteString('var' + SWinEoln);
-	WriteString('	i : LongWord;' + SWinEoln);
-	WriteString('	R : array[0..'+SStr(High(Typification))+'] of Boolean;' + SWinEoln);
-	WriteString('begin' + SWinEoln);
+	WriteString(DefaultEndOfLine + 'function Load_'+UnitName+'() : Boolean;' + DefaultEndOfLine);
+	WriteString('var' + DefaultEndOfLine);
+	WriteString('	i : LongWord;' + DefaultEndOfLine);
+	WriteString('	R : array[0..'+SStr(High(Typification))+'] of Boolean;' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
 	for i := 0 to High(Typification) do
 		begin
-		WriteString('R['+SStr(i)+'] := Load_'+UnitName+'_'+SStr(i)+'('+Typification[i][0].FExternalLibrary+');' + SWinEoln);
+		WriteString('R['+SStr(i)+'] := Load_'+UnitName+'_'+SStr(i)+'('+Typification[i][0].FExternalLibrary+');' + DefaultEndOfLine);
 		end;
-	WriteString('Result := True;' + SWinEoln);
-	WriteString('for i := 0 to '+SStr(High(Typification))+' do' + SWinEoln);
-	WriteString('	Result := Result and R[i];' + SWinEoln);
-	WriteString('end;' + SWinEoln);
-	WriteString('initialization' + SWinEoln);
-	WriteString('begin' + SWinEoln);
-	WriteString('Free_'+UnitName+'();' + SWinEoln);
-	WriteString('Load_'+UnitName+'();' + SWinEoln);
-	WriteString('end;' + SWinEoln);
-	WriteString('finalization' + SWinEoln);
-	WriteString('begin' + SWinEoln);
-	WriteString('Free_'+UnitName+'();' + SWinEoln);
-	WriteString('end;' + SWinEoln);
+	WriteString('Result := True;' + DefaultEndOfLine);
+	WriteString('for i := 0 to '+SStr(High(Typification))+' do' + DefaultEndOfLine);
+	WriteString('	Result := Result and R[i];' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
+	WriteString('initialization' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Free_'+UnitName+'();' + DefaultEndOfLine);
+	WriteString('Load_'+UnitName+'();' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
+	WriteString('finalization' + DefaultEndOfLine);
+	WriteString('begin' + DefaultEndOfLine);
+	WriteString('Free_'+UnitName+'();' + DefaultEndOfLine);
+	WriteString('end;' + DefaultEndOfLine);
 	end;
 
 for i := 0 to High(Typification) do
@@ -785,17 +785,17 @@ while FInStream.Size <> FInStream.Position do
 	else if (SUpCaseString(Identifier) = 'IMPLEMENTATION') and (FWriteMode <> SDDHWriteModeFpc) then
 		begin
 		Identifier := '';
-		WriteString('implementation' + SWinEoln);
-		WriteString(SWinEoln);
-		WriteString('uses ' + SWinEoln);
-		WriteString('	 SmoothBase' + SWinEoln);
+		WriteString('implementation' + DefaultEndOfLine);
+		WriteString(DefaultEndOfLine);
+		WriteString('uses ' + DefaultEndOfLine);
+		WriteString('	 SmoothBase' + DefaultEndOfLine);
 		if FWriteMode = SDDHWriteModeObjectSmooth then
 			begin
 			WriteLnString('	,SmoothDllManager');
 			WriteLnString('	,SmoothSysUtils');
 			WriteLnString('	,SmoothStringUtils');
 			end;
-		WriteString('	;' + SWinEoln);
+		WriteString('	;' + DefaultEndOfLine);
 		end
 	else if SUpCaseString(Identifier) = 'EXTERNAL' then
 		begin
@@ -809,7 +809,7 @@ while FInStream.Size <> FInStream.Position do
 		Identifier := '';
 		while (FInStream.Position <> i) and (FInStream.Position < FInStream.Size) do
 			Identifier += ReadChar();
-		WriteString(SWinEoln + '(*' + SWinEoln + Identifier + SWinEoln + '*)' + SWinEoln);
+		WriteString(DefaultEndOfLine + '(*' + DefaultEndOfLine + Identifier + DefaultEndOfLine + '*)' + DefaultEndOfLine);
 		//WriteLn(Identifier);
 		FInStream.Position := ProcInPos;
 		Identifier := '';
@@ -843,7 +843,7 @@ var
 begin
 FWriteMode := SUpCaseString(FWriteMode);
 SPrintEngineVersion();
-WriteLn('DynamicHeadersMaker : In file size = ',FInStream.Size,'(',SGetSizeString(FInStream.Size,'EN'),')','.');
+WriteLn('DynamicHeadersMaker : In file size = ',FInStream.Size,'(',SMemorySizeToString(FInStream.Size,'EN'),')','.');
 Count := 0;
 while FInStream.Size <> FInStream.Position do
 	begin

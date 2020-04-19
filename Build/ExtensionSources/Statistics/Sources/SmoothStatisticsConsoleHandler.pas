@@ -18,7 +18,7 @@ uses
 	,SmoothStatisticsGradientRegression
 	;
 
-procedure SConcoleRunStatistics(const VParams : TSConcoleCallerParams = nil);
+procedure SConcoleRunStatistics(const VParams : TSConsoleHandlerParams = nil);
 var
 	ImportFile          : TSString = '';
 	CorrelationFileName : TSString = '';
@@ -56,7 +56,7 @@ end;
 var
 	Success : TSBool = True;
 begin
-with TSConsoleCaller.Create(VParams) do
+with TSConsoleHandler.Create(VParams) do
 	begin
 	AddComand(@ProccessImporting,          ['input:*'],               'Import data');
 	AddComand(@ProccessTypesExport,        ['out_types:*'],           'Export types info');
@@ -91,7 +91,7 @@ end;
 
 initialization
 begin
-SGeneralConsoleCaller().AddComand(@SConcoleRunStatistics, ['statistics'], 'Statictics');
+SMainConsoleHandler().AddComand(@SConcoleRunStatistics, ['statistics'], 'Statictics');
 end;
 
 end.

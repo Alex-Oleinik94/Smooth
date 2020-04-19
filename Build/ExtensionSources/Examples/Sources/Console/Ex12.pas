@@ -24,7 +24,7 @@ uses
 	,SmoothContextClasses
 	,SmoothContextInterface
 	{$IF defined(ENGINE)}
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		,SmoothConsoleTools
 		{$ENDIF}
 	,SmoothConsolePaintableTools
@@ -331,7 +331,7 @@ SetLength(Setka,0);
 end;
 
 {$IFDEF ENGINE}
-	procedure SConsoleEx12(const VParams : TSConcoleCallerParams = nil);
+	procedure SConsoleEx12(const VParams : TSConsoleHandlerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -344,7 +344,7 @@ Go();
 	end;
 	initialization
 	begin
-	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx12, ['ex12'], 'Example 12');
+	SConsoleToolsConsoleHandler.AddComand('Examples', @SConsoleEx12, ['ex12'], 'Example 12');
 	end;
 	
 	end.

@@ -185,7 +185,7 @@ function SIcoBitMapDataSize(var _ImageHeader : TSIcoImageHeader; var _BitMapInfo
 function SCopyIcoImageProperties(const _IcoFile : PSIcoFileHeader; const _IcoImage : PSIcoImage; const _Image : TSBitMap) : TSBoolean;
 function SIsICOData(const _Stream : TStream) : TSBoolean;
 
-function SIcoImageExpansionFromDataType(const _DataType : TSIcoBitMapCompression) : TSString;
+function SIcoImageExtensionFromDataType(const _DataType : TSIcoBitMapCompression) : TSString;
 procedure SPrintIcoBitMapInfoHeader(const _Name : TSString; const _Header : TSIcoBitMapInfoHeader; const _PrintCase : TSCasesOfPrint = [SCaseLog]);
 
 implementation
@@ -211,38 +211,38 @@ type
 	TSResourceManipulatorImagesICO = class(TSResourceManipulator)
 			public
 		constructor Create();override;
-		function LoadResourceFromStream(const VStream : TStream; const VExpansion : TSString) : TSResource; override;
-		function SaveResourceToStream(const VStream : TStream; const VExpansion : TSString; const VResource : TSResource) : TSBoolean; override;
+		function LoadResourceFromStream(const VStream : TStream; const VExtension : TSString) : TSResource; override;
+		function SaveResourceToStream(const VStream : TStream; const VExtension : TSString; const VResource : TSResource) : TSBoolean; override;
 		end;
 
 constructor TSResourceManipulatorImagesICO.Create();
 begin
 inherited;
-AddExpansion('ICO', True{LoadIsSupported}, False{SaveIsSupported});
-AddExpansion('CUR', True{LoadIsSupported}, False{SaveIsSupported});
+AddFileExtension('ICO', True{LoadIsSupported}, False{SaveIsSupported});
+AddFileExtension('CUR', True{LoadIsSupported}, False{SaveIsSupported});
 end;
 
-function TSResourceManipulatorImagesICO.LoadResourceFromStream(const VStream : TStream; const VExpansion : TSString) : TSResource;
+function TSResourceManipulatorImagesICO.LoadResourceFromStream(const VStream : TStream; const VExtension : TSString) : TSResource;
 var
-	ExpansionUpCase : TSString;
+	ExtensionUpCase : TSString;
 begin
-ExpansionUpCase := SUpCaseString(VExpansion);
-if (ExpansionUpCase = 'ICO') then
+ExtensionUpCase := SUpCaseString(VExtension);
+if (ExtensionUpCase = 'ICO') then
 	Result := SLoadICO(VStream)
-else if (ExpansionUpCase = 'CUR') then
+else if (ExtensionUpCase = 'CUR') then
 	Result := SLoadCUR(VStream)
 else
 	Result := nil;
 end;
 
-function TSResourceManipulatorImagesICO.SaveResourceToStream(const VStream : TStream; const VExpansion : TSString; const VResource : TSResource) : TSBoolean;
+function TSResourceManipulatorImagesICO.SaveResourceToStream(const VStream : TStream; const VExtension : TSString; const VResource : TSResource) : TSBoolean;
 var
-	ExpansionUpCase : TSString;
+	ExtensionUpCase : TSString;
 begin
-ExpansionUpCase := SUpCaseString(VExpansion);
-if (ExpansionUpCase = 'ICO') then
+ExtensionUpCase := SUpCaseString(VExtension);
+if (ExtensionUpCase = 'ICO') then
 	Result := SSaveICO(VStream, VResource as TSBitMap)
-else if (ExpansionUpCase = 'CUR') then
+else if (ExtensionUpCase = 'CUR') then
 	Result := SSaveCUR(VStream, VResource as TSCursor)
 else
 	Result := False;
@@ -396,7 +396,7 @@ for Index := 0 to High(FImages) do
 		end;
 end;
 
-function SIcoImageExpansionFromDataType(const _DataType : TSIcoBitMapCompression) : TSString;
+function SIcoImageExtensionFromDataType(const _DataType : TSIcoBitMapCompression) : TSString;
 begin
 case _DataType of
 BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS : Result := 'bmp';
@@ -497,7 +497,7 @@ end;
 function SLoadICOImage(const _IcoFile : PSIcoFileHeader; const _IcoImage : PSIcoImage; const _Image : TSBitMap) : TSBoolean; overload;
 var
 	ImageDataType : TSIcoBitMapCompression;
-	FileExpansion : TSString;
+	FileExtension : TSString;
 	LoadedImage : TSBitMap = nil;
 	HaveAdditionalProperties : TSBoolean = False; // is ".ico" (not ".cur")
 var
@@ -506,7 +506,7 @@ var
 	BitsPerPixel : TSUInt16 = 0; // Should be 16, 24 or 32 (bit per pixel)
 begin
 ImageDataType := _IcoImage^.FData.FHeader.FCompression;
-{$IFDEF DEBUGINFO} SLog.Source(['SLoadICOImage: Determined format "', SIcoImageExpansionFromDataType(ImageDataType), '".']); {$ENDIF}
+{$IFDEF DEBUGINFO} SLog.Source(['SLoadICOImage: Determined format "', SIcoImageExtensionFromDataType(ImageDataType), '".']); {$ENDIF}
 case ImageDataType of
 BI_RGB, BI_BITFIELDS, BI_ALPHABITFIELDS:
 	begin
@@ -547,11 +547,11 @@ BI_JPEG:
 BI_PNG:
 	begin
 	_IcoImage^.FData.FEmbeddedImageData.Position := 0;
-	FileExpansion := TSImageFormatDeterminer.DetermineExpansion(_IcoImage^.FData.FEmbeddedImageData);
+	FileExtension := TSImageFormatDeterminer.DetermineFileExtension(_IcoImage^.FData.FEmbeddedImageData);
 	_IcoImage^.FData.FEmbeddedImageData.Position := 0;
-	if SResourceManager.LoadingIsSupported(FileExpansion) then
+	if SResourceManager.LoadingIsSupported(FileExtension) then
 		begin
-		LoadedImage := SResourceManager.LoadResourceFromStream(_IcoImage^.FData.FEmbeddedImageData, FileExpansion) as TSBitMap;
+		LoadedImage := SResourceManager.LoadResourceFromStream(_IcoImage^.FData.FEmbeddedImageData, FileExtension) as TSBitMap;
 		Result := (LoadedImage <> nil) and (LoadedImage.DataSize() <> 0);
 		if Result then
 			_Image.CopyFrom(LoadedImage);

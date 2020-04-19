@@ -57,9 +57,9 @@ var
 begin
 _Stream.Position := 0;
 ImageFormat := TSImageFormatDeterminer.DetermineFormat(_Stream);
-if (ImageFormat = SImageFormatNull) and (_FileName <> '') and (SUpCaseString(SFileExpansion(_FileName)) = 'TGA') then
+if (ImageFormat = SImageFormatNull) and (_FileName <> '') and (SUpCaseString(SFileExtension(_FileName)) = 'TGA') then
 	ImageFormat := SImageFormatTga;
-SLog.Source(['SLoadBitMapFromStream: Determined format "', TSImageFormatDeterminer.DetermineExpansionFromFormat(ImageFormat), '" for "', _FileName, '".']);
+SLog.Source(['SLoadBitMapFromStream: Determined format "', TSImageFormatDeterminer.DetermineFileExtensionFromFormat(ImageFormat), '" for "', _FileName, '".']);
 _Stream.Position := 0;
 Result := TSBitMap.Create();
 case ImageFormat of
@@ -148,7 +148,7 @@ Result := SSaveBitMapToStream(Stream, _Image, _Format);
 if Result then
 	begin
 	Stream.Position:=0;
-	Stream.SaveToFile(SSetExpansionToFileName(_FileName, TSImageFormatDeterminer.DetermineExpansionFromFormat(_Format)));
+	Stream.SaveToFile(SSetExtensionToFileName(_FileName, TSImageFormatDeterminer.DetermineFileExtensionFromFormat(_Format)));
 	SKill(Stream);
 	end;
 end;

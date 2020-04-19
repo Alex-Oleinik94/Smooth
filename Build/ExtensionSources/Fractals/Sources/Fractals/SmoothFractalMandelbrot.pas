@@ -1131,7 +1131,7 @@ if MandelbrotInitialized then
 						(
 						(
 						(FDateTime-
-						(Mandelbrot.FThreadsData[ii].FData as TSFractalMandelbrotThreadData).FBeginData).GetPastMiliSeconds
+						(Mandelbrot.FThreadsData[ii].FData as TSFractalMandelbrotThreadData).FBeginData).GetPastMilliseconds
 						)/FArProgressBar[ii].Progress*(1 - FArProgressBar[ii].Progress)
 						>150
 						) then

@@ -15,7 +15,7 @@ type
 	TSTextConsoleStream = class(TSTextStream)
 			public
 		procedure WriteLn(); override;
-		procedure Write(const StringToWrite : TSString); override;
+		procedure Write(const S : TSString); override;
 		procedure TextColor(const Color : TSUInt8); override;
 		procedure Clear(); override;
 		end;
@@ -53,9 +53,9 @@ begin
 System.WriteLn();
 end;
 
-procedure TSTextConsoleStream.Write(const StringToWrite : TSString);
+procedure TSTextConsoleStream.Write(const S : TSString);
 begin
-System.Write(SConvertString(StringToWrite, SEncodingCP866));
+System.Write(SConvertString(S, SEncodingCP866));
 end;
 
 end.

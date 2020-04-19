@@ -518,14 +518,14 @@ if (FSizeLabel<>nil) and (not FSizeLabelFlag)  and (F3dObject<>nil) then
 		begin
 		if HasIndexes then
 			FSizeLabel.Caption:=(
-				'Size : All: '+SGetSizeString(F3dObject.Size)+
-				' ;Face: '+SGetSizeString(F3dObject.FacesSize)+
-				' ;Vert: '+SGetSizeString(F3dObject.VertexesSize)+
+				'Size : All: '+SMemorySizeToString(F3dObject.Size)+
+				' ;Face: '+SMemorySizeToString(F3dObject.FacesSize)+
+				' ;Vert: '+SMemorySizeToString(F3dObject.VertexesSize)+
 				' ;LenArObj: '+SStr(F3dObject.QuantityObjects)+'.'
 				)
 		else
 			FSizeLabel.Caption:=(
-				'Size : Vert: '+SGetSizeString(F3dObject.VertexesSize)+
+				'Size : Vert: '+SMemorySizeToString(F3dObject.VertexesSize)+
 				' ;LenArObj: '+SStr(F3dObject.QuantityObjects)+'.'
 				);
 		FSizeLabelFlag:=True;

@@ -17,11 +17,11 @@ type
 	TSTextStream = class(TSNamed, ISTextStream)
 			public
 		procedure WriteLn(); virtual; abstract; overload;
-		procedure WriteLn(const StringToWrite : TSString); virtual; overload;
-		procedure WriteLn(const ValuesToWrite : array of const); virtual; overload;
-		procedure Write(const StringToWrite : TSString); virtual; abstract; overload;
+		procedure WriteLn(const S : TSString); virtual; overload;
+		procedure WriteLn(const ArrayOfVariant : array of const); virtual; overload;
+		procedure Write(const S : TSString); virtual; abstract; overload;
 		procedure Write(const Value : TSUInt32); virtual; overload;
-		procedure Write(const ValuesToWrite : array of const); virtual; overload;
+		procedure Write(const ArrayOfVariant : array of const); virtual; overload;
 		procedure TextColor(const Color : TSUInt8); virtual; // not abstract because may be not supported
 		procedure Clear(); virtual; // not abstract because may be not supported
 			public
@@ -69,14 +69,14 @@ begin
 Write(SStr(Value));
 end;
 
-procedure TSTextStream.Write(const ValuesToWrite : array of const);
+procedure TSTextStream.Write(const ArrayOfVariant : array of const);
 begin
-Write(SStr(ValuesToWrite));
+Write(SStr(ArrayOfVariant));
 end;
 
-procedure TSTextStream.WriteLn(const ValuesToWrite : array of const);
+procedure TSTextStream.WriteLn(const ArrayOfVariant : array of const);
 begin
-Write(SStr(ValuesToWrite));
+Write(SStr(ArrayOfVariant));
 WriteLn();
 end;
 
@@ -97,9 +97,9 @@ while Stream.Position <> Stream.Size do
 Stream.Position := 0;
 end;
 
-procedure TSTextStream.WriteLn(const StringToWrite : TSString);
+procedure TSTextStream.WriteLn(const S : TSString);
 begin
-Write(StringToWrite);
+Write(S);
 WriteLn();
 end;
 

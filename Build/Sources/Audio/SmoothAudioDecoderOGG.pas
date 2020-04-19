@@ -77,7 +77,7 @@ case Code of
  OV_ENOTVORBIS : Result := 'Not Vorbis data.';
  OV_EVERSION   : Result := 'Vorbis version mismatch.';
  OV_EBADHEADER : Result := 'Invalid Vorbis header.';
- OV_EFAULT     : Result := 'nternal logic fault (bug or heap/stack corruption.';
+ OV_EFAULT     : Result := 'Internal logic fault (bug or heap/stack corruption)';
 else
  Result := 'Unknown Ogg error.';
 end;

@@ -1,4 +1,4 @@
-// DEPRECATED EXAPLE
+// DEPRECATED EXAMPLE
 {$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex5_2;
@@ -21,7 +21,7 @@ uses
 	,SmoothCamera
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	
 	,Crt
@@ -172,7 +172,7 @@ FPhysics.SetGravitation(SVertex3fImport(
 	9.81*2.25*sin(FGravitationAngle*3)));
 
 Render.InitMatrixMode(S_2D);
-FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
+FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMilliseconds();
 FPhysicsTimeIndex+=1;
 if FPhysicsTimeIndex=FPhysicsTimeCount then
 	FPhysicsTimeIndex:=0;
@@ -214,6 +214,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample5_2, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample5_2, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

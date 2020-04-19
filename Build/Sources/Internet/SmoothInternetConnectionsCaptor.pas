@@ -157,7 +157,7 @@ FileNameData := FileName + Iff(FPacketDataFileExtension <> '', '.' + FPacketData
 TextStream := TSTextFileStream.Create(FileNameInfo);
 TextStream.WriteLn('[packet]');
 TextStream.WriteLn(['DataTime = ', SDateTimeCorrectionString(Date, Time, False)]);
-TextStream.WriteLn(['Size     = ', SGetSizeString(Stream.Size, 'EN')]);
+TextStream.WriteLn(['Size     = ', SMemorySizeToString(Stream.Size, 'EN')]);
 TextStream.WriteLn();
 Packet.ExportInfo(TextStream);
 SKill(TextStream);
@@ -276,7 +276,7 @@ if (ShortConnectionInfo <> nil) then
 		TextStream.TextColor(15);
 		TextStream.Write([ShortConnectionsInfo[Index].FAbbreviation]);
 		TextStream.TextColor(7);
-		TextStream.Write(['(', ShortConnectionsInfo[Index].FCount, ')[', ShortConnectionsInfo[Index].FPacketCount, ']: ', SGetSizeString(ShortConnectionsInfo[Index].FDataSize, 'EN')]);
+		TextStream.Write(['(', ShortConnectionsInfo[Index].FCount, ')[', ShortConnectionsInfo[Index].FPacketCount, ']: ', SMemorySizeToString(ShortConnectionsInfo[Index].FDataSize, 'EN')]);
 		TextStream.WriteLn();
 		end;
 	SetLength(ShortConnectionsInfo, 0);
@@ -310,9 +310,9 @@ if (FIncompatiblePacketsCount <> 0) or (FCompatiblePacketsCount <> 0) then
 	begin
 	TextStream.Write('Packets: ');
 	if (FCompatiblePacketsCount <> 0) then
-		TextStream.Write(['Compatible[', FCompatiblePacketsCount, ']: ', SGetSizeString(FCompatiblePacketsSize, 'ENG'), Iff((FIncompatiblePacketsCount <> 0), '; ', '.')]);
+		TextStream.Write(['Compatible[', FCompatiblePacketsCount, ']: ', SMemorySizeToString(FCompatiblePacketsSize, 'ENG'), Iff((FIncompatiblePacketsCount <> 0), '; ', '.')]);
 	if (FIncompatiblePacketsCount <> 0) then
-		TextStream.Write(['Incompatible[', FIncompatiblePacketsCount, ']: ', SGetSizeString(FIncompatiblePacketsSize, 'ENG'), '.']);
+		TextStream.Write(['Incompatible[', FIncompatiblePacketsCount, ']: ', SMemorySizeToString(FIncompatiblePacketsSize, 'ENG'), '.']);
 	TextStream.WriteLn();
 	end;
 if DestroyTextStream then

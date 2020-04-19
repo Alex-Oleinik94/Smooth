@@ -147,7 +147,7 @@ inherited;
 Stream.WriteLn(['Options sets   = ', (FOptions <> nil) and (FOptions.Size > 0)]);
 if (FOptions <> nil) and (FOptions.Size > 0) then
 	begin
-	Stream.WriteLn(['Options size   = ', FOptions.Size, ', ', SGetSizeString(FOptions.Size, 'EN')]);
+	Stream.WriteLn(['Options size   = ', FOptions.Size, ', ', SMemorySizeToString(FOptions.Size, 'EN')]);
 	Stream.WriteLn(['Options        = 0x', SStreamToHexString(FOptions), '[hex]']);
 	end;
 end;
@@ -163,7 +163,7 @@ var
 	BytesWrited : TSUInt8;
 	DataString : TSString;
 begin
-Stream.WriteLn(['Size   = ', FData.Size, ', ', SGetSizeString(FData.Size, 'EN')]);
+Stream.WriteLn(['Size   = ', FData.Size, ', ', SMemorySizeToString(FData.Size, 'EN')]);
 Stream.WriteLn(['Data   =...']);
 
 FData.Position := 0;
@@ -195,8 +195,8 @@ procedure TSEthernetPacketFrameTCP.ExportInfo(const Stream : TSTextFileStream);
 begin
 inherited;
 Stream.WriteLn(['Frame.Protocol     = ', ProtocolName]);
-Stream.WriteLn(['Frame.Size         = ', Size(), ', ', SGetSizeString(Size(), 'EN')]);
-Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SGetSizeString(SizeEncapsulated(), 'EN')]);
+Stream.WriteLn(['Frame.Size         = ', Size(), ', ', SMemorySizeToString(Size(), 'EN')]);
+Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SMemorySizeToString(SizeEncapsulated(), 'EN')]);
 Stream.WriteLn(['Source port        = ', FTCPHeader.SourcePort]);
 Stream.WriteLn(['Destination port   = ', FTCPHeader.DestinationPort]);
 Stream.WriteLn(['Sequence number    = 0x', SStr4BytesHex(FTCPHeader.SequenceNumber, False), '[hex]']);
@@ -210,7 +210,7 @@ Stream.WriteLn(['Flags.Acknowledgeme= ', FTCPHeader.Acknowledgement]);
 Stream.WriteLn(['Flags.Push         = ', FTCPHeader.Push]);
 Stream.WriteLn(['Flags.Reset        = ', FTCPHeader.Reset]);
 Stream.WriteLn(['Flags.Final        = ', FTCPHeader.Final]);
-Stream.WriteLn(['Flags.WindowSize   = ', FTCPHeader.WindowSize, ', ', SGetSizeString(FTCPHeader.WindowSize, 'EN')]);
+Stream.WriteLn(['Flags.WindowSize   = ', FTCPHeader.WindowSize, ', ', SMemorySizeToString(FTCPHeader.WindowSize, 'EN')]);
 Stream.WriteLn(['Flags.Checksum     = 0x', SStr2BytesHex(FTCPHeader.Checksum, False), '[hex]']);
 Stream.WriteLn(['Flags.UrgentPointer= 0x', SStr2BytesHex(FTCPHeader.UrgentPointer), '[hex], ', FTCPHeader.UrgentPointer, '[dec]']);
 ExportOptionsInfo(Stream);

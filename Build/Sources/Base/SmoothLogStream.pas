@@ -161,7 +161,7 @@ if LogEnablement <> SLogDisabled then
 	begin
 	SMakeLog();
 	EnterCriticalSection(Log^.CriticalSection);
-	SWriteStringToStream(StrintToWrite + SWinEoln, Log^.Stream, False);
+	SWriteStringToStream(StrintToWrite + DefaultEndOfLine, Log^.Stream, False);
 	LeaveCriticalSection(Log^.CriticalSection);
 	end;
 end;

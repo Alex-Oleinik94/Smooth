@@ -66,9 +66,9 @@ uses
 	try
 	{$ENDIF}
 	{$IF defined(WITHSMOOTHLIBRARY)}
-		SStandartLabraryCallConcoleCaller();
+		SExecuteLibraryConsoleHandler();
 	{$ELSE}
-		SStandartCallConcoleCaller();
+		SExecuteConsoleHandler();
 	{$ENDIF}
 	{$IFDEF WITHEXCEPTIONTRACEING}
 	except on e : TSException do

@@ -20,7 +20,7 @@ uses
 	,SmoothEncodingUtils
 	,SmoothFileUtils
 	{$IF defined(ENGINE)}
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		,SmoothConsoleTools
 		{$ENDIF}
 	
@@ -558,7 +558,7 @@ if Delta2ProcessEitckenaEnable then
 	WriteLn('Количество вызовов Дельта^2 процесса Эйткена: ',CountDelta2ProcessEitckena,'.');
 S:=SSecondsToStringTime((d2-d1).GetPastSeconds());
 Windows1251ToOEM866(s);
-WriteLn('Прошло: ',s,' ',(d2-d1).GetPastMiliSeconds() mod 100,' милисек.');
+WriteLn('Прошло: ',s,' ',(d2-d1).GetPastMilliseconds() mod 100,' милисек.');
 end;
 
 procedure ReadSystemFromFile();
@@ -597,7 +597,7 @@ else
 end;
 
 {$IFDEF ENGINE}
-	procedure SConsoleEx8(const VParams : TSConcoleCallerParams = nil);
+	procedure SConsoleEx8(const VParams : TSConsoleHandlerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -611,7 +611,7 @@ DoIneration();
 	end;
 	initialization
 	begin
-	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx8, ['ex8'], 'Example 8');
+	SConsoleToolsConsoleHandler.AddComand('Examples', @SConsoleEx8, ['ex8'], 'Example number 8');
 	end;
 	
 	end.

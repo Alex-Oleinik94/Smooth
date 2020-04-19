@@ -14,7 +14,7 @@ uses
 	 SmoothContext
 	,SmoothBase
 	{$IF defined(ENGINE)}
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		,SmoothConsoleTools
 		{$ENDIF}
 	,SmoothConsolePaintableTools
@@ -193,7 +193,7 @@ S.Destroy();
 end;
 
 {$IFDEF ENGINE}
-	procedure SConsoleEx9(const VParams : TSConcoleCallerParams = nil);
+	procedure SConsoleEx9(const VParams : TSConsoleHandlerParams = nil);
 	{$ENDIF}
 begin
 ClrScr();
@@ -206,7 +206,7 @@ Go();
 	end;
 	initialization
 	begin
-	SOtherConsoleCaller.AddComand('Examples', @SConsoleEx9, ['ex9'], 'Example 9');
+	SConsoleToolsConsoleHandler.AddComand('Examples', @SConsoleEx9, ['ex9'], 'Example number 9');
 	end;
 	
 	end.

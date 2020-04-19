@@ -27,9 +27,9 @@ type
 	TSImageFileOpener = class(TSFileOpener)
 			public
 		class function ClassName() : TSString; override;
-		class function GetExpansions() : TSStringList; override;
+		class function GetExtensions() : TSStringList; override;
 		class function GetDrawableClass() : TSFileOpenerDrawableClass; override;
-		class function ExpansionsSupported(const VExpansions : TSStringList) : TSBool; override;
+		class function ExtensionsSupported(const VExtensions : TSStringList) : TSBool; override;
 		end;
 	
 	TSImageViewer = class(TSFileOpenerDrawable)
@@ -245,7 +245,7 @@ Render.Color(FHintColor);
 PaintString('width = ' + SStr(FImage.Width));
 PaintString('height = ' + SStr(FImage.Height));
 PaintString('channels = ' + SStr(FImage.BitMap.Channels));
-PaintString('bitmap size = ' + SGetSizeString(FImage.BitMap.Width * FImage.BitMap.Height * FImage.BitMap.Channels,'EN'));
+PaintString('bitmap size = ' + SMemorySizeToString(FImage.BitMap.Width * FImage.BitMap.Height * FImage.BitMap.Channels,'EN'));
 PaintString('filename = ' + FImage.FileName);
 end;
 
@@ -563,7 +563,7 @@ begin
 Result := TSImageViewer;
 end;
 
-class function TSImageFileOpener.GetExpansions() : TSStringList;
+class function TSImageFileOpener.GetExtensions() : TSStringList;
 begin
 Result := nil;
 if (TSCompatibleContext <> nil) and (TSCompatibleRender <> nil) then
@@ -581,16 +581,16 @@ if (TSCompatibleContext <> nil) and (TSCompatibleRender <> nil) then
 	end;
 end;
 
-class function TSImageFileOpener.ExpansionsSupported(const VExpansions : TSStringList) : TSBool;
+class function TSImageFileOpener.ExtensionsSupported(const VExtensions : TSStringList) : TSBool;
 var
-	SupportedExpansions : TSStringList = nil;
+	SupportedExtensions : TSStringList = nil;
 	S : TSString = '';
 begin
-SupportedExpansions := GetExpansions();
-Result := (SupportedExpansions <> nil);
+SupportedExtensions := GetExtensions();
+Result := (SupportedExtensions <> nil);
 if Result then
-	for S in VExpansions do
-		if (not (S in SupportedExpansions)) then
+	for S in VExtensions do
+		if (not (S in SupportedExtensions)) then
 			begin
 			Result := False;
 			break;

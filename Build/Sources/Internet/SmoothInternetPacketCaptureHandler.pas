@@ -115,7 +115,7 @@ if (CasesOfPrint <> []) and (FDevicesData <> nil) and (Length(FDevicesData) > 0)
 		begin
 		SHint(['    Device "', FDevicesData[Index].DeviceDescription, '":'], CasesOfPrint);
 		SHint(['        Count packets = ', FDevicesData[Index].CountPackets], CasesOfPrint);
-		SHint(['        Size packets = ', SGetSizeString(FDevicesData[Index].CountPacketsSize, 'EN')], CasesOfPrint);
+		SHint(['        Size packets = ', SMemorySizeToString(FDevicesData[Index].CountPacketsSize, 'EN')], CasesOfPrint);
 		SHint(['        Defective packets = ', FDevicesData[Index].CountDefectivePackets], CasesOfPrint);
 		end;
 	end;
@@ -324,7 +324,7 @@ if  (not Result) and FPossibilityBreakLoopFromConsole and
 if (not Result) and FProcessTimeOutUpdates then
 	begin
 	TimeNow.Get();
-	if (TimeNow - FTimeLastUpdateInfo).GetPastMiliSeconds() > FInfoTimeOut then
+	if (TimeNow - FTimeLastUpdateInfo).GetPastMilliseconds() > FInfoTimeOut then
 		begin
 		FTimeLastUpdateInfo := TimeNow;
 		Result := HandleTimeOutUpdate(TimeNow);

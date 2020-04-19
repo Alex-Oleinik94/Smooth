@@ -164,7 +164,7 @@ begin
 Stream.WriteLn(['Options sets   = ', (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0)]);
 if (FProtocolOptions <> nil) and (FProtocolOptions.Size > 0) then
 	begin
-	Stream.WriteLn(['Options size   = ', FProtocolOptions.Size, ', ', SGetSizeString(FProtocolOptions.Size, 'EN')]);
+	Stream.WriteLn(['Options size   = ', FProtocolOptions.Size, ', ', SMemorySizeToString(FProtocolOptions.Size, 'EN')]);
 	Stream.WriteLn(['Options        = 0x', SStreamToHexString(FProtocolOptions), '[hex]']);
 	end;
 end;
@@ -173,8 +173,8 @@ procedure TSEthernetPacketFrameIPv4.ExportInfo(const Stream : TSTextFileStream);
 begin
 inherited;
 Stream.WriteLn(['Frame.Protocol = ', ProtocolName]);
-Stream.WriteLn(['Frame.Size     = ', Size(), ', ', SGetSizeString(Size(), 'EN')]);
-Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SGetSizeString(SizeEncapsulated(), 'EN')]);
+Stream.WriteLn(['Frame.Size     = ', Size(), ', ', SMemorySizeToString(Size(), 'EN')]);
+Stream.WriteLn(['Frame.Encapsulated size= ', SizeEncapsulated(), ', ', SMemorySizeToString(SizeEncapsulated(), 'EN')]);
 Stream.WriteLn(['Version        = ', FIPv4Header.Version]);
 Stream.WriteLn(['Header size    = ', FIPv4Header.HeaderSize]);
 Stream.WriteLn(['Differentiated services codepoint= ', FIPv4Header.DifferentiatedServicesCodepoint]);

@@ -1,4 +1,4 @@
-// DEPRECATED EXAPLE
+// DEPRECATED EXAMPLE
 {$INCLUDE Smooth.inc}
 {$IFDEF ENGINE}
 	unit Ex5;
@@ -22,7 +22,7 @@ uses
 	,SmoothMatrix	
 	{$IF not defined(ENGINE)}
 		,SmoothConsolePaintableTools
-		,SmoothConsoleCaller
+		,SmoothConsoleHandler
 		{$ENDIF}
 	
 	,Crt
@@ -278,7 +278,7 @@ Render.Disable(SR_LIGHT0);
 Render.Disable(SR_LIGHTING);
 
 Render.InitMatrixMode(S_2D);
-FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMiliSeconds();
+FPhysicsTime[FPhysicsTimeIndex]:=(dt2-dt1).GetPastMilliseconds();
 FPhysicsTimeIndex+=1;
 if FPhysicsTimeIndex=FPhysicsTimeCount then
 	FPhysicsTimeIndex:=0;
@@ -321,6 +321,6 @@ end;
 
 {$IFNDEF ENGINE}
 	begin
-	SConsoleRunPaintable(TSExample5, SSystemParamsToConcoleCallerParams());
+	SConsoleRunPaintable(TSExample5, SSystemParamsToConsoleHandlerParams());
 	{$ENDIF}
 end.

@@ -9,7 +9,7 @@ uses
 	
 	,SmoothStringUtils
 	,SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
 type
@@ -244,7 +244,7 @@ type
 		FObject:string;
 		FWays:packed array of String;
 		FOutWay:string;
-		FParams : TSConcoleCallerParams;
+		FParams : TSConsoleHandlerParams;
 			private
 		function GetOutWay:string;override;
 			public
@@ -254,7 +254,7 @@ type
 		function FileType(const VWay:string):string;
 		function GoFindAndReadUnit(const VWay:string):Boolean;
 			public
-		property Params : TSConcoleCallerParams read FParams write FParams;
+		property Params : TSConsoleHandlerParams read FParams write FParams;
 		end;
 	TSTranslater=STranslater;
 
@@ -1388,7 +1388,7 @@ if AnyError then
 	SHint(['  Use -pl(%object_path) for set object path to translate.']);
 	Halt(0);
 	end;
-if (SFileExpansion(SUpCaseString(FObject))='PAS') or (SFileExpansion(SUpCaseString(FObject))='PP') then
+if (SFileExtension(SUpCaseString(FObject))='PAS') or (SFileExtension(SUpCaseString(FObject))='PP') then
 	begin
 	SLog.Source(['TSTranslater.GoRead : Start Reading (Not Makefile Type)']);
 	FT:=FileType(FObject);
@@ -1425,7 +1425,7 @@ else {= Makefile}
 	if WasInCmd then
 		FObject:=MW;
 	SLog.Source(['TSTranslater.GoRead : Start Reading (Makefile Type)']);
-	if (SFileName(FObject)='') and (SFileExpansion(FObject)='') then
+	if (SFileName(FObject)='') and (SFileExtension(FObject)='') then
 		begin
 		FObject+='Makefile';
 		end;

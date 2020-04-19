@@ -6,10 +6,10 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleDynamicHeadersMaker(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleDynamicHeadersMaker(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -22,7 +22,7 @@ uses
 	,SmoothStringUtils
 	;
 
-procedure SConsoleDynamicHeadersMaker(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleDynamicHeadersMaker(const VParams : TSConsoleHandlerParams = nil);
 
 function ParamIsMode(const VParam : TSString): TSBool;
 var

@@ -1213,7 +1213,7 @@ SHint([FacePredString,'MaterialID      = "',ArFaces[Index].FMaterial,'"'], Cases
 SHint([FacePredString,'IndexFormat     = "'+SStr3dObjectIndexFormat(ArFaces[Index].FIndexFormat)+'"'], CasesOfPrint);
 SHint([FacePredString,'PoligonesType   = "', SStrPoligonesType(ArFaces[Index].FPoligonesType), '"'], CasesOfPrint);
 TextColor(15);
-SHint([FacePredString,'FacesSize       = "',SGetSizeString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], CasesOfPrint);
+SHint([FacePredString,'FacesSize       = "',SMemorySizeToString(GetFaceInt(ArFaces[Index].FIndexFormat) * GetFaceLength(Index),'EN'),'"'], CasesOfPrint);
 TextColor(7);
 end;
 
@@ -1244,9 +1244,9 @@ SHint([PredStr,'  VertexFormat        = "', SStrVertexFormat(FVertexType), '"'],
 SHint([PredStr,'  CountTextureFloatsInVertexArray = "',FCountTextureFloatsInVertexArray,'"'], CasesOfPrint);
 SHint([PredStr,'  ColorType           = "' + SStr3dObjectColorFormat(FColorType) + '"'], CasesOfPrint);
 TextColor(15);
-SHint([PredStr,'  VertexesSize        = "',SGetSizeString(VertexesSize(),'EN'),'"'], CasesOfPrint);
+SHint([PredStr,'  VertexesSize        = "',SMemorySizeToString(VertexesSize(),'EN'),'"'], CasesOfPrint);
 if FQuantityFaceArrays>0 then
-	SHint([PredStr,'  AllSize             = "',SGetSizeString(Size(),'EN'),'"'], CasesOfPrint);
+	SHint([PredStr,'  AllSize             = "',SMemorySizeToString(Size(),'EN'),'"'], CasesOfPrint);
 TextColor(7);
 SHint([PredStr,'  EnableVBO           = "',FEnableVBO,'"'], CasesOfPrint);
 SHint([PredStr,'  LinksVBO            = Vertex:',FVertexesBuffer,', Faces:(', Iff(LinksVBO() = '', 'nil', LinksVBO()), ')'], CasesOfPrint);

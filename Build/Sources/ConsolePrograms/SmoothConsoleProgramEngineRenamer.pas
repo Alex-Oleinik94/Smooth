@@ -7,10 +7,10 @@ interface
 uses
 	 SmoothBase
 	,SmoothLists
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleEngineRenamer(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleEngineRenamer(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -19,7 +19,7 @@ uses
 	,SmoothConsoleTools
 	;
 
-procedure SConsoleEngineRenamer(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleEngineRenamer(const VParams : TSConsoleHandlerParams = nil);
 var
 	FileExtensions : TSStringList = nil;
 	Words : TSStringList = nil;
@@ -52,7 +52,7 @@ end;
 
 begin
 if (VParams <> nil) and (Length(VParams) > 0) then
-	with TSConsoleCaller.Create(VParams) do
+	with TSConsoleHandler.Create(VParams) do
 		begin
 		AddComand(@AddReplacement, ['r:','replacement:'], 'Add Replacement');
 		AddComand(@AddWord,        ['w:','word:'],        'Add Word');
@@ -76,7 +76,7 @@ end;
 
 initialization
 begin
-SOtherConsoleCaller.AddComand('Other tools', @SConsoleEngineRenamer, ['enginerenamer', 'ern'], 'Launch engine renamer');
+SConsoleToolsConsoleHandler.AddComand('Other tools', @SConsoleEngineRenamer, ['enginerenamer', 'ern'], 'Engine renamer');
 end;
 
 end.

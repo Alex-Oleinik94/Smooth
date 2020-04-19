@@ -24,10 +24,10 @@ type
 	TSFileOpener = class(TSNamed)
 			public
 		class function ClassName() : TSString; override;
-		class function GetExpansions() : TSStringList; virtual;
+		class function GetExtensions() : TSStringList; virtual;
 		class procedure Execute(const VFiles : TSStringList);virtual;
 		class function GetDrawableClass() : TSFileOpenerDrawableClass;virtual;
-		class function ExpansionsSupported(const VExpansions : TSStringList) : TSBool; virtual;
+		class function ExtensionsSupported(const VExtensions : TSStringList) : TSBool; virtual;
 		end;
 
 	TSFileOpenerDrawable = class(TSPaintableObject)
@@ -45,7 +45,7 @@ var
 
 procedure SRegistryFileOpener(const VClass : TSFileOpenerClass);
 procedure STryOpenFiles(const VFiles : TSStringList);
-procedure SWriteOpenableExpansions();
+procedure SWriteOpenableExtensions();
 procedure SOpenFilesWithMenu(const VFiles : TSStringList);
 
 implementation
@@ -97,7 +97,7 @@ if (SFileOpeners <> nil) and (Length(SFileOpeners) > 0) then
 	end;
 end;
 
-procedure SWriteOpenableExpansions();
+procedure SWriteOpenableExtensions();
 var
 	SL : TSStringList = nil;
 	SL2 : TSStringList = nil;
@@ -109,7 +109,7 @@ SPrintEngineVersion();
 if SFileOpeners <> nil then if Length(SFileOpeners) > 0 then
 	for i := 0 to High(SFileOpeners) do
 		begin
-		SL2 := SFileOpeners[i].GetExpansions();
+		SL2 := SFileOpeners[i].GetExtensions();
 		if SL2 <> nil then if Length(SL2) > 0 then
 			begin
 			for ii := 0 to High(SL2) do
@@ -121,11 +121,11 @@ Len := Length(SL);
 if Len <> 0 then
 	begin
 	ii := Length(SFileOpeners);
-	SHint(['Supported expansion', Iff(Len > 1, 's'), ' (', Len, '), file opener list (', ii, ') :']);
+	SHint(['Supported Extension', Iff(Len > 1, 's'), ' (', Len, '), file opener list (', ii, ') :']);
 	if SFileOpeners <> nil then if Length(SFileOpeners) > 0 then
 		for i := 0 to High(SFileOpeners) do
 			begin
-			SL2 := SFileOpeners[i].GetExpansions();
+			SL2 := SFileOpeners[i].GetExtensions();
 			if (SL2 <> nil) and (Length(SL2) > 0) then
 				begin
 				Len := Length(SL2);
@@ -137,7 +137,7 @@ if Len <> 0 then
 			end;
 	end
 else
-	SHint('No suppored to open expansions found!');
+	SHint('No suppored to open Extensions found!');
 SetLength(SL, 0);
 end;
 
@@ -152,9 +152,9 @@ begin
 EC := nil;
 SL1 := nil;
 for i := 0 to High(VFiles) do
-	SL1 *= SUpCaseString(SFileExpansion(VFiles[i]));
+	SL1 *= SUpCaseString(SFileExtension(VFiles[i]));
 for C in SFileOpeners do
-	if C.ExpansionsSupported(SL1) then
+	if C.ExtensionsSupported(SL1) then
 		begin
 		EC := C;
 		break;
@@ -166,8 +166,8 @@ else
 	SHint(['Can''t open file' + Iff(Length(VFiles) > 1, 's') + ':']);
 	for i := 0 to High(VFiles) do
 		SHint('    ' + VFiles[i]);
-	SHint(['Which expansion' + Iff(Length(SL1) > 1, 's') + ' is ', SStringFromStringList(SL1,','),'.']);
-	SHint(['Error : Class which can open' + Iff(Length(SL1) > 1, ' all of') + ' this expansion' + Iff(Length(SL1) > 1, 's') + ' is missing!']);
+	SHint(['Which Extension' + Iff(Length(SL1) > 1, 's') + ' is ', SStringFromStringList(SL1,','),'.']);
+	SHint(['Error : Class which can open' + Iff(Length(SL1) > 1, ' all of') + ' this Extension' + Iff(Length(SL1) > 1, 's') + ' is missing!']);
 	{$IFDEF MSWINDOWS}
 	if SIsConsole() then
 		begin
@@ -201,7 +201,7 @@ else
 SFileOpeners[High(SFileOpeners)] := VClass;
 end;
 
-class function TSFileOpener.ExpansionsSupported(const VExpansions : TSStringList) : TSBool;
+class function TSFileOpener.ExtensionsSupported(const VExtensions : TSStringList) : TSBool;
 begin
 Result := False;
 end;
@@ -246,7 +246,7 @@ begin
 SCompatibleRunPaintable(GetDrawableClass(), SContextOptionImport('FILES TO OPEN', TSPointer(VFiles)) + SContextOptionMax());
 end;
 
-class function TSFileOpener.GetExpansions() : TSStringList;
+class function TSFileOpener.GetExtensions() : TSStringList;
 begin
 Result := nil;
 end;

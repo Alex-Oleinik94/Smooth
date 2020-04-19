@@ -62,7 +62,7 @@ function SValFloat(const Text : TSString) : TSFloat; {$IFDEF SUPPORTINLINE}inlin
 	//Проверяет, не образована ли строка AString как Part + [хз]
 function SExistsFirstPartString(const AString : TSString; const Part : TSString) : TSBoolean;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращает строку, которая содержит размер "файла"/"буфера", занимающего Size байт
-function SGetSizeString(const Size : TSUInt64; const Language : TSString = 'RU') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMemorySizeToString(const Size : TSUInt64; const Language : TSString = 'RU') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 	//Возвращаето часть строки, находящуюся между [a..b] включительно
 function SStringGetPart(const S : TSString; const a, b : TSUInt32) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SConstArrayToString(const Ar: array of const) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -741,7 +741,7 @@ for Index := a to b do
 	Result += S[Index];
 end;
 
-function SGetSizeString(const Size : TSUInt64; const Language : TSString = 'RU') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMemorySizeToString(const Size : TSUInt64; const Language : TSString = 'RU') : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
 	e:extended;
 	d:LongWord = 0;

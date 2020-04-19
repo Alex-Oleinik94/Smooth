@@ -6,22 +6,22 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleFPCTCTransliater(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleFPCTCTransliater(const VParams : TSConsoleHandlerParams = nil);
 
 procedure SConsoleRunConsole(const VParams : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SConcoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-procedure SStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SExecuteConsoleHandler(); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
-function SGeneralConsoleCaller() : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SOtherConsoleCaller()   : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SBuildConsoleCaller()   : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SApplicationsConsoleCaller() : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SHttpConsoleCaller()    : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SUdpConsoleCaller()     : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SInternetConsoleCaller() : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMainConsoleHandler() : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SConsoleToolsConsoleHandler()   : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SBuildConsoleHandler()   : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SApplicationsConsoleHandler() : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SHttpConsoleHandler()    : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SUdpConsoleHandler()     : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SInternetConsoleHandler() : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -41,7 +41,7 @@ uses
 	,SmoothConsoleHashTools
 	
 	// Aditional console program includes
-	,SmoothConsoleProgramFindInSources
+	,SmoothConsoleProgramSearchInSources
 	,SmoothConsoleProgramGoogleReNameCache
 	,SmoothConsoleProgramDynamicHeadersMaker
 	//,SmoothConsoleProgramUSMBIO ("deprecated")
@@ -49,39 +49,39 @@ uses
 	;
 
 var
-	GeneralConsoleCaller : TSConsoleCaller = nil;
-	OtherConsoleCaller   : TSConsoleCaller = nil;
-	BuildConsoleCaller   : TSConsoleCaller = nil;
-	ApplicationsConsoleCaller   : TSConsoleCaller = nil;
-	HttpConsoleCaller    : TSConsoleCaller = nil;
-	UdpConsoleCaller     : TSConsoleCaller = nil;
-	InternetConsoleCaller :  TSConsoleCaller = nil;
+	MainConsoleHandler : TSConsoleHandler = nil;
+	ConsoleToolsConsoleHandler   : TSConsoleHandler = nil;
+	BuildConsoleHandler   : TSConsoleHandler = nil;
+	ApplicationsConsoleHandler   : TSConsoleHandler = nil;
+	HttpConsoleHandler    : TSConsoleHandler = nil;
+	UdpConsoleHandler     : TSConsoleHandler = nil;
+	InternetConsoleHandler :  TSConsoleHandler = nil;
 
-procedure SConcoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-GeneralConsoleCaller.Params := VParams;
-GeneralConsoleCaller.Execute();
+MainConsoleHandler.Params := VParams;
+MainConsoleHandler.Execute();
 end;
 
-procedure SStandartCallConcoleCaller();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SExecuteConsoleHandler();{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	Params : TSConcoleCallerParams;
+	Params : TSConsoleHandlerParams;
 begin
-Params := SSystemParamsToConcoleCallerParams();
-SConcoleCaller(Params);
+Params := SSystemParamsToConsoleHandlerParams();
+SConsoleHandler(Params);
 SetLength(Params, 0);
 end;
 
 procedure SConsoleRunConsole(const VParams : TSString);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 var
-	Params : TSConcoleCallerParams = nil;
+	Params : TSConsoleHandlerParams = nil;
 begin
-Params := SParseStringToConsoleCallerParams(VParams);
-SConcoleCaller(Params);
+Params := SParseStringToConsoleHandlerParams(VParams);
+SConsoleHandler(Params);
 SetLength(Params, 0);
 end;
 
-procedure SConsoleFPCTCTransliater(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleFPCTCTransliater(const VParams : TSConsoleHandlerParams = nil);
 var
 	ST : STranslater = nil;
 begin
@@ -96,168 +96,168 @@ end;
 (*============Udp===========*)
 //============================
 
-procedure RunUdpConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunUdpConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-UdpConsoleCaller.Params := VParams;
-UdpConsoleCaller.Execute();
+UdpConsoleHandler.Params := VParams;
+UdpConsoleHandler.Execute();
 end;
 
-procedure InitUdpConsoleCaller();
+procedure InitUdpConsoleHandler();
 begin
-if UdpConsoleCaller <> nil then
+if UdpConsoleHandler <> nil then
 	exit;
-UdpConsoleCaller := TSConsoleCaller.Create(nil);
-UdpConsoleCaller.Category('UDP tools');
-UdpConsoleCaller.AddComand(@SConsoleNetServer, ['Server'], 'Run server');
-UdpConsoleCaller.AddComand(@SConsoleNetClient, ['Connect'], 'Connect to server');
+UdpConsoleHandler := TSConsoleHandler.Create(nil);
+UdpConsoleHandler.Category('UDP tools');
+UdpConsoleHandler.AddComand(@SConsoleNetServer, ['Server'], 'Run server');
+UdpConsoleHandler.AddComand(@SConsoleNetClient, ['Connect'], 'Connect to server');
 end;
 
 //============================
 (*============Http===========*)
 //============================
 
-procedure RunHttpConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunHttpConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-HttpConsoleCaller.Params := VParams;
-HttpConsoleCaller.Execute();
+HttpConsoleHandler.Params := VParams;
+HttpConsoleHandler.Execute();
 end;
 
-procedure InitHttpConsoleCaller();
+procedure InitHttpConsoleHandler();
 begin
-if HttpConsoleCaller <> nil then
+if HttpConsoleHandler <> nil then
 	Exit;
-HttpConsoleCaller := TSConsoleCaller.Create(nil);
-HttpConsoleCaller.Category('HTTP tools');
-HttpConsoleCaller.AddComand(@SConsoleHTTPGet,  ['get'], 'GET Method');
+HttpConsoleHandler := TSConsoleHandler.Create(nil);
+HttpConsoleHandler.Category('HTTP tools');
+HttpConsoleHandler.AddComand(@SConsoleHTTPGet,  ['get'], 'GET Method');
 end;
 
 //=================================
 (*=============Internet===========*)
 //=================================
 
-procedure RunInternetConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunInternetConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InternetConsoleCaller.Params := VParams;
-InternetConsoleCaller.Execute();
+InternetConsoleHandler.Params := VParams;
+InternetConsoleHandler.Execute();
 end;
 
-procedure InitInternetConsoleCaller();
+procedure InitInternetConsoleHandler();
 begin
-if InternetConsoleCaller <> nil then
+if InternetConsoleHandler <> nil then
 	Exit;
-InternetConsoleCaller := TSConsoleCaller.Create(nil);
-InternetConsoleCaller.Category('Internet tools');
-InternetConsoleCaller.AddComand(@RunHttpConsoleCaller, ['Http'], 'HTTP tools');
-InternetConsoleCaller.AddComand(@RunUdpConsoleCaller, ['Udp'], 'UDP tools');
-InternetConsoleCaller.AddComand(@SConsoleInternetPacketRuntimeDumper, ['ipd', 'iprd'], 'Internet Packet Runtime Dumper');
-InternetConsoleCaller.AddComand(@SConsoleDescriptPCapNG, ['dpcapng'], 'Descript PCapNG file');
-InternetConsoleCaller.AddComand(@SConsoleConnectionsCaptor, ['cc'], 'Connections captor');
+InternetConsoleHandler := TSConsoleHandler.Create(nil);
+InternetConsoleHandler.Category('Internet tools');
+InternetConsoleHandler.AddComand(@RunHttpConsoleHandler, ['Http'], 'HTTP tools');
+InternetConsoleHandler.AddComand(@RunUdpConsoleHandler, ['Udp'], 'UDP tools');
+InternetConsoleHandler.AddComand(@SConsoleInternetPacketRuntimeDumper, ['ipd', 'iprd'], 'Internet Packet Runtime Dumper');
+InternetConsoleHandler.AddComand(@SConsoleDescriptPCapNG, ['dpcapng'], 'Descript PCapNG file');
+InternetConsoleHandler.AddComand(@SConsoleConnectionsCaptor, ['cc'], 'Connections captor');
 end;
 
 //============================
-(*=====BuildConsoleCaller====*)
+(*=====BuildConsoleHandler====*)
 //============================
 
-procedure RunBuildConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunBuildConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-BuildConsoleCaller.Params := VParams;
-BuildConsoleCaller.Execute();
+BuildConsoleHandler.Params := VParams;
+BuildConsoleHandler.Execute();
 end;
 
-procedure InitBuildConsoleCaller();
+procedure InitBuildConsoleHandler();
 begin
-if BuildConsoleCaller <> nil then
+if BuildConsoleHandler <> nil then
 	Exit;
-BuildConsoleCaller := TSConsoleCaller.Create(nil);
-BuildConsoleCaller.Category('Build tools');
-BuildConsoleCaller.AddComand(@SConsoleBuild, ['BUILD'], 'Building Smooth Engine');
-BuildConsoleCaller.AddComand(@SConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
-BuildConsoleCaller.AddComand(@SConsoleClearFileForRegistrationExtensions, ['Cffre'], 'Clear File For Registration Extensions');
-BuildConsoleCaller.AddComand(@SConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
-BuildConsoleCaller.AddComand(@SConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
-BuildConsoleCaller.AddComand(@SConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
-BuildConsoleCaller.AddComand(@SConsoleBuildFiles, ['BF'], 'Build files in datafile');
-BuildConsoleCaller.AddComand(@SConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
-BuildConsoleCaller.AddComand(@SConsoleVersionTo_RC_WindowsFile, ['vtrc'], 'curent Version To RC windows file');
-BuildConsoleCaller.AddComand(@SConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
-BuildConsoleCaller.AddComand(@SConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
-BuildConsoleCaller.AddComand(@SConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
-BuildConsoleCaller.AddComand(@SConsoleAddToLog, ['ATL'], 'Add line To Log');
-BuildConsoleCaller.AddComand(@SConsoleOpenLastLog, ['oll'], 'Open Last Log file');
+BuildConsoleHandler := TSConsoleHandler.Create(nil);
+BuildConsoleHandler.Category('Build tools');
+BuildConsoleHandler.AddComand(@SConsoleBuild, ['BUILD'], 'Building Smooth Engine');
+BuildConsoleHandler.AddComand(@SConsoleClearFileRegistrationResources, ['Cfrr'], 'Clear File Registration Resources');
+BuildConsoleHandler.AddComand(@SConsoleClearFileForRegistrationExtensions, ['Cffre'], 'Clear File For Registration Extensions');
+BuildConsoleHandler.AddComand(@SConsoleConvertFileToPascalUnitAndRegisterUnit, ['CFTPUARU'], 'Convert File To Pascal Unit And Register Unit in registration file');
+BuildConsoleHandler.AddComand(@SConsoleConvertCachedFileToPascalUnitAndRegisterUnit, ['CCFTPUARU'], 'Convert Cached File To Pascal Unit And Register Unit in registration file');
+BuildConsoleHandler.AddComand(@SConsoleIncEngineVersion, ['IV'], 'Increment engine Version');
+BuildConsoleHandler.AddComand(@SConsoleBuildFiles, ['BF'], 'Build files in datafile');
+BuildConsoleHandler.AddComand(@SConsoleDefineSkiper, ['ds'], 'Tool to skip defines in file');
+BuildConsoleHandler.AddComand(@SConsoleVersionTo_RC_WindowsFile, ['vtrc'], 'curent Version To RC windows file');
+BuildConsoleHandler.AddComand(@SConsoleIsConsole, ['ic'], 'Return bool value, is console or not');
+BuildConsoleHandler.AddComand(@SConsoleConvertFileToPascalUnit, ['CFTPU'], 'Convert File To Pascal Unit utility');
+BuildConsoleHandler.AddComand(@SConsoleConvertDirectoryFilesToPascalUnits, ['CDTPUARU'], 'Convert Directory Files To Pascal Units utility');
+BuildConsoleHandler.AddComand(@SConsoleAddToLog, ['ATL'], 'Add line To Log');
+BuildConsoleHandler.AddComand(@SConsoleOpenLastLog, ['oll'], 'Open Last Log file');
 end;
 
 //===================================
-(*=====ApplicationsConsoleCaller====*)
+(*=====ApplicationsConsoleHandler====*)
 //===================================
 
-procedure RunApplicationsConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunApplicationsConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-ApplicationsConsoleCaller.Params := VParams;
-ApplicationsConsoleCaller.Execute();
+ApplicationsConsoleHandler.Params := VParams;
+ApplicationsConsoleHandler.Execute();
 end;
 
-procedure InitApplicationsConsoleCaller();
+procedure InitApplicationsConsoleHandler();
 begin
-if ApplicationsConsoleCaller <> nil then
+if ApplicationsConsoleHandler <> nil then
 	Exit;
-ApplicationsConsoleCaller := TSConsoleCaller.Create(nil);
-ApplicationsConsoleCaller.Category('Applications');
-ApplicationsConsoleCaller.AddComand(@SConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
-ApplicationsConsoleCaller.AddComand(@SConsoleDynamicHeadersMaker, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
-ApplicationsConsoleCaller.AddComand(@SConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
-ApplicationsConsoleCaller.AddComand(@SConsoleHash, ['hash'], 'Hash file or directory');
-ApplicationsConsoleCaller.AddComand(@SConsoleFindInSources, ['FIS','SIS'], 'Program for searching in the sources');
-ApplicationsConsoleCaller.AddComand(@SConsoleMake, ['MAKE'], 'Make utility');
+ApplicationsConsoleHandler := TSConsoleHandler.Create(nil);
+ApplicationsConsoleHandler.Category('Applications');
+ApplicationsConsoleHandler.AddComand(@SConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
+ApplicationsConsoleHandler.AddComand(@SConsoleDynamicHeadersMaker, ['CHTD', 'DDH'], 'Convert pascal Header to Dynamic utility');
+ApplicationsConsoleHandler.AddComand(@SConsoleShaderReadWrite, ['SRW'], 'Read shader file with params and write it as single file without directives');
+ApplicationsConsoleHandler.AddComand(@SConsoleHash, ['hash'], 'Hash file (hash directory)');
+ApplicationsConsoleHandler.AddComand(@SConsoleSearchInSources, ['SIS'], 'Search in the sources (text files)');
+ApplicationsConsoleHandler.AddComand(@SConsoleMake, ['MAKE'], 'Build program from makefile');
 end;
 
 //============================
-(*=====OtherConsoleCaller====*)
+(*=====ConsoleToolsConsoleHandler====*)
 //============================
 
-procedure RunOtherConsoleCaller(const VParams : TSConcoleCallerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure RunConsoleToolsConsoleHandler(const VParams : TSConsoleHandlerParams = nil);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-OtherConsoleCaller.Params := VParams;
-OtherConsoleCaller.Execute();
+ConsoleToolsConsoleHandler.Params := VParams;
+ConsoleToolsConsoleHandler.Execute();
 end;
 
-procedure InitOtherConsoleCaller();
+procedure InitConsoleToolsConsoleHandler();
 begin
-if OtherConsoleCaller <> nil then
+if ConsoleToolsConsoleHandler <> nil then
 	Exit;
-OtherConsoleCaller := TSConsoleCaller.Create(nil);
-OtherConsoleCaller.Category('Images tools');
-OtherConsoleCaller.AddComand(@SConsoleImageResizer, ['IR'], 'Image Resizer');
-OtherConsoleCaller.AddComand(@SConsoleConvertImageToSmoothImageAlphaFormat, ['CTSIA'], 'Convert image To SmoothImagesAlpha format');
-OtherConsoleCaller.Category('Math tools');
-OtherConsoleCaller.AddComand(@SConsoleCalculateExpression, ['ce'], 'Calculate Expression');
-OtherConsoleCaller.AddComand(@SConsoleCalculateBoolTable, ['cbt'], 'Calculate Boolean Table');
-OtherConsoleCaller.Category('Other tools');
-OtherConsoleCaller.AddComand(@SConsoleGoogleReNameCache, ['grc'], 'Tool for renameing browser cache files');
-OtherConsoleCaller.AddComand(@SConsoleFPCTCTransliater, ['fpctc'], 'Tool for transliating FPC to C');
+ConsoleToolsConsoleHandler := TSConsoleHandler.Create(nil);
+ConsoleToolsConsoleHandler.Category('Images tools');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleImageResizer, ['IR'], 'Resize image');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleConvertImageToSmoothImageAlphaFormat, ['CTSIA'], 'Convert image To SmoothImagesAlpha format');
+ConsoleToolsConsoleHandler.Category('Math tools');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleCalculateExpression, ['ce'], 'Calculate expression');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleCalculateBoolTable, ['cbt'], 'Calculate boolean Table');
+ConsoleToolsConsoleHandler.Category('Other tools');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleGoogleReNameCache, ['grc'], 'Tool for renameing browser cache files');
+ConsoleToolsConsoleHandler.AddComand(@SConsoleFPCTCTransliater, ['fpctc'], 'Tool for transliating FPC to C');
 end;
 
 //============================
 (*===========General=========*)
 //============================
 
-procedure InitGeneralConsoleCaller();
+procedure InitMainConsoleHandler();
 begin
-if GeneralConsoleCaller <> nil then
+if MainConsoleHandler <> nil then
 	Exit;
-GeneralConsoleCaller := TSConsoleCaller.Create(nil);
-GeneralConsoleCaller.AddComand(@SConcoleCaller, ['CONSOLE'], 'Run console caller');
-GeneralConsoleCaller.Category('Applications');
-GeneralConsoleCaller.AddComand(@SConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
-GeneralConsoleCaller.Category('Other tools');
-GeneralConsoleCaller.AddComand(@RunInternetConsoleCaller, ['inet'], 'Internet tools');
-GeneralConsoleCaller.AddComand(@RunOtherConsoleCaller, ['oa'], 'Other Engine''s Console Programs');
-GeneralConsoleCaller.AddComand(@RunBuildConsoleCaller, ['bt'], 'Build tools');
-GeneralConsoleCaller.AddComand(@RunApplicationsConsoleCaller, ['app'], 'Applications');
-GeneralConsoleCaller.Category('System tools');
-GeneralConsoleCaller.AddComand(@SConsoleExtractFiles, ['EF'], 'Extract all files in this application');
-GeneralConsoleCaller.AddComand(@SConsoleWriteOpenableExpansions, ['woe'], 'Write all of openable expansions of files');
-GeneralConsoleCaller.AddComand(@SConsoleWriteFiles, ['WF'], 'Write all files in this application');
-GeneralConsoleCaller.AddComand(@SConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
+MainConsoleHandler := TSConsoleHandler.Create(nil);
+MainConsoleHandler.AddComand(@SConsoleHandler, ['CONSOLE'], 'Run console caller');
+MainConsoleHandler.Category('Applications');
+MainConsoleHandler.AddComand(@SConsoleShowAllApplications, ['GUI', ''], 'Shows all 3D/2D scenes');
+MainConsoleHandler.Category('Other tools');
+MainConsoleHandler.AddComand(@RunInternetConsoleHandler, ['inet'], 'Internet tools');
+MainConsoleHandler.AddComand(@RunBuildConsoleHandler, ['bt'], 'Build tools');
+MainConsoleHandler.AddComand(@RunApplicationsConsoleHandler, ['app'], 'Applications');
+MainConsoleHandler.AddComand(@RunConsoleToolsConsoleHandler, ['oa'], 'Other console programs');
+MainConsoleHandler.Category('System tools');
+MainConsoleHandler.AddComand(@SConsoleExtractFiles, ['EF'], 'Extract all files in this application');
+MainConsoleHandler.AddComand(@SConsoleWriteOpenableExtensions, ['woe'], 'Write all of openable Extensions of files');
+MainConsoleHandler.AddComand(@SConsoleWriteFiles, ['WF'], 'Write all files in this application');
+MainConsoleHandler.AddComand(@SConsoleDllPrintStat, ['dlps'], 'Prints all statistics data of dynamic libraries, used in this application');
 end;
 
 (* == == == == == == == == == == == == == == *)
@@ -266,80 +266,80 @@ end;
 (* == == == == == == == == == == == == == == *)
 (* == == == == == == == == == == == == == == *)
 
-function SApplicationsConsoleCaller()   : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SApplicationsConsoleHandler()   : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitApplicationsConsoleCaller();
-Result := ApplicationsConsoleCaller;
+InitApplicationsConsoleHandler();
+Result := ApplicationsConsoleHandler;
 end;
 
-function SBuildConsoleCaller()   : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SBuildConsoleHandler()   : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitBuildConsoleCaller();
-Result := BuildConsoleCaller;
+InitBuildConsoleHandler();
+Result := BuildConsoleHandler;
 end;
 
-function SGeneralConsoleCaller() : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SMainConsoleHandler() : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitGeneralConsoleCaller();
-Result := GeneralConsoleCaller;
+InitMainConsoleHandler();
+Result := MainConsoleHandler;
 end;
 
-function SOtherConsoleCaller()   : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SConsoleToolsConsoleHandler()   : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitOtherConsoleCaller();
-Result := OtherConsoleCaller;
+InitConsoleToolsConsoleHandler();
+Result := ConsoleToolsConsoleHandler;
 end;
 
-function SHttpConsoleCaller()    : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SHttpConsoleHandler()    : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitHttpConsoleCaller();
-Result := HttpConsoleCaller;
+InitHttpConsoleHandler();
+Result := HttpConsoleHandler;
 end;
 
-function SUdpConsoleCaller()     : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SUdpConsoleHandler()     : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitUdpConsoleCaller();
-Result := UdpConsoleCaller;
+InitUdpConsoleHandler();
+Result := UdpConsoleHandler;
 end;
 
-function SInternetConsoleCaller()     : TSConsoleCaller; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SInternetConsoleHandler()     : TSConsoleHandler; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-InitInternetConsoleCaller();
-Result := InternetConsoleCaller;
+InitInternetConsoleHandler();
+Result := InternetConsoleHandler;
 end;
 
 //============================
 
-procedure InitConsoleCallers();
+procedure InitConsoleHandlers();
 begin
-InitUdpConsoleCaller();
-InitHttpConsoleCaller();
-InitInternetConsoleCaller();
-InitOtherConsoleCaller();
-InitBuildConsoleCaller();
-InitApplicationsConsoleCaller();
-InitGeneralConsoleCaller();
+InitUdpConsoleHandler();
+InitHttpConsoleHandler();
+InitInternetConsoleHandler();
+InitConsoleToolsConsoleHandler();
+InitBuildConsoleHandler();
+InitApplicationsConsoleHandler();
+InitMainConsoleHandler();
 end;
 
-procedure DestroyConsoleCallers();
+procedure DestroyConsoleHandlers();
 begin
-SKill(UdpConsoleCaller);
-SKill(HttpConsoleCaller);
-SKill(InternetConsoleCaller);
-SKill(OtherConsoleCaller);
-SKill(BuildConsoleCaller);
-SKill(ApplicationsConsoleCaller);
-SKill(GeneralConsoleCaller);
+SKill(UdpConsoleHandler);
+SKill(HttpConsoleHandler);
+SKill(InternetConsoleHandler);
+SKill(ConsoleToolsConsoleHandler);
+SKill(BuildConsoleHandler);
+SKill(ApplicationsConsoleHandler);
+SKill(MainConsoleHandler);
 end;
 
 initialization
 begin
-InitConsoleCallers();
+InitConsoleHandlers();
 end;
 
 finalization
 begin
-DestroyConsoleCallers();
+DestroyConsoleHandlers();
 end;
 
 end.

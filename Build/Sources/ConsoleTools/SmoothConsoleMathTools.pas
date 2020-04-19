@@ -6,11 +6,11 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleCalculateBoolTable(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleCalculateExpression(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleCalculateBoolTable(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleCalculateExpression(const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -22,7 +22,7 @@ uses
 	,SmoothStringUtils
 	;
 
-procedure SConsoleCalculateBoolTable(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleCalculateBoolTable(const VParams : TSConsoleHandlerParams = nil);
 
 function IsDebug() : TSBool;
 begin
@@ -63,7 +63,7 @@ begin
 TextColor(15);
 Exp:=TSExpression.Create;
 Exp.DeBug:=IsDebug();
-Exp.Expression:=SConsoleCallerParamsToPChar(VParams, TSByte(IsDebug));
+Exp.Expression:=SConsoleHandlerParamsToPChar(VParams, TSByte(IsDebug));
 Exp.CanculateExpression;
 Variables:=Exp.Variables;
 SetLength(Consts,Length(Variables));
@@ -105,7 +105,7 @@ while not Trues do
 Exp.Destroy();
 end;
 
-procedure SConsoleCalculateExpression(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleCalculateExpression(const VParams : TSConsoleHandlerParams = nil);
 
 function IsDebug() : TSBool;
 begin
@@ -120,7 +120,7 @@ var
 begin
 Exp := TSExpression.Create();
 Exp.DeBug := IsDebug();
-Exp.Expression := SConsoleCallerParamsToPChar(VParams, TSByte(IsDebug));
+Exp.Expression := SConsoleHandlerParamsToPChar(VParams, TSByte(IsDebug));
 Exp.CanculateExpression();
 Exp.Calculate();
 if Exp.Resultat.Quantity = 0 then 

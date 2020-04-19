@@ -150,7 +150,7 @@ with TSTextConsoleStream.Create() do
 	TextColor(15);
 	Write(' всего перехвачено ');
 	TextColor(12);
-	Write(SGetSizeString(AllDataSize(), 'EN'));
+	Write(SMemorySizeToString(AllDataSize(), 'EN'));
 	TextColor(15);
 	WriteLn(' данных.');
 	TextColor(7);

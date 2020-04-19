@@ -2871,7 +2871,7 @@ if (FileWay <> '') and (SFileExists(FileWay)) then
 	FRelefRedactor.SingleRelief^.Load(FileWay);
 	FRelefRedactor.SingleRelief^.FType := T;
 	FRelefRedactor.SingleRelief^.FEnabled := E;
-	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SFileName(FileWay)+'.'+SDownCaseString(SFileExpansion(FileWay))+')';
+	FRelefOptionPanel.Children[1].Caption := 'Статус рельефа:Загружен('+SFileName(FileWay)+'.'+SDownCaseString(SFileExtension(FileWay))+')';
 	(FRelefOptionPanel.Children[1] as TSScreenLabel).TextColor := SVertex4fImport(0,1,0,1);
 	end;
 if IsInFullscreen then
@@ -3539,13 +3539,13 @@ procedure TSGasDiffusion.UpDateInfoLabel();
 begin
 if FMoviePlayed then
 	begin
-	FInfoLabel.Caption:='Размер файла: "'+SGetSizeString(FFileStream.Size,'RU')+'", Итераций: "'+SStr(Length(FArCadrs))+'", Позиция: "'+SStrReal(FNowCadr/Length(FArCadrs)*100,2)+'%"';
+	FInfoLabel.Caption:='Размер файла: "'+SMemorySizeToString(FFileStream.Size,'RU')+'", Итераций: "'+SStr(Length(FArCadrs))+'", Позиция: "'+SStrReal(FNowCadr/Length(FArCadrs)*100,2)+'%"';
 	end
 else if FDiffusionRuned then
 	begin
 	FInfoLabel.Caption:='';
 	if FEnableSaving and (FFileStream<>nil)then
-		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SGetSizeString(FFileStream.Size,'RU')+'", ';
+		FInfoLabel.Caption:=FInfoLabel.Caption+'Размер файла: "'+SMemorySizeToString(FFileStream.Size,'RU')+'", ';
 	if (F3dObject<>nil) and (F3dObject.LastObject()<>nil) then
 		FInfoLabel.Caption:=FInfoLabel.Caption+'Итерация: "'+SStr(FNowCadr)+'", Количество точек: "'+SStr(FCube.FDinamicQuantityMoleculs)+'"'
 	end;

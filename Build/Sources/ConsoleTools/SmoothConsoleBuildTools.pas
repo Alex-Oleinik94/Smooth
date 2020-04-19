@@ -6,23 +6,23 @@ interface
 
 uses
 	 SmoothBase
-	,SmoothConsoleCaller
+	,SmoothConsoleHandler
 	;
 
-procedure SConsoleBuildFiles                                  (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleBuild                                       (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleClearFileRegistrationResources              (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleClearFileForRegistrationExtensions          (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConvertFileToPascalUnitAndRegisterUnit      (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleIncEngineVersion                            (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConvertDirectoryFilesToPascalUnits          (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConvertFileToPascalUnit                     (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleIsConsole                                   (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleMake                                        (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleDefineSkiper                                (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleVersionTo_RC_WindowsFile                    (const VParams : TSConcoleCallerParams = nil);
-procedure SConsoleOpenLastLog                                 (const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleBuildFiles                                  (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleBuild                                       (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleClearFileRegistrationResources              (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleClearFileForRegistrationExtensions          (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConvertFileToPascalUnitAndRegisterUnit      (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleIncEngineVersion                            (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConvertDirectoryFilesToPascalUnits          (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConvertFileToPascalUnit                     (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleIsConsole                                   (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleMake                                        (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleDefineSkiper                                (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleVersionTo_RC_WindowsFile                    (const VParams : TSConsoleHandlerParams = nil);
+procedure SConsoleOpenLastLog                                 (const VParams : TSConsoleHandlerParams = nil);
 
 implementation
 
@@ -44,7 +44,7 @@ uses
 	,SmoothDefinesSkiper
 	;
 
-procedure SConsoleOpenLastLog(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleOpenLastLog(const VParams : TSConsoleHandlerParams = nil);
 var
 	SL : TSStringList = nil;
 begin
@@ -59,7 +59,7 @@ else
 	SHint('Params are not alowed here!');
 end;
 
-procedure SConsoleVersionTo_RC_WindowsFile(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleVersionTo_RC_WindowsFile(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (SCountConsoleParams(VParams) = 2) and (SResourceFiles.FileExists(VParams[0])) then
 	SPushVersionToWindowsResourseFile(VParams[0], VParams[1])
@@ -70,7 +70,7 @@ else
 	end;
 end;
 
-procedure SConsoleDefineSkiper(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleDefineSkiper(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (SCountConsoleParams(VParams) = 2) and (SResourceFiles.FileExists(VParams[0])) then
 	SDefinesSkiper(VParams[0], VParams[1])
@@ -81,7 +81,7 @@ else
 	end;
 end;
 
-procedure SConsoleMake(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleMake(const VParams : TSConsoleHandlerParams = nil);
 var
 	Make : TSMakefileReader;
 	Param : TSString;
@@ -95,12 +95,12 @@ Make.Execute(Param);
 Make.Destroy();
 end;
 
-procedure SConsoleIsConsole(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleIsConsole(const VParams : TSConsoleHandlerParams = nil);
 begin
 Halt(TSByte(SIsConsole()));
 end;
 
-procedure SConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConvertDirectoryFilesToPascalUnits(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (SCountConsoleParams(VParams) = 3) and SResourceFiles.FileExists(VParams[2]) and SExistsDirectory(VParams[0])and SExistsDirectory(VParams[1]) then
 	SConvertDirectoryFilesToPascalUnits(VParams[0],VParams[1],'',VParams[2])
@@ -111,7 +111,7 @@ else
 	end;
 end;
 
-procedure SConsoleConvertFileToPascalUnit(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConvertFileToPascalUnit(const VParams : TSConsoleHandlerParams = nil);
 var
 	Param : TSString;
 begin
@@ -129,7 +129,7 @@ else
 	end;
 end;
 
-procedure SConsoleIncEngineVersion(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleIncEngineVersion(const VParams : TSConsoleHandlerParams = nil);
 var
 	Param : TSString;
 begin
@@ -149,7 +149,7 @@ else
 	end;
 end;
 
-procedure SConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConvertCachedFileToPascalUnitAndRegisterUnit(const VParams : TSConsoleHandlerParams = nil);
 var
 	ii : TSLongWord;
 begin
@@ -168,7 +168,7 @@ else
 	end;
 end;
 
-procedure SConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleConvertFileToPascalUnitAndRegisterUnit(const VParams : TSConsoleHandlerParams = nil);
 var
 	ii : TSLongWord;
 begin
@@ -187,7 +187,7 @@ else
 	end;
 end;
 
-procedure SConsoleClearFileForRegistrationExtensions(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleClearFileForRegistrationExtensions(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
 	SClearFileForRegistrationExtensions(VParams[0])
@@ -198,7 +198,7 @@ else
 	end;
 end;
 
-procedure SConsoleClearFileRegistrationResources(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleClearFileRegistrationResources(const VParams : TSConsoleHandlerParams = nil);
 begin
 if (VParams <> nil) and (Length(VParams) = 1) and (VParams[0] <> '') then
 	SClearFileRegistrationResources(VParams[0])
@@ -209,7 +209,7 @@ else
 	end;
 end;
 
-procedure SConsoleBuild(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleBuild(const VParams : TSConsoleHandlerParams = nil);
 const
 	BuildComand = 
 		{$IF defined(MSWINDOWS)}
@@ -293,7 +293,7 @@ Result := True;
 AllTargets := SStringListFromString(Make.GetConstant('S_TARGET_LIST'), ',');
 SStringListTrimAll(AllTargets, ' ');
 AllTargets := SUpCasedStringList(AllTargets, True);
-with TSConsoleCaller.Create(VParams) do
+with TSConsoleHandler.Create(VParams) do
 	begin
 	Category('Bitrate');
 	AddComand(@Proccess32, ['32', 'x32', 'i386'], 'Building 32 bit target');
@@ -400,7 +400,7 @@ ExecuteBuild();
 SetLength(Extensions, 0);
 end;
 
-procedure SConsoleBuildFiles(const VParams : TSConcoleCallerParams = nil);
+procedure SConsoleBuildFiles(const VParams : TSConsoleHandlerParams = nil);
 begin
 SBuildFiles(VParams[0], VParams[1], VParams[2], VParams[3]);
 end;

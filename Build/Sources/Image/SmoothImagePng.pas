@@ -38,25 +38,25 @@ type
 	TSResourceManipulatorImagesPNG = class(TSResourceManipulator)
 			public
 		constructor Create();override;
-		function LoadResourceFromStream(const VStream : TStream;const VExpansion : TSString):TSResource;override;
-		function SaveResourceToStream(const VStream : TStream;const VExpansion : TSString;const VResource : TSResource):TSBoolean;override;
+		function LoadResourceFromStream(const VStream : TStream;const VExtension : TSString):TSResource;override;
+		function SaveResourceToStream(const VStream : TStream;const VExtension : TSString;const VResource : TSResource):TSBoolean;override;
 		end;
 
 constructor TSResourceManipulatorImagesPNG.Create();
 begin
 inherited;
-AddExpansion('PNG', SupportedPNG(), SupportedPNG());
+AddFileExtension('PNG', SupportedPNG(), SupportedPNG());
 end;
 
-function TSResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExpansion : TSString):TSResource;
+function TSResourceManipulatorImagesPNG.LoadResourceFromStream(const VStream : TStream;const VExtension : TSString):TSResource;
 begin
 Result := TSBitMap.Create();
 LoadPNG(VStream, Result as TSBitMap);
 end;
 
-function TSResourceManipulatorImagesPNG.SaveResourceToStream(const VStream : TStream;const VExpansion : TSString;const VResource : TSResource):TSBoolean;
+function TSResourceManipulatorImagesPNG.SaveResourceToStream(const VStream : TStream;const VExtension : TSString;const VResource : TSResource):TSBoolean;
 begin
-if (VExpansion <> 'PNG') or (not(VResource is TSBitMap)) then
+if (VExtension <> 'PNG') or (not(VResource is TSBitMap)) then
 	Result := False
 else
 	begin

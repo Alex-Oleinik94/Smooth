@@ -213,7 +213,7 @@ end;
 
 function TSTCPSegment.ToString() : TSString;
 begin
-Result := '(0x' + SStr4BytesHex(SegmentBegin, False) + ', 0x' + SStr4BytesHex(SegmentEnd, False) + ', ' + SGetSizeString(SegmentEnd - SegmentBegin + 1) + ')';
+Result := '(0x' + SStr4BytesHex(SegmentBegin, False) + ', 0x' + SStr4BytesHex(SegmentEnd, False) + ', ' + SMemorySizeToString(SegmentEnd - SegmentBegin + 1) + ')';
 end;
 
 class function TSTCPSegment.Create(const _SegmentBegin, _SegmentEnd : TSTcpSequence) : TSTCPSegment;
