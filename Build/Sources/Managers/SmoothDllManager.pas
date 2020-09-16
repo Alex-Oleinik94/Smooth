@@ -715,7 +715,10 @@ SLog.Source('TSDll__PrintStat(' + SStr(Extended) + ')');
 {$ENDIF}
 SLogMakeSignificant();
 MNL  := FOwner.GenerateMaxNameLength();
-Loading();
+if FLoaded then
+	LogStat()
+else
+	Loading();
 if FLoaded then
 	if TotalFunctions() = LoadedFunctions() then
 		TextColor(10)
