@@ -121,7 +121,19 @@ function SCreateLabel(const Parent : TSScreenCustomComponent; const LabelCaption
 function SCreateLabel(const Parent : TSScreenCustomComponent; const LabelCaption : TSString; const X,Y,W,H : TSScreenInt; const Font : TSFont; const IsVisible : TSBoolean = True; const IsBoundsReal : TSBoolean = False; const InterfaceData : TSScreenInterfaceData = nil) : TSScreenLabel; overload;
 procedure SKill(var _Label : TSScreenLabel); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
+// Progress bar
+procedure SKill(var _ProgressBar : TSProgressBar); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
+
+procedure SKill(var _ProgressBar : TSProgressBar); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _ProgressBar <> nil then
+	begin
+	_ProgressBar.Destroy();
+	_ProgressBar := nil;
+	end;
+end;
 
 //##########
 //# Button #

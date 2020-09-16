@@ -227,13 +227,13 @@ end;
 
 destructor TSFractalMengerSpongeRelease.Destroy();
 begin
-if FComboBox1<>nil then FComboBox1.Destroy;
-if FButtonDepthMinus<>nil then FButtonDepthMinus.Destroy;
-if FButtonDepthPlus<>nil then FButtonDepthPlus.Destroy;
-if FLabelDepth<>nil then FLabelDepth.Destroy;
-if FComboBox2<>nil then FComboBox2.Destroy;
-if FFont1<>nil then FFont1.Destroy;
-if FLabelDepthCaption<>nil then FLabelDepthCaption.Destroy;
+SKill(FComboBox1);
+SKill(FButtonDepthMinus);
+SKill(FButtonDepthPlus);
+SKill(FLabelDepth);
+SKill(FComboBox2);
+SKill(FFont1);
+SKill(FLabelDepthCaption);
 inherited;
 end;
 
@@ -254,12 +254,12 @@ FFractal:=d;
 FThreadID:=TID;
 end;
 
-procedure NewMengerThread(Klass:TSMengerSpongeFractalData) ;
+procedure NewMengerThread(MengerSpongeFractalData:TSMengerSpongeFractalData) ;
 begin
-(Klass.FFractal as TSFractalMengerSponge).CalculateFromThread(Klass.a1,Klass.b1,Klass.c1);
-Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
-Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy();
+(MengerSpongeFractalData.FFractal as TSFractalMengerSponge).CalculateFromThread(MengerSpongeFractalData.a1,MengerSpongeFractalData.b1,MengerSpongeFractalData.c1);
+MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FFinished:=True;
+MengerSpongeFractalData.FFractal.FThreadsData[MengerSpongeFractalData.FThreadID].FData:=nil;
+MengerSpongeFractalData.Destroy();
 end;
 
 function TSFractalMengerSponge.DoAtThreads:boolean;inline;
@@ -277,7 +277,7 @@ end;
 
 class function TSFractalMengerSponge.ClassName:string;
 begin
-Result := 'Губка Менгера и подобное';
+Result := 'Губка Менгера и подобное (beta)';
 end;
 
 procedure TSFractalMengerSponge.Calculate;

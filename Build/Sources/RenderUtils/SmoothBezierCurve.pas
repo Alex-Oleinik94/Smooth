@@ -41,12 +41,23 @@ type
 		function VertexQuantity:TSMaxEnum;inline;
 		end;
 
+procedure SKill(var _BezierCurve : TSBezierCurve); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+
 implementation
 
 uses
 	 SmoothRenderBase
 	,SmoothCommon
 	;
+
+procedure SKill(var _BezierCurve : TSBezierCurve); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+if _BezierCurve <> nil then
+	begin
+	_BezierCurve.Destroy();
+	_BezierCurve := nil;
+	end;
+end;
 
 function TSBezierCurve.VertexQuantity:TSMaxEnum;inline;
 begin

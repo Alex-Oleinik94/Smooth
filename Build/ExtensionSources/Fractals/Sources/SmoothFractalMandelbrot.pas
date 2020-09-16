@@ -834,69 +834,36 @@ end;
 
 destructor TSFractalMandelbrotRelease.Destroy();
 var
-	i:TSMaxEnum;
+	Index : TSMaxEnum;
 begin
-if FCurveInfoLbl<>nil then
-	FCurveInfoLbl.Destroy();
+SKill(FCurveInfoLbl);
 SKill(FTNRF);
-if FCurvePointPanel<>nil then
-	FCurvePointPanel.Destroy();
+SKill(FCurvePointPanel);
 if FCurveArPoints<>nil then
 	SetLength(FCurveArPoints,0);
-if FBezierCurveKadrProgressBar<> nil then
-	FBezierCurveKadrProgressBar.Destroy();
-if FBezierCurvePanel<>nil then
-	FBezierCurvePanel.Destroy();
-if FButtonEnableCurve<>nil then
-	FButtonEnableCurve.Destroy();
-if FBezierCurve<>nil then
-	FBezierCurve.Destroy();
-if SecondImage<>nil then
-	SecondImage.Destroy;
-SecondImage:=nil;
-if LabelProcent<>nil then
-	LabelProcent.Destroy;
-LabelProcent:=nil;
-if LblProcent<>nil then
-	LblProcent.Destroy;
-LblProcent:=nil;
-if LabelCoord<>nil then
-	LabelCoord.Destroy;
-LabelCoord:=nil;
-if ScreenshotPanel<>nil then
-	ScreenshotPanel.Destroy;
-ScreenshotPanel:=nil;
-if ColorComboBox<>nil then
-	ColorComboBox.Destroy;
-ColorComboBox:=nil;
-if TypeComboBox<>nil then
-	TypeComboBox.Destroy;
-TypeComboBox:=nil;
-if ZumButton<>nil then
-	ZumButton.Destroy;
-ZumButton:=nil;
-if StepenComboBox<>nil then
-	StepenComboBox.Destroy;
-StepenComboBox:=nil;
-if QuantityRecComboBox<>nil then
-	QuantityRecComboBox.Destroy;
-QuantityRecComboBox:=nil;
-if ButtonSelectZNumber<>nil then
-	ButtonSelectZNumber.Destroy;
-ButtonSelectZNumber:=nil;
-if VideoPanel<>nil then
-	VideoPanel.Destroy;
-VideoPanel:=nil;
-if FStartPanel<>nil then
-	FStartPanel.Destroy;
-FStartPanel:=nil;
+SKill(FBezierCurveKadrProgressBar);
+SKill(FBezierCurvePanel);
+SKill(FButtonEnableCurve);
+SKill(FBezierCurve);
+SKill(SecondImage);
+SKill(LabelProcent);
+SKill(LblProcent);
+SKill(LabelCoord);
+SKill(ScreenshotPanel);
+SKill(ColorComboBox);
+SKill(TypeComboBox);
+SKill(ZumButton);
+SKill(StepenComboBox);
+SKill(QuantityRecComboBox);
+SKill(ButtonSelectZNumber);
+SKill(VideoPanel);
+SKill(FStartPanel);
 if Mandelbrot<>nil then
 	Mandelbrot.Destroy;
 Mandelbrot:=nil;
 if FArProgressBar<>nil then
-	for i:=0 to High(FArProgressBar) do
-		if FArProgressBar[i]<>nil then
-			FArProgressBar[i].Destroy;
+	for Index := 0 to High(FArProgressBar) do
+		SKill(FArProgressBar[Index]);
 SetLength(FArProgressBar,0);
 FArProgressBar:=nil;
 inherited;

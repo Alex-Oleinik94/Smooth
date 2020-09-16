@@ -231,11 +231,11 @@ end;
 
 destructor TSFractalLevyCurve.Destroy;
 begin
-FBMD.Destroy;
-FLD.Destroy;
-FLDC.Destroy;
-FBPD.Destroy;
-FTCB.Destroy;
+SKill(FBMD);
+SKill(FLD);
+SKill(FLDC);
+SKill(FBPD);
+SKill(FTCB);
 inherited;
 end;
 

@@ -127,8 +127,7 @@ end;
 
 destructor TSFractalSierpinskiCarpetSixAngle.Destroy();
 begin
-FTypeComboBox.Destroy();
-FTypeComboBox := nil;
+SKill(FTypeComboBox);
 inherited;
 end;
 

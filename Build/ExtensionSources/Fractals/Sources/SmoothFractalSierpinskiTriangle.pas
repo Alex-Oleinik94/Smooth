@@ -235,10 +235,10 @@ end;
 
 destructor TSFractalSierpinskiTriangle.Destroy;
 begin
-FBMD.Destroy;
-FLD.Destroy;
-FLDC.Destroy;
-FBPD.Destroy;
+SKill(FBMD);
+SKill(FLD);
+SKill(FLDC);
+SKill(FBPD);
 inherited;
 end;
 

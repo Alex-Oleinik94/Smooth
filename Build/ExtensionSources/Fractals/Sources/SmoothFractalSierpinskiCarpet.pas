@@ -153,12 +153,12 @@ if FThreadsEnable then
 			F3dObjectsInfo[ObjectId]:=S_TRUE;
 end;
 
-procedure NewMengerThread(Klass:TSFractalData);
+procedure NewMengerThread(FractalData:TSFractalData);
 begin
-(Klass.FFractal as TSFractalSierpinskiCarpet).CalculateFromThread();
-Klass.FFractal.FThreadsData[Klass.FThreadID].FFinished:=True;
-Klass.FFractal.FThreadsData[Klass.FThreadID].FData:=nil;
-Klass.Destroy;
+(FractalData.FFractal as TSFractalSierpinskiCarpet).CalculateFromThread();
+FractalData.FFractal.FThreadsData[FractalData.FThreadID].FFinished:=True;
+FractalData.FFractal.FThreadsData[FractalData.FThreadID].FData:=nil;
+FractalData.Destroy;
 end;
 
 procedure TSFractalSierpinskiCarpet.Calculate();

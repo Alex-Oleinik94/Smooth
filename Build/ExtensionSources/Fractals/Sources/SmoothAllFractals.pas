@@ -38,6 +38,7 @@ uses
 	,SmoothFractalSierpinskiTriangle
 	,SmoothFractalMengerSponge
 	,SmoothFractalSierpinskiCarpetSixAngle
+	,SmoothFractalSierpinskiCarpet2
 	;
 
 constructor TSAllFractals.Create();
@@ -51,6 +52,7 @@ FDrawClasses.Add(TSFractalSierpinskiTetrahedron);
 FDrawClasses.Add(TSFractalMinkowskiCurve);
 FDrawClasses.Add(TSFractalLevyCurve);
 FDrawClasses.Add(TSFractalSierpinskiCarpet);
+//FDrawClasses.Add(TSFractalSierpinskiCarpet2);
 FDrawClasses.Add(TSFractalSierpinskiCarpetSixAngle);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
@@ -58,8 +60,7 @@ end;
 
 destructor TSAllFractals.Destroy();
 begin
-FDrawClasses.Destroy();
-FDrawClasses:=nil;
+SKill(FDrawClasses);
 inherited;
 end;
 
