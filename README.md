@@ -21,7 +21,7 @@
    - [bmp][bmp_format]
    - [jpeg][jpeg_format] through PasJpeg
    - [png][png_format] through [LibPNG]
-   - [sgia][sgia_format](jpeg with alpha channel)
+   - [sia][sia_format](jpeg with alpha channel)
  * Loading 3D object formats: 
    - [obj][obj_format]
    - [3ds][3ds_format]
@@ -49,7 +49,7 @@
 [obj_format]: http://en.wikipedia.org/wiki/Wavefront_.obj_file "OBJ format - Wiki"
 [png_format]: http://en.wikipedia.org/wiki/Portable_Network_Graphics "PNG format - Wiki"
 [jpeg_format]: http://en.wikipedia.org/wiki/JPEG "JPEG format - Wiki"
-[sgia_format]: Build/Sources/Images/SmoothImageSgia.pas "SGIA source code"
+[sia_format]: Build/Sources/Images/SmoothImageSia.pas "sia source code"
 [bmp_format]: http://en.wikipedia.org/wiki/BMP_file_format "BMP format - Wiki"
 [tga_format]: http://en.wikipedia.org/wiki/Truevision_TGA "TARGA format - Wiki"
 [DirectX]: http://en.wikipedia.org/wiki/DirectX "DirectX - Wiki"
