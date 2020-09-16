@@ -5,13 +5,13 @@ type
 			public
 		x, y : STRUCT_TYPE;
 			public
-		class function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0) : STRUCT_2; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Write();                                                      {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure WriteLn();                                                    {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0) : STRUCT_2; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload; static;
+		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure Write();                                                      {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure WriteLn();                                                    {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$IFDEF STRUCT_IS_FLOAT}
-			function Round():STRUCT_2;                                          {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			function Normalized() : STRUCT_2;                                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			function Round():STRUCT_2;                                          {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+			function Normalized() : STRUCT_2;                                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$ENDIF STRUCT_IS_FLOAT}
 		function FieldsArray() : STRUCT_PTYPE;                                  {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 			public
@@ -28,13 +28,13 @@ type
 			public
 		z : STRUCT_TYPE;
 			public
-		class function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0) : STRUCT_3; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Write();                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure WriteLn();                 {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0) : STRUCT_3; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload; static;
+		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure Write();                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure WriteLn();                 {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$IFDEF STRUCT_IS_FLOAT}
-			function Round():STRUCT_3;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-			function Normalized() : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			function Round():STRUCT_3;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+			function Normalized() : STRUCT_3;{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$ENDIF STRUCT_IS_FLOAT}
 		{$IFDEF STRUCT_IS_COLOR}
 			property b : STRUCT_TYPE read z write z;
@@ -47,12 +47,12 @@ type
 			public
 		w : STRUCT_TYPE;
 			public
-		class function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0) : STRUCT_4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure Write();                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-		procedure WriteLn();                 {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+		function Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0) : STRUCT_4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload; static;
+		procedure Import(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure Write();                   {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+		procedure WriteLn();                 {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$IFDEF STRUCT_IS_FLOAT}
-			function Round():STRUCT_4;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+			function Round():STRUCT_4;       {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 		{$ENDIF STRUCT_IS_FLOAT}
 		{$IFDEF STRUCT_IS_COLOR}
 			function WithAlpha(const Alpha : STRUCT_TYPE):STRUCT_4;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
@@ -508,7 +508,7 @@ begin
 Result := STRUCT_PTYPE(@x);
 end;
 
-class function STRUCT_2.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0) : STRUCT_2; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function STRUCT_2.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0) : STRUCT_2; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} static;
 begin
 Result.Import(x1, y1);
 end;
@@ -555,7 +555,7 @@ end;
 {$ENDIF STRUCT_IS_FLOAT}
 
 {$IF defined(STRUCT_3) and defined(STRUCT_P_3)}
-class function STRUCT_3.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0) : STRUCT_3; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function STRUCT_3.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0) : STRUCT_3; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} static;
 begin
 Result.Import(x1, y1, z1);
 end;
@@ -602,7 +602,7 @@ end;
 {$ENDIF STRUCT_IS_FLOAT}
 
 {$IF    defined(STRUCT_4) and defined(STRUCT_P_4)}
-class function STRUCT_4.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0) : STRUCT_4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function STRUCT_4.Create(const x1 : STRUCT_TYPE = 0;const y1 : STRUCT_TYPE = 0;const z1 : STRUCT_TYPE = 0;const w1 : STRUCT_TYPE = 0) : STRUCT_4; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} static;
 begin
 Result.Import(x1, y1, z1, w1);
 end;
