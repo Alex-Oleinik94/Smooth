@@ -29,11 +29,9 @@
 
 ### Links
 
- * Binary data(for examples etc.) and libraries: [Binary data]
- * See also: [Smooth Programming]
+ * See also: [Smooth programming]
 
-[Smooth Programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd "Smooth programming files"
-[Binary data]: http://yadi.sk/d/2dXlhmaQ3VmgBd/Smooth "Smooth binary data"
+[Smooth programming]: http://yadi.sk/d/2dXlhmaQ3VmgBd "Smooth programming files"
 [Free Pascal Compiler]: http://www.freepascal.org "Free Pascal Compiler Homepage"
 [Smooth]: http://github.com/Byeneg/Smooth "Smooth Repository"
 [OpenGL]: http://www.opengl.org "OpenGL Homepage"
@@ -49,7 +47,7 @@
 [obj_format]: http://en.wikipedia.org/wiki/Wavefront_.obj_file "OBJ format - Wiki"
 [png_format]: http://en.wikipedia.org/wiki/Portable_Network_Graphics "PNG format - Wiki"
 [jpeg_format]: http://en.wikipedia.org/wiki/JPEG "JPEG format - Wiki"
-[sia_format]: Build/Sources/Images/SmoothImageSia.pas "sia source code"
+[sia_format]: Build/Sources/Image/SmoothImageSia.pas "SIA source code"
 [bmp_format]: http://en.wikipedia.org/wiki/BMP_file_format "BMP format - Wiki"
 [tga_format]: http://en.wikipedia.org/wiki/Truevision_TGA "TARGA format - Wiki"
 [DirectX]: http://en.wikipedia.org/wiki/DirectX "DirectX - Wiki"

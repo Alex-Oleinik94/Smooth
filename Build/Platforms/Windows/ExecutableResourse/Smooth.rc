@@ -16,7 +16,7 @@ BEGIN
       VALUE "FileDescription", "Smooth common application"
       VALUE "FileVersion", SMOOTH_VERSION_VALUE
       VALUE "InternalName", "Smooth"
-      VALUE "LegalCopyright", "Byeneg"
+      VALUE "LegalCopyright", "LetOmPewRa"
       VALUE "OriginalFilename", "Smooth.exe"
       VALUE "ProductName", "Smooth"
       VALUE "ProductVersion", SMOOTH_VERSION_VALUE
