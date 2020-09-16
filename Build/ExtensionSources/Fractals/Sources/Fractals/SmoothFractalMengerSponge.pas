@@ -16,8 +16,9 @@ uses
 	;
 type
 	TSMengerSpongeBoolAr6=array[0..5] of TSBool;
-	TSMengerType = (FMengerCube,FMengerStar,FMengerPlus,FMengerExtendedCube);
-const 
+	TSMengerType = (SMengerCube,SMengerStar,SMengerSnowflake);
+const
+	SDefaultMengerType = SMengerCube;
 	TSMengerSpongeBoolAr6Null:TSMengerSpongeBoolAr6=(False,False,False,False,False,False);
 	TSMengerSpongeBoolAr6True:TSMengerSpongeBoolAr6=(True,True,True,True,True,True);
 type
@@ -27,33 +28,33 @@ type
 		destructor Destroy();override;
 		class function ClassName():TSString;override;
 			public
-		FDeep:TSMengerType;
+		FFractalType:TSMengerType;
 		Ar6Normals:packed array [0..5] of  TSVertex3f;
 		FThreadsArray:packed array [0..19] of 
 			record
-			AllQ:Real;
-			Q:Real;
+			AllQ:TSFloat64;
+			Q:TSFloat64;
 			Arr6:TSMengerSpongeBoolAr6;
 			Point:TSVertex3f;
 			end;
 		procedure CalculateArray();
 		procedure Calculate();override;
-		procedure CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:LongWord);
-		function RecQuantity(const ArTP:TSMengerSpongeBoolAr6;const NowDepth:LongInt):int64;
-		function GetArTP(const OldArTP:TSMengerSpongeBoolAr6;const i,ii,iii: byte;const ThisDepth:LongWord = 0):TSMengerSpongeBoolAr6;inline;
-		class function DoOrNotDo(const i,ii,iii:Byte):boolean;inline;
-		class function DoOrNotDoPlus(const i,ii,iii:Byte):boolean;inline;
-		procedure PushIndexes(const i1,i2,i3,i4:TSVertex3f;const ai:longword;const AllQ:real;var ObjectId:LongWord;var FVertexIndex,FFaceIndex:LongWord);inline;
-		function DoAtThreads():boolean;inline;
+		procedure CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
+		function RecQuantity(const ArTP:TSMengerSpongeBoolAr6;const NowDepth:LongInt):TSInt64;
+		function GetArTP(const OldArTP:TSMengerSpongeBoolAr6;const i,ii,iii: TSUInt8;const ThisDepth:TSUInt32 = 0):TSMengerSpongeBoolAr6;inline;
+		class function DoOrNotDo(const i,ii,iii:TSUInt8):TSBoolean;inline;
+		class function DoOrNotDoPlus(const i,ii,iii:TSUInt8):TSBoolean;inline;
+		procedure PushIndexes(const i1,i2,i3,i4:TSVertex3f;const ai:TSUInt32;const AllQ:Real;var ObjectId:TSUInt32;var FVertexIndex,FFaceIndex:TSUInt32);inline;
+		function DoAtThreads():TSBoolean;inline;
 		end;
 		
 	TSMengerSpongeFractal=TSFractalMengerSponge;
 	
 	TSMengerSpongeFractalData=class(TSFractalData)
 			public
-		constructor Create(const a,b,c:LongWord;const d : TSFractalMengerSponge;const TID:LongWord);
+		constructor Create(const a,b,c:TSUInt32;const d : TSFractalMengerSponge;const TID:TSUInt32);
 			public
-		a1,b1,c1:LongWord;
+		a1,b1,c1:TSUInt32;
 		end;
 		
 	TSFractalMengerSpongeRelease=class(TSFractalMengerSponge)
@@ -116,11 +117,10 @@ with TSFractalMengerSpongeRelease(VComboBox.FUserPointer1) do
 		begin
 		if a<>b then
 			begin
-			case b of
-			0:FDeep:=FMengerCube;
-			1:FDeep:=FMengerStar;
-			2:FDeep:=FMengerPlus;
-			3:FDeep:=FMengerExtendedCube;
+			case b of //because strange bug
+			1:FFractalType:=SMengerCube;
+			0:FFractalType:=SMengerStar;
+			2:FFractalType:=SMengerSnowflake;
 			end;
 			Calculate;
 			end;
@@ -184,12 +184,11 @@ FComboBox1:=TSScreenComboBox.Create();
 Screen.CreateChild(FComboBox1);
 Screen.LastChild.SetBounds(Render.Width-250,5,230,30);
 Screen.LastChild.Anchors:=[SAnchRight];
-(Screen.LastChild as TSScreenComboBox).CreateItem('Звездочка');
 (Screen.LastChild as TSScreenComboBox).CreateItem('Губка Менгера');
-(Screen.LastChild as TSScreenComboBox).CreateItem('Снежинка (bug)');
-//(Screen.LastChild as TSScreenComboBox).CreateItem('New Губка Менгера');
+(Screen.LastChild as TSScreenComboBox).CreateItem('Звездочка');
+(Screen.LastChild as TSScreenComboBox).CreateItem('Снежинка (beta)');
 (Screen.LastChild as TSScreenComboBox).CallBackProcedure:=TSScreenComboBoxProcedure(@FractalMengerSpongeReleaseComboBoxProcedure);
-(Screen.LastChild as TSScreenComboBox).SelectItem:=0;
+(Screen.LastChild as TSScreenComboBox).SelectItem:=1; //because strange bug
 Screen.LastChild.FUserPointer1:=Self;
 Screen.LastChild.Visible:=True;
 Screen.LastChild.BoundsMakeReal();
@@ -218,7 +217,8 @@ Screen.LastChild.BoundsMakeReal();
 
 FLabelDepthCaption := SCreateLabel(Screen, 'Итерация:', Render.Width-250-90-125,5,115,30, [SAnchRight], True, True, Self);
 
-Depth:=2;
+Depth := 2;
+FFractalType := SDefaultMengerType;
 {$IFNDEF ANDROID}
 	Threads:=1;
 	{$ENDIF}
@@ -265,74 +265,75 @@ end;
 function TSFractalMengerSponge.DoAtThreads:boolean;inline;
 begin
 Result:=
-(FThreadsEnable) and 
-(Length(FThreadsData)>0) and 
-(((20 mod Length(FThreadsData))=0) or (FDeep<>FMengerCube)) and (FDepth<>0) and (FDepth<>1);
+	(FThreadsEnable) and 
+	(Length(FThreadsData) > 0) and 
+	(((20 mod Length(FThreadsData)) = 0) or (FFractalType <> SMengerCube)) and (FDepth<>0) and (FDepth<>1);
 end;
 
-class function TSFractalMengerSponge.DoOrNotDoPlus(const i,ii,iii:Byte):boolean;inline;
+class function TSFractalMengerSponge.DoOrNotDoPlus(const i,ii,iii:TSUInt8):TSBool;inline;
 begin
 Result:=((i=1) or (ii=1) or (iii=1)) and (not ((i=1) and (ii=1) and (iii=1)));
 end;
 
 class function TSFractalMengerSponge.ClassName:string;
 begin
-Result:='Губка Менгера и тп';
+Result := 'Губка Менгера и подобное';
 end;
 
 procedure TSFractalMengerSponge.Calculate;
 var
-	Quantity:int64 = 0;
-	i,ii,iii:LongWord;
+	Quantity:TSInt64 = 0;
+	Index,ii,iii:TSUInt32;
 begin
 Clear3dObject();
 if DoAtThreads then
 	begin
-	if FDeep = FMengerCube then
+	if FFractalType = SMengerCube then
 		begin
 		F3dObjectsReady:=False;
-		for i:=0 to High(FThreadsData) do
+		for Index:=0 to High(FThreadsData) do
 			begin
 			Quantity:=0;
-			for ii:=i*(20 div Length(FThreadsData)) to (i+1)*(20 div (Length(FThreadsData)))-1 do
+			for ii:=Index*(20 div Length(FThreadsData)) to (Index+1)*(20 div (Length(FThreadsData)))-1 do
 				begin
 				Quantity+=RecQuantity(FThreadsArray[ii].Arr6,FDepth-1);
 				end;
 			iii:=F3dObject.QuantityObjects;
 			Calculate3dObjects(Quantity,SR_QUADS);
-			FThreadsData[i].FData:=TSMengerSpongeFractalData.Create(iii,i*(20 div Length(FThreadsData)),(i+1)*(20 div Length(FThreadsData))-1,Self,i);
-			FThreadsData[i].FFinished:=False;
+			FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(iii,Index*(20 div Length(FThreadsData)),(Index+1)*(20 div Length(FThreadsData))-1,Self,Index);
+			FThreadsData[Index].FFinished:=False;
 			end;
-		for i:=0 to High(FThreadsData) do
-			FThreadsData[i].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[i].FData);;
+		for Index:=0 to High(FThreadsData) do
+			FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);;
 		end;
-	if FDeep <> FMengerCube then
+	if FFractalType <> SMengerCube then
 		begin
 		F3dObjectsReady:=False;
-		for i:=0 to High(FThreadsData) do
+		for Index:=0 to High(FThreadsData) do
 			begin
-			FThreadsData[i].FFinished:=True;
-			FThreadsData[i].FData:=nil;
+			FThreadsData[Index].FFinished:=True;
+			FThreadsData[Index].FData:=nil;
 			end;
 		Calculate3dObjects(RecQuantity(TSMengerSpongeBoolAr6True,FDepth),SR_QUADS);
-		FThreadsData[0].FFinished:=False;
-		FThreadsData[0].FData:=TSMengerSpongeFractalData.Create(0,0,0,Self,0);
-		FThreadsData[0].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[0].FData);
+		Index := 0;
+		FThreadsData[Index].FFinished:=False;
+		FThreadsData[Index].FData:=TSMengerSpongeFractalData.Create(0,0,0,Self,Index);
+		FThreadsData[Index].FThread:=TSThread.Create(TSPointerProcedure(@NewMengerThread),FThreadsData[Index].FData);
 		end;
 	end
 else
 	begin
 	Quantity:=RecQuantity(TSMengerSpongeBoolAr6True,FDepth);
 	Calculate3dObjects(Quantity,SR_QUADS);
-	i:=0;ii:=0;iii:=0;
-	CalculateFromThread(i,ii,iii);
+	Index:=0;ii:=0;iii:=0;
+	CalculateFromThread(Index,ii,iii);
 	end;
 end;
 
 constructor TSFractalMengerSponge.Create(const VContext : ISContext);
 begin
 inherited;
-FDeep:=FMengerCube;
+FFractalType:=SDefaultMengerType;
 EnableColors:=True;
 EnableNormals:=True;
 if FEnableNormals then
@@ -353,7 +354,7 @@ if FEnableNormals then
 CalculateArray();
 end;
 
-procedure TSFractalMengerSponge.CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:LongWord);
+procedure TSFractalMengerSponge.CalculateFromThread(var ObjectId,ThreadArB,ThreadArE:TSUInt32);
 var
 	i:LongInt;
 	ArVerts:packed array [1..8]of TSVertex3f;
@@ -361,7 +362,7 @@ var
 
 procedure Rec(const ArTP:TSMengerSpongeBoolAr6;const T1:TSVertex3f;const NowQ:real; const AllQ:real;const NowDepth:LongInt);
 var
-	i,ii,iii:Byte;
+	i,ii,iii:TSUInt8;
 	NewQ:Real;
 begin
 if NowDepth<=0 then
@@ -405,9 +406,9 @@ else
 	for i:=0 to 2 do
 		for ii:=0 to 2 do
 			for iii:=0 to 2 do
-				if ((FDeep = FMengerCube) and (DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerStar) and (not DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerPlus) and (DoOrNotDoPlus(i,ii,iii))) then
+				if ((FFractalType = SMengerCube)      and (DoOrNotDo(i,ii,iii))) or
+				   ((FFractalType = SMengerStar)      and (not DoOrNotDo(i,ii,iii))) or
+				   ((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 					begin
 					Rec( 
 						(GetArTP(ArTP,i,ii,iii,NowDepth-1)),
@@ -424,7 +425,7 @@ NOfV:=0;
 if DoAtThreads then
 	begin
 	//try
-	if FDeep = FMengerCube then
+	if FFractalType = SMengerCube then
 		begin
 		for i:=ThreadArB to ThreadArE do
 			begin
@@ -482,9 +483,9 @@ else
 	for i:=0 to 2 do
 		for ii:=0 to 2 do
 			for iii:=0 to 2 do
-				if ((FDeep = FMengerCube) and (DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerStar) and (not DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerPlus) and (DoOrNotDoPlus(i,ii,iii))) then
+				if ((FFractalType = SMengerCube) and (DoOrNotDo(i,ii,iii))) or
+				((FFractalType = SMengerStar) and (not DoOrNotDo(i,ii,iii))) or
+				((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 					begin
 					Result+=RecQuantity( 
 						(GetArTP(ArTP,i,ii,iii,NowDepth-1)),
@@ -502,9 +503,9 @@ i4:=0;
 for i:=0 to 2 do
 	for ii:=0 to 2 do
 		for iii:=0 to 2 do
-			if ((FDeep = FMengerCube) and (DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerStar) and (not DoOrNotDo(i,ii,iii))) or
-				((FDeep = FMengerPlus) and (DoOrNotDoPlus(i,ii,iii))) then
+			if ((FFractalType = SMengerCube) and (DoOrNotDo(i,ii,iii))) or
+				((FFractalType = SMengerStar) and (not DoOrNotDo(i,ii,iii))) or
+				((FFractalType = SMengerSnowflake) and (DoOrNotDoPlus(i,ii,iii))) then
 				begin
 				FThreadsArray[i4].Arr6:=GetArTP(TSMengerSpongeBoolAr6True,i,ii,iii);
 				FThreadsArray[i4].Point:=(SVertex3fImport(2.6,2.6,2.6)+SVertex3fImport(i*NewQ,ii*NewQ,iii*NewQ));
@@ -523,7 +524,7 @@ function TSFractalMengerSponge.GetArTP(const OldArTP:TSMengerSpongeBoolAr6;const
 begin
 Result:=OldArTP;
 
-if FDeep = FMengerStar then
+if FFractalType = SMengerStar then
 	begin
 	if (i=1) or (ii=1) or (iii=1) then
 		begin
@@ -549,7 +550,7 @@ if FDeep = FMengerStar then
 		if iii=0 then
 			Result[3]:=True;
 		if ii=2 then
-			Result[0]:=true;
+			Result[0]:=True;
 		if i=2 then
 			Result[4]:=True;
 		if iii=2 then
@@ -571,7 +572,7 @@ if FDeep = FMengerStar then
 			Result[1]:=False;
 		end;
 	end;
-if FDeep = FMengerCube then
+if FFractalType = SMengerCube then
 	begin
 	if (ii=1) and (iii=1) and (i=1) then
 		Result:=TSMengerSpongeBoolAr6Null
@@ -610,7 +611,7 @@ if FDeep = FMengerCube then
 			end;
 		end;
 	end;
-if FDeep = FMengerPlus then
+if FFractalType = SMengerSnowflake then
 	begin
 	if (i=0) and ((ThisDepth=0) or ((ThisDepth<>0) and (not ((iii=1) and (ii=1))))) then
 		Result[2]:=False;

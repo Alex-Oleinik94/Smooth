@@ -380,6 +380,8 @@ if DllCount = 0 then
 	WriteLn('Nothink to print!')
 else
 	begin
+	SLogMakeSignificant();
+	
 	LibLoaded := 0;
 	LibNotLoaded := 0;
 	FuncLoaded := 0;
@@ -711,6 +713,7 @@ begin
 {$IFDEF DLL_MANAGER_DEBUG}
 SLog.Source('TSDll__PrintStat(' + SStr(Extended) + ')');
 {$ENDIF}
+SLogMakeSignificant();
 MNL  := FOwner.GenerateMaxNameLength();
 Loading();
 if FLoaded then

@@ -602,12 +602,12 @@ end;
 class function TSDllPcap.SystemNames() : TSStringList;
 begin
 Result := nil;
-SAddStringToStringList(Result, 'Pcap');
+SAddStringToStringList(Result, 'PCap');
 end;
 class function TSDllPcap.DllNames() : TSStringList;
 begin
 Result := nil;
-SAddStringToStringList(Result, PCAP_LIB_NAME);
+SAddStringToStringList(Result, PCAP_LIB_NAME); //for loading dll need to install wpcap driver
 end;
 class function TSDllPcap.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var

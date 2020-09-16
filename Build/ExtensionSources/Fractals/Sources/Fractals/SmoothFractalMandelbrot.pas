@@ -191,6 +191,7 @@ uses
 	,SmoothScreen_Edit
 	,SmoothLists
 	,SmoothImageFormatDeterminer
+	,SmoothBitMapUtils
 	
 	,SysUtils
 	;
@@ -523,16 +524,16 @@ end;
 begin
 AddNameTheme('Стандартная');
 AddNameTheme('Молнии');
-AddNameTheme('Кучка гавна');
-AddNameTheme('Монохромный');
-AddNameTheme('Дьявол');
+AddNameTheme('Странная');
+AddNameTheme('Монохромная');
+AddNameTheme('Красная');
 AddNameTheme('Желтая пыль');
-AddNameTheme('Роза');
-AddNameTheme('Плесень');
-AddNameTheme('Медуза');
-AddNameTheme('Грибок');
-AddNameTheme('Амёба');
-AddNameTheme('Сакура');
+AddNameTheme('Розовая');
+AddNameTheme('Зелёно-красная');
+AddNameTheme('Сине-красная');
+AddNameTheme('Жёлто-синяя');
+AddNameTheme('Зелёно-синяя');
+AddNameTheme('Розово-зелёная');
 AddNameTheme('Голубая пыль');
 AddNameTheme('Красная пыль');
 AddNameTheme('Розовая пыль');
@@ -548,7 +549,7 @@ Mandelbrot.FZDegree:=2;
 Mandelbrot.FView.Import(-2.5,-2.5*(Render.Height/Render.Width),2.5,2.5*(Render.Height/Render.Width));
 Mandelbrot.CreateThreads(QuantityThreads);
 Mandelbrot.BeginCalculate;
-Mandelbrot.FImage.FileName:=SImagesDirectory+DirectorySeparator+'Mand New.jpg';
+Mandelbrot.FImage.FileName:=SImagesDirectory+DirectorySeparator+'Mandelbrot new.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3));
 
 FBeginCalc.Get;
 SetLength(FArProgressBar,QuantityThreads);
@@ -828,7 +829,7 @@ case SCoreCount() of
 else (Screen.LastChild.LastChild as TSScreenComboBox).SelectItem:=3;
 end;
 
-FTNRF := SCreateFontFromFile(Context, SFontDirectory+DirectorySeparator+'Times New Roman.sgf');
+FTNRF := SCreateFontFromFile(Context, SFontDirectory+DirectorySeparator+'Times New Roman.sf');
 end;
 
 destructor TSFractalMandelbrotRelease.Destroy();
@@ -837,8 +838,7 @@ var
 begin
 if FCurveInfoLbl<>nil then
 	FCurveInfoLbl.Destroy();
-if FTNRF<>nil then
-	FTNRF.Destroy();
+SKill(FTNRF);
 if FCurvePointPanel<>nil then
 	FCurvePointPanel.Destroy();
 if FCurveArPoints<>nil then
@@ -904,7 +904,7 @@ end;
 
 class function TSFractalMandelbrotRelease.ClassName:string;
 begin
-Result:='Фрактал Мандельброда и тп';
+Result := 'Фрактал Мандельброда и подобное';
 end;
 
 function TSFractalMandelbrotRelease.GetPointOnPosOnMand(const Point: TSPoint2int32):TSComplexNumber;inline;
@@ -1073,10 +1073,10 @@ if MandelbrotInitialized then
 					//Mandelbrot.FImage.Image.SetBounds(1920,1080);
 					Mandelbrot.FImage.FileName:=FVideoBuffer+DirectorySeparator+
 						//GetZeros(QuantityNumbers(FAllKadrs)-QuantityNumbers(FNowKadr))+
-						SStr(FNowKadr)+'.jpg';
+						SStr(FNowKadr)+'.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3));
 					end;
-				FTNRF.AddWaterString('made by Smooth',Mandelbrot.FImage,0);
-				Mandelbrot.FImage.Save(SImageFormatJpeg);
+				FTNRF.AddWaterString('made by Smooth', Mandelbrot.FImage,0);
+				Mandelbrot.FImage.Save(SDefaultSaveImageFormat(Mandelbrot.FImage.BitMap.Channels));
 				if not FNowRenderitsiaVideo then
 					begin
 					Mandelbrot.Width:=StartDepth;
@@ -1413,7 +1413,7 @@ if MandelbrotInitialized then
 			Mandelbrot.Height:=StartDepth;
 			end;
 		Mandelbrot.BeginCalculate();
-		Mandelbrot.FImage.FileName := SFreeFileName(SImagesDirectory + DirectorySeparator + 'Mandelbrot.jpg');
+		Mandelbrot.FImage.FileName := SFreeFileName(SImagesDirectory + DirectorySeparator + 'Mandelbrot.' + TSImageFormatDeterminer.DetermineFileExtensionFromFormat(SDefaultSaveImageFormat(3)));
 		LabelProcent.Visible:=True;
 		LblProcent.Visible:=True;
 		ii:={Context.TopShift+}40;

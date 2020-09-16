@@ -165,19 +165,18 @@ Result := False;
 case SaveFormat of
 SImageFormatSIA : Result := SSaveBitMapAsSiaToStream(_Stream, _Image);
 SImageFormatPNG :
-	if ((not SupportedPNG()) and (not SResourceManager.SaveingIsSupported('PNG'))) then
-		if _Image.Channels = 4 then
-			begin
-			SaveFormat := SImageFormatSIA;
-			SLog.Source('SSaveBitMapToStream: Save to PNG is impossible. Save format replaced to SIA.');
-			end
-		else
-			begin
-			SaveFormat := SImageFormatJpeg;
-			SLog.Source('SSaveBitMapToStream: Save to PNG is impossible. Save format replaced to JPEG.');
-			end
+	if SResourceManager.SaveingIsSupported('PNG') then
+		Result := SResourceManager.SaveResourceToStream(_Stream, 'PNG', _Image)
+	else if _Image.Channels = 4 then
+		begin
+		SaveFormat := SImageFormatSIA;
+		SLog.Source('SSaveBitMapToStream: Save to PNG is impossible. Save format replaced to SIA.');
+		end
 	else
-		SResourceManager.SaveResourceToStream(_Stream, 'PNG', _Image);
+		begin
+		SaveFormat := SImageFormatJpeg;
+		SLog.Source('SSaveBitMapToStream: Save to PNG is impossible. Save format replaced to JPEG.');
+		end;
 SImageFormatIco, SImageFormatCur:
 	Result := SSaveICO(_Stream, _Image);
 SImageFormatJpeg :
