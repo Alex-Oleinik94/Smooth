@@ -156,27 +156,27 @@ type
 class function TSDllFreeGLUT.SystemNames() : TSStringList;
 begin
 Result := 'FreeGLUT';
-Result += 'LibFreeGlut';
-Result += 'FreeGlut32';
-Result += 'FGlut';
-Result += 'FGlut32';
+SAddStringToStringList(Result, 'LibFreeGlut');
+SAddStringToStringList(Result, 'FreeGlut32');
+SAddStringToStringList(Result, 'FGlut');
+SAddStringToStringList(Result, 'FGlut32');
 end;
 
 class function TSDllFreeGLUT.DllNames() : TSStringList;
 begin
 Result := nil;
-Result += 'freeglut';
+SAddStringToStringList(Result, 'freeglut');
 {$IFDEF Windows}
-Result += 'glut32.dll';
+SAddStringToStringList(Result, 'glut32.dll');
 {$ELSE}
 {$ifdef darwin}
-Result += '/System/Library/Frameworks/GLUT.framework/GLUT';
+SAddStringToStringList(Result, '/System/Library/Frameworks/GLUT.framework/GLUT');
 {$else}
 {$IFDEF haiku}
-Result += 'libglut.so';
+SAddStringToStringList(Result, 'libglut.so');
 {$ELSE}
 {$IFNDEF MORPHOS}
-Result += 'libglut.so.3';
+SAddStringToStringList(Result, 'libglut.so.3');
 {$ENDIF}
 {$ENDIF}
 {$endif}

@@ -1858,7 +1858,7 @@ if (FLibHandles <> nil) then if Length(FLibHandles) = 1 then
 if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
 	Result := alGetProcAddress(Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;
@@ -1871,7 +1871,7 @@ LoadResult := @Result;
 //EAX Extensions
 if alIsExtensionPresent('EAX2.0') then
 	begin
-	Result.FExtensions += 'EAX2.0';
+	SAddStringToStringList(Result.FExtensions, 'EAX2.0');
 	EAXSet := alProcedure('EAXSet');
 	EAXGet := alProcedure('EAXGet');
 	end
@@ -1880,7 +1880,7 @@ else
 //EAX-RAM Extension
 if alIsExtensionPresent('EAX-RAM') then
 	begin
-	Result.FExtensions += 'EAX-RAM';
+	SAddStringToStringList(Result.FExtensions, 'EAX-RAM');
 	EAXSetBufferMode := alProcedure('EAXSetBufferMode');
 	EAXGetBufferMode := alProcedure('EAXGetBufferMode');
 	AL_EAX_RAM_SIZE := alGetEnumValue('AL_EAX_RAM_SIZE');
@@ -1893,7 +1893,7 @@ else
 	Result.FFunctionCount += 7;
 if alcIsExtensionPresent(alcGetContextsDevice(alcGetCurrentContext()), ALC_EXT_EFX_NAME) then
 	begin
-	Result.FExtensions += ALC_EXT_EFX_NAME;
+	SAddStringToStringList(Result.FExtensions, ALC_EXT_EFX_NAME);
 	alGenEffects := alProcedure('alGenEffects');
 	alDeleteEffects := alProcedure('alDeleteEffects');
 	alIsEffect := alProcedure('alIsEffect');
@@ -1935,20 +1935,20 @@ end;
 class function TSDllOpenAL.SystemNames() : TSStringList;
 begin
 Result := 'OpenAL';
-Result += 'OAL';
-Result += 'AL';
+SAddStringToStringList(Result, 'OAL');
+SAddStringToStringList(Result, 'AL');
 end;
 
 class function TSDllOpenAL.DllNames() : TSStringList;
 begin
 Result := nil;
 {$IFDEF MSWINDOWS}
-Result += 'OpenAL32.dll';
+SAddStringToStringList(Result, 'OpenAL32.dll');
 {$ELSE}
-Result += 'libopenal.so.3';
-Result += 'libopenal.so.2';
-Result += 'libopenal.so.1';
-Result += 'libopenal.so';
+SAddStringToStringList(Result, 'libopenal.so.3');
+SAddStringToStringList(Result, 'libopenal.so.2');
+SAddStringToStringList(Result, 'libopenal.so.1');
+SAddStringToStringList(Result, 'libopenal.so');
 {$ENDIF}
 end;
 
@@ -1966,7 +1966,7 @@ Result := GetProcAddress(VDll, Name);
 if (Result = nil) and (Addr(alGetProcAddress) <> nil) then
 	Result := alGetProcAddress(Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;

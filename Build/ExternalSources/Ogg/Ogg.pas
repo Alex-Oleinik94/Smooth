@@ -451,14 +451,14 @@ type
 class function TSDllOGG.SystemNames() : TSStringList;
 begin
 Result := 'Ogg';
-Result += 'LibOgg';
+SAddStringToStringList(Result, 'LibOgg');
 end;
 
 class function TSDllOGG.DllNames() : TSStringList;
 begin
 Result := DllPrefix + 'ogg' + DllPostfix;
 {$IFDEF MSWINDOWS}
-Result += DllPrefix + 'libogg' + DllPostfix;
+SAddStringToStringList(Result, DllPrefix + 'libogg' + DllPostfix);
 {$ENDIF}
 end;
 
@@ -518,7 +518,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

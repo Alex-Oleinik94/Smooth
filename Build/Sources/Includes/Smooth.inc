@@ -43,7 +43,7 @@
 	{$modeswitch nestedprocvars}
 	{$modeswitch typehelpers}
 	//{$modeswitch ADVANCEDRECORDS} //allow the use of advanced records (i.e. records with methods)
-	{$static on} // for static object fields (analog class fields for classes)
+	//{$static on} // for static object fields (analog class fields for classes)
 	{$ENDIF}
 
 {$IFNDEF MOBILE}

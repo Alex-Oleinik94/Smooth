@@ -437,7 +437,7 @@ end;
 class function TSDllMPG123.SystemNames() : TSStringList;
 begin
 Result := 'mpg123';
-Result += 'libmpg123';
+SAddStringToStringList(Result, 'libmpg123');
 end;
 
 class function TSDllMPG123.DllNames() : TSStringList;
@@ -445,27 +445,27 @@ class function TSDllMPG123.DllNames() : TSStringList;
 {$IFDEF UNIX}
 procedure UnixLib(const VLib : TSString);
 begin
-Result += VLib + '.so.3';
-Result += VLib + '.so.2';
-Result += VLib + '.so.1';
-Result += VLib + '.so.0';
-Result += VLib + '.so';
+SAddStringToStringList(Result, '.so.3');
+SAddStringToStringList(Result, '.so.2');
+SAddStringToStringList(Result, '.so.1');
+SAddStringToStringList(Result, '.so.0');
+SAddStringToStringList(Result, '.so');
 end;
 {$ENDIF}
 
 begin
 Result := nil;
 {$IFDEF MSWINDOWS}
-Result += 'libmpg123-0.dll';
-Result += 'libmpg123.dll';
-Result += 'mpg123.dll';
-Result += 'mpg123-0.dll';
+SAddStringToStringList(Result, 'libmpg123-0.dll');
+SAddStringToStringList(Result, 'libmpg123.dll');
+SAddStringToStringList(Result, 'mpg123.dll');
+SAddStringToStringList(Result, 'mpg123-0.dll');
 {$ENDIF}
 {$IFDEF UNIX}
-UnixLib('libmpg123-0');
-UnixLib('libmpg123');
-UnixLib('mpg123-0');
-UnixLib('mpg123');
+SAddStringToStringList(Result, 'libmpg123-0');
+SAddStringToStringList(Result, 'libmpg123');
+SAddStringToStringList(Result, 'mpg123-0');
+SAddStringToStringList(Result, 'mpg123');
 {$ENDIF}
 end;
 
@@ -553,7 +553,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;

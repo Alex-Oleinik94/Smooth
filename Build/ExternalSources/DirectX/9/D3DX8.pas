@@ -5745,7 +5745,7 @@ type
 class function TSDllD3DX8.SystemNames() : TSStringList;
 begin
 Result := 'Direct3DX8';
-Result += 'D3DX8';
+SAddStringToStringList(Result, 'D3DX8');
 end;
 
 class function TSDllD3DX8.DllNames() : TSStringList;
@@ -5754,21 +5754,21 @@ var
 begin
 Result := d3dx8dll;
 if d3dx8dll <> 'D3DX81ab.dll' then
-	Result += 'D3DX81ab.dll';
+	SAddStringToStringList(Result, 'D3DX81ab.dll');
 if d3dx8dll <> 'd3dx8.dll' then
-	Result += 'd3dx8.dll';
+	SAddStringToStringList(Result, 'd3dx8.dll');
 if d3dx8dll <> 'd3dx8d.dll' then
-	Result += 'd3dx8d.dll';
-Result += 'd3dx9_33.dll';
-Result += 'd3dx9.dll';
+	SAddStringToStringList(Result, 'd3dx8d.dll');
+SAddStringToStringList(Result, 'd3dx9_33.dll');
+SAddStringToStringList(Result, 'd3dx9.dll');
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9_'+SStr(i)+'.dll';
+		SAddStringToStringList(Result, 'd3dx9_'+SStr(i)+'.dll');
 for i := 43 downto 24 do
 	if i <> 33 then
-		Result += 'd3dx9d_'+SStr(i)+'.dll';
-Result += 'd3dx9d_33.dll';
-Result += 'd3dx9d.dll';
+		SAddStringToStringList(Result, 'd3dx9d_'+SStr(i)+'.dll');
+SAddStringToStringList(Result, 'd3dx9d_33.dll');
+SAddStringToStringList(Result, 'd3dx9d.dll');
 end;
 
 class procedure TSDllD3DX8.Free();
@@ -6011,7 +6011,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

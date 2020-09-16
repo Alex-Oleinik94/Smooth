@@ -14982,7 +14982,7 @@ begin
         LoadObjectGL^.FFunctionCount  += 1;
         LoadObjectGL^.FFunctionLoaded += Byte(Result <> nil);
         if Result = nil then
-          LoadObjectGL^.FFunctionErrors += String(ProcName);
+          SAddStringToStringList(LoadObjectGL^.FFunctionErrors, String(ProcName))
         end;
     end
   else if LibHandle = GLU_LibHandle then
@@ -14992,7 +14992,7 @@ begin
         LoadObjectGLU^.FFunctionCount  += 1;
         LoadObjectGLU^.FFunctionLoaded += Byte(Result <> nil);
         if Result = nil then
-          LoadObjectGLU^.FFunctionErrors += String(ProcName);
+          SAddStringToStringList(LoadObjectGLU^.FFunctionErrors, String(ProcName))
         end;
     end;
 end;
@@ -20366,24 +20366,24 @@ end;
 class function TSDllOpenGL.SystemNames() : TSStringList;
 begin
 Result := 'OpenGL';
-Result += 'OGL';
-Result += 'GL';
-Result += 'GLES';
+SAddStringToStringList(Result, 'OGL');
+SAddStringToStringList(Result, 'GL');
+SAddStringToStringList(Result, 'GLES');
 end;
 
 class function TSDllOpenGL.ChunkNames() : TSStringList;
 begin
 Result := nil;
-Result += 'GL';
-Result += 'GLU';
+SAddStringToStringList(Result, 'GL');
+SAddStringToStringList(Result, 'GLU');
 end;
 
 class function TSDllOpenGL.DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList;
 begin
 Result := nil;
 case ChunkIndex of
-0 : Result += OPENGL_LIBNAME;
-1 : Result += GLU_LIBNAME;
+0 : SAddStringToStringList(Result, OPENGL_LIBNAME);
+1 : SAddStringToStringList(Result, GLU_LIBNAME);
 end;
 end;
 

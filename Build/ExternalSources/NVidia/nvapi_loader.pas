@@ -190,11 +190,11 @@ class function TSDllNVAPI.DllNames() : TSStringList;
 begin
 Result := nil;
 {$IFDEF CPU64}
-Result += 'nvapi64';
-Result += 'nvapi64.dll';
+SAddStringToStringList(Result, 'nvapi64');
+SAddStringToStringList(Result, 'nvapi64.dll');
 {$ELSE}
-Result += 'nvapi';
-Result += 'nvapi.dll';
+SAddStringToStringList(Result, 'nvapi');
+SAddStringToStringList(Result, 'nvapi.dll');
 {$ENDIF}
 end;
 

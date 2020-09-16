@@ -2961,7 +2961,7 @@ if LoadObjectList <> nil then
 		begin
 		LoadObjectList[Index].FFunctionCount += 1;
 		if Result = nil then
-			LoadObjectList[Index].FFunctionErrors += ProcName
+			SAddStringToStringList(LoadObjectList[Index].FFunctionErrors, ProcName)
 		else
 			LoadObjectList[Index].FFunctionLoaded += 1;
 		end;
@@ -3472,33 +3472,33 @@ Result := nil;
 {$IFDEF WINDOWS}
 case ChunkIndex of
 1 : begin
-	Result += DLLSSLName;
-	Result += DLLSSLName2;
+	SAddStringToStringList(Result, DLLSSLName);
+	SAddStringToStringList(Result, DLLSSLName2);
 	end;
-0 : Result += DLLUtilName;
+0 : SAddStringToStringList(Result, DLLUtilName);
 end;
 {$ELSE}
  {$IFDEF OS2}
   {$IFDEF OS2GCC}
 	case ChunkIndex of
 	1 : begin
-		Result += DLLSSLName;
-		Result += DLLSSLName2;
+		SAddStringToStringList(Result, DLLSSLName);
+		SAddStringToStringList(Result, DLLSSLName2);
 		end;
 	0 : begin
-		Result += DLLUtilName;
-		Result += DLLUtilName2;
+		SAddStringToStringList(Result, DLLUtilName);
+		SAddStringToStringList(Result, DLLUtilName2);
 		end;
 	end;
     {$ELSE OS2GCC}
 	case ChunkIndex of
 	1 : begin
-		Result += DLLSSLName;
-		Result += DLLSSLName2;
+		SAddStringToStringList(Result, DLLSSLName);
+		SAddStringToStringList(Result, DLLSSLName2);
 		end;
 	0 : begin
-		Result += DLLUtilName;
-		Result += DLLUtilName2;
+		SAddStringToStringList(Result, DLLUtilName);
+		SAddStringToStringList(Result, DLLUtilName2);
 		end;
 	end;
     {$ENDIF OS2GCC}
@@ -3516,16 +3516,16 @@ end;
 class function TSDllOpenSSL.ChunkNames() : TSStringList;
 begin
 Result := nil;
-Result += 'Utils';
-Result += 'SSL';
+SAddStringToStringList(Result, 'Utils');
+SAddStringToStringList(Result, 'SSL');
 end;
 
 class function TSDllOpenSSL.SystemNames() : TSStringList;
 begin
 Result := nil;
-Result += 'OpenSSL';
-Result += 'OSSL';
-Result += 'SSL';
+SAddStringToStringList(Result, 'OpenSSL');
+SAddStringToStringList(Result, 'OSSL');
+SAddStringToStringList(Result, 'SSL');
 end;
 
 class function TSDllOpenSSL.DllNames() : TSStringList;

@@ -12327,24 +12327,24 @@ type
 class function TSDllD3DX9.SystemNames() : TSStringList;
 begin
 Result := 'Direct3DX9';
-Result += 'D3DX9';
+SAddStringToStringList(Result, 'D3DX9');
 end;
 
 class function TSDllD3DX9.DllNames() : TSStringList;
 var
-	i : TSUInt32;
+	Index : TSUInt32;
 begin
 Result := nil;
-Result += 'd3dx9_33.dll';
-Result += 'd3dx9.dll';
-for i := 43 downto 24 do
-	if i <> 33 then
-		Result += 'd3dx9_'+SStr(i)+'.dll';
-for i := 43 downto 24 do
-	if i <> 33 then
-		Result += 'd3dx9d_'+SStr(i)+'.dll';
-Result += 'd3dx9d_33.dll';
-Result += 'd3dx9d.dll';
+SAddStringToStringList(Result, 'd3dx9_33.dll');
+SAddStringToStringList(Result, 'd3dx9.dll');
+for Index := 43 downto 24 do
+	if Index <> 33 then
+		SAddStringToStringList(Result, 'd3dx9_'+SStr(Index)+'.dll');
+for Index := 43 downto 24 do
+	if Index <> 33 then
+		SAddStringToStringList(Result, 'd3dx9d_'+SStr(Index)+'.dll');
+SAddStringToStringList(Result, 'd3dx9d_33.dll');
+SAddStringToStringList(Result, 'd3dx9d.dll');
 end;
 
 class function TSDllD3DX9.LoadChunk(const VChunk : TSString; const VDll : TSLibHandle) : TSDllLoadObject;
@@ -12371,27 +12371,27 @@ end;
 class function TSDllD3DX9.ChunkNames() : TSStringList;
 begin
 Result := nil;
-Result += 'Math';
-Result += 'Core';
-Result += 'Shader';
-Result += 'Effect';
-Result += 'Mesh';
-Result += 'Shapes';
-Result += 'Tex';
-Result += 'Anim';
+SAddStringToStringList(Result, 'Math');
+SAddStringToStringList(Result, 'Core');
+SAddStringToStringList(Result, 'Shader');
+SAddStringToStringList(Result, 'Effect');
+SAddStringToStringList(Result, 'Mesh');
+SAddStringToStringList(Result, 'Shapes');
+SAddStringToStringList(Result, 'Tex');
+SAddStringToStringList(Result, 'Anim');
 end;
 
 class function TSDllD3DX9.DllChunkNames(const ChunkIndex : TSUInt32) : TSStringList;
 begin
 Result := nil;
-Result += d3dx9mathDLL;
-Result += d3dx9coreDLL;
-Result += d3dx9shaderDLL;
-Result += d3dx9effectDLL;
-Result += d3dx9meshDLL;
-Result += d3dx9shapesDLL;
-Result += d3dx9texDLL;
-Result += d3dx9animDLL;
+SAddStringToStringList(Result, d3dx9mathDLL);
+SAddStringToStringList(Result, d3dx9coreDLL);
+SAddStringToStringList(Result, d3dx9shaderDLL);
+SAddStringToStringList(Result, d3dx9effectDLL);
+SAddStringToStringList(Result, d3dx9meshDLL);
+SAddStringToStringList(Result, d3dx9shapesDLL);
+SAddStringToStringList(Result, d3dx9texDLL);
+SAddStringToStringList(Result, d3dx9animDLL);
 end;
 
 class procedure TSDllD3DX9.Free();
@@ -12787,7 +12787,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12907,7 +12907,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12937,7 +12937,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -12994,7 +12994,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13034,7 +13034,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13133,7 +13133,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13159,7 +13159,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;
@@ -13271,7 +13271,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

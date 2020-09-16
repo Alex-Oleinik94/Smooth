@@ -602,12 +602,12 @@ end;
 class function TSDllPcap.SystemNames() : TSStringList;
 begin
 Result := nil;
-Result += 'Pcap';
+SAddStringToStringList(Result, 'Pcap');
 end;
 class function TSDllPcap.DllNames() : TSStringList;
 begin
 Result := nil;
-Result += PCAP_LIB_NAME;
+SAddStringToStringList(Result, PCAP_LIB_NAME);
 end;
 class function TSDllPcap.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
@@ -617,9 +617,9 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
-LoadResult^.FFunctionLoaded += 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
 
 begin

@@ -17,8 +17,8 @@ type
 	TSTimeMiniNumber = TSInt8;
 	TSTime = object
 			public
-		class function Import(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime;
-		constructor Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber);
+		function Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime; overload; static;
+		constructor Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber); overload;
 			public
 		FSeconds : TSTimeNumber;
 		FMicroseconds : TSTimeNumber;
@@ -86,13 +86,13 @@ begin
 Result := Seconds mod 60;
 end;
 
-constructor TSTime.Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber);
+constructor TSTime.Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber); overload;
 begin
 FSeconds := ValueSeconds;
 FMicroseconds := ValueMicroseconds;
 end;
 
-class function TSTime.Import(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime;
+function TSTime.Create(const ValueSeconds, ValueMicroseconds : TSTimeNumber) : TSTime; overload; static;
 begin
 Result.Create(ValueSeconds, ValueMicroseconds);
 end;

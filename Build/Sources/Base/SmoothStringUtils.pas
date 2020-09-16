@@ -50,6 +50,7 @@ function SStrExtended(R : TSExtended; const l : TSInt32):TSString;{$IFDEF SUPPOR
 {$ENDIF WITHOUT_EXTENDED}
 function SFloatToString(const R : TSFloat64; const Zeros : TSInt32 = 0):TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SCheckFloatString(const S : TSString; const Point : TSChar = '.') : TSString; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SValInt64(const Text : TSString) : TSInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SVal(const Text : TSString) : TSUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SVal(const Text : TSString) : TSInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 function SVal(const Text : TSString) : TSUInt32; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
@@ -655,6 +656,11 @@ if (Result = '') or (Result = '-') then
 Result := SCheckFloatString(Result);
 end;
 {$ENDIF WITHOUT_EXTENDED}
+
+function SValInt64(const Text : TSString) : TSInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+Val(Text, Result);
+end;
 
 function SVal(const Text : TSString) : TSUInt64; {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 begin

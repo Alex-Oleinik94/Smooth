@@ -4489,7 +4489,7 @@ type
 class function TSDllD1D2.SystemNames() : TSStringList;
 begin
 Result := 'DX12.D1D2';
-Result += 'D1D2';
+SAddStringToStringList(Result, 'D1D2');
 end;
 
 class function TSDllD1D2.DllNames() : TSStringList;
@@ -4521,7 +4521,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

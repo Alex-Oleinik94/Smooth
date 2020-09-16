@@ -182,21 +182,21 @@ type
 class function TSDllAlut.SystemNames() : TSStringList;
 begin
 Result := 'ALUT';
-Result += 'LibAlut';
+SAddStringToStringList(Result, 'LibAlut');
 end;
 
 class function TSDllAlut.DllNames() : TSStringList;
 begin
 Result := nil;
 {$IFDEF MSWINDOWS}
-Result += 'Alut.dll';
-Result += 'Alut32.dll';
+SAddStringToStringList(Result, 'Alut.dll');
+SAddStringToStringList(Result, 'Alut32.dll');
 {$ELSE}
-Result += 'libalut.so.3';
-Result += 'libalut.so.2';
-Result += 'libalut.so.1';
-Result += 'libalut.so.0';
-Result += 'libalut.so';
+SAddStringToStringList(Result, 'libalut.so.3');
+SAddStringToStringList(Result, 'libalut.so.2');
+SAddStringToStringList(Result, 'libalut.so.1');
+SAddStringToStringList(Result, 'libalut.so.0');
+SAddStringToStringList(Result, 'libalut.so');
 {$ENDIF}
 end;
 
@@ -208,7 +208,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;

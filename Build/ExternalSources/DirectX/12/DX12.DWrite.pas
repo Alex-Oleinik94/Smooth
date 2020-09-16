@@ -1814,7 +1814,7 @@ type
 class function TSDllDWrite.SystemNames() : TSStringList;
 begin
 Result := 'DX12.DWrite';
-Result += 'DWrite';
+SAddStringToStringList(Result, 'DWrite');
 end;
 
 class function TSDllDWrite.DllNames() : TSStringList;
@@ -1835,7 +1835,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

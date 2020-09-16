@@ -18,13 +18,12 @@ type
 			public
 		procedure Import(const VName : TSString; const VPointer : TSOptionPointer);
 		end;
-
 operator = (const A, B : TSOption) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 type
 	TSDoubleString = packed array[0..1] of TSString;
-
 operator = (const A, B : TSDoubleString) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+
 {$DEFINE  INC_PLACE_INTERFACE}
 {$INCLUDE SmoothCommonLists.inc}
 {$UNDEF   INC_PLACE_INTERFACE}
@@ -36,11 +35,17 @@ type
 	PSStringList = ^ TSStringList;
 procedure SStringListDeleteByIndex(var StringList : TSStringList; const Index : TSMaxEnum);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 function SStringListLength(const StringList : TSStringList) : TSMaxEnum;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure SAddStringToStringList(var SL : TSStringList; const S : TSString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
 
 operator in(const S : TSString; const A : TSSettings) : TSBool;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 operator - (const A : TSSettings; const S : TSString) : TSSettings;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 
 implementation
+
+procedure SAddStringToStringList(var SL : TSStringList; const S : TSString); {$IFDEF SUPPORTINLINE}inline;{$ENDIF} overload;
+begin
+SL := SL + S;
+end;
 
 operator in(const S : TSString; const A : TSDoubleStrings) : TSString;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}overload;
 var

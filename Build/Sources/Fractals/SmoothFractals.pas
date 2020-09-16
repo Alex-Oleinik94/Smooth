@@ -701,7 +701,7 @@ end;
 	{$UNDEFINE RANGECHECKS_OFFED}
 	{$ENDIF}
 
-procedure TSImageFractal.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
+procedure TSImageFractal.InitColor(const x,y:LongInt;const RecNumber:LongInt);
 begin
 FImage.BitMap.Data[((FDepth-Y)*FDepth+X)*3]:=trunc((RecNumber/15)*255);
 end;

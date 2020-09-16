@@ -181,7 +181,7 @@ if Device <> nil then
 		Device^.CountPacketsSize += Packet.Data.Header.CapLen;
 		
 		Stream := Packet.Data.CreateStream();
-		HandlePacket(Device^.Identificator, Stream, TSTime.Import(Packet.Data.Header.ts.tv_sec, Packet.Data.Header.ts.tv_usec));
+		HandlePacket(Device^.Identificator, Stream, TSTime.Create(Packet.Data.Header.ts.tv_sec, Packet.Data.Header.ts.tv_usec));
 		Stream.Destroy();
 		Stream := nil;
 		end

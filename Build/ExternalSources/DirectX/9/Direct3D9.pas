@@ -3840,7 +3840,7 @@ type
 class function TSDllD3D9.SystemNames() : TSStringList; 
 begin
 Result := 'Direct3D9';
-Result += 'D3D9';
+SAddStringToStringList(Result, 'D3D9');
 end;
 
 class function TSDllD3D9.DllNames() : TSStringList;
@@ -3871,7 +3871,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

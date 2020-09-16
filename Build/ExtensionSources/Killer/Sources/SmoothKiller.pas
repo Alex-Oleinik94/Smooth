@@ -107,7 +107,7 @@ type
 		FTimerLabel, FLabebYouLose : TSScreenLabel;
 		FComboBoxRespamn,FGroundComboBox:TSScreenComboBox;
 			private
-		FImageZombi,FImageYou,FImageSkull,FImageBlock,FImageBullet:TSImage;
+		FImageZombi,FImagePlayer,FImageSkull,FImageBlock,FImageBullet:TSImage;
 		FImagesSize : TSLongWord;
 		end;
 
@@ -130,7 +130,7 @@ SKill(FImageSkull);
 SKill(FImageBlock);
 SKill(FImageBullet);
 SKill(FImageZombi);
-SKill(FImageYou);
+SKill(FImagePlayer);
 end;
 
 procedure TSKiller.LoadRenderResources();
@@ -336,7 +336,7 @@ FQuantitySkulls:=450;
 FImageBlock:=nil;
 FImageSkull:=nil;
 FImageZombi:=nil;
-FImageYou:=nil;
+FImagePlayer:=nil;
 FImageBullet:=nil;
 
 {FImageBlock:=TSImage.Create;
@@ -351,9 +351,9 @@ FImageZombi:=TSImage.Create;
 FImageZombi.Way:=STextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK0.png';
 FImageZombi.Loading;
 
-FImageYou:=TSImage.Create;
-FImageYou.Way:=STextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK2.png';
-FImageYou.Loading;
+FImagePlayer:=TSImage.Create;
+FImagePlayer.Way:=STextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK2.png';
+FImagePlayer.Loading;
 
 FImageBullet:=TSImage.Create;
 FImageBullet.Way:=STextureDirectory+DirectorySeparator+'Killer'+DirectorySeparator+'KKK3.png';
@@ -508,7 +508,7 @@ begin
 ProcessImage(FImageBlock,  KillerImagePredPath + 'Block.sia',  VWidthHeight);
 ProcessImage(FImageBullet, KillerImagePredPath + 'Bullet.sia', Iff(VWidthHeight > 64, 64, VWidthHeight));
 ProcessImage(FImageZombi,  KillerImagePredPath + 'Zombie.sia', VWidthHeight);
-ProcessImage(FImageYou,    KillerImagePredPath + 'You.sia',    VWidthHeight);
+ProcessImage(FImagePlayer, KillerImagePredPath + 'Player.sia',    VWidthHeight);
 ProcessImage(FImageSkull,  KillerImagePredPath + 'Skull.sia',  VWidthHeight);
 end;
 
@@ -609,7 +609,7 @@ SKill(FImageSkull);
 SKill(FImageBlock);
 SKill(FImageBullet);
 SKill(FImageZombi);
-SKill(FImageYou);
+SKill(FImagePlayer);
 inherited;
 end;
 
@@ -1155,7 +1155,7 @@ if (not FActive) and (not FVictory) then
 else
 	begin
 	Render.Color3f(1,1,1);
-	FImageYou.DrawImageFromTwoVertex2f(Vtx1,Vtx1+FR,True,S_2D);
+	FImagePlayer.DrawImageFromTwoVertex2f(Vtx1,Vtx1+FR,True,S_2D);
 	end;
 
 

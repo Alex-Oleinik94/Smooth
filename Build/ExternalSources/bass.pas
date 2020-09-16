@@ -1520,12 +1520,12 @@ end;
 class function TSDllbass.SystemNames() : TSStringList;
 begin
 Result := nil;
-Result += 'bass';
+SAddStringToStringList(Result, 'bass');
 end;
 class function TSDllbass.DllNames() : TSStringList;
 begin
 Result := nil;
-Result += bassdll;
+SAddStringToStringList(Result, bassdll);
 end;
 class function TSDllbass.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
@@ -1535,7 +1535,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 LoadResult^.FFunctionCount += 1;

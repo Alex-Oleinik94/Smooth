@@ -2374,10 +2374,10 @@ type
 class function TSDllD3D12.SystemNames() : TSStringList;
 begin
 Result := nil;
-Result += 'DX12.D3D12';
-Result += 'DX12.Direct3D12';
-Result += 'Direct3D12';
-Result += 'D3D12';
+SAddStringToStringList(Result, 'DX12.D3D12');
+SAddStringToStringList(Result, 'DX12.Direct3D12');
+SAddStringToStringList(Result, 'Direct3D12');
+SAddStringToStringList(Result, 'D3D12');
 end;
 
 class function TSDllD3D12.DllNames() : TSStringList;
@@ -2401,7 +2401,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

@@ -422,13 +422,12 @@ end;
 class function TSDllVorbisFile.SystemNames() : TSStringList;
 begin
 Result := nil;
-Result += 'VorbisFile';
-Result += 'LibVorbisFile';
+SAddStringToStringList(Result, 'VorbisFile');
+SAddStringToStringList(Result, 'LibVorbisFile');
 end;
 class function TSDllVorbisFile.DllNames() : TSStringList;
 begin
-Result := nil;
-Result += VorbisfileLib;
+Result := VorbisfileLib;
 end;
 class function TSDllVorbisFile.Load(const VDll : TSLibHandle) : TSDllLoadObject;
 var
@@ -438,9 +437,9 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
-LoadResult^.FFunctionLoaded += 1;
+	LoadResult^.FFunctionLoaded += 1;
 end;
 
 begin

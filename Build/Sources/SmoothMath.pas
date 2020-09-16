@@ -1310,7 +1310,7 @@ else
 			begin
 			Chunk .Create; Chunk.Quantity:=1;
 			Chunk.FType:=S_NUMERIC;
-			Chunk.FConst:=Trunc(SVal(SPCharToString(VPChar)));
+			Chunk.FConst:=Trunc(SValInt64(SPCharToString(VPChar)));
 			Result:=True;
 			end
 		else

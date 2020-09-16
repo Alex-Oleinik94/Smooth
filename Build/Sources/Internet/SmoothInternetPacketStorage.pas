@@ -18,7 +18,7 @@ type
 		FTime : TSTime;
 			public
 		procedure Kill();
-		class function Create(const _Time : TSTime; const _Date : TSDateTime; const _Packet : TSEthernetPacketFrame) : TSInternetPacket;
+		function Create(const _Time : TSTime; const _Date : TSDateTime; const _Packet : TSEthernetPacketFrame) : TSInternetPacket; overload; static;
 			public
 		property Packet : TSEthernetPacketFrame read FPacket write FPacket;
 		property Date : TSDateTime read FDate write FDate;
@@ -138,7 +138,7 @@ FPackets[FLength] := Packet;
 FLength += 1;
 end;
 
-class function TSInternetPacket.Create(const _Time : TSTime; const _Date : TSDateTime; const _Packet : TSEthernetPacketFrame) : TSInternetPacket;
+function TSInternetPacket.Create(const _Time : TSTime; const _Date : TSDateTime; const _Packet : TSEthernetPacketFrame) : TSInternetPacket; overload; static;
 begin
 Result.FPacket := _Packet;
 Result.FTime := _Time;

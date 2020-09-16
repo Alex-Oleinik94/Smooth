@@ -16,7 +16,7 @@ uses
 type
 	TSTCPSegment = object
 			public
-		class function Create(const _SegmentBegin, _SegmentEnd : TSTcpSequence) : TSTCPSegment;
+		function Create(const _SegmentBegin, _SegmentEnd : TSTcpSequence) : TSTCPSegment; overload; static;
 		procedure Free();
 		function ToString() : TSString;
 			protected
@@ -35,7 +35,7 @@ type
 		STCPSignificantPush);
 	TSTCPSignificantNumber = object
 			public
-		class function Create(const _NumberType : TSTCPSignificantNumberType; const _Number : TSTcpSequence) : TSTCPSignificantNumber;
+		function Create(const _NumberType : TSTCPSignificantNumberType; const _Number : TSTcpSequence) : TSTCPSignificantNumber; overload; static;
 		procedure Free();
 		function ToString() : TSString;
 			protected
@@ -143,7 +143,7 @@ else Result := '';
 end;
 end;
 
-class function TSTCPSignificantNumber.Create(const _NumberType : TSTCPSignificantNumberType; const _Number : TSTcpSequence) : TSTCPSignificantNumber;
+function TSTCPSignificantNumber.Create(const _NumberType : TSTCPSignificantNumberType; const _Number : TSTcpSequence) : TSTCPSignificantNumber; overload; static;
 begin
 Result.Free();
 Result.NumberType := _NumberType;
@@ -216,7 +216,7 @@ begin
 Result := '(0x' + SStr4BytesHex(SegmentBegin, False) + ', 0x' + SStr4BytesHex(SegmentEnd, False) + ', ' + SMemorySizeToString(SegmentEnd - SegmentBegin + 1) + ')';
 end;
 
-class function TSTCPSegment.Create(const _SegmentBegin, _SegmentEnd : TSTcpSequence) : TSTCPSegment;
+function TSTCPSegment.Create(const _SegmentBegin, _SegmentEnd : TSTcpSequence) : TSTCPSegment; overload; static;
 begin
 Result.Free();
 Result.FSegmentBegin := _SegmentBegin;

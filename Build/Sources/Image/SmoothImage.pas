@@ -79,9 +79,11 @@ type
 		procedure FreeAll();
 		function TextureLoaded() : TSBoolean;
 		function BitMapHasData() : TSBoolean;
+		function GetHeight() : TSBitMapUInt;
+		function GetWidth() : TSBitMapUInt;
 			public
-		property Height             : TSBitMapUInt    read FBitMap.FHeight;
-		property Width              : TSBitMapUInt    read FBitMap.FWidth;
+		property Height             : TSBitMapUInt    read GetHeight;
+		property Width              : TSBitMapUInt    read GetWidth;
 		property BitMap             : TSBitMap        read FBitMap;
 		property LoadedIntoRAM      : TSBoolean       read FLoadedIntoRAM write FLoadedIntoRAM;
 		property Texture            : TSRenderTexture read FTexture;
@@ -399,6 +401,22 @@ end;
 (****************************)
 (*OTHERS FUNCTIONS FOR IMAGE*)
 (****************************)
+
+function TSImage.GetHeight() : TSBitMapUInt;
+begin
+if (FBitMap <> nil) then
+	Result := FBitMap.Height
+else
+	Result := 0;
+end;
+
+function TSImage.GetWidth() : TSBitMapUInt;
+begin
+if (FBitMap <> nil) then
+	Result := FBitMap.Width
+else
+	Result := 0;
+end;
 
 function TSImage.Load(const Stream : TStream) : TSBool;
 begin

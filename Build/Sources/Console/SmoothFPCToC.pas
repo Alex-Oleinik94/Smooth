@@ -849,7 +849,7 @@ if FParent is STProgram then
 	end;
 end;
 
-class function STBeginEnd.ClassName:string;inline;
+class function STBeginEnd.ClassName:string;
 begin
 Result:='BEGIN END';
 end;
@@ -866,7 +866,7 @@ end;
 
 {===============}(*STProgram*){===============}
 
-class function STProgram.ClassName:string;inline;
+class function STProgram.ClassName:string;
 begin
 Result:='PROGRAM';
 end;
@@ -964,7 +964,7 @@ FStream.Destroy;
 end;
 
 {=========}(*STUnit*){=========}
-class function STUnit.ClassName:string;inline;
+class function STUnit.ClassName:string;
 begin
 Result:='UNIT';
 end;
@@ -1093,7 +1093,7 @@ FReadClass.ReMember;
 end;
 
 
-class function STReadClassComponent.ClassName:string;inline;
+class function STReadClassComponent.ClassName:string;
 begin
 Result:='READ CLASS COMPONENT';
 end;
@@ -1189,7 +1189,7 @@ if (Self is STReadClassComponent) and (NewComponent is STReadClassComponent) the
 	(NewComponent as STReadClassComponent).FReadClass:=(Self as STReadClassComponent).FReadClass;
 end;
 
-class function STComponent.ClassName:string;inline;
+class function STComponent.ClassName:string;
 begin
 Result:='COMPONENT';
 end;
@@ -1454,7 +1454,7 @@ GoRead;
 GoWrite;
 end;
 
-class function STranslater.ClassName:string;inline;
+class function STranslater.ClassName:string;
 begin
 Result:='TRANSLATER';
 end;

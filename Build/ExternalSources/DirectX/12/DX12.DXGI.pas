@@ -701,7 +701,7 @@ type
 class function TSDllDXGI.SystemNames() : TSStringList;
 begin
 Result := 'DX12.DXGI';
-Result += 'DXGI';
+SAddStringToStringList(Result, 'DXGI');
 end;
 
 class function TSDllDXGI.DllNames() : TSStringList;
@@ -723,7 +723,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

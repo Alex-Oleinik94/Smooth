@@ -1709,7 +1709,7 @@ else
 end;
 end;
 
-procedure TSFractalMandelbrot.InitColor(const x,y:LongInt;const RecNumber:LongInt);inline;
+procedure TSFractalMandelbrot.InitColor(const x,y:LongInt;const RecNumber:LongInt);
 var
 	MandelbrotPixel1,MandelbrotPixel2:TSMandelbrotPixel;
 begin

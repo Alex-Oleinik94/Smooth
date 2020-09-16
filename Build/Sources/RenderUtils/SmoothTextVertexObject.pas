@@ -38,13 +38,13 @@ type
 			public
 		constructor Create();
 		destructor Destroy();
-		procedure Paint(constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True);
+		procedure Paint(constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload;
 			public
 		property UseColors : TSBoolean read FUseColors write FUseColors;
 			public
-		class function Create(const Text : TSString; constref Render : ISRender; const Font : TSFont) : TSTextVertexObject;
-		class procedure Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload;
-		class procedure Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Color : TSVector4uint8; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload;
+		function Create(const Text : TSString; constref Render : ISRender; const Font : TSFont) : TSTextVertexObject; overload; static;
+		procedure Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload; static;
+		procedure Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Color : TSVector4uint8; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload; static;
 		end;
 
 implementation
@@ -55,7 +55,7 @@ uses
 	,SmoothBaseUtils
 	;
 
-class procedure TSTextVertexObject.Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Color : TSVector4uint8; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload;
+procedure TSTextVertexObject.Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Color : TSVector4uint8; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload; static;
 var
 	TextObject : TSTextVertexObject;
 begin
@@ -66,7 +66,7 @@ TextObject.Paint(Render, Font, Vector0, Vector1, WidthCentered, HeightCentered);
 TextObject.Destroy();
 end;
 
-class procedure TSTextVertexObject.Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload;
+procedure TSTextVertexObject.Paint(const Text : TSString; constref Render : ISRender; const Font : TSFont; const Vector0, Vector1 : TSVector2f; const WidthCentered : TSBoolean = True; const HeightCentered : TSBoolean = True); overload; static;
 var
 	TextObject : TSTextVertexObject;
 begin
@@ -86,7 +86,7 @@ FMaxTextWidth := 0;
 FTextHeight := 0;
 end;
 
-class function TSTextVertexObject.Create(const Text : TSString; constref Render : ISRender; const Font : TSFont) : TSTextVertexObject;
+function TSTextVertexObject.Create(const Text : TSString; constref Render : ISRender; const Font : TSFont) : TSTextVertexObject; overload; static;
 begin
 Result.Create();
 Result.SetText(Text, Render, Font);

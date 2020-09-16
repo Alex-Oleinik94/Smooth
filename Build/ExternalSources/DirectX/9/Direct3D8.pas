@@ -2955,7 +2955,7 @@ type
 class function TSDllD3D8.SystemNames() : TSStringList; 
 begin
 Result := 'Direct3D8';
-Result += 'D3D8';
+SAddStringToStringList(Result, 'D3D8');
 end;
 
 class function TSDllD3D8.DllNames() : TSStringList;
@@ -2976,7 +2976,7 @@ function LoadProcedure(const Name : PChar) : Pointer;
 begin
 Result := GetProcAddress(VDll, Name);
 if Result = nil then
-	LoadResult^.FFunctionErrors += SPCharToString(Name)
+	SAddStringToStringList(LoadResult^.FFunctionErrors, SPCharToString(Name))
 else
 	LoadResult^.FFunctionLoaded += 1;
 end;

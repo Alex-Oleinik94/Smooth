@@ -775,25 +775,25 @@ end;
 class function TSDllGLUT.SystemNames() : TSStringList; 
 begin
 Result := 'GLUT';
-Result += 'LibGlut';
-Result += 'Glut32';
+SAddStringToStringList(Result, 'LibGlut');
+SAddStringToStringList(Result, 'Glut32');
 end;
 
 class function TSDllGLUT.DllNames() : TSStringList;
 begin
 Result := nil;
-Result += 'freeglut';
+SAddStringToStringList(Result, 'freeglut');
 {$IFDEF Windows}
-Result += 'glut32.dll';
+SAddStringToStringList(Result, 'glut32.dll');
 {$ELSE}
 {$ifdef darwin}
-Result += '/System/Library/Frameworks/GLUT.framework/GLUT';
+SAddStringToStringList(Result, '/System/Library/Frameworks/GLUT.framework/GLUT');
 {$else}
 {$IFDEF haiku}
-Result += 'libglut.so';
+SAddStringToStringList(Result, 'libglut.so');
 {$ELSE}
 {$IFNDEF MORPHOS}
-Result += 'libglut.so.3';
+SAddStringToStringList(Result, 'libglut.so.3');
 {$ENDIF}
 {$ENDIF}
 {$endif}
