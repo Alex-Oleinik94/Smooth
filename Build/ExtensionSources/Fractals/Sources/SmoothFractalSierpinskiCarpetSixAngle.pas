@@ -35,7 +35,7 @@ type
 
 function SVector2fList6Import(const v1, v2, v3, v4, v5, v6 : TSVector2f): TSVector2fList6;{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 procedure SVector2fList6Swap(var List : TSVector2fList6); {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
-function SVector2fList6Swaping(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SVector2fList6Spining(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 
 implementation
 
@@ -45,7 +45,7 @@ uses
 	,SmoothScreenBase
 	;
 
-function SVector2fList6Swaping(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+function SVector2fList6Spining(Count : TSByte; const List : TSVector2fList6): TSVector2fList6; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 Count := Count mod 6;
 Result := List;
@@ -142,12 +142,12 @@ Result := 6 * (3 ** _Depth);
 end;
 
 procedure TSFractalSierpinskiCarpetSixAngle.CalculateFromThread();
-type
-	TListRecProcedure = procedure (const List : TSVector2fList6; const CountSwap : TSByte; const _Depth : TSUInt32) is nested;
 var 
 	ObjectId : TSUInt32; 
 	FVertexIndex, FFaceIndex : TSUInt32;
-	RecList : TListRecProcedure = nil;
+	SpinCount0, SpinCount1, SpinCount2 : TSInt8;
+
+procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSByte; const _Depth : TSUInt32);forward;
 
 procedure Rec(const v1, v2, v3, v4, v5, v6 : TSVector2f; const _Depth : TSUInt32); overload;
 var
@@ -171,76 +171,76 @@ else
 	v35 := (v3 + v5) / 2;
 	v51 := (v5 + v1) / 2;
 	case FType of
-	0 : // 1 Triangle
+	0 : // 1 Треугольник
 		begin
 		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
 		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
 		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
 		end;
-	1 : // 2 Лист клена
+	1 : // 2 Лист
 		begin
 		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
 		Rec(v23, v3, v34, v35, Center, v13, _Depth - 1);
 		Rec(v56, v51, Center, v35, v45, v5, _Depth - 1);
 		end;
-	2 : // 3 Забавная штука
+	2 : // 3 Красивый узор
 		begin
 		Rec(v1, v12, v13, Center, v51, v61, _Depth - 1);
 		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
 		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
 		end;
-	3 : // 4 Star
+	3 : // 4 Звезда
 		begin
 		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
 		Rec(v34, v35, Center, v13, v23, v3, _Depth - 1);
 		Rec(v45, v5, v56, v51, Center, v35, _Depth - 1);
 		end;
-	4 : // 5 Nothing
+	4 : // 5 Причудливый узор
 		begin
 		Rec(v61, v1, v12, v13, Center, v51, _Depth - 1);
 		Rec(v3, v34, v35, Center, v13, v23, _Depth - 1);
 		Rec(v5, v56, v51, Center, v35, v45, _Depth - 1);
 		end;
-	5 : // 6 ?
+	5 : // 6 Ладья
 		begin
 		Rec(Center, v51, v61, v1, v12, v13, _Depth - 1);
 		Rec(v13, v23, v3, v34, v35, Center, _Depth - 1);
 		Rec(v51, Center, v35, v45, v5, v56, _Depth - 1);
 		end;
-	6 : // 7 Random
+	6 : // 7 Случайный узор
 		begin
-		RecList(SVector2fList6Import(Center, v51, v61, v1, v12, v13), Random(6), _Depth - 1);
-		RecList(SVector2fList6Import(v34, v35, Center, v13, v23, v3), Random(6), _Depth - 1);
-		RecList(SVector2fList6Import(v45, v5, v56, v51, Center, v35), Random(6), _Depth - 1);
+		RecList(SVector2fList6Import(Center, v51, v61, v1, v12, v13), SpinCount0, _Depth - 1);
+		RecList(SVector2fList6Import(v34, v35, Center, v13, v23, v3), SpinCount1, _Depth - 1);
+		RecList(SVector2fList6Import(v45, v5, v56, v51, Center, v35), SpinCount2, _Depth - 1);
 		end;
 	end;
 	end;
 end;
 
-procedure RecListProcedure(const List : TSVector2fList6; const CountSwap : TSByte; const _Depth : TSUInt32);
+procedure RecList(const _List : TSVector2fList6; const _SpinCount : TSByte; const _Depth : TSUInt32);
 var
-	SwapedList : TSVector2fList6;
+	SpinedList : TSVector2fList6;
 begin
-SwapedList := SVector2fList6Swaping(CountSwap, List);
+SpinedList := SVector2fList6Spining(_SpinCount, _List);
 Rec(
-	SwapedList[0],
-	SwapedList[1],
-	SwapedList[2],
-	SwapedList[3],
-	SwapedList[4],
-	SwapedList[5],
+	SpinedList[0],
+	SpinedList[1],
+	SpinedList[2],
+	SpinedList[3],
+	SpinedList[4],
+	SpinedList[5],
 	_Depth);
 end;
 
-procedure Rec(const PointCenter : TSVector2f; const Radius : TSFloat64; const _Depth : TSUInt32); overload;
+procedure Rec(const _PointCenter : TSVector2f; const _Radius : TSFloat64; const _Depth : TSUInt32); overload;
 var
-	PointList : array[0..5] of TSVector2f;
+	PointList : TSVector2fList6;
 	Index : TSUInt32;
 begin
 for Index := 0 to 5 do
 	PointList[Index].Import(
-		PointCenter.x + Sin(Index/6*2*PI) * Radius,
-		PointCenter.y + Cos(Index/6*2*PI) * Radius);
+		_PointCenter.x + Sin(Index/6*2*PI) * _Radius,
+		_PointCenter.y + Cos(Index/6*2*PI) * _Radius);
 Rec(PointList[0],
 	PointList[1],
 	PointList[2],
@@ -254,10 +254,13 @@ begin
 FVertexIndex := 0;
 FFaceIndex := 0;
 ObjectId := 0;
-RecList := @RecListProcedure;
-Rec(SVertex2fImport(0, 0),
-	4,
-	Depth);
+if FType = 6 then
+	begin
+	SpinCount0 := Random(6) - 2;
+	SpinCount1 := Random(6) - 2;
+	SpinCount2 := Random(6) - 2;
+	end;
+Rec(SVertex2fImport(0, 0), 4, Depth);
 FinalizeCalculateFromThread(ObjectId);
 end;
 
