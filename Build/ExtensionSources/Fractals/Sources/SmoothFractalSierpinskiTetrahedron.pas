@@ -54,10 +54,10 @@ var
 
 function GetColor(const v : TSVertex3f):TSColor3f;
 begin
-Result:=c0*(Abs(v-bb0)/h)+
-		c1*(Abs(v-bb1)/h)+
-		c2*(Abs(v-bb2)/h)+
-		c3*(Abs(v-bb3)/h);
+Result:= c0*(Abs(v-bb0)/h)+
+		 c1*(Abs(v-bb1)/h)+
+		 c2*(Abs(v-bb2)/h)+
+		 c3*(Abs(v-bb3)/h);
 end;
 
 begin
@@ -66,18 +66,9 @@ F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex+1]^:=v1;
 F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex+2]^:=v2;
 if FEnableColors then
 	begin
-	c:=GetColor(v0);
-	C := C.Normalized();
-	F3dObject.Objects[ObjectId].SetColor(FVertexIndex,
-		c.r,c.g,c.b);
-	C:=GetColor(v1);
-	C := C.Normalized();
-	F3dObject.Objects[ObjectId].SetColor(FVertexIndex+1,
-		c.r,c.g,c.b);
-	C:=GetColor(v2);
-	C := C.Normalized();
-	F3dObject.Objects[ObjectId].SetColor(FVertexIndex+2,
-		c.r,c.g,c.b);
+	F3dObject.Objects[ObjectId].SetColor(FVertexIndex, GetColor(v0).Normalized());
+	F3dObject.Objects[ObjectId].SetColor(FVertexIndex+1, GetColor(v1).Normalized());
+	F3dObject.Objects[ObjectId].SetColor(FVertexIndex+2, GetColor(v2).Normalized());
 	end;
 if FEnableNormals then
 	begin

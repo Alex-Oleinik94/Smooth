@@ -46,18 +46,9 @@ end;
 procedure TSFractalSierpinskiTriangle.PushPoligonData(var ObjectId:LongWord;const v1,v2,v3:TSVertex2f;var FVertexIndex,FFaceIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 FVertexIndex+=3;
-if not (Render.RenderType in [SRenderDirectX9,SRenderDirectX8]) then
-	begin
-	F3dObject.Objects[ObjectId].ArVertex2f[FVertexIndex-3]^:=v1;
-	F3dObject.Objects[ObjectId].ArVertex2f[FVertexIndex-2]^:=v2;
-	F3dObject.Objects[ObjectId].ArVertex2f[FVertexIndex-1]^:=v3;
-	end
-else
-	begin
-	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex-3]^.Import(v1.x,v1.y);
-	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex-2]^.Import(v2.x,v2.y);
-	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex-1]^.Import(v3.x,v3.y);
-	end;
+F3dObject.Objects[ObjectId].SetVertex(FVertexIndex-3, v1);
+F3dObject.Objects[ObjectId].SetVertex(FVertexIndex-2, v2);
+F3dObject.Objects[ObjectId].SetVertex(FVertexIndex-1, v3);
 
 F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+0,FVertexIndex-1,FVertexIndex-2);
 F3dObject.Objects[ObjectId].SetFaceLine(0,FFaceIndex+1,FVertexIndex-3,FVertexIndex-2);

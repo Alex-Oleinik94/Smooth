@@ -29,7 +29,7 @@ type
 		FBPD, FBMD : TSScreenButton;
 			protected
 		FIs2D : TSBoolean;
-		FPrimetiveType : TSUInt32;
+		FPrimetiveType : TSUInt32; // SR_LINES, SR_QUADS ...
 		FPrimetiveParam : TSUInt32;
 		end;
 

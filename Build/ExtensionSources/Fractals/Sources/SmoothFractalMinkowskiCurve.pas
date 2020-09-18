@@ -47,11 +47,7 @@ end;
 
 procedure TSFractalMinkowskiCurve.PushPoligonData(var ObjectId:LongWord;const v:TSVertex2f;var FVertexIndex:LongWord);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
-if Render.RenderType in [SRenderDirectX9,SRenderDirectX8] then
-	F3dObject.Objects[ObjectId].ArVertex3f[FVertexIndex]^.Import(v.x,v.y)
-else
-	F3dObject.Objects[ObjectId].ArVertex2f[FVertexIndex]^:=v;
-
+F3dObject.Objects[ObjectId].SetVertex(FVertexIndex, v);
 FVertexIndex+=1;
 
 AfterPushingPoligonData(ObjectId,FThreadsEnable,FVertexIndex);

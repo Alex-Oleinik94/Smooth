@@ -264,7 +264,9 @@ type
 		property ArColor4b[Index : TSMaxEnum]:PSColor4b read GetColor4b;
 		
 		// Эта процедура устанавливает цвет вершины. Работает для любого формата хранение цвета.
-		procedure SetColor(const Index:TSMaxEnum;const r,g,b:TSSingle; const a:TSSingle = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+		procedure SetColor(const Index:TSMaxEnum;const r,g,b:TSSingle; const a:TSSingle = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+		procedure SetColor(const Index:TSMaxEnum; const Color : TSVector3f); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+		procedure SetColor(const Index:TSMaxEnum; const Color : TSVector4f); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
 		function GetColor(const Index:TSMaxEnum) : TSColor4f; {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
 		// Автоматически определяет нужный формат хранения цветов. (В зависимости от рендера)
 		procedure AutoSetColorType(const VWithAlpha:Boolean = False); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
@@ -938,7 +940,17 @@ else if FVertexType = S3dObjectVertexType4f then
 	ArVertex4f[VVertexIndex]^.Import(x, y, z, w);
 end;
 
-procedure TS3DObject.SetColor(const Index:TSMaxEnum;const r,g,b:Single; const a:Single = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF}
+procedure TS3DObject.SetColor(const Index:TSMaxEnum; const Color : TSVector3f); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+begin
+SetColor(Index, Color.r, Color.g, Color.b);
+end;
+
+procedure TS3DObject.SetColor(const Index:TSMaxEnum; const Color : TSVector4f); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
+begin
+SetColor(Index, Color.r, Color.g, Color.b, Color.a);
+end;
+
+procedure TS3DObject.SetColor(const Index:TSMaxEnum;const r,g,b:Single; const a:Single = 1); {$IFDEF SUPPORTINLINE} inline; {$ENDIF} overload;
 
 function Convert(const Value : TSFloat32) : TSByte; {$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin

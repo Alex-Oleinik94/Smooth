@@ -43,7 +43,7 @@ type
 	procedure Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
 		public
 	procedure PolygonsConstruction(); override; // fractal construction
-	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
+	procedure PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF} // adding data to array
 	end;
 
 implementation
@@ -58,6 +58,7 @@ constructor TSFractalSierpinskiCarpet2.Create(const VContext : ISContext);
 begin
 inherited Create(VContext);
 
+FEnableColors := True;
 FIs2D := True;
 FPrimetiveType := SR_QUADS;
 FPrimetiveParam := 0;
@@ -152,33 +153,31 @@ ObjectNumber := 0;
 VertexIndex := 0;
 FaceIndex := 0;
 Generate4(FDepth, TSVector2f.Create(1, 1), TSVector2f.Create(1, -1), TSVector2f.Create(-1, -1), TSVector2f.Create(-1, 1), 
-	TSColor3f.Create(1, 0, 0), TSColor3f.Create(0, 1, 0), TSColor3f.Create(0, 0, 1), TSColor3f.Create(1, 1, 0),
+	TSColor3f.Create(1, 0, 0), TSColor3f.Create(0, 1, 0), TSColor3f.Create(0, 0, 1), TSColor3f.Create(1, 1, 1),
 	ObjectNumber, VertexIndex, FaceIndex);
 EndOfPolygonsConstruction(ObjectNumber);
 end;
 
-procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
+procedure TSFractalSierpinskiCarpet2.PushPoligonData(var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32; const v1, v2, v3, v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);{$IFDEF SUPPORTINLINE}inline;{$ENDIF}
 begin
 _VertexIndex+=4;
-if not (Render.RenderType in [SRenderDirectX9, SRenderDirectX8]) then
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 4, v1);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 3, v2);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 2, v3);
+F3dObject.Objects[_ObjectNumber].SetVertex(_VertexIndex - 1, v4);
+
+if FEnableColors then
 	begin
-	F3dObject.Objects[_ObjectNumber].ArVertex2f[_VertexIndex-4]^:=v1;
-	F3dObject.Objects[_ObjectNumber].ArVertex2f[_VertexIndex-3]^:=v2;
-	F3dObject.Objects[_ObjectNumber].ArVertex2f[_VertexIndex-2]^:=v3;
-	F3dObject.Objects[_ObjectNumber].ArVertex2f[_VertexIndex-1]^:=v4;
-	end
-else
-	begin
-	F3dObject.Objects[_ObjectNumber].ArVertex3f[_VertexIndex-4]^.Import(v1.x,v1.y);
-	F3dObject.Objects[_ObjectNumber].ArVertex3f[_VertexIndex-3]^.Import(v2.x,v2.y);
-	F3dObject.Objects[_ObjectNumber].ArVertex3f[_VertexIndex-2]^.Import(v3.x,v3.y);
-	F3dObject.Objects[_ObjectNumber].ArVertex3f[_VertexIndex-1]^.Import(v4.x,v4.y);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 4, _c1);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 3, _c2);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 2, _c3);
+	F3dObject.Objects[_ObjectNumber].SetColor(_VertexIndex - 1, _c4);
 	end;
 
-F3dObject.Objects[_ObjectNumber].SetFaceQuad(0,_FaceIndex+0,_VertexIndex-1,_VertexIndex-2,_VertexIndex-3,_VertexIndex-4);
+F3dObject.Objects[_ObjectNumber].SetFaceQuad(0, _FaceIndex, _VertexIndex - 1, _VertexIndex - 2, _VertexIndex - 3, _VertexIndex - 4);
 _FaceIndex+=1;
 
-AfterPushingPoligonData(_ObjectNumber,FThreadsEnable,_VertexIndex,_FaceIndex);
+AfterPushingPoligonData(_ObjectNumber, FThreadsEnable, _VertexIndex, _FaceIndex);
 end;
 
 procedure TSFractalSierpinskiCarpet2.Generate4(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
@@ -188,23 +187,63 @@ if _Depth = 0 then
 else
 	begin
 	Generate2(_Depth, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4, _ObjectNumber, _VertexIndex, _FaceIndex);
-	Generate2(_Depth, _v4, _v1, _v2, _v3, _c4, _c1, _c2, _c3, _ObjectNumber, _VertexIndex, _FaceIndex);
+	Generate2(_Depth, _v2, _v3, _v4, _v1, _c2, _c3, _c4, _c1, _ObjectNumber, _VertexIndex, _FaceIndex);
 	end;
 end;
 
 procedure TSFractalSierpinskiCarpet2.Generate2(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
 begin
-Generate1(_Depth, _v1, (_v2 - _v1) / 3 + _v1, _v3, (_v3 - _v4) / 3 + _v4, _c1, (_c2 - _c1) / 3 + _c1, _c3, (_c3 - _c4) / 3 + _c4, _ObjectNumber, _VertexIndex, _FaceIndex);
-Generate1(_Depth, (_v1 - _v2) / 3 + _v2, _v2, _v3, (_v4 - _v3) / 3 + _v3, (_c1 - _c2) / 3 + _c2, _c2, _c3, (_c4 - _c3) / 3 + _c3, _ObjectNumber, _VertexIndex, _FaceIndex);
+Generate1(_Depth, _v1, (_v1 * 2 + _v2)/3, (_v4 * 2 + _v3)/3, _v4, _c1, (_c1 * 2 + _c2)/3, (_c4 * 2 + _c3)/3, _c4, _ObjectNumber, _VertexIndex, _FaceIndex);
+Generate1(_Depth, (_v2 * 2 + _v1)/3, _v2, _v3, (_v3 * 2 + _v4)/3, (_c2 * 2 + _c1)/3, _c2, _c3, (_c3 * 2 + _c4)/3, _ObjectNumber, _VertexIndex, _FaceIndex);
 end;
 
 procedure TSFractalSierpinskiCarpet2.Generate1(const _Depth : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f; var _ObjectNumber, _VertexIndex, _FaceIndex : TSUInt32);
+// 0 1 2 3  4   5    ...
+// 1 1 4 24 176 1376 ...
+
+procedure Generate(const _Depth, _Depth2 : TSMaxEnum; const _v1, _v2, _v3, _v4 : TSVector2f; const _c1, _c2, _c3, _c4 : TSColor3f);
+var
+	PatchNumber, Index, DivNumber : TSInt64;
+	Step : TSVector2f;
+	StepC41, StepC32 : TSVector3f;
 begin
-if _Depth = 0 then
-	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4)
+if (_Depth2 = 0) then
+	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
+else
+	begin
+	Generate(_Depth, _Depth2 - 1, _v1, (_v1 * 2 + _v2)/3, (_v4 * 2 + _v3)/3, _v4, _c1, (_c1 * 2 + _c2)/3, (_c4 * 2 + _c3)/3, _c4);
+	Generate(_Depth, _Depth2 - 1, (_v2 * 2 + _v1)/3, _v2, _v3, (_v3 * 2 + _v4)/3, (_c2 * 2 + _c1)/3, _c2, _c3, (_c3 * 2 + _c4)/3);
+	PatchNumber := 3**(_Depth - _Depth2 - 1);
+	DivNumber := 3*PatchNumber;
+	Step := (_v4 - _v1)/DivNumber;
+	StepC41 := (_c4 - _c1)/DivNumber;
+	StepC32 := (_c3 - _c2)/DivNumber;
+	for Index := 1 to PatchNumber do
+		Generate2(_Depth2, 
+		//(_v1 * (1 + Index * 3) + _v4 * (DivNumber - (Index + 1) * 3 - 2))/DivNumber - _v1,
+		//(_v2 * (1 + Index * 3) + _v3 * (DivNumber - (Index + 1) * 3 - 2))/DivNumber - _v2,
+		//(_v2 * (2 + Index * 3) + _v3 * (DivNumber - (Index + 1) * 3 - 1))/DivNumber - _v2,
+		//(_v1 * (2 + Index * 3) + _v4 * (DivNumber - (Index + 1) * 3 - 1))/DivNumber - _v1,
+		_v2 + Step * 3 * (Index - 1) + Step,
+		_v2 + Step * 3 * (Index - 1) + Step * 2,
+		_v1 + Step * 3 * (Index - 1) + Step * 2,
+		_v1 + Step * 3 * (Index - 1) + Step,
+		
+		_c2 + StepC32 * 3 * (Index - 1) + StepC32,
+		_c2 + StepC32 * 3 * (Index - 1) + StepC32 * 2,
+		_c1 + StepC41 * 3 * (Index - 1) + StepC41 * 2,
+		_c1 + StepC41 * 3 * (Index - 1) + StepC41,
+		_ObjectNumber, _VertexIndex, _FaceIndex);
+	end;
+end;
+
+begin
+if (_Depth = 0) or (_Depth = 1) then
+	PushPoligonData(_ObjectNumber, _VertexIndex, _FaceIndex, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4)
 else
 	begin
 	// constructing...
+	Generate(_Depth, _Depth - 1, _v1, _v2, _v3, _v4, _c1, _c2, _c3, _c4);
 	end;
 end;
 

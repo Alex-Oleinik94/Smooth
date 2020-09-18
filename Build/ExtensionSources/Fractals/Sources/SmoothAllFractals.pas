@@ -52,7 +52,7 @@ FDrawClasses.Add(TSFractalSierpinskiTetrahedron);
 FDrawClasses.Add(TSFractalMinkowskiCurve);
 FDrawClasses.Add(TSFractalLevyCurve);
 FDrawClasses.Add(TSFractalSierpinskiCarpet);
-//FDrawClasses.Add(TSFractalSierpinskiCarpet2);
+FDrawClasses.Add(TSFractalSierpinskiCarpet2);
 FDrawClasses.Add(TSFractalSierpinskiCarpetSixAngle);
 FDrawClasses.Initialize();
 FDrawClasses.ComboBox.SetBounds(FDrawClasses.ComboBox.Left, 28, FDrawClasses.ComboBox.Width, FDrawClasses.ComboBox.Height);
